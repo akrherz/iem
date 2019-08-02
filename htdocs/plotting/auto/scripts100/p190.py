@@ -7,6 +7,7 @@ import matplotlib.colors as mpcolors
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -79,6 +80,8 @@ def plotter(fdict):
     from data WHERE max_high_rank = 1 or min_high_rank = 1 or
     max_low_rank = 1 or min_low_rank = 1 ORDER by day ASC
     """, pgconn, params=(station, ), index_col=None)
+    if df.empty:
+        raise NoDataFound("No Data Found.")
 
     fig = plt.figure(figsize=(12, 6))
     fig.text(0.5, 0.95, ("[%s] %s Year of Daily Records, ties included"

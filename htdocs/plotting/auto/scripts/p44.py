@@ -11,6 +11,7 @@ from pyiem.nws import vtec
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem import reference
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'yes': "Limit Plot to Year-to-Date",
          'no': 'Plot Entire Year'}
@@ -73,6 +74,8 @@ def plotter(fdict):
 
     nt = NetworkTable('WFO')
     nt.sts['_ALL'] = {'name': 'All Offices'}
+    if station not in nt.sts:
+        raise NoDataFound("No Data Found.")
 
     lastdoy = 367
     if limit.lower() == 'yes':
@@ -106,6 +109,8 @@ def plotter(fdict):
     SELECT yr, doy, sum(count) OVER (PARTITION by yr ORDER by doy ASC)
     from agg2 ORDER by yr ASC, doy ASC
     """, (phenomena, significance, syear, eyear, lastdoy))
+    if cursor.rowcount == 0:
+        raise NoDataFound("No Data Found.")
 
     data = {}
     for yr in range(syear, eyear + 1):

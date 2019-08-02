@@ -7,6 +7,7 @@ import numpy as np
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([
     ('last_high_above', 'Last Date At or Above (High Temperature)'),
@@ -54,6 +55,7 @@ def get_description():
 
 def do_labels(ax, extrenum, varname, direction, threshold, station, network,
               season):
+    """Helper."""
     nt = NetworkTable(network)
     ax.set_title(("%s [%s] %s Date and Days\n"
                   "%s %s$^\circ$F"
@@ -113,6 +115,8 @@ def plotter(fdict):
     zeros = df[df['count'] == 0].index.values
     col = 'xday_doy' if extrenum == 'last' else 'nday_doy'
     df2 = df[df['count'] > 0]
+    if df2.empty:
+        raise NoDataFound("No data found.")
 
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     ax.scatter(df2[col], df2['count'])

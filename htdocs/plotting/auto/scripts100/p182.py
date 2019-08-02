@@ -9,6 +9,7 @@ from pyiem.plot.use_agg import plt
 from pyiem.reference import state_names
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.datatypes import distance
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -48,16 +49,16 @@ def plotter(fdict):
     threshold = ctx['threshold']
     window_sts = date - datetime.timedelta(days=days)
     if window_sts.year != date.year:
-        raise ValueError('Sorry, do not support multi-year plots yet!')
+        raise NoDataFound('Sorry, do not support multi-year plots yet!')
     if len(sector) != 2:
-        raise ValueError("Sorry, this does not support multi-state plots yet.")
+        raise NoDataFound("Sorry, this does not support multi-state plots yet.")
 
     idx0 = iemre.daily_offset(window_sts)
     idx1 = iemre.daily_offset(date)
     ncfn = iemre.get_daily_mrms_ncname(date.year)
     ncvar = 'p01d'
     if not os.path.isfile(ncfn):
-        raise ValueError("No data for that year, sorry.")
+        raise NoDataFound("No data for that year, sorry.")
     # Get the state weight
     df = gpd.GeoDataFrame.from_postgis("""
     SELECT the_geom from states where state_abbr = %s

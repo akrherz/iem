@@ -5,6 +5,7 @@ import pandas as pd
 from pyiem.nws import vtec
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -12,7 +13,8 @@ def get_description():
     desc = dict()
     desc['data'] = True
     desc['cache'] = 86400
-    desc['description'] = """For a given watch/warning/advisory type and forecast
+    desc['description'] = """
+    For a given watch/warning/advisory type and forecast
     zone, what is the frequency by time of day that the product was valid.  The
     total number of events for the county/zone is used for the frequency. Due
     to how the NWS issues some products for counties and some products for
@@ -64,7 +66,7 @@ def plotter(fdict):
     sts = row[1]
     ets = row[2]
     if sts is None:
-        raise ValueError("No Results Found, try flipping zone/county")
+        raise NoDataFound("No Results Found, try flipping zone/county")
 
     cursor.execute("""
      WITH coverage as (

@@ -8,6 +8,7 @@ from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([
         ('easter', 'Easter (Western Church Dates)'),
@@ -143,6 +144,8 @@ def get_context(fdict):
         """, pgconn, params=(station, tuple(days)),
                              index_col='year')
         ctx['subtitle'] = PDICT[date]
+    if ctx['df'].empty:
+        raise NoDataFound("No Data Found.")
     ctx['title'] = ("%s [%s] Daily %s"
                     ) % (nt.sts[ctx['station']]['name'], ctx['station'],
                          PDICT2[ctx['varname']])

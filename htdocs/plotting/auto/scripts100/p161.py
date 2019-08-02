@@ -6,6 +6,7 @@ from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
@@ -144,7 +145,7 @@ def plotter(fdict):
     ctx = get_context(fdict)
     df = ctx['df']
     if df.empty:
-        raise ValueError('Error, no results returned!')
+        raise NoDataFound('Error, no results returned!')
 
     (fig, ax) = plt.subplots(1, 1)
     ax.set_title("%s\n%s" % (ctx['title'], ctx['subtitle']))

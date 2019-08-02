@@ -7,6 +7,7 @@ from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'TS': 'Thunder (TS)',
          '-SN': 'Light Snow (-SN)',
@@ -58,6 +59,8 @@ def plotter(fdict):
     sts = datetime.date(syear, 1, 1)
     ets = datetime.date(eyear + 1, 1, 1)
     nt = NetworkTable(network)
+    if station not in nt.sts:
+        raise NoDataFound("Unknown station metadata.")
     code = ctx['code']
     if code == 'PSN':
         code = "+SN"
@@ -103,7 +106,7 @@ def plotter(fdict):
         """, pgconn, params=(nt.sts[station]['tzname'], station, sts, ets),
                       index_col=None)
     if df.empty:
-        raise ValueError("No data was found, sorry!")
+        raise NoDataFound("No data was found, sorry!")
 
     minyear = df['year'].min()
     maxyear = df['year'].max()

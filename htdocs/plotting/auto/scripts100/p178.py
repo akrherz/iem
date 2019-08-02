@@ -11,6 +11,8 @@ import pandas as pd
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem.plot import MapPlot
+from pyiem.exceptions import NoDataFound
+
 
 HOURS = OrderedDict([
     ('1', 'One Hour'),
@@ -122,7 +124,7 @@ def plotter(fdict):
                 fn = testfn
                 break
         if fn is None:
-            raise ValueError("No valid grib data found!")
+            raise NoDataFound("No valid grib data found!")
         grbs = pygrib.index(fn, 'stepRange')
         grb = grbs.select(stepRange='0-%s' % (hour, ))[0]
         lats, lons = grb.latlons()

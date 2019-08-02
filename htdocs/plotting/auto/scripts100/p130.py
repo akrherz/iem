@@ -5,6 +5,7 @@ from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -41,6 +42,8 @@ def plotter(fdict):
     WHERE station = %s
     GROUP by year, month
     """, pgconn, params=(station, ), index_col=None)
+    if df.empty:
+        raise NoDataFound("No data found.")
 
     # Only use months that had at least one day of snowcover
     df2 = df[df['coverdays'] > 0]

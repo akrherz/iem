@@ -9,6 +9,7 @@ import matplotlib.patheffects as PathEffects
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -40,7 +41,7 @@ def plotter(fdict):
         GROUP by year, month ORDER by year ASC
     """, (station, datetime.date.today().replace(day=1)))
     if cursor.rowcount == 0:
-        raise ValueError("No results found for query")
+        raise NoDataFound("No results found for query")
 
     for rownum, row in enumerate(cursor):
         if rownum == 0:

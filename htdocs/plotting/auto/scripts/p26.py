@@ -8,6 +8,7 @@ from matplotlib.patches import Rectangle
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'fall': 'Minimum Temperature after 1 July',
          'spring': 'Maximum Temperature before 1 July'}
@@ -65,6 +66,8 @@ def get_context(fdict):
             """ + varname + """ from
             """+table+""" WHERE station = %s and high is not null and
             low is not null and year >= %s""", (station, startyear))
+    if cursor.rowcount == 0:
+        raise NoDataFound("No Data Found.")
     for row in cursor:
         data[int(row[1] - startyear), int(row[0] - 1)] = row[2]
 
@@ -240,4 +243,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    highcharts({'year': 2016, 'half': 'spring', 'var': 'high'})
+    highcharts(dict())

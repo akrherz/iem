@@ -6,6 +6,7 @@ import matplotlib.dates as mdates
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -64,7 +65,7 @@ def plotter(fdict):
                          station2, network2, sdate, edate),
                   index_col='day')
     if df.empty:
-        raise ValueError("No data found for this comparison")
+        raise NoDataFound("No data found for this comparison")
     df['high_diff'] = df['one_high'] - df['two_high']
     df['low_diff'] = df['one_low'] - df['two_low']
 

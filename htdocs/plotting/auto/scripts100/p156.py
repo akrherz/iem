@@ -8,6 +8,7 @@ from matplotlib.font_manager import FontProperties
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem.reference import state_names
+from pyiem.exceptions import NoDataFound
 
 PDICT2 = OrderedDict([('CORN', 'Corn'),
                       ('SOYBEANS', 'Soybean')])
@@ -73,7 +74,7 @@ def plotter(fdict):
     """, pgconn, params=(commodity_desc, tuple(states),),
                   index_col=None)
     if df.empty:
-        raise ValueError("ERROR: No data found!")
+        raise NoDataFound("ERROR: No data found!")
 
     prop = FontProperties(size=10)
 

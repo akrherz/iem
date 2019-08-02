@@ -6,6 +6,7 @@ from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
+from pyiem.exceptions import NoDataFound
 
 PDICT = {
     'spring': 'Min Temp after first Spring Temp above',
@@ -94,6 +95,8 @@ def plotter(fdict):
         ctx['ax2_xlabel'] = 'Date of First %.0f High' % (thres, )
     df = read_sql(sql, dbconn, params=(station, thres, thres2, station),
                   index_col='year')
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     df2 = None
     if ctx['year'] in df.index:
         df2 = df.loc[ctx['year']]

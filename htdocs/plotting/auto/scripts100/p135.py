@@ -6,6 +6,7 @@ from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([('high_above', 'High Temperature At or Above'),
                      ('high_below', 'High Temperature Below'),
@@ -127,6 +128,8 @@ def get_data(fdict, nt):
     # We need to do some magic to compute the start date, since we don't want
     # an incomplete year mucking things up
     sts = nt.sts[station]['archive_begin']
+    if sts is None:
+        raise NoDataFound("Unknown station metadata.")
     if sts.month > 1:
         sts = sts + datetime.timedelta(days=365)
         sts = sts.replace(month=1, day=1)
@@ -165,7 +168,7 @@ def plotter(fdict):
     nt = NetworkTable(network)
     df = get_data(fdict, nt)
     if df.empty:
-        raise ValueError('Error, no results returned!')
+        raise NoDataFound('Error, no results returned!')
 
     (fig, ax) = plt.subplots(1, 1)
     ax.plot(df.index.values, df['avg'], c='k', lw=2, label='Average')

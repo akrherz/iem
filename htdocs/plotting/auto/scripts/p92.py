@@ -6,6 +6,7 @@ import pandas as pd
 from pyiem.nws import vtec
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -55,9 +56,9 @@ def plotter(fdict):
         edate = datetime.datetime.utcnow()
 
     if cursor.rowcount == 0:
-        raise ValueError(("No Events Found for %s (%s.%s)"
-                          ) % (vtec.get_ps_string(phenomena, significance),
-                               phenomena, significance))
+        raise NoDataFound(("No Events Found for %s (%s.%s)"
+                           ) % (vtec.get_ps_string(phenomena, significance),
+                                phenomena, significance))
     data = {}
     rows = []
     for row in cursor:

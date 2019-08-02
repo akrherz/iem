@@ -15,6 +15,7 @@ from pyiem.grid.zs import CachingZonalStats
 from pyiem.datatypes import distance
 from pyiem.util import get_autoplot_context, get_dbconn, ncopen
 from pyiem import reference
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -68,7 +69,7 @@ def plotter(fdict):
     sidx = iemre.daily_offset(sts)
     ncfn = iemre.get_daily_ncname(sts.year)
     if not os.path.isfile(ncfn):
-        raise ValueError("Data for year %s not found" % (sts.year, ))
+        raise NoDataFound("Data for year %s not found" % (sts.year, ))
     with ncopen(ncfn) as nc:
         czs = CachingZonalStats(iemre.AFFINE)
         hasdata = np.zeros((nc.dimensions['lat'].size,

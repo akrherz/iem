@@ -6,6 +6,7 @@ from pandas.io.sql import read_sql
 from pyiem.datatypes import speed
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict((
     ('TO', 'Tornado Warning'),
@@ -50,6 +51,8 @@ def plotter(fdict):
     date = ctx.get('date')
     wfo = ctx['wfo']
     nt = NetworkTable("WFO")
+    if wfo not in nt.sts:
+        raise NoDataFound("No station metadata.")
     pgconn = get_dbconn('postgis')
     ps = [phenomena]
     if phenomena == '_A':
@@ -60,6 +63,8 @@ def plotter(fdict):
         WHERE phenomena in %s and wfo = %s and status = 'NEW' and
         tml_direction is not null and tml_sknt is not null ORDER by issue
     """, pgconn, params=(tuple(ps), wfo))
+    if df.empty:
+        raise NoDataFound("No Data Found.")
 
     g = sns.jointplot(df['tml_direction'],
                       speed(df['tml_sknt'], 'KT').value('MPH'), s=40,
@@ -86,3 +91,7 @@ def plotter(fdict):
               df['issue'].max().date().strftime("%b %-d, %Y")))
     g.fig.subplots_adjust(top=.9)
     return g.fig, df
+
+
+if __name__ == '__main__':
+    plotter(dict())

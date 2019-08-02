@@ -6,6 +6,7 @@ from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'full': 'Show Full Year Totals',
          'ytd': 'Limit to Year to Date Period'}
@@ -54,6 +55,8 @@ def plotter(fdict):
         """ + limitsql + """
         ORDER by day ASC
      """, dbconn, params=(station,), index_col='day')
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     res = []
     maxval2 = int(df['high'].max())
     for level in range(maxval2 - 30, maxval2 + 2):

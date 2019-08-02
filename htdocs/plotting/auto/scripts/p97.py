@@ -7,6 +7,7 @@ from pandas.io.sql import read_sql
 import matplotlib.cm as cm
 from pyiem.plot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT2 = OrderedDict([
     ('max_high_temp', 'Maximum High Temperature'),
@@ -170,6 +171,8 @@ def plotter(fdict):
     from agg d JOIN stations t on (d.station = t.id)
     WHERE t.network ~* 'CLIMATE' """ + state_limiter + """
     """, pgconn, params=(ctx['gddbase'], date1, date2), index_col='station')
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     df = df.reindex(df[varname].abs().sort_values(ascending=False).index)
 
     datefmt = "%d %b %Y" if varname != 'cgdd_sum' else '%d %b'

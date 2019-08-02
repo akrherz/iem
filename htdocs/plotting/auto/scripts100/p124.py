@@ -5,6 +5,7 @@ from pandas.io.sql import read_sql
 import numpy as np
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 CATS = np.array([0.01, 0.5, 1., 2., 3., 4.])
 
 
@@ -31,7 +32,10 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2], )
     nt = NetworkTable("%sCLIMATE" % (station[:2], ))
 
-    startyear = nt.sts[station]['archive_begin'].year
+    bs = nt.sts[station]['archive_begin']
+    if bs is None:
+        raise NoDataFound("No metadata found.")
+    startyear = bs.year
     # 0.01, 0.5, 1, 2, 3, 4
     df = read_sql("""
         SELECT year, month,

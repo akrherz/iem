@@ -6,6 +6,7 @@ import pandas as pd
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -37,6 +38,8 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
     sts = nt.sts[station]['archive_begin']
+    if sts is None:
+        raise NoDataFound("Station metadata unknown.")
     syear = sts.year if sts.month == 1 and sts.day == 1 else (sts.year + 1)
     syear = max(syear, 1893)
     eyear = datetime.datetime.now().year
@@ -148,4 +151,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(station='IA6389', network='IACLIMATE'))
+    plotter(dict())

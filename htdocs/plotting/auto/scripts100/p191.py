@@ -7,6 +7,7 @@ from pyiem.nws import vtec
 from pyiem.plot import calendar_plot
 from pyiem.reference import state_names
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'yes': 'Colorize Cells in Chart',
          'no': 'Just plot values please'}
@@ -98,6 +99,8 @@ def plotter(fdict):
     if ctx['w'] == 'wfo':
         nt = NetworkTable("WFO")
         nt.sts['_ALL'] = {'name': 'All Offices', 'tzname': 'America/Chicago'}
+        if wfo not in nt.sts:
+            raise NoDataFound("No Data Found.")
         wfo_limiter = (" and wfo = '%s' "
                        ) % (wfo if len(wfo) == 3 else wfo[1:],)
         if wfo == '_ALL':

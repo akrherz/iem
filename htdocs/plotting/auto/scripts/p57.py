@@ -9,6 +9,7 @@ import numpy as np
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([('avg_temp', 'Average Daily Temperature'),
                      ('avg_high_temp', 'Average High Temperature'),
@@ -59,6 +60,8 @@ def plotter(fdict):
       sum(precip) as total_precip
       from """+table+""" where station = %s and day < %s GROUP by year, month
       """, pgconn, params=(station, lastday))
+    if df.empty:
+        raise NoDataFound("No Data Found.")
 
     resdf = pd.DataFrame(dict(monthname=pd.Series(calendar.month_abbr[1:],
                                                   index=range(1, 13))),

@@ -5,6 +5,7 @@ from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import temperature
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pyiem.exceptions import NoDataFound
 
 XREF = {
     'AEEI4': 'A130209',
@@ -88,7 +89,7 @@ def plotter(fdict):
                          threshold, threshold, threshold, threshold, hours1),
                   index_col=None)
     if df.empty:
-        raise ValueError("No Data Found")
+        raise NoDataFound("No Data Found")
 
     df2 = read_sql("""
     with obs as (
@@ -123,7 +124,7 @@ def plotter(fdict):
                          hours1),
                    index_col=None)
     if df2.empty:
-        raise ValueError("No Data Found")
+        raise NoDataFound("No Data Found")
 
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
@@ -156,7 +157,7 @@ def plotter(fdict):
     ax.grid(True)
 
     nt = NetworkTable("ISUSM")
-    nt2 = NetworkTable("ISUAG")
+    nt2 = NetworkTable("ISUAG", only_online=False)
     ax.set_title(("[%s] %s 4 Inch Soil Temps\n[%s] %s used for pre-%s dates"
                   ) % (station, nt.sts[station]['name'], oldstation,
                        nt2.sts[oldstation]['name'],

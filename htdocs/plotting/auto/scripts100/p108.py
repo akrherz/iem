@@ -7,6 +7,7 @@ import numpy as np
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([('all', 'Show All Three Plots'),
                      ('gdd', 'Show just Growing Degree Days'),
@@ -18,7 +19,8 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     desc['data'] = True
-    desc['description'] = """This plot presents accumulated totals and departures
+    desc['description'] = """
+    This plot presents accumulated totals and departures
     of growing degree days, precipitation and stress degree days. Leap days
     are not considered for this plot. The light blue area represents the
     range of accumulated values based on the observation history at the
@@ -92,8 +94,10 @@ def plotter(fdict):
     df[glabel + "_diff"] = df["o" + glabel] - df["c" + glabel]
 
     xlen = int((edate - sdate).days) + 1  # In case of leap day
-    years = (datetime.datetime.now().year -
-             nt.sts[station]['archive_begin'].year) + 1
+    bs = nt.sts[station]['archive_begin']
+    if bs is None:
+        raise NoDataFound("No Data Found.")
+    years = (datetime.datetime.now().year - bs.year) + 1
     acc = np.zeros((years, xlen))
     acc[:] = np.nan
     pacc = np.zeros((years, xlen))
@@ -135,7 +139,7 @@ def plotter(fdict):
         sts = sdate.replace(year=year)
         ets = sts + datetime.timedelta(days=(xlen-1))
         x = df.loc[sts:ets, 'o' + glabel].cumsum()
-        if len(x.index) == 0:
+        if x.empty:
             continue
         acc[(year - sdate.year), :len(x.index)] = x.values
         x = df.loc[sts:ets, 'oprecip'].cumsum()

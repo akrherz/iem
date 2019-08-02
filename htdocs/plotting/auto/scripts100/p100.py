@@ -3,9 +3,10 @@ import datetime
 from collections import OrderedDict
 
 import numpy as np
+from pandas.io.sql import read_sql
 from pyiem import network, util
 from pyiem.plot.use_agg import plt
-from pandas.io.sql import read_sql
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([
     ('max-high', 'Maximum High'),
@@ -87,6 +88,8 @@ def plotter(fdict):
     """, pgconn, params=(threshold, threshold, threshold, threshold, station,
                          syear, eyear),
                   index_col='year')
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     df['range-hilo'] = df['max-high'] - df['min-low']
 
     (fig, ax) = plt.subplots(1, 1)

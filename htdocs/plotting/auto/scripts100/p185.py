@@ -1,5 +1,6 @@
 """Precip days to accumulate"""
 import datetime
+import os
 
 import numpy as np
 import geopandas as gpd
@@ -8,6 +9,7 @@ from pyiem.plot.use_agg import plt
 from pyiem.plot.geoplot import MapPlot
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.datatypes import distance
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -43,11 +45,13 @@ def plotter(fdict):
     threshold_mm = distance(threshold, 'IN').value('MM')
     window_sts = date - datetime.timedelta(days=90)
     if window_sts.year != date.year:
-        raise ValueError('Sorry, do not support multi-year plots yet!')
+        raise NoDataFound('Sorry, do not support multi-year plots yet!')
 
     # idx0 = iemre.daily_offset(window_sts)
     idx1 = iemre.daily_offset(date)
     ncfn = iemre.get_daily_mrms_ncname(date.year)
+    if not os.path.isfile(ncfn):
+        raise NoDataFound("No data found.")
     ncvar = 'p01d'
 
     # Get the state weight

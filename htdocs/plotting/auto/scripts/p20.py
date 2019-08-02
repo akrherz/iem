@@ -7,6 +7,7 @@ from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -60,12 +61,12 @@ def plotter(fdict):
         SELECT t.month, t.max_year, a.avg, a.max from top t JOIN averages a
         on (t.month = a.month)
     )
-    SELECT a.month, m.count, a.avg, a.max, a.max_year from
+    SELECT a.month, m.count as count, a.avg, a.max, a.max_year from
     agg2 a LEFT JOIN myyear m
     on (m.month = a.month) ORDER by a.month ASC
     """, pgconn, params=(station, year), index_col=None)
     if df.empty:
-        raise ValueError("No Precipitation Data Found for Site")
+        raise NoDataFound("No Precipitation Data Found for Site")
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     monthly = df['avg'].values.tolist()
     bars = ax.bar(df['month'] - 0.2, monthly, fc='red', ec='red',
@@ -89,9 +90,12 @@ def plotter(fdict):
     ax.set_xticks(range(0, 13))
     ax.set_xticklabels(calendar.month_abbr)
     ax.set_xlim(0, 13)
-    ax.set_ylim(0, max([df['count'].max(), df['max'].max()]) * 1.2)
-    ax.set_yticks(np.arange(0, df['max'].max() + 20,
-                            12))
+    maxval = df['count'].max()
+    if not np.isnan(maxval):
+        ax.set_ylim(0, max([maxval, df['max'].max()]) * 1.2)
+    maxval = df['max'].max()
+    if not np.isnan(maxval):
+        ax.set_yticks(np.arange(0, maxval + 20, 12))
     ax.set_ylabel("Hours with 0.01+ inch precip")
     if datetime.date.today().year == year:
         ax.set_xlabel("Valid till %s" % (
@@ -106,4 +110,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(zstation='AMW', network='IA_ASOS', year=2017))
+    plotter(dict())

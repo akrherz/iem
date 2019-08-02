@@ -13,6 +13,7 @@ from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 PDICT5 = {'yes': 'YES: Draw Counties/Parishes',
@@ -209,7 +210,7 @@ def plotter(fdict):
         tuple([hour - 1, hour, hour + 1]), tuple(months)),
                       geom_col='geom')
     if df.empty:
-        raise ValueError("No results found for query")
+        raise NoDataFound("No results found for query")
     for _, row in df.iterrows():
         zs = zonal_stats(row['geom'], ones, affine=PRECIP_AFF, nodata=-1,
                          all_touched=True, raster_out=True)

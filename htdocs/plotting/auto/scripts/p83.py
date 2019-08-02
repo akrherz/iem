@@ -7,6 +7,7 @@ from scipy import stats
 from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'high': 'Average High Temperature',
          'low': 'Average Low Temperature',
@@ -93,6 +94,8 @@ def plotter(fdict):
     cb = %s and extract(month from day) = %s and extract(day from day) = %s
     """, pgconn, params=(days, days, days, days, days, days, days, days,
                          station, days, month, day), index_col='year')
+    if df.empty:
+        raise NoDataFound("No Data Found.")
 
     xvals = df[varname+'_before'].values
     yvals = df[varname+'_after'].values

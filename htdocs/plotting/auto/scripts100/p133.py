@@ -5,6 +5,7 @@ from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -108,7 +109,7 @@ def plotter(fdict):
     date = ctx['date']
     df = get_data(fdict)
     if df.empty:
-        raise ValueError('Error, no results returned!')
+        raise NoDataFound('Error, no results returned!')
 
     (fig, ax) = plt.subplots(1, 1)
     ax.scatter(df['before'].values, df['after'].values)

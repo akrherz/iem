@@ -7,6 +7,7 @@ import pyiem.nws.vtec as vtec
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'yes': "Limit Plot to Year-to-Date",
          'no': 'Plot Entire Year'}
@@ -45,6 +46,8 @@ def plotter(fdict):
 
     nt = NetworkTable('WFO')
     nt.sts['_ALL'] = {'name': 'All Offices'}
+    if station not in nt.sts:
+        raise NoDataFound("Station metadata unknown.")
 
     wfo_limiter = (" and wfo = '%s' "
                    ) % (station if len(station) == 3 else station[1:],)
@@ -66,7 +69,7 @@ def plotter(fdict):
         SELECT yr, count(*) from data GROUP by yr ORDER by yr ASC
       """, pgconn, params=(phenomena, significance))
     if df.empty:
-        raise ValueError("Sorry, no data found!")
+        raise NoDataFound("Sorry, no data found!")
 
     (fig, ax) = plt.subplots(1, 1)
     ax.bar(df['yr'], df['count'], align='center')
@@ -85,4 +88,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(station='DMX', phenomena='WI', significance='Y', limit='no'))
+    plotter(dict())

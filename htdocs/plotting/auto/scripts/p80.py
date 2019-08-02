@@ -5,6 +5,7 @@ import pandas as pd
 import pyiem.nws.vtec as vtec
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -54,7 +55,7 @@ def plotter(fdict):
      and wfo = %s and expire > issue and init_expire > issue
     """, (ugc, phenomena, significance, wfo))
     if cursor.rowcount < 2:
-        raise ValueError("No Results Found, try flipping zone/county")
+        raise NoDataFound("No Results Found, try flipping zone/county")
 
     rows = []
     for row in cursor:

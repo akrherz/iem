@@ -8,13 +8,15 @@ import pytz
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     desc['data'] = True
-    desc['description'] = """This plot looks at the bias associated with computing
+    desc['description'] = """
+    This plot looks at the bias associated with computing
     24 hour precipitation totals using a given hour of the day as the
     delimiter. This plot will take a number of seconds to generate, so please
     be patient.  This chart attempts to address the question of if computing
@@ -47,6 +49,8 @@ def plotter(fdict):
     station = %s and network = %s and phour >= 0.01 and
     valid >= '1973-01-01 00:00+00' and valid < %s
     """, (station, network, jan1))
+    if cursor.rowcount == 0:
+        raise NoDataFound("No Data Found.")
 
     days = (jan1.year - 1973) * 366
     data = np.zeros((days * 24), 'f')

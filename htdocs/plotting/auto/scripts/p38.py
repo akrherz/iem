@@ -8,6 +8,7 @@ from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([
         ('best', 'Use NARR, then MERRA, then HRRR'),
@@ -63,6 +64,8 @@ def plotter(fdict):
         o.hrrr_srad from agg a LEFT JOIN obs o on (a.sday = o.sday)
         ORDER by a.sday ASC
     """, pgconn, params=(station, station, year), index_col='sday')
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     df['max_narr_smooth'] = df['max_narr'].rolling(window=7, min_periods=1,
                                                    center=True).mean()
     df['best'] = df['narr_srad'].fillna(

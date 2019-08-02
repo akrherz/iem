@@ -6,6 +6,7 @@ from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.nws.vtec import NWS_COLORS
+from pyiem.exceptions import NoDataFound
 
 PDICT = {
     'no': 'Consider all calculated Heat Index Values',
@@ -45,7 +46,7 @@ def get_df(ctx):
         ) ORDER by issue ASC
     """, pgconn, params=(ctx['ugc'], ), index_col='valid')
     if events.empty:
-        raise ValueError("No Alerts were found for UGC: %s" % (ctx['ugc'], ))
+        raise NoDataFound("No Alerts were found for UGC: %s" % (ctx['ugc'], ))
     pgconn = get_dbconn('asos')
     obs = read_sql("""
         SELECT valid, tmpf::int as tmpf, feel

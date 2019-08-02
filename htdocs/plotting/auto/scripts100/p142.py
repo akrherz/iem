@@ -10,6 +10,7 @@ from matplotlib.patches import Rectangle
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 UNITS = {'precip': 'inch', 'avgt': 'F', 'high': 'F', 'low': 'F'}
 PDICT = OrderedDict([
@@ -181,6 +182,8 @@ def plotter(fdict):
                          p1 - 1, p2 - 1, p3 - 1,
                          p1 - 1, p2 - 1, p3 - 1, station, maxdays,
                          sts, ets), index_col='day')
+    if df.empty:
+        raise NoDataFound("No Data Found.")
 
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     ax.set_position([0.1, 0.14, 0.85, 0.71])

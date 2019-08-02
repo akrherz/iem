@@ -6,6 +6,7 @@ from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -52,7 +53,7 @@ def plotter(fdict):
     ORDER by day ASC
     """, pgconn, params=(station, station), index_col='day')
     if df.empty:
-        raise ValueError("No data found!")
+        raise NoDataFound("No data found!")
 
     (fig, ax) = plt.subplots(1, 1)
     # Average

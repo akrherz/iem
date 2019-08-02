@@ -6,6 +6,7 @@ from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([('precip', 'Last Measurable Precipitation'),
                      ('low', 'Low Temperature'),
@@ -86,6 +87,8 @@ def plotter(fdict):
       from totals where count > 170
     """, pgconn, params=(d180, today, d180, d180, d180, d180, d180, d180),
                   index_col='station')
+    if df.empty:
+        raise NoDataFound("No Data Found.")
 
     lats = []
     lons = []

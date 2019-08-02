@@ -7,6 +7,7 @@ import matplotlib.dates as mdates
 from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict((
     ('below', 'Daily Range Below Emphasis'),
@@ -70,7 +71,7 @@ def plotter(fdict):
         ORDER by day ASC
     """, pgconn, params=(station, network), index_col='day')
     if df.empty:
-        raise ValueError("No Data Found!")
+        raise NoDataFound("No Data Found!")
     df['range'] = df['max_' + varname] - df['min_' + varname]
 
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))

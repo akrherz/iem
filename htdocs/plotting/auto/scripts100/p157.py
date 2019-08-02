@@ -6,6 +6,7 @@ from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'above': 'Above Threshold',
          'below': 'Below Threshold'}
@@ -74,9 +75,13 @@ def plotter(fdict):
     and min_rh is not null and max_rh is not null
     ORDER by day ASC
     """, pgconn, params=(threshold, station, network), index_col='day')
+    if df.empty:
+        raise NoDataFound("No Data Found.")
 
     thisyear = df[df['year'] == year]
     gdf = df.groupby('doy').mean()
+    if gdf.empty or 'avg_rh' not in gdf.columns:
+        raise NoDataFound("No Data Found.")
     wdf = df.groupby('week').mean()
 
     (fig, ax) = plt.subplots(1, 1)

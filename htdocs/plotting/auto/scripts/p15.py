@@ -9,6 +9,7 @@ import matplotlib.patheffects as PathEffects
 from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([
         ('high', 'High Temperature'),
@@ -61,6 +62,8 @@ def plotter(fdict):
     """, pgconn, params=(station,), index_col=None)
     gdf = df.groupby('month').sum()
     gyear = df[df['year'] == year].groupby('month').sum()
+    if gyear.empty or gdf.empty:
+        raise NoDataFound("No data found.")
     increase = gdf[varname+'_greater']
     nochange = gdf[varname+'_unch']
     decrease = gdf[varname+'_lower']

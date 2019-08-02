@@ -7,6 +7,7 @@ import numpy as np
 from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict(
     [('min_range', 'Minimum Daily High to Low Temperature Range'),
@@ -65,6 +66,8 @@ def plotter(fdict):
     (high - low) as range from ranks
     WHERE rank = 1 ORDER by month ASC, day DESC
     """, pgconn, params=(station, ), index_col='month')
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     labels = []
     ranges = []
     months = []

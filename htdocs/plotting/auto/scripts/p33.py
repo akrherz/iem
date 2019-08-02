@@ -4,6 +4,7 @@ from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -48,6 +49,8 @@ def plotter(fdict):
       SELECT myyear as year, max(p - low) as largest_change, count(*) from data
       GROUP by year ORDER by year ASC
     """, pgconn, params=(station,), index_col='year')
+    if df.empty:
+      raise NoDataFound("No Data Found.")
     # remove in-progress years
     df = df[df['count'] > 122]
 

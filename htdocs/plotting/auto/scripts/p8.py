@@ -8,6 +8,7 @@ import pandas as pd
 from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -63,7 +64,7 @@ def plotter(fdict):
     for row in cursor:
         vals.append(row[1] / years * 100.)
     if not vals:
-        raise ValueError("No Data Found!")
+        raise NoDataFound("No Data Found!")
     df = pd.DataFrame(dict(freq=pd.Series(vals, index=range(1, 13))),
                       index=pd.Series(range(1, 13), name='month'))
 

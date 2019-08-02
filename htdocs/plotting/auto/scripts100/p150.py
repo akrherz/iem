@@ -6,6 +6,7 @@ from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'00': '00 UTC', '12': '12 UTC'}
 PDICT2 = {
@@ -113,7 +114,7 @@ def plotter(fdict):
     """, pgconn, params=(tuple(stations), hour, ts),
                   index_col='pressure')
     if df.empty:
-        raise ValueError(("Sounding for %s was not found!"
+        raise NoDataFound(("Sounding for %s was not found!"
                           ) % (ts.strftime("%Y-%m-%d %H:%M"),))
     df = df.drop('valid', axis=1)
     for key in PDICT3.keys():

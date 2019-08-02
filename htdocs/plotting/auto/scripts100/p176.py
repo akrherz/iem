@@ -4,6 +4,7 @@ import pandas as pd
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
+from pyiem.exceptions import NoDataFound
 
 PDICT = {
     '0': 'Max Highs / Min Lows',
@@ -16,7 +17,8 @@ def get_description():
     desc = dict()
     desc['highcharts'] = True
     desc['data'] = True
-    desc['description'] = """This chart shows the margin by which new daily high
+    desc['description'] = """
+    This chart shows the margin by which new daily high
     and low temperatures set are beaten by.
     """
     desc['arguments'] = [
@@ -43,6 +45,8 @@ def get_context(fdict):
         and high is not null and low is not null
         ORDER by day ASC
     """, (station, ))
+    if cursor.rowcount == 0:
+        raise NoDataFound("No Data Found.")
     dates = pd.date_range('2000/01/01', '2000/12/31').strftime("%m%d")
     if opt == '0':
         records = pd.DataFrame(dict(high=-9999, low=9999),

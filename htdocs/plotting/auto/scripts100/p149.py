@@ -7,6 +7,7 @@ import matplotlib.dates as mdates
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -111,6 +112,8 @@ def plotter(fdict):
                          _days3 - 1, _days3 - 1, _days3 - 1,
                          station, days),
                   index_col='day')
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     df['arridity'] = df['t'] - df['p']
     df['arridity2'] = df['t2'] - df['p2']
     df['arridity3'] = df['t3'] - df['p3']

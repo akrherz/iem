@@ -9,6 +9,7 @@ from pyiem.datatypes import distance
 from pyiem.plot.use_agg import plt
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import state_bounds, SECTORS
+from pyiem.exceptions import NoDataFound
 
 PDICT2 = {'c': 'Contour Plot',
           'g': 'Grid Cell Mesh'}
@@ -76,7 +77,7 @@ def plotter(fdict):
     opt = ctx['opt']
     usdm = ctx['usdm']
     if sdate.year != edate.year:
-        raise ValueError('Sorry, do not support multi-year plots yet!')
+        raise NoDataFound('Sorry, do not support multi-year plots yet!')
     days = (edate - sdate).days
     sector = ctx['sector']
 
@@ -122,7 +123,7 @@ def plotter(fdict):
     idx0 = iemre.daily_offset(sdate)
     idx1 = iemre.daily_offset(edate) + 1
     if not os.path.isfile(ncfn):
-        raise ValueError("No data for that year, sorry.")
+        raise NoDataFound("No data for that year, sorry.")
     with util.ncopen(ncfn) as nc:
         if state is not None:
             x0, y0, x1, y1 = util.grid_bounds(
@@ -152,7 +153,7 @@ def plotter(fdict):
                         np.sum(nc.variables[ncvar][i:i2, y0:y1, x0:x1], 0),
                         'MM').value('IN')
     if np.ma.is_masked(np.max(p01d)):
-        raise ValueError("Data Unavailable")
+        raise NoDataFound("Data Unavailable")
     units = 'inches'
     cmap = plt.get_cmap(ctx['cmap'])
     cmap.set_bad('white')

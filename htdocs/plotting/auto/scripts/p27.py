@@ -6,6 +6,7 @@ import numpy as np
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -48,6 +49,8 @@ def plotter(fdict):
         from """+table+""" where station = %s and month > 6
         GROUP by year ORDER by year ASC
     """, pgconn, params=(t1, t2, station), index_col='year')
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     df = df[df['t2_doy'] < 400]
 
     doy = np.array(df['t1_doy'], 'i')

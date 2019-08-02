@@ -1,5 +1,6 @@
 """Plot IEMRE"""
 import datetime
+import os
 from collections import OrderedDict
 
 import numpy as np
@@ -9,6 +10,7 @@ from pyiem.plot import MapPlot
 from pyiem.plot.colormaps import stretch_cmap
 from pyiem.datatypes import distance, temperature, speed
 from pyiem.util import get_autoplot_context, ncopen
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict(
     (('p01d_12z', '24 Hour Precipitation at 12 UTC'),
@@ -74,7 +76,10 @@ def plotter(fdict):
     islice = slice(i0, i1)
 
     idx0 = iemre.daily_offset(date)
-    with ncopen(iemre.get_daily_ncname(date.year)) as nc:
+    ncfn = iemre.get_daily_ncname(date.year)
+    if not os.path.isfile(ncfn):
+        raise NoDataFound("No Data Found.")
+    with ncopen(ncfn) as nc:
         lats = nc.variables['lat'][jslice]
         lons = nc.variables['lon'][islice]
         cmap = ctx['cmap']
@@ -131,7 +136,7 @@ def plotter(fdict):
             clevstride = 2
 
     if np.ma.is_masked(np.max(data)):
-        raise ValueError("Data Unavailable")
+        raise NoDataFound("Data Unavailable")
     x, y = np.meshgrid(lons, lats)
     if ptype == 'c':
         # in the case of contour, use the centroids on the grids

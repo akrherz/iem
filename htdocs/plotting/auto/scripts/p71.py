@@ -10,6 +10,7 @@ from pyiem.util import drct2text
 from pyiem.datatypes import speed
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'KT': 'knots',
          'MPH': 'miles per hour',
@@ -81,7 +82,7 @@ def plotter(fdict):
         drct.append(row[2])
         sknt.append(row[1])
     if not sknt:
-        raise ValueError("ERROR: No Data Found")
+        raise NoDataFound("ERROR: No Data Found")
     df = pd.DataFrame(dict(day=pd.Series(days),
                            drct=pd.Series(drct),
                            sknt=pd.Series(sknt)))

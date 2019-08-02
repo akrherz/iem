@@ -7,6 +7,7 @@ from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import loadqc
+from pyiem.exceptions import NoDataFound
 
 
 PLOTTYPES = {
@@ -50,7 +51,7 @@ def plot1(ctx):
     """, ctx['pgconn'], params=(dt, dt + datetime.timedelta(hours=24)),
                   index_col='station')
     if df.empty:
-        raise ValueError("No Data Found for This Plot.")
+        raise NoDataFound("No Data Found for This Plot.")
     df['max_tsoil_f'] = (
         df['max_tsoil_c'].values * units('degC')).to(units('degF')).m
     df['min_tsoil_f'] = (
@@ -84,7 +85,7 @@ def plot2(ctx):
     """, ctx['pgconn'], params=(ctx['date'], ),
                   index_col='station')
     if df.empty:
-        raise ValueError("No Data Found for This Plot.")
+        raise NoDataFound("No Data Found for This Plot.")
     df['high_f'] = (
         df['tair_c_max_qc'].values * units('degC')).to(units('degF')).m
     df['low_f'] = (
@@ -114,7 +115,7 @@ def plot3(ctx):
     """, ctx['pgconn'], params=(ctx['date'], ),
                   index_col='station')
     if df.empty:
-        raise ValueError("No Data Found for This Plot.")
+        raise NoDataFound("No Data Found for This Plot.")
     df['soil4_avg_f'] = (
         df['tsoil_c_avg_qc'].values * units('degC')).to(units('degF')).m
 
@@ -141,7 +142,7 @@ def plot4(ctx):
     """, ctx['pgconn'], params=(ctx['date'], ),
                   index_col='station')
     if df.empty:
-        raise ValueError("No Data Found for This Plot.")
+        raise NoDataFound("No Data Found for This Plot.")
 
     data = []
     for station, row in df.iterrows():
@@ -166,7 +167,7 @@ def plot5(ctx, col):
     """, ctx['pgconn'], params=(ctx['date'], ),
                   index_col='station')
     if df.empty:
-        raise ValueError("No Data Found for This Plot.")
+        raise NoDataFound("No Data Found for This Plot.")
     df['data'] = (
         df[col + '_qc'].values * units('mm')).to(units('inch')).m
 
@@ -194,7 +195,7 @@ def plot7(ctx):
     """, ctx['pgconn'], params=(ctx['date'], ),
                   index_col='station')
     if df.empty:
-        raise ValueError("No Data Found for This Plot.")
+        raise NoDataFound("No Data Found for This Plot.")
     df['gust_mph'] = (
         df['ws_mps_max_qc'].values * units('meter / second')
     ).to(units('mph')).m
@@ -224,7 +225,7 @@ def plot8(ctx):
     """, ctx['pgconn'], params=(ctx['date'], ),
                   index_col='station')
     if df.empty:
-        raise ValueError("No Data Found for This Plot.")
+        raise NoDataFound("No Data Found for This Plot.")
     df['wind_mph'] = (
         df['ws_mps_s_wvt_qc'].values * units('meter / second')
     ).to(units('mph')).m

@@ -8,6 +8,7 @@ from pyiem.datatypes import distance
 from pyiem.plot.use_agg import plt
 from pyiem.plot import MapPlot
 from pyiem.util import get_autoplot_context, utc
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'120': 'Five Day',
          '168': 'Seven Day'}
@@ -64,7 +65,7 @@ def plotter(fdict):
     gribfn = valid.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/wpc/"
                              "p" + period + "m_%Y%m%d%Hf" + period + ".grb"))
     if not os.path.isfile(gribfn):
-        raise ValueError("gribfn %s missing" % (gribfn, ))
+        raise NoDataFound("gribfn %s missing" % (gribfn, ))
 
     grbs = pygrib.open(gribfn)
     grb = grbs[1]

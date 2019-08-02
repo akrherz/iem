@@ -7,6 +7,7 @@ import numpy as np
 from pyiem.plot.use_agg import plt
 from pyiem.plot import MapPlot, centered_bins
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {
     'state': 'State Level Maps (select state)',
@@ -197,6 +198,8 @@ def plotter(fdict):
                          threshold, p2syear, p2eyear, tuple(months),
                          p1yearreq, p2yearreq],
                   index_col=None)
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     df['total_precip'] = df['p2_total_precip'] - df['p1_total_precip']
     df['avg_temp'] = df['p2_avg_temp'] - df['p1_avg_temp']
     df['avg_high'] = df['p2_avg_high'] - df['p1_avg_high']

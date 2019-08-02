@@ -8,6 +8,7 @@ from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([
     ('high', 'High Temp (F)'),
@@ -66,6 +67,8 @@ def plotter(fdict):
         and sday != '0229'
         GROUP by sday ORDER by sday
     """, pgconn, params=(station, ), index_col=None)
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     # Covert sday into year 2001 date
     df['date'] = pd.to_datetime(df['sday'] + "2001", format='%m%d%Y')
     df.set_index('date', inplace=True)

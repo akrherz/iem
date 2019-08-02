@@ -8,6 +8,7 @@ from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([
     ('high', 'High Temperature'),
@@ -52,8 +53,10 @@ def get_context(fdict):
     mydir = ctx['dir']
     table = "alldata_%s" % (station[:2], )
     nt = NetworkTable("%sCLIMATE" % (station[:2],))
-    years = (datetime.date.today().year -
-             nt.sts[station]['archive_begin'].year + 1.0)
+    bs = nt.sts[station]['archive_begin']
+    if bs is None:
+        raise NoDataFound("Unknown station metadata.")
+    years = (datetime.date.today().year - bs.year + 1.0)
 
     plimit = '' if varname != 'precip' else ' and precip >= 0.01 '
     comp = ">=" if mydir == 'above' else "<"

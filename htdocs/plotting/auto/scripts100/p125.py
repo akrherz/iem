@@ -7,6 +7,7 @@ import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.plot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {
     'state': 'State Level Maps (select state)',
@@ -79,7 +80,7 @@ def plotter(fdict):
     ON (d.station = t.id) WHERE t.network = 'NCDC81'
     """, pgconn, index_col=['station', 'month'])
     if df.empty:
-        raise ValueError("No data was found for query, sorry.")
+        raise NoDataFound("No data was found for query, sorry.")
 
     if over == 'monthly':
         title = "%s %s" % (calendar.month_name[month], PDICT3[varname])

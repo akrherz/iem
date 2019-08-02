@@ -8,6 +8,7 @@ from pyiem.network import Table as NetworkTable
 from pyiem.nws import vtec
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -15,7 +16,8 @@ def get_description():
     desc = dict()
     desc['cache'] = 600
     desc['data'] = True
-    desc['description'] = """Gaant chart of watch, warning, and advisories issued
+    desc['description'] = """
+    Gaant chart of watch, warning, and advisories issued
     by an NWS Forecast Office for a start date and number of days of your
     choice. The duration of the individual alert is the maximum found between
     the earliest issuance and latest expiration."""
@@ -41,6 +43,8 @@ def plotter(fdict):
     days = ctx['days']
 
     nt = NetworkTable('WFO')
+    if station not in nt.sts:
+        raise NoDataFound("No Data Found.")
     tz = pytz.timezone(nt.sts[station]['tzname'])
 
     sts = sts.replace(tzinfo=tz)
@@ -57,7 +61,7 @@ def plotter(fdict):
      ORDER by minissue ASC
     """, pgconn, params=(station, sts, ets), index_col=None)
     if df.empty:
-        raise ValueError("No events were found for WFO and time period.")
+        raise NoDataFound("No events were found for WFO and time period.")
 
     events = []
     labels = []

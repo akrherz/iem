@@ -9,6 +9,7 @@ from pandas.io.sql import read_sql
 from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict((
      ('cdd', 'Cooling Degree Days'),
@@ -66,6 +67,8 @@ def plotter(fdict):
     """ + gfunc + """ as """+glabel+"""
     from """+table+""" WHERE station = %s and year > 1892 and sday != '0229'
     """, pgconn, params=(station, ))
+    if df.empty:
+        raise NoDataFound("No data Found.")
 
     # Do some magic!
     df2 = df[['sday', glabel]].groupby('sday').describe(

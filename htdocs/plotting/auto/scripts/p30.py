@@ -7,6 +7,7 @@ from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'monthly': 'Plot Single Month',
          'yearly': 'Plot Entire Year'}
@@ -79,6 +80,8 @@ def plotter(fdict):
         and year <= %s GROUP by year
         ORDER by year ASC
         """, pgconn, params=(station, ctx['eyear']), index_col='year')
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     df['rng'] = df['max_high'] - df['min_low']
 
     (fig, ax) = plt.subplots(3, 1, sharex=True, figsize=(9, 6))

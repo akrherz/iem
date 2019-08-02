@@ -5,6 +5,7 @@ import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT3 = {'contour': 'Contour + Plot Values',
           'values': 'Plot Values Only'}
@@ -21,7 +22,8 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     desc['data'] = True
-    desc['description'] = """This map presents the first fall date or last spring
+    desc['description'] = """
+    This map presents the first fall date or last spring
     date with a temperature at/above or below some threshold.  The year is
     split on 1 July for the purposes of this plotting app.  Sorry, this app
     does not support multi-state plots at this time.
@@ -50,7 +52,7 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     sector = ctx['sector']
     if len(sector) != 2:
-        raise ValueError("Sorry, this app does not support multi-state plots.")
+        raise NoDataFound("Sorry, this app doesn't support multi-state plots.")
     varname = ctx['var']
     year = ctx['year']
     popt = ctx['popt']
@@ -69,7 +71,7 @@ def plotter(fdict):
     """, pgconn, params=(threshold, year, '%sCLIMATE' % (sector,)),
                   index_col='station')
     if df.empty:
-        raise ValueError("No data found!")
+        raise NoDataFound("No data found!")
 
     def f(val):
         ts = datetime.date(year, 1, 1) + datetime.timedelta(

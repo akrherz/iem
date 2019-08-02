@@ -4,6 +4,7 @@ import datetime
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'maxmin': 'Daily Maximum / Minimums',
          'precip': 'Daily Maximum Precipitation',
@@ -34,6 +35,9 @@ def plotter(fdict):
     varname = ctx['var']
 
     nt = NetworkTable("%sCLIMATE" % (station[:2], ))
+    bs = nt.sts[station]['archive_begin']
+    if bs is None:
+        raise NoDataFound("No Metadata found.")
     res = """\
 # IEM Climodat https://mesonet.agron.iastate.edu/climodat/
 # Report Generated: %s
@@ -41,7 +45,7 @@ def plotter(fdict):
 # Site Information: [%s] %s
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 """ % (datetime.date.today().strftime("%d %b %Y"),
-       nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
+       bs.date(), datetime.date.today(), station,
        nt.sts[station]['name'])
     if varname == 'maxmin':
         res += """\

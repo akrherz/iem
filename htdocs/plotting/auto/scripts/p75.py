@@ -9,6 +9,7 @@ import pandas as pd
 from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT2 = OrderedDict([
         ('winter', 'Winter (Dec, Jan, Feb)'),
@@ -23,7 +24,8 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     desc['data'] = True
-    desc['description'] = """Simple plot of seasonal/yearly precipitation totals.
+    desc['description'] = """
+    Simple plot of seasonal/yearly precipitation totals.
     """
     desc['arguments'] = [
         dict(type='station', name='station', default='IATDSM',
@@ -64,6 +66,8 @@ def plotter(fdict):
       sum(precip) as all
       from """ + table + """ WHERE station = %s GROUP by yr ORDER by yr ASC
     """, (1 if season != 'all' else 0, station))
+    if ccursor.rowcount == 0:
+        raise NoDataFound("No Data Found.")
 
     today = datetime.datetime.now()
     thisyear = today.year

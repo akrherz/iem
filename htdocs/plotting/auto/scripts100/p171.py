@@ -8,6 +8,7 @@ import pyiem.nws.vtec as vtec
 from pyiem import reference
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'wfo': 'Select by NWS Forecast Office',
          'state': 'Select by State'}
@@ -56,6 +57,8 @@ def plotter(fdict):
 
     nt = NetworkTable('WFO')
     nt.sts['_ALL'] = {'name': 'All Offices'}
+    if station not in nt.sts:
+        raise NoDataFound("Unknown station metadata.")
 
     wfo_limiter = (" and wfo = '%s' "
                    ) % (station if len(station) == 3 else station[1:],)
@@ -79,7 +82,7 @@ def plotter(fdict):
       """, pgconn, params=(phenomena, significance), index_col=None)
 
     if df.empty:
-        raise ValueError("Sorry, no data found!")
+        raise NoDataFound("Sorry, no data found!")
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 8))
 
     df2 = df.pivot('yr', 'mo', 'count')

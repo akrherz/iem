@@ -6,6 +6,7 @@ from pandas.io.sql import read_sql
 import matplotlib.cm as cm
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'high': 'High temperature',
          'low': 'Low Temperature'}
@@ -62,6 +63,8 @@ def plotter(fdict):
     stations s on (s.id = d.station) where s.network = 'NCDC81'
     and s.state not in ('HI', 'AK')
     """, pgconn, params=(date2, date1), index_col='station')
+    if df.empty:
+        raise NoDataFound("No Data Found.")
 
     days = int((date2 - date1).days)
     extent = int(df[varname].abs().max())

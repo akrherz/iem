@@ -7,6 +7,7 @@ from pandas.io.sql import read_sql
 from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([
         ('avg_high_temp', 'Average High Temperature'),
@@ -113,6 +114,8 @@ def plotter(fdict):
     """, pgconn, params=(gddbase, gddceil,
                          threshold, threshold, threshold, threshold,
                          station, tuple(sdays)))
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     # require at least 90% coverage
     df = df[df['count'] >= (days * 0.9)]
     # require values , not nan

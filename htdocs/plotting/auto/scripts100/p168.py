@@ -7,6 +7,7 @@ import numpy as np
 from pyiem import util
 from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -46,7 +47,7 @@ def plotter(fdict):
     ORDER by high DESC, day DESC
     """, pgconn, params=(station, ), index_col=None)
     if df.empty:
-        raise ValueError("No data found!")
+        raise NoDataFound("No data found!")
 
     (fig, ax) = plt.subplots(1, 1, figsize=(6, 8))
     current = {'d2000': datetime.date(2000, 1, 1),

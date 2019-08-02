@@ -11,6 +11,7 @@ from pyiem.plot.use_agg import plt
 from pyiem.datatypes import temperature, distance
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
+from pyiem.exceptions import NoDataFound
 
 
 PLOTTYPES = {
@@ -74,7 +75,7 @@ def make_daily_pet_plot(ctx):
     df = pd.DataFrame(dict(dates=dates, dailyet=o_dailyet,
                            climo_dailyet=c_et))
     if df.empty:
-        raise ValueError("No Data Found!")
+        raise NoDataFound("No Data Found!")
 
     (fig, ax) = plt.subplots(1, 1)
     ax.bar(dates, o_dailyet, fc='brown', ec='brown', zorder=1,
@@ -111,7 +112,7 @@ def make_daily_rad_plot(ctx):
     vals = []
     tmax = []
     if icursor.rowcount == 0:
-        raise ValueError("No Data Found, sorry")
+        raise NoDataFound("No Data Found, sorry")
     for row in icursor:
         dates.append(row[0])
         vals.append(row[1])
@@ -150,7 +151,7 @@ def make_daily_plot(ctx):
                                 ctx['ets'].strftime("%Y-%m-%d 23:59")),
                   index_col='date')
     if df.empty:
-        raise ValueError("No Data Found for Query")
+        raise NoDataFound("No Data Found for Query")
 
     mins = temperature(df['min'].values, 'C').value('F')
     maxs = temperature(df['max'].values, 'C').value('F')
@@ -371,7 +372,7 @@ def plot1(ctx):
     """, ctx['pgconn'], params=(ctx['station'], ctx['sts'],
                                 ctx['ets']), index_col='valid')
     if df.empty:
-        raise ValueError("No Data Found for This Plot.")
+        raise NoDataFound("No Data Found for This Plot.")
     slrkw = df['slrkw_avg_qc']
     d12sm = df['calc_vwc_12_avg_qc']
     d12t = df['t12_c_avg_qc']
@@ -502,11 +503,21 @@ def plotter(fdict):
     elif ctx['opt'] == '8':
         fig, df = make_battery_plot(ctx)
 
-    if 'valid' in df.columns:
-        df['valid'] = df['valid'].dt.strftime("%Y-%m-%d %H:%M")
+    # removal of timestamps, sigh
+    df = df.reset_index()
+    for col in ['valid', 'ws_mph_tmx', 'valid', 'ws_mph_tmx_qc', 'tair_c_tmn',
+                'tair_c_tmx', 'ws_mps_tmx', 'tair_c_tmx_qc', 'tair_c_tmn_qc',
+                'ws_mps_tmx_qc', 'ws_mph_tmx', 'ws_mph_tmx_qc']:
+        if col in df.columns:
+            df[col] = df[col].apply((
+                lambda x: x
+                if isinstance(x, str)
+                else x.strftime("%Y-%m-%d %H:%M")))
     return fig, df
 
 
 if __name__ == '__main__':
-    plotter(dict(opt='1', station='REFI4', sts='2018-08-01 0000',
-                 ets='2018-08-31 0800'))
+    plotter(dict())
+    # fig, df = plotter(dict())
+    # with pd.ExcelWriter("/tmp/ba.xlsx") as xl:
+    #    df.to_excel(xl)

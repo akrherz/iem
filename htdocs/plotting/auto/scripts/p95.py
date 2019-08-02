@@ -9,6 +9,7 @@ import matplotlib.colors as mpcolors
 from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'none': 'Show all values',
          'hide': 'Show "strong" events'}
@@ -96,6 +97,8 @@ def plotter(fdict):
         from """ + table + """
         where station = %s GROUP by year, month
     """, (station, ))
+    if ccursor.rowcount == 0:
+        raise NoDataFound("No Data Found.")
     yearly = {}
     for row in ccursor:
         (_year, _month, _precip, _temp) = row
@@ -185,4 +188,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(year="2018"))
+    plotter(dict())

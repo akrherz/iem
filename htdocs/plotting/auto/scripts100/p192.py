@@ -12,6 +12,7 @@ from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from metpy.units import units
 from metpy.calc import apparent_temperature
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'cwa': 'Plot by NWS Forecast Office',
          'state': 'Plot by State'}
@@ -119,7 +120,7 @@ def plotter(fdict):
         title = "NWS CWA %s [%s]" % (nt.sts[ctx['wfo']]['name'], ctx['wfo'])
     df, valid = get_df(ctx, bnds)
     if df.empty:
-        raise ValueError("No data was found for your query")
+        raise NoDataFound("No data was found for your query")
     mp = MapPlot(sector=('state' if ctx['t'] == 'state' else 'cwa'),
                  state=ctx['state'],
                  cwa=(ctx['wfo'] if len(ctx['wfo']) == 3 else ctx['wfo'][1:]),

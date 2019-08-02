@@ -6,6 +6,7 @@ import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'precip': 'Total Precipitation',
          'avg_high': 'Average High Temperature',
@@ -50,7 +51,7 @@ def p(df, year, month, varname, precision):
     """Lazy request of data"""
     try:
         val = df.at[(year, month), varname]
-    except Exception as _:
+    except:
         return ' ****'
     if pd.isna(val):
         return ' ****'
@@ -79,6 +80,8 @@ def plotter(fdict):
     GROUP by year, water_year, month
     ORDER by year ASC, month ASC
     """, pgconn, params=(station, today), index_col=None)
+    if df.empty:
+        raise NoDataFound("No Data Found.")
 
     res = (
         "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"

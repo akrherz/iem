@@ -9,6 +9,7 @@ import pyiem.datatypes as dt
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict((
     ('default', 'Temperatures | Winds | Clouds + Vis'),
@@ -101,16 +102,16 @@ def plotter(fdict):
 
     nt = NetworkTable(network)
     if not nt.sts:
-        raise ValueError(("Network Identifier %s is unknown to IEM"
-                          ) % (network,))
+        raise NoDataFound(("Network Identifier %s is unknown to IEM"
+                           ) % (network,))
     if station not in nt.sts:
-        raise ValueError(("Station %s does not exist in network %s"
-                          ) % (station, network))
+        raise NoDataFound(("Station %s does not exist in network %s"
+                           ) % (station, network))
     tzname = nt.sts[station]['tzname']
 
     df = get_data(network, station, tzname, sdate)
     if df.empty:
-        raise ValueError("No data was found!")
+        raise NoDataFound("No data was found!")
     # if d1 is not None and d1 >= 0 and d1 <= 360:
     # if s is not None and s >= 0 and s < 200:
     # if t is not None and t >= -90 and t < 190:

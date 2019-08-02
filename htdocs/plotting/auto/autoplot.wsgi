@@ -16,6 +16,7 @@ import pandas as pd
 from paste.request import parse_formvars
 from six import string_types
 from pyiem.plot.use_agg import plt
+from pyiem.exceptions import NoDataFound
 # Attempt to stop hangs within mod_wsgi and numpy
 np.seterr(all='ignore')
 
@@ -155,13 +156,11 @@ def workflow(environ, form, fmt):
     # res should be a 3 length tuple
     try:
         res, meta = get_res_by_fmt(scriptnum, fmt, fdict)
-    except (ImportError, SyntaxError, IndentationError, SystemError,
-            RuntimeWarning) as exp:
-        # Some errors we don't want to handle and let failures happen
-        # ie travis-ci testing
-        raise exp
-    except Exception as exp:
+    except NoDataFound as exp:
         return HTTP400, handle_error(exp, fmt, environ.get('REQUEST_URI'))
+    except Exception as exp:
+        # Everything else should be considered fatal
+        raise exp
     end_time = datetime.datetime.utcnow()
     sys.stderr.write(("Autoplot[%3s] Timing: %7.3fs Key: %s\n"
                       ) % (scriptnum, (end_time - start_time).total_seconds(),

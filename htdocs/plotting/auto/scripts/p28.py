@@ -8,6 +8,7 @@ import pandas as pd
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([
     ('dep', 'Departure [inch]'),
@@ -73,6 +74,8 @@ def get_ctx(fdict):
     SELECT year,  extract(doy from day) as doy, precip
     from """+table+""" where station = %s and precip is not null
     """, (station,))
+    if cursor.rowcount == 0:
+        raise NoDataFound("No Data Found")
 
     baseyear = nt.sts[station]['archive_begin'].year - 1
     ctx['years'] = (datetime.datetime.now().year - baseyear) + 1

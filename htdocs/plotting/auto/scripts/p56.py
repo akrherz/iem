@@ -8,6 +8,7 @@ from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem import reference
+from pyiem.exceptions import NoDataFound
 
 OPT = {'state': 'Summarize by State',
        'wfo': 'Summarize by NWS Forecast Office'}
@@ -55,6 +56,8 @@ def plotter(fdict):
     station = ctx['station'][:4]
 
     nt = NetworkTable('WFO')
+    if station not in nt.sts:
+        raise NoDataFound("Unknown station.")
 
     sts = datetime.datetime(2012, 1, 1)
     xticks = []
@@ -79,7 +82,7 @@ def plotter(fdict):
     """, pgconn, params=(phenomena, significance), index_col=None)
 
     if df.empty:
-        raise ValueError("ERROR: No Results Found!")
+        raise NoDataFound("ERROR: No Results Found!")
 
     # Top Panel: count
     gdf = df.groupby('week').count()

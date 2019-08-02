@@ -8,6 +8,7 @@ from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem import util
 from pyiem.reference import lsr_events
+from pyiem.exceptions import NoDataFound
 
 MARKERS = ['8', '>', '<', 'v', 'o', 'h', '*']
 
@@ -51,6 +52,8 @@ def plotter(fdict):
     # optional parameter, this could return null
     ltype = ctx.get('ltype')
     nt = NetworkTable('WFO')
+    if station not in nt.sts:
+        raise NoDataFound("Station metadata unknown.")
     wfo_limiter = " and wfo = '%s' " % (
         station if len(station) == 3 else station[1:],)
     if station == '_ALL':
@@ -71,7 +74,7 @@ def plotter(fdict):
         GROUP by yr, src
     """, pgconn)
     if df.empty:
-        raise ValueError("No data found")
+        raise NoDataFound("No data found")
     # pivot the table so that we can fill out zeros
     df = df.pivot(index='yr', columns='src', values='count')
     df = df.fillna(0).reset_index()

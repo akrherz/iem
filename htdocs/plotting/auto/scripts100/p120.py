@@ -7,6 +7,7 @@ import matplotlib.dates as mdates
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -67,6 +68,9 @@ def plotter(fdict):
             df.loc[0:row['doy'], '%scnts' % (base,)] += 1
         df['%sfreq' % (base,)] = df['%scnts' % (base,)] / len(df2.index) * 100.
 
+    bs = nt.sts[station]['archive_begin']
+    if bs is None:
+        raise NoDataFound("No metadata found.")
     res = """\
 # IEM Climodat https://mesonet.agron.iastate.edu/climodat/
 # Report Generated: %s
@@ -78,7 +82,7 @@ def plotter(fdict):
 # threshold would be observed again that spring season)
  DOY Date    <%s  <%s  <%s  <%s
 """ % (datetime.date.today().strftime("%d %b %Y"),
-       nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
+       bs.date(), datetime.date.today(), station,
        nt.sts[station]['name'], thresholds[0] + 1,
        thresholds[1] + 1, thresholds[2] + 1, thresholds[3] + 1)
     fcols = ['%sfreq' % (s,) for s in thresholds]

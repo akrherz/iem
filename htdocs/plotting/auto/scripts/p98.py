@@ -7,6 +7,7 @@ from pandas.io.sql import read_sql
 from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict((
      ('precip', 'Daily Precipitation'),
@@ -67,6 +68,8 @@ def plotter(fdict):
         from """+table+""" WHERE station = %s and month = %s
         GROUP by sday ORDER by sday ASC
         """, pgconn, params=(threshold, station, month), index_col='sday')
+    if df.empty:
+        raise NoDataFound("No Data Found.") 
     df['freq'] = df['hit'] / df['total'] * 100.
 
     fig, ax = plt.subplots(1, 1, figsize=(8, 6))

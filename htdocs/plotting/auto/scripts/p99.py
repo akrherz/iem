@@ -6,6 +6,7 @@ import matplotlib.dates as mdates
 from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'abs': 'Departure in degrees',
          'sigma': 'Depature in sigma'}
@@ -66,6 +67,8 @@ def plotter(fdict):
         (t.sday = c.sday) ORDER by t.day ASC
     """, pgconn, params=(year, year, year, year,
                          station, station, year), index_col='day')
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     df.index.name = 'Date'
     df['high_sigma'] = (df['high'] - df['avg_high']) / df['stddev_high']
     df['low_sigma'] = (df['low'] - df['avg_low']) / df['stddev_low']

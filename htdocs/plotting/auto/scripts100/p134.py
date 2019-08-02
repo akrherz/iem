@@ -10,6 +10,7 @@ from matplotlib.ticker import MaxNLocator
 from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([('coldest_temp', 'Coldest Average Temperature'),
                      ('coldest_hitemp', 'Coldest Average High Temperature'),
@@ -123,7 +124,7 @@ def plotter(fdict):
     ctx['nt'] = NetworkTable(network)
     df = get_data(ctx)
     if df.empty:
-        raise ValueError('Error, no results returned!')
+        raise NoDataFound('Error, no results returned!')
 
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_axes([0.1, 0.3, 0.75, 0.6])

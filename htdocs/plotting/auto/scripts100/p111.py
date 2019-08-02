@@ -4,6 +4,7 @@ import datetime
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -32,6 +33,8 @@ def plotter(fdict):
     and precip is not null
     ORDER by precip DESC LIMIT 30
     """, pgconn, params=(station,), index_col=None)
+    if df.empty:
+        raise NoDataFound("No Data Found.")
 
     res = ("""\
 # IEM Climodat https://mesonet.agron.iastate.edu/climodat/

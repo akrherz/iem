@@ -4,6 +4,7 @@ import datetime
 import pandas as pd
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -53,6 +54,8 @@ def plotter(fdict):
     s = nt.sts[station]['archive_begin']
     e = datetime.date.today()
 
+    if s is None:
+        raise NoDataFound("Unknown metadata.")
     res = """\
 # IEM Climodat https://mesonet.agron.iastate.edu/climodat/
 # Report Generated: %s
@@ -66,7 +69,7 @@ def plotter(fdict):
 THRES  %2.0f-%2.0f   %2.0f-%2.0f   %2.0f-%2.0f   %2.0f-%2.0f   %2.0f-%2.0f   %2.0f-%2.0f   %2.0f-%2.0f   %2.0f-%2.0f
 YEAR   SPRING  FALL    SPRING  FALL    SPRING  FALL    SPRING  FALL
 """ % (datetime.date.today().strftime("%d %b %Y"),
-       nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
+       s.date(), datetime.date.today(), station,
        nt.sts[station]['name'],
        prs[0][0], prs[0][1], prs[0][0], prs[0][1],
        prs[1][0], prs[1][1], prs[1][0], prs[1][1],

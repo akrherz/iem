@@ -10,6 +10,7 @@ from matplotlib.font_manager import FontProperties
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 ODICT = OrderedDict([
     ('max', 'Maximum'),
@@ -133,7 +134,8 @@ def get_data(pgconn, table, station, month, period, varname, days, opt):
             from data WHERE 1 = 1 """ + mlimiter + """)
         SELECT * from agg1 """ + ylimiter + """
         """, pgconn, params=(station, ), index_col=None)
-
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     mdata = df[varname].values
     if period is None:
         y1 = df['myyear'].min()

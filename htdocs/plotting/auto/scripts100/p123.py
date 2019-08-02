@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -64,6 +65,9 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2], )
     nt = NetworkTable("%sCLIMATE" % (station[:2], ))
+    bs = nt.sts[station]['archive_begin']
+    if bs is None:
+        raise NoDataFound("No Data Found.")
     res = """\
 # IEM Climodat https://mesonet.agron.iastate.edu/climodat/
 # Report Generated: %s
@@ -73,7 +77,7 @@ def plotter(fdict):
 # First occurance of record consecutive number of days
 # above or below a temperature threshold
 """ % (datetime.date.today().strftime("%d %b %Y"),
-       nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
+       bs.date(), datetime.date.today(), station,
        nt.sts[station]['name'])
     res += "#   %-27s %-27s  %-27s %-27s\n" % (" Low Cooler Than",
                                                " Low Warmer Than",

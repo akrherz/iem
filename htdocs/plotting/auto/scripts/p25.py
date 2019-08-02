@@ -8,6 +8,7 @@ import pandas as pd
 from pyiem import reference
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -44,6 +45,8 @@ def plotter(fdict):
     SELECT high, low from """+table+""" where sday = %s and
     high is not null and low is not null
      """, ("%02i%02i" % (month, day),))
+    if cursor.rowcount == 0:
+        raise NoDataFound("No Data Found.")
     highs = []
     lows = []
     for row in cursor:

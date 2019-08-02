@@ -8,6 +8,7 @@ from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.plot.util import fitbox
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
@@ -89,6 +90,8 @@ def plotter(fdict):
         months = [ts.month, 999]
 
     nt = NetworkTable("WFO")
+    if wfo not in nt.sts:
+        raise NoDataFound("Station is unknown.")
 
     (fig, ax) = plt.subplots(1, 1)
 
@@ -118,7 +121,7 @@ def plotter(fdict):
         tzname, tzname, phenomena, significance, wfo, tuple(months)),
                   index_col='minute')
     if df.empty:
-        raise ValueError("No Results Found")
+        raise NoDataFound("No Results Found")
     df['frequency'] = df['count'] / df['total'] * 100.
     ax.bar(df.index.values, df['frequency'].values, ec='b', fc='b',
            align='center')

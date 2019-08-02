@@ -6,6 +6,7 @@ from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 MDICT = {'warm': 'Temperature Rise',
          'cool': 'Temperature Drop'}
@@ -100,7 +101,7 @@ def plotter(fdict):
     df['diff'] = (df['tmpf1'] - df['tmpf2']).abs()
 
     if df.empty:
-        raise ValueError("No database entries found for station, sorry!")
+        raise NoDataFound("No database entries found for station, sorry!")
 
     fig = plt.figure()
     ax = plt.axes([0.55, 0.1, 0.4, 0.8])
@@ -131,4 +132,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(station='DSM', year=2009, month=1, network='IA_ASOS'))
+    plotter(dict())

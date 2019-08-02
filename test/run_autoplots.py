@@ -74,9 +74,9 @@ def workflow(entry):
     return [entry[0], entry[1], (ets - sts).total_seconds()]
 
 
-def main():
+def main(argv):
     """Do Something"""
-    i = 0  # autoplot starts at app 1 and not 0
+    i = 0 if len(argv) == 1 else int(argv[1]) # autoplot starts at app 1 and not 0
     queue = []
     while True:
         i += 1
@@ -104,4 +104,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)

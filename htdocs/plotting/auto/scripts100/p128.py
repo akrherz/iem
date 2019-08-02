@@ -5,6 +5,7 @@ from collections import OrderedDict
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([
     ('avg_high', 'Average High Temperature'),
@@ -64,6 +65,8 @@ def plotter(fdict):
     two_avg_low, two_avg_temp, two_max_high, two_min_low from one o JOIN two t
     on (o.year = t.year) ORDER by o.year ASC
     """, pgconn, params=(station1, station2), index_col='year')
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     df['one_station'] = station1
     df['two_station'] = station2
     for col in ['total_precip', 'avg_high', 'avg_low', 'max_high', 'min_low',

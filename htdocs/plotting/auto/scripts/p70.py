@@ -10,6 +10,7 @@ from pyiem import reference
 from pyiem.plot.use_agg import plt
 from pyiem.nws import vtec
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'jan1': 'January 1',
          'jul1': 'July 1'}
@@ -87,7 +88,7 @@ def plotter(fdict):
     df = read_sql(sql, pgconn, params=(phenomena, significance),
                   index_col=None)
     if df.empty:
-        raise ValueError("No data found for query")
+        raise NoDataFound("No data found for query")
 
     # Since many VTEC events start in 2005, we should not trust any
     # data that has its first year in 2005
@@ -111,6 +112,8 @@ def plotter(fdict):
     df.loc[df['enddoy'] == df['startdoy'], 'enddoy'] = df['enddoy'] + 1
     ends = df['enddoy'].values
     starts = df['startdoy'].values
+    if len(starts) < 2:
+        raise NoDataFound("No Data Found.")
     years = df.index.values
 
     fig = plt.figure(figsize=(8, 6))

@@ -7,6 +7,7 @@ from pandas.io.sql import read_sql
 from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'high': 'High Temperature',
          'low': 'Low Temperature',
@@ -95,6 +96,8 @@ def plotter(fdict):
       GROUP by yr ORDER by yr ASC
     """, pgconn, params=(station, station, tuple(months)),
                   index_col='yr')
+    if df.empty:
+        raise NoDataFound("No Data Found.")
 
     df['high_freq'] = df['high_above'] / df['days'].astype('f') * 100.
     df['low_freq'] = df['low_above'] / df['days'].astype('f') * 100.

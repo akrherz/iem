@@ -7,6 +7,7 @@ from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([
         ('precip', 'Precipitation'),
@@ -77,7 +78,9 @@ def plotter(fdict):
         SELECT year, day, high, low, precip, snow,
         (high + low) / 2. as avgt from """ + table + """ WHERE
         station = %s and extract(doy from day) <= extract(doy from %s::date)
-     """, dbconn, params=(station, date), index_col=None)
+    """, dbconn, params=(station, date), index_col=None)
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     for i, rng in enumerate([r1, r2, r3, r4, r5]):
         df['cnt%s' % (i + 1,)] = 0
         df.loc[((df[varname] >= rng[0]) & (df[varname] <= rng[1])),

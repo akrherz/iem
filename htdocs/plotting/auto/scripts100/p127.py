@@ -8,6 +8,7 @@ from matplotlib import cm
 from matplotlib import ticker
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([('PCT PLANTED', 'Planting'),
                      ('PCT EMERGED', 'Emerged'),
@@ -60,7 +61,7 @@ def plotter(fdict):
     """, pgconn, params=(commodity_desc, unit_desc, state, util_practice_desc),
                   index_col=None)
     if df.empty:
-        raise ValueError("ERROR: No data found!")
+        raise NoDataFound("ERROR: No data found!")
     df['yeari'] = df['year'] - df['year'].min()
 
     (fig, ax) = plt.subplots(1, 1)

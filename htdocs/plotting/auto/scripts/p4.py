@@ -10,6 +10,7 @@ from pyiem import iemre, reference
 from pyiem.plot.use_agg import plt
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.util import get_autoplot_context, get_dbconn, ncopen
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -51,7 +52,7 @@ def plotter(fdict):
 
     ncfn = iemre.get_daily_ncname(year)
     if not os.path.isfile(ncfn):
-        raise ValueError("Data not available for year")
+        raise NoDataFound("Data not available for year")
     with ncopen(ncfn) as nc:
         precip = nc.variables['p01d']
         czs = CachingZonalStats(iemre.AFFINE)

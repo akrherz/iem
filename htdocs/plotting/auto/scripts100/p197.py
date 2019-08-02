@@ -7,6 +7,7 @@ from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict((
     ('corn_poor_verypoor', 'Percentage Corn Poor + Very Poor Condition'),
@@ -86,7 +87,7 @@ def get_df(ctx):
     """, pgconn, params=(params[0], params[1], params[3]),
                   index_col=None)
     if df.empty:
-        raise ValueError("No NASS Data was found for query, sorry.")
+        raise NoDataFound("No NASS Data was found for query, sorry.")
     df['week_ending'] = pd.to_datetime(df['week_ending'])
     data = {}
     # Average atleast ten years
@@ -113,6 +114,8 @@ def get_df(ctx):
                 avgval = None
         data[state] = {'avg': avgval, 'thisval': thisval}
     ctx['df'] = pd.DataFrame.from_dict(data, orient='index')
+    if ctx['df'].empty:
+        raise NoDataFound("No Data Found.")
     ctx['df'].dropna(how='all', inplace=True)
     ctx['df'].index.name = 'state'
     ctx['df']['departure'] = ctx['df']['thisval'] - ctx['df']['avg']

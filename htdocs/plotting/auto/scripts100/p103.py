@@ -6,6 +6,7 @@ from pandas.io.sql import read_sql
 from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'spring': '1 January - 31 December',
          'fall': '1 July - 30 June'}
@@ -68,6 +69,8 @@ def plotter(fdict):
     (SELECT season as year, day, extract(doy from day) as doy,
      level, 'spring' as typ from highs WHERE rank = 1)
     """, pgconn, params=[station])
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     df2 = df[df['typ'] == season]
     (fig, ax) = plt.subplots(3, 1, figsize=(7, 10))
     dyear = df2.groupby(['year']).count()

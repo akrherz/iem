@@ -8,6 +8,7 @@ import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.plot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict((
     ('arridity', 'Arridity Index'),
@@ -89,9 +90,11 @@ def get_daily_data(ctx):
     edate = ctx['edate']
     offset = "0 days"
     if edate <= sdate:
-        raise ValueError("start date after end date, please correct")
+        raise NoDataFound("start date after end date, please correct")
     if (edate - sdate).days > 366:
-        raise ValueError("Sorry, too long of period selected. < 1 year please")
+        raise NoDataFound(
+            "Sorry, too long of period selected. < 1 year please"
+        )
     if edate.year != sdate.year:
         jan1 = (edate + datetime.timedelta(days=365)).replace(day=1, month=1)
         offset = "%.0f days" % ((jan1 - edate).days + 1, )
@@ -112,7 +115,8 @@ def get_daily_data(ctx):
 
     ctx['df'] = read_sql("""
     with monthly as (
-        SELECT extract(year from day + '""" + offset + """'::interval) as myyear,
+        SELECT
+        extract(year from day + '""" + offset + """'::interval) as myyear,
         station,
         sum(precip) as p,
         avg((high+low)/2.) as avgt,
@@ -178,7 +182,8 @@ def get_monthly_data(ctx):
 
     ctx['df'] = read_sql("""
     with monthly as (
-        SELECT extract(year from day + '""" + offset + """'::interval) as myyear,
+        SELECT
+        extract(year from day + '""" + offset + """'::interval) as myyear,
         station, sum(precip) as p,
         avg((high+low)/2.) as avgt,
         avg(low) as avglo,

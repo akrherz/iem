@@ -8,6 +8,7 @@ from scipy import stats
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'spring': 'Spring Season',
          'fall': 'Fall Season'}
@@ -59,6 +60,8 @@ def plotter(fdict):
 
     SELECT day, avgt from trail WHERE year between %s and %s ORDER by day ASC
     """, pgconn, params=(station, year, year + 2), index_col='day')
+    if obs.empty:
+        raise NoDataFound("No Data Found.")
 
     df = read_sql("""
     WITH trail as (

@@ -7,6 +7,7 @@ import matplotlib.colors as mpcolors
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -51,7 +52,10 @@ def plotter(fdict):
     ceil = ctx['ceil']
     nt = NetworkTable(ctx['network'])
     today = ctx['date']
-    byear = nt.sts[station]['archive_begin'].year
+    bs = nt.sts[station]['archive_begin']
+    if bs is None:
+        raise NoDataFound("Unknown station metadata.")
+    byear = bs.year
     eyear = today.year + 1
     pgconn = get_dbconn('coop')
     cursor = pgconn.cursor()

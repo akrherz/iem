@@ -8,6 +8,7 @@ from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.plot.colormaps import nwssnow
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 LEVELS = [0.1, 1, 2, 3, 4, 6, 8, 12, 18, 24, 30, 36]
 
@@ -39,7 +40,10 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
     nt = NetworkTable(ctx['network'])
-    syear = max([ctx['syear'], nt.sts[station]['archive_begin'].year])
+    ab = nt.sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("Unknown station metadatab.")
+    syear = max([ctx['syear'], ab.year])
     eyear = ctx['eyear']
     sts = datetime.date(syear, 11, 1)
     ets = datetime.date(eyear + 1, 6, 1)
@@ -55,6 +59,8 @@ def plotter(fdict):
         WHERE station = %s and
         month in (11, 12, 1, 2, 3, 4) and snowd >= 0 and day between %s and %s
     """, pgconn, params=(station, sts, ets), index_col='day')
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     minyear = df['year'].min()
     maxyear = df['year'].max()
     for _, row in df.iterrows():
@@ -89,4 +95,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(station='IA6316', network='IACLIMATE'))
+    plotter(dict())

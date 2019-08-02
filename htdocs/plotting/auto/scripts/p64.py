@@ -9,6 +9,7 @@ from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem.reference import TRACE_VALUE
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'first': 'First Snowfall after 1 July',
          'last': 'Last Snowfall before 1 July'}
@@ -43,7 +44,10 @@ def get_data(ctx):
 
     table = "alldata_%s" % (station[:2],)
     ctx['nt'] = NetworkTable("%sCLIMATE" % (station[:2],))
-    syear = max(1893, ctx['nt'].sts[station]['archive_begin'].year)
+    ab = ctx['nt'].sts[station]['archive_begin']
+    if ab is None:
+        raise NoDataFound("No Data Found.")
+    syear = max(1893, ab.year)
     eyear = datetime.datetime.now().year
 
     snow = np.zeros((eyear - syear + 1, 366))

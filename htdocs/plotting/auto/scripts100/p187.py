@@ -4,6 +4,7 @@ from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -46,6 +47,8 @@ def plotter(fdict):
     from agg a JOIN stdata s on (a.year = s.year)
     where a.station = %s ORDER by a.year ASC
     """, get_dbconn('coop'), params=(station, station), index_col='year')
+    if df.empty:
+        raise NoDataFound("No Data Found.")
 
     fig = plt.figure(figsize=(6, 7.5))
     ax = fig.add_axes([0.13, 0.52, 0.8, 0.4])

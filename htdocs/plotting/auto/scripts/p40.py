@@ -8,6 +8,7 @@ from matplotlib.patches import Rectangle
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pyiem.exceptions import NoDataFound
 
 PDICT = {
     'sky': 'Sky Coverage + Visibility',
@@ -174,7 +175,7 @@ def plotter(fdict):
     lookup = {'CLR': 0, 'FEW': 25, 'SCT': 50, 'BKN': 75, 'OVC': 100}
 
     if df.empty:
-        raise ValueError("No database entries found for station, sorry!")
+        raise NoDataFound("No database entries found for station, sorry!")
 
     for _, row in df.iterrows():
         delta = int(row['hours'] - 1)

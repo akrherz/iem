@@ -10,6 +10,7 @@ from matplotlib.patches import Rectangle
 from pyiem.util import get_autoplot_context, get_dbconn, drct2text
 from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([
          ('ts', 'Thunderstorm (TS) Reported'),
@@ -207,6 +208,8 @@ def get_context(fdict):
      """+limiter+""" and sknt > 0 and drct >= 0 and drct <= 360
      and extract(month from valid) in %s
     """, pgconn, params=(ctx['station'], tuple(months)), index_col='valid')
+    if ctx['df'].empty:
+        raise NoDataFound("No Data Found.")
     minvalid = ctx['df'].index.min()
     maxvalid = ctx['df'].index.max()
 

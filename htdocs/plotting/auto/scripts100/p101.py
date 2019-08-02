@@ -7,6 +7,7 @@ from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 import pyiem.nws.vtec as vtec
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -42,6 +43,8 @@ def plotter(fdict):
     sts = datetime.date(syear, 1, 1)
     ets = datetime.date(eyear, 1, 1)
     nt = NetworkTable('WFO')
+    if station not in nt.sts:
+        raise NoDataFound("No Data Found.")
     wfo_limiter = " and wfo = '%s' " % (
         station if len(station) == 3 else station[1:],)
     if station == '_ALL':

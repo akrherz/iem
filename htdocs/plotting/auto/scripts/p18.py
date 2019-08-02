@@ -13,6 +13,7 @@ from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 MDICT = OrderedDict([
     ('tmpf', 'Air Temperature'),
@@ -120,12 +121,13 @@ def get_data(fdict):
     if ctx['var'] == 'tmpf':
         ctx['climo'] = {}
         ccursor.execute("""
-        SELECT valid, high, low from ncdc_climate81 where station = %s
+            SELECT valid, high, low from ncdc_climate81 where station = %s
         """, (ctx['nt'].sts[ctx['station']]['ncdc81'],))
         for row in ccursor:
             ctx['climo'][row[0].strftime("%m%d")] = dict(high=row[1],
                                                          low=row[2])
-
+    if not ctx['climo']:
+        raise NoDataFound("No data found.")
     col = "tmpf::int" if ctx['var'] == 'tmpf' else ctx['var']
     col = "dwpf::int" if ctx['var'] == 'dwpf' else col
     ctx['df'] = read_sql("""

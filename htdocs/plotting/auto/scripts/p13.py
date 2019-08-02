@@ -8,6 +8,7 @@ from scipy import stats
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 PDICT = {'end_summer': 'End of Summer', 'start_summer': 'Start of Summer'}
@@ -51,6 +52,8 @@ def plotter(fdict):
             as foo2 where rank = 1
             ORDER by year ASC
     """, (station, ))
+    if cursor.rowcount == 0:
+        raise NoDataFound("No Data Found.")
     years = []
     maxsday = []
     today = datetime.date.today()

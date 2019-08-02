@@ -6,6 +6,7 @@ import pandas as pd
 from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -92,6 +93,8 @@ def plotter(fdict):
         WHERE station = '%s' and sday in %s GROUP by year) as foo
         """ % (now.year, now.year, table, station, str(tuple(sdays))))
         row = cursor.fetchone()
+        if row[0] is None:
+            raise NoDataFound("No Data Found.")
         psigma.append((row[4] - row[0]) / row[1])
         tsigma.append((row[5] - row[2]) / row[3])
         lbls.append(now.strftime("%-m/%-d"))

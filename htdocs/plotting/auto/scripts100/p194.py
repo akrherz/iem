@@ -10,6 +10,7 @@ from pyiem.plot import MapPlot
 from pyiem.plot.colormaps import stretch_cmap
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'0': 'D0: Abnormally Dry',
          '1': 'D1: Moderate Drought',
@@ -104,7 +105,7 @@ def plotter(fdict):
                          east, north, east, south, west, south),
                       geom_col='the_geom')
     if df.empty:
-        raise ValueError("No Data Found, sorry!")
+        raise NoDataFound("No Data Found, sorry!")
     # loop over the cached stats
     czs = CachingZonalStats(affine)
     czs.compute_gridnav(df['the_geom'], raster)
@@ -146,5 +147,5 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    fig, _df = plotter(dict(sdate="2000-01-01", edate="2018-06-07", d=0))
+    fig, _df = plotter(dict())
     fig.savefig('/tmp/test.png')

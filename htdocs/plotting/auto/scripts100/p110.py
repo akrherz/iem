@@ -4,6 +4,7 @@ import datetime
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
+from pyiem.exceptions import NoDataFound
 
 CWEEK = {1: '3/1-->3/7   ',
          2: '3/8-->3/14  ',
@@ -103,6 +104,8 @@ def plotter(fdict):
     stats e JOIN ranks r on (r.climoweek = e.climoweek) WHERE r.rank = 1
     ORDER by e.climoweek ASC
     """, pgconn, params=(station,), index_col=None)
+    if df.empty:
+        raise NoDataFound("No Data Found.")
 
     res = """\
 # IEM Climodat https://mesonet.agron.iastate.edu/climodat/

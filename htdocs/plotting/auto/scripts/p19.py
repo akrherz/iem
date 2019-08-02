@@ -8,6 +8,7 @@ from pandas.io.sql import read_sql
 from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 # Use OrderedDict to keep webform select in this same order!
 MDICT = OrderedDict([('all', 'No Month/Season Limit'),
@@ -82,6 +83,8 @@ def plotter(fdict):
       WHERE station = %s and year > 1892 and high >= low
       and month in %s
     """, pgconn, params=(station, tuple(months)), index_col=None)
+    if ddf.empty:
+        raise NoDataFound("No Data Found.")
 
     bins = np.arange(-40, 121, binsize)
 

@@ -4,6 +4,7 @@ from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
 from pyiem.plot import MapPlot, centered_bins
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'state': 'State Level Maps (select state)',
          'midwest': 'Midwest Map'}
@@ -93,7 +94,7 @@ def plotter(fdict):
                          p2syear, p2eyear],
                   index_col='station')
     if df.empty:
-        raise ValueError('No Data Found')
+        raise NoDataFound('No Data Found')
     df['p1_season'] = df['p1_first_fall'] - df['p1_last_spring']
     df['p2_season'] = df['p2_first_fall'] - df['p2_last_spring']
     df['season_delta'] = df['p2_season'] - df['p1_season']

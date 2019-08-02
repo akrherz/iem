@@ -6,6 +6,7 @@ from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'00': '00 UTC', '12': '12 UTC'}
 MDICT = OrderedDict([
@@ -122,7 +123,7 @@ def plotter(fdict):
     # need quorums
     df = dfin[dfin['count'] > ((len(months) * 28) * 0.75)]
     if df.empty:
-        raise ValueError("No data was found!")
+        raise NoDataFound("No data was found!")
     colname = "%s_%s" % (agg, varname)
     fig, ax = plt.subplots(1, 1)
     avgv = df[colname].mean()

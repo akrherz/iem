@@ -9,6 +9,7 @@ from pandas.io.sql import read_sql
 import pandas as pd
 from pyiem.plot.use_agg import plt
 from pyiem import network, util
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict((
     ('total_precip', 'Total Precipitation'),
@@ -160,6 +161,8 @@ def plotter(fdict):
 
     xdf = combine(df, months1, offsets1)
     ydf = combine(df, months2, offsets2)
+    if xdf.empty or ydf.empty:
+        raise NoDataFound("Sorry, could not find data.")
 
     resdf = pd.DataFrame({"%s_1" % (varname1, ): xdf[varname1],
                           "%s_2" % (varname2, ): ydf[varname2]})

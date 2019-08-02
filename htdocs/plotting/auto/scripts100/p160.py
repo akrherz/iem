@@ -9,6 +9,7 @@ from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 MDICT = {'primary': 'Primary Field',
          'secondary': 'Secondary Field'}
@@ -87,6 +88,8 @@ def get_context(fdict):
     on (d.key = h.id)
     WHERE station = %s and valid between %s and %s ORDER by valid
     """, pgconn, params=(station, mints, maxts), index_col=None)
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     ctx['odf'] = df.pivot('valid', 'label', 'value')
     if not ctx['fdf'].empty:
         ctx['fdf'].reset_index(inplace=True)
@@ -103,6 +106,8 @@ def get_context(fdict):
 def highcharts(fdict):
     """generate highcharts"""
     ctx = get_context(fdict)
+    if 'df' not in ctx:
+        raise NoDataFound("No Data Found.")
     df = ctx['df']
     df['ticks'] = df['valid'].astype(np.int64) // 10 ** 6
     lines = []
@@ -152,7 +157,7 @@ def plotter(fdict):
     """ Go """
     ctx = get_context(fdict)
     if 'df' not in ctx or (ctx['df'].empty and ctx['odf'].empty):
-        raise ValueError("No Data Found!")
+        raise NoDataFound("No Data Found!")
     df = ctx['df']
     (fig, ax) = plt.subplots(1, 1, figsize=(10, 6))
     fxs = df['id'].unique()

@@ -6,6 +6,7 @@ from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
+from pyiem.exceptions import NoDataFound
 
 BOOLS = {
     'yes': 'Yes, fit linear regression',
@@ -150,7 +151,7 @@ def yearly_plot(ax, ctx):
                META[ctx['plot_type']]['month_bounds']), pgconn)
     df = df[(df['yr'] >= ctx['first_year']) & (df['yr'] <= ctx['last_year'])]
     if df.empty:
-        raise ValueError("no data found, sorry")
+        raise NoDataFound("no data found, sorry")
 
     ax.plot(df['yr'].values, df['data'].values, 'bo-')
     ax.set_title(("%s (%s - %s)\nLocation Name: %s"

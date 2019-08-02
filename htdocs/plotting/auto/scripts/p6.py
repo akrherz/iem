@@ -8,6 +8,7 @@ import numpy as np
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem import reference
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'sum-precip': 'Total Precipitation [inch]',
          'avg-high': 'Average Daily High [F]',
@@ -62,6 +63,8 @@ def plotter(fdict):
     avg(avg_temp) as avg_t, stddev(avg_high) as std_t,
     avg(avg_low) as avg_low, stddev(avg_low) as std_low from yearly
    """, pgconn, params=(month, ), index_col=None)
+    if df.empty:
+        raise NoDataFound("No Data Found")
     climo_avg = df.at[0, 'avg_'+ptype_climo]
     climo_std = df.at[0, 'std_'+ptype_climo]
     df = read_sql("""
@@ -84,6 +87,8 @@ def plotter(fdict):
     t.avg_low as "avg-low", t.avg_temp as "avg-t"
     FROM agg1 a JOIN thisyear t on (a.station = t.station)
     """, pgconn, params=(month, year), index_col='station')
+    if "%s0000" % (state, ) not in df.index:
+        raise NoDataFound("No Data Found")
     stateavg = df.at["%s0000" % (state, ), ptype]
 
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))

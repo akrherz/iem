@@ -6,6 +6,7 @@ from pandas.io.sql import read_sql
 from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'yes': 'Yes, consider trace reports',
          'no': 'No, omit trace reports'}
@@ -81,6 +82,8 @@ def plotter(fdict):
     """, pgconn, params=(station, station,
                          0.0001 if use_trace else 0.01, station, threshold),
                   index_col='sday')
+    if df.empty:
+        raise NoDataFound("No Data Found.")
 
     (fig, ax) = plt.subplots(2, 1, sharex=True)
 

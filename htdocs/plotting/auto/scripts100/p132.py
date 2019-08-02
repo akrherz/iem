@@ -7,6 +7,7 @@ from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 MDICT = OrderedDict([
          ('all', 'No Month/Time Limit'),
@@ -117,7 +118,7 @@ def plotter(fdict):
                              station, tuple(months), tuple(months), days),
                   index_col=None)
     if df.empty:
-        raise ValueError('Error, no results returned!')
+        raise NoDataFound('Error, no results returned!')
     ylabels = []
     fmt = '%.2f' if varname in ['total_precip', ] else '%.0f'
     for _, row in df.iterrows():

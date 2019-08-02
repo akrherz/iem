@@ -5,6 +5,7 @@ from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'cdd': 'Cooling Degree Days',
          'hdd': 'Heating Degree Days'}
@@ -54,6 +55,8 @@ def plotter(fdict):
     sum(case when snow >= 0.1 then 1 else 0 end) as snow_days
      from """+table+""" WHERE station = %s GROUP by year, month
     """, pgconn, params=(station,), index_col=None)
+    if df.empty:
+        raise NoDataFound("No Data Found.")
     df['monthdate'] = df[['year', 'month']].apply(lambda x: datetime.date(x[0],
                                                                           x[1],
                                                                           1),

@@ -4,11 +4,12 @@ import datetime
 import numpy as np
 import numpy.ma as ma
 import pandas as pd
-import matplotlib.colors as mpcolors
 from pandas.io.sql import read_sql
+import matplotlib.colors as mpcolors
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -46,7 +47,7 @@ def plotter(fdict):
         extract(minute from valid) > 50) and report_type = 2
     """, pgconn, params=(station,), index_col=None)
     if df.empty:
-        raise ValueError('Error, no results returned!')
+        raise NoDataFound('Error, no results returned!')
 
     w = np.arange(1, 366, 7)
     z = np.array([100, 200, 300, 400, 500, 600, 700, 800, 900,

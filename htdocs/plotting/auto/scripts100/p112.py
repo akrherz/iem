@@ -5,6 +5,7 @@ from pandas.io.sql import read_sql
 import numpy as np
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -100,6 +101,9 @@ def plotter(fdict):
     GROUP by year, month
     """, pgconn, params=(gddbase, gddceil, station), index_col=None)
 
+    bs = nt.sts[station]['archive_begin']
+    if bs is None:
+        raise NoDataFound("No Data Found.")
     res = """\
 # IEM Climodat https://mesonet.agron.iastate.edu/climodat/
 # Report Generated: %s
@@ -107,7 +111,7 @@ def plotter(fdict):
 # Site Information: [%s] %s
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 """ % (datetime.date.today().strftime("%d %b %Y"),
-       nt.sts[station]['archive_begin'].date(), datetime.date.today(), station,
+       bs.date(), datetime.date.today(), station,
        nt.sts[station]['name'])
     res += ("# GROWING DEGREE DAYS FOR 4 BASE TEMPS FOR STATION ID %s\n"
             ) % (station, )

@@ -14,6 +14,7 @@ from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'cwa': 'Plot by NWS Forecast Office',
          'state': 'Plot by State'}
@@ -166,7 +167,7 @@ def do_polygon(ctx):
         else:
             counts[y0:y1, x0:x1] += np.where(raster.mask, 0, 1)
     if np.max(counts) == 0:
-        raise ValueError("Sorry, no data found for query!")
+        raise NoDataFound("Sorry, no data found for query!")
     # construct the df
     ctx['df'] = pd.DataFrame({'lat': lats.ravel(),
                               'lon': lons.ravel(),
@@ -344,7 +345,7 @@ def do_ugc(ctx):
         datavar = "average"
 
     if not rows:
-        raise ValueError("Sorry, no data found for query!")
+        raise NoDataFound("Sorry, no data found for query!")
     df = pd.DataFrame(rows)
     if varname == 'yearavg':
         years = maxv.year - minv.year + 1

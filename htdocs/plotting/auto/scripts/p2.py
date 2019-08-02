@@ -8,6 +8,7 @@ from matplotlib.patches import Circle
 from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -57,8 +58,8 @@ def plotter(fdict):
         WHERE station = %s and month = %s GROUP by year
     """, pgconn, params=(ctx['gddbase'], ctx['gddceil'], station, month),
                   index_col='year')
-    if df.empty:
-        raise ValueError("ERROR: No Data Found")
+    if len(df.index) < 3:
+        raise NoDataFound("ERROR: No Data Found")
 
     gstats = df.gdd.describe()
     pstats = df.total_precip.describe()

@@ -9,6 +9,7 @@ from matplotlib.patches import Rectangle
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -81,7 +82,7 @@ def plotter(fdict):
     """, pgconn, params=(tzname, station, sts, ets), index_col=None)
 
     if df.empty:
-        raise ValueError("No database entries found for station, sorry!")
+        raise NoDataFound("No database entries found for station, sorry!")
 
     # 0 Unknown
     # 1 VFR: Ceiling >3000' AGL and visibility >5 statutes miles (green)

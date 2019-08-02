@@ -7,6 +7,7 @@ from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pandas.io.sql import read_sql
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -47,6 +48,8 @@ def plotter(fdict):
     SELECT t as tmpf, avg(min) as min_jday,
     avg(max) as max_jday from agger GROUP by t ORDER by t ASC
     """, pgconn, params=(station, thisyear), index_col='tmpf')
+    if df.empty:
+        raise NoDataFound("No Data Found.")
 
     fig = plt.figure(figsize=(8, 6))
     ax = plt.axes([0.1, 0.1, 0.7, 0.8])

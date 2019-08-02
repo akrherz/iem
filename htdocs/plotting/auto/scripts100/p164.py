@@ -5,6 +5,7 @@ from collections import OrderedDict
 from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 MDICT = OrderedDict([('high', 'High Temperature'),
                      ('low', 'Low Temperature'),
@@ -67,7 +68,7 @@ def plotter(fdict):
     from data GROUP by valid ORDER by valid ASC
     """, pgconn, params=(sts, ets), index_col='valid')
     if df.empty:
-        raise ValueError('Error, no results returned!')
+        raise NoDataFound('Error, no results returned!')
     for v in ['precip', 'snow']:
         if varname == v:
             xlabel = "<-- No %s %%   |     %s   %% -->" % (v.capitalize(),

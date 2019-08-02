@@ -3,6 +3,7 @@ from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -33,6 +34,8 @@ def plotter(fdict):
 
     nt = NetworkTable('WFO')
     nt.sts['_ALL'] = {'name': 'All Offices'}
+    if station not in nt.sts:
+        raise NoDataFound("No Data Found.")
 
     fig = plt.figure(figsize=(8,
                               14 if station != '_ALL' else 21))

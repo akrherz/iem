@@ -8,6 +8,7 @@ import pandas as pd
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -62,6 +63,8 @@ def plotter(fdict):
     ORDER by o.sday ASC
     """, (station, month, nt.sts[station]['ncdc81'],
           station))
+    if cursor.rowcount == 0:
+        raise NoDataFound("No Data Found.")
 
     o_avgh = []
     o_avgl = []

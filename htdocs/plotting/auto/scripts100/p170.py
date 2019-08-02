@@ -7,6 +7,7 @@ from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([
         ('TS', 'All Thunder Reports (TS)'),
@@ -88,7 +89,7 @@ def plotter(fdict):
     """, pgconn, params=(tzname, station), index_col=None)
 
     if df.empty:
-        raise ValueError("No database entries found for station, sorry!")
+        raise NoDataFound("No database entries found for station, sorry!")
     (fig, ax) = plt.subplots(1, 1)
     ax.set_title(("[%s] %s %s Events\n"
                   "(%s-%s) Distinct Calendar Days with '%s' Reported"

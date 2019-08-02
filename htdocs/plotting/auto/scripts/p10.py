@@ -9,6 +9,7 @@ import pandas as pd
 from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'above': 'First Spring/Last Fall Temperature Above Threshold',
          'below': 'Last Spring/First Fall Temperature Below Threshold'}
@@ -80,6 +81,8 @@ def plotter(fdict):
             GROUP by year ORDER by year ASC"""
 
     ccursor.execute(sql, (threshold, threshold, threshold, threshold, station))
+    if ccursor.rowcount == 0:
+        raise NoDataFound("No Data Found.")
     rows = []
     for row in ccursor:
         if row['year'] < startyear:

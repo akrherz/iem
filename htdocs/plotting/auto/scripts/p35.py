@@ -9,6 +9,7 @@ import numpy as np
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict((
     ('tmpf', 'Air Temp (F)'),
@@ -61,7 +62,7 @@ def plotter(fdict):
     interval = ctx['interval']
     varname = ctx['var']
     if interval > 10 or interval < 0.1:
-        raise ValueError(
+        raise NoDataFound(
             "Invalid interval provided, positive number less than 10")
 
     nt = NetworkTable(network)
@@ -120,4 +121,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    print(compute_bins(2))
+    plotter(dict())

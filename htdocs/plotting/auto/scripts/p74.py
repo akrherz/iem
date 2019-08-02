@@ -5,6 +5,7 @@ from pandas.io.sql import read_sql
 from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'above': 'At or Above Threshold',
          'below': 'Below Threshold'}
@@ -75,7 +76,7 @@ def plotter(fdict):
     """, pgconn, params=(1 if season != 'all' else 0, station, startyear),
                   index_col='yr')
     if df.empty:
-        raise ValueError("No data found for query")
+        raise NoDataFound("No data found for query")
 
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     avgv = df[season].mean()

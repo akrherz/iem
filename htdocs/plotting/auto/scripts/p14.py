@@ -7,6 +7,7 @@ import pandas as pd
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -52,6 +53,8 @@ def plotter(fdict):
         station = %s and precip >= 0.01 and extract(doy from day) < %s and
         year < extract(year from now()) ORDER by precip ASC
     """, (station, jdaylimit))
+    if cursor.rowcount == 0:
+        raise NoDataFound("No Data Found.")
     total = None
     base = None
     bins = [0.01, ]

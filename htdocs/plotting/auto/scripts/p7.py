@@ -9,6 +9,7 @@ import matplotlib.colors as mpcolors
 from pyiem.plot.use_agg import plt
 from pyiem import network
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.exceptions import NoDataFound
 
 
 def get_description():
@@ -100,7 +101,7 @@ def plotter(fdict):
         now += datetime.timedelta(days=1)
 
     if True not in success:
-        raise ValueError("No data, pick lower GDD values")
+        raise NoDataFound("No data, pick lower GDD values")
     df = pd.DataFrame(rows)
     heights = np.array(heights)
     success = np.array(success)

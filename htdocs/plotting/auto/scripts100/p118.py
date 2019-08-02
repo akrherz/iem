@@ -3,6 +3,7 @@ import datetime
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.network import Table as NetworkTable
+from pyiem.exceptions import NoDataFound
 
 PDICT = {'precip_days': 'Precipitation Days',
          'snow_days': 'Snowfall Days'}
@@ -39,6 +40,8 @@ def plotter(fdict):
     from """+table+""" WHERE station = %s
     GROUP by year, month
     """, pgconn, params=(station,), index_col=['year', 'month'])
+    if df.empty:
+        raise NoDataFound("No Data Found.")
 
     res = """\
 # IEM Climodat https://mesonet.agron.iastate.edu/climodat/
