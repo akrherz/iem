@@ -392,6 +392,7 @@ data = {'plots': [
                    "per Year per Month")},
         {'id': "70",
          'label': "Period between First and Last VTEC Product Each Year"},
+        {'id': "203", 'label': "Storm Based Warning Polygon Visual Summary"},
         {'id': "195",
          'label': "Storm Motion distribution based on NWS Warnings"},
         {'id': "201",

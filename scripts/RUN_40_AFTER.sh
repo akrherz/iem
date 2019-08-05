@@ -12,13 +12,6 @@ python download_nam.py $(date -u --date '3 hours ago' +'%Y %m %d %H') &
 cd ../rtma
 python wind_power.py &
 
-cd ../sbw
-python polygon_mosaic.py S
-sleep 2
-python polygon_mosaic.py T
-sleep 2
-python polygon_mosaic.py W
-
 cd ../qc
 python check_webcams.py
 python check_isusm_online.py

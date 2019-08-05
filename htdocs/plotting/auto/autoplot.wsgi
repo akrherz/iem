@@ -179,7 +179,8 @@ def workflow(environ, form, fmt):
         content = mixedobj
     elif fmt in ['svg', 'png', 'pdf'] and isinstance(mixedobj, plt.Figure):
         # if our content is a figure, then add some fancy metadata to plot
-        plot_metadata(mixedobj, start_time, end_time, scriptnum)
+        if meta.get('plotmetadata', True):
+            plot_metadata(mixedobj, start_time, end_time, scriptnum)
         ram = BytesIO()
         plt.savefig(ram, format=fmt, dpi=dpi)
         plt.close()
