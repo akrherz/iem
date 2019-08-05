@@ -2,15 +2,15 @@
 /*
  * Generate Watch by county placefile
  */
- include("../../../config/settings.inc.php");
- include("../../../include/database.inc.php");
+ require_once "../../../config/settings.inc.php";
+ require_once "../../../include/database.inc.php";
  $dbconn = iemdb("postgis");
  
 header("Content-type: text/plain");
 
  
  $rs = pg_query($dbconn, "select phenomena, eventid, 
- 		ST_asText(ST_Multi(ST_buffer(ST_collect( u.geom ),0))) as g 
+ 		ST_asText(ST_Multi(ST_buffer(ST_collect( u.simple_geom ),0))) as g 
  		from warnings w JOIN ugcs u on (u.gid = w.gid) 
  		WHERE significance = 'A' and phenomena IN ('TO','SV') and 
  		issue <= now() and expire > now() 
