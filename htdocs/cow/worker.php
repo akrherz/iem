@@ -79,7 +79,9 @@ function printWARN($cow, $warn)
 
 include_once "../../include/cow.php";
 $cow = new Cow( iemdb("postgis") );
-$cow->setLimitWFO( Array($wfo) );
+// Allow for four char WFO
+$usewfo = (strlen($wfo) == 4) ? substr($wfo, 1, 3): $wfo;
+$cow->setLimitWFO( Array($usewfo) );
 $cow->setLimitTime( $sts, $ets );
 $cow->setHailSize( $hail );
 $cow->setWind( $wind );
