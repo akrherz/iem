@@ -2,9 +2,11 @@
 /*
  * Generate Watch by county placefile
  */
- require_once "../../../config/settings.inc.php";
- require_once "../../../include/database.inc.php";
- $dbconn = iemdb("postgis");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/database.inc.php";
+$alpha = isset($_GET["alpha"])? intval($_GET["alpha"]): 255;
+
+$dbconn = iemdb("postgis");
  
 header("Content-type: text/plain");
 
@@ -33,10 +35,10 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
     foreach ($tokens3 as $token3){
 	    $tokens = preg_split("/\),\(/", $token3);
         foreach ($tokens as $token){
-	    if ($row["phenomena"] == "SV"){
-	    	$c = ", 255, 255, 0, 255";
+	    if ($row["phenomena"] == "TO"){
+	    	$c = ", 255, 255, 0, ${alpha}";
 	    } else { 
-	    	$c = ", 255, 0, 0, 255";
+	    	$c = ", 219, 112, 147, ${alpha}";
 	    }
 	    echo "\n;". $row["phenomena"] ." Watch Number ". $row["eventid"] ."\n";
 		echo "Polygon:\n";

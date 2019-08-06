@@ -1,6 +1,6 @@
 <?php 
-include("../../../config/settings.inc.php");
-include("../../../include/myview.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "Gibson Ridge Placefiles";
 $t->thispage = "current-placefiles";
@@ -101,7 +101,12 @@ may be useful when looking at level2 data.  You can optionally pass a nexrad
 <tr>
   <th><a href="watch_by_county.php">SPC Watch by County</a></th>
   <td>https://mesonet.agron.iastate.edu/request/grx/watch_by_county.php?<br />
-  <i>Notes:</i> This is a placefile of the union of counties within a Storm Prediction Center watch.</td>
+  <i>Notes:</i> This is a placefile of the union of counties within a
+  Storm Prediction Center watch.  You can optionally pass an option
+  <code>alpha=255</code> to set the alpha value for the used color.  This value
+  is a number between 0 and 255. The
+  service uses the official NWS colors for Severe Thunderstorm Watch (#DB7093)
+  and Tornado Watch (yellow).</td>
 </tr>
 
 <tr>
