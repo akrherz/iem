@@ -268,12 +268,12 @@ with the area of the storm based warning to yield a percentage.</li>
 <h3><a name="api"></a> API for IEM Cow Data</h3>
 
 <p><strong>20 June 2018</strong>:  The IEM is pleased to announce availability
-of an API for programatic access to IEM Cow data and statistics.  At this time,
-the API is not considered stable and JSON schema should not be considered stable
-either.  Hopefully in a week or two, with some friendly testing and feedback, both
-will stablize for an API level "1" that should not change going forward. <strong>The
-generated output statistics have not been fully tested yet either!</strong> This
-will be stabilzed as well in the coming days.</p>
+of an API for programatic access to IEM Cow data and statistics.</p>
+
+<p><strong>6 August 2019</strong>: The API should be considered stable now and
+has been favorably compared against the legacy PHP based Cow statistics. Please
+feel free to use it and <a href="/info/contacts.php">report back</a> any issues
+you find.</p>
 
 <p>The JSON emitting service endpoint is:
 <br /><code>https://mesonet.agron.iastate.edu/api/1/cow.json</code></p>
@@ -380,12 +380,17 @@ example, <code>wind=58</code></td></tr>
 <tr>
 <td>windhailtag=N_or_Y</td>
 <td>No</td>
-<td><strong>NOT IMPLEMENTED YET, TODO</strong></td></tr>
+<td>For Severe Thunderstorm Warnings, the tags used to denote the wind speed
+and hail size at issuance are used to verify the warning.  For example, if a hail
+tag of 2 inches was used at issuance, any reports below that would not be considered
+as verifying the report.</td></tr>
 
 <tr>
 <td>limitwarns=N_or_Y</td>
 <td>No</td>
-<td><strong>NOT IMPLEMENTED YET, TODO</strong></td></tr>
+<td>Use the <code>wind</code> and <code>hailsize</code> parameters to filter
+considered warnings for the verification.  For example, if you set <code>wind=70</code>
+then any warnings issued with a wind tag below 70 MPH would be ignored.</td></tr>
 
 <tr>
 <td>fcster=string</td>
@@ -402,9 +407,6 @@ example, <code>fcster=forecaster10</code></td></tr>
 
 <h4>Resulting JSON Schema.</h4>
 
-<p><strong>This is very much a work-in-progress, with feedback needed and will
-change until this stablizes.</strong></p>
-
 <pre>
 {"generated_at": "ISO9660",
  "params": {dictionary of how API was called},
@@ -413,6 +415,9 @@ change until this stablizes.</strong></p>
  "stormreports": GeoJSON-style object on LSRS
 }
 </pre>
+
+<p>There is a <a href="https://github.com/akrherz/DEV/blob/master/cow/api2shapefile.py">Python based example</a>
+that uses this API to generate shapefiles of the verification data.</p>
 
 EOF;
 }
