@@ -1,7 +1,11 @@
 """Visual summary of polygons for a given UTC date."""
 import datetime
 import os
-from io import StringIO
+# python2.7 workaround
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 from collections import OrderedDict
 
 from pandas.io.sql import read_sql

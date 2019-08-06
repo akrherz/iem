@@ -22,6 +22,7 @@ NO_FEATURES = [
     152,  # growing season differences, too noisey
     158,  # Tall towers plot
     177,  # ISUSM plot linked to other app
+    203,  # Handled by dedicated PHP page
 ]
 
 
