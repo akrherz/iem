@@ -38,7 +38,7 @@ data = {'plots': [
         {'id': "66",
          "label": ("Consecutative Days with High/Low Temp "
                    "Above/Below Threshold")},
-        {'id': "9", 'label': ("Cooling/Growing/Heating Degree Day "
+        {'id': "9", 'label': ("Cooling/Growing/Heating/Stress Degree Day "
                               "Daily Values and Climatology")},
         {'id': "49",
          'label': "Daily Frequency of Some Threshold (snow, precip, temps)"},

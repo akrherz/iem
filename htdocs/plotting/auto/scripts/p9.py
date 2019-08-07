@@ -15,6 +15,7 @@ PDICT = OrderedDict((
      ('cdd', 'Cooling Degree Days'),
      ('gdd', 'Growing Degree Days'),
      ('hdd', 'Heating Degree Days'),
+     ('sdd', 'Stress Degree Days'),
 ))
 
 
@@ -36,7 +37,7 @@ def get_description():
         dict(type='int', name='base', default='50',
              label='Enter CDD/GDD/HDD Base (F):'),
         dict(type='int', name='ceiling', default='86',
-             label='Enter GDD Ceiling (F):'),
+             label='Enter GDD Ceiling / SDD Base (F):'),
     ]
     return desc
 
@@ -65,10 +66,16 @@ def plotter(fdict):
     if varname in ['hdd', 'cdd']:
         gfunc = "%s(high, low, %s)" % (varname, base)
         title = "base=%s" % (base, )
+    elif varname == 'sdd':
+        gfunc = "case when high > %s then high - %s else 0 end" % (
+            ceiling, ceiling)
+        title = "base=%s" % (ceiling, )
+
     df = read_sql("""
-    SELECT year, sday,
-    """ + gfunc + """ as """+glabel+"""
-    from """+table+""" WHERE station = %s and year > 1892 and sday != '0229'
+        SELECT year, sday,
+        """ + gfunc + """ as """+glabel+"""
+        from """ + table + """ WHERE station = %s and year > 1892
+        and sday != '0229'
     """, pgconn, params=(station, ))
     if df.empty:
         raise NoDataFound("No data Found.")
