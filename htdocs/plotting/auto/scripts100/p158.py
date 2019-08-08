@@ -32,7 +32,7 @@ def get_description():
 
 def get_context(fdict):
     """Get plot context"""
-    pgconn = get_dbconn('talltowers', host='iemdb-talltowers.local')
+    pgconn = get_dbconn('talltowers')
     ctx = get_autoplot_context(fdict, get_description())
     ctx['dt'] = ctx['dt'].replace(tzinfo=pytz.UTC)
     dt = ctx['dt']

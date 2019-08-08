@@ -417,7 +417,7 @@ data = {'plots': [
     ]},
     {'label': 'Tall Towers Plots', 'options': [
         {'id': "158",
-         'label': "1 Second Interval Time Series "},
+         'label': "Tall Towers - 1 Second Interval Time Series "},
     ]},
     {'label': 'Upper Air / RAOB Sounding Plots', 'options': [
         {'id': "198",

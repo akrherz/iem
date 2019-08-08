@@ -10,7 +10,6 @@ files.
 """
 from __future__ import print_function
 import datetime
-import logging
 import os
 
 import pytz
@@ -18,12 +17,9 @@ import numpy as np
 import pygrib
 from pyiem.datatypes import temperature
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
 
-logging.basicConfig()
-logger = logging.getLogger()
-logger.setLevel(logging.WARNING)
-
+LOG = logger()
 nt = NetworkTable('IACLIMATE')
 
 
@@ -45,7 +41,7 @@ def do_agg(dkey, fname, ts, data):
         key = cst.strftime("%Y-%m-%d")
         d = data['fx'].setdefault(key, dict(precip=None, high=None, low=None,
                                             srad=None))
-        logger.debug("Writting %s %s from ftime: %s", dkey, key, ftime)
+        LOG.debug("Writting %s %s from ftime: %s", dkey, key, ftime)
         if d[dkey] is None:
             d[dkey] = grib.values * 6 * 3600.
         else:
@@ -66,7 +62,7 @@ def do_temp(dkey, fname, func, ts, data):
         if key not in data['fx']:
             continue
         d = data['fx'][key]
-        logger.debug("Writting %s %s from ftime: %s", dkey, key, ftime)
+        LOG.debug("Writting %s %s from ftime: %s", dkey, key, ftime)
         if d[dkey] is None:
             d[dkey] = grib.values
         else:
@@ -95,27 +91,36 @@ def bnds(val, lower, upper):
 
 def dbsave(ts, data):
     """Save the data! """
+    if data['x'] is None:
+        LOG.warning("No longitude info found, aborting")
+        return
+
     pgconn = get_dbconn('coop')
     cursor = pgconn.cursor()
     # Check to see if we already have data for this date
-    cursor.execute("""SELECT id from forecast_inventory
-      WHERE model = 'CFS' and modelts = %s""", (ts,))
+    cursor.execute("""
+        SELECT id from forecast_inventory
+        WHERE model = 'CFS' and modelts = %s
+    """, (ts,))
     if cursor.rowcount > 0:
         modelid = cursor.fetchone()[0]
-        cursor.execute("""DELETE from alldata_forecast where
-        modelid = %s""", (modelid,))
+        cursor.execute("""
+            DELETE from alldata_forecast where modelid = %s
+        """, (modelid,))
         if cursor.rowcount > 0:
             print("Removed %s previous entries" % (cursor.rowcount,))
     else:
-        cursor.execute("""INSERT into forecast_inventory(model, modelts)
-        VALUES ('CFS', %s) RETURNING id""", (ts,))
+        cursor.execute("""
+            INSERT into forecast_inventory(model, modelts)
+            VALUES ('CFS', %s) RETURNING id
+        """, (ts,))
         modelid = cursor.fetchone()[0]
 
     for date in data['fx'].keys():
         d = data['fx'][date]
         if (d['high'] is None or d['low'] is None or
                 d['precip'] is None or d['srad'] is None):
-            print("Missing data for date: %s" % (date,))
+            LOG.info("Missing data for date: %s", date)
             del data['fx'][date]
 
     for sid in nt.sts.keys():
@@ -133,9 +138,10 @@ def dbsave(ts, data):
             srad = bnds(d['srad'][j, i] / 1000000., 0, 50)
             if high is None or low is None or precip is None or srad is None:
                 continue
-            cursor.execute("""INSERT into alldata_forecast(modelid,
-            station, day, high, low, precip, srad)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            cursor.execute("""
+                INSERT into alldata_forecast(modelid,
+                station, day, high, low, precip, srad)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (modelid, sid, date, high, low, precip, srad))
     cursor.close()
     pgconn.commit()
