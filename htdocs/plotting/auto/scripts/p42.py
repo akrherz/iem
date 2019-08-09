@@ -66,13 +66,15 @@ def get_description():
     desc = dict()
     desc['cache'] = 86400
     desc['data'] = True
-    desc['description'] = """ Based on hourly METAR reports of temperature
-    or dew point, this
+    desc['description'] = """
+    Based on hourly or better METAR reports, this
     plot displays the longest periods above or below a given temperature
     threshold.  There are plenty of caveats to this plot, including missing
-    data periods that are ignored and data during the 1960s that only has
+    data periods and data during the 1960s that only has
     reports every three hours.  This plot also limits the number of lines
-    drawn to 10, so if you hit the limit, please change the thresholds.
+    drawn to 10, so if you hit the limit, please change the thresholds.  This
+    plot also stops any computed streak when it encounters a data gap greater
+    than three hours.
     """
     year_range = "1928-%s" % (datetime.date.today().year, )
     desc['arguments'] = [
@@ -209,7 +211,9 @@ def plotter(fdict):
     year = 0
     lines = []
     for row in cursor:
-        if month != 'all' and year != row[0].year:
+        if ((month != 'all' and year != row[0].year) or
+                (valid and
+                 (row[0] - valid[-1]) > datetime.timedelta(hours=3))):
             year = row[0].year
             lines = plot(ax, interval, valid, tmpf, lines, mydir, month)
             valid = []
