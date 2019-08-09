@@ -14,6 +14,68 @@ can be freely used for educational use.  Use of the non government data
 "on-air" by media is strictly not allowed without permission of the 
 provider.</p>
 
+<div class="row well">
+<div class="col-sm-12">
+
+<h3>Placefile Range Ring Generator</h3>
+<form method="GET" action="/cgi-bin/request/grx_rings.py" name="rings">
+
+<p>Contributed by Zach Hiris, this generates a static placefile with range
+rings specified at the given distance for a point.</p>
+
+<div class="row">
+<div class="col-sm-4">
+<strong>Location Label:</strong><br />
+<input type="text" name="loc" value="My Location">
+</div>
+<div class="col-sm-4">
+<strong>Latitude (degrees N)</strong>
+<input type="text" name="lat" value="42.00">
+</div>
+<div class="col-sm-4">
+<strong>Longitude (degrees E)</strong>
+<input type="text" name="lat" value="-94.33">
+</div>
+</div>
+
+
+<table class="table">
+<thead><tr><th>Ring</th><th>Miles</th><th>Red (0-255)</th><th>Green (0-255)</th>
+<th>Blue (0-255)</th><th>Alpha (0-255)</th></tr></thead>
+
+<tbody>
+<tr>
+  <td>1</td>
+  <td><input type="text" size="5" maxlength="5" name="m0" value="100"></td>
+  <td><input type="text" size="5" maxlength="3" name="r0" value="255"></td>
+  <td><input type="text" size="5" maxlength="3" name="g0" value="255"></td>
+  <td><input type="text" size="5" maxlength="3" name="b0" value="0"></td>
+  <td><input type="text" size="5" maxlength="3" name="a0" value="255"></td>
+  </tr>
+<tr>
+  <td>2</td>
+  <td><input type="text" size="5" maxlength="5" name="m1" value="0"> (0 disables)</td>
+  <td><input type="text" size="5" maxlength="3" name="r1" value="255"></td>
+  <td><input type="text" size="5" maxlength="3" name="g1" value="255"></td>
+  <td><input type="text" size="5" maxlength="3" name="b1" value="0"></td>
+  <td><input type="text" size="5" maxlength="3" name="a1" value="255"></td>
+  </tr>
+<tr>
+  <td>3</td>
+  <td><input type="text" size="5" maxlength="5" name="m2" value="0"> (0 disables)</td>
+  <td><input type="text" size="5" maxlength="3" name="r2" value="255"></td>
+  <td><input type="text" size="5" maxlength="3" name="g2" value="255"></td>
+  <td><input type="text" size="5" maxlength="3" name="b2" value="0"></td>
+  <td><input type="text" size="5" maxlength="3" name="a2" value="255"></td>
+  </tr>
+
+</table>
+</table>
+<input type="submit" value="Generate Placefile">
+</form>
+</div>
+</div>
+
 <p>
 <table class="table table-striped">
 		<thead><tr><th>Title</th><th>Description</th></tr></thead>
