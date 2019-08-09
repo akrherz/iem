@@ -76,23 +76,26 @@ def plotter(fdict):
 
     (fig, ax) = plt.subplots(1, 1)
 
-    xs = df['x'].values
+    # HACK to get a datetime64 to datetime so matplotlib works
+    xs = df['x'].to_list()
     bottom = (df['D4'] + df['D3'] + df['D2'] + df['D1']).values
-    ax.bar(xs, df['D0'], width=7, fc=COLORS[0], ec='None', bottom=bottom,
-           label='D0 Abnormal')
+    ax.bar(
+        xs, df['D0'].values, width=7, fc=COLORS[0], ec='None',
+        bottom=bottom, label='D0 Abnormal'
+    )
     bottom = (df['D4'] + df['D3'] + df['D2']).values
-    ax.bar(xs, df['D1'], bottom=bottom, width=7, fc=COLORS[1],
+    ax.bar(xs, df['D1'].values, bottom=bottom, width=7, fc=COLORS[1],
            ec='None',
            label='D1 Moderate')
     bottom = (df['D4'] + df['D3']).values
-    ax.bar(xs, df['D2'], width=7,
+    ax.bar(xs, df['D2'].values, width=7,
            fc=COLORS[2], ec='None', bottom=bottom,
            label='D2 Severe')
     bottom = df['D4'].values
-    ax.bar(xs, df['D3'],
+    ax.bar(xs, df['D3'].values,
            width=7, fc=COLORS[3], ec='None', bottom=bottom,
            label='D3 Extreme')
-    ax.bar(xs, df['D4'],
+    ax.bar(xs, df['D4'].values,
            width=7, fc=COLORS[4], ec='None',
            label='D4 Exceptional')
 
