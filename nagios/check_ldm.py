@@ -34,7 +34,9 @@ def main():
         print('CRITICAL - can not parse output %s ' % (data,))
         sys.exit(2)
 
-    downstream = tokens[4]
+    # We are downstream of how many hosts
+    downstream = int(tokens[4])
+    # We are the upstream of how many hosts
     upstream = int(tokens[5])
     queue_age = tokens[6]
     product_count = tokens[7]
@@ -42,7 +44,8 @@ def main():
 
     msg = 'OK'
     estatus = 0
-    if upstream < 1:
+    # disable tests for now until we can resolve what LDM is doing
+    if downstream < 0:
         msg = 'CRITICAL'
         estatus = 2
     print(("%s - Down:%s Up:%s Raw:%s| downstream=%s;; upstream=%s;; "
