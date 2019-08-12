@@ -15,13 +15,20 @@ getTime(), getLoad(), getPortCount(), getPq(), getCpu()
 from __future__ import print_function
 import subprocess
 import sys
+import os
 
 
 def main():
     """Go Main Go."""
-    proc = subprocess.Popen("/home/ldm/bin/ldmadmin printmetrics", shell=True,
-                            stdout=subprocess.PIPE)
-    data = proc.stdout.read()
+    for username in ['ldm', 'meteor_ldm']:
+        fn = "/home/%s/bin/ldmadmin" % (username, )
+        if not os.path.isfile(fn):
+            continue
+        proc = subprocess.Popen(
+            "%s printmetrics" % (fn, ), shell=True, stdout=subprocess.PIPE
+        )
+        break
+    data = proc.stdout.read().decode('ascii')
     tokens = data.split()
     if len(tokens) != 18:
         print('CRITICAL - can not parse output %s ' % (data,))
@@ -35,7 +42,7 @@ def main():
 
     msg = 'OK'
     estatus = 0
-    if upstream < 0:
+    if upstream < 1:
         msg = 'CRITICAL'
         estatus = 2
     print(("%s - Down:%s Up:%s Raw:%s| downstream=%s;; upstream=%s;; "
