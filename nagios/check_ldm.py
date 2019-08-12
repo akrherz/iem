@@ -44,8 +44,8 @@ def main():
 
     msg = 'OK'
     estatus = 0
-    # disable tests for now until we can resolve what LDM is doing
-    if downstream < 0:
+    # CHECK that the registry has a valid netstat command not `true`!
+    if downstream < 1:
         msg = 'CRITICAL'
         estatus = 2
     print(("%s - Down:%s Up:%s Raw:%s| downstream=%s;; upstream=%s;; "
