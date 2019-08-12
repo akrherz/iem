@@ -1,5 +1,6 @@
 """Our mod_wsgi frontend to autoplot generation"""
 # pylint: disable=abstract-class-instantiated
+from collections import OrderedDict
 import sys
 import os
 import datetime
@@ -32,7 +33,8 @@ if BASEDIR not in sys.path:
 def parser(cgistr):
     """ Convert a CGI string into a dict that gets passed to the plotting
     routine """
-    data = dict()
+    # want predictable / stable URIs, generally.
+    data = OrderedDict()
     for token in cgistr.split("::"):
         token2 = token.split(":")
         if len(token2) != 2:
@@ -137,6 +139,19 @@ def plot_metadata(fig, start_time, end_time, p):
              va='bottom', ha='right', fontsize=8)
 
 
+def get_mckey(scriptnum, fdict, fmt):
+    """Figure out what our memcache key should be."""
+    vals = []
+    for key in fdict:
+        # Internal app controls should not be used on the memcache key
+        if not key.startswith("_"):
+            vals.append("%s:%s" % (key, fdict[key]))
+    return (
+        "/plotting/auto/plot/%s/%s.%s" % (
+            scriptnum, "::".join(vals), fmt)
+    ).replace(" ", "")
+
+
 def workflow(environ, form, fmt):
     """we need to return a status and content"""
     # q is the full query string that was rewritten to use by apache
@@ -147,8 +162,7 @@ def workflow(environ, form, fmt):
     dpi = int(fdict.get('dpi', 100))
 
     # memcache keys can not have spaces
-    mckey = (("/plotting/auto/plot/%s/%s.%s"
-              ) % (scriptnum, q, fmt)).replace(" ", "")
+    mckey = get_mckey(scriptnum, fdict, fmt)
     mc = memcache.Client(['iem-memcached:11211'], debug=0)
     # Don't fetch memcache when we have _cb set for an inbound CGI
     res = mc.get(mckey) if fdict.get('_cb') is None else None

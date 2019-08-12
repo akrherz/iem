@@ -124,8 +124,6 @@ def get_data(fdict):
         for row in ccursor:
             ctx['climo'][row[0].strftime("%m%d")] = dict(high=row[1],
                                                          low=row[2])
-    if not ctx['climo']:
-        raise NoDataFound("No data found.")
     col = "tmpf::int" if ctx['var'] == 'tmpf' else ctx['var']
     col = "dwpf::int" if ctx['var'] == 'dwpf' else col
     ctx['df'] = read_sql("""
@@ -137,6 +135,8 @@ def get_data(fdict):
     """, asos_pgconn, params=(ctx['station'], sdate,
                               sdate + datetime.timedelta(days=days)),
                          index_col='valid')
+    if ctx['df'].empty:
+        raise NoDataFound("No data found.")
 
     return ctx
 
