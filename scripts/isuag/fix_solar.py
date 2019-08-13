@@ -6,7 +6,8 @@ import sys
 
 import requests
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+LOG = logger()
 
 
 def check_date(date):
@@ -23,7 +24,7 @@ def check_date(date):
     for row in cursor:
         station = row[0]
         if station not in nt.sts:
-            print("fix_solar station table does not know %s" % (station, ))
+            LOG.info("fix_solar station table does not know %s", station)
             continue
         ob = row[1]
         # Go fetch me the IEMRE value!
@@ -34,7 +35,7 @@ def check_date(date):
         j = json.loads(res.content)
         estimate = j['data'][0]['srad_mj']
         if estimate is None:
-            print("fix_solar %s %s estimate is missing" % (station, date))
+            LOG.info("fix_solar %s %s estimate is missing", station, date)
             continue
         # Never pull data down
         if ob > estimate:
@@ -42,8 +43,8 @@ def check_date(date):
         # If ob is greater than 5 or the difference is less than 7 <arb>
         if ob > 5 or (estimate - ob) < 7:
             continue
-        print(
-            "fix_solar %s %s Ob:%.1f Est:%.1f" % (station, date, ob, estimate)
+        LOG.info(
+            "fix_solar %s %s Ob:%.1f Est:%.1f", station, date, ob, estimate
         )
         cursor2.execute("""
             UPDATE sm_daily SET slrmj_tot_qc = %s, slrmj_tot_f = 'E'
@@ -75,27 +76,33 @@ def fix_nulls():
         """, (station, v1, v2))
         row2 = cursor2.fetchone()
         if row2[0] is None or row2[0] < 0.01:
-            print('fix_solar %s %s summed %s hourly for solar, using IEMRE' % (
-                station, v1.strftime("%d %b %Y"), row2[0]))
+            LOG.info(
+                '%s %s summed %s hourly for solar, using IEMRE',
+                station, v1.strftime("%d %b %Y"), row2[0])
+            if station not in nt.sts:
+                LOG.info("unknown station %s metadata, skipping", station)
+                continue
             # Go fetch me the IEMRE value!
             uri = ("http://iem.local/iemre/daily/%s/%.2f/%.2f/json"
                    ) % (v1.strftime("%Y-%m-%d"), nt.sts[station]['lat'],
                         nt.sts[station]['lon'])
             res = requests.get(uri)
             if res.status_code != 200:
-                print("Fix solar got %s from %s" % (res.status_code, uri))
+                LOG.info("Fix solar got %s from %s", res.status_code, uri)
                 continue
             j = json.loads(res.content)
             if not j['data']:
-                print("fix solar: No data for %s %s" % (
-                    station, v1.strftime("%d %b %Y")))
+                LOG.info(
+                    "fix solar: No data for %s %s",
+                    station, v1.strftime("%d %b %Y"))
                 continue
             row2 = [j['data'][0]['srad_mj'], -1]
         if row2[0] is None or row2[0] < 0.01:
-            print('Triple! Failure %s %s' % (station, v1.strftime("%d %b %Y")))
+            LOG.info('Triple! Failure %s %s', station, v1.strftime("%d %b %Y"))
             continue
-        print('%s %s -> %.2f (%s obs)' % (station, v1.strftime("%d %b %Y"),
-                                          row2[0], row2[1]))
+        LOG.info(
+            '%s %s -> %.2f (%s obs)',
+            station, v1.strftime("%d %b %Y"), row2[0], row2[1])
         cursor2.execute("""
             UPDATE sm_daily SET slrmj_tot_qc = %s
             WHERE station = %s and valid = %s
@@ -107,11 +114,12 @@ def fix_nulls():
 
 def main(argv):
     """Go Main Go."""
-    # Correct any nulls in the database
-    fix_nulls()
     # if we are given an argument, run for that date
     if len(argv) == 4:
         check_date(datetime.date(int(argv[1]), int(argv[2]), int(argv[3])))
+    else:
+        # Correct any nulls in the database
+        fix_nulls()
 
 
 if __name__ == '__main__':

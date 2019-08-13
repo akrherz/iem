@@ -19,7 +19,8 @@ import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import distance
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger, utc
+LOG = logger()
 
 
 def print_debugging(station):
@@ -27,14 +28,14 @@ def print_debugging(station):
     pgconn = get_dbconn('isuag')
     cursor = pgconn.cursor()
     cursor.execute("""
-    SELECT valid, rain_mm_tot / 25.4, rain_mm_tot_qc / 25.4,
-    rain_mm_tot_f from sm_daily
-    WHERE station = %s and (rain_mm_tot > 0 or rain_mm_tot_qc > 0)
-    ORDER by valid DESC LIMIT 10
+        SELECT valid, rain_mm_tot / 25.4, rain_mm_tot_qc / 25.4,
+        rain_mm_tot_f from sm_daily
+        WHERE station = %s and (rain_mm_tot > 0 or rain_mm_tot_qc > 0)
+        ORDER by valid DESC LIMIT 10
     """, (station, ))
-    print("     Date           Obs     QC  Flag")
+    LOG.info("     Date           Obs     QC  Flag")
     for row in cursor:
-        print("     %s   %5.2f  %5.2f %5s" % row)
+        LOG.info("     %s   %5.2f  %5.2f %5s", *row)
 
 
 def get_hdf(nt, date):
@@ -54,7 +55,7 @@ def get_hdf(nt, date):
                                  valid=datetime.datetime.strptime(
                                      entry['end_valid'],
                                      '%Y-%m-%dT%H:%M:%SZ').replace(
-                                         tzinfo=pytz.utc),
+                                         tzinfo=pytz.UTC),
                                  precip_in=entry['precip_in']))
     df = pd.DataFrame(rows)
     df.fillna(0, inplace=True)
@@ -75,11 +76,11 @@ def update_precip(date, station, hdf):
     pgconn = get_dbconn('iem')
     cursor = pgconn.cursor()
     cursor.execute("""
-    UPDATE summary s
-    SET pday = %s
-    FROM stations t
-    WHERE t.iemid = s.iemid and s.day = %s and t.id = %s and
-    t.network = 'ISUSM'
+        UPDATE summary s
+        SET pday = %s
+        FROM stations t
+        WHERE t.iemid = s.iemid and s.day = %s and t.id = %s and
+        t.network = 'ISUSM'
     """, (newpday.value('IN'), date, station))
     cursor.close()
     pgconn.commit()
@@ -88,24 +89,24 @@ def update_precip(date, station, hdf):
     cursor = pgconn.cursor()
     # daily
     cursor.execute("""
-    UPDATE sm_daily
-    SET rain_mm_tot_qc = %s, rain_mm_tot_f = 'E'
-    WHERE valid = %s and station = %s
+        UPDATE sm_daily
+        SET rain_mm_tot_qc = %s, rain_mm_tot_f = 'E'
+        WHERE valid = %s and station = %s
     """, (newpday.value('MM'), date, station))
     for _, row in ldf.iterrows():
         # hourly
         total = distance(row['precip_in'], 'IN').value('MM')
         cursor.execute("""
-        UPDATE sm_hourly
-        SET rain_mm_tot_qc = %s, rain_mm_tot_f = 'E'
-        WHERE valid = %s and station = %s
+            UPDATE sm_hourly
+            SET rain_mm_tot_qc = %s, rain_mm_tot_f = 'E'
+            WHERE valid = %s and station = %s
         """, (total, row['valid'], station))
         # 15minute
         for minute in [45, 30, 15, 0]:
             cursor.execute("""
-            UPDATE sm_15minute
-            SET rain_mm_tot_qc = %s, rain_mm_tot_f = 'E'
-            WHERE valid = %s and station = %s
+                UPDATE sm_15minute
+                SET rain_mm_tot_qc = %s, rain_mm_tot_f = 'E'
+                WHERE valid = %s and station = %s
             """, (total / 4.,
                   row['valid'] - datetime.timedelta(minutes=minute), station))
     cursor.close()
@@ -120,20 +121,19 @@ def main(argv):
 
     # Get our obs
     df = read_sql("""
-     SELECT station, rain_mm_tot_qc / 25.4 as obs from sm_daily where
-     valid = %s ORDER by station ASC
+        SELECT station, rain_mm_tot_qc / 25.4 as obs from sm_daily where
+        valid = %s ORDER by station ASC
     """, pgconn, params=(date, ), index_col='station')
     hdf = get_hdf(nt, date)
     if hdf.empty:
-        print("hdf is empty, abort fix_precip for %s" % (date, ))
+        LOG.info("hdf is empty, abort fix_precip for %s", date)
         return
 
     # lets try some QC
     for station in df.index.values:
         # the daily total is 12 CST to 12 CST, so that is always 6z
         # so we want the 7z total
-        sts = datetime.datetime(date.year, date.month, date.day, 7)
-        sts = sts.replace(tzinfo=pytz.utc)
+        sts = utc(date.year, date.month, date.day, 7)
         ets = sts + datetime.timedelta(hours=24)
         # OK, get our data
         ldf = hdf[(hdf['station'] == station) &
@@ -146,8 +146,10 @@ def main(argv):
     # if stageIV > 0.1 and obs < 0.05
     df2 = df[(df['stage4'] > 0.1) & (df['obs'] < 0.05)]
     for station, row in df2.iterrows():
-        print(("ISUSM fix_precip %s %s stageIV: %.2f obs: %.2f"
-               ) % (date, station, row['stage4'], row['obs']))
+        LOG.info(
+            "ISUSM fix_precip %s %s stageIV: %.2f obs: %.2f",
+            date, station, row['stage4'], row['obs']
+        )
         print_debugging(station)
         update_precip(date, station, hdf)
 
