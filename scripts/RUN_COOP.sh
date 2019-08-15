@@ -6,7 +6,7 @@ python wxc_azos_gdd.py
 LD_PRELOAD=/opt/miniconda3/envs/prod/lib/libz.so:/opt/miniconda3/envs/prod/lib/libharfbuzz.so php wxc_coop.php
 
 cd ../coop
-csh PREC.csh
+bash PREC.sh
 python plot_precip_12z.py
 python year_precip.py
 python month_precip.py

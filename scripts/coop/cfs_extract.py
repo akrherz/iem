@@ -116,7 +116,7 @@ def dbsave(ts, data):
         """, (ts,))
         modelid = cursor.fetchone()[0]
 
-    for date in data['fx'].keys():
+    for date in list(data['fx'].keys()):
         d = data['fx'][date]
         if (d['high'] is None or d['low'] is None or
                 d['precip'] is None or d['srad'] is None):

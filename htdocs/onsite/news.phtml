@@ -1,14 +1,15 @@
 <?php
- include("../../config/settings.inc.php");
+ require_once "../../config/settings.inc.php";
  define("IEM_APPID", 22);
- include("../../include/myview.php");
+ require_once "../../include/myview.php";
  $t = new MyView();
- include("../../include/database.inc.php");
+ require_once "../../include/database.inc.php";
+ require_once "../../include/forms.php";
  $dbconn = iemdb("mesosite", TRUE, TRUE);
 
  $id = isset($_GET["id"]) ? intval($_GET["id"]): null;
- $q = isset($_GET["q"]) ? pg_escape_string($_GET["q"]) : "";
- $tag = isset($_GET['tag']) ? pg_escape_string($_GET['tag']) : null;
+ $q = isset($_GET["q"]) ? pg_escape_string(xssafe($_GET["q"])) : "";
+ $tag = isset($_GET['tag']) ? pg_escape_string(xssafe($_GET['tag'])) : null;
  
 
  $t->thispage = "iem-news";
