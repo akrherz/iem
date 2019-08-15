@@ -87,8 +87,8 @@
 192.168.1.244    iemdb2 iemdb2.local postgresread
 #   VI_9(59) iem12
 192.168.0.242    iem-nwnserver
-#   VI10(60) iem12
-192.168.1.241    iem-ldm iem-ldm.local iem-web-services.local
+#   VI_10(60) iem12
+192.168.1.241    iem-web-services.local
 #   VI11(61) iem12
 192.168.0.240    iem-openfire openfire-bosh
 # VI12(62) metvm7 <-> metvm0
@@ -99,3 +99,7 @@
 192.168.1.237    iemdb-talltowers.local
 # VI_15(65) metvm4
 192.168.1.236    iemdb-iemre.local
+# VI_1_235(66) iem12
+192.168.1.235    iemdb-ldm.local
+# VI_0_235(67) iem12
+192.168.0.235    iemdb-ldm-0.local
