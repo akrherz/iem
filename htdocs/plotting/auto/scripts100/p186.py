@@ -67,7 +67,8 @@ def plotter(fdict):
     df.sort_values('Date', ascending=True, inplace=True)
     df['x'] = df['Date'] + datetime.timedelta(hours=(3.5*24))
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(7, 9))
+    fig = plt.figure(figsize=(7, 9))
+    ax = fig.add_axes([0.1, 0.1, 0.87, 0.84])
     lastrow = None
     for year, gdf in df.groupby(df.Date.dt.year):
         if year < syear or year > eyear:
@@ -113,8 +114,8 @@ def plotter(fdict):
 
     ax.set_yticks(np.arange(ax.get_ylim()[0] - 1, ax.get_ylim()[1], -1,
                             dtype='i'))
-    fig.text(0.02, 0.04, "Blue areas are improving conditions", color='b')
-    fig.text(0.4, 0.04, "Red areas are degrading conditions", color='r')
+    fig.text(0.02, 0.03, "Blue areas are improving conditions", color='b')
+    fig.text(0.4, 0.03, "Red areas are degrading conditions", color='r')
 
     return fig, df[['Date', 'NONE', 'D0', 'D1', 'D2', 'D3', 'D4']]
 
