@@ -65,6 +65,11 @@ def workflow(link, target):
 
 def main():
     """Go Main"""
+    # Ensure some base folders exist
+    for mysubdir in ['share', 'ARCHIVE', 'data']:
+        path = "/mesonet/%s" % (mysubdir, )
+        if not os.path.isfile(path):
+            os.makedirs(path)
     for (link, target) in PAIRS:
         workflow(link, target)
 

@@ -1,5 +1,4 @@
 """Process the US Climate Reference Network"""
-from __future__ import print_function
 import datetime
 import os
 import sys
@@ -11,8 +10,9 @@ import pandas as pd
 import requests
 from metpy.units import units
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn, exponential_backoff
+from pyiem.util import get_dbconn, exponential_backoff, logger
 
+LOG = logger()
 BASE = "/mesonet/tmp/uscrn"
 URI = "https://www1.ncdc.noaa.gov/pub/data/uscrn/products/subhourly01"
 FTP = "ftp://ftp.ncdc.noaa.gov/pub/data/uscrn/products/subhourly01"
@@ -38,7 +38,7 @@ def init_year(year):
     """We need to do great things, for a great new year"""
     # We need FTP first, since that does proper wild card expansion
     subprocess.call("""
-        wget '%s/%s/*.txt'
+        wget -q '%s/%s/*.txt'
     """ % (FTP, year), shell=True)
 
 
@@ -86,10 +86,10 @@ def process_file(icursor, ocursor, year, filename, size, reprocess):
                      converters={'WBANNO': str, 'UTC_TIME': str})
     if reprocess and not df.empty:
         ocursor.execute("""
-        DELETE from uscrn_t"""+str(year)+"""
-        WHERE station = %s
+            DELETE from uscrn_t"""+str(year)+"""
+            WHERE station = %s
         """, (df.iloc[0]['WBANNO'], ))
-        print("Removed %s rows" % (ocursor.rowcount, ))
+        LOG.info("Removed %s rows", ocursor.rowcount)
     for _, row in df.iterrows():
         valid = datetime.datetime.strptime("%s %s" % (row['UTC_DATE'],
                                                       row['UTC_TIME']),
@@ -151,13 +151,12 @@ def download(year, reprocess=False):
         # No new data
         if req is None or req.status_code == 416:
             continue
-        if req.status_code == 404:
-            print("uscrn_ingest %s is 404" % (filename, ))
+        if req.status_code in [404, 403]:
+            LOG.info("uscrn_ingest %s is %s", filename, req.status_code)
             continue
         if req.status_code < 400:
-            fp = open(filename, 'a')
-            fp.write(req.content.decode('utf-8'))
-            fp.close()
+            with open(filename, 'a') as fh:
+                fh.write(req.content.decode('utf-8'))
         if req.status_code < 400 or reprocess:
             queue.append([filename, len(req.content)])
         else:
@@ -183,7 +182,7 @@ def main(argv):
         try:
             process_file(icursor, ocursor, year, fn, size, reprocess)
         except Exception as exp:
-            print("uscrn_ingest %s traceback: %s" % (fn, exp))
+            LOG.info("uscrn_ingest %s traceback: %s", fn, exp)
         icursor.close()
         ocursor.close()
         iem_pgconn.commit()
