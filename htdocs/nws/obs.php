@@ -1,18 +1,18 @@
 <?php
  require_once "../../config/settings.inc.php";
  define("IEM_APPID", 40);
- include("../../include/myview.php");
+ require_once "../../include/myview.php";
  require_once "../../include/mlib.php"; 
- include("../../include/network.php");
+ require_once "../../include/network.php";
  require_once "../../include/forms.php";
- include("../../include/station.php");
+ require_once "../../include/station.php";
   
   $t = new MyView();
  
  $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "peak";
  $metar = isset($_GET["metar"]) ? xssafe($_GET['metar']) : "no";
  $sorder = isset($_GET["sorder"]) ? xssafe($_GET["sorder"]) : "desc";
- $wfo = isset($_REQUEST["wfo"]) ? $_REQUEST["wfo"] : 'DMX';
+ $wfo = isset($_REQUEST["wfo"]) ? xssafe($_REQUEST["wfo"]) : 'DMX';
 
  $t->refresh = 60;
  $t->title = "Obs by NWS Forecast Office";
