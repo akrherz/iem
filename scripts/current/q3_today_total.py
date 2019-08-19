@@ -3,13 +3,15 @@
 """
 import datetime
 import sys
+import os
 
 import numpy as np
 import pytz
 from pyiem.datatypes import distance
 from pyiem.plot import MapPlot, nwsprecip
-from pyiem.util import utc, ncopen
+from pyiem.util import utc, ncopen, logger
 import pyiem.iemre as iemre
+LOG = logger()
 
 
 def doday(ts, realtime):
@@ -21,17 +23,21 @@ def doday(ts, realtime):
     # make assumptions about the last valid MRMS data
     if realtime:
         # Up until :59 after of the last hour
-        lts = (lts - datetime.timedelta(hours=1)).replace(minute=59)
+        lts = (datetime.datetime.now() -
+               datetime.timedelta(hours=1)).replace(minute=59)
     else:
         lts = lts.replace(year=ts.year, month=ts.month, day=ts.day,
                           hour=23, minute=59)
 
     idx = iemre.daily_offset(ts)
     ncfn = iemre.get_daily_mrms_ncname(ts.year)
-    nc = ncopen(ncfn, timeout=300)
-    precip = nc.variables['p01d'][idx, :, :]
-    lats = nc.variables['lat'][:]
-    lons = nc.variables['lon'][:]
+    if not os.path.isfile(ncfn):
+        LOG.info("File %s missing, abort.", ncfn)
+        return
+    with ncopen(ncfn, timeout=300) as nc:
+        precip = nc.variables['p01d'][idx, :, :]
+        lats = nc.variables['lat'][:]
+        lons = nc.variables['lon'][:]
     subtitle = "Total between 12:00 AM and %s" % (
                                             lts.strftime("%I:%M %p %Z"),)
     routes = 'ac'

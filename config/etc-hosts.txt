@@ -103,3 +103,5 @@
 192.168.1.235    iem-ldm.local
 # VI_0_235(67) iem12
 192.168.0.235    iem-ldm-0.local
+# VI_0_234(68) iem15
+192.168.0.234    iem-loggernet.local
