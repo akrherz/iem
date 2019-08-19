@@ -81,30 +81,27 @@ def main():
     coffset1 = iemre.daily_offset(c2000)
     c2000 = ts2.replace(year=2000)
     coffset2 = iemre.daily_offset(c2000) + 1
-    cnc = ncopen(iemre.get_dailyc_ncname())
-    chigh = datatypes.temperature(cnc.variables['high_tmpk'][coffset1:coffset2,
-                                                             j, i],
-                                  'K').value("F")
-    clow = datatypes.temperature(cnc.variables['low_tmpk'][coffset1:coffset2,
-                                                           j, i],
-                                 'K').value("F")
-    cprecip = cnc.variables['p01d'][coffset1:coffset2, j, i] / 25.4
-    cnc.close()
+    with ncopen(iemre.get_dailyc_ncname()) as cnc:
+        chigh = datatypes.temperature(
+            cnc.variables['high_tmpk'][coffset1:coffset2, j, i],
+            'K').value("F")
+        clow = datatypes.temperature(
+            cnc.variables['low_tmpk'][coffset1:coffset2, j, i],
+            'K').value("F")
+        cprecip = cnc.variables['p01d'][coffset1:coffset2, j, i] / 25.4
 
     if ts1.year > 1980:
-        nc = ncopen("/mesonet/data/prism/%s_daily.nc" % (ts1.year, ))
         i2, j2 = prismutil.find_ij(lon, lat)
-        prism_precip = nc.variables['ppt'][offset1:offset2, j2, i2] / 25.4
-        nc.close()
+        with ncopen("/mesonet/data/prism/%s_daily.nc" % (ts1.year, )) as nc:
+            prism_precip = nc.variables['ppt'][offset1:offset2, j2, i2] / 25.4
     else:
         prism_precip = [None]*(offset2-offset1)
 
     if ts1.year > 2010:
-        nc = ncopen(iemre.get_daily_mrms_ncname(ts1.year))
         j2 = int((lat - iemre.SOUTH) * 100.0)
         i2 = int((lon - iemre.WEST) * 100.0)
-        mrms_precip = nc.variables['p01d'][offset1:offset2, j2, i2] / 25.4
-        nc.close()
+        with ncopen(iemre.get_daily_mrms_ncname(ts1.year)) as nc:
+            mrms_precip = nc.variables['p01d'][offset1:offset2, j2, i2] / 25.4
     else:
         mrms_precip = [None]*(offset2-offset1)
 

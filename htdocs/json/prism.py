@@ -67,12 +67,10 @@ def dowork(form):
         ncfn = "/mesonet/data/prism/%s_daily.nc" % (sts.year, )
         if not os.path.isfile(ncfn):
             continue
-        nc = ncopen(ncfn)
-
-        tmax = nc.variables['tmax'][sidx:eidx, j, i]
-        tmin = nc.variables['tmin'][sidx:eidx, j, i]
-        ppt = nc.variables['ppt'][sidx:eidx, j, i]
-        nc.close()
+        with ncopen(ncfn) as nc:
+            tmax = nc.variables['tmax'][sidx:eidx, j, i]
+            tmin = nc.variables['tmin'][sidx:eidx, j, i]
+            ppt = nc.variables['ppt'][sidx:eidx, j, i]
 
         for tx, (mt, nt, pt) in enumerate(zip(tmax, tmin, ppt)):
             valid = sts + datetime.timedelta(days=tx)

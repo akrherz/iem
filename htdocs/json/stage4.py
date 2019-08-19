@@ -36,16 +36,14 @@ def dowork(form):
     res = {'gridi': -1, 'gridj': -1, 'data': []}
     if not os.path.isfile(ncfn):
         return json.dumps(res)
-    nc = ncopen(ncfn)
+    with ncopen(ncfn) as nc:
+        dist = ((nc.variables['lon'][:] - lon)**2 +
+                (nc.variables['lat'][:] - lat)**2)**0.5
+        (j, i) = np.unravel_index(dist.argmin(), dist.shape)
+        res['gridi'] = int(i)
+        res['gridj'] = int(j)
 
-    dist = ((nc.variables['lon'][:] - lon)**2 +
-            (nc.variables['lat'][:] - lat)**2)**0.5
-    (j, i) = np.unravel_index(dist.argmin(), dist.shape)
-    res['gridi'] = int(i)
-    res['gridj'] = int(j)
-
-    ppt = nc.variables['p01m'][sidx:eidx, j, i]
-    nc.close()
+        ppt = nc.variables['p01m'][sidx:eidx, j, i]
 
     for tx, pt in enumerate(ppt):
         valid = sts + datetime.timedelta(hours=tx)
