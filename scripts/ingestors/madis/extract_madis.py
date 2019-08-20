@@ -53,23 +53,24 @@ def main():
         print('extract_madis.py found no files? last: %s' % (fn, ))
         return
 
-    nc = ncopen(fn)
-    providers = chartostring(nc.variables["dataProvider"][:])
-    stations = chartostring(nc.variables['stationId'][:])
-    nc_tmpk = nc.variables["temperature"][:]
-    nc_dwpk = nc.variables["dewpoint"][:]
-    nc_alti = nc.variables["altimeter"][:]
-    tmpkqcd = nc.variables["temperatureQCD"][:]
-    dwpkqcd = nc.variables["dewpointQCD"][:]
-    altiqcd = nc.variables["altimeterQCD"][:]
+    with ncopen(fn) as nc:
+        providers = chartostring(nc.variables["dataProvider"][:])
+        stations = chartostring(nc.variables['stationId'][:])
+        nc_tmpk = nc.variables["temperature"][:]
+        nc_dwpk = nc.variables["dewpoint"][:]
+        nc_alti = nc.variables["altimeter"][:]
+        tmpkqcd = nc.variables["temperatureQCD"][:]
+        dwpkqcd = nc.variables["dewpointQCD"][:]
+        altiqcd = nc.variables["altimeterQCD"][:]
+        times = nc.variables["observationTime"][:]
 
     for p in range(providers.shape[0]):
         provider = providers[p]
         if provider not in ['IEM', 'IADOT']:
             continue
-        ticks = int(nc.variables["observationTime"][p])
+        ticks = int(times[p])
         ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=ticks)
-        ts = ts.replace(tzinfo=pytz.utc)
+        ts = ts.replace(tzinfo=pytz.UTC)
 
         (tmpf, tmpf_qc_av, tmpf_qc_sc) = (None, None, None)
         (dwpf, dwpf_qc_av, dwpf_qc_sc) = (None, None, None)
@@ -87,16 +88,17 @@ def main():
             alti = check((nc_alti[p] / 100.0) * 0.0295298)
             alti_qc_av = figure_alti(altiqcd[p, 0] * 0.0295298)
             alti_qc_sc = figure_alti(altiqcd[p, 6] * 0.0295298)
-        sql = """UPDATE current_qc SET tmpf = %s, tmpf_qc_av = %s,
-         tmpf_qc_sc = %s, dwpf = %s, dwpf_qc_av = %s,
-         dwpf_qc_sc = %s, alti = %s, alti_qc_av = %s,
-         alti_qc_sc = %s, valid = %s WHERE station = %s """
+        sql = """
+            UPDATE current_qc SET tmpf = %s, tmpf_qc_av = %s,
+            tmpf_qc_sc = %s, dwpf = %s, dwpf_qc_av = %s,
+            dwpf_qc_sc = %s, alti = %s, alti_qc_av = %s,
+            alti_qc_sc = %s, valid = %s WHERE station = %s
+        """
         args = (tmpf, tmpf_qc_av, tmpf_qc_sc, dwpf, dwpf_qc_av,
                 dwpf_qc_sc, alti, alti_qc_av, alti_qc_sc,
                 ts, stations[p])
         icursor.execute(sql, args)
 
-    nc.close()
     icursor.close()
     pgconn.commit()
     pgconn.close()

@@ -93,27 +93,24 @@ def do_precip(ts, ds):
         if not os.path.isfile(ncfn):
             LOG.warning("Missing %s", ncfn)
             return
-        hnc = ncopen(ncfn, timeout=600)
-        phour = np.sum(hnc.variables['p01m'][:offset2, :, :], 0)
-        hnc.close()
+        with ncopen(ncfn, timeout=600) as hnc:
+            phour = np.sum(hnc.variables['p01m'][:offset2, :, :], 0)
         ncfn = iemre.get_hourly_ncname(sts.year)
         if os.path.isfile(ncfn):
-            hnc = ncopen(ncfn, timeout=600)
-            phour += np.sum(hnc.variables['p01m'][offset1:, :, :], 0)
-            hnc.close()
+            with ncopen(ncfn, timeout=600) as hnc:
+                phour += np.sum(hnc.variables['p01m'][offset1:, :, :], 0)
     else:
         ncfn = iemre.get_hourly_ncname(sts.year)
         if not os.path.isfile(ncfn):
             LOG.warning("Missing %s", ncfn)
             return
-        hnc = ncopen(ncfn, timeout=600)
-        # for offset in range(offset1, offset2):
-        #    LOG.info(
-        #        "offset: %s min: %s max: %s",
-        #        offset, np.ma.min(hnc.variables['p01m'][offset, :, :]),
-        #        np.max(hnc.variables['p01m'][offset, :, :]))
-        phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
-        hnc.close()
+        with ncopen(ncfn, timeout=600) as hnc:
+            # for offset in range(offset1, offset2):
+            #    LOG.info(
+            #        "offset: %s min: %s max: %s",
+            #        offset, np.ma.min(hnc.variables['p01m'][offset, :, :]),
+            #        np.max(hnc.variables['p01m'][offset, :, :]))
+            phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
     ds['p01d'].values = np.where(phour < 0, 0, phour)
 
 
@@ -134,20 +131,17 @@ def do_precip12(ts, ds):
         if not os.path.isfile(ncfn):
             LOG.warning("Missing %s", ncfn)
             return
-        hnc = ncopen(ncfn, timeout=600)
-        phour = np.sum(hnc.variables['p01m'][:offset2, :, :], 0)
-        hnc.close()
-        hnc = ncopen(iemre.get_hourly_ncname(sts.year), timeout=600)
-        phour += np.sum(hnc.variables['p01m'][offset1:, :, :], 0)
-        hnc.close()
+        with ncopen(ncfn, timeout=600) as hnc:
+            phour = np.sum(hnc.variables['p01m'][:offset2, :, :], 0)
+        with ncopen(iemre.get_hourly_ncname(sts.year), timeout=600) as hnc:
+            phour += np.sum(hnc.variables['p01m'][offset1:, :, :], 0)
     else:
         ncfn = iemre.get_hourly_ncname(ts.year)
         if not os.path.isfile(ncfn):
             LOG.warning("Missing %s", ncfn)
             return
-        hnc = ncopen(ncfn, timeout=600)
-        phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
-        hnc.close()
+        with ncopen(ncfn, timeout=600) as hnc:
+            phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
     ds['p01d_12z'].values = np.where(phour < 0, 0, phour)
 
 

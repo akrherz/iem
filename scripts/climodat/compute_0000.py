@@ -52,21 +52,25 @@ def update_database(stid, valid, row):
 def do_day(valid):
     """ Process a day please """
     idx = iemre.daily_offset(valid)
-    nc = ncopen(iemre.get_daily_ncname(valid.year), 'r', timeout=300)
-    high = temperature(nc.variables['high_tmpk_12z'][idx, :, :],
-                       'K').value('F')
-    low = temperature(nc.variables['low_tmpk_12z'][idx, :, :],
-                      'K').value('F')
-    precip = distance(nc.variables['p01d_12z'][idx, :, :], 'MM').value("IN")
-    snow = distance(nc.variables['snow_12z'][idx, :, :], 'MM').value("IN")
-    snowd = distance(nc.variables['snowd_12z'][idx, :, :], 'MM').value("IN")
-    nc.close()
+    with ncopen(iemre.get_daily_ncname(valid.year), 'r', timeout=300) as nc:
+        high = temperature(
+            nc.variables['high_tmpk_12z'][idx, :, :],
+            'K').value('F')
+        low = temperature(
+            nc.variables['low_tmpk_12z'][idx, :, :],
+            'K').value('F')
+        precip = distance(
+            nc.variables['p01d_12z'][idx, :, :], 'MM').value("IN")
+        snow = distance(
+            nc.variables['snow_12z'][idx, :, :], 'MM').value("IN")
+        snowd = distance(
+            nc.variables['snowd_12z'][idx, :, :], 'MM').value("IN")
 
     # build out the state mappers
     pgconn = get_dbconn('postgis')
     states = gpd.GeoDataFrame.from_postgis("""
-    SELECT the_geom, state_abbr from states
-    where state_abbr not in ('AK', 'HI', 'DC')
+        SELECT the_geom, state_abbr from states
+        where state_abbr not in ('AK', 'HI', 'DC')
     """, pgconn, index_col='state_abbr', geom_col='the_geom')
     czs = CachingZonalStats(iemre.AFFINE)
     sthigh = czs.gen_stats(np.flipud(high), states['the_geom'])
@@ -88,8 +92,8 @@ def do_day(valid):
 
     # build out climate division mappers
     climdiv = gpd.GeoDataFrame.from_postgis("""
-    SELECT geom, iemid from climdiv
-    where st_abbrv not in ('AK', 'HI', 'DC')
+        SELECT geom, iemid from climdiv
+        where st_abbrv not in ('AK', 'HI', 'DC')
     """, pgconn, index_col='iemid', geom_col='geom')
     czs = CachingZonalStats(iemre.AFFINE)
     sthigh = czs.gen_stats(np.flipud(high), climdiv['geom'])

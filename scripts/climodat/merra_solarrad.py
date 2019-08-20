@@ -52,12 +52,11 @@ def do(date):
         print(("merra_solarrad %s miss[%s] -> fail"
                ) % (sts.strftime("%Y%m%d"), fn))
         return
-    nc = ncopen(fn, timeout=300)
-    rad = nc.variables['SWGDN'][7:, :, :]
-    cs_rad = nc.variables['SWGDNCLR'][7:, :, :]
-    xc = nc.variables['lon'][:]
-    yc = nc.variables['lat'][:]
-    nc.close()
+    with ncopen(fn, timeout=300) as nc:
+        rad = nc.variables['SWGDN'][7:, :, :]
+        cs_rad = nc.variables['SWGDNCLR'][7:, :, :]
+        xc = nc.variables['lon'][:]
+        yc = nc.variables['lat'][:]
 
     if not os.path.isfile(fn2):
         print(("merra_solarrad %s miss[%s] -> zeros"
@@ -65,10 +64,9 @@ def do(date):
         rad2 = 0
         cs_rad2 = 0
     else:
-        nc = ncopen(fn2, timeout=300)
-        rad2 = nc.variables['SWGDN'][:7, :, :]
-        cs_rad2 = nc.variables['SWGDNCLR'][:7, :, :]
-        nc.close()
+        with ncopen(fn2, timeout=300) as nc:
+            rad2 = nc.variables['SWGDN'][:7, :, :]
+            cs_rad2 = nc.variables['SWGDNCLR'][:7, :, :]
 
     # W m-2 -> J m-2 s-1 -> J m-2 dy-1
     total = (np.sum(rad, 0) + np.sum(rad2, 0)) * 3600.0
@@ -78,7 +76,7 @@ def do(date):
         SELECT station, ST_x(geom), ST_y(geom), temp24_hour
         from alldata a JOIN stations t on
         (a.station = t.id) where day = %s and network ~* 'CLIMATE'
-        """, (date.strftime("%Y-%m-%d"), ))
+    """, (date.strftime("%Y-%m-%d"), ))
     for row in ccursor:
         (x, y) = (row[1], row[2])
         (gridxs, gridys, distances) = get_gp(xc, yc, x, y)

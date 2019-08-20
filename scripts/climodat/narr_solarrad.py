@@ -114,16 +114,15 @@ def do(date):
         if not os.path.isfile(fn):
             print('MISSING NARR: %s' % (fn,))
             sys.exit()
-        nc = ncopen(fn, timeout=300)
-        rad = nc.variables['Downward_shortwave_radiation_flux'][0, :, :]
-        if now == sts:
-            xc = nc.variables['x'][:] * 1000.0  # convert to meters
-            yc = nc.variables['y'][:] * 1000.0  # convert to meters
+        with ncopen(fn, timeout=300) as nc:
+            rad = nc.variables['Downward_shortwave_radiation_flux'][0, :, :]
+            if now == sts:
+                xc = nc.variables['x'][:] * 1000.0  # convert to meters
+                yc = nc.variables['y'][:] * 1000.0  # convert to meters
 
-            total = rad * 10800.0  # 3 hr rad to total rad
-        else:
-            total += (rad * 10800.0)
-        nc.close()
+                total = rad * 10800.0  # 3 hr rad to total rad
+            else:
+                total += (rad * 10800.0)
         now += interval
 
     ccursor.execute("""

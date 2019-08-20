@@ -25,18 +25,18 @@ def main():
 
     fn = sys.argv[1]
     station = sys.argv[2]
-    nc = ncopen(fn)
+    with ncopen(fn) as nc:
+        byear = nc.variables['byear'][:]
+        maxt = nc.variables['maxt'][:]
+        mint = nc.variables['mint'][:]
+        pcpn = nc.variables['pcpn'][:]
+        snow = nc.variables['snow'][:]
+        snwg = nc.variables['snwg'][:]
 
-    byear = nc.variables['byear'][:]
-    maxt = nc.variables['maxt'][:]
-    mint = nc.variables['mint'][:]
-    pcpn = nc.variables['pcpn'][:]
-    snow = nc.variables['snow'][:]
-    snwg = nc.variables['snwg'][:]
-
-    current = read_sql("""SELECT day, high, low, precip, snow, snowd from
+    current = read_sql("""
+        SELECT day, high, low, precip, snow, snowd from
         alldata_ia WHERE station = %s ORDER by day ASC
-        """, pgconn, params=(station,), index_col='day')
+    """, pgconn, params=(station,), index_col='day')
 
     added = 0
     for yr in range(byear, 2016):
@@ -70,14 +70,13 @@ def main():
                     sday = "%02i%02i" % (date.month, date.day)
                     added += 1
                     ccursor.execute("""
-                    INSERT into alldata_ia(station, day, high,
-                    low, precip, snow, sday, year, month, snowd) VALUES (%s,
-                    %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        INSERT into alldata_ia(station, day, high,
+                        low, precip, snow, sday, year, month, snowd) VALUES
+                        (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     """, (station, date, high, low, precip, snowfall,
                           sday, int(date.year), int(date.month), snowd))
 
     print("added %s" % (added,))
-    nc.close()
     ccursor.close()
     pgconn.commit()
 

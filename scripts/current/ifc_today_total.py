@@ -16,13 +16,12 @@ def doday(ts, realtime):
     """
     Create a plot of precipitation stage4 estimates for some day
     """
-    nc = ncopen("/mesonet/data/iemre/%s_ifc_daily.nc" % (ts.year,),
-                timeout=300)
     idx = daily_offset(ts)
-    xaxis = nc.variables['lon'][:]
-    yaxis = nc.variables['lat'][:]
-    total = nc.variables['p01d'][idx, :, :]
-    nc.close()
+    with ncopen("/mesonet/data/iemre/%s_ifc_daily.nc" % (ts.year,),
+                timeout=300) as nc:
+        xaxis = nc.variables['lon'][:]
+        yaxis = nc.variables['lat'][:]
+        total = nc.variables['p01d'][idx, :, :]
     lastts = datetime.datetime(ts.year, ts.month, ts.day, 23, 59)
     if realtime:
         now = datetime.datetime.now() - datetime.timedelta(minutes=60)

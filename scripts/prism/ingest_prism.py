@@ -5,7 +5,6 @@
 3. Open the actual BIL file with rasterio
 4. Copy data into netcdf file
 5. Cleanup
-
 """
 from __future__ import print_function
 import sys
@@ -24,10 +23,9 @@ def do_process(valid, fn):
     # shape of data is (1, 621, 1405)
     data = rasterio.open(fn).read()
     varname = fn.split("_")[1]
-    nc = ncopen("/mesonet/data/prism/%s_daily.nc" % (valid.year,), 'a')
     idx = daily_offset(valid)
-    nc.variables[varname][idx] = np.flipud(data[0])
-    nc.close()
+    with ncopen("/mesonet/data/prism/%s_daily.nc" % (valid.year,), 'a') as nc:
+        nc.variables[varname][idx] = np.flipud(data[0])
 
 
 def do_download(valid):

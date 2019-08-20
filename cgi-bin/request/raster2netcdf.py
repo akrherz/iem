@@ -60,19 +60,19 @@ def get_table(prod):
 def make_netcdf(xpoints, ypoints, lons, lats):
     """generate the netcdf file"""
     tmpobj = tempfile.NamedTemporaryFile(suffix='.nc', delete=False)
-    nc = ncopen(tmpobj.name, 'w')
-    nc.Conventions = 'CF-1.6'
-    nc.createDimension('lat', ypoints)
-    nc.createDimension('lon', xpoints)
-    nclon = nc.createVariable('lon', np.float32, ('lon', ))
-    nclon.units = 'degree_east'
-    nclon.long_name = 'longitude'
-    nclon[:] = lons
-    nclat = nc.createVariable('lat', np.float32, ('lat', ))
-    nclat.units = 'degree_north'
-    nclat.long_name = 'latitude'
-    nclat[:] = lats
-    return nc, tmpobj
+    with ncopen(tmpobj.name, 'w') as nc:
+        nc.Conventions = 'CF-1.6'
+        nc.createDimension('lat', ypoints)
+        nc.createDimension('lon', xpoints)
+        nclon = nc.createVariable('lon', np.float32, ('lon', ))
+        nclon.units = 'degree_east'
+        nclon.long_name = 'longitude'
+        nclon[:] = lons
+        nclat = nc.createVariable('lat', np.float32, ('lat', ))
+        nclat.units = 'degree_north'
+        nclat.long_name = 'latitude'
+        nclat[:] = lats
+    return tmpobj.name
 
 
 def do_work(valid, prod):
@@ -88,23 +88,22 @@ def do_work(valid, prod):
     # build lat, lon arrays
     lons, lats = get_gridinfo(fn, xpoints, ypoints)
     # create netcdf file
-    nc, tmpobj = make_netcdf(xpoints, ypoints, lons, lats)
-
-    # write data
-    ncvar = nc.createVariable(prod, np.float, ('lat', 'lon'), zlib=True,
-                              fill_value=1.e20)
-    ncvar.units = units
-    ncvar.long_name = long_name
-    ncvar.coordinates = "lon lat"
-    # convert RASTER via lookup table
-    ncvar[:] = xref[raster]
-    nc.close()
+    tmpname = make_netcdf(xpoints, ypoints, lons, lats)
+    with ncopen(tmpname, 'a') as nc:
+        # write data
+        ncvar = nc.createVariable(
+            prod, np.float, ('lat', 'lon'), zlib=True, fill_value=1.e20)
+        ncvar.units = units
+        ncvar.long_name = long_name
+        ncvar.coordinates = "lon lat"
+        # convert RASTER via lookup table
+        ncvar[:] = xref[raster]
     # send data to user
     ssw("Content-type: application/octet-stream\n")
     ssw("Content-Disposition: attachment; filename=res.nc\n\n")
-    ssw(open(tmpobj.name, 'rb').read())
+    ssw(open(tmpname, 'rb').read())
     # remove tmp netcdf file
-    os.unlink(tmpobj.name)
+    os.unlink(tmpname)
 
 
 def main():
@@ -113,7 +112,7 @@ def main():
     dstr = form.getfirst('dstr', '201710251200')[:12]
     prod = form.getfirst('prod', 'composite_n0r')[:100]  # arb
     valid = datetime.datetime.strptime(dstr, '%Y%m%d%H%M').replace(
-        tzinfo=pytz.utc)
+        tzinfo=pytz.UTC)
     do_work(valid, prod)
 
 

@@ -1,15 +1,13 @@
 """Use the QC'd 12z 24 Hour files to adjust hourly data."""
-from __future__ import print_function
 import sys
 import os
 import datetime
 
 import numpy as np
-import pytz
 from scipy.interpolate import NearestNDInterpolator
 import pygrib
 from pyiem import iemre
-from pyiem.util import ncopen, logger
+from pyiem.util import ncopen, logger, utc
 LOG = logger()
 
 
@@ -43,43 +41,41 @@ def merge(ts):
     stage4 = np.where(stage4 < 10000., stage4, 0.)
     stage4 = np.where(stage4 < 0., 0., stage4)
 
-    # Open up our RE file
-    nc = ncopen(iemre.get_hourly_ncname(ts.year), 'a', timeout=300)
     ts0 = ts - datetime.timedelta(days=1)
     offset0 = iemre.hourly_offset(ts0)
     offset1 = iemre.hourly_offset(ts)
     # Running at 12 UTC 1 Jan
     if offset0 > offset1:
         offset0 = 0
-    iemre_total = np.sum(nc.variables["p01m"][offset0:offset1, :, :], axis=0)
-    iemre_total = np.where(iemre_total > 0., iemre_total, 0.00024)
-    iemre_total = np.where(iemre_total < 10000., iemre_total, 0.00024)
-    multiplier = stage4 / iemre_total
-    for offset in range(offset0, offset1):
-        # Get the unmasked dadta
-        data = nc.variables["p01m"][offset, :, :]
+    # Open up our RE file
+    with ncopen(iemre.get_hourly_ncname(ts.year), 'a', timeout=300) as nc:
+        iemre_total = np.sum(
+            nc.variables["p01m"][offset0:offset1, :, :], axis=0)
+        iemre_total = np.where(iemre_total > 0., iemre_total, 0.00024)
+        iemre_total = np.where(iemre_total < 10000., iemre_total, 0.00024)
+        multiplier = stage4 / iemre_total
+        for offset in range(offset0, offset1):
+            # Get the unmasked dadta
+            data = nc.variables["p01m"][offset, :, :]
 
-        # Keep data within reason
-        data = np.where(data > 10000., 0., data)
-        # 0.00024 / 24
-        adjust = np.where(data > 0, data, 0.00001) * multiplier
-        adjust = np.where(adjust > 250.0, 0, adjust)
-        nc.variables["p01m"][offset, :, :] = np.where(adjust < 0.01, 0, adjust)
-        ts = ts0 + datetime.timedelta(hours=offset-offset0)
-    nc.sync()
-    nc.close()
+            # Keep data within reason
+            data = np.where(data > 10000., 0., data)
+            # 0.00024 / 24
+            adjust = np.where(data > 0, data, 0.00001) * multiplier
+            adjust = np.where(adjust > 250.0, 0, adjust)
+            nc.variables["p01m"][offset, :, :] = np.where(
+                adjust < 0.01, 0, adjust)
+            ts = ts0 + datetime.timedelta(hours=offset-offset0)
 
 
 def main(argv):
     """Go Main Go"""
     if len(argv) == 4:
-        ts = datetime.datetime(int(argv[1]), int(argv[2]),
-                               int(argv[3]), 12)
+        ts = utc(int(argv[1]), int(argv[2]), int(argv[3]), 12)
     else:
-        ts = datetime.datetime.utcnow()
+        ts = utc()
         ts = ts - datetime.timedelta(days=1)
         ts = ts.replace(hour=12, minute=0, second=0, microsecond=0)
-    ts = ts.replace(tzinfo=pytz.UTC)
     merge(ts)
 
 
