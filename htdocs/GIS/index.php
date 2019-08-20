@@ -33,13 +33,13 @@ archive of presentations.</li>
 
 <p><h3>Web Applications:</h3>
 <ul>
-  <li><a href="/GIS/apps/rview/warnings.phtml">NEXRAD w/ warnings</a></li>
-  <li><a href="/GIS/apps/coop/">COOP Daily Extremes and Averages</a></li>
-  <li><a href="/my/current.php">Dynamic Plotting</a></li>
-  <li><a href="/sites/locate.php">IEM Site Locator</a></li>
-	<li><a href="rad-by-year-fe.phtml">NEXRAD Composite by Year</a>
-<br />Displays NEXRAD composites for a user specified sector for the same time
-each year going back to 1995.</li>
+    <li><a href="/GIS/apps/rview/warnings.phtml">NEXRAD w/ warnings</a></li>
+    <li><a href="/GIS/apps/coop/">COOP Daily Extremes and Averages</a></li>
+    <li><a href="/my/current.php">Dynamic Plotting</a></li>
+    <li><a href="/sites/locate.php">IEM Site Locator</a></li>
+    <li><a href="rad-by-year-fe.phtml">NEXRAD Mosaic by Year</a>
+    <br />Displays NEXRAD mosaicked base reflectivity for a user specified
+    sector for the same time each year going back to 1995.</li>
 </ul>
 
 
@@ -93,8 +93,8 @@ back to 1951.</li>
   <br />Current and archived Iowa road conditions.</li>
  <li><a href="/cow/">IEM Cow</a>
   <br />Unofficial NWS polygon warning verification.</li>
- <li><a href="/docs/nexrad_composites/">NEXRAD Composites on the IEM</a>
-  <br />Information about the NEXRAD composites that the IEM generates.</li>
+ <li><a href="/docs/nexrad_mosiac/">NEXRAD Mosiac on the IEM</a>
+  <br />Information about the NEXRAD Mosiac that the IEM generates.</li>
 </ul>
 
 <p><h3>GIS Shapefiles:</h3>

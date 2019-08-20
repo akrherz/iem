@@ -1,6 +1,6 @@
 <?php 
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 
 define("IEM_APPID", 67);
@@ -33,10 +33,10 @@ that have thousands of simultaneous users!  Our servers will melt!</div>
 
 
 
-<p>Since 2003, the IEM has been providing <a href="../docs/nexrad_composites/">composites</a> 
+<p>Since 2003, the IEM has been providing <a href="/docs/nexrad_mosiac/">mosiacs</a> 
 of National Weather Service
-RADAR imagery for use within GIS systems.  While these composites are nice, they
-are often ugly at very small scales (due to the crude nature of the compositing
+RADAR imagery for use within GIS systems.  While these mosaics are nice, they
+are often ugly at very small scales (due to the crude nature of the mosaicking
 process).  These images are also of base reflectivity and not of non-compositable
 products like velocity.
 

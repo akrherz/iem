@@ -19,6 +19,10 @@ def process(df, ncfn, south, west):
     with ncopen(fn1) as nc:
         with ncopen(fn2) as nc2019:
             for _, row in df.iterrows():
+                if row['State'] not in [
+                        'nd', 'sd', 'ne', 'ks', 'mo', 'ia', 'mn', 'wi', 'il',
+                        'in', 'ky', 'oh', 'mi']:
+                    continue
                 i = int((row['long'] - west) / 0.1250)
                 j = int((row['lat'] - south) / 0.1250)
                 nc_prcp = nc.variables['prcp'][:, j, i]

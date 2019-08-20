@@ -1,8 +1,8 @@
 <?php
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
-define("IEM_APPID", 53);
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 require_once "../../include/forms.php";
+define("IEM_APPID", 53);
 
 $day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d", time());
 $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m", time());
@@ -65,12 +65,14 @@ $minselect = minuteSelect($minute, "minute", 5);
 $t->content = <<<EOF
 <ol class="breadcrumb">
  <li><a href="/GIS/">GIS Mainpage</a></li>
- <li class="active">IEM NEXRAD Composite by Year</li>
+ <li class="active">IEM NEXRAD Mosaic by Year</li>
 </ol>
 
-<h3>IEM NEXRAD Composite by Year</h3>
+<h3>IEM NEXRAD Mosiac of Base Reflectivity by Year</h3>
 
-<p>This application generates a summary image of IEM generated NEXRAD composites for a given time over the archives duration.  You can click on the map to move the desired location.</p>
+<p>This application generates a summary image of IEM generated NEXRAD
+mosaic of base reflectivity for a given time over the archive's duration. 
+You can click on the map to move the desired location.</p>
 
 <form method="GET" action="rad-by-year-fe.phtml" name="Selector">
 <input type="hidden" name="oextents" value="{$er}">

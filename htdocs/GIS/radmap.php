@@ -673,11 +673,11 @@ if (isset($_GET["title"])){
 } else if (in_array("n0q", $layers)){
   $title = "NEXRAD Base Reflectivity";
 } else if (in_array("n0q_tc", $layers)){
-  $title = "IEM NEXRAD Daily N0Q Max Composite Reflectivity";
+  $title = "IEM NEXRAD Daily N0Q Max Base Reflectivity";
   $d = sprintf("Valid between %s 00:00 and 23:59 UTC",
       gmdate("d M Y", $ts));
 } else if (in_array("nexrad_tc", $layers)){
-  $title = "IEM NEXRAD Daily N0R Max Composite Reflectivity";
+  $title = "IEM NEXRAD Daily N0R Max Base Reflectivity";
   $d = sprintf("Valid between %s 00:00 and 23:59 UTC",
       gmdate("d M Y", $ts));
 } else {

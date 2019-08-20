@@ -1,8 +1,8 @@
 <?php 
-include_once("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 66);
 
-include_once("../../include/myview.php");
+require_once "../../include/myview.php";
 $t = new MyView();
 $t->thispage = "gis-radview";
 $t->title = "GIS RADAR Information";
@@ -14,14 +14,15 @@ $t->content = <<<EOF
 into GIS applications.  We have no magic bullets for getting this information
 into GIS systems, but have a number of things for you to try out!
 
-<div class="alert alert-info">These services are provided with-out warranty and with 
+<div class="alert alert-info">These services are provided with-out
+warranty and with 
 program interfaces that may change or go away!</div>
 
 <h3>Quick links to specific products</h3>
 <div class="row">
 		<div class="col-md-3">
-<a href="/docs/nexrad_composites"><strong>NEXRAD Composites</strong><br />
-<img src="/docs/nexrad_composites/example_raster.png" class="img img-responsive" /></a>
+<a href="/docs/nexrad_mosaic"><strong>NEXRAD Mosaic</strong><br />
+<img src="/docs/nexrad_mosaic/example_raster.png" class="img img-responsive" /></a>
 </div>
 		<div class="col-md-3">
 		<a href="ridge.phtml"><strong>Single RADAR Imagery</strong><br />
@@ -44,10 +45,10 @@ program interfaces that may change or go away!</div>
  <li><strong>14 Jul 2017:</strong> Release the <a href="model.phtml">HRRR Model Forecasted Reflectivity</a> services.</li>
  <li><strong>28 Jan 2012:</strong> Release the <a href="ridge.phtml">Single Site NEXRAD</a> services.</li>
  <li><b>28 Apr 2004:</b> Release the <a href="/request/gis/nids2gis.phtml">NIDS 2 GIS</a> application.
- <li><b>26 Apr 2004:</b> Add in links for the nationwide composites of NTP (storm total precip) and N1P (1 hour precip)!
- <li><b>13 Jan 2004:</b> Release the nationwide composite WMS!
+ <li><b>26 Apr 2004:</b> Add in links for the nationwide mosaics of NTP (storm total precip) and N1P (1 hour precip)!
+ <li><b>13 Jan 2004:</b> Release the nationwide mosiac WMS!
  <li><b>16 Sep 2003:</b> Add US base reflectivity, remove Iowa NTP product.
- <li><b>04 Jul 2003:</b> The composite base reflectivity plot has been 
+ <li><b>04 Jul 2003:</b> The mosaic base reflectivity plot has been 
 greatly improved.  The geo-referencing is nearly perfect!
  <li><b>01 Jul 2003:</b> Initial release to the public.</li>
 </ul>
@@ -55,7 +56,7 @@ greatly improved.  The geo-referencing is nearly perfect!
 <h3>NEXRAD + Mapserver Howto:</h3>
 
 <br>Here is a <a href="/docs/radmapserver/">HOWTO</a> on generating NEXRAD 
-composites with GEMPAK and then displaying them in Mapserver.  Feedback
+mosiacs with GEMPAK and then displaying them in Mapserver.  Feedback
 is certainly welcome.<p>
 
 <h3>Geo-referenced Images:</h3>
@@ -161,7 +162,7 @@ ArcIMS!
 
 <h3>Notes and Caveats:</h3>
 <ol>
-<li>The storm total precipitation (NTP) product does not directly composite.  Each 
+<li>The storm total precipitation (NTP) product does not directly mosiac.  Each 
 NEXRAD site reports the value for a different timespan.  Basically, once the
 radar detects rain, it will begin to accumulate the rainfall in the NTP product.
 Once it stops raining for an hour, the value is reset to zero.  Since all sites

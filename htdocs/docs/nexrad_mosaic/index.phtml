@@ -1,13 +1,13 @@
 <?php
-include("../../../config/settings.inc.php");
-include("../../../include/myview.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/myview.php";
 $t = new MyView();
-$t->title = "About NEXRAD Composites";
+$t->title = "About NEXRAD Mosaics";
 $t->thispage = "gis-nexrad";
 $d = date("Y/m/d");
 $t->content = <<<EOF
 
-<h3>Documentation on IEM generated NEXRAD composites</h3>
+<h3>Documentation on IEM generated NEXRAD Mosaics</h3>
 
 <div class="row">
 <div class="col-sm-6">
@@ -156,12 +156,12 @@ NODATA
  <li><a href="/current/mcview.phtml">Static Maps</a></li>
  <li><a href="/GIS/apps/rview/warnings.phtml">Interactive RADAR</a></li>
  <li><a href="/vtec/">VTEC Product Browser</a></li>
- <li><a href="/data/summary/max_n0r_0z0z_usrad.png">Max Reflectivity Composites</a></li>
- <li><a href="/GIS/rad-by-year-fe.phtml">NEXRAD Composites by Year</a></li>
+ <li><a href="/data/summary/max_n0r_0z0z_usrad.png">Max Reflectivity Mosaic</a></li>
+ <li><a href="/GIS/rad-by-year-fe.phtml">NEXRAD Mosiacs by Year</a></li>
 </ul>
 
-<p>Since 2003, the IEM has been generating and archiving nationwide composites 
-of NEXRAD base reflectivity every 5 minutes.  These composites are generated 
+<p>Since 2003, the IEM has been generating and archiving nationwide mosaics 
+of NEXRAD base reflectivity every 5 minutes.  These mosaics are generated 
 by combining the 130+ individual RADARs that comprise the NEXRAD network. This
 page provides background information on this dataset and highlights various
 ways this dataset can be and is used.  <b>Please note:</b>  Errors can and do
@@ -180,7 +180,7 @@ care.
 surface temperature analysis for near freezing areas to stop the clutter
 suppression algorithm from removing areas of winter precipitation.</li>
  <li><b>14 May 2009:</b> Completed a 7 month process of backfilling the
-composites back to 1 Jan 1995. Also regenerated composites prior to 2006 to
+mosaics back to 1 Jan 1995. Also regenerated mosaics prior to 2006 to
 produce them on a ~1 km grid as well.  Big thanks to Steve Ansari at NCDC 
 for providing the level3 archive.</li>
  <li><b>25 Aug 2010:</b> Reprocessed 2005 + 2006 data to improve product
@@ -193,8 +193,8 @@ the summer months (Apr-Sep).</li>
 	was expanded 1 degree east and south.  The reason is that the clipping was
 	occurring on the eastern and southern borders of the domain.</li>
 <li><strong>7 Sep 2016 1940 UTC</strong>: The original intent of the N0Q
-composites was to provide imagery at a resolution of 0.5 dBZ.  After some
-investigation, it was discovered that the N0Q composites only contained data
+mosaics was to provide imagery at a resolution of 0.5 dBZ.  After some
+investigation, it was discovered that the N0Q mosaics only contained data
 at values of whole integer values of dBZ. After some debugging of GEMPAK, the
 issue was <a href="https://github.com/Unidata/gempak/pull/11">hopefully fixed within GEMPAK</a>.  The good news is that this bug did
 not impact any processing of the file.  The conversion of color index and
@@ -209,14 +209,14 @@ composite.  You should consider using the n0q product as its replacement.</li>
 <h3>Product Generation:</h3>
 <div style="float: right; padding: 5px; border: 2px solid #000; margin: 5px;">
 <a href="https://mesonet.agron.iastate.edu/archive/data/2007/10/19/usrad/max_n0r_0z0z_20071019.png"><img src="https://mesonet.agron.iastate.edu/archive/data/2007/10/19/usrad/max_n0r_0z0z_20071019.png" width="480"></a>
-<br />Composite of composites for 18 Oct 2007. Click image for regular size.
+<br />Composite of mosaics for 18 Oct 2007. Click image for regular size.
 </div>
 <p>The IEM receives a feed of NEXRAD Level III products from the <a href="http://www.unidata.ucar.edu/software/idd/">Unidata Internet Data Distribution</a>. 
 This feed includes the Base Reflectivity (N0R) and Net Echo Top (NET) products
 which are saved to disk for later processing.  Every 5 minutes, a script runs
 a <a href="http://www.unidata.ucar.edu/software/gempak/">GEMPAK</a> program 
 called <a href="http://www.unidata.ucar.edu/cgi-bin/gempak/manual/programs_index?nex2img">nex2img</a>.  nex2img searches the on-disk data for current (within
-15 minutes of runtime) products and then composites them into a large image.</p>
+15 minutes of runtime) products and then mosaics them into a large image.</p>
 
 
 <p>The result of the nex2img process is a simple raster image with size of 6000

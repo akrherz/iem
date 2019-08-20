@@ -1,12 +1,12 @@
 <?php
- include("../../config/settings.inc.php");
+ require_once "../../config/settings.inc.php";
  $JQUERYUI = "1.12.1";
 
- include("../../include/myview.php");
+ require_once "../../include/myview.php";
  $t = new MyView();
  $uri = 'mcview.phtml';
  require_once "../../include/forms.php";
- include("../../include/database.inc.php");
+ require_once "../../include/database.inc.php";
  $postgis = iemdb("postgis");
 
  $rs = pg_prepare($postgis, "SELECT", "select * from watches 
@@ -315,13 +315,13 @@ EOF;
   if ($mode == "realtime") {
 	$t->refresh = 300;
   }
-  $t->title = "Current & Historical IEM NEXRAD Composite Loop";
+  $t->title = "Current & Historical IEM NEXRAD Mosaic Loop";
   $t->thispage = "current-radar";
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
  <li><a href="/current/">Current Data</a></li>
- <li class="active"><b>IEM NEXRAD Composite</b> <a href="{$uri}">Reset Application for a Current Loop</a></li>
+ <li class="active"><b>IEM NEXRAD Mosaic</b> <a href="{$uri}">Reset Application for a Current Loop</a></li>
  </ol>
 
 
@@ -384,8 +384,8 @@ rto correctly georeference them.  The projection of
 these images is geographic NAD83 (<i>unprojected</i>).  You will need to 
 rename the world file to match the filename of the RADAR layer before loading
 into your GIS.  You may also be interested in the <a href="/GIS/rasters.php?rid={$gissourcenum}">conversion</a> of
-color index values to dBZ and <a href="/docs/nexrad_composites/">more details</a>
-on these composites.</p>
+color index values to dBZ and <a href="/docs/nexrad_mosaic/">more details</a>
+on these mosaics.</p>
 <br>
 <ul>
 {$radlinks}
