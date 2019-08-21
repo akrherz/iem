@@ -54,7 +54,7 @@ def get_description():
              label='Plot Precipitation As:', options=PDICT3),
         dict(type='select', name='usdm', default='no',
              label='Overlay Drought Monitor', options=PDICT4),
-        dict(type='select', name='ptype', default='c',
+        dict(type='select', name='ptype', default='g',
              label='Select Plot Type:', options=PDICT2),
         dict(type='date', name='sdate',
              default=today.strftime("%Y/%m/%d"),
@@ -136,7 +136,11 @@ def plotter(fdict):
                 [bnds[0], bnds[2], bnds[1], bnds[3]])
         lats = nc.variables['lat'][y0:y1]
         lons = nc.variables['lon'][x0:x1]
-        if (idx1 - idx0) < 32:
+        if sdate == edate:
+            p01d = distance(
+                nc.variables[ncvar][idx0, y0:y1, x0:x1],
+                'MM').value('IN')
+        elif (idx1 - idx0) < 32:
             p01d = distance(
                 np.sum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1], 0),
                 'MM').value('IN')
