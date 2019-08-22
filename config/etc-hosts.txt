@@ -72,7 +72,7 @@
 192.168.0.254    iem-gateway   iem-gateway.local
 
 #   VI_1(51) metvm5
-192.168.1.251    iemdb-hads iemdb-hads.local iemdb-mos iemdb-mos.local
+192.168.1.251    iemdb-mos iemdb-mos.local
 #   VI_2(52) metvm5 <-> metvm9
 192.168.1.249    iem-memcached
 #   VI_3(53) metvm4 <-> metvm11
@@ -98,7 +98,7 @@
 # VI_14(64) metvm5
 192.168.1.237    iemdb-talltowers.local
 # VI_15(65) metvm4
-192.168.1.236    iemdb-iemre.local
+192.168.1.236    iemdb-iemre.local iemdb-hads iemdb-hads.local
 # VI_1_235(66) iem12
 192.168.1.235    iem-ldm.local
 # VI_0_235(67) iem12
