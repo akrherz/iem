@@ -98,10 +98,12 @@
 # VI_14(64) metvm5
 192.168.1.237    iemdb-talltowers.local
 # VI_15(65) metvm4
-192.168.1.236    iemdb-iemre.local iemdb-hads iemdb-hads.local
+192.168.1.236    iemdb-iemre.local
 # VI_1_235(66) iem12
 192.168.1.235    iem-ldm.local
 # VI_0_235(67) iem12
 192.168.0.235    iem-ldm-0.local
 # VI_0_234(68) iem15
 192.168.0.234    iem-loggernet.local
+# VI_1_233(69) metvm4
+192.168.1.233    iemdb-hads iemdb-hads.local
