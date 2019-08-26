@@ -61,7 +61,8 @@ def safe(row, varname):
         if val == 0:
             return '0'
         return "%.2f" % (val,)
-    return '%.0f' % (val,)
+    # prevent -0 values
+    return '%i' % (val,)
 
 
 def plotter(fdict):
@@ -106,7 +107,9 @@ def plotter(fdict):
                          avg_departure=ad,
                          min_tmpf=row['min_tmpf'], pday=row['pday']))
         data[row[0]] = {'val': safe(rows[-1], varname)}
-        if varname == 'high_departure':
+        if data[row[0]]['val'] == '0':
+            data[row[0]]['color'] = 'k'
+        elif varname == 'high_departure':
             data[row[0]]['color'] = 'b' if hd < 0 else 'r'
         elif varname == 'low_departure':
             data[row[0]]['color'] = 'b' if ld < 0 else 'r'
