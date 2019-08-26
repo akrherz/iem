@@ -7,7 +7,7 @@ now = datetime.datetime.utcnow()
 years = now.year - 2000 + 1
 counts = np.zeros((years,12))
 
-pgconn = get_dbconn('postgis', user='nobody')
+pgconn = get_dbconn('radar', user='nobody')
 acursor = pgconn.cursor()
 
 import sys

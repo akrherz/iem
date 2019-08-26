@@ -19,7 +19,7 @@ cmap.set_over('black')
 today = datetime.datetime.now()
 today = today.replace(tzinfo=pytz.utc)
 
-POSTGIS = get_dbconn('postgis', user='nobody')
+POSTGIS = get_dbconn('radar', user='nobody')
 
 
 def run(nexrad):

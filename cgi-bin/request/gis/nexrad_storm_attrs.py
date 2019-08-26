@@ -35,9 +35,7 @@ def get_context():
     ets = utc(int(year2), int(month2), int(day2),
               int(hour2), int(minute2))
     if ets < sts:
-        s = ets
-        ets = sts
-        sts = s
+        sts, ets = ets, sts
     radar = form.getlist('radar')
 
     fmt = form.getfirst('fmt', 'shp')
@@ -47,14 +45,12 @@ def get_context():
 
 def run(ctx):
     """Do something!"""
-    pgconn = get_dbconn('postgis', user='nobody')
+    pgconn = get_dbconn('radar')
     cursor = pgconn.cursor()
 
-    """
-    Need to limit what we are allowing them to request as the file would get
-    massive.  So lets set arbitrary values of
-    1) If 2 or more RADARs, less than 7 days
-    """
+    # Need to limit what we are allowing them to request as the file would get
+    # massive.  So lets set arbitrary values of
+    # 1) If 2 or more RADARs, less than 7 days
     if len(ctx['radar']) == 1:
         ctx['radar'].append('XXX')
     radarlimit = ''
@@ -102,17 +98,16 @@ def run(ctx):
     dbfio = BytesIO()
 
     with shapefile.Writer(shp=shpio, shx=shxio, dbf=dbfio) as shp:
-        """
-C is ASCII characters
-N is a double precision integer limited to around 18 characters in length
-D is for dates in the YYYYMMDD format,
-     with no spaces or hyphens between the sections
-F is for floating point numbers with the same length limits as N
-L is for logical data which is stored in the shapefile's attribute table as a
-    short integer as a 1 (true) or a 0 (false).
-    The values it can receive are 1, 0, y, n, Y, N, T, F
-    or the python builtins True and False
-        """
+        # C is ASCII characters
+        # N is a double precision integer limited to around 18 characters in
+        #   length
+        # D is for dates in the YYYYMMDD format,
+        #   with no spaces or hyphens between the sections
+        # F is for floating point numbers with the same length limits as N
+        # L is for logical data which is stored in the shapefile's attribute
+        #   table as a short integer as a 1 (true) or a 0 (false).
+        # The values it can receive are 1, 0, y, n, Y, N, T, F
+        # or the python builtins True and False
         shp.field('VALID', 'C', 12)
         shp.field('STORM_ID', 'C', 2)
         shp.field('NEXRAD', 'C', 3)
@@ -136,15 +131,13 @@ L is for logical data which is stored in the shapefile's attribute table as a
             shp.record(*row)
 
     zio = BytesIO()
-    zf = zipfile.ZipFile(zio, mode='w',
-                         compression=zipfile.ZIP_DEFLATED)
-    zf.writestr(fn+'.prj',
-                open(('/opt/iem/data/gis/meta/4326.prj'
-                      )).read())
-    zf.writestr(fn+".shp", shpio.getvalue())
-    zf.writestr(fn+'.shx', shxio.getvalue())
-    zf.writestr(fn+'.dbf', dbfio.getvalue())
-    zf.close()
+    with zipfile.ZipFile(
+            zio, mode='w', compression=zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr(
+            fn+'.prj', open(('/opt/iem/data/gis/meta/4326.prj')).read())
+        zf.writestr(fn+".shp", shpio.getvalue())
+        zf.writestr(fn+'.shx', shxio.getvalue())
+        zf.writestr(fn+'.dbf', dbfio.getvalue())
     ssw(("Content-Disposition: attachment; filename=%s.zip\n\n") % (fn,))
     ssw(zio.getvalue())
 

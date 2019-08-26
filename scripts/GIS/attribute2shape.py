@@ -9,10 +9,9 @@ import shutil
 import subprocess
 import datetime
 
-import pytz
 import shapefile
 import psycopg2.extras
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc
 
 INFORMATION = """
    Iowa Environmental Mesonet
@@ -96,14 +95,13 @@ def shpschema():
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconn('postgis')
+    pgconn = get_dbconn('radar')
     pcursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     os.chdir("/tmp")
 
     # Delete anything older than 20 minutes
-    now = datetime.datetime.utcnow()
-    now = now.replace(tzinfo=pytz.utc)
+    now = utc()
     ets = now - datetime.timedelta(minutes=20)
 
     shp = shpschema()

@@ -2,7 +2,7 @@
 /* Generate JSON of l3 nexrad attributes! */
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
-$postgis = iemdb("postgis");
+$postgis = iemdb("radar");
 
 
 /* Figure out what was requested */

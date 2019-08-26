@@ -281,7 +281,7 @@ def rabbit_tracks(row):
 
 def produce_content(nexrad):
     """Do Stuff"""
-    pgconn = get_dbconn('postgis')
+    pgconn = get_dbconn('radar')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     limiter = ''
     threshold = 999

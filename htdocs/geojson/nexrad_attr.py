@@ -12,7 +12,7 @@ from pyiem.util import get_dbconn, ssw
 
 def run(ts):
     """ Actually do the hard work of getting the geojson """
-    pgconn = get_dbconn('postgis')
+    pgconn = get_dbconn('radar')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     utcnow = datetime.datetime.utcnow()

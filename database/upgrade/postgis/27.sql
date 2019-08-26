@@ -125,16 +125,6 @@ CREATE INDEX lsrs_2018_valid_idx on lsrs_2018(valid);
 CREATE INDEX lsrs_2018_wfo_idx on lsrs_2018(wfo);
 GRANT SELECT on lsrs_2018 to nobody,apache;
 
-CREATE TABLE nexrad_attributes_2018() inherits (nexrad_attributes_log);
-GRANT SELECT on nexrad_attributes_2018 to nobody,apache;
-CREATE INDEX nexrad_attributes_2018_nexrad_idx 
-    on nexrad_attributes_2018(nexrad);
-CREATE INDEX nexrad_attributes_2018_valid_idx 
-    on nexrad_attributes_2018(valid);
-alter table nexrad_attributes_2018 add constraint 
-    __nexrad_attributes_2018__constraint CHECK 
-    (valid >= '2018-01-01 00:00+00' and valid < '2019-01-01 00:00+00');
-
 CREATE TABLE raob_profile_2018() inherits (raob_profile);
 GRANT SELECT on raob_profile_2018 to nobody,apache;
 CREATE INDEX raob_profile_2018_fid_idx 
