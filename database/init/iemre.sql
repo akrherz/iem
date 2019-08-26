@@ -7,7 +7,7 @@ CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz
 );
-INSERT into iem_schema_manager_version values (0, now());
+INSERT into iem_schema_manager_version values (1, now());
 
 -- Our baseline grid
 CREATE TABLE iemre_grid(
@@ -81,6 +81,7 @@ GRANT SELECT on iemre_daily to nobody,apache;
 
 CREATE INDEX on iemre_daily(valid);
 CREATE UNIQUE INDEX on iemre_daily(gid, valid);
+CREATE INDEX on iemre_daily(gid);
 
 
 do
@@ -118,6 +119,7 @@ GRANT SELECT on iemre_dailyc to nobody,apache;
 
 CREATE INDEX on iemre_dailyc(valid);
 CREATE UNIQUE INDEX on iemre_dailyc(gid, valid);
+CREATE INDEX on iemre_dailyc(gid);
 
 -- _______________________________________________________________________
 -- Storage of hourly analysis
@@ -137,6 +139,7 @@ GRANT SELECT on iemre_hourly to nobody,apache;
 
 CREATE INDEX on iemre_hourly(valid);
 CREATE UNIQUE INDEX on iemre_hourly(gid, valid);
+CREATE INDEX on iemre_hourly(gid);
 
 
 do
