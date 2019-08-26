@@ -1,3 +1,15 @@
+Soil Moisture Network Meeting Notes
+===================================
+
+15 Aug 2019 :: Vineyard Station Meeting
+----
+
+- Jim Schraeder uses my stuff a bunch already
+- [ ] Send some example ISU Farm cooperator agreements for their review
+- Kenny McCabe installed the stations and still is on campus somewhere
+- [ ] product they use is hours of wetness per week
+- [ ] add comments to excel headers for easier usage
+
   7 Feb 2018
   Hornbuckle, Flory, Ethan, Vanloocke
   - Add vineyard station modems to the quote
