@@ -82,7 +82,7 @@
 # VI_1(51)
 192.168.1.251 metvm5-iemdb.local
 192.168.1.251 iemdb-mos iemdb-mos.local iemdb-talltowers.local
-192.168.1.251 iemdb-radar.local
+192.168.1.251 iemdb-radar.local iemdb-nldn.local iemdb-smos.local
 # VI_01(151)
 192.168.0.251 metvm5-iemdb-0.local
 

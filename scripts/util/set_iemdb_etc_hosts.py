@@ -18,6 +18,7 @@ LOOKUP = {
     "-mos": IPS[METVM5],
     "-nldn": IPS[METVM5],
     "-radar": IPS[METVM5],
+    "-smos": IPS[METVM5],
     "-talltowers": IPS[METVM5],
 }
 

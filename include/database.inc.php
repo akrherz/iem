@@ -41,9 +41,11 @@ function iemdb($dbname, $force_new=0, $rw=FALSE)
 	$dbhost = "iemdb.local"; // read-only host
 	if ($rw) $dbhost = "iemdb.local"; // rw master
 	if ($dbname == "access"){ $dbname = "iem"; }
-	if ($dbname == "hads") $dbhost = "iemdb-hads.local";
-	if ($dbname == "mos") $dbhost = "iemdb-mos.local";
-	if ($dbname == "radar") $dbhost = "iemdb-radar.local";
+	elseif ($dbname == "hads") $dbhost = "iemdb-hads.local";
+	elseif ($dbname == "mos") $dbhost = "iemdb-mos.local";
+	elseif ($dbname == "radar") $dbhost = "iemdb-radar.local";
+	elseif ($dbname == "nldn") $dbhost = "iemdb-nldn.local";
+	elseif ($dbname == "smos") $dbhost = "iemdb-smos.local";
 	
 	$connstr = sprintf("dbname=%s host=%s user=%s connect_timeout=5",
 			$dbname, $dbhost, $dbuser);
