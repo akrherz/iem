@@ -1,19 +1,22 @@
 <?php 
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
+require_once "../../include/database.inc.php";
+
 $t = new MyView();
-include("../../include/database.inc.php");
 $coopdb = iemdb("coop");
 
 $t->thispage = "current-gs";
 $t->title = "Current Growing Season Data";
 
 $table = "";
-$lkp = Array("IA0200" => "Ames", "IA2203" => "Des Moines",
-		"IA8706" => "Waterloo", "IA1319" => "Cedar Rapids",
-		"IA2364" => "Dubuque", "IA2110" => "Decorah",
-		"IA5230" => "Mason City", "IA7708" => "Sioux City",
-		"IA7613" => "Shenandoah", "IA4585" => "Lamoni", "IA4705" => "Davenport");
+$lkp = Array(
+    "IA0200" => "Ames", "IA2203" => "Des Moines",
+	"IA8706" => "Waterloo", "IA1319" => "Cedar Rapids",
+	"IA2364" => "Dubuque", "IA2110" => "Decorah",
+	"IA5230" => "Mason City", "IA7708" => "Sioux City",
+    "IA7613" => "Shenandoah", "IA4585" => "Lamoni",
+    "IA4705" => "Davenport");
 $rs = pg_query($coopdb, "select o.station,
    sum(gdd50(o.high, o.low)) as ogdd50, sum(o.precip) as oprecip,
    sum(gdd50) as cgdd50, sum(c.precip) as cprecip,
@@ -33,11 +36,20 @@ for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 }
 
 $d = date("d M Y", time() - 86400);
+$y = date("Y");
+$murl = "/climodat/monitor.php?sdate=05/01/${y}&amp;".
+    "edate=12/31/${y}&amp;s[]=IA0200&amp;s[]=IA1319&amp;s[]=IA2203&amp;".
+    "s[]=IA8706&amp;s[]=IA2364&amp;s[]=IA2110&amp;s[]=IA5230&amp;".
+    "s[]=IA7708&amp;s[]=IA7613&amp;s[]=IA4585&amp;s[]=IA4705";
 $t->content = <<<EOF
+
 <h3>Selected Location Summary: 01 May thru {$d}</h3>
 
 <p>These values are estimates based on the IEM's collection of various datasets.
-Climatology is based on observations back to 1951.
+Climatology is based on observations back to 1951.</p>
+
+<p>There is an <a href="{$murl}"><span class="fa fa-refresh"></span> interactive version</a>
+of this table available as well.</p>
 
 <table cellpadding="2" cellspacing="0" border="1">
  <tr><th rowspan="2">Location</th><th colspan="2">Growing Degree Days</th>
@@ -68,5 +80,5 @@ Climatology is based on observations back to 1951.
  <li>May 1 - Today Climatology: <a href="/data/summary/gdd_norm_may1.png">contour plot</a> or <a href="/data/summary/gdd_norm_may1_pt.png">value plot</a></li>
 </ul>
 EOF;
-$t->render('single.phtml');
+$t->render('full.phtml');
 ?>

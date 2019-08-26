@@ -14,9 +14,10 @@ function ss($v){
 	return intval($v);
 }
 
-$sdate = isset($_GET["sdate"]) ? xssafe($_GET["sdate"]): "04/01/2015";
+$year = date("Y");
+$sdate = isset($_GET["sdate"]) ? xssafe($_GET["sdate"]): "05/01/${y}";
 $network = isset($_GET["network"]) ? xssafe($_GET["network"]): "IACLIMATE";
-$edate = isset($_GET["edate"]) ? xssafe($_GET["edate"]): "12/31/2015";
+$edate = isset($_GET["edate"]) ? xssafe($_GET["edate"]): "12/31/${y}";
 $gddbase = isset($_GET["gddbase"]) ? intval($_GET["gddbase"]) : 50;
 $gddfloor = isset($_GET["gddfloor"]) ? ss($_GET["gddfloor"]) : 50;
 $gddceil = isset($_GET["gddceil"]) ? ss($_GET["gddceil"]) : 86;
@@ -136,6 +137,7 @@ if (isset($_GET['map'])){
 	$showmap = "";
 }
 $t->title = "Climodat Station Monitor";
+$t->thispage = "climatology-climodatm";
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
 EOF;
