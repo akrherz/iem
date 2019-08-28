@@ -46,6 +46,7 @@ function iemdb($dbname, $force_new=0, $rw=FALSE)
 	elseif ($dbname == "radar") $dbhost = "iemdb-radar.local";
 	elseif ($dbname == "nldn") $dbhost = "iemdb-nldn.local";
 	elseif ($dbname == "smos") $dbhost = "iemdb-smos.local";
+	elseif ($dbname == "snet") $dbhost = "iemdb-snet.local";
 	
 	$connstr = sprintf("dbname=%s host=%s user=%s connect_timeout=5",
 			$dbname, $dbhost, $dbuser);

@@ -14,11 +14,12 @@ IPS = ['172.16.170.1', '172.16.171.1', '172.16.172.1']
 LOOKUP = {
     "": IPS[METVM6],
     "-hads": IPS[METVM4],
-    "-iemre": IPS[METVM4],
+    "-iemre": IPS[METVM6],
     "-mos": IPS[METVM5],
     "-nldn": IPS[METVM5],
     "-radar": IPS[METVM5],
     "-smos": IPS[METVM5],
+    "-snet": IPS[METVM5],
     "-talltowers": IPS[METVM5],
 }
 
