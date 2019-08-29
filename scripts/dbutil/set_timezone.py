@@ -3,9 +3,8 @@ Set time zones of stations using the shapefile found here:
 
 http://efele.net/maps/tz/world/
 """
-from __future__ import print_function
-
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+LOG = logger()
 
 
 def main():
@@ -31,8 +30,10 @@ def main():
           """ % (lon, lat))
         row2 = mcursor2.fetchone()
         if row2 is None or row2[0] == 'uninhabited':
-            print(('MISSING TZ ID: %s NETWORK: %s LAT: %.2f LON: %.2f'
-                   ) % (sid, network, lat, lon))
+            LOG.info(
+                'MISSING TZ ID: %s NETWORK: %s LAT: %.2f LON: %.2f',
+                sid, network, lat, lon
+            )
             mcursor2.execute("""
                 SELECT ST_Distance(geom, 'SRID=4326;POINT(%s %s)') as d,
                 id, tzname from stations WHERE network = %s
@@ -40,16 +41,30 @@ def main():
             """, (lon, lat, network))
             row3 = mcursor2.fetchone()
             if row3 is not None:
-                print(('FORCING tz to its neighbor: %s Tzname: %s Dist: %.5f'
-                       ) % (row3[1], row3[2], row3[0]))
+                LOG.info(
+                    'FORCING tz to its neighbor: %s Tzname: %s Dist: %.5f',
+                    row3[1], row3[2], row3[0]
+                )
                 mcursor2.execute("""
                     UPDATE stations SET tzname = %s
                     WHERE id = %s and network = %s
                 """, (row3[2], sid, network))
             else:
-                print('BAD, CAN NOT FORCE EVEN!')
+                mcursor2.execute("""
+                    SELECT tzname from networks where id = %s
+                """, (network, ))
+                if mcursor2.rowcount == 1:
+                    tzname = mcursor2.fetchone()[0]
+                    LOG.info(
+                        "%s using network default of %s", sid, tzname)
+                    mcursor2.execute("""
+                        UPDATE stations SET tzname = %s
+                        WHERE id = %s and network = %s
+                    """, (tzname, sid, network))
         else:
-            print('ID: %s NETWORK: %s TIMEZONE: %s' % (sid, network, row2[0]))
+            LOG.info(
+                'ID: %s NETWORK: %s TIMEZONE: %s', sid, network, row2[0]
+            )
             mcursor2.execute("""
                 UPDATE stations SET tzname = %s
                 WHERE id = %s and network = %s
