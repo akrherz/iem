@@ -52,6 +52,8 @@ data = {'plots': [
          'label': "Frequency of One Station Warmer/Wetter than Another"},
         {'id': "7",
          'label': "Growing Degree Day Periods for One Year by Planting Date"},
+        {'id': "204",
+         'label': ("Heatmap of Daily / Trailing Daily Temperature / Precip")},
         {'id': "61",
          'label': ("High/Low Temp above/below avg OR dry streaks "
                    "by NWS CLI Sites")},
