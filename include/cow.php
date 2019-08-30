@@ -304,7 +304,7 @@ EOF;
 
 function sqlTagLimiter(){
 	if ($this->limitwarns){
-		return sprintf(" and ((s.windtag >= %s or s.hailtag >= %s) or (s.windtag is null and s.hailtag is null))", $this->wind, $this->hailsize);
+		return sprintf(" and ((w.windtag >= %s or w.hailtag >= %s) or (w.windtag is null and w.hailtag is null))", $this->wind, $this->hailsize);
 	}
 	return "";
 }
@@ -339,7 +339,7 @@ function loadWarnings(){
 		from warnings w JOIN ugcs u on (u.gid = w.gid) WHERE           
         w.gid is not null and %s and significance = 'W' and
 		issue >= '%s' and issue < '%s' and expire < '%s' 
-		and %s %s %s
+		and %s %s
 		GROUP by w.wfo, phenomena, eventid, significance, year, fcster
     )
 	SELECT  
@@ -356,8 +356,7 @@ function loadWarnings(){
 	$this->sqlTypeBuilder(), $this->sqlTagLimiter(),
 	$this->sqlWFOBuilder(), date("Y/m/d H:i", $this->sts), 
 	date("Y/m/d H:i", $this->ets),  date("Y/m/d H:i", $this->ets),
-    $this->sqlTypeBuilder(), $this->sqlTagLimiter(),
-			$this->sqlForecasterBuilder());
+    $this->sqlTypeBuilder(), $this->sqlForecasterBuilder());
 	
 	//die("<pre>$sql</pre>");
 	$rs = $this->callDB($sql);
