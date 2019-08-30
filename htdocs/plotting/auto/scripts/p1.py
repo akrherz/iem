@@ -15,6 +15,7 @@ PDICT = OrderedDict((
     ('total_precip', 'Total Precipitation'),
     ('avg_temp', 'Average Temperature'),
     ('max_high', 'Maximum High Temperature'),
+    ('min_low', 'Minimum Low Temperature'),
     ('days_high_aoa', 'Days with High At or Above'),
     ('cdd65', 'Cooling Degree Days (base 65)'),
     ('hdd65', 'Heating Degree Days (base 65)'),
@@ -30,6 +31,7 @@ PDICT = OrderedDict((
 UNITS = {'total_precip': 'inch',
          'avg_temp': 'F',
          'max_high': 'F',
+         'min_low': 'F',
          'days_high_aoa': 'days',
          'cdd65': 'F',
          'hdd65': 'F',
@@ -143,7 +145,7 @@ def plotter(fdict):
     # Compute the monthly totals
     df = read_sql("""
     SELECT year, month, avg((high+low)/2.) as avg_temp,
-    sum(precip) as total_precip, max(high) as max_high,
+    sum(precip) as total_precip, max(high) as max_high, min(low) as min_low,
     sum(case when high >= %s then 1 else 0 end) as days_high_aoa,
     sum(cdd(high, low, 65)) as cdd65,
     sum(hdd(high, low, 65)) as hdd65,
