@@ -59,7 +59,8 @@ def plotter(fdict):
     df = read_sql("""
     WITH ranks as (
         SELECT month, day, high, low, precip, snow,
-        rank() OVER (PARTITION by month ORDER by """ + orderer + """ NULLS LAST)
+        rank() OVER (
+            PARTITION by month ORDER by """ + orderer + """ NULLS LAST)
         from """ + table + """ WHERE station = %s)
 
     select month, to_char(day, 'Mon dd, YYYY') as dd, high, low, precip, snow,
@@ -94,9 +95,12 @@ def plotter(fdict):
     ax.set_ylim(0, 13)
     ax.set_xlabel(("Date most recently set/tied shown, "
                   "* indicates ties are present"))
-    fig.text(0.5, 0.99, "%s [%s]\n%s by Month" % (
-                  nt.sts[station]['name'], station, PDICT[varname]),
-             transform=ax.transAxes, ha='center', fontsize=14, va='top')
+    fig.text(
+        0.5, 0.99,
+        "%s [%s]\n%s by Month" % (
+            nt.sts[station]['name'], station, PDICT[varname]),
+        ha='center', fontsize=14, va='top'
+    )
 
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width * 0.7, box.height])
