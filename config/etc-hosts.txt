@@ -23,7 +23,6 @@
 192.168.0.14     iem14.local
 192.168.0.15     iem15         iem15.local
 192.168.0.22     iem22         iem22.local
-192.168.0.30     iem30         iem30.local
 192.168.0.40     nrel.local
 
 # VM servers for webfarm nodes

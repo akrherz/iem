@@ -68,7 +68,7 @@ def main():
     # Ensure some base folders exist
     for mysubdir in ['share', 'ARCHIVE', 'data']:
         path = "/mesonet/%s" % (mysubdir, )
-        if not os.path.isfile(path):
+        if not os.path.isdir(path):
             os.makedirs(path)
     for (link, target) in PAIRS:
         workflow(link, target)

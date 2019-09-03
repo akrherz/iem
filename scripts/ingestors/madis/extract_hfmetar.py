@@ -51,8 +51,10 @@ def process(ncfn):
     pgconn = get_dbconn('iem')
     icursor = pgconn.cursor()
     xref = {}
-    icursor.execute("""SELECT id, network from stations where
-    network ~* 'ASOS' or network = 'AWOS' and country = 'US'""")
+    icursor.execute("""
+        SELECT id, network from stations where
+        network ~* 'ASOS' or network = 'AWOS' and country = 'US'
+    """)
     for row in icursor:
         xref[row[0]] = row[1]
     icursor.close()

@@ -48,8 +48,8 @@ def workflow():
     valid = datetime.datetime.now()
     valid = valid.replace(tzinfo=pytz.timezone("America/Chicago"),
                           microsecond=0)
-    req = requests.get(URI, timeout=30)
-    if req.status_code != 200:
+    req = exponential_backoff(requests.get, URI, timeout=30)
+    if req is None or req.status_code != 200:
         return
     data = req.json()
     features = data.get('features', [])
@@ -89,13 +89,6 @@ def workflow():
                     get_archive_fn(label, valid), tmp.name)
         proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE)
         proc.stderr.read()
-        # if output != "":
-        #    print '-------------------------'
-        #    print '  dot_truckcams.py pqinsert stderr result:'
-        #    print output
-        #    print 'label: %s timestamp: %s' % (label, utc)
-        #    print 'URI: %s' % (feat['attributes']['PHOTO_URL'],)
-        #    print '-------------------------\n'
         os.unlink(tmp.name)
 
         pt = P3857(feat['geometry']['x'], feat['geometry']['y'], inverse=True)
