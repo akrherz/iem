@@ -10,10 +10,15 @@ from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict([('PCT PLANTED', 'Planting'),
-                     ('PCT EMERGED', 'Emerged'),
-                     ('PCT DENTED', 'Percent Dented'),
-                     ('PCT HARVESTED', 'Harvest (Grain)')])
+PDICT = OrderedDict([
+    ('PCT PLANTED', 'Planting'),
+    ('PCT EMERGED', 'Emerged'),
+    ('PCT DENTED', 'Percent Dented'),
+    ('PCT COLORING', 'Percent Coloring'),
+    ('PCT SETTING PODS', 'Percent Setting Pods'),
+    ('PCT DROPPING LEAVES', 'Percent Dropping Leaves'),
+    ('PCT HARVESTED', 'Harvest (Grain)')
+])
 PDICT2 = OrderedDict([('CORN', 'Corn'),
                       ('SOYBEANS', 'Soybean')])
 
