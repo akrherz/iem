@@ -1,7 +1,7 @@
 <?php
-include("../../config/settings.inc.php");
-include("../../include/forms.php");
-include("../../include/myview.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/forms.php";
+require_once "../../include/myview.php";
 $OL = "3.9.0";
 $t = new MyView();
 $t->title = "SMOS Data";
@@ -99,10 +99,10 @@ to request a point outside of the domain.  Data is available since
 
     		<div class="row">
     		<div class="col-md-6">
-    		<a href="/timemachine/#54.0"><img src="/data/smos_midwest_sm00.png" class="img img-responsive" /></a>
+    		<a href="/timemachine/#53.0"><img src="/data/smos_midwest_sm00.png" class="img img-responsive" /></a>
     		</div>
     		<div class="col-md-6">
-    		<a href="/timemachine/#53.0"><img src="/data/smos_midwest_od00.png" class="img img-responsive" /></a>
+    		<a href="/timemachine/#54.0"><img src="/data/smos_midwest_od00.png" class="img img-responsive" /></a>
     		</div>
     		</div>
 
@@ -119,10 +119,10 @@ to request a point outside of the domain.  Data is available since
 
     		<div class="row">
     		<div class="col-md-6">
-    		<a href="/timemachine/#54.0"><img src="/data/smos_midwest_sm12.png" class="img img-responsive" /></a>
+    		<a href="/timemachine/#53.0"><img src="/data/smos_midwest_sm12.png" class="img img-responsive" /></a>
     		</div>
     		<div class="col-md-6">
-    		<a href="/timemachine/#53.0"><img src="/data/smos_midwest_od12.png" class="img img-responsive" /></a>
+    		<a href="/timemachine/#54.0"><img src="/data/smos_midwest_od12.png" class="img img-responsive" /></a>
     		</div>
     		</div>
     		
