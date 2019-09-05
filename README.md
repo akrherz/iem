@@ -19,7 +19,7 @@ Process | Primary | Backup | Monitor
 ------- | ------- | ------ | -------
 Apache ErrorLog | iem12 | None | None
 hads-database | metvm4 | None | [check_hads_ingest.py](nagios/check_hads_ingest.py)
-iembot  | iem6    | iem12  | nagios checks for twistd processes running
+iembot  | iem13    | iem12  | nagios checks for twistd processes running
 LDM | iem12 | None | None
 LoggerNet | iem12 | None | None
 mailman | iem12 | None | None
@@ -28,7 +28,7 @@ openfire | iem12 | None     | None
 postgres | metvm6 | metvm9  | None
 samba | iem12 | None | cron scripts check data availability
 SSH | iem12 | None | None
-RIDGE   | iem6    | None    | inbound file queue, check latency 7 radars
+RIDGE   | iem13    | None    | inbound file queue, check latency 7 radars
 webalizer | iem13 | None | None
-Webcam Current | iem6 | None | cron script monitors for offline webcams
-Webcam Lapses | iem6 | None | None
+Webcam Current | iem13 | None | cron script monitors for offline webcams
+Webcam Lapses | iem13 | None | None

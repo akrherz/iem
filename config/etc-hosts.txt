@@ -14,7 +14,6 @@
 192.168.0.3      nagios.local
 192.168.0.4      thumper-ah.local
 192.168.0.5      updraft.local
-192.168.0.6      iem6   iem6.local ridge.local
 192.168.0.9      metfs2.local  
 192.168.0.10      metfs1.local       iem-idd0      iem-idd0.local  
 192.168.0.11     iem-syslog
@@ -108,7 +107,7 @@
 # VI12(62) metvm7 <-> metvm0
 192.168.1.239    iem-memcached3
 
-#   VI_5(55) iem6
+#   VI_5(55) iem13
 192.168.1.246    iembot
 #   VI_9(59) iem12
 192.168.0.242    iem-nwnserver
