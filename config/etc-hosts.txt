@@ -87,7 +87,7 @@
 #### metvm4 PostgreSQL
 # VI_1_233(69)
 192.168.1.233 metvm4-iemdb.local
-192.168.1.233 iemdb-hads iemdb-hads.local
+192.168.1.233 iemdb-hads iemdb-hads.local iemdb-awos.local
 
 #### metvm9 PostgreSQL
 # VI_7(57) metvm9 <-> metvm6

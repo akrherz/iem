@@ -41,6 +41,7 @@ function iemdb($dbname, $force_new=0, $rw=FALSE)
 	$dbhost = "iemdb.local"; // read-only host
 	if ($rw) $dbhost = "iemdb.local"; // rw master
 	if ($dbname == "access"){ $dbname = "iem"; }
+	elseif ($dbname == "awos") $dbhost = "iemdb-awos.local";
 	elseif ($dbname == "hads") $dbhost = "iemdb-hads.local";
 	elseif ($dbname == "mos") $dbhost = "iemdb-mos.local";
 	elseif ($dbname == "radar") $dbhost = "iemdb-radar.local";

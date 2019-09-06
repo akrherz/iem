@@ -13,6 +13,7 @@ METVM4, METVM5, METVM6 = range(3)
 IPS = ['172.16.170.1', '172.16.171.1', '172.16.172.1']
 LOOKUP = {
     "": IPS[METVM6],
+    "-awos": IPS[METVM4],
     "-hads": IPS[METVM4],
     "-iemre": IPS[METVM6],
     "-mos": IPS[METVM5],
