@@ -1,8 +1,9 @@
-"""Fall Minimum by Date"""
+"""First Fall Threshold Dates."""
 import datetime
 
 from pandas.io.sql import read_sql
 import numpy as np
+from scipy.stats import linregress
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -71,6 +72,16 @@ def plotter(fdict):
 
     for x in xticks:
         ax.plot((x-100, x), (100, 0), ':', c=('#000000'))
+
+    h_slope, intercept, r_value, _, _ = linregress(
+        df['t1_doy'].values, df['t2_doy'].values - df['t1_doy'].values)
+    x = np.array(ax.get_xlim())
+    ax.plot(x, h_slope * x + intercept, lw=2, color='r')
+    ax.text(
+        0.95, 0.91, "slope: %.2f days/day, R$^2$=%.2f" % (
+            h_slope, r_value ** 2),
+        bbox=dict(color='white'),
+        transform=ax.transAxes, va='bottom', ha='right', color='r')
 
     ax.set_ylim(-1, max(doy2-doy)+4)
     ax.set_xlim(min(doy)-4, max(doy)+4)
