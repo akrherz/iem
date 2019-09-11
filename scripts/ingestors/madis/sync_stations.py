@@ -47,7 +47,8 @@ def main(argv):
                 provider not in MY_PROVIDERS):
             continue
         stid = stations[recnum]
-        name = names[recnum]
+        # can't have commas in the name, sigh
+        name = names[recnum].replace(",", " ")
         if provider == 'MesoWest':
             # get the network from the last portion of the name
             network = name.split()[-1]
