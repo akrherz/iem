@@ -17,7 +17,27 @@ $t->headextra = <<<EOF
   title="IEM News + Notes Feed" 
   href="/rss.php" />
 EOF;
-$feature = gen_feature($t);
+if (date("md") == "0911" || isset($_GET["911"])){
+    $feature = <<<EOM
+<h1 class="text-center">Remembering 9/11</h1>
+
+<div class="row">
+<div class="col-md-6">
+<p class="lead">The fateful day of September 11th, 2001 is a distant memory for some, a
+constant nightmare for others and an unexperienced event for most college age
+students and younger.  May we all not forget the ultimate sacrifice many made
+that day and the years that followed.</p> 
+</div>
+<div class="col-md-6">
+<img src="/images/911.jpg" class="img img-responsive">
+<br />&copy; Gordon Donovan/Yahoo News
+</div>
+</div>
+
+EOM;
+} else {
+    $feature = gen_feature($t);
+}
 $iemperf = get_website_stats();
 $lsr_snow = get_iemprop("homepage.lsrmap.on");
 
