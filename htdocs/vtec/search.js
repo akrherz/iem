@@ -34,6 +34,7 @@ var vtec_phenomena_dict = [
 ['AS','Air Stagnation'],
 ['AV','Avalanche'],
 ['BS','Blowing Snow'],
+['BW', 'Brisk Wind'],
 ['BZ','Blizzard'],
 ['CF','Coastal Flood'],
 ['DU','Blowing Dust'],
@@ -86,7 +87,8 @@ var vtec_phenomena_dict = [
 ['WS','Winter Storm'],
 ['WW','Winter Weather'],
 ['ZF','Freezing Fog'],
-['ZR','Freezing Rain']
+['ZR','Freezing Rain'],
+['ZY', 'Freezing Spray']
 ];
 
 Ext.override(Date, {

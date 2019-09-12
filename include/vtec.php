@@ -69,6 +69,7 @@ $vtec_phenomena = Array(
   'WW' => 'Winter Weather',
   'ZF' => 'Freezing Fog',
   'ZR' => 'Freezing Rain',
+  'ZY' => "Freezing Spray",
 );
 
 $vtec_significance = Array(
