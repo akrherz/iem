@@ -1,21 +1,48 @@
 """Map of dates"""
 import datetime
+from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.plot.geoplot import MapPlot
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT3 = {'contour': 'Contour + Plot Values',
-          'values': 'Plot Values Only'}
-PDICT2 = {'spring_below': 'Last Spring Date Below',
-          'fall_below': 'First Fall Date Below'}
+PDICT3 = {
+    'contour': 'Contour + Plot Values',
+    'values': 'Plot Values Only'}
+PDICT2 = OrderedDict((
+    ('spring_below', 'Last Spring Date Below'),
+    ('high_above', 'First Date of Year At or Above'),
+    ('fall_below', 'First Fall Date Below'),
+))
+
+MONTH_DOMAIN = {
+    'spring_below': range(1, 7),
+    'fall_below': range(1, 12),
+    'high_above': range(1, 12),
+}
 SQLOPT = {
-    'spring_below': (" max(case when low < %s and month < 7 then "
-                     " extract(doy from day) else -1 end) "),
-    'fall_below': (" min(case when low < %s and month >= 7 then "
-                   " extract(doy from day) else 400 end) ")}
+    'spring_below': " low < %s ",
+    'high_above': " high >= %s ",
+    'fall_below': " low < %s ",
+}
+YRGP = {
+    'spring_below': "year",
+    'high_above': "year",
+    'fall_below': "winter_year",
+}
+ORDER = {
+    'spring_below': "DESC",
+    'fall_below': "ASC",
+    "high_above": "ASC",
+}
+USEDOY = {
+    'spring_below': "doy",
+    "high_above": "doy",
+    'fall_below': "winter_doy",
+}
 
 
 def get_description():
@@ -23,25 +50,30 @@ def get_description():
     desc = dict()
     desc['data'] = True
     desc['description'] = """
-    This map presents the first fall date or last spring
-    date with a temperature at/above or below some threshold.  The year is
-    split on 1 July for the purposes of this plotting app.  Sorry, this app
-    does not support multi-state plots at this time.
+    This app generates a map showing either an explicit year's first or last
+    date or the given percentile (observed
+    frequency) date over all available years of a given temperature threshold.
+    Sadly, this app can only plot one state's worth of data at a time.
     """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc['arguments'] = [
-        dict(type='csector', name='sector', default='IA',
-             label='Select Sector:'),
+        dict(type='state', name='sector', default='IA',
+             label='Select State:'),
         dict(type='select', name='var', default='spring_below',
              label='Select Plot Type:', options=PDICT2),
         dict(type='select', name='popt', default='contour',
              label='Plot Display Options:', options=PDICT3),
         dict(type='year', name='year',
              default=today.year,
-             label='Start Year:', min=1893),
+             label='Year:', min=1893),
         dict(type='int', name='threshold',
              default=32,
              label='Temperature Threshold (F):'),
+        dict(
+            type="int", value=50, optional=True, name="p",
+            label="Plot date of given observed frequency (%): [optional]"
+        ),
+        dict(type='cmap', name='cmap', default='BrBG', label='Color Ramp:'),
     ]
     return desc
 
@@ -58,44 +90,75 @@ def plotter(fdict):
     popt = ctx['popt']
     threshold = ctx['threshold']
     table = "alldata_%s" % (sector,)
+    nt = NetworkTable("%sCLIMATE" % (sector, ))
     df = read_sql("""
-    WITH data as (
-        SELECT station, """ + SQLOPT[varname] + """ as doy
-        from """ + table + """
-        WHERE year = %s GROUP by station
-    )
-    select station, doy, st_x(geom) as lon, st_y(geom) as lat
-    from data d JOIN stations t on (d.station = t.id) WHERE
-    t.network = %s and substr(station, 3, 4) != '0000'
-    and substr(station, 3, 1) != 'C' and doy not in (0, 400) ORDER by doy
-    """, pgconn, params=(threshold, year, '%sCLIMATE' % (sector,)),
-                  index_col='station')
-    if df.empty:
-        raise NoDataFound("No data found!")
+        -- get the domain of data
+        WITH events as (
+            SELECT
+            station, month,
+            case when month < 7 then year - 1 else year end as winter_year,
+            year,
+            extract(doy from day) as doy,
+            day
+            from """ + table + """
+            WHERE """ + SQLOPT[varname] + """ and
+            month in %s and
+            substr(station, 3, 4) != '0000'
+            and substr(station, 3, 1) not in ('C', 'T')
+        ), agg as (
+            SELECT station, winter_year, year, doy, day,
+            case when month < 7 then doy + 366 else doy end as winter_doy,
+            rank() OVER (
+                PARTITION by """ + YRGP[varname] + """, station
+                ORDER by day """ + ORDER[varname] + """)
+            from events)
+        select * from agg where rank = 1
+        """, pgconn, params=(
+            threshold, tuple(MONTH_DOMAIN[varname]), ), index_col='station')
+
+    doy = USEDOY[varname]
 
     def f(val):
-        ts = datetime.date(year, 1, 1) + datetime.timedelta(
-            days=int(val - 1))
-        return ts.strftime("%-m/%-d")
+        """Make a pretty date."""
+        base = datetime.date(2000, 1, 1)
+        date = base + datetime.timedelta(days=int(val))
+        return date.strftime("%-m/%-d")
 
-    df['pdate'] = df['doy'].apply(f)
+    if ctx.get('p') is None:
+        df2 = df[df[YRGP[varname]] == year].copy()
+        title = r"%s %s %s$^\circ$F" % (year, PDICT2[varname], threshold)
+        df2['pdate'] = df2['day'].apply(lambda x: x.strftime("%-m/%-d"))
+    else:
+        df2 = df[[doy, ]].groupby('station').quantile(ctx['p'] / 100.).copy()
+        title = r"%.0f Percentile Date of %s %s$^\circ$F" % (
+            ctx['p'], PDICT2[varname], threshold)
+        df2['pdate'] = df2[doy].apply(f)
+    if df2.empty:
+        raise NoDataFound("No Data was found")
+    for station in df2.index.values:
+        if station not in nt.sts:
+            continue
+        df2.at[station, 'lat'] = nt.sts[station]['lat']
+        df2.at[station, 'lon'] = nt.sts[station]['lon']
 
-    mp = MapPlot(sector=('state' if len(sector) == 2 else sector),
-                 state=ctx['sector'],
-                 continental_color='white', nocaption=True,
-                 title=r"%s %s %s$^\circ$F" % (year, PDICT2[varname],
-                                               threshold),
-                 subtitle='based on NWS COOP and IEM Daily Estimates')
-    levs = np.linspace(df['doy'].min() - 3, df['doy'].max() + 3, 7, dtype='i')
+    mp = MapPlot(
+        sector='state',
+        state=ctx['sector'],
+        continental_color='white', nocaption=True,
+        title=title,
+        subtitle='based on NWS COOP and IEM Daily Estimates')
+    levs = np.linspace(
+        df2[doy].min() - 3, df2[doy].max() + 3, 7, dtype='i')
     levlables = list(map(f, levs))
     if popt == 'contour':
-        mp.contourf(df['lon'], df['lat'], df['doy'], levs,
-                    clevlabels=levlables)
-    mp.plot_values(df['lon'], df['lat'], df['pdate'], labelbuffer=5)
+        mp.contourf(
+            df2['lon'], df2['lat'], df2[doy], levs,
+            clevlabels=levlables, cmap=ctx['cmap'])
+    mp.plot_values(df2['lon'], df2['lat'], df2['pdate'], labelbuffer=5)
     mp.drawcounties()
 
-    return mp.fig, df
+    return mp.fig, df[['year', 'winter_doy', 'doy']]
 
 
 if __name__ == '__main__':
-    plotter(dict())
+    plotter(dict(var='fall_below'))
