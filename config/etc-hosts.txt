@@ -13,7 +13,7 @@
 192.168.0.2      iem-director1 iem-director1.local
 192.168.0.3      nagios.local
 192.168.0.4      thumper-ah.local
-192.168.0.5      updraft.local
+192.168.0.5      iem5.local
 192.168.0.9      metfs2.local  
 192.168.0.10      metfs1.local       iem-idd0      iem-idd0.local  
 192.168.0.11     iem-syslog
@@ -100,7 +100,7 @@
 
 #   VI_2(52) metvm5 <-> metvm9
 192.168.1.249    iem-memcached
-#   VI_3(53) metvm4 <-> metvm11
+#   VI_3(53) metvm4 <-> metvm8
 192.168.1.248    iem-memcached1
 #   VI_4(54) metvm8 <-> metvm3
 192.168.1.247    iem-memcached2

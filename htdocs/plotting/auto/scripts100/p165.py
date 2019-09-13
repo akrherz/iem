@@ -53,7 +53,16 @@ def get_description():
     This app generates a map showing either an explicit year's first or last
     date or the given percentile (observed
     frequency) date over all available years of a given temperature threshold.
-    Sadly, this app can only plot one state's worth of data at a time.
+    Sadly, this app can only plot one state's worth of data at a time.  If a
+    given year failed to meet the given threshold, it is not included on the
+    plot nor with the computed percentiles.
+
+    <br /><br />
+    <strong>Description of Observed Frequency:</strong> If requested, this
+    app will generate a plot showing the date of a given percentile for the
+    first/last temperature exceedance.  As a practical example of the 50th
+    percentile, the date plotted means that 50% of the previous years on
+    record experienced that temperature threshold by the given date.
     """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc['arguments'] = [
@@ -70,12 +79,24 @@ def get_description():
              default=32,
              label='Temperature Threshold (F):'),
         dict(
-            type="int", value=50, optional=True, name="p",
+            type="int", default=50, optional=True, name="p",
             label="Plot date of given observed frequency (%): [optional]"
         ),
         dict(type='cmap', name='cmap', default='BrBG', label='Color Ramp:'),
     ]
     return desc
+
+
+def th(val):
+    """Figure out the proper ending."""
+    v = val[-1]
+    if v in ['0', '4', '5', '6', '7', '8', '9']:
+        return "th"
+    if v in ['1']:
+        return 'rst'
+    if v in ['3']:
+        return 'rd'
+    return 'nd'
 
 
 def plotter(fdict):
@@ -105,6 +126,7 @@ def plotter(fdict):
             month in %s and
             substr(station, 3, 4) != '0000'
             and substr(station, 3, 1) not in ('C', 'T')
+            and year >= 1893
         ), agg as (
             SELECT station, winter_year, year, doy, day,
             case when month < 7 then doy + 366 else doy end as winter_doy,
@@ -128,11 +150,14 @@ def plotter(fdict):
         df2 = df[df[YRGP[varname]] == year].copy()
         title = r"%s %s %s$^\circ$F" % (year, PDICT2[varname], threshold)
         df2['pdate'] = df2['day'].apply(lambda x: x.strftime("%-m/%-d"))
+        extra = ""
     else:
         df2 = df[[doy, ]].groupby('station').quantile(ctx['p'] / 100.).copy()
-        title = r"%.0f Percentile Date of %s %s$^\circ$F" % (
-            ctx['p'], PDICT2[varname], threshold)
+        title = r"%.0f%s Percentile Date of %s %s$^\circ$F" % (
+            ctx['p'], th(str(ctx['p'])), PDICT2[varname], threshold)
         df2['pdate'] = df2[doy].apply(f)
+        extra = ", period of record: %.0f-%.0f" % (
+            df['year'].min(), df['year'].max())
     if df2.empty:
         raise NoDataFound("No Data was found")
     for station in df2.index.values:
@@ -146,9 +171,9 @@ def plotter(fdict):
         state=ctx['sector'],
         continental_color='white', nocaption=True,
         title=title,
-        subtitle='based on NWS COOP and IEM Daily Estimates')
+        subtitle='based on NWS COOP and IEM Daily Estimates%s' % (extra, ))
     levs = np.linspace(
-        df2[doy].min() - 3, df2[doy].max() + 3, 7, dtype='i')
+        df2[doy].min() - 1, df2[doy].max() + 1, 7, dtype='i')
     levlables = list(map(f, levs))
     if popt == 'contour':
         mp.contourf(
