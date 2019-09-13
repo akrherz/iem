@@ -18,6 +18,10 @@ PDICT2 = OrderedDict((
     ('state', 'Summarize by Selected State'),
     ('wfo', 'Summarize by Selected WFO'),
 ))
+PDICT3 = OrderedDict((
+    ('yes', "Yes"),
+    ("no", "No"),
+))
 COLORS = {
     'TSTM': "#c0e8c0",
     'MRGL': "#66c57d",
@@ -84,6 +88,10 @@ def get_description():
         dict(type='ugc', name='ugc',
              default='IAZ048',
              label='Select UGC Zone/County (when appropriate):'),
+        dict(
+            type="select", options=PDICT3, default='yes', name='g',
+            label="Include TSTM (general thunder) in generated calendar?"
+        )
     ]
     return desc
 
@@ -187,6 +195,8 @@ def plotter(fdict):
         data[now] = {'val': " "}
         now += datetime.timedelta(days=1)
     for date, row in df.iterrows():
+        if row['threshold'] == 'TSTM' and ctx.get('g', 'yes') == 'no':
+            continue
         data[date] = {
             'val': row['threshold'],
             'cellcolor': COLORS.get(row['threshold'], '#EEEEEE')
