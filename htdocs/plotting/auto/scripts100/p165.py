@@ -80,7 +80,18 @@ def get_description():
              label='Temperature Threshold (F):'),
         dict(
             type="int", default=50, optional=True, name="p",
-            label="Plot date of given observed frequency (%): [optional]"
+            label=(
+                "Plot date of given observed frequency / "
+                "percentiles (%): [optional]"
+            )
+        ),
+        dict(
+            type='year', default=1893, optional=True, name='syear',
+            label='Inclusive start year for percentiles: [optional]'
+        ),
+        dict(
+            type='year', default=today.year, optional=True, name='eyear',
+            label='Inclusive end year for percentiles: [optional]'
         ),
         dict(type='cmap', name='cmap', default='BrBG', label='Color Ramp:'),
     ]
@@ -112,6 +123,8 @@ def plotter(fdict):
     threshold = ctx['threshold']
     table = "alldata_%s" % (sector,)
     nt = NetworkTable("%sCLIMATE" % (sector, ))
+    syear = ctx.get('syear', 1893)
+    eyear = ctx.get('eyear', datetime.date.today().year)
     df = read_sql("""
         -- get the domain of data
         WITH events as (
@@ -126,7 +139,7 @@ def plotter(fdict):
             month in %s and
             substr(station, 3, 4) != '0000'
             and substr(station, 3, 1) not in ('C', 'T')
-            and year >= 1893
+            and year >= %s and year <= %s
         ), agg as (
             SELECT station, winter_year, year, doy, day,
             case when month < 7 then doy + 366 else doy end as winter_doy,
@@ -136,7 +149,8 @@ def plotter(fdict):
             from events)
         select * from agg where rank = 1
         """, pgconn, params=(
-            threshold, tuple(MONTH_DOMAIN[varname]), ), index_col='station')
+            threshold, tuple(MONTH_DOMAIN[varname]), syear, eyear),
+                  index_col='station')
 
     doy = USEDOY[varname]
 
