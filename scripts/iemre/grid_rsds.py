@@ -16,9 +16,7 @@ import pygrib
 from pyiem import iemre
 from pyiem.util import get_dbconn, utc, ncopen
 
-
 P4326 = pyproj.Proj(init="epsg:4326")
-
 SWITCH_DATE = utc(2014, 10, 10, 20)
 
 
@@ -48,6 +46,7 @@ def do_coop(ts):
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
 
     ds = iemre.get_grids(ts.date(), varnames='rsds')
+    # Convert MJ/d to Wm2
     ds['rsds'].values = nn(xi, yi) * 1000000. / 86400.
     iemre.set_grids(ts.date(), ds)
     subprocess.call(
@@ -64,16 +63,14 @@ def try_merra(ts):
     ).strftime("/mesonet/merra2/%Y/%Y%m%d.nc")
     if not os.path.isfile(ncfn1) or not os.path.isfile(ncfn2):
         return False
-    nc = ncopen(ncfn1)
-    # Total up from 6z to end of file for today
-    total = np.sum(nc.variables['SWGDN'][5:, :, :], axis=0)
-    nc.close()
-    nc = ncopen(ncfn2)
-    lat1d = nc.variables['lat'][:]
-    lon1d = nc.variables['lon'][:]
-    # Total up to 6z
-    total += np.sum(nc.variables['SWGDN'][:6, :, :], axis=0)
-    nc.close()
+    with ncopen(ncfn1) as nc:
+        # Total up from 6z to end of file for today
+        total = np.sum(nc.variables['SWGDN'][5:, :, :], axis=0)
+    with ncopen(ncfn2) as nc:
+        lat1d = nc.variables['lat'][:]
+        lon1d = nc.variables['lon'][:]
+        # Total up to 6z
+        total += np.sum(nc.variables['SWGDN'][:6, :, :], axis=0)
 
     # We wanna store as W m-2, so we just average out the data by hour
     total = total / 24.0
@@ -85,7 +82,7 @@ def try_merra(ts):
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
 
     ds = iemre.get_grids(ts.date(), varnames='rsds')
-    ds['rsds'].values = nn(xi, yi) * 1000000. / 86400.
+    ds['rsds'].values = nn(xi, yi)
     iemre.set_grids(ts.date(), ds)
     subprocess.call(
         "python db_to_netcdf.py %s" % (ts.strftime("%Y %m %d"), ),
