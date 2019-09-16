@@ -25,6 +25,7 @@ PDICT2 = OrderedDict([
     ('hdd65_sum', 'Heating Degree Days (base 65)'),
     ('hdd65_depart', 'Heating Degree Days Departure (base 65)'),
     ('precip_depart', 'Precipitation Departure'),
+    ('precip_percent', 'Precipitation Percent of Average'),
     ('precip_sum', 'Precipitation Total'),
     ])
 BASES = OrderedDict([('32', 32), ('41', 41), ('46', 46), ('48', 48),
@@ -47,6 +48,7 @@ UNITS = {
     'avg_temp_depart': 'F',
     'avg_temp': 'F',
     'precip_sum': 'inch',
+    'precip_percent': '%',
     }
 PDICT3 = {'contour': 'Contour the data',
           'text': 'Plot just values without contours'}
@@ -138,6 +140,7 @@ def plotter(fdict):
         SELECT station,
         avg(avg_temp) as avg_temp,
         sum(precip_diff) as precip_depart,
+        sum(precip) / sum(cprecip) * 100. as precip_percent,
         sum(precip) as precip, sum(cprecip) as cprecip,
         avg(high) as avg_high_temp,
         avg(low) as avg_low_temp,
@@ -157,6 +160,7 @@ def plotter(fdict):
     avg_temp,
     cprecip as cprecip_sum,
     precip_depart,
+    precip_percent,
     min_low_temp,
     avg_temp_depart,
     gdd_depart,
