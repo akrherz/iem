@@ -94,6 +94,10 @@ def get_description():
             label='Inclusive end year for percentiles: [optional]'
         ),
         dict(type='cmap', name='cmap', default='BrBG', label='Color Ramp:'),
+        dict(
+            type="int", default=2, name="cint", optional=True,
+            label="Contour interval in days (optional):",
+        ),
     ]
     return desc
 
@@ -188,6 +192,9 @@ def plotter(fdict):
         subtitle='based on NWS COOP and IEM Daily Estimates%s' % (extra, ))
     levs = np.linspace(
         df2[doy].min() - 1, df2[doy].max() + 1, 7, dtype='i')
+    if 'cint' in ctx:
+        levs = np.arange(
+            df2[doy].min() - 1, df2[doy].max() + 1, ctx['cint'], dtype='i')
     levlables = list(map(f, levs))
     if popt == 'contour':
         mp.contourf(
