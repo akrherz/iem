@@ -122,7 +122,6 @@
   Alias "/present" "/mesonet/share/present"
   Alias "/cases" "/mesonet/share/cases"
   Alias "/GIS/data/gis" "/mesonet/data/gis"
-  Alias "/archive/data" "/mesonet/ARCHIVE/data"
   Alias "/archive/awos" "/mesonet/ARCHIVE/awos"
   Alias "/archive/raw" "/mesonet/ARCHIVE/raw"
   Alias "/archive/rer" "/mesonet/ARCHIVE/rer"
@@ -207,6 +206,14 @@
     ProxyPass "http://iem-web-services.local/"
     ProxyPassReverse "http://iem-web-services.local/"
   </LocationMatch>
+
+  <Location "/archive/data">
+    RequestHeader set "Host" "iem-archive.local"
+    ProxyPreserveHost Off
+    ProxyPass "http://iem-archive.local"
+    ProxyPassReverse "http://iem-archive.local"
+  </Location>
+
 
   <Directory "/opt/iem/htdocs/content">
     RewriteRule pil_([A-Z0-9]{3,6}).png$ pil.php?pil=$1
