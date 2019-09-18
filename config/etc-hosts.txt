@@ -78,9 +78,6 @@
 #### metvm5 PostgreSQL
 # VI_1(51)
 192.168.1.251 metvm5-iemdb.local
-192.168.1.251 iemdb-mos iemdb-mos.local iemdb-talltowers.local
-192.168.1.251 iemdb-radar.local iemdb-nldn.local iemdb-smos.local
-192.168.1.251 iemdb-snet.local
 # VI_01(151)
 192.168.0.251 metvm5-iemdb-0.local
 
@@ -88,6 +85,9 @@
 # VI_1_233(69)
 192.168.1.233 metvm4-iemdb.local
 192.168.1.233 iemdb-hads iemdb-hads.local iemdb-awos.local
+192.168.1.233 iemdb-mos iemdb-mos.local iemdb-talltowers.local
+192.168.1.233 iemdb-radar.local iemdb-nldn.local iemdb-smos.local
+192.168.1.233 iemdb-snet.local
 
 #### metvm9 PostgreSQL
 # VI_7(57) metvm9 <-> metvm6
