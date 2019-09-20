@@ -4,6 +4,7 @@ from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
+import matplotlib.colors as mpcolors
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -13,8 +14,11 @@ PDICT = OrderedDict((
     ('high', 'High Temperature'),
     ('low', 'Low Temperature'),
 ))
-OPTDICT = {'diff': 'Difference in Degrees F',
-           'sigma': 'Difference in Standard Deviations'}
+OPTDICT = OrderedDict((
+    ('diff', 'Difference in Degrees F'),
+    ('sigma', 'Difference in Standard Deviations'),
+    ('ptile', 'Percentile'),
+))
 
 
 def get_description():
@@ -42,6 +46,10 @@ def get_description():
         ),
         dict(type="select", name='how', default='diff', options=OPTDICT,
              label='How to express the difference'),
+        dict(
+            type='cmap', name='cmap', default='jet',
+            label='Color ramp to use for percentile plot',
+        ),
     ]
     return desc
 
@@ -61,15 +69,24 @@ def plotter(fdict):
 
     df = read_sql("""
     WITH data as (
-     select day, high, low, (high+low)/2. as temp, sday,
-     gddxx(%s, %s, high, low) as gdd
-     from """+table+""" where station = %s and year = %s
+     select day, year, sday,
+     high,
+     low,
+     (high+low)/2. as temp,
+     gddxx(%s, %s, high, low) as gdd,
+     rank() OVER (PARTITION by sday ORDER by high ASC) as high_ptile,
+     rank() OVER (PARTITION by sday ORDER by (high+low)/2. ASC) as temp_ptile,
+     rank() OVER (PARTITION by sday ORDER by low ASC) as low_ptile,
+     rank() OVER (PARTITION by sday
+        ORDER by gddxx(%s, %s, high, low) ASC) as gdd_ptile
+     from """+table+""" where station = %s
     ), climo as (
      SELECT sday, avg(high) as avg_high, avg(low) as avg_low,
      avg((high+low)/2.) as avg_temp, stddev(high) as stddev_high,
      stddev(low) as stddev_low, stddev((high+low)/2.) as stddev_temp,
      avg(gddxx(%s, %s, high, low)) as avg_gdd,
-     stddev(gddxx(%s, %s, high, low)) as stddev_gdd
+     stddev(gddxx(%s, %s, high, low)) as stddev_gdd,
+     count(*)::float as years
      from """ + table + """ WHERE station = %s GROUP by sday
     )
     SELECT day,
@@ -88,32 +105,48 @@ def plotter(fdict):
     d.temp,
     c.avg_temp,
     d.gdd,
-    c.avg_gdd from
-    data d JOIN climo c on
-    (c.sday = d.sday) ORDER by day ASC
+    c.avg_gdd,
+    high_ptile / years * 100. as high_ptile,
+    low_ptile / years * 100. as low_ptile,
+    temp_ptile / years * 100. as temp_ptile,
+    gdd_ptile / years * 100. as gdd_ptile
+    from data d JOIN climo c on
+    (c.sday = d.sday) WHERE d.year = %s ORDER by day ASC
     """, pgconn, params=(
-        gddbase, gddceil, station, year, gddbase, gddceil, gddbase, gddceil,
-        station),
+        gddbase, gddceil, gddbase, gddceil, station, gddbase, gddceil,
+        gddbase, gddceil, station, year),
                   index_col=None)
 
     (fig, ax) = plt.subplots(1, 1)
-    diff = df[varname+'_' + how]
-    bars = ax.bar(df['day'].values, diff, fc='b', ec='b', align='center')
-    for i, _bar in enumerate(bars):
-        if diff[i] > 0:
-            _bar.set_facecolor('r')
-            _bar.set_edgecolor('r')
+    diff = df[varname+'_' + how].values
+    if how == 'ptile' and 'cmap' in ctx:
+        bins = range(0, 101, 10)
+        cmap = plt.get_cmap(ctx['cmap'])
+        norm = mpcolors.BoundaryNorm(bins, cmap.N)
+        colors = cmap(norm(diff))
+        ax.bar(df['day'].values, diff, color=colors, align='center')
+        ax.set_yticks(bins)
+    else:
+        bars = ax.bar(df['day'].values, diff, fc='b', ec='b', align='center')
+        for i, _bar in enumerate(bars):
+            if diff[i] > 0:
+                _bar.set_facecolor('r')
+                _bar.set_edgecolor('r')
     ax.grid(True)
     if how == 'diff':
         ax.set_ylabel(r"%s Departure $^\circ$F" % (PDICT[varname], ))
+    elif how == 'ptile':
+        ax.set_ylabel("%s Percentile (100 highest)" % (PDICT[varname], ))
     else:
         ax.set_ylabel(r"%s Std Dev Departure ($\sigma$)" % (PDICT[varname], ))
     if varname == 'gdd':
         ax.set_xlabel("Growing Degree Day Base: %s Ceiling: %s" % (
             gddbase, gddceil))
-    ax.set_title(("%s %s\nYear %s Daily %s Departure"
-                  ) % (station, ctx['_nt'].sts[station]['name'], year,
-                       PDICT[varname]))
+    ax.set_title(
+        ("%s %s\nYear %s Daily %s %s"
+         ) % (
+             station, ctx['_nt'].sts[station]['name'], year,
+             PDICT[varname], "Departure" if how != 'ptile' else "Percentile"))
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b'))
     ax.xaxis.set_major_locator(mdates.DayLocator(1))
 
