@@ -98,7 +98,7 @@
 
 ##############################################################################
 
-#   VI_2(52) metvm5 <-> metvm9
+#   VI_2(52) iem5 <-> metvm9
 192.168.1.249    iem-memcached
 #   VI_3(53) metvm4 <-> metvm8
 192.168.1.248    iem-memcached1
@@ -109,8 +109,6 @@
 
 #   VI_5(55) iem13
 192.168.1.246    iembot
-#   VI_9(59) iem12
-192.168.0.242    iem-nwnserver
 #   VI_10(60) iem12
 192.168.1.241    iem-web-services.local
 #   VI11(61) iem12

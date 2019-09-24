@@ -74,19 +74,21 @@ def plotter(fdict):
     for i, row in enumerate(cursor):
         if i == 0:
             baseyear = row[0]
-            data = np.ones((effective_date.year - row[0] + 1, days)) * -99
+            data = np.ma.ones((effective_date.year - row[0] + 1, days)) * -99
         data[row[0]-baseyear, row[1].day-1] = row[2]
 
     # overwrite our current month's data
     currentdata = data[-1, :effective_date.day-1]
     for i in range(np.shape(data)[0] - 1):
         data[i, :effective_date.day-1] = currentdata
-    avgs = np.zeros(np.shape(data))
+    data.mask = data < -98
+    avgs = np.ma.zeros(np.shape(data))
     days = np.shape(data)[1]
     prevavg = []
     for i in range(days):
         avgs[:, i] = np.sum(data[:, :i+1], 1) / float(i+1)
         prevavg.append(np.sum(prevmonth[:i+1]) / float(i+1))
+    avgs.mask = data.mask
 
     (fig, ax) = plt.subplots(1, 1)
 
@@ -96,12 +98,15 @@ def plotter(fdict):
             beats += 1
         ax.plot(np.arange(1, days+1), avgs[yr, :], zorder=1, color='tan')
 
+    lv = avgs[-1, effective_date.day-1]
+    if np.ma.is_masked(lv):
+        lv = avgs[-1, effective_date.day-2]
     ax.plot(np.arange(1, effective_date.day),
             avgs[-1, :effective_date.day-1], zorder=3,
             lw=2, color='brown',
             label=r"%s %s, %.2f$^\circ$F" % (
                 calendar.month_abbr[effective_date.month], effective_date.year,
-                avgs[-1, effective_date.day-1]))
+                lv))
     # For historical, we can additionally plot the month values
     today = datetime.date.today().replace(day=1)
     if effective_date < today:
@@ -136,4 +141,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(date='2007-02-15', year=1988, month=5))
+    plotter(dict(station='IA0200', network='IACLIMATE'))
