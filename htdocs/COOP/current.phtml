@@ -2,15 +2,16 @@
 /*
  * NWS COOP currents lister
  */
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 41);
- include("../../include/network.php");
- $nt = new NetworkTable("WFO");
- include("../../include/myview.php");
+require_once "../../include/network.php";
+require_once "../../include/myview.php";
+require_once "../../include/forms.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/mlib.php";
+
  $t = new MyView();
- require_once "../../include/forms.php";
- include_once("../../include/database.inc.php");
- require_once "../../include/mlib.php";
+ $nt = new NetworkTable("WFO");
  $mesosite = iemdb("mesosite");
  
 $network = isset($_GET['network']) ? xssafe($_GET['network']): 'IA_COOP'; 
