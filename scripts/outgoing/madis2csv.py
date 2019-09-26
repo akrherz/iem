@@ -4,6 +4,7 @@
 from __future__ import print_function
 import os
 import sys
+import time
 import subprocess
 import warnings
 import datetime
@@ -38,9 +39,13 @@ def main():
     utc = datetime.datetime.utcnow()
     fn = "/mesonet/data/madis/mesonet1/%s.nc" % (utc.strftime("%Y%m%d_%H00"), )
     if not os.path.isfile(fn):
-        if utc.minute > 30:
-            print('madis2csv %s does not exist' % (fn,))
-        sys.exit()
+        time.sleep(60)
+        fn = "/mesonet/data/madis/mesonet1/%s.nc" % (
+            utc.strftime("%Y%m%d_%H00"), )
+        if not os.path.isfile(fn):
+            if utc.minute > 30:
+                print('madis2csv %s does not exist' % (fn,))
+            sys.exit()
     nc = ncopen(fn, 'r', timeout=300)
     if nc is None:
         print(("madis2csv Numerous attempts to open MADIS netcdf %s failed!"

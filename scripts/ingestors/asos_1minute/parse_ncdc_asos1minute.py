@@ -14,8 +14,9 @@ import datetime
 
 import pytz
 import requests
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
 
+LOG = logger()
 BASEDIR = "/mesonet/ARCHIVE/raw/asos/"
 
 P1_RE = re.compile(r"""
@@ -100,7 +101,7 @@ def download(station, monthts):
     """
     Download a month file from NCDC
     """
-    baseuri = "http://www1.ncdc.noaa.gov/pub/data/asos-onemin/"
+    baseuri = "https://www1.ncdc.noaa.gov/pub/data/asos-onemin/"
     datadir = "%s/data/%s" % (BASEDIR, station)
     if not os.path.isdir(datadir):
         os.makedirs(datadir)
@@ -109,11 +110,13 @@ def download(station, monthts):
                                                       station,
                                                       monthts.strftime("%Y%m"))
         req = requests.get(uri)
-        o = open("%s/640%s0K%s%s.dat" % (datadir, page,
-                                         station, monthts.strftime("%Y%m")),
-                 'wb')
-        o.write(req.content)
-        o.close()
+        if req.status_code != 200:
+            LOG.info("dl %s failed with code %s", uri, req.status_code)
+            continue
+        with open(
+            "%s/640%s0K%s%s.dat" % (
+                datadir, page, station, monthts.strftime("%Y%m")), 'wb') as fp:
+            fp.write(req.content)
 
 
 def runner(station, monthts):
@@ -205,8 +208,9 @@ def runner(station, monthts):
     out.write("\.\n")
     out.close()
 
-    proc = subprocess.Popen("psql -f %s -h iemdb asos" % (tmpfn,), shell=True,
-                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.Popen(
+        "psql -f %s -h iemdb.local asos" % (tmpfn,), shell=True,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout = proc.stdout.read().decode('utf-8')
     stderr = proc.stderr.read().decode('utf-8')
 
