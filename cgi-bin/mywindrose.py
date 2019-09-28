@@ -64,7 +64,7 @@ def main():
     form = cgi.FieldStorage()
     try:
         sts, ets = get_times(form)
-    except Exception as _:
+    except:
         send_error(form, "Invalid Times Selected, please try again")
         return
 
@@ -112,7 +112,7 @@ def main():
     if "staticrange" in form and form["staticrange"].value == "1":
         rmax = 100
 
-    nt = NetworkTable(form['network'].value)
+    nt = NetworkTable(form['network'].value, only_online=False)
     bins = []
     if 'bins' in form:
         bins = [float(v) for v in form.getfirst('bins').split(",")]

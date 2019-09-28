@@ -49,7 +49,10 @@ class NetworkTable {
       if ($this->table[$id]["archive_begin"] != null){
           $this->table[$id]["archive_begin"] = strtotime($this->table[$id]["archive_begin"]);
       }
-  }
+      if ($this->table[$id]["archive_end"] != null){
+        $this->table[$id]["archive_end"] = strtotime($this->table[$id]["archive_end"]);
+    }
+}
 
   function get($id)
   {

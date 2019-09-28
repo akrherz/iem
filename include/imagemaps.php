@@ -109,6 +109,19 @@ function networkMultiSelect($network, $selected, $extra=Array(),
    return $s;
 }
 
+function make_sname($tbl){
+    // Construct a nice label for the given station
+    $dextra = '';
+    if ($tbl['archive_begin'] != null){
+        $dextra .= sprintf(" [%s-", date("Y", $tbl["archive_begin"]));
+        if ($tbl['archive_end'] != null){
+            $dextra .= sprintf("%s", date("Y", $tbl["archive_end"]));
+        }
+        $dextra .= "]";
+    }
+    return sprintf("[%s] %s%s", $tbl['id'], $tbl['name'], $dextra);
+}
+
 function networkSelect($network, $selected, $extra=Array(),
 		$selectName="station")
 {
@@ -121,8 +134,9 @@ function networkSelect($network, $selected, $extra=Array(),
     while (list($sid, $tbl) = each($cities))
     {
         $s .= "<option value=\"$sid\" ";
+        $sname = make_sname($tbl);
         if ($selected == $sid) { $s .= "SELECTED"; }
-        $s .= ">[$sid] ". $tbl["name"] ."</option>\n";
+        $s .= ">${sname}</option>\n";
    }
    while (list($idx,$sid) = each($extra))
    {
@@ -133,13 +147,15 @@ function networkSelect($network, $selected, $extra=Array(),
           $nt->load_station($sid);
           $tbl = $nt->table[$sid];
         }
+        $sname = make_sname($tbl);
         $s .= "<option value=\"$sid\" ";
         if ($selected == $sid) { $s .= "SELECTED"; }
-        $s .= ">[$sid] ". $tbl["name"] ."</option>\n";
+        $s .= ">${sname}</option>\n";
    }
    $s .= "</select>\n";
    return $s;
 }
+
 
 function networkSelectAuto($network, $selected, $extra=Array())
 {
@@ -152,18 +168,20 @@ function networkSelectAuto($network, $selected, $extra=Array())
     $s .= "<select class=\"iemselect2\" name=\"station\" onChange=\"this.form.submit()\">\n";
     while (list($sid, $tbl) = each($cities))
     {
+        $sname = make_sname($tbl);
         if ($tbl["network"] != $network) continue;
         $s .= "<option value=\"$sid\" ";
         if ($selected == $sid) { $s .= "SELECTED"; }
-        $s .= ">[$sid] ". $tbl["name"] ."</option>\n";
+        $s .= ">${sname}</option>\n";
    }
    while (list($idx,$sid) = each($extra))
    {
         $nt->load_station($sid);
         $tbl = $nt->table[$sid];
+        $sname = make_sname($tbl);
         $s .= "<option value=\"$sid\" ";
         if ($selected == $sid) { $s .= "SELECTED"; }
-        $s .= ">[$sid] ". $tbl["name"] ."</option>\n";
+        $s .= ">${sname}</option>\n";
    }
    $s .= "</select>\n";
    return $s;
