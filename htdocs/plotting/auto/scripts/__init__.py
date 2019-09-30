@@ -354,7 +354,7 @@ data = {'plots': [
         {'id': "146",
          'label': "Temperature Frequency by Week During Precipitation"},
         {'id': "155",
-         'label': "Top Ten Hourly Precipitation Reports"},
+         'label': "Top Ten Hourly Reports from ASOS Stations"},
         {'id': "16", 'label': "Wind Rose when specified criterion is meet"},
     ]},
     {'label': 'NASS Quickstats (USDA Crop Statistics)', 'options': [
