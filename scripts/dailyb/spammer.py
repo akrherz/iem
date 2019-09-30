@@ -204,7 +204,7 @@ def main():
     if os.environ['USER'] == 'akrherz':
         msg['To'] = 'akrherz@iastate.edu'
     else:
-        msg['To'] = 'dailyb@mesonet.agron.iastate.edu'
+        msg['To'] = 'iem-dailyb@iastate.edu'
 
     text = """Iowa Environmental Mesonet Daily Bulletin for %s\n\n""" % (
                                                 now.strftime("%d %B %Y"), )
