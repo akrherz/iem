@@ -60,14 +60,20 @@ def main(argv):
         on (p.fid = f.fid) WHERE not computed
         ORDER by pressure DESC
     """, dbconn)
+    count = 0
     for fid, gdf in df.groupby('fid'):
         try:
             do_profile(cursor, fid, gdf)
-        except (RuntimeError, ValueError) as exp:
+        except (RuntimeError, ValueError, IndexError) as exp:
             LOG.info("Profile fid: %s failed calculation %s", fid, exp)
             cursor.execute("""
                 UPDATE raob_flights SET computed = 't' WHERE fid = %s
             """, (fid, ))
+        if count % 100 == 0:
+            cursor.close()
+            dbconn.commit()
+            cursor = dbconn.cursor()
+        count += 1
     cursor.close()
     dbconn.commit()
 
