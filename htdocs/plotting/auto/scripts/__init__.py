@@ -423,7 +423,8 @@ data = {'plots': [
     ]},
     {'label': 'Upper Air / RAOB Sounding Plots', 'options': [
         {'id': "198",
-         'label': ("Monthly Max/Min/Avgs for Sounding Variable at Given Level"
+         'label': ("Monthly Max/Min/Avgs for Sounding Parameter "
+                   "or Variable at Given Level"
                    )},
         {'id': "150",
          'label': ("Single Sounding Mandatory Level Percentile Ranks")},

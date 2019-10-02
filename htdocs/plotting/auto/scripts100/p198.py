@@ -31,7 +31,13 @@ PDICT3 = OrderedDict([
     ('tmpc', 'Air Temperature (C)'),
     ('dwpc', 'Dew Point (C)'),
     ('height', 'Height (m)'),
-    ('smps', 'Wind Speed (mps)')])
+    ('smps', 'Wind Speed (mps)'),
+    ('sbcape_jkg', 'Surface Based CAPE (J/kg)'),
+    ('sbcin_jkg', 'Surface Based CIN (J/kg)'),
+    ('mucape_jkg', 'Most Unstable CAPE (J/kg)'),
+    ('mucin_jkg', 'Most Unstable CIN (J/kg)'),
+    ('pwater_mm', 'Precipitable Water (mm)'),
+    ])
 PDICT4 = OrderedDict((
     ('min', 'Minimum'),
     ('avg', 'Average'),
@@ -107,19 +113,38 @@ def plotter(fdict):
             "--")[1].strip().split(" ")
     pgconn = get_dbconn('postgis')
 
-    dfin = read_sql("""
-        select extract(year from f.valid + '%s days'::interval) as year,
-        avg(p.""" + varname + """) as avg_""" + varname + """,
-        min(p.""" + varname + """) as min_""" + varname + """,
-        max(p.""" + varname + """) as max_""" + varname + """,
-        count(*)
-        from raob_profile p JOIN raob_flights f on (p.fid = f.fid)
-        WHERE f.station in %s and p.pressure = %s and
-        extract(hour from f.valid at time zone 'UTC') = %s and
-        extract(month from f.valid) in %s
-        GROUP by year ORDER by year ASC
-    """, pgconn, params=(offset, tuple(stations), level, hour, tuple(months)),
-                    index_col='year')
+    if varname in ['tmpc', 'dwpc', 'height', 'smps']:
+        leveltitle = " @ %s hPa" % (level, )
+        dfin = read_sql("""
+            select extract(year from f.valid + '%s days'::interval) as year,
+            avg(p.""" + varname + """) as avg_""" + varname + """,
+            min(p.""" + varname + """) as min_""" + varname + """,
+            max(p.""" + varname + """) as max_""" + varname + """,
+            count(*)
+            from raob_profile p JOIN raob_flights f on (p.fid = f.fid)
+            WHERE f.station in %s and p.pressure = %s and
+            extract(hour from f.valid at time zone 'UTC') = %s and
+            extract(month from f.valid) in %s
+            GROUP by year ORDER by year ASC
+        """, pgconn, params=(
+            offset, tuple(stations), level, hour, tuple(months)),
+                        index_col='year')
+    else:
+        leveltitle = ""
+        dfin = read_sql("""
+            select extract(year from f.valid + '%s days'::interval) as year,
+            count(*),
+            avg(p.""" + varname + """) as avg_""" + varname + """,
+            min(p.""" + varname + """) as min_""" + varname + """,
+            max(p.""" + varname + """) as max_""" + varname + """
+            from raob_flights f
+            WHERE f.station in %s and
+            extract(hour from f.valid at time zone 'UTC') = %s and
+            extract(month from f.valid) in %s
+            GROUP by year ORDER by year ASC
+        """, pgconn, params=(
+            offset, tuple(stations), hour, tuple(months)),
+                        index_col='year')
     # need quorums
     df = dfin[dfin['count'] > ((len(months) * 28) * 0.75)]
     if df.empty:
@@ -144,9 +169,9 @@ def plotter(fdict):
     ax.set_ylabel("%s %s @ %s hPa" % (PDICT4[agg], PDICT3[varname], level))
     plt.gcf().text(0.5, 0.9,
                    ("%s %s %02i UTC Sounding\n"
-                    "%s %s @ %s hPa over %s"
+                    "%s %s%s over %s"
                     ) % (station, name, hour, PDICT4[agg], PDICT3[varname],
-                         level, MDICT[month]),
+                         leveltitle, MDICT[month]),
                    ha='center', va='bottom')
     ax.grid(True)
 

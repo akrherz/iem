@@ -91,10 +91,12 @@ cd ../ua
 if [ $HH -eq "04" ]
 then
 	python ingest_from_rucsoundings.py $YYYY $MM $DD 00
+    python compute_params.py $YYYY
 fi
 if [ $HH -eq "16" ]
 then
 	python ingest_from_rucsoundings.py $YYYY $MM $DD 12
+    python compute_params.py $YYYY
 fi
 
 cd ../mos

@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (32, now());
+INSERT into iem_schema_manager_version values (33, now());
 
 ---
 --- TABLES THAT ARE LOADED VIA shp2pgsql
@@ -363,8 +363,15 @@ CREATE TABLE raob_flights(
     hydro_level real,
     maxwd_level real,
     tropo_level real,
-    release_time timestamptz -- Time of Release
+    release_time timestamptz, -- Time of Release
+    sbcape_jkg real,
+    sbcin_jkg real,
+    mucape_jkg real,
+    mucin_jkg real,
+    pwater_mm real
 );
+ALTER TABLE raob_flights OWNER to mesonet;
+GRANT ALL on raob_flights to ldm,mesonet;
 create unique index raob_flights_idx on raob_flights(valid, station);
 GRANT SELECT on raob_flights to nobody,apache;
 
