@@ -84,7 +84,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME archwarn_county
   CONNECTION "user=akrherz dbname=postgis host=iemdb"
-  DATA "geom from (select u.geom, phenomena, issue, expire, w.wfo,  significance, eventid, oid from warnings_%YEAR% w JOIN ugcs u on (u.gid = w.gid) WHERE expire < '%ENDTS%' and issue > '%STARTTS%' and issue < '%ENDTS%' ORDER by expire, phenomena ASC) as foo USING unique oid USING SRID=4326"
+  DATA "geom from (select u.geom, phenomena, issue, expire, w.wfo,  significance, eventid, random() as boid from warnings_%YEAR% w JOIN ugcs u on (u.gid = w.gid) WHERE expire < '%ENDTS%' and issue > '%STARTTS%' and issue < '%ENDTS%' ORDER by expire, phenomena ASC) as foo USING unique boid USING SRID=4326"
   STATUS ON
   DUMP true
   TYPE POLYGON

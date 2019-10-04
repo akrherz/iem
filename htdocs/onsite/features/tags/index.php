@@ -78,7 +78,7 @@ previous winter seasons that these maps are available for:
 EOM;
 }
 
-$rs = pg_prepare($pgconn, "__SELECT", "SELECT oid, *, 
+$rs = pg_prepare($pgconn, "__SELECT", "SELECT *, 
       to_char(valid, 'YYYY/MM/YYMMDD') as imageref, 
       to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate,
       to_char(valid, 'YYYY-MM-DD') as permalink from feature

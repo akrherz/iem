@@ -18,8 +18,8 @@ def do(vote):
     pgconn = get_dbconn('mesosite')
     cursor = pgconn.cursor()
     cursor.execute("""
-        SELECT oid, good, bad, abstain from feature
-        ORDER by valid DESC LIMIT 1
+        SELECT to_char(valid, 'YYmmdd')::int as oid, good, bad,
+        abstain from feature ORDER by valid DESC LIMIT 1
     """)
     row = cursor.fetchone()
     foid = row[0]
@@ -32,7 +32,8 @@ def do(vote):
         # Allow this vote
         d[vote] += 1
         cursor.execute("""UPDATE feature
-        SET """+vote+""" = """+vote+""" + 1 WHERE oid = %s
+        SET """+vote+""" = """+vote+""" + 1
+        WHERE to_char(valid, 'YYmmdd')::int = %s
         """, (foid,))
         # Now we set a cookie
         expiration = datetime.datetime.now() + datetime.timedelta(days=4)

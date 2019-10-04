@@ -348,7 +348,8 @@ if (in_array("allsbw", $layers) && isset($_REQUEST["sector_wfo"])){
 	$sbwh->set("status",  MS_ON);
 	$sbwh->set("connection", $_DATABASES["postgis"]);
 	//$sbwh->set("maxscale", 10000000);
-	$sql = sprintf("geom from (select phenomena, geom, oid from sbw "
+	$sql = sprintf(
+        "geom from (select phenomena, geom, random() as oid from sbw "
 	    ."WHERE significance = 'W' and status = 'NEW' and wfo = '%s' and "
 	    ."phenomena in ('SV') "
 		."and issue > '2007-10-01') as foo "
@@ -485,7 +486,8 @@ if (in_array("sbwh", $layers) && intval(gmstrftime("%Y",$ts)) > 2001){
 	$sbwh->set("status", MS_ON);
 	$sbwh->set("connection", $_DATABASES["postgis"]);
 	//$sbwh->set("maxscale", 10000000);
-	$sql = sprintf("geom from (select %s, geom, oid from sbw_%s w "
+	$sql = sprintf(
+        "geom from (select %s, geom, random() as oid from sbw_%s w "
 	    ."WHERE significance != 'A' and polygon_begin <= '%s:00+00' and "
 	    ."polygon_end > '%s:00+00' "
 	    ."%s) as foo using unique oid using SRID=4326", 

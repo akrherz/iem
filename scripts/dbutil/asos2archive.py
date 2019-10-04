@@ -60,16 +60,17 @@ def main(argv):
     # delete dups from current_log
     icursor.execute("""
     with data as (
-        select c.oid,
+        select c.ctid,
         row_number() OVER
             (PARTITION by c.iemid, valid ORDER by length(raw) DESC)
         from current_log c JOIN stations t on (c.iemid = t.iemid)
         where (network ~* 'ASOS' or network = 'AWOS')
         and valid >= %s and valid <= %s)
 
-     DELETE from current_log c USING data d WHERE c.oid = d.oid
+     DELETE from current_log c USING data d WHERE c.ctid = d.ctid
      and d.row_number > 1
     """, (sts, ets))
+    print(icursor.rowcount)
     icursor.close()
     iempgconn.commit()
     icursor = iempgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)

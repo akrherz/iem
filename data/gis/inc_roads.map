@@ -4,7 +4,7 @@ LAYER
   NAME "roads"
   DUMP true
   CONNECTION "user=nobody dbname=postgis host=iemdb"
-  DATA "geom from (select b.type as rtype, b.int1, b.oid as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_current c WHERE b.segid = c.segid and b.type > 1 ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
+  DATA "geom from (select b.type as rtype, b.int1, random() as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_current c WHERE b.segid = c.segid and b.type > 1 ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
   STATUS OFF
   TYPE LINE
   DUMP TRUE
@@ -201,7 +201,7 @@ LAYER
   NAME "roads-inter"
   DUMP true
   CONNECTION "user=nobody dbname=postgis host=iemdb"
-  DATA "geom from (select b.type as rtype, b.int1, b.oid as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_current c WHERE b.segid = c.segid and b.type = 1 ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
+  DATA "geom from (select b.type as rtype, b.int1, random() as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_current c WHERE b.segid = c.segid and b.type = 1 ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
   STATUS OFF
   TYPE LINE
   METADATA

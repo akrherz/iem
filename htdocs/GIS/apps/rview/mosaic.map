@@ -404,9 +404,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_c
   CONNECTION "user=akrherz dbname=postgis host=iemdb"
-  DATA "geom from (select phenomena, geom, oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP) as foo using unique oid using SRID=4326"
-# DATA "geom from (select type, geom, oid from warnings WHERE  
-#	expire > CURRENT_TIMESTAMP  ORDER by expire, type ASC) as foo"
+  DATA "geom from (select phenomena, geom, random() as oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP) as foo using unique oid using SRID=4326"
   STATUS ON
   TYPE LINE
   METADATA

@@ -173,7 +173,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_c
   CONNECTION "user=nobody dbname=postgis host=iemdb"
-  DATA "geom from (select report, phenomena as wtype, geom, oid from warnings WHERE significance = 'W' and expire > CURRENT_TIMESTAMP ORDER by expire, type ASC) as foo"
+  DATA "geom from (select report, phenomena as wtype, geom, random() as oid from warnings WHERE significance = 'W' and expire > CURRENT_TIMESTAMP ORDER by expire, type ASC) as foo"
   STATUS ON
   TYPE LINE
   METADATA

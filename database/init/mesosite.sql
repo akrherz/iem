@@ -204,7 +204,6 @@ CREATE TABLE webcam_scheduler(
 	is_daily boolean,
 	filename varchar,
 	movie_seconds smallint);
-alter table webcam_scheduler SET with oids;	
 CREATE UNIQUE index webcam_scheduler_filename_idx on
 	webcam_scheduler(filename);
 GRANT ALL on webcam_scheduler to nobody,apache;
@@ -351,7 +350,6 @@ CREATE table feature(
   views int default 0,
   mediasuffix varchar(8) DEFAULT 'png'
 );
-alter table feature SET WITH oids;
 CREATE unique index feature_title_check_idx on feature(title);
 CREATE index feature_valid_idx on feature(valid);
 GRANT all on feature to nobody,apache;

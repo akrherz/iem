@@ -1,8 +1,8 @@
 <?php
 /* Generate an ultra fancy plot of a storm based warning history! */
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
-include("../../include/vtec.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/vtec.php";
 require_once "../../include/forms.php";
 
 $mapFile = "../../data/gis/base4326.map";
@@ -15,10 +15,11 @@ list($year, $wfo, $phenomena, $significance, $eventid) = explode(".", $vtec);
 $eventid = intval($eventid);
 $year = intval($year);
 $wfo = substr($wfo,1,3);
+$phenomena = substr($phenomena, 0, 2);
 $significance = substr($significance,0,1);
 
 $rs = pg_prepare($postgis, "SELECT", "SELECT ST_xmax(geom), ST_ymax(geom), 
-        ST_xmin(geom), ST_ymin(geom), *, oid,
+        ST_xmin(geom), ST_ymin(geom), *,
         round((ST_area2d(ST_transform(geom,2163))/1000000)::numeric,0 ) as area
         from sbw_$year WHERE phenomena = $1 and 
         eventid = $2 and wfo = $3 and significance = $4
@@ -61,7 +62,6 @@ $img2 = $map2->prepareImage();
 
 $buffer = 0.3;
 
-$oid0 = 0;
 $xmax = 0;
 $ymax = 0;
 $xmin = 0;
@@ -70,7 +70,6 @@ for ($i=0;$row = @pg_fetch_array($rs, $i); $i++)
 {
   if ($i > 8){ continue; }
   if ($i == 0){
-   $oid0 = $row["oid"];
    $xmax = $row["st_xmax"];
    $ymax = $row["st_ymax"];
    $xmin = $row["st_xmin"];
@@ -166,7 +165,11 @@ $sz0 = $row["area"];
   $wc->setConnectionType( MS_POSTGIS );
   $wc->set("connection", $_DATABASES["postgis"] );
   $wc->set("status", MS_ON );
-  $sql = sprintf("geom from (select oid, geom from sbw_$year WHERE oid = ". $oid0 .") as foo using unique oid using SRID=4326");
+  $sql = sprintf("geom from (select random() as oid, geom from sbw_$year ".
+    "WHERE phenomena = '%s' and wfo = '%s' and eventid = %s and ". 
+    "significance = '%s' and status = 'NEW') as foo using unique oid ".
+    "using SRID=4326",
+    $phenomena, $wfo, $eventid, $significance);
   $wc->set("data", $sql);
   $wc->set("type", MS_LAYER_LINE);
   $wc->setProjection("init=epsg:4326");
@@ -183,7 +186,11 @@ $sz0 = $row["area"];
   $wc->setConnectionType( MS_POSTGIS );
   $wc->set("connection", $_DATABASES["postgis"] );
   $wc->set("status", MS_ON );
-  $sql = sprintf("geom from (select oid, geom from sbw_$year WHERE oid = ". $row["oid"] .") as foo using unique oid using SRID=4326");
+  $sql = sprintf("geom from (select random() as oid, geom from sbw_$year ".
+    "WHERE phenomena = '%s' and wfo = '%s' and eventid = %s and ". 
+    "significance = '%s' and polygon_begin = '%s') as foo ".
+    "using unique oid using SRID=4326", $phenomena, $wfo, $eventid,
+    $significance, $row["polygon_begin"]);
   $wc->set("data", $sql);
   $wc->set("type", MS_LAYER_LINE);
   $wc->setProjection("init=epsg:4326");

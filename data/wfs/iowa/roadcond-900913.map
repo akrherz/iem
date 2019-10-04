@@ -38,7 +38,7 @@ LAYER
   NAME "roadcond-wfs-test-900913"
   DUMP true
   CONNECTION "user=nobody dbname=postgis host=iemdb"
-  DATA "geom from (select a.label, b.major, b.minor, b.type as rtype, b.int1, b.oid as boid, b.segid, c.cond_code, ST_transform(b.simple_geom,900913) as geom from roads_conditions a, roads_base b, roads_current_test c WHERE c.cond_code = a.code and  b.segid = c.segid ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=900913"
+  DATA "geom from (select a.label, b.major, b.minor, b.type as rtype, b.int1, random() as boid, b.segid, c.cond_code, ST_transform(b.simple_geom,900913) as geom from roads_conditions a, roads_base b, roads_current_test c WHERE c.cond_code = a.code and  b.segid = c.segid ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=900913"
   STATUS ON
   TYPE LINE
   METADATA
@@ -60,7 +60,7 @@ LAYER
   NAME "roadcond-wfs-900913"
   DUMP true
   CONNECTION "user=nobody dbname=postgis host=iemdb"
-  DATA "geom from (select a.label, b.major, b.minor, b.type as rtype, b.int1, b.oid as boid, b.segid, c.cond_code, ST_transform(b.simple_geom,900913) as geom from roads_conditions a, roads_base b, roads_current c WHERE c.cond_code = a.code and  b.segid = c.segid and c.valid > (now() - '24 hours'::interval) ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=900913"
+  DATA "geom from (select a.label, b.major, b.minor, b.type as rtype, b.int1, random() as boid, b.segid, c.cond_code, ST_transform(b.simple_geom,900913) as geom from roads_conditions a, roads_base b, roads_current c WHERE c.cond_code = a.code and  b.segid = c.segid and c.valid > (now() - '24 hours'::interval) ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=900913"
   STATUS ON
   TYPE LINE
   METADATA

@@ -70,7 +70,7 @@ $roads->draw($img);
 $roads_int = $map->getlayerbyname("roads-inter");
 $roads_int->set("status", MS_ON);
 if (isset($_GET["extreme"]))
-$roads_int->set("data", "geom from (select b.us1, b.type as rtype, b.int1, b.oid as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_2007_log c WHERE b.segid = c.segid and c.valid = '2007-03-02 00:11' and b.type = 1 and b.us1 NOT IN (6) ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915");
+$roads_int->set("data", "geom from (select b.us1, b.type as rtype, b.int1, random() as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_2007_log c WHERE b.segid = c.segid and c.valid = '2007-03-02 00:11' and b.type = 1 and b.us1 NOT IN (6) ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915");
 for ($k=0;$k<17;$k++)
 {
   $r_c1 = $roads_int->getClass($k);

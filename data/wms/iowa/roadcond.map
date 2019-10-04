@@ -83,7 +83,7 @@ LAYER
   NAME "roadcond-noninterstate"
   DUMP true
   CONNECTION "user=nobody dbname=postgis host=iemdb"
-  DATA "mygeom from (select b.type as rtype, b.int1, b.oid as boid, b.segid, c.cond_code, ST_Transform(b.geom,4326) as mygeom from roads_base b, roads_current c WHERE b.segid = c.segid and b.type > 1 ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
+  DATA "mygeom from (select b.type as rtype, b.int1, random() as boid, b.segid, c.cond_code, ST_Transform(b.geom,4326) as mygeom from roads_base b, roads_current c WHERE b.segid = c.segid and b.type > 1 ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
   STATUS ON
   TYPE LINE
   DUMP TRUE
@@ -279,7 +279,7 @@ LAYER
   NAME "roadcond-interstate"
   DUMP true
   CONNECTION "user=nobody dbname=postgis host=iemdb"
-  DATA "mygeom from (select b.type as rtype, b.int1, b.oid as boid, b.segid, c.cond_code, ST_Transform(b.geom,4326) as mygeom from roads_base b, roads_current c WHERE b.segid = c.segid and b.type = 1 ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
+  DATA "mygeom from (select b.type as rtype, b.int1, random() as boid, b.segid, c.cond_code, ST_Transform(b.geom,4326) as mygeom from roads_base b, roads_current c WHERE b.segid = c.segid and b.type = 1 ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
   STATUS ON
   TYPE LINE
   METADATA

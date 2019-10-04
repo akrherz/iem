@@ -94,7 +94,7 @@ function gen_feature($t){
 	$s = '';
 	
 	$connection = iemdb("mesosite", TRUE, TRUE);
-	$query1 = "SELECT oid, *, to_char(valid, 'YYYY/MM/YYMMDD') as imageref,
+	$query1 = "SELECT *, to_char(valid, 'YYYY/MM/YYMMDD') as imageref,
                 to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate,
                 to_char(valid, 'YYYY-MM-DD') as permalink from feature
                 ORDER by valid DESC LIMIT 1";

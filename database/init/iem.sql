@@ -433,7 +433,6 @@ CREATE TABLE current_log (
     peak_wind_drct real,
     peak_wind_time timestamptz
 );
-ALTER TABLE current_log SET WITH oids;
 GRANT ALL on current_log to mesonet,ldm;
 GRANT SELECT on current_log to apache,nobody;
 

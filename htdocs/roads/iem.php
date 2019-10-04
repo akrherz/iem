@@ -87,8 +87,8 @@ $dbvalid2 = date('Y-m-d H:i', $ts - 14 * 86400);
 if (isset($_GET['valid'])) {
   $roads->set("data", "geom from (WITH data as ( ". 
   "select b.type as rtype, b.int1, ". 
-  "b.oid as boid, b.segid, c.cond_code, b.geom, ". 
-  "row_number() OVER (PARTITION by b.oid ORDER by c.valid DESC) ". 
+  "random() as boid, b.segid, c.cond_code, b.geom, ". 
+  "row_number() OVER (PARTITION by b.segid ORDER by c.valid DESC) ". 
   "from roads_base b, ". 
   "roads_2018_2019_log c WHERE b.segid = c.segid and b.type > 1 and ". 
   "c.valid < '$dbvalid' and c.valid > '$dbvalid2' ". 
@@ -102,8 +102,8 @@ $roads_int->set("status", MS_ON);
 if (isset($_GET['valid'])) {
   $roads_int->set("data", "geom from (WITH data as ( ". 
   "select b.type as rtype, b.int1, ". 
-  "b.oid as boid, b.segid, c.cond_code, b.geom, ". 
-  "row_number() OVER (PARTITION by b.oid ORDER by c.valid DESC) ". 
+  "random() as boid, b.segid, c.cond_code, b.geom, ". 
+  "row_number() OVER (PARTITION by b.segid ORDER by c.valid DESC) ". 
   "from roads_base b, ". 
   "roads_2018_2019_log c WHERE b.segid = c.segid and b.type = 1 and ". 
   "c.valid < '$dbvalid' and c.valid > '$dbvalid2' ". 

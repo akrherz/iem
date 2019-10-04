@@ -445,7 +445,7 @@ $cuextra = "";
 if ($cu == 1) {
 	$cuextra = " and w.phenomena IN ('SV','TO','MA') ";
 }
-$query = "SELECT w.phenomena, w.oid, u.name as cname, w.expire as expire, 
+$query = "SELECT w.phenomena, u.name as cname, w.expire as expire, 
   w.updated as updated, w.status as status, w.fcster as fcster, 
   w.eventid as eventid, w.significance as significance, 
   w.issue as issue, u.state as sname, ST_xmax(u.geom) as lon0, 
@@ -492,7 +492,6 @@ else
 
 /* Loop thru results from database! */
 $wA = Array();
-$oA = Array();
 $iA = Array();
 $uA = Array();
 $fA = Array();
@@ -506,7 +505,6 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
      $row["phenomena"], $row["eventid"], $row["significance"], $row["expire"],
      $row["status"]);
 
-  $oA[$key] = $row["oid"];
   $iA[$key] = $row["issue"];
   $uA[$key] = $row["updated"];
   $fA[$key] = $row["fcster"];
@@ -524,13 +522,8 @@ while ( list($key, $val) = each($wA) )
   $significance = $tokens[4];
   $expire = $tokens[5];
   $status = $tokens[6];
-  $oid = $oA[$key];
 
-  if ($eventid > 0) {
-    $warningscat = "warnings_cat.phtml?year=$year&wfo=$wfo&phenomena=$phenomena&eventid=$eventid&significance=$significance";
-  } else { /* Old warnings have no VTEC! */
-    $warningscat = "warnings_old.phtml?year=$year&oid=$oid";
-  }
+  $warningscat = "warnings_cat.phtml?year=$year&wfo=$wfo&phenomena=$phenomena&eventid=$eventid&significance=$significance";
 
   $k += 1;
   $issue = strtotime($iA[$key]) - $tzoff;

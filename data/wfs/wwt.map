@@ -84,7 +84,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME archwarn_county
   CONNECTION "user=nobody dbname=postgis host=iemdb"
-  DATA "geom from (select u.geom, phenomena, issue at time zone 'UTC+0' as issue, expire at time zone 'UTC+0' as expire, w.wfo,  significance, eventid, oid from warnings_%year% w JOIN ugcs u on (u.gid = w.gid) WHERE expire > '%ts%+00' and issue < '%ts%+00' ORDER by expire, phenomena ASC) as foo USING unique oid USING SRID=4326"
+  DATA "geom from (select u.geom, phenomena, issue at time zone 'UTC+0' as issue, expire at time zone 'UTC+0' as expire, w.wfo,  significance, eventid, random() as boid from warnings_%year% w JOIN ugcs u on (u.gid = w.gid) WHERE expire > '%ts%+00' and issue < '%ts%+00' ORDER by expire, phenomena ASC) as foo USING unique boid USING SRID=4326"
   STATUS ON
   DUMP true
   TYPE POLYGON
@@ -162,7 +162,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME warn_polygon
   CONNECTION "user=nobody dbname=postgis host=iemdb"
-  DATA "geom from (select geom, phenomena, issue at time zone 'UTC+0' as issue, expire at time zone 'UTC+0' as expire, wfo,  significance, eventid, oid from sbw WHERE status = 'NEW' and expire > CURRENT_TIMESTAMP ORDER by expire, phenomena ASC) as foo USING unique oid USING SRID=4326"
+  DATA "geom from (select geom, phenomena, issue at time zone 'UTC+0' as issue, expire at time zone 'UTC+0' as expire, wfo,  significance, eventid, random() as boid from sbw WHERE status = 'NEW' and expire > CURRENT_TIMESTAMP ORDER by expire, phenomena ASC) as foo USING unique boid USING SRID=4326"
   STATUS ON
   DUMP true
   TYPE POLYGON
