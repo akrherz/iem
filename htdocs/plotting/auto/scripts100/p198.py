@@ -117,9 +117,9 @@ def plotter(fdict):
         leveltitle = " @ %s hPa" % (level, )
         dfin = read_sql("""
             select extract(year from f.valid + '%s days'::interval) as year,
-            avg(p.""" + varname + """) as avg_""" + varname + """,
-            min(p.""" + varname + """) as min_""" + varname + """,
-            max(p.""" + varname + """) as max_""" + varname + """,
+            avg(""" + varname + """) as avg_""" + varname + """,
+            min(""" + varname + """) as min_""" + varname + """,
+            max(""" + varname + """) as max_""" + varname + """,
             count(*)
             from raob_profile p JOIN raob_flights f on (p.fid = f.fid)
             WHERE f.station in %s and p.pressure = %s and
@@ -134,9 +134,9 @@ def plotter(fdict):
         dfin = read_sql("""
             select extract(year from f.valid + '%s days'::interval) as year,
             count(*),
-            avg(p.""" + varname + """) as avg_""" + varname + """,
-            min(p.""" + varname + """) as min_""" + varname + """,
-            max(p.""" + varname + """) as max_""" + varname + """
+            avg(""" + varname + """) as avg_""" + varname + """,
+            min(""" + varname + """) as min_""" + varname + """,
+            max(""" + varname + """) as max_""" + varname + """
             from raob_flights f
             WHERE f.station in %s and
             extract(hour from f.valid at time zone 'UTC') = %s and
@@ -166,7 +166,7 @@ def plotter(fdict):
     ax.axhline(avgv, color='k')
     ax.text(df.index.values[-1] + 2, avgv, "Avg:\n%.1f" % (avgv, ))
     ax.set_xlabel("Year")
-    ax.set_ylabel("%s %s @ %s hPa" % (PDICT4[agg], PDICT3[varname], level))
+    ax.set_ylabel("%s %s%s" % (PDICT4[agg], PDICT3[varname], leveltitle))
     plt.gcf().text(0.5, 0.9,
                    ("%s %s %02i UTC Sounding\n"
                     "%s %s%s over %s"
