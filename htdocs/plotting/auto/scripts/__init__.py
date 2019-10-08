@@ -50,6 +50,9 @@ data = {'plots': [
          'label': "Extreme Jumps or Dips in High Temperature over X days"},
         {'id': "147",
          'label': "Frequency of One Station Warmer/Wetter than Another"},
+        {'id': "205",
+         'label': (
+            "Frequency of Daily Summary Variables for Automated Stations")},
         {'id': "7",
          'label': "Growing Degree Day Periods for One Year by Planting Date"},
         {'id': "204",
