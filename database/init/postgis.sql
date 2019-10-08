@@ -368,7 +368,17 @@ CREATE TABLE raob_flights(
     sbcin_jkg real,
     mucape_jkg real,
     mucin_jkg real,
-    pwater_mm real
+    pwater_mm real,
+    computed boolean,
+    lcl_agl_m real,
+    lcl_pressure_hpa real,
+    lcl_tmpc real,
+    lfc_agl_m real,
+    lfc_pressure_hpa real,
+    lfc_tmpc real,
+    el_agl_m real,
+    el_pressure_hpa real,
+    el_tmpc real
 );
 ALTER TABLE raob_flights OWNER to mesonet;
 GRANT ALL on raob_flights to ldm,mesonet;
