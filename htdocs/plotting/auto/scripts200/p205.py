@@ -66,7 +66,7 @@ def plotter(fdict):
         labels['dwpf_hit'] = "Max Dewpoint < %.0fF" % (ctx['max_dwpf_below'],)
     if ctx.get('avg_smph_below'):
         params.append((
-            "case when avg_sknt / 1.15 < %.0f "
+            "case when avg_sknt * 1.15 < %.0f "
             "then 1 else 0 end as smph_hit") % (ctx['avg_smph_below'], ))
         labels['smph_hit'] = "Avg Wind < %.0fMPH" % (ctx['avg_smph_below'],)
     df = read_sql("""
