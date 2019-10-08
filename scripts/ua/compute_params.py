@@ -33,7 +33,8 @@ def get_station_elevation(df, nt):
     df2 = df[df['levelcode'] == 9]
     if not df2.empty:
         return df2.iloc[0]['height']
-    return nt.sts.get(df.iloc[0]['station'], {}).get('elevation')
+    res = nt.sts.get(df.iloc[0]['station'], {}).get('elevation')
+    return 0 if res is None else res
 
 
 def gt1(val):
