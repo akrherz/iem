@@ -70,7 +70,6 @@ def main(argv):
      DELETE from current_log c USING data d WHERE c.ctid = d.ctid
      and d.row_number > 1
     """, (sts, ets))
-    print(icursor.rowcount)
     icursor.close()
     iempgconn.commit()
     icursor = iempgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
