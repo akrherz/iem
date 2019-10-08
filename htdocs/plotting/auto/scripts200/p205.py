@@ -69,6 +69,8 @@ def plotter(fdict):
             "case when avg_sknt * 1.15 < %.0f "
             "then 1 else 0 end as smph_hit") % (ctx['avg_smph_below'], ))
         labels['smph_hit'] = "Avg Wind < %.0fMPH" % (ctx['avg_smph_below'],)
+    if not params:
+        raise NoDataFound("Please select some options for plotting.")
     df = read_sql("""
         SELECT """ + " , ".join(params) + """
         , extract(doy from day) as doy
