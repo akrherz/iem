@@ -2,7 +2,7 @@
 require_once '../config/settings.inc.php';
 include("../include/database.inc.php");
 //$dbconn = iemdb("mesosite");
-$dbconn = pg_connect("dbname=mesosite host=iemdb");
+$dbconn = pg_connect("dbname=mesosite host=iemdb-mesosite.local");
 
 $rs = pg_prepare($dbconn, "ADDSUB", "INSERT into iembot_room_subscriptions
                  (roomname, channel) VALUES ($1,$2)");

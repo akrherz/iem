@@ -82,7 +82,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME "roadcond-noninterstate"
   DUMP true
-  CONNECTION "user=nobody dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "mygeom from (select b.type as rtype, b.int1, random() as boid, b.segid, c.cond_code, ST_Transform(b.geom,4326) as mygeom from roads_base b, roads_current c WHERE b.segid = c.segid and b.type > 1 ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
   STATUS ON
   TYPE LINE
@@ -278,7 +278,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME "roadcond-interstate"
   DUMP true
-  CONNECTION "user=nobody dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "mygeom from (select b.type as rtype, b.int1, random() as boid, b.segid, c.cond_code, ST_Transform(b.geom,4326) as mygeom from roads_base b, roads_current c WHERE b.segid = c.segid and b.type = 1 ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
   STATUS ON
   TYPE LINE

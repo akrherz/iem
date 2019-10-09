@@ -62,7 +62,7 @@ LAYER
     "wms_timeitem" "datetime"
     "wms_timedefault" "2006-06-23T03:10:00Z"
   END
-  CONNECTION "dbname=postgis host=iemdb user=nobody"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   CONNECTIONTYPE postgis
   MAXFEATURES 5
 END

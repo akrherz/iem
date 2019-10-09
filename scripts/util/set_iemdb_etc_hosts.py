@@ -13,15 +13,39 @@ METVM4, METVM5, METVM6 = range(3)
 IPS = ['172.16.170.1', '172.16.171.1', '172.16.172.1']
 LOOKUP = {
     "": IPS[METVM6],
+    "-afos": IPS[METVM6],
+    "-asos": IPS[METVM6],
     "-awos": IPS[METVM4],
+    "-coop": IPS[METVM6],
+    "-frost": IPS[METVM6],
     "-hads": IPS[METVM4],
+    "-id3b": IPS[METVM6],
+    "-idep": IPS[METVM6],
+    "-iem": IPS[METVM6],
     "-iemre": IPS[METVM6],
+    "-isuag": IPS[METVM6],
+    "-kcci": IPS[METVM6],
+    "-mec": IPS[METVM6],
+    "-mesonet": IPS[METVM6],
+    "-mesosite": IPS[METVM6],
     "-mos": IPS[METVM5],
+    "-nc1018": IPS[METVM6],
     "-nldn": IPS[METVM5],
+    "-nwx": IPS[METVM6],
+    "-openfire": IPS[METVM6],
+    "-other": IPS[METVM6],
+    "-portfolio": IPS[METVM6],
     "-radar": IPS[METVM5],
+    "-rtstats": IPS[METVM6],
+    "-scada": IPS[METVM6],
+    "-scan": IPS[METVM6],
     "-smos": IPS[METVM5],
     "-snet": IPS[METVM5],
+    "-squaw": IPS[METVM6],
+    "-sustainablecorn": IPS[METVM6],
     "-talltowers": IPS[METVM5],
+    "-td": IPS[METVM6],
+    "-wepp": IPS[METVM6],
 }
 
 
@@ -39,8 +63,8 @@ def main(argv):
             break
     for dbname in LOOKUP:
         ip = LOOKUP[dbname] if argv[1] == 'proxy' else '127.0.0.1'
-        print("%s -> %s" % (dbname, ip))
         result.append("%s iemdb%s.local" % (ip, dbname))
+    print("added %s entries" % (len(LOOKUP), ))
     (tmpfd, tmpfn) = tempfile.mkstemp()
     os.write(tmpfd, ('\n'.join(result)).encode('ascii'))
     os.write(tmpfd, b'\n')

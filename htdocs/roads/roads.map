@@ -309,7 +309,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME "cnttime"
   DUMP true
-  CONNECTION "user=nobody dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select b.geom, random() as boid, b.tempval / 1440.0 / 70.0 * 100.0 as t from roads_base b) as foo using UNIQUE boid using SRID=26915"
   STATUS OFF
   TYPE LINE
@@ -371,7 +371,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME "visibility"
   DUMP true
-  CONNECTION "user=nobody dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select random() as boid, (CASE WHEN c.limited_vis THEN 1 ELSE 0 END) as lv, b.geom from roads_base b, roads_current c WHERE b.segid = c.segid  and c.valid > (now() - '93 days'::interval) ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
   STATUS OFF
   TYPE LINE
@@ -400,7 +400,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME "roads"
   DUMP true
-  CONNECTION "user=nobody dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select b.st1, b.us1, b.type as rtype, b.int1, random() as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_current c WHERE b.segid = c.segid and b.type > 1  and c.valid > (now() - '93 days'::interval) ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
   STATUS OFF
   TYPE LINE
@@ -663,7 +663,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME "trucks"
   DUMP false
-  CONNECTION "user=nobody dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select geom, random() as boid from idot_snowplow_archive WHERE valid > (now() - '10 minutes'::interval)) as foo using UNIQUE boid using SRID=4326"
   STATUS OFF
   TYPE POINT
@@ -685,7 +685,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME "roads-inter"
   DUMP true
-  CONNECTION "user=nobody dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select b.type as rtype, b.int1, random() as boid, b.segid, c.cond_code, b.geom from roads_base b, roads_current c WHERE b.segid = c.segid and b.type = 1 and c.valid > (now() - '93 days'::interval) ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
   STATUS OFF
   TYPE LINE

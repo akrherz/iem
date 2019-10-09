@@ -163,7 +163,7 @@ $sz0 = $row["area"];
 
   $wc = ms_newLayerObj($map);
   $wc->setConnectionType( MS_POSTGIS );
-  $wc->set("connection", $_DATABASES["postgis"] );
+  $wc->set("connection", get_dbconn_str("postgis") );
   $wc->set("status", MS_ON );
   $sql = sprintf("geom from (select random() as oid, geom from sbw_$year ".
     "WHERE phenomena = '%s' and wfo = '%s' and eventid = %s and ". 
@@ -184,7 +184,7 @@ $sz0 = $row["area"];
 
   $wc = ms_newLayerObj($map);
   $wc->setConnectionType( MS_POSTGIS );
-  $wc->set("connection", $_DATABASES["postgis"] );
+  $wc->set("connection", get_dbconn_str("postgis") );
   $wc->set("status", MS_ON );
   $sql = sprintf("geom from (select random() as oid, geom from sbw_$year ".
     "WHERE phenomena = '%s' and wfo = '%s' and eventid = %s and ". 

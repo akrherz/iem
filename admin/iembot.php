@@ -6,7 +6,7 @@ include_once "../include/myview.php";
 $t = new MyView();
 
 //$dbconn = iemdb("mesosite");
-$dbconn = pg_connect("dbname=mesosite host=iemdb");
+$dbconn = pg_connect("dbname=mesosite host=iemdb-mesosite.local");
 
 $rs = pg_prepare($dbconn, "SELECTROOMS", "SELECT * from iembot_rooms 
                  WHERE roomname NOT IN ('allpeopletalk', 'botstalk')

@@ -329,7 +329,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME "watch_by_county"
-  CONNECTION "dbname=postgis host=iemdb user=nobody"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   STATUS OFF
   TYPE LINE
   PROJECTION
@@ -357,7 +357,7 @@ END
 LAYER
  CONNECTIONTYPE postgis
  NAME watches
- CONNECTION "dbname=postgis host=iemdb"
+ CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
  DATA "geom from watches"
  PROJECTION
   "init=epsg:4326"
@@ -395,7 +395,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME sbw
-  CONNECTION "dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select phenomena, geom, random() as oid from sbw WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and status = 'NEW') as foo using unique oid using SRID=4326"
   STATUS OFF
   TYPE POLYGON
@@ -492,7 +492,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_c
-  CONNECTION "user=nobody dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select phenomena, significance, u.geom, random() as oid from warnings w JOIN ugcs u on (u.gid = w.gid) WHERE  expire > CURRENT_TIMESTAMP) as foo using unique oid using SRID=4326"
   STATUS OFF
   TYPE LINE
@@ -713,7 +713,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME allsbw
-  CONNECTION "dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select phenomena, geom, random() as oid from sbw WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and status = 'NEW') as foo using unique oid using SRID=4326"
   STATUS OFF
   TYPE POLYGON
@@ -1163,7 +1163,7 @@ LAYER
   STATUS OFF
   TYPE POINT
   CONNECTIONTYPE POSTGIS
-  CONNECTION "user=nobody dbname=mesosite host=iemdb"
+  CONNECTION "user=nobody dbname=mesosite host=iemdb-mesosite.local"
   DATA "geom from (select geom, id, plot_name, msoid, network, case when is_climate_site THEN 't' ELSE 'f' END as is_climate_site  from stations WHERE online = 't') as foo using unique msoid using srid=4326"
   PROJECTION
    "init=epsg:4326"

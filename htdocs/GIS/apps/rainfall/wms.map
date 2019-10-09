@@ -51,7 +51,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME sevendays_rainfall_data
 	GROUP sevendays_rainfall
-  CONNECTION "user=nobody dbname=wepp host=iemdb"
+  CONNECTION "user=nobody dbname=wepp host=iemdb-wepp.local"
   DATA  "the_geom from (select random() as oid, d.rainfall / 25.4 as da, h.the_geom as the_geom from (select sum(rainfall) as rainfall, hrap_i from daily_rainfall WHERE valid  IN ('YESTERDAY'::date, ('now'::date - '2 days'::interval)::date,('now'::date - '3 days'::interval)::date, ('now'::date - '4 days'::interval)::date, ('now'::date - '5 days'::interval)::date, ('now'::date - '6 days'::interval)::date, ('now'::date - '7 days'::interval)::date ) GROUP by hrap_i) as d left join hrap_polygons h using (hrap_i)) as foo using unique oid using srid=26915"
   STATUS ON
   TYPE POLYGON
@@ -146,7 +146,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME yesterday_rainfall_data
 	GROUP yesterday_rainfall
-  CONNECTION "user=nobody dbname=wepp host=iemdb"
+  CONNECTION "user=nobody dbname=wepp host=iemdb-wepp.local"
   DATA  "the_geom from (select random() as oid, d.rainfall / 25.4 as da, h.the_geom from daily_rainfall d left join hrap_polygons h using (hrap_i) WHERE d.valid = 'YESTERDAY'::date) as foo using unique oid using srid=26915"
   STATUS ON
   TYPE POLYGON
@@ -240,7 +240,7 @@ LAYER
   CONNECTIONTYPE postgis
   GROUP month_rainfall
   NAME month_rainfall_data
-  CONNECTION "user=nobody dbname=wepp host=iemdb"
+  CONNECTION "user=nobody dbname=wepp host=iemdb-wepp.local"
   DATA  "the_geom from (select random() as oid, d.rainfall / 25.4 as da, h.the_geom from monthly_rainfall d left join hrap_polygons h using (hrap_i) WHERE d.valid = to_char(CURRENT_TIMESTAMP, 'YYYY-MM-01')::date ) as foo using unique oid using srid=26915"
   STATUS ON
   TYPE POLYGON

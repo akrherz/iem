@@ -1,7 +1,7 @@
 LAYER
   CONNECTIONTYPE postgis
   NAME lsrs
-  CONNECTION "dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || x(geom) || y(geom) as k from lsrs WHERE valid > 'YESTERDAY'::timestamp) as foo USING unique k USING SRID=4326 "
   STATUS OFF
   TYPE POINT

@@ -71,7 +71,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME robins
-  CONNECTION "user=nobody dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "the_geom from (select id, random() as oid, the_geom from robins) as foo using unique oid using srid=4326"
   STATUS DEFAULT
   TYPE POINT

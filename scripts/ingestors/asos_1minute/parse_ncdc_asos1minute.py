@@ -209,7 +209,7 @@ def runner(station, monthts):
     out.close()
 
     proc = subprocess.Popen(
-        "psql -f %s -h iemdb.local asos" % (tmpfn,), shell=True,
+        "psql -f %s -h iemdb-asos.local asos" % (tmpfn,), shell=True,
         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout = proc.stdout.read().decode('utf-8')
     stderr = proc.stderr.read().decode('utf-8')

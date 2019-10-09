@@ -38,7 +38,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME roadtemps
   # Connect to a remote spatial database
-  CONNECTION "user=nobody dbname=iem host=iemdb"
+  CONNECTION "user=nobody dbname=iem host=iemdb-iem.local"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "geom from (select geom, round(tsf0::numeric,0) as tsf0,
     c.iemid as oid from current c JOIn stations s on (s.iemid = c.iemid) 

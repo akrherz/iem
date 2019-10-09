@@ -41,7 +41,7 @@ def main():
 
     table = "warnings_%s" % (ts.year, )
     source = ogr.Open(
-        "PG:host=iemdb dbname=postgis user=nobody tables=%s(tgeom)" % (table,))
+        "PG:host=iemdb-postgis.local dbname=postgis user=nobody tables=%s(tgeom)" % (table,))
 
     out_driver = ogr.GetDriverByName('ESRI Shapefile')
     out_ds = out_driver.CreateDataSource("%s.shp" % (fp, ))

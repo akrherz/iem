@@ -8,7 +8,6 @@ cache:
     - $HOME/miniconda3
 addons:
   hosts:
-    - iemdb.local
     - iemdb2.local
     - iemdb-hads.local
     - iemdb-iemre.local
@@ -17,6 +16,23 @@ addons:
     - iem-memcached
     - iemdb-talltowers.local
     - iem-web-services.local
+    - iemdb-postgis.local
+    - iemdb-mesosite.local
+    - iemdb-afos.local
+    - iemdb-asos.local
+    - iemdb-snet.local
+    - iemdb-mos.local
+    - iemdb-rwis.local
+    - iemdb-squaw.local
+    - iemdb-awos.local
+    - iemdb-iem.local
+    - iemdb-other.local
+    - iemdb-scan.local
+    - iemdb-wepp.local
+    - iemdb-coop.local
+    - iemdb-isuag.local
+    - iemdb-portfolio.local
+    - iemdb-smos.local
 language: python
 env:
   matrix:

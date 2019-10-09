@@ -269,7 +269,7 @@ END
 LAYER
  CONNECTIONTYPE postgis
  NAME watches
- CONNECTION "user=akrherz dbname=postgis host=iemdb"
+ CONNECTION "user=akrherz dbname=postgis host=iemdb-postgis.local"
  DATA "geom from watches"
  PROJECTION
   "init=epsg:4326"
@@ -297,7 +297,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_c
-  CONNECTION "user=akrherz dbname=postgis host=iemdb"
+  CONNECTION "user=akrherz dbname=postgis host=iemdb-postgis.local"
   DATA "geom from warnings_2004"
   STATUS ON
   TYPE POLYGON

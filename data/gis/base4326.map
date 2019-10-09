@@ -453,7 +453,7 @@ END
 LAYER
  CONNECTIONTYPE postgis
  NAME watches
- CONNECTION "dbname=postgis host=iemdb"
+ CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
  DATA "geom from watches"
  PROJECTION
   "init=epsg:4326"
@@ -492,7 +492,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_c
-  CONNECTION "user=nobody dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select phenomena, significance, u.geom, random() as  oid from warnings w JOIN ugcs u on (u.gid = w.gid) WHERE  expire > CURRENT_TIMESTAMP) as foo using unique oid using SRID=4326"
   STATUS OFF
   TYPE LINE
@@ -635,7 +635,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME sbw
-  CONNECTION "dbname=postgis host=iemdb user=nobody"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select phenomena, geom, random() as oid from sbw WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and status = 'NEW') as foo using unique oid using SRID=4326"
   STATUS OFF
   TYPE POLYGON
@@ -733,7 +733,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME allsbw
-  CONNECTION "dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select phenomena, geom, random() as oid from sbw WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and status = 'NEW') as foo using unique oid using SRID=4326"
   STATUS OFF
   TYPE POLYGON
@@ -791,7 +791,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_p
-  CONNECTION "dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   #DATA "geom from warnings"
   DATA "geom from (select phenomena, geom, random() as oid from sbw WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and status = 'NEW') as foo using unique oid using SRID=4326"
   STATUS OFF
@@ -1150,7 +1150,7 @@ END
 # Current sites
 LAYER
   CONNECTIONTYPE postgis
-  CONNECTION "user=nobody dbname=iem host=iemdb"
+  CONNECTION "user=nobody dbname=iem host=iemdb-iem.local"
   NAME "current_sites"
   DATA "geom from (select c.iemid as foid, geom, t.id as station, network from current c JOIN stations t ON (t.iemid = c.iemid)
        WHERE valid > (now() - '70 minutes'::interval) and network !~* 'COOP' ) as foo
@@ -1184,7 +1184,7 @@ END
 # Current sites
 LAYER
   CONNECTIONTYPE postgis
-  CONNECTION "user=nobody dbname=iem host=iemdb"
+  CONNECTION "user=nobody dbname=iem host=iemdb-iem.local"
   NAME "current_temps"
   DATA "geom from (select c.iemid as foid, geom, round(tmpf::numeric,0) as tmpf from current c JOIN stations t ON (t.iemid = c.iemid)
        WHERE valid > (now() - '70 minutes'::interval) and tmpf > -60 ) as foo
@@ -1218,7 +1218,7 @@ END
 # Current Wind barb
 LAYER
   CONNECTIONTYPE postgis
-  CONNECTION "user=nobody dbname=iem host=iemdb"
+  CONNECTION "user=nobody dbname=iem host=iemdb-iem.local"
   NAME "current_barbs"
   DATA "geom from (select c.iemid as foid, geom,
     case WHEN sknt between 0 and 4.99 THEN chr(227)
@@ -1268,7 +1268,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME mintmpf
   # Connect to a remote spatial database
-  CONNECTION "user=nobody dbname=iem host=iemdb"
+  CONNECTION "user=nobody dbname=iem host=iemdb-iem.local"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "geom from (select geom, round(min_tmpf::numeric,0) as tsf0,
     c.iemid as oid from summary_2013 c JOIN stations t ON (t.iemid = c.iemid) 
@@ -1302,7 +1302,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME surface
   # Connect to a remote spatial database
-  CONNECTION "user=nobody dbname=iem host=iemdb"
+  CONNECTION "user=nobody dbname=iem host=iemdb-iem.local"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "geom from (select geom, round(tsf0::numeric,0) as tsf0,
     c.iemid as oid from current c JOIN stations t ON (t.iemid = c.iemid) WHERE (valid > CURRENT_TIMESTAMP - '70 minutes'::interval)
@@ -1369,7 +1369,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME airtemps
   # Connect to a remote spatial database
-  CONNECTION "user=nobody dbname=iem host=iemdb"
+  CONNECTION "user=nobody dbname=iem host=iemdb-iem.local"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "geom from (select geom, round(tmpf::numeric,0) as tmpf, 
     c.iemid as foid from current c JOIN stations t ON (t.iemid = c.iemid) 
@@ -1530,7 +1530,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME "watch_by_county"
-  CONNECTION "dbname=postgis host=iemdb user=nobody"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   STATUS OFF
   TYPE LINE
   PROJECTION

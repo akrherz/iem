@@ -172,7 +172,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_c
-  CONNECTION "user=nobody dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select report, phenomena as wtype, geom, random() as oid from warnings WHERE significance = 'W' and expire > CURRENT_TIMESTAMP ORDER by expire, type ASC) as foo"
   STATUS ON
   TYPE LINE
@@ -220,7 +220,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings1d_c
-  CONNECTION "user=nobody dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select report, phenomena as wtype, geom, oid from warnings WHERE significance = 'W' and expire > (CURRENT_TIMESTAMP - '24 hours'::interval)  ORDER by type ASC) as foo"
   STATUS ON
   STATUS ON
@@ -268,7 +268,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_p
-  CONNECTION "user=nobody dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select report, phenomena, geom, random() as oid from sbw WHERE significance = 'W' and status = 'NEW' and expire > CURRENT_TIMESTAMP  ORDER by expire, type ASC) as foo"
   STATUS ON
   TYPE LINE
@@ -293,7 +293,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings1d_p
-  CONNECTION "user=nobody dbname=postgis host=iemdb"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select report, type, geom, oid from sbw WHERE status = 'NEW' and significance = 'W' and expire > (CURRENT_TIMESTAMP - '24 hours'::interval)  ORDER by expire, type ASC) as foo"
   STATUS ON
   TYPE POLYGON
@@ -317,7 +317,7 @@ END
 LAYER
  CONNECTIONTYPE postgis
  NAME watches
- CONNECTION "user=nobody dbname=postgis host=iemdb"
+ CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
  DATA "geom from watches"
  PROJECTION
   "init=epsg:4326"
@@ -343,7 +343,7 @@ END
 LAYER
  CONNECTIONTYPE postgis
  NAME watches_all
- CONNECTION "user=nobody dbname=postgis host=iemdb"
+ CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
  DATA "geom from watches"
  PROJECTION
   "init=epsg:4326"
@@ -370,7 +370,7 @@ END
 LAYER
  CONNECTIONTYPE postgis
  NAME watches_today
- CONNECTION "user=nobody dbname=postgis host=iemdb"
+ CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
  DATA "geom from watches"
  PROJECTION
   "init=epsg:4326"

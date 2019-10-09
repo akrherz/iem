@@ -346,7 +346,7 @@ $states->draw($img);
 if (in_array("allsbw", $layers) && isset($_REQUEST["sector_wfo"])){
 	$sbwh = $map->getlayerbyname("allsbw");
 	$sbwh->set("status",  MS_ON);
-	$sbwh->set("connection", $_DATABASES["postgis"]);
+	$sbwh->set("connection", get_dbconn_str("postgis"));
 	//$sbwh->set("maxscale", 10000000);
 	$sql = sprintf(
         "geom from (select phenomena, geom, random() as oid from sbw "
@@ -371,7 +371,7 @@ $cwas->draw($img);
 if (in_array("bufferedlsr", $layers)){
 	$blsr = ms_newLayerObj($map);
 	$blsr->setConnectionType( MS_POSTGIS);
-	$blsr->set("connection", $_DATABASES["postgis"]);
+	$blsr->set("connection", get_dbconn_str("postgis"));
 	$blsr->set("status", in_array("bufferedlsr", $layers) );
 	$sql = "geo from (select distinct city, magnitude, valid, "
 	  ."ST_Transform(ST_Buffer(ST_Transform(geom,2163),${lsrbuffer}000),4326) as geo, "
@@ -406,7 +406,7 @@ if (in_array("bufferedlsr", $layers)){
 /* Watch by County */
 $wbc = $map->getlayerbyname("watch_by_county");
 $wbc->set("status", in_array("watch_by_county", $layers) );
-$wbc->set("connection", $_DATABASES["postgis"]);
+$wbc->set("connection", get_dbconn_str("postgis"));
 $sql = sprintf("g from (select phenomena, eventid, ".
 		"ST_buffer(ST_collect(u.simple_geom), 0) as g ".
 		"from warnings w JOIN ugcs u ".
@@ -421,7 +421,7 @@ $wbc->draw($img);
 
 $watches = $map->getlayerbyname("watches");
 $watches->set("status", in_array("watches", $layers) );
-$watches->set("connection", $_DATABASES["postgis"]);
+$watches->set("connection", get_dbconn_str("postgis"));
 $sql = sprintf("geom from (select type as wtype, geom, num from watches "
        ."WHERE issued <= '%s:00+00' and expired > '%s:00+00') as foo "
 	   ."using SRID=4326 using unique num", 
@@ -434,7 +434,7 @@ if (isset($_REQEST["pid"]))
 {
   $wc = ms_newLayerObj($map);
   $wc->setConnectionType( MS_POSTGIS );
-  $wc->set("connection", $_DATABASES["postgis"]);
+  $wc->set("connection", get_dbconn_str("postgis"));
   $wc->set("status", MS_ON );
   $sql = sprintf("geom from (select geom, id from text_products "
   		."WHERE product_id = '$pid') as foo using unique id using SRID=4326");
@@ -457,7 +457,7 @@ if (isset($_REQUEST["vtec"]) && in_array("cbw", $layers))
 {
   $wc = ms_newLayerObj($map);
   $wc->setConnectionType(MS_POSTGIS);
-  $wc->set("connection", $_DATABASES["postgis"]);
+  $wc->set("connection", get_dbconn_str("postgis"));
   $wc->set("status", MS_ON);
   $sql = sprintf("geom from (select eventid, w.wfo, significance, "
   		."phenomena, u.geom, random() as oid from warnings_$year w JOIN ugcs u "
@@ -484,7 +484,7 @@ if (in_array("sbwh", $layers) && intval(gmstrftime("%Y",$ts)) > 2001){
 	$ptext = "'ZZ' as phenomena";
 	$sbwh = $map->getlayerbyname("sbw");
 	$sbwh->set("status", MS_ON);
-	$sbwh->set("connection", $_DATABASES["postgis"]);
+	$sbwh->set("connection", get_dbconn_str("postgis"));
 	//$sbwh->set("maxscale", 10000000);
 	$sql = sprintf(
         "geom from (select %s, geom, random() as oid from sbw_%s w "
@@ -509,7 +509,7 @@ if (in_array("sbw", $layers)  && intval(gmstrftime("%Y",$ts)) > 2001){
 	}
 	$sbw = $map->getlayerbyname("sbw");
 	$sbw->set("status", MS_ON);
-	$sbw->set("connection", $_DATABASES["postgis"]);
+	$sbw->set("connection", get_dbconn_str("postgis"));
 	//$sbw->set("maxscale", 10000000);
 	$sql = sprintf("geom from (select %s, geom, random() as oid from sbw_%s w "
 	    ."WHERE significance != 'A' and polygon_begin <= '%s:00+00' "
@@ -524,7 +524,7 @@ if (in_array("sbw", $layers)  && intval(gmstrftime("%Y",$ts)) > 2001){
 
 /* warnings by county */
 $w0c = $map->getlayerbyname("warnings0_c");
-$w0c->set("connection", $_DATABASES["postgis"]);
+$w0c->set("connection", get_dbconn_str("postgis"));
 $w0c->set("status", in_array("county_warnings", $layers) );
 $sql = sprintf("geom from (select u.geom, phenomena, significance, "
 		."random() as oid from warnings_%s w JOIN ugcs u on (u.gid = w.gid) "
@@ -538,7 +538,7 @@ $w0c->draw($img);
 
 /* Local Storm Reports */
 $lsrs = $map->getlayerbyname("lsrs");
-$lsrs->set("connection", $_DATABASES["postgis"]);
+$lsrs->set("connection", get_dbconn_str("postgis"));
 $lsrs->set("status",in_array("lsrs", $layers) );
 if ($ts2 > $ts1){
  $sql = "geom from (select distinct city, magnitude, valid, geom, "
@@ -561,7 +561,7 @@ $lsrs->draw($img);
 if (in_array("ci", $layers) ){
 	$ci = ms_newLayerObj($map);
 	$ci->setConnectionType( MS_POSTGIS);
-	$ci->set("connection", $_DATABASES["postgis"]);
+	$ci->set("connection", get_dbconn_str("postgis"));
 	$ci->set("status", in_array("ci", $layers) );
 	$tblyr = date("Y", $ts);
 	$sql = <<<EOF
@@ -602,13 +602,13 @@ $interstates->draw($img);
 
 /* roads */
 $roads = $map->getlayerbyname("roads");
-$roads->set("connection", $_DATABASES["postgis"]);
+$roads->set("connection", get_dbconn_str("postgis"));
 $roads->set("status", in_array("roads", $layers) );
 $roads->draw($img);
 
 /* roads */
 $roadsint = $map->getlayerbyname("roads-inter");
-$roadsint->set("connection", $_DATABASES["postgis"]);
+$roadsint->set("connection", get_dbconn_str("postgis"));
 $roadsint->set("status", in_array("roads-inter", $layers) );
 $roadsint->draw($img);
 

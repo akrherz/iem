@@ -73,7 +73,35 @@
 #### metvm6 PostgreSQL
 # VI_6(56) metvm6 <-> metvm9
 192.168.1.245 metvm6-iemdb.local
-192.168.1.245 iemdb iemdb.local iemdb-iemre.local
+# TODO removal of this line legacy names
+192.168.1.245 iemdb iemdb.local
+192.168.1.245 iemdb-afos.local
+192.168.1.245 iemdb-asos.local
+192.168.1.245 iemdb-coop.local
+192.168.1.245 iemdb-frost.local
+192.168.1.245 iemdb-id3b.local
+192.168.1.245 iemdb-idep.local
+192.168.1.245 iemdb-iem.local
+192.168.1.245 iemdb-iemre.local
+192.168.1.245 iemdb-isuag.local
+192.168.1.245 iemdb-kcci.local
+192.168.1.245 iemdb-mec.local
+192.168.1.245 iemdb-mesonet.local
+192.168.1.245 iemdb-mesosite.local
+192.168.1.245 iemdb-nc1018.local
+192.168.1.245 iemdb-nwx.local
+192.168.1.245 iemdb-openfire.local
+192.168.1.245 iemdb-other.local
+192.168.1.245 iemdb-portfolio.local
+192.168.1.245 iemdb-postgis.local
+192.168.1.245 iemdb-rtstats.local
+192.168.1.245 iemdb-rwis.local
+192.168.1.245 iemdb-scada.local
+192.168.1.245 iemdb-scan.local
+192.168.1.245 iemdb-squaw.local
+192.168.1.245 iemdb-sustainablecorn.local
+192.168.1.245 iemdb-td.local
+192.168.1.245 iemdb-wepp.local
 
 #### metvm5 PostgreSQL
 # VI_1(51)
