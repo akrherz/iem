@@ -57,27 +57,15 @@ def main(argv):
         DELETE from """ + table + """ WHERE valid >= %s and valid <= %s
         """, (sts, ets))
 
-    # delete dups from current_log
-    icursor.execute("""
-    with data as (
-        select c.ctid,
-        row_number() OVER
-            (PARTITION by c.iemid, valid ORDER by length(raw) DESC)
-        from current_log c JOIN stations t on (c.iemid = t.iemid)
-        where (network ~* 'ASOS' or network = 'AWOS')
-        and valid >= %s and valid <= %s)
-
-     DELETE from current_log c USING data d WHERE c.ctid = d.ctid
-     and d.row_number > 1
-    """, (sts, ets))
-    icursor.close()
-    iempgconn.commit()
-    icursor = iempgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
     # Get obs from Access
-    icursor.execute("""SELECT c.*, t.network, t.id from
-        current_log c JOIN stations t on (t.iemid = c.iemid) WHERE
-        valid >= %s and valid <= %s and (network ~* 'ASOS' or network = 'AWOS')
+    icursor.execute("""
+        WITH data as (
+            SELECT c.*, t.network, t.id, row_number() OVER
+            (PARTITION by c.iemid, valid ORDER by length(raw) DESC) from
+            current_log c JOIN stations t on (t.iemid = c.iemid) WHERE
+            valid >= %s and valid <= %s and
+            (network ~* 'ASOS' or network = 'AWOS'))
+        SELECT * from data where row_number = 1
         """, (sts, ets))
     for row in icursor:
         sql = """INSERT into t""" + repr(sts.year) + """ (station, valid, tmpf,
