@@ -664,7 +664,7 @@ LAYER
   NAME "trucks"
   DUMP false
   CONNECTION "user=nobody dbname=postgis host=iemdb"
-  DATA "geom from (select geom, random() as boid from idot_snowplow_2013_2014 WHERE valid > (now() - '10 minutes'::interval)) as foo using UNIQUE boid using SRID=4326"
+  DATA "geom from (select geom, random() as boid from idot_snowplow_archive WHERE valid > (now() - '10 minutes'::interval)) as foo using UNIQUE boid using SRID=4326"
   STATUS OFF
   TYPE POINT
   PROJECTION

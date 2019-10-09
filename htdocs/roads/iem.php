@@ -119,7 +119,7 @@ if (isset($_GET["trucks"])){
   $trucks = $map->getlayerbyname("trucks");
   $trucks->set("status", MS_ON);
   $trucks->set("data", "geom from (select geom, random() as boid from ".
-  "idot_snowplow_2013_2014 WHERE valid > '{$w1}' and valid < '{$w2}') as foo ".
+  "idot_snowplow_archive WHERE valid > '{$w1}' and valid < '{$w2}') as foo ".
   "using UNIQUE boid using SRID=4326");
   $trucks->draw($img);
 }

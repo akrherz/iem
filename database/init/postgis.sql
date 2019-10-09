@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (33, now());
+INSERT into iem_schema_manager_version values (34, now());
 
 ---
 --- TABLES THAT ARE LOADED VIA shp2pgsql
@@ -327,7 +327,7 @@ CREATE TABLE idot_snowplow_current(
 SELECT AddGeometryColumn('idot_snowplow_current', 'geom', 4326, 'POINT', 2);
 GRANT SELECT on idot_snowplow_current to nobody,apache;
 
-CREATE TABLE idot_snowplow_2013_2014(
+CREATE TABLE idot_snowplow_archive(
 	label varchar(20) not null,
 	valid timestamptz not null,
 	heading real,
@@ -345,13 +345,35 @@ CREATE TABLE idot_snowplow_2013_2014(
 	frontplowstate smallint,
 	underbellyplowstate smallint,
 	solid_spread_code smallint,
-	road_temp_code smallint
-);
-SELECT AddGeometryColumn('idot_snowplow_2013_2014', 'geom', 4326, 'POINT', 2);
-CREATE INDEX idot_snowplow_2013_2014_label_idx on idot_snowplow_2013_2014(label);
-CREATE INDEX idot_snowplow_2013_2014_valid_idx 
-	on idot_snowplow_2013_2014(valid);
-GRANT SELECT on idot_snowplow_2013_2014 to nobody,apache;
+	road_temp_code smallint,
+    geom geometry(Point, 4326)
+) PARTITION by RANGE (valid);
+CREATE INDEX on idot_snowplow_archive(label);
+CREATE INDEX on idot_snowplow_archive(valid);
+ALTER TABLE idot_snowplow_archive OWNER to mesonet;
+GRANT ALL on idot_snowplow_archive to ldm;
+GRANT SELECT on idot_snowplow_archive to nobody,apache;
+
+do
+$do$
+declare
+     year int;
+begin
+    for year in 2013..2030
+    loop
+        execute format($f$
+            create table idot_snowplow_%s partition of idot_snowplow_archive
+            for values from ('%s-01-01 00:00+00') to ('%s-01-01 00:00+00')
+        $f$, year, year, year + 1);
+        execute format($f$
+            GRANT ALL on idot_snowplow_%s to mesonet,ldm
+        $f$, year);
+        execute format($f$
+            GRANT SELECT on idot_snowplow_%s to nobody,apache
+        $f$, year);
+    end loop;
+end;
+$do$;
 
 ---
 --- Rawinsonde data!
