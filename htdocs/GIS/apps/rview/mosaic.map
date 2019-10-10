@@ -65,7 +65,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME lsrs
-  CONNECTION "user=akrherz dbname=postgis host=iemdb-postgis.local"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || x(geom) || y(geom) as k from lsrs) as foo USING unique k USING SRID=4326 "
   STATUS ON
   TYPE POINT
@@ -363,7 +363,7 @@ END
 LAYER
  CONNECTIONTYPE postgis
  NAME watches
- CONNECTION "user=akrherz dbname=postgis host=iemdb-postgis.local"
+ CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
  DATA "geom from watches"
  PROJECTION
   "init=epsg:4326"
@@ -403,7 +403,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_c
-  CONNECTION "user=akrherz dbname=postgis host=iemdb-postgis.local"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select phenomena, geom, random() as oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP) as foo using unique oid using SRID=4326"
   STATUS ON
   TYPE LINE
@@ -469,7 +469,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings1d_c
-  CONNECTION "user=akrherz dbname=postgis host=iemdb-postgis.local"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   #DATA "geom from warnings"
   DATA "geom from (select phenomena, geom, random() as oid from sbw WHERE significance != 'A' and issue > 'YESTERDAY'::timestamp and status = 'NEW') as foo using unique oid using SRID=4326"
   STATUS ON
@@ -495,7 +495,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_p
-  CONNECTION "user=akrherz dbname=postgis host=iemdb-postgis.local"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   #DATA "geom from warnings"
   DATA "geom from (select phenomena, geom, random() as oid from sbw WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and status = 'NEW') as foo using unique oid using SRID=4326"
   STATUS ON
@@ -522,7 +522,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings1d_p
-  CONNECTION "user=akrherz dbname=postgis host=iemdb-postgis.local"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from sbw"
   STATUS ON
   TYPE POLYGON

@@ -93,7 +93,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME ASOS
-  CONNECTION "user=akrherz dbname=mesosite host=mesonet-db1.agron.iastate.edu"
+  CONNECTION "user=nobody dbname=mesosite host=iemdb-mesosite.local"
   DATA "geom from stations"
   FILTER "network = 'ASOS'"
   STATUS OFF
@@ -121,7 +121,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME RWIS
-  CONNECTION "user=akrherz dbname=mesosite host=mesonet-db1.agron.iastate.edu"
+  CONNECTION "user=nobody dbname=mesosite host=iemdb-mesosite.local"
   DATA "geom from stations"
   FILTER "network = 'RWIS'"
   STATUS OFF
@@ -150,7 +150,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME AWOS
-  CONNECTION "user=akrherz dbname=mesosite host=mesonet-db1.agron.iastate.edu"
+  CONNECTION "user=nobody dbname=mesosite host=iemdb-mesosite.local"
   DATA "geom from stations"
   FILTER "network = 'AWOS'"
   STATUS OFF
@@ -178,7 +178,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME KCCI
-  CONNECTION "user=akrherz dbname=mesosite host=mesonet-db1.agron.iastate.edu"
+  CONNECTION "user=nobody dbname=mesosite host=iemdb-mesosite.local"
   DATA "geom from stations"
   FILTER "network = 'KCCI'"
   STATUS OFF

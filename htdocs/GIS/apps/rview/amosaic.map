@@ -269,7 +269,7 @@ END
 LAYER
  CONNECTIONTYPE postgis
  NAME watches
- CONNECTION "user=akrherz dbname=postgis host=iemdb-postgis.local"
+ CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
  DATA "geom from watches"
  PROJECTION
   "init=epsg:4326"
@@ -297,7 +297,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_c
-  CONNECTION "user=akrherz dbname=postgis host=iemdb-postgis.local"
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from warnings_2004"
   STATUS ON
   TYPE POLYGON
@@ -331,7 +331,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings1d_c
-  CONNECTION "user=akrherz dbname=postgis host=mesonet.agron.iastate.edu"
+  CONNECTION "user=nobody dbname=postgis host=mesonet.agron.iastate.edu"
   DATA "geom from warnings_2004"
   STATUS ON
   TYPE POLYGON
@@ -356,7 +356,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings0_p
-  CONNECTION "user=akrherz dbname=postgis host=mesonet.agron.iastate.edu"
+  CONNECTION "user=nobody dbname=postgis host=mesonet.agron.iastate.edu"
   DATA "geom from sbw"
   STATUS ON
   TYPE POLYGON
@@ -381,7 +381,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME warnings1d_p
-  CONNECTION "user=akrherz dbname=postgis host=mesonet.agron.iastate.edu"
+  CONNECTION "user=nobody dbname=postgis host=mesonet.agron.iastate.edu"
   DATA "geom from sbw"
   STATUS ON
   TYPE POLYGON

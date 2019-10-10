@@ -173,7 +173,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME asos
-  CONNECTION "user=akrherz dbname=mesosite"
+  CONNECTION "user=nobody dbname=mesosite"
   DATA "geom from stations"
   FILTER "network = 'ASOS'"
   STATUS ON
@@ -211,7 +211,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME awos
-  CONNECTION "user=akrherz dbname=mesosite"
+  CONNECTION "user=nobody dbname=mesosite"
   DATA "geom from stations"
   FILTER "network = 'AWOS'"
   STATUS ON
@@ -248,7 +248,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME rwis
-  CONNECTION "user=akrherz dbname=mesosite"
+  CONNECTION "user=nobody dbname=mesosite"
   DATA "geom from stations"
   FILTER "network = 'RWIS'"
   STATUS ON
@@ -285,7 +285,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME kcci
-  CONNECTION "user=akrherz dbname=mesosite"
+  CONNECTION "user=nobody dbname=mesosite"
   DATA "geom from stations"
   FILTER "network = 'KCCI'"
   STATUS ON
@@ -322,7 +322,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME dcp
-  CONNECTION "user=akrherz dbname=mesosite"
+  CONNECTION "user=nobody dbname=mesosite"
   DATA "geom from stations"
   FILTER "network = 'DCP' and sid ~* 'I4'"
   STATUS ON
@@ -358,7 +358,7 @@ END
 LAYER
   CONNECTIONTYPE postgis
   NAME coop
-  CONNECTION "user=akrherz dbname=mesosite"
+  CONNECTION "user=nobody dbname=mesosite"
   DATA "geom from stations"
   FILTER "network = 'COOP' and sid ~* 'I4'"
   STATUS ON
@@ -395,7 +395,7 @@ LAYER
   CONNECTIONTYPE postgis
   NAME winds
   # Connect to a remote spatial database
-  CONNECTION "user=akrherz dbname=mesosite"
+  CONNECTION "user=nobody dbname=mesosite"
   # Get the lines from the 'geom' column of the 'roads' table
   DATA "geom from temps"
   STATUS ON
