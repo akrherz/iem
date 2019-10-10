@@ -35,6 +35,7 @@ LOOKUP = {
     "-openfire": IPS[METVM6],
     "-other": IPS[METVM6],
     "-portfolio": IPS[METVM6],
+    "-postgis": IPS[METVM6],
     "-radar": IPS[METVM5],
     "-rtstats": IPS[METVM6],
     "-scada": IPS[METVM6],
