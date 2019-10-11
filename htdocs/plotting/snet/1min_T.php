@@ -23,7 +23,7 @@ $yesterday = mktime(0,0,0,date("m"), date("d"), date("Y")) - 96400;
 if ($myTime >= $yesterday)
 {
   /* Look in IEM Access! */
-  $dbconn = iemdb("access");
+  $dbconn = iemdb("iem");
   $tbl = "current_log";
   $pcol = ", pres as alti";
   $rs = pg_prepare($dbconn, "SELECT", "SELECT * $pcol from $tbl c JOIN stations s ON (s.iemid = c.iemid)

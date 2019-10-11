@@ -8,7 +8,7 @@
  require_once "../../../include/database.inc.php";
  require_once "../../../include/forms.php";
  require_once "../../../include/mlib.php";
- $dbconn = iemdb("access");
+ $dbconn = iemdb("iem");
  $rs = pg_prepare($dbconn, "SELECT", "SELECT * from current_qc WHERE 
        network = $1");
  $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "station";

@@ -39,7 +39,7 @@ if (isset($_GET["limit"])) $val = "between 25 and 35";
 
 if ($mode == "rt"){
  $c1 = iemdb('rwis');
- $c0 = iemdb('access');
+ $c0 = iemdb("iem");
  $q0 = "SELECT
     valid, gvalid, max(tmpf) as tmpf, max(pday) as pcpn,
     max(dwpf) as dwpf, max(tcs0) as tcs0, max(tcs1) as tcs1,

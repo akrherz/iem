@@ -14,7 +14,7 @@ $t = new MyView();
 $t->thispage = "networks-asos";
 $t->title = "Iowa ASOS Monthly Precipitation";
 
-$pgconn = iemdb("access");
+$pgconn = iemdb("iem");
 $nt = new NetworkTable("IA_ASOS");
 $cities = $nt->table;
 

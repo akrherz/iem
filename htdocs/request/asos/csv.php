@@ -3,7 +3,7 @@
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
 $mesosite = iemdb("mesosite");
-$access = iemdb("access");
+$access = iemdb("iem");
 $asos = iemdb("asos");
 pg_exec($access, "SET TIME ZONE 'UTC'");
 pg_exec($asos, "SET TIME ZONE 'UTC'");

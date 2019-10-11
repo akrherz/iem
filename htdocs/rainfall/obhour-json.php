@@ -3,7 +3,7 @@
 include('../../config/settings.inc.php');
 include("../../include/database.inc.php");
 
-$connect = iemdb("access");
+$connect = iemdb("iem");
 $mesosite = iemdb("mesosite");
 
 $network = isset($_GET["network"]) ? substr($_GET["network"],0,20) : "IA_ASOS";

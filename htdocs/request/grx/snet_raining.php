@@ -12,7 +12,7 @@ include("../../../include/database.inc.php");
 include("../../../include/mlib.php");
 include("../../../include/network.php");
 $nt = new NetworkTable(array("KCCI","KIMT","KELO"));
-$pgconn = iemdb("access");
+$pgconn = iemdb("iem");
 
 $rs = pg_query($pgconn, "select * from events WHERE 
 		valid > now() - '5 minutes'::interval and event = 'P+' ");

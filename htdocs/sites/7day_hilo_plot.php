@@ -10,7 +10,7 @@ $cities = $st->table;
  $climate_site = $cities[$station]["climate_site"];
  $hasclimate = 1;
  if ($climate_site == ""){ $hasclimate = 0;}
- $db = iemdb("access");
+ $db = iemdb("iem");
 
  /* Get high and low temps for the past 7 days */
 $rs = pg_prepare($db, "SELECT",

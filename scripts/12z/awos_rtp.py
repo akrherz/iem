@@ -74,7 +74,7 @@ def main():
     args = (yesterday12z, now12z)
     icursor.execute(sql, args)
     for row in icursor:
-        if qdict.get(row[0], {}).get('precip'):
+        if qdict.get(row[0], {}).get('precip') or row[1] is None:
             continue
         pcpn[row[0]] = "%5.2f" % (row[1],)
 

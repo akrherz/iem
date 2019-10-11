@@ -157,7 +157,7 @@ if ($mode == "monthly"){
 if (substr($network,2) == "CLIMATE"){
 	$c = iemdb("coop");
 } else {
-	$c = iemdb("access");
+	$c = iemdb("iem");
 }
 $rs = pg_exec($c, $sql);
 

@@ -19,7 +19,7 @@ $today = mktime(0,0,0,date("m"), date("d"), date("Y"));
 if ($myTime == $today)
 {
   /* Look in IEM Access! */
-  $dbconn = iemdb("access");
+  $dbconn = iemdb("iem");
   $tbl = "current_log";
   $rs = pg_prepare($dbconn, "SELECT", "SELECT * from $tbl s JOIN stations t on
   			(t.iemid = s.iemid)

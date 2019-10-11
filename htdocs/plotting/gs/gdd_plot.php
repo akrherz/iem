@@ -26,7 +26,7 @@ $climate_site = $st->table[$station]['climate_site'];
 $st->load_station( $climate_site );
 $cities = $st->table;
 $coopdb = iemdb("coop");
-$iem = iemdb("access");
+$iem = iemdb("iem");
 
 function calcGDD($high,$low)
 {

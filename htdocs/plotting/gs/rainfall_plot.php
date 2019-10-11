@@ -27,7 +27,7 @@ $st = new StationData($station, $network);
 $st->load_station( $st->table[$station]['climate_site'] );
 $cities = $st->table;
 $coopdb = iemdb("coop");
-$iem = iemdb("access");
+$iem = iemdb("iem");
 
 $climate_site = $cities[$station]["climate_site"];
 

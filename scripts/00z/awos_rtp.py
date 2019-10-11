@@ -11,6 +11,7 @@ from pyiem.util import get_dbconn
 
 
 def main():
+    """Go Main Go."""
     nt = network.Table("AWOS")
     qdict = loadqc()
     pgconn = get_dbconn('iem', user='nobody')
@@ -65,7 +66,7 @@ def main():
         GROUP by t.id, hour) as foo
         GROUP by id""", (sts24h, ets))
     for row in icursor:
-        if qdict.get(row[0], {}).get('precip'):
+        if qdict.get(row[0], {}).get('precip') or row[1] is None:
             continue
         pcpn[row[0]] = "%5.2f" % (row[1],)
 

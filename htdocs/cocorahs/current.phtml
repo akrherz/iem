@@ -27,7 +27,7 @@ $t->current_network = "CoCoRaHS";
  $nt = new NetworkTable($network);
 
  /* Compute monthly rainfall totals! */
- $dbconn = iemdb("access");
+ $dbconn = iemdb("iem");
  $year = date("Y");
  $first_of_month = date("Y-m");
  $sql = "SELECT id, 

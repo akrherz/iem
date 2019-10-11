@@ -106,7 +106,7 @@ if ($source == "qc")
 	$cutstring1 = 2;
 	$cutstring2 = 4;
 } else {
-	$c = iemdb("access");
+	$c = iemdb("iem");
 	$cutstring1 = 0;
 	$cutstring2 = 5;
 	$sql = sprintf("SELECT id as station, day, snowd, max_tmpf as high, ".

@@ -48,7 +48,7 @@ function fmt($val, $varname){
  		$extremumcodes[ $row['code'] ] = $row['name'];
  	}
  	
- 	$pgconn = iemdb('access');
+ 	$pgconn = iemdb("iem");
  	$rs = pg_prepare($pgconn, "SELECT", "SELECT *, ".
  			"to_char(valid at time zone $1, 'dd Mon YYYY HH:MI AM') as ts ".
  			"from current_shef ".

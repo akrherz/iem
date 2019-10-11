@@ -14,7 +14,7 @@ $t = new MyView();
 $t->thispage = "networks-awos";
 $t->title = "Iowa AWOS Monthly Precipitation";
 
-$pgconn = iemdb("access");
+$pgconn = iemdb("iem");
 $nt = new NetworkTable("AWOS");
 $cities = $nt->table;
 
