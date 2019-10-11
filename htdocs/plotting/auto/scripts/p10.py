@@ -1,6 +1,7 @@
 """First and Last Date"""
 import calendar
 import datetime
+from collections import OrderedDict
 
 import psycopg2.extras
 import numpy as np
@@ -11,11 +12,17 @@ from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = {'above': 'First Spring/Last Fall Temperature Above Threshold',
-         'below': 'Last Spring/First Fall Temperature Below Threshold'}
-
-PDICT2 = {'low': 'Low Temperature',
-          'high': 'High Temperature'}
+PDICT = OrderedDict((
+    ('above', 'First Spring/Last Fall Temperature Above (>=) Threshold'),
+    ('above2', 'Last Spring/First Fall Temperature Above (>=) Threshold'),
+    ('below', 'Last Spring/First Fall Temperature Below Threshold'),
+))
+PDICT2 = OrderedDict((
+    ('high', 'High Temperature'),
+    ('low', 'Low Temperature'),
+    ('snow', 'Snowfall'),
+    ('snowd', 'Snow Cover Depth'),
+))
 
 
 def get_description():
@@ -33,9 +40,9 @@ def get_description():
         dict(type='select', name='direction', default='below',
              label='Threshold Direction', options=PDICT),
         dict(type='select', name='varname', default='low',
-             label='Daily High or Low Temperature?', options=PDICT2),
-        dict(type='int', name='threshold', default='32',
-             label='Enter Threshold Temperature:'),
+             label='Daily Variable to plot?', options=PDICT2),
+        dict(type='float', name='threshold', default='32',
+             label='Enter Threshold (degrees F or Inches):'),
         dict(type='year', name='year', default=1893,
              label='Start Year of Plot'),
     ]
@@ -56,26 +63,39 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
-    sql = """select year,
-     max(case when """+varname+""" < %s and month < 7
-         then extract(doy from day) else 0 end) as spring,
-     max(case when """+varname+""" < %s and month < 7
-         then day else null end) as spring_date,
-     min(case when """+varname+""" < %s and month > 6
-         then extract(doy from day) else 388 end) as fall,
-     min(case when """+varname+""" < %s and month > 6
-         then day else null end) as fall_date
-    from """+table+""" where station = %s
-    GROUP by year ORDER by year ASC"""
-    if direction == 'above':
+    if direction == 'below':
         sql = """select year,
-             min(case when """+varname+""" > %s and month < 7
+        max(case when """+varname+""" < %s and month < 7
+            then extract(doy from day) else 0 end) as spring,
+        max(case when """+varname+""" < %s and month < 7
+            then day else null end) as spring_date,
+        min(case when """+varname+""" < %s and month > 6
+            then extract(doy from day) else 388 end) as fall,
+        min(case when """+varname+""" < %s and month > 6
+            then day else null end) as fall_date
+        from """+table+""" where station = %s
+        GROUP by year ORDER by year ASC"""
+    elif direction == 'above':
+        sql = """select year,
+             min(case when """+varname+""" >= %s and month < 7
                  then extract(doy from day) else 183 end) as spring,
-             min(case when """+varname+""" > %s and month < 7
+             min(case when """+varname+""" >= %s and month < 7
                  then day else null end) as spring_date,
-             max(case when """+varname+""" > %s and month > 6
+             max(case when """+varname+""" >= %s and month > 6
                  then extract(doy from day) else 183 end) as fall,
-             max(case when """+varname+""" > %s and month > 6
+             max(case when """+varname+""" >= %s and month > 6
+                 then day else null end) as fall_date
+            from """+table+""" where station = %s
+            GROUP by year ORDER by year ASC"""
+    elif direction == 'above2':
+        sql = """select year,
+             max(case when """+varname+""" >= %s and month < 7
+                 then extract(doy from day) else 0 end) as spring,
+             max(case when """+varname+""" >= %s and month < 7
+                 then day else null end) as spring_date,
+             min(case when """+varname+""" >= %s and month > 6
+                 then extract(doy from day) else 388 end) as fall,
+             min(case when """+varname+""" >= %s and month > 6
                  then day else null end) as fall_date
             from """+table+""" where station = %s
             GROUP by year ORDER by year ASC"""
@@ -96,6 +116,8 @@ def plotter(fdict):
                          fall_date=row['fall_date']))
 
     df = pd.DataFrame(rows)
+    if df.empty:
+        raise NoDataFound("No data found for query.")
     df['season'] = df['fall'] - df['spring']
     res = """\
 # IEM Climodat https://mesonet.agron.iastate.edu/climodat/
@@ -156,9 +178,11 @@ def plotter(fdict):
     ax.grid(True)
     title = PDICT.get(direction, '').replace('Temperature',
                                              PDICT2.get(varname))
-    ax.set_title(("[%s] %s\n"
-                  r"%s %s$^\circ$F"
-                  ) % (station, nt.sts[station]['name'], title, threshold))
+    units = r"$^\circ$F" if not varname.startswith("snow") else "inch"
+    ax.set_title((
+        "[%s] %s\n"
+        r"%s %s%s"
+        ) % (station, nt.sts[station]['name'], title, threshold, units))
     ax.legend(ncol=2, fontsize=14, labelspacing=2)
     ax.set_yticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
     ax.set_yticklabels(calendar.month_abbr[1:])
@@ -168,5 +192,5 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict(station='IA7844', network='IACLIMATE', direction='below',
-                 varname='low', threshold=50))
+    plotter(dict(station='IA0200', network='IACLIMATE', direction='above2',
+                 varname='snow', threshold=1))
