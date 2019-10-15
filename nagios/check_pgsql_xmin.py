@@ -8,12 +8,11 @@ from __future__ import print_function
 import sys
 from pyiem.util import get_dbconn
 
-IEM = get_dbconn('iem', user='nobody')
-icursor = IEM.cursor()
 
-
-def check():
+def check(dbname):
     """Do the database check."""
+    pgconn = get_dbconn(dbname, user='nobody')
+    icursor = pgconn.cursor()
     icursor.execute("""
         SELECT datname, age(datfrozenxid) FROM pg_database
         ORDER by age DESC LIMIT 1
@@ -23,9 +22,9 @@ def check():
     return row
 
 
-def main():
+def main(argv):
     """Go Main Go."""
-    dbname, count = check()
+    dbname, count = check(argv[1])
     if count < 191000000:
         print('OK - %s %s |count=%s;191000000;195000000;220000000' % (count,
                                                                       dbname,
@@ -43,4 +42,4 @@ def main():
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(main(sys.argv))
