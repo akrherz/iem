@@ -11,7 +11,7 @@ iemdata.vtec_phenomena_dict = [
 ['SV','Severe Thunderstorm'],
 ['TO','Tornado'],
 ['MA','Marine'],
-['AF','Volcanic Ashfall'],
+['AF','Ashfall'],
 ['AS','Air Stagnation'],
 ['AV','Avalanche'],
 ['BS','Blowing Snow'],
