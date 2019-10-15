@@ -70,6 +70,8 @@ function formatter($i, $row){
 $year = isset($_GET["year"])? intval($_GET["year"]): date("Y");
 $month = isset($_GET["month"])? intval($_GET["month"]): date("m");
 $day = isset($_GET["day"])? intval($_GET["day"]): date("d");
+$metar = (isset($_GET["metar"]) & $_GET["metar"] == "1") ? "1": "0";
+$madis = (isset($_GET["madis"]) & $_GET["madis"] == "1") ? "1": "0";
 $date = mktime(0,0,0,$month, $day, $year);
 $yesterday = $date - 86400;
 $tomorrow = $date + 86400;
@@ -144,25 +146,73 @@ $t->sites_current = 'obhistory';
 
 $savevars = Array("year"=>date("Y", $date),
  "month"=>date("m", $date), "day"=>date("d", $date)); 
-$t->jsextra = <<<EOF
+$madis_show = ($madis == "1") ? "true" : "false";
+$metar_show = ($metar == "1") ? "true" : "false";
+ $t->jsextra = <<<EOF
 <script type="text/javascript">
-var metar_show = false;
-var madis_show = false;
+var metar_show = {$metar_show};
+var madis_show = {$madis_show};
+var station = "{$station}";
+var network = "{$network}";
+var month = "{$month}";
+var day = "{$day}";
+var year = "{$year}";
+function updateButton(label){
+    var btn = $("#" + label);
+    var uri = window.location.origin + window.location.pathname + "?station=" +
+    station + "&network=" + network  + "&year=" + btn.data("year")
+    + "&month=" + btn.data("month")  + "&day=" + btn.data("day");
+    if (metar_show){
+        uri += "&metar=1";
+    }
+    if (madis_show){
+        uri += "&madis=1";
+    }
+    btn.attr("href", uri);
+}
+function updateURI(){
+    // Add CGI vars that control the METAR and MADIS show buttons
+    var uri = window.location.origin + window.location.pathname + "?station=" +
+        station + "&network=" + network  + "&year=" + year
+        + "&month=" + month  + "&day=" + day;
+    if (metar_show){
+        uri += "&metar=1";
+    }
+    if (madis_show){
+        uri += "&madis=1";
+    }
+    window.history.pushState({}, "", uri);
+    updateButton("prevbutton");
+    updateButton("nextbutton");
+}
+function showMETAR(){
+    $(".metar").css("display", "table-row");
+    if (madis_show){
+        $(".hfmetar").css("display", "table-row");
+    }
+    $("#metar_toggle").html("<i class=\"fa fa-minus\"></i> Hide METARs");
+}
 function toggleMETAR(){
 	if (metar_show){
 		// Hide both METARs and HFMETARs
 		$(".metar").css("display", "none");
 		$(".hfmetar").css("display", "none");
-		$("#metar_toggle").html("<i class=\"fa fa-plus\"></i> Show METARs");
+        $("#metar_toggle").html("<i class=\"fa fa-plus\"></i> Show METARs");
+        $("#hmetar").val("0");
 	} else{
-		// show
-		$(".metar").css("display", "table-row");
-		if (madis_show){
-			$(".hfmetar").css("display", "table-row");
-		}
-		$("#metar_toggle").html("<i class=\"fa fa-minus\"></i> Hide METARs");
+        // show
+        showMETAR();
+        $("#hmetar").val("1");
 	}
-	metar_show = !metar_show;
+    metar_show = !metar_show;
+    updateURI();
+}
+function showMADIS(){
+    $("tr[data-madis=1]").css("display", "table-row");
+    if (metar_show){
+        $(".hfmetar").css("display", "table-row");
+    }
+    $("#madis_toggle").html("<i class=\"fa fa-minus\"></i> Hide High Frequency MADIS");
 }
 function toggleMADIS(){
 	if (madis_show){
@@ -170,16 +220,23 @@ function toggleMADIS(){
 		$("tr[data-madis=1]").css("display", "none");
 		$(".hfmetar").css("display", "none");
 		$("#madis_toggle").html("<i class=\"fa fa-plus\"></i> Show High Frequency MADIS");
+        $("#hmadis").val("0");
 	} else {
-		// Show
-		$("tr[data-madis=1]").css("display", "table-row");
-		if (metar_show){
-			$(".hfmetar").css("display", "table-row");
-		}
-		$("#madis_toggle").html("<i class=\"fa fa-minus\"></i> Hide High Frequency MADIS");
+        // Show
+        showMADIS();
+        $("#hmadis").val("1");
 	}
 	madis_show = !madis_show;
+    updateURI();
 }
+$(document).ready(function(){
+    if (metar_show) {
+        showMETAR();
+    }
+    if (madis_show) {
+        showMADIS();
+    }
+});
 </script>
 EOF;
 $dstr = date("d F Y", $date);
@@ -218,6 +275,8 @@ $content = <<<EOF
 <strong>Select Date:</strong>
 <input type="hidden" value="{$station}" name="station" />
 <input type="hidden" value="{$network}" name="network" />
+<input id="hmetar" type="hidden" value="{$metar}" name="metar" />
+<input id="hmadis" type="hidden" value="{$madis}" name="madis" />
 {$ys}
 {$ms}
 {$ds}
@@ -225,14 +284,22 @@ $content = <<<EOF
 </form>
 <p>{$mbutton}</p>
 EOF;
-$content .= sprintf("<a rel=\"nofollow\" href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" 
-  class=\"btn btn-default\">Previous Day</a>", $network, $station, date("Y", $yesterday),
-  date("m", $yesterday), date("d", $yesterday));
+$content .= sprintf("<a id=\"prevbutton\" ".
+    "data-year=\"%s\" data-month=\"%s\" data-day=\"%s\" ".
+    "href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" ".
+    "class=\"btn btn-default\">Previous Day</a>",
+    date("Y", $yesterday), date("m", $yesterday), date("d", $yesterday),
+    $network, $station, date("Y", $yesterday),
+    date("m", $yesterday), date("d", $yesterday));
   
 if ($tomorrow){
-  $content .= sprintf("<a rel=\"nofollow\" href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" 
-  class=\"btn btn-default\">Next Day</a>", $network, $station, date("Y", $tomorrow),
-  date("m", $tomorrow), date("d", $tomorrow));
+  $content .= sprintf("<a id=\"nextbutton\" ". 
+    "data-year=\"%s\" data-month=\"%s\" data-day=\"%s\" ".
+    "href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" ".
+    "class=\"btn btn-default\">Next Day</a>",
+    date("Y", $tomorrow), date("m", $tomorrow), date("d", $tomorrow),
+    $network, $station, date("Y", $tomorrow),
+    date("m", $tomorrow), date("d", $tomorrow));
 }
 $notes = '';
 if ($network == "ISUSM"){
