@@ -60,8 +60,31 @@ def get_data(ts):
         daily[row[0]] = {'pday': row[1], 'max_tmpf': row[2],
                          'min_tmpf': row[3]}
     cursor.execute("""
-    SELECT * from sm_hourly where valid = %s
-    """, (ts,))
+    SELECT h.station,
+        h.encrh_avg,
+        coalesce(m.rh_avg_qc, h.rh_qc) as rh,
+        h.rain_mm_tot,
+        etalfalfa,
+        battv_min,
+        coalesce(m.slrkj_tot_qc * 3600 / 1000000, h.slrmj_tot_qc) as slrmj_tot,
+        coalesce(m.tair_c_avg, h.tair_c_avg) as tair_c_avg,
+        coalesce(m.tsoil_c_avg_qc, h.tsoil_c_avg_qc) as tsoil_c_avg_qc,
+        coalesce(m.t12_c_avg_qc, h.t12_c_avg_qc) as t12_c_avg_qc,
+        coalesce(m.t24_c_avg_qc, h.t24_c_avg_qc) as t24_c_avg_qc,
+        coalesce(m.t50_c_avg_qc, h.t50_c_avg_qc) as t50_c_avg_qc,
+        coalesce(m.calcvwc12_avg_qc, h.calc_vwc_12_avg_qc)
+            as calc_vwc_12_avg_qc,
+        coalesce(m.calcvwc24_avg_qc, h.calc_vwc_24_avg_qc)
+            as calc_vwc_24_avg_qc,
+        coalesce(m.calcvwc50_avg_qc, h.calc_vwc_50_avg_qc)
+            as calc_vwc_50_avg_qc,
+        coalesce(m.ws_mph_max, h.ws_mph_max) as ws_mph_max,
+        coalesce(m.winddir_d1_wvt, h.winddir_d1_wvt) as winddir_d1_wvt,
+        coalesce(m.ws_mph_s_wvt * 0.447, h.ws_mps_s_wvt)as ws_mps_s_wvt
+    from sm_hourly h LEFT JOIN sm_minute m on (h.station = m.station and
+    h.valid = m.valid)
+    where h.valid = %s
+    """, (ts, ))
     for row in cursor:
         sid = row['station']
         if sid not in nt.sts:
