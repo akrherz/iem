@@ -90,7 +90,7 @@ if (isset($_GET['valid'])) {
   "random() as boid, b.segid, c.cond_code, b.geom, ". 
   "row_number() OVER (PARTITION by b.segid ORDER by c.valid DESC) ". 
   "from roads_base b, ". 
-  "roads_2018_2019_log c WHERE b.segid = c.segid and b.type > 1 and ". 
+  "roads_2019_2020_log c WHERE b.segid = c.segid and b.type > 1 and ". 
   "c.valid < '$dbvalid' and c.valid > '$dbvalid2' ". 
   "ORDER by b.segid DESC) select * from data WHERE row_number = 1) as foo ". 
   "using UNIQUE boid using SRID=26915");
@@ -105,7 +105,7 @@ if (isset($_GET['valid'])) {
   "random() as boid, b.segid, c.cond_code, b.geom, ". 
   "row_number() OVER (PARTITION by b.segid ORDER by c.valid DESC) ". 
   "from roads_base b, ". 
-  "roads_2018_2019_log c WHERE b.segid = c.segid and b.type = 1 and ". 
+  "roads_2019_2020_log c WHERE b.segid = c.segid and b.type = 1 and ". 
   "c.valid < '$dbvalid' and c.valid > '$dbvalid2' ". 
   "ORDER by b.segid DESC) select * from data WHERE row_number = 1) as foo ". 
   "using UNIQUE boid using SRID=26915");

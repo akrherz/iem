@@ -208,7 +208,7 @@ def main():
         # Save to log, if difference
         if cond != current[segid]:
             cursor.execute("""
-                INSERT into roads_2018_2019_log(segid, valid, cond_code, raw)
+                INSERT into roads_2019_2020_log(segid, valid, cond_code, raw)
                 VALUES (%s, %s, %s, %s)
             """, (segid, valid.strftime("%Y-%m-%d %H:%M+00"), cond, raw))
             dirty = True

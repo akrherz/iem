@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (34, now());
+INSERT into iem_schema_manager_version values (35, now());
 
 ---
 --- TABLES THAT ARE LOADED VIA shp2pgsql
@@ -2118,6 +2118,17 @@ CREATE TABLE roads_2018_2019_log(
 
 GRANT ALL on roads_2018_2019_log to mesonet,ldm;
 GRANT SELECT on roads_2018_2019_log to apache,nobody;
+
+CREATE TABLE roads_2019_2020_log(
+  segid INT references roads_base(segid),
+  valid timestamptz,
+  cond_code smallint references roads_conditions(code),
+  towing_prohibited bool,
+  limited_vis bool,
+  raw varchar);
+
+GRANT ALL on roads_2019_2020_log to mesonet,ldm;
+GRANT SELECT on roads_2019_2020_log to apache,nobody;
 
 create table lsrs_2016( 
   CONSTRAINT __lsrs_2016_check 
