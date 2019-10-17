@@ -78,6 +78,7 @@ def run(wfo, year, phenomena, significance, combo):
             dict(phenomena=row['phenomena'],
                  significance=row['significance'],
                  eventid=row['eventid'],
+                 hvtec_nwsli=row['nwsli'],
                  area=float(row['myarea']),
                  locations=row['locations'],
                  issue=row['utc_issue'].strftime(ISO9660),

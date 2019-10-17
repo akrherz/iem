@@ -16,7 +16,7 @@ $edate = isset($_REQUEST["edate"]) ? $_REQUEST["edate"] : 'TODAY';
 $rs = pg_prepare($dbconn, "SELECT", "SELECT 
 		to_char(issue, 'YYYY-MM-DDThh24:MI:SSZ') as iso_issued,
         to_char(expire, 'YYYY-MM-DDThh24:MI:SSZ') as iso_expired,
-		eventid, phenomena, significance,  
+		eventid, phenomena, significance, hvtec_nwsli,
 		extract(year from issue) || phenomena || significance || eventid as id, 
 		wfo 
 		from warnings WHERE ugc = $1 and issue > $2::date 
@@ -31,7 +31,8 @@ for( $i=0; $row = @pg_fetch_assoc($rs,$i); $i++){
   $ar["events"][] = Array(
   	"issue" => $row["iso_issued"],
   	"expire" => $row["iso_expired"],
-  	"eventid" => $row["eventid"],
+      "eventid" => $row["eventid"],
+      "hvtec_nwsli" => $row["hvtec_nwsli"],
     "significance" => $row["significance"],
     "phenomena" => $row["phenomena"],
     "wfo" => $row["wfo"],

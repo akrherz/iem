@@ -25,7 +25,7 @@ def run(lon, lat, sdate, edate):
     SELECT
     to_char(issue at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ') as iso_issued,
   to_char(expire at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ') as iso_expired,
-    eventid, phenomena, significance, wfo
+    eventid, phenomena, significance, wfo, hvtec_nwsli
     from warnings w JOIN myugcs u on (w.gid = u.gid) WHERE
     issue > %s and issue < %s ORDER by issue ASC
     """, (lon, lat, sdate, edate))
@@ -36,6 +36,7 @@ def run(lon, lat, sdate, edate):
                               'expire': row[1],
                               'eventid': row[2],
                               'phenomena': row[3],
+                              'hvtec_nwsli': row[6],
                               'significance': row[4],
                               'wfo': row[5]})
 

@@ -61,7 +61,7 @@ def run(wfo, year, phenomena, significance, etn):
     w.issue at time zone 'UTC' utc_issue,
     w.expire at time zone 'UTC' utc_expire,
     w.init_expire at time zone 'UTC' utc_init_expire,
-    w.updated at time zone 'UTC' utc_updated
+    w.updated at time zone 'UTC' utc_updated, hvtec_nwsli
     from """+table+""" w JOIN ugcs u on (w.gid = u.gid)
     WHERE w.wfo = %s and eventid = %s and
     phenomena = %s and significance = %s
@@ -73,6 +73,7 @@ def run(wfo, year, phenomena, significance, etn):
             'ugc': row['ugc'],
             'name': row['name'],
             'status': row['status'],
+            'hvtec_nwsli': row['hvtec_nwsli'],
             'utc_product_issue': row['utc_product_issue'].strftime(ISO9660),
             'utc_issue': row['utc_issue'].strftime(ISO9660),
             'utc_init_expire': row['utc_init_expire'].strftime(ISO9660),
