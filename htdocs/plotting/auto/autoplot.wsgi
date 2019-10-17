@@ -30,6 +30,25 @@ if BASEDIR not in sys.path:
     sys.path.insert(0, BASEDIR)
 
 
+def format_mapbox_response(js):
+    """Wrap the given javascript in a mapbox wrapper."""
+
+    return """
+    mapboxgl.accessToken = 'pk.eyJ1IjoiYWtyaGVyeiIsImEiOiJjanNveG5sOWowc' +
+        'm0yNDlwMXlsbXVpeXJoIn0.Qwjhi5VK_ADPbHd2jz01Sw';
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/dark-v9',
+        center: [-68.13734351262877, 45.137451890638886],
+        zoom: 5
+    });
+
+    map.on('load', function () {
+        """ + js + """
+    });
+    """
+
+
 def parser(cgistr):
     """ Convert a CGI string into a dict that gets passed to the plotting
     routine """
@@ -54,7 +73,7 @@ def get_response_headers(fmt):
     extra = None
     if fmt == 'png':
         ctype = "image/png"
-    elif fmt == 'js':
+    elif fmt in ['js', 'mapbox']:
         ctype = "application/javascript"
     elif fmt == 'svg':
         ctype = "image/svg+xml"
@@ -116,6 +135,8 @@ def get_res_by_fmt(p, fmt, fdict):
     # Allow returning of javascript as a string
     if fmt == 'js':
         res = a.highcharts(fdict)
+    elif fmt == 'mapbox':
+        res = format_mapbox_response(a.mapbox(fdict))
     else:
         res = a.plotter(fdict)
     # res should be either a 2 or 3 length tuple, rectify this otherwise
@@ -189,7 +210,7 @@ def workflow(environ, form, fmt):
     if fmt == 'js' and isinstance(mixedobj, dict):
         content = ('$("#ap_container").highcharts(%s);'
                    ) % (json.dumps(mixedobj),)
-    elif fmt == 'js':
+    elif fmt in ['js', 'mapbox']:
         content = mixedobj
     elif fmt in ['svg', 'png', 'pdf'] and isinstance(mixedobj, plt.Figure):
         # if our content is a figure, then add some fancy metadata to plot
@@ -224,7 +245,7 @@ def workflow(environ, form, fmt):
     else:
         sys.stderr.write(("Undefined edge case: fmt: %s uri: %s\n"
                           ) % (fmt, environ.get('REQUEST_URI')))
-        raise Exception("Undefined autoplot action")
+        raise Exception("Undefined autoplot action |%s|" % (fmt, ))
 
     try:
         mc.set(mckey, content, meta.get('cache', 43200))
@@ -241,7 +262,7 @@ def application(environ, start_response):
     # Parse the request that was sent our way
     fields = parse_formvars(environ)
     # Figure out the format that was requested from us, default to png
-    fmt = fields.get('fmt', 'png')[:4]
+    fmt = fields.get('fmt', 'png')[:6]
     # Figure out what our response headers should be
     response_headers = get_response_headers(fmt)
     try:

@@ -343,6 +343,7 @@
     RewriteRule plot/([0-9]{1,12})/(.*).txt$ autoplot.py?p=$1&q=$2&fmt=txt
     RewriteRule plot/([0-9]{1,12})/(.*).xlsx$ autoplot.py?p=$1&q=$2&fmt=xlsx
     RewriteRule plot/([0-9]{1,12})/(.*).js$ autoplot.py?p=$1&q=$2&fmt=js
+    RewriteRule plot/([0-9]{1,12})/(.*).mapbox$ autoplot.py?p=$1&q=$2&fmt=mapbox
     RewriteRule plot/([0-9]{1,12})/(.*).pdf$ autoplot.py?p=$1&q=$2&fmt=pdf
     RewriteRule plot/([0-9]{1,12})/(.*).svg$ autoplot.py?p=$1&q=$2&fmt=svg
     RewriteRule meta/([0-9]{1,12}).(json|html) meta.py?p=$1&_fmt=$2 [QSA]

@@ -82,6 +82,7 @@ def do_json(pidx):
         fp, pathname, description = imp.find_module(name)
         app = imp.load_module(name, fp, pathname, description)
         data = app.get_description()
+        data['mapbox'] = hasattr(app, 'mapbox')
         data['timing[secs]'] = timing
 
         # Defaults

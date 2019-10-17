@@ -12,22 +12,10 @@ $mesosite = iemdb("mesosite");
 $formhtml = "";
 $image = "";
 $extrascripts = "";
+$headextra = "";
 $t = new MyView();
 $t->thispage = "current-plotter";
 $t->title = "Automated Data Plotter";
-$t->headextra = <<<EOF
- <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.css" />
- <link rel="stylesheet" type="text/css" href="/vendor/jquery-ui-timepicker/1.6.3/jquery-ui-timepicker-addon.min.css"/ >
- <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
-<style>
-    .select2-results .select2-disabled,  .select2-results__option[aria-disabled=true] { 
-    display: none;
-    }
-.ui-datepicker { width: 17em; padding: .2em .2em 0; z-index: 9999 !important; }
-.cmapselect { width: 400px; }
-</style>
-EOF;
-
 
 $q = isset($_GET["q"]) ? intval($_GET["q"]) : 0;
 $network = isset($_GET["network"]) ? xssafe($_GET["network"]): "IACLIMATE";
@@ -455,6 +443,15 @@ EOF;
 <script src="/vendor/highcharts/{$HC}/modules/exporting.js"></script>		
 <script src="${imguri}.js"></script>		
 EOF;
+		} elseif ($fmt == 'mapbox'){
+			// Add debug to the screen so to allow easy copy/paste
+			$image = ($_SERVER['SERVER_NAME'] == 'iem.local') ? "<pre>iem.local: ${imguri}.mapbox</pre>": ""; 
+			$image .= '<div id="map" style="width:100%s;height:400px;"></div>';
+			$headextra .= <<<EOF
+            <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.js'></script>
+            <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.css' rel='stylesheet' />
+EOF;
+            $extrascripts .= "<script src=\"${imguri}.mapbox\"></script>";
 		} elseif ($fmt == 'png' || $fmt == 'svg') {
 			$timing_secs = intval($jobj->{"timing[secs]"}) + 1;
 			if ($timing_secs < 1) $timing_secs = 5;
@@ -502,6 +499,9 @@ EOF;
 	}
 	elseif (isset($jobj->highcharts) && $jobj->highcharts){
 		$ar["js"] = "Interactive Chart";
+	}
+	elseif (isset($jobj->mapbox) && $jobj->mapbox){
+		$ar["mapbox"] = "Interactive Map";
 	}
 	$thisi = make_select("_fmt", $fmt, $ar);
 	$form .= sprintf("<tr><td>Select Output Format</td><td>%s</td></tr>",
@@ -626,5 +626,19 @@ $(document).ready(function(){
 });
 </script>
 EOF;
+$t->headextra = <<<EOF
+ <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.css" />
+ <link rel="stylesheet" type="text/css" href="/vendor/jquery-ui-timepicker/1.6.3/jquery-ui-timepicker-addon.min.css"/ >
+ <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
+<style>
+    .select2-results .select2-disabled,  .select2-results__option[aria-disabled=true] { 
+    display: none;
+    }
+.ui-datepicker { width: 17em; padding: .2em .2em 0; z-index: 9999 !important; }
+.cmapselect { width: 400px; }
+</style>
+ {$headextra}
+EOF;
+
 $t->render('full.phtml');
 ?>
