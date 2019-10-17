@@ -45,6 +45,8 @@ PDICT3 = OrderedDict([
     ('pwater_mm', 'Precipitable Water (mm)'),
     ('sbcape_jkg', 'Surface Based CAPE (J/kg)'),
     ('sbcin_jkg', 'Surface Based CIN (J/kg)'),
+    ('sweat_index', 'Sweat Index'),
+    ('total_totals', 'Total Totals (C)'),
     ('smps', 'Wind Speed (mps)'),
     ])
 PDICT4 = OrderedDict((

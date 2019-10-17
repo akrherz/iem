@@ -400,7 +400,9 @@ CREATE TABLE raob_flights(
     lfc_tmpc real,
     el_agl_m real,
     el_pressure_hpa real,
-    el_tmpc real
+    el_tmpc real,
+    total_totals real,
+    sweat_index real
 );
 ALTER TABLE raob_flights OWNER to mesonet;
 GRANT ALL on raob_flights to ldm,mesonet;

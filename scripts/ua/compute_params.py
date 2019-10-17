@@ -44,6 +44,50 @@ def gt1(val):
     return val
 
 
+def compute_total_totals(profile):
+    """Total Totals."""
+    # (T850 - T500) + (Td850 - T500)
+    l850 = profile[profile['pressure'] == 850]
+    l500 = profile[profile['pressure'] == 500]
+    if l850.empty or l500.empty:
+        return np.nan
+    return (
+        (l850.iloc[0]['tmpc'] - l500.iloc[0]['tmpc']) +
+        (l850.iloc[0]['dwpc'] - l500.iloc[0]['tmpc'])
+    )
+
+
+def compute_sweat_index(profile, total_totals):
+    """Compute the Sweat Index."""
+    if pd.isnull(total_totals):
+        return np.nan
+    # 	SWET	= 12 * TD850 + 20 * TERM2 + 2 * SKT850 + SKT500 + SHEAR
+    # TERM2	= MAX ( TOTL - 49, 0 )
+    # TOTL	= Total totals index
+    # SKT850	= 850 mb wind speed in knots
+    # SKT500	= 500 mb wind speed in knots
+    # SHEAR	= 125 * [ SIN ( DIR500 - DIR850 ) + .2 ]
+    # DIR500	= 500 mb wind direction
+    # DIR850	= 850 mb wind direction
+    l850 = profile[profile['pressure'] == 850]
+    l500 = profile[profile['pressure'] == 500]
+    if l850.empty or l500.empty:
+        return np.nan
+    term2 = np.max([total_totals - 49., 0])
+    skt850 = (
+        l850.iloc[0]['smps'] * units("m/s")
+    ).to(units.knots).m
+    skt500 = (
+        l500.iloc[0]['smps'] * units("m/s")
+    ).to(units.knots).m
+    dir500 = (l500.iloc[0]['drct'] * units("degrees_north")).to(units.radian).m
+    dir850 = (l850.iloc[0]['drct'] * units("degrees_north")).to(units.radian).m
+    shear = 125. * (np.sin(dir500 - dir850) + .2)
+    return (
+        12. * l850.iloc[0]['dwpc'] + 20. * term2 + 2 * skt850 + skt500 + shear
+    )
+
+
 def do_profile(cursor, fid, gdf, nt):
     """Process this profile."""
     profile = gdf[pd.notnull(gdf['tmpc']) & pd.notnull(gdf['dwpc'])]
@@ -54,6 +98,8 @@ def do_profile(cursor, fid, gdf, nt):
         raise ValueError(
             "Profile only up to %s mb" % (profile['pressure'].min(), ))
     station_elevation_m = get_station_elevation(gdf, nt)
+    total_totals = compute_total_totals(profile)
+    sweat_index = compute_sweat_index(profile, total_totals)
     pwater = precipitable_water(
         profile['dwpc'].values * units.degC,
         profile['pressure'].values * units.hPa)
@@ -88,14 +134,7 @@ def do_profile(cursor, fid, gdf, nt):
     el_agl = gt1(el_hght - station_elevation_m)
     lcl_agl = gt1(lcl_hght - station_elevation_m)
     lfc_agl = gt1(lfc_hght - station_elevation_m)
-    cursor.execute("""
-        UPDATE raob_flights SET sbcape_jkg = %s, sbcin_jkg = %s,
-        mucape_jkg = %s, mucin_jkg = %s, pwater_mm = %s,
-        el_agl_m = %s, el_pressure_hpa = %s, el_tmpc = %s,
-        lfc_agl_m = %s, lfc_pressure_hpa = %s, lfc_tmpc = %s,
-        lcl_agl_m = %s, lcl_pressure_hpa = %s, lcl_tmpc = %s,
-        computed = 't' WHERE fid = %s
-    """, (
+    args = (
         nonull(sbcape.to(units('joules / kilogram')).m),
         nonull(sbcin.to(units('joules / kilogram')).m),
         nonull(mucape.to(units('joules / kilogram')).m),
@@ -107,8 +146,19 @@ def do_profile(cursor, fid, gdf, nt):
         nonull(lfc_t.to(units.degC).m),
         nonull(lcl_agl), nonull(lcl_p.to(units('hPa')).m),
         nonull(lcl_t.to(units.degC).m),
+        nonull(total_totals), nonull(sweat_index),
         fid
-    ))
+    )
+    print(args)
+    cursor.execute("""
+        UPDATE raob_flights SET sbcape_jkg = %s, sbcin_jkg = %s,
+        mucape_jkg = %s, mucin_jkg = %s, pwater_mm = %s,
+        el_agl_m = %s, el_pressure_hpa = %s, el_tmpc = %s,
+        lfc_agl_m = %s, lfc_pressure_hpa = %s, lfc_tmpc = %s,
+        lcl_agl_m = %s, lcl_pressure_hpa = %s, lcl_tmpc = %s,
+        total_totals = %s, sweat_index = %s,
+        computed = 't' WHERE fid = %s
+    """, args)
 
 
 def main(argv):

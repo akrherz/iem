@@ -14,3 +14,5 @@ ALTER TABLE raob_flights add lfc_tmpc real;
 ALTER TABLE raob_flights add el_agl_m real;
 ALTER TABLE raob_flights add el_pressure_hpa real;
 ALTER TABLE raob_flights add el_tmpc real;
+ALTER TABLE raob_flights add total_totals real;
+ALTER TABLE raob_flights add sweat_index real;
