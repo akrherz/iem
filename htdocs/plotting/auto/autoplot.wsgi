@@ -39,12 +39,13 @@ def format_mapbox_response(js):
     var map = new mapboxgl.Map({
         container: 'map',
         style: 'mapbox://styles/mapbox/dark-v9',
-        center: [-68.13734351262877, 45.137451890638886],
-        zoom: 5
+        center: [-91.9, 42.0],
+        zoom: 3
     });
 
     map.on('load', function () {
         """ + js + """
+
     });
     """
 

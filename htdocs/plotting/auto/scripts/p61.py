@@ -3,6 +3,8 @@ import datetime
 from collections import OrderedDict
 
 from pandas.io.sql import read_sql
+import pandas as pd
+import geopandas as gpd
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -45,14 +47,10 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
-    """ Go """
+def get_data(ctx):
+    """Build out our data."""
     pgconn = get_dbconn('iem')
-    ctx = get_autoplot_context(fdict, get_description())
     varname = ctx['var']
-    sector = ctx['sector']
-    state = ctx['state']
-    wfo = ctx['wfo']
 
     today = ctx['sdate']
     yesterday = today - datetime.timedelta(days=1)
@@ -88,11 +86,11 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No Data Found.")
 
-    lats = []
-    lons = []
-    vals = []
-    colors = []
-    labels = []
+    df['lat'] = None
+    df['lon'] = None
+    df['val'] = None
+    df['color'] = ""
+    df['label'] = ""
     df['precip_days'] = (df['last_dry'] - df['last_wet']).dt.days
     df['low_days'] = (df['last_low_above'] - df['last_low_below']).dt.days
     df['high_days'] = (df['last_high_above'] - df['last_high_below']).dt.days
@@ -101,37 +99,83 @@ def plotter(fdict):
         ).sort_values(ascending=False).index)
 
     for station, row in df.iterrows():
-        if station not in ctx['_nt'].sts:
+        lookup = station[1:] if station.startswith("K") else station
+        if lookup not in ctx['_nt'].sts:
             continue
-        lats.append(ctx['_nt'].sts[station]['lat'])
-        lons.append(ctx['_nt'].sts[station]['lon'])
+        df.at[station, 'lat'] = ctx['_nt'].sts[lookup]['lat']
+        df.at[station, 'lon'] = ctx['_nt'].sts[lookup]['lon']
         if varname == 'precip':
             last_wet = row['last_wet']
             days = 0 if last_wet in [today, yesterday] else row['precip_days']
         else:
             days = row[varname + '_days']
-        vals.append(days)
-        colors.append('r' if days > 0 else 'b')
-        labels.append(station[1:])
+        df.at[station, 'val'] = days
+        df.at[station, 'color'] = '#FF0000' if days > 0 else '#0000FF'
+        df.at[station, 'label'] = station[1:]
+    df = df[pd.notnull(df['lon'])]
+    ctx['df'] = gpd.GeoDataFrame(
+        df, geometry=gpd.points_from_xy(df['lon'], df['lat']))
+    ctx['subtitle'] = (
+        'based on NWS CLI Sites, map approximately '
+        'valid for %s') % (today.strftime("%-d %b %Y"), )
+
+
+def mapbox(fdict):
+    """mapbox interface output."""
+    ctx = get_autoplot_context(fdict, get_description())
+    get_data(ctx)
+    geojson = ctx['df'][['label', 'val', 'geometry', 'color']].to_json()
+    return """
+
+    var ap_geodata = """ + geojson + """;
+
+    map.addLayer({
+        "id": "points",
+        "type": "symbol",
+        "source": {
+            "type": "geojson",
+            "data": ap_geodata
+        },
+        "paint": {
+            "text-color": {"type": "identity", "property": "color"},
+            "text-halo-color": "#FFFFFF",
+            "text-halo-width": 4
+        },
+        "layout": {
+            "text-field": "{val}",
+            "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+            "text-offset": [0, 0.6],
+            "text-anchor": "top"
+        }
+    });
+    """
+
+
+def plotter(fdict):
+    """ Go """
+    ctx = get_autoplot_context(fdict, get_description())
+    get_data(ctx)
 
     title = ('Consecutive Days with %s Temp '
-             'above(+)/below(-) Average') % (varname.capitalize(),)
-    if varname == 'precip':
+             'above(+)/below(-) Average') % (ctx['var'].capitalize(),)
+    if ctx['var'] == 'precip':
         title = 'Days Since Last Measurable Precipitation'
-    mp = MapPlot(sector=sector,
-                 state=state,
-                 cwa=(wfo if len(wfo) == 3 else wfo[1:]),
+    mp = MapPlot(sector=ctx['sector'],
+                 state=ctx['state'],
+                 cwa=(ctx['wfo'] if len(ctx['wfo']) == 3 else ctx['wfo'][1:]),
                  axisbg='tan', statecolor='#EEEEEE',
                  title=title,
-                 subtitle=('based on NWS CLI Sites, map approximately '
-                           'valid for %s') % (today.strftime("%-d %b %Y"), ))
-    mp.plot_values(lons, lats, vals, color=colors, labels=labels,
-                   labeltextsize=(8 if sector != 'state' else 12),
-                   textsize=(12 if sector != 'state' else 16),
-                   labelbuffer=10)
+                 subtitle=ctx['subtitle'])
+    df2 = ctx['df'][pd.notnull(ctx['df']['lon'])]
+    mp.plot_values(
+        df2['lon'].values, df2['lat'].values, df2['val'].values,
+        color=df2['color'].values, labels=df2['label'].values,
+        labeltextsize=(8 if ctx['sector'] != 'state' else 12),
+        textsize=(12 if ctx['sector'] != 'state' else 16),
+        labelbuffer=10)
 
-    return mp.fig, df
+    return mp.fig, ctx['df']
 
 
 if __name__ == '__main__':
-    plotter(dict(var='precip'))
+    print(mapbox(dict(var='precip')))
