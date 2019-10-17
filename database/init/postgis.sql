@@ -402,7 +402,19 @@ CREATE TABLE raob_flights(
     el_pressure_hpa real,
     el_tmpc real,
     total_totals real,
-    sweat_index real
+    sweat_index real,
+    bunkers_lm_smps real,
+    bunkers_lm_drct real,
+    bunkers_rm_smps real,
+    bunkers_rm_drct real,
+    mean_sfc_6km_smps real,
+    mean_sfc_6km_drct real,
+    srh_sfc_1km_pos real,
+    srh_sfc_1km_neg real,
+    srh_sfc_1km_total real,
+    srh_sfc_3km_pos real,
+    srh_sfc_3km_neg real,
+    srh_sfc_3km_total real
 );
 ALTER TABLE raob_flights OWNER to mesonet;
 GRANT ALL on raob_flights to ldm,mesonet;

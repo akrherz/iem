@@ -43,6 +43,12 @@ PDICT3 = OrderedDict([
     ('mucape_jkg', 'Most Unstable CAPE (J/kg)'),
     ('mucin_jkg', 'Most Unstable CIN (J/kg)'),
     ('pwater_mm', 'Precipitable Water (mm)'),
+    ('srh_sfc_1km_neg', 'Storm Relative Helicity Negative (0-1km) (m2/s2)'),
+    ('srh_sfc_1km_pos', 'Storm Relative Helicity Positive (0-1km) (m2/s2)'),
+    ('srh_sfc_1km_total', 'Storm Relative Helicity Total (0-1km) (m2/s2)'),
+    ('srh_sfc_3km_neg', 'Storm Relative Helicity Negative (0-3km) (m2/s2)'),
+    ('srh_sfc_3km_pos', 'Storm Relative Helicity Positive (0-3km) (m2/s2)'),
+    ('srh_sfc_3km_total', 'Storm Relative Helicity Total (0-3km) (m2/s2)'),
     ('sbcape_jkg', 'Surface Based CAPE (J/kg)'),
     ('sbcin_jkg', 'Surface Based CIN (J/kg)'),
     ('sweat_index', 'Sweat Index'),
@@ -68,6 +74,11 @@ def get_description():
     <br /><br />The 'Select Station' option provides some 'virtual' stations
     that are spliced together archives of close by stations.  For some
     locations, the place that the sounding is made has moved over the years..
+
+    <br /><br />
+    <strong>Some derived parameters are a work-in-progress.</strong>  The IEM
+    is presently computing a host of sounding parameters and with millions of
+    soundings, this computation will take a number of days to complete.
     """
     desc['arguments'] = [
         dict(type='networkselect', name='station', network='RAOB',
