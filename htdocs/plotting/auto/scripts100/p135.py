@@ -20,7 +20,6 @@ def get_description():
     desc = dict()
     desc['data'] = True
     desc['cache'] = 86400
-    desc['highcharts'] = True
     desc['description'] = """This plot displays the accumulated number of days
     that the high or low temperature was above or below some threshold.
     """

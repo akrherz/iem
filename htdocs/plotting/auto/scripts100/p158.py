@@ -13,7 +13,6 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     desc['data'] = True
-    desc['highcharts'] = True
     desc['description'] = """This plot presents one second data from the
     Iowa Atmospheric Observatory Tall-Towers sites overseen by Dr Gene Takle.
     The plot limits the number of times plotted to approximately 1,000 so to

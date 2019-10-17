@@ -19,7 +19,6 @@ def get_description():
     desc = dict()
     desc['data'] = True
     desc['cache'] = 86400
-    desc['highcharts'] = True
     desc['description'] = """This chart presents the hourly average wind speeds
     by month of the year or by custom periods.
     The hours presented are valid in the local time zone

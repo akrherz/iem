@@ -31,7 +31,6 @@ def get_description():
     desc = dict()
     ts = datetime.date.today() - datetime.timedelta(days=365)
     desc['data'] = True
-    desc['highcharts'] = True
     desc['description'] = """This chart displays a simple time series of
     an observed variable for a location of your choice.  For sites in the
     US, the daily high and low temperature climatology is presented as a

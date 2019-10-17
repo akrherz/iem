@@ -28,7 +28,6 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     desc['data'] = True
-    desc['highcharts'] = True
     desc['cache'] = 86400
     desc['description'] = """This plot presents a daily observation for a site
     and year on a given date / holiday date each year.  A large caveat to this

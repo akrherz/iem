@@ -61,7 +61,6 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     desc['data'] = True
-    desc['highcharts'] = True
     desc['description'] = """This plot displays a single month's worth of data
     over all of the years in the period of record.  In most cases, you can
     access the raw data for these plots

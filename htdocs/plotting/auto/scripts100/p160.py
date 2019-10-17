@@ -20,7 +20,6 @@ def get_description():
     desc = dict()
     desc['data'] = True
     desc['cache'] = 3600
-    desc['highcharts'] = True
     desc['description'] = """This page presents a sphagetti plot of river stage
     and forecasts.  The plot is roughly centered on the date of your choice
     with the plot showing any forecasts made three days prior to the date

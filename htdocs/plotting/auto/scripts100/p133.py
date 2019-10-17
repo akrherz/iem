@@ -11,7 +11,6 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     desc['data'] = True
-    desc['highcharts'] = True
     desc['cache'] = 86400
     desc['description'] = """This plot displays the total reported snowfall for
     a period prior to a given date and then after the date for the winter

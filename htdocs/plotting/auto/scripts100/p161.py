@@ -41,7 +41,6 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     desc['data'] = True
-    desc['highcharts'] = True
     desc['cache'] = 86400
     desc['description'] = """This application plots the number of days for a
     given month or period of months that a given variable was above or below

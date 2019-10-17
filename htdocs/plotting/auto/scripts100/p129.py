@@ -23,7 +23,6 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     desc['data'] = True
-    desc['highcharts'] = True
     desc['description'] = """This chart plots the monthly percentiles that
     a given daily value has.  For example, where would a daily 2 inch
     precipitation rank for each month of the year.  Having a two inch event

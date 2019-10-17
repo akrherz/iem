@@ -14,7 +14,6 @@ PDICT = {
 def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
-    desc['highcharts'] = True
     desc['data'] = True
     desc['description'] = """
     This chart shows the margin by which new daily high

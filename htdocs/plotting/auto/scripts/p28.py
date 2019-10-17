@@ -23,7 +23,6 @@ def get_description():
     desc = dict()
     today = datetime.date.today()
     desc['data'] = True
-    desc['highcharts'] = True
     desc['description'] = """This plot presents trailing day precipitation
     metrics.  Each point on the x-axis represents a period from that date to
     the right-most date on the plot.  There are five options for units to

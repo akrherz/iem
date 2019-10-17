@@ -19,7 +19,6 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     desc['data'] = True
-    desc['highcharts'] = True
     desc['description'] = """This plot presents the climatology and actual
     year's progression of warmest to date or coldest to date temperature.
     The simple average is presented along with the percentile intervals."""

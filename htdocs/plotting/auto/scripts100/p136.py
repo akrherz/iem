@@ -17,7 +17,6 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     desc['data'] = True
-    desc['highcharts'] = True
     desc['cache'] = 86400
     desc['description'] = """This plot displays the number of accumulated
     hours below a given wind chill temperature threshold by season. The

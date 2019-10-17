@@ -42,7 +42,6 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     desc['data'] = True
-    desc['highcharts'] = True
     desc['description'] = """This application generates a wind rose for a given
     criterion being meet. A wind rose plot is a convenient way of summarizing
     wind speed and direction."""
