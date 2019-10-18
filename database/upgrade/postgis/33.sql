@@ -28,3 +28,6 @@ ALTER TABLE raob_flights add srh_sfc_1km_total real;
 ALTER TABLE raob_flights add srh_sfc_3km_pos real;
 ALTER TABLE raob_flights add srh_sfc_3km_neg real;
 ALTER TABLE raob_flights add srh_sfc_3km_total real;
+ALTER TABLE raob_flights add shear_sfc_1km_smps real;
+ALTER TABLE raob_flights add shear_sfc_3km_smps real;
+ALTER TABLE raob_flights add shear_sfc_6km_smps real;

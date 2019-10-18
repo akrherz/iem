@@ -8,6 +8,7 @@ from pandas.io.sql import read_sql
 from tqdm import tqdm
 import pandas as pd
 import numpy as np
+from scipy.interpolate import interp1d
 from metpy.calc import (
     precipitable_water, surface_based_cape_cin, most_unstable_cape_cin,
     el, lfc, lcl, bunkers_storm_motion, wind_components, wind_direction,
@@ -30,6 +31,22 @@ def log_interp(zz, xx, yy):
     logx = np.log10(xx)
     logy = np.log10(yy)
     return np.power(10.0, np.interp(logz, logx, logy))
+
+
+def get_surface_winds(wind_profile):
+    """See if we can get the surface wind."""
+    df = wind_profile[wind_profile['levelcode'] == 9]
+    if not df.empty:
+        return df.iloc[0]['u'], df.iloc[0]['v']
+    # return the bottom level
+    return wind_profile.iloc[0]['u'], wind_profile.iloc[0]['v']
+
+
+def get_aloft_winds(wind_profile, level):
+    """See if we can get the surface wind."""
+    fu = interp1d(wind_profile['height'].values, wind_profile['u'].values)
+    fv = interp1d(wind_profile['height'].values, wind_profile['v'].values)
+    return fu(level), fv(level)
 
 
 def get_station_elevation(df, nt):
@@ -116,6 +133,15 @@ def do_profile(cursor, fid, gdf, nt):
     # Does a crude check that our metadata station elevation is within 50m
     # of the profile bottom, otherwise we ABORT
     station_elevation_m = get_station_elevation(td_profile, nt)
+    # get surface wind
+    u_sfc, v_sfc = get_surface_winds(wind_profile)
+    u_1km, v_1km = get_aloft_winds(wind_profile, station_elevation_m + 1000.)
+    u_3km, v_3km = get_aloft_winds(wind_profile, station_elevation_m + 3000.)
+    u_6km, v_6km = get_aloft_winds(wind_profile, station_elevation_m + 6000.)
+    shear_sfc_1km_smps = np.sqrt((u_1km - u_sfc) ** 2 + (v_1km - v_sfc) ** 2)
+    shear_sfc_3km_smps = np.sqrt((u_3km - u_sfc) ** 2 + (v_3km - v_sfc) ** 2)
+    shear_sfc_6km_smps = np.sqrt((u_6km - u_sfc) ** 2 + (v_6km - v_sfc) ** 2)
+
     total_totals = compute_total_totals(td_profile)
     sweat_index = compute_sweat_index(td_profile, total_totals)
     try:
@@ -214,6 +240,9 @@ def do_profile(cursor, fid, gdf, nt):
         nonull(srh_sfc_1km_total.m),
         nonull(srh_sfc_3km_pos.m), nonull(srh_sfc_3km_neg.m),
         nonull(srh_sfc_3km_total.m),
+        nonull(shear_sfc_1km_smps),
+        nonull(shear_sfc_3km_smps),
+        nonull(shear_sfc_6km_smps),
         fid
     )
     cursor.execute("""
@@ -228,6 +257,8 @@ def do_profile(cursor, fid, gdf, nt):
         mean_sfc_6km_smps = %s, mean_sfc_6km_drct = %s,
         srh_sfc_1km_pos = %s, srh_sfc_1km_neg = %s, srh_sfc_1km_total = %s,
         srh_sfc_3km_pos = %s, srh_sfc_3km_neg = %s, srh_sfc_3km_total = %s,
+        shear_sfc_1km_smps = %s, shear_sfc_3km_smps = %s,
+        shear_sfc_6km_smps = %s,
         computed = 't' WHERE fid = %s
     """, args)
 

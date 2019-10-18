@@ -414,7 +414,10 @@ CREATE TABLE raob_flights(
     srh_sfc_1km_total real,
     srh_sfc_3km_pos real,
     srh_sfc_3km_neg real,
-    srh_sfc_3km_total real
+    srh_sfc_3km_total real,
+    shear_sfc_1km_smps real,
+    shear_sfc_3km_smps real,
+    shear_sfc_6km_smps real
 );
 ALTER TABLE raob_flights OWNER to mesonet;
 GRANT ALL on raob_flights to ldm,mesonet;
