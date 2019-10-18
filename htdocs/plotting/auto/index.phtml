@@ -148,7 +148,7 @@ if (isset($_GET["q"])){
 	if (isset($jobj->report) && ! isset($_GET["_fmt"])){
 		$fmt = "text";
 	}
-	if (isset($jobj->highcharts) && ! isset($_GET["_fmt"])){
+	if (isset($jobj->highcharts) && $jobj->highcharts && ! isset($_GET["_fmt"])){
 		$fmt = "js";
 	}
 	if (isset($jobj->nass) && $jobj->nass){
