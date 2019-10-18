@@ -1,9 +1,11 @@
 """Compute sounding derived parameters."""
 import sys
+# import warnings
 
 from pyiem.util import get_dbconn, utc, logger
 from pyiem.network import Table as NetworkTable
 from pandas.io.sql import read_sql
+from tqdm import tqdm
 import pandas as pd
 import numpy as np
 from metpy.calc import (
@@ -13,6 +15,7 @@ from metpy.calc import (
 )
 from metpy.units import units
 LOG = logger()
+# warnings.simplefilter("error")
 
 
 def nonull(val):
@@ -101,9 +104,12 @@ def do_profile(cursor, fid, gdf, nt):
     # temperature and dewpoint are valid and call that the bottom.
     td_profile = gdf[pd.notnull(gdf['tmpc']) & pd.notnull(gdf['dwpc'])]
     wind_profile = gdf[pd.notnull(gdf['u'])]
-    if td_profile.empty or wind_profile.empty:
-        LOG.info("profile %s is empty, skipping", fid)
-        return
+    # Presently we are all or nothing here.  The length is arb
+    if len(td_profile.index) < 5 or len(wind_profile.index) < 5:
+        msg = (
+            "quorum fail td: %s wind: %s, skipping"
+         ) % (len(td_profile.index), len(wind_profile.index))
+        raise ValueError(msg)
     if gdf['pressure'].min() > 500:
         raise ValueError(
             "Profile only up to %s mb" % (gdf['pressure'].min(), ))
@@ -236,21 +242,26 @@ def main(argv):
         select f.fid, f.station, pressure, dwpc, tmpc, drct, smps, height,
         levelcode from
         raob_profile_""" + str(year) + """ p JOIN raob_flights f
-        on (p.fid = f.fid) WHERE not computed
+        on (p.fid = f.fid) WHERE not computed and height is not null
+        and pressure is not null
         ORDER by pressure DESC
     """, dbconn)
-    if df.empty:
+    if df.empty or pd.isnull(df['smps'].max()):
         return
-    df['u'], df['v'] = wind_components(
+    u, v = wind_components(
         df['smps'].values * units('m/s'),
         df['drct'].values * units("degrees_north")
     )
+    df['u'] = u.to(units('m/s')).m
+    df['v'] = v.to(units('m/s')).m
     count = 0
-    for fid, gdf in df.groupby('fid'):
+    progress = tqdm(df.groupby('fid'), disable=not sys.stdout.isatty())
+    for fid, gdf in progress:
+        progress.set_description("%s %s" % (year, fid))
         try:
             do_profile(cursor, fid, gdf, nt)
         except (RuntimeError, ValueError, IndexError) as exp:
-            LOG.info(
+            LOG.debug(
                 "Profile %s fid: %s failed calculation %s",
                 gdf.iloc[0]['station'], fid, exp)
             cursor.execute("""
