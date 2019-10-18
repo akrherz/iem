@@ -1,6 +1,7 @@
 """METAR Code Climo"""
 import datetime
 import calendar
+from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
@@ -8,12 +9,15 @@ from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = {'TS': 'Thunder (TS)',
-         '-SN': 'Light Snow (-SN)',
-         'PSN': 'Heavy Snow (+SN)',  # +SN causes CGI issues
-         'FZFG': 'Freezing Fog (FZFG)',
-         'FG': 'Fog (FG)',
-         'BLSN': 'Blowing Snow (BLSN)'}
+PDICT = OrderedDict((
+    ('BLSN', 'Blowing Snow (BLSN)'),
+    ('FG', 'Fog (FG)'),
+    ('FZFG', 'Freezing Fog (FZFG)'),
+    ('FZRA', 'Freezing Rain (FZRA)'),
+    ('PSN', 'Heavy Snow (+SN)'),  # +SN causes CGI issues
+    ('-SN', 'Light Snow (-SN)'),
+    ('TS', 'Thunder (TS)'),
+))
 PDICT2 = {
     'week': 'group by week of year',
     'doy': 'group by day of year',
