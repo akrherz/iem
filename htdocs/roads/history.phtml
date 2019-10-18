@@ -1,23 +1,28 @@
 <?php 
 require_once "../../config/settings.inc.php";
-require_once "../../include/myview.php";
-$t = new MyView();
 define("IEM_APPID", 43);
+require_once "../../include/myview.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/forms.php"; 
+$t = new MyView();
 $dbconn = iemdb('postgis');
 
 $month = isset($_GET["month"]) ? intval($_GET["month"]) : intval(date("m"));
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : intval(date("Y"));
 $segid = isset($_GET["segid"]) ? intval($_GET["segid"]) : "";
-$valid = isset($_GET["valid"]) ? substr($_GET["valid"],0,16) : "";
+$valid = isset($_GET["valid"]) ? DateTime::createFromFormat("Y-m-d H:i", $_GET['valid']) : null;
 
 $t->thispage = "roads-history";
 $t->title = "Historical Iowa Winter Road Conditions";
+$t->headextra = <<<EOM
+<link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
+EOM;
 $t->jsextra = <<<EOF
+<script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script src="/vendor/jquery-filtertable/1.5.7/jquery.filtertable.min.js"></script>
 		<script>
-		$("#table1").filterTable({label: "Filter Table By: "});
+        $("#table1").filterTable({label: "Filter Table By: "});
+        $(".iemselect2").select2()
 		</script>
 EOF;
 
@@ -85,23 +90,33 @@ if (isset($_GET["month"]) && isset($_GET["segid"]) )
   	}
   	$content .= "</tbody></table>\n";
 }
-else if ( isset($_GET["valid"]) )
+else if ( $valid != null )
 {
-  $content .= "<div class=\"alert-info\">Here is a listing of historical road conditions for a particular
+    $year = intval($valid->format("Y"));
+    $year1 = (intval($valid->format("m")) < 7) ? ($year - 1) : $year;
+    $year2 = (intval($valid->format("m")) < 7) ? $year : ($year + 1);
+    $logtable = sprintf("roads_%s_%s_log", $year1, $year2);
+    $content .= "<div class=\"alert-info\">Here is a listing of historical road conditions for a particular
    time for all roads monitored in Iowa.  Click on the segment name to get 
    a listing of historical conditions for that segment.</div>";
-  $ts = strtotime(substr($valid,0,16));
-  $gisurl = "https://mesonet.agron.iastate.edu/archive/data/". gmdate('Y/m/d/', $ts) ."/GIS/iaroad_cond_". gmdate('YmdHi', $ts) .".zip";
+  $gisurl = "https://mesonet.agron.iastate.edu/archive/data/". $valid->format('Y/m/d/') ."/GIS/iaroad_cond_". $valid->format('YmdHi') .".zip";
   $content .= "<p>You can download a <a href=\"$gisurl\">gis shapefile</a> for this reporting time.";
   $content .= "<br /><table id='table1' class=\"table table-condensed table-striped\">
   		<thead><tr><th>Date:</th><th>Report Time:</th><th>Road Segment</th>
   		<th>Condition</th></tr></thead><tbody>";
-    $rs = pg_prepare($dbconn, "SELECT", "SELECT c.label, l.valid, b.major, b.minor, 
-    		b.segid from roads_base b, ${logtable} l, roads_conditions c 
-    		WHERE l.valid = $1 and l.cond_code = c.code and b.segid = l.segid 
-    		ORDER by major ASC");
-  
-    $rs = pg_execute($dbconn, "SELECT", Array($valid));
+    $rs = pg_prepare(
+        $dbconn, "SELECT",
+        "SELECT c.label, l.valid, b.major, b.minor, ".
+    	"b.segid from roads_base b, ${logtable} l, roads_conditions c ".
+        "WHERE l.valid > $1 and l.valid < $2 and l.cond_code = c.code ".
+        "and b.segid = l.segid ORDER by major ASC");
+    $sts = DateTime::createFromFormat("Y-m-d H:i", $_GET["valid"]);
+    $sts->sub(new DateInterval('P1D'));
+    $ets = DateTime::createFromFormat("Y-m-d H:i", $_GET["valid"]);
+    $ets->add(new DateInterval('P1D'));
+    $rs = pg_execute(
+        $dbconn, "SELECT",
+        Array($sts->format("Y-m-d H:i"), $ets->format("Y-m-d H:i")));
 
   for ($i=0; $row = @pg_fetch_assoc($rs, $i); $i++)
   {
