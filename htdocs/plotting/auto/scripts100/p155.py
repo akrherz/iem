@@ -32,12 +32,24 @@ MDICT = OrderedDict([
 METRICS = OrderedDict([
     ('max_tmpf', 'Max Air Temperature'),
     ('min_tmpf', 'Min Air Temperature'),
+    ('min_alti', 'Min Pressure Altimeter'),
+    ('max_alti', 'Max Pressure Altimeter'),
     ('max_dwpf', 'Max Dewpoint Temperature'),
     ('min_dwpf', 'Min Dewpoint Temperature'),
     ('max_feel', 'Max Feels Like Temperature'),
     ('min_feel', 'Min Feels Like Temperature'),
     ('max_p01i', 'Max Hourly Precipitation'),
+    ('min_mslp', 'Min Sea Level Pressure'),
+    ('max_mslp', 'Max Sea Level Pressure'),
     ])
+UNITS = {
+    'tmpf': 'F',
+    'dwpf': 'F',
+    'feel': 'F',
+    'p01i': 'inch',
+    'mslp': 'hPa',
+    'alti': 'inch',
+}
 
 
 def get_description():
@@ -146,7 +158,7 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound('Error, no results returned!')
     ylabels = []
-    fmt = '%.2f' if varname in ['max_p01i', ] else '%.0f'
+    fmt = '%.0f' if dbvar in ['tmpf', 'dwpf'] else '%.2f'
     hours = []
     y = []
     lastval = -99
@@ -184,9 +196,7 @@ def plotter(fdict):
     ax.set_yticklabels(["#%s" % (x,) for x in ranks][::-1])
     ax2.set_yticklabels(ylabels[::-1])
     ax.grid(True, zorder=11)
-    ax.set_xlabel(("Precipitation [inch]"
-                   if varname in ['max_p01i'] else r"Temperature $^\circ$F"
-                   ))
+    ax.set_xlabel("%s %s" % (METRICS[varname], UNITS[dbvar]))
     ab = ctx['_nt'].sts[station]['archive_begin']
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
