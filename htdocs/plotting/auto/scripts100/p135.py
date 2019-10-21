@@ -169,7 +169,7 @@ def plotter(fdict):
     ax.plot(df.index.values, df['thisyear'], c='g', lw=2, label="%s" % (year,))
     ax.plot(df.index.values, df['max'], c='r', lw=2, label='Max')
     ax.plot(df.index.values, df['min'], c='b', lw=2, label='Min')
-    ax.set_title((r"%s [%s]\n%s %.0f$^\circ$F"
+    ax.set_title(("%s [%s]\n%s %.0f$^\circ$F"
                   ) % (
                       ctx['_nt'].sts[station]['name'], station, PDICT[varname],
                       threshold))
