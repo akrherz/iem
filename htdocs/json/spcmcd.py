@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""SPC MCD service
-"""
+"""SPC MCD service."""
 import os
 import cgi
 import json
@@ -19,20 +18,20 @@ def dowork(lon, lat):
     res = dict(mcds=[])
 
     cursor.execute("""
-    SELECT issue at time zone 'UTC' as i,
-    expire at time zone 'UTC' as e,
-    product_num,
-    product_id
-    from text_products WHERE pil = 'SWOMCD'
-    and ST_Contains(geom, ST_GeomFromEWKT('SRID=4326;POINT(%s %s)'))
-    ORDER by product_id DESC
+        SELECT issue at time zone 'UTC' as i,
+        expire at time zone 'UTC' as e,
+        num,
+        product_id, year
+        from mcd WHERE
+        ST_Contains(geom, ST_GeomFromEWKT('SRID=4326;POINT(%s %s)'))
+        ORDER by product_id DESC
     """, (lon, lat))
     for row in cursor:
         url = ("http://www.spc.noaa.gov/products/md/%s/md%04i.html"
-               ) % (row[3][:4], row[2])
+               ) % (row[4], row[2])
         res['mcds'].append(
             dict(spcurl=url,
-                 year=row[0].year,
+                 year=row[4],
                  utc_issue=row[0].strftime(ISO9660),
                  utc_expire=row[1].strftime(ISO9660),
                  product_num=row[2],
