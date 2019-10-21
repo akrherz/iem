@@ -56,17 +56,17 @@ function fmt($val, $varname){
  	$rs = pg_execute($pgconn, "SELECT", Array($metadata['tzname'], $station));
 	$table .= "<table class=\"table table-striped\">
 			<thead><tr><th>Physical Code</th><th>Duration</th><th>Extremum</th>
-			<th>Valid</th><th>Value</th></thead>";
+			<th>Source</th><th>Valid</th><th>Value</th></thead>";
  	for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
  		$depth = "";
  		if ($row["depth"] > 0){
  			$depth = sprintf("%d inch", $row["depth"]);
  		}
- 		$table .= sprintf("<tr><td>[%s] %s %s</td><td>[%s] %s</td><td>[%s] %s</td><td>%s</td><td>%s</td></tr>", 
+ 		$table .= sprintf("<tr><td>[%s] %s %s</td><td>[%s] %s</td><td>[%s] %s</td><td>%s</td><td>%s</td><td>%s</td></tr>", 
  				$row["physical_code"],$shefcodes[$row["physical_code"]], $depth,
  				$row["duration"], $durationcodes[ $row["duration"] ], 
  				$row["extremum"] == 'Z'? '-': $row['extremum'] , $extremumcodes[ $row["extremum"] ],
- 				$row["ts"], $row["value"]);
+ 				$row["source"], $row["ts"], $row["value"]);
  	}
  	$table .= "</table>";
 } else {
