@@ -1,0 +1,71 @@
+<?php
+require_once "../../config/settings.inc.php";
+include_once "../../include/myview.php";
+$t = new MyView();
+$count = isset($_GET["count"]) ? intval($_GET["count"]): 10;
+
+require_once "../../include/forms.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/network.php";
+require_once "../../include/imagemaps.php";
+require_once  "../../include/vtec.php";
+
+$baseurl = sprintf("http://iem.local/json/mcd_bysize.py?count=%s&sort=",
+    $count);
+
+function dowork($baseurl, $sort){
+    $uri = $baseurl . $sort;
+    $public = str_replace("http://iem.local", "https://mesonet.agron.iastate.edu", $uri);
+    $s = <<<EOM
+
+    <p>JSON Webservice for the data below:<br />
+    <code>${public}</code></p>
+    <table class="table table-condensed table-striped">
+    <tr><th>Year</th><th>Number</th><th>Issuance UTC</th><th>Size (sq km)</th></tr>
+
+EOM;
+    $jdata = file_get_contents($uri);
+    $json = json_decode($jdata, $assoc=TRUE);
+    while (list($key, $val) = each($json["mcds"])) {
+        $s .= sprintf("<tr><td>%s</td><td><a href=\"%s\">%s</a></td><td>%s</td><td>%.2f</td></tr>",
+            $val["year"], $val["spcurl"], $val["product_num"], $val["utc_issue"],
+            $val["area_sqkm"]);
+    }
+    $s .= "</table>\n";
+    return $s;
+}
+
+$ltable = dowork($baseurl, "DESC");
+$stable = dowork($baseurl, "ASC");
+
+$t->content = <<<EOF
+<ol class="breadcrumb">
+ <li><a href="/current/severe.phtml">Severe Weather Mainpage</a></li>
+ <li class="active">Top ${count} SPC Mesoscale Convective Discussions by size</li>
+</ol>
+
+<h3>Top ${count} SPC Mesoscale Convective Discussions by Size</h3>
+
+<p>The IEM maintains a database of <a href="https://www.spc.noaa.gov">NWS Storm Prediction Center</a>
+ Mesoscale Convective Discussions (MCD)s.  These products contain a polygon for the
+ alerted region for the product. This page provides an unofficial listing
+ of the top ${count} largest and smallest polygons associated with the MCDs.</p>
+
+ <p><strong>Pro Tip:</strong> If you want to use this data, try copying the table
+ contents and pasting into a spreadsheet program like Excel.</p>
+
+ <p><form method="GET" name="u">
+ Number of Events to Show:
+ <input size="10" type="text" name="count" value="${count}">
+ <input type="submit" value="Update Table">
+ </form></p>
+
+<h3>Top ${count} Largest:</h3>
+$ltable
+
+<h3>Top ${count} Smallest:</h3>
+$stable
+
+EOF;
+$t->render('single.phtml');
+?>

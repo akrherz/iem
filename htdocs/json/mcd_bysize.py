@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 """SPC MCD service."""
-import os
 import cgi
 import json
 
-import memcache
 from pyiem.util import get_dbconn, ssw
 
 ISO9660 = '%Y-%m-%dT%H:%MZ'
 
 
-def dowork(lon, lat):
+def dowork(count, sort):
     """ Actually do stuff"""
     pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor()
@@ -21,11 +19,11 @@ def dowork(lon, lat):
         SELECT issue at time zone 'UTC' as i,
         expire at time zone 'UTC' as e,
         num,
-        product_id, year
-        from mcd WHERE
-        ST_Contains(geom, ST_GeomFromEWKT('SRID=4326;POINT(%s %s)'))
-        ORDER by product_id DESC
-    """, (lon, lat))
+        product_id, year,
+        ST_Area(geom::geography) / 1000000. as area_sqkm
+        from mcd WHERE not ST_isEmpty(geom)
+        ORDER by area_sqkm """ + sort + """ LIMIT %s
+    """, (count, ))
     for row in cursor:
         url = ("https://www.spc.noaa.gov/products/md/%s/md%04i.html"
                ) % (row[4], row[2])
@@ -35,7 +33,8 @@ def dowork(lon, lat):
                  utc_issue=row[0].strftime(ISO9660),
                  utc_expire=row[1].strftime(ISO9660),
                  product_num=row[2],
-                 product_id=row[3]))
+                 product_id=row[3],
+                 area_sqkm=row[5]))
 
     return json.dumps(res)
 
@@ -45,20 +44,14 @@ def main():
     ssw("Content-type: application/vnd.geo+json\n\n")
 
     form = cgi.FieldStorage()
-    lat = float(form.getfirst('lat', 42.0))
-    lon = float(form.getfirst('lon', -95.0))
+    count = int(form.getfirst('count', 10))
+    sort = form.getfirst('sort', 'DESC').upper()
+    if sort not in ['ASC', 'DESC']:
+        return
 
     cb = form.getfirst('callback', None)
 
-    hostname = os.environ.get("SERVER_NAME", "")
-    mckey = ("/json/spcmcd/%.4f/%.4f"
-             ) % (lon, lat)
-    mc = memcache.Client(['iem-memcached:11211'], debug=0)
-    res = mc.get(mckey) if hostname != 'iem.local' else None
-    if not res:
-        res = dowork(lon, lat)
-        mc.set(mckey, res, 3600)
-
+    res = dowork(count, sort)
     if cb is None:
         ssw(res)
     else:
