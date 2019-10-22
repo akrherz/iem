@@ -15,11 +15,10 @@ def main():
     icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     state = sys.argv[1]
-    fn = tempfile.mktemp()
+    tmpfd, tmpfn = tempfile.mkstemp()
     ldmname = "wxc_iemstage_%s.txt" % (state.lower(),)
 
-    fh = open(fn, 'w')
-    fh.write("""Weather Central 001d0300 Surface Data TimeStamp=%s
+    s = """Weather Central 001d0300 Surface Data TimeStamp=%s
   15
    5 Station
   64 Stage Location Name
@@ -36,7 +35,8 @@ def main():
   10 Sig Stage Major
   10 Sig Stage Record
   10 Sig Stage Text
-""" % (datetime.datetime.now().strftime("%Y.%m.%d.%H%M"), ))
+""" % (datetime.datetime.now().strftime("%Y.%m.%d.%H%M"), )
+    os.write(tmpfd, s.encode('ascii', 'ignore'))
 
     def compute_text(row):
         """ Generate text of what this current stage is """
@@ -80,22 +80,24 @@ def main():
         if nwsli in used:
             continue
         used.append(nwsli)
-        fh.write(("%5s %-64.64s %02i %s %-7.2f %-7.2f %-10.2f %-10.10s "
-                  "%-10.10s %-10.10s %-10.10s %-10.10s %-10.10s %-10.10s "
-                  "%-10.10s\n"
-                  ) % (row['station'], row['name'], row['valid'].day,
-                       row['valid'].strftime("%H%M"),
-                       row['lat'], row['lon'], row['value'],
-                       row['ss_low'], row['ss_action'], row['ss_bankfull'],
-                       row['ss_flood'], row['ss_moderate'], row['ss_major'],
-                       row['ss_record'], compute_text(row)))
+        s = ("%5s %-64.64s %02i %s %-7.2f %-7.2f %-10.2f %-10.10s "
+             "%-10.10s %-10.10s %-10.10s %-10.10s %-10.10s %-10.10s "
+             "%-10.10s\n"
+             ) % (
+                row['station'], row['name'], row['valid'].day,
+                row['valid'].strftime("%H%M"),
+                row['lat'], row['lon'], row['value'],
+                row['ss_low'], row['ss_action'], row['ss_bankfull'],
+                row['ss_flood'], row['ss_moderate'], row['ss_major'],
+                row['ss_record'], compute_text(row))
+        os.write(tmpfd, s.encode('ascii', 'ignore'))
 
-    fh.close()
+    os.close(tmpfd)
 
     pqstr = "data c 000000000000 wxc/%s bogus text" % (ldmname,)
-    cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % (pqstr, fn)
+    cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % (pqstr, tmpfn)
     subprocess.call(cmd, shell=True)
-    os.remove(fn)
+    os.remove(tmpfn)
 
 
 if __name__ == '__main__':

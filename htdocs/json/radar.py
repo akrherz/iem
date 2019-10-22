@@ -33,7 +33,7 @@ def parse_time(s):
             date = datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M:%SZ')
         else:
             date = datetime.datetime.utcnow()
-    except Exception as _exp:
+    except Exception:
         date = datetime.datetime.utcnow()
     return date
 
@@ -115,7 +115,7 @@ def find_scans(root, radar, product, sts, ets):
             now += datetime.timedelta(minutes=1)
     if len(times) > 500:
         # Do some filtering
-        interval = int((len(times) / 500) + 1)
+        interval = int((len(times) / 500.) + 1)
         times = times[::interval]
 
     root['scans'] = times
