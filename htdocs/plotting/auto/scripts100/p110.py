@@ -166,7 +166,7 @@ def plotter(fdict):
     res += ("%-17s %5.2f        %4.2f %4i(%2i) %4i(%2i) "
             "%4i(%2i) %4i(%2i) %4i(%2i)  %5i\n"
             ) % (
-                 "ANNUAL TOTALS", maxRain, totRain / annEvents,
+                 "ANNUAL TOTALS", maxRain, totRain / float(annEvents),
                  cat1t, (float(cat1t) / float(annEvents)) * 100,
                  cat2t, (float(cat2t) / float(annEvents)) * 100,
                  cat3t, (float(cat3t) / float(annEvents)) * 100,

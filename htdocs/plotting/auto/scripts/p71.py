@@ -1,20 +1,26 @@
 """Daily avg wind speeds"""
 import datetime
 
-import psycopg2.extras
 import numpy as np
 import pandas as pd
+from pandas.io.sql import read_sql
 import matplotlib.patheffects as PathEffects
 from pyiem.util import drct2text
-from pyiem.datatypes import speed
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem.exceptions import NoDataFound
+from metpy.units import units
 
 PDICT = {'KT': 'knots',
          'MPH': 'miles per hour',
          'MPS': 'meters per second',
          'KMH': 'kilometers per hour'}
+XREF_UNITS = {
+    'MPS': units('meter / second'),
+    'KT': units('knot'),
+    'KMH': units('kilometer / hour'),
+    'MPH': units('mile / hour'),
+}
 
 
 def get_description():
@@ -55,39 +61,30 @@ def draw_line(x, y, angle):
 def plotter(fdict):
     """ Go """
     pgconn = get_dbconn('iem')
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['zstation']
-    units = ctx['units']
+    plot_units = ctx['units']
     year = ctx['year']
     month = ctx['month']
     sts = datetime.date(year, month, 1)
     ets = (sts + datetime.timedelta(days=35)).replace(day=1)
 
-    cursor.execute("""
-        SELECT day, avg_sknt, vector_avg_drct from summary s JOIN stations t
+    df = read_sql("""
+        SELECT day, avg_sknt as sknt, vector_avg_drct as drct
+        from summary s JOIN stations t
         ON (t.iemid = s.iemid) WHERE t.id = %s and t.network = %s and
-        s.day >= %s and s.day < %s ORDER by day ASC
-    """, (station, ctx['network'], sts, ets))
-    days = []
-    drct = []
-    sknt = []
-    for row in cursor:
-        if row[1] is None:
-            continue
-        days.append(row[0].day)
-        drct.append(row[2])
-        sknt.append(row[1])
-    if not sknt:
+        s.day >= %s and s.day < %s and avg_sknt is not null
+        ORDER by day ASC
+    """, pgconn, params=(station, ctx['network'], sts, ets))
+    if df.empty:
         raise NoDataFound("ERROR: No Data Found")
-    df = pd.DataFrame(dict(day=pd.Series(days),
-                           drct=pd.Series(drct),
-                           sknt=pd.Series(sknt)))
-    sknt = speed(np.array(sknt), 'KT').value(units)
+    df['day'] = pd.to_datetime(df['day'])
+    sknt = (df['sknt'].values * units('knot')).to(XREF_UNITS[plot_units]).m
     (fig, ax) = plt.subplots(1, 1)
-    ax.bar(np.array(days), sknt, ec='green', fc='green', align='center')
+    ax.bar(
+        df['day'].dt.day.values, sknt, ec='green', fc='green', align='center')
     pos = max([min(sknt) / 2.0, 0.5])
-    for d, _, r in zip(days, sknt, drct):
+    for d, _, r in zip(df['day'].dt.day.values, sknt, df['drct'].values):
         draw_line(d, max(sknt)+0.5, (270. - r) / 180. * np.pi)
         txt = ax.text(d, pos, drct2text(r), ha='center', rotation=90,
                       color='white', va='center')
@@ -101,7 +98,7 @@ def plotter(fdict):
     ax.set_xticks(range(1, 31, 5))
     ax.set_ylim(top=max(sknt)+2)
 
-    ax.set_ylabel("Average Wind Speed [%s]" % (PDICT.get(units),))
+    ax.set_ylabel("Average Wind Speed [%s]" % (PDICT[plot_units],))
 
     return fig, df
 

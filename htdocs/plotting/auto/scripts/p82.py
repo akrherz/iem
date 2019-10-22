@@ -6,10 +6,10 @@ import psycopg2.extras
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.datatypes import speed
 from pyiem.reference import TRACE_VALUE
 from pyiem.plot import calendar_plot
 from pyiem.exceptions import NoDataFound
+from metpy.units import units
 
 
 PDICT = OrderedDict([
@@ -88,11 +88,11 @@ def plotter(fdict):
         raise NoDataFound("No Data Found.")
 
     cursor.execute("""
-    SELECT day, max_tmpf, min_tmpf, max_dwpf, min_dwpf,
-    (max_tmpf + min_tmpf) / 2. as avg_tmpf,
-    pday, coalesce(avg_sknt, 0) as avg_sknt from summary s JOIN stations t
-    on (t.iemid = s.iemid) WHERE s.day >= %s and s.day <= %s and
-    t.id = %s and t.network = %s ORDER by day ASC
+        SELECT day, max_tmpf, min_tmpf, max_dwpf, min_dwpf,
+        (max_tmpf + min_tmpf) / 2. as avg_tmpf,
+        pday, avg_sknt from summary s JOIN stations t
+        on (t.iemid = s.iemid) WHERE s.day >= %s and s.day <= %s and
+        t.id = %s and t.network = %s ORDER by day ASC
     """, (sdate, edate, station, ctx['network']))
     rows = []
     data = {}
@@ -100,12 +100,17 @@ def plotter(fdict):
         hd = row['max_tmpf'] - cdf.at[row[0].strftime("%m%d"), 'high']
         ld = row['min_tmpf'] - cdf.at[row[0].strftime("%m%d"), 'low']
         ad = row['avg_tmpf'] - cdf.at[row[0].strftime("%m%d"), 'avg']
-        rows.append(dict(day=row['day'], max_tmpf=row['max_tmpf'],
-                         avg_smph=speed(row['avg_sknt'], 'KT').value('MPH'),
-                         min_dwpf=row['min_dwpf'], max_dwpf=row['max_dwpf'],
-                         high_departure=hd, low_departure=ld,
-                         avg_departure=ad,
-                         min_tmpf=row['min_tmpf'], pday=row['pday']))
+        if varname == 'avg_smph' and row['avg_sknt'] is None:
+            continue
+        rows.append(dict(
+            day=row['day'], max_tmpf=row['max_tmpf'],
+            avg_smph=(
+                row['avg_sknt'] * units('knot')).to(units('mile / hour')).m,
+            min_dwpf=row['min_dwpf'], max_dwpf=row['max_dwpf'],
+            high_departure=hd, low_departure=ld,
+            avg_departure=ad,
+            min_tmpf=row['min_tmpf'], pday=row['pday'])
+        )
         data[row[0]] = {'val': safe(rows[-1], varname)}
         if data[row[0]]['val'] == '0':
             data[row[0]]['color'] = 'k'

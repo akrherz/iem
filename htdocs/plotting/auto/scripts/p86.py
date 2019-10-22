@@ -8,9 +8,9 @@ import cartopy.crs as ccrs
 from pyiem import iemre
 from pyiem.plot import MapPlot
 from pyiem.plot.colormaps import stretch_cmap
-from pyiem.datatypes import distance, temperature, speed
 from pyiem.util import get_autoplot_context, ncopen
 from pyiem.exceptions import NoDataFound
+from metpy.units import units, masked_array
 
 PDICT = OrderedDict(
     (('p01d_12z', '24 Hour Precipitation at 12 UTC'),
@@ -87,24 +87,24 @@ def plotter(fdict):
             # Value is in W m**-2, we want MJ
             multi = (86400. / 1000000.) if varname == 'rsds' else 1
             data = nc.variables[varname][idx0, jslice, islice] * multi
-            units = 'MJ d-1'
+            plot_units = 'MJ d-1'
             clevs = np.arange(0, 37, 3.)
             clevs[0] = 0.01
             clevstride = 1
         elif varname in ['wind_speed', ]:
-            data = speed(
+            data = masked_array(
                 nc.variables[varname][idx0, jslice, islice],
-                'MPS').value('MPH')
-            units = 'mph'
+                units('meter / second')).to(units('mile / hour')).m
+            plot_units = 'mph'
             clevs = np.arange(0, 41, 2)
             clevs[0] = 0.01
             clevstride = 2
         elif varname in ['p01d', 'p01d_12z', 'snow_12z', 'snowd_12z']:
             # Value is in W m**-2, we want MJ
-            data = distance(
+            data = masked_array(
                 nc.variables[varname][idx0, jslice, islice],
-                'MM').value('IN')
-            units = 'inch'
+                units('mm')).to(units('inch')).m
+            plot_units = 'inch'
             clevs = np.arange(0, 0.25, 0.05)
             clevs = np.append(clevs, np.arange(0.25, 3., 0.25))
             clevs = np.append(clevs, np.arange(3., 10.0, 1))
@@ -115,10 +115,10 @@ def plotter(fdict):
                 'high_tmpk', 'low_tmpk', 'high_tmpk_12z', 'low_tmpk_12z',
                 'avg_dwpk']:
             # Value is in W m**-2, we want MJ
-            data = temperature(
-                nc.variables[varname][idx0, jslice, islice],
-                'K').value('F')
-            units = 'F'
+            data = masked_array(
+                nc.variables[varname][idx0, jslice, islice], units('degK')
+                ).to(units('degF')).m
+            plot_units = 'F'
             clevs = np.arange(-30, 120, 5)
             clevstride = 2
         elif varname in ['range_tmpk', 'range_tmpk_12z']:
@@ -129,9 +129,9 @@ def plotter(fdict):
             d1 = nc.variables[vname1][idx0, jslice, islice]
             d2 = nc.variables[vname2][idx0, jslice, islice]
             data = (
-                temperature(d1, 'K').value('F') -
-                temperature(d2, 'K').value('F'))
-            units = 'F'
+                masked_array(d1, units('degK')).to(units('degF')).m -
+                masked_array(d2, units('degK')).to(units('degF')).m)
+            plot_units = 'F'
             clevs = np.arange(0, 61, 5)
             clevstride = 2
 
@@ -140,12 +140,14 @@ def plotter(fdict):
     x, y = np.meshgrid(lons, lats)
     if ptype == 'c':
         # in the case of contour, use the centroids on the grids
-        mp.contourf(x + 0.125, y + 0.125, data, clevs, clevstride=clevstride,
-                    units=units, ilabel=True, labelfmt='%.0f', cmap=cmap)
+        mp.contourf(
+            x + 0.125, y + 0.125, data, clevs, clevstride=clevstride,
+            units=plot_units, ilabel=True, labelfmt='%.0f', cmap=cmap)
     else:
         x, y = np.meshgrid(lons, lats)
-        mp.pcolormesh(x, y, data, clevs, clevstride=clevstride, cmap=cmap,
-                      units=units)
+        mp.pcolormesh(
+            x, y, data, clevs, clevstride=clevstride, cmap=cmap,
+            units=plot_units)
 
     return mp.fig
 

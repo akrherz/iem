@@ -43,7 +43,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    pgconn = get_dbconn('postgis')
     ctx = get_autoplot_context(fdict, get_description())
     ctx['_nt'].sts['_ALL'] = {'name': 'All Offices'}
 

@@ -97,7 +97,7 @@ def plotter(fdict):
         xmax = x[-1] + 60 - (x[-1] % 60)
         ax.set_xlim(0, xmax)
         ax.set_xticks(np.arange(0, xmax+1, 60))
-        ax.set_xticklabels(np.arange(0, (xmax+1)/60))
+        ax.set_xticklabels(np.arange(0, (xmax+1) / 60.))
         ax.set_xlabel("Duration [hours]")
     ax.set_ylabel("Frequency [%%] out of %s Events" % (y[-1],))
     ax.set_title(("[%s] %s :: %s (%s.%s)\n"
