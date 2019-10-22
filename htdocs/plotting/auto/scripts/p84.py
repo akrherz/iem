@@ -5,11 +5,11 @@ from collections import OrderedDict
 
 import numpy as np
 from pyiem import iemre, util
-from pyiem.datatypes import distance
 from pyiem.plot.use_agg import plt
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import state_bounds, SECTORS
 from pyiem.exceptions import NoDataFound
+from metpy.units import units
 
 PDICT2 = {'c': 'Contour Plot',
           'g': 'Grid Cell Mesh'}
@@ -65,6 +65,11 @@ def get_description():
         dict(type='cmap', name='cmap', default='RdBu', label='Color Ramp:'),
     ]
     return desc
+
+
+def mm2inch(val):
+    """Helper."""
+    return (val * units('mm')).to(units('inch')).m
 
 
 def plotter(fdict):
@@ -137,49 +142,42 @@ def plotter(fdict):
         lats = nc.variables['lat'][y0:y1]
         lons = nc.variables['lon'][x0:x1]
         if sdate == edate:
-            p01d = distance(
-                nc.variables[ncvar][idx0, y0:y1, x0:x1],
-                'MM').value('IN')
+            p01d = mm2inch(nc.variables[ncvar][idx0, y0:y1, x0:x1])
         elif (idx1 - idx0) < 32:
-            p01d = distance(
-                np.sum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1], 0),
-                'MM').value('IN')
+            p01d = mm2inch(
+                np.sum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1], 0))
         else:
             # Too much data can overwhelm this app, need to chunk it
             for i in range(idx0, idx1, 10):
                 i2 = min([i+10, idx1])
                 if idx0 == i:
-                    p01d = distance(
-                        np.sum(nc.variables[ncvar][i:i2, y0:y1, x0:x1], 0),
-                        'MM').value('IN')
+                    p01d = mm2inch(
+                        np.sum(nc.variables[ncvar][i:i2, y0:y1, x0:x1], 0))
                 else:
-                    p01d += distance(
-                        np.sum(nc.variables[ncvar][i:i2, y0:y1, x0:x1], 0),
-                        'MM').value('IN')
+                    p01d += mm2inch(
+                        np.sum(nc.variables[ncvar][i:i2, y0:y1, x0:x1], 0))
     if np.ma.is_masked(np.max(p01d)):
         raise NoDataFound("Data Unavailable")
-    units = 'inches'
+    plot_units = 'inches'
     cmap = plt.get_cmap(ctx['cmap'])
     cmap.set_bad('white')
     if opt == 'dep':
         # Do departure work now
         with util.ncopen(clncfn) as nc:
-            climo = distance(
-                np.sum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1], 0),
-                'MM').value('IN')
+            climo = mm2inch(
+                np.sum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1], 0))
         p01d = p01d - climo
         [maxv] = np.percentile(np.abs(p01d), [99, ])
         clevs = np.around(np.linspace(0 - maxv, maxv, 11), decimals=2)
     elif opt == 'per':
         with util.ncopen(clncfn) as nc:
-            climo = distance(
-                np.sum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1], 0),
-                'MM').value('IN')
+            climo = mm2inch(
+                np.sum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1], 0))
         p01d = p01d / climo * 100.
         cmap.set_under('white')
         cmap.set_over('black')
         clevs = [1, 10, 25, 50, 75, 100, 125, 150, 200, 300, 500]
-        units = 'percent'
+        plot_units = 'percent'
     else:
         p01d = np.where(p01d < 0.001, np.nan, p01d)
         cmap.set_under('white')
@@ -193,10 +191,11 @@ def plotter(fdict):
 
     x2d, y2d = np.meshgrid(lons, lats)
     if ptype == 'c':
-        mp.contourf(x2d, y2d, p01d, clevs, cmap=cmap, units=units,
-                    iline=False)
+        mp.contourf(
+            x2d, y2d, p01d, clevs, cmap=cmap, units=plot_units, iline=False)
     else:
-        res = mp.pcolormesh(x2d, y2d, p01d, clevs, cmap=cmap, units=units)
+        res = mp.pcolormesh(
+            x2d, y2d, p01d, clevs, cmap=cmap, units=plot_units)
         res.set_rasterized(True)
     if sector != 'midwest':
         mp.drawcounties()

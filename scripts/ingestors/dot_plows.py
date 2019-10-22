@@ -3,7 +3,6 @@ import json
 import datetime
 
 import requests
-import pytz
 from pyiem.util import get_dbconn, utc, exponential_backoff, logger
 LOG = logger()
 
@@ -34,9 +33,6 @@ def workflow():
     cursor.execute("""SELECT label, valid from idot_snowplow_current""")
     for row in cursor:
         current[row[0]] = row[1]
-
-    valid = datetime.datetime.now()
-    valid = valid.replace(tzinfo=pytz.UTC, microsecond=0)
 
     req = exponential_backoff(requests.get, URI, timeout=30)
     if req is None:

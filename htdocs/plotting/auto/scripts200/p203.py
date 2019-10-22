@@ -127,7 +127,7 @@ def plotter(fdict):
     fig = plt.figure(
         figsize=(thumbpx * cols / 100., ypixels / 100.)
     )
-    faux = plt.axes([0, 0, 1, 1], facecolor='black')
+    plt.axes([0, 0, 1, 1], facecolor='black')
 
     imagemap = StringIO()
     utcnow = utc()

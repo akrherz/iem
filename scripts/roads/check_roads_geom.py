@@ -27,21 +27,11 @@ def main():
         path = MultiLineString([LineString(feat['geometry']['paths'][0])])
         # segid is defined by the database insert
         major = props['ROUTE_NAME']
-        minor = props['NAMEID'].split(":", 1)[1]
-        (typ, num) = major.replace("-", " ").split()
-        int1 = num if typ == 'I' else None
-        us1 = num if typ == 'US' else None
-        st1 = num if typ == 'IA' else None
+        (typ, _num) = major.replace("-", " ").split()
         if typ not in ['I', 'US', 'IA']:
             print("Totally unknown, abort")
             print(json.dumps(jobj, indent=4))
             sys.exit()
-        sys_id = 1
-        if typ == 'US':
-            sys_id = 2
-        elif typ == 'IA':
-            sys_id = 3
-        longname = props['LONGNAME']
         geom = ("ST_Transform(ST_SetSrid(ST_GeomFromText('%s'), 3857), 26915)"
                 ) % (path.wkt)
         idot_id = props['SEGMENT_ID']

@@ -90,7 +90,6 @@ def plotter(fdict):
     for _, row in df.iterrows():
         x = row['ts'].day - 1
         y = row['ts'].hour
-        val = 1
         level = 100000  # arb high number
         coverages = [row['skyc1'], row['skyc2'], row['skyc3'], row['skyc4']]
         if 'OVC' in coverages:

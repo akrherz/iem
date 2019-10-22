@@ -5,10 +5,10 @@ from collections import OrderedDict
 import pytz
 import matplotlib.dates as mdates
 from pandas.io.sql import read_sql
-import pyiem.datatypes as dt
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
+from metpy.units import units
 
 PDICT = OrderedDict((
     ('default', 'Temperatures | Winds | Clouds + Vis'),
@@ -150,19 +150,22 @@ def plotter(fdict):
 
     # _____________PLOT 2____________________________
     ax = fig.add_axes([xalign, 0.4, xwidth, 0.25])
-    df2 = df[df['drct'].notnull()]
 
     ax2 = ax.twinx()
     df2 = df[df['gust'].notnull()]
     if not df2.empty:
-        ax2.fill_between(df2.index.values, 0,
-                         dt.speed(df2['gust'], 'KT').value('MPH'),
-                         color='#9898ff', zorder=2)
+        ax2.fill_between(
+            df2.index.values, 0,
+            (df2['gust'].values * units('knot')).to(units('mile / hour')).m,
+            color='#9898ff', zorder=2
+        )
     df2 = df[df['sknt'].notnull()]
     if not df2.empty:
-        ax2.fill_between(df2.index.values, 0,
-                         dt.speed(df2['sknt'], 'KT').value('MPH'),
-                         color='#373698', zorder=3)
+        ax2.fill_between(
+            df2.index.values, 0,
+            (df2['sknt'].values * units('knot')).to(units('mile / hour')).m,
+            color='#373698', zorder=3
+        )
     ax2.set_ylim(bottom=0)
     ax.set_yticks(range(0, 361, 45))
     ax.set_yticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', "N"])
@@ -191,7 +194,7 @@ def plotter(fdict):
     elif plot_type == 'two':
         df2 = df[(df['alti'] > 20.) & (df['alti'] < 40.)]
         ax.grid(True)
-        vals = dt.pressure(df2['alti'], 'IN').value('MB')
+        vals = (df2['alti'].values * units('inch_Hg')).to(units('hPa')).m
         ax.fill_between(df2.index.values, 0, vals, color='#a16334')
         ax.set_ylim(bottom=(vals.min() - 1), top=(vals.max() + 1))
         ax.set_ylabel("Pressure [mb]")

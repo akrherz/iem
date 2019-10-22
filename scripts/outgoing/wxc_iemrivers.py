@@ -5,9 +5,9 @@ in it!
 import re
 import os
 import subprocess
-import datetime
+
 import psycopg2.extras
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc
 
 
 def main():
@@ -31,32 +31,28 @@ def main():
   12 Severity
   10 Trend
  128 Forecast Text
-""" % (datetime.datetime.utcnow().strftime("%Y.%m.%d.%H%M"), ))
+""" % (utc().strftime("%Y.%m.%d.%H%M"), ))
 
     pcursor.execute("""
         select r.*, h.*, ST_x(h.geom) as lon, ST_y(h.geom) as lat
-       from hvtec_nwsli h, riverpro r,
-      (select distinct hvtec_nwsli from warnings_%s WHERE
-       status NOT IN ('EXP','CAN') and phenomena = 'FL' and
-       significance = 'W') as foo
-       WHERE foo.hvtec_nwsli = r.nwsli and r.nwsli = h.nwsli
-    """ % (datetime.datetime.utcnow().year, ))
+        from hvtec_nwsli h, riverpro r,
+        (select distinct hvtec_nwsli from warnings_%s WHERE
+         status NOT IN ('EXP','CAN') and phenomena = 'FL' and
+         significance = 'W') as foo
+        WHERE foo.hvtec_nwsli = r.nwsli and r.nwsli = h.nwsli
+    """ % (utc().year, ))
 
     for row in pcursor:
         # nwsli = row['nwsli']
         ft = re.findall(r"([0-9]+\.?[0-9]?)", row['flood_text'])
         if not ft:
-            # print 'MISSING %s %s' % (nwsli, rs[i]['flood_text'])
             continue
         fstage = float(ft[-1])
 
         ft = re.findall(r"([0-9]+\.?[0-9]?)", row['stage_text'])
         if not ft:
-            # print 'MISSING %s %s' % (nwsli, rs[i]['stage_text'])
             continue
         stage = float(ft[-1])
-        if row['severity'] in svr_dict:
-            severe = svr_dict[row['severity']]
 
         forecast_text = row['forecast_text']
         trend = "Unknown"

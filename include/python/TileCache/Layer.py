@@ -279,9 +279,10 @@ class Layer(object):
         res = self.resolutions[z]
         
         if exact and self.extent_type == "strict" and not self.contains((minx, miny), res): 
-            raise TileCacheException("Lower left corner (%f, %f) is outside layer bounds %s. \nTo remove this condition, set extent_type=loose in your configuration." 
-                     % (minx, miny, self.bbox))
-            return None
+            raise TileCacheException((
+                "Lower left corner (%f, %f) is outside layer bounds %s. \n"
+                "To remove this condition, set extent_type=loose in your "
+                "configuration.") % (minx, miny, self.bbox))
 
         x0 = (minx - self.bbox[0]) / (res * self.size[0])
         y0 = (miny - self.bbox[1]) / (res * self.size[1])

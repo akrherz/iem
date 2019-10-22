@@ -39,7 +39,6 @@ def modMonth(
         raise NoDataFound("Unknown station metadata.")
     s = ab.year
     e = datetime.date(datetime.date.today().year + 1, 1, 1)
-    now = s
     for year in range(s, e.year):
         now = datetime.date(year, 1, 1)
         m1 = now.replace(month=mo1)

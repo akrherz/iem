@@ -5,37 +5,27 @@ import calendar
 import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.datatypes import speed
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
+from metpy.units import units
+from metpy.calc import wind_components
 
 PDICT = {'mps': 'Meters per Second',
          'kt': 'Knots',
          'kmh': 'Kilometers per Hour',
          'mph': 'Miles per Hour'}
+XREF_UNITS = {
+    'mps': units('meter / second'),
+    'kt': units('knot'),
+    'kmh': units('kilometer / hour'),
+    'mph': units('mile / hour'),
+}
 
 
 def smooth(x):
     """Smooth the data"""
     return pd.Series(x).rolling(7, min_periods=1).mean()
-
-
-def uv(sped, drct):
-    """Convert wind speed and direction into u, v components
-
-    Args:
-      sped (float): wind speed in mps
-      drct (float): wind direction in degrees north
-
-    Returns:
-      u (float): u component in mps
-      v (float): v component in mps
-    """
-    dirr = drct * np.pi / 180.00
-    u = 0. - sped * np.sin(dirr)
-    v = 0. - sped * np.cos(dirr)
-    return u, v
 
 
 def get_description():
@@ -64,22 +54,28 @@ def plotter(fdict):
 
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx['station']
-    units = ctx['units']
+    plot_units = ctx['units']
 
     df = read_sql("""
-    SELECT extract(doy from valid) as doy, sknt, drct from alldata
-    where station = %s and sknt >= 0 and drct >= 0 and report_type = 2
+        SELECT extract(doy from valid) as doy, sknt, drct from alldata
+        where station = %s and sknt >= 0 and drct >= 0 and report_type = 2
     """, asos, params=(station, ), index_col=None)
     if df.empty:
         raise NoDataFound("No data Found.")
 
     # Compute components in MPS
-    (df['u'], df['v']) = uv(speed(df['sknt'].values, 'KT').value('MPS'),
-                            df['drct'].values)
+    u, v = wind_components(
+        (df['sknt'].values * units('knot')).to(units('meter / second')),
+        df['drct'].values * units('degree')
+    )
+    df['u'] = u.m
+    df['v'] = v.m
     gdf = df.groupby(by='doy').mean()
-    u = speed(gdf['u'].values, 'MPS').value(units.upper())
-    v = speed(gdf['v'].values, 'mps').value(units.upper())
-    mag = speed(gdf['sknt'].values, 'KT').value(units.upper())
+    u = (gdf['u'].values * units('meter / second')
+         ).to(XREF_UNITS[plot_units]).m
+    v = (gdf['v'].values * units('meter / second')
+         ).to(XREF_UNITS[plot_units]).m
+    mag = (gdf['sknt'].values * units('knot')).to(XREF_UNITS[plot_units]).m
 
     df2 = pd.DataFrame(dict(u=pd.Series(u),
                             v=pd.Series(v),
@@ -88,10 +84,12 @@ def plotter(fdict):
 
     (fig, axes) = plt.subplots(2, 1, figsize=(8, 9))
     ax = axes[0]
-    ax.plot(np.arange(1, 366), smooth(u[:-1]), color='r',
-            label='u, West(+) : East(-) component', lw=2)
-    ax.plot(np.arange(1, 366), smooth(v[:-1]), color='b',
-            label='v, South(+) : North(-) component', lw=2)
+    ax.plot(
+        np.arange(1, 366), smooth(u[:-1]), color='r',
+        label='u, West(+) : East(-) component', lw=2)
+    ax.plot(
+        np.arange(1, 366), smooth(v[:-1]), color='b',
+        label='v, South(+) : North(-) component', lw=2)
     ax.set_xticks([1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365])
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.legend(ncol=2, fontsize=11, loc=(0., -0.21))
@@ -105,7 +103,7 @@ def plotter(fdict):
                   "") % (station, ctx['_nt'].sts[station]['name'],
                          ab.year,
                          datetime.datetime.now().year, len(df.index)))
-    ax.set_ylabel("Average Wind Speed %s" % (PDICT.get(units), ))
+    ax.set_ylabel("Average Wind Speed %s" % (PDICT.get(plot_units), ))
 
     box = ax.get_position()
     ax.set_position([box.x0, box.y0 + box.height * 0.1, box.width,
@@ -117,7 +115,7 @@ def plotter(fdict):
     ax.legend(loc='best')
     ax.set_xticks([1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365])
     ax.set_xticklabels(calendar.month_abbr[1:])
-    ax.set_ylabel("Average Speed %s" % (PDICT[units],))
+    ax.set_ylabel("Average Speed %s" % (PDICT[plot_units],))
     ax.grid(True)
     ax.set_xlim(0, 366)
 

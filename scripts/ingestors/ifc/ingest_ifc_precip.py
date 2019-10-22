@@ -14,7 +14,6 @@
 http://s-iihr57.iihr.uiowa.edu/feeds/IFC7ADV/latest.dat
 http://s-iihr57.iihr.uiowa.edu/feeds/IFC7ADV/H99999999_I0007_G_15MAR2013_154500.out
 """
-from __future__ import print_function
 import tempfile
 import os
 import datetime
@@ -25,8 +24,8 @@ import numpy as np
 from PIL import Image
 from PIL import PngImagePlugin
 import pyiem.mrms as mrms
-from pyiem.util import exponential_backoff
-
+from pyiem.util import exponential_backoff, logger
+LOG = logger()
 BASEURL = "http://rainproc.its.uiowa.edu/Products/IFC7ADV"
 
 
@@ -45,9 +44,7 @@ def get_file(now, routes):
         if req.status_code == 404:
             continue
         if req.status_code != 200:
-            print(
-                ("ingest_ifc_precip uri %s failed with status %s"
-                 ) % (uri, req.status_code))
+            LOG.info("uri %s failed with status %s", uri, req.status_code)
             continue
         data = req.content
 
@@ -56,10 +53,9 @@ def get_file(now, routes):
         if routes == 'a':
             print("ingest_ifc_precip missing data for %s" % (now, ))
         return None
-    tmpfn = tempfile.mktemp()
-    fp = open(tmpfn, 'wb')
-    fp.write(data)
-    fp.close()
+    tmpfd, tmpfn = tempfile.mkstemp()
+    os.write(tmpfd, data)
+    os.close(tmpfd)
     return tmpfn
 
 
@@ -82,14 +78,13 @@ def to_raster(tmpfn, now):
     png.save('%s.png' % (tmpfn,), pnginfo=meta)
     del png
     # Make worldfile
-    fp = open("%s.wld" % (tmpfn, ), 'w')
-    fp.write("""0.004167
+    with open("%s.wld" % (tmpfn, ), 'w') as fh:
+        fh.write("""0.004167
 0.00
 0.00
 -0.004167
 44.53785
 -89.89942""")
-    fp.close()
 
 
 def ldm(tmpfn, now, routes):

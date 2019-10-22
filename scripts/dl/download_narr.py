@@ -32,7 +32,7 @@ def process(tarfn):
                 continue
             for grb in argrbs:
                 dt = grb['dataDate']
-                hr = int(grb['dataTime']) / 100
+                hr = int(grb['dataTime']) / 100.
                 ts = datetime.datetime.strptime("%s %.0f" % (dt, hr),
                                                 "%Y%m%d %H")
                 fn = "%s_%s.grib" % (pname, ts.strftime("%Y%m%d%H%M"))

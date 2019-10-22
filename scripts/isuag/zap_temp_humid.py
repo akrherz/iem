@@ -68,7 +68,7 @@ def main(argv):
     ets = datetime.datetime(int(argv[6]), int(argv[7]), int(argv[8]),
                             int(argv[9]))
     res = input("%s %s->%s, OK? y/[n] " % (nwsli, sts, ets))
-    if res != 'y':
+    if str(res) != 'y':
         print("ABORT")
         return
     do_iem(nwsli, sts, ets)

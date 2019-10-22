@@ -44,6 +44,7 @@ def mk_header():
 
 
 def weather_logic(month, high, low, rain, snow):
+    """Do Something."""
     deltaT = high - low
 
     if month > 4 and month < 11:		# It is summer
@@ -51,35 +52,32 @@ def weather_logic(month, high, low, rain, snow):
             if rain == 0.00:
                 return "Sunny!!"
             return "Mostly sunny w/ Rain!!"
-        elif deltaT >= 15 and deltaT < 30:
+        if deltaT >= 15:
             if rain == 0.00:
                 return "Mostly Sunny!!"
             return "Partly Sunny w/ Rain!!"
-        else:
-            if rain == 0.00:
-                return "Cloudy!!"
-            return "Cloudy and rainy!!"
+        if rain == 0.00:
+            return "Cloudy!!"
+        return "Cloudy and rainy!!"
 
-    else:					# It is winter
-        if deltaT >= 20:
-            if rain == 0.00:
-                return "Sunny!!"
-            elif rain > 0 and snow > 0:
-                return "Snowy!!"
-            return "Mostly sunny w/ Rain!!"
-                
-        elif deltaT >= 10 and deltaT < 20:
-            if rain == 0.00:
-                return "Mostly Sunny!!"
-            elif rain > 0 and snow > 0:
-                return "Snowy!!"
-            return "Partly Sunny w/ Rain!!"
-        else:
-            if rain == 0.00:
-                return "Cloudy!!"
-            elif rain > 0 and snow > 0:
-                return "Snowy!!"
-            return "Cloudy and rainy!!"
+    if deltaT >= 20:
+        if rain == 0.00:
+            return "Sunny!!"
+        if rain > 0 and snow > 0:
+            return "Snowy!!"
+        return "Mostly sunny w/ Rain!!"
+
+    if deltaT >= 10:
+        if rain == 0.00:
+            return "Mostly Sunny!!"
+        if rain > 0 and snow > 0:
+            return "Snowy!!"
+        return "Partly Sunny w/ Rain!!"
+    if rain == 0.00:
+        return "Cloudy!!"
+    if rain > 0 and snow > 0:
+        return "Snowy!!"
+    return "Cloudy and rainy!!"
 
 
 def get_values(city, dateStr):

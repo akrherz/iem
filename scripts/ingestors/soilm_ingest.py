@@ -4,7 +4,6 @@
  Run from RUN_10_AFTER.sh
 """
 # stdlib
-from __future__ import print_function
 import datetime
 import os
 import sys
@@ -212,8 +211,6 @@ def m15_process(nwsli, maxts):
         if 'calc_vwc_50_avg' in df.columns:
             ob.data['c4smv'] = row['calc_vwc_50_avg_qc'] * 100.0
         ob.save(acursor, force_current_log=True)
-        # print 'soilm_ingest.py station: %s ts: %s hrly updated no data?' % (
-        #                                        nwsli, valid)
         processed += 1
     acursor.close()
     ACCESS.commit()
@@ -231,7 +228,6 @@ def hourly_process(nwsli, maxts):
     acursor = ACCESS.cursor()
     for _i, row in df.iterrows():
         # Update IEMAccess
-        # print nwsli, valid
         ob = Observation(nwsli, 'ISUSM', row['valid'])
         tmpc = temperature(row['tair_c_avg_qc'], 'C')
         if tmpc.value('F') > -50 and tmpc.value('F') < 140:
@@ -266,8 +262,6 @@ def hourly_process(nwsli, maxts):
         if 'calc_vwc_50_avg' in df.columns:
             ob.data['c4smv'] = row['calc_vwc_50_avg_qc'] * 100.0
         ob.save(acursor)
-        # print 'soilm_ingest.py station: %s ts: %s hrly updated no data?' % (
-        #                                        nwsli, valid)
         processed += 1
     acursor.close()
     ACCESS.commit()
@@ -276,7 +270,6 @@ def hourly_process(nwsli, maxts):
 
 def daily_process(nwsli, maxts):
     """ Process the daily file """
-    # print '-------------- DAILY PROCESS ----------------'
     fn = "%s/%s_DailySI.dat" % (BASE, STATIONS[nwsli])
     df = common_df_logic(fn, maxts, nwsli, "sm_daily")
     if df is None:
@@ -389,15 +382,14 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
     if len(lines) < 5:
         return
 
-    tmpfn = tempfile.mktemp()
-    tmpfp = open(tmpfn, 'w')
-    tmpfp.write(lines[0])
-    tmpfp.write(lines[1])
-    tmpfp.write(lines[2])
-    tmpfp.write(lines[3])
+    tmpfd, tmpfn = tempfile.mkstemp()
+    os.write(tmpfd, lines[0].encode('ascii', 'ignore'))
+    os.write(tmpfd, lines[1].encode('ascii', 'ignore'))
+    os.write(tmpfd, lines[2].encode('ascii', 'ignore'))
+    os.write(tmpfd, lines[3].encode('ascii', 'ignore'))
     for linenum in range(0 - dyprocessed, 0):
-        tmpfp.write(lines[linenum])
-    tmpfp.close()
+        os.write(tmpfd, lines[linenum].encode('ascii', 'ignore'))
+    os.close(tmpfd)
     cmd = ("/home/ldm/bin/pqinsert -p "
            "'data c %s csv/isusm/%s_daily.txt bogus txt' %s"
            ) % (datetime.datetime.utcnow().strftime("%Y%m%d%H%M"), nwsli,
@@ -417,15 +409,14 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
     if len(lines) < 5:
         return
 
-    tmpfn = tempfile.mktemp()
-    tmpfp = open(tmpfn, 'w')
-    tmpfp.write(lines[0])
-    tmpfp.write(lines[1])
-    tmpfp.write(lines[2])
-    tmpfp.write(lines[3])
+    tmpfd, tmpfn = tempfile.mkstemp()
+    os.write(tmpfd, lines[0].encode('ascii', 'ignore'))
+    os.write(tmpfd, lines[1].encode('ascii', 'ignore'))
+    os.write(tmpfd, lines[2].encode('ascii', 'ignore'))
+    os.write(tmpfd, lines[3].encode('ascii', 'ignore'))
     for linenum in range(0 - hrprocessed, 0):
-        tmpfp.write(lines[linenum])
-    tmpfp.close()
+        os.write(tmpfd, lines[linenum].encode('ascii', 'ignore'))
+    os.close(tmpfd)
     cmd = ("/home/ldm/bin/pqinsert -p "
            "'data c %s csv/isusm/%s_hourly.txt bogus txt' %s"
            ) % (datetime.datetime.utcnow().strftime("%Y%m%d%H%M"), nwsli,

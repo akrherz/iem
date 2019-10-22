@@ -5,11 +5,11 @@ from collections import OrderedDict
 import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.datatypes import temperature, speed
-import pyiem.meteorology as pymet
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
+from metpy.units import units
+from metpy.calc import heat_index, windchill, relative_humidity_from_dewpoint
 
 
 PDICT = {'yes': 'Yes, Include only Year to Date period each year',
@@ -101,12 +101,12 @@ def plotter(fdict):
         tmpflimit = ""
 
     df = read_sql("""
-    SELECT to_char(valid, 'YYYYmmddHH24') as d, avg(tmpf)::int as tmpf,
-    avg(dwpf)::int as dwpf,
-    avg(coalesce(sknt, 0)) as sknt
-    from alldata WHERE station = %s """ + tmpflimit + """
-    and dwpf <= tmpf and valid > '1973-01-01'
-    and report_type = 2 """ + doylimiter + """ GROUP by d
+        SELECT to_char(valid, 'YYYYmmddHH24') as d, avg(tmpf)::int as tmpf,
+        avg(dwpf)::int as dwpf,
+        avg(coalesce(sknt, 0)) as sknt
+        from alldata WHERE station = %s """ + tmpflimit + """
+        and dwpf <= tmpf and valid > '1973-01-01'
+        and report_type = 2 """ + doylimiter + """ GROUP by d
     """, pgconn, params=(station, ), index_col=None)
     if df.empty:
         raise NoDataFound("No Data Found.")
@@ -117,9 +117,10 @@ def plotter(fdict):
     compop = np.greater_equal
     inctitle = ''
     if varname == 'heatindex':
-        df['heatindex'] = pymet.heatindex(
-            temperature(df['tmpf'].values, 'F'),
-            temperature(df['dwpf'].values, 'F')).value('F')
+        df['heatindex'] = heat_index(
+            df['tmpf'].values * units('degF'),
+            relative_humidity_from_dewpoint(df['dwpf'].values * units('degF'))
+            ).to(units('degF')).m
         inctitle = " [All Obs Included]"
         if inc == 'no':
             df2 = df[df['heatindex'] > df['tmpf']]
@@ -132,9 +133,10 @@ def plotter(fdict):
         compop = np.less_equal
         df['year'] = df['d'].apply(
             lambda x: (int(x[:4]) - 1) if int(x[4:6]) < 7 else int(x[:4]))
-        df['windchill'] = pymet.windchill(temperature(df['tmpf'].values, 'F'),
-                                          speed(df['sknt'].values, 'KT')
-                                          ).value('F')
+        df['windchill'] = windchill(
+            df['tmpf'].values * units('degF'),
+            df['sknt'].values * units('knot')
+            ).to(units('degF')).m
         inctitle = " [All Obs Included]"
         if inc == 'no':
             df2 = df[df['windchill'] < df['tmpf']]
