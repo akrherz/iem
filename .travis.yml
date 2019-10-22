@@ -79,14 +79,15 @@ install:
       wget https://repo.continuum.io/miniconda/Miniconda$MINICONDA-latest-Linux-x86_64.sh -O miniconda.sh;
       bash miniconda.sh -f -b -p $HOME/miniconda$MINICONDA;
       sh .ci_tooling/setupconda.sh;
-      conda update conda;
       conda create -n prod python=$PYTHON_VERSION;
+      conda activate prod;
       conda install -q --file conda_requirements.txt;
       conda clean -y --all -q;
       pip install --upgrade -r pip_requirements.txt;
       rm -rf $HOME/miniconda$MINICONDA/pkgs/cache/*;
     fi
   - sh .ci_tooling/setupconda.sh
+  - conda activate prod
   # Debug printout
   - conda list
   - conda config --show channels
