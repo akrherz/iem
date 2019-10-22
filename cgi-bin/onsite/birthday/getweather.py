@@ -45,47 +45,42 @@ def mk_header():
 
 def weather_logic(month, high, low, rain, snow):
     deltaT = high - low
-    
+
     if month > 4 and month < 11:		# It is summer
         if deltaT >= 30:
             if rain == 0.00:
                 return "Sunny!!"
-            else:
-                return "Mostly sunny w/ Rain!!"
+            return "Mostly sunny w/ Rain!!"
         elif deltaT >= 15 and deltaT < 30:
             if rain == 0.00:
                 return "Mostly Sunny!!"
-            else:
-                return "Partly Sunny w/ Rain!!"
+            return "Partly Sunny w/ Rain!!"
         else:
             if rain == 0.00:
                 return "Cloudy!!"
-            else:
-                return "Cloudy and rainy!!"
-        
+            return "Cloudy and rainy!!"
+
     else:					# It is winter
         if deltaT >= 20:
             if rain == 0.00:
                 return "Sunny!!"
             elif rain > 0 and snow > 0:
                 return "Snowy!!"
-            else:
-                return "Mostly sunny w/ Rain!!"
+            return "Mostly sunny w/ Rain!!"
                 
         elif deltaT >= 10 and deltaT < 20:
             if rain == 0.00:
                 return "Mostly Sunny!!"
             elif rain > 0 and snow > 0:
                 return "Snowy!!"
-            else:
-                return "Partly Sunny w/ Rain!!"
+            return "Partly Sunny w/ Rain!!"
         else:
             if rain == 0.00:
                 return "Cloudy!!"
             elif rain > 0 and snow > 0:
                 return "Snowy!!"
-            else:
-                return "Cloudy and rainy!!"
+            return "Cloudy and rainy!!"
+
 
 def get_values(city, dateStr):
     query_str = """SELECT high, low, precip, snow from alldata_ia
@@ -96,16 +91,15 @@ def get_values(city, dateStr):
     rain = round(float(row[2]), 2)
     try:
         snow = round(float(row[3]), 2)
-    except:
-        snow = 0	
+    except Exception:
+        snow = 0
 
     if rain < 0:
         rain = 0
     if snow < 0:
         snow = 0
-        
-    return row[0], row[1], str(rain), str(snow)
 
+    return row[0], row[1], str(rain), str(snow)
 
 
 def get_day(city, ts):
@@ -114,8 +108,8 @@ def get_day(city, ts):
     month = str(ts.month)
     day = str(ts.day)
     dateStr = year+"-"+month+"-"+day
-    high, low, rain, snow =  get_values(city, dateStr)
-    
+    high, low, rain, snow = get_values(city, dateStr)
+
     cloud_type = weather_logic(int(month), int(high), int(low), round(float(rain), 2), round(float(snow), 2) )
 
     print('<TD WIDTH="120" VALIGN="TOP" BORDER="1" align="CENTER">')
@@ -128,7 +122,8 @@ def get_day(city, ts):
     print("<TR><TH colspan='2' NOWRAP><font color='blue'>"+cloud_type+"</font></TH></TR>")
     print('</TABLE>')
     print('</TD>')
-    
+
+
 def now_get_day(city, ts):
     str_month = ts.strftime("%B")
     year = str(ts.year)
@@ -161,7 +156,7 @@ def main():
         month = form.getfirst("month")
         day = form.getfirst("day")
         city = form.getfirst("city").upper()
-    except:
+    except Exception:
         print("<P><P><B>Invalid Post:</B><BR>")
         print("Please use this URL <a href='/onsite/birthday/'>https://mesonet.agron.iastate.edu/onsite/birthday/</a>")
         sys.exit(0)
@@ -172,24 +167,22 @@ def main():
     nowM1 = now + datetime.timedelta(days=-1)
     nowP1 = now + datetime.timedelta(days=1)
     nowP2 = now + datetime.timedelta(days=2)
-    
 
     print('<BR><h4>Data valid for station: '+cityName+', Iowa</h4><BR>')
-    
+
     print('<TABLE width="600">')
     print('<TR><TD><BR><BR><BR></TD><TD></TD>')
     now_get_day(city, now)
     print('<TD></TD><TD></TD></TR><TR>')
-    
+
     get_day(city, nowM2)
-    
+
     get_day(city, nowM1)
-    
+
     get_day(city, nowP1)
-    
+
     get_day(city, nowP2)
-    
-    
+
     print('</TR></TABLE>')
 
     print("""

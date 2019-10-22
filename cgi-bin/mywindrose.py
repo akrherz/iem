@@ -64,7 +64,7 @@ def main():
     form = cgi.FieldStorage()
     try:
         sts, ets = get_times(form)
-    except:
+    except Exception:
         send_error(form, "Invalid Times Selected, please try again")
         return
 
@@ -105,7 +105,7 @@ def main():
 
     try:
         nsector = int(form['nsector'].value)
-    except Exception as _:
+    except Exception:
         nsector = 36
 
     rmax = None

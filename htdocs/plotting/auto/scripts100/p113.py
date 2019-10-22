@@ -81,7 +81,7 @@ def plotter(fdict):
                 if ts not in df.index:
                     res += bad
                     continue
-            except:
+            except Exception:
                 res += bad
                 continue
             row = df.loc[ts]

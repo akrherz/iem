@@ -50,7 +50,7 @@ def p(df, year, month, varname, precision):
     """Lazy request of data"""
     try:
         val = df.at[(year, month), varname]
-    except:
+    except Exception:
         return ' ****'
     if pd.isna(val):
         return ' ****'

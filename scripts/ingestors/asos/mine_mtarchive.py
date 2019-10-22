@@ -52,13 +52,13 @@ def write(ts, stid, obs):
             if open(fn2).read().startswith("FullMetar,"):
                 try:
                     df = pd.read_csv(fn2)
-                except:
+                except Exception:
                     print(fn2)
                     return
             else:
                 try:
                     df = pd.read_csv(fn2, skiprows=[0, ])
-                except:
+                except Exception:
                     print(fn2)
                     return
             df2 = pd.DataFrame({'FullMetar': obs})
@@ -85,7 +85,7 @@ def compute_ts(stid, ts, token):
     try:
         ts2 = datetime.datetime(ts.year, ts.month, ts.day, int(ddhhmmz[2:4]),
                                 int(ddhhmmz[4:6]))
-    except:
+    except Exception:
         print("Invalid timestamp %s" % (ddhhmmz,))
         return None
     ts2 = ts2.replace(tzinfo=pytz.timezone("UTC"))

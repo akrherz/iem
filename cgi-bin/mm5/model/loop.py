@@ -12,11 +12,11 @@ def main():
     form = cgi.FieldStorage()
     try:
         mapType = form.getfirst("mapType")
-    except:
+    except Exception:
         print("Hi")
     try:
         Fhour = form.getfirst("Fhour")
-    except:
+    except Exception:
         print("Hi")
 
     files = [

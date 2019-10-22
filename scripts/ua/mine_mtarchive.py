@@ -1,4 +1,5 @@
 """Run to ingest gempak files from mtarchive"""
+from __future__ import print_function
 import subprocess
 import datetime
 
@@ -9,10 +10,12 @@ from pyiem.util import get_dbconn
 
 POSTGIS = get_dbconn('postgis')
 
-def conv( raw):
+
+def conv(raw):
     if float(raw) < -9998:
         return None
-    return float(raw) 
+    return float(raw)
+
 
 def conv_speed(raw):
     ''' convert sped to mps units '''
@@ -20,12 +23,13 @@ def conv_speed(raw):
         return None
     return float(raw) * 0.5144
 
+
 sts = datetime.datetime(1989, 9, 25)
 ets = datetime.datetime(1989, 9, 26)
 interval = datetime.timedelta(days=1)
 now = sts
 while now < ets:
-    print now
+    print(now)
     uri = now.strftime("http://mtarchive.geol.iastate.edu/%Y/%m/%d/gempak/upperair/%Y%m%d_upa.gem")
     try:
         req = requests.get(uri, timeout=30)
@@ -34,8 +38,8 @@ while now < ets:
         o = open('data.gem', 'wb')
         o.write(req.content)
         o.close()
-    except Exception, exp:
-        print exp
+    except Exception as exp:
+        print(exp)
         now += interval
         continue
 
@@ -54,7 +58,7 @@ run
 exit
 """)
     o.close()
-    p = subprocess.Popen("snlist < fn", stdin=subprocess.PIPE, 
+    p = subprocess.Popen("snlist < fn", stdin=subprocess.PIPE,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE, shell=True)
     data = p.stdout.read()
@@ -63,7 +67,7 @@ exit
         if line.strip()[:4] == 'STID':
 
             if myraob is not None:
-                print str(myraob)
+                print(str(myraob))
                 txn = POSTGIS.cursor()
                 myraob.database_save(txn)
                 txn.close()
@@ -72,7 +76,7 @@ exit
             tokens = line.strip().split()
             myraob = RAOB()
             myraob.station = (tokens[2] if len(tokens[2]) == 4
-                              else 'K'+ tokens[2])
+                              else 'K' + tokens[2])
             valid = datetime.datetime.strptime("19"+tokens[-1], '%Y%m%d/%H%M')
             myraob.valid = valid.replace(tzinfo=pytz.utc)
         if line.find(".") > 0 and line.find("=") == -1 and line.find("PRES") == -1:

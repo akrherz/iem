@@ -77,6 +77,7 @@ def application(environ, start_response):
         plt.axis('off')
         ram = BytesIO()
         plt.savefig(ram, format='png')
+        plt.close()
         ram.seek(0)
         start_response('404 Not Found', headers)
         return [ram.read()]

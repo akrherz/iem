@@ -11,8 +11,8 @@ def averageTemp(db, hi="high", lo="low"):
         highSum += db[day][hi]
         lowSum += db[day][lo]
 
-    highAvg = highSum / len(db)
-    lowAvg = lowSum / len(db)
+    highAvg = highSum / float(len(db))
+    lowAvg = lowSum / float(len(db))
 
     return highAvg, lowAvg
 

@@ -1,4 +1,4 @@
-#!/usr/local/python/bin/python
+#!/usr/bin/env python
 import time
 import os
 import datetime
@@ -21,7 +21,7 @@ def main():
             t = l.split()
             try:
                 data[int(t[0])] = t[1]
-            except:
+            except Exception:
                 print(l)
         if len(data) > 3:
             now = datetime.datetime.now()

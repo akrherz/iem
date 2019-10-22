@@ -39,7 +39,7 @@ KELO sites.  Data from the previous day is the most current available.
     try:
         postDate = form.getfirst("date")
         myTime = datetime.datetime.strptime(postDate, "%Y-%m-%d")
-    except:
+    except Exception:
         myTime = datetime.datetime.now() - datetime.timedelta(days=1)
 
     ssw('<table border=1><tr>')
@@ -59,6 +59,7 @@ KELO sites.  Data from the previous day is the most current available.
 </form></td></tr></table>
 """)
     return myTime
+
 
 def setupTable():
     ssw("""
@@ -112,7 +113,9 @@ def loadstations():
         stData[station] = ["M"]*25
         totp[station] = 0
 
+
 def main():
+    """Go Main Go."""
     ts = doHeader()
     loadstations()
     setupTable()
@@ -155,7 +158,7 @@ def main():
             ssw("%s%s " % (stData[station][i], "</td>"))
             try:
                 totp[station] = totp[station] + stData[station][i]
-            except Exception as _exp:
+            except Exception:
                 continue
         ssw("%s%s%s" % ("<td>", totp[station], "</td>"))
         ssw("%s%s%s" % ("<td>", station, "</td>"))
@@ -168,6 +171,7 @@ def main():
 example, the value in the 1AM column is precipitation accumulation from 1 AM 
 till 2 AM.
 """)
+
 
 if __name__ == '__main__':
     main()

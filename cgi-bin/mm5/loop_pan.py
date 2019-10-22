@@ -12,7 +12,7 @@ def main():
     try:
         fdom0 = form.getfirst("fdom")
         ffield0 = form.getfirst("ffield")
-    except:
+    except Exception:
         print("Hi")
 
     files = [

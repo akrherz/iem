@@ -34,7 +34,7 @@ def get_dates(form):
     try:
         sts = datetime.datetime(int(year1), int(month1), int(day1))
         ets = datetime.datetime(int(year2), int(month2), int(day2))
-    except Exception as _exp:
+    except Exception:
         ssw("Content-type: text/plain\n\n")
         ssw(("ERROR: Failed to parse specified start and end "
              "dates.  Please go back and ensure that you have "
@@ -65,13 +65,6 @@ def fetch_daily(form, cols):
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     sts, ets = get_dates(form)
     stations = get_stations(form)
-    delim = get_delimiter(form)
-    if delim == 'tab':
-        delim = '\t'
-    elif delim == 'comma':
-        delim = ','
-    elif delim == 'space':
-        delim = ' '
 
     if not cols:
         cols = ["station", "valid", "high", "low", "rh_min", "rh", "rh_max",
@@ -226,13 +219,6 @@ def fetch_hourly(form, cols):
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     sts, ets = get_dates(form)
     stations = get_stations(form)
-    delim = get_delimiter(form)
-    if delim == 'tab':
-        delim = '\t'
-    elif delim == 'comma':
-        delim = ','
-    elif delim == 'space':
-        delim = ' '
 
     if not cols:
         cols = ["station", "valid", "tmpf", "relh", "solar", "precip",

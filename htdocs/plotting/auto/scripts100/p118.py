@@ -63,7 +63,7 @@ YEAR   JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC ANN
                 val = df.at[(year, month), varname]
                 total += val
                 res += " %3i" % (val, )
-            except:
+            except Exception:
                 res += "    "
         res += " %3i\n" % (total, )
     return None, df, res
