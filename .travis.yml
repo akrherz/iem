@@ -76,7 +76,7 @@ before_install:
 install:
   - export PATH="$HOME/miniconda$MINICONDA/bin:$PATH"
   - if [[ ! -f $HOME/miniconda$MINICONDA/envs/prod/bin/python ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda$MINICONDA-latest-Linux-x86_64.sh -O miniconda.sh;
+      wget https://repo.continuum.io/miniconda/Miniconda$MINICONDA-4.6.14-Linux-x86_64.sh -O miniconda.sh;
       bash miniconda.sh -f -b -p $HOME/miniconda$MINICONDA;
       sh .ci_tooling/setupconda.sh;
       conda create -n prod python=$PYTHON_VERSION;
