@@ -105,7 +105,7 @@ script:
   # restart apache
   - sudo service apache2 restart || sudo cat /var/log/apache2/error.log
   - sudo systemctl status apache2.service -l
-  - ls -l $HOME/miniconda$MINICONDA/envs/prod/lib/python$PYTHON_VERSION/site-packages/mod_wsgi/server
+  - ls -lR $HOME/miniconda$MINICONDA/envs/prod/lib/python*/site-packages/mod_wsgi
   # Run autoplot tests with basically no data in database
   - python test/run_autoplots.py
   # Add some test data to the database
