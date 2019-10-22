@@ -80,6 +80,7 @@ install:
       bash miniconda.sh -f -b -p $HOME/miniconda$MINICONDA;
       sh .ci_tooling/setupconda.sh;
       conda create -n prod python=$PYTHON_VERSION;
+      conda init bash;
       conda activate prod;
       conda install -q --file conda_requirements.txt;
       conda clean -y --all -q;
@@ -87,6 +88,7 @@ install:
       rm -rf $HOME/miniconda$MINICONDA/pkgs/cache/*;
     fi
   - sh .ci_tooling/setupconda.sh
+  - conda init bash;
   - conda activate prod
   # Debug printout
   - conda list
