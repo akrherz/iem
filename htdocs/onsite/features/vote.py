@@ -1,17 +1,15 @@
-#!/usr/bin/env python
 """ Feature Voting"""
-import cgi
-import os
 from http.cookies import SimpleCookie
 import json
 import datetime
 
-from pyiem.util import get_dbconn, ssw
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn
 
 
-def do(vote):
+def do(environ, headers, vote):
     """ Do Something, yes do something """
-    cookie = SimpleCookie(os.environ.get("HTTP_COOKIE", ''))
+    cookie = SimpleCookie(environ.get("HTTP_COOKIE", ''))
     myoid = 0
     if 'foid' in cookie:
         myoid = int(cookie['foid'].value)
@@ -42,7 +40,7 @@ def do(vote):
         cookie["foid"]["path"] = "/onsite/features/"
         cookie["foid"]["expires"] = expiration.strftime(
                                                 "%a, %d-%b-%Y %H:%M:%S CST")
-        ssw(cookie.output() + "\n")
+        headers.append(("Set-Cookie", cookie.output(header='')))
         cursor.close()
         pgconn.commit()
         d['can_vote'] = False
@@ -50,15 +48,15 @@ def do(vote):
     return d
 
 
-def main():
-    """Do Something"""
-    form = cgi.FieldStorage()
-    vote = form.getfirst('vote', 'missing')
-    ssw("Content-type: application/json\n")
-    j = do(vote)
-    ssw("\n")  # Finalize headers
-    ssw(json.dumps(j))
+def application(environ, start_response):
+    """Process this request.
 
-
-if __name__ == '__main__':
-    main()
+    This should look something like "/onsite/features/vote.json"
+    or like "/onsite/features/vote/abstain.json".
+    """
+    headers = [('Content-type', 'application/json')]
+    fields = parse_formvars(environ)
+    vote = fields.get('vote', 'missing')
+    j = do(environ, headers, vote)
+    start_response('200 OK', headers)
+    return [json.dumps(j).encode('ascii')]

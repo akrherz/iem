@@ -1,42 +1,16 @@
-#!/usr/bin/env python
 """Frontend for Feature Content, such that we can make some magic happen"""
 import sys
 import os
 import re
 import datetime
+from io import BytesIO
 
-from pyiem.util import get_dbconn, ssw
+from pyiem.plot.use_agg import plt
+from pyiem.util import get_dbconn
 
 PATTERN = re.compile(("^/onsite/features/(?P<yyyy>[0-9]{4})/(?P<mm>[0-9]{2})/"
                       "(?P<yymmdd>[0-9]{6})(?P<extra>.*)."
                       "(?P<suffix>png|gif|jpg|xls|pdf|gnumeric|mp4)$"))
-
-
-def send_content_type(val, totalsize=0, stripe=None):
-    """Do as I say"""
-    ssw("Accept-Ranges: bytes\n")
-    if totalsize != (stripe.stop - stripe.start):
-        ssw("Status: 206 Partial Content\n")
-    if stripe:
-        ssw("Content-Length: %.0f\n" % (stripe.stop - stripe.start, ))
-    if os.environ.get("HTTP_RANGE") and stripe is not None:
-        secondval = (
-            ""
-            if os.environ.get("HTTP_RANGE") == 'bytes=0-'
-            else (stripe.stop - 1)
-        )
-        ssw("Content-Range: bytes %s-%s/%s\n" % (
-            stripe.start, secondval, totalsize))
-    if val == 'text':
-        ssw("Content-type: text/plain\n\n")
-    elif val in ['png', 'gif', 'jpg']:
-        ssw("Content-type: image/%s\n\n" % (val, ))
-    elif val in ['mp4', ]:
-        ssw("Content-type: video/%s\n\n" % (val, ))
-    elif val in ['pdf', ]:
-        ssw("Content-type: application/%s\n\n" % (val, ))
-    else:
-        ssw("Content-type: text/plain\n\n")
 
 
 def dblog(yymmdd):
@@ -51,44 +25,52 @@ def dblog(yymmdd):
             WHERE date(valid) = %s
             """, (dt,))
         pgconn.commit()
+        pgconn.close()
     except Exception as exp:
         sys.stderr.write(str(exp))
 
 
-def process(env):
+def get_content_type(val):
+    """return the content-type header entry."""
+    if val == 'text':
+        ct = "text/plain"
+    elif val in ['png', 'gif', 'jpg']:
+        ct = "image/%s" % (val, )
+    elif val in ['mp4', ]:
+        ct = "video/%s" % (val, )
+    elif val in ['pdf', ]:
+        ct = "application/%s" % (val, )
+    else:
+        ct = "text/plain"
+    return ('Content-type', ct)
+
+
+def application(environ, start_response):
     """Process this request
 
     This should look something like "/onsite/features/2016/11/161125.png"
     """
-    uri = env.get('REQUEST_URI')
+    headers = [('Accept-Ranges', 'bytes')]
+    uri = environ.get('REQUEST_URI')
+    # Option 1, no URI is provided.
     if uri is None:
-        send_content_type("text")
-        ssw("ERROR!")
-        return
+        headers.append(get_content_type("text"))
+        start_response('500 Internal Server Error', headers)
+        return [b"ERROR!"]
     match = PATTERN.match(uri)
+    # Option 2, the URI pattern is unknown.
     if match is None:
-        send_content_type("text")
-        ssw("ERROR!")
+        headers.append(get_content_type("text"))
+        start_response('500 Internal Server Error', headers)
         sys.stderr.write("feature content failure: %s\n" % (repr(uri), ))
-        return
+        return [b"ERROR!"]
+
     data = match.groupdict()
     fn = ("/mesonet/share/features/%(yyyy)s/%(mm)s/"
           "%(yymmdd)s%(extra)s.%(suffix)s") % data
-    if os.path.isfile(fn):
-        rng = env.get("HTTP_RANGE", "bytes=0-")
-        tokens = rng.replace("bytes=", "").split("-", 1)
-        resdata = open(fn, 'rb').read()
-        totalsize = len(resdata)
-        stripe = slice(
-            int(tokens[0]),
-            totalsize if tokens[-1] == '' else (int(tokens[-1]) + 1))
-        send_content_type(data['suffix'], len(resdata), stripe)
-        ssw(resdata[stripe])
-        dblog(data['yymmdd'])
-    else:
-        send_content_type('png')
-        from io import BytesIO
-        from pyiem.plot.use_agg import plt
+    # Option 3, we have no file.
+    if not os.path.isfile(fn):
+        headers.append(get_content_type('png'))
         (_, ax) = plt.subplots(1, 1)
         ax.text(0.5, 0.5, "Feature Image was not Found!",
                 transform=ax.transAxes, ha='center')
@@ -96,13 +78,34 @@ def process(env):
         ram = BytesIO()
         plt.savefig(ram, format='png')
         ram.seek(0)
-        ssw(ram.read())
+        start_response('404 Not Found', headers)
+        return [ram.read()]
 
-
-def main():
-    """Do Something"""
-    process(os.environ)
-
-
-if __name__ == '__main__':
-    main()
+    # Option 4, we can support this request.
+    headers.append(get_content_type(data['suffix']))
+    rng = environ.get("HTTP_RANGE", "bytes=0-")
+    tokens = rng.replace("bytes=", "").split("-", 1)
+    resdata = open(fn, 'rb').read()
+    totalsize = len(resdata)
+    stripe = slice(
+        int(tokens[0]),
+        totalsize if tokens[-1] == '' else (int(tokens[-1]) + 1))
+    status = '200 OK'
+    if totalsize != (stripe.stop - stripe.start):
+        status = '206 Partial Content'
+    headers.append(
+        ("Content-Length", "%.0f" % (stripe.stop - stripe.start, ))
+    )
+    if environ.get("HTTP_RANGE") and stripe is not None:
+        secondval = (
+            ""
+            if environ.get("HTTP_RANGE") == 'bytes=0-'
+            else (stripe.stop - 1)
+        )
+        headers.append(
+            ("Content-Range", "bytes %s-%s/%s" % (
+                stripe.start, secondval, totalsize))
+        )
+    dblog(data['yymmdd'])
+    start_response(status, headers)
+    return [resdata[stripe]]

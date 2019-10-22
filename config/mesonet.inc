@@ -309,7 +309,8 @@
   </Directory>
 
   <Directory "/opt/iem/htdocs/onsite/features">
-    AddHandler cgi-script .py
+    WSGIProcessGroup iemwsgi_ap
+    AddHandler wsgi-script .py
     Options +ExecCGI
 
     RewriteRule tags/([^\.]+)\.html tags/index.php?tag=$1 [L]
