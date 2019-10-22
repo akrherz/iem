@@ -1,5 +1,5 @@
 sudo: required
-dist: bionic
+dist: xenial
 cache:
   timeout: 1000
   directories:
