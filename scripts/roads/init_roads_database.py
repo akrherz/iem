@@ -6,8 +6,8 @@ from __future__ import print_function
 
 from shapely.geometry import LineString, MultiLineString
 import requests
-from ingest_roads_rest import URI
 from pyiem.util import get_dbconn
+from ingest_roads_rest import URI
 
 
 def main():
@@ -34,7 +34,6 @@ def main():
         us1 = num if typ == 'US' else None
         st1 = num if typ == 'IA' else None
         if major == 'Airline Highway':
-            typ = 'IA'
             num = 0
         sys_id = props['ROUTE_RANK']
         longname = props['LONG_NAME']
@@ -42,9 +41,10 @@ def main():
                 ) % (path.wkt)
         idot_id = props['SEGMENT_ID']
         cursor.execute("""
-        INSERT into roads_base (major, minor, us1, st1, int1, type, longname,
-        geom, idot_id, archive_begin) VALUES (%s, %s, %s, %s, %s, %s, %s,
-        """ + geom + """, %s, %s) RETURNING segid
+            INSERT into roads_base (major, minor, us1, st1, int1, type,
+            longname, geom, idot_id, archive_begin)
+            VALUES (%s, %s, %s, %s, %s, %s, %s,
+            """ + geom + """, %s, %s) RETURNING segid
         """, (major[:10], minor, us1, st1, int1, sys_id, longname,
               idot_id, archive_begin))
         segid = cursor.fetchone()[0]

@@ -87,7 +87,7 @@ def make_daily_pet_plot(ctx):
                   "Climatology from Ames 1986-2014"
                   ) % (ctx['_nt'].sts[ctx['station']]['name'], ))
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
-    interval = int(len(dates) / 7 + 1)
+    interval = int(len(dates) / 7. + 1)
     ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
     ax.legend(loc='best', ncol=1, fontsize=10)
     return fig, df
@@ -129,7 +129,7 @@ def make_daily_rad_plot(ctx):
     ax.plot(dates, tmax, label=r"Modelled Max $\tau$ =0.75", color='k', lw=1.5)
     ax.grid(True)
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
-    interval = int(len(dates) / 7 + 1)
+    interval = int(len(dates) / 7. + 1)
     ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
     ax.set_ylabel("Solar Radiation $MJ m^{-2}$")
     ax.set_title(("ISUSM Station: %s Timeseries\n"
@@ -168,7 +168,7 @@ def make_daily_plot(ctx):
                   "Daily Max/Min/Avg 4 inch Soil Temperatures"
                   ) % (ctx['_nt'].sts[ctx['station']]['name'], ))
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
-    interval = int(len(df.index) / 7 + 1)
+    interval = int(len(df.index) / 7. + 1)
     ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
     ax.legend(loc='best', ncol=2, fontsize=10)
     return fig, df
@@ -197,8 +197,6 @@ def make_battery_plot(ctx):
                   "Battery Voltage"
                   ) % (ctx['_nt'].sts[ctx['station']]['name'], ))
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
-    # interval = len(dates) / 7 + 1
-    # ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
     ax.legend(loc='best', ncol=2, fontsize=10)
     return fig, df
 
@@ -288,7 +286,7 @@ def make_daily_water_change_plot(ctx):
             mybar.set_edgecolor('r')
     ax[1].set_ylabel("Soil Water Change [inch]")
     ax[1].xaxis.set_major_formatter(mdates.DateFormatter('%-d %b\n%Y'))
-    interval = int(len(df.index) / 7 + 1)
+    interval = int(len(df.index) / 7. + 1)
     ax[1].xaxis.set_major_locator(mdates.DayLocator(interval=interval))
     ax[1].grid(True)
 

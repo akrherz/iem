@@ -3,7 +3,6 @@
 
   /YYYY/mm/dd/camera/idot_trucks/keyhash/keyhash_timestamp.jpg
 """
-from __future__ import print_function
 import datetime
 import subprocess
 import tempfile
@@ -12,8 +11,8 @@ import os
 import pytz
 import requests
 import pyproj
-from pyiem.util import exponential_backoff, get_dbconn
-
+from pyiem.util import exponential_backoff, get_dbconn, logger
+LOG = logger()
 P3857 = pyproj.Proj(init='EPSG:3857')
 URI = (
     "https://services.arcgis.com/8lRhdTsQyJpO52F1/ArcGIS/rest/services/"
@@ -45,9 +44,6 @@ def get_archive_fn(label, utc):
 
 def workflow():
     ''' Do stuff '''
-    valid = datetime.datetime.now()
-    valid = valid.replace(tzinfo=pytz.timezone("America/Chicago"),
-                          microsecond=0)
     req = exponential_backoff(requests.get, URI, timeout=30)
     if req is None or req.status_code != 200:
         return
@@ -71,15 +67,17 @@ def workflow():
         idnum = feat['attributes']['PHOTO_UID']
         if idnum <= current.get(label, 0):
             continue
-
+        photourl = feat['attributes']['PHOTO_URL']
         # Go get the URL for saving!
         # print label, utc, feat['attributes']['PHOTO_URL']
-        req = exponential_backoff(requests.get,
-                                  feat['attributes']['PHOTO_URL'], timeout=15)
+        LOG.debug("Fetch %s", photourl)
+        req = exponential_backoff(requests.get, photourl, timeout=15)
         if req is None or req.status_code != 200:
-            print(('dot_truckcams.py dl fail |%s| %s'
-                   ) % ('req is None' if req is None else req.status_code,
-                        feat['attributes']['PHOTO_URL']))
+            LOG.info(
+                'dot_truckcams.py dl fail |%s| %s',
+                'req is None' if req is None else req.status_code,
+                photourl
+            )
             continue
         tmp = tempfile.NamedTemporaryFile(delete=False)
         tmp.write(req.content)

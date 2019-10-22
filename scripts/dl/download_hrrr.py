@@ -5,7 +5,6 @@
 Run at 40 AFTER for the previous hour
 
 """
-from __future__ import print_function
 import subprocess
 import sys
 import datetime
@@ -13,7 +12,8 @@ import os
 
 import requests
 import pygrib
-from pyiem.util import exponential_backoff
+from pyiem.util import exponential_backoff, logger
+LOG = logger()
 
 
 def need_to_run(valid):
@@ -29,9 +29,8 @@ def need_to_run(valid):
             grbs.select(name=name)
         # print("%s had everything we desired!" % (gribfn, ))
         return False
-    except Exception as exp:
+    except Exception:
         return True
-    return True
 
 
 def fetch(valid):
@@ -44,7 +43,7 @@ def fetch(valid):
                           "wrfprsf00.grib2.idx"))
     req = requests.get(uri, timeout=30)
     if req.status_code != 200:
-        print("download_hrrr failed to get idx\n%s" % (uri,))
+        LOG.info("failed to get idx %s", uri)
         return
 
     offsets = []
@@ -78,14 +77,13 @@ def fetch(valid):
     output = open(outfn, 'ab', 0o664)
 
     if len(offsets) != 13:
-        print("download_hrrr_rad warning, found %s gribs for %s" % (
-                                                    len(offsets), valid))
+        LOG.info("warning, found %s gribs for %s", len(offsets), valid)
     for pr in offsets:
         headers = {'Range': 'bytes=%s-%s' % (pr[0], pr[1])}
         req = exponential_backoff(requests.get, uri[:-4],
                                   headers=headers, timeout=30)
         if req is None:
-            print("download_hrrr.py failure for uri: %s" % (uri,))
+            LOG.info("failure for uri: %s", uri)
         else:
             output.write(req.content)
 

@@ -1,7 +1,8 @@
 """Be able to merge a CSV file that IDOT provides"""
-import pandas as pd
 import sys
 import datetime
+
+import pandas as pd
 from pyiem.util import get_dbconn
 
 pgconn = get_dbconn('postgis')
@@ -25,7 +26,6 @@ ROADCOND = {
     'completely covered with slush': 64,
     'completely covered with mixed': 23,
     'travel not advised': 51,
-    'impassable': 86,
     'partially covered with mixed snow ice or slush': 15,
     'completely covered with mixed snow ice or slush': 23,
     'icy bridges': 27,
