@@ -1,5 +1,5 @@
 sudo: required
-dist: xenial
+dist: bionic
 cache:
   timeout: 1000
   directories:
@@ -7,6 +7,9 @@ cache:
     - $HOME/miniconda2
     - $HOME/miniconda3
 addons:
+  apt:
+    sources:
+      - ppa:ubuntugis/ppa
   hosts:
     - iemdb2.local
     - iemdb-hads.local
@@ -57,8 +60,6 @@ before_install:
   - echo `pwd`
   - chmod 755 $HOME
   - sudo apt-get install librrd-dev
-  - sudo add-apt-repository ppa:ubuntugis/ppa -y
-  - sudo apt-get update -qq
   # need apache2-dev for mod-wsgi to build
   - sudo apt-get install apache2 apache2-dev memcached
   - sudo service memcached start
@@ -103,7 +104,7 @@ before_script:
 script:
   # restart apache
   - sudo service apache2 restart || sudo cat /var/log/apache2/error.log
-  - sudo systemctl status apache2.service
+  - sudo systemctl status apache2.service -l
   - ls -l $HOME/miniconda$MINICONDA/envs/prod/lib/python$PYTHON_VERSION/site-packages/mod_wsgi/server
   # Run autoplot tests with basically no data in database
   - python test/run_autoplots.py
