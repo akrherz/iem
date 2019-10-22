@@ -76,30 +76,23 @@ before_install:
   - echo "LoadModule wsgi_module $HOME/miniconda$MINICONDA/envs/prod/lib/python$PYTHON_VERSION/site-packages/mod_wsgi/server/$MOD_WSGI_SO" | sudo tee -a /etc/apache2/mods-enabled/wsgi.load > /dev/null;
   - echo "WSGIApplicationGroup %{GLOBAL}" | sudo tee -a /etc/apache2/mods-enabled/wsgi.load > /dev/null;
 install:
+  - export PATH="$HOME/miniconda$MINICONDA/bin:$PATH"
   - if [[ ! -f $HOME/miniconda$MINICONDA/envs/prod/bin/python ]]; then
       wget https://repo.continuum.io/miniconda/Miniconda$MINICONDA-latest-Linux-x86_64.sh -O miniconda.sh;
       bash miniconda.sh -f -b -p $HOME/miniconda$MINICONDA;
-      $HOME/miniconda$MINICONDA/bin/conda config --set quiet True --set always_yes yes --set changeps1 no;
-      $HOME/miniconda$MINICONDA/bin/conda config --prepend channels conda-forge;
-      $HOME/miniconda$MINICONDA/bin/conda config --set channel_priority strict;
-      $HOME/miniconda$MINICONDA/bin/conda update conda;
-      $HOME/miniconda$MINICONDA/bin/conda create -n prod python=$PYTHON_VERSION;
+      sh .ci_tooling/setupconda.sh;
+      conda update conda;
+      conda create -n prod python=$PYTHON_VERSION;
+      conda install -q --file conda_requirements.txt;
+      conda clean -y --all -q;
+      pip install --upgrade -r pip_requirements.txt;
+      rm -rf $HOME/miniconda$MINICONDA/pkgs/cache/*;
     fi
-  - export PATH="$HOME/miniconda$MINICONDA/bin:$PATH"
-  - conda config --set always_yes yes --set changeps1 no
-  - . $HOME/miniconda$MINICONDA/etc/profile.d/conda.sh
-  - conda activate prod
-  - hash -r
-  - conda install -q --file conda_requirements.txt
-  # Remove packages to save space
-  - conda clean -q --packages
+  - sh .ci_tooling/setupconda.sh
   # Debug printout
   - conda list
   - conda config --show channels
-  # Then do additional pip stuff
-  - pip install --upgrade -r pip_requirements.txt
-  # now delete out some cache stuff, so that our travis-ci cache is still valid
-  - rm -f $HOME/miniconda$MINICONDA/pkgs/cache/*
+
 before_script:
   # https://travis-ci.community/t/t/712/12
   - export PATH="/usr/lib/postgresql/11/bin:$PATH"
@@ -110,6 +103,8 @@ before_script:
 script:
   # restart apache
   - sudo service apache2 restart || sudo cat /var/log/apache2/error.log
+  - sudo systemctl status apache2.service
+  - ls -l $HOME/miniconda$MINICONDA/envs/prod/lib/python$PYTHON_VERSION/site-packages/mod_wsgi/server
   # Run autoplot tests with basically no data in database
   - python test/run_autoplots.py
   # Add some test data to the database
