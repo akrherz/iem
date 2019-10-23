@@ -5,7 +5,7 @@ rrdtool
 PyRSS2Gen
 odfpy
 git+https://github.com/akrherz/python-metar.git@snowdepth
---no_binary :all: mod-wsgi
+mod-wsgi
 git+https://github.com/akrherz/smartsheet-python-sdk.git@issue38
 git+https://github.com/akrherz/windrose.git@darylchanges
 git+https://github.com/akrherz/nwnserver.git
