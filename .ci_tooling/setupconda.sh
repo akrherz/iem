@@ -1,7 +1,7 @@
 # Get conda in our $PATH
 export PATH="$HOME/miniconda/bin:$PATH"
 
-if [[ ! -f $HOME/miniconda/envs/prod/bin/python ]]; then
+if [ ! -f $HOME/miniconda/envs/prod/bin/python ]; then
     wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
     bash miniconda.sh -f -b -p $HOME/miniconda
     . $HOME/miniconda/etc/profile.d/conda.sh
