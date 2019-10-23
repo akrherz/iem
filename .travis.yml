@@ -95,7 +95,7 @@ before_script:
   - python schema_manager.py
   - cd ..
 script:
-  - MOD_WSGI_SO=$(find /opt/miniconda3/envs/prod -type f -name 'mod_wsgi*.so')
+  - MOD_WSGI_SO=$(find /home/travis/miniconda/envs/prod -type f -name 'mod_wsgi*.so')
   - echo $MOD_WSGI_SO
   - echo "LoadModule wsgi_module $MOD_WSGI_SO" | sudo tee -a /etc/apache2/mods-enabled/wsgi.load > /dev/null;
   - echo "WSGIApplicationGroup %{GLOBAL}" | sudo tee -a /etc/apache2/mods-enabled/wsgi.load > /dev/null;
