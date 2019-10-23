@@ -5,5 +5,5 @@ sudo apt install -yq --no-install-suggests --no-install-recommends postgresql-11
 sed -e 's/^port.*/port = 5432/' /etc/postgresql/11/main/postgresql.conf > postgresql.conf
 sudo chown postgres postgresql.conf
 sudo mv postgresql.conf /etc/postgresql/11/main
-sudo cp /etc/postgresql/{10,11}/main/pg_hba.conf
+sudo cp /etc/postgresql/10/main/pg_hba.conf /etc/postgresql/11/main/pg_hba.conf
 sudo service postgresql restart 11
