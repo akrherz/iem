@@ -44,7 +44,7 @@ kealib
 krb5
 lxml
 lzo
-matplotlib
+matplotlib-base
 metpy
 mock
 mpich
