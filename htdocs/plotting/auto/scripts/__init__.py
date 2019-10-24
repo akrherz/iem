@@ -71,6 +71,8 @@ data = {'plots': [
          'label': "Largest Local Calendar Day Temperature Differences"},
         {'id': "168",
          "label": "Latest Date of Year for High Temperature"},
+        {'id': "206",
+         "label": "Map of Daily Automated Station Summaries"},
         {'id': "97",
          "label": "Map of Departures/Stats over One Period of Days"},
         {'id': "34",
