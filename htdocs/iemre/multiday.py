@@ -4,7 +4,6 @@ import sys
 import cgi
 import datetime
 import json
-from json import encoder
 import warnings
 
 import numpy as np
@@ -13,8 +12,8 @@ from pyiem.util import ncopen, ssw
 import pyiem.prism as prismutil
 
 warnings.simplefilter("ignore", UserWarning)
-encoder.FLOAT_REPR = lambda o: format(o, '.2f')
-encoder.c_make_encoder = None
+json.encoder.FLOAT_REPR = lambda o: format(o, '.2f')
+json.encoder.c_make_encoder = None
 
 
 def clean(val):

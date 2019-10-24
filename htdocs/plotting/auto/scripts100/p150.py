@@ -3,7 +3,6 @@ import calendar
 from collections import OrderedDict
 
 from pandas.io.sql import read_sql
-from pyiem.network import Table as NetworkTable  # This is needed.
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound

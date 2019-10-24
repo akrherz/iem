@@ -7,7 +7,6 @@ from __future__ import print_function
 import datetime
 import sys
 
-import pytz
 from pyiem.util import get_dbconn, utc
 
 
@@ -29,18 +28,15 @@ def query(sql, args=None):
 
 def workflow(valid):
     ''' Do the work for this date, which is set to 00 UTC '''
-    # Delete schoolnet data, since we created it in the first place!
     tbl = "raw%s" % (valid.strftime("%Y_%m"),)
-    sql = """DELETE from """ + tbl + """ WHERE station IN
-              (SELECT id from stations WHERE network in ('KCCI','KELO','KIMT')
-              )"""
-    query(sql)
 
     # make sure our tmp table does not exist
     query("DROP TABLE IF EXISTS tmp")
     # Extract unique obs to special table
-    sql = """CREATE table tmp as select distinct * from """+tbl+"""
-        WHERE valid BETWEEN %s and %s"""
+    sql = """
+        CREATE table tmp as select distinct * from """ + tbl + """
+        WHERE valid BETWEEN %s and %s
+    """
     args = (valid, valid + datetime.timedelta(hours=24))
     query(sql, args)
 
@@ -72,9 +68,8 @@ def main(argv):
         utcnow = utc(int(argv[1]), int(argv[2]), int(argv[3]))
         workflow(utcnow)
         return
-    utcnow = datetime.datetime.utcnow()
-    utcnow = utcnow.replace(hour=0, minute=0, second=0, microsecond=0,
-                            tzinfo=pytz.utc)
+    utcnow = utc().replace(
+        hour=0, minute=0, second=0, microsecond=0)
     # Run for 'yesterday' and 35 days ago
     for day in [1, 35]:
         workflow(utcnow - datetime.timedelta(days=day))

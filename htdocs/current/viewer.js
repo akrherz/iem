@@ -216,7 +216,7 @@ $().ready(function(){
 			format: new ol.format.GeoJSON()
 		}),
 		style: function(feature, resolution){
-			color = sbwLookup[feature.get('phenomena')];
+			var color = sbwLookup[feature.get('phenomena')];
 			if (color === undefined) return;
 			sbwStyle[1].getStroke().setColor(color);
 			return sbwStyle;

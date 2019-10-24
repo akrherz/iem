@@ -7,135 +7,88 @@ import os
 import sys
 
 import requests
-import pytz
-import pandas as pd
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc
 
 DUP = re.compile("[0-9]{3} SA..[0-9][0-9] [A-Z]{3,4}")
 PROD = re.compile("[A-Z0-9]{3,4} [0-3][0-9][0-2][0-9][0-5][0-9]Z ")
 
 XREF = {}
+NETWORKS = []
 
 
 def load_stations():
+    """Get station timezone info?"""
     pgconn = get_dbconn('mesosite', user='nobody')
     cursor = pgconn.cursor()
     cursor.execute("""
-    SELECT id, tzname from stations where network ~* 'ASOS'
-    and tzname not in ('UTC+4', 'UTC-3', 'UTC-5')
+        SELECT id, network from stations where network ~* 'ASOS'
     """)
     for row in cursor:
-        XREF[row[0]] = pytz.timezone(row[1])
+        XREF[row[0]] = row[1]
 
 
-def write(ts, stid, obs):
-
-    files = dict()
-    for ts, ob in obs.iteritems():
-        fn = ts.strftime("%Y%m%d.txt")
-        a = files.setdefault(fn, [])
-        a.append(ob)
-    lsid = stid
-    if len(stid) == 4 and stid[0] == 'K':
-        lsid = stid[1:]
-    mydir = ("/mesonet/ARCHIVE/wunder/cache/%s/%s"
-             ) % (lsid, ts.year)
-    if not os.path.isdir(mydir):
-        os.makedirs(mydir)
-    for fn, obs in files.iteritems():
-        fn2 = "%s/%s" % (mydir, fn)
-        # remove old files that had no data at all
-        if (os.path.isfile(fn2) and
-                open(fn2).read().find("No daily or hourly history ") > -1):
-            os.unlink(fn2)
-        if os.path.isfile(fn2):
-            if open(fn2).read().startswith("FullMetar,"):
-                try:
-                    df = pd.read_csv(fn2)
-                except Exception:
-                    print(fn2)
-                    return
-            else:
-                try:
-                    df = pd.read_csv(fn2, skiprows=[0, ])
-                except Exception:
-                    print(fn2)
-                    return
-            df2 = pd.DataFrame({'FullMetar': obs})
-            df = df.append(df2, ignore_index=True)
-            series = df['FullMetar'].unique()
-            o = open(fn2, 'w')
-            o.write("FullMetar,\n")
-            for s in series:
-                o.write("%s,\n" % (s,))
-            o.close()
-        else:
-            # We are good to overwrite
-            o = open(fn2, 'w')
-            o.write("FullMetar,\n")
-            obs.sort()
-            for ob in obs:
-                o.write("%s,\n" % (ob.replace(",", " "),))
-            o.close()
-
-
-def compute_ts(stid, ts, token):
-    _stid = stid if stid[0] != 'K' else stid[1:]
-    ddhhmmz = token.split()[1]
-    try:
-        ts2 = datetime.datetime(ts.year, ts.month, ts.day, int(ddhhmmz[2:4]),
-                                int(ddhhmmz[4:6]))
-    except Exception:
-        print("Invalid timestamp %s" % (ddhhmmz,))
-        return None
-    ts2 = ts2.replace(tzinfo=pytz.timezone("UTC"))
-    if ts2.strftime("%d") != ddhhmmz[:2]:
-        ts2 -= datetime.timedelta(days=1)
-    if ts2.strftime("%d") != ddhhmmz[:2]:
-        return None
-    return ts2.astimezone(XREF.get(_stid, pytz.timezone("UTC")))
-
-
-def do_stid(archive, ts, stid):
+def do_stid(stid):
+    """Go."""
+    pgconn = get_dbconn('asos')
+    cursor = pgconn.cursor()
     if len(stid) not in [3, 4]:
         return 0
-    o = open('fn', 'w')
-    o.write("""
+    with open('fn', 'w') as fh:
+        # NB: not all GEMPAK surface files stored the raw METAR, so using
+        # TEXT here may not always work.
+        fh.write("""
 SFFILE = /mesonet/tmp/mtsf.gem
 AREA = @%s
 DATTIM = ALL
-SFPARM = TEXT
+SFPARM = TMPF
 OUTPUT   = f/fn2
 IDNTYP   = STID
 run
 
 exit
 """ % (stid,))
-    o.close()
-    r = subprocess.Popen("timeout 30 sflist < fn", stdin=subprocess.PIPE,
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE, shell=True)
+    r = subprocess.Popen(
+        "timeout 30 /tmp/sflist < fn", stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE, shell=True)
     # need to make this sync, so that fn2 is accurate
     r.stdout.read()
-    data = open('fn2').read().replace("\n", " ").strip()
-    poss = [q.start() for q in PROD.finditer(data)]
-    cnt = 0
-    for i, pos in enumerate(poss[:-1]):
-        token = data[pos:poss[i+1]].strip()
-        m = DUP.search(token)
-        if m:
-            token = token[:m.start()]
-        _stid = token.split()[0]
-        a = archive.setdefault(_stid, dict())
-        ts2 = compute_ts(_stid, ts, token)
-        if ts2 is not None:
-            a[ts2] = token
-        cnt += 1
-    return cnt
+    if not os.path.isfile('fn2'):
+        return 0
+    for line in open('fn2'):
+        tokens = line.strip().split()
+        if len(tokens) != 3:
+            continue
+        try:
+            ts = datetime.datetime.strptime(tokens[1], '%y%m%d/%H%M')
+        except ValueError:
+            continue
+        tmpf = float(tokens[2])
+        # missing
+        if tmpf < -9000:
+            continue
+        valid = utc(ts.year, ts.month, ts.day, ts.hour, ts.minute)
+        cursor.execute("""
+            SELECT tmpf from alldata where station = %s and valid = %s
+            and tmpf is not null
+        """, (stid, valid))
+        if cursor.rowcount == 0:
+            print("%s %s no results" % (stid, valid))
+            continue
+        row = cursor.fetchone()
+        delta = abs(row[0] - tmpf)
+        if delta > 1:
+            network = XREF.get(stid)
+            if network not in NETWORKS:
+                NETWORKS.append(network)
+            print("%s[%s] %s old: %s new: %s" % (
+                stid, network, valid, row[0], tmpf))
+    return 0
     # 5. save these in the proper /mesonet/ARCHIVE/cache Folder
 
 
 def workflow(ts):
+    """We do work."""
     # 1. Get mtarchive file
     uri = ts.strftime(("http://mtarchive.geol.iastate.edu/%Y/%m/%d/gempak/"
                        "surface/sao/%Y%m%d_sao.gem"))
@@ -143,12 +96,11 @@ def workflow(ts):
     if req.status_code != 200:
         print('Whoa! %s %s' % (req.status, uri))
         return
-    fh = open("/mesonet/tmp/mtsf.gem", 'wb')
-    fh.write(req.content)
-    fh.close()
+    with open("/mesonet/tmp/mtsf.gem", 'wb') as fh:
+        fh.write(req.content)
     # 2. run sflist to extract all stations
-    fh = open('fn', 'w')
-    fh.write("""
+    with open('fn', 'w') as fh:
+        fh.write("""
 SFFILE = /mesonet/tmp/mtsf.gem
 AREA = ALL
 DATTIM = ALL
@@ -160,11 +112,11 @@ run
 
 exit
 """)
-    fh.close()
-    proc = subprocess.Popen("sflist < fn", stdin=subprocess.PIPE,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE, shell=True)
-    data = proc.stdout.read()
+    proc = subprocess.Popen(
+        "/tmp/sflist < fn", stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE, shell=True)
+    data = proc.stdout.read().decode('ascii', 'ignore')
     stations = {}
     for line in data.split("\n"):
         tokens = line.strip().split()
@@ -174,12 +126,10 @@ exit
             continue
         stations[tokens[0]] = True
     # 3. loop over each station, sigh
-    archive = dict()
-    res = [do_stid(archive, ts, stid) for stid in stations]
+    res = [do_stid(stid) for stid in stations]
     print("Found %s stations, %s obs for %s" % (len(stations), sum(res),
                                                 ts.strftime("%Y%m%d")))
-    for stid, obs in archive.iteritems():
-        write(ts, stid, obs)
+    print(NETWORKS)
 
 
 def main(argv):

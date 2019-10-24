@@ -98,9 +98,9 @@ def plotter(fdict):
                      ][idx]
         if level < 500 or row['vsby'] < 1:
             val = 4
-        elif (level < 1000 and level >= 500) or row['vsby'] < 3:
+        elif level < 1000 or row['vsby'] < 3:
             val = 3
-        elif (level < 3000 and level >= 1000) or row['vsby'] < 5:
+        elif level < 3000 or row['vsby'] < 5:
             val = 2
         elif level >= 3000 and row['vsby'] >= 5:
             val = 1

@@ -52,7 +52,8 @@ def plotter(fdict):
             wfo = %s and phenomena is not null and significance is not null
             and issue > '2005-01-01'
             """, pgconn, params=(station, ), index_col=None)
-
+    if df.empty:
+        raise NoDataFound("No data was found for this WFO.")
     df['wfo'] = station
     df['year'] = df['year'].astype('i')
     gdf = df.groupby('year').count()
