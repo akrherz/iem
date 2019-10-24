@@ -93,7 +93,10 @@ def plotter(fdict):
                      })
 
     eidx = iemre.daily_offset(ets)
-    with ncopen(iemre.get_daily_ncname(ets.year)) as nc:
+    ncfn = iemre.get_daily_ncname(ets.year)
+    if not os.path.isfile(ncfn):
+        raise NoDataFound("Data for year %s not found" % (ets.year, ))
+    with ncopen(ncfn) as nc:
         snowd = nc.variables['snowd_12z'][:eidx, :, :]
     for i in range(snowd.shape[0]):
         rows.append({

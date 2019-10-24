@@ -175,6 +175,8 @@ def plotter(fdict):
     ax.set_title("%s\n%s" % (ctx['title'], ctx['subtitle']))
     ax.set_position([pos.x0, pos.y0, 0.6, 0.8])
     ax.legend(loc=(1.0, 0.0))
+    df['issued'] = df['issued'].apply(lambda x: x.strftime("%Y-%m-%d %H:%M"))
+    df['valid'] = df['valid'].apply(lambda x: x.strftime("%Y-%m-%d %H:%M"))
     return fig, df
 
 

@@ -9,7 +9,7 @@ from pyiem.plot.use_agg import plt
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import state_bounds, SECTORS
 from pyiem.exceptions import NoDataFound
-from metpy.units import units
+from metpy.units import units, masked_array
 
 PDICT2 = {'c': 'Contour Plot',
           'g': 'Grid Cell Mesh'}
@@ -69,7 +69,7 @@ def get_description():
 
 def mm2inch(val):
     """Helper."""
-    return (val * units('mm')).to(units('inch')).m
+    return masked_array(val, units('mm')).to(units('inch')).m
 
 
 def plotter(fdict):

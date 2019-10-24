@@ -119,7 +119,9 @@ def plotter(fdict):
     if varname == 'heatindex':
         df['heatindex'] = heat_index(
             df['tmpf'].values * units('degF'),
-            relative_humidity_from_dewpoint(df['dwpf'].values * units('degF'))
+            relative_humidity_from_dewpoint(
+                df['tmpf'].values * units('degF'),
+                df['dwpf'].values * units('degF'))
             ).to(units('degF')).m
         inctitle = " [All Obs Included]"
         if inc == 'no':
