@@ -9,6 +9,7 @@ from scipy.interpolate import interp1d
 from pyiem import util
 from pyiem.plot.use_agg import plt
 from pyiem.reference import state_names, state_fips
+from pyiem.exceptions import NoDataFound
 
 SERVICE = (
     "https://droughtmonitor.unl.edu"
@@ -62,6 +63,8 @@ def plotter(fdict):
     headers['Content-Type'] = "application/json; charset=UTF-8"
     req = requests.post(SERVICE, payload, headers=headers)
     jdata = req.json()
+    if 'd' not in jdata:
+        raise NoDataFound("Data Not Found.")
     df = pd.DataFrame(jdata['d'])
     df['Date'] = pd.to_datetime(df['ReleaseDate'])
     df.sort_values('Date', ascending=True, inplace=True)
