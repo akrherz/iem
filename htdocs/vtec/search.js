@@ -151,7 +151,7 @@ Ext.define('SBW', {
         {name: 'phenomena', type: 'string'},
         {name: 'pstring', type: 'string', 
         	convert: function(val, record){
-                idx = pDict.find('abbr', record.data.phenomena);
+                var idx = pDict.find('abbr', record.data.phenomena);
                 if (idx > -1) {
                 	rec = pDict.getAt(idx);
                         return rec.data.name;
@@ -161,7 +161,7 @@ Ext.define('SBW', {
         	}},
         {name: 'sig_string', type: 'string',
         	convert: function(val, record){
-                idx = sDict.find('abbr', record.data.significance);
+                var idx = sDict.find('abbr', record.data.significance);
                 if (idx > -1) {
                 	rec = sDict.getAt(idx);
                 	return rec.data.name;
@@ -340,7 +340,7 @@ function setupUI() {
 	});
 	
 	
-	var form = new Ext.form.Panel({
+	new Ext.form.Panel({
 		renderTo : 'myform',
 		layout : 'anchor',
 		title : 'Select County/Zone to search for...',

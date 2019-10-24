@@ -192,7 +192,7 @@ def process(ncfn):
             if val >= 0.01:
                 iem.data['phour'] = float(round(val, 2))
                 mtr += "P%04i " % (iem.data['phour'] * 100.,)
-            elif val < 0.01 and val > 0:
+            elif val > 0:
                 # Trace
                 mtr += "P0000 "
                 iem.data['phour'] = TRACE_VALUE

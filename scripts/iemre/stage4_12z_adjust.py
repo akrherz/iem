@@ -65,7 +65,6 @@ def merge(ts):
             adjust = np.where(adjust > 250.0, 0, adjust)
             nc.variables["p01m"][offset, :, :] = np.where(
                 adjust < 0.01, 0, adjust)
-            ts = ts0 + datetime.timedelta(hours=offset-offset0)
 
 
 def main(argv):
@@ -73,8 +72,7 @@ def main(argv):
     if len(argv) == 4:
         ts = utc(int(argv[1]), int(argv[2]), int(argv[3]), 12)
     else:
-        ts = utc()
-        ts = ts - datetime.timedelta(days=1)
+        ts = utc() - datetime.timedelta(days=1)
         ts = ts.replace(hour=12, minute=0, second=0, microsecond=0)
     merge(ts)
 

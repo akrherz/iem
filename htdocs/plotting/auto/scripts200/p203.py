@@ -141,7 +141,7 @@ def plotter(fdict):
         [os.path.dirname(os.path.abspath(__file__)), "../../../images"
          ])
     logo = mpimage.imread("%s/logo_reallysmall.png" % (mydir, ))
-    y0 = y0 = fig.get_figheight() * 100.0 - logo.shape[0] - 5
+    y0 = fig.get_figheight() * 100.0 - logo.shape[0] - 5
     fig.figimage(logo, 5, y0, zorder=3)
 
     i = 0
