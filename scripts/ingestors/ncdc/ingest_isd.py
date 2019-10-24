@@ -9,6 +9,8 @@ import tqdm
 from pyiem.ncei import ds3505
 from pyiem.util import get_dbconn, utc
 
+ADD_ONLY = True
+
 
 def main(argv):
     """Go"""
@@ -20,6 +22,7 @@ def main(argv):
     year2 = int(argv[5])
     failedyears = []
     msgs = []
+    dbid = faa if len(faa) == 4 and faa[0] != 'K' else faa[1:]
     for year in tqdm.tqdm(range(year, year2)):
         sts = utc(year, 1, 1)
         ets = sts.replace(year=year+1)
@@ -45,8 +48,7 @@ def main(argv):
             if data is None:
                 bad += 1
                 continue
-            if added == 0:
-                dbid = faa if len(faa) == 4 and faa[0] != 'K' else faa[1:]
+            if added == 0 and not ADD_ONLY:
                 cursor.execute("""
                     DELETE from alldata where station = %s
                     and valid >= %s and valid < %s
@@ -54,6 +56,14 @@ def main(argv):
                 if cursor.rowcount > 0:
                     print("deleted %s rows for %s" % (cursor.rowcount, dbid))
                 removed = cursor.rowcount
+            if ADD_ONLY:
+                # check for existing ob
+                cursor.execute("""
+                    SELECT valid from alldata where station = %s and valid = %s
+                """, (dbid, data['valid']))
+                if cursor.rowcount > 0:
+                    skipped += 1
+                    continue
             res = ds3505.sql(cursor, faa, data)
             if res is None:
                 skipped += 1
