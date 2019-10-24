@@ -100,12 +100,15 @@ def plotter(fdict):
         hd = row['max_tmpf'] - cdf.at[row[0].strftime("%m%d"), 'high']
         ld = row['min_tmpf'] - cdf.at[row[0].strftime("%m%d"), 'low']
         ad = row['avg_tmpf'] - cdf.at[row[0].strftime("%m%d"), 'avg']
-        if varname == 'avg_smph' and row['avg_sknt'] is None:
-            continue
+        avg_sknt = row['avg_sknt']
+        if avg_sknt is None:
+            if varname == 'avg_smph':
+                continue
+            avg_sknt = 0
         rows.append(dict(
             day=row['day'], max_tmpf=row['max_tmpf'],
             avg_smph=(
-                row['avg_sknt'] * units('knot')).to(units('mile / hour')).m,
+                avg_sknt * units('knot')).to(units('mile / hour')).m,
             min_dwpf=row['min_dwpf'], max_dwpf=row['max_dwpf'],
             high_departure=hd, low_departure=ld,
             avg_departure=ad,
@@ -133,4 +136,4 @@ def plotter(fdict):
 
 
 if __name__ == '__main__':
-    plotter(dict())
+    plotter({'var': 'avg_sknt'})
