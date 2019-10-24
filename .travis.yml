@@ -42,6 +42,7 @@ env:
     - PYTHON_VERSION=3.6
     - PYTHON_VERSION=3.7
 before_install:
+  - git clone --depth 1 https://github.com/akrherz/ci_tooling.git .ci_tooling
   - . .ci_tooling/postgres.sh
   - sudo mkdir -p /mesonet/www/logs
   - sudo ln -s `pwd` /opt/iem
@@ -62,7 +63,7 @@ before_install:
   - echo "export PATH=/home/travis/miniconda/envs/prod/bin:$PATH" | sudo tee -a /etc/apache2/envvars > /dev/null
   - echo "export LD_PRELOAD=/home/travis/miniconda/envs/prod/lib/libz.so" | sudo tee -a /etc/apache2/envvars > /dev/null
 install:
-  - . .ci_tooling/setupconda.sh
+  - . .ci_tooling/miniconda.sh
 
 before_script:
   # https://travis-ci.community/t/t/712/12
