@@ -115,13 +115,14 @@ function do_row($row){
 }
 
 function do_row_ffw($row){
-	return sprintf("<tr><td>%s</td><td nowrap>%s</td><td>%s</td><td>%s</td>"
-			 ."<td>%02.0f</td><td>%4.2f</td><td>%s</td><td>%s</td><td>%02.0f</td></tr>",
-			 do_col1($row), do_col2($row),
- 			do_col3($row),
-			 $row["locations"], $row["floodtag_flashflood"],
-			 $row["floodtag_damage"],
- 			$row["floodtag_heavyrain"], $row["floodtag_dam"], $row["floodtag_leeve"]);
+	return sprintf("<tr><td>%s</td><td nowrap>%s</td><td>%s</td><td>%s</td>".
+        "<td>%s</td><td>%s</td><td>%s</td><td>%s</td>".
+        "<td>%s</td></tr>",
+		do_col1($row), do_col2($row), do_col3($row),
+		$row["locations"], $row["floodtag_flashflood"],
+		$row["floodtag_damage"],
+        $row["floodtag_heavyrain"], $row["floodtag_dam"],
+        $row["floodtag_leeve"]);
 }
  
  $svrtable = <<<EOF
