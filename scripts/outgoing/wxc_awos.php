@@ -5,8 +5,8 @@
  * 2) We get a 5 minute datafed and use it to build more accurate daily totals
  *    not found in the METAR feed.
  */
-include "../../config/settings.inc.php";
-include "../../include/mlib.php";
+require_once "../../config/settings.inc.php";
+require_once "../../include/mlib.php";
 
 function fancy($v, $floor,$ceil, $p){
   if ($v < $floor || $v > $ceil) return "";
@@ -54,8 +54,8 @@ while ( list($bogus, $val) = each($jobj["data"]) ) {
 
 fclose($rwis);
 
-$pqstr = "data c 000000000000 wxc/wxc_ia_awos.txt bogus txt";
-$cmd = sprintf("/home/ldm/bin/pqinsert -p '%s' /tmp/wxc_ia_awos.txt", $pqstr);
+$pqstr = sprintf("data c %s wxc/wxc_ia_awos.txt bogus txt", gmdate("YmdHi"));
+$cmd = sprintf("/home/ldm/bin/pqinsert -i -p '%s' /tmp/wxc_ia_awos.txt", $pqstr);
 system($cmd);
 unlink("/tmp/wxc_ia_awos.txt");
 
