@@ -64,64 +64,80 @@ roads base is
 
 """
 import sys
-import psycopg2
+
 from pyiem.util import get_dbconn
-conn = get_dbconn('postgis', host='localhost')
-conn2 = get_dbconn('postgis', user='mesonet')
+
+conn = get_dbconn("postgis", host="localhost")
+conn2 = get_dbconn("postgis", user="mesonet")
 cursor = conn.cursor()
 cursor2 = conn2.cursor()
 
 cursor2.execute("""DELETE from roads_current""")
 
-cursor.execute("""
+cursor.execute(
+    """
      SELECT route_name, nameid, longname, ST_Transform(geom, 26915), segment_id
      from new_roads
-""")
+"""
+)
 for row in cursor:
     (route, name_id, longname, geom, gid) = row
     major = route
     minor = name_id.split(":")[1]
     (typ, num) = route.replace("-", " ").split()
-    int1 = num if typ == 'I' else None
-    us1 = num if typ == 'US' else None
-    st1 = num if typ == 'IA' else None
-    if typ not in ['I', 'US', 'IA']:
+    int1 = num if typ == "I" else None
+    us1 = num if typ == "US" else None
+    st1 = num if typ == "IA" else None
+    if typ not in ["I", "US", "IA"]:
         print("Totally unknown, abort %s" % (route,))
         sys.exit()
     sys_id = 1
-    if typ == 'US':
+    if typ == "US":
         sys_id = 2
-    elif typ == 'IA':
+    elif typ == "IA":
         sys_id = 3
     idot_id = gid
 
     # OK, insert this into the database!
-    cursor2.execute("""
+    cursor2.execute(
+        """
     INSERT into roads_base(major, minor, us1, st1, int1, type, geom, longname,
     idot_id)
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING segid
-    """, (major, minor, us1, st1, int1,
-          sys_id, geom, longname, idot_id))
+    """,
+        (major, minor, us1, st1, int1, sys_id, geom, longname, idot_id),
+    )
     segid = cursor2.fetchone()[0]
     # Create the simplified geom
-    cursor2.execute("""UPDATE roads_base
-    SET simple_geom = ST_Simplify(geom, 0.01) WHERE segid = %s""", (segid,))
+    cursor2.execute(
+        """UPDATE roads_base
+    SET simple_geom = ST_Simplify(geom, 0.01) WHERE segid = %s""",
+        (segid,),
+    )
 
     # Figure out which WFO this segment is in...
-    cursor2.execute("""SELECT u.wfo,
+    cursor2.execute(
+        """SELECT u.wfo,
     ST_Distance(u.geom, ST_Transform(b.geom, 4326))
     from ugcs u, roads_base b WHERE
     substr(ugc, 1, 2) = 'IA' and b.segid = %s
-    and u.end_ts is null ORDER by ST_Distance ASC""", (segid,))
+    and u.end_ts is null ORDER by ST_Distance ASC""",
+        (segid,),
+    )
     wfo = cursor2.fetchone()[0]
-    print('Added [%s] "%s" segid:%s wfo:%s' % (longname, name_id, segid,
-                                               wfo))
-    cursor2.execute("""UPDATE roads_base SET wfo = %s WHERE segid = %s
-    """, (wfo, segid))
+    print('Added [%s] "%s" segid:%s wfo:%s' % (longname, name_id, segid, wfo))
+    cursor2.execute(
+        """UPDATE roads_base SET wfo = %s WHERE segid = %s
+    """,
+        (wfo, segid),
+    )
 
     # Add a roads_current entry!
-    cursor2.execute("""INSERT into roads_current(segid, valid)
-     VALUES (%s, now())""" % (segid, ))
+    cursor2.execute(
+        """INSERT into roads_current(segid, valid)
+     VALUES (%s, now())"""
+        % (segid,)
+    )
 
 
 cursor2.close()

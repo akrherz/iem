@@ -19,18 +19,23 @@ def main():
     interval = datetime.timedelta(days=1)
     now = sts
     while now < ets:
-        icursor.execute("""
-      select valid, station, metar from t""" + str(now.year) + """
+        icursor.execute(
+            """
+      select valid, station, metar from t"""
+            + str(now.year)
+            + """
       where metar is not null and valid >= %s and valid < %s
       and wxcodes is null
-        """, (now, now + interval))
+        """,
+            (now, now + interval),
+        )
         total = 0
         for row in icursor:
             try:
                 mtr = Metar(row[2], row[0].month, row[0].year)
-            except Exception as _exp:
+            except Exception:
                 continue
-            sql = 'update t%s SET ' % (now.year,)
+            sql = "update t%s SET " % (now.year,)
             if mtr.max_temp_6hr:
                 sql += "max_tmpf_6hr = %s," % (mtr.max_temp_6hr.value("F"),)
             if mtr.min_temp_6hr:
@@ -51,17 +56,19 @@ def main():
                 pwx = []
                 for x in mtr.weather:
                     pwx.append(("").join([a for a in x if a is not None]))
-                sql += "wxcodes = '{%s}'," % (",".join(pwx), )
+                sql += "wxcodes = '{%s}'," % (",".join(pwx),)
             if sql == "update t%s SET " % (now.year,):
                 continue
-            sql = "%s WHERE station = '%s' and valid = '%s'" % (sql[:-1],
-                                                                row[1],
-                                                                row[0])
+            sql = "%s WHERE station = '%s' and valid = '%s'" % (
+                sql[:-1],
+                row[1],
+                row[0],
+            )
             # print(sql)
             icursor2.execute(sql)
             total += 1
             if total % 1000 == 0:
-                print('Done total: %s now: %s' % (total, now))
+                print("Done total: %s now: %s" % (total, now))
                 pgconn.commit()
         now += interval
     icursor2.close()
@@ -69,5 +76,5 @@ def main():
     pgconn.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

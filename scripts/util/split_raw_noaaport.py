@@ -18,30 +18,33 @@ def main():
 
     now = sts
     while now < ets:
-        subprocess.call(("tar -zxf /mesonet/ARCHIVE/raw/noaaport/%s/%s.tgz"
-                         ) % (now.year, now.strftime("%Y%m%d")), shell=True)
-        out = open("%s.txt" % (now.strftime("%Y%m%d"), ), 'w')
+        subprocess.call(
+            ("tar -zxf /mesonet/ARCHIVE/raw/noaaport/%s/%s.tgz")
+            % (now.year, now.strftime("%Y%m%d")),
+            shell=True,
+        )
+        out = open("%s.txt" % (now.strftime("%Y%m%d"),), "w")
         for hour in tqdm.tqdm(range(0, 24), desc=now.strftime("%m%d")):
             fn = "%s%02i.txt" % (now.strftime("%Y%m%d"), hour)
             if not os.path.isfile(fn):
-                print('Missing %s' % (fn,))
+                print("Missing %s" % (fn,))
                 continue
             # careful here to keep bad bytes from causing issues
-            fp = open(fn, 'rb').read()
-            prods = fp.decode('utf-8', 'ignore').split("\003")
+            fp = open(fn, "rb").read()
+            prods = fp.decode("utf-8", "ignore").split("\003")
             for prod in prods:
                 if prod.find("RRSTAR") == -1:
                     continue
                 try:
                     tp = TextProduct(prod, utcnow=now)
-                except Exception as _exp:
+                except Exception:
                     continue
-                if tp.afos == 'RRSTAR':
+                if tp.afos == "RRSTAR":
                     out.write(prod + "\003")
             os.unlink(fn)
         out.close()
         now += interval
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

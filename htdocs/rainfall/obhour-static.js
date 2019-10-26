@@ -120,7 +120,7 @@ var task = {
 
     },
     interval: 1200000 
-}
+};
 Ext.TaskMgr.start(task);
 
 
@@ -238,7 +238,7 @@ var tp = new Ext.Panel({
 });
 
 
-var viewport = new Ext.Viewport({
+new Ext.Viewport({
     layout:'border',
     items:[
          new Ext.BoxComponent({

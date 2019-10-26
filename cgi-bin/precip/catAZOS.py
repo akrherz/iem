@@ -12,14 +12,15 @@ nt = NetworkTable(("AWOS", "IA_ASOS"))
 IEM = get_dbconn("iem")
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-requireHrs = [0]*25
+requireHrs = [0] * 25
 stData = {}
 totp = {}
 
 
 def doHeader():
-    ssw('Content-type: text/html \n\n')
-    ssw("""
+    ssw("Content-type: text/html \n\n")
+    ssw(
+        """
 <html>
 <head>
   <title>IEM | Hourly Precip Grid</title>
@@ -29,35 +30,52 @@ def doHeader():
 <a href="/climate/">Climatology</a> &gt;
 Hourly Precipitation [ASOS/AWOS]
 
-""")
+"""
+    )
     ssw('<h3 align="center">Hourly Precip [inches] Grid</h3>')
     form = cgi.FieldStorage()
     try:
         postDate = form.getfirst("date")
         myTime = datetime.datetime.strptime(postDate, "%Y-%m-%d")
-    except Exception as _exp:
+    except Exception:
         myTime = datetime.datetime.now()
 
-    ssw('<table border=1><tr>')
-    ssw('<td>Back: <a href="catAZOS.py?date='+ (myTime - datetime.timedelta(days=1) ).strftime("%Y-%m-%d") +'"> \
-    '+ (myTime -  datetime.timedelta(days=1) ).strftime("%Y-%m-%d") +'</a></td>')
- 
-    ssw('<td>Shown: '+ myTime.strftime("%d %B %Y") +'</td>')
+    ssw("<table border=1><tr>")
+    ssw(
+        '<td>Back: <a href="catAZOS.py?date='
+        + (myTime - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        + '"> \
+    '
+        + (myTime - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        + "</a></td>"
+    )
 
-    ssw('<td>Forward: <a href="catAZOS.py?date='+ (myTime + datetime.timedelta(days=1) ).strftime("%Y-%m-%d") +'"> \
-    '+ (myTime +  datetime.timedelta(days=1) ).strftime("%Y-%m-%d") +'</a></td>')
+    ssw("<td>Shown: " + myTime.strftime("%d %B %Y") + "</td>")
 
-    ssw("""
+    ssw(
+        '<td>Forward: <a href="catAZOS.py?date='
+        + (myTime + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        + '"> \
+    '
+        + (myTime + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        + "</a></td>"
+    )
+
+    ssw(
+        """
 <td>Pick: (yyyy-mm-dd)  
 <form method="GET" action="catAZOS.py">
 <input type="text" size="8" name="date">
 <input type="submit" value="Submit Date">
 </form></td></tr></table>
-""")
+"""
+    )
     return myTime
 
+
 def setupTable():
-    ssw("""
+    ssw(
+        """
 <style language="css">
 td.style1{
   background-color: #EEEEEE;
@@ -100,13 +118,14 @@ table.main{
   <td class="style1">9</td> <td class="style2">10</td> <td class="style0">11</td> 
   <th>Tot:</th>
 </tr>
-""")
+"""
+    )
 
 
 def loadstations():
     """load stations"""
     for station in nt.sts:
-        stData[station] = ["M"]*24
+        stData[station] = ["M"] * 24
         totp[station] = 0
 
 
@@ -116,7 +135,6 @@ def main():
     loadstations()
     setupTable()
 
-    sqlDate = ts.strftime("%Y-%m-%d")
     td = ts.strftime("%Y-%m-%d")
     tm = (ts + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
 
@@ -128,7 +146,11 @@ def main():
         station, valid, phour from hourly_%s WHERE 
         valid >= '%s 00:00' and valid < '%s 00:00'
         and network in ('AWOS','IA_ASOS')
-    """ % (ts.year, td, tm)
+    """ % (
+        ts.year,
+        td,
+        tm,
+    )
 
     icursor.execute(sql)
     for row in icursor:
@@ -147,40 +169,43 @@ def main():
                 continue
 
     if ts < datetime.datetime(2006, 6, 1):
-        stData['MXO'] = ["M"]*24
+        stData["MXO"] = ["M"] * 24
     if ts < datetime.datetime(2007, 6, 1):
-        stData['IIB'] = ["M"]*24
-        stData['VTI'] = ["M"]*24
-        stData['MPZ'] = ["M"]*24
-        stData['PEA'] = ["M"]*24
-        stData['IFA'] = ["M"]*24
-        stData['TVK'] = ["M"]*24
+        stData["IIB"] = ["M"] * 24
+        stData["VTI"] = ["M"] * 24
+        stData["MPZ"] = ["M"] * 24
+        stData["PEA"] = ["M"] * 24
+        stData["IFA"] = ["M"] * 24
+        stData["TVK"] = ["M"] * 24
 
     j = 0
     ids = list(nt.sts.keys())
     ids.sort()
     for station in ids:
         j += 1
-        ssw("<tr class=\"row" + str(j % 5) + "\">")
+        ssw('<tr class="row' + str(j % 5) + '">')
         ssw("%s%s%s" % ("<td>", station, "</td>"))
         for i in range(24):
-            ssw("<td class=\"style" + str((i+1) % 3) + "\">")
+            ssw('<td class="style' + str((i + 1) % 3) + '">')
             ssw("%s%s " % (stData[station][i], "</td>"))
             try:
                 totp[station] = totp[station] + stData[station][i]
-            except Exception as _exp:
+            except Exception:
                 continue
         ssw("%s%s%s" % ("<td>", totp[station], "</td>"))
         ssw("%s%s%s" % ("<td>", station, "</td>"))
         ssw("</tr>")
 
-    ssw("""
+    ssw(
+        """
 </table>
 
 <p>Precipitation values are shown for the hour in which they are valid.  For
 example, the value in the 1AM column is precipitation accumulation from 1 AM
 till 2 AM.
-""")
+"""
+    )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

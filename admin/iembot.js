@@ -81,7 +81,7 @@ Ext.onReady(function(){
         listeners: {
     		load : function(st, records, options){
     			mytree.root.removeAll();
-    			for(i=0;i<records.length;i++){
+    			for(var i=0;i<records.length;i++){
     	              mytree.root.appendChild({
     	                  text 		: records[i].data.text +' ('+ records[i].data.id +')', 
     	                  channelid	: records[i].data.id,

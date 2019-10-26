@@ -153,8 +153,7 @@ Ext.define('SBW', {
         	convert: function(val, record){
                 var idx = pDict.find('abbr', record.data.phenomena);
                 if (idx > -1) {
-                	rec = pDict.getAt(idx);
-                        return rec.data.name;
+                    return pDict.getAt(idx).data.name;
                 } else {
                         return record.data.phenomena;
                 }
@@ -163,8 +162,7 @@ Ext.define('SBW', {
         	convert: function(val, record){
                 var idx = sDict.find('abbr', record.data.significance);
                 if (idx > -1) {
-                	rec = sDict.getAt(idx);
-                	return rec.data.name;
+                	return sDict.getAt(idx).data.name;
                 } else {
                         return record.data.significance;
                 }

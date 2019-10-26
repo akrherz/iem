@@ -62,16 +62,16 @@ var sbw_expander = new Ext.grid.RowExpander({
  * Figure out the last valid time for the slider
  */
 function setLastNEXRAD(){
-  now = new Date();
-  gmt = now.toUTC();
-  gmtl5 = gmt.add(Date.MINUTE, 0 - (parseInt(gmt.format('i')) % 5));
+  var now = new Date();
+  var gmt = now.toUTC();
+  var gmtl5 = gmt.add(Date.MINUTE, 0 - (parseInt(gmt.format('i')) % 5));
   Ext.getCmp('nexradslider').setMaxValue(gmtl5.fromUTC().getTime());
   Ext.getCmp('nexradslider').setValue(gmtl5.fromUTC().getTime());
 }
 
 function genSettings(){ 
   /* Generate URL options set on this page */
-  s = "";
+  var s = "";
   s += (nexradWMS.visibility ? "1" : "0");
   s += (lsrLayer.visibility ? "1" : "0");
   s += (sbwLayer.visibility ? "1" : "0");
@@ -98,21 +98,21 @@ function applySettings(opts){
 function reloadData(){
   /* Switch display to LSR tab */
   Ext.getCmp("tabs").setActiveTab(1);
-  s = Ext.getCmp("wfoselector").getValue();
+  var s = Ext.getCmp("wfoselector").getValue();
 
-  sts = Ext.getCmp("datepicker1").getValue().format('m/d/Y')
+  var sts = Ext.getCmp("datepicker1").getValue().format('m/d/Y')
                      +" "+ Ext.getCmp("timepicker1").getValue();
-  sdt = new Date(sts);
-  start_utc = sdt.toUTC();
+  var sdt = new Date(sts);
+  var start_utc = sdt.toUTC();
   /* Set the nexradSlider to the top of the hour */
   Ext.getCmp("nexradslider").setMinValue(
 		  (start_utc.fromUTC()).add(Date.MINUTE, 
                           0 - parseInt(start_utc.format('i')) ).getTime());
 
-  ets = Ext.getCmp("datepicker2").getValue().format('m/d/Y')
+  var ets = Ext.getCmp("datepicker2").getValue().format('m/d/Y')
                      +" "+ Ext.getCmp("timepicker2").getValue();
-  edt = new Date(ets);
-  end_utc = edt.toUTC();
+  var edt = new Date(ets);
+  var end_utc = edt.toUTC();
   /* Set the nexradSlider to the top of the next hour */
   Ext.getCmp("nexradslider").setMaxValue(
 		  (end_utc.fromUTC()).add(Date.MINUTE, 
@@ -149,16 +149,16 @@ function reloadData(){
 }
 
 function updateURL(){
-   s = Ext.getCmp("wfoselector").getValue();
-   sts = Ext.getCmp("datepicker1").getValue().format('m/d/Y')
+   var s = Ext.getCmp("wfoselector").getValue();
+   var sts = Ext.getCmp("datepicker1").getValue().format('m/d/Y')
                      +" "+ Ext.getCmp("timepicker1").getValue();
-   sdt = new Date(sts);
-   start_utc = sdt.toUTC();
+   var sdt = new Date(sts);
+   var start_utc = sdt.toUTC();
 
-   ets = Ext.getCmp("datepicker2").getValue().format('m/d/Y')
+   var ets = Ext.getCmp("datepicker2").getValue().format('m/d/Y')
                      +" "+ Ext.getCmp("timepicker2").getValue();
-   edt = new Date(ets);
-   end_utc = edt.toUTC();
+   var edt = new Date(ets);
+   var end_utc = edt.toUTC();
 
    window.location.href = "#"+ s +"/"+ start_utc.format('YmdHi') +
                                   "/"+ end_utc.format('YmdHi') +
@@ -258,7 +258,7 @@ var states = new OpenLayers.Layer.WMS("States", "https://mesonet.agron.iastate.e
 
 
 map = new OpenLayers.Map(options);
-ls = new OpenLayers.Control.LayerSwitcher();
+var ls = new OpenLayers.Control.LayerSwitcher();
 map.addControl(ls);
 
 /* Create LSR styler */
@@ -378,11 +378,11 @@ lsrLayer = new OpenLayers.Layer.Vector("Local Storm Reports",{
 
 function createPopup(feature) {
       // Can't get valid as an object :(
-      html = "Time: "+ feature.data.valid +" UTC"
+      var html = "Time: "+ feature.data.valid +" UTC"
            +"<br />Event: "+ feature.data.magnitude +" "+ feature.data.typetext
            +"<br />Source: "+ feature.data.source
            +"<br />Remark: "+ feature.data.remark ;
-      popup = new GeoExt.Popup({
+      var popup = new GeoExt.Popup({
             title: feature.data.wfo +": "+ feature.data.city,
             feature: feature,
             width:200,
@@ -438,7 +438,7 @@ sbwGridPanel = new Ext.grid.GridPanel({
         handler : function(){
            var xd = sbwGridPanel.getExcelXml(true);
          var dataURL = 'exportexcel.php';
-         params =[{
+         var params =[{
               name: 'ex',
               value: xd
          }];
@@ -451,19 +451,19 @@ sbwGridPanel = new Ext.grid.GridPanel({
             cls       : 'x-btn-text-icon',
             listeners : {
                click  : function() {
-                  uri = "https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py?";
-                  s = Ext.getCmp("wfoselector").getValue();
-                  sts = Ext.getCmp("datepicker1").getValue().format('m/d/Y')
+                  var uri = "https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py?";
+                  var s = Ext.getCmp("wfoselector").getValue();
+                  var sts = Ext.getCmp("datepicker1").getValue().format('m/d/Y')
                      +" "+ Ext.getCmp("timepicker1").getValue();
-                  sdt = new Date(sts);
-                  start_utc = sdt.toUTC();
-                  ets = Ext.getCmp("datepicker2").getValue().format('m/d/Y')
+                  var sdt = new Date(sts);
+                  var start_utc = sdt.toUTC();
+                  var ets = Ext.getCmp("datepicker2").getValue().format('m/d/Y')
                      +" "+ Ext.getCmp("timepicker2").getValue();
-                  edt = new Date(ets);
-                  end_utc = edt.toUTC();
+                  var edt = new Date(ets);
+                  var end_utc = edt.toUTC();
                   if (s != ""){
-                    tokens = s.split(",");
-                    for (i=0;i<tokens.length;i++){
+                    var tokens = s.split(",");
+                    for (var i=0;i<tokens.length;i++){
                       uri += "&wfo[]="+ tokens[i];
                     }
                   }
@@ -485,8 +485,8 @@ sbwGridPanel = new Ext.grid.GridPanel({
        text      : 'Expand All',
        listeners : {
            click : function() {
-                nRows=sbwGridPanel.getStore().getCount();
-                for(i=0;i< nRows;i++)
+                var nRows=sbwGridPanel.getStore().getCount();
+                for(var i=0;i< nRows;i++)
                    sbw_expander.expandRow(sbwGridPanel.view.getRow(i));
            }
        }
@@ -614,7 +614,7 @@ lsrGridPanel = new Ext.grid.GridPanel({
      handler : function(){
         var xd = lsrGridPanel.getExcelXml(true);
               var dataURL = 'exportexcel.php';
-              params =[{
+              var params =[{
                    name: 'ex',
                    value: xd
               }];
@@ -627,19 +627,19 @@ lsrGridPanel = new Ext.grid.GridPanel({
             cls       : 'x-btn-text-icon',
             listeners : {
                click  : function() {
-                  uri = "https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py?";
-                  s = Ext.getCmp("wfoselector").getValue();
-                  sts = Ext.getCmp("datepicker1").getValue().format('m/d/Y')
+                  var uri = "https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py?";
+                  var s = Ext.getCmp("wfoselector").getValue();
+                  var sts = Ext.getCmp("datepicker1").getValue().format('m/d/Y')
                      +" "+ Ext.getCmp("timepicker1").getValue();
-                  sdt = new Date(sts);
-                  start_utc = sdt.toUTC();
-                  ets = Ext.getCmp("datepicker2").getValue().format('m/d/Y')
+                  var sdt = new Date(sts);
+                  var start_utc = sdt.toUTC();
+                  var ets = Ext.getCmp("datepicker2").getValue().format('m/d/Y')
                      +" "+ Ext.getCmp("timepicker2").getValue();
-                  edt = new Date(ets);
-                  end_utc = edt.toUTC();
+                  var edt = new Date(ets);
+                  var end_utc = edt.toUTC();
                   if (s != ""){
-                    tokens = s.split(",");
-                    for (i=0;i<tokens.length;i++){
+                    var tokens = s.split(",");
+                    for (var i=0;i<tokens.length;i++){
                       uri += "&wfo[]="+ tokens[i];
                     }
                   }
@@ -661,8 +661,8 @@ lsrGridPanel = new Ext.grid.GridPanel({
        text      : 'Expand All',
        listeners : {
            click : function() {
-                nRows=lsrGridPanel.getStore().getCount();
-                for(i=0;i< nRows;i++)
+                var nRows=lsrGridPanel.getStore().getCount();
+                for(var i=0;i< nRows;i++)
                    expander.expandRow(lsrGridPanel.view.getRow(i));
            }
        }
@@ -778,7 +778,7 @@ lsrGridPanel.getStore().on("load", function(mystore, records, options){
 
 
 /* SuperBoxSelector to do a multi pick */
-wfoSelector = {
+var wfoSelector = {
     store           : new Ext.data.SimpleStore({
        fields : ['abbr', 'wfo'],
        data   : iemdata.wfos
@@ -802,7 +802,7 @@ wfoSelector = {
 };
 
 
-startDateSelector = {
+var startDateSelector = {
     xtype     : 'datefield',
     id        : 'datepicker1',
     maxValue  : new Date(),
@@ -821,7 +821,7 @@ startDateSelector = {
     }
 }
 
-startTimeSelector = {
+var startTimeSelector = {
     xtype     : 'timefield',
     allowBlank: false,
     increment : 1,
@@ -836,7 +836,7 @@ startTimeSelector = {
     }
 }
 
-loadButton = {
+var loadButton = {
     xtype           : 'button',
     id              : 'refresh',
     text            : 'Load',
@@ -851,7 +851,7 @@ loadButton = {
     }
 }
 
-endDateSelector = {
+var endDateSelector = {
     xtype     : 'datefield',
     id        : 'datepicker2',
     maxValue  : new Date(),
@@ -871,7 +871,7 @@ endDateSelector = {
     }
 }
 
-endTimeSelector = {
+var endTimeSelector = {
     xtype     : 'timefield',
     allowBlank: false,
     increment : 1,
@@ -892,7 +892,7 @@ endTimeSelector = {
 
 
 
-myForm = {
+var myForm = {
    autoScroll  : true,
    xtype       : 'form',
    labelAlign  : 'top',
