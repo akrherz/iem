@@ -2,9 +2,10 @@
 
 # BSD Licensed, Copyright (c) 2006-2010 TileCache Contributors
 from __future__ import print_function
+
 try:
     from urllib.parse import urlencode
-except ImportError as _exp:
+except ImportError:
     from urllib import urlencode
 
 import requests
@@ -16,7 +17,7 @@ HIDE_ALL = False
 
 class WMS(object):
     fields = ("bbox", "srs", "width", "height", "format", "layers", "styles")
-    defaultParams = {'version': '1.1.1', 'request': 'GetMap', 'service': 'WMS'}
+    defaultParams = {"version": "1.1.1", "request": "GetMap", "service": "WMS"}
     __slots__ = ("base", "params", "client", "data", "response")
 
     def __init__(self, base, params, user=None, password=None):
@@ -47,11 +48,15 @@ class WMS(object):
         """Fetch image from backend"""
         req = requests.get(self.url())
         data = req.content
-        if req.headers.get('content-type') != 'image/png':
-            raise Exception(("Did not get image data back. \n"
-                             "URL: %s\nStatus: %s\n"
-                             "Response: \n%s"
-                             ) % (self.url(), req.status_code, data))
+        if req.headers.get("content-type") != "image/png":
+            raise Exception(
+                (
+                    "Did not get image data back. \n"
+                    "URL: %s\nStatus: %s\n"
+                    "Response: \n%s"
+                )
+                % (self.url(), req.status_code, data)
+            )
         return data, req
 
     def setBBox(self, box):

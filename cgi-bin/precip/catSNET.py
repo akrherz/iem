@@ -7,12 +7,13 @@ import datetime
 import psycopg2.extras
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, ssw
+
 nt = NetworkTable(("KCCI", "KIMIT", "KELO"))
 IEM = get_dbconn("iem")
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 
-requireHrs = [0]*25
+requireHrs = [0] * 25
 stData = {}
 totp = {}
 
@@ -20,8 +21,9 @@ totp = {}
 # Return the Date we will be looking for...
 def doHeader():
     """header please"""
-    ssw('Content-type: text/html \n\n')
-    ssw("""
+    ssw("Content-type: text/html \n\n")
+    ssw(
+        """
 <html>
 <head>
   <title>IEM | Hourly Precip Grid</title>
@@ -33,7 +35,8 @@ Hourly Precipitation [SNET]
 <br>This archive starts on 12 Feb 2002 for KCCI sites and 12 Sept 2002 for
 KELO sites.  Data from the previous day is the most current available.
 
-""")
+"""
+    )
     ssw('<h3 align="center">Hourly Precip Grid</h3>')
     form = cgi.FieldStorage()
     try:
@@ -42,27 +45,42 @@ KELO sites.  Data from the previous day is the most current available.
     except Exception:
         myTime = datetime.datetime.now() - datetime.timedelta(days=1)
 
-    ssw('<table border=1><tr>')
-    ssw('<td>Back: <a href="catSNET.py?date='+ (myTime - datetime.timedelta(days=1) ).strftime("%Y-%m-%d") +'"> \
-        '+ (myTime - datetime.timedelta(days=1) ).strftime("%Y-%m-%d") +'</a></td>')
- 
-    ssw('<td>Shown: '+ myTime.strftime("%d %B %Y") +'</td>')
+    ssw("<table border=1><tr>")
+    ssw(
+        '<td>Back: <a href="catSNET.py?date='
+        + (myTime - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        + '"> \
+        '
+        + (myTime - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        + "</a></td>"
+    )
 
-    ssw('<td>Forward: <a href="catSNET.py?date='+ (myTime + datetime.timedelta(days=1) ).strftime("%Y-%m-%d") +'"> \
-        '+ (myTime + datetime.timedelta(days=1) ).strftime("%Y-%m-%d") +'</a></td>')
+    ssw("<td>Shown: " + myTime.strftime("%d %B %Y") + "</td>")
 
-    ssw("""
+    ssw(
+        '<td>Forward: <a href="catSNET.py?date='
+        + (myTime + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        + '"> \
+        '
+        + (myTime + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        + "</a></td>"
+    )
+
+    ssw(
+        """
 <td>Pick: (yyyy-mm-dd)  
 <form method="GET" action="catSNET.py">
 <input type="text" size="8" name="date">
 <input type="submit" value="Submit Date">
 </form></td></tr></table>
-""")
+"""
+    )
     return myTime
 
 
 def setupTable():
-    ssw("""
+    ssw(
+        """
 <style language="css">
 td.style1{
   background-color: #EEEEEE;
@@ -105,12 +123,13 @@ table.main{
   <td class="style0">9</td> <td class="style1">10</td> <td class="style2">11</td> 
   <th>Tot:</th>
 </tr>
-""")
+"""
+    )
 
 
 def loadstations():
     for station in nt.sts:
-        stData[station] = ["M"]*25
+        stData[station] = ["M"] * 25
         totp[station] = 0
 
 
@@ -120,29 +139,34 @@ def main():
     loadstations()
     setupTable()
 
-    sqlDate = ts.strftime("%Y-%m-%d")
     td = ts.strftime("%Y-%m-%d")
     tm = (ts + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
 
-    sqlStr = """SELECT extract('hour' from valid) as vhour,
-    station, valid, phour from hourly_%s WHERE
-    valid > '%s 00:00' and valid <= '%s 00:00'
-    and network in ('KCCI','KIMT','KELO')""" % (ts.year, td, tm)
+    sqlStr = """
+        SELECT extract('hour' from valid) as vhour,
+        station, valid, phour from hourly_%s WHERE
+        valid > '%s 00:00' and valid <= '%s 00:00'
+        and network in ('KCCI','KIMT','KELO')
+    """ % (
+        ts.year,
+        td,
+        tm,
+    )
 
     icursor.execute(sqlStr)
 
     for row in icursor:
         p01i = float(row["phour"])
         vhour = int(row["vhour"])
-        if (p01i >= 0):  # We should require this timestep
-            requireHrs[ vhour ] = 1
+        if p01i >= 0:  # We should require this timestep
+            requireHrs[vhour] = 1
             try:
-                stData[ row["station"] ][ vhour ]  = round(p01i,2)
+                stData[row["station"]][vhour] = round(p01i, 2)
             except KeyError:
                 continue
         else:
             try:
-                stData[ row["station"] ][ vhour ]  = "&nbsp;"
+                stData[row["station"]][vhour] = "&nbsp;"
             except KeyError:
                 continue
 
@@ -151,10 +175,10 @@ def main():
     ids.sort()
     for station in ids:
         j += 1
-        ssw("<tr class=\"row"+ str(j % 5) +"\">")
-        ssw("%s%s%s" % ("<td>", nt.sts[station]['name'], "</td>"))
+        ssw('<tr class="row' + str(j % 5) + '">')
+        ssw("%s%s%s" % ("<td>", nt.sts[station]["name"], "</td>"))
         for i in range(0, 24):
-            ssw("<td class=\"style" + str(i % 3) + "\">")
+            ssw('<td class="style' + str(i % 3) + '">')
             ssw("%s%s " % (stData[station][i], "</td>"))
             try:
                 totp[station] = totp[station] + stData[station][i]
@@ -164,14 +188,16 @@ def main():
         ssw("%s%s%s" % ("<td>", station, "</td>"))
         ssw("</tr>")
 
-    ssw("""
+    ssw(
+        """
 </table>
 
 <p>Precipitation values are shown for the hour in which they are valid.  For
-example, the value in the 1AM column is precipitation accumulation from 1 AM 
+example, the value in the 1AM column is precipitation accumulation from 1 AM
 till 2 AM.
-""")
+"""
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

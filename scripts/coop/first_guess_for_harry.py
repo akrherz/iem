@@ -26,11 +26,11 @@ import datetime
 from xlwt import Workbook
 from pyiem.util import get_dbconn
 
-MESOSITE = get_dbconn('mesosite', user='nobody')
+MESOSITE = get_dbconn("mesosite", user="nobody")
 mcursor = MESOSITE.cursor()
-COOP = get_dbconn('coop', user='nobody')
+COOP = get_dbconn("coop", user="nobody")
 ccursor = COOP.cursor()
-HADS = get_dbconn('hads', user='nobody')
+HADS = get_dbconn("hads", user="nobody")
 hcursor = HADS.cursor()
 
 DATA = """IA0112,ALBI4,A
@@ -193,13 +193,14 @@ ordering = []
 UNCONV_VARS = []
 for line in DATA.split("\n"):
     tokens = line.split(",")
-    METADATA[tokens[2].strip()] = {'IEMRE': tokens[0], 'NWSLI': tokens[1]}
+    METADATA[tokens[2].strip()] = {"IEMRE": tokens[0], "NWSLI": tokens[1]}
     ordering.append(tokens[2].strip())
 
 
 def good_value(val, bad):
+    """Helper."""
     if val == bad:
-        return 'M'
+        return "M"
     return val
 
 
@@ -208,26 +209,46 @@ def get_site(year, month, iemre, nwsli):
     do our work for this site
     """
     # Create data dictionary to store our wares
-    data = [0, ]
+    data = [0]
     sts = datetime.datetime(year, month, 1)
     ets = sts + datetime.timedelta(days=35)
     ets = ets.replace(day=1)
     now = sts
     while now < ets:
-        data.append({'coop': {'high': '', 'low': '', 'atob': '',
-                              'prec': '', 'sf': '', 'sog': '',
-                              'v': ''},
-                     'iemre': {'high': '', 'low': '', 'atob': '',
-                               'prec': '', 'sf': '', 'sog': ''}})
+        data.append(
+            {
+                "coop": {
+                    "high": "",
+                    "low": "",
+                    "atob": "",
+                    "prec": "",
+                    "sf": "",
+                    "sog": "",
+                    "v": "",
+                },
+                "iemre": {
+                    "high": "",
+                    "low": "",
+                    "atob": "",
+                    "prec": "",
+                    "sf": "",
+                    "sog": "",
+                },
+            }
+        )
         now += datetime.timedelta(days=1)
 
-    table = "raw%s" % (year, )
-    hcursor.execute("""
-    SELECT valid, key, value from """ + table + """ WHERE station = %s
+    table = "raw%s" % (year,)
+    hcursor.execute(
+        """
+    SELECT valid, key, value from """
+        + table
+        + """ WHERE station = %s
     and valid > %s and valid <= %s
     and value != -9999 and substr(key,3,1) not in ('H','Q') ORDER by valid ASC
-    """, (nwsli, sts.strftime("%Y-%m-%d 00:00"),
-          ets.strftime("%Y-%m-%d 00:00")))
+    """,
+        (nwsli, sts.strftime("%Y-%m-%d 00:00"), ets.strftime("%Y-%m-%d 00:00")),
+    )
     for row in hcursor:
         valid = row[0]
         # Move midnight data back one minute
@@ -235,46 +256,55 @@ def get_site(year, month, iemre, nwsli):
             valid = valid - datetime.timedelta(minutes=1)
         idx = int(valid.day)
         key = row[1]
-        if key in ['TAIRGZ']:
+        if key in ["TAIRGZ"]:
             # This is automated station
             continue
-        elif key in ['TAIRZXZ', 'TAIRZX']:
-            data[idx]['coop']['high'] = row[2]
-        elif key in ['TAIRZNZ', 'TAIRZN']:
-            data[idx]['coop']['low'] = row[2]
-        elif key in ['TAIRZZ']:
-            data[idx]['coop']['atob'] = row[2]
-        elif key in ['SFDRZZ']:
-            data[idx]['coop']['sf'] = row[2]
-        elif key in ['SDIRZZ']:
-            data[idx]['coop']['sog'] = row[2]
-        elif key in ['PPDRZZ']:
-            data[idx]['coop']['prec'] = row[2]
-        elif key[:2] in ['PP', 'SF'] and key[2] == 'V':
-            data[idx]['coop']['v'] += "%s/%s " % (key, row[2])
-        elif key[:2] in ['PP', 'SD', 'SF', 'TA']:
+        elif key in ["TAIRZXZ", "TAIRZX"]:
+            data[idx]["coop"]["high"] = row[2]
+        elif key in ["TAIRZNZ", "TAIRZN"]:
+            data[idx]["coop"]["low"] = row[2]
+        elif key in ["TAIRZZ"]:
+            data[idx]["coop"]["atob"] = row[2]
+        elif key in ["SFDRZZ"]:
+            data[idx]["coop"]["sf"] = row[2]
+        elif key in ["SDIRZZ"]:
+            data[idx]["coop"]["sog"] = row[2]
+        elif key in ["PPDRZZ"]:
+            data[idx]["coop"]["prec"] = row[2]
+        elif key[:2] in ["PP", "SF"] and key[2] == "V":
+            data[idx]["coop"]["v"] += "%s/%s " % (key, row[2])
+        elif key[:2] in ["PP", "SD", "SF", "TA"]:
             if key not in UNCONV_VARS:
-                print('Unaccounted for %s %s %s' % (nwsli, valid, key))
+                print("Unaccounted for %s %s %s" % (nwsli, valid, key))
                 UNCONV_VARS.append(key)
 
-    ccursor.execute("""
+    ccursor.execute(
+        """
     select extract(day from day), high, low, snow, snowd, precip from
     alldata_ia where station = %s and year = %s and month = %s
-    """, (iemre, year, month))
+    """,
+        (iemre, year, month),
+    )
     for row in ccursor:
         idx = int(row[0])
-        data[idx]['iemre']['high'] = row[1]
-        data[idx]['iemre']['low'] = row[2]
-        data[idx]['iemre']['sf'] = row[3]
-        data[idx]['iemre']['sog'] = row[4]
-        data[idx]['iemre']['prec'] = row[5]
+        data[idx]["iemre"]["high"] = row[1]
+        data[idx]["iemre"]["low"] = row[2]
+        data[idx]["iemre"]["sf"] = row[3]
+        data[idx]["iemre"]["sog"] = row[4]
+        data[idx]["iemre"]["prec"] = row[5]
 
     return data
 
 
 def get_sitename(site):
-    mcursor.execute("""SELECT name from stations where network = 'IACLIMATE'
-    and id = %s """, (site,))
+    """Go."""
+    mcursor.execute(
+        """
+        SELECT name from stations where network = 'IACLIMATE'
+        and id = %s
+    """,
+        (site,),
+    )
     if mcursor.rowcount == 0:
         return site
     return mcursor.fetchone()[0]
@@ -285,48 +315,48 @@ def print_data(year, month, iemre, nwsli, sheet, data):
     Print out our data file!
     """
     row = sheet.row(0)
-    row.write(8, '?')
-    row.write(10, '?')
+    row.write(8, "?")
+    row.write(10, "?")
     row.write(12, "%s %s NWSLI: %s" % (get_sitename(iemre), iemre, nwsli))
     row = sheet.row(1)
-    row.write(2, 'YR')
-    row.write(3, 'MO')
-    row.write(4, 'DA')
-    row.write(6, 'MAX')
-    row.write(8, 'MIN')
-    row.write(10, 'ATOB')
-    row.write(12, 'PREC')
-    row.write(14, 'SF')
-    row.write(16, 'SOG')
-    row.write(17, 'F')
-    row.write(18, 'I')
-    row.write(19, 'G')
-    row.write(20, 'T')
-    row.write(21, 'H')
-    row.write(22, 'W')
+    row.write(2, "YR")
+    row.write(3, "MO")
+    row.write(4, "DA")
+    row.write(6, "MAX")
+    row.write(8, "MIN")
+    row.write(10, "ATOB")
+    row.write(12, "PREC")
+    row.write(14, "SF")
+    row.write(16, "SOG")
+    row.write(17, "F")
+    row.write(18, "I")
+    row.write(19, "G")
+    row.write(20, "T")
+    row.write(21, "H")
+    row.write(22, "W")
 
     sts = datetime.datetime(year, month, 1)
     ets = sts + datetime.timedelta(days=35)
     ets = ets.replace(day=1)
     while sts < ets:
         idx = int(sts.day)
-        row = sheet.row(idx+1)
-        row.write(0, '%s' % (int(iemre[2:]),))
+        row = sheet.row(idx + 1)
+        row.write(0, "%s" % (int(iemre[2:]),))
         row.write(2, year)
         row.write(3, month)
         row.write(4, sts.day)
-        row.write(5, data[idx]['iemre']['high'])
-        row.write(6, data[idx]['coop']['high'])
-        row.write(7, data[idx]['iemre']['low'])
-        row.write(8, data[idx]['coop']['low'])
-        row.write(10, data[idx]['coop']['atob'])
-        row.write(11, data[idx]['iemre']['prec'])
-        row.write(12, data[idx]['coop']['prec'])
-        row.write(13, data[idx]['iemre']['sf'])
-        row.write(14, data[idx]['coop']['sf'])
-        row.write(15, data[idx]['iemre']['sog'])
-        row.write(16, data[idx]['coop']['sog'])
-        row.write(17, data[idx]['coop']['v'])
+        row.write(5, data[idx]["iemre"]["high"])
+        row.write(6, data[idx]["coop"]["high"])
+        row.write(7, data[idx]["iemre"]["low"])
+        row.write(8, data[idx]["coop"]["low"])
+        row.write(10, data[idx]["coop"]["atob"])
+        row.write(11, data[idx]["iemre"]["prec"])
+        row.write(12, data[idx]["coop"]["prec"])
+        row.write(13, data[idx]["iemre"]["sf"])
+        row.write(14, data[idx]["coop"]["sf"])
+        row.write(15, data[idx]["iemre"]["sog"])
+        row.write(16, data[idx]["coop"]["sog"])
+        row.write(17, data[idx]["coop"]["v"])
         sts += datetime.timedelta(days=1)
 
 
@@ -337,18 +367,18 @@ def runner(year, month):
     """
     book = Workbook()
     for label in ordering:
-        data = get_site(year, month, METADATA[label]['IEMRE'],
-                        METADATA[label]['NWSLI'])
+        data = get_site(year, month, METADATA[label]["IEMRE"], METADATA[label]["NWSLI"])
         sheet = book.add_sheet(label)
-        sheet.col(0).width = 256*5
-        sheet.col(1).width = 256*2
-        sheet.col(2).width = 256*5
-        sheet.col(3).width = 256*4
-        sheet.col(4).width = 256*4
+        sheet.col(0).width = 256 * 5
+        sheet.col(1).width = 256 * 2
+        sheet.col(2).width = 256 * 5
+        sheet.col(3).width = 256 * 4
+        sheet.col(4).width = 256 * 4
         for col in range(5, 17):
-            sheet.col(col).width = 256*5
-        print_data(year, month, METADATA[label]['IEMRE'],
-                   METADATA[label]['NWSLI'], sheet, data)
+            sheet.col(col).width = 256 * 5
+        print_data(
+            year, month, METADATA[label]["IEMRE"], METADATA[label]["NWSLI"], sheet, data
+        )
     fn = "/tmp/IEM%s%02i.xls" % (year, month)
     book.save(fn)
     return fn
@@ -361,30 +391,28 @@ def main():
         fn = runner(lastmonth.year, lastmonth.month)
         # Email this out!
         msg = MIMEMultipart()
-        msg['Subject'] = ('IEM COOP Report for %s'
-                          ) % (lastmonth.strftime("%b %Y"),)
-        msg['From'] = 'akrherz@iastate.edu'
+        msg["Subject"] = ("IEM COOP Report for %s") % (lastmonth.strftime("%b %Y"),)
+        msg["From"] = "akrherz@iastate.edu"
         # msg['To'] = 'akrherz@localhost'
-        msg['To'] = 'justin.glisan@iowaagriculture.gov'
-        msg.preamble = 'COOP Report'
+        msg["To"] = "justin.glisan@iowaagriculture.gov"
+        msg.preamble = "COOP Report"
 
-        fp = open(fn, 'rb')
-        b = MIMEBase('Application', 'VND.MS-EXCEL')
+        fp = open(fn, "rb")
+        b = MIMEBase("Application", "VND.MS-EXCEL")
         b.set_payload(fp.read())
         encoders.encode_base64(b)
         fp.close()
-        b.add_header('Content-Disposition', 'attachment; filename="%s"' % (fn,
-                                                                           ))
+        b.add_header("Content-Disposition", 'attachment; filename="%s"' % (fn,))
         msg.attach(b)
 
         # Send the email via our own SMTP server.
-        s = smtplib.SMTP('localhost')
-        s.sendmail(msg['From'], msg['To'], msg.as_string())
+        s = smtplib.SMTP("localhost")
+        s.sendmail(msg["From"], msg["To"], msg.as_string())
         s.quit()
         os.unlink(fn)
     else:
-        fn = runner(int(sys.argv[1]), int(sys.argv[2]))
+        runner(int(sys.argv[1]), int(sys.argv[2]))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

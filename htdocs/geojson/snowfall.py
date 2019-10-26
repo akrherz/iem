@@ -3,13 +3,13 @@
 import cgi
 import datetime
 import json
-from json import encoder
 
 import memcache
 import psycopg2.extras
 from pyiem.util import get_dbconn, ssw
 from pyiem.reference import TRACE_VALUE
-encoder.FLOAT_REPR = lambda o: format(o, '.2f')
+
+json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 
 
 def sanitize(val):
@@ -23,45 +23,52 @@ def sanitize(val):
 
 def get_data(ts):
     """ Get the data for this timestamp """
-    pgconn = get_dbconn('iem')
+    pgconn = get_dbconn("iem")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    data = {"type": "FeatureCollection",
-            "features": []}
+    data = {"type": "FeatureCollection", "features": []}
     # Fetch the daily values
-    cursor.execute("""
+    cursor.execute(
+        """
     select id as station, name, state, wfo,
     round(st_x(geom)::numeric, 4)::float as st_x,
     round(st_y(geom)::numeric, 4)::float as st_y,
     snow
     from summary s JOIN stations t on (s.iemid = t.iemid)
     WHERE s.day = %s and s.snow >= 0 and t.network = 'IA_COOP' LIMIT 5
-    """, (ts.date(),))
+    """,
+        (ts.date(),),
+    )
     for i, row in enumerate(cursor):
-        data['features'].append({"type": "Feature", "id": i, "properties": {
-                "station": row["station"],
-                "state": row["state"],
-                "wfo": row["wfo"],
-                "name": row["name"],
-                "snow":  str(sanitize(row["snow"]))
-            },
-            "geometry": {"type": "Point",
-                         "coordinates": [row['st_x'], row['st_y']]
-                         }
-        })
+        data["features"].append(
+            {
+                "type": "Feature",
+                "id": i,
+                "properties": {
+                    "station": row["station"],
+                    "state": row["state"],
+                    "wfo": row["wfo"],
+                    "name": row["name"],
+                    "snow": str(sanitize(row["snow"])),
+                },
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [row["st_x"], row["st_y"]],
+                },
+            }
+        )
     return json.dumps(data)
 
 
 def main():
     """see how we are called"""
     field = cgi.FieldStorage()
-    dt = field.getfirst('dt', datetime.date.today().strftime("%Y-%m-%d"))
-    ts = datetime.datetime.strptime(dt, '%Y-%m-%d')
-    cb = field.getfirst('callback', None)
+    dt = field.getfirst("dt", datetime.date.today().strftime("%Y-%m-%d"))
+    ts = datetime.datetime.strptime(dt, "%Y-%m-%d")
+    cb = field.getfirst("callback", None)
     ssw("Content-type: application/vnd.geo+json\n\n")
 
-    mckey = "/geojson/snowfall/%s?callback=%s" % (ts.strftime("%Y%m%d"),
-                                                  cb)
-    mc = memcache.Client(['iem-memcached:11211'], debug=0)
+    mckey = "/geojson/snowfall/%s?callback=%s" % (ts.strftime("%Y%m%d"), cb)
+    mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
     if not res:
         res = get_data(ts)
@@ -72,5 +79,5 @@ def main():
         ssw("%s(%s)" % (cgi.escape(cb, quote=True), res))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

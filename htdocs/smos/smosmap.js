@@ -7,8 +7,6 @@ var feature;
 		window.app = {};
 		var app = window.app;
 
-
-
 		/**
 		 * @constructor
 		 * @extends {ol.interaction.Pointer}
@@ -144,7 +142,7 @@ $(document).ready(
 			 * document.getElementById('lon').value = geo.x;
 			 * document.getElementById('lat').value = geo.y; } }) };
 			 */
-			var map = new ol.Map({
+			new ol.Map({
 				interactions: ol.interaction.defaults().extend([new app.Drag()]),
 				target : 'map',
 				controls : [ new ol.control.Zoom() ],

@@ -2,84 +2,91 @@
 """ Recent METARs containing some pattern """
 import cgi
 import json
-from json import encoder
 
 import memcache
 import psycopg2.extras
 from pyiem.util import get_dbconn, ssw
 from pyiem.reference import TRACE_VALUE
-encoder.FLOAT_REPR = lambda o: format(o, '.2f')
+
+json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 
 
 def trace(val):
     """Nice Print"""
     if val == TRACE_VALUE:
-        return 'T'
+        return "T"
     return val
 
 
 def get_data(q):
     """ Get the data for this query """
-    pgconn = get_dbconn('iem')
+    pgconn = get_dbconn("iem")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    data = {"type": "FeatureCollection",
-            "features": []}
+    data = {"type": "FeatureCollection", "features": []}
 
     # Fetch the values
-    if q == 'snowdepth':
+    if q == "snowdepth":
         datasql = "substring(raw, ' 4/([0-9]{3})')::int"
         wheresql = "raw ~* ' 4/'"
-    elif q == 'i1':
+    elif q == "i1":
         datasql = "ice_accretion_1hr"
         wheresql = "ice_accretion_1hr >= 0"
-    elif q == 'i3':
+    elif q == "i3":
         datasql = "ice_accretion_3hr"
         wheresql = "ice_accretion_3hr >= 0"
-    elif q == 'i6':
+    elif q == "i6":
         datasql = "ice_accretion_6hr"
         wheresql = "ice_accretion_6hr >= 0"
-    elif q == 'fc':
+    elif q == "fc":
         datasql = "''"
         wheresql = "'FC' = ANY(wxcodes)"
-    elif q == 'gr':
+    elif q == "gr":
         datasql = "''"
         wheresql = "'GR' = ANY(wxcodes)"
     else:
         return json.dumps(data)
-    cursor.execute("""
+    cursor.execute(
+        """
     select id, network, name, st_x(geom) as lon, st_y(geom) as lat,
     valid at time zone 'UTC' as utc_valid,
-    """ + datasql + """ as data, raw
+    """
+        + datasql
+        + """ as data, raw
     from current_log c JOIN stations t on (c.iemid = t.iemid)
-    WHERE network ~* 'ASOS' and """ + wheresql + """ ORDER by valid DESC
-    """)
+    WHERE network ~* 'ASOS' and """
+        + wheresql
+        + """ ORDER by valid DESC
+    """
+    )
     for i, row in enumerate(cursor):
-        data['features'].append({"type": "Feature", "id": i, "properties": {
-                "station": row["id"],
-                "network": row["network"],
-                "name": row["name"],
-                "value":  trace(row['data']),
-                "metar": row['raw'],
-                "valid":  row['utc_valid'].strftime("%Y-%m-%dT%H:%M:%SZ")
-            },
-            "geometry": {"type": "Point",
-                         "coordinates": [row['lon'], row['lat']]
-                         }
-        })
+        data["features"].append(
+            {
+                "type": "Feature",
+                "id": i,
+                "properties": {
+                    "station": row["id"],
+                    "network": row["network"],
+                    "name": row["name"],
+                    "value": trace(row["data"]),
+                    "metar": row["raw"],
+                    "valid": row["utc_valid"].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                },
+                "geometry": {"type": "Point", "coordinates": [row["lon"], row["lat"]]},
+            }
+        )
     return json.dumps(data)
 
 
 def main():
     """ see how we are called """
     field = cgi.FieldStorage()
-    q = field.getfirst('q', 'snowdepth')[:10]
-    cb = field.getfirst('callback', None)
+    q = field.getfirst("q", "snowdepth")[:10]
+    cb = field.getfirst("callback", None)
 
     ssw("Content-type: application/vnd.geo+json\n\n")
 
-    mckey = ("/geojson/recent_metar?callback=%s&q=%s"
-             ) % (cb, q)
-    mc = memcache.Client(['iem-memcached:11211'], debug=0)
+    mckey = ("/geojson/recent_metar?callback=%s&q=%s") % (cb, q)
+    mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
     if not res:
         res = get_data(q)
@@ -90,5 +97,5 @@ def main():
         ssw("%s(%s)" % (cgi.escape(cb, quote=True), res))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
