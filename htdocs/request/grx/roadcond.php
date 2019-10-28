@@ -4,7 +4,7 @@ header("Content-type: text/plain");
 /*
  * Iowa DOT provided state road conditions
  */
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 
 // Try to get it from memcached
 $memcache = new Memcached();
@@ -15,7 +15,7 @@ if ($val){
 }
 ob_start();
 
-include("../../../include/database.inc.php");
+require_once "../../../include/database.inc.php";
 $conn = iemdb('postgis');
 
 $colors = Array(
@@ -69,7 +69,11 @@ for ($i=0;$row= @pg_fetch_array($rs,$i);$i++)
   $meat = str_replace("))", "", $meat);
   $segments = explode("),(", $meat);
   $valid = strtotime( substr($row["valid"],0,16) );
-  echo "Color: ". $colors[$row["cond_code"]] ."\n";
+  $color = "255 255 255";
+  if (array_key_exists($row["cond_code"], $colors)){
+      $color = $colors[$row["cond_code"]];
+  }
+  echo "Color: ${color}\n";
   while(list($q,$seg) = each($segments))
   {
     echo "Line: 4, 0, ". $row["major"] ." :: ". $row["minor"]  ."\\nReport: ". $row["raw"] ."\\nTime: ". date('j M Y g:i A', $valid) ."\n";
