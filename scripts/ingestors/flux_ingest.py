@@ -122,7 +122,7 @@ DBCOLS = [
     "pa",
     "vr",
 ]
-DROPCOLS = ["lithium_bv_avg", "utcyear"]
+DROPCOLS = ["lithium_bv_avg", "utcyear", "fw_avg", "site"]
 CONVERT = {
     "timestamp": "valid",
     "incoming_sw_avg": "incoming_sw",
