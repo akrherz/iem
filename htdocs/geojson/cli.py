@@ -7,9 +7,10 @@ import simplejson as json
 from simplejson import encoder
 import memcache
 import psycopg2.extras
-from pyiem.util import get_dbconn, ssw
+from pyiem.util import get_dbconn, ssw, html_escape
 from pyiem.reference import TRACE_VALUE
-encoder.FLOAT_REPR = lambda o: format(o, '.2f')
+
+encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 
 
 def departure(ob, climo):
@@ -48,12 +49,12 @@ def f2_sanitize(val):
 
 def get_data(ts, fmt):
     """ Get the data for this timestamp """
-    pgconn = get_dbconn('iem')
+    pgconn = get_dbconn("iem")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    data = {"type": "FeatureCollection",
-            "features": []}
+    data = {"type": "FeatureCollection", "features": []}
     # Fetch the daily values
-    cursor.execute("""
+    cursor.execute(
+        """
     select station, name, product, state, wfo, valid,
     round(st_x(geom)::numeric, 4)::float as st_x,
     round(st_y(geom)::numeric, 4)::float as st_y,
@@ -70,72 +71,90 @@ def get_data(ts, fmt):
         - snow_jul1_normal)::numeric, 2) as snow_jul1_depart
     from cli_data c JOIN stations s on (c.station = s.id)
     WHERE s.network = 'NWSCLI' and c.valid = %s
-    """, (ts.date(),))
+    """,
+        (ts.date(),),
+    )
     for i, row in enumerate(cursor):
-        data['features'].append({"type": "Feature", "id": i, "properties": {
-                "station": row["station"],
-                "state": row["state"],
-                "valid": row["valid"].strftime("%Y-%m-%d"),
-                "wfo": row["wfo"],
-                "link": "/api/1/nwstext.txt?pid=%s" % (row['product'],),
-                "name": row["name"],
-                "high":  int_sanitize(row["high"]),
-                "high_record":  int_sanitize(row["high_record"]),
-                "high_record_years":  row["high_record_years"],
-                "high_normal":  int_sanitize(row["high_normal"]),
-                "high_depart": departure(row['high'], row['high_normal']),
-                "high_time": row["high_time"],
-                "low":  int_sanitize(row["low"]),
-                "low_record":  int_sanitize(row["low_record"]),
-                "low_record_years":  row["low_record_years"],
-                "low_normal":  int_sanitize(row["low_normal"]),
-                "low_depart": departure(row['low'], row['low_normal']),
-                "low_time": row["low_time"],
-                "precip":  f2_sanitize(row["precip"]),
-                "precip_normal": f2_sanitize(row["precip_normal"]),
-                "precip_month": f2_sanitize(row["precip_month"]),
-                "precip_month_normal": f2_sanitize(row["precip_month_normal"]),
-                "precip_jan1":  f2_sanitize(row["precip_jan1"]),
-                "precip_jan1_normal": f2_sanitize(row["precip_jan1_normal"]),
-                "precip_jun1":  f2_sanitize(row["precip_jun1"]),
-                "precip_jun1_normal": f2_sanitize(row["precip_jun1_normal"]),
-                "precip_jul1":  f2_sanitize(row["precip_jul1"]),
-                "precip_dec1":  f2_sanitize(row["precip_dec1"]),
-                "precip_dec1_normal": f2_sanitize(row["precip_dec1_normal"]),
-                "precip_record":  f2_sanitize(row["precip_record"]),
-                "precip_record_years": row["precip_record_years"],
-                "snow":  f1_sanitize(row["snow"]),
-                "snow_month":  f1_sanitize(row["snow_month"]),
-                "snow_jun1":  f1_sanitize(row["snow_jun1"]),
-                "snow_jul1":  f1_sanitize(row["snow_jul1"]),
-                "snow_dec1":  f1_sanitize(row["snow_dec1"]),
-                "snow_record":  f1_sanitize(row["snow_record"]),
-                "snow_record_years": row["snow_record_years"],
-                "snow_jul1_normal":  f1_sanitize(row["snow_jul1_normal"]),
-                "snow_jul1_depart":  f1_sanitize(row["snow_jul1_depart"]),
-                "snow_dec1_normal":  f1_sanitize(row["snow_dec1_normal"]),
-                "snow_month_normal":  f1_sanitize(row["snow_month_normal"]),
-            },
-            "geometry": {"type": "Point",
-                         "coordinates": [row['st_x'], row['st_y']]
-                         }
-        })
-    if fmt == 'geojson':
+        data["features"].append(
+            {
+                "type": "Feature",
+                "id": i,
+                "properties": {
+                    "station": row["station"],
+                    "state": row["state"],
+                    "valid": row["valid"].strftime("%Y-%m-%d"),
+                    "wfo": row["wfo"],
+                    "link": "/api/1/nwstext.txt?pid=%s" % (row["product"],),
+                    "name": row["name"],
+                    "high": int_sanitize(row["high"]),
+                    "high_record": int_sanitize(row["high_record"]),
+                    "high_record_years": row["high_record_years"],
+                    "high_normal": int_sanitize(row["high_normal"]),
+                    "high_depart": departure(row["high"], row["high_normal"]),
+                    "high_time": row["high_time"],
+                    "low": int_sanitize(row["low"]),
+                    "low_record": int_sanitize(row["low_record"]),
+                    "low_record_years": row["low_record_years"],
+                    "low_normal": int_sanitize(row["low_normal"]),
+                    "low_depart": departure(row["low"], row["low_normal"]),
+                    "low_time": row["low_time"],
+                    "precip": f2_sanitize(row["precip"]),
+                    "precip_normal": f2_sanitize(row["precip_normal"]),
+                    "precip_month": f2_sanitize(row["precip_month"]),
+                    "precip_month_normal": f2_sanitize(
+                        row["precip_month_normal"]
+                    ),
+                    "precip_jan1": f2_sanitize(row["precip_jan1"]),
+                    "precip_jan1_normal": f2_sanitize(
+                        row["precip_jan1_normal"]
+                    ),
+                    "precip_jun1": f2_sanitize(row["precip_jun1"]),
+                    "precip_jun1_normal": f2_sanitize(
+                        row["precip_jun1_normal"]
+                    ),
+                    "precip_jul1": f2_sanitize(row["precip_jul1"]),
+                    "precip_dec1": f2_sanitize(row["precip_dec1"]),
+                    "precip_dec1_normal": f2_sanitize(
+                        row["precip_dec1_normal"]
+                    ),
+                    "precip_record": f2_sanitize(row["precip_record"]),
+                    "precip_record_years": row["precip_record_years"],
+                    "snow": f1_sanitize(row["snow"]),
+                    "snow_month": f1_sanitize(row["snow_month"]),
+                    "snow_jun1": f1_sanitize(row["snow_jun1"]),
+                    "snow_jul1": f1_sanitize(row["snow_jul1"]),
+                    "snow_dec1": f1_sanitize(row["snow_dec1"]),
+                    "snow_record": f1_sanitize(row["snow_record"]),
+                    "snow_record_years": row["snow_record_years"],
+                    "snow_jul1_normal": f1_sanitize(row["snow_jul1_normal"]),
+                    "snow_jul1_depart": f1_sanitize(row["snow_jul1_depart"]),
+                    "snow_dec1_normal": f1_sanitize(row["snow_dec1_normal"]),
+                    "snow_month_normal": f1_sanitize(row["snow_month_normal"]),
+                },
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [row["st_x"], row["st_y"]],
+                },
+            }
+        )
+    if fmt == "geojson":
         return json.dumps(data)
-    cols = ("station,valid,name,state,wfo,high,high_record,high_record_years,"
-            "high_normal,high_time,low,low_record,low_record_years,low_normal,"
-            "low_time,precip,precip_normal,precip_month,precip_jan1,"
-            "precip_jan1_normal,precip_jul1,precip_dec1,precip_dec1_normal,"
-            "precip_record,precip_record_years,"
-            "snow,snow_month,snow_jun1,snow_jul1,snow_dec1,snow_record,"
-            "snow_record_years,snow_jul1_normal,snow_dec1_normal,"
-            "snow_month_normal,snow_jul1_depart")
-    res = cols+"\n"
-    for feat in data['features']:
+    cols = (
+        "station,valid,name,state,wfo,high,high_record,high_record_years,"
+        "high_normal,high_time,low,low_record,low_record_years,low_normal,"
+        "low_time,precip,precip_normal,precip_month,precip_jan1,"
+        "precip_jan1_normal,precip_jul1,precip_dec1,precip_dec1_normal,"
+        "precip_record,precip_record_years,"
+        "snow,snow_month,snow_jun1,snow_jul1,snow_dec1,snow_record,"
+        "snow_record_years,snow_jul1_normal,snow_dec1_normal,"
+        "snow_month_normal,snow_jul1_depart"
+    )
+    res = cols + "\n"
+    for feat in data["features"]:
         for col in cols.split(","):
-            val = feat['properties'][col]
+            val = feat["properties"][col]
             if isinstance(val, (list, tuple)):
-                res += "%s," % (" ".join([str(s) for s in val]), )
+                res += "%s," % (" ".join([str(s) for s in val]),)
             else:
                 res += "%s," % (val,)
         res += "\n"
@@ -143,21 +162,24 @@ def get_data(ts, fmt):
 
 
 def main():
-    ''' see how we are called '''
+    """ see how we are called """
     field = cgi.FieldStorage()
-    dt = field.getfirst('dt', datetime.date.today().strftime("%Y-%m-%d"))
-    ts = datetime.datetime.strptime(dt, '%Y-%m-%d')
-    cb = field.getfirst('callback', None)
-    fmt = field.getfirst('fmt', 'geojson')
+    dt = field.getfirst("dt", datetime.date.today().strftime("%Y-%m-%d"))
+    ts = datetime.datetime.strptime(dt, "%Y-%m-%d")
+    cb = field.getfirst("callback", None)
+    fmt = field.getfirst("fmt", "geojson")
 
-    if fmt == 'geojson':
+    if fmt == "geojson":
         ssw("Content-type: application/vnd.geo+json\n\n")
     else:
         ssw("Content-type: text/plain\n\n")
 
-    mckey = "/geojson/cli/%s?callback=%s&fmt=%s" % (ts.strftime("%Y%m%d"),
-                                                    cb, fmt)
-    mc = memcache.Client(['iem-memcached:11211'], debug=0)
+    mckey = "/geojson/cli/%s?callback=%s&fmt=%s" % (
+        ts.strftime("%Y%m%d"),
+        cb,
+        fmt,
+    )
+    mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
     if not res:
         res = get_data(ts, fmt)
@@ -165,8 +187,8 @@ def main():
     if cb is None:
         ssw(res)
     else:
-        ssw("%s(%s)" % (cgi.escape(cb, quote=True), res))
+        ssw("%s(%s)" % (html_escape(cb), res))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

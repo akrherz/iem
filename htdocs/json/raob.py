@@ -14,14 +14,14 @@
   {...}]
 }
 """
-import cgi
 import datetime
 import json
 
 import pytz
 import memcache
 from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn, ssw
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn, html_escape
 
 json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 
@@ -106,17 +106,15 @@ def parse_time(tstring):
     return dt.replace(tzinfo=pytz.utc)
 
 
-def main():
-    """Do Something"""
-    ssw("Content-type: application/json\n\n")
-
-    form = cgi.FieldStorage()
-    sid = form.getfirst("station", "")[:4]
+def application(environ, start_response):
+    """Answer request."""
+    fields = parse_formvars(environ)
+    sid = fields.get("station", "")[:4]
     if len(sid) == 3:
         sid = "K" + sid
-    ts = parse_time(form.getfirst("ts"))
-    pressure = int(form.getfirst("pressure", -1))
-    cb = form.getfirst("callback", None)
+    ts = parse_time(fields.get("ts"))
+    pressure = int(fields.get("pressure", -1))
+    cb = fields.get("callback")
 
     mckey = "/json/raob/%s/%s/%s?callback=%s" % (
         ts.strftime("%Y%m%d%H%M"),
@@ -131,10 +129,10 @@ def main():
         mc.set(mckey, res)
 
     if cb is None:
-        ssw(res)
+        data = res
     else:
-        ssw("%s(%s)" % (cgi.escape(cb, quote=True), res))
+        data = "%s(%s)" % (html_escape(cb), res)
 
-
-if __name__ == "__main__":
-    main()
+    headers = [("Content-type", "application/json")]
+    start_response("200 OK", headers)
+    return [data.encode("ascii")]

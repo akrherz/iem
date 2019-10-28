@@ -6,18 +6,19 @@ import json
 
 import memcache
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, ssw
+from pyiem.util import get_dbconn, ssw, html_escape
 
 
 def run(network, month, day, syear, eyear):
     """Do something"""
-    pgconn = get_dbconn('coop')
+    pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
 
     nt = NetworkTable(network)
     sday = "%02i%02i" % (month, day)
     table = "alldata_%s" % (network[:2],)
-    cursor.execute("""
+    cursor.execute(
+        """
     WITH data as (
       SELECT station, year, precip,
       avg(precip) OVER (PARTITION by station) as avg_precip,
@@ -28,7 +29,9 @@ def run(network, month, day, syear, eyear):
       avg(low) OVER (PARTITION by station) as avg_low,
       rank() OVER (PARTITION by station ORDER by low ASC) as min_low,
       rank() OVER (PARTITION by station ORDER by precip DESC) as max_precip
-      from """ + table + """ WHERE sday = %s and year >= %s and year < %s),
+      from """
+        + table
+        + """ WHERE sday = %s and year >= %s and year < %s),
 
     max_highs as (
       SELECT station, high, array_agg(year) as years from data
@@ -61,32 +64,51 @@ def run(network, month, day, syear, eyear):
     and xh.station = xl.station and
     xh.station = nl.station and xh.station = mp.station ORDER by station ASC
 
-    """, (sday, syear, eyear))
-    data = {"type": "FeatureCollection",
-            "month": month, "day": day, "network": network,
-            "features": []}
+    """,
+        (sday, syear, eyear),
+    )
+    data = {
+        "type": "FeatureCollection",
+        "month": month,
+        "day": day,
+        "network": network,
+        "features": [],
+    }
 
     for i, row in enumerate(cursor):
         if row[0] not in nt.sts:
             continue
-        props = dict(station=row[0], years=row[1],
-                     avg_high=float(row[2]), max_high=row[3],
-                     max_high_years=row[4], min_high=row[5],
-                     min_high_years=row[6],
-                     avg_low=float(row[7]), max_low=row[8],
-                     max_low_years=row[9], min_low=row[10],
-                     min_low_years=row[11],
-                     avg_precip=float(row[12]),
-                     max_precip=row[13],
-                     max_precip_years=row[14])
-        data['features'].append({"type": "Feature", "id": i,
-                                 'properties': props,
-                                 "geometry": {"type": "Point",
-                                              "coordinates": [
-                                                        nt.sts[row[0]]['lon'],
-                                                        nt.sts[row[0]]['lat']]
-                                              }
-                                 })
+        props = dict(
+            station=row[0],
+            years=row[1],
+            avg_high=float(row[2]),
+            max_high=row[3],
+            max_high_years=row[4],
+            min_high=row[5],
+            min_high_years=row[6],
+            avg_low=float(row[7]),
+            max_low=row[8],
+            max_low_years=row[9],
+            min_low=row[10],
+            min_low_years=row[11],
+            avg_precip=float(row[12]),
+            max_precip=row[13],
+            max_precip_years=row[14],
+        )
+        data["features"].append(
+            {
+                "type": "Feature",
+                "id": i,
+                "properties": props,
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                        nt.sts[row[0]]["lon"],
+                        nt.sts[row[0]]["lat"],
+                    ],
+                },
+            }
+        )
 
     return json.dumps(data)
 
@@ -97,15 +119,20 @@ def main():
 
     form = cgi.FieldStorage()
     network = form.getfirst("network", "IACLIMATE").upper()
-    month = int(form.getfirst('month', 1))
-    day = int(form.getfirst('day', 1))
-    syear = int(form.getfirst('syear', 1800))
-    eyear = int(form.getfirst('eyear', datetime.datetime.now().year + 1))
-    cb = form.getfirst('callback', None)
+    month = int(form.getfirst("month", 1))
+    day = int(form.getfirst("day", 1))
+    syear = int(form.getfirst("syear", 1800))
+    eyear = int(form.getfirst("eyear", datetime.datetime.now().year + 1))
+    cb = form.getfirst("callback", None)
 
-    mckey = "/geojson/climodat_dayclimo/%s/%s/%s/%s/%s" % (network, month, day,
-                                                           syear, eyear)
-    mc = memcache.Client(['iem-memcached:11211'], debug=0)
+    mckey = "/geojson/climodat_dayclimo/%s/%s/%s/%s/%s" % (
+        network,
+        month,
+        day,
+        syear,
+        eyear,
+    )
+    mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
     if not res:
         res = run(network, month, day, syear, eyear)
@@ -114,8 +141,8 @@ def main():
     if cb is None:
         ssw(res)
     else:
-        ssw("%s(%s)" % (cgi.escape(cb, quote=True), res))
+        ssw("%s(%s)" % (html_escape(cb), res))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -7,33 +7,38 @@ import datetime
 import memcache
 import psycopg2.extras
 import pytz
-from pyiem.util import get_dbconn, ssw
+from pyiem.util import get_dbconn, ssw, html_escape
 
 
 def run(ts):
     """ Actually do the hard work of getting the geojson """
-    pgconn = get_dbconn('radar')
+    pgconn = get_dbconn("radar")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     utcnow = datetime.datetime.utcnow()
 
-    if ts == '':
-        cursor.execute("""
+    if ts == "":
+        cursor.execute(
+            """
             SELECT ST_x(geom) as lon, ST_y(geom) as lat, *,
             valid at time zone 'UTC' as utc_valid from
             nexrad_attributes WHERE valid > now() - '30 minutes'::interval
-        """)
+        """
+        )
     else:
         try:
-            valid = datetime.datetime.strptime(ts, '%Y-%m-%dT%H:%M:%S')
+            valid = datetime.datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S")
         except ValueError:
             ssw("ERROR")
             return
         valid = valid.replace(tzinfo=pytz.UTC)
-        tbl = "nexrad_attributes_%s" % (valid.year, )
-        cursor.execute("""
+        tbl = "nexrad_attributes_%s" % (valid.year,)
+        cursor.execute(
+            """
         with vcps as (
-            SELECT distinct nexrad, valid from """ + tbl + """
+            SELECT distinct nexrad, valid from """
+            + tbl
+            + """
             where valid between %s and %s),
         agg as (
             select nexrad, valid,
@@ -42,39 +47,55 @@ def run(ts):
             as rank from vcps)
         SELECT n.*, ST_x(geom) as lon, ST_y(geom) as lat,
         n.valid at time zone 'UTC' as utc_valid
-        from """ + tbl + """ n, agg a WHERE
+        from """
+            + tbl
+            + """ n, agg a WHERE
         a.rank = 1 and a.nexrad = n.nexrad and a.valid = n.valid
         ORDER by n.nexrad ASC
-        """, (valid - datetime.timedelta(minutes=10),
-              valid + datetime.timedelta(minutes=10), valid, valid))
+        """,
+            (
+                valid - datetime.timedelta(minutes=10),
+                valid + datetime.timedelta(minutes=10),
+                valid,
+                valid,
+            ),
+        )
 
-    res = {'type': 'FeatureCollection',
-           'features': [],
-           'generation_time': utcnow.strftime("%Y-%m-%dT%H:%M:%SZ"),
-           'count': cursor.rowcount}
+    res = {
+        "type": "FeatureCollection",
+        "features": [],
+        "generation_time": utcnow.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "count": cursor.rowcount,
+    }
     for i, row in enumerate(cursor):
-        res['features'].append({"type": "Feature", "id": i, "properties": {
-                "nexrad": row["nexrad"],
-                "storm_id": row["storm_id"],
-                "azimuth": row["azimuth"],
-                "range": row["range"],
-                "tvs": row["tvs"],
-                "meso": row["meso"],
-                "posh": row["posh"],
-                "poh": row["poh"],
-                "max_size": row["max_size"],
-                "vil": row["vil"],
-                "max_dbz": row["max_dbz"],
-                "max_dbz_height": row["max_dbz_height"],
-                "top": row["top"],
-                "drct": row["drct"],
-                "sknt": row["sknt"],
-                "valid":  row['utc_valid'].strftime("%Y-%m-%dT%H:%M:%SZ")
-            },
-            "geometry": {"type": "Point",
-                         "coordinates": [row['lon'], row['lat']]
-                         }
-        })
+        res["features"].append(
+            {
+                "type": "Feature",
+                "id": i,
+                "properties": {
+                    "nexrad": row["nexrad"],
+                    "storm_id": row["storm_id"],
+                    "azimuth": row["azimuth"],
+                    "range": row["range"],
+                    "tvs": row["tvs"],
+                    "meso": row["meso"],
+                    "posh": row["posh"],
+                    "poh": row["poh"],
+                    "max_size": row["max_size"],
+                    "vil": row["vil"],
+                    "max_dbz": row["max_dbz"],
+                    "max_dbz_height": row["max_dbz_height"],
+                    "top": row["top"],
+                    "drct": row["drct"],
+                    "sknt": row["sknt"],
+                    "valid": row["utc_valid"].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                },
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [row["lon"], row["lat"]],
+                },
+            }
+        )
 
     return json.dumps(res)
 
@@ -85,21 +106,21 @@ def main():
     ssw("Content-type: application/vnd.geo+json\n\n")
 
     form = cgi.FieldStorage()
-    cb = form.getfirst('callback', None)
-    ts = form.getfirst('valid', '')[:19]  # ISO-8601ish
+    cb = form.getfirst("callback", None)
+    ts = form.getfirst("valid", "")[:19]  # ISO-8601ish
 
     mckey = "/geojson/nexrad_attr.geojson|%s" % (ts,)
-    mc = memcache.Client(['iem-memcached:11211'], debug=0)
+    mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
     if not res:
         res = run(ts)
-        mc.set(mckey, res, 30 if ts == '' else 3600)
+        mc.set(mckey, res, 30 if ts == "" else 3600)
 
     if cb is None:
         ssw(res)
     else:
-        ssw("%s(%s)" % (cgi.escape(cb, quote=True), res))
+        ssw("%s(%s)" % (html_escape(cb), res))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
