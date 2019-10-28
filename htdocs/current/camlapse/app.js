@@ -33,7 +33,6 @@ function myloader() {
 }
 
 $(function () {
-    var ts = new Date();
     var tokens = window.location.href.split('#');
     if (tokens.length == 2) {
         var tokens2 = tokens[1].rsplit('_', 1);
