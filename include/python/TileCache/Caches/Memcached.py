@@ -11,13 +11,13 @@ from TileCache.Cache import Cache
 class Memcached(Cache):
     """Implements a cache"""
 
-    def __init__(self, servers='127.0.0.1:11211', **kwargs):
+    def __init__(self, servers="127.0.0.1:11211", **kwargs):
         """Constructor"""
         Cache.__init__(self, **kwargs)
         if isinstance(servers, string_types):
             servers = [s.strip() for s in servers.split(",")]
         self.cache = memcache.Client(servers, debug=0)
-        self.timeout = int(kwargs.get('timeout', 0))
+        self.timeout = int(kwargs.get("timeout", 0))
 
     def getKey(self, tile):
         """Get the key for this tile"""
@@ -44,8 +44,9 @@ class Memcached(Cache):
 
     def attemptLock(self, tile):
         """Attempt to lock the cache for a tile"""
-        return self.cache.add(self.getLockName(tile), "0",
-                              time.time() + self.timeout)
+        return self.cache.add(
+            self.getLockName(tile), "0", time.time() + self.timeout
+        )
 
     def unlock(self, tile):
         """Attempt to unlock the cache for a tile"""

@@ -71,7 +71,8 @@ def main():
         ts = maxts.get(sid, datetime.datetime(2000, 1, 1))
         ticks = int(ts.strftime("%s"))
         sql = (
-            "SELECT * from logger_data WHERE site_serial = %s" " and Date_time > %s"
+            "SELECT * from logger_data WHERE site_serial = %s"
+            " and Date_time > %s"
         ) % (sid, ticks)
         proc = subprocess.Popen(
             ("echo '%s' | mdb-sql -p " "/mnt/sts_gold/sts_gold.mdb") % (sql,),

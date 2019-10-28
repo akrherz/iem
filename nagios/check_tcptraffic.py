@@ -36,7 +36,9 @@ def read_stats(device):
 
 def write_stats(device, payload):
     """write to tmp file"""
-    fp = open("/tmp/check_tcptraffic_py_%s_%s" % (device, getpass.getuser()), "w")
+    fp = open(
+        "/tmp/check_tcptraffic_py_%s_%s" % (device, getpass.getuser()), "w"
+    )
     json.dump(payload, fp)
     fp.close()
 
@@ -51,7 +53,9 @@ def get_stats(device):
             rxbytes = int(tokens[1])
             txbytes = int(tokens[9])
             payload = dict(
-                valid=datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+                valid=datetime.datetime.utcnow().strftime(
+                    "%Y-%m-%dT%H:%M:%SZ"
+                ),
                 rxbytes=rxbytes,
                 txbytes=txbytes,
                 device=device,

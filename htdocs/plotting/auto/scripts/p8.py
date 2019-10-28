@@ -16,18 +16,32 @@ def get_description():
     desc = dict()
     y2 = datetime.date.today().year
     y1 = y2 - 20
-    desc['arguments'] = [
-        dict(type='station', name='station', default='IA0200',
-             label='Select Station:', network='IACLIMATE'),
-        dict(type='year', name='syear', default=y1,
-             label='Enter Start Year:'),
-        dict(type='year', name='eyear', default=y2,
-             label='Enter End Year (inclusive):'),
-        dict(type='int', name='threshold', default='80',
-             label='Threshold Percentage [%]:'),
+    desc["arguments"] = [
+        dict(
+            type="station",
+            name="station",
+            default="IA0200",
+            label="Select Station:",
+            network="IACLIMATE",
+        ),
+        dict(type="year", name="syear", default=y1, label="Enter Start Year:"),
+        dict(
+            type="year",
+            name="eyear",
+            default=y2,
+            label="Enter End Year (inclusive):",
+        ),
+        dict(
+            type="int",
+            name="threshold",
+            default="80",
+            label="Threshold Percentage [%]:",
+        ),
     ]
-    desc['data'] = True
-    desc['description'] = """This plot presents the frequency of having
+    desc["data"] = True
+    desc[
+        "description"
+    ] = """This plot presents the frequency of having
     a month's preciptation at or above some threshold.  This threshold
     is compared against the long term climatology for the site and month. This
     plot is designed to answer the question about reliability of monthly
@@ -37,40 +51,47 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    coop = get_dbconn('coop')
+    coop = get_dbconn("coop")
     cursor = coop.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
-    station = ctx['station']
-    syear = ctx['syear']
-    eyear = ctx['eyear']
-    threshold = ctx['threshold']
+    station = ctx["station"]
+    syear = ctx["syear"]
+    eyear = ctx["eyear"]
+    threshold = ctx["threshold"]
 
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
-    cursor.execute("""
+    cursor.execute(
+        """
     with months as (
       select year, month, p, avg(p) OVER (PARTITION by month) from (
-        select year, month, sum(precip) as p from """+table+"""
+        select year, month, sum(precip) as p from """
+        + table
+        + """
         where station = %s and year < extract(year from now())
         GROUP by year, month) as foo)
 
     SELECT month, sum(case when p > (avg * %s / 100.0) then 1 else 0 end)
     from months WHERE year >= %s and year < %s
     GROUP by month ORDER by month ASC
-    """, (station, threshold, syear, eyear))
+    """,
+        (station, threshold, syear, eyear),
+    )
     vals = []
     years = float(1 + eyear - syear)
     for row in cursor:
-        vals.append(row[1] / years * 100.)
+        vals.append(row[1] / years * 100.0)
     if not vals:
         raise NoDataFound("No Data Found!")
-    df = pd.DataFrame(dict(freq=pd.Series(vals, index=range(1, 13))),
-                      index=pd.Series(range(1, 13), name='month'))
+    df = pd.DataFrame(
+        dict(freq=pd.Series(vals, index=range(1, 13))),
+        index=pd.Series(range(1, 13), name="month"),
+    )
 
     (fig, ax) = plt.subplots(1, 1)
 
-    ax.bar(np.arange(1, 13), vals, align='center')
+    ax.bar(np.arange(1, 13), vals, align="center")
     ax.set_xticks(np.arange(1, 13))
     ax.set_ylim(0, 100)
     ax.set_yticks(np.arange(0, 101, 10))
@@ -78,13 +99,16 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_xlim(0.5, 12.5)
     ax.set_ylabel("Percentage of Months, n=%.0f years" % (years,))
-    ax.set_title(("%s [%s] Monthly Precipitation Reliability\n"
-                  "Period: %s-%s, %% of Months above %s%% of Long Term Avg"
-                  ) % (nt.sts[station]['name'], station, syear,
-                       eyear, threshold))
+    ax.set_title(
+        (
+            "%s [%s] Monthly Precipitation Reliability\n"
+            "Period: %s-%s, %% of Months above %s%% of Long Term Avg"
+        )
+        % (nt.sts[station]["name"], station, syear, eyear, threshold)
+    )
 
     return fig, df
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     plotter(dict())

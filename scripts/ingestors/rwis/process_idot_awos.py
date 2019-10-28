@@ -48,7 +48,8 @@ def main():
     sio = StringIO()
     sio.write("\001\r\r\n")
     sio.write(
-        ("SAUS00 KISU %s\r\r\n") % (datetime.datetime.utcnow().strftime("%d%H%M"),)
+        ("SAUS00 KISU %s\r\r\n")
+        % (datetime.datetime.utcnow().strftime("%d%H%M"),)
     )
     sio.write("METAR\r\r\n")
     for sid in data:

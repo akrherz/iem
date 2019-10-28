@@ -13,7 +13,7 @@ from pyiem.util import get_dbconn
 
 def main():
     """Go Main Go"""
-    iemaccess = get_dbconn('iem')
+    iemaccess = get_dbconn("iem")
     cursor = iemaccess.cursor()
 
     valid = datetime.datetime.utcnow()
@@ -31,23 +31,25 @@ def main():
         return
 
     tparts = re.split(":", tokens[3])
-    valid = valid.replace(hour=int(tparts[0]),
-                          minute=int(tparts[1]), second=0, microsecond=0)
+    valid = valid.replace(
+        hour=int(tparts[0]), minute=int(tparts[1]), second=0, microsecond=0
+    )
 
     iem = Observation("OT0010", "OT", valid)
 
-    iem.data['tmpf'] = float(tokens[4])
-    iem.data['max_tmpf'] = float(tokens[5])
-    iem.data['min_tmpf'] = float(tokens[6])
-    iem.data['relh'] = int(tokens[7])
-    iem.data['dwpf'] = dewpoint(temperature(iem.data['tmpf'], 'F'),
-                                humidity(iem.data['relh'], '%')).value("F")
-    iem.data['sknt'] = speed(float(tokens[8]), 'mph').value('KT')
-    iem.data['drct'] = int(tokens[9])
-    iem.data['max_sknt'] = speed(float(tokens[10]), 'mph').value('KT')
-    iem.data['alti'] = float(tokens[12])
-    iem.data['pday'] = float(tokens[13])
-    iem.data['srad'] = None if tokens[18] == 'n/a' else float(tokens[18])
+    iem.data["tmpf"] = float(tokens[4])
+    iem.data["max_tmpf"] = float(tokens[5])
+    iem.data["min_tmpf"] = float(tokens[6])
+    iem.data["relh"] = int(tokens[7])
+    iem.data["dwpf"] = dewpoint(
+        temperature(iem.data["tmpf"], "F"), humidity(iem.data["relh"], "%")
+    ).value("F")
+    iem.data["sknt"] = speed(float(tokens[8]), "mph").value("KT")
+    iem.data["drct"] = int(tokens[9])
+    iem.data["max_sknt"] = speed(float(tokens[10]), "mph").value("KT")
+    iem.data["alti"] = float(tokens[12])
+    iem.data["pday"] = float(tokens[13])
+    iem.data["srad"] = None if tokens[18] == "n/a" else float(tokens[18])
 
     iem.save(cursor)
 
@@ -55,5 +57,5 @@ def main():
     iemaccess.commit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

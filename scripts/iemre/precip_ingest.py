@@ -20,7 +20,8 @@ LOG = logger()
 def get_p01m_status(valid):
     """Figure out what our current status is of this hour."""
     nc = ncopen(
-        ("/mesonet/data/stage4/%s_stage4_hourly.nc") % (valid.year,), timeout=300
+        ("/mesonet/data/stage4/%s_stage4_hourly.nc") % (valid.year,),
+        timeout=300,
     )
     tidx = iemre.hourly_offset(valid)
     # 2 prism_adjust_stage4 ran
@@ -39,7 +40,9 @@ def ingest_hourly_grib(valid):
       int value of the new p01m_status
     """
     tidx = iemre.hourly_offset(valid)
-    fn = valid.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/stage4/ST4.%Y%m%d%H.01h.grib")
+    fn = valid.strftime(
+        "/mesonet/ARCHIVE/data/%Y/%m/%d/stage4/ST4.%Y%m%d%H.01h.grib"
+    )
     if not os.path.isfile(fn):
         LOG.info("stage4_ingest: missing file %s", fn)
         return 0
@@ -50,7 +53,9 @@ def ingest_hourly_grib(valid):
     val = np.where(val > 250.0, 0, val)
 
     nc = ncopen(
-        ("/mesonet/data/stage4/%s_stage4_hourly.nc") % (valid.year,), "a", timeout=300
+        ("/mesonet/data/stage4/%s_stage4_hourly.nc") % (valid.year,),
+        "a",
+        timeout=300,
     )
     p01m = nc.variables["p01m"]
     # account for legacy grid prior to 2002
@@ -73,7 +78,9 @@ def copy_to_iemre(valid):
     """verbatim copy over to IEMRE."""
     tidx = iemre.hourly_offset(valid)
     nc = ncopen(
-        ("/mesonet/data/stage4/%s_stage4_hourly.nc") % (valid.year,), "a", timeout=300
+        ("/mesonet/data/stage4/%s_stage4_hourly.nc") % (valid.year,),
+        "a",
+        timeout=300,
     )
     lats = nc.variables["lat"][:]
     lons = nc.variables["lon"][:]

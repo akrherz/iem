@@ -20,18 +20,18 @@ import os
 
 def main():
     """Go Main Go."""
-    for username in ['ldm', 'meteor_ldm']:
-        fn = "/home/%s/bin/ldmadmin" % (username, )
+    for username in ["ldm", "meteor_ldm"]:
+        fn = "/home/%s/bin/ldmadmin" % (username,)
         if not os.path.isfile(fn):
             continue
         proc = subprocess.Popen(
-            "%s printmetrics" % (fn, ), shell=True, stdout=subprocess.PIPE
+            "%s printmetrics" % (fn,), shell=True, stdout=subprocess.PIPE
         )
         break
-    data = proc.stdout.read().decode('ascii')
+    data = proc.stdout.read().decode("ascii")
     tokens = data.split()
     if len(tokens) != 18:
-        print('CRITICAL - can not parse output %s ' % (data,))
+        print("CRITICAL - can not parse output %s " % (data,))
         sys.exit(2)
 
     # We are downstream of how many hosts
@@ -42,19 +42,31 @@ def main():
     product_count = tokens[7]
     byte_count = tokens[8]
 
-    msg = 'OK'
+    msg = "OK"
     estatus = 0
     # CHECK that the registry has a valid netstat command not `true`!
     if downstream < 1:
-        msg = 'CRITICAL'
+        msg = "CRITICAL"
         estatus = 2
-    print(("%s - Down:%s Up:%s Raw:%s| downstream=%s;; upstream=%s;; "
-           "queue_age=%s;; product_count=%s;; byte_count=%s"
-           ) % (msg, downstream, upstream, data,
-                downstream, upstream, queue_age,
-                product_count, byte_count))
+    print(
+        (
+            "%s - Down:%s Up:%s Raw:%s| downstream=%s;; upstream=%s;; "
+            "queue_age=%s;; product_count=%s;; byte_count=%s"
+        )
+        % (
+            msg,
+            downstream,
+            upstream,
+            data,
+            downstream,
+            upstream,
+            queue_age,
+            product_count,
+            byte_count,
+        )
+    )
     return estatus
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

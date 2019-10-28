@@ -20,7 +20,9 @@ def get_latest_time(model):
     utc = utc.replace(hour=12, minute=0, second=0, microsecond=0)
     limit = 24
     while not os.path.isfile(
-        utc.strftime(("/mesonet/share/frost/" + model + "/%Y%m%d%H%M_iaoutput.nc"))
+        utc.strftime(
+            ("/mesonet/share/frost/" + model + "/%Y%m%d%H%M_iaoutput.nc")
+        )
     ):
         utc -= datetime.timedelta(hours=12)
         limit -= 1
@@ -45,7 +47,8 @@ def get_times(nc):
 def get_ij(lon, lat, nc):
     """ Figure out the closest grid cell """
     dist = (
-        (nc.variables["lon"][:] - lon) ** 2 + (nc.variables["lat"][:] - lat) ** 2
+        (nc.variables["lon"][:] - lon) ** 2
+        + (nc.variables["lat"][:] - lat) ** 2
     ) ** 0.5
     return np.unravel_index(np.argmin(dist), dist.shape)
 
@@ -108,7 +111,9 @@ def process(model, lon, lat):
         fig.savefig(getattr(sys.stdout, "buffer", sys.stdout), format="png")
         return
     nc = ncopen(
-        modelts.strftime(("/mesonet/share/frost/" + model + "/%Y%m%d%H%M_iaoutput.nc"))
+        modelts.strftime(
+            ("/mesonet/share/frost/" + model + "/%Y%m%d%H%M_iaoutput.nc")
+        )
     )
     times = get_times(nc)
     (i, j) = get_ij(lon, lat, nc)
@@ -133,7 +138,10 @@ def process(model, lon, lat):
     )
     # ax.set_ylim(-30,150)
     ax.set_title(
-        ("ISUMM5 %s Timeseries\n" "i: %s j:%s lon: %.2f lat: %.2f Model Run: %s")
+        (
+            "ISUMM5 %s Timeseries\n"
+            "i: %s j:%s lon: %.2f lat: %.2f Model Run: %s"
+        )
         % (
             model,
             i,
@@ -177,7 +185,9 @@ def process(model, lon, lat):
 
     # Shrink current axis's height by 10% on the bottom
     box = ax.get_position()
-    ax.set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9])
+    ax.set_position(
+        [box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9]
+    )
     ax.legend(
         loc="upper center",
         bbox_to_anchor=(0.5, -0.12),

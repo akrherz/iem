@@ -21,7 +21,10 @@ def main():
     for row in icursor:
         station = row[0]
         if station not in table.sts:
-            print(("Whoa station: %s does not exist in metadatabase?") % (station,))
+            print(
+                ("Whoa station: %s does not exist in metadatabase?")
+                % (station,)
+            )
             continue
         if table.sts[station]["archive_begin"] != row[1]:
             print(

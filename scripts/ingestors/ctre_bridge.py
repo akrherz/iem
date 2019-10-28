@@ -24,96 +24,98 @@ def main():
         return
 
     props = util.get_properties()
-    pgconn = util.get_dbconn('iem')
+    pgconn = util.get_dbconn("iem")
     icursor = pgconn.cursor()
 
-    csv = open('/tmp/ctre.txt', 'w')
+    csv = open("/tmp/ctre.txt", "w")
     bio = BytesIO()
     # Get Saylorville
     try:
-        ftp = ftplib.FTP('129.186.224.167')
-        ftp.login(props['ctre_ftpuser'], props['ctre_ftppass'])
-        ftp.retrbinary('RETR Saylorville_Table3Min_current.dat',
-                       bio.write)
+        ftp = ftplib.FTP("129.186.224.167")
+        ftp.login(props["ctre_ftpuser"], props["ctre_ftppass"])
+        ftp.retrbinary("RETR Saylorville_Table3Min_current.dat", bio.write)
         ftp.close()
     except Exception as exp:
         if now.minute % 15 == 0:
-            print('Download CTRE Bridge Data Failed!!!\n%s' % (exp, ))
+            print("Download CTRE Bridge Data Failed!!!\n%s" % (exp,))
         return
     bio.seek(0)
-    data = bio.getvalue().decode('ascii').split("\n")
+    data = bio.getvalue().decode("ascii").split("\n")
     bio.truncate()
     if len(data) < 2:
         return
-    keys = data[0].strip().replace('"', '').split(',')
-    vals = data[1].strip().replace('"', '').split(',')
+    keys = data[0].strip().replace('"', "").split(",")
+    vals = data[1].strip().replace('"', "").split(",")
     d = {}
     for i in range(len(vals)):
         d[keys[i]] = vals[i]
     # Ob times are always CDT
-    ts1 = datetime.datetime.strptime(d['TIMESTAMP'], '%Y-%m-%d %H:%M:%S')
+    ts1 = datetime.datetime.strptime(d["TIMESTAMP"], "%Y-%m-%d %H:%M:%S")
     gts1 = ts1 + datetime.timedelta(hours=5)
     gts1 = gts1.replace(tzinfo=pytz.utc)
     lts = gts1.astimezone(pytz.timezone("America/Chicago"))
 
-    iem = Observation('RSAI4', "OT", lts)
-    drct = d['WindDir']
-    iem.data['drct'] = drct
-    sknt = float(d['WS_mph_S_WVT']) / 1.15
-    iem.data['sknt'] = sknt
-    gust = float(d['WS_mph_Max']) / 1.15
-    iem.data['gust'] = gust
+    iem = Observation("RSAI4", "OT", lts)
+    drct = d["WindDir"]
+    iem.data["drct"] = drct
+    sknt = float(d["WS_mph_S_WVT"]) / 1.15
+    iem.data["sknt"] = sknt
+    gust = float(d["WS_mph_Max"]) / 1.15
+    iem.data["gust"] = gust
     iem.save(icursor)
 
-    csv.write("%s,%s,%s,%.1f,%.1f\n" % ('RSAI4',
-                                        gts1.strftime("%Y/%m/%d %H:%M:%S"),
-                                        drct, sknt, gust))
+    csv.write(
+        "%s,%s,%s,%.1f,%.1f\n"
+        % ("RSAI4", gts1.strftime("%Y/%m/%d %H:%M:%S"), drct, sknt, gust)
+    )
 
     # Red Rock
     try:
-        ftp = ftplib.FTP('129.186.224.167')
-        ftp.login(props['ctre_ftpuser'], props['ctre_ftppass'])
-        ftp.retrbinary('RETR Red Rock_Table3Min_current.dat',
-                       bio.write)
+        ftp = ftplib.FTP("129.186.224.167")
+        ftp.login(props["ctre_ftpuser"], props["ctre_ftppass"])
+        ftp.retrbinary("RETR Red Rock_Table3Min_current.dat", bio.write)
         ftp.close()
     except Exception as exp:
         if now.minute % 15 == 0:
-            print('Download CTRE Bridge Data Failed!!!\n%s' % (exp, ))
+            print("Download CTRE Bridge Data Failed!!!\n%s" % (exp,))
         return
     bio.seek(0)
-    data = bio.getvalue().decode('ascii').split("\n")
+    data = bio.getvalue().decode("ascii").split("\n")
     bio.truncate()
     if len(data) < 2:
         return
 
-    keys = data[0].strip().replace('"', '').split(',')
-    vals = data[1].strip().replace('"', '').split(',')
+    keys = data[0].strip().replace('"', "").split(",")
+    vals = data[1].strip().replace('"', "").split(",")
     d = {}
     for i in range(len(vals)):
         d[keys[i]] = vals[i]
 
-    ts2 = datetime.datetime.strptime(d['TIMESTAMP'], '%Y-%m-%d %H:%M:%S')
+    ts2 = datetime.datetime.strptime(d["TIMESTAMP"], "%Y-%m-%d %H:%M:%S")
     gts2 = ts2 + datetime.timedelta(hours=5)
     gts2 = gts2.replace(tzinfo=pytz.timezone("UTC"))
     lts = gts2.astimezone(pytz.timezone("America/Chicago"))
 
-    iem = Observation('RLRI4', "OT", lts)
-    drct = d['WindDir']
-    iem.data['drct'] = drct
-    sknt = float(d['WS_mph_S_WVT']) / 1.15
-    iem.data['sknt'] = sknt
-    gust = float(d['WS_mph_Max']) / 1.15
-    iem.data['gust'] = gust
+    iem = Observation("RLRI4", "OT", lts)
+    drct = d["WindDir"]
+    iem.data["drct"] = drct
+    sknt = float(d["WS_mph_S_WVT"]) / 1.15
+    iem.data["sknt"] = sknt
+    gust = float(d["WS_mph_Max"]) / 1.15
+    iem.data["gust"] = gust
     iem.save(icursor)
 
-    csv.write("%s,%s,%s,%.1f,%.1f\n" % ('RLRI4',
-                                        gts2.strftime("%Y/%m/%d %H:%M:%S"),
-                                        drct, sknt, gust))
+    csv.write(
+        "%s,%s,%s,%.1f,%.1f\n"
+        % ("RLRI4", gts2.strftime("%Y/%m/%d %H:%M:%S"), drct, sknt, gust)
+    )
 
     csv.close()
 
-    cmd = ("/home/ldm/bin/pqinsert -i -p 'data c %s csv/ctre.txt "
-           "bogus txt' /tmp/ctre.txt") % (now.strftime("%Y%m%d%H%M"),)
+    cmd = (
+        "/home/ldm/bin/pqinsert -i -p 'data c %s csv/ctre.txt "
+        "bogus txt' /tmp/ctre.txt"
+    ) % (now.strftime("%Y%m%d%H%M"),)
     subprocess.call(cmd, shell=True)
 
     icursor.close()
@@ -121,5 +123,5 @@ def main():
     pgconn.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

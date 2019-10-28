@@ -86,7 +86,9 @@ def fetch(valid, hr):
         )
     for pr in offsets:
         headers = {"Range": "bytes=%s-%s" % (pr[0], pr[1])}
-        req = exponential_backoff(requests.get, uri[:-4], headers=headers, timeout=30)
+        req = exponential_backoff(
+            requests.get, uri[:-4], headers=headers, timeout=30
+        )
         if req is None:
             print("download_nam.py failure for uri: %s" % (uri,))
         else:

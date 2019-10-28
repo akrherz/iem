@@ -15,32 +15,32 @@ from pyiem.util import get_dbconn, ncopen
 
 def figure(val, qcval):
     if qcval > 1000:
-        return 'Null'
-    tmpf = temperature(val, 'K').value("F")
-    qcval = temperature(val + qcval, 'K').value("F")
+        return "Null"
+    tmpf = temperature(val, "K").value("F")
+    qcval = temperature(val + qcval, "K").value("F")
     return qcval - tmpf
 
 
 def figure_alti(val, qcval):
-    if qcval > 100000.:
-        return 'Null'
+    if qcval > 100000.0:
+        return "Null"
     return qcval / 100.0
 
 
 def check(val):
-    if val > 200000.:
-        return 'Null'
+    if val > 200000.0:
+        return "Null"
     return val
 
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconn('iem')
+    pgconn = get_dbconn("iem")
     icursor = pgconn.cursor()
 
     now = datetime.datetime.utcnow() - datetime.timedelta(hours=3)
 
-    fn = "/mesonet/data/madis/metar/%s.nc" % (now.strftime("%Y%m%d_%H00"), )
+    fn = "/mesonet/data/madis/metar/%s.nc" % (now.strftime("%Y%m%d_%H00"),)
     table = "current_qc"
 
     if not os.path.isfile(fn):
@@ -62,21 +62,26 @@ def main():
             continue
         if sid[0] == "K":
             ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(
-                                    seconds=int(nc.variables["timeObs"][j]))
+                seconds=int(nc.variables["timeObs"][j])
+            )
             ts = ts.replace(tzinfo=pytz.utc)
-            (tmpf, tmpf_qc_av, tmpf_qc_sc) = ('Null', 'Null', 'Null')
-            (dwpf, dwpf_qc_av, dwpf_qc_sc) = ('Null', 'Null', 'Null')
-            (alti, alti_qc_av, alti_qc_sc) = ('Null', 'Null', 'Null')
-            if (not np.ma.is_masked(nc_tmpk[j]) and
-                    not np.ma.is_masked(tmpkqcd[j, 0]) and
-                    not np.ma.is_masked(tmpkqcd[j, 6])):
-                tmpf = check(temperature(nc_tmpk[j], 'K').value('F'))
+            (tmpf, tmpf_qc_av, tmpf_qc_sc) = ("Null", "Null", "Null")
+            (dwpf, dwpf_qc_av, dwpf_qc_sc) = ("Null", "Null", "Null")
+            (alti, alti_qc_av, alti_qc_sc) = ("Null", "Null", "Null")
+            if (
+                not np.ma.is_masked(nc_tmpk[j])
+                and not np.ma.is_masked(tmpkqcd[j, 0])
+                and not np.ma.is_masked(tmpkqcd[j, 6])
+            ):
+                tmpf = check(temperature(nc_tmpk[j], "K").value("F"))
                 tmpf_qc_av = figure(nc_tmpk[j], tmpkqcd[j, 0])
                 tmpf_qc_sc = figure(nc_tmpk[j], tmpkqcd[j, 6])
-            if (not np.ma.is_masked(nc_dwpk[j]) and
-                    not np.ma.is_masked(dwpkqcd[j, 0]) and
-                    not np.ma.is_masked(dwpkqcd[j, 6])):
-                dwpf = check(temperature(nc_dwpk[j], 'K').value('F'))
+            if (
+                not np.ma.is_masked(nc_dwpk[j])
+                and not np.ma.is_masked(dwpkqcd[j, 0])
+                and not np.ma.is_masked(dwpkqcd[j, 6])
+            ):
+                dwpf = check(temperature(nc_dwpk[j], "K").value("F"))
                 dwpf_qc_av = figure(nc_dwpk[j], dwpkqcd[j, 0])
                 dwpf_qc_sc = figure(nc_dwpk[j], dwpkqcd[j, 6])
             if not np.ma.is_masked(nc_alti[j]):
@@ -89,10 +94,20 @@ def main():
                 dwpf_qc_sc = %s, alti = %s, alti_qc_av = %s,
                 alti_qc_sc = %s, valid = '%s' WHERE
                 station = '%s'
-                """ % (table, tmpf,
-                       tmpf_qc_av, tmpf_qc_sc, dwpf, dwpf_qc_av,
-                       dwpf_qc_sc, alti, alti_qc_av, alti_qc_sc,
-                       ts.strftime("%Y-%m-%d %H:%M+00"), sid[1:])
+                """ % (
+                table,
+                tmpf,
+                tmpf_qc_av,
+                tmpf_qc_sc,
+                dwpf,
+                dwpf_qc_av,
+                dwpf_qc_sc,
+                alti,
+                alti_qc_av,
+                alti_qc_sc,
+                ts.strftime("%Y-%m-%d %H:%M+00"),
+                sid[1:],
+            )
             sql = sql.replace("--", "Null").replace("nan", "Null")
             try:
                 icursor.execute(sql)
@@ -106,5 +121,5 @@ def main():
     pgconn.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

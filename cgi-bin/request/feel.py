@@ -11,28 +11,35 @@ from pyiem.util import get_dbconn, ssw
 
 def run(sts, ets):
     """ Get data! """
-    dbconn = get_dbconn('other', user='nobody')
+    dbconn = get_dbconn("other", user="nobody")
     sql = """SELECT * from feel_data_daily where
-    valid >= '%s' and valid < '%s' ORDER by valid ASC""" % (sts, ets)
+    valid >= '%s' and valid < '%s' ORDER by valid ASC""" % (
+        sts,
+        ets,
+    )
     df = pd.read_sql(sql, dbconn)
 
     sql = """SELECT * from feel_data_hourly where
-    valid >= '%s' and valid < '%s' ORDER by valid ASC""" % (sts, ets)
+    valid >= '%s' and valid < '%s' ORDER by valid ASC""" % (
+        sts,
+        ets,
+    )
     df2 = pd.read_sql(sql, dbconn)
 
     def fmt(val):
         """Lovely hack."""
         return val.strftime("%Y-%m-%d %H:%M")
-    df2['valid'] = df2['valid'].apply(fmt)
 
-    with pd.ExcelWriter('/tmp/ss.xlsx') as writer:
-        df.to_excel(writer, 'Daily Data', index=False)
-        df2.to_excel(writer, 'Hourly Data', index=False)
+    df2["valid"] = df2["valid"].apply(fmt)
+
+    with pd.ExcelWriter("/tmp/ss.xlsx") as writer:
+        df.to_excel(writer, "Daily Data", index=False)
+        df2.to_excel(writer, "Hourly Data", index=False)
 
     ssw("Content-type: application/vnd.ms-excel\n")
     ssw("Content-Disposition: attachment;Filename=feel.xls\n\n")
-    ssw(open('/tmp/ss.xlsx', 'rb').read())
-    os.unlink('/tmp/ss.xlsx')
+    ssw(open("/tmp/ss.xlsx", "rb").read())
+    os.unlink("/tmp/ss.xlsx")
 
 
 def main():
@@ -51,5 +58,5 @@ def main():
     run(sts, ets)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

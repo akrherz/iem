@@ -126,7 +126,10 @@ def main(argv):
         ts = indices[sid]["ts"]
 
         out.write(
-            ("%5.5s %25.25s %8.4f %10.4f " "%02i %02i %5s %5s %5s %5s %5s %5s\n")
+            (
+                "%5.5s %25.25s %8.4f %10.4f "
+                "%02i %02i %5s %5s %5s %5s %5s %5s\n"
+            )
             % (
                 sid,
                 name,
@@ -146,7 +149,9 @@ def main(argv):
     nc.close()
     out.close()
     pqstr = "data c 000000000000 wxc/wxc_%s.txt bogus txt" % (network.lower(),)
-    subprocess.call("/home/ldm/bin/pqinsert -p '%s' %s" % (pqstr, wxcfn), shell=True)
+    subprocess.call(
+        "/home/ldm/bin/pqinsert -p '%s' %s" % (pqstr, wxcfn), shell=True
+    )
     os.remove(wxcfn)
 
 

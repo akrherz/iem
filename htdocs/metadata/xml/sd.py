@@ -11,9 +11,9 @@ IEM = "https://mesonet.agron.iastate.edu/metadata/xml"
 def main():
     """ Do Something"""
     form = cgi.FieldStorage()
-    network = form.getfirst('network', 'ISUSM')
+    network = form.getfirst("network", "ISUSM")
     nt = NetworkTable(network)
-    station = form.getfirst('station', 'AEEI4')
+    station = form.getfirst("station", "AEEI4")
     xs = """<?xml version="1.0" encoding="UTF-8"?>
 <sfl:SensorDeployment xmlns:xlink="http://www.w3.org/1999/xlink"
 xmlns:sfl="http://sawi.gst.com/nmpa/schema/sfl.xsd"
@@ -125,16 +125,19 @@ gml:id="sd_%(network)s_%(station)s">
   <sfl:boundTo xlink:href="%(iem)s/pl_%(network)s_%(station)s.xml" />
 
 </sfl:SensorDeployment>
-""" % dict(network=network, station=station,
-           name=nt.sts[station]['name'],
-           lat=nt.sts[station]['lat'],
-           iem=IEM,
-           lon=nt.sts[station]['lon'],
-           sts=nt.sts[station]['archive_begin'].strftime("%Y-%m-%dT%H:%M:%SZ"))
+""" % dict(
+        network=network,
+        station=station,
+        name=nt.sts[station]["name"],
+        lat=nt.sts[station]["lat"],
+        iem=IEM,
+        lon=nt.sts[station]["lon"],
+        sts=nt.sts[station]["archive_begin"].strftime("%Y-%m-%dT%H:%M:%SZ"),
+    )
 
     ssw("Content-type: text/xml\n\n")
     ssw(xs)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

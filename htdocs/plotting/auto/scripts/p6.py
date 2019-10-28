@@ -10,68 +10,90 @@ from pyiem.plot.use_agg import plt
 from pyiem import reference
 from pyiem.exceptions import NoDataFound
 
-PDICT = {'sum-precip': 'Total Precipitation [inch]',
-         'avg-high': 'Average Daily High [F]',
-         'avg-low': 'Average Daily Low [F]',
-         'avg-t': 'Average Daily Temp [F]',
-         }
+PDICT = {
+    "sum-precip": "Total Precipitation [inch]",
+    "avg-high": "Average Daily High [F]",
+    "avg-low": "Average Daily Low [F]",
+    "avg-t": "Average Daily Temp [F]",
+}
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     today = datetime.date.today()
-    desc['description'] = """This application plots out the distribution of
+    desc[
+        "description"
+    ] = """This application plots out the distribution of
     some monthly metric for single month for all tracked sites within one
     state.  The plot presents the distribution and normalized frequency
     for a specific year and for all years combined for the given month."""
-    desc['data'] = True
-    desc['arguments'] = [
-        dict(type='state', name='state', default='IA',
-             label='Select State:'),
-        dict(type='year', name='year', default=today.year,
-             label='Select Year'),
-        dict(type='month', name='month', default=today.month,
-             label='Select Month'),
-        dict(type='select', name='type', default='sum-precip',
-             label='Which metric to plot?', options=PDICT),
+    desc["data"] = True
+    desc["arguments"] = [
+        dict(type="state", name="state", default="IA", label="Select State:"),
+        dict(
+            type="year", name="year", default=today.year, label="Select Year"
+        ),
+        dict(
+            type="month",
+            name="month",
+            default=today.month,
+            label="Select Month",
+        ),
+        dict(
+            type="select",
+            name="type",
+            default="sum-precip",
+            label="Which metric to plot?",
+            options=PDICT,
+        ),
     ]
     return desc
 
 
 def plotter(fdict):
     """ Go """
-    pgconn = get_dbconn('coop')
+    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
-    state = ctx['state']
-    year = ctx['year']
-    month = ctx['month']
-    ptype = ctx['type']
+    state = ctx["state"]
+    year = ctx["year"]
+    month = ctx["month"]
+    ptype = ctx["type"]
     ptype_climo = ptype.split("-")[1]
     table = "alldata_%s" % (state,)
 
     # Compute the bulk statistics for climatology
-    df = read_sql("""
+    df = read_sql(
+        """
     WITH yearly as (
         SELECT station, year, sum(precip) as sum_precip,
         avg(high) as avg_high, avg(low) as avg_low,
-        avg((high+low)/2.) as avg_temp from """ + table + """
+        avg((high+low)/2.) as avg_temp from """
+        + table
+        + """
         WHERE month = %s GROUP by station, year)
 
     SELECT avg(sum_precip) as avg_precip, stddev(sum_precip) as std_precip,
     avg(avg_high) as avg_high, stddev(avg_high) as std_high,
     avg(avg_temp) as avg_t, stddev(avg_high) as std_t,
     avg(avg_low) as avg_low, stddev(avg_low) as std_low from yearly
-   """, pgconn, params=(month, ), index_col=None)
+   """,
+        pgconn,
+        params=(month,),
+        index_col=None,
+    )
     if df.empty:
         raise NoDataFound("No Data Found")
-    climo_avg = df.at[0, 'avg_'+ptype_climo]
-    climo_std = df.at[0, 'std_'+ptype_climo]
-    df = read_sql("""
+    climo_avg = df.at[0, "avg_" + ptype_climo]
+    climo_std = df.at[0, "std_" + ptype_climo]
+    df = read_sql(
+        """
     WITH yearly as (
         SELECT station, year, sum(precip) as sum_precip,
         avg(high) as avg_high, avg(low) as avg_low,
-        avg((high+low)/2.) as avg_temp from """ + table + """
+        avg((high+low)/2.) as avg_temp from """
+        + table
+        + """
         WHERE month = %s GROUP by station, year),
     agg1 as (
         SELECT station, avg(sum_precip) as precip,
@@ -86,49 +108,78 @@ def plotter(fdict):
     t.sum_precip as "sum-precip", t.avg_high as "avg-high",
     t.avg_low as "avg-low", t.avg_temp as "avg-t"
     FROM agg1 a JOIN thisyear t on (a.station = t.station)
-    """, pgconn, params=(month, year), index_col='station')
-    if "%s0000" % (state, ) not in df.index:
+    """,
+        pgconn,
+        params=(month, year),
+        index_col="station",
+    )
+    if "%s0000" % (state,) not in df.index:
         raise NoDataFound("No Data Found")
-    stateavg = df.at["%s0000" % (state, ), ptype]
+    stateavg = df.at["%s0000" % (state,), ptype]
 
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     _, bins, _ = ax.hist(
-        df[ptype].dropna(), 20, fc='lightblue', ec='lightblue', density=1
+        df[ptype].dropna(), 20, fc="lightblue", ec="lightblue", density=1
     )
     y = norm.pdf(bins, df[ptype].mean(), df[ptype].std())
-    ax.plot(bins, y, 'b--', lw=2,
-            label=(r"%s Normal Dist. $\sigma$=%.2f $\mu$=%.2f"
-                   ) % (year, df[ptype].std(), df[ptype].mean()))
+    ax.plot(
+        bins,
+        y,
+        "b--",
+        lw=2,
+        label=(r"%s Normal Dist. $\sigma$=%.2f $\mu$=%.2f")
+        % (year, df[ptype].std(), df[ptype].mean()),
+    )
 
-    bins = np.linspace(climo_avg - (climo_std * 3.),
-                       climo_avg + (climo_std * 3.), 30)
+    bins = np.linspace(
+        climo_avg - (climo_std * 3.0), climo_avg + (climo_std * 3.0), 30
+    )
     y = norm.pdf(bins, climo_avg, climo_std)
-    ax.plot(bins, y, 'g--', lw=2,
-            label=(r"Climo Normal Dist. $\sigma$=%.2f $\mu$=%.2f"
-                   ) % (climo_std, climo_avg))
+    ax.plot(
+        bins,
+        y,
+        "g--",
+        lw=2,
+        label=(r"Climo Normal Dist. $\sigma$=%.2f $\mu$=%.2f")
+        % (climo_std, climo_avg),
+    )
 
     if stateavg is not None:
-        ax.axvline(stateavg, label='%s Statewide Avg %.2f' % (year, stateavg),
-                   color='b', lw=2)
-    stateavg = df.at["%s0000" % (state, ), 'climo_'+ptype_climo]
+        ax.axvline(
+            stateavg,
+            label="%s Statewide Avg %.2f" % (year, stateavg),
+            color="b",
+            lw=2,
+        )
+    stateavg = df.at["%s0000" % (state,), "climo_" + ptype_climo]
     if stateavg is not None:
-        ax.axvline(stateavg, label='Climo Statewide Avg %.2f' % (stateavg,),
-                   color='g', lw=2)
+        ax.axvline(
+            stateavg,
+            label="Climo Statewide Avg %.2f" % (stateavg,),
+            color="g",
+            lw=2,
+        )
     ax.set_xlabel(PDICT[ptype])
     ax.set_ylabel("Normalized Frequency")
-    ax.set_title(("%s %s %s %s Distribution\nNumber of stations: %s"
-                  ) % (reference.state_names[state], year,
-                       calendar.month_name[month],
-                       PDICT[ptype], len(df.index)))
+    ax.set_title(
+        ("%s %s %s %s Distribution\nNumber of stations: %s")
+        % (
+            reference.state_names[state],
+            year,
+            calendar.month_name[month],
+            PDICT[ptype],
+            len(df.index),
+        )
+    )
     ax.grid(True)
     box = ax.get_position()
     ax.set_position([box.x0, 0.26, box.width, 0.65])
     ax.legend(ncol=2, fontsize=12, loc=(-0.05, -0.35))
-    if ptype == 'sum-precip':
+    if ptype == "sum-precip":
         ax.set_xlim(left=0)
 
     return fig, df
 
 
-if __name__ == '__main__':
-    plotter({'type': 'avg-low', 'year': 2014, 'month': 12})
+if __name__ == "__main__":
+    plotter({"type": "avg-low", "year": 2014, "month": 12})

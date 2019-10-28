@@ -8,45 +8,59 @@ from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = {'high': 'High temperature',
-         'low': 'Low Temperature'}
+PDICT = {"high": "High temperature", "low": "Low Temperature"}
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
-    desc['data'] = True
-    desc['description'] = """This map displays an analysis of the change in
+    desc["data"] = True
+    desc[
+        "description"
+    ] = """This map displays an analysis of the change in
     average high or low temperature over a time period of your choice."""
     today = datetime.date.today()
     threeweeks = today - datetime.timedelta(days=21)
-    desc['arguments'] = [
-        dict(type='date', name='date1',
-             default=threeweeks.strftime("%Y/%m/%d"),
-             label='From Date (ignore year):',
-             min="2014/01/01"),  # Comes back to python as yyyy-mm-dd
-        dict(type='date', name='date2', default=today.strftime("%Y/%m/%d"),
-             label='To Date (ignore year):',
-             min="2014/01/01"),  # Comes back to python as yyyy-mm-dd
-        dict(type='select', name='varname', default='high',
-             label='Which metric to plot?', options=PDICT),
-        dict(type='cmap', name='cmap', default='RdBu_r', label='Color Ramp:'),
+    desc["arguments"] = [
+        dict(
+            type="date",
+            name="date1",
+            default=threeweeks.strftime("%Y/%m/%d"),
+            label="From Date (ignore year):",
+            min="2014/01/01",
+        ),  # Comes back to python as yyyy-mm-dd
+        dict(
+            type="date",
+            name="date2",
+            default=today.strftime("%Y/%m/%d"),
+            label="To Date (ignore year):",
+            min="2014/01/01",
+        ),  # Comes back to python as yyyy-mm-dd
+        dict(
+            type="select",
+            name="varname",
+            default="high",
+            label="Which metric to plot?",
+            options=PDICT,
+        ),
+        dict(type="cmap", name="cmap", default="RdBu_r", label="Color Ramp:"),
     ]
     return desc
 
 
 def plotter(fdict):
     """ Go """
-    pgconn = get_dbconn('coop')
+    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
-    date1 = ctx['date1']
-    date2 = ctx['date2']
+    date1 = ctx["date1"]
+    date2 = ctx["date2"]
     date1 = date1.replace(year=2000)
     date2 = date2.replace(year=2000)
 
-    varname = ctx['varname']
+    varname = ctx["varname"]
 
-    df = read_sql("""
+    df = read_sql(
+        """
     WITH t2 as (
          SELECT station, high, low from ncdc_climate81 WHERE
          valid = %s
@@ -62,25 +76,34 @@ def plotter(fdict):
     t2_high -  t1_high as high, t2_low - t1_low as low from data d JOIN
     stations s on (s.id = d.station) where s.network = 'NCDC81'
     and s.state not in ('HI', 'AK')
-    """, pgconn, params=(date2, date1), index_col='station')
+    """,
+        pgconn,
+        params=(date2, date1),
+        index_col="station",
+    )
     if df.empty:
         raise NoDataFound("No Data Found.")
 
     days = int((date2 - date1).days)
     extent = int(df[varname].abs().max())
-    mp = MapPlot(sector='conus',
-                 title=('%s Day Change in %s NCDC 81 Climatology'
-                        ) % (days, PDICT[varname]),
-                 subtitle='from %s to %s' % (date1.strftime("%-d %B"),
-                                             date2.strftime("%-d %B"))
-                 )
+    mp = MapPlot(
+        sector="conus",
+        title=("%s Day Change in %s NCDC 81 Climatology")
+        % (days, PDICT[varname]),
+        subtitle="from %s to %s"
+        % (date1.strftime("%-d %B"), date2.strftime("%-d %B")),
+    )
     mp.contourf(
-        df['lon'].values, df['lat'].values, df[varname].values,
-        np.arange(0-extent, extent+1, 2),
-        cmap=cm.get_cmap(ctx['cmap']), units='F')
+        df["lon"].values,
+        df["lat"].values,
+        df[varname].values,
+        np.arange(0 - extent, extent + 1, 2),
+        cmap=cm.get_cmap(ctx["cmap"]),
+        units="F",
+    )
 
     return mp.fig, df
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     plotter(dict())

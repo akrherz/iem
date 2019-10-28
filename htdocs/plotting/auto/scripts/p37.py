@@ -36,9 +36,18 @@ def get_description():
             label="Select Station:",
             network="IA_ASOS",
         ),
-        dict(type="month", name="month", label="Select Month:", default=today.month),
         dict(
-            type="year", name="year", label="Select Year:", default=today.year, min=2000
+            type="month",
+            name="month",
+            label="Select Month:",
+            default=today.month,
+        ),
+        dict(
+            type="year",
+            name="year",
+            label="Select Year:",
+            default=today.year,
+            min=2000,
         ),
         dict(
             type="select",
@@ -134,10 +143,14 @@ def plotter(fdict):
     rows = []
     while now.month == month:
         days.append(now.day)
-        lbottom.append(mosdata.get(now, {}).get("morning", [np.nan, np.nan])[0])
+        lbottom.append(
+            mosdata.get(now, {}).get("morning", [np.nan, np.nan])[0]
+        )
         ltop.append(mosdata.get(now, {}).get("morning", [np.nan, np.nan])[1])
 
-        hbottom.append(mosdata.get(now, {}).get("afternoon", [np.nan, np.nan])[0])
+        hbottom.append(
+            mosdata.get(now, {}).get("afternoon", [np.nan, np.nan])[0]
+        )
         htop.append(mosdata.get(now, {}).get("afternoon", [np.nan, np.nan])[1])
 
         hobs.append(obs.get(now, {}).get("max", np.nan))
@@ -166,7 +179,12 @@ def plotter(fdict):
 
     ax.set_title(
         "[%s] %s Daily Temperatures\n%s Forecast MOS Range for %s"
-        % (station, ctx["_nt"].sts[station]["name"], model, month1.strftime("%B %Y"))
+        % (
+            station,
+            ctx["_nt"].sts[station]["name"],
+            model,
+            month1.strftime("%B %Y"),
+        )
     )
     arr = (df["high_max"] - df["high_min"]).values
     ax.bar(
@@ -207,7 +225,9 @@ def plotter(fdict):
 
     # Shrink current axis's height by 10% on the bottom
     box = ax.get_position()
-    ax.set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9])
+    ax.set_position(
+        [box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9]
+    )
 
     # Put a legend below current axis
     ax.legend(

@@ -12,7 +12,7 @@ from pyiem.nws.product import TextProduct
 
 BAD_CHARS = r"[^\n\r\001\003a-zA-Z0-9:\(\)\%\.,\s\*\-\?\|/><&$=\+\@]"
 DEBUG = False
-PGCONN = get_dbconn('afos')
+PGCONN = get_dbconn("afos")
 XREF_SOURCE = {
     "KDSM": "KDMX",
     "KOKC": "KOUN",
@@ -91,19 +91,19 @@ XREF_SOURCE = {
     "KORH": "KBOX",
     "KSPS": "KOUN",
     "KSMX": "KLOX",
-    'KMKC': "KWNS",
-    'KCRW': 'KRLX',
-    'KSDF': 'KLMK',
-    'KSEA': 'KSEW',
-    'KMKE': 'KMKX',
-    'KPHL': 'KPHI',
-    'KPWM': 'KGYX',
-    'KARB': 'KDTX',
-    'KFTW': 'KFWD',
-    'KFSM': 'KLZK',
-    'KLEX': 'KLMK',
-    'KEVV': 'KPAH',
-    'KACT': 'KFWD',
+    "KMKC": "KWNS",
+    "KCRW": "KRLX",
+    "KSDF": "KLMK",
+    "KSEA": "KSEW",
+    "KMKE": "KMKX",
+    "KPHL": "KPHI",
+    "KPWM": "KGYX",
+    "KARB": "KDTX",
+    "KFTW": "KFWD",
+    "KFSM": "KLZK",
+    "KLEX": "KLMK",
+    "KEVV": "KPAH",
+    "KACT": "KFWD",
 }
 
 
@@ -111,33 +111,34 @@ def process(order):
     """ Process this timestamp """
     cursor = PGCONN.cursor()
     ts = datetime.datetime.strptime(order[:6], "%y%m%d").replace(
-        tzinfo=pytz.utc)
+        tzinfo=pytz.utc
+    )
     base = ts - datetime.timedelta(days=2)
     ceiling = ts + datetime.timedelta(days=2)
-    subprocess.call("tar -xzf %s" % (order, ), shell=True)
+    subprocess.call("tar -xzf %s" % (order,), shell=True)
     inserts = 0
     deletes = 0
     filesparsed = 0
     bad = 0
-    for fn in glob.glob("%s[0-2][0-9].*" % (order[:6], )):
-        content = re.sub(BAD_CHARS, "",
-                         open(fn, 'rb').read().decode('ascii', 'ignore'))
+    for fn in glob.glob("%s[0-2][0-9].*" % (order[:6],)):
+        content = re.sub(
+            BAD_CHARS, "", open(fn, "rb").read().decode("ascii", "ignore")
+        )
         # Now we are getting closer, lets split by the delimter as we
         # may have multiple products in one file!
         for bulletin in content.split("\001"):
-            if bulletin == '':
+            if bulletin == "":
                 continue
             try:
                 bulletin = noaaport_text(bulletin)
-                prod = TextProduct(bulletin, utcnow=ts,
-                                   parse_segments=False)
+                prod = TextProduct(bulletin, utcnow=ts, parse_segments=False)
                 prod.source = XREF_SOURCE.get(prod.source, prod.source)
             except Exception as exp:
                 if DEBUG:
-                    o = open('/tmp/bad/%s.txt' % (bad, ), 'w')
+                    o = open("/tmp/bad/%s.txt" % (bad,), "w")
                     o.write(bulletin)
                     o.close()
-                    print('Parsing Failure %s' % (exp, ))
+                    print("Parsing Failure %s" % (exp,))
                 bad += 1
                 continue
             if prod.valid < base or prod.valid > ceiling:
@@ -146,24 +147,37 @@ def process(order):
                 bad += 1
                 continue
 
-            table = "products_%s_%s" % (prod.valid.year,
-                                        ("0712" if prod.valid.month > 6
-                                         else "0106"))
-            cursor.execute("""
-                DELETE from """ + table + """ WHERE pil = %s and
+            table = "products_%s_%s" % (
+                prod.valid.year,
+                ("0712" if prod.valid.month > 6 else "0106"),
+            )
+            cursor.execute(
+                """
+                DELETE from """
+                + table
+                + """ WHERE pil = %s and
                 entered = %s and source = %s and data = %s
-            """, (prod.afos, prod.valid, prod.source, bulletin))
+            """,
+                (prod.afos, prod.valid, prod.source, bulletin),
+            )
             deletes += cursor.rowcount
-            cursor.execute("""
-                INSERT into """+table+"""
+            cursor.execute(
+                """
+                INSERT into """
+                + table
+                + """
                 (data, pil, entered, source, wmo) values (%s,%s,%s,%s,%s)
-            """, (bulletin, prod.afos, prod.valid, prod.source, prod.wmo))
+            """,
+                (bulletin, prod.afos, prod.valid, prod.source, prod.wmo),
+            )
             inserts += 1
 
         os.unlink(fn)
         filesparsed += 1
-    print(("%s Files Parsed: %s Inserts: %s Deletes: %s Bad: %s"
-           ) % (order, filesparsed, inserts, deletes, bad))
+    print(
+        ("%s Files Parsed: %s Inserts: %s Deletes: %s Bad: %s")
+        % (order, filesparsed, inserts, deletes, bad)
+    )
     cursor.close()
     PGCONN.commit()
     # remove cruft
@@ -179,6 +193,6 @@ def main():
         process(order)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # do something
     main()

@@ -31,7 +31,16 @@ def fetch(cid):
     )
     if cursor.rowcount != 1:
         return
-    (ip, fqdn, online, name, port, is_vapix, scrape_url, network) = cursor.fetchone()
+    (
+        ip,
+        fqdn,
+        online,
+        name,
+        port,
+        is_vapix,
+        scrape_url,
+        network,
+    ) = cursor.fetchone()
     pgconn.close()
     if scrape_url is not None or not online:
         return

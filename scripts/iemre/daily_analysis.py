@@ -19,8 +19,8 @@ from metpy.interpolate import inverse_distance_to_grid
 from pyiem import iemre, datatypes
 from pyiem.util import get_dbconn, utc, ncopen, logger
 
-PGCONN = get_dbconn('iem')
-COOP_PGCONN = get_dbconn('coop')
+PGCONN = get_dbconn("iem")
+COOP_PGCONN = get_dbconn("coop")
 LOG = logger()
 
 
@@ -35,8 +35,12 @@ def generic_gridder(df, idx):
     for lat in np.arange(iemre.SOUTH, iemre.NORTH, window):
         for lon in np.arange(iemre.WEST, iemre.EAST, window):
             (west, east, south, north) = (lon, lon + window, lat, lat + window)
-            box = f1[(f1['lat'] >= south) & (f1['lat'] < north) &
-                     (f1['lon'] >= west) & (f1['lon'] < east)]
+            box = f1[
+                (f1["lat"] >= south)
+                & (f1["lat"] < north)
+                & (f1["lon"] >= west)
+                & (f1["lon"] < east)
+            ]
             # can't QC data that is all equal
             if len(box.index) < 4 or box[idx].min() == box[idx].max():
                 continue
@@ -53,8 +57,7 @@ def generic_gridder(df, idx):
     res = np.ones(xi.shape) * np.nan
     # do our gridding
     grid = inverse_distance_to_grid(
-        df2['lon'].values, df2['lat'].values,
-        df2[idx].values, xi, yi, 1.5
+        df2["lon"].values, df2["lat"].values, df2[idx].values, xi, yi, 1.5
     )
     # replace nan values in res with whatever now is in grid
     res = np.where(np.isnan(res), grid, res)
@@ -62,8 +65,7 @@ def generic_gridder(df, idx):
     if np.isnan(res).any():
         # very aggressive with search radius
         grid = inverse_distance_to_grid(
-            df2['lon'].values, df2['lat'].values,
-            df2[idx].values, xi, yi, 5.5
+            df2["lon"].values, df2["lat"].values, df2[idx].values, xi, yi, 5.5
         )
         # replace nan values in res with whatever now is in grid
         res = np.where(np.isnan(res), grid, res)
@@ -85,20 +87,24 @@ def do_precip(ts, ds):
     offset2 = iemre.hourly_offset(ets)
     if ts.month == 12 and ts.day == 31:
         LOG.warning(
-            "p01d      for %s [idx:%s] %s(%s)->%s(%s) SPECIAL", ts, offset,
-            sts.strftime("%Y%m%d%H"), offset1, ets.strftime("%Y%m%d%H"),
-            offset2
+            "p01d      for %s [idx:%s] %s(%s)->%s(%s) SPECIAL",
+            ts,
+            offset,
+            sts.strftime("%Y%m%d%H"),
+            offset1,
+            ets.strftime("%Y%m%d%H"),
+            offset2,
         )
         ncfn = iemre.get_hourly_ncname(ets.year)
         if not os.path.isfile(ncfn):
             LOG.warning("Missing %s", ncfn)
             return
         with ncopen(ncfn, timeout=600) as hnc:
-            phour = np.sum(hnc.variables['p01m'][:offset2, :, :], 0)
+            phour = np.sum(hnc.variables["p01m"][:offset2, :, :], 0)
         ncfn = iemre.get_hourly_ncname(sts.year)
         if os.path.isfile(ncfn):
             with ncopen(ncfn, timeout=600) as hnc:
-                phour += np.sum(hnc.variables['p01m'][offset1:, :, :], 0)
+                phour += np.sum(hnc.variables["p01m"][offset1:, :, :], 0)
     else:
         ncfn = iemre.get_hourly_ncname(sts.year)
         if not os.path.isfile(ncfn):
@@ -110,8 +116,8 @@ def do_precip(ts, ds):
             #        "offset: %s min: %s max: %s",
             #        offset, np.ma.min(hnc.variables['p01m'][offset, :, :]),
             #        np.max(hnc.variables['p01m'][offset, :, :]))
-            phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
-    ds['p01d'].values = np.where(phour < 0, 0, phour)
+            phour = np.sum(hnc.variables["p01m"][offset1:offset2, :, :], 0)
+    ds["p01d"].values = np.where(phour < 0, 0, phour)
 
 
 def do_precip12(ts, ds):
@@ -125,40 +131,50 @@ def do_precip12(ts, ds):
         if sts.year >= 1900:
             LOG.warning(
                 "p01d_12z  for %s [idx:%s] %s(%s)->%s(%s) SPECIAL",
-                ts, offset, sts.strftime("%Y%m%d%H"), offset1,
-                ets.strftime("%Y%m%d%H"), offset2)
+                ts,
+                offset,
+                sts.strftime("%Y%m%d%H"),
+                offset1,
+                ets.strftime("%Y%m%d%H"),
+                offset2,
+            )
         ncfn = iemre.get_hourly_ncname(ets.year)
         if not os.path.isfile(ncfn):
             LOG.warning("Missing %s", ncfn)
             return
         with ncopen(ncfn, timeout=600) as hnc:
-            phour = np.sum(hnc.variables['p01m'][:offset2, :, :], 0)
+            phour = np.sum(hnc.variables["p01m"][:offset2, :, :], 0)
         with ncopen(iemre.get_hourly_ncname(sts.year), timeout=600) as hnc:
-            phour += np.sum(hnc.variables['p01m'][offset1:, :, :], 0)
+            phour += np.sum(hnc.variables["p01m"][offset1:, :, :], 0)
     else:
         ncfn = iemre.get_hourly_ncname(ts.year)
         if not os.path.isfile(ncfn):
             LOG.warning("Missing %s", ncfn)
             return
         with ncopen(ncfn, timeout=600) as hnc:
-            phour = np.sum(hnc.variables['p01m'][offset1:offset2, :, :], 0)
-    ds['p01d_12z'].values = np.where(phour < 0, 0, phour)
+            phour = np.sum(hnc.variables["p01m"][offset1:offset2, :, :], 0)
+    ds["p01d_12z"].values = np.where(phour < 0, 0, phour)
 
 
 def plot(df):
     """Diagnostic"""
     from pyiem.plot import MapPlot
-    m = MapPlot(sector='midwest', continentalcolor='white')
-    m.plot_values(df['lon'].values, df['lat'].values, df['highdata'].values,
-                  labelbuffer=0)
-    m.postprocess(filename='test.png')
+
+    m = MapPlot(sector="midwest", continentalcolor="white")
+    m.plot_values(
+        df["lon"].values,
+        df["lat"].values,
+        df["highdata"].values,
+        labelbuffer=0,
+    )
+    m.postprocess(filename="test.png")
     m.close()
 
 
 def grid_day12(ts, ds):
     """Use the COOP data for gridding"""
-    LOG.debug('12z hi/lo for %s', ts)
-    mybuf = 2.
+    LOG.debug("12z hi/lo for %s", ts)
+    mybuf = 2.0
     if ts.year > 2010:
         sql = """
            SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, s.state,
@@ -175,16 +191,25 @@ def grid_day12(ts, ds):
   ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
   geom) and s.network ~* 'COOP' and c.iemid = s.iemid and
   extract(hour from c.coop_valid at time zone s.tzname) between 4 and 11
-            """ % (ts.year, ts.strftime("%Y-%m-%d"),
-                   iemre.WEST - mybuf, iemre.SOUTH - mybuf,
-                   iemre.WEST - mybuf, iemre.NORTH + mybuf,
-                   iemre.EAST + mybuf, iemre.NORTH + mybuf,
-                   iemre.EAST + mybuf, iemre.SOUTH - mybuf,
-                   iemre.WEST - mybuf, iemre.SOUTH - mybuf)
+            """ % (
+            ts.year,
+            ts.strftime("%Y-%m-%d"),
+            iemre.WEST - mybuf,
+            iemre.SOUTH - mybuf,
+            iemre.WEST - mybuf,
+            iemre.NORTH + mybuf,
+            iemre.EAST + mybuf,
+            iemre.NORTH + mybuf,
+            iemre.EAST + mybuf,
+            iemre.SOUTH - mybuf,
+            iemre.WEST - mybuf,
+            iemre.SOUTH - mybuf,
+        )
         df = read_sql(sql, PGCONN)
         LOG.debug("loaded %s rows from iemaccess database", len(df.index))
     else:
-        df = read_sql("""
+        df = read_sql(
+            """
         WITH mystations as (
             SELECT id, ST_X(geom) as lon, ST_Y(geom) as lat, state, name
             from stations where ST_Contains(
@@ -196,45 +221,46 @@ def grid_day12(ts, ds):
         precip as precipdata, snow as snowdata, snowd as snowddata,
         high as highdata, low as lowdata from alldata a JOIN mystations m
         ON (a.station = m.id) WHERE a.day = %s
-        """, COOP_PGCONN, params=(iemre.WEST - mybuf,
-                                  iemre.SOUTH - mybuf,
-                                  iemre.WEST - mybuf,
-                                  iemre.NORTH + mybuf,
-                                  iemre.EAST + mybuf,
-                                  iemre.NORTH + mybuf,
-                                  iemre.EAST + mybuf,
-                                  iemre.SOUTH - mybuf,
-                                  iemre.WEST - mybuf,
-                                  iemre.SOUTH - mybuf, ts))
+        """,
+            COOP_PGCONN,
+            params=(
+                iemre.WEST - mybuf,
+                iemre.SOUTH - mybuf,
+                iemre.WEST - mybuf,
+                iemre.NORTH + mybuf,
+                iemre.EAST + mybuf,
+                iemre.NORTH + mybuf,
+                iemre.EAST + mybuf,
+                iemre.SOUTH - mybuf,
+                iemre.WEST - mybuf,
+                iemre.SOUTH - mybuf,
+                ts,
+            ),
+        )
         LOG.debug("loaded %s rows from climodat database", len(df.index))
     # plot(df)
 
     if len(df.index) > 4:
-        res = generic_gridder(df, 'highdata')
-        ds['high_tmpk_12z'].values = datatypes.temperature(
-            res, 'F').value('K')
+        res = generic_gridder(df, "highdata")
+        ds["high_tmpk_12z"].values = datatypes.temperature(res, "F").value("K")
 
-        res = generic_gridder(df, 'lowdata')
-        ds['low_tmpk_12z'].values = datatypes.temperature(
-            res, 'F').value('K')
+        res = generic_gridder(df, "lowdata")
+        ds["low_tmpk_12z"].values = datatypes.temperature(res, "F").value("K")
 
-        res = generic_gridder(df, 'snowdata')
-        ds['snow_12z'].values = datatypes.distance(
-            res, 'IN').value('MM')
+        res = generic_gridder(df, "snowdata")
+        ds["snow_12z"].values = datatypes.distance(res, "IN").value("MM")
 
-        res = generic_gridder(df, 'snowddata')
-        ds['snowd_12z'].values = datatypes.distance(
-            res, 'IN').value('MM')
+        res = generic_gridder(df, "snowddata")
+        ds["snowd_12z"].values = datatypes.distance(res, "IN").value("MM")
     else:
         LOG.info(
-            "%s has %02i entries, FAIL", ts.strftime("%Y-%m-%d"),
-            len(df.index)
+            "%s has %02i entries, FAIL", ts.strftime("%Y-%m-%d"), len(df.index)
         )
 
 
 def grid_day(ts, ds):
     """Do our gridding"""
-    mybuf = 2.
+    mybuf = 2.0
     if ts.year > 1927:
         sql = """
            SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, s.state,
@@ -258,15 +284,24 @@ def grid_day(ts, ds):
            ST_Contains(
   ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
   geom) and (s.network = 'AWOS' or s.network ~* 'ASOS') and c.iemid = s.iemid
-            """ % (ts.year, ts.strftime("%Y-%m-%d"),
-                   iemre.WEST - mybuf, iemre.SOUTH - mybuf,
-                   iemre.WEST - mybuf, iemre.NORTH + mybuf,
-                   iemre.EAST + mybuf, iemre.NORTH + mybuf,
-                   iemre.EAST + mybuf, iemre.SOUTH - mybuf,
-                   iemre.WEST - mybuf, iemre.SOUTH - mybuf)
+            """ % (
+            ts.year,
+            ts.strftime("%Y-%m-%d"),
+            iemre.WEST - mybuf,
+            iemre.SOUTH - mybuf,
+            iemre.WEST - mybuf,
+            iemre.NORTH + mybuf,
+            iemre.EAST + mybuf,
+            iemre.NORTH + mybuf,
+            iemre.EAST + mybuf,
+            iemre.SOUTH - mybuf,
+            iemre.WEST - mybuf,
+            iemre.SOUTH - mybuf,
+        )
         df = read_sql(sql, PGCONN)
     else:
-        df = read_sql("""
+        df = read_sql(
+            """
         WITH mystations as (
             SELECT id, ST_X(geom) as lon, ST_Y(geom) as lat, state, name
             from stations where ST_Contains(
@@ -281,42 +316,49 @@ def grid_day(ts, ds):
         null as minrh, null as maxrh
         from alldata a JOIN mystations m
         ON (a.station = m.id) WHERE a.day = %s
-        """, COOP_PGCONN, params=(iemre.WEST - mybuf,
-                                  iemre.SOUTH - mybuf,
-                                  iemre.WEST - mybuf,
-                                  iemre.NORTH + mybuf,
-                                  iemre.EAST + mybuf,
-                                  iemre.NORTH + mybuf,
-                                  iemre.EAST + mybuf,
-                                  iemre.SOUTH - mybuf,
-                                  iemre.WEST - mybuf,
-                                  iemre.SOUTH - mybuf, ts))
+        """,
+            COOP_PGCONN,
+            params=(
+                iemre.WEST - mybuf,
+                iemre.SOUTH - mybuf,
+                iemre.WEST - mybuf,
+                iemre.NORTH + mybuf,
+                iemre.EAST + mybuf,
+                iemre.NORTH + mybuf,
+                iemre.EAST + mybuf,
+                iemre.SOUTH - mybuf,
+                iemre.WEST - mybuf,
+                iemre.SOUTH - mybuf,
+                ts,
+            ),
+        )
     if len(df.index) < 4:
         LOG.info(
-            "%s has %02i entries, FAIL", ts.strftime("%Y-%m-%d"),
-            len(df.index)
+            "%s has %02i entries, FAIL", ts.strftime("%Y-%m-%d"), len(df.index)
         )
         return
-    res = generic_gridder(df, 'highdata')
-    ds['high_tmpk'].values = datatypes.temperature(res, 'F').value('K')
-    res = generic_gridder(df, 'lowdata')
-    ds['low_tmpk'].values = datatypes.temperature(res, 'F').value('K')
-    hres = generic_gridder(df, 'highdwpf')
-    lres = generic_gridder(df, 'lowdwpf')
+    res = generic_gridder(df, "highdata")
+    ds["high_tmpk"].values = datatypes.temperature(res, "F").value("K")
+    res = generic_gridder(df, "lowdata")
+    ds["low_tmpk"].values = datatypes.temperature(res, "F").value("K")
+    hres = generic_gridder(df, "highdwpf")
+    lres = generic_gridder(df, "lowdwpf")
     if hres is not None and lres is not None:
-        ds['avg_dwpk'].values = datatypes.temperature(
-            (hres + lres) / 2., 'F').value('K')
-    res = generic_gridder(df, 'avgsknt')
+        ds["avg_dwpk"].values = datatypes.temperature(
+            (hres + lres) / 2.0, "F"
+        ).value("K")
+    res = generic_gridder(df, "avgsknt")
     if res is not None:
-        ds['wind_speed'].values = (
-            res * units.knots).to(units.meters / units.second).m
+        ds["wind_speed"].values = (
+            (res * units.knots).to(units.meters / units.second).m
+        )
         LOG.debug(
             "wind_speed min: %s max: %s",
-            np.nanmin(ds['wind_speed'].values),
-            np.nanmax(ds['wind_speed'].values)
+            np.nanmin(ds["wind_speed"].values),
+            np.nanmax(ds["wind_speed"].values),
         )
-    ds['min_rh'].values = generic_gridder(df, 'minrh')
-    ds['max_rh'].values = generic_gridder(df, 'maxrh')
+    ds["min_rh"].values = generic_gridder(df, "minrh")
+    ds["max_rh"].values = generic_gridder(df, "maxrh")
 
 
 def workflow(ts, irealtime, justprecip):
@@ -333,8 +375,9 @@ def workflow(ts, irealtime, justprecip):
     if irealtime:
         iemre.set_grids(ts, ds)
         subprocess.call(
-            "python db_to_netcdf.py %s" % (ts.strftime("%Y %m %d"), ),
-            shell=True)
+            "python db_to_netcdf.py %s" % (ts.strftime("%Y %m %d"),),
+            shell=True,
+        )
         ts -= datetime.timedelta(days=1)
         ds = iemre.get_grids(ts)
     if not justprecip:
@@ -343,8 +386,8 @@ def workflow(ts, irealtime, justprecip):
     do_precip(ts, ds)
     iemre.set_grids(ts, ds)
     subprocess.call(
-        "python db_to_netcdf.py %s" % (ts.strftime("%Y %m %d"), ),
-        shell=True)
+        "python db_to_netcdf.py %s" % (ts.strftime("%Y %m %d"),), shell=True
+    )
 
 
 def main(argv):

@@ -24,18 +24,19 @@ from pyiem.datatypes import temperature, distance
 from pyiem.meteorology import gdd
 from pyiem.util import get_properties, get_dbconn
 
-XREF = {'ames': {'isusm': 'BOOI4', 'climodat': 'IA0200'},
-        'cobs': {'isusm': None, 'station': 'OT0012', 'climodat': 'IA0200'},
-        'crawfordsville': {'isusm': 'CRFI4', 'climodat': 'IA8688'},
-        'lewis': {'isusm': 'OKLI4', 'climodat': 'IA0364'},
-        'nashua': {'isusm': 'NASI4', 'climodat': 'IA1402'},
-        'sutherland': {'isusm': 'CAMI4', 'climodat': 'IA1442'},
-        'kanawha': {'isusm': 'KNAI4', 'climodat': 'IA0923'},
-        'mcnay': {'isusm': 'CHAI4', 'climodat': 'IA1394'},
-        'muscatine': {'isusm': 'FRUI4', 'climodat': 'IA5837'},
-        }
+XREF = {
+    "ames": {"isusm": "BOOI4", "climodat": "IA0200"},
+    "cobs": {"isusm": None, "station": "OT0012", "climodat": "IA0200"},
+    "crawfordsville": {"isusm": "CRFI4", "climodat": "IA8688"},
+    "lewis": {"isusm": "OKLI4", "climodat": "IA0364"},
+    "nashua": {"isusm": "NASI4", "climodat": "IA1402"},
+    "sutherland": {"isusm": "CAMI4", "climodat": "IA1442"},
+    "kanawha": {"isusm": "KNAI4", "climodat": "IA0923"},
+    "mcnay": {"isusm": "CHAI4", "climodat": "IA1394"},
+    "muscatine": {"isusm": "FRUI4", "climodat": "IA5837"},
+}
 
-DO_UPLOAD = (len(sys.argv) == 1)
+DO_UPLOAD = len(sys.argv) == 1
 if not DO_UPLOAD:
     print("Disabling dropbox upload of results")
 
@@ -43,7 +44,7 @@ if not DO_UPLOAD:
 def p(val, prec):
     """Use 99 for missing values, which Dr A says is wrong, sigh"""
     if val is None or np.isnan(val):
-        return '99'
+        return "99"
     _fmt = "%%.%sf" % (prec,)
     return _fmt % (val,)
 
@@ -51,69 +52,124 @@ def p(val, prec):
 def upload_summary_plots():
     """Some additional work"""
     props = get_properties()
-    dbx = dropbox.Dropbox(props.get('dropbox.token'))
+    dbx = dropbox.Dropbox(props.get("dropbox.token"))
     year = datetime.date.today().year
-    interval = 'jan1'
-    for opt in ['yes', 'no']:
+    interval = "jan1"
+    for opt in ["yes", "no"]:
         for location in XREF:
             (tmpfd, tmpfn) = tempfile.mkstemp()
-            uri = ("http://iem.local/plotting/auto/plot/143/"
-                   "location:%s::s:%s::opt:%s::dpi:100.png"
-                   ) % (location, interval, opt)
+            uri = (
+                "http://iem.local/plotting/auto/plot/143/"
+                "location:%s::s:%s::opt:%s::dpi:100.png"
+            ) % (location, interval, opt)
             res = requests.get(uri)
             os.write(tmpfd, res.content)
             os.close(tmpfd)
             today = datetime.date.today()
-            remotefn = ("%s_%s_%s%s.png"
-                        ) % (location, today.strftime("%Y%m%d"),
-                             interval, '_yields' if opt == 'yes' else '')
+            remotefn = ("%s_%s_%s%s.png") % (
+                location,
+                today.strftime("%Y%m%d"),
+                interval,
+                "_yields" if opt == "yes" else "",
+            )
             if DO_UPLOAD:
                 try:
                     dbx.files_upload(
-                        open(tmpfn, 'rb').read(),
-                        ("/YieldForecast/Daryl/%s vs other years plots%s/%s"
-                         ) % (year, ' with yields' if opt == 'yes' else '',
-                              remotefn),
-                        mode=dropbox.files.WriteMode.overwrite)
+                        open(tmpfn, "rb").read(),
+                        ("/YieldForecast/Daryl/%s vs other years plots%s/%s")
+                        % (
+                            year,
+                            " with yields" if opt == "yes" else "",
+                            remotefn,
+                        ),
+                        mode=dropbox.files.WriteMode.overwrite,
+                    )
                 except Exception as _:
-                    print('dropbox fail')
+                    print("dropbox fail")
             os.unlink(tmpfn)
 
 
 def write_and_upload(df, location):
     """ We are done, whew!"""
     props = get_properties()
-    dbx = dropbox.Dropbox(props.get('dropbox.token'))
+    dbx = dropbox.Dropbox(props.get("dropbox.token"))
     (tmpfd, tmpfn) = tempfile.mkstemp(text=True)
     sio = StringIO()
-    for line in open("baseline/%s.met" % (location, )):
+    for line in open("baseline/%s.met" % (location,)):
         if line.startswith("year"):
             break
-        sio.write(line.strip()+"\r\n")
-    sio.write(('! auto-generated at %sZ by daryl akrherz@iastate.edu\r\n'
-               ) % (datetime.datetime.utcnow().isoformat(),))
-    fmt = ("%-10s%-10s%-10s%-10s%-10s%-10s"
-           "%-10s%-10s%-10s%-10s%-10s%-10s%-10s%-10s\r\n")
-    sio.write(fmt % ('year', 'day', 'radn', 'maxt', 'mint', 'rain',
-                     'gdd', 'st4', 'st12', 'st24', 'st50',
-                     'sm12', 'sm24', 'sm50'))
-    sio.write(fmt % ('()', '()', '(MJ/m^2)', '(oC)', '(oC)', '(mm)',
-                     '(oF)', '(oC)', '(oC)', '(oC)', '(oC)',
-                     '(mm/mm)', '(mm/mm)', '(mm/mm)'))
-    fmt = (" %-9i%-10i%-10s%-10s%-10s%-10s%-10s"
-           "%-10s%-10s%-10s%-10s%-10s%-10s%-10s\r\n")
+        sio.write(line.strip() + "\r\n")
+    sio.write(
+        ("! auto-generated at %sZ by daryl akrherz@iastate.edu\r\n")
+        % (datetime.datetime.utcnow().isoformat(),)
+    )
+    fmt = (
+        "%-10s%-10s%-10s%-10s%-10s%-10s"
+        "%-10s%-10s%-10s%-10s%-10s%-10s%-10s%-10s\r\n"
+    )
+    sio.write(
+        fmt
+        % (
+            "year",
+            "day",
+            "radn",
+            "maxt",
+            "mint",
+            "rain",
+            "gdd",
+            "st4",
+            "st12",
+            "st24",
+            "st50",
+            "sm12",
+            "sm24",
+            "sm50",
+        )
+    )
+    sio.write(
+        fmt
+        % (
+            "()",
+            "()",
+            "(MJ/m^2)",
+            "(oC)",
+            "(oC)",
+            "(mm)",
+            "(oF)",
+            "(oC)",
+            "(oC)",
+            "(oC)",
+            "(oC)",
+            "(mm/mm)",
+            "(mm/mm)",
+            "(mm/mm)",
+        )
+    )
+    fmt = (
+        " %-9i%-10i%-10s%-10s%-10s%-10s%-10s"
+        "%-10s%-10s%-10s%-10s%-10s%-10s%-10s\r\n"
+    )
     for valid, row in df.iterrows():
-        sio.write(fmt % (valid.year,
-                         int(valid.strftime("%j")),
-                         p(row['radn'], 3),
-                         p(row['maxt'], 1), p(row['mint'], 1),
-                         p(row['rain'], 2),
-                         p(row['gdd'], 1), p(row['st4'], 2),
-                         p(row['st12'], 2),
-                         p(row['st24'], 2), p(row['st50'], 2),
-                         p(row['sm12'], 2),
-                         p(row['sm24'], 2), p(row['sm50'], 2)))
-    os.write(tmpfd, sio.getvalue().encode('utf-8'))
+        sio.write(
+            fmt
+            % (
+                valid.year,
+                int(valid.strftime("%j")),
+                p(row["radn"], 3),
+                p(row["maxt"], 1),
+                p(row["mint"], 1),
+                p(row["rain"], 2),
+                p(row["gdd"], 1),
+                p(row["st4"], 2),
+                p(row["st12"], 2),
+                p(row["st24"], 2),
+                p(row["st50"], 2),
+                p(row["sm12"], 2),
+                p(row["sm24"], 2),
+                p(row["sm50"], 2),
+            )
+        )
+    os.write(tmpfd, sio.getvalue().encode("utf-8"))
     os.close(tmpfd)
 
     today = datetime.date.today()
@@ -121,16 +177,19 @@ def write_and_upload(df, location):
     if DO_UPLOAD:
         try:
             dbx.files_upload(
-                open(tmpfn, 'rb').read(),
-                "/YieldForecast/Daryl/%s" % (remotefn, ),
-                mode=dropbox.files.WriteMode.overwrite)
+                open(tmpfn, "rb").read(),
+                "/YieldForecast/Daryl/%s" % (remotefn,),
+                mode=dropbox.files.WriteMode.overwrite,
+            )
         except Exception as _:
-            print('dropbox fail')
+            print("dropbox fail")
     # Save file for usage by web plotting...
     os.chmod(tmpfn, 0o644)
     # os.rename fails here due to cross device link bug
-    subprocess.call(("mv %s /mesonet/share/pickup/yieldfx/%s.met"
-                     ) % (tmpfn, location), shell=True)
+    subprocess.call(
+        ("mv %s /mesonet/share/pickup/yieldfx/%s.met") % (tmpfn, location),
+        shell=True,
+    )
 
 
 def qc(df):
@@ -141,24 +200,33 @@ def qc(df):
 
 def load_baseline(location):
     """return a dataframe of this location's data"""
-    pgconn = get_dbconn('coop', user='nobody')
-    df = read_sql("""
+    pgconn = get_dbconn("coop", user="nobody")
+    df = read_sql(
+        """
         SELECT *, extract(doy from valid) as doy,
         extract(year from valid) as year
         from yieldfx_baseline where station = %s ORDER by valid
-        """, pgconn, params=(location,), index_col='valid')
+        """,
+        pgconn,
+        params=(location,),
+        index_col="valid",
+    )
     # we want data from 1980 to this year
     today = datetime.date.today()
     # So now, we need to move any data that exists for this year and overwrite
     # the previous years with that data.  This is QC'd prior to any new obs
     # are taken from ISUSM
-    rcols = ['radn', 'maxt', 'mint', 'rain']
-    for date, row in df[df['year'] == today.year].iterrows():
+    rcols = ["radn", "maxt", "mint", "rain"]
+    for date, row in df[df["year"] == today.year].iterrows():
         for year in range(1980, today.year):
             if date.month == 2 and date.day == 29 and year % 4 != 0:
                 continue
-            df.loc[date.replace(year=year), rcols] = (row['radn'], row['maxt'],
-                                                      row['mint'], row['rain'])
+            df.loc[date.replace(year=year), rcols] = (
+                row["radn"],
+                row["maxt"],
+                row["mint"],
+                row["rain"],
+            )
     # Fill out the time domain
     dec31 = today.replace(month=12, day=31)
     df = df.reindex(index=pd.date_range(datetime.date(1980, 1, 1), dec31).date)
@@ -167,61 +235,74 @@ def load_baseline(location):
 
 def replace_forecast(df, location):
     """Replace dataframe data with forecast for this location"""
-    pgconn = get_dbconn('coop', user='nobody')
+    pgconn = get_dbconn("coop", user="nobody")
     cursor = pgconn.cursor()
     today = datetime.date.today()
     nextjan1 = datetime.date(today.year + 1, 1, 1)
-    coop = XREF[location]['climodat']
-    years = [int(y) for y in np.arange(df.index.values.min().year,
-                                       df.index.values.max().year + 1)]
-    cursor.execute("""
+    coop = XREF[location]["climodat"]
+    years = [
+        int(y)
+        for y in np.arange(
+            df.index.values.min().year, df.index.values.max().year + 1
+        )
+    ]
+    cursor.execute(
+        """
         SELECT day, high, low, precip from alldata_forecast WHERE
         modelid = (SELECT id from forecast_inventory WHERE model = 'NDFD'
         ORDER by modelts DESC LIMIT 1) and station = %s and day >= %s
-    """, (coop, today))
-    rcols = ['maxt', 'mint', 'rain']
+    """,
+        (coop, today),
+    )
+    rcols = ["maxt", "mint", "rain"]
     for row in cursor:
         valid = row[0]
-        maxc = temperature(row[1], 'F').value('C')
-        minc = temperature(row[2], 'F').value('C')
-        rain = distance(row[3], 'IN').value('MM')
+        maxc = temperature(row[1], "F").value("C")
+        minc = temperature(row[2], "F").value("C")
+        rain = distance(row[3], "IN").value("MM")
         for year in years:
             df.loc[valid.replace(year=year), rcols] = (maxc, minc, rain)
 
     # Need to get radiation from CFS
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT day, srad from alldata_forecast WHERE
         modelid = (SELECT id from forecast_inventory WHERE model = 'CFS'
         ORDER by modelts DESC LIMIT 1) and station = %s and day >= %s
         and day < %s
-    """, (coop, today, nextjan1))
+    """,
+        (coop, today, nextjan1),
+    )
     for row in cursor:
         valid = row[0]
         for year in years:
-            df.loc[valid.replace(year=year), 'radn'] = row[1]
+            df.loc[valid.replace(year=year), "radn"] = row[1]
 
 
 def replace_cfs(df, location):
     """Replace the CFS data for this year!"""
-    pgconn = get_dbconn('coop', user='nobody')
+    pgconn = get_dbconn("coop", user="nobody")
     cursor = pgconn.cursor()
-    coop = XREF[location]['climodat']
+    coop = XREF[location]["climodat"]
     today = datetime.date.today() + datetime.timedelta(days=3)
     dec31 = today.replace(day=31, month=12)
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT day, high, low, precip, srad from alldata_forecast WHERE
         modelid = (SELECT id from forecast_inventory WHERE model = 'CFS'
         ORDER by modelts DESC LIMIT 1) and station = %s and day >= %s
         and day <= %s ORDER by day ASC
-    """, (coop, today, dec31))
-    rcols = ['maxt', 'mint', 'rain', 'radn']
+    """,
+        (coop, today, dec31),
+    )
+    rcols = ["maxt", "mint", "rain", "radn"]
     if cursor.rowcount == 0:
         print("  replace_cfs found zero rows!")
         return
     for row in cursor:
-        maxt = temperature(row[1], 'F').value('C')
-        mint = temperature(row[2], 'F').value('C')
-        rain = distance(row[3], 'IN').value('MM')
+        maxt = temperature(row[1], "F").value("C")
+        mint = temperature(row[2], "F").value("C")
+        rain = distance(row[3], "IN").value("MM")
         radn = row[4]
         df.loc[row[0], rcols] = [maxt, mint, rain, radn]
 
@@ -229,8 +310,7 @@ def replace_cfs(df, location):
         return
     now = row[0] + datetime.timedelta(days=1)
     # OK, if our last row does not equal dec31, we have some more work to do
-    print(("  Replacing %s->%s with previous year's data"
-           ) % (now, dec31))
+    print(("  Replacing %s->%s with previous year's data") % (now, dec31))
     while now <= dec31:
         lastyear = now.replace(year=(now.year - 1))
         df.loc[now, rcols] = df.loc[lastyear, rcols]
@@ -243,46 +323,61 @@ def replace_obs_iem(df, location):
     Tricky part, if the baseline already provides data for this year, we should
     use it!
     """
-    pgconn = get_dbconn('iem', user='nobody')
+    pgconn = get_dbconn("iem", user="nobody")
     cursor = pgconn.cursor()
-    station = XREF[location]['station']
+    station = XREF[location]["station"]
     today = datetime.date.today()
     jan1 = today.replace(month=1, day=1)
-    years = [int(y) for y in np.arange(df.index.values.min().year,
-                                       df.index.values.max().year + 1)]
+    years = [
+        int(y)
+        for y in np.arange(
+            df.index.values.min().year, df.index.values.max().year + 1
+        )
+    ]
 
     table = "summary_%s" % (jan1.year,)
-    cursor.execute("""
+    cursor.execute(
+        """
         select day, max_tmpf, min_tmpf, srad_mj, pday
-        from """ + table + """ s JOIN stations t on (s.iemid = t.iemid)
+        from """
+        + table
+        + """ s JOIN stations t on (s.iemid = t.iemid)
         WHERE t.id = %s and max_tmpf is not null
         and day < 'TODAY' ORDER by day ASC
-        """, (station,))
-    rcols = ['maxt', 'mint', 'radn', 'gdd', 'rain']
+        """,
+        (station,),
+    )
+    rcols = ["maxt", "mint", "radn", "gdd", "rain"]
     replaced = []
     for row in cursor:
         valid = row[0]
         # Does our df currently have data for this date?  If so, we shall do
         # no more
-        dont_replace = not np.isnan(df.at[valid, 'mint'])
+        dont_replace = not np.isnan(df.at[valid, "mint"])
         if not dont_replace:
             replaced.append(valid)
-        _gdd = gdd(temperature(row[1], 'F'), temperature(row[2], 'F'))
+        _gdd = gdd(temperature(row[1], "F"), temperature(row[2], "F"))
         for year in years:
             if valid.month == 2 and valid.day == 29 and year % 4 != 0:
                 continue
             if dont_replace:
-                df.loc[valid.replace(year=year),
-                       rcols[3:]] = (_gdd,
-                                     distance(row[4], 'in').value('mm'))
+                df.loc[valid.replace(year=year), rcols[3:]] = (
+                    _gdd,
+                    distance(row[4], "in").value("mm"),
+                )
                 continue
             df.loc[valid.replace(year=year), rcols] = (
-                temperature(row[1], 'F').value('C'),
-                temperature(row[2], 'F').value('C'), row[3],
-                _gdd, distance(row[4], 'in').value('mm'))
+                temperature(row[1], "F").value("C"),
+                temperature(row[2], "F").value("C"),
+                row[3],
+                _gdd,
+                distance(row[4], "in").value("mm"),
+            )
     if replaced:
-        print(("  used IEM Access %s from %s->%s"
-               ) % (station, replaced[0], replaced[-1]))
+        print(
+            ("  used IEM Access %s from %s->%s")
+            % (station, replaced[0], replaced[-1])
+        )
 
 
 def replace_obs(df, location):
@@ -291,15 +386,20 @@ def replace_obs(df, location):
     Tricky part, if the baseline already provides data for this year, we should
     use it!
     """
-    pgconn = get_dbconn('isuag', user='nobody')
+    pgconn = get_dbconn("isuag", user="nobody")
     cursor = pgconn.cursor()
-    isusm = XREF[location]['isusm']
+    isusm = XREF[location]["isusm"]
     today = datetime.date.today()
     jan1 = today.replace(month=1, day=1)
-    years = [int(y) for y in np.arange(df.index.values.min().year,
-                                       df.index.values.max().year + 1)]
+    years = [
+        int(y)
+        for y in np.arange(
+            df.index.values.min().year, df.index.values.max().year + 1
+        )
+    ]
 
-    cursor.execute("""
+    cursor.execute(
+        """
         select valid, tair_c_max_qc, tair_c_min_qc, slrmj_tot_qc,
         vwc_12_avg_qc,
         vwc_24_avg_qc, vwc_50_avg_qc, tsoil_c_avg_qc, t12_c_avg_qc,
@@ -307,41 +407,74 @@ def replace_obs(df, location):
         rain_mm_tot_qc from sm_daily WHERE station = %s and valid >= %s
         and tair_c_max_qc is not null and tair_c_min_qc is not null
         ORDER by valid
-        """, (isusm, jan1))
-    rcols = ['maxt', 'mint', 'radn', 'gdd', 'sm12', 'sm24', 'sm50',
-             'st4', 'st12', 'st24', 'st50', 'rain']
+        """,
+        (isusm, jan1),
+    )
+    rcols = [
+        "maxt",
+        "mint",
+        "radn",
+        "gdd",
+        "sm12",
+        "sm24",
+        "sm50",
+        "st4",
+        "st12",
+        "st24",
+        "st50",
+        "rain",
+    ]
     replaced = []
     for row in cursor:
         valid = row[0]
         # Does our df currently have data for this date?  If so, we shall do
         # no more
-        dont_replace = not np.isnan(df.at[valid, 'mint'])
+        dont_replace = not np.isnan(df.at[valid, "mint"])
         if not dont_replace:
             replaced.append(valid)
-        _gdd = gdd(temperature(row[1], 'C'), temperature(row[2], 'C'))
+        _gdd = gdd(temperature(row[1], "C"), temperature(row[2], "C"))
         for year in years:
             if valid.month == 2 and valid.day == 29 and year % 4 != 0:
                 continue
             if dont_replace:
-                df.loc[valid.replace(year=year),
-                       rcols[3:-1]] = (_gdd, row[4], row[5],
-                                       row[6], row[7], row[8],
-                                       row[9], row[10])
+                df.loc[valid.replace(year=year), rcols[3:-1]] = (
+                    _gdd,
+                    row[4],
+                    row[5],
+                    row[6],
+                    row[7],
+                    row[8],
+                    row[9],
+                    row[10],
+                )
                 continue
-            df.loc[valid.replace(year=year), rcols] = (row[1], row[2], row[3],
-                                                       _gdd, row[4], row[5],
-                                                       row[6], row[7], row[8],
-                                                       row[9], row[10], row[11]
-                                                       )
+            df.loc[valid.replace(year=year), rcols] = (
+                row[1],
+                row[2],
+                row[3],
+                _gdd,
+                row[4],
+                row[5],
+                row[6],
+                row[7],
+                row[8],
+                row[9],
+                row[10],
+                row[11],
+            )
     if replaced:
-        print(("  replaced with obs from %s for %s->%s"
-               ) % (isusm, replaced[0], replaced[-1]))
+        print(
+            ("  replaced with obs from %s for %s->%s")
+            % (isusm, replaced[0], replaced[-1])
+        )
 
 
 def compute_gdd(df):
     """Compute GDDs Please"""
-    df['gdd'] = gdd(temperature(df['maxt'].values, 'C'),
-                    temperature(df['mint'].values, 'C'))
+    df["gdd"] = gdd(
+        temperature(df["maxt"].values, "C"),
+        temperature(df["mint"].values, "C"),
+    )
 
 
 def do(location):
@@ -350,12 +483,20 @@ def do(location):
     # 1. Read baseline
     df = load_baseline(location)
     # 2. Add columns and observed data
-    for colname in ['gdd', 'st4', 'st12', 'st24', 'st50', 'sm12', 'sm24',
-                    'sm50']:
+    for colname in [
+        "gdd",
+        "st4",
+        "st12",
+        "st24",
+        "st50",
+        "sm12",
+        "sm24",
+        "sm50",
+    ]:
         df[colname] = None
     # 3. Do data replacement
     # TODO: what to do with RAIN!
-    if location == 'cobs':
+    if location == "cobs":
         replace_obs_iem(df, location)
     else:
         replace_obs(df, location)
@@ -382,6 +523,6 @@ def main(argv):
         do(location)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)
     # do('cobs')

@@ -41,11 +41,11 @@ def compute_time(is_hourly):
 
 def main(argv):
     """Do Something Good"""
-    asospgconn = get_dbconn('asos')
-    iempgconn = get_dbconn('iem')
+    asospgconn = get_dbconn("asos")
+    iempgconn = get_dbconn("iem")
     acursor = asospgconn.cursor()
     icursor = iempgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    is_hourly = (len(argv) > 1)
+    is_hourly = len(argv) > 1
 
     (sts, ets) = compute_time(is_hourly)
     # print("Processing %s thru %s" % (sts.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -53,12 +53,18 @@ def main(argv):
 
     # Delete any duplicate obs
     table = "t%s" % (sts.year,)
-    acursor.execute("""
-        DELETE from """ + table + """ WHERE valid >= %s and valid <= %s
-        """, (sts, ets))
+    acursor.execute(
+        """
+        DELETE from """
+        + table
+        + """ WHERE valid >= %s and valid <= %s
+        """,
+        (sts, ets),
+    )
 
     # Get obs from Access
-    icursor.execute("""
+    icursor.execute(
+        """
         WITH data as (
             SELECT c.*, t.network, t.id, row_number() OVER
             (PARTITION by c.iemid, valid ORDER by length(raw) DESC) from
@@ -66,9 +72,14 @@ def main(argv):
             valid >= %s and valid <= %s and
             (network ~* 'ASOS' or network = 'AWOS'))
         SELECT * from data where row_number = 1
-        """, (sts, ets))
+        """,
+        (sts, ets),
+    )
     for row in icursor:
-        sql = """INSERT into t""" + repr(sts.year) + """ (station, valid, tmpf,
+        sql = (
+            """INSERT into t"""
+            + repr(sts.year)
+            + """ (station, valid, tmpf,
         dwpf, drct, sknt,  alti, p01i, gust, vsby, skyc1, skyc2, skyc3, skyc4,
         skyl1, skyl2, skyl3, skyl4, metar, p03i, p06i, p24i, max_tmpf_6hr,
         min_tmpf_6hr, max_tmpf_24hr, min_tmpf_24hr, mslp, wxcodes,
@@ -77,33 +88,61 @@ def main(argv):
         peak_wind_time)
         values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
         %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+        )
 
         # see @akrherz/iem#104 as an enhancement to differentiate rtype
-        rtype = (1
-                 if row['raw'] is not None and row['raw'].find(' MADISHF') > -1
-                 else 2)
-        args = (row['id'], row['valid'], row['tmpf'],
-                row['dwpf'], row['drct'], row['sknt'], row['alti'],
-                row['phour'], row['gust'], row['vsby'], row['skyc1'],
-                row['skyc2'],
-                row['skyc3'], row['skyc4'], row['skyl1'], row['skyl2'],
-                row['skyl3'], row['skyl4'], row['raw'], row['p03i'],
-                row['p06i'],
-                row['p24i'], row['max_tmpf_6hr'], row['min_tmpf_6hr'],
-                row['max_tmpf_24hr'], row['min_tmpf_24hr'], row['mslp'],
-                row['wxcodes'],
-                row['ice_accretion_1hr'], row['ice_accretion_3hr'],
-                row['ice_accretion_6hr'], rtype, row['feel'], row['relh'],
-                row['peak_wind_gust'], row['peak_wind_drct'],
-                row['peak_wind_time'])
+        rtype = (
+            1
+            if row["raw"] is not None and row["raw"].find(" MADISHF") > -1
+            else 2
+        )
+        args = (
+            row["id"],
+            row["valid"],
+            row["tmpf"],
+            row["dwpf"],
+            row["drct"],
+            row["sknt"],
+            row["alti"],
+            row["phour"],
+            row["gust"],
+            row["vsby"],
+            row["skyc1"],
+            row["skyc2"],
+            row["skyc3"],
+            row["skyc4"],
+            row["skyl1"],
+            row["skyl2"],
+            row["skyl3"],
+            row["skyl4"],
+            row["raw"],
+            row["p03i"],
+            row["p06i"],
+            row["p24i"],
+            row["max_tmpf_6hr"],
+            row["min_tmpf_6hr"],
+            row["max_tmpf_24hr"],
+            row["min_tmpf_24hr"],
+            row["mslp"],
+            row["wxcodes"],
+            row["ice_accretion_1hr"],
+            row["ice_accretion_3hr"],
+            row["ice_accretion_6hr"],
+            rtype,
+            row["feel"],
+            row["relh"],
+            row["peak_wind_gust"],
+            row["peak_wind_drct"],
+            row["peak_wind_time"],
+        )
 
         acursor.execute(sql, args)
 
     if icursor.rowcount == 0:
-        print(("%s - %s Nothing done for asos2archive.py?"
-               ) % (sts.strftime("%Y-%m-%dT%H:%M"),
-                    ets.strftime("%Y-%m-%dT%H:%M"))
-              )
+        print(
+            ("%s - %s Nothing done for asos2archive.py?")
+            % (sts.strftime("%Y-%m-%dT%H:%M"), ets.strftime("%Y-%m-%dT%H:%M"))
+        )
 
     icursor.close()
     iempgconn.commit()
@@ -112,5 +151,5 @@ def main(argv):
     iempgconn.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

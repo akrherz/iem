@@ -7,21 +7,24 @@ from pyiem.util import get_dbconn, ssw
 
 def do(cursor, wfo):
     """workflow"""
-    cursor.execute("""
+    cursor.execute(
+        """
     SELECT data, entered from products where pil = 'RRM%s' and
     entered > 'TODAY'::date  and
     data ~* '.A' ORDER by entered DESC
-    """ % (wfo,))
+    """
+        % (wfo,)
+    )
 
     if cursor.rowcount == 0:
         return "# RRM%s not found?!?!\n" % (wfo,), ""
     meta = ""
     meat = ""
     for row in cursor:
-        meta += ("# based on IEM processing of RRM%s dated: %s UTC\n"
-                 ) % (wfo,
-                      row[1].astimezone(
-                          pytz.utc).strftime("%Y-%m-%d %H:%M"))
+        meta += ("# based on IEM processing of RRM%s dated: %s UTC\n") % (
+            wfo,
+            row[1].astimezone(pytz.utc).strftime("%Y-%m-%d %H:%M"),
+        )
         data = row[0].replace("\001", "")
         for line in data.split("\r\r\n"):
             if not line.startswith(".A"):
@@ -38,21 +41,27 @@ def do(cursor, wfo):
                 t = lbl.split("  ")
                 src = t[2]
                 lbl = t[1]
-            meat += ("%9s,%s,%s,%s,%s,%s,%s\n"
-                     ) % (sid, dv, val, tokens2[0].split("=")[1],
-                          tokens2[1].split("=")[1], lbl, src)
+            meat += ("%9s,%s,%s,%s,%s,%s,%s\n") % (
+                sid,
+                dv,
+                val,
+                tokens2[0].split("=")[1],
+                tokens2[1].split("=")[1],
+                lbl,
+                src,
+            )
 
     return meta, meat
 
 
 def run():
     """ Do Stuff """
-    pgconn = get_dbconn('afos', user='nobody')
+    pgconn = get_dbconn("afos", user="nobody")
     cursor = pgconn.cursor()
     ssw("Content-type:text/plain\n\n")
     m1 = ""
     m2 = ""
-    for wfo in ['OKX', 'ALY', 'BTV', 'BUF', 'BGM']:
+    for wfo in ["OKX", "ALY", "BTV", "BUF", "BGM"]:
         meta, meat = do(cursor, wfo)
         m1 += meta
         m2 += meat
@@ -62,5 +71,5 @@ def run():
     ssw(m2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()

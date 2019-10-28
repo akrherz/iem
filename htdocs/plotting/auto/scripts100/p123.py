@@ -10,12 +10,17 @@ from pyiem.exceptions import NoDataFound
 def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
-    desc['data'] = True
-    desc['report'] = True
-    desc['description'] = """ """
-    desc['arguments'] = [
-        dict(type='station', name='station', default='IATDSM',
-             label='Select Station', network='IACLIMATE'),
+    desc["data"] = True
+    desc["report"] = True
+    desc["description"] = """ """
+    desc["arguments"] = [
+        dict(
+            type="station",
+            name="station",
+            default="IATDSM",
+            label="Select Station",
+            network="IACLIMATE",
+        )
     ]
     return desc
 
@@ -57,13 +62,13 @@ def contiguous_regions(condition):
 
 def plotter(fdict):
     """ Go """
-    pgconn = get_dbconn('coop')
+    pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
     ctx = get_autoplot_context(fdict, get_description())
-    station = ctx['station']
+    station = ctx["station"]
 
-    table = "alldata_%s" % (station[:2], )
-    bs = ctx['_nt'].sts[station]['archive_begin']
+    table = "alldata_%s" % (station[:2],)
+    bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:
         raise NoDataFound("No Data Found.")
     res = """\
@@ -74,24 +79,45 @@ def plotter(fdict):
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 # First occurance of record consecutive number of days
 # above or below a temperature threshold
-""" % (datetime.date.today().strftime("%d %b %Y"),
-       bs.date(), datetime.date.today(), station,
-       ctx['_nt'].sts[station]['name'])
-    res += "#   %-27s %-27s  %-27s %-27s\n" % (" Low Cooler Than",
-                                               " Low Warmer Than",
-                                               " High Cooler Than",
-                                               " High Warmer Than")
+""" % (
+        datetime.date.today().strftime("%d %b %Y"),
+        bs.date(),
+        datetime.date.today(),
+        station,
+        ctx["_nt"].sts[station]["name"],
+    )
+    res += "#   %-27s %-27s  %-27s %-27s\n" % (
+        " Low Cooler Than",
+        " Low Warmer Than",
+        " High Cooler Than",
+        " High Warmer Than",
+    )
     res += "%3s %5s %10s %10s %5s %10s %10s  %5s %10s %10s %5s %10s %10s\n" % (
-      'TMP', 'DAYS', 'BEGIN DATE', 'END DATE',
-      'DAYS', 'BEGIN DATE', 'END DATE',
-      'DAYS', 'BEGIN DATE', 'END DATE',
-      'DAYS', 'BEGIN DATE', 'END DATE')
+        "TMP",
+        "DAYS",
+        "BEGIN DATE",
+        "END DATE",
+        "DAYS",
+        "BEGIN DATE",
+        "END DATE",
+        "DAYS",
+        "BEGIN DATE",
+        "END DATE",
+        "DAYS",
+        "BEGIN DATE",
+        "END DATE",
+    )
 
-    cursor.execute("""SELECT high, low from """+table+"""
+    cursor.execute(
+        """SELECT high, low from """
+        + table
+        + """
     WHERE station = %s and day >= '1900-01-01' ORDER by day ASC
-    """, (station, ))
-    highs = np.zeros((cursor.rowcount,), 'f')
-    lows = np.zeros((cursor.rowcount,), 'f')
+    """,
+        (station,),
+    )
+    highs = np.zeros((cursor.rowcount,), "f")
+    lows = np.zeros((cursor.rowcount,), "f")
     for i, row in enumerate(cursor):
         highs[i] = row[0]
         lows[i] = row[1]
@@ -105,81 +131,93 @@ def plotter(fdict):
         for start, stop in contiguous_regions(condition):
             if (stop - start) > max_bl:
                 max_bl = int(stop - start)
-                max_bl_ts = datetime.date(startyear,
-                                          1, 1) + datetime.timedelta(
-                                                        days=int(stop))
+                max_bl_ts = datetime.date(
+                    startyear, 1, 1
+                ) + datetime.timedelta(days=int(stop))
         condition = lows >= thres
         max_al = 0
         max_al_ts = datetime.date.today()
         for start, stop in contiguous_regions(condition):
             if (stop - start) > max_al:
                 max_al = int(stop - start)
-                max_al_ts = datetime.date(startyear,
-                                          1, 1) + datetime.timedelta(
-                                              days=int(stop))
+                max_al_ts = datetime.date(
+                    startyear, 1, 1
+                ) + datetime.timedelta(days=int(stop))
         condition = highs < thres
         max_bh = 0
         max_bh_ts = datetime.date.today()
         for start, stop in contiguous_regions(condition):
             if (stop - start) > max_bh:
                 max_bh = int(stop - start)
-                max_bh_ts = datetime.date(startyear,
-                                          1, 1) + datetime.timedelta(
-                                              days=int(stop))
+                max_bh_ts = datetime.date(
+                    startyear, 1, 1
+                ) + datetime.timedelta(days=int(stop))
         condition = highs >= thres
         max_ah = 0
         max_ah_ts = datetime.date.today()
         for start, stop in contiguous_regions(condition):
             if (stop - start) > max_ah:
                 max_ah = int(stop - start)
-                max_ah_ts = datetime.date(startyear,
-                                          1, 1) + datetime.timedelta(
-                                                        days=int(stop))
+                max_ah_ts = datetime.date(
+                    startyear, 1, 1
+                ) + datetime.timedelta(days=int(stop))
 
-        max_bl_sdate = (max_bl_ts - datetime.timedelta(days=max_bl)
-                        ).strftime("%m/%d/%Y")
+        max_bl_sdate = (max_bl_ts - datetime.timedelta(days=max_bl)).strftime(
+            "%m/%d/%Y"
+        )
         max_bl_edate = max_bl_ts.strftime("%m/%d/%Y")
-        max_bh_sdate = (max_bh_ts - datetime.timedelta(days=max_bh)
-                        ).strftime("%m/%d/%Y")
+        max_bh_sdate = (max_bh_ts - datetime.timedelta(days=max_bh)).strftime(
+            "%m/%d/%Y"
+        )
         max_bh_edate = max_bh_ts.strftime("%m/%d/%Y")
-        max_al_sdate = (max_al_ts - datetime.timedelta(days=max_al)
-                        ).strftime("%m/%d/%Y")
+        max_al_sdate = (max_al_ts - datetime.timedelta(days=max_al)).strftime(
+            "%m/%d/%Y"
+        )
         max_al_edate = max_al_ts.strftime("%m/%d/%Y")
-        max_ah_sdate = (max_ah_ts - datetime.timedelta(days=max_ah)
-                        ).strftime("%m/%d/%Y")
+        max_ah_sdate = (max_ah_ts - datetime.timedelta(days=max_ah)).strftime(
+            "%m/%d/%Y"
+        )
         max_ah_edate = max_ah_ts.strftime("%m/%d/%Y")
-        rows.append(dict(thres=thres, max_low_below=max_bl,
-                         max_high_below=max_bh, max_low_above=max_al,
-                         max_high_above=max_ah,
-                         max_low_below_sdate=max_bl_sdate,
-                         max_low_below_edate=max_bl_edate,
-                         max_low_above_sdate=max_al_sdate,
-                         max_low_above_edate=max_al_edate,
-                         max_high_below_sdate=max_bh_sdate,
-                         max_high_below_edate=max_bh_edate,
-                         max_high_above_sdate=max_ah_sdate,
-                         max_high_above__edate=max_ah_edate))
-        res += ("%3i %5s %10s %10s %5s %10s %10s  "
-                "%5s %10s %10s %5s %10s %10s\n"
-                ) % (thres,
-                     wrap(max_bl),
-                     wrap(max_bl, max_bl_sdate),
-                     wrap(max_bl, max_bl_edate),
-                     wrap(max_al),
-                     wrap(max_al, max_al_sdate),
-                     wrap(max_al, max_al_edate),
-                     wrap(max_bh),
-                     wrap(max_bh, max_bh_sdate),
-                     wrap(max_bh, max_bh_edate),
-                     wrap(max_ah),
-                     wrap(max_ah, max_ah_sdate),
-                     wrap(max_ah, max_ah_edate))
+        rows.append(
+            dict(
+                thres=thres,
+                max_low_below=max_bl,
+                max_high_below=max_bh,
+                max_low_above=max_al,
+                max_high_above=max_ah,
+                max_low_below_sdate=max_bl_sdate,
+                max_low_below_edate=max_bl_edate,
+                max_low_above_sdate=max_al_sdate,
+                max_low_above_edate=max_al_edate,
+                max_high_below_sdate=max_bh_sdate,
+                max_high_below_edate=max_bh_edate,
+                max_high_above_sdate=max_ah_sdate,
+                max_high_above__edate=max_ah_edate,
+            )
+        )
+        res += (
+            "%3i %5s %10s %10s %5s %10s %10s  " "%5s %10s %10s %5s %10s %10s\n"
+        ) % (
+            thres,
+            wrap(max_bl),
+            wrap(max_bl, max_bl_sdate),
+            wrap(max_bl, max_bl_edate),
+            wrap(max_al),
+            wrap(max_al, max_al_sdate),
+            wrap(max_al, max_al_edate),
+            wrap(max_bh),
+            wrap(max_bh, max_bh_sdate),
+            wrap(max_bh, max_bh_edate),
+            wrap(max_ah),
+            wrap(max_ah, max_ah_sdate),
+            wrap(max_ah, max_ah_edate),
+        )
 
     df = pd.DataFrame(rows)
-    df.set_index('thres', inplace=True)
-    df.index.name = 'threshold'
+    df.set_index("thres", inplace=True)
+    df.index.name = "threshold"
     return None, df, res
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     plotter(dict())

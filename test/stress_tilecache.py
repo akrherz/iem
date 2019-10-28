@@ -20,23 +20,36 @@ def main():
     istart = start
     while now < ets:
         for _ in range(1000):
-            uri = now.strftime(("http://iem.local/"
-                                "c/tile.py/1.0.0/ridge::USCOMP-N0R-"
-                                "%Y%m%d%H%M/"+str(random.randint(0, 10)) +
-                                "/"+str(random.randint(0, 10))+"/" +
-                                str(random.randint(0, 10))+".png"))
+            uri = now.strftime(
+                (
+                    "http://iem.local/"
+                    "c/tile.py/1.0.0/ridge::USCOMP-N0R-"
+                    "%Y%m%d%H%M/"
+                    + str(random.randint(0, 10))
+                    + "/"
+                    + str(random.randint(0, 10))
+                    + "/"
+                    + str(random.randint(0, 10))
+                    + ".png"
+                )
+            )
             requests.get(uri)
             cnt += 1
             if cnt % 100 == 0:
                 delta = datetime.datetime.now() - start
                 delta2 = datetime.datetime.now() - istart
-                print(("%6i %9.5f req/s %9.5f req/s"
-                       ) % (cnt, 100.0 / delta2.total_seconds(),
-                            (float(cnt) / delta.total_seconds())))
+                print(
+                    ("%6i %9.5f req/s %9.5f req/s")
+                    % (
+                        cnt,
+                        100.0 / delta2.total_seconds(),
+                        (float(cnt) / delta.total_seconds()),
+                    )
+                )
                 istart = datetime.datetime.now()
 
         now += interval
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

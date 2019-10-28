@@ -30,7 +30,10 @@ def main(argv):
         cursor = pgconn.cursor()
         lfn = "%06i-%05i-%s" % (airforce, wban, year)
         if not os.path.isfile("%s/%s" % (TMPDIR, lfn)):
-            uri = "https://www1.ncdc.noaa.gov/pub/data/noaa/%s/%s.gz" % (year, lfn)
+            uri = "https://www1.ncdc.noaa.gov/pub/data/noaa/%s/%s.gz" % (
+                year,
+                lfn,
+            )
             req = exponential_backoff(requests.get, uri, timeout=30)
             if req is None or req.status_code != 200:
                 LOG.info("Failed to fetch %s", uri)
@@ -39,7 +42,9 @@ def main(argv):
             with open("%s/%s.gz" % (TMPDIR, lfn), "wb") as fh:
                 fh.write(req.content)
             subprocess.call(
-                "gunzip %s/%s.gz" % (TMPDIR, lfn), shell=True, stderr=subprocess.PIPE
+                "gunzip %s/%s.gz" % (TMPDIR, lfn),
+                shell=True,
+                stderr=subprocess.PIPE,
             )
         added = 0
         bad = 0

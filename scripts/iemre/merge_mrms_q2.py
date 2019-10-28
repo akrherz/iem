@@ -15,22 +15,23 @@ def findfile(ts):
     """See if we can find a file to use"""
     for hr in [0, -1, 1, -2, 2, -3, 3]:
         ts2 = ts + datetime.timedelta(hours=hr)
-        fn = ts2.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/mrms/"
-                           "p24h_%Y%m%d%H00.png"))
+        fn = ts2.strftime(
+            ("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/mrms/" "p24h_%Y%m%d%H00.png")
+        )
         if os.path.isfile(fn):
             return fn
 
 
 def run(ts):
     """Actually do the work, please"""
-    nc = ncopen(iemre.get_daily_mrms_ncname(ts.year), 'a', timeout=300)
+    nc = ncopen(iemre.get_daily_mrms_ncname(ts.year), "a", timeout=300)
     offset = iemre.daily_offset(ts)
-    ncprecip = nc.variables['p01d']
+    ncprecip = nc.variables["p01d"]
     ts += datetime.timedelta(hours=24)
     gmtts = ts.astimezone(pytz.utc)
     fn = findfile(gmtts)
     if fn is None:
-        print("merge_mrms_q2 failed to find file for time: %s" % (gmtts, ))
+        print("merge_mrms_q2 failed to find file for time: %s" % (gmtts,))
         return
     img = Image.open(fn)
     data = np.asarray(img)
@@ -39,10 +40,16 @@ def run(ts):
     # Anything over 254 is bad
     res = np.where(data > 254, 0, data)
     res = np.where(np.logical_and(data >= 0, data < 100), data * 0.25, res)
-    res = np.where(np.logical_and(data >= 100, data < 180),
-                   25. + ((data - 100) * 1.25), res)
-    res = np.where(np.logical_and(data >= 180, data < 255),
-                   125. + ((data - 180) * 5.), res)
+    res = np.where(
+        np.logical_and(data >= 100, data < 180),
+        25.0 + ((data - 100) * 1.25),
+        res,
+    )
+    res = np.where(
+        np.logical_and(data >= 180, data < 255),
+        125.0 + ((data - 180) * 5.0),
+        res,
+    )
 
     y1 = int((iemre.NORTH - mrms.SOUTH) * 100.0)
     y0 = int((iemre.SOUTH - mrms.SOUTH) * 100.0)
@@ -56,8 +63,7 @@ def main(argv):
     """Go Main Go"""
     if len(argv) == 4:
         # 12 noon to prevent ugliness with timezones
-        ts = datetime.datetime(int(argv[1]), int(argv[2]),
-                               int(argv[3]), 12, 0)
+        ts = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]), 12, 0)
     else:
         ts = datetime.datetime.now() - datetime.timedelta(hours=24)
         ts = ts.replace(hour=12)
@@ -68,5 +74,5 @@ def main(argv):
     run(ts)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

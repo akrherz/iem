@@ -18,25 +18,28 @@ NETWORKS = []
 
 def load_stations():
     """Get station timezone info?"""
-    pgconn = get_dbconn('mesosite', user='nobody')
+    pgconn = get_dbconn("mesosite", user="nobody")
     cursor = pgconn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT id, network from stations where network ~* 'ASOS'
-    """)
+    """
+    )
     for row in cursor:
         XREF[row[0]] = row[1]
 
 
 def do_stid(stid):
     """Go."""
-    pgconn = get_dbconn('asos')
+    pgconn = get_dbconn("asos")
     cursor = pgconn.cursor()
     if len(stid) not in [3, 4]:
         return 0
-    with open('fn', 'w') as fh:
+    with open("fn", "w") as fh:
         # NB: not all GEMPAK surface files stored the raw METAR, so using
         # TEXT here may not always work.
-        fh.write("""
+        fh.write(
+            """
 SFFILE = /mesonet/tmp/mtsf.gem
 AREA = @%s
 DATTIM = ALL
@@ -46,21 +49,26 @@ IDNTYP   = STID
 run
 
 exit
-""" % (stid,))
+"""
+            % (stid,)
+        )
     r = subprocess.Popen(
-        "timeout 30 /tmp/sflist < fn", stdin=subprocess.PIPE,
+        "timeout 30 /tmp/sflist < fn",
+        stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE, shell=True)
+        stderr=subprocess.PIPE,
+        shell=True,
+    )
     # need to make this sync, so that fn2 is accurate
     r.stdout.read()
-    if not os.path.isfile('fn2'):
+    if not os.path.isfile("fn2"):
         return 0
-    for line in open('fn2'):
+    for line in open("fn2"):
         tokens = line.strip().split()
         if len(tokens) != 3:
             continue
         try:
-            ts = datetime.datetime.strptime(tokens[1], '%y%m%d/%H%M')
+            ts = datetime.datetime.strptime(tokens[1], "%y%m%d/%H%M")
         except ValueError:
             continue
         tmpf = float(tokens[2])
@@ -68,10 +76,13 @@ exit
         if tmpf < -9000:
             continue
         valid = utc(ts.year, ts.month, ts.day, ts.hour, ts.minute)
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT tmpf from alldata where station = %s and valid = %s
             and tmpf is not null
-        """, (stid, valid))
+        """,
+            (stid, valid),
+        )
         if cursor.rowcount == 0:
             print("%s %s no results" % (stid, valid))
             continue
@@ -81,8 +92,10 @@ exit
             network = XREF.get(stid)
             if network not in NETWORKS:
                 NETWORKS.append(network)
-            print("%s[%s] %s old: %s new: %s" % (
-                stid, network, valid, row[0], tmpf))
+            print(
+                "%s[%s] %s old: %s new: %s"
+                % (stid, network, valid, row[0], tmpf)
+            )
     return 0
     # 5. save these in the proper /mesonet/ARCHIVE/cache Folder
 
@@ -90,17 +103,22 @@ exit
 def workflow(ts):
     """We do work."""
     # 1. Get mtarchive file
-    uri = ts.strftime(("http://mtarchive.geol.iastate.edu/%Y/%m/%d/gempak/"
-                       "surface/sao/%Y%m%d_sao.gem"))
+    uri = ts.strftime(
+        (
+            "http://mtarchive.geol.iastate.edu/%Y/%m/%d/gempak/"
+            "surface/sao/%Y%m%d_sao.gem"
+        )
+    )
     req = requests.get(uri, timeout=30)
     if req.status_code != 200:
-        print('Whoa! %s %s' % (req.status, uri))
+        print("Whoa! %s %s" % (req.status, uri))
         return
-    with open("/mesonet/tmp/mtsf.gem", 'wb') as fh:
+    with open("/mesonet/tmp/mtsf.gem", "wb") as fh:
         fh.write(req.content)
     # 2. run sflist to extract all stations
-    with open('fn', 'w') as fh:
-        fh.write("""
+    with open("fn", "w") as fh:
+        fh.write(
+            """
 SFFILE = /mesonet/tmp/mtsf.gem
 AREA = ALL
 DATTIM = ALL
@@ -111,12 +129,16 @@ list
 run
 
 exit
-""")
+"""
+        )
     proc = subprocess.Popen(
-        "/tmp/sflist < fn", stdin=subprocess.PIPE,
+        "/tmp/sflist < fn",
+        stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE, shell=True)
-    data = proc.stdout.read().decode('ascii', 'ignore')
+        stderr=subprocess.PIPE,
+        shell=True,
+    )
+    data = proc.stdout.read().decode("ascii", "ignore")
     stations = {}
     for line in data.split("\n"):
         tokens = line.strip().split()
@@ -127,8 +149,10 @@ exit
         stations[tokens[0]] = True
     # 3. loop over each station, sigh
     res = [do_stid(stid) for stid in stations]
-    print("Found %s stations, %s obs for %s" % (len(stations), sum(res),
-                                                ts.strftime("%Y%m%d")))
+    print(
+        "Found %s stations, %s obs for %s"
+        % (len(stations), sum(res), ts.strftime("%Y%m%d"))
+    )
     print(NETWORKS)
 
 
@@ -138,5 +162,5 @@ def main(argv):
     workflow(datetime.date(int(argv[1]), int(argv[2]), int(argv[3])))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

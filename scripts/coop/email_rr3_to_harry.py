@@ -11,27 +11,30 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from pyiem.util import get_dbconn
 
-WFOS = ['KDMX', 'KARX', 'KDVN', 'KFSD', 'KOAX']
+WFOS = ["KDMX", "KARX", "KDVN", "KFSD", "KOAX"]
 
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconn('afos', user='nobody')
+    pgconn = get_dbconn("afos", user="nobody")
     acursor = pgconn.cursor()
 
     now = datetime.datetime.now()
     sts = now + datetime.timedelta(days=-7)
     sts = sts.replace(hour=0)
 
-    acursor.execute("""
+    acursor.execute(
+        """
       SELECT data, source from products where
       pil in ('RR3DMX','RR3DVN','RR3ARX','RR3FSD','RR3OAX','RR1FSD')
       and entered > '%s' ORDER by entered ASC
-    """ % (sts.strftime("%Y-%m-%d %H:%M"), ))
+    """
+        % (sts.strftime("%Y-%m-%d %H:%M"),)
+    )
 
     files = {}
     for wfo in WFOS:
-        files[wfo] = open('/tmp/%sRR3.txt' % (wfo,), 'w')
+        files[wfo] = open("/tmp/%sRR3.txt" % (wfo,), "w")
 
     for row in acursor:
         files[row[1]].write(row[0].replace("\001", ""))
@@ -41,31 +44,34 @@ def main():
         files[wfo].close()
 
     msg = MIMEMultipart()
-    msg['Subject'] = 'NWS RR3 Data for %s - %s' % (sts.strftime("%d %b %Y"),
-                                                   now.strftime("%d %b %Y"))
-    msg['From'] = 'akrherz@iastate.edu'
-    msg['To'] = 'justin.glisan@iowaagriculture.gov'
+    msg["Subject"] = "NWS RR3 Data for %s - %s" % (
+        sts.strftime("%d %b %Y"),
+        now.strftime("%d %b %Y"),
+    )
+    msg["From"] = "akrherz@iastate.edu"
+    msg["To"] = "justin.glisan@iowaagriculture.gov"
     # msg['To'] = 'akrherz@localhost'
-    msg.preamble = 'RR3 Report'
+    msg.preamble = "RR3 Report"
 
     fn = "RR3-%s-%s.txt" % (sts.strftime("%Y%m%d"), now.strftime("%Y%m%d"))
 
     for wfo in WFOS:
-        fp = open('/tmp/%sRR3.txt' % (wfo,), 'rb')
-        b = MIMEBase('Text', 'Plain')
+        fp = open("/tmp/%sRR3.txt" % (wfo,), "rb")
+        b = MIMEBase("Text", "Plain")
         b.set_payload(fp.read())
         encoders.encode_base64(b)
         fp.close()
-        b.add_header('Content-Disposition',
-                     'attachment; filename="%s-%s"' % (wfo, fn))
+        b.add_header(
+            "Content-Disposition", 'attachment; filename="%s-%s"' % (wfo, fn)
+        )
         msg.attach(b)
-        os.unlink('/tmp/%sRR3.txt' % (wfo,))
+        os.unlink("/tmp/%sRR3.txt" % (wfo,))
 
     # Send the email via our own SMTP server.
-    s = smtplib.SMTP('localhost')
-    s.sendmail(msg['From'], msg['To'], msg.as_string())
+    s = smtplib.SMTP("localhost")
+    s.sendmail(msg["From"], msg["To"], msg.as_string())
     s.quit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

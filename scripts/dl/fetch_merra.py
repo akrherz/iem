@@ -34,12 +34,12 @@ PROPS = get_properties()
 def trans(now):
     """ Hacky hack hack """
     if now.year < 1992:
-        return '100'
+        return "100"
     if now.year < 2001:
-        return '200'
+        return "200"
     if now.year < 2011:
-        return '300'
-    return '400'
+        return "300"
+    return "400"
 
 
 def do_month(sts):
@@ -52,22 +52,31 @@ def do_month(sts):
     now = sts
     while now < ets:
         uri = now.strftime(
-            ("http://goldsmr4.gesdisc.eosdis.nasa.gov/daac-bin/OTF/"
-             "HTTP_services.cgi?FILENAME=/data/s4pa/MERRA2"
-             "/M2T1NXRAD.5.12.4/%Y/%m/MERRA2_"+trans(now)+".tavg1_2d_rad_"
-             "Nx.%Y%m%d.nc4&FORMAT=bmM0Lw&"
-             "BBOX=22.852,-129.727,52.383,-60.117"
-             "&LABEL=MERRA2_"+trans(now)+".tavg1_2d_rad_Nx.%Y%m%d.SUB.nc"
-             "&FLAGS=&SHORTNAME=M2T1NXRAD&SERVICE=SUBSET_MERRA2&"
-             "LAYERS=&VERSION=1.02&VARIABLES=swgdn,swgdnclr,swtdn"))
+            (
+                "http://goldsmr4.gesdisc.eosdis.nasa.gov/daac-bin/OTF/"
+                "HTTP_services.cgi?FILENAME=/data/s4pa/MERRA2"
+                "/M2T1NXRAD.5.12.4/%Y/%m/MERRA2_"
+                + trans(now)
+                + ".tavg1_2d_rad_"
+                "Nx.%Y%m%d.nc4&FORMAT=bmM0Lw&"
+                "BBOX=22.852,-129.727,52.383,-60.117"
+                "&LABEL=MERRA2_"
+                + trans(now)
+                + ".tavg1_2d_rad_Nx.%Y%m%d.SUB.nc"
+                "&FLAGS=&SHORTNAME=M2T1NXRAD&SERVICE=SUBSET_MERRA2&"
+                "LAYERS=&VERSION=1.02&VARIABLES=swgdn,swgdnclr,swtdn"
+            )
+        )
         dirname = now.strftime("/mesonet/merra2/%Y")
         if not os.path.isdir(dirname):
             os.makedirs(dirname)
         localfn = now.strftime("/mesonet/merra2/%Y/%Y%m%d.nc")
-        cmd = ("curl -n -c ~/.urscookies -b ~/.urscookies -L "
-               "--url '%s' -o %s") % (uri, localfn)
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True,
-                                stderr=subprocess.PIPE)
+        cmd = (
+            "curl -n -c ~/.urscookies -b ~/.urscookies -L " "--url '%s' -o %s"
+        ) % (uri, localfn)
+        proc = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, shell=True, stderr=subprocess.PIPE
+        )
         proc.stderr.read()
         now += interval
 
@@ -83,5 +92,5 @@ def main(argv):
     do_month(now)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

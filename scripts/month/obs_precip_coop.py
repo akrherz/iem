@@ -8,7 +8,7 @@ from pyiem.util import get_dbconn
 def main():
     """Go Main Go"""
     now = datetime.date.today()
-    pgconn = get_dbconn('iem', user='nobody')
+    pgconn = get_dbconn("iem", user="nobody")
     icursor = pgconn.cursor()
 
     day1 = now.replace(day=1)
@@ -23,8 +23,11 @@ def main():
         ON (s.iemid = c.iemid)
         WHERE s.network in ('IA_COOP') and s.iemid = c.iemid and
         day >= '%s' and day < '%s'
-        GROUP by id, lat, lon""" % (now.year, day1.strftime("%Y-%m-%d"),
-                                    day2.strftime("%Y-%m-%d"))
+        GROUP by id, lat, lon""" % (
+        now.year,
+        day1.strftime("%Y-%m-%d"),
+        day2.strftime("%Y-%m-%d"),
+    )
 
     lats = []
     lons = []
@@ -41,14 +44,17 @@ def main():
         lons.append(row[3])
         precip.append(row[1])
 
-    mp = MapPlot(title="This Month's Precipitation [inch] (NWS COOP Network)",
-                 subtitle=now.strftime("%b %Y"), axisbg='white')
-    mp.plot_values(lons, lats, precip, fmt='%.2f', labels=labels)
+    mp = MapPlot(
+        title="This Month's Precipitation [inch] (NWS COOP Network)",
+        subtitle=now.strftime("%b %Y"),
+        axisbg="white",
+    )
+    mp.plot_values(lons, lats, precip, fmt="%.2f", labels=labels)
     mp.drawcounties()
     pqstr = "plot c 000000000000 coopMonthPlot.png bogus png"
     mp.postprocess(view=False, pqstr=pqstr)
     mp.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

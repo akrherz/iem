@@ -20,11 +20,11 @@ def compute_stations():
     station metadata about them! """
     stations = []
     pass1 = []
-    for line in open('temp-inventory.txt'):
+    for line in open("temp-inventory.txt"):
         pass1.append(line[:11])
 
     # Now we iterate over the precip inventory
-    for line in open('prcp-inventory.txt'):
+    for line in open("prcp-inventory.txt"):
         if line[:11] not in pass1:
             continue
         # We have a station we care about!
@@ -37,8 +37,8 @@ def ingest(stations, pgconn):
 
     data = {}
 
-    print('Process PRCP')
-    for line in open('ytd-prcp-normal.txt'):
+    print("Process PRCP")
+    for line in open("ytd-prcp-normal.txt"):
         if line[:11] not in stations:
             continue
         tokens = line.split()
@@ -52,12 +52,12 @@ def ingest(stations, pgconn):
             val = int(token[:-1]) / 100.0
             if val == "-8888":
                 continue
-            d = "2000-%s-%02i" % (month, t-1)
+            d = "2000-%s-%02i" % (month, t - 1)
             data[dbid][d] = {}
-            data[dbid][d]['precip'] = val
+            data[dbid][d]["precip"] = val
 
-    print('Process TMIN')
-    for line in open('dly-tmin-normal.txt'):
+    print("Process TMIN")
+    for line in open("dly-tmin-normal.txt"):
         if line[:11] not in stations:
             continue
         tokens = line.split()
@@ -69,11 +69,11 @@ def ingest(stations, pgconn):
             val = int(token[:-1]) / 10.0
             if val == "-8888":
                 continue
-            d = "2000-%s-%02i" % (month, t-1)
-            data[dbid][d]['tmin'] = val
+            d = "2000-%s-%02i" % (month, t - 1)
+            data[dbid][d]["tmin"] = val
 
-    print('Process TMAX')
-    for line in open('dly-tmax-normal.txt'):
+    print("Process TMAX")
+    for line in open("dly-tmax-normal.txt"):
         if line[:11] not in stations:
             continue
         tokens = line.split()
@@ -85,8 +85,8 @@ def ingest(stations, pgconn):
             val = int(token[:-1]) / 10.0
             if val == "-8888":
                 continue
-            d = "2000-%s-%02i" % (month, t-1)
-            data[dbid][d]['tmax'] = val
+            d = "2000-%s-%02i" % (month, t - 1)
+            data[dbid][d]["tmax"] = val
 
     for dbid in data:
         ccursor = pgconn.cursor()
@@ -97,18 +97,26 @@ def ingest(stations, pgconn):
         while now < ets:
             d = now.strftime("%Y-%m-%d")
             # Precip data is always missing on leap day, sigh
-            if d == '2000-02-29':
+            if d == "2000-02-29":
                 precip = 0
             else:
-                precip = data[dbid][d]['precip'] - running
-                running = data[dbid][d]['precip']
+                precip = data[dbid][d]["precip"] - running
+                running = data[dbid][d]["precip"]
 
-            ccursor.execute("""
+            ccursor.execute(
+                """
                 INSERT into ncdc_climate81
                 (station, valid, high, low, precip)
                 VALUES (%s, %s, %s, %s, %s)
-            """, (dbid, d, data[dbid][d]['tmax'], data[dbid][d]['tmin'],
-                  precip))
+            """,
+                (
+                    dbid,
+                    d,
+                    data[dbid][d]["tmax"],
+                    data[dbid][d]["tmin"],
+                    precip,
+                ),
+            )
             now += interval
         ccursor.close()
         pgconn.commit()
@@ -116,12 +124,12 @@ def ingest(stations, pgconn):
 
 def main():
     """ Go main Go """
-    pgconn = get_dbconn('coop')
+    pgconn = get_dbconn("coop")
 
     stations = compute_stations()
     ingest(stations, pgconn)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Go
     main()

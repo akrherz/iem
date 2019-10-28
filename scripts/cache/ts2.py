@@ -1,9 +1,9 @@
-'''
+"""
 Fuzzy math to get the right timestamp
 
 if 15, we want 00
 if 45, we want 30
-'''
+"""
 from __future__ import print_function
 import datetime
 import sys
@@ -24,5 +24,5 @@ def main(argv):
     print(gmt.strftime(argv[2]))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

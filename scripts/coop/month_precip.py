@@ -38,7 +38,9 @@ def main():
     for row in ccursor:
         mrain[row[0]] = row[1]
 
-    o.write(("   VALID FOR MONTH OF: %s\n\n") % (now.strftime("%d %B %Y").upper(),))
+    o.write(
+        ("   VALID FOR MONTH OF: %s\n\n") % (now.strftime("%d %B %Y").upper(),)
+    )
     o.write(
         "%-6s%-24.24s%9s%10s%11s%10s\n"
         % ("ID", "STATION", "REPORTS", "PREC (IN)", "CLIMO2DATE", "DIFF")
@@ -64,7 +66,9 @@ def main():
         if thisStation in nt.sts:
             d[thisStation] = {"prectot": thisPrec, "cnt": thisCount}
             d[thisStation]["name"] = nt.sts[thisStation]["name"]
-            d[thisStation]["crain"] = mrain[nt.sts[thisStation]["climate_site"]]
+            d[thisStation]["crain"] = mrain[
+                nt.sts[thisStation]["climate_site"]
+            ]
 
     keys = list(d.keys())
     keys.sort()

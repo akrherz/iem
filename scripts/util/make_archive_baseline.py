@@ -14,10 +14,14 @@ import subprocess
 
 from pyiem.network import Table as NetworkTable
 
-PRODS = {'NEXRAD': ['N0Q', 'N0S', 'N0U', 'N0Z', 'NET'],
-         'TWDR': ['NET', 'TR0', 'TV0']}
-PILS = ("LSR|FWW|CFW|TCV|RFW|FFA|SVR|TOR|SVS|SMW|MWS|NPW|WCN|WSW|EWW|FLS"
-        "|FLW|SPS|SEL|SWO|FFW").split("|")
+PRODS = {
+    "NEXRAD": ["N0Q", "N0S", "N0U", "N0Z", "NET"],
+    "TWDR": ["NET", "TR0", "TV0"],
+}
+PILS = (
+    "LSR|FWW|CFW|TCV|RFW|FFA|SVR|TOR|SVS|SMW|MWS|NPW|WCN|WSW|EWW|FLS"
+    "|FLW|SPS|SEL|SWO|FFW"
+).split("|")
 
 
 def chgrp(filepath, gid):
@@ -45,25 +49,25 @@ def main(argv):
         ts = datetime.datetime.utcnow()
     else:
         ts = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]))
-    nt = NetworkTable(['NEXRAD', 'TWDR'])
+    nt = NetworkTable(["NEXRAD", "TWDR"])
     basedir = ts.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ridge")
     for sid in nt.sts:
-        for prod in PRODS[nt.sts[sid]['network']]:
+        for prod in PRODS[nt.sts[sid]["network"]]:
             mydir = "%s/%s/%s" % (basedir, sid, prod)
             if os.path.isdir(mydir):
                 continue
-            supermakedirs(mydir, 0o775, grp.getgrnam('ldm')[2])
+            supermakedirs(mydir, 0o775, grp.getgrnam("ldm")[2])
     # Do noaaport text
     basedir = ts.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/text/noaaport")
-    supermakedirs(basedir, 0o775, grp.getgrnam('ldm')[2])
+    supermakedirs(basedir, 0o775, grp.getgrnam("ldm")[2])
     os.chdir(basedir)
     for pil in PILS:
         fn = "%s_%s.txt" % (pil, ts.strftime("%Y%m%d"))
         if not os.path.isfile(fn):
             subprocess.call("touch %s" % (fn,), shell=True)
             os.chmod(fn, 0o664)
-            chgrp(fn, grp.getgrnam('ldm')[2])
+            chgrp(fn, grp.getgrnam("ldm")[2])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

@@ -13,7 +13,7 @@ from pyiem.util import get_dbconn
 
 def main():
     """Go Main Go"""
-    iemaccess = get_dbconn('iem')
+    iemaccess = get_dbconn("iem")
     cursor = iemaccess.cursor()
     valid = datetime.datetime.utcnow()
     valid = valid.replace(tzinfo=pytz.utc)
@@ -28,16 +28,17 @@ def main():
     tokens = re.split(r"[\s+]+", lastline)
 
     tparts = re.split(":", tokens[4])
-    valid = valid.replace(hour=int(tparts[0]),
-                          minute=int(tparts[1]), second=int(tparts[2]))
+    valid = valid.replace(
+        hour=int(tparts[0]), minute=int(tparts[1]), second=int(tparts[2])
+    )
 
     iem = Observation("OT0002", "OT", valid)
 
-    sknt = speed(float(tokens[8]), 'MPH').value('KT')
+    sknt = speed(float(tokens[8]), "MPH").value("KT")
 
-    iem.data['sknt'] = sknt
-    iem.data['drct'] = tokens[9]
-    iem.data['tmpf'] = tokens[7]
+    iem.data["sknt"] = sknt
+    iem.data["drct"] = tokens[9]
+    iem.data["tmpf"] = tokens[7]
 
     iem.save(cursor)
 
@@ -45,5 +46,5 @@ def main():
     iemaccess.commit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

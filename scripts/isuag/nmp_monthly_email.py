@@ -18,15 +18,19 @@ from pyiem.util import get_properties, get_dbconn
 
 def generate_report(start_date, end_date):
     """Generate the text report"""
-    pgconn = get_dbconn('isuag', user='nobody')
+    pgconn = get_dbconn("isuag", user="nobody")
     days = (end_date - start_date).days + 1
     totalobs = days * 24 * 17
-    df = read_sql("""
+    df = read_sql(
+        """
         SELECT station, count(*) from sm_hourly WHERE valid >= %s
         and valid < %s GROUP by station ORDER by station
-    """, pgconn, params=(start_date, end_date + datetime.timedelta(days=1)),
-                  index_col='station')
-    performance = min([100, df['count'].sum() / float(totalobs) * 100.])
+    """,
+        pgconn,
+        params=(start_date, end_date + datetime.timedelta(days=1)),
+        index_col="station",
+    )
+    performance = min([100, df["count"].sum() / float(totalobs) * 100.0])
     return """
 Iowa Environmental Mesonet Data Delivery Report
 ===============================================
@@ -43,30 +47,37 @@ Additional Details
   Report Generated: %s
 
 .END
-""" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y"),
-       performance, len(df.index), totalobs, days, df['count'].sum(),
-       datetime.datetime.now().strftime("%d %B %Y %H:%M %p"))
+""" % (
+        start_date.strftime("%d %b %Y"),
+        end_date.strftime("%d %b %Y"),
+        performance,
+        len(df.index),
+        totalobs,
+        days,
+        df["count"].sum(),
+        datetime.datetime.now().strftime("%d %B %Y %H:%M %p"),
+    )
 
 
 def main():
     """Go Main Go"""
-    emails = get_properties()['nmp_monthly_email_list'].split(",")
+    emails = get_properties()["nmp_monthly_email_list"].split(",")
 
     end_date = datetime.date.today().replace(day=16)
     start_date = (end_date - datetime.timedelta(days=40)).replace(day=17)
     report = generate_report(start_date, end_date)
 
     msg = MIMEText(report)
-    msg['Subject'] = "[IEM] 404-41-12 Synoptic Contract Deliverables Report"
-    msg['From'] = 'IEM Automation <mesonet@mesonet.agron.iastate.edu>'
-    msg['To'] = ', '.join(emails)
-    msg.add_header('reply-to', 'akrherz@iastate.edu')
+    msg["Subject"] = "[IEM] 404-41-12 Synoptic Contract Deliverables Report"
+    msg["From"] = "IEM Automation <mesonet@mesonet.agron.iastate.edu>"
+    msg["To"] = ", ".join(emails)
+    msg.add_header("reply-to", "akrherz@iastate.edu")
 
     # Send the email via our own SMTP server.
-    smtp = smtplib.SMTP('mailhub.iastate.edu')
-    smtp.sendmail(msg['From'], msg['To'], msg.as_string())
+    smtp = smtplib.SMTP("mailhub.iastate.edu")
+    smtp.sendmail(msg["From"], msg["To"], msg.as_string())
     smtp.quit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

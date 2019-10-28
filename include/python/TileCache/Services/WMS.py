@@ -6,11 +6,12 @@ import TileCache.Layer as Layer
 
 class WMS(Request):
     """WMS Service"""
+
     def parse(self, fields, path, host):
         param = {}
-        for key in ['bbox', 'layers', 'request', 'version']: 
+        for key in ["bbox", "layers", "request", "version"]:
             if key.upper() in fields:
-                param[key] = fields[key.upper()] 
+                param[key] = fields[key.upper()]
             elif key in fields:
                 param[key] = fields[key]
             else:
@@ -30,7 +31,8 @@ class WMS(Request):
             if not tile:
                 raise Exception(
                     "couldn't calculate tile index for layer %s from (%s)"
-                    % (layer.name, bbox))
+                    % (layer.name, bbox)
+                )
             tiles.append(tile)
 
         if len(tiles) > 1:
@@ -74,7 +76,10 @@ class WMS(Request):
             <Title>%s</Title>
             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="%s"/>
           </Service>
-        """ % (description, host)
+        """ % (
+            description,
+            host,
+        )
 
         xml += """
           <Capability>
@@ -86,12 +91,17 @@ class WMS(Request):
                     <Get><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="%s"/></Get>
                   </HTTP>
                 </DCPType>
-              </GetCapabilities>""" % (host)
+              </GetCapabilities>""" % (
+            host
+        )
         xml += """
               <GetMap>"""
         for format in formats:
-            xml += """
-                <Format>%s</Format>\n""" % format
+            xml += (
+                """
+                <Format>%s</Format>\n"""
+                % format
+            )
         xml += """
                 <DCPType>
                   <HTTP>
@@ -99,7 +109,9 @@ class WMS(Request):
                   </HTTP>
                 </DCPType>
               </GetMap>
-            </Request>""" % (host)
+            </Request>""" % (
+            host
+        )
         xml += """
             <Exception>
               <Format>text/plain</Format>
@@ -119,9 +131,18 @@ class WMS(Request):
                 <Layers>%s</Layers>
                 <Styles></Styles>
               </TileSet>""" % (
-                layer.srs, layer.srs, layer.bbox[0], layer.bbox[1],
-                layer.bbox[2], layer.bbox[3], resolutions, layer.size[0],
-                layer.size[1], layer.format(), name )
+                layer.srs,
+                layer.srs,
+                layer.bbox[0],
+                layer.bbox[1],
+                layer.bbox[2],
+                layer.bbox[3],
+                resolutions,
+                layer.size[0],
+                layer.size[1],
+                layer.format(),
+                name,
+            )
         xml += """
             </VendorSpecificCapabilities>
             <UserDefinedSymbolization SupportSLD="0" UserLayer="0"
@@ -137,8 +158,15 @@ class WMS(Request):
               <BoundingBox SRS="%s" minx="%f" miny="%f"
                                     maxx="%f" maxy="%f" />
             </Layer>""" % (
-                name, layer.name, layer.srs, layer.srs,
-                layer.bbox[0], layer.bbox[1], layer.bbox[2], layer.bbox[3])
+                name,
+                layer.name,
+                layer.srs,
+                layer.srs,
+                layer.bbox[0],
+                layer.bbox[1],
+                layer.bbox[2],
+                layer.bbox[3],
+            )
 
         xml += """
             </Layer>

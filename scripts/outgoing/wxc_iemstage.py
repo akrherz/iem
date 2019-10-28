@@ -11,7 +11,7 @@ from pyiem.util import get_dbconn
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconn('iem', user='nobody')
+    pgconn = get_dbconn("iem", user="nobody")
     icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     state = sys.argv[1]
@@ -35,20 +35,31 @@ def main():
   10 Sig Stage Major
   10 Sig Stage Record
   10 Sig Stage Text
-""" % (datetime.datetime.now().strftime("%Y.%m.%d.%H%M"), )
-    os.write(tmpfd, s.encode('ascii', 'ignore'))
+""" % (
+        datetime.datetime.now().strftime("%Y.%m.%d.%H%M"),
+    )
+    os.write(tmpfd, s.encode("ascii", "ignore"))
 
     def compute_text(row):
         """ Generate text of what this current stage is """
-        stage = row['value']
-        for s in ['Record', 'Major', 'Moderate', 'Flood', 'Bankfull',
-                  'Action']:
-            if (row['ss_'+s.lower()] != 'M' and
-                    float(row['ss_'+s.lower()]) < stage):
+        stage = row["value"]
+        for s in [
+            "Record",
+            "Major",
+            "Moderate",
+            "Flood",
+            "Bankfull",
+            "Action",
+        ]:
+            if (
+                row["ss_" + s.lower()] != "M"
+                and float(row["ss_" + s.lower()]) < stage
+            ):
                 return s
-        return 'Normal'
+        return "Normal"
 
-    icursor.execute("""
+    icursor.execute(
+        """
      SELECT c.value, c.source, ST_x(geom) as lon, ST_y(geom) as lat, name,
      station, valid,
      case when sigstage_low is null then 'M'
@@ -70,27 +81,40 @@ def main():
      s.network in ('%s_DCP') and c.valid > now() - '4 hours'::interval
      and c.physical_code in ('HG','HP', 'HT') and c.duration = 'I'
      and c.extremum = 'Z' ORDER by rank DESC
-    """ % (state,))
+    """
+        % (state,)
+    )
 
     used = []
     for row in icursor:
-        nwsli = row['station']
-        if row['source'] in ['R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9']:
+        nwsli = row["station"]
+        if row["source"] in ["R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9"]:
             continue
         if nwsli in used:
             continue
         used.append(nwsli)
-        s = ("%5s %-64.64s %02i %s %-7.2f %-7.2f %-10.2f %-10.10s "
-             "%-10.10s %-10.10s %-10.10s %-10.10s %-10.10s %-10.10s "
-             "%-10.10s\n"
-             ) % (
-                row['station'], row['name'], row['valid'].day,
-                row['valid'].strftime("%H%M"),
-                row['lat'], row['lon'], row['value'],
-                row['ss_low'], row['ss_action'], row['ss_bankfull'],
-                row['ss_flood'], row['ss_moderate'], row['ss_major'],
-                row['ss_record'], compute_text(row))
-        os.write(tmpfd, s.encode('ascii', 'ignore'))
+        s = (
+            "%5s %-64.64s %02i %s %-7.2f %-7.2f %-10.2f %-10.10s "
+            "%-10.10s %-10.10s %-10.10s %-10.10s %-10.10s %-10.10s "
+            "%-10.10s\n"
+        ) % (
+            row["station"],
+            row["name"],
+            row["valid"].day,
+            row["valid"].strftime("%H%M"),
+            row["lat"],
+            row["lon"],
+            row["value"],
+            row["ss_low"],
+            row["ss_action"],
+            row["ss_bankfull"],
+            row["ss_flood"],
+            row["ss_moderate"],
+            row["ss_major"],
+            row["ss_record"],
+            compute_text(row),
+        )
+        os.write(tmpfd, s.encode("ascii", "ignore"))
 
     os.close(tmpfd)
 
@@ -100,5 +124,5 @@ def main():
     os.remove(tmpfn)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

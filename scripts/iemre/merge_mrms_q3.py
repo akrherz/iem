@@ -23,9 +23,9 @@ def run(ts):
       ts (datetime): timestamptz at midnight central time and we are running
         forward in time
     """
-    nc = ncopen(iemre.get_daily_mrms_ncname(ts.year), 'a', timeout=300)
+    nc = ncopen(iemre.get_daily_mrms_ncname(ts.year), "a", timeout=300)
     offset = iemre.daily_offset(ts)
-    ncprecip = nc.variables['p01d']
+    ncprecip = nc.variables["p01d"]
 
     gmtts = ts.astimezone(pytz.UTC)
     utcnow = utc()
@@ -36,20 +36,20 @@ def run(ts):
         if gmtts > utcnow:
             continue
         gribfn = None
-        for prefix in ['GaugeCorr_QPE_01H', 'RadarOnly_QPE_01H']:
+        for prefix in ["GaugeCorr_QPE_01H", "RadarOnly_QPE_01H"]:
             fn = mrms.fetch(prefix, gmtts)
             if fn is None:
                 continue
-            fp = gzip.GzipFile(fn, 'rb')
+            fp = gzip.GzipFile(fn, "rb")
             (_, gribfn) = tempfile.mkstemp()
-            tmpfp = open(gribfn, 'wb')
+            tmpfp = open(gribfn, "wb")
             tmpfp.write(fp.read())
             tmpfp.close()
             os.unlink(fn)
             break
         if gribfn is None:
             if gmtts < utcnow:
-                print("merge_mrms_q3.py MISSING %s" % (gmtts, ))
+                print("merge_mrms_q3.py MISSING %s" % (gmtts,))
             continue
         grbs = pygrib.open(gribfn)
         grb = grbs[1]
@@ -57,7 +57,7 @@ def run(ts):
             lats, _ = grb.latlons()
         os.unlink(gribfn)
 
-        val = grb['values']
+        val = grb["values"]
         # Anything less than zero, we set to zero
         val = np.where(val < 0, 0, val)
         if total is None:
@@ -66,7 +66,7 @@ def run(ts):
             total += val
 
     if lats is None:
-        print("merge_mrms_q3 nodata for %s" % (ts.date(), ))
+        print("merge_mrms_q3 nodata for %s" % (ts.date(),))
         return
     # CAREFUL HERE!  The MRMS grid is North to South
     # set top (smallest y)
@@ -84,8 +84,7 @@ def main(argv):
     """ go main go """
     if len(argv) == 4:
         # 12 noon to prevent ugliness with timezones
-        ts = datetime.datetime(int(argv[1]), int(argv[2]),
-                               int(argv[3]), 12, 0)
+        ts = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]), 12, 0)
     else:
         # default to noon today
         ts = datetime.datetime.now()
@@ -97,5 +96,5 @@ def main(argv):
     run(ts)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

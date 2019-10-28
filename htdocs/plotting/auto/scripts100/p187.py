@@ -9,27 +9,37 @@ from pyiem.exceptions import NoDataFound
 def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
-    desc['data'] = True
-    desc['description'] = """This chart presents the rank a station's yearly
+    desc["data"] = True
+    desc[
+        "description"
+    ] = """This chart presents the rank a station's yearly
     summary value has against an unweighted population of available
     observations in the state.  The green line is a simple average of the
     plot."""
-    desc['arguments'] = [
-        dict(type='station', name='station', default='IA0000',
-             label='Select Station:', network='IACLIMATE'),
-        ]
+    desc["arguments"] = [
+        dict(
+            type="station",
+            name="station",
+            default="IA0000",
+            label="Select Station:",
+            network="IACLIMATE",
+        )
+    ]
     return desc
 
 
 def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
-    station = ctx['station']
-    table = "alldata_%s" % (station[:2], )
+    station = ctx["station"]
+    table = "alldata_%s" % (station[:2],)
 
-    df = read_sql("""
+    df = read_sql(
+        """
     with data as (
-        select station, year, sum(precip) from """ + table + """
+        select station, year, sum(precip) from """
+        + table
+        + """
         WHERE year >= 1893
         GROUP by station, year),
     stdata as (
@@ -44,35 +54,39 @@ def plotter(fdict):
     select a.station, a.year, a.percentile, s.sum, a.avgval
     from agg a JOIN stdata s on (a.year = s.year)
     where a.station = %s ORDER by a.year ASC
-    """, get_dbconn('coop'), params=(station, station), index_col='year')
+    """,
+        get_dbconn("coop"),
+        params=(station, station),
+        index_col="year",
+    )
     if df.empty:
         raise NoDataFound("No Data Found.")
 
     fig = plt.figure(figsize=(6, 7.5))
     ax = fig.add_axes([0.13, 0.52, 0.8, 0.4])
-    meanval = df['percentile'].mean()
-    bars = ax.bar(df.index.values, df['percentile'], color='b')
+    meanval = df["percentile"].mean()
+    bars = ax.bar(df.index.values, df["percentile"], color="b")
     for mybar in bars:
         if mybar.get_height() > meanval:
-            mybar.set_color('red')
-    ax.axhline(meanval, color='green', lw=2, zorder=5)
-    ax.text(df.index.max() + 1, meanval, "%.1f" % (meanval, ), color='green')
+            mybar.set_color("red")
+    ax.axhline(meanval, color="green", lw=2, zorder=5)
+    ax.text(df.index.max() + 1, meanval, "%.1f" % (meanval,), color="green")
     ax.set_xlim(df.index.min() - 1, df.index.max() + 1)
     ax.set_ylim(0, 100)
     ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     ax.set_ylabel("Percentile (no spatial weighting)")
     ax.grid(True)
-    ax.set_title((
-        "[%s] %s\nYearly Precip Total Percentile for all %s stations "
-         ) % (station, ctx['_nt'].sts[station]['name'], station[:2])
+    ax.set_title(
+        ("[%s] %s\nYearly Precip Total Percentile for all %s stations ")
+        % (station, ctx["_nt"].sts[station]["name"], station[:2])
     )
 
     # second plot
     ax = fig.add_axes([0.13, 0.07, 0.8, 0.4])
-    ax.bar(df.index.values, df['sum'] - df['avgval'])
-    meanval = (df['sum'] - df['avgval']).mean()
-    ax.axhline(meanval, color='green', lw=2, zorder=5)
-    ax.text(df.index.max() + 1, meanval, "%.2f" % (meanval, ), color='green')
+    ax.bar(df.index.values, df["sum"] - df["avgval"])
+    meanval = (df["sum"] - df["avgval"]).mean()
+    ax.axhline(meanval, color="green", lw=2, zorder=5)
+    ax.text(df.index.max() + 1, meanval, "%.2f" % (meanval,), color="green")
     ax.set_xlim(df.index.min() - 1, df.index.max() + 1)
     ax.set_ylabel("Bias to State Arithmetic Mean")
     ax.grid(True)
@@ -80,5 +94,5 @@ def plotter(fdict):
     return fig, df
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     plotter(dict())

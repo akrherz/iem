@@ -12,14 +12,19 @@ from pyiem.util import get_dbconn
 
 def zero_hourly(station, sts, ets):
     """Zero out the hourly data"""
-    pgconn = get_dbconn('isuag')
+    pgconn = get_dbconn("isuag")
     cursor = pgconn.cursor()
-    for table in ['sm_hourly', 'sm_15minute']:
-        cursor.execute("""
-            UPDATE """ + table + """
+    for table in ["sm_hourly", "sm_15minute"]:
+        cursor.execute(
+            """
+            UPDATE """
+            + table
+            + """
             SET rain_mm_tot_qc = 0, rain_mm_tot_f = 'Z', rain_mm_tot = 0
             WHERE station = %s and valid > %s and valid <= %s
-        """, (station, sts, ets))
+        """,
+            (station, sts, ets),
+        )
         print("%s updated %s rows" % (table, cursor.rowcount))
     cursor.close()
     pgconn.commit()
@@ -27,30 +32,36 @@ def zero_hourly(station, sts, ets):
 
 def zero_daily(station, date):
     """Zero out the daily data"""
-    pgconn = get_dbconn('isuag')
+    pgconn = get_dbconn("isuag")
     cursor = pgconn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         UPDATE sm_daily
         SET rain_mm_tot_qc = 0, rain_mm_tot_f = 'Z', rain_mm_tot = 0
         WHERE station = %s and valid = %s
-    """, (station, date))
-    print("sm_daily updated %s rows" % (cursor.rowcount, ))
+    """,
+        (station, date),
+    )
+    print("sm_daily updated %s rows" % (cursor.rowcount,))
     cursor.close()
     pgconn.commit()
 
 
 def zero_iem(station, date):
     """Zero out the hourly data"""
-    pgconn = get_dbconn('iem')
+    pgconn = get_dbconn("iem")
     cursor = pgconn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         UPDATE summary s
         SET pday = 0
         FROM stations t
         WHERE s.iemid = t.iemid and t.id = %s and t.network = 'ISUSM'
         and day = %s
-    """, (station, date))
-    print("summary updated %s rows" % (cursor.rowcount, ))
+    """,
+        (station, date),
+    )
+    print("summary updated %s rows" % (cursor.rowcount,))
     cursor.close()
     pgconn.commit()
 
@@ -69,5 +80,5 @@ def main(argv):
     zero_iem(station, date)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

@@ -8,22 +8,27 @@ import configparser
 
 from six import string_types
 from TileCache.base import (
-    TileCacheException, TileCacheLayerNotFoundException,
-    TileCacheFutureException)
+    TileCacheException,
+    TileCacheLayerNotFoundException,
+    TileCacheFutureException,
+)
 import TileCache.Cache as Cache
 import TileCache.Layer as Layer
 from TileCache.Services.TMS import TMS
 from TileCache.Services.WMS import WMS
 
 
-cfgfiles = ("/etc/tilecache.cfg", os.path.join("..", "tilecache.cfg"),
-            "tilecache.cfg")
+cfgfiles = (
+    "/etc/tilecache.cfg",
+    os.path.join("..", "tilecache.cfg"),
+    "tilecache.cfg",
+)
 
 
 def import_module(name):
     """Helper module to import any module based on a name"""
     mod = __import__(name)
-    components = name.split('.')
+    components = name.split(".")
     for comp in components[1:]:
         mod = getattr(mod, comp)
     return mod
@@ -31,8 +36,15 @@ def import_module(name):
 
 class Service(object):
     """Our Service Object"""
-    __slots__ = ("layers", "cache", "metadata", "tilecache_options", "config",
-                 "files")
+
+    __slots__ = (
+        "layers",
+        "cache",
+        "metadata",
+        "tilecache_options",
+        "config",
+        "files",
+    )
 
     def __init__(self, cache, layers, metadata=dict()):
         """Constructor"""
@@ -66,6 +78,7 @@ class Service(object):
         if module is Layer:
             return section_object(section, **objargs)
         return section_object(**objargs)
+
     loadFromSection = classmethod(_loadFromSection)
 
     def _load(cls, *files):
@@ -83,9 +96,10 @@ class Service(object):
                     metadata[key] = config.get("metadata", key)
 
             if config.has_section("tilecache_options"):
-                if 'path' in config.options("tilecache_options"):
-                    for path in config.get("tilecache_options",
-                                           "path").split(","):
+                if "path" in config.options("tilecache_options"):
+                    for path in config.get("tilecache_options", "path").split(
+                        ","
+                    ):
                         sys.path.insert(0, path)
 
             cache = cls.loadFromSection(config, "cache", Cache)
@@ -94,11 +108,12 @@ class Service(object):
             for section in config.sections():
                 if section in cls.__slots__:
                     continue
-                layers[section] = cls.loadFromSection(config, section, Layer,
-                                                      cache=cache)
+                layers[section] = cls.loadFromSection(
+                    config, section, Layer, cache=cache
+                )
         except Exception as exp:
-            metadata['exception'] = exp
-            metadata['traceback'] = str(exp)
+            metadata["exception"] = exp
+            metadata["traceback"] = str(exp)
         service = cls(cache, layers, metadata)
         service.files = files
         service.config = config
@@ -109,17 +124,19 @@ class Service(object):
     def generate_crossdomain_xml(self):
         """Helper method for generating the XML content for a crossdomain.xml
            file, to be used to allow remote sites to access this content."""
-        xml = ["""<?xml version="1.0"?>
+        xml = [
+            """<?xml version="1.0"?>
 <!DOCTYPE cross-domain-policy SYSTEM
   "http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd">
 <cross-domain-policy>
-        """]
-        if 'crossdomain_sites' in self.metadata:
-            sites = self.metadata['crossdomain_sites'].split(',')
+        """
+        ]
+        if "crossdomain_sites" in self.metadata:
+            sites = self.metadata["crossdomain_sites"].split(",")
             for site in sites:
                 xml.append('  <allow-access-from domain="%s" />' % site)
         xml.append("</cross-domain-policy>")
-        return ('text/xml', "\n".join(xml))
+        return ("text/xml", "\n".join(xml))
 
     def renderTile(self, tile, force=False):
         """render a Tile please"""
@@ -139,43 +156,75 @@ class Service(object):
             else:
                 raise Exception("Zero length data returned from layer.")
             if layer.debug:
-                sys.stderr.write(("Cache miss: %s, Tile: x: %s, y: %s, z: %s, "
-                                  "time: %s\n"
-                                  ) % (tile.bbox(), tile.x, tile.y, tile.z,
-                                       (time.time() - start)))
+                sys.stderr.write(
+                    (
+                        "Cache miss: %s, Tile: x: %s, y: %s, z: %s, "
+                        "time: %s\n"
+                    )
+                    % (
+                        tile.bbox(),
+                        tile.x,
+                        tile.y,
+                        tile.z,
+                        (time.time() - start),
+                    )
+                )
         else:
             if layer.debug:
-                sys.stderr.write(("Cache hit: %s, Tile: x: %s, y: %s, z: %s, "
-                                  "time: %s, debug: %s\n"
-                                  ) % (tile.bbox(), tile.x, tile.y, tile.z,
-                                       (time.time() - start), layer.debug))
+                sys.stderr.write(
+                    (
+                        "Cache hit: %s, Tile: x: %s, y: %s, z: %s, "
+                        "time: %s, debug: %s\n"
+                    )
+                    % (
+                        tile.bbox(),
+                        tile.x,
+                        tile.y,
+                        tile.z,
+                        (time.time() - start),
+                        layer.debug,
+                    )
+                )
 
         return (layer.mime_type, image)
 
-    def dispatchRequest(self, params, path_info="/", req_method="GET",
-                        host="http://example.com/"):
+    def dispatchRequest(
+        self,
+        params,
+        path_info="/",
+        req_method="GET",
+        host="http://example.com/",
+    ):
         """dispatch the request!"""
-        if 'exception' in self.metadata:
-            raise TileCacheException("%s\n%s" % (self.metadata['exception'],
-                                                 self.metadata['traceback']))
+        if "exception" in self.metadata:
+            raise TileCacheException(
+                "%s\n%s"
+                % (self.metadata["exception"], self.metadata["traceback"])
+            )
         if path_info.find("crossdomain.xml") != -1:
             return self.generate_crossdomain_xml()
 
         # We currently are just supporting TMS or WMS REquests
-        if ("service" in params or "SERVICE" in params or
-                "REQUEST" in params and params['REQUEST'] == "GetMap" or
-                "request" in params and params['request'] == "GetMap"):
+        if (
+            "service" in params
+            or "SERVICE" in params
+            or "REQUEST" in params
+            and params["REQUEST"] == "GetMap"
+            or "request" in params
+            and params["request"] == "GetMap"
+        ):
             tile = WMS(self).parse(params, path_info, host)
         else:
             tile = TMS(self).parse(params, path_info, host)
-        if not hasattr(tile, 'layer'):
-            return 'text/xml', tile.data.encode('utf-8')
-        return self.renderTile(tile, 'FORCE' in params)
+        if not hasattr(tile, "layer"):
+            return "text/xml", tile.data.encode("utf-8")
+        return self.renderTile(tile, "FORCE" in params)
 
 
 def wsgiHandler(environ, start_response, service):
     """ This is the WSGI handler """
     from paste.request import parse_formvars
+
     host = ""
     path_info = environ.get("PATH_INFO", "")
 
@@ -189,23 +238,29 @@ def wsgiHandler(environ, start_response, service):
 
     try:
         fields = parse_formvars(environ)
-        fmt, image = service.dispatchRequest(fields,
-                                             path_info, req_method, host)
-        headers = [('Content-Type', fmt)]
+        fmt, image = service.dispatchRequest(
+            fields, path_info, req_method, host
+        )
+        headers = [("Content-Type", fmt)]
         if fmt.startswith("image/"):
             if service.cache.sendfile:
-                headers.append(('X-SendFile', image))
+                headers.append(("X-SendFile", image))
             if service.cache.expire:
-                headers.append(('Expires', email.utils.formatdate(
-                                time.time() + service.cache.expire,
-                                False, True)))
+                headers.append(
+                    (
+                        "Expires",
+                        email.utils.formatdate(
+                            time.time() + service.cache.expire, False, True
+                        ),
+                    )
+                )
 
         start_response("200 OK", headers)
         if service.cache.sendfile and fmt.startswith("image/"):
             return []
         return [image]
     except TileCacheException as exp:
-        status = '404 Tile Not Found'
+        status = "404 Tile Not Found"
         msg = "An error occurred: %s" % (str(exp),)
     except TileCacheLayerNotFoundException as exp:
         status = "500 Internal Server Error"
@@ -218,10 +273,15 @@ def wsgiHandler(environ, start_response, service):
         E = str(exp)
         # Swallow this error
         if E.find("Corrupt, empty or missing file") == -1:
-            sys.stderr.write(("[client: %s] Path: %s Err: %s Referrer: %s\n"
-                              ) % (environ.get("REMOTE_ADDR"), path_info,
-                                   E.replace("\n", " "),
-                                   environ.get("HTTP_REFERER")))
+            sys.stderr.write(
+                ("[client: %s] Path: %s Err: %s Referrer: %s\n")
+                % (
+                    environ.get("REMOTE_ADDR"),
+                    path_info,
+                    E.replace("\n", " "),
+                    environ.get("HTTP_REFERER"),
+                )
+            )
         # nice code, but we are getting invalid requests into the near future
         # which error out.
         # else:
@@ -234,9 +294,9 @@ def wsgiHandler(environ, start_response, service):
         #                      "missing file %s Referrer: %s\n"
         #                      ) % (environ.get("REMOTE_ADDR"), path_info,
         #                           missfn, environ.get("HTTP_REFERER")))
-        msg = "An error occurred: %s\n" % (exp, )
+        msg = "An error occurred: %s\n" % (exp,)
 
-    start_response(status, [('Content-Type', 'text/plain')])
+    start_response(status, [("Content-Type", "text/plain")])
     if isinstance(msg, string_types):
-        msg = msg.encode('utf-8')
+        msg = msg.encode("utf-8")
     return [msg]

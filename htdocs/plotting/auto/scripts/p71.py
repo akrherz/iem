@@ -11,24 +11,28 @@ from pyiem.plot.use_agg import plt
 from pyiem.exceptions import NoDataFound
 from metpy.units import units
 
-PDICT = {'KT': 'knots',
-         'MPH': 'miles per hour',
-         'MPS': 'meters per second',
-         'KMH': 'kilometers per hour'}
+PDICT = {
+    "KT": "knots",
+    "MPH": "miles per hour",
+    "MPS": "meters per second",
+    "KMH": "kilometers per hour",
+}
 XREF_UNITS = {
-    'MPS': units('meter / second'),
-    'KT': units('knot'),
-    'KMH': units('kilometer / hour'),
-    'MPH': units('mile / hour'),
+    "MPS": units("meter / second"),
+    "KT": units("knot"),
+    "KMH": units("kilometer / hour"),
+    "MPH": units("mile / hour"),
 }
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
-    desc['data'] = True
-    desc['cache'] = 86400
-    desc['description'] = """This plot displays daily average wind speeds for
+    desc["data"] = True
+    desc["cache"] = 86400
+    desc[
+        "description"
+    ] = """This plot displays daily average wind speeds for
     a given year and month of your choice.  These values are computed by the
     IEM using available observations.  Some observation sites explicitly
     produce an average wind speed, but that is not considered for this plot.
@@ -37,16 +41,33 @@ def get_description():
     The average wind direction
     is computed by vector averaging of the wind speed and direction reports.
     """
-    desc['arguments'] = [
-        dict(type='sid', name='zstation', default='DSM',
-             network='IA_ASOS', label='Select Station:'),
-        dict(type='year', name='year', default=datetime.datetime.now().year,
-             label='Select Year:'),
-        dict(type='month', name='month', default=datetime.datetime.now().month,
-             label='Select Month:'),
-        dict(type='select', name='units', default='MPH',
-             label='Wind Speed Units:', options=PDICT),
-
+    desc["arguments"] = [
+        dict(
+            type="sid",
+            name="zstation",
+            default="DSM",
+            network="IA_ASOS",
+            label="Select Station:",
+        ),
+        dict(
+            type="year",
+            name="year",
+            default=datetime.datetime.now().year,
+            label="Select Year:",
+        ),
+        dict(
+            type="month",
+            name="month",
+            default=datetime.datetime.now().month,
+            label="Select Month:",
+        ),
+        dict(
+            type="select",
+            name="units",
+            default="MPH",
+            label="Wind Speed Units:",
+            options=PDICT,
+        ),
     ]
     return desc
 
@@ -54,54 +75,76 @@ def get_description():
 def draw_line(x, y, angle):
     """Draw a line"""
     r = 0.25
-    plt.arrow(x, y, r * np.cos(angle), r * np.sin(angle),
-              head_width=0.35, head_length=0.5, fc='k', ec='k')
+    plt.arrow(
+        x,
+        y,
+        r * np.cos(angle),
+        r * np.sin(angle),
+        head_width=0.35,
+        head_length=0.5,
+        fc="k",
+        ec="k",
+    )
 
 
 def plotter(fdict):
     """ Go """
-    pgconn = get_dbconn('iem')
+    pgconn = get_dbconn("iem")
     ctx = get_autoplot_context(fdict, get_description())
-    station = ctx['zstation']
-    plot_units = ctx['units']
-    year = ctx['year']
-    month = ctx['month']
+    station = ctx["zstation"]
+    plot_units = ctx["units"]
+    year = ctx["year"]
+    month = ctx["month"]
     sts = datetime.date(year, month, 1)
     ets = (sts + datetime.timedelta(days=35)).replace(day=1)
 
-    df = read_sql("""
+    df = read_sql(
+        """
         SELECT day, avg_sknt as sknt, vector_avg_drct as drct
         from summary s JOIN stations t
         ON (t.iemid = s.iemid) WHERE t.id = %s and t.network = %s and
         s.day >= %s and s.day < %s and avg_sknt is not null
         ORDER by day ASC
-    """, pgconn, params=(station, ctx['network'], sts, ets))
+    """,
+        pgconn,
+        params=(station, ctx["network"], sts, ets),
+    )
     if df.empty:
         raise NoDataFound("ERROR: No Data Found")
-    df['day'] = pd.to_datetime(df['day'])
-    sknt = (df['sknt'].values * units('knot')).to(XREF_UNITS[plot_units]).m
+    df["day"] = pd.to_datetime(df["day"])
+    sknt = (df["sknt"].values * units("knot")).to(XREF_UNITS[plot_units]).m
     (fig, ax) = plt.subplots(1, 1)
     ax.bar(
-        df['day'].dt.day.values, sknt, ec='green', fc='green', align='center')
+        df["day"].dt.day.values, sknt, ec="green", fc="green", align="center"
+    )
     pos = max([min(sknt) / 2.0, 0.5])
-    for d, _, r in zip(df['day'].dt.day.values, sknt, df['drct'].values):
-        draw_line(d, max(sknt)+0.5, (270. - r) / 180. * np.pi)
-        txt = ax.text(d, pos, drct2text(r), ha='center', rotation=90,
-                      color='white', va='center')
-        txt.set_path_effects([PathEffects.withStroke(linewidth=2,
-                                                     foreground="k")])
+    for d, _, r in zip(df["day"].dt.day.values, sknt, df["drct"].values):
+        draw_line(d, max(sknt) + 0.5, (270.0 - r) / 180.0 * np.pi)
+        txt = ax.text(
+            d,
+            pos,
+            drct2text(r),
+            ha="center",
+            rotation=90,
+            color="white",
+            va="center",
+        )
+        txt.set_path_effects(
+            [PathEffects.withStroke(linewidth=2, foreground="k")]
+        )
     ax.grid(True, zorder=11)
-    ax.set_title(("%s [%s]\n%s Daily Average Wind Speed and Direction"
-                  ) % (ctx['_nt'].sts[station]['name'], station,
-                       sts.strftime("%b %Y")))
+    ax.set_title(
+        ("%s [%s]\n%s Daily Average Wind Speed and Direction")
+        % (ctx["_nt"].sts[station]["name"], station, sts.strftime("%b %Y"))
+    )
     ax.set_xlim(0.5, 31.5)
     ax.set_xticks(range(1, 31, 5))
-    ax.set_ylim(top=max(sknt)+2)
+    ax.set_ylim(top=max(sknt) + 2)
 
     ax.set_ylabel("Average Wind Speed [%s]" % (PDICT[plot_units],))
 
     return fig, df
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     plotter(dict())

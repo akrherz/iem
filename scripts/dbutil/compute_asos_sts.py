@@ -16,9 +16,9 @@ def main(network):
     basets = datetime.datetime.now()
     basets = basets.replace(tzinfo=pytz.timezone("America/Chicago"))
 
-    asos = get_dbconn('asos', user='nobody')
+    asos = get_dbconn("asos", user="nobody")
     acursor = asos.cursor()
-    mesosite = get_dbconn('mesosite')
+    mesosite = get_dbconn("mesosite")
     mcursor = mesosite.cursor()
 
     table = NetworkTable(network)
@@ -28,45 +28,63 @@ def main(network):
     else:
         ids = "('%s')" % (keys[0],)
 
-    acursor.execute("""SELECT station, min(valid), max(valid) from alldata
+    acursor.execute(
+        """SELECT station, min(valid), max(valid) from alldata
         WHERE station in %s GROUP by station
-        ORDER by min ASC""" % (ids,))
+        ORDER by min ASC"""
+        % (ids,)
+    )
     for row in acursor:
         station = row[0]
-        if table.sts[station]['archive_begin'] != row[1]:
-            print(('Updated %s STS WAS: %s NOW: %s'
-                   ) % (station, table.sts[station]['archive_begin'], row[1]))
+        if table.sts[station]["archive_begin"] != row[1]:
+            print(
+                ("Updated %s STS WAS: %s NOW: %s")
+                % (station, table.sts[station]["archive_begin"], row[1])
+            )
 
-            mcursor.execute("""UPDATE stations SET archive_begin = %s
-                 WHERE id = %s and network = %s""", (row[1], station, network))
+            mcursor.execute(
+                """UPDATE stations SET archive_begin = %s
+                 WHERE id = %s and network = %s""",
+                (row[1], station, network),
+            )
             if mcursor.rowcount == 0:
-                print('ERROR: No rows updated')
+                print("ERROR: No rows updated")
 
         # Site without data in past year is offline!
         if (basets - row[2]).days > 365:
-            if table.sts[station]['archive_end'] != row[2]:
-                print(('Updated %s ETS WAS: %s NOW: %s'
-                       ) % (station, table.sts[station]['archive_end'],
-                            row[2]))
+            if table.sts[station]["archive_end"] != row[2]:
+                print(
+                    ("Updated %s ETS WAS: %s NOW: %s")
+                    % (station, table.sts[station]["archive_end"], row[2])
+                )
 
-                mcursor.execute("""
+                mcursor.execute(
+                    """
                     UPDATE stations SET archive_end = %s
                     WHERE id = %s and network = %s
-                """, (row[2], station, network))
+                """,
+                    (row[2], station, network),
+                )
 
         # If it was offline and now is on, correct this
-        if ((basets - row[2]).days < 365 and
-                table.sts[station]['archive_end'] is not None):
-            print(('Updated %s ETS WAS: %s NOW: None'
-                   '') % (station, table.sts[station]['archive_end']))
+        if (basets - row[2]).days < 365 and table.sts[station][
+            "archive_end"
+        ] is not None:
+            print(
+                ("Updated %s ETS WAS: %s NOW: None" "")
+                % (station, table.sts[station]["archive_end"])
+            )
 
-            mcursor.execute("""UPDATE stations SET archive_end = null
-                     WHERE id = %s and network = %s""", (station, network))
+            mcursor.execute(
+                """UPDATE stations SET archive_end = null
+                     WHERE id = %s and network = %s""",
+                (station, network),
+            )
 
     mcursor.close()
     mesosite.commit()
     mesosite.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv[1])

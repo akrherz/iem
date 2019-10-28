@@ -5,15 +5,17 @@ from pyiem.util import get_dbconn
 
 def main():
     """Go Main Go"""
-    MESOSITE = get_dbconn('mesosite')
+    MESOSITE = get_dbconn("mesosite")
     mcursor = MESOSITE.cursor()
-    POSTGIS = get_dbconn('postgis', user='nobody')
+    POSTGIS = get_dbconn("postgis", user="nobody")
     pcursor = POSTGIS.cursor()
 
-    pcursor.execute("""
+    pcursor.execute(
+        """
         SELECT station, min(valid), max(valid), count(*) from
         raob_flights GROUP by station ORDER by count DESC
-    """)
+    """
+    )
     for row in pcursor:
         station = row[0]
         sts = row[1]
@@ -22,10 +24,13 @@ def main():
         if ets.year == 2013:
             ets = None
             online = True
-        mcursor.execute("""
+        mcursor.execute(
+            """
             UPDATE stations SET online = %s, archive_begin = %s,
             archive_end = %s WHERE network = 'RAOB' and id = %s
-        """, (online, sts, ets, station))
+        """,
+            (online, sts, ets, station),
+        )
         if mcursor.rowcount != 1:
             print("%s %s %s %s" % (station, sts, ets, row[3]))
 
@@ -34,5 +39,5 @@ def main():
     MESOSITE.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

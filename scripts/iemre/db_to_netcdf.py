@@ -18,8 +18,7 @@ def main(argv):
     """Go Main Go."""
     log = logger()
     if len(argv) == 6:
-        valid = utc(
-            int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
+        valid = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
         ncfn = iemre.get_hourly_ncname(valid.year)
         idx = iemre.hourly_offset(valid)
     else:
@@ -27,7 +26,7 @@ def main(argv):
         ncfn = iemre.get_daily_ncname(valid.year)
         idx = iemre.daily_offset(valid)
     ds = iemre.get_grids(valid)
-    with ncopen(ncfn, 'a', timeout=600) as nc:
+    with ncopen(ncfn, "a", timeout=600) as nc:
         for vname in ds:
             if vname not in nc.variables:
                 continue
@@ -38,5 +37,5 @@ def main(argv):
             )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

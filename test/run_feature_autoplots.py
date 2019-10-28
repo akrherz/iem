@@ -7,22 +7,23 @@ from bs4 import BeautifulSoup
 import requests
 import pandas as pd
 from pyiem.util import get_dbconn, logger
+
 LOG = logger()
 
 
 def run_plot(uri):
     """Run this plot"""
-    uri = "http://iem.local/%s" % (uri, )
+    uri = "http://iem.local/%s" % (uri,)
     try:
         res = requests.get(uri, timeout=600)
-        soup = BeautifulSoup(res.content, 'html.parser')
-        img = soup.find_all(id='theimage')
+        soup = BeautifulSoup(res.content, "html.parser")
+        img = soup.find_all(id="theimage")
         if not img:
             return True
-        uri = "http://iem.local%s" % (img[0]['src'], )
+        uri = "http://iem.local%s" % (img[0]["src"],)
         res = requests.get(uri, timeout=600)
     except requests.exceptions.ReadTimeout:
-        print("%s -> Read Timeout" % (uri[16:], ))
+        print("%s -> Read Timeout" % (uri[16:],))
         return False
     # Known failures likely due to missing data
     if res.status_code == 400:
@@ -31,8 +32,10 @@ def run_plot(uri):
         print("%s -> HTTP: %s (timeout)" % (uri, res.status_code))
         return False
     if res.status_code != 200 or res.content == "":
-        print("%s -> HTTP: %s len(content): %s" % (
-            uri[16:], res.status_code, len(res.content)))
+        print(
+            "%s -> HTTP: %s len(content): %s"
+            % (uri[16:], res.status_code, len(res.content))
+        )
 
         return False
 
@@ -51,13 +54,15 @@ def workflow(entry):
 
 def main():
     """Do Something"""
-    pgconn = get_dbconn('mesosite')
+    pgconn = get_dbconn("mesosite")
     cursor = pgconn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT date(valid), appurl from feature
         WHERE appurl ~* '/plotting/auto/'
         ORDER by valid ASC
-    """)
+    """
+    )
     queue = []
     for row in cursor:
         queue.append(row)
@@ -67,22 +72,22 @@ def main():
     pool = Pool(4)
     for res in pool.imap_unordered(workflow, queue):
         if res[2] is False:
-            failed.append({'i': res[0], 'fmt': res[1]})
+            failed.append({"i": res[0], "fmt": res[1]})
             continue
-        timing.append({'i': res[0], 'fmt': res[1], 'secs': res[2]})
+        timing.append({"i": res[0], "fmt": res[1], "secs": res[2]})
     if not timing:
         print("WARNING: no timing results found!")
         return
     df = pd.DataFrame(timing)
-    df.set_index('i', inplace=True)
-    df.sort_values('secs', ascending=False, inplace=True)
+    df.set_index("i", inplace=True)
+    df.sort_values("secs", ascending=False, inplace=True)
     print(df.head(5))
     if failed:
         print("Failures:")
         for f in failed:
-            print("%s %s" % (f['i'], f['fmt']))
+            print("%s %s" % (f["i"], f["fmt"]))
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -10,8 +10,8 @@ from pyiem.network import Table as NetworkTable
 from pyiem.reference import state_names
 from pyiem.util import get_dbconn, ncopen
 
-NT = NetworkTable(["%sCLIMATE" % (abbr, ) for abbr in state_names])
-COOP = get_dbconn('coop', user='nobody')
+NT = NetworkTable(["%sCLIMATE" % (abbr,) for abbr in state_names])
+COOP = get_dbconn("coop", user="nobody")
 
 
 def generic_gridder(nc, cursor, idx):
@@ -22,19 +22,23 @@ def generic_gridder(nc, cursor, idx):
     lons = []
     vals = []
     for row in cursor:
-        if row[idx] is not None and row['station'] in NT.sts:
-            lats.append(NT.sts[row['station']]['lat'])
-            lons.append(NT.sts[row['station']]['lon'])
+        if row[idx] is not None and row["station"] in NT.sts:
+            lats.append(NT.sts[row["station"]]["lat"])
+            lons.append(NT.sts[row["station"]]["lon"])
             vals.append(row[idx])
     if len(vals) < 4:
-        print(("Only %s observations found for %s, won't grid"
-               ) % (len(vals), idx))
+        print(
+            ("Only %s observations found for %s, won't grid")
+            % (len(vals), idx)
+        )
         return None
 
     nn = NearestNDInterpolator((lons, lats), np.array(vals))
-    grid = nn(nc.variables['lon'][:], nc.variables['lat'][:])
-    print(("%s %s %.3f %.3f"
-           ) % (cursor.rowcount, idx, np.max(grid), np.min(grid)))
+    grid = nn(nc.variables["lon"][:], nc.variables["lat"][:])
+    print(
+        ("%s %s %.3f %.3f")
+        % (cursor.rowcount, idx, np.max(grid), np.min(grid))
+    )
     if grid is not None:
         return grid
     return None
@@ -52,25 +56,28 @@ def grid_day(nc, ts):
 
     sql = """SELECT * from climate51 WHERE valid = '%s' and
              substr(station,3,4) != '0000' and substr(station,3,1) != 'C'
-             """ % (ts.strftime("%Y-%m-%d"), )
+             """ % (
+        ts.strftime("%Y-%m-%d"),
+    )
     cursor.execute(sql)
-    res = generic_gridder(nc, cursor, 'high')
-    nc.variables['high_tmpk'][offset] = datatypes.temperature(
-        res, 'F').value('K')
+    res = generic_gridder(nc, cursor, "high")
+    nc.variables["high_tmpk"][offset] = datatypes.temperature(res, "F").value(
+        "K"
+    )
 
-    cursor.scroll(0, mode='absolute')
-    res = generic_gridder(nc, cursor, 'low')
-    nc.variables['low_tmpk'][offset] = datatypes.temperature(
-        res, 'F').value('K')
+    cursor.scroll(0, mode="absolute")
+    res = generic_gridder(nc, cursor, "low")
+    nc.variables["low_tmpk"][offset] = datatypes.temperature(res, "F").value(
+        "K"
+    )
 
-    cursor.scroll(0, mode='absolute')
-    res = generic_gridder(nc, cursor, 'precip')
-    nc.variables['p01d'][offset] = datatypes.distance(
-        res, 'IN').value('MM')
+    cursor.scroll(0, mode="absolute")
+    res = generic_gridder(nc, cursor, "precip")
+    nc.variables["p01d"][offset] = datatypes.distance(res, "IN").value("MM")
 
-    cursor.scroll(0, mode='absolute')
-    res = generic_gridder(nc, cursor, 'gdd50')
-    nc.variables['gdd50'][offset] = res
+    cursor.scroll(0, mode="absolute")
+    res = generic_gridder(nc, cursor, "gdd50")
+    nc.variables["gdd50"][offset] = res
 
 
 def workflow(ts):
@@ -78,7 +85,7 @@ def workflow(ts):
     # Load up a station table we are interested in
 
     # Load up our netcdf file!
-    nc = ncopen("/mesonet/data/ndfd/ndfd_dailyc.nc", 'a')
+    nc = ncopen("/mesonet/data/ndfd/ndfd_dailyc.nc", "a")
     grid_day(nc, ts)
     nc.close()
 

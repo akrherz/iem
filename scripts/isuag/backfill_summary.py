@@ -7,53 +7,72 @@ from __future__ import print_function
 from pyiem.util import get_dbconn
 from pyiem.datatypes import speed, distance, temperature
 
-ISUAG = get_dbconn('isuag', user='mesonet')
+ISUAG = get_dbconn("isuag", user="mesonet")
 
-IEM = get_dbconn('iem', user='mesonet')
+IEM = get_dbconn("iem", user="mesonet")
 
 
 def two():
     """option 2"""
     icursor = ISUAG.cursor()
     iemcursor = IEM.cursor()
-    icursor.execute("""
+    icursor.execute(
+        """
     SELECT station, date(valid) as dt, min(rh), max(rh) from sm_hourly
     where rh >= 0 and rh <= 100 GROUP by station, dt
-    """)
+    """
+    )
     for row in icursor:
         station = row[0]
         valid = row[1]
         min_rh = row[2]
         max_rh = row[3]
-        iemcursor.execute("""
+        iemcursor.execute(
+            """
             SELECT min_rh, max_rh from summary s JOIN stations t on
             (t.iemid = s.iemid)
             WHERE day = %s and t.id = %s and t.network = 'ISUSM'
-        """, (valid, station))
+        """,
+            (valid, station),
+        )
         if iemcursor.rowcount == 0:
-            print(('Adding summary_%s row %s %s'
-                   ) % (valid.year, station, valid))
-            iemcursor.execute("""
-            INSERT into summary_""" + str(valid.year) + """
+            print(
+                ("Adding summary_%s row %s %s") % (valid.year, station, valid)
+            )
+            iemcursor.execute(
+                """
+            INSERT into summary_"""
+                + str(valid.year)
+                + """
             (iemid, day) VALUES (
                 (SELECT iemid from stations where id = '%s' and
                 network = 'ISUSM'), '%s')
-            """ % (station, valid))
+            """
+                % (station, valid)
+            )
             row2 = [None, None]
         else:
             row2 = iemcursor.fetchone()
-        if (row2[1] is None or row2[0] is None or
-                round(row2[0], 2) != round(min_rh, 2) or
-                round(row2[1], 2) != round(max_rh, 2)):
-            print(('Mismatch %s %s min_rh: %s->%s max_rh: %s->%s'
-                   ) % (station, valid, row2[0], min_rh, row2[1], max_rh))
+        if (
+            row2[1] is None
+            or row2[0] is None
+            or round(row2[0], 2) != round(min_rh, 2)
+            or round(row2[1], 2) != round(max_rh, 2)
+        ):
+            print(
+                ("Mismatch %s %s min_rh: %s->%s max_rh: %s->%s")
+                % (station, valid, row2[0], min_rh, row2[1], max_rh)
+            )
 
-            iemcursor.execute("""
+            iemcursor.execute(
+                """
             UPDATE summary SET min_rh = %s,
             max_rh = %s WHERE
             iemid = (select iemid from stations WHERE network = 'ISUSM' and
             id = %s) and day = %s
-            """, (min_rh, max_rh, station, valid))
+            """,
+                (min_rh, max_rh, station, valid),
+            )
     iemcursor.close()
     IEM.commit()
     IEM.close()
@@ -63,25 +82,30 @@ def one():
     """option 1"""
     icursor = ISUAG.cursor()
     iemcursor = IEM.cursor()
-    icursor.execute("""
+    icursor.execute(
+        """
         SELECT station, valid, ws_mps_s_wvt, winddir_d1_wvt, rain_mm_tot,
         tair_c_max, tair_c_min
         from sm_daily
-    """)
+    """
+    )
 
     for row in icursor:
-        avg_sknt = speed(row[2], 'MPS').value('KT')
+        avg_sknt = speed(row[2], "MPS").value("KT")
         avg_drct = row[3]
-        pday = distance(row[4], 'MM').value('IN')
-        high = temperature(row[5], 'C').value('F')
-        low = temperature(row[6], 'C').value('F')
-        iemcursor.execute("""
+        pday = distance(row[4], "MM").value("IN")
+        high = temperature(row[5], "C").value("F")
+        low = temperature(row[6], "C").value("F")
+        iemcursor.execute(
+            """
         UPDATE summary SET avg_sknt = %s, vector_avg_drct = %s, pday = %s,
         max_tmpf = %s, min_tmpf = %s
         WHERE
         iemid = (select iemid from stations WHERE network = 'ISUSM' and
         id = %s) and day = %s
-        """, (avg_sknt, avg_drct, pday, high, low, row[0], row[1]))
+        """,
+            (avg_sknt, avg_drct, pday, high, low, row[0], row[1]),
+        )
     iemcursor.close()
     IEM.commit()
     IEM.close()
@@ -93,5 +117,5 @@ def main():
     two()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

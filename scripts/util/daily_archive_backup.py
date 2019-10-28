@@ -17,11 +17,12 @@ def run(date):
     os.chdir("/mesonet/tmp")
     tarfn = date.strftime("iem_%Y%m%d.tgz")
     # Step 1: Create a gzipped tar file
-    cmd = "tar -czf %s /mesonet/ARCHIVE/data/%s" % (tarfn,
-                                                    date.strftime("%Y/%m/%d"))
+    cmd = "tar -czf %s /mesonet/ARCHIVE/data/%s" % (
+        tarfn,
+        date.strftime("%Y/%m/%d"),
+    )
     subprocess.call(cmd, shell=True, stderr=subprocess.PIPE)
-    send2box(tarfn, date.strftime("/IEMArchive/%Y/%m"),
-             tmpdir="/mesonet/tmp")
+    send2box(tarfn, date.strftime("/IEMArchive/%Y/%m"), tmpdir="/mesonet/tmp")
     os.unlink(tarfn)
 
 
@@ -41,5 +42,5 @@ def main(argv):
         run(yesterday)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

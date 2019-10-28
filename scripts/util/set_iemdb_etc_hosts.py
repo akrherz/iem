@@ -10,7 +10,7 @@ import tempfile
 import os
 
 METVM4, METVM5, METVM6 = range(3)
-IPS = ['172.16.170.1', '172.16.171.1', '172.16.172.1']
+IPS = ["172.16.170.1", "172.16.171.1", "172.16.172.1"]
 LOOKUP = {
     "": IPS[METVM6],
     "-afos": IPS[METVM6],
@@ -54,26 +54,26 @@ LOOKUP = {
 def main(argv):
     """Go Main Go"""
     if len(argv) == 1:
-        print('Usage: python set_iemdb_etc_hosts.py <local|proxy>')
+        print("Usage: python set_iemdb_etc_hosts.py <local|proxy>")
         return
-    data = open('/etc/hosts').read()
+    data = open("/etc/hosts").read()
     result = []
     for line in data.split("\n"):
         result.append(line)
-        if line.startswith('# ---AUTOGEN---'):
+        if line.startswith("# ---AUTOGEN---"):
             print("Found ---AUTOGEN---")
             break
     for dbname in LOOKUP:
-        ip = LOOKUP[dbname] if argv[1] == 'proxy' else '127.0.0.1'
+        ip = LOOKUP[dbname] if argv[1] == "proxy" else "127.0.0.1"
         result.append("%s iemdb%s.local" % (ip, dbname))
-    print("added %s entries" % (len(LOOKUP), ))
+    print("added %s entries" % (len(LOOKUP),))
     (tmpfd, tmpfn) = tempfile.mkstemp()
-    os.write(tmpfd, ('\n'.join(result)).encode('ascii'))
-    os.write(tmpfd, b'\n')
+    os.write(tmpfd, ("\n".join(result)).encode("ascii"))
+    os.write(tmpfd, b"\n")
     os.close(tmpfd)
-    os.rename(tmpfn, '/etc/hosts')
-    os.chmod('/etc/hosts', 0o644)
+    os.rename(tmpfn, "/etc/hosts")
+    os.chmod("/etc/hosts", 0o644)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

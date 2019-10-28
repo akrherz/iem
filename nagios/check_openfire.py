@@ -6,7 +6,7 @@ import requests
 
 def main():
     """Go Main Go"""
-    req = requests.get('http://iem-openfire:7070')
+    req = requests.get("http://iem-openfire:7070")
     if req.status_code == 200:
         print("OK")
         return 0
@@ -14,5 +14,5 @@ def main():
     return 2
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

@@ -15,14 +15,16 @@ def main():
     icursor = pgconn.cursor()
 
     now = datetime.datetime.now().replace(
-        tzinfo=pytz.timezone("America/Chicago"))
+        tzinfo=pytz.timezone("America/Chicago")
+    )
 
-    fn = ("/mesonet/ARCHIVE/data/%s/text/ot/ot0006.dat"
-          "") % (now.strftime("%Y/%m/%d"), )
+    fn = ("/mesonet/ARCHIVE/data/%s/text/ot/ot0006.dat" "") % (
+        now.strftime("%Y/%m/%d"),
+    )
 
     if not os.path.isfile(fn):
         return
-    lines = open(fn, 'r').readlines()
+    lines = open(fn, "r").readlines()
     line = lines[-1]
 
     # January 17, 2017 02:57 PM
@@ -31,20 +33,24 @@ def main():
     if len(tokens) != 19:
         sys.exit(0)
 
-    ts = datetime.datetime.strptime(" ".join(tokens[:5]),
-                                    "%B %d, %Y %I:%M %p")
+    ts = datetime.datetime.strptime(" ".join(tokens[:5]), "%B %d, %Y %I:%M %p")
 
-    ts = now.replace(year=ts.year, month=ts.month, day=ts.day, hour=ts.hour,
-                     minute=ts.minute)
+    ts = now.replace(
+        year=ts.year,
+        month=ts.month,
+        day=ts.day,
+        hour=ts.hour,
+        minute=ts.minute,
+    )
 
     iemob = Observation("OT0006", "OT", ts)
 
-    iemob.data['tmpf'] = float(tokens[5])
-    iemob.data['relh'] = float(tokens[8])
-    iemob.data['sknt'] = speed(float(tokens[9]), 'MPH').value('KT')
-    iemob.data['drct'] = tokens[10]
-    iemob.data['alti'] = float(tokens[13])
-    iemob.data['pday'] = float(tokens[14])
+    iemob.data["tmpf"] = float(tokens[5])
+    iemob.data["relh"] = float(tokens[8])
+    iemob.data["sknt"] = speed(float(tokens[9]), "MPH").value("KT")
+    iemob.data["drct"] = tokens[10]
+    iemob.data["alti"] = float(tokens[13])
+    iemob.data["pday"] = float(tokens[14])
     iemob.save(icursor)
 
     icursor.close()
@@ -52,5 +58,5 @@ def main():
     pgconn.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

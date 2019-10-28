@@ -12,19 +12,28 @@ from pyiem.util import get_dbconn
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconn('coop')
+    pgconn = get_dbconn("coop")
     ccursor = pgconn.cursor()
 
     form = cgi.FieldStorage()
-    if ("year1" in form and "year2" in form and
-            "month1" in form and "month2" in form and
-            "day1" in form and "day2" in form):
-        sts = datetime.datetime(int(form["year1"].value),
-                                int(form["month1"].value),
-                                int(form["day1"].value))
-        ets = datetime.datetime(int(form["year2"].value),
-                                int(form["month2"].value),
-                                int(form["day2"].value))
+    if (
+        "year1" in form
+        and "year2" in form
+        and "month1" in form
+        and "month2" in form
+        and "day1" in form
+        and "day2" in form
+    ):
+        sts = datetime.datetime(
+            int(form["year1"].value),
+            int(form["month1"].value),
+            int(form["day1"].value),
+        )
+        ets = datetime.datetime(
+            int(form["year2"].value),
+            int(form["month2"].value),
+            int(form["day2"].value),
+        )
     else:
         sts = datetime.datetime(2011, 5, 1)
         ets = datetime.datetime(2011, 10, 1)
@@ -48,8 +57,13 @@ def main():
         from alldata_ia WHERE year = %s and day >= '%s' and day < '%s'
         and substr(station, 2, 1) != 'C' and station != 'IA0000'
         GROUP by station
-    """ % (baseV, maxV, sts.year, sts.strftime("%Y-%m-%d"),
-           ets.strftime("%Y-%m-%d"))
+    """ % (
+        baseV,
+        maxV,
+        sts.year,
+        sts.strftime("%Y-%m-%d"),
+        ets.strftime("%Y-%m-%d"),
+    )
 
     lats = []
     lons = []
@@ -63,23 +77,27 @@ def main():
             continue
         if row[2] < (total_days * 0.9):
             continue
-        lats.append(st.sts[sid]['lat'])
-        lons.append(st.sts[sid]['lon'])
+        lats.append(st.sts[sid]["lat"])
+        lons.append(st.sts[sid]["lon"])
         gdd50.append(float(row[1]))
         valmask.append(True)
 
-    m = MapPlot(title=("Iowa %s thru %s GDD(base=%s,max=%s) Accumulation"
-                       "") % (sts.strftime("%Y: %d %b"),
-                              (ets - datetime.timedelta(days=1)
-                               ).strftime("%d %b"),
-                              baseV, maxV),
-                axisbg='white')
+    m = MapPlot(
+        title=("Iowa %s thru %s GDD(base=%s,max=%s) Accumulation" "")
+        % (
+            sts.strftime("%Y: %d %b"),
+            (ets - datetime.timedelta(days=1)).strftime("%d %b"),
+            baseV,
+            maxV,
+        ),
+        axisbg="white",
+    )
     m.contourf(lons, lats, gdd50, range(int(min(gdd50)), int(max(gdd50)), 25))
-    m.plot_values(lons, lats, gdd50, fmt='%.0f')
+    m.plot_values(lons, lats, gdd50, fmt="%.0f")
     m.drawcounties()
     m.postprocess(web=True)
     m.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

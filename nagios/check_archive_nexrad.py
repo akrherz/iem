@@ -16,19 +16,26 @@ def main(argv):
 
     miss = []
     for _ in range(12):
-        fn = now.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/" +
-                           prod + "_%Y%m%d%H%M.png"))
+        fn = now.strftime(
+            (
+                "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/"
+                + prod
+                + "_%Y%m%d%H%M.png"
+            )
+        )
         if not os.path.isfile(fn):
             miss.append(now.strftime("%Y%m%d_%H%M"))
         now -= datetime.timedelta(minutes=5)
 
     if not miss:
-        print('OK')
+        print("OK")
         return 0
-    print('CRITICAL - %s archive miss N0R %s' % (base.strftime("%d_%H%M"),
-                                                 ', '.join(miss),))
+    print(
+        "CRITICAL - %s archive miss N0R %s"
+        % (base.strftime("%d_%H%M"), ", ".join(miss))
+    )
     return 2
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main(sys.argv))

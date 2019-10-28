@@ -9,7 +9,7 @@ from pyiem.util import get_dbconn
 def main():
     """Go Main Go"""
     now = datetime.datetime.now()
-    pgconn = get_dbconn('iem', user='nobody')
+    pgconn = get_dbconn("iem", user="nobody")
     icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     # Compute normal from the climate database
@@ -29,16 +29,17 @@ def main():
     for row in icursor:
         data.append(row)
 
-    mp = MapPlot(axisbg='white',
-                 title='Iowa DOT RWIS Mesoplot',
-                 subtitle='plot valid %s' % (
-                     now.strftime("%-d %b %Y %H:%M %P"), ))
+    mp = MapPlot(
+        axisbg="white",
+        title="Iowa DOT RWIS Mesoplot",
+        subtitle="plot valid %s" % (now.strftime("%-d %b %Y %H:%M %P"),),
+    )
     mp.plot_station(data)
-    mp.drawcounties(color='#EEEEEE')
+    mp.drawcounties(color="#EEEEEE")
     pqstr = "plot c 000000000000 iowa_rwis.png bogus png"
     mp.postprocess(pqstr=pqstr)
     mp.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

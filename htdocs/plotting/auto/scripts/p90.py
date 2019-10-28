@@ -22,7 +22,10 @@ PDICT2 = {
     "yearavg": "Yearly Average Count between Start and End Year",
     "lastyear": "Year of Last Issuance",
 }
-PDICT3 = {"yes": "YES: Label Counties/Zones", "no": "NO: Do not Label Counties/Zones"}
+PDICT3 = {
+    "yes": "YES: Label Counties/Zones",
+    "no": "NO: Do not Label Counties/Zones",
+}
 PDICT4 = {
     "ugc": "Summarize/Plot by UGC (Counties/Parishes/Zones)",
     "polygon": "Summarize/Plot by Polygon (Storm Based Warnings)",
@@ -231,7 +234,12 @@ def do_polygon(ctx):
     )
     # print df, sts, ets, west, east, south, north
     zs = zonal_stats(
-        df["geom"], ones, affine=affine, nodata=-1, all_touched=True, raster_out=True
+        df["geom"],
+        ones,
+        affine=affine,
+        nodata=-1,
+        all_touched=True,
+        raster_out=True,
     )
     for i, z in enumerate(zs):
         aff = z["mini_raster_affine"]
@@ -515,12 +523,17 @@ def do_ugc(ctx):
             bins = bins[:: int(len(bins) / 8.0)]
         bins[0] = 0.01
     else:
-        bins = list(range(np.min(df[datavar][:]), np.max(df[datavar][:]) + 2, 1))
+        bins = list(
+            range(np.min(df[datavar][:]), np.max(df[datavar][:]) + 2, 1)
+        )
         if len(bins) < 3:
             bins.append(bins[-1] + 1)
         if len(bins) > 8:
             bins = np.linspace(
-                np.min(df[datavar][:]), np.max(df[datavar][:]) + 2, 8, dtype="i"
+                np.min(df[datavar][:]),
+                np.max(df[datavar][:]) + 2,
+                8,
+                dtype="i",
             )
     ctx["bins"] = bins
     ctx["data"] = data
@@ -577,7 +590,12 @@ def plotter(fdict):
         m.fill_ugcs(ctx["data"], ctx["bins"], cmap=cmap, ilabel=ilabel)
     else:
         res = m.pcolormesh(
-            ctx["lons"], ctx["lats"], ctx["data"], ctx["bins"], cmap=cmap, units="count"
+            ctx["lons"],
+            ctx["lats"],
+            ctx["data"],
+            ctx["bins"],
+            cmap=cmap,
+            units="count",
         )
         # Cut down on SVG et al size
         res.set_rasterized(True)

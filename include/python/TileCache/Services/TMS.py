@@ -23,27 +23,41 @@ class TMS(Request):
             else:
                 parts[-1] = parts[-1].split(".")[0]
                 tile = None
-                if (layer.tms_type == "google" or
-                        fields.get('type') == 'google'):
+                if (
+                    layer.tms_type == "google"
+                    or fields.get("type") == "google"
+                ):
                     res = layer.resolutions[int(parts[2])]
-                    maxY = int(
-                      round(
-                        (layer.bbox[3] - layer.bbox[1]) / 
-                        (res * layer.size[1])
-                       )
-                    ) - 1
-                    tile = Layer.Tile(layer, int(parts[3]),
-                                      maxY - int(parts[4]), int(parts[2]))
+                    maxY = (
+                        int(
+                            round(
+                                (layer.bbox[3] - layer.bbox[1])
+                                / (res * layer.size[1])
+                            )
+                        )
+                        - 1
+                    )
+                    tile = Layer.Tile(
+                        layer,
+                        int(parts[3]),
+                        maxY - int(parts[4]),
+                        int(parts[2]),
+                    )
                 else:
-                    tile = Layer.Tile(layer, int(parts[3]), int(parts[4]),
-                                      int(parts[2]))
+                    tile = Layer.Tile(
+                        layer, int(parts[3]), int(parts[4]), int(parts[2])
+                    )
                 return tile
 
     def serverCapabilities(self, host):
-        return Capabilities("text/xml", """<?xml version="1.0" encoding="UTF-8" ?>
+        return Capabilities(
+            "text/xml",
+            """<?xml version="1.0" encoding="UTF-8" ?>
             <Services>
                 <TileMapService version="1.0.0" href="%s1.0.0/" />
-            </Services>""" % host)
+            </Services>"""
+            % host,
+        )
 
     def serviceCapabilities(self, host, layers):
         xml = """<?xml version="1.0" encoding="UTF-8" ?>
@@ -62,7 +76,13 @@ class TMS(Request):
                    srs="%s"
                    title="%s"
                    profile="%s" />
-                """ % (host, name, layer.srs, layer.name, profile)
+                """ % (
+                host,
+                name,
+                layer.srs,
+                layer.name,
+                profile,
+            )
 
         xml += """
               </TileMaps>
@@ -82,17 +102,35 @@ class TMS(Request):
               <Origin x="%.6f" y="%.6f" />  
               <TileFormat width="%d" height="%d" mime-type="%s" extension="%s" />
               <TileSets>
-            """ % (host, tms_type, layer.name, layer.description, layer.srs,
-                   layer.bbox[0], layer.bbox[1],
-                   layer.bbox[2], layer.bbox[3], layer.bbox[0], layer.bbox[1],
-                   layer.size[0], layer.size[1], layer.fmt(), layer.extension)
+            """ % (
+            host,
+            tms_type,
+            layer.name,
+            layer.description,
+            layer.srs,
+            layer.bbox[0],
+            layer.bbox[1],
+            layer.bbox[2],
+            layer.bbox[3],
+            layer.bbox[0],
+            layer.bbox[1],
+            layer.size[0],
+            layer.size[1],
+            layer.fmt(),
+            layer.extension,
+        )
 
         for z, res in enumerate(layer.resolutions):
             xml += """
                  <TileSet href="%s1.0.0/%s/%d"
                           units-per-pixel="%.20f" order="%d" />""" % (
-                   host, layer.name, z, res, z)
-                
+                host,
+                layer.name,
+                z,
+                res,
+                z,
+            )
+
         xml += """
               </TileSets>
             </TileMap>"""

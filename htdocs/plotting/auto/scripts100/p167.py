@@ -49,9 +49,18 @@ Ceiling >3000' AGL and visibility >5 statutes miles (green)</td></tr>
             label="Select Station:",
             network="IA_ASOS",
         ),
-        dict(type="month", name="month", label="Select Month:", default=today.month),
         dict(
-            type="year", name="year", label="Select Year:", default=today.year, min=1970
+            type="month",
+            name="month",
+            label="Select Month:",
+            default=today.month,
+        ),
+        dict(
+            type="year",
+            name="year",
+            label="Select Year:",
+            default=today.year,
+            min=1970,
         ),
     ]
     return desc
@@ -106,7 +115,9 @@ def plotter(fdict):
         coverages = [row["skyc1"], row["skyc2"], row["skyc3"], row["skyc4"]]
         if "OVC" in coverages:
             idx = coverages.index("OVC")
-            level = [row["skyl1"], row["skyl2"], row["skyl3"], row["skyl4"]][idx]
+            level = [row["skyl1"], row["skyl2"], row["skyl3"], row["skyl4"]][
+                idx
+            ]
         if level < 500 or row["vsby"] < 1:
             val = 4
         elif level < 1000 or row["vsby"] < 3:
@@ -148,7 +159,9 @@ def plotter(fdict):
         norm=norm,
     )
     ax.set_yticks(range(0, 24, 3))
-    ax.set_yticklabels(["Mid", "3 AM", "6 AM", "9 AM", "Noon", "3 PM", "6 PM", "9 PM"])
+    ax.set_yticklabels(
+        ["Mid", "3 AM", "6 AM", "9 AM", "Noon", "3 PM", "6 PM", "9 PM"]
+    )
     ax.set_xticks(range(1, days + 1))
     ax.set_ylabel("Hour of Local Day (%s)" % (tzname,))
     ax.set_xlabel("Day of %s" % (sts.strftime("%b %Y"),))
@@ -160,7 +173,9 @@ def plotter(fdict):
     ax.grid(True)
     # Shrink current axis's height by 10% on the bottom
     box = ax.get_position()
-    ax.set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9])
+    ax.set_position(
+        [box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9]
+    )
 
     ax.legend(
         rects,

@@ -11,19 +11,22 @@ from pyiem.util import get_dbconn
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconn('postgis', user='mesonet')
+    pgconn = get_dbconn("postgis", user="mesonet")
     pcursor = pgconn.cursor()
     pcursor2 = pgconn.cursor()
 
     year = datetime.datetime.now().year
 
-    pcursor.execute("""
+    pcursor.execute(
+        """
         SELECT wfo, phenomena, significance, eventid from
         vtec_missing_events WHERE year = %s
-    """, (year, ))
+    """,
+        (year,),
+    )
     missing = []
     for row in pcursor:
-        missing.append('%s.%s.%s.%s' % (row[0], row[1], row[2], row[3]))
+        missing.append("%s.%s.%s.%s" % (row[0], row[1], row[2], row[3]))
 
     # Gap analysis!
     sql = """
@@ -38,7 +41,9 @@ def main():
 
     SELECT wfo, eventid, phenomena, significance, delta from deltas
     WHERE delta > 1 ORDER by wfo ASC
-    """ % (year, )
+    """ % (
+        year,
+    )
     pcursor.execute(sql)
     for row in pcursor:
         phenomena = row[2]
@@ -48,25 +53,32 @@ def main():
         eventid = row[1]
 
         # Skip these
-        if (wfo in ('NHC') or
-                phenomena in ('TR', 'HU', 'SS') or
-                (phenomena in ('TO', 'SV', 'SS') and sig == 'A')):
+        if (
+            wfo in ("NHC")
+            or phenomena in ("TR", "HU", "SS")
+            or (phenomena in ("TO", "SV", "SS") and sig == "A")
+        ):
             continue
 
         for eid in range(eventid - gap + 1, eventid):
             lookup = "%s.%s.%s.%s" % (wfo, phenomena, sig, eid)
             if lookup in missing:
                 continue
-            pcursor2.execute("""INSERT into vtec_missing_events(year, wfo,
+            pcursor2.execute(
+                """INSERT into vtec_missing_events(year, wfo,
                 phenomena, significance, eventid) VALUES (%s,%s,%s,%s,%s)
-                """, (year, wfo, phenomena, sig, eid))
-            print(("WWA missing WFO: %s phenomena: %s sig: %s eventid: %s"
-                   ) % (wfo, phenomena, sig, eid))
+                """,
+                (year, wfo, phenomena, sig, eid),
+            )
+            print(
+                ("WWA missing WFO: %s phenomena: %s sig: %s eventid: %s")
+                % (wfo, phenomena, sig, eid)
+            )
 
     pcursor2.close()
     pgconn.commit()
     pgconn.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

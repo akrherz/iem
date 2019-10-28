@@ -16,7 +16,7 @@ from pyiem.util import get_dbconn, exponential_backoff
 
 def process(tmpfn):
     """Process a file of data"""
-    pgconn = get_dbconn('other')
+    pgconn = get_dbconn("other")
     nt = NetworkTable("IA_HPD")
     data = []
     for line in open(tmpfn):
@@ -26,68 +26,87 @@ def process(tmpfn):
         if tokens[0] not in nt.sts:
             continue
         sid = tokens[0]
-        cst = datetime.datetime.strptime(tokens[1] + " " + tokens[2],
-                                         "%Y/%m/%d %H:%M:%S")
+        cst = datetime.datetime.strptime(
+            tokens[1] + " " + tokens[2], "%Y/%m/%d %H:%M:%S"
+        )
         counter = tokens[4].strip()
         tmpc = tokens[5].strip()
         battery = tokens[8].strip()
-        data.append(dict(sid=sid, cst=cst, counter=counter, tmpc=tmpc,
-                         battery=battery))
+        data.append(
+            dict(sid=sid, cst=cst, counter=counter, tmpc=tmpc, battery=battery)
+        )
     df = pd.DataFrame(data)
-    sids = df['sid'].unique()
-    print('Found %s records from %s stations' % (len(data), len(sids)))
+    sids = df["sid"].unique()
+    print("Found %s records from %s stations" % (len(data), len(sids)))
     for sid in sids:
         cursor = pgconn.cursor()
-        df2 = df[df['sid'] == sid]
-        maxts = df2['cst'].max()
-        mints = df2['cst'].min()
+        df2 = df[df["sid"] == sid]
+        maxts = df2["cst"].max()
+        mints = df2["cst"].min()
         # Delete out old data
-        cursor.execute("""DELETE from hpd_alldata where station = '%s'
+        cursor.execute(
+            """DELETE from hpd_alldata where station = '%s'
         and valid >= '%s-06' and valid <= '%s-06'
-        """ % (sid, mints.strftime("%Y-%m-%d %H:%M:%S"),
-               maxts.strftime("%Y-%m-%d %H:%M:%S")))
+        """
+            % (
+                sid,
+                mints.strftime("%Y-%m-%d %H:%M:%S"),
+                maxts.strftime("%Y-%m-%d %H:%M:%S"),
+            )
+        )
         if cursor.rowcount > 0:
-            print(' - removed  %s rows for sid: %s' % (cursor.rowcount, sid))
+            print(" - removed  %s rows for sid: %s" % (cursor.rowcount, sid))
         counter = None
         for (_, row) in df2.iterrows():
             if counter is None:
-                counter = float(row['counter'])
-            if counter is not None and row['counter'] is not None:
-                precip = float(row['counter']) - counter
+                counter = float(row["counter"])
+            if counter is not None and row["counter"] is not None:
+                precip = float(row["counter"]) - counter
                 if precip < 0:
                     precip = 0
             else:
                 precip = 0
             if precip > 1:
-                print(('sid: %s cst: %s precip: %s counter1: %s counter2: %s'
-                       ) % (sid, row['cst'], precip, counter, row['counter']))
-            counter = float(row['counter'])
-            tbl = "hpd_%s" % (row['cst'] + datetime.timedelta(hours=6)).year
-            cursor.execute("""INSERT into """ + tbl + """
+                print(
+                    ("sid: %s cst: %s precip: %s counter1: %s counter2: %s")
+                    % (sid, row["cst"], precip, counter, row["counter"])
+                )
+            counter = float(row["counter"])
+            tbl = "hpd_%s" % (row["cst"] + datetime.timedelta(hours=6)).year
+            cursor.execute(
+                """INSERT into """
+                + tbl
+                + """
             (station, valid, counter, tmpc, battery, calc_precip)
             VALUES ('%s', '%s-06', %s, %s, %s, %s)
-            """ % (sid, row['cst'].strftime("%Y-%m-%d %H:%M:%S"),
-                   'null' if row['counter'] == 'NaN' else row['counter'],
-                   'null' if row['tmpc'] == '' else row['tmpc'],
-                   'null' if row['battery'] == '' else row['battery'],
-                   'null' if pd.isnull(precip) else precip))
-        print(' + inserted %s rows for sid: %s' % (len(df2), sid))
+            """
+                % (
+                    sid,
+                    row["cst"].strftime("%Y-%m-%d %H:%M:%S"),
+                    "null" if row["counter"] == "NaN" else row["counter"],
+                    "null" if row["tmpc"] == "" else row["tmpc"],
+                    "null" if row["battery"] == "" else row["battery"],
+                    "null" if pd.isnull(precip) else precip,
+                )
+            )
+        print(" + inserted %s rows for sid: %s" % (len(df2), sid))
         cursor.close()
         pgconn.commit()
 
 
 def dowork(valid):
     """Process a month's worth of data"""
-    uri = valid.strftime(("http://www1.ncdc.noaa.gov/pub/data/hpd/data/"
-                          "hpd_%Y%m.csv"))
+    uri = valid.strftime(
+        ("http://www1.ncdc.noaa.gov/pub/data/hpd/data/" "hpd_%Y%m.csv")
+    )
     tmpfn = valid.strftime("/mesonet/tmp/hpd_%Y%m.csv")
     if not os.path.isfile(tmpfn):
-        print('Downloading %s from NCDC' % (tmpfn,))
+        print("Downloading %s from NCDC" % (tmpfn,))
         req = exponential_backoff(requests.get, uri, timeout=60)
         if req is None or req.status_code != 200:
-            print('dlerror')
+            print("dlerror")
             return
-        output = open(tmpfn, 'wb')
+        output = open(tmpfn, "wb")
         output.write(req.content)
         output.close()
 
@@ -101,5 +120,5 @@ def main(argv):
     dowork(valid)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)
