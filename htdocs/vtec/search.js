@@ -1,4 +1,4 @@
-Ext.BLANK_IMAGE_URL = '/ext/resources/images/default/s.gif';
+Ext.BLANK_IMAGE_URL = '/vendor/ext/resources/images/default/s.gif';
 
 function utcdate(v, record){
 	return (Ext.Date.parseDate(v, 'c')).toUTC();

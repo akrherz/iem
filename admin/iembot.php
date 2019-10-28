@@ -1,12 +1,11 @@
 <?php
-include("../config/settings.inc.php");
-include("Zend/XmlRpc/Client.php");
-include("../include/database.inc.php");
+require_once "../config/settings.inc.php";
+require_once "Zend/XmlRpc/Client.php";
+require_once "../include/database.inc.php";
 include_once "../include/myview.php";
 $t = new MyView();
 
-//$dbconn = iemdb("mesosite");
-$dbconn = pg_connect("dbname=mesosite host=iemdb-mesosite.local");
+$dbconn = iemdb("mesosite");
 
 $rs = pg_prepare($dbconn, "SELECTROOMS", "SELECT * from iembot_rooms 
                  WHERE roomname NOT IN ('allpeopletalk', 'botstalk')
@@ -58,9 +57,9 @@ if ($action == "addchannel" && $channel != ""){
 
 /* BEGIN WEB OUTPUT PLEASE */
 $t->headextra = '<link rel="stylesheet" type="text/css" 
-	href="https://nwschat.weather.gov/ext-3.4.0/resources/css/ext-all.css"/>
-<script type="text/javascript" src="https://nwschat.weather.gov/ext-3.4.0/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="https://nwschat.weather.gov/ext-3.4.0/ext-all.js"></script>
+	href="/vendor/ext/3.4.1/resources/css/ext-all.css"/>
+<script type="text/javascript" src="/vendor/ext/3.4.1/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="/vendor/ext/3.4.1/ext-all.js"></script>
 <script type="text/javascript">
 Ext.ns("App");
 App.roomname = "'. $room .'";
