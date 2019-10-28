@@ -259,7 +259,8 @@
   </Directory>
 
   <Directory "/opt/iem/htdocs/json">
-    AddHandler cgi-script .py
+    WSGIProcessGroup iemwsgi_ap
+    AddHandler wsgi-script .py
     Options +ExecCGI
 
     RewriteRule radar$ radar.py

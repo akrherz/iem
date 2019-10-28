@@ -3,13 +3,13 @@
 
 import datetime
 import json
-import cgi
 import os
 
 import numpy as np
 import memcache
+from paste.request import parse_formvars
 from pyiem import iemre, datatypes
-from pyiem.util import utc, ncopen, ssw
+from pyiem.util import utc, ncopen, html_escape
 
 
 def myrounder(val, precision):
@@ -19,11 +19,11 @@ def myrounder(val, precision):
     return round(val, precision)
 
 
-def dowork(form):
+def dowork(fields):
     """Do work!"""
-    date = datetime.datetime.strptime(form.getfirst('valid'), '%Y-%m-%d')
-    lat = float(form.getfirst("lat"))
-    lon = float(form.getfirst("lon"))
+    date = datetime.datetime.strptime(fields.get("valid"), "%Y-%m-%d")
+    lat = float(fields.get("lat"))
+    lon = float(fields.get("lon"))
 
     # We want data for the UTC date and timestamps are in the rears, so from
     # 1z through 1z
@@ -32,52 +32,55 @@ def dowork(form):
     sidx = iemre.hourly_offset(sts)
     eidx = iemre.hourly_offset(ets)
 
-    ncfn = "/mesonet/data/stage4/%s_stage4_hourly.nc" % (date.year, )
-    res = {'gridi': -1, 'gridj': -1, 'data': []}
+    ncfn = "/mesonet/data/stage4/%s_stage4_hourly.nc" % (date.year,)
+    res = {"gridi": -1, "gridj": -1, "data": []}
     if not os.path.isfile(ncfn):
         return json.dumps(res)
     with ncopen(ncfn) as nc:
-        dist = ((nc.variables['lon'][:] - lon)**2 +
-                (nc.variables['lat'][:] - lat)**2)**0.5
+        dist = (
+            (nc.variables["lon"][:] - lon) ** 2
+            + (nc.variables["lat"][:] - lat) ** 2
+        ) ** 0.5
         (j, i) = np.unravel_index(dist.argmin(), dist.shape)
-        res['gridi'] = int(i)
-        res['gridj'] = int(j)
+        res["gridi"] = int(i)
+        res["gridj"] = int(j)
 
-        ppt = nc.variables['p01m'][sidx:eidx, j, i]
+        ppt = nc.variables["p01m"][sidx:eidx, j, i]
 
     for tx, pt in enumerate(ppt):
         valid = sts + datetime.timedelta(hours=tx)
-        res['data'].append({
-            'end_valid': valid.strftime("%Y-%m-%dT%H:00:00Z"),
-            'precip_in': myrounder(
-                        datatypes.distance(pt, 'MM').value('IN'), 2)
-            })
+        res["data"].append(
+            {
+                "end_valid": valid.strftime("%Y-%m-%dT%H:00:00Z"),
+                "precip_in": myrounder(
+                    datatypes.distance(pt, "MM").value("IN"), 2
+                ),
+            }
+        )
 
     return json.dumps(res)
 
 
-def main():
-    """Do Something Fun!"""
-    ssw("Content-type: application/json\n\n")
-
-    form = cgi.FieldStorage()
-    lat = float(form.getfirst('lat'))
-    lon = float(form.getfirst('lon'))
-    valid = form.getfirst('valid')
-    cb = form.getfirst('callback', None)
+def application(environ, start_response):
+    """Answer request."""
+    fields = parse_formvars(environ)
+    lat = float(fields.get("lat"))
+    lon = float(fields.get("lon"))
+    valid = fields.get("valid")
+    cb = fields.get("callback", None)
 
     mckey = "/json/stage4/%.2f/%.2f/%s?callback=%s" % (lon, lat, valid, cb)
-    mc = memcache.Client(['iem-memcached:11211'], debug=0)
+    mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
     if not res:
-        res = dowork(form)
-        mc.set(mckey, res, 3600*12)
+        res = dowork(fields)
+        mc.set(mckey, res, 3600 * 12)
 
     if cb is None:
-        ssw(res)
+        data = res
     else:
-        ssw("%s(%s)" % (cgi.escape(cb, quote=True), res))
+        data = "%s(%s)" % (html_escape(cb), res)
 
-
-if __name__ == '__main__':
-    main()
+    headers = [("Content-type", "application/json")]
+    start_response("200 OK", headers)
+    return [data.encode("ascii")]

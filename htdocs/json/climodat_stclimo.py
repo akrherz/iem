@@ -1,20 +1,21 @@
 #!/usr/bin/env python
 """Dump daily computed climatology direct from the database"""
 import datetime
-import cgi
 import json
 
 import memcache
-from pyiem.util import get_dbconn, ssw
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn, html_escape
 
 
 def run(station, syear, eyear):
     """Do something"""
-    pgconn = get_dbconn('coop')
+    pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
 
     table = "alldata_%s" % (station[:2],)
-    cursor.execute("""
+    cursor.execute(
+        """
     WITH data as (
       SELECT sday, year, precip,
       avg(precip) OVER (PARTITION by sday) as avg_precip,
@@ -25,7 +26,9 @@ def run(station, syear, eyear):
       avg(low) OVER (PARTITION by sday) as avg_low,
       rank() OVER (PARTITION by sday ORDER by low ASC) as min_low,
       rank() OVER (PARTITION by sday ORDER by precip DESC) as max_precip
-      from """ + table + """ WHERE station = %s and year >= %s and year < %s),
+      from """
+        + table
+        + """ WHERE station = %s and year >= %s and year < %s),
 
     max_highs as (
       SELECT sday, high, array_agg(year) as years from data
@@ -57,47 +60,60 @@ def run(station, syear, eyear):
     WHERE xh.sday = a.sday and xh.sday = nh.sday and xh.sday = xl.sday and
     xh.sday = nl.sday and xh.sday = mp.sday ORDER by sday ASC
 
-    """, (station, syear, eyear))
-    res = {'station': station, 'start_year': syear, 'end_year': eyear,
-           'climatology': []}
+    """,
+        (station, syear, eyear),
+    )
+    res = {
+        "station": station,
+        "start_year": syear,
+        "end_year": eyear,
+        "climatology": [],
+    }
     for row in cursor:
-        res['climatology'].append(dict(month=int(row[0][:2]),
-                                       day=int(row[0][2:]), years=row[1],
-                                       avg_high=float(row[2]), max_high=row[3],
-                                       max_high_years=row[4], min_high=row[5],
-                                       min_high_years=row[6],
-                                       avg_low=float(row[7]), max_low=row[8],
-                                       max_low_years=row[9], min_low=row[10],
-                                       min_low_years=row[11],
-                                       avg_precip=float(row[12]),
-                                       max_precip=row[13],
-                                       max_precip_years=row[14]))
+        res["climatology"].append(
+            dict(
+                month=int(row[0][:2]),
+                day=int(row[0][2:]),
+                years=row[1],
+                avg_high=float(row[2]),
+                max_high=row[3],
+                max_high_years=row[4],
+                min_high=row[5],
+                min_high_years=row[6],
+                avg_low=float(row[7]),
+                max_low=row[8],
+                max_low_years=row[9],
+                min_low=row[10],
+                min_low_years=row[11],
+                avg_precip=float(row[12]),
+                max_precip=row[13],
+                max_precip_years=row[14],
+            )
+        )
 
     return json.dumps(res)
 
 
-def main():
-    """Main()"""
-    ssw("Content-type: application/json\n\n")
-
-    form = cgi.FieldStorage()
-    station = form.getfirst("station", "IA0200").upper()
-    syear = int(form.getfirst('syear', 1800))
-    eyear = int(form.getfirst('eyear', datetime.datetime.now().year + 1))
-    cb = form.getfirst('callback', None)
+def application(environ, start_response):
+    """Answer request."""
+    fields = parse_formvars(environ)
+    station = fields.get("station", "IA0200").upper()
+    syear = int(fields.get("syear", 1800))
+    eyear = int(fields.get("eyear", datetime.datetime.now().year + 1))
+    cb = fields.get("callback", None)
 
     mckey = "/json/climodat_stclimo/%s/%s/%s" % (station, syear, eyear)
-    mc = memcache.Client(['iem-memcached:11211'], debug=0)
+    mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
     if not res:
         res = run(station, syear, eyear)
         mc.set(mckey, res, 86400)
 
     if cb is None:
-        ssw(res)
+        data = res
     else:
-        ssw("%s(%s)" % (cgi.escape(cb, quote=True), res))
+        data = "%s(%s)" % (html_escape(cb), res)
 
-
-if __name__ == '__main__':
-    main()
+    headers = [("Content-type", "application/json")]
+    start_response("200 OK", headers)
+    return [data.encode("ascii")]

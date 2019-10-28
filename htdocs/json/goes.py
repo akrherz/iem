@@ -2,16 +2,16 @@
 """
 Return JSON metadata for GOES Imagery
 """
-import cgi
 import json
 import os
 import glob
 import datetime
 
-from pyiem.util import ssw
+from paste.request import parse_formvars
+from pyiem.util import html_escape
 
-BIRDS = ['EAST', 'WEST']
-PRODUCTS = ['WV', 'VIS', 'IR']
+BIRDS = ["EAST", "WEST"]
+PRODUCTS = ["WV", "VIS", "IR"]
 
 
 def parse_time(text):
@@ -20,12 +20,12 @@ def parse_time(text):
     """
     try:
         if len(text) == 17:
-            date = datetime.datetime.strptime(text, '%Y-%m-%dT%H:%MZ')
+            date = datetime.datetime.strptime(text, "%Y-%m-%dT%H:%MZ")
         elif len(text) == 20:
-            date = datetime.datetime.strptime(text, '%Y-%m-%dT%H:%M:%SZ')
+            date = datetime.datetime.strptime(text, "%Y-%m-%dT%H:%M:%SZ")
         else:
             date = datetime.datetime.utcnow()
-    except Exception as _:
+    except Exception:
         date = datetime.datetime.utcnow()
     return date
 
@@ -42,51 +42,48 @@ def find_scans(root, bird, product, start_gts, end_gts):
             filenames = glob.glob("GOES_%s_%s_*.wld" % (bird, product))
             filenames.sort()
             for filename in filenames:
-                ts = datetime.datetime.strptime(filename[:-4].split("_")[3],
-                                                "%Y%m%d%H%M")
+                ts = datetime.datetime.strptime(
+                    filename[:-4].split("_")[3], "%Y%m%d%H%M"
+                )
                 if ts >= start_gts and ts <= end_gts:
-                    root['scans'].append(ts.strftime("%Y-%m-%dT%H:%M:00Z"))
+                    root["scans"].append(ts.strftime("%Y-%m-%dT%H:%M:00Z"))
         now += datetime.timedelta(hours=24)
 
 
-def list_files(form):
+def list_files(fields):
     """
     List available GOES files based on the form request
     """
-    bird = form.getvalue('bird', 'EAST').upper()
-    product = form.getvalue('product', 'VIS').upper()
+    bird = fields.get("bird", "EAST").upper()
+    product = fields.get("product", "VIS").upper()
 
     # default to a four hour period
     utc0 = datetime.datetime.utcnow()
     utc1 = utc0 - datetime.timedelta(hours=4)
 
-    start_gts = parse_time(form.getvalue('start',
-                                         utc1.strftime("%Y-%m-%dT%H:%MZ")))
-    end_gts = parse_time(form.getvalue('end',
-                                       utc0.strftime("%Y-%m-%dT%H:%MZ")))
-    root = {'scans': []}
+    start_gts = parse_time(
+        fields.get("start", utc1.strftime("%Y-%m-%dT%H:%MZ"))
+    )
+    end_gts = parse_time(fields.get("end", utc0.strftime("%Y-%m-%dT%H:%MZ")))
+    root = {"scans": []}
     find_scans(root, bird, product, start_gts, end_gts)
 
     return root
 
 
-def main():
-    """
-    Do something fun and educational
-    """
-    form = cgi.FieldStorage()
-    operation = form.getvalue('operation', 'list')
-    callback = form.getvalue('callback', None)
+def application(environ, start_response):
+    """Answer request."""
+    fields = parse_formvars(environ)
+    operation = fields.get("operation", "list")
+    callback = fields.get("callback")
+    headers = []
+    data = ""
     if callback is not None:
-        ssw("Content-type: application/javascript\n\n")
-        ssw("%s(" % (cgi.escape(callback, quote=True),))
-    else:
-        ssw("Content-type: text/plain\n\n")
+        data = "%s(" % (html_escape(callback),)
     if operation == "list":
-        ssw(json.dumps(list_files(form)))
+        data += json.dumps(list_files(fields))
     if callback is not None:
-        ssw(')')
-
-
-if __name__ == "__main__":
-    main()
+        data += ")"
+    headers = [("Content-type", "application/json")]
+    start_response("200 OK", headers)
+    return [data.encode("ascii")]
