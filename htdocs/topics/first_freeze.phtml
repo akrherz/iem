@@ -1,0 +1,96 @@
+<?php
+// First Fall Freeze Resources
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
+
+$t = new MyView();
+$t->thispage = "topics-firstfall";
+$t->title = "First Fall Freeze Resources";
+
+$t->content = <<<EOM
+<ol class="breadcrumb">
+ <li><a href="/topics/">Topics</a></li>
+ <li class="active">First Fall Freeze</li>
+ </ol>
+
+ <p>This page presents resources relevant to the first fall freeze.  Many of these
+ plots are dynamicly generated and can be adjusted for the location and thresholds
+ of your interest.  The general definition used by the IEM for 'first fall' is
+ the first date after 1 July.  For some parts of the county, this date may not
+ be the most appropriate.</p>
+
+ <p><strong>IEM Dataset</strong>: For most of these data presentations, data from
+ the <a href="/COOP/">NWS Cooperative Observer (COOP)</a> network is used.  These
+ once daily observations form the backbone of climate monitoring.</p>
+
+<h3>Map of Fall Minimum Temperature</h3>
+
+<p><img src="/plotting/auto/plot/97/sector:IA::var:min_low_temp::gddbase:50::usdm:no::p:text::cmap:RdYlBu::c:yes::dpi:100.png" class="img img-responsive" alt="autoplot"></p>
+
+<p><a class="btn btn-sm btn-primary" href="/plotting/auto/?_wait=no&q=97&sector=IA&var=min_low_temp&gddbase=50&usdm=no&p=text&cmap=RdYlBu&c=yes">Generate This Map</a></p>
+
+<h3>First Fall Date this year below 32&deg;F</h3>
+
+<p><img src="/plotting/auto/plot/165/sector:IA::var:fall_below::popt:values::threshold:32::cmap:BrBG.png" class="img img-responsive" alt="autoplot"></p>
+
+<p><a class="btn btn-sm btn-primary" href="/plotting/auto/?_wait=no&q=165&sector=IA&var=fall_below&popt=values&year=2019&threshold=32&p=50&syear=1893&eyear=2019&cmap=BrBG&cint=2">Generate This Map</a></p>
+
+<h3>First Fall Date this year below 29&deg;F</h3>
+
+<p><img src="/plotting/auto/plot/165/sector:IA::var:fall_below::popt:values::threshold:29::cmap:BrBG.png" class="img img-responsive" alt="autoplot"></p>
+
+<p><a class="btn btn-sm btn-primary" href="/plotting/auto/?_wait=no&q=165&sector=IA&var=fall_below&popt=values&threshold=29&p=50&syear=1893&eyear=2019&cmap=BrBG&cint=2">Generate This Map</a></p>
+
+<h3>Probability Dates below 32&deg;F</h3>
+
+<div class="row">
+<div class="col-md-4">
+  <h4>5th Percentile</h4>
+  <p><img src="/plotting/auto/plot/165/sector:IA::var:fall_below::popt:values::year:2019::threshold:32::p:5::cmap:BrBG::dpi:100.png" class="img img-responsive" alt="autoplot"></p>
+  <p><a class="btn btn-sm btn-primary" href="/plotting/auto/?_wait=no&q=165&sector=IA&var=fall_below&popt=values&year=2019&threshold=32&_opt_p=on&p=5&syear=1893&eyear=2019&cmap=BrBG&cint=2">Generate This Map</a></p>
+</div>
+<div class="col-md-4">
+  <h4>50th Percentile</h4>
+  <p><img src="/plotting/auto/plot/165/sector:IA::var:fall_below::popt:values::year:2019::threshold:32::p:50::cmap:BrBG::dpi:100.png" class="img img-responsive" alt="autoplot"></p>
+  <p><a class="btn btn-sm btn-primary" href="/plotting/auto/?_wait=no&q=165&sector=IA&var=fall_below&popt=values&year=2019&threshold=32&_opt_p=on&p=5&syear=1893&eyear=2019&cmap=BrBG&cint=2">Generate This Map</a></p>
+</div>
+<div class="col-md-4">
+  <h4>95th Percentile</h4>
+  <p><img src="/plotting/auto/plot/165/sector:IA::var:fall_below::popt:values::year:2019::threshold:32::p:95::cmap:BrBG::dpi:100.png" class="img img-responsive" alt="autoplot"></p>
+  <p><a class="btn btn-sm btn-primary" href="/plotting/auto/?_wait=no&q=165&sector=IA&var=fall_below&popt=values&year=2019&threshold=32&_opt_p=on&p=5&syear=1893&eyear=2019&cmap=BrBG&cint=2">Generate This Map</a></p>
+</div>
+</div>
+
+<h3>Accumulated observed frequencies</h3>
+
+<div class="row">
+<div class="col-md-4">
+  <h4>Ames</h4>
+<p><img src="/plotting/auto/plot/119/network:IACLIMATE::station:IA0200::t1:32::t2:28::t3:26::t4:22.png" class="img img-responsive" alt="autoplot"></p>
+<p><a class="btn btn-sm btn-primary" href="/plotting/auto/?_wait=no&q=119&network=IACLIMATE&station=IA0200&t1=32&t2=28&t3=26&t4=22">Generate This Chart</a></p>
+</div>
+<div class="col-md-4">
+  <h4>Cedar Rapids</h4>
+<p><img src="/plotting/auto/plot/119/network:IACLIMATE::station:IATCID::t1:32::t2:28::t3:26::t4:22.png" class="img img-responsive" alt="autoplot"></p>
+<p><a class="btn btn-sm btn-primary" href="/plotting/auto/?_wait=no&q=119&network=IACLIMATE&station=IATCID&t1=32&t2=28&t3=26&t4=22">Generate This Chart</a></p>
+</div>
+<div class="col-md-4">
+  <h4>Sioux City</h4>
+<p><img src="/plotting/auto/plot/119/network:IACLIMATE::station:IATSUX::t1:32::t2:28::t3:26::t4:22.png" class="img img-responsive" alt="autoplot"></p>
+<p><a class="btn btn-sm btn-primary" href="/plotting/auto/?_wait=no&q=119&network=IACLIMATE&station=IATSUX&t1=32&t2=28&t3=26&t4=22">Generate This Chart</a></p>
+</div>
+</div>
+
+
+<!--
+<h3></h3>
+
+<p><img src="" class="img img-responsive" alt="autoplot"></p>
+
+<p><a class="btn btn-sm btn-primary" href="">Generate This Map</a></p>
+-->
+
+
+EOM;
+$t->render("single.phtml");
+?>
