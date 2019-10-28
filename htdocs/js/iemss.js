@@ -151,7 +151,7 @@ $().ready(function() {
 	geojson = new ol.layer.Vector({
 		source : geojsonSource,
 		style : function(feature, resolution){
-			style = [new ol.style.Style({
+			var style = [new ol.style.Style({
 				image: new ol.style.Circle({
 					fill: new ol.style.Fill({
 						color: 'rgba(255,0,0,1)'
@@ -201,7 +201,7 @@ $().ready(function() {
 	var $newdiv2 = $("<div>", {id: "popover-content"});
 	$("#map").append($newdiv2);
 
-	element = document.getElementById('popup');
+	var element = document.getElementById('popup');
 
 	var popup = new ol.Overlay({
 		element: element,

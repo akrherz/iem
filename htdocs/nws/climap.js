@@ -96,7 +96,7 @@ $(document).ready(function(){
 	});
 
 	vectorLayer = makeVectorLayer($.datepicker.formatDate("yy-mm-dd",new Date()));
-	key = 'AsgbmE8m-iBbkypiCOE23M0qElHUfEQtaTvPdDPdM0p7s0N7pJcgrjo70FXjX6bY';
+	var key = 'AsgbmE8m-iBbkypiCOE23M0qElHUfEQtaTvPdDPdM0p7s0N7pJcgrjo70FXjX6bY';
 	map = new ol.Map({
 		target: 'map',
 		layers: [new ol.layer.Tile({
@@ -175,7 +175,7 @@ $(document).ready(function(){
 			var tpart = tokens[0];
 			renderattr = tokens[1];
 			$('select[id=renderattr] option[value='+renderattr+']').attr("selected", "selected");
-			dstr = tpart.substr(4,2) +"/"+ tpart.substr(6,2) +"/"+ tpart.substr(0,4);
+			var dstr = tpart.substr(4,2) +"/"+ tpart.substr(6,2) +"/"+ tpart.substr(0,4);
 			$("#datepicker").datepicker("setDate", new Date(dstr));
 			updateDate();
 		}

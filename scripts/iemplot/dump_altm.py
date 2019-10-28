@@ -1,31 +1,34 @@
-"""
-    Dumping altimeter data so that GEMPAK can analyze it
-"""
+"""Dumping altimeter data so that GEMPAK can analyze it."""
 import datetime
+
 from pyiem.util import get_dbconn
+from pandas.io.sql import read_sql
+from metpy.units import units
 
 
 def main():
     """Go Main Go"""
     ts = datetime.datetime.utcnow().strftime("%y%m%d/%H00")
-    pgconn = get_dbconn('iem')
-    cursor = pgconn.cursor()
+    pgconn = get_dbconn("iem")
 
-    cursor.execute("""
-     SELECT t.id, alti from current c JOIN stations t on (t.iemid = c.iemid)
-     WHERE alti > 0 and valid > (now() - '60 minutes'::interval)
-     and t.state in ('IA','MO','IL','WI','IN','OH','KY','MI','SD','ND','NE',
-     'KS')
-     """)
+    df = read_sql(
+        """
+        SELECT t.id, alti from current c JOIN stations t on (t.iemid = c.iemid)
+        WHERE alti > 0 and valid > (now() - '60 minutes'::interval)
+        and t.state in ('IA','MO','IL','WI','IN','OH','KY','MI','SD','ND','NE',
+        'KS') and (network ~* 'ASOS' or network = 'AWOS')
+     """,
+        pgconn,
+        index_col="id",
+    )
+    df["altm"] = (df["alti"].values * units("inHg")).to(units("hPa")).m
 
-    fh = open('/mesonet/data/iemplot/altm.txt', 'w')
-    fh.write((" PARM = ALTM\n\n"
-             "    STN    YYMMDD/HHMM      ALTM\n"))
+    with open("/mesonet/data/iemplot/altm.txt", "w") as fh:
+        fh.write((" PARM = ALTM\n\n" "    STN    YYMMDD/HHMM      ALTM\n"))
 
-    for row in cursor:
-        fh.write("   %4s    %s  %8.2f\n" % (row[0], ts, row[1] * 33.8637526))
-    fh.close()
+        for sid, row in df.iterrows():
+            fh.write("   %4s    %s  %8.2f\n" % (sid, ts, row["altm"]))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

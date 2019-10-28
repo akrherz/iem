@@ -153,7 +153,7 @@ function init(){
   		  for (var i=0; i < json.services.length; i++){
   			  var s = json.services[i];
   			  if (s.id == 'ridge_uscomp_n0q'){
-  				  valid = new Date(s.utc_valid);
+  				  var valid = new Date(s.utc_valid);
   				  n0q.setName("NEXRAD N0Q @"
   				  	+ ("0"+valid.getUTCHours()).slice(-2)
   				  	+ ("0"+valid.getUTCMinutes()).slice(-2)

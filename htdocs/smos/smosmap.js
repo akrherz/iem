@@ -75,10 +75,10 @@ var feature;
 		app.Drag.prototype.handleDragEvent = function(evt) {
 		  var map = evt.map;
 
-		  var feature = map.forEachFeatureAtPixel(evt.pixel,
-		      function(feature, layer) {
-		        return feature;
-		      });
+		    map.forEachFeatureAtPixel(evt.pixel,
+		        function(feature, layer) {
+		            return feature;
+		    });
 
 		  var deltaX = evt.coordinate[0] - this.coordinate_[0];
 		  var deltaY = evt.coordinate[1] - this.coordinate_[1];
@@ -121,12 +121,12 @@ var feature;
 		 * @return {boolean} `false` to stop the drag sequence.
 		 */
 		app.Drag.prototype.handleUpEvent = function(evt) {
-			ar = ol.proj.transform(this.coordinate_, 'EPSG:3857', 'EPSG:4326');
+			var ar = ol.proj.transform(this.coordinate_, 'EPSG:3857', 'EPSG:4326');
 			$('#lon').val(ar[0].toFixed(4));
 			$('#lat').val(ar[1].toFixed(4));
-		  this.coordinate_ = null;
-		  this.feature_ = null;
-		  return false;
+		    this.coordinate_ = null;
+		    this.feature_ = null;
+		    return false;
 		};
 
 $(document).ready(

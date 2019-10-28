@@ -45,7 +45,7 @@ Ext.override(Ext.form.ComboBox, {
 
 Ext.onReady(function(){
 
-states = [
+var states = [
  ["AL","Alabama"],
  ["AK","Alaska"],
  ["AZ","Arizona"],
@@ -220,21 +220,21 @@ var varStore = new Ext.data.Store({
 	});
 	
 	function updateImage(){
-		ds = datepicker.getValue();
-		ds2 = ds.add(Date.DAY, dayInterval.getValue());
-		url = String.format('plot.php?station={0}&sday={1}&eday={2}&var={3}',
+		var ds = datepicker.getValue();
+		var ds2 = ds.add(Date.DAY, dayInterval.getValue());
+		var url = String.format('plot.php?station={0}&sday={1}&eday={2}&var={3}',
 				stationCB.getValue(), ds.format('Y-m-d'), 
 				ds2.format('Y-m-d'), varCB.getValue());
 		Ext.get("imagedisplay").dom.src = url;
 		/* Now adjust the URL */
-		uri = String.format('#{0}.{1}.{2}.{3}.{4}', stateCB.getValue(), stationCB.getValue(),
+		var uri = String.format('#{0}.{1}.{2}.{3}.{4}', stateCB.getValue(), stationCB.getValue(),
 				varCB.getValue(), ds.format('Y-m-d'), 
 				dayInterval.getValue() );
 		window.location.href = uri;
 		
 	}
 	
-	var form = new Ext.form.FormPanel({
+	new Ext.form.FormPanel({
 		applyTo		: 'myform',
 		labelAlign	: 'top',
 		width		: 320,

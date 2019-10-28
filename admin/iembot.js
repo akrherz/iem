@@ -24,7 +24,7 @@ Ext.onReady(function(){
         '</div></tpl>'
     );
     
-    var search = new Ext.form.ComboBox({
+    new Ext.form.ComboBox({
         store: ds,
         displayField:'text',
         typeAhead: false,

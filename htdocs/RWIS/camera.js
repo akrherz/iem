@@ -69,7 +69,7 @@ function fetchtimes(findtime){
 function getimage(){
 	var href = $('select[name=times]').val();
 	if (href && href != '-1'){
-		fn = href.split('/');
+		var fn = href.split('/');
 		window.location.href = '#'+ fn[ fn.length -1];
 		$('#theimage').attr('src', href);
 	}
@@ -88,16 +88,16 @@ $(document).ready(function(){
 	// See if we have a anchor HREF already
 	var tokens = window.location.href.split("#");
 	if (tokens.length == 2){
-		fn = tokens[1];
+		var fn = tokens[1];
 		tokens = fn.split("_");
 		if (tokens.length == 2){
 			var cid = tokens[0];
 			var tpart = tokens[1];
 			/* Set camera ID */
 			$('select[name=cid] option[value='+cid+']').attr("selected", "selected");
-			dstr = tpart.substr(4,2) +"/"+ tpart.substr(6,2) +"/"+ tpart.substr(0,4);
+			var dstr = tpart.substr(4,2) +"/"+ tpart.substr(6,2) +"/"+ tpart.substr(0,4);
 			$("#datepicker").datepicker("setDate", new Date(dstr)); // mm/dd/yyyy
-			isotime = tpart.substr(0,4) +'-'+ tpart.substr(4,2) +"-"+ tpart.substr(6,2) +
+			var isotime = tpart.substr(0,4) +'-'+ tpart.substr(4,2) +"-"+ tpart.substr(6,2) +
 			          'T'+ tpart.substr(8,2) +':'+ tpart.substr(10,2) +":00Z";
 			fetchtimes(isotime);
 		} else {

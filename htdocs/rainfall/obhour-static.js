@@ -188,7 +188,7 @@ function updateHeaders(ts) {
   var cm = gpanel.getColumnModel();
   var col;
   var ts0;
-  for (i=2; i < cm.getColumnCount(); i++)
+  for (var i=2; i < cm.getColumnCount(); i++)
   {
     col = cm.getColumnById( cm.getColumnId(i) );
     ts0 = ts.add(Date.SECOND, 0 - (col.toffset * 3600));
