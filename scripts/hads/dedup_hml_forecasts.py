@@ -13,21 +13,29 @@ from pyiem.util import get_dbconn
 
 def workflow(ts):
     """Deduplicate this timestep"""
-    pgconn = get_dbconn('hads')
+    pgconn = get_dbconn("hads")
     cursor = pgconn.cursor()
-    table = "hml_forecast_data_%s" % (ts.year, )
-    cursor.execute("""
+    table = "hml_forecast_data_%s" % (ts.year,)
+    cursor.execute(
+        """
     with data as (
         select id, station, generationtime, issued,
     rank() OVER (PARTITION by station, issued ORDER by generationtime DESC),
         forecast_sts, forecast_ets from hml_forecast where
         issued >= %s and issued < %s)
-    DELETE from """ + table + """ where hml_forecast_id in
+    DELETE from """
+        + table
+        + """ where hml_forecast_id in
         (select id from data where rank > 1)
-        """, (ts, ts + datetime.timedelta(days=1)))
-    print(("dedup_hml_forecasts removed %s rows on %s for %s"
-           ) % (cursor.rowcount, table, ts.strftime("%Y-%m-%d")))
-    cursor.execute("""
+        """,
+        (ts, ts + datetime.timedelta(days=1)),
+    )
+    print(
+        ("dedup_hml_forecasts removed %s rows on %s for %s")
+        % (cursor.rowcount, table, ts.strftime("%Y-%m-%d"))
+    )
+    cursor.execute(
+        """
     with data as (
         select id, station, generationtime, issued,
     rank() OVER (PARTITION by station, issued ORDER by generationtime DESC),
@@ -35,9 +43,13 @@ def workflow(ts):
         issued >= %s and issued < %s)
     DELETE from hml_forecast where id in
         (select id from data where rank > 1)
-    """, (ts, ts + datetime.timedelta(days=1)))
-    print(("dedup_hml_forecasts removed %s rows on %s for %s"
-           ) % (cursor.rowcount, "hml_forecast", ts.strftime("%Y-%m-%d")))
+    """,
+        (ts, ts + datetime.timedelta(days=1)),
+    )
+    print(
+        ("dedup_hml_forecasts removed %s rows on %s for %s")
+        % (cursor.rowcount, "hml_forecast", ts.strftime("%Y-%m-%d"))
+    )
     cursor.close()
     pgconn.commit()
 
@@ -52,5 +64,5 @@ def main(argv):
     workflow(ts)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

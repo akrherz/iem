@@ -12,14 +12,21 @@ from pyiem.util import get_dbconn, utc
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconn('postgis', user='nobody')
+    pgconn = get_dbconn("postgis", user="nobody")
     pcursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    svr_dict = {"N": "None", "0": "Aerial", "1": "Minor", "2": "Moderate",
-                "3": "Major", "U": "Unknown"}
+    svr_dict = {
+        "N": "None",
+        "0": "Aerial",
+        "1": "Minor",
+        "2": "Moderate",
+        "3": "Major",
+        "U": "Unknown",
+    }
 
-    fh = open('/tmp/wxc_iemrivers.txt', 'w')
-    fh.write("""Weather Central 001d0300 Surface Data TimeStamp=%s
+    fh = open("/tmp/wxc_iemrivers.txt", "w")
+    fh.write(
+        """Weather Central 001d0300 Surface Data TimeStamp=%s
   10
    5 Station
   64 River Forecast Point
@@ -31,30 +38,35 @@ def main():
   12 Severity
   10 Trend
  128 Forecast Text
-""" % (utc().strftime("%Y.%m.%d.%H%M"), ))
+"""
+        % (utc().strftime("%Y.%m.%d.%H%M"),)
+    )
 
-    pcursor.execute("""
+    pcursor.execute(
+        """
         select r.*, h.*, ST_x(h.geom) as lon, ST_y(h.geom) as lat
         from hvtec_nwsli h, riverpro r,
         (select distinct hvtec_nwsli from warnings_%s WHERE
          status NOT IN ('EXP','CAN') and phenomena = 'FL' and
          significance = 'W') as foo
         WHERE foo.hvtec_nwsli = r.nwsli and r.nwsli = h.nwsli
-    """ % (utc().year, ))
+    """
+        % (utc().year,)
+    )
 
     for row in pcursor:
         # nwsli = row['nwsli']
-        ft = re.findall(r"([0-9]+\.?[0-9]?)", row['flood_text'])
+        ft = re.findall(r"([0-9]+\.?[0-9]?)", row["flood_text"])
         if not ft:
             continue
         fstage = float(ft[-1])
 
-        ft = re.findall(r"([0-9]+\.?[0-9]?)", row['stage_text'])
+        ft = re.findall(r"([0-9]+\.?[0-9]?)", row["stage_text"])
         if not ft:
             continue
         stage = float(ft[-1])
 
-        forecast_text = row['forecast_text']
+        forecast_text = row["forecast_text"]
         trend = "Unknown"
         if forecast_text.find("FALL ") > 0:
             trend = "Falling"
@@ -67,15 +79,28 @@ def main():
             ft = [0]
         xstage = float(ft[-1])
 
-        severe = svr_dict.get(row['severity'], "")
+        severe = svr_dict.get(row["severity"], "")
 
-        rname = "%s %s %s" % (row['river_name'], row['proximity'],
-                              row['name'])
-        ftxt = re.sub(r"\s+", " ", row['forecast_text'].strip())
-        fh.write(("%5s %-64.64s %7.2f %7.2f %7.2f %7.2f %7.2f "
-                  "%-12.12s %-10.10s %-128.128s\n"
-                  ) % (row['nwsli'], rname, row['lat'], row['lon'],
-                       fstage, stage, xstage, severe, trend, ftxt))
+        rname = "%s %s %s" % (row["river_name"], row["proximity"], row["name"])
+        ftxt = re.sub(r"\s+", " ", row["forecast_text"].strip())
+        fh.write(
+            (
+                "%5s %-64.64s %7.2f %7.2f %7.2f %7.2f %7.2f "
+                "%-12.12s %-10.10s %-128.128s\n"
+            )
+            % (
+                row["nwsli"],
+                rname,
+                row["lat"],
+                row["lon"],
+                fstage,
+                stage,
+                xstage,
+                severe,
+                trend,
+                ftxt,
+            )
+        )
 
     fh.close()
 
@@ -85,5 +110,5 @@ def main():
     os.remove("/tmp/wxc_iemrivers.txt")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -8,8 +8,8 @@ import sys
 import psycopg2.extras
 from pyiem.util import get_dbconn, utc
 
-OTHER = get_dbconn('other')
-IEM = get_dbconn('iem')
+OTHER = get_dbconn("other")
+IEM = get_dbconn("iem")
 
 
 def dowork(ts, ts2):
@@ -17,33 +17,48 @@ def dowork(ts, ts2):
     # Delete any obs from yesterday
     ocursor = OTHER.cursor(cursor_factory=psycopg2.extras.DictCursor)
     icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    sql = "DELETE from t%s WHERE valid >= '%s' and valid < '%s'" % (ts.year,
-                                                                    ts, ts2)
+    sql = "DELETE from t%s WHERE valid >= '%s' and valid < '%s'" % (
+        ts.year,
+        ts,
+        ts2,
+    )
     ocursor.execute(sql)
 
     # Get obs from Access
     sql = """SELECT c.*, t.id from current_log c JOIN stations t on
         (t.iemid = c.iemid) WHERE valid >= '%s' and valid < '%s'
-        and t.network = 'OT'""" % (ts, ts2)
+        and t.network = 'OT'""" % (
+        ts,
+        ts2,
+    )
     icursor.execute(sql)
     if icursor.rowcount == 0:
         print("ot2archive found no results for ts: %s ts2: %s" % (ts, ts2))
 
     for row in icursor:
         pday = 0
-        if row['pday'] is not None and float(row['pday']) > 0:
-            pday = row['pday']
-        alti = row['alti']
-        if alti is None and row['mslp'] is not None:
-            alti = row['mslp'] * .03
+        if row["pday"] is not None and float(row["pday"]) > 0:
+            pday = row["pday"]
+        alti = row["alti"]
+        if alti is None and row["mslp"] is not None:
+            alti = row["mslp"] * 0.03
         sql = """INSERT into t%s (station, valid, tmpf, dwpf, drct, sknt, alti,
              pday, gust, c1tmpf, srad) values
              ('%s','%s',%s,%s,%s,%s,%s,%s,%s,%s,%s)
-        """ % (ts.year, row['id'], row['valid'], (row['tmpf'] or "Null"),
-               (row['dwpf'] or "Null"), (row['drct'] or "Null"),
-               (row['sknt'] or "Null"), (alti or "Null"), pday,
-               (row['gust'] or "Null"), (row['c1tmpf'] or "Null"),
-               (row['srad'] or "Null"))
+        """ % (
+            ts.year,
+            row["id"],
+            row["valid"],
+            (row["tmpf"] or "Null"),
+            (row["dwpf"] or "Null"),
+            (row["drct"] or "Null"),
+            (row["sknt"] or "Null"),
+            (alti or "Null"),
+            pday,
+            (row["gust"] or "Null"),
+            (row["c1tmpf"] or "Null"),
+            (row["srad"] or "Null"),
+        )
         ocursor.execute(sql)
 
     ocursor.close()
@@ -57,5 +72,5 @@ def main(argv):
     dowork(ts, ts2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

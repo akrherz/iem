@@ -14,7 +14,7 @@ THRESHOLD = 86400
 def main():
     """Go Main"""
     for proc in psutil.process_iter():
-        if proc.username() != 'apache':
+        if proc.username() != "apache":
             continue
         vals = proc.cpu_times()
         if vals[0] > THRESHOLD:
@@ -22,5 +22,5 @@ def main():
             proc.send_signal(9)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

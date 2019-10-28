@@ -25,11 +25,12 @@ def text_image(content):
     import PIL.ImageDraw
     import PIL.ImageOps
     from io import BytesIO
-    grayscale = 'L'
+
+    grayscale = "L"
     content = content.replace("\r\r\n", "\n").replace("\001", "")
     lines = content.split("\n")
     if len(lines) > 100:
-        msg = "...truncated %s lines..." % (len(lines) - 100, )
+        msg = "...truncated %s lines..." % (len(lines) - 100,)
         lines = lines[:100]
         lines.append(msg)
 
@@ -40,7 +41,7 @@ def text_image(content):
     # make the background image based on the combination of font and lines
     max_width_line = max(lines, key=lambda s: font.getsize(s)[0])
     # max height is adjusted down because it's too large visually for spacing
-    test_string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    test_string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     max_height = pt2px(font.getsize(test_string)[1])
     max_width = pt2px(font.getsize(max_width_line)[0])
     height = max_height * len(lines)  # perfect or a little oversized
@@ -53,27 +54,31 @@ def text_image(content):
     horizontal_position = 5
     line_spacing = int(round(max_height * 0.8))  # reduced spacing seems better
     for line in lines:
-        draw.text((horizontal_position, vertical_position),
-                  line, fill=0, font=font)
+        draw.text(
+            (horizontal_position, vertical_position), line, fill=0, font=font
+        )
         vertical_position += line_spacing
     # crop the text
     c_box = PIL.ImageOps.invert(image).getbbox()
     image = image.crop(c_box)
     buf = BytesIO()
-    PIL.ImageOps.expand(image, border=5, fill='white').save(buf, format='PNG')
+    PIL.ImageOps.expand(image, border=5, fill="white").save(buf, format="PNG")
     return buf.getvalue()
 
 
 def make_image(e, pil):
     """Do as I say"""
-    pgconn = get_dbconn('afos')
+    pgconn = get_dbconn("afos")
     cursor = pgconn.cursor()
-    valid = datetime.datetime.strptime(e, '%Y%m%d%H%M')
+    valid = datetime.datetime.strptime(e, "%Y%m%d%H%M")
     valid = valid.replace(tzinfo=pytz.UTC)
 
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT data from products WHERE pil = %s and entered = %s
-    """, (pil, valid))
+    """,
+        (pil, valid),
+    )
     content = ""
     if cursor.rowcount > 0:
         content = cursor.fetchone()[0]
@@ -83,10 +88,10 @@ def make_image(e, pil):
 def main():
     """Go Main Go"""
     form = cgi.FieldStorage()
-    e = form.getfirst('e', '201612141916')[:12]
-    pil = form.getfirst('pil', 'ADMNFD')[:6].replace(" ", "")
+    e = form.getfirst("e", "201612141916")[:12]
+    pil = form.getfirst("pil", "ADMNFD")[:6].replace(" ", "")
     key = "%s_%s.png" % (e, pil)
-    mc = memcache.Client(['iem-memcached:11211'], debug=0)
+    mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(key)
     if not res:
         res = make_image(e, pil)
@@ -95,5 +100,5 @@ def main():
     ssw(res)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -13,30 +13,37 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     ts = datetime.date.today()
-    desc['data'] = True
-    desc['description'] = """This chart displays the number of hourly
+    desc["data"] = True
+    desc[
+        "description"
+    ] = """This chart displays the number of hourly
     observations each month that reported measurable precipitation.  Sites
     are able to report trace amounts, but those reports are not considered
     in hopes of making the long term climatology comparable.
     """
-    desc['arguments'] = [
-        dict(type='zstation', name='zstation', default='AMW',
-             network='IA_ASOS', label='Select Station:'),
-        dict(type='year', name='year', default=ts.year,
-             label='Select Year:'),
+    desc["arguments"] = [
+        dict(
+            type="zstation",
+            name="zstation",
+            default="AMW",
+            network="IA_ASOS",
+            label="Select Station:",
+        ),
+        dict(type="year", name="year", default=ts.year, label="Select Year:"),
     ]
     return desc
 
 
 def plotter(fdict):
     """ Go """
-    pgconn = get_dbconn('asos')
+    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
 
-    station = ctx['zstation']
-    year = ctx['year']
+    station = ctx["zstation"]
+    year = ctx["year"]
 
-    df = read_sql("""
+    df = read_sql(
+        """
     WITH obs as (
         SELECT distinct date_trunc('hour', valid) as t from alldata
         WHERE station = %s and p01i >= 0.01
@@ -61,50 +68,90 @@ def plotter(fdict):
     SELECT a.month, m.count as count, a.avg, a.max, a.max_year from
     agg2 a LEFT JOIN myyear m
     on (m.month = a.month) ORDER by a.month ASC
-    """, pgconn, params=(station, year), index_col=None)
+    """,
+        pgconn,
+        params=(station, year),
+        index_col=None,
+    )
     if df.empty:
         raise NoDataFound("No Precipitation Data Found for Site")
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
-    monthly = df['avg'].values.tolist()
-    bars = ax.bar(df['month'] - 0.2, monthly, fc='red', ec='red',
-                  width=0.4, label='Climatology', align='center')
+    monthly = df["avg"].values.tolist()
+    bars = ax.bar(
+        df["month"] - 0.2,
+        monthly,
+        fc="red",
+        ec="red",
+        width=0.4,
+        label="Climatology",
+        align="center",
+    )
     for i, _ in enumerate(bars):
-        ax.text(i+1-0.25, monthly[i]+1, "%.0f" % (monthly[i],), ha='center')
-    thisyear = df['count'].values.tolist()
+        ax.text(
+            i + 1 - 0.25, monthly[i] + 1, "%.0f" % (monthly[i],), ha="center"
+        )
+    thisyear = df["count"].values.tolist()
     if not all([a is None for a in thisyear]):
-        bars = ax.bar(np.arange(1, 13) + 0.2, thisyear, fc='blue', ec='blue',
-                      width=0.4, label=str(year), align='center')
+        bars = ax.bar(
+            np.arange(1, 13) + 0.2,
+            thisyear,
+            fc="blue",
+            ec="blue",
+            width=0.4,
+            label=str(year),
+            align="center",
+        )
         for i, _ in enumerate(bars):
             if not np.isnan(thisyear[i]):
-                ax.text(i+1+0.25, thisyear[i]+1, "%.0f" % (thisyear[i],),
-                        ha='center')
+                ax.text(
+                    i + 1 + 0.25,
+                    thisyear[i] + 1,
+                    "%.0f" % (thisyear[i],),
+                    ha="center",
+                )
 
-    ax.scatter(df['month'], df['max'], marker='s', s=45, label="Max",
-               zorder=2, color='g')
+    ax.scatter(
+        df["month"],
+        df["max"],
+        marker="s",
+        s=45,
+        label="Max",
+        zorder=2,
+        color="g",
+    )
     for i, row in df.iterrows():
-        ax.text(row['month'], row['max'], '%i\n%i.' % (row['max_year'],
-                                                       row['max']), ha='right')
+        ax.text(
+            row["month"],
+            row["max"],
+            "%i\n%i." % (row["max_year"], row["max"]),
+            ha="right",
+        )
     ax.set_xticks(range(0, 13))
     ax.set_xticklabels(calendar.month_abbr)
     ax.set_xlim(0, 13)
-    maxval = df['count'].max()
+    maxval = df["count"].max()
     if not np.isnan(maxval):
-        ax.set_ylim(0, max([maxval, df['max'].max()]) * 1.2)
-    maxval = df['max'].max()
+        ax.set_ylim(0, max([maxval, df["max"].max()]) * 1.2)
+    maxval = df["max"].max()
     if not np.isnan(maxval):
         ax.set_yticks(np.arange(0, maxval + 20, 12))
     ax.set_ylabel("Hours with 0.01+ inch precip")
     if datetime.date.today().year == year:
-        ax.set_xlabel("Valid till %s" % (
-            datetime.date.today().strftime("%-d %B"),))
+        ax.set_xlabel(
+            "Valid till %s" % (datetime.date.today().strftime("%-d %B"),)
+        )
     ax.grid(True)
     ax.legend(ncol=3)
-    ax.set_title(("%s [%s]\n"
-                  "Number of Hours with *Measurable* Precipitation Reported"
-                  ) % (ctx['_nt'].sts[station]['name'], station))
+    ax.set_title(
+        (
+            "%s [%s]\n"
+            "Number of Hours with *Measurable* Precipitation Reported"
+        )
+        % (ctx["_nt"].sts[station]["name"], station)
+    )
 
     return fig, df
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     plotter(dict())

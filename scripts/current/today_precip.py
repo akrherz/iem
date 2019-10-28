@@ -11,14 +11,14 @@ from pyiem.reference import TRACE_VALUE
 def t(value):
     """Convert into something nice"""
     if value == TRACE_VALUE:
-        return 'T'
+        return "T"
     return value
 
 
 def main():
     """Go Main Go"""
     now = datetime.datetime.now()
-    pgconn = get_dbconn('iem', user='nobody')
+    pgconn = get_dbconn("iem", user="nobody")
     icursor = pgconn.cursor()
 
     # Compute normal from the climate database
@@ -33,7 +33,9 @@ def main():
      and c.day = 'TODAY'
      and s.country = 'US' and (s.network ~* 'ASOS' or s.network = 'AWOS')
      and s.state in ('IA','MN','WI','IL','MO','NE','KS','SD','ND')
-    """ % (now.year, )
+    """ % (
+        now.year,
+    )
 
     lats = []
     lons = []
@@ -45,7 +47,7 @@ def main():
         lats.append(row[3])
         lons.append(row[2])
         vals.append(t(row[4]))
-        iowa = row[1] in ['AWOS', 'IA_ASOS']
+        iowa = row[1] in ["AWOS", "IA_ASOS"]
         valmask.append(iowa)
         if iowa:
             iavals.append(row[4])
@@ -53,8 +55,11 @@ def main():
     if len(lats) < 3:
         return
 
-    mp = MapPlot(title="Iowa ASOS/AWOS Rainfall Reports", axisbg='white',
-                 subtitle="%s" % (now.strftime("%d %b %Y"), ))
+    mp = MapPlot(
+        title="Iowa ASOS/AWOS Rainfall Reports",
+        axisbg="white",
+        subtitle="%s" % (now.strftime("%d %b %Y"),),
+    )
     mp.drawcounties()
     mp.plot_values(lons, lats, vals)
     pqstr = "plot c 000000000000 summary/today_prec.png bogus png"
@@ -62,5 +67,5 @@ def main():
     mp.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

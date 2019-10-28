@@ -15,18 +15,20 @@ import pytz
 
 def workflow(basedate, utcdt):
     """ Create the sym link """
-    basefn = utcdt.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/"
-                             "mrms/p24h_%Y%m%d%H00"))
-    for suffix in ['png', 'wld']:
+    basefn = utcdt.strftime(
+        ("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/" "mrms/p24h_%Y%m%d%H00")
+    )
+    for suffix in ["png", "wld"]:
         target = "%s.%s" % (basefn, suffix)
         if not os.path.isfile(target):
-            print('MRMS create_daily_symlink ERROR: %s not found' % (target,))
+            print("MRMS create_daily_symlink ERROR: %s not found" % (target,))
             return
-        linkfn = basedate.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/"
-                                    "mrms_calday_%Y%m%d"))
+        linkfn = basedate.strftime(
+            ("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/" "mrms_calday_%Y%m%d")
+        )
         link = "%s.%s" % (linkfn, suffix)
         if os.path.islink(link):
-            print('Skipping link creation, already exists %s' % (link,))
+            print("Skipping link creation, already exists %s" % (link,))
             continue
         os.symlink(target, link)
 
@@ -34,8 +36,7 @@ def workflow(basedate, utcdt):
 def main(argv):
     """Do Something"""
     # Start off at noon
-    basedt = datetime.datetime(int(argv[1]), int(argv[2]),
-                               int(argv[3]), 12, 0)
+    basedt = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]), 12, 0)
     localdt = basedt.replace(tzinfo=pytz.utc)
     localdt = localdt.astimezone(pytz.timezone("America/Chicago"))
     # Now set to midnight tomorrow
@@ -46,6 +47,6 @@ def main(argv):
     workflow(basedt, utcdt)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Go Main Go
     main(sys.argv)

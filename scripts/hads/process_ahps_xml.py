@@ -12,8 +12,10 @@ from pyiem.util import get_dbconn
 def process_site(mcursor, nwsli, network):
     """Do our processing work"""
 
-    url = ("http://water.weather.gov/ahps2/hydrograph_to_xml.php?"
-           "gage=%s&output=xml") % (nwsli,)
+    url = (
+        "http://water.weather.gov/ahps2/hydrograph_to_xml.php?"
+        "gage=%s&output=xml"
+    ) % (nwsli,)
 
     elementStream = domish.elementStream()
     roots = []
@@ -24,8 +26,8 @@ def process_site(mcursor, nwsli, network):
     try:
         req = requests.get(url, timeout=30)
         xml = req.content
-        if xml.strip() == 'No results found for this gage.':
-            print('No results for %s' % (nwsli,))
+        if xml.strip() == "No results found for this gage.":
+            print("No results for %s" % (nwsli,))
             return
     except Exception as exp:
         print("DOWNLOAD ERROR")
@@ -42,35 +44,48 @@ def process_site(mcursor, nwsli, network):
 
     elem = results[0]
 
-    nodes = xpath.queryForNodes('/site/sigstages', elem)
+    nodes = xpath.queryForNodes("/site/sigstages", elem)
     if nodes is None:
         print("No data found for %s" % (nwsli,))
         return
 
     sigstages = nodes[0]
-    data = {'id': nwsli, 'network': network, 'sigstage_low': None,
-            'sigstage_action': None, 'sigstage_bankfull': None,
-            'sigstage_flood': None, 'sigstage_moderate': None,
-            'sigstage_major': None, 'sigstage_record': None}
+    data = {
+        "id": nwsli,
+        "network": network,
+        "sigstage_low": None,
+        "sigstage_action": None,
+        "sigstage_bankfull": None,
+        "sigstage_flood": None,
+        "sigstage_moderate": None,
+        "sigstage_major": None,
+        "sigstage_record": None,
+    }
     for s in sigstages.children:
         val = str(s)
-        if val == '':
+        if val == "":
             continue
-        data['sigstage_%s' % (s.name, )] = float(val)
+        data["sigstage_%s" % (s.name,)] = float(val)
 
-    if 'sigstage_low' not in data:
-        print('No Data %s %s' % (nwsli, network))
+    if "sigstage_low" not in data:
+        print("No Data %s %s" % (nwsli, network))
         return
 
-    print(("%s %5.1f %5.1f %5.1f %5.1f %5.1f %5.1f %5.1f"
-           ) % (data['id'], data['sigstage_low'] or -99,
-                data['sigstage_action'] or -99,
-                data['sigstage_bankfull'] or -99,
-                data['sigstage_flood'] or -99,
-                data['sigstage_moderate'] or -99,
-                data['sigstage_major'] or -99,
-                data['sigstage_record'] or -99))
-    mcursor.execute("""
+    print(
+        ("%s %5.1f %5.1f %5.1f %5.1f %5.1f %5.1f %5.1f")
+        % (
+            data["id"],
+            data["sigstage_low"] or -99,
+            data["sigstage_action"] or -99,
+            data["sigstage_bankfull"] or -99,
+            data["sigstage_flood"] or -99,
+            data["sigstage_moderate"] or -99,
+            data["sigstage_major"] or -99,
+            data["sigstage_record"] or -99,
+        )
+    )
+    mcursor.execute(
+        """
         UPDATE stations SET sigstage_low = %(sigstage_low)s,
         sigstage_action = %(sigstage_action)s,
         sigstage_bankfull = %(sigstage_bankfull)s,
@@ -79,16 +94,19 @@ def process_site(mcursor, nwsli, network):
         sigstage_major = %(sigstage_major)s,
         sigstage_record = %(sigstage_record)s
         WHERE id = %(id)s and network = %(network)s
-    """, data)
+    """,
+        data,
+    )
 
 
 def main():
     """Go Main Go"""
-    mesosite = get_dbconn('mesosite')
+    mesosite = get_dbconn("mesosite")
     mcursor = mesosite.cursor()
-    print(('%5s %5s %5s %5s %5s %5s %5s %5s'
-           ) % ("NWSLI", "LOW", "ACTN", "BANK",
-                "FLOOD", "MOD", "MAJOR", "REC"))
+    print(
+        ("%5s %5s %5s %5s %5s %5s %5s %5s")
+        % ("NWSLI", "LOW", "ACTN", "BANK", "FLOOD", "MOD", "MAJOR", "REC")
+    )
     net = sys.argv[1]
     nt = NetworkTable(net)
     for sid in nt.sts:
@@ -98,5 +116,5 @@ def main():
     mesosite.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

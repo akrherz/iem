@@ -9,28 +9,40 @@ from pyiem.exceptions import NoDataFound
 def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
-    desc['data'] = True
-    desc['report'] = True
-    desc['description'] = """ """
-    desc['arguments'] = [
-        dict(type='station', name='station', default='IATDSM',
-             label='Select Station', network='IACLIMATE'),
+    desc["data"] = True
+    desc["report"] = True
+    desc["description"] = """ """
+    desc["arguments"] = [
+        dict(
+            type="station",
+            name="station",
+            default="IATDSM",
+            label="Select Station",
+            network="IACLIMATE",
+        )
     ]
     return desc
 
 
 def plotter(fdict):
     """ Go """
-    pgconn = get_dbconn('coop')
+    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
-    station = ctx['station'].upper()
+    station = ctx["station"].upper()
 
-    table = "alldata_%s" % (station[:2], )
-    df = read_sql("""
-     SELECT year, count(low) from """+table+""" WHERE
+    table = "alldata_%s" % (station[:2],)
+    df = read_sql(
+        """
+     SELECT year, count(low) from """
+        + table
+        + """ WHERE
      station = %s and low >= 32
     and year < %s GROUP by year ORDER by year ASC
-    """, pgconn, params=(station, datetime.date.today().year), index_col=None)
+    """,
+        pgconn,
+        params=(station, datetime.date.today().year),
+        index_col=None,
+    )
     if df.empty:
         raise NoDataFound("No Data Found.")
 
@@ -41,17 +53,21 @@ def plotter(fdict):
 # Site Information: [%s] %s
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 # OF DAYS EACH YEAR WHERE MIN >=32 F
-""" % (datetime.date.today().strftime("%d %b %Y"),
-       ctx['_nt'].sts[station]['archive_begin'].date(), datetime.date.today(),
-       station, ctx['_nt'].sts[station]['name'])
+""" % (
+        datetime.date.today().strftime("%d %b %Y"),
+        ctx["_nt"].sts[station]["archive_begin"].date(),
+        datetime.date.today(),
+        station,
+        ctx["_nt"].sts[station]["name"],
+    )
 
     for _, row in df.iterrows():
-        res += "%s %3i\n" % (row['year'], row['count'])
+        res += "%s %3i\n" % (row["year"], row["count"])
 
-    res += "MEAN %3i\n" % (df['count'].mean(),)
+    res += "MEAN %3i\n" % (df["count"].mean(),)
 
     return None, df, res
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     plotter(dict())

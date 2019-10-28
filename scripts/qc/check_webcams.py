@@ -14,9 +14,9 @@ from pyiem.util import get_dbconn
 
 def workflow(netname, pname):
     """Do something please"""
-    pgconn_iem = get_dbconn('iem')
-    pgconn_mesosite = get_dbconn('mesosite')
-    pgconn_portfolio = get_dbconn('portfolio')
+    pgconn_iem = get_dbconn("iem")
+    pgconn_mesosite = get_dbconn("mesosite")
+    pgconn_portfolio = get_dbconn("portfolio")
 
     # Now lets check files
     mydir = "/home/ldm/data/camera/stills"
@@ -24,26 +24,31 @@ def workflow(netname, pname):
     threshold = datetime.datetime.utcnow() - datetime.timedelta(hours=2)
     threshold = threshold.replace(tzinfo=pytz.UTC)
     mcursor = pgconn_mesosite.cursor()
-    mcursor.execute("""
+    mcursor.execute(
+        """
         SELECT id, network, name from webcams where
         network = %s
         and online ORDER by id ASC
-    """, (netname, ))
+    """,
+        (netname,),
+    )
     nt = NetworkTable(None)
     obs = {}
     missing = 0
     for row in mcursor:
-        nt.sts[row[0]] = dict(id=row[0], network=row[1], name=row[2],
-                              tzname='America/Chicago')
+        nt.sts[row[0]] = dict(
+            id=row[0], network=row[1], name=row[2], tzname="America/Chicago"
+        )
         fn = "%s/%s.jpg" % (mydir, row[0])
         if not os.path.isfile(fn):
             missing += 1
             if missing > 1:
-                print('Missing webcam file: %s' % (fn,))
+                print("Missing webcam file: %s" % (fn,))
             continue
         ticks = os.stat(fn)[stat.ST_MTIME]
-        valid = (datetime.datetime(1970, 1, 1) +
-                 datetime.timedelta(seconds=ticks))
+        valid = datetime.datetime(1970, 1, 1) + datetime.timedelta(
+            seconds=ticks
+        )
         valid = valid.replace(tzinfo=pytz.UTC)
         obs[row[0]] = dict(valid=valid)
     # Abort out if no obs are found
@@ -59,9 +64,9 @@ def workflow(netname, pname):
 
 def main():
     """Do something"""
-    for network in ['KCCI', 'KCRG', 'KELO', 'KCWI']:
-        workflow(network, "%ssnet" % (network.lower(), ))
+    for network in ["KCCI", "KCRG", "KELO", "KCWI"]:
+        workflow(network, "%ssnet" % (network.lower(),))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -11,9 +11,9 @@ from pyiem.util import get_dbconn
 
 def main(argv):
     """Go Main Go"""
-    st = NetworkTable('IACLIMATE')
+    st = NetworkTable("IACLIMATE")
     now = datetime.datetime.now() - datetime.timedelta(days=1)
-    pgconn = get_dbconn('coop', user='nobody')
+    pgconn = get_dbconn("coop", user="nobody")
     ccursor = pgconn.cursor()
 
     gfunc = "gdd50"
@@ -26,13 +26,16 @@ def main(argv):
         gbase = 48
 
     # Compute normal from the climate database
-    ccursor.execute("""
+    ccursor.execute(
+        """
         SELECT station,
         sum(%s(high, low)) as gdd
         from alldata_ia WHERE station != 'IA0000'
         and substr(station, 3, 1) != 'C' and year = %s
         GROUP by station
-    """ % (gfunc, now.year))
+    """
+        % (gfunc, now.year)
+    )
 
     lats = []
     lons = []
@@ -43,18 +46,20 @@ def main(argv):
         station = row[0]
         if station not in st.sts:
             continue
-        lats.append(st.sts[station]['lat'])
-        lons.append(st.sts[station]['lon'])
+        lats.append(st.sts[station]["lat"])
+        lons.append(st.sts[station]["lon"])
         gdd50.append(float(row[1]))
         valmask.append(True)
 
-    mp = MapPlot(axisbg='white',
-                 title=("Iowa %s GDD (base=%s) Accumulation"
-                        ) % (now.strftime("%Y"), gbase),
-                 subtitle="1 Jan - %s" % (now.strftime("%d %b %Y"), ))
+    mp = MapPlot(
+        axisbg="white",
+        title=("Iowa %s GDD (base=%s) Accumulation")
+        % (now.strftime("%Y"), gbase),
+        subtitle="1 Jan - %s" % (now.strftime("%d %b %Y"),),
+    )
     minval = min(gdd50)
     rng = max([int(max(gdd50) - minval), 10])
-    ramp = np.linspace(minval, minval+rng, 10, dtype=np.int)
+    ramp = np.linspace(minval, minval + rng, 10, dtype=np.int)
     mp.contourf(lons, lats, gdd50, ramp)
     pqstr = "plot c 000000000000 summary/gdd_jan1.png bogus png"
     if gbase == 52:
@@ -66,5 +71,5 @@ def main(argv):
     mp.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

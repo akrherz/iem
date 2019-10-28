@@ -19,7 +19,8 @@ from pyiem.util import get_dbconn, logger
 LOG = logger()
 BASEDIR = "/mesonet/ARCHIVE/raw/asos/"
 
-P1_RE = re.compile(r"""
+P1_RE = re.compile(
+    r"""
 (?P<wban>[0-9]{5})
 (?P<faaid>[0-9A-Z]{4})\s
 (?P<id3>[0-9A-Z]{3})
@@ -35,11 +36,14 @@ P1_RE = re.compile(r"""
 ((?P<gust_sknt>\d+)R?L?F*\d*\+?|(?P<gust_sknt_miss>M))\s+
 (....)\s
 (...)
-""", re.VERBOSE)
+""",
+    re.VERBOSE,
+)
 
-p1_examples = open('p1_examples.txt').readlines()
+p1_examples = open("p1_examples.txt").readlines()
 
-P2_RE = re.compile(r"""
+P2_RE = re.compile(
+    r"""
 (?P<wban>[0-9]{5})
 (?P<faaid>[0-9A-Z]{4})\s
 (?P<id3>[0-9A-Z]{3})
@@ -54,10 +58,12 @@ P2_RE = re.compile(r"""
 ((?P<pres3>\d+\.\d*)|(?P<pres3_miss>[M ]))\s*
 \s*((?P<tmpf>\-?\d+)|(?P<tmpf_miss>[M ]))\s*
 \s*((?P<dwpf>\-?\d+)|(?P<dwpf_miss>[M ]))\s+
-""", re.VERBOSE)
+""",
+    re.VERBOSE,
+)
 
 
-p2_examples = open('p2_examples.txt').readlines()
+p2_examples = open("p2_examples.txt").readlines()
 
 
 def tstamp2dt(s):
@@ -80,7 +86,7 @@ def p2_parser(ln):
         print("P2_FAIL:|%s|" % (ln,))
         return None
     res = m.groupdict()
-    res['ts'] = tstamp2dt(res['tstamp'])
+    res["ts"] = tstamp2dt(res["tstamp"])
     return res
 
 
@@ -93,7 +99,7 @@ def p1_parser(ln):
         print("P1_FAIL:|%s|" % (ln,))
         return None
     res = m.groupdict()
-    res['ts'] = tstamp2dt(res['tstamp'])
+    res["ts"] = tstamp2dt(res["tstamp"])
     return res
 
 
@@ -106,16 +112,22 @@ def download(station, monthts):
     if not os.path.isdir(datadir):
         os.makedirs(datadir)
     for page in [5, 6]:
-        uri = baseuri + "640%s-%s/640%s0K%s%s.dat" % (page, monthts.year, page,
-                                                      station,
-                                                      monthts.strftime("%Y%m"))
+        uri = baseuri + "640%s-%s/640%s0K%s%s.dat" % (
+            page,
+            monthts.year,
+            page,
+            station,
+            monthts.strftime("%Y%m"),
+        )
         req = requests.get(uri)
         if req.status_code != 200:
             LOG.info("dl %s failed with code %s", uri, req.status_code)
             continue
         with open(
-            "%s/640%s0K%s%s.dat" % (
-                datadir, page, station, monthts.strftime("%Y%m")), 'wb') as fp:
+            "%s/640%s0K%s%s.dat"
+            % (datadir, page, station, monthts.strftime("%Y%m")),
+            "wb",
+        ) as fp:
             fp.write(req.content)
 
 
@@ -126,25 +138,36 @@ def runner(station, monthts):
 
     # Our final amount of data
     data = {}
-    if os.path.isfile("64050K%s%s%02i" % (station, monthts.year,
-                                          monthts.month)):
-        fn5 = '64050K%s%s%02i' % (station, monthts.year, monthts.month)
-        fn6 = '64060K%s%s%02i' % (station, monthts.year, monthts.month)
+    if os.path.isfile(
+        "64050K%s%s%02i" % (station, monthts.year, monthts.month)
+    ):
+        fn5 = "64050K%s%s%02i" % (station, monthts.year, monthts.month)
+        fn6 = "64060K%s%s%02i" % (station, monthts.year, monthts.month)
     else:
-        fn5 = ('%sdata/%s/64050K%s%s%02i.dat'
-               ) % (BASEDIR, station,
-                    station, monthts.year, monthts.month)
-        fn6 = ('%sdata/%s/64060K%s%s%02i.dat'
-               ) % (BASEDIR, station,
-                    station, monthts.year, monthts.month)
+        fn5 = ("%sdata/%s/64050K%s%s%02i.dat") % (
+            BASEDIR,
+            station,
+            station,
+            monthts.year,
+            monthts.month,
+        )
+        fn6 = ("%sdata/%s/64060K%s%s%02i.dat") % (
+            BASEDIR,
+            station,
+            station,
+            monthts.year,
+            monthts.month,
+        )
         if not os.path.isfile(fn5):
             try:
                 download(station, monthts)
             except Exception as exp:
-                print('download() error %s' % (exp,))
+                print("download() error %s" % (exp,))
             if not os.path.isfile(fn5) or not os.path.isfile(fn6):
-                print(("NCDC did not have %s station for %s"
-                       ) % (station, monthts.strftime("%b %Y")))
+                print(
+                    ("NCDC did not have %s station for %s")
+                    % (station, monthts.strftime("%b %Y"))
+                )
                 return
     # We have two files to worry about
     print("Processing 64050: %s" % (fn5,))
@@ -152,20 +175,20 @@ def runner(station, monthts):
         d = p1_parser(ln)
         if d is None:
             continue
-        data[d['ts']] = d
+        data[d["ts"]] = d
 
     print("Processing 64060: %s" % (fn6,))
     for ln in open(fn6):
         d = p2_parser(ln)
         if d is None:
             continue
-        if d['ts'] not in data:
-            data[d['ts']] = {}
+        if d["ts"] not in data:
+            data[d["ts"]] = {}
         for k in d.keys():
-            data[d['ts']][k] = d[k]
+            data[d["ts"]][k] = d[k]
 
     if not data:
-        print('No data found for station: %s' % (station,))
+        print("No data found for station: %s" % (station,))
         return
 
     mints = None
@@ -180,11 +203,15 @@ def runner(station, monthts):
             maxts = ts
 
     tmpfn = "/tmp/%s%s-dbinsert.sql" % (station, monthts.strftime("%Y%m"))
-    out = open(tmpfn, 'w')
-    out.write("""DELETE from alldata_1minute WHERE station = '%s' and
-               valid >= '%s' and valid <= '%s';\n""" % (station, mints, maxts))
-    out.write("COPY t%s_1minute FROM stdin WITH NULL as 'Null';\n" % (
-         monthts.year,))
+    out = open(tmpfn, "w")
+    out.write(
+        """DELETE from alldata_1minute WHERE station = '%s' and
+               valid >= '%s' and valid <= '%s';\n"""
+        % (station, mints, maxts)
+    )
+    out.write(
+        "COPY t%s_1minute FROM stdin WITH NULL as 'Null';\n" % (monthts.year,)
+    )
 
     # Loop over the data we got please
     keys = list(data.keys())
@@ -194,46 +221,78 @@ def runner(station, monthts):
         if ts.year != monthts.year and not flipped:
             print("  Flipped years from %s to %s" % (monthts.year, ts.year))
             out.write("\.\n")
-            out.write(("COPY t%s_1minute FROM stdin WITH NULL as 'Null';\n"
-                       ) % (ts.year,))
+            out.write(
+                ("COPY t%s_1minute FROM stdin WITH NULL as 'Null';\n")
+                % (ts.year,)
+            )
             flipped = True
         ln = ""
-        data[ts]['station'] = station
-        for col in ['station', 'ts', 'vis1_coeff', 'vis1_nd',
-                    'vis2_coeff', 'vis2_nd', 'drct', 'sknt', 'gust_drct',
-                    'gust_sknt', 'ptype', 'precip', 'pres1', 'pres2', 'pres3',
-                    'tmpf', 'dwpf']:
-            ln += "%s\t" % (data[ts].get(col) or 'Null',)
-        out.write(ln[:-1]+"\n")
+        data[ts]["station"] = station
+        for col in [
+            "station",
+            "ts",
+            "vis1_coeff",
+            "vis1_nd",
+            "vis2_coeff",
+            "vis2_nd",
+            "drct",
+            "sknt",
+            "gust_drct",
+            "gust_sknt",
+            "ptype",
+            "precip",
+            "pres1",
+            "pres2",
+            "pres3",
+            "tmpf",
+            "dwpf",
+        ]:
+            ln += "%s\t" % (data[ts].get(col) or "Null",)
+        out.write(ln[:-1] + "\n")
     out.write("\.\n")
     out.close()
 
     proc = subprocess.Popen(
-        "psql -f %s -h iemdb-asos.local asos" % (tmpfn,), shell=True,
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout = proc.stdout.read().decode('utf-8')
-    stderr = proc.stderr.read().decode('utf-8')
+        "psql -f %s -h iemdb-asos.local asos" % (tmpfn,),
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    stdout = proc.stdout.read().decode("utf-8")
+    stderr = proc.stderr.read().decode("utf-8")
 
-    print(("%s %s processed %s entries [%s to %s UTC]\n"
-           "STDOUT: %s\nSTDERR: %s"
-           ) % (datetime.datetime.now().strftime("%H:%M %p"),
-                station, len(data.keys()), mints.strftime("%y%m%d %H:%M"),
-                maxts.strftime("%y%m%d %H:%M"), stdout.replace("\n", " "),
-                stderr.replace("\n", " ")))
+    print(
+        (
+            "%s %s processed %s entries [%s to %s UTC]\n"
+            "STDOUT: %s\nSTDERR: %s"
+        )
+        % (
+            datetime.datetime.now().strftime("%H:%M %p"),
+            station,
+            len(data.keys()),
+            mints.strftime("%y%m%d %H:%M"),
+            maxts.strftime("%y%m%d %H:%M"),
+            stdout.replace("\n", " "),
+            stderr.replace("\n", " "),
+        )
+    )
 
-    if stderr == '':
+    if stderr == "":
         os.unlink(tmpfn)
 
 
 def update_iemprops():
     """db update"""
-    pgconn = get_dbconn('mesosite')
+    pgconn = get_dbconn("mesosite")
     cursor = pgconn.cursor()
     m1 = datetime.date.today().replace(day=1)
-    cursor.execute("""
+    cursor.execute(
+        """
         UPDATE properties SET propvalue = %s
         WHERE propname = 'asos.1min.end'
-    """, (m1.strftime("%Y-%m-%d"),))
+    """,
+        (m1.strftime("%Y-%m-%d"),),
+    )
     cursor.close()
     pgconn.commit()
 
@@ -241,14 +300,30 @@ def update_iemprops():
 def main(argv):
     """Go Main Go"""
     if len(argv) == 3:
-        for station in ["DVN", "LWD", "FSD", "MLI", 'OMA', 'MCW', 'BRL', 'AMW',
-                        'MIW', 'SPW', 'OTM', 'CID', 'EST', 'IOW', 'SUX', 'DBQ',
-                        'ALO', 'DSM']:
-            runner(station,
-                   datetime.datetime(int(argv[1]), int(argv[2]), 1))
+        for station in [
+            "DVN",
+            "LWD",
+            "FSD",
+            "MLI",
+            "OMA",
+            "MCW",
+            "BRL",
+            "AMW",
+            "MIW",
+            "SPW",
+            "OTM",
+            "CID",
+            "EST",
+            "IOW",
+            "SUX",
+            "DBQ",
+            "ALO",
+            "DSM",
+        ]:
+            runner(station, datetime.datetime(int(argv[1]), int(argv[2]), 1))
     elif len(argv) == 4:
         if int(argv[3]) != 0:
-            months = [int(argv[3]), ]
+            months = [int(argv[3])]
         else:
             months = range(1, 13)
         for month in months:
@@ -256,15 +331,31 @@ def main(argv):
     else:
         # default to last month
         ts = datetime.date.today() - datetime.timedelta(days=19)
-        for station in ["DVN", "LWD", "FSD", "MLI", 'OMA', 'MCW', 'BRL', 'AMW',
-                        'MIW', 'SPW', 'OTM', 'CID', 'EST', 'IOW', 'SUX', 'DBQ',
-                        'ALO', 'DSM']:
-            runner(station,
-                   datetime.datetime(ts.year, ts.month, 1))
+        for station in [
+            "DVN",
+            "LWD",
+            "FSD",
+            "MLI",
+            "OMA",
+            "MCW",
+            "BRL",
+            "AMW",
+            "MIW",
+            "SPW",
+            "OTM",
+            "CID",
+            "EST",
+            "IOW",
+            "SUX",
+            "DBQ",
+            "ALO",
+            "DSM",
+        ]:
+            runner(station, datetime.datetime(ts.year, ts.month, 1))
         update_iemprops()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)
 
 

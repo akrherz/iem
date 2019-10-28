@@ -17,10 +17,10 @@ def consume(scursor, fn, ts):
     """
     table = "data_%s" % (ts.strftime("%Y_%m"),)
     nc = ncopen(fn)
-    gpids = nc.variables['Grid_Point_ID'][:]
-    sms = nc.variables['Soil_Moisture'][:].tolist()
-    optdepths = nc.variables['Optical_Thickness_Nad'][:].tolist()
-    chi2pds = nc.variables['Chi_2_P'][:].tolist()
+    gpids = nc.variables["Grid_Point_ID"][:]
+    sms = nc.variables["Soil_Moisture"][:].tolist()
+    optdepths = nc.variables["Optical_Thickness_Nad"][:].tolist()
+    chi2pds = nc.variables["Chi_2_P"][:].tolist()
     bad = 0
     good = 0
     data = StringIO()
@@ -34,15 +34,24 @@ def consume(scursor, fn, ts):
             sm = None
         if od is None or od <= 0 or od > 1:
             od = None
-        data.write(("%s\t%s\t%s\t%s\n"
-                    ) % (int(gpid), ts.strftime("%Y-%m-%d %H:%M:%S+00"),
-                         sm or 'null', od or 'null'))
+        data.write(
+            ("%s\t%s\t%s\t%s\n")
+            % (
+                int(gpid),
+                ts.strftime("%Y-%m-%d %H:%M:%S+00"),
+                sm or "null",
+                od or "null",
+            )
+        )
         good += 1
 
     data.seek(0)
-    scursor.copy_from(data, table, columns=('grid_idx', 'valid',
-                                            'soil_moisture', 'optical_depth'),
-                      null='null')
+    scursor.copy_from(
+        data,
+        table,
+        columns=("grid_idx", "valid", "soil_moisture", "optical_depth"),
+        null="null",
+    )
 
 
 def fn2datetime(fn):
@@ -53,13 +62,13 @@ def fn2datetime(fn):
     tokens = TSTAMP.findall(fn)
     if not tokens:
         return None
-    ts = datetime.datetime.strptime(tokens[0], '%Y%m%dT%H%M%S')
+    ts = datetime.datetime.strptime(tokens[0], "%Y%m%dT%H%M%S")
     return ts.replace(tzinfo=pytz.utc)
 
 
 def lookforfiles():
     """Look for any new data to ingest"""
-    pgconn = get_dbconn('smos')
+    pgconn = get_dbconn("smos")
     scursor = pgconn.cursor()
     os.chdir("/mesonet/data/smos")
     files = glob.glob("*.nc")
@@ -68,16 +77,22 @@ def lookforfiles():
         if ts is None:
             print("ingest_smos: fn2datetime fail: %s" % (fn,))
             continue
-        scursor.execute("""
+        scursor.execute(
+            """
             SELECT * from obtimes where valid = %s
-        """, (ts,))
+        """,
+            (ts,),
+        )
         row = scursor.fetchone()
         if row is None:
             # print "INGEST FILE!", file
             consume(scursor, fn, ts)
-            scursor.execute("""
+            scursor.execute(
+                """
             INSERT into obtimes(valid) values (%s)
-            """, (ts,))
+            """,
+                (ts,),
+            )
             pgconn.commit()
 
 

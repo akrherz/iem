@@ -11,21 +11,21 @@ import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.util import get_dbconn, utc, ssw
 
-PGCONN = get_dbconn('hads')
-DELIMITERS = {'comma': ',', 'space': ' ', 'tab': '\t'}
+PGCONN = get_dbconn("hads")
+DELIMITERS = {"comma": ",", "space": " ", "tab": "\t"}
 
 
 def get_time(form):
     """ Get timestamps """
-    y1 = int(form.getfirst('year'))
-    m1 = int(form.getfirst('month1'))
-    m2 = int(form.getfirst('month2'))
-    d1 = int(form.getfirst('day1'))
-    d2 = int(form.getfirst('day2'))
-    h1 = int(form.getfirst('hour1'))
-    h2 = int(form.getfirst('hour2'))
-    mi1 = int(form.getfirst('minute1'))
-    mi2 = int(form.getfirst('minute2'))
+    y1 = int(form.getfirst("year"))
+    m1 = int(form.getfirst("month1"))
+    m2 = int(form.getfirst("month2"))
+    d1 = int(form.getfirst("day1"))
+    d2 = int(form.getfirst("day2"))
+    h1 = int(form.getfirst("hour1"))
+    h2 = int(form.getfirst("hour2"))
+    mi1 = int(form.getfirst("minute1"))
+    mi2 = int(form.getfirst("minute2"))
     sts = utc(y1, m1, d1, h1, mi1)
     ets = utc(y1, m2, d2, h2, mi2)
     return sts, ets
@@ -49,18 +49,39 @@ def threshold_search(table, threshold, thresholdvar, delimiter):
         val = row[mycol]
         if val > threshold and not above:
             found = True
-            res.append(dict(station=station, utc_valid=valid, event='START',
-                            value=val, varname=mycol))
+            res.append(
+                dict(
+                    station=station,
+                    utc_valid=valid,
+                    event="START",
+                    value=val,
+                    varname=mycol,
+                )
+            )
             above = True
         if val > threshold and above:
             if val > maxrunning:
                 maxrunning = val
                 maxvalid = valid
         if val < threshold and above:
-            res.append(dict(station=station, utc_valid=maxvalid, event='MAX',
-                            value=maxrunning, varname=mycol))
-            res.append(dict(station=station, utc_valid=valid, event='END',
-                            value=val, varname=mycol))
+            res.append(
+                dict(
+                    station=station,
+                    utc_valid=maxvalid,
+                    event="MAX",
+                    value=maxrunning,
+                    varname=mycol,
+                )
+            )
+            res.append(
+                dict(
+                    station=station,
+                    utc_valid=valid,
+                    event="END",
+                    value=val,
+                    varname=mycol,
+                )
+            )
             above = False
             maxrunning = -99
             maxvalid = None
@@ -82,55 +103,60 @@ def main():
     """ Go do something """
     form = cgi.FieldStorage()
     # network = form.getfirst('network')
-    delimiter = DELIMITERS.get(form.getfirst('delim', 'comma'))
-    what = form.getfirst('what', 'dl')
-    threshold = float(form.getfirst('threshold', -99))
-    thresholdvar = form.getfirst('threshold-var', 'RG')
+    delimiter = DELIMITERS.get(form.getfirst("delim", "comma"))
+    what = form.getfirst("what", "dl")
+    threshold = float(form.getfirst("threshold", -99))
+    thresholdvar = form.getfirst("threshold-var", "RG")
     sts, ets = get_time(form)
-    stations = form.getlist('stations')
+    stations = form.getlist("stations")
     if not stations:
         ssw("Content-type: text/plain\n\n")
         ssw("Error, no stations specified for the query!")
         return
     if len(stations) == 1:
-        stations.append('XXXXXXX')
+        stations.append("XXXXXXX")
 
     table = "raw%s" % (sts.year,)
-    sql = """SELECT station, valid at time zone 'UTC' as utc_valid,
-    key, value from """+table+"""
+    sql = (
+        """SELECT station, valid at time zone 'UTC' as utc_valid,
+    key, value from """
+        + table
+        + """
     WHERE station in %s and valid BETWEEN '%s' and '%s'
-    and value > -999""" % (tuple(stations), sts, ets)
+    and value > -999"""
+        % (tuple(stations), sts, ets)
+    )
     df = read_sql(sql, PGCONN)
     if df.empty:
         ssw("Content-type: text/plain\n\n")
         ssw("Sorry, no results found for query!")
         return
-    table = df.pivot_table(values='value', columns=['key'], index=['station',
-                                                                   'utc_valid']
-                           )
+    table = df.pivot_table(
+        values="value", columns=["key"], index=["station", "utc_valid"]
+    )
     if threshold >= 0:
-        if 'XXXXXXX' not in stations:
-            error('Can not do threshold search for more than one station')
+        if "XXXXXXX" not in stations:
+            error("Can not do threshold search for more than one station")
             return
         table = threshold_search(table, threshold, thresholdvar, delimiter)
 
     bio = StringIO()
-    if what == 'txt':
-        ssw('Content-type: application/octet-stream\n')
-        ssw(('Content-Disposition: attachment; filename=hads.txt\n\n'))
+    if what == "txt":
+        ssw("Content-type: application/octet-stream\n")
+        ssw(("Content-Disposition: attachment; filename=hads.txt\n\n"))
         table.to_csv(bio, sep=delimiter)
-    elif what == 'html':
+    elif what == "html":
         ssw("Content-type: text/html\n\n")
         table.to_html(bio)
-    elif what == 'excel':
-        writer = pd.ExcelWriter('/tmp/ss.xlsx')
-        table.to_excel(writer, 'Data', index=True)
+    elif what == "excel":
+        writer = pd.ExcelWriter("/tmp/ss.xlsx")
+        table.to_excel(writer, "Data", index=True)
         writer.save()
 
         ssw("Content-type: application/vnd.ms-excel\n")
         ssw(("Content-Disposition: attachment; Filename=hads.xlsx\n\n"))
-        ssw(open('/tmp/ss.xlsx', 'rb').read())
-        os.unlink('/tmp/ss.xlsx')
+        ssw(open("/tmp/ss.xlsx", "rb").read())
+        os.unlink("/tmp/ss.xlsx")
         return
     else:
         ssw("Content-type: text/plain\n\n")
@@ -139,5 +165,5 @@ def main():
     ssw(bio.getvalue())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

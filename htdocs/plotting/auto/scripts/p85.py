@@ -7,45 +7,60 @@ from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict([
-    ('above', 'At or Above Temperature'),
-    ('below', 'Below Temperature'),
-    ])
+PDICT = OrderedDict(
+    [("above", "At or Above Temperature"), ("below", "Below Temperature")]
+)
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
-    desc['data'] = True
-    desc['description'] = """Based on IEM archives of METAR reports, this
+    desc["data"] = True
+    desc[
+        "description"
+    ] = """Based on IEM archives of METAR reports, this
     application produces the hourly frequency of a temperature at or
     above or below a temperature thresold."""
-    desc['arguments'] = [
-        dict(type='zstation', name='zstation', default='AMW',
-             network='IA_ASOS', label='Select Station:'),
-        dict(type='month', name='month', default=7,
-             label='Month:'),
-        dict(type='int', name='t', default=80,
-             label='Temperature Threshold (F):'),
-        dict(type='select', name='dir', default='above',
-             label='Threshold Option:', options=PDICT),
+    desc["arguments"] = [
+        dict(
+            type="zstation",
+            name="zstation",
+            default="AMW",
+            network="IA_ASOS",
+            label="Select Station:",
+        ),
+        dict(type="month", name="month", default=7, label="Month:"),
+        dict(
+            type="int",
+            name="t",
+            default=80,
+            label="Temperature Threshold (F):",
+        ),
+        dict(
+            type="select",
+            name="dir",
+            default="above",
+            label="Threshold Option:",
+            options=PDICT,
+        ),
     ]
     return desc
 
 
 def plotter(fdict):
     """ Go """
-    pgconn = get_dbconn('asos', user='nobody')
+    pgconn = get_dbconn("asos", user="nobody")
 
     ctx = get_autoplot_context(fdict, get_description())
-    station = ctx['zstation']
-    month = int(ctx['month'])
-    thres = ctx['t']
-    mydir = ctx['dir']
+    station = ctx["zstation"]
+    month = int(ctx["month"])
+    thres = ctx["t"]
+    mydir = ctx["dir"]
 
-    tzname = ctx['_nt'].sts[station]['tzname']
+    tzname = ctx["_nt"].sts[station]["tzname"]
 
-    df = read_sql("""
+    df = read_sql(
+        """
     WITH data as (
         SELECT valid at time zone %s  + '10 minutes'::interval as v, tmpf
         from alldata where station = %s and tmpf > -90 and tmpf < 150
@@ -57,40 +72,55 @@ def plotter(fdict):
     sum(case when tmpf::int >= %s THEN 1 ELSE 0 END) as above,
     count(*) from data
     GROUP by hour ORDER by hour ASC
-    """, pgconn, params=(tzname, station, month, thres, thres),
-                  index_col='hour')
+    """,
+        pgconn,
+        params=(tzname, station, month, thres, thres),
+        index_col="hour",
+    )
     if df.empty:
         raise NoDataFound("No data found.")
 
-    df['below_freq'] = df['below'].values.astype('f') / df['count'] * 100.
-    df['above_freq'] = df['above'].values.astype('f') / df['count'] * 100.
+    df["below_freq"] = df["below"].values.astype("f") / df["count"] * 100.0
+    df["above_freq"] = df["above"].values.astype("f") / df["count"] * 100.0
 
-    freq = df[mydir+"_freq"].values
+    freq = df[mydir + "_freq"].values
     hours = df.index.values
 
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
-    bars = ax.bar(hours, freq, fc='blue', align='center')
+    bars = ax.bar(hours, freq, fc="blue", align="center")
     for i, mybar in enumerate(bars):
-        ax.text(i, mybar.get_height() + 3, "%.0f" % (mybar.get_height(),),
-                ha='center', fontsize=10)
+        ax.text(
+            i,
+            mybar.get_height() + 3,
+            "%.0f" % (mybar.get_height(),),
+            ha="center",
+            fontsize=10,
+        )
     ax.set_xticks(range(0, 25, 3))
-    ax.set_xticklabels(['Mid', '3 AM', '6 AM', '9 AM', 'Noon', '3 PM',
-                        '6 PM', '9 PM'])
+    ax.set_xticklabels(
+        ["Mid", "3 AM", "6 AM", "9 AM", "Noon", "3 PM", "6 PM", "9 PM"]
+    )
     ax.grid(True)
     ax.set_ylim(0, 100)
     ax.set_yticks([0, 25, 50, 75, 100])
     ax.set_ylabel("Frequency [%]")
     ax.set_xlabel("Hour Timezone: %s" % (tzname,))
     ax.set_xlim(-0.5, 23.5)
-    ax.set_title(("(%s - %s) %s [%s]\n"
-                  r"Frequency of %s Hour, %s: %s$^\circ$F"
-                  ) % (df['min_valid'].min().year, df['max_valid'].max().year,
-                       ctx['_nt'].sts[station]['name'], station,
-                       calendar.month_name[month], PDICT[mydir],
-                       thres))
+    ax.set_title(
+        ("(%s - %s) %s [%s]\n" r"Frequency of %s Hour, %s: %s$^\circ$F")
+        % (
+            df["min_valid"].min().year,
+            df["max_valid"].max().year,
+            ctx["_nt"].sts[station]["name"],
+            station,
+            calendar.month_name[month],
+            PDICT[mydir],
+            thres,
+        )
+    )
 
     return fig, df
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     plotter(dict())

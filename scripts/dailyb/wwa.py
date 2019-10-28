@@ -4,7 +4,7 @@ import datetime
 import pytz
 from pyiem.util import get_dbconn, utc
 
-POSTGIS = get_dbconn('postgis', user='nobody')
+POSTGIS = get_dbconn("postgis", user="nobody")
 cursor = POSTGIS.cursor()
 
 textfmt = """
@@ -62,8 +62,7 @@ def run(sts=None, ets=None):
     # comprises yesterday!  Call it 00 UTC to 00 UTC
     if sts is None or ets is None:
         utc = datetime.datetime.utcnow()
-        utc = utc.replace(tzinfo=pytz.utc, second=0,
-                          microsecond=0, minute=0)
+        utc = utc.replace(tzinfo=pytz.utc, second=0, microsecond=0, minute=0)
         ts = utc.astimezone(pytz.timezone("America/Chicago"))
         sts = ts - datetime.timedelta(hours=24)
         sts = sts.replace(hour=0)
@@ -72,57 +71,71 @@ def run(sts=None, ets=None):
     d = {}
 
     # Get US states
-    d['TOu'] = 0
-    d['SVu'] = 0
-    d['FFu'] = 0
-    cursor.execute("""select phenomena, count(*) from sbw_%s
+    d["TOu"] = 0
+    d["SVu"] = 0
+    d["FFu"] = 0
+    cursor.execute(
+        """select phenomena, count(*) from sbw_%s
         WHERE status = 'NEW' and issue >= '%s' and issue < '%s'
         and phenomena IN ('TO','SV','FF') GROUP by phenomena
-        """ % (sts.year, sts, ets))
+        """
+        % (sts.year, sts, ets)
+    )
     for row in cursor:
-        d['%su' % (row[0],)] = row[1]
+        d["%su" % (row[0],)] = row[1]
 
     # Get Iowa
-    d['TOi'] = 0
-    d['SVi'] = 0
-    d['FFi'] = 0
-    cursor.execute("""
+    d["TOi"] = 0
+    d["SVi"] = 0
+    d["FFi"] = 0
+    cursor.execute(
+        """
         select phenomena, count(*) as count
         from sbw_%s w, states s
         WHERE ST_contains(s.the_geom, w.geom) and s.state_name = 'Iowa'
         and issue >= '%s' and issue < '%s' and status = 'NEW'
         and phenomena IN ('TO','SV','FF') GROUP by phenomena
-        """ % (sts.year, sts, ets))
+        """
+        % (sts.year, sts, ets)
+    )
     for row in cursor:
-        d['%si' % (row[0],)] = row[1]
+        d["%si" % (row[0],)] = row[1]
 
     # Get per WFO
-    for wfo in ['DMX', 'DVN', 'ARX', 'FSD', 'OAX']:
-        d['TO%s' % (wfo,)] = 0
-        d['SV%s' % (wfo,)] = 0
-        d['FF%s' % (wfo,)] = 0
-    cursor.execute("""
+    for wfo in ["DMX", "DVN", "ARX", "FSD", "OAX"]:
+        d["TO%s" % (wfo,)] = 0
+        d["SV%s" % (wfo,)] = 0
+        d["FF%s" % (wfo,)] = 0
+    cursor.execute(
+        """
       SELECT phenomena, wfo, count(*) as count from sbw_%s WHERE
       issue >= '%s' and issue < '%s' and status = 'NEW'
       and phenomena IN ('TO','SV','FF') and
       wfo in ('DMX','FSD','ARX','DVN','OAX') GROUP by wfo, phenomena
-      """ % (sts.year, sts, ets))
+      """
+        % (sts.year, sts, ets)
+    )
     for row in cursor:
-        d['%s%s' % (row[0], row[1])] = row[2]
+        d["%s%s" % (row[0], row[1])] = row[2]
 
     # SPC Watches
-    d['TORw'] = 0
-    d['SVRw'] = 0
+    d["TORw"] = 0
+    d["SVRw"] = 0
 
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT type, count(*) as count from watches WHERE
         issued >= '%s' and issued < '%s' GROUP by type
-        """ % (sts, ets))
+        """
+        % (sts, ets)
+    )
     for row in cursor:
-        d['%sw' % (row[0],)] = row[1]
+        d["%sw" % (row[0],)] = row[1]
 
-    label = "%s - %s" % (sts.strftime("%-I %p %-d %b %Y"),
-                         ets.strftime("%-I %p %-d %b %Y %Z"))
+    label = "%s - %s" % (
+        sts.strftime("%-I %p %-d %b %Y"),
+        ets.strftime("%-I %p %-d %b %Y %Z"),
+    )
 
     txt = "> NWS Watch/Warning Summary for %s\n" % (label,)
     html = "<h3>NWS Watch/Warning Summary for %s</h3>" % (label,)
@@ -144,5 +157,5 @@ def main():
     print(html)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

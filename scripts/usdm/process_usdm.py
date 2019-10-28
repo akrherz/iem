@@ -19,20 +19,23 @@ PQINSERT = "/home/ldm/bin/pqinsert"
 
 def database_save(date, shpfn):
     """Save to our databasem please"""
-    pgconn = get_dbconn('postgis')
+    pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
-    cursor.execute("""DELETE from usdm where valid = %s""", (date, ))
+    cursor.execute("""DELETE from usdm where valid = %s""", (date,))
     if cursor.rowcount > 0:
-        print("    database delete removed %s rows" % (cursor.rowcount, ))
+        print("    database delete removed %s rows" % (cursor.rowcount,))
     with fiona.open(shpfn) as shps:
         for shp in shps:
-            geo = shape(shp['geometry'])
-            if geo.type == 'Polygon':
+            geo = shape(shp["geometry"])
+            if geo.type == "Polygon":
                 geo = MultiPolygon([geo])
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT into usdm(valid, dm, geom) VALUES
                 (%s, %s, st_setsrid(st_geomfromtext(%s), 4326))
-            """, (date, shp['properties']['DM'], geo.wkt))
+            """,
+                (date, shp["properties"]["DM"], geo.wkt),
+            )
     cursor.close()
     pgconn.commit()
 
@@ -44,33 +47,42 @@ def workflow(date, routes):
     url = "%sUSDM_%s_M.zip" % (BASEURL, date.strftime("%Y%m%d"))
     req = exponential_backoff(requests.get, url, timeout=30)
     if req is None:
-        print("process_usdm download full fail: %s" % (url, ))
+        print("process_usdm download full fail: %s" % (url,))
         return
     if req.status_code != 200:
-        print(("process_usdm download failed for: %s code: %s"
-               ) % (url, req.status_code))
+        print(
+            ("process_usdm download failed for: %s code: %s")
+            % (url, req.status_code)
+        )
         return
-    tmp = tempfile.NamedTemporaryFile(suffix='.zip', delete=False)
+    tmp = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
     tmp.write(req.content)
     tmp.close()
-    zipfp = zipfile.ZipFile(tmp.name, 'r')
+    zipfp = zipfile.ZipFile(tmp.name, "r")
     shpfn = None
     for name in zipfp.namelist():
         # print("    extracting: %s" % (name, ))
-        fp = open("/tmp/%s" % (name, ), 'wb')
+        fp = open("/tmp/%s" % (name,), "wb")
         fp.write(zipfp.read(name))
         fp.close()
-        if name[-3:] == 'shp':
+        if name[-3:] == "shp":
             shpfn = "/tmp/" + name
     # 2. Save it to the database
     database_save(date, shpfn)
     # 3. Send it to LDM for current and archive writing
-    for fn in glob.glob("/tmp/USDM_%s*" % (date.strftime("%Y%m%d"), )):
+    for fn in glob.glob("/tmp/USDM_%s*" % (date.strftime("%Y%m%d"),)):
         suffix = fn.split("/")[-1].split(".", 1)[1]
-        cmd = ("%s -i -p 'data %s %s0000 gis/shape/4326/us/dm_current.%s "
-               "GIS/usdm/%s bogus' %s"
-               ) % (PQINSERT, routes, date.strftime("%Y%m%d"), suffix,
-                    fn.split("/")[-1], fn)
+        cmd = (
+            "%s -i -p 'data %s %s0000 gis/shape/4326/us/dm_current.%s "
+            "GIS/usdm/%s bogus' %s"
+        ) % (
+            PQINSERT,
+            routes,
+            date.strftime("%Y%m%d"),
+            suffix,
+            fn.split("/")[-1],
+            fn,
+        )
         subprocess.call(cmd, shell=True)
         os.unlink(fn)
     # 4. Clean up after ourself
@@ -91,5 +103,5 @@ def main(argv):
     workflow(tuesday, routes)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

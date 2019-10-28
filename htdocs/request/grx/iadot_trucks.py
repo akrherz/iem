@@ -20,28 +20,41 @@ Color: 200 200 255
 IconFile: 1, 15, 25, 8, 25, "%s"
 Font: 1, 11, 1, "Courier New"
 
-""" % (datetime.datetime.utcnow().strftime("%H%M"), ARROWS)
+""" % (
+        datetime.datetime.utcnow().strftime("%H%M"),
+        ARROWS,
+    )
 
-    pgconn = get_dbconn('postgis', user='nobody')
+    pgconn = get_dbconn("postgis", user="nobody")
     cursor = pgconn.cursor()
 
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT valid, heading, velocity, roadtemp, airtemp,
         solidmaterial, liquidmaterial, prewetmaterial, solidsetrate,
         liquidsetrate, prewetsetrate, solid_spread_code, road_temp_code,
         ST_x(geom), ST_y(geom), label from idot_snowplow_current
         where valid > (now() - '1 hour'::interval) and
         valid < (now() + '1 hour'::interval) ORDER by label ASC
-    """)
+    """
+    )
 
     for row in cursor:
-        txt = ("%s @ %s\\nRoad Temp: %s\\nVelocity: %s MPH\\nAir Temp: %s\\n"
-               ) % (row[15],
-                    row[0].strftime("%d %b %I:%M %p"), row[3], row[2], row[4])
+        txt = (
+            "%s @ %s\\nRoad Temp: %s\\nVelocity: %s MPH\\nAir Temp: %s\\n"
+        ) % (
+            row[15],
+            row[0].strftime("%d %b %I:%M %p"),
+            row[3],
+            row[2],
+            row[4],
+        )
         res += "Object: %.6f, %.6f\n" % (row[14], row[13])
         res += "Threshold: 999\n"
-        res += ("Icon: 0,0,%s,1,7,\"%s\"\n"
-                ) % (0 if row[1] is None else int(row[1]), txt)
+        res += ('Icon: 0,0,%s,1,7,"%s"\n') % (
+            0 if row[1] is None else int(row[1]),
+            txt,
+        )
         res += "End:\n\n"
 
     return res
@@ -52,7 +65,7 @@ def main():
     ssw("Content-type: text/plain\n\n")
 
     mckey = "/request/grx/iadot_trucks.txt"
-    mc = memcache.Client(['iem-memcached:11211'], debug=0)
+    mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
     if not res:
         res = produce_content()
@@ -60,5 +73,5 @@ def main():
     ssw(res)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

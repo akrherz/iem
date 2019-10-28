@@ -35,7 +35,9 @@ def main():
     )
     df2 = amsi4.join(df, how="outer")
     sio = StringIO()
-    df2.to_html(sio, classes="table table-striped", na_rep="-", float_format="%.2f")
+    df2.to_html(
+        sio, classes="table table-striped", na_rep="-", float_format="%.2f"
+    )
     sio.seek(0)
     ssw("Content-type: text/html\n\n")
     ssw(sio.getvalue())

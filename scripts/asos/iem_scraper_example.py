@@ -5,6 +5,7 @@ from __future__ import print_function
 import json
 import time
 import datetime
+
 # Python 2 and 3: alternative 4
 try:
     from urllib.request import urlopen
@@ -33,8 +34,8 @@ def download_data(uri):
     attempt = 0
     while attempt < MAX_ATTEMPTS:
         try:
-            data = urlopen(uri, timeout=300).read().decode('utf-8')
-            if data is not None and not data.startswith('ERROR'):
+            data = urlopen(uri, timeout=300).read().decode("utf-8")
+            if data is not None and not data.startswith("ERROR"):
                 return data
         except Exception as exp:
             print("download_data(%s) failed with %s" % (uri, exp))
@@ -63,18 +64,19 @@ def get_stations_from_networks():
      MI MN MO MS MT NC ND NE NH NJ NM NV NY OH OK OR PA RI SC SD TN TX UT VA VT
      WA WI WV WY"""
     # IEM quirk to have Iowa AWOS sites in its own labeled network
-    networks = ['AWOS']
+    networks = ["AWOS"]
     for state in states.split():
         networks.append("%s_ASOS" % (state,))
 
     for network in networks:
         # Get metadata
-        uri = ("https://mesonet.agron.iastate.edu/"
-               "geojson/network/%s.geojson") % (network,)
+        uri = (
+            "https://mesonet.agron.iastate.edu/" "geojson/network/%s.geojson"
+        ) % (network,)
         data = urlopen(uri)
         jdict = json.load(data)
-        for site in jdict['features']:
-            stations.append(site['properties']['sid'])
+        for site in jdict["features"]:
+            stations.append(site["properties"]["sid"])
     return stations
 
 
@@ -86,22 +88,25 @@ def main():
 
     service = SERVICE + "data=all&tz=Etc/UTC&format=comma&latlon=yes&"
 
-    service += startts.strftime('year1=%Y&month1=%m&day1=%d&')
-    service += endts.strftime('year2=%Y&month2=%m&day2=%d&')
+    service += startts.strftime("year1=%Y&month1=%m&day1=%d&")
+    service += endts.strftime("year2=%Y&month2=%m&day2=%d&")
 
     # Two examples of how to specify a list of stations
     stations = get_stations_from_networks()
     # stations = get_stations_from_filelist("mystations.txt")
     for station in stations:
-        uri = '%s&station=%s' % (service, station)
-        print('Downloading: %s' % (station, ))
+        uri = "%s&station=%s" % (service, station)
+        print("Downloading: %s" % (station,))
         data = download_data(uri)
-        outfn = '%s_%s_%s.txt' % (station, startts.strftime("%Y%m%d%H%M"),
-                                  endts.strftime("%Y%m%d%H%M"))
-        out = open(outfn, 'w')
+        outfn = "%s_%s_%s.txt" % (
+            station,
+            startts.strftime("%Y%m%d%H%M"),
+            endts.strftime("%Y%m%d%H%M"),
+        )
+        out = open(outfn, "w")
         out.write(data)
         out.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

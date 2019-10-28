@@ -37,9 +37,13 @@ def is_within(val, floor, ceiling):
 def init_year(year):
     """We need to do great things, for a great new year"""
     # We need FTP first, since that does proper wild card expansion
-    subprocess.call("""
+    subprocess.call(
+        """
         wget -q '%s/%s/*.txt'
-    """ % (FTP, year), shell=True)
+    """
+        % (FTP, year),
+        shell=True,
+    )
 
 
 def process_file(icursor, ocursor, year, filename, size, reprocess):
@@ -68,67 +72,137 @@ def process_file(icursor, ocursor, year, filename, size, reprocess):
    22   WIND_1_5                       m/s
    23   WIND_FLAG                      X
     """
-    fp = open(filename, 'rb')
+    fp = open(filename, "rb")
     if size > 0:
         fp.seek(os.stat(filename).st_size - size)
-    df = pd.read_csv(fp, sep=r"\s+",
-                     names=['WBANNO', 'UTC_DATE', 'UTC_TIME', 'LST_DATE',
-                            'LST_TIME', 'CRX_VN', 'LON', 'LAT', 'TMPC',
-                            'PRECIP_MM', 'SRAD', 'SR_FLAG', 'SKINC',
-                            'ST_TYPE', 'ST_FLAG', 'RH', 'RH_FLAG', 'VSM5',
-                            'SOILC5', 'WETNESS', 'WET_FLAG', 'SMPS',
-                            'SMPS_FLAG'],
-                     na_values={'TMPC': "-9999", "PRECIP_MM": "-9999",
-                                'SRAD': "-99999", "SKINC": "-9999",
-                                "RH": "-9999", "VSM5": "-99",
-                                "SOILC5": "-9999", "WETNESS": "-9999",
-                                "SMPS": "-99"},
-                     converters={'WBANNO': str, 'UTC_TIME': str})
+    df = pd.read_csv(
+        fp,
+        sep=r"\s+",
+        names=[
+            "WBANNO",
+            "UTC_DATE",
+            "UTC_TIME",
+            "LST_DATE",
+            "LST_TIME",
+            "CRX_VN",
+            "LON",
+            "LAT",
+            "TMPC",
+            "PRECIP_MM",
+            "SRAD",
+            "SR_FLAG",
+            "SKINC",
+            "ST_TYPE",
+            "ST_FLAG",
+            "RH",
+            "RH_FLAG",
+            "VSM5",
+            "SOILC5",
+            "WETNESS",
+            "WET_FLAG",
+            "SMPS",
+            "SMPS_FLAG",
+        ],
+        na_values={
+            "TMPC": "-9999",
+            "PRECIP_MM": "-9999",
+            "SRAD": "-99999",
+            "SKINC": "-9999",
+            "RH": "-9999",
+            "VSM5": "-99",
+            "SOILC5": "-9999",
+            "WETNESS": "-9999",
+            "SMPS": "-99",
+        },
+        converters={"WBANNO": str, "UTC_TIME": str},
+    )
     if reprocess and not df.empty:
-        ocursor.execute("""
-            DELETE from uscrn_t"""+str(year)+"""
+        ocursor.execute(
+            """
+            DELETE from uscrn_t"""
+            + str(year)
+            + """
             WHERE station = %s
-        """, (df.iloc[0]['WBANNO'], ))
+        """,
+            (df.iloc[0]["WBANNO"],),
+        )
         LOG.info("Removed %s rows", ocursor.rowcount)
     for _, row in df.iterrows():
-        valid = datetime.datetime.strptime("%s %s" % (row['UTC_DATE'],
-                                                      row['UTC_TIME']),
-                                           '%Y%m%d %H%M')
+        valid = datetime.datetime.strptime(
+            "%s %s" % (row["UTC_DATE"], row["UTC_TIME"]), "%Y%m%d %H%M"
+        )
         valid = valid.replace(tzinfo=pytz.utc)
-        ob = Observation(str(row['WBANNO']), 'USCRN', valid)
-        ob.data['tmpf'] = is_within((float(row["TMPC"]) * units.degC
-                                     ).to(units.degF).magnitude, -100, 150)
-        ob.data['pcounter'] = is_within((float(row['PRECIP_MM']) * units('mm')
-                                         ).to(units.inch).magnitude, 0, 900)
-        ob.data['srad'] = is_within(row['SRAD'], 0, 2000)
-        ob.data['tsf0'] = is_within((float(row["SKINC"]) * units.degC
-                                     ).to(units.degF).magnitude, -100, 200)
-        ob.data['relh'] = is_within(row['RH'], 1, 100.1)
-        ob.data['c1smv'] = is_within(row['VSM5'], 0.01, 1.01)
-        ob.data['c1tmpf'] = is_within((float(row["SOILC5"]) * units.degC
-                                       ).to(units.degF).magnitude, -100, 200)
-        ob.data['sknt'] = is_within((float(row['SMPS']) * units('m/s')
-                                     ).to(units('miles per hour')).magnitude,
-                                    0, 200)
+        ob = Observation(str(row["WBANNO"]), "USCRN", valid)
+        ob.data["tmpf"] = is_within(
+            (float(row["TMPC"]) * units.degC).to(units.degF).magnitude,
+            -100,
+            150,
+        )
+        ob.data["pcounter"] = is_within(
+            (float(row["PRECIP_MM"]) * units("mm")).to(units.inch).magnitude,
+            0,
+            900,
+        )
+        ob.data["srad"] = is_within(row["SRAD"], 0, 2000)
+        ob.data["tsf0"] = is_within(
+            (float(row["SKINC"]) * units.degC).to(units.degF).magnitude,
+            -100,
+            200,
+        )
+        ob.data["relh"] = is_within(row["RH"], 1, 100.1)
+        ob.data["c1smv"] = is_within(row["VSM5"], 0.01, 1.01)
+        ob.data["c1tmpf"] = is_within(
+            (float(row["SOILC5"]) * units.degC).to(units.degF).magnitude,
+            -100,
+            200,
+        )
+        ob.data["sknt"] = is_within(
+            (float(row["SMPS"]) * units("m/s"))
+            .to(units("miles per hour"))
+            .magnitude,
+            0,
+            200,
+        )
         ob.save(icursor, skip_current=reprocess)
-        table = "uscrn_t%s" % (valid.year, )
+        table = "uscrn_t%s" % (valid.year,)
         if not reprocess:
-            ocursor.execute("""
-            DELETE from """ + table + """ WHERE station = %s and valid = %s
-            """, (row['WBANNO'], valid))
-        ocursor.execute("""
-        INSERT into """+table+""" (station, valid, tmpc, precip_mm, srad,
+            ocursor.execute(
+                """
+            DELETE from """
+                + table
+                + """ WHERE station = %s and valid = %s
+            """,
+                (row["WBANNO"], valid),
+            )
+        ocursor.execute(
+            """
+        INSERT into """
+            + table
+            + """ (station, valid, tmpc, precip_mm, srad,
         srad_flag, skinc, skinc_flag, skinc_type, rh, rh_flag, vsm5,
         soilc5, wetness, wetness_flag, wind_mps, wind_mps_flag) VALUES
         (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (str(row['WBANNO']), valid, n2n(row['TMPC']),
-              n2n(row['PRECIP_MM']),
-              n2n(row['SRAD']), row['SR_FLAG'], n2n(row['SKINC']),
-              row['ST_TYPE'],
-              row['ST_FLAG'], n2n(row['RH']), row['RH_FLAG'], n2n(row['VSM5']),
-              n2n(row['SOILC5']), n2n(row['WETNESS']), row['WET_FLAG'],
-              n2n(row['SMPS']),
-              row['SMPS_FLAG']))
+        """,
+            (
+                str(row["WBANNO"]),
+                valid,
+                n2n(row["TMPC"]),
+                n2n(row["PRECIP_MM"]),
+                n2n(row["SRAD"]),
+                row["SR_FLAG"],
+                n2n(row["SKINC"]),
+                row["ST_TYPE"],
+                row["ST_FLAG"],
+                n2n(row["RH"]),
+                row["RH_FLAG"],
+                n2n(row["VSM5"]),
+                n2n(row["SOILC5"]),
+                n2n(row["WETNESS"]),
+                row["WET_FLAG"],
+                n2n(row["SMPS"]),
+                row["SMPS_FLAG"],
+            ),
+        )
 
 
 def download(year, reprocess=False):
@@ -145,9 +219,11 @@ def download(year, reprocess=False):
     for filename in files:
         size = os.stat(filename).st_size
         req = exponential_backoff(
-            requests.get, "%s/%s/%s" % (URI, year, filename),
-            headers={'Range': 'bytes=%s-%s' % (size, size + 16000000)},
-            timeout=30)
+            requests.get,
+            "%s/%s/%s" % (URI, year, filename),
+            headers={"Range": "bytes=%s-%s" % (size, size + 16000000)},
+            timeout=30,
+        )
         # No new data
         if req is None or req.status_code == 416:
             continue
@@ -155,8 +231,8 @@ def download(year, reprocess=False):
             LOG.info("uscrn_ingest %s is %s", filename, req.status_code)
             continue
         if req.status_code < 400:
-            with open(filename, 'a') as fh:
-                fh.write(req.content.decode('utf-8'))
+            with open(filename, "a") as fh:
+                fh.write(req.content.decode("utf-8"))
         if req.status_code < 400 or reprocess:
             queue.append([filename, len(req.content)])
         else:
@@ -168,8 +244,8 @@ def download(year, reprocess=False):
 
 def main(argv):
     """Go Main Go"""
-    iem_pgconn = get_dbconn('iem')
-    other_pgconn = get_dbconn('other')
+    iem_pgconn = get_dbconn("iem")
+    other_pgconn = get_dbconn("other")
     year = datetime.datetime.utcnow().year
     reprocess = False
     if len(argv) == 2:
@@ -189,5 +265,5 @@ def main(argv):
         other_pgconn.commit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

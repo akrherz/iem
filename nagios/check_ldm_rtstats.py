@@ -49,18 +49,20 @@ def get_fileage(fn):
 
 def runner(hostname, feedtype):
     """ Do something! """
-    for username in ['ldm', 'meteor_ldm']:
+    for username in ["ldm", "meteor_ldm"]:
         mydir = "/home/%s/rtstats/%s/%s" % (
-            username, hostname,
+            username,
+            hostname,
             # workaround nagios/nrpe issues
-            feedtype if feedtype != 'IDS' else 'IDS|DDPLUS')
+            feedtype if feedtype != "IDS" else "IDS|DDPLUS",
+        )
         if os.path.isdir(mydir):
             os.chdir(mydir)
             break
     min_latency = 1e6
     tot_bytes = 0
     tot_prods = 0
-    time_threshold = 120 if feedtype == 'CONDUIT' else 15
+    time_threshold = 120 if feedtype == "CONDUIT" else 15
     for fn in glob.glob("*_v_*"):
         age = get_fileage(fn)
         if age > (time_threshold * 60):
@@ -79,7 +81,10 @@ def runner(hostname, feedtype):
     elif min_latency < 1200:
         exitcode = 1
     stats = "prods=%.0f;;;0; bytes=%.0fB;;;; latency=%.4fs;;;;" % (
-        tot_prods, tot_bytes, min_latency)
+        tot_prods,
+        tot_bytes,
+        min_latency,
+    )
     print("%s | %s" % (msg, stats))
     return exitcode
 
@@ -92,5 +97,5 @@ def main(argv):
     return runner(argv[1], argv[2])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main(sys.argv))

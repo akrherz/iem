@@ -14,43 +14,49 @@ def query(sql, args=None):
     """
     Do a query and make it atomic
     """
-    pgconn = get_dbconn('hads')
+    pgconn = get_dbconn("hads")
     hcursor = pgconn.cursor()
     sts = datetime.datetime.now()
     hcursor.execute("set work_mem='16GB'")
     hcursor.execute(sql, args if args is not None else [])
     ets = datetime.datetime.now()
-    print("%7s [%8.4fs] %s" % (hcursor.rowcount, (ets - sts).total_seconds(),
-                               sql))
+    print(
+        "%7s [%8.4fs] %s"
+        % (hcursor.rowcount, (ets - sts).total_seconds(), sql)
+    )
     hcursor.close()
     pgconn.commit()
 
 
 def workflow(valid):
-    ''' Do the work for this date, which is set to 00 UTC '''
+    """ Do the work for this date, which is set to 00 UTC """
     tbl = "raw%s" % (valid.strftime("%Y_%m"),)
 
     # make sure our tmp table does not exist
     query("DROP TABLE IF EXISTS tmp")
     # Extract unique obs to special table
-    sql = """
-        CREATE table tmp as select distinct * from """ + tbl + """
+    sql = (
+        """
+        CREATE table tmp as select distinct * from """
+        + tbl
+        + """
         WHERE valid BETWEEN %s and %s
     """
+    )
     args = (valid, valid + datetime.timedelta(hours=24))
     query(sql, args)
 
     # Delete them all!
-    sql = """delete from """+tbl+""" WHERE valid BETWEEN %s and %s"""
+    sql = """delete from """ + tbl + """ WHERE valid BETWEEN %s and %s"""
     query(sql, args)
 
-    sql = "DROP index IF EXISTS "+tbl+"_idx"
+    sql = "DROP index IF EXISTS " + tbl + "_idx"
     query(sql)
-    sql = "DROP index IF EXISTS "+tbl+"_valid_idx"
+    sql = "DROP index IF EXISTS " + tbl + "_valid_idx"
     query(sql)
 
     # Insert from special table
-    sql = "INSERT into "+tbl+" SELECT * from tmp"
+    sql = "INSERT into " + tbl + " SELECT * from tmp"
     query(sql)
 
     sql = "CREATE index %s_idx on %s(station,valid)" % (tbl, tbl)
@@ -68,13 +74,12 @@ def main(argv):
         utcnow = utc(int(argv[1]), int(argv[2]), int(argv[3]))
         workflow(utcnow)
         return
-    utcnow = utc().replace(
-        hour=0, minute=0, second=0, microsecond=0)
+    utcnow = utc().replace(hour=0, minute=0, second=0, microsecond=0)
     # Run for 'yesterday' and 35 days ago
     for day in [1, 35]:
         workflow(utcnow - datetime.timedelta(days=day))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # See how we are called
     main(sys.argv)

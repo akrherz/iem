@@ -14,85 +14,94 @@ import psycopg2.extras
 from pyiem.util import get_dbconn
 
 DISTRICTS = [
-             'North West',
-             'North Central',
-             'North East',
-             'West Central',
-             'Central',
-             'East Central',
-             'South West',
-             'South Central',
-             'South East',
-            ]
+    "North West",
+    "North Central",
+    "North East",
+    "West Central",
+    "Central",
+    "East Central",
+    "South West",
+    "South Central",
+    "South East",
+]
 STIDS = [
-    ['Rock Rapids    RKRI4',
-     'Sheldon    SHDI4',
-     'Sibley    SIBI4',
-     'Sioux Center    SIXI4',
-     'Spirit Lake    VICI4',
-     'Storm Lake    SLBI4',
-     ],
-    ['Algona    ALGI4',
-     'Charles City    CIYI4',
-     'Dakota City    DAKI4',
-     'Hampton    HPTI4',
-     'Mason City    MCWI4',
-     'Osage    OSAI4',
-     ],
-    ['Cresco    CRCI4',
-     'Decorah    DCRI4',
-     'Dubuque    DLDI4',
-     'Fayette    FYTI4',
-     'Manchester    MHRI4',
-     'Tripoli    TRPI4',
-     ],
-    ['Audubon    AUDI4',
-     'Carroll    CINI4',
-     'Jefferson    JFFI4',
-     'Logan    LOGI4',
-     'Mapleton    MPTI4',
-     'Rockwell City    RKWI4',
-     ],
-    ['Boone    BNWI4',
-     'Grinnell    GRII4',
-     'Grundy Center    GNDI4',
-     'Iowa Falls    IWAI4',
-     'Marshalltown    MSHI4',
-     'Webster City    WEBI4',
-     ],
-    ['Anamosa    AMOI4',
-     'Cedar Rapids    CRPI4',
-     'Clinton    CLNI4',
-     'Lowden    LWDI4',
-     'Maquoketa    MKTI4',
-     'Vinton    VNTI4',
-     ],
-    ['Atlantic    ATLI4',
-     'Clarinda    CLDI4',
-     'Glenwood    GLNI4',
-     'Oakland    OAKI4',
-     'Red Oak    ROKI4',
-     'Sidney    SIDI4',
-     ],
-    ['Allerton    ALRI4',
-     'Beaconsfield    BCNI4',
-     'Centerville    CNTI4',
-     'Indianola    IDAI4',
-     'Lamoni    3OI',
-     'Osceola    OSEI4',
-     ],
-    ['Bloomfield    BLMI4',
-     'Donnellson    DNNI4',
-     'Fairfield    FRFI4',
-     'Keosauqua    KEQI4',
-     'Washington    WSHI4',
-     ]
+    [
+        "Rock Rapids    RKRI4",
+        "Sheldon    SHDI4",
+        "Sibley    SIBI4",
+        "Sioux Center    SIXI4",
+        "Spirit Lake    VICI4",
+        "Storm Lake    SLBI4",
+    ],
+    [
+        "Algona    ALGI4",
+        "Charles City    CIYI4",
+        "Dakota City    DAKI4",
+        "Hampton    HPTI4",
+        "Mason City    MCWI4",
+        "Osage    OSAI4",
+    ],
+    [
+        "Cresco    CRCI4",
+        "Decorah    DCRI4",
+        "Dubuque    DLDI4",
+        "Fayette    FYTI4",
+        "Manchester    MHRI4",
+        "Tripoli    TRPI4",
+    ],
+    [
+        "Audubon    AUDI4",
+        "Carroll    CINI4",
+        "Jefferson    JFFI4",
+        "Logan    LOGI4",
+        "Mapleton    MPTI4",
+        "Rockwell City    RKWI4",
+    ],
+    [
+        "Boone    BNWI4",
+        "Grinnell    GRII4",
+        "Grundy Center    GNDI4",
+        "Iowa Falls    IWAI4",
+        "Marshalltown    MSHI4",
+        "Webster City    WEBI4",
+    ],
+    [
+        "Anamosa    AMOI4",
+        "Cedar Rapids    CRPI4",
+        "Clinton    CLNI4",
+        "Lowden    LWDI4",
+        "Maquoketa    MKTI4",
+        "Vinton    VNTI4",
+    ],
+    [
+        "Atlantic    ATLI4",
+        "Clarinda    CLDI4",
+        "Glenwood    GLNI4",
+        "Oakland    OAKI4",
+        "Red Oak    ROKI4",
+        "Sidney    SIDI4",
+    ],
+    [
+        "Allerton    ALRI4",
+        "Beaconsfield    BCNI4",
+        "Centerville    CNTI4",
+        "Indianola    IDAI4",
+        "Lamoni    3OI",
+        "Osceola    OSEI4",
+    ],
+    [
+        "Bloomfield    BLMI4",
+        "Donnellson    DNNI4",
+        "Fairfield    FRFI4",
+        "Keosauqua    KEQI4",
+        "Washington    WSHI4",
+    ],
 ]
 
 
 def compute_weekly(fp, sts, ets):
-    ''' Compute the weekly stats we need '''
-    pgconn = get_dbconn('iem', user='nobody')
+    """ Compute the weekly stats we need """
+    pgconn = get_dbconn("iem", user="nobody")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     # Max daily high
@@ -108,7 +117,8 @@ def compute_weekly(fp, sts, ets):
     sday = sts.strftime("%m%d")
     eday = ets.strftime("%m%d")
     apr1 = "%s-04-01" % (sts.year,)
-    cursor.execute("""
+    cursor.execute(
+        """
     WITH obs as (
         SELECT id as station , climate_site,
         max(max_tmpf) as hi,
@@ -156,10 +166,12 @@ def compute_weekly(fp, sts, ets):
     from obs JOIN climo on (obs.climate_site = climo.station)
     JOIN april_obs on (obs.station = april_obs.station)
     JOIN april_climo on (april_climo.station  = obs.climate_site)
-""", (sts, ets, apr1, ets, sday, eday, eday))
+""",
+        (sts, ets, apr1, ets, sday, eday, eday),
+    )
     data = {}
     for row in cursor:
-        data[row['station']] = row
+        data[row["station"]] = row
 
     for district, sector in zip(DISTRICTS, STIDS):
         fp.write("%s District\n" % (district,))
@@ -167,24 +179,32 @@ def compute_weekly(fp, sts, ets):
             nwsli = sid[-5:].strip()
             name = sid[:-5].strip()
             if nwsli not in data:
-                print('Missing NWSLI: %s' % (nwsli,))
+                print("Missing NWSLI: %s" % (nwsli,))
                 continue
-            fp.write(("%-15.15s %3.0f %3.0f %3.0f %3.0f  %5.2f  %5.2f   "
-                      "%5.2f %6.2f %7.0f %5.0f\n"
-                      ) % (name, data[nwsli]['hi'],
-                           data[nwsli]['lo'], data[nwsli]['avg'],
-                           data[nwsli]['temp_dfn'],
-                           data[nwsli]['total_p'],
-                           data[nwsli]['precip_dfn'],
-                           data[nwsli]['april_p'],
-                           data[nwsli]['april_p_dfn'],
-                           data[nwsli]['april_gdd'],
-                           data[nwsli]['april_gdd_dfn']))
+            fp.write(
+                (
+                    "%-15.15s %3.0f %3.0f %3.0f %3.0f  %5.2f  %5.2f   "
+                    "%5.2f %6.2f %7.0f %5.0f\n"
+                )
+                % (
+                    name,
+                    data[nwsli]["hi"],
+                    data[nwsli]["lo"],
+                    data[nwsli]["avg"],
+                    data[nwsli]["temp_dfn"],
+                    data[nwsli]["total_p"],
+                    data[nwsli]["precip_dfn"],
+                    data[nwsli]["april_p"],
+                    data[nwsli]["april_p_dfn"],
+                    data[nwsli]["april_gdd"],
+                    data[nwsli]["april_gdd_dfn"],
+                )
+            )
 
 
 def compute_monthly(fp, year, month):
-    ''' Compute the monthly data we need to compute '''
-    pgconn = get_dbconn('iem', user='nobody')
+    """ Compute the monthly data we need to compute """
+    pgconn = get_dbconn("iem", user="nobody")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     # Max daily high
@@ -202,7 +222,8 @@ def compute_monthly(fp, year, month):
     ets = sts + datetime.timedelta(days=35)
     ets = ets.replace(day=1)
 
-    cursor.execute("""
+    cursor.execute(
+        """
     WITH obs as (
         SELECT id as station, climate_site,
         max(max_tmpf) as hi,
@@ -236,37 +257,49 @@ def compute_monthly(fp, year, month):
     obs.days32,
     obs.days28
     from obs JOIN climo on (obs.climate_site = climo.station)
-""", (sts, ets, month))
+""",
+        (sts, ets, month),
+    )
     data = {}
     for row in cursor:
-        data[row['station']] = row
+        data[row["station"]] = row
 
     for district, sector in zip(DISTRICTS, STIDS):
         fp.write("%s District\n" % (district,))
         for sid in sector:
             nwsli = sid[-5:].strip()
             name = sid[:-5].strip()
-            if data[nwsli]['hi'] is None:
-                fp.write(("%-15.15s  --- No Observations Reported ---\n"
-                          ) % (name, ))
+            if data[nwsli]["hi"] is None:
+                fp.write(
+                    ("%-15.15s  --- No Observations Reported ---\n") % (name,)
+                )
                 continue
-            fp.write(("%-15.15s %3.0f %3.0f %3.0f %3.0f  %5.2f  %5.2f   "
-                      "%2s %5.0f %5.0f %3s  %3s\n"
-                      ) % (name, data[nwsli]['hi'],
-                           data[nwsli]['lo'], data[nwsli]['avg'],
-                           data[nwsli]['temp_dfn'],
-                           data[nwsli]['total_p'],
-                           data[nwsli]['precip_dfn'],
-                           data[nwsli]['days'],
-                           data[nwsli]['hdd'] or 0,
-                           data[nwsli]['hdd_dfn'] or 0,
-                           data[nwsli]['days32'],
-                           data[nwsli]['days28']))
+            fp.write(
+                (
+                    "%-15.15s %3.0f %3.0f %3.0f %3.0f  %5.2f  %5.2f   "
+                    "%2s %5.0f %5.0f %3s  %3s\n"
+                )
+                % (
+                    name,
+                    data[nwsli]["hi"],
+                    data[nwsli]["lo"],
+                    data[nwsli]["avg"],
+                    data[nwsli]["temp_dfn"],
+                    data[nwsli]["total_p"],
+                    data[nwsli]["precip_dfn"],
+                    data[nwsli]["days"],
+                    data[nwsli]["hdd"] or 0,
+                    data[nwsli]["hdd_dfn"] or 0,
+                    data[nwsli]["days32"],
+                    data[nwsli]["days28"],
+                )
+            )
 
 
 def monthly_header(fp, sts, ets):
-    ''' Write the monthly header information '''
-    fp.write("""Weather Summary For Iowa Agricultural Statistics Service
+    """ Write the monthly header information """
+    fp.write(
+        """Weather Summary For Iowa Agricultural Statistics Service
 Prepared By Iowa Environmental Mesonet
 
 For the Period:    %s
@@ -277,12 +310,15 @@ For the Period:    %s
                   TEMPERATURE      PRECIPITATION     HDD   HDD  32   28
 STATION          HI  LO AVG DFN  TOTAL    DFN DAYS   TOT   DFN COLD COLD
 -------          --  --  --  --  -----   ----   --   ---   ---  --   --
-""" % (sts.strftime("%A %B %d, %Y"), ets.strftime("%A %B %d, %Y")))
+"""
+        % (sts.strftime("%A %B %d, %Y"), ets.strftime("%A %B %d, %Y"))
+    )
 
 
 def weekly_header(fp, sts, ets):
-    ''' Write the header information '''
-    fp.write("""Weather Summary For Iowa Agricultural Statistics Service
+    """ Write the header information """
+    fp.write(
+        """Weather Summary For Iowa Agricultural Statistics Service
 Prepared By Iowa Environmental Mesonet
 
 For the Period:     %s
@@ -294,30 +330,32 @@ For the Period:     %s
                    -----------  -------------  -------------  ------------
 STATION          HI  LO AVG DFN  TOTAL    DFN   TOTAL    DFN   TOTAL   DFN
 -------          --  --  --  --  -----   ----   -----   ----   -----  ----
-""" % (sts.strftime("%A %B %d, %Y"), ets.strftime("%A %B %d, %Y")))
+"""
+        % (sts.strftime("%A %B %d, %Y"), ets.strftime("%A %B %d, %Y"))
+    )
 
 
 def email_report(report, subject):
-    ''' Actually do the emailing stuff '''
+    """ Actually do the emailing stuff """
     msg = MIMEMultipart()
-    msg['Subject'] = subject
-    msg['From'] = 'mesonet@mesonet.agron.iastate.edu'
-    msg['Cc'] = 'akrherz@iastate.edu'
-    msg['To'] = 'akrherz@localhost'
-    msg.preamble = 'Report'
+    msg["Subject"] = subject
+    msg["From"] = "mesonet@mesonet.agron.iastate.edu"
+    msg["Cc"] = "akrherz@iastate.edu"
+    msg["To"] = "akrherz@localhost"
+    msg.preamble = "Report"
 
     fn = "iem.txt"
 
-    b = MIMEBase('Text', 'Plain')
+    b = MIMEBase("Text", "Plain")
     report.seek(0)
     b.set_payload(report.read())
     encoders.encode_base64(b)
-    b.add_header('Content-Disposition', 'attachment; filename="%s"' % (fn))
+    b.add_header("Content-Disposition", 'attachment; filename="%s"' % (fn))
     msg.attach(b)
 
     # Send the email via our own SMTP server.
-    s = smtplib.SMTP('localhost')
-    s.sendmail(msg['From'], [msg['To'], msg['Cc']], msg.as_string())
+    s = smtplib.SMTP("localhost")
+    s.sendmail(msg["From"], [msg["To"], msg["Cc"]], msg.as_string())
     s.quit()
 
 
@@ -332,7 +370,7 @@ def main():
     rtype = sys.argv[1]
     # We are testing things
     if len(sys.argv) >= 4:
-        if rtype == 'monthly':
+        if rtype == "monthly":
             sts = datetime.date(int(sys.argv[2]), int(sys.argv[3]), 1)
             ets = sts + datetime.timedelta(days=35)
             ets = ets.replace(day=1)
@@ -341,9 +379,10 @@ def main():
             compute_monthly(report, sts.year, sts.month)
             report.seek(0)
             print(report.read())
-        if rtype == 'weekly':
-            sts = datetime.date(int(sys.argv[2]), int(sys.argv[3]),
-                                int(sys.argv[4]))
+        if rtype == "weekly":
+            sts = datetime.date(
+                int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4])
+            )
             ets = sts + datetime.timedelta(days=6)
             report = StringIO()
             weekly_header(report, sts, ets)
@@ -367,5 +406,5 @@ def main():
             email_report(report, "IEM Weekly Data Report")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

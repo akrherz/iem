@@ -10,6 +10,7 @@ from ftplib import FTP, error_perm
 import os
 
 from pyiem.util import logger
+
 LOG = logger()
 
 
@@ -21,22 +22,23 @@ def do(ts):
     if os.path.isfile(localfn):
         return
     remotefn = ts.strftime("5kmffg_%Y%m%d%H.grb2")
-    ftp = FTP('ftp.wpc.ncep.noaa.gov')
+    ftp = FTP("ftp.wpc.ncep.noaa.gov")
     ftp.login()
     ftp.cwd("workoff/ffg")
     tmpfd, tmpfn = tempfile.mkstemp()
     errored = False
     writer = partial(os.write, tmpfd)
     try:
-        ftp.retrbinary('RETR ' + remotefn, writer)
+        ftp.retrbinary("RETR " + remotefn, writer)
     except error_perm as err:
         LOG.info("failed to fetch: %s %s", remotefn, err)
         errored = True
     ftp.close()
     os.close(tmpfd)
-    cmd = ("/home/ldm/bin/pqinsert -i -p 'data a %s bogus "
-           "model/ffg/%s.grib2 grib2' %s"
-           ) % (ts.strftime("%Y%m%d%H%M"), remotefn[:-5], tmpfn)
+    cmd = (
+        "/home/ldm/bin/pqinsert -i -p 'data a %s bogus "
+        "model/ffg/%s.grib2 grib2' %s"
+    ) % (ts.strftime("%Y%m%d%H%M"), remotefn[:-5], tmpfn)
     LOG.debug(cmd)
     if not errored:
         subprocess.call(cmd, shell=True)
@@ -55,5 +57,5 @@ def main():
         do(ts - datetime.timedelta(hours=offset))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

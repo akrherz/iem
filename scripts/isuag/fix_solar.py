@@ -7,20 +7,24 @@ import sys
 import requests
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, logger
+
 LOG = logger()
 
 
 def check_date(date):
     """Look this date over and compare with IEMRE."""
-    pgconn = get_dbconn('isuag')
+    pgconn = get_dbconn("isuag")
     cursor = pgconn.cursor()
     cursor2 = pgconn.cursor()
 
     nt = NetworkTable("ISUSM")
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT station, slrmj_tot_qc from sm_daily where
         valid = %s ORDER by station ASC
-    """, (date, ))
+    """,
+        (date,),
+    )
     for row in cursor:
         station = row[0]
         if station not in nt.sts:
@@ -28,12 +32,14 @@ def check_date(date):
             continue
         ob = row[1]
         # Go fetch me the IEMRE value!
-        uri = ("http://iem.local/iemre/daily/%s/%.2f/%.2f/json"
-               ) % (date.strftime("%Y-%m-%d"), nt.sts[station]['lat'],
-                    nt.sts[station]['lon'])
+        uri = ("http://iem.local/iemre/daily/%s/%.2f/%.2f/json") % (
+            date.strftime("%Y-%m-%d"),
+            nt.sts[station]["lat"],
+            nt.sts[station]["lon"],
+        )
         res = requests.get(uri)
         j = json.loads(res.content)
-        estimate = j['data'][0]['srad_mj']
+        estimate = j["data"][0]["srad_mj"]
         if estimate is None:
             LOG.info("fix_solar %s %s estimate is missing", station, date)
             continue
@@ -46,10 +52,13 @@ def check_date(date):
         LOG.info(
             "fix_solar %s %s Ob:%.1f Est:%.1f", station, date, ob, estimate
         )
-        cursor2.execute("""
+        cursor2.execute(
+            """
             UPDATE sm_daily SET slrmj_tot_qc = %s, slrmj_tot_f = 'E'
             WHERE station = %s and valid = %s
-        """, (estimate, station, date))
+        """,
+            (estimate, station, date),
+        )
 
     cursor2.close()
     pgconn.commit()
@@ -57,56 +66,75 @@ def check_date(date):
 
 def fix_nulls():
     """Correct any nulls."""
-    pgconn = get_dbconn('isuag')
+    pgconn = get_dbconn("isuag")
     cursor = pgconn.cursor()
     cursor2 = pgconn.cursor()
 
     nt = NetworkTable("ISUSM")
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT station, valid from sm_daily where (slrmj_tot_qc is null or
         slrmj_tot_qc = 0) and valid > '2019-04-14' ORDER by valid ASC
-    """)
+    """
+    )
     for row in cursor:
         station = row[0]
         v1 = datetime.datetime(row[1].year, row[1].month, row[1].day)
         v2 = v1.replace(hour=23, minute=59)
-        cursor2.execute("""
+        cursor2.execute(
+            """
             SELECT sum(slrmj_tot_qc), count(*) from sm_hourly WHERE
             station = %s and valid >= %s and valid < %s
-        """, (station, v1, v2))
+        """,
+            (station, v1, v2),
+        )
         row2 = cursor2.fetchone()
         if row2[0] is None or row2[0] < 0.01:
             LOG.info(
-                '%s %s summed %s hourly for solar, using IEMRE',
-                station, v1.strftime("%d %b %Y"), row2[0])
+                "%s %s summed %s hourly for solar, using IEMRE",
+                station,
+                v1.strftime("%d %b %Y"),
+                row2[0],
+            )
             if station not in nt.sts:
                 LOG.info("unknown station %s metadata, skipping", station)
                 continue
             # Go fetch me the IEMRE value!
-            uri = ("http://iem.local/iemre/daily/%s/%.2f/%.2f/json"
-                   ) % (v1.strftime("%Y-%m-%d"), nt.sts[station]['lat'],
-                        nt.sts[station]['lon'])
+            uri = ("http://iem.local/iemre/daily/%s/%.2f/%.2f/json") % (
+                v1.strftime("%Y-%m-%d"),
+                nt.sts[station]["lat"],
+                nt.sts[station]["lon"],
+            )
             res = requests.get(uri)
             if res.status_code != 200:
                 LOG.info("Fix solar got %s from %s", res.status_code, uri)
                 continue
             j = json.loads(res.content)
-            if not j['data']:
+            if not j["data"]:
                 LOG.info(
                     "fix solar: No data for %s %s",
-                    station, v1.strftime("%d %b %Y"))
+                    station,
+                    v1.strftime("%d %b %Y"),
+                )
                 continue
-            row2 = [j['data'][0]['srad_mj'], -1]
+            row2 = [j["data"][0]["srad_mj"], -1]
         if row2[0] is None or row2[0] < 0.01:
-            LOG.info('Triple! Failure %s %s', station, v1.strftime("%d %b %Y"))
+            LOG.info("Triple! Failure %s %s", station, v1.strftime("%d %b %Y"))
             continue
         LOG.info(
-            '%s %s -> %.2f (%s obs)',
-            station, v1.strftime("%d %b %Y"), row2[0], row2[1])
-        cursor2.execute("""
+            "%s %s -> %.2f (%s obs)",
+            station,
+            v1.strftime("%d %b %Y"),
+            row2[0],
+            row2[1],
+        )
+        cursor2.execute(
+            """
             UPDATE sm_daily SET slrmj_tot_qc = %s
             WHERE station = %s and valid = %s
-        """, (row2[0], station, row[1]))
+        """,
+            (row2[0], station, row[1]),
+        )
 
     cursor2.close()
     pgconn.commit()
@@ -122,5 +150,5 @@ def main(argv):
         fix_nulls()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

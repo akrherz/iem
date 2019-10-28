@@ -7,7 +7,7 @@ from pyiem.util import get_dbconn
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconn('iem', user='nobody')
+    pgconn = get_dbconn("iem", user="nobody")
     icursor = pgconn.cursor()
     now = datetime.datetime.now()
 
@@ -21,7 +21,10 @@ def main():
 
     select t.id, ST_x(t.geom) as lon, ST_y(t.geom) as lat, l.low12z from
     lows l JOIN stations t on (t.iemid = l.iemid)
-    """ % (now.strftime("%Y-%m-%d"), now.strftime("%Y-%m-%d"))
+    """ % (
+        now.strftime("%Y-%m-%d"),
+        now.strftime("%Y-%m-%d"),
+    )
 
     lats = []
     lons = []
@@ -36,16 +39,18 @@ def main():
         labels.append(row[0])
         valmask.append(True)
 
-    mp = MapPlot(title='Iowa ASOS/AWOS 12Z Morning Low Temperature',
-                 subtitle="%s" % (now.strftime("%d %b %Y"), ),
-                 axisbg='white')
+    mp = MapPlot(
+        title="Iowa ASOS/AWOS 12Z Morning Low Temperature",
+        subtitle="%s" % (now.strftime("%d %b %Y"),),
+        axisbg="white",
+    )
     mp.drawcounties()
-    mp.plot_values(lons, lats, vals, fmt='%.0f', labels=labels, labelbuffer=5)
-    pqstr = ("plot ac %s summary/iowa_asos_12z_low.png "
-             "iowa_asos_12z_low.png png"
-             ) % (now.strftime("%Y%m%d%H%M"), )
+    mp.plot_values(lons, lats, vals, fmt="%.0f", labels=labels, labelbuffer=5)
+    pqstr = (
+        "plot ac %s summary/iowa_asos_12z_low.png " "iowa_asos_12z_low.png png"
+    ) % (now.strftime("%Y%m%d%H%M"),)
     mp.postprocess(pqstr=pqstr)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

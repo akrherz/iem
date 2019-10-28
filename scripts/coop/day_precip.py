@@ -37,7 +37,8 @@ def main():
 
     o.write("   VALID AT 7AM ON: %s\n\n" % (now.strftime("%d %b %Y").upper(),))
     o.write(
-        "%-6s%-24s%10s%11s%10s\n" % ("ID", "STATION", "PREC (IN)", "CLIMO4DATE", "DIFF")
+        "%-6s%-24s%10s%11s%10s\n"
+        % ("ID", "STATION", "PREC (IN)", "CLIMO4DATE", "DIFF")
     )
 
     queryStr = """
@@ -58,7 +59,9 @@ def main():
         if thisStation in nt.sts:
             d[thisStation] = {"prectot": thisPrec}
             d[thisStation]["name"] = nt.sts[thisStation]["name"]
-            d[thisStation]["crain"] = mrain[nt.sts[thisStation]["climate_site"]]
+            d[thisStation]["crain"] = mrain[
+                nt.sts[thisStation]["climate_site"]
+            ]
 
     keys = list(d.keys())
     keys.sort()

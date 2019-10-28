@@ -13,24 +13,45 @@ def fetcher(station, sts, ets):
     """
     Fetch the data
     """
-    cols = ['station', 'valid', 'tmpf', 'dwpf', 'drct', 'sknt', 'gust',
-            'relh', 'alti', 'pcpncnt', 'pday', 'pmonth', 'srad', 'c1tmpf']
+    cols = [
+        "station",
+        "valid",
+        "tmpf",
+        "dwpf",
+        "drct",
+        "sknt",
+        "gust",
+        "relh",
+        "alti",
+        "pcpncnt",
+        "pday",
+        "pmonth",
+        "srad",
+        "c1tmpf",
+    ]
 
-    pgconn = get_dbconn('other', user='nobody')
+    pgconn = get_dbconn("other", user="nobody")
     ocursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    ocursor.execute("""
+    ocursor.execute(
+        """
     SELECT * from alldata where station = %s and valid between %s and %s
     ORDER by valid ASC
-    """, (station, sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d")))
+    """,
+        (station, sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d")),
+    )
 
     if ocursor.rowcount == 0:
         ssw("Sorry, no data was found for your query...\n")
         return
 
-    ssw(("station,valid_CST_CDT,air_tmp_F,dew_point_F,"
-         "wind_dir_deg,wind_sped_kts,wind_gust_kts,relh_%,"
-         "alti_in,pcpncnt_in,precip_day_in,precip_month_in,"
-         "solar_rad_wms,c1tmpf\n"))
+    ssw(
+        (
+            "station,valid_CST_CDT,air_tmp_F,dew_point_F,"
+            "wind_dir_deg,wind_sped_kts,wind_gust_kts,relh_%,"
+            "alti_in,pcpncnt_in,precip_day_in,precip_month_in,"
+            "solar_rad_wms,c1tmpf\n"
+        )
+    )
 
     for row in ocursor:
         for col in cols:
@@ -43,7 +64,7 @@ def main():
     Do something!
     """
     form = cgi.FieldStorage()
-    station = form.getfirst('station', '')[:10]
+    station = form.getfirst("station", "")[:10]
     year1 = int(form.getfirst("year1"))
     year2 = int(form.getfirst("year2"))
     month1 = int(form.getfirst("month1"))
@@ -57,5 +78,5 @@ def main():
     fetcher(station, sts, ets)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -23,5 +23,5 @@ def main(argv):
     print(now.strftime("%j%H%M"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

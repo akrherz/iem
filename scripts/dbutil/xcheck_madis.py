@@ -9,12 +9,16 @@ from pyiem.util import get_dbconn, ncopen, utc
 
 def main():
     """Go Main Go!"""
-    pgconn = get_dbconn('hads')
-    udf = read_sql("""
+    pgconn = get_dbconn("hads")
+    udf = read_sql(
+        """
         SELECT distinct nwsli, 1 as col from unknown
         WHERE length(nwsli) = 5 ORDER by nwsli
-    """, pgconn, index_col='nwsli')
-    print("Found %s unknown entries" % (len(udf.index), ))
+    """,
+        pgconn,
+        index_col="nwsli",
+    )
+    print("Found %s unknown entries" % (len(udf.index),))
     # Find latest MADIS netcdf
     now = utc()
     i = 0
@@ -35,10 +39,16 @@ def main():
             continue
         idx = stations.index(sid)
         print(
-            "%s %s %s %s %s" % (
-                sid, names[idx], providers[idx], latitudes[idx],
-                longitudes[idx]))
+            "%s %s %s %s %s"
+            % (
+                sid,
+                names[idx],
+                providers[idx],
+                latitudes[idx],
+                longitudes[idx],
+            )
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

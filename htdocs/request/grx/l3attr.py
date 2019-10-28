@@ -23,11 +23,12 @@ import numpy as np
 import psycopg2.extras
 from pyiem.datatypes import speed
 from pyiem.util import get_dbconn, ssw
+
 # Do geo math in US National Atlas Equal Area
-P3857 = pyproj.Proj(init='epsg:3857')
+P3857 = pyproj.Proj(init="epsg:3857")
 
 ICONFILE = "https://mesonet.agron.iastate.edu/request/grx/storm_attribute.png"
-SECONDS = np.array([15*60, 30*60, 45*60, 60*60])
+SECONDS = np.array([15 * 60, 30 * 60, 45 * 60, 60 * 60])
 RADARS = """pabc,-161.876
 pacg,-135.528
 pahg,-151.351
@@ -233,8 +234,10 @@ kriw,-108.477"""
 
 def rotate(x, y, rad):
     """rotate"""
-    return [(x * math.cos(-rad) - y * math.sin(-rad)),
-            (x * math.sin(-rad) + y * math.cos(-rad))]
+    return [
+        (x * math.cos(-rad) - y * math.sin(-rad)),
+        (x * math.sin(-rad) + y * math.cos(-rad)),
+    ]
 
 
 def dir2ccwrot(mydir):
@@ -252,15 +255,15 @@ def dir2ccwrot(mydir):
 def rabbit_tracks(row):
     """Generate a rabbit track for this attr"""
     res = ""
-    if row['sknt'] is None or row['sknt'] <= 5 or row['drct'] is None:
+    if row["sknt"] is None or row["sknt"] <= 5 or row["drct"] is None:
         return res
     # 5 carrots at six minutes to get 30 minutes?
-    lat0 = row['lat']
-    lon0 = row['lon']
-    drct = row['drct']
-    sknt = row['sknt']
+    lat0 = row["lat"]
+    lon0 = row["lon"]
+    drct = row["drct"]
+    sknt = row["sknt"]
     x0, y0 = P3857(lon0, lat0)
-    smps = speed(sknt, 'KTS').value('MPS')
+    smps = speed(sknt, "KTS").value("MPS")
     angle = dir2ccwrot(drct)
     rotation = (drct + 180) % 360
     rad = math.radians(angle)
@@ -268,68 +271,79 @@ def rabbit_tracks(row):
     y = y0 + math.sin(rad) * smps * SECONDS
     # Draw white line out 30 minutes
     lons, lats = P3857(x, y, inverse=True)
-    res += ("Line: 1, 0, \"Cell [%s]\"\n"
-            "%.4f, %.4f\n"
-            "%.4f, %.4f\n"
-            "END:\n") % (row['storm_id'],
-                         lat0, lon0, lats[-1], lons[-1])
+    res += (
+        'Line: 1, 0, "Cell [%s]"\n' "%.4f, %.4f\n" "%.4f, %.4f\n" "END:\n"
+    ) % (row["storm_id"], lat0, lon0, lats[-1], lons[-1])
     for i in range(3):
-        res += ("Icon: %.4f,%.4f,%.0f,1,10,\"+%.0f min\"\n"
-                ) % (lats[i], lons[i], rotation, (i+1)*15)
+        res += ('Icon: %.4f,%.4f,%.0f,1,10,"+%.0f min"\n') % (
+            lats[i],
+            lons[i],
+            rotation,
+            (i + 1) * 15,
+        )
     return res
 
 
 def produce_content(nexrad):
     """Do Stuff"""
-    pgconn = get_dbconn('radar')
+    pgconn = get_dbconn("radar")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    limiter = ''
+    limiter = ""
     threshold = 999
     title = "IEM NEXRAD L3 Attributes"
-    if nexrad != '':
+    if nexrad != "":
         limiter = " and nexrad = '%s' " % (nexrad,)
         title = "IEM %s NEXRAD L3 Attributes" % (nexrad,)
         threshold = 45
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT *, ST_x(geom) as lon, ST_y(geom) as lat,
         valid at time zone 'UTC' as utc_valid
         from nexrad_attributes WHERE valid > now() - '15 minutes'::interval
-    """ + limiter)
-    res = ("Refresh: 3\n"
-           "Threshold: %s\n"
-           "Title: %s\n"
-           "IconFile: 1, 32, 32, 16, 16, \"%s\"\n"
-           "Font: 1, 11, 1, \"Courier New\"\n"
-           ) % (threshold, title, ICONFILE)
+    """
+        + limiter
+    )
+    res = (
+        "Refresh: 3\n"
+        "Threshold: %s\n"
+        "Title: %s\n"
+        'IconFile: 1, 32, 32, 16, 16, "%s"\n'
+        'Font: 1, 11, 1, "Courier New"\n'
+    ) % (threshold, title, ICONFILE)
     for row in cursor:
-        text = ("K%s [%s] %s Z\\n"
-                "Drct: %s Speed: %s kts\\n"
-                ) % (row['nexrad'], row['storm_id'],
-                     row['utc_valid'].strftime("%H:%I"), row['drct'],
-                     row['sknt'])
+        text = ("K%s [%s] %s Z\\n" "Drct: %s Speed: %s kts\\n") % (
+            row["nexrad"],
+            row["storm_id"],
+            row["utc_valid"].strftime("%H:%I"),
+            row["drct"],
+            row["sknt"],
+        )
         icon = 9
         if row["tvs"] != "NONE" or row["meso"] != "NONE":
-            text += "TVS: %s MESO: %s\\n" % (row['tvs'], row['meso'])
-        if row['poh'] > 0 or row['posh'] > 0:
-            text += "POH: %s POSH: %s MaxSize: %s\\n" % (row['poh'],
-                                                         row['posh'],
-                                                         row['max_size'])
+            text += "TVS: %s MESO: %s\\n" % (row["tvs"], row["meso"])
+        if row["poh"] > 0 or row["posh"] > 0:
+            text += "POH: %s POSH: %s MaxSize: %s\\n" % (
+                row["poh"],
+                row["posh"],
+                row["max_size"],
+            )
             icon = 2
-        if row['meso'] != 'NONE':
-            meso = int(row['meso'])
+        if row["meso"] != "NONE":
+            meso = int(row["meso"])
             if meso < 4:
                 icon = 8
             elif meso < 7:
                 icon = 7
             else:
                 icon = 6
-        if row['tvs'] != 'NONE':
+        if row["tvs"] != "NONE":
             icon = 5
-        res += ("Object: %.4f,%.4f\n"
-                "Threshold: 999\n"
-                "Icon: 0,0,0,1,%s,\"%s\"\n"
-                "END:\n"
-                ) % (row['lat'], row['lon'], icon, text)
+        res += (
+            "Object: %.4f,%.4f\n"
+            "Threshold: 999\n"
+            'Icon: 0,0,0,1,%s,"%s"\n'
+            "END:\n"
+        ) % (row["lat"], row["lon"], icon, text)
         res += rabbit_tracks(row)
     return res
 
@@ -337,16 +351,16 @@ def produce_content(nexrad):
 def main():
     """ Go Main Go """
     form = cgi.FieldStorage()
-    nexrad = form.getfirst('nexrad', '').upper()[:3]
-    if nexrad == '':
-        lon = form.getfirst('lon')
+    nexrad = form.getfirst("nexrad", "").upper()[:3]
+    if nexrad == "":
+        lon = form.getfirst("lon")
         if lon is not None:
             for line in RADARS.split("\n"):
                 if line.find(lon) > 0:
                     nexrad = line[1:4].upper()
 
     mckey = "/request/grx/i3attr|%s" % (nexrad,)
-    mc = memcache.Client(['iem-memcached:11211'], debug=0)
+    mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
     if not res:
         res = produce_content(nexrad)
@@ -355,5 +369,5 @@ def main():
     ssw(res)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

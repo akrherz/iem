@@ -9,13 +9,16 @@ from pyiem.util import get_dbconn
 def main(argv):
     """Go Main Go"""
     (network, station, year, month, day) = argv[1:]
-    pgconn = get_dbconn('iem')
+    pgconn = get_dbconn("iem")
     cursor = pgconn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
     SELECT s.iemid, min(day)
     from summary s JOIN stations t on (s.iemid = t.iemid)
     WHERE t.id = %s and t.network = %s GROUP by s.iemid
-    """, (station, network))
+    """,
+        (station, network),
+    )
     if cursor.rowcount == 0:
         print("ABORT: found no database entries for station")
         return
@@ -24,10 +27,15 @@ def main(argv):
     added = 0
     while day < maxday:
         added += 1
-        table = "summary_%s" % (day.year, )
-        cursor.execute("""
-        INSERT into """ + table + """ (iemid, day) VALUES (%s, %s)
-        """, (iemid, day))
+        table = "summary_%s" % (day.year,)
+        cursor.execute(
+            """
+        INSERT into """
+            + table
+            + """ (iemid, day) VALUES (%s, %s)
+        """,
+            (iemid, day),
+        )
         day += datetime.timedelta(days=1)
     print("Added %s rows for station %s[%s]" % (added, station, network))
 
@@ -35,5 +43,5 @@ def main(argv):
     pgconn.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

@@ -22,14 +22,16 @@ import pandas as pd
 from metar.Metar import Metar
 from metar.Metar import ParserError as MetarParserError
 from pyiem.util import get_dbconn
-ASOS = get_dbconn('asos')
 
-SLP = 'Sea Level PressureIn'
+ASOS = get_dbconn("asos")
+
+SLP = "Sea Level PressureIn"
 ERROR_RE = re.compile("Unparsed groups in body '(?P<msg>.*)' while processing")
 
 
 class OB(object):
     """hacky representation of the database schema"""
+
     station = None
     valid = None
     tmpf = None
@@ -67,12 +69,27 @@ def get_job_list():
     tznames = []
 
     parser = OptionParser()
-    parser.add_option("-n", "--network", dest="network",
-                      help="IEM network", metavar="NETWORK")
-    parser.add_option("-s", "--station", dest="station",
-                      help="IEM station", metavar="STATION")
-    parser.add_option("-m", "--monthdate", dest="monthdate",
-                      help="Month Date", metavar="MONTHDATE")
+    parser.add_option(
+        "-n",
+        "--network",
+        dest="network",
+        help="IEM network",
+        metavar="NETWORK",
+    )
+    parser.add_option(
+        "-s",
+        "--station",
+        dest="station",
+        help="IEM station",
+        metavar="STATION",
+    )
+    parser.add_option(
+        "-m",
+        "--monthdate",
+        dest="monthdate",
+        help="Month Date",
+        metavar="MONTHDATE",
+    )
     (options, args) = parser.parse_args()
     if options.monthdate is not None:
         process_rawtext(options.monthdate)
@@ -89,11 +106,11 @@ def get_job_list():
             where network = %s and archive_begin is not null
             ORDER by id ASC
             """
-        acursor.execute(sql, (options.network, ))
+        acursor.execute(sql, (options.network,))
         floor = days[0] + datetime.timedelta(days=900)
         for row in acursor:
             if row[1].date() > floor:
-                print('Skipping station: %4s sts: %s' % (row[0], row[1]))
+                print("Skipping station: %4s sts: %s" % (row[0], row[1]))
                 continue
             stations.append(row[0])
             tznames.append(row[2])
@@ -103,10 +120,10 @@ def get_job_list():
             SELECT id, archive_begin, tzname from stations
             where id = %s and network ~* 'ASOS'
             """
-        acursor.execute(sql, (options.station, ))
+        acursor.execute(sql, (options.station,))
         tznames.append(acursor.fetchone()[2])
 
-    print('Processing %s stations for %s days' % (len(stations), len(days)))
+    print("Processing %s stations for %s days" % (len(stations), len(days)))
     return stations, tznames, days
 
 
@@ -133,18 +150,17 @@ def process_rawtext(yyyymm):
                 if metar.find(" NIL") > -1:
                     continue
                 elif metar.find("METAR") > -1:
-                    metar = metar[metar.find("METAR")+5:]
+                    metar = metar[metar.find("METAR") + 5 :]
                 elif metar.find("LWIS ") > -1:
-                    metar = metar[metar.find("LWIS ")+5:]
+                    metar = metar[metar.find("LWIS ") + 5 :]
                 elif metar.find("SPECI") > -1:
-                    metar = metar[metar.find("SPECI")+5:]
-                metar = " ".join(
-                            metar.replace("\r\r\n", " ").strip().split())
+                    metar = metar[metar.find("SPECI") + 5 :]
+                metar = " ".join(metar.replace("\r\r\n", " ").strip().split())
                 if len(metar.strip()) < 13:
                     continue
                 station = metar[:4]
                 tm = metar[5:11]
-                if metar[11] != 'Z':
+                if metar[11] != "Z":
                     continue
                 if station not in stdata:
                     stdata[station] = {}
@@ -168,15 +184,17 @@ def process_rawtext(yyyymm):
                     out.close()
                 day = tm[:2]
                 dirname = "/mesonet/ARCHIVE/wunder/cache/%s/%s/" % (
-                                            stup(station), yyyymm[:4])
+                    stup(station),
+                    yyyymm[:4],
+                )
                 if not os.path.isdir(dirname):
                     os.makedirs(dirname)
                 fn = "%s/%s%s.txt" % (dirname, yyyymm, day)
                 if os.path.isfile(fn) and len(open(fn).read()) > 500:
-                    out = open('/dev/null', 'a')
+                    out = open("/dev/null", "a")
                 else:
                     try:
-                        out = open(fn, 'w')
+                        out = open(fn, "w")
                     except Exception as exp:
                         continue
                     out.write("FullMetar,\n")
@@ -185,24 +203,29 @@ def process_rawtext(yyyymm):
 
 
 def stup(station):
-    if station[0] == 'K':
+    if station[0] == "K":
         return station[1:]
     return station
 
 
 def clear_data(station, tzname, sts, ets):
     if tzname is None:
-        tzname = 'UTC'
+        tzname = "UTC"
     acursor = ASOS.cursor()
     ets = ets + datetime.timedelta(days=1)
-    acursor.execute("""
+    acursor.execute(
+        """
         DELETE from alldata WHERE station = %s and
         valid at time zone %s >= %s and (valid at time zone %s) < %s
         and report_type = 2
-    """, (station, tzname, sts, tzname, ets))
+    """,
+        (station, tzname, sts, tzname, ets),
+    )
     cnt = acursor.rowcount
-    print(('Removed %s rows for station %s %s->%s(%s)'
-           ) % (cnt, station, sts, ets, tzname))
+    print(
+        ("Removed %s rows for station %s %s->%s(%s)")
+        % (cnt, station, sts, ets, tzname)
+    )
     ASOS.commit()
     return cnt
 
@@ -223,21 +246,25 @@ def read_legacy(fn):
                 headers[tokens[i]] = i
             continue
         if "FullMetar" in headers and len(tokens) >= headers["FullMetar"]:
-            mstr = (tokens[headers["FullMetar"]]
-                    ).strip().replace("'",
-                                      "").replace("SPECI ",
-                                                  "").replace("METAR ", "")
+            mstr = (
+                (tokens[headers["FullMetar"]])
+                .strip()
+                .replace("'", "")
+                .replace("SPECI ", "")
+                .replace("METAR ", "")
+            )
             pres = None
             if SLP in headers:
                 value = tokens[headers[SLP]].strip()
-                if value not in ['-', '']:
+                if value not in ["-", ""]:
                     try:
                         pres = float(value)
                     except Exception as exp:
-                        print(("Failed to parse SLP: %s %s"
-                               ) % (repr(headers[SLP]), fn))
-            rows.append({'FullMetar': mstr,
-                         'Sea Level PressureIn': pres})
+                        print(
+                            ("Failed to parse SLP: %s %s")
+                            % (repr(headers[SLP]), fn)
+                        )
+            rows.append({"FullMetar": mstr, "Sea Level PressureIn": pres})
     return pd.DataFrame(rows)
 
 
@@ -259,14 +286,16 @@ def process_metar(mstr, now):
             orig_mstr = mstr
             if tokens:
                 for token in tokens[0].split():
-                    mstr = mstr.replace(" %s" % (token, ), "")
+                    mstr = mstr.replace(" %s" % (token,), "")
                 if orig_mstr == mstr:
                     print("Can't fix badly formatted metar: " + mstr)
                     return None
             else:
-                print("MetarParserError: "+msg)
-                print("    --> now: %s month: %s, year: %s" % (now, now.month,
-                                                               now.year))
+                print("MetarParserError: " + msg)
+                print(
+                    "    --> now: %s month: %s, year: %s"
+                    % (now, now.month, now.year)
+                )
                 sys.exit()
                 return None
         except Exception as exp:
@@ -278,8 +307,13 @@ def process_metar(mstr, now):
     ob = OB()
     ob.metar = mstr[:254]
 
-    gts = datetime.datetime(mtr.time.year, mtr.time.month,
-                            mtr.time.day, mtr.time.hour, mtr.time.minute)
+    gts = datetime.datetime(
+        mtr.time.year,
+        mtr.time.month,
+        mtr.time.day,
+        mtr.time.hour,
+        mtr.time.minute,
+    )
     gts = gts.replace(tzinfo=pytz.UTC)
     # When processing data on the last day of the month, we get GMT times
     # for the first of this month
@@ -317,9 +351,9 @@ def process_metar(mstr, now):
     # Do something with sky coverage
     for i in range(len(mtr.sky)):
         (c, h, _) = mtr.sky[i]
-        setattr(ob, 'skyc%s' % (i+1), c)
+        setattr(ob, "skyc%s" % (i + 1), c)
         if h is not None:
-            setattr(ob, 'skyl%s' % (i+1), h.value("FT"))
+            setattr(ob, "skyl%s" % (i + 1), h.value("FT"))
 
     if mtr.max_temp_6hr:
         ob.max_tmpf_6hr = mtr.max_temp_6hr.value("F")
@@ -348,11 +382,11 @@ def process_metar(mstr, now):
 
 def main():
     """Go Main Go"""
-    print('Starting up...')
+    print("Starting up...")
     # workflow()
     ASOS.commit()
     ASOS.close()
-    print('Done!')
+    print("Done!")
 
 
 if __name__ == "__main__":

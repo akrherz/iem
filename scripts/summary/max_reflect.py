@@ -14,7 +14,7 @@ import numpy as np
 import pytz
 from pyiem.util import get_dbconn
 
-PGCONN = get_dbconn('mesosite', user='nobody')
+PGCONN = get_dbconn("mesosite", user="nobody")
 CURSOR = PGCONN.cursor()
 PQINSERT = "/home/ldm/bin/pqinsert"
 URLBASE = "http://iem.local/GIS/radmap.php?width=1280&height=720&"
@@ -30,10 +30,13 @@ def get_colortable(prod):
       colortable
 
     """
-    CURSOR.execute("""
+    CURSOR.execute(
+        """
     select r,g,b from iemrasters_lookup l JOIN iemrasters r on
     (r.id = l.iemraster_id) WHERE r.name = %s ORDER by l.coloridx ASC
-    """, ("composite_"+prod,))
+    """,
+        ("composite_" + prod,),
+    )
     ct = gdal.ColorTable()
     for i, row in enumerate(CURSOR):
         ct.SetColorEntry(i, (row[0], row[1], row[2], 255))
@@ -56,10 +59,14 @@ def run(prod, sts):
     maxn0r = None
     now = sts
     while now < ets:
-        fn = now.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/"
-                           "GIS/uscomp/"+prod+"_%Y%m%d%H%M.png"))
+        fn = now.strftime(
+            (
+                "/mesonet/ARCHIVE/data/%Y/%m/%d/"
+                "GIS/uscomp/" + prod + "_%Y%m%d%H%M.png"
+            )
+        )
         if not os.path.isfile(fn):
-            print("max_reflect MISSING: %s" % (fn, ))
+            print("max_reflect MISSING: %s" % (fn,))
             now += interval
             continue
         n0r = gdal.Open(fn, 0)
@@ -71,9 +78,13 @@ def run(prod, sts):
         now += interval
 
     out_driver = gdal.GetDriverByName("gtiff")
-    outdataset = out_driver.Create('max.tiff', n0r.RasterXSize,
-                                   n0r.RasterYSize, n0r.RasterCount,
-                                   gdalconst.GDT_Byte)
+    outdataset = out_driver.Create(
+        "max.tiff",
+        n0r.RasterXSize,
+        n0r.RasterYSize,
+        n0r.RasterCount,
+        gdalconst.GDT_Byte,
+    )
     # Set output color table to match input
     outdataset.GetRasterBand(1).SetRasterColorTable(n0rct)
     outdataset.GetRasterBand(1).WriteArray(maxn0r)
@@ -81,35 +92,41 @@ def run(prod, sts):
 
     subprocess.call("convert max.tiff max.png", shell=True)
     # Insert into LDM
-    cmd = ("%s -p 'plot a %s0000 bogus GIS/uscomp/max_%s_0z0z_%s.png "
-           "png' max.png") % (PQINSERT, sts.strftime("%Y%m%d"), prod,
-                              sts.strftime("%Y%m%d"))
+    cmd = (
+        "%s -p 'plot a %s0000 bogus GIS/uscomp/max_%s_0z0z_%s.png "
+        "png' max.png"
+    ) % (PQINSERT, sts.strftime("%Y%m%d"), prod, sts.strftime("%Y%m%d"))
     subprocess.call(cmd, shell=True)
 
     # Create tmp world file
-    wldfn = '/tmp/tmpwld%s.wld' % (sts.strftime("%Y%m%d"),)
-    out = open(wldfn, 'w')
-    if prod == 'n0r':
-        out.write("""0.01
+    wldfn = "/tmp/tmpwld%s.wld" % (sts.strftime("%Y%m%d"),)
+    out = open(wldfn, "w")
+    if prod == "n0r":
+        out.write(
+            """0.01
 0.0
 0.0
 -0.01
 -126.0
-50.0""")
+50.0"""
+        )
     else:
-        out.write("""0.005
+        out.write(
+            """0.005
 0.0
 0.0
 -0.005
 -126.0
-50.0""")
+50.0"""
+        )
 
     out.close()
 
     # Insert world file as well
-    cmd = ("%s -i -p 'plot a %s0000 bogus GIS/uscomp/max_%s_0z0z_%s.wld "
-           "wld' %s") % (PQINSERT, sts.strftime("%Y%m%d"), prod,
-                         sts.strftime("%Y%m%d"), wldfn)
+    cmd = (
+        "%s -i -p 'plot a %s0000 bogus GIS/uscomp/max_%s_0z0z_%s.wld "
+        "wld' %s"
+    ) % (PQINSERT, sts.strftime("%Y%m%d"), prod, sts.strftime("%Y%m%d"), wldfn)
     subprocess.call(cmd, shell=True)
 
     # cleanup
@@ -121,31 +138,39 @@ def run(prod, sts):
     time.sleep(60)
 
     # Iowa
-    png = requests.get("%slayers[]=uscounties&layers[]=%s&ts=%s" % (
-        URLBASE, "nexrad_tc" if prod == 'n0r' else 'n0q_tc',
-        sts.strftime("%Y%m%d%H%M"),))
-    fp = open('tmp.png', 'wb')
+    png = requests.get(
+        "%slayers[]=uscounties&layers[]=%s&ts=%s"
+        % (
+            URLBASE,
+            "nexrad_tc" if prod == "n0r" else "n0q_tc",
+            sts.strftime("%Y%m%d%H%M"),
+        )
+    )
+    fp = open("tmp.png", "wb")
     fp.write(png.content)
     fp.close()
-    cmd = ("%s -p 'plot ac %s0000 summary/max_%s_0z0z_comprad.png "
-           "comprad/max_%s_0z0z_%s.png png' tmp.png"
-           ) % (PQINSERT, sts.strftime("%Y%m%d"), prod, prod,
-                sts.strftime("%Y%m%d"))
+    cmd = (
+        "%s -p 'plot ac %s0000 summary/max_%s_0z0z_comprad.png "
+        "comprad/max_%s_0z0z_%s.png png' tmp.png"
+    ) % (PQINSERT, sts.strftime("%Y%m%d"), prod, prod, sts.strftime("%Y%m%d"))
     subprocess.call(cmd, shell=True)
 
     # US
-    png = requests.get(("%ssector=conus&layers[]=uscounties&"
-                        "layers[]=%s&ts=%s"
-                        ) % (URLBASE,
-                             "nexrad_tc" if prod == 'n0r' else 'n0q_tc',
-                             sts.strftime("%Y%m%d%H%M"),))
-    fp = open('tmp.png', 'wb')
+    png = requests.get(
+        ("%ssector=conus&layers[]=uscounties&" "layers[]=%s&ts=%s")
+        % (
+            URLBASE,
+            "nexrad_tc" if prod == "n0r" else "n0q_tc",
+            sts.strftime("%Y%m%d%H%M"),
+        )
+    )
+    fp = open("tmp.png", "wb")
     fp.write(png.content)
     fp.close()
-    cmd = ("%s -p 'plot ac %s0000 summary/max_%s_0z0z_usrad.png "
-           "usrad/max_%s_0z0z_%s.png png' tmp.png"
-           ) % (PQINSERT, sts.strftime("%Y%m%d"), prod, prod,
-                sts.strftime("%Y%m%d"))
+    cmd = (
+        "%s -p 'plot ac %s0000 summary/max_%s_0z0z_usrad.png "
+        "usrad/max_%s_0z0z_%s.png png' tmp.png"
+    ) % (PQINSERT, sts.strftime("%Y%m%d"), prod, prod, sts.strftime("%Y%m%d"))
     subprocess.call(cmd, shell=True)
     os.remove("tmp.png")
 
@@ -157,12 +182,13 @@ def main(argv):
     ts = ts.replace(tzinfo=pytz.utc)
     ts = ts.replace(hour=0, minute=0, second=0, microsecond=0)
     if len(argv) == 4:
-        ts = ts.replace(year=int(argv[1]), month=int(argv[2]),
-                        day=int(argv[3]))
-    for prod in ['n0r', 'n0q']:
+        ts = ts.replace(
+            year=int(argv[1]), month=int(argv[2]), day=int(argv[3])
+        )
+    for prod in ["n0r", "n0q"]:
         run(prod, ts)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Do something
     main(sys.argv)

@@ -9,54 +9,86 @@ from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict([('precip', 'Last Measurable Precipitation'),
-                     ('low', 'Low Temperature'),
-                     ('high', 'High Temperature')])
-SECTORS = OrderedDict([
-    ('conus', 'CONUS'),
-    ('cornbelt', 'Corn Belt'),
-    ('midwest', 'Mid West'),
-    ('state', 'Select a State'),
-    ('cwa', 'Select a NWS Weather Forecast Office')])
+PDICT = OrderedDict(
+    [
+        ("precip", "Last Measurable Precipitation"),
+        ("low", "Low Temperature"),
+        ("high", "High Temperature"),
+    ]
+)
+SECTORS = OrderedDict(
+    [
+        ("conus", "CONUS"),
+        ("cornbelt", "Corn Belt"),
+        ("midwest", "Mid West"),
+        ("state", "Select a State"),
+        ("cwa", "Select a NWS Weather Forecast Office"),
+    ]
+)
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
-    desc['data'] = True
-    desc['cache'] = 3600
-    desc['description'] = """This plot presents the current streak of days with
+    desc["data"] = True
+    desc["cache"] = 3600
+    desc[
+        "description"
+    ] = """This plot presents the current streak of days with
     a high or low temperature above or at/below the daily average temperature.
     You can also plot the number of days since last measurable precipitation
     event (trace events are counted as dry).
     This plot is based off of NWS CLI sites."""
-    desc['arguments'] = [
-        dict(type='select', name='var', default='high',
-             label='Which parameter:', options=PDICT),
-        dict(type='date', name='sdate',
-             default=datetime.date.today().strftime("%Y/%m/%d"),
-             label='Start Date:', min="2010/01/01"),
-        dict(type='select', name='sector', default='conus',
-             options=SECTORS, label='Select Map Extent'),
-        dict(type='networkselect', name='wfo', network='WFO',
-             default='DMX', label='Select WFO: (used when plotting wfo)'),
-        dict(type='state', name='state',
-             default='IA', label='Select State: (used when plotting state)'),
-
+    desc["arguments"] = [
+        dict(
+            type="select",
+            name="var",
+            default="high",
+            label="Which parameter:",
+            options=PDICT,
+        ),
+        dict(
+            type="date",
+            name="sdate",
+            default=datetime.date.today().strftime("%Y/%m/%d"),
+            label="Start Date:",
+            min="2010/01/01",
+        ),
+        dict(
+            type="select",
+            name="sector",
+            default="conus",
+            options=SECTORS,
+            label="Select Map Extent",
+        ),
+        dict(
+            type="networkselect",
+            name="wfo",
+            network="WFO",
+            default="DMX",
+            label="Select WFO: (used when plotting wfo)",
+        ),
+        dict(
+            type="state",
+            name="state",
+            default="IA",
+            label="Select State: (used when plotting state)",
+        ),
     ]
     return desc
 
 
 def get_data(ctx):
     """Build out our data."""
-    pgconn = get_dbconn('iem')
-    varname = ctx['var']
+    pgconn = get_dbconn("iem")
+    varname = ctx["var"]
 
-    today = ctx['sdate']
+    today = ctx["sdate"]
     yesterday = today - datetime.timedelta(days=1)
     d180 = today - datetime.timedelta(days=180)
 
-    df = read_sql("""
+    df = read_sql(
+        """
      with obs as (
       select station, valid,
       (case when low > low_normal then 1 else 0 end) as low_hit,
@@ -81,53 +113,61 @@ def get_data(ctx):
       SELECT station, last_low_below, last_low_above, last_high_below,
       last_high_above, last_dry, last_wet
       from totals where count > 170
-    """, pgconn, params=(d180, today, d180, d180, d180, d180, d180, d180),
-                  index_col='station')
+    """,
+        pgconn,
+        params=(d180, today, d180, d180, d180, d180, d180, d180),
+        index_col="station",
+    )
     if df.empty:
         raise NoDataFound("No Data Found.")
 
-    df['lat'] = None
-    df['lon'] = None
-    df['val'] = None
-    df['color'] = ""
-    df['label'] = ""
-    df['precip_days'] = (df['last_dry'] - df['last_wet']).dt.days
-    df['low_days'] = (df['last_low_above'] - df['last_low_below']).dt.days
-    df['high_days'] = (df['last_high_above'] - df['last_high_below']).dt.days
+    df["lat"] = None
+    df["lon"] = None
+    df["val"] = None
+    df["color"] = ""
+    df["label"] = ""
+    df["precip_days"] = (df["last_dry"] - df["last_wet"]).dt.days
+    df["low_days"] = (df["last_low_above"] - df["last_low_below"]).dt.days
+    df["high_days"] = (df["last_high_above"] - df["last_high_below"]).dt.days
     # reorder the frame so that the largest values come first
-    df = df.reindex(df[varname+'_days'].abs(
-        ).sort_values(ascending=False).index)
+    df = df.reindex(
+        df[varname + "_days"].abs().sort_values(ascending=False).index
+    )
 
     for station, row in df.iterrows():
         lookup = station[1:] if station.startswith("K") else station
-        if lookup not in ctx['_nt'].sts:
+        if lookup not in ctx["_nt"].sts:
             continue
-        df.at[station, 'lat'] = ctx['_nt'].sts[lookup]['lat']
-        df.at[station, 'lon'] = ctx['_nt'].sts[lookup]['lon']
-        if varname == 'precip':
-            last_wet = row['last_wet']
-            days = 0 if last_wet in [today, yesterday] else row['precip_days']
+        df.at[station, "lat"] = ctx["_nt"].sts[lookup]["lat"]
+        df.at[station, "lon"] = ctx["_nt"].sts[lookup]["lon"]
+        if varname == "precip":
+            last_wet = row["last_wet"]
+            days = 0 if last_wet in [today, yesterday] else row["precip_days"]
         else:
-            days = row[varname + '_days']
-        df.at[station, 'val'] = days
-        df.at[station, 'color'] = '#FF0000' if days > 0 else '#0000FF'
-        df.at[station, 'label'] = station[1:]
-    df = df[pd.notnull(df['lon'])]
-    ctx['df'] = gpd.GeoDataFrame(
-        df, geometry=gpd.points_from_xy(df['lon'], df['lat']))
-    ctx['subtitle'] = (
-        'based on NWS CLI Sites, map approximately '
-        'valid for %s') % (today.strftime("%-d %b %Y"), )
+            days = row[varname + "_days"]
+        df.at[station, "val"] = days
+        df.at[station, "color"] = "#FF0000" if days > 0 else "#0000FF"
+        df.at[station, "label"] = station[1:]
+    df = df[pd.notnull(df["lon"])]
+    ctx["df"] = gpd.GeoDataFrame(
+        df, geometry=gpd.points_from_xy(df["lon"], df["lat"])
+    )
+    ctx["subtitle"] = (
+        "based on NWS CLI Sites, map approximately " "valid for %s"
+    ) % (today.strftime("%-d %b %Y"),)
 
 
 def mapbox(fdict):
     """mapbox interface output."""
     ctx = get_autoplot_context(fdict, get_description())
     get_data(ctx)
-    geojson = ctx['df'][['label', 'val', 'geometry', 'color']].to_json()
-    return """
+    geojson = ctx["df"][["label", "val", "geometry", "color"]].to_json()
+    return (
+        """
 
-    var ap_geodata = """ + geojson + """;
+    var ap_geodata = """
+        + geojson
+        + """;
 
     map.addLayer({
         "id": "points",
@@ -149,6 +189,7 @@ def mapbox(fdict):
         }
     });
     """
+    )
 
 
 def plotter(fdict):
@@ -156,26 +197,34 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     get_data(ctx)
 
-    title = ('Consecutive Days with %s Temp '
-             'above(+)/below(-) Average') % (ctx['var'].capitalize(),)
-    if ctx['var'] == 'precip':
-        title = 'Days Since Last Measurable Precipitation'
-    mp = MapPlot(sector=ctx['sector'],
-                 state=ctx['state'],
-                 cwa=(ctx['wfo'] if len(ctx['wfo']) == 3 else ctx['wfo'][1:]),
-                 axisbg='tan', statecolor='#EEEEEE',
-                 title=title,
-                 subtitle=ctx['subtitle'])
-    df2 = ctx['df'][pd.notnull(ctx['df']['lon'])]
+    title = ("Consecutive Days with %s Temp " "above(+)/below(-) Average") % (
+        ctx["var"].capitalize(),
+    )
+    if ctx["var"] == "precip":
+        title = "Days Since Last Measurable Precipitation"
+    mp = MapPlot(
+        sector=ctx["sector"],
+        state=ctx["state"],
+        cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),
+        axisbg="tan",
+        statecolor="#EEEEEE",
+        title=title,
+        subtitle=ctx["subtitle"],
+    )
+    df2 = ctx["df"][pd.notnull(ctx["df"]["lon"])]
     mp.plot_values(
-        df2['lon'].values, df2['lat'].values, df2['val'].values,
-        color=df2['color'].values, labels=df2['label'].values,
-        labeltextsize=(8 if ctx['sector'] != 'state' else 12),
-        textsize=(12 if ctx['sector'] != 'state' else 16),
-        labelbuffer=10)
+        df2["lon"].values,
+        df2["lat"].values,
+        df2["val"].values,
+        color=df2["color"].values,
+        labels=df2["label"].values,
+        labeltextsize=(8 if ctx["sector"] != "state" else 12),
+        textsize=(12 if ctx["sector"] != "state" else 16),
+        labelbuffer=10,
+    )
 
-    return mp.fig, ctx['df']
+    return mp.fig, ctx["df"]
 
 
-if __name__ == '__main__':
-    print(mapbox(dict(var='precip')))
+if __name__ == "__main__":
+    print(mapbox(dict(var="precip")))

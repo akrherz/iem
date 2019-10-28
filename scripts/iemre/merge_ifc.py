@@ -24,8 +24,9 @@ def run(ts):
         gmt = now.astimezone(pytz.utc)
         if gmt > currenttime:
             break
-        fn = gmt.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/"
-                           "GIS/ifc/p05m_%Y%m%d%H%M.png"))
+        fn = gmt.strftime(
+            ("/mesonet/ARCHIVE/data/%Y/%m/%d/" "GIS/ifc/p05m_%Y%m%d%H%M.png")
+        )
         if not os.path.isfile(fn):
             now += interval
             continue
@@ -39,22 +40,23 @@ def run(ts):
 
         now += interval
     if total is None:
-        print(('No IFC Data found for date: %s'
-               ) % (now.strftime("%d %B %Y"),))
+        print(("No IFC Data found for date: %s") % (now.strftime("%d %B %Y"),))
         return
 
-    nc = ncopen("/mesonet/data/iemre/%s_ifc_daily.nc" % (ts.year,),
-                "a", timeout=300)
+    nc = ncopen(
+        "/mesonet/data/iemre/%s_ifc_daily.nc" % (ts.year,), "a", timeout=300
+    )
     idx = iemre.daily_offset(ts)
-    nc.variables['p01d'][idx, :, :] = np.flipud(total)
+    nc.variables["p01d"][idx, :, :] = np.flipud(total)
     nc.close()
 
 
 def main(argv):
     """Go Main Go"""
     if len(argv) == 4:
-        date = datetime.datetime(int(argv[1]), int(argv[2]),
-                                 int(argv[3]), 12, 0)
+        date = datetime.datetime(
+            int(argv[1]), int(argv[2]), int(argv[3]), 12, 0
+        )
     else:
         date = datetime.datetime.now()
         date = date - datetime.timedelta(minutes=60)

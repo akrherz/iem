@@ -71,31 +71,31 @@ def shpschema():
         The values it can receive are 1, 0, y, n, Y, N, T, F
         or the python builtins True and False
     """
-    shp = shapefile.Writer('current_nexattr')
-    shp.field("VALID", 'C', 12, 0)
-    shp.field("STORM_ID", 'C', 2, 0)
-    shp.field("NEXRAD", 'C', 3, 0)
-    shp.field("AZIMUTH", 'N', 3, 0)
-    shp.field("RANGE", 'N', 3, 0)
-    shp.field("TVS", 'C', 10, 0)
-    shp.field("MESO", 'C', 10, 0)
-    shp.field("POSH", 'N', 3, 0)
-    shp.field("POH", 'N', 3, 0)
-    shp.field("MAX_SIZE", 'F', 5, 2)
-    shp.field("VIL", 'N', 3, 0)
-    shp.field("MAX_DBZ", 'N', 3, 0)
-    shp.field("MAX_DBZ_H", 'F', 5, 2)
-    shp.field("TOP", 'F', 9, 2)
-    shp.field("DRCT", 'N', 3, 0)
-    shp.field("SKNT", 'N', 3, 0)
-    shp.field("LAT", 'F', 10, 4)
-    shp.field("LON", 'F', 10, 4)
+    shp = shapefile.Writer("current_nexattr")
+    shp.field("VALID", "C", 12, 0)
+    shp.field("STORM_ID", "C", 2, 0)
+    shp.field("NEXRAD", "C", 3, 0)
+    shp.field("AZIMUTH", "N", 3, 0)
+    shp.field("RANGE", "N", 3, 0)
+    shp.field("TVS", "C", 10, 0)
+    shp.field("MESO", "C", 10, 0)
+    shp.field("POSH", "N", 3, 0)
+    shp.field("POH", "N", 3, 0)
+    shp.field("MAX_SIZE", "F", 5, 2)
+    shp.field("VIL", "N", 3, 0)
+    shp.field("MAX_DBZ", "N", 3, 0)
+    shp.field("MAX_DBZ_H", "F", 5, 2)
+    shp.field("TOP", "F", 9, 2)
+    shp.field("DRCT", "N", 3, 0)
+    shp.field("SKNT", "N", 3, 0)
+    shp.field("LAT", "F", 10, 4)
+    shp.field("LON", "F", 10, 4)
     return shp
 
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconn('radar')
+    pgconn = get_dbconn("radar")
     pcursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     os.chdir("/tmp")
@@ -108,80 +108,92 @@ def main():
 
     # Less aggressively delete data
     if now.minute % 10 == 0:
-        pcursor.execute("""
+        pcursor.execute(
+            """
             DELETE from nexrad_attributes WHERE valid < %s
-        """, (ets, ))
-    pcursor.execute("""
+        """,
+            (ets,),
+        )
+    pcursor.execute(
+        """
         SELECT *, valid at time zone 'UTC' as utcvalid,
         ST_x(geom) as lon, ST_y(geom) as lat from nexrad_attributes
         WHERE valid > %s
-    """, (ets, ))
+    """,
+        (ets,),
+    )
 
     for row in pcursor:
-        shp.point(row['lon'], row['lat'])
-        shp.record(row['utcvalid'].strftime("%Y%m%d%H%M"),
-                   row['storm_id'],
-                   row['nexrad'],
-                   row['azimuth'],
-                   row['range'],
-                   row['tvs'],
-                   row['meso'],
-                   row['posh'],
-                   row['poh'],
-                   row['max_size'],
-                   row['vil'],
-                   row['max_dbz'],
-                   row['max_dbz_height'],
-                   row['top'],
-                   row['drct'],
-                   row['sknt'],
-                   row['lat'],
-                   row['lon'])
+        shp.point(row["lon"], row["lat"])
+        shp.record(
+            row["utcvalid"].strftime("%Y%m%d%H%M"),
+            row["storm_id"],
+            row["nexrad"],
+            row["azimuth"],
+            row["range"],
+            row["tvs"],
+            row["meso"],
+            row["posh"],
+            row["poh"],
+            row["max_size"],
+            row["vil"],
+            row["max_dbz"],
+            row["max_dbz_height"],
+            row["top"],
+            row["drct"],
+            row["sknt"],
+            row["lat"],
+            row["lon"],
+        )
 
     if pcursor.rowcount == 0:
         if now.minute == 1:
-            print('No NEXRAD attributes found, this may be bad!')
+            print("No NEXRAD attributes found, this may be bad!")
         shp.point(0.1, 0.1)
-        shp.record("200000000000",
-                   "XX",
-                   "XXX",
-                   0,
-                   0,
-                   "NONE",
-                   "NONE",
-                   0,
-                   0,
-                   0,
-                   0,
-                   0,
-                   0,
-                   0,
-                   0,
-                   0,
-                   0,
-                   0)
+        shp.record(
+            "200000000000",
+            "XX",
+            "XXX",
+            0,
+            0,
+            "NONE",
+            "NONE",
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        )
 
     shp.close()
     shutil.copy("/opt/iem/data/gis/meta/4326.prj", "current_nexattr.prj")
-    zfp = zipfile.ZipFile("current_nexattr.zip", 'w', zipfile.ZIP_DEFLATED)
+    zfp = zipfile.ZipFile("current_nexattr.zip", "w", zipfile.ZIP_DEFLATED)
     zfp.write("current_nexattr.shp")
     zfp.write("current_nexattr.shx")
     zfp.write("current_nexattr.dbf")
     zfp.write("current_nexattr.prj")
 
     zfp.writestr("current_nexattr.txt", INFORMATION)
-    zinfo = zfp.getinfo('current_nexattr.txt')
+    zinfo = zfp.getinfo("current_nexattr.txt")
     zinfo.external_attr = 0o664
     zfp.close()
 
-    cmd = ("/home/ldm/bin/pqinsert -i -p \"zip c %s "
-           "gis/shape/4326/us/current_nexattr.zip bogus zip\" "
-           "current_nexattr.zip") % (now.strftime("%Y%m%d%H%M"),)
+    cmd = (
+        '/home/ldm/bin/pqinsert -i -p "zip c %s '
+        'gis/shape/4326/us/current_nexattr.zip bogus zip" '
+        "current_nexattr.zip"
+    ) % (now.strftime("%Y%m%d%H%M"),)
     subprocess.call(cmd, shell=True)
 
-    for suffix in ['zip', 'shp', 'dbf', 'shx', 'prj']:
-        os.unlink('current_nexattr.%s' % (suffix,))
+    for suffix in ["zip", "shp", "dbf", "shx", "prj"]:
+        os.unlink("current_nexattr.%s" % (suffix,))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

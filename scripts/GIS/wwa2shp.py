@@ -15,64 +15,64 @@ def main():
 
     os.chdir("/tmp")
     fp = "current_ww"
-    for suffix in ['shp', 'shx', 'dbf']:
+    for suffix in ["shp", "shx", "dbf"]:
         if os.path.isfile("%s.%s" % (fp, suffix)):
             os.remove("%s.%s" % (fp, suffix))
 
     source = ogr.Open("PG:host=iemdb-postgis.local dbname=postgis user=nobody")
 
-    out_driver = ogr.GetDriverByName('ESRI Shapefile')
-    out_ds = out_driver.CreateDataSource("%s.shp" % (fp, ))
+    out_driver = ogr.GetDriverByName("ESRI Shapefile")
+    out_ds = out_driver.CreateDataSource("%s.shp" % (fp,))
     out_layer = out_ds.CreateLayer("polygon", None, ogr.wkbPolygon)
 
-    fd = ogr.FieldDefn('ISSUED', ogr.OFTString)
+    fd = ogr.FieldDefn("ISSUED", ogr.OFTString)
     fd.SetWidth(12)
     out_layer.CreateField(fd)
 
-    fd = ogr.FieldDefn('EXPIRED', ogr.OFTString)
+    fd = ogr.FieldDefn("EXPIRED", ogr.OFTString)
     fd.SetWidth(12)
     out_layer.CreateField(fd)
 
-    fd = ogr.FieldDefn('UPDATED', ogr.OFTString)
+    fd = ogr.FieldDefn("UPDATED", ogr.OFTString)
     fd.SetWidth(12)
     out_layer.CreateField(fd)
 
-    fd = ogr.FieldDefn('INIT_ISS', ogr.OFTString)
+    fd = ogr.FieldDefn("INIT_ISS", ogr.OFTString)
     fd.SetWidth(12)
     out_layer.CreateField(fd)
 
-    fd = ogr.FieldDefn('INIT_EXP', ogr.OFTString)
+    fd = ogr.FieldDefn("INIT_EXP", ogr.OFTString)
     fd.SetWidth(12)
     out_layer.CreateField(fd)
 
-    fd = ogr.FieldDefn('TYPE', ogr.OFTString)
+    fd = ogr.FieldDefn("TYPE", ogr.OFTString)
     fd.SetWidth(2)
     out_layer.CreateField(fd)
 
-    fd = ogr.FieldDefn('PHENOM', ogr.OFTString)
+    fd = ogr.FieldDefn("PHENOM", ogr.OFTString)
     fd.SetWidth(2)
     out_layer.CreateField(fd)
 
-    fd = ogr.FieldDefn('GTYPE', ogr.OFTString)
+    fd = ogr.FieldDefn("GTYPE", ogr.OFTString)
     fd.SetWidth(1)
     out_layer.CreateField(fd)
 
-    fd = ogr.FieldDefn('SIG', ogr.OFTString)
+    fd = ogr.FieldDefn("SIG", ogr.OFTString)
     fd.SetWidth(1)
     out_layer.CreateField(fd)
 
-    fd = ogr.FieldDefn('WFO', ogr.OFTString)
+    fd = ogr.FieldDefn("WFO", ogr.OFTString)
     fd.SetWidth(3)
     out_layer.CreateField(fd)
 
-    fd = ogr.FieldDefn('ETN', ogr.OFTInteger)
+    fd = ogr.FieldDefn("ETN", ogr.OFTInteger)
     out_layer.CreateField(fd)
 
-    fd = ogr.FieldDefn('STATUS', ogr.OFTString)
+    fd = ogr.FieldDefn("STATUS", ogr.OFTString)
     fd.SetWidth(3)
     out_layer.CreateField(fd)
 
-    fd = ogr.FieldDefn('NWS_UGC', ogr.OFTString)
+    fd = ogr.FieldDefn("NWS_UGC", ogr.OFTString)
     fd.SetWidth(6)
     out_layer.CreateField(fd)
 
@@ -101,7 +101,13 @@ def main():
      from warnings_%s w JOIN ugcs u on (u.gid = w.gid) WHERE
      expire > '%s' and w.gid is not null
 
-    """ % (utcnow.year, utcnow, utcnow, utcnow.year, utcnow)
+    """ % (
+        utcnow.year,
+        utcnow,
+        utcnow,
+        utcnow.year,
+        utcnow,
+    )
 
     data = source.ExecuteSQL(sql)
 
@@ -117,19 +123,19 @@ def main():
 
         featDef = ogr.Feature(out_layer.GetLayerDefn())
         featDef.SetGeometry(geom)
-        featDef.SetField('GTYPE', feat.GetField("gtype"))
-        featDef.SetField('TYPE', feat.GetField("phenomena"))
-        featDef.SetField('PHENOM', feat.GetField("phenomena"))
-        featDef.SetField('ISSUED', feat.GetField("utcissue"))
-        featDef.SetField('EXPIRED', feat.GetField("utcexpire"))
-        featDef.SetField('UPDATED', feat.GetField("utcupdated"))
-        featDef.SetField('INIT_ISS', feat.GetField("utc_prodissue"))
-        featDef.SetField('INIT_EXP', feat.GetField("utc_init_expire"))
-        featDef.SetField('SIG', feat.GetField("significance"))
-        featDef.SetField('WFO', feat.GetField("wfo"))
-        featDef.SetField('STATUS', feat.GetField("status"))
-        featDef.SetField('ETN', feat.GetField("eventid"))
-        featDef.SetField('NWS_UGC', feat.GetField("ugc"))
+        featDef.SetField("GTYPE", feat.GetField("gtype"))
+        featDef.SetField("TYPE", feat.GetField("phenomena"))
+        featDef.SetField("PHENOM", feat.GetField("phenomena"))
+        featDef.SetField("ISSUED", feat.GetField("utcissue"))
+        featDef.SetField("EXPIRED", feat.GetField("utcexpire"))
+        featDef.SetField("UPDATED", feat.GetField("utcupdated"))
+        featDef.SetField("INIT_ISS", feat.GetField("utc_prodissue"))
+        featDef.SetField("INIT_EXP", feat.GetField("utc_init_expire"))
+        featDef.SetField("SIG", feat.GetField("significance"))
+        featDef.SetField("WFO", feat.GetField("wfo"))
+        featDef.SetField("STATUS", feat.GetField("status"))
+        featDef.SetField("ETN", feat.GetField("eventid"))
+        featDef.SetField("NWS_UGC", feat.GetField("ugc"))
 
         out_layer.CreateFeature(featDef)
         feat.Destroy()
@@ -137,24 +143,26 @@ def main():
     source.Destroy()
     out_ds.Destroy()
 
-    z = zipfile.ZipFile("current_ww.zip", 'w', zipfile.ZIP_DEFLATED)
+    z = zipfile.ZipFile("current_ww.zip", "w", zipfile.ZIP_DEFLATED)
     z.write("current_ww.shp")
-    shutil.copy('/opt/iem/scripts/GIS/current_ww.shp.xml',
-                'current_ww.shp.xml')
+    shutil.copy(
+        "/opt/iem/scripts/GIS/current_ww.shp.xml", "current_ww.shp.xml"
+    )
     z.write("current_ww.shp.xml")
     z.write("current_ww.shx")
     z.write("current_ww.dbf")
-    shutil.copy('/opt/iem/data/gis/meta/4326.prj', 'current_ww.prj')
+    shutil.copy("/opt/iem/data/gis/meta/4326.prj", "current_ww.prj")
     z.write("current_ww.prj")
     z.close()
 
-    cmd = ("/home/ldm/bin/pqinsert -p \"zip c %s "
-           "gis/shape/4326/us/current_ww.zip bogus zip\" current_ww.zip"
-           ) % (utcnow.strftime("%Y%m%d%H%M"),)
+    cmd = (
+        '/home/ldm/bin/pqinsert -p "zip c %s '
+        'gis/shape/4326/us/current_ww.zip bogus zip" current_ww.zip'
+    ) % (utcnow.strftime("%Y%m%d%H%M"),)
     subprocess.call(cmd, shell=True)
-    for suffix in ['shp', 'shp.xml', 'shx', 'dbf', 'prj', 'zip']:
-        os.remove('current_ww.%s' % (suffix,))
+    for suffix in ["shp", "shp.xml", "shx", "dbf", "prj", "zip"]:
+        os.remove("current_ww.%s" % (suffix,))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

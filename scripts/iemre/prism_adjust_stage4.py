@@ -25,24 +25,27 @@ def workflow(valid):
         return
     # read prism
     tidx = daily_offset(valid)
-    nc = ncopen("/mesonet/data/prism/%s_daily.nc" % (valid.year, ), 'r')
-    ppt = nc.variables['ppt'][tidx, :, :]
+    nc = ncopen("/mesonet/data/prism/%s_daily.nc" % (valid.year,), "r")
+    ppt = nc.variables["ppt"][tidx, :, :]
     # missing as zero
     ppt = np.where(ppt.mask, 0, ppt)
-    lons = nc.variables['lon'][:]
-    lats = nc.variables['lat'][:]
+    lons = nc.variables["lon"][:]
+    lats = nc.variables["lat"][:]
     nc.close()
     (lons, lats) = np.meshgrid(lons, lats)
     (i, j) = prismutil.find_ij(DEBUGLON, DEBUGLAT)
     LOG.debug("prism debug point ppt: %.3f", ppt[j, i])
 
     # Interpolate this onto the stage4 grid
-    nc = ncopen(("/mesonet/data/stage4/%s_stage4_hourly.nc"
-                 ) % (valid.year, ), 'a', timeout=300)
-    p01m = nc.variables['p01m']
-    p01m_status = nc.variables['p01m_status']
-    s4lons = nc.variables['lon'][:]
-    s4lats = nc.variables['lat'][:]
+    nc = ncopen(
+        ("/mesonet/data/stage4/%s_stage4_hourly.nc") % (valid.year,),
+        "a",
+        timeout=300,
+    )
+    p01m = nc.variables["p01m"]
+    p01m_status = nc.variables["p01m_status"]
+    s4lons = nc.variables["lon"][:]
+    s4lats = nc.variables["lat"][:]
     i, j = find_ij(s4lons, s4lats, DEBUGLON, DEBUGLAT)
     # Values are in the hourly arrears, so start at -23 and thru current hour
     sts_tidx = hourly_offset(valid - datetime.timedelta(hours=23))
@@ -50,7 +53,11 @@ def workflow(valid):
     s4total = np.sum(p01m[sts_tidx:ets_tidx, :, :], axis=0)
     LOG.debug(
         "stage4 s4total: %.3f lon: %.2f (%.2f) lat: %.2f (%.2f)",
-        s4total[i, j], s4lons[i, j], DEBUGLON, s4lats[i, j], DEBUGLAT
+        s4total[i, j],
+        s4lons[i, j],
+        DEBUGLON,
+        s4lats[i, j],
+        DEBUGLAT,
     )
     # make sure the s4total does not have zeros
     s4total = np.where(s4total < 0.001, 0.001, s4total)
@@ -59,19 +66,26 @@ def workflow(valid):
     prism_on_s4grid = nn(s4lons, s4lats)
     LOG.debug(
         "shape of prism_on_s4grid: %s s4lons: %s ll: %.2f s4lats: %s ll: %.2f",
-        np.shape(prism_on_s4grid), np.shape(s4lons), s4lons[0, 0],
-        np.shape(s4lats), s4lats[0, 0]
+        np.shape(prism_on_s4grid),
+        np.shape(s4lons),
+        s4lons[0, 0],
+        np.shape(s4lats),
+        s4lats[0, 0],
     )
     multiplier = prism_on_s4grid / s4total
     LOG.debug(
         "prism avg: %.3f stageIV avg: %.3f prismons4grid avg: %.3f mul: %.3f",
-        np.mean(ppt), np.mean(s4total), np.mean(prism_on_s4grid),
-        np.mean(multiplier)
+        np.mean(ppt),
+        np.mean(s4total),
+        np.mean(prism_on_s4grid),
+        np.mean(multiplier),
     )
     LOG.debug(
         "Boone IA0807 prism: %.3f stageIV: %.4f prismons4grid: %.3f mul: %.3f",
-        ppt[431, 746], s4total[i, j], prism_on_s4grid[i, j],
-        multiplier[i, j]
+        ppt[431, 746],
+        s4total[i, j],
+        prism_on_s4grid[i, j],
+        multiplier[i, j],
     )
 
     # Do the work now, we should not have to worry about the scale factor
@@ -80,19 +94,27 @@ def workflow(valid):
         # we threshold the s4total to at least 0.001, so we divide by 24 here
         # and denote that if the multiplier is zero, then we net zero
         newval = np.where(oldval < 0.001, 0.00004, oldval) * multiplier
-        nc.variables['p01m'][tidx, :, :] = newval
+        nc.variables["p01m"][tidx, :, :] = newval
         LOG.debug(
             "adjust tidx: %s oldval: %.3f newval: %.3f",
-            tidx, oldval[i, j], newval[i, j]
+            tidx,
+            oldval[i, j],
+            newval[i, j],
         )
         # make sure have data
         if np.ma.max(newval) > 0:
             p01m_status[tidx] = 2
         else:
-            print(("prism_adjust_stage4 NOOP for time %s[idx:%s]"
-                   ) % ((datetime.datetime(valid.year, 1, 1, 0) +
-                         datetime.timedelta(hours=tidx)
-                         ).strftime("%Y-%m-%dT%H"), tidx))
+            print(
+                ("prism_adjust_stage4 NOOP for time %s[idx:%s]")
+                % (
+                    (
+                        datetime.datetime(valid.year, 1, 1, 0)
+                        + datetime.timedelta(hours=tidx)
+                    ).strftime("%Y-%m-%dT%H"),
+                    tidx,
+                )
+            )
     nc.close()
 
     # s4total_v2 = np.sum(p01m[sts_tidx:ets_tidx, :, :], axis=0)
@@ -112,5 +134,5 @@ def main(argv):
     workflow(valid)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

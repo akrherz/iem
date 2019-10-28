@@ -14,13 +14,13 @@ import os
 
 def main():
     """Go Main Go."""
-    fn = '/tmp/onewire.txt'
+    fn = "/tmp/onewire.txt"
     if not os.path.isfile(fn):
-        print("ERROR: %s does not exist" % (fn, ))
+        print("ERROR: %s does not exist" % (fn,))
         return 2
-    data = open(fn, 'r').readlines()
+    data = open(fn, "r").readlines()
     if len(data) != 4:
-        print('WARNING - Could not read file!')
+        print("WARNING - Could not read file!")
         return 1
 
     v = []
@@ -36,19 +36,19 @@ def main():
     maxes = [80, 70, 100, 75]
     msg = ""
     for k, d, m in zip(ks, v, maxes):
-        ds += "%s=%s;%s;%s;%s " % (k, d, m, m+5, m+10)
+        ds += "%s=%s;%s;%s;%s " % (k, d, m, m + 5, m + 10)
         msg += "%s %s," % (k, d)
     if v[3] < 75:
-        print('OK - %s |%s' % (msg, ds))
+        print("OK - %s |%s" % (msg, ds))
         status = 0
     elif v[3] < 80:
-        print('WARNING - %s |%s' % (msg, ds))
+        print("WARNING - %s |%s" % (msg, ds))
         status = 1
     else:
-        print('CRITICAL - %s |%s' % (msg, ds))
+        print("CRITICAL - %s |%s" % (msg, ds))
         status = 2
     return status
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

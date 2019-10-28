@@ -4,6 +4,7 @@ import os
 import sys
 import stat
 import datetime
+
 BASEDIR = "/mesonet/share/lapses/auto"
 
 
@@ -15,7 +16,7 @@ def check():
         fn = "%s/%s" % (BASEDIR, filename)
         mtime = os.stat(fn)[stat.ST_MTIME]
         ts = datetime.datetime.fromtimestamp(mtime)
-        diff = (now - ts).days * 86400. + (now - ts).seconds
+        diff = (now - ts).days * 86400.0 + (now - ts).seconds
         if diff < 86400:
             good += 1
     return good
@@ -24,13 +25,13 @@ def check():
 def main():
     """Go Main Go."""
     good = check()
-    msg = '%s good lapses' % (good, )
+    msg = "%s good lapses" % (good,)
     if good > 30:
-        print('OK - %s' % (msg,))
+        print("OK - %s" % (msg,))
         return 0
-    print('CRITICAL - %s' % (msg,))
+    print("CRITICAL - %s" % (msg,))
     return 2
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

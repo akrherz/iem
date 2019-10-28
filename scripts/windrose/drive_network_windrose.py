@@ -11,9 +11,10 @@ def main(argv):
     net = argv[1]
     nt = NetworkTable(net)
     for sid in nt.sts:
-        subprocess.call("python make_windrose.py %s %s" % (net, sid),
-                        shell=True)
+        subprocess.call(
+            "python make_windrose.py %s %s" % (net, sid), shell=True
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

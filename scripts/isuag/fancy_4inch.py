@@ -19,22 +19,25 @@ from pyiem.util import get_dbconn
 
 def get_idx(lons, lats, lon, lat):
     """ Return the grid points closest to this point """
-    dist = ((lons - lon)**2 + (lats - lat)**2)**0.5
+    dist = ((lons - lon) ** 2 + (lats - lat) ** 2) ** 0.5
     return np.unravel_index(dist.argmin(), dist.shape)
 
 
 def get_grib(now, fhour):
     """Find the desired grib within the grib messages"""
-    gribfn = now.strftime(("/mesonet/ARCHIVE/data/%Y/%m/%d/model/nam/"
-                           "%H/nam.t%Hz.conusnest.hiresf0"+str(fhour) +
-                           ".tm00.grib2"))
+    gribfn = now.strftime(
+        (
+            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/nam/"
+            "%H/nam.t%Hz.conusnest.hiresf0" + str(fhour) + ".tm00.grib2"
+        )
+    )
     if not os.path.isfile(gribfn):
-        print("fancy_4inch NAM missing: %s" % (gribfn, ))
+        print("fancy_4inch NAM missing: %s" % (gribfn,))
         return
     grbs = pygrib.open(gribfn)
-    gs = grbs.select(shortName='st')
+    gs = grbs.select(shortName="st")
     for g in gs:
-        if str(g).find('levels 0.0-0.1 m') > 0:
+        if str(g).find("levels 0.0-0.1 m") > 0:
             return g
 
 
@@ -56,7 +59,7 @@ def do_nam(valid):
                 lats, lons = grib.latlons()
                 data = np.zeros(np.shape(lats))
     if grib is None or lats is None:
-        print("fancy_4inch failed to find NAM data for %s" % (valid, ))
+        print("fancy_4inch failed to find NAM data for %s" % (valid,))
         return
     data += grib.values
     count += 1
@@ -79,16 +82,15 @@ def main(argv):
     nt = Table("ISUSM")
     qdict = loadqc()
 
-    idbconn = get_dbconn('isuag', user='nobody')
-    pdbconn = get_dbconn('postgis', user='nobody')
+    idbconn = get_dbconn("isuag", user="nobody")
+    pdbconn = get_dbconn("postgis", user="nobody")
 
     day_ago = int(argv[1])
     ts = datetime.date.today() - datetime.timedelta(days=day_ago)
     hlons, hlats, hvals = do_nam(ts)
-    nam = temperature(hvals, 'K').value('F')
+    nam = temperature(hvals, "K").value("F")
     window = np.ones((3, 3))
-    nam = convolve2d(nam, window / window.sum(), mode='same',
-                     boundary='symm')
+    nam = convolve2d(nam, window / window.sum(), mode="same", boundary="symm")
 
     # mp = MapPlot(sector='midwest')
     # mp.pcolormesh(hlons, hlats, nam,
@@ -97,7 +99,8 @@ def main(argv):
     # sys.exit()
 
     # Query out the data
-    df = read_sql("""
+    df = read_sql(
+        """
         WITH ranges as (
             select station, count(*), min(tsoil_c_avg_qc),
             max(tsoil_c_avg_qc) from sm_hourly WHERE
@@ -107,65 +110,98 @@ def main(argv):
         r.max as hourly_max_c, r.min as hourly_min_c, r.count
          from sm_daily d JOIN ranges r on (d.station = r.station)
         where valid = %s and tsoil_c_avg_qc > -40 and r.count > 19
-    """, idbconn, params=(ts, ts + datetime.timedelta(days=1), ts),
-                  index_col='station')
-    for col, newcol in zip(['tsoil_c_avg_qc', 'hourly_min_c', 'hourly_max_c'],
-                           ['ob', 'min', 'max']):
-        df[newcol] = temperature(df[col].values, 'C').value('F')
+    """,
+        idbconn,
+        params=(ts, ts + datetime.timedelta(days=1), ts),
+        index_col="station",
+    )
+    for col, newcol in zip(
+        ["tsoil_c_avg_qc", "hourly_min_c", "hourly_max_c"],
+        ["ob", "min", "max"],
+    ):
+        df[newcol] = temperature(df[col].values, "C").value("F")
         df.drop(col, axis=1, inplace=True)
 
     for stid, row in df.iterrows():
-        df.at[stid, 'ticket'] = qdict.get(stid, {}).get('soil4', False)
-        x, y = get_idx(hlons, hlats, nt.sts[stid]['lon'], nt.sts[stid]['lat'])
-        df.at[stid, 'nam'] = nam[x, y]
-        df.at[stid, 'lat'] = nt.sts[stid]['lat']
-        df.at[stid, 'lon'] = nt.sts[stid]['lon']
+        df.at[stid, "ticket"] = qdict.get(stid, {}).get("soil4", False)
+        x, y = get_idx(hlons, hlats, nt.sts[stid]["lon"], nt.sts[stid]["lat"])
+        df.at[stid, "nam"] = nam[x, y]
+        df.at[stid, "lat"] = nt.sts[stid]["lat"]
+        df.at[stid, "lon"] = nt.sts[stid]["lon"]
     # ticket is an object type from above
-    df = df[~df['ticket'].astype('bool')]
-    df['diff'] = df['ob'] - df['nam']
-    bias = df['diff'].mean()
+    df = df[~df["ticket"].astype("bool")]
+    df["diff"] = df["ob"] - df["nam"]
+    bias = df["diff"].mean()
     nam = nam + bias
-    print("fancy_4inch NAM bias correction of: %.2fF applied" % (bias, ))
+    print("fancy_4inch NAM bias correction of: %.2fF applied" % (bias,))
     # apply nam bias to sampled data
-    df['nam'] += bias
-    df['diff'] = df['ob'] - df['nam']
+    df["nam"] += bias
+    df["diff"] = df["ob"] - df["nam"]
     # we are going to require data be within 1 SD of sampled or 5 deg
-    std = 5. if df['nam'].std() < 5. else df['nam'].std()
-    for station in df[df['diff'].abs() > std].index.values:
-        print(("fancy_4inch %s QC'd %s out std: %.2f, ob:%.1f nam:%.1f"
-               ) % (ts.strftime("%Y%m%d"), station, std, df.at[station, 'ob'],
-                    df.at[station, 'nam']))
+    std = 5.0 if df["nam"].std() < 5.0 else df["nam"].std()
+    for station in df[df["diff"].abs() > std].index.values:
+        print(
+            ("fancy_4inch %s QC'd %s out std: %.2f, ob:%.1f nam:%.1f")
+            % (
+                ts.strftime("%Y%m%d"),
+                station,
+                std,
+                df.at[station, "ob"],
+                df.at[station, "nam"],
+            )
+        )
         df.drop(station, inplace=True)
 
     # Query out centroids of counties...
-    cdf = read_sql("""SELECT ST_x(ST_centroid(the_geom)) as lon,
+    cdf = read_sql(
+        """SELECT ST_x(ST_centroid(the_geom)) as lon,
         ST_y(ST_centroid(the_geom)) as lat
         from uscounties WHERE state_name = 'Iowa'
-    """, pdbconn, index_col=None)
+    """,
+        pdbconn,
+        index_col=None,
+    )
     for i, row in cdf.iterrows():
-        x, y = get_idx(hlons, hlats, row['lon'], row['lat'])
-        cdf.at[i, 'nam'] = nam[x, y]
+        x, y = get_idx(hlons, hlats, row["lon"], row["lat"])
+        cdf.at[i, "nam"] = nam[x, y]
 
-    mp = MapPlot(sector='iowa',
-                 title=("Average 4 inch Depth Soil Temperatures for %s"
-                        ) % (ts.strftime("%b %d, %Y"), ),
-                 subtitle=("County est. based on bias adj. "
-                           "NWS NAM Model (black numbers), "
-                           "ISUSM network observations (red numbers)"))
-    mp.pcolormesh(hlons, hlats, nam, np.arange(10, 101, 5),
-                  cmap=cm.get_cmap('jet'),
-                  units=r'$^\circ$F')
-    mp.plot_values(df['lon'], df['lat'], df['ob'], fmt='%.0f',
-                   color='r', labelbuffer=5)
-    mp.plot_values(cdf['lon'], cdf['lat'], cdf['nam'], fmt='%.0f',
-                   textsize=11, labelbuffer=5)
+    mp = MapPlot(
+        sector="iowa",
+        title=("Average 4 inch Depth Soil Temperatures for %s")
+        % (ts.strftime("%b %d, %Y"),),
+        subtitle=(
+            "County est. based on bias adj. "
+            "NWS NAM Model (black numbers), "
+            "ISUSM network observations (red numbers)"
+        ),
+    )
+    mp.pcolormesh(
+        hlons,
+        hlats,
+        nam,
+        np.arange(10, 101, 5),
+        cmap=cm.get_cmap("jet"),
+        units=r"$^\circ$F",
+    )
+    mp.plot_values(
+        df["lon"], df["lat"], df["ob"], fmt="%.0f", color="r", labelbuffer=5
+    )
+    mp.plot_values(
+        cdf["lon"],
+        cdf["lat"],
+        cdf["nam"],
+        fmt="%.0f",
+        textsize=11,
+        labelbuffer=5,
+    )
     mp.drawcounties()
     routes = "a" if day_ago >= 4 else "ac"
-    pqstr = ("plot %s %s0000 soilt_day%s.png isuag_county_4inch_soil.png png"
-             ) % (routes, ts.strftime("%Y%m%d"), day_ago)
+    pqstr = (
+        "plot %s %s0000 soilt_day%s.png isuag_county_4inch_soil.png png"
+    ) % (routes, ts.strftime("%Y%m%d"), day_ago)
     mp.postprocess(pqstr=pqstr)
     mp.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

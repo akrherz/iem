@@ -21,7 +21,7 @@ def safeP(v):
 
 def main():
     """Go Main Go"""
-    dbconn = get_dbconn('iem')
+    dbconn = get_dbconn("iem")
     cursor = dbconn.cursor()
 
     now = datetime.datetime.now() - datetime.timedelta(hours=3)
@@ -32,11 +32,12 @@ def main():
 
     state = sys.argv[1]
 
-    url = ("http://data.cocorahs.org/Cocorahs/export/exportreports.aspx"
-           "?ReportType=Daily&dtf=1&Format=CSV&State=%s&"
-           "ReportDateType=timestamp&Date=%s&TimesInGMT=False"
-           ) % (state, now.strftime("%m/%d/%Y%%20%H:00%%20%P"))
-    data = requests.get(url, timeout=30).content.decode('ascii').split("\r\n")
+    url = (
+        "http://data.cocorahs.org/Cocorahs/export/exportreports.aspx"
+        "?ReportType=Daily&dtf=1&Format=CSV&State=%s&"
+        "ReportDateType=timestamp&Date=%s&TimesInGMT=False"
+    ) % (state, now.strftime("%m/%d/%Y%%20%H:00%%20%P"))
+    data = requests.get(url, timeout=30).content.decode("ascii").split("\r\n")
 
     # Process Header
     header = {}
@@ -44,7 +45,7 @@ def main():
     for i, _h in enumerate(h):
         header[_h] = i
 
-    if 'StationNumber' not in header:
+    if "StationNumber" not in header:
         return
 
     for row in data[1:]:
@@ -53,17 +54,24 @@ def main():
             continue
         sid = cols[header["StationNumber"]].strip()
 
-        t = "%s %s" % (cols[header["ObservationDate"]],
-                       cols[header["ObservationTime"]].strip())
+        t = "%s %s" % (
+            cols[header["ObservationDate"]],
+            cols[header["ObservationTime"]].strip(),
+        )
         ts = datetime.datetime.strptime(t, "%Y-%m-%d %I:%M %p")
-        lts = lts.replace(year=ts.year, month=ts.month, day=ts.day,
-                          hour=ts.hour, minute=ts.minute)
+        lts = lts.replace(
+            year=ts.year,
+            month=ts.month,
+            day=ts.day,
+            hour=ts.hour,
+            minute=ts.minute,
+        )
         iem = Observation(sid, "%sCOCORAHS" % (state,), lts)
-        iem.data['pday'] = safeP(cols[header["TotalPrecipAmt"]])
+        iem.data["pday"] = safeP(cols[header["TotalPrecipAmt"]])
         if cols[header["NewSnowDepth"]].strip() != "NA":
-            iem.data['snow'] = safeP(cols[header["NewSnowDepth"]])
+            iem.data["snow"] = safeP(cols[header["NewSnowDepth"]])
         if cols[header["TotalSnowDepth"]].strip() != "NA":
-            iem.data['snowd'] = safeP(cols[header["TotalSnowDepth"]])
+            iem.data["snowd"] = safeP(cols[header["TotalSnowDepth"]])
         iem.save(cursor)
         del iem
 
@@ -71,5 +79,5 @@ def main():
     dbconn.commit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

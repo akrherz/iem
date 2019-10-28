@@ -50,26 +50,70 @@ from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, exponential_backoff, logger
 
 LOG = logger()
-PGCONN = get_dbconn('coop')
+PGCONN = get_dbconn("coop")
 
 BASEDIR = "/mesonet/tmp"
 BASE = datetime.date(1850, 1, 1)
 TODAY = datetime.date.today()
 
-STCONV = {'WA': '45', 'DE': '07', 'DC': '18', 'WI': '47', 'WV': '46',
-          'HI': '51', 'FL': '08', 'WY': '48', 'NH': '27', 'NJ': '28',
-          'NM': '29', 'TX': '41', 'LA': '16', 'AK': '50', 'NC': '31',
-          'ND': '32', 'NE': '25', 'TN': '40', 'NY': '30', 'PA': '36',
-          'PI': '91', 'RI': '37', 'NV': '26', 'VA': '44', 'CO': '05',
-          'CA': '04', 'AL': '01', 'AR': '03', 'VT': '43', 'IL': '11',
-          'GA': '09', 'IN': '12', 'IA': '13', 'OK': '34', 'AZ': '02',
-          'ID': '10', 'CT': '06', 'ME': '17', 'MD': '18', 'MA': '19',
-          'OH': '33', 'UT': '42', 'MO': '23', 'MN': '21', 'MI': '20',
-          'KS': '14', 'MT': '24', 'MS': '22', 'SC': '38', 'KY': '15',
-          'OR': '35', 'SD': '39'}
+STCONV = {
+    "WA": "45",
+    "DE": "07",
+    "DC": "18",
+    "WI": "47",
+    "WV": "46",
+    "HI": "51",
+    "FL": "08",
+    "WY": "48",
+    "NH": "27",
+    "NJ": "28",
+    "NM": "29",
+    "TX": "41",
+    "LA": "16",
+    "AK": "50",
+    "NC": "31",
+    "ND": "32",
+    "NE": "25",
+    "TN": "40",
+    "NY": "30",
+    "PA": "36",
+    "PI": "91",
+    "RI": "37",
+    "NV": "26",
+    "VA": "44",
+    "CO": "05",
+    "CA": "04",
+    "AL": "01",
+    "AR": "03",
+    "VT": "43",
+    "IL": "11",
+    "GA": "09",
+    "IN": "12",
+    "IA": "13",
+    "OK": "34",
+    "AZ": "02",
+    "ID": "10",
+    "CT": "06",
+    "ME": "17",
+    "MD": "18",
+    "MA": "19",
+    "OH": "33",
+    "UT": "42",
+    "MO": "23",
+    "MN": "21",
+    "MI": "20",
+    "KS": "14",
+    "MT": "24",
+    "MS": "22",
+    "SC": "38",
+    "KY": "15",
+    "OR": "35",
+    "SD": "39",
+}
 
 
-DATARE = re.compile(r"""
+DATARE = re.compile(
+    r"""
 (?P<id>[A-Z0-9]{11})
 (?P<year>[0-9]{4})
 (?P<month>[0-9]{2})
@@ -105,30 +149,33 @@ DATARE = re.compile(r"""
 (?P<value29>[0-9\- ]{5})(?P<flag29>...)
 (?P<value30>[0-9\- ]{5})(?P<flag30>...)
 (?P<value31>[0-9\- ]{5})(?P<flag31>...)
-""", re.VERBOSE)
+""",
+    re.VERBOSE,
+)
 
 
 def get_file(station):
     """Download the file from NCEI, if necessary!"""
     # IPv6, use 205.167.25.102 rather than www1.ncdc.noaa.gov
-    uri = ("http://www1.ncdc.noaa.gov/pub/data/ghcn/daily/all/%s.dly"
-           ) % (station, )
+    uri = ("http://www1.ncdc.noaa.gov/pub/data/ghcn/daily/all/%s.dly") % (
+        station,
+    )
     localfn = "%s/%s.dly" % (BASEDIR, station)
     if not os.path.isfile(localfn):
-        LOG.info('dl from NCEI station: %s', station)
+        LOG.info("dl from NCEI station: %s", station)
         req = exponential_backoff(requests.get, uri, timeout=30)
         if req is None:
             LOG.info("ingest_ghcn download failed for %s", uri)
             return None
-        with open(localfn, 'wb') as fp:
+        with open(localfn, "wb") as fp:
             fp.write(req.content)
     else:
-        LOG.info('%s is cached...', localfn)
+        LOG.info("%s is cached...", localfn)
     return localfn
 
 
 def get_days_for_month(day):
-    ''' Compute the number of days this month '''
+    """ Compute the number of days this month """
     nextmo = day + datetime.timedelta(days=35)
     nextmo = nextmo.replace(day=1)
     return (nextmo - day).days
@@ -137,14 +184,14 @@ def get_days_for_month(day):
 def varconv(val, element):
     """Convert NCDC to something we use in the database"""
     ret = None
-    if element in ['TMAX', 'TMIN']:
-        fv = round(temperature(float(val) / 10.0, 'C').value('F'), 0)
+    if element in ["TMAX", "TMIN"]:
+        fv = round(temperature(float(val) / 10.0, "C").value("F"), 0)
         ret = None if (fv < -100 or fv > 150) else fv
-    elif element in ['PRCP']:
-        fv = round(distance(float(val) / 10.0, 'MM').value('IN'), 2)
+    elif element in ["PRCP"]:
+        fv = round(distance(float(val) / 10.0, "MM").value("IN"), 2)
         ret = None if fv < 0 else fv
-    elif element in ['SNOW', 'SNWD']:
-        fv = round(distance(float(val), 'MM').value('IN'), 1)
+    elif element in ["SNOW", "SNWD"]:
+        fv = round(distance(float(val), "MM").value("IN"), 1)
         ret = None if fv < 0 else fv
     return ret
 
@@ -152,7 +199,7 @@ def varconv(val, element):
 def get_obs(metadata):
     """Generate the observation data frame"""
     # The GHCN station ID is based on what the database has for its 11 char
-    fn = get_file(metadata['ncdc81'])
+    fn = get_file(metadata["ncdc81"])
     if fn is None:
         return
     rows = []
@@ -161,33 +208,38 @@ def get_obs(metadata):
         if m is None:
             continue
         data = m.groupdict()
-        if data['element'] not in ['TMAX', 'TMIN', 'PRCP', 'SNOW', 'SNWD']:
+        if data["element"] not in ["TMAX", "TMIN", "PRCP", "SNOW", "SNWD"]:
             continue
-        day = datetime.date(int(data['year']), int(data['month']), 1)
+        day = datetime.date(int(data["year"]), int(data["month"]), 1)
         days = get_days_for_month(day)
-        for i in range(1, days+1):
+        for i in range(1, days + 1):
             day = day.replace(day=i)
             # We don't want data in the future!
             if day >= TODAY:
                 continue
-            rows.append([day,
-                         data['element'],
-                         varconv(data['value%s' % (i,)], data['element']),
-                         data['flag%s' % (i,)][0],
-                         data['flag%s' % (i,)][1],
-                         data['flag%s' % (i,)][2]])
+            rows.append(
+                [
+                    day,
+                    data["element"],
+                    varconv(data["value%s" % (i,)], data["element"]),
+                    data["flag%s" % (i,)][0],
+                    data["flag%s" % (i,)][1],
+                    data["flag%s" % (i,)][2],
+                ]
+            )
     os.unlink(fn)
-    df = pd.DataFrame(rows, columns=['date', 'element', 'value', 'mflag',
-                                     'qflag', 'sflag'])
-    df['date'] = pd.to_datetime(df['date'])
+    df = pd.DataFrame(
+        rows, columns=["date", "element", "value", "mflag", "qflag", "sflag"]
+    )
+    df["date"] = pd.to_datetime(df["date"])
     # Replace trace values
-    df.loc[df['mflag'] == 'T', 'value'] = TRACE_VALUE
+    df.loc[df["mflag"] == "T", "value"] = TRACE_VALUE
     # If data is flagged, set it to NaN
-    df.loc[df['qflag'] != ' ', 'value'] = np.nan
+    df.loc[df["qflag"] != " ", "value"] = np.nan
     # pivot our dataset
-    return df[['date', 'element', 'value']].pivot(index='date',
-                                                  columns='element',
-                                                  values='value')
+    return df[["date", "element", "value"]].pivot(
+        index="date", columns="element", values="value"
+    )
 
 
 def process(station, metadata, allow_inserts):
@@ -203,73 +255,107 @@ def process(station, metadata, allow_inserts):
     if obs is None:
         LOG.info("Failing to process %s as obs is None", station)
         return
-    for col in ['TMAX', 'TMIN', 'PRCP', 'SNOW', 'SNWD']:
+    for col in ["TMAX", "TMIN", "PRCP", "SNOW", "SNWD"]:
         if col not in obs.columns:
             LOG.info("Obs missing for column: %s", col)
             obs[col] = None
 
     table = "alldata_%s" % (station[:2],)
-    current = read_sql("""
+    current = read_sql(
+        """
         SELECT day, high, low, precip, snow, snowd from
-        """+table+""" where station = %s ORDER by day ASC
-    """, PGCONN, params=(station,), index_col=None)
-    current['day'] = pd.to_datetime(current['day'])
-    current = current.set_index('day')
+        """
+        + table
+        + """ where station = %s ORDER by day ASC
+    """,
+        PGCONN,
+        params=(station,),
+        index_col=None,
+    )
+    current["day"] = pd.to_datetime(current["day"])
+    current = current.set_index("day")
     # join the tables
-    df = obs.join(current, how='left')
+    df = obs.join(current, how="left")
     # Loop over our result
-    cnts = {'updates': 0, 'adds': 0, 'inserts_skipped': 0}
+    cnts = {"updates": 0, "adds": 0, "inserts_skipped": 0}
     for dt, row in df.iterrows():
         date = datetime.date(dt.year, dt.month, dt.day)
         work = []
-        for dbcol, obcol in zip(['high', 'low', 'precip', 'snow', 'snowd'],
-                                ['TMAX', 'TMIN', 'PRCP', 'SNOW', 'SNWD']):
+        for dbcol, obcol in zip(
+            ["high", "low", "precip", "snow", "snowd"],
+            ["TMAX", "TMIN", "PRCP", "SNOW", "SNWD"],
+        ):
             if not pd.isna(row[obcol]) and row[obcol] != row[dbcol]:
                 work.append(" %s = %s " % (dbcol, row[obcol]))
-                if (dbcol in ['high', 'low']
-                        and abs(row[dbcol] - row[obcol]) > 5):
+                if (
+                    dbcol in ["high", "low"]
+                    and abs(row[dbcol] - row[obcol]) > 5
+                ):
                     LOG.debug(
                         "%5s %s large diff %s %s",
-                        dbcol, date, row[obcol], row[dbcol]
+                        dbcol,
+                        date,
+                        row[obcol],
+                        row[dbcol],
                     )
-                if (dbcol == 'precip'
-                        and abs(row[dbcol] - row[obcol]) > 0.25):
+                if dbcol == "precip" and abs(row[dbcol] - row[obcol]) > 0.25:
                     LOG.debug(
                         "%5s %s large diff %s %s",
-                        dbcol, date, row[obcol], row[dbcol]
+                        dbcol,
+                        date,
+                        row[obcol],
+                        row[dbcol],
                     )
         if not work:
             continue
-        cursor.execute("""
-            UPDATE """ + table + """ SET """ + ",".join(work) + """
+        cursor.execute(
+            """
+            UPDATE """
+            + table
+            + """ SET """
+            + ",".join(work)
+            + """
             WHERE station = %s and day = %s
-        """, (station, date))
+        """,
+            (station, date),
+        )
         if cursor.rowcount == 1:
-            cnts['updates'] += 1
+            cnts["updates"] += 1
             continue
         if not allow_inserts:
-            cnts['inserts_skipped'] += 1
+            cnts["inserts_skipped"] += 1
             continue
-        cnts['adds'] += 1
+        cnts["adds"] += 1
         # Adding a row
-        cursor.execute("""
-            INSERT into """ + table + """
+        cursor.execute(
+            """
+            INSERT into """
+            + table
+            + """
             (station, day, sday, year, month, high, low, precip,
             snow, snowd)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (station, date,
-              "%02i%02i" % (date.month, date.day),
-              date.year, date.month,
-              None if pd.isna(row['TMAX']) else row['TMAX'],
-              None if pd.isna(row['TMIN']) else row['TMIN'],
-              None if pd.isna(row['PRCP']) else row['PRCP'],
-              None if pd.isna(row['SNOW']) else row['SNOW'],
-              None if pd.isna(row['SNWD']) else row['SNWD'],
-              ))
+        """,
+            (
+                station,
+                date,
+                "%02i%02i" % (date.month, date.day),
+                date.year,
+                date.month,
+                None if pd.isna(row["TMAX"]) else row["TMAX"],
+                None if pd.isna(row["TMIN"]) else row["TMIN"],
+                None if pd.isna(row["PRCP"]) else row["PRCP"],
+                None if pd.isna(row["SNOW"]) else row["SNOW"],
+                None if pd.isna(row["SNWD"]) else row["SNWD"],
+            ),
+        )
 
     LOG.info(
         "%s adds: %s skipped: %s updates: %s",
-        station, cnts['adds'], cnts['inserts_skipped'], cnts['updates']
+        station,
+        cnts["adds"],
+        cnts["inserts_skipped"],
+        cnts["updates"],
     )
     cursor.close()
     PGCONN.commit()
@@ -285,19 +371,19 @@ def main(argv):
         station = states[doy % len(states)]
     else:
         station = argv[1]
-    allow_inserts = (len(argv) == 3)
+    allow_inserts = len(argv) == 3
     if len(station) == 2:
         # we have a state!
         nt = NetworkTable("%sCLIMATE" % (station,))
         for sid in nt.sts:
-            if sid[2:] == '0000' or sid[2] == 'C':
+            if sid[2:] == "0000" or sid[2] == "C":
                 continue
             process(sid, nt.sts[sid], allow_inserts)
-    elif station == 'ALL':
+    elif station == "ALL":
         for state in STCONV:
             nt = NetworkTable("%sCLIMATE" % (state,))
             for sid in nt.sts:
-                if sid[2:] == '0000' or sid[2] == 'C':
+                if sid[2:] == "0000" or sid[2] == "C":
                     continue
                 process(sid, nt.sts[sid], allow_inserts)
     else:
@@ -305,5 +391,5 @@ def main(argv):
         process(sys.argv[1], nt.sts[station], allow_inserts)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

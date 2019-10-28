@@ -11,12 +11,14 @@ from pyiem.util import get_dbconn
 
 def check(dbname):
     """Do the database check."""
-    pgconn = get_dbconn(dbname, user='nobody')
+    pgconn = get_dbconn(dbname, user="nobody")
     icursor = pgconn.cursor()
-    icursor.execute("""
+    icursor.execute(
+        """
         SELECT datname, age(datfrozenxid) FROM pg_database
         ORDER by age DESC LIMIT 1
-    """)
+    """
+    )
     row = icursor.fetchone()
 
     return row
@@ -26,20 +28,25 @@ def main(argv):
     """Go Main Go."""
     dbname, count = check(argv[1])
     if count < 191000000:
-        print('OK - %s %s |count=%s;191000000;195000000;220000000' % (count,
-                                                                      dbname,
-                                                                      count))
+        print(
+            "OK - %s %s |count=%s;191000000;195000000;220000000"
+            % (count, dbname, count)
+        )
         retval = 0
     elif count < 195000000:
-        print(('WARNING - %s %s |count=%s;191000000;195000000;220000000'
-               ) % (count, dbname, count))
+        print(
+            ("WARNING - %s %s |count=%s;191000000;195000000;220000000")
+            % (count, dbname, count)
+        )
         retval = 1
     else:
-        print(('CRITICAL - %s %s |count=%s;191000000;195000000;220000000'
-               ) % (count, dbname, count))
+        print(
+            ("CRITICAL - %s %s |count=%s;191000000;195000000;220000000")
+            % (count, dbname, count)
+        )
         retval = 2
     return retval
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main(sys.argv))

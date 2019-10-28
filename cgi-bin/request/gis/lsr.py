@@ -20,21 +20,21 @@ def send_error(msg):
 
 def get_time_domain(form):
     """Figure out the start and end timestamps"""
-    if 'recent' in form:
+    if "recent" in form:
         # Allow for specifying a recent number of seconds
         ets = datetime.datetime.utcnow()
-        seconds = abs(int(form.getfirst('recent')))
+        seconds = abs(int(form.getfirst("recent")))
         sts = ets - datetime.timedelta(seconds=seconds)
         return sts, ets
 
-    if 'year' in form:
+    if "year" in form:
         year1 = int(form.getfirst("year"))
         year2 = int(form.getfirst("year"))
     else:
         year1 = int(form.getfirst("year1"))
         year2 = int(form.getfirst("year2"))
     month1 = int(form.getfirst("month1"))
-    if form.getfirst('month2') is None:
+    if form.getfirst("month2") is None:
         sys.exit()
     month2 = int(form.getfirst("month2"))
     day1 = int(form.getfirst("day1"))
@@ -51,11 +51,11 @@ def get_time_domain(form):
 
 def main():
     """Go Main Go"""
-    if os.environ['REQUEST_METHOD'] == 'OPTIONS':
+    if os.environ["REQUEST_METHOD"] == "OPTIONS":
         ssw("Allow: GET,POST,OPTIONS\n\n")
         sys.exit()
 
-    pgconn = get_dbconn('postgis')
+    pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
 
     # Get CGI vars
@@ -64,23 +64,28 @@ def main():
     (sTS, eTS) = get_time_domain(form)
 
     wfoLimiter = ""
-    if 'wfo[]' in form:
-        aWFO = form.getlist('wfo[]')
-        aWFO.append('XXX')  # Hack to make next section work
+    if "wfo[]" in form:
+        aWFO = form.getlist("wfo[]")
+        aWFO.append("XXX")  # Hack to make next section work
         if "ALL" not in aWFO:
-            wfoLimiter = " and wfo in %s " % (str(tuple(aWFO)), )
+            wfoLimiter = " and wfo in %s " % (str(tuple(aWFO)),)
 
-    os.chdir('/tmp')
+    os.chdir("/tmp")
     fn = "lsr_%s_%s" % (sTS.strftime("%Y%m%d%H%M"), eTS.strftime("%Y%m%d%H%M"))
-    for suffix in ['shp', 'shx', 'dbf', 'csv']:
+    for suffix in ["shp", "shx", "dbf", "csv"]:
         if os.path.isfile("%s.%s" % (fn, suffix)):
             os.remove("%s.%s" % (fn, suffix))
 
     csv = StringIO()
-    csv.write(("VALID,VALID2,LAT,LON,MAG,WFO,TYPECODE,TYPETEXT,CITY,"
-               "COUNTY,STATE,SOURCE,REMARK\n"))
+    csv.write(
+        (
+            "VALID,VALID2,LAT,LON,MAG,WFO,TYPECODE,TYPETEXT,CITY,"
+            "COUNTY,STATE,SOURCE,REMARK\n"
+        )
+    )
 
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT distinct
         to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as dvalid,
         magnitude, wfo, type, typetext,
@@ -90,8 +95,13 @@ def main():
         from lsrs WHERE
         valid >= '%s+00' and valid < '%s+00' %s
         ORDER by dvalid ASC
-        """ % (sTS.strftime("%Y-%m-%d %H:%M"),
-               eTS.strftime("%Y-%m-%d %H:%M"), wfoLimiter))
+        """
+        % (
+            sTS.strftime("%Y-%m-%d %H:%M"),
+            eTS.strftime("%Y-%m-%d %H:%M"),
+            wfoLimiter,
+        )
+    )
 
     if cursor.rowcount == 0:
         send_error("ERROR: No results found for query.")
@@ -101,56 +111,71 @@ def main():
     dbfio = BytesIO()
 
     with shapefile.Writer(shp=shpio, shx=shxio, dbf=dbfio) as shp:
-        shp.field('VALID', 'C', 12)
-        shp.field('MAG', 'F', 5, 2)
-        shp.field('WFO', 'C', 3)
-        shp.field('TYPECODE', 'C', 1)
-        shp.field('TYPETEXT', 'C', 40)
-        shp.field('CITY', 'C', 40)
-        shp.field('COUNTY', 'C', 40)
-        shp.field('STATE', 'C', 2)
-        shp.field('SOURCE', 'C', 40)
-        shp.field('REMARK', 'C', 200)
-        shp.field('LAT', 'F', 7, 4)
-        shp.field('LON', 'F', 9, 4)
+        shp.field("VALID", "C", 12)
+        shp.field("MAG", "F", 5, 2)
+        shp.field("WFO", "C", 3)
+        shp.field("TYPECODE", "C", 1)
+        shp.field("TYPETEXT", "C", 40)
+        shp.field("CITY", "C", 40)
+        shp.field("COUNTY", "C", 40)
+        shp.field("STATE", "C", 2)
+        shp.field("SOURCE", "C", 40)
+        shp.field("REMARK", "C", 200)
+        shp.field("LAT", "F", 7, 4)
+        shp.field("LON", "F", 9, 4)
         for row in cursor:
             row = list(row)
             shp.point(row[-2], row[-3])
             if row[9] is not None:
-                row[9] = row[9].encode('utf-8', 'ignore').decode(
-                                'ascii', 'ignore').replace(",", "_")
+                row[9] = (
+                    row[9]
+                    .encode("utf-8", "ignore")
+                    .decode("ascii", "ignore")
+                    .replace(",", "_")
+                )
             shp.record(*row[:-1])
             csv.write(
-                ("%s,%s,%.2f,%.2f,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"
-                 ) % (row[0], row[12], row[-3], row[-2], row[1], row[2],
-                      row[3],
-                      row[4], row[5].encode(
-                        'utf-8', 'ignore').decode('ascii', 'ignore'),
-                      row[6], row[7], row[8],
-                      row[9] if row[9] is not None else ''))
+                ("%s,%s,%.2f,%.2f,%s,%s,%s,%s,%s,%s,%s,%s,%s\n")
+                % (
+                    row[0],
+                    row[12],
+                    row[-3],
+                    row[-2],
+                    row[1],
+                    row[2],
+                    row[3],
+                    row[4],
+                    row[5].encode("utf-8", "ignore").decode("ascii", "ignore"),
+                    row[6],
+                    row[7],
+                    row[8],
+                    row[9] if row[9] is not None else "",
+                )
+            )
 
     if "justcsv" in form:
         ssw("Content-type: application/octet-stream\n")
-        ssw(("Content-Disposition: "
-             "attachment; filename=%s.csv\n\n") % (fn,))
+        ssw(
+            ("Content-Disposition: " "attachment; filename=%s.csv\n\n") % (fn,)
+        )
         ssw(csv.getvalue())
 
     else:
         zio = BytesIO()
-        zf = zipfile.ZipFile(
-            zio, mode='w', compression=zipfile.ZIP_DEFLATED)
+        zf = zipfile.ZipFile(zio, mode="w", compression=zipfile.ZIP_DEFLATED)
         zf.writestr(
-            fn+'.prj', open(('/opt/iem/data/gis/meta/4326.prj')).read()
+            fn + ".prj", open(("/opt/iem/data/gis/meta/4326.prj")).read()
         )
-        zf.writestr(fn+".shp", shpio.getvalue())
-        zf.writestr(fn+'.shx', shxio.getvalue())
-        zf.writestr(fn+'.dbf', dbfio.getvalue())
-        zf.writestr(fn+'.csv', csv.getvalue())
+        zf.writestr(fn + ".shp", shpio.getvalue())
+        zf.writestr(fn + ".shx", shxio.getvalue())
+        zf.writestr(fn + ".dbf", dbfio.getvalue())
+        zf.writestr(fn + ".csv", csv.getvalue())
         zf.close()
-        ssw(("Content-Disposition: attachment; "
-             "filename=%s.zip\n\n") % (fn,))
+        ssw(
+            ("Content-Disposition: attachment; " "filename=%s.zip\n\n") % (fn,)
+        )
         ssw(zio.getvalue())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

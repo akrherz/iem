@@ -14,18 +14,18 @@ def main():
     now = datetime.datetime.now()
     mtime = os.stat(FN)[stat.ST_MTIME]
     ts = datetime.datetime.fromtimestamp(mtime)
-    diff = (now - ts).days * 86400. + (now - ts).seconds
+    diff = (now - ts).days * 86400.0 + (now - ts).seconds
     if diff < 600:
-        print('OK - n0q_0.png %s' % (ts,))
+        print("OK - n0q_0.png %s" % (ts,))
         status = 0
     elif diff < 700:
-        print('WARNING - n0q_0.png %s' % (ts,))
+        print("WARNING - n0q_0.png %s" % (ts,))
         status = 1
     else:
-        print('CRITICAL - n0q_0.png %s' % (ts,))
+        print("CRITICAL - n0q_0.png %s" % (ts,))
         status = 2
     return status
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

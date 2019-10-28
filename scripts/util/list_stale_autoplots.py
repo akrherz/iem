@@ -15,9 +15,22 @@ NO_FEATURES = [
     96,  # one-off showing precip biases
     94,  # one-off showing temp biases
     102,  # LSR report types
-    110, 111, 112, 113, 114, 115, 117,
-    118, 119, 120, 121, 122, 123, 124,   # climodat text-only reports
-    143, 141,  # yieldfx plots
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    117,
+    118,
+    119,
+    120,
+    121,
+    122,
+    123,
+    124,  # climodat text-only reports
+    143,
+    141,  # yieldfx plots
     144,  # soil temp periods, too fragile of data to be useful
     152,  # growing season differences, too noisey
     158,  # Tall towers plot
@@ -28,12 +41,14 @@ NO_FEATURES = [
 
 def main():
     """DO Something"""
-    pgconn = get_dbconn('mesosite', user='nobody')
+    pgconn = get_dbconn("mesosite", user="nobody")
     cursor = pgconn.cursor()
 
-    cursor.execute("""SELECT valid, appurl from feature WHERE appurl is not null
+    cursor.execute(
+        """SELECT valid, appurl from feature WHERE appurl is not null
         and appurl != ''
-        """)
+        """
+    )
     rows = {}
     for row in cursor:
         appurl = row[1]
@@ -54,15 +69,15 @@ def main():
     if not rows:
         print("No data found")
         return
-    df = pd.DataFrame.from_dict(rows, orient='index')
-    df.columns = ['valid']
+    df = pd.DataFrame.from_dict(rows, orient="index")
+    df.columns = ["valid"]
     maxval = df.index.max()
     for i in range(1, maxval):
         if i not in rows and i not in NO_FEATURES:
-            print("No entries for: %4i" % (i, ))
-    df.sort_values(by='valid', inplace=True)
+            print("No entries for: %4i" % (i,))
+    df.sort_values(by="valid", inplace=True)
     print(df.head(10))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -11,49 +11,76 @@ from pyiem.util import get_autoplot_context, get_dbconn, drct2text
 from pyiem.plot.use_agg import plt
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict([
-         ('ts', 'Thunderstorm (TS) Reported'),
-         ('tmpf_above', 'Temperature At or Above Threshold (F)'),
-         ('tmpf_below', 'Temperature Below Threshold (F)'),
-         ('dwpf_above', 'Dew Point At or Above Threshold (F)'),
-         ('dwpf_below', 'Dew Point Below Threshold (F)')])
+PDICT = OrderedDict(
+    [
+        ("ts", "Thunderstorm (TS) Reported"),
+        ("tmpf_above", "Temperature At or Above Threshold (F)"),
+        ("tmpf_below", "Temperature Below Threshold (F)"),
+        ("dwpf_above", "Dew Point At or Above Threshold (F)"),
+        ("dwpf_below", "Dew Point Below Threshold (F)"),
+    ]
+)
 
-MDICT = OrderedDict([
-         ('all', 'No Month/Time Limit'),
-         ('spring', 'Spring (MAM)'),
-         ('fall', 'Fall (SON)'),
-         ('winter', 'Winter (DJF)'),
-         ('summer', 'Summer (JJA)'),
-         ('jan', 'January'),
-         ('feb', 'February'),
-         ('mar', 'March'),
-         ('apr', 'April'),
-         ('may', 'May'),
-         ('jun', 'June'),
-         ('jul', 'July'),
-         ('aug', 'August'),
-         ('sep', 'September'),
-         ('oct', 'October'),
-         ('nov', 'November'),
-         ('dec', 'December')])
+MDICT = OrderedDict(
+    [
+        ("all", "No Month/Time Limit"),
+        ("spring", "Spring (MAM)"),
+        ("fall", "Fall (SON)"),
+        ("winter", "Winter (DJF)"),
+        ("summer", "Summer (JJA)"),
+        ("jan", "January"),
+        ("feb", "February"),
+        ("mar", "March"),
+        ("apr", "April"),
+        ("may", "May"),
+        ("jun", "June"),
+        ("jul", "July"),
+        ("aug", "August"),
+        ("sep", "September"),
+        ("oct", "October"),
+        ("nov", "November"),
+        ("dec", "December"),
+    ]
+)
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
-    desc['data'] = True
-    desc['description'] = """This application generates a wind rose for a given
+    desc["data"] = True
+    desc[
+        "description"
+    ] = """This application generates a wind rose for a given
     criterion being meet. A wind rose plot is a convenient way of summarizing
     wind speed and direction."""
-    desc['arguments'] = [
-        dict(type='zstation', name='zstation', default='AMW',
-             label='Select Station:', network='IA_ASOS'),
-        dict(type='select', name='opt', default='ts',
-             label='Which metric to plot?', options=PDICT),
-        dict(type='select', name='month', default='all',
-             label='Month Limiter', options=MDICT),
-        dict(type='int', name='threshold', default='80',
-             label='Threshold (when appropriate):')
+    desc["arguments"] = [
+        dict(
+            type="zstation",
+            name="zstation",
+            default="AMW",
+            label="Select Station:",
+            network="IA_ASOS",
+        ),
+        dict(
+            type="select",
+            name="opt",
+            default="ts",
+            label="Which metric to plot?",
+            options=PDICT,
+        ),
+        dict(
+            type="select",
+            name="month",
+            default="all",
+            label="Month Limiter",
+            options=MDICT,
+        ),
+        dict(
+            type="int",
+            name="threshold",
+            default="80",
+            label="Threshold (when appropriate):",
+        ),
     ]
     return desc
 
@@ -61,41 +88,63 @@ def get_description():
 def highcharts(fdict):
     """ Generate the highcharts variant"""
     ctx = get_context(fdict)
-    dir_edges, _, table = histogram(ctx['df']['drct'].values,
-                                    ctx['df']['smph'].values,
-                                    np.array([0, 2, 5, 7, 10, 15, 20]),
-                                    18, True)
+    dir_edges, _, table = histogram(
+        ctx["df"]["drct"].values,
+        ctx["df"]["smph"].values,
+        np.array([0, 2, 5, 7, 10, 15, 20]),
+        18,
+        True,
+    )
     arr = [drct2text(mydir) for mydir in dir_edges]
-    return """
-    var arr = """+str(arr)+""";
+    return (
+        """
+    var arr = """
+        + str(arr)
+        + """;
     $("#ap_container").highcharts({
     series: [{name: '2 - 5',
-                    data: """ + str(list(zip(arr, table[1]))) + """,
+                    data: """
+        + str(list(zip(arr, table[1])))
+        + """,
                     _colorIndex: 0},
                    {name: '5 - 7',
-                    data: """ + str(list(zip(arr, table[2]))) + """,
+                    data: """
+        + str(list(zip(arr, table[2])))
+        + """,
                     _colorIndex: 1},
                    {name: '7 - 10',
-                    data: """ + str(list(zip(arr, table[3]))) + """,
+                    data: """
+        + str(list(zip(arr, table[3])))
+        + """,
                     _colorIndex: 2},
                    {name: '10 - 15',
-                    data: """ + str(list(zip(arr, table[4]))) + """,
+                    data: """
+        + str(list(zip(arr, table[4])))
+        + """,
                     _colorIndex: 3},
                    {name: '15 - 20',
-                    data: """ + str(list(zip(arr, table[5]))) + """,
+                    data: """
+        + str(list(zip(arr, table[5])))
+        + """,
                     _colorIndex: 4},
                    {name: '20 +',
-                    data: """ + str(list(zip(arr, table[6]))) + """,
+                    data: """
+        + str(list(zip(arr, table[6])))
+        + """,
                     _colorIndex: 5}],
     chart: {
             polar: true,
             type: 'column'
     },
     title: {
-            'text': '"""+ctx['title']+"""'
+            'text': '"""
+        + ctx["title"]
+        + """'
     },
     subtitle: {
-            'text': '"""+ctx['subtitle']+"""'
+            'text': '"""
+        + ctx["subtitle"]
+        + """'
     },
     pane: {
             'size': '85%'
@@ -160,66 +209,84 @@ def highcharts(fdict):
     }
     });
     """
+    )
 
 
 def get_context(fdict):
     """Do the agnostic stuff"""
-    pgconn = get_dbconn('asos')
+    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
-    ctx['station'] = ctx['zstation']
+    ctx["station"] = ctx["zstation"]
 
-    if ctx['month'] == 'all':
+    if ctx["month"] == "all":
         months = range(1, 13)
-    elif ctx['month'] == 'fall':
+    elif ctx["month"] == "fall":
         months = [9, 10, 11]
-    elif ctx['month'] == 'winter':
+    elif ctx["month"] == "winter":
         months = [12, 1, 2]
-    elif ctx['month'] == 'spring':
+    elif ctx["month"] == "spring":
         months = [3, 4, 5]
-    elif ctx['month'] == 'summer':
+    elif ctx["month"] == "summer":
         months = [6, 7, 8]
     else:
-        ts = datetime.datetime.strptime("2000-"+ctx['month']+"-01", '%Y-%b-%d')
+        ts = datetime.datetime.strptime(
+            "2000-" + ctx["month"] + "-01", "%Y-%b-%d"
+        )
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
     limiter = "array_to_string(wxcodes, '') ~* 'TS'"
     title = "Thunderstorm (TS) contained in METAR"
-    if ctx['opt'] == 'tmpf_above':
-        limiter = "round(tmpf::numeric,0) >= %s" % (ctx['threshold'],)
-        title = r"Air Temp at or above %s$^\circ$F" % (ctx['threshold'],)
-    elif ctx['opt'] == 'tmpf_below':
-        limiter = "round(tmpf::numeric,0) < %s" % (ctx['threshold'],)
-        title = r"Air Temp below %s$^\circ$F" % (ctx['threshold'],)
-    elif ctx['opt'] == 'dwpf_below':
-        limiter = "round(dwpf::numeric,0) < %s" % (ctx['threshold'],)
-        title = r"Dew Point below %s$^\circ$F" % (ctx['threshold'],)
-    elif ctx['opt'] == 'dwpf_above':
-        limiter = "round(tmpf::numeric,0) >= %s" % (ctx['threshold'],)
-        title = r"Dew Point at or above %s$^\circ$F" % (ctx['threshold'],)
+    if ctx["opt"] == "tmpf_above":
+        limiter = "round(tmpf::numeric,0) >= %s" % (ctx["threshold"],)
+        title = r"Air Temp at or above %s$^\circ$F" % (ctx["threshold"],)
+    elif ctx["opt"] == "tmpf_below":
+        limiter = "round(tmpf::numeric,0) < %s" % (ctx["threshold"],)
+        title = r"Air Temp below %s$^\circ$F" % (ctx["threshold"],)
+    elif ctx["opt"] == "dwpf_below":
+        limiter = "round(dwpf::numeric,0) < %s" % (ctx["threshold"],)
+        title = r"Dew Point below %s$^\circ$F" % (ctx["threshold"],)
+    elif ctx["opt"] == "dwpf_above":
+        limiter = "round(tmpf::numeric,0) >= %s" % (ctx["threshold"],)
+        title = r"Dew Point at or above %s$^\circ$F" % (ctx["threshold"],)
 
-    ctx['df'] = read_sql("""
+    ctx["df"] = read_sql(
+        """
      SELECT valid at time zone 'UTC' as valid,
      drct, sknt * 1.15 as smph from alldata
      where station = %s and
-     """+limiter+""" and sknt > 0 and drct >= 0 and drct <= 360
+     """
+        + limiter
+        + """ and sknt > 0 and drct >= 0 and drct <= 360
      and extract(month from valid) in %s
-    """, pgconn, params=(ctx['station'], tuple(months)), index_col='valid')
-    if ctx['df'].empty:
+    """,
+        pgconn,
+        params=(ctx["station"], tuple(months)),
+        index_col="valid",
+    )
+    if ctx["df"].empty:
         raise NoDataFound("No Data Found.")
-    minvalid = ctx['df'].index.min()
-    maxvalid = ctx['df'].index.max()
+    minvalid = ctx["df"].index.min()
+    maxvalid = ctx["df"].index.max()
 
-    ctx['plottitle'] = ("%s-%s %s Wind Rose, month=%s\n%s\nWhen  "
-                        "%s") % (minvalid.year,
-                                 maxvalid.year, ctx['station'],
-                                 ctx['month'].upper(),
-                                 ctx['_nt'].sts[ctx['station']]['name'],
-                                 title)
-    ctx['title'] = "%s-%s %s Wind Rose, month=%s" % (
-        minvalid.year, maxvalid.year, ctx['station'], ctx['month'].upper())
-    ctx['subtitle'] = "%s, %s" % (ctx['_nt'].sts[ctx['station']]['name'],
-                                  title.replace(r"$^\circ$", ""))
+    ctx["plottitle"] = ("%s-%s %s Wind Rose, month=%s\n%s\nWhen  " "%s") % (
+        minvalid.year,
+        maxvalid.year,
+        ctx["station"],
+        ctx["month"].upper(),
+        ctx["_nt"].sts[ctx["station"]]["name"],
+        title,
+    )
+    ctx["title"] = "%s-%s %s Wind Rose, month=%s" % (
+        minvalid.year,
+        maxvalid.year,
+        ctx["station"],
+        ctx["month"].upper(),
+    )
+    ctx["subtitle"] = "%s, %s" % (
+        ctx["_nt"].sts[ctx["station"]]["name"],
+        title.replace(r"$^\circ$", ""),
+    )
     return ctx
 
 
@@ -227,33 +294,50 @@ def plotter(fdict):
     """ Go """
     ctx = get_context(fdict)
 
-    fig = plt.figure(figsize=(6, 7.2), facecolor='w', edgecolor='w')
+    fig = plt.figure(figsize=(6, 7.2), facecolor="w", edgecolor="w")
     rect = [0.08, 0.1, 0.8, 0.8]
-    ax = WindroseAxes(fig, rect, facecolor='w')
+    ax = WindroseAxes(fig, rect, facecolor="w")
     fig.add_axes(ax)
-    ax.bar(ctx['df']['drct'].values, ctx['df']['smph'].values,
-           normed=True, bins=[0, 2, 5, 7, 10, 15, 20], opening=0.8,
-           edgecolor='white', nsector=18)
+    ax.bar(
+        ctx["df"]["drct"].values,
+        ctx["df"]["smph"].values,
+        normed=True,
+        bins=[0, 2, 5, 7, 10, 15, 20],
+        opening=0.8,
+        edgecolor="white",
+        nsector=18,
+    )
     handles = []
     for p in ax.patches_list:
         color = p.get_facecolor()
-        handles.append(Rectangle((0, 0), 0.1, 0.3,
-                                 facecolor=color, edgecolor='black'))
-    legend = fig.legend(handles,
-                        ('2-5', '5-7', '7-10', '10-15', '15-20', '20+'),
-                        loc=(0.01, 0.03), ncol=6,
-                        title='Wind Speed [%s]' % ('mph',),
-                        mode=None, columnspacing=0.9, handletextpad=0.45)
+        handles.append(
+            Rectangle((0, 0), 0.1, 0.3, facecolor=color, edgecolor="black")
+        )
+    legend = fig.legend(
+        handles,
+        ("2-5", "5-7", "7-10", "10-15", "15-20", "20+"),
+        loc=(0.01, 0.03),
+        ncol=6,
+        title="Wind Speed [%s]" % ("mph",),
+        mode=None,
+        columnspacing=0.9,
+        handletextpad=0.45,
+    )
     plt.setp(legend.get_texts(), fontsize=10)
 
-    plt.gcf().text(0.5, 0.99, ctx['plottitle'],
-                   fontsize=16, ha='center', va='top')
-    plt.gcf().text(0.95, 0.12, "n=%s" % (len(ctx['df'].index),),
-                   verticalalignment="bottom", ha='right')
+    plt.gcf().text(
+        0.5, 0.99, ctx["plottitle"], fontsize=16, ha="center", va="top"
+    )
+    plt.gcf().text(
+        0.95,
+        0.12,
+        "n=%s" % (len(ctx["df"].index),),
+        verticalalignment="bottom",
+        ha="right",
+    )
 
-    return fig, ctx['df']
+    return fig, ctx["df"]
 
 
-if __name__ == '__main__':
-    plotter(dict(station='AMW', month='jan', opt='tmpf_above',
-                 threshold=32))
+if __name__ == "__main__":
+    plotter(dict(station="AMW", month="jan", opt="tmpf_above", threshold=32))

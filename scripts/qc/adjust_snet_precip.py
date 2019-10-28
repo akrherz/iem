@@ -20,10 +20,12 @@ def process(icursor, ts):
     """process this timestamp"""
     nt = NetworkTable(["KCCI", "KIMT", "KELO"])
     for nwsli in nt.sts.keys():
-        nwnid = nt.sts[nwsli]['nwn_id']
+        nwnid = nt.sts[nwsli]["nwn_id"]
         #
-        fp = "/mesonet/ARCHIVE/raw/snet/%s/%s.dat" % (ts.strftime("%Y_%m/%d"),
-                                                      nwnid)
+        fp = "/mesonet/ARCHIVE/raw/snet/%s/%s.dat" % (
+            ts.strftime("%Y_%m/%d"),
+            nwnid,
+        )
         if not os.path.isfile(fp):
             # print 'Missing: %s' % (fp,)
             continue
@@ -41,23 +43,28 @@ def process(icursor, ts):
 
         sql = """UPDATE summary_%s s SET pday = %s FROM stations t
             WHERE t.id = '%s' and t.iemid = s.iemid
-            and day = '%s' """ % (ts.year, maxPrecip, nwsli,
-                                  ts.strftime("%Y-%m-%d"))
+            and day = '%s' """ % (
+            ts.year,
+            maxPrecip,
+            nwsli,
+            ts.strftime("%Y-%m-%d"),
+        )
         icursor.execute(sql)
 
 
 def main(argv):
     """Go Main Go"""
-    pgconn = get_dbconn('iem')
+    pgconn = get_dbconn("iem")
     icursor = pgconn.cursor()
     ts = datetime.datetime.now() - datetime.timedelta(days=1)
     if len(argv) == 4:
-        ts = datetime.datetime(int(sys.argv[1]), int(sys.argv[2]),
-                               int(sys.argv[3]))
+        ts = datetime.datetime(
+            int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])
+        )
     process(icursor, ts)
     icursor.close()
     pgconn.commit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

@@ -23,96 +23,130 @@ def get_description():
     desc = dict()
     today = datetime.date.today()
     year = today.year if today.month > 9 else today.year - 1
-    desc['description'] = """This chart displays estimated areal coverage of
+    desc[
+        "description"
+    ] = """This chart displays estimated areal coverage of
     snow cover for a single state.  This estimate is based on a 0.125x0.125
     degree analysis of NWS COOP observations.  The date shown would represent
     snow depth reported approximately at 7 AM.
     """
-    desc['data'] = True
-    desc['arguments'] = [
-        dict(type='year', name='year', default=year,
-             label='Year of December for Winter Season'),
-        dict(type='float', name='thres', default='1.0',
-             label='Snow Cover Threshold [inch]'),
-        dict(type='state', name='state', default='IA', label='For State'),
+    desc["data"] = True
+    desc["arguments"] = [
+        dict(
+            type="year",
+            name="year",
+            default=year,
+            label="Year of December for Winter Season",
+        ),
+        dict(
+            type="float",
+            name="thres",
+            default="1.0",
+            label="Snow Cover Threshold [inch]",
+        ),
+        dict(type="state", name="state", default="IA", label="For State"),
     ]
     return desc
 
 
 def f(st, snowd, metric, stpts):
     """f is for Fancy."""
-    v = np.ma.sum(
-        np.ma.where(
-            np.ma.logical_and(st > 0, snowd >= metric), 1, 0)
-                  ) / float(stpts) * 100.
+    v = (
+        np.ma.sum(
+            np.ma.where(np.ma.logical_and(st > 0, snowd >= metric), 1, 0)
+        )
+        / float(stpts)
+        * 100.0
+    )
     return np.nan if v is np.ma.masked else v
 
 
 def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
-    year = ctx['year']
-    thres = ctx['thres']
-    metric = distance(thres, 'IN').value('MM')
-    state = ctx['state'][:2]
+    year = ctx["year"]
+    thres = ctx["thres"]
+    metric = distance(thres, "IN").value("MM")
+    state = ctx["state"][:2]
 
     sts = datetime.datetime(year, 10, 1)
     ets = datetime.datetime(year + 1, 5, 1)
     rows = []
 
-    pgconn = get_dbconn('postgis')
-    states = gpd.GeoDataFrame.from_postgis("""
+    pgconn = get_dbconn("postgis")
+    states = gpd.GeoDataFrame.from_postgis(
+        """
     SELECT the_geom, state_abbr from states where state_abbr = %s
-    """, pgconn, params=(state, ), index_col='state_abbr',
-                                           geom_col='the_geom')
+    """,
+        pgconn,
+        params=(state,),
+        index_col="state_abbr",
+        geom_col="the_geom",
+    )
 
     sidx = iemre.daily_offset(sts)
     ncfn = iemre.get_daily_ncname(sts.year)
     if not os.path.isfile(ncfn):
-        raise NoDataFound("Data for year %s not found" % (sts.year, ))
+        raise NoDataFound("Data for year %s not found" % (sts.year,))
     with ncopen(ncfn) as nc:
         czs = CachingZonalStats(iemre.AFFINE)
-        hasdata = np.zeros((nc.dimensions['lat'].size,
-                            nc.dimensions['lon'].size))
-        czs.gen_stats(hasdata, states['the_geom'])
+        hasdata = np.zeros(
+            (nc.dimensions["lat"].size, nc.dimensions["lon"].size)
+        )
+        czs.gen_stats(hasdata, states["the_geom"])
         for nav in czs.gridnav:
             grid = np.ones((nav.ysz, nav.xsz))
-            grid[nav.mask] = 0.
+            grid[nav.mask] = 0.0
             jslice = slice(nav.y0, nav.y0 + nav.ysz)
             islice = slice(nav.x0, nav.x0 + nav.xsz)
-            hasdata[jslice, islice] = np.where(grid > 0, 1,
-                                               hasdata[jslice, islice])
+            hasdata[jslice, islice] = np.where(
+                grid > 0, 1, hasdata[jslice, islice]
+            )
         st = np.flipud(hasdata)
         stpts = np.sum(np.where(hasdata > 0, 1, 0))
 
-        snowd = nc.variables['snowd_12z'][sidx:, :, :]
+        snowd = nc.variables["snowd_12z"][sidx:, :, :]
     for i in range(snowd.shape[0]):
-        rows.append({
-            'valid': sts + datetime.timedelta(days=i),
-            'coverage': f(st, snowd[i], metric, stpts),
-                     })
+        rows.append(
+            {
+                "valid": sts + datetime.timedelta(days=i),
+                "coverage": f(st, snowd[i], metric, stpts),
+            }
+        )
 
     eidx = iemre.daily_offset(ets)
     ncfn = iemre.get_daily_ncname(ets.year)
     if not os.path.isfile(ncfn):
-        raise NoDataFound("Data for year %s not found" % (ets.year, ))
+        raise NoDataFound("Data for year %s not found" % (ets.year,))
     with ncopen(ncfn) as nc:
-        snowd = nc.variables['snowd_12z'][:eidx, :, :]
+        snowd = nc.variables["snowd_12z"][:eidx, :, :]
     for i in range(snowd.shape[0]):
-        rows.append({
-         'valid': datetime.date(ets.year, 1, 1) + datetime.timedelta(days=i),
-         'coverage': f(st, snowd[i], metric, stpts),
-                     })
+        rows.append(
+            {
+                "valid": datetime.date(ets.year, 1, 1)
+                + datetime.timedelta(days=i),
+                "coverage": f(st, snowd[i], metric, stpts),
+            }
+        )
     df = pd.DataFrame(rows)
-    df = df[np.isfinite(df['coverage'])]
+    df = df[np.isfinite(df["coverage"])]
 
     (fig, ax) = plt.subplots(1, 1, sharex=True, figsize=(8, 6))
-    ax.bar(df['valid'].values, df['coverage'].values, fc='tan', ec='tan',
-           align='center')
-    ax.set_title(("IEM Estimated Areal Snow Coverage Percent of %s\n"
-                  " percentage of state reporting at least  %.2fin snow"
-                  " cover"
-                  ) % (reference.state_names[state], thres))
+    ax.bar(
+        df["valid"].values,
+        df["coverage"].values,
+        fc="tan",
+        ec="tan",
+        align="center",
+    )
+    ax.set_title(
+        (
+            "IEM Estimated Areal Snow Coverage Percent of %s\n"
+            " percentage of state reporting at least  %.2fin snow"
+            " cover"
+        )
+        % (reference.state_names[state], thres)
+    )
     ax.set_ylabel("Areal Coverage [%]")
     ax.xaxis.set_major_locator(mdates.DayLocator([1, 15]))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d %b\n%Y"))
@@ -122,6 +156,6 @@ def plotter(fdict):
     return fig, df
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     plotter(dict())
     # print df['coverage'].max()

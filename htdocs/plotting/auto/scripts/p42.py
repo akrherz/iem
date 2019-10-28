@@ -92,7 +92,11 @@ def get_description():
             label="Select Station:",
         ),
         dict(
-            type="select", name="m", default="all", label="Month Limiter", options=MDICT
+            type="select",
+            name="m",
+            default="all",
+            label="Month Limiter",
+            options=MDICT,
         ),
         dict(
             type="text",
@@ -116,7 +120,10 @@ def get_description():
             options=PDICT2,
         ),
         dict(
-            type="int", name="threshold", default=50, label="Temperature (F) Threshold:"
+            type="int",
+            name="threshold",
+            default=50,
+            label="Temperature (F) Threshold:",
         ),
         dict(
             type="int",
@@ -133,17 +140,28 @@ def plot(ax, interval, valid, tmpf, lines, mydir, month):
     if len(lines) > 10 or len(valid) < 2 or (valid[-1] - valid[0]) < interval:
         return lines
     if len(lines) == 10:
-        ax.text(0.5, 0.9, "ERROR: Limit of 10 lines reached", transform=ax.transAxes)
+        ax.text(
+            0.5,
+            0.9,
+            "ERROR: Limit of 10 lines reached",
+            transform=ax.transAxes,
+        )
         return lines
     delta = (valid[-1] - valid[0]).total_seconds()
     i = tmpf.index(min(tmpf))
-    mylbl = "%s\n%id%.0fh" % (valid[0].year, delta / 86400, (delta % 86400) / 3600.0)
+    mylbl = "%s\n%id%.0fh" % (
+        valid[0].year,
+        delta / 86400,
+        (delta % 86400) / 3600.0,
+    )
     x0 = valid[0].replace(month=1, day=1, hour=0, minute=0)
     offset = 0
     if mydir == "below" and valid[0].month < 7 and month == "all":
         offset = 366.0 * 86400.0
     seconds = [((v - x0).total_seconds() + offset) for v in valid]
-    lines.append(ax.plot(seconds, tmpf, lw=2, label=mylbl.replace("\n", " "))[0])
+    lines.append(
+        ax.plot(seconds, tmpf, lw=2, label=mylbl.replace("\n", " "))[0]
+    )
     lines[-1].hours = round((valid[-1] - valid[0]).seconds / 3600.0, 2)
     lines[-1].days = (valid[-1] - valid[0]).days
     lines[-1].mylbl = mylbl

@@ -25,7 +25,7 @@ def send_error(msg):
 
 def get_gridinfo(filename, xpoints, ypoints):
     """Figure out the grid navigation, sigh"""
-    wld = "%s.wld" % (filename[:-4], )
+    wld = "%s.wld" % (filename[:-4],)
     lines = open(wld).readlines()
     dx = float(lines[0])
     dy = float(lines[3])
@@ -39,19 +39,25 @@ def get_gridinfo(filename, xpoints, ypoints):
 
 def get_table(prod):
     """Return our lookup table"""
-    pgconn = get_dbconn('mesosite', user='nobody')
+    pgconn = get_dbconn("mesosite", user="nobody")
     cursor = pgconn.cursor()
-    xref = [1.e20]*256
-    cursor.execute("""
+    xref = [1.0e20] * 256
+    cursor.execute(
+        """
         SELECT id, filename_template, units, cf_long_name
         from iemrasters where name = %s
-    """, (prod, ))
+    """,
+        (prod,),
+    )
     (rid, template, units, long_name) = cursor.fetchone()
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT coloridx, value from iemrasters_lookup
         WHERE iemraster_id = %s and value is not null
         ORDER by coloridx ASC
-    """, (rid, ))
+    """,
+        (rid,),
+    )
     for row in cursor:
         xref[row[0]] = row[1]
     return np.array(xref), template, units, long_name
@@ -59,18 +65,18 @@ def get_table(prod):
 
 def make_netcdf(xpoints, ypoints, lons, lats):
     """generate the netcdf file"""
-    tmpobj = tempfile.NamedTemporaryFile(suffix='.nc', delete=False)
-    with ncopen(tmpobj.name, 'w') as nc:
-        nc.Conventions = 'CF-1.6'
-        nc.createDimension('lat', ypoints)
-        nc.createDimension('lon', xpoints)
-        nclon = nc.createVariable('lon', np.float32, ('lon', ))
-        nclon.units = 'degree_east'
-        nclon.long_name = 'longitude'
+    tmpobj = tempfile.NamedTemporaryFile(suffix=".nc", delete=False)
+    with ncopen(tmpobj.name, "w") as nc:
+        nc.Conventions = "CF-1.6"
+        nc.createDimension("lat", ypoints)
+        nc.createDimension("lon", xpoints)
+        nclon = nc.createVariable("lon", np.float32, ("lon",))
+        nclon.units = "degree_east"
+        nclon.long_name = "longitude"
         nclon[:] = lons
-        nclat = nc.createVariable('lat', np.float32, ('lat', ))
-        nclat.units = 'degree_north'
-        nclat.long_name = 'latitude'
+        nclat = nc.createVariable("lat", np.float32, ("lat",))
+        nclat.units = "degree_north"
+        nclat.long_name = "latitude"
         nclat[:] = lats
     return tmpobj.name
 
@@ -89,10 +95,11 @@ def do_work(valid, prod):
     lons, lats = get_gridinfo(fn, xpoints, ypoints)
     # create netcdf file
     tmpname = make_netcdf(xpoints, ypoints, lons, lats)
-    with ncopen(tmpname, 'a') as nc:
+    with ncopen(tmpname, "a") as nc:
         # write data
         ncvar = nc.createVariable(
-            prod, np.float, ('lat', 'lon'), zlib=True, fill_value=1.e20)
+            prod, np.float, ("lat", "lon"), zlib=True, fill_value=1.0e20
+        )
         ncvar.units = units
         ncvar.long_name = long_name
         ncvar.coordinates = "lon lat"
@@ -101,7 +108,7 @@ def do_work(valid, prod):
     # send data to user
     ssw("Content-type: application/octet-stream\n")
     ssw("Content-Disposition: attachment; filename=res.nc\n\n")
-    ssw(open(tmpname, 'rb').read())
+    ssw(open(tmpname, "rb").read())
     # remove tmp netcdf file
     os.unlink(tmpname)
 
@@ -109,12 +116,13 @@ def do_work(valid, prod):
 def main():
     """Do great things"""
     form = cgi.FieldStorage()
-    dstr = form.getfirst('dstr', '201710251200')[:12]
-    prod = form.getfirst('prod', 'composite_n0r')[:100]  # arb
-    valid = datetime.datetime.strptime(dstr, '%Y%m%d%H%M').replace(
-        tzinfo=pytz.UTC)
+    dstr = form.getfirst("dstr", "201710251200")[:12]
+    prod = form.getfirst("prod", "composite_n0r")[:100]  # arb
+    valid = datetime.datetime.strptime(dstr, "%Y%m%d%H%M").replace(
+        tzinfo=pytz.UTC
+    )
     do_work(valid, prod)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

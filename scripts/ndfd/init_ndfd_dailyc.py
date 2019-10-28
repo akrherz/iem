@@ -11,28 +11,32 @@ def init_year(ts):
     """
     Create a new NetCDF file for a year of our specification!
     """
-    nc = ncopen("/mesonet/data/ndfd/ndfd_dailyc.nc", 'w')
+    nc = ncopen("/mesonet/data/ndfd/ndfd_dailyc.nc", "w")
     nc.title = "NDFD"
     nc.contact = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
     nc.history = "%s Generated" % (
-                    datetime.datetime.now().strftime("%d %B %Y"),)
+        datetime.datetime.now().strftime("%d %B %Y"),
+    )
 
-    grbs = pygrib.open((
-        '/mesonet/ARCHIVE/data/2019/05/06/model/'
-        'ndfd/00/ndfd.t00z.awp2p5f001.grib2'))
+    grbs = pygrib.open(
+        (
+            "/mesonet/ARCHIVE/data/2019/05/06/model/"
+            "ndfd/00/ndfd.t00z.awp2p5f001.grib2"
+        )
+    )
     grb = grbs[1]
     shape = grb.values.shape
     lats, lons = grb.latlons()
 
     # Setup Dimensions
-    nc.createDimension('lat', shape[0])
-    nc.createDimension('lon', shape[1])
+    nc.createDimension("lat", shape[0])
+    nc.createDimension("lon", shape[1])
     ts2 = datetime.datetime(ts.year + 1, 1, 1)
     days = (ts2 - ts).days
-    nc.createDimension('time', int(days))
+    nc.createDimension("time", int(days))
 
     # Setup Coordinate Variables
-    lat = nc.createVariable('lat', np.float, ('lat', 'lon'))
+    lat = nc.createVariable("lat", np.float, ("lat", "lon"))
     lat.units = "degrees_north"
     lat.long_name = "Latitude"
     lat.standard_name = "latitude"
@@ -40,7 +44,7 @@ def init_year(ts):
     lat.axis = "Y"
     lat[:] = lats
 
-    lon = nc.createVariable('lon', np.float, ('lat', 'lon'))
+    lon = nc.createVariable("lon", np.float, ("lat", "lon"))
     lon.units = "degrees_east"
     lon.long_name = "Longitude"
     lon.standard_name = "longitude"
@@ -48,7 +52,7 @@ def init_year(ts):
     lon.axis = "X"
     lon[:] = lons
 
-    tm = nc.createVariable('time', np.float, ('time',))
+    tm = nc.createVariable("time", np.float, ("time",))
     tm.units = "Days since %s-01-01 00:00:0.0" % (ts.year,)
     tm.long_name = "Time"
     tm.standard_name = "time"
@@ -57,16 +61,18 @@ def init_year(ts):
     tm[:] = np.arange(0, int(days))
 
     p01d = nc.createVariable(
-        'p01d', np.uint16, ('time', 'lat', 'lon'), fill_value=65535)
-    p01d.units = 'mm'
+        "p01d", np.uint16, ("time", "lat", "lon"), fill_value=65535
+    )
+    p01d.units = "mm"
     p01d.scale_factor = 0.01
-    p01d.long_name = 'Precipitation'
-    p01d.standard_name = 'Precipitation'
+    p01d.long_name = "Precipitation"
+    p01d.standard_name = "Precipitation"
     p01d.coordinates = "lon lat"
     p01d.description = "Precipitation accumulation for the day"
 
     high = nc.createVariable(
-        'high_tmpk', np.uint16, ('time', 'lat', 'lon'), fill_value=65535)
+        "high_tmpk", np.uint16, ("time", "lat", "lon"), fill_value=65535
+    )
     high.units = "K"
     high.scale_factor = 0.01
     high.long_name = "2m Air Temperature Daily High"
@@ -74,7 +80,8 @@ def init_year(ts):
     high.coordinates = "lon lat"
 
     low = nc.createVariable(
-        'low_tmpk', np.uint16, ('time', 'lat', 'lon'), fill_value=65535)
+        "low_tmpk", np.uint16, ("time", "lat", "lon"), fill_value=65535
+    )
     low.units = "K"
     low.scale_factor = 0.01
     low.long_name = "2m Air Temperature Daily Low"
@@ -82,7 +89,8 @@ def init_year(ts):
     low.coordinates = "lon lat"
 
     gdd = nc.createVariable(
-        'gdd50', np.uint16, ('time', 'lat', 'lon'), fill_value=65535)
+        "gdd50", np.uint16, ("time", "lat", "lon"), fill_value=65535
+    )
     gdd.units = "F"
     gdd.scale_factor = 0.01
     gdd.long_name = "Growing Degree Days"
@@ -97,5 +105,5 @@ def main():
     init_year(datetime.datetime(2000, 1, 1))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

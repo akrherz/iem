@@ -38,36 +38,37 @@ from shapely.geometry import MultiPolygon
 from pyiem.util import get_dbconn, utc
 
 # Change Directory to /tmp, so that we can rw
-os.chdir('/tmp')
+os.chdir("/tmp")
 
 
 def do_download(zipfn):
     """Do the download steps"""
     if not os.path.isfile(zipfn):
         req = requests.get(
-            ('https://www.weather.gov/source/gis/Shapefiles/%s/'
-             '%s') % ('County' if zipfn.startswith('c_') else 'WSOM', zipfn,))
-        print('Downloading %s ...' % (zipfn,))
-        fh = open(zipfn, 'wb')
+            ("https://www.weather.gov/source/gis/Shapefiles/%s/" "%s")
+            % ("County" if zipfn.startswith("c_") else "WSOM", zipfn)
+        )
+        print("Downloading %s ..." % (zipfn,))
+        fh = open(zipfn, "wb")
         fh.write(req.content)
         fh.close()
 
-    print('Unzipping')
-    zipfp = zipfile.ZipFile(zipfn, 'r')
+    print("Unzipping")
+    zipfp = zipfile.ZipFile(zipfn, "r")
     shpfn = None
     for name in zipfp.namelist():
-        print('    Extracting %s' % (name,))
-        fh = open(name, 'wb')
+        print("    Extracting %s" % (name,))
+        fh = open(name, "wb")
         fh.write(zipfp.read(name))
         fh.close()
-        if name[-3:] == 'shp':
+        if name[-3:] == "shp":
             shpfn = name
     return shpfn
 
 
 def new_poly(geo):
     """Sort and return new multipolygon"""
-    if geo.geom_type == 'Polygon':
+    if geo.geom_type == "Polygon":
         return geo
     # This is tricky. We want to have our multipolygon have its
     # biggest polygon first in the multipolygon.
@@ -88,47 +89,64 @@ def new_poly(geo):
 
 def db_fixes(cursor, valid):
     """Fix some issues in the database"""
-    cursor.execute("""
+    cursor.execute(
+        """
      update ugcs SET geom = st_makevalid(geom) where end_ts is null
      and not st_isvalid(geom) and begin_ts = %s
-    """, (valid, ))
-    print("    Fixed %s entries that were ST_Invalid()" % (cursor.rowcount, ))
+    """,
+        (valid,),
+    )
+    print("    Fixed %s entries that were ST_Invalid()" % (cursor.rowcount,))
 
-    cursor.execute("""
+    cursor.execute(
+        """
         UPDATE ugcs SET simple_geom = ST_Multi(
             ST_Buffer(ST_SnapToGrid(geom, 0.01), 0)
         ),
         centroid = ST_Centroid(geom),
         area2163 = ST_area( ST_transform(geom, 2163) ) / 1000000.0
         WHERE begin_ts = %s
-    """, (valid, ))
-    print(("    Updated simple_geom,centroid,area2163 for %s rows"
-           ) % (cursor.rowcount, ))
+    """,
+        (valid,),
+    )
+    print(
+        ("    Updated simple_geom,centroid,area2163 for %s rows")
+        % (cursor.rowcount,)
+    )
 
     # Check the last step that we don't have empty geoms, which happened once
     def _check():
         """Do the check."""
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT end_ts from ugcs
             where begin_ts = %s and ST_IsEmpty(simple_geom)
-        """, (valid, ))
+        """,
+            (valid,),
+        )
+
     _check()
     if cursor.rowcount > 0:
-        print((
-            "    Found %s rows with empty simple_geom, decreasing tolerance"
-        ) % (cursor.rowcount, ))
-        cursor.execute("""
+        print(
+            ("    Found %s rows with empty simple_geom, decreasing tolerance")
+            % (cursor.rowcount,)
+        )
+        cursor.execute(
+            """
             UPDATE ugcs
             SET simple_geom = ST_Multi(
                 ST_Buffer(ST_SnapToGrid(geom, 0.0001), 0)
             )
             WHERE begin_ts = %s and ST_IsEmpty(simple_geom)
-        """, (valid, ))
+        """,
+            (valid,),
+        )
         _check()
         if cursor.rowcount > 0:
-            print((
-                "    Found %s rows with empty simple_geom, FIXME SOMEHOW!"
-            ) % (cursor.rowcount, ))
+            print(
+                ("    Found %s rows with empty simple_geom, FIXME SOMEHOW!")
+                % (cursor.rowcount,)
+            )
 
 
 def workflow(argv, pgconn, cursor):
@@ -137,67 +155,91 @@ def workflow(argv, pgconn, cursor):
     zipfn = "%s.zip" % (argv[1],)
     shpfn = do_download(zipfn)
 
-    print('Processing')
+    print("Processing")
 
     df = pd.read_file(shpfn)
     # make all columns upper
-    df.columns = [x.upper() if x != 'geometry' else x for x in df.columns]
+    df.columns = [x.upper() if x != "geometry" else x for x in df.columns]
     # Compute the ugc column
-    if zipfn[:2] in ('mz', 'oz', 'hz'):
-        geo_type = 'Z'
-        df['STATE'] = ''
-        df['ugc'] = df['ID']
-        wfocol = 'WFO'
+    if zipfn[:2] in ("mz", "oz", "hz"):
+        geo_type = "Z"
+        df["STATE"] = ""
+        df["ugc"] = df["ID"]
+        wfocol = "WFO"
     elif zipfn.startswith("c_"):
-        geo_type = 'C'
-        df['ugc'] = df['STATE'] + geo_type + df['FIPS'].str.slice(-3)
-        df['NAME'] = df['COUNTYNAME']
-        wfocol = 'CWA'
+        geo_type = "C"
+        df["ugc"] = df["STATE"] + geo_type + df["FIPS"].str.slice(-3)
+        df["NAME"] = df["COUNTYNAME"]
+        wfocol = "CWA"
     else:
-        geo_type = 'Z'
-        df['ugc'] = df['STATE'] + geo_type + df['ZONE']
-        wfocol = 'CWA'
+        geo_type = "Z"
+        df["ugc"] = df["STATE"] + geo_type + df["ZONE"]
+        wfocol = "CWA"
 
-    postgis = pd.read_postgis("""
+    postgis = pd.read_postgis(
+        """
         SELECT * from ugcs where end_ts is null
         and substr(ugc, 3, 1) = %s
-    """, pgconn, params=(geo_type,), geom_col='geom', index_col='ugc')
-    print(("Loaded %s '%s' type rows from the database"
-           ) % (len(postgis.index), geo_type))
+    """,
+        pgconn,
+        params=(geo_type,),
+        geom_col="geom",
+        index_col="ugc",
+    )
+    print(
+        ("Loaded %s '%s' type rows from the database")
+        % (len(postgis.index), geo_type)
+    )
 
     # Compute the area and then sort to order duplicated UGCs :/
-    df['area'] = df['geometry'].area
-    df.sort_values(by='area', ascending=False, inplace=True)
-    gdf = df.groupby('ugc').nth(0)
-    print("Loaded %s/%s unique entries from %s" % (len(gdf.index),
-                                                   len(df.index), shpfn))
+    df["area"] = df["geometry"].area
+    df.sort_values(by="area", ascending=False, inplace=True)
+    gdf = df.groupby("ugc").nth(0)
+    print(
+        "Loaded %s/%s unique entries from %s"
+        % (len(gdf.index), len(df.index), shpfn)
+    )
     countnew = 0
     countdups = 0
     for ugc, row in gdf.iterrows():
         if ugc in postgis.index:
             # Some very small number, good enough
             current = postgis.loc[ugc]
-            if (abs(row['area'] - current['geom'].area) < 0.00000001 and
-                    row['NAME'] == current['name'] and
-                    row[wfocol] == current['wfo']):
+            if (
+                abs(row["area"] - current["geom"].area) < 0.00000001
+                and row["NAME"] == current["name"]
+                and row[wfocol] == current["wfo"]
+            ):
                 countdups += 1
                 continue
 
         # Go find the previous geom and truncate the time
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE ugcs SET end_ts = %s WHERE ugc = %s and end_ts is null
-            """, (valid, ugc))
+            """,
+            (valid, ugc),
+        )
 
         # Finally, insert the new geometry
-        cursor.execute("""
+        cursor.execute(
+            """
         INSERT into ugcs (ugc, name, state, begin_ts, wfo, geom)
         VALUES (%s, %s, %s, %s, %s,
         ST_Multi(ST_SetSRID(ST_GeomFromEWKT(%s),4326)))
-        """, (ugc, row['NAME'], row['STATE'], valid, row[wfocol],
-              new_poly(row['geometry']).wkt))
+        """,
+            (
+                ugc,
+                row["NAME"],
+                row["STATE"],
+                valid,
+                row[wfocol],
+                new_poly(row["geometry"]).wkt,
+            ),
+        )
         countnew += 1
 
-    print('NEW: %s Dups: %s' % (countnew, countdups))
+    print("NEW: %s Dups: %s" % (countnew, countdups))
 
     db_fixes(cursor, valid)
 
@@ -205,19 +247,19 @@ def workflow(argv, pgconn, cursor):
 def main(argv):
     """Go Main Go"""
     if len(argv) != 5:
-        print('ERROR: You need to specify the file date to download and date')
-        print('Example:  python ugcs_update.py z_01dec10 2010 12 01')
+        print("ERROR: You need to specify the file date to download and date")
+        print("Example:  python ugcs_update.py z_01dec10 2010 12 01")
         sys.exit(0)
 
-    pgconn = get_dbconn('postgis')
+    pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
     workflow(argv, pgconn, cursor)
     cursor.close()
     pgconn.commit()
     pgconn.close()
-    print('Done!')
+    print("Done!")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Get the name of the file we wish to download
     main(sys.argv)

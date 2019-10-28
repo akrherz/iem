@@ -9,25 +9,30 @@ from pyiem.exceptions import NoDataFound
 def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
-    desc['data'] = True
-    desc['report'] = True
-    desc['description'] = """ """
-    desc['arguments'] = [
-        dict(type='station', name='station', default='IATDSM',
-             label='Select Station', network='IACLIMATE'),
+    desc["data"] = True
+    desc["report"] = True
+    desc["description"] = """ """
+    desc["arguments"] = [
+        dict(
+            type="station",
+            name="station",
+            default="IATDSM",
+            label="Select Station",
+            network="IACLIMATE",
+        )
     ]
     return desc
 
 
 def plotter(fdict):
     """ Go """
-    pgconn = get_dbconn('coop')
+    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
 
-    station = ctx['station']
+    station = ctx["station"]
 
-    table = "alldata_%s" % (station[:2], )
-    bs = ctx['_nt'].sts[station]['archive_begin']
+    table = "alldata_%s" % (station[:2],)
+    bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:
         raise NoDataFound("No data Found.")
     res = """# IEM Climodat https://mesonet.agron.iastate.edu/climodat/
@@ -38,13 +43,28 @@ def plotter(fdict):
 # Number of days exceeding given temperature thresholds
 # -20, -10, 0, 32 are days with low temperature at or below value
 # 50, 70, 80, 93, 100 are days with high temperature at or above value
-""" % (datetime.date.today().strftime("%d %b %Y"),
-       bs.date(), datetime.date.today(), station,
-       ctx['_nt'].sts[station]['name'])
-    res += ("%s %4s %4s %4s %4s %4s %4s %4s %4s %4s\n"
-            "") % ('YEAR', -20, -10, 0, 32, 50, 70, 80, 93, 100)
+""" % (
+        datetime.date.today().strftime("%d %b %Y"),
+        bs.date(),
+        datetime.date.today(),
+        station,
+        ctx["_nt"].sts[station]["name"],
+    )
+    res += ("%s %4s %4s %4s %4s %4s %4s %4s %4s %4s\n" "") % (
+        "YEAR",
+        -20,
+        -10,
+        0,
+        32,
+        50,
+        70,
+        80,
+        93,
+        100,
+    )
 
-    df = read_sql("""SELECT year,
+    df = read_sql(
+        """SELECT year,
        sum(case when low <= -20 THEN 1 ELSE 0 END) as m20,
        sum(case when low <= -10 THEN 1 ELSE 0 END) as m10,
        sum(case when low <=  0 THEN 1 ELSE 0 END) as m0,
@@ -54,16 +74,24 @@ def plotter(fdict):
        sum(case when high >= 80 THEN 1 ELSE 0 END) as e80,
        sum(case when high >= 93 THEN 1 ELSE 0 END) as e93,
        sum(case when high >= 100 THEN 1 ELSE 0 END) as e100
-       from """+table+""" WHERE station = %s
+       from """
+        + table
+        + """ WHERE station = %s
        GROUP by year ORDER by year ASC
-    """, pgconn, params=(station, ), index_col=None)
+    """,
+        pgconn,
+        params=(station,),
+        index_col=None,
+    )
 
     for _, row in df.iterrows():
-        res += ("%(year)4i %(m20)4i %(m10)4i %(m0)4i %(m32)4i %(e50)4i "
-                "%(e70)4i %(e80)4i %(e93)4i %(e100)4i\n") % row
+        res += (
+            "%(year)4i %(m20)4i %(m10)4i %(m0)4i %(m32)4i %(e50)4i "
+            "%(e70)4i %(e80)4i %(e93)4i %(e100)4i\n"
+        ) % row
 
     return None, df, res
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     plotter(dict())

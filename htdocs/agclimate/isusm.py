@@ -32,7 +32,12 @@ def get_currents():
     )
     valid = None
     for row in cursor:
-        data[row[0]] = {"tmpf": row[2], "rh": row[3], "valid": row[1], "high": None}
+        data[row[0]] = {
+            "tmpf": row[2],
+            "rh": row[3],
+            "valid": row[1],
+            "high": None,
+        }
         if valid is None:
             valid = row[1]
 

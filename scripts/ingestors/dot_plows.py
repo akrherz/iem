@@ -4,6 +4,7 @@ import datetime
 
 import requests
 from pyiem.util import get_dbconn, utc, exponential_backoff, logger
+
 LOG = logger()
 
 URI = (
@@ -25,8 +26,8 @@ CEILING = utc() + datetime.timedelta(hours=3)
 
 
 def workflow():
-    ''' Do stuff '''
-    postgis = get_dbconn('postgis')
+    """ Do stuff """
+    postgis = get_dbconn("postgis")
     cursor = postgis.cursor()
 
     current = {}
@@ -39,19 +40,20 @@ def workflow():
         return
     if req.status_code != 200:
         LOG.info(
-            ("dot_plows got non-200 status_code: %s\n"
-             "Content: %s"), req.status_code, req.content)
+            ("dot_plows got non-200 status_code: %s\n" "Content: %s"),
+            req.status_code,
+            req.content,
+        )
         return
     data = json.loads(req.content)
-    for feat in data.get('features', []):
-        logdt = feat['attributes']['MODIFIEDDT']
-        label = feat['attributes']['LABEL']
+    for feat in data.get("features", []):
+        logdt = feat["attributes"]["MODIFIEDDT"]
+        label = feat["attributes"]["LABEL"]
         if logdt is None:
             continue
         # Unsure why I do it this way, but alas
-        ts = datetime.datetime.utcfromtimestamp(logdt/1000.)
-        valid = utc(ts.year, ts.month, ts.day,
-                    ts.hour, ts.minute, ts.second)
+        ts = datetime.datetime.utcfromtimestamp(logdt / 1000.0)
+        valid = utc(ts.year, ts.month, ts.day, ts.hour, ts.minute, ts.second)
         if valid > CEILING:
             # print(json.dumps(feat, sort_keys=True,
             #                 indent=4, separators=(',', ': ')))
@@ -63,16 +65,24 @@ def workflow():
         if current.get(label) is None:
             # allows subsequent data insert to work
             current[label] = valid - datetime.timedelta(minutes=1)
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT into idot_snowplow_current(label, valid) VALUES (%s,%s)
-            """, (label, valid))
+            """,
+                (label, valid),
+            )
         LOG.debug(
             "logdt: %s label: %s, valid: %s current: %s",
-            logdt, label, valid, current[label])
+            logdt,
+            label,
+            valid,
+            current[label],
+        )
         if current[label] >= valid:
             LOG.debug("    label: %s skipped as old", label)
             continue
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE idot_snowplow_current
             SET
             valid = %s,
@@ -94,29 +104,36 @@ def workflow():
             road_temp_code = %s,
             geom = 'SRID=4326;POINT(%s %s)'
             WHERE label = %s
-        """, (
-            valid, feat['attributes']['HEADING'],
-            feat['attributes']['VELOCITY'],
-            feat['attributes']['ROADTEMP'],
-            feat['attributes']['AIRTEMP'],
-            feat['attributes']['SOLIDMATERIAL'],
-            feat['attributes']['LIQUIDMATERIAL'],
-            feat['attributes']['PREWETMATERIAL'],
-            feat['attributes']['SOLIDSETRATE'],
-            feat['attributes']['LIQUIDSETRATE'],
-            feat['attributes']['PREWETSETRATE'],
-            feat['attributes']['LEFTWINGPLOWSTATE'],
-            feat['attributes']['RIGHTWINGPLOWSTATE'],
-            feat['attributes']['FRONTPLOWSTATE'],
-            feat['attributes']['UNDERBELLYPLOWSTATE'],
-            None,  # SOIL_SPREAD_CODE
-            None,  # ROAD_TEMP_CODE,
-            feat['attributes']['XPOSITION'],
-            feat['attributes']['YPOSITION'],
-            label))
+        """,
+            (
+                valid,
+                feat["attributes"]["HEADING"],
+                feat["attributes"]["VELOCITY"],
+                feat["attributes"]["ROADTEMP"],
+                feat["attributes"]["AIRTEMP"],
+                feat["attributes"]["SOLIDMATERIAL"],
+                feat["attributes"]["LIQUIDMATERIAL"],
+                feat["attributes"]["PREWETMATERIAL"],
+                feat["attributes"]["SOLIDSETRATE"],
+                feat["attributes"]["LIQUIDSETRATE"],
+                feat["attributes"]["PREWETSETRATE"],
+                feat["attributes"]["LEFTWINGPLOWSTATE"],
+                feat["attributes"]["RIGHTWINGPLOWSTATE"],
+                feat["attributes"]["FRONTPLOWSTATE"],
+                feat["attributes"]["UNDERBELLYPLOWSTATE"],
+                None,  # SOIL_SPREAD_CODE
+                None,  # ROAD_TEMP_CODE,
+                feat["attributes"]["XPOSITION"],
+                feat["attributes"]["YPOSITION"],
+                label,
+            ),
+        )
         # Archive it too
-        cursor.execute("""
-            INSERT into idot_snowplow_""" + str(valid.year) + """
+        cursor.execute(
+            """
+            INSERT into idot_snowplow_"""
+            + str(valid.year)
+            + """
             (label, valid, heading, velocity, roadtemp, airtemp, solidmaterial,
             liquidmaterial, prewetmaterial, solidsetrate, liquidsetrate,
             prewetsetrate, leftwingplowstate, rightwingplowstate,
@@ -125,29 +142,34 @@ def workflow():
              values
             (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
             , %s, 'SRID=4326;POINT(%s %s)')
-        """, (
-            label, valid, feat['attributes']['HEADING'],
-            feat['attributes']['VELOCITY'],
-            feat['attributes']['ROADTEMP'],
-            feat['attributes']['AIRTEMP'],
-            feat['attributes']['SOLIDMATERIAL'],
-            feat['attributes']['LIQUIDMATERIAL'],
-            feat['attributes']['PREWETMATERIAL'],
-            feat['attributes']['SOLIDSETRATE'],
-            feat['attributes']['LIQUIDSETRATE'],
-            feat['attributes']['PREWETSETRATE'],
-            feat['attributes']['LEFTWINGPLOWSTATE'],
-            feat['attributes']['RIGHTWINGPLOWSTATE'],
-            feat['attributes']['FRONTPLOWSTATE'],
-            feat['attributes']['UNDERBELLYPLOWSTATE'],
-            None,
-            None,
-            feat['attributes']['XPOSITION'],
-            feat['attributes']['YPOSITION']))
+        """,
+            (
+                label,
+                valid,
+                feat["attributes"]["HEADING"],
+                feat["attributes"]["VELOCITY"],
+                feat["attributes"]["ROADTEMP"],
+                feat["attributes"]["AIRTEMP"],
+                feat["attributes"]["SOLIDMATERIAL"],
+                feat["attributes"]["LIQUIDMATERIAL"],
+                feat["attributes"]["PREWETMATERIAL"],
+                feat["attributes"]["SOLIDSETRATE"],
+                feat["attributes"]["LIQUIDSETRATE"],
+                feat["attributes"]["PREWETSETRATE"],
+                feat["attributes"]["LEFTWINGPLOWSTATE"],
+                feat["attributes"]["RIGHTWINGPLOWSTATE"],
+                feat["attributes"]["FRONTPLOWSTATE"],
+                feat["attributes"]["UNDERBELLYPLOWSTATE"],
+                None,
+                None,
+                feat["attributes"]["XPOSITION"],
+                feat["attributes"]["YPOSITION"],
+            ),
+        )
 
     postgis.commit()
     postgis.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     workflow()

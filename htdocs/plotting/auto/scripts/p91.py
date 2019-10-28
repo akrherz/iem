@@ -8,91 +8,148 @@ from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
-PDICT = OrderedDict((
-        ('high', 'High Temperature'),
-        ('low', 'Low Temperature'),
-        ('precip', 'Precipitation'),
-        ('snow', 'Snowfall'),
-        ('snowd', 'Snow Depth'),
-))
+PDICT = OrderedDict(
+    (
+        ("high", "High Temperature"),
+        ("low", "Low Temperature"),
+        ("precip", "Precipitation"),
+        ("snow", "Snowfall"),
+        ("snowd", "Snow Depth"),
+    )
+)
 
-UNITS = {'precip': 'inch', 'snow': 'inch', 'snowd': 'inch',
-         'high': 'F',
-         'low': 'F'}
+UNITS = {
+    "precip": "inch",
+    "snow": "inch",
+    "snowd": "inch",
+    "high": "F",
+    "low": "F",
+}
 
 
 def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
-    desc['data'] = True
-    desc['description'] = """This plot produces statistics on min, max, and
+    desc["data"] = True
+    desc[
+        "description"
+    ] = """This plot produces statistics on min, max, and
     average values of a variable over a window of days.  The labels get
     a bit confusing, but we are looking for previous periods of time with
     temperature
     above or below a given threshold.  For precipitation, it is only a period
     with each day above a given threshold and the average over that period.
     """
-    desc['arguments'] = [
-        dict(type='station', name='station', default='IATDSM',
-             label='Select Station', network='IACLIMATE'),
-        dict(type='select', name='var', default='precip',
-             label='Which Variable:', options=PDICT),
+    desc["arguments"] = [
+        dict(
+            type="station",
+            name="station",
+            default="IATDSM",
+            label="Select Station",
+            network="IACLIMATE",
+        ),
+        dict(
+            type="select",
+            name="var",
+            default="precip",
+            label="Which Variable:",
+            options=PDICT,
+        ),
     ]
     return desc
 
 
 def plotter(fdict):
     """ Go """
-    pgconn = get_dbconn('coop')
+    pgconn = get_dbconn("coop")
     ccursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
-    station = ctx['station']
-    varname = ctx['var']
+    station = ctx["station"]
+    varname = ctx["var"]
 
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
     rows = []
     for dy in range(1, 32):
-        ccursor.execute("""
+        ccursor.execute(
+            """
             with data as (
             select day,
-            avg("""+varname+""") OVER
+            avg("""
+            + varname
+            + """) OVER
                 (ORDER by day ASC rows between %s preceding and current row),
-            min("""+varname+""") OVER
+            min("""
+            + varname
+            + """) OVER
                 (ORDER by day ASC rows between %s preceding and current row),
-            max("""+varname+""") OVER
+            max("""
+            + varname
+            + """) OVER
                 (ORDER by day ASC rows between %s preceding and current row)
-            from """+table+"""
+            from """
+            + table
+            + """
             where station = %s)
         SELECT max(avg), min(avg), max(min), min(min), max(max), min(max)
         from data
-        """, (dy-1, dy-1, dy-1, station))
+        """,
+            (dy - 1, dy - 1, dy - 1, station),
+        )
         row = ccursor.fetchone()
-        rows.append(dict(days=dy, highest_avg=row[0], lowest_avg=row[1],
-                         highest_min=row[2], lowest_min=row[3],
-                         highest_max=row[4], lowest_max=row[5]))
+        rows.append(
+            dict(
+                days=dy,
+                highest_avg=row[0],
+                lowest_avg=row[1],
+                highest_min=row[2],
+                lowest_min=row[3],
+                highest_max=row[4],
+                lowest_max=row[5],
+            )
+        )
     df = pd.DataFrame(rows)
 
     fig, ax = plt.subplots(1, 1, figsize=(8, 6))
-    if varname == 'precip':
-        ax.plot(np.arange(1, 32), df['highest_avg'], color='b',
-                label='Highest Average', lw=2)
-        ax.plot(np.arange(1, 32), df['highest_min'], color='g',
-                label='Consec Days Over', lw=2)
-        ax.plot(np.arange(1, 32), df['lowest_min'], color='r',
-                label='Consec Days Under', lw=2)
+    if varname == "precip":
+        ax.plot(
+            np.arange(1, 32),
+            df["highest_avg"],
+            color="b",
+            label="Highest Average",
+            lw=2,
+        )
+        ax.plot(
+            np.arange(1, 32),
+            df["highest_min"],
+            color="g",
+            label="Consec Days Over",
+            lw=2,
+        )
+        ax.plot(
+            np.arange(1, 32),
+            df["lowest_min"],
+            color="r",
+            label="Consec Days Under",
+            lw=2,
+        )
     else:
-        ax.plot(np.arange(1, 32), df['highest_avg'],
-                label='Highest Average', lw=2)
-        ax.plot(np.arange(1, 32), df['lowest_avg'],
-                label='Lowest Average', lw=2)
-        ax.plot(np.arange(1, 32), df['highest_min'],
-                label='Highest Above', lw=2)
-        ax.plot(np.arange(1, 32), df['lowest_max'],
-                label='Lowest Below', lw=2)
-    msg = ("[%s] %s Statistics of %s over 1-31 Consecutive Days"
-           ) % (station, nt.sts[station]['name'], PDICT.get(varname))
+        ax.plot(
+            np.arange(1, 32), df["highest_avg"], label="Highest Average", lw=2
+        )
+        ax.plot(
+            np.arange(1, 32), df["lowest_avg"], label="Lowest Average", lw=2
+        )
+        ax.plot(
+            np.arange(1, 32), df["highest_min"], label="Highest Above", lw=2
+        )
+        ax.plot(np.arange(1, 32), df["lowest_max"], label="Lowest Below", lw=2)
+    msg = ("[%s] %s Statistics of %s over 1-31 Consecutive Days") % (
+        station,
+        nt.sts[station]["name"],
+        PDICT.get(varname),
+    )
     tokens = msg.split()
     sz = int(len(tokens) / 2)
     ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
@@ -103,14 +160,22 @@ def plotter(fdict):
 
     # Shrink current axis's height by 10% on the bottom
     box = ax.get_position()
-    ax.set_position([box.x0, box.y0 + box.height * 0.15,
-                     box.width, box.height * 0.85])
+    ax.set_position(
+        [box.x0, box.y0 + box.height * 0.15, box.width, box.height * 0.85]
+    )
 
-    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1),
-              fancybox=True, shadow=True, ncol=3, scatterpoints=1, fontsize=12)
+    ax.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.1),
+        fancybox=True,
+        shadow=True,
+        ncol=3,
+        scatterpoints=1,
+        fontsize=12,
+    )
 
     return fig, df
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     plotter(dict())

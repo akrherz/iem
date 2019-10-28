@@ -10,12 +10,16 @@ from pyiem.util import get_dbconn
 
 def main():
     """Go Main Go!"""
-    pgconn = get_dbconn('hads')
-    udf = read_sql("""
+    pgconn = get_dbconn("hads")
+    udf = read_sql(
+        """
         SELECT distinct nwsli, 1 as col from unknown
         WHERE length(nwsli) = 5 ORDER by nwsli
-    """, pgconn, index_col='nwsli')
-    print("Found %s unknown entries" % (len(udf.index), ))
+    """,
+        pgconn,
+        index_col="nwsli",
+    )
+    print("Found %s unknown entries" % (len(udf.index),))
     for line in open("/home/akrherz/Downloads/mshr_enhanced_201907.txt"):
         if len(line) < 10:
             continue
@@ -32,9 +36,11 @@ def main():
         name = line[260:360].strip()
         platform = line[1473:1572].strip()
         if nwsli in udf.index:
-            print("%s %s %s %s %s %s %s %s" % (
-                nwsli, enddate, state, country, name, platform, lat, lon))
+            print(
+                "%s %s %s %s %s %s %s %s"
+                % (nwsli, enddate, state, country, name, platform, lat, lon)
+            )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

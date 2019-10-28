@@ -7,8 +7,15 @@ YESVALS = ["yes", "y", "t", "true"]
 class Cache(object):
     """Base Cache"""
 
-    def __init__(self, timeout=30.0, stale_interval=300.0, readonly=False,
-                 expire=False, sendfile=False, **kwargs):
+    def __init__(
+        self,
+        timeout=30.0,
+        stale_interval=300.0,
+        readonly=False,
+        expire=False,
+        sendfile=False,
+        **kwargs
+    ):
         """Constructor"""
         self.stale = float(stale_interval)
         self.timeout = float(timeout)
@@ -28,9 +35,13 @@ class Cache(object):
             return False
         while result is not True:
             if time.time() - start_time > self.timeout:
-                raise Exception(("You appear to have a stuck lock. You may "
-                                 "wish to remove the lock named:\n%s"
-                                 ) % (self.getLockName(tile), )) 
+                raise Exception(
+                    (
+                        "You appear to have a stuck lock. You may "
+                        "wish to remove the lock named:\n%s"
+                    )
+                    % (self.getLockName(tile),)
+                )
             time.sleep(0.25)
             result = self.attemptLock(tile)
         return True

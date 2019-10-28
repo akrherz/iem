@@ -247,7 +247,11 @@ def get_site(year, month, iemre, nwsli):
     and valid > %s and valid <= %s
     and value != -9999 and substr(key,3,1) not in ('H','Q') ORDER by valid ASC
     """,
-        (nwsli, sts.strftime("%Y-%m-%d 00:00"), ets.strftime("%Y-%m-%d 00:00")),
+        (
+            nwsli,
+            sts.strftime("%Y-%m-%d 00:00"),
+            ets.strftime("%Y-%m-%d 00:00"),
+        ),
     )
     for row in hcursor:
         valid = row[0]
@@ -367,7 +371,9 @@ def runner(year, month):
     """
     book = Workbook()
     for label in ordering:
-        data = get_site(year, month, METADATA[label]["IEMRE"], METADATA[label]["NWSLI"])
+        data = get_site(
+            year, month, METADATA[label]["IEMRE"], METADATA[label]["NWSLI"]
+        )
         sheet = book.add_sheet(label)
         sheet.col(0).width = 256 * 5
         sheet.col(1).width = 256 * 2
@@ -377,7 +383,12 @@ def runner(year, month):
         for col in range(5, 17):
             sheet.col(col).width = 256 * 5
         print_data(
-            year, month, METADATA[label]["IEMRE"], METADATA[label]["NWSLI"], sheet, data
+            year,
+            month,
+            METADATA[label]["IEMRE"],
+            METADATA[label]["NWSLI"],
+            sheet,
+            data,
         )
     fn = "/tmp/IEM%s%02i.xls" % (year, month)
     book.save(fn)
@@ -391,7 +402,9 @@ def main():
         fn = runner(lastmonth.year, lastmonth.month)
         # Email this out!
         msg = MIMEMultipart()
-        msg["Subject"] = ("IEM COOP Report for %s") % (lastmonth.strftime("%b %Y"),)
+        msg["Subject"] = ("IEM COOP Report for %s") % (
+            lastmonth.strftime("%b %Y"),
+        )
         msg["From"] = "akrherz@iastate.edu"
         # msg['To'] = 'akrherz@localhost'
         msg["To"] = "justin.glisan@iowaagriculture.gov"
@@ -402,7 +415,9 @@ def main():
         b.set_payload(fp.read())
         encoders.encode_base64(b)
         fp.close()
-        b.add_header("Content-Disposition", 'attachment; filename="%s"' % (fn,))
+        b.add_header(
+            "Content-Disposition", 'attachment; filename="%s"' % (fn,)
+        )
         msg.attach(b)
 
         # Send the email via our own SMTP server.

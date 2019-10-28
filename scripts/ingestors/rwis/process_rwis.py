@@ -141,7 +141,10 @@ def merge(atmos, surface):
         nwsli = get_nwsli(row["Rpuid"])
         if nwsli is None:
             if int(row["Rpuid"]) not in KNOWN_UNKNOWNS:
-                print(("process_rwis: Unknown Rpuid: %s in atmos" "") % (row["Rpuid"],))
+                print(
+                    ("process_rwis: Unknown Rpuid: %s in atmos" "")
+                    % (row["Rpuid"],)
+                )
             continue
         if nwsli not in data:
             data[nwsli] = {}
@@ -178,7 +181,10 @@ def merge(atmos, surface):
         nwsli = get_nwsli(row["Rpuid"])
         if nwsli is None:
             if int(row["Rpuid"]) not in KNOWN_UNKNOWNS:
-                print(("process_rwis: Unknown Rpuid: %s in sfc" "") % (row["Rpuid"],))
+                print(
+                    ("process_rwis: Unknown Rpuid: %s in sfc" "")
+                    % (row["Rpuid"],)
+                )
             continue
         ts = datetime.datetime.strptime(row["DtTm"], "%m/%d/%y %H:%M")
         ts = ts.replace(tzinfo=pytz.UTC)
@@ -236,7 +242,10 @@ def do_windalerts(obs):
         if smph < 50:
             continue
         if smph > 100:
-            print(("process_rwis did not relay gust %.1f MPH from %s" "") % (smph, sid))
+            print(
+                ("process_rwis did not relay gust %.1f MPH from %s" "")
+                % (smph, sid)
+            )
             continue
         # Use a hacky tmp file to denote a wind alert that was sent
         fn = "/tmp/iarwis.%s.%s" % (sid, ob["valid"].strftime("%Y%m%d%H%M"))
@@ -414,7 +423,8 @@ def fetch_files():
     # Insert into LDM
     pqstr = "plot ac %s rwis.txt raw/rwis/%sat.txt txt" % (GTS, GTS)
     subprocess.call(
-        ("/home/ldm/bin/pqinsert -i -p '%s' %s " "") % (pqstr, atmosfn), shell=True
+        ("/home/ldm/bin/pqinsert -i -p '%s' %s " "") % (pqstr, atmosfn),
+        shell=True,
     )
 
     # get sfcfn
@@ -424,7 +434,8 @@ def fetch_files():
     # Insert into LDM
     pqstr = "plot ac %s rwis_sf.txt raw/rwis/%ssf.txt txt" % (GTS, GTS)
     subprocess.call(
-        ("/home/ldm/bin/pqinsert -i -p '%s' %s " "") % (pqstr, sfcfn), shell=True
+        ("/home/ldm/bin/pqinsert -i -p '%s' %s " "") % (pqstr, sfcfn),
+        shell=True,
     )
 
     return atmosfn, sfcfn
@@ -434,7 +445,8 @@ def ldm_insert_metars(fn1, fn2):
     """ Insert into LDM please """
     for fn in [fn1, fn2]:
         proc = subprocess.Popen(
-            ("/home/ldm/bin/pqinsert -p '%s' %s") % (fn.replace("/tmp/", ""), fn),
+            ("/home/ldm/bin/pqinsert -p '%s' %s")
+            % (fn.replace("/tmp/", ""), fn),
             shell=True,
             stderr=subprocess.PIPE,
             stdout=subprocess.PIPE,

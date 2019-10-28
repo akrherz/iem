@@ -36,7 +36,10 @@ def setup_csv(yr):
     for i in range(1, 13):
         for v in ["MINT", "MAXT", "PREC"]:
             out.write("%02i_%s,C%02i_%s," % (i, v, i, v))
-    out.write(("%i_MINT,CYR_MINT,%i_MAXT,CYR_MAXT,%i_PREC,CYR_PREC,\n") % (yr, yr, yr))
+    out.write(
+        ("%i_MINT,CYR_MINT,%i_MAXT,CYR_MAXT,%i_PREC,CYR_PREC,\n")
+        % (yr, yr, yr)
+    )
     return out
 
 
@@ -99,7 +102,14 @@ def process(sid, csv, yr):
 
         csv.write(
             "%s,%s,%s,%s,%s,%s,"
-            % (obLow or "M", avgLow, obHigh or "M", avgHigh, obRain or "M", avgRain)
+            % (
+                obLow or "M",
+                avgLow,
+                obHigh or "M",
+                avgHigh,
+                obRain or "M",
+                avgRain,
+            )
         )
 
     low = np.average(ol)
@@ -108,7 +118,9 @@ def process(sid, csv, yr):
     avg_low = np.average(al)
     avg_high = np.average(ah)
     avg_rain = np.sum(ap)
-    csv.write("%s,%s,%s,%s,%s,%s," % (low, avg_low, high, avg_high, rain, avg_rain))
+    csv.write(
+        "%s,%s,%s,%s,%s,%s," % (low, avg_low, high, avg_high, rain, avg_rain)
+    )
 
     csv.write("\n")
     csv.flush()

@@ -1,8 +1,10 @@
 """This is a stupid printer that prints the top and bottom of the HTML page...
 """
 
+
 def printTop():
-	print("""
+    print(
+        """
 <HTML>
 	<HEAD>
 		<BASE HREF="https://mesonet.agron.iastate.edu/~mm5/">
@@ -26,11 +28,13 @@ def printTop():
 
 //********* SET UP THESE VARIABLES - MUST BE CORRECT!!!*********************
  
-""")
+"""
+    )
 
 
 def printBot():
-	print("""
+    print(
+        """
 
 //=== global variables ====
 theImages = new Array();      //holds the images
@@ -60,10 +64,13 @@ if (first_image > last_image)
    first_image = help;
 }
 
-""")
+"""
+    )
+
 
 def printBot15():
-	print("""
+    print(
+        """
 //==============================================================
 //== All previous statements are performed as the page loads. ==
 //== The following functions are also defined at this time.   ==
@@ -268,10 +275,13 @@ function change_mode(mode)
 function launch()
 {
 
-""")
+"""
+    )
+
 
 def printBot2():
-	print("""
+    print(
+        """
    // this needs to be done to set the right mode when the page is manually reloaded
    change_mode (1);
    fwd();
@@ -352,10 +362,13 @@ function animation()
                    </TD>
                    <TD BGCOLOR="#AAAAAA" ALIGN=CENTER VALIGN=MIDDLE>
                       <IMG NAME="animation" BORDER=0
-""")
+"""
+    )
+
 
 def printBot3():
-	print("""
+    print(
+        """
                        ALT="satellite image">
                    </TD>
                </TR>
@@ -363,4 +376,5 @@ def printBot3():
 
 </BODY>
 </HTML>
-""")
+"""
+    )

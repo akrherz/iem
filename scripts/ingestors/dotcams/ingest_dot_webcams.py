@@ -73,7 +73,11 @@ def process(tokens, cameras, mcursor):
     """Process this line from what we downloaded"""
     cid = "IDOT-%s-%s" % (tokens[0], tokens[2])
     gmt = datetime.datetime(
-        int(tokens[3]), int(tokens[4]), int(tokens[5]), int(tokens[6]), int(tokens[7])
+        int(tokens[3]),
+        int(tokens[4]),
+        int(tokens[5]),
+        int(tokens[6]),
+        int(tokens[7]),
     )
     gmt = gmt.replace(tzinfo=pytz.utc)
     now = gmt.astimezone(pytz.timezone("America/Chicago"))
@@ -89,7 +93,14 @@ def process(tokens, cameras, mcursor):
         "/home/ldm/bin/pqinsert -p 'webcam c %s camera/stills/%s.jpg "
         "camera/%s/%s_%s.jpg jpg' %s-320x240.jpg"
         ""
-    ) % (gmt.strftime("%Y%m%d%H%M"), cid, cid, cid, gmt.strftime("%Y%m%d%H%M"), cid)
+    ) % (
+        gmt.strftime("%Y%m%d%H%M"),
+        cid,
+        cid,
+        cid,
+        gmt.strftime("%Y%m%d%H%M"),
+        cid,
+    )
     proc = subprocess.Popen(
         cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
@@ -99,7 +110,14 @@ def process(tokens, cameras, mcursor):
         "/home/ldm/bin/pqinsert -p 'webcam ac %s camera/640x480/%s.jpg "
         "camera/%s/%s_%s.jpg jpg' %s-640x480.jpg"
         ""
-    ) % (gmt.strftime("%Y%m%d%H%M"), cid, cid, cid, gmt.strftime("%Y%m%d%H%M"), cid)
+    ) % (
+        gmt.strftime("%Y%m%d%H%M"),
+        cid,
+        cid,
+        cid,
+        gmt.strftime("%Y%m%d%H%M"),
+        cid,
+    )
     proc = subprocess.Popen(
         cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
@@ -118,7 +136,10 @@ def process(tokens, cameras, mcursor):
         (now, drct, cid),
     )
     if mcursor.rowcount == 0:
-        print(("ingest_dot_webcams adding camera_current entry for cam: %s") % (cid,))
+        print(
+            ("ingest_dot_webcams adding camera_current entry for cam: %s")
+            % (cid,)
+        )
         mcursor.execute(
             """
             INSERT into camera_current(cam, valid, drct) values (%s,%s,%s)
@@ -141,7 +162,9 @@ def main():
 
     # Every three hours, clean up after ourselves :)
     if utc.hour % 3 == 0 and utc.minute < 5:
-        subprocess.call("/usr/sbin/tmpwatch 6 165.206.203.34/rwis_images", shell=True)
+        subprocess.call(
+            "/usr/sbin/tmpwatch 6 165.206.203.34/rwis_images", shell=True
+        )
 
     # Make dictionary of webcams we are interested in
     cameras = {}
