@@ -62,7 +62,7 @@ imagestore = new Ext.data.JsonStore({
  * webcams so that we don't show it again
  */
 imagestore.on('load', function(store, records){
-	data = Array();
+	var data = Array();
 	Ext.each(records, function(record){
 		var checked = (disableStore.find('cid', record.get("cid")) == -1);
 		data.push({
@@ -71,11 +71,11 @@ imagestore.on('load', function(store, records){
 			checked  : checked,
 			listeners  : {
 				change: function(cb, checked, oldValue){
-					id = cb.getName();
+					var id = cb.getName();
 					//console.log("cid: "+ id +" checked: "+ checked);
 					if (! imagestore.isLoaded ){ return; }
 
-					rec = imagestore.getAt(imagestore.find("cid", id ));
+					var rec = imagestore.getAt(imagestore.find("cid", id ));
 					rec.set('show', checked, {silent: true});
 					if (checked){
 						rec = disableStore.getAt(disableStore.find('cid', id ));
@@ -227,7 +227,7 @@ Ext.create('Ext.Panel', {
             listeners: {
                 'select': function(sb){
                    imagestore.isLoaded = false;
-                   ts = Ext.Date.format(Ext.getCmp("datepicker").getValue(), 'm/d/Y') 
+                   var ts = Ext.Date.format(Ext.getCmp("datepicker").getValue(), 'm/d/Y') 
                      +" "+ Ext.getCmp("timepicker").getRawValue();
                    var dt = new Date(ts);
                    if (Ext.getCmp("timemode").realtime){ ts = 0; }
@@ -277,7 +277,7 @@ Ext.create('Ext.Panel', {
           listeners : {
               select : function(field, value){
                   imagestore.isLoaded = false;
-                  ts = Ext.Date.format(Ext.getCmp("datepicker").getValue(), 'm/d/Y') 
+                  var ts = Ext.Date.format(Ext.getCmp("datepicker").getValue(), 'm/d/Y') 
                      +" "+ Ext.getCmp("timepicker").getRawValue();
                   var dt = new Date(ts);
                   imagestore.reload({
@@ -300,7 +300,7 @@ Ext.create('Ext.Panel', {
           listeners : {
               select : function(field, value){
                   imagestore.isLoaded = false;
-                  ts = Ext.Date.format(Ext.getCmp("datepicker").getValue(),
+                  var ts = Ext.Date.format(Ext.getCmp("datepicker").getValue(),
                 		  'm/d/Y') 
                      +" "+ Ext.getCmp("timepicker").getRawValue();
                   var dt = new Date(ts);

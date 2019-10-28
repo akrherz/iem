@@ -482,8 +482,8 @@ function getVTECGeometry(){
 			});
 			productVectorCountyLayer.setSource(vectorSource);
 			var e = productVectorCountyLayer.getSource().getExtent();
-			x = (e[2] + e[0]) / 2.;
-			y = (e[3] + e[1]) / 2.;
+			var x = (e[2] + e[0]) / 2.;
+			var y = (e[3] + e[1]) / 2.;
 			olmap.getView().setCenter([x, y]);
 			updateRADARSources();
 		}
@@ -562,7 +562,7 @@ function getVTECGeometry(){
 			lsrLayer.setSource(vectorSource);
 			lsrTable.clear();
 			$.each(geodata.features, function(idx, feat){
-				prop = feat.properties;
+				var prop = feat.properties;
 				lsrTable.row.add(prop);		
 			});
 			lsrTable.draw();
@@ -585,7 +585,7 @@ function getVTECGeometry(){
 		success: function(geodata){
 			sbwLsrTable.clear();
 			$.each(geodata.features, function(idx, feat){
-				prop = feat.properties;
+				var prop = feat.properties;
 				sbwLsrTable.row.add(prop);		
 			});
 			sbwLsrTable.draw();

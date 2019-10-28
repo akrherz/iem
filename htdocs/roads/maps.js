@@ -36,7 +36,7 @@ var rcLookup = {
 
 $(document).ready(function(){
 
-	roadLayer = new ol.layer.Vector({
+	var roadLayer = new ol.layer.Vector({
 		title: 'Winter Road Conditions',
 		source: new ol.source.Vector({
 			url: '/geojson/winter_roads.geojson',

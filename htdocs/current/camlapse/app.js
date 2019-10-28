@@ -17,13 +17,13 @@ flowplayer(function (api, root) {
  });
 
 function myloader() {
-    ts = new Date();
+    var ts = new Date();
     var mycam = document.theform.mycam.value;
     var mylapse = document.theform.mylapse.value;
     window.location.href = "#" + mycam + "_" + mylapse;
-    url = "/onsite/lapses/auto/" + mycam + "_" + mylapse + ".flv?" + ts.getTime();
-    url2 = "/onsite/lapses/auto/" + mycam + "_" + mylapse + ".mp4?" + ts.getTime();
-    api = flowplayer(0);
+    var url = "/onsite/lapses/auto/" + mycam + "_" + mylapse + ".flv?" + ts.getTime();
+    var url2 = "/onsite/lapses/auto/" + mycam + "_" + mylapse + ".mp4?" + ts.getTime();
+    var api = flowplayer(0);
     api.load({
         sources: [
             { type: "video/flv", src: url },
@@ -33,14 +33,13 @@ function myloader() {
 }
 
 $(function () {
-    ts = new Date();
     var tokens = window.location.href.split('#');
     if (tokens.length == 2) {
-        tokens2 = tokens[1].rsplit('_', 1);
+        var tokens2 = tokens[1].rsplit('_', 1);
         if (tokens2.length == 2) {
-            mycam = tokens2[0];
+            var mycam = tokens2[0];
             document.getElementById('mycam').value = mycam;
-            mylapse = tokens2[1];
+            var mylapse = tokens2[1];
             document.getElementById('mylapse').value = mylapse;
             window.setTimeout(myloader, 1000);
         } else {

@@ -86,7 +86,7 @@ function makeVectorLayer(){
 $(document).ready(function(){
 
 	vectorLayer = makeVectorLayer();
-	key = 'AsgbmE8m-iBbkypiCOE23M0qElHUfEQtaTvPdDPdM0p7s0N7pJcgrjo70FXjX6bY';
+	var key = 'AsgbmE8m-iBbkypiCOE23M0qElHUfEQtaTvPdDPdM0p7s0N7pJcgrjo70FXjX6bY';
 	map = new ol.Map({
 		target: 'map',
 		layers: [new ol.layer.Tile({

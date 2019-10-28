@@ -116,7 +116,7 @@ function createFans(){
 		if (cnt > 5) cnt = 5;
 		counts[cnt] += 1;
 	});
-	for (i=0; i<counts.length; i++){
+	for (var i=0; i<counts.length; i++){
 		$("#t"+i).html(counts[i]);
 	}
 	counts = [0, 0, 0, 0, 0, 0];

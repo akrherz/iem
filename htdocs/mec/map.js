@@ -40,7 +40,7 @@ var styleMap = new OpenLayers.StyleMap(style);
 
 
 function cb_siteOver(feature){
-	  popup = new OpenLayers.Popup('chicken',
+	  var popup = new OpenLayers.Popup('chicken',
 	              feature.geometry.getBounds().getCenterLonLat(),
 	              new OpenLayers.Size(200,20),
 	          "<strong>Turbine Name</strong>: " + feature.attributes.turbinename 
@@ -108,7 +108,7 @@ function init(){
 	  map.addControl( new OpenLayers.Control.LayerSwitcher({id:'ls'}) );
 	  map.addControl( new OpenLayers.Control.MousePosition() );
 
-	  selectControl = new OpenLayers.Control.SelectFeature(geojson, {
+	  var selectControl = new OpenLayers.Control.SelectFeature(geojson, {
 	       onSelect: cb_siteOver,
 	       onUnselect: cb_siteOut
 	   });
