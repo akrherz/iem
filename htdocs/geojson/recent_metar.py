@@ -5,7 +5,7 @@ import json
 
 import memcache
 import psycopg2.extras
-from pyiem.util import get_dbconn, ssw
+from pyiem.util import get_dbconn, ssw, html_escape
 from pyiem.reference import TRACE_VALUE
 
 json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
@@ -71,7 +71,10 @@ def get_data(q):
                     "metar": row["raw"],
                     "valid": row["utc_valid"].strftime("%Y-%m-%dT%H:%M:%SZ"),
                 },
-                "geometry": {"type": "Point", "coordinates": [row["lon"], row["lat"]]},
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [row["lon"], row["lat"]],
+                },
             }
         )
     return json.dumps(data)
@@ -94,7 +97,7 @@ def main():
     if cb is None:
         ssw(res)
     else:
-        ssw("%s(%s)" % (cgi.escape(cb, quote=True), res))
+        ssw("%s(%s)" % (html_escape(cb), res))
 
 
 if __name__ == "__main__":
