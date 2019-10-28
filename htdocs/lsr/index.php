@@ -6,12 +6,12 @@ $t->jsextra = <<<EOF
 <script type="text/javascript" src="/vendor/ext/3.4.1/adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="/vendor/ext/3.4.1/ext-all.js"></script>
 <script src="/vendor/openlayers/2.13.1/OpenLayers.js"></script>
-<script type="text/javascript" src="GeoExt.js"></script>
-<script type="text/javascript" src="RowExpander.js"></script>
-<script type="text/javascript" src="Printer-all.js"></script>
+<script type="text/javascript" src="/vendor/geoext/GeoExt.js"></script>
+<script type="text/javascript" src="/vendor/ext/RowExpander.js"></script>
+<script type="text/javascript" src="/vendor/ext/Printer-all.js"></script>
 <script type="text/javascript" src="wfos.js"></script>
-<script type="text/javascript" src="SuperBoxSelect.js"></script>
-<script type="text/javascript" src="Exporter-all.js?v=1"></script>
+<script type="text/javascript" src="/vendor/ext/SuperBoxSelect.js"></script>
+<script type="text/javascript" src="/vendor/ext/Exporter-all.js"></script>
 <script type="text/javascript" src="static.js?v=25"></script>
 <script>
 Ext.onReady(function(){
@@ -47,7 +47,7 @@ Ext.onReady(function(){
 EOF;
 $t->headextra = <<<EOF
 <link rel="stylesheet" type="text/css" href="/vendor/ext/3.4.1/resources/css/ext-all.css"/>
-<link rel="stylesheet" type="text/css" href="superboxselect.css" />
+<link rel="stylesheet" type="text/css" href="/vendor/ext/superboxselect.css" />
 EOF;
 $t->title = "Local Storm Report App";
 $t->thispage ="severe-lsr";

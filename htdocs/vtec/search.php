@@ -10,7 +10,7 @@ $t = new MyView();
 
 $t->jsextra = <<<EOF
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/5.1.0/build/ext-all.js"></script>
-<script type="text/javascript" src="/ext/ux/ExcelGridPanel.js"></script>
+<script type="text/javascript" src="/vendor/ext/ux/ExcelGridPanel.js"></script>
 <script type="text/javascript" src="search.js?v=16"></script>
 EOF;
 $t->headextra = <<<EOF
