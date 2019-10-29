@@ -12,14 +12,6 @@
   ServerAdmin akrherz@iastate.edu
   DocumentRoot /opt/iem/htdocs
 
-  WSGIScriptAlias /cache/tile.py /opt/iem/htdocs/cache/tile.wsgi
-  WSGIScriptAlias /cache/c.py /opt/iem/htdocs/cache/tile.wsgi
-  WSGIScriptAlias /c/tile.py /opt/iem/htdocs/c/tile.wsgi
-  WSGIScriptAlias /c/c.py /opt/iem/htdocs/c/tile.wsgi
-
-  WSGIScriptAlias /plotting/auto/meta.py /opt/iem/htdocs/plotting/auto/meta.wsgi
-  WSGIScriptAlias /plotting/auto/autoplot.py /opt/iem/htdocs/plotting/auto/autoplot.wsgi
-
   # http://enable-cors.org/server_apache.html
   Header set Access-Control-Allow-Origin "*"
 
@@ -148,6 +140,26 @@
     RewriteRule n0q.cgi /cgi-bin/mapserv/mapserv.fcgi?map=/opt/iem/data/wms/nexrad/n0q.map& [QSA,L]
   </Directory>
 
+  <Directory "/opt/iem/htdocs/c">
+    WSGIProcessGroup iemwsgi_tc
+    AddHandler wsgi-script .py
+    Options +ExecCGI
+
+    # http://lists.osgeo.org/pipermail/tilecache/2010-June/002453.html
+    ExpiresActive On
+    ExpiresDefault "access plus 14 days"
+  </Directory>
+
+  <Directory "/opt/iem/htdocs/cache">
+    WSGIProcessGroup iemwsgi_tc
+    AddHandler wsgi-script .py
+    Options +ExecCGI
+
+    # http://lists.osgeo.org/pipermail/tilecache/2010-June/002453.html
+    ExpiresActive On
+    ExpiresDefault "access plus 5 minutes"
+  </Directory>
+
   <Directory "/opt/iem/htdocs/DCP">
     AddHandler cgi-script .py
     Options +ExecCGI
@@ -183,20 +195,6 @@
   <Directory "/opt/iem/htdocs/info">
     RewriteRule datasets/([a-z_]+).html$ datasets.php?id=$1 [QSA]
     RewriteRule datasets/?$ datasets.php [QSA]
-  </Directory>
-
-  <Directory "/opt/iem/htdocs/c">
-    WSGIProcessGroup iemwsgi_tc
-    # http://lists.osgeo.org/pipermail/tilecache/2010-June/002453.html
-    ExpiresActive On
-    ExpiresDefault "access plus 14 days"
-  </Directory>
-  
-  <Directory "/opt/iem/htdocs/cache">
-    WSGIProcessGroup iemwsgi_tc
-    # http://lists.osgeo.org/pipermail/tilecache/2010-June/002453.html
-    ExpiresActive On
-    ExpiresDefault "access plus 5 minutes"
   </Directory>
 
   <LocationMatch "/api/.*\.(json|geojson|txt)">
@@ -337,7 +335,7 @@
 
   <Directory "/opt/iem/htdocs/plotting/auto">
     WSGIProcessGroup iemwsgi_ap
-    AddHandler cgi-script .py
+    AddHandler wsgi-script .py
     Options +ExecCGI
 
     RewriteRule plot/([0-9]{1,12})/(.*).png$ autoplot.py?p=$1&q=$2&fmt=png
