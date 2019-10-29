@@ -18,8 +18,9 @@ from paste.request import parse_formvars
 from six import string_types
 from pyiem.plot.use_agg import plt
 from pyiem.exceptions import NoDataFound
+
 # Attempt to stop hangs within mod_wsgi and numpy
-np.seterr(all='ignore')
+np.seterr(all="ignore")
 
 
 HTTP200 = "200 OK"
@@ -33,7 +34,8 @@ if BASEDIR not in sys.path:
 def format_mapbox_response(js):
     """Wrap the given javascript in a mapbox wrapper."""
 
-    return """
+    return (
+        """
     mapboxgl.accessToken = 'pk.eyJ1IjoiYWtyaGVyeiIsImEiOiJjanNveG5sOWowc' +
         'm0yNDlwMXlsbXVpeXJoIn0.Qwjhi5VK_ADPbHd2jz01Sw';
     var map = new mapboxgl.Map({
@@ -44,10 +46,13 @@ def format_mapbox_response(js):
     });
 
     map.on('load', function () {
-        """ + js + """
+        """
+        + js
+        + """
 
     });
     """
+    )
 
 
 def parser(cgistr):
@@ -61,7 +66,7 @@ def parser(cgistr):
             continue
         if token2[0] in data:
             if isinstance(data[token2[0]], string_types):
-                data[token2[0]] = [data[token2[0]], ]
+                data[token2[0]] = [data[token2[0]]]
             data[token2[0]].append(token2[1])
         else:
             data[token2[0]] = token2[1]
@@ -72,20 +77,20 @@ def parser(cgistr):
 def get_response_headers(fmt):
     """Figure out some headers"""
     extra = None
-    if fmt == 'png':
+    if fmt == "png":
         ctype = "image/png"
-    elif fmt in ['js', 'mapbox']:
+    elif fmt in ["js", "mapbox"]:
         ctype = "application/javascript"
-    elif fmt == 'svg':
+    elif fmt == "svg":
         ctype = "image/svg+xml"
-    elif fmt == 'pdf':
+    elif fmt == "pdf":
         ctype = "application/pdf"
-    elif fmt in ['csv', 'txt']:
-        ctype = 'text/plain'
+    elif fmt in ["csv", "txt"]:
+        ctype = "text/plain"
     else:
         ctype = "application/vnd.ms-excel"
         extra = [("Content-Disposition", "attachment;Filename=iem.xlsx")]
-    res = [('Content-type', ctype)]
+    res = [("Content-type", ctype)]
     if extra:
         res.extend(extra)
     return res
@@ -95,11 +100,10 @@ def error_image(message, fmt):
     """Create an error image"""
     plt.close()
     _, ax = plt.subplots(1, 1)
-    msg = "IEM Autoplot generation resulted in an error\n%s" % (message, )
-    ax.text(0.5, 0.5, msg, transform=ax.transAxes, ha='center',
-            va='center')
+    msg = "IEM Autoplot generation resulted in an error\n%s" % (message,)
+    ax.text(0.5, 0.5, msg, transform=ax.transAxes, ha="center", va="center")
     ram = BytesIO()
-    plt.axis('off')
+    plt.axis("off")
     plt.savefig(ram, format=fmt, dpi=100)
     ram.seek(0)
     plt.close()
@@ -110,33 +114,35 @@ def handle_error(exp, fmt, uri):
     """Handle errors"""
     exc_type, exc_value, exc_traceback = sys.exc_info()
     tb = traceback.extract_tb(exc_traceback)[-1]
-    sys.stderr.write(("URI:%s %s method:%s lineno:%s %s\n"
-                      ) % (uri, exp.__class__.__name__, tb[2], tb[1], exp))
+    sys.stderr.write(
+        ("URI:%s %s method:%s lineno:%s %s\n")
+        % (uri, exp.__class__.__name__, tb[2], tb[1], exp)
+    )
     if not isinstance(exp, NoDataFound):
         traceback.print_exc()
-    del(exc_type, exc_value, exc_traceback, tb)
-    if fmt in ['png', 'svg', 'pdf']:
+    del (exc_type, exc_value, exc_traceback, tb)
+    if fmt in ["png", "svg", "pdf"]:
         return error_image(str(exp), fmt)
-    elif fmt == 'js':
-        return "alert('%s');" % (str(exp), )
+    elif fmt == "js":
+        return "alert('%s');" % (str(exp),)
     return str(exp)
 
 
 def get_res_by_fmt(p, fmt, fdict):
     """Do the work of actually calling things"""
     if p >= 200:
-        name = "scripts200/p%s" % (p, )
+        name = "scripts200/p%s" % (p,)
     elif p >= 100:
-        name = "scripts100/p%s" % (p, )
+        name = "scripts100/p%s" % (p,)
     else:
-        name = 'scripts/p%s' % (p,)
+        name = "scripts/p%s" % (p,)
     fp, pathname, description = imp.find_module(name)
     a = imp.load_module(name, fp, pathname, description)
     meta = a.get_description()
     # Allow returning of javascript as a string
-    if fmt == 'js':
+    if fmt == "js":
         res = a.highcharts(fdict)
-    elif fmt == 'mapbox':
+    elif fmt == "mapbox":
         res = format_mapbox_response(a.mapbox(fdict))
     else:
         res = a.plotter(fdict)
@@ -153,12 +159,26 @@ def plot_metadata(fig, start_time, end_time, p):
     """Place timestamp on the image"""
     utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
     now = utcnow.astimezone(pytz.timezone("America/Chicago"))
-    fig.text(0.01, 0.005, ('Generated at %s in %.2fs'
-                           ) % (now.strftime("%-d %b %Y %-I:%M %p %Z"),
-                                (end_time - start_time).total_seconds()),
-             va='bottom', ha='left', fontsize=8)
-    fig.text(0.99, 0.005, ('IEM Autoplot App #%s') % (p, ),
-             va='bottom', ha='right', fontsize=8)
+    fig.text(
+        0.01,
+        0.005,
+        ("Generated at %s in %.2fs")
+        % (
+            now.strftime("%-d %b %Y %-I:%M %p %Z"),
+            (end_time - start_time).total_seconds(),
+        ),
+        va="bottom",
+        ha="left",
+        fontsize=8,
+    )
+    fig.text(
+        0.99,
+        0.005,
+        ("IEM Autoplot App #%s") % (p,),
+        va="bottom",
+        ha="right",
+        fontsize=8,
+    )
 
 
 def get_mckey(scriptnum, fdict, fmt):
@@ -169,25 +189,24 @@ def get_mckey(scriptnum, fdict, fmt):
         if not key.startswith("_"):
             vals.append("%s:%s" % (key, fdict[key]))
     return (
-        "/plotting/auto/plot/%s/%s.%s" % (
-            scriptnum, "::".join(vals), fmt)
+        "/plotting/auto/plot/%s/%s.%s" % (scriptnum, "::".join(vals), fmt)
     ).replace(" ", "")
 
 
 def workflow(environ, form, fmt):
     """we need to return a status and content"""
     # q is the full query string that was rewritten to use by apache
-    q = form.get('q', "")
+    q = form.get("q", "")
     fdict = parser(q)
     # p=number is the python backend code called by this framework
-    scriptnum = int(form.get('p', 0))
-    dpi = int(fdict.get('dpi', 100))
+    scriptnum = int(form.get("p", 0))
+    dpi = int(fdict.get("dpi", 100))
 
     # memcache keys can not have spaces
     mckey = get_mckey(scriptnum, fdict, fmt)
-    mc = memcache.Client(['iem-memcached:11211'], debug=0)
+    mc = memcache.Client(["iem-memcached:11211"], debug=0)
     # Don't fetch memcache when we have _cb set for an inbound CGI
-    res = mc.get(mckey) if fdict.get('_cb') is None else None
+    res = mc.get(mckey) if fdict.get("_cb") is None else None
     if res:
         return HTTP200, res
     # memcache failed to save us work, so work we do!
@@ -196,26 +215,28 @@ def workflow(environ, form, fmt):
     try:
         res, meta = get_res_by_fmt(scriptnum, fmt, fdict)
     except NoDataFound as exp:
-        return HTTP400, handle_error(exp, fmt, environ.get('REQUEST_URI'))
+        return HTTP400, handle_error(exp, fmt, environ.get("REQUEST_URI"))
     except Exception as exp:
         # Everything else should be considered fatal
-        return HTTP500, handle_error(exp, fmt, environ.get('REQUEST_URI'))
+        return HTTP500, handle_error(exp, fmt, environ.get("REQUEST_URI"))
     end_time = datetime.datetime.utcnow()
-    sys.stderr.write(("Autoplot[%3s] Timing: %7.3fs Key: %s\n"
-                      ) % (scriptnum, (end_time - start_time).total_seconds(),
-                           mckey))
+    sys.stderr.write(
+        ("Autoplot[%3s] Timing: %7.3fs Key: %s\n")
+        % (scriptnum, (end_time - start_time).total_seconds(), mckey)
+    )
 
     [mixedobj, df, report] = res
     # Our output content
     content = ""
-    if fmt == 'js' and isinstance(mixedobj, dict):
-        content = ('$("#ap_container").highcharts(%s);'
-                   ) % (json.dumps(mixedobj),)
-    elif fmt in ['js', 'mapbox']:
+    if fmt == "js" and isinstance(mixedobj, dict):
+        content = ('$("#ap_container").highcharts(%s);') % (
+            json.dumps(mixedobj),
+        )
+    elif fmt in ["js", "mapbox"]:
         content = mixedobj
-    elif fmt in ['svg', 'png', 'pdf'] and isinstance(mixedobj, plt.Figure):
+    elif fmt in ["svg", "png", "pdf"] and isinstance(mixedobj, plt.Figure):
         # if our content is a figure, then add some fancy metadata to plot
-        if meta.get('plotmetadata', True):
+        if meta.get("plotmetadata", True):
             plot_metadata(mixedobj, start_time, end_time, scriptnum)
         ram = BytesIO()
         plt.savefig(ram, format=fmt, dpi=dpi)
@@ -223,36 +244,41 @@ def workflow(environ, form, fmt):
         ram.seek(0)
         content = ram.read()
         del ram
-    elif fmt in ['svg', 'png', 'pdf'] and mixedobj is None:
-        return HTTP400, error_image(("plot requested but backend "
-                                     "does not support plots"), fmt)
-    elif fmt == 'txt' and report is not None:
+    elif fmt in ["svg", "png", "pdf"] and mixedobj is None:
+        return (
+            HTTP400,
+            error_image(
+                ("plot requested but backend " "does not support plots"), fmt
+            ),
+        )
+    elif fmt == "txt" and report is not None:
         content = report
-    elif fmt in ['csv', 'xlsx'] and df is not None:
-        if fmt == 'csv':
-            content = df.to_csv(
-                index=(df.index.name is not None), header=True)
-        elif fmt == 'xlsx':
+    elif fmt in ["csv", "xlsx"] and df is not None:
+        if fmt == "csv":
+            content = df.to_csv(index=(df.index.name is not None), header=True)
+        elif fmt == "xlsx":
             # Can't write to ram buffer yet, unimplmented upstream
             (_, tmpfn) = tempfile.mkstemp()
             df.index.name = None
             # Need to set engine as xlsx/xls can't be inferred
-            with pd.ExcelWriter(tmpfn, engine='openpyxl') as writer:
-                df.to_excel(writer,
-                            encoding='latin-1', sheet_name='Sheet1')
-            content = open(tmpfn, 'rb').read()
+            with pd.ExcelWriter(tmpfn, engine="openpyxl") as writer:
+                df.to_excel(writer, encoding="latin-1", sheet_name="Sheet1")
+            content = open(tmpfn, "rb").read()
             os.unlink(tmpfn)
         del df
     else:
-        sys.stderr.write(("Undefined edge case: fmt: %s uri: %s\n"
-                          ) % (fmt, environ.get('REQUEST_URI')))
-        raise Exception("Undefined autoplot action |%s|" % (fmt, ))
+        sys.stderr.write(
+            ("Undefined edge case: fmt: %s uri: %s\n")
+            % (fmt, environ.get("REQUEST_URI"))
+        )
+        raise Exception("Undefined autoplot action |%s|" % (fmt,))
 
     try:
-        mc.set(mckey, content, meta.get('cache', 43200))
+        mc.set(mckey, content, meta.get("cache", 43200))
     except Exception as exp:
-        sys.stderr.write("Exception while writting key: %s\n%s\n" % (mckey,
-                                                                     exp))
+        sys.stderr.write(
+            "Exception while writting key: %s\n%s\n" % (mckey, exp)
+        )
     if isinstance(mixedobj, plt.Figure):
         plt.close()
     return HTTP200, content
@@ -263,7 +289,7 @@ def application(environ, start_response):
     # Parse the request that was sent our way
     fields = parse_formvars(environ)
     # Figure out the format that was requested from us, default to png
-    fmt = fields.get('fmt', 'png')[:6]
+    fmt = fields.get("fmt", "png")[:6]
     # Figure out what our response headers should be
     response_headers = get_response_headers(fmt)
     try:
@@ -271,11 +297,11 @@ def application(environ, start_response):
         status, output = workflow(environ, fields, fmt)
     except Exception as exp:
         status = HTTP500
-        output = handle_error(exp, fmt, environ.get('REQUEST_URI'))
+        output = handle_error(exp, fmt, environ.get("REQUEST_URI"))
     start_response(status, response_headers)
     # python3 mod-wsgi requires returning bytes, so we encode strings
     if sys.version_info[0] > 2 and isinstance(output, str):
-        output = output.encode('UTF-8')
+        output = output.encode("UTF-8")
     return [output]
 
 
