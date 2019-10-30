@@ -8,9 +8,7 @@ Implementation Thoughts:
 4. This uses the flag 'E' for estimated
 
 """
-from __future__ import print_function
 import datetime
-import json
 import sys
 
 import pytz
@@ -54,8 +52,11 @@ def get_hdf(nt, date):
                 nt.sts[station]["lat"],
                 ldate.strftime("%Y-%m-%d"),
             )
-            res = requests.get(uri)
-            j = json.loads(res.content)
+            try:
+                j = requests.get(uri).json()
+            except Exception as exp:
+                LOG.info("JSON stage4 service failed\n%s\n%s", uri, exp)
+                continue
             for entry in j["data"]:
                 rows.append(
                     dict(
