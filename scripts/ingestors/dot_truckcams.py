@@ -69,6 +69,9 @@ def workflow():
         valid = ts.replace(tzinfo=pytz.UTC)
         label = feat["attributes"]["PHOTO_ANUMBER"]
         idnum = feat["attributes"]["PHOTO_UID"]
+        if label is None:
+            LOG.info("null label for PHOTO_UID: %s", idnum)
+            continue
         if idnum <= current.get(label, 0):
             continue
         photourl = feat["attributes"]["PHOTO_URL"]
