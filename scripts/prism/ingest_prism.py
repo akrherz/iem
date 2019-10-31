@@ -32,7 +32,7 @@ def do_download(valid):
     """Make the download happen!"""
     files = []
     for varname in ["ppt", "tmax", "tmin"]:
-        d = "2" if varname == "ppt" else "1"
+        d = "2"  # if varname == "ppt" else "1"
         for classify in ["stable", "provisional", "early"]:
             localfn = valid.strftime(
                 (
