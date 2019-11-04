@@ -17,16 +17,17 @@ LOG = logger()
 P3857 = pyproj.Proj(init="EPSG:3857")
 URI = (
     "https://services.arcgis.com/8lRhdTsQyJpO52F1/ArcGIS/rest/services/"
-    "AVL_Images_View/FeatureServer/0/query?where=1%3D1&objectIds=&time=&"
-    "geometry=&geometryType=esriGeometryEnvelope&inSR=&"
+    "AVL_Images_Past_1HR_View/FeatureServer/0/query?"
+    "where=PHOTO_ANUMBER+IS+NOT+NULL&"
+    "objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&"
     "spatialRel=esriSpatialRelIntersects&resultType=none&distance=0.0&"
     "units=esriSRUnit_Meter&returnGeodetic=false&outFields=*&"
     "returnGeometry=true&multipatchOption=xyFootprint&maxAllowableOffset="
     "&geometryPrecision=&outSR=&datumTransformation=&"
     "applyVCSProjection=false&returnIdsOnly=false&returnUniqueIdsOnly=false&"
     "returnCountOnly=false&returnExtentOnly=false&returnDistinctValues=false&"
-    "orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&"
-    "resultOffset=&resultRecordCount=&returnZ=false&returnM=false&"
+    "orderByFields=PHOTO_UID&groupByFieldsForStatistics=&outStatistics="
+    "&having=&resultOffset=&resultRecordCount=&returnZ=false&returnM=false&"
     "returnExceededLimitFeatures=true&quantizationParameters=&"
     "sqlFormat=none&f=pjson&token="
 )
@@ -69,9 +70,12 @@ def workflow():
         valid = ts.replace(tzinfo=pytz.UTC)
         label = feat["attributes"]["PHOTO_ANUMBER"]
         idnum = feat["attributes"]["PHOTO_UID"]
-        if label is None:
-            LOG.info("null label for PHOTO_UID: %s", idnum)
-            continue
+        LOG.debug(
+            "label: %s current: %s new: %s",
+            label,
+            current.get(label, 0),
+            idnum,
+        )
         if idnum <= current.get(label, 0):
             continue
         photourl = feat["attributes"]["PHOTO_URL"]
