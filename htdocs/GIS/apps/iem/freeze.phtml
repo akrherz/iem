@@ -1,11 +1,11 @@
 <?php
-include("../../../../config/settings.inc.php");
+require_once "../../../../config/settings.inc.php";
 define("IEM_APPID", 46);
-include("../../../../include/myview.php");
+require_once "../../../../include/myview.php";
 $t = new MyView();
 
-include_once "../../../../include/iemmap.php";
-include("../../../../include/database.inc.php");
+require_once "../../../../include/iemmap.php";
+require_once "../../../../include/database.inc.php";
 require_once "../../../../include/forms.php";
 
 $state = isset($_GET['state']) ? xssafe($_GET['state']): '' ;
@@ -110,9 +110,9 @@ $imgurl .= "&title=IEM%20Freeze&";
  $t->jsextra = <<<EOF
 <script Language="JavaScript">
  function resetButtons(){
-   document.panButton.src = "../imagenav/button_pan_off.png";
-   document.zoominButton.src = "../imagenav/button_zoomin_off.png";
-   document.zoomoutButton.src = "../imagenav/button_zoomout_off.png";
+   document.panButton.src = "/images/button_pan_off.png";
+   document.zoominButton.src = "/images/button_zoomin_off.png";
+   document.zoomoutButton.src = "/images/button_zoomout_off.png";
  }
 </script>
 EOF;
@@ -164,12 +164,12 @@ $t->content = <<<EOF
 <div class="row">
 
 <div class="col-md-3"><b>Map Controls:</b><br />
-<img src="../imagenav/button_zoomin_off.png" name="zoominButton" alt="Zoom In"
-  onClick="javascript: resetButtons(); document.zoominButton.src = '../imagenav/button_zoomin_on.png'; document.myform.zoom.value = -2;">
-<img src="../imagenav/button_pan_on.png" name="panButton" alt="Pan"
-  onClick="javascript: resetButtons(); document.panButton.src = '../imagenav/button_pan_on.png'; document.myform.zoom.value = 1;">
-<img src="../imagenav/button_zoomout_off.png" name="zoomoutButton" alt="Zoom Out"
-  onClick="javascript: resetButtons(); document.zoomoutButton.src = '../imagenav/button_zoomout_on.png'; document.myform.zoom.value = 2;">
+<img src="/images/button_zoomin_off.png" name="zoominButton" alt="Zoom In"
+  onClick="javascript: resetButtons(); document.zoominButton.src = '/images/button_zoomin_on.png'; document.myform.zoom.value = -2;">
+<img src="/images/button_pan_on.png" name="panButton" alt="Pan"
+  onClick="javascript: resetButtons(); document.panButton.src = '/images/button_pan_on.png'; document.myform.zoom.value = 1;">
+<img src="/images/button_zoomout_off.png" name="zoomoutButton" alt="Zoom Out"
+  onClick="javascript: resetButtons(); document.zoomoutButton.src = '/images/button_zoomout_on.png'; document.myform.zoom.value = 2;">
 <a href="{$uri}">Reset</a>
 </div>
 

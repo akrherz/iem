@@ -1,5 +1,4 @@
 """Create a plot of SMOS data for either 0 or 12z"""
-from __future__ import print_function
 import sys
 import datetime
 
@@ -8,7 +7,9 @@ import pytz
 import matplotlib.cm as cm
 from pandas.io.sql import read_sql
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
 def makeplot(ts, routes="ac"):
@@ -37,12 +38,10 @@ def makeplot(ts, routes="ac"):
     )
 
     if df.empty:
-        print(
-            ("Did not find SMOS data for: %s-%s")
-            % (
-                ts - datetime.timedelta(hours=6),
-                ts + datetime.timedelta(hours=6),
-            )
+        LOG.info(
+            "Did not find SMOS data for: %s-%s",
+            ts - datetime.timedelta(hours=6),
+            ts + datetime.timedelta(hours=6),
         )
         return
 

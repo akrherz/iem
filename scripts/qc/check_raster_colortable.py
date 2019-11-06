@@ -1,12 +1,13 @@
 """ Verify that a RASTER's colortable matches documentation
 """
-from __future__ import print_function
 
 import numpy as np
 from pandas.io.sql import read_sql
 import requests
 from PIL import Image
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
 def main():
@@ -42,21 +43,20 @@ def main():
     # Read the color table
     img = Image.open("/tmp/check_raster.png")
     flat = np.array(img.getpalette())
-    palette = np.reshape(flat, (flat.shape[0] / 3, 3))
+    # pylint: disable=unsubscriptable-object
+    palette = np.reshape(flat, (int(flat.shape[0] / 3), 3))
     for coloridx, rgb in enumerate(palette):
         row = df.loc[coloridx]
         if rgb[0] != row["r"] or rgb[1] != row["g"] or rgb[2] != row["b"]:
-            print(
-                ("Mismatch coloridx:%s PNG: %s,%s,%s Docs: %s,%s,%s")
-                % (
-                    coloridx,
-                    rgb[0],
-                    rgb[1],
-                    rgb[2],
-                    row["r"],
-                    row["g"],
-                    row["b"],
-                )
+            LOG.info(
+                "Mismatch coloridx:%s PNG: %s,%s,%s Docs: %s,%s,%s",
+                coloridx,
+                rgb[0],
+                rgb[1],
+                rgb[2],
+                row["r"],
+                row["g"],
+                row["b"],
             )
 
 

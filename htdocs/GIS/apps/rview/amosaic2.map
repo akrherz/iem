@@ -31,10 +31,9 @@ WEB
   MAXSCALE 40000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  LOG "/var/webtmp/warning0.log"
   METADATA
    "wms_title" "IEM WMS Service"
-   "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.wms?map=/opt/iem/htdocs/GIS/apps/warning0/warning0.map&amp;"
+   "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv.wms?map=/opt/iem/htdocs/GIS/apps/rview/amosaic2.map&amp;"
    "wms_srs" "EPSG:4269"
    "wms_abstract" "Ba Ba Ba"
 #   "wms_fees" "None"

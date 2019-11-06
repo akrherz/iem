@@ -1,7 +1,7 @@
 <?php 
-include_once "../../../../config/settings.inc.php";
+require_once "../../../../config/settings.inc.php";
 
-include_once "../../../../include/myview.php";
+require_once "../../../../include/myview.php";
 
 $OL = "4.1.0";
 $t = new MyView();

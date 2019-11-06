@@ -34,7 +34,6 @@ WEB
   MAXSCALE 40000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  LOG "/var/webtmp/fancy.log"
 END
 
 
