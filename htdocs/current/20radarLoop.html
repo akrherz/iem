@@ -39,7 +39,7 @@ dwell_step = 1;
 end_dwell_multipler   = dwell_multipler;
 start_dwell_multipler = dwell_multipler;
 current_image = first_image;     //number of the current image
-timeID = null;
+var timeID = null;
 status = 0;                      // 0-stopped, 1-playing
 play_mode = 0;                   // 0-normal, 1-loop, 2-sweep
 size_valid = 0;
@@ -111,7 +111,7 @@ function animate_fwd()
    if (current_image == last_image)   delay_time = end_dwell_multipler*delay;
  
    //== call "animate_fwd()" again after a set time (delay_time) has elapsed ==
-   var timeID = setTimeout("animate_fwd()", delay_time);
+   timeID = setTimeout("animate_fwd()", delay_time);
 }
  
  
@@ -154,7 +154,7 @@ function animate_rev()
    if (current_image == last_image)   delay_time = end_dwell_multipler*delay;
  
    //== call "animate_rev()" again after a set amount of time (delay_time) has elapsed ==
-   var timeID = setTimeout("animate_rev()", delay_time);
+   timeID = setTimeout("animate_rev()", delay_time);
 }
  
  
