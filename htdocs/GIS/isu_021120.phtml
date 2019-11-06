@@ -1,6 +1,6 @@
 <?php 
-include("../../config/settings.inc.php");
-include_once "../../include/myview.php";
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 
 $t->thispage = "gis-homepage";
@@ -26,7 +26,7 @@ observations in near real-time.</p>
 <br>Based on an Iowa Tornado reports archive, this web application allows you
 the ability to dynamically plot and query tornado reports.</p>
 
-<p><b><a href="/cgi-bin/mapserv/mapserv?map=/opt/iem/htdocs/GIS/apps/warning0/warning0.map">Example 3</a> NWS Archive Warnings with National Composite NEXRAD</b>
+<p><b>Example 3 NWS Archive Warnings with National Composite NEXRAD</b>
 <br>NWS severe bulletins are ingested into the IEM spatial database in real-time
 and combined with a recent national RADAR mosiac.</p>
 

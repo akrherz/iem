@@ -2,15 +2,15 @@
 
 Called from RUN_2AM.sh script
 """
-from __future__ import print_function
 import os
 import subprocess
 import stat
 import datetime
 
-from pyiem.util import get_dbconn
+from pandas.io.sql import read_sql
+from pyiem.util import get_dbconn, logger
 
-MESOSITE = get_dbconn("mesosite", user="nobody")
+LOG = logger()
 CACHEDIR = "/mesonet/share/windrose/climate/yearly"
 
 
@@ -33,28 +33,32 @@ def do_network(network):
 
 def main():
     """Main"""
-    mcursor = MESOSITE.cursor()
     now = datetime.datetime.now()
-    mcursor.execute(
-        """SELECT max(id), network from stations
-        WHERE (network ~* 'ASOS' or network = 'AWOS' or network ~* 'DCP')
-        and online = 't' GROUP by network ORDER by random()"""
-    )
-    for row in mcursor:
-        network = row[1]
-        testfn = "%s/%s_yearly.png" % (CACHEDIR, row[0])
+    with get_dbconn("mesosite") as pgconn:
+        df = read_sql(
+            """SELECT max(id) as station, network from stations
+            WHERE (network ~* 'ASOS' or network = 'AWOS' or network ~* 'DCP')
+            and online = 't' GROUP by network ORDER by random()""",
+            pgconn,
+            index_col="network",
+        )
+    for network, row in df.iterrows():
+        station = row["station"]
+        testfn = "%s/%s_yearly.png" % (CACHEDIR, station)
         if not os.path.isfile(testfn):
-            print("Driving network %s because no file" % (network,))
+            LOG.info(
+                "Driving network %s because no file for %s", network, station
+            )
             do_network(network)
-            return
-        else:
-            mtime = os.stat(testfn)[stat.ST_MTIME]
-            age = float(now.strftime("%s")) - mtime
-            # 250 days in seconds, enough to cover the number of networks
-            if age > (250 * 24 * 60 * 60):
-                print("Driving network %s because of age!" % (network,))
-                do_network(network)
-                return
+            break
+        mtime = os.stat(testfn)[stat.ST_MTIME]
+        age = float(now.strftime("%s")) - mtime
+        # 250 days in seconds, enough to cover the number of networks
+        if age < (250 * 24 * 60 * 60):
+            continue
+        LOG.info("Driving network %s because of age!", network)
+        do_network(network)
+        break
 
 
 if __name__ == "__main__":

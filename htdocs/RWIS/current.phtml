@@ -12,15 +12,6 @@
  $network = isset($_GET['network']) ? xssafe($_GET['network']): 'IA_RWIS';
  $t->title = "RWIS Sortable Currents";
  $t->refresh = 600;
- $t->headextra = <<<EOF
- <script language="JavaScript" type="text/javascript">
-<!--//BEGIN Script
-function new_window(url) {
- link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
-} 
-//END Script-->
-</script>
-EOF;
  $t->thispage= "current-sort";
 $mesosite = iemdb('mesosite');
   
@@ -170,8 +161,6 @@ while (list ($key, $val) = each ($skippedStations) ) {
 	$format = "%b-%d-%Y";
 	$table .= ">". strftime($format, $parts["ts"]) ."</td><th align='center' colspan='9'>Site Offline</th></tr>\n";
 }
-
-$c = "javascript:new_window('/GIS/apps/php/currents.phtml?layers[]=radar&layers[]=labels&network=".$network."&var=";
 
 $content = <<<EOF
 <ol class="breadcrumb">

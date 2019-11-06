@@ -2,8 +2,9 @@
   Check to make sure the station metadata is reasonable!
 called from RUN_MIDNIGHT.sh
 """
-from __future__ import print_function
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
 def main():
@@ -19,8 +20,7 @@ def main():
     """
     )
     for row in mcursor:
-        print("check_station_geom.py LOC QC FAIL")
-        print(row)
+        LOG.info("QC FAIL %s %s %s %s %s", *row)
 
 
 if __name__ == "__main__":

@@ -1,8 +1,8 @@
 <?php
-include_once("../../../../config/settings.inc.php");
-include_once "../../../../include/iemmap.php";
-include_once "../../../../include/database.inc.php";
-include("../../../../include/network.php");
+require_once "../../../../config/settings.inc.php";
+require_once "../../../../include/iemmap.php";
+require_once "../../../../include/database.inc.php";
+require_once "../../../../include/network.php";
 $nt = new NetworkTable("ISUSM");
 $ISUAGcities = $nt->table;
 
@@ -140,7 +140,7 @@ if (strlen($direct) > 0) {
   header("Content-type: image/png");
   $img->saveImage();
 } else { 
-	$url = $img->saveWebImage();
-	?>
-<img src="<?php echo $url; ?>" border=1>
-<?php } ?>
+    $url = $img->saveWebImage();
+	echo sprintf("<img src=\"%s\" border=\"1\">", $url);
+}
+?>

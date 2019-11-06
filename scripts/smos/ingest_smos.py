@@ -1,5 +1,4 @@
 """Ingest SMOS data, please!"""
-from __future__ import print_function
 import glob
 import os
 import re
@@ -7,8 +6,9 @@ import datetime
 from io import StringIO
 
 import pytz
-from pyiem.util import get_dbconn, ncopen
+from pyiem.util import get_dbconn, ncopen, logger
 
+LOG = logger()
 TSTAMP = re.compile("([0-9]{8}T[0-9]{6})")
 
 
@@ -75,7 +75,7 @@ def lookforfiles():
     for fn in files:
         ts = fn2datetime(fn)
         if ts is None:
-            print("ingest_smos: fn2datetime fail: %s" % (fn,))
+            LOG.info("ingest_smos: fn2datetime fail: %s", fn)
             continue
         scursor.execute(
             """
@@ -85,7 +85,6 @@ def lookforfiles():
         )
         row = scursor.fetchone()
         if row is None:
-            # print "INGEST FILE!", file
             consume(scursor, fn, ts)
             scursor.execute(
                 """

@@ -109,12 +109,12 @@ function animate_fwd()
  
    document.animation.src = theImages[current_image-first_image].src;   //display image onto screen
 
-   delay_time = delay;
+   var delay_time = delay;
    if ( current_image == first_image) delay_time = start_dwell_multipler*delay;
    if (current_image == last_image)   delay_time = end_dwell_multipler*delay;
  
    //== call "animate_fwd()" again after a set time (delay_time) has elapsed ==
-   timeID = setTimeout("animate_fwd()", delay_time);
+   var vtimeID = setTimeout("animate_fwd()", delay_time);
 }
  
  
@@ -152,12 +152,12 @@ function animate_rev()
  
    document.animation.src = theImages[current_image-first_image].src;   //display image onto screen
 
-   delay_time = delay;
+   var delay_time = delay;
    if ( current_image == first_image) delay_time = start_dwell_multipler*delay;
    if (current_image == last_image)   delay_time = end_dwell_multipler*delay;
  
    //== call "animate_rev()" again after a set amount of time (delay_time) has elapsed ==
-   timeID = setTimeout("animate_rev()", delay_time);
+   var timeID = setTimeout("animate_rev()", delay_time);
 }
  
  
@@ -195,7 +195,7 @@ function incrementImage(number)
          if (number > last_image) number = first_image;
    }
  
-   current_image = number;
+   var current_image = number;
    document.animation.src = theImages[current_image-first_image].src;   //display image
 }
 //===> Decrement to next image
@@ -212,7 +212,7 @@ function decrementImage(number)
          if (number < first_image) number = last_image;
    }
  
-   current_image = number;
+   var current_image = number;
    document.animation.src = theImages[current_image-first_image].src;   //display image
 }
  
@@ -322,45 +322,45 @@ function animation()
         <TD BGCOLOR="#AAAAAA" NOWRAP ALIGN=CENTER VALIGN=MIDDLE>
         <FONT SIZE=-1 COLOR="#3300CC"> Loop Mode:</FONT><BR>
                       <A HREF="JavaScript: func()" onClick="change_mode(1);fwd()"><IMG BORDER=0 WIDTH=29
-HEIGHT=24 SRC="/icons/nrm_button.gif" ALT="Normal"></A>
+HEIGHT=24 SRC="/images/nrm_button.gif" ALT="Normal"></A>
                       <A HREF="JavaScript: func()" onClick="sweep()"><IMG BORDER=0 WIDTH=29 HEIGHT=24
-SRC="/icons/swp_button.gif" ALT="Sweep"></A><BR> 
+SRC="/images/swp_button.gif" ALT="Sweep"></A><BR> 
         <HR WIDTH="70%" SIZE=2>
                       
         <FONT SIZE=-1 COLOR="#3300CC">Animate Frames:</FONT><BR>
                       <A HREF="JavaScript: func()" onClick="change_mode(1);rev()"><IMG BORDER=0 WIDTH=35
-HEIGHT=35 SRC="/icons/rev_button.gif" ALT="REV"></A>
+HEIGHT=35 SRC="/images/rev_button.gif" ALT="REV"></A>
                       <A HREF="JavaScript: func()" onClick="stop()"><IMG BORDER=0 WIDTH=35 HEIGHT=35
-SRC="/icons/stp_button.gif" ALT="STOP"></A>
+SRC="/images/stp_button.gif" ALT="STOP"></A>
                       <A HREF="JavaScript: func()" onClick="change_mode(1);fwd()"><IMG BORDER=0 WIDTH=35
-HEIGHT=35 SRC="/icons/fwd_button.gif" ALT="FWD"></A><BR> 
+HEIGHT=35 SRC="/images/fwd_button.gif" ALT="FWD"></A><BR> 
         <HR WIDTH="70%" SIZE=2>
 
         <FONT SIZE=-1 COLOR="#3300CC"> Dwell First:</FONT><BR>
                       <A HREF="JavaScript: func()" onClick="change_start_dwell(-dwell_step)"><IMG BORDER=0
-WIDTH=29 HEIGHT=24 SRC="/icons/dw1_minus.gif" ALT="dec"></A>
+WIDTH=29 HEIGHT=24 SRC="/images/dw1_minus.gif" ALT="dec"></A>
                       <A HREF="JavaScript: func()" onClick="change_start_dwell(dwell_step)"><IMG BORDER=0
-WIDTH=29 HEIGHT=24 SRC="/icons/dw1_plus.gif" ALT="inc"></A><BR>
+WIDTH=29 HEIGHT=24 SRC="/images/dw1_plus.gif" ALT="inc"></A><BR>
 
         <FONT SIZE=-1 COLOR="#3300CC"> Dwell Last:</FONT><BR>
                       <A HREF="JavaScript: func()" onClick="change_end_dwell(-dwell_step)"><IMG BORDER=0
-WIDTH=29 HEIGHT=24 SRC="/icons/dw2_minus.gif" ALT="dec"></A>
+WIDTH=29 HEIGHT=24 SRC="/images/dw2_minus.gif" ALT="dec"></A>
                       <A HREF="JavaScript: func()" onClick="change_end_dwell(dwell_step)"><IMG BORDER=0
-WIDTH=29 HEIGHT=24 SRC="/icons/dw2_plus.gif" ALT="inc"></A><BR> 
+WIDTH=29 HEIGHT=24 SRC="/images/dw2_plus.gif" ALT="inc"></A><BR> 
         <HR WIDTH="70%" SIZE=2>
                       
         <FONT SIZE=-1 COLOR="#3300CC">Adjust Speed:</FONT><BR>
                       <A HREF="JavaScript: func()" onClick="change_speed(delay_step)"><IMG BORDER=0 WIDTH=35
-HEIGHT=35 SRC="/icons/slw_button.gif" ALT="--"></A>
+HEIGHT=35 SRC="/images/slw_button.gif" ALT="--"></A>
                       <A HREF="JavaScript: func()" onClick="change_speed(-delay_step)"><IMG BORDER=0 WIDTH=35
-HEIGHT=35 SRC="/icons/fst_button.gif" ALT="++"></A><BR> 
+HEIGHT=35 SRC="/images/fst_button.gif" ALT="++"></A><BR> 
         <HR WIDTH="70%" SIZE=2>
                       
         <FONT SIZE=-1 COLOR="#3300CC">Advance One:</FONT><BR>
                       <A HREF="JavaScript: func()" onClick="decrementImage(--current_image)"><IMG BORDER=0
-WIDTH=35 HEIGHT=35 SRC="/icons/mns_button.gif" ALT="-1"></A>
+WIDTH=35 HEIGHT=35 SRC="/images/mns_button.gif" ALT="-1"></A>
                       <A HREF="JavaScript: func()" onClick="incrementImage(++current_image)"><IMG BORDER=0
-WIDTH=35 HEIGHT=35 SRC="/icons/pls_button.gif" ALT="+1"></A>
+WIDTH=35 HEIGHT=35 SRC="/images/pls_button.gif" ALT="+1"></A>
 
         <HR WIDTH="70%" SIZE=2>
                       
