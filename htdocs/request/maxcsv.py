@@ -4,14 +4,14 @@
 first four columns need to be
 ID,Station,Latitude,Longitude
 """
-import cgi
 import datetime
 import sys
 
 import pytz
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn, ssw
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn
 
 # DOT plows
 # RWIS sensor data
@@ -155,9 +155,7 @@ def do_ahps_obs(nwsli):
         (nwsli,),
     )
     if cursor.rowcount == 0:
-        ssw("Content-type: text/plain\n\n")
-        ssw("NO DATA")
-        sys.exit()
+        return "NO DATA"
     plabel = cursor.fetchone()[1]
     slabel = cursor.fetchone()[1]
     df = read_sql(
@@ -195,16 +193,16 @@ def do_ahps_obs(nwsli):
     df[plabel] = df["primary_value"]
     df[slabel] = df["secondary_value"]
     # we have to do the writing from here
-    ssw("Content-type: text/plain\n\n")
-    ssw("Observed Data:,,\n")
-    ssw("|Date|,|Stage|,|--Flow-|\n")
+    res = "Observed Data:,,\n"
+    res += "|Date|,|Stage|,|--Flow-|\n"
     odf = df[df["type"] == "O"]
     for _, row in odf.iterrows():
-        ssw(
-            "%s,%.2fft,%.1fkcfs\n"
-            % (row["Time"], row["Stage[ft]"], row["Flow[kcfs]"])
+        res += "%s,%.2fft,%.1fkcfs\n" % (
+            row["Time"],
+            row["Stage[ft]"],
+            row["Flow[kcfs]"],
         )
-    sys.exit(0)
+    return res
 
 
 def do_ahps_fx(nwsli):
@@ -277,20 +275,18 @@ def do_ahps_fx(nwsli):
     df[plabel] = df["primary_value"]
     df[slabel] = df["secondary_value"]
     # we have to do the writing from here
-    ssw("Content-type: text/plain\n\n")
-    ssw(
-        "Forecast Data (Issued %s UTC):,\n"
-        % (generationtime.strftime("%m-%d-%Y %H:%M:%S"),)
+    res = "Forecast Data (Issued %s UTC):,\n" % (
+        generationtime.strftime("%m-%d-%Y %H:%M:%S"),
     )
-    ssw("|Date|,|Stage|,|--Flow-|\n")
+    res += "|Date|,|Stage|,|--Flow-|\n"
     odf = df[df["type"] == "F"]
     for _, row in odf.iterrows():
-        ssw(
-            "%s,%.2fft,%.1fkcfs\n"
-            % (row["Time"], row["Stage[ft]"], row["Flow[kcfs]"])
+        res += "%s,%.2fft,%.1fkcfs\n" % (
+            row["Time"],
+            row["Stage[ft]"],
+            row["Flow[kcfs]"],
         )
-
-    sys.exit(0)
+    return res
 
 
 def feet(val, suffix="'"):
@@ -330,9 +326,7 @@ def do_ahps(nwsli):
         (nwsli,),
     )
     if cursor.rowcount == 0:
-        ssw("Content-type: text/plain\n\n")
-        ssw("NO DATA")
-        sys.exit()
+        return "NO DATA"
     row = cursor.fetchone()
     generationtime = row[2]
     y = "{}".format(generationtime.year)
@@ -347,9 +341,7 @@ def do_ahps(nwsli):
         (nwsli,),
     )
     if cursor.rowcount == 0:
-        ssw("Content-type: text/plain\n\n")
-        ssw("NO DATA")
-        sys.exit()
+        return "NO DATA"
     lookupkey = 14
     for _row in cursor:
         if _row[1].find("[ft]") > 0:
@@ -407,45 +399,39 @@ def do_ahps(nwsli):
     df["forecaststage"] = df["primary_value"]
     # df[slabel] = df['secondary_value']
     # we have to do the writing from here
-    ssw("Content-type: text/plain\n\n")
-    ssw(
-        (
-            "locationid,locationname,latitude,longitude,obtime,obstage,"
-            "obstage2,obstagetext,forecasttime,forecaststage,forecaststage1,"
-            "forecaststage2,forecaststage3,highestvalue,highestvalue2,"
-            "highestvaluedate\n"
-        )
+    res = (
+        "locationid,locationname,latitude,longitude,obtime,obstage,"
+        "obstage2,obstagetext,forecasttime,forecaststage,forecaststage1,"
+        "forecaststage2,forecaststage3,highestvalue,highestvalue2,"
+        "highestvaluedate\n"
     )
-    ssw(",,,,,,,,,,,,,,,\n,,,,,,,,,,,,,,,\n")
+    res += ",,,,,,,,,,,,,,,\n,,,,,,,,,,,,,,,\n"
 
     maxrow = df.sort_values("forecaststage", ascending=False).iloc[0]
     for idx, row in df.iterrows():
         fs = (
             row["forecaststage"] if not pd.isnull(row["forecaststage"]) else ""
         )
-        ssw(
-            ("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n")
-            % (
-                nwsli if idx == 0 else "",
-                stationname if idx == 0 else "",
-                latitude if idx == 0 else "",
-                longitude if idx == 0 else "",
-                row["obtime"],
-                row["obstage"],
-                feet(row["obstage"]),
-                "Unknown" if idx == 0 else "",
-                (row["forecasttime"] if row["forecasttime"] != "NaT" else ""),
-                feet(row["forecaststage"], "ft"),
-                fs,
-                feet(row["forecaststage"]),
-                fs,
-                "" if idx > 0 else maxrow["forecaststage"],
-                "" if idx > 0 else feet(maxrow["forecaststage"]),
-                "" if idx > 0 else maxrow["forecasttime"],
-            )
+        res += ("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n") % (
+            nwsli if idx == 0 else "",
+            stationname if idx == 0 else "",
+            latitude if idx == 0 else "",
+            longitude if idx == 0 else "",
+            row["obtime"],
+            row["obstage"],
+            feet(row["obstage"]),
+            "Unknown" if idx == 0 else "",
+            (row["forecasttime"] if row["forecasttime"] != "NaT" else ""),
+            feet(row["forecaststage"], "ft"),
+            fs,
+            feet(row["forecaststage"]),
+            fs,
+            "" if idx > 0 else maxrow["forecaststage"],
+            "" if idx > 0 else feet(maxrow["forecaststage"]),
+            "" if idx > 0 else maxrow["forecasttime"],
         )
 
-    sys.exit(0)
+    return res
 
 
 def router(appname):
@@ -457,11 +443,11 @@ def router(appname):
     # elif appname == 'isusm':
     #    df = do_isusm()
     if appname.startswith("ahpsobs_"):
-        do_ahps_obs(appname[8:].upper())  # we write ourselves and exit
+        df = do_ahps_obs(appname[8:].upper())  # we write ourselves and exit
     elif appname.startswith("ahpsfx_"):
-        do_ahps_fx(appname[7:].upper())  # we write ourselves and exit
+        df = do_ahps_fx(appname[7:].upper())  # we write ourselves and exit
     elif appname.startswith("ahps_"):
-        do_ahps(appname[5:].upper())  # we write ourselves and exit
+        df = do_ahps(appname[5:].upper())  # we write ourselves and exit
     elif appname == "iaroadcond":
         df = do_iaroadcond()
     elif appname == "iarwis":
@@ -473,25 +459,21 @@ def router(appname):
     elif appname == "kcrgcitycam":
         df = do_webcams("KCRG")
     else:
-        sys.stdout.write("""ERROR, unknown report specified""")
-        sys.exit()
+        df = """ERROR, unknown report specified"""
     return df
 
 
-def main():
+def application(environ, start_response):
     """Do Something"""
-    form = cgi.FieldStorage()
-    appname = form.getfirst("q")
-    df = router(appname)
-    ssw("Content-type: text/plain\n\n")
-    ssw(df.to_csv(None, index=False))
-    ssw("\n")
+    form = parse_formvars(environ)
+    appname = form.get("q")
+    res = router(appname)
+    start_response("200 OK", [("Content-type", "text/plain")])
+    if isinstance(res, pd.DataFrame):
+        return [res.to_csv(None, index=False).encode("ascii")]
+    return [res.encode("ascii")]
 
 
 def test_hml():
     """Can we do it?"""
     do_ahps("DBQI4")
-
-
-if __name__ == "__main__":
-    main()

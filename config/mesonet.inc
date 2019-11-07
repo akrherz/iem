@@ -322,7 +322,8 @@
   </Directory>
 
   <Directory "/opt/iem/htdocs/current">
-    AddHandler cgi-script .py
+    WSGIProcessGroup iemwsgi_ap
+    AddHandler wsgi-script .py
     Options +ExecCGI
 
 	RewriteRule live.php(.*)$ live.py$1
@@ -330,7 +331,8 @@
   </Directory>
 
   <Directory "/opt/iem/htdocs/other">
-    AddHandler cgi-script .py
+    WSGIProcessGroup iemwsgi_ap
+    AddHandler wsgi-script .py
     Options +ExecCGI
 
     RewriteRule kymn.phtml current.phtml?network=KYMN
@@ -358,7 +360,8 @@
   </Directory>
 
   <Directory "/opt/iem/htdocs/request">
-    AddHandler cgi-script .py
+    WSGIProcessGroup iemwsgi_ap
+    AddHandler wsgi-script .py
     Options +ExecCGI
     RewriteRule maxcsv/(.*).txt$ maxcsv.py?q=$1
 

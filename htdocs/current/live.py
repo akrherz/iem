@@ -5,16 +5,15 @@ URIs look like so:
     /current/live.py?id=KCRG-006
     /current/live/KCRG-006.jpg
 """
-import cgi
 from io import BytesIO
-import traceback
 import datetime
 
 import memcache
 from PIL import Image, ImageDraw
 import requests
 from requests.auth import HTTPDigestAuth
-from pyiem.util import get_properties, get_dbconn, ssw
+from paste.request import parse_formvars
+from pyiem.util import get_properties, get_dbconn
 
 
 def fetch(cid):
@@ -86,10 +85,10 @@ def workflow(cid):
     return res
 
 
-def main():
+def application(environ, start_response):
     """Do Fun Things"""
-    form = cgi.FieldStorage()
-    cid = form.getfirst("id", "KCCI-016")[:10]  # Default to ISU Ames
+    form = parse_formvars(environ)
+    cid = form.get("id", "KCCI-016")[:10]  # Default to ISU Ames
     imagedata = workflow(cid)
     if imagedata is None:
         # TOOD: make a sorry image
@@ -100,12 +99,5 @@ def main():
         image.save(buf, format="JPEG")
         imagedata = buf.getvalue()
 
-    ssw("Content-type: image/jpeg\n\n")
-    ssw(imagedata)
-
-
-if __name__ == "__main__":
-    try:
-        main()
-    except Exception as exp:  # noqa
-        traceback.print_exc()
+    start_response("200 OK", [("Content-type", "image/jpeg")])
+    return [imagedata]

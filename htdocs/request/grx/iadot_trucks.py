@@ -5,7 +5,7 @@
 import datetime
 
 import memcache
-from pyiem.util import get_dbconn, ssw
+from pyiem.util import get_dbconn
 
 URLBASE = "https://mesonet.agron.iastate.edu/data/camera/idot_trucks"
 ARROWS = "https://mesonet.agron.iastate.edu/request/grx/arrows.png"
@@ -60,9 +60,9 @@ Font: 1, 11, 1, "Courier New"
     return res
 
 
-def main():
+def application(_environ, start_response):
     """ Go Main Go """
-    ssw("Content-type: text/plain\n\n")
+    start_response("200 OK", [("Content-type", "text/plain")])
 
     mckey = "/request/grx/iadot_trucks.txt"
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
@@ -70,8 +70,4 @@ def main():
     if not res:
         res = produce_content()
         mc.set(mckey, res, 300)
-    ssw(res)
-
-
-if __name__ == "__main__":
-    main()
+    return [res.encode("ascii")]

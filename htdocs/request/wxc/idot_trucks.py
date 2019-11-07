@@ -3,7 +3,7 @@
 import datetime
 import memcache
 
-from pyiem.util import get_dbconn, ssw
+from pyiem.util import get_dbconn
 
 
 def get_data():
@@ -46,9 +46,9 @@ def get_data():
     return data
 
 
-def main():
+def application(_environ, start_response):
     """Go Main Go"""
-    ssw("Content-type: text/plain\n\n")
+    start_response("200 OK", [("Content-type", "text/plain")])
 
     mckey = "/request/wxc/idot_trucks.txt"
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
@@ -56,9 +56,4 @@ def main():
     if not res:
         res = get_data()
         mc.set(mckey, res, 300)
-
-    ssw(res)
-
-
-if __name__ == "__main__":
-    main()
+    return [res.encode("ascii")]
