@@ -1,6 +1,6 @@
 # BSD Licensed, Copyright (c) 2006-2010 TileCache Contributors
 
-from TileCache.base import Request, Capabilities
+from TileCache.base import Request, Capabilities, TileCacheException
 import TileCache.Layer as Layer
 
 
@@ -20,34 +20,29 @@ class TMS(Request):
             layer = self.getLayer(parts[1])
             if len(parts) < 3:
                 return self.layerCapabilities(host, layer)
-            else:
-                parts[-1] = parts[-1].split(".")[0]
-                tile = None
-                if (
-                    layer.tms_type == "google"
-                    or fields.get("type") == "google"
-                ):
-                    res = layer.resolutions[int(parts[2])]
-                    maxY = (
-                        int(
-                            round(
-                                (layer.bbox[3] - layer.bbox[1])
-                                / (res * layer.size[1])
-                            )
+            if parts[2] == "{z}":
+                raise TileCacheException("{z} was provided instead of value.")
+            parts[-1] = parts[-1].split(".")[0]
+            tile = None
+            if layer.tms_type == "google" or fields.get("type") == "google":
+                res = layer.resolutions[int(parts[2])]
+                maxY = (
+                    int(
+                        round(
+                            (layer.bbox[3] - layer.bbox[1])
+                            / (res * layer.size[1])
                         )
-                        - 1
                     )
-                    tile = Layer.Tile(
-                        layer,
-                        int(parts[3]),
-                        maxY - int(parts[4]),
-                        int(parts[2]),
-                    )
-                else:
-                    tile = Layer.Tile(
-                        layer, int(parts[3]), int(parts[4]), int(parts[2])
-                    )
-                return tile
+                    - 1
+                )
+                tile = Layer.Tile(
+                    layer, int(parts[3]), maxY - int(parts[4]), int(parts[2])
+                )
+            else:
+                tile = Layer.Tile(
+                    layer, int(parts[3]), int(parts[4]), int(parts[2])
+                )
+            return tile
 
     def serverCapabilities(self, host):
         return Capabilities(

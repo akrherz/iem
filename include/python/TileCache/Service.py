@@ -7,6 +7,7 @@ import email
 import configparser
 
 from six import string_types
+from paste.request import parse_formvars
 from TileCache.base import (
     TileCacheException,
     TileCacheLayerNotFoundException,
@@ -223,7 +224,6 @@ class Service(object):
 
 def wsgiHandler(environ, start_response, service):
     """ This is the WSGI handler """
-    from paste.request import parse_formvars
 
     host = ""
     path_info = environ.get("PATH_INFO", "")
