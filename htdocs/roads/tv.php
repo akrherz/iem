@@ -35,24 +35,6 @@ $map->setsize(720, 496);
 
 $img = $map->prepareImage();
 
-/*
-if ($metroview)
-{
-  $background = $map->getlayerbyname("woiback");
-} else
-{
-  $background = $map->getlayerbyname("ia_woiback");
-}
-$background->set("status", MS_ON);
-$background->draw($img);
-*/
-
-/*
-$counties = $map->getlayerbyname("counties");
-$counties->set("status", MS_ON);
-$counties->draw($img);
-*/
-
 $states = $map->getlayerbyname("states");
 $states->set("status", MS_ON);
 $states->draw($img);

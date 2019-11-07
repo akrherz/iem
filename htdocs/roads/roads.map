@@ -214,62 +214,6 @@ LAYER
  STATUS OFF
 END
 
-LAYER
- NAME ktivback
- DATA "images/4326/ktiv.tif"
- PROJECTION
-  "init=epsg:4326"
- END
- METADATA
-  "show_in_legend" "0"
- END
- TYPE RASTER
- STATUS OFF
- PROCESSING "CLOSE_CONNECTION=NORMAL"
-END
-
-LAYER
- NAME kcciback
- DATA "images/4326/kcci.tif"
- PROJECTION
-  "init=epsg:4326"
- END
- METADATA
-  "show_in_legend" "0"
- END
- TYPE RASTER
- STATUS OFF
- PROCESSING "CLOSE_CONNECTION=NORMAL"
-END
-
-LAYER
- NAME woi-metro
- DATA "images/26915/woi-metro.tif"
- PROCESSING "CLOSE_CONNECTION=NORMAL"
- PROJECTION
-  "init=epsg:26915"
- END
- METADATA
-  "show_in_legend" "0"
- END
- TYPE RASTER
- STATUS OFF
-END
-
-LAYER
- NAME woi-iowa
- DATA "images/26915/woi-iowa.tif"
- PROCESSING "CLOSE_CONNECTION=NORMAL"
- PROJECTION
-  "init=epsg:26915"
- END
- METADATA
-  "show_in_legend" "0"
- END
- TYPE RASTER
- STATUS OFF
-END
-
 
 LAYER
  NAME dsmback

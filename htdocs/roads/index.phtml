@@ -1,7 +1,7 @@
 <?php 
-require '../../config/settings.inc.php';
+require_once '../../config/settings.inc.php';
 define("IEM_APPID", 150);
-include_once('../../include/myview.php');
+require_once '../../include/myview.php';
 
 $t = new MyView();
 $t->thispage = 'roads-main';
@@ -29,8 +29,8 @@ $tm = time();
 <strong>Links:</strong>
 <ul>
  <li><a href="http://www.511ia.org/">Iowa DOT 511 Page</a></li>
- <li><a href="http://iowadot.maps.arcgis.com/home/item.html?id=5d6c7d6963e549539ead6e50d89
-bdd08">Iowa DOT Feature Collection Service</a></li>
+ <li><a href="https://services.arcgis.com/8lRhdTsQyJpO52F1/ArcGIS/rest/services/511_IA_Road_Conditions_View/FeatureServer">Iowa DOT REST Service</a></li>
+ <li><a href="https://services.arcgis.com/8lRhdTsQyJpO52F1/ArcGIS/rest/services/Midwest_Winter_Road_Conditions_View/FeatureServer">Midwest Road Conditions REST Service</a></li>
  <li><a href="http://www.dps.state.ia.us/ISP/">Iowa State Patrol</a></li>
 </ul>
 
