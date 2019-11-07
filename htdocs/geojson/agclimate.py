@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 """ Produce geojson of ISUSM data """
-import cgi
 import datetime
 import json
 
 import pytz
 import psycopg2.extras
+from paste.request import parse_formvars
 from pyiem.datatypes import temperature
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import loadqc
-from pyiem.util import drct2text, get_dbconn, ssw
+from pyiem.util import drct2text, get_dbconn, utc
 
 ISUAG = get_dbconn("isuag")
 IEM = get_dbconn("iem")
@@ -179,19 +179,20 @@ def get_data(ts):
                 "geometry": {"type": "Point", "coordinates": [lon, lat]},
             }
         )
-    ssw(json.dumps(data))
+    return json.dumps(data)
 
 
-def main():
+def application(environ, start_response):
     """Go Main Go"""
-    ssw("Content-type: application/vnd.geo+json\n\n")
-    field = cgi.FieldStorage()
-    dt = field.getfirst("dt")
-    ts = datetime.datetime.strptime(dt, "%Y-%m-%dT%H:%M:%S.000Z")
-    ts = ts.replace(tzinfo=pytz.utc)
-    get_data(ts)
+    headers = [("Content-type", "application/vnd.geo+json")]
+    field = parse_formvars(environ)
+    dt = field.get("dt")
+    if dt is None:
+        ts = utc().replace(minute=0, second=0, microsecond=0)
+    else:
+        ts = datetime.datetime.strptime(dt, "%Y-%m-%dT%H:%M:%S.000Z")
+        ts = ts.replace(tzinfo=pytz.UTC)
+    data = get_data(ts)
 
-
-if __name__ == "__main__":
-    # see how we are called
-    main()
+    start_response("200 OK", headers)
+    return [data.encode("ascii")]

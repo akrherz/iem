@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 """Dump daily computed climatology direct from the database"""
-import cgi
 import datetime
 import json
 
 import memcache
+from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, ssw, html_escape
+from pyiem.util import get_dbconn, html_escape
 
 
 def run(network, month, day, syear, eyear):
@@ -113,17 +113,17 @@ def run(network, month, day, syear, eyear):
     return json.dumps(data)
 
 
-def main():
+def application(environ, start_response):
     """Main()"""
-    ssw("Content-type: application/json\n\n")
+    headers = [("Content-type", "application/json")]
 
-    form = cgi.FieldStorage()
-    network = form.getfirst("network", "IACLIMATE").upper()
-    month = int(form.getfirst("month", 1))
-    day = int(form.getfirst("day", 1))
-    syear = int(form.getfirst("syear", 1800))
-    eyear = int(form.getfirst("eyear", datetime.datetime.now().year + 1))
-    cb = form.getfirst("callback", None)
+    form = parse_formvars(environ)
+    network = form.get("network", "IACLIMATE").upper()
+    month = int(form.get("month", 1))
+    day = int(form.get("day", 1))
+    syear = int(form.get("syear", 1800))
+    eyear = int(form.get("eyear", datetime.datetime.now().year + 1))
+    cb = form.get("callback", None)
 
     mckey = "/geojson/climodat_dayclimo/%s/%s/%s/%s/%s" % (
         network,
@@ -139,10 +139,9 @@ def main():
         mc.set(mckey, res, 86400)
 
     if cb is None:
-        ssw(res)
+        data = res
     else:
-        ssw("%s(%s)" % (html_escape(cb), res))
+        data = "%s(%s)" % (html_escape(cb), res)
 
-
-if __name__ == "__main__":
-    main()
+    start_response("200 OK", headers)
+    return [data.encode("ascii")]

@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 """ Generate a GeoJSON of current storm based warnings """
-import cgi
 import datetime
 import json
 
 import memcache
 import psycopg2.extras
 import pytz
-from pyiem.util import get_dbconn, ssw, html_escape
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn, html_escape
 
 
 def run(ts):
@@ -20,7 +20,7 @@ def run(ts):
         t0 = utcnow + datetime.timedelta(days=7)
     else:
         utcnow = datetime.datetime.strptime(ts, "%Y-%m-%dT%H:%M:%SZ").replace(
-            tzinfo=pytz.utc
+            tzinfo=pytz.UTC
         )
         t0 = utcnow
     sbwtable = "sbw_%s" % (utcnow.year,)
@@ -72,13 +72,13 @@ def run(ts):
     return json.dumps(res)
 
 
-def main():
+def application(environ, start_response):
     """Main Workflow"""
-    ssw("Content-type: application/vnd.geo+json\n\n")
+    headers = [("Content-type", "application/vnd.geo+json")]
 
-    form = cgi.FieldStorage()
-    cb = form.getfirst("callback", None)
-    ts = form.getfirst("ts", "")
+    form = parse_formvars(environ)
+    cb = form.get("callback", None)
+    ts = form.get("ts", "")
 
     mckey = "/geojson/sbw.geojson|%s" % (ts,)
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
@@ -88,11 +88,9 @@ def main():
         mc.set(mckey, res, 15 if ts == "" else 3600)
 
     if cb is None:
-        ssw(res)
+        data = res
     else:
-        ssw("%s(%s)" % (html_escape(cb), res))
+        data = "%s(%s)" % (html_escape(cb), res)
 
-
-if __name__ == "__main__":
-    # Go Main Go
-    main()
+    start_response("200 OK", headers)
+    return [data.encode("ascii")]
