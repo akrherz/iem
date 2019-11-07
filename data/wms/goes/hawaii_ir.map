@@ -42,15 +42,10 @@ LAYER
   STATUS ON
   MINSCALE 0
   MAXSCALE 465000000
-  DATA "/home/ldm/data/gis/images/awips208/GOES_HI_IR.png"
+  DATA "/home/ldm/data/gis/images/4326/goes/GOES_HI_IR.png"
   TYPE RASTER
   PROJECTION
-    "proj=merc"
-    "lat_ts=20"
-        "x_0=0"
-    "y_0=0"
-    "a=6371200.0"
-    "b=6371200.0"
+    "init:epsg=4326"
   END
 INCLUDE "/home/ldm/data/gis/images/4326/goes/GOES_HI_IR.msinc"
       PROCESSING "CLOSE_CONNECTION=NORMAL"
