@@ -45,7 +45,7 @@ $t->current_network = "CoCoRaHS";
  $jobj = json_decode($jdata, $assoc=TRUE);
 
  $db = Array();
- while (list($bogus, $iemob) = each($jobj["data"]) ){
+ foreach($jobj["data"] as $bogus => $iemob){
      $site = $iemob["station"];
   $db[$site] = Array('snow'=> "", 'snowd'=>"", 'ratio'=>"", 'pday'=>"", 'pmonth'=>"", 'pmiss' => "");
   $db[$site]['ts'] = strtotime($iemob["local_valid"]);
@@ -106,7 +106,7 @@ The number of observations missing for this month is shown in parenthesis.
 EOF;
  $oddrow = true;
  $now = time();
- while (list($site, $value) = each($db) ){
+ foreach($db as $site => $value){
    $tdiff = $now - $value["ts"];
    if ( intval( date("Y", $value["ts"]) ) < 2003 ) continue;
    $oddrow = ! $oddrow;

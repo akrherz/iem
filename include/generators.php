@@ -2,7 +2,7 @@
 /*
  * functions that generate stuff
  */
-include_once dirname(__FILE__) ."/database.inc.php";
+require_once dirname(__FILE__) ."/database.inc.php";
 
 function get_news_by_tag($tag){
 	// Generate a listing of recent news items by a certain tag
@@ -45,28 +45,31 @@ function get_website_stats(){
 	$val = $memcache->get("iemperf.json");
 	if (! $val){
 		// Fetch from nagios
-		$val = file_get_contents("http://nagios.local/cgi-bin/get_iemstats.py");
-		$memcache->set("iemperf.json", $val, 90);
-	}
-	$jobj = json_decode($val);
+		$val = @file_get_contents("http://nagios.local/cgi-bin/get_iemstats.py");
+        if ($val) $memcache->set("iemperf.json", $val, 90);
+    }
+    $bcolor = "success";
+    $rcolor = "success";
+    $bandwidth = 0;
+    $req = 0;
+    if ($val){
+        $jobj = json_decode($val);
 	
-	$bandwidth = $jobj->stats->bandwidth / 1000000.0;
-	$bcolor = "success";
-	// grading of the bandwidth (MB/s)
-	if ($bandwidth > 35) $bcolor = "warning";
-	if ($bandwidth > 70) $bcolor = "danger";
-	
-	$label = sprintf("%.1f MB/s", $bandwidth);
-	$bpercent = intval( $bandwidth / 124.0  * 100.0 );
+        $bandwidth = $jobj->stats->bandwidth / 1000000.0;
+        // grading of the bandwidth (MB/s)
+        if ($bandwidth > 35) $bcolor = "warning";
+        if ($bandwidth > 70) $bcolor = "danger";
+    
+        $req = $jobj->stats->apache_req_per_sec;
+        if ($req > 5000) $rcolor = "warning";
+        if ($req > 7500) $rcolor = "danger";
+        
+    }
+    $label = sprintf("%.1f MB/s", $bandwidth);
+    $bpercent = intval( $bandwidth / 124.0  * 100.0 );
+    $rlabel = number_format($req);
+    $rpercent = intval( $req / 15000.0 * 100.0);    
 
-	$req = $jobj->stats->apache_req_per_sec;
-	$rcolor = "success";
-	if ($req > 5000) $rcolor = "warning";
-	if ($req > 7500) $rcolor = "danger";
-	
-	$rlabel = number_format($req);
-	$rpercent = intval( $req / 15000.0 * 100.0);
-	
 	$s = <<<EOF
 <div class="panel panel-default">
 <div class="panel-heading">Current Website Performance:</div>
@@ -119,7 +122,7 @@ function gen_feature($t){
 	$tagtext = "";
 	if (sizeof($tags) > 0){
 		$tagtext .= "<br /><small>Tags: &nbsp; ";
-		while (list($k,$v) = each($tags))
+		foreach($tags as $k => $v)
 		{
 			$tagtext .= sprintf("<a href=\"/onsite/features/tags/%s.html\">%s</a> &nbsp; ", $v, $v);
 		}

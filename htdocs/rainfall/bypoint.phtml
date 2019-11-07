@@ -1,6 +1,6 @@
 <?php
  require_once "../../config/settings.inc.php";
- include_once "../../include/database.inc.php";
+ require_once "../../include/database.inc.php";
  require_once "../../include/forms.php";
  /* bypoint.phtml  Query IEM rainfall by a point */
 $wepp = iemdb("wepp");
@@ -54,7 +54,7 @@ if ($method == "geocode")
 }
 else if ($method == "id")
 {
-	include("../../include/station.php");
+	require_once "../../include/station.php";
 	$id = strtoupper(xssafe($_GET["nwsli"]));
     $st = new StationData($id);
     $cities = $st->table;
@@ -121,12 +121,12 @@ $tot = 0;
 $otot = 0;
 while ($row = pg_fetch_array($rs))
 {
-	$tot += $row["inch"];
-	$otot += $d[ $row["valid"] ]["ob"];
+    $tot += $row["inch"];
+    @$otot += $d[ $row["valid"] ]["ob"];
 	$d[ $row["valid"] ]["rain"] = $row["inch"];
 }
 
-while (list($k,$v) = each($d))
+foreach($d as $k => $v)
 {
   if ($method == "id") {
 	$data .=  sprintf("%s,%5.2f,%9s\n", $k, $d[$k]["rain"],

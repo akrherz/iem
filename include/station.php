@@ -5,7 +5,7 @@ include_once dirname(__FILE__) ."/network.php";
 
 class StationData {
 
-  function StationData($a,$n="")
+  function __construct($a,$n="")
   {
     $this->table = Array();
     $this->dbconn = iemdb("mesosite");

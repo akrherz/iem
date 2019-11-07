@@ -4,12 +4,16 @@
     /wx/afos/201612141916_ADMNFD.png
     Rewritten by apache to text2png?e=201612141916&pil=ADMNFD
 """
-import cgi
 import datetime
+from io import BytesIO
 
 import memcache
 import pytz
-from pyiem.util import get_dbconn, ssw
+import PIL.ImageFont
+import PIL.ImageDraw
+import PIL.ImageOps
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn
 
 
 def pt2px(pt):
@@ -21,11 +25,6 @@ def text_image(content):
     """
     http://stackoverflow.com/questions/29760402
     """
-    import PIL.ImageFont
-    import PIL.ImageDraw
-    import PIL.ImageOps
-    from io import BytesIO
-
     grayscale = "L"
     content = content.replace("\r\r\n", "\n").replace("\001", "")
     lines = content.split("\n")
@@ -85,20 +84,16 @@ def make_image(e, pil):
     return text_image(content)
 
 
-def main():
+def application(environ, start_response):
     """Go Main Go"""
-    form = cgi.FieldStorage()
-    e = form.getfirst("e", "201612141916")[:12]
-    pil = form.getfirst("pil", "ADMNFD")[:6].replace(" ", "")
+    form = parse_formvars(environ)
+    e = form.get("e", "201612141916")[:12]
+    pil = form.get("pil", "ADMNFD")[:6].replace(" ", "")
     key = "%s_%s.png" % (e, pil)
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(key)
     if not res:
         res = make_image(e, pil)
         mc.set(key, res, 3600)
-    ssw("Content-type: image/png\n\n")
-    ssw(res)
-
-
-if __name__ == "__main__":
-    main()
+    start_response("200 OK", [("Content-type", "image/png")])
+    return [res]

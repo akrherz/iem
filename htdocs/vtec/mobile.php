@@ -37,7 +37,7 @@ $txtdata = "";
 for( $i=0; $row  = @pg_fetch_array($rs,$i); $i++){
   $tokens = @explode('__', $row["svs"]);
   $tokens = array_reverse($tokens);
-  while (list($key,$val) = each($tokens))
+  foreach($tokens as $key => $val)
   {
     if ($val == "") continue;
     $txtdata .= sprintf("<pre>%s</pre><br />", $val);

@@ -1,7 +1,7 @@
 <?php 
- include("../../config/settings.inc.php");
- include("../../include/myview.php");
- include("../../include/generators.php");
+ require_once "../../config/settings.inc.php";
+ require_once "../../include/myview.php";
+ require_once "../../include/generators.php";
  $t = new MyView();
 
  $t->title = "NWS COOP Data";
@@ -87,7 +87,7 @@
  
  );
  $content = "";
- while (list($k,$v) = each($dict))
+ foreach($dict as $k => $v)
  {
  	$content .= <<<EOF
 <div class="tease">

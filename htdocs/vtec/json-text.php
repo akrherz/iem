@@ -36,7 +36,7 @@ for( $i=0; $row  = @pg_fetch_array($result,$i); $i++)
   $z["svs"] = Array();
   $tokens = @explode('__', $row["svs"]);
   $lsvs = "";
-  while (list($key,$val) = each($tokens))
+  foreach($tokens as $key => $val)
   { 
     if ($val == "") continue;
     $lsvs = htmlspecialchars( $val );

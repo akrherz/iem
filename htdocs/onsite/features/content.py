@@ -5,7 +5,6 @@ import re
 import datetime
 from io import BytesIO
 
-from pyiem.plot.use_agg import plt
 from pyiem.util import get_dbconn
 
 PATTERN = re.compile(
@@ -20,20 +19,19 @@ PATTERN = re.compile(
 def dblog(yymmdd):
     """Log this request"""
     try:
-        pgconn = get_dbconn("mesosite")
-        cursor = pgconn.cursor()
-        dt = datetime.date(
-            2000 + int(yymmdd[:2]), int(yymmdd[2:4]), int(yymmdd[4:6])
-        )
-        cursor.execute(
-            """
-            UPDATE feature SET views = views + 1
-            WHERE date(valid) = %s
-            """,
-            (dt,),
-        )
-        pgconn.commit()
-        pgconn.close()
+        with get_dbconn("mesosite") as pgconn:
+            cursor = pgconn.cursor()
+            dt = datetime.date(
+                2000 + int(yymmdd[:2]), int(yymmdd[2:4]), int(yymmdd[4:6])
+            )
+            cursor.execute(
+                """
+                UPDATE feature SET views = views + 1
+                WHERE date(valid) = %s
+                """,
+                (dt,),
+            )
+            pgconn.commit()
     except Exception as exp:
         sys.stderr.write(str(exp))
 
@@ -80,6 +78,10 @@ def application(environ, start_response):
     ) % data
     # Option 3, we have no file.
     if not os.path.isfile(fn):
+        # lazy import to save the expense of firing this up when this loads
+        # pylint: disable=import-outside-toplevel
+        from pyiem.plot.use_agg import plt
+
         headers.append(get_content_type("png"))
         (_, ax) = plt.subplots(1, 1)
         ax.text(

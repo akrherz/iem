@@ -62,8 +62,7 @@ function selectNetwork($selected, $extra=Array())
     $dbconn = iemdb('mesosite');
     $rs = pg_exec($dbconn, "SELECT * from networks ORDER by name ASC");
     $s = "<select class=\"iemselect2\" name=\"network\">\n";
-    reset($extra);
-    while (list($idx,$sid) = each($extra))
+    foreach($extra as $idx => $sid)
     {
     	$s .= "<option value=\"$idx\" ";
     	if ($selected == $idx) { $s .= "SELECTED"; }
@@ -91,15 +90,14 @@ function networkMultiSelect($network, $selected, $extra=Array(),
     $cities = $nt->table;
     $s .= "<select name=\"${label}\" size=\"5\" MULTIPLE >\n";
     
-    reset($extra);
-    while (list($idx,$sid) = each($extra))
+    foreach($extra as $idx => $sid)
     {
     	$s .= "<option value=\"$idx\" ";
     	if ($selected == $idx) { $s .= "SELECTED"; }
     	$s .= ">[$idx] $sid </option>\n";
     }
     
-    while (list($sid, $tbl) = each($cities))
+    foreach ($cities as $sid => $tbl)
     {
         $s .= "<option value=\"$sid\" ";
         if ($selected == $sid) { $s .= "SELECTED"; }
@@ -129,16 +127,15 @@ function networkSelect($network, $selected, $extra=Array(),
     include_once dirname(__FILE__) ."/network.php";
     $nt = new NetworkTable($network);
     $cities = $nt->table;
-    reset($cities);
     $s .= "<select class=\"iemselect2\" name=\"$selectName\">\n";
-    while (list($sid, $tbl) = each($cities))
+    foreach($cities as $sid => $tbl)
     {
         $s .= "<option value=\"$sid\" ";
         $sname = make_sname($tbl);
         if ($selected == $sid) { $s .= "SELECTED"; }
         $s .= ">${sname}</option>\n";
    }
-   while (list($idx,$sid) = each($extra))
+   foreach($extra as $idx => $sid)
    {
         if (is_array($sid)){
           $tbl = $sid;
@@ -164,9 +161,8 @@ function networkSelectAuto($network, $selected, $extra=Array())
     include_once dirname(__FILE__) ."/network.php";
     $nt = new NetworkTable($network);
     $cities = $nt->table;
-    reset($cities);
     $s .= "<select class=\"iemselect2\" name=\"station\" onChange=\"this.form.submit()\">\n";
-    while (list($sid, $tbl) = each($cities))
+    foreach($cities as $sid => $tbl)
     {
         $sname = make_sname($tbl);
         if ($tbl["network"] != $network) continue;
@@ -174,7 +170,7 @@ function networkSelectAuto($network, $selected, $extra=Array())
         if ($selected == $sid) { $s .= "SELECTED"; }
         $s .= ">${sname}</option>\n";
    }
-   while (list($idx,$sid) = each($extra))
+   foreach($extra as $idx => $sid)
    {
         $nt->load_station($sid);
         $tbl = $nt->table[$sid];
@@ -194,9 +190,8 @@ function isuagSelect($selected)
     include_once dirname(__FILE__) ."/network.php";
     $nt = new NetworkTable("ISUAG");
     $cities = $nt->table;
-    reset($cities);
     $s .= '<select name="station">\n';
-    while (list($sid, $tbl) = each($cities))
+    foreach($cities as $sid => $tbl)
     {
         $s .= "<option value=\"$sid\" ";
         if ($selected == $sid) { $s .= "SELECTED"; }
@@ -212,8 +207,7 @@ function rwisMultiSelect($selected, $size){
     $cities = $nt->table;
   $s = "<select name=\"stations\" size=\"". $size ."\" MULTIPLE>\n";
   $s .= "<option value=\"_ALL\">Select All</option>\n";
-  reset($cities);
-  while( list($key, $val) = each($cities) ) {
+  foreach($cities as $key => $val){
     if ($val["network"] != "IA_RWIS") continue; 
     $s .= "<option value=\"". $key ."\"";
     if ($selected == $key){

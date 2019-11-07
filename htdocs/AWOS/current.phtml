@@ -76,7 +76,7 @@ $jdata = file_get_contents("http://iem.local/api/1/currents.json?network=AWOS");
 $jobj = json_decode($jdata, $assoc=TRUE);
 
 
-  while (list($bogus, $iemob) = each($jobj["data"]) ){
+foreach($jobj["data"] as $bogus => $iemob){
     $key = $iemob["station"];
     $mydata[$key] = $iemob;
     $mydata[$key]["sname"] = $iemob["name"];
@@ -106,8 +106,7 @@ $jobj = json_decode($jdata, $assoc=TRUE);
  $finalA = Array();
  $finalA = aSortBySecondIndex($mydata, $sortcol, "desc");
  $now = time();
- while (list ($key, $val) = each ($finalA))  { 
-	$parts = $finalA[$key];
+ foreach($finalA as $key => $parts){ 
         $table .= "<tr>\n 
          <td><input type=\"checkbox\" name=\"st[]\"  value=\"".$key."\"></td>";
 

@@ -26,7 +26,7 @@ if (isset($_GET["lat"]) && isset($_GET["lon"]))
 
 $result = "id,valid,tmpf,dwpf,sknt,drct,phour,alti,gust,lon,lat\n";
 $prepared = null;
-while(list($k,$id) = each($stations))
+foreach($stations as $k => $id)
 {
 	if (isset($_REQUEST["date"])){
 		$ts = strtotime($_REQUEST["date"]);

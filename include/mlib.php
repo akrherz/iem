@@ -16,13 +16,13 @@ function aSortBySecondIndex($multiArray, $secondIndex, $sorder="asc") {
     if (sizeof($multiArray) == 0){
         return array();
     }
-    while (list($firstIndex, ) = each($multiArray))
+    foreach($multiArray as $firstIndex => $blah)
         $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
         if ($sorder == "asc")
             asort($indexMap);
             else
                 arsort($indexMap);
-                while (list($firstIndex, ) = each($indexMap))
+                foreach($indexMap as $firstIndex => $unused)
                     $sortedArray[$firstIndex] = $multiArray[$firstIndex];
                     return $sortedArray;
 }

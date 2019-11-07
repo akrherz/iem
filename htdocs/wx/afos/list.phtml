@@ -94,7 +94,7 @@ if ($view == "prod"){
 	$keys = array_keys($prods);
 	asort($keys);
 	$table .= "<table class=\"table table-condensed table-striped\"><tr><th>Product Link</th><th>Date</th><th>UTC Time</th></tr>";
-	while(list($i,$k) = each($keys)){
+	foreach($keys as $i => $k){
 		$table .= sprintf("%s", $prods[$k]);
 	}
 	$table .= "</table>";
@@ -110,7 +110,7 @@ if ($view == "prod"){
 	asort($keys);
 	$table = "";
 	$atags .= '<div class="clearfix"></div><strong>Skip to PIL:</strong> ';
-	while(list($i,$k) = each($keys)){
+	foreach($keys as $i => $k){
 		$atags .= sprintf("<a class=\"btn btn-default btn-sm\" href=\"javascript:void(0)\" onclick=\"j('%s');\">%s</a> ",
 		                  $k, $k);
 		if ($i % 6 == 0){
@@ -167,10 +167,10 @@ $groupnames = Array("Weather Forecast Offices (WFO)",
 		"Center Weather Service Units (CWSU)",
 		"Weather Service Offices (WSO)");
 $sources = Array();
-while (list($key, $s)=each($groups)){
+foreach($groups as $key => $s){
 	$sources[$groupnames[$key]] = Array();
 	$nt = new NetworkTable($s);
-	while (list($sid, $tbl) = each($nt->table))
+	foreach ($nt->table as $sid => $tbl)
 	{
 		$sources[$groupnames[$key]][$sid] = sprintf("[%s] %s", $sid,
 				$tbl['name']);

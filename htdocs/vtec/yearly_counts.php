@@ -1,11 +1,11 @@
 <?php 
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 151);
-include("../../include/database.inc.php");
-include("../../include/myview.php");
-include("../../include/vtec.php");
-include("../../include/network.php");
-include("../../include/forms.php");
+require_once "../../include/database.inc.php";
+require_once "../../include/myview.php";
+require_once "../../include/vtec.php";
+require_once "../../include/network.php";
+require_once "../../include/forms.php";
 $nt = new NetworkTable("WFO");
 
 $clobber = isset($_REQUEST["clobber"]);
@@ -98,21 +98,20 @@ if ($phenomena == null || $significance == null){
 EOF;
 	$years = array_keys($data);
 	asort($years);
-	while( list($i,$yr) = each($years)){
+	foreach($years as $i => $yr){
 		$table .= "<th>{$yr}</th>";
 	}
 	$table .= "</tr></thead>\n";
 	
 	$codes = array_keys($pcodes);
 	asort($codes);
-	while( list($j,$code) = each($codes)){
+	foreach($codes as $j => $code){
 		list($phenomena, $significance) = explode(".", $code);
 		$table .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td>",
 				$phenomena, $significance, @$vtec_phenomena[$phenomena],
 				@$vtec_significance[$significance]);
 	
-		reset($years);
-		while( list($i,$yr) = each($years)){
+		foreach($years as $i => $yr){
 			if (array_key_exists($code, $data[$yr])){
 				$table .= sprintf("<td>%s</td>", $data[$yr][$code]);
 			} else {
@@ -140,7 +139,7 @@ EOF;
 EOF;
 	$years = array_keys($data);
 	asort($years);
-	while( list($i,$yr) = each($years)){
+	foreach($years as $i => $yr){
 		$table .= "<th>{$yr}</th>";
 	}
 	$table .= "</tr></thead>\n";
@@ -149,9 +148,7 @@ EOF;
 	while( list($key,$val) = each($nt->table)){
 		$table .= sprintf("<tr><td>%s</td><td>%s</td>",
 				$key, $val["name"]);
-	
-		reset($years);
-		while( list($i,$yr) = each($years)){
+		foreach($years as $i => $yr){
 			if (array_key_exists($key, $data[$yr])){
 				$table .= sprintf("<td>%s</td>", $data[$yr][$key]);
 			} else {
@@ -192,7 +189,7 @@ Limit Numbers by WFO:
 EOF;
 $content .= "<select name=\"wfo\">
  <option value=\"ALL\" SELECTED>All Available</option>";
-while( list($key, $value) = each($nt->table) ){
+foreach($nt->table as $key => $value){
 	$content .= "<option value='$key'>[$key] ". $value["name"] ."</option>\n";
 }
 $content .= <<<EOF

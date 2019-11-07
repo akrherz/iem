@@ -2,7 +2,7 @@
  require_once "../../config/settings.inc.php";
  require_once "../../include/myview.php";
  require_once "../../include/mlib.php"; 
- include_once "../../include/database.inc.php";
+ require_once "../../include/database.inc.php";
  require_once "../../include/forms.php";
  
  $t = new MyView();
@@ -44,7 +44,7 @@ EOF;
 
 $mydata = Array();
 
-while (list($bogus, $iemob) = each($jobj["data"]) ){
+foreach($jobj["data"] as $bogus => $iemob){
     $key = $iemob["station"];
 	$mydata[$key] = $iemob;
 	$mydata[$key]["ts"] = strtotime($iemob["local_valid"]);
@@ -68,8 +68,7 @@ $now = time();
 
 $table = "";
 // Loop though all data
-while (list ($key, $val) = each ($finalA))  {
-	$parts = $finalA[$key];
+foreach($finalA as $key => $parts){
 	$i++;
 	$tdiff = $now - $parts["ts"];
 	// Don't show stations over 5 days old
@@ -119,7 +118,7 @@ $networks = Array(
 		"OT" => "IEM Misc Stations",
 		"VTWAC" => "Vermont Weather Analytics Center");
 $buttons = "";
-while (list($key,$val)=each($networks)){
+foreach($networks as $key => $val){
 	$buttons .= sprintf("<a class=\"btn btn-sm%s\" href=\"current.phtml?network=%s\">%s</a>",
 			($key == $network) ? ' active': '', $key, $val);
 }

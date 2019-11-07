@@ -1,8 +1,8 @@
 <?php 
 require_once "../../config/settings.inc.php";
-include("../../include/myview.php");
+require_once "../../include/myview.php";
 require_once "../../include/mlib.php";
-include("../../include/network.php");
+require_once "../../include/network.php";
 require_once "../../include/forms.php";
 $nt = new NetworkTable("SCAN");
 $cities = $nt->table;
@@ -23,7 +23,7 @@ $mydata = Array();
 $jdata = file_get_contents("http://iem.local/api/1/currents.json?network=SCAN");
 $jobj = json_decode($jdata, $assoc=TRUE);
 
-while (list($bogus, $iemob) = each($jobj["data"]) ){
+foreach($jobj["data"] as $bogus => $iemob){
     $key = $iemob["station"];
     $mydata[$key] = $iemob;
 	$mydata[$key]["ts"] = strtotime($iemob["local_valid"]);
@@ -48,7 +48,7 @@ $now = time();
 
 $t1 = "";
 // Loop though all data
-while (list ($key, $val) = each ($finalA))  {
+foreach($finalA as $key => $val){
 	$parts = $finalA[$key];
 	$i++;
 	$tdiff = $now - $parts["ts"];
@@ -96,8 +96,7 @@ while (list ($key, $val) = each ($finalA))  {
 
 $t2 = "";
 $n = $finalA;
-while (list ($key, $val) = each ($n))  {
-	$parts = $finalA[$key];
+foreach($n as $key => $parts){
 	$tdiff = $now - $parts["ts"];
 	// Don't show stations over 5 days old
 	if ($tdiff > 86400*5){

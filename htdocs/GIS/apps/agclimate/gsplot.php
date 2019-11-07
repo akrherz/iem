@@ -131,8 +131,7 @@ function gdd($high, $low, $ceiling, $floor)
 
 /* -------- Lets compute the climatology ------ */
 $climate = Array();
-reset($ISUAGcities);
-while( list($key,$val) = each($ISUAGcities) ) {
+foreach($ISUAGcities as $key => $val){
   $csite = strtolower($ISUAGcities[$key]["climate_site"]);
   $climate[$key] = Array('gdd32'=> 0, 'gdd50' => 0, 'sdd86'=>0, 'prec'=>0,
     'gdd41' => 0, 'gdd46' => 0, 'gdd48' => 0, 'gdd51' => 0, 'gdd52' => 0);

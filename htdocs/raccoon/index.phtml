@@ -1,10 +1,10 @@
 <?php
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 define("IEM_APPID", 69);
 require_once "../../include/forms.php";
-include("../../include/imagemaps.php");
+require_once "../../include/imagemaps.php";
 include_once "../../include/database.inc.php";
 
 $wfo = isset($_REQUEST["wfo"]) ? xssafe($_REQUEST["wfo"]): 'OAX';
@@ -65,7 +65,7 @@ $ar = Array("FF" => "Flash Flood",
 "SV" => "Severe Thunderstorm",
 "TO" => "Tornado");
 $wtselect = "";
-while (list($p,$n) = each($ar)){
+foreach($ar as $p => $n){
 	$wtselect .= sprintf("<input name=\"wtype[]\" type=\"checkbox\" 
 			value=\"%s\"%s>%s (%s.W)</input><br />", $p, 
 			in_array($p, $wtype) ? " CHECKED": "", $n, $p);

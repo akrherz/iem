@@ -1,6 +1,6 @@
 <?php
-include("../../../config/settings.inc.php");
-include("../../../include/database.inc.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/database.inc.php";
 
 /** We need these vars to make this work */
 $syear = isset($_GET["syear"]) ? $_GET["syear"] : date("Y");
@@ -100,7 +100,7 @@ $graph->legend->SetLayout(LEGEND_VERT);
 
 $colors = Array(0 => "green", 1 => "black", 2 => "blue", 3 => "red",
  4 => "purple", 5 => "tan", 6 => "pink", 7 => "lavendar");
-while(list($k,$v) = each($times)){
+foreach($times as $k => $v){
 	// Create the linear plot
     $lineplot=new LinePlot($avg_speed[$k], $times[$k]);
     $lineplot->SetLegend($labels[$k]);

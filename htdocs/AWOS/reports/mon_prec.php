@@ -68,7 +68,7 @@ function friendly($val){
 	return sprintf("%.2f", $val);
 }
 $table = "";
-while (list($key,$val) = each($data)){
+foreach($data as $key => $val){
 	$table .= sprintf("<tr><td>%s</td><td>%s</td>
   <td>%s</td><td>%s</td><td>%s</td>
   <td>%s</td><td>%s</td><td>%s</td>

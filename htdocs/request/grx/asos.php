@@ -11,8 +11,8 @@ IconFile: 2, 15, 15, 8, 8, "https://mesonet.agron.iastate.edu/request/grx/cloudc
 Font: 1, 11, 1, "Courier New"
 
 ';
-include("../../../config/settings.inc.php");
-include("../../../include/mlib.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/mlib.php";
 
 function s2icon($s)
 {
@@ -47,7 +47,7 @@ $now = time();
 $jdata = file_get_contents("http://iem.local/api/1/currents.json?network=AWOS");
 $jobj = json_decode($jdata, $assoc=TRUE);
 
-while (list($bogus, $iemob) = each($jobj["data"]) ){
+foreach($jobj["data"] as $bogus => $iemob){
     $mydata = $iemob;
     $tdiff = $now - strtotime($mydata["local_valid"]);
     if ($tdiff > 3600) continue;

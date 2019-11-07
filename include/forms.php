@@ -41,10 +41,10 @@ function make_select($name, $selected, $ar, $jscallback="", $cssclass='',
            ($jscallback != "")? " onChange=\"$jscallback(this.value)\"" : "",
            ($cssclass != "")? " class=\"$cssclass\"" : "",
            ($multiple === FALSE) ? '': ' MULTIPLE');
-        while( list($key,$val) = each($ar)){
+        foreach($ar as $key => $val){
                 if (is_array($val)){
                         $s .= "<optgroup label=\"$key\">\n";
-                        while( list($k2,$v2) = each($val)){
+                        foreach($val as $k2 => $v2){
                                 $s .= sprintf("<option value=\"%s\"%s>%s</option>\n", $k2,
                                                 in_array($k2, $myselected)? " SELECTED": "", $v2);
                         }
@@ -121,7 +121,7 @@ function stateSelect($selected, $jscallback='', $name='state', $size = 1, $multi
         $s .= ' MULTIPLE';
     }
     $s .= '>';
-    while (list($key,$val) = each($states)){
+    foreach($states as $key => $val){
         $s .= "<option value=\"$key\"";
         if ($selected == $key) $s .= " SELECTED";
         $s .= ">[".$key."] ". $val ."</option>";
@@ -135,7 +135,7 @@ function vtecPhenoSelect($selected, $name='phenomena')
  global $vtec_phenomena;
  reset($vtec_phenomena);
  $s = "<select name=\"{$name}\" style=\"width: 195px;\">\n";
- while( list($key, $value) = each($vtec_phenomena) ){
+ foreach($vtec_phenomena as $key => $value){
   $s .= "<option value=\"$key\" ";
   if ($selected == $key) $s .= "SELECTED";
   $s .= ">[".$key."] ". $vtec_phenomena[$key] ."</option>";
@@ -149,7 +149,7 @@ function vtecSigSelect($selected, $name='significance')
  global $vtec_significance;
  reset($vtec_significance);
  $s = "<select name=\"{$name}\" style=\"width: 195px;\">\n";
- while( list($key, $value) = each($vtec_significance) ){
+ foreach($vtec_significance as $key => $value){
   $s .= "<option value=\"$key\" ";
   if ($selected == $key) $s .= "SELECTED";
   $s .= ">[".$key."] ". $vtec_significance[$key] ."</option>";
@@ -163,7 +163,7 @@ function wfoSelect($selected)
  global $wfos;
  reset($wfos);
  $s = "<select name=\"wfo\" style=\"width: 195px;\">\n";
- while( list($key, $value) = each($wfos) ){
+ foreach($wfos as $key => $value){
    $s .= "<option value=\"$key\" ";
    if ($selected == $key) $s .= "SELECTED";
    $s .= ">[".$key."] ". $wfos[$key]["city"] ."</option>";

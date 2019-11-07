@@ -115,7 +115,7 @@ EOF;
 	$extra .= "<br /><br />
 	<table class=\"table table-striped table-bordered\" style=\"width: auto;\">";
 	$theader = "<thead><tr><th>Site:</th><th>Valid:</th>";
-	while(list($k,$v) = each($mycols)){ $theader .= "<th>$v</th>"; }
+	foreach($mycols as $k => $v){ $theader .= "<th>$v</th>"; }
 	$theader .= "</tr></thead>";
 	
 	$times = array_keys($data);
@@ -125,7 +125,7 @@ EOF;
 	}
 	$colorme = True;
 	$cnt = 0;
-	while(list($k,$ts) = each($times)){
+	foreach($times as $k => $ts){
 		if ($cnt % 30 == 0){
 			$extra .= $theader;
 		}
@@ -136,7 +136,7 @@ EOF;
 				date("i", $ts), date("Y-m-d H:i", $ts) );
 		$colorme = !$colorme;
 		reset($mycols);
-		while(list($k,$v) = each($mycols)){
+		foreach($mycols as $k => $v){
 			$extra .= sprintf("<td>%s</td>", @$data[$ts][$v]);
 		}
 		$extra .= "</tr>";

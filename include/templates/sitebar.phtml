@@ -8,7 +8,7 @@ require_once dirname(__FILE__)."/../imagemaps.php";
 <form method="GET" name="automatic">
 <?php 
 if (isset($savevars)){
-	while (list($k,$v)=each($savevars)){
+	foreach($savevars as $k => $v){
 		echo sprintf("<input type=\"hidden\" value=\"%s\" name=\"%s\" />",
 		$v, $k);
 	}
@@ -65,7 +65,7 @@ $o = Array(
   		"icon" => "calendar"),
 );
 
-while (list($key,$val) = each($o))
+foreach($o as $key => $val)
 {
 	if ((array_key_exists("azos", $val) &&  preg_match('/ASOS|AWOS|ISUSM/', $network) <= 0) &&
 		(array_key_exists("rwis", $val) &&  preg_match('/RWIS/', $network) <= 0)){

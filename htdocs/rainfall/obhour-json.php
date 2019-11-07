@@ -1,7 +1,6 @@
 <?php
-
-include('../../config/settings.inc.php');
-include("../../include/database.inc.php");
+require_once '../../config/settings.inc.php';
+require_once "../../include/database.inc.php";
 
 $connect = iemdb("iem");
 $mesosite = iemdb("mesosite");
@@ -39,7 +38,7 @@ for($i=0;$z = @pg_fetch_array($rs,$i); $i++)
   );
 }
 
-while( list($key,$interval) = each($intervals))
+foreach($intervals as $key => $interval)
 {
   if ($interval == "midnight")
   {
@@ -70,8 +69,7 @@ while( list($key,$interval) = each($intervals))
 }
 
 $ar = Array("precip" => Array() );
-reset($data);
-while( list($station,$d) = each($data) )
+foreach($data as $station => $d)
 {
   $ar["precip"][] = $d;
 }
