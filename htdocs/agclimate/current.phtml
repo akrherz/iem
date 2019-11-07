@@ -43,7 +43,7 @@
  		</tr>";
  $offline = Array();
  $threshold = time() - 86400;
- while (list($bogus, $data)=each($jobj["data"])) {
+ foreach($jobj["data"] as $bogus => $data){
      $sid = $data["station"];
  	$uri = sprintf("/sites/site.php?station=%s&network=ISUSM", $sid);
  	
@@ -84,11 +84,11 @@
  
  $table .= "</table>";
  if (sizeof($offline) > 0){
- 	$table .= sprintf("<br />Sites Offline: %s", implode($offline, ", "));
+ 	$table .= sprintf("<br />Sites Offline: %s", implode(", ", $offline));
  }
  $v = isset($_REQUEST["v"]) ? htmlentities($_REQUEST["v"]): 'tmpf';
  $t = new MyView();
- $t->current_network = "ISUSM";
+ $t->current_network = "ISU Soil Moisture";
  $t->title = "ISU Ag Climate Sortable Currents"; 
  $t->thispage = "networks-agclimate";
 

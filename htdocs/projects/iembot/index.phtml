@@ -21,7 +21,7 @@
 EOF;
  
  $wselect = "<select name=\"wfo\" onChange=\"javascript: urlChanger(); return false;\">";
-while (list($key, $val) = each($nt->table)){
+foreach($nt->table as $key => $val){
   $wselect .= "<option value=\"$key\">[$key] ". $val["name"] ."\n";
 }
 $wselect .= "</select>";

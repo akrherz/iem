@@ -42,7 +42,7 @@ if ($portfolio != null)
 	}
 
 
-	while (list($param,$tbl) = each($rowDict)){
+	foreach($rowDict as $param => $tbl){
 		$table .= "<tr><th colspan=\"6\" align=\"left\" style=\"background: #eee; border-bottom: 1px solid #000\">". $varDict[$param] ."</th></tr>";
 		$table .= $tbl;
 	}

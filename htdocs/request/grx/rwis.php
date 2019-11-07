@@ -12,8 +12,8 @@ IconFile: 3, 25, 25, 12, 12, "https://mesonet.agron.iastate.edu/request/grx/rwis
 Font: 1, 11, 1, "Courier New"
 
 ';
-include("../../../config/settings.inc.php");
-include("../../../include/mlib.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/mlib.php";
 
 function pcolor($tmpf)
 {
@@ -61,7 +61,7 @@ $jobj = json_decode($jdata, $assoc=TRUE);
 
 $now = time();
 
-while (list($bogus, $iemob) = each($jobj["data"]) ){
+foreach($jobj["data"] as $bogus => $iemob){
     $mydata = $iemob;
     $tdiff = $now - strtotime($mydata["local_valid"]);
     if ($tdiff > 3600) continue;

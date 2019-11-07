@@ -3,10 +3,10 @@
  * Download COOP observations from the QC'd table
  * DEPRECIATE this at some point...
  */
-include("../../../config/settings.inc.php");
-include("../../../include/database.inc.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/database.inc.php";
 $connection = iemdb("coop");
-include("../../../include/mlib.php");
+require_once "../../../include/mlib.php";
 $network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,10) : "IACLIMATE";
 $day1 = isset($_GET["day1"]) ? $_GET["day1"] : die("No day1 specified");
 $day2 = isset($_GET["day2"]) ? $_GET["day2"] : die("No day2 specified");
@@ -154,8 +154,7 @@ tmax  1981  30.84  28.71  27.02  16.84  12.88   6.82   8.21   7.70  11.90  20.02
 	}
 	$idxs = Array("prec", "tmin", "tmax");
 	for ($y=$year1;$y<=$year2;$y++){
-		reset($idxs);
-		while( list($key,$val)= each($idxs)){
+		foreach($idxs as $key => $val){
 			$response .= sprintf("%s  %s%7.2f%7.2f%7.2f%7.2f%7.2f%7.2f%7.2f".
 					"%7.2f%7.2f%7.2f%7.2f%7.2f\n", $val, $y,
 					$monthly["${y}01"][$val], $monthly["${y}02"][$val],
@@ -259,7 +258,7 @@ else if (in_array('dndc', $vars)){
 	chdir("/tmp");
 	$zip = new ZipArchive;
 	$res = $zip->open('dndc.zip', ZipArchive::CREATE);
-	while (list($key, $val) = each($zipfiles)){
+	foreach($zipfiles as $key => $val){
 		$zip->addFromString($key, $val);
 	}
 	$zip->close();

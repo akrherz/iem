@@ -67,7 +67,7 @@ $jobj = json_decode($jdata, $assoc=TRUE);
 /* Final data array */
 $mydata = Array();
 
-while ( list($bogus, $iemob) = each($jobj["data"]) ){
+foreach($jobj["data"] as $bogus => $iemob){
     $key = $iemob["station"];
     $mydata[$key] = $iemob;
     $mydata[$key]["ts"] = strtotime($iemob["local_valid"]);
@@ -86,8 +86,7 @@ while ( list($bogus, $iemob) = each($jobj["data"]) ){
 
 if($format == 'csv'){
 	$csv = "station,valid_gmt,tmpf,max_tmpf,min_tmpf,dwpf,sknt,drct,relh,vsby,phour_in,pday_in,metar\n";
-	while (list ($key, $val) = each ($mydata))  {
-		$data = $mydata[$key];
+	foreach($mydata as $key => $data){
 		$csv .= sprintf("%s,%s,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.1f,%s,%.2f,%.2f,%s\n", $key, 
 		    gmstrftime("%Y-%m-%d %H:%M", strtotime($data['utc_valid'])),
 			$data['tmpf'], $data["max_tmpf"], $data["min_tmpf"], 
@@ -201,9 +200,8 @@ $finalA = aSortBySecondIndex($mydata, $sortcol, $sorder);
 $now = time();
 $i = 0;
 $old = "";
-while (list ($key, $val) = each ($finalA))  {
+foreach ($finalA as $key => $parts){
   $i++;
-  $parts = $finalA[$key];
 
   $row = "<tr";
   if ($i % 2 == 0)  $row .= " bgcolor='#eeeeee'";  

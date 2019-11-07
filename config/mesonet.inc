@@ -218,7 +218,8 @@
   </Directory>
 
   <Directory "/opt/iem/htdocs/wx/afos">
-    AddHandler cgi-script .py
+    WSGIProcessGroup iemwsgi_ap
+    AddHandler wsgi-script .py
     Options +ExecCGI
 
     RewriteRule ([0-9]{12})_([A-Z0-9\s]+).png$ text2png.py?e=$1&pil=$2
@@ -321,7 +322,8 @@
   </Directory>
 
   <Directory "/opt/iem/htdocs/current">
-    AddHandler cgi-script .py
+    WSGIProcessGroup iemwsgi_ap
+    AddHandler wsgi-script .py
     Options +ExecCGI
 
 	RewriteRule live.php(.*)$ live.py$1
@@ -329,7 +331,8 @@
   </Directory>
 
   <Directory "/opt/iem/htdocs/other">
-    AddHandler cgi-script .py
+    WSGIProcessGroup iemwsgi_ap
+    AddHandler wsgi-script .py
     Options +ExecCGI
 
     RewriteRule kymn.phtml current.phtml?network=KYMN
@@ -357,7 +360,8 @@
   </Directory>
 
   <Directory "/opt/iem/htdocs/request">
-    AddHandler cgi-script .py
+    WSGIProcessGroup iemwsgi_ap
+    AddHandler wsgi-script .py
     Options +ExecCGI
     RewriteRule maxcsv/(.*).txt$ maxcsv.py?q=$1
 

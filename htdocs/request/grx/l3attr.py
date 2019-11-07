@@ -11,18 +11,16 @@ TODO suggestions:
 
 TODO:
 Add storm tracks.
-
-
 """
-import cgi
 import math
 
 import memcache
 import pyproj
 import numpy as np
 import psycopg2.extras
+from paste.request import parse_formvars
 from pyiem.datatypes import speed
-from pyiem.util import get_dbconn, ssw
+from pyiem.util import get_dbconn
 
 # Do geo math in US National Atlas Equal Area
 P3857 = pyproj.Proj(init="epsg:3857")
@@ -348,12 +346,12 @@ def produce_content(nexrad):
     return res
 
 
-def main():
+def application(environ, start_response):
     """ Go Main Go """
-    form = cgi.FieldStorage()
-    nexrad = form.getfirst("nexrad", "").upper()[:3]
+    form = parse_formvars(environ)
+    nexrad = form.get("nexrad", "").upper()[:3]
     if nexrad == "":
-        lon = form.getfirst("lon")
+        lon = form.get("lon")
         if lon is not None:
             for line in RADARS.split("\n"):
                 if line.find(lon) > 0:
@@ -365,9 +363,5 @@ def main():
     if not res:
         res = produce_content(nexrad)
         mc.set(mckey, res, 60)
-    ssw("Content-type: text/plain\n\n")
-    ssw(res)
-
-
-if __name__ == "__main__":
-    main()
+    start_response("200 OK", [("Content-type", "text/plain")])
+    return [res.encode("ascii")]

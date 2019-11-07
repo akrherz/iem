@@ -1,9 +1,9 @@
 <?php
- include("../../config/settings.inc.php");
+ require_once "../../config/settings.inc.php";
  define("IEM_APPID", 75);
- include("../../include/myview.php");
+ require_once "../../include/myview.php";
  $t = new MyView();
- include_once "../../include/database.inc.php";
+ require_once "../../include/database.inc.php";
  require_once "../../include/forms.php";
  require_once "../../include/mlib.php";
  $pgconn = iemdb('iem');
@@ -98,7 +98,7 @@ $content = <<<EOF
 <tbody>
 EOF;
  $now = time();
- while (list($site, $value) = each($final) ){
+ foreach($final as $site => $value){
    $url = sprintf("/sites/site.php?station=%s&network=%s", $site, $network);
    $content .= "<tr><td><a href=\"$url\">$site</a></td>
     <td>". $value["name"] ."</font></td>";

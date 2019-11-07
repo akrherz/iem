@@ -147,7 +147,7 @@ $content .= '<p><table class="table table-condensed table-bordered">';
 $rvs = array_keys($rivers);
 asort($rvs);
 
-while (list($idx, $key) = each($rvs))
+foreach($rvs as $idx => $key)
 {
   $content .=  "<tr><th colspan=\"7\" style='background: #eee; text-align: left;'>$key</th></tr>";
   $content .=  $rivers[$key];

@@ -34,7 +34,7 @@ $d = Array(
 		"USCRN" => Array("url" => "/current/uscrn.phtml"),
 );
 $i = 1;
-while ( list($key, $value) = each($d) ){
+foreach($d as $key => $value){
 	echo "<th";
 	if ($this->current_network == $key){
 		echo " class=\"info\">$key</th>";

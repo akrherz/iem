@@ -74,7 +74,7 @@ $jdata = file_get_contents($uri);
 $jobj = json_decode($jdata, $assoc=TRUE);
 
 $db = Array();
-while (list($bogus, $iemob) = each($jobj["data"]) ){
+foreach($jobj["data"] as $bogus => $iemob){
     $site = $iemob["station"];
 	$db[$site] = Array('snow'=> "", 'snowd'=>"", 'ratio'=>"", 'pday'=>"",
 			'min_tmpf'=>"", 'max_tmpf'=>"", 'tmpf'=>"", 'snoww'=>"");
@@ -113,7 +113,7 @@ $db = aSortBySecondIndex($db, $sortcol, $sortdir);
 $oddrow = true;
 $firstsection = "";
 $lastsection = "";
-while (list($site, $value) = each($db) ){
+foreach($db as $site => $value){
 	$oddrow = ! $oddrow;
 	if (date("Ymd", $value["ts"]) == date("Ymd")){
 		$firstsection .= make_row($value, $oddrow);
@@ -164,7 +164,7 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 $nselect .= "</select>";
 
 $wselect = "<select name=\"wfo\">";
-while( list($key, $value) = each($nt->table) ){
+foreach($nt->table as $key => $value){
 	$wselect .= "<option value=\"$key\" ";
 	if ($wfo == $key) $wselect .= "SELECTED";
 	$wselect .= ">[".$key."] ". $nt->table[$key]["name"] ."\n";

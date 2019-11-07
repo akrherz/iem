@@ -293,14 +293,14 @@ function get_title($page){
 	return sprintf("%s", $page["title"]);
 }
 
-while( list($idx, $page) = each($_pages) )
+foreach($_pages as $idx => $page)
 {
   	echo sprintf("<li class=\"dropdown%s\">\n<a class=\"dropdown-toggle\" 
 		data-toggle=\"dropdown\" href=\"#\">%s</a>\n", 
       ($ar[0] == $idx) ? " active" : "", get_title($page));
 
     echo "<ul class=\"dropdown-menu\">\n";
-    while( list($idx2, $page2) = each($page["subs"]) )
+    foreach($page["subs"] as $idx2 => $page2)
     {
        echo sprintf("<li><a%s href=\"%s\">%s</a></li>\n", 
          ($ar[1] == $idx2 && $ar[0] == $idx) ? " class=\"active\"" : "",

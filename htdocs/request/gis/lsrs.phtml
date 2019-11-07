@@ -1,9 +1,9 @@
 <?php 
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 17);
-include("../../../include/forms.php");
-include("../../../include/myview.php");
-include("../../../include/network.php");
+require_once "../../../include/forms.php";
+require_once "../../../include/myview.php";
+require_once "../../../include/network.php";
 $nt = new NetworkTable("WFO");
 
 $t = new MyView();
@@ -22,7 +22,7 @@ $hs2 = gmtHourSelect(0, "hour2");
 $ns2 = minuteSelect(0, "minute2");
 
 $ss = "";
-while( list($key, $value) = each($nt->table) ){
+foreach($nt->table as $key => $value){
 	$ss .= "<option value='$key'>[$key] ". $value["name"] ."</option>\n";
 }
 

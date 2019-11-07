@@ -74,11 +74,11 @@ for ($i=0;$row= @pg_fetch_array($rs,$i);$i++)
       $color = $colors[$row["cond_code"]];
   }
   echo "Color: ${color}\n";
-  while(list($q,$seg) = each($segments))
+  foreach($segments as $q => $seg)
   {
     echo "Line: 4, 0, ". $row["major"] ." :: ". $row["minor"]  ."\\nReport: ". $row["raw"] ."\\nTime: ". date('j M Y g:i A', $valid) ."\n";
     $tokens = explode(",", $seg);
-    while (list($p,$s) = each($tokens)){
+    foreach($tokens as $p => $s){
       $t = explode(" ", $s);
       echo sprintf("  %.5f,%.5f", $t[1], $t[0]) ."\n";
     }

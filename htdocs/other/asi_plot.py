@@ -1,27 +1,23 @@
 #!/usr/bin/env python
 """ ASI Data Timeseries """
 from __future__ import print_function
-import sys
 import datetime
-import cgitb
-import cgi
+from io import BytesIO
 
 import psycopg2.extras
 import pytz
 import numpy as np
 import matplotlib.dates as mdates
-
+from paste.request import parse_formvars
 from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, ssw
-
-cgitb.enable()
+from pyiem.util import get_dbconn
 
 
-def main():
+def application(environ, start_response):
     """Go Main Go"""
     nt = NetworkTable("ISUASI")
-    form = cgi.FieldStorage()
+    form = parse_formvars(environ)
     if (
         "syear" in form
         and "eyear" in form
@@ -52,9 +48,8 @@ def main():
 
     station = form.getvalue("station", "ISU4003")
     if station not in nt.sts:
-        print("Content-type: text/plain\n")
-        print("ERROR")
-        return
+        start_response("200 OK", [("Content-type", "text/plain")])
+        return [b"ERROR"]
 
     pgconn = get_dbconn("other")
     icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -81,13 +76,15 @@ def main():
         data["ch%savg" % (i,)] = np.array(data["ch%savg" % (i,)])
 
     if len(valid) < 3:
-        (fig, ax) = plt.subplots(1, 1)
+        (_fig, ax) = plt.subplots(1, 1)
         ax.text(0.5, 0.5, "Sorry, no data found!", ha="center")
-        print("Content-Type: image/png\n")
-        plt.savefig(sys.stdout, format="png")
-        return
+        start_response("200 OK", [("Content-Type", "image/png")])
+        io = BytesIO()
+        plt.savefig(io, format="png")
+        io.seek(0)
+        return [io.read()]
 
-    (fig, ax) = plt.subplots(2, 1, sharex=True)
+    (_fig, ax) = plt.subplots(2, 1, sharex=True)
     ax[0].grid(True)
 
     ax[0].plot(
@@ -140,9 +137,8 @@ def main():
     ax[1].set_ylabel("Air Temperature [C]")
     ax[1].legend(loc="best")
 
-    ssw("Content-Type: image/png\n\n")
-    fig.savefig(getattr(sys.stdout, "buffer", sys.stdout), format="png")
-
-
-if __name__ == "__main__":
-    main()
+    start_response("200 OK", [("Content-Type", "image/png")])
+    io = BytesIO()
+    plt.savefig(io, format="png")
+    io.seek(0)
+    return [io.read()]

@@ -116,7 +116,7 @@ function fmt($val, $varname){
  	}
  
  $table = "<table class=\"table table-striped\">";
- while (list($key, $label) = each($vardict)){
+ foreach($vardict as $key => $label){
 	if (! array_key_exists($key, $json["last_ob"])){
 		continue;
 	}

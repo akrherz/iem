@@ -51,7 +51,7 @@ $location_select_group_meta = array(
 $selected_group = 'wfo';
 $wselect = "<select name=\"wfos[]\" MULTIPLE size=\"5\">";
 $wselect .= "<option value=\"ALL\" SELECTED>All Available</option>";
-while( list($key, $value) = each($nt->table) ){
+foreach($nt->table as $key => $value){
   $wselect .= "<option value='$key'>[$key] ". $nt->table[$key]["name"] ."</option>\n";
 }
 $wselect .= "</select>";

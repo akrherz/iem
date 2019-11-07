@@ -1,11 +1,11 @@
 <?php
 // Build Network station tables on demand!
 
-include_once dirname(__FILE__) ."/database.inc.php";
+require_once dirname(__FILE__) ."/database.inc.php";
 
 class NetworkTable {
 
-  function NetworkTable($a)
+  function __construct($a)
   {
     $this->table = Array();
     // We force new here to prevent reused prepared statement names, hack
