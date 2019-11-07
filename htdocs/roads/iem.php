@@ -85,30 +85,38 @@ $roads->set("status", MS_ON);
 $dbvalid = date('Y-m-d H:i', $ts);
 $dbvalid2 = date('Y-m-d H:i', $ts - 14 * 86400);
 if (isset($_GET['valid'])) {
-  $roads->set("data", "geom from (WITH data as ( ". 
-  "select b.type as rtype, b.int1, ". 
-  "random() as boid, b.segid, c.cond_code, b.geom, ". 
+  $roads->set("data", "geom from (with data as (".
+  "select b.type as rtype, b.int1, b.segid, c.cond_code, ". 
   "row_number() OVER (PARTITION by b.segid ORDER by c.valid DESC) ". 
-  "from roads_base b, ". 
-  "roads_2019_2020_log c WHERE b.segid = c.segid and b.type > 1 and ". 
-  "c.valid < '$dbvalid' and c.valid > '$dbvalid2' ". 
-  "ORDER by b.segid DESC) select * from data WHERE row_number = 1) as foo ". 
-  "using UNIQUE boid using SRID=26915");
+  "from roads_base b, roads_2019_2020_log c WHERE b.segid = c.segid ". 
+  "and b.type > 1 and c.valid < '$dbvalid' and ". 
+  "c.valid > '$dbvalid2'), ". 
+  "agg as (select * from data where row_number = 1) ". 
+  "select b.type as rtype, b.int1, random() as boid, b.geom, ".
+  "coalesce(d.cond_code, 0) as cond_code from ". 
+  "roads_base b LEFT JOIN agg d on (b.segid = d.segid) ". 
+  "WHERE b.type > 1 and ". 
+  "b.archive_end > '$dbvalid' and b.archive_begin < '$dbvalid')".  
+  "as foo using UNIQUE boid using SRID=26915");
 }
 $roads->draw($img);
 
 $roads_int = $map->getlayerbyname("roads-inter");
 $roads_int->set("status", MS_ON);
 if (isset($_GET['valid'])) {
-  $roads_int->set("data", "geom from (WITH data as ( ". 
-  "select b.type as rtype, b.int1, ". 
-  "random() as boid, b.segid, c.cond_code, b.geom, ". 
-  "row_number() OVER (PARTITION by b.segid ORDER by c.valid DESC) ". 
-  "from roads_base b, ". 
-  "roads_2019_2020_log c WHERE b.segid = c.segid and b.type = 1 and ". 
-  "c.valid < '$dbvalid' and c.valid > '$dbvalid2' ". 
-  "ORDER by b.segid DESC) select * from data WHERE row_number = 1) as foo ". 
-  "using UNIQUE boid using SRID=26915");
+    $roads_int->set("data", "geom from (with data as (".
+    "select b.type as rtype, b.int1, b.segid, c.cond_code, ". 
+    "row_number() OVER (PARTITION by b.segid ORDER by c.valid DESC) ". 
+    "from roads_base b, roads_2019_2020_log c WHERE b.segid = c.segid ". 
+    "and b.type > 1 and c.valid < '$dbvalid' and ". 
+    "c.valid > '$dbvalid2'), ". 
+    "agg as (select * from data where row_number = 1) ". 
+    "select b.type as rtype, b.int1, random() as boid, b.geom, ".
+    "coalesce(d.cond_code, 0) as cond_code from ". 
+    "roads_base b LEFT JOIN agg d on (b.segid = d.segid) ". 
+    "WHERE b.type = 1 and ". 
+    "b.archive_end > '$dbvalid' and b.archive_begin < '$dbvalid')".  
+    "as foo using UNIQUE boid using SRID=26915");
 }
 $roads_int->draw($img);
 
