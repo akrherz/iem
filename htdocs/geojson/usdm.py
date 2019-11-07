@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 """ Generate a GeoJSON of US Drought Monitor"""
-import cgi
 import json
 import datetime
 
 import memcache
 import psycopg2.extras
-from pyiem.util import get_dbconn, ssw, html_escape
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn, html_escape
 
 
 def rectify_date(tstamp):
@@ -74,13 +74,13 @@ def run(ts):
     return json.dumps(res)
 
 
-def main():
+def application(environ, start_response):
     """Main Workflow"""
-    ssw("Content-type: application/vnd.geo+json\n\n")
+    headers = [("Content-type", "application/vnd.geo+json")]
 
-    form = cgi.FieldStorage()
-    cb = form.getfirst("callback", None)
-    ts = rectify_date(form.getfirst("date", ""))
+    form = parse_formvars(environ)
+    cb = form.get("callback", None)
+    ts = rectify_date(form.get("date", ""))
 
     mckey = "/geojson/usdm.geojson|%s" % (ts,)
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
@@ -90,11 +90,9 @@ def main():
         mc.set(mckey, res, 15 if ts == "" else 3600)
 
     if cb is None:
-        ssw(res)
+        data = res
     else:
-        ssw("%s(%s)" % (html_escape(cb), res))
+        data = "%s(%s)" % (html_escape(cb), res)
 
-
-if __name__ == "__main__":
-    # Go Main Go
-    main()
+    start_response("200 OK", headers)
+    return [data.encode("ascii")]

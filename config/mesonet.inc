@@ -233,8 +233,10 @@
   </Directory>
 
   <Directory "/opt/iem/htdocs/geojson">
-    AddHandler cgi-script .py
+    WSGIProcessGroup iemwsgi_ap
+    AddHandler wsgi-script .py
     Options +ExecCGI
+
 	## QSA causes the query string to be appended
 	RewriteRule network/(.*).geojson network.py?network=$1 [QSA]
 	# 7 Dec 2016: Rewrote service as Python

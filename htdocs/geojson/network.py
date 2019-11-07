@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 """GeoJSON of a given IEM network code"""
-import cgi
 import json
 import datetime
 
 import psycopg2.extras
 import memcache
-from pyiem.util import get_dbconn, ssw, html_escape
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn, html_escape
 
 
 def run(network):
@@ -56,13 +56,13 @@ def run(network):
     return json.dumps(res)
 
 
-def main():
+def application(environ, start_response):
     """Main Workflow"""
-    ssw("Content-type: application/vnd.geo+json\n\n")
+    headers = [("Content-type", "application/vnd.geo+json")]
 
-    form = cgi.FieldStorage()
-    cb = form.getfirst("callback", None)
-    network = form.getfirst("network", "KCCI")
+    form = parse_formvars(environ)
+    cb = form.get("callback", None)
+    network = form.get("network", "KCCI")
 
     mckey = "/geojson/network/%s.geojson" % (network,)
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
@@ -72,11 +72,9 @@ def main():
         mc.set(mckey, res, 3600)
 
     if cb is None:
-        ssw(res)
+        data = res
     else:
-        ssw("%s(%s)" % (html_escape(cb), res))
+        data = "%s(%s)" % (html_escape(cb), res)
 
-
-if __name__ == "__main__":
-    # Go Main Go
-    main()
+    start_response("200 OK", headers)
+    return [data.encode("ascii")]

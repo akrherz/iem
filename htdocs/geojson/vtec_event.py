@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 """GeoJSON source for VTEC event"""
-import cgi
 import json
 import datetime
 
 import memcache
 import psycopg2.extras
-from pyiem.util import get_dbconn, ssw, html_escape
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn, html_escape
 
 ISO = "%Y-%m-%dT%H:%M:%SZ"
 
@@ -176,21 +176,21 @@ def run(wfo, year, phenomena, significance, etn):
     return json.dumps(res)
 
 
-def main():
+def application(environ, start_response):
     """Main()"""
-    ssw("Content-type: application/vnd.geo+json\n\n")
+    headers = [("Content-type", "application/vnd.geo+json")]
 
-    form = cgi.FieldStorage()
-    wfo = form.getfirst("wfo", "MPX")
+    form = parse_formvars(environ)
+    wfo = form.get("wfo", "MPX")
     if len(wfo) == 4:
         wfo = wfo[1:]
-    year = int(form.getfirst("year", 2015))
-    phenomena = form.getfirst("phenomena", "SV")[:2]
-    significance = form.getfirst("significance", "W")[:1]
-    etn = int(form.getfirst("etn", 1))
-    sbw = int(form.getfirst("sbw", 0))
-    lsrs = int(form.getfirst("lsrs", 0))
-    cb = form.getfirst("callback", None)
+    year = int(form.get("year", 2015))
+    phenomena = form.get("phenomena", "SV")[:2]
+    significance = form.get("significance", "W")[:1]
+    etn = int(form.get("etn", 1))
+    sbw = int(form.get("sbw", 0))
+    lsrs = int(form.get("lsrs", 0))
+    cb = form.get("callback", None)
 
     mckey = ("/geojson/vtec_event/%s/%s/%s/%s/%s/%s/%s") % (
         wfo,
@@ -214,10 +214,9 @@ def main():
         mc.set(mckey, res, 3600)
 
     if cb is None:
-        ssw(res)
+        data = res
     else:
-        ssw("%s(%s)" % (html_escape(cb), res))
+        data = "%s(%s)" % (html_escape(cb), res)
 
-
-if __name__ == "__main__":
-    main()
+    start_response("200 OK", headers)
+    return [data.encode("ascii")]

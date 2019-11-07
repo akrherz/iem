@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """ Recent METARs containing some pattern """
-import cgi
 import json
 
 import memcache
 import psycopg2.extras
-from pyiem.util import get_dbconn, ssw, html_escape
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn, html_escape
 from pyiem.reference import TRACE_VALUE
 
 json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
@@ -80,13 +80,13 @@ def get_data(q):
     return json.dumps(data)
 
 
-def main():
+def application(environ, start_response):
     """ see how we are called """
-    field = cgi.FieldStorage()
-    q = field.getfirst("q", "snowdepth")[:10]
-    cb = field.getfirst("callback", None)
+    field = parse_formvars(environ)
+    q = field.get("q", "snowdepth")[:10]
+    cb = field.get("callback", None)
 
-    ssw("Content-type: application/vnd.geo+json\n\n")
+    headers = [("Content-type", "application/vnd.geo+json")]
 
     mckey = ("/geojson/recent_metar?callback=%s&q=%s") % (cb, q)
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
@@ -95,10 +95,9 @@ def main():
         res = get_data(q)
         mc.set(mckey, res, 300)
     if cb is None:
-        ssw(res)
+        data = res
     else:
-        ssw("%s(%s)" % (html_escape(cb), res))
+        data = "%s(%s)" % (html_escape(cb), res)
 
-
-if __name__ == "__main__":
-    main()
+    start_response("200 OK", headers)
+    return [data.encode("ascii")]

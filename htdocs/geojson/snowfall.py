@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 """ Produce geojson of Snowfall data """
-import cgi
 import datetime
 import json
 
 import memcache
 import psycopg2.extras
-from pyiem.util import get_dbconn, ssw, html_escape
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn, html_escape
 from pyiem.reference import TRACE_VALUE
 
 json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
@@ -59,13 +59,13 @@ def get_data(ts):
     return json.dumps(data)
 
 
-def main():
+def application(environ, start_response):
     """see how we are called"""
-    field = cgi.FieldStorage()
-    dt = field.getfirst("dt", datetime.date.today().strftime("%Y-%m-%d"))
+    field = parse_formvars(environ)
+    dt = field.get("dt", datetime.date.today().strftime("%Y-%m-%d"))
     ts = datetime.datetime.strptime(dt, "%Y-%m-%d")
-    cb = field.getfirst("callback", None)
-    ssw("Content-type: application/vnd.geo+json\n\n")
+    cb = field.get("callback", None)
+    headers = [("Content-type", "application/vnd.geo+json")]
 
     mckey = "/geojson/snowfall/%s?callback=%s" % (ts.strftime("%Y%m%d"), cb)
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
@@ -74,10 +74,9 @@ def main():
         res = get_data(ts)
         mc.set(mckey, res, 300)
     if cb is None:
-        ssw(res)
+        data = res
     else:
-        ssw("%s(%s)" % (html_escape(cb), res))
+        data = "%s(%s)" % (html_escape(cb), res)
 
-
-if __name__ == "__main__":
-    main()
+    start_response("200 OK", headers)
+    return [data.encode("ascii")]

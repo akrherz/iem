@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 """ Generate a GeoJSON of nexrad attributes"""
-import cgi
 import json
 import datetime
 
 import memcache
 import psycopg2.extras
 import pytz
-from pyiem.util import get_dbconn, ssw, html_escape
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn, html_escape
 
 
 def run(ts):
@@ -29,8 +29,7 @@ def run(ts):
         try:
             valid = datetime.datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S")
         except ValueError:
-            ssw("ERROR")
-            return
+            return "ERROR"
         valid = valid.replace(tzinfo=pytz.UTC)
         tbl = "nexrad_attributes_%s" % (valid.year,)
         cursor.execute(
@@ -100,14 +99,14 @@ def run(ts):
     return json.dumps(res)
 
 
-def main():
+def application(environ, start_response):
     """Do Something"""
     # Go Main Go
-    ssw("Content-type: application/vnd.geo+json\n\n")
+    headers = [("Content-type", "application/vnd.geo+json")]
 
-    form = cgi.FieldStorage()
-    cb = form.getfirst("callback", None)
-    ts = form.getfirst("valid", "")[:19]  # ISO-8601ish
+    form = parse_formvars(environ)
+    cb = form.get("callback", None)
+    ts = form.get("valid", "")[:19]  # ISO-8601ish
 
     mckey = "/geojson/nexrad_attr.geojson|%s" % (ts,)
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
@@ -117,10 +116,9 @@ def main():
         mc.set(mckey, res, 30 if ts == "" else 3600)
 
     if cb is None:
-        ssw(res)
+        data = res
     else:
-        ssw("%s(%s)" % (html_escape(cb), res))
+        data = "%s(%s)" % (html_escape(cb), res)
 
-
-if __name__ == "__main__":
-    main()
+    start_response("200 OK", headers)
+    return [data.encode("ascii")]

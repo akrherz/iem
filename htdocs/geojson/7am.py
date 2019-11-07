@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 """ Generate a GeoJSON of 7 AM precip data """
-import cgi
 import datetime
 import json
 
 import memcache
 import psycopg2.extras
 import pytz
-from pyiem.util import get_dbconn, ssw, html_escape
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn, html_escape
 
 
 def router(group, ts):
@@ -113,14 +113,14 @@ def run(ts):
     return json.dumps(res)
 
 
-def main():
+def application(environ, start_response):
     """Do Workflow"""
-    ssw("Content-type: application/vnd.geo+json\n\n")
+    headers = [("Content-type", "application/vnd.geo+json")]
 
-    form = cgi.FieldStorage()
-    group = form.getfirst("group", "coop")
-    cb = form.getfirst("callback", None)
-    dt = form.getfirst("dt", datetime.date.today().strftime("%Y-%m-%d"))
+    form = parse_formvars(environ)
+    group = form.get("group", "coop")
+    cb = form.get("callback", None)
+    dt = form.get("dt", datetime.date.today().strftime("%Y-%m-%d"))
     ts = datetime.datetime.strptime(dt, "%Y-%m-%d")
     ts = ts.replace(hour=12, tzinfo=pytz.utc)
 
@@ -132,10 +132,9 @@ def main():
         mc.set(mckey, res, 15)
 
     if cb is None:
-        ssw(res)
+        data = res
     else:
-        ssw("%s(%s)" % (html_escape(cb), res))
+        data = "%s(%s)" % (html_escape(cb), res)
 
-
-if __name__ == "__main__":
-    main()
+    start_response("200 OK", headers)
+    return [data.encode("ascii")]
