@@ -42,11 +42,11 @@ $ar = Array(
   "snw", "cig", "vis", "obv", "poz", "pos", "typ", "sky", "swh", "lcb",
   "i06", "slv", "s06", "pra", "ppl", "psn", "pzr", "t03", "gst");
 
-echo implode($ar, ",") ."\n";
+echo implode(",", $ar) ."\n";
 for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 {
   reset($ar);
-  while (list($k,$v) = each($ar))
+  foreach($ar as $k => $v)
   {
     echo sprintf("%s,", $row[$v]);
   }

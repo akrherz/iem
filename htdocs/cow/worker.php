@@ -71,7 +71,7 @@ function printWARN($cow, $warn)
   			be added to the Cow to better account for these.</td></tr>";
   }
   
-  while ( list($k,$lsr) = each($warn["lsrs"])){ 
+  foreach($warn["lsrs"] as $k => $lsr){ 
 	$s .= printLSR($cow->lsrs[$lsr]); 
   }
   return $s;
@@ -128,14 +128,14 @@ $tdq = $cow->computeTDQEvents();
 $wtable = "";
 reset($cow->warnings);
 $wsz = sizeof($cow->warnings);
-while( list($k, $warn) = each($cow->warnings)){
+foreach($cow->warnings as $k => $warn){
 	$wtable .= printWARN($cow, $warn);
 }
 
 $ltable = "";
 reset($cow->lsrs);
 $lsz = sizeof($cow->lsrs);
-while ( list($k,$lsr) = each($cow->lsrs)){
+foreach($cow->lsrs as $k => $lsr){
 	if ($lsr["warned"]) continue;
 
 	$ltable .= printLSR($lsr);

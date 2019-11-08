@@ -63,7 +63,7 @@ putenv("TZ=UTC");
  $h2 = gmtHourSelect($ehour, "ehour");
  
  $wselect = "<select name=\"wfo\" class=\"iemselect2\">";
- while( list($key, $value) = each($nt->table) ){
+ foreach($nt->table as $key => $value){
  	$wselect .= "<option value=\"$key\" ";
  	if ($wfo == $key) $wselect .= "SELECTED";
  	$wselect .= ">". $nt->table[$key]["name"] ." [".$key."]</option>\n";
@@ -76,7 +76,7 @@ putenv("TZ=UTC");
 	 "FF" => "Flash Flood (2008+)",
      "DS" => "Dust Storm (2018+)");
  $tselect = "";
- while (list($k,$v)=each($ar)){
+ foreach($ar as $k => $v){
  	$tselect .= sprintf("<input name=\"wtype[]\" type=\"checkbox\" 
  			id=\"%s\" value=\"%s\"%s>%s</input>", $k, $k, 
  		(in_array($k, $wtype) ? " CHECKED": ""), $v);
@@ -90,7 +90,7 @@ putenv("TZ=UTC");
  "FF" => "Flash Flood (2008+)",
  "DS" => "Dust Storm (2018+)");
  $ltselect = "";
- while (list($k,$v)=each($ar)){
+ foreach($ar as $k => $v){
  	if ($k == "MA2") $ltselect .= "<br />";
  	$ltselect .= sprintf("<input name=\"ltype[]\" type=\"checkbox\"
  			id=\"%s%s\" value=\"%s\"%s>%s</input>", $k, 

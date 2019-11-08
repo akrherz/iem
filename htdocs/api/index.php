@@ -88,7 +88,7 @@ $srv[] = Array(
     );
 
 $table = "";
-while (list($unused, $ws) = each($srv)){
+foreach($srv as $unused => $ws){
     $table .= sprintf("<div class='sect'><strong><a href=\"#%s\">".
         "<i class=\"fa fa-bookmark\"></i></a> <a name=\"%s\">%s</a></strong>".
         "<br /><strong>Description:</strong> %s",
@@ -98,7 +98,7 @@ while (list($unused, $ws) = each($srv)){
     <p><strong>Service Endpoint Examples</strong>
 <table class="table table-condensed table-striped">
 EOM;
-    while (list($key, $ep) = each($ws['endpoints'])){
+    foreach($ws['endpoints'] as $key => $ep){
         $table .= sprintf("<tr><th>%s%s</th><td>%s</td></tr>", ROOTURL,
             $key, $ep);
     }
@@ -110,7 +110,7 @@ uses <a href="https://frictionlessdata.io/specs/table-schema/">JSON Table Schema
 for returned content. Here's a description of the column identifiers used.
 <table class="table table-condensed table-striped">
 EOM;
-    while (list($key, $desc) = each($ws['schema'])){
+    foreach($ws['schema'] as $key => $desc){
         $table .= sprintf("<tr><th>%s</th><td>%s</td></tr>", $key, $desc);
     }
     $table .= "</table>";

@@ -1,9 +1,9 @@
 <?php
-include("../../../../config/settings.inc.php");
+require_once "../../../../config/settings.inc.php";
 define("IEM_APPID", 68);
-include_once "../../../../include/myview.php";
-include("lib.php");
-include("../../../../include/network.php");
+require_once "../../../../include/myview.php";
+require_once "lib.php";
+require_once "../../../../include/network.php";
 require_once "../../../../include/forms.php";
 
 $t = new MyView();
@@ -30,9 +30,6 @@ if ($ul_x != ""){
 } else {
   $extents = Array(-96.639706, 39.1497,-90.140061, 44.726);
 }
-?>
-
-<?php
 
 $t->title = "RADAR Comparison";
 $t->thispage = "current-radar";
@@ -40,8 +37,6 @@ $nt = new NetworkTable("NEXRAD");
 
 $latlon = ms_newprojectionobj("init=epsg:4326");
 $p26915 = ms_newprojectionobj("init=epsg:26915");
-
-
 
 $cntyMdpoint = ms_newpointobj();
 $cntyMdpoint->setXY( ($extents[0] + $extents[2])/2, 
@@ -51,7 +46,7 @@ $cntyMdpoint->project($latlon, $p26915);
 $n = Array("DMX", "DVN", "ARX", "MPX", "FSD", "OAX", "EAX", "KCCI");
 $nt->table["KCCI"] = Array("lat"=> 41.8072, "lon"=> -93.6214);
 $distances = Array();
-while (list($key, $site) = each($n) ){
+foreach($n as $key => $site){
   $r = ms_newpointobj();
   $r->setXY($nt->table[$site]['lon'], $nt->table[$site]['lat']);
   $r->project($latlon, $p26915);

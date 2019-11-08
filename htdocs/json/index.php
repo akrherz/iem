@@ -781,15 +781,15 @@ for a given network that collects webcams and a UTC timestamp.",
 uses <a href="https://frictionlessdata.io/specs/table-schema/">JSON Table Schema</a>
 for returned content.
 EOM;
-  while (list($key, $ws) = each($services)){
+  foreach($services as $key => $ws){
   	$url = $ws['url'];
   	$uriadd = (strpos($url, "?") === FALSE) ? "?": "&amp;";
   	$ts = array_key_exists("table_schema", $ws) ? $TABLE_SCHEMA: "";
 	  $tc = '';
-	  while (list($key2, $vs) = each($ws['vars'])){
+	  foreach($ws['vars'] as $key2 => $vs){
 		$tc .= sprintf("<tr><th>%s</th><td>%s</td></tr>", $key2, $vs);
 	  }
-  	  while (list($key2, $vs) = each($ws['example'])){
+  	  foreach($ws['example'] as $key2 => $vs){
 		$url = str_replace($key2, $vs, $url);
 	  }
 	$td = sprintf("<a class=\"btn btn-default\" href=\"%s%s\">Example JSON</a>".

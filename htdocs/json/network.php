@@ -13,7 +13,7 @@ $nt = new NetworkTable($network);
 
 $ar = Array("stations"=> Array());
 
-while (list($sid,$data) = each($nt->table))
+foreach($nt->table as $sid => $data)
 {
   $z = Array("id"=>$sid, 
              "combo" => sprintf("[%s] %s", $sid, $data["name"]),

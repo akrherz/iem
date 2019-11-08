@@ -7,7 +7,7 @@ putenv("TZ=UTC");
 
 class cow {
 
-function cow($dbconn){
+function __construct($dbconn){
     /* Constructor */
     $this->dbconn = $dbconn;
     pg_query($dbconn, "SET TIME ZONE 'UTC'");
@@ -96,7 +96,7 @@ function sqlLSRTypeBuilder(){
     reset($this->ltype);
     if (sizeof($this->ltype) == 0){ return "type in ('@')"; }
     $l = Array();
-    while( list($k,$v) = each($this->ltype)){
+    foreach($this->ltype as $k => $v){
         if ($v == "TO"){ $l[] = "T"; }
         else if ($v == "SV"){ $l[] = "H"; $l[] = "G"; $l[] = "D"; }
         else if ($v == "MA"){ $l[] = "M"; $l[] = "W"; }
@@ -121,7 +121,7 @@ function computeAverageSize(){
     if (sizeof($this->warnings) == 0){ return 0; }
     reset($this->warnings);
     $polysz = 0;
-    while (list($k,$v) = each($this->warnings)){
+    foreach($this->warnings as $k => $v){
         $polysz += $v["parea"];
     }
     return $polysz / floatval(sizeof($this->warnings));
@@ -131,7 +131,7 @@ function computeSizeReduction(){
     reset($this->warnings);
     $polysz = 0;
     $countysz = 0;
-    while (list($k,$v) = each($this->warnings)){
+    foreach($this->warnings as $k => $v){
         $polysz += $v["parea"];
         $countysz += $v["carea"];
     }
@@ -149,7 +149,7 @@ function computeWarnedEvents(){
 
     reset($this->lsrs);
     $counter = 0;
-    while (list($k,$v) = each($this->lsrs)){
+    foreach($this->lsrs as $k => $v){
         if ($v["warned"]){ $counter += 1; }
     }
     return $counter;
@@ -160,7 +160,7 @@ function computeTDQEvents(){
 
     reset($this->lsrs);
     $counter = 0;
-    while (list($k,$v) = each($this->lsrs)){
+    foreach($this->lsrs as $k => $v){
         if ($v["tdq"]){ $counter += 1; }
     }
     return $counter;
@@ -171,7 +171,7 @@ function computeMaxLeadTime(){
 
    $large = 0;
    reset($this->lsrs);
-   while (list($k,$v) = each($this->lsrs)){
+   foreach($this->lsrs as $k => $v){
        if ($v["leadtime"] > $large){ $large = $v["leadtime"]; }
    }
    return $large;
@@ -180,7 +180,7 @@ function computeMinLeadTime(){
    if (sizeof($this->lsrs) == 0){ return 0; }
    $smallest = 99;
    reset($this->lsrs);
-   while (list($k,$v) = each($this->lsrs)){
+   foreach($this->lsrs as $k => $v){
        if ($v["leadtime"] < $smallest){ $smallest = $v["leadtime"]; }
    }
    return $smallest;
@@ -190,7 +190,7 @@ function computeMinLeadTime(){
 function computeAllLeadTime(){
    $ar = Array();
    reset($this->lsrs);
-   while (list($k,$v) = each($this->lsrs)){
+   foreach($this->lsrs as $k => $v){
        if ($v["leadtime"] != "NA"){ $ar[] = $v["leadtime"]; }
    }
    if (sizeof($ar) == 0){ return 0; }
@@ -200,7 +200,7 @@ function computeAllLeadTime(){
 function computeAverageLeadTime(){
    $ar = Array();
    reset($this->warnings);
-   while (list($k,$v) = each($this->warnings)){
+   foreach($this->warnings as $k => $v){
        if ($v["lead0"] > -1){ $ar[] = $v["lead0"]; }
    }
    if (sizeof($ar) == 0){ return 0; }
@@ -211,7 +211,7 @@ function computeAveragePerimeterRatio(){
    $shared = 0;
    $total = 0;
    reset($this->warnings);
-   while (list($k,$v) = each($this->warnings)){
+   foreach($this->warnings as $k => $v){
        $shared += $v["sharedborder"];
        $total += $v["perimeter"];
    }
@@ -244,7 +244,7 @@ function computeAreaVerify(){
     $lsrsz = 0;
     if (sizeof($this->warnings) == 0){ return 0; }
     reset($this->warnings);
-    while (list($k,$v) = each($this->warnings)){
+    foreach($this->warnings as $k => $v){
     	if ($v["buffered"] === null) continue;
         $polysz += $v["parea"];
         $lsrsz += $v["buffered"];
@@ -261,7 +261,7 @@ function computeWarningsVerifiedPercent(){
 function computeWarningsVerified(){
     reset($this->warnings);
     $counter = 0;
-    while (list($k,$v) = each($this->warnings)){
+    foreach($this->warnings as $k => $v){
         if ($v["verify"]){ $counter += 1; }
     }
     return $counter;
@@ -274,7 +274,7 @@ function computeWarningsUnverified(){
 function computeSharedBorder(){
 	// Compute the storm based warning intersection with the counties
     reset($this->warnings);
-    while (list($k,$v) = each($this->warnings)){
+    foreach($this->warnings as $k => $v){
     	$sql = <<<EOF
     WITH stormbased as (SELECT geom from sbw_{$v["year"]} 
     	where wfo = '{$v["wfo"]}' 
@@ -433,14 +433,14 @@ function areaVerify() {
 	 * Compute the areal verification for each warning
 	 */
     reset($this->warnings);
-    while (list($wkey,$warn) = each($this->warnings)) {
+    foreach($this->warnings as $wkey => $warn) {
         if (sizeof($warn["lsrs"]) == 0){ 
         	continue; 
         }
         
         $bufferedArray = Array();
         reset($warn["lsrs"]);
-        while (list($lkey,$lsr) = each($warn["lsrs"])){
+        foreach($warn["lsrs"] as $lkey => $lsr){
             $bufferedArray[] = sprintf("ST_SetSRID(ST_GeomFromText('%s'),2163)", 
               $this->lsrs[$lsr]["buffered"]);
         }
@@ -478,7 +478,7 @@ function sbwVerify() {
 	 * Compute if a warning verifies or not!
 	 */
     reset($this->warnings);
-    while (list($k,$v) = each($this->warnings)) {
+    foreach($this->warnings as $k => $v) {
     	/*
     	 * No SBW found?
     	 */

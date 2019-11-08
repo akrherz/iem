@@ -28,7 +28,7 @@ $ms2 = monthSelect($month1, "month2");
 $ds2 = daySelect2($day1, "day2");
 
 $table = "";
-while (list($k,$v) = each($mosvars)){
+foreach($mosvars as $k => $v){
 	$table .= sprintf("<tr><th>%s</th><td>%s</td></tr>\n", $k, $v);
 }
 
