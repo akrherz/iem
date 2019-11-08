@@ -11,6 +11,7 @@ git+https://github.com/akrherz/windrose.git@darylchanges
 git+https://github.com/akrherz/nwnserver.git
 git+https://github.com/akrherz/pyLDM.git
 git+https://github.com/akrherz/pyIEM.git
+git+https://github.com/akrherz/tilecache.git
 Unidecode
 git+https://github.com/perrygeo/jenks.git
 git+https://github.com/fatiando/verde.git; python_version > '3.4'
