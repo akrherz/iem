@@ -8,6 +8,8 @@ from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
+PDICT = {"low": "Low Temperature", "high": "High Temperature"}
+
 
 def get_description():
     """ Return a dict describing how to call this plotter """
@@ -25,6 +27,13 @@ def get_description():
             default="IATDSM",
             label="Select Station",
             network="IACLIMATE",
+        ),
+        dict(
+            type="select",
+            options=PDICT,
+            name="var",
+            default="low",
+            label="Select variable to summarize:",
         ),
         dict(type="int", name="t1", default=32, label="First Threshold (F)"),
         dict(type="int", name="t2", default=28, label="Second Threshold (F)"),
@@ -44,39 +53,45 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
     # Load up dict of dates..
 
+    sz = 214 + 304
     df = pd.DataFrame(
         {
-            "dates": pd.date_range("2000/07/28", "2000/12/31"),
+            "dates": pd.date_range("2000/08/01", "2001/05/31"),
             "%scnts" % (thresholds[0],): 0,
             "%scnts" % (thresholds[1],): 0,
             "%scnts" % (thresholds[2],): 0,
             "%scnts" % (thresholds[3],): 0,
         },
-        index=range(210, 367),
+        index=range(214, sz),
     )
     df.index.name = "doy"
 
     for base in thresholds:
-        # Query Last doy for each year in archive
+        # Find first dates by winter season
         df2 = read_sql(
             """
-            select year,
-            min(case when low <= %s then extract(doy from day)
-                else 400 end) as doy from
+            select
+            case when month > 7 then year + 1 else year end as winter,
+            min(case when """
+            + ctx["var"]
+            + """ <= %s
+            then day else '2099-01-01'::date end) as mindate from
             """
             + table
             + """
-            WHERE month > 7 and station = %s and year < %s
-            GROUP by year
+            WHERE month not in (6, 7) and station = %s and year < %s
+            GROUP by winter
         """,
             pgconn,
             params=(base, station, datetime.date.today().year),
             index_col=None,
         )
         for _, row in df2.iterrows():
-            if row["doy"] == 400:
+            if row["mindate"].year == 2099:
                 continue
-            df.loc[row["doy"] : 367, "%scnts" % (base,)] += 1
+            jan1 = datetime.date(row["winter"] - 1, 1, 1)
+            doy = (row["mindate"] - jan1).days
+            df.loc[doy:sz, "%scnts" % (base,)] += 1
         df["%sfreq" % (base,)] = (
             df["%scnts" % (base,)] / len(df2.index) * 100.0
         )
@@ -90,7 +105,7 @@ def plotter(fdict):
 # Climate Record: %s -> %s
 # Site Information: [%s] %s
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
-# Low Temperature exceedence probabilities
+# %s exceedence probabilities
 # (On a certain date, what is the chance a temperature below a certain
 # threshold would have been observed once already during the fall of that year)
  DOY Date    <%s  <%s  <%s  <%s
@@ -100,6 +115,7 @@ def plotter(fdict):
         datetime.date.today(),
         station,
         ctx["_nt"].sts[station]["name"],
+        PDICT[ctx["var"]],
         thresholds[0] + 1,
         thresholds[1] + 1,
         thresholds[2] + 1,
@@ -107,8 +123,13 @@ def plotter(fdict):
     )
     fcols = ["%sfreq" % (s,) for s in thresholds]
     mindate = None
+    maxdate = None
     for doy, row in df.iterrows():
         if doy % 2 != 0:
+            continue
+        if row[fcols[3]] >= 100:
+            if maxdate is None:
+                maxdate = row["dates"] + datetime.timedelta(days=5)
             continue
         if row[fcols[0]] > 0 and mindate is None:
             mindate = row["dates"] - datetime.timedelta(days=5)
@@ -120,6 +141,8 @@ def plotter(fdict):
             row[fcols[2]],
             row[fcols[3]],
         )
+    if maxdate is None:
+        maxdate = datetime.datetime(2001, 6, 1)
 
     (fig, ax) = plt.subplots(1, 1)
     for base in thresholds:
@@ -131,15 +154,15 @@ def plotter(fdict):
         )
 
     ax.legend(loc="best")
-    ax.set_xlim(mindate)
-    ax.xaxis.set_major_locator(mdates.DayLocator([1, 7, 14, 21]))
+    ax.set_xlim(mindate, maxdate)
+    days = (maxdate - mindate).days
+    dl = [1] if days > 120 else [1, 7, 14, 21]
+    ax.xaxis.set_major_locator(mdates.DayLocator(dl))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d\n%b"))
     ax.set_title(
-        (
-            "Frequency of First Fall Temperature At or Below Threshold\n"
-            "%s %s (%s-%s)"
-        )
+        ("Frequency of First Fall %s At or Below Threshold\n" "%s %s (%s-%s)")
         % (
+            PDICT[ctx["var"]],
             station,
             ctx["_nt"].sts[station]["name"],
             bs.year,
@@ -148,9 +171,10 @@ def plotter(fdict):
     )
     ax.grid(True)
     ax.set_yticks([0, 10, 25, 50, 75, 90, 100])
+    ax.set_ylabel("Accumulated to Date Frequency [%]")
     df.reset_index(inplace=True)
     return fig, df, res
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({"var": "high", "t4": 0})

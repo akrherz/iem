@@ -6,272 +6,201 @@ dict(type='date', name='date2', default='2012/03/15', label='Bogus2:',
 
 """
 # Association of plots
+daily_opts = [
+    {
+        "id": "51",
+        "label": (
+            "Accumulated Station Departures of Precip/GDD/SDD "
+            "(Automated Stations)"
+        ),
+    },
+    {
+        "id": "108",
+        "label": (
+            "Accumulated Station Departures of Precip/GDD/SDD "
+            "(Long Term Climate)"
+        ),
+    },
+    {"id": "172", "label": "Accumulated Year to Date Precipitation"},
+    {
+        "id": "149",
+        "label": "Arridity Index (High Temperature minus Precip Departures)",
+    },
+    {
+        "id": "11",
+        "label": (
+            "ASOS/AWOS Daily Min/Max Dew Point/Temp/Feels Like/RH "
+            "for a Year"
+        ),
+    },
+    {"id": "94", "label": "Bias of 24 Hour High+Low Computation by Hour"},
+    {"id": "96", "label": "Bias of 24 Hour Precipitation Computation by Hour"},
+    {
+        "id": "82",
+        "label": "Calendar of Daily Observations from Automated Stations",
+    },
+    {"id": "180", "label": "Daily Temperature Climatology"},
+    {"id": "32", "label": "Daily Temperature Departures for One Year"},
+    {"id": "21", "label": "Change in NCDC 81 Daily Climatology over X Days"},
+    {"id": "174", "label": "Compare Daily High/Low Temps for ASOS Stations"},
+    {
+        "id": "91",
+        "label": "Consecutative Day Statistics of High+Low Temps / Precip",
+    },
+    {
+        "id": "66",
+        "label": (
+            "Consecutative Days with High/Low Temp " "Above/Below Threshold"
+        ),
+    },
+    {
+        "id": "9",
+        "label": (
+            "Cooling/Growing/Heating/Stress Degree Day "
+            "Daily Values and Climatology"
+        ),
+    },
+    {
+        "id": "49",
+        "label": "Daily Frequency of Some Threshold (snow, precip, temps)",
+    },
+    {"id": "176", "label": "Daily Records Beat Margin"},
+    {"id": "5", "label": "Daily Records for each month of year"},
+    {
+        "id": "31",
+        "label": "Extreme Jumps or Dips in High Temperature over X days",
+    },
+    {
+        "id": "147",
+        "label": "Frequency of One Station Warmer/Wetter than Another",
+    },
+    {
+        "id": "205",
+        "label": (
+            "Frequency of Daily Summary Variables for Automated Stations"
+        ),
+    },
+    {
+        "id": "7",
+        "label": "Growing Degree Day Periods for One Year by Planting Date",
+    },
+    {
+        "id": "204",
+        "label": ("Heatmap of Daily / Trailing Daily Temperature / Precip"),
+    },
+    {
+        "id": "61",
+        "label": (
+            "High/Low Temp above/below avg OR dry streaks " "by NWS CLI Sites"
+        ),
+    },
+    {"id": "19", "label": "Histogram of Daily High/Low Temperatures"},
+    {"id": "35", "label": "Histogram of X Hour Temp/RH/Dew/Pressure Changes"},
+    {
+        "id": "60",
+        "label": (
+            "Hourly Temperature/Dew Point/RH Frequencies "
+            "Above/Below Threshold"
+        ),
+    },
+    {"id": "86", "label": "IEM Daily Reanalysis Plots"},
+    {
+        "id": "139",
+        "label": "Largest Local Calendar Day Temperature Differences",
+    },
+    {"id": "168", "label": "Latest Date of Year for High Temperature"},
+    {"id": "206", "label": "Map of Daily Automated Station Summaries"},
+    {"id": "97", "label": "Map of Departures/Stats over One Period of Days"},
+    {
+        "id": "34",
+        "label": "Max Stretch of Days with High/Low Above/Below Threshold",
+    },
+    {
+        "id": "26",
+        "label": "Min Daily Low after 1 July / Max Daily High before 1 July",
+    },
+    {
+        "id": "126",
+        "label": (
+            "Mixing Ratio / Vapor Pressure Deficit Climatology "
+            "and Yearly Timeseries Plot"
+        ),
+    },
+    {
+        "id": "84",
+        "label": (
+            "MRMS Q3 / PRISM / IEM Reanalysis Estimated Precipitation "
+            "(multiday summaries/departures too)"
+        ),
+    },
+    {
+        "id": "185",
+        "label": (
+            "Number of Days to Accumulate an Amount of Precipitation" " (MRMS)"
+        ),
+    },
+    {
+        "id": "164",
+        "label": (
+            "Percentage of NWS CLI Sites Reporting Daily Above/Below "
+            "Temps or Precip/Snow"
+        ),
+    },
+    {
+        "id": "22",
+        "label": (
+            "Percentage of Years within Temperature Range " "from Averages"
+        ),
+    },
+    {
+        "id": "83",
+        "label": (
+            "Period Averages or Totals of X days around a "
+            "given day of the year"
+        ),
+    },
+    {
+        "id": "140",
+        "label": (
+            "Period Statistics of Temp/Precip/Wind for a date period "
+            "each year [ASOS/Automated Stations]"
+        ),
+    },
+    {
+        "id": "107",
+        "label": (
+            "Period Statistics of Temp/Precip for a date period "
+            "each year [COOP/Climate Sites]"
+        ),
+    },
+    {
+        "id": "182",
+        "label": "Precipitation (MRMS) Coverage Efficiency by State",
+    },
+    {"id": "43", "label": "Recent (Past 2-3 Days) Timeseries (Meteogram)"},
+    {"id": "157", "label": "Relative Humidity Max/Min/Avg by Day of Year"},
+    {"id": "62", "label": "Snow Depth"},
+    {"id": "199", "label": "ISU Soil Moisture Network Daily Plots"},
+    {"id": "38", "label": "Solar Radiation Estimates from NARR"},
+    {"id": "25", "label": "Spread of Daily High and Low Temperatures"},
+    {"id": "137", "label": "Start Date of Spring/Fall with Statistics"},
+    {
+        "id": "4",
+        "label": "State Areal Coverage of Precip Intensity over X Days",
+    },
+    {"id": "89", "label": "State Areal Coverage/Efficiency of Precipitation"},
+    {"id": "81", "label": "Standard Deviation of Daily Temperatures"},
+    {"id": "28", "label": "Trailing Number of Days Precipitation Total Rank"},
+    {
+        "id": "142",
+        "label": "Trailing X Number of Days Temp/Precipitation Departures",
+    },
+    {"id": "132", "label": "Top 10 Precip/Temperature Values by Month/Season"},
+    {"id": "190", "label": "Year of Daily High/Low Temperature Record"},
+]
 data = {
     "plots": [
-        {
-            "label": "Daily",
-            "options": [
-                {
-                    "id": "51",
-                    "label": (
-                        "Accumulated Station Departures of Precip/GDD/SDD "
-                        "(Automated Stations)"
-                    ),
-                },
-                {
-                    "id": "108",
-                    "label": (
-                        "Accumulated Station Departures of Precip/GDD/SDD "
-                        "(Long Term Climate)"
-                    ),
-                },
-                {
-                    "id": "172",
-                    "label": "Accumulated Year to Date Precipitation",
-                },
-                {
-                    "id": "149",
-                    "label": "Arridity Index (High Temperature minus Precip Departures)",
-                },
-                {
-                    "id": "11",
-                    "label": (
-                        "ASOS/AWOS Daily Min/Max Dew Point/Temp/Feels Like/RH "
-                        "for a Year"
-                    ),
-                },
-                {
-                    "id": "94",
-                    "label": "Bias of 24 Hour High+Low Computation by Hour",
-                },
-                {
-                    "id": "96",
-                    "label": "Bias of 24 Hour Precipitation Computation by Hour",
-                },
-                {
-                    "id": "82",
-                    "label": "Calendar of Daily Observations from Automated Stations",
-                },
-                {"id": "180", "label": "Daily Temperature Climatology"},
-                {
-                    "id": "32",
-                    "label": "Daily Temperature Departures for One Year",
-                },
-                {
-                    "id": "21",
-                    "label": "Change in NCDC 81 Daily Climatology over X Days",
-                },
-                {
-                    "id": "174",
-                    "label": "Compare Daily High/Low Temps for ASOS Stations",
-                },
-                {
-                    "id": "91",
-                    "label": "Consecutative Day Statistics of High+Low Temps / Precip",
-                },
-                {
-                    "id": "66",
-                    "label": (
-                        "Consecutative Days with High/Low Temp "
-                        "Above/Below Threshold"
-                    ),
-                },
-                {
-                    "id": "9",
-                    "label": (
-                        "Cooling/Growing/Heating/Stress Degree Day "
-                        "Daily Values and Climatology"
-                    ),
-                },
-                {
-                    "id": "49",
-                    "label": "Daily Frequency of Some Threshold (snow, precip, temps)",
-                },
-                {"id": "176", "label": "Daily Records Beat Margin"},
-                {"id": "5", "label": "Daily Records for each month of year"},
-                {
-                    "id": "31",
-                    "label": "Extreme Jumps or Dips in High Temperature over X days",
-                },
-                {
-                    "id": "147",
-                    "label": "Frequency of One Station Warmer/Wetter than Another",
-                },
-                {
-                    "id": "205",
-                    "label": (
-                        "Frequency of Daily Summary Variables for Automated Stations"
-                    ),
-                },
-                {
-                    "id": "7",
-                    "label": "Growing Degree Day Periods for One Year by Planting Date",
-                },
-                {
-                    "id": "204",
-                    "label": (
-                        "Heatmap of Daily / Trailing Daily Temperature / Precip"
-                    ),
-                },
-                {
-                    "id": "61",
-                    "label": (
-                        "High/Low Temp above/below avg OR dry streaks "
-                        "by NWS CLI Sites"
-                    ),
-                },
-                {
-                    "id": "19",
-                    "label": "Histogram of Daily High/Low Temperatures",
-                },
-                {
-                    "id": "35",
-                    "label": "Histogram of X Hour Temp/RH/Dew/Pressure Changes",
-                },
-                {
-                    "id": "60",
-                    "label": (
-                        "Hourly Temperature/Dew Point/RH Frequencies "
-                        "Above/Below Threshold"
-                    ),
-                },
-                {"id": "86", "label": "IEM Daily Reanalysis Plots"},
-                {
-                    "id": "139",
-                    "label": "Largest Local Calendar Day Temperature Differences",
-                },
-                {
-                    "id": "168",
-                    "label": "Latest Date of Year for High Temperature",
-                },
-                {
-                    "id": "206",
-                    "label": "Map of Daily Automated Station Summaries",
-                },
-                {
-                    "id": "97",
-                    "label": "Map of Departures/Stats over One Period of Days",
-                },
-                {
-                    "id": "34",
-                    "label": "Max Stretch of Days with High/Low Above/Below Threshold",
-                },
-                {
-                    "id": "26",
-                    "label": "Min Daily Low after 1 July / Max Daily High before 1 July",
-                },
-                {
-                    "id": "126",
-                    "label": (
-                        "Mixing Ratio / Vapor Pressure Deficit Climatology "
-                        "and Yearly Timeseries Plot"
-                    ),
-                },
-                {
-                    "id": "84",
-                    "label": (
-                        "MRMS Q3 / PRISM / IEM Reanalysis Estimated Precipitation "
-                        "(multiday summaries/departures too)"
-                    ),
-                },
-                {
-                    "id": "185",
-                    "label": (
-                        "Number of Days to Accumulate an Amount of Precipitation"
-                        " (MRMS)"
-                    ),
-                },
-                {
-                    "id": "164",
-                    "label": (
-                        "Percentage of NWS CLI Sites Reporting Daily Above/Below "
-                        "Temps or Precip/Snow"
-                    ),
-                },
-                {
-                    "id": "22",
-                    "label": (
-                        "Percentage of Years within Temperature Range "
-                        "from Averages"
-                    ),
-                },
-                {
-                    "id": "83",
-                    "label": (
-                        "Period Averages or Totals of X days around a "
-                        "given day of the year"
-                    ),
-                },
-                {
-                    "id": "140",
-                    "label": (
-                        "Period Statistics of Temp/Precip/Wind for a date period "
-                        "each year [ASOS/Automated Stations]"
-                    ),
-                },
-                {
-                    "id": "107",
-                    "label": (
-                        "Period Statistics of Temp/Precip for a date period "
-                        "each year [COOP/Climate Sites]"
-                    ),
-                },
-                {
-                    "id": "182",
-                    "label": "Precipitation (MRMS) Coverage Efficiency by State",
-                },
-                {
-                    "id": "43",
-                    "label": "Recent (Past 2-3 Days) Timeseries (Meteogram)",
-                },
-                {
-                    "id": "157",
-                    "label": "Relative Humidity Max/Min/Avg by Day of Year",
-                },
-                {"id": "62", "label": "Snow Depth"},
-                {
-                    "id": "199",
-                    "label": "ISU Soil Moisture Network Daily Plots",
-                },
-                {"id": "38", "label": "Solar Radiation Estimates from NARR"},
-                {
-                    "id": "25",
-                    "label": "Spread of Daily High and Low Temperatures",
-                },
-                {
-                    "id": "137",
-                    "label": "Start Date of Spring/Fall with Statistics",
-                },
-                {
-                    "id": "4",
-                    "label": "State Areal Coverage of Precip Intensity over X Days",
-                },
-                {
-                    "id": "89",
-                    "label": "State Areal Coverage/Efficiency of Precipitation",
-                },
-                {
-                    "id": "81",
-                    "label": "Standard Deviation of Daily Temperatures",
-                },
-                {
-                    "id": "28",
-                    "label": "Trailing Number of Days Precipitation Total Rank",
-                },
-                {
-                    "id": "142",
-                    "label": "Trailing X Number of Days Temp/Precipitation Departures",
-                },
-                {
-                    "id": "132",
-                    "label": "Top 10 Precip/Temperature Values by Month/Season",
-                },
-                {
-                    "id": "190",
-                    "label": "Year of Daily High/Low Temperature Record",
-                },
-            ],
-        },
+        {"label": "Daily", "options": daily_opts},
         {
             "label": "Monthly",
             "options": [
@@ -481,7 +410,7 @@ data = {
                 },
                 {
                     "id": "119",
-                    "label": "Frequency of First Fall Low Temperature by Day of Year",
+                    "label": "Frequency of First Fall High/Low Temperature by Day of Year",
                 },
                 {
                     "id": "189",
