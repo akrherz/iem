@@ -1,24 +1,16 @@
+"""mod-wsgi service."""
 import os
-import sys
 
-tilecachepath, wsgi_file = os.path.split(__file__)
-sys.path.insert(0, "/opt/iem/include/python/")
-sys.path.insert(0, "/opt/iem/include/python/TileCache/")
-
+# https://github.com/akrherz/tilecache
 from TileCache.Service import Service, wsgiHandler
 
+tilecachepath, wsgi_file = os.path.split(__file__)
 cfgfiles = os.path.join(tilecachepath, "tilecache.cfg")
-
-theService = {}
-
-
-def wsgiApp(environ, start_response):
-    global theService
-
-    cfgs = cfgfiles
-    if not theService:
-        theService = Service.load(cfgs)
-    return wsgiHandler(environ, start_response, theService)
+theService = {"app": None}
 
 
-application = wsgiApp
+def application(environ, start_response):
+    """Go service."""
+    if not theService["app"]:
+        theService["app"] = Service.load(cfgfiles)
+    return wsgiHandler(environ, start_response, theService["app"])
