@@ -48,7 +48,7 @@ def main():
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
-    stdout = proc.stdout.read()
+    stdout = proc.stdout.read().decode("ascii")
     return process(stdout)
 
 
