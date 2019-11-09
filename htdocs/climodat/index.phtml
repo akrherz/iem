@@ -211,7 +211,7 @@ do <a href="/info/contacts.php">let us know</a>!</li>
 EOF;
 
 if ($station != ""){
-	$tokens = split("/", $xref[$report]);
+	$tokens = explode("/", $xref[$report]);
 	$autoploturi = sprintf("/plotting/auto/?q=%s&amp;station=%s&amp;network=%s&amp;_fmt=text",
 			$tokens[0], $station, $network);
 	$dluri = sprintf("/climodat/?station=%s&amp;network=%s&amp;dl=yes&amp;report=%s",

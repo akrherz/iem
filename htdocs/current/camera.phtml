@@ -21,9 +21,9 @@
  $radts = time();
  }
  $num = 1;
- include("../../include/cameras.inc.php");
+ require_once "../../include/cameras.inc.php";
  if ($network == "KCRG"){ $cameras["KCCI-017"]["network"] = "KCRG"; }
- while (list($id, $val) = each($cameras))
+ foreach($cameras as $id => $val)
  {
     if ($cameras[$id]["network"] != $network) continue;
 
@@ -87,9 +87,8 @@ $dd = date("YmdHi", $radts);
 
 
 $misstxt = "Cameras Missing: ";
-reset($cameras);
 $control = "";
-while (list($id, $v) = each($cameras))
+foreach($cameras as $id => $v)
 {
 	if ($v["network"] != $network){ continue; }
 	if (! $v["active"] ){

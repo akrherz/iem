@@ -2,13 +2,13 @@
 if (isset($argv))
    for ($i=1;$i<count($argv);$i++)
    {
-       $it = split("=",$argv[$i]);
+       $it = explode("=",$argv[$i]);
        $_GET[$it[0]] = $it[1];
    }
 
 
-include("../../../config/settings.inc.php");
-include("../../../include/station.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/station.php";
 
 require_once "../../../include/database.inc.php";
 $pgconn = iemdb("iem");

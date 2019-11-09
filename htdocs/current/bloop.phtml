@@ -1,8 +1,8 @@
 <?php
 require_once '../../config/settings.inc.php';
 $JQUERYUI = "1.12.1";
-include_once '../../include/myview.php';
-include_once "../../include/cameras.inc.php";
+require_once '../../include/myview.php';
+require_once "../../include/cameras.inc.php";
 require_once "../../include/forms.php"; 
 define("IEM_APPID", 117);
 $t = new MyView();
@@ -59,7 +59,7 @@ for ($i=0; $i < (intval($frames));$i++){
 }
 
 $cselect = "<select name=\"cid\">";
-while (list($k,$v) = each($cameras)) {
+foreach($cameras as $k => $v){
 	if ($v["network"] == "IDOT"){ continue; }
 	$lbl = sprintf("%s (%s)", $v["name"], date("d M Y", $v["sts"]) );
 	$cselect .= "<option value=\"$k\"";
@@ -94,7 +94,7 @@ $headextra = "";
 if ($java == "script") {
 	$sz = sizeof($images); 
 	$mis = Array();
-	while ( list($key,$val) = each($images) ){
+	foreach($images as $key => $val){
 		$mis[] = sprintf("'%s'", $val);
 	}
 	$jsurls = implode(",", $mis);
@@ -126,14 +126,14 @@ EOM;
 EOM;
 } else {
 	$control = "";
-		while ( list($key,$val) = each($images) ){
-			$control .= sprintf("<img src=\"%s\" style=\"margin: 2px;\">", $val);
-		}
+	foreach($images as $key => $val){
+		$control .= sprintf("<img src=\"%s\" style=\"margin: 2px;\">", $val);
+	}
 }
 
 $imglinks = "";
 reset($images);
-while ( list($key, $value) = each($images) ){
+foreach($images as $key => $value){
 	$imglinks .= "<li><a href=\"". $images[$key] ."\">". $labels[$key] ."</a></li>";
 }
 
