@@ -32,9 +32,9 @@
     $cbody .= "Ele [m]: ". $row["elevation"] ."\n";
     $cbody .= "Network: ". $row["netname"] ." (". $row["network"] .")\n";
  	$cbody .= "</pre>\n";
- 	$cbody = ereg_replace("&","&amp;", $cbody);
-    $cbody = ereg_replace(">","&gt;", $cbody);
-    $cbody = ereg_replace("<","&lt;", $cbody);
+ 	$cbody = str_replace("&", "&amp;", $cbody);
+    $cbody = str_replace(">", "&gt;", $cbody);
+    $cbody = str_replace("<", "&lt;", $cbody);
   echo "<entry>\n";
   echo "<title>". $row["name"] ." [". $row["id"] ."]</title>\n";
   echo "<author><name>Daryl Herzmann</name><email>akrherz@iastate.edu</email></author>\n";

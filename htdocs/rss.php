@@ -31,7 +31,7 @@ EOF;
  pg_close($conn);
  for ($i=0; $row = @pg_fetch_assoc($rs, $i); $i++) {
   echo "<item>\n";
-  echo "<title>". preg_replace("&","&amp;",$row["title"]) ."</title>\n";
+  echo "<title>". str_replace("&","&amp;",$row["title"]) ."</title>\n";
   echo "<author>akrherz@iastate.edu (Daryl Herzmann)</author>\n";
   echo "<link>https://mesonet.agron.iastate.edu/onsite/news.phtml?id=". $row["id"] ."</link>\n";
   echo "<guid>https://mesonet.agron.iastate.edu/onsite/news.phtml?id=". $row["id"] ."</guid>\n";
