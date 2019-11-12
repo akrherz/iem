@@ -3,9 +3,9 @@
 // File:        JPGRAPH_ANTISPAM.PHP
 // Description: Genarate anti-spam challenge
 // Created:     2004-10-07
-// Ver:         $Id: jpgraph_antispam-digits.php 1106 2009-02-22 20:16:35Z ljp $
+// Ver:         $Id: jpgraph_antispam-digits.php 1930 2010-01-22 20:19:27Z ljp $
 //
-// Copyright (c) Aditus Consulting. All rights reserved.
+// Copyright (c) Asial Corporation. All rights reserved.
 //========================================================================
 
 class HandDigits {
@@ -154,7 +154,7 @@ class HandDigits {
 
 class AntiSpam {
 
-    var $iNumber='';
+    private $iNumber='';
 
     function __construct($aNumber='') {
         $this->iNumber = $aNumber;

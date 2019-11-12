@@ -5,7 +5,7 @@
  // Created:     2003-02-02
  // Ver:         $Id: jpgraph_polar.php 1796 2009-09-07 09:37:19Z ljp $
  //
- // Copyright (c) Aditus Consulting. All rights reserved.
+ // Copyright (c) Asial Corporation. All rights reserved.
  //========================================================================
  */
 
@@ -423,6 +423,7 @@ class PolarAxis extends Axis {
                         $this->img->Line($x1,$y1,$x2,$y2);
                     }
                 }
+                $a = (int) $a;
                 $a += $this->angle_step;
             }
         }
@@ -487,6 +488,7 @@ class PolarAxis extends Axis {
                 if( $this->show_angle_tick ) {
                     $this->img->Line($x1,$y1,$x2,$y2);
                 }
+                $a = (int) $a;
                 $a += $this->angle_step;
             }
         }

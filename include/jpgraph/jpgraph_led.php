@@ -5,7 +5,7 @@
 // Created:     2006-11-26
 // Ver:         $Id: jpgraph_led.php 1674 2009-07-22 19:42:23Z ljp $
 //
-// Copyright 2006 (c) Aditus Consulting. All rights reserved.
+// Copyright 2006 (c) Asial Corporation. All rights reserved.
 //
 // Changed: 2007-08-06 by Alexander Kurochkin (inspector@list.ru)
 //========================================================================
@@ -30,7 +30,7 @@ DEFINE('LEDC_INVERTGRAY', 15);
 
 // Check that mb_strlen() is available
 if( ! function_exists('mb_strlen') ) {
-    //JpGraphError::RaiseL(25500);
+    JpGraphError::RaiseL(25500);
     //'Multibyte strings must be enabled in the PHP installation in order to run the LED module
     // so that the function mb_strlen() is available. See PHP documentation for more information.'
 }
@@ -275,13 +275,13 @@ class DigitalLED74
             $aColor = 0;
         }
 
-        if(($n = strlen($aValStr)) == 0) {
+        if(($n = mb_strlen($aValStr,'utf8')) == 0) {
             $aValStr = ' ';
             $n = 1;
         }
 
         for($i = 0; $i < $n; ++$i) {
-            $d = substr($aValStr, $i, 1);
+            $d = mb_substr($aValStr, $i, 1, 'utf8');
             if(  ctype_digit($d) ) {
                 $d = (int)$d;
             }

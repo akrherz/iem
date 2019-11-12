@@ -5,7 +5,7 @@
  // Created:     2003-09-17
  // Ver:         $Id: jpgraph_windrose.php 1928 2010-01-11 19:56:51Z ljp $
  //
- // Copyright (c) Asial Co. Ltd. (Asial USA) All rights reserved.
+ // Copyright (c) Asial Corporation. All rights reserved.
  //========================================================================
  */
 

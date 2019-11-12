@@ -5,7 +5,7 @@
  // Created:     2001-01-08
  // Ver:         $Id: jpgraph_log.php 1106 2009-02-22 20:16:35Z ljp $
  //
- // Copyright (c) Aditus Consulting. All rights reserved.
+ // Copyright (c) Asial Corporation. All rights reserved.
  //========================================================================
  */
 
@@ -131,7 +131,7 @@ class LogTicks extends Ticks{
     private $ticklabels_pos = array();
     //---------------
     // CONSTRUCTOR
-    function LogTicks() {
+    function __construct() {
     }
     //---------------
     // PUBLIC METHODS

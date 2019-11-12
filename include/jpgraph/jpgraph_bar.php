@@ -5,7 +5,7 @@
  // Created:     2001-01-08
  // Ver:         $Id: jpgraph_bar.php 1905 2009-10-06 18:00:21Z ljp $
  //
- // Copyright (c) Aditus Consulting. All rights reserved.
+ // Copyright (c) Asial Corporation. All rights reserved.
  //========================================================================
  */
 
@@ -41,6 +41,8 @@ class BarPlot extends Plot {
     protected $bar_shadow=false;
     protected $bar_shadow_color="black";
     protected $bar_shadow_hsize=3,$bar_shadow_vsize=3;
+    protected $bar_3d=false;
+    protected $bar_3d_hsize=3,$bar_3d_vsize=3;
 
     //---------------
     // CONSTRUCTOR
@@ -60,6 +62,14 @@ class BarPlot extends Plot {
         $this->bar_shadow_hsize=$aHSize;
 
         // Adjust the value margin to compensate for shadow
+        $this->value->margin += $aVSize;
+    }
+
+    function Set3D($aHSize=3,$aVSize=3,$aShow=true) {
+        $this->bar_3d=$aShow;
+        $this->bar_3d_vsize=$aVSize;
+        $this->bar_3d_hsize=$aHSize;
+
         $this->value->margin += $aVSize;
     }
 
@@ -420,6 +430,7 @@ class BarPlot extends Plot {
                 $img->PopColor();
             }
 
+/////////////////////////kokorahen rectangle polygon//////////////////////
 
             // Remember value of this bar
             $val=$this->coords[0][$i];
@@ -462,6 +473,47 @@ class BarPlot extends Plot {
                     $img->PushColor($this->bar_shadow_color);
                 }
                 $img->FilledPolygon($sp);
+                $img->PopColor();
+
+            } elseif( $this->bar_3d && $val != 0) {
+              // Determine the 3D
+
+                $ssh = $this->bar_3d_hsize;
+                $ssv = $this->bar_3d_vsize;
+
+                // Create points to create a "upper-right" shadow
+                if( $val > 0 ) {
+                    $sp1[0]=$pts[6];  $sp1[1]=$pts[7];
+                    $sp1[2]=$pts[4];  $sp1[3]=$pts[5];
+                    $sp1[4]=$pts[4]+$ssh; $sp1[5]=$pts[5]-$ssv;
+                    $sp1[6]=$pts[6]+$ssh; $sp1[7]=$pts[7]-$ssv;
+
+                    $sp2[0]=$pts[4];  $sp2[1]=$pts[5];
+                    $sp2[2]=$pts[2];  $sp2[3]=$pts[3];
+                    $sp2[4]=$pts[2]+$ssh; $sp2[5]=$pts[3]-$ssv;
+                    $sp2[6]=$pts[4]+$ssh; $sp2[7]=$pts[5]-$ssv;
+
+                }
+                elseif( $val < 0 ) {
+                    $sp1[0]=$pts[4];  $sp1[1]=$pts[5];
+                    $sp1[2]=$pts[6];  $sp1[3]=$pts[7];
+                    $sp1[4]=$pts[6]+$ssh; $sp1[5]=$pts[7]-$ssv;
+                    $sp1[6]=$pts[4]+$ssh; $sp1[7]=$pts[5]-$ssv;
+
+                    $sp2[0]=$pts[6];  $sp2[1]=$pts[7];
+                    $sp2[2]=$pts[0];  $sp2[3]=$pts[1];
+                    $sp2[4]=$pts[0]+$ssh; $sp2[5]=$pts[1]-$ssv;
+                    $sp2[6]=$pts[6]+$ssh; $sp2[7]=$pts[7]-$ssv;
+                }
+
+                $base_color = $this->fill_color;
+
+                $img->PushColor($base_color . ':0.7');
+                $img->FilledPolygon($sp1);
+                $img->PopColor();
+
+                $img->PushColor($base_color . ':1.1');
+                $img->FilledPolygon($sp2);
                 $img->PopColor();
             }
 
@@ -625,10 +677,11 @@ class BarPlot extends Plot {
 // Description: Produce grouped bar plots
 //===================================================
 class GroupBarPlot extends BarPlot {
-    private $plots, $nbrplots=0;
+    public $plots; 
+    private $nbrplots=0;
     //---------------
     // CONSTRUCTOR
-    function GroupBarPlot($plots) {
+    function __construct($plots) {
         $this->width=0.7;
         $this->plots = $plots;
         $this->nbrplots = count($plots);
@@ -663,7 +716,7 @@ class GroupBarPlot extends BarPlot {
         $n = count($this->plots);
         for($i=0; $i < $n; ++$i) {
             list($xm,$ym) = $this->plots[$i]->Min();
-            $xmin = max($xmin,$xm);
+            $xmin = min($xmin,$xm);
             $ymin = min($ymin,$ym);
         }
         return array($xmin,$ymin);
@@ -716,7 +769,8 @@ class GroupBarPlot extends BarPlot {
 // Description: Produce accumulated bar plots
 //===================================================
 class AccBarPlot extends BarPlot {
-    private $plots=null,$nbrplots=0;
+    public $plots=null;
+    private $nbrplots=0;
     //---------------
     // CONSTRUCTOR
     function __construct($plots) {
@@ -1057,14 +1111,13 @@ class AccBarPlot extends BarPlot {
 
             // First stroke the accumulated value for the entire bar
             // This value is always placed at the top/bottom of the bars
-            if( $accy_neg < 0 ) {
+            if( $accy + $accy_neg < 0 ) {
                 $y=$yscale->Translate($accy_neg);
-                $this->value->Stroke($img,$accy_neg,$x,$y);
             }
             else {
                 $y=$yscale->Translate($accy);
-                $this->value->Stroke($img,$accy,$x,$y);
             }
+            $this->value->Stroke($img,$accy + $accy_neg,$x,$y);
 
             $accy = 0;
             $accy_neg = 0;
@@ -1124,7 +1177,7 @@ class AccBarPlot extends BarPlot {
                         $this->plots[$j]->value->SetMargin(-1);
                     }
                 }
-                $this->plots[$j]->value->Stroke($img,$this->plots[$j]->coords[0][$i],$x,$y);
+                $this->plots[$j]->value->Stroke($img,$this->plots[$j]->coords[0][$i],round($x),round($y));
             }
 
         }

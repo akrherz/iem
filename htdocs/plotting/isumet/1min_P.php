@@ -1,5 +1,5 @@
 <?php
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 
 
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
@@ -22,7 +22,7 @@ $valid = array();
 if ($station == null){
 	$firstval = null;
 	$fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0002.dat");
-	while (list ($line_num, $line) = each ($fcontents)) {
+	foreach($fcontents as $line_num => $line){
   		$valid[] = strtotime( substr($line, 0, 26) );
   		$parts = preg_split ("/\s+/", $line);
   		$val = floatval($parts[10])/100.;
@@ -38,7 +38,7 @@ if ($station == null){
  		of gust, pressure, daily_precip, monthly_rain, yearly_rain, inside
  		temp, inside humidity, solar radiation, UV index
 	 */
-	while (list ($line_num, $line) = each ($fcontents)) {
+	foreach($fcontents as $line_num => $line){
 		$tokens = explode(' ', $line);
 		if (sizeof($tokens) != 21){
 			continue;

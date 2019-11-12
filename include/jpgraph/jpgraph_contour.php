@@ -5,7 +5,7 @@
 // Created:     2009-03-08
 // Ver:         $Id: jpgraph_contour.php 1870 2009-09-29 04:24:18Z ljp $
 //
-// Copyright (c) Aditus Consulting. All rights reserved.
+// Copyright (c) Asial Corporation. All rights reserved.
 //========================================================================
 */
 require_once('jpgraph_meshinterpolate.inc.php');

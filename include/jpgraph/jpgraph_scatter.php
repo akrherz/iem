@@ -5,7 +5,7 @@
  // Created:     2001-02-11
  // Ver:         $Id: jpgraph_scatter.php 1397 2009-06-27 21:34:14Z ljp $
  //
- // Copyright (c) Aditus Consulting. All rights reserved.
+ // Copyright (c) Asial Corporation. All rights reserved.
  //========================================================================
  */
 require_once ('jpgraph_plotmark.inc.php');
@@ -136,7 +136,7 @@ class ScatterPlot extends Plot {
     //---------------
     // CONSTRUCTOR
     function __construct($datay,$datax=false) {
-        if( (count($datax) != count($datay)) && is_array($datax)) {
+        if( is_array($datax) && (count($datax) != count($datay)) ) {
         	JpGraphError::RaiseL(20003);//("Scatterplot must have equal number of X and Y points.");
         }
         parent::__construct($datay,$datax);

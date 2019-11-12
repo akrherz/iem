@@ -155,7 +155,7 @@ class JpGraphException extends Exception {
     	}
         $errobj->Raise($this->getMessage());
     }
-    static public function defaultHandler(Exception $exception) {
+    static public function defaultHandler(Throwable $exception) {
         global $__jpg_OldHandler;
         if( $exception instanceof JpGraphException ) {
             $exception->Stroke();
@@ -347,6 +347,7 @@ class JpGraphErrObjectImg extends JpGraphErrObject {
         $img->SetColor("black");
         $img->SetFont(FF_FONT1,FS_NORMAL);
         $txt = new Text($aMsg,52,25);
+        $txt->SetFont(FF_FONT1);
         $txt->Align("left","top");
         $txt->Stroke($img);
         if ($this->iDest) {

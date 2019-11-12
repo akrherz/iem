@@ -5,7 +5,7 @@
 // Created:     2010-09-29 
 // Ver:         $Id: jpgraph_theme.inc.php 83 2010-10-01 11:24:19Z atsushi $
 //
-// Copyright (c) Asial Co. Ltd. (Asial USA) All rights reserved.
+// Copyright (c) Asial Corporation. All rights reserved.
 //========================================================================
 
 
