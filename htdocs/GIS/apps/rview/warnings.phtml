@@ -179,7 +179,7 @@ $rtl = Array(
 	"current_sites" => "Site Labels",
 );
 $rtlselect = "";
-while (list($key, $val)=each($rtl)){
+foreach($rtl as $key => $val){
 	$rtlselect .= sprintf("<br /><input name=\"layers[]\" type=\"checkbox\" "
 			." value=\"%s\"%s>%s\n", $key, 
 			(in_array($key, $layers)) ? ' checked="checked"': '', $val);
@@ -194,14 +194,14 @@ $ll = Array(
 	"watches" => "Watches",
 );
 $lselect = "";
-while (list($key, $val)=each($ll)){
+foreach($ll as $key => $val){
 	$lselect .= sprintf("<br /><input name=\"layers[]\" type=\"checkbox\" "
 			." value=\"%s\"%s>%s\n", $key,
 			(in_array($key, $layers)) ? ' checked="checked"': '', $val);
 }
 
 $wselect = "<select name=\"site\" style=\"width: 195px;\">";
-while( list($key, $value) = each($nt->table) ){
+foreach($nt->table as $key => $value){
 	$wselect .= "<option value=\"$key\" ";
 	if ($site == $key) $wselect .= "SELECTED";
 	$wselect .= ">[".$key."] ". $value["name"] ."</option>";
@@ -512,7 +512,7 @@ for( $i=0; $row = @pg_fetch_array($result,$i); $i++)
 }
 
 /* Now we loop thru aggregated warnings */
-while ( list($key, $val) = each($wA) )
+foreach($wA as $key => $val)
 {
   $tokens = explode("|", $key);
   $wfo = $tokens[0];

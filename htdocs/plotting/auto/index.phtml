@@ -26,9 +26,9 @@ $fmt = isset($_GET["_fmt"]) ? xssafe($_GET["_fmt"]): 'png';
 $data = file_get_contents("http://iem.local/plotting/auto/meta/0.json");
 $jobj = json_decode($data);
 $pselect = "<select name=\"q\" class=\"iemselect2\">";
-while (list($k,$v) = each($jobj->plots)){
+foreach($jobj->plots as $k => $v){
 	$pselect .= sprintf("<optgroup label=\"%s\">", $v->label);
-	while (list($k2,$v2) = each($v->options)){
+	foreach($v->options as $k2 => $v2){
 		$pselect .= sprintf("<option value=\"%s\"%s>%s (#%s)</option>",
 				$v2->id,
 			($v2->id == $q) ? ' selected="selected"': '', $v2->label,
@@ -163,7 +163,7 @@ EOF;
 	$imguri = "/plotting/auto/plot/$q/";
 	$pltvars = Array();
 	$form = "";
-	while (list($k,$v) = each($jobj->arguments)){
+	foreach($jobj->arguments as $k => $v){
 		$value = isset($_GET[$v->name]) ? xssafe($_GET[$v->name]): $v->default;
 		$thisrow = null;
 		// BEGIN generation of interfaces based on types
@@ -388,8 +388,7 @@ EOF;
 					  // handled above
 					} else {
 						if (is_array($value)){
-							reset($value);
-							while (list($kk, $vv) = each($value)){
+							foreach($value as $kk => $vv){
 								$pltvars[] = sprintf("%s:%s", $v->name, $vv);
 							}
 						} else {
@@ -407,8 +406,7 @@ EOF;
 					// handled above
 				} else {
 					if (is_array($value)){
-						reset($value);
-						while (list($kk, $vv) = each($value)){
+						foreach($value as $kk => $vv){
 							$pltvars[] = sprintf("%s:%s", $v->name, $vv);
 						}
 					} else {
@@ -422,7 +420,7 @@ EOF;
 	if (isset($_GET["_cb"]) && $_GET["_cb"] == "1"){
 	    $pltvars[] = "_cb:1";
 	}
-	$imguri .= str_replace('/', '-', implode($pltvars, "::"));
+	$imguri .= str_replace('/', '-', implode("::", $pltvars));
 	if (isset($_GET["_wait"]) && $_GET["_wait"] == 'yes'){
 		$image = "";
 	} else{

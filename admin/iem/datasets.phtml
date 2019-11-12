@@ -8,7 +8,7 @@ $myid = isset($_GET["id"]) ? $_GET["id"]: null;
 $form = Array();
 $fields = Array("name", "description", "justification", "homepage",
 		"alternatives", "archive_begin", "download");
-while (list($key, $val)=each($fields)){
+foreach($fields as $key => $val){
 	$form[$val] = isset($_POST[$val]) ? $_POST[$val]: null;
 }
 

@@ -15,9 +15,9 @@ function ss($v){
 }
 
 $year = date("Y");
-$sdate = isset($_GET["sdate"]) ? xssafe($_GET["sdate"]): "05/01/${y}";
+$sdate = isset($_GET["sdate"]) ? xssafe($_GET["sdate"]): "05/01/${year}";
 $network = isset($_GET["network"]) ? xssafe($_GET["network"]): "IACLIMATE";
-$edate = isset($_GET["edate"]) ? xssafe($_GET["edate"]): "12/31/${y}";
+$edate = isset($_GET["edate"]) ? xssafe($_GET["edate"]): "12/31/${year}";
 $gddbase = isset($_GET["gddbase"]) ? intval($_GET["gddbase"]) : 50;
 $gddfloor = isset($_GET["gddfloor"]) ? ss($_GET["gddfloor"]) : 50;
 $gddceil = isset($_GET["gddceil"]) ? ss($_GET["gddceil"]) : 86;
@@ -31,16 +31,15 @@ $edate = strtotime($edate);
 $s = isset($_GET["s"]) ? $_GET["s"]: Array();
 if (isset($_GET['r'])){
 	$r = $_GET["r"];
-	while(list($k,$v)=each($r)){
+	foreach($r as $k => $v){
 		if(($key = array_search($v, $s)) !== false) {
 			unset($s[$key]);
 		}
 	}
 }
 // Prevent stations from appearing twice in the display
-reset($s);
 $tmpst = Array();
-while (list($k, $v)=each($s)){
+foreach($s as $k => $v){
 	if (in_array($v, $tmpst)){
 		unset($s[$k]);
 	} else{
@@ -50,9 +49,8 @@ while (list($k, $v)=each($s)){
 
 $hiddenstations = "";
 $table = "";
-reset($s);
 $stationgrps = Array();
-while (list($k,$v)=each($s)){
+foreach($s as $k => $v){
 	$state = substr($v, 0, 2);
 	if (! array_key_exists($state, $stationgrps)){
 		$stationgrps[$state] = Array();
@@ -61,8 +59,7 @@ while (list($k,$v)=each($s)){
 	$hiddenstations .= "<input type=\"hidden\" name=\"s[]\" value=\"$v\">";
 }
 $networks = Array();
-reset($stationgrps);
-while (list($state, $v) = each($stationgrps)){
+foreach($stationgrps as $state => $v){
 	$networks[] = sprintf("%sCLIMATE", $state);
 }
 $nt2 = new NetworkTable($networks);
@@ -77,8 +74,7 @@ if ($gddfloor == '' || $gddceil == ''){
 $pgconn = iemdb('coop');
 
 // Loop over station groups
-reset($stationgrps);
-while (list($state, $stations)=each($stationgrps)){
+foreach($stationgrps as $state => $stations){
 	$sstring = "('". implode(",", $stations) ."')";
 	$sstring = str_replace(",", "','", $sstring);
 	// bulk radiation bias values applied below

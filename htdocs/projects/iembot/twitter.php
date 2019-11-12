@@ -2,7 +2,7 @@
 session_start();
 require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 102);
-include_once "../../../include/myview.php";
+require_once "../../../include/myview.php";
 require_once "../../../include/twitteroauth/twitteroauth.php";
 require_once "../../../include/iemprop.php";
 require_once "../../../include/forms.php";
@@ -93,7 +93,7 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
 }
 
 $msghtml = "";
-while (list($key, $val)=each($msg)){
+foreach($msg as $key => $val){
 	$msghtml .= "<div class='alert alert-info'>". $val ."</div>";
 }
 

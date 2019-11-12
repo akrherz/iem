@@ -1,9 +1,9 @@
 <?php
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 87);
 require_once "../../../include/forms.php";
-include("../../../include/myview.php");
-include("../../../include/imagemaps.php");
+require_once "../../../include/myview.php";
+require_once "../../../include/imagemaps.php";
 
 $t = new MyView();
 $t->thispage = "networks-scan";
@@ -30,7 +30,7 @@ $myu = $u[$plot];
  $mselect = monthSelect($month, "month");
  $dselect = daySelect($day, "day");
  $pselect = "<select name=\"plot\">";
- while (list($key,$val)=each($u)){
+ foreach($u as $key => $val){
  	$pselect .= sprintf("<option value=\"%s\"%s>%s</option>", $key, 
  			($key == $plot) ? ' selected="selected"': '', $ulabel[$key]);
  }

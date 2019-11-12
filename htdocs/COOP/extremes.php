@@ -53,7 +53,7 @@ $cities = $nt->table;
 	$json = json_decode($jdata, $assoc=TRUE);
 	$data = Array();
 	$table = "";
- 	while(list($key,$val)=each($json['climatology'])){
+ 	foreach($json['climatology'] as $key => $val){
  		$val["valid"]  = mktime(0,0,0, $val["month"], $val["day"], 2000);
  		$data[] = $val;
  	}
@@ -62,7 +62,7 @@ $cities = $nt->table;
  	} else{
 	 	$sorted_data = aSortBySecondIndex($data, $sortcol, "desc");
  	}
- 	while(list($key,$val)=each($sorted_data)){
+ 	foreach($sorted_data as $key => $val){
  		$link = sprintf("extremes.php?day=%s&amp;month=%s&amp;network=%s&amp;tbl=%s",
  				$day, $month, $network, $tbl);
  		$table .= sprintf("<tr><td><a href=\"%s\">%s</a></td><td>%s</td>
@@ -92,7 +92,7 @@ $cities = $nt->table;
  	$json = json_decode($jdata, $assoc=TRUE);
  	$data = Array();
  	$table = "";
- 	while(list($key,$val)=each($json['features'])){
+ 	foreach($json['features'] as $key => $val){
  		$data[] = $val['properties'];
  	}
  	if ($sortdir == 'ASC'){
@@ -100,7 +100,7 @@ $cities = $nt->table;
  	} else{
  		$sorted_data = aSortBySecondIndex($data, $sortcol, "desc");
  	}
- 	while(list($key,$val)=each($sorted_data)){
+ 	foreach($sorted_data as $key => $val){
  		$link = sprintf("extremes.php?station=%s&amp;network=%s&amp;tbl=%s",
  				$val["station"], $network, $tbl);
  		$table .= sprintf("<tr><td><a href=\"%s\">%s</a> (%s)</td><td>%s</td>

@@ -40,7 +40,7 @@ $ar = Array(
 );
 $mselect = make_select("mode", $mode, $ar);
 $wselect = "<select name=\"wfo\">\n";
-while( list($key, $value) = each($nt->table) ){
+foreach($nt->table as $key => $value){
 	$wselect .= "<option value=\"$key\" ";
 	if ($wfo == $key) $wselect .= "SELECTED";
 	$wselect .= ">[".$key."] ". $nt->table[$key]["name"] ."\n";
@@ -150,11 +150,10 @@ for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
 	$table .= sprintf("<h3>Event: %s Issue: %s Expire: %s</h3>\n", $eventid,
 						$issue, $expire);
 	$table .= "<p><strong>UGC Codes:</strong> ";
-	while (list($k,$zone)=each($ar)){
+	foreach($ar as $k => $zone){
 		$table .= " $zone,";
 		if (array_key_exists($zone, $ugc2station)){
-			reset($ugc2station[$zone]);
-			while (list($k2,$st)=each($ugc2station[$zone])){
+			foreach($ugc2station[$zone] as $k2 => $st){
 				$stations  .= sprintf("'%s',", $st);
 			}
 		}

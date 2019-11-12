@@ -1,7 +1,7 @@
 <?php 
-include "../../../config/settings.inc.php";
-include "../../../include/myview.php";
-include "../../../include/network.php";
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/myview.php";
+require_once "../../../include/network.php";
 
 $nt = new NetworkTable("ISUSM");
 
@@ -14,7 +14,7 @@ $content = <<<EOF
 
 EOF;
 
-while (list($k, $v)=each($nt->table)){
+foreach($nt->table as $k => $v){
 	$content .= sprintf("<li><a href='pl_ISUSM_%s.xml'>%s %s</a></li>",
 			$k, $k, $v["name"]);
 }

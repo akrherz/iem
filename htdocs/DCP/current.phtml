@@ -150,8 +150,7 @@ EOF;
 	if ($shef)
 	{
 		$content .= "<tr><td colspan=\"9\">";
-		reset($value);
-		while (list($k,$v)=each($value)){
+		foreach($value as $k => $v){
 			if ($k == 'name' || $k == 'valid') continue;
            $content .= sprintf("/%s %s ", $k, $v);
         }

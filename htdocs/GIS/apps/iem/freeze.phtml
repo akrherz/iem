@@ -131,7 +131,7 @@ EOF;
  "KS" => "Kansas", "NE" => "Nebraska", "MN_N" => "Minnesota North",
  "MN_S" => "Minnsota South", "MO" => "Missouri", "ND" => "North Dakota", 
  "NW" => "Pacific Northwest", "SD" => "South Dakota", "WI" => "Wisconsin");
- while (list($key,$val)=each($ar)){
+ foreach($ar as $key => $val){
  	$sselect .= sprintf("<option value=\"%s?width=%s&amp;height=%s&amp;state=%s\"%s>%s</option>\n",
  			$uri, $imgwidth, $imgheight, $key, 
  			($state == $key) ? " SELECTED": "", $val); 

@@ -11,7 +11,7 @@ $uri = "http://iem.local/json/vtec_emergencies.py";
 $data = file_get_contents($uri);
 $json = json_decode($data, $assoc=TRUE);
 $table = "";
-while(list($key, $val)=each($json['events'])){
+foreach($json['events'] as $key => $val){
 	$table .= sprintf("<tr><td>%s</td><td>%s</td><td><a href=\"%s\">%s</a></td>".
 			"<td>%s</td><td>%s</td><td>%s %s</td><td>%s</td><td>%s</td></tr>",
 			$val["year"],

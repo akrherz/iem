@@ -183,7 +183,7 @@ $content .= $uselect;
 
 $content .= '<br />Direction Bins: <select name="nsector">';
 $opts = Array(8,12,16,20,24,28,32,36);
-while(list($k,$v)=each($opts)){
+foreach($opts as $k => $v){
 	$content .= sprintf("<option value=\"%s\" %s>%s</option>\n", $v, 
 			($nsector == $v) ? 'selected="selected"': '',$v);
 }

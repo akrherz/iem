@@ -148,7 +148,7 @@ EOF;
  $data = file_get_contents($jsonuri);
  $json = json_decode($data, $assoc=TRUE);
  
- while(list($key, $val)=each($json['results'])){
+ foreach($json['results'] as $key => $val){
  	if ($val["phenomena"] == 'SV'){
  		$svrtable .= do_row($val);
 	} elseif ($val["phenomena"] == 'TO'){

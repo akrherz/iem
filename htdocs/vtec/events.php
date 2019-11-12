@@ -26,7 +26,7 @@ $public_uri = str_replace(
 $data = file_get_contents($uri);
 $json = json_decode($data, $assoc=TRUE);
 $table = "";
-while(list($key, $val)=each($json['events'])){
+foreach($json['events'] as $key => $val){
     $hmlurl = "";
     if (($val["hvtec_nwsli"] != null) && ($val["hvtec_nwsli"] != "00000")){
         $ts = strtotime($val["issue"]);

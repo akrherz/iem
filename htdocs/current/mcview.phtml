@@ -236,9 +236,8 @@ $headextra = "";
 
 if ($java == 'script'){
 	$i = 0;
-	reset($images);
 	$jsurls = [];
-	while(list($key, $val)=each($images)){
+	foreach($images as $key => $val){
 	    $jsurls[] = sprintf("'%s'", $val);
 	}
 	$myimages = implode(",", $jsurls);

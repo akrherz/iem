@@ -1,8 +1,8 @@
 <?php 
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 require_once "../../include/forms.php";
-include "../../include/database.inc.php";
-include "../../include/imagemaps.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/imagemaps.php";
 function download_data($sts, $ets){
 	
 	$dbconn = iemdb('other');
@@ -73,7 +73,7 @@ $channels = Array(
 				);
 
 $c="";
-while (list($key,$ch)=each($channels)){
+foreach($channels as $key => $ch){
 	$c .= sprintf("<tr><td>%s</td><td>%s</td></tr>", $key, $ch);
 }
 
