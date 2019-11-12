@@ -2,6 +2,7 @@
 """Generation of National Mesonet Project CSV File"""
 
 import psycopg2.extras
+from metpy.units import units
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import distance, temperature
 from pyiem.util import get_dbconn, ssw
@@ -82,7 +83,14 @@ def do_output():
                 p(row["rh_qc"], 1, 0, 1600),
                 p(row["rain_mm_tot_qc"], 2, 0, 100),
                 p(row["ws_mps_s_wvt_qc"], 2, 0, 100),
-                p(row["ws_mph_max_qc"], 2, 0, 100),
+                p(
+                    (row["ws_mph_max_qc"] * units("mph"))
+                    .to(units("meter / second"))
+                    .m,
+                    2,
+                    0,
+                    100,
+                ),
                 p(row["winddir_d1_wvt_qc"], 2, 0, 360),
             )
         )
