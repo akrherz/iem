@@ -1,5 +1,5 @@
 <?php 
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
 $t = new MyView();
@@ -26,9 +26,9 @@ $fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0006.dat");
 $thisMax = -99;
 $thisMin = 99;
 $maxGust = 0;
-while (list ($line_num, $line) = each ($fcontents)) {
+foreach($fcontents as $line_num => $line){
     if ($line_num < 5) continue;
-	$parts = split (" ", $line);
+	$parts = explode(" ", $line);
 	$tm = $parts[5];
 	if ($tm > $thisMax){ $thisMax = $tm; }
 	if ($tm < $thisMin){ $thisMin = $tm; }

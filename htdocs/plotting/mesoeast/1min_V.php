@@ -1,10 +1,10 @@
 <?php
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 // 1 minute schoolnet data plotter
-include ("../../../include/jpgraph/jpgraph.php");
-include ("../../../include/jpgraph/jpgraph_line.php");
-include ("../../../include/jpgraph/jpgraph_scatter.php");
-include ("../../../include/jpgraph/jpgraph_date.php");
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_scatter.php";
+require_once "../../../include/jpgraph/jpgraph_date.php";
 
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
@@ -44,9 +44,8 @@ $peaksped = 0;
 $prevMPH = 0;
 $prevDRCT = 0;
 
-while (list ($line_num, $line) = each ($fcontents)) {
-
-	$parts = split (" ", $line);
+foreach($fcontents as $line_num => $line){
+	$parts = explode(" ", $line);
 	$times[] = strtotime(sprintf("%s %s %s %s %s", $parts[0], $parts[1],
 			$parts[2], $parts[3], $parts[4]));
   $inTmpf = $parts[5];

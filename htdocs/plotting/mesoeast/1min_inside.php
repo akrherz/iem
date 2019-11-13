@@ -1,13 +1,13 @@
 <?php
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 //  1 minute data plotter 
-include ("../../../include/jpgraph/jpgraph.php");
-include ("../../../include/jpgraph/jpgraph_line.php");
-include ("../../../include/jpgraph/jpgraph_date.php");
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_date.php";
 
 function dwpf($tmpf, $relh){
   $tmpk = 273.15 + (5.00/9.00 * ($tmpf - 32.00));
-  $dwpk = $tmpk / (1 + 0.000425 * $tmpk * - (log10($relh/100)));
+  @$dwpk = $tmpk / (1 + 0.000425 * $tmpk * - (log10($relh/100)));
   return round( ($dwpk - 273.15) * 9.00/5.00 + 32,2 );
 }
 
@@ -44,9 +44,8 @@ $max_yaxis = 0;
 $max_yaxis_i = 0;
 $prev_Tmpf = 0.0;
 
-while (list ($line_num, $line) = each ($fcontents)) {
-
-	$parts = split (" ", $line);
+foreach($fcontents as $line_num => $line){
+	$parts = explode(" ", $line);
 	$times[] = strtotime(sprintf("%s %s %s %s %s", $parts[0], $parts[1],
 			$parts[2], $parts[3], $parts[4]));
   $thisTmpf = $parts[17];
