@@ -136,7 +136,7 @@ $radar->draw($img);
 $c0->draw($img);
 
 /* Draw Points */
-while (list($key, $drct) = each($cdrct))
+foreach($cdrct as $key => $drct)
 {
    if ($cameras[$key]["network"] != $network) continue;
    $lon = $cameras[$key]['lon'];

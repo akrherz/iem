@@ -2,8 +2,8 @@
 /*
  * Dumps IA and IL CoCoRaHS data to a Weather Central formatted file
  */
-include "../../config/settings.inc.php";
-include "../../include/mlib.php";
+require_once "../../config/settings.inc.php";
+require_once "../../include/mlib.php";
 
 $rwis = fopen('/tmp/wxc_cocorahs.txt', 'w');
 fwrite($rwis, sprintf("Weather Central 001d0300 Surface Data timestamp=%s
@@ -21,14 +21,13 @@ fwrite($rwis, sprintf("Weather Central 001d0300 Surface Data timestamp=%s
 ", date("Y.m.d.H.I")) );
  
 $states = Array("IA");
-reset($states);
 $now = time();
-while(list($k,$state) = each($states)){
+foreach($states as $k => $state){
 
     $jdata = file_get_contents("http://iem.local/api/1/currents.json?network=${state}COCORAHS");
     $jobj = json_decode($jdata, $assoc=TRUE);
 
-	while ( list($bogus, $val) = each($jobj["data"]) ) {
+	foreach($jobj["data"] as $bogus => $val){
   		$tdiff = $now - strtotime($val["local_valid"]);
 		if ($tdiff > 86400) continue;
   		

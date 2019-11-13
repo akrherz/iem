@@ -1,6 +1,6 @@
 <?php
-include "../../config/settings.inc.php";
-include "../../include/mlib.php";
+require_once "../../config/settings.inc.php";
+require_once "../../include/mlib.php";
 
 function fancy($v, $floor,$ceil, $p){
   if ($v < $floor || $v > $ceil) return "";
@@ -57,7 +57,7 @@ fwrite($rwis, "Weather Central 001d0300 Surface Data TimeStamp=$tstamp
 
 
 $now = time();
-while ( list($bogus, $val) = each($jobj["data"]) ) {
+foreach($jobj["data"] as $bogus => $val){
     $key = $val["station"];
 	if (! array_key_exists($key,$traffic)){
 		$traffic[$key] = Array("avgspeed0" => "M", 
@@ -155,7 +155,7 @@ fwrite($rwis, "Weather Central 001d0300 Surface Data TimeStamp=$tstamp
  
 
 $now = time();
-while ( list($bogus, $val) = each($jobj["data"]) ) {
+foreach($jobj["data"] as $bogus => $val){
   $tdiff = $now - strtotime($val["local_valid"]);
 
   if ($val['tsf0'] == "") $val['tsf0'] = -99.99;

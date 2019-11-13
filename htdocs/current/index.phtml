@@ -465,7 +465,7 @@ if ($pathinfo){
             " class=\"btn btn-default\">Back to Current Weather</a></p>");            
         $maincontent .= "<div class=\"row\">\n";
         $i = 0;
-        while (list($path, $product) = each($section["prods"])){
+        foreach($section["prods"] as $path => $product){
             if ($i > 0 && $i % 3 == 0){
                 $maincontent .= "</div>\n<div class=\"row\">\n";
             }
@@ -517,7 +517,7 @@ if ($pathinfo){
 reset($cfg);
 $menuhidden = ($showmenu) ? "": " hidden-xs hidden-sm";
 $menu = "";
-while (list($path, $section) = each($cfg)){
+foreach($cfg as $path => $section){
     $menu .= sprintf("<li><a href=\"/current/index.phtml/%s\"".
         " class=\"btn btn-default btn-block%s\">%s</a></li>",
         $path,

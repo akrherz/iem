@@ -2,11 +2,11 @@
  /* 
   * Download front end for daily data from the ISUSM network
   */
- include("../../../config/settings.inc.php");
- include("../../../include/myview.php");
- include("../../../include/network.php");
- include("../../../include/forms.php");
- include_once "boxinc.phtml";
+ require_once "../../../config/settings.inc.php";
+ require_once "../../../include/myview.php";
+ require_once "../../../include/network.php";
+ require_once "../../../include/forms.php";
+ require_once "boxinc.phtml";
  
  $t = new MyView();
  $t->title = "ISU Soil Moisture Daily Data Request";
@@ -22,14 +22,14 @@
  $dselect2= daySelect2(date("d"), "day2");
 
 $sselect = "";
-while( list($key,$val) = each($nt->table)){
+foreach($nt->table as $key => $val){
 	$sselect .= sprintf("<br /><input type=\"checkbox\" name=\"sts\" value=\"%s\">%s (%s County, %s)",
 			$key, $val["name"], $val["county"], $key);
 }
 
 $soilopts = "";
 $levels = Array(4,12,24,50);
-while( list($key, $val) = each($levels)){
+foreach($levels as $key => $val){
 	$soilopts .= sprintf("<br /><input type=\"checkbox\" name=\"vars\" value=\"soil%02dtn\">Daily Low %s inch Soil Temperature [F]</input>\n"
 		,$val, $val);
 	$soilopts .= sprintf("<br /><input type=\"checkbox\" name=\"vars\" value=\"soil%02dt\">Daily Average %s inch Soil Temperature [F]</input>\n"

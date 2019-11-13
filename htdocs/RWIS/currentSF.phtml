@@ -54,7 +54,7 @@ $mydata = Array();
 $jdata = file_get_contents("http://iem.local/api/1/currents.json?network=${network}");
 $jobj = json_decode($jdata, $assoc=TRUE);
 
-while (list($bogus, $ob) = each($jobj["data"])){
+foreach($jobj["data"] as $bogus => $ob){
     $key = $ob["station"];
 	$mydata[$key] = $ob;
 	$mydata[$key]["ts"] = strtotime($ob["local_valid"]);
@@ -87,8 +87,7 @@ $finalA = Array();
 $finalA = aSortBySecondIndex($mydata, $sortcol);
 $i = 0;
 $now = time();
-while (list ($key, $val) = each ($finalA))  {
-	$parts = $finalA[$key];
+foreach($finalA as $key => $parts){
 	$i++;
 	$tdiff = $now - $parts["ts"];
 	/*    if ($tdiff > 86400*5){

@@ -7,7 +7,7 @@ require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
 require_once "../../include/myview.php";
 $t = new MyView();
-include("lib.php");
+require_once "lib.php";
 $mosdb = iemdb("mos");
 pg_exec($mosdb, "SET TIME ZONE 'UTC'");
 
@@ -57,10 +57,9 @@ for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
 
 for($now=$sts+(3600*12);$now <= $ets+(2*86400); $now += (3600*3)){
  $thisrow = sprintf("<tr><td>%sZ</td>", date('d/H', $now) );
- reset($runtimes);
  $allnulls = TRUE;
  $lookup = date('Y-m-d H:i', $now);
- while (list($k,$s) = each($runtimes)){
+ foreach($runtimes as $k => $s){
    if (@$data[$s][$lookup] != null){
      $allnulls = FALSE;
    }
@@ -95,7 +94,7 @@ should use the "K" for United States sites.</p>
 
 <select name="vname">
 EOF;
-while (list($v,$n) = each($mosvars))
+foreach($mosvars as $v => $n)
 {
   $content .= "<option value=\"$v\"";
   if ($vname == $v) $content .= " SELECTED";

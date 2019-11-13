@@ -16,7 +16,7 @@ $jobj = json_decode($jdata, $assoc=TRUE);
 
 $mydata = Array();
 
-while ( list($bogus, $iemob) = each($jobj["data"]) ){
+foreach($jobj["data"] as $bogus => $iemob){
     $key = $iemob["station"];
     $mydata[$key] = $iemob;
     unset($mydata[$key]['local_max_sknt_ts']);
@@ -38,7 +38,7 @@ $ar = Array("type"=>"FeatureCollection",
       "features" => Array()
 );
 
-while (list($sid,$data) = each($mydata))
+foreach($mydata as $sid => $data)
 {
 
   $z = Array("type"=>"Feature", "id"=>$sid, 

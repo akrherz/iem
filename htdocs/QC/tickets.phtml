@@ -8,12 +8,11 @@ $t->title = "Quality Control, Active Trouble Tickets";
 $t->thispage = "iem-qc";
 
 $conn = iemdb("portfolio");
-$rs = pg_exec($conn, "SELECT *, getSiteName(s_mid) as s_name from tt_base
-    WHERE status != 'CLOSED' ORDER by id ASC");
+$rs = pg_exec($conn, "SELECT *, getSiteName(s_mid) as s_name from tt_base ".
+    "WHERE status != 'CLOSED' ORDER by id ASC");
 pg_close($conn);
 
-$ars = Array("isusm" => "", "iaawos" => "", "iarwis" => "", 
-		"kcci" => "", "kelo" => "", "kimt" => "");
+$ars = Array("isusm" => "", "iaawos" => "", "iarwis" => "");
 
 for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 {
@@ -30,8 +29,7 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 	@$ars[$row["portfolio"]] .= $s;
  }
  
- reset($ars);
- while( list($key, $val) = each($ars)){
+ foreach($ars as $key => $val){
  	if ($val == '')
  		$ars[$key] = "<tr><td colspan=\"6\">No Open/Active Tickets Found</td></tr>";
  }
@@ -78,15 +76,6 @@ please feel free to <a href="/info/contacts.php">Contact Us</a>.
  {$ars["iarwis"]}
 </table><br><br>
 
-<h3>KCCI SchoolNet</h3>
-<table class="table table-striped">
-<thead>
-<tr>
- <th>ID</th><th>Status:</th><th>Opened:</th><th>Updated:</th><th>Site:</th>
- <th>Ticket Topic:</th></tr>
-</thead>
- {$ars["kccisnet"]}
-</table><br><br>
 
 EOF;
 $t->render('single.phtml');

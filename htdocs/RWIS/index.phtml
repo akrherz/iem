@@ -1,13 +1,13 @@
 <?php 
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
-include("../../include/cameras.inc.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
+require_once "../../include/cameras.inc.php";
 require_once "../../include/forms.php";
 $camid = isset($_GET["camid"]) ? xssafe($_GET["camid"]) : "IDOT-000";
 
 $cdict = Array();
 $selectform = "<select name=\"camid\">\n";
-while( list($id,$cam) = each($cameras)){
+foreach($cameras as $id => $cam){
   if ($cam["network"] != "IDOT"){ continue; }
   $base = substr($id,0,8);
   if (! array_key_exists($base, $cdict)){ $cdict[$base] = 0; }

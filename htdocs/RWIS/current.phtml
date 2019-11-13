@@ -43,7 +43,7 @@ $mydata = Array();
 $jdata = file_get_contents("http://iem.local/api/1/currents.json?network=${network}");
 $jobj = json_decode($jdata, $assoc=TRUE);
 
-while (list($bogus, $ob) = each($jobj["data"]) ){
+foreach($jobj["data"] as $bogus => $ob){
     $key = $ob["station"];
     $mydata[$key] = $ob;
     $mydata[$key]["ts"] = strtotime($ob["local_valid"]);
@@ -97,7 +97,7 @@ $now = time();
 $skippedStations = Array();
 $table = "";
 // Loop though all data
-while (list ($key, $val) = each ($finalA))  {
+foreach($finalA as $key => $val){
 	$parts = $finalA[$key];
 	$tdiff = $now - $parts["ts"];
 
@@ -147,12 +147,7 @@ while (list ($key, $val) = each ($finalA))  {
 	    </tr>\n";
 }
 
-
-
-
-while (list ($key, $val) = each ($skippedStations) ) {
-	$parts = $finalA[$key];
-
+foreach($skippedStations as $key => $parts){
 	$table .= "<tr>";
 	$table .= "<td><input type=\"checkbox\" name=\"st[]\"
                value=\"".$key."\"></td>";

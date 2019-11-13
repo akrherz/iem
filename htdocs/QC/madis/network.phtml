@@ -2,12 +2,14 @@
  require_once "../../../config/settings.inc.php";
  define("IEM_APPID", 97);
  require_once "../../../include/myview.php";
- $t = new MyView();
- $t->thispage = "iem-qc";
- $t->title = "Quality Control, MADIS Raw QC";
  require_once "../../../include/database.inc.php";
  require_once "../../../include/forms.php";
  require_once "../../../include/mlib.php";
+ require_once "../../../include/network.php";
+
+ $t = new MyView();
+ $t->thispage = "iem-qc";
+ $t->title = "Quality Control, MADIS Raw QC";
  $dbconn = iemdb("iem");
  $rs = pg_prepare($dbconn, "SELECT", "SELECT * from current_qc WHERE 
        network = $1");
@@ -15,7 +17,6 @@
  $network = isset($_GET["network"])? substr($_GET["network"],0,10): "IA_ASOS";
  $baa = 'network.phtml?network='. $network;
 
- require_once "../../../include/network.php";
  $nt = new NetworkTable($network);
  $cities = $nt->table;
  
@@ -46,7 +47,7 @@
  );
  
  $sselect = "";
- while( list($key, $val) = each($ns_networks) ){
+ foreach($ns_networks as $key => $val){
  	$sselect .= "<option value=\"network.phtml?network=$key\" ";
  	if ($network == $key) $sselect .= "selected=\"selected\"";
  	$sselect .= ">". $ns_networks[$key] ."\n";
@@ -65,7 +66,7 @@
  	return round($v,$r);
  }
  $table = "";
- while (list ($key, $val) = each ($finalA))  {
+ foreach($finalA as $key => $val){
  	$ts = strtotime($val["valid"]);
  	$table .= '<tr ';
  	if ($i) $table .= 'class="even"';

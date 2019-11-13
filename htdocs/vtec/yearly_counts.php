@@ -144,8 +144,7 @@ EOF;
 	}
 	$table .= "</tr></thead>\n";
 
-	reset($nt->table);
-	while( list($key,$val) = each($nt->table)){
+	foreach($nt->table as $key => $val){
 		$table .= sprintf("<tr><td>%s</td><td>%s</td>",
 				$key, $val["name"]);
 		foreach($years as $i => $yr){
