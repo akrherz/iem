@@ -11,7 +11,7 @@ $t = new MyView();
 $fb = new \Facebook\Facebook([
   'app_id' => '148705700931',
   'app_secret' => $fb_feature_secret,
-  'default_graph_version' => 'v2.10'
+  'default_graph_version' => 'v5.0'
 ]);
 $helper = $fb->getRedirectLoginHelper();
 $permissions = ['publish_pages'];
@@ -62,25 +62,27 @@ $permalink = sprintf('%s/onsite/features/cat.php?day=%s', $rooturl, date("Y-m-d"
 $thumbnail = sprintf('%s/onsite/features/%s.%s', $rooturl, 
              date("Y/m/ymd"), $mediasuffix);
 
-
-$action_links = [
-		'name' => 'Permalink',
-        'link' => $permalink
-];
+// Here's the rub, Facebook wants to visit the permalink above to scrape content
+// So we need to get this info into the database before we tell facebook about it
+if ($story != null && $title != null &&
+    isset($_REQUEST['iemdb']) && $_REQUEST['iemdb'] == 'yes'){
+  pg_query($mesosite, "DELETE from feature WHERE date(valid) = 'TODAY'");
+  pg_execute($mesosite, "INJECTOR", Array($title, $story, $caption,
+			 $voting, $tags, null, $appurl, $javascripturl,
+			 $mediasuffix) );
+}
 
 if ( isset($_REQUEST["facebook"]) && $_REQUEST["facebook"] == "yes"){
-	
+
+    // https://developers.facebook.com/docs/graph-api/reference/v2.12/page/feed#custom-image
 	$data = [
-		 'name' => 'IEM Feature',
-			'message' => $story,
-			'link' => $permalink,
-			'picture' => $thumbnail,
-			'description' => $title,
+		'link' => $permalink,
+		'message' => $story,
 	];
 	try{
 		// Get a page access token to use
 		$response = $fb->get('/157789644737?fields=access_token');
-		$fbid = $response->getGraphNode();
+        $fbid = $response->getGraphNode();
 		$response = $fb->post('/157789644737/feed', $data, $fbid["access_token"]);
 		$fbid = $response->getGraphNode();
 	} catch(Facebook\Exceptions\FacebookSDKException $e) {
@@ -89,7 +91,10 @@ if ( isset($_REQUEST["facebook"]) && $_REQUEST["facebook"] == "yes"){
 		exit;
 	}
 	$story_fbid = explode("_", $fbid['id']);
-  	$story_fbid = $story_fbid[1];
+      $story_fbid = $story_fbid[1];
+    $app .= sprintf("<br />Facebook <a href=\"https://www.facebook.com/". 
+        "permalink.php?story_fbid=%s&id=157789644737\">post created</a>.",
+        $story_fbid);
 }
 if ($story != null && $title != null &&
     isset($_REQUEST['iemdb']) && $_REQUEST['iemdb'] == 'yes'){
