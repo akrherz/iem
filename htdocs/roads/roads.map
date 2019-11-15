@@ -172,50 +172,6 @@ END
 
 
 LAYER
- NAME kwwlback
- DATA "images/26915/kwwl.jpg"
- PROJECTION
-  "init=epsg:26915"
- END
- METADATA
-  "show_in_legend" "0"
- END
- TYPE RASTER
- STATUS OFF
- PROCESSING "CLOSE_CONNECTION=NORMAL"
-END
-
-LAYER
- NAME kwwl2015
- DATA "images/26915/kwwl2015.png"
- PROJECTION
-  "init=epsg:26915"
- END
- METADATA
-  "show_in_legend" "0"
- END
- TYPE RASTER
- STATUS OFF
- PROCESSING "CLOSE_CONNECTION=NORMAL"
-END
-
-
-
-LAYER
- NAME kgan
- DATA "images/26915/kgan.tif"
- PROJECTION
-  "init=epsg:26915"
- END
- METADATA
-  "show_in_legend" "0"
- END
- TYPE RASTER
- STATUS OFF
-END
-
-
-LAYER
  NAME dsmback
  DATA "/mesonet/data/gis/static/images/26915/iowa/dsmmetro.tif"
  PROJECTION

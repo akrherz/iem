@@ -45,16 +45,6 @@ $map->set("height", $height);
 
 $img = $map->prepareImage();
 
-if (! $eightbit)
-{
-  $background = $map->getlayerbyname("kcciback");
-  if ($metroview)
-  {
-    $background = $map->getlayerbyname("dsmback");
-  }
-  $background->set("status", MS_ON);
-  //$background->draw($img);
-}
 
 if (isset($_GET["nexrad"])){
   $radarfn = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0q_%Y%m%d%H%M.png", $ts);
