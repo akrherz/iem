@@ -17,9 +17,9 @@
 192.168.0.9      metfs2.local  
 192.168.0.10      metfs1.local       iem-idd0      iem-idd0.local  
 192.168.0.11     iem-syslog
-192.168.0.12     iem12 iem12.local lesync.local
+192.168.0.12     iem12 iem12.local
 192.168.0.13     iem13         iem13.local
-192.168.0.14     iem14.local
+192.168.0.14     iem14.local   lesync.local
 192.168.0.15     iem15         iem15.local
 192.168.0.16     iem16.local
 192.168.0.22     iem22         iem22.local
