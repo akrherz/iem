@@ -6,7 +6,6 @@ Run from RUN_20_AFTER.sh
 import subprocess
 import datetime
 import os
-import unittest
 import tempfile
 
 import numpy as np
@@ -66,9 +65,9 @@ def generate_rr5():
             mt("TV", row[4], "12", q),
             mt("TV", row[5], "24", q),
             mt("TV", row[6], "50", q),
-            mt("MW", max([0, 0 if row[7] is None else row[7]]), "12", q),
-            mt("MW", max([0, 0 if row[8] is None else row[8]]), "24", q),
-            mt("MW", max([0, 0 if row[9] is None else row[9]]), "50", q),
+            mt("MV", max([0, 0 if row[7] is None else row[7]]), "12", q),
+            mt("MV", max([0, 0 if row[8] is None else row[8]]), "24", q),
+            mt("MV", max([0, 0 if row[9] is None else row[9]]), "50", q),
             precip,
         )
     return data
@@ -88,15 +87,12 @@ def main():
     os.unlink(tmpfn)
 
 
+def test_mt():
+    """Conversion of values to SHEF encoded values"""
+    assert mt("TV", 4, 40, dict()) == "/TV 40.004"
+    assert mt("TV", -4, 40, dict()) == "/TV -40.004"
+    assert mt("TV", 104, 40, dict()) == "/TV 40.104"
+
+
 if __name__ == "__main__":
     main()
-
-
-class MyTest(unittest.TestCase):
-    """Test out our functions"""
-
-    def test_mt(self):
-        """Conversion of values to SHEF encoded values"""
-        self.assertEquals(mt("TV", 4, 40, dict()), "/TV 40.004")
-        self.assertEquals(mt("TV", -4, 40, dict()), "/TV -40.004")
-        self.assertEquals(mt("TV", 104, 40, dict()), "/TV 40.104")
