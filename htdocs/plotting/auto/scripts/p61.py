@@ -5,6 +5,7 @@ from collections import OrderedDict
 from pandas.io.sql import read_sql
 import pandas as pd
 import geopandas as gpd
+from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -81,6 +82,7 @@ def get_description():
 def get_data(ctx):
     """Build out our data."""
     pgconn = get_dbconn("iem")
+    ctx["nt"] = NetworkTable("NWSCLI")
     varname = ctx["var"]
 
     today = ctx["sdate"]
@@ -135,11 +137,10 @@ def get_data(ctx):
     )
 
     for station, row in df.iterrows():
-        lookup = station[1:] if station.startswith("K") else station
-        if lookup not in ctx["_nt"].sts:
+        if station not in ctx["nt"].sts:
             continue
-        df.at[station, "lat"] = ctx["_nt"].sts[lookup]["lat"]
-        df.at[station, "lon"] = ctx["_nt"].sts[lookup]["lon"]
+        df.at[station, "lat"] = ctx["nt"].sts[station]["lat"]
+        df.at[station, "lon"] = ctx["nt"].sts[station]["lon"]
         if varname == "precip":
             last_wet = row["last_wet"]
             days = 0 if last_wet in [today, yesterday] else row["precip_days"]
@@ -227,4 +228,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    print(mapbox(dict(var="precip")))
+    print(plotter(dict(var="precip")))
