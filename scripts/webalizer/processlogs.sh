@@ -3,11 +3,8 @@
 # iemssl
 # cocorahs
 # datateam
-# idep
-# schoolnet8
 # sustainablecorn
 # weatherim
-# wepp
 # 
 # RPM requirements for this workflow
 # yum -y install libdb-cxx libmaxminddb gd lftp tcsh tmpwatch
@@ -16,7 +13,7 @@ export yyyymmdd="`date --date '1 day ago' +'%Y%m%d'`"
 export yyyymm="`date --date '1 day ago' +'%Y%m'`"
 export dd="`date --date '1 day ago' +'%d'`"
 
-PREFIXES="iem iemssl cocorahs datateam idep schoolnet8 sustainablecorn weatherim wepp depbackend"
+PREFIXES="iem iemssl cocorahs datateam sustainablecorn weatherim depbackend"
 MACHINES="iemvs100 iemvs101 iemvs102 iemvs103 iemvs104 iemvs105 iemvs106 iemvs107 iemvs108 iemvs109"
 CONFBASE="/opt/iem/scripts/webalizer"
 
@@ -55,8 +52,6 @@ mv combined.access_log combined-iem.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/mesonet.conf -T combined-iem.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/cocorahs.conf combined-cocrahs.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/sustainablecorn.conf combined-sustainablecorn.log
-/home/mesonet/bin/webalizer -c ${CONFBASE}/wepp.conf combined-wepp.log
-/home/mesonet/bin/webalizer -c ${CONFBASE}/idep.conf combined-idep.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/weatherim.conf combined-weatherim.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/datateam.conf combined-datateam.log
 rsync -a /mnt/webalizer/usage/. iem12:/mesonet/share/usage/
