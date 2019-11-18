@@ -1,6 +1,5 @@
 """Create simple maximum dbz composites for a given UTC date
 """
-from __future__ import print_function
 import datetime
 import os
 import time
@@ -11,9 +10,9 @@ import requests
 import osgeo.gdal as gdal
 from osgeo import gdalconst
 import numpy as np
-import pytz
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger, utc
 
+LOG = logger()
 PGCONN = get_dbconn("mesosite", user="nobody")
 CURSOR = PGCONN.cursor()
 PQINSERT = "/home/ldm/bin/pqinsert"
@@ -66,11 +65,14 @@ def run(prod, sts):
             )
         )
         if not os.path.isfile(fn):
-            print("max_reflect MISSING: %s" % (fn,))
+            LOG.info("missing file: %s", fn)
             now += interval
             continue
         n0r = gdal.Open(fn, 0)
         n0rd = n0r.ReadAsArray()
+        LOG.debug(
+            "%s %s %s %s", now, n0rd.dtype, np.shape(n0rd), n0r.RasterCount
+        )
         if maxn0r is None:
             maxn0r = n0rd
         maxn0r = np.where(n0rd > maxn0r, n0rd, maxn0r)
@@ -178,8 +180,7 @@ def run(prod, sts):
 def main(argv):
     """Run main()"""
     # Default is to run for yesterday
-    ts = datetime.datetime.utcnow() - datetime.timedelta(days=1)
-    ts = ts.replace(tzinfo=pytz.utc)
+    ts = utc() - datetime.timedelta(days=1)
     ts = ts.replace(hour=0, minute=0, second=0, microsecond=0)
     if len(argv) == 4:
         ts = ts.replace(

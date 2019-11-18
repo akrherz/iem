@@ -1,25 +1,35 @@
 <?php 
 require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 118);
-include_once "../../../include/myview.php";
+require_once "../../../include/myview.php";
+require_once "../../../include/imagemaps.php"; 
+require_once "../../../include/forms.php";
+
 $t = new MyView();
 $t->title = "NWS COOP Daily Normals";
 $t->thispage = "climatology-today";
-include_once "../../../include/imagemaps.php"; 
-require_once "../../../include/forms.php";
 
 $year = date("Y");
-$nselect = networkSelect("IACLIMATE", "");
+$network = isset($_REQUEST['network']) ? xssafe($_REQUEST['network']) : 'IACLIMATE';
+$nselect = networkSelect($network, "");
 $mselect = monthSelect("month");
 $dselect = daySelect("day");
+
+$sselect = selectClimodatNetwork($network, "network");
 
 $t->content = <<<EOF
 
 <p>With this interface, you can download daily climate normals for NWS COOP
 sites.  Please fill out the form below:</p>
 
-<form method="GET" action="normals_wkr.php" name="dl">
+<p>Data is available from the following states: 
+<form name="sss" method="GET">
+{$sselect}
+<input type="submit" value="Select State">
+</form>
 
+<form method="GET" action="normals_wkr.php" name="dl">
+<input type="hidden" name="network" value="{$network}">
 <h3>1. Climatology Source:</h3>
 <blockquote>
 (<i>Based on daily observations, the IEM has computed standard climatological values. The
@@ -66,7 +76,7 @@ open the comma delimited file.
 
 <select name="dloption">
   <option value="online">View Online</option>
-  <option value="cdf">Download to Disk [CDF]</option>
+  <option value="cdf">Download to Disk [CSV]</option>
 </select><p>
 
 <h3>4. Submit Form:</h3><br>
