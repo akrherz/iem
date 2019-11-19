@@ -20,7 +20,7 @@ rm OAX_radar.gif* >& /dev/null
 set DEVICE1="GIF|ARX_radar.gif|800;600"
 
 
-setenv DATA_DIR /home/ldm/data/nexrad/NIDS/ARX/N0R
+setenv DATA_DIR /mesonet/data/nexrad/NIDS/ARX/N0R
 set grid=${DATA_DIR}/N0R_${dateY}_${hh}00
 
 if (! -e ${grid} ) then

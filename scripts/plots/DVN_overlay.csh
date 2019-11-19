@@ -20,8 +20,8 @@ rm DVN_radar.gif* >& /dev/null
 set DEVICE1="GIF|DVN_radar.gif|800;600"
 
 
-setenv DATA_DIR /home/ldm/data/nexrad/NIDS/DVN/N0R
-setenv CHECK_DIR /home/ldm/data/nexrad/NIDS/DVN/N0V
+setenv DATA_DIR /mesonet/data/nexrad/NIDS/DVN/N0R
+setenv CHECK_DIR /mesonet/data/nexrad/NIDS/DVN/N0V
 
 set grid=${DATA_DIR}/N0R_${dateY}_${hh}00
 set USE_TIME=${dateY}_${hh}00

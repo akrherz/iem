@@ -30,7 +30,7 @@ set DEVICE1="GIF|20radarOverlay.gif"
 set DEVICE2="GIF|20radarOverlay_s.gif|500;400"
 
 
-setenv DATA_DIR /home/ldm/data/nexrad/NIDS/DMX/N0R
+setenv DATA_DIR /mesonet/data/nexrad/NIDS/DMX/N0R
 set grid=${DATA_DIR}/N0R_${dateY}_${hh}${mm}
 set proj="RAD"
 

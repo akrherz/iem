@@ -1,5 +1,4 @@
 """Download and archive 1000 ft reflectivity from the NCEP HRRR"""
-from __future__ import print_function
 import sys
 import os
 import subprocess
@@ -9,8 +8,9 @@ import datetime
 import pytz
 import requests
 import pygrib
-from pyiem.util import utc, exponential_backoff
+from pyiem.util import utc, exponential_backoff, logger
 
+LOG = logger()
 # HRRR model hours available
 HOURS = [
     36,
