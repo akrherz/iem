@@ -73,21 +73,22 @@ def main(argv):
         sys.exit(2)
     write_stats(device, current)
     if old is None:
-        print("CRITICAL - initializing counter")
-        sys.exit(2)
+        print("NOTICE - initializing counter")
+        sys.exit(0)
     # need to support rhel6 hosts, so no total_seconds()
     seconds = (datetime.datetime.utcnow() - old["valid"]).days * 86400 + (
         datetime.datetime.utcnow() - old["valid"]
     ).seconds
     if seconds < 1 or seconds > 700:
-        print("CRITICAL - seconds timer is too large %s" % (seconds,))
-        sys.exit(2)
+        print("NOTICE - seconds timer is too large %s" % (seconds,))
+        sys.exit(0)
     rxrate = compute_rate(old["rxbytes"], current["rxbytes"], seconds)
     txrate = compute_rate(old["txbytes"], current["txbytes"], seconds)
 
     print(
         (
-            "TCPTRAFFIC OK - %s %.0f bytes/s | TOTAL=%.0fB;400000000;500000000 "
+            "TCPTRAFFIC OK - %s %.0f bytes/s | "
+            "TOTAL=%.0fB;400000000;500000000 "
             "IN=%.0fB;; OUT=%.0fB;; TIME=%.0f;;"
         )
         % (device, rxrate + txrate, rxrate + txrate, rxrate, txrate, seconds)
