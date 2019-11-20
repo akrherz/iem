@@ -2,10 +2,36 @@
  Main script that adds a site into the appropriate tables
  called from SYNC_STATIONS.sh
 """
-from __future__ import print_function
 import datetime
+
 import psycopg2.extras
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
+
+
+def add_summary(cursor, date, iemid):
+    """Add a summary entry for the given date."""
+    table = "summary_%s" % (date.year,)
+    cursor.execute(
+        """
+        SELECT iemid from """
+        + table
+        + """ WHERE day = %s and iemid = %s
+    """,
+        (date, iemid),
+    )
+    if cursor.rowcount == 1:
+        LOG.info("%s entry already exists for date %s", table, date)
+        return
+    cursor.execute(
+        """
+        INSERT into """
+        + table
+        + """ (day, iemid) values (%s, %s)
+    """,
+        (date, iemid),
+    )
 
 
 def main():
@@ -27,25 +53,14 @@ def main():
     now = datetime.datetime.now()
 
     for row in icursor:
-        print(
-            ("Add iemdb current: ID: %10s NETWORK: %s")
-            % (row["id"], row["network"])
+        LOG.info(
+            "Add iemdb current: ID: %10s NETWORK: %s",
+            row["id"],
+            row["network"],
         )
 
-        tbl = "summary_%s" % (now.year,)
-        icursor2.execute(
-            """
-            INSERT into %s (day, iemid) VALUES ('TODAY', %s)
-            """
-            % (tbl, row["iemid"])
-        )
-
-        tbl = "summary_%s" % ((now + datetime.timedelta(days=1)).year,)
-        icursor2.execute(
-            """INSERT into %s ( day, iemid)
-              VALUES ( 'TOMORROW', %s) """
-            % (tbl, row["iemid"])
-        )
+        for date in [now, now - datetime.timedelta(days=1)]:
+            add_summary(icursor2, date, row["iemid"])
         tbl = "current"
         icursor2.execute(
             """INSERT into %s ( valid, iemid)
