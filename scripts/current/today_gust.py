@@ -12,10 +12,10 @@ def main():
     now = datetime.datetime.now()
 
     service = (
-        "http://iem.local/plotting/auto/?_wait=no&q=206&t=state"
-        "&state=IA&v=max_gust&p=both&day=%s&cmap=gist_stern&"
-        "cmap_r=on&dpi=100&_fmt=png&_cb=1"
-    ) % (now.strftime("%Y/%m/%d"),)
+        "http://iem.local/plotting/auto/plot/206/t:state::network:WFO"
+        "::wfo:DMX::state:IA::v:max_gust::p:both::day:%s::"
+        "cmap:gist_stern_r::dpi:100::_cb:1.png"
+    ) % (now.strftime("%Y-%m-%d"),)
 
     req = requests.get(service, timeout=60)
     tmpfd = tempfile.NamedTemporaryFile(delete=False)
