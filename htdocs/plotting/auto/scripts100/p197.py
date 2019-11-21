@@ -13,9 +13,11 @@ PDICT = OrderedDict(
     (
         ("corn_poor_verypoor", "Percentage Corn Poor + Very Poor Condition"),
         ("corn_good_excellent", "Percentage Corn Good + Excellent Condition"),
+        ("corn_harvest", "Percentage Corn Harvested (Grain) Acres"),
         ("corn_planting", "Percentage Corn Planted Acres"),
         ("corn_silking", "Percentage Corn Silking Acres"),
         ("soybeans_planting", "Percentage Soybean Planted Acres"),
+        ("soybeans_harvest", "Percentage Soybean Harvested Acres"),
     )
 )
 LOOKUP = {
@@ -25,10 +27,17 @@ LOOKUP = {
         "PCT PLANTED",
         "ALL UTILIZATION PRACTICES",
     ],
+    "corn_harvest": ["CORN", "PROGRESS", "PCT HARVESTED", "GRAIN"],
     "soybeans_planting": [
         "SOYBEANS",
         "PROGRESS",
         "PCT PLANTED",
+        "ALL UTILIZATION PRACTICES",
+    ],
+    "soybeans_harvest": [
+        "SOYBEANS",
+        "PROGRESS",
+        "PCT HARVESTED",
         "ALL UTILIZATION PRACTICES",
     ],
     "corn_silking": [
@@ -152,7 +161,7 @@ def get_df(ctx):
     ctx["df"].index.name = "state"
     ctx["df"]["departure"] = ctx["df"]["thisval"] - ctx["df"]["avg"]
     ctx["title"] = "%s USDA NASS %s" % (
-        date.strftime("%-d %B %Y"),
+        date.strftime("%-d %b %Y"),
         PDICT[varname],
     )
     ctx["subtitle"] = (
