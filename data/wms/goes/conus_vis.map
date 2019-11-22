@@ -26,7 +26,7 @@ WEB
   METADATA
    "wms_title" "IEM GOES VIS WMS Service"
    "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/data/wms/goes/conus_vis.map&SERVICE=WMS&"
-   "wms_srs" "EPSG:4326"
+   "wms_srs" "EPSG:4326 EPSG:3857"
    "wms_abstract" "IEM generated CONUS composite of GOES Visible Satellite."
    "wms_keywords" "GOES,VISIBILE"
    "wms_accessconstraints" "None"
@@ -39,60 +39,37 @@ END
 #------------------------------------------------------
 #
 LAYER
-  NAME "conus_vis_4km"
+  NAME "conus_vis_1km"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/sat/conus_goes_vis4km.tif"
+  DATA "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel02/GOES-16_C02.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
-  PROJECTION
-    "init=epsg:4326"
-  END
-  METADATA
-    "wms_title" "GOES CONUS VIS"
-    "wms_srs"   "EPSG:4326 EPSG:26915"
-    "wms_extent" "-126 24 -66 50"
-  END
-  #OFFSITE 0 0 0
+  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel02/GOES-16_C02.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 LAYER
   NAME "conus_vis_1km_900913"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/sat/conus_goes_vis1km.tif"
+  DATA "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel02/GOES-16_C02.png"
   TYPE RASTER
   MINSCALE 0
-  MAXSCALE 4650000000000000
-  PROJECTION
-    "init=epsg:3857"
-  END
-  METADATA
-    "wms_title" "GOES CONUS VIS"
-    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
-    "wms_extent" "-126 24 -66 50"
-  END
-  #OFFSITE 0 0 0
+  MAXSCALE 465000000
+  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel02/GOES-16_C02.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 LAYER
   NAME "vis_1km_900913"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/goes/vis_0.tif"
+  DATA "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel02/GOES-16_C02.png"
   TYPE RASTER
   MINSCALE 0
-  MAXSCALE 4650000000000000
-  PROJECTION
-    "init=epsg:3857"
-  END
-  METADATA
-    "wms_title" "GOES VIS"
-    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
-    "wms_extent" "-180  -20 -20 65"
-  END
-  #OFFSITE 0 0 0
+  MAXSCALE 465000000
+  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel02/GOES-16_C02.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
+
 
 END

@@ -2,7 +2,7 @@ MAP
 #
 # Start of map file
 #
-NAME "goes_conus_ir"
+NAME "goes_east_ir"
 STATUS ON
 SIZE 450 350
 EXTENT -126 24 -66 50
@@ -25,7 +25,7 @@ WEB
   #LOG "/var/webtmp/w0.log"
   METADATA
    "wms_title" "IEM GOES IR WMS Service"
-   "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/data/wms/goes/conus_ir.map&SERVICE=WMS&"
+   "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/data/wms/goes/east_ir.map&SERVICE=WMS&"
    "wms_srs" "EPSG:4326 EPSG:3857"
    "wms_abstract" "IEM generated CONUS composite of GOES IR Satellite."
    "wms_keywords" "GOES,IR"
@@ -39,7 +39,7 @@ END
 #------------------------------------------------------
 #
 LAYER
-  NAME "conus_ir_4km"
+  NAME "east_ir_4km"
   STATUS ON
   DATA "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel13/GOES-16_C13.png"
   TYPE RASTER
@@ -50,7 +50,7 @@ LAYER
 END
 
 LAYER
-  NAME "conus_ir_4km_900913"
+  NAME "east_ir_4km_900913"
   STATUS ON
   DATA "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel13/GOES-16_C13.png"
   TYPE RASTER

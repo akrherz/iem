@@ -2,7 +2,7 @@ MAP
 #
 # Start of map file
 #
-NAME "goes_conus_ir"
+NAME "goes_east_vis"
 STATUS ON
 SIZE 450 350
 EXTENT -126 24 -66 50
@@ -24,11 +24,11 @@ WEB
   IMAGEURL "/tmp/"
   #LOG "/var/webtmp/w0.log"
   METADATA
-   "wms_title" "IEM GOES IR WMS Service"
-   "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/data/wms/goes/conus_ir.map&SERVICE=WMS&"
+   "wms_title" "IEM GOES VIS WMS Service"
+   "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/data/wms/goes/east_vis.map&SERVICE=WMS&"
    "wms_srs" "EPSG:4326 EPSG:3857"
-   "wms_abstract" "IEM generated CONUS composite of GOES IR Satellite."
-   "wms_keywords" "GOES,IR"
+   "wms_abstract" "IEM generated CONUS composite of GOES Visible Satellite."
+   "wms_keywords" "GOES,VISIBILE"
    "wms_accessconstraints" "None"
    "wms_contactperson" "Daryl Herzmann"
    "wms_contactorganization" "Iowa State University"
@@ -39,35 +39,35 @@ END
 #------------------------------------------------------
 #
 LAYER
-  NAME "conus_ir_4km"
+  NAME "east_vis_1km"
   STATUS ON
-  DATA "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel13/GOES-16_C13.png"
+  DATA "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel02/GOES-16_C02.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
-  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel13/GOES-16_C13.msinc"
+  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel02/GOES-16_C02.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 LAYER
-  NAME "conus_ir_4km_900913"
+  NAME "east_vis_1km_900913"
   STATUS ON
-  DATA "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel13/GOES-16_C13.png"
+  DATA "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel02/GOES-16_C02.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
-  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel13/GOES-16_C13.msinc"
+  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel02/GOES-16_C02.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 LAYER
-  NAME "ir_4km_900913"
+  NAME "vis_1km_900913"
   STATUS ON
-  DATA "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel13/GOES-16_C13.png"
+  DATA "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel02/GOES-16_C02.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
-  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel13/GOES-16_C13.msinc"
+  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel02/GOES-16_C02.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
