@@ -14,20 +14,15 @@ SWTDN       toa incoming shortwave flux
 SWGDN       surface incoming shortwave flux
 SWGDNCLR    surface incoming shortwave flux assuming clear sky
 
-NOTE: we need to have a ~/.netrc file to make this script happy.
-
 """
-from __future__ import print_function
 import datetime
 import os
 import sys
-import logging
 import subprocess
 
-from pyiem.util import get_properties
+from pyiem.util import get_properties, logger
 
-logging.basicConfig(level=logging.DEBUG)
-
+LOG = logger()
 PROPS = get_properties()
 
 
@@ -51,6 +46,7 @@ def do_month(sts):
     interval = datetime.timedelta(days=1)
     now = sts
     while now < ets:
+        LOG.debug(now)
         uri = now.strftime(
             (
                 "http://goldsmr4.gesdisc.eosdis.nasa.gov/daac-bin/OTF/"

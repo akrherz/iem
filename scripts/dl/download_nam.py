@@ -4,10 +4,13 @@ import subprocess
 import sys
 import datetime
 import os
+import tempfile
 
 import requests
 import pygrib
-from pyiem.util import exponential_backoff
+from pyiem.util import exponential_backoff, logger
+
+LOG = logger()
 
 
 def need_to_run(valid, hr):
@@ -23,6 +26,7 @@ def need_to_run(valid, hr):
     try:
         grbs = pygrib.open(gribfn)
         if grbs.messages < 5:
+            LOG.debug("gribfn %s only has %s messages", gribfn, grbs.messages)
             return True
     except Exception:
         return True
@@ -34,14 +38,14 @@ def fetch(valid, hr):
     """
     uri = valid.strftime(
         (
-            "http://www.ftp.ncep.noaa.gov/data/nccf/"
+            "https://ftpprd.ncep.noaa.gov/data/nccf/"
             "com/nam/prod/nam.%Y%m%d/nam.t%Hz.conusnest."
             "hiresf0" + str(hr) + ".tm00.grib2.idx"
         )
     )
     req = exponential_backoff(requests.get, uri, timeout=30)
     if req is None or req.status_code != 200:
-        print("download_hrrr failed to get idx\n%s" % (uri,))
+        LOG.info("failed to get idx: %s", uri)
         return
 
     offsets = []
@@ -67,34 +71,30 @@ def fetch(valid, hr):
                 offsets.append([int(tokens[1])])
                 neednext = True
 
-    outfn = valid.strftime(
+    pqstr = valid.strftime(
         (
-            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/nam/"
-            "%H/nam.t%Hz.conusnest.hiresf0" + str(hr) + ".tm00.grib2"
+            "data u %Y%m%d%H00 bogus model/nam/"
+            "%H/nam.t%Hz.conusnest.hiresf0" + str(hr) + ".tm00.grib2 grib2"
         )
     )
-    outdir = os.path.dirname(outfn)
-    if not os.path.isdir(outdir):
-        os.makedirs(outdir)  # make sure LDM can then write to dir
-        subprocess.call("chmod 775 %s" % (outdir,), shell=True)
-    output = open(outfn, "ab", 0o664)
 
     if len(offsets) != 8:
-        print(
-            "download_nam warning, found %s gribs for %s[%s]"
-            % (len(offsets), valid, hr)
-        )
+        LOG.info("warning, found %s gribs for %s[%s]", len(offsets), valid, hr)
     for pr in offsets:
         headers = {"Range": "bytes=%s-%s" % (pr[0], pr[1])}
         req = exponential_backoff(
             requests.get, uri[:-4], headers=headers, timeout=30
         )
         if req is None:
-            print("download_nam.py failure for uri: %s" % (uri,))
-        else:
-            output.write(req.content)
-
-    output.close()
+            LOG.info("failure for uri: %s", uri)
+            continue
+        tmpfd = tempfile.NamedTemporaryFile(delete=False)
+        tmpfd.write(req.content)
+        tmpfd.close()
+        subprocess.call(
+            "pqinsert -p '%s' %s" % (pqstr, tmpfd.name), shell=True
+        )
+        os.unlink(tmpfd.name)
 
 
 def main():
@@ -112,9 +112,9 @@ def main():
         for hr in range(6):
             if not need_to_run(ts, hr):
                 continue
+            LOG.debug("Running for ts: %s hr: %s", ts, hr)
             fetch(ts, hr)
 
 
 if __name__ == "__main__":
-    os.umask(0o002)
     main()

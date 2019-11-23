@@ -8,11 +8,12 @@ Run at 40 AFTER for the previous hour
 import subprocess
 import sys
 import datetime
+import tempfile
 import os
 
 import requests
 import pygrib
-from pyiem.util import exponential_backoff, logger
+from pyiem.util import exponential_backoff, logger, utc
 
 LOG = logger()
 
@@ -47,7 +48,7 @@ def fetch(valid):
     """
     uri = valid.strftime(
         (
-            "http://www.ftp.ncep.noaa.gov/data/nccf/"
+            "https://ftpprd.ncep.noaa.gov/data/nccf/"
             "com/hrrr/prod/hrrr.%Y%m%d/conus/hrrr.t%Hz."
             "wrfprsf00.grib2.idx"
         )
@@ -81,17 +82,12 @@ def fetch(valid):
                 offsets.append([int(tokens[1])])
                 neednext = True
 
-    outfn = valid.strftime(
+    pqstr = valid.strftime(
         (
-            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/"
-            "%H/hrrr.t%Hz.3kmf00.grib2"
+            "data u %Y%m%d%H00 bogus model/hrrr/%H/hrrr.t%Hz.3kmf00.grib2 "
+            "grib2"
         )
     )
-    outdir = os.path.dirname(outfn)
-    if not os.path.isdir(outdir):
-        os.makedirs(outdir)  # make sure LDM can then write to dir
-        subprocess.call("chmod 775 %s" % (outdir,), shell=True)
-    output = open(outfn, "ab", 0o664)
 
     if len(offsets) != 13:
         LOG.info("warning, found %s gribs for %s", len(offsets), valid)
@@ -102,34 +98,33 @@ def fetch(valid):
         )
         if req is None:
             LOG.info("failure for uri: %s", uri)
-        else:
-            output.write(req.content)
+            continue
+        tmpfd = tempfile.NamedTemporaryFile(delete=False)
+        tmpfd.write(req.content)
+        tmpfd.close()
+        subprocess.call(
+            "pqinsert -p '%s' %s" % (pqstr, tmpfd.name), shell=True
+        )
+        os.unlink(tmpfd.name)
 
-    output.close()
 
-
-def main():
+def main(argv):
     """ Go Main Go"""
     times = []
-    if len(sys.argv) == 5:
+    if len(argv) == 5:
         times.append(
-            datetime.datetime(
-                int(sys.argv[1]),
-                int(sys.argv[2]),
-                int(sys.argv[3]),
-                int(sys.argv[4]),
-            )
+            utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
         )
     else:
-        times.append(datetime.datetime.utcnow() - datetime.timedelta(hours=1))
-        times.append(datetime.datetime.utcnow() - datetime.timedelta(hours=6))
-        times.append(datetime.datetime.utcnow() - datetime.timedelta(hours=24))
+        times.append(utc() - datetime.timedelta(hours=1))
+        times.append(utc() - datetime.timedelta(hours=6))
+        times.append(utc() - datetime.timedelta(hours=24))
     for ts in times:
         if not need_to_run(ts):
             continue
+        LOG.debug("running for %s", ts)
         fetch(ts)
 
 
 if __name__ == "__main__":
-    os.umask(0o002)
-    main()
+    main(sys.argv)

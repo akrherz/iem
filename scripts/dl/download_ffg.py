@@ -9,7 +9,7 @@ from functools import partial
 from ftplib import FTP, error_perm
 import os
 
-from pyiem.util import logger
+from pyiem.util import logger, utc
 
 LOG = logger()
 
@@ -36,11 +36,10 @@ def do(ts):
     ftp.close()
     os.close(tmpfd)
     cmd = (
-        "/home/ldm/bin/pqinsert -i -p 'data a %s bogus "
-        "model/ffg/%s.grib2 grib2' %s"
+        "pqinsert -i -p 'data a %s bogus " "model/ffg/%s.grib2 grib2' %s"
     ) % (ts.strftime("%Y%m%d%H%M"), remotefn[:-5], tmpfn)
-    LOG.debug(cmd)
     if not errored:
+        LOG.debug(cmd)
         subprocess.call(cmd, shell=True)
 
     os.remove(tmpfn)
@@ -49,7 +48,7 @@ def do(ts):
 def main():
     """Go Main Go"""
     # Run for the last hour, when we are modulus 6
-    ts = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+    ts = utc() - datetime.timedelta(hours=1)
     ts = ts.replace(minute=0)
     if ts.hour % 6 > 0:
         return

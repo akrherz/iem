@@ -10,12 +10,13 @@ from tqdm import tqdm
 import requests
 import numpy as np
 from pyiem import iemre
-from pyiem.util import ncopen, logger
+from pyiem.util import ncopen, logger, exponential_backoff
+
+LOG = logger()
 
 
 def main(argv):
     """Go Main Go."""
-    log = logger()
     year = int(argv[1])
     sts = datetime.date(year, 1, 1)
     ets = min([datetime.date(year, 12, 31), datetime.date.today()])
@@ -25,12 +26,12 @@ def main(argv):
         ds = iemre.get_grids(now, varnames="power_swdn")
         maxval = ds["power_swdn"].values.max()
         if np.isnan(maxval) or maxval < 0:
-            log.debug("adding %s as currently empty", now)
+            LOG.debug("adding %s as currently empty", now)
             current[now] = {"data": ds, "dirty": False}
         now -= datetime.timedelta(days=1)
     sts = min(list(current.keys()))
     ets = max(list(current.keys()))
-    log.debug("running between %s and %s", sts, ets)
+    LOG.debug("running between %s and %s", sts, ets)
 
     queue = []
     for x0 in np.arange(iemre.WEST, iemre.EAST, 5.0):
@@ -52,11 +53,11 @@ def main(argv):
             min([y0 + 5.0, iemre.NORTH]) - 0.1,
             min([x0 + 5.0, iemre.EAST]) - 0.1,
         )
-        req = requests.get(url, timeout=60)
+        req = exponential_backoff(requests.get, url, timeout=60)
         js = req.json()
         if "outputs" not in js:
-            print(url)
-            print(js)
+            LOG.debug(url)
+            LOG.debug(str(js))
             continue
         fn = js["outputs"]["netcdf"]
         req = requests.get(fn, timeout=60, stream=True)
@@ -96,7 +97,7 @@ def main(argv):
     for date in current:
         if not current[date]["dirty"]:
             continue
-        log.debug("saving %s", date)
+        LOG.debug("saving %s", date)
         iemre.set_grids(date, current[date]["data"])
         subprocess.call(
             "python ../iemre/db_to_netcdf.py %s"

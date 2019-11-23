@@ -18,7 +18,7 @@ def do(ts):
         now = ts.replace(hour=hr, minute=0, second=0)
 
         uri = now.strftime(
-            "http://www.ftp.ncep.noaa.gov/data/nccf/com/nldas/"
+            "https://ftpprd.ncep.noaa.gov/data/nccf/com/nldas/"
             "prod/nldas.%Y%m%d/nldas.t12z.force-a.grb2f"
         ) + "%02i" % (hr,)
 
@@ -27,20 +27,20 @@ def do(ts):
             if req.status_code != 200:
                 raise Exception("status code is %s" % (req.status_code,))
         except Exception:
-            LOG.info("NLDAS Download failed for: %s", uri)
+            LOG.info("download failed for: %s", uri)
             continue
-        tmpfd, tmpfn = tempfile.mkstemp()
-        os.write(tmpfd, req.content)
-        os.close(tmpfd)
+        tmpfd = tempfile.NamedTemporaryFile(delete=False)
+        tmpfd.write(req.content)
+        tmpfd.close()
 
         cmd = (
-            "/home/ldm/bin/pqinsert -p 'data a %s bogus "
+            "pqinsert -p 'data a %s bogus "
             "model/nldas/nldas.t12z.force-a.grb2f%02i grib2' %s"
-        ) % (now.strftime("%Y%m%d%H%M"), hr, tmpfn)
+        ) % (now.strftime("%Y%m%d%H%M"), hr, tmpfd.name)
         LOG.debug(cmd)
         subprocess.call(cmd, shell=True)
 
-        os.remove(tmpfn)
+        os.remove(tmpfd.name)
 
 
 def main():

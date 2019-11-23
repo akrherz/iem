@@ -4,7 +4,6 @@ Appears that data for the previous month is available by the 9th of current mon
 
     called from RUN_2AM.sh
 """
-from __future__ import print_function
 import sys
 import os
 import glob
@@ -13,8 +12,9 @@ import subprocess
 
 import requests
 import pygrib
-from pyiem.util import get_properties
+from pyiem.util import get_properties, logger
 
+LOG = logger()
 TMP = "/mesonet/tmp"
 
 
@@ -28,7 +28,7 @@ def process(tarfn):
             try:
                 argrbs = grbs.select(parameterName=pnum)
             except ValueError:
-                print("download_narr Failed to find %s in %s" % (pname, grbfn))
+                LOG.info("failed to find %s in %s", pname, grbfn)
                 continue
             for grb in argrbs:
                 dt = grb["dataDate"]
@@ -37,12 +37,11 @@ def process(tarfn):
                     "%s %.0f" % (dt, hr), "%Y%m%d %H"
                 )
                 fn = "%s_%s.grib" % (pname, ts.strftime("%Y%m%d%H%M"))
-                fh = open(fn, "wb")
-                fh.write(grb.tostring())
-                fh.close()
+                with open(fn, "wb") as fh:
+                    fh.write(grb.tostring())
 
                 cmd = (
-                    "/home/ldm/bin/pqinsert -p 'data a %s bogus "
+                    "pqinsert -p 'data a %s bogus "
                     "model/NARR/%s_%s.grib grib' %s"
                 ) % (
                     ts.strftime("%Y%m%d%H%M"),
@@ -51,7 +50,7 @@ def process(tarfn):
                     fn,
                 )
                 subprocess.call(cmd, shell=True)
-                # print("grbfn: %s fn: %s" % (grbfn, fn))
+                LOG.debug("grbfn: %s fn: %s", grbfn, fn)
                 os.remove(fn)
         os.remove(grbfn)
 
@@ -69,9 +68,7 @@ def fetch_rda(year, month):
         timeout=30,
     )
     if req.status_code != 200:
-        print(
-            "download_narr RDA login failed with code %s" % (req.status_code,)
-        )
+        LOG.info("RDA login failed with code %s", req.status_code)
         return
     cookies = req.cookies
 

@@ -1,13 +1,13 @@
 """Cache NEXRAD composites for the website."""
+import tempfile
 import os
 import subprocess
 import sys
 
 import requests
-from pyiem.util import get_dbconn, exponential_backoff, utc
+from pyiem.util import get_dbconn, exponential_backoff, utc, logger
 
-
-TMPFN = "/tmp/radar_composite_tmp.png"
+LOG = logger()
 N0QBASE = utc(2010, 11, 14)
 
 
@@ -35,25 +35,31 @@ def save(sectorName, file_name, dir_name, ts, bbox=None, routes="ac"):
             layers,
         )
     req = exponential_backoff(requests.get, uri, timeout=60)
+    LOG.debug(uri)
     if req is None or req.status_code != 200:
-        print("radar_composite %s returned %s" % (uri, req.status_code))
+        LOG.info("%s failure", uri)
         return
 
-    fh = open(TMPFN, "wb")
-    fh.write(req.content)
-    fh.close()
+    tmpfd = tempfile.NamedTemporaryFile(delete=False)
+    tmpfd.write(req.content)
+    tmpfd.close()
 
-    cmd = (
-        "/home/ldm/bin/pqinsert -p 'plot %s %s %s %s/n0r_%s_%s.png " "png' %s"
-    ) % (routes, tstamp, file_name, dir_name, tstamp[:8], tstamp[8:], TMPFN)
+    cmd = ("pqinsert -p 'plot %s %s %s %s/n0r_%s_%s.png " "png' %s") % (
+        routes,
+        tstamp,
+        file_name,
+        dir_name,
+        tstamp[:8],
+        tstamp[8:],
+        tmpfd.name,
+    )
     subprocess.call(cmd, shell=True)
-
-    os.unlink(TMPFN)
+    os.unlink(tmpfd.name)
 
 
 def runtime(ts):
     """ Actually run for a time """
-    pgconn = get_dbconn("postgis", user="nobody")
+    pgconn = get_dbconn("postgis")
     pcursor = pgconn.cursor()
 
     save("conus", "uscomp.png", "usrad", ts)
