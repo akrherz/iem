@@ -1,37 +1,43 @@
 <?php 
-include("../../config/settings.inc.php");
-include_once "../../include/myview.php";
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 
 $t->thispage = "gis-satellite";
 $t->title = "GOES GIS Products";
-$fpbase = "/home/ldm/data/gis/images/awips211";
-$west = json_decode(file_get_contents("$fpbase/GOES_WEST_IR.json"));
 
-$wmbird = $west->{"meta"}->{"bird"};
-$wmvalid = $west->{"meta"}->{"valid"};
 $adir = date("Y/m/d");
 
 $t->content = <<<EOF
-<h4>GOES Satellite Imagery for GIS</h4>
+<h3>GOES Satellite Imagery for GIS</h3>
 
-<p>The IEM receives a "real-time" feed of GOES East and West satellite imagery
-in GINI format.  We process this into GIS-ready RASTERs for download and web
-services.  This page details this dataset.
+<p>The IEM has a long history processing the GOES Satellite information into
+formats and services appropriate for GIS.  This processing was based on the
+GINI format of products provided by NOAA.  The IEM implemented a number of
+services and archives based on this format.</p>
+
+<p>With the advent of GOES-R and GOES-S, this GINI format was discontinued and
+the IEM <a href="/onsite/news.phtml?id=1369">pulled the plug</a> on the various
+GOES East services back in 2018 and now in late 2019 GOES West.</p>
+
+<p>A renewed effort is now being made to process the new GOES-R and GOES-S data
+into similar formats and services as before.  There is not a one-to-one match
+here due to many reasons.</p>
+
+<p>The source of our GOES data comes via <a href="https://www.unidata.ucar.edu/data/nimage.html">Unidata NIMAGE</a>
+products, which nicely merge the netCDF tiles into consistent products. These
+products use a geostationary satellite projection that the IEM attempts to 
+natively store and use within the various services.</p>
 
 <div class="row">
- <div class="col-md-4 col-sm-4">
+ <div class="col-md-6">
 
- <h3>AWIPS native projections</h3>
-<img src="goes-gini-example.png" class="img img-responsive" />
- <br /><a href="/data/gis/images/">current imagery folder</a>
- </div><div class="col-md-4 col-sm-4">
+ <h3>Satellite native projections</h3>
+<img src="goes_c13.png" class="img img-responsive" />
+ <br /><a href="/data/gis/images/GOES/">current imagery folder</a>
+ </div>
  
- <h3>Reprojected into EPSG:4326 "lat/long"</h3>
- <img src="goes4326_example.png" class="img img-responsive" />
- <br /><a href="/data/gis/images/4326/goes">current imagery folder</a>
- 
- </div><div class="col-md-4 col-sm-4">
+<div class="col-md-6">
  
  <h3>Ready for Google-Maps</h3>
  <img src="goes-gm.png" class="img img-responsive" />
@@ -44,6 +50,9 @@ services.  This page details this dataset.
 <h4>Changes</h4>
 
 <ul>
+<li><strong>1 December 2019:</strong> GOES West products have stopped and everything
+has been migrated to new workflows based on GOES-R (GOES-16) and GOES-S (GOES-17).</li>
+
 <li><strong>30 January 2018:</strong> GOES East products and services have been removed</li>
 
 <li><b>18 December 2017:</b> The GOES "East" satellite has been assigned now to
@@ -57,73 +66,8 @@ default.  The previous default grayscale was not very useful.  You can find
 a color ramp <a href="legends/ir_ramp.png">here</a>.</li>
 </ul>
 
-<h4>IEM GOES Ingest Status</h4>
-
-<table class="table table-condensed table-bordered">
- <tr><th></th><th>Bird</th><th>Latest Imagery</th><th>JSON Metadata</th></tr>
- <tr><th>West</th>
- 	<td>{$wmbird}</td>
- 	<td>{$wmvalid}</td>
- 	 <td><a href="/data/gis/images/awips211/GOES_WEST_IR.json">IR</a> - 
- 	<a href="/data/gis/images/awips211/GOES_WEST_VIS.json">VIS</a> -
- 	<a href="/data/gis/images/awips211/GOES_WEST_WV.json">WV</a></td> 
- 	</tr>
-</table>
-
-
-<p>The <a href="http://www.goes.noaa.gov/">GOES (Geostationary Satellite)</a> 
-provide the commonly seen views of clouds from space.  The IEM receives a near
-real-time feed of this data in GINI format and processes it into geo-referenced
-PNG raster files.  A directory of these files can be found 
-<a href="/data/gis/images/">here</a>, but the native grid
-projections may be difficult for you to use.  The IEM projects this data onto a
-simple lat/long grid (EPSG:4326) and you can find those files 
-<a href="/data/gis/images/4326/goes/">here</a>. 
-Besides the raw files, the IEM also provides <a href="/ogc/">OGC web-services</a>
-of this imagery.
-
-<h3>AWIPS Projection Data</h3>
-
-<p>The raw GINI data files are provided on predefined grids used by the National
-Weather Service AWIPS system.  Here is an attempt to cross reference these grid
-numbers into Proj4 strings.
-
-<table cellpadding="2" cellspacing="0" border="1">
-<tr>
-<th>AWIPS Grid</th>
-<th>Proj4 String</th>
-<th>ESRI Projection files</th>
-</tr>
-<tr>
-<th>208</th>
-<td>proj=merc lat_ts=20 x_0=0 y_0=0 a=6371200.0 b=6371200.0</td>
-<td></td></tr>
-
-<tr>
-<th>211</th>
-<td>proj=lcc lat_0=25 lat_1=25 lat_2=25 lon_0=-95 a=6371200.0 b=6371200.0</td>
-<td><a href='awips211.aux.xml'>awips211.aux.xml</a> 
-<a href='awips211.prj'>awips211.prj</a> </td>
-</tr>
-</table>
-
-<p>These AWIPS projection imagery files can be found 
- 			<a href="/data/gis/images/">here</a>.
- You will find three files for each image: the raw PNG imagery, the world file, and a 
- JSON formatted metadata file.
-
 <h3>OGC Web Map Service</h3>
 
-<strong>Conus GOES visible imagery</strong>
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/conus_vis.cgi?</code>
-
-<p><strong>Conus GOES infrared imagery</strong>
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/conus_ir.cgi?</code>
-
-<p><strong>Conus GOES water vapor  imagery</strong>
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/conus_wv.cgi?</code>
-
-<hr />
 
 <p><strong>GOES West infrared imagery</strong>
 <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/west_ir.cgi?</code>

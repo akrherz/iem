@@ -231,13 +231,11 @@ LAYER
 END
 
 LAYER
-  NAME goes_east1V
+  NAME goes_east_2
   STATUS OFF
   TYPE RASTER
-  DATA /home/ldm/data/gis/images/4326/goes/east1V_0.tif
-  PROJECTION
-    "init=epsg:4326"
-  END
+  DATA /home/meteor_ldm/data/gis/images/GOES/CONUS/channel02/GOES-16_C02.png
+  INCLUDE /home/meteor_ldm/data/gis/images/GOES/CONUS/channel02/GOES-16_C02.msinc
 END
 
 LAYER
