@@ -26,7 +26,7 @@ WEB
   METADATA
    "wms_title" "IEM GOES WV WMS Service"
    "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/data/wms/goes/alaska_wv.map&SERVICE=WMS&"
-   "wms_srs" "EPSG:4326"
+   "wms_srs" "EPSG:4326 EPSG:3857"
    "wms_abstract" "IEM generated CONUS composite of GOES WV Satellite."
    "wms_keywords" "GOES,WEST,WV"
    "wms_accessconstraints" "None"
@@ -43,20 +43,10 @@ LAYER
   STATUS ON
   MINSCALE 0
   MAXSCALE 465000000
-  DATA "/home/ldm/data/gis/images/awips207/GOES_AK_WV.png"
+  DATA "/home/meteor_ldm/data/gis/images/GOES/Alaska/channel09/GOES-17_C09.png"
   TYPE RASTER
-  PROJECTION
-    "proj=stere"
-    "lat_ts=60"
-    "lat_0=90"
-    "lat_2=25"
-    "lon_0=-150"
-    "a=6371200.0"
-    "b=6371200.0"
-  END
-INCLUDE "/home/ldm/data/gis/images/4326/goes/GOES_AK_WV.msinc"
-      PROCESSING "CLOSE_CONNECTION=NORMAL"
-  #OFFSITE 0 0 0
+  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/Alaska/channel09/GOES-17_C09.msinc"
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 END
