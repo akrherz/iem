@@ -43,14 +43,10 @@ LAYER
   STATUS ON
   MINSCALE 0
   MAXSCALE 465000000
-  DATA "/home/ldm/data/gis/images/4326/goes/GOES_HI_VIS.png"
+  DATA "/home/meteor_ldm/data/gis/images/GOES/Hawaii/channel02/GOES-17_C02.png"
   TYPE RASTER
-  PROJECTION
-    "init=epsg:4326"
-  END
-INCLUDE "/home/ldm/data/gis/images/4326/goes/GOES_HI_VIS.msinc"
-      PROCESSING "CLOSE_CONNECTION=NORMAL"
-  #OFFSITE 0 0 0
+  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/Hawaii/channel02/GOES-17_C02.msinc"
+  PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
 END
