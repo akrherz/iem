@@ -69,9 +69,10 @@ do
 	fi
 done
 
+# Requires a newer lftp for that `-f` on mkdir to work.
 lftp -u akrherz@iastate.edu ftps://ftp.box.com << EOM
 cd IEMWWWLogs
-mkdir $yyyymm
+mkdir -f $yyyymm
 cd $yyyymm
 mput *-${yyyymmdd}.log.gz
 bye
