@@ -93,7 +93,7 @@ def workflow():
         tmp = tempfile.NamedTemporaryFile(delete=False)
         tmp.write(req.content)
         tmp.close()
-        cmd = ("/home/ldm/bin/pqinsert -p 'plot ac %s %s %s jpg' %s") % (
+        cmd = ("pqinsert -p 'plot ac %s %s %s jpg' %s") % (
             valid.strftime("%Y%m%d%H%M"),
             get_current_fn(label),
             get_archive_fn(label, valid),

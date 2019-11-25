@@ -129,7 +129,7 @@ def main():
     out.close()
 
     pqstr = "data c %s fn/madis.csv bogus csv" % (utc.strftime("%Y%m%d%H%M"),)
-    cmd = "/home/ldm/bin/pqinsert -i -p '%s' /tmp/madis.csv" % (pqstr,)
+    cmd = "pqinsert -i -p '%s' /tmp/madis.csv" % (pqstr,)
     subprocess.call(cmd, shell=True)
     os.remove("/tmp/madis.csv")
 
@@ -147,7 +147,7 @@ def main():
     pqstr = "data c %s fn/madis_iamn.csv bogus csv" % (
         utc.strftime("%Y%m%d%H%M"),
     )
-    cmd = "/home/ldm/bin/pqinsert -i -p '%s' /tmp/madis.csv" % (pqstr,)
+    cmd = "pqinsert -i -p '%s' /tmp/madis.csv" % (pqstr,)
     subprocess.call(cmd, shell=True)
     os.remove("/tmp/madis.csv")
 

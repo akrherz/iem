@@ -20,7 +20,7 @@ import pyiem.mrms as mrms
 import pygrib
 
 TMP = "/mesonet/tmp"
-PQI = "/home/ldm/bin/pqinsert"
+PQI = "pqinsert"
 MISSED_FILES = []
 DOWNLOADED_FILES = []
 

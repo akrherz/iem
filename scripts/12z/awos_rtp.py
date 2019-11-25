@@ -2,7 +2,6 @@
  Generate a RTP product for the weather bureau as my database as more AWOS
  obs than what they get
 """
-from __future__ import print_function
 import os
 import subprocess
 import datetime
@@ -118,8 +117,7 @@ def main():
     out.close()
 
     cmd = (
-        "/home/ldm/bin/pqinsert -p 'plot ac %s0000 awos_rtp.shef "
-        "awos_rtp.shef shef' %s"
+        "pqinsert -p 'plot ac %s0000 awos_rtp.shef " "awos_rtp.shef shef' %s"
     ) % (now12z.strftime("%Y%m%d"), shef_fn)
     subprocess.call(cmd, shell=True)
     os.unlink(shef_fn)

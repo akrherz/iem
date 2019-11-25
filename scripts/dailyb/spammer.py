@@ -272,24 +272,16 @@ def main():
     exponential_backoff(send_email, msg)
 
     # Send forth LDM
-    fp = open("tmp.txt", "w")
-    fp.write(text)
-    fp.close()
+    with open("tmp.txt", "w") as fh:
+        fh.write(text)
     subprocess.call(
-        (
-            '/home/ldm/bin/pqinsert -p "plot c 000000000000 '
-            'iemdb.txt bogus txt" tmp.txt'
-        ),
+        ('pqinsert -p "plot c 000000000000 ' 'iemdb.txt bogus txt" tmp.txt'),
         shell=True,
     )
-    fp = open("tmp.txt", "w")
-    fp.write(html)
-    fp.close()
+    with open("tmp.txt", "w") as fh:
+        fh.write(html)
     subprocess.call(
-        (
-            '/home/ldm/bin/pqinsert -p "plot c 000000000000 '
-            'iemdb.html bogus txt" tmp.txt'
-        ),
+        ('pqinsert -p "plot c 000000000000 ' 'iemdb.html bogus txt" tmp.txt'),
         shell=True,
     )
     os.unlink("tmp.txt")
@@ -307,9 +299,8 @@ def tests():
     text, html = get_github_commits()
     print("Text Variant")
     print(text)
-    fp = open("/tmp/gh.html", "w")
-    fp.write(html)
-    fp.close()
+    with open("/tmp/gh.html", "w") as fh:
+        fh.write(html)
     subprocess.call("xdg-open /tmp/gh.html >& /dev/null", shell=True)
 
 

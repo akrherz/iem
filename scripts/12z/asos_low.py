@@ -1,6 +1,6 @@
 """Generate a map of the 12z UTC low temperature """
-from __future__ import print_function
 import datetime
+
 from pyiem.plot import MapPlot
 from pyiem.util import get_dbconn
 

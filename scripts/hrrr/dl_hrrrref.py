@@ -92,8 +92,8 @@ def run(valid):
             )
         req = exponential_backoff(requests.get, uri, timeout=30)
         if req is None or req.status_code != 200:
-            print("dl_hrrrref failed to fetch %s" % (uri,))
-            print("ABORT")
+            LOG.info("failed to fetch %s", uri)
+            LOG.info("ABORT")
             return
         data = req.text
 
@@ -111,15 +111,17 @@ def run(valid):
                 neednext = True
 
         if hr > 0 and hr < 19 and len(offsets) != 4:
-            print(
-                ("dl_hrrrref[%s] hr: %s offsets: %s")
-                % (valid.strftime("%Y%m%d%H"), hr, offsets)
+            LOG.info(
+                "[%s] hr: %s offsets: %s",
+                valid.strftime("%Y%m%d%H"),
+                hr,
+                offsets,
             )
         for pr in offsets:
             headers = {"Range": "bytes=%s-%s" % (pr[0], pr[1])}
             req = exponential_backoff(requests.get, uri[:-4], headers=headers)
             if req is None:
-                print("dl_hrrrref FAIL %s %s" % (uri[:-4], headers))
+                LOG.info("dl_hrrrref FAIL %s %s", uri[:-4], headers)
                 continue
             output.write(req.content)
 
@@ -129,7 +131,7 @@ def run(valid):
         "data a %s bogus " "model/hrrr/%02i/hrrr.t%02iz.refd.grib2 grib2"
     ) % (valid.strftime("%Y%m%d%H%M"), valid.hour, valid.hour)
     subprocess.call(
-        "/home/ldm/bin/pqinsert -p '%s' %s" % (pqstr, tmpfn),
+        "pqinsert -p '%s' %s" % (pqstr, tmpfn),
         shell=True,
         stderr=subprocess.PIPE,
         stdout=subprocess.PIPE,

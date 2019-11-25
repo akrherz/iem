@@ -1,6 +1,6 @@
 dstr=`date --date '1 day ago' +'%Y-%m-%d'`
 WEBHOST="iem.local"
-PQI="/home/ldm/bin/pqinsert"
+PQI="pqinsert"
 URI="http://${WEBHOST}/plotting/auto/plot/199"
 
 runner () {

@@ -86,7 +86,7 @@ def main():
 
     subprocess.call(
         (
-            "/home/ldm/bin/pqinsert -p 'plot c 000000000000 "
+            "pqinsert -p 'plot c 000000000000 "
             "text/IEMNWSYPR.txt bogus txt' IEMNWSYPR.txt"
         ),
         shell=True,

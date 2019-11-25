@@ -2,7 +2,6 @@
 
 Run every minute from RUN_1MIN.sh
 """
-from __future__ import print_function
 import zipfile
 import os
 import shutil
@@ -185,7 +184,7 @@ def main():
     zfp.close()
 
     cmd = (
-        '/home/ldm/bin/pqinsert -i -p "zip c %s '
+        'pqinsert -i -p "zip c %s '
         'gis/shape/4326/us/current_nexattr.zip bogus zip" '
         "current_nexattr.zip"
     ) % (now.strftime("%Y%m%d%H%M"),)

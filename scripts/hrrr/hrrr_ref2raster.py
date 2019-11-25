@@ -52,7 +52,7 @@ def do_grb(grib, valid, routes):
     png.putpalette(PALETTE)
     png.save(pngtemp)
     cmd = (
-        "/home/ldm/bin/pqinsert -i -p 'plot %s %s gis/images/4326/hrrr/"
+        "pqinsert -i -p 'plot %s %s gis/images/4326/hrrr/"
         "refd_%04i.png GIS/hrrr/%02i/refd_%04i.png png' %s"
     ) % (
         routes,
@@ -75,7 +75,7 @@ def do_grb(grib, valid, routes):
     )
     wldtmp.close()
     cmd = (
-        "/home/ldm/bin/pqinsert -i -p 'plot %s %s gis/images/4326/hrrr/"
+        "pqinsert -i -p 'plot %s %s gis/images/4326/hrrr/"
         "refd_%04i.wld GIS/hrrr/%02i/refd_%04i.wld wld' %s"
     ) % (
         routes,
@@ -97,7 +97,7 @@ def do_grb(grib, valid, routes):
     jsontmp.close()
     # No need to archive this JSON file, it provides nothing new
     cmd = (
-        "/home/ldm/bin/pqinsert -i -p 'plot c %s gis/images/4326/hrrr/"
+        "pqinsert -i -p 'plot c %s gis/images/4326/hrrr/"
         "refd_%04i.json bogus json' %s"
     ) % (valid.strftime("%Y%m%d%H%M"), fxminutes, jsontmp.name)
     if routes == "ac":

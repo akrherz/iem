@@ -73,7 +73,7 @@ def workflow(now, realtime):
     routes = "c" if realtime else ""
     prefix = "a2m"
     pqstr = (
-        "/home/ldm/bin/pqinsert -i -p 'plot a%s %s "
+        "pqinsert -i -p 'plot a%s %s "
         "gis/images/4326/mrms/%s.wld GIS/mrms/%s_%s.wld wld' %s.wld"
         ""
     ) % (
@@ -87,7 +87,7 @@ def workflow(now, realtime):
     subprocess.call(pqstr, shell=True)
     # Now we inject into LDM
     pqstr = (
-        "/home/ldm/bin/pqinsert -i -p 'plot a%s %s "
+        "pqinsert -i -p 'plot a%s %s "
         "gis/images/4326/mrms/%s.png GIS/mrms/%s_%s.png png' %s.png"
         ""
     ) % (
@@ -109,7 +109,7 @@ def workflow(now, realtime):
         subprocess.call(cmd, shell=True)
         # Insert into LDM
         pqstr = (
-            "/home/ldm/bin/pqinsert -i -p 'plot c %s "
+            "pqinsert -i -p 'plot c %s "
             "gis/images/900913/mrms/%s.tif GIS/mrms/%s_%s.tif tif' %s.tif"
             ""
         ) % (
@@ -126,7 +126,7 @@ def workflow(now, realtime):
         j.close()
         # Insert into LDM
         pqstr = (
-            "/home/ldm/bin/pqinsert -i -p 'plot c %s "
+            "pqinsert -i -p 'plot c %s "
             "gis/images/4326/mrms/%s.json GIS/mrms/%s_%s.json json' "
             "%s.json"
         ) % (

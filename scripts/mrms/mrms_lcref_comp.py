@@ -89,7 +89,7 @@ def do(now, realtime=False):
     # Inject WLD file
     prefix = "lcref"
     pqstr = (
-        "/home/ldm/bin/pqinsert -i -p 'plot ac %s "
+        "pqinsert -i -p 'plot ac %s "
         "gis/images/4326/mrms/%s.wld GIS/mrms/%s_%s.wld wld' %s.wld"
     ) % (
         now.strftime("%Y%m%d%H%M"),
@@ -101,7 +101,7 @@ def do(now, realtime=False):
     subprocess.call(pqstr, shell=True)
     # Now we inject into LDM
     pqstr = (
-        "/home/ldm/bin/pqinsert -i -p 'plot ac %s "
+        "pqinsert -i -p 'plot ac %s "
         "gis/images/4326/mrms/%s.png GIS/mrms/%s_%s.png png' %s.png"
     ) % (
         now.strftime("%Y%m%d%H%M"),
@@ -119,7 +119,7 @@ def do(now, realtime=False):
     subprocess.call(cmd, shell=True)
     # Insert into LDM
     pqstr = (
-        "/home/ldm/bin/pqinsert -i -p 'plot c %s "
+        "pqinsert -i -p 'plot c %s "
         "gis/images/900913/mrms/%s.tif GIS/mrms/%s_%s.tif tif' %s.tif"
     ) % (
         now.strftime("%Y%m%d%H%M"),
@@ -136,7 +136,7 @@ def do(now, realtime=False):
 
     # Insert into LDM
     pqstr = (
-        "/home/ldm/bin/pqinsert -p 'plot c %s "
+        "pqinsert -p 'plot c %s "
         "gis/images/4326/mrms/%s.json GIS/mrms/%s_%s.json json' %s.json"
     ) % (
         now.strftime("%Y%m%d%H%M"),

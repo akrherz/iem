@@ -1,5 +1,4 @@
 """Something to dump current warnings to a shapefile."""
-from __future__ import print_function
 import zipfile
 import os
 import shutil
@@ -156,7 +155,7 @@ def main():
     z.close()
 
     cmd = (
-        '/home/ldm/bin/pqinsert -p "zip c %s '
+        'pqinsert -p "zip c %s '
         'gis/shape/4326/us/current_ww.zip bogus zip" current_ww.zip'
     ) % (utcnow.strftime("%Y%m%d%H%M"),)
     subprocess.call(cmd, shell=True)

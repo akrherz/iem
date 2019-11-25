@@ -53,7 +53,7 @@ def get_file(now, routes):
     if data is None:
         # only generate an annoy-o-gram if we are in archive mode
         if routes == "a":
-            print("ingest_ifc_precip missing data for %s" % (now,))
+            LOG.info("missing data for %s", now)
         return None
     tmpfd, tmpfn = tempfile.mkstemp()
     os.write(tmpfd, data)
@@ -93,31 +93,18 @@ def to_raster(tmpfn, now):
 
 def ldm(tmpfn, now, routes):
     """ Send stuff to ldm """
-    pq = "/home/ldm/bin/pqinsert"
     pqstr = (
-        "%s -i -p 'plot %s %s gis/images/4326/ifc/p05m.wld "
+        "pqinsert -i -p 'plot %s %s gis/images/4326/ifc/p05m.wld "
         "GIS/ifc/p05m_%s.wld wld' %s.wld"
         ""
-    ) % (
-        pq,
-        routes,
-        now.strftime("%Y%m%d%H%M"),
-        now.strftime("%Y%m%d%H%M"),
-        tmpfn,
-    )
+    ) % (routes, now.strftime("%Y%m%d%H%M"), now.strftime("%Y%m%d%H%M"), tmpfn)
     subprocess.call(pqstr, shell=True)
     # Now we inject into LDM
     pqstr = (
-        "%s -i -p 'plot %s %s gis/images/4326/ifc/p05m.png "
+        "pqinsert -i -p 'plot %s %s gis/images/4326/ifc/p05m.png "
         "GIS/ifc/p05m_%s.png png' %s.png"
         ""
-    ) % (
-        pq,
-        routes,
-        now.strftime("%Y%m%d%H%M"),
-        now.strftime("%Y%m%d%H%M"),
-        tmpfn,
-    )
+    ) % (routes, now.strftime("%Y%m%d%H%M"), now.strftime("%Y%m%d%H%M"), tmpfn)
     subprocess.call(pqstr, shell=True)
 
 

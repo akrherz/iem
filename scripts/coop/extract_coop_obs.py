@@ -154,9 +154,7 @@ def main():
     # Ship csv file
     csv.close()
     pqstr = "plot c %s csv/coop.csv bogus csv" % (now.strftime("%Y%m%d%H%M"),)
-    subprocess.call(
-        "/home/ldm/bin/pqinsert -p '%s' coop.csv" % (pqstr,), shell=True
-    )
+    subprocess.call("pqinsert -p '%s' coop.csv" % (pqstr,), shell=True)
     os.unlink("coop.csv")
 
 

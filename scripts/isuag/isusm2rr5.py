@@ -81,8 +81,7 @@ def main():
     os.write(tmpfd, rr5data.encode("utf-8"))
     os.close(tmpfd)
     subprocess.call(
-        ("/home/ldm/bin/pqinsert -p 'SUADSMRR5DMX.dat' %s") % (tmpfn,),
-        shell=True,
+        ("pqinsert -p 'SUADSMRR5DMX.dat' %s") % (tmpfn,), shell=True
     )
     os.unlink(tmpfn)
 

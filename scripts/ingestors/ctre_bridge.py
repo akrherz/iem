@@ -47,12 +47,12 @@ def main():
     keys = data[0].strip().replace('"', "").split(",")
     vals = data[1].strip().replace('"', "").split(",")
     d = {}
-    for i in range(len(vals)):
-        d[keys[i]] = vals[i]
+    for i, val in enumerate(vals):
+        d[keys[i]] = val
     # Ob times are always CDT
     ts1 = datetime.datetime.strptime(d["TIMESTAMP"], "%Y-%m-%d %H:%M:%S")
     gts1 = ts1 + datetime.timedelta(hours=5)
-    gts1 = gts1.replace(tzinfo=pytz.utc)
+    gts1 = gts1.replace(tzinfo=pytz.UTC)
     lts = gts1.astimezone(pytz.timezone("America/Chicago"))
 
     iem = Observation("RSAI4", "OT", lts)
@@ -88,12 +88,12 @@ def main():
     keys = data[0].strip().replace('"', "").split(",")
     vals = data[1].strip().replace('"', "").split(",")
     d = {}
-    for i in range(len(vals)):
-        d[keys[i]] = vals[i]
+    for i, val in enumerate(vals):
+        d[keys[i]] = val
 
     ts2 = datetime.datetime.strptime(d["TIMESTAMP"], "%Y-%m-%d %H:%M:%S")
     gts2 = ts2 + datetime.timedelta(hours=5)
-    gts2 = gts2.replace(tzinfo=pytz.timezone("UTC"))
+    gts2 = gts2.replace(tzinfo=pytz.UTC)
     lts = gts2.astimezone(pytz.timezone("America/Chicago"))
 
     iem = Observation("RLRI4", "OT", lts)
@@ -113,8 +113,7 @@ def main():
     csv.close()
 
     cmd = (
-        "/home/ldm/bin/pqinsert -i -p 'data c %s csv/ctre.txt "
-        "bogus txt' /tmp/ctre.txt"
+        "pqinsert -i -p 'data c %s csv/ctre.txt " "bogus txt' /tmp/ctre.txt"
     ) % (now.strftime("%Y%m%d%H%M"),)
     subprocess.call(cmd, shell=True)
 

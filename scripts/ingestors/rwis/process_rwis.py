@@ -423,8 +423,7 @@ def fetch_files():
     # Insert into LDM
     pqstr = "plot ac %s rwis.txt raw/rwis/%sat.txt txt" % (GTS, GTS)
     subprocess.call(
-        ("/home/ldm/bin/pqinsert -i -p '%s' %s " "") % (pqstr, atmosfn),
-        shell=True,
+        ("pqinsert -i -p '%s' %s " "") % (pqstr, atmosfn), shell=True
     )
 
     # get sfcfn
@@ -434,8 +433,7 @@ def fetch_files():
     # Insert into LDM
     pqstr = "plot ac %s rwis_sf.txt raw/rwis/%ssf.txt txt" % (GTS, GTS)
     subprocess.call(
-        ("/home/ldm/bin/pqinsert -i -p '%s' %s " "") % (pqstr, sfcfn),
-        shell=True,
+        ("pqinsert -i -p '%s' %s " "") % (pqstr, sfcfn), shell=True
     )
 
     return atmosfn, sfcfn
@@ -445,8 +443,7 @@ def ldm_insert_metars(fn1, fn2):
     """ Insert into LDM please """
     for fn in [fn1, fn2]:
         proc = subprocess.Popen(
-            ("/home/ldm/bin/pqinsert -p '%s' %s")
-            % (fn.replace("/tmp/", ""), fn),
+            ("pqinsert -p '%s' %s") % (fn.replace("/tmp/", ""), fn),
             shell=True,
             stderr=subprocess.PIPE,
             stdout=subprocess.PIPE,

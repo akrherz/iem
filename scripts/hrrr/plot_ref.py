@@ -140,7 +140,7 @@ def run(valid, routes):
         "model/hrrr/hrrr_1km_ref_%02i.gif gif"
     ) % (routes, valid.strftime("%Y%m%d%H%M"), valid.hour)
     subprocess.call(
-        ("/home/ldm/bin/pqinsert -p '%s' /tmp/hrrr_ref_%s.gif")
+        ("pqinsert -p '%s' /tmp/hrrr_ref_%s.gif")
         % (pqstr, valid.strftime("%Y%m%d%H")),
         shell=True,
         stderr=subprocess.PIPE,

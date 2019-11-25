@@ -149,9 +149,7 @@ def main(argv):
     nc.close()
     out.close()
     pqstr = "data c 000000000000 wxc/wxc_%s.txt bogus txt" % (network.lower(),)
-    subprocess.call(
-        "/home/ldm/bin/pqinsert -p '%s' %s" % (pqstr, wxcfn), shell=True
-    )
+    subprocess.call("pqinsert -p '%s' %s" % (pqstr, wxcfn), shell=True)
     os.remove(wxcfn)
 
 

@@ -90,7 +90,7 @@ def process(tokens, cameras, mcursor):
         return
     # Insert into LDM
     cmd = (
-        "/home/ldm/bin/pqinsert -p 'webcam c %s camera/stills/%s.jpg "
+        "pqinsert -p 'webcam c %s camera/stills/%s.jpg "
         "camera/%s/%s_%s.jpg jpg' %s-320x240.jpg"
         ""
     ) % (

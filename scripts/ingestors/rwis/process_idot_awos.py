@@ -61,7 +61,7 @@ def main():
     os.close(tmpfd)
     proc = subprocess.Popen(
         (
-            "/home/ldm/bin/pqinsert -i -p 'data c %s "
+            "pqinsert -i -p 'data c %s "
             "LOCDSMMETAR.dat LOCDSMMETAR.dat txt' %s"
         )
         % (utc, tmpname),

@@ -76,14 +76,14 @@ def main():
     zfh.close()
 
     cmd = (
-        "/home/ldm/bin/pqinsert -i "
+        "pqinsert -i "
         '-p "zip c %s gis/shape/4326/us/lsr_24hour.zip '
         'bogus zip" lsr_24hour.zip'
     ) % (ets.strftime("%Y%m%d%H%M"),)
     subprocess.call(cmd, shell=True)
     for suffix in ["geojson", "csv"]:
         cmd = (
-            "/home/ldm/bin/pqinsert -i "
+            "pqinsert -i "
             '-p "data c %s gis/shape/4326/us/lsr_24hour.%s '
             'bogus %s" lsr_24hour.%s'
         ) % (ets.strftime("%Y%m%d%H%M"), suffix, suffix, suffix)

@@ -40,14 +40,14 @@ getter GoesWest04I4${tm}.tif $BASE/GOESwest/GoesWest04I4_latest.tif
 getter GoesWest04I4${tm}.tfw $BASE/GOESwest/GoesWest04I4_latest.tfw
 
 
-/home/ldm/bin/pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/west1V_0.tif bogus tif" GoesWest1V${tm}.tif
-/home/ldm/bin/pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/west1V_0.tfw bogus tfw" GoesWest1V${tm}.tfw
+pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/west1V_0.tif bogus tif" GoesWest1V${tm}.tif
+pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/west1V_0.tfw bogus tfw" GoesWest1V${tm}.tfw
 
-/home/ldm/bin/pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/west04I4_0.tif bogus tif" GoesWest04I4${tm}.tif
-/home/ldm/bin/pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/west04I4_0.tfw bogus tfw" GoesWest04I4${tm}.tfw
+pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/west04I4_0.tif bogus tif" GoesWest04I4${tm}.tif
+pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/west04I4_0.tfw bogus tfw" GoesWest04I4${tm}.tfw
  
-/home/ldm/bin/pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/west04I3_0.tif bogus tif" GoesWest04I3${tm}.tif
-/home/ldm/bin/pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/west04I3_0.tfw bogus tfw" GoesWest04I3${tm}.tfw
+pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/west04I3_0.tif bogus tif" GoesWest04I3${tm}.tif
+pqinsert -i -p "gis c ${ftm} gis/images/4326/goes/west04I3_0.tfw bogus tfw" GoesWest04I3${tm}.tfw
 
 # Cleanup!
 cd ..

@@ -1,6 +1,5 @@
 """Generate a First Guess RTP that the bureau can use for their product
 """
-from __future__ import print_function
 import datetime
 import subprocess
 
@@ -107,7 +106,7 @@ def main():
     out.close()
 
     cmd = (
-        "/home/ldm/bin/pqinsert -p 'plot ac %s0000 awos_rtp_00z.shef "
+        "pqinsert -p 'plot ac %s0000 awos_rtp_00z.shef "
         "awos_rtp_00z.shef shef' /tmp/awos_rtp.shef"
     ) % (ets.strftime("%Y%m%d"),)
     subprocess.call(cmd, shell=True)

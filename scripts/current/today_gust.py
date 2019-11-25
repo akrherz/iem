@@ -25,10 +25,7 @@ def main():
     pqstr = "plot ac %s summary/today_gust.png iowa_wind_gust.png png" % (
         now.strftime("%Y%m%d%H%M"),
     )
-    subprocess.call(
-        "/home/ldm/bin/pqinsert -i -p '%s' %s" % (pqstr, tmpfd.name),
-        shell=True,
-    )
+    subprocess.call("pqinsert -i -p '%s' %s" % (pqstr, tmpfd.name), shell=True)
     os.unlink(tmpfd.name)
 
 

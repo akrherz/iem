@@ -432,8 +432,7 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
         os.write(tmpfd, lines[linenum].encode("ascii", "ignore"))
     os.close(tmpfd)
     cmd = (
-        "/home/ldm/bin/pqinsert -p "
-        "'data c %s csv/isusm/%s_daily.txt bogus txt' %s"
+        "pqinsert -p " "'data c %s csv/isusm/%s_daily.txt bogus txt' %s"
     ) % (datetime.datetime.utcnow().strftime("%Y%m%d%H%M"), nwsli, tmpfn)
     proc = subprocess.Popen(
         cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE
@@ -460,8 +459,7 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
         os.write(tmpfd, lines[linenum].encode("ascii", "ignore"))
     os.close(tmpfd)
     cmd = (
-        "/home/ldm/bin/pqinsert -p "
-        "'data c %s csv/isusm/%s_hourly.txt bogus txt' %s"
+        "pqinsert -p " "'data c %s csv/isusm/%s_hourly.txt bogus txt' %s"
     ) % (datetime.datetime.utcnow().strftime("%Y%m%d%H%M"), nwsli, tmpfn)
     proc = subprocess.Popen(
         cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE
@@ -477,9 +475,7 @@ def dump_madis_csv():
     output = open("/tmp/isusm.csv", "wb")
     output.write(req.content)
     output.close()
-    subprocess.call(
-        "/home/ldm/bin/pqinsert -p 'isusm.csv' /tmp/isusm.csv", shell=True
-    )
+    subprocess.call("pqinsert -p 'isusm.csv' /tmp/isusm.csv", shell=True)
 
 
 def main(argv):
