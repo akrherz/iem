@@ -62,7 +62,7 @@ gdcntr << EOF > /tmp/MW_MESONET_gdcntr.out
 	GDATTIM  = F001
 	GLEVEL   = 0
 	GVCORD   = NONE
-	GFUNC    = SM9S(MUL(0.01,MSLMA))
+	GFUNC    = SM9S(MMSL)
 GDFILE   = $gdfile
 	CINT     = 4
 	LINE     = 4
