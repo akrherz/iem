@@ -235,7 +235,7 @@ LAYER
   STATUS OFF
   TYPE RASTER
   DATA /home/meteor_ldm/data/gis/images/GOES/CONUS/channel02/GOES-16_C02.png
-  INCLUDE /home/meteor_ldm/data/gis/images/GOES/CONUS/channel02/GOES-16_C02.msinc
+  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel02/GOES-16_C02.msinc"
 END
 
 LAYER
