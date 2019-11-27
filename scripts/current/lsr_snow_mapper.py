@@ -4,6 +4,23 @@ import os
 import subprocess
 
 import requests
+from pyiem.util import logger
+
+LOG = logger()
+
+
+def do(url, fn):
+    """Do the work."""
+    res = requests.get(url, timeout=30)
+    if res.status_code != 200:
+        LOG.info("%s resulted in %s", url, res.status_code)
+        return
+    tmpfd = tempfile.NamedTemporaryFile(delete=False)
+    tmpfd.write(res.content)
+    tmpfd.close()
+    pqstr = "plot c 000000000000 %s bogus png" % (fn,)
+    subprocess.call("pqinsert -p '%s' %s" % (pqstr, tmpfd.name), shell=True)
+    os.unlink(tmpfd.name)
 
 
 def main():
@@ -12,26 +29,14 @@ def main():
         "http://iem.local/plotting/auto/plot/207/t:state::csector:IA"
         "::p:both::hours:12.png"
     )
-    res = requests.get(url, timeout=30)
-    tmpfd = tempfile.NamedTemporaryFile(delete=False)
-    tmpfd.write(res.content)
-    tmpfd.close()
-    pqstr = "plot c 000000000000 lsr_snowfall.png bogus png"
-    subprocess.call("pqinsert -p '%s' %s" % (pqstr, tmpfd.name), shell=True)
-    os.unlink(tmpfd.name)
+    do(url, "lsr_snowfall.png")
 
     # -----------------
     url = (
         "http://iem.local/plotting/auto/plot/207/t:state::csector:midwest"
         "::p:contour::hours:12.png"
     )
-    res = requests.get(url, timeout=30)
-    tmpfd = tempfile.NamedTemporaryFile(delete=False)
-    tmpfd.write(res.content)
-    tmpfd.close()
-    pqstr = "plot c 000000000000 mw_lsr_snowfall.png bogus png"
-    subprocess.call("pqinsert -p '%s' %s" % (pqstr, tmpfd.name), shell=True)
-    os.unlink(tmpfd.name)
+    do(url, "mw_lsr_snowfall.png")
 
 
 if __name__ == "__main__":
