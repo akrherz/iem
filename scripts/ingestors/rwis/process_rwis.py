@@ -213,64 +213,6 @@ def merge(atmos, surface):
     return data
 
 
-def do_windalerts(obs):
-    """Iterate through the obs and do wind alerts where appropriate"""
-    for sid in obs:
-        # Problem sites with lightning issues
-        if sid in [
-            "RBFI4",
-            "RTMI4",
-            "RWII4",
-            "RCAI4",
-            "RDYI4",
-            "RDNI4",
-            "RCDI4",
-            "RCII4",
-            "RCLI4",
-            "VCTI4",
-            "RGAI4",
-            "RAVI4",
-        ]:
-            continue
-        ob = obs[sid]
-        # screening
-        if ob.get("gust") is None or ob["gust"] < 40:
-            continue
-        if np.isnan(ob["gust"]):
-            continue
-        smph = speed(ob["gust"], "KT").value("MPH")
-        if smph < 50:
-            continue
-        if smph > 100:
-            print(
-                ("process_rwis did not relay gust %.1f MPH from %s" "")
-                % (smph, sid)
-            )
-            continue
-        # Use a hacky tmp file to denote a wind alert that was sent
-        fn = "/tmp/iarwis.%s.%s" % (sid, ob["valid"].strftime("%Y%m%d%H%M"))
-        if os.path.isfile(fn):
-            continue
-        o = open(fn, "w")
-        o.write(" ")
-        o.close()
-        lts = ob["valid"].astimezone(pytz.timezone("America/Chicago"))
-        stname = NT.sts[sid]["name"]
-        msg = (
-            "At %s, a wind gust of %.1f mph (%.1f kts) was recorded "
-            "at the %s (%s) Iowa RWIS station"
-            ""
-        ) % (lts.strftime("%I:%M %p %d %b %Y"), smph, ob["gust"], stname, sid)
-        mt = MIMEText(msg)
-        mt["From"] = "akrherz@iastate.edu"
-        # mt['To'] = 'akrherz@iastate.edu'
-        mt["To"] = "iarwis-alert@mesonet.agron.iastate.edu"
-        mt["Subject"] = "Iowa RWIS Wind Gust %.0f mph %s" % (smph, stname)
-        s = smtplib.SMTP("mailhub.iastate.edu")
-        s.sendmail(mt["From"], [mt["To"]], mt.as_string())
-        s.quit()
-
-
 def do_iemtracker(obs):
     """Iterate over the obs and do IEM Tracker related activities """
     threshold = datetime.datetime.utcnow() - datetime.timedelta(hours=3)
@@ -459,7 +401,6 @@ def main():
     surface = pd.read_csv(sfcfn)
 
     obs = merge(atmos, surface)
-    do_windalerts(obs)
     do_iemtracker(obs)
 
     ts = datetime.datetime.utcnow().strftime("%d%H%M")
