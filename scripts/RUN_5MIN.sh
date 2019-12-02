@@ -1,6 +1,6 @@
 # Run every 5 minutes...
 cd cache 
-sh download_wwa.sh &
+bash download_wwa.sh &
 
 cd ../roads
 python ingest_roads_rest.py &

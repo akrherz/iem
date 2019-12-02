@@ -3,7 +3,7 @@ DD=$(date +%d)
 DOW=$(date +%u)
 
 cd isuag
-sh run_plots.sh
+bash run_plots.sh
 if [ $DD -eq "17" ]
 	then
 		python nmp_monthly_email.py
@@ -14,7 +14,7 @@ cd ../climodat
 python daily_estimator.py $(date --date '1 days ago' +'%Y %m %d')
 
 cd ../climodat
-sh run.sh &
+bash run.sh &
 
 cd ../coop
 if [ $DD -eq "01" ]
@@ -25,7 +25,7 @@ fi
 cd ../util
 if [ $DD -eq "02" ]
 	then
-		sh monthly.sh $(date --date '3 days ago' +'%y %m')
+		bash monthly.sh $(date --date '3 days ago' +'%y %m')
 fi
 
 cd ../dl
