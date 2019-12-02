@@ -21,6 +21,7 @@ import pytz
 import memcache
 from pandas.io.sql import read_sql
 from paste.request import parse_formvars
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, html_escape
 
 json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
@@ -45,6 +46,18 @@ def run(ts, sid, pressure):
     stationlimiter = ""
     if sid != "":
         stationlimiter = " f.station = '%s' and " % (sid,)
+        if sid.startswith("_"):
+            # Magic here
+            nt = NetworkTable("RAOB", only_online=False)
+            ids = (
+                nt.sts.get(sid, dict())
+                .get("name", " -- %s" % (sid,))
+                .split("--")[1]
+                .strip()
+                .split()
+            )
+            if len(ids) > 1:
+                stationlimiter = " f.station in %s and " % (str(tuple(ids)),)
     pressurelimiter = ""
     if pressure > 0:
         pressurelimiter = " and p.pressure = %s " % (pressure,)

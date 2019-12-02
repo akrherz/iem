@@ -586,7 +586,9 @@ EOM
 		  all profiles in the database for that timestamp.  When provided a
 		  pressure [mb], returns just that pressure level's data.  Realtime data
 		from this service is typically available within 2 hours of observation
-		time.",
+        time.  For some RAOB sites, the IEM has a special identifier that merges
+        period of record data for a general location.  For example, _OAX merges
+        the long term data for KOMA, KOAX, and KOVN.",
   		"vars" => Array(
   				"sid" => "3 or 4 character site ID used in North America",
   				"timestamp" => "YYYYMMDDHHMI UTC Timestamp"
