@@ -1,4 +1,4 @@
-"""Wfo gaant chart"""
+"""Wfo Gantt chart"""
 import datetime
 
 import pytz
@@ -18,7 +18,7 @@ def get_description():
     desc[
         "description"
     ] = """
-    Gaant chart of watch, warning, and advisories issued
+    Gantt chart of watch, warning, and advisories issued
     by an NWS Forecast Office for a start date and number of days of your
     choice. The duration of the individual alert is the maximum found between
     the earliest issuance and latest expiration."""

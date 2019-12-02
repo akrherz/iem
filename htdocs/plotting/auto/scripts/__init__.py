@@ -722,7 +722,7 @@ data = {
                 },
                 {
                     "id": "52",
-                    "label": "Gaant Chart of WFO Issued Watch/Warning/Advisories",
+                    "label": "Gantt Chart of WFO Issued Watch/Warning/Advisories",
                 },
                 {
                     "id": "163",
