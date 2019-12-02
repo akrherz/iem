@@ -425,7 +425,7 @@ create unique index raob_flights_idx on raob_flights(valid, station);
 GRANT SELECT on raob_flights to nobody,apache;
 
 CREATE TABLE raob_profile(
-    fid int REFERENCES raob_flights(fid),
+    fid int REFERENCES raob_flights(fid) ON DELETE CASCADE ON UPDATE CASCADE,
     ts timestamptz,
     levelcode smallint,
     pressure real, -- mb
@@ -437,420 +437,30 @@ CREATE TABLE raob_profile(
     bearing real, -- deg
     range_miles real -- miles
 );
+ALTER TABLE raob_profile OWNER to mesonet;
+CREATE INDEX raob_profile_fid_idx on raob_profile(fid);
 GRANT SELECT on raob_profile to nobody,apache;
 
-CREATE TABLE raob_profile_1946() inherits (raob_profile);
-GRANT SELECT on raob_profile_1946 to nobody,apache;
-CREATE INDEX raob_profile_1946_fid_idx 
-	on raob_profile_1946(fid);
-    
-
-CREATE TABLE raob_profile_1947() inherits (raob_profile);
-GRANT SELECT on raob_profile_1947 to nobody,apache;
-CREATE INDEX raob_profile_1947_fid_idx 
-	on raob_profile_1947(fid);
-    
-
-CREATE TABLE raob_profile_1948() inherits (raob_profile);
-GRANT SELECT on raob_profile_1948 to nobody,apache;
-CREATE INDEX raob_profile_1948_fid_idx 
-	on raob_profile_1948(fid);
-    
-
-CREATE TABLE raob_profile_1949() inherits (raob_profile);
-GRANT SELECT on raob_profile_1949 to nobody,apache;
-CREATE INDEX raob_profile_1949_fid_idx 
-	on raob_profile_1949(fid);
-    
-
-CREATE TABLE raob_profile_1950() inherits (raob_profile);
-GRANT SELECT on raob_profile_1950 to nobody,apache;
-CREATE INDEX raob_profile_1950_fid_idx 
-	on raob_profile_1950(fid);
-    
-
-CREATE TABLE raob_profile_1951() inherits (raob_profile);
-GRANT SELECT on raob_profile_1951 to nobody,apache;
-CREATE INDEX raob_profile_1951_fid_idx 
-	on raob_profile_1951(fid);
-    
-
-CREATE TABLE raob_profile_1952() inherits (raob_profile);
-GRANT SELECT on raob_profile_1952 to nobody,apache;
-CREATE INDEX raob_profile_1952_fid_idx 
-	on raob_profile_1952(fid);
-    
-
-CREATE TABLE raob_profile_1953() inherits (raob_profile);
-GRANT SELECT on raob_profile_1953 to nobody,apache;
-CREATE INDEX raob_profile_1953_fid_idx 
-	on raob_profile_1953(fid);
-    
-
-CREATE TABLE raob_profile_1954() inherits (raob_profile);
-GRANT SELECT on raob_profile_1954 to nobody,apache;
-CREATE INDEX raob_profile_1954_fid_idx 
-	on raob_profile_1954(fid);
-    
-
-CREATE TABLE raob_profile_1955() inherits (raob_profile);
-GRANT SELECT on raob_profile_1955 to nobody,apache;
-CREATE INDEX raob_profile_1955_fid_idx 
-	on raob_profile_1955(fid);
-    
-
-CREATE TABLE raob_profile_1956() inherits (raob_profile);
-GRANT SELECT on raob_profile_1956 to nobody,apache;
-CREATE INDEX raob_profile_1956_fid_idx 
-	on raob_profile_1956(fid);
-    
-
-CREATE TABLE raob_profile_1957() inherits (raob_profile);
-GRANT SELECT on raob_profile_1957 to nobody,apache;
-CREATE INDEX raob_profile_1957_fid_idx 
-	on raob_profile_1957(fid);
-    
-
-CREATE TABLE raob_profile_1958() inherits (raob_profile);
-GRANT SELECT on raob_profile_1958 to nobody,apache;
-CREATE INDEX raob_profile_1958_fid_idx 
-	on raob_profile_1958(fid);
-    
-
-CREATE TABLE raob_profile_1959() inherits (raob_profile);
-GRANT SELECT on raob_profile_1959 to nobody,apache;
-CREATE INDEX raob_profile_1959_fid_idx 
-	on raob_profile_1959(fid);
-    
-
-CREATE TABLE raob_profile_1960() inherits (raob_profile);
-GRANT SELECT on raob_profile_1960 to nobody,apache;
-CREATE INDEX raob_profile_1960_fid_idx 
-	on raob_profile_1960(fid);
-    
-
-CREATE TABLE raob_profile_1961() inherits (raob_profile);
-GRANT SELECT on raob_profile_1961 to nobody,apache;
-CREATE INDEX raob_profile_1961_fid_idx 
-	on raob_profile_1961(fid);
-    
-
-CREATE TABLE raob_profile_1962() inherits (raob_profile);
-GRANT SELECT on raob_profile_1962 to nobody,apache;
-CREATE INDEX raob_profile_1962_fid_idx 
-	on raob_profile_1962(fid);
-    
-
-CREATE TABLE raob_profile_1963() inherits (raob_profile);
-GRANT SELECT on raob_profile_1963 to nobody,apache;
-CREATE INDEX raob_profile_1963_fid_idx 
-	on raob_profile_1963(fid);
-    
-
-CREATE TABLE raob_profile_1964() inherits (raob_profile);
-GRANT SELECT on raob_profile_1964 to nobody,apache;
-CREATE INDEX raob_profile_1964_fid_idx 
-	on raob_profile_1964(fid);
-    
-
-CREATE TABLE raob_profile_1965() inherits (raob_profile);
-GRANT SELECT on raob_profile_1965 to nobody,apache;
-CREATE INDEX raob_profile_1965_fid_idx 
-	on raob_profile_1965(fid);
-    
-
-CREATE TABLE raob_profile_1966() inherits (raob_profile);
-GRANT SELECT on raob_profile_1966 to nobody,apache;
-CREATE INDEX raob_profile_1966_fid_idx 
-	on raob_profile_1966(fid);
-    
-
-CREATE TABLE raob_profile_1967() inherits (raob_profile);
-GRANT SELECT on raob_profile_1967 to nobody,apache;
-CREATE INDEX raob_profile_1967_fid_idx 
-	on raob_profile_1967(fid);
-    
-
-CREATE TABLE raob_profile_1968() inherits (raob_profile);
-GRANT SELECT on raob_profile_1968 to nobody,apache;
-CREATE INDEX raob_profile_1968_fid_idx 
-	on raob_profile_1968(fid);
-    
-
-CREATE TABLE raob_profile_1969() inherits (raob_profile);
-GRANT SELECT on raob_profile_1969 to nobody,apache;
-CREATE INDEX raob_profile_1969_fid_idx 
-	on raob_profile_1969(fid);
-    
-
-CREATE TABLE raob_profile_1970() inherits (raob_profile);
-GRANT SELECT on raob_profile_1970 to nobody,apache;
-CREATE INDEX raob_profile_1970_fid_idx 
-	on raob_profile_1970(fid);
-    
-
-CREATE TABLE raob_profile_1971() inherits (raob_profile);
-GRANT SELECT on raob_profile_1971 to nobody,apache;
-CREATE INDEX raob_profile_1971_fid_idx 
-	on raob_profile_1971(fid);
-    
-
-CREATE TABLE raob_profile_1972() inherits (raob_profile);
-GRANT SELECT on raob_profile_1972 to nobody,apache;
-CREATE INDEX raob_profile_1972_fid_idx 
-	on raob_profile_1972(fid);
-    
-
-CREATE TABLE raob_profile_1973() inherits (raob_profile);
-GRANT SELECT on raob_profile_1973 to nobody,apache;
-CREATE INDEX raob_profile_1973_fid_idx 
-	on raob_profile_1973(fid);
-    
-
-CREATE TABLE raob_profile_1974() inherits (raob_profile);
-GRANT SELECT on raob_profile_1974 to nobody,apache;
-CREATE INDEX raob_profile_1974_fid_idx 
-	on raob_profile_1974(fid);
-    
-
-CREATE TABLE raob_profile_1975() inherits (raob_profile);
-GRANT SELECT on raob_profile_1975 to nobody,apache;
-CREATE INDEX raob_profile_1975_fid_idx 
-	on raob_profile_1975(fid);
-    
-
-CREATE TABLE raob_profile_1976() inherits (raob_profile);
-GRANT SELECT on raob_profile_1976 to nobody,apache;
-CREATE INDEX raob_profile_1976_fid_idx 
-	on raob_profile_1976(fid);
-    
-
-CREATE TABLE raob_profile_1977() inherits (raob_profile);
-GRANT SELECT on raob_profile_1977 to nobody,apache;
-CREATE INDEX raob_profile_1977_fid_idx 
-	on raob_profile_1977(fid);
-    
-
-CREATE TABLE raob_profile_1978() inherits (raob_profile);
-GRANT SELECT on raob_profile_1978 to nobody,apache;
-CREATE INDEX raob_profile_1978_fid_idx 
-	on raob_profile_1978(fid);
-    
-
-CREATE TABLE raob_profile_1979() inherits (raob_profile);
-GRANT SELECT on raob_profile_1979 to nobody,apache;
-CREATE INDEX raob_profile_1979_fid_idx 
-	on raob_profile_1979(fid);
-    
-
-CREATE TABLE raob_profile_1980() inherits (raob_profile);
-GRANT SELECT on raob_profile_1980 to nobody,apache;
-CREATE INDEX raob_profile_1980_fid_idx 
-	on raob_profile_1980(fid);
-    
-
-CREATE TABLE raob_profile_1981() inherits (raob_profile);
-GRANT SELECT on raob_profile_1981 to nobody,apache;
-CREATE INDEX raob_profile_1981_fid_idx 
-	on raob_profile_1981(fid);
-    
-
-CREATE TABLE raob_profile_1982() inherits (raob_profile);
-GRANT SELECT on raob_profile_1982 to nobody,apache;
-CREATE INDEX raob_profile_1982_fid_idx 
-	on raob_profile_1982(fid);
-    
-
-CREATE TABLE raob_profile_1983() inherits (raob_profile);
-GRANT SELECT on raob_profile_1983 to nobody,apache;
-CREATE INDEX raob_profile_1983_fid_idx 
-	on raob_profile_1983(fid);
-    
-
-CREATE TABLE raob_profile_1984() inherits (raob_profile);
-GRANT SELECT on raob_profile_1984 to nobody,apache;
-CREATE INDEX raob_profile_1984_fid_idx 
-	on raob_profile_1984(fid);
-    
-
-CREATE TABLE raob_profile_1985() inherits (raob_profile);
-GRANT SELECT on raob_profile_1985 to nobody,apache;
-CREATE INDEX raob_profile_1985_fid_idx 
-	on raob_profile_1985(fid);
-    
-
-CREATE TABLE raob_profile_1986() inherits (raob_profile);
-GRANT SELECT on raob_profile_1986 to nobody,apache;
-CREATE INDEX raob_profile_1986_fid_idx 
-	on raob_profile_1986(fid);
-    
-
-CREATE TABLE raob_profile_1987() inherits (raob_profile);
-GRANT SELECT on raob_profile_1987 to nobody,apache;
-CREATE INDEX raob_profile_1987_fid_idx 
-	on raob_profile_1987(fid);
-    
-
-CREATE TABLE raob_profile_1988() inherits (raob_profile);
-GRANT SELECT on raob_profile_1988 to nobody,apache;
-CREATE INDEX raob_profile_1988_fid_idx 
-	on raob_profile_1988(fid);
-    
-
-CREATE TABLE raob_profile_1989() inherits (raob_profile);
-GRANT SELECT on raob_profile_1989 to nobody,apache;
-CREATE INDEX raob_profile_1989_fid_idx 
-	on raob_profile_1989(fid);
-    
-
-CREATE TABLE raob_profile_1990() inherits (raob_profile);
-GRANT SELECT on raob_profile_1990 to nobody,apache;
-CREATE INDEX raob_profile_1990_fid_idx 
-	on raob_profile_1990(fid);
-    
-
-CREATE TABLE raob_profile_1991() inherits (raob_profile);
-GRANT SELECT on raob_profile_1991 to nobody,apache;
-CREATE INDEX raob_profile_1991_fid_idx 
-	on raob_profile_1991(fid);
-    
-
-CREATE TABLE raob_profile_1992() inherits (raob_profile);
-GRANT SELECT on raob_profile_1992 to nobody,apache;
-CREATE INDEX raob_profile_1992_fid_idx 
-	on raob_profile_1992(fid);
-    
-
-CREATE TABLE raob_profile_1993() inherits (raob_profile);
-GRANT SELECT on raob_profile_1993 to nobody,apache;
-CREATE INDEX raob_profile_1993_fid_idx 
-	on raob_profile_1993(fid);
-    
-
-CREATE TABLE raob_profile_1994() inherits (raob_profile);
-GRANT SELECT on raob_profile_1994 to nobody,apache;
-CREATE INDEX raob_profile_1994_fid_idx 
-	on raob_profile_1994(fid);
-    
-
-CREATE TABLE raob_profile_1995() inherits (raob_profile);
-GRANT SELECT on raob_profile_1995 to nobody,apache;
-CREATE INDEX raob_profile_1995_fid_idx 
-	on raob_profile_1995(fid);
-    
-
-CREATE TABLE raob_profile_1996() inherits (raob_profile);
-GRANT SELECT on raob_profile_1996 to nobody,apache;
-CREATE INDEX raob_profile_1996_fid_idx 
-	on raob_profile_1996(fid);
-    
-
-CREATE TABLE raob_profile_1997() inherits (raob_profile);
-GRANT SELECT on raob_profile_1997 to nobody,apache;
-CREATE INDEX raob_profile_1997_fid_idx 
-	on raob_profile_1997(fid);
-    
-
-CREATE TABLE raob_profile_1998() inherits (raob_profile);
-GRANT SELECT on raob_profile_1998 to nobody,apache;
-CREATE INDEX raob_profile_1998_fid_idx 
-	on raob_profile_1998(fid);
-    
-
-CREATE TABLE raob_profile_1999() inherits (raob_profile);
-GRANT SELECT on raob_profile_1999 to nobody,apache;
-CREATE INDEX raob_profile_1999_fid_idx 
-	on raob_profile_1999(fid);
-    
-
-CREATE TABLE raob_profile_2000() inherits (raob_profile);
-GRANT SELECT on raob_profile_2000 to nobody,apache;
-CREATE INDEX raob_profile_2000_fid_idx 
-	on raob_profile_2000(fid);
-    
-
-CREATE TABLE raob_profile_2001() inherits (raob_profile);
-GRANT SELECT on raob_profile_2001 to nobody,apache;
-CREATE INDEX raob_profile_2001_fid_idx 
-	on raob_profile_2001(fid);
-    
-
-CREATE TABLE raob_profile_2002() inherits (raob_profile);
-GRANT SELECT on raob_profile_2002 to nobody,apache;
-CREATE INDEX raob_profile_2002_fid_idx 
-	on raob_profile_2002(fid);
-    
-
-CREATE TABLE raob_profile_2003() inherits (raob_profile);
-GRANT SELECT on raob_profile_2003 to nobody,apache;
-CREATE INDEX raob_profile_2003_fid_idx 
-	on raob_profile_2003(fid);
-    
-
-CREATE TABLE raob_profile_2004() inherits (raob_profile);
-GRANT SELECT on raob_profile_2004 to nobody,apache;
-CREATE INDEX raob_profile_2004_fid_idx 
-	on raob_profile_2004(fid);
-    
-
-CREATE TABLE raob_profile_2005() inherits (raob_profile);
-GRANT SELECT on raob_profile_2005 to nobody,apache;
-CREATE INDEX raob_profile_2005_fid_idx 
-	on raob_profile_2005(fid);
-    
-
-CREATE TABLE raob_profile_2006() inherits (raob_profile);
-GRANT SELECT on raob_profile_2006 to nobody,apache;
-CREATE INDEX raob_profile_2006_fid_idx 
-	on raob_profile_2006(fid);
-    
-
-CREATE TABLE raob_profile_2007() inherits (raob_profile);
-GRANT SELECT on raob_profile_2007 to nobody,apache;
-CREATE INDEX raob_profile_2007_fid_idx 
-	on raob_profile_2007(fid);
-    
-
-CREATE TABLE raob_profile_2008() inherits (raob_profile);
-GRANT SELECT on raob_profile_2008 to nobody,apache;
-CREATE INDEX raob_profile_2008_fid_idx 
-	on raob_profile_2008(fid);
-    
-
-CREATE TABLE raob_profile_2009() inherits (raob_profile);
-GRANT SELECT on raob_profile_2009 to nobody,apache;
-CREATE INDEX raob_profile_2009_fid_idx 
-	on raob_profile_2009(fid);
-    
-
-CREATE TABLE raob_profile_2010() inherits (raob_profile);
-GRANT SELECT on raob_profile_2010 to nobody,apache;
-CREATE INDEX raob_profile_2010_fid_idx 
-	on raob_profile_2010(fid);
-    
-
-CREATE TABLE raob_profile_2011() inherits (raob_profile);
-GRANT SELECT on raob_profile_2011 to nobody,apache;
-CREATE INDEX raob_profile_2011_fid_idx 
-	on raob_profile_2011(fid);
-    
-
-CREATE TABLE raob_profile_2012() inherits (raob_profile);
-GRANT SELECT on raob_profile_2012 to nobody,apache;
-CREATE INDEX raob_profile_2012_fid_idx 
-	on raob_profile_2012(fid);
-    
-
-CREATE TABLE raob_profile_2013() inherits (raob_profile);
-GRANT SELECT on raob_profile_2013 to nobody,apache;
-CREATE INDEX raob_profile_2013_fid_idx 
-	on raob_profile_2013(fid);
-    
-
-CREATE TABLE raob_profile_2014() inherits (raob_profile);
-GRANT SELECT on raob_profile_2014 to nobody,apache;
-CREATE INDEX raob_profile_2014_fid_idx 
-	on raob_profile_2014(fid);
+do
+$do$
+declare
+     y int;
+begin
+    for y in 1946..2030
+    loop
+    execute format($f$
+        CREATE TABLE raob_profile_%s
+            (LIKE raob_profile INCLUDING all);
+        ALTER TABLE raob_profile_%s INHERIT raob_profile;
+        ALTER TABLE raob_profile_%s OWNER to mesonet;
+        alter table raob_profile_%s add constraint fid_fk FOREIGN KEY (fid)
+            REFERENCES raob_flights(fid) ON DELETE CASCADE ON UPDATE CASCADE;
+        GRANT SELECT on raob_profile_%s to nobody,apache;
+    $f$, y, y, y, y, y
+    );
+    end loop;
+end;
+$do$;
 
 
 ---
@@ -1896,12 +1506,6 @@ CREATE INDEX lsrs_2015_valid_idx on lsrs_2015(valid);
 CREATE INDEX lsrs_2015_wfo_idx on lsrs_2015(wfo);
 GRANT SELECT on lsrs_2015 to nobody,apache;
 
-
-CREATE TABLE raob_profile_2015() inherits (raob_profile);
-GRANT SELECT on raob_profile_2015 to nobody,apache;
-CREATE INDEX raob_profile_2015_fid_idx 
-	on raob_profile_2015(fid);
-
 -- !!!!!!!!!!!!! WARNING !!!!!!!!!!!!
 -- look what was done in 9.sql and replicate that for 2016 updates
 CREATE TABLE warnings_2015() inherits (warnings);
@@ -2156,10 +1760,6 @@ CREATE INDEX lsrs_2016_valid_idx on lsrs_2016(valid);
 CREATE INDEX lsrs_2016_wfo_idx on lsrs_2016(wfo);
 GRANT SELECT on lsrs_2016 to nobody,apache;
 
-CREATE TABLE raob_profile_2016() inherits (raob_profile);
-GRANT SELECT on raob_profile_2016 to nobody,apache;
-CREATE INDEX raob_profile_2016_fid_idx 
-	on raob_profile_2016(fid);
 
 -- !!!!!!!!!!!!! WARNING !!!!!!!!!!!!
 -- look what was done in 9.sql and replicate that for 2017 updates
@@ -2230,11 +1830,6 @@ create table lsrs_2017(
 CREATE INDEX lsrs_2017_valid_idx on lsrs_2017(valid);
 CREATE INDEX lsrs_2017_wfo_idx on lsrs_2017(wfo);
 GRANT SELECT on lsrs_2017 to nobody,apache;
-
-CREATE TABLE raob_profile_2017() inherits (raob_profile);
-GRANT SELECT on raob_profile_2017 to nobody,apache;
-CREATE INDEX raob_profile_2017_fid_idx 
-	on raob_profile_2017(fid);
 
 CREATE TABLE warnings_2017() inherits (warnings);
 CREATE INDEX warnings_2017_combo_idx on 
@@ -2499,11 +2094,6 @@ CREATE INDEX lsrs_2018_valid_idx on lsrs_2018(valid);
 CREATE INDEX lsrs_2018_wfo_idx on lsrs_2018(wfo);
 GRANT SELECT on lsrs_2018 to nobody,apache;
 
-CREATE TABLE raob_profile_2018() inherits (raob_profile);
-GRANT SELECT on raob_profile_2018 to nobody,apache;
-CREATE INDEX raob_profile_2018_fid_idx 
-    on raob_profile_2018(fid);
-
 
 CREATE TABLE warnings_2018() inherits (warnings);
 CREATE INDEX warnings_2018_combo_idx on 
@@ -2552,12 +2142,6 @@ create table lsrs_2019(
 CREATE INDEX lsrs_2019_valid_idx on lsrs_2019(valid);
 CREATE INDEX lsrs_2019_wfo_idx on lsrs_2019(wfo);
 GRANT SELECT on lsrs_2019 to nobody,apache;
-
-CREATE TABLE raob_profile_2019() inherits (raob_profile);
-GRANT SELECT on raob_profile_2019 to nobody,apache;
-CREATE INDEX raob_profile_2019_fid_idx 
-    on raob_profile_2019(fid);
-
 
 CREATE TABLE warnings_2019() inherits (warnings);
 CREATE INDEX warnings_2019_combo_idx on 
