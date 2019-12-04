@@ -43,9 +43,9 @@ LAYER
   STATUS ON
   MINSCALE 0
   MAXSCALE 465000000
-  DATA "/home/meteor_ldm/data/gis/images/GOES/Hawaii/channel09/GOES-17_C09.png"
+  DATA "/home/meteor_ldm/data/gis/images/GOES/hawaii/channel09/GOES-17_C09.png"
   TYPE RASTER
-  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/Hawaii/channel09/GOES-17_C09.msinc"
+  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/hawaii/channel09/GOES-17_C09.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 

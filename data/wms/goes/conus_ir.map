@@ -41,11 +41,11 @@ END
 LAYER
   NAME "conus_ir_4km"
   STATUS ON
-  DATA "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel13/GOES-16_C13.png"
+  DATA "/home/meteor_ldm/data/gis/images/GOES/conus/channel13/GOES-16_C13.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
-  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel13/GOES-16_C13.msinc"
+  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/conus/channel13/GOES-16_C13.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
