@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 """ JSON service providing IEMRE data for a given point """
-import sys
 import os
-import cgi
 import datetime
 import json
 
 import numpy as np
+from paste.request import parse_formvars
 from pyiem import iemre, datatypes
-from pyiem.util import ncopen, ssw
+from pyiem.util import ncopen
 import pyiem.prism as prismutil
 
 
@@ -19,19 +18,17 @@ def myrounder(val, precision):
     return round(val, precision)
 
 
-def main():
+def application(environ, start_response):
     """Do Something Fun!"""
-    form = cgi.FieldStorage()
-    ts = datetime.datetime.strptime(
-        form.getfirst("date", "2019-03-01"), "%Y-%m-%d"
-    )
-    lat = float(form.getfirst("lat", 41.99))
-    lon = float(form.getfirst("lon", -95.1))
-    fmt = form.getfirst("format", "json")
+    form = parse_formvars(environ)
+    ts = datetime.datetime.strptime(form.get("date", "2019-03-01"), "%Y-%m-%d")
+    lat = float(form.get("lat", 41.99))
+    lon = float(form.get("lon", -95.1))
+    fmt = form.get("format", "json")
     if fmt != "json":
-        ssw("Content-type: text/plain\n\n")
-        ssw("ERROR: Service only emits json at this time")
-        return
+        headers = [("Content-type", "text/plain")]
+        start_response("200 OK", headers)
+        return [b"ERROR: Service only emits json at this time"]
 
     i, j = iemre.find_ij(lon, lat)
     offset = iemre.daily_offset(ts)
@@ -40,14 +37,15 @@ def main():
 
     fn = iemre.get_daily_ncname(ts.year)
 
-    ssw("Content-type: application/json\n\n")
+    headers = [("Content-type", "application/json")]
+    start_response("200 OK", headers)
+
     if not os.path.isfile(fn):
-        ssw(json.dumps(res))
-        sys.exit()
+        return [json.dumps(res).encode("ascii")]
 
     if i is None or j is None:
-        ssw(json.dumps({"error": "Coordinates outside of domain"}))
-        return
+        data = {"error": "Coordinates outside of domain"}
+        return [json.dumps(data).encode("ascii")]
 
     if ts.year > 1980:
         ncfn = "/mesonet/data/prism/%s_daily.nc" % (ts.year,)
@@ -144,9 +142,4 @@ def main():
                     ),
                 }
             )
-
-    ssw(json.dumps(res))
-
-
-if __name__ == "__main__":
-    main()
+    return [json.dumps(res).encode("ascii")]
