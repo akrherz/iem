@@ -91,12 +91,12 @@ $(document).ready(function(){
         layers: [mrmsLayer, new ol.layer.Tile({
                 title: 'County Boundaries',
                 source: new ol.source.XYZ({
-                        url : '/c/tile.py/1.0.0/c-900913/{z}/{x}/{y}.png'
+                        url : '/c/tile.py/1.0.0/uscounties/{z}/{x}/{y}.png'
                 })
         	}), new ol.layer.Tile({
                 title: 'State Boundaries',
                 source: new ol.source.XYZ({
-                        url : '/c/tile.py/1.0.0/s-900913/{z}/{x}/{y}.png'
+                        url : '/c/tile.py/1.0.0/usstates/{z}/{x}/{y}.png'
                 })
         }), coopLayer, azosLayer
         ],

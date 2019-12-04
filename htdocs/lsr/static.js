@@ -225,7 +225,7 @@ var nexradWMS = new OpenLayers.Layer.WMS("NEXRAD",
 
 
 var counties = new OpenLayers.Layer.WMS("Counties", "https://mesonet.agron.iastate.edu/c/c.py/",
-    {layers      : 'c-900913',
+    {layers      : 'uscounties',
      format      : 'image/png',
      transparent : 'true'},{
      opacity     : 1.0,
@@ -241,7 +241,7 @@ var counties = new OpenLayers.Layer.WMS("Counties", "https://mesonet.agron.iasta
 });
 
 var states = new OpenLayers.Layer.WMS("States", "https://mesonet.agron.iastate.edu/c/c.py/",
-	    {layers      : 's-900913',
+	    {layers      : 'usstates',
 	     format      : 'image/png',
 	     transparent : 'true'},{
 	     opacity     : 1.0,

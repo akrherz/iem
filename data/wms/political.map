@@ -37,7 +37,7 @@ END
 #------------------------------------------------------
 #
 LAYER
-  NAME "fz-900913"
+  NAME "fz"
   STATUS ON
   DATA "nws/fire_zones.shp"
   TYPE LINE
@@ -62,7 +62,7 @@ END
 #------------------------------------------------------
 #
 LAYER
-  NAME "c-900913"
+  NAME "uscounties"
   STATUS ON
   DATA "us/counties.shp"
   TYPE LINE
@@ -88,7 +88,7 @@ END
 #------------------------------------------------------
 #
 LAYER
-  NAME "iac-900913"
+  NAME "iacounties"
   STATUS ON
   DATA "us/counties.shp"
   TYPE LINE
@@ -116,7 +116,7 @@ END
 #------------------------------------------------------
 #
 LAYER
-  NAME "s-900913"
+  NAME "usstates"
   STATUS ON
   DATA "us/states.shp"
   TYPE LINE
@@ -140,7 +140,7 @@ END
 #------------------------------------------------------
 #
 LAYER
-  NAME "wfo-900913"
+  NAME "wfo"
   STATUS ON
   DATA "nws/cwas.shp"
   TYPE LINE
@@ -164,7 +164,7 @@ END
 #------------------------------------------------------
 #
 LAYER
-  NAME "rfc-900913"
+  NAME "rfc"
   STATUS ON
   DATA "nws/rfc.shp"
   TYPE LINE
@@ -188,7 +188,7 @@ END
 #------------------------------------------------------
 #
 LAYER
-  NAME "cwsu-900913"
+  NAME "cwsu"
   STATUS ON
   DATA "nws/cwsu.shp"
   TYPE LINE
@@ -212,7 +212,7 @@ END
 #------------------------------------------------------
 #
 LAYER
-  NAME "tribal-900913"
+  NAME "tribal"
   STATUS ON
   DATA "us/tribal.shp"
   TYPE LINE
@@ -236,8 +236,8 @@ END
 #------------------------------------------------------
 #
 LAYER
-  NAME "iarivers-900913"
-  GROUP "iahydrology-900913"
+  NAME "iarivers"
+  GROUP "iahydrology"
   STATUS ON
   DATA "iowa/IA_NHDplus_General.shp"
   TYPE LINE
@@ -261,8 +261,8 @@ END
 #------------------------------------------------------
 #
 LAYER
-  NAME "iawaterbody-900913"
-  GROUP "iahydrology-900913"
+  NAME "iawaterbody"
+  GROUP "iahydrology"
   STATUS ON
   DATA "iowa/IA_NHD_waterbody_general.shp"
   TYPE POLYGON
@@ -282,7 +282,7 @@ END
 #------------------------------------------------------
 #
 LAYER
-  NAME "iahshd-900913"
+  NAME "iahshd"
   STATUS ON
   DATA "/mesonet/data/gis/static/images/3857/iowa/hshd100m1.tif"
   TYPE RASTER
@@ -300,7 +300,7 @@ END
 #------------------------------------------------------
 #
 LAYER
-  NAME "iaglu-900913"
+  NAME "iaglu"
   STATUS ON
   DATA "/mesonet/data/gis/static/images/3857/iowa/glu0813.tif"
   TYPE RASTER
