@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-"""Fun"""
+"""Fun."""
 import os
-import cgi
 import zipfile
 import datetime
 import json
@@ -9,25 +8,26 @@ import shutil
 
 import numpy as np
 import shapefile
+from paste.request import parse_formvars
 from pyiem import iemre, datatypes
-from pyiem.util import get_dbconn, ncopen, ssw
+from pyiem.util import get_dbconn, ncopen
 
 
-def main():
+def application(environ, start_response):
     """Go main go"""
     os.chdir("/tmp")
 
-    form = cgi.FieldStorage()
-    ts0 = datetime.datetime.strptime(form.getfirst("date0"), "%Y-%m-%d")
-    ts1 = datetime.datetime.strptime(form.getfirst("date1"), "%Y-%m-%d")
-    base = int(form.getfirst("base", 50))
-    ceil = int(form.getfirst("ceil", 86))
+    form = parse_formvars(environ)
+    ts0 = datetime.datetime.strptime(form.get("date0"), "%Y-%m-%d")
+    ts1 = datetime.datetime.strptime(form.get("date1"), "%Y-%m-%d")
+    base = int(form.get("base", 50))
+    ceil = int(form.get("ceil", 86))
     # Make sure we aren't in the future
     tsend = datetime.date.today()
     if ts1.date() >= tsend:
         ts1 = tsend - datetime.timedelta(days=1)
         ts1 = datetime.datetime(ts1.year, ts1.month, ts1.day)
-    fmt = form.getfirst("format")
+    fmt = form.get("format")
 
     offset0 = iemre.daily_offset(ts0)
     offset1 = iemre.daily_offset(ts1)
@@ -79,54 +79,48 @@ def main():
                 "longitude": "%.4f" % (lon,),
             }
         )
-        ssw("Content-type: application/json\n\n")
-        ssw(json.dumps(res))
+        headers = [("Content-type", "application/json")]
+        start_response("200 OK", headers)
+        return [json.dumps(res).encode("ascii")]
 
-    if fmt == "shp":
-        # Time to create the shapefiles
-        basefn = "iemre_%s_%s" % (ts0.strftime("%Y%m%d"), ts1.strftime("%Y%m"))
-        w = shapefile.Writer(basefn)
-        w.field("GDD", "F", 10, 2)
-        w.field("PREC_IN", "F", 10, 2)
+    # Time to create the shapefiles
+    basefn = "iemre_%s_%s" % (ts0.strftime("%Y%m%d"), ts1.strftime("%Y%m"))
+    w = shapefile.Writer(basefn)
+    w.field("GDD", "F", 10, 2)
+    w.field("PREC_IN", "F", 10, 2)
 
-        for x in iemre.XAXIS:
-            for y in iemre.YAXIS:
-                w.poly(
+    for x in iemre.XAXIS:
+        for y in iemre.YAXIS:
+            w.poly(
+                [
                     [
-                        [
-                            (x, y),
-                            (x, y + iemre.DY),
-                            (x + iemre.DX, y + iemre.DY),
-                            (x + iemre.DX, y),
-                            (x, y),
-                        ]
+                        (x, y),
+                        (x, y + iemre.DY),
+                        (x + iemre.DX, y + iemre.DY),
+                        (x + iemre.DX, y),
+                        (x, y),
                     ]
-                )
+                ]
+            )
 
-        for i in range(len(iemre.XAXIS)):
-            for j in range(len(iemre.YAXIS)):
-                w.record(gdd[j, i], precip[j, i])
-        w.close()
-        # Create zip file, send it back to the clients
-        shutil.copyfile(
-            "/opt/iem/data/gis/meta/4326.prj", "%s.prj" % (basefn,)
-        )
-        z = zipfile.ZipFile("%s.zip" % (basefn,), "w", zipfile.ZIP_DEFLATED)
-        for suffix in ["shp", "shx", "dbf", "prj"]:
-            z.write("%s.%s" % (basefn, suffix))
-        z.close()
+    for i in range(len(iemre.XAXIS)):
+        for j in range(len(iemre.YAXIS)):
+            w.record(gdd[j, i], precip[j, i])
+    w.close()
+    # Create zip file, send it back to the clients
+    shutil.copyfile("/opt/iem/data/gis/meta/4326.prj", "%s.prj" % (basefn,))
+    z = zipfile.ZipFile("%s.zip" % (basefn,), "w", zipfile.ZIP_DEFLATED)
+    for suffix in ["shp", "shx", "dbf", "prj"]:
+        z.write("%s.%s" % (basefn, suffix))
+    z.close()
 
-        ssw("Content-type: application/octet-stream\n")
-        ssw(
-            ("Content-Disposition: attachment; filename=%s.zip\n\n")
-            % (basefn,)
-        )
+    headers = [
+        ("Content-type", "application/octet-stream"),
+        ("Content-Disposition", "attachment; filename=%s.zip" % (basefn,)),
+    ]
+    start_response("200 OK", headers)
+    content = open(basefn + ".zip", "rb").read()
+    for suffix in ["zip", "shp", "shx", "dbf", "prj"]:
+        os.unlink("%s.%s" % (basefn, suffix))
 
-        ssw(open(basefn + ".zip", "rb").read())
-
-        for suffix in ["zip", "shp", "shx", "dbf", "prj"]:
-            os.unlink("%s.%s" % (basefn, suffix))
-
-
-if __name__ == "__main__":
-    main()
+    return [content]

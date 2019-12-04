@@ -250,10 +250,12 @@
   </Directory>
 
   <Directory "/opt/iem/htdocs/iemre">
-    AddHandler cgi-script .py
+    WSGIProcessGroup iemwsgi_ap
+    AddHandler wsgi-script .py
     Options +ExecCGI
 
     RewriteRule daily/([0-9\-]+)/([0-9\.]+)/([0-9\.\-]+)/(json) daily.py?date=$1&lat=$2&lon=$3&format=$4
+    RewriteRule hourly/([0-9\-]+)/([0-9\.]+)/([0-9\.\-]+)/(json) hourly.py?date=$1&lat=$2&lon=$3&format=$4
     RewriteRule multiday/([0-9\-]+)/([0-9\-]+)/([0-9\.]+)/([0-9\.\-]+)/(json) multiday.py?date1=$1&date2=$2&lat=$3&lon=$4&format=$5
     RewriteRule cum/([0-9\-]+)/([0-9\-]+)/(shp) cum.py?date0=$1&date1=$2&format=$3&base=50&ceil=86
     RewriteRule cumcounty/([0-9]+)/([0-9\-]+)/([0-9\-]+)/([0-9]+)/([0-9]+)/(json) cum.py?county=$1&date0=$2&date1=$3&format=$6&base=$4&ceil=$5
