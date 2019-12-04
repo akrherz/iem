@@ -3,8 +3,10 @@
 import os
 import datetime
 import json
+import sys
 
 import numpy as np
+import memcache
 from paste.request import parse_formvars
 import pytz
 from pyiem import iemre, datatypes
@@ -30,34 +32,18 @@ def get_timerange(form):
     return ts.replace(hour=0), ts.replace(hour=23)
 
 
-def application(environ, start_response):
-    """Do Something Fun!"""
-    form = parse_formvars(environ)
-    sts, ets = get_timerange(form)
-    lat = float(form.get("lat", 41.99))
-    lon = float(form.get("lon", -95.1))
-    fmt = form.get("format", "json")
-    if fmt != "json":
-        headers = [("Content-type", "text/plain")]
-        start_response("200 OK", headers)
-        return [b"ERROR: Service only emits json at this time"]
-
-    i, j = iemre.find_ij(lon, lat)
-
-    res = {"data": []}
+def workflow(sts, ets, i, j):
+    """Return a dict of our data."""
+    res = {"data": [], "generated_at": utc().strftime(ISO)}
 
     # BUG here for Dec 31.
     fn = iemre.get_hourly_ncname(sts.year)
 
-    headers = [("Content-type", "application/json")]
-    start_response("200 OK", headers)
-
     if not os.path.isfile(fn):
-        return [json.dumps(res).encode("ascii")]
+        return res
 
     if i is None or j is None:
-        data = {"error": "Coordinates outside of domain"}
-        return [json.dumps(data).encode("ascii")]
+        return {"error": "Coordinates outside of domain"}
 
     with ncopen(fn) as nc:
         now = sts
@@ -92,4 +78,30 @@ def application(environ, start_response):
                 }
             )
             now += datetime.timedelta(hours=1)
-    return [json.dumps(res).encode("ascii")]
+    return res
+
+
+def application(environ, start_response):
+    """Do Something Fun!"""
+    form = parse_formvars(environ)
+    sts, ets = get_timerange(form)
+    lat = float(form.get("lat", 41.99))
+    lon = float(form.get("lon", -95.1))
+    # fmt = form.get("format", "json")
+
+    headers = [("Content-type", "application/json")]
+    start_response("200 OK", headers)
+
+    i, j = iemre.find_ij(lon, lat)
+    mckey = "iemre/hourly/%s/%s/%s" % (sts.strftime("%Y%m%d"), i, j)
+
+    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    res = mc.get(mckey)
+    if res is None:
+        res = workflow(sts, ets, i, j)
+        res = json.dumps(res).encode("ascii")
+        mc.set(mckey, res, 3600)
+    else:
+        sys.stderr.write("Using cached %s\n" % (mckey,))
+
+    return [res]
