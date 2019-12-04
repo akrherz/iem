@@ -31,93 +31,45 @@ $t->content = <<<EOF
 
 <h3>Tile Map Service (TMS)</h3>
 
-<p>This service makes for easy integration with web mapping applications like 
-Google Maps, OpenLayers, and ESRI JS API.</p>
+<p>Here are working examples using IEM TMS services within various Javascript
+libraries.</p>
 
+<div class="row">
+<div class="col-md-3 well">
 <h4>Bing Maps</h4>
 
-<p>The folks at Microsoft Bing Maps group have kindly created two examples
-	using their javascript framework.</p>
+<p>The Microsoft Bing Maps group kindly provided these two examples.</p>
 
-<p><strong>Single Tile Layer:</strong> <a href="http://www.bing.com/api/maps/sdk/mapcontrol/isdk#tileLayerPublicXYZoom+JS">example</a></p>
+<p><strong>Single Tile Layer:</strong>
+<a href="https://www.bing.com/api/maps/sdk/mapcontrol/isdk#tileLayerPublicXYZoom+JS">example</a></p>
 
-<p><strong>Animated Tile Layer:</strong> <a href="http://www.bing.com/api/maps/sdk/mapcontrol/isdk#weatherRadarMap+JS">example</a></p>
+<p><strong>Animated Tile Layer:</strong>
+<a href="https://www.bing.com/api/maps/sdk/mapcontrol/isdk#weatherRadarMap+JS">example</a></p>
+</div>
 
-		
+<div class="col-md-3 well">
 <h4>ESRI JS API</h4>
 <p>Here is an <a href="arcgis_wtms.html">example</a> using the ESRI JS API. This
 was contributed by Derek Swingley.
+</div>
 
+<div class="col-md-3 well">
 <h4>Google Maps</h4>
-<p>The following is example code that works with version 2 of the Google Maps API:</p>
-
-<pre style="border-top: 1px solid #ccc; background: #EEFFCC; border-bottom: 1px solid #ccc; padding-left: 5px;">
-var tileNEX = new GTileLayer(null,null,null); 
-tileNEX.getTileUrl = function(tile,zoom) {
-   /* Include date at the end as a cachebuster */
-   return "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/"
-   + zoom + "/" + tile.x + "/" + tile.y +".png?"+ (new Date()).getTime(); 
-};
-tileNEX.isPng = function() { return true;};
-tileNEX.getOpacity = function() { return 0.5; }
-
-
-var layer4=[G_NORMAL_MAP.getTileLayers()[0],tileNEX]; 
-var custommap4 = new GMapType(layer4, G_SATELLITE_MAP.getProjection(), "Nexrad", G_SATELLITE_MAP);
-map.addMapType(custommap4);
-</pre>
-
 <p>Here is <a href="googlemaps_v3.html">an example for Google Maps v3</a>. 
+</div>
 
-<h4>OpenLayers v2</h4>
-<p>Here is an example for <a href="http://openlayers.org">OpenLayers</a> and assumes your map projection
-is in spherical mercator.  Or check out this 
-<a href="openlayers_example.html">self contained</a> and fully functional 
-openlayers example.
-<pre style="border-top: 1px solid #ccc; background: #EEFFCC; border-bottom: 1px solid #ccc; padding-left: 5px;">
-function get_my_url (bounds) {
-    var res = this.map.getResolution();
-    var x = Math.round ((bounds.left - this.maxExtent.left) / (res * this.tileSize.w));
-    var y = Math.round ((this.maxExtent.top - bounds.top) / (res * this.tileSize.h));
-    var z = this.map.getZoom();
+<div class="col-md-3 well">
+<h4>OpenLayers</h4>
+<p><a href="openlayers_example.html">Example</a> for OpenLayers v2.</p>
 
-    var path = z + "/" + x + "/" + y + "." + this.type +"?"+ parseInt(Math.random()*9999);
-    var url = this.url;
-    if (url instanceof Array) {
-        url = this.selectUrl(path, url);
-    }
-    return url + this.service +"/"+ this.layername +"/"+ path;
+<p><a href="ol3_example.html">Example</a> for OpenLayers v3.</p>
+</div>
 
-}
-var n0q = new OpenLayers.Layer.TMS(
-        'NEXRAD Base Reflectivity',
-        'https://mesonet.agron.iastate.edu/cache/tile.py/',
-        {layername      : 'nexrad-n0q-900913',
-        service         : '1.0.0',
-        type            : 'png',
-        visibility      : true,
-        getURL          : get_my_url,
-        isBaseLayer     : false}
-);
-/* you'd then add n0q to your map object */
-</pre>
+</div><!-- ./row -->
 
-<h4>OpenLayers v3</h4>
-<p>Here is a <a href="ol3_example.html">self contained example</a> for OpenLayers v3.</p>
-<pre>
-var tms = new ol.layer.Tile({
-            title: 'GOES East IR Satellite',
-            visible: false,
-            source: new ol.source.XYZ({
-                    url : '/cache/tile.py/1.0.0/goes-east-ir-4km-900913/{z}/{x}/{y}.png'
-            });
-</pre>
+<h4>Listing of Tile Map Services</h4>
 
-
-<h4>Other Tile Map Services</h4>
-
-<p>The <i>nexrad-n0r-900913</i> is the layer name and represents the "current" composite base reflectivity.  
-Here are other TileCache services provided by the IEM.  These are all TMS for spherical mercator.<br />
+<p>The following services are for Spherical Mercator (EPSG:3857) maps only.</p>
 
 <table class="table table-striped table-condensed">
 <thead><tr><th>Service Name</th><th>Description</th></tr></thead>
@@ -125,14 +77,26 @@ Here are other TileCache services provided by the IEM.  These are all TMS for sp
 <tr><td>uscounties</td><td>US County Borders</td></tr>
 <tr><td>usstates</td><td>US State Borders</td></tr>
 
-<tr><td>hrrr::REFD-FXXXX-0</td><td>Latest HRRR Reflectivity Forecasts, FXXXX is the forecast minute 
+<tr>
+<td>Template: goes_<i>bird</i>_<i>sector</i>_ch<i>channel</i><br />
+Example: goes_east_conus_ch02
+</td>
+<td>Current GOES R/S Imagery. Where: <br />
+ <i>bird</i> is "east" or "west"<br />
+ <i>sector</i> is "fulldisk", "alaska" (west only), "conus", "hawaii" (west only),
+ "mesoscale-1", "mesoscale-2", "puertorico" (east only)<br />
+ <i>channel</i> is two-digit, zero padded 01-16 <br />
+ <a href="/GIS/goes.phtml">more info</a>.</td>
+</tr>
+
+<tr><td>Template: hrrr::REFD-FXXXX-0</td><td>Latest HRRR Reflectivity Forecasts, FXXXX is the forecast minute 
 <a href="/GIS/model.phtml">more info</a></td></tr>
-<tr><td>hrrr::REFD-FXXXX-YYYYMMDDHHMI</td><td>Archived HRRR Reflectivity Forecasts, FXXXX is the forecast minute 
+<tr><td>Template: hrrr::REFD-FXXXX-YYYYMMDDHHMI</td><td>Archived HRRR Reflectivity Forecasts, FXXXX is the forecast minute 
 <a href="/GIS/model.phtml">more info</a></td></tr>
 
-<tr><td>ridge::XXX-XXX-0</td><td>Latest individual RADAR XXX data for product XXX 
+<tr><td>Template: ridge::XXX-XXX-0</td><td>Latest individual RADAR XXX data for product XXX 
 <a href="../GIS/ridge.phtml">more info</a></td></tr>
-<tr><td>ridge::XXX-XXX-YYYYMMDDHHMI</td><td>Archived individual RADAR XXX data for product XXX 
+<tr><td>Template: ridge::XXX-XXX-YYYYMMDDHHMI</td><td>Archived individual RADAR XXX data for product XXX 
 <a href="../GIS/ridge.phtml">more info</a></td></tr>
 <tr><td>nexrad-n0q-900913</td><td>NEXRAD Base Reflectivity current</td></tr>
 <tr><td>nexrad-n0q-900913-m05m</td><td>... 5 minutes old ...</td></tr>
@@ -156,22 +120,7 @@ Here are other TileCache services provided by the IEM.  These are all TMS for sp
 <tr><td>nexrad-eet-900913-m40m</td><td>... 40 minutes old ...</td></tr>
 <tr><td>nexrad-eet-900913-m45m</td><td>... 45 minutes old ...</td></tr>
 <tr><td>nexrad-eet-900913-m50m</td><td>... 50 minutes old ...</td></tr>
-<tr><td>goes-ir-4km-900913</td>
-  <td>GOES North American Infrared ~4km</td></tr>
-<tr><td>goes-wv-4km-900913</td>
-  <td>GOES North American Water Vapor ~4km</td></tr>
-<tr><td>goes-vis-1km-900913</td>
-  <td>GOES North American Visible ~1km</td></tr>
-<tr><td>goes-east-ir-4km-900913</td><td>GOES East CONUS Infrared ~4km</td></tr>
-<tr><td>goes-east-wv-4km-900913</td><td>GOES East CONUS Water Vapor ~4km</td></tr>
-<tr><td>goes-east-vis-1km-900913</td><td>GOES East CONUS Visible ~1km</td></tr>
-<tr><td>goes-west-ir-4km-900913</td><td>GOES West CONUS Infrared ~4km</td></tr>
-<tr><td>goes-west-wv-4km-900913</td><td>GOES West CONUS Water Vapor ~4km</td></tr>
-<tr><td>goes-west-vis-1km-900913</td><td>GOES West CONUS Visible ~1km</td></tr>
-<tr><td>hawaii-vis-900913</td><td>GOES WEST Hawaii Regional Visible</td></tr>
-<tr><td>alaska-vis-900913</td><td>GOES WEST Alaska Regional Visible</td></tr>
-<tr><td>alaska-ir-900913</td><td>GOES WEST Alaska Regional IR</td></tr>
-<tr><td>alaska-wv-900913</td><td>GOES WEST Alaska Regional Water Vapor</td></tr>
+
 <tr><td>q2-n1p-900913</td>
   <td>Q2 1 Hour Precipitation</td></tr> 
 <tr><td>q2-p24h-900913</td>
@@ -206,32 +155,15 @@ Here are other TileCache services provided by the IEM.  These are all TMS for sp
  <br /><i>Layer:</i> <strong>mrms_p24h</strong> 24 Hour Precipitation
  <br /><i>Layer:</i> <strong>mrms_p1h</strong> One Hour Precipitation
  </li>
-<li>CONUS GOES Infrared Satellite
- <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/conus_ir.cgi?</code></li>
-<hr />
-<li>CONUS GOES Visible Satellite
- <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/conus_vis.cgi?</code></li>
-		
-<li>GOES East infrared imagery
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/east_ir.cgi?</code></li>
-<li>GOES West infrared imagery
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/west_ir.cgi?</code></li>
-<li>GOES East visible imagery
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/east_vis.cgi?</code></li>
-<li>GOES West visible imagery
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/west_vis.cgi?</code></li>
-<li>GOES West Alaska Regional imagery visible
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/alaska_vis.cgi?</code></li>
-<li>GOES West Alaska Regional imagery infrared
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/alaska_ir.cgi?</code></li>
-<li>GOES West Alaska Regional imagery water vapor
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/alaska_wv.cgi?</code></li>
-<li>GOES West Hawaii Regional imagery visible
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/hawaii_vis.cgi?</code></li>
-<li>GOES West Hawaii Regional imagery infrared
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/hawaii_ir.cgi?</code></li>
-<li>GOES West Hawaii Regional imagery water vapor
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes/hawaii_wv.cgi?</code></li>
+
+ <hr />
+ <li>GOES East Imagery (All Sectors, All 16 Channels)
+<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes_east.cgi?</code>
+<br /><i>Layer Template:</i> <strong>sector_chchannel</strong> ie conus_ch02</li>
+
+<li>GOES West Imagery (All Sectors, All 16 Channels)
+<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/wms/goes_west.cgi?</code>
+<br /><i>Layer Template:</i> <strong>sector_chchannel</strong> ie hawaii_ch02</li>
 
 <hr />
 <li>CONUS NEXRAD Base Reflectivity (n0q) 
