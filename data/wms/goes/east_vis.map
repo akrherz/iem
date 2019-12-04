@@ -41,35 +41,12 @@ END
 LAYER
   NAME "east_vis_1km"
   STATUS ON
-  DATA "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel02/GOES-16_C02.png"
+  DATA "/home/meteor_ldm/data/gis/images/GOES/conus/channel02/GOES-16_C02.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
-  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel02/GOES-16_C02.msinc"
+  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/conus/channel02/GOES-16_C02.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
-
-LAYER
-  NAME "east_vis_1km_900913"
-  STATUS ON
-  DATA "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel02/GOES-16_C02.png"
-  TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
-  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel02/GOES-16_C02.msinc"
-  PROCESSING "CLOSE_CONNECTION=NORMAL"
-END
-
-LAYER
-  NAME "vis_1km_900913"
-  STATUS ON
-  DATA "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel02/GOES-16_C02.png"
-  TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
-  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel02/GOES-16_C02.msinc"
-  PROCESSING "CLOSE_CONNECTION=NORMAL"
-END
-
 
 END

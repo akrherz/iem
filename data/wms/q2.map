@@ -25,7 +25,7 @@ WEB
   METADATA
    "wms_title" "IEM MRMS WMS Service"
    "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/data/wms/q2.map&SERVICE=WMS&"
-   "wms_srs" "EPSG:4326 EPSG:900913 EPSG:3857"
+   "wms_srs" "EPSG:4326 EPSG:3857"
    "wms_abstract" "IEM generated MRMS Precipitation Products."
    "wms_keywords" "MRMS"
    "wms_accessconstraints" "None"
@@ -55,24 +55,6 @@ LAYER
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
-LAYER
-  NAME "q2_hsr_900913"
-  STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/mrms/lcref.tif"
-  TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
-  PROJECTION
-    "init=epsg:3857"
-  END
-  METADATA
-    "wms_title" "MRMS Hybrid Scan Reflectivity"
-    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
-    "wms_extent" "-126 24 -66 50"
-  END
-  OFFSITE 0 0 0
-  PROCESSING "CLOSE_CONNECTION=NORMAL"
-END
 
 #------------------------------------------------------
 #
@@ -96,25 +78,6 @@ LAYER
 END
 
 LAYER
-  NAME "q2_n1p_900913"
-  STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/mrms/p1h.tif"
-  TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
-  PROJECTION
-    "init=epsg:3857"
-  END
-  METADATA
-    "wms_title" "MRMS Q3 1 Hour Precip"
-    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
-    "wms_extent" "-126 24 -66 50"
-  END
-  OFFSITE 0 0 0
-  PROCESSING "CLOSE_CONNECTION=NORMAL"
-END
-
-LAYER
   NAME "q2_p24h"
   STATUS ON
   DATA "/home/ldm/data/gis/images/4326/mrms/p24h.png"
@@ -127,30 +90,6 @@ LAYER
   METADATA
     "wms_title" "MRMS Q3 24 Hour Precipitation"
     "wms_srs"   "EPSG:4326 EPSG:26915"
-    "wms_extent" "-126 24 -66 50"
-    "wms_style_default_legendurl_href" "https://mesonet.agron.iastate.edu/images/mrms_q3_p24h.png"
-    "wms_style_default_legendurl_format" "image/png"
-    "wms_style_default_legendurl_height" "30"
-    "wms_style_default_legendurl_width" "256"
-    "wms_style" "default"
-  END
-  OFFSITE 0 0 0
-  PROCESSING "CLOSE_CONNECTION=NORMAL"
-END
-
-LAYER
-  NAME "q2_p24h_900913"
-  STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/mrms/p24h.tif"
-  TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
-  PROJECTION
-    "init=epsg:3857"
-  END
-  METADATA
-    "wms_title" "MRMS Q3 24 Hour Precipitation"
-    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
     "wms_style_default_legendurl_href" "https://mesonet.agron.iastate.edu/images/mrms_q3_p24h.png"
     "wms_style_default_legendurl_format" "image/png"
@@ -187,30 +126,6 @@ LAYER
 END
 
 LAYER
-  NAME "q2_p48h_900913"
-  STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/mrms/p48h.tif"
-  TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
-  PROJECTION
-    "init=epsg:3857"
-  END
-  METADATA
-    "wms_title" "MRMS Q3 48 Hour Precipitation"
-    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
-    "wms_extent" "-126 24 -66 50"
-    "wms_style_default_legendurl_href" "https://mesonet.agron.iastate.edu/images/mrms_q3_p24h.png"
-    "wms_style_default_legendurl_format" "image/png"
-    "wms_style_default_legendurl_height" "30"
-    "wms_style_default_legendurl_width" "256"
-    "wms_style" "default"
-  END
-  OFFSITE 0 0 0
-  PROCESSING "CLOSE_CONNECTION=NORMAL"
-END
-
-LAYER
   NAME "q2_p72h"
   STATUS ON
   DATA "/home/ldm/data/gis/images/4326/mrms/p72h.png"
@@ -223,30 +138,6 @@ LAYER
   METADATA
     "wms_title" "MRMS Q3 72 Hour Precipitation"
     "wms_srs"   "EPSG:4326 EPSG:26915"
-    "wms_extent" "-126 24 -66 50"
-    "wms_style_default_legendurl_href" "https://mesonet.agron.iastate.edu/images/mrms_q3_p24h.png"
-    "wms_style_default_legendurl_format" "image/png"
-    "wms_style_default_legendurl_height" "30"
-    "wms_style_default_legendurl_width" "256"
-    "wms_style" "default"
-  END
-  OFFSITE 0 0 0
-  PROCESSING "CLOSE_CONNECTION=NORMAL"
-END
-
-LAYER
-  NAME "q2_p72h_900913"
-  STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/mrms/p72h.tif"
-  TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
-  PROJECTION
-    "init=epsg:3857"
-  END
-  METADATA
-    "wms_title" "MRMS Q3 72 Hour Precipitation"
-    "wms_srs"   "EPSG:900913 EPSG:4326 EPSG:102100 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
     "wms_style_default_legendurl_href" "https://mesonet.agron.iastate.edu/images/mrms_q3_p24h.png"
     "wms_style_default_legendurl_format" "image/png"

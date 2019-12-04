@@ -18,7 +18,7 @@ function init(){
         maxResolution = 156543.0339;
     
     var options = {
-        projection: new OpenLayers.Projection("EPSG:900913"),
+        projection: new OpenLayers.Projection("EPSG:3857"),
         displayProjection: new OpenLayers.Projection("EPSG:4326"),
         units: "m",
         numZoomLevels: 18,
@@ -117,7 +117,7 @@ function init(){
     var states = new OpenLayers.Layer.TMS(
             'US State Borders',
             'https://mesonet.agron.iastate.edu/c/tile.py/',
-            {layername      : 's-900913',
+            {layername      : 'usstates',
             service         : '1.0.0',
             type            : 'png',
             visibility      : false,

@@ -167,7 +167,7 @@ function updateURL(){
 }
 
 options = {
-    projection    : new OpenLayers.Projection("EPSG:900913"),
+    projection    : new OpenLayers.Projection("EPSG:3857"),
     units         : "m",
     numZoomLevels : 18,
     maxResolution : 156543.0339,
@@ -225,7 +225,7 @@ var nexradWMS = new OpenLayers.Layer.WMS("NEXRAD",
 
 
 var counties = new OpenLayers.Layer.WMS("Counties", "https://mesonet.agron.iastate.edu/c/c.py/",
-    {layers      : 'c-900913',
+    {layers      : 'uscounties',
      format      : 'image/png',
      transparent : 'true'},{
      opacity     : 1.0,
@@ -241,7 +241,7 @@ var counties = new OpenLayers.Layer.WMS("Counties", "https://mesonet.agron.iasta
 });
 
 var states = new OpenLayers.Layer.WMS("States", "https://mesonet.agron.iastate.edu/c/c.py/",
-	    {layers      : 's-900913',
+	    {layers      : 'usstates',
 	     format      : 'image/png',
 	     transparent : 'true'},{
 	     opacity     : 1.0,
@@ -509,7 +509,7 @@ sbwGridPanel = new Ext.grid.GridPanel({
               url      : "/geojson/sbw.php",
               format   : new OpenLayers.Format.GeoJSON({
                    externalProjection: new OpenLayers.Projection("EPSG:4326"),
-                   internalProjection: new OpenLayers.Projection("EPSG:900913")
+                   internalProjection: new OpenLayers.Projection("EPSG:3857")
                })
              })
       }),
@@ -690,7 +690,7 @@ lsrGridPanel = new Ext.grid.GridPanel({
               url      : "/geojson/lsr.php?inc_ap=yes",
               format   : new OpenLayers.Format.GeoJSON({
                    externalProjection: new OpenLayers.Projection("EPSG:4326"),
-                   internalProjection: new OpenLayers.Projection("EPSG:900913")
+                   internalProjection: new OpenLayers.Projection("EPSG:3857")
                })
              })
       }),

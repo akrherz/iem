@@ -216,7 +216,7 @@ def doit(gts, hr):
         subprocess.call(pqstr, shell=True)
 
     if irealtime:
-        # Create 900913 image
+        # Create 3857 image
         cmd = (
             "gdalwarp -s_srs EPSG:4326 -t_srs EPSG:3857 -q -of GTiff "
             "-tr 1000.0 1000.0 %s.png %s.tif"
@@ -232,7 +232,7 @@ def doit(gts, hr):
         # Insert into LDM
         pqstr = (
             "%s -i -p 'plot c %s "
-            "gis/images/900913/mrms/p%ih.tif "
+            "gis/images/3857/mrms/p%ih.tif "
             "GIS/mrms/p%ih_%s.tif tif' "
             "%s.tif"
             ""
@@ -248,7 +248,7 @@ def doit(gts, hr):
 
         pqstr = (
             "%s -i -p 'plot c %s "
-            "gis/images/900913/mrms/p%ih_nn.tif "
+            "gis/images/3857/mrms/p%ih_nn.tif "
             "GIS/mrms/p%ih_%s.tif tif' "
             "%s_nn.tif"
             ""

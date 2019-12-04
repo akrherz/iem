@@ -24,7 +24,7 @@ WEB
   METADATA
    "wms_title" "IEM 2 Meter Air Temperature"
    "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/wms/us/obs.cgi?"
-   "wms_srs" "EPSG:4326 EPSG:26915 EPSG:900913 EPSG:3857"
+   "wms_srs" "EPSG:4326 EPSG:26915 EPSG:3857"
    "wms_abstract" "Temps."
    "wms_keywords" "Temps"
    "wms_accessconstraints" "None"
@@ -47,7 +47,7 @@ LAYER
   STATUS OFF
   METADATA
     "wms_title" "2 Meter Air Temps"
-    "wms_srs" "EPSG:4326 EPSG:26915 EPSG:900913 EPSG:3857"
+    "wms_srs" "EPSG:4326 EPSG:26915 EPSG:3857"
   END
   TYPE POINT
   LABELCACHE ON
