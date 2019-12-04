@@ -18,7 +18,7 @@ WEB
   METADATA
     "wms_title"	"IEM Iowa Road Conditions"
     "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/roadcond.cgi"
-    "wms_srs"	"EPSG:4326 EPSG:26915 EPSG:900913 EPSG:3857 EPSG:102113 EPSG:102100"
+    "wms_srs"	"EPSG:4326 EPSG:26915"
     "wms_abstract" "Ba Ba Ba"
     "wms_fees" "None"
     "wms_keywordlist" "Ba"

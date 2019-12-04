@@ -34,7 +34,7 @@ WEB
   METADATA
    "wms_title" "IEM WMS KCCI-TV Super DopplerHD"
    "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/kcci.cgi?"
-   "wms_srs" "EPSG:26915 EPSG:4326 EPSG:900913 EPSG:3857"
+   "wms_srs" "EPSG:26915 EPSG:4326 EPSG:3857"
    "wms_abstract" "IEM feed of KCCI-TV SuperDopperHD RADAR"
    "wms_keywords" "KCCI"
    "wms_accessconstraints" "None"
@@ -51,7 +51,7 @@ LAYER
   TYPE RASTER
   METADATA
     "wms_title" "KCCI Super DopplerHD"
-   "wms_srs" "EPSG:26915 EPSG:4326 EPSG:900913 EPSG:3857"
+   "wms_srs" "EPSG:26915 EPSG:4326 EPSG:3857"
   END
   PROJECTION
     "init=epsg:26915"

@@ -49,27 +49,4 @@ LAYER
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
-LAYER
-  NAME "east_ir_4km_900913"
-  STATUS ON
-  DATA "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel13/GOES-16_C13.png"
-  TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
-  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel13/GOES-16_C13.msinc"
-  PROCESSING "CLOSE_CONNECTION=NORMAL"
-END
-
-LAYER
-  NAME "ir_4km_900913"
-  STATUS ON
-  DATA "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel13/GOES-16_C13.png"
-  TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
-  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel13/GOES-16_C13.msinc"
-  PROCESSING "CLOSE_CONNECTION=NORMAL"
-END
-
-
 END

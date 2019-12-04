@@ -1,6 +1,6 @@
 var map;
 var epsg4326 = new OpenLayers.Projection('EPSG:4326');
-var epsg900913 = new OpenLayers.Projection('EPSG:900913');
+var epsg3857 = new OpenLayers.Projection('EPSG:3857');
 
 var context = {
         getFillColor: function(feature){
@@ -62,8 +62,8 @@ function cb_siteOver(feature){
 
 function init(){
 	  map = new OpenLayers.Map( 'map',{
-	        projection: new OpenLayers.Projection('EPSG:900913'),
-	        displayProjection: new OpenLayers.Projection('EPSG:4326'),
+	        projection: epsg3857,
+	        displayProjection: epsg4326,
 	        units: 'm',
 	        wrapDateLine: false,
 	        numZoomLevels: 18,

@@ -24,7 +24,7 @@ WEB
   METADATA
    "wms_title" "IEM Road Pavement Temperatures Service"
    "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/wms/us/roadtemps.cgi?"
-   "wms_srs" "EPSG:4326 EPSG:26915 EPSG:900913 EPSG:3857"
+   "wms_srs" "EPSG:4326 EPSG:26915 EPSG:3857"
    "wms_abstract" "Road Temps."
    "wms_keywords" "Road Temps"
    "wms_accessconstraints" "None"
@@ -49,7 +49,7 @@ LAYER
   LABELCACHE OFF
   METADATA
     "wms_title" "Road Pavement Temps"
-    "wms_srs" "EPSG:4326 EPSG:26915 EPSG:900913 EPSG:3857"
+    "wms_srs" "EPSG:4326 EPSG:26915 EPSG:3857"
   END
   PROJECTION
    "init=epsg:4326"

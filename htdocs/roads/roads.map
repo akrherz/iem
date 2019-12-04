@@ -22,7 +22,7 @@ WEB
   METADATA
     "wfs_title"	"IEM Iowa Road Conditions"
     "wfs_onlineresource" "https://mesonet.agron.iastate.edu:80/cgi-bin/mapserv/mapserv?map=/mesonet/www/apps/roads//data/gis/roads.map"
-    "wfs_srs"	"EPSG:26915 EPSG:4326 EPSG:900913"
+    "wfs_srs"	"EPSG:26915 EPSG:4326 EPSG:3857"
     "wfs_abstract" "Ba Ba Ba"
     "wfs_fees" "None"
     "wfs_keywordlist" "Ba"
@@ -308,7 +308,7 @@ LAYER
   METADATA
     "wfs_title" "Iowa Non-Interstates Conditions"
     "wms_title" "Iowa Non-Interstates Conditions"
-    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:900913"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:3857"
   END
   PROJECTION
    "init=epsg:26915"
@@ -592,7 +592,7 @@ LAYER
   METADATA
     "wfs_title" "Iowa Interstates Conditions"
     "wms_title" "Iowa Interstates Conditions"
-    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:900913"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:3857"
   END
   PROJECTION
    "init=epsg:26915"

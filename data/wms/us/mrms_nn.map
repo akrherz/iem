@@ -18,7 +18,7 @@ WEB
   METADATA
    "wms_title" "IEM MRMS WMS Service"
    "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/data/wms/us/mrms_nn.map&"
-   "wms_srs" "EPSG:4326 EPSG:900913 EPSG:3857"
+   "wms_srs" "EPSG:4326 EPSG:3857"
    "wms_abstract" "IEM generated NOAA MRMS Products."
    "wms_keywords" "Q3 MRMS"
    "wms_accessconstraints" "None"

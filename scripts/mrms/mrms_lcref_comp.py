@@ -111,7 +111,7 @@ def do(now, realtime=False):
         tmpfn,
     )
     subprocess.call(pqstr, shell=True)
-    # Create 900913 image
+    # Create 3857 image
     cmd = (
         "gdalwarp -s_srs EPSG:4326 -t_srs EPSG:3857 -q -of GTiff "
         "-tr 1000.0 1000.0 %s.png %s.tif"
@@ -120,7 +120,7 @@ def do(now, realtime=False):
     # Insert into LDM
     pqstr = (
         "pqinsert -i -p 'plot c %s "
-        "gis/images/900913/mrms/%s.tif GIS/mrms/%s_%s.tif tif' %s.tif"
+        "gis/images/3857/mrms/%s.tif GIS/mrms/%s_%s.tif tif' %s.tif"
     ) % (
         now.strftime("%Y%m%d%H%M"),
         prefix,

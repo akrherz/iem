@@ -49,26 +49,4 @@ LAYER
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
-LAYER
-  NAME "conus_wv_4km_900913"
-  STATUS ON
-  DATA "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel09/GOES-16_C09.png"
-  TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
-  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel09/GOES-16_C09.msinc"
-  PROCESSING "CLOSE_CONNECTION=NORMAL"
-END
-
-LAYER
-  NAME "wv_4km_900913"
-  STATUS ON
-  DATA "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel09/GOES-16_C09.png"
-  TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
-  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/CONUS/channel09/GOES-16_C09.msinc"
-  PROCESSING "CLOSE_CONNECTION=NORMAL"
-END
-
 END

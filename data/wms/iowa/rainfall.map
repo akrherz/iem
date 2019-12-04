@@ -39,7 +39,7 @@ WEB
   METADATA
    "wms_title" "IEM WMS Iowa Rainfall"
    "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/rainfall.cgi?"
-   "wms_srs" "EPSG:26915 EPSG:900913 EPSG:3857 EPSG:102113 EPSG:102100 EPSG:4326"
+   "wms_srs" "EPSG:26915 EPSG:3857 EPSG:4326"
    "wms_abstract" "Ba Ba Ba"
    "wms_keywords" "Ba"
    "wms_accessconstraints" "None"
