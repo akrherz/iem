@@ -177,7 +177,11 @@ def plotter(fdict):
         ),
     )
     if df2["val"].max() > 0 and ctx["p"] in ["both", "contour"]:
-        mp.contourf(xi, yi, vals, rng, cmap=cmap)
+        mp.contourf(xi, yi, vals, rng, cmap=cmap, clip_on=(ctx["t"] != "cwa"))
+        # Allow analysis to bleed outside the CWA per request.
+        if ctx["t"] == "cwa":
+            mp.draw_mask(sector="conus")
+            mp.draw_cwas(linewidth=2)
     mp.drawcounties()
     if not df.empty and ctx["p"] in ["both", "plot"]:
         df2 = df[df["plotme"]]
