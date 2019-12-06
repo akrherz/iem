@@ -3,7 +3,7 @@
 
 cd outgoing
 python wxc_azos_gdd.py
-LD_PRELOAD=/opt/miniconda3/envs/prod/lib/libz.so:/opt/miniconda3/envs/prod/lib/libharfbuzz.so php wxc_coop.php
+LD_PRELOAD=/opt/miniconda3/envs/prod/lib/libstdc++.so:/opt/miniconda3/envs/prod/lib/libz.so:/opt/miniconda3/envs/prod/lib/libharfbuzz.so php wxc_coop.php
 
 cd ../coop
 bash PREC.sh
