@@ -172,8 +172,8 @@ def plotter(fdict):
         axisbg="white",
         title="Local Storm Report Snowfall Total Analysis",
         subtitle=(
-            "Reports past 12 hours: %s"
-            "" % (endts.strftime("%d %b %Y %I:%M %p"),)
+            "Reports past %.0f hours: %s"
+            "" % (ctx["hours"], endts.strftime("%d %b %Y %I:%M %p"))
         ),
     )
     if df2["val"].max() > 0 and ctx["p"] in ["both", "contour"]:

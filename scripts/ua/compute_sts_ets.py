@@ -1,42 +1,60 @@
 """Update mesosite with sts and ets"""
-from __future__ import print_function
-from pyiem.util import get_dbconn
+
+from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn, logger
+from tqdm import tqdm
+
+LOG = logger()
 
 
 def main():
     """Go Main Go"""
-    MESOSITE = get_dbconn("mesosite")
-    mcursor = MESOSITE.cursor()
-    POSTGIS = get_dbconn("postgis", user="nobody")
-    pcursor = POSTGIS.cursor()
+    nt = NetworkTable("RAOB", only_online=False)
+    pgconn = get_dbconn("postgis")
+    pcursor = pgconn.cursor()
+    pgconn2 = get_dbconn("mesosite", user="mesonet")
+    mcursor = pgconn2.cursor()
 
-    pcursor.execute(
-        """
-        SELECT station, min(valid), max(valid), count(*) from
-        raob_flights GROUP by station ORDER by count DESC
-    """
-    )
-    for row in pcursor:
-        station = row[0]
-        sts = row[1]
-        ets = row[2]
-        online = False
-        if ets.year == 2013:
-            ets = None
-            online = True
-        mcursor.execute(
+    progress = tqdm(list(nt.sts.keys()))
+    for station in progress:
+        progress.set_description(station)
+        stations = [station]
+        if station.startswith("_"):
+            # Magic
+            stations = nt.sts[station]["name"].split("--")[1].strip().split()
+        pcursor.execute(
             """
-            UPDATE stations SET online = %s, archive_begin = %s,
-            archive_end = %s WHERE network = 'RAOB' and id = %s
+            SELECT min(valid), max(valid), count(*) from
+            raob_flights WHERE station in %s
         """,
-            (online, sts, ets, station),
+            (tuple(stations),),
         )
-        if mcursor.rowcount != 1:
-            print("%s %s %s %s" % (station, sts, ets, row[3]))
+        row = pcursor.fetchone()
+        current_sts = nt.sts[station]["archive_begin"]
+        current_ets = nt.sts[station]["archive_end"]
+        sts = row[0]
+        ets = row[1]
+        if current_sts is None or current_sts != sts:
+            LOG.info("%s sts %s->%s", station, current_sts, sts)
+            mcursor.execute(
+                """
+                UPDATE stations SET archive_begin = %s where id = %s and
+                network = 'RAOB'
+            """,
+                (sts, station),
+            )
+        if current_ets is None and ets.year < 2018:
+            LOG.info("%s ets %s->%s", station, current_ets, ets)
+            mcursor.execute(
+                """
+                UPDATE stations SET archive_end = %s where id = %s and
+                network = 'RAOB'
+            """,
+                (ets, station),
+            )
 
     mcursor.close()
-    MESOSITE.commit()
-    MESOSITE.close()
+    pgconn2.commit()
 
 
 if __name__ == "__main__":

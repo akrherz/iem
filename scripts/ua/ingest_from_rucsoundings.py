@@ -62,16 +62,17 @@ BEARING: Bearing from the ground point for this level
 RANGE:   Range (nautical miles) from the ground point for this level.
 
 """
-from __future__ import print_function
 import datetime
 import sys
 
 import pytz
 import requests
-from pyiem.util import exponential_backoff, get_dbconn
+from tqdm import tqdm
+from pyiem.util import exponential_backoff, get_dbconn, logger, utc
 from pyiem.network import Table as NetworkTable
+from pandas.io.sql import read_sql
 
-NT = NetworkTable("RAOB")
+LOG = logger()
 
 
 class RAOB:
@@ -140,14 +141,12 @@ class RAOB:
         row = txn.fetchone()
         fid = row[0]
         txn.execute("""DELETE from raob_profile where fid = %s""", (fid,))
-        if txn.rowcount > 0:
-            print(
-                ("RAOB del %s rows for sid: %s valid: %s")
-                % (
-                    txn.rowcount,
-                    self.station,
-                    self.valid.strftime("%Y-%m-%d %H"),
-                )
+        if txn.rowcount > 0 and self.valid.hour in [0, 12]:
+            LOG.info(
+                "RAOB del %s rows for sid: %s valid: %s",
+                txn.rowcount,
+                self.station,
+                self.valid.strftime("%Y-%m-%d %H"),
             )
         table = "raob_profile_%s" % (self.valid.year,)
         for d in self.profile:
@@ -212,7 +211,7 @@ def parse(raw, sid):
             s = " ".join(tokens[1:])
             ts = datetime.datetime.strptime(s, "%H %d %b %Y")
             rob = RAOB()
-            rob.valid = ts.replace(tzinfo=pytz.utc)
+            rob.valid = ts.replace(tzinfo=pytz.UTC)
             continue
         if tokens[0] == "1":
             fl_hhmm = line[44:].strip()
@@ -248,14 +247,33 @@ def parse(raw, sid):
 
 def main(valid):
     """Run for the given valid time!"""
+    nt = NetworkTable("RAOB")
     dbconn = get_dbconn("postgis")
-
+    # check what we have
+    obs = read_sql(
+        """
+        SELECT station, count(*) from
+        raob_flights f JOIN raob_profile_"""
+        + str(valid.year)
+        + """ p
+        ON (f.fid = p.fid) where valid = %s GROUP by station
+        ORDER by station ASC
+    """,
+        dbconn,
+        params=(valid,),
+        index_col="station",
+    )
+    obs["added"] = 0
     v12 = valid - datetime.timedelta(hours=13)
 
-    for sid in NT.sts:
+    progress = tqdm(list(nt.sts.keys()), disable=not sys.stdout.isatty())
+    for sid in progress:
         # skip virtual sites
-        if sid.startswith("_") or sid in ["KHKS"]:
+        if sid.startswith("_"):
             continue
+        if sid in obs.index and obs.at[sid, "count"] > 10:
+            continue
+        progress.set_description(sid)
         uri = (
             "https://rucsoundings.noaa.gov/get_raobs.cgi?data_source=RAOB;"
             "start_year=%s;start_month_name=%s;"
@@ -271,83 +289,37 @@ def main(valid):
             valid.strftime("%s"),
         )
 
-        cursor = dbconn.cursor()
         req = exponential_backoff(requests.get, uri, timeout=30)
-        if req is None:
-            print("ingest_from_rucsoundings failed %s for %s" % (sid, valid))
+        if req is None or req.status_code != 200:
+            LOG.info("dl failed %s for %s", sid, valid)
             continue
+        cursor = dbconn.cursor()
         try:
             for rob in parse(req.content.decode("utf-8"), sid):
-                NT.sts[sid]["count"] = len(rob.profile)
+                if rob.valid == valid:
+                    obs.at[sid, "added"] = len(rob.profile)
                 rob.database_save(cursor)
         except Exception as exp:
-            print(
-                ("RAOB FAIL %s %s %s, check /tmp for data") % (sid, valid, exp)
-            )
-            output = open(
-                "/tmp/%s_%s_fail" % (sid, valid.strftime("%Y%m%d%H%M")), "w"
-            )
-            output.write(req.content)
-            output.close()
+            fn = "/tmp/%s_%s_fail" % (sid, valid.strftime("%Y%m%d%H%M"))
+            LOG.info("FAIL %s %s %s, check %s for data", sid, valid, exp, fn)
+            with open(fn, "w") as fh:
+                fh.write(req.content)
         finally:
             cursor.close()
             dbconn.commit()
-
-    # Loop thru and see which stations we were missing data from
-    missing = []
-    for sid in NT.sts:
-        if NT.sts[sid]["online"]:
-            if NT.sts[sid].get("count", 0) == 0:
-                missing.append(sid)
-
-    if len(missing) > 40:
-        cursor = dbconn.cursor()
-        for sid in missing:
-            # Go find the last ob we have for the site
-            cursor.execute(
-                """SELECT max(valid) from raob_flights where
-            station = %s""",
-                (sid,),
-            )
-            row = cursor.fetchone()
-            if row[0] is None:
-                print("RAOB dl station: %s has null max(valid)?" % (sid,))
-                continue
-            lastts = row[0].astimezone(pytz.utc)
-            print(
-                ("RAOB dl fail ts: %s sid: %s last: %s")
-                % (
-                    valid.strftime("%Y-%m-%d %H"),
-                    sid,
-                    lastts.strftime("%Y-%m-%d %H"),
-                )
-            )
-
-    dbconn.close()
+    LOG.debug("%s entered %s levels of data", valid, obs["added"].sum())
+    df2 = obs[obs["count"] == 0]
+    if len(df2.index) > 40:
+        LOG.info("%s high missing count of %s", valid, len(df2.index))
 
 
 def frontend(argv):
     """Figure out what we need to do here! """
-    valid = datetime.datetime(
-        int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4])
-    )
-    valid = valid.replace(tzinfo=pytz.utc)
+    valid = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
     main(valid)
-    pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor()
     for days in [3, 14, 365]:
         ts = valid - datetime.timedelta(days=days)
-        cursor.execute(
-            """SELECT count(*) from raob_flights where
-            valid = %s""",
-            (ts,),
-        )
-        cnt = cursor.fetchone()[0]
-        if cnt < 100:
-            print(
-                ("rucsoundings reprocess: %s due to count of: %s") % (ts, cnt)
-            )
-            main(ts)
+        main(ts)
 
 
 if __name__ == "__main__":
