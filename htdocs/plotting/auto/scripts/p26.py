@@ -1,5 +1,6 @@
 """max temp before jul 1 or min after"""
 import datetime
+import calendar
 
 import psycopg2.extras
 import numpy as np
@@ -11,7 +12,7 @@ from pyiem.exceptions import NoDataFound
 
 PDICT = {
     "fall": "Minimum Temperature after 1 July",
-    "spring": "Maximum Temperature before 1 July",
+    "spring": "Maximum Temperature for Year to Date",
 }
 PDICT2 = {"high": "High Temperature", "low": "Low Temperature"}
 
@@ -24,7 +25,9 @@ def get_description():
         "description"
     ] = """This plot presents the climatology and actual
     year's progression of warmest to date or coldest to date temperature.
-    The simple average is presented along with the percentile intervals."""
+    The simple average is presented along with the percentile intervals. When
+    plotting the after 1 July period, the calendar year of the fall season
+    is shown.  For example, 1 Jul 2019 to 30 Jun 2020 is 2019 for this plot."""
     desc["arguments"] = [
         dict(
             type="station",
@@ -37,7 +40,7 @@ def get_description():
             type="year",
             name="year",
             default=datetime.datetime.now().year,
-            label="Year to Highlight:",
+            label="Year (of fall season) to highlight:",
         ),
         dict(
             type="select",
@@ -79,15 +82,19 @@ def get_context(fdict):
     data = np.ma.ones((thisyear - startyear + 1, 366)) * 199
     if half == "fall":
         cursor.execute(
-            """SELECT extract(doy from day), year,
+            """SELECT
+            CASE WHEN month < 7 then
+            extract(doy from day) + 366 else
+            extract(doy from day) end,
+            CASE WHEN month < 7 then year - 1 else year end,
             """
             + varname
-            + """ from
+            + """, day from
             """
             + table
             + """ WHERE station = %s and low is not null and
-            high is not null and year >= %s""",
-            (station, startyear),
+            high is not null and day >= %s ORDER by day ASC""",
+            (station, datetime.date(startyear, 7, 1)),
         )
     else:
         cursor.execute(
@@ -98,13 +105,14 @@ def get_context(fdict):
             """
             + table
             + """ WHERE station = %s and high is not null and
-            low is not null and year >= %s""",
+            low is not null and year >= %s ORDER by day ASC""",
             (station, startyear),
         )
     if cursor.rowcount == 0:
         raise NoDataFound("No Data Found.")
+    subval = 1 if half == "spring" else 183
     for row in cursor:
-        data[int(row[1] - startyear), int(row[0] - 1)] = row[2]
+        data[int(row[1] - startyear), int(row[0] - subval)] = row[2]
 
     data.mask = np.where(data == 199, True, False)
 
@@ -118,37 +126,23 @@ def get_context(fdict):
     maxs = []
     dyear = []
     idx = year - startyear
-    last_doy = int(today.strftime("%j"))
-    if half == "fall":
-        for doy in range(181, 366):
-            low = np.ma.min(data[:-1, 180:doy], 1)
-            avg.append(np.ma.average(low))
-            mins.append(np.ma.min(low))
-            maxs.append(np.ma.max(low))
-            p = np.percentile(low, [2.5, 25, 75, 97.5])
-            p2p5.append(p[0])
-            p25.append(p[1])
-            p75.append(p[2])
-            p97p5.append(p[3])
-            doys.append(doy)
-            if year == thisyear and doy > last_doy:
-                continue
-            dyear.append(np.ma.min(data[idx, 180:doy]))
-    else:
-        for doy in range(1, 181):
-            low = np.ma.max(data[:-1, :doy], 1)
-            avg.append(np.ma.average(low))
-            mins.append(np.ma.min(low))
-            maxs.append(np.ma.max(low))
-            p = np.percentile(low, [2.5, 25, 75, 97.5])
-            p2p5.append(p[0])
-            p25.append(p[1])
-            p75.append(p[2])
-            p97p5.append(p[3])
-            doys.append(doy)
-            if year == thisyear and doy > last_doy:
-                continue
-            dyear.append(np.ma.max(data[idx, :doy]))
+    doys = list(range(1, 366))
+    f = np.ma.max if half == "spring" else np.ma.min
+    lastdoy = int(today.strftime("%j"))
+    if half == "fall" and today.month > 6:
+        lastdoy -= 183
+    for doy in doys:
+        if year != today.year or doy < lastdoy:
+            dyear.append(f(data[idx, :doy]))
+        vals = f(data[:-1, :doy], 1)
+        avg.append(np.ma.average(vals))
+        mins.append(np.ma.min(vals))
+        maxs.append(np.ma.max(vals))
+        p = np.percentile(vals, [2.5, 25, 75, 97.5])
+        p2p5.append(p[0])
+        p25.append(p[1])
+        p75.append(p[2])
+        p97p5.append(p[3])
 
     # http://stackoverflow.com/questions/19736080
     d = dict(
@@ -172,7 +166,7 @@ def get_context(fdict):
     if ctx["half"] == "fall":
         title = "Minimum Daily %s Temperature after 1 July"
     else:
-        title = "Maximum Daily %s Temperature before 1 July"
+        title = "Maximum Daily %s Temperature"
     title = title % (varname.capitalize(),)
     ctx["ylabel"] = title
     ctx["title"] = "%s-%s %s %s\n%s" % (
@@ -289,26 +283,12 @@ def plotter(fdict):
         label="%s" % (ctx["year"],),
     )
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
-    ax.set_xticklabels(
-        (
-            "Jan",
-            "Feb",
-            "Mar",
-            "Apr",
-            "May",
-            "Jun",
-            "Jul",
-            "Aug",
-            "Sep",
-            "Oct",
-            "Nov",
-            "Dec",
-        )
-    )
+    if ctx["half"] == "spring":
+        ax.set_xticklabels(calendar.month_abbr[1:])
     if ctx["half"] == "fall":
-        ax.set_xlim(200, 366)
-    else:
-        ax.set_xlim(0, 181)
+        labels = calendar.month_abbr[7:]
+        labels.extend(calendar.month_abbr[1:7])
+        ax.set_xticklabels(labels)
     ax.set_ylabel(r"%s $^\circ$F" % (ctx["ylabel"],))
     ax.set_title(ctx["title"])
     ax.axhline(ctx["t"], linestyle="--", lw=1, color="k", zorder=6)

@@ -118,7 +118,7 @@ daily_opts = [
     },
     {
         "id": "26",
-        "label": "Min Daily Low after 1 July / Max Daily High before 1 July",
+        "label": "Min Daily Low after 1 July / Max Daily High for year",
     },
     {
         "id": "126",
