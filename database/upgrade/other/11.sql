@@ -1,11 +1,6 @@
--- Boilerplate IEM schema_manager_version, the version gets incremented each
--- time we make an upgrade script
-CREATE TABLE iem_schema_manager_version(
-	version int,
-	updated timestamptz);
-INSERT into iem_schema_manager_version values (11, now());
-
--- Storage of USCRN sub-hourly data
+-- initial definition was not range partitioned, so we have to a convoluted
+-- dance
+ALTER TABLE uscrn_alldata RENAME to uscrn_alldata_old;
 
 CREATE TABLE uscrn_alldata(
   station varchar(5),
@@ -36,7 +31,27 @@ declare
      year int;
      mytable varchar;
 begin
-    for year in 2006..2030
+    for year in 2006..2019
+    loop
+        mytable := format($f$uscrn_t%s$f$, year);
+        execute format($f$
+            ALTER TABLE %s NO INHERIT uscrn_alldata_old
+            $f$, mytable);
+        execute format($f$
+            ALTER TABLE uscrn_alldata ATTACH PARTITION %s
+            FOR VALUES FROM ('%s-01-01 00:00+00') to ('%s-01-01 00:00+00')
+        $f$, mytable, year, year + 1);
+    end loop;
+end;
+$do$;
+
+do
+$do$
+declare
+     year int;
+     mytable varchar;
+begin
+    for year in 2020..2030
     loop
         mytable := format($f$uscrn_t%s$f$, year);
         execute format($f$
@@ -63,99 +78,14 @@ begin
 end;
 $do$;
 
----
---- Stuart Smith Park Hydrology Learning Lab
----
-CREATE TABLE ss_bubbler(
-  valid timestamptz,
-  field varchar(32),
-  value real,
-  units varchar(32)
-);
-CREATE INDEX ss_bubbler_idx on ss_bubbler(valid);
-GRANT SELECT on ss_bubbler to nobody,apache;
+DROP TABLE uscrn_alldata_old;
 
----
---- Stuart Smith Park Hydrology Learning Lab
----
-CREATE TABLE ss_logger_data(
-  id int,
-  site_serial int,
-  valid timestamptz,
-  ch1_data_p real,
-  ch2_data_p real,
-  ch3_data_p real,
-  ch4_data_p real,
-  ch1_data_t real,
-  ch2_data_t real,
-  ch3_data_t real,
-  ch4_data_t real,
-  ch1_data_c real,
-  ch2_data_c real,
-  ch3_data_c real,
-  ch4_data_c real
-);
-CREATE INDEX ss_logger_data_idx on ss_logger_data(valid);
-GRANT SELECT on ss_logger_data to nobody,apache;
+-- initial definition was not range partitioned, so we have to a convoluted
+-- dance
+ALTER TABLE alldata RENAME to alldata_old;
 
-CREATE TABLE asi_data (
-  station char(7),
-  valid timestamp with time zone,
-  ch1avg real,
-  ch1sd  real,
-  ch1max real,
-  ch1min real,
-  ch2avg real,
-  ch2sd  real,
-  ch2max real,
-  ch2min real,
-  ch3avg real,
-  ch3sd  real,
-  ch3max real,
-  ch3min real,
-  ch4avg real,
-  ch4sd  real,
-  ch4max real,
-  ch4min real,
-  ch5avg real,
-  ch5sd  real,
-  ch5max real,
-  ch5min real,
-  ch6avg real,
-  ch6sd  real,
-  ch6max real,
-  ch6min real,
-  ch7avg real,
-  ch7sd  real,
-  ch7max real,
-  ch7min real,
-  ch8avg real,
-  ch8sd  real,
-  ch8max real,
-  ch8min real,
-  ch9avg real,
-  ch9sd  real,
-  ch9max real,
-  ch9min real,
-  ch10avg real,
-  ch10sd  real,
-  ch10max real,
-  ch10min real,
-  ch11avg real,
-  ch11sd  real,
-  ch11max real,
-  ch11min real,
-  ch12avg real,
-  ch12sd  real,
-  ch12max real,
-  ch12min real);
-CREATE unique index asi_data_idx on asi_data(station, valid);
-GRANT SELECT on asi_data to nobody;
-GRANT SELECT on asi_data to apache;
-  
-
-CREATE TABLE alldata (
-    station character varying(6),
+CREATE TABLE alldata(
+  station character varying(6),
     valid timestamp with time zone,
     tmpf real,
     dwpf real,
@@ -168,8 +98,11 @@ CREATE TABLE alldata (
     pday real,
     pmonth real,
     srad real,
-    c1tmpf real
-) PARTITION by range(valid);
+    c1tmpf real)
+  PARTITION by range(valid);
+ALTER TABLE alldata OWNER to mesonet;
+GRANT ALL on alldata to ldm;
+GRANT SELECT on alldata to nobody,apache;
 
 do
 $do$
@@ -177,7 +110,27 @@ declare
      year int;
      mytable varchar;
 begin
-    for year in 2003..2030
+    for year in 2003..2019
+    loop
+        mytable := format($f$t%s$f$, year);
+        execute format($f$
+            ALTER TABLE %s NO INHERIT alldata_old
+            $f$, mytable);
+        execute format($f$
+            ALTER TABLE alldata ATTACH PARTITION %s
+            FOR VALUES FROM ('%s-01-01 00:00+00') to ('%s-01-01 00:00+00')
+        $f$, mytable, year, year + 1);
+    end loop;
+end;
+$do$;
+
+do
+$do$
+declare
+     year int;
+     mytable varchar;
+begin
+    for year in 2020..2030
     loop
         mytable := format($f$t%s$f$, year);
         execute format($f$
@@ -201,7 +154,10 @@ begin
 end;
 $do$;
 
--- -----------------------------------
+DROP TABLE alldata_old;
+
+-- ---------------------------------
+ALTER TABLE flux_data RENAME to flux_data_old;
 
 CREATE TABLE flux_data(
 station            character varying(10),   
@@ -315,7 +271,27 @@ declare
      year int;
      mytable varchar;
 begin
-    for year in 2002..2030
+    for year in 2002..2019
+    loop
+        mytable := format($f$flux%s$f$, year);
+        execute format($f$
+            ALTER TABLE %s NO INHERIT flux_data_old
+            $f$, mytable);
+        execute format($f$
+            ALTER TABLE flux_data ATTACH PARTITION %s
+            FOR VALUES FROM ('%s-01-01 00:00+00') to ('%s-01-01 00:00+00')
+        $f$, mytable, year, year + 1);
+    end loop;
+end;
+$do$;
+
+do
+$do$
+declare
+     year int;
+     mytable varchar;
+begin
+    for year in 2020..2030
     loop
         mytable := format($f$flux%s$f$, year);
         execute format($f$
@@ -339,43 +315,10 @@ begin
 end;
 $do$;
 
---
--- Storage of ISU FEEL Data
-CREATE TABLE feel_data_daily(
-        valid date UNIQUE,
-        AirTemp_Max real,
-        AirTemp_Min real,
-        Rain_Tot real,
-        Windspeed_Max real,
-        SolarRad_MJ_Tot real
-);
-GRANT SELECT on feel_data_daily to nobody,apache;
+DROP TABLE flux_data_old;
 
-CREATE TABLE feel_data_hourly(
-        valid timestamptz UNIQUE,
-        BattVolt_Avg real,
-        PanTemp_Avg real,
-        AirTemp_Avg real,
-        RH_Avg real,
-        sat_vp_Avg real,
-        act_vp_Avg real,
-        WindDir_Avg real,
-        Windspeed_Avg real,
-        SolarRad_mV_Avg real,
-        SolarRad_W_Avg real,
-        Soil_Temp_5_Avg real,
-        Rain_Tot real,
-        LWS1_Avg real,
-        LWS2_Avg real,
-        LWS3_Avg real,
-        LWS1_Ohms real,
-        LWS2_Ohms real,
-        LWS3_Ohms real,
-        LWS1_Ohms_Hst real,
-        LWS2_Ohms_Hst real,
-        LWS3_Ohms_Hst real
-);
-GRANT SELECT on feel_data_hourly to nobody,apache;
+-- ------------------------------------------
+ALTER TABLE hpd_alldata RENAME to hpd_alldata_old;
 
 -- Storage of ncdc HPD data
 --
@@ -397,7 +340,27 @@ declare
      year int;
      mytable varchar;
 begin
-    for year in 2009..2030
+    for year in 2009..2019
+    loop
+        mytable := format($f$hpd_%s$f$, year);
+        execute format($f$
+            ALTER TABLE %s NO INHERIT hpd_alldata_old
+            $f$, mytable);
+        execute format($f$
+            ALTER TABLE hpd_alldata ATTACH PARTITION %s
+            FOR VALUES FROM ('%s-01-01 00:00+00') to ('%s-01-01 00:00+00')
+        $f$, mytable, year, year + 1);
+    end loop;
+end;
+$do$;
+
+do
+$do$
+declare
+     year int;
+     mytable varchar;
+begin
+    for year in 2020..2030
     loop
         mytable := format($f$hpd_%s$f$, year);
         execute format($f$
@@ -420,3 +383,5 @@ begin
     end loop;
 end;
 $do$;
+
+DROP TABLE hpd_alldata_old;
