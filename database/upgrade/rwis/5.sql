@@ -1,19 +1,8 @@
--- Boilerplate IEM schema_manager_version, the version gets incremented each
--- time we make an upgrade script
-CREATE TABLE iem_schema_manager_version(
-	version int,
-	updated timestamptz);
-INSERT into iem_schema_manager_version values (5, now());
-
-CREATE TABLE sensors(
-  station varchar(5),
-  sensor0 varchar(100),
-  sensor1 varchar(100),
-  sensor2 varchar(100),
-  sensor3 varchar(100)
-);
-GRANT SELECT on sensors to nobody,apache;
-  
+-- initial definition was not range partitioned, so we have to a convoluted
+-- dance
+ALTER TABLE alldata RENAME to alldata_old;
+ALTER TABLE alldata_traffic RENAME to alldata_traffic_old;
+ALTER TABLE alldata_soil RENAME to alldata_soil_old;
 
 CREATE TABLE alldata(
   station varchar(6),
@@ -83,7 +72,27 @@ declare
      year int;
      mytable varchar;
 begin
-    for year in 1994..2030
+    for year in 1994..2019
+    loop
+        mytable := format($f$t%s$f$, year);
+        execute format($f$
+            ALTER TABLE %s NO INHERIT alldata_old
+            $f$, mytable);
+        execute format($f$
+            ALTER TABLE alldata ATTACH PARTITION %s
+            FOR VALUES FROM ('%s-01-01 00:00+00') to ('%s-01-01 00:00+00')
+        $f$, mytable, year, year + 1);
+    end loop;
+end;
+$do$;
+
+do
+$do$
+declare
+     year int;
+     mytable varchar;
+begin
+    for year in 2020..2030
     loop
         mytable := format($f$t%s$f$, year);
         execute format($f$
@@ -110,13 +119,37 @@ begin
 end;
 $do$;
 
+DROP TABLE alldata_old;
+
+-- -----------------------------
+
 do
 $do$
 declare
      year int;
      mytable varchar;
 begin
-    for year in 2008..2030
+    for year in 2008..2019
+    loop
+        mytable := format($f$t%s_traffic$f$, year);
+        execute format($f$
+            ALTER TABLE %s NO INHERIT alldata_traffic_old
+            $f$, mytable);
+        execute format($f$
+            ALTER TABLE alldata_traffic ATTACH PARTITION %s
+            FOR VALUES FROM ('%s-01-01 00:00+00') to ('%s-01-01 00:00+00')
+        $f$, mytable, year, year + 1);
+    end loop;
+end;
+$do$;
+
+do
+$do$
+declare
+     year int;
+     mytable varchar;
+begin
+    for year in 2020..2030
     loop
         mytable := format($f$t%s_traffic$f$, year);
         execute format($f$
@@ -143,13 +176,37 @@ begin
 end;
 $do$;
 
+DROP TABLE alldata_traffic_old;
+
+-- ----------------------------------
+
 do
 $do$
 declare
      year int;
      mytable varchar;
 begin
-    for year in 2008..2030
+    for year in 2008..2019
+    loop
+        mytable := format($f$t%s_soil$f$, year);
+        execute format($f$
+            ALTER TABLE %s NO INHERIT alldata_soil_old
+            $f$, mytable);
+        execute format($f$
+            ALTER TABLE alldata_soil ATTACH PARTITION %s
+            FOR VALUES FROM ('%s-01-01 00:00+00') to ('%s-01-01 00:00+00')
+        $f$, mytable, year, year + 1);
+    end loop;
+end;
+$do$;
+
+do
+$do$
+declare
+     year int;
+     mytable varchar;
+begin
+    for year in 2020..2030
     loop
         mytable := format($f$t%s_soil$f$, year);
         execute format($f$
@@ -175,3 +232,5 @@ begin
     end loop;
 end;
 $do$;
+
+DROP TABLE alldata_soil_old;

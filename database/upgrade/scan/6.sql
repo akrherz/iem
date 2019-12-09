@@ -1,9 +1,6 @@
--- Boilerplate IEM schema_manager_version, the version gets incremented each
--- time we make an upgrade script
-CREATE TABLE iem_schema_manager_version(
-	version int,
-	updated timestamptz);
-INSERT into iem_schema_manager_version values (6, now());
+-- initial definition was not range partitioned, so we have to a convoluted
+-- dance
+ALTER TABLE alldata RENAME to alldata_old;
 
 CREATE TABLE alldata(
 	station varchar(5),
@@ -37,7 +34,27 @@ declare
      year int;
      mytable varchar;
 begin
-    for year in 1983..2030
+    for year in 1983..2019
+    loop
+        mytable := format($f$t%s_hourly$f$, year);
+        execute format($f$
+            ALTER TABLE %s NO INHERIT alldata_old
+            $f$, mytable);
+        execute format($f$
+            ALTER TABLE alldata ATTACH PARTITION %s
+            FOR VALUES FROM ('%s-01-01 00:00+00') to ('%s-01-01 00:00+00')
+        $f$, mytable, year, year + 1);
+    end loop;
+end;
+$do$;
+
+do
+$do$
+declare
+     year int;
+     mytable varchar;
+begin
+    for year in 2020..2030
     loop
         mytable := format($f$t%s_hourly$f$, year);
         execute format($f$
@@ -60,3 +77,5 @@ begin
     end loop;
 end;
 $do$;
+
+DROP TABLE alldata_old;

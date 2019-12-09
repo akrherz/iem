@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (36, now());
+INSERT into iem_schema_manager_version values (37, now());
 
 ---
 --- TABLES THAT ARE LOADED VIA shp2pgsql
@@ -485,9 +485,9 @@ CREATE TABLE text_products (
     pil char(6),
     product_num smallint,
     issue timestamptz,
-    expire timestamptz
+    expire timestamptz,
+    geom geometry(MultiPolygon, 4326)
 );
-select addgeometrycolumn('','text_products','geom',4326,'MULTIPOLYGON',2);
 
 grant select on text_products to apache,nobody;
 
@@ -532,312 +532,88 @@ CREATE TABLE warnings (
     issue timestamp with time zone not null,
     expire timestamp with time zone not null,
     updated timestamp with time zone not null,
-    wfo character(3),
-    eventid smallint,
-    status character(3),
+    wfo character(3) NOT NULL,
+    eventid smallint NOT NULL,
+    status character(3) NOT NULL,
     fcster character varying(24),
     report text,
     svs text,
-    ugc character varying(6),
-    phenomena character(2),
-    significance character(1),
+    ugc character varying(6) NOT NULL,
+    phenomena character(2) NOT NULL,
+    significance character(1) NOT NULL,
     hvtec_nwsli character(5),
     gid int references ugcs(gid),
     init_expire timestamp with time zone not null,
     product_issue timestamp with time zone not null,
     is_emergency boolean
-) WITH OIDS;
-
+);
+ALTER TABLE warnings OWNER to mesonet;
+GRANT ALL on warnings to ldm;
 grant select on warnings to apache,nobody;
 
-CREATE TABLE warnings_1986() inherits (warnings);
-CREATE INDEX warnings_1986_combo_idx on 
-	warnings_1986(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_1986_expire_idx on warnings_1986(expire);
-CREATE INDEX warnings_1986_issue_idx on warnings_1986(issue);
-CREATE INDEX warnings_1986_ugc_idx on warnings_1986(ugc);
-CREATE INDEX warnings_1986_wfo_idx on warnings_1986(wfo);
-grant select on warnings_1986 to nobody,apache;
-    
 
-CREATE TABLE warnings_1987() inherits (warnings);
-CREATE INDEX warnings_1987_combo_idx on 
-	warnings_1987(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_1987_expire_idx on warnings_1987(expire);
-CREATE INDEX warnings_1987_issue_idx on warnings_1987(issue);
-CREATE INDEX warnings_1987_ugc_idx on warnings_1987(ugc);
-CREATE INDEX warnings_1987_wfo_idx on warnings_1987(wfo);
-grant select on warnings_1987 to nobody,apache;
-    
+do
+$do$
+declare
+     year int;
+     mytable varchar;
+begin
+    for year in 1986..2030
+    loop
+        mytable := format($f$warnings_%s$f$, year);
+        execute format($f$
+            create table %s() INHERITS (warnings)
+            $f$, mytable);
+        execute format($f$
+            alter table %s ADD CONSTRAINT %s_gid_fkey
+            FOREIGN KEY(gid) REFERENCES ugcs(gid)
+        $f$, mytable, mytable);
+        execute format($f$
+            alter table %s ALTER WFO SET NOT NULL;
+            alter table %s ALTER eventid SET NOT NULL;
+            alter table %s ALTER status SET NOT NULL;
+            alter table %s ALTER ugc SET NOT NULL;
+            alter table %s ALTER phenomena SET NOT NULL;
+            alter table %s ALTER significance SET NOT NULL;
+        $f$, mytable, mytable, mytable, mytable, mytable, mytable);
+        execute format($f$
+            ALTER TABLE %s OWNER to mesonet
+        $f$, mytable);
+        execute format($f$
+            GRANT ALL on %s to ldm
+        $f$, mytable);
+        execute format($f$
+            GRANT SELECT on %s to nobody,apache
+        $f$, mytable);
+        -- Indices
+        execute format($f$
+            CREATE INDEX %s_combo_idx
+            on %s(wfo, phenomena, eventid, significance)
+        $f$, mytable, mytable);
+        execute format($f$
+            CREATE INDEX %s_expire_idx
+            on %s(expire)
+        $f$, mytable, mytable);
+        execute format($f$
+            CREATE INDEX %s_issue_idx
+            on %s(issue)
+        $f$, mytable, mytable);
+        execute format($f$
+            CREATE INDEX %s_ugc_idx
+            on %s(ugc)
+        $f$, mytable, mytable);
+        execute format($f$
+            CREATE INDEX %s_wfo_idx
+            on %s(wfo)
+        $f$, mytable, mytable);
+        execute format($f$
+            CREATE INDEX %s_gid_idx
+            on %s(gid)
+        $f$, mytable, mytable);
+    end loop;
+end;
+$do$;
 
-CREATE TABLE warnings_1988() inherits (warnings);
-CREATE INDEX warnings_1988_combo_idx on 
-	warnings_1988(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_1988_expire_idx on warnings_1988(expire);
-CREATE INDEX warnings_1988_issue_idx on warnings_1988(issue);
-CREATE INDEX warnings_1988_ugc_idx on warnings_1988(ugc);
-CREATE INDEX warnings_1988_wfo_idx on warnings_1988(wfo);
-grant select on warnings_1988 to nobody,apache;
-    
-
-CREATE TABLE warnings_1989() inherits (warnings);
-CREATE INDEX warnings_1989_combo_idx on 
-	warnings_1989(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_1989_expire_idx on warnings_1989(expire);
-CREATE INDEX warnings_1989_issue_idx on warnings_1989(issue);
-CREATE INDEX warnings_1989_ugc_idx on warnings_1989(ugc);
-CREATE INDEX warnings_1989_wfo_idx on warnings_1989(wfo);
-grant select on warnings_1989 to nobody,apache;
-    
-
-CREATE TABLE warnings_1990() inherits (warnings);
-CREATE INDEX warnings_1990_combo_idx on 
-	warnings_1990(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_1990_expire_idx on warnings_1990(expire);
-CREATE INDEX warnings_1990_issue_idx on warnings_1990(issue);
-CREATE INDEX warnings_1990_ugc_idx on warnings_1990(ugc);
-CREATE INDEX warnings_1990_wfo_idx on warnings_1990(wfo);
-grant select on warnings_1990 to nobody,apache;
-    
-
-CREATE TABLE warnings_1991() inherits (warnings);
-CREATE INDEX warnings_1991_combo_idx on 
-	warnings_1991(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_1991_expire_idx on warnings_1991(expire);
-CREATE INDEX warnings_1991_issue_idx on warnings_1991(issue);
-CREATE INDEX warnings_1991_ugc_idx on warnings_1991(ugc);
-CREATE INDEX warnings_1991_wfo_idx on warnings_1991(wfo);
-grant select on warnings_1991 to nobody,apache;
-    
-
-CREATE TABLE warnings_1992() inherits (warnings);
-CREATE INDEX warnings_1992_combo_idx on 
-	warnings_1992(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_1992_expire_idx on warnings_1992(expire);
-CREATE INDEX warnings_1992_issue_idx on warnings_1992(issue);
-CREATE INDEX warnings_1992_ugc_idx on warnings_1992(ugc);
-CREATE INDEX warnings_1992_wfo_idx on warnings_1992(wfo);
-grant select on warnings_1992 to nobody,apache;
-    
-
-CREATE TABLE warnings_1993() inherits (warnings);
-CREATE INDEX warnings_1993_combo_idx on 
-	warnings_1993(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_1993_expire_idx on warnings_1993(expire);
-CREATE INDEX warnings_1993_issue_idx on warnings_1993(issue);
-CREATE INDEX warnings_1993_ugc_idx on warnings_1993(ugc);
-CREATE INDEX warnings_1993_wfo_idx on warnings_1993(wfo);
-grant select on warnings_1993 to nobody,apache;
-    
-
-CREATE TABLE warnings_1994() inherits (warnings);
-CREATE INDEX warnings_1994_combo_idx on 
-	warnings_1994(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_1994_expire_idx on warnings_1994(expire);
-CREATE INDEX warnings_1994_issue_idx on warnings_1994(issue);
-CREATE INDEX warnings_1994_ugc_idx on warnings_1994(ugc);
-CREATE INDEX warnings_1994_wfo_idx on warnings_1994(wfo);
-grant select on warnings_1994 to nobody,apache;
-    
-
-CREATE TABLE warnings_1995() inherits (warnings);
-CREATE INDEX warnings_1995_combo_idx on 
-	warnings_1995(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_1995_expire_idx on warnings_1995(expire);
-CREATE INDEX warnings_1995_issue_idx on warnings_1995(issue);
-CREATE INDEX warnings_1995_ugc_idx on warnings_1995(ugc);
-CREATE INDEX warnings_1995_wfo_idx on warnings_1995(wfo);
-grant select on warnings_1995 to nobody,apache;
-    
-
-CREATE TABLE warnings_1996() inherits (warnings);
-CREATE INDEX warnings_1996_combo_idx on 
-	warnings_1996(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_1996_expire_idx on warnings_1996(expire);
-CREATE INDEX warnings_1996_issue_idx on warnings_1996(issue);
-CREATE INDEX warnings_1996_ugc_idx on warnings_1996(ugc);
-CREATE INDEX warnings_1996_wfo_idx on warnings_1996(wfo);
-grant select on warnings_1996 to nobody,apache;
-    
-
-CREATE TABLE warnings_1997() inherits (warnings);
-CREATE INDEX warnings_1997_combo_idx on 
-	warnings_1997(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_1997_expire_idx on warnings_1997(expire);
-CREATE INDEX warnings_1997_issue_idx on warnings_1997(issue);
-CREATE INDEX warnings_1997_ugc_idx on warnings_1997(ugc);
-CREATE INDEX warnings_1997_wfo_idx on warnings_1997(wfo);
-grant select on warnings_1997 to nobody,apache;
-    
-
-CREATE TABLE warnings_1998() inherits (warnings);
-CREATE INDEX warnings_1998_combo_idx on 
-	warnings_1998(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_1998_expire_idx on warnings_1998(expire);
-CREATE INDEX warnings_1998_issue_idx on warnings_1998(issue);
-CREATE INDEX warnings_1998_ugc_idx on warnings_1998(ugc);
-CREATE INDEX warnings_1998_wfo_idx on warnings_1998(wfo);
-grant select on warnings_1998 to nobody,apache;
-    
-
-CREATE TABLE warnings_1999() inherits (warnings);
-CREATE INDEX warnings_1999_combo_idx on 
-	warnings_1999(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_1999_expire_idx on warnings_1999(expire);
-CREATE INDEX warnings_1999_issue_idx on warnings_1999(issue);
-CREATE INDEX warnings_1999_ugc_idx on warnings_1999(ugc);
-CREATE INDEX warnings_1999_wfo_idx on warnings_1999(wfo);
-grant select on warnings_1999 to nobody,apache;
-    
-
-CREATE TABLE warnings_2000() inherits (warnings);
-CREATE INDEX warnings_2000_combo_idx on 
-	warnings_2000(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_2000_expire_idx on warnings_2000(expire);
-CREATE INDEX warnings_2000_issue_idx on warnings_2000(issue);
-CREATE INDEX warnings_2000_ugc_idx on warnings_2000(ugc);
-CREATE INDEX warnings_2000_wfo_idx on warnings_2000(wfo);
-grant select on warnings_2000 to nobody,apache;
-    
-
-CREATE TABLE warnings_2001() inherits (warnings);
-CREATE INDEX warnings_2001_combo_idx on 
-	warnings_2001(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_2001_expire_idx on warnings_2001(expire);
-CREATE INDEX warnings_2001_issue_idx on warnings_2001(issue);
-CREATE INDEX warnings_2001_ugc_idx on warnings_2001(ugc);
-CREATE INDEX warnings_2001_wfo_idx on warnings_2001(wfo);
-grant select on warnings_2001 to nobody,apache;
-    
-
-CREATE TABLE warnings_2002() inherits (warnings);
-CREATE INDEX warnings_2002_combo_idx on 
-	warnings_2002(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_2002_expire_idx on warnings_2002(expire);
-CREATE INDEX warnings_2002_issue_idx on warnings_2002(issue);
-CREATE INDEX warnings_2002_ugc_idx on warnings_2002(ugc);
-CREATE INDEX warnings_2002_wfo_idx on warnings_2002(wfo);
-grant select on warnings_2002 to nobody,apache;
-    
-
-CREATE TABLE warnings_2003() inherits (warnings);
-CREATE INDEX warnings_2003_combo_idx on 
-	warnings_2003(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_2003_expire_idx on warnings_2003(expire);
-CREATE INDEX warnings_2003_issue_idx on warnings_2003(issue);
-CREATE INDEX warnings_2003_ugc_idx on warnings_2003(ugc);
-CREATE INDEX warnings_2003_wfo_idx on warnings_2003(wfo);
-grant select on warnings_2003 to nobody,apache;
-    
-
-CREATE TABLE warnings_2004() inherits (warnings);
-CREATE INDEX warnings_2004_combo_idx on 
-	warnings_2004(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_2004_expire_idx on warnings_2004(expire);
-CREATE INDEX warnings_2004_issue_idx on warnings_2004(issue);
-CREATE INDEX warnings_2004_ugc_idx on warnings_2004(ugc);
-CREATE INDEX warnings_2004_wfo_idx on warnings_2004(wfo);
-grant select on warnings_2004 to nobody,apache;
-    
-
-CREATE TABLE warnings_2005() inherits (warnings);
-CREATE INDEX warnings_2005_combo_idx on 
-	warnings_2005(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_2005_expire_idx on warnings_2005(expire);
-CREATE INDEX warnings_2005_issue_idx on warnings_2005(issue);
-CREATE INDEX warnings_2005_ugc_idx on warnings_2005(ugc);
-CREATE INDEX warnings_2005_wfo_idx on warnings_2005(wfo);
-grant select on warnings_2005 to nobody,apache;
-    
-
-CREATE TABLE warnings_2006() inherits (warnings);
-CREATE INDEX warnings_2006_combo_idx on 
-	warnings_2006(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_2006_expire_idx on warnings_2006(expire);
-CREATE INDEX warnings_2006_issue_idx on warnings_2006(issue);
-CREATE INDEX warnings_2006_ugc_idx on warnings_2006(ugc);
-CREATE INDEX warnings_2006_wfo_idx on warnings_2006(wfo);
-grant select on warnings_2006 to nobody,apache;
-    
-
-CREATE TABLE warnings_2007() inherits (warnings);
-CREATE INDEX warnings_2007_combo_idx on 
-	warnings_2007(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_2007_expire_idx on warnings_2007(expire);
-CREATE INDEX warnings_2007_issue_idx on warnings_2007(issue);
-CREATE INDEX warnings_2007_ugc_idx on warnings_2007(ugc);
-CREATE INDEX warnings_2007_wfo_idx on warnings_2007(wfo);
-grant select on warnings_2007 to nobody,apache;
-    
-
-CREATE TABLE warnings_2008() inherits (warnings);
-CREATE INDEX warnings_2008_combo_idx on 
-	warnings_2008(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_2008_expire_idx on warnings_2008(expire);
-CREATE INDEX warnings_2008_issue_idx on warnings_2008(issue);
-CREATE INDEX warnings_2008_ugc_idx on warnings_2008(ugc);
-CREATE INDEX warnings_2008_wfo_idx on warnings_2008(wfo);
-grant select on warnings_2008 to nobody,apache;
-    
-
-CREATE TABLE warnings_2009() inherits (warnings);
-CREATE INDEX warnings_2009_combo_idx on 
-	warnings_2009(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_2009_expire_idx on warnings_2009(expire);
-CREATE INDEX warnings_2009_issue_idx on warnings_2009(issue);
-CREATE INDEX warnings_2009_ugc_idx on warnings_2009(ugc);
-CREATE INDEX warnings_2009_wfo_idx on warnings_2009(wfo);
-grant select on warnings_2009 to nobody,apache;
-    
-
-CREATE TABLE warnings_2010() inherits (warnings);
-CREATE INDEX warnings_2010_combo_idx on 
-	warnings_2010(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_2010_expire_idx on warnings_2010(expire);
-CREATE INDEX warnings_2010_issue_idx on warnings_2010(issue);
-CREATE INDEX warnings_2010_ugc_idx on warnings_2010(ugc);
-CREATE INDEX warnings_2010_wfo_idx on warnings_2010(wfo);
-grant select on warnings_2010 to nobody,apache;
-    
-
-CREATE TABLE warnings_2011() inherits (warnings);
-CREATE INDEX warnings_2011_combo_idx on 
-	warnings_2011(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_2011_expire_idx on warnings_2011(expire);
-CREATE INDEX warnings_2011_issue_idx on warnings_2011(issue);
-CREATE INDEX warnings_2011_ugc_idx on warnings_2011(ugc);
-CREATE INDEX warnings_2011_wfo_idx on warnings_2011(wfo);
-grant select on warnings_2011 to nobody,apache;
-    
-
-CREATE TABLE warnings_2012() inherits (warnings);
-CREATE INDEX warnings_2012_combo_idx on 
-	warnings_2012(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_2012_expire_idx on warnings_2012(expire);
-CREATE INDEX warnings_2012_issue_idx on warnings_2012(issue);
-CREATE INDEX warnings_2012_ugc_idx on warnings_2012(ugc);
-CREATE INDEX warnings_2012_wfo_idx on warnings_2012(wfo);
-grant select on warnings_2012 to nobody,apache;
-    
-
-CREATE TABLE warnings_2013() inherits (warnings);
-CREATE INDEX warnings_2013_combo_idx on 
-	warnings_2013(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_2013_expire_idx on warnings_2013(expire);
-CREATE INDEX warnings_2013_issue_idx on warnings_2013(issue);
-CREATE INDEX warnings_2013_ugc_idx on warnings_2013(ugc);
-CREATE INDEX warnings_2013_wfo_idx on warnings_2013(wfo);
-grant select on warnings_2013 to nobody,apache;
-
-
-CREATE TABLE warnings_2014() inherits (warnings);
-CREATE INDEX warnings_2014_combo_idx on 
-	warnings_2014(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_2014_expire_idx on warnings_2014(expire);
-CREATE INDEX warnings_2014_issue_idx on warnings_2014(issue);
-CREATE INDEX warnings_2014_ugc_idx on warnings_2014(ugc);
-CREATE INDEX warnings_2014_wfo_idx on warnings_2014(wfo);
-grant select on warnings_2014 to nobody,apache;
 
 ---
 --- Storm Based Warnings Geo Tables
@@ -868,116 +644,55 @@ create table sbw(
   floodtag_flashflood varchar(64),
   floodtag_damage varchar(64),
   floodtag_leeve varchar(64),
-  floodtag_dam varchar(64)
-) WITH OIDS;
-select addgeometrycolumn('','sbw','geom',4326,'MULTIPOLYGON',2);
-select addGeometryColumn('sbw', 'tml_geom', 4326, 'POINT', 2);
-select addGeometryColumn('sbw', 'tml_geom_line', 4326, 'LINESTRING', 2);
-
+  floodtag_dam varchar(64),
+  geom geometry(MultiPolygon, 4326),
+  tml_geom geometry(Point, 4326),
+  tml_geom_line geometry(Linestring, 4326)
+);
+ALTER TABLE sbw OWNER to mesonet;
+GRANT ALL on sbw to ldm;
 grant select on sbw to apache,nobody;
 
-CREATE table sbw_2002() inherits (sbw);
-create index sbw_2002_idx on sbw_2002(wfo,eventid,significance,phenomena);
-create index sbw_2002_expire_idx on sbw_2002(expire);
-create index sbw_2002_issue_idx on sbw_2002(issue);
-create index sbw_2002_wfo_idx on sbw_2002(wfo);
-grant select on sbw_2002 to apache,nobody;
-    
-
-CREATE table sbw_2003() inherits (sbw);
-create index sbw_2003_idx on sbw_2003(wfo,eventid,significance,phenomena);
-create index sbw_2003_expire_idx on sbw_2003(expire);
-create index sbw_2003_issue_idx on sbw_2003(issue);
-create index sbw_2003_wfo_idx on sbw_2003(wfo);
-grant select on sbw_2003 to apache,nobody;
-    
-
-CREATE table sbw_2004() inherits (sbw);
-create index sbw_2004_idx on sbw_2004(wfo,eventid,significance,phenomena);
-create index sbw_2004_expire_idx on sbw_2004(expire);
-create index sbw_2004_issue_idx on sbw_2004(issue);
-create index sbw_2004_wfo_idx on sbw_2004(wfo);
-grant select on sbw_2004 to apache,nobody;
-    
-
-CREATE table sbw_2005() inherits (sbw);
-create index sbw_2005_idx on sbw_2005(wfo,eventid,significance,phenomena);
-create index sbw_2005_expire_idx on sbw_2005(expire);
-create index sbw_2005_issue_idx on sbw_2005(issue);
-create index sbw_2005_wfo_idx on sbw_2005(wfo);
-grant select on sbw_2005 to apache,nobody;
-    
-
-CREATE table sbw_2006() inherits (sbw);
-create index sbw_2006_idx on sbw_2006(wfo,eventid,significance,phenomena);
-create index sbw_2006_expire_idx on sbw_2006(expire);
-create index sbw_2006_issue_idx on sbw_2006(issue);
-create index sbw_2006_wfo_idx on sbw_2006(wfo);
-grant select on sbw_2006 to apache,nobody;
-    
-
-CREATE table sbw_2007() inherits (sbw);
-create index sbw_2007_idx on sbw_2007(wfo,eventid,significance,phenomena);
-create index sbw_2007_expire_idx on sbw_2007(expire);
-create index sbw_2007_issue_idx on sbw_2007(issue);
-create index sbw_2007_wfo_idx on sbw_2007(wfo);
-grant select on sbw_2007 to apache,nobody;
-    
-
-CREATE table sbw_2008() inherits (sbw);
-create index sbw_2008_idx on sbw_2008(wfo,eventid,significance,phenomena);
-create index sbw_2008_expire_idx on sbw_2008(expire);
-create index sbw_2008_issue_idx on sbw_2008(issue);
-create index sbw_2008_wfo_idx on sbw_2008(wfo);
-grant select on sbw_2008 to apache,nobody;
-    
-
-CREATE table sbw_2009() inherits (sbw);
-create index sbw_2009_idx on sbw_2009(wfo,eventid,significance,phenomena);
-create index sbw_2009_expire_idx on sbw_2009(expire);
-create index sbw_2009_issue_idx on sbw_2009(issue);
-create index sbw_2009_wfo_idx on sbw_2009(wfo);
-grant select on sbw_2009 to apache,nobody;
-    
-
-CREATE table sbw_2010() inherits (sbw);
-create index sbw_2010_idx on sbw_2010(wfo,eventid,significance,phenomena);
-create index sbw_2010_expire_idx on sbw_2010(expire);
-create index sbw_2010_issue_idx on sbw_2010(issue);
-create index sbw_2010_wfo_idx on sbw_2010(wfo);
-grant select on sbw_2010 to apache,nobody;
-    
-
-CREATE table sbw_2011() inherits (sbw);
-create index sbw_2011_idx on sbw_2011(wfo,eventid,significance,phenomena);
-create index sbw_2011_expire_idx on sbw_2011(expire);
-create index sbw_2011_issue_idx on sbw_2011(issue);
-create index sbw_2011_wfo_idx on sbw_2011(wfo);
-grant select on sbw_2011 to apache,nobody;
-    
-
-CREATE table sbw_2012() inherits (sbw);
-create index sbw_2012_idx on sbw_2012(wfo,eventid,significance,phenomena);
-create index sbw_2012_expire_idx on sbw_2012(expire);
-create index sbw_2012_issue_idx on sbw_2012(issue);
-create index sbw_2012_wfo_idx on sbw_2012(wfo);
-grant select on sbw_2012 to apache,nobody;
-    
-
-CREATE table sbw_2013() inherits (sbw);
-create index sbw_2013_idx on sbw_2013(wfo,eventid,significance,phenomena);
-create index sbw_2013_expire_idx on sbw_2013(expire);
-create index sbw_2013_issue_idx on sbw_2013(issue);
-create index sbw_2013_wfo_idx on sbw_2013(wfo);
-grant select on sbw_2013 to apache,nobody;
-
-
-CREATE table sbw_2014() inherits (sbw);
-create index sbw_2014_idx on sbw_2014(wfo,eventid,significance,phenomena);
-create index sbw_2014_expire_idx on sbw_2014(expire);
-create index sbw_2014_issue_idx on sbw_2014(issue);
-create index sbw_2014_wfo_idx on sbw_2014(wfo);
-grant select on sbw_2014 to apache,nobody;
+do
+$do$
+declare
+     year int;
+     mytable varchar;
+begin
+    for year in 1986..2030
+    loop
+        mytable := format($f$sbw_%s$f$, year);
+        execute format($f$
+            create table %s() INHERITS (sbw)
+            $f$, mytable);
+        execute format($f$
+            ALTER TABLE %s OWNER to mesonet
+        $f$, mytable);
+        execute format($f$
+            GRANT ALL on %s to ldm
+        $f$, mytable);
+        execute format($f$
+            GRANT SELECT on %s to nobody,apache
+        $f$, mytable);
+        -- Indices
+        execute format($f$
+            CREATE INDEX %s_idx on %s(wfo, eventid, significance, phenomena)
+        $f$, mytable, mytable);
+        execute format($f$
+            CREATE INDEX %s_expire_idx on %s(expire)
+        $f$, mytable, mytable);
+        execute format($f$
+            CREATE INDEX %s_issue_idx on %s(issue)
+        $f$, mytable, mytable);
+        execute format($f$
+            CREATE INDEX %s_wfo_idx on %s(wfo)
+        $f$, mytable, mytable);
+        execute format($f$
+            CREATE INDEX %s_gix ON %s USING GIST (geom)
+        $f$, mytable, mytable);
+    end loop;
+end;
+$do$;
 
 
 ---
@@ -993,301 +708,46 @@ CREATE TABLE lsrs (
     source character varying(32),
     remark text,
     wfo character(3),
-    typetext character varying(40)
-) WITH OIDS;
-select addgeometrycolumn('','lsrs','geom',4326,'POINT',2);
+    typetext character varying(40),
+    geom geometry(Point, 4326)
+) PARTITION by range(valid);
+ALTER TABLE lsrs OWNER to mesonet;
+GRANT ALL on lsrs to ldm;
 grant select on lsrs to apache,nobody;
 
-create table lsrs_1986( 
-  CONSTRAINT __lsrs_1986_check 
-  CHECK(valid >= '1986-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_1986_valid_idx on lsrs_1986(valid);
-CREATE INDEX lsrs_1986_wfo_idx on lsrs_1986(wfo);
-GRANT SELECT on lsrs_1986 to nobody,apache;
-    
 
-create table lsrs_1987( 
-  CONSTRAINT __lsrs_1987_check 
-  CHECK(valid >= '1987-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_1987_valid_idx on lsrs_1987(valid);
-CREATE INDEX lsrs_1987_wfo_idx on lsrs_1987(wfo);
-GRANT SELECT on lsrs_1987 to nobody,apache;
-    
-
-create table lsrs_1988( 
-  CONSTRAINT __lsrs_1988_check 
-  CHECK(valid >= '1988-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_1988_valid_idx on lsrs_1988(valid);
-CREATE INDEX lsrs_1988_wfo_idx on lsrs_1988(wfo);
-GRANT SELECT on lsrs_1988 to nobody,apache;
-    
-
-create table lsrs_1989( 
-  CONSTRAINT __lsrs_1989_check 
-  CHECK(valid >= '1989-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_1989_valid_idx on lsrs_1989(valid);
-CREATE INDEX lsrs_1989_wfo_idx on lsrs_1989(wfo);
-GRANT SELECT on lsrs_1989 to nobody,apache;
-    
-
-create table lsrs_1990( 
-  CONSTRAINT __lsrs_1990_check 
-  CHECK(valid >= '1990-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_1990_valid_idx on lsrs_1990(valid);
-CREATE INDEX lsrs_1990_wfo_idx on lsrs_1990(wfo);
-GRANT SELECT on lsrs_1990 to nobody,apache;
-    
-
-create table lsrs_1991( 
-  CONSTRAINT __lsrs_1991_check 
-  CHECK(valid >= '1991-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_1991_valid_idx on lsrs_1991(valid);
-CREATE INDEX lsrs_1991_wfo_idx on lsrs_1991(wfo);
-GRANT SELECT on lsrs_1991 to nobody,apache;
-    
-
-create table lsrs_1992( 
-  CONSTRAINT __lsrs_1992_check 
-  CHECK(valid >= '1992-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_1992_valid_idx on lsrs_1992(valid);
-CREATE INDEX lsrs_1992_wfo_idx on lsrs_1992(wfo);
-GRANT SELECT on lsrs_1992 to nobody,apache;
-    
-
-create table lsrs_1993( 
-  CONSTRAINT __lsrs_1993_check 
-  CHECK(valid >= '1993-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_1993_valid_idx on lsrs_1993(valid);
-CREATE INDEX lsrs_1993_wfo_idx on lsrs_1993(wfo);
-GRANT SELECT on lsrs_1993 to nobody,apache;
-    
-
-create table lsrs_1994( 
-  CONSTRAINT __lsrs_1994_check 
-  CHECK(valid >= '1994-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_1994_valid_idx on lsrs_1994(valid);
-CREATE INDEX lsrs_1994_wfo_idx on lsrs_1994(wfo);
-GRANT SELECT on lsrs_1994 to nobody,apache;
-    
-
-create table lsrs_1995( 
-  CONSTRAINT __lsrs_1995_check 
-  CHECK(valid >= '1995-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_1995_valid_idx on lsrs_1995(valid);
-CREATE INDEX lsrs_1995_wfo_idx on lsrs_1995(wfo);
-GRANT SELECT on lsrs_1995 to nobody,apache;
-    
-
-create table lsrs_1996( 
-  CONSTRAINT __lsrs_1996_check 
-  CHECK(valid >= '1996-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_1996_valid_idx on lsrs_1996(valid);
-CREATE INDEX lsrs_1996_wfo_idx on lsrs_1996(wfo);
-GRANT SELECT on lsrs_1996 to nobody,apache;
-    
-
-create table lsrs_1997( 
-  CONSTRAINT __lsrs_1997_check 
-  CHECK(valid >= '1997-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_1997_valid_idx on lsrs_1997(valid);
-CREATE INDEX lsrs_1997_wfo_idx on lsrs_1997(wfo);
-GRANT SELECT on lsrs_1997 to nobody,apache;
-    
-
-create table lsrs_1998( 
-  CONSTRAINT __lsrs_1998_check 
-  CHECK(valid >= '1998-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_1998_valid_idx on lsrs_1998(valid);
-CREATE INDEX lsrs_1998_wfo_idx on lsrs_1998(wfo);
-GRANT SELECT on lsrs_1998 to nobody,apache;
-    
-
-create table lsrs_1999( 
-  CONSTRAINT __lsrs_1999_check 
-  CHECK(valid >= '1999-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_1999_valid_idx on lsrs_1999(valid);
-CREATE INDEX lsrs_1999_wfo_idx on lsrs_1999(wfo);
-GRANT SELECT on lsrs_1999 to nobody,apache;
-    
-
-create table lsrs_2000( 
-  CONSTRAINT __lsrs_2000_check 
-  CHECK(valid >= '2000-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_2000_valid_idx on lsrs_2000(valid);
-CREATE INDEX lsrs_2000_wfo_idx on lsrs_2000(wfo);
-GRANT SELECT on lsrs_2000 to nobody,apache;
-    
-
-create table lsrs_2001( 
-  CONSTRAINT __lsrs_2001_check 
-  CHECK(valid >= '2001-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_2001_valid_idx on lsrs_2001(valid);
-CREATE INDEX lsrs_2001_wfo_idx on lsrs_2001(wfo);
-GRANT SELECT on lsrs_2001 to nobody,apache;
-    
-
-create table lsrs_2002( 
-  CONSTRAINT __lsrs_2002_check 
-  CHECK(valid >= '2002-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_2002_valid_idx on lsrs_2002(valid);
-CREATE INDEX lsrs_2002_wfo_idx on lsrs_2002(wfo);
-GRANT SELECT on lsrs_2002 to nobody,apache;
-    
-
-create table lsrs_2003( 
-  CONSTRAINT __lsrs_2003_check 
-  CHECK(valid >= '2003-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_2003_valid_idx on lsrs_2003(valid);
-CREATE INDEX lsrs_2003_wfo_idx on lsrs_2003(wfo);
-GRANT SELECT on lsrs_2003 to nobody,apache;
-    
-
-create table lsrs_2004( 
-  CONSTRAINT __lsrs_2004_check 
-  CHECK(valid >= '2004-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_2004_valid_idx on lsrs_2004(valid);
-CREATE INDEX lsrs_2004_wfo_idx on lsrs_2004(wfo);
-GRANT SELECT on lsrs_2004 to nobody,apache;
-    
-
-create table lsrs_2005( 
-  CONSTRAINT __lsrs_2005_check 
-  CHECK(valid >= '2005-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_2005_valid_idx on lsrs_2005(valid);
-CREATE INDEX lsrs_2005_wfo_idx on lsrs_2005(wfo);
-GRANT SELECT on lsrs_2005 to nobody,apache;
-    
-
-create table lsrs_2006( 
-  CONSTRAINT __lsrs_2006_check 
-  CHECK(valid >= '2006-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_2006_valid_idx on lsrs_2006(valid);
-CREATE INDEX lsrs_2006_wfo_idx on lsrs_2006(wfo);
-GRANT SELECT on lsrs_2006 to nobody,apache;
-    
-
-create table lsrs_2007( 
-  CONSTRAINT __lsrs_2007_check 
-  CHECK(valid >= '2007-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_2007_valid_idx on lsrs_2007(valid);
-CREATE INDEX lsrs_2007_wfo_idx on lsrs_2007(wfo);
-GRANT SELECT on lsrs_2007 to nobody,apache;
-    
-
-create table lsrs_2008( 
-  CONSTRAINT __lsrs_2008_check 
-  CHECK(valid >= '2008-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_2008_valid_idx on lsrs_2008(valid);
-CREATE INDEX lsrs_2008_wfo_idx on lsrs_2008(wfo);
-GRANT SELECT on lsrs_2008 to nobody,apache;
-    
-
-create table lsrs_2009( 
-  CONSTRAINT __lsrs_2009_check 
-  CHECK(valid >= '2009-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_2009_valid_idx on lsrs_2009(valid);
-CREATE INDEX lsrs_2009_wfo_idx on lsrs_2009(wfo);
-GRANT SELECT on lsrs_2009 to nobody,apache;
-    
-
-create table lsrs_2010( 
-  CONSTRAINT __lsrs_2010_check 
-  CHECK(valid >= '2010-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_2010_valid_idx on lsrs_2010(valid);
-CREATE INDEX lsrs_2010_wfo_idx on lsrs_2010(wfo);
-GRANT SELECT on lsrs_2010 to nobody,apache;
-    
-
-create table lsrs_2011( 
-  CONSTRAINT __lsrs_2011_check 
-  CHECK(valid >= '2011-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_2011_valid_idx on lsrs_2011(valid);
-CREATE INDEX lsrs_2011_wfo_idx on lsrs_2011(wfo);
-GRANT SELECT on lsrs_2011 to nobody,apache;
-    
-
-create table lsrs_2012( 
-  CONSTRAINT __lsrs_2012_check 
-  CHECK(valid >= '2012-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_2012_valid_idx on lsrs_2012(valid);
-CREATE INDEX lsrs_2012_wfo_idx on lsrs_2012(wfo);
-GRANT SELECT on lsrs_2012 to nobody,apache;
-    
-
-create table lsrs_2013( 
-  CONSTRAINT __lsrs_2013_check 
-  CHECK(valid >= '2013-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_2013_valid_idx on lsrs_2013(valid);
-CREATE INDEX lsrs_2013_wfo_idx on lsrs_2013(wfo);
-GRANT SELECT on lsrs_2013 to nobody,apache;
-
-
-create table lsrs_2014( 
-  CONSTRAINT __lsrs_2014_check 
-  CHECK(valid >= '2014-01-01 00:00+00'::timestamptz 
-        and valid < '2015-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_2014_valid_idx on lsrs_2014(valid);
-CREATE INDEX lsrs_2014_wfo_idx on lsrs_2014(wfo);
-GRANT SELECT on lsrs_2014 to nobody,apache;
-
-
+do
+$do$
+declare
+     year int;
+     mytable varchar;
+begin
+    for year in 1986..2030
+    loop
+        mytable := format($f$lsrs_%s$f$, year);
+        execute format($f$
+            create table %s partition of lsrs
+            for values from ('%s-01-01 00:00+00') to ('%s-01-01 00:00+00')
+            $f$, mytable, year, year + 1);
+        execute format($f$
+            ALTER TABLE %s OWNER to mesonet
+        $f$, mytable);
+        execute format($f$
+            GRANT ALL on %s to ldm
+        $f$, mytable);
+        execute format($f$
+            GRANT SELECT on %s to nobody,apache
+        $f$, mytable);
+        -- Indices
+        execute format($f$
+            CREATE INDEX %s_valid_idx on %s(valid)
+        $f$, mytable, mytable);
+        execute format($f$
+            CREATE INDEX %s_wfo_idx on %s(wfo)
+        $f$, mytable, mytable);
+    end loop;
+end;
+$do$;
 
 ---
 --- HVTEC Table
@@ -1297,10 +757,9 @@ CREATE TABLE hvtec_nwsli (
     river_name character varying(128),
     proximity character varying(16),
     name character varying(128),
-    state character(2)
+    state character(2),
+    geom geometry(Point, 4326)
 );
-
-select addgeometrycolumn('','hvtec_nwsli','geom',4326,'POINT',2);
 grant select on hvtec_nwsli to apache,nobody;
 
 ---
@@ -1314,12 +773,12 @@ CREATE TABLE nws_ugc (
     state character varying(2),
     time_zone character varying(2),
     wfo character varying(9),
-    fe_area character varying(2)
+    fe_area character varying(2),
+    geom geometry(MultiPolygon, 4326),
+    centroid geometry(Point, 4326),
+    simple_geom geometry(MultiPolygon, 4326)
 );
 
-select addgeometrycolumn('','nws_ugc','geom',4326,'MULTIPOLYGON',2);
-select addgeometrycolumn('','nws_ugc','centroid',4326,'POINT',2);
-select addgeometrycolumn('','nws_ugc','simple_geom',4326,'MULTIPOLYGON',2);
 grant select on nws_ugc to apache,nobody;
 
 ---
@@ -1478,9 +937,9 @@ CREATE TABLE watches (
     expired timestamp with time zone,
     type character(3),
     report text,
-    num smallint
+    num smallint,
+    geom geometry(MultiPolygon, 4326)
 );
-select addgeometrycolumn('','watches','geom',4326,'MULTIPOLYGON',2);
 grant select on watches to apache,nobody;
 
 CREATE UNIQUE INDEX watches_idx ON watches USING btree (issued, num);
@@ -1491,38 +950,17 @@ CREATE TABLE watches_current (
     expired timestamp with time zone,
     type character(3),
     report text,
-    num smallint
+    num smallint,
+    geom geometry(MultiPolygon, 4326)
 );
-select addgeometrycolumn('','watches_current','geom',4326,'MULTIPOLYGON',2);
 GRANT ALL on watches_current to mesonet,ldm;
 grant select on watches_current to apache,nobody;
 
-create table lsrs_2015( 
-  CONSTRAINT __lsrs_2015_check 
-  CHECK(valid >= '2015-01-01 00:00+00'::timestamptz 
-        and valid < '2016-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_2015_valid_idx on lsrs_2015(valid);
-CREATE INDEX lsrs_2015_wfo_idx on lsrs_2015(wfo);
-GRANT SELECT on lsrs_2015 to nobody,apache;
+
 
 -- !!!!!!!!!!!!! WARNING !!!!!!!!!!!!
 -- look what was done in 9.sql and replicate that for 2016 updates
-CREATE TABLE warnings_2015() inherits (warnings);
-CREATE INDEX warnings_2015_combo_idx on 
-	warnings_2015(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_2015_expire_idx on warnings_2015(expire);
-CREATE INDEX warnings_2015_issue_idx on warnings_2015(issue);
-CREATE INDEX warnings_2015_ugc_idx on warnings_2015(ugc);
-CREATE INDEX warnings_2015_wfo_idx on warnings_2015(wfo);
-grant select on warnings_2015 to nobody,apache;
 
-CREATE table sbw_2015() inherits (sbw);
-create index sbw_2015_idx on sbw_2015(wfo,eventid,significance,phenomena);
-create index sbw_2015_expire_idx on sbw_2015(expire);
-create index sbw_2015_issue_idx on sbw_2015(issue);
-create index sbw_2015_wfo_idx on sbw_2015(wfo);
-grant select on sbw_2015 to apache,nobody;
 
 CREATE TABLE roads_2014_2015_log(
   segid int,
@@ -1545,159 +983,6 @@ CREATE TABLE pireps(
 );
 CREATE INDEX pireps_valid_idx on pireps(valid);
 GRANT SELECT on pireps to nobody,apache;
-
-CREATE table sbw_1986() inherits (sbw);
-create index sbw_1986_idx on sbw_1986(wfo,eventid,significance,phenomena);
-create index sbw_1986_expire_idx on sbw_1986(expire);
-create index sbw_1986_issue_idx on sbw_1986(issue);
-create index sbw_1986_wfo_idx on sbw_1986(wfo);
-grant select on sbw_1986 to apache,nobody;
-
-CREATE table sbw_1987() inherits (sbw);
-create index sbw_1987_idx on sbw_1987(wfo,eventid,significance,phenomena);
-create index sbw_1987_expire_idx on sbw_1987(expire);
-create index sbw_1987_issue_idx on sbw_1987(issue);
-create index sbw_1987_wfo_idx on sbw_1987(wfo);
-grant select on sbw_1987 to apache,nobody;
-
-CREATE table sbw_1988() inherits (sbw);
-create index sbw_1988_idx on sbw_1988(wfo,eventid,significance,phenomena);
-create index sbw_1988_expire_idx on sbw_1988(expire);
-create index sbw_1988_issue_idx on sbw_1988(issue);
-create index sbw_1988_wfo_idx on sbw_1988(wfo);
-grant select on sbw_1988 to apache,nobody;
-
-CREATE table sbw_1989() inherits (sbw);
-create index sbw_1989_idx on sbw_1989(wfo,eventid,significance,phenomena);
-create index sbw_1989_expire_idx on sbw_1989(expire);
-create index sbw_1989_issue_idx on sbw_1989(issue);
-create index sbw_1989_wfo_idx on sbw_1989(wfo);
-grant select on sbw_1989 to apache,nobody;
-
-CREATE table sbw_1990() inherits (sbw);
-create index sbw_1990_idx on sbw_1990(wfo,eventid,significance,phenomena);
-create index sbw_1990_expire_idx on sbw_1990(expire);
-create index sbw_1990_issue_idx on sbw_1990(issue);
-create index sbw_1990_wfo_idx on sbw_1990(wfo);
-grant select on sbw_1990 to apache,nobody;
-
-CREATE table sbw_1991() inherits (sbw);
-create index sbw_1991_idx on sbw_1991(wfo,eventid,significance,phenomena);
-create index sbw_1991_expire_idx on sbw_1991(expire);
-create index sbw_1991_issue_idx on sbw_1991(issue);
-create index sbw_1991_wfo_idx on sbw_1991(wfo);
-grant select on sbw_1991 to apache,nobody;
-
-CREATE table sbw_1992() inherits (sbw);
-create index sbw_1992_idx on sbw_1992(wfo,eventid,significance,phenomena);
-create index sbw_1992_expire_idx on sbw_1992(expire);
-create index sbw_1992_issue_idx on sbw_1992(issue);
-create index sbw_1992_wfo_idx on sbw_1992(wfo);
-grant select on sbw_1992 to apache,nobody;
-
-CREATE table sbw_1993() inherits (sbw);
-create index sbw_1993_idx on sbw_1993(wfo,eventid,significance,phenomena);
-create index sbw_1993_expire_idx on sbw_1993(expire);
-create index sbw_1993_issue_idx on sbw_1993(issue);
-create index sbw_1993_wfo_idx on sbw_1993(wfo);
-grant select on sbw_1993 to apache,nobody;
-
-CREATE table sbw_1994() inherits (sbw);
-create index sbw_1994_idx on sbw_1994(wfo,eventid,significance,phenomena);
-create index sbw_1994_expire_idx on sbw_1994(expire);
-create index sbw_1994_issue_idx on sbw_1994(issue);
-create index sbw_1994_wfo_idx on sbw_1994(wfo);
-grant select on sbw_1994 to apache,nobody;
-
-CREATE table sbw_1995() inherits (sbw);
-create index sbw_1995_idx on sbw_1995(wfo,eventid,significance,phenomena);
-create index sbw_1995_expire_idx on sbw_1995(expire);
-create index sbw_1995_issue_idx on sbw_1995(issue);
-create index sbw_1995_wfo_idx on sbw_1995(wfo);
-grant select on sbw_1995 to apache,nobody;
-
-CREATE table sbw_1996() inherits (sbw);
-create index sbw_1996_idx on sbw_1996(wfo,eventid,significance,phenomena);
-create index sbw_1996_expire_idx on sbw_1996(expire);
-create index sbw_1996_issue_idx on sbw_1996(issue);
-create index sbw_1996_wfo_idx on sbw_1996(wfo);
-grant select on sbw_1996 to apache,nobody;
-
-CREATE table sbw_1997() inherits (sbw);
-create index sbw_1997_idx on sbw_1997(wfo,eventid,significance,phenomena);
-create index sbw_1997_expire_idx on sbw_1997(expire);
-create index sbw_1997_issue_idx on sbw_1997(issue);
-create index sbw_1997_wfo_idx on sbw_1997(wfo);
-grant select on sbw_1997 to apache,nobody;
-
-CREATE table sbw_1998() inherits (sbw);
-create index sbw_1998_idx on sbw_1998(wfo,eventid,significance,phenomena);
-create index sbw_1998_expire_idx on sbw_1998(expire);
-create index sbw_1998_issue_idx on sbw_1998(issue);
-create index sbw_1998_wfo_idx on sbw_1998(wfo);
-grant select on sbw_1998 to apache,nobody;
-
-CREATE table sbw_1999() inherits (sbw);
-create index sbw_1999_idx on sbw_1999(wfo,eventid,significance,phenomena);
-create index sbw_1999_expire_idx on sbw_1999(expire);
-create index sbw_1999_issue_idx on sbw_1999(issue);
-create index sbw_1999_wfo_idx on sbw_1999(wfo);
-grant select on sbw_1999 to apache,nobody;
-
-CREATE table sbw_2000() inherits (sbw);
-create index sbw_2000_idx on sbw_2000(wfo,eventid,significance,phenomena);
-create index sbw_2000_expire_idx on sbw_2000(expire);
-create index sbw_2000_issue_idx on sbw_2000(issue);
-create index sbw_2000_wfo_idx on sbw_2000(wfo);
-grant select on sbw_2000 to apache,nobody;
-
-CREATE table sbw_2001() inherits (sbw);
-create index sbw_2001_idx on sbw_2001(wfo,eventid,significance,phenomena);
-create index sbw_2001_expire_idx on sbw_2001(expire);
-create index sbw_2001_issue_idx on sbw_2001(issue);
-create index sbw_2001_wfo_idx on sbw_2001(wfo);
-grant select on sbw_2001 to apache,nobody;
-
-CREATE INDEX sbw_1986_gix ON sbw_1986 USING GIST (geom);
-CREATE INDEX sbw_1987_gix ON sbw_1987 USING GIST (geom);
-CREATE INDEX sbw_1988_gix ON sbw_1988 USING GIST (geom);
-CREATE INDEX sbw_1989_gix ON sbw_1989 USING GIST (geom);
-CREATE INDEX sbw_1990_gix ON sbw_1990 USING GIST (geom);
-CREATE INDEX sbw_1991_gix ON sbw_1991 USING GIST (geom);
-CREATE INDEX sbw_1992_gix ON sbw_1992 USING GIST (geom);
-CREATE INDEX sbw_1993_gix ON sbw_1993 USING GIST (geom);
-CREATE INDEX sbw_1994_gix ON sbw_1994 USING GIST (geom);
-CREATE INDEX sbw_1995_gix ON sbw_1995 USING GIST (geom);
-CREATE INDEX sbw_1996_gix ON sbw_1996 USING GIST (geom);
-CREATE INDEX sbw_1997_gix ON sbw_1997 USING GIST (geom);
-CREATE INDEX sbw_1998_gix ON sbw_1998 USING GIST (geom);
-CREATE INDEX sbw_1999_gix ON sbw_1999 USING GIST (geom);
-CREATE INDEX sbw_2000_gix ON sbw_2000 USING GIST (geom);
-CREATE INDEX sbw_2001_gix ON sbw_2001 USING GIST (geom);
-CREATE INDEX sbw_2002_gix ON sbw_2002 USING GIST (geom);
-CREATE INDEX sbw_2003_gix ON sbw_2003 USING GIST (geom);
-CREATE INDEX sbw_2004_gix ON sbw_2004 USING GIST (geom);
-CREATE INDEX sbw_2005_gix ON sbw_2005 USING GIST (geom);
-CREATE INDEX sbw_2006_gix ON sbw_2006 USING GIST (geom);
-CREATE INDEX sbw_2007_gix ON sbw_2007 USING GIST (geom);
-CREATE INDEX sbw_2008_gix ON sbw_2008 USING GIST (geom);
-CREATE INDEX sbw_2009_gix ON sbw_2009 USING GIST (geom);
-CREATE INDEX sbw_2010_gix ON sbw_2010 USING GIST (geom);
-CREATE INDEX sbw_2011_gix ON sbw_2011 USING GIST (geom);
-CREATE INDEX sbw_2012_gix ON sbw_2012 USING GIST (geom);
-CREATE INDEX sbw_2013_gix ON sbw_2013 USING GIST (geom);
-CREATE INDEX sbw_2014_gix ON sbw_2014 USING GIST (geom);
-CREATE INDEX sbw_2015_gix ON sbw_2015 USING GIST (geom);
-
--- Add some proper constraints to keep database cleaner
-alter table warnings_2015 ADD CONSTRAINT warnings_2015_gid_fkey
-        FOREIGN KEY(gid) REFERENCES ugcs(gid);
-alter table warnings_2015 ALTER WFO SET NOT NULL;
-alter table warnings_2015 ALTER eventid SET NOT NULL;
-alter table warnings_2015 ALTER status SET NOT NULL;
-alter table warnings_2015 ALTER ugc SET NOT NULL;
-alter table warnings_2015 ALTER phenomena SET NOT NULL;
-alter table warnings_2015 ALTER significance SET NOT NULL;
 
 -- Storage of Winter Road Conditions for 2015 - 2016
 CREATE TABLE roads_2015_2016_log(
@@ -1751,115 +1036,6 @@ CREATE TABLE roads_2019_2020_log(
 GRANT ALL on roads_2019_2020_log to mesonet,ldm;
 GRANT SELECT on roads_2019_2020_log to apache,nobody;
 
-create table lsrs_2016( 
-  CONSTRAINT __lsrs_2016_check 
-  CHECK(valid >= '2016-01-01 00:00+00'::timestamptz 
-        and valid < '2017-01-01 00:00+00')) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_2016_valid_idx on lsrs_2016(valid);
-CREATE INDEX lsrs_2016_wfo_idx on lsrs_2016(wfo);
-GRANT SELECT on lsrs_2016 to nobody,apache;
-
-
--- !!!!!!!!!!!!! WARNING !!!!!!!!!!!!
--- look what was done in 9.sql and replicate that for 2017 updates
--- look at 15.sql too :(
-CREATE TABLE warnings_2016() inherits (warnings);
-CREATE INDEX warnings_2016_combo_idx on 
-	warnings_2016(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_2016_expire_idx on warnings_2016(expire);
-CREATE INDEX warnings_2016_issue_idx on warnings_2016(issue);
-CREATE INDEX warnings_2016_ugc_idx on warnings_2016(ugc);
-CREATE INDEX warnings_2016_wfo_idx on warnings_2016(wfo);
--- Add some proper constraints to keep database cleaner
-alter table warnings_2016 ADD CONSTRAINT warnings_2016_gid_fkey
-        FOREIGN KEY(gid) REFERENCES ugcs(gid);
-alter table warnings_2016 ALTER WFO SET NOT NULL;
-alter table warnings_2016 ALTER eventid SET NOT NULL;
-alter table warnings_2016 ALTER status SET NOT NULL;
-alter table warnings_2016 ALTER ugc SET NOT NULL;
-alter table warnings_2016 ALTER phenomena SET NOT NULL;
-alter table warnings_2016 ALTER significance SET NOT NULL;
-grant select on warnings_2016 to nobody,apache;
-
-CREATE table sbw_2016() inherits (sbw);
-create index sbw_2016_idx on sbw_2016(wfo,eventid,significance,phenomena);
-create index sbw_2016_expire_idx on sbw_2016(expire);
-create index sbw_2016_issue_idx on sbw_2016(issue);
-create index sbw_2016_wfo_idx on sbw_2016(wfo);
-CREATE INDEX sbw_2016_gix ON sbw_2016 USING GIST (geom);
-grant select on sbw_2016 to apache,nobody;
-
-CREATE INDEX warnings_1986_gid_idx on warnings_1986(gid);
-CREATE INDEX warnings_1987_gid_idx on warnings_1987(gid);
-CREATE INDEX warnings_1988_gid_idx on warnings_1988(gid);
-CREATE INDEX warnings_1989_gid_idx on warnings_1989(gid);
-CREATE INDEX warnings_1990_gid_idx on warnings_1990(gid);
-CREATE INDEX warnings_1991_gid_idx on warnings_1991(gid);
-CREATE INDEX warnings_1992_gid_idx on warnings_1992(gid);
-CREATE INDEX warnings_1993_gid_idx on warnings_1993(gid);
-CREATE INDEX warnings_1994_gid_idx on warnings_1994(gid);
-CREATE INDEX warnings_1995_gid_idx on warnings_1995(gid);
-CREATE INDEX warnings_1996_gid_idx on warnings_1996(gid);
-CREATE INDEX warnings_1997_gid_idx on warnings_1997(gid);
-CREATE INDEX warnings_1998_gid_idx on warnings_1998(gid);
-CREATE INDEX warnings_1999_gid_idx on warnings_1999(gid);
-CREATE INDEX warnings_2000_gid_idx on warnings_2000(gid);
-CREATE INDEX warnings_2001_gid_idx on warnings_2001(gid);
-CREATE INDEX warnings_2002_gid_idx on warnings_2002(gid);
-CREATE INDEX warnings_2003_gid_idx on warnings_2003(gid);
-CREATE INDEX warnings_2004_gid_idx on warnings_2004(gid);
-CREATE INDEX warnings_2005_gid_idx on warnings_2005(gid);
-CREATE INDEX warnings_2006_gid_idx on warnings_2006(gid);
-CREATE INDEX warnings_2007_gid_idx on warnings_2007(gid);
-CREATE INDEX warnings_2008_gid_idx on warnings_2008(gid);
-CREATE INDEX warnings_2009_gid_idx on warnings_2009(gid);
-CREATE INDEX warnings_2010_gid_idx on warnings_2010(gid);
-CREATE INDEX warnings_2011_gid_idx on warnings_2011(gid);
-CREATE INDEX warnings_2012_gid_idx on warnings_2012(gid);
-CREATE INDEX warnings_2013_gid_idx on warnings_2013(gid);
-CREATE INDEX warnings_2014_gid_idx on warnings_2014(gid);
-CREATE INDEX warnings_2015_gid_idx on warnings_2015(gid);
-CREATE INDEX warnings_2016_gid_idx on warnings_2016(gid);
-
-create table lsrs_2017( 
-  CONSTRAINT __lsrs_2017_check 
-  CHECK(valid >= '2017-01-01 00:00+00'::timestamptz 
-        and valid < '2018-01-01 00:00+00'::timestamptz)) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_2017_valid_idx on lsrs_2017(valid);
-CREATE INDEX lsrs_2017_wfo_idx on lsrs_2017(wfo);
-GRANT SELECT on lsrs_2017 to nobody,apache;
-
-CREATE TABLE warnings_2017() inherits (warnings);
-CREATE INDEX warnings_2017_combo_idx on 
-	warnings_2017(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_2017_expire_idx on warnings_2017(expire);
-CREATE INDEX warnings_2017_issue_idx on warnings_2017(issue);
-CREATE INDEX warnings_2017_ugc_idx on warnings_2017(ugc);
-CREATE INDEX warnings_2017_wfo_idx on warnings_2017(wfo);
-CREATE INDEX warnings_2017_gid_idx on warnings_2017(gid);
--- Add some proper constraints to keep database cleaner
-alter table warnings_2017 ADD CONSTRAINT warnings_2017_gid_fkey
-        FOREIGN KEY(gid) REFERENCES ugcs(gid);
-alter table warnings_2017 ALTER WFO SET NOT NULL;
-alter table warnings_2017 ALTER eventid SET NOT NULL;
-alter table warnings_2017 ALTER status SET NOT NULL;
-alter table warnings_2017 ALTER ugc SET NOT NULL;
-alter table warnings_2017 ALTER phenomena SET NOT NULL;
-alter table warnings_2017 ALTER significance SET NOT NULL;
-grant select on warnings_2017 to nobody,apache;
-GRANT ALL on warnings_2017 to mesonet,ldm;
-
-
-CREATE table sbw_2017() inherits (sbw);
-create index sbw_2017_idx on sbw_2017(wfo,eventid,significance,phenomena);
-create index sbw_2017_expire_idx on sbw_2017(expire);
-create index sbw_2017_issue_idx on sbw_2017(issue);
-create index sbw_2017_wfo_idx on sbw_2017(wfo);
-CREATE INDEX sbw_2017_gix ON sbw_2017 USING GIST (geom);
-grant select on sbw_2017 to apache,nobody;
-
 CREATE TABLE ffg(
   ugc char(6),
   valid timestamptz,
@@ -1867,310 +1043,55 @@ CREATE TABLE ffg(
   hour03 real,
   hour06 real,
   hour12 real,
-  hour24 real);
+  hour24 real)
+  PARTITION by range(valid);
+ALTER TABLE ffg OWNER to mesonet;
 GRANT SELECT on ffg to nobody,apache;
-GRANT ALL on ffg to ldm,mesonet;
+GRANT ALL on ffg to ldm;
 
-CREATE TABLE ffg_2000(
-  CONSTRAINT __ffg_2000_check 
-  CHECK(valid >= '2000-01-01 00:00+00'::timestamptz
-        and valid < '2001-01-01 00:00+00'::timestamptz))
-  INHERITS (ffg);
-CREATE INDEX ffg_2000_ugc_idx on ffg_2000(ugc);
-CREATE INDEX ffg_2000_valid_idx on ffg_2000(valid);
-GRANT ALL on ffg_2000 to ldm,mesonet;
-GRANT SELECT on ffg_2000 to nobody,apache;
-    
+do
+$do$
+declare
+     year int;
+     mytable varchar;
+begin
+    for year in 2000..2030
+    loop
+        mytable := format($f$ffg_%s$f$, year);
+        execute format($f$
+            create table %s partition of ffg
+            for values from ('%s-01-01 00:00+00') to ('%s-01-01 00:00+00')
+            $f$, mytable, year, year + 1);
+        execute format($f$
+            ALTER TABLE %s OWNER to mesonet
+        $f$, mytable);
+        execute format($f$
+            GRANT ALL on %s to ldm
+        $f$, mytable);
+        execute format($f$
+            GRANT SELECT on %s to nobody,apache
+        $f$, mytable);
+        -- Indices
+        execute format($f$
+            CREATE INDEX %s_ugc_idx on %s(ugc)
+        $f$, mytable, mytable);
+        execute format($f$
+            CREATE INDEX %s_valid_idx on %s(valid)
+        $f$, mytable, mytable);
+    end loop;
+end;
+$do$;
 
-CREATE TABLE ffg_2001(
-  CONSTRAINT __ffg_2001_check 
-  CHECK(valid >= '2001-01-01 00:00+00'::timestamptz
-        and valid < '2002-01-01 00:00+00'::timestamptz))
-  INHERITS (ffg);
-CREATE INDEX ffg_2001_ugc_idx on ffg_2001(ugc);
-CREATE INDEX ffg_2001_valid_idx on ffg_2001(valid);
-GRANT ALL on ffg_2001 to ldm,mesonet;
-GRANT SELECT on ffg_2001 to nobody,apache;
 
-CREATE TABLE ffg_2002(
-  CONSTRAINT __ffg_2002_check 
-  CHECK(valid >= '2002-01-01 00:00+00'::timestamptz
-        and valid < '2003-01-01 00:00+00'::timestamptz))
-  INHERITS (ffg);
-CREATE INDEX ffg_2002_ugc_idx on ffg_2002(ugc);
-CREATE INDEX ffg_2002_valid_idx on ffg_2002(valid);
-GRANT ALL on ffg_2002 to ldm,mesonet;
-GRANT SELECT on ffg_2002 to nobody,apache;
-
-CREATE TABLE ffg_2003(
-  CONSTRAINT __ffg_2003_check 
-  CHECK(valid >= '2003-01-01 00:00+00'::timestamptz
-        and valid < '2004-01-01 00:00+00'::timestamptz))
-  INHERITS (ffg);
-CREATE INDEX ffg_2003_ugc_idx on ffg_2003(ugc);
-CREATE INDEX ffg_2003_valid_idx on ffg_2003(valid);
-GRANT ALL on ffg_2003 to ldm,mesonet;
-GRANT SELECT on ffg_2003 to nobody,apache;
-    
-
-CREATE TABLE ffg_2004(
-  CONSTRAINT __ffg_2004_check 
-  CHECK(valid >= '2004-01-01 00:00+00'::timestamptz
-        and valid < '2005-01-01 00:00+00'::timestamptz))
-  INHERITS (ffg);
-CREATE INDEX ffg_2004_ugc_idx on ffg_2004(ugc);
-CREATE INDEX ffg_2004_valid_idx on ffg_2004(valid);
-GRANT ALL on ffg_2004 to ldm,mesonet;
-GRANT SELECT on ffg_2004 to nobody,apache;
-    
-
-CREATE TABLE ffg_2005(
-  CONSTRAINT __ffg_2005_check 
-  CHECK(valid >= '2005-01-01 00:00+00'::timestamptz
-        and valid < '2006-01-01 00:00+00'::timestamptz))
-  INHERITS (ffg);
-CREATE INDEX ffg_2005_ugc_idx on ffg_2005(ugc);
-CREATE INDEX ffg_2005_valid_idx on ffg_2005(valid);
-GRANT ALL on ffg_2005 to ldm,mesonet;
-GRANT SELECT on ffg_2005 to nobody,apache;
-    
-
-CREATE TABLE ffg_2006(
-  CONSTRAINT __ffg_2006_check 
-  CHECK(valid >= '2006-01-01 00:00+00'::timestamptz
-        and valid < '2007-01-01 00:00+00'::timestamptz))
-  INHERITS (ffg);
-CREATE INDEX ffg_2006_ugc_idx on ffg_2006(ugc);
-CREATE INDEX ffg_2006_valid_idx on ffg_2006(valid);
-GRANT ALL on ffg_2006 to ldm,mesonet;
-GRANT SELECT on ffg_2006 to nobody,apache;
-    
-
-CREATE TABLE ffg_2007(
-  CONSTRAINT __ffg_2007_check 
-  CHECK(valid >= '2007-01-01 00:00+00'::timestamptz
-        and valid < '2008-01-01 00:00+00'::timestamptz))
-  INHERITS (ffg);
-CREATE INDEX ffg_2007_ugc_idx on ffg_2007(ugc);
-CREATE INDEX ffg_2007_valid_idx on ffg_2007(valid);
-GRANT ALL on ffg_2007 to ldm,mesonet;
-GRANT SELECT on ffg_2007 to nobody,apache;
-    
-
-CREATE TABLE ffg_2008(
-  CONSTRAINT __ffg_2008_check 
-  CHECK(valid >= '2008-01-01 00:00+00'::timestamptz
-        and valid < '2009-01-01 00:00+00'::timestamptz))
-  INHERITS (ffg);
-CREATE INDEX ffg_2008_ugc_idx on ffg_2008(ugc);
-CREATE INDEX ffg_2008_valid_idx on ffg_2008(valid);
-GRANT ALL on ffg_2008 to ldm,mesonet;
-GRANT SELECT on ffg_2008 to nobody,apache;
-    
-
-CREATE TABLE ffg_2009(
-  CONSTRAINT __ffg_2009_check 
-  CHECK(valid >= '2009-01-01 00:00+00'::timestamptz
-        and valid < '2010-01-01 00:00+00'::timestamptz))
-  INHERITS (ffg);
-CREATE INDEX ffg_2009_ugc_idx on ffg_2009(ugc);
-CREATE INDEX ffg_2009_valid_idx on ffg_2009(valid);
-GRANT ALL on ffg_2009 to ldm,mesonet;
-GRANT SELECT on ffg_2009 to nobody,apache;
-    
-
-CREATE TABLE ffg_2010(
-  CONSTRAINT __ffg_2010_check 
-  CHECK(valid >= '2010-01-01 00:00+00'::timestamptz
-        and valid < '2011-01-01 00:00+00'::timestamptz))
-  INHERITS (ffg);
-CREATE INDEX ffg_2010_ugc_idx on ffg_2010(ugc);
-CREATE INDEX ffg_2010_valid_idx on ffg_2010(valid);
-GRANT ALL on ffg_2010 to ldm,mesonet;
-GRANT SELECT on ffg_2010 to nobody,apache;
-    
-
-CREATE TABLE ffg_2011(
-  CONSTRAINT __ffg_2011_check 
-  CHECK(valid >= '2011-01-01 00:00+00'::timestamptz
-        and valid < '2012-01-01 00:00+00'::timestamptz))
-  INHERITS (ffg);
-CREATE INDEX ffg_2011_ugc_idx on ffg_2011(ugc);
-CREATE INDEX ffg_2011_valid_idx on ffg_2011(valid);
-GRANT ALL on ffg_2011 to ldm,mesonet;
-GRANT SELECT on ffg_2011 to nobody,apache;
-    
-
-CREATE TABLE ffg_2012(
-  CONSTRAINT __ffg_2012_check 
-  CHECK(valid >= '2012-01-01 00:00+00'::timestamptz
-        and valid < '2013-01-01 00:00+00'::timestamptz))
-  INHERITS (ffg);
-CREATE INDEX ffg_2012_ugc_idx on ffg_2012(ugc);
-CREATE INDEX ffg_2012_valid_idx on ffg_2012(valid);
-GRANT ALL on ffg_2012 to ldm,mesonet;
-GRANT SELECT on ffg_2012 to nobody,apache;
-    
-
-CREATE TABLE ffg_2013(
-  CONSTRAINT __ffg_2013_check 
-  CHECK(valid >= '2013-01-01 00:00+00'::timestamptz
-        and valid < '2014-01-01 00:00+00'::timestamptz))
-  INHERITS (ffg);
-CREATE INDEX ffg_2013_ugc_idx on ffg_2013(ugc);
-CREATE INDEX ffg_2013_valid_idx on ffg_2013(valid);
-GRANT ALL on ffg_2013 to ldm,mesonet;
-GRANT SELECT on ffg_2013 to nobody,apache;
-    
-
-CREATE TABLE ffg_2014(
-  CONSTRAINT __ffg_2014_check 
-  CHECK(valid >= '2014-01-01 00:00+00'::timestamptz
-        and valid < '2015-01-01 00:00+00'::timestamptz))
-  INHERITS (ffg);
-CREATE INDEX ffg_2014_ugc_idx on ffg_2014(ugc);
-CREATE INDEX ffg_2014_valid_idx on ffg_2014(valid);
-GRANT ALL on ffg_2014 to ldm,mesonet;
-GRANT SELECT on ffg_2014 to nobody,apache;
-    
-
-CREATE TABLE ffg_2015(
-  CONSTRAINT __ffg_2015_check 
-  CHECK(valid >= '2015-01-01 00:00+00'::timestamptz
-        and valid < '2016-01-01 00:00+00'::timestamptz))
-  INHERITS (ffg);
-CREATE INDEX ffg_2015_ugc_idx on ffg_2015(ugc);
-CREATE INDEX ffg_2015_valid_idx on ffg_2015(valid);
-GRANT ALL on ffg_2015 to ldm,mesonet;
-GRANT SELECT on ffg_2015 to nobody,apache;
-    
-
-CREATE TABLE ffg_2016(
-  CONSTRAINT __ffg_2016_check 
-  CHECK(valid >= '2016-01-01 00:00+00'::timestamptz
-        and valid < '2017-01-01 00:00+00'::timestamptz))
-  INHERITS (ffg);
-CREATE INDEX ffg_2016_ugc_idx on ffg_2016(ugc);
-CREATE INDEX ffg_2016_valid_idx on ffg_2016(valid);
-GRANT ALL on ffg_2016 to ldm,mesonet;
-GRANT SELECT on ffg_2016 to nobody,apache;
-    
-
-CREATE TABLE ffg_2017(
-  CONSTRAINT __ffg_2017_check 
-  CHECK(valid >= '2017-01-01 00:00+00'::timestamptz
-        and valid < '2018-01-01 00:00+00'::timestamptz))
-  INHERITS (ffg);
-CREATE INDEX ffg_2017_ugc_idx on ffg_2017(ugc);
-CREATE INDEX ffg_2017_valid_idx on ffg_2017(valid);
-GRANT ALL on ffg_2017 to ldm,mesonet;
-GRANT SELECT on ffg_2017 to nobody,apache;
 
 -- Storage of USDM
 CREATE TABLE usdm(
   valid date,
-  dm smallint);
-select addgeometrycolumn('', 'usdm', 'geom', 4326, 'MULTIPOLYGON', 2);
+  dm smallint,
+  geom geometry(MultiPolygon, 4326));
 CREATE INDEX usdm_valid_idx on usdm(valid);
 GRANT SELECT on usdm to nobody,apache;
 GRANT ALL on usdm to mesonet,ldm;
-
-CREATE TABLE ffg_2018(
-  CONSTRAINT __ffg_2018_check 
-  CHECK(valid >= '2018-01-01 00:00+00'::timestamptz
-        and valid < '2019-01-01 00:00+00'::timestamptz))
-  INHERITS (ffg);
-CREATE INDEX ffg_2018_ugc_idx on ffg_2018(ugc);
-CREATE INDEX ffg_2018_valid_idx on ffg_2018(valid);
-GRANT ALL on ffg_2018 to ldm,mesonet;
-GRANT SELECT on ffg_2018 to nobody,apache;
-
-create table lsrs_2018( 
-  CONSTRAINT __lsrs_2018_check 
-  CHECK(valid >= '2018-01-01 00:00+00'::timestamptz 
-        and valid < '2019-01-01 00:00+00'::timestamptz)) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_2018_valid_idx on lsrs_2018(valid);
-CREATE INDEX lsrs_2018_wfo_idx on lsrs_2018(wfo);
-GRANT SELECT on lsrs_2018 to nobody,apache;
-
-
-CREATE TABLE warnings_2018() inherits (warnings);
-CREATE INDEX warnings_2018_combo_idx on 
-    warnings_2018(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_2018_expire_idx on warnings_2018(expire);
-CREATE INDEX warnings_2018_issue_idx on warnings_2018(issue);
-CREATE INDEX warnings_2018_ugc_idx on warnings_2018(ugc);
-CREATE INDEX warnings_2018_wfo_idx on warnings_2018(wfo);
-CREATE INDEX warnings_2018_gid_idx on warnings_2018(gid);
--- Add some proper constraints to keep database cleaner
-alter table warnings_2018 ADD CONSTRAINT warnings_2018_gid_fkey
-        FOREIGN KEY(gid) REFERENCES ugcs(gid);
-alter table warnings_2018 ALTER WFO SET NOT NULL;
-alter table warnings_2018 ALTER eventid SET NOT NULL;
-alter table warnings_2018 ALTER status SET NOT NULL;
-alter table warnings_2018 ALTER ugc SET NOT NULL;
-alter table warnings_2018 ALTER phenomena SET NOT NULL;
-alter table warnings_2018 ALTER significance SET NOT NULL;
-grant select on warnings_2018 to nobody,apache;
-GRANT ALL on warnings_2018 to mesonet,ldm;
-
-
-CREATE table sbw_2018() inherits (sbw);
-create index sbw_2018_idx on sbw_2018(wfo,eventid,significance,phenomena);
-create index sbw_2018_expire_idx on sbw_2018(expire);
-create index sbw_2018_issue_idx on sbw_2018(issue);
-create index sbw_2018_wfo_idx on sbw_2018(wfo);
-CREATE INDEX sbw_2018_gix ON sbw_2018 USING GIST (geom);
-grant select on sbw_2018 to apache,nobody;
-
-CREATE TABLE ffg_2019(
-  CONSTRAINT __ffg_2019_check 
-  CHECK(valid >= '2019-01-01 00:00+00'::timestamptz
-        and valid < '2020-01-01 00:00+00'::timestamptz))
-  INHERITS (ffg);
-CREATE INDEX ffg_2019_ugc_idx on ffg_2019(ugc);
-CREATE INDEX ffg_2019_valid_idx on ffg_2019(valid);
-GRANT ALL on ffg_2019 to ldm,mesonet;
-GRANT SELECT on ffg_2019 to nobody,apache;
-
-create table lsrs_2019( 
-  CONSTRAINT __lsrs_2019_check 
-  CHECK(valid >= '2019-01-01 00:00+00'::timestamptz 
-        and valid < '2020-01-01 00:00+00'::timestamptz)) 
-  INHERITS (lsrs);
-CREATE INDEX lsrs_2019_valid_idx on lsrs_2019(valid);
-CREATE INDEX lsrs_2019_wfo_idx on lsrs_2019(wfo);
-GRANT SELECT on lsrs_2019 to nobody,apache;
-
-CREATE TABLE warnings_2019() inherits (warnings);
-CREATE INDEX warnings_2019_combo_idx on 
-    warnings_2019(wfo, phenomena, eventid, significance);
-CREATE INDEX warnings_2019_expire_idx on warnings_2019(expire);
-CREATE INDEX warnings_2019_issue_idx on warnings_2019(issue);
-CREATE INDEX warnings_2019_ugc_idx on warnings_2019(ugc);
-CREATE INDEX warnings_2019_wfo_idx on warnings_2019(wfo);
-CREATE INDEX warnings_2019_gid_idx on warnings_2019(gid);
--- Add some proper constraints to keep database cleaner
-alter table warnings_2019 ADD CONSTRAINT warnings_2019_gid_fkey
-        FOREIGN KEY(gid) REFERENCES ugcs(gid);
-alter table warnings_2019 ALTER WFO SET NOT NULL;
-alter table warnings_2019 ALTER eventid SET NOT NULL;
-alter table warnings_2019 ALTER status SET NOT NULL;
-alter table warnings_2019 ALTER ugc SET NOT NULL;
-alter table warnings_2019 ALTER phenomena SET NOT NULL;
-alter table warnings_2019 ALTER significance SET NOT NULL;
-grant select on warnings_2019 to nobody,apache;
-GRANT ALL on warnings_2019 to mesonet,ldm;
-
-
-CREATE table sbw_2019() inherits (sbw);
-create index sbw_2019_idx on sbw_2019(wfo,eventid,significance,phenomena);
-create index sbw_2019_expire_idx on sbw_2019(expire);
-create index sbw_2019_issue_idx on sbw_2019(issue);
-create index sbw_2019_wfo_idx on sbw_2019(wfo);
-CREATE INDEX sbw_2019_gix ON sbw_2019 USING GIST (geom);
-grant select on sbw_2019 to apache,nobody;
 
 -- Storage of MCDs
 CREATE TABLE mcd(

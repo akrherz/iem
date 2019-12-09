@@ -1,34 +1,5 @@
-CREATE EXTENSION postgis;
+ALTER TABLE data rename to data_old;
 
--- Boilerplate IEM schema_manager_version, the version gets incremented each
--- time we make an upgrade script
-CREATE TABLE iem_schema_manager_version(
-	version int,
-	updated timestamptz);
-INSERT into iem_schema_manager_version values (5, now());
-
----
---- Store grid point geometries
----
-CREATE TABLE grid(
-  idx int UNIQUE,
-  gridx int,
-  gridy int,
-  geom geometry(Point, 4326)
-  );
-  CREATE index grid_idx on grid(idx);
- GRANT SELECT on grid to apache,nobody;
- 
- ---
- --- Lookup table of observation events
- ---
- CREATE TABLE obtimes(
-   valid timestamp with time zone UNIQUE
- );
- GRANT SELECT on obtimes to apache,nobody;
- 
- ---
- --- Store the actual data, will have partitioned tables
  --- 
  CREATE TABLE data(
    grid_idx int REFERENCES grid(idx),
@@ -40,6 +11,35 @@ CREATE TABLE grid(
  GRANT ALL on data to ldm;
  GRANT SELECT on data to apache,nobody;
  
+
+do
+$do$
+declare
+     year int;
+     month int;
+     mytable varchar;
+begin
+    for year in 2010..2019
+    loop
+        for month in 1..12
+        loop
+            mytable := format($f$data_%s_%s$f$,
+                year, lpad(month::text, 2, '0'));
+            execute format($f$
+                ALTER TABLE %s NO INHERIT data_old
+                $f$, mytable);
+            execute format($f$
+                ALTER TABLE data ATTACH PARTITION %s
+                FOR VALUES FROM ('%s-%s-01 00:00+00') to ('%s-%s-01 00:00+00')
+            $f$, mytable, year, month,
+                case when month = 12 then year + 1 else year end,
+                case when month = 12 then 1 else month + 1 end);
+
+        end loop;
+    end loop;
+end;
+$do$;
+
  do
 $do$
 declare
@@ -47,7 +47,7 @@ declare
      month int;
      mytable varchar;
 begin
-    for year in 2010..2030
+    for year in 2020..2030
     loop
         for month in 1..12
         loop
@@ -79,3 +79,5 @@ begin
     end loop;
 end;
 $do$;
+
+DROP TABLE data_old;

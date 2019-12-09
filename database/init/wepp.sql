@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (4, now());
+INSERT into iem_schema_manager_version values (5, now());
 
 --- Tables loaded by shp2pgsql
 ---   + counties
@@ -238,115 +238,41 @@ CREATE TABLE monthly_rainfall(
   rainfall real,
   peak_15min real,
   hr_cnt smallint
-);
+) PARTITION by range(valid);
+ALTER TABLE monthly_rainfall OWNER to mesonet;
 GRANT SELECT on monthly_rainfall to nobody,apache;
 
-CREATE TABLE monthly_rainfall_1997() inherits (monthly_rainfall);
-GRANT SELECT on monthly_rainfall_1997 to nobody,apache;
-ALTER TABLE monthly_rainfall_1997 add constraint __monthly_rainfall_1997__constraint
-  CHECK(valid >= '1997-01-01'::date and valid < '1998-01-01'::date);
-    
 
-CREATE TABLE monthly_rainfall_1998() inherits (monthly_rainfall);
-GRANT SELECT on monthly_rainfall_1998 to nobody,apache;
-ALTER TABLE monthly_rainfall_1998 add constraint __monthly_rainfall_1998__constraint
-  CHECK(valid >= '1998-01-01'::date and valid < '1999-01-01'::date);
-    
-
-CREATE TABLE monthly_rainfall_1999() inherits (monthly_rainfall);
-GRANT SELECT on monthly_rainfall_1999 to nobody,apache;
-ALTER TABLE monthly_rainfall_1999 add constraint __monthly_rainfall_1999__constraint
-  CHECK(valid >= '1999-01-01'::date and valid < '2000-01-01'::date);
-    
-
-CREATE TABLE monthly_rainfall_2000() inherits (monthly_rainfall);
-GRANT SELECT on monthly_rainfall_2000 to nobody,apache;
-ALTER TABLE monthly_rainfall_2000 add constraint __monthly_rainfall_2000__constraint
-  CHECK(valid >= '2000-01-01'::date and valid < '2001-01-01'::date);
-    
-
-CREATE TABLE monthly_rainfall_2001() inherits (monthly_rainfall);
-GRANT SELECT on monthly_rainfall_2001 to nobody,apache;
-ALTER TABLE monthly_rainfall_2001 add constraint __monthly_rainfall_2001__constraint
-  CHECK(valid >= '2001-01-01'::date and valid < '2002-01-01'::date);
-    
-
-CREATE TABLE monthly_rainfall_2002() inherits (monthly_rainfall);
-GRANT SELECT on monthly_rainfall_2002 to nobody,apache;
-ALTER TABLE monthly_rainfall_2002 add constraint __monthly_rainfall_2002__constraint
-  CHECK(valid >= '2002-01-01'::date and valid < '2003-01-01'::date);
-    
-
-CREATE TABLE monthly_rainfall_2003() inherits (monthly_rainfall);
-GRANT SELECT on monthly_rainfall_2003 to nobody,apache;
-ALTER TABLE monthly_rainfall_2003 add constraint __monthly_rainfall_2003__constraint
-  CHECK(valid >= '2003-01-01'::date and valid < '2004-01-01'::date);
-    
-
-CREATE TABLE monthly_rainfall_2004() inherits (monthly_rainfall);
-GRANT SELECT on monthly_rainfall_2004 to nobody,apache;
-ALTER TABLE monthly_rainfall_2004 add constraint __monthly_rainfall_2004__constraint
-  CHECK(valid >= '2004-01-01'::date and valid < '2005-01-01'::date);
-    
-
-CREATE TABLE monthly_rainfall_2005() inherits (monthly_rainfall);
-GRANT SELECT on monthly_rainfall_2005 to nobody,apache;
-ALTER TABLE monthly_rainfall_2005 add constraint __monthly_rainfall_2005__constraint
-  CHECK(valid >= '2005-01-01'::date and valid < '2006-01-01'::date);
-    
-
-CREATE TABLE monthly_rainfall_2006() inherits (monthly_rainfall);
-GRANT SELECT on monthly_rainfall_2006 to nobody,apache;
-ALTER TABLE monthly_rainfall_2006 add constraint __monthly_rainfall_2006__constraint
-  CHECK(valid >= '2006-01-01'::date and valid < '2007-01-01'::date);
-    
-
-CREATE TABLE monthly_rainfall_2007() inherits (monthly_rainfall);
-GRANT SELECT on monthly_rainfall_2007 to nobody,apache;
-ALTER TABLE monthly_rainfall_2007 add constraint __monthly_rainfall_2007__constraint
-  CHECK(valid >= '2007-01-01'::date and valid < '2008-01-01'::date);
-    
-
-CREATE TABLE monthly_rainfall_2008() inherits (monthly_rainfall);
-GRANT SELECT on monthly_rainfall_2008 to nobody,apache;
-ALTER TABLE monthly_rainfall_2008 add constraint __monthly_rainfall_2008__constraint
-  CHECK(valid >= '2008-01-01'::date and valid < '2009-01-01'::date);
-    
-
-CREATE TABLE monthly_rainfall_2009() inherits (monthly_rainfall);
-GRANT SELECT on monthly_rainfall_2009 to nobody,apache;
-ALTER TABLE monthly_rainfall_2009 add constraint __monthly_rainfall_2009__constraint
-  CHECK(valid >= '2009-01-01'::date and valid < '2010-01-01'::date);
-    
-
-CREATE TABLE monthly_rainfall_2010() inherits (monthly_rainfall);
-GRANT SELECT on monthly_rainfall_2010 to nobody,apache;
-ALTER TABLE monthly_rainfall_2010 add constraint __monthly_rainfall_2010__constraint
-  CHECK(valid >= '2010-01-01'::date and valid < '2011-01-01'::date);
-    
-
-CREATE TABLE monthly_rainfall_2011() inherits (monthly_rainfall);
-GRANT SELECT on monthly_rainfall_2011 to nobody,apache;
-ALTER TABLE monthly_rainfall_2011 add constraint __monthly_rainfall_2011__constraint
-  CHECK(valid >= '2011-01-01'::date and valid < '2012-01-01'::date);
-    
-
-CREATE TABLE monthly_rainfall_2012() inherits (monthly_rainfall);
-GRANT SELECT on monthly_rainfall_2012 to nobody,apache;
-ALTER TABLE monthly_rainfall_2012 add constraint __monthly_rainfall_2012__constraint
-  CHECK(valid >= '2012-01-01'::date and valid < '2013-01-01'::date);
-    
-
-CREATE TABLE monthly_rainfall_2013() inherits (monthly_rainfall);
-GRANT SELECT on monthly_rainfall_2013 to nobody,apache;
-ALTER TABLE monthly_rainfall_2013 add constraint __monthly_rainfall_2013__constraint
-  CHECK(valid >= '2013-01-01'::date and valid < '2014-01-01'::date);
-
-
-CREATE TABLE monthly_rainfall_2014() inherits (monthly_rainfall);
-GRANT SELECT on monthly_rainfall_2014 to nobody,apache;
-ALTER TABLE monthly_rainfall_2014 add constraint __monthly_rainfall_2014__constraint
-  CHECK(valid >= '2014-01-01'::date and valid < '2015-01-01'::date);
+ do
+$do$
+declare
+     year int;
+     mytable varchar;
+begin
+    for year in 1997..2030
+    loop
+        mytable := format($f$monthly_rainfall_%s$f$,
+            year);
+        execute format($f$
+            create table %s partition of monthly_rainfall
+            for values from ('%s-01-01 00:00+00') to ('%s-01-01 00:00+00')
+            $f$, mytable,
+            year, year +1);
+        execute format($f$
+            ALTER TABLE %s OWNER to mesonet
+        $f$, mytable);
+        execute format($f$
+            GRANT ALL on %s to ldm
+        $f$, mytable);
+        execute format($f$
+            GRANT SELECT on %s to nobody,apache
+        $f$, mytable);
+        execute format($f$
+            CREATE INDEX %s_valid_idx on %s(valid)
+        $f$, mytable, mytable);
+    end loop;
+end;
+$do$;
 
 ---
 --- Daily Rainfall
@@ -357,248 +283,40 @@ CREATE TABLE daily_rainfall(
   rainfall real,
   peak_15min real,
   hr_cnt real
-);
+) PARTITION by range(valid);
+ALTER TABLE daily_rainfall OWNER to mesonet;
 GRANT SELECT on daily_rainfall to nobody,apache;
 
-
-CREATE TABLE daily_rainfall_1997() inherits (daily_rainfall);
-GRANT SELECT on daily_rainfall_1997 to nobody,apache;
-ALTER TABLE daily_rainfall_1997 add constraint __daily_rainfall_1997__constraint
-  CHECK(valid >= '1997-01-01'::date and valid < '1998-01-01'::date);
-CREATE INDEX daily_rainfall_1997_hrap_i_idx on
-  daily_rainfall_1997(hrap_i);
-CREATE INDEX daily_rainfall_1997_valid_idx on
-  daily_rainfall_1997(valid);
-    
-
-CREATE TABLE daily_rainfall_1998() inherits (daily_rainfall);
-GRANT SELECT on daily_rainfall_1998 to nobody,apache;
-ALTER TABLE daily_rainfall_1998 add constraint __daily_rainfall_1998__constraint
-  CHECK(valid >= '1998-01-01'::date and valid < '1999-01-01'::date);
-CREATE INDEX daily_rainfall_1998_hrap_i_idx on
-  daily_rainfall_1998(hrap_i);
-CREATE INDEX daily_rainfall_1998_valid_idx on
-  daily_rainfall_1998(valid);
-    
-
-CREATE TABLE daily_rainfall_1999() inherits (daily_rainfall);
-GRANT SELECT on daily_rainfall_1999 to nobody,apache;
-ALTER TABLE daily_rainfall_1999 add constraint __daily_rainfall_1999__constraint
-  CHECK(valid >= '1999-01-01'::date and valid < '2000-01-01'::date);
-CREATE INDEX daily_rainfall_1999_hrap_i_idx on
-  daily_rainfall_1999(hrap_i);
-CREATE INDEX daily_rainfall_1999_valid_idx on
-  daily_rainfall_1999(valid);
-    
-
-CREATE TABLE daily_rainfall_2000() inherits (daily_rainfall);
-GRANT SELECT on daily_rainfall_2000 to nobody,apache;
-ALTER TABLE daily_rainfall_2000 add constraint __daily_rainfall_2000__constraint
-  CHECK(valid >= '2000-01-01'::date and valid < '2001-01-01'::date);
-CREATE INDEX daily_rainfall_2000_hrap_i_idx on
-  daily_rainfall_2000(hrap_i);
-CREATE INDEX daily_rainfall_2000_valid_idx on
-  daily_rainfall_2000(valid);
-    
-
-CREATE TABLE daily_rainfall_2001() inherits (daily_rainfall);
-GRANT SELECT on daily_rainfall_2001 to nobody,apache;
-ALTER TABLE daily_rainfall_2001 add constraint __daily_rainfall_2001__constraint
-  CHECK(valid >= '2001-01-01'::date and valid < '2002-01-01'::date);
-CREATE INDEX daily_rainfall_2001_hrap_i_idx on
-  daily_rainfall_2001(hrap_i);
-CREATE INDEX daily_rainfall_2001_valid_idx on
-  daily_rainfall_2001(valid);
-    
-
-CREATE TABLE daily_rainfall_2002() inherits (daily_rainfall);
-GRANT SELECT on daily_rainfall_2002 to nobody,apache;
-ALTER TABLE daily_rainfall_2002 add constraint __daily_rainfall_2002__constraint
-  CHECK(valid >= '2002-01-01'::date and valid < '2003-01-01'::date);
-CREATE INDEX daily_rainfall_2002_hrap_i_idx on
-  daily_rainfall_2002(hrap_i);
-CREATE INDEX daily_rainfall_2002_valid_idx on
-  daily_rainfall_2002(valid);
-    
-
-CREATE TABLE daily_rainfall_2003() inherits (daily_rainfall);
-GRANT SELECT on daily_rainfall_2003 to nobody,apache;
-ALTER TABLE daily_rainfall_2003 add constraint __daily_rainfall_2003__constraint
-  CHECK(valid >= '2003-01-01'::date and valid < '2004-01-01'::date);
-CREATE INDEX daily_rainfall_2003_hrap_i_idx on
-  daily_rainfall_2003(hrap_i);
-CREATE INDEX daily_rainfall_2003_valid_idx on
-  daily_rainfall_2003(valid);
-    
-
-CREATE TABLE daily_rainfall_2004() inherits (daily_rainfall);
-GRANT SELECT on daily_rainfall_2004 to nobody,apache;
-ALTER TABLE daily_rainfall_2004 add constraint __daily_rainfall_2004__constraint
-  CHECK(valid >= '2004-01-01'::date and valid < '2005-01-01'::date);
-CREATE INDEX daily_rainfall_2004_hrap_i_idx on
-  daily_rainfall_2004(hrap_i);
-CREATE INDEX daily_rainfall_2004_valid_idx on
-  daily_rainfall_2004(valid);
-    
-
-CREATE TABLE daily_rainfall_2005() inherits (daily_rainfall);
-GRANT SELECT on daily_rainfall_2005 to nobody,apache;
-ALTER TABLE daily_rainfall_2005 add constraint __daily_rainfall_2005__constraint
-  CHECK(valid >= '2005-01-01'::date and valid < '2006-01-01'::date);
-CREATE INDEX daily_rainfall_2005_hrap_i_idx on
-  daily_rainfall_2005(hrap_i);
-CREATE INDEX daily_rainfall_2005_valid_idx on
-  daily_rainfall_2005(valid);
-    
-
-CREATE TABLE daily_rainfall_2006() inherits (daily_rainfall);
-GRANT SELECT on daily_rainfall_2006 to nobody,apache;
-ALTER TABLE daily_rainfall_2006 add constraint __daily_rainfall_2006__constraint
-  CHECK(valid >= '2006-01-01'::date and valid < '2007-01-01'::date);
-CREATE INDEX daily_rainfall_2006_hrap_i_idx on
-  daily_rainfall_2006(hrap_i);
-CREATE INDEX daily_rainfall_2006_valid_idx on
-  daily_rainfall_2006(valid);
-    
-
-CREATE TABLE daily_rainfall_2007() inherits (daily_rainfall);
-GRANT SELECT on daily_rainfall_2007 to nobody,apache;
-ALTER TABLE daily_rainfall_2007 add constraint __daily_rainfall_2007__constraint
-  CHECK(valid >= '2007-01-01'::date and valid < '2008-01-01'::date);
-CREATE INDEX daily_rainfall_2007_hrap_i_idx on
-  daily_rainfall_2007(hrap_i);
-CREATE INDEX daily_rainfall_2007_valid_idx on
-  daily_rainfall_2007(valid);
-    
-
-CREATE TABLE daily_rainfall_2008() inherits (daily_rainfall);
-GRANT SELECT on daily_rainfall_2008 to nobody,apache;
-ALTER TABLE daily_rainfall_2008 add constraint __daily_rainfall_2008__constraint
-  CHECK(valid >= '2008-01-01'::date and valid < '2009-01-01'::date);
-CREATE INDEX daily_rainfall_2008_hrap_i_idx on
-  daily_rainfall_2008(hrap_i);
-CREATE INDEX daily_rainfall_2008_valid_idx on
-  daily_rainfall_2008(valid);
-    
-
-CREATE TABLE daily_rainfall_2009() inherits (daily_rainfall);
-GRANT SELECT on daily_rainfall_2009 to nobody,apache;
-ALTER TABLE daily_rainfall_2009 add constraint __daily_rainfall_2009__constraint
-  CHECK(valid >= '2009-01-01'::date and valid < '2010-01-01'::date);
-CREATE INDEX daily_rainfall_2009_hrap_i_idx on
-  daily_rainfall_2009(hrap_i);
-CREATE INDEX daily_rainfall_2009_valid_idx on
-  daily_rainfall_2009(valid);
-    
-
-CREATE TABLE daily_rainfall_2010() inherits (daily_rainfall);
-GRANT SELECT on daily_rainfall_2010 to nobody,apache;
-ALTER TABLE daily_rainfall_2010 add constraint __daily_rainfall_2010__constraint
-  CHECK(valid >= '2010-01-01'::date and valid < '2011-01-01'::date);
-CREATE INDEX daily_rainfall_2010_hrap_i_idx on
-  daily_rainfall_2010(hrap_i);
-CREATE INDEX daily_rainfall_2010_valid_idx on
-  daily_rainfall_2010(valid);
-    
-
-CREATE TABLE daily_rainfall_2011() inherits (daily_rainfall);
-GRANT SELECT on daily_rainfall_2011 to nobody,apache;
-ALTER TABLE daily_rainfall_2011 add constraint __daily_rainfall_2011__constraint
-  CHECK(valid >= '2011-01-01'::date and valid < '2012-01-01'::date);
-CREATE INDEX daily_rainfall_2011_hrap_i_idx on
-  daily_rainfall_2011(hrap_i);
-CREATE INDEX daily_rainfall_2011_valid_idx on
-  daily_rainfall_2011(valid);
-    
-
-CREATE TABLE daily_rainfall_2012() inherits (daily_rainfall);
-GRANT SELECT on daily_rainfall_2012 to nobody,apache;
-ALTER TABLE daily_rainfall_2012 add constraint __daily_rainfall_2012__constraint
-  CHECK(valid >= '2012-01-01'::date and valid < '2013-01-01'::date);
-CREATE INDEX daily_rainfall_2012_hrap_i_idx on
-  daily_rainfall_2012(hrap_i);
-CREATE INDEX daily_rainfall_2012_valid_idx on
-  daily_rainfall_2012(valid);
-    
-
-CREATE TABLE daily_rainfall_2013() inherits (daily_rainfall);
-GRANT SELECT on daily_rainfall_2013 to nobody,apache;
-ALTER TABLE daily_rainfall_2013 add constraint __daily_rainfall_2013__constraint
-  CHECK(valid >= '2013-01-01'::date and valid < '2014-01-01'::date);
-CREATE INDEX daily_rainfall_2013_hrap_i_idx on
-  daily_rainfall_2013(hrap_i);
-CREATE INDEX daily_rainfall_2013_valid_idx on
-  daily_rainfall_2013(valid);
-
-CREATE TABLE daily_rainfall_2014() inherits (daily_rainfall);
-GRANT SELECT on daily_rainfall_2014 to nobody,apache;
-ALTER TABLE daily_rainfall_2014 add constraint __daily_rainfall_2014__constraint
-  CHECK(valid >= '2014-01-01'::date and valid < '2015-01-01'::date);
-CREATE INDEX daily_rainfall_2014_hrap_i_idx on
-  daily_rainfall_2014(hrap_i);
-CREATE INDEX daily_rainfall_2014_valid_idx on
-  daily_rainfall_2014(valid);
-  
-  CREATE TABLE monthly_rainfall_2015() inherits (monthly_rainfall);
-GRANT SELECT on monthly_rainfall_2015 to nobody,apache;
-ALTER TABLE monthly_rainfall_2015 add constraint __monthly_rainfall_2015__constraint
-  CHECK(valid >= '2015-01-01'::date and valid < '2016-01-01'::date);
-
-CREATE TABLE daily_rainfall_2015() inherits (daily_rainfall);
-GRANT SELECT on daily_rainfall_2015 to nobody,apache;
-ALTER TABLE daily_rainfall_2015 add constraint __daily_rainfall_2015__constraint
-  CHECK(valid >= '2015-01-01'::date and valid < '2016-01-01'::date);
-CREATE INDEX daily_rainfall_2015_hrap_i_idx on
-  daily_rainfall_2015(hrap_i);
-CREATE INDEX daily_rainfall_2015_valid_idx on
-  daily_rainfall_2015(valid);
-CREATE TABLE monthly_rainfall_2016() inherits (monthly_rainfall);
-GRANT SELECT on monthly_rainfall_2016 to nobody,apache;
-ALTER TABLE monthly_rainfall_2016 add constraint __monthly_rainfall_2016__constraint
-  CHECK(valid >= '2016-01-01'::date and valid < '2017-01-01'::date);
-
-CREATE TABLE daily_rainfall_2016() inherits (daily_rainfall);
-GRANT SELECT on daily_rainfall_2016 to nobody,apache;
-ALTER TABLE daily_rainfall_2016 add constraint __daily_rainfall_2016__constraint
-  CHECK(valid >= '2016-01-01'::date and valid < '2017-01-01'::date);
-CREATE INDEX daily_rainfall_2016_hrap_i_idx on
-  daily_rainfall_2016(hrap_i);
-CREATE INDEX daily_rainfall_2016_valid_idx on
-  daily_rainfall_2016(valid);
-CREATE TABLE monthly_rainfall_2017() inherits (monthly_rainfall);
-GRANT SELECT on monthly_rainfall_2017 to nobody,apache;
-ALTER TABLE monthly_rainfall_2017 add constraint __monthly_rainfall_2017__constraint
-  CHECK(valid >= '2017-01-01'::date and valid < '2018-01-01'::date);
-
-CREATE TABLE daily_rainfall_2017() inherits (daily_rainfall);
-GRANT SELECT on daily_rainfall_2017 to nobody,apache;
-ALTER TABLE daily_rainfall_2017 add constraint __daily_rainfall_2017__constraint
-  CHECK(valid >= '2017-01-01'::date and valid < '2018-01-01'::date);
-CREATE INDEX daily_rainfall_2017_hrap_i_idx on
-  daily_rainfall_2017(hrap_i);
-CREATE INDEX daily_rainfall_2017_valid_idx on
-  daily_rainfall_2017(valid);
-  
-CREATE TABLE daily_rainfall_2018() inherits (daily_rainfall);
-GRANT SELECT on daily_rainfall_2018 to nobody,apache;
-ALTER TABLE daily_rainfall_2018 add constraint __daily_rainfall_2018__constraint
-  CHECK(valid >= '2018-01-01'::date and valid < '2019-01-01'::date);
-CREATE INDEX daily_rainfall_2018_hrap_i_idx on
-  daily_rainfall_2018(hrap_i);
-CREATE INDEX daily_rainfall_2018_valid_idx on
-  daily_rainfall_2018(valid);
-
-CREATE TABLE monthly_rainfall_2019() inherits (monthly_rainfall);
-GRANT SELECT on monthly_rainfall_2019 to nobody,apache;
-ALTER TABLE monthly_rainfall_2019 add constraint __monthly_rainfall_2019__constraint
-  CHECK(valid >= '2019-01-01'::date and valid < '2020-01-01'::date);
-
-CREATE TABLE daily_rainfall_2019() inherits (daily_rainfall);
-GRANT SELECT on daily_rainfall_2019 to nobody,apache;
-ALTER TABLE daily_rainfall_2019 add constraint __daily_rainfall_2019__constraint
-  CHECK(valid >= '2019-01-01'::date and valid < '2020-01-01'::date);
-CREATE INDEX daily_rainfall_2019_hrap_i_idx on
-  daily_rainfall_2019(hrap_i);
-CREATE INDEX daily_rainfall_2019_valid_idx on
-  daily_rainfall_2019(valid);
-  
+ do
+$do$
+declare
+     year int;
+     mytable varchar;
+begin
+    for year in 1997..2030
+    loop
+        mytable := format($f$daily_rainfall_%s$f$,
+            year);
+        execute format($f$
+            create table %s partition of daily_rainfall
+            for values from ('%s-01-01 00:00+00') to ('%s-01-01 00:00+00')
+            $f$, mytable,
+            year, year +1);
+        execute format($f$
+            ALTER TABLE %s OWNER to mesonet
+        $f$, mytable);
+        execute format($f$
+            GRANT ALL on %s to ldm
+        $f$, mytable);
+        execute format($f$
+            GRANT SELECT on %s to nobody,apache
+        $f$, mytable);
+        execute format($f$
+            CREATE INDEX %s_valid_idx on %s(valid)
+        $f$, mytable, mytable);
+        execute format($f$
+            CREATE INDEX %s_hrap_i_idx on %s(hrap_i)
+        $f$, mytable, mytable);
+    end loop;
+end;
+$do$;
