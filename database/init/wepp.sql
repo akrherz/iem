@@ -282,7 +282,7 @@ CREATE TABLE daily_rainfall(
   valid date,
   rainfall real,
   peak_15min real,
-  hr_cnt real
+  hr_cnt smallint
 ) PARTITION by range(valid);
 ALTER TABLE daily_rainfall OWNER to mesonet;
 GRANT SELECT on daily_rainfall to nobody,apache;
