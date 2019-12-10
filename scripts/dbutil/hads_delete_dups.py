@@ -3,11 +3,12 @@
 
  called from RUN_MIDNIGHT.sh
 """
-from __future__ import print_function
 import datetime
 import sys
 
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconn, utc, logger
+
+LOG = logger()
 
 
 def query(sql, args=None):
@@ -20,9 +21,8 @@ def query(sql, args=None):
     hcursor.execute("set work_mem='16GB'")
     hcursor.execute(sql, args if args is not None else [])
     ets = datetime.datetime.now()
-    print(
-        "%7s [%8.4fs] %s"
-        % (hcursor.rowcount, (ets - sts).total_seconds(), sql)
+    LOG.info(
+        "%7s [%8.4fs] %s", hcursor.rowcount, (ets - sts).total_seconds(), sql
     )
     hcursor.close()
     pgconn.commit()
@@ -50,18 +50,8 @@ def workflow(valid):
     sql = """delete from """ + tbl + """ WHERE valid BETWEEN %s and %s"""
     query(sql, args)
 
-    sql = "DROP index IF EXISTS " + tbl + "_idx"
-    query(sql)
-    sql = "DROP index IF EXISTS " + tbl + "_valid_idx"
-    query(sql)
-
     # Insert from special table
     sql = "INSERT into " + tbl + " SELECT * from tmp"
-    query(sql)
-
-    sql = "CREATE index %s_idx on %s(station,valid)" % (tbl, tbl)
-    query(sql)
-    sql = "CREATE index %s_valid_idx on %s(valid)" % (tbl, tbl)
     query(sql)
 
     sql = "DROP TABLE IF EXISTS tmp"

@@ -12,10 +12,11 @@ LOG = logger()
 TSTAMP = re.compile("([0-9]{8}T[0-9]{6})")
 
 
-def consume(scursor, fn, ts):
+def consume(scursor, fn, ts, grid_ids):
     """Actually process the filename at given timestamp
     """
     table = "data_%s" % (ts.strftime("%Y_%m"),)
+    LOG.debug("Processing %s for table %s", fn, table)
     nc = ncopen(fn)
     gpids = nc.variables["Grid_Point_ID"][:]
     sms = nc.variables["Soil_Moisture"][:].tolist()
@@ -25,6 +26,8 @@ def consume(scursor, fn, ts):
     good = 0
     data = StringIO()
     for gpid, sm, od, chi2pd in zip(gpids, sms, optdepths, chi2pds):
+        if int(gpid) not in grid_ids:
+            continue
         # changed 1 Feb 2018 as per guidance from Victoria
         if chi2pd is not None and chi2pd < 0.05:
             bad += 1
@@ -63,7 +66,14 @@ def fn2datetime(fn):
     if not tokens:
         return None
     ts = datetime.datetime.strptime(tokens[0], "%Y%m%dT%H%M%S")
-    return ts.replace(tzinfo=pytz.utc)
+    return ts.replace(tzinfo=pytz.UTC)
+
+
+def load_grid_ids(scursor, grid_ids):
+    """Figure out which grid IDs we know."""
+    scursor.execute("SELECT idx from grid")
+    for row in scursor:
+        grid_ids.append(row[0])
 
 
 def lookforfiles():
@@ -72,6 +82,7 @@ def lookforfiles():
     scursor = pgconn.cursor()
     os.chdir("/mesonet/data/smos")
     files = glob.glob("*.nc")
+    grid_ids = []
     for fn in files:
         ts = fn2datetime(fn)
         if ts is None:
@@ -85,7 +96,9 @@ def lookforfiles():
         )
         row = scursor.fetchone()
         if row is None:
-            consume(scursor, fn, ts)
+            if not grid_ids:
+                load_grid_ids(scursor, grid_ids)
+            consume(scursor, fn, ts, grid_ids)
             scursor.execute(
                 """
             INSERT into obtimes(valid) values (%s)
