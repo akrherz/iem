@@ -121,8 +121,8 @@ def application(environ, start_response):
     if len(wfo) == 4:
         wfo = wfo[1:]
     year = int(fields.get("year", 2015))
-    phenomena = fields.get("phenomena", "SV")
-    significance = fields.get("significance", "W")
+    phenomena = fields.get("phenomena")
+    significance = fields.get("significance")
     cb = fields.get("callback")
     combo = int(fields.get("combo", 0))
 
