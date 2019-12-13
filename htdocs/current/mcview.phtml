@@ -268,7 +268,7 @@ EOM;
 } else {
  	reset($images);
  	$control = "";
- 	while ( list($key,$val) = each($images) ){
+ 	foreach($images as $key => $val){
    		$control .= "<p><img src=\"". $val ."\" class=\"img img-responsive\">\n";
  	}
 }
