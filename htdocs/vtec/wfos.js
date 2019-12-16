@@ -111,7 +111,7 @@ iemdata.wfos = [
  ['BMX','BIRMINGHAM'],
  ['BOI','BOISE'],
  ['BOU','DENVER'],
- ['BOX','TAUNTON'],
+ ['BOX','Boston / Norton'],
  ['BRO','BROWNSVILLE'],
  ['BTV','BURLINGTON'],
  ['BUF','BUFFALO'],

@@ -96,7 +96,7 @@ iemdata.wfos = [
  ['KBMX','BIRMINGHAM'],
  ['KBOI','BOISE'],
  ['KBOU','DENVER'],
- ['KBOX','TAUNTON'],
+ ['KBOX','Boston / Norton'],
  ['KBRO','BROWNSVILLE'],
  ['KBTV','BURLINGTON'],
  ['KBUF','BUFFALO'],
