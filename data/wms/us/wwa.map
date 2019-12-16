@@ -26,7 +26,7 @@ WEB
   METADATA
    "wms_title" "IEM NWS Warnings WMS Service"
    "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/wms/us/wwa.cgi?"
-   "wms_srs" "EPSG:4326 EPSG:26915 EPSG:3857"
+   "wms_srs" "EPSG:4326 EPSG:26915 EPSG:3857 EPSG:900913"
    "wms_abstract" "NWS warnings."
    "wms_keywords" "NWS"
    "wms_accessconstraints" "None"
@@ -42,7 +42,7 @@ LAYER
         NAME warnings_p
         STATUS OFF
         TYPE LINE
-        DATA "/home/ldm/data/gis/shape/4326/us/current_ww.shp"
+        DATA "/home/meteor_ldm/data/gis/shape/4326/us/current_ww.shp"
         MINSCALE 0
         MAXSCALE 465000000
   METADATA
