@@ -1,14 +1,12 @@
-#!/usr/bin/env python
 """Provide multiday values for IEMRE and friends"""
-import sys
-import cgi
 import datetime
 import json
 import warnings
 
 import numpy as np
+from paste.request import parse_formvars
 from pyiem import iemre, datatypes
-from pyiem.util import ncopen, ssw
+from pyiem.util import ncopen
 import pyiem.prism as prismutil
 
 warnings.simplefilter("ignore", UserWarning)
@@ -23,38 +21,47 @@ def clean(val):
     return float(val)
 
 
-def send_error(msg):
+def send_error(start_response, msg):
     """ Send an error when something bad happens(tm)"""
-    ssw("Content-type: application/json\n\n")
-    ssw(json.dumps({"error": msg}))
-    sys.exit()
+    headers = [("Content-type", "application/json")]
+    start_response("500 Internal Server Error", headers)
+    return json.dumps({"error": msg}).encode("ascii")
 
 
-def main():
+def application(environ, start_response):
     """Go Main Go"""
-    form = cgi.FieldStorage()
-    ts1 = datetime.datetime.strptime(form.getfirst("date1"), "%Y-%m-%d")
-    ts2 = datetime.datetime.strptime(form.getfirst("date2"), "%Y-%m-%d")
+    form = parse_formvars(environ)
+    ts1 = datetime.datetime.strptime(form.get("date1"), "%Y-%m-%d")
+    ts2 = datetime.datetime.strptime(form.get("date2"), "%Y-%m-%d")
     if ts1 > ts2:
-        send_error("date1 larger than date2")
+        return [send_error(start_response, "date1 larger than date2")]
     if ts1.year != ts2.year:
-        send_error("multi-year query not supported yet...")
+        return [
+            send_error(start_response, "multi-year query not supported yet...")
+        ]
     # Make sure we aren't in the future
     tsend = datetime.date.today()
     if ts2.date() > tsend:
         ts2 = datetime.datetime.now() - datetime.timedelta(days=1)
 
-    lat = float(form.getfirst("lat"))
-    lon = float(form.getfirst("lon"))
+    lat = float(form.get("lat"))
+    lon = float(form.get("lon"))
     if lon < iemre.WEST or lon > iemre.EAST:
-        send_error(
-            "lon value outside of bounds: %s to %s" % (iemre.WEST, iemre.EAST)
-        )
+        return [
+            send_error(
+                start_response,
+                "lon value outside of bounds: %s to %s"
+                % (iemre.WEST, iemre.EAST),
+            )
+        ]
     if lat < iemre.SOUTH or lat > iemre.NORTH:
-        send_error(
-            "lat value outside of bounds: %s to %s"
-            % (iemre.SOUTH, iemre.NORTH)
-        )
+        return [
+            send_error(
+                start_response,
+                "lat value outside of bounds: %s to %s"
+                % (iemre.SOUTH, iemre.NORTH),
+            )
+        ]
     # fmt = form["format"][0]
 
     i, j = iemre.find_ij(lon, lat)
@@ -128,9 +135,5 @@ def main():
             }
         )
 
-    ssw("Content-type: application/json\n\n")
-    ssw(json.dumps(res))
-
-
-if __name__ == "__main__":
-    main()
+    start_response("200 OK", [("Content-type", "application/json")])
+    return [json.dumps(res).encode("ascii")]
