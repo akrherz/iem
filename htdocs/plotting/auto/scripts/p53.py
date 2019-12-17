@@ -2,7 +2,6 @@
 import datetime
 import calendar
 
-import psycopg2.extras
 from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -67,8 +66,6 @@ def get_description():
 def plotter(fdict):
     """ Go """
     pgconn = get_dbconn("asos")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["zstation"]
@@ -120,6 +117,8 @@ def plotter(fdict):
         params=(t1, t2, t1, t3, t2, t4, t3, t5, t4, t5, station),
         index_col="week",
     )
+    if df.empty:
+        raise NoDataFound("No observations found for query.")
 
     for i in range(1, 7):
         df["p%s" % (i,)] = df["d%s" % (i,)] / df["count"] * 100.0
