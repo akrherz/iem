@@ -3,7 +3,7 @@ import datetime
 import calendar
 
 import psycopg2.extras
-import pandas as pd
+from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -18,10 +18,11 @@ def get_description():
     desc[
         "description"
     ] = """This plot is a histogram of observed temperatures
-    placed into five range bins of your choice.  The plot attempts to answer
+    placed into six range bins of your choice.  The plot attempts to answer
     the question of how often is the air temperature within a certain range
     during a certain time of the year.  The data for this plot is partitioned
-    by week of the year."""
+    by week of the year.  Each plot legend entry contains the overall
+    frequency for that bin."""
     desc["data"] = True
     desc["arguments"] = [
         dict(
@@ -78,60 +79,50 @@ def plotter(fdict):
     t5 = ctx["t5"]
     v = ctx["var"]
 
-    cursor.execute(
+    df = read_sql(
         """
-        SELECT extract(week from valid) as w,
+        SELECT extract(week from valid) as week,
         sum(case when """
         + v
-        + """::int < %s then 1 else 0 end),
+        + """::int < %s then 1 else 0 end) as d1,
         sum(case when """
         + v
-        + """::int < %s then 1 else 0 end),
+        + """::int < %s and """
+        + v
+        + """::int >= %s then 1 else 0 end) as d2,
         sum(case when """
         + v
-        + """::int < %s then 1 else 0 end),
+        + """::int < %s and """
+        + v
+        + """::int >= %s then 1 else 0 end) as d3,
         sum(case when """
         + v
-        + """::int < %s then 1 else 0 end),
+        + """::int < %s and """
+        + v
+        + """::int >= %s then 1 else 0 end) as d4,
         sum(case when """
         + v
-        + """::int < %s then 1 else 0 end),
+        + """::int < %s and """
+        + v
+        + """::int >= %s then 1 else 0 end) as d5,
+        sum(case when """
+        + v
+        + """::int >= %s then 1 else 0 end) as d6,
         count(*)
         from alldata where station = %s and """
         + v
         + """ is not null
         and extract(minute  from valid  - '1 minute'::interval) > 49
         and report_type = 2
-        GROUP by w ORDER by w ASC
+        GROUP by week ORDER by week ASC
     """,
-        (t1, t2, t3, t4, t5, station),
+        pgconn,
+        params=(t1, t2, t1, t3, t2, t4, t3, t5, t4, t5, station),
+        index_col="week",
     )
-    weeks = []
-    d1 = []
-    d2 = []
-    d3 = []
-    d4 = []
-    d5 = []
-    d6 = []
-    for row in cursor:
-        weeks.append(row[0] - 1)
-        d1.append(float(row[1]) / float(row[6]) * 100.0)
-        d2.append(float(row[2]) / float(row[6]) * 100.0)
-        d3.append(float(row[3]) / float(row[6]) * 100.0)
-        d4.append(float(row[4]) / float(row[6]) * 100.0)
-        d5.append(float(row[5]) / float(row[6]) * 100.0)
-        d6.append(100.0)
 
-    df = pd.DataFrame(
-        dict(
-            week=pd.Series(weeks),
-            d1=pd.Series(d1),
-            d2=pd.Series(d2),
-            d3=pd.Series(d3),
-            d4=pd.Series(d4),
-            d5=pd.Series(d5),
-        )
-    )
+    for i in range(1, 7):
+        df["p%s" % (i,)] = df["d%s" % (i,)] / df["count"] * 100.0
     sts = datetime.datetime(2012, 1, 1)
     xticks = []
     for i in range(1, 13):
@@ -139,25 +130,66 @@ def plotter(fdict):
         xticks.append(float(ts.strftime("%j")) / 7.0)
 
     (fig, ax) = plt.subplots(1, 1)
-    ax.bar(weeks, d6, width=1, fc="red", ec="None", label="%s & Above" % (t5,))
+    x = df.index.values - 1
+    val = df["d6"].sum() / df["count"].sum() * 100.0
     ax.bar(
-        weeks, d5, width=1, fc="tan", ec="None", label="%s-%s" % (t4, t5 - 1)
+        x,
+        df["p6"].values,
+        bottom=(df["p5"] + df["p4"] + df["p3"] + df["p2"] + df["p1"]).values,
+        width=1,
+        fc="red",
+        ec="None",
+        label="%s & Above (%.1f%%)" % (t5, val),
     )
+    val = df["d5"].sum() / df["count"].sum() * 100.0
     ax.bar(
-        weeks,
-        d4,
+        x,
+        df["p5"].values,
+        bottom=(df["p4"] + df["p3"] + df["p2"] + df["p1"]).values,
+        width=1,
+        fc="tan",
+        ec="None",
+        label="%s-%s (%.1f%%)" % (t4, t5 - 1, val),
+    )
+    val = df["d4"].sum() / df["count"].sum() * 100.0
+    ax.bar(
+        x,
+        df["p4"].values,
+        bottom=(df["p3"] + df["p2"] + df["p1"]).values,
         width=1,
         fc="yellow",
         ec="None",
-        label="%s-%s" % (t3, t4 - 1),
+        label="%s-%s (%.1f%%)" % (t3, t4 - 1, val),
     )
+    val = df["d3"].sum() / df["count"].sum() * 100.0
     ax.bar(
-        weeks, d3, width=1, fc="green", ec="None", label="%s-%s" % (t2, t3 - 1)
+        x,
+        df["p3"].values,
+        width=1,
+        fc="green",
+        bottom=(df["p2"] + df["p1"]).values,
+        ec="None",
+        label="%s-%s (%.1f%%)" % (t2, t3 - 1, val),
     )
+    val = df["d2"].sum() / df["count"].sum() * 100.0
     ax.bar(
-        weeks, d2, width=1, fc="blue", ec="None", label="%s-%s" % (t1, t2 - 1)
+        x,
+        df["p2"].values,
+        bottom=df["p1"].values,
+        width=1,
+        fc="blue",
+        ec="None",
+        label="%s-%s (%.1f%%)" % (t1, t2 - 1, val),
     )
-    ax.bar(weeks, d1, width=1, fc="purple", ec="None", label="Below %s" % (t1))
+    val = df["d1"].sum() / df["count"].sum() * 100.0
+    ax.bar(
+        x,
+        df["p1"].values,
+        width=1,
+        fc="purple",
+        ec="None",
+        label="Below %s (%.1f%%)" % (t1, val),
+    )
 
     ax.grid(True, zorder=11)
     ab = ctx["_nt"].sts[station]["archive_begin"]
