@@ -1,6 +1,23 @@
 Soil Moisture Network Meeting Notes
 ===================================
 
+17 Dec 2019 :: Meeting with Dr Lamkey
+----
+
+- Weather data is important to Ag Research and we need to emphasis that.
+- Dr Lamkey discussed replacing Ethan with Dr Honeyman, who is on board.
+- There is experiment station money that needs to be spent on research.
+- Dr Lamkey would like to see more monetization of the IEM.
+- Discussion of previous inversion station efforts.
+- [ ] create a one pager describing the usage of IEM/ISUSM
+- Will provide the one pager to the Dean, who may wish to promote it.
+- Dr Lamkey wishes we not concentrate on implementation, but request a budget.
+- People think NOAA stations are enough, one pager to show otherwise.
+- Discussion of new Dr Taylor position and how that may work out.
+- Tie in Climate Smart Ag.
+- Loop in USCRN?
+- Have a grad student do research / station maintenance next summer.
+
 15 Aug 2019 :: Vineyard Station Meeting
 ----
 

@@ -1,6 +1,10 @@
 """Attempt to manage the disaster that is IEM symlinking"""
-from __future__ import print_function
 import os
+import datetime
+
+from pyiem.util import logger
+
+LOG = logger()
 
 # LINK , TARGET
 PAIRS = [
@@ -10,7 +14,6 @@ PAIRS = [
     ["/mesonet/scripts", "/mnt/mesonet2/scripts"],
     ["/mesonet/wepp", "/mnt/idep"],
     ["/mesonet/ARCHIVE/dailydata", "/mnt/mtarchive/longterm/dailydata"],
-    ["/mesonet/ARCHIVE/data", "/mnt/mtarchive/ARCHIVE/data"],
     ["/mesonet/ARCHIVE/gempak", "/mnt/mtarchive/longterm/gempak"],
     ["/mesonet/ARCHIVE/nexrad", "/mnt/mtarchive/longterm/nexrad3_iowa"],
     ["/mesonet/ARCHIVE/raw", "/mnt/mesonet2/ARCHIVE/raw"],
@@ -49,17 +52,17 @@ PAIRS = [
 def workflow(link, target):
     """Do things"""
     if not os.path.isdir(target):
-        print("ERROR: link target: %s is not found" % (target,))
+        LOG.info("ERROR: link target: %s is not found", target)
         return
     if not os.path.islink(link) and os.path.isdir(link):
-        print("ERROR: symlink: %s is already a directory!" % (link,))
+        LOG.info("ERROR: symlink: %s is already a directory!", link)
         return
     if os.path.islink(link):
         oldtarget = os.path.realpath(link)
         if oldtarget == target:
             return
         os.unlink(link)
-    print("%s -> %s" % (link, target))
+    LOG.info("%s -> %s", link, target)
     os.symlink(target, link)
 
 
@@ -70,6 +73,14 @@ def main():
         path = "/mesonet/%s" % (mysubdir,)
         if not os.path.isdir(path):
             os.makedirs(path)
+    # Quasi dynamic generation of /mesonet/ARCHIVE/data/YYYY links
+    if not os.path.isdir("/mesonet/ARCHIVE/data"):
+        os.makedirs("/mesonet/ARCHIVE/data")
+    for year in range(1893, datetime.date.today().year + 1):
+        link = "/mesonet/ARCHIVE/data/%s" % (year,)
+        target = "/mnt/mtarchive3/ARCHIVE/data/%s" % (year,)
+        workflow(link, target)
+
     for (link, target) in PAIRS:
         workflow(link, target)
 

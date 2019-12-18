@@ -15,7 +15,7 @@ def check():
     now = datetime.datetime.now()
     count = []
     for nexrad in SAMPLES:
-        fn = "/mnt/mtarchive/nexrd2/raw/%s/dir.list" % (nexrad,)
+        fn = "/mnt/level2/raw/%s/dir.list" % (nexrad,)
         mtime = os.stat(fn)[stat.ST_MTIME]
         ts = datetime.datetime.fromtimestamp(mtime)
         diff = (now - ts).days * 86400.0 + (now - ts).seconds
