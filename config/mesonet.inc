@@ -208,8 +208,9 @@
   <Location "/archive/data">
     RequestHeader set "Host" "iem-archive.local"
     ProxyPreserveHost Off
-    ProxyPass "http://iem-archive.local"
-    ProxyPassReverse "http://iem-archive.local"
+    # hacky to keep the paths matching in auto-index
+    ProxyPass "http://iem-archive.local/archive/data"
+    ProxyPassReverse "http://iem-archive.local/archive/data"
   </Location>
 
 
