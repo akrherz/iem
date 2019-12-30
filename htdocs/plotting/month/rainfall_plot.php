@@ -1,6 +1,9 @@
 <?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/station.php";
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_bar.php";
 
 $station = isset($_GET['station']) ? $_GET['station'] : "DSM";
 $network = isset($_GET['network']) ? $_GET['network'] : "IA_ASOS";
@@ -78,10 +81,6 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 pg_close($coopdb);
 pg_close($db);
 
-include ("../../../include/jpgraph/jpgraph.php");
-include ("../../../include/jpgraph/jpgraph_line.php");
-include ("../../../include/jpgraph/jpgraph_bar.php");
-
 // Create the graph. These two calls are always required
 $graph = new Graph(640,400);
 $graph->SetScale("textlin");
@@ -105,38 +104,42 @@ $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.05, 0.1, "right", "top");
 
 if($hasclimate && sizeof($cdiff) > 0){
-// Create the linear plot
-$b1plot =new BarPlot($cdiff);
-$b1plot->SetFillColor("red");
-$b1plot->SetLegend("Accum Difference");
-$b2plot = new BarPlot($obs);
-$b2plot->SetFillColor("blue");
-$b2plot->SetLegend("Obs Rain");
-$g = new GroupBarPlot(array($b1plot,$b2plot));
-$g->SetAlign("left");
+    // Create the linear plot
+    $b1plot =new BarPlot($cdiff);
+
+    $b2plot = new BarPlot($obs);
+
+    $g = new GroupBarPlot(array($b1plot,$b2plot));
+    $graph->Add($g);
+
+    $g->SetAlign("left");
+
+    $b1plot->SetFillColor('#FF0000');
+    $b1plot->SetColor('white');
+    $b1plot->SetLegend("Accum Difference");
+
+    $b2plot->SetFillColor('#0000FF');
+    $b2plot->SetColor('white');
+    $b2plot->SetLegend("Obs Rain");
 }
 
 // Create the linear plot
 $lp1=new LinePlot($aobs);
+$graph->Add($lp1);
 $lp1->SetLegend("Actual Accum");
 $lp1->SetColor("blue");
 $lp1->SetWeight(2);
 
 if ($hasclimate && sizeof($cdiff) > 0){
-$lp2=new LinePlot($aclimate);
-$lp2->SetLegend("Climate Accum");
-$lp2->SetColor("red");
-$lp2->SetWeight(2);
-$z = new LinePlot($zeros);
-$z->SetWeight(2);
-}
+    $lp2=new LinePlot($aclimate);
+    $graph->Add($lp2);
+    $lp2->SetLegend("Climate Accum");
+    $lp2->SetColor("red");
+    $lp2->SetWeight(2);
 
-// Add the plot to the graph
-$graph->Add($lp1);
-if ($hasclimate && sizeof($cdiff) > 0){
-$graph->Add($lp2);
-$graph->Add($g);
-$graph->Add($z);
+    $z = new LinePlot($zeros);
+    $graph->Add($z);
+    $z->SetWeight(2);
 }
 
 // Display the graph
