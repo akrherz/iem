@@ -59,6 +59,7 @@ before_install:
   - echo '<VirtualHost *:80>' | sudo tee /etc/apache2/sites-enabled/iem.conf > /dev/null
   - cat config/mesonet.inc | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
   - echo '</VirtualHost>' | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
+  - sudo ls -l /etc/apache2/sites-enabled/
   # Setup PATH so that miniconda gets in the front
   - echo "export PATH=/home/travis/miniconda/envs/prod/bin:$PATH" | sudo tee -a /etc/apache2/envvars > /dev/null
   - echo "export LD_PRELOAD=/home/travis/miniconda/envs/prod/lib/libz.so" | sudo tee -a /etc/apache2/envvars > /dev/null
