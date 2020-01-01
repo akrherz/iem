@@ -82,6 +82,7 @@ script:
   - sudo systemctl status apache2.service -l
   # Run autoplot tests with basically no data in database
   - python test/run_autoplots.py
+  - sudo cat /var/log/apache2/error.log
   # Add some test data to the database
   - python database/store_test_data.py
   - python scripts/dbutil/sync_stations.py
