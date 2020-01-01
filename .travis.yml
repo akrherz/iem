@@ -59,7 +59,6 @@ before_install:
   - echo '<VirtualHost *:80>' | sudo tee /etc/apache2/sites-enabled/iem.conf > /dev/null
   - cat config/mesonet.inc | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
   - echo '</VirtualHost>' | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
-  - sudo ls -l /etc/apache2/sites-enabled/
   # Setup PATH so that miniconda gets in the front
   - echo "export PATH=/home/travis/miniconda/envs/prod/bin:$PATH" | sudo tee -a /etc/apache2/envvars > /dev/null
   - echo "export LD_PRELOAD=/home/travis/miniconda/envs/prod/lib/libz.so" | sudo tee -a /etc/apache2/envvars > /dev/null
@@ -79,7 +78,9 @@ script:
   - echo "LoadModule wsgi_module $MOD_WSGI_SO" | sudo tee -a /etc/apache2/mods-enabled/wsgi.load > /dev/null;
   - echo "WSGIApplicationGroup %{GLOBAL}" | sudo tee -a /etc/apache2/mods-enabled/wsgi.load > /dev/null;
   # restart apache
-  - sudo service apache2 restart || sudo cat /var/log/apache2/error.log
+  - sudo service apache2 stop
+  - sudo service apache2 start
+  - sudo cat /var/log/apache2/error.log
   - sudo systemctl status apache2.service -l
   # Run autoplot tests with basically no data in database
   - python test/run_autoplots.py
