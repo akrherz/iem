@@ -3,7 +3,7 @@ setuptools-markdown
 inotify
 PyRSS2Gen
 odfpy
-mod_wsgi-standalone
+mod_wsgi<4.7.0
 git+https://github.com/akrherz/smartsheet-python-sdk.git@issue38
 git+https://github.com/akrherz/windrose.git@darylchanges
 git+https://github.com/akrherz/nwnserver.git
