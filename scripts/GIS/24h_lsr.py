@@ -55,9 +55,8 @@ def main():
         substr(remark, 1, 200) as REMARK,
         ST_x(geom) as LON,
         ST_y(geom) as LAT
-        from lsrs_%s WHERE valid > (now() -'1 day'::interval)
-    """
-        % (ets.year,),
+        from lsrs WHERE valid > (now() -'1 day'::interval)
+    """,
         pgconn,
         index_col=None,
         geom_col="geom",

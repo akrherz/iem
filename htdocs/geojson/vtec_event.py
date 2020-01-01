@@ -16,7 +16,6 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    lsrtable = "lsrs_%s" % (year,)
     sbwtable = "sbw_%s" % (year,)
     warningtable = "warnings_%s" % (year,)
     if sbw == 1:
@@ -24,9 +23,7 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
             """
             SELECT distinct l.*, valid at time zone 'UTC' as utc_valid,
             ST_asGeoJson(l.geom) as geojson
-            from """
-            + lsrtable
-            + """ l,
+            from lsrs l,
             """
             + sbwtable
             + """ w WHERE
@@ -53,9 +50,7 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
 
             SELECT distinct l.*, valid at time zone 'UTC' as utc_valid,
             ST_asGeoJson(l.geom) as geojson
-            from """
-            + lsrtable
-            + """ l, countybased c WHERE
+            from lsrs l, countybased c WHERE
             l.valid >= c.issued and l.valid < c.expired and
             l.wfo = %s ORDER by l.valid ASC
         """

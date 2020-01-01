@@ -487,7 +487,7 @@ function sbwVerify() {
     	}
         /* Look for LSRs! */
         $sql = sprintf("SELECT distinct *
-         from lsrs_%s w WHERE 
+         from lsrs w WHERE 
          geom && ST_Buffer(ST_SetSrid(ST_GeometryFromText('%s'),4326), %s) and 
          ST_contains(ST_Buffer(ST_SetSrid(ST_GeometryFromText('%s'),4326), %s), geom) 
          and %s and wfo = '%s' and
@@ -497,7 +497,7 @@ function sbwVerify() {
          or type = 'F' or type = 'x')
          and valid >= '%s+00' and valid <= '%s+00' 
          ORDER by valid ASC", 
-         $v["year"], $v["geom"], $this->warningbuffer, 
+         $v["geom"], $this->warningbuffer, 
         		$v["geom"], $this->warningbuffer, $this->sqlLSRTypeBuilder(), 
          $v["wfo"], $this->getVerifyHailSize($v), $this->getVerifyWind($v),
          date("Y/m/d H:i", strtotime($v["issue"])),

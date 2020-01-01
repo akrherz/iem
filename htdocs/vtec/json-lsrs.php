@@ -22,12 +22,12 @@ $sbw = isset($_GET['sbw']) ? 1 : 0;
 
 
 if ($sbw){
-$sql = sprintf("SELECT distinct l.* from lsrs_%s l, sbw_%s w WHERE
+$sql = sprintf("SELECT distinct l.* from lsrs l, sbw_%s w WHERE
          l.geom && w.geom and ST_contains(w.geom, l.geom) and l.wfo = '%s' and
          l.valid >= w.issue and l.valid <= w.expire and
          w.wfo = '%s' and w.eventid = '%s' and 
          w.significance = '%s' and w.phenomena = '%s'
-         ORDER by l.valid ASC", $year, $year, $wfo, $wfo, $eventid, 
+         ORDER by l.valid ASC", $year, $wfo, $wfo, $eventid, 
          $significance, $phenomena);
 } else {
 $sql = <<<EOF
@@ -37,7 +37,7 @@ $sql = <<<EOF
 		WHERE w.wfo = '$wfo' and w.eventid = $eventid and 
 		w.significance = '$significance' and w.phenomena = '$phenomena')
 		
-	SELECT distinct l.* from lsrs_$year l, countybased c WHERE
+	SELECT distinct l.* from lsrs l, countybased c WHERE
 	l.valid >= c.issued and l.valid < c.expired and
 	l.wfo = '$wfo' ORDER by l.valid ASC
 EOF;

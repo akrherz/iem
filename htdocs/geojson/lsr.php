@@ -3,9 +3,9 @@
  * Generate GeoJSON LSR information for a period of choice
  */
 header("Content-type: application/vnd.geo+json");
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
-include("../../include/vtec.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/vtec.php";
 $postgis = iemdb("postgis");
 
 function toTime($s){
@@ -31,7 +31,7 @@ if (isset($_REQUEST["phenomena"])){
   $rs = pg_prepare($postgis, "SELECT", "SELECT l.*, 
   		to_char(valid, 'YYYY-MM-DDThh24:MI:SSZ') as iso_valid,
   			ST_x(l.geom) as lon, ST_y(l.geom) as lat
-           from sbw_$year w, lsrs_$year l
+           from sbw_$year w, lsrs l
            WHERE w.wfo = $1 and w.phenomena = $2 and 
            w.eventid = $3 and w.significance = $4
            and w.geom && l.geom and l.valid BETWEEN w.issue and w.expire

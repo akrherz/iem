@@ -1,8 +1,8 @@
 <?php
 /* Sucks to render a KML */
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
-include("../../include/vtec.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/vtec.php";
 $connect = iemdb("postgis");
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
@@ -16,7 +16,7 @@ $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1)
 
 /* Now we fetch warning and perhaps polygon */
 $query2 = "SELECT l.*, ST_askml(l.geom) as kml
-           from sbw_$year w, lsrs_$year l
+           from sbw_$year w, lsrs l
            WHERE w.wfo = '$wfo' and w.phenomena = '$phenomena' and 
            w.eventid = $eventid and w.significance = '$significance'
            and w.geom && l.geom and l.valid BETWEEN w.issue and w.expire
