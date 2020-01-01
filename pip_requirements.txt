@@ -1,11 +1,9 @@
 setuptools-markdown
 --extra-index-url https://pypi.anaconda.org/pypi/simple
 inotify
-rrdtool
 PyRSS2Gen
 odfpy
-git+https://github.com/akrherz/python-metar.git@snowdepth
-mod_wsgi-standalone
+mod_wsgi<4.7.0
 git+https://github.com/akrherz/smartsheet-python-sdk.git@issue38
 git+https://github.com/akrherz/windrose.git@darylchanges
 git+https://github.com/akrherz/nwnserver.git
@@ -14,4 +12,3 @@ git+https://github.com/akrherz/pyIEM.git
 git+https://github.com/akrherz/tilecache.git
 Unidecode
 git+https://github.com/perrygeo/jenks.git
-git+https://github.com/fatiando/verde.git; python_version > '3.4'
