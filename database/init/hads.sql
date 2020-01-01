@@ -294,6 +294,15 @@ CREATE INDEX hml_forecast_data_2019_idx on
   hml_forecast_data_2019(hml_forecast_id);
 GRANT SELECT on hml_forecast_data_2019 to nobody,apache;
 
+CREATE TABLE hml_forecast_data_2020(
+  hml_forecast_id int REFERENCES hml_forecast(id),
+  valid timestamptz,
+  primary_value real,
+  secondary_value real);
+CREATE INDEX hml_forecast_data_2020_idx on
+  hml_forecast_data_2020(hml_forecast_id);
+GRANT SELECT on hml_forecast_data_2020 to nobody,apache;
+
 -- Storage of common / instantaneous data values
 CREATE TABLE alldata(
 	station varchar(8),
