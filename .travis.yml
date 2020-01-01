@@ -40,6 +40,7 @@ env:
   matrix:
     - PYTHON_VERSION=3.6
     - PYTHON_VERSION=3.7
+    - PYTHON_VERSION=3.8
 before_install:
   - git clone --depth 1 https://github.com/akrherz/ci_tooling.git .ci_tooling
   - . .ci_tooling/postgres.sh

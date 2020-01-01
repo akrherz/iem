@@ -1,97 +1,85 @@
-# This file may be used to create an environment using:
-# $ conda create --name <env> --file <this file>
-# platform: linux-64
+# NB: these are requirements of code in this repo
+# autoplot uses
 affine
+# pytest
 beautifulsoup4
-boto3
-botocore
-bzip2
-ca-certificates
-cairo
+# plotting
 cartopy
-cdo
-certifi
-cf_units
-cffi
+# pytest
 coverage
-curl
-cycler
-cython
-descartes
+# upload scripts
 dropbox
-ecmwf_grib
+# one wxc script
 ephem
-esmf
+# various places
 fiona
-freetype
-fribidi
+# various places
 gdal
+# used
 geojson
+# important
 geopandas
-geos
-geotiff
-harfbuzz
-hdf4
-hdf5
-html5lib
+# mrms script
 imageio
-jasper
-jdcal
-jpeg
-json-c
-jsonschema
-kealib
-krb5
+# soft requirement for pandas
 lxml
-lzo
+# duh
 matplotlib-base
+# various places
+metar
+# duh
 metpy
-mock
-mpich
-nco
-ncurses
-netcdf-fortran
+# yup
 netcdf4
-nose
-numexpr
+# yup
 numpy
+# excel output
 openpyxl
+# yo
 pandas
-pango
+# mod-wsgi
 paste
-pika
+# PIL
 pillow
-# busted pint on python27
-pint<0.9
+# for downstream installs
 pip
+# for psql and friends
 postgresql
-proj4
+# important
 psycopg2
+# lots of places
 pygrib
-pylint
-pyparsing
+# various places
 pyproj
+# various shapefile dumpers
 pyshp>=2
+# for testing
 pytest
+# important
 python-memcached
+# important
 pytz
+# various places
 rasterio
+# various places
 rasterstats
+# yo
 requests
-requests-toolbelt
+# important
 scipy
+# autoplots
 seaborn
+# cow et al
 shapely
+# various dumpers
 simplejson
-tornado
+# scripts
 tqdm
+# AHPS scripts
 twisted
-udunits2
-unixodbc
-uritemplate
-xarray<0.12.2
-wordcloud
-xlrd
+# need to use more
+verde
+# Excel
 xlsxwriter
+# Excel
 xlwt
-zope.interface
