@@ -294,12 +294,13 @@ def plotter(fdict):
         column = "p1_%s" % (varname,)
         title = "%.0f-%.0f %s" % (p1syear, p1eyear, title)
     else:
-        title = ("%.0f-%.0f minus %.0f-%.0f %s Difference") % (
+        title = ("%.0f-%.0f minus %.0f-%.0f %s Difference (%s)") % (
             p2syear,
             p2eyear,
             p1syear,
             p1eyear,
             title,
+            UNITS[varname],
         )
 
     # Reindex so that most extreme values are first
