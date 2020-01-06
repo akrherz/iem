@@ -44,6 +44,8 @@ PDICT3 = OrderedDict(
         ("lfc_agl_m", "Lifted of Free Convection (m AGL)"),
         ("lfc_pressure_hpa", "Lifted of Free Convection (hPa)"),
         ("lfc_tmpc", "Lifted of Free Convection Temperature (C)"),
+        ("mlcape_jkg", "Mixed Layer (100hPa) CAPE (J/kg)"),
+        ("mlcin_jkg", "Mixed Layer (100hPa) CIN (J/kg)"),
         ("mucape_jkg", "Most Unstable CAPE (J/kg)"),
         ("mucin_jkg", "Most Unstable CIN (J/kg)"),
         ("pwater_mm", "Precipitable Water (mm)"),

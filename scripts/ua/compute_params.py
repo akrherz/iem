@@ -10,10 +10,11 @@ from tqdm import tqdm
 import pandas as pd
 import numpy as np
 from scipy.interpolate import interp1d
+from metpy.future import precipitable_water, storm_relative_helicity
 from metpy.calc import (
-    precipitable_water,
     surface_based_cape_cin,
     most_unstable_cape_cin,
+    mixed_layer_cape_cin,
     el,
     lfc,
     lcl,
@@ -21,7 +22,6 @@ from metpy.calc import (
     wind_components,
     wind_direction,
     wind_speed,
-    storm_relative_helicity,
 )
 from metpy.units import units
 
@@ -178,9 +178,9 @@ def do_profile(cursor, fid, gdf, nt):
             srh_sfc_1km_neg,
             srh_sfc_1km_total,
         ) = storm_relative_helicity(
+            wind_profile["height"].values * units("m"),
             wind_profile["u"].values * units("m/s"),
             wind_profile["v"].values * units("m/s"),
-            wind_profile["height"].values * units("m"),
             1000.0 * units("m"),
         )
     except ValueError:
@@ -193,9 +193,9 @@ def do_profile(cursor, fid, gdf, nt):
             srh_sfc_3km_neg,
             srh_sfc_3km_total,
         ) = storm_relative_helicity(
+            wind_profile["height"].values * units("m"),
             wind_profile["u"].values * units("m/s"),
             wind_profile["v"].values * units("m/s"),
-            wind_profile["height"].values * units("m"),
             3000.0 * units("m"),
         )
     except ValueError:
@@ -203,8 +203,8 @@ def do_profile(cursor, fid, gdf, nt):
         srh_sfc_3km_neg = np.nan * units("m")  # blah
         srh_sfc_3km_total = np.nan * units("m")  # blah
     pwater = precipitable_water(
-        td_profile["dwpc"].values * units.degC,
         td_profile["pressure"].values * units.hPa,
+        td_profile["dwpc"].values * units.degC,
     )
     (sbcape, sbcin) = surface_based_cape_cin(
         td_profile["pressure"].values * units.hPa,
@@ -212,6 +212,11 @@ def do_profile(cursor, fid, gdf, nt):
         td_profile["dwpc"].values * units.degC,
     )
     (mucape, mucin) = most_unstable_cape_cin(
+        td_profile["pressure"].values * units.hPa,
+        td_profile["tmpc"].values * units.degC,
+        td_profile["dwpc"].values * units.degC,
+    )
+    (mlcape, mlcin) = mixed_layer_cape_cin(
         td_profile["pressure"].values * units.hPa,
         td_profile["tmpc"].values * units.degC,
         td_profile["dwpc"].values * units.degC,
@@ -249,6 +254,8 @@ def do_profile(cursor, fid, gdf, nt):
         nonull(sbcin.to(units("joules / kilogram")).m),
         nonull(mucape.to(units("joules / kilogram")).m),
         nonull(mucin.to(units("joules / kilogram")).m),
+        nonull(mlcape.to(units("joules / kilogram")).m),
+        nonull(mlcin.to(units("joules / kilogram")).m),
         nonull(pwater.to(units("mm")).m),
         nonull(el_agl),
         nonull(el_p.to(units("hPa")).m),
@@ -281,7 +288,8 @@ def do_profile(cursor, fid, gdf, nt):
     cursor.execute(
         """
         UPDATE raob_flights SET sbcape_jkg = %s, sbcin_jkg = %s,
-        mucape_jkg = %s, mucin_jkg = %s, pwater_mm = %s,
+        mucape_jkg = %s, mucin_jkg = %s,
+        mlcape_jkg = %s, mlcin_jkg = %s, pwater_mm = %s,
         el_agl_m = %s, el_pressure_hpa = %s, el_tmpc = %s,
         lfc_agl_m = %s, lfc_pressure_hpa = %s, lfc_tmpc = %s,
         lcl_agl_m = %s, lcl_pressure_hpa = %s, lcl_tmpc = %s,
