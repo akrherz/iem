@@ -8,7 +8,7 @@ import pytz
 import pandas as pd
 from pandas.io.sql import read_sql
 from metpy.units import masked_array
-from metpy.interpolate import inverse_distance
+from metpy.interpolate import inverse_distance_to_grid
 from pyiem import iemre
 from pyiem import meteorology
 import pyiem.datatypes as dt
@@ -68,7 +68,7 @@ def generic_gridder(df, idx, domain):
     # set a sentinel of where we won't be estimating
     res = np.where(domain > 0, res, -9999)
     # do our gridding
-    grid = inverse_distance(
+    grid = inverse_distance_to_grid(
         df2["lon"].values, df2["lat"].values, df2[idx].values, xi, yi, 1.5
     )
     # replace nan values in res with whatever now is in grid
@@ -76,7 +76,7 @@ def generic_gridder(df, idx, domain):
     # Do we still have missing values?
     if np.isnan(res).any():
         # very aggressive with search radius
-        grid = inverse_distance(
+        grid = inverse_distance_to_grid(
             df2["lon"].values, df2["lat"].values, df2[idx].values, xi, yi, 5.5
         )
         # replace nan values in res with whatever now is in grid
