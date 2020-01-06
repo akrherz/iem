@@ -7,7 +7,6 @@
  - For this year, replace day + 4 to Dec 31 with CFS :)
  - Upload the resulting file <site>_YYYYmmdd.met
 """
-from __future__ import print_function
 import sys
 import datetime
 import tempfile
@@ -22,8 +21,9 @@ import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.datatypes import temperature, distance
 from pyiem.meteorology import gdd
-from pyiem.util import get_properties, get_dbconn
+from pyiem.util import get_properties, get_dbconn, logger
 
+LOG = logger()
 XREF = {
     "ames": {"isusm": "BOOI4", "climodat": "IA0200"},
     "cobs": {"isusm": None, "station": "OT0012", "climodat": "IA0200"},
@@ -38,7 +38,7 @@ XREF = {
 
 DO_UPLOAD = len(sys.argv) == 1
 if not DO_UPLOAD:
-    print("Disabling dropbox upload of results")
+    LOG.info("Disabling dropbox upload of results")
 
 
 def p(val, prec):
@@ -84,8 +84,8 @@ def upload_summary_plots():
                         ),
                         mode=dropbox.files.WriteMode.overwrite,
                     )
-                except Exception as _:
-                    print("dropbox fail")
+                except Exception:
+                    LOG.info("dropbox fail")
             os.unlink(tmpfn)
 
 
@@ -181,8 +181,8 @@ def write_and_upload(df, location):
                 "/YieldForecast/Daryl/%s" % (remotefn,),
                 mode=dropbox.files.WriteMode.overwrite,
             )
-        except Exception as _:
-            print("dropbox fail")
+        except Exception:
+            LOG.info("dropbox fail")
     # Save file for usage by web plotting...
     os.chmod(tmpfn, 0o644)
     # os.rename fails here due to cross device link bug
@@ -261,7 +261,12 @@ def replace_forecast(df, location):
         minc = temperature(row[2], "F").value("C")
         rain = distance(row[3], "IN").value("MM")
         for year in years:
-            df.loc[valid.replace(year=year), rcols] = (maxc, minc, rain)
+            # This fails for leap year, just silently skip it when it does.
+            try:
+                idx = valid.replace(year=year)
+            except ValueError:
+                continue
+            df.loc[idx, rcols] = (maxc, minc, rain)
 
     # Need to get radiation from CFS
     cursor.execute(
@@ -276,7 +281,12 @@ def replace_forecast(df, location):
     for row in cursor:
         valid = row[0]
         for year in years:
-            df.loc[valid.replace(year=year), "radn"] = row[1]
+            # This fails for leap year, just silently skip it when it does.
+            try:
+                idx = valid.replace(year=year)
+            except ValueError:
+                continue
+            df.loc[idx, "radn"] = row[1]
 
 
 def replace_cfs(df, location):
@@ -297,7 +307,7 @@ def replace_cfs(df, location):
     )
     rcols = ["maxt", "mint", "rain", "radn"]
     if cursor.rowcount == 0:
-        print("  replace_cfs found zero rows!")
+        LOG.info("  replace_cfs found zero rows!")
         return
     for row in cursor:
         maxt = temperature(row[1], "F").value("C")
@@ -310,7 +320,7 @@ def replace_cfs(df, location):
         return
     now = row[0] + datetime.timedelta(days=1)
     # OK, if our last row does not equal dec31, we have some more work to do
-    print(("  Replacing %s->%s with previous year's data") % (now, dec31))
+    LOG.info("Replacing %s->%s with previous year's data", now, dec31)
     while now <= dec31:
         lastyear = now.replace(year=(now.year - 1))
         df.loc[now, rcols] = df.loc[lastyear, rcols]
@@ -374,9 +384,11 @@ def replace_obs_iem(df, location):
                 distance(row[4], "in").value("mm"),
             )
     if replaced:
-        print(
-            ("  used IEM Access %s from %s->%s")
-            % (station, replaced[0], replaced[-1])
+        LOG.info(
+            "  used IEM Access %s from %s->%s",
+            station,
+            replaced[0],
+            replaced[-1],
         )
 
 
@@ -463,9 +475,11 @@ def replace_obs(df, location):
                 row[11],
             )
     if replaced:
-        print(
-            ("  replaced with obs from %s for %s->%s")
-            % (isusm, replaced[0], replaced[-1])
+        LOG.info(
+            "  replaced with obs from %s for %s->%s",
+            isusm,
+            replaced[0],
+            replaced[-1],
         )
 
 
@@ -479,7 +493,7 @@ def compute_gdd(df):
 
 def do(location):
     """Workflow for a particular location"""
-    print("yieldfx_workflow: Processing '%s'" % (location,))
+    LOG.info("yieldfx_workflow: Processing '%s'", location)
     # 1. Read baseline
     df = load_baseline(location)
     # 2. Add columns and observed data
