@@ -101,7 +101,7 @@ if ($isarchive && $basets < $wfo_filter_ts)
   $filter = 0;
 }
 
-$nt = new NetworkTable("WFO");
+$nt = new NetworkTable("WFO", TRUE);
 $nt->table["NHC"] = Array("lat" => 25.75 , "lon" => -80.38 , 
 		"name" => "National Hurricane Center");
 

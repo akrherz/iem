@@ -5,7 +5,7 @@ require_once dirname(__FILE__) ."/database.inc.php";
 
 class NetworkTable {
 
-  function __construct($a)
+  function __construct($a, $force3char=FALSE)
   {
     $this->table = Array();
     // We force new here to prevent reused prepared statement names, hack
@@ -14,20 +14,24 @@ class NetworkTable {
     	ST_y(geom) as lat from stations WHERE network = $1 ORDER by name ASC");
     $rs = pg_prepare($this->dbconn, "SELECTST", "SELECT *, ST_x(geom) as lon, 
     	ST_y(geom) as lat from stations WHERE id = $1");
-    if (is_string($a)) $this->load_network($a);
+    if (is_string($a)) $this->load_network($a, $force3char);
     else if (is_array($a)) 
     {
-      foreach($a as $network) { $this->load_network($network); }
+      foreach($a as $network) { $this->load_network($network, $force3char); }
     }
   }
 
-  function load_network($network)
+  function load_network($network, $force3char=FALSE)
   {
     $rs = pg_execute($this->dbconn, "SELECT", Array($network));
     for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
     {
-      $this->table[ $row["id"] ] = $row;
-      $this->do_conversions($row["id"]);
+        $keyid = $row["id"];
+        if ($force3char && strlen($keyid) == 4){
+            $keyid = substr($keyid, 1, 3);
+        }
+        $this->table[$keyid] = $row;
+        $this->do_conversions($keyid);
     }
   }
 
