@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (14, now());
+INSERT into iem_schema_manager_version values (15, now());
 
 CREATE TABLE stations(
 	id varchar(20),
@@ -144,14 +144,6 @@ CREATE TABLE hml_forecast(
 CREATE INDEX hml_forecast_idx on hml_forecast(station, generationtime);
 GRANT SELECT on hml_forecast to nobody,apache;
 
-CREATE TABLE hml_forecast_data_2016(
-  hml_forecast_id int REFERENCES hml_forecast(id),
-  valid timestamptz,
-  primary_value real,
-  secondary_value real);
-CREATE INDEX hml_forecast_data_2016_idx on
-  hml_forecast_data_2016(hml_forecast_id);
-GRANT SELECT on hml_forecast_data_2016 to nobody,apache;
 
 CREATE TABLE hml_observed_keys(
   id smallint UNIQUE,
@@ -227,81 +219,40 @@ begin
 end;
 $do$;
 
-
--- Add older table
-CREATE TABLE hml_forecast_data_2014(
-  hml_forecast_id int REFERENCES hml_forecast(id),
-  valid timestamptz,
-  primary_value real,
-  secondary_value real);
-CREATE INDEX hml_forecast_data_2014_idx on
-  hml_forecast_data_2014(hml_forecast_id);
-GRANT SELECT on hml_forecast_data_2014 to nobody,apache;
-
-CREATE TABLE hml_forecast_data_2015(
-  hml_forecast_id int REFERENCES hml_forecast(id),
-  valid timestamptz,
-  primary_value real,
-  secondary_value real);
-CREATE INDEX hml_forecast_data_2015_idx on
-  hml_forecast_data_2015(hml_forecast_id);
-GRANT SELECT on hml_forecast_data_2015 to nobody,apache;
-
-CREATE TABLE hml_forecast_data_2012(
-  hml_forecast_id int REFERENCES hml_forecast(id),
-  valid timestamptz,
-  primary_value real,
-  secondary_value real);
-CREATE INDEX hml_forecast_data_2012_idx on
-  hml_forecast_data_2012(hml_forecast_id);
-GRANT SELECT on hml_forecast_data_2012 to nobody,apache;
-
-CREATE TABLE hml_forecast_data_2013(
-  hml_forecast_id int REFERENCES hml_forecast(id),
-  valid timestamptz,
-  primary_value real,
-  secondary_value real);
-CREATE INDEX hml_forecast_data_2013_idx on
-  hml_forecast_data_2013(hml_forecast_id);
-GRANT SELECT on hml_forecast_data_2013 to nobody,apache;
-
 CREATE INDEX hml_forecast_issued_idx on hml_forecast(issued);
 
-CREATE TABLE hml_forecast_data_2017(
-  hml_forecast_id int REFERENCES hml_forecast(id),
-  valid timestamptz,
-  primary_value real,
-  secondary_value real);
-CREATE INDEX hml_forecast_data_2017_idx on
-  hml_forecast_data_2017(hml_forecast_id);
-GRANT SELECT on hml_forecast_data_2017 to nobody,apache;
-
-CREATE TABLE hml_forecast_data_2018(
-  hml_forecast_id int REFERENCES hml_forecast(id),
-  valid timestamptz,
-  primary_value real,
-  secondary_value real);
-CREATE INDEX hml_forecast_data_2018_idx on
-  hml_forecast_data_2018(hml_forecast_id);
-GRANT SELECT on hml_forecast_data_2018 to nobody,apache;
-
-CREATE TABLE hml_forecast_data_2019(
-  hml_forecast_id int REFERENCES hml_forecast(id),
-  valid timestamptz,
-  primary_value real,
-  secondary_value real);
-CREATE INDEX hml_forecast_data_2019_idx on
-  hml_forecast_data_2019(hml_forecast_id);
-GRANT SELECT on hml_forecast_data_2019 to nobody,apache;
-
-CREATE TABLE hml_forecast_data_2020(
-  hml_forecast_id int REFERENCES hml_forecast(id),
-  valid timestamptz,
-  primary_value real,
-  secondary_value real);
-CREATE INDEX hml_forecast_data_2020_idx on
-  hml_forecast_data_2020(hml_forecast_id);
-GRANT SELECT on hml_forecast_data_2020 to nobody,apache;
+-- HML forecast data is kind of a one-off with no inheritence
+do
+$do$
+declare
+     year int;
+     mytable varchar;
+begin
+    for year in 2012..2030
+    loop
+        mytable := format($f$hml_forecast_data_%s$f$, year);
+        execute format($f$
+            CREATE TABLE %s(
+            hml_forecast_id int REFERENCES hml_forecast(id),
+            valid timestamptz,
+            primary_value real,
+            secondary_value real)
+        $f$, mytable);
+        execute format($f$
+            ALTER TABLE %s OWNER to mesonet
+        $f$, mytable);
+        execute format($f$
+            GRANT ALL on %s to ldm
+        $f$, mytable);
+        execute format($f$
+            GRANT SELECT on %s to nobody,apache
+        $f$, mytable);
+        execute format($f$
+            CREATE INDEX on %s(hml_forecast_id)
+        $f$, mytable);
+    end loop;
+end;
+$do$;
 
 -- Storage of common / instantaneous data values
 CREATE TABLE alldata(
