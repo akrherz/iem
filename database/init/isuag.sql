@@ -4,7 +4,7 @@
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (8, now());
+INSERT into iem_schema_manager_version values (9, now());
 
 CREATE TABLE sm_daily (
   station char(5),
@@ -607,19 +607,33 @@ CREATE TABLE sm_minute (
   bp_mb real,
   bp_mb_qc real,
   bp_mb_f char(1)
-);
+) PARTITION by range(valid);
+ALTER TABLE sm_minute OWNER to mesonet;
 GRANT SELECT on sm_minute to nobody;
-GRANT ALL on sm_minute to ldm,mesonet;
+GRANT ALL on sm_minute to ldm;
+CREATE INDEX on sm_minute(station, valid);
 
-create table sm_minute_2019( 
-  CONSTRAINT __t2019_check 
-  CHECK(valid >= '2019-01-01 00:00+00'::timestamptz 
-        and valid < '2020-01-01 00:00+00')) 
-  INHERITS (sm_minute);
-CREATE UNIQUE INDEX sm_minute_2019_idx on sm_minute_2019(station, valid);
-GRANT SELECT on sm_minute_2019 to nobody;
-GRANT ALL on sm_minute_2019 to ldm,mesonet;
 
+do
+$do$
+declare
+     year int;
+begin
+    for year in 2019..2030
+    loop
+        execute format($f$
+            create table sm_minute_%s partition of sm_minute
+            for values from ('%s-01-01 00:00+00') to ('%s-01-01 00:00+00')
+        $f$, year, year, year + 1);
+        execute format($f$
+            GRANT ALL on sm_minute_%s to mesonet,ldm
+        $f$, year);
+        execute format($f$
+            GRANT SELECT on sm_minute_%s to nobody,apache
+        $f$, year);
+    end loop;
+end;
+$do$;
 
 CREATE TABLE daily (
     station character varying(7),
