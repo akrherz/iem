@@ -1,13 +1,15 @@
 """Generate the IEMRE daily analysis file for a year"""
-from __future__ import print_function
 import datetime
 import sys
+import os
 
 import geopandas as gpd
 import numpy as np
 from pyiem import iemre
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_dbconn, ncopen
+from pyiem.util import get_dbconn, ncopen, logger
+
+LOG = logger()
 
 
 def init_year(ts):
@@ -16,6 +18,9 @@ def init_year(ts):
     """
 
     fn = iemre.get_daily_ncname(ts.year)
+    if os.path.isfile(fn):
+        LOG.info("cowardly refusing to overwrite: %s", fn)
+        sys.exit()
     nc = ncopen(fn, "w")
     nc.title = "IEM Daily Reanalysis %s" % (ts.year,)
     nc.platform = "Grided Observations"

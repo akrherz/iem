@@ -312,7 +312,7 @@ def grid_day(ts, ds):
         SELECT m.lon, m.lat, m.state, m.id as station, m.name as name,
         precip as precipdata, snow as snowdata, snowd as snowddata,
         high as highdata, low as lowdata,
-        null as highdwpf, null as lowdwpf, null as avgsknt
+        null as highdwpf, null as lowdwpf, null as avgsknt,
         null as minrh, null as maxrh
         from alldata a JOIN mystations m
         ON (a.station = m.id) WHERE a.day = %s
@@ -357,8 +357,12 @@ def grid_day(ts, ds):
             np.nanmin(ds["wind_speed"].values),
             np.nanmax(ds["wind_speed"].values),
         )
-    ds["min_rh"].values = generic_gridder(df, "minrh")
-    ds["max_rh"].values = generic_gridder(df, "maxrh")
+    res = generic_gridder(df, "minrh")
+    if res is not None:
+        ds["min_rh"].values = res
+    res = generic_gridder(df, "maxrh")
+    if res is not None:
+        ds["max_rh"].values = res
 
 
 def workflow(ts, irealtime, justprecip):
@@ -384,6 +388,7 @@ def workflow(ts, irealtime, justprecip):
         LOG.debug("doing calendar day logic for %s", ts)
         grid_day(ts, ds)
     do_precip(ts, ds)
+    LOG.debug("calling iemre.set_grids()")
     iemre.set_grids(ts, ds)
     subprocess.call(
         "python db_to_netcdf.py %s" % (ts.strftime("%Y %m %d"),), shell=True
