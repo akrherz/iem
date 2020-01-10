@@ -2,14 +2,14 @@
 
 Run from RUN_10_AFTER.sh
 """
-from __future__ import print_function
 import datetime
 import re
 
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
 
+LOG = logger()
 LOGRE = re.compile(r"Autoplot\[\s*(\d+)\] Timing:\s*(\d+\.\d+)s Key: ([^\s]*)")
-LOGFN = "/var/log/mesonet/error_log"
+LOGFN = "/var/log/app/www_log"
 
 
 def get_dbendts(cursor):
@@ -50,9 +50,9 @@ def find_and_save(cursor, dbendts):
         inserts += 1
     # Don't complain during the early morning hours
     if inserts == 0 and now.hour > 5:
-        print(
-            ("mine_autoplot: no new entries found for databasing " "since %s")
-            % (dbendts)
+        LOG.info(
+            "mine_autoplot: no new entries found for databasing " "since %s",
+            dbendts,
         )
 
 
