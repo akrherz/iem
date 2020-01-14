@@ -9,10 +9,11 @@ import pytz
 from pyiem.observation import Observation
 from pyiem.datatypes import temperature, humidity, speed
 import pyiem.meteorology as met
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
 import numpy as np
 import pandas as pd
 
+LOG = logger()
 DIRPATH = "/var/opt/CampbellSci/LoggerNet"
 STOREPATH = "/mesonet/data/isusm"
 TSOIL_COLS = [
@@ -218,8 +219,21 @@ def process(path, fn):
     pgconn = get_dbconn("isuag")
     icursor = pgconn.cursor()
     if tabletype == "MinSI":
-        # partitioned tables
+        # partitioned tables, BUG
         tablename = "sm_minute_%s" % (df.iloc[0]["valid"].strftime("%Y"),)
+    # Delete away any old data
+    for _, row in df.iterrows():
+        icursor.execute(
+            """
+            DELETE from """
+            + tablename
+            + """ WHERE station = %s and valid = %s
+        """,
+            (row["station"], row["valid"]),
+        )
+        # LOG.debug(
+        #    "deleted %s rows for %s %s", icursor.rowcount, row['station'],
+        #    row['valid'])
     icursor.copy_from(output, tablename, columns=df.columns, null="")
     icursor.close()
     pgconn.commit()
@@ -236,6 +250,7 @@ def main():
             if event is None:
                 continue
             (_header, type_names, watch_path, fn) = event
+            # LOG.debug("fn: %s type_names: %s", fn, str(type_names))
             if "IN_CLOSE_WRITE" not in type_names:
                 continue
             if not fn.endswith(".dat"):
