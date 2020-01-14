@@ -43,8 +43,7 @@ $cntyMdpoint->setXY( ($extents[0] + $extents[2])/2,
                      ($extents[1] + $extents[3])/2 );
 $cntyMdpoint->project($latlon, $p26915);
 
-$n = Array("DMX", "DVN", "ARX", "MPX", "FSD", "OAX", "EAX", "KCCI");
-$nt->table["KCCI"] = Array("lat"=> 41.8072, "lon"=> -93.6214);
+$n = Array("DMX", "DVN", "ARX", "MPX", "FSD", "OAX", "EAX");
 $distances = Array();
 foreach($n as $key => $site){
   $r = ms_newpointobj();
@@ -63,9 +62,8 @@ $site = "FSD"; $fsd_url = drawCountyNEXRAD($site, $extents);
 $site = "OAX"; $oax_url = drawCountyNEXRAD($site, $extents);
 $site = "MPX"; $mpx_url = drawCountyNEXRAD($site, $extents);
 $site = "EAX"; $eax_url = drawCountyNEXRAD($site, $extents);
-$kcci_url = drawKCCI($extents);
 
-$ftime = filemtime('/home/ldm/data/gis/images/4326/ridge/DMX/N0Q_0.png');
+$ftime = filemtime('/home/meteor_ldm/data/gis/images/4326/ridge/DMX/N0Q_0.png');
 $radTS = date("m/d h:i a", $ftime);
 $s = drawStateNEXRAD($extents);
 
@@ -81,9 +79,7 @@ $t->content = <<<EOF
  <td><b>DMX - Des Moines:</b>
    <br><i>Distance:</i> {$distances['DMX']} km
    <br><img src="{$dmx_url}"></td>
- <td><b>KCCI-TV - Des Moines:</b>
-   <br><i>Distance:</i> {$distances['KCCI']} km
-   <br><img src="{$kcci_url}"></td>
+ <td></td>
  <td rowspan=4 valign="TOP">
   <b>Directions:</b> Click on the State NEXRAD view to change your comparison 
   area (shown in white)<br>

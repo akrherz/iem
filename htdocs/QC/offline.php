@@ -1,13 +1,13 @@
 <?php 
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 101);
-include("../../include/myview.php");
+require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Quality Control, Sites Offline";
 $t->thispage = "iem-qc";
 
 require_once "../../include/database.inc.php";
-include ("../../include/network.php");
+require_once "../../include/network.php";
 require_once "../../include/mlib.php";
 $pgconn = iemdb("iem");
 $rs = pg_prepare($pgconn, "SELECT", "SELECT *,
@@ -39,9 +39,6 @@ function networkOffline($network)
 
 	return $s;
 }
-$kcci = networkOffline("KCCI");
-$kelo = networkOffline("KELO");
-$kimt = networkOffline("KIMT");
 $rwis = networkOffline("IA_RWIS");
 $awos = networkOffline("AWOS");
 $isusm = networkOffline("ISUSM");
@@ -66,18 +63,6 @@ to a wide range of factors.  Here is a listing of sites currently offline.
 <tr><td colspan="3" style="background: #CCCCCC;"><b>ISU Soil Moisture Network</b>
   (3 hour tolerance)</td></tr>
 {$isusm}
-
-<tr><td colspan="3" style="background: #CCCCCC;"><b>KCCI School Network</b>
-  (30 minute tolerance)</td></tr>
-{$kcci}
-
-<tr><td colspan=3 style="background: #CCCCCC;"><b>KELO School Network</b>
-  (3 hour tolerance)</td></tr>
-{$kelo}
-
-<tr><td colspan=3 style="background: #CCCCCC;"><b>KIMT School Network</b>
-  (30 minute tolerance)</td></tr>
-{$kimt}
 
 <tr>
  <td colspan=3 style="background: #CCCCCC;"><b>RWIS Network</b>
