@@ -9,6 +9,7 @@ from pyiem.exceptions import NoDataFound
 
 PDICT = {
     "precip": "Total Precipitation",
+    "snow": "Total Snowfall",
     "avg_high": "Average High Temperature",
     "avg_low": "Average Low Temperature",
     "avg_temp": "Average Monthly Temperature",
@@ -16,6 +17,7 @@ PDICT = {
 
 LABELS = {
     "precip": "Monthly Liquid Precip Totals [inches] (snow is melted)",
+    "snow": "Monthly Snow Fall [inches]",
     "avg_high": "Monthly Average High Temperatures [F]",
     "avg_low": "Monthly Average Low Temperatures [F]",
     "avg_temp": "Monthly Average Temperatures [F] (High + low)/2",
@@ -90,6 +92,7 @@ def plotter(fdict):
         case when month in (10, 11, 12) then year + 1 else year end
           as water_year,
         sum(precip) as precip,
+        sum(snow) as snow,
         avg(high) as avg_high, avg(low) as avg_low,
         avg((high+low)/2.) as avg_temp from """
         + table
@@ -135,10 +138,12 @@ def plotter(fdict):
     wyrmean = df.groupby("water_year")[varname].mean()
 
     prec = 2 if varname == "precip" else 0
+    if varname == "snow":
+        prec = 1
     for year in years:
         yrtot = yrsum[year]
         wyrtot = wyrsum.get(year, 0)
-        if varname != "precip":
+        if varname not in ["precip", "snow"]:
             yrtot = yrmean[year]
             wyrtot = wyrmean.get(year, 0)
         res += ("%s%6s%6s%6s%6s%6s%6s%6s%6s%6s%6s%6s%6s%6s%6s\n") % (
@@ -158,8 +163,12 @@ def plotter(fdict):
             myformat(yrtot, 2),
             myformat(wyrtot, 2),
         )
-    yrtot = yrmean.mean() if varname != "precip" else yrsum.mean()
-    wyrtot = wyrmean.mean() if varname != "precip" else wyrsum.mean()
+    yrtot = (
+        yrmean.mean() if varname not in ["precip", "snow"] else yrsum.mean()
+    )
+    wyrtot = (
+        wyrmean.mean() if varname not in ["precip", "snow"] else wyrsum.mean()
+    )
     res += (
         "MEAN%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f%6.2f"
         "%6.2f%6.2f%6.2f%6.2f\n"
@@ -189,8 +198,10 @@ def plotter(fdict):
         resdf[month_abbr.upper()] = df[df["month"] == i].set_index("year")[
             varname
         ]
-    resdf["ANN"] = yrmean if varname != "precip" else yrsum
-    resdf["WATER YEAR"] = wyrmean if varname != "precip" else wyrsum
+    resdf["ANN"] = yrmean if varname not in ["precip", "snow"] else yrsum
+    resdf["WATER YEAR"] = (
+        wyrmean if varname not in ["precip", "snow"] else wyrsum
+    )
 
     return None, resdf, res
 
