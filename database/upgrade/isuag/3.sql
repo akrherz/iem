@@ -70,39 +70,3 @@ ALTER TABLE sm_daily add lwmwet_2_tot_f char(1);
 ALTER TABLE sm_daily add bpres_avg real;
 ALTER TABLE sm_daily add bpres_avg_qc real;
 ALTER TABLE sm_daily add bpres_avg_f char(1);
-
-ALTER TABLE sm_15minute add lwmv_1 real;
-ALTER TABLE sm_15minute add lwmv_1_qc real;
-ALTER TABLE sm_15minute add lwmv_1_f char(1);
-
-ALTER TABLE sm_15minute add lwmv_2 real;
-ALTER TABLE sm_15minute add lwmv_2_qc real;
-ALTER TABLE sm_15minute add lwmv_2_f char(1);
-
-ALTER TABLE sm_15minute add lwmdry_1_tot real;
-ALTER TABLE sm_15minute add lwmdry_1_tot_qc real;
-ALTER TABLE sm_15minute add lwmdry_1_tot_f char(1);
-
-ALTER TABLE sm_15minute add lwmcon_1_tot real;
-ALTER TABLE sm_15minute add lwmcon_1_tot_qc real;
-ALTER TABLE sm_15minute add lwmcon_1_tot_f char(1);
-
-ALTER TABLE sm_15minute add lwmwet_1_tot real;
-ALTER TABLE sm_15minute add lwmwet_1_tot_qc real;
-ALTER TABLE sm_15minute add lwmwet_1_tot_f char(1);
-
-ALTER TABLE sm_15minute add lwmdry_2_tot real;
-ALTER TABLE sm_15minute add lwmdry_2_tot_qc real;
-ALTER TABLE sm_15minute add lwmdry_2_tot_f char(1);
-
-ALTER TABLE sm_15minute add lwmcon_2_tot real;
-ALTER TABLE sm_15minute add lwmcon_2_tot_qc real;
-ALTER TABLE sm_15minute add lwmcon_2_tot_f char(1);
-
-ALTER TABLE sm_15minute add lwmwet_2_tot real;
-ALTER TABLE sm_15minute add lwmwet_2_tot_qc real;
-ALTER TABLE sm_15minute add lwmwet_2_tot_f char(1);
-
-ALTER TABLE sm_15minute add bpres_avg real;
-ALTER TABLE sm_15minute add bpres_avg_qc real;
-ALTER TABLE sm_15minute add bpres_avg_f char(1);

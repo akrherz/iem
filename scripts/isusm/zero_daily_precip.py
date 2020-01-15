@@ -14,7 +14,7 @@ def zero_hourly(station, sts, ets):
     """Zero out the hourly data"""
     pgconn = get_dbconn("isuag")
     cursor = pgconn.cursor()
-    for table in ["sm_hourly", "sm_15minute"]:
+    for table in ["sm_hourly", "sm_minute"]:
         cursor.execute(
             """
             UPDATE """

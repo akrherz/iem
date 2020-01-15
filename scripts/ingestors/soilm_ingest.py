@@ -1,5 +1,5 @@
 """
- Ingest ISU SOILM data!
+    LEGACY ISU SOIL MOISTURE INGEST!
 
  Run from RUN_10_AFTER.sh
 """
@@ -40,10 +40,10 @@ VARCONV = {
     "calcvwc12_avg": "calc_vwc_12_avg",
     "calcvwc24_avg": "calc_vwc_24_avg",
     "calcvwc50_avg": "calc_vwc_50_avg",
-    "outofrange06": "P06OutOfRange",
-    "outofrange12": "P12OutOfRange",
-    "outofrange24": "P24OutOfRange",
-    "outofrange50": "P50OutOfRange",
+    "outofrange06": "p06outofrange",
+    "outofrange12": "p12outofrange",
+    "outofrange24": "p24outofrange",
+    "outofrange50": "p50outofrange",
     "ws_ms_s_wvt": "ws_mps_s_wvt",
     "ec6in": "ec06",
     "ec12in": "ec12",
@@ -130,6 +130,76 @@ def common_df_logic(filename, maxts, nwsli, tablename):
     df.columns = map(str.lower, df.columns)
     # rename columns to rectify differences
     df.rename(columns=VARCONV, inplace=True)
+    if tablename == "sm_minute":
+        # Some conversions needed to map this data back to 1min table
+        # slrkw_avg to slrkj_tot (* 15 * 60 / 15)
+        df["slrkj_tot"] = df["slrkw_avg"] * 60.0
+        # rain_mm_tot to rain_in_tot
+        df["rain_in_tot"] = df["rain_mm_tot"] / 25.4
+        if "rain_mm_2_tot" in df.columns:
+            df["rain_in_2_tot"] = df["rain_mm_2_tot"] / 25.4
+            df = df.drop("rain_mm_2_tot", axis=1)
+        # Wind
+        df["ws_mph_s_wvt"] = df["ws_mps_s_wvt"] * 2.23694
+        # drop our no longer needed columns
+        df = df.drop(
+            [
+                "slrkw_avg",
+                "slrmj_tot",
+                "rain_mm_tot",
+                "ws_mps_s_wvt",
+                "winddir_sd1_wvt",
+                "ws_mph_tmx",
+                "ec06",
+                "ec12",
+                "ec24",
+                "ec50",
+                "pa06",
+                "pa12",
+                "pa24",
+                "pa50",
+                "p06outofrange",
+                "p12outofrange",
+                "p24outofrange",
+                "p50outofrange",
+                "battv_min",
+                "ec_2in",
+                "ec_4in",
+                "ec_8in",
+                "ec_12in",
+                "ec_16in",
+                "ec_20in",
+            ],
+            axis=1,
+            errors="ignore",
+        )
+        # HACK
+        df = df.rename(
+            columns={
+                "calc_vwc_06_avg": "calcvwc06_avg",
+                "vwc_06_avg": "calcvwc06_avg",
+                "vwc_12_avg": "calcvwc12_avg",
+                "vwc_24_avg": "calcvwc24_avg",
+                "vwc_50_avg": "calcvwc50_avg",
+                "vwc_avg2in": "calcvwc02_avg",
+                "vwc_avg4in": "calcvwc04_avg",
+                "vwc_avg8in": "calcvwc08_avg",
+                "vwc_avg12in": "calcvwc12_avg",
+                "vwc_avg16in": "calcvwc16_avg",
+                "vwc_avg20in": "calcvwc20_avg",
+                "calc_vwc_12_avg": "calcvwc12_avg",
+                "calc_vwc_24_avg": "calcvwc24_avg",
+                "calc_vwc_50_avg": "calcvwc50_avg",
+                "temp_avg2in": "t02_c_avg",
+                "temp_avg4in": "t04_c_avg",
+                "temp_avg8in": "t08_c_avg",
+                "temp_avg12in": "t12_c_avg",
+                "temp_avg16in": "t16_c_avg",
+                "temp_avg20in": "t20_c_avg",
+                "bpres_avg": "bp_mb",
+                "rh": "rh_avg",
+            }
+        )
     df["valid"] = df["valid"].apply(make_time)
     if tablename == "sm_daily":
         # Rework the valid column into the appropriate date
@@ -176,7 +246,7 @@ def common_df_logic(filename, maxts, nwsli, tablename):
 def m15_process(nwsli, maxts):
     """ Process the 15minute file """
     fn = "%s/%s_Min15SI.dat" % (BASE, STATIONS[nwsli])
-    df = common_df_logic(fn, maxts, nwsli, "sm_15minute")
+    df = common_df_logic(fn, maxts, nwsli, "sm_minute")
     if df is None:
         return 0
 
@@ -189,16 +259,16 @@ def m15_process(nwsli, maxts):
         tmpc = temperature(row["tair_c_avg_qc"], "C")
         if tmpc.value("F") > -50 and tmpc.value("F") < 140:
             ob.data["tmpf"] = tmpc.value("F")
-            relh = humidity(row["rh_qc"], "%")
+            relh = humidity(row["rh_avg_qc"], "%")
             ob.data["relh"] = relh.value("%")
             ob.data["dwpf"] = met.dewpoint(tmpc, relh).value("F")
-        ob.data["srad"] = row["slrkw_avg_qc"]
-        ob.data["pcounter"] = round(
-            distance(row["rain_mm_tot_qc"], "MM").value("IN"), 2
-        )
-        ob.data["sknt"] = speed(row["ws_mps_s_wvt_qc"], "MPS").value("KT")
+        # ob.data["srad"] = row["slrkw_avg_qc"]
+        # ob.data["pcounter"] = round(
+        #    distance(row["rain_mm_tot_qc"], "MM").value("IN"), 2
+        # )
+        ob.data["sknt"] = speed(row["ws_mph_s_wvt_qc"], "MPH").value("KT")
         ob.data["gust"] = speed(row["ws_mph_max_qc"], "MPH").value("KT")
-        ob.data["max_gust_ts"] = row["ws_mph_tmx"]
+        # ob.data["max_gust_ts"] = row["ws_mph_tmx"]
         ob.data["drct"] = row["winddir_d1_wvt_qc"]
         if "tsoil_c_avg" in df.columns:
             ob.data["c1tmpf"] = temperature(row["tsoil_c_avg_qc"], "C").value(
@@ -366,9 +436,7 @@ def get_max_timestamps(nwsli):
     icursor = ISUAG.cursor()
     data = {
         "hourly": datetime.datetime(2012, 1, 1, tzinfo=pytz.FixedOffset(-360)),
-        "15minute": datetime.datetime(
-            2012, 1, 1, tzinfo=pytz.FixedOffset(-360)
-        ),
+        "minute": datetime.datetime(2012, 1, 1, tzinfo=pytz.FixedOffset(-360)),
         "daily": datetime.date(2012, 1, 1),
     }
     icursor.execute(
@@ -394,20 +462,20 @@ def get_max_timestamps(nwsli):
 
     icursor.execute(
         """
-        SELECT max(valid) from sm_15minute
+        SELECT max(valid) from sm_minute
         WHERE station = %s
     """,
         (nwsli,),
     )
     row = icursor.fetchone()
     if row[0] is not None:
-        data["15minute"] = row[0]
+        data["minute"] = row[0]
     LOG.debug(
-        "%s max daily: %s hourly: %s 15minute: %s",
+        "%s max daily: %s hourly: %s minute: %s",
         nwsli,
         data["daily"],
         data["hourly"],
-        data["15minute"],
+        data["minute"],
     )
     return data
 
@@ -473,7 +541,7 @@ def main(argv):
     for nwsli in stations:
         LOG.debug("starting workflow for: %s", nwsli)
         maxobs = get_max_timestamps(nwsli)
-        m15processed = m15_process(nwsli, maxobs["15minute"])
+        m15processed = m15_process(nwsli, maxobs["minute"])
         hrprocessed = hourly_process(nwsli, maxobs["hourly"])
         dyprocessed = daily_process(nwsli, maxobs["daily"])
         if hrprocessed > 0:
@@ -496,7 +564,7 @@ def main(argv):
     for day in EVENTS["days"]:
         LOG.info("Calling fix_{solar,precip}.py for %s", day)
         subprocess.call(
-            ("python ../isuag/fix_precip.py %s %s %s")
+            ("python ../isusm/fix_precip.py %s %s %s")
             % (day.year, day.month, day.day),
             shell=True,
         )

@@ -10,10 +10,10 @@ def do_isuag(nwsli, sts, ets):
     """Do ISUAG Table"""
     pgconn = get_dbconn("isuag")
     cursor = pgconn.cursor()
-    # Cull 15minute
+    # Cull minute
     cursor.execute(
         """
-        UPDATE sm_15minute SET
+        UPDATE sm_minute SET
         tair_c_avg_qc = null, tair_c_avg_f = 'M',
         rh_qc = null, rh_f = 'M'
         WHERE station = %s and valid >= %s and valid <= %s

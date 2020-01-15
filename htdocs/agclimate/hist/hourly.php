@@ -55,7 +55,7 @@ wish to change this to <a href="daily.php">daily data</a>.
 
 <select name="timeres">
   <option value="hourly">Hourly</option>
-  <option value="15minute">15 Minute</option>
+  <option value="minute">Minute (coming soon!)</option>
 </select>
 
 <h4>Select station(s):</h4>

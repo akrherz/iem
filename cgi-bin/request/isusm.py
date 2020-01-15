@@ -333,8 +333,8 @@ def fetch_hourly(form, cols):
 
     table = "sm_hourly"
     sqlextra = ", null as bp_mb_qc, etalfalfa_qc "
-    if form.getfirst("timeres") == "15minute":
-        table = "sm_15minute"
+    if form.getfirst("timeres") == "minute":
+        table = "sm_minute"
         sqlextra = ", bp_mb_qc, null as etalfalfa_qc"
     else:
         if "bp_mb" in cols:

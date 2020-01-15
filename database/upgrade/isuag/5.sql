@@ -1,8 +1,4 @@
 
-ALTER TABLE sm_15minute add etapples real;
-ALTER TABLE sm_15minute add etapples_qc real;
-ALTER TABLE sm_15minute add etapples_f char(1);
-
 ALTER TABLE sm_hourly add etapples real;
 ALTER TABLE sm_hourly add etapples_qc real;
 ALTER TABLE sm_hourly add etapples_f char(1);

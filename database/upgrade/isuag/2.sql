@@ -23,16 +23,3 @@ alter table sm_daily add calc_vwc_24_avg_f char(1);
 alter table sm_daily add calc_vwc_50_avg real;
 alter table sm_daily add calc_vwc_50_avg_qc real;
 alter table sm_daily add calc_vwc_50_avg_f char(1);
-
-alter table sm_15minute add calc_vwc_06_avg real;
-alter table sm_15minute add calc_vwc_06_avg_qc real;
-alter table sm_15minute add calc_vwc_06_avg_f char(1);
-alter table sm_15minute add calc_vwc_12_avg real;
-alter table sm_15minute add calc_vwc_12_avg_qc real;
-alter table sm_15minute add calc_vwc_12_avg_f char(1);
-alter table sm_15minute add calc_vwc_24_avg real;
-alter table sm_15minute add calc_vwc_24_avg_qc real;
-alter table sm_15minute add calc_vwc_24_avg_f char(1);
-alter table sm_15minute add calc_vwc_50_avg real;
-alter table sm_15minute add calc_vwc_50_avg_qc real;
-alter table sm_15minute add calc_vwc_50_avg_f char(1);

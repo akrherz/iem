@@ -122,16 +122,16 @@ def update_precip(date, station, hdf):
         """,
             (total, row["valid"], station),
         )
-        # 15minute
-        for minute in [45, 30, 15, 0]:
+        # minute
+        for minute in range(60):
             cursor.execute(
                 """
-                UPDATE sm_15minute
-                SET rain_mm_tot_qc = %s, rain_mm_tot_f = 'E'
+                UPDATE sm_minute
+                SET rain_in_tot_qc = %s, rain_mm_tot_f = 'E'
                 WHERE valid = %s and station = %s
             """,
                 (
-                    total / 4.0,
+                    total / 60.0 / 25.4,
                     row["valid"] - datetime.timedelta(minutes=minute),
                     station,
                 ),
