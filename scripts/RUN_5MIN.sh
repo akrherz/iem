@@ -2,6 +2,9 @@
 cd cache 
 bash download_wwa.sh &
 
+cd ../isusm
+python csv2ldm.py &
+
 cd ../roads
 python ingest_roads_rest.py &
 

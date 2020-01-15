@@ -13,7 +13,6 @@ import io
 
 # Third party
 import psycopg2
-import requests
 import pytz
 import numpy as np
 import pandas as pd
@@ -468,16 +467,6 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
     os.remove(tmpfn)
 
 
-def dump_madis_csv():
-    """Inject the current MADIS NMP csv into LDM"""
-    uri = "http://iem.local/agclimate/isusm.csv"
-    req = requests.get(uri)
-    output = open("/tmp/isusm.csv", "wb")
-    output.write(req.content)
-    output.close()
-    subprocess.call("pqinsert -p 'isusm.csv' /tmp/isusm.csv", shell=True)
-
-
 def main(argv):
     """ Go main Go """
     stations = STATIONS if len(argv) == 1 else [argv[1]]
@@ -516,8 +505,6 @@ def main(argv):
             % (day.year, day.month, day.day),
             shell=True,
         )
-
-    dump_madis_csv()
 
 
 def test_make_tstamp():

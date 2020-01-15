@@ -22,33 +22,28 @@ def p2(val, prec, minv, maxv):
     return round(temperature(val, "C").value("K"), prec)
 
 
-def do_output():
-    """Do as I say"""
+def use_table(table, hits):
+    """Process for the given table."""
+    nt = NetworkTable("ISUSM")
     pgconn = get_dbconn("isuag")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cursor.execute(
         """
     with data as (
-        select rank() OVER (ORDER by valid DESC), * from sm_hourly
+        select row_number() OVER (PARTITION by station ORDER by valid DESC),
+        * from """
+        + table
+        + """
         where valid > now() - '48 hours'::interval
         and valid < now())
     SELECT *, valid at time zone 'UTC' as utc_valid from data
-    where rank = 1 ORDER by station ASC"""
+    where row_number = 1 ORDER by station ASC"""
     )
-
-    ssw(
-        (
-            "station_id,LAT [degN],LON [degE],date_time,ELEV [m],"
-            "depth [m]#SOILT [K],depth [m]#SOILM [kg/kg],"
-            "GSRD[1]H [W/m^2],height [m]#T [K]#RH [%],"
-            "PCP[1]H [mm],"
-            "height [m]#FF[1]H [m/s]#FFMAX[1]H [m/s]#DD[1]H [degN]\n"
-        )
-    )
-
-    nt = NetworkTable("ISUSM")
     for row in cursor:
         sid = row["station"]
+        if sid in hits:
+            continue
+        hits.append(sid)
         ssw(
             (
                 "%s,%.4f,%.4f,%s,%.1f,"
@@ -75,25 +70,58 @@ def do_output():
                 distance(12, "IN").value("M"),
                 distance(24, "IN").value("M"),
                 distance(50, "IN").value("M"),
-                p(row["vwc_12_avg_qc"], 1, 0, 100),
-                p(row["vwc_24_avg_qc"], 1, 0, 100),
-                p(row["vwc_50_avg_qc"], 1, 0, 100),
-                p(row["slrkw_avg_qc"], 1, 0, 1600),
-                p2(row["tair_c_avg_qc"], 1, -90, 90),
-                p(row["rh_qc"], 1, 0, 1600),
-                p(row["rain_mm_tot_qc"], 2, 0, 100),
-                p(row["ws_mps_s_wvt_qc"], 2, 0, 100),
                 p(
-                    (row["ws_mph_max_qc"] * units("mph"))
+                    row.get("vwc_12_avg_qc", row.get("calcvwc12_avg_qc")),
+                    1,
+                    0,
+                    100,
+                ),
+                p(
+                    row.get("vwc_24_avg_qc", row.get("calcvwc24_avg_qc")),
+                    1,
+                    0,
+                    100,
+                ),
+                p(
+                    row.get("vwc_50_avg_qc", row.get("calcvwc50_avg_qc")),
+                    1,
+                    0,
+                    100,
+                ),
+                p(row.get("slrkw_avg_qc"), 1, 0, 1600),
+                p2(row["tair_c_avg_qc"], 1, -90, 90),
+                p(row.get("rh_qc", row.get("rh_avg_qc")), 1, 0, 1600),
+                p(row.get("rain_mm_tot_qc"), 2, 0, 100),
+                p(row.get("ws_mps_s_wvt_qc"), 2, 0, 100),
+                p(
+                    (row.get("ws_mph_max_qc", 0) * units("mph"))
                     .to(units("meter / second"))
                     .m,
                     2,
                     0,
                     100,
                 ),
-                p(row["winddir_d1_wvt_qc"], 2, 0, 360),
+                p(row.get("winddir_d1_wvt_qc"), 2, 0, 360),
             )
         )
+
+
+def do_output():
+    """Do as I say"""
+
+    ssw(
+        (
+            "station_id,LAT [degN],LON [degE],date_time,ELEV [m],"
+            "depth [m]#SOILT [K],depth [m]#SOILM [kg/kg],"
+            "GSRD[1]H [W/m^2],height [m]#T [K]#RH [%],"
+            "PCP[1]H [mm],"
+            "height [m]#FF[1]H [m/s]#FFMAX[1]H [m/s]#DD[1]H [degN]\n"
+        )
+    )
+
+    hits = []
+    use_table("sm_minute", hits)
+    use_table("sm_hourly", hits)
     ssw(".EOO\n")
 
 
