@@ -8,6 +8,7 @@ import datetime
 import os
 import glob
 import subprocess
+from io import BytesIO
 import tempfile
 import zipfile
 
@@ -42,7 +43,7 @@ def save_content(station, content):
         )
         LOG.debug(pqstr)
         with tempfile.NamedTemporaryFile(delete=False) as tmpfd:
-            tmpfd.write(content[key])
+            tmpfd.write(content[key].getvalue())
         proc = subprocess.Popen(
             "pqinsert -i -p '%s' %s" % (pqstr, tmpfd.name),
             shell=True,
@@ -69,11 +70,12 @@ def process(files):
         # build key based on the header
         key = "%s||%s" % (ftype, lines[1])
         if key not in content:
-            content[key] = b"".join(lines[:4])
+            content[key] = BytesIO()
+            content[key].write(b"".join(lines[:4]))
         for line in lines[4:]:
             if line.strip() == b"":
                 continue
-            content[key] += line
+            content[key].write(line)
     return content
 
 
