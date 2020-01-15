@@ -2,9 +2,11 @@
 import sys
 import datetime
 
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
 from pyiem.plot import MapPlot
 from pyiem.network import Table as NetworkTable
+
+LOG = logger()
 
 
 def main():
@@ -36,16 +38,20 @@ def main():
         sdd86.append(float(row[1]))
         valmask.append(True)
 
-    if len(sdd86) < 5 or max(sdd86) == 0:
+    if len(sdd86) < 5:
+        LOG.debug("aborting due to %s obs", len(sdd86))
         sys.exit()
 
     mp = MapPlot(
         axisbg="white",
         title="Iowa %s SDD Accumulation" % (now.strftime("%B %Y"),),
     )
-    mp.contourf(
-        lons, lats, sdd86, range(int(min(sdd86) - 1), int(max(sdd86) + 1))
-    )
+    if max(sdd86) > 5:
+        mp.contourf(
+            lons, lats, sdd86, range(int(min(sdd86) - 1), int(max(sdd86) + 1))
+        )
+    else:
+        mp.plot_values(lons, lats, sdd86, fmt="%.0f")
     pqstr = "plot c 000000000000 summary/sdd_mon.png bogus png"
     mp.postprocess(view=False, pqstr=pqstr)
     mp.close()

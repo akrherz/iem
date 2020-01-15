@@ -3,10 +3,8 @@ from __future__ import print_function
 import datetime
 import os
 import sys
-import smtplib
 import ftplib
 import subprocess
-from email.mime.text import MIMEText
 
 import pandas as pd
 import pytz

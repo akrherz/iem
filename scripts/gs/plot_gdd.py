@@ -1,5 +1,6 @@
 """Generate a plot of GDD"""
 import datetime
+
 import numpy as np
 from pyiem.plot import MapPlot
 from pyiem.network import Table as NetworkTable

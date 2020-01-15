@@ -112,7 +112,7 @@ def application(environ, start_response):
         ts = datetime.datetime.utcnow()
     else:
         ts = datetime.datetime.strptime(ts, "%Y%m%d%H%M")
-    ts = ts.replace(tzinfo=pytz.utc)
+    ts = ts.replace(tzinfo=pytz.UTC)
 
     cb = fields.get("callback")
 
