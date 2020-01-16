@@ -37,7 +37,7 @@ def do_updates(cursor, station, valid, row):
         row,
     )
     if cursor.rowcount == 0:
-        LOG.info("Updating %s %s resulted in 0 rows updated", station, valid)
+        LOG.debug("Updating %s %s resulted in 0 rows updated", station, valid)
 
 
 def process(cursor, row):

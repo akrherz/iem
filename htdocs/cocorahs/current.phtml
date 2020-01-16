@@ -50,7 +50,7 @@ $t->current_network = "CoCoRaHS";
   $db[$site] = Array('snow'=> "", 'snowd'=>"", 'ratio'=>"", 'pday'=>"", 'pmonth'=>"", 'pmiss' => "");
   $db[$site]['ts'] = strtotime($iemob["local_valid"]);
   $db[$site]['sid'] = $site;
-  $db[$site]['sname'] = $iemob["name"];
+  $db[$site]['name'] = $iemob["name"];
   $db[$site]['county'] = $nt->table[$site]["county"];
   if ( date("Ym") == date("Ym", strtotime($iemob["local_valid"])) ){
     $db[$site]['pmonth'] = @$monthDict[$site]["accum"];
@@ -74,7 +74,7 @@ $t->current_network = "CoCoRaHS";
 $db = aSortBySecondIndex($db, $sortcol, "desc");
 
 $cols = Array("ts" => "Valid", "county" => "County",
-  "sid" => "Site ID", "sname" => "Station Name",
+  "sid" => "Site ID", "name" => "Station Name",
   "tmpf" => "Ob Temperature", "max_tmpf" => "24 hour High",
   "min_tmpf" => "24 hour Low", "snow" => "24 hour Snowfall",
   "snowd" => "Snowfall Depth", "pday" => "24 hour rainfall",
@@ -90,7 +90,7 @@ The number of observations missing for this month is shown in parenthesis.
 <tr>
   <th rowspan="2">Add:</th>
   <th rowspan="2"><a href="{$baseurl2}sid">SiteID:</a></th>
-  <th rowspan="2"><a href="{$baseurl2}sname">Station Name:</a></th>
+  <th rowspan="2"><a href="{$baseurl2}name">Station Name:</a></th>
   <th rowspan="2"><a href="{$baseurl2}county">County:</a></th>
   <th rowspan="2"><a href="{$baseurl2}ts">Valid:</a></th>
   <th colspan="5">Hydro</th></tr>
@@ -116,7 +116,7 @@ EOF;
    $content .= <<<EOF
 ><th><input type="checkbox" name="st[]"
    value="{$site}"></th><td><a href="/sites/site.php?station={$site}&network={$network}">$site</a></td>
-    <td>{$value["sname"]}</td>
+    <td>{$value["name"]}</td>
     <td>{$value["county"]}</td>
 EOF;
    $content .= "<td ";

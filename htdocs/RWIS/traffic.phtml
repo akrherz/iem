@@ -1,15 +1,15 @@
 <?php
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 $t = new MyView();
 $t->current_network = "RWIS Traffic";
-include("../../include/database.inc.php");
+require_once "../../include/database.inc.php";
 $dbconn = iemdb("iem");
 $sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']): 'valid';
 
 /* Query out the data */
-$rs = pg_prepare($dbconn, "SELECT", "select t.*, s.name as sname from rwis_traffic t, stations s
+$rs = pg_prepare($dbconn, "SELECT", "select t.*, s.name from rwis_traffic t, stations s
       where s.remote_id = t.location_id ORDER by $sortcol DESC");
 $rs = pg_execute($dbconn, "SELECT", Array() );
 
@@ -25,7 +25,7 @@ $rs = pg_execute($dbconn, "SELECT", Array() );
  	else { return date("M d h:i A", $ts); }
  }
  $vals = Array(
- 		"sname" => "Station Name",
+ 		"name" => "Station Name",
  		"valid" => "Observation Time",
  		"avg_speed" => "Average Speed [mph]",
  		"normal_vol" => "2 Axel Volume",
@@ -36,7 +36,7 @@ $rs = pg_execute($dbconn, "SELECT", Array() );
  $table = "";
  for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
  	$table .= sprintf("<tr><th>%s</th><th>%s</th><td>%s</td><td>%.1f</td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
- 			$row["sname"], $row["name"], fancytime($row["valid"]), $row["avg_speed"],
+ 			$row["name"], $row["name"], fancytime($row["valid"]), $row["avg_speed"],
  			$row["normal_vol"], $row["long_vol"], $row["occupancy"]);
  }
  
@@ -51,7 +51,7 @@ $t->content = <<<EOF
 <table style="width: 100%; font-size: 10pt;" cellspacing="0" cellpadding="1" border="1">
 <thead>
 <tr>
-  <th><a href="traffic.phtml?sortcol=sname">Station:</a></th>
+  <th><a href="traffic.phtml?sortcol=name">Station:</a></th>
   <th>Lane ID:</th>
   <th><a href="traffic.phtml?sortcol=valid">Ob Time</a></th>
   <th><a href="traffic.phtml?sortcol=avg_speed">Average Speed</a></th>

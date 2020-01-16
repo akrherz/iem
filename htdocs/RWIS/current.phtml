@@ -21,7 +21,7 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
   "pday" => "Precip Accum [inches]", "max_sknt" => "Wind Gust [knots]",
   "ts" => "Observation Time [local]", "feel" => "Feels Like", "peak" =>"Wind Gust",
   "min_tmpf" => "Today's Low Temperature", "peak_ts" => "Time of Wind Gust",
-  "max_tmpf" => "Today's High Temperature", "sname" => "Station Name",
+  "max_tmpf" => "Today's High Temperature", "name" => "Station Name",
   "sid" => "Station ID", "relh" => "Relative Humidity", "vsby" => "Visibility");
 
 $nselect = "<select name=\"network\">";
@@ -172,7 +172,7 @@ $content = <<<EOF
 <thead>
 <tr>
   <th rowspan="2">ADD:</th>
-  <th rowspan="2"><a href="{$uri}sname">Station:</a></th>
+  <th rowspan="2"><a href="{$uri}name">Station:</a></th>
   <th rowspan="2"><a href="{$uri}ts">Ob Time</a></th>
   <th colspan="3" bgcolor="#acdcda">Temps &deg;F</th>
   <th>&nbsp;</th>

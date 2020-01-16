@@ -62,7 +62,7 @@ $vals = Array("valid" => "Observation Time", "tmpf" => "Temperature",
 		"gust" => "Peak Gust Today", "gtim" => "Time of Peak Gust",
 		"pday" => "Today's Precipitation", "feel" => "Feels Like",
 		"pmonth" => "Month's Precipitation", "phour" => "Hourly Precip",
-		"tmpf0" => "Sensor 1 - Temp [F]",  "sname" => "Station Name",
+		"tmpf0" => "Sensor 1 - Temp [F]",  "name" => "Station Name",
 		"tmpf1" => "Sensor 2 - Temp [F]",
 		"tmpf2" => "Sensor 3 - Temp [F]",
 		"tmpf3" => "Sensor 4 - Temp [F]",
@@ -144,7 +144,8 @@ $now = time();
 $cgiStr = "";
 $i = 0;
 $table = "";
-while (list ($key, $val) = each ($finalA))  {
+foreach ($finalA as $key => $val)
+{
 	$i++;
 	$parts = $finalA[$key];
 	$cgiStr .= "st[]=". $key ."&";
@@ -217,7 +218,7 @@ Click on a column to sort it.<br>
 <tr>
 
   <th rowspan="2">DEL</th>
-  <th rowspan="2"><a href="{$uri}sname">Station:</a></th>
+  <th rowspan="2"><a href="{$uri}name">Station:</a></th>
   <th rowspan="2"><a href="{$uri}ts">Valid</a></th>
   <th rowspan="2">Present Wx</th>
   <th colspan=6></td>
@@ -275,7 +276,8 @@ reset($mydata);
 $finalA = aSortBySecondIndex($mydata, $sortcol);
   $i = 0;
   $now = time();
-  while (list ($key, $val) = each ($finalA))  {
+  foreach ($finalA as $key => $val)
+  {
       if (! in_array($key, $sfstations)) continue;
     $parts = $finalA[$key];
           $i++;
@@ -337,7 +339,7 @@ $content .= <<<EOF
 <table class="table table-striped table-condensed table-bordered">
 <tr>
   <td rowspan="2">DEL:</td>
-  <th rowspan="2"><a href="{$uri}sname">Station:</a></th>
+  <th rowspan="2"><a href="{$uri}name">Station:</a></th>
   <th rowspan="2"><a href="{$uri}ts">Ob Time</a></th>
   <th colspan="2" bgcolor="#acdcda">Air:</th>
   <th bgcolor="#acdcda">Sensor 1</th>

@@ -26,7 +26,7 @@ $vals = Array("tsf0" => "Sensor 1 - Temp [F]",
   "dry2" => "Sensor 3 - Cond [F]",
   "dry3" => "Sensor 4 - Cond [F]",
   "ts" => "Observation Time",
-  "sname" => "Site Name",
+  "name" => "Site Name",
   "rwis_subf" => "Sub-Surface Temperature"
 );
 
@@ -155,7 +155,7 @@ $content = <<<EOF
 <thead>
 <tr>
   <th rowspan="2">ADD:</th>
-  <th rowspan="2"><a href="currentSF.phtml?network={$network}&sortcol=sname">Station:</a></th>
+  <th rowspan="2"><a href="currentSF.phtml?network={$network}&sortcol=name">Station:</a></th>
   <th rowspan="2"><a href="currentSF.phtml?network={$network}&sortcol=ts">Ob Time</a></th>
   <th colspan="2">Air:</th>
   <th>Sensor 1</th>

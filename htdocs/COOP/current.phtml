@@ -41,7 +41,7 @@ function make_row($dict, $oddrow){
 	</td>
 EOF;
 	$s .= "<td><a href=\"cat.phtml?station=". $dict["sid"] ."&network=". $dict["network"] . "\">". $dict['sid'] ."</a></td>";
-	$s .= "<td><a href=\"$sitesurl\">". $dict["sname"] .", ". $dict["state"] ."</a></td>";
+	$s .= "<td><a href=\"$sitesurl\">". $dict["name"] .", ". $dict["state"] ."</a></td>";
 	$s .= "<td>". $dict["county"] ."</td>";
 
 	$bgcolor = (date("Ymd") != date("Ymd", $dict["ts"])) ? '#F00': 'inherit';
@@ -81,7 +81,7 @@ foreach($jobj["data"] as $bogus => $iemob){
 	$db[$site]['ts'] = strtotime($iemob["local_valid"]);
 	$db[$site]['lts'] = strtotime($iemob["local_valid"]);
 	$db[$site]['sid'] = $site;
-	$db[$site]['sname'] = $iemob["name"];
+	$db[$site]['name'] = $iemob["name"];
 	$db[$site]['raw'] = $iemob["raw"];
 	$db[$site]['state'] = $iemob["state"];
 	$db[$site]['network'] = $iemob["network"];
@@ -143,7 +143,7 @@ EOF;
 $t->thispage = "current-sort";
 
 $cols = Array("ts" => "Valid", "county" => "County",
-  "sid" => "Site ID", "sname" => "Station Name", 
+  "sid" => "Site ID", "name" => "Station Name", 
   "ratio" => "Snow to Water Ratio",
   "tmpf" => "Ob Temperature", "max_tmpf" => "24 hour High",
   "min_tmpf" => "24 hour Low", "snow" => "24 hour Snowfall",
@@ -174,7 +174,7 @@ $wselect .= "</select>";
 $sorts = Array("asc" => "Ascending", "desc" => "Descending");
 
 $one = get_sortdir($baseurl, "sid", $sortcol, $sortdir);
-$two = get_sortdir($baseurl, "sname", $sortcol, $sortdir);
+$two = get_sortdir($baseurl, "name", $sortcol, $sortdir);
 $three = get_sortdir($baseurl, "county", $sortcol, $sortdir);
 $four = get_sortdir($baseurl, "ts", $sortcol, $sortdir);
 $five = get_sortdir($baseurl, "tmpf", $sortcol, $sortdir);

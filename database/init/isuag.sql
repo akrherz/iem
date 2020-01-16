@@ -704,7 +704,7 @@ $do$
 declare
      year int;
 begin
-    for year in 2019..2030
+    for year in 2014..2030
     loop
         execute format($f$
             create table sm_minute_%s partition of sm_minute

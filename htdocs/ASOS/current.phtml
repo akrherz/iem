@@ -53,7 +53,7 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
   "peak_ts" => "Time of Peak Gust", "relh" => "Relative Humidity",
   "feel" => "Feels Like [F]", "vsby" => "Visibility [miles]",
   "ts" => "Observation Time", "phour" => "Last Hour Rainfall [inch]",
-  "min_tmpf" => "Today's Low Temperature", "sname" => "Station Name",
+  "min_tmpf" => "Today's Low Temperature", "name" => "Station Name",
   "max_tmpf" => "Today's High Temperature", "id" => "Station Identifier",
   "skyl1" => "Cloud Level 1",
   "skyl2" => "Cloud Level 2",
@@ -71,7 +71,6 @@ foreach($jobj["data"] as $bogus => $iemob){
     $key = $iemob["station"];
     $mydata[$key] = $iemob;
     $mydata[$key]["ts"] = strtotime($iemob["local_valid"]);
-    $mydata[$key]["sname"] = $cities[$key]["name"];
     $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
     if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
       $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
@@ -165,7 +164,7 @@ on this network.
 <tr>
   <th rowspan="2">ADD:</th>
   <th rowspan="2"><a href="{$uri}id">ID</a></th>
-  <th rowspan="2"><a href="{$uri}sname">Station</a></th>
+  <th rowspan="2"><a href="{$uri}name">Station</a></th>
   <th rowspan="2"><a href="{$uri}ts">Ob Time</a></th>
   <th rowspan="2">Present Wx</th>
   <th colspan="5">Temps &deg;F</th>
