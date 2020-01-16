@@ -1,55 +1,79 @@
-"""Generate a map of the 12z UTC low temperature """
-import datetime
+"""Generate a map of the 12z UTC low temperature.
+
+run from RUN_SUMMARY.sh
+"""
 
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc, logger
+from pandas.io.sql import read_sql
+
+LOG = logger()
 
 
 def main():
     """Go Main Go"""
     pgconn = get_dbconn("iem", user="nobody")
-    icursor = pgconn.cursor()
-    now = datetime.datetime.now()
+    now = utc().replace(hour=0, minute=0, second=0, microsecond=0)
 
-    sql = """
+    df = read_sql(
+        """
     WITH lows as (
-     SELECT c.iemid, min(tmpf) as low12z from current_log c JOIN stations s
+     SELECT c.iemid,
+     min(tmpf) as calc_low,
+     min(min_tmpf_6hr) as reported_low
+     from current_log c JOIN stations s
      ON (s.iemid = c.iemid)
-     WHERE tmpf > -90 and valid > '%s 00:00:00+00' and valid < '%s 12:00:00+00'
-     and s.network in ('IA_ASOS', 'AWOS') GROUP by c.iemid
+     WHERE valid > %s and valid < %s
+     and (s.network ~* 'ASOS' or s.network = 'AWOS')
+     and s.country = 'US' and s.state not in ('HI', 'AK') GROUP by c.iemid
     )
 
-    select t.id, ST_x(t.geom) as lon, ST_y(t.geom) as lat, l.low12z from
+    select t.id, t.state, ST_x(t.geom) as lon, ST_y(t.geom) as lat,
+    least(l.calc_low, l.reported_low) as low from
     lows l JOIN stations t on (t.iemid = l.iemid)
-    """ % (
-        now.strftime("%Y-%m-%d"),
-        now.strftime("%Y-%m-%d"),
+    """,
+        pgconn,
+        params=(now, now.replace(hour=12)),
+        index_col="id",
     )
+    df = df[df["low"].notnull()]
+    LOG.debug("found %s observations for %s", len(df.index), now)
 
-    lats = []
-    lons = []
-    vals = []
-    valmask = []
-    labels = []
-    icursor.execute(sql)
-    for row in icursor:
-        lats.append(row[2])
-        lons.append(row[1])
-        vals.append(float(row[3]))
-        labels.append(row[0])
-        valmask.append(True)
-
-    mp = MapPlot(
-        title="Iowa ASOS/AWOS 12Z Morning Low Temperature",
-        subtitle="%s" % (now.strftime("%d %b %Y"),),
-        axisbg="white",
-    )
-    mp.drawcounties()
-    mp.plot_values(lons, lats, vals, fmt="%.0f", labels=labels, labelbuffer=5)
-    pqstr = (
-        "plot ac %s summary/iowa_asos_12z_low.png " "iowa_asos_12z_low.png png"
-    ) % (now.strftime("%Y%m%d%H%M"),)
-    mp.postprocess(pqstr=pqstr)
+    for sector in ["iowa", "midwest", "conus"]:
+        mp = MapPlot(
+            sector=sector,
+            title="%s ASOS/AWOS 01-12 UTC Low Temperature"
+            % (now.strftime("%-d %b %Y"),),
+            subtitle=(
+                "includes available 6z and 12z 6-hr mins, "
+                "does not include 0z observation"
+            ),
+            axisbg="white",
+        )
+        if sector == "iowa":
+            df2 = df[df["state"] == "IA"]
+            labels = df2.index.values
+            mp.drawcounties()
+            size = 14
+        else:
+            df2 = df
+            labels = None
+            size = 10
+        mp.plot_values(
+            df2["lon"].values,
+            df2["lat"].values,
+            df2["low"],
+            fmt="%.0f",
+            labels=labels,
+            labelbuffer=1,
+            textsize=size,
+        )
+        pqstr = (
+            "plot ac %s summary/%s_asos_12z_low.png " "%s_asos_12z_low.png png"
+        ) % (now.strftime("%Y%m%d%H%M"), sector, sector)
+        LOG.debug(pqstr)
+        mp.postprocess(pqstr=pqstr)
+        mp.close()
 
 
 if __name__ == "__main__":

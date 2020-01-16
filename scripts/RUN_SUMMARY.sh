@@ -3,6 +3,9 @@
 cd current
 python plot_hilo.py 1
 
+cd ../12z
+python asos_low.py
+
 cd ../climate
 python today_hilo.py
 python today_rec_hilo.py

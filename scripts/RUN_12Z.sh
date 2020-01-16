@@ -8,7 +8,6 @@ fi
 # DVN wants this to run at 12:10 UTC, so we start the cron script a bit late
 cd 12z
 python awos_rtp.py
-python asos_low.py
 
 cd ../hads
 python compute_hads_pday.py $(date -u --date '1 days ago' +'%Y %m %d')
