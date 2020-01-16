@@ -699,7 +699,7 @@ data = {
             "options": [
                 {
                     "id": "196",
-                    "label": "ASOS/METAR Heat Index Frequencies by NWS Alert Headline",
+                    "label": "ASOS/METAR Heat Index / Wind Chill Frequencies by NWS Alert Headline",
                 },
                 {
                     "id": "191",
