@@ -63,7 +63,6 @@ def run(valid):
         try:
             grbs = pygrib.open(gribfn)
             if grbs.messages == (18 * 4 + (HOURS[valid.hour] - 18) + 1):
-                # print("%s is complete!" % (gribfn, ))
                 return
             del grbs
         except Exception as exp:

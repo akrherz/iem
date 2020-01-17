@@ -1,5 +1,4 @@
 """Convert HRRR Grib Reflectivity to RASTERS matching ramp used with N0Q"""
-from __future__ import print_function
 import sys
 import os
 import datetime
@@ -10,8 +9,9 @@ import json
 import numpy as np
 from PIL import Image
 import pygrib
-from pyiem.util import utc
+from pyiem.util import utc, logger
 
+LOG = logger()
 PALETTE = Image.open(
     open("/home/ldm/data/gis/images/4326/USCOMP/n0q_0.png", "rb")
 ).getpalette()
@@ -116,7 +116,7 @@ def workflow(valid, routes):
         )
     )
     if not os.path.isfile(gribfn):
-        print("hrrr_ref2raster.py missing %s" % (gribfn,))
+        LOG.info("missing %s", gribfn)
         return
     grbs = pygrib.open(gribfn)
     for i in range(grbs.messages):
@@ -126,10 +126,8 @@ def workflow(valid, routes):
 def main(argv):
     """So Something great"""
     valid = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
-    now = utc()
-    routes = "a"
-    if (now - valid) < datetime.timedelta(hours=3):
-        routes = "ac"
+    routes = "ac" if argv[5] == "RT" else "a"
+    LOG.debug("valid: %s routes: %s", valid, routes)
     # See if we already have output
     fn = valid.strftime(
         "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/hrrr/%H/refd_0000.png"

@@ -3,7 +3,6 @@ Generate an animated GIF of HRRR forecasted 1km reflectivity
 
 Run from RUN_40AFTER.sh and for the previous hour's HRRR run
 """
-from __future__ import print_function
 import datetime
 import subprocess
 import sys
@@ -14,8 +13,9 @@ import pytz
 import pygrib
 from pyiem.plot import MapPlot
 import pyiem.reference as ref
-from pyiem.util import utc
+from pyiem.util import utc, logger
 
+LOG = logger()
 HOURS = [
     36,
     18,
@@ -47,8 +47,10 @@ HOURS = [
 def compute_bounds(lons, lats):
     """figure out a minimum box to extract data from, save CPU"""
     dist = ((lats - ref.MW_NORTH) ** 2 + (lons - ref.MW_WEST) ** 2) ** 0.5
+    # pylint: disable=unbalanced-tuple-unpacking
     x2, y1 = np.unravel_index(dist.argmin(), dist.shape)
     dist = ((lats - ref.MW_SOUTH) ** 2 + (lons - ref.MW_EAST) ** 2) ** 0.5
+    # pylint: disable=unbalanced-tuple-unpacking
     x1, y2 = np.unravel_index(dist.argmin(), dist.shape)
     return x1 - 100, x2 + 100, y1 - 100, y2 + 100
 
@@ -63,7 +65,7 @@ def run(valid, routes):
     )
 
     if not os.path.isfile(fn):
-        print("hrrr/plot_ref missing %s" % (fn,))
+        LOG.info("hrrr/plot_ref missing %s", fn)
         return
     grbs = pygrib.open(fn)
 
@@ -155,10 +157,8 @@ def run(valid, routes):
 def main(argv):
     """Go Main"""
     valid = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
-    now = utc()
-    routes = "a"
-    if (now - valid) < datetime.timedelta(hours=2):
-        routes = "ac"
+    routes = "ac" if argv[5] == "RT" else "a"
+    LOG.debug("valid: %s routes: %s", valid, routes)
 
     # See if we already have output
     fn = valid.strftime(
