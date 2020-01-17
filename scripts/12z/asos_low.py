@@ -39,9 +39,22 @@ def main():
     df = df[df["low"].notnull()]
     LOG.debug("found %s observations for %s", len(df.index), now)
 
-    for sector in ["iowa", "midwest", "conus"]:
+    for sector in [
+        "iowa",
+        "midwest",
+        "conus",
+        "SD",
+        "NE",
+        "ND",
+        "KS",
+        "MN",
+        "MO",
+        "WI",
+        "IL",
+    ]:
         mp = MapPlot(
-            sector=sector,
+            sector=sector if len(sector) > 2 else "state",
+            state=sector if len(sector) == 2 else "IA",
             title="%s ASOS/AWOS 01-12 UTC Low Temperature"
             % (now.strftime("%-d %b %Y"),),
             subtitle=(
@@ -50,8 +63,8 @@ def main():
             ),
             axisbg="white",
         )
-        if sector == "iowa":
-            df2 = df[df["state"] == "IA"]
+        if sector == "iowa" or len(sector) == 2:
+            df2 = df[df["state"] == ("IA" if len(sector) > 2 else sector)]
             labels = df2.index.values
             mp.drawcounties()
             size = 14
@@ -70,7 +83,7 @@ def main():
         )
         pqstr = (
             "plot ac %s summary/%s_asos_12z_low.png " "%s_asos_12z_low.png png"
-        ) % (now.strftime("%Y%m%d%H%M"), sector, sector)
+        ) % (now.strftime("%Y%m%d%H%M"), sector.lower(), sector.lower())
         LOG.debug(pqstr)
         mp.postprocess(pqstr=pqstr)
         mp.close()
