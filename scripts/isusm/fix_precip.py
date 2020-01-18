@@ -127,7 +127,7 @@ def update_precip(date, station, hdf):
             cursor.execute(
                 """
                 UPDATE sm_minute
-                SET rain_in_tot_qc = %s, rain_mm_tot_f = 'E'
+                SET rain_in_tot_qc = %s, rain_in_tot_f = 'E'
                 WHERE valid = %s and station = %s
             """,
                 (
