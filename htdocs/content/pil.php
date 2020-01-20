@@ -27,8 +27,8 @@ imagettftext($img, 32, 0, 1, 35, $black,
 imagettftext($img, 12, 0, 31, 54, $ee, 
 	"/usr/share/fonts/liberation/LiberationMono-Bold.ttf", "by");
 imagettftext($img, 14, 0, 1, 74, $black,
-"/usr/share/fonts/liberation/LiberationMono-Bold.ttf",
-		sprintf("NWS %s", substr($pil,3,3)));
+    "/usr/share/fonts/liberation/LiberationMono-Bold.ttf",
+	sprintf("NWS %s", substr($pil,3,3)));
 
 header("content-type: image/png");
 ImagePng($img);
@@ -36,5 +36,4 @@ ImageDestroy($img);
 
 $memcache->set("pil_${pil}.png", ob_get_contents(), 0);
 ob_end_flush();
-
 ?>

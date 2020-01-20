@@ -1,7 +1,7 @@
 <?php
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 103);
-include("../../include/myview.php");
+require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Cool Webcam Lapses";
 $t->thispage = "webcam-cool";
@@ -12,7 +12,7 @@ $t->content = <<<EOF
 <p>The IEM collects and archives still images from many webcams.  We produce
 	<a href="/current/camlapse/">lapses</a> of these still images each day.
 	Sometimes these lapses capture something interesting, so they are shared
-	on <a href="http://youtube.com/users/akrherz">YouTube</a> for all to easily see.
+	on <a href="https://youtube.com/users/akrherz">YouTube</a> for all to easily see.
 	This page highlights some of these lapses.</p>	
 		
 <h4>Most Recent Web Camera Videos:</h4>
@@ -20,7 +20,7 @@ $t->content = <<<EOF
 <p>Click on the three-bar menu in upper left corner to display a listing of
 		recent movies.</p>
 		
-<iframe src="http://www.youtube.com/embed/?listType=user_uploads&list=akrherz" width="100%" height="400"></iframe>
+<iframe src="https://www.youtube.com/embed/?listType=user_uploads&list=akrherz" width="100%" height="400"></iframe>
 
 
 
@@ -28,7 +28,7 @@ $t->content = <<<EOF
 <table width="100%">
 <thead> <tr><th colspan="2" align="left"><b>6 May 2007: Gravity Wave</b></th></tr></thead> 
 <tbody><tr><td>
-<object width="425" height="350"><param name="movie" value="http://www.youtube.com/v/yXnkzeCU3bE"></param><param name="wmode" value="transparent"></param><embed src="http://www.youtube.com/v/yXnkzeCU3bE" type="application/x-shockwave-flash" wmode="transparent" width="425" height="350"></embed></object>
+<object width="425" height="350"><param name="movie" value="https://www.youtube.com/v/yXnkzeCU3bE"></param><param name="wmode" value="transparent"></param><embed src="https://www.youtube.com/v/yXnkzeCU3bE" type="application/x-shockwave-flash" wmode="transparent" width="425" height="350"></embed></object>
 </td><td>
 Just a wonderful lapse of a gravity wave associated with an intense 
 convective line early on 6 May 2007.  This lapse is from the Tama 
@@ -92,12 +92,6 @@ clear skies and dry air behind the front allowed from some great lapses!
 </td></tr></tbody>
 </table></div>
 
-
-<p><div class="iem-form">
-<table width="100%"><thead> <tr><th colspan="2" align="left"><b>5 Apr 2006: Kelvin Helmholtz Waves</b></th></tr></thead> <tbody><tr><td><br /><img src="/cool/images/ames_060405_kh.jpg" width="320"></td><td valign="top"><br />This lapse is of clouds formed by Kelvin Helmholtz waves.  These waves often appear underneath a layer of strong static stability with vertical wind sheer present.  You can see the rolls in the cloud elements!
-<br /><br /><a href="../onsite/lapses/ames_060405_khwaves.mpg">View 640x480 MPG (5 MB)</a> or <a href="../onsite/lapses/ames_060405_khwaves_small.mpg">View 320x240 MPG (1 MB)</a>
-<br /><br /><a href="../onsite/lapses/ames_060405_khwaves.qt">View 640x480 AVI (5 MB)</a> or <a href="../onsite/lapses/ames_060405_khwaves_small.qt">View 320x240 AVI (1 MB)</a>
-</td></tr></tbody></table></div>
 
 <p><div class="iem-form">
 <table width="100%"><thead> <tr><th colspan="2" align="left"><b>22 Mar 2006: Radiation 101</b></th></tr></thead> <tbody><tr><td><br /><img src="/cool/images/ames_060322_tree.jpg" width="320"></td><td valign="top"><br />After an early spring snow storm, the skies cleared nicely the next day allowing full sunshine to hit these two evergreen trees near the Ames webcam.  What happened during the day and shown in this lapse can be found in the radiation 101 book.  The green tree absorbs incoming short wave radiation from the sun and then emitts it back to the snow surface as long wave radiation.  The snow reflects the short wave and absorbs the long wave thus melting the snow around the tree near the long wave radiation source (the trees).

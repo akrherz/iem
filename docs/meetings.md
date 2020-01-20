@@ -1,6 +1,18 @@
 Assorted Meeting Notes
 =====
 
+14 Jan 2020 Dr Takle, Iowa Climate Assessment
+----
+
+- Seeking to have first Iowa specific climate assessment report made
+- Just to note that Iowa is one of the few states without sig orography
+- maps can be of trends in the 9 climate regions
+- orography allows us to downscale more easily (?)
+- [ ] would like to see some sort of humidity variable in climodat
+- review Indiana's well done assessment
+- Seek a report on Iowa's current human health related to climate
+- would be nice to talk some about ozone, but am unsure of data sources
+
 30 Aug 2018 Monsanto
 -----
 
