@@ -28,7 +28,7 @@ def p2(val, prec, minv, maxv):
     return round(temperature(val, "C").value("K"), prec)
 
 
-def use_table(table, hits):
+def use_table(table):
     """Process for the given table."""
     nt = NetworkTable("ISUSM")
     pgconn = get_dbconn("isuag")
@@ -47,9 +47,6 @@ def use_table(table, hits):
     )
     for row in cursor:
         sid = row["station"]
-        if sid in hits:
-            continue
-        hits.append(sid)
         ssw(
             (
                 "%s,%.4f,%.4f,%s,%.1f,"
@@ -76,38 +73,37 @@ def use_table(table, hits):
                 distance(12, "IN").value("M"),
                 distance(24, "IN").value("M"),
                 distance(50, "IN").value("M"),
-                p(
-                    row.get("vwc_12_avg_qc", row.get("calcvwc12_avg_qc")),
-                    1,
-                    0,
-                    100,
-                ),
-                p(
-                    row.get("vwc_24_avg_qc", row.get("calcvwc24_avg_qc")),
-                    1,
-                    0,
-                    100,
-                ),
-                p(
-                    row.get("vwc_50_avg_qc", row.get("calcvwc50_avg_qc")),
-                    1,
-                    0,
-                    100,
-                ),
-                p(row.get("slrkw_avg_qc"), 1, 0, 1600),
+                p(row["calcvwc12_avg_qc"], 1, 0, 100),
+                p(row["calcvwc24_avg_qc"], 1, 0, 100),
+                p(row["calcvwc50_avg_qc"], 1, 0, 100),
+                p(nan(row["slrkj_tot_qc"]) * 1000.0 / 60.0, 1, 0, 1600),
                 p2(row["tair_c_avg_qc"], 1, -90, 90),
-                p(row.get("rh_qc", row.get("rh_avg_qc")), 1, 0, 1600),
-                p(row.get("rain_mm_tot_qc"), 2, 0, 100),
-                p(row.get("ws_mps_s_wvt_qc"), 2, 0, 100),
+                p(row["rh_avg_qc"], 1, 0, 1600),
                 p(
-                    (nan(row.get("ws_mph_max_qc", 0)) * units("mph"))
-                    .to(units("meter / second"))
-                    .m,  # BUG
+                    (nan(row["rain_in_tot_qc"]) * units("inch"))
+                    .to(units("cm"))
+                    .m,
                     2,
                     0,
                     100,
                 ),
-                p(row.get("winddir_d1_wvt_qc"), 2, 0, 360),
+                p(
+                    (nan(row["ws_mph_s_wvt_qc"]) * units("mph"))
+                    .to(units("meter / second"))
+                    .m,
+                    2,
+                    0,
+                    100,
+                ),
+                p(
+                    (nan(row["ws_mph_max_qc"]) * units("mph"))
+                    .to(units("meter / second"))
+                    .m,
+                    2,
+                    0,
+                    100,
+                ),
+                p(row["winddir_d1_wvt_qc"], 2, 0, 360),
             )
         )
 
@@ -125,9 +121,7 @@ def do_output():
         )
     )
 
-    hits = []
-    use_table("sm_minute", hits)
-    use_table("sm_hourly", hits)
+    use_table("sm_minute")
     ssw(".EOO\n")
 
 
