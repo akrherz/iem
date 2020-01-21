@@ -1,11 +1,17 @@
 #!/usr/bin/env python
 """Generation of National Mesonet Project CSV File"""
 
+import numpy as np
 import psycopg2.extras
 from metpy.units import units
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import distance, temperature
 from pyiem.util import get_dbconn, ssw
+
+
+def nan(val):
+    """Convert to NaN, if necessary."""
+    return np.nan if val is None else val
 
 
 def p(val, prec, minv, maxv):
@@ -94,7 +100,9 @@ def use_table(table, hits):
                 p(row.get("rain_mm_tot_qc"), 2, 0, 100),
                 p(row.get("ws_mps_s_wvt_qc"), 2, 0, 100),
                 p(
-                    (0 * units("mph")).to(units("meter / second")).m,  # BUG
+                    (nan(row.get("ws_mph_max_qc", 0)) * units("mph"))
+                    .to(units("meter / second"))
+                    .m,  # BUG
                     2,
                     0,
                     100,
