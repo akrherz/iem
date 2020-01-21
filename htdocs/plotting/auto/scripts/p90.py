@@ -17,10 +17,11 @@ from pyiem.exceptions import NoDataFound
 
 PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
 PDICT2 = {
-    "total": "Total Count between Start and End Date",
     "yearcount": "Count of Events for Given Year",
-    "yearavg": "Yearly Average Count between Start and End Year",
+    "hour": "Most Frequent Issuance Hour of Day",
+    "total": "Total Count between Start and End Date",
     "lastyear": "Year of Last Issuance",
+    "yearavg": "Yearly Average Count between Start and End Year",
 }
 PDICT3 = {
     "yes": "YES: Label Counties/Zones",
@@ -116,14 +117,14 @@ def get_description():
             type="datetime",
             name="sdate",
             default=jan1.strftime("%Y/%m/%d 0000"),
-            label='Start DateTime UTC(for "total" option):',
+            label='Start DateTime UTC(for "total", "hour" option):',
             min="1986/01/01 0000",
         ),
         dict(
             type="datetime",
             name="edate",
             default=today.strftime("%Y/%m/%d 0000"),
-            label='End DateTime (for "total" option):',
+            label='End DateTime (for "total", "hour" option):',
             min="1986/01/01 0000",
         ),
         dict(
@@ -173,6 +174,8 @@ def do_polygon(ctx):
     if varname == "total":
         sts = sdate
         ets = edate
+    elif varname == "hour":
+        raise NoDataFound("Sorry, not implemented for polygon summaries.")
     elif varname == "yearcount":
         sts = datetime.datetime(year, 1, 1).replace(tzinfo=pytz.utc)
         ets = datetime.datetime(year, 12, 31, 23, 59).replace(tzinfo=pytz.utc)
@@ -389,14 +392,11 @@ def do_ugc(ctx):
         ctx["title"] = "Count for %s" % (year,)
         datavar = "count"
     elif varname == "total":
-        table = "warnings"
         if t == "cwa":
             cursor.execute(
                 """
             select ugc, count(*), min(issue at time zone 'UTC'),
-            max(issue at time zone 'UTC') from """
-                + table
-                + """
+            max(issue at time zone 'UTC') from warnings
             WHERE wfo = %s and phenomena = %s and significance = %s
             and issue >= %s and issue <= %s
             GROUP by ugc
@@ -413,9 +413,7 @@ def do_ugc(ctx):
             cursor.execute(
                 """
             select ugc, count(*), min(issue at time zone 'UTC'),
-            max(issue at time zone 'UTC') from """
-                + table
-                + """
+            max(issue at time zone 'UTC') from warnings
             WHERE substr(ugc, 1, 2) = %s and phenomena = %s
             and significance = %s and issue >= %s and issue < %s
             GROUP by ugc
@@ -441,15 +439,48 @@ def do_ugc(ctx):
             edate.strftime("%d %b %Y %H%M"),
         )
         datavar = "count"
+    elif varname == "hour":
+        cursor.execute(
+            """
+        WITH data as (
+        SELECT ugc, issue at time zone tzname as v
+        from warnings w JOIN stations t
+        ON (w.wfo =
+            (case when length(t.id) = 4 then substr(t.id, 1, 3) else t.id end))
+        WHERE t.network = 'WFO' and
+        phenomena = %s and significance = %s and issue >= %s and issue < %s),
+        agg as (
+            SELECT ugc, extract(hour from v) as hr, count(*) from data
+            GROUP by ugc, hr),
+        ranks as (
+            SELECT ugc, hr, rank() OVER (PARTITION by ugc ORDER by count DESC)
+            from agg)
+
+        SELECT ugc, hr from ranks where rank = 1
+        """,
+            (phenomena, significance, sdate, edate),
+        )
+        rows = []
+        data = {}
+        ctx["labels"] = {}
+        midnight = datetime.datetime(2000, 1, 1)
+        for row in cursor:
+            rows.append(dict(hour=int(row[1]), ugc=row[0]))
+            data[row[0]] = row[1]
+            ctx["labels"][row[0]] = (
+                midnight + datetime.timedelta(hours=row[1])
+            ).strftime("%-I %p")
+        ctx["title"] = ("Most Freq. Issue Hour: %s and %s") % (
+            sdate.strftime("%d %b %Y"),
+            edate.strftime("%d %b %Y"),
+        )
+        datavar = "hour"
     elif varname == "yearavg":
-        table = "warnings"
         if t == "cwa":
             cursor.execute(
                 """
             select ugc, count(*), min(issue at time zone 'UTC'),
-            max(issue at time zone 'UTC') from """
-                + table
-                + """
+            max(issue at time zone 'UTC') from warnings
             WHERE wfo = %s and phenomena = %s and significance = %s
             and issue >= %s and issue <= %s
             GROUP by ugc
@@ -466,9 +497,7 @@ def do_ugc(ctx):
             cursor.execute(
                 """
             select ugc, count(*), min(issue at time zone 'UTC'),
-            max(issue at time zone 'UTC') from """
-                + table
-                + """
+            max(issue at time zone 'UTC') from warnings
             WHERE substr(ugc, 1, 2) = %s and phenomena = %s
             and significance = %s and issue >= %s and issue < %s
             GROUP by ugc
@@ -522,6 +551,8 @@ def do_ugc(ctx):
         if len(bins) > 8:
             bins = bins[:: int(len(bins) / 8.0)]
         bins[0] = 0.01
+    elif varname == "hour":
+        bins = list(range(0, 25))
     else:
         bins = list(
             range(np.min(df[datavar][:]), np.max(df[datavar][:]) + 2, 1)
@@ -587,7 +618,45 @@ def plotter(fdict):
     cmap.set_under("white")
     cmap.set_over("white")
     if geo == "ugc":
-        m.fill_ugcs(ctx["data"], ctx["bins"], cmap=cmap, ilabel=ilabel)
+        if ctx["v"] == "hour":
+            cl = [
+                "Mid",
+                "",
+                "2 AM",
+                "",
+                "4 AM",
+                "",
+                "6 AM",
+                "",
+                "8 AM",
+                "",
+                "10 AM",
+                "",
+                "Noon",
+                "",
+                "2 PM",
+                "",
+                "4 PM",
+                "",
+                "6 PM",
+                "",
+                "8 PM",
+                "",
+                "10 PM",
+                "",
+            ]
+            m.fill_ugcs(
+                ctx["data"],
+                ctx["bins"],
+                cmap=cmap,
+                ilabel=ilabel,
+                labels=ctx["labels"],
+                clevstride=2,
+                clevlabels=cl,
+                extend="neither",
+            )
+        else:
+            m.fill_ugcs(ctx["data"], ctx["bins"], cmap=cmap, ilabel=ilabel)
     else:
         res = m.pcolormesh(
             ctx["lons"],
