@@ -94,9 +94,7 @@ def use_table(table, hits):
                 p(row.get("rain_mm_tot_qc"), 2, 0, 100),
                 p(row.get("ws_mps_s_wvt_qc"), 2, 0, 100),
                 p(
-                    (row.get("ws_mph_max_qc", 0) * units("mph"))
-                    .to(units("meter / second"))
-                    .m,
+                    (0 * units("mph")).to(units("meter / second")).m,  # BUG
                     2,
                     0,
                     100,
