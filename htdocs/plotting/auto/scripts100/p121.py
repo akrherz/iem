@@ -83,7 +83,7 @@ def plotter(fdict):
 # Climate Record: %s -> %s
 # Site Information: [%s] %s
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
-# SEASONAL TEMPERATURE CYCLES PER YEAR
+# seasonal temperature cycles per year, spring is Jan-Jun, fall is Jul-Dec
 # 1 CYCLE IS A TEMPERATURE VARIATION FROM A VALUE BELOW A THRESHOLD
 #   TO A VALUE EXCEEDING A THRESHOLD.  THINK OF IT AS FREEZE/THAW CYCLES
 #  FIRST DATA COLUMN WOULD BE FOR CYCLES EXCEEDING 26 AND 38 DEGREES F
