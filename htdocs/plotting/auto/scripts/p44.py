@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from pyiem.nws import vtec
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem import reference
 from pyiem.exceptions import NoDataFound
 
@@ -135,7 +135,7 @@ def plotter(fdict):
     cursor.execute(
         """
     WITH data as (
-        SELECT extract(year from issue) as yr,
+        SELECT extract(year from issue)::int as yr,
         issue, phenomena, significance, eventid, wfo from warnings WHERE
         ((phenomena = %s and significance = %s) """
         + eventlimiter
@@ -169,16 +169,15 @@ def plotter(fdict):
         data[row[0]]["counts"].append(row[2])
         rows.append(dict(year=row[0], day_of_year=row[1], count=row[2]))
     # append on a lastdoy value so all the plots go to the end
-    for yr in range(syear, eyear):
-        if len(data[yr]["doy"]) == 1 or data[yr]["doy"][-1] >= lastdoy:
+    for yr in range(syear, eyear + 1):
+        if data[yr]["doy"][-1] >= lastdoy:
             continue
-        data[yr]["doy"].append(lastdoy)
+        if yr == utc().year:
+            # append today
+            data[yr]["doy"].append(int(utc().strftime("%j")))
+        else:
+            data[yr]["doy"].append(lastdoy)
         data[yr]["counts"].append(data[yr]["counts"][-1])
-    if data[eyear]["doy"]:
-        data[eyear]["doy"].append(
-            int(datetime.datetime.today().strftime("%j")) + 1
-        )
-        data[eyear]["counts"].append(data[eyear]["counts"][-1])
     df = pd.DataFrame(rows)
 
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
@@ -231,7 +230,6 @@ def plotter(fdict):
             ann.remove(rm)
 
     ax.legend(loc=2, ncol=2, fontsize=10)
-    ax.set_xlim(1, 367)
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.grid(True)
@@ -257,4 +255,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter(dict(station="UNR", opt="wfo", c="svrtor"))
