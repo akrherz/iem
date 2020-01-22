@@ -734,7 +734,7 @@ data = {
                 },
                 {
                     "id": "44",
-                    "label": "NWS Office Accumulated Warning/Warning/Advisories by Year",
+                    "label": "NWS Office Accumulated Watch/Warning/Advisories by Year",
                 },
                 {
                     "id": "68",
