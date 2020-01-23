@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 """give me some AFOS data please"""
-from __future__ import print_function
 import cgi
 import unittest
 
@@ -40,6 +39,7 @@ def pil_logic(s):
                 "WSW",
                 "FFA",
                 "WCN",
+                "NPW",
             ]:
                 res.append("%s%s" % (q, pil[3:6]))
         else:
@@ -179,7 +179,7 @@ def main():
             ssw("\n\003\n")
 
     if cursor.rowcount == 0:
-        print("ERROR: Could not Find: %s" % (",".join(pils),))
+        ssw("ERROR: Could not Find: %s" % (",".join(pils),))
 
 
 if __name__ == "__main__":
