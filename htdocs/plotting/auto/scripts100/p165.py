@@ -241,7 +241,7 @@ def plotter(fdict):
             df2[doy].min() - 1, df2[doy].max() + 1, ctx["cint"], dtype="i"
         )
     levlables = list(map(f, levs))
-    if popt == "contour":
+    if popt == "contour" and (levs[-1] - levs[0]) > 5:
         mp.contourf(
             df2["lon"],
             df2["lat"],
@@ -257,4 +257,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(var="fall_below"))
+    plotter(dict())

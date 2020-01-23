@@ -187,7 +187,10 @@ def highcharts(fdict):
     p95 = ctx["df"][["dates", "p2p5", "p97p5"]].to_json(orient="values")
     p50 = ctx["df"][["dates", "p25", "p75"]].to_json(orient="values")
     mean = ctx["df"][["dates", "avg"]].to_json(orient="values")
-    thisyear = ctx["df"][["dates", "thisyear"]].to_json(orient="values")
+    try:
+        thisyear = ctx["df"][["dates", "thisyear"]].to_json(orient="values")
+    except Exception:
+        thisyear = "[]"
     return (
         """
 $("#ap_container").highcharts({
