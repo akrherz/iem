@@ -35,6 +35,14 @@ def get_time_extent(form):
     return sts, ets
 
 
+def char3(wfos):
+    """Make sure we don't have any 4 char IDs."""
+    res = []
+    for wfo in wfos:
+        res.append(wfo[1:] if len(wfo) == 4 else wfo)
+    return res
+
+
 def parse_wfo_location_group(form):
     """Parse wfoLimiter"""
     limiter = ""
@@ -42,13 +50,13 @@ def parse_wfo_location_group(form):
         wfos = form.getlist("wfo[]")
         wfos.append("XXX")  # Hack to make next section work
         if "ALL" not in wfos:
-            limiter = " and w.wfo in %s " % (str(tuple(wfos)),)
+            limiter = " and w.wfo in %s " % (str(tuple(char3(wfos))),)
 
     if "wfos[]" in form:
         wfos = form.getlist("wfos[]")
         wfos.append("XXX")  # Hack to make next section work
         if "ALL" not in wfos:
-            limiter = " and w.wfo in %s " % (str(tuple(wfos)),)
+            limiter = " and w.wfo in %s " % (str(tuple(char3(wfos))),)
     return limiter
 
 
