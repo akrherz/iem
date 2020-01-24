@@ -44,7 +44,7 @@ for ($i=0; $row=pg_fetch_assoc($rs); $i++){
 }
 
 function f($data, $key1, $key2, $fmt){
-      if (!array_key_exists($key1, $data) &&
+      if (!array_key_exists($key1, $data) ||
           !array_key_exists($key2, $data[$key1])){
                 return "M";
           }

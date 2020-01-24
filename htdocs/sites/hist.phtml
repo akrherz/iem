@@ -95,8 +95,10 @@ EOF;
 			if (isset($db[$key]["cv"])){
 				$s .= sprintf(" (@%s)", $db[$key]['cv']);
 			}
-			$s .= "<br />". @$db[$key]["content"] ."</td>";
-			$now = $now + 86400;
+			if (isset($db[$key]["content"])){
+                $s .= "<br />". $db[$key]["content"] ."</td>";
+            }
+            $now = $now + 86400;
 		} // End of week
 		$s .= "</tr>\n";
 	}

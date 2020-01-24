@@ -87,7 +87,10 @@ if ($view == "prod"){
 	for($i=0;$row=pg_fetch_array($rs);$i++){
 		$ts = strtotime($row["entered"]);
 		$url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
-		@$prods[$row["pil"]] .= sprintf("<tr><td><a href=\"%s\">%s</a></td>
+        if (!array_key_exists($row["pil"], $prods)){
+            $prods[$row["pil"]] = "";
+        }
+        $prods[$row["pil"]] .= sprintf("<tr><td><a href=\"%s\">%s</a></td>
     	<td>%s</td><td>%s</td></tr>",
 				$url, $row["pil"], gmdate("Y-m-d", $ts), gmdate("H:i", $ts));
 	}
@@ -103,7 +106,10 @@ if ($view == "prod"){
 	for($i=0;$row=pg_fetch_array($rs);$i++){
 		$ts = strtotime($row["entered"]);
 		$url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
-		@$columns[$row["pil"]] .= sprintf("<a href=\"%s\">%s</a> (%s)<br />",
+        if (!array_key_exists($row["pil"], $columns)){
+            $columns[$row["pil"]] = "";
+        }
+        $columns[$row["pil"]] .= sprintf("<a href=\"%s\">%s</a> (%s)<br />",
 				$url, $row["pil"], gmdate("H:i", $ts));
 	}
 	$keys = array_keys($columns);
