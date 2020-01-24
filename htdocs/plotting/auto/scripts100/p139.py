@@ -1,4 +1,4 @@
-"""Top 10 largest"""
+"""Top 10 largest, smallest"""
 import datetime
 from collections import OrderedDict
 
@@ -29,6 +29,7 @@ MDICT = OrderedDict(
         ("dec", "December"),
     ]
 )
+PDICT = {"largest": "Largest", "smallest": "Smallest"}
 
 
 def get_description():
@@ -38,7 +39,7 @@ def get_description():
     desc["cache"] = 86400
     desc[
         "description"
-    ] = """This table presents the 10 largest differences
+    ] = """This table presents the 10 largest or smallest differences
     between the lowest and highest air temperature for a local calendar
     day."""
     desc["arguments"] = [
@@ -48,6 +49,13 @@ def get_description():
             default="AMW",
             label="Select Station:",
             network="IA_ASOS",
+        ),
+        dict(
+            type="select",
+            name="v",
+            default="largest",
+            label="Show largest or smallest differences?",
+            options=PDICT,
         ),
         dict(
             type="select",
@@ -85,6 +93,7 @@ def plotter(fdict):
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
+    order = "DESC" if ctx["v"] == "largest" else "ASC"
     df = read_sql(
         """
         SELECT day as date, max_tmpf as max, min_tmpf as min,
@@ -93,7 +102,9 @@ def plotter(fdict):
         where t.id = %s and t.network = %s
         and extract(month from day) in %s
         and max_tmpf is not null and min_tmpf is not null
-        ORDER by difference DESC, date DESC LIMIT 10
+        ORDER by difference """
+        + order
+        + """, date DESC LIMIT 10
     """,
         pgconn,
         params=(station, ctx["network"], tuple(months)),
@@ -102,7 +113,9 @@ def plotter(fdict):
     )
     if df.empty:
         raise NoDataFound("No Data Found,")
-    df["rank"] = df["difference"].rank(ascending=False, method="min")
+    df["rank"] = df["difference"].rank(
+        ascending=(ctx["v"] == "smallest"), method="min"
+    )
     fig = plt.figure(figsize=(5.5, 4))
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
@@ -112,7 +125,7 @@ def plotter(fdict):
         0.9,
         (
             "%s [%s] %s-%s\n"
-            "Top 10 Local Calendar Day [%s] "
+            "Top 10 %s Local Calendar Day [%s] "
             "Temperature Differences"
         )
         % (
@@ -120,6 +133,7 @@ def plotter(fdict):
             station,
             ab.year,
             datetime.date.today().year,
+            PDICT[ctx["v"]],
             month.capitalize(),
         ),
         ha="center",

@@ -106,7 +106,7 @@ daily_opts = [
     {"id": "86", "label": "IEM Daily Reanalysis Plots"},
     {
         "id": "139",
-        "label": "Largest Local Calendar Day Temperature Differences",
+        "label": "Largest / Smallest Local Calendar Day Temperature Differences",
     },
     {"id": "168", "label": "Latest Date of Year for High Temperature"},
     {"id": "207", "label": "Local Storm Report Snowfall Analysis Maps"},
