@@ -17,7 +17,7 @@ $st = isset($_REQUEST["state"]) ? $_REQUEST["state"] : 'IA';
 $rs = pg_execute($dbconn, "SELECT", Array($st));
 
 $ar = Array("ugcs" => Array() );
-for( $i=0; $row = @pg_fetch_assoc($rs,$i); $i++){
+for( $i=0; $row = pg_fetch_assoc($rs); $i++){
   $ar["ugcs"][] = $row;
 }
 $json = json_encode($ar);

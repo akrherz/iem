@@ -84,7 +84,7 @@ $rs = pg_execute($afos, "_SELECT", Array($dbsource, date("Y-m-d H:i", $ts)."+00"
 		date("Y-m-d H:i", $ts2)."+00"));
 if ($view == "prod"){
 	$prods = Array();
-	for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+	for($i=0;$row=pg_fetch_array($rs);$i++){
 		$ts = strtotime($row["entered"]);
 		$url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
 		@$prods[$row["pil"]] .= sprintf("<tr><td><a href=\"%s\">%s</a></td>
@@ -100,7 +100,7 @@ if ($view == "prod"){
 	$table .= "</table>";
 } else if ($view == "grid"){
 	$columns = Array();
-	for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+	for($i=0;$row=pg_fetch_array($rs);$i++){
 		$ts = strtotime($row["entered"]);
 		$url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
 		@$columns[$row["pil"]] .= sprintf("<a href=\"%s\">%s</a> (%s)<br />",
@@ -129,7 +129,7 @@ if ($view == "prod"){
 	$lasthour = "";
 	$colnum = 0;
 	$atags .= '<div class="clearfix"></div><strong>Skip to Hour:</strong> ';
-	for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+	for($i=0;$row=pg_fetch_array($rs);$i++){
 		$ts = strtotime($row["entered"]);
 		$url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
 		if (gmdate("H", $ts) != $lasthour){

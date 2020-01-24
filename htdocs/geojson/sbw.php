@@ -83,7 +83,7 @@ $ar = Array("type"=>"FeatureCollection",
 $reps = Array();
 $subs = Array();
 
-for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
+for ($i=0;$row=pg_fetch_assoc($rs);$i++)
 {
   $wfo = $row["wfo"];
   $reps[] = "\"REPLACEME$i\"";

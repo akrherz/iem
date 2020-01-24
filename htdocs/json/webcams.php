@@ -58,7 +58,7 @@ if (pg_num_rows($result) > 0){
      "url" => $url);
 }
 $used = Array();
-for( $i=0; $row = @pg_fetch_assoc($result,$i); $i++)
+for( $i=0; $row = pg_fetch_assoc($result); $i++)
 {
 	if (array_key_exists($row["cam"], $used)){
 		continue;

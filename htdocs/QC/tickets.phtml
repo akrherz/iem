@@ -14,7 +14,7 @@ pg_close($conn);
 
 $ars = Array("isusm" => "", "iaawos" => "", "iarwis" => "");
 
-for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
+for( $i=0; $row = pg_fetch_array($rs); $i++)
 {
 	$entered = strtotime(substr($row["entered"],0,16));
 	$last = strtotime(substr($row["last"],0,16));

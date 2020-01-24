@@ -23,7 +23,7 @@
  echo "<id>https://mesonet.agron.iastate.edu/sites/locate.php</id>\n";
  echo "<author><name>Daryl Herzmann</name><email>akrherz@iastate.edu</email></author>\n";
  
- for ($i=0; $row = @pg_fetch_array($rs, $i); $i++) {
+ for ($i=0; $row = pg_fetch_array($rs); $i++) {
  	$cbody = "<pre>\n";
  	$cbody .= "ID     : ". $row["id"] ."\n";
  	$cbody .= "Name   : ". $row["name"] ."\n";

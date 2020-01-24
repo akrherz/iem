@@ -89,7 +89,7 @@ for ($j=0; $j< $num_vars;$j++){
 echo "\n";
 if ($dl_option == "download"){
 
- for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
+ for( $i=0; $row = pg_fetch_array($rs); $i++) 
  {
   printf("%s%s%s", $row["station"] , $d[$delim],  $row["dvalid"]);
   for ($j=0; $j< $num_vars;$j++){
@@ -99,7 +99,7 @@ if ($dl_option == "download"){
   }
 } else {
 
- for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
+ for( $i=0; $row = pg_fetch_array($rs); $i++) 
  {
   printf("%s%s%s", $row["station"] , $d[$delim], $row["dvalid"]);
   for ($j=0; $j< $num_vars;$j++){

@@ -55,7 +55,7 @@ $aobs = Array();
 $atot = 0;
 $atimes = Array();
 $zeros = Array();
-for ($i=0; $row = @pg_fetch_array($rs,$i); $i++)
+for ($i=0; $row = pg_fetch_array($rs); $i++)
 {
 	$hi = (float)$row["max_tmpf"];
 	$lo = (float)$row["min_tmpf"];
@@ -79,7 +79,7 @@ $cdiff = Array();
 $aclimate = Array();
 $atot = 0;
 $times = Array();
-for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
+for( $i=0; $row = pg_fetch_array($rs); $i++) 
 {
 	$gdd = (float)$row["gdd50"];
 	$atot += $gdd;

@@ -38,7 +38,7 @@ $rs = pg_execute($pgconn, "SELECT22", Array($station1,$station2));
 /* Assign into data arrays */
 //$cnt=array($station1 => 0, $station2 => 0);
 
-for ($i=0;  $row=@pg_fetch_array($rs,$i); $i++)
+for ($i=0;  $row=pg_fetch_array($rs); $i++)
 {
   $s = $row["station"];
   if ($var == "drct" && floatval($row["data"]) == 0) { continue; }

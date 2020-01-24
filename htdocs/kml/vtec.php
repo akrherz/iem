@@ -69,7 +69,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     </Style>
 ";
 
-for($i=0;$row=@pg_fetch_assoc($result, $i);$i++){
+for($i=0;$row=pg_fetch_assoc($result);$i++){
   echo "<Placemark>
     <description>
         <![CDATA[

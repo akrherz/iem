@@ -22,7 +22,7 @@ $rs = pg_query($mesosite, "SELECT * from iemrasters
 $rname = "";
 $runits = "";
 $urltemplate = "";
-for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+for($i=0;$row=pg_fetch_assoc($rs);$i++){
 	if ($rid == intval($row["id"])){
 		$rname = $row["name"];
 		$runits = $row["units"];
@@ -60,7 +60,7 @@ if ($rid > 0){
 	$rs = pg_prepare($mesosite, "-SELECT", "SELECT * from iemrasters_lookup"
 			." WHERE iemraster_id = $1 ORDER by coloridx ASC");
 	$rs = pg_execute($mesosite, "-SELECT", Array($rid));
-	for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	for($i=0;$row=pg_fetch_assoc($rs);$i++){
 		$table2 .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td>"
 				."<td>%s</td><td>%s</td><td>%s</td></tr>\n", $row["coloridx"], 
 				($row["value"] == null) ? 'Missing': $row["value"],

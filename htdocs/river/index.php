@@ -78,7 +78,7 @@ $rs = pg_query($postgis, $sql);
 
 $rivers = Array();
 $used = Array();
-for($i=0;$row=@pg_fetch_array($rs,$i);$i++)
+for($i=0;$row=pg_fetch_array($rs);$i++)
 {
     if (in_array($row["nwsli"], $used)) {
         continue;

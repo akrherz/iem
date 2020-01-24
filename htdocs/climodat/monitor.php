@@ -104,7 +104,7 @@ foreach($stationgrps as $state => $stations){
 	   ORDER by o.station ASC
 EOF;
 	$rs = pg_query($pgconn, $sql);
-	for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 		$table .= sprintf("<tr><td>"
 				."<input type=\"checkbox\" name=\"r[]\" value=\"%s\" >"
 				." %s</td><td>%s</td>"

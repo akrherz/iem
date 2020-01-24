@@ -30,7 +30,7 @@ $result = pg_exec($connect, "SET TIME ZONE 'GMT'");
 $result = pg_exec($connect, $query1);
 
 $ar = Array("meta" => Array() );
-for( $i=0; $z = @pg_fetch_assoc($result,$i); $i++)
+for( $i=0; $z = pg_fetch_assoc($result); $i++)
 {
   $z["id"] = $i +1;
   $z["issue"] = substr($z["issue"],0,16);

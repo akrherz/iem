@@ -13,7 +13,7 @@ $pgconn = iemdb("other");
 
 $sql = "SELECT * from flux_vars ORDER by details ASC";
 $rows = pg_exec($pgconn, $sql);
-for( $i=0; $row = @pg_fetch_array($rows,$i); $i++)
+for( $i=0; $row = pg_fetch_array($rows); $i++)
 {
   $vars[ $row["name"] ] = Array("units" => $row["units"], "details" => $row["details"]);
 }
@@ -37,7 +37,7 @@ $times = Array("NSTL11" => Array(),
    "NSTL110" => Array(),
    "NSTLNSPR" => Array());
 
-for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
+for( $i=0; $row = pg_fetch_array($rs); $i++) 
 { 
   $ts = strtotime( substr($row["valid"],0,16) );
   $stid = $row["station"];
@@ -51,7 +51,7 @@ for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
 $labels = Array("NSTLNSPR" => "NSTLNSPR", "NSTL11" => "NSTL11", 
         "NSTL10" => "NSTL10", "NSTL30FT" => "NSTL30FT", "NSTL110" => "NSTL110");
 $rs = pg_execute($pgconn, "METADATA", Array(date('Y-m-d', $sts)));
-for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
+for( $i=0; $row = pg_fetch_array($rs); $i++)
 {
   $st = $row["station"];
   $labels[$st] =  $row["surface"];

@@ -118,7 +118,7 @@ if ($source == "qc")
 
 $rs =  pg_exec($c, $sql);
 $vals = Array();
-for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+for ($i=0; $row = pg_fetch_array($rs); $i++) {
 	$stid = $row['station'];
 	$vals[$stid] = (float)$row[$var];
 }

@@ -79,7 +79,7 @@ if (strlen($station) > 0 ) {
 	$q0 = "SELECT * from sensors WHERE station = '". $station ."' ";
 	$r0 = pg_exec($c0, $q0);
 	
-	$row = @pg_fetch_array($r0, 0);
+	$row = pg_fetch_array($r0);
 	$ns0 = $row['sensor0'];
 	$ns1 = $row['sensor1'];
 	$ns2 = $row['sensor2'];

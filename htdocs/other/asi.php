@@ -16,7 +16,7 @@ function download_data($sts, $ets){
 		echo sprintf("ch%savg,ch%ssd,ch%smax,ch%smin,", $i, $i, $i,$i);
 	}
 	echo "\n";
-	for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 		echo sprintf("%s,%s,", $row['station'], $row['valid']);
 		for ($j=1;$j<13;$j++){
 			echo sprintf("%s,%s,%s,%s,", $row["ch${j}avg"],

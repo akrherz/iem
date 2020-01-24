@@ -25,7 +25,7 @@ function networkOffline($network)
 	$rs = pg_execute($pgconn, "SELECT", Array($network) );
 
 	$q = 0;
-	for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
+	for( $i=0; $row = pg_fetch_array($rs); $i++)
 	{
 		$valid = $row["v"];
 		$tracker_id = $row["trackerid"];

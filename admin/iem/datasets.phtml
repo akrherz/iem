@@ -53,7 +53,7 @@ if ($myid != null){
 $rs = pg_query($dbconn, "SELECT id, name from iemdatasets ".
 		"ORDER by name ASC");
 $ar = Array();
-for ($i=0; $row=@pg_fetch_assoc($rs,$i); $i++){
+for ($i=0; $row=pg_fetch_assoc($rs); $i++){
 	$ar[$row['id']] = $row['name'];
 }
 $dsselect = make_select('id', $myid, $ar);

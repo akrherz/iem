@@ -18,7 +18,7 @@ $day = isset( $_GET["day"] ) ? intval($_GET["day"]): date("d");
  $rs2 = pg_query($iem->dbconn, "SELECT day, max_tmpf, min_tmpf, pday from summary s JOIN stations t
   ON (t.iemid = s.iemid)
   WHERE t.id = 'OT0009' and max_tmpf > -99 ORDER by day DESC");
- for($i=0;$row=@pg_fetch_array($rs2,$i);$i++){
+ for($i=0;$row=pg_fetch_array($rs2);$i++){
  	$table .= sprintf("<tr><th>%s</th><td>%.1f</td><td>%.1f</td><td>%.2f</td></tr>",
  			$row["day"], $row["max_tmpf"], $row["min_tmpf"], $row["pday"]);
  }

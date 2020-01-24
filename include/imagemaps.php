@@ -8,7 +8,7 @@ function ugcStateSelect($state, $selected)
     $rs = pg_exec($dbconn, "SELECT ugc, name from ugcs WHERE end_ts is null "
           ." and substr(ugc,1,2) = '$state' ORDER by name ASC");
     $s = "<select name=\"ugc\">\n";
-    for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
+    for ($i=0;$row=pg_fetch_array($rs);$i++)
     {
        $z = (substr($row["ugc"],2,1) == "Z") ? "Zone": "County";
        $s .= "<option value=\"". $row["ugc"] ."\" ";
@@ -26,7 +26,7 @@ function selectAzosNetwork($network)
     $dbconn = iemdb('mesosite');
     $rs = pg_exec($dbconn, "SELECT * from networks WHERE id ~* 'ASOS' or id ~* 'AWOS' ORDER by name ASC");
     $s = "<select name=\"network\">\n";
-    for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
+    for ($i=0;$row=pg_fetch_array($rs);$i++)
     {
        $s .= "<option value=\"". $row["id"] ."\" ";
        if ($row["id"] == $network){ $s .= "SELECTED"; }
@@ -46,7 +46,7 @@ function selectClimodatNetwork($selected, $label="network")
         "id not in ('AKCLIMATE', 'HICLIMATE', 'DCCLIMATE') ".
         "ORDER by name ASC");
     $s = "<select class=\"iemselect2\" name=\"$label\">\n";
-    for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
+    for ($i=0;$row=pg_fetch_array($rs);$i++)
     {
        $s .= "<option value=\"". $row["id"] ."\" ";
        if ($row["id"] == $selected){ $s .= "SELECTED"; }
@@ -68,7 +68,7 @@ function selectNetwork($selected, $extra=Array())
     	if ($selected == $idx) { $s .= "SELECTED"; }
     	$s .= ">$sid</option>\n";
     }
-    for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
+    for ($i=0;$row=pg_fetch_array($rs);$i++)
     {
        $s .= "<option value=\"". $row["id"] ."\" ";
        if ($row["id"] == $selected){ $s .= "SELECTED"; }

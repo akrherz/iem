@@ -108,7 +108,7 @@ foreach($ISUAGcities as $key => $val){
   $sql = sprintf("SELECT * from climate51 WHERE station = '%s' and
     valid BETWEEN '%s' and '%s'", $csite, $cStart, $cEnd);
   $rs =  pg_exec($climatedb, $sql);
-  for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+  for ($i=0; $row = pg_fetch_array($rs); $i++) {
     $climate[$key]['gdd32'] += $row["gdd32"];
     $climate[$key]['gdd41'] += $row["gdd41"];
     $climate[$key]['gdd46'] += $row["gdd46"];
@@ -138,7 +138,7 @@ EOF;
   
   $gdds = Array();
   $rs =  pg_exec($c, $q);
-  for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+  for ($i=0; $row = pg_fetch_array($rs); $i++) {
     $stid = $row['station'];
     $high = (float)$row['c11'];
     $low  = (float)$row['c12'];
@@ -167,7 +167,7 @@ EOF;
 
   $gdds = Array();
   $rs =  pg_exec($c, $q);
-  for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+  for ($i=0; $row = pg_fetch_array($rs); $i++) {
     $stid = $row['station'];
     $high = (float)$row['c11'];
     $low  = (float)$row['c12'];
@@ -194,7 +194,7 @@ else if ($var == 'sgdd50' || $var == 'sgdd52') {
 	}
   $gdds = Array();
   $rs =  pg_exec($c, $q);
-  for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+  for ($i=0; $row = pg_fetch_array($rs); $i++) {
     $stid = $row['station'];
     $high = (float)$row['high'];
     $low  = (float)$row['low'];
@@ -222,7 +222,7 @@ EOF;
 	}
   $vals = Array();
   $rs =  pg_exec($c, $q);
-  for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+  for ($i=0; $row = pg_fetch_array($rs); $i++) {
     $stid = $row['station'];
     $vals[$stid] = $row['et'];
   }
@@ -241,7 +241,7 @@ else if ($var == 'srad') {
   
   $vals = Array();
   $rs =  pg_exec($c, $q);
-  for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+  for ($i=0; $row = pg_fetch_array($rs); $i++) {
     $stid = $row['station'];
     $vals[$stid] = $row['srad'];
   }
@@ -260,7 +260,7 @@ else if ($var == 'prec') {
 
   $vals = Array();
   $rs =  pg_exec($c, $q);
-  for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+  for ($i=0; $row = pg_fetch_array($rs); $i++) {
     $stid = $row['station'];
     $vals[$stid] = $row['prec'];
   }

@@ -32,7 +32,7 @@ class StationData {
   	} else{
   		$rs = pg_execute($this->dbconn, "SELECT  ST2", Array($id));
   	}
-    for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
+    for( $i=0; $row = pg_fetch_array($rs); $i++)
     {
       $this->table[ $row["id"] ] = $row;
       $this->do_conversions($row["id"]);

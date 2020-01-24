@@ -28,7 +28,7 @@ $sql = "SELECT replace(report,'\001','') as report,
 $result = pg_exec($connect, $sql);
 
 $ar = Array("data" => Array() );
-for( $i=0; $row  = @pg_fetch_array($result,$i); $i++)
+for( $i=0; $row  = pg_fetch_array($result); $i++)
 {
   $z = Array();
   $z["id"] = $i +1;

@@ -28,7 +28,7 @@ $xlabel= array();
 
 $thisP = 0;
 
-for( $i=0; $row = @pg_fetch_array($result,$i); $i++) 
+for( $i=0; $row = pg_fetch_array($result); $i++) 
 { 
   $ydata1[$i]  = $row["phour"];
   $xlabel[$i] = $row["tvalid"];

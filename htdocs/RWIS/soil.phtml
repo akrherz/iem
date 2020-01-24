@@ -62,7 +62,7 @@ $rs = pg_execute($dbconn, "SELECT", Array());
  
  $data = Array();
  $table  = "";
- for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+ for($i=0;$row=pg_fetch_array($rs);$i++){
  	$table .= sprintf("<tr><th>%s</th><th>%s</th>
    <td>%.1f</td><td>%.1f</td><td>%.1f</td><td>%.1f</td>
    <td>%.1f</td><td>%.1f</td><td>%.1f</td><td>%.1f</td><td>%.1f</td>

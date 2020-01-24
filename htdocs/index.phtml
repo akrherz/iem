@@ -76,7 +76,7 @@ $rs = pg_query($pgconn, "SELECT * from news ORDER by entered DESC LIMIT 5");
 $today = mktime(0,0,0, date("m"), date("d"), date("Y"));
 
 $news = "";
-for ($i=0; $row = @pg_fetch_array($rs, $i); $i++){
+for ($i=0; $row = pg_fetch_array($rs); $i++){
     $ts = strtotime(substr($row["entered"],0,16));
     if ($ts > $today) $sts = strftime("%I:%M %p", $ts);
     $sts = strftime("%d %b %I:%M %p", $ts);

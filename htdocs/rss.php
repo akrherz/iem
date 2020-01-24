@@ -29,7 +29,7 @@ EOF;
  $conn = iemdb("mesosite");
  $rs = pg_exec($conn, "SELECT * from news ORDER by entered DESC LIMIT 20");
  pg_close($conn);
- for ($i=0; $row = @pg_fetch_assoc($rs, $i); $i++) {
+ for ($i=0; $row = pg_fetch_assoc($rs); $i++) {
   echo "<item>\n";
   echo "<title>". str_replace("&","&amp;",$row["title"]) ."</title>\n";
   echo "<author>akrherz@iastate.edu (Daryl Herzmann)</author>\n";

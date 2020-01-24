@@ -64,7 +64,7 @@ $bar640t->draw($img);
 $rs = pg_execute($dbconn, "SELECT", Array($month, $year));
 $minvalid = null;
 $maxvalid = null;
-for ($i=0; $row = @pg_fetch_assoc($rs,$i); $i++) {
+for ($i=0; $row = pg_fetch_assoc($rs); $i++) {
   $key = $row["station"];
   if ($key == "AMFI4" or $key == "AHTI4") continue;
 

@@ -23,7 +23,7 @@ $query2 = "SELECT l.*, ST_askml(l.geom) as kml
            and w.status = 'NEW'";
 
 $result = pg_exec($connect, $query2);
-$row = @pg_fetch_array($result, 0);
+$row = pg_fetch_array($result);
 
 header('Content-disposition: attachment; filename=sbw_lsrs.kml');
 header("Content-Type: application/vnd.google-earth.kml+xml");
@@ -45,7 +45,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
         <color>$color</color>
       </PolyStyle>
     </Style>";
-for ($i=0;$row=@pg_fetch_assoc($result,$i);$i++)
+for ($i=0;$row=pg_fetch_assoc($result);$i++)
 {
   $ts = strtotime( $row["valid"] );
   echo "<Placemark>

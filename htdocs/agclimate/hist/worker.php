@@ -111,7 +111,7 @@ $sql = "SELECT station, to_char(valid, '${tsfmt}') as dvalid,
    ORDER by station, valid";
   $rs = pg_exec($c, $sql);
 
-for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+for( $i=0; $row = pg_fetch_array($rs); $i++) {
   echo $row["station"] . $d[$delim] . $ISUAGcities[$row["station"]]['name'] 
     . $d[$delim] . $row["dvalid"] . $d[$delim];
   for ($j=0; $j < $num_vars;$j++){

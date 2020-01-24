@@ -25,7 +25,7 @@ $rs = pg_execute($pgconn, "SELECT", Array($station, $network));
 $data = Array();
 $minyear = 3000;
 $maxyear = 1000;
-for ($i=0; $row=@pg_fetch_assoc($rs, $i); $i++){
+for ($i=0; $row=pg_fetch_assoc($rs); $i++){
       if ($minyear > $row["year"]) $minyear = $row["year"];
       if ($maxyear < $row["year"]) $maxyear = $row["year"];
       $key = sprintf("%s_%s", $row["year"], $row["month"]);
@@ -39,7 +39,7 @@ $rs = pg_prepare($pgconn, "SELECT", "SELECT ".
 "sum(precip) as precip from ncdc_climate81 WHERE station = $1".
 " GROUP by month ORDER by month ASC");
 $rs = pg_execute($pgconn, "SELECT", Array($metadata["ncdc81"]));
-for ($i=0; $row=@pg_fetch_assoc($rs, $i); $i++){
+for ($i=0; $row=pg_fetch_assoc($rs); $i++){
       $climo[$row["month"]] = $row;
 }
 

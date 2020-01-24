@@ -52,7 +52,7 @@ EOF;
 
 	 $rs = pg_execute($coop, "SELECTOR", Array($station, date("md", $sts),
 	 		date("md", $ets)));
-	 for( $i=0; $row = @pg_fetch_assoc($rs,$i); $i++) {
+	 for( $i=0; $row = pg_fetch_assoc($rs); $i++) {
 	 		$table .= sprintf("<tr><th>%s</th><td>%.2f</td><td>%.2f</td><td>%.2f</td><td>%.2f</td><td>%.1f</td></tr>",
 	 				$row["year"], $row["avg_temp"], $row["avg_high"],
 	 				$row["avg_low"], $row["sum_precip"], $row["sum_snow"]);

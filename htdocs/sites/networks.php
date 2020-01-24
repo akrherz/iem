@@ -46,7 +46,7 @@ if (strlen($network) > 0){
 </tr>
 </thead>
 EOM;
-		for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
+		for ($i=0; $row = pg_fetch_array($result); $i++) {
 			$table .= "<tr>\n
 			  <td><a href=\"site.php?station=". $row["id"] ."&amp;network=". $row["network"] ."\">". $row["id"] ."</a></td>
 			  <td>". $row["name"] ."</td>
@@ -64,7 +64,7 @@ EOM;
 		if (! $nohtml) $table .= "<p><b>". $network ." Network</b></p>\n";
 		if (! $nohtml) $table .= "<pre>\n";
 		$table .= "stid,station_name,lat,lon,elev,begints,iem_network\n";
-		for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
+		for ($i=0; $row = pg_fetch_array($result); $i++) {
 			$table .= $row["id"] .","
 					. $row["name"] .","
 					. round($row["latitude"],5). ","
@@ -93,7 +93,7 @@ EOM;
 					array("BEGINTS","C",16),
 			));
 	
-			for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
+			for ($i=0; $row = pg_fetch_array($result); $i++) {
 				$pt = ms_newPointobj();
 				$pt->setXY( $row["longitude"], $row["latitude"], 0);
 				$shpFile->addPoint($pt);
@@ -116,7 +116,7 @@ EOM;
 }
 else if ($format == "awips") {
 	if (! $nohtml) $table .= "<pre>\n";
-	for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
+	for ($i=0; $row = pg_fetch_array($result); $i++) {
 		$table .= sprintf("%s|%s|%-30s|%4.1f|%2.5f|%3.5f|GMT|||1||||\n", $row["id"], $row["id"], $row["name"], $row["elevation"], $row["latitude"], $row["longitude"]);
 	} // End of for
 	if (! $nohtml) $table .= "</pre>\n";
@@ -125,7 +125,7 @@ else if ($format == "awips") {
 else if ($format == "madis") {
 	if (! $nohtml) $table .= "<pre>\n";
 
-	for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
+	for ($i=0; $row = pg_fetch_array($result); $i++) {
 		if (substr($row["network"],0,4) == "KCCI") $row["network"] = "KCCI-TV";
 		if (substr($row["network"],0,4) == "KELO") $row["network"] = "KELO-TV";
 		if (substr($row["network"],0,4) == "KIMT") $row["network"] = "KIMT-TV";
@@ -136,7 +136,7 @@ else if ($format == "madis") {
 
 else if ($format == "gempak") {
 	if (! $nohtml) $table .= "<pre>\n";
-	for ($i=0; $row = @pg_fetch_array($result,$i); $i++) {
+	for ($i=0; $row = pg_fetch_array($result); $i++) {
 		$table .= str_pad($row["id"], 9)
 		.  str_pad($row["synop"], 7)
 		.  str_pad($row["name"], 33)

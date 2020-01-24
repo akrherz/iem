@@ -18,7 +18,7 @@ $ydata3 = array();
 $xlabel= array();
 $years = 0;
 
-for( $i=0; $row = @pg_fetch_array($result,$i); $i++) 
+for( $i=0; $row = pg_fetch_array($result); $i++) 
 { 
   $ydata[$i]  = $row["max"];
   $ydata2[$i]  = $row["min"];

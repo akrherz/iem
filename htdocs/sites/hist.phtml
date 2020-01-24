@@ -164,7 +164,7 @@ $rs = pg_exec($c, $sql);
 if ($mode == "monthly") {
 	$t->title = sprintf("%s Data Calendar for %s", $station, $nicemonthdate);
 	$db = Array();
- for( $i=0; $row = @pg_fetch_assoc($rs,$i); $i++){
+ for( $i=0; $row = pg_fetch_assoc($rs); $i++){
   $qc = $row["max_tmpf_qc"];
   if ($row["max_tmpf"] == -99) $row["max_tmpf"] = "M";
   if ($row["min_tmpf"] == 99) $row["min_tmpf"] = "M";
@@ -278,7 +278,7 @@ summary information.</p>
 </tr>
 </thead>
 EOF;
- 	for( $i=0; $row = @pg_fetch_assoc($rs,$i); $i++){
+ 	for( $i=0; $row = pg_fetch_assoc($rs); $i++){
   		$qc = $row["max_tmpf_qc"];
   		if (! $st->load_station($row["id"], $network) ) {
   			continue;

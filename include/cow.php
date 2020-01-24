@@ -361,7 +361,7 @@ function loadWarnings(){
 	//die("<pre>$sql</pre>");
 	$rs = $this->callDB($sql);
 	
-    for ($i=0;$row = @pg_fetch_assoc($rs,$i);$i++){
+    for ($i=0;$row = pg_fetch_assoc($rs);$i++){
         $key = sprintf("%s-%s-%s-%s", $row["year"], $row["wfo"], 
                        $row["phenomena"], $row["eventid"]);
 
@@ -414,7 +414,7 @@ function loadLSRs() {
         	date("Y/m/d H:i", $this->sts), date("Y/m/d H:i", $this->ets), 
         	$this->sqlLSRTypeBuilder(), $this->hailsize, $this->wind);
     $rs = $this->callDB($sql);
-    for ($i=0;$row = @pg_fetch_assoc($rs,$i);$i++)
+    for ($i=0;$row = pg_fetch_assoc($rs);$i++)
     {
         $key = sprintf("%s-%s-%s-%s-%s", $row["wfo"], $row["valid"], 
         				$row["type"], $row["magnitude"], $row["city"]);
@@ -503,7 +503,7 @@ function sbwVerify() {
          date("Y/m/d H:i", strtotime($v["issue"])),
          date("Y/m/d H:i", $v["expire"]) );
         $rs = $this->callDB($sql);
-        for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+        for ($i=0;$row=pg_fetch_assoc($rs);$i++){
             $key = sprintf("%s-%s-%s-%s-%s", 
                    $row["wfo"], $row["valid"], $row["type"],
                    $row["magnitude"], $row["city"]);

@@ -13,7 +13,7 @@ function get_news_by_tag($tag){
 	$rs = pg_execute($pgconn, "NEWSTAGSELECT", Array($tag));
 	$s = "<h3>Recent News Items</h3><p>Most recent news items tagged: "
 		."{$tag}</p><ul>";
-	for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	for($i=0;$row=pg_fetch_assoc($rs);$i++){
 		$s .= sprintf("<li><a href=\"/onsite/news.phtml?id=%s\">%s</a>"
 				."<br />Posted: %s</li>\n", $row["id"],
 				$row["title"], date("d M Y", strtotime($row["entered"])));
@@ -31,7 +31,7 @@ function get_iemapps_tags($tagname){
 			."ORDER by name ASC");
 	$rs = pg_execute($pgconn, "TAGSELECT", Array($tagname));
 	$s = "<ul>";
-	for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	for($i=0;$row=pg_fetch_assoc($rs);$i++){
 		$s .= sprintf("<li><a href=\"%s\">%s</a><br />%s</li>\n", $row["url"],
 				$row["name"], $row["description"]);	
 	}
@@ -277,7 +277,7 @@ EOF;
 			extract(year from valid) != extract(year from now()) ORDER by yr DESC";
 	$result = pg_exec($connection, $sql);
 	
-	for($i=0;$row=@pg_fetch_assoc($result,$i);$i++)
+	for($i=0;$row=pg_fetch_assoc($result);$i++)
 	{
 		// Start a new row
 		if ($i % 2 == 0){ $s .= "\n<div class=\"row\">"; }

@@ -26,7 +26,7 @@ $highs = Array();
 $lows = Array();
 $xlabels = Array();
 
-for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+for( $i=0; $row = pg_fetch_array($rs); $i++) {
   $ts = strtotime($row["day"]);
   $xlabels[] = date("m/d", $ts);
   if ($row["max_tmpf"] < $row["min_tmpf"] || $row["max_tmpf"] < -100 || $row["min_tmpf"] < -100){
@@ -56,7 +56,7 @@ if ($hasclimate){
  $ahighs = Array();
  $alows = Array();
 
- for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+ for( $i=0; $row = pg_fetch_array($rs); $i++) {
   $ahighs[] = $row["high"];
   $alows[] = $row["low"];
  }

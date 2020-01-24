@@ -49,7 +49,7 @@ $temps = Array();
 $dewps = Array();
 $srad  = Array();
 
-for($i=0;$row = @pg_fetch_array($rs,$i); $i++)
+for($i=0;$row = pg_fetch_array($rs); $i++)
 {
   $ts = strtotime( substr($row["valid"],0,16) );
   $times[] = $ts;

@@ -21,7 +21,7 @@ $rs = pg_execute($hads, "SELECT", Array($station));
 
 $ar = Array("vars"=> Array());
 
-for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
+for ($i=0;$row=pg_fetch_assoc($rs);$i++)
 {
   $z = Array("id"=>$row["key"]);
   $ar["vars"][] = $z;

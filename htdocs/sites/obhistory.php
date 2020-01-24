@@ -130,7 +130,7 @@ $rs = pg_prepare($dbconn, "_MYSELECT", $sql);
 $rs = pg_execute($dbconn, "_MYSELECT", Array($station, $network,
 	date("Y-m-d", $date), date("Y-m-d", $date + 90400)));
 $table = "";
-for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 	if ($row['dwpf'] == null && $row['relh'] != null){
 		$row['dwpf'] = dwpf($row["tmpf"], $row["relh"]);
 	}

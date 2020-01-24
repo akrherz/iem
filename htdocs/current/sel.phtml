@@ -12,7 +12,7 @@
  
  $metdata = Array();
  $rs = pg_query($conn, "SELECT * from watches_current");
- for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+ for ($i=0;$row=pg_fetch_assoc($rs);$i++){
  	$metadata[$row["sel"]] = $row;
  	$metadata[$row["sel"]]["sts"] = strtotime(substr($row["issued"],0,16));
  	$metadata[$row["sel"]]["ets"] = strtotime(substr($row["expired"],0,16));

@@ -45,7 +45,7 @@ $ys = yearSelect("2010", $year);
 $ms = monthSelect($month);
 
 $table = "";
-for($i=0;$row=@pg_fetch_assoc($data,$i);$i++){
+for($i=0;$row=pg_fetch_assoc($data);$i++){
 	$table .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", $row["id"], 
 	$row["name"], $row["total"], $row["pobs"], $row["tobs"], $row["sobs"],
 	$row["sdobs"]);

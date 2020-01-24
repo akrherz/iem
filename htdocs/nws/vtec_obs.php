@@ -64,7 +64,7 @@ $ugc2station = Array();
 $rs = pg_prepare($postgis, "STATIONS", "SELECT id, ugc_zone from stations
   		where wfo = $1 and (network ~* 'ASOS' or network = 'AWOS')");
 $rs = pg_execute($postgis, "STATIONS", Array($wfo));
-for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+for($i=0;$row=pg_fetch_assoc($rs);$i++){
   	if (! array_key_exists($row["ugc_zone"], $ugc2station)){
   		$ugc2station[$row["ugc_zone"]] = Array();
   	}
@@ -140,7 +140,7 @@ $table = "";
 
 $rs = pg_execute($postgis, "FIND", Array($wfo, $sid, $eid, $phenomena, 
 										$significance));
-for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+for($i=0;$row=pg_fetch_assoc($rs);$i++){
 	$ar = explode(",", $row["a"]);
 	$issue = $row["issue"];
   	$expire = $row["expire"];
@@ -170,7 +170,7 @@ for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
   	$table .= "<table class=\"table table-condensed\">";
   	$ostation = "";
   	$stfound = 0;
-  	for($j=0;$row2=@pg_fetch_assoc($rs2,$j);$j++){
+  	for($j=0;$row2=pg_fetch_assoc($rs2);$j++){
   		if ($ostation != $row2["station"]){
   			if ($stfound > 0 && $stfound % 3 == 0){
   				$table .= "</td></tr>";

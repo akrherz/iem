@@ -18,7 +18,7 @@ $date = isset($_REQUEST["date"]) ? $_REQUEST["date"] : date('Y-m-d');
 $rs = pg_execute($dbconn, "SELECT", Array($date));
 
 $ar = Array("stations" => Array() );
-for( $i=0; $row = @pg_fetch_assoc($rs,$i); $i++){
+for( $i=0; $row = pg_fetch_assoc($rs); $i++){
   $ar["stations"][] = $row;
   $ar['stations'][$i]['state'] = ($ar['stations'][$i]['state'] == null) ? ""  : $ar['stations'][$i]['state'];
 }

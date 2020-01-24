@@ -139,7 +139,7 @@ if ($room != "" && $action != "delete"){
 
 $table = "";
 $rs = pg_execute($dbconn, "SELECTROOMS", Array());
-for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+for ($i=0;$row=pg_fetch_array($rs);$i++){
 	if ($i % 8 == 0) $table .= "</tr><tr>";
 	$table .= sprintf("<td><a href=\"iembot.php?action=edit&room=%s\">%s</a></td>",
 			$row["roomname"], $row["roomname"] );

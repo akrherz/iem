@@ -13,7 +13,7 @@ $query1 = "SELECT title, good, bad, abstain,
 $result = pg_exec($connection, $query1);
 $table = "";
 $count = pg_num_rows($result);
-for($i = 0; $row = @pg_fetch_assoc ( $result, $i ); $i ++) {
+for($i = 0; $row = pg_fetch_assoc($result); $i ++) {
 	if ($i % 4 == 0) {
 		$table .= "<tr>\n";
 	}

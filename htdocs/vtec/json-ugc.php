@@ -35,7 +35,7 @@ $sql = "SELECT w.ugc, status, name,
 $result = pg_exec($connect, $sql);
 
 $ar = Array("ugcs" => Array() );
-for( $i=0; $z = @pg_fetch_assoc($result,$i); $i++)
+for( $i=0; $z = pg_fetch_assoc($result); $i++)
 {
   $z["id"] = $i +1;
   $z["issued"] = $z["iso_issued"];

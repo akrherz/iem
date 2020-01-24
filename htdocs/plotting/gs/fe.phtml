@@ -40,7 +40,7 @@ $rs = pg_query($mesosite, "SELECT id, name from networks where
 	 or id ~* '^KS' or id ~* '^MO' or id ~* '^IL' or id ~* '^IN' or id ~* '^OH' or id ~* '^KY'
 	or id in ('KCCI','KELO','KIMT')");
 $nselect = "<select name=\"network\">";
-for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 	$nselect .= sprintf("<option value=\"%s\"%s>%s</option>", $row["id"],
 			($row["id"] == $network) ? ' selected="selected"': '', $row["name"]);
 }

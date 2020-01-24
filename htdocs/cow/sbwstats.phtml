@@ -44,7 +44,7 @@ $rs = pg_execute($postgis, "SELECT",
 
 $data = Array();
 $sorted = Array();
-for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
+for ($i=0;$row=pg_fetch_array($rs);$i++)
 {
   if (! array_key_exists($row["wfo"], $data)){ $sorted[] = $row["wfo"]; }
   $data[ $row["wfo"] ][ $row["phenomena"] ."_sum_polysize"] = $row["sum_polysize"];

@@ -64,7 +64,7 @@ $ar = Array(
    "features" => Array()
 );
 
-for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
+for ($i=0;$row=pg_fetch_assoc($rs);$i++)
 {
   $lon = floatval($row["lon"]);
   $lat = floatval($row["lat"]);
@@ -83,7 +83,7 @@ for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
         $row["valid"], $lon, $lat, $lon, $lat );
      $rs2 = pg_query($postgis, $sql);
      $products = "";
-     for ($j=0;$row2 = @pg_fetch_array($rs2,$j); $j++)
+     for ($j=0;$row2 = pg_fetch_array($rs2); $j++)
      {
       $vtecurl = sprintf("%s/vtec/#%s-O-NEW-K%s-%s-%s-%04d", ROOTURL, 
       substr($row["valid"],0,4),

@@ -158,7 +158,7 @@ $rs = pg_prepare($coopdb, "SELECT", "SELECT station,
 $rs = pg_execute($coopdb, "SELECT", Array(adodb_date("Y-m-d", $sts),
 	adodb_date("Y-m-d", $ets)));
 	
-for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+for($i=0;$row=pg_fetch_array($rs);$i++){
 	
 	$ukey = $row["station"];
 	if (! isset($cities[$ukey]) ) continue;

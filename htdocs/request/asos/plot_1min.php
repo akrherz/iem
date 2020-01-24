@@ -30,7 +30,7 @@ for ($j=0; $j<$num_vars; $j++){
 }
 
 
-for( $i=0; $row = @pg_fetch_array($rs,$i); $i++){
+for( $i=0; $row = pg_fetch_array($rs); $i++){
   $times[$i] = strtotime($row["dvalid"]);
   for ($j=0; $j<$num_vars; $j++){
    $dataA[$j][$i] = $row["var".$j];

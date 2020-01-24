@@ -19,7 +19,7 @@ $sql = "SELECT * from flux_vars ORDER by details ASC";
 $rows = pg_exec($other, $sql);
 $var_names = Array();
 $var_details = Array();
-for( $i=0; $row = @pg_fetch_array($rows,$i); $i++)
+for( $i=0; $row = pg_fetch_array($rows); $i++)
 {
   $var_names[] = $row["name"];
   $var_details[] = $row["details"];

@@ -27,7 +27,7 @@ EOF;
  $conn = iemdb("mesosite");
  $rs = pg_exec($conn, "SELECT *, to_char(valid, 'YYYY/MM/YYMMDD') as imageref from feature ORDER by valid DESC LIMIT 20");
  pg_close($conn);
- for ($i=0; $row = @pg_fetch_assoc($rs, $i); $i++) {
+ for ($i=0; $row = pg_fetch_assoc($rs); $i++) {
 	$appurl = "";
  	if ($row["appurl"] != ""){
 		$appurl = "<p><a href=\"https://mesonet.agron.iastate.edu".$row["appurl"]."\">Generate This Chart on IEM Website</a></p>";

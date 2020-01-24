@@ -46,7 +46,7 @@ if ($ts == 0){ $ts = time(); }
 
 /* Who was online and where did they look?  Hehe */
 $cdrct = Array();
-for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
+for( $i=0; $row = pg_fetch_array($rs); $i++) 
 {  $cdrct[ $row["cam"] ] = $row["drct"]; }
 
 

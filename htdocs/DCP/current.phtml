@@ -42,7 +42,7 @@ $cols = Array(
  $rs = pg_execute($pgconn, "SELECT", Array($network));
 
  $obs = Array();
- for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+ for($i=0;$row=pg_fetch_assoc($rs);$i++){
  	$datakey = sprintf("%s%s%s", $row["physical_code"], $row["duration"],
  			$row["extremum"]);
  	$obs[ $row['station'] ][ $datakey ] = $row["value"]; 
@@ -54,7 +54,7 @@ $cols = Array(
  
  $nselect = "<select name=\"network\">";
  $rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'DCP' ORDER by name ASC");
- for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+ for ($i=0;$row=pg_fetch_assoc($rs);$i++){
  	$sel = '';
  	if ($network == $row["id"]){
  		$sel = " selected='SELECTED'";

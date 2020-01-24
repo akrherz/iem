@@ -23,7 +23,7 @@
  $rs = pg_execute($dbconn, "SELECT", Array($network));
  
  $data = Array();
- for($i=0; $row = @pg_fetch_array($rs,$i); $i++)
+ for($i=0; $row = pg_fetch_array($rs); $i++)
  {
  	$data[ $row["station"] ] = $row;
  	$data[ $row["station"] ]["sname"] = $cities[ $row["station"] ]["name"];

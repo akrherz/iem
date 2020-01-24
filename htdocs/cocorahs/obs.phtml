@@ -40,7 +40,7 @@ if (strlen($station) > 0) {
 }
 $hirow = 1;
 $table = "";
-for( $i=0; $row = @pg_fetch_assoc($rs,$i); $i++) {
+for( $i=0; $row = pg_fetch_assoc($rs); $i++) {
 	$nwsli = $row["station"];
 
 	$rain = $row["pday"];

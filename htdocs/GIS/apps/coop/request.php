@@ -90,7 +90,7 @@ $dbfFile = dbase_create( $shpFname.".dbf", array(
 ));
 
 
-for( $i=0; $row = @pg_fetch_array($rs,$i); $i++){
+for( $i=0; $row = pg_fetch_array($rs); $i++){
   addPoint($row, $row["lon"], 
                  $row["lat"],
                  $row["name"]);

@@ -30,7 +30,7 @@ if ($portfolio != null)
 	}
 
 	$rowDict = Array("tmpf"=>"", "dwpf"=>"");
-	for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
+	for( $i=0; $row = pg_fetch_array($rs); $i++)
 	{
 		$param = $row["parameter"];
 		$color = "#00f";

@@ -21,7 +21,7 @@ $times = array();
 
 $rs = pg_exec($db, $sql);
 
-for($i=0; $row = @pg_fetch_array($rs,$i); $i++){
+for($i=0; $row = pg_fetch_array($rs); $i++){
   $sknt[] = $row["sknt"];
   $drct[] = $row["drct"];
   $times[] = strtotime( $row["valid"] );

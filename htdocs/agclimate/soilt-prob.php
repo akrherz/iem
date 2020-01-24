@@ -30,7 +30,7 @@ while (list($k,$thres) = each($thresholds))
   $rs = pg_execute($conn, "spring", Array($station,$thres));
   $cnts = Array();
   $yrs = pg_num_rows($rs);
-  for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
+  for ($i=0;$row=pg_fetch_array($rs);$i++)
   {
     @$cnts[ $row["v"] ] += 1;
   }
@@ -62,7 +62,7 @@ while (list($k,$thres) = each($thresholds))
   $rs = pg_execute($conn, "fall", Array($station,$thres));
   $cnts = Array();
   $yrs = pg_num_rows($rs);
-  for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
+  for ($i=0;$row=pg_fetch_array($rs);$i++)
   {
     @$cnts[ $row["v"] ] += 1;
   }

@@ -23,7 +23,7 @@ $rs = pg_execute($pgconn, "SELECT", Array($station,
 
 $data = Array();
 $times = Array();
-for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+for ($i=0;$row=pg_fetch_array($rs);$i++){
 	$times[] = strtotime($row["valid"]);
 	$data[] = $row["value"];
 }

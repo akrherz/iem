@@ -46,7 +46,7 @@ EOF;
 $result = pg_exec($connect, $sql);
 
 $ar = Array("lsrs" => Array() );
-for( $i=0; $lsr = @pg_fetch_array($result,$i); $i++)
+for( $i=0; $lsr = pg_fetch_array($result); $i++)
 {
   $q = Array();
   $q["id"] = $i +1;

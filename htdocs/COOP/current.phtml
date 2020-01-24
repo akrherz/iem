@@ -153,7 +153,7 @@ $t->current_network = "COOP";
 
 $nselect = '<select name="network">';
 $rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'COOP' ORDER by name ASC");
-for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 	$sel = '';
 	if ($network == $row["id"]){
 		$sel = " selected='SELECTED'";

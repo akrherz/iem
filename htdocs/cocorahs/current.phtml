@@ -37,7 +37,7 @@ $t->current_network = "CoCoRaHS";
    and day >= '${first_of_month}-01' GROUP by id";
  $rs = pg_exec($dbconn, $sql);
  $monthDict = Array();
- for( $i=0; $row = @pg_fetch_array($rs,$i); $i++){ 
+ for( $i=0; $row = pg_fetch_array($rs); $i++){ 
    $monthDict[ $row["id"] ] = Array("accum" => round($row["pmonth"],2), "missing" => $row["missing"] );
  }
 

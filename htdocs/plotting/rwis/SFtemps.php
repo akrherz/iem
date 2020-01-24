@@ -112,7 +112,7 @@ $q1 = "SELECT * from sensors WHERE station = '". $station ."' ";
 $result = pg_exec($c0, $q0);
 $r1 = pg_exec($c1, $q1);
 
-$row = @pg_fetch_array($r1, 0);
+$row = pg_fetch_array($r1);
 $ns0 = $row['sensor0'];
 $ns1 = $row['sensor1'];
 $ns2 = $row['sensor2'];
@@ -136,7 +136,7 @@ function checker($v){
 }
 
 $lastp = 0;
-for( $i=0; $row = @pg_fetch_array($result,$i); $i++) 
+for( $i=0; $row = pg_fetch_array($result); $i++) 
 { 
   $times[] = strtotime( substr($row["gvalid"],0,16) );
   $tcs0[] = checker($row["tcs0"]);

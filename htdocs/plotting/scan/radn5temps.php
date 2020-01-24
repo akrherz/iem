@@ -35,7 +35,7 @@ $ydataSR = array();
 
 $times= array();
 
-for( $i=0; $row = @pg_fetch_array($result,$i); $i++) 
+for( $i=0; $row = pg_fetch_array($result); $i++) 
 {
   $ydata1[] = ($row["c1tmpf"] > -90) ? $row["c1tmpf"] : "";
   $ydata2[] = ($row["c2tmpf"] > -90) ? $row["c2tmpf"] : "";

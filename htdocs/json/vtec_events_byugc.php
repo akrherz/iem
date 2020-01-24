@@ -27,7 +27,7 @@ $rs = pg_prepare($dbconn, "SELECT", "SELECT
 $rs = pg_execute($dbconn, "SELECT", Array($ugc, $sdate, $edate));
 
 $ar = Array("events" => Array() );
-for( $i=0; $row = @pg_fetch_assoc($rs,$i); $i++){
+for( $i=0; $row = pg_fetch_assoc($rs); $i++){
   $ar["events"][] = Array(
   	"issue" => $row["iso_issued"],
   	"expire" => $row["iso_expired"],

@@ -37,7 +37,7 @@ else {
 }
 $ar = Array("synd" => Array() , "totalCount" => $total);
 
-for ($i=0;$row=@pg_fetch_array($rs, $i);$i++){
+for ($i=0;$row=pg_fetch_array($rs);$i++){
 	$z = Array("id" => $row["roomname"], "text" => $row["roomname"]);
 	$ar["synd"][] = $z;
 }

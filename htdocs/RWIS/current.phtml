@@ -26,7 +26,7 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
 
 $nselect = "<select name=\"network\">";
 $rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'RWIS' ORDER by name ASC");
-for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 	$sel = '';
 	if ($network == $row["id"]){
 		$sel = " selected='SELECTED'";

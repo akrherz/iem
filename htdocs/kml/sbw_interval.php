@@ -90,7 +90,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
       <LineStyle><width>1</width><color>ff000000</color></LineStyle>
       <PolyStyle><color>7d00ff00</color></PolyStyle>
     </Style>";
-for ($i=0;$row=@pg_fetch_array($result,$i);$i++){
+for ($i=0;$row=pg_fetch_array($result);$i++){
   $sts = strtotime($row["issue"]);
   $ets = strtotime($row["expire"]);
   $uri = sprintf("<a href=\"%s/vtec/#%s-O-NEW-K%s-%s-%s-%04d\">%s</a>", ROOTURL, date('Y',$sts), $row["wfo"], $row["phenomena"], $row["significance"], $row["eventid"], $row["eventid"]);
@@ -136,7 +136,7 @@ function pull_wfos_in_states($db, $state_abbreviations){
         if($valid_state_count > 0 ){
             $sql .= ')';
             $result  = pg_query($db, $sql);
-            for ($i=0;$row=@pg_fetch_array($result,$i);$i++){
+            for ($i=0;$row=pg_fetch_array($result);$i++){
                 if($row['wfo'] !== null){
                     $wfos[$wfo_count] = $row['wfo'];
                     ++$wfo_count;

@@ -49,7 +49,7 @@ $rs = pg_prepare($mosdb, "SELECT", "SELECT *, t06_1 ||'/'||t06_2 as t06, ".
       "runtime IN $sqlSelector ".
       "and station = $1 and model = $2");
 $rs = pg_execute($mosdb, "SELECT", Array($station, $model));
-for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
+for ($i=0;$row=pg_fetch_array($rs);$i++)
 {
   $data[ substr($row["runtime"],0,16) ][ substr($row["ftime"],0,16) ] = $row[$vname];
 }

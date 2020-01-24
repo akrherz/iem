@@ -27,7 +27,7 @@ Font: 1, 11, 1, \"Courier New\"
 
 ";
 
-for ($k=0;$row=@pg_fetch_array($rs,$k);$k++){
+for ($k=0;$row=pg_fetch_array($rs);$k++){
 	$valid = strtotime($row["tmlv"]);
 	$pe = strtotime($row["pe"]);
 	$dur = $pe - $valid;

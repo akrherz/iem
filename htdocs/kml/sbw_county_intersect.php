@@ -58,7 +58,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     </Style>
 ";
 
-for($i=0;$row=@pg_fetch_assoc($rs, $i);$i++){
+for($i=0;$row=pg_fetch_assoc($rs);$i++){
   echo sprintf("<Placemark>
     <styleUrl>#iemstyle%s</styleUrl>
     <name>Intersect size: %.1f km ID: %s</name>", $i%3, $row["sz"] /1000.0, $i);

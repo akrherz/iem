@@ -29,7 +29,7 @@ WHERE
  and pday >= 0
 GROUP by id, month");
 $data = Array();
-for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
+for($i=0;$row=pg_fetch_assoc($rs);$i++)
 {
   if (!array_key_exists($row['id'], $data))
   { 

@@ -48,7 +48,7 @@ if (isset($_REQUEST["longitude"]) && isset($_REQUEST["latitude"]))
 			sprintf("SELECT iemid, network, name from stations WHERE id = '%s'",
 					$station));
 	$found = False;
-	for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	for($i=0;$row=pg_fetch_assoc($rs);$i++){
 		if ($row["network"] == $network) $found = True;
 		$msg .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td></tr>",
 				$row["iemid"], $row["network"], $row["name"]);

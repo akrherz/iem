@@ -495,7 +495,7 @@ $wA = Array();
 $iA = Array();
 $uA = Array();
 $fA = Array();
-for( $i=0; $row = @pg_fetch_array($result,$i); $i++) 
+for( $i=0; $row = pg_fetch_array($result); $i++) 
 {
   /* Save the drama! */
   if ($filter && $row["wfo"] != $site) continue; 

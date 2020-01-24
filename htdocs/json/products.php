@@ -15,7 +15,7 @@ $result = pg_exec($connect, "SELECT * from archive_products
 		ORDER by groupname, name");
 
 $ar = Array("products" => Array() );
-for( $i=0; $row = @pg_fetch_assoc($result,$i); $i++)
+for( $i=0; $row = pg_fetch_assoc($result); $i++)
 {
   $z = Array("id" => $row["id"],
         "template" => $row["template"], 
@@ -32,7 +32,7 @@ for( $i=0; $row = @pg_fetch_assoc($result,$i); $i++)
 $result = pg_exec($connect, "SELECT * from webcams WHERE 
           network != 'IDOT' ORDER by network, name");
 
-for( $i=0; $row = @pg_fetch_assoc($result,$i); $i++)
+for( $i=0; $row = pg_fetch_assoc($result); $i++)
 {
   $tpl = sprintf("https://mesonet.agron.iastate.edu/archive/data/%%Y/%%m/%%d/".
   		"camera/%s/%s_%%Y%%m%%d%%H%%i.jpg", $row["id"],

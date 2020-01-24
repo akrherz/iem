@@ -41,7 +41,7 @@ function get_data(){
 	
 	$data = Array();
 	$pcodes = Array();
-	for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 		$yr = $row["yr"];
 		if (! array_key_exists($yr, $data)){
 			$data[$yr] = Array();
@@ -67,7 +67,7 @@ function get_data2(){
 	");
 
 	$data = Array();
-	for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 		$yr = $row["yr"];
 		if (! array_key_exists($yr, $data)){
 			$data[$yr] = Array();

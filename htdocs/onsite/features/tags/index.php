@@ -13,7 +13,7 @@ $pgconn = iemdb('mesosite');
 if (! isset($_GET["tag"])){
   $rs = pg_exec($pgconn, "SELECT tags from feature WHERE tags is not Null");
   $tags = Array();
-  for ($i=0;$row=@pg_fetch_array($rs,$i);$i++) { 
+  for ($i=0;$row=pg_fetch_array($rs);$i++) { 
     $tokens = preg_split("/,/", $row["tags"]);
     while (list($k,$v) = each($tokens)){ 
 		if ($v == ""){ continue; }
@@ -87,7 +87,7 @@ $rs = pg_prepare($pgconn, "__SELECT", "SELECT *,
       ORDER by valid DESC");
 $rs = pg_execute($pgconn, "__SELECT", Array($tag));
 $content = "";
-for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
+for ($i=0;$row=pg_fetch_assoc($rs);$i++)
 {
 	$tokens = preg_split("/,/", $row["tags"]);
 	$found = False;

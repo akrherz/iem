@@ -25,7 +25,7 @@ $srad = array();
 $times = array();
 
 
-for($i=0; $row = @pg_fetch_array($rs,$i); $i++){
+for($i=0; $row = pg_fetch_array($rs); $i++){
   $tmpf[] = $row["tmpf"];
   $dwpf[] = $row["dwpf"];
   $srad[] = $row["srad"];

@@ -144,7 +144,7 @@ for ($j=0; $j < $num_vars;$j++){
 }
 echo "\n";
 
-for( $i=0; $row = @pg_fetch_assoc($rs,$i); $i++) 
+for( $i=0; $row = pg_fetch_assoc($rs); $i++) 
 {
   $sid = $row["station"];
   echo $sid . $d[$delim] . $cities[$sid]["name"] ;

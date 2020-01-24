@@ -66,7 +66,7 @@ $xmax = 0;
 $ymax = 0;
 $xmin = 0;
 $xmax = 0;
-for ($i=0;$row = @pg_fetch_array($rs, $i); $i++)
+for ($i=0;$row = pg_fetch_array($rs); $i++)
 {
   if ($i > 8){ continue; }
   if ($i == 0){

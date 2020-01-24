@@ -47,7 +47,7 @@ $ar = Array("type"=>"FeatureCollection",
 );
 
 
-for( $i=0; $row = @pg_fetch_assoc($result,$i); $i++)
+for( $i=0; $row = pg_fetch_assoc($result); $i++)
 {
 	$valid = strtotime($row["valid"]);
   $url = sprintf("//mesonet.agron.iastate.edu/archive/data/".

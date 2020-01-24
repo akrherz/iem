@@ -96,7 +96,7 @@ $rs = pg_execute($coopdb, "SELECT", Array(adodb_date("md", $sts),
  'StationName', 'Latitude', 'Longitude', 'GDD50', 'GDD48', 'SDD86', 'PRECIP',
  'CLIM_GDD50', 'CLIM_GDD48', 'CLIM_PRECIP', 'MAX_TEMP', 'MIN_TEMP',
  'CDD65', 'HDD65', 'CLIM_CDD65', 'CLIM_HDD65');
-for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+for($i=0;$row=pg_fetch_array($rs);$i++){
 
 $ukey = $row["station"];
 	if (! isset($cities[$ukey]) ) continue;
@@ -115,7 +115,7 @@ $netselect = "<select name=\"network\">";
 $mesosite = iemdb("mesosite");
 $rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'CLIMATE'
     and id not in ('MSCLIMATE') ORDER by name ASC");
-for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 	$netselect .= sprintf("<option value='%s' %s>%s</option>\n", $row["id"],
 			($row["id"] == $network)? "selected='selected'": "", $row["name"]);
 }

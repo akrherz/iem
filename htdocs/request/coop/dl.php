@@ -114,7 +114,7 @@ if (in_array('daycent', $vars)){
 	$rs = pg_execute($connection, 'DAYCENT', Array());
 	echo "Daily Weather Data File (use extra weather drivers = 0):\n";
 	echo "\n";
-	for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 		echo sprintf("%s %s %s %s %.2f %.2f %.2f\n", $row["lday"], $row["month"], $row["year"], 
 		$row["doy"], f2c($row["high"]), f2c($row["low"]), $row["precip"] * 25.4);
 	}
@@ -144,7 +144,7 @@ tmax  1981  30.84  28.71  27.02  16.84  12.88   6.82   8.21   7.70  11.90  20.02
 			" year >= $1 and year <= $2 GROUP by year, month");
 	$rs = pg_execute($connection, 'TBD', Array($year1, $year2));
 	$monthly = Array();
-	for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 		$key = sprintf("%s%02d", $row["year"], $row["month"]);
 		$monthly[$key] = Array(
 			"tmax" => f2c($row["avgh"]),
@@ -217,7 +217,7 @@ year          day           radn          maxt          mint          rain
 			" WHERE station IN ". $stationString ." and ".
 			" day >= '".$sqlTS1."' and day <= '".$sqlTS2 ."' ORDER by day ASC");
 	$rs = pg_execute($connection, 'TBD4', Array());
-	for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 		$response .= sprintf(" %s         %s        %.4f         %.4f      %.4f     %.2f\n",
 				$row["year"], $row["doy"], 
 				($row["srad"] === null)? -99: $row["srad"], f2c($row["high"]), 
@@ -246,7 +246,7 @@ else if (in_array('dndc', $vars)){
 			" day >= '".$sqlTS1."' and day <= '".$sqlTS2 ."' ORDER by day ASC");
 	$rs = pg_execute($connection, 'TBD', Array());
 	$zipfiles = Array();
-	for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){		
+	for ($i=0;$row=pg_fetch_assoc($rs);$i++){		
 		$sname = str_replace(" ", "_", $cities[$row["station"]]["name"]);
 		$fn = sprintf("%s/%s_%s.txt", $sname, $sname, $row["year"]);
 		if (! array_key_exists($fn, $zipfiles)){
@@ -284,7 +284,7 @@ CTRL, 1981, 2, 3.1898, 1.59032, -6.83361, 1.38607, NaN, NaN, NaN, 3
 	" day >= '".$sqlTS1."' and day <= '".$sqlTS2 ."' ORDER by day ASC");
 	$rs = pg_execute($connection, 'TBD', Array());
 	echo "StationID, Year, DOY, SRAD, Tmax, Tmin, Rain, DewP, Wind, Par, dbnum\n";
-	for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 		echo sprintf("%s, %s, %s, %.4f, %.2f, %.2f, %.2f, , , , %s\n", 
 				substr($row["station"],0,4), $row["year"],
 				$row["doy"], ($row["srad"] === null)? -99: $row["srad"],  
@@ -308,7 +308,7 @@ else if ($what != "plot"){
   }
   echo "\r\n";
 
- for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
+ for( $i=0; $row = pg_fetch_array($rs); $i++) 
  {
   $sid = $row["station"];
   echo $sid . $d[$delim] . $cities[$sid]["name"] ;

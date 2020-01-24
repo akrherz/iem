@@ -83,7 +83,7 @@ function cleaner($v){
  $cols = Array("nwsli", "date", "time", "high_F", "low_F", "precip", 
  	"snow_inch", "snowd_inch");
  $data = implode($d[$delim], $cols) ."\n";
- for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
+ for( $i=0; $row = pg_fetch_array($rs); $i++) 
  {
    $data .= sprintf("%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n", 
    		$row["id"], $d[$delim], 

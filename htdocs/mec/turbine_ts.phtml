@@ -16,7 +16,7 @@ $dselect = daySelect2($day, "day");
 $pgconn = pg_connect("dbname=mec host=iemdb-mec.local user=mesonet port=5432");
 $ar = Array();
 $res = pg_query($pgconn, "SELECT turbinename from turbines ORDER by turbinename ASC");
-for ($i=0; $row=@pg_fetch_assoc($res,$i);$i++){
+for ($i=0; $row=pg_fetch_assoc($res);$i++){
 	$ar[$row['turbinename']] = $row['turbinename'];
 }
 $sselect = make_select("turbinename", $turbinename, $ar);

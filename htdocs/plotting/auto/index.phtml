@@ -130,7 +130,7 @@ if ($q > 0){
 		plot type.</p>
 <ul>
 EOF;
-		for ($i=0;$row=@pg_fetch_assoc($rs,$i); $i++){
+		for ($i=0;$row=pg_fetch_assoc($rs); $i++){
 			$uri = sprintf("/onsite/features/cat.php?day=%s", $row['d2']);
 			$flist .= sprintf("<li><strong><a href=\"%s\">%s</a></strong>: %s</li>",
 					$uri, $row["d"], $row["title"]);
@@ -172,7 +172,7 @@ EOF;
 			if (sizeof($networks) == 0){
 				$rs = pg_query($mesosite, "SELECT id, name from networks 
 						where id ~* 'ASOS' or id = 'AWOS' ORDER by name ASC");
-				for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+				for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 					$networks[$row["id"]] = $row["name"];
 				}
 			}
@@ -195,7 +195,7 @@ EOF;
 			if (sizeof($networks) == 0){
 				$rs = pg_query($mesosite, "SELECT id, name from networks ".
 					"WHERE id !~* 'CLIMATE' ORDER by name ASC");
-				for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+				for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 					$networks[$row["id"]] = $row["name"];
 				}
 			}
@@ -222,7 +222,7 @@ EOF;
 			if (sizeof($networks) == 0){
 				$rs = pg_query($mesosite, "SELECT id, name from networks ". 
 					"where id ~* 'CLIMATE' ORDER by name ASC");
-				for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+				for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 					$networks[$row["id"]] = $row["name"];
 				}
 			}

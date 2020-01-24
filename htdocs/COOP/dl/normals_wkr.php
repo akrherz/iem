@@ -48,7 +48,7 @@ $rs = pg_execute($con, "SELECT", Array($datestr));
 
 
 $s = "Source,StationID,Name,Latitude,Longitude,Month,Day,Avg_High,Avg_Low,Avg_Precip,Max_Precip,Max_High,Min_High,Max_Low,Min_Low\n";
-for($i=0; $row = @pg_fetch_array($rs,$i); $i++){
+for($i=0; $row = pg_fetch_array($rs); $i++){
   $sid = $row["station"];
   $s .= sprintf("%s,%s,%s,%5.2f,%5.2f,%2d,%2d,%4.1f,%4.1f,%4.2f,%.2f,%.0f,%.0f,%.0f,%.0f\n", 
   	$source, $sid, $cities[$sid]["name"],

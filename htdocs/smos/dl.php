@@ -35,7 +35,7 @@ $rs = pg_query($conn, "SELECT valid,
 
 header("Content-type: text/plain");
 echo "Timestamp,Longitude,Latitude,Soil_Moisture,Optical_Depth\n";
-for ($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 	echo sprintf("%s,%s,%s,%s,%s\n", $row["valid"], $lon, $lat, 
 			$row["sm"], $row["od"]);
 	

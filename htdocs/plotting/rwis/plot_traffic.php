@@ -32,7 +32,7 @@ $long_vol = Array();
 $occupancy = Array();
 $times = Array();
 $labels = Array();
-for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+for($i=0;$row=pg_fetch_array($rs);$i++){
 	$avg_speed[$row["lane_id"]] = Array();
 	$normal_vol[$row["lane_id"]] = Array();
 	$long_vol[$row["lane_id"]] = Array();
@@ -47,7 +47,7 @@ $rs = pg_prepare($dbconn, "SELECT", "SELECT * from alldata_traffic
 $rs = pg_execute($dbconn, "SELECT", Array($station,
        date("Y-m-d H:i", $sts), date("Y-m-d H:i", $ets)) );
 
-for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
+for( $i=0; $row = pg_fetch_array($rs); $i++) 
 { 
   $times[$row["lane_id"]][] = strtotime( substr($row["valid"],0,16) );
   $avg_speed[$row["lane_id"]][] = $row["avg_speed"];

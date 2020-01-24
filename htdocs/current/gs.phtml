@@ -29,7 +29,7 @@ $rs = pg_query($coopdb, "select o.station,
    and day >= '".date("Y")."-05-01' and day < '".date("Y")."-10-01'
    and extract(doy from day) = extract(doy from valid)  GROUP by o.station
    ORDER by o.station ASC");
-for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+for($i=0;$row=pg_fetch_array($rs);$i++){
 	$table .= sprintf("<tr style=\"background: %s;\"><th>%s</th><td>%.0f</td><td>%.0f</td><td>%.2f</td><td>%.2f</td><td>%.0f</td><td>%.0f</td><td>%.0f</td></tr>",
 			($i % 2 == 0) ? "#eee": "#fff;", $lkp[$row["station"]], $row["ogdd50"], $row["cgdd50"], $row["oprecip"], $row["cprecip"],
 			$row["maxtmpf"], $row["mintmpf"], $row["avgtmpf"]);

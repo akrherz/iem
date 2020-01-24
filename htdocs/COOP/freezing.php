@@ -31,7 +31,7 @@ $rs2 = pg_exec($connection, $query);
 
 
 $data = Array();
-for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
+for( $i=0; $row = pg_fetch_array($rs); $i++)
 {
 $st = $row["station"];
 		if (! isset($data[$st])){
@@ -48,7 +48,7 @@ $st = $row["station"];
 
 		}
 
-		for( $i=0; $row = @pg_fetch_array($rs2,$i); $i++)
+		for( $i=0; $row = pg_fetch_array($rs2); $i++)
 		{
 		$st = $row["station"];
 		if (! isset($data[$st]["avelow40day"])){

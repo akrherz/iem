@@ -16,7 +16,7 @@ $content = "";
 if (pg_numrows($rs) < 1){
 	$content .= "ERROR: No products found in past 48 hours.";
 }
-for ($i=0; $row = @pg_fetch_assoc($rs, $i); $i++)
+for ($i=0; $row = pg_fetch_assoc($rs); $i++)
 {
 	$d = preg_replace("/\r\r\n/", "\n", $row["data"]);
 	$d = preg_replace("/\001/", "", $d);

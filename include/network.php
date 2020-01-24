@@ -24,7 +24,7 @@ class NetworkTable {
   function load_network($network, $force3char=FALSE)
   {
     $rs = pg_execute($this->dbconn, "SELECT", Array($network));
-    for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
+    for( $i=0; $row = pg_fetch_array($rs); $i++)
     {
         $keyid = $row["id"];
         if ($force3char && strlen($keyid) == 4){
@@ -38,7 +38,7 @@ class NetworkTable {
   function load_station($id)
   {
     $rs = pg_execute($this->dbconn, "SELECTST", Array($id));
-    for( $i=0; $row = @pg_fetch_array($rs,$i); $i++)
+    for( $i=0; $row = pg_fetch_array($rs); $i++)
     {
       $this->table[ $row["id"] ] = $row;
       $this->do_conversions($row["id"]);

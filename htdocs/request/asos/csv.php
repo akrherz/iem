@@ -18,7 +18,7 @@ if (isset($_GET["lat"]) && isset($_GET["lon"]))
       WHERE (network ~* 'ASOS' or network ~* 'AWOS') ORDER by dist ASC
       LIMIT 5", $_GET["lon"], $_GET["lat"]);
   $rs = pg_exec($mesosite, $sql);
-  for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
+  for ($i=0;$row=pg_fetch_array($rs);$i++)
   {
     $stations[$i] = $row["id"];
   }
@@ -50,7 +50,7 @@ foreach($stations as $k => $id)
       GROUP by id, valid ORDER by valid ASC");
 	}
   if (pg_num_rows($rs) == 0){ continue; }
-  for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
+  for ($i=0;$row=pg_fetch_array($rs);$i++)
   {
     $result .= sprintf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%.4f,%.4f\n", $row["id"],$row["valid"], 
     $row["tmpf"], $row["dwpf"], $row["sknt"], $row["drct"], $row["phour"], $row["alti"],

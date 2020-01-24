@@ -40,7 +40,7 @@ $cities = $st->table;
 <thead><tr><th>ID</th><th>Name</th><th>Network</th></tr></thead>
 <tbody>
 EOF;
-	for($i=0; $row=@pg_fetch_assoc($rs, $i); $i++){
+	for($i=0; $row=pg_fetch_assoc($rs); $i++){
 		$table .= sprintf("<tr><td>%s</td><td><a href=\"site.php?network=%s".
 				"&amp;station=%s\">%s</a></td><td>%s</td></tr>", $row["id"],
 				$row["network"], $row["id"], $row["name"], $row["network"]);

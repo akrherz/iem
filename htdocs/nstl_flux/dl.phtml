@@ -1,7 +1,7 @@
 <?php
  /* Download NSTL Data */
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
 
 $eyear = isset($_GET["eyear"]) ? intval($_GET["eyear"]): date("Y", time() - 86400);
@@ -37,7 +37,7 @@ header("Content-type: application/octet-stream");
 header("Content-Disposition: attachment; filename=fluxdata.txt");
 
 
-for( $i=0; $row = @pg_fetch_array($rs,$i, PGSQL_ASSOC); $i++)
+for( $i=0; $row = pg_fetch_assoc($rs); $i++)
 {
   if ($i == 0) /* Print el-header */
   {

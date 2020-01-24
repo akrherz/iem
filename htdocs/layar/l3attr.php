@@ -49,7 +49,7 @@ $json = Array("layer"=>"nexradl3attr",
         "errorString"=>"ok", "morePages"=>false, "errorCode"=>0, 
         "nextPageKey"=>null);
 
-for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++)
+for($i=0;$row=pg_fetch_assoc($rs);$i++)
 {
   $lat = sprintf("%.6f", $row["lat"]);
   $lon = sprintf("%.6f", $row["lon"]);

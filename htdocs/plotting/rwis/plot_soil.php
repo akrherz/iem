@@ -30,7 +30,7 @@ if ($mode != 'rt') {
 	$rs = pg_execute($dbconn, "SELECT", Array($station,
        date("Y-m-d H:i", $sts), date("Y-m-d H:i", $ets)) );
 
-	for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
+	for( $i=0; $row = pg_fetch_array($rs); $i++) 
 	{ 
     	$times[] = strtotime(substr($row["valid"],0,16));
 		for($j=0;$j<15;$j++){
@@ -46,7 +46,7 @@ if ($mode != 'rt') {
 		ORDER by valid ASC");
 	$rs = pg_execute($dbconn, "SELECT", Array($station));
 	$lts = 0;
-	for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
+	for( $i=0; $row = pg_fetch_array($rs); $i++) 
 	{
 		$ts = strtotime(substr($row["valid"],0,16));
 		if ($lts != $ts){ $times[] = $ts; $lts = $ts;}

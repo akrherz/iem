@@ -30,7 +30,7 @@ EOF;
 /* Find all snow days for this date! */
 $rs = pg_execute($coopdb, "FIND", Array(strtoupper($station), $sday));
 $data = Array();
-for($i=0;$row=@pg_fetch_array($rs,$i); $i++)
+for($i=0;$row=pg_fetch_array($rs); $i++)
 {
   $rs2 = pg_execute($coopdb, "FIND2", Array($row["day"], $station));
   $row2 = pg_fetch_array($rs2,0);

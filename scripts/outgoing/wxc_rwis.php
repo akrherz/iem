@@ -14,7 +14,7 @@ $pgconn = iemdb('iem');
 $rs = pg_query($pgconn, "select l.nwsli, t.* from rwis_traffic t, 
 	rwis_locations l where l.id = t.location_id and lane_id < 4");
 $traffic = Array();
-for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+for ($i=0;$row=pg_fetch_array($rs);$i++){
 	if (! array_key_exists($row["nwsli"], $traffic)){
 		$traffic[$row["nwsli"]] = Array("avgspeed0" => "M", 
 		"avgspeed1" => "M", "avgspeed2" => "M", "avgspeed3" => "M");

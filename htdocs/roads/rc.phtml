@@ -20,7 +20,7 @@ $sql = "SELECT * from roads_current r, roads_base b, roads_conditions c ".
 $rs = pg_query($conn, $sql);
 
 $obs = Array();
-for ($i=0; $row = @pg_fetch_array($rs, $i); $i++)
+for ($i=0; $row = pg_fetch_array($rs); $i++)
 {
   $seg = intval($row["segid"]);
   $obs[$seg] = $row;

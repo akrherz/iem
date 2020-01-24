@@ -27,7 +27,7 @@ if ($station){
 	$ets = date("Y-m-d 23:59", $valid);
 	$rs = pg_execute($dbconn, "SELECT", Array($station, $sts, $ets));
 	$table = '<table class="table table-striped"><tr><th>Valid</th><th>Precip</th><th>Counter</th><th>Temp C</th><th>Battery</th></tr>';
-	for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+	for($i=0;$row=pg_fetch_assoc($rs);$i++){
 		$table .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
 				$row["valid"], $row["calc_precip"], $row["counter"],
 				$row["tmpc"], $row["battery"]);

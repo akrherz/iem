@@ -21,7 +21,7 @@ $intervals = Array(1,3,6,12,24,48,72,168,720,"midnight");
 $data = Array();
 $sql = "SELECT id, name from stations WHERE network IN ($networks)";
 $rs = pg_exec($mesosite, $sql);
-for($i=0;$z = @pg_fetch_array($rs,$i); $i++)
+for($i=0;$z = pg_fetch_array($rs); $i++)
 {
   $data[$z["id"]] = Array(
     "name"=>$z["name"],
@@ -53,7 +53,7 @@ foreach($intervals as $key => $interval)
       strftime("%Y", $ts), strftime("%Y-%m-%d %H:%M", $ts0), 
           strftime("%Y-%m-%d %H:%M", $ts), $networks);
   $rs = pg_exec($connect, $sql);
-  for( $i=0; $z = @pg_fetch_array($rs,$i); $i++)
+  for( $i=0; $z = pg_fetch_array($rs); $i++)
   {
       // hackery to account for trace values
       $val = floatval($z["p1"]);

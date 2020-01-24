@@ -32,7 +32,7 @@ $ydataSR = array();
 
 $xlabel= array();
 
-for( $i=0; $row = @pg_fetch_array($result,$i); $i++) 
+for( $i=0; $row = pg_fetch_array($result); $i++) 
 { 
   if ($row["c1smv"] > 0)   $ydata1[$i]  = $row["c1smv"];
   if ($row["c2smv"] > 0)   $ydata2[$i]  = $row["c2smv"];

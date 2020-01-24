@@ -34,17 +34,17 @@ function fmt($val, $varname){
  	$mesosite = iemdb('mesosite');
  	$shefcodes = Array();
  	$rs = pg_query($mesosite, "SELECT * from shef_physical_codes");
- 	for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+ 	for($i=0;$row=pg_fetch_assoc($rs);$i++){
  		$shefcodes[ $row['code'] ] = $row['name'];
  	}
  	$durationcodes = Array();
  	$rs = pg_query($mesosite, "SELECT * from shef_duration_codes");
- 	for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+ 	for($i=0;$row=pg_fetch_assoc($rs);$i++){
  		$durationcodes[ $row['code'] ] = $row['name'];
  	}
  	$extremumcodes = Array();
  	$rs = pg_query($mesosite, "SELECT * from shef_extremum_codes");
- 	for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+ 	for($i=0;$row=pg_fetch_assoc($rs);$i++){
  		$extremumcodes[ $row['code'] ] = $row['name'];
  	}
  	
@@ -57,7 +57,7 @@ function fmt($val, $varname){
 	$table .= "<table class=\"table table-striped\">
 			<thead><tr><th>Physical Code</th><th>Duration</th><th>Extremum</th>
 			<th>Source</th><th>Valid</th><th>Value</th></thead>";
- 	for($i=0;$row=@pg_fetch_assoc($rs,$i);$i++){
+ 	for($i=0;$row=pg_fetch_assoc($rs);$i++){
  		$depth = "";
  		if ($row["depth"] > 0){
  			$depth = sprintf("%d inch", $row["depth"]);

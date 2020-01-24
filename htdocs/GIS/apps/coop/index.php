@@ -137,7 +137,7 @@ $sql = "SELECT station, years as yrs, ". $dbarray[$plot] ." as d
     and substr(station,1,2) = 'IA'";
 
 $rs = pg_query($coopdb, $sql);
-for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+for($i=0;$row=pg_fetch_array($rs);$i++){
   	$station = $row["station"];
 	if (! array_key_exists($station, $cities)) continue;
   	$pt = ms_newPointObj();

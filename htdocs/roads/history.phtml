@@ -76,7 +76,7 @@ if (isset($_GET["month"]) && isset($_GET["segid"]) )
   $rs = pg_execute($dbconn, "SELECT", Array($segid, $month));
 
   	$lastcond = "";
-  	for ($i=0; $row = @pg_fetch_array($rs, $i); $i++)
+  	for ($i=0; $row = pg_fetch_array($rs); $i++)
   	{
   		if ($lastcond == $row["label"]) continue;
   		$lastcond = $row["label"];
@@ -118,7 +118,7 @@ else if ( $valid != null )
         $dbconn, "SELECT",
         Array($sts->format("Y-m-d H:i"), $ets->format("Y-m-d H:i")));
 
-  for ($i=0; $row = @pg_fetch_assoc($rs, $i); $i++)
+  for ($i=0; $row = pg_fetch_assoc($rs); $i++)
   {
     	$ts = strtotime(substr($row["valid"],0,16));
     	$content .= sprintf("<tr><td>%s</td><td>%s</td>

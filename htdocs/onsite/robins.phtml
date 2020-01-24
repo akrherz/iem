@@ -11,7 +11,7 @@ include("../../include/database.inc.php");
 	$rs = pg_exec($q);
 	
 	$table = "";
-	for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+	for( $i=0; $row = pg_fetch_array($rs); $i++) {
 	
 		$table .= "<tr> <td>". $row["id"] ."</td>
     <td>". $row["name"] ."</td>

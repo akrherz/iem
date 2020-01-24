@@ -85,7 +85,7 @@ if ($screen_name == ''){
 
 $sselect2 = "";
 $rs = pg_execute($pgconn, "SELECTSUBS", Array($user_id));
-for ($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+for ($i=0;$row=pg_fetch_array($rs);$i++){
 	$sselect2 .= sprintf('<tr><th>%s</th><td>%s</td>
     	<td><a href="?del&amp;channel=%s">Unsubscribe</a></tr>',
 				$screen_name, $row['channel'],

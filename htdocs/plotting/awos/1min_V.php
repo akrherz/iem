@@ -54,7 +54,7 @@ if (pg_num_rows($result) == 0){
  die();
 }
 
-for( $p=0; $row = @pg_fetch_array($result,$p); $p++)  {
+for( $p=0; $row = pg_fetch_array($result); $p++)  {
   $strDate = $sqlDate ." ". $row["tvalid"];
   $timestamp = strtotime($strDate );
 #  echo $thisTime ."||";

@@ -32,7 +32,7 @@ echo "Refresh: 99999\n";
 echo "Threshold: 999\n";
 echo sprintf("Title: $wfo SBW @ %s UTC\n", gmdate("d M Y H:i", $ts));            
                      
-for($i=0;$row=@pg_fetch_array($result,$i);$i++){
+for($i=0;$row=pg_fetch_array($result);$i++){
 	$geom = $row["g"];
 	$geom = str_replace("MULTIPOLYGON(((", "", $geom);
 	$geom = str_replace(")))", "", $geom);

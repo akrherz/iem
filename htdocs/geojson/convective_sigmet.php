@@ -24,7 +24,7 @@ $ar = Array(
 $reps = Array();
 $subs = Array();
 
-for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
+for ($i=0;$row=pg_fetch_array($rs);$i++)
 {
   $reps[] = "\"REPLACEME$i\"";
   $subs[] = $row["geojson"];

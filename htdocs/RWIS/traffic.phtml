@@ -34,7 +34,7 @@ $rs = pg_execute($dbconn, "SELECT", Array() );
  );
 
  $table = "";
- for($i=0;$row=@pg_fetch_array($rs,$i);$i++){
+ for($i=0;$row=pg_fetch_array($rs);$i++){
  	$table .= sprintf("<tr><th>%s</th><th>%s</th><td>%s</td><td>%.1f</td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
  			$row["name"], $row["name"], fancytime($row["valid"]), $row["avg_speed"],
  			$row["normal_vol"], $row["long_vol"], $row["occupancy"]);

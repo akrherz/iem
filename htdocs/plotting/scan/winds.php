@@ -25,7 +25,7 @@ $ydata2 = array();
 
 $xlabel= array();
 
-for( $i=0; $row = @pg_fetch_array($result,$i); $i++) 
+for( $i=0; $row = pg_fetch_array($result); $i++) 
 { 
   $ydata1[$i]  = $row["drct"];
   $ydata2[$i]  = $row["sknt"];

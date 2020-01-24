@@ -48,7 +48,7 @@ $linkbar = <<<EOF
 EOF;
 
 for ($i = 0; $i < $num; $i++){
-	$row = @pg_fetch_assoc($rs,$i);
+	$row = pg_fetch_assoc($rs);
 	$valid = strtotime( substr($row["valid"],0,16) );
     $p = printTags( explode(",", $row["tags"]) );
 	$d = date("Y-m-d", $valid);

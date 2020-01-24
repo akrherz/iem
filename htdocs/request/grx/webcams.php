@@ -32,7 +32,7 @@ $vectors = Array(
  "N" => Array("ax"=> 160, "ay" => 0));
 
 $rs = pg_exec($conn, $sql);
-for ($i=0;$row=@pg_fetch_array($rs,$i);$i++)
+for ($i=0;$row=pg_fetch_array($rs);$i++)
 {
   $key = $row["cam"];
   if (!$overview && $cameras[$key]["network"] != $network){ continue; }

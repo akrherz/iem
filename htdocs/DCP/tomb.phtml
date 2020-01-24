@@ -15,7 +15,7 @@ $table = <<<EOF
 <tbody>
 EOF;
 $floor = date("YmdHi", time() - 8*86400);
-for($i=0; $row=@pg_fetch_array($rs, $i); $i++){
+for($i=0; $row=pg_fetch_array($rs); $i++){
 	$link = sprintf("<a href=\"/p.php?pid=%s\">%s</a>", $row[1], $row[1]);
 	if (substr($row[1], 0, 12) < $floor){
 		$link = $row[1];

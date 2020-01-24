@@ -51,7 +51,7 @@ $missing = 0;
 $min_yaxis = 100;
 $max_yaxis = 0;
 
-for( $p=0; $row = @pg_fetch_array($result,$p); $p++)  {
+for( $p=0; $row = pg_fetch_array($result); $p++)  {
   $strDate = $sqlDate ." ". $row["tvalid"]; 
   $timestamp = strtotime($strDate );
   

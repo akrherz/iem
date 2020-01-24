@@ -68,7 +68,7 @@ $sql = "select station, min(valid) as v from sm_hourly "
 		."WHERE valid > '${sdate}' and tair_c_avg < f2c(29.0) and "
 		."valid < '${edate}' GROUP by station";
 $rs =  pg_exec($c, $sql);
-for ($i=0; $row = @pg_fetch_array($rs,$i); $i++) {
+for ($i=0; $row = pg_fetch_array($rs); $i++) {
   $bdate = $sdate;
   $key = $row["station"];
 

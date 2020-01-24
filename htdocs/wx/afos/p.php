@@ -94,7 +94,7 @@ $content = "<h3>National Weather Service Raw Text Product</h3>";
 if ($rs == null || pg_numrows($rs) < 1){
 	$content .= "<div class=\"alert alert-warning\">Sorry, could not find product.</div>";
 }
-for ($i=0; $row = @pg_fetch_assoc($rs, $i); $i++)
+for ($i=0; $row = pg_fetch_assoc($rs); $i++)
 {
 	if ($i == 0){ 
 		$basets = strtotime($row["mytime"]); 

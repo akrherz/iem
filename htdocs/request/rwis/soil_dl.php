@@ -138,7 +138,7 @@ if ($what != "plot"){
   }
   echo "\n";
 
- for( $i=0; $row = @pg_fetch_array($rs,$i); $i++) 
+ for( $i=0; $row = pg_fetch_array($rs); $i++) 
  {
   $sid = $row["station"];
   echo $sid . $d[$delim] . $cities[$sid]["name"] ;

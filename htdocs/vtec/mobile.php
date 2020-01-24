@@ -34,7 +34,7 @@ $rs = pg_prepare($conn, "SELECT" , "SELECT replace(report,'\001','') as report,
 
 $rs = pg_execute($conn, "SELECT", Array($wfo, $phenomena, $eventid, $significance));
 $txtdata = "";
-for( $i=0; $row  = @pg_fetch_array($rs,$i); $i++){
+for( $i=0; $row  = pg_fetch_array($rs); $i++){
   $tokens = @explode('__', $row["svs"]);
   $tokens = array_reverse($tokens);
   foreach($tokens as $key => $val)

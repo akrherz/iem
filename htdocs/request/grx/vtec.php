@@ -46,7 +46,7 @@ echo "Refresh: 99999\n";
 echo "Threshold: 999\n";
 echo "Title: VTEC $wfo ${phenomena}.${significance} $eventid\n";            
                      
-for($i=0;$row=@pg_fetch_assoc($result,$i);$i++){
+for($i=0;$row=pg_fetch_assoc($result);$i++){
 	$geom = $row["g"];
 	$geom = str_replace("MULTIPOLYGON(((", "", $geom);
 	$geom = str_replace(")))", "", $geom);
