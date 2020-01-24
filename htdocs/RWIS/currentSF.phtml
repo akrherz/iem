@@ -10,6 +10,7 @@ $t = new MyView();
 $t->current_network = "RWIS Surface";
 $network = isset($_GET['network']) ? xssafe($_GET['network']) : 'IA_RWIS';
 $sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']) : 'ts';
+if ($sortcol == "sname") $sortcol = "name";
  $t->title = "RWIS Surface Currents";
  $t->refresh = 600;
  $t->thispage = "current-sort";

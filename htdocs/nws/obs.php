@@ -37,7 +37,8 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
 $t->current_network = "By NWS WFO"; 
 
 $wselect = "<select name=\"wfo\">";
-while( list($key, $value) = each($nt->table) ){
+foreach($nt->table as $key => $value)
+{
   $wselect .= "<option value=\"$key\" ";
   if ($wfo == $key) $wselect .= "SELECTED";
   $wselect .= ">[".$key."] ". $nt->table[$key]["name"] ."\n";
@@ -45,9 +46,11 @@ while( list($key, $value) = each($nt->table) ){
 $wselect .= "</select>";
 
 $mydata = Array();
-while (list($bogus, $iemob) = each($jobj["data"]) ){
+foreach($jobj["data"] as $bogus => $iemob)
+{
     $key = $iemob["station"];
-	$mydata[$key] = $iemob;
+    $mydata[$key] = $iemob;
+    $mydata[$key]["ts"] = $mydata[$key]["local_valid"]; // legacy
 	$mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
 	$mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]), f2c($mydata[$key]["dwpf"]) );
 	if ($mydata[$key]["relh"] < 5)
@@ -102,7 +105,8 @@ $table = "";
 $finalA = aSortBySecondIndex($mydata, $sortcol, $sorder);
 $now = time();
 $i = 0;
-while (list ($key, $val) = each ($finalA))  {
+foreach($finalA as $key => $val)
+{
 	$i++;
 
 	$parts = $finalA[$key];
