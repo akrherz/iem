@@ -88,7 +88,7 @@ foreach($stations as $k => $v){
   $table .= sprintf("<tr><td><a href='site.phtml?station=%s&year=%s&month=%s&day=%s'>%s</a></td><td>%s</td>", $v, date("Y", $ts), date("m", $ts), date("d", $ts), $v, $cities[$v]['name']);
   reset($keys);
   foreach($keys as $k => $key){
-    $table .= @sprintf("<td>%s</td>", $data[$v][$key]);
+    $table .= sprintf("<td>%s</td>", $data[$v][$key] ?? '');
   }
   $table .= "</tr>";
 }

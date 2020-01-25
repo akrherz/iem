@@ -75,7 +75,7 @@ EOF;
 		if (isset($db[$key]["cv"])){
 			$s .= sprintf(" (@%s)", $db[$key]['cv']);
 		}
-		$s .= "<br />". @$db[$key]["content"] ."</td>";
+		$s .= sprintf("<br />%s</td>", $db[$key]["content"] ?? '');
 		$now = $now + 86400;
 	} 
 	$s .= "</tr>";

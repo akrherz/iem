@@ -70,8 +70,8 @@ function formatter($i, $row){
 $year = isset($_GET["year"])? intval($_GET["year"]): date("Y");
 $month = isset($_GET["month"])? intval($_GET["month"]): date("m");
 $day = isset($_GET["day"])? intval($_GET["day"]): date("d");
-$metar = (isset($_GET["metar"]) & $_GET["metar"] == "1") ? "1": "0";
-$madis = (isset($_GET["madis"]) & $_GET["madis"] == "1") ? "1": "0";
+$metar = (isset($_GET["metar"]) && $_GET["metar"] == "1") ? "1": "0";
+$madis = (isset($_GET["madis"]) && $_GET["madis"] == "1") ? "1": "0";
 $date = mktime(0,0,0,$month, $day, $year);
 $yesterday = $date - 86400;
 $tomorrow = $date + 86400;

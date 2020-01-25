@@ -135,9 +135,8 @@ EOF;
 				date("Y", $ts), date("m", $ts), date("d", $ts), date("H", $ts),
 				date("i", $ts), date("Y-m-d H:i", $ts) );
 		$colorme = !$colorme;
-		reset($mycols);
 		foreach($mycols as $k => $v){
-			$extra .= sprintf("<td>%s</td>", @$data[$ts][$v]);
+			$extra .= sprintf("<td>%s</td>", $data[$ts][$v] ?? '');
 		}
 		$extra .= "</tr>";
 	
