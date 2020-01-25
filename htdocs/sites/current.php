@@ -117,7 +117,8 @@ function fmt($val, $varname){
  
  $table = "<table class=\"table table-striped\">";
  foreach($vardict as $key => $label){
-	if (! array_key_exists($key, $json["last_ob"])){
+    if (!array_key_exists("last_ob", $json) ||
+            !array_key_exists($key, $json["last_ob"])){
 		continue;
 	}
  	if ($key == "local_valid") {
