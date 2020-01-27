@@ -1,6 +1,6 @@
 <?php
-include("../config/settings.inc.php");
-include("../include/myview.php");
+require_once "../config/settings.inc.php";
+require_once "../include/myview.php";
 $t = new MyView();
 define("IEM_APPID", 61);
 $t->title = "Information Mainpage";
@@ -34,7 +34,6 @@ $t->content = <<<EOF
 
 <h3>IEM Server Information:</h3>
 <ul>
-	<li><a href="/mailman/listinfo/">Mailing Lists</a></li>
 	<li><a href="/usage/">Webfarm Statistics</a></li>
 </ul>
 

@@ -122,7 +122,8 @@ $otot = 0;
 while ($row = pg_fetch_array($rs))
 {
     $tot += $row["inch"];
-    @$otot += $d[ $row["valid"] ]["ob"];
+    $ob = $d[ $row["valid"] ]["ob"];
+    $otot += ($ob == "M") ? 0: $ob;
 	$d[ $row["valid"] ]["rain"] = $row["inch"];
 }
 

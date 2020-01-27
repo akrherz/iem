@@ -41,7 +41,8 @@ $aselect = make_select("sorder", $sorder, $ar);
 $uri = "all.phtml?state=$state&metar=$metar&sorder=$sorder&sortcol=";
 
 $mydata = Array();
-while (list($bogus, $iemob) = each($jobj["data"]) ){
+foreach($jobj["data"] as $bogus => $iemob)
+{
     $key = $iemob["station"];
 	$mydata[$key] = $iemob;
 	$mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
@@ -99,7 +100,8 @@ $finalA = aSortBySecondIndex($mydata, $sortcol, $sorder);
 $now = time();
 $i = 0;
 $table = "";
-while (list ($key, $val) = each ($finalA))  {
+foreach($finalA as $key => $val)
+{
 	$i++;
 	if ($i > 30) break;
 	$parts = $finalA[$key];

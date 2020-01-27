@@ -1,14 +1,14 @@
 <?php
-include_once "../../config/settings.inc.php";
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 149);
-include_once "../../include/myview.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Storm Based Warning Stats";
 $t->thispage = "severe-cow";
 
 require_once "../../include/forms.php";
-include_once "../../include/database.inc.php";
-include_once "../../include/network.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/network.php";
 $nt = new NetworkTable("WFO");
 $postgis = iemdb("postgis");
 
@@ -35,7 +35,7 @@ $rs = pg_prepare($postgis, "SELECT", "SELECT wfo, phenomena, count(*),
   sum( st_perimeter( ST_transform(geom,2163) ) ) as sum_perimsize,
   avg( st_perimeter( ST_transform(geom,2163) ) ) as avg_perimsize
   from sbw WHERE status = 'NEW' and 
-  phenomena IN ('SV','TO','MA','FF','FA') and significance = 'W'
+  phenomena IN ('SV','TO','MA','FF','FA','DS','SQ') and significance = 'W'
   and issue BETWEEN $1 and $2 GROUP by wfo, phenomena ORDER by $sortby ASC");
 
 pg_query($postgis, "SET TIME ZONE 'GMT'");
@@ -56,45 +56,53 @@ for ($i=0;$row=pg_fetch_array($rs);$i++)
 
 $table = "
 <style>
-.to  { background: #FFC1C1; }
-.sv  { background: #FFFF7E;}
-.ma  { background: #A2CD5A;}
-.fa { background: #C8F526;}
-.ff { background: #FFEC8B;}
+.phto  { background: #FFC1C1; }
+.phsv  { background: #FFFF7E;}
+.phma  { background: #A2CD5A;}
+.phfa { background: #C8F526;}
+.phff { background: #FFEC8B;}
+.phds { background: #FFE4C4;}
+.phsq { background: #C71585;}
 </style>
 <table border=\"1\" cellpadding=\"3\" cellspacing=\"0\">
 <caption>Data valid for warnings issued between ". date('d M Y H:i', $sts) ." and ". date('d M Y H:i', $ets) ." UTC</caption>
 <tr>
   <th colspan='2'>Weather Forecast Office</th>
   <th colspan='3'>Summary</th>
-  <th colspan='3' class='to'>Tornado</th>
-  <th colspan='3' class='sv'>Severe Thunderstorm</th>
-  <th colspan='3' class='ma'>Marine</th>
-  <th colspan='3' class='ff'>Flash Flood</th>
-  <th colspan='3' class='fa'>Areal Flood</th></tr>
+  <th colspan='3' class='phto'>Tornado</th>
+  <th colspan='3' class='phsv'>Severe Thunderstorm</th>
+  <th colspan='3' class='phma'>Marine</th>
+  <th colspan='3' class='phff'>Flash Flood</th>
+  <th colspan='3' class='phfa'>Areal Flood</th>
+  <th colspan='3' class='phds'>Dust Storm</th>
+  <th colspan='3' class='phsq'>Snow Squall</th>
+</tr>
 <tr>
  <th>ID</th><th>Name</th>
  <th>Cnt</th><th>Perim</th><th>Area</th>
- <th class='to'>Cnt</th><th class='to'>Perim</th><th class='to'>Area</th>
- <th class='sv'>Cnt</th><th class='sv'>Perim</th><th class='sv'>Area</th>
- <th class='ma'>Cnt</th><th class='ma'>Perim</th><th class='ma'>Area</th>
- <th class='ff'>Cnt</th><th class='ff'>Perim</th><th class='ff'>Area</th>
- <th class='fa'>Cnt</th><th class='fa'>Perim</th><th class='fa'>Area</th>
+ <th class='phto'>Cnt</th><th class='phto'>Perim</th><th class='phto'>Area</th>
+ <th class='phsv'>Cnt</th><th class='phsv'>Perim</th><th class='phsv'>Area</th>
+ <th class='phma'>Cnt</th><th class='phma'>Perim</th><th class='phma'>Area</th>
+ <th class='phff'>Cnt</th><th class='phff'>Perim</th><th class='phff'>Area</th>
+ <th class='phfa'>Cnt</th><th class='phfa'>Perim</th><th class='phfa'>Area</th>
+ <th class='phds'>Cnt</th><th class='phds'>Perim</th><th class='phds'>Area</th>
+ <th class='phsq'>Cnt</th><th class='phsq'>Perim</th><th class='phsq'>Area</th>
 </tr>
 ";
-reset($sorted);
 $totals = Array(
 	"TO_cnt" => 0, "TO_perim" => 0, "TO_area" => 0,
 	"SV_cnt" => 0, "SV_perim" => 0, "SV_area" => 0,
 	"MA_cnt" => 0, "MA_perim" => 0, "MA_area" => 0,
 	"FF_cnt" => 0, "FF_perim" => 0, "FF_area" => 0,	
 	"FA_cnt" => 0, "FA_perim" => 0, "FA_area" => 0,	
+	"DS_cnt" => 0, "DS_perim" => 0, "DS_area" => 0,	
+	"SQ_cnt" => 0, "SQ_perim" => 0, "SQ_area" => 0,	
 );
-$phenoms = Array("TO", "SV", "MA", "FF", "FA");
-while( list($v,$wfo) = each($sorted) )
+$phenoms = Array("TO", "SV", "MA", "FF", "FA", "DS", "SQ");
+foreach($sorted as $v => $wfo)
 {
-	reset($phenoms);
-	while( list($idx, $phenom) = each($phenoms)){
+    foreach($phenoms as $idx => $phenom)
+    {
 		$totals["${phenom}_cnt"] += @$data[$wfo]["${phenom}_cnt"];
 		$totals["${phenom}_perim"] += @$data[$wfo]["${phenom}_sum_perimsize"];
 		$totals["${phenom}_area"] += @$data[$wfo]["${phenom}_sum_polysize"];
@@ -104,24 +112,32 @@ while( list($v,$wfo) = each($sorted) )
   		@$data[$wfo]["SV_cnt"] +
   		@$data[$wfo]["MA_cnt"] +
   		@$data[$wfo]["FA_cnt"] +
-  		@$data[$wfo]["FF_cnt"] ;
+  		@$data[$wfo]["FF_cnt"] +
+  		@$data[$wfo]["DS_cnt"] +
+  		@$data[$wfo]["SQ_cnt"] ;
   $perim = @$data[$wfo]["TO_sum_perimsize"] + 
            @$data[$wfo]["SV_sum_perimsize"] +
            @$data[$wfo]["MA_sum_perimsize"] +
            @$data[$wfo]["FA_sum_perimsize"] +
-           @$data[$wfo]["FF_sum_perimsize"] ;
+           @$data[$wfo]["FF_sum_perimsize"] +
+           @$data[$wfo]["DS_sum_perimsize"] +
+           @$data[$wfo]["SQ_sum_perimsize"] ;
   $poly = @$data[$wfo]["TO_sum_polysize"] + 
            @$data[$wfo]["SV_sum_polysize"] +
            @$data[$wfo]["MA_sum_polysize"] +
            @$data[$wfo]["FA_sum_polysize"] +
-           @$data[$wfo]["FF_sum_polysize"] ;
+           @$data[$wfo]["FF_sum_polysize"] +
+           @$data[$wfo]["DS_sum_polysize"] +
+           @$data[$wfo]["SQ_sum_polysize"] ;
   $table .= @sprintf("<tr><td>%s</td><td>%s</td>
          <td>%s</td><td>%.1f</td><td>%.1f</td>
-         <td class='to'>%s</td><td class='to'>%.1f</td><td class='to'>%.1f</td>
-         <td class='sv'>%s</td><td class='sv'>%.1f</td><td class='sv'>%.1f</td>
-         <td class='ma'>%s</td><td class='ma'>%.1f</td><td class='ma'>%.1f</td>
-         <td class='ff'>%s</td><td class='ff'>%.1f</td><td class='ff'>%.1f</td>
-         <td class='fa'>%s</td><td class='fa'>%.1f</td><td class='fa'>%.1f</td>
+         <td class='phto'>%s</td><td class='phto'>%.1f</td><td class='phto'>%.1f</td>
+         <td class='phsv'>%s</td><td class='phsv'>%.1f</td><td class='phsv'>%.1f</td>
+         <td class='phma'>%s</td><td class='phma'>%.1f</td><td class='phma'>%.1f</td>
+         <td class='phff'>%s</td><td class='phff'>%.1f</td><td class='phff'>%.1f</td>
+         <td class='phfa'>%s</td><td class='phfa'>%.1f</td><td class='phfa'>%.1f</td>
+         <td class='phds'>%s</td><td class='phds'>%.1f</td><td class='phds'>%.1f</td>
+         <td class='phsq'>%s</td><td class='phsq'>%.1f</td><td class='phsq'>%.1f</td>
           </tr>", $wfo, $nt->table[$wfo]['name'], 
           $cnt, $perim/$cnt/1000.0, $poly/$cnt/1000000.0,
 	$data[$wfo]["TO_cnt"], 
@@ -138,21 +154,32 @@ while( list($v,$wfo) = each($sorted) )
 	$data[$wfo]["FF_sum_polysize"]/$data[$wfo]["FF_cnt"]/1000000.0,
 	$data[$wfo]["FA_cnt"], 
 	$data[$wfo]["FA_sum_perimsize"]/$data[$wfo]["FA_cnt"]/1000.0,
-	$data[$wfo]["FA_sum_polysize"]/$data[$wfo]["FA_cnt"]/1000000.0
+	$data[$wfo]["FA_sum_polysize"]/$data[$wfo]["FA_cnt"]/1000000.0,
+	$data[$wfo]["DS_cnt"], 
+	$data[$wfo]["DS_sum_perimsize"]/$data[$wfo]["DS_cnt"]/1000.0,
+	$data[$wfo]["DS_sum_polysize"]/$data[$wfo]["DS_cnt"]/1000000.0,
+	$data[$wfo]["SQ_cnt"], 
+	$data[$wfo]["SQ_sum_perimsize"]/$data[$wfo]["SQ_cnt"]/1000.0,
+	$data[$wfo]["SQ_sum_polysize"]/$data[$wfo]["SQ_cnt"]/1000000.0
 	);
 }
 
-$tcount = $totals["TO_cnt"] + $totals["SV_cnt"] + $totals["MA_cnt"] + $totals["FF_cnt"] + $totals["FA_cnt"];
-$tpoly = $totals["TO_area"] + $totals["SV_area"] + $totals["MA_area"] + $totals["FF_area"] + $totals["FA_area"];
-$tperim = $totals["TO_perim"] + $totals["SV_perim"] + $totals["MA_perim"] + $totals["FF_perim"] + $totals["FA_perim"];
+$tcount = $totals["TO_cnt"] + $totals["SV_cnt"] + $totals["MA_cnt"] +
+    $totals["FF_cnt"] + $totals["FA_cnt"] + $totals["DS_cnt"] + $totals["SQ_cnt"];
+$tpoly = $totals["TO_area"] + $totals["SV_area"] + $totals["MA_area"] +
+    $totals["FF_area"] + $totals["FA_area"] + $totals["DS_area"] + $totals["SQ_area"];
+$tperim = $totals["TO_perim"] + $totals["SV_perim"] + $totals["MA_perim"] +
+    $totals["FF_perim"] + $totals["FA_perim"] + $totals["DS_perim"] + $totals["SQ_perim"];
 
 $table .= @sprintf("<tr><th> </th><th>Total/Averages</th>
          <th>%s</th><th>%.1f</th><th>%.1f</th>
-         <th class='to'>%s</th><th class='to'>%.1f</th><th class='to'>%.1f</th>
-         <th class='sv'>%s</th><th class='sv'>%.1f</th><th class='sv'>%.1f</th>
-         <th class='ma'>%s</th><th class='ma'>%.1f</th><th class='ma'>%.1f</th>
-         <th class='ff'>%s</th><th class='ff'>%.1f</th><th class='ff'>%.1f</th>
-         <th class='fa'>%s</th><th class='fa'>%.1f</th><th class='fa'>%.1f</th>
+         <th class='phto'>%s</th><th class='phto'>%.1f</th><th class='phto'>%.1f</th>
+         <th class='phsv'>%s</th><th class='phsv'>%.1f</th><th class='phsv'>%.1f</th>
+         <th class='phma'>%s</th><th class='phma'>%.1f</th><th class='phma'>%.1f</th>
+         <th class='phff'>%s</th><th class='phff'>%.1f</th><th class='phff'>%.1f</th>
+         <th class='phfa'>%s</th><th class='phfa'>%.1f</th><th class='phfa'>%.1f</th>
+         <th class='phds'>%s</th><th class='phds'>%.1f</th><th class='phds'>%.1f</th>
+         <th class='phsq'>%s</th><th class='phsq'>%.1f</th><th class='phsq'>%.1f</th>
           </tr>",
 
 		$tcount, $tperim/$tcount/1000.0, $tpoly/$tcount/1000000.0,
@@ -170,7 +197,13 @@ $table .= @sprintf("<tr><th> </th><th>Total/Averages</th>
 		$totals["FF_area"]/$totals["FF_cnt"]/1000000.0,
 		$totals["FA_cnt"],
 		$totals["FA_perim"]/$totals["FA_cnt"]/1000.0,
-		$totals["FA_area"]/$totals["FA_cnt"]/1000000.0
+		$totals["FA_area"]/$totals["FA_cnt"]/1000000.0,
+		$totals["DS_cnt"],
+		$totals["DS_perim"]/$totals["DS_cnt"]/1000.0,
+		$totals["DS_area"]/$totals["DS_cnt"]/1000000.0,
+		$totals["SQ_cnt"],
+		$totals["SQ_perim"]/$totals["SQ_cnt"]/1000.0,
+		$totals["SQ_area"]/$totals["SQ_cnt"]/1000000.0
 );
 
 $table .= "</table>";
@@ -225,5 +258,5 @@ since summer of 2007.
 
 {$table}
 EOF;
-$t->render('single.phtml');
+$t->render('full.phtml');
 ?>
