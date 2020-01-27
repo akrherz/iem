@@ -15,7 +15,8 @@ if (! isset($_GET["tag"])){
   $tags = Array();
   for ($i=0;$row=pg_fetch_array($rs);$i++) { 
     $tokens = preg_split("/,/", $row["tags"]);
-    while (list($k,$v) = each($tokens)){ 
+    foreach($tokens as $k => $v)
+    { 
 		if ($v == ""){ continue; }
     	@$tags[$v] += 1; 
     }
@@ -28,7 +29,8 @@ if (! isset($_GET["tag"])){
   asort($keys);
   $b = 0;
   $table = "";
-  while (list($k,$v) = each($keys)){
+  foreach($keys as $k => $v)
+  {
   	if ($b % 6 == 0) $table .= "<tr>";
   	$table .= sprintf("<td><a href=\"%s.html\">%s</a> (%s)</td>\n", $v, $v, $tags[$v]);
   	$b += 1;
@@ -91,7 +93,8 @@ for ($i=0;$row=pg_fetch_assoc($rs);$i++)
 {
 	$tokens = preg_split("/,/", $row["tags"]);
 	$found = False;
-	while (list($k,$v) = each($tokens)){
+    foreach($tokens as $k => $v)
+    {
 		if ($v == $tag){ $found = True; }
 	}
 	if (!$found){ continue; }

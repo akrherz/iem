@@ -3,9 +3,9 @@
  * Generate GeoJSON SBW information for a period of choice
  */
 header("Content-type: application/vnd.geo+json");
-include_once "../../config/settings.inc.php";
-include_once "../../include/database.inc.php";
-include_once "../../include/vtec.php";
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/vtec.php";
 $postgis = iemdb("postgis");
 
 function toTime($s){
