@@ -7,6 +7,12 @@ $t = new MyView();
 $t->thispage = "topics-firstfall";
 $t->title = "First Fall Freeze Resources";
 
+// Compute a good fall Year
+$fall_year = intval(date("Y"));
+if (intval(date("m")) < 8){
+    $fall_year -= 1;
+}
+
 $t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/topics/">Topics</a></li>
@@ -29,15 +35,15 @@ $t->content = <<<EOM
 
 <p><a class="btn btn-sm btn-primary" href="/plotting/auto/?_wait=no&q=97&sector=IA&var=min_low_temp&gddbase=50&usdm=no&p=text&cmap=RdYlBu&c=yes">Generate This Map</a></p>
 
-<h3>First Fall Date this year below 32&deg;F</h3>
+<h3>First {$fall_year} Fall Date this year below 32&deg;F</h3>
 
-<p><img src="/plotting/auto/plot/165/sector:IA::var:fall_below::popt:values::threshold:32::cmap:BrBG.png" class="img img-responsive" alt="autoplot"></p>
+<p><img src="/plotting/auto/plot/165/sector:IA::year:${fall_year}::var:fall_below::popt:values::threshold:32::cmap:BrBG.png" class="img img-responsive" alt="autoplot"></p>
 
 <p><a class="btn btn-sm btn-primary" href="/plotting/auto/?_wait=no&q=165&sector=IA&var=fall_below&popt=values&year=2019&threshold=32&p=50&syear=1893&eyear=2019&cmap=BrBG&cint=2">Generate This Map</a></p>
 
-<h3>First Fall Date this year below 29&deg;F</h3>
+<h3>First {$fall_year} Fall Date this year below 29&deg;F</h3>
 
-<p><img src="/plotting/auto/plot/165/sector:IA::var:fall_below::popt:values::threshold:29::cmap:BrBG.png" class="img img-responsive" alt="autoplot"></p>
+<p><img src="/plotting/auto/plot/165/sector:IA::year:${fall_year}::var:fall_below::popt:values::threshold:29::cmap:BrBG.png" class="img img-responsive" alt="autoplot"></p>
 
 <p><a class="btn btn-sm btn-primary" href="/plotting/auto/?_wait=no&q=165&sector=IA&var=fall_below&popt=values&threshold=29&p=50&syear=1893&eyear=2019&cmap=BrBG&cint=2">Generate This Map</a></p>
 
