@@ -27,8 +27,10 @@ PDICT = OrderedDict(
         ("days-lows-below", "Days with Low Temp Below (threshold)"),
         ("max_high", "Maximum High Temperature"),
         ("min_high", "Minimum High Temperature"),
+        ("range_high", "Range of High Temperature"),
         ("min_low", "Minimum Low Temperature"),
         ("max_low", "Maximum Low Temperature"),
+        ("range_low", "Range of Low Temperature"),
         ("precip", "Total Precipitation"),
         ("snow", "Total Snowfall"),
     ]
@@ -44,7 +46,12 @@ def get_description():
     ] = """This plot presents statistics for a period of
     days each year provided your start date and number of days after that
     date. If your period crosses a year bounds, the plotted year represents
-    the year of the start date of the period."""
+    the year of the start date of the period.
+
+    <br /><br />This autoplot is specific to data from COOP stations, a
+    similiar autoplot <a href="/plotting/auto/?q=140">#140</a> exists for
+    automated stations.
+    """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc["arguments"] = [
         dict(
@@ -171,6 +178,8 @@ def plotter(fdict):
     )
     if df.empty:
         raise NoDataFound("No Data Found.")
+    df["range_high"] = df["max_high"] - df["min_high"]
+    df["range_low"] = df["max_low"] - df["min_low"]
     # require at least 90% coverage
     df = df[df["count"] >= (days * 0.9)]
     # require values , not nan

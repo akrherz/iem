@@ -12,11 +12,15 @@ from pyiem.exceptions import NoDataFound
 PDICT = OrderedDict(
     [
         ("avg_high_temp", "Average High Temperature"),
+        ("range_high_temp", "Range of High Temperature"),
         ("avg_low_temp", "Average Low Temperature"),
+        ("range_low_temp", "Range of Low Temperature"),
         ("avg_temp", "Average Temperature"),
         ("avg_dewp", "Average Dew Point Temp"),
         ("avg_wind_speed", "Average Wind Speed"),
         ("max_high", "Maximum High Temperature"),
+        ("min_high", "Minimum High Temperature"),
+        ("max_low", "Maximum Low Temperature"),
         ("min_low", "Minimum Low Temperature"),
         ("precip", "Total Precipitation"),
     ]
@@ -34,6 +38,10 @@ def get_description():
     date. If your period crosses a year bounds, the plotted year represents
     the year of the start date of the period. <strong>Average Dew Point Temp
     </strong> is computed by averaging the daily max and min dew point values.
+
+    <br /><br />This autoplot is specific to data from automated stations, a
+    similiar autoplot <a href="/plotting/auto/?q=107">#107</a> exists for
+    long term COOP data.
     """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc["arguments"] = [
@@ -110,6 +118,7 @@ def plotter(fdict):
     min(min_tmpf) as min_low,
     max(min_tmpf) as max_low,
     max(max_tmpf) as max_high,
+    min(max_tmpf) as min_high,
     avg((max_dwpf + min_dwpf)/2.) as avg_dewp
     from summary s JOIN stations t on (s.iemid = t.iemid)
     WHERE t.network = %s and t.id = %s and to_char(day, 'mmdd') in %s
@@ -120,6 +129,8 @@ def plotter(fdict):
     )
     if df.empty:
         raise NoDataFound("No data was found.")
+    df["range_high_temp"] = df["max_high"] - df["min_high"]
+    df["range_low_temp"] = df["max_low"] - df["min_low"]
 
     (fig, ax) = plt.subplots(2, 1, figsize=(8, 6))
 
