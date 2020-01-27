@@ -435,8 +435,8 @@ EOM
   		"title" => "Search for Storm Based Warnings by Lat/Lon Point",
   		"url" => "/json/sbw_by_point.py?lon={longitude}&lat={latitude}",
   		"desc" => "Provides a listing of storm based (polygon) warnings 
-  		based on the provided latitutde and longitude pair for warnings 
-  		dating back to 1 Jan 2005.",
+  		based on the provided latitude and longitude pair for warnings 
+        dating back to 1 Jan 2005.",
   		"vars" => Array(
   				"lat" => "Latitude in degrees",
   				"lon" => "Longitude in (degrees east)"
@@ -446,6 +446,26 @@ EOM
   				"{longitude}" => "-95.0"
   		)
   );
+
+  $services[] = Array(
+    "title" => "Search for Storm Based Warnings by Lat/Lon Point by Time",
+    "url" => "/json/sbw_by_point.py?lon={longitude}&lat={latitude}&valid={valid}",
+    "desc" => "Provides a listing of storm based (polygon) warnings 
+    based on the provided latitude and longitude pair for warnings 
+  dating back to 1 Jan 2005.  You also provide an ISO-9660
+  <code>valid</code> parameter to get any storm based warnings active
+  at the given UTC time and location.",
+    "vars" => Array(
+            "lat" => "Latitude in degrees",
+            "lon" => "Longitude in (degrees east)",
+            "valid" => "UTC ISO-9660 timestamp"
+    ),
+    "example" => Array(
+            "{latitude}" => "42.5",
+            "{longitude}" => "-95.0",
+            "{valid}" => "2014-09-01T00:29Z"
+    )
+);
 
   $services[] = Array(
   		"title" => "Search for VTEC Events by Lat/Lon Point",
