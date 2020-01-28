@@ -1,5 +1,4 @@
 """Suck in MADIS data into the iemdb"""
-from __future__ import print_function
 import datetime
 import os
 import sys
@@ -13,8 +12,9 @@ from metpy.units import units
 from netCDF4 import chartostring
 from pyiem.observation import Observation
 from pyiem.datatypes import temperature, distance, speed
-from pyiem.util import get_dbconn, ncopen
+from pyiem.util import get_dbconn, ncopen, logger
 
+LOG = logger()
 MY_PROVIDERS = ["KYTC-RWIS", "KYMN", "NEDOR", "MesoWest"]
 
 
@@ -50,7 +50,7 @@ def provider2network(provider):
         if provider[:2] == "IA":
             return None
         return "%s_RWIS" % (provider[:2],)
-    print("Unsure how to convert %s into a network" % (provider,))
+    LOG.info("Unsure how to convert %s into a network", provider)
     return None
 
 
@@ -69,12 +69,12 @@ def main():
     dwpk = nc.variables["dewpoint"][:]
 
     # Set some data bounds to keep mcalc from complaining
-    dwpk = np.ma.where(
+    dwpk = np.where(
         np.ma.logical_or(np.ma.less(dwpk, 200), np.ma.greater(dwpk, 320)),
         np.nan,
         dwpk,
     )
-    tmpk = np.ma.where(
+    tmpk = np.where(
         np.ma.logical_or(np.ma.less(tmpk, 200), np.ma.greater(tmpk, 320)),
         np.nan,
         tmpk,
@@ -139,7 +139,6 @@ def main():
         db[this_station]["pday"] = sanity_check(pcpn[recnum], -1, 5000)
 
     for sid in db:
-        # print("Processing %s[%s]" % (sid, db[sid]['network']))
         iem = Observation(sid, db[sid]["network"], db[sid]["ts"])
         if db[sid]["tmpk"] is not None:
             iem.data["tmpf"] = temperature(db[sid]["tmpk"], "K").value("F")
@@ -172,15 +171,17 @@ def main():
                 distance(db[sid]["pday"], "MM").value("IN"), 2
             )
         if not iem.save(icursor):
-            print(
-                ("MADIS Extract: %s found new station: %s network: %s" "")
-                % (fn.split("/")[-1], sid, db[sid]["network"])
+            LOG.info(
+                "MADIS Extract: %s found new station: %s network: %s" "",
+                fn.split("/")[-1],
+                sid,
+                db[sid]["network"],
             )
             subprocess.call("python sync_stations.py %s" % (fn,), shell=True)
             os.chdir("../../dbutil")
             subprocess.call("sh SYNC_STATIONS.sh", shell=True)
             os.chdir("../ingestors/madis")
-            print("...done with sync.")
+            LOG.info("...done with sync.")
         del iem
     icursor.close()
     pgconn.commit()
