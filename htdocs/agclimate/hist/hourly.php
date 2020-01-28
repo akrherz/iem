@@ -21,7 +21,8 @@
  $dselect2= daySelect2(date("d"), "day2");
 
 $sselect = "";
-while( list($key,$val) = each($nt->table)){
+foreach($nt->table as $key => $val)
+{
 	$sselect .= sprintf("<br /><input type=\"checkbox\" name=\"sts\" value=\"%s\">%s (%s County, %s)",
 			$key, $val["name"], $val["county"], $key);
 }

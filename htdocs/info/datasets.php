@@ -50,7 +50,8 @@ if ($myid == null){
 	$content .= get_text($myid);
 }
 $tags = '';
-while (list($k,$page) = each($pages)){
+foreach($pages as $k => $page)
+{
 	$tags .= sprintf("<a href=\"#%s\" class=\"btn btn-default\">%s</a>", $page, $page);
 }
 if ($tags == ''){

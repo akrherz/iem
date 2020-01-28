@@ -41,7 +41,8 @@ $start = intval( $myTime );
 $i = 0;
 
 $new_contents = array_slice($fcontents,2);
-while (list ($line_num, $line) = each ($new_contents)) {
+foreach($new_contents as $line_num => $line)
+{
   $parts = preg_split ("/,/", $line); 
   if (sizeof($parts) < 3) continue;
   $hhmm = str_pad($parts[3],4,"0",STR_PAD_LEFT);

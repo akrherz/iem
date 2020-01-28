@@ -39,7 +39,8 @@ $peaksped = 0;
 $times = Array();
 $lts = 0;
 
-while (list ($line_num, $line) = each ($fcontents)) {
+foreach($fcontents as $linenum => $line)
+{
   $parts = preg_split ("/,/", $line);
   $thisGust = 0;
   $timestamp = $parts[0];

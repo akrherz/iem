@@ -62,7 +62,8 @@ function print_tags($str){
 	
 	$ar  = explode(",", trim($str, "{}"));
 	$s = "";
-	while (list($k,$v) = each($ar)){ 
+    foreach($ar as $k => $v)
+    { 
 		$s .= sprintf("<a href='news.phtml?tag=%s'>%s</a> ", $v, $v);
 	}
 	return $s;

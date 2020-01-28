@@ -1,7 +1,7 @@
 <?php
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 121);
-include_once "../../include/myview.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 $count = isset($_GET["count"]) ? intval($_GET["count"]): 10;
 
@@ -27,7 +27,8 @@ function dowork($baseurl, $sort){
 EOM;
     $jdata = file_get_contents($uri);
     $json = json_decode($jdata, $assoc=TRUE);
-    while (list($key, $val) = each($json["mcds"])) {
+    foreach($json["mcds"] as $key => $val)
+    {
         $s .= sprintf("<tr><td>%s</td><td><a href=\"%s\">%s</a></td><td>%s</td><td>%.2f</td></tr>",
             $val["year"], $val["spcurl"], $val["product_num"], $val["utc_issue"],
             $val["area_sqkm"]);

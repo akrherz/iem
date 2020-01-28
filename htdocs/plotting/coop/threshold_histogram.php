@@ -24,7 +24,7 @@ for($thres=-40;$thres<11;$thres++)
 }
 $yrs = pg_numrows($rs);
 $pct = Array();
-while( list($k,$v) = each($ydata))
+foreach($ydata as $k => $v)
 {
   $pct[] = $v / $yrs * 100.0;
 }
@@ -47,7 +47,7 @@ if ($station2 != "")
   }
   $yrs2 = pg_numrows($rs);
   $pct2 = Array();
-  while( list($k,$v) = each($ydata))
+  foreach($ydata as $k => $v)
   {
     $pct2[] = $v / $yrs2 * 100.0;
   }

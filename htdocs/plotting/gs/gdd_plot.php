@@ -1,6 +1,8 @@
 <?php
- include("../../../config/settings.inc.php");
-
+ require_once "../../../config/settings.inc.php";
+ require_once "../../../include/database.inc.php";
+ require_once "../../../include/station.php";
+ 
 $station = isset($_GET['station']) ? $_GET['station'] : "DSM";
 $network = isset($_GET['network']) ? $_GET['network'] : 'IA_ASOS';
 $year = isset($_GET['year']) ? $_GET['year']: date("Y");
@@ -19,8 +21,6 @@ $s2date = date("2000-m-d", $sts);
 $e2date = date("2000-m-d", $ets);
 $today = time();
 
-include("../../../include/database.inc.php");
-include("../../../include/station.php");
 $st = new StationData($station, $network);
 $climate_site = $st->table[$station]['climate_site'];
 $st->load_station( $climate_site );
@@ -96,11 +96,11 @@ for( $i=0; $row = pg_fetch_array($rs); $i++)
 
 pg_close($coopdb);
 
-include ("../../../include/jpgraph/jpgraph.php");
-include ("../../../include/jpgraph/jpgraph_line.php");
-include ("../../../include/jpgraph/jpgraph_plotline.php");
-include ("../../../include/jpgraph/jpgraph_date.php");
-include ("../../../include/jpgraph/jpgraph_bar.php");
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_plotline.php";
+require_once "../../../include/jpgraph/jpgraph_date.php";
+require_once "../../../include/jpgraph/jpgraph_bar.php";
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640,480,"example1");
@@ -120,8 +120,7 @@ $graph->subtitle->Set("Climate Site: ". $cities[$climate_site]["name"] ."[". $cl
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.05, 0.1, "right", "top");
 
-reset($times);
-while (list($k,$v) = each($times))
+foreach($times as $k => $v)
 {
  if (date("d", $v) == 1)
    $graph->AddLine(new PlotLine(VERTICAL,$v,"tan",1));

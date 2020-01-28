@@ -1,8 +1,8 @@
 <?php
 /* Generate a KML file of a network locations, yummy */
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
-include("../../include/network.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/network.php";
 $network = isset($_GET["network"]) ? $_GET["network"] : "KCCI"; 
 
 header("Content-Type: application/vnd.google-earth.kml+xml");
@@ -25,7 +25,7 @@ EOF;
 
 $nt = new NetworkTable($network);
 
-while (list($sid,$data) = each($nt->table))
+foreach($nt->table as $sid => $data)
 {
 
   echo "<Placemark>

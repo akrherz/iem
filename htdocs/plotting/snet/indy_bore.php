@@ -1,7 +1,7 @@
 <?php
 // 1 minute schoolnet data plotter
 // Cool.....
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 
 $fcontents = file("data/SINI4_071002.txt");
 $sts = mktime(9,45,0,10,2,2007);
@@ -39,7 +39,8 @@ $peaksped = 0;
 $times = Array();
 $lts = 0;
 
-while (list ($line_num, $line) = each ($fcontents)) {
+foreach($fcontents as $linenum => $line)
+{
   $parts = preg_split ("/,/", $line);
   $thisGust = 0;
   $timestamp = $parts[0];

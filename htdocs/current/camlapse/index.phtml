@@ -11,8 +11,7 @@ EOF;
 $t->thispage = "webcam-lapse";
 
 $camselect = "<select id=\"mycam\" name=\"mycam\" onchange=\"myloader();\">";
-reset($cameras);
-while( list($key, $dict) = each($cameras) )
+foreach($cameras as $key => $dict)
 {
 	if ($dict["removed"] || $dict["network"] == "IDOT"){ continue; }
 	$camselect .= "<option value=\"". $dict["moviebase"] ."\">". $dict["name"] ." \n";

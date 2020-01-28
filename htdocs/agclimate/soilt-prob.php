@@ -24,7 +24,7 @@ $thresholds = explode(",",$tstr);
 $tblrows = Array();
 
 $row1 = "<tr><th>Date:</th>";
-while (list($k,$thres) = each($thresholds))
+foreach($thresholds as $k => $thres)
 {
   $row1 .= "<th>$thres</th>";
   $rs = pg_execute($conn, "spring", Array($station,$thres));
@@ -56,8 +56,7 @@ $spring .= "</table>";
 
 /* ________________________FALL ______________ */
 $tblrows = Array();
-reset($thresholds);
-while (list($k,$thres) = each($thresholds))
+foreach($thresholds as $k => $thres)
 {
   $rs = pg_execute($conn, "fall", Array($station,$thres));
   $cnts = Array();

@@ -38,7 +38,8 @@ $aselect = make_select("sorder", $sorder, $ar);
 $uri = "uscrn.phtml?sorder=$sorder&sortcol=";
 
 $mydata = Array();
-while (list($bogus, $iemob) = each($jobj["data"]) ){
+foreach($jobj["data"] as $bogus => $iemob)
+{
     $key = $iemob["station"];
 	$mydata[$key] = $iemob;
 	if ($mydata[$key]["relh"] < 5)
@@ -94,7 +95,8 @@ $finalA = aSortBySecondIndex($mydata, $sortcol, $sorder);
 $now = time();
 $i = 0;
 $table = "";
-while (list ($key, $val) = each ($finalA))  {
+foreach($finalA as $key => $val)
+{
 	$i++;
 	$parts = $finalA[$key];
 

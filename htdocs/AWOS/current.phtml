@@ -21,7 +21,9 @@ $t->thispage = "current-sort";
   		"tmpf" => "Temperature", "dwpf" => "Dew Point", "vsby" => "Visibility",
   		"sknt" => "Speed", "peak" => "Peak Gust [knots]","alti" => "Altimeter",
   		"peak_ts" => "Gust Time", "phour" => "1 hr Rainfall", "pday" => "Today Rainfall", "feel" => "Feels Like");
-  
+
+if (!array_key_exists($sortcol, $vals)) $sortcol = "name";
+
 $t->breadcrumbs = <<<EOF
 <ol class="breadcrumb">
  <li><a href="/AWOS/">AWOS Homepage</a></li>

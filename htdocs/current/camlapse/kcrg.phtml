@@ -1,10 +1,9 @@
 <?php 
-include("../../../config/settings.inc.php");
-include("../../../include/cameras.inc.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/cameras.inc.php";
 
 $camselect = "<select id=\"mycam\" name=\"mycam\" onchange=\"myloader();\">";
-reset($cameras);
-while( list($key, $dict) = each($cameras) )
+foreach($cameras as $key => $dict)
 {
 	if ($dict["removed"] || ($dict["network"] != "KCRG" && $key != 'KCCI-017')){ continue; }
 	$camselect .= "<option value=\"". $dict["moviebase"] ."\">". $dict["name"] ." \n";

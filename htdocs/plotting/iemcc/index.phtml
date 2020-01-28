@@ -1,7 +1,7 @@
 <?php 
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 include_once "../../../include/myview.php";
-include("../../../include/mlib.php");
+require_once "../../../include/mlib.php";
 require_once "../../../include/forms.php";
 $t = new MyView();
 $t->title = "Central Command Time Series";
@@ -41,7 +41,8 @@ $rain = array();
 $times = array();
 
 $pcpn = 0;
-while (list ($line_num, $line) = each ($fcontents)) {
+foreach($fcontents as $line_num => $line)
+{
 	$tokens = preg_split ("/,/", $line);
 	if (sizeof($tokens) != 11) continue;
 
@@ -73,11 +74,10 @@ for($i=0;$i<sizeof($drct);$i+=5)
 	$drct5[] = $drct[$i];
 }
 
-
-include ("../../../include/jpgraph/jpgraph.php");
-include ("../../../include/jpgraph/jpgraph_line.php");
-include ("../../../include/jpgraph/jpgraph_date.php");
-include ("../../../include/jpgraph/jpgraph_scatter.php");
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_date.php";
+require_once "../../../include/jpgraph/jpgraph_scatter.php";
 
 /* ------------------------- */
 // Create the graph. These two calls are always required

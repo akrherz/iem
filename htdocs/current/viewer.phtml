@@ -10,7 +10,8 @@ $t = new MyView();
 
  $camselect = "";
  $cnt = 0;
- while (list($cid, $v) = each($cameras) ) {
+ foreach($cameras as $cid => $v)
+ {
  	if ($v["active"] && $v["network"] != "IDOT"){
  		$camselect .= "<div class=\"col-md-2\"><label class=\"radio-inline\"><input type=\"radio\" name=\"id\" value=\"$cid\" id=\"c$cid\" ";
  		if ($cid == $id) { $camselect .= "checked=\"checked\""; }

@@ -4,6 +4,7 @@
  $camera_refresh = get_iemprop("webcam.interval");
  require_once "../../include/myview.php";
  require_once "../../include/forms.php"; 
+ require_once "../../include/cameras.inc.php";
  $t = new MyView();
 /* CGI GET Requests */
  $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
@@ -21,36 +22,37 @@
  $radts = time();
  }
  $num = 1;
- require_once "../../include/cameras.inc.php";
  if ($network == "KCRG"){ $cameras["KCCI-017"]["network"] = "KCRG"; }
  foreach($cameras as $id => $val)
  {
     if ($cameras[$id]["network"] != $network) continue;
 
 	$cameras[$id]["url"] = sprintf("/data/camera/stills/%s.jpg?%s", $id, time() );
-    if ( @filemtime("/home/ldm/data/camera/stills/${id}.jpg") < (time() - 1200))
+    $camfn = "/home/meteor_ldm/data/camera/stills/${id}.jpg";
+    if (!is_file($camfn) || filemtime($camfn) < (time() - 1200))
     {      
-      $cameras[$id]["active"] = false;
+        $cameras[$id]["active"] = false;
     }
 
- if ($isarchive)
- {
-    $cameras[$id]["active"] = true;
-    $ts = mktime($hour, $minute, 0, $month, $day, $year);
-    $ts5 = mktime($hour, $minute - ($minute % 5), 0, $month, $day, $year);
+    if ($isarchive)
+    {
+        $cameras[$id]["active"] = true;
+        $ts = mktime($hour, $minute, 0, $month, $day, $year);
+        $ts5 = mktime($hour, $minute - ($minute % 5), 0, $month, $day, $year);
 
-    $fp = "/mesonet/ARCHIVE/data/". gmdate("Y/m/d/", $ts) ."camera/$id/${id}_". gmdate("YmdHi", $ts) .".jpg";
-    $url = "/archive/data/". gmdate("Y/m/d/", $ts) ."camera/$id/${id}_". gmdate("YmdHi", $ts) .".jpg";
-    $fp5 = "/mesonet/ARCHIVE/data/". gmdate("Y/m/d/", $ts5) ."camera/$id/${id}_". gmdate("YmdHi", $ts5) .".jpg";
-    $url5 = "/archive/data/". gmdate("Y/m/d/", $ts5) ."camera/$id/${id}_". gmdate("YmdHi", $ts5) .".jpg";
+        $fp = "/mesonet/ARCHIVE/data/". gmdate("Y/m/d/", $ts) ."camera/$id/${id}_". gmdate("YmdHi", $ts) .".jpg";
+        $url = "/archive/data/". gmdate("Y/m/d/", $ts) ."camera/$id/${id}_". gmdate("YmdHi", $ts) .".jpg";
+        $fp5 = "/mesonet/ARCHIVE/data/". gmdate("Y/m/d/", $ts5) ."camera/$id/${id}_". gmdate("YmdHi", $ts5) .".jpg";
+        $url5 = "/archive/data/". gmdate("Y/m/d/", $ts5) ."camera/$id/${id}_". gmdate("YmdHi", $ts5) .".jpg";
 
-    if (is_file($fp)) $cameras[$id]["url"] = $url;
-    else if (is_file($fp5)) $cameras[$id]["url"] = $url5;
-    else $cameras[$id]["active"] = false;
- }
+        if (is_file($fp)) $cameras[$id]["url"] = $url;
+        else if (is_file($fp5)) $cameras[$id]["url"] = $url5;
+        else $cameras[$id]["active"] = false;
+    }
  
- if ($cameras[$id]["active"]){ 
-  $cameras[$id]["num"] = intval(substr($id,5,3)); }
+    if ($cameras[$id]["active"]){ 
+        $cameras[$id]["num"] = intval(substr($id,5,3));
+    }
 }/* End of while */
 
 reset($cameras);

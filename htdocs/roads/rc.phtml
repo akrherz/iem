@@ -1,8 +1,8 @@
 <?php
- include("../../config/settings.inc.php");
+ require_once "../../config/settings.inc.php";
  define("IEM_APPID", 54);
- include "../../include/myview.php";
- include("../../include/database.inc.php");
+ require_once "../../include/myview.php";
+ require_once "../../include/database.inc.php";
  require_once "../../include/forms.php";
  require_once "../../include/mlib.php";
  
@@ -54,7 +54,8 @@ $vals = Array("number" => "Route #", "type" => "Road Classification",
  $now = time();
  $i = 0;
  $table = "";
- while (list ($key, $val) = each ($finalA))  {
+ foreach($finalA as $key => $val)
+ {
  	$i++;
  	$parts = $finalA[$key];
  

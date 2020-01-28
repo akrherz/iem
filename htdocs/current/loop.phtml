@@ -1,6 +1,6 @@
 <?php
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 $t = new MyView();
  /* Script to generate a loop of whatever */
@@ -43,8 +43,7 @@ for($i=$q; $i >= 0; $i--)
  $loopselect = make_select("java", $java, $ar);
  
  $prodselect = "<select name=\"prod\">";
- reset($products);
-  while( list($k, $v) = each($products) )
+ foreach($products as $k => $v)
  {
  	$prodselect .= "<option value=\"$k\" ";
  	if ($prod == $k) $prodselect .= " SELECTED ";

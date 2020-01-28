@@ -1,10 +1,10 @@
 <?php
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 26);
-include("../../include/myview.php");
+require_once "../../include/myview.php";
 $t = new MyView();
 require_once "../../include/forms.php";
-include("../../include/database.inc.php");
+require_once "../../include/database.inc.php";
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y", time() - 86400);
 $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m", time() - 86400);
@@ -28,8 +28,7 @@ for( $i=0; $row = pg_fetch_array($rows); $i++)
 function genselect($name, $selected, $ids, $values)
 {
   $s = "<select name=\"$name\">\n";
-  reset($ids);
-  while( list($k,$v) = each($ids) )
+  foreach($ids as $k => $v)
   {
     $s .= "<option value=\"$v\" ";
     if ($selected == $v) $s .= "selected=\"selected\"";

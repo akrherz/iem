@@ -2,13 +2,13 @@
 /*
  * Print out a listing of COOP sites and observation frequency
  */
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 113);
-include("../../include/myview.php");
+require_once "../../include/myview.php";
 $t = new MyView();
 
-include("../../include/database.inc.php");
-include("../../include/network.php");
+require_once "../../include/database.inc.php";
+require_once "../../include/network.php";
 $nt = new NetworkTable("WFO");
 require_once "../../include/forms.php";
 $dbconn = iemdb("iem");
@@ -35,7 +35,8 @@ $data = pg_execute($dbconn, "MYSELECT", Array($tstring, $wfo));
 $t->title = "NWS COOP Obs per month per WFO";
 
 $wselect = "";
-while( list($key, $value) = each($nt->table) ){
+foreach($nt->table as $key => $value)
+{
 	$wselect .= "<option value=\"$key\" ";
 	if ($wfo == $key) $wselect .= "SELECTED";
 	$wselect .= ">[".$key."] ". $nt->table[$key]["name"] ."\n";
