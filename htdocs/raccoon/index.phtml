@@ -5,7 +5,7 @@ $t = new MyView();
 define("IEM_APPID", 69);
 require_once "../../include/forms.php";
 require_once "../../include/imagemaps.php";
-include_once "../../include/database.inc.php";
+require_once "../../include/database.inc.php";
 
 $wfo = isset($_REQUEST["wfo"]) ? xssafe($_REQUEST["wfo"]): 'OAX';
 $radar = isset($_REQUEST["radar"]) ? xssafe($_REQUEST["radar"]): 'OAX';
@@ -25,9 +25,9 @@ $wtype = isset($_GET["wtype"]) ? $_GET["wtype"] : Array('TO', 'SV');
 if (isset($_REQUEST["wfo"])){
 	/* Check to make sure we have warnings first! */
 	$postgis = iemdb("postgis");
-	$rs = pg_prepare($postgis, "SELECT", "SELECT issue from sbw_${year}
-	WHERE wfo = $1 and phenomena in ('SV','TO','FF') and significance = 'W' and
-	issue BETWEEN $2 and $3");
+	$rs = pg_prepare($postgis, "SELECT", "SELECT issue from sbw_${year} ".
+	"WHERE wfo = $1 and phenomena in ('SV','TO','FF', 'MA', 'SQ', 'DS') ".
+    "and significance = 'W' and issue BETWEEN $2 and $3");
 	$rs = pg_execute($postgis, "SELECT", Array($wfo, 
 		gmdate("Y-m-d H:i", $sts) ."+00", gmdate("Y-m-d H:i", $ets) ."+00"));
 	pg_close($postgis);
@@ -56,12 +56,13 @@ $t->headextra = "<meta name='robots' content='index, nofollow'/>";
 
 $e = "";
 if (isset($err)){
-	$e = sprintf("<div class='warning'>%s</div>", $err);
+	$e = sprintf("<div class=\"alert alert-warning\">%s</div>", $err);
 }
 
 $ar = Array("FF" => "Flash Flood",
 "MA" => "Marine",
     "SQ" => "Snow Squall",
+    "DS" => "Dust Storm",
 "SV" => "Severe Thunderstorm",
 "TO" => "Tornado");
 $wtselect = "";

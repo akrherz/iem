@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Generate a Powerpoint file for an event.  This script looks for queued jobs
-within the database and runs them sequentially each minute"""
-from __future__ import print_function
+"""Generate a Powerpoint file for an event.
+
+This script looks for queued jobs within the database and runs them
+sequentially each minute"""
 
 import sys
 import shutil
@@ -16,11 +17,12 @@ from odf.style import Style, MasterPage, PageLayout, PageLayoutProperties
 from odf.style import TextProperties, GraphicProperties, ParagraphProperties
 from odf.text import P
 from odf.draw import Page, Frame, TextBox, Image
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
 
 os.putenv("DISPLAY", "localhost:1")
 
-__REV__ = "11Feb2013"
+LOG = logger()
+__REV__ = "28Jan2020"
 TMPDIR = "/mesonet/tmp"
 SUPER_RES = datetime.datetime(2010, 3, 1)
 
@@ -46,7 +48,7 @@ def add_job(row):
     """Add back a job"""
     pgconn = get_dbconn("mesosite")
     mcursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    print("setting racoon jobid: %s back to unprocessed" % (row["jobid"],))
+    LOG.info("setting racoon jobid: %s back to unprocessed", row["jobid"])
     mcursor.execute(
         """
         UPDATE racoon_jobs SET processed = False
@@ -401,15 +403,15 @@ def do_job(job):
     cmd = "unoconv -f ppt %s" % (outputfile,)
     subprocess.call(cmd, shell=True)
     pptfn = "%s.ppt" % (basefn,)
-    print("Generated %s with %s slides" % (pptfn, i))
+    LOG.info("Generated %s with %s slides", pptfn, i)
     if os.path.isfile(pptfn):
-        print("...copied to webfolder")
+        LOG.info("...copied to webfolder")
         shutil.copyfile(pptfn, "/mesonet/share/pickup/raccoon/%s" % (pptfn,))
         # Cleanup
         os.chdir(TMPDIR)
         subprocess.call("rm -rf %s" % (job["jobid"],), shell=True)
     else:
-        print("Uh oh, no output file, lets kill soffice.bin")
+        LOG.info("Uh oh, no output file, lets kill soffice.bin")
         subprocess.call("pkill --signal 9 soffice.bin", shell=True)
         add_job(job)
 
