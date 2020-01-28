@@ -3,7 +3,7 @@
 import math
 import cgi
 
-from pyiem.util import ssw
+from pyiem.util import ssw, html_escape
 
 
 def createCircleAroundWithRadius(lat, lon, radiusMiles):
@@ -51,7 +51,7 @@ def main():
     ssw(("Content-Disposition: attachment; filename=placefile_rings.txt\n\n"))
 
     # Things for the user to theoretically input:
-    loc = form.getfirst("loc", "Jack Trice Stadium")
+    loc = html_escape(form.getfirst("loc", "Jack Trice Stadium"))
     pointLat = float(form.getfirst("lat", 42.014004))
     pointLon = float(form.getfirst("lon", -93.635773))
     ssw(
