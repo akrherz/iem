@@ -1,7 +1,7 @@
 #
 # Apache vhost configuration for IEM
 # the master file for this is on github, so edit there!
-# I have this set in dev: SetEnv PYTHONPATH "/home/akrherz/projects/pyIEM/"
+# I have this set in dev: SetEnv PYTHONPATH "/home/akrherz/projects/pyIEM/src"
 
   ServerName mesonet.agron.iastate.edu
   ServerAlias www.mesonet.agron.iastate.edu
@@ -23,12 +23,12 @@
   RewriteRule ^/p.phppid=([^\.]+) /p.php?pid=$1 [L]
   RewriteRule ^/iembot(.*)$ https://weather.im/iembot$1 [R=permanent]
 
-  Redirect /data/mwcomp.phtml http://mesonet.agron.iastate.edu/current/mwcomp.phtml
-  Redirect /RWIS/current.php http://mesonet.agron.iastate.edu/RWIS/current.phtml
-  Redirect /schoolnet/current.php http://mesonet.agron.iastate.edu/schoolnet/current.phtml
-  Redirect /RWIS/currentSF.php http://mesonet.agron.iastate.edu/RWIS/currentSF.phtml
-  Redirect /my/current.php http://mesonet.agron.iastate.edu/my/current.phtml
-  Redirect http://www.mesonet.agron.iastate.edu http://mesonet.agron.iastate.edu
+  Redirect /data/mwcomp.phtml https://mesonet.agron.iastate.edu/current/mwcomp.phtml
+  Redirect /RWIS/current.php https://mesonet.agron.iastate.edu/RWIS/current.phtml
+  Redirect /schoolnet/current.php https://mesonet.agron.iastate.edu/schoolnet/current.phtml
+  Redirect /RWIS/currentSF.php https://mesonet.agron.iastate.edu/RWIS/currentSF.phtml
+  Redirect /my/current.php https://mesonet.agron.iastate.edu/my/current.phtml
+  Redirect http://www.mesonet.agron.iastate.edu https://mesonet.agron.iastate.edu
   Redirect permanent /archive/nexrad http://mesonet-longterm.agron.iastate.edu/archive/nexrad
   Redirect permanent /archive/gempak http://mesonet-longterm.agron.iastate.edu/archive/gempak
   Redirect permanent /archive/raw http://mesonet-longterm.agron.iastate.edu/archive/raw
@@ -47,6 +47,12 @@
     Options Indexes FollowSymLinks
     AllowOverride None
     Require all granted
+
+    # Default handler for python scripts
+    WSGIProcessGroup iemwsgi_ap
+    AddHandler wsgi-script .py
+    Options +ExecCGI
+
   </Directory>
 
   <Directory "/mesonet/ARCHIVE">
@@ -142,8 +148,6 @@
 
   <Directory "/opt/iem/htdocs/c">
     WSGIProcessGroup iemwsgi_tc
-    AddHandler wsgi-script .py
-    Options +ExecCGI
 
     # http://lists.osgeo.org/pipermail/tilecache/2010-June/002453.html
     ExpiresActive On
@@ -152,8 +156,6 @@
 
   <Directory "/opt/iem/htdocs/cache">
     WSGIProcessGroup iemwsgi_tc
-    AddHandler wsgi-script .py
-    Options +ExecCGI
 
     # http://lists.osgeo.org/pipermail/tilecache/2010-June/002453.html
     ExpiresActive On
@@ -161,15 +163,8 @@
   </Directory>
 
   <Directory "/opt/iem/htdocs/DCP">
-    AddHandler cgi-script .py
-    Options +ExecCGI
 
     RewriteRule ahpsxml2wxc/([0-9A-Z]{3,5}).txt$ ahpsxml2wxc.py?nwsli=$1
-  </Directory>
-  
-  <Directory "/opt/iem/htdocs/GIS/apps/iem">
-    AddHandler cgi-script .py
-    Options +ExecCGI
   </Directory>
 
   <Directory "/opt/iem/htdocs/GIS">
@@ -183,9 +178,6 @@
     Redirect /agclimate/daily-pics https://mesonet.agron.iastate.edu/agclimate/daily_pics
     Redirect /agclimate/daily_pics https://mesonet.agron.iastate.edu/data/agclimate
     Redirect /agclimate/info.txt https://mesonet.agron.iastate.edu/agclimate/info.phtml
-
-    AddHandler cgi-script .py
-    Options +ExecCGI
 
     # 
     RewriteRule smplot/([0-9]{1,12})/(.*).png$ isusm.py?t=$1&v=$2
@@ -219,26 +211,15 @@
   </Directory>
 
   <Directory "/opt/iem/htdocs/wx/afos">
-    WSGIProcessGroup iemwsgi_ap
-    AddHandler wsgi-script .py
-    Options +ExecCGI
-
     RewriteRule ([0-9]{12})_([A-Z0-9\s]+).png$ text2png.py?e=$1&pil=$2
   </Directory>
 
 
   <Directory "/opt/iem/htdocs/frost">
-    AddHandler cgi-script .py
-    Options +ExecCGI
-
     RewriteRule frost_ts_([a-z]+)_([\-\.0-9]+)_([\.0-9]+).png$ frost_ts.py?lon=$2&lat=$3&model=$1
   </Directory>
 
   <Directory "/opt/iem/htdocs/geojson">
-    WSGIProcessGroup iemwsgi_ap
-    AddHandler wsgi-script .py
-    Options +ExecCGI
-
 	## QSA causes the query string to be appended
 	RewriteRule network/(.*).geojson network.py?network=$1 [QSA]
 	# 7 Dec 2016: Rewrote service as Python
@@ -251,10 +232,6 @@
   </Directory>
 
   <Directory "/opt/iem/htdocs/iemre">
-    WSGIProcessGroup iemwsgi_ap
-    AddHandler wsgi-script .py
-    Options +ExecCGI
-
     RewriteRule daily/([0-9\-]+)/([0-9\.]+)/([0-9\.\-]+)/(json) daily.py?date=$1&lat=$2&lon=$3&format=$4
     RewriteRule hourly/([0-9\-]+)/([0-9\.]+)/([0-9\.\-]+)/(json) hourly.py?date=$1&lat=$2&lon=$3&format=$4
     RewriteRule multiday/([0-9\-]+)/([0-9\-]+)/([0-9\.]+)/([0-9\.\-]+)/(json) multiday.py?date1=$1&date2=$2&lat=$3&lon=$4&format=$5
@@ -263,10 +240,6 @@
   </Directory>
 
   <Directory "/opt/iem/htdocs/json">
-    WSGIProcessGroup iemwsgi_ap
-    AddHandler wsgi-script .py
-    Options +ExecCGI
-
     RewriteRule radar$ radar.py
     RewriteRule tms.json tms.py [QSA]
     RewriteRule qpe/([0-9\.\-]+)/([0-9\.\-]+)/(json) qpe.py?lat=$2&lon=$1&format=$3
@@ -277,9 +250,6 @@
   </Directory>
 
   <Directory "/opt/iem/htdocs/kml">
-    AddHandler cgi-script .py
-    Options +ExecCGI
-
     RewriteRule roadcond.kml roadcond.php
     RewriteRule roadcond_v2.kml roadcond.php?linewidth=6&maxtype=2
   </Directory>
@@ -298,26 +268,16 @@
 
     require user mec
 
-    AddHandler cgi-script .py
-    Options +ExecCGI
-
     RewriteRule i/([A-Za-z\-_0-9]*).png$ image.php?i=$1
     RewriteRule map_power_([0-9]*)_(yaw2?).png$ map_power.py?ts=$1&yawsource=$2
     RewriteRule turbine_ts_([0-9]*)_(.*).png$ turbine_ts.py?date=$1&turbinename=$2
   </Directory>
 
   <Directory "/opt/iem/htdocs/nws">
-    AddHandler cgi-script .py
-    Options +ExecCGI
-
     RewriteRule days_since_([A-Z][A-Z])_([A-Z]).png /plotting/auto/plot/92/phenomena:$1::significance:$2::dpi:100.png
   </Directory>
 
   <Directory "/opt/iem/htdocs/onsite/features">
-    WSGIProcessGroup iemwsgi_ap
-    AddHandler wsgi-script .py
-    Options +ExecCGI
-
     RewriteRule tags/([^\.]+)\.html tags/index.php?tag=$1 [L]
     RewriteRule vote/(good|bad|abstain).json$ vote.py?vote=$1
     RewriteRule vote.json$ vote.py
@@ -325,27 +285,15 @@
   </Directory>
 
   <Directory "/opt/iem/htdocs/current">
-    WSGIProcessGroup iemwsgi_ap
-    AddHandler wsgi-script .py
-    Options +ExecCGI
-
 	RewriteRule live.php(.*)$ live.py$1
     RewriteRule live/(.*).jpg live.py?id=$1 [L]
   </Directory>
 
   <Directory "/opt/iem/htdocs/other">
-    WSGIProcessGroup iemwsgi_ap
-    AddHandler wsgi-script .py
-    Options +ExecCGI
-
     RewriteRule kymn.phtml current.phtml?network=KYMN
   </Directory>
 
   <Directory "/opt/iem/htdocs/plotting/auto">
-    WSGIProcessGroup iemwsgi_ap
-    AddHandler wsgi-script .py
-    Options +ExecCGI
-
     RewriteRule plot/([0-9]{1,12})/(.*).png$ autoplot.py?p=$1&q=$2&fmt=png
     RewriteRule plot/([0-9]{1,12})/(.*).csv$ autoplot.py?p=$1&q=$2&fmt=csv
     RewriteRule plot/([0-9]{1,12})/(.*).txt$ autoplot.py?p=$1&q=$2&fmt=txt
@@ -357,15 +305,7 @@
     RewriteRule meta/([0-9]{1,12}).(json|html) meta.py?p=$1&_fmt=$2 [QSA]
   </Directory>
 
-  <Directory "/opt/iem/htdocs/rainfall">
-    AddHandler cgi-script .py
-    Options +ExecCGI
-  </Directory>
-
   <Directory "/opt/iem/htdocs/request">
-    WSGIProcessGroup iemwsgi_ap
-    AddHandler wsgi-script .py
-    Options +ExecCGI
     RewriteRule maxcsv/(.*).txt$ maxcsv.py?q=$1
 
     RewriteRule grx/iadot_trucks.txt grx/iadot_trucks.py
@@ -390,9 +330,6 @@
   </Directory>
 
   <Directory "/opt/iem/htdocs/metadata/xml">
-    AddHandler cgi-script .py
-    Options +ExecCGI
-
     RewriteRule pl_(.*)_(.*).xml pl.py?network=$1&station=$2 [QSA]
     RewriteRule sd_(.*)_(.*).xml sd.py?network=$1&station=$2 [QSA]
   </Directory>
@@ -404,9 +341,6 @@
     AuthType Basic
 
     require user mec
-
-    AddHandler cgi-script .py
-    Options +ExecCGI
 
     RewriteRule i/([A-Za-z\-_0-9]*).png$ image.php?i=$1
     RewriteRule map_power_([0-9]*).png$ map_power.py?ts=$1

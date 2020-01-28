@@ -1,8 +1,8 @@
-#!/usr/bin/env python
 """
 Create ERDAS Imagine file from a MRMS Raster
 """
-import cgi
+import sys
+from io import BytesIO
 import os
 import datetime
 import zipfile
@@ -11,10 +11,10 @@ from osgeo import gdal
 from osgeo import osr
 from imageio import imread
 import numpy as np
-from pyiem.util import ssw
+from paste.request import parse_formvars
 
 
-def workflow(valid, period):
+def workflow(valid, period, start_response):
     """ Actually do the work! """
     fn = valid.strftime(
         (
@@ -23,21 +23,17 @@ def workflow(valid, period):
         )
     )
     if not os.path.isfile(fn):
-        ssw("Content-type: text/plain\n\n")
-        ssw("ERROR: Data File Not Found!")
-        return
+        raise FileNotFoundError(fn)
     img = imread(fn, pilmode="P")
     size = np.shape(img)
     # print 'A', np.max(img), np.min(img), img[0,0], img[-1,-1]
     data = np.ones(size, np.uint16) * 65535
 
-    """
-    000 -> 099  0.25mm  000.00 to 024.75
-    100 -> 179  1.25mm  025.00 to 123.75
-    180 -> 254  5.00mm  125.00 to 495.00
-    254                 500.00+
-    255  MISSING/BAD DATA
-    """
+    # 000 -> 099  0.25mm  000.00 to 024.75
+    # 100 -> 179  1.25mm  025.00 to 123.75
+    # 180 -> 254  5.00mm  125.00 to 495.00
+    # 254                 500.00+
+    # 255  MISSING/BAD DATA
     data = np.where(
         np.logical_and(img >= 180, img < 255),
         (125.0 + (img - 180) * 5.0) * 10,
@@ -82,39 +78,43 @@ def workflow(valid, period):
     del ds
 
     zipfn = "mrms_%sh_%s.zip" % (period, valid.strftime("%Y%m%d%H%M"))
-    zfp = zipfile.ZipFile(zipfn, "w", zipfile.ZIP_DEFLATED)
-    zfp.write(outfn)
-    zfp.write(outfn + ".aux.xml")
-    zfp.close()
+    with zipfile.ZipFile(zipfn, "w", zipfile.ZIP_DEFLATED) as zfp:
+        zfp.write(outfn)
+        zfp.write(outfn + ".aux.xml")
 
     # Send file back to client
-    ssw("Content-type: application/octet/stream\n")
-    ssw("Content-Disposition: attachment; filename=%s\n\n" % (zipfn,))
-    ssw(open(zipfn, "rb").read())
-
+    headers = [
+        ("Content-type", "application/octet/stream"),
+        ("Content-Disposition", "attachment; filename=%s" % (zipfn,)),
+    ]
+    start_response("200 OK", headers)
+    bio = BytesIO()
+    bio.write(open(zipfn, "rb").read())
     os.unlink(outfn)
     os.unlink(zipfn)
     os.unlink(outfn + ".aux.xml")
+    return bio.getvalue()
 
 
-def main():
+def application(environ, start_response):
     """Do Something"""
     os.chdir("/tmp")
 
-    form = cgi.FieldStorage()
-    year = int(form.getfirst("year", 2016))
-    month = int(form.getfirst("month", 4))
-    day = int(form.getfirst("day", 13))
-    hour = int(form.getfirst("hour", 18))
-    minute = int(form.getfirst("minute", 0))
+    form = parse_formvars(environ)
+    year = int(form.get("year", 2016))
+    month = int(form.get("month", 4))
+    day = int(form.get("day", 13))
+    hour = int(form.get("hour", 18))
+    minute = int(form.get("minute", 0))
 
-    period = int(form.getfirst("period", 1))
+    period = int(form.get("period", 1))
 
     valid = datetime.datetime(year, month, day, hour, minute)
 
-    workflow(valid, period)
-
-
-if __name__ == "__main__":
-    # Go Main Go
-    main()
+    try:
+        return [workflow(valid, period, start_response)]
+    except Exception as exp:
+        sys.stderr.write(str(exp) + "\n")
+        headers = [("Content-type", "text/plain")]
+        start_response("500 Internal Server Error", headers)
+        return [b"An error occurred."]

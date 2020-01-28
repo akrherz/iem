@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """JSON service emitting observation history for a given date"""
 import json
 import os

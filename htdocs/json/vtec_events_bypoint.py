@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """ Find VTEC events by a given Lat / Lon pair """
 import json
 import datetime

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Get storm based warnings by lat lon point, optionally a time
 """

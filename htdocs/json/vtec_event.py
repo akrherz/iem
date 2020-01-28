@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """VTEC event metadata"""
 import json
 import datetime

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
  Aggregate the RIDGE current files
 """

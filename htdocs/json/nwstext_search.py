@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
  Search for NWS Text, return JSON
 """

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Listing of VTEC events for a WFO and year"""
 import json
 

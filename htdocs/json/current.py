@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Current Observation for a station and network"""
 import json
 import datetime

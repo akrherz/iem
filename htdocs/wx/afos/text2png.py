@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Convert a NWS Text Product into a PNG
 
     /wx/afos/201612141916_ADMNFD.png

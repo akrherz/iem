@@ -1,14 +1,13 @@
-#!/usr/bin/env python
 """Plot 2 day Timeseries from one Turbine"""
-import cgi
+from io import BytesIO
 import datetime
-import sys
 
 import pytz
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
+from paste.request import parse_formvars
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_dbconn, ssw
+from pyiem.util import get_dbconn
 
 PGCONN = get_dbconn("mec", user="mesonet")
 cursor = PGCONN.cursor()
@@ -135,19 +134,16 @@ def workflow(turbinename, ts):
             "%-I %p\n%-d/%b", tz=pytz.timezone("America/Chicago")
         )
     )
-    plt.savefig(getattr(sys.stdout, "buffer", sys.stdout))
 
 
-def main():
+def application(environ, start_response):
     """Go Main Go"""
-    ssw("Content-type: image/png\n\n")
-    form = cgi.FieldStorage()
-    turbinename = form.getfirst("turbinename", "I 050-350")
-    ts = datetime.datetime.strptime(
-        form.getfirst("date", "20100401"), "%Y%m%d"
-    )
+    headers = [("Content-type", "image/png")]
+    start_response("200 OK", headers)
+    form = parse_formvars(environ)
+    turbinename = form.get("turbinename", "I 050-350")
+    ts = datetime.datetime.strptime(form.get("date", "20100401"), "%Y%m%d")
     workflow(turbinename, ts)
-
-
-if __name__ == "__main__":
-    main()
+    bio = BytesIO()
+    plt.savefig(bio)
+    return [bio.getvalue()]

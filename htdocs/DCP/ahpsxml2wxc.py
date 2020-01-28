@@ -1,11 +1,9 @@
-#!/usr/bin/env python
 """Convert the AHPS XML into WXC format"""
-import cgi
 import datetime
 
+from paste.request import parse_formvars
 from twisted.words.xish import domish, xpath
 import requests
-from pyiem.util import ssw
 
 
 def do(nwsli):
@@ -13,7 +11,7 @@ def do(nwsli):
     res = ""
     xml = requests.get(
         (
-            "http://water.weather.gov/ahps2/"
+            "https://water.weather.gov/ahps2/"
             "hydrograph_to_xml.php?gage=%s&output=xml"
         )
         % (nwsli,)
@@ -39,6 +37,8 @@ def do(nwsli):
     elementStream.parse(xml)
     elem = results[0]
     nodes = xpath.queryForNodes("/site/forecast/datum", elem)
+    if nodes is None:
+        return res
     i = 0
     maxval = {"val": 0, "time": None}
     for node in nodes:
@@ -70,13 +70,9 @@ def do(nwsli):
     return res
 
 
-def main():
+def application(environ, start_response):
     """Do Fun Things"""
-    fields = cgi.FieldStorage()
-    nwsli = fields.getfirst("nwsli", "MROI4")[:5]
-    ssw("Content-type: text/plain\n\n")
-    ssw(do(nwsli))
-
-
-if __name__ == "__main__":
-    main()
+    fields = parse_formvars(environ)
+    nwsli = fields.get("nwsli", "MROI4")[:5]
+    start_response("200 OK", [("Content-type", "text/plain")])
+    return [do(nwsli).encode("ascii")]

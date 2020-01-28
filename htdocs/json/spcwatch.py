@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
  Return GeoJSON of valid watches for a provided timestamp or just now
 """

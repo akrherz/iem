@@ -1,12 +1,12 @@
-#!/usr/bin/env python
 """Generation of National Mesonet Project CSV File"""
+from io import StringIO
 
 import numpy as np
 import psycopg2.extras
 from metpy.units import units
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import distance, temperature
-from pyiem.util import get_dbconn, ssw
+from pyiem.util import get_dbconn
 
 
 def nan(val):
@@ -28,7 +28,7 @@ def p2(val, prec, minv, maxv):
     return round(temperature(val, "C").value("K"), prec)
 
 
-def use_table(table):
+def use_table(table, sio):
     """Process for the given table."""
     nt = NetworkTable("ISUSM")
     pgconn = get_dbconn("isuag")
@@ -47,7 +47,7 @@ def use_table(table):
     )
     for row in cursor:
         sid = row["station"]
-        ssw(
+        sio.write(
             (
                 "%s,%.4f,%.4f,%s,%.1f,"
                 "%.3f;%.3f;%.3f;%.3f#%s;%s;%s;%s,"
@@ -108,10 +108,10 @@ def use_table(table):
         )
 
 
-def do_output():
+def do_output(sio):
     """Do as I say"""
 
-    ssw(
+    sio.write(
         (
             "station_id,LAT [degN],LON [degE],date_time,ELEV [m],"
             "depth [m]#SOILT [K],depth [m]#SOILM [kg/kg],"
@@ -121,15 +121,14 @@ def do_output():
         )
     )
 
-    use_table("sm_minute")
-    ssw(".EOO\n")
+    use_table("sm_minute", sio)
+    sio.write(".EOO\n")
 
 
-def main():
+def application(_environ, start_response):
     """Do Something"""
-    ssw("Content-type: text/csv;header=present\n\n")
-    do_output()
-
-
-if __name__ == "__main__":
-    main()
+    headers = [("Content-type", "text/csv;header=present")]
+    start_response("200 OK", headers)
+    sio = StringIO()
+    do_output(sio)
+    return [sio.getvalue().encode("ascii")]

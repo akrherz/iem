@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
  Tile Map service metadata
 """

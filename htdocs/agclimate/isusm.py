@@ -1,13 +1,13 @@
-#!/usr/bin/env python
 """
  Generate various plots for ISUSM data
 """
-import cgi
+from io import BytesIO
 
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import temperature
 from pyiem.plot import MapPlot
 from pyiem.util import get_dbconn
+from paste.request import parse_formvars
 
 CTX = {
     "tmpf": {"title": "2m Air Temperature [F]"},
@@ -91,16 +91,18 @@ def plot(data, v):
     )
     mp.plot_values(lons, lats, vals, "%.1f")
     mp.drawcounties()
-    mp.postprocess(web=True)
+    return mp
 
 
-def main():
+def application(environ, start_response):
     """Go Main Go"""
-    form = cgi.FieldStorage()
-    v = form.getfirst("v", "tmpf")
+    form = parse_formvars(environ)
+    v = form.get("v", "tmpf")
     data = get_currents()
-    plot(data, v)
+    mp = plot(data, v)
+    bio = BytesIO()
+    mp.fig.savefig(bio)
 
-
-if __name__ == "__main__":
-    main()
+    headers = [("Content-type", "image/png")]
+    start_response("200 OK", headers)
+    return [bio.getvalue()]

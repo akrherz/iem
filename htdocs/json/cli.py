@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """CLI data."""
 import datetime
 import simplejson as json

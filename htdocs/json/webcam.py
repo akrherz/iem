@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 JSON webservice providing timestamps of available webcam images
 """

@@ -1,16 +1,15 @@
-#!/usr/bin/env python
 """Generate the Starfish Fungis XML"""
-import cgi
+
+from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
-from pyiem.util import ssw
 
 
-def main():
+def application(environ, start_response):
     """ Do Something"""
-    form = cgi.FieldStorage()
-    network = form.getfirst("network", "ISUSM")
-    nt = NetworkTable(network)
-    station = form.getfirst("station", "AEEI4")
+    form = parse_formvars(environ)
+    network = form.get("network", "ISUSM")
+    nt = NetworkTable(network, only_online=False)
+    station = form.get("station", "AEEI4")
     xs = """<?xml version="1.0" encoding="UTF-8"?>
 <sfl:Platform
 xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -88,9 +87,6 @@ gml:id="%(network)s_%(station)s">
         sts=nt.sts[station]["archive_begin"].strftime("%Y-%m-%dT%H:%M:%SZ"),
     )
 
-    ssw("Content-type: text/xml\n\n")
-    ssw(xs)
-
-
-if __name__ == "__main__":
-    main()
+    headers = [("Content-type", "text/xml")]
+    start_response("200 OK", headers)
+    return [xs.encode("ascii")]

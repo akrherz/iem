@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Listing of VTEC emergencies"""
 import json
 

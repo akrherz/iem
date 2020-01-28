@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """ Recent METARs containing some pattern """
 import json
 

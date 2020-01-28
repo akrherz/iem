@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """SPC Outlook JSON service."""
 import datetime
 import os

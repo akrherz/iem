@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """ Produce geojson of Snowfall data """
 import datetime
 import json

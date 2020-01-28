@@ -1,12 +1,11 @@
-#!/usr/bin/env python
 """Report on our second tipping bucket"""
 from io import StringIO
 
 from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn, ssw
+from pyiem.util import get_dbconn
 
 
-def main():
+def application(_environ, start_response):
     """Go Main Go"""
     pgconn = get_dbconn("iem")
     amsi4 = read_sql(
@@ -39,9 +38,6 @@ def main():
         sio, classes="table table-striped", na_rep="-", float_format="%.2f"
     )
     sio.seek(0)
-    ssw("Content-type: text/html\n\n")
-    ssw(sio.getvalue())
-
-
-if __name__ == "__main__":
-    main()
+    headers = [("Content-type", "text/html")]
+    start_response("200 OK", headers)
+    return [sio.getvalue().encode("ascii")]

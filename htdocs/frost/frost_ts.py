@@ -1,14 +1,13 @@
-#!/usr/bin/env python
 """Generate some line charts from ISU Frost Model Output"""
-import sys
+from io import BytesIO
 import os
-import cgi
 import datetime
 
 import numpy as np
 import pytz
 import matplotlib.dates as mdates
-from pyiem.util import ncopen, ssw
+from paste.request import parse_formvars
+from pyiem.util import ncopen
 from pyiem.plot.use_agg import plt
 from pyiem.datatypes import temperature
 
@@ -107,8 +106,6 @@ def process(model, lon, lat):
     modelts = get_latest_time(model)
     if modelts is None:
         ax.text(0.5, 0.5, "No Data Found to Plot!", ha="center")
-        ssw("Content-Type: image/png\n\n")
-        fig.savefig(getattr(sys.stdout, "buffer", sys.stdout), format="png")
         return
     nc = ncopen(
         modelts.strftime(
@@ -197,21 +194,16 @@ def process(model, lon, lat):
     )
     add_labels(fig)
 
-    ssw("Content-Type: image/png\n\n")
-    fig.savefig(getattr(sys.stdout, "buffer", sys.stdout), format="png")
 
-
-def main():
+def application(environ, start_response):
     """ Go Main Go """
-    form = cgi.FieldStorage()
+    form = parse_formvars(environ)
     if "lon" in form and "lat" in form:
         process(
-            form.getfirst("model"),
-            float(form.getfirst("lon")),
-            float(form.getfirst("lat")),
+            form.get("model"), float(form.get("lon")), float(form.get("lat"))
         )
 
-
-if __name__ == "__main__":
-    # main
-    main()
+    start_response("200 OK", [("Content-type", "image/png")])
+    bio = BytesIO()
+    plt.savefig(bio)
+    return [bio.getvalue()]

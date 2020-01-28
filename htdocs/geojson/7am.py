@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """ Generate a GeoJSON of 7 AM precip data """
 import datetime
 import json

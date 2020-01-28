@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """ Generate a GeoJSON of current SPS Polygons """
 import json
 import datetime

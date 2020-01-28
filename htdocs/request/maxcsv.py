@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Provide some CSV Files
 
 first four columns need to be

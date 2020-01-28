@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """ JSON service providing IEMRE data for a given point """
 import os
 import datetime

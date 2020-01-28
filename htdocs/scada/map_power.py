@@ -1,19 +1,18 @@
-#!/usr/bin/env python
 """
   Generate a simple scatter plot of power...
 """
-import cgi
-import sys
+from io import BytesIO
 import datetime
 
 import numpy as np
 import matplotlib.colors as mpcolors
 import matplotlib.colorbar as mpcolorbar
 import matplotlib.patheffects as PathEffects
+from paste.request import parse_formvars
 from pyiem.meteorology import uv
 from pyiem.plot.use_agg import plt
 from pyiem.datatypes import speed, direction
-from pyiem.util import get_dbconn, ssw
+from pyiem.util import get_dbconn
 
 
 def make_colorbar(clevs, norm, cmap):
@@ -45,7 +44,7 @@ def make_colorbar(clevs, norm, cmap):
     ax.yaxis.set_ticklabels([])
 
 
-def do(valid, yawsource):
+def do(valid):
     """ Generate plot for a given timestamp """
     pgconn = get_dbconn("scada")
     cursor = pgconn.cursor()
@@ -184,14 +183,16 @@ def do(valid, yawsource):
         rotation=90,
     )
 
-    plt.savefig(getattr(sys.stdout, "buffer", sys.stdout))
 
-
-if __name__ == "__main__":
-    # Go main Go
-    form = cgi.FieldStorage()
-    ts = form.getfirst("ts", "200006302000")
+def application(environ, start_response):
+    """Go Main Go."""
+    form = parse_formvars(environ)
+    ts = form.get("ts", "200006302000")
     ts = datetime.datetime.strptime(ts, "%Y%m%d%H%M")
-    yawsource = form.getfirst("yawsource", "yaw")
-    ssw("Content-type: image/png\n\n")
-    do(ts, yawsource)
+    # yawsource = form.get("yawsource", "yaw")
+    headers = [("Content-type", "image/png")]
+    start_response("200 OK", headers)
+    do(ts)
+    bio = BytesIO()
+    plt.savefig(bio)
+    return [bio.getvalue()]

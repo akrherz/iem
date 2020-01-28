@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Provide nws text in JSON format
 """

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Fun."""
 import os
 import zipfile

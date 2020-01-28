@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Generate a 'Live' webcam image on demand
 
 URIs look like so:

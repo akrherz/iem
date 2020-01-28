@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """ Service to dump out IBW tags for a WFO / Year"""
 import json
 import datetime

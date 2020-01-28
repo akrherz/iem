@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """ Generate a GeoJSON of nexrad attributes"""
 import json
 import datetime

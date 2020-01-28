@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """GeoJSON of a given IEM network code"""
 import json
 import datetime

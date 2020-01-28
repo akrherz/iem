@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
  Placefile for DOT trucks and webcam images
 """

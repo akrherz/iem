@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """GeoJSON source for VTEC event"""
 import json
 import datetime

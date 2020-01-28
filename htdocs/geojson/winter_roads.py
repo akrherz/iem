@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """ Generate a GeoJSON of current storm based warnings """
 import json
 import datetime

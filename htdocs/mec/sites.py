@@ -1,15 +1,15 @@
-#!/usr/bin/env python
 """geojson"""
 import json
 
-from pyiem.util import get_dbconn, ssw
+from pyiem.util import get_dbconn
 
 
-def main():
+def application(_environ, start_response):
     """GO Main"""
     dbconn = get_dbconn("mec")
     cursor = dbconn.cursor()
-    ssw("Content-type: application/vnd.geo+json\n\n")
+    headers = [("Content-type", "application/vnd.geo+json")]
+    start_response("200 OK", headers)
     data = {
         "type": "FeatureCollection",
         "crs": {
@@ -39,8 +39,4 @@ def main():
             }
         )
 
-    ssw(json.dumps(data))
-
-
-if __name__ == "__main__":
-    main()
+    return [json.dumps(data).encode("ascii")]

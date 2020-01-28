@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """ ASI Data Timeseries """
 from __future__ import print_function
 import datetime

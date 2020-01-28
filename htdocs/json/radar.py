@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Return JSON metadata for nexrad information
 """

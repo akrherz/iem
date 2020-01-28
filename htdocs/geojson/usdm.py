@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """ Generate a GeoJSON of US Drought Monitor"""
 import json
 import datetime

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Placefile for NEXRAD l3 storm attributes
 
 TODO suggestions:

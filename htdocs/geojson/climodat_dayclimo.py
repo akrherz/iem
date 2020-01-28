@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Dump daily computed climatology direct from the database"""
 import datetime
 import json

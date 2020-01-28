@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """JSON service that emits RAOB profiles in JSON format
 
 {'profiles': [

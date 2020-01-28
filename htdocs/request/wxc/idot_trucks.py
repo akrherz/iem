@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Generate a WXC formatted file of DOT Snowplow positions"""
 import datetime
 import memcache

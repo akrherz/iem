@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """ Produce geojson of ISUSM data """
 import datetime
 import json

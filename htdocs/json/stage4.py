@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """ JSON service providing hourly Stage IV data for a given point """
 
 import datetime
