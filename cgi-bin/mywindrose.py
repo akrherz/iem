@@ -1,23 +1,22 @@
-#!/usr/bin/env python
 """
 Generate a PNG windrose based on the CGI parameters, called from
 
     htdocs/sites/dyn_windrose.phtml
     htdocs/sites/windrose.phtml
 """
+from io import BytesIO
 import datetime
-import cgi
-import sys
 
 import numpy
+from paste.request import parse_formvars
+from pyiem.plot.use_agg import plt
 from pyiem.windrose_utils import windrose
 from pyiem.network import Table as NetworkTable
-from pyiem.util import ssw
 
 
-def send_error(form, msg):
+def send_error(form, msg, start_response):
     """Abort, abort"""
-    fmt = form.getfirst("fmt", "png")
+    fmt = form.get("fmt", "png")
     if fmt == "png":
         ct = "image/png"
     elif fmt == "pdf":
@@ -25,15 +24,15 @@ def send_error(form, msg):
     elif fmt == "svg":
         ct = "image/svg+xml"
     else:
-        ssw("Content-type: text/plain\n\n")
-        ssw(msg)
-        sys.exit(0)
-    import matplotlib.pyplot as plt
+        start_response("200 OK", [("Content-type", "text/plain")])
+        return msg.encode("ascii")
 
     fig, ax = plt.subplots(1, 1)
     ax.text(0.5, 0.5, msg, ha="center")
-    ssw("Content-type: %s\n\n" % (ct,))
-    fig.savefig(getattr(sys.stdout, "buffer", sys.stdout), format=fmt)
+    start_response("200 OK", [("Content-type", "%s" % (ct,))])
+    bio = BytesIO()
+    fig.savefig(bio, format=fmt)
+    return bio.getvalue()
 
 
 def get_times(form):
@@ -51,18 +50,18 @@ def get_times(form):
         and "minute2" in form
     ):
         sts = datetime.datetime(
-            int(form["year1"].value),
-            int(form["month1"].value),
-            int(form["day1"].value),
-            int(form["hour1"].value),
-            int(form["minute1"].value),
+            int(form["year1"]),
+            int(form["month1"]),
+            int(form["day1"]),
+            int(form["hour1"]),
+            int(form["minute1"]),
         )
         ets = datetime.datetime(
-            int(form["year2"].value),
-            int(form["month2"].value),
-            int(form["day2"].value),
-            int(form["hour2"].value),
-            int(form["minute2"].value),
+            int(form["year2"]),
+            int(form["month2"]),
+            int(form["day2"]),
+            int(form["hour2"]),
+            int(form["minute2"]),
         )
     else:
         sts = datetime.datetime(1900, 1, 1)
@@ -71,17 +70,22 @@ def get_times(form):
     return sts, ets
 
 
-def main():
+def application(environ, start_response):
     """ Query out the CGI variables"""
-    form = cgi.FieldStorage()
+    form = parse_formvars(environ)
     try:
         sts, ets = get_times(form)
     except Exception:
-        send_error(form, "Invalid Times Selected, please try again")
-        return
+        return [
+            send_error(
+                form,
+                "Invalid Times Selected, please try again",
+                start_response,
+            )
+        ]
 
     if "hour1" in form and "hourlimit" in form:
-        hours = numpy.array((int(form["hour1"].value),))
+        hours = numpy.array((int(form["hour1"]),))
     elif "hour1" in form and "hour2" in form and "hourrangelimit" in form:
         if sts.hour > ets.hour:  # over midnight
             hours = numpy.arange(sts.hour, 24)
@@ -93,44 +97,44 @@ def main():
     else:
         hours = numpy.arange(0, 24)
 
-    if "units" in form and form["units"].value in ["mph", "kts", "mps", "kph"]:
-        units = form["units"].value
+    if "units" in form and form["units"] in ["mph", "kts", "mps", "kph"]:
+        units = form["units"]
     else:
         units = "mph"
 
     if "month1" in form and "monthlimit" in form:
-        months = numpy.array((int(form["month1"].value),))
+        months = numpy.array((int(form["month1"]),))
     else:
         months = numpy.arange(1, 13)
 
     database = "asos"
-    if form["network"].value in ("KCCI", "KELO", "KIMT"):
+    if form["network"] in ("KCCI", "KELO", "KIMT"):
         database = "snet"
-    elif form["network"].value in ("IA_RWIS",):
+    elif form["network"] in ("IA_RWIS",):
         database = "rwis"
-    elif form["network"].value in ("ISUSM",):
+    elif form["network"] in ("ISUSM",):
         database = "isuag"
-    elif form["network"].value in ("RAOB",):
+    elif form["network"] in ("RAOB",):
         database = "postgis"
-    elif form["network"].value.find("_DCP") > 0:
+    elif form["network"].find("_DCP") > 0:
         database = "hads"
 
     try:
-        nsector = int(form["nsector"].value)
+        nsector = int(form["nsector"])
     except Exception:
         nsector = 36
 
     rmax = None
-    if "staticrange" in form and form["staticrange"].value == "1":
+    if "staticrange" in form and form["staticrange"] == "1":
         rmax = 100
 
-    nt = NetworkTable(form["network"].value, only_online=False)
+    nt = NetworkTable(form["network"], only_online=False)
     bins = []
     if "bins" in form:
-        bins = [float(v) for v in form.getfirst("bins").split(",")]
+        bins = [float(v) for v in form.get("bins").split(",")]
         bins.insert(0, 0)
     res = windrose(
-        form["station"].value,
+        form["station"],
         database=database,
         sts=sts,
         ets=ets,
@@ -140,33 +144,24 @@ def main():
         nsector=nsector,
         justdata=("justdata" in form),
         rmax=rmax,
-        sname=nt.sts[form["station"].value]["name"],
-        level=form.getfirst("level", None),
+        sname=nt.sts[form["station"]]["name"],
+        level=form.get("level", None),
         bins=bins,
     )
     if "justdata" in form:
         # We want text
-        ssw("Content-type: text/plain\n\n")
-        ssw(res)
+        start_response("200 OK", [("Content-type", "text/plain")])
+        return [res.encode("ascii")]
+    fmt = form.get("fmt", "png")
+    if fmt == "png":
+        ct = "image/png"
+    elif fmt == "pdf":
+        ct = "application/pdf"
+    elif fmt == "svg":
+        ct = "image/svg+xml"
     else:
-        fmt = form.getfirst("fmt", "png")
-        if fmt == "png":
-            ct = "image/png"
-        elif fmt == "pdf":
-            ct = "application/pdf"
-        elif fmt == "svg":
-            ct = "image/svg+xml"
-        else:
-            ssw("Content-type: text/plain\n\n")
-            ssw("Invalid fmt set")
-            sys.exit(0)
-        ssw("Content-type: %s\n\n" % (ct,))
-        res.savefig(
-            getattr(sys.stdout, "buffer", sys.stdout),
-            format=fmt,
-            dpi=int(form.getfirst("dpi", 100)),
-        )
-
-
-if __name__ == "__main__":
-    main()
+        return [send_error(form, "Invalid fmt set", start_response)]
+    start_response("200 OK", [("Content-type", ct)])
+    bio = BytesIO()
+    res.savefig(bio, format=fmt, dpi=int(form.get("dpi", 100)))
+    return [bio.getvalue()]

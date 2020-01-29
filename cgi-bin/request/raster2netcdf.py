@@ -1,11 +1,9 @@
-#!/usr/bin/env python
 """Service providing netcdf files of a requested IEM RASTER
 
     https://mesonet.agron.iastate.edu/cgi-bin/request/raster2netcdf.py?
     dstr=201710251200&prod=composite_n0r
 """
-import cgi
-import sys
+from io import BytesIO
 import os
 import datetime
 import tempfile
@@ -13,14 +11,8 @@ import tempfile
 import numpy as np
 import pytz
 from PIL import Image
-from pyiem.util import get_dbconn, ncopen, ssw
-
-
-def send_error(msg):
-    """something bad happened, so let the user know"""
-    ssw("Content-type: text/plain\n\n")
-    ssw(msg)
-    sys.exit()
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn, ncopen
 
 
 def get_gridinfo(filename, xpoints, ypoints):
@@ -81,14 +73,15 @@ def make_netcdf(xpoints, ypoints, lons, lats):
     return tmpobj.name
 
 
-def do_work(valid, prod):
+def do_work(valid, prod, start_response):
     """Our workflow"""
     # Get lookup table
     xref, template, units, long_name = get_table(prod)
     # Get RASTER
     fn = valid.strftime(template)
     if not os.path.isfile(fn):
-        send_error("ERROR: The IEM Archives do not have this file available")
+        start_response("200 OK", [("Content-type", "text/plain")])
+        return b"ERROR: The IEM Archives do not have this file available"
     raster = np.flipud(np.array(Image.open(fn)))
     (ypoints, xpoints) = raster.shape
     # build lat, lon arrays
@@ -106,23 +99,24 @@ def do_work(valid, prod):
         # convert RASTER via lookup table
         ncvar[:] = xref[raster]
     # send data to user
-    ssw("Content-type: application/octet-stream\n")
-    ssw("Content-Disposition: attachment; filename=res.nc\n\n")
-    ssw(open(tmpname, "rb").read())
+    headers = [
+        ("Content-type", "application/octet-stream"),
+        ("Content-disposition", "attachment; filename=res.nc"),
+    ]
+    start_response("200 OK", headers)
+    bio = BytesIO()
+    bio.write(open(tmpname, "rb").read())
     # remove tmp netcdf file
     os.unlink(tmpname)
+    return bio.getvalue()
 
 
-def main():
+def application(environ, start_response):
     """Do great things"""
-    form = cgi.FieldStorage()
-    dstr = form.getfirst("dstr", "201710251200")[:12]
-    prod = form.getfirst("prod", "composite_n0r")[:100]  # arb
+    form = parse_formvars(environ)
+    dstr = form.get("dstr", "201710251200")[:12]
+    prod = form.get("prod", "composite_n0r")[:100]  # arb
     valid = datetime.datetime.strptime(dstr, "%Y%m%d%H%M").replace(
         tzinfo=pytz.UTC
     )
-    do_work(valid, prod)
-
-
-if __name__ == "__main__":
-    main()
+    return [do_work(valid, prod, start_response)]

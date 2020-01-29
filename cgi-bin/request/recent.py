@@ -1,11 +1,10 @@
-#!/usr/bin/env python
 """
 Return a simple CSV of recent observations from the database
 """
-import cgi
 
 import memcache
-from pyiem.util import get_dbconn, ssw
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn
 
 
 def run(sid):
@@ -46,22 +45,17 @@ def run(sid):
     return res.replace("None", "M")
 
 
-def main():
+def application(environ, start_response):
     """Go Main Go"""
-    ssw("Content-type: text/plain\n\n")
-    form = cgi.FieldStorage()
-    sid = form.getfirst("station", "AMW")[:5]
+    start_response("200 OK", [("Content-type", "text/plain")])
+    form = parse_formvars(environ)
+    sid = form.get("station", "AMW")[:5]
 
     mckey = "/cgi-bin/request/recent.py|%s" % (sid,)
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
     if not res:
         res = run(sid)
-        ssw(res)
         mc.set(mckey, res, 300)
-    else:
-        ssw(res)
 
-
-if __name__ == "__main__":
-    main()
+    return [res.encode("ascii")]

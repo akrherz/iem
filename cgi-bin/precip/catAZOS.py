@@ -1,12 +1,13 @@
-#!/usr/bin/env python
 """
 IEM_APPID = 79
 """
-import cgi
+from io import StringIO
 import datetime
+
 import psycopg2.extras
+from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, ssw
+from pyiem.util import get_dbconn
 
 nt = NetworkTable(("AWOS", "IA_ASOS"))
 IEM = get_dbconn("iem")
@@ -17,9 +18,10 @@ stData = {}
 totp = {}
 
 
-def doHeader():
-    ssw("Content-type: text/html \n\n")
-    ssw(
+def doHeader(environ, start_response, sio):
+    """get going."""
+    start_response("200 OK", [("Content-type", "text/html")])
+    sio.write(
         """
 <html>
 <head>
@@ -32,16 +34,16 @@ Hourly Precipitation [ASOS/AWOS]
 
 """
     )
-    ssw('<h3 align="center">Hourly Precip [inches] Grid</h3>')
-    form = cgi.FieldStorage()
+    sio.write('<h3 align="center">Hourly Precip [inches] Grid</h3>')
+    form = parse_formvars(environ)
     try:
-        postDate = form.getfirst("date")
+        postDate = form.get("date")
         myTime = datetime.datetime.strptime(postDate, "%Y-%m-%d")
     except Exception:
         myTime = datetime.datetime.now()
 
-    ssw("<table border=1><tr>")
-    ssw(
+    sio.write("<table border=1><tr>")
+    sio.write(
         '<td>Back: <a href="catAZOS.py?date='
         + (myTime - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
         + '"> \
@@ -50,9 +52,9 @@ Hourly Precipitation [ASOS/AWOS]
         + "</a></td>"
     )
 
-    ssw("<td>Shown: " + myTime.strftime("%d %B %Y") + "</td>")
+    sio.write("<td>Shown: " + myTime.strftime("%d %B %Y") + "</td>")
 
-    ssw(
+    sio.write(
         '<td>Forward: <a href="catAZOS.py?date='
         + (myTime + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
         + '"> \
@@ -61,7 +63,7 @@ Hourly Precipitation [ASOS/AWOS]
         + "</a></td>"
     )
 
-    ssw(
+    sio.write(
         """
 <td>Pick: (yyyy-mm-dd)  
 <form method="GET" action="catAZOS.py">
@@ -73,8 +75,9 @@ Hourly Precipitation [ASOS/AWOS]
     return myTime
 
 
-def setupTable():
-    ssw(
+def setupTable(sio):
+    """make table."""
+    sio.write(
         """
 <style language="css">
 td.style1{
@@ -129,11 +132,12 @@ def loadstations():
         totp[station] = 0
 
 
-def main():
+def application(environ, start_response):
     """Go Main Go"""
-    ts = doHeader()
+    sio = StringIO()
+    ts = doHeader(environ, start_response, sio)
     loadstations()
-    setupTable()
+    setupTable(sio)
 
     td = ts.strftime("%Y-%m-%d")
     tm = (ts + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
@@ -183,20 +187,20 @@ def main():
     ids.sort()
     for station in ids:
         j += 1
-        ssw('<tr class="row' + str(j % 5) + '">')
-        ssw("%s%s%s" % ("<td>", station, "</td>"))
+        sio.write('<tr class="row' + str(j % 5) + '">')
+        sio.write("%s%s%s" % ("<td>", station, "</td>"))
         for i in range(24):
-            ssw('<td class="style' + str((i + 1) % 3) + '">')
-            ssw("%s%s " % (stData[station][i], "</td>"))
+            sio.write('<td class="style' + str((i + 1) % 3) + '">')
+            sio.write("%s%s " % (stData[station][i], "</td>"))
             try:
                 totp[station] = totp[station] + stData[station][i]
             except Exception:
                 continue
-        ssw("%s%s%s" % ("<td>", totp[station], "</td>"))
-        ssw("%s%s%s" % ("<td>", station, "</td>"))
-        ssw("</tr>")
+        sio.write("%s%s%s" % ("<td>", totp[station], "</td>"))
+        sio.write("%s%s%s" % ("<td>", station, "</td>"))
+        sio.write("</tr>")
 
-    ssw(
+    sio.write(
         """
 </table>
 
@@ -205,7 +209,4 @@ example, the value in the 1AM column is precipitation accumulation from 1 AM
 till 2 AM.
 """
     )
-
-
-if __name__ == "__main__":
-    main()
+    return [sio.getvalue().encode("ascii")]

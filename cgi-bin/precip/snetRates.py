@@ -1,14 +1,15 @@
-#!/usr/bin/env python
+"""Legacy stuff."""
+from io import StringIO
 import datetime
-import cgi
-import sys
 
 import psycopg2.extras
 import pytz
-from pyiem.util import get_dbconn, ssw
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn
 
 
 def diff(nowVal, pastVal, mulli):
+    """t"""
     if nowVal < 0 or pastVal < 0:
         return "%5s," % ("M")
     differ = nowVal - pastVal
@@ -18,21 +19,24 @@ def diff(nowVal, pastVal, mulli):
     return "%5.2f," % (differ * mulli)
 
 
-def main():
-    form = cgi.FieldStorage()
-    year = form.getfirst("year")
-    month = form.getfirst("month")
-    day = form.getfirst("day")
-    station = form.getfirst("station", "SAMI4")[:5]
+def application(environ, start_response):
+    """Go Main."""
+    sio = StringIO()
+    start_response("200 OK", [("Content-type", "text/plain")])
+    form = parse_formvars(environ)
+    year = form.get("year", 2010)
+    month = form.get("month", 6)
+    day = form.get("day", 7)
+    station = form.get("station", "SAMI4")[:5]
     s = datetime.datetime(int(year), int(month), int(day))
     s = s.replace(tzinfo=pytz.timezone("America/Chicago"))
     e = s + datetime.timedelta(days=1)
     e = e.replace(tzinfo=pytz.timezone("America/Chicago"))
     interval = datetime.timedelta(seconds=60)
 
-    ssw("Content-type: text/plain\n\n")
-    ssw(
-        "SID  ,  DATE    ,TIME ,PCOUNT,P1MIN ,60min ,30min ,20min ,15min ,10min , 5min , 1min ,"
+    sio.write(
+        "SID  ,  DATE    ,TIME ,PCOUNT,P1MIN ,60min ,30min ,20min "
+        ",15min ,10min , 5min , 1min ,"
     )
 
     if s.strftime("%Y%m%d") == datetime.datetime.now().strftime("%Y%m%d"):
@@ -51,7 +55,7 @@ def main():
         cursor.execute(
             """SELECT station, valid, pday from t"""
             + s.strftime("%Y_%m")
-            + """ WHERE 
+            + """ WHERE
             station = %s and valid >= %s and valid < %s ORDER by valid ASC""",
             (station, s, e),
         )
@@ -59,14 +63,13 @@ def main():
     pcpn = [-1] * (24 * 60)
 
     if cursor.rowcount == 0:
-        ssw("NO RESULTS FOUND FOR THIS DATE!")
-        sys.exit(0)
+        return [b"NO RESULTS FOUND FOR THIS DATE!"]
 
     lminutes = 0
     lval = 0
     for row in cursor:
         ts = row["valid"]
-        minutes = (ts - s).seconds / 60
+        minutes = (ts - s).seconds // 60
         val = float(row["pday"])
         pcpn[minutes] = val
         if (val - lval) < 0.02:
@@ -75,56 +78,53 @@ def main():
         lminutes = minutes
         lval = val
 
-    for i in range(len(pcpn)):
+    for i, val in enumerate(pcpn):
         ts = s + (interval * i)
-        ssw("%s,%s," % (station, ts.strftime("%Y-%m-%d,%H:%M")))
+        sio.write("%s,%s," % (station, ts.strftime("%Y-%m-%d,%H:%M")))
         if pcpn[i] < 0:
-            ssw("%5s," % ("M"))
+            sio.write("%5s," % ("M"))
         else:
-            ssw("%5.2f," % (pcpn[i],))
+            sio.write("%5.2f," % (val,))
 
         if i >= 1:
-            ssw(diff(pcpn[i], pcpn[i - 1], 1))
+            sio.write(diff(pcpn[i], pcpn[i - 1], 1))
         else:
-            ssw("%5s," % (" "))
+            sio.write("%5s," % (" "))
 
         if i >= 60:
-            ssw(diff(pcpn[i], pcpn[i - 60], 1))
+            sio.write(diff(pcpn[i], pcpn[i - 60], 1))
         else:
-            ssw("%5s," % (" "))
+            sio.write("%5s," % (" "))
 
         if i >= 30:
-            ssw(diff(pcpn[i], pcpn[i - 30], 2))
+            sio.write(diff(pcpn[i], pcpn[i - 30], 2))
         else:
-            ssw("%5s," % (" "))
+            sio.write("%5s," % (" "))
 
         if i >= 20:
-            ssw(diff(pcpn[i], pcpn[i - 20], 3))
+            sio.write(diff(pcpn[i], pcpn[i - 20], 3))
         else:
-            ssw("%5s," % (" "))
+            sio.write("%5s," % (" "))
 
         if i >= 15:
-            ssw(diff(pcpn[i], pcpn[i - 15], 4))
+            sio.write(diff(pcpn[i], pcpn[i - 15], 4))
         else:
-            ssw("%5s," % (" "))
+            sio.write("%5s," % (" "))
 
         if i >= 10:
-            ssw(diff(pcpn[i], pcpn[i - 10], 6))
+            sio.write(diff(pcpn[i], pcpn[i - 10], 6))
         else:
-            ssw("%5s," % (" "))
+            sio.write("%5s," % (" "))
 
         if i >= 5:
-            ssw(diff(pcpn[i], pcpn[i - 5], 12))
+            sio.write(diff(pcpn[i], pcpn[i - 5], 12))
         else:
-            ssw("%5s," % (" "))
+            sio.write("%5s," % (" "))
 
         if i >= 1:
-            ssw(diff(pcpn[i], pcpn[i - 1], 60))
+            sio.write(diff(pcpn[i], pcpn[i - 1], 60))
         else:
-            ssw("%5s," % (" "))
+            sio.write("%5s," % (" "))
 
-        ssw("\n")
-
-
-if __name__ == "__main__":
-    main()
+        sio.write("\n")
+    return [sio.getvalue().encode("ascii")]

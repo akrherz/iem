@@ -1,9 +1,8 @@
-#!/usr/bin/env python
-"""give me some AFOS data please"""
-import cgi
-import unittest
+"""give me some AFOS data please."""
+from io import StringIO
 
-from pyiem.util import get_dbconn, ssw
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn
 
 
 def pil_logic(s):
@@ -13,7 +12,7 @@ def pil_logic(s):
       s (str): The CGI variable wanted
 
     Returns:
-      list of PILs to send to the databae"""
+      list of PILs to send to the database"""
     if s == "":
         return []
     s = s.upper()
@@ -47,32 +46,34 @@ def pil_logic(s):
     return res
 
 
-def main():
+def application(environ, start_response):
     """Process the request"""
     # Attempt to keep the file from downloading and just displaying in chrome
-    form = cgi.FieldStorage()
-    pils = pil_logic(form.getfirst("pil", ""))
+    form = parse_formvars(environ)
+    pils = pil_logic(form.get("pil", ""))
     try:
-        limit = int(form.getfirst("limit", 1))
+        limit = int(form.get("limit", 1))
     except ValueError:
         limit = 1
-    center = form.getfirst("center", "")[:4]
-    sdate = form.getfirst("sdate", "")[:10]
-    edate = form.getfirst("edate", "")[:10]
-    ttaaii = form.getfirst("ttaaii", "")[:6]
-    fmt = form.getfirst("fmt", "text")
-    ssw("X-Content-Type-Options: nosniff\n")
-    if form.getfirst("dl") == "1":
-        ssw("Content-type: application/octet-stream\n")
-        ssw("Content-Disposition: attachment; filename=afos.txt\n\n")
+    center = form.get("center", "")[:4]
+    sdate = form.get("sdate", "")[:10]
+    edate = form.get("edate", "")[:10]
+    ttaaii = form.get("ttaaii", "")[:6]
+    fmt = form.get("fmt", "text")
+    headers = [("X-Content-Type-Options", "nosniff")]
+    if form.get("dl") == "1":
+        headers.append(("Content-type", "application/octet-stream"))
+        headers.append(
+            ("Content-Disposition: attachment", "filename=afos.txt")
+        )
     else:
         if fmt == "text":
-            ssw("Content-type: text/plain\n\n")
+            headers.append(("Content-type", "text/plain"))
         elif fmt == "html":
-            ssw("Content-type: text/html\n\n")
+            headers.append(("Content-type", "text/html"))
+    start_response("200 OK", headers)
     if not pils:
-        ssw("ERROR: No pil specified...")
-        return
+        return [b"ERROR: No pil specified..."]
     centerlimit = "" if center == "" else (" and source = '%s' " % (center,))
     timelimit = ""
     if sdate != "":
@@ -80,8 +81,9 @@ def main():
     if edate != "":
         timelimit += " and entered < '%s' " % (edate,)
 
+    sio = StringIO()
     if pils[0][:3] == "MTR":
-        access = get_dbconn("iem", user="nobody")
+        access = get_dbconn("iem")
         cursor = access.cursor()
         sql = """
             SELECT raw from current_log c JOIN stations t
@@ -94,23 +96,24 @@ def main():
         cursor.execute(sql)
         for row in cursor:
             if fmt == "html":
-                ssw("<pre>\n")
+                sio.write("<pre>\n")
             else:
-                ssw("\001\n")
-            ssw(row[0].replace("\r\r\n", "\n"))
+                sio.write("\001\n")
+            sio.write(row[0].replace("\r\r\n", "\n"))
             if fmt == "html":
-                ssw("</pre>\n")
+                sio.write("</pre>\n")
             else:
-                ssw("\003\n")
+                sio.write("\003\n")
         if cursor.rowcount == 0:
-            ssw("ERROR: METAR lookup for %s failed" % (pils[0][3:].strip(),))
-        return
+            sio.write(
+                "ERROR: METAR lookup for %s failed" % (pils[0][3:].strip(),)
+            )
+        return [sio.getvalue().encode("ascii", "ignore")]
 
     try:
         mydb = get_dbconn("afos", user="nobody")
     except Exception:  # noqa
-        ssw("Error Connecting to Database, please try again!\n")
-        return
+        return [b"Error Connecting to Database, please try again!"]
 
     cursor = mydb.cursor()
 
@@ -155,47 +158,41 @@ def main():
 
     for row in cursor:
         if fmt == "html":
-            ssw(
+            sio.write(
                 (
                     '<a href="/wx/afos/p.php?pil=%s&e=%s">Permalink</a> '
                     "for following product: "
                 )
                 % (row[1], row[2])
             )
-            ssw("<br /><pre>\n")
+            sio.write("<br /><pre>\n")
         else:
-            ssw("\001\n")
+            sio.write("\001\n")
         # Remove control characters from the product as we are including
         # them manually here...
-        ssw(
+        sio.write(
             (row[0])
             .replace("\003", "")
             .replace("\001\r\r\n", "")
             .replace("\r\r\n", "\n")
         )
         if fmt == "html":
-            ssw("</pre><hr>\n")
+            sio.write("</pre><hr>\n")
         else:
-            ssw("\n\003\n")
+            sio.write("\n\003\n")
 
     if cursor.rowcount == 0:
-        ssw("ERROR: Could not Find: %s" % (",".join(pils),))
+        sio.write("ERROR: Could not Find: %s" % (",".join(pils),))
+    return [sio.getvalue().encode("ascii", "ignore")]
 
 
-if __name__ == "__main__":
-    main()
-
-
-class TestRetrieve(unittest.TestCase):
-    """some tests"""
-
-    def test_pil_logic(self):
-        """Make sure our pil logic works! """
-        res = pil_logic("AFDDMX")
-        assert len(res) == 1
-        assert res[0] == "AFDDMX"
-        res = pil_logic("WAREWX")
-        assert len(res) == 12
-        res = pil_logic("STOIA,AFDDMX")
-        assert res[0] == "STOIA "
-        assert res[1] == "AFDDMX"
+def test_pil_logic():
+    """Make sure our pil logic works! """
+    res = pil_logic("AFDDMX")
+    assert len(res) == 1
+    assert res[0] == "AFDDMX"
+    res = pil_logic("WAREWX")
+    assert len(res) == 12
+    res = pil_logic("STOIA,AFDDMX")
+    assert res[0] == "STOIA "
+    assert res[1] == "AFDDMX"

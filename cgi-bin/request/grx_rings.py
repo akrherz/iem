@@ -1,9 +1,9 @@
-#!/usr/bin/env python
 """Author: Zach Hiris"""
 import math
-import cgi
+from io import StringIO
 
-from pyiem.util import ssw, html_escape
+from paste.request import parse_formvars
+from pyiem.util import html_escape
 
 
 def createCircleAroundWithRadius(lat, lon, radiusMiles):
@@ -44,17 +44,21 @@ def getLocation(lat1, lon1, brng, distanceMiles):
     return lat2, lon2
 
 
-def main():
+def application(environ, start_response):
     """Go Main Go."""
-    form = cgi.FieldStorage()
-    ssw("Content-type: application/octet-stream\n")
-    ssw(("Content-Disposition: attachment; filename=placefile_rings.txt\n\n"))
+    form = parse_formvars(environ)
+    headers = [
+        ("Content-type", "application/octet-stream"),
+        ("Content-Disposition", "attachment; filename=placefile_rings.txt"),
+    ]
+    start_response("200 OK", headers)
 
     # Things for the user to theoretically input:
-    loc = html_escape(form.getfirst("loc", "Jack Trice Stadium"))
-    pointLat = float(form.getfirst("lat", 42.014004))
-    pointLon = float(form.getfirst("lon", -93.635773))
-    ssw(
+    loc = html_escape(form.get("loc", "Jack Trice Stadium"))
+    pointLat = float(form.get("lat", 42.014004))
+    pointLon = float(form.get("lon", -93.635773))
+    sio = StringIO()
+    sio.write(
         (
             "; This is a placefile to draw a range ring x miles from: %s\n"
             "; Created by Zach Hiris - 8/9/2019\n"
@@ -66,27 +70,24 @@ def main():
     )
 
     for i in range(3):
-        distanceInMiles = float(form.getfirst("m%s" % (i,), 100))
+        distanceInMiles = float(form.get("m%s" % (i,), 100))
         if distanceInMiles <= 0.00001:
             continue
-        r = int(form.getfirst("r%s" % (i,), 255))
-        g = int(form.getfirst("g%s" % (i,), 255))
-        b = int(form.getfirst("b%s" % (i,), 0))
-        a = int(form.getfirst("a%s" % (i,), 255))
+        r = int(form.get("r%s" % (i,), 255))
+        g = int(form.get("g%s" % (i,), 255))
+        b = int(form.get("b%s" % (i,), 0))
+        a = int(form.get("a%s" % (i,), 255))
 
         # Create the lon/lat pairs
         X, Y = createCircleAroundWithRadius(
             pointLat, pointLon, distanceInMiles
         )
 
-        ssw(
+        sio.write(
             ("Color: %s %s %s %s\n" 'Line: 2, 0, "%.1f miles from %s" \n')
             % (r, g, b, a, distanceInMiles, loc)
         )
         for x, y in zip(X, Y):
-            ssw(" %s, %s\n" % (y, x))
-        ssw("End:\n\n")
-
-
-if __name__ == "__main__":
-    main()
+            sio.write(" %s, %s\n" % (y, x))
+        sio.write("End:\n\n")
+    return [sio.getvalue().encode("ascii")]

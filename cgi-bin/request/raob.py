@@ -1,13 +1,12 @@
-#!/usr/bin/env python
 """
 Download interface for data from RAOB network
 """
-import sys
-import cgi
+from io import StringIO
 import datetime
 
 import pytz
-from pyiem.util import get_dbconn, ssw
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn
 from pyiem.network import Table as NetworkTable
 
 
@@ -20,6 +19,7 @@ def m(val):
 
 def fetcher(station, sts, ets):
     """Do fetching"""
+    sio = StringIO()
     dbconn = get_dbconn("postgis")
     cursor = dbconn.cursor("raobstreamer")
     stations = [station]
@@ -37,14 +37,14 @@ def fetcher(station, sts, ets):
     """,
         (tuple(stations), sts, ets),
     )
-    ssw(
+    sio.write(
         (
             "station,validUTC,levelcode,pressure_mb,height_m,tmpc,"
             "dwpc,drct,speed_kts,bearing,range_sm\n"
         )
     )
     for row in cursor:
-        ssw(
+        sio.write(
             ("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n")
             % (
                 row[10],
@@ -60,11 +60,12 @@ def fetcher(station, sts, ets):
                 m(row[9]),
             )
         )
+    return sio.getvalue().encode("ascii", "ignore")
 
 
 def friendly_date(form, key):
     """More forgiving date conversion"""
-    val = form.getfirst(key)
+    val = form.get(key)
     try:
         val = val.strip()
         if len(val.split()) == 1:
@@ -73,35 +74,39 @@ def friendly_date(form, key):
             dt = datetime.datetime.strptime(val, "%m/%d/%Y %H:%M")
         dt = dt.replace(tzinfo=pytz.UTC)
     except Exception:
-        ssw("Content-type: text/plain\n\n")
-        ssw(
-            (
-                'Invalid %s date provided, should be "%%m/%%d/%%Y %%H:%%M"'
-                " in UTC timezone"
-            )
-            % (key,)
-        )
-        sys.exit()
+        return (
+            "Invalid %s date provided, should be '%%m/%%d/%%Y %%H:%%M'"
+            " in UTC timezone"
+        ) % (key,)
     return dt
 
 
-def main():
+def application(environ, start_response):
     """Go Main Go"""
-    form = cgi.FieldStorage()
+    form = parse_formvars(environ)
     sts = friendly_date(form, "sts")
     ets = friendly_date(form, "ets")
+    for val in [sts, ets]:
+        if not isinstance(val, datetime.datetime):
+            headers = [("Content-type", "text/plain")]
+            start_response("500 Internal Server Error", headers)
+            return [val.encode("ascii")]
 
-    station = form.getfirst("station", "KOAX")[:4]
-    if form.getfirst("dl", None) is not None:
-        ssw("Content-type: application/octet-stream\n")
-        ssw(
-            ("Content-Disposition: attachment; filename=%s_%s_%s.txt\n\n")
-            % (station, sts.strftime("%Y%m%d%H"), ets.strftime("%Y%m%d%H"))
-        )
+    station = form.get("station", "KOAX")[:4]
+    if form.get("dl", None) is not None:
+        headers = [
+            ("Content-type", "application/octet-stream"),
+            (
+                "Content-Disposition",
+                "attachment; filename=%s_%s_%s.txt"
+                % (
+                    station,
+                    sts.strftime("%Y%m%d%H"),
+                    ets.strftime("%Y%m%d%H"),
+                ),
+            ),
+        ]
     else:
-        ssw("Content-type: text/plain\n\n")
-    fetcher(station, sts, ets)
-
-
-if __name__ == "__main__":
-    main()
+        headers = [("Content-type", "text/plain")]
+    start_response("200 OK", headers)
+    return [fetcher(station, sts, ets)]

@@ -4,47 +4,48 @@
 """
 import datetime
 import zipfile
-import cgi
-from io import BytesIO
+from io import BytesIO, StringIO
 
 # import cgitb
 import shapefile
-from pyiem.util import get_dbconn, utc, ssw
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn, utc
 
 # cgitb.enable()
 
 
-def get_context():
+def get_context(environ):
     """Figure out the CGI variables passed to this script"""
-    form = cgi.FieldStorage()
+    form = parse_formvars(environ)
     if "year" in form:
-        year1 = form.getfirst("year")
+        year1 = form.get("year")
         year2 = year1
     else:
-        year1 = form.getfirst("year1")
-        year2 = form.getfirst("year2")
-    month1 = form.getfirst("month1")
-    month2 = form.getfirst("month2")
-    day1 = form.getfirst("day1")
-    day2 = form.getfirst("day2")
-    hour1 = form.getfirst("hour1")
-    hour2 = form.getfirst("hour2")
-    minute1 = form.getfirst("minute1")
-    minute2 = form.getfirst("minute2")
+        year1 = form.get("year1")
+        year2 = form.get("year2")
+    month1 = form.get("month1")
+    month2 = form.get("month2")
+    day1 = form.get("day1")
+    day2 = form.get("day2")
+    hour1 = form.get("hour1")
+    hour2 = form.get("hour2")
+    minute1 = form.get("minute1")
+    minute2 = form.get("minute2")
 
     sts = utc(int(year1), int(month1), int(day1), int(hour1), int(minute1))
     ets = utc(int(year2), int(month2), int(day2), int(hour2), int(minute2))
     if ets < sts:
         sts, ets = ets, sts
-    radar = form.getlist("radar")
+    radar = form.getall("radar")
 
-    fmt = form.getfirst("fmt", "shp")
+    fmt = form.get("fmt", "shp")
 
     return dict(sts=sts, ets=ets, radar=radar, fmt=fmt)
 
 
-def run(ctx):
+def run(ctx, start_response):
     """Do something!"""
+    sio = StringIO()
     pgconn = get_dbconn("radar")
     cursor = pgconn.cursor()
 
@@ -72,15 +73,10 @@ def run(ctx):
         radarlimit,
     )
 
-    # print 'Content-type: text/plain\n'
-    # print sql
-    # sys.exit()
-    # sys.stderr.write("Begin SQL...")
     cursor.execute(sql)
     if cursor.rowcount == 0:
-        ssw("Content-type: text/plain\n\n")
-        ssw("ERROR: no results found for your query")
-        return
+        start_response("200 OK", [("Content-type", "text/plain")])
+        return b"ERROR: no results found for your query"
 
     fn = "stormattr_%s_%s" % (
         ctx["sts"].strftime("%Y%m%d%H%M"),
@@ -89,19 +85,20 @@ def run(ctx):
 
     # sys.stderr.write("End SQL with rowcount %s" % (cursor.rowcount, ))
     if ctx["fmt"] == "csv":
-        ssw("Content-type: application/octet-stream\n")
-        ssw(
-            ("Content-Disposition: attachment; " "filename=%s.csv\n\n") % (fn,)
-        )
-        ssw(
+        headers = [
+            ("Content-type", "application/octet-stream"),
+            ("Content-Disposition", "attachment; filename=%s.csv" % (fn,)),
+        ]
+        start_response("200 OK", headers)
+        sio.write(
             (
                 "VALID,STORM_ID,NEXRAD,AZIMUTH,RANGE,TVS,MESO,POSH,"
                 "POH,MAX_SIZE,VIL,MAX_DBZ,MAZ_DBZ_H,TOP,DRCT,SKNT,LAT,LON\n"
             )
         )
         for row in cursor:
-            ssw(",".join([str(s) for s in row]) + "\n")
-        return
+            sio.write(",".join([str(s) for s in row]) + "\n")
+        return sio.getvalue().encode("ascii", "ignore")
 
     shpio = BytesIO()
     shxio = BytesIO()
@@ -150,16 +147,16 @@ def run(ctx):
         zf.writestr(fn + ".shp", shpio.getvalue())
         zf.writestr(fn + ".shx", shxio.getvalue())
         zf.writestr(fn + ".dbf", dbfio.getvalue())
-    ssw(("Content-Disposition: attachment; filename=%s.zip\n\n") % (fn,))
-    ssw(zio.getvalue())
+    headers = [
+        ("Content-type", "application/octet-stream"),
+        ("Content-Disposition", "attachment; filename=%s.zip" % (fn,)),
+    ]
+    start_response("200 OK", headers)
+
+    return zio.getvalue()
 
 
-def main():
+def application(environ, start_response):
     """Do something fun!"""
-    ctx = get_context()
-    run(ctx)
-
-
-if __name__ == "__main__":
-    # Go Main!
-    main()
+    ctx = get_context(environ)
+    return [run(ctx, start_response)]

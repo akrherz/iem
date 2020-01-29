@@ -1,24 +1,24 @@
-#!/usr/bin/env python
 """Do a comparison with what's on SRH"""
-from __future__ import print_function
+from io import StringIO
 import datetime
 
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn, ssw
+from pyiem.util import get_dbconn
 
 SRH = "http://www.srh.noaa.gov/ridge2/shapefiles/psql_currenthazards.html"
 
 
-def main():
+def application(_environ, start_response):
     """Go Main Go"""
-    ssw("Content-type: text/plain\n\n")
-    ssw("Report run at %s\n" % (datetime.datetime.utcnow(),))
+    sio = StringIO()
+    start_response("200 OK", [("Content-type", "text/plain")])
+    sio.write("Report run at %s\n" % (datetime.datetime.utcnow(),))
     try:
         srhdf = pd.read_html(SRH, header=0)[0]
     except Exception:
-        ssw("Failure to download %s, comparison failed" % (SRH,))
-        return
+        sio.write("Failure to download %s, comparison failed" % (SRH,))
+        return [sio.getvalue().encode("ascii")]
     srhdf["wfo"] = srhdf["wfo"].str.slice(1, 4)
     iemdf = read_sql(
         """
@@ -31,10 +31,10 @@ def main():
     )
     for idx, g_srhdf in srhdf.groupby(["wfo", "phenom", "sig", "event"]):
         if idx not in iemdf.index:
-            ssw("IEM Missing %s\n" % (repr(idx),))
+            sio.write("IEM Missing %s\n" % (repr(idx),))
             continue
         if len(g_srhdf.index) != iemdf.at[idx, "count"]:
-            ssw(
+            sio.write(
                 ("%s Count Mismatch IEM: %s SRH: %s\n")
                 % (repr(idx), iemdf.at[idx, "count"], len(g_srhdf.index))
             )
@@ -49,9 +49,6 @@ def main():
             )
         ]
         if df2.empty:
-            ssw("SRH MISSING %s\n" % (repr(idx),))
-    ssw("DONE...\n")
-
-
-if __name__ == "__main__":
-    main()
+            sio.write("SRH MISSING %s\n" % (repr(idx),))
+    sio.write("DONE...\n")
+    return [sio.getvalue().encode("ascii")]

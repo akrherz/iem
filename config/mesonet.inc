@@ -73,12 +73,17 @@
     Require all granted
   </Directory>
 
-  ScriptAlias /cgi-bin/ "/opt/iem/cgi-bin/"
-  ScriptAlias /servlet/ "/opt/iem/cgi-bin/"
+  Alias /cgi-bin/ "/opt/iem/cgi-bin/"
   <Directory "/opt/iem/cgi-bin">
     AllowOverride All
     Options FollowSymLinks
     Require all granted
+
+    # Default handler for python scripts
+    WSGIProcessGroup iemwsgi_ap
+    AddHandler wsgi-script .py
+    AddHandler cgi-script .cgi
+    Options +ExecCGI
   </Directory>
 
   <LocationMatch "camera">

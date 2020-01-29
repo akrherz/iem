@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """Do a comparison with what's on api.weather.gov/cap"""
-from __future__ import print_function
+from io import StringIO
 import datetime
 
 import simplejson
@@ -8,29 +8,36 @@ import requests
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.nws.vtec import parse as vtec_parse
-from pyiem.util import get_dbconn, ssw
+from pyiem.util import get_dbconn
 
 CAP = "https://api.weather.gov/alerts/active"
 
 
-def main():
+def application(_environ, start_response):
     """Go Main Go"""
-    ssw("Content-type: text/plain\n\n")
-    ssw(
+    sio = StringIO()
+    start_response("200 OK", [("Content-type", "text/plain")])
+    sio.write(
         "Report run at %s\n"
         % (datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"))
     )
-    ssw("Comparison against %s\n" % (CAP,))
+    sio.write("Comparison against %s\n" % (CAP,))
     try:
         req = requests.get(CAP, headers={"Accept": "application/geo+json"})
         if req.status_code != 200:
-            ssw("Download failed with status_code %s" % (req.status_code,))
+            sio.write(
+                "Download failed with status_code %s" % (req.status_code,)
+            )
         jdata = req.json()
     except requests.exceptions.BaseHTTPError as exp:
-        ssw(("Failure to download %s, comparison failed" "%s\n") % (CAP, exp))
+        sio.write(
+            ("Failure to download %s, comparison failed" "%s\n") % (CAP, exp)
+        )
         return
     except simplejson.errors.JSONDecodeError as exp:
-        ssw(("Download %s had bad JSON %s" "%s\n") % (CAP, req.content, exp))
+        sio.write(
+            ("Download %s had bad JSON %s" "%s\n") % (CAP, req.content, exp)
+        )
         return
     rows = []
     for feature in jdata["features"]:
@@ -70,8 +77,8 @@ def main():
             )
         ]
         if df2.empty:
-            print(
-                ("IEM MISSING (%s %s %s %s %s)")
+            sio.write(
+                ("IEM MISSING (%s %s %s %s %s)\n")
                 % (
                     row["wfo"],
                     row["phenomena"],
@@ -92,8 +99,8 @@ def main():
             )
         ]
         if df2.empty:
-            print(
-                ("NWS MISSING (%s %s %s %s %s)")
+            sio.write(
+                ("NWS MISSING (%s %s %s %s %s)\n")
                 % (
                     row["wfo"],
                     row["phenomena"],
@@ -103,8 +110,5 @@ def main():
                 )
             )
 
-    ssw("DONE...\n")
-
-
-if __name__ == "__main__":
-    main()
+    sio.write("DONE...\n")
+    return [sio.getvalue().encode("ascii")]

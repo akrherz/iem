@@ -38,7 +38,7 @@ LOOKUP = {
     "-postgis": IPS[METVM4],
     "-radar": IPS[METVM4],
     "-rtstats": IPS[METVM6],
-    "-rwis": IPS[METVM4],
+    "-rwis": IPS[METVM6],
     "-scada": IPS[METVM6],
     "-scan": IPS[METVM6],
     "-smos": IPS[METVM4],

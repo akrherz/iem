@@ -84,50 +84,6 @@ GRANT ALL on stations_iemid_seq to mesonet,ldm;
 
 
 ---
---- road conditions archive
----
-CREATE TABLE roads_log(
-    segid int REFERENCES roads_base(segid),
-    valid timestamptz,
-    cond_code smallint REFERENCES roads_conditions(code),
-    towing_prohibited bool,
-    limited_vis bool,
-    raw text
-) PARTITION by range(valid);
-CREATE INDEX on roads_log(valid);
-CREATE INDEX on roads_log(segid);
-ALTER TABLE roads_log OWNER to mesonet;
-GRANT ALL on roads_log to ldm;
-GRANT SELECT on roads_log to nobody,apache;
-
-do
-$do$
-declare
-     year int;
-     mytable varchar;
-begin
-    for year in 2003..2030
-    loop
-        mytable := format($f$roads_%s_%s_log$f$, year, year + 1);
-        execute format($f$
-            create table %s partition of roads_log
-            for values from ('%s-07-01 00:00+00') to ('%s-07-01 00:00+00')
-            $f$, mytable, year, year + 1);
-        execute format($f$
-            ALTER TABLE %s OWNER to mesonet
-        $f$, mytable);
-        execute format($f$
-            GRANT ALL on %s to ldm
-        $f$, mytable);
-        execute format($f$
-            GRANT SELECT on %s to nobody,apache
-        $f$, mytable);
-    end loop;
-end;
-$do$;
-
-
----
 --- Cruft from the old days
 ---
 CREATE TABLE iemchat_room_participation(
@@ -828,6 +784,50 @@ CREATE TABLE roads_current(
   limited_vis boolean,
   raw varchar);
 GRANT SELECT on roads_current to nobody,apache;
+
+---
+--- road conditions archive
+---
+CREATE TABLE roads_log(
+    segid int REFERENCES roads_base(segid),
+    valid timestamptz,
+    cond_code smallint REFERENCES roads_conditions(code),
+    towing_prohibited bool,
+    limited_vis bool,
+    raw text
+) PARTITION by range(valid);
+CREATE INDEX on roads_log(valid);
+CREATE INDEX on roads_log(segid);
+ALTER TABLE roads_log OWNER to mesonet;
+GRANT ALL on roads_log to ldm;
+GRANT SELECT on roads_log to nobody,apache;
+
+do
+$do$
+declare
+     year int;
+     mytable varchar;
+begin
+    for year in 2003..2030
+    loop
+        mytable := format($f$roads_%s_%s_log$f$, year, year + 1);
+        execute format($f$
+            create table %s partition of roads_log
+            for values from ('%s-07-01 00:00+00') to ('%s-07-01 00:00+00')
+            $f$, mytable, year, year + 1);
+        execute format($f$
+            ALTER TABLE %s OWNER to mesonet
+        $f$, mytable);
+        execute format($f$
+            GRANT ALL on %s to ldm
+        $f$, mytable);
+        execute format($f$
+            GRANT SELECT on %s to nobody,apache
+        $f$, mytable);
+    end loop;
+end;
+$do$;
+
 
 ---
 --- SPC Convective Outlooks

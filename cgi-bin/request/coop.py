@@ -1,22 +1,18 @@
-#!/usr/bin/env python
 """
  Download interface for the data stored in coop database (alldata)
 
  This is called from /request/coop/fe.phtml
 """
-import cgi
-import os
-import sys
 import datetime
 import zipfile
-from io import BytesIO
-import unittest
+from io import BytesIO, StringIO
 
 import pandas as pd
 from pandas.io.sql import read_sql
 import psycopg2.extras
+from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, ssw
+from pyiem.util import get_dbconn
 from metpy.units import units
 
 DEGC = units.degC
@@ -55,12 +51,12 @@ def sane_date(year, month, day):
 def get_cgi_dates(form):
     """ Figure out which dates are requested via the form, we shall attempt
     to account for invalid dates provided! """
-    y1 = int(form.getfirst("year1"))
-    m1 = int(form.getfirst("month1"))
-    d1 = int(form.getfirst("day1"))
-    y2 = int(form.getfirst("year2"))
-    m2 = int(form.getfirst("month2"))
-    d2 = int(form.getfirst("day2"))
+    y1 = int(form.get("year1"))
+    m1 = int(form.get("month1"))
+    d1 = int(form.get("day1"))
+    y2 = int(form.get("year2"))
+    m2 = int(form.get("month2"))
+    d2 = int(form.get("day2"))
 
     ets = sane_date(y2, m2, d2)
     archive_end = datetime.date.today() - datetime.timedelta(days=1)
@@ -72,15 +68,13 @@ def get_cgi_dates(form):
 
 def get_cgi_stations(form):
     """ Figure out which stations the user wants, return a list of them """
-    reqlist = form.getlist("station[]")
+    reqlist = form.getall("station[]")
     if not reqlist:
-        reqlist = form.getlist("stations")
+        reqlist = form.getall("stations")
     if not reqlist:
-        ssw("Content-type: text/plain\n\n")
-        ssw("No stations or station[] specified, need at least one station!")
-        sys.exit()
+        return []
     if "_ALL" in reqlist:
-        network = form.getfirst("network")
+        network = form.get("network")
         nt = NetworkTable(network)
         return nt.sts.keys()
 
@@ -98,13 +92,10 @@ def do_apsim(ctx):
      1986          1             7.38585       0.8938889    -7.295556      0
      """
     if len(ctx["stations"]) > 1:
-        ssw(
-            (
-                "ERROR: APSIM output is only "
-                "permitted for one station at a time."
-            )
-        )
-        return
+        return (
+            "ERROR: APSIM output is only "
+            "permitted for one station at a time."
+        ).encode("ascii")
 
     dbconn = get_database()
     cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -144,22 +135,25 @@ def do_apsim(ctx):
             feb28 = datetime.date(thisyear, 2, 28)
             extra[febtest] = extra[feb28]
 
-    ssw("! Iowa Environmental Mesonet -- NWS Cooperative Data\n")
-    ssw(
+    sio = StringIO()
+    sio.write("! Iowa Environmental Mesonet -- NWS Cooperative Data\n")
+    sio.write(
         "! Created: %s UTC\n"
         % (datetime.datetime.utcnow().strftime("%d %b %Y %H:%M:%S"),)
     )
-    ssw("! Contact: daryl herzmann akrherz@iastate.edu 515-294-5978\n")
-    ssw("! Station: %s %s\n" % (station, nt.sts[station]["name"]))
-    ssw("! Data Period: %s - %s\n" % (ctx["sts"], ctx["ets"]))
+    sio.write("! Contact: daryl herzmann akrherz@iastate.edu 515-294-5978\n")
+    sio.write("! Station: %s %s\n" % (station, nt.sts[station]["name"]))
+    sio.write("! Data Period: %s - %s\n" % (ctx["sts"], ctx["ets"]))
     if ctx["scenario"] == "yes":
-        ssw(
+        sio.write(
             "! !SCENARIO DATA! inserted after: %s replicating year: %s\n"
             % (ctx["ets"], ctx["scenario_year"])
         )
 
-    ssw("[weather.met.weather]\n")
-    ssw("latitude = %.1f (DECIMAL DEGREES)\n" % (nt.sts[station]["lat"],))
+    sio.write("[weather.met.weather]\n")
+    sio.write(
+        "latitude = %.1f (DECIMAL DEGREES)\n" % (nt.sts[station]["lat"],)
+    )
 
     # Compute average temperature!
     cursor.execute(
@@ -169,7 +163,7 @@ def do_apsim(ctx):
         (station,),
     )
     row = cursor.fetchone()
-    ssw(
+    sio.write(
         "tav = %.3f (oC) ! annual average ambient temperature\n"
         % (f2c(row["avgt"]),)
     )
@@ -185,12 +179,12 @@ def do_apsim(ctx):
         (station,),
     )
     row = cursor.fetchone()
-    ssw(
+    sio.write(
         ("amp = %.3f (oC) ! annual amplitude in mean monthly temperature\n")
         % (f2c(row["h"]) - f2c(row["l"]),)
     )
 
-    ssw(
+    sio.write(
         """year        day       radn       maxt       mint      rain
   ()         ()   (MJ/m^2)       (oC)       (oC)       (mm)\n"""
     )
@@ -228,7 +222,7 @@ def do_apsim(ctx):
         )
     for row in cursor:
         srad = -99 if row["srad"] is None else row["srad"]
-        ssw(
+        sio.write(
             ("%4s %10.0f %10.3f %10.1f %10.1f %10.2f\n")
             % (
                 row["day"].year,
@@ -246,7 +240,7 @@ def do_apsim(ctx):
         while now <= dec31:
             row = extra[now]
             srad = -99 if row["srad"] is None else row["srad"]
-            ssw(
+            sio.write(
                 ("%4s %10.0f %10.3f %10.1f %10.1f %10.2f\n")
                 % (
                     now.year,
@@ -258,6 +252,7 @@ def do_apsim(ctx):
                 )
             )
             now += datetime.timedelta(days=1)
+    return sio.getvalue().encode("ascii")
 
 
 def do_century(ctx):
@@ -271,13 +266,10 @@ def do_century(ctx):
     tmax  1981  30.84  28.71  27.02  16.84  12.88   6.82
     """
     if len(ctx["stations"]) > 1:
-        ssw(
-            (
-                "ERROR: Century output is only "
-                "permitted for one station at a time."
-            )
-        )
-        return
+        return (
+            "ERROR: Century output is only "
+            "permitted for one station at a time."
+        ).encode("ascii")
 
     station = ctx["stations"][0]
     network = "%sCLIMATE" % (station[:2],)
@@ -330,24 +322,24 @@ def do_century(ctx):
             "tmin": f2c(row["tmin"]),
             "tmax": f2c(row["tmax"]),
         }
-
-    ssw("# Iowa Environmental Mesonet -- NWS Cooperative Data\n")
-    ssw(
+    sio = StringIO()
+    sio.write("# Iowa Environmental Mesonet -- NWS Cooperative Data\n")
+    sio.write(
         "# Created: %s UTC\n"
         % (datetime.datetime.utcnow().strftime("%d %b %Y %H:%M:%S"),)
     )
-    ssw("# Contact: daryl herzmann akrherz@iastate.edu 515-294-5978\n")
-    ssw("# Station: %s %s\n" % (station, nt.sts[station]["name"]))
-    ssw("# Data Period: %s - %s\n" % (sts, ets))
+    sio.write("# Contact: daryl herzmann akrherz@iastate.edu 515-294-5978\n")
+    sio.write("# Station: %s %s\n" % (station, nt.sts[station]["name"]))
+    sio.write("# Data Period: %s - %s\n" % (sts, ets))
     if ctx["scenario"] == "yes":
-        ssw(
+        sio.write(
             "# !SCENARIO DATA! inserted after: %s replicating year: %s\n"
             % (ctx["ets"], ctx["scenario_year"])
         )
     idxs = ["prec", "tmin", "tmax"]
     for year in range(sts.year, ets.year + 1):
         for idx in idxs:
-            ssw(
+            sio.write(
                 (
                     "%s  %s%7.2f%7.2f%7.2f%7.2f%7.2f%7.2f%7.2f"
                     "%7.2f%7.2f%7.2f%7.2f%7.2f\n"
@@ -369,6 +361,7 @@ def do_century(ctx):
                     data[year][12][idx],
                 )
             )
+    return sio.getvalue().encode("ascii")
 
 
 def do_daycent(ctx):
@@ -387,13 +380,10 @@ def do_daycent(ctx):
     Column 7 - Precipitation for day, centimeters
     """
     if len(ctx["stations"]) > 1:
-        ssw(
-            (
-                "ERROR: Daycent output is only "
-                "permitted for one station at a time."
-            )
-        )
-        return
+        return (
+            "ERROR: Daycent output is only "
+            "permitted for one station at a time."
+        ).encode("ascii")
 
     dbconn = get_database()
     cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -455,9 +445,10 @@ def do_daycent(ctx):
         """,
             (ctx["stations"][0], ctx["sts"], ctx["ets"]),
         )
-    ssw("Daily Weather Data File (use extra weather drivers = 0):\n\n")
+    sio = StringIO()
+    sio.write("Daily Weather Data File (use extra weather drivers = 0):\n\n")
     for row in cursor:
-        ssw(
+        sio.write(
             ("%s %s %s %s %.2f %.2f %.2f\n")
             % (
                 row["day"].day,
@@ -474,7 +465,7 @@ def do_daycent(ctx):
         now = row["day"]
         while now <= dec31:
             row = extra[now]
-            ssw(
+            sio.write(
                 ("%s %s %s %s %.2f %.2f %.2f\n")
                 % (
                     now.day,
@@ -487,6 +478,7 @@ def do_daycent(ctx):
                 )
             )
             now += datetime.timedelta(days=1)
+    return sio.getvalue().encode("ascii")
 
 
 def get_tablename(stations):
@@ -591,31 +583,28 @@ def do_simple(ctx):
         if "lat" in cols:
             df["lat"] = [_gs(x, "lat") for x in df["station"]]
             df["lon"] = [_gs(x, "lon") for x in df["station"]]
-        ssw("Content-type: application/vnd.ms-excel\n")
-        ssw("Content-Disposition: attachment;Filename=nwscoop.xls\n\n")
-        df.to_excel("/tmp/ss.xls", columns=cols, index=False)
-        ssw(open("/tmp/ss.xls", "rb").read())
-        os.unlink("/tmp/ss.xls")
-        return
+        bio = BytesIO()
+        df.to_excel(bio, columns=cols, index=False)
+        return bio.getvalue()
 
     cursor.execute(sql, args)
-
-    ssw("# Iowa Environmental Mesonet -- NWS Cooperative Data\n")
-    ssw(
+    sio = StringIO()
+    sio.write("# Iowa Environmental Mesonet -- NWS Cooperative Data\n")
+    sio.write(
         "# Created: %s UTC\n"
         % (datetime.datetime.utcnow().strftime("%d %b %Y %H:%M:%S"),)
     )
-    ssw("# Contact: daryl herzmann akrherz@iastate.edu 515-294-5978\n")
-    ssw("# Data Period: %s - %s\n" % (ctx["sts"], ctx["ets"]))
+    sio.write("# Contact: daryl herzmann akrherz@iastate.edu 515-294-5978\n")
+    sio.write("# Data Period: %s - %s\n" % (ctx["sts"], ctx["ets"]))
     if ctx["scenario"] == "yes":
-        ssw(
+        sio.write(
             "# !SCENARIO DATA! inserted after: %s replicating year: %s\n"
             % (ctx["ets"], ctx["scenario_year"])
         )
 
     p = {"comma": ",", "tab": "\t", "space": " "}
     d = p[ctx["delim"]]
-    ssw(d.join(cols) + "\r\n")
+    sio.write(d.join(cols) + "\r\n")
 
     for row in cursor:
         sid = row["station"]
@@ -627,7 +616,8 @@ def do_simple(ctx):
         res = []
         for n in cols:
             res.append(str(dc[n]))
-        ssw((d.join(res)).replace("None", "M") + "\r\n")
+        sio.write((d.join(res)).replace("None", "M") + "\r\n")
+    return sio.getvalue().encode("ascii")
 
 
 def do_salus(ctx):
@@ -637,13 +627,10 @@ def do_salus(ctx):
     CTRL, 1981, 2, 3.1898, 1.59032, -6.83361, 1.38607, NaN, NaN, NaN, 3
     """
     if len(ctx["stations"]) > 1:
-        ssw(
-            (
-                "ERROR: SALUS output is only "
-                "permitted for one station at a time."
-            )
-        )
-        return
+        return (
+            "ERROR: SALUS output is only "
+            "permitted for one station at a time."
+        ).encode("ascii")
 
     dbconn = get_database()
     cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -690,7 +677,8 @@ def do_salus(ctx):
     """,
         (station, asts, scenario_year, station, ctx["sts"], ctx["ets"]),
     )
-    ssw(
+    sio = StringIO()
+    sio.write(
         (
             "StationID, Year, DOY, SRAD, Tmax, Tmin, Rain, DewP, "
             "Wind, Par, dbnum\n"
@@ -698,7 +686,7 @@ def do_salus(ctx):
     )
     for i, row in enumerate(cursor):
         srad = -99 if row["srad"] is None else row["srad"]
-        ssw(
+        sio.write(
             ("%s, %s, %s, %.4f, %.2f, %.2f, %.2f, , , , %s\n")
             % (
                 station[:4],
@@ -711,6 +699,7 @@ def do_salus(ctx):
                 i + 2,
             )
         )
+    return sio.getvalue().encode("ascii")
 
 
 def do_dndc(ctx):
@@ -783,14 +772,10 @@ def do_dndc(ctx):
         )
 
     sio = BytesIO()
-    z = zipfile.ZipFile(sio, "a")
-    for fn in zipfiles:
-        z.writestr(fn, zipfiles[fn])
-    z.close()
-    ssw("Content-type: application/octet-stream\n")
-    ssw("Content-Disposition: attachment; filename=dndc.zip\n\n")
-    sio.seek(0)
-    ssw(sio.read())
+    with zipfile.ZipFile(sio, "a") as zf:
+        for fn in zipfiles:
+            zf.writestr(fn, zipfiles[fn])
+    return sio.getvalue()
 
 
 def do_swat(ctx):
@@ -869,81 +854,94 @@ def do_swat(ctx):
                 row["tmin"],
             )
     sio = BytesIO()
-    zipfn = zipfile.ZipFile(sio, "a")
-    for fn in zipfiles:
-        zipfn.writestr(fn, zipfiles[fn])
-    zipfn.close()
-    ssw("Content-type: application/octet-stream\n")
-    ssw("Content-Disposition: attachment; filename=swatfiles.zip\n\n")
-    sio.seek(0)
-    ssw(sio.read())
+    with zipfile.ZipFile(sio, "a") as zf:
+        for fn in zipfiles:
+            zf.writestr(fn, zipfiles[fn])
+    return sio.getvalue()
 
 
-def main():
+def application(environ, start_response):
     """ go main go """
-    form = cgi.FieldStorage()
+    form = parse_formvars(environ)
     ctx = {}
     ctx["stations"] = get_cgi_stations(form)
+    if not ctx["stations"]:
+        start_response(
+            "500 Internal Server Error", [("Content-type", "text/plain")]
+        )
+        return [b"No stations were specified for the request."]
     ctx["sts"], ctx["ets"] = get_cgi_dates(form)
-    ctx["myvars"] = form.getlist("vars[]")
+    ctx["myvars"] = form.getall("vars[]")
     # Model specification trumps vars[]
-    if form.getfirst("model") is not None:
-        ctx["myvars"] = [form.getfirst("model")]
-    ctx["what"] = form.getfirst("what", "view")
-    ctx["delim"] = form.getfirst("delim", "comma")
-    ctx["inclatlon"] = form.getfirst("gis", "no")
-    ctx["scenario"] = form.getfirst("scenario", "no")
-    ctx["hayhoe_scenario"] = form.getfirst("hayhoe_scenario")
-    ctx["hayhoe_model"] = form.getfirst("hayhoe_model")
+    if form.get("model") is not None:
+        ctx["myvars"] = [form.get("model")]
+    ctx["what"] = form.get("what", "view")
+    ctx["delim"] = form.get("delim", "comma")
+    ctx["inclatlon"] = form.get("gis", "no")
+    ctx["scenario"] = form.get("scenario", "no")
+    ctx["hayhoe_scenario"] = form.get("hayhoe_scenario")
+    ctx["hayhoe_model"] = form.get("hayhoe_model")
     ctx["scenario_year"] = 2099
     if ctx["scenario"] == "yes":
-        ctx["scenario_year"] = int(form.getfirst("scenario_year", 2099))
+        ctx["scenario_year"] = int(form.get("scenario_year", 2099))
     ctx["scenario_sts"], ctx["scenario_ets"] = get_scenario_period(ctx)
 
     # TODO: this code stinks and is likely buggy
-    if "apsim" in ctx["myvars"]:
-        ssw("Content-type: text/plain\n\n")
+    headers = []
+    if (
+        "apsim" in ctx["myvars"]
+        or "daycent" in ctx["myvars"]
+        or "century" in ctx["myvars"]
+    ):
+        headers.append(("Content-type", "text/plain"))
     elif "dndc" not in ctx["myvars"] and ctx["what"] != "excel":
         if ctx["what"] == "download":
-            ssw("Content-type: application/octet-stream\n")
+            headers.append(("Content-type", "application/octet-stream"))
             dlfn = "changeme.txt"
             if len(ctx["stations"]) < 10:
                 dlfn = "%s.txt" % ("_".join(ctx["stations"]),)
-            ssw(
-                (
-                    "Content-Disposition: attachment; "
-                    "filename=%s\n\n" % (dlfn,)
-                )
+            headers.append(
+                ("Content-Disposition", "attachment; filename=%s" % (dlfn,))
             )
         else:
-            ssw("Content-type: text/plain\n\n")
+            headers.append(("Content-type", "text/plain"))
+    elif "dndc" in ctx["myvars"]:
+        headers.append(("Content-type", "application/octet-stream"))
+        headers.append(
+            ("Content-Disposition", "attachment; filename=dndc.zip")
+        )
+    elif "swat" in ctx["myvars"]:
+        headers.append(("Content-type", "application/vnd.ms-excel"))
+        headers.append(
+            ("Content-Disposition", "attachment; filename=swatfiles")
+        )
+    elif ctx["what"] == "excel":
+        headers.append(("Content-type", "application/vnd.ms-excel"))
+        headers.append(
+            ("Content-Disposition", "attachment; filename=nwscoop.xls")
+        )
 
+    start_response("200 OK", headers)
     # OK, now we fret
     if "daycent" in ctx["myvars"]:
-        do_daycent(ctx)
+        res = do_daycent(ctx)
     elif "century" in ctx["myvars"]:
-        do_century(ctx)
+        res = do_century(ctx)
     elif "apsim" in ctx["myvars"]:
-        do_apsim(ctx)
+        res = do_apsim(ctx)
     elif "dndc" in ctx["myvars"]:
-        do_dndc(ctx)
+        res = do_dndc(ctx)
     elif "salus" in ctx["myvars"]:
-        do_salus(ctx)
+        res = do_salus(ctx)
     elif "swat" in ctx["myvars"]:
-        do_swat(ctx)
+        res = do_swat(ctx)
     else:
-        do_simple(ctx)
+        res = do_simple(ctx)
+    return [res]
 
 
-if __name__ == "__main__":
-    main()
-
-
-class Tests(unittest.TestCase):
-    """We have some local tests"""
-
-    def test_sane_date(self):
-        """ Test our sane_date() method"""
-        assert sane_date(2000, 9, 31) == datetime.date(2000, 9, 30)
-        assert sane_date(2000, 2, 31) == datetime.date(2000, 2, 29)
-        assert sane_date(2000, 1, 15) == datetime.date(2000, 1, 15)
+def test_sane_date():
+    """ Test our sane_date() method"""
+    assert sane_date(2000, 9, 31) == datetime.date(2000, 9, 30)
+    assert sane_date(2000, 2, 31) == datetime.date(2000, 2, 29)
+    assert sane_date(2000, 1, 15) == datetime.date(2000, 1, 15)

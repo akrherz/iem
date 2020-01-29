@@ -1,30 +1,34 @@
-#!/usr/bin/env python
 """Do a comparison with what's on CRH CAP"""
-from __future__ import print_function
 import datetime
+from io import StringIO
 
 import requests
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn, ssw
+from pyiem.util import get_dbconn
 
 # Akami has this cached, so we shall cache bust it, please
 NOUNCE = "?%s" % (datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
 URI = "https://www.weather.gov/source/crh/allhazard.geojson"
 
 
-def main():
+def application(_environ, start_response):
     """Go Main Go"""
-    ssw("Content-type: text/plain\n\n")
-    ssw("Report run at %s\n" % (datetime.datetime.utcnow(),))
-    ssw("Comparing %s\n" % (URI,))
+    start_response("200 OK", [("Content-type", "text/plain")])
+    sio = StringIO()
+    sio.write("Report run at %s\n" % (datetime.datetime.utcnow(),))
+    sio.write("Comparing %s\n" % (URI,))
     try:
         req = requests.get(URI + NOUNCE)
         jdata = req.json()
     except Exception as exp:
-        ssw(("Failure to download %s, comparison failed\n" "%s") % (URI, exp))
-        return
-    ssw("geojson generation_time: %s\n" % (jdata.get("generation_time"),))
+        sio.write(
+            ("Failure to download %s, comparison failed\n" "%s") % (URI, exp)
+        )
+        return [sio.getvalue().encode("ascii")]
+    sio.write(
+        "geojson generation_time: %s\n" % (jdata.get("generation_time"),)
+    )
     rows = []
     for feature in jdata["features"]:
         props = feature["properties"]
@@ -60,8 +64,8 @@ def main():
         ]
         if df2.empty:
             if len(row["phenomena"]) > 2:
-                print(
-                    ("Indeteriminate %s %s %s %s %s")
+                sio.write(
+                    ("Indeteriminate %s %s %s %s %s\n")
                     % (
                         row["wfo"],
                         row["phenomena"],
@@ -71,8 +75,8 @@ def main():
                     )
                 )
                 continue
-            print(
-                ("IEM MISSING (%s %s %s %s %s)")
+            sio.write(
+                ("IEM MISSING (%s %s %s %s %s)\n")
                 % (
                     row["wfo"],
                     row["phenomena"],
@@ -93,8 +97,8 @@ def main():
             )
         ]
         if df2.empty:
-            print(
-                ("CRH MISSING (%s %s %s %s %s)")
+            sio.write(
+                ("CRH MISSING (%s %s %s %s %s)\n")
                 % (
                     row["wfo"],
                     row["phenomena"],
@@ -104,8 +108,5 @@ def main():
                 )
             )
 
-    ssw("DONE...\n")
-
-
-if __name__ == "__main__":
-    main()
+    sio.write("DONE...\n")
+    return [sio.getvalue().encode("ascii")]

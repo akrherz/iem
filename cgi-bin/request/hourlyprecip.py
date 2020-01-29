@@ -1,10 +1,9 @@
-#!/usr/bin/env python
 """Hourly precip download"""
-import cgi
 import datetime
 
 import pytz
-from pyiem.util import get_dbconn, ssw
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn
 
 
 def get_data(network, sts, ets, tzinfo, stations):
@@ -30,36 +29,29 @@ def get_data(network, sts, ets, tzinfo, stations):
             row[3],
         )
 
-    return res
+    return res.encode("ascii", "ignore")
 
 
-def main():
+def application(environ, start_response):
     """ run rabbit run """
-    ssw("Content-type: text/plain\n\n")
-    form = cgi.FieldStorage()
-    tzinfo = pytz.timezone(form.getfirst("tz", "America/Chicago"))
+    start_response("200 OK", [("Content-type", "text/plain")])
+    form = parse_formvars(environ)
+    tzinfo = pytz.timezone(form.get("tz", "America/Chicago"))
     try:
         sts = datetime.date(
-            int(form.getfirst("year1")),
-            int(form.getfirst("month1")),
-            int(form.getfirst("day1")),
+            int(form.get("year1")),
+            int(form.get("month1")),
+            int(form.get("day1")),
         )
         ets = datetime.date(
-            int(form.getfirst("year2")),
-            int(form.getfirst("month2")),
-            int(form.getfirst("day2")),
+            int(form.get("year2")),
+            int(form.get("month2")),
+            int(form.get("day2")),
         )
     except Exception:
-        ssw(("ERROR: Invalid date provided, please check selected dates."))
-        return
-    stations = form.getlist("station")
+        return [b"ERROR: Invalid date provided, please check selected dates."]
+    stations = form.getall("station")
     if not stations:
-        ssw(("ERROR: No stations specified for request."))
-        return
-    network = form.getfirst("network")[:12]
-    ssw(get_data(network, sts, ets, tzinfo, stations=stations))
-
-
-if __name__ == "__main__":
-    # Go Main Go
-    main()
+        return [b"ERROR: No stations specified for request."]
+    network = form.get("network")[:12]
+    return [get_data(network, sts, ets, tzinfo, stations=stations)]

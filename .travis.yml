@@ -90,6 +90,4 @@ script:
   - python scripts/dbutil/sync_stations.py
   # Run autoplot testing a second time
   - python test/run_autoplots.py
-  - pytest cgi-bin/request/asos.py
-  - pytest cgi-bin/request/daily.py
   - sudo cat /var/log/apache2/error.log
