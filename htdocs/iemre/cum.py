@@ -52,7 +52,7 @@ def application(environ, start_response):
 
     if fmt == "json":
         # For example: 19013
-        ugc = "IAC" + form.getfirst("county")[2:]
+        ugc = "IAC" + form.get("county")[2:]
         # Go figure out where this is!
         postgis = get_dbconn("postgis")
         pcursor = postgis.cursor()
