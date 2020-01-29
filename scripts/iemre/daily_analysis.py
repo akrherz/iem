@@ -14,9 +14,10 @@ import datetime
 import numpy as np
 from pandas.io.sql import read_sql
 from scipy.stats import zscore
-from metpy.units import units
+from metpy.units import units, masked_array
 from metpy.interpolate import inverse_distance_to_grid
 from pyiem import iemre, datatypes
+from pyiem.plot import MapPlot
 from pyiem.util import get_dbconn, utc, ncopen, logger
 
 PGCONN = get_dbconn("iem")
@@ -158,8 +159,6 @@ def do_precip12(ts, ds):
 
 def plot(df):
     """Diagnostic"""
-    from pyiem.plot import MapPlot
-
     m = MapPlot(sector="midwest", continentalcolor="white")
     m.plot_values(
         df["lon"].values,
@@ -350,7 +349,7 @@ def grid_day(ts, ds):
     res = generic_gridder(df, "avgsknt")
     if res is not None:
         ds["wind_speed"].values = (
-            (res * units.knots).to(units.meters / units.second).m
+            masked_array(res, units.knots).to(units.meters / units.second).m
         )
         LOG.debug(
             "wind_speed min: %s max: %s",
