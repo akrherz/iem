@@ -54,7 +54,6 @@ EOF;
 
 $year1 = ($month < 7) ? ($year - 1) : $year;
 $year2 = ($month < 7) ? $year : ($year + 1);
-$logtable = sprintf("roads_%s_%s_log", $year1, $year2);
 
 if (isset($_GET["month"]) && isset($_GET["segid"]) )
 {
@@ -70,7 +69,7 @@ if (isset($_GET["month"]) && isset($_GET["segid"]) )
 
    $rs = pg_prepare($dbconn, "SELECT", "SELECT c.label, l.valid, "
    		."b.major, b.minor from roads_base b, "
-	    ."${logtable} l, roads_conditions c WHERE l.segid = $1 and "
+	    ."roads_log l, roads_conditions c WHERE l.segid = $1 and "
    		."extract(month from l.valid) = $2 and l.cond_code = c.code "
    		."and b.segid = l.segid ORDER by valid ASC");
   $rs = pg_execute($dbconn, "SELECT", Array($segid, $month));
@@ -95,7 +94,6 @@ else if ( $valid != null )
     $year = intval($valid->format("Y"));
     $year1 = (intval($valid->format("m")) < 7) ? ($year - 1) : $year;
     $year2 = (intval($valid->format("m")) < 7) ? $year : ($year + 1);
-    $logtable = sprintf("roads_%s_%s_log", $year1, $year2);
     $content .= "<div class=\"alert-info\">Here is a listing of historical road conditions for a particular
    time for all roads monitored in Iowa.  Click on the segment name to get 
    a listing of historical conditions for that segment.</div>";
@@ -107,7 +105,7 @@ else if ( $valid != null )
     $rs = pg_prepare(
         $dbconn, "SELECT",
         "SELECT c.label, l.valid, b.major, b.minor, ".
-    	"b.segid from roads_base b, ${logtable} l, roads_conditions c ".
+    	"b.segid from roads_base b, roads_log l, roads_conditions c ".
         "WHERE l.valid > $1 and l.valid < $2 and l.cond_code = c.code ".
         "and b.segid = l.segid ORDER by major ASC");
     $sts = DateTime::createFromFormat("Y-m-d H:i", $_GET["valid"]);

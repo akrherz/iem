@@ -6,6 +6,7 @@ cd ../isusm
 python csv2ldm.py &
 
 cd ../roads
+python archive_roadsplot.py $(date -u +'%Y %m %d %H %M') &
 python ingest_roads_rest.py &
 
 cd ../ingestors/ifc

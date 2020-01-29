@@ -78,7 +78,7 @@ if (isset($_GET['valid'])) {
   $roads->set("data", "geom from (with data as (".
   "select b.type as rtype, b.int1, b.segid, c.cond_code, ". 
   "row_number() OVER (PARTITION by b.segid ORDER by c.valid DESC) ". 
-  "from roads_base b, roads_2019_2020_log c WHERE b.segid = c.segid ". 
+  "from roads_base b, roads_log c WHERE b.segid = c.segid ". 
   "and b.type > 1 and c.valid < '$dbvalid' and ". 
   "c.valid > '$dbvalid2'), ". 
   "agg as (select * from data where row_number = 1) ". 
@@ -97,7 +97,7 @@ if (isset($_GET['valid'])) {
     $roads_int->set("data", "geom from (with data as (".
     "select b.type as rtype, b.int1, b.segid, c.cond_code, ". 
     "row_number() OVER (PARTITION by b.segid ORDER by c.valid DESC) ". 
-    "from roads_base b, roads_2019_2020_log c WHERE b.segid = c.segid ". 
+    "from roads_base b, roads_log c WHERE b.segid = c.segid ". 
     "and b.type > 1 and c.valid < '$dbvalid' and ". 
     "c.valid > '$dbvalid2'), ". 
     "agg as (select * from data where row_number = 1) ". 

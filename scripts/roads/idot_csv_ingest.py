@@ -43,7 +43,7 @@ for i, row in df.iterrows():
         str(row["CARS_MSG_UPDATE_DATE"]), "%Y%m%d%H%M%S"
     )
     cursor.execute(
-        """INSERT into roads_2015_2016_log(segid, valid, cond_code,
+        """INSERT into roads_log(segid, valid, cond_code,
     raw) VALUES (%s, %s, %s, %s)""",
         (segid, ts, condcode, row["HL_PAVEMENT_CONDITION"]),
     )

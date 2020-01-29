@@ -86,87 +86,46 @@ GRANT ALL on stations_iemid_seq to mesonet,ldm;
 ---
 --- road conditions archive
 ---
-CREATE TABLE roads_2003_2004_log(
-  segid smallint,
-  valid timestamptz,
-  cond_code smallint
-);
-GRANT SELECT on roads_2003_2004_log to nobody,apache;
+CREATE TABLE roads_log(
+    segid int REFERENCES roads_base(segid),
+    valid timestamptz,
+    cond_code smallint REFERENCES roads_conditions(code),
+    towing_prohibited bool,
+    limited_vis bool,
+    raw text
+) PARTITION by range(valid);
+CREATE INDEX on roads_log(valid);
+CREATE INDEX on roads_log(segid);
+ALTER TABLE roads_log OWNER to mesonet;
+GRANT ALL on roads_log to ldm;
+GRANT SELECT on roads_log to nobody,apache;
 
-CREATE TABLE roads_2004_2005_log(
-  segid smallint,
-  valid timestamptz,
-  cond_code smallint
-);
-GRANT SELECT on roads_2004_2005_log to nobody,apache;
+do
+$do$
+declare
+     year int;
+     mytable varchar;
+begin
+    for year in 2003..2030
+    loop
+        mytable := format($f$roads_%s_%s_log$f$, year, year + 1);
+        execute format($f$
+            create table %s partition of roads_log
+            for values from ('%s-07-01 00:00+00') to ('%s-07-01 00:00+00')
+            $f$, mytable, year, year + 1);
+        execute format($f$
+            ALTER TABLE %s OWNER to mesonet
+        $f$, mytable);
+        execute format($f$
+            GRANT ALL on %s to ldm
+        $f$, mytable);
+        execute format($f$
+            GRANT SELECT on %s to nobody,apache
+        $f$, mytable);
+    end loop;
+end;
+$do$;
 
-CREATE TABLE roads_2005_2006_log(
-  segid smallint,
-  valid timestamptz,
-  cond_code smallint
-);
-GRANT SELECT on roads_2005_2006_log to nobody,apache;
-
-CREATE TABLE roads_2006_2007_log(
-  segid smallint,
-  valid timestamptz,
-  cond_code smallint,
-  towing_prohibited boolean,
-  limited_vis boolean,
-  raw varchar
-);
-GRANT SELECT on roads_2006_2007_log to nobody,apache;
-
-CREATE TABLE roads_2007_2008_log(
-  segid smallint,
-  valid timestamptz,
-  cond_code smallint,
-  towing_prohibited boolean,
-  limited_vis boolean,
-  raw varchar
-);
-GRANT SELECT on roads_2007_2008_log to nobody,apache;
-
-CREATE TABLE roads_2008_2009_log(
-  segid smallint,
-  valid timestamptz,
-  cond_code smallint,
-  towing_prohibited boolean,
-  limited_vis boolean,
-  raw varchar
-);
-GRANT SELECT on roads_2008_2009_log to nobody,apache;
-
-CREATE TABLE roads_2009_2010_log(
-  segid smallint,
-  valid timestamptz,
-  cond_code smallint,
-  towing_prohibited boolean,
-  limited_vis boolean,
-  raw varchar
-);
-GRANT SELECT on roads_2009_2010_log to nobody,apache;
-
-CREATE TABLE roads_2010_2011_log(
-  segid smallint,
-  valid timestamptz,
-  cond_code smallint,
-  towing_prohibited boolean,
-  limited_vis boolean,
-  raw varchar
-);
-GRANT SELECT on roads_2010_2011_log to nobody,apache;
-
-
-
-CREATE TABLE roads_2013_2014_log(
-  segid int,
-  valid timestamptz,
-  cond_code smallint,
-  towing_prohibited boolean,
-  limited_vis boolean,
-  raw varchar);
-GRANT SELECT on roads_2013_2014_log to nobody,apache;
 
 ---
 --- Cruft from the old days
@@ -870,24 +829,6 @@ CREATE TABLE roads_current(
   raw varchar);
 GRANT SELECT on roads_current to nobody,apache;
 
-CREATE TABLE roads_2011_2012_log(
-  segid int REFERENCES roads_base(segid),
-  valid timestamptz,
-  cond_code smallint REFERENCES roads_conditions(code),
-  towing_prohibited boolean,
-  limited_vis boolean,
-  raw varchar);
-GRANT SELECT on roads_2011_2012_log to nobody,apache;
-
-CREATE TABLE roads_2012_2013_log(
-  segid int REFERENCES roads_base(segid),
-  valid timestamptz,
-  cond_code smallint REFERENCES roads_conditions(code),
-  towing_prohibited boolean,
-  limited_vis boolean,
-  raw varchar);
-GRANT SELECT on roads_2012_2013_log to nobody,apache;
-
 ---
 --- SPC Convective Outlooks
 ---
@@ -964,15 +905,6 @@ grant select on watches_current to apache,nobody;
 -- look what was done in 9.sql and replicate that for 2016 updates
 
 
-CREATE TABLE roads_2014_2015_log(
-  segid int,
-  valid timestamptz,
-  cond_code smallint,
-  towing_prohibited boolean,
-  limited_vis boolean,
-  raw varchar);
-GRANT SELECT on roads_2014_2015_log to nobody,apache;
-
 --
 -- Storage of PIREPs
 --
@@ -985,58 +917,6 @@ CREATE TABLE pireps(
 );
 CREATE INDEX pireps_valid_idx on pireps(valid);
 GRANT SELECT on pireps to nobody,apache;
-
--- Storage of Winter Road Conditions for 2015 - 2016
-CREATE TABLE roads_2015_2016_log(
-        segid int REFERENCES roads_base(segid),
-        valid timestamptz,
-        cond_code smallint REFERENCES roads_conditions(code),
-        towing_prohibited boolean,
-        limited_vis boolean,
-        raw varchar);
-GRANT SELECT on roads_2015_2016_log to nobody;
-
-CREATE TABLE roads_2016_2017_log(
-        segid int REFERENCES roads_base(segid),
-        valid timestamptz,
-        cond_code smallint REFERENCES roads_conditions(code),
-        towing_prohibited boolean,
-        limited_vis boolean,
-        raw varchar);
-GRANT SELECT on roads_2016_2017_log to nobody;
-
-CREATE TABLE roads_2017_2018_log(
-  segid INT references roads_base(segid),
-  valid timestamptz,
-  cond_code smallint references roads_conditions(code),
-  towing_prohibited bool,
-  limited_vis bool,
-  raw varchar);
-
-GRANT ALL on roads_2017_2018_log to mesonet,ldm;
-GRANT SELECT on roads_2017_2018_log to apache,nobody;
-
-CREATE TABLE roads_2018_2019_log(
-  segid INT references roads_base(segid),
-  valid timestamptz,
-  cond_code smallint references roads_conditions(code),
-  towing_prohibited bool,
-  limited_vis bool,
-  raw varchar);
-
-GRANT ALL on roads_2018_2019_log to mesonet,ldm;
-GRANT SELECT on roads_2018_2019_log to apache,nobody;
-
-CREATE TABLE roads_2019_2020_log(
-  segid INT references roads_base(segid),
-  valid timestamptz,
-  cond_code smallint references roads_conditions(code),
-  towing_prohibited bool,
-  limited_vis bool,
-  raw varchar);
-
-GRANT ALL on roads_2019_2020_log to mesonet,ldm;
-GRANT SELECT on roads_2019_2020_log to apache,nobody;
 
 CREATE TABLE ffg(
   ugc char(6),
