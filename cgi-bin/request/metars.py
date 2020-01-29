@@ -1,15 +1,14 @@
-#!/usr/bin/env python
 """Provide an UTC hour's worth of METARs
 
  Called from nowhere known at the moment
 """
-
-import cgi
+from io import StringIO
 import sys
 import datetime
 
 import pytz
-from pyiem.util import get_dbconn, ssw
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn
 
 
 def check_load(cursor):
@@ -25,37 +24,34 @@ def check_load(cursor):
             ("/cgi-bin/request/metars.py over capacity: %s")
             % (cursor.rowcount,)
         )
-        ssw("Content-type: text/plain\n")
-        ssw("Status: 503 Service Unavailable\n\n")
-        ssw("ERROR: server over capacity, please try later")
-        sys.exit(0)
+        return False
+    return True
 
 
-def main():
+def application(environ, start_response):
     """Do Something"""
     pgconn = get_dbconn("asos", user="nobody")
-    check_load(pgconn.cursor())
+    if not check_load(pgconn.cursor()):
+        start_response(
+            "503 Service Unavailable", [("Content-type", "text/plain")]
+        )
+        return [b"ERROR: server over capacity, please try later"]
     acursor = pgconn.cursor("streamer")
-    ssw("Content-type: text/plain\n\n")
-    form = cgi.FieldStorage()
+    start_response("200 OK", [("Content-type", "text/plain")])
+    form = parse_formvars(environ)
     valid = datetime.datetime.strptime(
-        form.getfirst("valid", "2016010100")[:10], "%Y%m%d%H"
+        form.get("valid", "2016010100")[:10], "%Y%m%d%H"
     )
-    valid = valid.replace(tzinfo=pytz.utc)
-    table = "t%s" % (valid.year,)
+    valid = valid.replace(tzinfo=pytz.UTC)
     acursor.execute(
         """
-        SELECT metar from """
-        + table
-        + """
+        SELECT metar from alldata
         WHERE valid >= %s and valid < %s and metar is not null
         ORDER by valid ASC
     """,
         (valid, valid + datetime.timedelta(hours=1)),
     )
+    sio = StringIO()
     for row in acursor:
-        ssw("%s\n" % (row[0].replace("\n", " "),))
-
-
-if __name__ == "__main__":
-    main()
+        sio.write("%s\n" % (row[0].replace("\n", " "),))
+    return [sio.getvalue().encode("ascii", "ignore")]

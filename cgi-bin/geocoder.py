@@ -1,27 +1,27 @@
-#!/usr/bin/env python
 """
  Geocoder used by:
   - IEM Rainfall App
 """
-import cgi
+from io import StringIO
 
 import requests
-from pyiem.util import ssw, get_properties
+from paste.request import parse_formvars
+from pyiem.util import get_properties
 
 SERVICE = "https://maps.googleapis.com/maps/api/geocode/json"
 
 
-def main():
+def application(environ, start_response):
     """Go main go"""
     props = get_properties()
-    form = cgi.FieldStorage()
+    form = parse_formvars(environ)
     if "address" in form:
-        address = form["address"].value
+        address = form["address"]
     elif "street" in form and "city" in form:
-        address = "%s, %s" % (form["street"].value, form["city"].value)
+        address = "%s, %s" % (form["street"], form["city"])
     else:
-        ssw("APIFAIL")
-        return
+        start_response("200 OK", [("Content-type", "text/plain")])
+        return [b"APIFAIL"]
 
     req = requests.get(
         SERVICE,
@@ -31,8 +31,9 @@ def main():
         timeout=10,
     )
     data = req.json()
+    sio = StringIO()
     if data["results"]:
-        ssw(
+        sio.write(
             "%s,%s"
             % (
                 data["results"][0]["geometry"]["location"]["lat"],
@@ -40,12 +41,6 @@ def main():
             )
         )
     else:
-        ssw("ERROR")
-
-
-if __name__ == "__main__":
-    ssw("Content-type: text/plain \n\n")
-    try:
-        main()
-    except Exception as exp:
-        ssw("ERROR\n")
+        sio.write("ERROR")
+    start_response("200 OK", [("Content-type", "text/plain")])
+    return [sio.getvalue().encode("ascii")]

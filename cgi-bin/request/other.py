@@ -1,12 +1,12 @@
-#!/usr/bin/env python
 """
 Download interface for data from 'other' network
 """
-import cgi
 import datetime
+from io import StringIO
 
 import psycopg2.extras
-from pyiem.util import get_dbconn, ssw
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn
 
 
 def fetcher(station, sts, ets):
@@ -40,11 +40,8 @@ def fetcher(station, sts, ets):
         (station, sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d")),
     )
 
-    if ocursor.rowcount == 0:
-        ssw("Sorry, no data was found for your query...\n")
-        return
-
-    ssw(
+    sio = StringIO()
+    sio.write(
         (
             "station,valid_CST_CDT,air_tmp_F,dew_point_F,"
             "wind_dir_deg,wind_sped_kts,wind_gust_kts,relh_%,"
@@ -55,28 +52,25 @@ def fetcher(station, sts, ets):
 
     for row in ocursor:
         for col in cols:
-            ssw("%s," % (row[col],))
-        ssw("\n")
+            sio.write("%s," % (row[col],))
+        sio.write("\n")
+    return sio.getvalue().encode("ascii")
 
 
-def main():
+def application(environ, start_response):
     """
     Do something!
     """
-    form = cgi.FieldStorage()
-    station = form.getfirst("station", "")[:10]
-    year1 = int(form.getfirst("year1"))
-    year2 = int(form.getfirst("year2"))
-    month1 = int(form.getfirst("month1"))
-    month2 = int(form.getfirst("month2"))
-    day1 = int(form.getfirst("day1"))
-    day2 = int(form.getfirst("day2"))
+    form = parse_formvars(environ)
+    station = form.get("station", "")[:10]
+    year1 = int(form.get("year1"))
+    year2 = int(form.get("year2"))
+    month1 = int(form.get("month1"))
+    month2 = int(form.get("month2"))
+    day1 = int(form.get("day1"))
+    day2 = int(form.get("day2"))
 
     sts = datetime.datetime(year1, month1, day1)
     ets = datetime.datetime(year2, month2, day2)
-    ssw("Content-type: text/plain\n\n")
-    fetcher(station, sts, ets)
-
-
-if __name__ == "__main__":
-    main()
+    start_response("200 OK", [("Content-type", "text/plain")])
+    return [fetcher(station, sts, ets)]

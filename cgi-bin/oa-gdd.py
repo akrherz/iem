@@ -1,21 +1,21 @@
-#!/usr/bin/env python
 """
  Produce a OA GDD Plot, dynamically!
 """
-import cgi
+from io import BytesIO
 import datetime
 
+from paste.request import parse_formvars
 from pyiem.plot import MapPlot
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
 
 
-def main():
+def application(environ, start_response):
     """Go Main Go"""
     pgconn = get_dbconn("coop")
     ccursor = pgconn.cursor()
 
-    form = cgi.FieldStorage()
+    form = parse_formvars(environ)
     if (
         "year1" in form
         and "year2" in form
@@ -25,24 +25,20 @@ def main():
         and "day2" in form
     ):
         sts = datetime.datetime(
-            int(form["year1"].value),
-            int(form["month1"].value),
-            int(form["day1"].value),
+            int(form["year1"]), int(form["month1"]), int(form["day1"])
         )
         ets = datetime.datetime(
-            int(form["year2"].value),
-            int(form["month2"].value),
-            int(form["day2"].value),
+            int(form["year2"]), int(form["month2"]), int(form["day2"])
         )
     else:
         sts = datetime.datetime(2011, 5, 1)
         ets = datetime.datetime(2011, 10, 1)
     baseV = 50
     if "base" in form:
-        baseV = int(form["base"].value)
+        baseV = int(form["base"])
     maxV = 86
     if "max" in form:
-        maxV = int(form["max"].value)
+        maxV = int(form["max"])
 
     # Make sure we aren't in the future
     now = datetime.datetime.today()
@@ -95,9 +91,8 @@ def main():
     m.contourf(lons, lats, gdd50, range(int(min(gdd50)), int(max(gdd50)), 25))
     m.plot_values(lons, lats, gdd50, fmt="%.0f")
     m.drawcounties()
-    m.postprocess(web=True)
+    bio = BytesIO()
+    m.fig.savefig(bio)
     m.close()
-
-
-if __name__ == "__main__":
-    main()
+    start_response("200 OK", [("Content-type", "image/png")])
+    return [bio.getvalue()]

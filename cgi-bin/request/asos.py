@@ -1,15 +1,15 @@
-#!/usr/bin/env python
 """
 Download interface for ASOS/AWOS data from the asos database
 """
 import time
-import cgi
 import os
 import sys
+from io import StringIO
 import datetime
 
 import pytz
-from pyiem.util import get_dbconn, ssw
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn
 
 NULLS = {"M": "M", "null": "null", "empty": ""}
 TRACE_OPTS = {"T": "T", "null": "null", "empty": "", "0.0001": "0.0001"}
@@ -98,9 +98,7 @@ def dance(val):
 
 def check_load():
     """Prevent automation from overwhelming the server"""
-    if os.environ["REQUEST_METHOD"] == "OPTIONS":
-        ssw("Allow: GET,POST,OPTIONS\n\n")
-        sys.exit()
+
     for i in range(5):
         pgconn = get_dbconn("mesosite")
         mcursor = pgconn.cursor()
@@ -110,7 +108,7 @@ def check_load():
         and datname = 'asos'"""
         )
         if mcursor.rowcount < 30:
-            return
+            return True
         pgconn.close()
         if i == 4:
             sys.stderr.write(
@@ -122,23 +120,16 @@ def check_load():
             )
         else:
             time.sleep(3)
-    ssw("Content-type: text/plain \n")
-    ssw("Status: 503 Service Unavailable\n\n")
-    ssw("ERROR: server over capacity, please try later")
-    sys.exit(0)
+    return False
 
 
 def get_stations(form):
     """ Figure out the requested station """
     if "station" not in form:
-        ssw("Content-type: text/plain \n\n")
-        ssw("ERROR: station must be specified!")
-        sys.exit(0)
-    stations = form.getlist("station")
+        return []
+    stations = form.getall("station")
     if not stations:
-        ssw("Content-type: text/plain \n\n")
-        ssw("ERROR: station must be specified!")
-        sys.exit(0)
+        return []
     # allow folks to specify the ICAO codes for K*** sites
     for i, station in enumerate(stations):
         if len(station) == 4 and station[0] == "K":
@@ -150,18 +141,16 @@ def get_time_bounds(form, tzinfo):
     """ Figure out the exact time bounds desired """
     # Here lie dragons, so tricky to get a proper timestamp
     try:
-        y1 = int(form.getfirst("year1"))
-        y2 = int(form.getfirst("year2"))
-        m1 = int(form.getfirst("month1"))
-        m2 = int(form.getfirst("month2"))
-        d1 = int(form.getfirst("day1"))
-        d2 = int(form.getfirst("day2"))
+        y1 = int(form.get("year1"))
+        y2 = int(form.get("year2"))
+        m1 = int(form.get("month1"))
+        m2 = int(form.get("month2"))
+        d1 = int(form.get("day1"))
+        d2 = int(form.get("day2"))
         sts = tzinfo.localize(datetime.datetime(y1, m1, d1))
         ets = tzinfo.localize(datetime.datetime(y2, m2, d2))
-    except Exception as exp:
-        sys.stderr.write("asos.py malformed date: %s\n" % (exp,))
-        ssw("ERROR: Malformed Date!")
-        sys.exit()
+    except Exception:
+        return None, None
 
     if sts == ets:
         ets += datetime.timedelta(days=1)
@@ -170,7 +159,7 @@ def get_time_bounds(form, tzinfo):
 
 def build_querycols(form):
     """Which database columns correspond to our query."""
-    req = form.getlist("data")
+    req = form.getall("data")
     if not req or "all" in req:
         return AVAILABLE
     res = []
@@ -188,7 +177,7 @@ def build_querycols(form):
 
 def build_gisextra(form, dbstations, rD):
     """Build lookup table."""
-    if form.getfirst("latlon", "no") != "yes":
+    if form.get("latlon", "no") != "yes":
         return {}
     res = {}
     mesosite = get_dbconn("mesosite")
@@ -207,43 +196,70 @@ def build_gisextra(form, dbstations, rD):
     return res
 
 
-def main(form):
+def application(environ, start_response):
     """ Go main Go """
-    check_load()
+    if environ["REQUEST_METHOD"] == "OPTIONS":
+        start_response("400 Bad Request", [("Content-type", "text/plain")])
+        yield b"Allow: GET,POST,OPTIONS"
+        return
+    form = parse_formvars(environ)
+    if not check_load():
+        start_response(
+            "503 Service Unavailable", [("Content-type", "text/plain")]
+        )
+        yield b"ERROR: server over capacity, please try later"
+        return
     try:
-        tzinfo = pytz.timezone(form.getfirst("tz", "Etc/UTC"))
+        tzinfo = pytz.timezone(form.get("tz", "Etc/UTC"))
     except pytz.exceptions.UnknownTimeZoneError as exp:
-        ssw("Content-type: text/plain\n\n")
-        ssw("Invalid Timezone (tz) provided")
+        start_response(
+            "500 Internal Server Error", [("Content-type", "text/plain")]
+        )
         sys.stderr.write("asos.py invalid tz: %s\n" % (exp,))
-        sys.exit()
+        yield b"Invalid Timezone (tz) provided"
+        return
     pgconn = get_dbconn("asos")
     acursor = pgconn.cursor("mystream")
 
     # Save direct to disk or view in browser
-    direct = form.getfirst("direct", "no") == "yes"
-    report_type = form.getlist("report_type")
+    direct = form.get("direct", "no") == "yes"
+    report_type = form.getall("report_type")
     stations = get_stations(form)
+    if not stations:
+        start_response(
+            "500 Internal Server Error", [("Content-type", "text/plain")]
+        )
+        yield b"No stations provided."
+        return
+    sts, ets = get_time_bounds(form, tzinfo)
+    if sts is None:
+        start_response(
+            "500 Internal Server Error", [("Content-type", "text/plain")]
+        )
+        yield b"Invalid times provided."
+        return
+    headers = []
     if direct:
-        ssw("Content-type: application/octet-stream\n")
+        headers.append(("Content-type", "application/octet-stream"))
         fn = "%s.txt" % (stations[0],)
         if len(stations) > 1:
             fn = "asos.txt"
-        ssw("Content-Disposition: attachment; filename=%s\n\n" % (fn,))
+        headers.append(
+            ("Content-Disposition", "attachment; filename=%s" % (fn,))
+        )
     else:
-        ssw("Content-type: text/plain \n\n")
+        headers.append(("Content-type", "text/plain"))
+    start_response("200 OK", headers)
 
     dbstations = stations
     if len(dbstations) == 1:
         dbstations.append("XYZXYZ")
 
-    sts, ets = get_time_bounds(form, tzinfo)
-
-    delim = form.getfirst("format", "onlycomma")
+    delim = form.get("format", "onlycomma")
     # How should null values be represented
-    missing = NULLS.get(form.getfirst("missing"), "M")
+    missing = NULLS.get(form.get("missing"), "M")
     # How should trace values be represented
-    trace = TRACE_OPTS.get(form.getfirst("trace"), "0.0001")
+    trace = TRACE_OPTS.get(form.get("trace"), "0.0001")
 
     querycols = build_querycols(form)
 
@@ -253,7 +269,7 @@ def main(form):
         rD = ","
 
     gtxt = build_gisextra(form, dbstations, rD)
-    gisextra = form.getfirst("latlon", "no") == "yes"
+    gisextra = form.get("latlon", "no") == "yes"
 
     rlimiter = ""
     if len(report_type) == 1:
@@ -276,22 +292,23 @@ def main(form):
         (sts, ets, tuple(dbstations)),
     )
 
+    sio = StringIO()
     if delim not in ["onlytdf", "onlycomma"]:
-        ssw("#DEBUG: Format Typ    -> %s\n" % (delim,))
-        ssw("#DEBUG: Time Period   -> %s %s\n" % (sts, ets))
-        ssw("#DEBUG: Time Zone     -> %s\n" % (tzinfo,))
-        ssw(
+        sio.write("#DEBUG: Format Typ    -> %s\n" % (delim,))
+        sio.write("#DEBUG: Time Period   -> %s %s\n" % (sts, ets))
+        sio.write("#DEBUG: Time Zone     -> %s\n" % (tzinfo,))
+        sio.write(
             (
                 "#DEBUG: Data Contact   -> daryl herzmann "
                 "akrherz@iastate.edu 515-294-5978\n"
             )
         )
-        ssw("#DEBUG: Entries Found -> %s\n" % (acursor.rowcount,))
-    ssw("station" + rD + "valid" + rD)
+        sio.write("#DEBUG: Entries Found -> %s\n" % (acursor.rowcount,))
+    sio.write("station" + rD + "valid" + rD)
     if gisextra:
-        ssw("lon%slat%s" % (rD, rD))
+        sio.write("lon%slat%s" % (rD, rD))
     # hack to convert tmpf as tmpc to tmpc
-    ssw("%s\n" % (rD.join([c.split(" as ")[-1] for c in querycols]),))
+    sio.write("%s\n" % (rD.join([c.split(" as ")[-1] for c in querycols]),))
 
     ff = {
         "wxcodes": fmt_wxcodes,
@@ -311,12 +328,12 @@ def main(form):
     formatters = [ff.get(col, fmt_f2) for col in querycols]
 
     gismiss = "%s%s%s%s" % (missing, rD, missing, rD)
-    for row in acursor:
-        ssw(row[0] + rD)
-        ssw((row[1].astimezone(tzinfo)).strftime("%Y-%m-%d %H:%M") + rD)
+    for rownum, row in enumerate(acursor):
+        sio.write(row[0] + rD)
+        sio.write((row[1].astimezone(tzinfo)).strftime("%Y-%m-%d %H:%M") + rD)
         if gisextra:
-            ssw(gtxt.get(row[0], gismiss))
-        ssw(
+            sio.write(gtxt.get(row[0], gismiss))
+        sio.write(
             rD.join(
                 [
                     func(val, missing, trace, tzinfo)
@@ -325,25 +342,7 @@ def main(form):
             )
             + "\n"
         )
-
-
-if __name__ == "__main__":
-    main(cgi.FieldStorage())
-
-
-def test_basic(capfd):
-    """Can we do things."""
-    headers = os.environ
-    headers.setdefault(
-        "QUERY_STRING",
-        (
-            "data=all&station=DSM&year1=2018&year2=2019&month1=1&month2=1"
-            "&day1=1&day2=1"
-        ),
-    )
-    headers.setdefault("REQUEST_METHOD", "GET")
-    fs = cgi.FieldStorage(environ=headers)
-    main(fs)
-    out, err = capfd.readouterr()
-    assert err == ""
-    assert "tmpf" in out
+        if rownum > 0 and rownum % 1000 == 0:
+            yield sio.getvalue().encode("ascii", "ignore")
+            sio = StringIO()
+    yield sio.getvalue().encode("ascii", "ignore")

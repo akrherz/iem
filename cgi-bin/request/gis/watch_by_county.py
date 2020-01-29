@@ -1,26 +1,24 @@
-#!/usr/bin/env python
 """Watch by county, a one-off"""
 
 import zipfile
 import os
 import shutil
 import datetime
-import cgi
 
 from osgeo import ogr
-from pyiem.util import ssw
+from paste.request import parse_formvars
 
 
-def main():
+def application(environ, start_response):
     """Go Main Go"""
     # Get CGI vars
-    form = cgi.FieldStorage()
+    form = parse_formvars(environ)
     if "year" in form:
-        year = int(form.getfirst("year"))
-        month = int(form.getfirst("month"))
-        day = int(form.getfirst("day"))
-        hour = int(form.getfirst("hour"))
-        minute = int(form.getfirst("minute"))
+        year = int(form.get("year"))
+        month = int(form.get("month"))
+        day = int(form.get("day"))
+        hour = int(form.get("hour"))
+        minute = int(form.get("minute"))
         ts = datetime.datetime(year, month, day, hour, minute)
         fp = "watch_by_county_%s" % (ts.strftime("%Y%m%d%H%M"),)
     else:
@@ -28,10 +26,10 @@ def main():
         fp = "watch_by_county"
 
     if "etn" in form:
-        etnLimiter = "and eventid = %s" % (int(form.getfirst("etn")),)
+        etnLimiter = "and eventid = %s" % (int(form.get("etn")),)
         fp = "watch_by_county_%s_%s" % (
             ts.strftime("%Y%m%d%H%M"),
-            int(form.getfirst("etn")),
+            int(form.get("etn")),
         )
     else:
         etnLimiter = ""
@@ -43,7 +41,10 @@ def main():
 
     table = "warnings_%s" % (ts.year,)
     source = ogr.Open(
-        "PG:host=iemdb-postgis.local dbname=postgis user=nobody tables=%s(tgeom)"
+        (
+            "PG:host=iemdb-postgis.local dbname=postgis "
+            "user=nobody tables=%s(tgeom)"
+        )
         % (table,)
     )
 
@@ -87,9 +88,6 @@ def main():
         etnLimiter,
     )
 
-    # print 'Content-type: text/plain\n'
-    # print sql
-    # sys.exit()
     data = source.ExecuteSQL(sql)
 
     while True:
@@ -114,23 +112,19 @@ def main():
 
     # Create zip file, send it back to the clients
     shutil.copyfile("/opt/iem/data/gis/meta/4326.prj", fp + ".prj")
-    z = zipfile.ZipFile(fp + ".zip", "w", zipfile.ZIP_DEFLATED)
-    z.write(fp + ".shp")
-    z.write(fp + ".shx")
-    z.write(fp + ".dbf")
-    z.write(fp + ".prj")
-    z.close()
+    with zipfile.ZipFile(fp + ".zip", "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.write(fp + ".shp")
+        zf.write(fp + ".shx")
+        zf.write(fp + ".dbf")
+        zf.write(fp + ".prj")
 
-    ssw("Content-type: application/octet-stream\n")
-    ssw("Content-Disposition: attachment; filename=%s.zip\n\n" % (fp,))
-    ssw(open(fp + ".zip", "rb").read())
+    headers = [
+        ("Content-type", "application/octet-stream"),
+        ("Content-Disposition", "attachment; filename=%s.zip" % (fp,)),
+    ]
+    start_response("200 OK", headers)
+    payload = open(fp + ".zip", "rb").read()
 
-    os.remove(fp + ".zip")
-    os.remove(fp + ".shp")
-    os.remove(fp + ".shx")
-    os.remove(fp + ".dbf")
-    os.remove(fp + ".prj")
-
-
-if __name__ == "__main__":
-    main()
+    for suffix in ["zip", "shp", "shx", "dbf", "prj"]:
+        os.remove("%s.%s" % (fp, suffix))
+    return [payload]

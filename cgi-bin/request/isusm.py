@@ -1,20 +1,17 @@
-#!/usr/bin/env python
 """Download interface for ISU-SM data."""
-import cgi
 import datetime
-import sys
-import os
-from io import StringIO
+from io import StringIO, BytesIO
 
 import pandas as pd
 import psycopg2.extras
+from paste.request import parse_formvars
 from pyiem.datatypes import temperature, distance
-from pyiem.util import get_dbconn, ssw
+from pyiem.util import get_dbconn
 
 
 def get_stations(form):
     """ Figure out which stations were requested """
-    stations = form.getlist("sts")
+    stations = form.getall("sts")
     if not stations:
         stations.append("XXXXX")
     if len(stations) == 1:
@@ -24,32 +21,21 @@ def get_stations(form):
 
 def get_dates(form):
     """ Get the start and end dates requested """
-    year1 = form.getfirst("year1", 2013)
-    month1 = form.getfirst("month1", 1)
-    day1 = form.getfirst("day1", 1)
-    year2 = form.getfirst("year2", 2013)
-    month2 = form.getfirst("month2", 1)
-    day2 = form.getfirst("day2", 1)
+    year1 = form.get("year1", 2013)
+    month1 = form.get("month1", 1)
+    day1 = form.get("day1", 1)
+    year2 = form.get("year2", 2013)
+    month2 = form.get("month2", 1)
+    day2 = form.get("day2", 1)
 
     try:
         sts = datetime.datetime(int(year1), int(month1), int(day1))
         ets = datetime.datetime(int(year2), int(month2), int(day2))
     except Exception:
-        ssw("Content-type: text/plain\n\n")
-        ssw(
-            (
-                "ERROR: Failed to parse specified start and end "
-                "dates.  Please go back and ensure that you have "
-                "specified valid dates.  For example, 31 November "
-                "does not exist."
-            )
-        )
-        sys.exit()
+        return None, None
 
     if sts > ets:
-        sts2 = ets
-        ets = sts
-        sts = sts2
+        sts, ets = ets, sts
     if sts == ets:
         ets = sts + datetime.timedelta(days=1)
     return sts, ets
@@ -68,6 +54,8 @@ def fetch_daily(form, cols):
     pgconn = get_dbconn("isuag", user="nobody")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     sts, ets = get_dates(form)
+    if sts is None:
+        return None, None
     stations = get_stations(form)
 
     if not cols:
@@ -306,6 +294,8 @@ def fetch_hourly(form, cols):
     pgconn = get_dbconn("isuag", user="nobody")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     sts, ets = get_dates(form)
+    if sts is None:
+        return None, None
     stations = get_stations(form)
 
     if not cols:
@@ -333,7 +323,7 @@ def fetch_hourly(form, cols):
 
     table = "sm_hourly"
     sqlextra = ", null as bp_mb_qc, etalfalfa_qc "
-    if form.getfirst("timeres") == "minute":
+    if form.get("timeres") == "minute":
         table = "sm_minute"
         sqlextra = ", bp_mb_qc, null as etalfalfa_qc"
     else:
@@ -465,47 +455,44 @@ def fetch_hourly(form, cols):
     return values, cols
 
 
-def main():
+def application(environ, start_response):
     """Do things"""
-    form = cgi.FieldStorage()
-    mode = form.getfirst("mode", "hourly")
-    cols = form.getlist("vars")
-    fmt = form.getfirst("format", "csv").lower()
-    todisk = form.getfirst("todisk", "no")
+    form = parse_formvars(environ)
+    mode = form.get("mode", "hourly")
+    cols = form.getall("vars")
+    fmt = form.get("format", "csv").lower()
+    todisk = form.get("todisk", "no")
     if mode == "hourly":
         values, cols = fetch_hourly(form, cols)
     else:
         values, cols = fetch_daily(form, cols)
 
     if not values:
-        ssw("Content-type: text/plain\n\n")
-        ssw("Sorry, no data found for this query.")
-        return
+        start_response("200 OK", [("Content-type", "text/plain")])
+        return [b"Sorry, no data found for this query."]
 
     df = pd.DataFrame(values)
     if fmt == "excel":
-        writer = pd.ExcelWriter("/tmp/ss.xlsx", engine="xlsxwriter")
-        df.to_excel(writer, "Data", columns=cols, index=False)
-        writer.save()
-        ssw("Content-type: application/vnd.ms-excel\n")
-        ssw("Content-Disposition: attachment; Filename=isusm.xlsx\n\n")
-        ssw(open("/tmp/ss.xlsx", "rb").read())
-        os.unlink("/tmp/ss.xlsx")
-        return
+        bio = BytesIO()
+        with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
+            df.to_excel(writer, "Data", columns=cols, index=False)
+        headers = [
+            ("Content-type", "application/vnd.ms-excel"),
+            ("Content-Disposition", "attachment; Filename=isusm.xlsx"),
+        ]
+        start_response("200 OK", headers)
+        return [bio.getvalue()]
 
     delim = "," if fmt == "comma" else "\t"
-    buf = StringIO()
-    df.to_csv(buf, index=False, columns=cols, sep=delim)
-    buf.seek(0)
+    sio = StringIO()
+    df.to_csv(sio, index=False, columns=cols, sep=delim)
 
     if todisk == "yes":
-        ssw("Content-type: text/plain\n")
-        ssw("Content-Disposition: attachment; filename=isusm.txt\n\n")
+        headers = [
+            ("Content-type", "application/octet-stream"),
+            ("Content-Disposition", "attachment; filename=isusm.txt"),
+        ]
     else:
-        ssw("Content-type: text/plain\n\n")
-    ssw(buf.read())
-
-
-if __name__ == "__main__":
-    # make stuff happen
-    main()
+        headers = [("Content-type", "text/plain")]
+    start_response("200 OK", headers)
+    return [sio.getvalue().encode("ascii")]

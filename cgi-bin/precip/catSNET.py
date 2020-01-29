@@ -1,12 +1,13 @@
-#!/usr/bin/env python
 """
 Generate web output for precip data
 """
-import cgi
+from io import StringIO
 import datetime
+
 import psycopg2.extras
+from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, ssw
+from pyiem.util import get_dbconn
 
 nt = NetworkTable(("KCCI", "KIMIT", "KELO"))
 IEM = get_dbconn("iem")
@@ -19,10 +20,10 @@ totp = {}
 
 
 # Return the Date we will be looking for...
-def doHeader():
+def doHeader(environ, start_response, sio):
     """header please"""
-    ssw("Content-type: text/html \n\n")
-    ssw(
+    start_response("200 OK", [("Content-type", "text/html")])
+    sio.write(
         """
 <html>
 <head>
@@ -37,16 +38,16 @@ KELO sites.  Data from the previous day is the most current available.
 
 """
     )
-    ssw('<h3 align="center">Hourly Precip Grid</h3>')
-    form = cgi.FieldStorage()
+    sio.write('<h3 align="center">Hourly Precip Grid</h3>')
+    form = parse_formvars(environ)
     try:
-        postDate = form.getfirst("date")
+        postDate = form.get("date")
         myTime = datetime.datetime.strptime(postDate, "%Y-%m-%d")
     except Exception:
         myTime = datetime.datetime.now() - datetime.timedelta(days=1)
 
-    ssw("<table border=1><tr>")
-    ssw(
+    sio.write("<table border=1><tr>")
+    sio.write(
         '<td>Back: <a href="catSNET.py?date='
         + (myTime - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
         + '"> \
@@ -55,9 +56,9 @@ KELO sites.  Data from the previous day is the most current available.
         + "</a></td>"
     )
 
-    ssw("<td>Shown: " + myTime.strftime("%d %B %Y") + "</td>")
+    sio.write("<td>Shown: " + myTime.strftime("%d %B %Y") + "</td>")
 
-    ssw(
+    sio.write(
         '<td>Forward: <a href="catSNET.py?date='
         + (myTime + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
         + '"> \
@@ -66,7 +67,7 @@ KELO sites.  Data from the previous day is the most current available.
         + "</a></td>"
     )
 
-    ssw(
+    sio.write(
         """
 <td>Pick: (yyyy-mm-dd)  
 <form method="GET" action="catSNET.py">
@@ -78,8 +79,9 @@ KELO sites.  Data from the previous day is the most current available.
     return myTime
 
 
-def setupTable():
-    ssw(
+def setupTable(sio):
+    """Do"""
+    sio.write(
         """
 <style language="css">
 td.style1{
@@ -128,16 +130,18 @@ table.main{
 
 
 def loadstations():
+    """Bah"""
     for station in nt.sts:
         stData[station] = ["M"] * 25
         totp[station] = 0
 
 
-def main():
+def application(environ, start_response):
     """Go Main Go."""
-    ts = doHeader()
+    sio = StringIO()
+    ts = doHeader(environ, start_response, sio)
     loadstations()
-    setupTable()
+    setupTable(sio)
 
     td = ts.strftime("%Y-%m-%d")
     tm = (ts + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
@@ -175,20 +179,20 @@ def main():
     ids.sort()
     for station in ids:
         j += 1
-        ssw('<tr class="row' + str(j % 5) + '">')
-        ssw("%s%s%s" % ("<td>", nt.sts[station]["name"], "</td>"))
+        sio.write('<tr class="row' + str(j % 5) + '">')
+        sio.write("%s%s%s" % ("<td>", nt.sts[station]["name"], "</td>"))
         for i in range(0, 24):
-            ssw('<td class="style' + str(i % 3) + '">')
-            ssw("%s%s " % (stData[station][i], "</td>"))
+            sio.write('<td class="style' + str(i % 3) + '">')
+            sio.write("%s%s " % (stData[station][i], "</td>"))
             try:
                 totp[station] = totp[station] + stData[station][i]
             except Exception:
                 continue
-        ssw("%s%s%s" % ("<td>", totp[station], "</td>"))
-        ssw("%s%s%s" % ("<td>", station, "</td>"))
-        ssw("</tr>")
+        sio.write("%s%s%s" % ("<td>", totp[station], "</td>"))
+        sio.write("%s%s%s" % ("<td>", station, "</td>"))
+        sio.write("</tr>")
 
-    ssw(
+    sio.write(
         """
 </table>
 
@@ -197,7 +201,4 @@ example, the value in the 1AM column is precipitation accumulation from 1 AM
 till 2 AM.
 """
     )
-
-
-if __name__ == "__main__":
-    main()
+    return [sio.getvalue().encode("ascii")]

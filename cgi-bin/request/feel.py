@@ -1,15 +1,14 @@
-#!/usr/bin/env python
 """FEEL data download"""
 # pylint: disable=abstract-class-instantiated
-import cgi
 import datetime
-import os
+from io import BytesIO
 
 import pandas as pd
-from pyiem.util import get_dbconn, ssw
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn
 
 
-def run(sts, ets):
+def run(sts, ets, start_response):
     """ Get data! """
     dbconn = get_dbconn("other", user="nobody")
     sql = """SELECT * from feel_data_daily where
@@ -32,31 +31,30 @@ def run(sts, ets):
 
     df2["valid"] = df2["valid"].apply(fmt)
 
-    with pd.ExcelWriter("/tmp/ss.xlsx") as writer:
+    bio = BytesIO()
+    with pd.ExcelWriter(bio) as writer:
         df.to_excel(writer, "Daily Data", index=False)
         df2.to_excel(writer, "Hourly Data", index=False)
 
-    ssw("Content-type: application/vnd.ms-excel\n")
-    ssw("Content-Disposition: attachment;Filename=feel.xls\n\n")
-    ssw(open("/tmp/ss.xlsx", "rb").read())
-    os.unlink("/tmp/ss.xlsx")
+    headers = [
+        ("Content-type", "application/vnd.ms-excel"),
+        ("Content-Disposition", "attachment;Filename=feel.xls"),
+    ]
+    start_response("200 OK", headers)
+    return bio.getvalue()
 
 
-def main():
+def application(environ, start_response):
     """ Get stuff """
-    form = cgi.FieldStorage()
-    year1 = int(form.getfirst("year1"))
-    year2 = int(form.getfirst("year2"))
-    month1 = int(form.getfirst("month1"))
-    month2 = int(form.getfirst("month2"))
-    day1 = int(form.getfirst("day1"))
-    day2 = int(form.getfirst("day2"))
+    form = parse_formvars(environ)
+    year1 = int(form.get("year1"))
+    year2 = int(form.get("year2"))
+    month1 = int(form.get("month1"))
+    month2 = int(form.get("month2"))
+    day1 = int(form.get("day1"))
+    day2 = int(form.get("day2"))
 
     sts = datetime.datetime(year1, month1, day1)
     ets = datetime.datetime(year2, month2, day2)
 
-    run(sts, ets)
-
-
-if __name__ == "__main__":
-    main()
+    return [run(sts, ets, start_response)]

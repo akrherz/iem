@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Return a simple CSV of stuart smith data
 
@@ -13,12 +12,12 @@ Conductivity (micro-S)
 18.19    ch2_data_t
 48       ch1_data_c
 """
-import cgi
 import datetime
-import os
+from io import BytesIO
 
 import pandas as pd
-from pyiem.util import get_dbconn, ssw
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn
 
 LOOKUP = {
     9100104: "SSP #6",
@@ -28,7 +27,7 @@ LOOKUP = {
 }
 
 
-def gage_run(sts, ets, stations, excel):
+def gage_run(sts, ets, stations, excel, start_response):
     """ run() """
     if not stations:
         stations = LOOKUP.keys()
@@ -58,17 +57,19 @@ def gage_run(sts, ets, stations, excel):
     ]
 
     if excel == "yes":
-        ssw("Content-type: application/vnd.ms-excel\n")
-        ssw(("Content-Disposition: attachment; Filename=stuartsmith.xls\n\n"))
-        df.to_excel("/tmp/ss.xls", header=headers, index=False)
-        ssw(open("/tmp/ss.xls", "rb").read())
-        os.unlink("/tmp/ss.xls")
-    else:
-        ssw("Content-type: text/plain\n\n")
-        ssw(df.to_csv(None, header=headers, index=False))
+        headers = [
+            ("Content-type", "application/vnd.ms-excel"),
+            ("Content-disposition", "attachment; Filename=stuartsmith.xls"),
+        ]
+        start_response("200 OK", headers)
+        bio = BytesIO()
+        df.to_excel(bio, header=headers, index=False)
+        return bio.getvalue()
+    start_response("200 OK", [("Content-type", "text/plain")])
+    return df.to_csv(None, header=headers, index=False).encode("ascii")
 
 
-def bubbler_run(sts, ets, excel):
+def bubbler_run(sts, ets, excel, start_response):
     """ run() """
     dbconn = get_dbconn("other", user="nobody")
     sql = """
@@ -97,37 +98,36 @@ def bubbler_run(sts, ets, excel):
     headers = ["date", "time", "batt voltage", "stage", "water temp"]
 
     if excel == "yes":
-        ssw("Content-type: application/vnd.ms-excel\n")
-        ssw(("Content-Disposition: attachment; Filename=bubbler.xls\n\n"))
-        df.to_excel("/tmp/ss.xls", header=headers, index=False)
-        ssw(open("/tmp/ss.xls", "rb").read())
-        os.unlink("/tmp/ss.xls")
-    else:
-        ssw("Content-type: text/plain\n\n")
-        ssw(df.to_csv(None, header=headers, index=False))
+        headers = [
+            ("Content-type", "application/vnd.ms-excel"),
+            ("Content-disposition", "attachment; Filename=stuartsmith.xls"),
+        ]
+        start_response("200 OK", headers)
+        bio = BytesIO()
+        df.to_excel(bio, header=headers, index=False)
+        return bio.getvalue()
+    start_response("200 OK", [("Content-type", "text/plain")])
+    return df.to_csv(None, header=headers, index=False).encode("ascii")
 
 
-def main():
+def application(environ, start_response):
     """ Go Main Go """
-    form = cgi.FieldStorage()
-    opt = form.getfirst("opt", "bubbler")
+    form = parse_formvars(environ)
+    opt = form.get("opt", "bubbler")
 
-    year1 = int(form.getfirst("year1"))
-    year2 = int(form.getfirst("year2"))
-    month1 = int(form.getfirst("month1"))
-    month2 = int(form.getfirst("month2"))
-    day1 = int(form.getfirst("day1"))
-    day2 = int(form.getfirst("day2"))
-    stations = form.getlist("station")
+    year1 = int(form.get("year1"))
+    year2 = int(form.get("year2"))
+    month1 = int(form.get("month1"))
+    month2 = int(form.get("month2"))
+    day1 = int(form.get("day1"))
+    day2 = int(form.get("day2"))
+    stations = form.getall("station")
 
     sts = datetime.datetime(year1, month1, day1)
     ets = datetime.datetime(year2, month2, day2)
 
     if opt == "bubbler":
-        bubbler_run(sts, ets, form.getfirst("excel", "n"))
-    elif opt == "gage":
-        gage_run(sts, ets, stations, form.getfirst("excel", "n"))
-
-
-if __name__ == "__main__":
-    main()
+        return [bubbler_run(sts, ets, form.get("excel", "n"), start_response)]
+    return [
+        gage_run(sts, ets, stations, form.get("excel", "n"), start_response)
+    ]

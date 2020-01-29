@@ -1,9 +1,6 @@
-#!/usr/bin/env python
 """Generate a shapefile of warnings based on the CGI request"""
 import zipfile
 import os
-import cgi
-import sys
 import datetime
 
 from psycopg2.extras import DictCursor
@@ -11,25 +8,26 @@ import fiona
 from fiona.crs import from_epsg
 from shapely.geometry import mapping
 from shapely.wkb import loads
-from pyiem.util import get_dbconn, utc, ssw
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn, utc
 
 
 def get_time_extent(form):
     """ Figure out the time extent of this request"""
     if "year" in form:
-        year1 = form.getfirst("year")
-        year2 = form.getfirst("year")
+        year1 = form.get("year")
+        year2 = form.get("year")
     else:
-        year1 = form.getfirst("year1")
-        year2 = form.getfirst("year2")
-    month1 = form.getfirst("month1")
-    month2 = form.getfirst("month2")
-    day1 = form.getfirst("day1")
-    day2 = form.getfirst("day2")
-    hour1 = form.getfirst("hour1")
-    hour2 = form.getfirst("hour2")
-    minute1 = form.getfirst("minute1")
-    minute2 = form.getfirst("minute2")
+        year1 = form.get("year1")
+        year2 = form.get("year2")
+    month1 = form.get("month1")
+    month2 = form.get("month2")
+    day1 = form.get("day1")
+    day2 = form.get("day2")
+    hour1 = form.get("hour1")
+    hour2 = form.get("hour2")
+    minute1 = form.get("minute1")
+    minute2 = form.get("minute2")
     sts = utc(int(year1), int(month1), int(day1), int(hour1), int(minute1))
     ets = utc(int(year2), int(month2), int(day2), int(hour2), int(minute2))
     return sts, ets
@@ -47,36 +45,29 @@ def parse_wfo_location_group(form):
     """Parse wfoLimiter"""
     limiter = ""
     if "wfo[]" in form:
-        wfos = form.getlist("wfo[]")
+        wfos = form.getall("wfo[]")
         wfos.append("XXX")  # Hack to make next section work
         if "ALL" not in wfos:
             limiter = " and w.wfo in %s " % (str(tuple(char3(wfos))),)
 
     if "wfos[]" in form:
-        wfos = form.getlist("wfos[]")
+        wfos = form.getall("wfos[]")
         wfos.append("XXX")  # Hack to make next section work
         if "ALL" not in wfos:
             limiter = " and w.wfo in %s " % (str(tuple(char3(wfos))),)
     return limiter
 
 
-def send_error(msg):
-    """Error out please!"""
-    ssw("Content-type: text/plain\n\n")
-    ssw("ERROR: %s" % (msg,))
-    sys.exit()
-
-
-def main():
+def application(environ, start_response):
     """Go Main Go"""
-    form = cgi.FieldStorage()
+    form = parse_formvars(environ)
     sts, ets = get_time_extent(form)
 
     table_extra = ""
-    location_group = form.getfirst("location_group", "wfo")
+    location_group = form.get("location_group", "wfo")
     if location_group == "states":
         if "states[]" in form:
-            states = form.getlist("states[]")
+            states = form.getall("states[]")
             states.append("XX")  # Hack for 1 length
             wfo_limiter = (
                 " and ST_Overlaps(s.the_geom, w.geom) and s.state_abbr in %s "
@@ -86,24 +77,27 @@ def main():
             )
             table_extra = " , states s "
         else:
-            send_error("No state specified")
+            start_response("200 OK", [("Content-type", "text/plain")])
+            return [b"No state specified"]
     elif location_group == "wfo":
         wfo_limiter = parse_wfo_location_group(form)
         wfo_limiter2 = wfo_limiter
     else:
         # Unknown location_group
-        send_error("Unknown location_group (%s)" % (location_group,))
+        msg = "Unknown location_group (%s)" % (location_group,)
+        start_response("200 OK", [("Content-type", "text/plain")])
+        return [msg.encode("ascii")]
 
     # Change to postgis db once we have the wfo list
     pgconn = get_dbconn("postgis", user="nobody")
     fn = "wwa_%s_%s" % (sts.strftime("%Y%m%d%H%M"), ets.strftime("%Y%m%d%H%M"))
-    timeopt = int(form.getfirst("timeopt", [1])[0])
+    timeopt = int(form.get("timeopt", [1])[0])
     if timeopt == 2:
-        year3 = int(form.getfirst("year3"))
-        month3 = int(form.getfirst("month3"))
-        day3 = int(form.getfirst("day3"))
-        hour3 = int(form.getfirst("hour3"))
-        minute3 = int(form.getfirst("minute3"))
+        year3 = int(form.get("year3"))
+        month3 = int(form.get("month3"))
+        day3 = int(form.get("day3"))
+        hour3 = int(form.get("hour3"))
+        minute3 = int(form.get("minute3"))
         sts = utc(year3, month3, day3, hour3, minute3)
         fn = "wwa_%s" % (sts.strftime("%Y%m%d%H%M"),)
 
@@ -127,7 +121,7 @@ def main():
         sbw_table = "sbw_%s" % (sts.year,)
 
     geomcol = "geom"
-    if form.getfirst("simple", "no") == "yes":
+    if form.get("simple", "no") == "yes":
         geomcol = "simple_geom"
 
     cols = """geo, wfo, utc_issue, utc_expire, utc_prodissue, utc_init_expire,
@@ -189,17 +183,12 @@ def main():
         cols=cols,
         sbwlimiter=sbwlimiter,
     )
-    # dump SQL to disk for further debugging
-    # o = open('/tmp/daryl.txt', 'w')
-    # o.write(sql)
-    # o.close()
 
     cursor = pgconn.cursor(cursor_factory=DictCursor)
     cursor.execute(sql)
     if cursor.rowcount == 0:
-        ssw("Content-type: text/plain\n\n")
-        ssw("ERROR: No results found for query, please try again")
-        sys.exit()
+        start_response("200 OK", [("Content-type", "text/plain")])
+        return [b"ERROR: No results found for query, please try again"]
 
     csv = open("%s.csv" % (fn,), "w")
     csv.write(
@@ -265,21 +254,21 @@ def main():
             )
     csv.close()
 
-    zf = zipfile.ZipFile(fn + ".zip", "w", zipfile.ZIP_DEFLATED)
-    zf.write(fn + ".shp")
-    zf.write(fn + ".shx")
-    zf.write(fn + ".dbf")
-    zf.write(fn + ".prj")
-    zf.write(fn + ".csv")
-    zf.close()
+    with zipfile.ZipFile(fn + ".zip", "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.write(fn + ".shp")
+        zf.write(fn + ".shx")
+        zf.write(fn + ".dbf")
+        zf.write(fn + ".prj")
+        zf.write(fn + ".csv")
 
-    ssw("Content-type: application/octet-stream\n")
-    ssw("Content-Disposition: attachment; filename=%s.zip\n\n" % (fn,))
-    ssw(open(fn + ".zip", "rb").read())
+    headers = [
+        ("Content-type", "application/octet-stream"),
+        ("Content-Disposition", "attachment; filename=%s.zip" % (fn,)),
+    ]
+    start_response("200 OK", headers)
+    payload = open(fn + ".zip", "rb").read()
 
     for suffix in ["zip", "shp", "shx", "dbf", "prj", "csv"]:
         os.remove("%s.%s" % (fn, suffix))
 
-
-if __name__ == "__main__":
-    main()
+    return [payload]

@@ -1,21 +1,18 @@
-#!/usr/bin/env python
 """Generate a Watch Outline for a given SPC convective watch """
-
 import zipfile
 import os
-import sys
-import cgi
 from io import BytesIO
 
 import shapefile
 import psycopg2.extras
+from paste.request import parse_formvars
 from pyiem import wellknowntext
-from pyiem.util import get_dbconn, ssw
+from pyiem.util import get_dbconn
 
 POSTGIS = get_dbconn("postgis", user="nobody")
 
 
-def main(year, etn):
+def main(year, etn, start_response):
     """Go Main Go"""
     pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -39,7 +36,8 @@ def main(year, etn):
     )
     pcursor.execute(sql)
     if pcursor.rowcount == 0:
-        sys.exit()
+        start_response("200 OK", [("Content-type", "text/plain")])
+        return b"No Data Found"
 
     shpio = BytesIO()
     shxio = BytesIO()
@@ -55,27 +53,28 @@ def main(year, etn):
         shp.record("A", etn)
 
     zio = BytesIO()
-    zf = zipfile.ZipFile(zio, mode="w", compression=zipfile.ZIP_DEFLATED)
-    zf.writestr(
-        basefn + ".prj", open(("/opt/iem/data/gis/meta/4326.prj")).read()
-    )
-    zf.writestr(basefn + ".shp", shpio.getvalue())
-    zf.writestr(basefn + ".shx", shxio.getvalue())
-    zf.writestr(basefn + ".dbf", dbfio.getvalue())
-    zf.close()
-    ssw(("Content-Disposition: attachment; filename=%s.zip\n\n") % (basefn,))
-    ssw(zio.getvalue())
+    with zipfile.ZipFile(
+        zio, mode="w", compression=zipfile.ZIP_DEFLATED
+    ) as zf:
+        zf.writestr(
+            basefn + ".prj", open(("/opt/iem/data/gis/meta/4326.prj")).read()
+        )
+        zf.writestr(basefn + ".shp", shpio.getvalue())
+        zf.writestr(basefn + ".shx", shxio.getvalue())
+        zf.writestr(basefn + ".dbf", dbfio.getvalue())
+
+    headers = [
+        ("Content-type", "application/octet-stream"),
+        ("Content-Disposition", "attachment; filename=%s.zip" % (basefn,)),
+    ]
+    start_response("200 OK", headers)
+    return zio.getvalue()
 
 
-def cgiworkflow():
+def application(environ, start_response):
     """Yawn"""
-    form = cgi.FieldStorage()
-    year = int(form.getfirst("year", 2018))
-    etn = int(form.getfirst("etn", 1))
+    form = parse_formvars(environ)
+    year = int(form.get("year", 2018))
+    etn = int(form.get("etn", 1))
 
-    main(year, etn)
-
-
-if __name__ == "__main__":
-    cgiworkflow()
-    # main(2017, 1)
+    return [main(year, etn, start_response)]

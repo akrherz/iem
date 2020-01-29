@@ -1,7 +1,8 @@
-#!/usr/bin/env python
 """A specialized report"""
+from io import StringIO
 import datetime
-from pyiem.util import get_dbconn, ssw
+
+from pyiem.util import get_dbconn
 
 
 def averageTemp(db, hi="high", lo="low"):
@@ -41,7 +42,7 @@ def cdd(db, hi="high", lo="low"):
     return dd
 
 
-def main():
+def application(_environ, start_response):
     """Go Main Go"""
     COOP = get_dbconn("coop")
     ccursor = COOP.cursor()
@@ -100,12 +101,14 @@ def main():
     row = acursor.fetchone()
     awind = row[1]
 
-    ssw("Content-type: text/plain\n\n")
-    ssw("  Orange City Climate Summary\n")
-    ssw("%15s %6s %6s\n" % ("DATE", "HIGH", "LOW"))
+    headers = [("Content-type", "text/plain")]
+    start_response("200 OK", headers)
+    sio = StringIO()
+    sio.write("  Orange City Climate Summary\n")
+    sio.write("%15s %6s %6s\n" % ("DATE", "HIGH", "LOW"))
     now = s
     while now <= e:
-        ssw(
+        sio.write(
             ("%15s %6i %6i %6i %6i\n")
             % (
                 now.strftime("%Y-%m-%d"),
@@ -126,7 +129,7 @@ def main():
     l_cdd = cdd(db)
     c_cdd = cdd(db, "avg_high", "avg_low")
 
-    ssw(
+    sio.write(
         """
 Summary Information [%s - %s]
 -------------------
@@ -155,7 +158,4 @@ Summary Information [%s - %s]
             awind,
         )
     )
-
-
-if __name__ == "__main__":
-    main()
+    return [sio.getvalue().encode("ascii")]

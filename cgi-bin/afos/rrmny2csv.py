@@ -1,8 +1,8 @@
-#!/usr/bin/env python
 """ One off conversion of RRMBUF to CSV """
+from io import StringIO
 
 import pytz
-from pyiem.util import get_dbconn, ssw
+from pyiem.util import get_dbconn
 
 
 def do(cursor, wfo):
@@ -34,7 +34,6 @@ def do(cursor, wfo):
             dv = "%s %s" % (tokens[2], tokens[4][2:6])
             val = tokens[5].split('"')[0]
             tokens2 = " ".join(tokens[5:]).split()
-            # ssw(line+"\n")
             lbl = line.split('"')[1]
             src = ""
             if lbl.find("  ") > 0:
@@ -54,22 +53,19 @@ def do(cursor, wfo):
     return meta, meat
 
 
-def run():
+def application(_environ, start_response):
     """ Do Stuff """
     pgconn = get_dbconn("afos", user="nobody")
     cursor = pgconn.cursor()
-    ssw("Content-type:text/plain\n\n")
-    m1 = ""
-    m2 = ""
+    headers = [("Content-type", "text/plain")]
+    start_response("200 OK", headers)
+    m1 = StringIO()
+    m2 = StringIO()
     for wfo in ["OKX", "ALY", "BTV", "BUF", "BGM"]:
         meta, meat = do(cursor, wfo)
-        m1 += meta
-        m2 += meat
+        m1.write(meta)
+        m2.write(meat)
 
-    ssw(m1)
-    ssw("id,timestamp,value,lat,lon,name,source\n")
-    ssw(m2)
-
-
-if __name__ == "__main__":
-    run()
+    m1.write("id,timestamp,value,lat,lon,name,source\n")
+    m1.write(m2.getvalue())
+    return [m1.getvalue().encode("ascii")]

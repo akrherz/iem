@@ -1,21 +1,12 @@
-#!/usr/bin/env python
 """Dumps Local Storm Reports on-demand for web requests."""
 import datetime
 import zipfile
 import os
-import sys
-import cgi
 from io import BytesIO, StringIO
 
 import shapefile
-from pyiem.util import get_dbconn, ssw
-
-
-def send_error(msg):
-    """Please send an error"""
-    ssw("Content-type: text/plain\n\n")
-    ssw(msg)
-    sys.exit()
+from paste.request import parse_formvars
+from pyiem.util import get_dbconn
 
 
 def get_time_domain(form):
@@ -23,49 +14,47 @@ def get_time_domain(form):
     if "recent" in form:
         # Allow for specifying a recent number of seconds
         ets = datetime.datetime.utcnow()
-        seconds = abs(int(form.getfirst("recent")))
+        seconds = abs(int(form.get("recent")))
         sts = ets - datetime.timedelta(seconds=seconds)
         return sts, ets
 
     if "year" in form:
-        year1 = int(form.getfirst("year"))
-        year2 = int(form.getfirst("year"))
+        year1 = int(form.get("year"))
+        year2 = int(form.get("year"))
     else:
-        year1 = int(form.getfirst("year1"))
-        year2 = int(form.getfirst("year2"))
-    month1 = int(form.getfirst("month1"))
-    if form.getfirst("month2") is None:
-        sys.exit()
-    month2 = int(form.getfirst("month2"))
-    day1 = int(form.getfirst("day1"))
-    day2 = int(form.getfirst("day2"))
-    hour1 = int(form.getfirst("hour1"))
-    hour2 = int(form.getfirst("hour2"))
-    minute1 = int(form.getfirst("minute1"))
-    minute2 = int(form.getfirst("minute2"))
+        year1 = int(form.get("year1"))
+        year2 = int(form.get("year2"))
+    month1 = int(form.get("month1"))
+    month2 = int(form.get("month2"))
+    day1 = int(form.get("day1"))
+    day2 = int(form.get("day2"))
+    hour1 = int(form.get("hour1"))
+    hour2 = int(form.get("hour2"))
+    minute1 = int(form.get("minute1"))
+    minute2 = int(form.get("minute2"))
     sts = datetime.datetime(year1, month1, day1, hour1, minute1)
     ets = datetime.datetime(year2, month2, day2, hour2, minute2)
 
     return sts, ets
 
 
-def main():
+def application(environ, start_response):
     """Go Main Go"""
-    if os.environ["REQUEST_METHOD"] == "OPTIONS":
-        ssw("Allow: GET,POST,OPTIONS\n\n")
-        sys.exit()
+    if environ["REQUEST_METHOD"] == "OPTIONS":
+        start_response("400 Bad Request", [("Content-type", "text/plain")])
+        return [b"Allow: GET,POST,OPTIONS"]
 
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
 
     # Get CGI vars
-    form = cgi.FieldStorage()
+    form = parse_formvars(environ)
 
     (sTS, eTS) = get_time_domain(form)
 
     wfoLimiter = ""
     if "wfo[]" in form:
-        aWFO = form.getlist("wfo[]")
+        aWFO = form.getall("wfo[]")
         aWFO.append("XXX")  # Hack to make next section work
         if "ALL" not in aWFO:
             wfoLimiter = " and wfo in %s " % (str(tuple(aWFO)),)
@@ -104,7 +93,8 @@ def main():
     )
 
     if cursor.rowcount == 0:
-        send_error("ERROR: No results found for query.")
+        start_response("200 OK", [("Content-type", "text/plain")])
+        return [b"No results found for query."]
 
     shpio = BytesIO()
     shxio = BytesIO()
@@ -154,15 +144,17 @@ def main():
             )
 
     if "justcsv" in form:
-        ssw("Content-type: application/octet-stream\n")
-        ssw(
-            ("Content-Disposition: " "attachment; filename=%s.csv\n\n") % (fn,)
-        )
-        ssw(csv.getvalue())
+        headers = [
+            ("Content-type", "application/octet-stream"),
+            ("Content-Disposition", "attachment; filename=%s.csv" % (fn,)),
+        ]
+        start_response("200 OK", headers)
+        return [csv.getvalue().encode("ascii", "ignore")]
 
-    else:
-        zio = BytesIO()
-        zf = zipfile.ZipFile(zio, mode="w", compression=zipfile.ZIP_DEFLATED)
+    zio = BytesIO()
+    with zipfile.ZipFile(
+        zio, mode="w", compression=zipfile.ZIP_DEFLATED
+    ) as zf:
         zf.writestr(
             fn + ".prj", open(("/opt/iem/data/gis/meta/4326.prj")).read()
         )
@@ -170,12 +162,9 @@ def main():
         zf.writestr(fn + ".shx", shxio.getvalue())
         zf.writestr(fn + ".dbf", dbfio.getvalue())
         zf.writestr(fn + ".csv", csv.getvalue())
-        zf.close()
-        ssw(
-            ("Content-Disposition: attachment; " "filename=%s.zip\n\n") % (fn,)
-        )
-        ssw(zio.getvalue())
-
-
-if __name__ == "__main__":
-    main()
+    headers = [
+        ("Content-type", "application/octet-stream"),
+        ("Content-Disposition", "attachment; filename=%s.zip" % (fn,)),
+    ]
+    start_response("200 OK", headers)
+    return [zio.getvalue()]
