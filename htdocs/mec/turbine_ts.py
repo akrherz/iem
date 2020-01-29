@@ -9,12 +9,11 @@ from paste.request import parse_formvars
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_dbconn
 
-PGCONN = get_dbconn("mec", user="mesonet")
-cursor = PGCONN.cursor()
-
 
 def workflow(turbinename, ts):
     """Go main()"""
+    pgconn = get_dbconn("mec", user="mesonet")
+    cursor = pgconn.cursor()
     cursor.execute(
         """SELECT unitnumber from turbines
     where turbinename = %s""",
@@ -40,7 +39,7 @@ def workflow(turbinename, ts):
     WHERE s.valid BETWEEN %s and %s
     ORDER by stamp ASC
     """,
-        PGCONN,
+        pgconn,
         params=[ts1, ts2],
     )
 

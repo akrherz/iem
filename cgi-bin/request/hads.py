@@ -8,7 +8,6 @@ from pandas.io.sql import read_sql
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, utc
 
-PGCONN = get_dbconn("hads")
 DELIMITERS = {"comma": ",", "space": " ", "tab": "\t"}
 
 
@@ -28,7 +27,7 @@ def get_time(form):
     return sts, ets
 
 
-def threshold_search(table, threshold, thresholdvar, delimiter):
+def threshold_search(table, threshold, thresholdvar):
     """ Do the threshold searching magic """
     cols = list(table.columns.values)
     searchfor = "HGI%s" % (thresholdvar.upper(),)
@@ -109,7 +108,8 @@ def application(environ, start_response):
     and value > -999"""
         % (tuple(stations), sts, ets)
     )
-    df = read_sql(sql, PGCONN)
+    pgconn = get_dbconn("hads")
+    df = read_sql(sql, pgconn)
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
         return [b"Error, no results found for query!"]
@@ -120,7 +120,7 @@ def application(environ, start_response):
         if "XXXXXXX" not in stations:
             start_response("200 OK", [("Content-type", "text/plain")])
             return [b"Can not do threshold search for more than one station"]
-        table = threshold_search(table, threshold, thresholdvar, delimiter)
+        table = threshold_search(table, threshold, thresholdvar)
 
     sio = StringIO()
     if what == "txt":

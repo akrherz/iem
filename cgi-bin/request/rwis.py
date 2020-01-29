@@ -9,8 +9,6 @@ from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
 
-PGCONN = get_dbconn("rwis")
-
 DELIMITERS = {"comma": ",", "space": " ", "tab": "\t"}
 
 
@@ -64,7 +62,8 @@ def application(environ, start_response):
     WHERE station in %s and valid BETWEEN %s and %s ORDER by valid ASC
     """
     )
-    df = read_sql(sql, PGCONN, params=(tzname, tuple(stations), sts, ets))
+    pgconn = get_dbconn("rwis")
+    df = read_sql(sql, pgconn, params=(tzname, tuple(stations), sts, ets))
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
         return [b"Sorry, no results found for query!"]
