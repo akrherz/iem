@@ -27,7 +27,6 @@ def get_time_bounds(form, tzinfo):
     sts = datetime.datetime.utcnow()
     sts = sts.replace(tzinfo=pytz.UTC)
     sts = sts.astimezone(tzinfo)
-    ets = sts
 
     sts = sts.replace(
         year=y1, month=m1, day=d1, hour=h1, minute=0, second=0, microsecond=0
