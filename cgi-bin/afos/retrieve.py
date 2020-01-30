@@ -64,7 +64,7 @@ def application(environ, start_response):
     if form.get("dl") == "1":
         headers.append(("Content-type", "application/octet-stream"))
         headers.append(
-            ("Content-Disposition: attachment", "filename=afos.txt")
+            ("Content-disposition", "attachment; filename=afos.txt")
         )
     else:
         if fmt == "text":
