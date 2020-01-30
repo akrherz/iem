@@ -212,11 +212,12 @@ first guess at fields the NWS needs for their RTP product.</p>
 <p>The IEM processes LSRs issued by the NWS in real-time. A number of
 	applications on this website utilize this source of reports.</p>
 <ul>
-	<li><a href="/data/lsr_snowfall.png">Snowfall Analysis [Iowa]</a> of
-		recent LSRs. <a href="/data/lsr_snowfall_nv.png">Iowa map without
-		labels</a>.</li>
-	<li><a href="/data/mw_lsr_snowfall.png">Snowfall Analysis [MidWest]</a>
-		of recent LSRs.</li>
+    <li><a href="/plotting/auto/?q=207">LSR + COOP Snowfall Analysis Autoplot #207</a>
+    <br />Dynamic analysis of available LSR and COOP reports that is used to
+    generate these static maps for:
+    <a href="/data/lsr_snowfall.png">Iowa</a>,
+    <a href="/data/lsr_snowfall_nv.png">Iowa map without labels</a>,
+    and <a href="/data/mw_lsr_snowfall.png">Midwest</a>.</li>
   
     <li>Past 24 hours of Storm Reports
     <br /><a href="/data/gis/shape/4326/us/lsr_24hour.zip">ESRI Shapefile</a>, 

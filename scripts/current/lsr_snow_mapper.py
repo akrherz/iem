@@ -4,7 +4,7 @@ import os
 import subprocess
 
 import requests
-from pyiem.util import logger
+from pyiem.util import logger, utc
 
 LOG = logger()
 
@@ -18,8 +18,12 @@ def do(url, fn):
     tmpfd = tempfile.NamedTemporaryFile(delete=False)
     tmpfd.write(res.content)
     tmpfd.close()
-    pqstr = "plot c 000000000000 %s bogus png" % (fn,)
-    subprocess.call("pqinsert -p '%s' %s" % (pqstr, tmpfd.name), shell=True)
+    pqstr = "plot c %s %s bogus%s png" % (
+        utc().strftime("%Y%m%d%H%M"),
+        fn,
+        utc().second,
+    )
+    subprocess.call("pqinsert -i -p '%s' %s" % (pqstr, tmpfd.name), shell=True)
     os.unlink(tmpfd.name)
 
 
@@ -30,6 +34,12 @@ def main():
         "::p:both::hours:12.png"
     )
     do(url, "lsr_snowfall.png")
+
+    url = (
+        "http://iem.local/plotting/auto/plot/207/t:state::csector:IA"
+        "::p:contour::hours:12.png"
+    )
+    do(url, "lsr_snowfall_nv.png")
 
     # -----------------
     url = (
