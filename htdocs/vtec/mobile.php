@@ -14,7 +14,7 @@ closelog();
 
 $v = isset($_GET["vtec"]) ? substr($_GET["vtec"],0,25) : "2008-O-NEW-KJAX-TO-W-0048";
 $tokens = preg_split("/-/", $v);
-$year = $tokens[0];
+$year = intval($tokens[0]);
 $operation = $tokens[1];
 $vstatus = $tokens[2];
 $wfo4 = $tokens[3];

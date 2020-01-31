@@ -26,6 +26,7 @@ python plot_4month_stage4.py
 python plot_cli_jul1_snow.py
 
 cd ../year
+python plot_stage4.py
 python precip.py
 python plot_gdd.py
 python plot_gdd.py gdd52
