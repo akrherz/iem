@@ -4,14 +4,17 @@ import os
 import subprocess
 
 import requests
-from pyiem.util import logger, utc
+from pyiem.util import logger, utc, exponential_backoff
 
 LOG = logger()
 
 
 def do(url, fn):
     """Do the work."""
-    res = requests.get(url, timeout=30)
+    res = exponential_backoff(requests.get, url, timeout=30)
+    if res is None:
+        LOG.info("%s failure", url)
+        return
     if res.status_code != 200:
         LOG.info("%s resulted in %s", url, res.status_code)
         return
