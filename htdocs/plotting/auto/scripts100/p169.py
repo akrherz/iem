@@ -2,6 +2,7 @@
 import datetime
 from collections import OrderedDict
 
+import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -151,8 +152,8 @@ def plotter(fdict):
     for i in range(10):
         row = df.iloc[i]
         ax.barh(i + 1, row["diff"], color="b", align="center")
-        sts = row["valid1"]
-        ets = row["valid2"]
+        sts = pd.Timestamp(row["valid1"])
+        ets = pd.Timestamp(row["valid2"])
         labels.append(
             ("%.0f to %.0f -> %.0f\n%s - %s")
             % (

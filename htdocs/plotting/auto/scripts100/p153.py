@@ -2,6 +2,7 @@
 from collections import OrderedDict
 import datetime
 
+import pandas as pd
 from pandas.io.sql import read_sql
 from matplotlib.font_manager import FontProperties
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -223,7 +224,7 @@ def plotter(fdict):
             "%3.0f: %s%s"
             % (
                 row[varname],
-                row["ts"].strftime("%d %b %Y"),
+                pd.Timestamp(row["ts"]).strftime("%d %b %Y"),
                 ("*" if len(sdf.index) > 1 else ""),
             ),
             fontproperties=font0,
@@ -239,4 +240,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(over="annual"))
+    plotter(dict())

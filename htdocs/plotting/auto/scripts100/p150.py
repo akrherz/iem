@@ -2,6 +2,7 @@
 import calendar
 from collections import OrderedDict
 
+import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, utc
@@ -196,8 +197,8 @@ def plotter(fdict):
             station,
             name,
             ts.strftime("%Y/%m/%d %H UTC"),
-            df.iloc[0]["min_valid"].year,
-            df.iloc[0]["max_valid"].year,
+            pd.Timestamp(df.iloc[0]["min_valid"]).year,
+            pd.Timestamp(df.iloc[0]["max_valid"]).year,
             ("All Year" if which == "none" else calendar.month_name[ts.month]),
             PDICT3[varname],
             hour,
