@@ -5,6 +5,7 @@ import json
 
 import memcache
 import pytz
+import pandas as pd
 from pandas.io.sql import read_sql
 from paste.request import parse_formvars
 from pyiem.nws.products.spcpts import THRESHOLD_ORDER
@@ -71,9 +72,9 @@ def dotime(time, lon, lat, day, cat):
     df.sort_values("threshold_rank", ascending=False, inplace=True)
     res["outlook"] = {
         "threshold": df.iloc[0]["threshold"],
-        "utc_product_issue": df.iloc[0]["v"].strftime(ISO9660),
-        "utc_issue": df.iloc[0]["i"].strftime(ISO9660),
-        "utc_expire": df.iloc[0]["e"].strftime(ISO9660),
+        "utc_product_issue": pd.Timestamp(df.iloc[0]["v"]).strftime(ISO9660),
+        "utc_issue": pd.Timestamp(df.iloc[0]["i"]).strftime(ISO9660),
+        "utc_expire": pd.Timestamp(df.iloc[0]["e"]).strftime(ISO9660),
     }
     return json.dumps(res)
 
