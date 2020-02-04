@@ -86,6 +86,12 @@
     Options +ExecCGI
   </Directory>
 
+  # Since the above does not cover mapserv binaries
+  <Directory "/opt/iem/cgi-bin/mapserv">
+    SetHandler cgi-script
+    Options +ExecCGI
+  </Directory>
+
   <LocationMatch "camera">
     ErrorDocument 404 /images/missing-320x240.jpg
   </LocationMatch>
