@@ -8,6 +8,8 @@ from paste.request import parse_formvars
 from pyiem.datatypes import temperature, distance
 from pyiem.util import get_dbconn
 
+EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
 
 def get_stations(form):
     """ Figure out which stations were requested """
@@ -477,8 +479,8 @@ def application(environ, start_response):
         with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
             df.to_excel(writer, "Data", columns=cols, index=False)
         headers = [
-            ("Content-type", "application/vnd.ms-excel"),
-            ("Content-Disposition", "attachment; Filename=isusm.xlsx"),
+            ("Content-type", EXL),
+            ("Content-disposition", "attachment; Filename=isusm.xlsx"),
         ]
         start_response("200 OK", headers)
         return [bio.getvalue()]

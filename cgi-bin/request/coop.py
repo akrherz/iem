@@ -17,6 +17,7 @@ from metpy.units import units
 
 DEGC = units.degC
 DEGF = units.degF
+EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 def f2c(val):
@@ -584,7 +585,7 @@ def do_simple(ctx):
             df["lat"] = [_gs(x, "lat") for x in df["station"]]
             df["lon"] = [_gs(x, "lon") for x in df["station"]]
         bio = BytesIO()
-        df.to_excel(bio, columns=cols, index=False)
+        df.to_excel(bio, columns=cols, index=False, engine="openpyxl")
         return bio.getvalue()
 
     cursor.execute(sql, args)
@@ -911,14 +912,14 @@ def application(environ, start_response):
             ("Content-Disposition", "attachment; filename=dndc.zip")
         )
     elif "swat" in ctx["myvars"]:
-        headers.append(("Content-type", "application/vnd.ms-excel"))
+        headers.append(("Content-type", "application/octet-stream"))
         headers.append(
             ("Content-Disposition", "attachment; filename=swatfiles")
         )
     elif ctx["what"] == "excel":
-        headers.append(("Content-type", "application/vnd.ms-excel"))
+        headers.append(("Content-type", EXL))
         headers.append(
-            ("Content-Disposition", "attachment; filename=nwscoop.xls")
+            ("Content-Disposition", "attachment; filename=nwscoop.xlsx")
         )
 
     start_response("200 OK", headers)

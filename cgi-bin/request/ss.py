@@ -25,6 +25,7 @@ LOOKUP = {
     9100131: "SSP #1",
     9100156: "SSP #7",
 }
+EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 def gage_run(sts, ets, stations, excel, start_response):
@@ -58,12 +59,12 @@ def gage_run(sts, ets, stations, excel, start_response):
 
     if excel == "yes":
         headers = [
-            ("Content-type", "application/vnd.ms-excel"),
-            ("Content-disposition", "attachment; Filename=stuartsmith.xls"),
+            ("Content-type", EXL),
+            ("Content-disposition", "attachment; Filename=stuartsmith.xlsx"),
         ]
         start_response("200 OK", headers)
         bio = BytesIO()
-        df.to_excel(bio, header=headers, index=False)
+        df.to_excel(bio, header=headers, index=False, engine="openpyxl")
         return bio.getvalue()
     start_response("200 OK", [("Content-type", "text/plain")])
     return df.to_csv(None, header=headers, index=False).encode("ascii")

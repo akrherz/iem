@@ -9,6 +9,7 @@ from paste.request import parse_formvars
 from pyiem.util import get_dbconn, utc
 
 DELIMITERS = {"comma": ",", "space": " ", "tab": "\t"}
+EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 def get_time(form):
@@ -138,11 +139,11 @@ def application(environ, start_response):
         return [sio.getvalue().encode("ascii")]
     if what == "excel":
         bio = BytesIO()
-        with pd.ExcelWriter(bio) as writer:
+        with pd.ExcelWriter(bio, engine="openpyxl") as writer:
             table.to_excel(writer, "Data", index=True)
 
         headers = [
-            ("Content-type", "application/octet-stream"),
+            ("Content-type", EXL),
             ("Content-Disposition", "attachment; filename=hads.xlsx"),
         ]
         start_response("200 OK", headers)

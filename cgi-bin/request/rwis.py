@@ -10,6 +10,7 @@ from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
 
 DELIMITERS = {"comma": ",", "space": " ", "tab": "\t"}
+EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 def get_time(form, tzname):
@@ -103,7 +104,7 @@ def application(environ, start_response):
             df.to_excel(writer, "Data", index=False, columns=myvars)
 
         headers = [
-            ("Content-type", "application/vnd.ms-excel"),
+            ("Content-type", EXL),
             ("Content-disposition", "attachment; Filename=rwis.xlsx"),
         ]
         start_response("200 OK", headers)

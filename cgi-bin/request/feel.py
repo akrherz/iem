@@ -7,6 +7,8 @@ import pandas as pd
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn
 
+EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
 
 def run(sts, ets, start_response):
     """ Get data! """
@@ -32,13 +34,13 @@ def run(sts, ets, start_response):
     df2["valid"] = df2["valid"].apply(fmt)
 
     bio = BytesIO()
-    with pd.ExcelWriter(bio) as writer:
+    with pd.ExcelWriter(bio, engine="openpyxl") as writer:
         df.to_excel(writer, "Daily Data", index=False)
         df2.to_excel(writer, "Hourly Data", index=False)
 
     headers = [
-        ("Content-type", "application/vnd.ms-excel"),
-        ("Content-Disposition", "attachment;Filename=feel.xls"),
+        ("Content-type", EXL),
+        ("Content-disposition", "attachment;Filename=feel.xlsx"),
     ]
     start_response("200 OK", headers)
     return bio.getvalue()
