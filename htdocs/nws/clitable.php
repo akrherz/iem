@@ -78,11 +78,13 @@ $table = <<<EOF
 </thead>
 EOF;
 function departure($actual, $normal){
-	if ($actual == null || $normal == null) return "M";
+    // JSON upstream hacky returns M instead of null
+    if ($actual == "M" || $normal == "M") return "M";
 	return $actual - $normal;
 }
-function departcolor($actual, $normal){
-	if ($actual == null || $normal == null) return "#FFF";
+    // JSON upstream hacky returns M instead of null
+    function departcolor($actual, $normal){
+	if ($actual == "M" || $normal == "M") return "#FFF";
 	$diff = $actual - $normal;
 	if ($diff == 0) return "#fff";
 	if ($diff >= 10) return "#FF1493";
@@ -96,12 +98,12 @@ function trace($val){
 	return $val;
 }
 function new_record($actual, $record){
-	if ($actual == null || $record == null) return "";
+	if ($actual == "M" || $record == "M") return "";
 	if ($actual == $record) return "<i class=\"fa fa-star-empty\"></i>";
 	if ($actual > $record) return "<i class=\"fa fa-star\"></i>";
 }
 function new_record2($actual, $record){
-	if ($actual == null || $record == null) return "";
+	if ($actual == "M" || $record == "M") return "";
 	if ($actual == $record) return "<i class=\"fa fa-star-empty\"></i>";
 	if ($actual < $record) return "<i class=\"fa fa-star\"></i>";
 }

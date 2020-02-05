@@ -60,6 +60,9 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
   "skyl3" => "Cloud Level 3",
   "skyl4" => "Cloud Level 4",
   "pday" => "Today Rainfall [inch]", );
+if (!array_key_exists($sortcol, $vals)){
+    $sortcol = "name";
+}
 
 $jdata = file_get_contents("http://iem.local/api/1/currents.json?network=${network}");
 $jobj = json_decode($jdata, $assoc=TRUE);
