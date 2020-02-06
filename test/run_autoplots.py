@@ -12,9 +12,10 @@ def get_formats(i):
     """Figure out which formats this script supports"""
     uri = "http://iem.local/plotting/auto/meta/%s.json" % (i,)
     try:
-        res = requests.get(uri, timeout=10)
-    except requests.exceptions.ReadTimeout:
+        res = requests.get(uri, timeout=30)
+    except requests.exceptions.ReadTimeout as exp:
         print("%s. %s -> Read Timeout" % (i, uri[16:]))
+        raise exp
     if res.status_code == 404:
         print("scanning metadata got 404 at i=%s, proceeding" % (i,))
         return False

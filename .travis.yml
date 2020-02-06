@@ -83,6 +83,7 @@ script:
   - sudo service apache2 start
   - sudo cat /var/log/apache2/error.log
   - sudo systemctl status apache2.service -l
+  - ls -l /opt/iem/deployment/mod_wsgi_startup.py
   # Run autoplot tests with basically no data in database
   - python test/run_autoplots.py
   - sudo cat /var/log/apache2/error.log
