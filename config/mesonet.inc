@@ -88,7 +88,7 @@
 
   # Since the above does not cover mapserv binaries
   <Directory "/opt/iem/cgi-bin/mapserv">
-    SetHandler cgi-script
+    SetHandler fcgid-script
     Options +ExecCGI
   </Directory>
 
@@ -156,6 +156,11 @@
     RewriteRule n0r.cgi /cgi-bin/mapserv/mapserv.fcgi?map=/opt/iem/data/wms/nexrad/n0r.map& [QSA,L]
     RewriteRule n0q.cgi /cgi-bin/mapserv/mapserv.fcgi?map=/opt/iem/data/wms/nexrad/n0q.map& [QSA,L]
   </Directory>
+
+  <Directory "/opt/iem/cgi-bin/wms/us">
+    RewriteRule wwa.cgi /cgi-bin/mapserv/mapserv.fcgi?map=/opt/iem/data/wms/us/wwa.map& [QSA,L]
+  </Directory>
+
 
   <Directory "/opt/iem/htdocs/c">
     WSGIProcessGroup iemwsgi_tc
