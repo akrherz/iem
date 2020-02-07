@@ -19,8 +19,8 @@ cd ../summary
 python update_dailyrain.py
 
 cd ../outgoing
-LD_PRELOAD=/opt/miniconda3/envs/prod/lib/libstdc++.so:/opt/miniconda3/envs/prod/lib/libz.so:/opt/miniconda3/envs/prod/lib/libharfbuzz.so php wxc_rwis.php
-LD_PRELOAD=/opt/miniconda3/envs/prod/lib/libstdc++.so:/opt/miniconda3/envs/prod/lib/libz.so:/opt/miniconda3/envs/prod/lib/libharfbuzz.so php wxc_awos.php
+php wxc_rwis.php
+php wxc_awos.php
 python madis2csv.py
 python wxc_azos_prec.py
 python wxc_iarwis_traffic.py
