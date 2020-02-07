@@ -327,7 +327,7 @@ def plotter(fdict):
     if gdf.empty:
         fitbox(fig, "No warnings Found!", 0.2, 0.8, 0.2, 0.5, color="white")
 
-    df = gdf.drop("utmgeom", axis=1)
+    df = gdf.drop(["utmgeom", "issue"], axis=1)
     return fig, df, imagemap.read()
 
 
