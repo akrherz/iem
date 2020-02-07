@@ -1,10 +1,10 @@
 sudo: required
-dist: xenial
+dist: bionic
 cache:
   timeout: 1000
   directories:
-    - $HOME/.cache/pip
     - $HOME/miniconda
+    - $HOME/.cache/pip
 addons:
   hosts:
     - iemdb2.local
@@ -62,6 +62,8 @@ before_install:
   - echo '<VirtualHost *:80>' | sudo tee /etc/apache2/sites-enabled/iem.conf > /dev/null
   - cat config/mesonet.inc | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
   - echo '</VirtualHost>' | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
+  # This may be a requirement for mod-wsgi to properly find python tooling?
+  - echo "export PATH=/home/travis/miniconda/envs/prod/bin:$PATH" | sudo tee -a /etc/apache2/envvars > /dev/null
 install:
   - . .ci_tooling/miniconda.sh
 
@@ -80,6 +82,8 @@ script:
   # restart apache
   - sudo service apache2 stop
   - sudo service apache2 start
+  - which python
+  - python /opt/iem/deployment/mod_wsgi_startup.py
   - sudo cat /var/log/apache2/error.log
   - sudo systemctl status apache2.service -l
   # Run autoplot tests with basically no data in database

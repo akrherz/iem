@@ -13,15 +13,16 @@ def get_formats(i):
     uri = "http://iem.local/plotting/auto/meta/%s.json" % (i,)
     try:
         res = requests.get(uri, timeout=30)
-    except requests.exceptions.ReadTimeout as exp:
+    except requests.exceptions.ReadTimeout:
         print("%s. %s -> Read Timeout" % (i, uri[16:]))
-        raise exp
+        raise
     if res.status_code == 404:
         print("scanning metadata got 404 at i=%s, proceeding" % (i,))
         return False
     if res.status_code != 200:
         print("%s. %s -> HTTP: %s" % (i, uri, res.status_code))
         print(res.text)
+        raise Exception("json fetch failed, erroring out")
     try:
         json = res.json()
     except Exception as exp:
@@ -42,7 +43,7 @@ def run_plot(i, fmt):
     """Run this plot"""
     uri = "http://iem.local/plotting/auto/plot/%s/dpi:100::_cb:1.%s" % (i, fmt)
     try:
-        res = requests.get(uri, timeout=600)
+        res = requests.get(uri, timeout=60)
     except requests.exceptions.ReadTimeout:
         print("%s. %s -> Read Timeout" % (i, uri[16:]))
     # Known failures likely due to missing data
