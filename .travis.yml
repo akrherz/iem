@@ -56,13 +56,12 @@ before_install:
   - sudo a2enmod headers rewrite proxy cgi expires authz_groupfile
   # we do things the old fashioned way, we earn it
   - sudo a2dissite 000-default.conf
+  # reduce resource usage of mod-wsgi processes
+  - sed -i -E "s/ processes=([0-9]+) / processes=4 /" deployment/apache_configs/mod_wsgi.conf
   - sudo cp deployment/apache_configs/mod_wsgi.conf /etc/apache2/sites-enabled/
   - echo '<VirtualHost *:80>' | sudo tee /etc/apache2/sites-enabled/iem.conf > /dev/null
   - cat config/mesonet.inc | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
   - echo '</VirtualHost>' | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
-  # Setup PATH so that miniconda gets in the front
-  - echo "export PATH=/home/travis/miniconda/envs/prod/bin:$PATH" | sudo tee -a /etc/apache2/envvars > /dev/null
-  - echo "export LD_PRELOAD=/home/travis/miniconda/envs/prod/lib/libz.so" | sudo tee -a /etc/apache2/envvars > /dev/null
 install:
   - . .ci_tooling/miniconda.sh
 
@@ -83,7 +82,6 @@ script:
   - sudo service apache2 start
   - sudo cat /var/log/apache2/error.log
   - sudo systemctl status apache2.service -l
-  - ls -l /opt/iem/deployment/mod_wsgi_startup.py
   # Run autoplot tests with basically no data in database
   - python test/run_autoplots.py
   - sudo cat /var/log/apache2/error.log
