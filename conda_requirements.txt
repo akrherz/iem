@@ -57,6 +57,7 @@ pyproj
 pyshp>=2
 # for testing
 pytest
+pytest-xdist
 # important
 python-memcached
 # important
