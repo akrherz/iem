@@ -90,6 +90,6 @@ gpend
 
 
 if (-e mesonet_altm.gif) then
-  /home/ldm/bin/pqinsert -p "plot ac ${timestamp} mesonet_altm.gif mesonet_altm_${hh}00.gif gif" mesonet_altm.gif >& /dev/null
+    pqinsert -p "plot ac ${timestamp} mesonet_altm.gif mesonet_altm_${hh}00.gif gif" mesonet_altm.gif >& /dev/null
 	rm -f mesonet_altm.gif
 endif

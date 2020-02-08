@@ -2,7 +2,6 @@
 
   Run from RUN_20_AFTER.sh
 """
-from __future__ import print_function
 import datetime
 import os
 import sys
@@ -11,8 +10,9 @@ import pandas as pd
 import pytz
 from pint import UnitRegistry
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
 
+LOG = logger()
 UREG = UnitRegistry()
 QUANTITY = UREG.Quantity
 SID = "OT0012"
@@ -72,7 +72,6 @@ def sum_hourly(hdf, date, col):
     ets = sts + datetime.timedelta(hours=24)
     df2 = hdf[(hdf["valid"] > sts) & (hdf["valid"] < ets)]
     if df2.empty:
-        # print("ingest_cobs found no hourly data for date: %s" % (date,))
         return None
     return float(df2[col].sum())
 
@@ -95,7 +94,6 @@ def database(lastob, ddf, hdf, force_currentlog):
         hdf["TIMESTAMP"].max().replace(tzinfo=pytz.timezone("America/Chicago"))
     )
     if lastob is not None and maxts <= lastob:
-        # print("maxts: %s lastob: %s" % (maxts, lastob))
         return
     iemdb = get_dbconn("iem")
     icursor = iemdb.cursor()
@@ -112,9 +110,7 @@ def database(lastob, ddf, hdf, force_currentlog):
             for key, value in DAILYCONV.items():
                 if value is None:
                     continue
-                # print("D: %s -> %s" % (key, value))
                 ob.data[value] = clean(key, daily.iloc[0][key])
-        # print("date: %s srad_mj: %s" % (localts.date(), ob.data['srad_mj']))
         if ob.data["srad_mj"] is None:
             ob.data["srad_mj"] = sum_hourly(hdf, localts.date(), "SlrMJ_Tot")
         if ob.data["pday"] is None:
@@ -122,7 +118,6 @@ def database(lastob, ddf, hdf, force_currentlog):
         for key, value in HOURLYCONV.items():
             if value is None:
                 continue
-            # print("H: %s -> %s" % (key, value))
             ob.data[value] = clean(key, row[key])
         ob.save(
             icursor,
@@ -154,12 +149,12 @@ def campbell2df(year):
     if not os.path.isfile(dailyfn):
         dailyfn = "%s/%s/Daily.dat" % (DIRPATH, year - 1)
         if not os.path.isfile(dailyfn):
-            print("cobs_ingest.py missing %s" % (dailyfn,))
+            LOG.info("missing %s", dailyfn)
             return None, None
     if not os.path.isfile(hourlyfn):
         hourlyfn = "%s/%s/Hourly.dat" % (DIRPATH, year - 1)
         if not os.path.isfile(hourlyfn):
-            print("cobs_ingest.py missing %s" % (hourlyfn,))
+            LOG.info("missing %s", hourlyfn)
             return None, None
 
     ddf = pd.read_csv(
@@ -193,7 +188,7 @@ def campbell2df(year):
 def main(argv):
     """Go for it!"""
     if len(argv) > 1:
-        print("Running special request")
+        LOG.info("Running special request")
         for year in range(2017, 2018):
             ddf, hdf = campbell2df(year)
             if ddf is not None:

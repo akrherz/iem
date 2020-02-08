@@ -1,7 +1,7 @@
 # Only EDIT on github!
 #
-PATH=/opt/miniconda3/envs/prod/bin:/home/ldm/bin:/usr/bin:/bin:/sbin:/usr/sbin:/home/mesonet/bin:/usr/local/bin
-PYTHONPATH=/opt/iem/scripts/lib
+BASH_ENV=/home/mesonet/.bashrc
+SHELL=/bin/bash
 S=/opt/iem/scripts
 
 # webalizer

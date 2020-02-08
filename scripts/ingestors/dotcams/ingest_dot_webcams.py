@@ -6,11 +6,7 @@
                   ViewID
                      GMT Timestamp....
 """
-from __future__ import print_function
-
-# stdlib
 import os
-import datetime
 import re
 import subprocess
 
@@ -20,6 +16,7 @@ import psycopg2.extras
 import pytz
 import pyiem.util as util
 
+LOG = util.logger()
 FONT = ImageFont.truetype("veramono.ttf", 10)
 
 
@@ -72,17 +69,16 @@ def do_imagework(cameras, cid, tokens, now):
 def process(tokens, cameras, mcursor):
     """Process this line from what we downloaded"""
     cid = "IDOT-%s-%s" % (tokens[0], tokens[2])
-    gmt = datetime.datetime(
+    gmt = util.utc(
         int(tokens[3]),
         int(tokens[4]),
         int(tokens[5]),
         int(tokens[6]),
         int(tokens[7]),
     )
-    gmt = gmt.replace(tzinfo=pytz.utc)
     now = gmt.astimezone(pytz.timezone("America/Chicago"))
     if cid not in cameras:
-        print("ingest_dot_webcams.py unknown CameraID: %s" % (cid,))
+        LOG.info("unknown CameraID: %s", cid)
         cameras[cid] = {"pan0": 0, "name": "unknown"}
 
     drct = do_imagework(cameras, cid, tokens, now)
@@ -107,7 +103,7 @@ def process(tokens, cameras, mcursor):
     proc.communicate()
 
     cmd = (
-        "/home/ldm/bin/pqinsert -p 'webcam ac %s camera/640x480/%s.jpg "
+        "pqinsert -p 'webcam ac %s camera/640x480/%s.jpg "
         "camera/%s/%s_%s.jpg jpg' %s-640x480.jpg"
         ""
     ) % (
@@ -136,9 +132,8 @@ def process(tokens, cameras, mcursor):
         (now, drct, cid),
     )
     if mcursor.rowcount == 0:
-        print(
-            ("ingest_dot_webcams adding camera_current entry for cam: %s")
-            % (cid,)
+        LOG.info(
+            "ingest_dot_webcams adding camera_current entry for cam: %s", cid
         )
         mcursor.execute(
             """
@@ -155,13 +150,13 @@ def main():
 
     props = util.get_properties()
     ftp_pass = props["rwis_ftp_password"]
-    utc = datetime.datetime.utcnow()
+    utcnow = util.utc()
 
     # we work from here
     os.chdir("/mesonet/data/dotcams")
 
     # Every three hours, clean up after ourselves :)
-    if utc.hour % 3 == 0 and utc.minute < 5:
+    if utcnow.hour % 3 == 0 and utcnow.minute < 5:
         subprocess.call(
             "/usr/sbin/tmpwatch 6 165.206.203.34/rwis_images", shell=True
         )

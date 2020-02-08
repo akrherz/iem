@@ -37,7 +37,8 @@ fwrite($rwis, "Weather Central 001d0300 Surface Data
 
 
 $now = time();
-while ( list($bogus, $val) = each($jobj["data"]) ) {
+foreach($jobj["data"] as $bogus => $val)
+{
   $tdiff = $now - strtotime($val["local_valid"]);
   if ($tdiff > 3600){ continue; }
   if ($val['pday'] < 0){ $val['pday'] = 0; }
@@ -55,7 +56,7 @@ while ( list($bogus, $val) = each($jobj["data"]) ) {
 fclose($rwis);
 
 $pqstr = sprintf("data c %s wxc/wxc_ia_awos.txt bogus txt", gmdate("YmdHi"));
-$cmd = sprintf("/home/ldm/bin/pqinsert -i -p '%s' /tmp/wxc_ia_awos.txt", $pqstr);
+$cmd = sprintf("pqinsert -i -p '%s' /tmp/wxc_ia_awos.txt", $pqstr);
 system($cmd);
 unlink("/tmp/wxc_ia_awos.txt");
 

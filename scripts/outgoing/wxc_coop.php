@@ -5,7 +5,7 @@
  * to process and I'd like to think I do a great job at it :)
  */
 
-include '../../config/settings.inc.php';
+require_once '../../config/settings.inc.php';
 
 $coop = fopen('/tmp/wxc_coop.txt', 'w');
 fwrite($coop, "Weather Central 001d0300 Surface Data
@@ -29,7 +29,8 @@ $jobj = json_decode($jdata, $assoc=TRUE);
 
 $now = time();
 
-while (list($bogus, $iemob) = each($jobj["data"]) ){
+foreach($jobj["data"] as $bogus => $iemob)
+{
     if ((float)$iemob["max_tmpf"] < -50) $iemob["max_tmpf"] = " ";
     if ((float)$iemob["min_tmpf"] > 90) $iemob["min_tmpf"] = " ";
     if ((float)$iemob["min_tmpf"] < -90) $iemob["min_tmpf"] = " ";
@@ -50,7 +51,7 @@ while (list($bogus, $iemob) = each($jobj["data"]) ){
 fclose($coop);
 
 $pqstr = "data c 000000000000 wxc/wxc_coop.txt bogus txt";
-$cmd = sprintf("/home/ldm/bin/pqinsert -p '%s' /tmp/wxc_coop.txt", $pqstr);
+$cmd = sprintf("pqinsert -p '%s' /tmp/wxc_coop.txt", $pqstr);
 system($cmd);
 unlink("/tmp/wxc_coop.txt");
 

@@ -2,7 +2,6 @@
  Generate a WXC formatted file with moon conditions for Iowa sites.  I am
  unsure if the TV folks are still using this or not.  Its easy to generate
 """
-from __future__ import print_function
 import datetime
 import os
 import subprocess
@@ -119,7 +118,7 @@ def main():
     out.close()
 
     pqstr = "data c 000000000000 wxc/wxc_moon.txt bogus text"
-    cmd = "/home/ldm/bin/pqinsert -p '%s' /tmp/wxc_moon.txt" % (pqstr,)
+    cmd = "pqinsert -p '%s' /tmp/wxc_moon.txt" % (pqstr,)
     subprocess.call(cmd, shell=True)
     os.remove("/tmp/wxc_moon.txt")
 
