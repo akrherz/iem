@@ -3,7 +3,7 @@ import datetime
 
 import numpy as np
 import pandas as pd
-import pyproj
+from pyproj import Transformer
 from geopandas import read_postgis
 from shapely.geometry import Polygon, Point
 from scipy.interpolate import Rbf
@@ -12,8 +12,8 @@ from pyiem import reference
 from pyiem.plot import MapPlot, nwssnow
 from pyiem.util import get_autoplot_context, get_dbconn
 
-EPSG4326 = pyproj.Proj(init="epsg:4326")
-EPSG2163 = pyproj.Proj(init="epsg:2163")
+T4326_2163 = Transformer.from_proj(4326, 2163, always_xy=True)
+T2163_4326 = Transformer.from_proj(2163, 4326, always_xy=True)
 USEME = "used_for_analysis"
 SCIPY = (
     "https://docs.scipy.org/doc/scipy/reference/generated/"
@@ -218,10 +218,10 @@ def compute_grid_bounds(ctx):
     else:
         bnds = reference.wfo_bounds[ctx["wfo"]]
     # xmin, ymin, xmax, ymax in EPSG:4326, we want meter space
-    ll = pyproj.transform(EPSG4326, EPSG2163, bnds[0], bnds[1])
-    ul = pyproj.transform(EPSG4326, EPSG2163, bnds[0], bnds[3])
-    lr = pyproj.transform(EPSG4326, EPSG2163, bnds[2], bnds[1])
-    ur = pyproj.transform(EPSG4326, EPSG2163, bnds[2], bnds[3])
+    ll = T4326_2163.transform(bnds[0], bnds[1])
+    ul = T4326_2163.transform(bnds[0], bnds[3])
+    lr = T4326_2163.transform(bnds[2], bnds[1])
+    ur = T4326_2163.transform(bnds[2], bnds[3])
     buffer = 20000.0  # km
     return [
         min(ll[0], ul[0]) - buffer,  # minx
@@ -250,7 +250,7 @@ def add_zeros(df, ctx):
             df2 = df[df["geo"].within(poly)]
             if df2.empty:
                 # Add a zero at this "point"
-                (lon, lat) = pyproj.transform(EPSG2163, EPSG4326, x, y)
+                (lon, lat) = T2163_4326.transform(x, y)
                 if ctx["z"] != "no":
                     newrows.append(
                         {
@@ -287,7 +287,7 @@ def do_analysis(df, ctx):
     xi = np.arange(ctx["bnds2163"][0], ctx["bnds2163"][2] + sz, sz)
     yi = np.arange(ctx["bnds2163"][1], ctx["bnds2163"][3] + sz, sz)
     xi, yi = np.meshgrid(xi, yi)
-    lons, lats = pyproj.transform(EPSG2163, EPSG4326, xi, yi)
+    lons, lats = T2163_4326.transform(xi, yi)
     gridder = Rbf(
         df2["level_0"].values,
         df2["level_1"].values,
