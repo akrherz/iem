@@ -3,7 +3,6 @@ Need to do some custom 1 minute data aggregation to fill out hourly table.
 """
 import datetime
 
-import pandas as pd
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.util import get_dbconn, utc, logger
