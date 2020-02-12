@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (38, now());
+INSERT into iem_schema_manager_version values (39, now());
 
 ---
 --- TABLES THAT ARE LOADED VIA shp2pgsql
@@ -564,7 +564,8 @@ create table sbw(
   floodtag_dam varchar(64),
   geom geometry(MultiPolygon, 4326),
   tml_geom geometry(Point, 4326),
-  tml_geom_line geometry(Linestring, 4326)
+  tml_geom_line geometry(Linestring, 4326),
+  hvtec_nwsli text
 );
 ALTER TABLE sbw OWNER to mesonet;
 GRANT ALL on sbw to ldm;
