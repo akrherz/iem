@@ -4,6 +4,7 @@ Need to do some custom 1 minute data aggregation to fill out hourly table.
 import datetime
 
 import pandas as pd
+import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.util import get_dbconn, utc, logger
 
@@ -102,7 +103,7 @@ def main():
         index_col=None,
     )
     # We want NaN values as None
-    df = df.replace({pd.np.nan: None})
+    df = df.replace({np.nan: None})
     cursor = pgconn.cursor()
     for _, row in df.iterrows():
         process(cursor, row)
