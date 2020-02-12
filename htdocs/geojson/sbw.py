@@ -30,7 +30,8 @@ def run(ts):
         """
         SELECT ST_asGeoJson(geom) as geojson, phenomena, eventid, wfo,
         significance, polygon_end at time zone 'UTC' as utc_polygon_end,
-        polygon_begin at time zone 'UTC' as utc_polygon_begin, status
+        polygon_begin at time zone 'UTC' as utc_polygon_begin, status,
+        hvtec_nwsli
         from """
         + sbwtable
         + """ WHERE
@@ -63,6 +64,7 @@ def run(ts):
                     eventid=row["eventid"],
                     polygon_begin=sts,
                     expire=ets,
+                    hvtec_nwsli=row["hvtec_nwsli"],
                 ),
                 geometry=json.loads(row["geojson"]),
             )

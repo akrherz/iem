@@ -29,7 +29,7 @@ def get_events(ctx):
     cursor.execute(
         """
   select wfo, significance, phenomena, issue, expire, eventid,
-  tml_direction, tml_sknt from sbw
+  tml_direction, tml_sknt, hvtec_nwsli from sbw
   where status = 'NEW' and
   ST_Contains(geom, ST_SetSRID(ST_GeomFromEWKT('POINT(%s %s)'),4326)) and
   issue > '2005-10-01' """
@@ -50,6 +50,7 @@ def get_events(ctx):
                 "expire": row[4].strftime("%Y-%m-%dT%H:%MZ"),
                 "tml_direction": row[6],
                 "tml_sknt": row[7],
+                "hvtec_nwsli": row[8],
             }
         )
     return data

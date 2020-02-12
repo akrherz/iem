@@ -34,7 +34,7 @@ if (isset($_REQUEST["phenomena"])){
   			issue, expire, phenomena, status, w.wfo, eventid, significance,
   		to_char(issue, 'YYYY-MM-DDThh24:MI:SSZ') as iso_issue,
   		to_char(expire, 'YYYY-MM-DDThh24:MI:SSZ') as iso_expire,
-  		ST_asGeoJson(geom) as geojson
+  		ST_asGeoJson(geom) as geojson, hvtec_nwsli
       FROM sbw_$year w WHERE
       status = 'NEW' and significance = $1 and wfo = $2
       and eventid = $3 and phenomena = $4");
@@ -45,7 +45,7 @@ if (isset($_REQUEST["phenomena"])){
   			issue, expire, phenomena, status, w.wfo, eventid, significance,
   		to_char(issue, 'YYYY-MM-DDThh24:MI:SSZ') as iso_issue,
   		to_char(expire, 'YYYY-MM-DDThh24:MI:SSZ') as iso_expire,
-  			ST_asGeoJson(u.geom) as geojson
+  			ST_asGeoJson(u.geom) as geojson, w.hvtec_nwsli
   			FROM warnings_$year w JOIN ugcs u on (u.gid = w.gid) WHERE
   			significance = $1 and w.wfo = $2
   			and eventid = $3 and phenomena = $4");
@@ -65,7 +65,7 @@ if (isset($_REQUEST["phenomena"])){
   			issue, expire, phenomena, status, w.wfo, eventid, significance,
   		to_char(issue, 'YYYY-MM-DDThh24:MI:SSZ') as iso_issue,
   		to_char(expire, 'YYYY-MM-DDThh24:MI:SSZ') as iso_expire,
-			ST_asGeoJson(geom) as geojson
+			ST_asGeoJson(geom) as geojson, hvtec_nwsli
       FROM sbw w WHERE
       issue < $2 and
       expire > $1 and expire < $3 $str_wfo_list
@@ -100,6 +100,7 @@ for ($i=0;$row=pg_fetch_assoc($rs);$i++)
                 "eventid"   => $row["eventid"],
                 "issue"     => $row["iso_issue"],
                 "expire"     => $row["iso_expire"],
+                "hvtec_nwsli" => $row["hvtec_nwsli"],
                 "link"         => sprintf("<a href='%s'>%s %s %s</a> &nbsp; ",
          $vtecurl, $vtec_phenomena[$row["phenomena"]],
          $vtec_significance[$row["significance"]], $row["eventid"]),
