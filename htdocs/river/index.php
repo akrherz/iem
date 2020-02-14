@@ -88,9 +88,11 @@ for($i=0;$row=pg_fetch_array($rs);$i++)
   $uri = sprintf("/vtec/#%s-O-%s-K%s-%s-%s-%04d", date("Y"),
         "NEW", $row["wfo"], $row["phenomena"],
         "W", $row["eventid"]);
+    if (!array_key_exists($river, $rivers)){
+        $rivers[$river] = "";
+    }
 
-
-  @$rivers[$river] .= sprintf("<tr><td style='background: %s;'>&nbsp;&nbsp;</td>".
+  $rivers[$river] .= sprintf("<tr><td style='background: %s;'>&nbsp;&nbsp;</td>".
       "<th>%s<br />".
       "<a href=\"/plotting/auto/?q=160&amp;station=%s\"><i class=\"fa fa-signal\"></i> %s</a></th><td><a href='%s'>%s</a></td><td>%s</td>".
       "<td>%s</td><td>%s</td><td><strong>Impact...</strong> %s</td></tr>",
@@ -134,13 +136,13 @@ which shows forecasted stage and observations.</p>
 
 <table class="table table-condensed table-bordered">
 <tr>
- <th>&nbsp; &nbsp;</th>
  <th>Key:</th>
  <td style="background: #ff0;">Near Flood Stage</td>
  <td style="background: #ff9900;">Minor Flooding</td>
  <td style="background: #f00;">Moderate Flooding</td>
  <td style="background: #f0f;">Major Flooding</td>
-</tr></table>
+</tr>
+</table>
 EOF;
 
 $content .= '<p><table class="table table-condensed table-bordered">';
