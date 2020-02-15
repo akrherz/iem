@@ -1,12 +1,16 @@
 """ Find VTEC events by a given Lat / Lon pair """
 import json
+from io import BytesIO
 import datetime
 
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
+from pandas.io.sql import read_sql
+
+EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
-def run(lon, lat, sdate, edate):
+def get_df(lon, lat, sdate, edate):
     """Generate a report of VTEC ETNs used for a WFO and year
 
     Args:
@@ -14,9 +18,8 @@ def run(lon, lat, sdate, edate):
       year (int): year to run for
     """
     pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor()
 
-    cursor.execute(
+    return read_sql(
         """
     WITH myugcs as (
         select gid from ugcs where
@@ -29,20 +32,24 @@ def run(lon, lat, sdate, edate):
     from warnings w JOIN myugcs u on (w.gid = u.gid) WHERE
     issue > %s and issue < %s ORDER by issue ASC
     """,
-        (lon, lat, sdate, edate),
+        pgconn,
+        params=(lon, lat, sdate, edate),
     )
 
+
+def to_json(df):
+    """Materialize as JSON."""
     res = {"events": []}
-    for row in cursor:
+    for _, row in df.iterrows():
         res["events"].append(
             {
-                "issue": row[0],
-                "expire": row[1],
-                "eventid": row[2],
-                "phenomena": row[3],
-                "hvtec_nwsli": row[6],
-                "significance": row[4],
-                "wfo": row[5],
+                "issue": row["iso_issued"],
+                "expire": row["iso_expired"],
+                "eventid": row["eventid"],
+                "phenomena": row["phenomena"],
+                "hvtec_nwsli": row["hvtec_nwsli"],
+                "significance": row["significance"],
+                "wfo": row["wfo"],
             }
         )
 
@@ -61,8 +68,26 @@ def application(environ, start_response):
         fields.get("edate", "2099/1/1"), "%Y/%m/%d"
     )
     cb = fields.get("callback", None)
+    fmt = fields.get("fmt", "json")
 
-    res = run(lon, lat, sdate, edate)
+    df = get_df(lon, lat, sdate, edate)
+    if fmt == "xlsx":
+        fn = "vtec_%.4fW_%.4fN_%s_%s.xlsx" % (
+            0 - lon,
+            lat,
+            sdate.strftime("%Y%m%d"),
+            edate.strftime("%Y%m%d"),
+        )
+        headers = [
+            ("Content-type", EXL),
+            ("Content-disposition", "attachment; Filename=" + fn),
+        ]
+        start_response("200 OK", headers)
+        bio = BytesIO()
+        df.to_excel(bio, index=False)
+        return [bio.getvalue()]
+
+    res = to_json(df)
     if cb is None:
         data = res
     else:

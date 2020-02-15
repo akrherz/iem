@@ -477,7 +477,8 @@ EOM
   				"lon" => "Longitude in (degrees east)",
   				"sdate" => "YYYY-mm-dd Start Date (UTC)",
   		  		"edate" => "YYYY-mm-dd End Date (UTC)",
-  				),
+                "fmt" => "(optional) Format to download as: json (default) or xlsx"    
+                ),
   		"example" => Array(
   				"{latitude}" => "42.5",
   				"{longitude}" => "-95.0",
@@ -563,7 +564,8 @@ EOM
   		"vars" => Array(
   				"ugc" => "Five character UGC identifier used by the NWS",
   				"sdate" => "YYYY-mm-dd Start Date (UTC)",
-  		  		"edate" => "YYYY-mm-dd End Date (UTC)",
+                "edate" => "YYYY-mm-dd End Date (UTC)",
+                "fmt" => "(optional) Format to download as: json (default) or xlsx"    
   		),
   		"example" => Array(
   				"{ugc}" => "IAC001",

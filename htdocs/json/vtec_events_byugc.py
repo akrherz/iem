@@ -1,17 +1,20 @@
 """ Find VTEC events by a given UGC code. """
 import json
+from io import BytesIO
 import datetime
 
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
 from pandas.io.sql import read_sql
 
+EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
-def run(ugc, sdate, edate):
+
+def get_df(ugc, sdate, edate):
     """ Answer the request! """
     pgconn = get_dbconn("postgis")
 
-    df = read_sql(
+    return read_sql(
         """
         SELECT
         to_char(issue at time zone 'UTC',
@@ -26,6 +29,9 @@ def run(ugc, sdate, edate):
         params=(ugc, sdate, edate),
     )
 
+
+def as_json(df):
+    """Materialize this df as JSON."""
     res = {"events": []}
     for _, row in df.iterrows():
         res["events"].append(
@@ -54,8 +60,25 @@ def application(environ, start_response):
         fields.get("edate", "2099/1/1"), "%Y/%m/%d"
     )
     cb = fields.get("callback", None)
+    fmt = fields.get("fmt", "json")
 
-    res = run(ugc, sdate, edate)
+    df = get_df(ugc, sdate, edate)
+    if fmt == "xlsx":
+        fn = "vtec_%s_%s_%s.xlsx" % (
+            ugc,
+            sdate.strftime("%Y%m%d"),
+            edate.strftime("%Y%m%d"),
+        )
+        headers = [
+            ("Content-type", EXL),
+            ("Content-disposition", "attachment; Filename=" + fn),
+        ]
+        start_response("200 OK", headers)
+        bio = BytesIO()
+        df.to_excel(bio, index=False)
+        return [bio.getvalue()]
+
+    res = as_json(df)
     if cb is None:
         data = res
     else:
