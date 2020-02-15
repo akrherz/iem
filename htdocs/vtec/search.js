@@ -202,7 +202,7 @@ function setupUI() {
 		model : 'SBW',
 		proxy : {
 			type : 'ajax',
-			url : '/json/vtec_events_byugc.php',
+			url : '/json/vtec_events_byugc.py',
 	        reader: {
 	            type: 'json',
 	            rootProperty: 'events'
@@ -348,7 +348,7 @@ function setupUI() {
 			text : 'Load Grid with Settings Above',
 			handler : function(){
 
-				eventStore.getProxy().setUrl('/json/vtec_events_byugc.php');
+				eventStore.getProxy().setUrl('/json/vtec_events_byugc.py');
 
 				eventStore.load({
 					add : false,

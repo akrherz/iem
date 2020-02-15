@@ -556,7 +556,7 @@ EOM
   
   $services[] = Array(
   		"title" => "Search for Warnings by UGC Code and Date Interval",
-  		"url" => "/json/vtec_events_byugc.php?ugc={ugc}&edate={edate}&sdate={sdate}",
+  		"url" => "/json/vtec_events_byugc.py?ugc={ugc}&edate={edate}&sdate={sdate}",
   		"desc" => "Provides a json response of archived warnings valid for the
   		given UGC code and date interval (UTC time, end date exclusive). The date
   		of product issuance is used for the date filtering.",

@@ -263,6 +263,8 @@
     RewriteRule prism/([0-9\.\-]+)/([0-9\.\-]+)/([0-9\.\-]+)$ prism.py?lon=$1&lat=$2&valid=$3 [QSA]
     RewriteRule stage4/([0-9\.\-]+)/([0-9\.\-]+)/([0-9\.\-]+)$ stage4.py?lon=$1&lat=$2&valid=$3 [QSA]
     RewriteRule network/([0-9\.\-A-Z]+).geojson network.py?network=$1 [QSA]
+    # 15 Feb 2020 migration from PHP to python
+	RewriteRule vtec_events_byugc.php(.*) vtec_events_byugc.py$1 [QSA]
   </Directory>
 
   <Directory "/opt/iem/htdocs/kml">
