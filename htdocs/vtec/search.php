@@ -10,8 +10,7 @@ $t = new MyView();
 
 $t->jsextra = <<<EOF
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/5.1.0/build/ext-all.js"></script>
-<script type="text/javascript" src="/vendor/ext/ux/ExcelGridPanel.js"></script>
-<script type="text/javascript" src="search.js?v=16"></script>
+<script type="text/javascript" src="search.js?v=17"></script>
 EOF;
 $t->headextra = <<<EOF
 <script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}" type="text/javascript"></script>
@@ -39,18 +38,9 @@ Warning, and Advisories.  There are currently two options:
 </ul>
 
 <div class="alert alert-info"><strong>Troubles downloading Excel File?</strong>
-<br />It turns out that making an export to Excel option that works for all
-	variants of Microsoft Office and web browsers is very difficult.  Here are
-	some tips.
-<ul>
-	<li>When you "Export to Excel", you should get a file saved in your downloads
-		folder with a .xml ending.</li>
-	<li>When you double click this .xml file, Microsoft Windows may not know
-		what to do with the file.  Try opening Excel first and then go to 
-		File -&gt; Open to attempt to open the file.</li>
-	<li>If that fails, attempt to right click the file and go to 'Open With'
-		and then select Excel from the available options.</li>
-</ul>
+<br />On 15 Feb 2020, this application was updated to export Excel files via
+a more robust mechanism.  If you have troubles opening the downloaded Excel files,
+please <a href="/info/contacts.php">contact us</a>.
 		</div>
 		
 <h3><a name="bypoint">1.</a> Search for Storm Based Warnings by Point</h3>

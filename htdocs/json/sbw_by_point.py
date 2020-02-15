@@ -2,13 +2,17 @@
 Get storm based warnings by lat lon point, optionally a time
 """
 import sys
+from io import BytesIO
 import json
 import datetime
 
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, utc
+from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
+from pandas.io.sql import read_sql
 
 ISO = "%Y-%m-%dT%H:%M:%SZ"
+EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 def get_events(ctx):
@@ -24,11 +28,14 @@ def get_events(ctx):
         data["valid"] = ctx["valid"].strftime(ISO)
 
     pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor()
-    cursor.execute("""SET TIME ZONE 'UTC'""")
-    cursor.execute(
+    df = read_sql(
         """
-  select wfo, significance, phenomena, issue, expire, eventid,
+  select wfo, significance, phenomena,
+  to_char(issue at time zone 'UTC',
+            'YYYY-MM-DDThh24:MIZ') as iso_issued,
+    to_char(expire at time zone 'UTC',
+            'YYYY-MM-DDThh24:MIZ') as iso_expired,
+    eventid,
   tml_direction, tml_sknt, hvtec_nwsli from sbw
   where status = 'NEW' and
   ST_Contains(geom, ST_SetSRID(ST_GeomFromEWKT('POINT(%s %s)'),4326)) and
@@ -37,20 +44,36 @@ def get_events(ctx):
         + """
   ORDER by issue ASC
     """,
-        (ctx["lon"], ctx["lat"]),
+        pgconn,
+        params=(ctx["lon"], ctx["lat"]),
     )
-    for row in cursor:
+    if df.empty:
+        return data, df
+    df["name"] = df[["phenomena", "significance"]].apply(
+        lambda x: get_ps_string(x[0], x[1]), axis=1
+    )
+    df["ph_name"] = df["phenomena"].map(VTEC_PHENOMENA)
+    df["sig_name"] = df["significance"].map(VTEC_SIGNIFICANCE)
+    return data, df
+
+
+def to_json(data, df):
+    """Make JSON."""
+    for _, row in df.iterrows():
         data["sbws"].append(
             {
-                "phenomena": row[2],
-                "eventid": row[5],
-                "significance": row[1],
-                "wfo": row[0],
-                "issue": row[3].strftime("%Y-%m-%dT%H:%MZ"),
-                "expire": row[4].strftime("%Y-%m-%dT%H:%MZ"),
-                "tml_direction": row[6],
-                "tml_sknt": row[7],
-                "hvtec_nwsli": row[8],
+                "phenomena": row["phenomena"],
+                "eventid": row["eventid"],
+                "significance": row["significance"],
+                "wfo": row["wfo"],
+                "issue": row["iso_issued"],
+                "expire": row["iso_expired"],
+                "tml_direction": row["tml_direction"],
+                "tml_sknt": row["tml_sknt"],
+                "hvtec_nwsli": row["hvtec_nwsli"],
+                "name": row["name"],
+                "ph_name": row["ph_name"],
+                "sig_name": row["sig_name"],
             }
         )
     return data
@@ -71,6 +94,7 @@ def application(environ, start_response):
     ctx = {}
     ctx["lat"] = float(fields.get("lat", 41.99))
     ctx["lon"] = float(fields.get("lon", -92.0))
+    fmt = fields.get("fmt", "json")
     try:
         try_valid(ctx, fields)
     except Exception as exp:
@@ -79,8 +103,18 @@ def application(environ, start_response):
         start_response("500 Internal Server Error", headers)
         return [b"Failed to parse valid, ensure YYYY-mm-ddTHH:MM:SSZ"]
 
-    data = get_events(ctx)
-
+    data, df = get_events(ctx)
+    if fmt == "xlsx":
+        fn = "sbw_%.4fN_%.4fW.xlsx" % (ctx["lat"], 0 - ctx["lon"])
+        headers = [
+            ("Content-type", EXL),
+            ("Content-disposition", "attachment; Filename=" + fn),
+        ]
+        start_response("200 OK", headers)
+        bio = BytesIO()
+        df.to_excel(bio, index=False)
+        return [bio.getvalue()]
+    res = to_json(data, df)
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [json.dumps(data).encode("ascii")]
+    return [json.dumps(res).encode("ascii")]

@@ -8,88 +8,19 @@ var marker;
 var marker2;
 var warnStore;
 var eventStore;
+var ugcStore;
 var warntable;
 var eventTable;
-var pDict;
 var map;
 var map2;
-var sDict;
 var sdate;
 var edate;
-var vtec_sig_dict = [
-['W','Warning'],
-['Y','Advisory'],
-['A','Watch'],
-['S','Statement'],
-['F','Forecast'],
-['O','Outlook'],
-['N','Synopsis']
-];
-
-var vtec_phenomena_dict = [
-['SV','Severe Thunderstorm'],
-['TO','Tornado'],
-['MA','Marine'],
-['AF','Ashfall'],
-['AS','Air Stagnation'],
-['AV','Avalanche'],
-['BS','Blowing Snow'],
-['BW', 'Brisk Wind'],
-['BZ','Blizzard'],
-['CF','Coastal Flood'],
-['DU','Blowing Dust'],
-['DS','Dust Storm'],
-['EC','Extreme Cold'],
-['EH','Excessive Heat'],
-['EW','Extreme Wind'],
-['FA','Areal Flood'],
-['FF','Flash Flood'],
-['FL','Flood'],
-['FR','Frost'],
-['FZ','Freeze'],
-['FG','Dense Fog'],
-['FW','Red Flag'],
-['GL','Gale'],
-['HF','Hurricane Force Wind'],
-['HI','Inland Hurricane Wind'],
-['HS','Heavy Snow'],
-['HP','Heavy Sleet'],
-['HT','Heat'],
-['HU','Hurricane'],
-['HW','High Wind'],
-['HY','Hydrologic'],
-['HZ','Hard Freeze'],
-['IS','Ice Storm'],
-['IP','Sleet'],
-['LB','Lake Effect Snow and Blowing Snow'],
-['LE','Lake Effect Snow'],
-['LO','Low Water'],
-['LS','Lakeshore Flood'],
-['LW','Lake Wind'],
-['RB','Small Craft for Rough Bar'],
-['RH','Radiological Hazard'],
-['SB','Snow and Blowing Snow'],
-['SC','Small Craft'],
-['SE','Hazardous Seas'],
-['SI','Small Craft for Winds'],
-['SM','Dense Smoke'],
-['SN','Snow'],
-['SR','Storm'],
-['SU','High Surf'],
-['TI','Inland Tropical Storm Wind'],
-['TR','Tropical Storm'],
-['TS','Tsunami'],
-['TY','Typhoon'],
-['UP','Ice Accretion'],
-['VO','Volcano'],
-['WC','Wind Chill'],
-['WI','Wind'],
-['WS','Winter Storm'],
-['WW','Winter Weather'],
-['ZF','Freezing Fog'],
-['ZR','Freezing Rain'],
-['ZY', 'Freezing Spray']
-];
+var defaultUGC;
+var stateCombobox;
+var ugcCombobox;
+var BACKEND_EVENTS_BYPOINT = '/json/vtec_events_bypoint.py';
+var BACKEND_EVENTS_BYUGC = '/json/vtec_events_byugc.py';
+var BACKEND_SBW_BYPOINT = '/json/sbw_by_point.py';
 
 Ext.override(Date, {
     toUTC : function() {
@@ -149,24 +80,8 @@ Ext.define('SBW', {
         {name: 'eventid',  type: 'float'},
         {name: 'wfo', type: 'string'},
         {name: 'phenomena', type: 'string'},
-        {name: 'pstring', type: 'string', 
-        	convert: function(val, record){
-                var idx = pDict.find('abbr', record.data.phenomena);
-                if (idx > -1) {
-                    return pDict.getAt(idx).data.name;
-                } else {
-                        return record.data.phenomena;
-                }
-        	}},
-        {name: 'sig_string', type: 'string',
-        	convert: function(val, record){
-                var idx = sDict.find('abbr', record.data.significance);
-                if (idx > -1) {
-                	return sDict.getAt(idx).data.name;
-                } else {
-                        return record.data.significance;
-                }
-        	}},
+        {name: 'ph_name', type: 'string'},
+        {name: 'sig_name', type: 'string'},
         {name: 'significance', type: 'string'},
         {name: 'issue', type: 'date', dateFormat: 'c'},
         {name: 'utc_issue', type: 'date', mapping: 'issue', convert: utcdate},
@@ -177,32 +92,20 @@ Ext.define('SBW', {
 
 function alinkUGC(){
 	window.location.href = Ext.String.format("#byugc/{0}/{1}/{2}/{3}", 
-			Ext.getCmp('stateselector').getValue(), 
-			Ext.getCmp('ugcselector').getValue(),
+		stateCombobox.getValue(), 
+		ugcCombobox.getValue(),
 			Ext.Date.format(Ext.getCmp('sdate').getValue(),'Ymd'),
 			Ext.Date.format(Ext.getCmp('edate').getValue(),'Ymd')
 			);
 }
 
 function setupUI() {
-
-	pDict = new Ext.data.SimpleStore({
-				idIndex : 0,
-				fields : ['abbr', 'name'],
-				data : vtec_phenomena_dict
-			});
-	sDict = new Ext.data.SimpleStore({
-				idIndex : 0,
-				fields : ['abbr', 'name'],
-				data : vtec_sig_dict
-			});
-
 	eventStore = new Ext.data.Store({
 		autoLoad : false,
 		model : 'SBW',
 		proxy : {
 			type : 'ajax',
-			url : '/json/vtec_events_byugc.py',
+			url : BACKEND_EVENTS_BYUGC,
 	        reader: {
 	            type: 'json',
 	            rootProperty: 'events'
@@ -226,9 +129,20 @@ function setupUI() {
 	});
 
 	
-	var ugcStore = new Ext.data.Store({
+	ugcStore = new Ext.data.Store({
 		autoLoad : false,
-		model : 'UGC',
+        model : 'UGC',
+        listeners: {
+            load: function(){
+                var record = ugcStore.findRecord("ugc", defaultUGC);
+                defaultUGC = "";
+                if (record){
+                    ugcCombobox.select(record);
+                    upcCombobox.fireEvent("select", ugcCombobox, record);
+                }
+                return false;
+            }
+        },
 		proxy : {
 			type: 'ajax',
 			url : '/json/state_ugc.php',
@@ -239,8 +153,7 @@ function setupUI() {
 		}
 	});
 
-	var ugcCB = new Ext.form.ComboBox({
-		id : 'ugcselector',
+	ugcCombobox = new Ext.form.ComboBox({
 		store : ugcStore,
 		displayField : 'nicename',
 		valueField : 'ugc',
@@ -254,6 +167,7 @@ function setupUI() {
 		hideTrigger : false,
 		listeners : {
 			select : function(cb, record, idx) {
+                eventStore.getProxy().setUrl(BACKEND_EVENTS_BYUGC);
 				eventStore.load({
 					add : false,
 					params : {
@@ -282,12 +196,12 @@ function setupUI() {
 	    ]
 	});
 	
-	var stateCB = new Ext.form.ComboBox({
+	stateCombobox = new Ext.form.ComboBox({
 		hiddenName : 'state',
 		store : new Ext.data.SimpleStore({
-					model : 'States',
-					data : states
-				}),
+            model : 'States',
+			data : states
+		}),
 		valueField : 'abbr',
 		fieldLabel : 'Select State',
 		typeAhead : true,
@@ -305,15 +219,15 @@ function setupUI() {
 		triggerAction : 'all',
 		emptyText : 'Select/or type here...',
 		selectOnFocus : true,
-		id : 'stateselector',
 		listeners : {
 			select : function(cb, record, idx) {
+                eventStore.getProxy().setUrl(BACKEND_EVENTS_BYUGC);
 				ugcStore.load({
-							add : false,
-							params : {
-								state: record.data.abbr
-							}
-						});
+					add : false,
+					params : {
+						state: record.data.abbr
+					}
+				});
 				return false;
 			}
 		}
@@ -342,18 +256,18 @@ function setupUI() {
 		renderTo : 'myform',
 		layout : 'anchor',
 		title : 'Select County/Zone to search for...',
-		items : [stateCB, ugcCB, sdate, edate],
+		items : [stateCombobox, ugcCombobox, sdate, edate],
 		buttons : [{
 			id : 'eventbutton',
 			text : 'Load Grid with Settings Above',
 			handler : function(){
 
-				eventStore.getProxy().setUrl('/json/vtec_events_byugc.py');
+				eventStore.getProxy().setUrl(BACKEND_EVENTS_BYUGC);
 
 				eventStore.load({
 					add : false,
 					params : {
-						ugc : ugcCB.getValue(),
+						ugc : ugcCombobox.getValue(),
 						sdate : Ext.Date.format(
 								Ext.getCmp('sdate').getValue(),
 						'Y/m/d'),
@@ -366,7 +280,7 @@ function setupUI() {
 			}
 		}]
 	});
-	eventTable = Ext.create('My.grid.ExcelGridPanel', {
+	eventTable = Ext.create('Ext.grid.GridPanel', {
 			ugc : '',
 				height : 500,
 				title : 'Events Listing',
@@ -379,7 +293,16 @@ function setupUI() {
 					icon : '/lsr/icons/excel.png',
 					text : 'Export to Excel...',
 					handler : function(b, e) {
-						b.up('grid').downloadExcelXml();
+                        var url = eventStore.getProxy().getUrl();
+                        // Send both sets of vals to whatever backend is active
+                        url = url + "?fmt=xlsx&ugc=" + ugcCombobox.getValue()
+                            + "&lat=" + $("#lat2").val()
+                            + "&lon=" + $("#lon2").val()
+                            + "&sdate=" + Ext.Date.format(
+                                Ext.getCmp('sdate').getValue(), 'Y/m/d')
+                            + "&edate=" + Ext.Date.format(
+                                Ext.getCmp('edate').getValue(), 'Y/m/d');
+                        window.location = url;
 					}
 				}],
 				columns : [{
@@ -396,20 +319,12 @@ function setupUI() {
 						}, {
 							'header' : 'Phenomena',
 							sortable : true,
-							dataIndex : 'pstring',
+							dataIndex : 'ph_name',
 							width : 150
 						}, {
 							'header' : 'Significance',
 							sortable : true,
-							dataIndex : 'sig_string'
-						}, {
-							header : 'VTEC Phenomena',
-							hidden : true,
-							dataIndex : 'phenomena'
-						}, {
-							header : 'VTEC Significance',
-							hidden : true,
-							dataIndex : 'significance'
+							dataIndex : 'sig_name'
 						}, {
 							'header' : 'Issued',
 							sortable : true,
@@ -438,7 +353,7 @@ function setupUI() {
 		model : 'SBW',
 		proxy : {
 			type: 'ajax',
-			url : '/json/sbw_by_point.py',
+			url : BACKEND_SBW_BYPOINT,
 	        reader: {
 	            type: 'json',
 	            rootProperty: 'sbws'
@@ -447,7 +362,7 @@ function setupUI() {
 	});
 
 	
-	warntable = Ext.create('My.grid.ExcelGridPanel', {
+	warntable = Ext.create('Ext.grid.GridPanel', {
 		height : 500,
 		title : 'Drag marker on map to load data...',
 		loadMask : {
@@ -459,7 +374,14 @@ function setupUI() {
 			icon : '/lsr/icons/excel.png',
 			text : 'Export to Excel...',
 			handler : function(b, e) {
-				b.up('grid').downloadExcelXml();
+                var url = warnStore.getProxy().getUrl();
+                url = url + "?fmt=xlsx&lon=" + $("#lon").val()
+                    + "&lat=" + $("#lat").val()
+                    + "&sdate=" + Ext.Date.format(
+                        Ext.getCmp('sdate').getValue(), 'Y/m/d')
+                    + "&edate=" + Ext.Date.format(
+                        Ext.getCmp('edate').getValue(), 'Y/m/d');
+                window.location = url;
 			}
 		}],
 		columns : [{
@@ -476,21 +398,13 @@ function setupUI() {
 		}, {
 			'header' : 'Phenomena',
 			sortable : true,
-			dataIndex : 'pstring',
+			dataIndex : 'ph_name',
 			width : 150
 		}, {
 			'header' : 'Significance',
 			sortable : true,
-			dataIndex : 'sig_string'
+			dataIndex : 'sig_name'
 		}, {
-			header : 'VTEC Phenomena',
-			hidden : true,
-			dataIndex : 'phenomena'
-		},{
-			header : 'VTEC Significance',
-			hidden : true,
-			dataIndex : 'significance'
-		},{
 			'header' : 'Issued',
 			sortable : true,
 			dataIndex : 'issue',
@@ -519,6 +433,9 @@ function setupUI() {
 		var tokens2 = tokens[1].split("/");
 		if (tokens2.length == 5){
 			if (tokens2[0] == 'byugc'){
+                // scroll page
+                var aTag = $("a[name='byugc']");
+                $('html,body').animate({scrollTop: aTag.offset().top},'slow');
 				sdate = tokens2[3].substr(0,4) +"/"+
 						tokens2[3].substr(4,2) +"/"+
 						tokens2[3].substr(6,2) ;
@@ -527,8 +444,13 @@ function setupUI() {
 						tokens2[4].substr(4,2) +"/"+
 						tokens2[4].substr(6,2) ;
 				Ext.getCmp("edate").setValue(new Date(edate));
-				Ext.getCmp("stateselector").setValue(tokens2[1]);
-				Ext.getCmp("ugcselector").setValue(tokens2[2]);
+                var record = stateCombobox.getStore().findRecord(
+                    "abbr", tokens2[1]);
+                if (record){
+                    stateCombobox.select(record);
+                    stateCombobox.fireEvent('select', stateCombobox, record);    
+                }
+				defaultUGC = tokens2[2];
 				eventStore.load({
 					add : false,
 					params : {
@@ -581,7 +503,7 @@ function updateMarkerPosition(latLng) {
 
 function updateMarkerPosition2(latLng) {
 	// callback on when the map marker is moved
-	eventStore.getProxy().setUrl('/json/vtec_events_bypoint.py');
+	eventStore.getProxy().setUrl(BACKEND_EVENTS_BYPOINT);
 	eventStore.load({add: false, params: {
 		sdate: Ext.Date.format(Ext.getCmp('sdate').getValue(), 'Y/m/d'),
 		edate: Ext.Date.format(Ext.getCmp('edate').getValue(), 'Y/m/d'),

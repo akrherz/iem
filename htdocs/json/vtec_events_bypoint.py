@@ -5,6 +5,7 @@ import datetime
 
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
+from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
 from pandas.io.sql import read_sql
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -19,7 +20,7 @@ def get_df(lon, lat, sdate, edate):
     """
     pgconn = get_dbconn("postgis")
 
-    return read_sql(
+    df = read_sql(
         """
     WITH myugcs as (
         select gid from ugcs where
@@ -35,6 +36,14 @@ def get_df(lon, lat, sdate, edate):
         pgconn,
         params=(lon, lat, sdate, edate),
     )
+    if df.empty:
+        return df
+    df["name"] = df[["phenomena", "significance"]].apply(
+        lambda x: get_ps_string(x[0], x[1]), axis=1
+    )
+    df["ph_name"] = df["phenomena"].map(VTEC_PHENOMENA)
+    df["sig_name"] = df["significance"].map(VTEC_SIGNIFICANCE)
+    return df
 
 
 def to_json(df):
@@ -50,6 +59,9 @@ def to_json(df):
                 "hvtec_nwsli": row["hvtec_nwsli"],
                 "significance": row["significance"],
                 "wfo": row["wfo"],
+                "name": row["name"],
+                "ph_name": row["ph_name"],
+                "sig_name": row["sig_name"],
             }
         )
 
