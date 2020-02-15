@@ -173,7 +173,7 @@ def load_data(ctx, basets, endts):
         geom_col="geo",
     )
     df[USEME] = False
-    df["nwsli"] = ""
+    df["nwsli"] = df.index.values
     df["plotme"] = False
     df["source"] = "LSR"
     if ctx["coop"] == "no":
@@ -258,6 +258,7 @@ def add_zeros(df, ctx):
                             "lon": lon,
                             "lat": lat,
                             "val": 0,
+                            "nwsli": "Z%s" % (len(newrows) + 1,),
                             USEME: True,
                             "plotme": False,
                             "state": "Z",
