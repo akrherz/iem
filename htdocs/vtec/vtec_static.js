@@ -17,7 +17,7 @@ iemdata.vtec_phenomena_dict = [
 ['EC','Extreme Cold'],
 ['EH','Excessive Heat'],
 ['EW','Extreme Wind'],
-['FA','Areal Flood'],
+['FA','Flood'],
 ['FF','Flash Flood'],
 ['FL','Flood'],
 ['FR','Frost'],

@@ -13,7 +13,7 @@ PDICT = OrderedDict(
         ("SV", "Severe Thunderstorm Warning"),
         ("_A", "Severe Tstorm + Tornado Warning"),
         ("EW", "Extreme Wind"),
-        ("FA", "Areal Flood Advisory/Warning"),
+        ("FA", "Flood Advisory/Warning"),
         ("FF", "Flash Flood Warning"),
         ("MA", "Marine Warning"),
         ("SQ", "Snow Squall"),
