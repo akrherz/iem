@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (19, now());
+INSERT into iem_schema_manager_version values (20, now());
 
 CREATE TABLE stations(
 	id varchar(20),
@@ -171,7 +171,8 @@ CREATE TABLE cli_data(
   snow_dec1_normal float,
   snow_month_normal float,
   precip_jun1 real,
-  precip_jun1_normal real
+  precip_jun1_normal real,
+  average_sky_cover real
 );
 CREATE UNIQUE index cli_data_idx on cli_data(station,valid);
 GRANT SELECT on cli_data to nobody,apache;

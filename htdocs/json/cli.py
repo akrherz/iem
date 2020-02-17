@@ -66,7 +66,8 @@ def get_data(station, year, fmt):
         snow_dec1, snow_record, snow_jul1_normal, snow_record_years,
         snow_dec1_normal, snow_month_normal, precip_jun1, precip_jun1_normal,
         round(((case when snow_jul1 < 0.1 then 0 else snow_jul1 end)
-            - snow_jul1_normal)::numeric, 2) as snow_jul1_depart
+            - snow_jul1_normal)::numeric, 2) as snow_jul1_depart,
+        average_sky_cover
         from cli_data c JOIN stations s on (c.station = s.id)
         WHERE s.network = 'NWSCLI' and c.station = %s
         and c.valid >= %s and c.valid <= %s
@@ -119,6 +120,7 @@ def get_data(station, year, fmt):
                 "snow_jul1_depart": f1_sanitize(row["snow_jul1_depart"]),
                 "snow_dec1_normal": f1_sanitize(row["snow_dec1_normal"]),
                 "snow_month_normal": f1_sanitize(row["snow_month_normal"]),
+                "average_sky_cover": f1_sanitize(row["average_sky_cover"]),
             }
         )
     if fmt == "json":
@@ -131,7 +133,7 @@ def get_data(station, year, fmt):
         "precip_record,precip_record_years,"
         "snow,snow_month,snow_jun1,snow_jul1,snow_dec1,snow_record,"
         "snow_record_years,snow_jul1_normal,snow_dec1_normal,"
-        "snow_month_normal,snow_jul1_depart"
+        "snow_month_normal,snow_jul1_depart,average_sky_cover"
     )
     res = cols + "\n"
     for feat in data["results"]:
