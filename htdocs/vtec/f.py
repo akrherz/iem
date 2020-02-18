@@ -6,8 +6,9 @@ import pytz
 from pyiem.util import get_dbconn, html_escape
 from pyiem.nws import vtec
 
+# sadly, I have a lot of links in the wild without a status?
 VTEC_RE = re.compile(
-    r"^(?P<year>\d+)-(?P<op>O)-(?P<status>[A-Z]{3})-(?P<wfo4>[A-Z]{4})-"
+    r"^(?P<year>\d+)-(?P<op>O)-(?P<status>[A-Z]{3})?-?(?P<wfo4>[A-Z]{4})-"
     r"(?P<phenomena>[A-Z]{2})-(?P<significance>[A-Z])-(?P<eventid>\d+)$"
 )
 
@@ -43,7 +44,7 @@ def get_data(ctx):
 def as_html(ctx):
     """Generate the HTML page."""
     ctx["v"] = (
-        "%(year)s-%(op)s-%(wfo4)s-%(phenomena)s-"
+        "%(year)s-%(op)s-%(status)s-%(wfo4)s-%(phenomena)s-"
         "%(significance)s-%(eventid)s"
     ) % ctx
     ctx["ogtitle"] = "%s %s %s %s" % (
@@ -109,6 +110,8 @@ def get_context(url):
     tokens = url.split("/")[-1].split("_")
     m = VTEC_RE.match(tokens[0])
     ctx = m.groupdict()
+    if ctx["status"] is None:
+        ctx["status"] = "NEW"
     get_data(ctx)
     ctx["valid"] = None
     if len(tokens) > 1:
