@@ -344,7 +344,7 @@
 
   <Directory "/opt/iem/htdocs/vtec">
     RewriteRule ([^\.]+)\.html index.php?vtec=$1 [L]
-    RewriteRule f/(.*)$ f.php?vtec=$1 [L]
+    RewriteRule f/(.*)$ f.py [QSA]
   </Directory>
 
   <Directory "/opt/iem/htdocs/metadata/xml">
