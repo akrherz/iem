@@ -801,6 +801,10 @@ data = {
                     ),
                 },
                 {
+                    "id": "208",
+                    "label": ("WFO VTEC Single Event Map Plot (map)"),
+                },
+                {
                     "id": "90",
                     "label": (
                         "UGC or Polygon SBW Statistics for "
