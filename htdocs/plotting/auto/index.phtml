@@ -194,7 +194,7 @@ EOF;
 			// Build out listing of networks, if we have not already
 			if (sizeof($networks) == 0){
 				$rs = pg_query($mesosite, "SELECT id, name from networks ".
-					"WHERE id !~* 'CLIMATE' ORDER by name ASC");
+					"ORDER by name ASC");
 				for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 					$networks[$row["id"]] = $row["name"];
 				}
