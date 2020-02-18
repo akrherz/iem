@@ -152,7 +152,8 @@ def plotter(fdict):
     )
     mp.sector = "cwa"
     mp.cwa = wfo[-3:]
-    df2 = df[(df["issue"] <= utcvalid) & (df["expire"] > utcvalid)]
+    # CAN statements come here with time == expire :/
+    df2 = df[(df["issue"] <= utcvalid) & (df["expire"] >= utcvalid)]
     if df2.empty:
         raise NoDataFound("Your time filter removed all events.")
     mp.fill_ugcs(
