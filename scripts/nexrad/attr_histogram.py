@@ -1,56 +1,51 @@
 """Generates the nice histograms on the IEM website"""
-from __future__ import print_function
-import datetime
 import calendar
 import os
 
-import pytz
 import numpy as np
 import matplotlib.pyplot as plt
+from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, utc
 from pyiem.plot import maue
-
-cmap = maue()
-cmap.set_bad("white")
-cmap.set_under("white")
-cmap.set_over("black")
-
-today = datetime.datetime.now()
-today = today.replace(tzinfo=pytz.utc)
-
-POSTGIS = get_dbconn("radar", user="nobody")
+from tqdm import tqdm
 
 
-def run(nexrad):
-    drct = []
-    sknt = []
-    doy = []
-    minvalid = utc(2016, 1, 1)
-    cursor = POSTGIS.cursor()
-    cursor.execute(
+def run(nexrad, name, network):
+    """Do some work!"""
+    cmap = maue()
+    cmap.set_bad("white")
+    cmap.set_under("white")
+    cmap.set_over("black")
+
+    today = utc()
+
+    pgconn = get_dbconn("radar", user="nobody")
+    df = read_sql(
         """
-    SELECT drct, sknt, extract(doy from valid), valid
+    SELECT drct, sknt, extract(doy from valid) as doy, valid
     from nexrad_attributes_log WHERE nexrad = %s and sknt > 0
     """,
-        (nexrad,),
+        pgconn,
+        params=(nexrad,),
+        index_col=None,
     )
-    for row in cursor:
-        drct.append(row[0])
-        sknt.append(row[1])
-        doy.append(row[2])
-        if row[3] < minvalid:
-            minvalid = row[3]
-    cursor.close()
-    print(
-        "  RADAR: %s found %s entries since %s" % (nexrad, len(doy), minvalid)
-    )
+    if df.empty:
+        print("No results for %s" % (nexrad,))
+        return
+    minvalid = df["valid"].min()
 
     years = (today - minvalid).days / 365.25
-    (fig, ax) = plt.subplots(2, 1, figsize=(9, 7), dpi=100)
+    fig = plt.figure(figsize=(10.24, 7.68), dpi=100)
+    ax = [None, None]
+    ax[0] = fig.add_axes([0.06, 0.53, 0.99, 0.39])
+    ax[1] = fig.add_axes([0.06, 0.06, 0.99, 0.39])
 
     H2, xedges, yedges = np.histogram2d(
-        drct, sknt, bins=(36, 15), range=[[0, 360], [0, 70]]
+        df["drct"].values,
+        df["sknt"].values,
+        bins=(36, 15),
+        range=[[0, 360], [0, 70]],
     )
     H2 = np.ma.array(H2 / years)
     H2.mask = np.where(H2 < 1, True, False)
@@ -58,31 +53,37 @@ def run(nexrad):
     fig.colorbar(res, ax=ax[0], extend="both")
     ax[0].set_xlim(0, 360)
     ax[0].set_ylabel("Storm Speed [kts]")
+    ax[0].set_xlabel("Movement Direction (from)")
     ax[0].set_xticks((0, 90, 180, 270, 360))
     ax[0].set_xticklabels(("N", "E", "S", "W", "N"))
     ax[0].set_title(
         (
-            "%s - %s K%s NEXRAD Storm Attributes Histogram\n"
+            "Storm Attributes Histogram\n%s - %s K%s %s (%s)\n"
             "%s total attrs, units are ~ (attrs+scans)/year"
         )
         % (
             minvalid.strftime("%d %b %Y"),
             today.strftime("%d %b %Y"),
             nexrad,
-            len(drct),
+            name,
+            network,
+            len(df.index),
         )
     )
     ax[0].grid(True)
 
     H2, xedges, yedges = np.histogram2d(
-        doy, drct, bins=(36, 36), range=[[0, 365], [0, 360]]
+        df["doy"].values,
+        df["drct"].values,
+        bins=(36, 36),
+        range=[[0, 365], [0, 360]],
     )
     H2 = np.ma.array(H2 / years)
     H2.mask = np.where(H2 < 1, True, False)
     res = ax[1].pcolormesh(xedges, yedges, H2.transpose(), cmap=cmap)
     fig.colorbar(res, ax=ax[1], extend="both")
     ax[1].set_ylim(0, 360)
-    ax[1].set_ylabel("Movement Direction")
+    ax[1].set_ylabel("Movement Direction (from)")
     ax[1].set_yticks((0, 90, 180, 270, 360))
     ax[1].set_yticklabels(("N", "E", "S", "W", "N"))
     ax[1].set_xticks(
@@ -104,11 +105,14 @@ def run(nexrad):
 def main():
     """ See how we are called """
     nt = NetworkTable(["NEXRAD", "TWDR"])
-    for sid in nt.sts:
+    stations = list(nt.sts.keys())
+    stations.sort()
+    progress = tqdm(stations)
+    for sid in progress:
+        progress.set_description(sid)
         if os.path.isfile("%s_histogram.png" % (sid,)):
-            print("  Skipping %s" % (sid,))
             continue
-        run(sid)
+        run(sid, nt.sts[sid]["name"], nt.sts[sid]["network"])
 
 
 if __name__ == "__main__":
