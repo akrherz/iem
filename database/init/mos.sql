@@ -51,7 +51,7 @@ end;
 $do$;
 
 CREATE TABLE alldata(
- station character(4)           ,
+  station text,
  model character varying(12)  ,
  runtime timestamp with time zone ,
  ftime  timestamp with time zone ,
@@ -87,7 +87,13 @@ CREATE TABLE alldata(
   slv smallint,
   i06 smallint,
   lcb smallint,
-  swh smallint
+  swh smallint,
+  dur smallint,
+  mht smallint,
+  twd smallint,
+  tws smallint,
+  hid smallint,
+  sol smallint
 ) PARTITION by range(runtime);
 ALTER TABLE alldata OWNER to mesonet;
 GRANT ALL on alldata to ldm;
