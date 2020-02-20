@@ -60,7 +60,7 @@ $('#makefancy').click(function(){
 EOM;
 $yselect = yearSelect2(2005, $year, 'year');
 $wfoselect = networkSelect("WFO", $wfo, array(), "wfo");
-$stselect = stateSelect("state", $state);
+$stselect = stateSelect($state);
 
 $wchecked = ($which == 'wfo') ? "CHECKED": "";
 $schecked = ($which == 'state') ? "CHECKED": "";

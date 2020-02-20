@@ -22,10 +22,10 @@ def run(state, year, phenomena, significance):
     table = "warnings_%s" % (year,)
     sbwtable = "sbw_%s" % (year,)
     plimit = "phenomena is not null and significance is not null"
-    if phenomena is not None and significance is not None:
+    if phenomena != "__" and significance != "_":
         plimit = ("phenomena = '%s' and significance = '%s'") % (
-            phenomena[:2],
-            significance[0],
+            phenomena,
+            significance,
         )
     cursor.execute(
         """
@@ -103,8 +103,8 @@ def application(environ, start_response):
     fields = parse_formvars(environ)
     state = fields.get("state", "IA")[:2]
     year = int(fields.get("year", 2015))
-    phenomena = fields.get("phenomena", "SV")[:2]
-    significance = fields.get("significance", "W")[:1]
+    phenomena = fields.get("phenomena", "__")[:2]
+    significance = fields.get("significance", "_")[:1]
     cb = fields.get("callback")
 
     mckey = "/json/vtec_events_bystate/%s/%s/%s/%s" % (
