@@ -1,22 +1,19 @@
 """Generates the nice histograms on the IEM website"""
 import calendar
-import os
+import sys
 
 import numpy as np
-import matplotlib.pyplot as plt
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_dbconn, utc
-from pyiem.plot import maue
 from tqdm import tqdm
 
 
-def run(nexrad, name, network):
+def run(nexrad, name, network, cname):
     """Do some work!"""
-    cmap = maue()
+    cmap = plt.get_cmap(cname)
     cmap.set_bad("white")
-    cmap.set_under("white")
-    cmap.set_over("black")
 
     today = utc()
 
@@ -50,7 +47,7 @@ def run(nexrad, name, network):
     H2 = np.ma.array(H2 / years)
     H2.mask = np.where(H2 < 1, True, False)
     res = ax[0].pcolormesh(xedges, yedges, H2.transpose(), cmap=cmap)
-    fig.colorbar(res, ax=ax[0], extend="both")
+    fig.colorbar(res, ax=ax[0], extend="neither")
     ax[0].set_xlim(0, 360)
     ax[0].set_ylabel("Storm Speed [kts]")
     ax[0].set_xlabel("Movement Direction (from)")
@@ -81,7 +78,7 @@ def run(nexrad, name, network):
     H2 = np.ma.array(H2 / years)
     H2.mask = np.where(H2 < 1, True, False)
     res = ax[1].pcolormesh(xedges, yedges, H2.transpose(), cmap=cmap)
-    fig.colorbar(res, ax=ax[1], extend="both")
+    fig.colorbar(res, ax=ax[1], extend="neither")
     ax[1].set_ylim(0, 360)
     ax[1].set_ylabel("Movement Direction (from)")
     ax[1].set_yticks((0, 90, 180, 270, 360))
@@ -102,18 +99,20 @@ def run(nexrad, name, network):
     plt.close()
 
 
-def main():
+def main(argv):
     """ See how we are called """
     nt = NetworkTable(["NEXRAD", "TWDR"])
     stations = list(nt.sts.keys())
     stations.sort()
+    cname = "hot_r"
+    if len(argv) > 1:
+        stations = [argv[1]]
+        cname = argv[2]
     progress = tqdm(stations)
     for sid in progress:
         progress.set_description(sid)
-        if os.path.isfile("%s_histogram.png" % (sid,)):
-            continue
-        run(sid, nt.sts[sid]["name"], nt.sts[sid]["network"])
+        run(sid, nt.sts[sid]["name"], nt.sts[sid]["network"], cname)
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
