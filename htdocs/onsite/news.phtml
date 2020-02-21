@@ -35,7 +35,7 @@ EOF;
       from news WHERE (title ~* $1 or body ~* $1) 
       ORDER by entered DESC");
   	$result = pg_execute($dbconn, "SEARCH", Array($q) );
-  } else if ($tag != null){
+  } else if (! is_null($tag)){
   	$rs = pg_prepare($dbconn, "SEARCH", "SELECT *,
       to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate
       from news WHERE tags @> Array[$1]::varchar[]
@@ -58,7 +58,7 @@ if (pg_numrows($result) == 1 && $id > 0){
 }
 
 function print_tags($str){
-	if ($str == "" || $str == null) return "none";
+	if ($str == "" || is_null($str)) return "none";
 	
 	$ar  = explode(",", trim($str, "{}"));
 	$s = "";
@@ -78,7 +78,7 @@ for( $i=0; $i < pg_num_rows($result) && $row = pg_fetch_assoc($result,$i); $i++)
   $content .= "<button type=\"button\" class=\"btn btn-default btn-xs\">Permalink: ". $l ."</button>";
   $content .= "<button type=\"button\" class=\"btn btn-default btn-xs\">Date: ". $row["webdate"] ."</button>";
   $content .= "<button type=\"button\" class=\"btn btn-default btn-xs\">Author: ". $row["author"] ."</button>";
-  if ($row["tags"] != null){
+  if (! is_null($row["tags"])){
   	$content .= "<button type=\"button\" class=\"btn btn-default btn-xs\">Tags: ". print_tags($row["tags"]) ."</button>";
   }
   if (strlen($row["url"]) > 0) {

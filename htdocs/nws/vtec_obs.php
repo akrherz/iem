@@ -106,7 +106,7 @@ function c2($sknt, $gust){
 }
 
 function c3($vsby){
-	if ($vsby == null) return "MMSM";
+	if (is_null($vsby)) return "MMSM";
   	global $vsbythres;
   	if ($vsby <= $vsbythres){
 		return sprintf("<span style='color:#f00;'>%.1fSM</span>", $vsby);
@@ -114,7 +114,7 @@ function c3($vsby){
 	return sprintf("%.1fSM", $vsby);
 }
 function c4($tmpf){
-	if ($tmpf == null) return "M";
+	if (is_null($tmpf)) return "M";
 	global $ltmpfthres;
 	global $htmpfthres;
 	if ($tmpf <= $ltmpfthres){
@@ -126,7 +126,7 @@ function c4($tmpf){
 	return sprintf("%.0f", $tmpf);
 }
 function c5($wcht){
-	if ($wcht == null)  return "";
+	if (is_null($wcht))  return "";
 	global $wchtthres;
 	if ($wcht <= $wchtthres)
 		return sprintf("<span style='color:#00f; font-weight:bold;'> WC %.0f</span>", 

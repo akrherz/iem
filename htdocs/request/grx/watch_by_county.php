@@ -25,7 +25,7 @@ echo "Title: SPC Watch by County\n";
 
 for ($i=0;$row=pg_fetch_array($rs);$i++){
 	$geom = $row["g"];
-	if ($geom == null){
+	if (is_null($geom)){
 		continue;
 	}
 	//echo $geom ."\n";

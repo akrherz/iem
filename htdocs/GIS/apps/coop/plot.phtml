@@ -135,7 +135,7 @@ $tr .= sprintf("%10s,%20s,%10s,%10s,%10s,%10s\n", 'ID', 'StationName', 'Date',
 foreach($vals as $key => $value){
 	$ukey = strtoupper($key);
 	if (! isset($cities[$ukey]) ) continue;
-	if ($value == null) continue;
+	if (is_null($value)) continue;
 
 	$tr .= sprintf("%10s,%-20s,%10s,%10.4f,%10.4f,%10s\n", $key, $cities[$ukey]['name'], $ndate,
 			$cities[$ukey]['lat'], $cities[$ukey]['lon'], $value );

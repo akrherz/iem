@@ -53,7 +53,7 @@ if ($station != null){
 	
 $t->title = "SHEF Data by Site by Day";
 $t->thispage = "networks-dcp";
-if ($station == null){
+if (is_null($station)){
   $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol3-layerswitcher.css" rel="stylesheet" />
@@ -92,7 +92,7 @@ $ms = monthSelect($month);
 $ds = daySelect($day);
 
 $extra = "";
-if ($station == null){ 
+if (is_null($station)){ 
 	$extra = <<<EOF
 <style type="text/css">
         #map {

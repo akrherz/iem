@@ -80,7 +80,7 @@ function get_data2(){
 /* see if memcache has our data */
 $memcache = new Memcached();
 $memcache->addServer('iem-memcached', 11211);
-if ($phenomena == null || $significance == null){
+if (is_null($phenomena) || is_null($significance)){
 	$data = $memcache->get("vtec_counts_data_$wfo");
 	$pcodes = $memcache->get("vtec_counts_pcodes_$wfo");
 	$cachedwarning = '<div class="alert alert-warning">This information was cached

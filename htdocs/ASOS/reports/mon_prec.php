@@ -64,7 +64,7 @@ Ext.onReady(function(){
 
 reset($data);
 function friendly($val){
-	if ($val == null) return "M";
+	if (is_null($val)) return "M";
 	return sprintf("%.2f", $val);
 }
 $table = "";

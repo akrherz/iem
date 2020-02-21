@@ -1,8 +1,8 @@
 <?php
 require_once "../../config/settings.inc.php";
-include_once "../../include/database.inc.php";
-include_once "../../include/myview.php";
-include_once "../../include/forms.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/myview.php";
+require_once "../../include/forms.php";
 
 $myid = isset($_GET["id"]) ? $_GET["id"]: null;
 $form = Array();
@@ -28,7 +28,7 @@ $rs = pg_prepare($dbconn, "SELECT", "SELECT * from iemdatasets WHERE id = $1");
 $editor = '';
 $target = "datasets.phtml";
 $formtitle = "Create New";
-if ($myid == null && $form["name"] != null){
+if (is_null($myid) && ! is_null($form["name"])){
 	// We are making a new entry!
 	$res = pg_execute($dbconn, "INSERT", Array($form["name"], $form["description"],
 			$form["justification"], $form["homepage"], $form["alternatives"],
@@ -37,10 +37,10 @@ if ($myid == null && $form["name"] != null){
 	$myid = $row["id"];
 }
 
-if ($myid != null){
+if (! is_null($myid)){
 	$formtitle = "Edit Previous";
 	$target = "datasets.phtml?id={$myid}";
-	if ($form["name"] != null){
+	if (! is_null($form["name"])){
 		pg_execute($dbconn, "UPDATE", Array($form["name"], $form["description"],
 				$form["justification"], $form["homepage"], $form["alternatives"],
 				$form["archive_begin"], $form["download"], $myid));

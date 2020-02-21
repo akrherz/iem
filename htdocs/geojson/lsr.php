@@ -106,7 +106,7 @@ for ($i=0;$row=pg_fetch_assoc($rs);$i++)
   
   $z = Array("type"=>"Feature", "id"=>$i, 
              "properties"=>Array(
-                "magnitude" => ($magnitude == null)? "": $magnitude,
+                "magnitude" => (is_null($magnitude))? "": $magnitude,
                 "wfo"       => $row["wfo"],
                 "valid"     => $row["iso_valid"],
                 "type"      => $row["type"],

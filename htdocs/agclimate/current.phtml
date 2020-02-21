@@ -16,7 +16,7 @@
 
  function pretty($val, $fmt){
 	 // Pretty print things for the table
-	 if ($val == null){
+	 if (is_null($val)){
 		 return "M";
 	 }
 	 return sprintf($fmt, $val);

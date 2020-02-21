@@ -130,7 +130,7 @@ function fmt($val, $varname){
 			$label, drct2txt($json["last_ob"][$key]), $json["last_ob"][$key]);
 	}
 	else {
-		 if ($json["last_ob"][$key] == null) continue;
+		 if (is_null($json["last_ob"][$key])) continue;
 		 $table .= '<tr><td><b>'. $label .'</b></td>'.
 		 '<td>'. fmt($json["last_ob"][$key], $key).'</td></tr>';
  	} // End if

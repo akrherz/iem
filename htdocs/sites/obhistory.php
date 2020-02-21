@@ -7,7 +7,7 @@ require_once "../../include/myview.php";
  * Rip off weather bureau website, but do it better
  */
 function wind_formatter($row){
-	if ($row["drct"] == null){
+	if (is_null($row["drct"])){
 		return "M";
 	} 
 	$gust_text = "";
@@ -20,7 +20,7 @@ function wind_formatter($row){
 function indy_sky_formatter($skyc, $skyl){
 	if (intval($skyl) > 0){ $skyl = sprintf("%03d", $skyl/100); }
 	else { $skyl = "";}	
-	if ($skyc == null || trim($skyc) == "") return "";
+	if (is_null($skyc) || trim($skyc) == "") return "";
 	return sprintf("%s%s<br />", $skyc,$skyl);
 }
 function sky_formatter($row){
@@ -32,17 +32,17 @@ function sky_formatter($row){
 	);
 }
 function temp_formatter($val){
-	if ($val == null) return "";
+	if (is_null($val)) return "";
 	return sprintf("%.0f", $val);
 }
 function vis_formatter($val){
-	if ($val == null) return "";
+	if (is_null($val)) return "";
 	return round($val, 2);
 }
 function formatter($i, $row){
 	$ts = strtotime(substr($row["valid"],0,16));
 	$relh = relh(f2c($row["tmpf"]), f2c($row["dwpf"]) );
-	$relh = ($relh != null) ? intval($relh): "";
+	$relh = (! is_null($relh)) ? intval($relh): "";
 	$ismadis = (strpos($row["raw"], "MADISHF") > 0); 
 	return sprintf("<tr style=\"background: %s;\" class=\"%sob\" data-madis=\"%s\">" .
 	"</div><td>%s</td><td>%s</td><td>%s</td>
@@ -131,7 +131,7 @@ $rs = pg_execute($dbconn, "_MYSELECT", Array($station, $network,
 	date("Y-m-d", $date), date("Y-m-d", $date + 90400)));
 $table = "";
 for ($i=0;$row=pg_fetch_assoc($rs);$i++){
-	if ($row['dwpf'] == null && $row['relh'] != null){
+	if (is_null($row['dwpf']) && ! is_null($row['relh'])){
 		$row['dwpf'] = dwpf($row["tmpf"], $row["relh"]);
 	}
 	$table .= formatter($i, $row);

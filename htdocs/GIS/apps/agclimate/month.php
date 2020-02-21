@@ -68,10 +68,10 @@ for ($i=0; $row = pg_fetch_assoc($rs); $i++) {
   $key = $row["station"];
   if ($key == "AMFI4" or $key == "AHTI4") continue;
 
-  if ($minvalid == null || $row["min_valid"] < $minvalid){
+  if (is_null($minvalid) || $row["min_valid"] < $minvalid){
       $minvalid = $row["min_valid"];
   }
-  if ($maxvalid == null || $row["max_valid"] > $maxvalid){
+  if (is_null($maxvalid) || $row["max_valid"] > $maxvalid){
     $maxvalid = $row["max_valid"];
 }
   $val = round($row["s"] / 25.4,2);

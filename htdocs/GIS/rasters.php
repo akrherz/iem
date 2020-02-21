@@ -3,7 +3,7 @@
  * Attempt to actually document the RASTERs the IEM produces and stores
  * within its archives
  */
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 82);
 require_once "../../include/database.inc.php";
 include_once "../../include/myview.php";
@@ -63,7 +63,7 @@ if ($rid > 0){
 	for($i=0;$row=pg_fetch_assoc($rs);$i++){
 		$table2 .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td>"
 				."<td>%s</td><td>%s</td><td>%s</td></tr>\n", $row["coloridx"], 
-				($row["value"] == null) ? 'Missing': $row["value"],
+				(is_null($row["value"])) ? 'Missing': $row["value"],
 				$row["r"], $row["g"], $row["b"], 
 				rgb2html($row["r"], $row["g"], $row["b"]));
 	

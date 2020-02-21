@@ -2,7 +2,7 @@
 /*
  * Datasets listing app
  */
-include_once "../../config/settings.inc.php";
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 84);
 require_once "../../include/database.inc.php";
 $mesosite = iemdb("mesosite");
@@ -12,7 +12,7 @@ $t = new MyView();
 
 $myid = isset($_GET["id"]) ? $_GET["id"]: null;
 // Sanitize $myid
-if ($myid != null){
+if (! is_null($myid)){
 	if (preg_match('/^[a-z_]+$/', $myid) != 1){
 		$myid = null;
 	}
@@ -37,7 +37,7 @@ EOF;
 
 $content = "";
 $pages = Array();
-if ($myid == null){
+if (is_null($myid)){
 	if ($dh = opendir("../../docs/datasets")){
 		while (($file = readdir($dh)) !== false){
 			if ($file == '.' || $file == '..' || $file == 'template.md') continue;

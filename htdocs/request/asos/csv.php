@@ -30,7 +30,7 @@ foreach($stations as $k => $id)
 {
 	if (isset($_REQUEST["date"])){
 		$ts = strtotime($_REQUEST["date"]);
-		if ($prepared == null){
+		if (is_null($prepared)){
 		  $prepared = pg_prepare($asos, "SELECT", sprintf("SELECT station as id, valid,
 		    max(tmpf) as tmpf, max(dwpf) as dwpf, max(sknt) as sknt, max(drct) as drct,
 		    max(p01i) as phour, max(alti) as alti, max(gust) as gust, 

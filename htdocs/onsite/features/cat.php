@@ -11,7 +11,7 @@ $t = new MyView();
 
 $day = isset($_GET["day"]) ? substr(xssafe($_GET["day"]),0,10) : null;
 $offset = isset($_GET["offset"]) ? intval($_GET["offset"]): 0;
-if ($day == null){
+if (is_null($day)){
 	$day = Date("Y-m-d");
 	$offset = -1;
 }
@@ -41,7 +41,7 @@ if (pg_num_rows($result) == 0){ die("Feature Not Found"); }
 $row = pg_fetch_array($result,0);
 $valid = strtotime( $row["valid"] );
 
-if ($row["fbid"] == null){
+if (is_null($row["fbid"])){
 	$row["fbid"] = $valid;
 }
 

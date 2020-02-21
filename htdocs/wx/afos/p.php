@@ -11,7 +11,7 @@ $e = isset($_GET['e']) ? intval($_GET['e']) : null;
 $pil = isset($_GET['pil']) ? strtoupper(substr($_GET['pil'],0,6)) : null;
 $dir = isset($_REQUEST['dir']) ? $_REQUEST['dir'] : null;
 
-if ($pil == null || trim($pil) == ""){
+if (is_null($pil) || trim($pil) == ""){
 	die("No 'pil' provided by URL, it is required.");
 }
 
@@ -67,11 +67,11 @@ function last_product($conn, $pil){
 }
 
 // Okay, lets see if we can find the product we are looking for!
-if ($e == null){
+if (is_null($e)){
 	// Option 1: We only pil= set and no time, find the last product
 	$rs = last_product($conn, $pil);
 }
-elseif ($e != null && $dir != null){
+elseif (! is_null($e) && ! is_null($dir)){
 	// Option 2: We have a time set and some directionality set
 	$rs	= locate_product($conn, $e, $pil, $dir);
 	// if the above fails, just go to last product
@@ -91,7 +91,7 @@ else {
 $t->title = sprintf("%s from NWS %s", substr($pil,0,3), substr($pil,3,3));
 $content = "<h3>National Weather Service Raw Text Product</h3>";
 
-if ($rs == null || pg_numrows($rs) < 1){
+if (is_null($rs) || pg_numrows($rs) < 1){
 	$content .= "<div class=\"alert alert-warning\">Sorry, could not find product.</div>";
 }
 for ($i=0; $row = pg_fetch_assoc($rs); $i++)

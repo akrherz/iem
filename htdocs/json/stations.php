@@ -20,7 +20,7 @@ $rs = pg_execute($dbconn, "SELECT", Array($date));
 $ar = Array("stations" => Array() );
 for( $i=0; $row = pg_fetch_assoc($rs); $i++){
   $ar["stations"][] = $row;
-  $ar['stations'][$i]['state'] = ($ar['stations'][$i]['state'] == null) ? ""  : $ar['stations'][$i]['state'];
+  $ar['stations'][$i]['state'] = (is_null($ar['stations'][$i]['state'])) ? ""  : $ar['stations'][$i]['state'];
 }
 
 $json = json_encode($ar);

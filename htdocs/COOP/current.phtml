@@ -63,7 +63,7 @@ EOF;
 	return $s;
 }
 
-if ($wfo == null){
+if (is_null($wfo)){
     $uri = "http://iem.local/api/1/currents.json?network=$network";
     $baseurl = "current.phtml?network=$network";
 } else {

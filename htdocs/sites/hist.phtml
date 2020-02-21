@@ -28,7 +28,7 @@ $nicemonthdate = strftime("%B %Y", $ts);
 $htmlout = "";
 
 function snowprint($val){
-	if ($val == null) return "";
+	if (is_null($val)) return "";
 	if ($val > 0 && $val < 0.01) return "T";
 	return $val;
 }
@@ -184,16 +184,16 @@ if ($mode == "monthly") {
   if ($row["pday"] >= 0){
   	if ($row["pday"] < 0.01 && $row["pday"] > 0){
   		$str .= "<br>Rain: Trace ";
-  	} elseif ($row["pday"] == null) {
+  	} elseif (is_null($row["pday"])) {
   		$str .= "<br />Rain: ";
   	} else {
   		$str .= "<br>Rain: ". sprintf("%.2f", $row["pday"]);
   	}
   }
-  if ($row["snow"] != null && $row["snow"] >= 0){
+  if (! is_null($row["snow"]) && $row["snow"] >= 0){
   	 $str .= "<br>Snow: ". snowprint($row["snow"]);
   }
-  if ($row["snowd"] != null && $row["snowd"] >= 0){
+  if (! is_null($row["snowd"]) && $row["snowd"] >= 0){
   	$str .= "<br>Snow Depth: ". snowprint($row["snowd"]);
   }
     if (isset($row["avg_sknt"])){
@@ -205,18 +205,18 @@ if ($mode == "monthly") {
     $gtim = strtotime(substr($row["lmax_gust_ts"],0,16));
     $gs = date("g:i A", $gtim);
 	$g = round($row["max_gust"] * 1.15,0);
-	if ($row["max_drct"] == null){
+	if (is_null($row["max_drct"])){
 		$str .= "<br>Gust: ". $g . " (". $gs .")";
 	} else {
 		$str .= "<br>Gust:<br> ". drct2txt($row["max_drct"]) ." @ ". $g .
 			"<br>(". $gs .")";
 	}
   }
-  if ($row["min_rh"] != null){
+  if (is_null($row["min_rh"])){
   	$str .= sprintf("<br />RH%% Min/Max: %.0f-%.0f", $row["min_rh"],
   			$row["max_rh"]);
   }
-  if ($row["min_feel"] != null){
+  if (is_null($row["min_feel"])){
 	$str .= sprintf("<br />Feel Min/Max: %.0f to %.0f", $row["min_feel"],
 			$row["max_feel"]);
 }
@@ -314,7 +314,7 @@ EOF;
 	    	$gs = date("g:i A", $gtim);
 	    	$g = round($row["max_gust"] * 1.15,0);
 	
-			if ($row["max_drct"] == null){
+			if (is_null($row["max_drct"])){
 				$htmlout .= "<td>". $g ."</td><td>". $gs ."</td>";
 			} else {
 				$htmlout .= "<td>". drct2txt($row["max_drct"]) ." @ ". $g .
