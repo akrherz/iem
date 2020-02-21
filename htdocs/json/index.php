@@ -563,14 +563,14 @@ EOM
   		of product issuance is used for the date filtering.",
   		"vars" => Array(
   				"ugc" => "Five character UGC identifier used by the NWS",
-  				"sdate" => "YYYY-mm-dd Start Date (UTC)",
-                "edate" => "YYYY-mm-dd End Date (UTC)",
+  				"sdate" => "YYYY/mm/dd Start Date (UTC)",
+                "edate" => "YYYY/mm/dd End Date (UTC)",
                 "fmt" => "(optional) Format to download as: json (default) or xlsx"    
   		),
   		"example" => Array(
   				"{ugc}" => "IAC001",
-  				"{sdate}" => "1990-06-01",
-  				"{edate}" => "1990-07-01",
+  				"{sdate}" => "1990/06/01",
+  				"{edate}" => "1990/07/01",
   		)
   );
   $services[] = Array(
