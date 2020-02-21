@@ -2,14 +2,14 @@
 
 But be careful about not overwritting 'better' data gleaned from CLI/DSM
 """
-from __future__ import print_function
 import sys
 import datetime
 import warnings
 
 import numpy as np
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
 
+LOG = logger()
 warnings.simplefilter("ignore", RuntimeWarning)
 
 
@@ -89,10 +89,7 @@ def do(ts):
         computed["pday"] = np.sum(pday)
 
         if stid not in current:
-            print(
-                ("compute_tp Adding %s for %s %s %s")
-                % (table, station, network, ts)
-            )
+            LOG.info("Adding %s for %s %s %s", table, station, network, ts)
             icursor.execute(
                 """
                 INSERT into """
@@ -108,7 +105,6 @@ def do(ts):
         for vname in ["max_tmpf", "min_tmpf", "max_dwpf", "min_dwpf", "pday"]:
             oldval = current[stid].get(vname)
             newval = computed.get(vname)
-            # print vname, oldval, newval
             if newval is None or np.isnan(newval):
                 continue
             if oldval is None:

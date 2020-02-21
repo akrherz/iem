@@ -5,7 +5,6 @@ which is 5 mm.  So if we want to store 5mm in 250 bins, we have a resolution
 of 0.02 mm per index.
 
 """
-from __future__ import print_function
 import datetime
 import os
 import tempfile
@@ -14,11 +13,13 @@ import json
 import sys
 import gzip
 
-import pytz
 import numpy as np
 from PIL import Image
 import pyiem.mrms as mrms
+from pyiem.util import logger, utc
 import pygrib
+
+LOG = logger()
 
 
 def workflow(now, realtime):
@@ -37,19 +38,15 @@ def workflow(now, realtime):
 
     gribfn = mrms.fetch("PrecipRate", now)
     if gribfn is None:
-        print(
-            ("mrms_rainrate_comp.py NODATA for PrecipRate: %s")
-            % (now.strftime("%Y-%m-%dT%H:%MZ"),)
-        )
+        LOG.info("NODATA for PrecipRate: %s", now.strftime("%Y-%m-%dT%H:%MZ"))
         return
 
     # http://www.nssl.noaa.gov/projects/mrms/operational/tables.php
     # Says units are mm/hr
     fp = gzip.GzipFile(gribfn, "rb")
     (_, tmpfn) = tempfile.mkstemp()
-    tmpfp = open(tmpfn, "wb")
-    tmpfp.write(fp.read())
-    tmpfp.close()
+    with open(tmpfn, "wb") as fh:
+        fh.write(fp.read())
     grbs = pygrib.open(tmpfn)
     grb = grbs[1]
     os.unlink(tmpfn)
@@ -121,9 +118,8 @@ def workflow(now, realtime):
         )
         subprocess.call(pqstr, shell=True)
 
-        j = open("%s.json" % (tmpfn,), "w")
-        j.write(json.dumps(dict(meta=metadata)))
-        j.close()
+        with open("%s.json" % (tmpfn,), "w") as fh:
+            fh.write(json.dumps(dict(meta=metadata)))
         # Insert into LDM
         pqstr = (
             "pqinsert -i -p 'plot c %s "
@@ -147,15 +143,15 @@ def workflow(now, realtime):
 
 def main(argv):
     """ Go Main Go """
-    utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+    utcnow = utc()
     if len(argv) == 6:
-        utcnow = datetime.datetime(
+        utcnow = utc(
             int(argv[1]),
             int(argv[2]),
             int(argv[3]),
             int(argv[4]),
             int(argv[5]),
-        ).replace(tzinfo=pytz.utc)
+        )
         workflow(utcnow, False)
     else:
         # If our time is an odd time, run 5 minutes ago
@@ -165,7 +161,7 @@ def main(argv):
         utcnow = utcnow - datetime.timedelta(minutes=5)
         workflow(utcnow, True)
         # Also check old dates
-        for delta in [30, 90, 1440, 2880]:
+        for delta in [30, 90, 600, 1440, 2880]:
             ts = utcnow - datetime.timedelta(minutes=delta)
             fn = ts.strftime(
                 (

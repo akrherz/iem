@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+"""Onewire ingest."""
 import time
 import os
 import datetime
@@ -14,7 +14,6 @@ def main():
     while 1:
         _si, so = os.popen4('./digitemp -q -a -s /dev/ttyS0 -o"%s %.2F"')
         d = so.readlines()
-        # print d
         data = {}
         for l in d:
             t = l.split()
@@ -36,9 +35,7 @@ def main():
                         data[3],
                     )
                 )
-            # print 'INSERT %s' % (fp,)
             os.system("pqinsert %s" % (fp,))
-            # print so.read()
             os.remove(fp)
         time.sleep(56)
 

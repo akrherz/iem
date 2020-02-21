@@ -102,7 +102,6 @@ def main():
     w.field("SMONTH", "F", 10, 2)
     for sid in cob:
         w.point(cob[sid]["LON"], cob[sid]["LAT"])
-        # print id, cob[sid]
         if cob[sid]["P24I"] < 0:
             cob[sid]["P24I"] = -99.0
         if cob[sid]["SNOW"] < 0:
@@ -113,7 +112,6 @@ def main():
             cob[sid]["PMOI"] = -99.0
         if cob[sid]["SMOI"] < 0:
             cob[sid]["SMOI"] = -99.0
-        # print cob[sid], sid
         w.record(
             sid,
             cob[sid]["NAME"],

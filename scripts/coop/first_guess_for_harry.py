@@ -11,10 +11,8 @@ for line in open('/tmp/SCIA1107.txt'):
     if not site in sites:
         sites.append( site )
 
-print `sites`
 sys.exit()
 """
-from __future__ import print_function
 import sys
 import os
 import smtplib
@@ -24,8 +22,9 @@ from email.mime.multipart import MIMEMultipart
 import datetime
 
 from xlwt import Workbook
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
 
+LOG = logger()
 MESOSITE = get_dbconn("mesosite", user="nobody")
 mcursor = MESOSITE.cursor()
 COOP = get_dbconn("coop", user="nobody")
@@ -279,7 +278,7 @@ def get_site(year, month, iemre, nwsli):
             data[idx]["coop"]["v"] += "%s/%s " % (key, row[2])
         elif key[:2] in ["PP", "SD", "SF", "TA"]:
             if key not in UNCONV_VARS:
-                print("Unaccounted for %s %s %s" % (nwsli, valid, key))
+                LOG.info("Unaccounted for %s %s %s", nwsli, valid, key)
                 UNCONV_VARS.append(key)
 
     ccursor.execute(

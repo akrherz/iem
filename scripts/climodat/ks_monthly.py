@@ -130,7 +130,6 @@ def main(yr):
     """ main ! """
     csv = setup_csv(yr)
     for sid in nt.sts:
-        # print "%s processing [%s] %s" % (yr, id, nt.sts[id]["name"])
         metadata(sid, csv)
         process(sid, csv, yr)
 

@@ -1,7 +1,6 @@
 """
  Generate the dailyb spam, run from RUN_12Z.sh
 """
-from __future__ import print_function
 import subprocess
 import smtplib
 import os
@@ -12,9 +11,10 @@ from email.mime.multipart import MIMEMultipart
 import psycopg2.extras
 import requests
 import pytz
-from pyiem.util import exponential_backoff, get_dbconn
+from pyiem.util import exponential_backoff, get_dbconn, logger
 import wwa  # @UnresolvedImport
 
+LOG = logger()
 IEM_BRANCHES = "https://api.github.com/repos/akrherz/iem/branches"
 
 
@@ -251,7 +251,7 @@ def main():
         text += t
         html += h
     except Exception as exp:
-        print("get_github_commits failed with %s" % (exp,))
+        LOG.info("get_github_commits failed with %s", exp)
         text += "\n(script failure fetching github activity\n"
         html += "<br />(script failure fetching github activity<br />"
     t, h = feature()
@@ -297,8 +297,8 @@ def send_email(msg):
 def tests():
     """Hacky means to test things"""
     text, html = get_github_commits()
-    print("Text Variant")
-    print(text)
+    LOG.info("Text Variant")
+    LOG.info(text)
     with open("/tmp/gh.html", "w") as fh:
         fh.write(html)
     subprocess.call("xdg-open /tmp/gh.html >& /dev/null", shell=True)
