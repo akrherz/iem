@@ -59,6 +59,9 @@ $varDef = Array("low" => "Low Temperature",
 		"snowd" => "Snow Depth",
 		"high" => "High Temperature"
 );
+if (!array_key_exists($var, $varDef)){
+    $var = "precip";
+}
 
 
 
@@ -100,8 +103,9 @@ if ($source == "qc")
 {
 	$c = iemdb("coop");
 	$sql = sprintf("SELECT * from alldata_ia "
-			."WHERE day = '%s' and %s is not null"
-			." and substr(station, 3, 1) != 'C' and station != 'IA0000'",
+			." WHERE day = '%s' and %s is not null"
+            ." and substr(station, 3, 1) != 'C' and station != 'IA0000'"
+            ." ORDER by $var DESC",
 			adodb_date("Y-m-d", $ts), $var );
 	$cutstring1 = 2;
 	$cutstring2 = 4;
@@ -112,7 +116,7 @@ if ($source == "qc")
 	$sql = sprintf("SELECT id as station, day, snowd, max_tmpf as high, ".
 	    "min_tmpf as low, pday as precip, snow, snowd from summary_%s s ".
 	    "JOIN stations t on (t.iemid = s.iemid) WHERE day = '%s' and ".
-	    "network = 'IA_COOP'",
+	    "network = 'IA_COOP' ORDER by $var DESC",
 	    adodb_date("Y", $ts), adodb_date("Y-m-d", $ts) );
 }
 
@@ -131,14 +135,15 @@ $tr = "# ".$ndate." ". $varDef[$var] ."
 # Download Date: ". strftime("%d %b %Y") ."
 # Data Contact: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 #-----------------------snip------------------\n";
-$tr .= sprintf("%10s,%20s,%10s,%10s,%10s,%10s\n", 'ID', 'StationName', 'Date',
-    'Latitude', 'Longitude', $var);
+$tr .= sprintf("%-6s, %-20s, %-20s, %-10s, %10s, %10s, %10s\n", 'ID',
+    'StationName', 'County', 'Date', 'Latitude', 'Longitude', $var);
 foreach($vals as $key => $value){
 	$ukey = strtoupper($key);
 	if (! isset($cities[$ukey]) ) continue;
 
-	$tr .= sprintf("%10s,%-20s,%10s,%10.4f,%10.4f,%10s\n", $key, $cities[$ukey]['name'], $ndate,
-			$cities[$ukey]['lat'], $cities[$ukey]['lon'], $value );
+    $tr .= sprintf("%-6s, %-20s, %-20s, %10s, %10.4f, %10.4f, %10s\n", $key,
+        $cities[$ukey]['name'], $cities[$ukey]['county'], $ndate,
+		$cities[$ukey]['lat'], $cities[$ukey]['lon'], $value );
 
 	if ($ukey == "IA0807") $cities["IA0807"]["lon"] -= 0.1;
 
