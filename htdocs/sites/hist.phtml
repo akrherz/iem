@@ -212,11 +212,11 @@ if ($mode == "monthly") {
 			"<br>(". $gs .")";
 	}
   }
-  if (is_null($row["min_rh"])){
+  if (! is_null($row["min_rh"])){
   	$str .= sprintf("<br />RH%% Min/Max: %.0f-%.0f", $row["min_rh"],
   			$row["max_rh"]);
   }
-  if (is_null($row["min_feel"])){
+  if (! is_null($row["min_feel"])){
 	$str .= sprintf("<br />Feel Min/Max: %.0f to %.0f", $row["min_feel"],
 			$row["max_feel"]);
 }
