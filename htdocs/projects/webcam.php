@@ -1,7 +1,7 @@
 <?php 
-include_once "../../config/settings.inc.php";
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 98);
-include_once "../../include/myview.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Webcam Project";
 $t->thispage = "webcam-base";
@@ -22,7 +22,12 @@ images saved every 5 minutes for that period!</p>
 		north and west back on 12 Nov 2005.
 </div>
 <div class="col-md-6">
-<object width="100%" height="350"><param name="movie" value="http://www.youtube.com/v/yXnkzeCU3bE"></param><param name="wmode" value="transparent"></param><embed src="http://www.youtube.com/v/yXnkzeCU3bE" type="application/x-shockwave-flash" wmode="transparent" width="425" height="350"></embed></object>
+<object width="100%" height="350">
+<param name="movie" value="https://youtube.com/v/yXnkzeCU3bE"></param>
+<param name="wmode" value="transparent"></param>
+<embed src="https://youtube.com/v/yXnkzeCU3bE" 
+type="application/x-shockwave-flash" wmode="transparent" width="425" 
+height="350"></embed></object>
 
 <br />An awesome gravity wave lapse from near Tama, IA.  This lapse has over
 		1 million views on YouTube!
