@@ -39,6 +39,11 @@ function vis_formatter($val){
 	if (is_null($val)) return "";
 	return round($val, 2);
 }
+function precip_formatter($val){
+    if (is_null($val)) return "";
+    if ($val == 0.0001) return "T";
+    return round($val, 2);
+}
 function formatter($i, $row){
 	$ts = strtotime(substr($row["valid"],0,16));
 	$relh = relh(f2c($row["tmpf"]), f2c($row["dwpf"]) );
@@ -62,7 +67,10 @@ function formatter($i, $row){
 	temp_formatter($row["feel"]),
 	temp_formatter($row["max_tmpf_6hr"]), temp_formatter($row["min_tmpf_6hr"]), 
 	relh(f2c($row["tmpf"]), f2c($row["dwpf"])),
-	$row["alti"], $row["pres"], $row["phour"], $row["p03i"], $row["p06i"],
+    $row["alti"], $row["pres"],
+    precip_formatter($row["phour"]),
+    precip_formatter($row["p03i"]),
+    precip_formatter($row["p06i"]),
 	($i % 2 == 0)? "#FFF": "#EEE",
 	$ismadis ? " hf": "", $row["raw"]
 	);
