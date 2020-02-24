@@ -47,8 +47,9 @@ if ($ts == 0){ $ts = time(); }
 /* Who was online and where did they look?  Hehe */
 $cdrct = Array();
 for( $i=0; $row = pg_fetch_array($rs); $i++) 
-{  $cdrct[ $row["cam"] ] = $row["drct"]; }
-
+{
+    $cdrct[ $row["cam"] ] = $row["drct"];
+}
 
 /* Finally we get to map rendering */
 $map = ms_newMapObj("../../data/gis/base4326.map");
@@ -99,6 +100,7 @@ if (file_exists($fp)){
 
 
 $cp = ms_newLayerObj($map);
+$cp->setProjection("epsg:4326");
 $cp->set("type", MS_SHAPE_POINT);
 $cp->set("status", MS_ON);
 $cp->set("labelcache", MS_ON);
