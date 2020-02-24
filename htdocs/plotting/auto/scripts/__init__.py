@@ -692,6 +692,7 @@ data = {
                 },
                 {"id": "127", "label": ("Crop Progress by Year")},
                 {"id": "197", "label": ("Crop Progress State Average Map")},
+                {"id": "209", "label": ("Crop Progress Weekly Change")},
             ],
         },
         {
