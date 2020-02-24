@@ -17,7 +17,7 @@ $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
 $day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
 $source = isset($_GET["source"]) ? xssafe($_GET["source"]): "prelim";
 $size = isset($_GET["size"]) ? xssafe($_GET["size"]): "640x480";
-$showlabels = isset($_GET["labels"]);
+$showlabels = (isset($_GET["labels"]) && $_GET["labels"] == "on");
 $tokens = explode("x", $size);
 $width = $tokens[0]; $height = $tokens[1];
 
@@ -194,14 +194,16 @@ $ar = Array(
 );
 $sizeselect = make_select("size", $size, $ar);
 
-$showlabels = ($showlabels) ? " CHECKED=\"CHECKED\" ": "";
+$showlabelson = ($showlabels) ? " CHECKED=\"CHECKED\" ": "";
 
-$minusone = sprintf("plot.phtml?source=%s&amp;var=%s&amp;year=%s&amp;month=%s&amp;day=%s&amp;size=%s",
+$minusone = sprintf("plot.phtml?source=%s&amp;var=%s&amp;year=%s&amp;". 
+    "month=%s&amp;day=%s&amp;size=%s&amp;labels=%s",
 		$source, $var, date("Y", $ts - 86400), date("m", $ts - 86400),
-		date("d", $ts - 86400), $size);
-$plusone = sprintf("plot.phtml?source=%s&amp;var=%s&amp;year=%s&amp;month=%s&amp;day=%s&amp;size=%s",
+		date("d", $ts - 86400), $size, $showlabels ? "on": "off");
+$plusone = sprintf("plot.phtml?source=%s&amp;var=%s&amp;year=%s&amp;". 
+    "month=%s&amp;day=%s&amp;size=%s&amp;labels=%s",
 		$source, $var, date("Y", $ts + 86400), date("m", $ts + 86400),
-		date("d", $ts + 86400), $size);
+		date("d", $ts + 86400), $size, $showlabels ? "on": "off");
 
 $t->content = <<<EOF
 <p>With this application, you can plot COOP observations for a date of your
@@ -231,7 +233,7 @@ choice.
   </td>
   </tr>
 </table>
-<input type="checkbox" name="labels"{$showlabels}>Show point labels
+<input type="checkbox" name="labels"{$showlabelson}>Show point labels
 </form>
 <ul>
 <li>Snowfall data is not complete.  Please be careful using the data.</li>
