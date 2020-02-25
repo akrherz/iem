@@ -18,7 +18,7 @@ def main():
         delete from products WHERE
         entered < ('YESTERDAY'::date - '7 days'::interval) and
         entered > ('YESTERDAY'::date - '31 days'::interval) and
-    (pil ~* '^(RR[1-9SMA]|ROB|MAV|MET|MTR|MEX|NBE|NBH|NBP|NBS|NBX|RWR|STO|HML|WRK|OSO|SCV)'
+    (pil ~* '^(RR[1-9SMA]|ROB|ECM|ECS|ECX|MAV|MET|MTR|MEX|NBE|NBH|NBP|NBS|NBX|RWR|STO|HML|WRK|OSO|SCV)'
          or pil in ('HPTNCF', 'WTSNCF','WRKTTU','TSTNCF', 'HD3RSA', 'LAVUSA',
             'XF03DY', 'XOBUS', 'ECMNC1', 'SYNBOU', 'MISWTM', 'MISWTX',
             'MISMA1', 'MISAM1'))
