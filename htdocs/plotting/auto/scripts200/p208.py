@@ -80,7 +80,8 @@ def plotter(fdict):
         issue at time zone 'UTC' as issue,
         expire at time zone 'UTC' as expire,
         init_expire at time zone 'UTC' as init_expire,
-        1 as val
+        1 as val,
+        status
         from """
         + table
         + """ w JOIN ugcs u on (w.gid = u.gid)
@@ -153,20 +154,27 @@ def plotter(fdict):
     mp.sector = "cwa"
     mp.cwa = wfo[-3:]
     # CAN statements come here with time == expire :/
-    df2 = df[(df["issue"] <= utcvalid) & (df["expire"] >= utcvalid)]
+    df2 = df[(df["issue"] <= utcvalid) & (df["expire"] > utcvalid)]
     if df2.empty:
-        df2 = df[df["issue"] <= utcvalid]
-        if df2.empty:
-            raise NoDataFound("Your time filter removed all events.")
-    mp.fill_ugcs(
-        df2["val"].to_dict(),
-        color=df2["color"].to_dict(),
-        nocbar=True,
-        labels=df2["name"].to_dict(),
-        missingval="",
-        ilabel=(len(df2.index) <= 10),
-        labelbuffer=5,
-    )
+        mp.ax.text(
+            0.5,
+            0.5,
+            "Event No Longer Active",
+            zorder=1000,
+            transform=mp.ax.transAxes,
+            fontsize=24,
+            ha="center",
+        )
+    else:
+        mp.fill_ugcs(
+            df2["val"].to_dict(),
+            color=df2["color"].to_dict(),
+            nocbar=True,
+            labels=df2["name"].to_dict(),
+            missingval="",
+            ilabel=(len(df2.index) <= 10),
+            labelbuffer=5,
+        )
     if not sbwdf.empty:
         color = vtec.NWS_COLORS.get("%s.%s" % (p1, s1), "#FF0000")
         poly = sbwdf.iloc[0]["geom"]
