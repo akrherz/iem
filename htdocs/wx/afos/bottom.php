@@ -37,6 +37,11 @@ PIL       Description             Product ID for Des Moines
 MAVxxx    GFS MOS Guidance         MAVDSM
 METxxx    NAM MOS Guidance         METDSM
 MEXxxx    GFSX MOS Guidance        MEXDSM
+NBExxx    National Blend E         NBEDSM
+NBHxxx    National Blend H         NBHDSM
+NBPxxx    National Blend P         NBPDSM
+NBSxxx    National Blend S         NBSDSM
+NBXxxx    National Blend X         NBXDSM
 
 And model output
 
