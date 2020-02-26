@@ -6,8 +6,10 @@ import datetime
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.plot import MapPlot
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
+import cartopy.crs as ccrs
 
 PDICT = {
     "state": "State Level Maps (select state)",
@@ -21,20 +23,66 @@ PDICT2 = {
 }
 PDICT3 = OrderedDict(
     [
-        ("total_precip", "Total Precipitation"),
         ("avg_temp", "Average Temperature"),
         ("avg_high", "Average High Temperature"),
         ("avg_low", "Average Low Temperature"),
+        ("total_cdd65", "Total Cooling Degree Days (base=65)"),
+        ("total_gdd32", "Total Growing Degree Days (base=32)"),
+        ("total_gdd41", "Total Growing Degree Days (base=41)"),
+        ("total_gdd46", "Total Growing Degree Days (base=46)"),
+        ("total_gdd48", "Total Growing Degree Days (base=48)"),
+        ("total_gdd50", "Total Growing Degree Days (base=50)"),
+        ("total_gdd51", "Total Growing Degree Days (base=51)"),
+        ("total_gdd52", "Total Growing Degree Days (base=52)"),
+        ("total_hdd65", "Total Heating Degree Days (base=65)"),
+        ("total_sdd86", "Total Stress Degree Days (base=86)"),
+        ("total_precip", "Total Precipitation"),
     ]
 )
-UNITS = {
-    "total_precip": "inch",
-    "avg_temp": "F",
-    "avg_high": "F",
-    "avg_low": "F",
+PDICT5 = {
+    "climate": "Period of Record Climatology",
+    "climate51": "1951-Present Climatology",
+    "climate71": "1971-Present Climatology",
+    "climate81": "1981-Present Climatology",
+    "ncdc_climate71": "NCEI 1971-2000 Climatology",
+    "ncdc_climate81": "NCEI 1981-2000 Climatology",
 }
-PRECISION = {"total_precip": 2, "avg_temp": 1, "avg_high": 1, "avg_low": 1}
-PDICT4 = {"monthly": "Monthly Averages", "yearly": "Yearly Averages"}
+UNITS = {"total_precip": "inch"}
+PRECISION = {
+    "total_precip": 2,
+    "total_gdd50": 0,
+    "total_gdd32": 0,
+    "total_gdd41": 0,
+    "total_gdd46": 0,
+    "total_gdd48": 0,
+    "total_gdd51": 0,
+    "total_gdd52": 0,
+    "total_cdd65": 0,
+    "total_hdd65": 0,
+}
+MDICT = OrderedDict(
+    [
+        ("all", "No Month/Time Limit"),
+        ("spring", "Spring (MAM)"),
+        ("mjj", "May/June/July"),
+        ("gs", "May thru Sep"),
+        ("fall", "Fall (SON)"),
+        ("winter", "Winter (DJF)"),
+        ("summer", "Summer (JJA)"),
+        ("jan", "January"),
+        ("feb", "February"),
+        ("mar", "March"),
+        ("apr", "April"),
+        ("may", "May"),
+        ("jun", "June"),
+        ("jul", "July"),
+        ("aug", "August"),
+        ("sep", "September"),
+        ("oct", "October"),
+        ("nov", "November"),
+        ("dec", "December"),
+    ]
+)
 
 
 def get_description():
@@ -44,15 +92,17 @@ def get_description():
     desc[
         "description"
     ] = """This application produces map analysis of
-    climatological averages. These averages are solely derived from the
-    published NCDC 1981-2010 Climatology."""
+    climatological averages.  The IEM maintains a number of different
+    climatologies based on period of record and source.  If you pick the NCEI
+    Climatology, only basic temperature and precipitation variables are
+    available at this time."""
     desc["arguments"] = [
         dict(
             type="select",
-            name="over",
-            default="monthly",
-            options=PDICT4,
-            label="Show Monthly or Annual Averages",
+            name="month",
+            default="all",
+            label="Month Limiter",
+            options=MDICT,
         ),
         dict(
             type="select",
@@ -62,16 +112,20 @@ def get_description():
             label="Select Map Region",
         ),
         dict(
+            type="select",
+            name="src",
+            default="ncdc_climate81",
+            options=PDICT5,
+            label=(
+                "Select Climatology Source to Use "
+                "(limits available variables)"
+            ),
+        ),
+        dict(
             type="state",
             name="state",
             default="IA",
             label="Select State to Plot (when appropriate)",
-        ),
-        dict(
-            type="month",
-            name="month",
-            default=datetime.date.today().month,
-            label="Select Month (when appropriate)",
         ),
         dict(
             type="select",
@@ -87,6 +141,7 @@ def get_description():
             default="total_precip",
             label="Which Variable to Plot",
         ),
+        dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
     ]
     return desc
 
@@ -99,59 +154,105 @@ def plotter(fdict):
     varname = ctx["var"]
     sector = ctx["sector"]
     opt = ctx["opt"]
-    over = ctx["over"]
     month = ctx["month"]
+    if month == "all":
+        months = range(1, 13)
+    elif month == "fall":
+        months = [9, 10, 11]
+    elif month == "winter":
+        months = [12, 1, 2]
+    elif month == "spring":
+        months = [3, 4, 5]
+    elif month == "mjj":
+        months = [5, 6, 7]
+    elif month == "gs":
+        months = [5, 6, 7, 8, 9]
+    elif month == "summer":
+        months = [6, 7, 8]
+    else:
+        ts = datetime.datetime.strptime("2000-" + month + "-01", "%Y-%b-%d")
+        # make sure it is length two for the trick below in SQL
+        months = [ts.month]
 
+    if len(months) == 1:
+        title = "%s %s" % (calendar.month_name[months[0]], PDICT3[varname])
+    else:
+        title = "%s" % (MDICT[month],)
+    mp = MapPlot(
+        sector=sector,
+        state=state,
+        axisbg="white",
+        title="%s %s for %s" % (PDICT5[ctx["src"]], PDICT3[varname], title),
+        nocaption=True,
+    )
+    bnds = mp.ax.get_extent(crs=ccrs.PlateCarree())
+
+    joincol = "ncdc81" if ctx["src"] == "ncdc_climate81" else "id"
+    extra = ""
+    if not ctx["src"].startswith("ncdc_"):
+        extra = """,
+        sum(cdd65) as total_cdd65,
+        sum(hdd65) as total_hdd65,
+        sum(gdd32) as total_gdd32,
+        sum(gdd41) as total_gdd41,
+        sum(gdd46) as total_gdd46,
+        sum(gdd48) as total_gdd48,
+        sum(gdd50) as total_gdd50,
+        sum(gdd51) as total_gdd51,
+        sum(gdd52) as total_gdd52
+        """
     df = read_sql(
         """
-    WITH data as (
+        WITH mystations as (
+            select """
+        + joincol
+        + """ as myid,
+            max(ST_x(geom)) as lon, max(ST_y(geom)) as lat from stations
+            where network ~* 'CLIMATE' and
+            ST_Contains(ST_MakeEnvelope(%s, %s, %s, %s, 4326), geom)
+            GROUP by myid
+        )
         SELECT station, extract(month from valid) as month,
-        sum(precip) as total_precip, avg(high) as avg_high,
-        avg(low) as avg_low, avg((high+low)/2.) as avg_temp
-        from ncdc_climate81 GROUP by station, month)
-
-    SELECT station, ST_X(geom) as lon, ST_Y(geom) as lat, month,
-    total_precip, avg_high, avg_low, avg_temp from data d JOIN stations t
-    ON (d.station = t.id) WHERE t.network = 'NCDC81'
-    """,
+        max(lon) as lon, min(lat) as lat,
+        sum(precip) as total_precip,
+        avg(high) as avg_high,
+        avg(low) as avg_low,
+        avg((high+low)/2.) as avg_temp """
+        + extra
+        + """
+        from """
+        + ctx["src"]
+        + """ c
+        JOIN mystations t on (c.station = t.myid)
+        WHERE extract(month from valid) in %s
+        GROUP by station, month
+        """,
         pgconn,
+        params=(bnds[0], bnds[2], bnds[1], bnds[3], tuple(months)),
         index_col=["station", "month"],
     )
     if df.empty:
         raise NoDataFound("No data was found for query, sorry.")
 
-    if over == "monthly":
-        title = "%s %s" % (calendar.month_name[month], PDICT3[varname])
-        df.reset_index(inplace=True)
-        df2 = df[df["month"] == month]
+    if len(months) == 1:
+        df2 = df
     else:
-        title = "Annual %s" % (PDICT3[varname],)
-        if varname == "total_precip":
+        if varname.startswith("total"):
             df2 = df.sum(axis=0, level="station")
         else:
             df2 = df.mean(axis=0, level="station")
         df2["lat"] = df["lat"].mean(axis=0, level="station")
         df2["lon"] = df["lon"].mean(axis=0, level="station")
-    mp = MapPlot(
-        sector=sector,
-        state=state,
-        axisbg="white",
-        title="NCEI 1981-2010 Climatology of %s" % (title,),
-        subtitle=(
-            "based on National Centers for "
-            "Environmental Information (NCEI) 1981-2010"
-            " Climatology"
-        ),
-    )
     levels = np.linspace(df2[varname].min(), df2[varname].max(), 10)
-    levels = [round(x, PRECISION[varname]) for x in levels]
+    levels = [round(x, PRECISION.get(varname, 1)) for x in levels]
     if opt in ["both", "contour"]:
         mp.contourf(
             df2["lon"].values,
             df2["lat"].values,
             df2[varname].values,
             levels,
-            units=UNITS[varname],
+            units=UNITS.get(varname, "F"),
+            cmap=plt.get_cmap(ctx["cmap"]),
             clip_on=False,
         )
     if sector == "state":
@@ -161,11 +262,12 @@ def plotter(fdict):
             df2["lon"].values,
             df2["lat"].values,
             df2[varname].values,
-            fmt="%%.%if" % (PRECISION[varname],),
+            fmt="%%.%if" % (PRECISION.get(varname, 1),),
+            labelbuffer=5,
         )
 
     return mp.fig, df
 
 
 if __name__ == "__main__":
-    plotter(dict(over="annual"))
+    plotter(dict(month="gs", var="total_gdd50", src="climate51"))
