@@ -108,7 +108,7 @@ def plotter(fdict):
         sql = (
             """
         WITH doy as (
-            SELECT year, max(day) from """
+            SELECT year, min(day) from """
             + table
             + """ WHERE station = %s
             and high >= %s and month < 6 GROUP by year),
@@ -118,17 +118,17 @@ def plotter(fdict):
             from """
             + table
             + """ a, doy d
-            WHERE a.station = %s and a.year = d.year and a.day < d.min
+            WHERE a.station = %s and a.year = d.year and a.day > d.min
+            and a.month < 6
             GROUP by a.year)
 
         SELECT d.year, d.min as date, extract(doy from d.min) as day_of_year,
         a.peak_value, a.count_days
         from doy d JOIN agg a on (d.year = a.year) ORDER by d.year"""
         )
-        title = ("Min low after first %.0f+ high, days below %.0f") % (
-            thres,
-            thres2,
-        )
+        title = (
+            "Min low after first %.0f+ high, " "days below %.0f till 1 Jun"
+        ) % (thres, thres2)
         ctx["ax1_ylabel"] = r"Min Low Temperature $^\circ$F"
         ctx["ax2_xlabel"] = "Date of First %.0f High" % (thres,)
     df = read_sql(
