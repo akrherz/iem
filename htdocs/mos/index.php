@@ -26,7 +26,8 @@ local research and makes it available for others to use as well.</p>
 <tr><th>ETA</th><td>24 Feb 2002</td><td>9 Dec 2008</td></tr>
 <tr><th>GFS</th><td>16 Dec 2003</td><td>--Realtime--</td></tr>
 <tr><th>NAM</th><td>9 Dec 2008</td><td>--Realtime--</td></tr>
-<tr><th>NBS [0, 7, 12, 19z]</th><td>7 Nov 2018</td><td>--Realtime--</td></tr>
+<tr><th>NBS [0, 7, 12, 19z]</th><td>7 Nov 2018</td><td>25 Feb 2020</td></tr>
+<tr><th>NBS [1, 7, 13, 19z]</th><td>26 Feb 2020</td><td>--Realtime--</td></tr>
 </tbody>
 </table>
 <br />The MOS products are processed in realtime and immediately available from
@@ -37,7 +38,7 @@ the applications listed below.
  <li><a href="table.phtml">Interactive MOS Tables</a>
   <br />Generates a simple table of how a variable changes over time
    and by model run.</li>
- <li><a href="http://www.meteor.iastate.edu/~ckarsten/bufkit/image_loader.phtml">Meteogram Generator</a>
+ <li><a href="https://meteor.geol.iastate.edu/~ckarsten/bufkit/image_loader.phtml">Meteogram Generator</a>
   <br />Fancy application to generate graphs of current MOS data.</li>
  <li><a href="csv.php">Comma Delimited output</a>
   <br />Simple web service provides csv data for a site and for a period

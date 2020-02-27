@@ -51,6 +51,10 @@ $t->content = <<<EOF
 data. The archive goes back to June 2000.  You can set the start and end times
 to the same time to get that particular run.
 
+<p>For dates after 25 Feb 2020, the NBS was only archived for the 1, 7, 13,
+and 19 UTC cycles as per guidance from the MOS developers.  For dates before
+25 Feb 2020, the NBS was only archived for 0, 7, 12, and 19 UTC runs.</p>
+
 <form name="selector" action="dl.php" method="GET">
 <table class="table table-striped">
 <tr><th>Enter 4-Char Station ID:</th>
@@ -66,9 +70,13 @@ to the same time to get that particular run.
   <td>{$ds1}</td>
   <td><select name="hour1">
  <option value="0">00 UTC</option>
+ <option value="1">01 UTC</option>
  <option value="6">6 UTC</option>
+ <option value="7">7 UTC</option>
  <option value="12">12 UTC</option>
+ <option value="13">13 UTC</option>
  <option value="18">18 UTC</option>
+ <option value="19">19 UTC</option>
   </select></td></tr>
 
 <tr><th>End Date (inclusive)</th>
@@ -76,11 +84,15 @@ to the same time to get that particular run.
   <td>{$ms2}</td>
   <td>{$ds2}</td>
   <td><select name="hour2">
- <option value="0">00 UTC</option>
- <option value="6">6 UTC</option>
- <option value="12">12 UTC</option>
- <option value="18">18 UTC</option>
-  </select></td></tr>
+  <option value="0">00 UTC</option>
+  <option value="1">01 UTC</option>
+  <option value="6">6 UTC</option>
+  <option value="7">7 UTC</option>
+  <option value="12">12 UTC</option>
+  <option value="13">13 UTC</option>
+  <option value="18">18 UTC</option>
+  <option value="19">19 UTC</option>
+   </select></td></tr>
 </table>
 
 <input type="submit" value="Generate Data">
