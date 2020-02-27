@@ -3,6 +3,7 @@ TODO: add table listing each forecast's peak and peak time...
 """
 import datetime
 
+import pytz
 import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
@@ -80,7 +81,10 @@ def get_context(fdict):
         select id, issued, primaryname, primaryunits, secondaryname,
         secondaryunits from hml_forecast where station = %s
         and generationtime between %s and %s)
-    SELECT f.id, f.issued, d.valid, d.primary_value, f.primaryname,
+    SELECT f.id,
+    f.issued at time zone 'UTC' as issued,
+    d.valid at time zone 'UTC' as valid,
+    d.primary_value, f.primaryname,
     f.primaryunits, d.secondary_value, f.secondaryname,
     f.secondaryunits from
     hml_forecast_data_"""
@@ -97,6 +101,8 @@ def get_context(fdict):
         index_col=None,
     )
     if not ctx["fdf"].empty:
+        ctx["fdf"]["valid"] = ctx["fdf"]["valid"].dt.tz_localize(pytz.UTC)
+        ctx["fdf"]["issued"] = ctx["fdf"]["issued"].dt.tz_localize(pytz.UTC)
         ctx["primary"] = "%s[%s]" % (
             ctx["fdf"].iloc[0]["primaryname"],
             ctx["fdf"].iloc[0]["primaryunits"],
@@ -252,4 +258,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter(dict(station="CIRI2"))
