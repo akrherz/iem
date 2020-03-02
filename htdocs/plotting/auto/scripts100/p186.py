@@ -68,7 +68,11 @@ def plotter(fdict):
     headers = {}
     headers["Accept"] = "application/json, text/javascript, */*; q=0.01"
     headers["Content-Type"] = "application/json; charset=UTF-8"
-    req = requests.post(SERVICE, payload, headers=headers)
+    req = util.exponential_backoff(
+        requests.post, SERVICE, payload, headers=headers
+    )
+    if req is None:
+        raise NoDataFound("Drought Web Service failed to deliver data.")
     jdata = req.json()
     if "d" not in jdata:
         raise NoDataFound("Data Not Found.")
