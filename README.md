@@ -29,6 +29,6 @@ postgres | metvm6 | metvm9  | None
 samba | iem12 | None | cron scripts check data availability
 SSH | iem12 | None | None
 RIDGE   | iem13    | None    | inbound file queue, check latency 7 radars
-webalizer | iem13 | None | None
+webalizer | iem19 | None | None
 Webcam Current | iem13 | None | cron script monitors for offline webcams
 Webcam Lapses | iem13 | None | None

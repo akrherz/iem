@@ -10,8 +10,10 @@
 # yum -y install libdb-cxx libmaxminddb gd lftp tcsh tmpwatch
 
 export yyyymmdd="`date --date '1 day ago' +'%Y%m%d'`"
-export yyyymm="`date --date '1 day ago' +'%Y%m'`"
+export yyyy="`date --date '1 day ago' +'%Y'`"
+export mm="`date --date '1 day ago' +'%m'`"
 export dd="`date --date '1 day ago' +'%d'`"
+export yyyymm="`date --date '1 day ago' +'%Y%m'`"
 
 PREFIXES="iem iemssl cocorahs datateam sustainablecorn weatherim depbackend"
 MACHINES="iemvs100 iemvs101 iemvs102 iemvs103 iemvs104 iemvs105 iemvs106 iemvs107 iemvs108 iemvs109"
@@ -69,15 +71,10 @@ do
 	fi
 done
 
-# Requires a newer lftp for that `-f` on mkdir to work.
-lftp -u akrherz@iastate.edu ftps://ftp.box.com << EOM
-cd IEMWWWLogs
-mkdir -f $yyyymm
-cd $yyyymm
-mput *-${yyyymmdd}.log.gz
-bye
-EOM
-
-mv *-${yyyymmdd}.log.gz ../save/
-tmpwatch 10d ../save
+mkdir -p ../save/$yyyy/$mm
+mv *-${yyyymmdd}.log.gz ../save/$yyyy/$mm/
+cd ../save
+# save to staging area for now
+rsync -a . metl60.agron.iastate.edu:/stage/IEMWWWLogs/
+tmpwatch 10d .
 # Done!
