@@ -366,7 +366,11 @@ def fetch_hourly(form, cols):
             else -99
         )
         relh = row["rh_qc"] if row["rh_qc"] is not None else -99
-        solar = row["slrkw_avg_qc"] if row["slrkw_avg_qc"] is not None else -99
+        solar = (
+            (row["slrkw_avg_qc"] * 1000.0)
+            if row["slrkw_avg_qc"] is not None
+            else -99
+        )
         precip = (
             distance(row["rain_mm_tot_qc"], "MM").value("IN")
             if row["rain_mm_tot_qc"] is not None
