@@ -1,6 +1,4 @@
-"""Send a tar file of our daily data to CyBox!
-
-Note, needs a ~/.netrc file with 600 perms
+"""Send a tar file of our daily data to staging for upload to Google Drive!
 
 Lets run at 12z for the previous date
 """
@@ -9,7 +7,9 @@ import subprocess
 import os
 import sys
 
-from pyiem.ftpsession import send2box
+from pyiem.util import logger
+
+LOG = logger()
 
 
 def run(date):
@@ -21,9 +21,20 @@ def run(date):
         tarfn,
         date.strftime("%Y/%m/%d"),
     )
+    LOG.debug(cmd)
     subprocess.call(cmd, shell=True, stderr=subprocess.PIPE)
-    send2box(tarfn, date.strftime("/IEMArchive/%Y/%m"), tmpdir="/mesonet/tmp")
-    os.unlink(tarfn)
+    cmd = date.strftime(
+        "ssh mesonet@metl60.agron.iastate.edu "
+        "mkdir -p /stage/IEMArchive/%Y/%m"
+    )
+    LOG.debug(cmd)
+    subprocess.call(cmd, shell=True)
+    cmd = date.strftime(
+        "rsync -a --remove-source-files " + tarfn + " "
+        "mesonet@metl60.agron.iastate.edu:/stage/IEMArchive/%Y/%m"
+    )
+    LOG.debug(cmd)
+    subprocess.call(cmd, shell=True)
 
 
 def main(argv):
