@@ -1,49 +1,70 @@
-"""Upload i5 analysis to CyBox"""
+"""Move i5 analysis to staging for upload to Google Drive.
+
+Run from RUN_MIDNIGHT.sh
+"""
 import os
+import subprocess
 import datetime
 import glob
-import logging
 import sys
 
-from pyiem.ftpsession import send2box
+from pyiem.util import logger
+
+LOG = logger()
+REMOTEUSER = "mesonet@metl60.agron.iastate.edu"
+
+
+def call(cmd):
+    """Our custom caller."""
+    LOG.debug(cmd)
+    proc = subprocess.Popen(
+        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    stdout = proc.stdout.read().decode("ascii", "ignore")
+    stderr = proc.stderr.read().decode("ascii", "ignore")
+    if stdout == "" and stderr == "":
+        return
+    LOG.info("cmd %s yielded stdout: %s stderr: %s", cmd, stdout, stderr)
 
 
 def main(argv):
     """Go Main!"""
-    if len(argv) > 1 and argv[1] == "debug":
-        logger = logging.getLogger()
-        logger.setLevel(logging.DEBUG)
-        logging.debug("Setting logging to debug...")
-
-    ceiling = datetime.datetime.utcnow() - datetime.timedelta(hours=24)
+    if len(argv) == 4:
+        date = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
+    else:
+        date = datetime.date.today() - datetime.timedelta(days=1)
     os.chdir("/mesonet/share/pickup/ntrans")
 
-    local_filenames = {}
-    remote_filenames = {}
-    for fn in glob.glob("*.zip"):
-        valid = datetime.datetime.strptime(fn[3:15], "%Y%m%d%H%M")
-        if valid >= ceiling:
+    basedir = date.strftime("%Y/%m/%d")
+    for hour in range(24):
+        remotedir = "/stage/NTRANS/wxarchive/%s/%02i" % (basedir, hour)
+        cmd = "ssh %s mkdir -p %s" % (REMOTEUSER, remotedir)
+        call(cmd)
+        fns = glob.glob("wx_%s%02i*.zip" % (date.strftime("%Y%m%d"), hour))
+        if not fns:
+            LOG.info("wx date:%s hour:%s had no files?", date, hour)
             continue
-        rp = valid.strftime("/NTRANS/wxarchive/%Y/%m/%d/%H")
-        if fn.startswith("fx"):
-            rp = valid.strftime("/NTRANS/wxarchive/forecast/%Y/%m")
-        if rp not in remote_filenames:
-            local_filenames[rp] = []
-            remote_filenames[rp] = []
-        # Move file to temp fn so that we don't attempt to upload this twice
-        fn2 = "%s.xfer" % (fn,)
-        os.rename(fn, fn2)
-        local_filenames[rp].append(fn2)
-        remote_filenames[rp].append(fn)
-
-    fs = None
-    for rp in remote_filenames:
-        _ftps, ress = send2box(
-            local_filenames[rp], rp, remotenames=remote_filenames[rp], fs=fs
+        cmd = "rsync -a --remove-source-files %s %s:%s" % (
+            " ".join(fns),
+            REMOTEUSER,
+            remotedir,
         )
-        for fn, res in zip(local_filenames[rp], ress):
-            if res is not False:
-                os.unlink(fn)
+        call(cmd)
+
+    basedir = date.strftime("%Y/%m")
+    remotedir = "/stage/NTRANS/wxarchive/forecast/%s" % (basedir,)
+    cmd = "ssh %s mkdir -p %s" % (REMOTEUSER, remotedir)
+    call(cmd)
+    fns = glob.glob("fx_%s*.zip" % (date.strftime("%Y%m%d"),))
+    if not fns:
+        LOG.info("fx date:%s had no files?", date)
+    else:
+        cmd = "rsync -a --remove-source-files %s %s:%s" % (
+            " ".join(fns),
+            REMOTEUSER,
+            remotedir,
+        )
+        call(cmd)
 
 
 if __name__ == "__main__":
