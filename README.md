@@ -18,6 +18,7 @@ limited time.
 Process | Primary | Backup | Monitor
 ------- | ------- | ------ | -------
 Apache ErrorLog | iem12 | None | None
+GOES R/S | iem19 | iem15 | None
 hads-database | metvm4 | None | [check_hads_ingest.py](nagios/check_hads_ingest.py)
 iembot  | iem13    | iem12  | nagios checks for twistd processes running
 LDM | iem12 | None | None

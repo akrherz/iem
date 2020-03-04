@@ -24,6 +24,11 @@ then
 	python q3_today_total.py $(date --date '1 day ago' +'%Y %m %d')
 fi
 
+# We have troubles with IEMRE daily_analysis running timely at midnight, so
+# we run at 11 PM for today as well
+if [ $HH -eq "23" ]
+    python daily_analysis.py $(date +'%Y %m %d')
+fi
 
 if [ $LHH -eq "05" ]
 then

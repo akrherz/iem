@@ -95,7 +95,8 @@ def get_data(ctx):
       select station, valid,
       (case when low > low_normal then 1 else 0 end) as low_hit,
       (case when high > high_normal then 1 else 0 end) as high_hit,
-      (case when precip >= 0.01 then 1 else 0 end) as precip_hit
+      (case when precip >= 0.01 or precip is null then 1 else 0 end)
+        as precip_hit
       from cli_data
       where high is not null
       and high_normal is not null and low is not null and
