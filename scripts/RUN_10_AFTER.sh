@@ -26,7 +26,7 @@ fi
 
 # We have troubles with IEMRE daily_analysis running timely at midnight, so
 # we run at 11 PM for today as well
-if [ $HH -eq "23" ]
+if [ $LHH -eq "23" ]
 then
     python daily_analysis.py $(date +'%Y %m %d')
 fi
