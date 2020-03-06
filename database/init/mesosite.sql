@@ -5,13 +5,24 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (19, now());
+INSERT into iem_schema_manager_version values (20, now());
 
 --- ==== TABLES TO investigate deleting
 --- counties
 --- states
 --- tz_world  (scripts/dbutil/set_timezone.py)
 
+---
+--- Store 404s for downstream analysis
+CREATE TABLE weblog(
+    valid timestamptz DEFAULT now(),
+    client_addr inet,
+    uri text,
+    referer text,
+    http_status int
+);
+ALTER TABLE weblog OWNER to mesonet;
+GRANT ALL on weblog to nobody,apache;
 
 ---
 --- Store metadata used to drive the /timemachine/
