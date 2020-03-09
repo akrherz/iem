@@ -1,6 +1,6 @@
 <?php 
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Climatology Plots for Past 7 Days";
 $t->thispage = "climatology-week";
@@ -8,11 +8,11 @@ $t->thispage = "climatology-week";
 $t->content = <<<EOF
 <h4>Temperature</h4>
 <ul>
-<li><a href="/data/summary/7day/iaavg_max_tmpf.png">Avg High</a></li>
-<li><a href="/data/summary/7day/iaavg_min_tmpf.png">Avg Low</a></li>
+<li><a href="/data/summary/7day/iaavg_max_tmpf.png">Average High</a></li>
+<li><a href="/data/summary/7day/iaavg_min_tmpf.png">Average Low</a></li>
 </ul>
 
-<h4>Precipitatiom</h4>
+<h4>Precipitation</h4>
 <ul>
 <li><a href="/rainfall/obhour.phtml">Hourly Precip Accumulator</a></li>
 <li><a href="/data/summary/7day/ia_precip.png">Precip Accumulation</a> [ASOS+AWOS]</li>
