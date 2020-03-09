@@ -29,6 +29,7 @@ fi
 if [ $LHH -eq "23" ]
 then
     python daily_analysis.py $(date +'%Y %m %d')
+	python grid_rsds.py	$(date +'%Y %m %d')
 fi
 
 if [ $LHH -eq "05" ]
@@ -71,12 +72,6 @@ cd ../iemplot
 cd ../iemre
 python hourly_analysis.py `date -u +'%Y %m %d %H'`
 python hourly_analysis.py `date -u --date '2 hours ago' +'%Y %m %d %H'`
-# Grid solar so that we have values by midnight
-if [ $LHH -eq "23" ]
-then
-	python grid_rsds.py	$(date +'%Y %m %d') &
-fi
-
 
 cd ../mrms
 python make_mrms_rasters.py $YYYY $MM $DD $HH
