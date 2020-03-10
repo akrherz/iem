@@ -1,7 +1,6 @@
 """
     Plot the hourly stage IV precip data
 """
-from __future__ import print_function
 import sys
 import os
 import datetime
@@ -9,8 +8,10 @@ import datetime
 import pygrib
 import pytz
 import matplotlib.cm as cm
-from pyiem.util import utc
+from pyiem.util import utc, logger
 from pyiem.plot import MapPlot
+
+LOG = logger()
 
 
 def doit(ts):
@@ -28,7 +29,7 @@ def doit(ts):
         ts.strftime("%Y%m%d%H"),
     )
     if not os.path.isfile(fn):
-        print("current/stage4_hourly.py Missing stage4 %s" % (fn,))
+        LOG.info("Missing stage4 %s", fn)
         return
 
     grbs = pygrib.open(fn)
@@ -85,8 +86,7 @@ def main(argv):
         ts = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
         doit(ts)
     else:
-        ts = datetime.datetime.utcnow()
-        ts = ts.replace(tzinfo=pytz.utc)
+        ts = utc()
         doit(ts)
         doit(ts - datetime.timedelta(hours=24))
         doit(ts - datetime.timedelta(hours=48))

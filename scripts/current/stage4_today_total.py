@@ -1,7 +1,6 @@
 """
  Sum up the hourly precipitation from NCEP stage IV and produce maps
 """
-from __future__ import print_function
 import datetime
 import os
 import sys
@@ -9,7 +8,10 @@ import sys
 import pygrib
 from pyiem.datatypes import distance
 from pyiem.plot import MapPlot, nwsprecip
+from pyiem.util import logger
 import pytz
+
+LOG = logger()
 
 
 def doday(ts, realtime):
@@ -43,7 +45,7 @@ def doday(ts, realtime):
 
     if lts is None:
         if ts.hour > 1:
-            print(("stage4_today_total.py found no data for date: %s") % (ts,))
+            LOG.info("found no data for date: %s", ts)
         return
     lts = lts - datetime.timedelta(minutes=1)
     subtitle = "Total between 12:00 AM and %s" % (lts.strftime("%I:%M %p %Z"),)

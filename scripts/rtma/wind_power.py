@@ -10,7 +10,6 @@ capacity factor).
 RUN from RUN_40_AFTER.sh
 
 """
-from __future__ import print_function
 import datetime
 import os
 import sys
@@ -20,7 +19,9 @@ import numpy as np
 import pygrib
 import pytz
 from pyiem.plot import MapPlot
+from pyiem.util import logger
 
+LOG = logger()
 LEVELS = [
     0.0,
     0.01,
@@ -54,7 +55,7 @@ def run(ts, routes):
         )
     )
     if not os.path.isfile(fn):
-        print("rtma/wind_power.py missing %s" % (fn,))
+        LOG.info("File Not Found: %s", fn)
         return
 
     grb = pygrib.open(fn)
@@ -62,7 +63,7 @@ def run(ts, routes):
         u = grb.select(name="10 metre U wind component")[0]
         v = grb.select(name="10 metre V wind component")[0]
     except Exception as exp:
-        print("Missing u/v wind for wind_power.py\nFN: %s\n%s" % (fn, exp))
+        LOG.info("Missing u/v wind for wind_power.py\nFN: %s\n%s", fn, exp)
         return
     mag = np.hypot(u["values"], v["values"])
 

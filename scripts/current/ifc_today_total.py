@@ -1,7 +1,6 @@
 """
  Create a plot of today's IFC estimated precip
 """
-from __future__ import print_function
 import datetime
 import sys
 

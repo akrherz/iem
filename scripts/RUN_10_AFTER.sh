@@ -6,12 +6,14 @@ MM=$(date -u +'%m')
 DD=$(date -u +'%d')
 HH=$(date -u +'%H')
 LHH=$(date +'%H')
+YEST=$(date --date '1 day ago' +'%Y %m %d')
+TODAY=$(date +'%Y %m %d')
 
 cd iemre
 # MRMS hourly totals arrive shortly after the top of the hour
 if [ $LHH -eq "00" ]
 then
-	python merge_mrms_q3.py	$(date --date '1 day ago' +'%Y %m %d')
+	python merge_mrms_q3.py	$YEST
 else
 	python merge_mrms_q3.py	
 fi
@@ -19,17 +21,17 @@ python merge_ifc.py
 
 if [ $HH -eq "12" ]
 then
-	python merge_mrms_q3.py	$(date --date '1 day ago' +'%Y %m %d')
+	python merge_mrms_q3.py	$YEST
 	cd ../current
-	python q3_today_total.py $(date --date '1 day ago' +'%Y %m %d')
+	python q3_today_total.py $YEST
 fi
 
 # We have troubles with IEMRE daily_analysis running timely at midnight, so
 # we run at 11 PM for today as well
 if [ $LHH -eq "23" ]
 then
-    python daily_analysis.py $(date +'%Y %m %d')
-	python grid_rsds.py	$(date +'%Y %m %d')
+    python daily_analysis.py $TODAY
+	python grid_rsds.py	$TODAY
 fi
 
 if [ $LHH -eq "05" ]

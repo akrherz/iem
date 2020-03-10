@@ -1,7 +1,6 @@
 """
 Create a variable X hour plot of stage IV estimates
 """
-from __future__ import print_function
 import datetime
 import os
 import sys
@@ -10,7 +9,10 @@ import pygrib
 import pytz
 from pyiem.datatypes import distance
 from pyiem.plot import MapPlot
+from pyiem.util import logger
 import matplotlib.cm as cm
+
+LOG = logger()
 
 
 def do(ts, hours):
@@ -44,7 +46,7 @@ def do(ts, hours):
         now += interval
 
     if lts is None and ts.hour > 1:
-        print("Missing StageIV data!")
+        LOG.info("Missing StageIV data!")
     if lts is None:
         return
 

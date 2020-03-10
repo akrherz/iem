@@ -2,7 +2,6 @@
 
 Called from RUN_12Z.sh for the previous date
 """
-from __future__ import print_function
 import sys
 import datetime
 import warnings
@@ -12,8 +11,9 @@ import pandas as pd
 from pandas.io.sql import read_sql
 import metpy.calc as mcalc
 from metpy.units import units as munits
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
 
+LOG = logger()
 # bad values into mcalc
 warnings.simplefilter("ignore", RuntimeWarning)
 
@@ -100,7 +100,7 @@ def do(ts):
         index_col=None,
     )
     if df.empty:
-        print("compute_daily no ASOS database entries for %s" % (ts,))
+        LOG.info("no ASOS database entries for %s", ts)
         return
     # derive some parameters
     df["u"], df["v"] = mcalc.wind_components(
@@ -118,12 +118,14 @@ def do(ts):
 
     for iemid, gdf in df.groupby("iemid"):
         if len(gdf.index) < 6:
-            # print(" Quorum not meet for %s" % (gdf.iloc[0]['station'], ))
             continue
         if iemid not in current.index:
-            print(
-                ("compute_daily Adding %s for %s %s %s")
-                % (table, gdf.iloc[0]["station"], gdf.iloc[0]["network"], ts)
+            LOG.info(
+                "Adding %s for %s %s %s",
+                table,
+                gdf.iloc[0]["station"],
+                gdf.iloc[0]["network"],
+                ts,
             )
             icursor.execute(
                 """
@@ -190,9 +192,7 @@ def do(ts):
             continue
         cols = []
         args = []
-        # print(gdf.iloc[0]['station'])
         for key, val in newdata.items():
-            # print("  %s %s -> %s" % (key, currentrow[key], val))
             cols.append("%s = %%s" % (key,))
             args.append(val)
         args.extend([iemid, ts])
@@ -213,9 +213,10 @@ def do(ts):
             args,
         )
         if icursor.rowcount == 0:
-            print(
-                "compute_daily update of %s[%s] was 0"
-                % (gdf.iloc[0]["station"], gdf.iloc[0]["network"])
+            LOG.info(
+                " update of %s[%s] was 0",
+                gdf.iloc[0]["station"],
+                gdf.iloc[0]["network"],
             )
 
     icursor.close()

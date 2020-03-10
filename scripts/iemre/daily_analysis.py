@@ -23,7 +23,6 @@ from pyiem.util import get_dbconn, utc, ncopen, logger
 PGCONN = get_dbconn("iem")
 COOP_PGCONN = get_dbconn("coop")
 LOG = logger()
-LOG.info("Starting up!")
 
 
 def generic_gridder(df, idx):

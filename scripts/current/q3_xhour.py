@@ -1,5 +1,4 @@
 """Create a plot of the X Hour interval precipitation"""
-from __future__ import print_function
 import os
 import sys
 import datetime
@@ -12,8 +11,9 @@ import pygrib
 from pyiem.datatypes import distance
 import pyiem.mrms as mrms
 from pyiem.plot import MapPlot, nwsprecip
-from pyiem.util import utc
+from pyiem.util import utc, logger
 
+LOG = logger()
 TMP = "/mesonet/tmp"
 
 
@@ -37,7 +37,7 @@ def doit(ts, hours):
                 continue
             break
         if gribfn is None:
-            print("q3_xhour.py[%s] MISSING %s" % (hours, now))
+            LOG.info("%s MISSING %s", hours, now)
             now += interval
             continue
         fp = gzip.GzipFile(gribfn, "rb")
@@ -62,7 +62,7 @@ def doit(ts, hours):
         os.unlink(gribfn)
 
     if total is None:
-        print("q3_xhour.py no data ts: %s hours: %s" % (ts, hours))
+        LOG.info("no data ts: %s hours: %s", ts, hours)
         return
 
     # Scale factor is 10
@@ -111,13 +111,12 @@ def main(argv):
         )
         doit(ts, int(sys.argv[6]))
     else:
-        ts = datetime.datetime.utcnow()
-        ts = ts.replace(tzinfo=pytz.utc)
+        ts = utc()
         try:
             doit(ts, int(argv[1]))
         except Exception as exp:
-            print("q3_xhour failure ts: %s argv: %s" % (ts, argv[1]))
-            print(exp)
+            LOG.info("failure ts: %s argv: %s", ts, argv[1])
+            LOG.exception(exp)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,4 @@
 """Generate current plot of Temperature"""
-from __future__ import print_function
 import datetime
 
 from pandas.io.sql import read_sql

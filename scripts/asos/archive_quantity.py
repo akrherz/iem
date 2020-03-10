@@ -1,5 +1,4 @@
 """ Create a simple prinout of observation quanity in the database """
-from __future__ import print_function
 import sys
 
 import datetime
