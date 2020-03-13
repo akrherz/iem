@@ -18,6 +18,7 @@ PDICT2 = {
     "svrtor": "Plot Severe Thunderstorm + Tornado Warnings",
 }
 PDICT3 = {"wfo": "Plot for Single/All WFO", "state": "Plot for a Single State"}
+PDICT4 = {"line": "Accumulated line plot", "bar": "Single bar plot per year"}
 
 
 def get_description():
@@ -32,8 +33,21 @@ def get_description():
     and based on IEM processing of NWS text warning data.  The totals are for
     individual warnings and not some combination of counties + warnings. The
     archive begin date varies depending on which phenomena you are interested
-    in."""
+    in.
+
+    <p>Generally, the archive starts in Fall 2005 for most types.  Event
+    counts do exist for Severe Thunderstorm, Tornado and Flash Flood warnings
+    for dates back to 1986.  Data quality prior to 2001 is not the greatest
+    though.
+    """
     desc["arguments"] = [
+        dict(
+            type="select",
+            name="plot",
+            options=PDICT4,
+            default="line",
+            label="Which plot type to produce?",
+        ),
         dict(
             type="select",
             name="opt",
@@ -99,6 +113,37 @@ def get_description():
     return desc
 
 
+def plot_common(ctx, ax):
+    """Common plot stuff."""
+    ax.set_ylabel("Accumulated Count")
+    ax.grid(True)
+    ax.set_title(ctx["title"])
+    ax.set_xlabel(ctx["xlabel"])
+
+
+def make_barplot(ctx, df):
+    """Create a bar plot."""
+    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    df2 = (
+        df.groupby("year").max().reindex(range(ctx["syear"], ctx["eyear"] + 1))
+    )
+    df2 = df2.fillna(0)
+    ax.bar(df2.index.values, df2["count"])
+    for year, row in df2.iterrows():
+        ax.text(
+            year,
+            float(row["count"]) + 3,
+            "%.0f" % (row["count"],),
+            rotation=90 if len(df2.index) > 17 else 0,
+            bbox=dict(color="white", boxstyle="square,pad=0.1"),
+            ha="center",
+        )
+    ax.set_xlim(ctx["syear"] - 0.5, ctx["eyear"] + 0.5)
+    ax.set_ylim(top=max(5, float(df2["count"].max()) * 1.2))
+    plot_common(ctx, ax)
+    return fig, df2
+
+
 def plotter(fdict):
     """ Go """
     pgconn = get_dbconn("postgis")
@@ -109,9 +154,12 @@ def plotter(fdict):
     combo = ctx["c"]
     phenomena = ctx["phenomena"][:2]
     significance = ctx["significance"][:2]
+    if phenomena in ["SV", "TO", "FF"] and significance == "W":
+        pass
+    else:
+        ctx["syear"] = max(ctx["syear"], 2005)
     opt = ctx["opt"]
     state = ctx["state"][:2]
-    syear = ctx["syear"]
     eyear = ctx["eyear"]
 
     ctx["_nt"].sts["_ALL"] = {"name": "All Offices"}
@@ -155,13 +203,13 @@ def plotter(fdict):
     SELECT yr, doy, sum(count) OVER (PARTITION by yr ORDER by doy ASC)
     from agg2 ORDER by yr ASC, doy ASC
     """,
-        (phenomena, significance, syear, eyear, lastdoy),
+        (phenomena, significance, ctx["syear"], eyear, lastdoy),
     )
     if cursor.rowcount == 0:
         raise NoDataFound("No Data Found.")
 
     data = {}
-    for yr in range(syear, eyear + 1):
+    for yr in range(ctx["syear"], eyear + 1):
         data[yr] = {"doy": [0], "counts": [0]}
     rows = []
     for row in cursor:
@@ -169,7 +217,7 @@ def plotter(fdict):
         data[row[0]]["counts"].append(row[2])
         rows.append(dict(year=row[0], day_of_year=row[1], count=row[2]))
     # append on a lastdoy value so all the plots go to the end
-    for yr in range(syear, eyear + 1):
+    for yr in range(ctx["syear"], eyear + 1):
         if data[yr]["doy"][-1] >= lastdoy:
             continue
         if yr == utc().year:
@@ -180,9 +228,26 @@ def plotter(fdict):
         data[yr]["counts"].append(data[yr]["counts"][-1])
     df = pd.DataFrame(rows)
 
+    title = vtec.get_ps_string(phenomena, significance)
+    if combo == "svrtor":
+        title = "Severe Thunderstorm + Tornado Warning"
+    ptitle = "NWS WFO: %s (%s)" % (ctx["_nt"].sts[station]["name"], station)
+    if opt == "state":
+        ptitle = ("NWS Issued for Counties/Parishes in %s") % (
+            reference.state_names[state],
+        )
+    ctx["title"] = "%s\n %s Count" % (ptitle, title)
+    ctx["xlabel"] = "entire year plotted"
+    if lastdoy < 367:
+        ctx["xlabel"] = ("thru approximately %s") % (
+            datetime.date.today().strftime("%-d %B"),
+        )
+
+    if ctx["plot"] == "bar":
+        return make_barplot(ctx, df)
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     ann = []
-    for yr in range(syear, eyear + 1):
+    for yr in range(ctx["syear"], eyear + 1):
         if len(data[yr]["doy"]) < 2:
             continue
         lp = ax.plot(
@@ -232,27 +297,14 @@ def plotter(fdict):
     ax.legend(loc=2, ncol=2, fontsize=10)
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
     ax.set_xticklabels(calendar.month_abbr[1:])
-    ax.grid(True)
-    ax.set_ylabel("Accumulated Count")
+    plot_common(ctx, ax)
     ax.set_ylim(bottom=0)
-    title = vtec.get_ps_string(phenomena, significance)
-    if combo == "svrtor":
-        title = "Severe Thunderstorm + Tornado Warning"
-    ptitle = "%s" % (ctx["_nt"].sts[station]["name"],)
-    if opt == "state":
-        ptitle = ("NWS Issued for Counties/Parishes in %s") % (
-            reference.state_names[state],
-        )
-    ax.set_title(("%s\n %s Count") % (ptitle, title))
     ax.set_xlim(0, lastdoy)
-    if lastdoy < 367:
-        ax.set_xlabel(
-            ("thru approximately %s")
-            % (datetime.date.today().strftime("%-d %B"),)
-        )
 
     return fig, df
 
 
 if __name__ == "__main__":
-    plotter(dict(station="UNR", opt="wfo", c="svrtor"))
+    plotter(
+        dict(limit="yes", station="UNR", opt="wfo", c="svrtor", plot="bar")
+    )
