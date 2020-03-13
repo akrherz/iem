@@ -233,7 +233,8 @@ def plotter(fdict):
         title = "Severe Thunderstorm + Tornado Warning"
     ptitle = "NWS WFO: %s (%s)" % (ctx["_nt"].sts[station]["name"], station)
     if opt == "state":
-        ptitle = ("NWS Issued for Counties/Parishes in %s") % (
+        ptitle = ("NWS Issued for %s in %s") % (
+            "Parishes" if state == "LA" else "Counties",
             reference.state_names[state],
         )
     ctx["title"] = "%s\n %s Count" % (ptitle, title)

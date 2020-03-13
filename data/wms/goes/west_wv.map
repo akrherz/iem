@@ -26,7 +26,7 @@ WEB
   METADATA
    "wms_title" "IEM GOES WV WMS Service"
    "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/data/wms/goes/west_wv.map&SERVICE=WMS&"
-   "wms_srs" "EPSG:4326"
+   "wms_srs" "EPSG:4326 EPSG:3857"
    "wms_abstract" "IEM generated CONUS composite of GOES WV Satellite."
    "wms_keywords" "GOES,WEST,WV"
    "wms_accessconstraints" "None"
