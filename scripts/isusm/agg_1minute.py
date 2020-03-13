@@ -8,9 +8,10 @@ from pandas.io.sql import read_sql
 from pyiem.util import get_dbconn, utc, logger
 
 LOG = logger()
+TIME_FORMAT = "%Y-%m-%d %H:%M-06"
 
 
-def do_updates(cursor, station, valid, row):
+def do_updates(cursor, station, row):
     """Make the updates happen, captain."""
     cursor.execute(
         """
@@ -36,29 +37,39 @@ def do_updates(cursor, station, valid, row):
         t50_c_avg = %(t50_c_avg)s,
         t50_c_avg_qc = %(t50_c_avg)s,
         obs_count = %(obs_count)s
-        WHERE station = %(station)s and valid = %(hour)s
+        WHERE station = %(station)s and valid = %(valid_cst)s
     """,
         row,
     )
     if cursor.rowcount == 0:
-        LOG.debug("Updating %s %s resulted in 0 rows updated", station, valid)
+        LOG.debug(
+            "Updating %s %s resulted in 0 rows updated",
+            station,
+            row["valid_cst"],
+        )
 
 
-def process(cursor, row):
+def hourly_process(cursor, row):
     """Merge this row information into the database."""
-    valid = row["hour"] + datetime.timedelta(hours=1)
+    # Data for this 'hour' is stored at the top of the next hour in the
+    # database
+    valid_cst = row["hour"] + datetime.timedelta(hours=1)
+    row["valid_cst"] = valid_cst.strftime(TIME_FORMAT)
     station = row["station"]
     cursor.execute(
         """
         SELECT obs_count from sm_hourly where station = %s and valid = %s
     """,
-        (station, valid),
+        (station, row["valid_cst"]),
     )
     if cursor.rowcount == 1:
         current = cursor.fetchone()
         if current[0] == row["obs_count"]:
             LOG.debug(
-                "%s %s obs_count %s matches", valid, station, row["obs_count"]
+                "%s %s obs_count %s matches",
+                row["valid_cst"],
+                station,
+                row["obs_count"],
             )
             return
     elif cursor.rowcount == 0:
@@ -67,24 +78,92 @@ def process(cursor, row):
             """
         INSERT into sm_hourly(station, valid, obs_count) values (%s, %s, 0)
         """,
-            (station, valid),
+            (station, row["valid_cst"]),
         )
-    do_updates(cursor, station, valid, row)
+    do_updates(cursor, station, row)
 
 
-def main():
-    """Go Main Go."""
+def daily_process(cursor, station, date, df):
+    """Process this date's dataframe."""
+    # The database storage date is "tomorrow" as we store things in the rears
+    valid = date + datetime.timedelta(days=1)
+    sumdf = df.sum()
+    avgdf = df.mean()
+    row = {"station": station, "date": valid}
+    row["obs_count"] = float(sumdf["obs_count"])
+    for colname in [
+        "tsoil_c_avg",
+        "t12_c_avg",
+        "t24_c_avg",
+        "t50_c_avg",
+        "calc_vwc_12_avg",
+        "calc_vwc_24_avg",
+        "calc_vwc_50_avg",
+    ]:
+        row[colname] = float(avgdf[colname])
+    cursor.execute(
+        """
+        SELECT obs_count from sm_daily where station = %s and valid = %s
+    """,
+        (station, valid),
+    )
+    if cursor.rowcount == 0:
+        LOG.debug("no database entry found %s %s", date, station)
+        return
+    current = cursor.fetchone()
+    if current[0] == row["obs_count"]:
+        LOG.debug(
+            "%s %s obs_count %s matches", date, station, row["obs_count"]
+        )
+        return
+    cursor.execute(
+        """
+        UPDATE sm_daily SET
+        tsoil_c_avg = %(tsoil_c_avg)s,
+        tsoil_c_avg_qc = %(tsoil_c_avg)s,
+        t12_c_avg = %(t12_c_avg)s,
+        t12_c_avg_qc = %(t12_c_avg)s,
+        t24_c_avg = %(t24_c_avg)s,
+        t24_c_avg_qc = %(t24_c_avg)s,
+        t50_c_avg = %(t50_c_avg)s,
+        t50_c_avg_qc = %(t50_c_avg)s,
+        calc_vwc_12_avg = %(calc_vwc_12_avg)s,
+        calc_vwc_12_avg_qc = %(calc_vwc_12_avg)s,
+        calc_vwc_24_avg = %(calc_vwc_24_avg)s,
+        calc_vwc_24_avg_qc = %(calc_vwc_24_avg)s,
+        calc_vwc_50_avg = %(calc_vwc_50_avg)s,
+        calc_vwc_50_avg_qc = %(calc_vwc_50_avg)s,
+        vwc_12_avg = %(calc_vwc_12_avg)s,
+        vwc_12_avg_qc = %(calc_vwc_12_avg)s,
+        vwc_24_avg = %(calc_vwc_24_avg)s,
+        vwc_24_avg_qc = %(calc_vwc_24_avg)s,
+        vwc_50_avg = %(calc_vwc_50_avg)s,
+        vwc_50_avg_qc = %(calc_vwc_50_avg)s,
+        obs_count = %(obs_count)s
+        WHERE station = %(station)s and valid = %(date)s
+    """,
+        row,
+    )
+
+
+def workflow():
+    """Do things."""
     pgconn = get_dbconn("isuag")
-    sts = utc() - datetime.timedelta(hours=36)
-    sts = sts.replace(minute=0, second=0, microsecond=0)
+    # We need to collect up data for periods representing CST dates, this
+    # is tricky business
+    date = datetime.date.today() - datetime.timedelta(days=7)
+    # 6z is the start of such a date
+    sts = utc(date.year, date.month, date.day, 6)
     df = read_sql(
         """
     WITH data as (
         SELECT *,
-        date_trunc('hour', valid - '1 minute'::interval) as hour,
+        date_trunc('hour',
+            (valid - '1 minute'::interval) at time zone 'UTC+6') as hour,
         row_number() OVER (
             PARTITION by station,
-            date_trunc('hour', valid - '1 minute'::interval)
+            date_trunc('hour',
+            (valid - '1 minute'::interval) at time zone 'UTC+6')
             ORDER by valid DESC) as rn
         from sm_minute where valid >= %s
     )
@@ -106,13 +185,29 @@ def main():
         params=(sts,),
         index_col=None,
     )
+    # Compute the "date"
+    df["date"] = df["hour"].dt.date
     # We want NaN values as None
     df = df.replace({np.nan: None})
+
+    # Daily work
     cursor = pgconn.cursor()
-    for _, row in df.iterrows():
-        process(cursor, row)
+    for (station, date), gdf in df.groupby(["station", "date"]):
+        daily_process(cursor, station, date, gdf)
     cursor.close()
     pgconn.commit()
+
+    # Hourly work
+    cursor = pgconn.cursor()
+    for _, row in df.iterrows():
+        hourly_process(cursor, row)
+    cursor.close()
+    pgconn.commit()
+
+
+def main():
+    """Go Main Go."""
+    workflow()
 
 
 if __name__ == "__main__":
