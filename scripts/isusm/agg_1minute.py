@@ -85,11 +85,9 @@ def hourly_process(cursor, row):
 
 def daily_process(cursor, station, date, df):
     """Process this date's dataframe."""
-    # The database storage date is "tomorrow" as we store things in the rears
-    valid = date + datetime.timedelta(days=1)
     sumdf = df.sum()
     avgdf = df.mean()
-    row = {"station": station, "date": valid}
+    row = {"station": station, "date": date}
     row["obs_count"] = float(sumdf["obs_count"])
     for colname in [
         "tsoil_c_avg",
@@ -105,7 +103,7 @@ def daily_process(cursor, station, date, df):
         """
         SELECT obs_count from sm_daily where station = %s and valid = %s
     """,
-        (station, valid),
+        (station, date),
     )
     if cursor.rowcount == 0:
         LOG.debug("no database entry found %s %s", date, station)
