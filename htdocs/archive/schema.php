@@ -9,7 +9,7 @@ $t->title = "Archived Data Schema";
 $url = sprintf("https://mesonet.agron.iastate.edu/archive/data/%s", gmdate('Y/m/d'));
 $u = sprintf("<a href=\"%s\">%s</a>\n", $url, $url);
 
-$url2 = sprintf("http://mtarchive.geol.iastate.edu/%s", gmdate('Y/m/d'));
+$url2 = sprintf("https://mtarchive.geol.iastate.edu/%s", gmdate('Y/m/d'));
 $u2 = sprintf("<a href=\"%s\">%s</a>\n", $url2, $url2);
 
 

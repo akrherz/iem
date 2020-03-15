@@ -59,7 +59,7 @@ hole with hundreds of plotting options for many datasets of NWS interest.</p>
   <li><a href="/rainfall/obhour.phtml">Hourly Precipitation Summaries</a> for ASOS</li>
   <li><a href="/rainfall/">IEM GIS Rainfall</a><br />
     Mostly Midwest products, but includes a conversion of MRMS to ERDAS Imagine Files.</li>
-  <li><a href="http://mtarchive.geol.iastate.edu">MRMS Grib Archive</a>
+  <li><a href="https://mtarchive.geol.iastate.edu">MRMS Grib Archive</a>
     <br />Archive of a handful MRMS products in Grib Format.</li>
   <li><a href="/ASOS/current.phtml">Sortable Currents</a> for ASOS, COOP, etc</li>
 </ul>

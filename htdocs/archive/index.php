@@ -30,10 +30,10 @@ you should use the <a href="https://mrms.ncep.noaa.gov/data/">MRMS Data Website<
 for realtime data.</p>
 
 <ul>
-  <li><a href="https://iastate.box.com/s/i4p9z71rxxo0ohplx7d89kvwqpur2609">~Complete Hourly Zipfiles on CyBox</a> since 28 Sep 2019.
+  <li><a href="https://drive.google.com/drive/folders/1JCajASK61bFp9h3khOb9PjoS04Um0DfQ?usp=sharing">~Complete Hourly Zipfiles on Google Drive</a> since 28 Sep 2019.
   These are based on whatever was provided by the LDM NCEP feed and there is no mechanism
   attempted to repair any holes (quasi rare) from the LDM feed.</li>
-  <li><a href="http://mtarchive.geol.iastate.edu/${d}/mrms/ncep/">Mtarchive Daily Selected Files</a> contains
+  <li><a href="https://mtarchive.geol.iastate.edu/${d}/mrms/ncep/">Mtarchive Daily Selected Files</a> contains
   selected grib2 files of interest and has a more aggressive process that attempts to fill
   in holes based on NCEP LDM or HTTP outages.  This archive goes back to the beginning
   of MRMS, but the number of data types archived varies.</li>
@@ -121,11 +121,11 @@ this data back to 2001.  The IEM's archives can be found:
   contains a sub-directory called 'bufkit'.
    This directory contains model point soundings for locations near Iowa. The
    archive started 25 January 2006 - 27 March 2015.
-  <br /><a href="http://mtarchive.geol.iastate.edu/">Mtarchive Bufkit Archive</a>
+  <br /><a href="https://mtarchive.geol.iastate.edu/">Mtarchive Bufkit Archive</a>
   This archive contains data for many more sites and models, including SREF.
    </li>
 
- <li><a href="http://mtarchive.geol.iastate.edu/">GEMPAK data archive</a>
+ <li><a href="https://mtarchive.geol.iastate.edu/">GEMPAK data archive</a>
   <br />Archive of gempak products taken from the UNIDATA NOAAPORT feed.  This
    archive dates back to 2001 and for some dates even further.</li>
 

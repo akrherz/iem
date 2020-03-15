@@ -3,7 +3,6 @@
     Run from RUN_2AM.sh for 3, 6, and 12 months in the past
     on the 15th each month
 """
-from __future__ import print_function
 import sys
 import datetime
 import os
@@ -11,7 +10,9 @@ import os
 import requests
 import pandas as pd
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, exponential_backoff
+from pyiem.util import get_dbconn, exponential_backoff, logger
+
+LOG = logger()
 
 
 def process(tmpfn):
@@ -35,9 +36,12 @@ def process(tmpfn):
         data.append(
             dict(sid=sid, cst=cst, counter=counter, tmpc=tmpc, battery=battery)
         )
+    if not data:
+        LOG.info("No data found for %s", tmpfn)
+        return
     df = pd.DataFrame(data)
     sids = df["sid"].unique()
-    print("Found %s records from %s stations" % (len(data), len(sids)))
+    LOG.info("Found %s records from %s stations", len(data), len(sids))
     for sid in sids:
         cursor = pgconn.cursor()
         df2 = df[df["sid"] == sid]
@@ -55,7 +59,7 @@ def process(tmpfn):
             )
         )
         if cursor.rowcount > 0:
-            print(" - removed  %s rows for sid: %s" % (cursor.rowcount, sid))
+            LOG.info(" - removed  %s rows for sid: %s", cursor.rowcount, sid)
         counter = None
         for (_, row) in df2.iterrows():
             if counter is None:
@@ -67,9 +71,13 @@ def process(tmpfn):
             else:
                 precip = 0
             if precip > 1:
-                print(
-                    ("sid: %s cst: %s precip: %s counter1: %s counter2: %s")
-                    % (sid, row["cst"], precip, counter, row["counter"])
+                LOG.info(
+                    ("sid: %s cst: %s precip: %s counter1: %s counter2: %s"),
+                    sid,
+                    row["cst"],
+                    precip,
+                    counter,
+                    row["counter"],
                 )
             counter = float(row["counter"])
             tbl = "hpd_%s" % (row["cst"] + datetime.timedelta(hours=6)).year
@@ -89,7 +97,7 @@ def process(tmpfn):
                     "null" if pd.isnull(precip) else precip,
                 )
             )
-        print(" + inserted %s rows for sid: %s" % (len(df2), sid))
+        LOG.info(" + inserted %s rows for sid: %s", len(df2), sid)
         cursor.close()
         pgconn.commit()
 
@@ -97,18 +105,17 @@ def process(tmpfn):
 def dowork(valid):
     """Process a month's worth of data"""
     uri = valid.strftime(
-        ("http://www1.ncdc.noaa.gov/pub/data/hpd/data/" "hpd_%Y%m.csv")
+        ("https://www1.ncdc.noaa.gov/pub/data/hpd/data/" "hpd_%Y%m.csv")
     )
     tmpfn = valid.strftime("/mesonet/tmp/hpd_%Y%m.csv")
     if not os.path.isfile(tmpfn):
-        print("Downloading %s from NCDC" % (tmpfn,))
+        LOG.info("Downloading %s from NCDC", tmpfn)
         req = exponential_backoff(requests.get, uri, timeout=60)
         if req is None or req.status_code != 200:
-            print("dlerror")
+            LOG.info("dlerror")
             return
-        output = open(tmpfn, "wb")
-        output.write(req.content)
-        output.close()
+        with open(tmpfn, "wb") as fh:
+            fh.write(req.content)
 
     process(tmpfn)
     os.unlink(tmpfn)
