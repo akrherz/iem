@@ -26,10 +26,11 @@ def application(environ, start_response):
     pil_limiter = ""
     if int(fields.get("opt", 0)) == 1:
         pil_limiter = """
-            and substr(pil, 1, 3) in ('AQA', 'CFW', 'DGT', 'FFA',
-            'FFS', 'FFW', 'FLS', 'FLW', 'HLS', 'MWS', 'MWW', 'NPW', 'NOW',
-            'PNS', 'PSH', 'RER', 'RFW', 'RWR', 'RWS', 'SMW', 'SPS', 'SRF',
-            'SVR', 'SVS', 'TOR', 'WCN', 'WSW') """
+            and substr(pil, 1, 3) in ('AQA', 'CFW', 'DGT', 'DSW', 'FFA',
+            'FFS', 'FFW', 'FLS', 'FLW', 'FWW', 'HLS', 'MWS', 'MWW', 'NPW',
+            'NOW', 'PNS', 'PSH', 'RER', 'RFW', 'RWR', 'RWS', 'SMW', 'SPS',
+            'SRF', 'SQW', 'SVR', 'SVS', 'TCV', 'TOR', 'TSU', 'WCN', 'WSW')
+        """
 
     acursor.execute(
         """
