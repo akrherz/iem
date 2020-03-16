@@ -122,6 +122,14 @@ wish to change this to <a href="daily.php">daily data</a>.
   	<option value="tab">Tab Delimited Text File</option>
 </select>
 
+<p><strong>How should missing values be represented?:</strong>
+<br /> 
+<select name="missing">
+	<option value="-99">-99</option>
+	<option value="M">M</option>
+  	<option value="">(blank, empty space)</option>
+</select>
+
 <p><b><h4 class="subtitle">Submit your request:</h4></b>
 	<input type="submit" value="Submit Query">
 	<input type="reset">

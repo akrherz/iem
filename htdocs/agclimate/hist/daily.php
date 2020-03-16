@@ -128,6 +128,14 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
   	<option value="tab">Tab Delimited Text File</option>
 </select>
 
+<p><strong>How should missing values be represented?:</strong>
+<br /> 
+<select name="missing">
+	<option value="-99">-99</option>
+	<option value="M">M</option>
+  	<option value="">(blank, empty space)</option>
+</select>
+
 <p><h4>Submit your request:</h4>
 	<input type="submit" value="Get Data">
 	<input type="reset">

@@ -9,6 +9,7 @@ from pyiem.datatypes import temperature, distance
 from pyiem.util import get_dbconn
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+MISSING = {"", "M", "-99"}
 
 
 def get_stations(form):
@@ -131,6 +132,8 @@ def fetch_daily(form, cols):
     cursor.execute(sql)
 
     values = []
+    miss = form.get("missing", "-99")
+    assert miss in MISSING
 
     for row in cursor:
         valid = row["valid"]
@@ -138,12 +141,12 @@ def fetch_daily(form, cols):
         high = (
             temperature(row["tair_c_max_qc"], "C").value("F")
             if row["tair_c_max_qc"] is not None
-            else -99
+            else miss
         )
         low = (
             temperature(row["tair_c_min_qc"], "C").value("F")
             if row["tair_c_min_qc"] is not None
-            else -99
+            else miss
         )
         precip = (
             distance(row["rain_mm_tot_qc"], "MM").value("IN")
@@ -159,91 +162,91 @@ def fetch_daily(form, cols):
         soil04t = (
             temperature(row["tsoil_c_avg_qc"], "C").value("F")
             if row["tsoil_c_avg_qc"] is not None
-            else -99
+            else miss
         )
         soil04tn = (
             temperature(row["soil04tn"], "C").value("F")
             if row["soil04tn"] is not None
-            else -99
+            else miss
         )
         soil04tx = (
             temperature(row["soil04tx"], "C").value("F")
             if row["soil04tx"] is not None
-            else -99
+            else miss
         )
 
         soil12t = (
             temperature(row["t12_c_avg_qc"], "C").value("F")
             if row["t12_c_avg_qc"] is not None
-            else -99
+            else miss
         )
         soil12tn = (
             temperature(row["soil12tn"], "C").value("F")
             if row["soil12tn"] is not None
-            else -99
+            else miss
         )
         soil12tx = (
             temperature(row["soil12tx"], "C").value("F")
             if row["soil12tx"] is not None
-            else -99
+            else miss
         )
 
         soil24t = (
             temperature(row["t24_c_avg_qc"], "C").value("F")
             if row["t24_c_avg_qc"] is not None
-            else -99
+            else miss
         )
         soil24tn = (
             temperature(row["soil24tn"], "C").value("F")
             if row["soil24tn"] is not None
-            else -99
+            else miss
         )
         soil24tx = (
             temperature(row["soil24tx"], "C").value("F")
             if row["soil24tx"] is not None
-            else -99
+            else miss
         )
 
         soil50t = (
             temperature(row["t50_c_avg_qc"], "C").value("F")
             if row["t50_c_avg_qc"] is not None
-            else -99
+            else miss
         )
         soil50tn = (
             temperature(row["soil50tn"], "C").value("F")
             if row["soil50tn"] is not None
-            else -99
+            else miss
         )
         soil50tx = (
             temperature(row["soil50tx"], "C").value("F")
             if row["soil50tx"] is not None
-            else -99
+            else miss
         )
 
         soil12vwc = (
             row["calc_vwc_12_avg_qc"]
             if row["calc_vwc_12_avg_qc"] is not None
-            else -99
+            else miss
         )
         soil24vwc = (
             row["calc_vwc_24_avg_qc"]
             if row["calc_vwc_24_avg_qc"] is not None
-            else -99
+            else miss
         )
         soil50vwc = (
             row["calc_vwc_50_avg_qc"]
             if row["calc_vwc_50_avg_qc"] is not None
-            else -99
+            else miss
         )
         speed = (
             row["ws_mps_s_wvt_qc"] * 2.23
             if row["ws_mps_s_wvt_qc"] is not None
-            else -99
+            else miss
         )
         gust = (
             row["ws_mps_max_qc"] * 2.23
             if row["ws_mps_max_qc"] is not None
-            else -99
+            else miss
         )
 
         values.append(
@@ -356,6 +359,8 @@ def fetch_hourly(form, cols):
     )
 
     values = []
+    miss = form.get("missing", "-99")
+    assert miss in MISSING
 
     for row in cursor:
         valid = row["valid"]
@@ -363,68 +368,68 @@ def fetch_hourly(form, cols):
         tmpf = (
             temperature(row["tair_c_avg_qc"], "C").value("F")
             if row["tair_c_avg_qc"] is not None
-            else -99
+            else miss
         )
         relh = row["rh_qc"] if row["rh_qc"] is not None else -99
         solar = (
             (row["slrkw_avg_qc"] * 1000.0)
             if row["slrkw_avg_qc"] is not None
-            else -99
+            else miss
         )
         precip = (
             distance(row["rain_mm_tot_qc"], "MM").value("IN")
             if row["rain_mm_tot_qc"] is not None
-            else -99
+            else miss
         )
         speed = (
             row["ws_mps_s_wvt_qc"] * 2.23
             if row["ws_mps_s_wvt_qc"] is not None
-            else -99
+            else miss
         )
         drct = (
             row["winddir_d1_wvt_qc"]
             if row["winddir_d1_wvt_qc"] is not None
-            else -99
+            else miss
         )
         et = (
             distance(row["etalfalfa_qc"], "MM").value("IN")
             if row["etalfalfa_qc"] is not None
-            else -99
+            else miss
         )
         soil04t = (
             temperature(row["tsoil_c_avg_qc"], "C").value("F")
             if row["tsoil_c_avg_qc"] is not None
-            else -99
+            else miss
         )
         soil12t = (
             temperature(row["t12_c_avg_qc"], "C").value("F")
             if row["t12_c_avg_qc"] is not None
-            else -99
+            else miss
         )
         soil24t = (
             temperature(row["t24_c_avg_qc"], "C").value("F")
             if row["t24_c_avg_qc"] is not None
-            else -99
+            else miss
         )
         soil50t = (
             temperature(row["t50_c_avg_qc"], "C").value("F")
             if row["t50_c_avg_qc"] is not None
-            else -99
+            else miss
         )
         soil12vwc = (
             row["calc_vwc_12_avg_qc"]
             if row["calc_vwc_12_avg_qc"] is not None
-            else -99
+            else miss
         )
         soil24vwc = (
             row["calc_vwc_24_avg_qc"]
             if row["calc_vwc_24_avg_qc"] is not None
-            else -99
+            else miss
         )
         soil50vwc = (
             row["calc_vwc_50_avg_qc"]
             if row["calc_vwc_50_avg_qc"] is not None
-            else -99
+            else miss
         )
         bp_mb = row["bp_mb_qc"] if row["bp_mb_qc"] is not None else -99
 
@@ -480,6 +485,7 @@ def application(environ, start_response):
     df = pd.DataFrame(values)
     if fmt == "excel":
         bio = BytesIO()
+        # pylint: disable=abstract-class-instantiated
         with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
             df.to_excel(writer, "Data", columns=cols, index=False)
         headers = [
