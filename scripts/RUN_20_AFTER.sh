@@ -11,6 +11,7 @@ cd ../../plots
 ./RUN_PLOTS
 
 cd ../isuag
+python agg_1minute.py
 python isusm2rr5.py
 
 cd ../dbutil

@@ -40,9 +40,6 @@ then
 	python cfs_extract.py &
 fi
 
-cd ../isusm
-python agg_1minute.py &
-
 cd ../hads
 python process_hads_inbound.py &
 
