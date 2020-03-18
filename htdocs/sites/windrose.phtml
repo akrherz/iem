@@ -1,9 +1,9 @@
 <?php 
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
-include("setup.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
+require_once "setup.php";
 
-include("../../include/myview.php");
+require_once "../../include/myview.php";
 $t = new MyView();
 $t->thispage="iem-sites";
 $t->title = "Site Wind Roses";
@@ -28,11 +28,11 @@ $rosedata_uri = "/cgi-bin/mywindrose.py?nsector=36&station=$station&network=$net
 		."justdata=true&hour1=0&hour2=0&year2=". (intval(date("Y"))+1);
 
 
-if (file_exists("/mesonet/share/windrose/climate/yearly/${station}_yearly.png"))
+if (file_exists("/mesonet/share/windrose/${network}/${station}/${station}_yearly.png"))
 {
   $content .= "<p><h4>Yearly Climatology:</h4>
   <div class='row'><div class='col-md-12'><a href='{$rosedata_uri}&month1=1' class='btn btn-primary' role='button' rel='nofollow'><i class='fa fa-list'></i> View raw data</a>
-  <br /><br /><img src=\"/onsite/windrose/climate/yearly/${station}_yearly.png\" class='img-responsive'>
+  <br /><br /><img src=\"/onsite/windrose/${network}/${station}/${station}_yearly.png\" class='img-responsive'>
   </div></div>";
 
  $content .= "<p><h4>Monthly Climatology:  (click thumbnail)</h4>
@@ -40,8 +40,8 @@ if (file_exists("/mesonet/share/windrose/climate/yearly/${station}_yearly.png"))
  for ($mon=1;$mon<13;$mon++)
  {
   $ts = mktime(0,0,0,$mon,1,2006);
-  $url = sprintf("/onsite/windrose/climate/monthly/%02d/%s_%s.png",  $mon, 
-  		$station, strtolower(date("M", $ts)) );
+  $url = sprintf("/onsite/windrose/%s/%s/%s_%s.png",
+        $network, $station, $station, strtolower(date("M", $ts)) );
   $rosedata = $rosedata_uri ."&month1={$mon}&monthlimit=1";
   $content .= "<div class='col-md-4 well'><strong>".date("F", $ts) ."</strong> 
   <a href='{$rosedata}' class='btn btn-primary' role='button' rel='nofollow'><i class='fa fa-list'></i> View raw data</a>

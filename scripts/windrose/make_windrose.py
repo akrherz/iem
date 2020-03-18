@@ -9,8 +9,7 @@ from pyiem.plot.use_agg import plt
 from pyiem.network import Table as NetworkTable
 from pyiem.windrose_utils import windrose
 
-YEARLY_DIR = "/mesonet/share/windrose/climate/yearly"
-MONTHLY_DIR = "/mesonet/share/windrose/climate/monthly"
+CACHE_DIR = "/mesonet/share/windrose"
 
 
 def main():
@@ -29,20 +28,16 @@ def main():
     elif net.find("_DCP") > 0:
         database = "hads"
 
-    if not os.path.isdir(YEARLY_DIR):
-        os.makedirs(YEARLY_DIR)
-    if not os.path.isdir(MONTHLY_DIR):
-        os.makedirs(MONTHLY_DIR)
-    fn = "%s/%s_yearly.png" % (YEARLY_DIR, sid)
+    mydir = "%s/%s/%s" % (CACHE_DIR, net, sid)
+    if not os.path.isdir(mydir):
+        os.makedirs(mydir)
+    fn = "%s/%s_yearly.png" % (mydir, sid)
     res = windrose(sid, database=database, sname=nt.sts[sid]["name"])
     res.savefig(fn)
     plt.close()
     for month in range(1, 13):
-        dirname = "%s/%02i" % (MONTHLY_DIR, month)
-        if not os.path.isdir(dirname):
-            os.makedirs(dirname)
         fn = ("%s/%s_%s.png") % (
-            dirname,
+            mydir,
             sid,
             datetime.datetime(2000, month, 1).strftime("%b").lower(),
         )

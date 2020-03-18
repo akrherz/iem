@@ -11,7 +11,7 @@ from pandas.io.sql import read_sql
 from pyiem.util import get_dbconn, logger
 
 LOG = logger()
-CACHEDIR = "/mesonet/share/windrose/climate/yearly"
+CACHEDIR = "/mesonet/share/windrose/"
 
 
 def do_network(network):
@@ -44,7 +44,12 @@ def main():
         )
     for network, row in df.iterrows():
         station = row["station"]
-        testfn = "%s/%s_yearly.png" % (CACHEDIR, station)
+        testfn = "%s/%s/%s/%s_yearly.png" % (
+            CACHEDIR,
+            network,
+            station,
+            station,
+        )
         if not os.path.isfile(testfn):
             LOG.info(
                 "Driving network %s because no file for %s", network, station
