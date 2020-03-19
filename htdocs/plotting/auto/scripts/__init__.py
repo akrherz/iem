@@ -68,7 +68,7 @@ daily_opts = [
     {"id": "5", "label": "Daily Records for each month of year"},
     {
         "id": "31",
-        "label": "Extreme Jumps or Dips in High Temperature over X days",
+        "label": "Extreme Jumps or Dips in High/Low Temperature over X days",
     },
     {
         "id": "147",

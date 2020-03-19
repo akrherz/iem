@@ -77,6 +77,20 @@ def get_description():
             network="IACLIMATE",
         ),
         dict(
+            type="year",
+            min=1893,
+            default=1893,
+            label="Start Year for Plot:",
+            name="syear",
+        ),
+        dict(
+            type="year",
+            min=1893,
+            default=datetime.date.today().year,
+            label="End Year for Plot:",
+            name="eyear",
+        ),
+        dict(
             type="select",
             name="month",
             default="year",
@@ -162,6 +176,8 @@ def plotter(fdict):
     days = int(ctx["days"])
     fdays = int(ctx["fdays"])
     mdays = int(ctx["mdays"])
+    syear = int(ctx["syear"])
+    eyear = int(ctx["eyear"])
     agg = ctx["agg"]
     # belt and suspenders
     assert agg in PDICT
@@ -213,7 +229,8 @@ def plotter(fdict):
          as trailing_stat
      from """
         + table
-        + """ where station = %s and month in %s ORDER by day ASC
+        + """ where station = %s and month in %s and year >= %s
+        and year <= %s ORDER by day ASC
     """,
         pgconn,
         params=(
@@ -223,6 +240,8 @@ def plotter(fdict):
             days,
             station,
             tuple(months),
+            syear,
+            eyear,
         ),
     )
     if obs.empty:
@@ -325,10 +344,12 @@ def plotter(fdict):
         else "\nBack Threshold of at least %.0f $^\circ$F" % (ctx["thres"],)
     )
     ax.set_title(
-        ("%s %s\n" "Max Change in %s %s (%s)\n" "%s%s")
+        ("%s %s (%.0f-%.0f)\n" "Max Change in %s %s (%s)\n" "%s%s")
         % (
             station,
             ctx["_nt"].sts[station]["name"],
+            max([ctx["_nt"].sts[station]["archive_begin"].year, syear]),
+            eyear,
             PDICT3[ctx["var"]].replace("Temperature", "Temp"),
             PDICT[agg].replace("Aggregate", "Agg"),
             MDICT[month],
