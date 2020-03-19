@@ -3,6 +3,7 @@
 Called from RUN_12Z.sh for the previous date
 """
 import sys
+import time
 import datetime
 import warnings
 
@@ -66,14 +67,10 @@ def do(ts):
     asos = get_dbconn("asos", user="nobody")
     iemaccess = get_dbconn("iem")
     icursor = iemaccess.cursor()
-    table = "summary_%s" % (ts.year,)
+    table = f"summary_{ts.year}"
     # Get what we currently know, just grab everything
     current = read_sql(
-        """
-        SELECT * from """
-        + table
-        + """ WHERE day = %s
-    """,
+        f"SELECT * from {table} WHERE day = %s",
         iemaccess,
         params=(ts.strftime("%Y-%m-%d"),),
         index_col="iemid",
@@ -116,6 +113,7 @@ def do(ts):
     )
     df["timedelta"] = df["timedelta"] / np.timedelta64(1, "s")
 
+    updates = 0
     for iemid, gdf in df.groupby("iemid"):
         if len(gdf.index) < 6:
             continue
@@ -128,12 +126,7 @@ def do(ts):
                 ts,
             )
             icursor.execute(
-                """
-                INSERT into """
-                + table
-                + """
-                (iemid, day) values (%s, %s)
-            """,
+                f"INSERT into {table} (iemid, day) values (%s, %s)",
                 (iemid, ts),
             )
             current.loc[iemid] = None
@@ -200,24 +193,20 @@ def do(ts):
         sql = ", ".join(cols)
 
         icursor.execute(
-            """
-        UPDATE """
-            + table
-            + """
-        SET """
-            + sql
-            + """
-        WHERE
-        iemid = %s and day = %s
-        """,
-            args,
+            f"UPDATE {table} SET {sql} WHERE iemid = %s and day = %s", args
         )
+        updates += 1
         if icursor.rowcount == 0:
             LOG.info(
                 " update of %s[%s] was 0",
                 gdf.iloc[0]["station"],
                 gdf.iloc[0]["network"],
             )
+        if updates % 100 == 0:
+            LOG.debug("committing cursor")
+            icursor.close()
+            iemaccess.commit()
+            icursor = iemaccess.cursor()
 
     icursor.close()
     iemaccess.commit()
@@ -229,7 +218,14 @@ def main(argv):
     ts = datetime.date.today() - datetime.timedelta(days=1)
     if len(argv) == 4:
         ts = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
-    do(ts)
+    try:
+        do(ts)
+    except Exception as exp:
+        LOG.info("first pass yield an exception")
+        LOG.exception(exp)
+        LOG.info("sleeping two minutes before trying once more")
+        time.sleep(120)
+        do(ts)
 
 
 if __name__ == "__main__":
