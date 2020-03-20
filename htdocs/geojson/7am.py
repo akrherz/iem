@@ -6,7 +6,17 @@ import memcache
 import psycopg2.extras
 import pytz
 from paste.request import parse_formvars
+from pyiem.reference import TRACE_VALUE
 from pyiem.util import get_dbconn, html_escape
+
+
+def p(val, precision=2):
+    """see if we can round values better?"""
+    if val is None:
+        return None
+    if val > 0 and val < 0.001:
+        return TRACE_VALUE
+    return round(val, precision)
 
 
 def router(group, ts):
@@ -58,7 +68,7 @@ def run_azos(ts):
                 type="Feature",
                 id=row["id"],
                 properties=dict(
-                    pday=row["sum"], snow=None, snowd=None, name=row["name"]
+                    pday=p(row["sum"]), snow=None, snowd=None, name=row["name"]
                 ),
                 geometry=dict(
                     type="Point", coordinates=[row["st_x"], row["st_y"]]
@@ -98,9 +108,9 @@ def run(ts):
                 type="Feature",
                 id=row["id"],
                 properties=dict(
-                    pday=row["pday"],
-                    snow=row["snow"],
-                    snowd=row["snowd"],
+                    pday=p(row["pday"]),
+                    snow=p(row["snow"], 1),
+                    snowd=p(row["snowd"], 1),
                     name=row["name"],
                 ),
                 geometry=dict(

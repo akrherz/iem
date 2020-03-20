@@ -1,5 +1,5 @@
 <?php
-$OL = "5.3.0";
+$OL = "6.2.1";
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 86);
 require_once "../../include/myview.php";
@@ -53,7 +53,7 @@ $t->content = <<<EOF
 		
 <form name="bah">
 <div class="row">
-<div class="col-md-7">
+<div class="col-md-6">
 		<strong>Parameter to Plot:</strong>
 	<select onChange="javascript: updateMap();" id="renderattr">
 		<option value='pday'>Precipitation</option>
@@ -62,9 +62,11 @@ $t->content = <<<EOF
 	</select>
 	<br /><strong>MRMS Legend:</strong> <img src="/images/mrms_q3_p24h.png" />
 </div>
-<div class="col-md-5">
-		<strong>View Date:</strong>
-	<input type="text" id="datepicker" size="30">
+<div class="col-md-6">
+	<strong>View Date:</strong>
+    <button role="button" id="minusday">-1 Day</button>
+    <input type="text" id="datepicker" size="30">
+    <button role="button" id="plusday">+1 Day</button>
 </div>
 </div>
 </form>

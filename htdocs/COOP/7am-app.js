@@ -62,8 +62,8 @@ function get_tms_url(){
     return '/cache/tile.py/1.0.0/idep0::mrms-12z24h::'+$.datepicker.formatDate("yy-mm-dd", $("#datepicker").datepicker('getDate'))+'/{z}/{x}/{y}.png';
 }
 
-$(document).ready(function(){
-
+function buildUI(){
+    //build up interface
 	$( "#datepicker" ).datepicker({
         dateFormat:"DD, d MM, yy",
         minDate: new Date(2009, 1, 1),
@@ -73,6 +73,21 @@ $(document).ready(function(){
 	$("#datepicker").change(function(){
         updateDate();
 	});
+    $("#minusday").click(function(){
+        var date2 = $('#datepicker').datepicker('getDate'); 
+        date2.setDate(date2.getDate() - 1); 
+        $('#datepicker').datepicker('setDate', date2);
+        updateDate();
+    });
+    $("#plusday").click(function(){
+        var date2 = $('#datepicker').datepicker('getDate'); 
+        date2.setDate(date2.getDate() + 1); 
+        $('#datepicker').datepicker('setDate', date2);
+        updateDate();
+    });
+}
+$(document).ready(function(){
+    buildUI();
 
 	coopLayer = makeVectorLayer($.datepicker.formatDate("yy-mm-dd",new Date()),
 			'NWS COOP Reports', 'coop');
