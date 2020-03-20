@@ -214,7 +214,7 @@ def plotter(fdict):
         (ORDER by day ASC rows between %s FOLLOWING and %s FOLLOWING)
         as forward_stat,
      """
-        + ctx["fstat"]
+        + ctx["mstat"]
         + """("""
         + ctx["var"]
         + """) OVER
@@ -324,14 +324,14 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_ylabel(r"Temperature Change $^\circ$F")
     title = "Backward (%s) %.0f Days and Forward (%s) %.0f Inclusive Days" % (
-        PDICT2[ctx["fstat"]],
+        PDICT2[ctx["stat"]],
         days,
         PDICT2[ctx["mstat"]],
         mdays,
     )
     if ctx["how"] == "three":
         title = ("Back (%s) %.0fd, Middle (%s) %.0fd, Forward (%s) %.0fd") % (
-            PDICT2[ctx["fstat"]],
+            PDICT2[ctx["stat"]],
             days,
             PDICT2[ctx["mstat"]],
             mdays,
