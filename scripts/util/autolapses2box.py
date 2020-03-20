@@ -1,12 +1,15 @@
-"""Send autolapse tar files to box for archival.
+"""Send autolapse tar files to staging for archival.
 
 Run from RUN_MIDNIGHT.sh for the previous date"""
 import datetime
+import subprocess
 import os
 import stat
 import glob
 
-from pyiem.box_utils import sendfiles2box
+from pyiem.util import logger
+
+LOG = logger()
 
 
 def main():
@@ -23,14 +26,16 @@ def main():
             continue
         localfns.append(tarfilename)
     if not localfns:
-        print("autolapses2box found no files within the past day?")
+        LOG.info("Found no files within the past day?")
         return
 
-    remotepath = valid.strftime("/iemwebcams/auto/%Y/%m/%d")
-    res = sendfiles2box(remotepath, localfns)
-    for sid, fn in zip(res, localfns):
-        if sid is None:
-            print("failed to upload %s" % (fn,))
+    remotepath = valid.strftime("/stage/iemwebcams/auto/%Y/%m/%d")
+    cmd = (
+        'rsync -a --rsync-path "mkdir -p %s && rsync" %s '
+        "mesonet@metl60.agron.iastate.edu:%s"
+    ) % (remotepath, " ".join(localfns), remotepath)
+    LOG.debug(cmd)
+    subprocess.call(cmd, shell=True)
 
 
 if __name__ == "__main__":
