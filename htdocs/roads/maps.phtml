@@ -1,11 +1,11 @@
 <?php
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 112);
-include("../../include/database.inc.php");
-include_once "../../include/myview.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 
-$OL = '3.11.0';
+$OL = '6.2.1';
 $con = iemdb("postgis");
 $sql = "SELECT max(valid) as valid from roads_current";
 $rs = pg_query($con, $sql);
@@ -18,11 +18,11 @@ $valid = strftime("%I:%M %p on %d %b %Y", $ts);
 $t->thispage = "roads-maps";
 $t->headextra = <<<EOF
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol.css" rel="stylesheet" />
-<link type="text/css" href="/vendor/openlayers/{$OL}/ol3-layerswitcher.css" rel="stylesheet" />
+<link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
 EOF;
 $t->jsextra = <<<EOF
 <script src="/vendor/openlayers/{$OL}/ol.js"></script>
-<script src="/vendor/openlayers/{$OL}/ol3-layerswitcher.js"></script>
+<script src="/vendor/openlayers/{$OL}/ol-layerswitcher.js"></script>
 <script src="maps.js"></script>
 EOF;
 $t->title = "Interactive Road Conditions";

@@ -6,9 +6,9 @@ This monolith drives much of the ingest, processing, product generation, and
 web presence of the [IEM](https://mesonet.agron.iastate.edu).  Hopefully it can
 be found useful for others to at least look at to see how some of the magic happens.
 
-Limited integration testing is done on Travis-CI: [![Build Status](https://travis-ci.org/akrherz/iem.svg)](https://travis-ci.org/akrherz/iem)
+Limited integration testing is done on Travis-CI: [![Build Status](https://travis-ci.com/akrherz/iem.svg)](https://travis-ci.com/akrherz/iem)
 
-### Where are processes running?!?
+## Where are processes running
 
 The processing load for the IEM is spread over a number of virtual machines.
 This is an attempt to document what is running where.  The backup shown may not

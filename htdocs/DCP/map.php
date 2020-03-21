@@ -8,14 +8,14 @@ require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "SHEF Physical Code Map";
 $t->thispage = "networks-dcp";
-$OL = '4.6.4';
+$OL = '6.2.1';
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
-<link type="text/css" href="/vendor/openlayers/{$OL}/ol3-layerswitcher.css" rel="stylesheet" />
+<link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
 <style>
 .map {
-	height: 75%;
+	height: 400px;
 	width: 100%;
 	background-color: #D2B48C;
 }
@@ -27,8 +27,8 @@ EOF;
 $t->jsextra = <<<EOF
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
-<script src='/vendor/openlayers/{$OL}/ol3-layerswitcher.js'></script>
-<script src='map.js?v=2'></script>
+<script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
+<script src='map.js?v=3'></script>
 EOF;
 
 $t->content = <<<EOF
@@ -331,10 +331,7 @@ be wonderful.</p>
 </form>
 </div></div>
 
-		
-<div id="map" class="map">
-<div id="popup"></div>
-</div>
+<div id="map" class="map"><div id="popup"></div></div>
 
 EOF;
 

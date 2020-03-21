@@ -1,7 +1,7 @@
 <?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
-$OL = "4.6.4";
+$OL = "6.2.1";
 $t = new MyView();
 $t->thispage = "severe-vtec";
 $t->title = "Valid Time Event Code (VTEC) App";
@@ -21,7 +21,7 @@ $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/jquery-datatables/1.10.16/datatables.min.css" />
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
 <link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
-<link type="text/css" href="/vendor/openlayers/{$OL}/ol3-layerswitcher.css" rel="stylesheet" />
+<link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
 <link rel="stylesheet" href="vtec_static.css" />
 EOM;
 $t->jsextra = <<<EOM
@@ -29,7 +29,7 @@ $t->jsextra = <<<EOM
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
-<script src='/vendor/openlayers/{$OL}/ol3-layerswitcher.js'></script>
+<script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
 <script type="text/javascript" src="vtec_static.js?v=4"></script>
 <script>
 var CONFIG = {

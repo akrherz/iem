@@ -44,8 +44,13 @@ var feature;
 		   */
 		  this.previousCursor_ = undefined;
 
-		};
-		ol.inherits(app.Drag, ol.interaction.Pointer);
+        };
+        // https://gis.stackexchange.com/questions/324606
+        var ol_ext_inherits = function(child,parent) {
+            child.prototype = Object.create(parent.prototype);
+            child.prototype.constructor = child;
+          };
+		ol_ext_inherits(app.Drag, ol.interaction.Pointer);
 
 
 		/**

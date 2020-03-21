@@ -1,5 +1,5 @@
 <?php
-$OL = "4.6.4";
+$OL = "6.2.1";
 /*
  * Main landing page for the IEM Sites stuff
  */
@@ -24,12 +24,12 @@ $t->title = "Site Locator";
 $t->thispage = "iem-sites";
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
-<link type="text/css" href="/vendor/openlayers/{$OL}/ol3-layerswitcher.css" rel="stylesheet" />
+<link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
 EOF;
 $t->jsextra = <<<EOF
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
-<script src='/vendor/openlayers/{$OL}/ol3-layerswitcher.js'></script>
+<script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
 <script src="/js/olselect.php?network=${network}"></script>
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script type="text/javascript">

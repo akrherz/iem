@@ -2,7 +2,7 @@
 require_once "../../config/settings.inc.php";
 require_once "../../include/forms.php";
 require_once "../../include/myview.php";
-$OL = "3.9.0";
+$OL = "6.2.1";
 $t = new MyView();
 $t->title = "SMOS Data";
 $t->thispage = "archive-smos";

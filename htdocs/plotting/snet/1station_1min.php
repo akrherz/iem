@@ -1,11 +1,11 @@
 <?php
-$OL = "3.18.2";
- include("../../../config/settings.inc.php");
- include_once "../../../include/myview.php";
+$OL = "6.2.1";
+ require_once "../../../config/settings.inc.php";
+ require_once "../../../include/myview.php";
  $t = new MyView();
  
 require_once "../../../include/forms.php";
- include("../../../include/imagemaps.php"); 
+ require_once "../../../include/imagemaps.php"; 
  $network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]): "KCCI";
  
 $year = isset( $_GET["year"] ) ? intval($_GET["year"]): date("Y");
@@ -16,12 +16,12 @@ $station = isset($_GET['station'] ) ? xssafe($_GET['station']): "";
 if (! isset($_GET["station"])){
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
-<link type="text/css" href="/vendor/openlayers/{$OL}/ol3-layerswitcher.css" rel="stylesheet" />
+<link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
 EOF;
 $t->jsextra = <<<EOF
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
-<script src='/vendor/openlayers/{$OL}/ol3-layerswitcher.js'></script>
+<script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
 <script src="/js/olselect.php?network=${network}"></script>
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script type="text/javascript">

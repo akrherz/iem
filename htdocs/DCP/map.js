@@ -174,5 +174,4 @@ $(document).ready(function(){
 		fontSize -= 2;
 		vectorLayer.setStyle(vectorStyleFunction);
 	});
-	
 });
