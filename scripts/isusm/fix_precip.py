@@ -72,6 +72,24 @@ def get_hdf(nt, date):
     return df
 
 
+def set_iemacces(station, date, precip_inch):
+    """Set the precip value for IEMAccess."""
+    # update iemaccess
+    pgconn = get_dbconn("iem")
+    cursor = pgconn.cursor()
+    LOG.debug("Update iemaccess %s %s %.4f", station, date, precip_inch)
+    cursor.execute(
+        (
+            "UPDATE summary s SET pday = %s FROM stations t "
+            "WHERE t.iemid = s.iemid and s.day = %s and t.id = %s and "
+            "t.network = 'ISUSM'"
+        ),
+        (precip_inch, date, station),
+    )
+    cursor.close()
+    pgconn.commit()
+
+
 def update_precip(date, station, hdf):
     """Do the update work"""
     sts = datetime.datetime(date.year, date.month, date.day, 7)
@@ -84,21 +102,7 @@ def update_precip(date, station, hdf):
     ]
 
     newpday = distance(ldf["precip_in"].sum(), "IN")
-    # update iemaccess
-    pgconn = get_dbconn("iem")
-    cursor = pgconn.cursor()
-    cursor.execute(
-        """
-        UPDATE summary s
-        SET pday = %s
-        FROM stations t
-        WHERE t.iemid = s.iemid and s.day = %s and t.id = %s and
-        t.network = 'ISUSM'
-    """,
-        (newpday.value("IN"), date, station),
-    )
-    cursor.close()
-    pgconn.commit()
+    set_iemacces(station, date, newpday.value("IN"))
     # update isusm
     pgconn = get_dbconn("isuag")
     cursor = pgconn.cursor()
@@ -176,19 +180,22 @@ def main(argv):
         df.at[station, "stage4"] = ldf["precip_in"].sum()
 
     df["diff"] = df["obs"] - df["stage4"]
-    # We want to QC the case of having too low of precip, how low is too low?
-    # if stageIV > 0.1 and obs < 0.05
-    df2 = df[(df["stage4"] > 0.1) & (df["obs"] < 0.05)]
-    for station, row in df2.iterrows():
-        LOG.info(
-            "ISUSM fix_precip %s %s stageIV: %.2f obs: %.2f",
-            date,
-            station,
-            row["stage4"],
-            row["obs"],
-        )
-        print_debugging(station)
-        update_precip(date, station, hdf)
+    for station, row in df.iterrows():
+        # We want to QC the case of having too low of precip.
+        # How low is too low?
+        # if stageIV > 0.1 and obs < 0.05
+        if row["stage4"] > 0.1 and row["obs"] < 0.05:
+            LOG.info(
+                "ISUSM fix_precip %s %s stageIV: %.2f obs: %.2f",
+                date,
+                station,
+                row["stage4"],
+                row["obs"],
+            )
+            print_debugging(station)
+            update_precip(date, station, hdf)
+        else:
+            set_iemacces(station, date, row["obs"])
 
 
 if __name__ == "__main__":
