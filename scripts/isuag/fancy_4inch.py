@@ -104,7 +104,8 @@ def main(argv):
         WITH ranges as (
             select station, count(*), min(tsoil_c_avg_qc),
             max(tsoil_c_avg_qc) from sm_hourly WHERE
-            valid >= %s and valid < %s GROUP by station
+            valid >= %s and valid < %s and tsoil_c_avg_qc > -40
+            and tsoil_c_avg_qc < 50 GROUP by station
         )
         SELECT d.station, d.tsoil_c_avg_qc,
         r.max as hourly_max_c, r.min as hourly_min_c, r.count
