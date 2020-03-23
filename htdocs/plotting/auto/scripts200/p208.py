@@ -11,6 +11,10 @@ import cartopy.crs as ccrs
 import pytz
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
+PDICT = {
+    "twitter": "Twitter Friendly 600x335",
+    "normal": "IEM Default 640x480",
+}
 
 
 def get_description():
@@ -29,6 +33,13 @@ def get_description():
     """
     now = utc()
     desc["arguments"] = [
+        dict(
+            type="select",
+            name="res",
+            default="twitter",
+            label="Output Image Resolution",
+            options=PDICT,
+        ),
         dict(
             optional=True,
             type="datetime",
@@ -150,6 +161,7 @@ def plotter(fdict):
         east=bounds[2] + buffer,
         north=bounds[3] + buffer,
         nocaption=True,
+        figsize=(6.00, 3.35) if ctx["res"] == "twitter" else None,
     )
     mp.sector = "cwa"
     mp.cwa = wfo[-3:]
