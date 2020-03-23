@@ -89,8 +89,8 @@ def as_html(ctx):
 <meta property="og:url" content="%(ogurl)s">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@akrherz">
-<meta name="og:image:width" content="1024">
-<meta name="og:image:height" content="768">
+<meta name="og:image:width" content="600">
+<meta name="og:image:height" content="335">
 <meta name="og:site_name" content="Iowa Environmental Mesonet">
 <meta name="twitter:image:alt" content="Visualization of the VTEC Product">
 </head>
