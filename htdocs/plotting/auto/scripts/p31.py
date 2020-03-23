@@ -204,7 +204,7 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
 
     obs = read_sql(
-        """
+        """WITH data as (
      select day, extract(week from day) - 1 as week, year, month, sday,
      """
         + ctx["fstat"]
@@ -229,7 +229,8 @@ def plotter(fdict):
          as trailing_stat
      from """
         + table
-        + """ where station = %s and month in %s and year >= %s
+        + """ where station = %s)
+    SELECT * from data WHERE month in %s and year >= %s
         and year <= %s ORDER by day ASC
     """,
         pgconn,
@@ -293,13 +294,15 @@ def plotter(fdict):
             )
             y = h_slope * df.index.values + intercept
             ax.plot(df.index.values, y, lw=2, zorder=10, color="k")
-            yloc = 2 if df[col].max() > 0 else -5
+            yloc = 0.55 if col == "max" else 0.45
             color = "white" if yloc < 0 else "k"
             ax.text(
-                df.index.values[-1],
+                0.9,
                 yloc,
                 r"R^2=%.02f" % (r_value ** 2,),
                 color=color,
+                transform=ax.transAxes,
+                va="center",
                 ha="right",
             )
         ax.set_xlim(df.index.values[0] - 1, df.index.values[-1] + 1)
