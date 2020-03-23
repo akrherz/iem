@@ -12,7 +12,7 @@ import pytz
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
 PDICT = {
-    "twitter": "Twitter Friendly 600x335",
+    "twitter": "Twitter Friendly 1200x628",
     "normal": "IEM Default 640x480",
 }
 
@@ -161,7 +161,7 @@ def plotter(fdict):
         east=bounds[2] + buffer,
         north=bounds[3] + buffer,
         nocaption=True,
-        figsize=(6.00, 3.35) if ctx["res"] == "twitter" else None,
+        figsize=(12.00, 6.28) if ctx["res"] == "twitter" else None,
     )
     mp.sector = "cwa"
     mp.cwa = wfo[-3:]
