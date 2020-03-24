@@ -21,7 +21,7 @@ def dowork(lon, lat):
         SELECT issue at time zone 'UTC' as i,
         expire at time zone 'UTC' as e,
         num,
-        product_id, year
+        product_id, year, concerning
         from mcd WHERE
         ST_Contains(geom, ST_GeomFromEWKT('SRID=4326;POINT(%s %s)'))
         ORDER by product_id DESC
@@ -41,6 +41,7 @@ def dowork(lon, lat):
                 utc_expire=row[1].strftime(ISO9660),
                 product_num=row[2],
                 product_id=row[3],
+                concerning=row[5],
             )
         )
 

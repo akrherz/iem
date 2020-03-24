@@ -20,7 +20,8 @@ def dowork(count, sort):
         expire at time zone 'UTC' as e,
         num,
         product_id, year,
-        ST_Area(geom::geography) / 1000000. as area_sqkm
+        ST_Area(geom::geography) / 1000000. as area_sqkm,
+        concerning
         from mcd WHERE not ST_isEmpty(geom)
         ORDER by area_sqkm """
         + sort
@@ -42,6 +43,7 @@ def dowork(count, sort):
                 product_num=row[2],
                 product_id=row[3],
                 area_sqkm=row[5],
+                concerning=row[6],
             )
         )
 

@@ -5,7 +5,7 @@ CREATE EXTENSION postgis;
 CREATE TABLE iem_schema_manager_version(
 	version int,
 	updated timestamptz);
-INSERT into iem_schema_manager_version values (39, now());
+INSERT into iem_schema_manager_version values (40, now());
 
 ---
 --- TABLES THAT ARE LOADED VIA shp2pgsql
@@ -985,7 +985,8 @@ CREATE TABLE mcd(
     num int NOT NULL,
     issue timestamptz,
     expire timestamptz,
-    watch_confidence smallint
+    watch_confidence smallint,
+    concerning text
 );
 ALTER TABLE mcd OWNER to mesonet;
 GRANT ALL on mcd to ldm;
@@ -1004,7 +1005,8 @@ CREATE TABLE mpd(
     num int NOT NULL,
     issue timestamptz,
     expire timestamptz,
-    watch_confidence smallint
+    watch_confidence smallint,
+    concerning text
 );
 ALTER TABLE mpd OWNER to mesonet;
 GRANT ALL on mpd to ldm;
