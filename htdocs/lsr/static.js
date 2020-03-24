@@ -281,7 +281,9 @@ var sbwLookup = {
  "EW": {strokeColor: 'green'},
  "FA": {strokeColor: 'green'},
  "FL": {strokeColor: 'green'},
- "SV": {strokeColor: 'yellow'}
+ "SV": {strokeColor: 'yellow'},
+ "SQ": {strokeColor: "#C71585"},
+ "DS": {strokeColor: "#FFE4C4"}
 }
 
 // Lookup 'table' for styling

@@ -25,7 +25,9 @@ var sbwLookup = {
         "EW": 'green',
         "FA": 'green',
         "FL": 'green',
-        "SV": 'yellow'
+        "SV": 'yellow',
+        "SQ": "#C71585",
+        "DS": "#FFE4C4"
        };
 
 var lsrLookup = {

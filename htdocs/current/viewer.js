@@ -132,7 +132,9 @@ var sbwLookup = {
 		 "TO": 'red',
 		 "MA": 'purple',
 		 "EW": 'green',
-		 "SV": 'yellow'
+         "SV": 'yellow',
+         "SQ": "#C71585",
+         "DS": "#FFE4C4"
 		};
 
 var sbwStyle = [new ol.style.Style({
