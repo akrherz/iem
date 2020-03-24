@@ -1,5 +1,4 @@
 """Rectify climodat database entries."""
-from __future__ import print_function
 from io import StringIO
 import subprocess
 import sys
@@ -7,7 +6,9 @@ import sys
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
 def delete_data(pgconn, station, state):
@@ -21,7 +22,7 @@ def delete_data(pgconn, station, state):
     """,
         (station,),
     )
-    print("Removed %s database entries" % (cursor.rowcount,))
+    LOG.info("Removed %s database entries", cursor.rowcount)
     cursor.close()
     pgconn.commit()
 
@@ -45,9 +46,8 @@ def main(argv):
 
     for station, gdf in df.groupby("station"):
         if station not in nt.sts:
-            print(
-                "station: %s is unknown to %sCLIMATE network"
-                % (station, state)
+            LOG.info(
+                "station: %s is unknown to %sCLIMATE network", station, state
             )
             delete_data(pgconn, station, state)
             continue
@@ -55,16 +55,14 @@ def main(argv):
         minday = gdf["day"].min().replace(day=1)
         days = pd.date_range(minday, gdf["day"].max())
         missing = [x for x in days.values if x not in gdf["day"].values]
-        print(
-            ("station: %s has %s rows between: %s and %s, missing %s/%s days")
-            % (
-                station,
-                len(gdf.index),
-                gdf["day"].min(),
-                gdf["day"].max(),
-                len(missing),
-                len(days.values),
-            )
+        LOG.info(
+            "station: %s has %s rows between: %s and %s, missing %s/%s days",
+            station,
+            len(gdf.index),
+            gdf["day"].min(),
+            gdf["day"].max(),
+            len(missing),
+            len(days.values),
         )
         coverage = len(missing) / float(len(days.values))
         if coverage > 0.33:
@@ -72,7 +70,7 @@ def main(argv):
                 state,
                 station,
             )
-            print(cmd)
+            LOG.info(cmd)
             subprocess.call(cmd, shell=True)
             delete_data(pgconn, station, state)
             continue

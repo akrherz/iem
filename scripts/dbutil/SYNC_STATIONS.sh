@@ -1,6 +1,5 @@
 #!/bin/sh
 # Manually run workflow that syncs station metadata
-set -x
 
 python set_elevation.py
 python set_county.py

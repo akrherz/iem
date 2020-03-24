@@ -5,12 +5,13 @@ pre-generate them and allow folks to download.
 
     This is a cron job from RUN_2AM.sh
 """
-from __future__ import print_function
 import datetime
 import sys
 
+from pyiem.util import logger
 import requests
 
+LOG = logger()
 FINAL = "/mesonet/share/pickup/wwa/"
 URL = "http://iem.local/cgi-bin/request/gis/watchwarn.py"
 
@@ -19,15 +20,15 @@ def get_uri(uri, localfn):
     """Fetch the remote resource to a local file"""
     req = requests.get(uri)
     if req.status_code != 200:
-        print(
-            ("warn_cache[%s] failed with status: %s\n%s")
-            % (req.status_code, uri, req.content)
+        LOG.info(
+            "warn_cache[%s] failed with status: %s\n%s",
+            req.status_code,
+            uri,
+            req.content,
         )
         return
-    else:
-        output = open(localfn, "wb")
-        output.write(req.content)
-        output.close()
+    with open(localfn, "wb") as fh:
+        fh.write(req.content)
 
 
 def get_files(year):

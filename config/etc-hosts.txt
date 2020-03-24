@@ -5,6 +5,7 @@
 127.0.0.1        iem-backend.local
 127.0.0.1        datateam.local
 127.0.0.1        dailyerosion.local
+127.0.0.1        depbackend.local
 127.0.0.1        mesonet.agron.iastate.edu
 # 
 # Iron, in general, these IPs should not be used for services

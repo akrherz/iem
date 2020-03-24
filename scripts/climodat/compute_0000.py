@@ -1,5 +1,4 @@
 """Compute the Statewide and Climate District Averages!"""
-from __future__ import print_function
 import sys
 import datetime
 import warnings
@@ -9,8 +8,9 @@ import geopandas as gpd
 from pyiem import iemre
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.datatypes import temperature, distance
-from pyiem.util import get_dbconn, ncopen
+from pyiem.util import get_dbconn, ncopen, logger
 
+LOG = logger()
 warnings.filterwarnings("ignore", category=FutureWarning)
 COOP = get_dbconn("coop")
 ccursor = COOP.cursor()
@@ -137,10 +137,7 @@ def do_day(valid):
         )
         # we must have temperature data
         if row["high"] is np.ma.masked or row["low"] is np.ma.masked:
-            print(
-                ("compute_0000 %s has missing temperature data, using state")
-                % (iemid,)
-            )
+            LOG.info("%s has missing temperature data, using state", iemid)
             row = statedata[iemid[:2]]
         update_database(iemid, valid, row)
 

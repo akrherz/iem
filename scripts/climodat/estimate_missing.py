@@ -5,15 +5,15 @@ reason.  The main data estimator is found at `daily_estimator.py`.
 
 This script utilizes the IEMRE web service to provide data.
 """
-from __future__ import print_function
 import sys
 
 import requests
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
 
+LOG = logger()
 URI = (
     "http://iem.local/iemre/multiday/"
     "%(sdate)s/%(edate)s/%(lat)s/%(lon)s/json"
@@ -33,14 +33,13 @@ def process(cursor, station, df, meta):
     }
     req = requests.get(wsuri)
     if req.status_code != 200:
-        print("%s got status %s" % (wsuri, req.status_code))
+        LOG.info("%s got status %s", wsuri, req.status_code)
         return
     try:
         estimated = pd.DataFrame(req.json()["data"])
     except Exception as exp:
-        print(
-            ("\n%s Failure:%s\n%s\nExp: %s")
-            % (station, req.content, wsuri, exp)
+        LOG.info(
+            "\n%s Failure:%s\n%s\nExp: %s", station, req.content, wsuri, exp
         )
         return
     estimated["date"] = pd.to_datetime(estimated["date"])
@@ -64,19 +63,17 @@ def process(cursor, station, df, meta):
                     "%s_%s_%s" % (prefix, col, units)
                 ]
         if None in newvals.values():
-            print(
-                "Skipping %s as there are missing values still" % (row["day"],)
+            LOG.info(
+                "Skipping %s as there are missing values still", row["day"]
             )
             continue
-        print(
-            ("Set station: %s day: %s high: %.0f low: %.0f precip: %.2f")
-            % (
-                station,
-                row["day"],
-                newvals["high"],
-                newvals["low"],
-                newvals["precip"],
-            )
+        LOG.info(
+            "Set station: %s day: %s high: %.0f low: %.0f precip: %.2f",
+            station,
+            row["day"],
+            newvals["high"],
+            newvals["low"],
+            newvals["precip"],
         )
         sql = """
             UPDATE alldata_%s SET estimated = true,
@@ -110,10 +107,10 @@ def main(argv):
         pgconn,
         index_col=None,
     )
-    print("Processing %s rows for %s" % (len(df.index), state))
+    LOG.info("Processing %s rows for %s", len(df.index), state)
     for (_year, station), gdf in df.groupby(["year", "station"]):
         if station not in nt.sts:
-            print("station %s is unknown, skipping..." % (station,))
+            LOG.info("station %s is unknown, skipping...", station)
             continue
         cursor = pgconn.cursor()
         process(cursor, station, gdf, nt.sts[station])

@@ -3,7 +3,6 @@
 Run once at 10 PM to snag calendar day stations. (RUN_50_AFTER.sh)
 Run again with RUN_NOON.sh when the regular estimator runs
 """
-from __future__ import print_function
 import datetime
 import os
 import sys
@@ -12,9 +11,10 @@ import pytz
 import pyproj
 import numpy as np
 import pygrib
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconn, utc, logger
 
-P4326 = pyproj.Proj(init="epsg:4326")
+LOG = logger()
+P4326 = pyproj.Proj("epsg:4326")
 LCC = pyproj.Proj(
     (
         "+lon_0=-97.5 +y_0=0.0 +R=6367470. +proj=lcc +x_0=0.0"
@@ -52,10 +52,10 @@ def run(ts):
         except ValueError:
             # Don't complain about 10 PM file, which may not be complete yet
             if utcts.hour not in [3, 4]:
-                print("hrrr_solarrad.py %s had no solar rad" % (fn,))
+                LOG.info("%s had no solar rad", fn)
             continue
         if not grb:
-            print("Could not find SWDOWN in HRR %s" % (fn,))
+            LOG.info("Could not find SWDOWN in HRR %s", fn)
             continue
         g = grb[0]
         if total is None:
@@ -73,10 +73,7 @@ def run(ts):
             total += g.values
 
     if total is None:
-        print(
-            ("hrrr_solarrad.py found no HRRR data for %s")
-            % (ts.strftime("%d %b %Y"),)
-        )
+        LOG.info("No HRRR data for %s", ts.strftime("%d %b %Y"))
         return
 
     # Total is the sum of the hourly values
@@ -99,7 +96,7 @@ def run(ts):
         rad_mj = float(total[j, i])
 
         if rad_mj < 0:
-            print("WHOA! Negative RAD: %.2f, station: %s" % (rad_mj, row[0]))
+            LOG.info("WHOA! Negative RAD: %.2f, station: %s", rad_mj, row[0])
             continue
         # if our station is 12z, then this day's data goes into 'tomorrow'
         # if our station is not, then this day is today
@@ -141,7 +138,7 @@ def main(argv):
             run(now)
             now += datetime.timedelta(days=1)
     else:
-        print("ERROR: call with hrrr_solarrad.py <YYYY> <mm> <dd>")
+        LOG.info("ERROR: call with hrrr_solarrad.py <YYYY> <mm> <dd>")
 
 
 if __name__ == "__main__":

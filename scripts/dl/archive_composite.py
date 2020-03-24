@@ -19,8 +19,8 @@ def main(argv):
     interval = datetime.timedelta(minutes=5)
     now = sts
     while now < ets:
-        LOG.debug(now)
         cmd = now.strftime("python radar_composite.py %Y %m %d %H %M")
+        LOG.debug(cmd)
         subprocess.call(cmd, shell=True)
         now += interval
 

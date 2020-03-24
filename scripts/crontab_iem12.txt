@@ -34,9 +34,4 @@ S=/opt/iem/scripts
 # Email Harry RR3 data
 14 14 * * 5 cd $S/coop; python email_rr3_to_harry.py
 
-# Get GIS Sat Data!
-27 * * * * cd $S/cache; sh nesdis_satellite.sh 45
-57 * * * * cd $S/cache; sh nesdis_satellite.sh 15
-
 03,13,24 * * * * cd $S/plots; ./HOURLY_PLOTS
-

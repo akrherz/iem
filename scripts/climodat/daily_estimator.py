@@ -6,7 +6,6 @@ RUN_NOON.sh - processes the current date, this skips any calendar day sites
 RUN_NOON.sh - processes yesterday, running all sites
 RUN_2AM.sh - processes yesterday, which should run all sites
 """
-from __future__ import print_function
 import sys
 import datetime
 
@@ -32,7 +31,6 @@ def load_table(state, date):
         if sid[2:] == "0000" or sid[2] == "C":
             continue
         if istoday and not nt.sts[sid]["temp24_hour"] in range(3, 12):
-            # print('skipping %s as is_today' % (sid, ))
             continue
         i, j = iemre.find_ij(nt.sts[sid]["lon"], nt.sts[sid]["lat"])
         nt.sts[sid]["gridi"] = i

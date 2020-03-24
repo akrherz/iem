@@ -14,32 +14,31 @@ def main():
 
     for sid in nt.sts:
         fn = "%s/%s.csv" % (BASEDIR, nt.sts[sid]["name"].replace(" ", "_"))
-        out = open(fn, "w")
-        out.write("station,station_name,lat,lon,day,high,low,precip,snow,\n")
         ccursor.execute(
             """
             SELECT * from alldata_ia WHERE station = %s ORDER by day ASC
         """,
             (sid,),
         )
-
-        for row in ccursor:
-            out.write(
-                ("%s,%s,%s,%s,%s,%s,%s,%s,%s,\n")
-                % (
-                    sid.lower(),
-                    nt.sts[sid]["name"],
-                    nt.sts[sid]["lat"],
-                    nt.sts[sid]["lon"],
-                    row["day"],
-                    row["high"],
-                    row["low"],
-                    row["precip"],
-                    row["snow"],
-                )
+        with open(fn, "w") as fh:
+            fh.write(
+                "station,station_name,lat,lon,day,high,low,precip,snow,\n"
             )
-
-        out.close()
+            for row in ccursor:
+                fh.write(
+                    ("%s,%s,%s,%s,%s,%s,%s,%s,%s,\n")
+                    % (
+                        sid.lower(),
+                        nt.sts[sid]["name"],
+                        nt.sts[sid]["lat"],
+                        nt.sts[sid]["lon"],
+                        row["day"],
+                        row["high"],
+                        row["low"],
+                        row["precip"],
+                        row["snow"],
+                    )
+                )
 
 
 if __name__ == "__main__":
