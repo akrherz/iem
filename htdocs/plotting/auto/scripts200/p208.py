@@ -205,7 +205,7 @@ def plotter(fdict):
                 ccrs.PlateCarree(),
                 facecolor="None",
                 edgecolor="k",
-                zorder=Z_OVERLAY2 - 1,
+                zorder=Z_OVERLAY2,
             )
             poly = df2.iloc[0]["geom"]
         mp.ax.add_geometries(
