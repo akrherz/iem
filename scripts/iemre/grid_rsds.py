@@ -2,7 +2,6 @@
 
 Called from RUN_MIDNIGHT.sh
 """
-from __future__ import print_function
 import datetime
 import os
 import subprocess
@@ -14,8 +13,9 @@ import numpy as np
 from scipy.interpolate import NearestNDInterpolator
 import pygrib
 from pyiem import iemre
-from pyiem.util import get_dbconn, utc, ncopen
+from pyiem.util import get_dbconn, utc, ncopen, logger
 
+LOG = logger()
 P4326 = pyproj.Proj(init="epsg:4326")
 SWITCH_DATE = utc(2014, 10, 10, 20)
 
@@ -129,10 +129,10 @@ def do_hrrr(ts):
         except ValueError:
             # don't complain about late evening no-solar
             if utcnow.hour > 10 and utcnow.hour < 24:
-                print("iemre/grid_rsds.py %s had no solar rad" % (fn,))
+                LOG.info(" %s had no solar rad", fn)
             continue
         if not grb:
-            print("Could not find SWDOWN in HRR %s" % (fn,))
+            LOG.info("Could not find SWDOWN in HRR %s", fn)
             continue
         g = grb[0]
         if total is None:
@@ -150,10 +150,7 @@ def do_hrrr(ts):
             total += g.values
 
     if total is None:
-        print(
-            ("iemre/grid_rsds.py found no HRRR data for %s")
-            % (ts.strftime("%d %b %Y"),)
-        )
+        LOG.info("found no HRRR data for %s", ts.strftime("%d %b %Y"))
         return
 
     # We wanna store as W m-2, so we just average out the data by hour

@@ -16,9 +16,9 @@ def setupcsv():
     out = open("/mesonet/share/climodat/ks/yearly.csv", "w")
     out.write("stationID,stationName,Latitude,Longitude,")
     for i in range(1893, ENDYEAR):
-        for v in ["MINT", "MAXT", "PREC"]:
+        for v in ["MINT", "MAXT", "PREC", "GDD50", "SDD86"]:
             out.write("%02i_%s," % (i, v))
-    out.write("CYR_MINT,CYR_MAXT,CYR_PREC,\n")
+    out.write("CYR_MINT,CYR_MAXT,CYR_PREC,CYR_GDD50,CYR_SDD86,\n")
     return out
 
 
@@ -30,7 +30,7 @@ def metadata(nt, sid, csv):
     )
 
 
-def process(nt, sid, csv):
+def process(sid, csv):
     """Process"""
     table = "alldata_%s" % (sid[:2],)
     # Fetch Yearly Totals
@@ -38,7 +38,10 @@ def process(nt, sid, csv):
         """
         SELECT year, round(avg(high)::numeric,1) as avg_high,
         round(avg(low)::numeric,1) as avg_low,
-        round(sum(precip)::numeric,2) as rain from """
+        round(sum(precip)::numeric,2) as rain,
+        round(sum(gdd50(high, low))::numeric, 0) as gdd50,
+        round(sum(sdd86(high, low))::numeric, 0) as sdd86
+        from """
         + table
         + """
         WHERE station = %s GROUP by year ORDER by year ASC
@@ -53,13 +56,28 @@ def process(nt, sid, csv):
             "oHigh": row["avg_high"],
             "oLow": row["avg_low"],
             "oRain": row["rain"],
+            "oGDD": row["gdd50"],
+            "oSDD": row["sdd86"],
         }
 
     for i in range(1893, ENDYEAR):
         if i not in data:
-            data[i] = {"oHigh": "M", "oLow": "M", "oRain": "M"}
+            data[i] = {
+                "oHigh": "M",
+                "oLow": "M",
+                "oRain": "M",
+                "oGDD": "M",
+                "oSDD": "M",
+            }
         csv.write(
-            "%s,%s,%s," % (data[i]["oLow"], data[i]["oHigh"], data[i]["oRain"])
+            "%s,%s,%s,%s,%s,"
+            % (
+                data[i]["oLow"],
+                data[i]["oHigh"],
+                data[i]["oRain"],
+                data[i]["oGDD"],
+                data[i]["oSDD"],
+            )
         )
 
     # Need to do climate stuff
@@ -68,7 +86,10 @@ def process(nt, sid, csv):
         """
         SELECT round(avg(high)::numeric,1) as avg_high,
         round(avg(low)::numeric,1) as avg_low,
-        round(sum(precip)::numeric,2) as rain from """
+        round(sum(precip)::numeric,2) as rain,
+        round(sum(gdd50(high, low))::numeric, 0) as gdd50,
+        round(sum(sdd86(high, low))::numeric, 0) as sdd86
+        from """
         + table
         + """
         WHERE station = %s
@@ -79,7 +100,9 @@ def process(nt, sid, csv):
     aHigh = row["avg_high"]
     aLow = row["avg_low"]
     aRain = row["rain"]
-    csv.write("%s,%s,%s," % (aLow, aHigh, aRain))
+    csv.write(
+        "%s,%s,%s,%s,%s," % (aLow, aHigh, aRain, row["gdd50"], row["sdd86"])
+    )
 
     csv.write("\n")
     csv.flush()
@@ -109,7 +132,7 @@ def main():
     keys.sort()
     for sid in keys:
         metadata(nt, sid, csv)
-        process(nt, sid, csv)
+        process(sid, csv)
 
 
 if __name__ == "__main__":

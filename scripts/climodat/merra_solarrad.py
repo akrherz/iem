@@ -8,13 +8,14 @@
 
  Dr Arritt wants MJ m-2 dy-1
 """
-from __future__ import print_function
 import datetime
 import sys
 import os
 
 import numpy as np
-from pyiem.util import get_dbconn, ncopen
+from pyiem.util import get_dbconn, ncopen, logger
+
+LOG = logger()
 
 
 def get_gp(xc, yc, x, y):
@@ -49,10 +50,7 @@ def do(date):
     fn = sts.strftime("/mesonet/merra2/%Y/%Y%m%d.nc")
     fn2 = ets.strftime("/mesonet/merra2/%Y/%Y%m%d.nc")
     if not os.path.isfile(fn):
-        print(
-            ("merra_solarrad %s miss[%s] -> fail")
-            % (sts.strftime("%Y%m%d"), fn)
-        )
+        LOG.info("%s miss[%s] -> fail", sts.strftime("%Y%m%d"), fn)
         return
     with ncopen(fn, timeout=300) as nc:
         rad = nc.variables["SWGDN"][7:, :, :]
@@ -61,10 +59,7 @@ def do(date):
         yc = nc.variables["lat"][:]
 
     if not os.path.isfile(fn2):
-        print(
-            ("merra_solarrad %s miss[%s] -> zeros")
-            % (sts.strftime("%Y%m%d"), fn2)
-        )
+        LOG.info("%s miss[%s] -> zeros", sts.strftime("%Y%m%d"), fn2)
         rad2 = 0
         cs_rad2 = 0
     else:
@@ -127,7 +122,7 @@ def do(date):
         cs_rad_mj = float(cs_val) / 1000000.0
 
         if rad_mj < 0:
-            print("WHOA! Negative RAD: %.2f, station: %s" % (rad_mj, row[0]))
+            LOG.info("WHOA! Negative RAD: %.2f, station: %s", rad_mj, row[0])
             continue
         # if our station is 12z, then this day's data goes into 'tomorrow'
         # if our station is not, then this day is today
