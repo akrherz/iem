@@ -92,7 +92,7 @@ def plotter(fdict):
         expire at time zone 'UTC' as expire,
         init_expire at time zone 'UTC' as init_expire,
         1 as val,
-        status
+        status, is_emergency
         from """
         + table
         + """ w JOIN ugcs u on (w.gid = u.gid)
@@ -150,7 +150,11 @@ def plotter(fdict):
             year,
             wfo,
             vtec.VTEC_PHENOMENA.get(p1, p1),
-            vtec.VTEC_SIGNIFICANCE.get(s1, s1),
+            (
+                "Emergency"
+                if True in df["is_emergency"].values
+                else vtec.VTEC_SIGNIFICANCE.get(s1, s1)
+            ),
             p1,
             s1,
             etn,

@@ -20,21 +20,17 @@ def get_data(ctx):
     cursor = pgconn.cursor()
     table = "warnings_%s" % (ctx["year"],)
     cursor.execute(
-        """
-        SELECT max(report) as r,
-        sumtxt(name::text || ', ') as cnties from
-        """
-        + table
-        + """ w JOIN ugcs u
-        on (w.gid = u.gid) WHERE
-        w.wfo = %s and phenomena = %s and significance = %s and
-        eventid = %s
-    """,
+        (
+            "SELECT max(report) as r, sumtxt(name::text || ', ') as cnties, "
+            "max(case when is_emergency then 1 else 0 end) from "
+            f"{table} w JOIN ugcs u on (w.gid = u.gid) WHERE "
+            "w.wfo = %s and phenomena = %s and significance = %s and eventid = %s"
+        ),
         (
             ctx["wfo4"][-3:],
             ctx["phenomena"],
             ctx["significance"],
-            ctx["eventid"],
+            int(ctx["eventid"]),
         ),
     )
     row = cursor.fetchone()
@@ -42,6 +38,7 @@ def get_data(ctx):
         "" if row[0] is None else html_escape(row[0].replace("\001", ""))
     )
     ctx["desc"] = "" if row[1] is None else html_escape(row[1][:-2])
+    ctx["is_emergency"] = row[2] == 1
 
 
 def as_html(ctx):
@@ -50,11 +47,15 @@ def as_html(ctx):
         "%(year)s-%(op)s-%(status)s-%(wfo4)s-%(phenomena)s-"
         "%(significance)s-%(eventid)s"
     ) % ctx
-    ctx["ogtitle"] = "%s %s %s %s" % (
+    ctx["ogtitle"] = "%s %s %s #%s" % (
         ctx["wfo4"],
         vtec.VTEC_PHENOMENA.get(ctx["phenomena"]),
-        vtec.VTEC_SIGNIFICANCE.get(ctx["significance"]),
-        ctx["eventid"],
+        (
+            "Emergency"
+            if ctx["is_emergency"]
+            else vtec.VTEC_SIGNIFICANCE.get(ctx["significance"])
+        ),
+        int(ctx["eventid"]),
     )
     ctx["ogurl"] = ("https://mesonet.agron.iastate.edu/vtec/f/%s") % (
         ctx["v"],
