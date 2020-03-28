@@ -59,7 +59,7 @@ def process(sid, csv):
             "oGDD": row["gdd50"],
             "oSDD": row["sdd86"],
         }
-
+    years = 0
     for i in range(1893, ENDYEAR):
         if i not in data:
             data[i] = {
@@ -69,6 +69,7 @@ def process(sid, csv):
                 "oGDD": "M",
                 "oSDD": "M",
             }
+        years += 1
         csv.write(
             "%s,%s,%s,%s,%s,"
             % (
@@ -86,9 +87,9 @@ def process(sid, csv):
         """
         SELECT round(avg(high)::numeric,1) as avg_high,
         round(avg(low)::numeric,1) as avg_low,
-        round(sum(precip)::numeric,2) as rain,
-        round(sum(gdd50(high, low))::numeric, 0) as gdd50,
-        round(sum(sdd86(high, low))::numeric, 0) as sdd86
+        sum(precip) as rain,
+        sum(gdd50(high, low)) as gdd50,
+        sum(sdd86(high, low)) as sdd86
         from """
         + table
         + """
@@ -101,7 +102,14 @@ def process(sid, csv):
     aLow = row["avg_low"]
     aRain = row["rain"]
     csv.write(
-        "%s,%s,%s,%s,%s," % (aLow, aHigh, aRain, row["gdd50"], row["sdd86"])
+        "%s,%s,%.2f,%.2f,%.2f,"
+        % (
+            aLow,
+            aHigh,
+            float(aRain) / float(years),
+            float(row["gdd50"]) / float(years),
+            float(row["sdd86"]) / float(years),
+        )
     )
 
     csv.write("\n")
