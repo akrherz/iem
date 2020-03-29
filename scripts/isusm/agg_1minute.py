@@ -22,6 +22,8 @@ def do_updates(cursor, station, row):
         slrkw_avg_qc = coalesce(%(slrkj_tot_sum)s, 0) / 3600.,
         tair_c_avg = %(tair_c_avg)s,
         tair_c_avg_qc = %(tair_c_avg)s,
+        rh = %(rh_avg)s,
+        rh_qc = %(rh_avg)s,
         tsoil_c_avg = %(tsoil_c_avg)s,
         tsoil_c_avg_qc = %(tsoil_c_avg)s,
         calc_vwc_12_avg = %(calc_vwc_12_avg)s,
@@ -97,6 +99,7 @@ def daily_process(cursor, station, date, df):
         "calc_vwc_12_avg",
         "calc_vwc_24_avg",
         "calc_vwc_50_avg",
+        "rh_avg",
     ]:
         row[colname] = float(avgdf[colname])
     cursor.execute(
@@ -121,6 +124,8 @@ def daily_process(cursor, station, date, df):
         tsoil_c_avg_qc = %(tsoil_c_avg)s,
         t12_c_avg = %(t12_c_avg)s,
         t12_c_avg_qc = %(t12_c_avg)s,
+        rh_avg = %(rh_avg)s,
+        rh_avg_qc = %(rh_avg)s,
         t24_c_avg = %(t24_c_avg)s,
         t24_c_avg_qc = %(t24_c_avg)s,
         t50_c_avg = %(t50_c_avg)s,
@@ -169,6 +174,7 @@ def workflow():
     station, hour,
     count(*) as obs_count,
     sum(slrkj_tot_qc) as slrkj_tot_sum,
+    max(case when rn = 1 then rh_avg else null end) as rh_avg,
     max(case when rn = 1 then tair_c_avg else null end) as tair_c_avg,
     max(case when rn = 1 then tsoil_c_avg else null end) as tsoil_c_avg,
     max(case when rn = 1 then t12_c_avg else null end) as t12_c_avg,
