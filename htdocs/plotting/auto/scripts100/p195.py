@@ -6,6 +6,8 @@ from pandas.io.sql import read_sql
 from pyiem.datatypes import speed
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
+import seaborn as sns
+
 
 PDICT = OrderedDict(
     (
@@ -64,8 +66,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import seaborn as sns
-
     ctx = get_autoplot_context(fdict, get_description())
     phenomena = ctx["p"]
     date = ctx.get("date")
@@ -94,6 +94,7 @@ def plotter(fdict):
         stat_func=None,
         zorder=1,
         color="tan",
+        xlim=(0, 360),
     ).plot_joint(sns.kdeplot, n_levels=6)
     g.ax_joint.set_xlabel("Storm Motion From Direction")
     g.ax_joint.set_ylabel("Storm Speed [MPH]")
@@ -111,7 +112,7 @@ def plotter(fdict):
             label=date.strftime("%b %-d, %Y"),
             zorder=2,
         )
-    g.ax_joint.legend()
+        g.ax_joint.legend(loc="best")
     g.ax_joint.grid()
     g.ax_marg_x.set_title(
         ("NWS %s\n%s Storm Motion\n" "%s warnings ploted between %s and %s")
