@@ -96,7 +96,7 @@ if ($metadata["archive_begin"]){
 }
 
 $iemarchive = mktime(0,0,0,date("m"), date("d"), date("Y")) - 86400;
-if ($date >= $iemarchive){
+if ($date >= $iemarchive && $network != 'ISUSM'){
 	$db = "iem";
 	$sql = sprintf("SELECT distinct c.*
 	from current_log c JOIN stations s on (s.iemid = c.iemid)
@@ -116,7 +116,7 @@ if ($date >= $iemarchive){
 		from alldata where 
 		station = $1  and valid  >= $3 and valid  < $4 
 		and $2 = $2 ORDER by valid DESC");
-	} else if (preg_match("/ISUSM/", $network)){
+	} else if ($network == "ISUSM"){
 		$db = "isuag";
 		$sql = sprintf("SELECT *, null as pres, null as raw, null as feel
 		from alldata where 

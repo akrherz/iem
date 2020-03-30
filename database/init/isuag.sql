@@ -795,5 +795,7 @@ grant select on hourly to nobody,apache;
 --- Clever hack to map data around!
 create or replace view alldata as 
 	select station, valid, ws_mps_s_wvt * 1.94 as sknt, 
-	winddir_d1_wvt as drct, rain_mm_tot / 24.5 as phour from sm_hourly;
+	winddir_d1_wvt as drct, rain_mm_tot / 24.5 as phour,
+    c2f(tair_c_avg) as tmpf, rh as relh
+    from sm_hourly;
 grant select on alldata to nobody,apache;
