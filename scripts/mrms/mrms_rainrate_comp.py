@@ -46,7 +46,12 @@ def workflow(now, realtime):
     fp = gzip.GzipFile(gribfn, "rb")
     (_, tmpfn) = tempfile.mkstemp()
     with open(tmpfn, "wb") as fh:
-        fh.write(fp.read())
+        try:
+            fh.write(fp.read())
+        except EOFError:
+            LOG.info("caught EOFError on %s, likely corrupt, deleting", gribfn)
+            os.unlink(gribfn)
+            return
     grbs = pygrib.open(tmpfn)
     grb = grbs[1]
     os.unlink(tmpfn)

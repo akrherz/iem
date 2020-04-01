@@ -264,7 +264,7 @@ data = {
                 },
                 {
                     "id": "2",
-                    "label": "Month Precipitation v Month Growing Degree Day Departures",
+                    "label": "Month Precipitation vs Month Growing Degree Day Departures",
                 },
                 {
                     "id": "57",
@@ -587,7 +587,7 @@ data = {
                 },
                 {
                     "id": "59",
-                    "label": "Daily u and v Wind Component Climatologies",
+                    "label": "Daily u and vs Wind Component Climatologies",
                 },
                 {
                     "id": "54",
