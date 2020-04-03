@@ -9,7 +9,7 @@ from pyiem.network import Table as NetworkTable
 
 def get_climate(network, stations):
     """Fetch the climatology for these stations"""
-    nt = NetworkTable(network)
+    nt = NetworkTable(network, only_online=False)
     if not nt.sts:
         return "ERROR: Invalid network specified"
     data = dict()
@@ -63,7 +63,7 @@ def get_data(network, sts, ets, stations):
     cursor = pgconn.cursor()
     climate = get_climate(network, stations)
     if not isinstance(climate, dict):
-        return ""
+        return climate
     sio = StringIO()
     sio.write(
         "station,day,max_temp_f,min_temp_f,max_dewpoint_f,"
