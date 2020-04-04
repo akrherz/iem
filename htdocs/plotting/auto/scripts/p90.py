@@ -18,6 +18,7 @@ from pyiem.exceptions import NoDataFound
 PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
 PDICT2 = {
     "yearcount": "Count of Events for Given Year",
+    "days": "Days Since Last Issuance",
     "hour": "Most Frequent Issuance Hour of Day",
     "total": "Total Count between Start and End Date",
     "lastyear": "Year of Last Issuance",
@@ -45,21 +46,76 @@ def get_description():
     desc[
         "description"
     ] = """This application has a considerable and likely
-    confusing amount of configuration options.  In general, it will produce
+    confusing amount of configuration options.  The biggest source of the
+    confusion is the interplay between the statistic chosen and the dates/times
+    provided.  This table summarizes that interplay.<br />
+
+    <table>
+    <thead><tr><th>Statistic</th><th>Uses</th><th>Application</th></tr></thead>
+    <tbody>
+    <tr>
+    <td>Days Since</td>
+    <td>Start/End Date Time</td>
+    <td>This plots the number of "days" since the last issuance of a given
+    headline between the start and end date times that you provide.  The
+    concept of "days" is 24 hour periods.</td>
+    </tr>
+
+    <tr>
+    <td>Last Year</td>
+    <td>Start/End Date Time</td>
+    <td>This plots the most recent year of issuance for a given warning type.
+    </td>
+    </tr>
+
+    <tr>
+    <td>Most Frequent Hour</td>
+    <td>Start/End Date Time</td>
+    <td>This plots only works for UGC summarization. It attempts to plot the
+    hour of the day with the most frequent number of events issued. Not that
+    for long-fuse warnings, these type of plot is likely ill-defined.</td>
+    </tr>
+
+    <tr>
+    <td>Total Count</td>
+    <td>Start/End Date Time</td>
+    <td>This plots the total number of events between the start and end
+    date time.</td>
+    </tr>
+
+    <tr>
+    <td>Year Average</td>
+    <td>Start/End Year</td>
+    <td>This plots the average number of events between the inclusive start
+    and end year. The caveat is that it uses the actual found time domain
+    of warnings within those years to compute a yearly average. So if you
+    pick a year period between 2005 to 2010 and no warnings were issued in
+    2005, it would then use 2006 to 2010 to compute the yearly average.</td>
+    </tr>
+
+    <tr>
+    <td>Year Count</td>
+    <td>Start Year</td>
+    <td>This plots the number of events for a given year.  A year is defined
+    as the calendar year in US Central Time.</td>
+    </tr>
+    </table>
+
+    <p>In general, it will produce
     a map of either a single NWS Weather Forecast Office (WFO) or for a
     specified state.  For warning types that are issued with polygons, you
     can optionally plot heatmaps of these products.  Please be careful when
     selecting start and end dates to ensure you are getting the plot you
     want.  There are likely some combinations here that will produce a
     broken image symbol.  If you find such a case, please email us the link
-    to this page that shows the broken image!
+    to this page that shows the broken image!</p>
 
-    <br />Storm Based Warning polygons were not official until 1 October 2007,
+    <p>Storm Based Warning polygons were not official until 1 October 2007,
     so if you generate plots for years prior to this date, you may notice
     polygons well outside the County Warning Area bounds.  There was no
-    enforcement of these unofficial polygons to stay within CWA bounds.
+    enforcement of these unofficial polygons to stay within CWA bounds.</p>
 
-    <br /><strong>This app can be very slow</strong>, so please let it grind
+    <p><strong>This app can be very slow</strong>, so please let it grind
     away as sometimes it will take 3-5 minutes to generate a map :("""
     today = datetime.date.today()
     jan1 = today.replace(day=1, month=1)
@@ -104,27 +160,27 @@ def get_description():
             min=1986,
             name="year",
             default=today.year,
-            label="Select start year (where appropriate):",
+            label="Select start year (only for year count/average):",
         ),
         dict(
             type="year",
             min=1986,
             name="year2",
             default=today.year,
-            label="Select end year (inclusive, where appropriate):",
+            label="Select end year (only for year count/average) (inclusive):",
         ),
         dict(
             type="datetime",
             name="sdate",
             default=jan1.strftime("%Y/%m/%d 0000"),
-            label='Start DateTime UTC(for "total", "hour" option):',
+            label="Start DateTime UTC:",
             min="1986/01/01 0000",
         ),
         dict(
             type="datetime",
             name="edate",
             default=today.strftime("%Y/%m/%d 0000"),
-            label='End DateTime (for "total", "hour" option):',
+            label="End DateTime UTC:",
             min="1986/01/01 0000",
         ),
         dict(
@@ -171,7 +227,7 @@ def do_polygon(ctx):
     year = ctx["year"]
     year2 = ctx["year2"]
     # figure out the start and end timestamps
-    if varname == "total":
+    if varname in ["total", "days"]:
         sts = sdate
         ets = edate
     elif varname == "hour":
@@ -206,17 +262,19 @@ def do_polygon(ctx):
     # do arbitrary buffer to prevent segfaults?
     df = read_postgis(
         """
-    SELECT ST_Forcerhr(ST_Buffer(geom, 0.0005)) as geom, issue, expire
-     from sbw where """
+    SELECT ST_Forcerhr(ST_Buffer(geom, 0.0005)) as geom, issue, expire,
+    extract(epoch from %s::timestamptz - issue) / 86400. as days
+    from sbw where """
         + wfolimiter
         + """
-     phenomena = %s and status = 'NEW' and significance = %s
-     and ST_Within(geom, ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s %s,
-     %s %s, %s %s, %s %s))')) and ST_IsValid(geom)
-     and issue >= %s and issue <= %s ORDER by issue ASC
+    phenomena = %s and status = 'NEW' and significance = %s
+    and ST_Within(geom, ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s %s,
+    %s %s, %s %s, %s %s))')) and ST_IsValid(geom)
+    and issue >= %s and issue <= %s ORDER by issue ASC
     """,
         pgconn,
         params=(
+            ets,
             phenomena,
             significance,
             west,
@@ -235,7 +293,8 @@ def do_polygon(ctx):
         geom_col="geom",
         index_col=None,
     )
-    # print df, sts, ets, west, east, south, north
+    if df.empty:
+        raise NoDataFound("No data found for query.")
     zs = zonal_stats(
         df["geom"],
         ones,
@@ -261,6 +320,10 @@ def do_polygon(ctx):
             counts[y0:y1, x0:x1] = np.where(
                 raster.mask, counts[y0:y1, x0:x1], df.iloc[i]["issue"].year
             )
+        elif varname == "days":
+            counts[y0:y1, x0:x1] = np.where(
+                raster.mask, counts[y0:y1, x0:x1], df.iloc[i]["days"]
+            )
         else:
             counts[y0:y1, x0:x1] += np.where(raster.mask, 0, 1)
     if np.max(counts) == 0:
@@ -277,14 +340,33 @@ def do_polygon(ctx):
             bins = range(int(minv.year) - 4, int(maxv.year) + 2)
         else:
             bins = range(int(minv.year), int(maxv.year) + 2)
+        ctx["units"] = "year"
+        ctx["subtitle"] = (" between %s and %s UTC") % (
+            sdate.strftime("%d %b %Y %H%M"),
+            edate.strftime("%d %b %Y %H%M"),
+        )
+    elif varname == "days":
+        ctx["title"] = PDICT2[varname]
+        bins = np.linspace(
+            max([df["days"].min() - 7, 0]), df["days"].max() + 7, 12, dtype="i"
+        )
+        counts = np.where(counts < 0.0001, -1, counts)
+        ctx["subtitle"] = (" between %s and %s UTC") % (
+            sdate.strftime("%d %b %Y %H%M"),
+            edate.strftime("%d %b %Y %H%M"),
+        )
+        ctx["units"] = "days"
+        ctx["extend"] = "neither"
     elif varname == "yearcount":
         ctx["title"] = "Count for %s" % (year,)
+        ctx["units"] = "count"
     elif varname == "total":
         ctx["title"] = "Total"
         ctx["subtitle"] = (" between %s and %s UTC") % (
             sdate.strftime("%d %b %Y %H%M"),
             edate.strftime("%d %b %Y %H%M"),
         )
+        ctx["units"] = "count"
     elif varname == "yearavg":
         ctx["title"] = ("Yearly Avg: %s and %s") % (
             minv.strftime("%d %b %Y"),
@@ -292,9 +374,10 @@ def do_polygon(ctx):
         )
         years = (maxv.year - minv.year) + 1
         counts = counts / years
+        ctx["units"] = "count per year"
 
     maxv = np.max(counts)
-    if varname != "lastyear":
+    if varname not in ["lastyear", "days"]:
         if varname == "total":
             if maxv < 8:
                 bins = np.arange(1, 8, 1)
@@ -326,18 +409,21 @@ def do_ugc(ctx):
     edate = ctx["edate"]
     year = ctx["year"]
     year2 = ctx["year2"]
-    if varname == "lastyear":
+    if varname in ["lastyear", "days"]:
         if t == "cwa":
             cursor.execute(
                 """
             select ugc, max(issue at time zone 'UTC') from warnings
-            WHERE wfo = %s and phenomena = %s and significance = %s
+            WHERE wfo = %s and phenomena = %s and significance = %s and
+            issue >= %s and issue < %s
             GROUP by ugc
             """,
                 (
                     station if len(station) == 3 else station[1:],
                     phenomena,
                     significance,
+                    sdate,
+                    edate,
                 ),
             )
         else:
@@ -345,17 +431,23 @@ def do_ugc(ctx):
                 """
             select ugc, max(issue at time zone 'UTC') from warnings
             WHERE substr(ugc, 1, 2) = %s and phenomena = %s
-            and significance = %s GROUP by ugc
+            and significance = %s and issue >= %s and issue < %s
+            GROUP by ugc
             """,
-                (state, phenomena, significance),
+                (state, phenomena, significance, edate, sdate),
             )
         rows = []
         data = {}
         for row in cursor:
-            rows.append(dict(valid=row[1], year=row[1].year, ugc=row[0]))
-            data[row[0]] = row[1].year
-        ctx["title"] = "Year of Last"
-        datavar = "year"
+            days = (edate - row[1]).total_seconds() / 86400.0
+            rows.append(
+                dict(days=days, valid=row[1], year=row[1].year, ugc=row[0])
+            )
+            data[row[0]] = row[1].year if varname == "lastyear" else days
+        ctx["title"] = (
+            "Year of Last" if varname == "lastyear" else PDICT2[varname]
+        )
+        datavar = "year" if varname == "lastyear" else "days"
     elif varname == "yearcount":
         table = "warnings_%s" % (year,)
         if t == "cwa":
@@ -551,8 +643,10 @@ def do_ugc(ctx):
         if len(bins) > 8:
             bins = bins[:: int(len(bins) / 8.0)]
         bins[0] = 0.01
+        ctx["units"] = "count per year"
     elif varname == "hour":
         bins = list(range(0, 25))
+        ctx["units"] = "hour of day"
     else:
         bins = list(
             range(np.min(df[datavar][:]), np.max(df[datavar][:]) + 2, 1)
@@ -566,6 +660,7 @@ def do_ugc(ctx):
                 8,
                 dtype="i",
             )
+        ctx["units"] = "count"
     ctx["bins"] = bins
     ctx["data"] = data
     ctx["df"] = df
@@ -664,7 +759,8 @@ def plotter(fdict):
             ctx["data"],
             ctx["bins"],
             cmap=cmap,
-            units="count",
+            units=ctx["units"],
+            extend=ctx.get("extend", "both"),
         )
         # Cut down on SVG et al size
         res.set_rasterized(True)
@@ -678,11 +774,14 @@ if __name__ == "__main__":
     plotter(
         dict(
             geo="polygon",
-            state="NM",
-            phenomena="SV",
+            state="IA",
+            phenomena="TO",
             significance="W",
-            v="lastyear",
+            v="days",
+            t="state",
             year=1986,
             year2=2017,
+            sdate="2020-01-01 0000",
+            edate="2020-04-04 0000",
         )
     )
