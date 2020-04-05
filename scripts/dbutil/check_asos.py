@@ -3,9 +3,10 @@
 Looks at our archive for ASOS sites which we think are online, but have
 never reported data.  If so, set them offline!
 """
-from __future__ import print_function
 
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
 def main():
@@ -40,14 +41,14 @@ def main():
         if row:
             valid = row[0]
             if valid.year == 1980:
-                print("No current data for %s %s" % (sid, network))
+                LOG.info("No current data for %s %s", sid, network)
         else:
             mcursor2.execute(
                 """ UPDATE stations SET online = 'f' where
                 id = %s and network = %s """,
                 (sid, network),
             )
-            print("Setting %s %s to offline" % (sid, network))
+            LOG.info("Setting %s %s to offline", sid, network)
             continue
         acursor.execute(
             """
@@ -56,7 +57,7 @@ def main():
             (sid,),
         )
         row = acursor.fetchone()
-        print("%s %s IEMDB: %s ASOSDB: %s" % (sid, network, valid, row[0]))
+        LOG.info("%s %s IEMDB: %s ASOSDB: %s", sid, network, valid, row[0])
 
     pgconn_mesosite.close()
 

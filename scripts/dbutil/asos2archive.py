@@ -14,13 +14,14 @@
  RUN_MIDNIGHT.sh
 
 """
-from __future__ import print_function
 import datetime
 import sys
 
 import pytz
 import psycopg2.extras
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
 def compute_time(is_hourly):
@@ -48,8 +49,11 @@ def main(argv):
     is_hourly = len(argv) > 1
 
     (sts, ets) = compute_time(is_hourly)
-    # print("Processing %s thru %s" % (sts.strftime("%Y-%m-%dT%H:%M:%SZ"),
-    #                                  ets.strftime("%Y-%m-%dT%H:%M:%SZ")))
+    LOG.debug(
+        "Processing %s thru %s",
+        sts.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        ets.strftime("%Y-%m-%dT%H:%M:%SZ"),
+    )
 
     # Delete any duplicate obs
     table = "t%s" % (sts.year,)
@@ -139,9 +143,10 @@ def main(argv):
         acursor.execute(sql, args)
 
     if icursor.rowcount == 0:
-        print(
-            ("%s - %s Nothing done for asos2archive.py?")
-            % (sts.strftime("%Y-%m-%dT%H:%M"), ets.strftime("%Y-%m-%dT%H:%M"))
+        LOG.info(
+            "%s - %s Nothing done?",
+            sts.strftime("%Y-%m-%dT%H:%M"),
+            ets.strftime("%Y-%m-%dT%H:%M"),
         )
 
     icursor.close()

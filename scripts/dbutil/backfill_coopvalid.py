@@ -1,18 +1,19 @@
 """The IEM summary table has a coop_valid column that tracks when the SHEF
 COOP report was valid.  This was not around in the database from day1, so we
 should backfill it"""
-from __future__ import print_function
 import sys
 import datetime
 
 from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
 
+LOG = logger()
 IEM = get_dbconn("iem")
 HADS = get_dbconn("hads")
 
 
 def workflow(iemid, row):
+    """Do Work."""
     # 1. Figure out dates we need to process
     hcursor = HADS.cursor()
     icursor = IEM.cursor()
@@ -55,7 +56,6 @@ def workflow(iemid, row):
             hour=hours[0], minute=0, second=0, microsecond=0
         )
         table = "summary_%s" % (coopvalid.year,)
-        # print("  %s -> %s" % (day, coopvalid))
         icursor.execute(
             """
         UPDATE """
@@ -67,9 +67,8 @@ def workflow(iemid, row):
         )
         updated += 1
 
-    print(
-        ("%s iemid:%s updated/found %s/%s")
-        % (nwsli, iemid, updated, len(df.index))
+    LOG.info(
+        "%s iemid:%s updated/found %s/%s", nwsli, iemid, updated, len(df.index)
     )
     icursor.close()
     IEM.commit()

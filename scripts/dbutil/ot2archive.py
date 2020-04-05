@@ -2,12 +2,12 @@
 Dump iem database of OT data to archive
 Runs at 00 and 12 UTC
 """
-from __future__ import print_function
 import datetime
 import sys
 import psycopg2.extras
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconn, utc, logger
 
+LOG = logger()
 OTHER = get_dbconn("other")
 IEM = get_dbconn("iem")
 
@@ -33,7 +33,7 @@ def dowork(ts, ts2):
     )
     icursor.execute(sql)
     if icursor.rowcount == 0:
-        print("ot2archive found no results for ts: %s ts2: %s" % (ts, ts2))
+        LOG.info("found no results for ts: %s ts2: %s", ts, ts2)
 
     for row in icursor:
         pday = 0

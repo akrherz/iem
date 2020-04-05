@@ -1,13 +1,13 @@
 """Create a hybrid maize dump file"""
-from __future__ import print_function
 import datetime
 import subprocess
 
 import dropbox
 from pyiem.network import Table as NetworkTable
 from pyiem.datatypes import speed
-from pyiem.util import get_properties, get_dbconn
+from pyiem.util import get_properties, get_dbconn, logger
 
+LOG = logger()
 SITES = ["ames", "nashua", "sutherland", "crawfordsville", "lewis"]
 XREF = ["BOOI4", "NASI4", "CAMI4", "CRFI4", "OKLI4"]
 
@@ -111,8 +111,7 @@ year    day     Solar   T-High  T-Low   RelHum  Precip  WndSpd\r
                 shell=True,
             )
         except Exception as exp:
-            print("fail")
-            print(exp)
+            LOG.exception(exp)
 
 
 if __name__ == "__main__":

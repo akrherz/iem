@@ -27,7 +27,6 @@ python ugcs_update.py z_03de13a 2013 12 03
 python ugcs_update.py z_05fe14a 2014 02 05
 
 """
-from __future__ import print_function
 import sys
 import os
 import zipfile
@@ -35,8 +34,9 @@ import zipfile
 import requests
 import geopandas as pd
 from shapely.geometry import MultiPolygon
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconn, utc, logger
 
+LOG = logger()
 # Change Directory to /tmp, so that we can rw
 os.chdir("/tmp")
 
@@ -48,16 +48,16 @@ def do_download(zipfn):
             ("https://www.weather.gov/source/gis/Shapefiles/%s/" "%s")
             % ("County" if zipfn.startswith("c_") else "WSOM", zipfn)
         )
-        print("Downloading %s ..." % (zipfn,))
+        LOG.info("Downloading %s ...", zipfn)
         fh = open(zipfn, "wb")
         fh.write(req.content)
         fh.close()
 
-    print("Unzipping")
+    LOG.info("Unzipping")
     zipfp = zipfile.ZipFile(zipfn, "r")
     shpfn = None
     for name in zipfp.namelist():
-        print("    Extracting %s" % (name,))
+        LOG.info("Extracting %s", name)
         fh = open(name, "wb")
         fh.write(zipfp.read(name))
         fh.close()
@@ -96,7 +96,7 @@ def db_fixes(cursor, valid):
     """,
         (valid,),
     )
-    print("    Fixed %s entries that were ST_Invalid()" % (cursor.rowcount,))
+    LOG.info("Fixed %s entries that were ST_Invalid()", cursor.rowcount)
 
     cursor.execute(
         """
@@ -109,9 +109,8 @@ def db_fixes(cursor, valid):
     """,
         (valid,),
     )
-    print(
-        ("    Updated simple_geom,centroid,area2163 for %s rows")
-        % (cursor.rowcount,)
+    LOG.info(
+        "Updated simple_geom,centroid,area2163 for %s rows", cursor.rowcount
     )
 
     # Check the last step that we don't have empty geoms, which happened once
@@ -127,9 +126,9 @@ def db_fixes(cursor, valid):
 
     _check()
     if cursor.rowcount > 0:
-        print(
-            ("    Found %s rows with empty simple_geom, decreasing tolerance")
-            % (cursor.rowcount,)
+        LOG.info(
+            "Found %s rows with empty simple_geom, decreasing tolerance",
+            cursor.rowcount,
         )
         cursor.execute(
             """
@@ -143,9 +142,9 @@ def db_fixes(cursor, valid):
         )
         _check()
         if cursor.rowcount > 0:
-            print(
-                ("    Found %s rows with empty simple_geom, FIXME SOMEHOW!")
-                % (cursor.rowcount,)
+            LOG.info(
+                "Found %s rows with empty simple_geom, FIXME SOMEHOW!",
+                cursor.rowcount,
             )
 
 
@@ -155,7 +154,7 @@ def workflow(argv, pgconn, cursor):
     zipfn = "%s.zip" % (argv[1],)
     shpfn = do_download(zipfn)
 
-    print("Processing")
+    LOG.info("Processing")
 
     df = pd.read_file(shpfn)
     # make all columns upper
@@ -186,18 +185,21 @@ def workflow(argv, pgconn, cursor):
         geom_col="geom",
         index_col="ugc",
     )
-    print(
-        ("Loaded %s '%s' type rows from the database")
-        % (len(postgis.index), geo_type)
+    LOG.info(
+        "Loaded %s '%s' type rows from the database",
+        len(postgis.index),
+        geo_type,
     )
 
     # Compute the area and then sort to order duplicated UGCs :/
     df["area"] = df["geometry"].area
     df.sort_values(by="area", ascending=False, inplace=True)
     gdf = df.groupby("ugc").nth(0)
-    print(
-        "Loaded %s/%s unique entries from %s"
-        % (len(gdf.index), len(df.index), shpfn)
+    LOG.info(
+        "Loaded %s/%s unique entries from %s",
+        len(gdf.index),
+        len(df.index),
+        shpfn,
     )
     countnew = 0
     countdups = 0
@@ -239,7 +241,7 @@ def workflow(argv, pgconn, cursor):
         )
         countnew += 1
 
-    print("NEW: %s Dups: %s" % (countnew, countdups))
+    LOG.info("NEW: %s Dups: %s", countnew, countdups)
 
     db_fixes(cursor, valid)
 
@@ -247,8 +249,8 @@ def workflow(argv, pgconn, cursor):
 def main(argv):
     """Go Main Go"""
     if len(argv) != 5:
-        print("ERROR: You need to specify the file date to download and date")
-        print("Example:  python ugcs_update.py z_01dec10 2010 12 01")
+        LOG.info("ERROR: You need to specify the file date to download + date")
+        LOG.info("Example:  python ugcs_update.py z_01dec10 2010 12 01")
         sys.exit(0)
 
     pgconn = get_dbconn("postgis")
@@ -257,7 +259,7 @@ def main(argv):
     cursor.close()
     pgconn.commit()
     pgconn.close()
-    print("Done!")
+    LOG.info("Done!")
 
 
 if __name__ == "__main__":

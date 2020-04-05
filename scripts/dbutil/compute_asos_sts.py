@@ -2,13 +2,14 @@
 
 Looks at the asos database and finds the first observation from a site.
 """
-from __future__ import print_function
 import sys
 import datetime
 
 import pytz
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
 def main(network):
@@ -37,9 +38,11 @@ def main(network):
     for row in acursor:
         station = row[0]
         if table.sts[station]["archive_begin"] != row[1]:
-            print(
-                ("Updated %s STS WAS: %s NOW: %s")
-                % (station, table.sts[station]["archive_begin"], row[1])
+            LOG.info(
+                "Updated %s STS WAS: %s NOW: %s",
+                station,
+                table.sts[station]["archive_begin"],
+                row[1],
             )
 
             mcursor.execute(
@@ -48,14 +51,16 @@ def main(network):
                 (row[1], station, network),
             )
             if mcursor.rowcount == 0:
-                print("ERROR: No rows updated")
+                LOG.info("ERROR: No rows updated")
 
         # Site without data in past year is offline!
         if (basets - row[2]).days > 365:
             if table.sts[station]["archive_end"] != row[2]:
-                print(
-                    ("Updated %s ETS WAS: %s NOW: %s")
-                    % (station, table.sts[station]["archive_end"], row[2])
+                LOG.info(
+                    "Updated %s ETS WAS: %s NOW: %s",
+                    station,
+                    table.sts[station]["archive_end"],
+                    row[2],
                 )
 
                 mcursor.execute(
@@ -70,9 +75,10 @@ def main(network):
         if (basets - row[2]).days < 365 and table.sts[station][
             "archive_end"
         ] is not None:
-            print(
-                ("Updated %s ETS WAS: %s NOW: None" "")
-                % (station, table.sts[station]["archive_end"])
+            LOG.info(
+                "Updated %s ETS WAS: %s NOW: None" "",
+                station,
+                table.sts[station]["archive_end"],
             )
 
             mcursor.execute(

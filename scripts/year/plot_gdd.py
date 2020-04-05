@@ -1,5 +1,4 @@
 """ Generate a plot of GDD for the ASOS/AWOS network"""
-from __future__ import print_function
 import sys
 import datetime
 

@@ -1,9 +1,10 @@
 """Initialize entries in the IEM summary table"""
-from __future__ import print_function
 import sys
 import datetime
 
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
 def main(argv):
@@ -20,7 +21,7 @@ def main(argv):
         (station, network),
     )
     if cursor.rowcount == 0:
-        print("ABORT: found no database entries for station")
+        LOG.info("ABORT: found no database entries for station")
         return
     (iemid, maxday) = cursor.fetchone()
     day = datetime.date(int(year), int(month), int(day))
@@ -37,7 +38,7 @@ def main(argv):
             (iemid, day),
         )
         day += datetime.timedelta(days=1)
-    print("Added %s rows for station %s[%s]" % (added, station, network))
+    LOG.info("Added %s rows for station %s[%s]", added, station, network)
 
     pgconn.commit()
     pgconn.close()

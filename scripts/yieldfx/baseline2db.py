@@ -1,11 +1,12 @@
 """Copy the provided baseline data to the database"""
-from __future__ import print_function
 import glob
 import os
 import datetime
 
 from pyiem.datatypes import speed
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
 def main():
@@ -40,7 +41,7 @@ def main():
         """,
             (location,),
         )
-        print("Removed %s rows for station: %s" % (cursor.rowcount, location))
+        LOG.info("Removed %s rows for station: %s", cursor.rowcount, location)
         for line in open(fn):
             line = line.strip()
             if not line.startswith("19") and not line.startswith("20"):

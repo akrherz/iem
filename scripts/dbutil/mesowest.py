@@ -1,5 +1,4 @@
 """Review mesowest station file for differences"""
-from __future__ import print_function
 import os
 import pandas as pd
 import requests
@@ -11,9 +10,8 @@ def cache_file():
     if os.path.isfile(localfn):
         return
     req = requests.get("http://mesowest.utah.edu/data/mesowest_csv.tbl")
-    fh = open(localfn, "w")
-    fh.write(req.content)
-    fh.close()
+    with open(localfn, "wb") as fh:
+        fh.write(req.content)
 
 
 def main():
