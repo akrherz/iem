@@ -778,6 +778,7 @@ data = {
                         "Storm Prediction Center (SPC) Watches per Year for a State"
                     ),
                 },
+                {"id": "210", "label": "Text Product Frequency Maps"},
                 {
                     "id": "48",
                     "label": "Time of Day Frequency for Given Warning / UGC",

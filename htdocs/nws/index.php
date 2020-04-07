@@ -281,6 +281,10 @@ some convective outlook or the number of outlooks for a given point.</li>
 <ul>
  <li><a href="/wx/afos/">AFOS Product Viewer</a>
   <br />Web based version of TextDB.</li>
+  <li><a href="/plotting/auto/?q=210">Map of Text Product Issuance Counts</a>
+  <br />Autoplot 210 will generate maps of how many text products are
+  issued for a given product type. It will also plot the first and last
+  usage of a product.</li>
  <li><a href="/wx/afos/list.phtml">View Products by WFO by Date</a>
   <br />View quick listings of issued products by forecast office and by 
     date.</li>

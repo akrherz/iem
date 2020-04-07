@@ -50,6 +50,9 @@ begin
             $f$, mytable);
             -- Indices
             execute format($f$
+                CREATE INDEX on %s(substr(pil, 1, 3))
+            $f$, mytable);
+            execute format($f$
                 CREATE INDEX %s_pil_idx on %s(pil)
             $f$, mytable, mytable);
             execute format($f$
