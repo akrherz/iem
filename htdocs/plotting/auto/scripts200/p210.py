@@ -1,6 +1,7 @@
 """Count up the number of text products issued."""
 import datetime
 
+import pytz
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.plot.geoplot import MapPlot
@@ -89,7 +90,7 @@ def plotter(fdict):
     pgconn = get_dbconn("afos")
     ctx = get_autoplot_context(fdict, get_description())
     pil = ctx["pil"][:3]
-    if ctx["ets"] > utc():
+    if ctx["ets"].astimezone(pytz.UTC) > utc():
         ctx["ets"] = utc()
 
     df = read_sql(
