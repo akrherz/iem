@@ -89,6 +89,8 @@ def plotter(fdict):
     pgconn = get_dbconn("afos")
     ctx = get_autoplot_context(fdict, get_description())
     pil = ctx["pil"][:3]
+    if ctx["ets"] > utc():
+        ctx["ets"] = utc()
 
     df = read_sql(
         (
