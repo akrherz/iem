@@ -14,7 +14,7 @@ def logic(counts, family):
     for addr, hits in counts.items():
         if len(hits) < 30:
             continue
-        cmd = "%s -A INPUT -s %s -j DROP" % (exe, addr)
+        cmd = "/usr/sbin/%s -A INPUT -s %s -j DROP" % (exe, addr)
         print(cmd)
         for hit in hits[:10]:
             print("%s uri:|%s| ref:|%s|" % (hit[0], hit[2], hit[3]))
@@ -30,7 +30,7 @@ def main(argv):
         host="iemdb-mesosite.local",
         user="nobody",
         connect_timeout=5,
-        gssencmode="disable",
+        # gssencmode="disable",
     )
     cursor = pgconn.cursor()
     cursor.execute(
@@ -44,8 +44,9 @@ def main(argv):
     valid = None
     counts = {}
     for row in cursor:
-        d = counts.setdefault(row[1], [])
-        d.append(row)
+        if row[2].find("/windrose/") == -1:
+            d = counts.setdefault(row[1], [])
+            d.append(row)
         valid = row[0]
 
     if valid is None:
