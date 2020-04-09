@@ -19,6 +19,12 @@ PDICT = OrderedDict(
     ]
 )
 PDICT2 = OrderedDict([(">=", "Greater than or equal to"), ("<", "Less than")])
+PDICT3 = {
+    "min": "Minimum",
+    "avg": "Average",
+    "max": "Maximum",
+    "sum": "Accumulated",
+}
 
 
 def get_description():
@@ -31,7 +37,11 @@ def get_description():
     ] = """This plot presents the observed frequency of
     some daily event happening.  Leap day (Feb 29th) is excluded from the
     analysis. If you download the data from this application, a placeholder
-    date during the year 2001 is used."""
+    date during the year 2001 is used.</p>
+
+    <p>You can specify a given number of forward days to look for the given
+    threshold to happen.  Please be sure to review the aggregate function that
+    you want used over this period of days."""
     desc["arguments"] = [
         dict(
             type="station",
@@ -46,6 +56,19 @@ def get_description():
             default="snow",
             label="Select Variable:",
             options=PDICT,
+        ),
+        dict(
+            type="int",
+            name="days",
+            default="1",
+            label="Number of Days to Look:",
+        ),
+        dict(
+            options=PDICT3,
+            type="select",
+            name="f",
+            default="avg",
+            label="Statistical Aggregate Function over Number of Days",
         ),
         dict(
             type="select",
@@ -70,29 +93,22 @@ def plotter(fdict):
     threshold = ctx["threshold"]
     varname = ctx["var"]
     opt = ctx["opt"]
+    days = int(ctx["days"])
     table = "alldata_%s" % (station[:2],)
+    func = "avg" if days == 1 else ctx["f"]
 
     df = read_sql(
-        """
-        SELECT sday, sum(case when """
-        + varname
-        + """ """
-        + opt
-        + """
-            """
-        + str(threshold)
-        + """ then 1 else 0 end) as hits,
-        count(*) as total,
-        min(day) as min_date,
-        max(day) as max_date from """
-        + table
-        + """
-        WHERE station = %s and """
-        + varname
-        + """ is not null
-        and sday != '0229'
-        GROUP by sday ORDER by sday
-    """,
+        (
+            "WITH data as ( "
+            f"SELECT sday, {func}({varname}) "
+            "OVER (ORDER by day ASC ROWS between "
+            f"CURRENT ROW and {days - 1} FOLLOWING) as val, day from {table} "
+            f"WHERE station = %s and {varname} is not null) "
+            f"SELECT sday, sum(case when val {opt} {threshold} then 1 else 0 "
+            "end) as hits, count(*) as total, "
+            "min(day) as min_date, max(day) as max_date from data "
+            "WHERE sday != '0229' GROUP by sday ORDER by sday ASC"
+        ),
         pgconn,
         params=(station,),
         index_col=None,
@@ -115,18 +131,14 @@ def plotter(fdict):
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b"))
     ax.grid(True)
     ax.set_ylabel("Frequency [%]")
-    ax.set_title(
-        ("%s %s (%s-%s)\nFrequency of %s %s %s")
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            df["min_date"].min().year,
-            df["max_date"].max().year,
-            PDICT[varname],
-            PDICT2[opt],
-            threshold,
-        )
+    title = (
+        f"{station} {ctx['_nt'].sts[station]['name']} "
+        f"({df['min_date'].min().year}-{df['max_date'].max().year})\n"
+        f"Frequency of {PDICT[varname]} {PDICT2[opt]} {threshold}"
     )
+    if days > 1:
+        title += f"\n{PDICT3[func]} over inclusive forward {days} days"
+    ax.set_title(title)
     df.drop(["min_date", "max_date"], axis=1, inplace=True)
     return fig, df
 

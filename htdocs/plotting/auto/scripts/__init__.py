@@ -62,7 +62,10 @@ daily_opts = [
     },
     {
         "id": "49",
-        "label": "Daily Frequency of Some Threshold (snow, precip, temps)",
+        "label": (
+            "Daily/Multi-Day Frequency of Some Threshold "
+            "(snow, precip, temps)"
+        ),
     },
     {"id": "176", "label": "Daily Records Beat Margin"},
     {"id": "5", "label": "Daily Records for each month of year"},
