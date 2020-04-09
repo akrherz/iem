@@ -51,6 +51,20 @@ def get_description():
             label="Select Climate Site:",
         ),
         dict(
+            type="year",
+            name="syear",
+            default=1893,
+            min=1893,
+            label="Start year for plot",
+        ),
+        dict(
+            type="year",
+            name="eyear",
+            default=datetime.date.today().year,
+            min=1893,
+            label="End year (inclusive) for plot",
+        ),
+        dict(
             type="select",
             name="var",
             default="snow",
@@ -103,14 +117,15 @@ def plotter(fdict):
             f"SELECT sday, {func}({varname}) "
             "OVER (ORDER by day ASC ROWS between "
             f"CURRENT ROW and {days - 1} FOLLOWING) as val, day from {table} "
-            f"WHERE station = %s and {varname} is not null) "
+            f"WHERE station = %s and {varname} is not null and year >= %s "
+            "and year <= %s) "
             f"SELECT sday, sum(case when val {opt} {threshold} then 1 else 0 "
             "end) as hits, count(*) as total, "
             "min(day) as min_date, max(day) as max_date from data "
             "WHERE sday != '0229' GROUP by sday ORDER by sday ASC"
         ),
         pgconn,
-        params=(station,),
+        params=(station, ctx["syear"], ctx["eyear"]),
         index_col=None,
     )
     if df.empty:
