@@ -5,6 +5,8 @@ import datetime
 import numpy as np
 from pyiem.util import get_dbconn
 
+BASEYEAR = 1928
+
 
 class bcolors:
     """Kind of hacky"""
@@ -31,9 +33,10 @@ def d(hits, total):
 def main(argv):
     """Go Main Go"""
     now = datetime.datetime.utcnow()
-    counts = np.zeros((120, 12))
-    mslp = np.zeros((120, 12))
-    metar = np.zeros((120, 12))
+    years = int(now.year - 1928 + 1)
+    counts = np.zeros((years, 12))
+    mslp = np.zeros((years, 12))
+    metar = np.zeros((years, 12))
 
     pgconn = get_dbconn("asos", user="nobody")
     acursor = pgconn.cursor()
@@ -52,15 +55,15 @@ def main(argv):
     )
 
     for row in acursor:
-        counts[int(row[0] - 1900), int(row[1] - 1)] = row[2]
-        mslp[int(row[0] - 1900), int(row[1] - 1)] = row[3]
-        metar[int(row[0] - 1900), int(row[1] - 1)] = row[4]
+        counts[int(row[0] - BASEYEAR), int(row[1] - 1)] = row[2]
+        mslp[int(row[0] - BASEYEAR), int(row[1] - 1)] = row[3]
+        metar[int(row[0] - BASEYEAR), int(row[1] - 1)] = row[4]
 
     print("Observation Count For %s" % (stid,))
     print("YEAR  JAN  FEB  MAR  APR  MAY  JUN  JUL  AUG  SEP  OCT  NOV  DEC")
     output = False
-    for i in range(120):
-        year = 1900 + i
+    for i in range(years):
+        year = BASEYEAR + i
         if year > now.year:
             continue
         if not output and np.max(counts[i, :]) == 0:
