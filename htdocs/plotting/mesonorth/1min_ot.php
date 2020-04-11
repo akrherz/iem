@@ -70,10 +70,10 @@ foreach($new_contents as $line_num => $line)
 
 
 // Create the graph. These two calls are always required
-$graph = new Graph(600,500);
+$graph = new Graph(1200, 628);
 $graph->SetScale("datlin");
 
-$graph->img->SetMargin(65,20,45,70);
+$graph->img->SetMargin(65,20,45,90);
 //$graph->xaxis->SetFont(FONT1,FS_BOLD);
 //$graph->xaxis->SetTickLabels($xlabel);
 //$graph->xaxis->SetTextLabelInterval(60);
@@ -97,12 +97,9 @@ $graph->legend->Pos(0.01,0.05);
 $graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 $graph->yaxis->SetTitle("Temperature [F]");
 
-//[DMF]$graph->y2axis->SetTitle("Solar Radiation [W m**-2]");
-
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
-$graph->xaxis->SetTitle("Valid Local Time");
-$graph->xaxis->SetTitleMargin(40);
-//$graph->yaxis->SetTitleMargin(48);
+$graph->xaxis->SetTitle("Valid Local Time (Central US)");
+$graph->xaxis->SetTitleMargin(55);
 $graph->yaxis->SetTitleMargin(40);
 $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
