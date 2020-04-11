@@ -1,97 +1,116 @@
-"""Process Traffic Data"""
-from __future__ import print_function
-import csv
-import psycopg2.extras
-from pyiem.util import get_dbconn
+"""Ingest Iowa DOT RWIS data provided by DTN."""
+import datetime
 
+from pyiem.network import Table as NetworkTable
+from pyiem.util import get_properties, get_dbconn, utc, logger
+import pandas as pd
+import requests
+
+LOG = logger()
 DBCONN = get_dbconn("iem")
+NT = NetworkTable("IA_RWIS")
 
 
 def load_metadata():
-    """
-    Load up what we know about these traffic sites
-    """
+    """Load up what we know about these traffic sites."""
     meta = {}
-    cur = DBCONN.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("""SELECT * from rwis_traffic_meta""")
+    cur = DBCONN.cursor()
+    cur.execute(
+        """
+        SELECT location_id, lane_id, sensor_id from rwis_traffic_meta
+    """
+    )
     rows = cur.fetchall()
     cur.close()
     for row in rows:
-        key = "%s_%s" % (row["location_id"], row["lane_id"])
-        meta[key] = row["sensor_id"]
+        key = f"{row[0]}_{row[1]}"
+        meta[key] = row[2]
     return meta
 
 
-def create_sensor(row):
-    """
-    Create a sensor in the database please
-    """
-    print(
-        ("Adding RWIS Traffic Sensor: %s Lane: %s Name: %s")
-        % (row["site_id"], row["Lane_id"], row["Sensor_position_name"])
-    )
-    cursor = DBCONN.cursor()
+def create_sensor(cursor, key, row, meta):
+    """create an entry."""
     cursor.execute(
-        """INSERT into rwis_traffic_sensors(location_id,
-     lane_id, name) VALUES (%s, %s, %s)
+        """
+            INSERT into rwis_traffic_sensors(location_id,
+            lane_id, name) VALUES (%s, %s, %s) RETURNING id
      """,
-        (row["site_id"], row["Lane_id"], row["Sensor_position_name"]),
+        (
+            row["stationId"].replace("IA", ""),
+            row["sensorId"],
+            row["sensorName"],
+        ),
     )
-    cursor.close()
-
-
-def create_traffic(key):
-    """
-    Need to initialize the rwis_traffic_data table
-    """
-    cursor = DBCONN.cursor()
+    sensor_id = cursor.fetchone()[0]
+    LOG.info(
+        "Adding RWIS Traffic Sensor: %s Lane: %s Name: %s DB_SENSOR_ID: %s",
+        row["stationId"],
+        row["sensorId"],
+        row["sensorName"],
+        sensor_id,
+    )
+    meta[key] = sensor_id
     cursor.execute(
-        """INSERT into rwis_traffic_data(sensor_id)
-     VALUES (%s)""",
-        (key,),
+        """
+        INSERT into rwis_traffic_data(sensor_id) VALUES (%s)
+        """,
+        (sensor_id,),
     )
-    cursor.close()
 
 
-def processfile(filename):
-    """Process file"""
-    meta = load_metadata()
-    o = open("/mesonet/data/incoming/rwis/%s" % (filename,), "r")
-    data = []
-    for row in csv.DictReader(o):
-        if row["Lane_id"] is None:
-            continue
-        key = "%s_%s" % (int(row["site_id"]), int(row["Lane_id"]))
+def process(cursor, df, meta):
+    """Process our data."""
+    rows = []
+    for _, row in df.iterrows():
+        data = dict(row)
+        key = f"{int(row['stationId'].replace('IA', ''))}_{row['sensorId']}"
         if key not in meta:
-            create_sensor(row)
-            meta = load_metadata()
-            create_traffic(meta[key])
-        row["sensor_id"] = meta[key]
-        if row["long_vol"] == "":
-            row["long_vol"] = None
-        if row["occupancy"] == "":
-            row["occupancy"] = None
-        if row["normal_vol"] == "":
-            row["normal_vol"] = None
-        if row["avg_speed"] == "":
-            row["avg_speed"] = None
-        data.append(row)
-    o.close()
-
-    cursor = DBCONN.cursor()
-    cursor.execute("SET TIME ZONE 'UTC'")
+            create_sensor(cursor, key, row, meta)
+        data["sensor_id"] = meta[key]
+        rows.append(data)
+    # 'volume',
+    # 'occupancy',
+    # 'normalLength', 'longLength', 'unclassifiedLength', 'qcFailures'
     cursor.executemany(
         """UPDATE rwis_traffic_data SET
-      valid = %(obs_date_time)s, avg_speed = %(avg_speed)s,
-      avg_headway = %(avg_headway)s, normal_vol = %(normal_vol)s,
-      long_vol = %(long_vol)s,  occupancy = %(occupancy)s
+      valid = %(utcTime)s, avg_speed = %(avgSpeed)s,
+      normal_vol = %(normalLength)s,
+      long_vol = %(longLength)s,  occupancy = %(occupancy)s
       WHERE sensor_id = %(sensor_id)s""",
-        data,
+        rows,
     )
-    cursor.close()
-    DBCONN.commit()
-    DBCONN.close()
+
+
+def main():
+    """Go Main Go."""
+    ets = utc()
+    sts = ets - datetime.timedelta(days=1)
+    edate = ets.strftime("%Y-%m-%dT%H:%M:%SZ")
+    sdate = sts.strftime("%Y-%m-%dT%H:%M:%SZ")
+    meta = load_metadata()
+    props = get_properties()
+    apikey = props["dtn.apikey"]
+    headers = {"accept": "application/json", "apikey": apikey}
+    for nwsli in NT.sts:
+        idot_id = NT.sts[nwsli]["remote_id"]
+        if idot_id is None:
+            continue
+        URI = (
+            f"https://api.dtn.com/weather/stations/IA{idot_id:03}/"
+            f"traffic-observations?startDate={sdate}"
+            f"&endDate={edate}&units=us&precision=0"
+        )
+
+        req = requests.get(URI, headers=headers)
+        res = req.json()
+        if not res:
+            continue
+        df = pd.DataFrame(res)
+        cursor = DBCONN.cursor()
+        process(cursor, df, meta)
+        cursor.close()
+        DBCONN.commit()
 
 
 if __name__ == "__main__":
-    processfile("TrafficFile.csv")
+    main()

@@ -51,7 +51,10 @@ python soilm_ingest.py
 python flux_ingest.py
 python stuart_smith.py &
 
-cd ../outgoing
+cd rwis
+python process_traffic.py &
+
+cd ../../outgoing
 php wxc_cocorahs.php
 
 cd ../current
