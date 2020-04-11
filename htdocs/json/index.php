@@ -879,7 +879,7 @@ not be implied as an endorsement. Of course, you can just search google for
 
 <ul>
  <li><a href="https://www.aerisweather.com/develop/">Aeris Weather</a></li>
- <li><a href="https://darksky.net/dev/">DarkSky</a></li>
+ <li><a href="https://cs-docs.dtn.com/apis/">DTN</a></li>
  <li><a href="https://realearth.ssec.wisc.edu/doc/api.php">SSEC RealEarth API</a></li>
  <li><a href="https://www.wunderground.com/weather/api/">Wunderground API</a></li>
 </ul>

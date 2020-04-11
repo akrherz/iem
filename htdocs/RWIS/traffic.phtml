@@ -9,8 +9,16 @@ $dbconn = iemdb("iem");
 $sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']): 'valid';
 
 /* Query out the data */
-$rs = pg_prepare($dbconn, "SELECT", "select t.*, s.name from rwis_traffic t, stations s
-      where s.remote_id = t.location_id ORDER by $sortcol DESC");
+$rs = pg_prepare($dbconn, "SELECT", <<<EOM
+    WITH data as (
+        SELECT t.location_id, avg_speed, normal_vol, long_vol, occupancy,
+        valid, s.name from
+        rwis_traffic t JOIN rwis_traffic_sensors s on (t.id = s.id)
+    )
+    select d.*, t.name as station_name from data d JOIN stations t ON
+    (d.location_id = t.remote_id) WHERE t.network = 'IA_RWIS'
+EOM
+);
 $rs = pg_execute($dbconn, "SELECT", Array() );
 
  $t->title = "RWIS Current Traffic Data";
@@ -36,7 +44,7 @@ $rs = pg_execute($dbconn, "SELECT", Array() );
  $table = "";
  for($i=0;$row=pg_fetch_array($rs);$i++){
  	$table .= sprintf("<tr><th>%s</th><th>%s</th><td>%s</td><td>%.1f</td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
- 			$row["name"], $row["name"], fancytime($row["valid"]), $row["avg_speed"],
+ 			$row["station_name"], $row["name"], fancytime($row["valid"]), $row["avg_speed"],
  			$row["normal_vol"], $row["long_vol"], $row["occupancy"]);
  }
  
