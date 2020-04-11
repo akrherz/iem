@@ -15,7 +15,7 @@ from pyiem import iemre
 
 DEFAULTS = {"srad": 0.0, "high_tmpk": 100.0, "low_tmpk": 400.0, "p01d": 0.0}
 AGGFUNC = {
-    "srad": np.maximum,
+    "srad": np.add,
     "high_tmpk": np.maximum,
     "low_tmpk": np.minimum,
     "p01d": np.add,
@@ -56,6 +56,13 @@ def merge(nc, valid, gribname, vname):
         if current.mask.all():
             current[:, :] = DEFAULTS[vname]
         nc.variables[vname][tstep, :, :] = AGGFUNC[vname](current, vals)
+
+    if vname != "srad":
+        return
+    # HACK so above, we added all the solar radiation data together, so we
+    # should divide this number by four to rectify it back to avg W m-2
+    for tstep in range(nc.variables[vname].shape[0]):
+        nc.variables[vname][tstep] = nc.variables[vname][tstep] / 4.0
 
 
 def create_netcdf(valid):
