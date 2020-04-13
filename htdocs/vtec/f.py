@@ -22,9 +22,11 @@ def get_data(ctx):
     cursor.execute(
         (
             "SELECT max(report) as r, sumtxt(name::text || ', ') as cnties, "
-            "max(case when is_emergency then 1 else 0 end) from "
+            "max(case when is_emergency then 1 else 0 end), "
+            "max(case when is_pds then 1 else 0 end) from "
             f"{table} w JOIN ugcs u on (w.gid = u.gid) WHERE "
-            "w.wfo = %s and phenomena = %s and significance = %s and eventid = %s"
+            "w.wfo = %s and phenomena = %s and significance = %s "
+            "and eventid = %s"
         ),
         (
             ctx["wfo4"][-3:],
@@ -39,6 +41,7 @@ def get_data(ctx):
     )
     ctx["desc"] = "" if row[1] is None else html_escape(row[1][:-2])
     ctx["is_emergency"] = row[2] == 1
+    ctx["is_pds"] = row[3] == 1
 
 
 def as_html(ctx):
@@ -47,9 +50,10 @@ def as_html(ctx):
         "%(year)s-%(op)s-%(status)s-%(wfo4)s-%(phenomena)s-"
         "%(significance)s-%(eventid)s"
     ) % ctx
-    ctx["ogtitle"] = "%s %s %s #%s" % (
+    ctx["ogtitle"] = "%s %s%s %s #%s" % (
         ctx["wfo4"],
         vtec.VTEC_PHENOMENA.get(ctx["phenomena"]),
+        " (Particularly Dangerous Situation) " if ctx["is_pds"] else "",
         (
             "Emergency"
             if ctx["is_emergency"]

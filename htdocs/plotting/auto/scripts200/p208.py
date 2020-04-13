@@ -92,7 +92,7 @@ def plotter(fdict):
         expire at time zone 'UTC' as expire,
         init_expire at time zone 'UTC' as init_expire,
         1 as val,
-        status, is_emergency
+        status, is_emergency, is_pds
         from """
         + table
         + """ w JOIN ugcs u on (w.gid = u.gid)
@@ -145,11 +145,12 @@ def plotter(fdict):
     mp = MapPlot(
         subtitle="Map Valid: %s, Event: %s to %s"
         % (m(utcvalid), m(df["issue"].min()), m(df["expire"].max())),
-        title="%s %s %s %s (%s.%s) #%s"
+        title="%s %s %s%s %s (%s.%s) #%s"
         % (
             year,
             wfo,
             vtec.VTEC_PHENOMENA.get(p1, p1),
+            " (PDS) " if True in df["is_pds"].values else "",
             (
                 "Emergency"
                 if True in df["is_emergency"].values
