@@ -1,5 +1,5 @@
 APSIM Weather Files for FACTS
------------------------------
+=====
 
 Behold there is some overly complex code in this folder for the preparation of climate files for APSIM.  Here is the basic gist of what the workflow is.
 
@@ -8,6 +8,6 @@ Behold there is some overly complex code in this folder for the preparation of c
  3. The data for today and out 3 days for only the current year is replaced by the NDFD forecast data.
  4. The period after the NDFD replacement till the end of the year is replaced with CFS extracted forecast.
 
- So the result is a climate file that has yearly scenarios representing the combination of this year's observations plus a previous years data plus a CFS forecast for the current year.  The APSIM runs then aren't year specific, but each previous year represents an ensemble member of sort.  The thought is that each of the previous year's time series represents a scenario that could potentially happen this year.
+So the result is a climate file that has yearly scenarios representing the combination of this year's observations plus a previous years data plus a CFS forecast for the current year.  The APSIM runs then aren't year specific, but each previous year represents an ensemble member of sort.  The thought is that each of the previous year's time series represents a scenario that could potentially happen this year.
 
- The complexity in `yieldfx_workflow.py` comes from keeping track of which replacements should happen when and what happens when there is missing data in any of these replacements.
+The complexity in `yieldfx_workflow.py` comes from keeping track of which replacements should happen when and what happens when there is missing data in any of these replacements.

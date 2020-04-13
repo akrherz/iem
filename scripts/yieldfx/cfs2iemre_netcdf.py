@@ -10,10 +10,12 @@ import numpy as np
 from scipy.interpolate import NearestNDInterpolator
 from tqdm import tqdm
 import pygrib
-from pyiem.util import utc, ncopen
+from pyiem.util import utc, ncopen, logger
 from pyiem import iemre
 
+LOG = logger()
 DEFAULTS = {"srad": 0.0, "high_tmpk": 100.0, "low_tmpk": 400.0, "p01d": 0.0}
+MULTIPLIER = {"p01d": 6 * 3600.0}
 AGGFUNC = {
     "srad": np.add,
     "high_tmpk": np.maximum,
@@ -26,18 +28,18 @@ def merge(nc, valid, gribname, vname):
     """Merge in the grib data"""
     fn = valid.strftime(
         (
-            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/cfs/%H/"
-            + gribname
-            + ".01.%Y%m%d%H.daily.grib2"
+            f"/mesonet/ARCHIVE/data/%Y/%m/%d/model/cfs/%H/{gribname}"
+            ".01.%Y%m%d%H.daily.grib2"
         )
     )
     if not os.path.isfile(fn):
-        print("cfs2iemre missing %s, abort" % (fn,))
+        LOG.info("Missing %s, aborting", fn)
         sys.exit()
     grbs = pygrib.open(fn)
     lats = None
     lons = None
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
+    ncvar = nc.variables[vname]
     for grib in tqdm(
         grbs, total=grbs.messages, desc=vname, disable=not sys.stdout.isatty()
     ):
@@ -48,14 +50,14 @@ def merge(nc, valid, gribname, vname):
             continue
         if lats is None:
             lats, lons = grib.latlons()
-        vals = grib.values
+        vals = grib.values * MULTIPLIER.get(vname, 1)
         nn = NearestNDInterpolator((lons.flat, lats.flat), vals.flat)
         vals = nn(xi, yi)
         tstep = iemre.daily_offset(cst.date())
-        current = nc.variables[vname][tstep, :, :]
+        current = ncvar[tstep, :, :]
         if current.mask.all():
             current[:, :] = DEFAULTS[vname]
-        nc.variables[vname][tstep, :, :] = AGGFUNC[vname](current, vals)
+        ncvar[tstep, :, :] = AGGFUNC[vname](current, vals)
 
     if vname != "srad":
         return
@@ -155,10 +157,14 @@ def create_netcdf(valid):
     return nc
 
 
-def main():
+def main(argv):
     """Go Main Go"""
-    # Run for 12z yesterday
-    today = datetime.date.today() - datetime.timedelta(days=1)
+    if len(argv) == 4:
+        today = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
+    else:
+        # Run for 12z yesterday
+        today = datetime.date.today() - datetime.timedelta(days=1)
+    LOG.debug("running for today=%s", today)
     for hour in [0, 6, 12, 18]:
         valid = utc(today.year, today.month, today.day, hour)
         # Create netcdf file
@@ -174,4 +180,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
