@@ -72,11 +72,10 @@ def process(cursor, df, meta):
     # 'occupancy',
     # 'normalLength', 'longLength', 'unclassifiedLength', 'qcFailures'
     cursor.executemany(
-        """UPDATE rwis_traffic_data SET
-      valid = %(utcTime)s, avg_speed = %(avgSpeed)s,
-      normal_vol = %(normalLength)s,
-      long_vol = %(longLength)s,  occupancy = %(occupancy)s
-      WHERE sensor_id = %(sensor_id)s""",
+        "UPDATE rwis_traffic_data SET valid = %(utcTime)s, "
+        "avg_speed = %(avgSpeed)s, normal_vol = %(normalLength)s, "
+        "long_vol = %(longLength)s,  occupancy = %(occupancy)s "
+        "WHERE sensor_id = %(sensor_id)s and valid < %(utcTime)s",
         rows,
     )
 
@@ -84,7 +83,7 @@ def process(cursor, df, meta):
 def main():
     """Go Main Go."""
     ets = utc()
-    sts = ets - datetime.timedelta(days=1)
+    sts = ets - datetime.timedelta(hours=4)
     edate = ets.strftime("%Y-%m-%dT%H:%M:%SZ")
     sdate = sts.strftime("%Y-%m-%dT%H:%M:%SZ")
     meta = load_metadata()
