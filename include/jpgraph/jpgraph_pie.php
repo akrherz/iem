@@ -334,10 +334,12 @@ class PiePlot {
             }
 
             if( $this->setslicecolors==null ) {
-                $graph->legend->Add($l,$colors[$ta[$i%$numcolors]],"",0,$this->csimtargets[$i],$alt,$wintarg);
+                $csimtarget = isset($this->csimtargets[$i]) ? $this->csimtargets[$i] : null;
+                $graph->legend->Add($l,$colors[$ta[$i%$numcolors]],"",0,$csimtarget,$alt,$wintarg);
             }
             else {
-                $graph->legend->Add($l,$this->setslicecolors[$i%$numcolors],"",0,$this->csimtargets[$i],$alt,$wintarg);
+                $csimtarget = isset($this->csimtargets[$i]) ? $this->csimtargets[$i] : null;
+                $graph->legend->Add($l,$this->setslicecolors[$i%$numcolors],"",0,$csimtarget,$alt,$wintarg);
             }
         }
     }

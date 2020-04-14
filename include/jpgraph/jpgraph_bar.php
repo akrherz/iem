@@ -309,6 +309,17 @@ class BarPlot extends Plot {
         }
     }
 
+
+    /**
+     * @override
+     * Without overriding this method, $this->numpoints does not updated correctly.
+     */
+    function Clear() {
+        $this->isRunningClear = true;
+        $this->__construct($this->inputValues['aDatay'], $this->inputValues['aDatax']);
+        $this->isRunningClear = false;
+    }
+
     function Stroke($img,$xscale,$yscale) {
 
         $numpoints = count($this->coords[0]);
