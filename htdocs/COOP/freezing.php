@@ -1,14 +1,14 @@
 <?php 
 define("IEM_APPID", 158);
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 require_once "../../include/forms.php";
-include("../../include/myview.php");
+require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Freezing Dates";
 $t->thispage = "climatology-year";
 
-include("../../include/database.inc.php"); 
-include("../../include/network.php");
+require_once "../../include/database.inc.php"; 
+require_once "../../include/network.php";
 require_once "../../include/mlib.php";
 $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;

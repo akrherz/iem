@@ -6,10 +6,10 @@ require_once "../../../include/database.inc.php";
 $pil = isset($_GET['pil']) ? strtoupper(substr($_GET['pil'],0,3)) : "AFD";
 
 $conn = iemdb("afos");
-$rs = pg_prepare($conn, "_LSELECT", "SELECT data from products
-        WHERE substr(pil,1,3) = $1 
-		and entered between now() - '48 hours'::interval and now()
-        ORDER by entered DESC");
+$rs = pg_prepare($conn, "_LSELECT", "SELECT data from products ".
+    "WHERE substr(pil,1,3) = $1 ".
+	"and entered between now() - '48 hours'::interval and now() ".
+    "ORDER by entered DESC");
 $rs = pg_execute($conn, "_LSELECT", Array($pil)); 
 
 $content = "";

@@ -1,7 +1,7 @@
 <?php
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 // Does the work of processing the download request...
-include("../../../include/database.inc.php");
+require_once "../../../include/database.inc.php";
 
 $year1 = isset($_GET["year1"])? $_GET["year1"]: die("No year1");
 $year2 = isset($_GET["year2"])? $_GET["year2"]: die("No year2");
@@ -30,8 +30,6 @@ if ( $num_vars == 0 )  die("You did not specify data");
 
  $connection = iemdb("snet");
 
-
-
 $sqlStr = "SELECT station, ";
 for ($i=0; $i< $num_vars;$i++){
   $sqlStr .= $vars[$i] ." as var".$i.", ";
@@ -58,8 +56,6 @@ foreach ($stations as $key => $value){
 }
 $stationString = substr($stationString, 0, -1);
 $stationString .= ")";
-
-
 
 $sqlStr .= "to_char(valid, 'YYYY-MM-DD HH24:MI') as dvalid from alldata";
 $sqlStr .= " WHERE valid >= '".$sqlTS1."' and valid <= '".$sqlTS2 ."' ";

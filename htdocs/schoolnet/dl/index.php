@@ -1,11 +1,11 @@
 <?php 
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 78);
-include_once "../../../include/myview.php";
+require_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "School Network Data Download";
-include("../../../include/forms.php");
-include("../../../include/imagemaps.php");
+require_once "../../../include/forms.php";
+require_once "../../../include/imagemaps.php";
 
 $nselect = networkMultiSelect(Array("KCCI", "KIMT", "KELO"), '', Array(),
 	'station[]');

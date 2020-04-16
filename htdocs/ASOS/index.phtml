@@ -1,8 +1,7 @@
 <?php 
- include("../../config/settings.inc.php");
+ require_once "../../config/settings.inc.php";
  define("IEM_APPID", 21);
-
-include_once('../../include/myview.php');
+ require_once '../../include/myview.php';
 
 $t = new MyView();
 $t->thispage = 'networks-asos';
@@ -34,14 +33,14 @@ be performed on the same day.</p>
 <div class="col-md-6">
 
 <P><h3>Current ASOS Data:</h3>
-<UL>
+<ul>
  <li><a href="current.phtml">Sortable Current Conditions</a></li>
  <li><a href="/data/mesonet.gif">Combined Mesonet</a></li>
  <li><a href="/data/asos.gif">ASOS Mesonet</a></li>
  <li><a href="/data/wcht.gif">Wind Chill Index</a></li>
 	<li><a href="recent.phtml">Recent Interesting METAR Reports</a></li>
 	<li><a href="/data/relh.gif">Relative Humidity</a></li>
-</UL>
+</ul>
 
 
 <P><h3>1 Minute Archive:</h3>
