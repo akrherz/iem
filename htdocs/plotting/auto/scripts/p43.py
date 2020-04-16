@@ -4,6 +4,7 @@ from collections import OrderedDict
 
 import pytz
 import matplotlib.dates as mdates
+from matplotlib import ticker
 from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, utc
@@ -130,11 +131,15 @@ def plotter(fdict):
 
     if not ctx["_nt"].sts:
         raise NoDataFound(
-            ("Network Identifier %s is unknown to IEM") % (ctx["network"],)
+            f"Network Identifier {ctx['network']} is unknown to IEM"
         )
     tzname = ctx["_nt"].sts[station]["tzname"]
 
-    df = get_data(ctx["network"], station, tzname, sdate)
+    df = get_data(ctx["network"], station, tzname, sdate).reset_index()
+    df["time_delta"] = (
+        df["utc_valid"] - df.shift(1)["utc_valid"]
+    ).dt.total_seconds()
+    df = df.set_index("utc_valid")
     if df.empty:
         raise NoDataFound("No data was found!")
     # if d1 is not None and d1 >= 0 and d1 <= 360:
@@ -205,19 +210,19 @@ def plotter(fdict):
     ax2 = ax.twinx()
     df2 = df[df["gust"].notnull()]
     if not df2.empty:
-        ax2.fill_between(
+        ax2.bar(
             df2.index.values,
-            0,
             (df2["gust"].values * units("knot")).to(units("mile / hour")).m,
+            width=df2["time_delta"].values / 86400.0,
             color="#9898ff",
             zorder=2,
         )
     df2 = df[df["sknt"].notnull()]
     if not df2.empty:
-        ax2.fill_between(
+        ax2.bar(
             df2.index.values,
-            0,
             (df2["sknt"].values * units("knot")).to(units("mile / hour")).m,
+            width=df2["time_delta"].values / 86400.0,
             color="#373698",
             zorder=3,
         )
@@ -238,6 +243,8 @@ def plotter(fdict):
     ax.set_zorder(ax2.get_zorder() + 1)
     ax.patch.set_visible(False)
     ax.set_xlim(xmin, xmax)
+    ax2.yaxis.set_major_locator(ticker.LinearLocator(9))
+    ax.grid(True)
 
     # _________ PLOT 3 ____
     ax = fig.add_axes([xalign, 0.1, xwidth, 0.25])
@@ -274,9 +281,12 @@ def plotter(fdict):
     ax.set_xlim(xmin, xmax)
     date_ticker(ax, pytz.timezone(tzname))
     ax.set_xlabel("Plot Time Zone: %s" % (tzname,))
+    ax.yaxis.set_major_locator(ticker.LinearLocator(9))
+    ax2.yaxis.set_major_locator(ticker.LinearLocator(9))
+    ax.grid(True)
 
     return fig, df
 
 
 if __name__ == "__main__":
-    plotter(dict(station="OT0013", network="OT"))
+    plotter(dict(station="AMW", network="IA_ASOS"))
