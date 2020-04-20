@@ -5,6 +5,7 @@ from collections import OrderedDict
 import pytz
 import matplotlib.dates as mdates
 from matplotlib import ticker
+import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, utc
@@ -92,7 +93,8 @@ def get_data(network, station, tzname, sdate):
             skyl1, skyl2, skyl3, skyl4, vsby, alti,
             valid at time zone 'UTC' as utc_valid
             from current_log c JOIN stations t ON (t.iemid = c.iemid)
-            WHERE t.network = %s and t.id = %s ORDER by valid ASC
+            WHERE t.network = %s and t.id = %s and
+            valid > now() - '4 days'::interval ORDER by valid ASC
         """,
             pgconn,
             params=(network, station),
@@ -136,12 +138,12 @@ def plotter(fdict):
     tzname = ctx["_nt"].sts[station]["tzname"]
 
     df = get_data(ctx["network"], station, tzname, sdate).reset_index()
+    if df.empty:
+        raise NoDataFound("No data was found!")
     df["time_delta"] = (
         df["utc_valid"] - df.shift(1)["utc_valid"]
     ).dt.total_seconds()
     df = df.set_index("utc_valid")
-    if df.empty:
-        raise NoDataFound("No data was found!")
     # if d1 is not None and d1 >= 0 and d1 <= 360:
     # if s is not None and s >= 0 and s < 200:
     # if t is not None and t >= -90 and t < 190:
@@ -186,8 +188,13 @@ def plotter(fdict):
     )
 
     ax.set_title(
-        "[%s] %s\nRecent Time Series"
-        % (station, ctx["_nt"].sts[station]["name"])
+        "[%s] %s\nRecent Time Series %s - %s"
+        % (
+            station,
+            ctx["_nt"].sts[station]["name"],
+            pd.to_datetime(df.index.values[0]).strftime("%Y %b %-d"),
+            pd.to_datetime(df.index.values[-1]).strftime("%Y %b %-d"),
+        )
     )
     ax.grid(True)
     ax.text(
