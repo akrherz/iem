@@ -21,10 +21,8 @@ def main(argv):
     table = NetworkTable(network)
 
     rcursor.execute(
-        """
-        SELECT station, min(valid), max(valid) from alldata
-        GROUP by station ORDER by min ASC
-    """
+        "SELECT station, min(valid), max(valid) from alldata "
+        "GROUP by station ORDER by min ASC"
     )
     for row in rcursor:
         station = row[0]
@@ -39,8 +37,8 @@ def main(argv):
             )
 
         mcursor.execute(
-            """UPDATE stations SET archive_begin = %s
-             WHERE id = %s and network = %s""",
+            "UPDATE stations SET archive_begin = %s "
+            "WHERE id = %s and network = %s",
             (row[1], station, network),
         )
         if mcursor.rowcount == 0:

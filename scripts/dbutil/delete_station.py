@@ -25,18 +25,14 @@ def main(argv):
 
 def delete_logic(icursor, mcursor, network, station):
     """Do the work"""
-    for table in ["current", "summary"]:
+    for table in ["current", "summary", "hourly"]:
         icursor.execute(
-            """
-         DELETE from %s where
-         iemid = (select iemid from stations
-                  where id = '%s' and network = '%s')
-        """
-            % (table, station, network)
+            f"DELETE from {table} where iemid = (select iemid from stations "
+            "where id = %s and network = %s)",
+            (table, station, network),
         )
         print(
-            ("  Removed %s rows from IEMAccess table %s")
-            % (icursor.rowcount, table)
+            f"  Removed {icursor.rowcount} rows from IEMAccess table {table}"
         )
 
     mcursor.execute(
