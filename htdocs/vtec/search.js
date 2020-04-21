@@ -4,15 +4,13 @@ function utcdate(v, record){
 	return (Ext.Date.parseDate(v, 'c')).toUTC();
 }
 
-var marker;
-var marker2;
 var warnStore;
 var eventStore;
 var ugcStore;
 var warntable;
 var eventTable;
-var map;
-var map2;
+var mapwidget1;
+var mapwidget2;
 var sdate;
 var edate;
 var defaultUGC;
@@ -473,21 +471,22 @@ function setupUI() {
 		var la = $("#lat").val();
 		var lo = $("#lon").val();
 		var latlng = new google.maps.LatLng(parseFloat(la), parseFloat(lo))
-		marker.setPosition(latlng);
-		updateMarkerPosition(latlng);
+		mapwidget1.marker.setPosition(latlng);
+		updateMarkerPosition(lo, la);
 	});
 	$("#manualpt2").click(function(){
 		var la = $("#lat2").val();
 		var lo = $("#lon2").val();
 		var latlng = new google.maps.LatLng(parseFloat(la), parseFloat(lo))
-		marker2.setPosition(latlng);
-		updateMarkerPosition2(latlng);
+		mapwidget2.marker.setPosition(latlng);
+		updateMarkerPosition2(lo, la);
 	});
 };
 
 
-function updateMarkerPosition(latLng) {
-	// callback on when the map marker is moved
+function updateMarkerPosition(lon, lat) {
+    var latLng = new google.maps.LatLng(parseFloat(lat), parseFloat(lon))
+    // callback on when the map marker is moved
 	warnStore.load({add: false, params: {
 		lon: latLng.lng(),
 		lat: latLng.lat()
@@ -498,10 +497,11 @@ function updateMarkerPosition(latLng) {
 		latLng.lat().toFixed(4), latLng.lng().toFixed(4) ));
 	window.location.href = Ext.String.format("#bypoint/{0}/{1}", 
 			latLng.lng().toFixed(4), latLng.lat().toFixed(4)  );
-	map.setCenter(latLng);
+	mapwidget1.map.setCenter(latLng);
 }
 
-function updateMarkerPosition2(latLng) {
+function updateMarkerPosition2(lon, lat) {
+    var latLng = new google.maps.LatLng(parseFloat(lat), parseFloat(lon))
 	// callback on when the map marker is moved
 	eventStore.getProxy().setUrl(BACKEND_EVENTS_BYPOINT);
 	eventStore.load({add: false, params: {
@@ -516,42 +516,14 @@ function updateMarkerPosition2(latLng) {
 		latLng.lat().toFixed(4), latLng.lng().toFixed(4) ));
 	window.location.href = Ext.String.format("#eventsbypoint/{0}/{1}", 
 			latLng.lng().toFixed(4), latLng.lat().toFixed(4)  );
-	map2.setCenter(latLng);
+	mapwidget2.map.setCenter(latLng);
 }
 
 function initialize() {
 	// build the EXT components
-	setupUI();
-	var latLng = new google.maps.LatLng(41.53, -93.653);
-	map = new google.maps.Map(document.getElementById('map'), {
-		zoom: 3,
-		center: latLng,
-		mapTypeId: google.maps.MapTypeId.ROADMAP
-	});
-	map2 = new google.maps.Map(document.getElementById('map2'), {
-		zoom: 3,
-		center: latLng,
-		mapTypeId: google.maps.MapTypeId.ROADMAP
-	});
-	marker = new google.maps.Marker({
-		position: latLng,
-		title: 'Point A',
-		map: map,
-		draggable: true
-	});
-	marker2 = new google.maps.Marker({
-		position: latLng,
-		title: 'Point A',
-		map: map2,
-		draggable: true
-	});
-
-	google.maps.event.addListener(marker, 'dragend', function() {
-		updateMarkerPosition(marker.getPosition());
-	});
-	google.maps.event.addListener(marker2, 'dragend', function() {
-		updateMarkerPosition2(marker2.getPosition());
-	});
+    setupUI();
+    var default_lon = -93.653;
+    var default_lat = 41.53;
 
 	// Do the anchor tag linking, please
 	var tokens = window.location.href.split("#");
@@ -559,17 +531,23 @@ function initialize() {
 		var tokens2 = tokens[1].split("/");
 		if (tokens2.length == 3){
 			if (tokens2[0] == 'bypoint'){
-				var latlng = new google.maps.LatLng(tokens2[2], tokens2[1]);
-				marker.setPosition(latlng);
-				updateMarkerPosition(latlng);
+                default_lat = tokens2[2];
+                default_lon = tokens2[1];
+				updateMarkerPosition(default_lon, default_lat);
 			}
 			if (tokens2[0] == 'eventsbypoint'){
-				var latlng = new google.maps.LatLng(tokens2[2], tokens2[1]);
-				marker2.setPosition(latlng);
-				updateMarkerPosition2(latlng);
+                default_lat = tokens2[2];
+                default_lon = tokens2[1];
+				updateMarkerPosition2(default_lon, default_lat);
 			}
 		}
-	}
+    }
+
+    mapwidget1 = new MapMarkerWidget("map", default_lon, default_lat);
+    mapwidget1.register(updateMarkerPosition);
+
+    mapwidget2 = new MapMarkerWidget("map2", default_lon, default_lat);
+    mapwidget2.register(updateMarkerPosition2);
 
 }
 
