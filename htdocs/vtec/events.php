@@ -10,6 +10,10 @@ $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"], 0, 4): 'DMX';
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : intval(date("Y"));
 $state = isset($_GET['state']) ? substr($_GET["state"], 0, 2): 'IA';
 $which = isset($_GET["which"]) ? $_GET["which"]: 'wfo';
+$significance = isset($_GET["s"]) ? xssafe($_GET["s"]): "";
+$phenomena = isset($_GET["p"]) ? xssafe($_GET["p"]): "";
+$pon = (isset($_GET["pon"]) && $_GET["pon"] == "on");
+$son = (isset($_GET["son"]) && $_GET["son"] == "on");
 
 
 if ($which == 'wfo'){
@@ -21,11 +25,20 @@ if ($which == 'wfo'){
 	$uri = sprintf("http://iem.local/json/vtec_events_bystate.py?state=%s&year=%s", 
 	$state, $year);
 }
+if ($significance != "" && $son){
+    $uri .= sprintf("&significance=%s", $significance);
+}
+if ($phenomena != "" && $pon){
+    $uri .= sprintf("&phenomena=%s", $phenomena);
+}
 $public_uri = str_replace(
     "http://iem.local", "https://mesonet.agron.iastate.edu", $uri);
 $data = file_get_contents($uri);
 $json = json_decode($data, $assoc=TRUE);
 $table = "";
+if (sizeof($json["events"]) == 0){
+    $table .= "<tr><th colspan=\"8\">No Events Found</th><tr>";
+}
 foreach($json['events'] as $key => $val){
     $hmlurl = "";
     if (($val["hvtec_nwsli"] != null) && ($val["hvtec_nwsli"] != "00000")){
@@ -61,9 +74,13 @@ EOM;
 $yselect = yearSelect2(2005, $year, 'year');
 $wfoselect = networkSelect("WFO", $wfo, array(), "wfo");
 $stselect = stateSelect($state);
+$pselect = make_select("p", $phenomena, $vtec_phenomena);
+$sselect = make_select("s", $significance, $vtec_significance);
 
 $wchecked = ($which == 'wfo') ? "CHECKED": "";
 $schecked = ($which == 'state') ? "CHECKED": "";
+$ponchecked = $pon ? "CHECKED": "";
+$sonchecked = $son ? "CHECKED": "";
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
@@ -107,12 +124,23 @@ directly access it here:
  <td> $yselect </td>
  <td><input type="submit" value="Generate Table"></td>
 </tr>
+
+<tr>
+ <td colspan="2">
+ <input id="pon" type="checkbox" name="pon" value="on" {$ponchecked}>
+ <label for="pon">Filter Phenomena?</label> &nbsp; {$pselect}
+ </td>
+ <td colspan="2">
+ <input id="son" type="checkbox" name="son" value="on" {$sonchecked}>
+ <label for="son">Filter Significance?</label> &nbsp; {$sselect}
+ </td>
+
 </tbody>
 </table>
 
 </form>
 
-<p><button id="makefancy">Make Table Interactive</button></p>
+<p><button id="makefancy" class="btn btn-default">Make Table Below Interactive</button></p>
 
 <div id="thetable">
 <table class="table table-striped table-condensed">

@@ -19,27 +19,21 @@ def run(state, year, phenomena, significance):
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    table = "warnings_%s" % (year,)
-    sbwtable = "sbw_%s" % (year,)
-    plimit = "phenomena is not null and significance is not null"
-    if phenomena != "__" and significance != "_":
-        plimit = ("phenomena = '%s' and significance = '%s'") % (
-            phenomena,
-            significance,
-        )
+    limits = ["phenomena is not null", "significance is not null"]
+    if phenomena != "__":
+        limits[0] = f"phenomena = '{phenomena}'"
+    if significance != "_":
+        limits[1] = f"significance = '{significance}'"
+    plimit = " and ".join(limits)
     cursor.execute(
-        """
+        f"""
     WITH polyareas as (
         SELECT wfo, phenomena, significance, eventid, round((ST_area(
         ST_transform(geom,2163)) / 1000000.0)::numeric,0) as area
-        from """
-        + sbwtable
-        + """ s, states t WHERE
+        from sbw_{year} s, states t WHERE
         ST_Overlaps(s.geom, t.the_geom) and
-        t.state_abbr = %s and eventid is not null and
-        """
-        + plimit
-        + """ and status = 'NEW'
+        t.state_abbr = %s and eventid is not null and {plimit}
+        and status = 'NEW'
     ), ugcareas as (
         SELECT w.wfo,
         round(sum(ST_area(
@@ -52,13 +46,8 @@ def run(state, year, phenomena, significance):
         max(init_expire) at time zone 'UTC' as utc_init_expire,
         max(hvtec_nwsli) as nwsli,
         max(fcster) as fcster from
-        """
-        + table
-        + """ w JOIN ugcs u on (w.gid = u.gid)
-        WHERE substr(u.ugc, 1, 2) = %s and eventid is not null and
-        """
-        + plimit
-        + """
+        warnings_{year} w JOIN ugcs u on (w.gid = u.gid)
+        WHERE substr(u.ugc, 1, 2) = %s and eventid is not null and {plimit}
         GROUP by w.wfo, phenomena, significance, eventid)
 
     SELECT u.*, coalesce(p.area, u.area) as myarea

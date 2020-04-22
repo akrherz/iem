@@ -24,13 +24,13 @@ def run(wfo, year, phenomena, significance, combo):
 
     table = "warnings_%s" % (year,)
     sbwtable = "sbw_%s" % (year,)
-    plimit = "phenomena is not null and significance is not null"
+    limits = ["phenomena is not null", "significance is not null"]
     orderby = "u.phenomena ASC, u.significance ASC, u.utc_issue ASC"
-    if phenomena is not None and significance is not None:
-        plimit = ("phenomena = '%s' and significance = '%s'") % (
-            phenomena[:2],
-            significance[0],
-        )
+    if phenomena != "":
+        limits[0] = f"phenomena = '{phenomena}'"
+    if significance != "":
+        limits[1] = f"significance = '{significance}'"
+    plimit = " and ".join(limits)
     if combo == 1:
         plimit = (
             "phenomena in ('SV', 'TO', 'FF') and significance in ('W', 'A')"
@@ -120,8 +120,8 @@ def application(environ, start_response):
     if len(wfo) == 4:
         wfo = wfo[1:]
     year = int(fields.get("year", 2015))
-    phenomena = fields.get("phenomena")
-    significance = fields.get("significance")
+    phenomena = fields.get("phenomena", "")[:2]
+    significance = fields.get("significance", "")[:1]
     cb = fields.get("callback")
     combo = int(fields.get("combo", 0))
 
