@@ -417,6 +417,10 @@ data = {
                     "label": "Frequency of First Fall High/Low Temperature by Day of Year",
                 },
                 {
+                    "id": "120",
+                    "label": "Frequency of Last Spring High/Low Temperature by Day of Year",
+                },
+                {
                     "id": "189",
                     "label": ("General yearly totals with trend line fitted"),
                 },
