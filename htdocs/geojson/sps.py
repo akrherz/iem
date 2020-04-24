@@ -37,7 +37,7 @@ def run():
     for row in cursor:
         sts = row["utc_issue"].strftime("%Y-%m-%dT%H:%M:%SZ")
         ets = row["utc_expire"].strftime("%Y-%m-%dT%H:%M:%SZ")
-        href = "/api/1/nwstext.txt?pid=%s" % (row["product_id"],)
+        href = f"/api/1/nwstext/{row['product_id']}"
         res["features"].append(
             dict(
                 type="Feature",

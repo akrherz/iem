@@ -205,12 +205,9 @@
     RewriteRule datasets/?$ datasets.php [QSA]
   </Directory>
 
-  <LocationMatch "/api/.*\.(json|geojson|txt)">
-    # Behold, great gnashing of teeth for this combination to somehow work
-    RequestHeader set "Host" "iem-web-services.local"
-    ProxyPreserveHost Off
-    ProxyPass "http://iem-web-services.local/"
-    ProxyPassReverse "http://iem-web-services.local/"
+  <LocationMatch "/api/1">
+    ProxyPass "http://iem-web-services.local:8000"
+    ProxyPassReverse "http://iem-web-services.local:8000"
   </LocationMatch>
 
   <Location "/archive/data">

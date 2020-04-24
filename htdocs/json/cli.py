@@ -82,7 +82,7 @@ def get_data(station, year, fmt):
                 "valid": row["valid"].strftime("%Y-%m-%d"),
                 "state": row["state"],
                 "wfo": row["wfo"],
-                "link": "/api/1/nwstext.txt?pid=%s" % (row["product"],),
+                "link": f"/api/1/nwstext/{row['product']}",
                 "name": row["name"],
                 "high": int_sanitize(row["high"]),
                 "high_record": int_sanitize(row["high_record"]),
