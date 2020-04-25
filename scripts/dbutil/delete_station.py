@@ -29,7 +29,7 @@ def delete_logic(icursor, mcursor, network, station):
         icursor.execute(
             f"DELETE from {table} where iemid = (select iemid from stations "
             "where id = %s and network = %s)",
-            (table, station, network),
+            (station, network),
         )
         print(
             f"  Removed {icursor.rowcount} rows from IEMAccess table {table}"
