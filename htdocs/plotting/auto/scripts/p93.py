@@ -76,6 +76,20 @@ def get_description():
         dict(
             type="year",
             minvalue=1973,
+            default=1973,
+            name="syear",
+            label="Start year (if data available) for plot:",
+        ),
+        dict(
+            type="year",
+            minvalue=1973,
+            default=datetime.date.today().year,
+            name="eyear",
+            label="End year (inclusive, if data available) for plot:",
+        ),
+        dict(
+            type="year",
+            minvalue=1973,
             default=datetime.date.today().year,
             name="year",
             label="Year to Highlight:",
@@ -130,6 +144,8 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     highlightyear = ctx["year"]
+    sdate = datetime.date(ctx["syear"], 1, 1)
+    edate = datetime.date(ctx["eyear"] + 1, 1, 1)
     ytd = ctx["ytd"]
     varname = ctx["var"]
     inc = ctx["inc"]
@@ -139,20 +155,13 @@ def plotter(fdict):
         tmpflimit = ""
 
     df = read_sql(
-        """
-        SELECT to_char(valid, 'YYYYmmddHH24') as d, avg(tmpf)::int as tmpf,
-        avg(dwpf)::int as dwpf,
-        avg(coalesce(sknt, 0)) as sknt
-        from alldata WHERE station = %s """
-        + tmpflimit
-        + """
-        and dwpf <= tmpf and valid > '1973-01-01'
-        and report_type = 2 """
-        + doylimiter
-        + """ GROUP by d
-    """,
+        "SELECT to_char(valid, 'YYYYmmddHH24') as d, avg(tmpf)::int as tmpf, "
+        "avg(dwpf)::int as dwpf, avg(coalesce(sknt, 0)) as sknt "
+        f"from alldata WHERE station = %s {tmpflimit} "
+        "and dwpf <= tmpf and valid > %s and valid < %s and report_type = 2 "
+        f"{doylimiter} GROUP by d",
         pgconn,
-        params=(station,),
+        params=(station, sdate, edate),
         index_col=None,
     )
     if df.empty:
@@ -211,8 +220,8 @@ def plotter(fdict):
     bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:
         raise NoDataFound("Unknown station metadata.")
-    minyear = max([1973, bs.year])
-    maxyear = datetime.date.today().year
+    minyear = df["year"].min()
+    maxyear = df["year"].max()
     years = float((maxyear - minyear) + 1)
     x = []
     y = []
@@ -282,7 +291,7 @@ def plotter(fdict):
             station,
             ctx["_nt"].sts[station]["name"],
             minyear,
-            datetime.date.today().year,
+            maxyear,
             title2,
             title,
             inctitle,
