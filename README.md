@@ -8,6 +8,8 @@ be found useful for others to at least look at to see how some of the magic happ
 
 Limited integration testing is done on Travis-CI: [![Build Status](https://travis-ci.com/akrherz/iem.svg)](https://travis-ci.com/akrherz/iem)
 
+Database schema is in [akrherz/iem-database](https://github.com/akrherz/iem-database).
+
 ## Where are processes running
 
 The processing load for the IEM is spread over a number of virtual machines.

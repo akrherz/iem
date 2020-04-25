@@ -1,1 +1,0 @@
--- Storage of 15 minute data, depreciated
