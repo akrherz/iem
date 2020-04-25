@@ -22,7 +22,10 @@ if (isset($_GET["lat"]) &&
 	$newlon = floatval($_GET["lon"]);
 	$email = isset($_GET["email"]) ? xssafe($_GET["email"]): 'n/a';
 	$name = isset($_GET["name"]) ? xssafe($_GET["name"]): "n/a";
-	$msg = <<<EOF
+    $delta = (
+        ($newlat - $cities[$station]["lat"]) ** 2 + 
+        ($newlon - $cities[$station]["lon"]) ** 2)**0.5;
+    $msg = <<<EOF
 IEM Sites Move Request
 ======================
 > REMOTE_ADDR: {$_SERVER["REMOTE_ADDR"]}
@@ -35,8 +38,13 @@ IEM Sites Move Request
 
 https://mesonet.agron.iastate.edu/sites/site.php?network={$network}&station={$station}
 EOF;
-	mail("akrherz@iastate.edu", "Please move {$station} {$network}", $msg);
-	$alertmsg = "<div class=\"alert alert-danger\">Thanks! Your suggested move was submitted for evaluation.</div>";
+    if (($delta < 0.5) || (strpos($email, '@') > 0)){
+        mail("akrherz@iastate.edu", "Please move {$station} {$network}", $msg);
+    }
+    $alertmsg = <<<EOM
+<div class="alert alert-danger">Thanks! Your suggested move was submitted for
+evaluation.</div>
+EOM;
 }
 
 $t = new MyView();
@@ -76,9 +84,9 @@ $t->content = <<<EOF
 
   <div id="mymap" style="height: 400px; width: 100%;"></div>
  <div>
- <strong>Location Feedback:</strong> Do you believe the shown location to be
- incorrect?  If so, please consider moving the marker on the map to the proper
- location and submitting this form for review.
+ <strong>Is the location shown for this station wrong?</strong>
+ <br />If so, please consider submitting a location submission by moving the marker
+ on the map and completing this form below.<br />
 	<form name="updatecoords" method="GET">
 	<input type="hidden" value="{$network}" name="network">
 	<input type="hidden" value="{$station}" name="station">
