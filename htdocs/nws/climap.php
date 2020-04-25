@@ -79,7 +79,14 @@ $t->content = <<<EOF
 	<option value="snow_jul1_depart">Snowfall since July 1 Departure</option>
 	<option value="snow_dec1">Snowfall since December 1</option>
 	<option value="snow_record">Snowfall Record</option>
-</select>	
+    <option value="resultant_wind_speed">Resultant Wind Speed [mph]</option>
+    <option value="resultant_wind_direction">Resultant Wind Direction</option>
+    <option value="highest_wind_speed">Highest Wind Speed [mph]</option>
+    <option value="highest_wind_direction">Highest Wind Direction</option>
+    <option value="highest_gust_speed">Highest Wind Gust [mph]</option>
+    <option value="highest_gust_direction">Highest Gust Direction</option>
+    <option value="average_wind_speed">Average Wind Speed [mph]</option>
+    </select>	
 		
 <strong>For Date:</strong>
 		<input type="text" id="datepicker" size="30">

@@ -67,7 +67,11 @@ def get_data(station, year, fmt):
         snow_dec1_normal, snow_month_normal, precip_jun1, precip_jun1_normal,
         round(((case when snow_jul1 < 0.1 then 0 else snow_jul1 end)
             - snow_jul1_normal)::numeric, 2) as snow_jul1_depart,
-        average_sky_cover
+        average_sky_cover,
+        resultant_wind_speed, resultant_wind_direction,
+        highest_wind_speed, highest_wind_direction,
+        highest_gust_speed, highest_gust_direction,
+        average_wind_speed
         from cli_data c JOIN stations s on (c.station = s.id)
         WHERE s.network = 'NWSCLI' and c.station = %s
         and c.valid >= %s and c.valid <= %s
@@ -121,6 +125,21 @@ def get_data(station, year, fmt):
                 "snow_dec1_normal": f1_sanitize(row["snow_dec1_normal"]),
                 "snow_month_normal": f1_sanitize(row["snow_month_normal"]),
                 "average_sky_cover": f1_sanitize(row["average_sky_cover"]),
+                "resultant_wind_speed": f1_sanitize(
+                    row["resultant_wind_speed"]
+                ),
+                "resultant_wind_direction": int_sanitize(
+                    row["resultant_wind_direction"]
+                ),
+                "highest_wind_speed": int_sanitize(row["highest_wind_speed"]),
+                "highest_wind_direction": int_sanitize(
+                    row["highest_wind_direction"]
+                ),
+                "highest_gust_speed": int_sanitize(row["highest_gust_speed"]),
+                "highest_gust_direction": int_sanitize(
+                    row["highest_gust_direction"]
+                ),
+                "average_wind_speed": f1_sanitize(row["average_wind_speed"]),
             }
         )
     if fmt == "json":
