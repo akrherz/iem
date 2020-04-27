@@ -84,11 +84,11 @@ def agg(sts, ets):
     while now <= ets:
         fn = now.strftime("/mnt/mrms/MESH/%d%H%M.grib")
         if os.path.isfile(fn):
-            grb = pygrib.open(fn)
-            if maxval is None:
-                maxval = grb[1].values
-            else:
-                maxval = np.maximum(grb[1].values, maxval)
+            with pygrib.open(fn) as grb:
+                if maxval is None:
+                    maxval = grb[1].values
+                else:
+                    maxval = np.maximum(grb[1].values, maxval)
             hits += 1
         else:
             misses += 1
