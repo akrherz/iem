@@ -211,6 +211,18 @@
   				)
   		);
   
+          $services[] = Array(
+            "title" => "MRMS Max Estimated Hail Size (MESH) Contours",
+            "url" => "/data/gis/shape/4326/us/mrms_mesh_1440min.geojson",
+            "desc" => "This static file provides MRMS MESH Hail Contours. It
+            is updated every 2 minutes and you can also find a 2min, 30min,
+            and 60min interval file.",
+            "vars" => Array(
+                    ),
+            "example" => Array(
+                    )
+            );
+
   $services[] = Array(
   		"title" => "NWS COOP Station Climatology",
   		"url" => "/json/climodat_stclimo.py?station={station}&amp;syear={syear}&amp;eyear={eyear}",

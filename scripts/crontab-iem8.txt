@@ -1,0 +1,9 @@
+MAILTO="akrherz@iastate.edu"
+SHELL=/bin/bash
+BASH_ENV=/home/mesonet/.bashrc
+
+# IEM8
+*/2 * * * * cd /opt/iem/scripts/mrms; python mesh_contours.py -i 2 --datetime $(date -u --date '2 minutes ago' +'\%Y-\%m-\%dT\%H:\%M')
+*/2 * * * * cd /opt/iem/scripts/mrms; sleep 5; python mesh_contours.py -i 30 --datetime $(date -u --date '2 minutes ago' +'\%Y-\%m-\%dT\%H:\%M')
+*/2 * * * * cd /opt/iem/scripts/mrms; sleep 10; python mesh_contours.py -i 60 --datetime $(date -u --date '2 minutes ago' +'\%Y-\%m-\%dT\%H:\%M')
+*/2 * * * * cd /opt/iem/scripts/mrms; sleep 15; python mesh_contours.py -i 1440 --datetime $(date -u --date '2 minutes ago' +'\%Y-\%m-\%dT\%H:\%M')
