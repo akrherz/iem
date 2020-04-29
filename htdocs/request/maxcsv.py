@@ -55,13 +55,11 @@ def do_iowa_azos(date, itoday=False):
     table = "summary_%s" % (date.year,)
     pgconn = get_dbconn("iem")
     df = read_sql(
-        """
+        f"""
     select id as locationid, n.name as locationname, st_y(geom) as latitude,
     st_x(geom) as longitude, s.day, s.max_tmpf::int as high,
     s.min_tmpf::int as low, pday as precip
-    from stations n JOIN """
-        + table
-        + """ s on (n.iemid = s.iemid)
+    from stations n JOIN {table} s on (n.iemid = s.iemid)
     WHERE n.network in ('IA_ASOS', 'AWOS') and s.day = %s
     """,
         pgconn,
@@ -72,7 +70,7 @@ def do_iowa_azos(date, itoday=False):
         # Additionally, piggy back rainfall totals
         df2 = read_sql(
             """
-        SELECT station,
+        SELECT id as station,
         sum(phour) as precip720,
         sum(case when valid >= (now() - '168 hours'::interval)
             then phour else 0 end) as precip168,
@@ -82,9 +80,10 @@ def do_iowa_azos(date, itoday=False):
             then phour else 0 end) as precip48,
         sum(case when valid >= (now() - '24 hours'::interval)
             then phour else 0 end) as precip24
-        from hourly where network in ('IA_ASOS', 'AWOS')
+        from hourly h JOIN stations t on (h.iemid = t.iemid)
+        where t.network in ('IA_ASOS', 'AWOS')
         and valid >= now() - '720 hours'::interval
-        and phour > 0.005 GROUP by station
+        and phour > 0.005 GROUP by id
         """,
             pgconn,
             index_col="station",
