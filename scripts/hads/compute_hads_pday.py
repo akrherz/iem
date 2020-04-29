@@ -1,17 +1,18 @@
-"""Attempt at totalling up hourly DCP data
+"""Attempt at totalling up DCP data
 
     Run from `RUN_12Z.sh` for previous day
     Run from `RUN_20_AFTER.sh` for current day
 
 """
-from __future__ import print_function
 import datetime
 import sys
 
 import pytz
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconn, utc, logger
+
+LOG = logger()
 
 
 def workflow(date):
@@ -21,14 +22,12 @@ def workflow(date):
     icursor = iem_pgconn.cursor()
     # load up the current obs
     df = read_sql(
-        """
+        f"""
     WITH dcp as (
         SELECT id, iemid, tzname from stations where network ~* 'DCP'
         and tzname is not null
     ), obs as (
-        SELECT iemid, pday from summary_"""
-        + str(date.year)
-        + """
+        SELECT iemid, pday from summary_{date.year}
         WHERE day = %s)
     SELECT d.id, d.iemid, d.tzname, coalesce(o.pday, 0) as pday from
     dcp d LEFT JOIN obs o on (d.iemid = o.iemid)
@@ -48,11 +47,9 @@ def workflow(date):
     ) - datetime.timedelta(hours=12)
     ets = sts + datetime.timedelta(hours=48)
     obsdf = read_sql(
-        """
+        f"""
     SELECT distinct station, valid at time zone 'UTC' as utc_valid, value
-    from raw"""
-        + str(date.year)
-        + """ WHERE valid between %s and %s and
+    from raw{date.year} WHERE valid between %s and %s and
     substr(key, 1, 3) = 'PPH' and value >= 0
     """,
         pgconn,
@@ -60,7 +57,7 @@ def workflow(date):
         index_col=None,
     )
     if obsdf.empty:
-        print("compute_hads_pday for %s found no data" % (date,))
+        LOG.info("%s found no data", date)
         return
     obsdf["utc_valid"] = obsdf["utc_valid"].dt.tz_localize(pytz.UTC)
     precip = np.zeros((24 * 60))
@@ -80,39 +77,24 @@ def workflow(date):
             precip[int(t0) : int(t1)] = row["value"] / 60.0
         pday = np.sum(precip)
         if pday > 50 or np.allclose([pday], [current_pday]):
-            # print("Skipping %s %s==%s" % (station, current_pday,
-            #                              pday))
             continue
-        # print("Updating %s old: %s new: %s" % (station, current_pday, pday))
         iemid = int(df.loc[station, "iemid"])
         icursor.execute(
-            """
-            UPDATE summary_"""
-            + str(date.year)
-            + """
-            SET pday = %s WHERE iemid = %s and day = %s
-        """,
+            f"UPDATE summary_{date.year} "
+            "SET pday = %s WHERE iemid = %s and day = %s",
             (pday, iemid, date),
         )
         if icursor.rowcount == 0:
-            print("Adding record %s[%s] for day %s" % (station, iemid, date))
+            LOG.info("Adding record %s[%s] for day %s", station, iemid, date)
             icursor.execute(
-                """
-                INSERT into summary_"""
-                + str(date.year)
-                + """
-                (iemid, day) VALUES (%s, %s)
-            """,
+                f"INSERT into summary_{date.year} "
+                "(iemid, day) VALUES (%s, %s)",
                 (iemid, date),
             )
             icursor.execute(
-                """
-                UPDATE summary_"""
-                + str(date.year)
-                + """
-                SET pday = %s WHERE iemid = %s and day = %s
-                and %s > coalesce(pday, 0)
-            """,
+                f"UPDATE summary_{date.year} "
+                "SET pday = %s WHERE iemid = %s and day = %s "
+                "and %s > coalesce(pday, 0)",
                 (pday, iemid, date, pday),
             )
     icursor.close()

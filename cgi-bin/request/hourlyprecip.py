@@ -14,11 +14,10 @@ def get_data(network, sts, ets, tzinfo, stations):
     if len(stations) == 1:
         stations.append("ZZZZZ")
     cursor.execute(
-        """SELECT station, network, valid, phour from
-        hourly WHERE
-        valid >= %s and valid < %s and network = %s and station in %s
-        ORDER by valid ASC
-        """,
+        "SELECT id, t.network, valid, phour from hourly h JOIN stations t on "
+        "(h.iemid = t.iemid) WHERE "
+        "valid >= %s and valid < %s and t.network = %s and t.id in %s "
+        "ORDER by valid ASC",
         (sts, ets, network, tuple(stations)),
     )
     for row in cursor:

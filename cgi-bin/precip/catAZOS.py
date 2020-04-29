@@ -139,24 +139,13 @@ def application(environ, start_response):
     loadstations()
     setupTable(sio)
 
-    td = ts.strftime("%Y-%m-%d")
-    tm = (ts + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
-
-    ##
-    #  Hack, since postgres won't index date(valid)
-
-    sql = """
-        SELECT extract('hour' from valid) as vhour, 
-        station, valid, phour from hourly_%s WHERE 
-        valid >= '%s 00:00' and valid < '%s 00:00'
-        and network in ('AWOS','IA_ASOS')
-    """ % (
-        ts.year,
-        td,
-        tm,
+    icursor.execute(
+        "SELECT extract('hour' from valid) as vhour, t.id as station, "
+        f"valid, phour from hourly_{ts.year} h JOIN stations t on "
+        "(h.iemid = t.iemid) WHERE "
+        "valid >= %s and valid < %s and t.network in ('AWOS','IA_ASOS')",
+        (ts, ts + datetime.timedelta(hours=24)),
     )
-
-    icursor.execute(sql)
     for row in icursor:
         p01i = float(row["phour"])
         vhour = int(row["vhour"])
