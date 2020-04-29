@@ -47,9 +47,10 @@ foreach($intervals as $key => $interval)
   } else {
     $ts0 = $ts - ($interval * 3600);
   }
-  $sql = sprintf("select station, sum(phour) as p1 from hourly_%s ".
-      "WHERE valid >= '%s+00' and valid < '%s+00' and network IN (%s) ".
-      "GROUP by station",
+  $sql = sprintf("select id as station, sum(phour) as p1 from hourly_%s h ".
+      "JOIN stations t on (h.iemid = t.iemid) WHERE valid >= '%s+00' and ".
+      "valid < '%s+00' and t.network IN (%s) ".
+      "GROUP by t.id",
       strftime("%Y", $ts), strftime("%Y-%m-%d %H:%M", $ts0), 
           strftime("%Y-%m-%d %H:%M", $ts), $networks);
   $rs = pg_exec($connect, $sql);
