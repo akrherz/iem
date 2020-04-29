@@ -48,7 +48,8 @@ def make_metadata(tmpfn, mydict):
 def make_contours(tmpfn):
     """Make a GeoJSON."""
     cmd = (
-        "gdal_contour -fl 0 5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 "
+        "timeout 120 gdal_contour "
+        "-fl 0 5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 "
         "90 95 100 150 200 -amin ssize_mm -amax esize_mm "
         f"-snodata -1 -p -q {tmpfn}.tif {tmpfn}.geojson"
     )
