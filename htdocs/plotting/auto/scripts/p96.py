@@ -54,12 +54,10 @@ def plotter(fdict):
     ts1973 = datetime.datetime(1973, 1, 1)
     today = datetime.datetime.now()
     cursor.execute(
-        """
-        SELECT valid at time zone 'UTC', phour from hourly WHERE
-        station = %s and network = %s and phour >= 0.01 and
-        valid >= '1973-01-01 00:00+00' and valid < %s
-    """,
-        (station, ctx["network"], jan1),
+        "SELECT valid at time zone 'UTC', phour from hourly WHERE "
+        "iemid = %s and phour >= 0.01 and "
+        "valid >= '1973-01-01 00:00+00' and valid < %s",
+        (ctx["_nt"].sts[station]["iemid"], jan1),
     )
     if cursor.rowcount == 0:
         raise NoDataFound("No Data Found.")
