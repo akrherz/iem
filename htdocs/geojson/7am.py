@@ -43,16 +43,9 @@ def run_azos(ts):
     ts1 = ts.replace(hour=7)
     ts0 = ts1 - datetime.timedelta(hours=24)
     cursor.execute(
-        """
-    WITH obs as (
-        select iemid, sum(phour) from hourly
-        where network in ('AWOS', 'IA_ASOS') and
-        valid >= %s and valid < %s GROUP by iemid
-    )
-
-    SELECT name, id, ST_x(geom), ST_y(geom), sum from stations t JOIN obs o
-    ON (o.iemid = t.iemid)
-    """,
+        "select t.id, t.name, sum(phour) from hourly h JOIN stations t ON "
+        "(h.iemid = t.iemid) where t.network in ('AWOS', 'IA_ASOS') and "
+        "valid >= %s and valid < %s GROUP by t.id, t.name",
         (ts0, ts1),
     )
 
