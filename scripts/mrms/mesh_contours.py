@@ -138,7 +138,7 @@ def main(argv):
         make_metadata(tmp.name, mydict)
         pqinsert(tmp.name, ets, ctx.interval)
         os.unlink(f"{tmp.name}.geojson")
-        os.unlink(f"{tmp.name}_meta.geojson")
+        os.unlink(f"{tmp.name}_meta.json")
 
 
 if __name__ == "__main__":
