@@ -416,9 +416,37 @@ var sbwLayer = new OpenLayers.Layer.Vector("Storm Based Warnings",{
      }
 });
 
+function getShapefileLink(){
+    var uri = "https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py?";
+    var s = Ext.getCmp("wfoselector").getValue();
+    var sts = Ext.getCmp("datepicker1").getValue().format('m/d/Y')
+       +" "+ Ext.getCmp("timepicker1").getValue();
+    var sdt = new Date(sts);
+    var start_utc = sdt.toUTC();
+    var ets = Ext.getCmp("datepicker2").getValue().format('m/d/Y')
+       +" "+ Ext.getCmp("timepicker2").getValue();
+    var edt = new Date(ets);
+    var end_utc = edt.toUTC();
+    if (s != ""){
+      var tokens = s.split(",");
+      for (var i=0;i<tokens.length;i++){
+        uri += "&wfo[]="+ tokens[i];
+      }
+    }
+    uri += "&year1="+ start_utc.format('Y');
+    uri += "&month1="+ start_utc.format('m');
+    uri += "&day1="+ start_utc.format('d');
+    uri += "&hour1="+ start_utc.format('H');
+    uri += "&minute1="+ start_utc.format('i');
+    uri += "&year2="+ end_utc.format('Y');
+    uri += "&month2="+ end_utc.format('m');
+    uri += "&day2="+ end_utc.format('d');
+    uri += "&hour2="+ end_utc.format('H');
+    uri += "&minute2="+ end_utc.format('i');
+    return uri;
+}
 
-// create feature store, binding it to the vector layer
-;
+
 
 sbwGridPanel = new Ext.grid.GridPanel({
    autoScroll : true,
@@ -453,36 +481,22 @@ sbwGridPanel = new Ext.grid.GridPanel({
             cls       : 'x-btn-text-icon',
             listeners : {
                click  : function() {
-                  var uri = "https://mesonet.agron.iastate.edu/cgi-bin/request/gis/watchwarn.py?";
-                  var s = Ext.getCmp("wfoselector").getValue();
-                  var sts = Ext.getCmp("datepicker1").getValue().format('m/d/Y')
-                     +" "+ Ext.getCmp("timepicker1").getValue();
-                  var sdt = new Date(sts);
-                  var start_utc = sdt.toUTC();
-                  var ets = Ext.getCmp("datepicker2").getValue().format('m/d/Y')
-                     +" "+ Ext.getCmp("timepicker2").getValue();
-                  var edt = new Date(ets);
-                  var end_utc = edt.toUTC();
-                  if (s != ""){
-                    var tokens = s.split(",");
-                    for (var i=0;i<tokens.length;i++){
-                      uri += "&wfo[]="+ tokens[i];
-                    }
-                  }
-                  uri += "&year1="+ start_utc.format('Y');
-                  uri += "&month1="+ start_utc.format('m');
-                  uri += "&day1="+ start_utc.format('d');
-                  uri += "&hour1="+ start_utc.format('H');
-                  uri += "&minute1="+ start_utc.format('i');
-                  uri += "&year2="+ end_utc.format('Y');
-                  uri += "&month2="+ end_utc.format('m');
-                  uri += "&day2="+ end_utc.format('d');
-                  uri += "&hour2="+ end_utc.format('H');
-                  uri += "&minute2="+ end_utc.format('i');
+                  var uri = getShapefileLink();
                   window.location.href = uri;
                }  // End of handler
             }
    },{
+    xtype     : 'button',
+    text      : 'Save SBW Shapefile',
+    icon      : 'icons/shapefile.gif',
+    cls       : 'x-btn-text-icon',
+    listeners : {
+       click  : function() {
+          var uri = getShapefileLink() + "&limit1=yes";
+          window.location.href = uri;
+       }  // End of handler
+    }
+},{
        xtype     : 'button',
        text      : 'Expand All',
        listeners : {
