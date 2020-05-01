@@ -70,7 +70,8 @@ def application(environ, start_response):
             states = form.getall("states[]")
             states.append("XX")  # Hack for 1 length
             wfo_limiter = (
-                " and ST_Overlaps(s.the_geom, w.geom) and s.state_abbr in %s "
+                " and ST_Intersects(s.the_geom, w.geom) "
+                "and s.state_abbr in %s "
             ) % (tuple(states),)
             wfo_limiter2 = (" and substr(w.ugc, 1, 2) in %s ") % (
                 str(tuple(states)),
@@ -136,7 +137,7 @@ def application(environ, start_response):
             sts,
         )
 
-    sql = """
+    sql = f"""
     WITH stormbased as (
      SELECT distinct w.geom as geo, 'P'::text as gtype, significance, wfo,
      status, eventid, ''::text as ugc,
@@ -149,12 +150,12 @@ def application(environ, start_response):
              'YYYYMMDDHH24MI') as utc_init_expire,
      to_char(updated at time zone 'UTC',
              'YYYYMMDDHH24MI') as utc_updated
-     from %(sbw_table)s w %(table_extra)s
-     WHERE status = 'NEW' and %(timelimit)s
-     %(wfo_limiter)s %(limiter)s
+     from {sbw_table} w {table_extra}
+     WHERE status = 'NEW' and {timelimit}
+     {wfo_limiter} {limiter}
     ),
     countybased as (
-     SELECT u.%(geomcol)s as geo, 'C'::text as gtype,
+     SELECT u.{geomcol} as geo, 'C'::text as gtype,
      significance,
      w.wfo, status, eventid, u.ugc, phenomena,
      u.area2163 as area2d,
@@ -166,23 +167,12 @@ def application(environ, start_response):
              'YYYYMMDDHH24MI') as utc_init_expire,
      to_char(updated at time zone 'UTC',
              'YYYYMMDDHH24MI') as utc_updated
-     from %(warnings_table)s w JOIN ugcs u on (u.gid = w.gid) WHERE
-     %(timelimit)s %(wfo_limiter2)s %(limiter)s
+     from {warnings_table} w JOIN ugcs u on (u.gid = w.gid) WHERE
+     {timelimit} {wfo_limiter2} {limiter}
      )
-     SELECT %(cols)s from stormbased UNION ALL
-     SELECT %(cols)s from countybased %(sbwlimiter)s
-    """ % dict(
-        sbw_table=sbw_table,
-        timelimit=timelimit,
-        wfo_limiter=wfo_limiter,
-        limiter=limiter,
-        geomcol=geomcol,
-        warnings_table=warnings_table,
-        table_extra=table_extra,
-        wfo_limiter2=wfo_limiter2,
-        cols=cols,
-        sbwlimiter=sbwlimiter,
-    )
+     SELECT {cols} from stormbased UNION ALL
+     SELECT {cols} from countybased {sbwlimiter}
+    """
 
     cursor = pgconn.cursor(cursor_factory=DictCursor)
     cursor.execute(sql)
