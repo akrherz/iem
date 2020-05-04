@@ -1,5 +1,5 @@
 liberation-bold	/usr/share/fonts/liberation-serif/LiberationSerif-Bold.ttf
 liberation      /usr/share/fonts/liberation-serif/LiberationSerif-Regular.ttf
-liberation-mono /usr/share/fonts/liberation/LiberationMono-Regular.ttf
+liberation-mono /usr/share/fonts/liberation-mono/LiberationMono-Regular.ttf
 weather         weather.ttf
 esri34          esri_34.ttf

@@ -33,7 +33,7 @@ def text_image(content):
         lines.append(msg)
 
     large_font = 20
-    font_path = "/usr/share/fonts/liberation/LiberationMono-Regular.ttf"
+    font_path = "/usr/share/fonts/liberation-mono/LiberationMono-Regular.ttf"
     font = PIL.ImageFont.truetype(font_path, size=large_font)
 
     # make the background image based on the combination of font and lines

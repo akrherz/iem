@@ -23,11 +23,11 @@ ImageFilledRectangle($img,0,0, 85, 85, $white);
 //$logo = imagecreatefrompng("../images/logo_small.png");
 //imagecopy($img, $logo, 0, 0, 0, 0, 85, 65);
 imagettftext($img, 32, 0, 1, 35, $black, 
-	"/usr/share/fonts/liberation/LiberationMono-Bold.ttf", substr($pil,0,3));
+	"/usr/share/fonts/liberation-mono/LiberationMono-Bold.ttf", substr($pil,0,3));
 imagettftext($img, 12, 0, 31, 54, $ee, 
-	"/usr/share/fonts/liberation/LiberationMono-Bold.ttf", "by");
+	"/usr/share/fonts/liberation-mono/LiberationMono-Bold.ttf", "by");
 imagettftext($img, 14, 0, 1, 74, $black,
-    "/usr/share/fonts/liberation/LiberationMono-Bold.ttf",
+    "/usr/share/fonts/liberation-mono/LiberationMono-Bold.ttf",
 	sprintf("NWS %s", substr($pil,3,3)));
 
 header("content-type: image/png");
