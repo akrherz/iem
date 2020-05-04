@@ -101,7 +101,7 @@ $c = iemdb("isuag");
 $climatedb = iemdb("coop");
 $climate = Array();
 foreach($ISUAGcities as $key => $val){
-  $csite = strtolower($ISUAGcities[$key]["climate_site"]);
+  $csite = $ISUAGcities[$key]["climate_site"];
   $climate[$key] = Array('gdd32'=> 0, 'gdd50' => 0, 'sdd86'=>0, 'prec'=>0,
     'gdd41' => 0, 'gdd46' => 0, 'gdd48' => 0, 'gdd51' => 0, 'gdd52' => 0);
 
@@ -270,15 +270,16 @@ else if ($var == 'prec') {
 
 $tr = "# ".$year." ". $varDef[$var] ." (". $sstr_txt ." - ". $estr_txt .")\n";
 $tr .= "#-----------------------snip------------------\n";
-$tr .= sprintf("%s,%-40s,%10s,%10s,%10s\n", 'ID', 'StationName',
-               'Latitude', 'Longitude', $var);
+$tr .= sprintf("%-5s,%-40s,%-10s,%-10s,%-10s,climate_%s\n", 'ID', 'StationName',
+               'Latitude', 'Longitude', $var, $var);
 foreach($vals as $key => $value){
   if ($key == "A133259") continue;
 
-  $tr .= sprintf("%s,%-40.40s,%.4f,%.4f,%10s\n", $key,
+  $tr .= sprintf("%s,%-40.40s,%10.4f,%10.4f,%10s,%10s\n", $key,
       $ISUAGcities[$key]['name'],
   		$ISUAGcities[$key]['lat'], $ISUAGcities[$key]['lon'], 
-  		round($value, $round[$var]) );
+          round($value, $round[$var]),
+          round($climate[$key][$var], $round[$var]) );
 }
 
 $t = new MyView();
