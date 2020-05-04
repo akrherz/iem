@@ -23,7 +23,7 @@ LOG = logger()
 
 def load_table(state, date):
     """Update the station table"""
-    nt = NetworkTable("%sCLIMATE" % (state,))
+    nt = NetworkTable(f"{state}CLIMATE")
     rows = []
     istoday = date == datetime.date.today()
     for sid in nt.sts:
@@ -33,8 +33,6 @@ def load_table(state, date):
         if istoday and not nt.sts[sid]["temp24_hour"] in range(3, 12):
             continue
         i, j = iemre.find_ij(nt.sts[sid]["lon"], nt.sts[sid]["lat"])
-        nt.sts[sid]["gridi"] = i
-        nt.sts[sid]["gridj"] = j
         rows.append(
             {
                 "station": sid,
@@ -47,8 +45,6 @@ def load_table(state, date):
                 .split("|")[0],
             }
         )
-    if not rows:
-        return
     df = pd.DataFrame(rows)
     df.set_index("station", inplace=True)
     for key in ["high", "low", "precip", "snow", "snowd"]:
@@ -61,9 +57,7 @@ def estimate_precip(df, ds):
     grid12 = mm2in(ds["p01d_12z"].values)
     grid00 = mm2in(ds["p01d"].values)
 
-    for sid, row in df.iterrows():
-        if not pd.isnull(row["precip"]):
-            continue
+    for sid, row in df[pd.isna(df["precip"])].iterrows():
         if row["precip24_hour"] in [0, 22, 23]:
             precip = grid00[row["gridj"], row["gridi"]]
         else:
@@ -167,13 +161,9 @@ def commit(cursor, table, df, ts):
         def do_update(_sid, _row):
             """inline."""
             sql = (
-                """
-                UPDATE """
-                + table
-                + """ SET high = %s, low = %s,
-                precip = %s, snow = %s, snowd = %s, estimated = 't'
-                WHERE day = %s and station = %s
-                """
+                f"UPDATE {table} SET high = %s, low = %s, precip = %s, "
+                "snow = %s, snowd = %s, estimated = 't' WHERE day = %s "
+                "and station = %s"
             )
             args = (
                 nonan(_row["high"], 0),
@@ -189,13 +179,8 @@ def commit(cursor, table, df, ts):
         do_update(sid, row)
         if cursor.rowcount == 0:
             cursor.execute(
-                """
-                INSERT INTO """
-                + table
-                + """
-                (station, day, sday, year, month)
-                VALUES (%s, %s, %s, %s, %s)
-            """,
+                f"INSERT INTO {table} (station, day, sday, year, month) "
+                "VALUES (%s, %s, %s, %s, %s)",
                 (sid, ts, ts.strftime("%m%d"), ts.year, ts.month),
             )
             do_update(sid, row)
@@ -206,12 +191,9 @@ def merge_network_obs(df, network, ts):
     """Merge data from observations."""
     pgconn = get_dbconn("iem")
     obs = read_sql(
-        """
-        SELECT t.id as station,
-        max_tmpf as high, min_tmpf as low, pday as precip, snow, snowd
-        from summary s JOIN stations t
-        on (t.iemid = s.iemid) WHERE t.network = %s and s.day = %s
-    """,
+        "SELECT t.id as station, max_tmpf as high, min_tmpf as low, "
+        "pday as precip, snow, snowd from summary s JOIN stations t "
+        "on (t.iemid = s.iemid) WHERE t.network = %s and s.day = %s",
         pgconn,
         params=(network, ts),
         index_col="station",
@@ -222,7 +204,7 @@ def merge_network_obs(df, network, ts):
     df = df.join(obs, how="left", on="tracks", rsuffix="b")
     for col in ["high", "low", "precip", "snow", "snowd"]:
         df[col].update(df[col + "b"])
-        df.drop(col + "b", axis=1, inplace=True)
+        df = df.drop(col + "b", axis=1)
     return df
 
 
@@ -237,8 +219,8 @@ def main(argv):
         table = "alldata_%s" % (state,)
         cursor = pgconn.cursor()
         df = load_table(state, date)
-        df = merge_network_obs(df, "%s_COOP" % (state,), date)
-        df = merge_network_obs(df, "%s_ASOS" % (state,), date)
+        df = merge_network_obs(df, f"{state}_COOP", date)
+        df = merge_network_obs(df, f"{state}_ASOS", date)
         estimate_hilo(df, ds)
         estimate_precip(df, ds)
         estimate_snow(df, ds)

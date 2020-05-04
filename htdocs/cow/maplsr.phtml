@@ -1,6 +1,6 @@
 <?php
 /* Legacy App that dynamically forwards to LSR app */
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 
 $ts = isset($_GET["ts"]) ? strtotime($_GET["ts"]) : time();
 $ts2 = isset($_GET["ts2"]) ? strtotime($_GET["ts2"]) : $ts;
@@ -10,6 +10,4 @@ if (sizeof($mywfos) == 0 && $wfo != ""){ $mywfos[] = $wfo; }
 $url = sprintf("/lsr/#%s/%s/%s", implode(",",$mywfos),
        date("YmdHi", $ts), date("YmdHi", $ts2) );
 header("Location: $url");
-exit();
-
 ?>
