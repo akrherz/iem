@@ -28,6 +28,9 @@ PDICT2 = OrderedDict(
         ("precip_depart", "Precipitation Departure"),
         ("precip_percent", "Precipitation Percent of Average"),
         ("precip_sum", "Precipitation Total"),
+        ("snow_depart", "Snowfall Departure"),
+        ("snow_percent", "Snowfall Percent of Average"),
+        ("snow_sum", "Snowfall Total"),
     ]
 )
 BASES = OrderedDict(
@@ -46,7 +49,6 @@ PDICT4 = {
     "no": "No, do not overlay Drought Monitor",
 }
 UNITS = {
-    "precip_depart": "inch",
     "min_low_temp": "F",
     "avg_low_temp": "F",
     "avg_high_temp": "F",
@@ -60,8 +62,12 @@ UNITS = {
     "cgdd_sum": "F",
     "avg_temp_depart": "F",
     "avg_temp": "F",
+    "precip_depart": "inch",
     "precip_sum": "inch",
     "precip_percent": "%",
+    "snow_depart": "inch",
+    "snow_sum": "inch",
+    "snow_percent": "%",
 }
 PDICT3 = {
     "contour": "Contour the data",
@@ -158,22 +164,18 @@ def plotter(fdict):
             " and network in ('IACLIMATE', 'ILCLIMATE', 'INCLIMATE') "
         )
     df = read_sql(
-        """
+        f"""
     WITH obs as (
         SELECT station, gddxx(%s, 86, high, low) as gdd,
         cdd(high, low, 65) as cdd65, hdd(high, low, 65) as hdd65,
-        sday, high, low, precip,
+        sday, high, low, precip, snow,
         (high + low)/2. as avg_temp
-        from """
-        + table
-        + """ WHERE
+        from {table} WHERE
         day >= %s and day < %s and
         substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000'),
     climo as (
         SELECT station, to_char(valid, 'mmdd') as sday, precip, high, low,
-        gdd"""
-        + str(ctx["gddbase"])
-        + """ as gdd, cdd65, hdd65
+        gdd{ctx["gddbase"]} as gdd, cdd65, hdd65, snow
         from climate51),
     combo as (
         SELECT o.station, o.precip - c.precip as precip_diff,
@@ -183,7 +185,9 @@ def plotter(fdict):
         o.gdd - c.gdd as gdd_diff,
         o.cdd65 - c.cdd65 as cdd_diff,
         o.hdd65 - c.hdd65 as hdd_diff,
-        o.avg_temp - (c.high + c.low)/2. as temp_diff
+        o.avg_temp - (c.high + c.low)/2. as temp_diff,
+        o.snow as snow, c.snow as csnow,
+        o.snow - c.snow as snow_diff
         from obs o JOIN climo c ON
         (o.station = c.station and o.sday = c.sday)),
     agg as (
@@ -191,7 +195,10 @@ def plotter(fdict):
         avg(avg_temp) as avg_temp,
         sum(precip_diff) as precip_depart,
         sum(precip) / sum(cprecip) * 100. as precip_percent,
+        sum(snow_diff) as snow_depart,
+        sum(snow) / sum(csnow) * 100. as snow_percent,
         sum(precip) as precip, sum(cprecip) as cprecip,
+        sum(snow) as snow, sum(csnow) as csnow,
         avg(high) as avg_high_temp,
         avg(low) as avg_low_temp,
         max(high) as max_high_temp,
@@ -206,11 +213,15 @@ def plotter(fdict):
         from combo GROUP by station)
 
     SELECT d.station, t.name,
-    precip as precip_sum,
     avg_temp,
+    precip as precip_sum,
     cprecip as cprecip_sum,
     precip_depart,
     precip_percent,
+    snow as snow_sum,
+    csnow as csnow_sum,
+    snow_depart,
+    snow_percent,
     min_low_temp,
     avg_temp_depart,
     gdd_depart,
@@ -223,9 +234,7 @@ def plotter(fdict):
     cdd_sum, hdd_sum, cdd_depart, hdd_depart,
     ST_x(t.geom) as lon, ST_y(t.geom) as lat
     from agg d JOIN stations t on (d.station = t.id)
-    WHERE t.network ~* 'CLIMATE' """
-        + state_limiter
-        + """
+    WHERE t.network ~* 'CLIMATE' {state_limiter}
     """,
         pgconn,
         params=(ctx["gddbase"], date1, date2),
@@ -260,14 +269,19 @@ def plotter(fdict):
     )
     fmt = "%.2f"
     cmap = cm.get_cmap(ctx["cmap"])
-    if varname in ["precip_depart", "avg_temp_depart", "gdd_depart"]:
+    if varname in [
+        "precip_depart",
+        "avg_temp_depart",
+        "gdd_depart",
+        "snow_depart",
+    ]:
         rng = df[varname].abs().describe(percentiles=[0.95])["95%"]
         clevels = np.linspace(
             0 - rng, rng, 7, dtype="i" if varname == "gdd_depart" else "f"
         )
         if varname == "gdd_depart":
             fmt = "%.0f"
-    elif varname in ["precip_sum"]:
+    elif varname in ["precip_sum", "snow_sum"]:
         rng = df[varname].abs().describe(percentiles=[0.95])["95%"]
         clevels = np.linspace(0, rng, 7)
         cmap.set_under("white")
