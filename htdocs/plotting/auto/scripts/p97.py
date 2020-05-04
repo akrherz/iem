@@ -196,7 +196,7 @@ def plotter(fdict):
         sum(precip_diff) as precip_depart,
         sum(precip) / sum(cprecip) * 100. as precip_percent,
         sum(snow_diff) as snow_depart,
-        sum(snow) / sum(csnow) * 100. as snow_percent,
+        sum(snow) / greatest(sum(csnow), 0.0001) * 100. as snow_percent,
         sum(precip) as precip, sum(cprecip) as cprecip,
         sum(snow) as snow, sum(csnow) as csnow,
         avg(high) as avg_high_temp,
