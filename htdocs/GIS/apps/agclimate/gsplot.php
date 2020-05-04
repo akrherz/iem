@@ -158,12 +158,12 @@ if (substr($var, 0, 3) == 'gdd') {
 	if ($year > 2013){
 		$q = <<<EOF
   SELECT station, c2f(tair_c_max) as c11, c2f(tair_c_min) as c12 from sm_daily
-  WHERE valid >= '{$sstr}' and valid < '{$estr}'
+  WHERE valid >= '{$sstr}' and valid <= '{$estr}'
 EOF;
 	} else {
   		$q = <<<EOF
   SELECT station, c11, c12 from daily
-  WHERE valid >= '{$sstr}' and valid < '{$estr}'
+  WHERE valid >= '{$sstr}' and valid <= '{$estr}'
 EOF;
 	}
   
@@ -185,12 +185,12 @@ if ($var == 'sdd86') {
 	if ($year > 2013){
 		$q = <<<EOF
   SELECT station, c2f(tair_c_max) as c11, c2f(tair_c_min) as c12 from sm_daily
-  WHERE valid >= '{$sstr}' and valid < '{$estr}'
+  WHERE valid >= '{$sstr}' and valid <= '{$estr}'
 EOF;
 	} else {
   		$q = <<<EOF
   SELECT station, c11, c12 from daily
-  WHERE valid >= '{$sstr}' and valid < '{$estr}'
+  WHERE valid >= '{$sstr}' and valid <= '{$estr}'
 EOF;
 	}
 
@@ -214,12 +214,12 @@ else if ($var == 'sgdd50' || $var == 'sgdd52') {
 				c2f(max(tsoil_c_avg)) as high,
 				c2f(min(tsoil_c_avg)) as low from sm_hourly WHERE
 				valid >= '". $sstr ."'
-     			and valid < '". $estr ."' GROUP by station, dvalid";	
+     			and valid <= '". $estr ."' GROUP by station, dvalid";	
 	} else {
   		$q = "SELECT station, date(valid) as dvalid, 
      		max(c300) as high, min(c300) as low
      		from hourly WHERE valid >= '". $sstr ."'
-     		and valid < '". $estr ."' GROUP by station, dvalid";
+     		and valid <= '". $estr ."' GROUP by station, dvalid";
 	}
   $gdds = Array();
   $rs =  pg_exec($c, $q);
@@ -241,13 +241,13 @@ else if ($var == 'sgdd50' || $var == 'sgdd52') {
 else if ($var == 'et') {
 	if ($year > 2013){
 	$q = <<<EOF
-	SELECT station, sum(dailyet / 24.5) as et from sm_daily
-	WHERE valid >= '{$sstr}' and valid < '{$estr}' GROUP by station
+	SELECT station, sum(dailyet / 25.4) as et from sm_daily
+	WHERE valid >= '{$sstr}' and valid <= '{$estr}' GROUP by station
 EOF;
 	} else {
   $q = "SELECT station, sum(c70) as et
      from daily WHERE valid >= '". $sstr ."'
-     and valid < '". $estr ."' GROUP by station";
+     and valid <= '". $estr ."' GROUP by station";
 	}
   $vals = Array();
   $rs =  pg_exec($c, $q);
@@ -261,11 +261,11 @@ else if ($var == 'srad') {
 	if ($year > 2013){
   $q = "SELECT station, sum(slrmj_tot) as srad
      from sm_daily WHERE valid >= '". $sstr ."'
-     and valid < '". $estr ."' GROUP by station";
+     and valid <= '". $estr ."' GROUP by station";
 	} else {
 		$q = "SELECT station, sum(c80) as srad
      from daily WHERE valid >= '". $sstr ."'
-     and valid < '". $estr ."' GROUP by station";
+     and valid <= '". $estr ."' GROUP by station";
 	}
 
   $vals = Array();
@@ -278,13 +278,13 @@ else if ($var == 'srad') {
 /* ------------------------------------------------------- */
 else if ($var == 'prec') {
 	if ($year > 2013){
-		$q = "SELECT station, sum(rain_mm_tot / 24.5) as prec
+		$q = "SELECT station, sum(rain_mm_tot_qc / 25.4) as prec
      from sm_daily WHERE valid >= '". $sstr ."'
-     and valid < '". $estr ."' GROUP by station";
+     and valid <= '". $estr ."' GROUP by station";
 	} else {
   $q = "SELECT station, sum(c90) as prec
      from daily WHERE valid >= '". $sstr ."'
-     and valid < '". $estr ."' GROUP by station";
+     and valid <= '". $estr ."' GROUP by station";
 	}
   $vals = Array();
   $rs =  pg_exec($c, $q);
