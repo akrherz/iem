@@ -40,7 +40,7 @@ function imagettftextalign($image, $size, $angle, $x, $y, $color, $font, $text, 
 /* Make fancy chart! */
 $width = 130;
 $height = 122;
-$font = "/usr/share/fonts/liberation/LiberationSerif-Bold.ttf";
+$font = "/usr/share/fonts/liberation-serif/LiberationSerif-Bold.ttf";
 
 $png = ImageCreate($width,$height);
 
