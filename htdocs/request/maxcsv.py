@@ -52,14 +52,13 @@ def do_webcams(network):
 
 def do_iowa_azos(date, itoday=False):
     """Dump high and lows for Iowa ASOS + AWOS """
-    table = "summary_%s" % (date.year,)
     pgconn = get_dbconn("iem")
     df = read_sql(
         f"""
     select id as locationid, n.name as locationname, st_y(geom) as latitude,
     st_x(geom) as longitude, s.day, s.max_tmpf::int as high,
-    s.min_tmpf::int as low, pday as precip
-    from stations n JOIN {table} s on (n.iemid = s.iemid)
+    s.min_tmpf::int as low, coalesce(pday, 0) as precip
+    from stations n JOIN summary_{date.year} s on (n.iemid = s.iemid)
     WHERE n.network in ('IA_ASOS', 'AWOS') and s.day = %s
     """,
         pgconn,
