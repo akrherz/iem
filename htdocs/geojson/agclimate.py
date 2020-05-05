@@ -86,7 +86,8 @@ def get_data(ts):
             as calc_vwc_50_avg_qc,
         coalesce(m.ws_mph_max, h.ws_mph_max) as ws_mph_max,
         coalesce(m.winddir_d1_wvt, h.winddir_d1_wvt) as winddir_d1_wvt,
-        coalesce(m.ws_mph_s_wvt * 0.447, h.ws_mps_s_wvt)as ws_mps_s_wvt
+        coalesce(m.ws_mph_s_wvt * 0.447,
+                 coalesce(h.ws_mps_s_wvt, 0))as ws_mps_s_wvt
     from sm_hourly h LEFT JOIN sm_minute m on (h.station = m.station and
     h.valid = m.valid)
     where h.valid = %s
