@@ -1,5 +1,4 @@
 """Some of our solar radiation data is not good!"""
-from __future__ import print_function
 import datetime
 import json
 import sys
@@ -19,10 +18,8 @@ def check_date(date):
 
     nt = NetworkTable("ISUSM")
     cursor.execute(
-        """
-        SELECT station, slrmj_tot_qc from sm_daily where
-        valid = %s ORDER by station ASC
-    """,
+        "SELECT station, slrmj_tot_qc from sm_daily where "
+        "valid = %s ORDER by station ASC",
         (date,),
     )
     for row in cursor:
@@ -44,19 +41,17 @@ def check_date(date):
             LOG.info("fix_solar %s %s estimate is missing", station, date)
             continue
         # Never pull data down
-        if ob > estimate:
+        if ob is not None and ob > estimate:
             continue
         # If ob is greater than 5 or the difference is less than 7 <arb>
-        if ob > 5 or (estimate - ob) < 7:
+        if ob is not None and (ob > 5 or (estimate - ob) < 7):
             continue
         LOG.info(
             "fix_solar %s %s Ob:%.1f Est:%.1f", station, date, ob, estimate
         )
         cursor2.execute(
-            """
-            UPDATE sm_daily SET slrmj_tot_qc = %s, slrmj_tot_f = 'E'
-            WHERE station = %s and valid = %s
-        """,
+            "UPDATE sm_daily SET slrmj_tot_qc = %s, slrmj_tot_f = 'E' "
+            "WHERE station = %s and valid = %s",
             (estimate, station, date),
         )
 
