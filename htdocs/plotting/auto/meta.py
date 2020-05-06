@@ -83,7 +83,7 @@ def do_json(pidx):
             return output, status, response_headers
         try:
             timing = get_timing(pidx)
-        except Exception as _:
+        except Exception:
             timing = -1
         fp, pathname, description = imp.find_module(name)
         app = imp.load_module(name, fp, pathname, description)
@@ -95,7 +95,7 @@ def do_json(pidx):
         # Defaults
         data["arguments"].append(
             dict(
-                type="text",
+                type="int",
                 name="dpi",
                 default="100",
                 label="Image Resolution (DPI)",

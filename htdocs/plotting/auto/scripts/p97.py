@@ -143,8 +143,26 @@ def get_description():
             name="c",
             label="Label Values?",
         ),
+        dict(
+            type="text",
+            name="cull",
+            default="",
+            label=(
+                "Space or comma separated IEM stations ids (ST####) to cull "
+                "from the plot."
+            ),
+        ),
     ]
     return desc
+
+
+def cull_to_list(vals):
+    """Convert to a list for culling."""
+    res = ["ZZZZZZ"]
+    vals = vals.replace(",", " ")
+    for val in vals.strip().split():
+        res.append(val.upper()[:6])
+    return res
 
 
 def plotter(fdict):
@@ -156,6 +174,7 @@ def plotter(fdict):
     date1 = ctx["date1"]
     date2 = ctx["date2"]
     varname = ctx["var"]
+    cull = cull_to_list(ctx["cull"])
 
     table = "alldata_%s" % (sector,) if len(sector) == 2 else "alldata"
     state_limiter = ""
@@ -172,7 +191,8 @@ def plotter(fdict):
         (high + low)/2. as avg_temp
         from {table} WHERE
         day >= %s and day < %s and
-        substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000'),
+        substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000' and
+        station not in %s),
     climo as (
         SELECT station, to_char(valid, 'mmdd') as sday, precip, high, low,
         gdd{ctx["gddbase"]} as gdd, cdd65, hdd65, snow
@@ -237,7 +257,7 @@ def plotter(fdict):
     WHERE t.network ~* 'CLIMATE' {state_limiter}
     """,
         pgconn,
-        params=(ctx["gddbase"], date1, date2),
+        params=(ctx["gddbase"], date1, date2, tuple(cull)),
         index_col="station",
     )
     if df.empty:

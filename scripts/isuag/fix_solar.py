@@ -46,9 +46,7 @@ def check_date(date):
         # If ob is greater than 5 or the difference is less than 7 <arb>
         if ob is not None and (ob > 5 or (estimate - ob) < 7):
             continue
-        LOG.info(
-            "fix_solar %s %s Ob:%.1f Est:%.1f", station, date, ob, estimate
-        )
+        LOG.info("%s %s Ob:%s Est:%.1f", station, date, ob, estimate)
         cursor2.execute(
             "UPDATE sm_daily SET slrmj_tot_qc = %s, slrmj_tot_f = 'E' "
             "WHERE station = %s and valid = %s",

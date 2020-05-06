@@ -309,7 +309,7 @@ function formatState (state) {
 EOF;
 		}
 		elseif ($v->type == "text" || $v->type == "int" || $v->type == 'float'){
-			$thisrow = "<input value=\"$value\" type=\"text\" name=\"". $v->name ."\">";
+			$thisrow = "<input value=\"$value\" type=\"text\" name=\"". $v->name ."\" size=\"60\">";
 		}
 		elseif ($v->type == "month"){
 			$thisrow = monthSelect2( $value, $v->name);
