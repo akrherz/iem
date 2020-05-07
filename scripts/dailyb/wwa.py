@@ -1,5 +1,4 @@
 """Some simple summary stats for the IEM Daily Bulletin..."""
-from __future__ import print_function
 import datetime
 import pytz
 from pyiem.util import get_dbconn, utc
@@ -8,13 +7,13 @@ POSTGIS = get_dbconn("postgis", user="nobody")
 cursor = POSTGIS.cursor()
 
 textfmt = """
-             Summary +_________ By WFO ____________+  Watches 
-Type         US   IA | ARX   DVN   DMX   OAX   FSD |  US 
+             Summary +_________ By WFO ____________+  Watches
+Type         US   IA | ARX   DVN   DMX   OAX   FSD |  US
 Tornado     %(TOu)3s  %(TOi)3s | %(TOARX)3s   %(TODVN)3s   %(TODMX)3s   %(TOOAX)3s   %(TOFSD)3s | %(TORw)3s
 Svr Tstorm  %(SVu)3s  %(SVi)3s | %(SVARX)3s   %(SVDVN)3s   %(SVDMX)3s   %(SVOAX)3s   %(SVFSD)3s | %(SVRw)3s
 Flash Flood %(FFu)3s  %(FFi)3s | %(FFARX)3s   %(FFDVN)3s   %(FFDMX)3s   %(FFOAX)3s   %(FFFSD)3s | N/A
 
-ARX = LaCrosse, WI  DVN = Davenport, IA    DMX = Des Moines, IA 
+ARX = LaCrosse, WI  DVN = Davenport, IA    DMX = Des Moines, IA
 OAX = Omaha, NE     FSD = Sioux Falls, SD
 
 """
@@ -58,15 +57,13 @@ OAX = Omaha, NE     FSD = Sioux Falls, SD
 
 def run(sts=None, ets=None):
     """ Generate listing of warning counts """
-    # When the start or end time is None, we then want for a period that
-    # comprises yesterday!  Call it 00 UTC to 00 UTC
+    # default for CST yesterday
     if sts is None or ets is None:
-        utc = datetime.datetime.utcnow()
-        utc = utc.replace(tzinfo=pytz.utc, second=0, microsecond=0, minute=0)
-        ts = utc.astimezone(pytz.timezone("America/Chicago"))
-        sts = ts - datetime.timedelta(hours=24)
-        sts = sts.replace(hour=0)
-        ets = ts.replace(hour=0)
+        yest = utc() - datetime.timedelta(hours=24)
+        yest = yest.replace(second=0, microsecond=0, minute=0)
+        ts = yest.astimezone(pytz.timezone("America/Chicago"))
+        sts = ts.replace(hour=0)
+        ets = sts + datetime.timedelta(hours=24)
 
     d = {}
 
@@ -75,11 +72,10 @@ def run(sts=None, ets=None):
     d["SVu"] = 0
     d["FFu"] = 0
     cursor.execute(
-        """select phenomena, count(*) from sbw_%s
-        WHERE status = 'NEW' and issue >= '%s' and issue < '%s'
-        and phenomena IN ('TO','SV','FF') GROUP by phenomena
-        """
-        % (sts.year, sts, ets)
+        f"select phenomena, count(*) from sbw_{sts.year} "
+        "WHERE status = 'NEW' and issue >= %s and issue < %s "
+        "and phenomena IN ('TO','SV','FF') GROUP by phenomena",
+        (sts, ets),
     )
     for row in cursor:
         d["%su" % (row[0],)] = row[1]
@@ -89,14 +85,11 @@ def run(sts=None, ets=None):
     d["SVi"] = 0
     d["FFi"] = 0
     cursor.execute(
-        """
-        select phenomena, count(*) as count
-        from sbw_%s w, states s
-        WHERE ST_contains(s.the_geom, w.geom) and s.state_name = 'Iowa'
-        and issue >= '%s' and issue < '%s' and status = 'NEW'
-        and phenomena IN ('TO','SV','FF') GROUP by phenomena
-        """
-        % (sts.year, sts, ets)
+        f"select phenomena, count(*) as count from sbw_{sts.year} w, states s "
+        "WHERE ST_contains(s.the_geom, w.geom) and s.state_abbr = 'IA' "
+        "and issue >= %s and issue < %s and status = 'NEW' "
+        "and phenomena IN ('TO','SV','FF') GROUP by phenomena",
+        (sts, ets),
     )
     for row in cursor:
         d["%si" % (row[0],)] = row[1]
@@ -107,13 +100,11 @@ def run(sts=None, ets=None):
         d["SV%s" % (wfo,)] = 0
         d["FF%s" % (wfo,)] = 0
     cursor.execute(
-        """
-      SELECT phenomena, wfo, count(*) as count from sbw_%s WHERE
-      issue >= '%s' and issue < '%s' and status = 'NEW'
-      and phenomena IN ('TO','SV','FF') and
-      wfo in ('DMX','FSD','ARX','DVN','OAX') GROUP by wfo, phenomena
-      """
-        % (sts.year, sts, ets)
+        f"SELECT phenomena, wfo, count(*) as count from sbw_{sts.year} WHERE "
+        "issue >= %s and issue < %s and status = 'NEW' "
+        "and phenomena IN ('TO','SV','FF') and "
+        "wfo in ('DMX','FSD','ARX','DVN','OAX') GROUP by wfo, phenomena",
+        (sts, ets),
     )
     for row in cursor:
         d["%s%s" % (row[0], row[1])] = row[2]
@@ -123,11 +114,9 @@ def run(sts=None, ets=None):
     d["SVRw"] = 0
 
     cursor.execute(
-        """
-        SELECT type, count(*) as count from watches WHERE
-        issued >= '%s' and issued < '%s' GROUP by type
-        """
-        % (sts, ets)
+        "SELECT type, count(*) as count from watches WHERE "
+        "issued >= %s and issued < %s GROUP by type",
+        (sts, ets),
     )
     for row in cursor:
         d["%sw" % (row[0],)] = row[1]

@@ -11,7 +11,7 @@ from email.mime.multipart import MIMEMultipart
 import psycopg2.extras
 import requests
 import pytz
-from pyiem.util import exponential_backoff, get_dbconn, logger
+from pyiem.util import exponential_backoff, get_dbconn, logger, utc
 import wwa  # @UnresolvedImport
 
 LOG = logger()
@@ -103,15 +103,44 @@ def get_github_commits():
 
 def cowreport():
     """ Generate something from the Cow, moooo! """
-    proc = subprocess.Popen(
-        "php cowreport.php",
-        shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+    central = pytz.timezone("America/Chicago")
+    yesterday = (utc() - datetime.timedelta(days=1)).astimezone(central)
+    midnight = yesterday.replace(hour=0, minute=0)
+    midutc = midnight.astimezone(pytz.UTC)
+    begints = midutc.strftime("%Y-%m-%dT%H:%M")
+    endts = (midutc + datetime.timedelta(hours=24)).strftime("%Y-%m-%dT%H:%M")
+    api = (
+        f"http://iem.local/api/1/cow.json?begints={begints}&endts={endts}&"
+        "phenomena=SV&phenomena=TO&lsrtype=SV&lsrtype=TO"
     )
-    data = proc.stdout.read().decode("utf-8")
-    html = "<h3>IEM Cow Report</h3><pre>" + data + "</pre>"
-    txt = "> IEM Cow Report\n" + data + "\n"
+    data = requests.get(api, timeout=60).json()
+    st = data["stats"]
+    if st["events_total"] == 0:
+        text = "No SVR+TOR Warnings Issued."
+        html = "<h3>IEM Cow Report</h3><pre>" + text + "</pre>"
+        txt = "> IEM Cow Report\n" + text + "\n"
+        return txt, html
+
+    vp = st["events_verified"] / float(st["events_total"]) * 100.0
+    text = (
+        f"SVR+TOR Warnings Issued: {st['events_total']:3.0f} "
+        f"Verified: {st['events_verified']:3.0f} [{vp:.1f}%]\n"
+        "Polygon Size Versus County Size            "
+        f"[{st['size_poly_vs_county[%]']:.1f}%]\n"
+        "Average Perimeter Ratio                    "
+        f"[{st['shared_border[%]']:.1f}%]\n"
+        "Percentage of Warned Area Verified (15km)  "
+        f"[{st['area_verify[%]']:.1f}%]\n"
+        "Average Storm Based Warning Size           "
+        f"[{st['avg_size[sq km]']:.0f} sq km]\n"
+        f"Probability of Detection(higher is better) [{st['POD[1]']:.2f}]\n"
+        f"False Alarm Ratio (lower is better)        [{st['FAR[1]']:.2f}]\n"
+        f"Critical Success Index (higher is better)  [{st['CSI[1]']:.2f}]\n"
+    )
+
+    html = "<h3>IEM Cow Report</h3><pre>" + text + "</pre>"
+    txt = "> IEM Cow Report\n" + text + "\n"
+
     return txt, html
 
 
@@ -122,9 +151,8 @@ def feature():
     lastts = datetime.datetime.now() + datetime.timedelta(days=-1)
     # Query
     mcursor.execute(
-        """
-      SELECT *, to_char(valid, 'DD Mon HH:MI AM') as nicedate
-      from feature WHERE date(valid) = 'YESTERDAY'"""
+        "SELECT *, to_char(valid, 'DD Mon HH:MI AM') as nicedate "
+        "from feature WHERE date(valid) = 'YESTERDAY'"
     )
     textfmt = """
  +----------------------------------------------
@@ -181,12 +209,9 @@ def news():
     # Last dailyb delivery
     lastts = datetime.datetime.now() + datetime.timedelta(days=-1)
     mcursor.execute(
-        """
-      SELECT *, to_char(entered, 'DD Mon HH:MI AM') as nicedate
-      from news WHERE entered > '%s'
-      ORDER by entered DESC
-      """
-        % (lastts.strftime("%Y-%m-%d %H:%M"),)
+        "SELECT *, to_char(entered, 'DD Mon HH:MI AM') as nicedate "
+        "from news WHERE entered > %s ORDER by entered DESC",
+        (lastts,),
     )
 
     textfmt = """
@@ -234,12 +259,10 @@ def main():
     else:
         msg["To"] = "iem-dailyb@iastate.edu"
 
-    text = """Iowa Environmental Mesonet Daily Bulletin for %s\n\n""" % (
+    text = "Iowa Environmental Mesonet Daily Bulletin for %s\n\n" % (
         now.strftime("%d %B %Y"),
     )
-    html = """
-    <h3>Iowa Environmental Mesonet Daily Bulletin for %s</h3>
-    """ % (
+    html = "<h3>Iowa Environmental Mesonet Daily Bulletin for %s</h3>\n" % (
         now.strftime("%d %B %Y"),
     )
 
@@ -260,9 +283,12 @@ def main():
     t, h = wwa.run()
     text += t
     html += h
-    t, h = cowreport()
-    text += t
-    html += h
+    try:
+        t, h = cowreport()
+        text += t
+        html += h
+    except Exception as exp:
+        LOG.exception(exp)
 
     part1 = MIMEText(text, "plain")
     part2 = MIMEText(html, "html")
@@ -305,5 +331,6 @@ def tests():
 
 
 if __name__ == "__main__":
+    # cowreport()
     main()
     # tests()
