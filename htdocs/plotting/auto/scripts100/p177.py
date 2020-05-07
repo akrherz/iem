@@ -528,10 +528,8 @@ def plot2(ctx):
 def plot1(ctx):
     """Do main plotting logic"""
     df = read_sql(
-        """
-        SELECT * from sm_hourly WHERE
-        station = %s and valid BETWEEN %s and %s ORDER by valid ASC
-    """,
+        "SELECT * from sm_hourly WHERE "
+        "station = %s and valid BETWEEN %s and %s ORDER by valid ASC",
         ctx["pgconn"],
         params=(ctx["station"], ctx["sts"], ctx["ets"]),
         index_col="valid",
@@ -548,7 +546,7 @@ def plot1(ctx):
     rain = df["rain_mm_tot_qc"]
     tair = df["tair_c_avg_qc"]
     tsoil = df["tsoil_c_avg_qc"]
-    valid = df.index.values
+    valid = df.index.tz_convert(pytz.timezone("America/Chicago"))
 
     (fig, ax) = plt.subplots(3, 1, sharex=True, figsize=(8, 8))
     ax[0].grid(True)
@@ -578,31 +576,6 @@ def plot1(ctx):
             valid, d50sm * 100.0, linewidth=2, color="black", zorder=5
         )
     ax[0].set_ylabel("Volumetric Soil Water Content [%]", fontsize=10)
-
-    days = (ctx["ets"] - ctx["sts"]).days
-    if days >= 3:
-        interval = max(int(days / 7), 1)
-        ax[0].xaxis.set_major_locator(
-            mdates.DayLocator(
-                interval=interval, tz=pytz.timezone("America/Chicago")
-            )
-        )
-        ax[0].xaxis.set_major_formatter(
-            mdates.DateFormatter(
-                "%-d %b\n%Y", tz=pytz.timezone("America/Chicago")
-            )
-        )
-    else:
-        ax[0].xaxis.set_major_locator(
-            mdates.AutoDateLocator(
-                maxticks=10, tz=pytz.timezone("America/Chicago")
-            )
-        )
-        ax[0].xaxis.set_major_formatter(
-            mdates.DateFormatter(
-                "%-I %p\n%d %b", tz=pytz.timezone("America/Chicago")
-            )
-        )
 
     ax[0].set_title(
         ("ISUSM Station: %s Timeseries")
@@ -661,7 +634,7 @@ def plot1(ctx):
     # ------------------------------------------------------
 
     ax2 = ax[2].twinx()
-    l3, = ax2.plot(valid, slrkw, color="g", zorder=1, lw=2)
+    l3, = ax2.plot(valid, slrkw * 1000.0, color="g", zorder=1, lw=2)
     ax2.set_ylabel("Solar Radiation [W/m^2]", color="g")
 
     l1, = ax[2].plot(
@@ -691,6 +664,32 @@ def plot1(ctx):
     ax[2].set_zorder(ax2.get_zorder() + 1)
     ax[2].patch.set_visible(False)
     ax[0].set_xlim(df.index.min(), df.index.max())
+
+    days = (ctx["ets"] - ctx["sts"]).days
+    if days >= 3:
+        interval = max(int(days / 7), 1)
+        ax[2].xaxis.set_major_locator(
+            mdates.DayLocator(
+                interval=interval, tz=pytz.timezone("America/Chicago")
+            )
+        )
+        ax[2].xaxis.set_major_formatter(
+            mdates.DateFormatter(
+                "%-d %b\n%Y", tz=pytz.timezone("America/Chicago")
+            )
+        )
+    else:
+        ax[2].xaxis.set_major_locator(
+            mdates.AutoDateLocator(
+                maxticks=10, tz=pytz.timezone("America/Chicago")
+            )
+        )
+        ax[2].xaxis.set_major_formatter(
+            mdates.DateFormatter(
+                "%-I %p\n%d %b", tz=pytz.timezone("America/Chicago")
+            )
+        )
+
     return fig, df
 
 
