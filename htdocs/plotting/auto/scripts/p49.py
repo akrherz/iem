@@ -18,7 +18,10 @@ PDICT = OrderedDict(
         ("snowd", "Snow Depth (inch)"),
     ]
 )
-PDICT2 = OrderedDict([(">=", "Greater than or equal to"), ("<", "Less than")])
+PDICT2 = OrderedDict(
+    [("gte", "Greater than or equal to"), ("lt", "Less than")]
+)
+XREF = {"gte": ">=", "lt": "<"}
 PDICT3 = {
     "min": "Minimum",
     "avg": "Average",
@@ -87,7 +90,7 @@ def get_description():
         dict(
             type="select",
             name="opt",
-            default=">=",
+            default="gte",
             label="Threshold Requirement:",
             options=PDICT2,
         ),
@@ -106,7 +109,7 @@ def plotter(fdict):
     station = ctx["station"]
     threshold = ctx["threshold"]
     varname = ctx["var"]
-    opt = ctx["opt"]
+    opt = XREF[ctx["opt"]]
     days = int(ctx["days"])
     table = "alldata_%s" % (station[:2],)
     func = "avg" if days == 1 else ctx["f"]
