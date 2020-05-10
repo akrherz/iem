@@ -18,14 +18,14 @@ $significance = $tokens[5];
 $etn = intval($tokens[6]);
 
 $t->headextra = <<<EOM
-<link rel="stylesheet" href="/vendor/jquery-datatables/1.10.16/datatables.min.css" />
+<link rel="stylesheet" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" />
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
 <link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
 <link rel="stylesheet" href="vtec_static.css" />
 EOM;
 $t->jsextra = <<<EOM
-<script src="/vendor/jquery-datatables/1.10.16/datatables.min.js"></script>
+<script src="/vendor/jquery-datatables/1.10.20/datatables.min.js"></script>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>

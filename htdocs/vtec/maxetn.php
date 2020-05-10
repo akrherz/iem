@@ -17,7 +17,7 @@ $table = file_get_contents($uri);
 $t = new MyView();
 $t->title = "VTEC Event Listing for $year";
 $t->headextra = <<<EOM
-<link type="text/css" href="/vendor/jquery-datatables/1.10.16/datatables.min.css" rel="stylesheet" />
+<link type="text/css" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" rel="stylesheet" />
 EOM;
 
 $yselect = yearSelect2(2005, $year, 'year');
@@ -55,7 +55,7 @@ see presented on this page<br />
 
 EOF;
 $t->jsextra = <<<EOM
-<script src='/vendor/jquery-datatables/1.10.16/datatables.min.js'></script>
+<script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
 <script>
 $(document).ready(function(){
     $("#thetable table").DataTable();

@@ -51,7 +51,7 @@ $table = <<<EOF
 }	
 </style>
 <h3>{$title}</h3>
-<table class="table table-condensed table-striped table-bordered table-hover">
+<table id="thetable" class="table table-condensed table-striped table-bordered table-hover">
 <thead>
 <tr class="small">
 	<th rowspan="2">{$col1label}</th>
@@ -210,6 +210,7 @@ $t->content = <<<EOF
 directly access it here:
 <br /><code>{$prettyurl}</code></p>
 
+<p><button id="makefancy">Make Table Interactive</button></p>
 
 <div class="table-responsive">
 	{$table}
@@ -222,14 +223,19 @@ directly access it here:
 EOF;
 $t->headextra = <<<EOF
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
+<link type="text/css" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" rel="stylesheet" />
 EOF;
 $t->jsextra = <<<EOF
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
+<script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
 <script>
 $(document).ready(function(){
 	$(".iemselect2").select2();
 });
+$('#makefancy').click(function(){
+    $("#thetable").DataTable();
+});
 </script>
 EOF;
-$t->render('single.phtml');
+$t->render('full.phtml');
 ?>

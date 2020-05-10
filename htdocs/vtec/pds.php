@@ -25,10 +25,10 @@ foreach($json['events'] as $key => $val){
 $t = new MyView();
 $t->title = "Particularly Dangerous Situation Tornado Warnings Listing";
 $t->headextra = <<<EOM
-<link type="text/css" href="/vendor/jquery-datatables/1.10.16/datatables.min.css" rel="stylesheet" />
+<link type="text/css" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" rel="stylesheet" />
 EOM;
 $t->jsextra = <<<EOM
-<script src='/vendor/jquery-datatables/1.10.16/datatables.min.js'></script>
+<script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
 <script>
 $('#makefancy').click(function(){
     $("#thetable table").DataTable();
