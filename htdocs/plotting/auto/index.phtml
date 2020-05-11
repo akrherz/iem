@@ -138,6 +138,18 @@ EOF;
 		$flist .= "</ul>\n";
 	}
 }
+$overview = "";
+if ($q == 0){
+    $overview = <<<EOM
+<h1>Visual Overview of All Autoplots</h1>
+
+<p>Below you will find an example resulting image from each of the autoplots
+available.  Click on the image or title to navigate to that autoplot. These are
+grouped into sections as they also appear grouped in the dropdown selection
+box above.</p>
+EOM;
+    $overview .= file_get_contents("/mesonet/share/pickup/autoplot/overview.html");
+}
 
 $nassmsg = "";
 if (isset($_GET["q"])){
@@ -550,6 +562,17 @@ if (isset($jobj->data) && $jobj->data){
 EOF;
 }
 
+$issues = "";
+if ($q > 0){
+    $issues = <<<EOM
+    <div><span class="fa fa-info"></span>
+    If you notice plotting issues with the image above, please 
+    do <a class="alert-link" href="/info/contacts.php">let us know</a>
+    by providing the 
+    URL address currently shown by your web browser.</div>
+EOM;
+}
+
 $t->content = <<<EOF
 <h3>Automated Data Plotter</h3>
 
@@ -581,14 +604,12 @@ $image
 
 $dataextra
 		
-<div><span class="fa fa-info"></span>
-		If you notice plotting issues with the image above, please 
-		do <a class="alert-link" href="/info/contacts.php">let us know</a>
-		by providing the 
-		URL address currently shown by your web browser.</div>
+{$issues}
 
 {$flist}
-		
+
+{$overview}
+
 EOF;
 $t->jsextra = <<<EOF
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
