@@ -237,6 +237,9 @@ def grid_day12(ts, ds):
             ),
         )
         LOG.debug("loaded %s rows from climodat database", len(df.index))
+    # Require that high > low before any gridding, accounts for some COOP
+    # sites that only report TOB and not 24 hour high/low
+    df.at[df["highdata"] > df["lowdata"], ["highdata", "lowdata"]] = None
     # plot(df)
 
     if len(df.index) > 4:
