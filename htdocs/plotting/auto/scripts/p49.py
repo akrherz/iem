@@ -152,7 +152,7 @@ def plotter(fdict):
     title = (
         f"{station} {ctx['_nt'].sts[station]['name']} "
         f"({df['min_date'].min().year}-{df['max_date'].max().year})\n"
-        f"Frequency of {PDICT[varname]} {PDICT2[opt]} {threshold}"
+        f"Frequency of {PDICT[varname]} {PDICT2[ctx['opt']]} {threshold}"
     )
     if days > 1:
         title += f"\n{PDICT3[func]} over inclusive forward {days} days"

@@ -41,6 +41,7 @@ def get_description():
             name="station",
             default="IATDSM",
             label="Select Station",
+            network="IACLIMATE",
         ),
         dict(
             type="date",
