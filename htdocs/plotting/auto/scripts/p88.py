@@ -16,7 +16,7 @@ def get_description():
     desc = dict()
     desc["data"] = True
     desc[
-        "desciption"
+        "description"
     ] = """This plot attempts to show the impact of cloudiness
     on temperatures.  The plot shows a simple difference between the average
     temperature during cloudy/mostly cloudy conditions and the average

@@ -14,7 +14,7 @@ def get_description():
     desc = dict()
     desc["data"] = True
     desc[
-        "desciption"
+        "description"
     ] = """This plot looks at the effect of splitting a 24
     hour period at different hours of the day.  Using the hourly temperature
     record, we can look at the bias of computing the daily high and low
