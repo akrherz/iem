@@ -12,14 +12,15 @@ $data = file_get_contents($uri);
 $json = json_decode($data, $assoc=TRUE);
 $table = "";
 foreach($json['events'] as $key => $val){
-	$table .= sprintf("<tr><td>%s</td><td>%s</td><td><a href=\"%s\">%s</a></td>".
-			"<td>%s</td><td>%s</td><td>%s %s</td><td>%s</td><td>%s</td></tr>",
-			$val["year"],
-			$val["wfo"], $val["uri"], $val["eventid"],
-			$val["phenomena"], $val["significance"],
-			$vtec_phenomena[$val["phenomena"]],
-			$vtec_significance[$val["significance"]], 
-			$val["issue"], $val["expire"]);
+    $table .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td>".
+        "<td><a href=\"%s\">%s</a></td>".
+		"<td>%s</td><td>%s</td><td>%s %s</td><td>%s</td><td>%s</td></tr>",
+        $val["year"],
+        $val["wfo"], $val["states"], $val["uri"], $val["eventid"],
+        $val["phenomena"], $val["significance"],
+        $vtec_phenomena[$val["phenomena"]],
+        $vtec_significance[$val["significance"]], 
+        $val["issue"], $val["expire"]);
 }
 
 $t = new MyView();
@@ -64,8 +65,8 @@ directly access it here:
 
 <div id="thetable">
 <table class="table table-striped table-condensed">
-<thead><tr><th>Year</th><th>WFO</th><th>Event ID</th><th>PH</th><th>SIG</th>
- <th>Event</th><th>Issue</th><th>Expire</th></tr>
+<thead><tr><th>Year</th><th>WFO</th><th>State(s)</th><th>Event ID</th>
+<th>PH</th><th>SIG</th><th>Event</th><th>Issue</th><th>Expire</th></tr>
 </thead>		
 {$table}
 </table>

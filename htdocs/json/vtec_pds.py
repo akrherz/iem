@@ -21,7 +21,9 @@ def run():
         min(product_issue at time zone 'UTC') as utc_product_issue,
         min(init_expire at time zone 'UTC') as utc_init_expire,
         min(issue at time zone 'UTC') as utc_issue,
-        max(expire at time zone 'UTC') as utc_expire from warnings
+        max(expire at time zone 'UTC') as utc_expire,
+        array_to_string(array_agg(distinct substr(ugc, 1, 2)), ',') as states
+        from warnings
         WHERE phenomena in ('TO', 'FF') and significance = 'W'
         and is_pds
         GROUP by year, wfo, eventid, phenomena, significance
@@ -49,6 +51,7 @@ def run():
                 init_expire=row["utc_init_expire"].strftime(ISO9660),
                 uri=uri,
                 wfo=row["wfo"],
+                states=row["states"],
             )
         )
 
