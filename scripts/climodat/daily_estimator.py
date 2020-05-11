@@ -198,6 +198,9 @@ def merge_network_obs(df, network, ts):
         params=(network, ts),
         index_col="station",
     )
+    # Some COOP sites may not report 'daily' high and low, so we cull those
+    # out as nulls
+    obs.at[obs["high"] <= obs["low"], ["high", "low"]] = None
     if obs.empty:
         LOG.warning("loading obs for network %s yielded no data", network)
         return df
