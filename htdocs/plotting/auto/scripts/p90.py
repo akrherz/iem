@@ -434,12 +434,14 @@ def do_ugc(ctx):
             and significance = %s and issue >= %s and issue < %s
             GROUP by ugc
             """,
-                (state, phenomena, significance, edate, sdate),
+                (state, phenomena, significance, sdate, edate),
             )
         rows = []
         data = {}
         for row in cursor:
-            days = (edate - row[1]).total_seconds() / 86400.0
+            days = (
+                edate - row[1].replace(tzinfo=pytz.UTC)
+            ).total_seconds() / 86400.0
             rows.append(
                 dict(days=days, valid=row[1], year=row[1].year, ugc=row[0])
             )
