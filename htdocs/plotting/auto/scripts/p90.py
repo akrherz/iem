@@ -446,8 +446,10 @@ def do_ugc(ctx):
                 dict(days=days, valid=row[1], year=row[1].year, ugc=row[0])
             )
             data[row[0]] = row[1].year if varname == "lastyear" else days
-        ctx["title"] = (
-            "Year of Last" if varname == "lastyear" else PDICT2[varname]
+        ctx["title"] = "%s-%s %s" % (
+            sdate.strftime("%-d %b %Y"),
+            edate.strftime("%-d %b %Y"),
+            "Year of Last" if varname == "lastyear" else PDICT2[varname],
         )
         datavar = "year" if varname == "lastyear" else "days"
     elif varname == "yearcount":
