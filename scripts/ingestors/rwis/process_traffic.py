@@ -82,7 +82,8 @@ def process(cursor, df, meta):
 
 def main():
     """Go Main Go."""
-    ets = utc()
+    # prevent a clock drift issue
+    ets = utc() - datetime.timedelta(minutes=1)
     sts = ets - datetime.timedelta(hours=4)
     edate = ets.strftime("%Y-%m-%dT%H:%M:%SZ")
     sdate = sts.strftime("%Y-%m-%dT%H:%M:%SZ")
