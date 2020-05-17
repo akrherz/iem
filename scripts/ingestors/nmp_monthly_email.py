@@ -2,12 +2,11 @@
 
 Requires: iem property `nmp_monthly_email_list`
 
-Period of performance is previous month 17th thru this month 16th
+Period of performance is previous month 7th thru this month 6th
 
-Run on the 17th from `RUN_2AM.sh`
+Run on the 7th from `RUN_2AM.sh`
 
 """
-from __future__ import print_function
 import datetime
 import smtplib
 from email.mime.text import MIMEText
@@ -20,12 +19,10 @@ def generate_report(start_date, end_date):
     """Generate the text report"""
     pgconn = get_dbconn("isuag", user="nobody")
     days = (end_date - start_date).days + 1
-    totalobs = days * 24 * 17
+    totalobs = days * 24 * 25
     df = read_sql(
-        """
-        SELECT station, count(*) from sm_hourly WHERE valid >= %s
-        and valid < %s GROUP by station ORDER by station
-    """,
+        "SELECT station, count(*) from sm_hourly WHERE valid >= %s "
+        "and valid < %s GROUP by station ORDER by station",
         pgconn,
         params=(start_date, end_date + datetime.timedelta(days=1)),
         index_col="station",
@@ -42,7 +39,7 @@ Iowa Environmental Mesonet Data Delivery Report
 
 Additional Details
 ==================
-  Total Required Obs: %.0f (24 hourly obs x 17 platforms x %.0f days)
+  Total Required Obs: %.0f (24 hourly obs x 25 platforms x %.0f days)
   Observations Delivered: %.0f
   Report Generated: %s
 
@@ -63,12 +60,12 @@ def main():
     """Go Main Go"""
     emails = get_properties()["nmp_monthly_email_list"].split(",")
 
-    end_date = datetime.date.today().replace(day=16)
-    start_date = (end_date - datetime.timedelta(days=40)).replace(day=17)
+    end_date = datetime.date.today().replace(day=6)
+    start_date = (end_date - datetime.timedelta(days=40)).replace(day=7)
     report = generate_report(start_date, end_date)
 
     msg = MIMEText(report)
-    msg["Subject"] = "[IEM] 404-41-12 Synoptic Contract Deliverables Report"
+    msg["Subject"] = "[IEM] Synoptic Contract Deliverables Report"
     msg["From"] = "IEM Automation <mesonet@mesonet.agron.iastate.edu>"
     msg["To"] = ", ".join(emails)
     msg.add_header("reply-to", "akrherz@iastate.edu")
