@@ -69,7 +69,7 @@ $t = new MyView();
 $t->thispage ="iem-sites";
 $t->title = "Custom Wind Roses";
 $t->sites_current = "custom_windrose";
-$tznote = "(Times are in US Central Standard/Daylight Time, sorry)";
+$tznote = "(Times are in {$metadata["tzname"]} time zone)";
 if ($network == 'RAOB'){
 	$tznote = "(Times presented are in UTC)";
 }

@@ -8,6 +8,7 @@ from io import BytesIO
 import datetime
 
 import numpy
+import pytz
 from paste.request import parse_formvars
 from pyiem.plot.use_agg import plt
 from pyiem.windrose_utils import windrose
@@ -129,6 +130,13 @@ def application(environ, start_response):
         rmax = 100
 
     nt = NetworkTable(form["network"], only_online=False)
+    tzname = nt.sts[form["station"]]["tzname"]
+    if form["network"] not in ["RAOB"]:
+        # Assign the station time zone to the sts and ets
+        sts = pytz.timezone(tzname).localize(sts)
+        ets = pytz.timezone(tzname).localize(ets)
+    else:
+        tzname = "UTC"
     bins = []
     if "bins" in form:
         bins = [float(v) for v in form.get("bins").split(",")]
@@ -145,6 +153,7 @@ def application(environ, start_response):
         justdata=("justdata" in form),
         rmax=rmax,
         sname=nt.sts[form["station"]]["name"],
+        tzname=tzname,
         level=form.get("level", None),
         bins=bins,
     )

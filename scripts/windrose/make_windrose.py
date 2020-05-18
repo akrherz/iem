@@ -31,18 +31,22 @@ def main():
     mydir = "%s/%s/%s" % (CACHE_DIR, net, sid)
     if not os.path.isdir(mydir):
         os.makedirs(mydir)
-    fn = "%s/%s_yearly.png" % (mydir, sid)
+    fn = f"{mydir}/{sid}_yearly.png"
     res = windrose(sid, database=database, sname=nt.sts[sid]["name"])
     res.savefig(fn)
     plt.close()
     for month in range(1, 13):
-        fn = ("%s/%s_%s.png") % (
+        fn = "%s/%s_%s.png" % (
             mydir,
             sid,
             datetime.datetime(2000, month, 1).strftime("%b").lower(),
         )
         res = windrose(
-            sid, months=(month,), database=database, sname=nt.sts[sid]["name"]
+            sid,
+            months=(month,),
+            database=database,
+            sname=nt.sts[sid]["name"],
+            tzname=nt.sts[sid]["tzname"],
         )
         res.savefig(fn)
         plt.close()
