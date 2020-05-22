@@ -1,9 +1,10 @@
 <?php 
-include("../../../config/settings.inc.php");
-include_once "../../../include/myview.php";
-include("../../../include/imagemaps.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/myview.php";
+require_once "../../../include/imagemaps.php";
 require_once "../../../include/forms.php";
-include("../../../include/iemprop.php");
+require_once "../../../include/iemprop.php";
+require_once "../../../include/database.inc.php";
 
 define("IEM_APPID", 73);
 $t = new MyView();
@@ -15,8 +16,19 @@ $bogus = 0;
 
 $archive_end = date('d M Y', $asos_archive_end);
 
-$sselect = networkMultiSelect("IA_ASOS", "", Array("FSD"=>"Sioux Falls, SD",
-  		"MLI" => "Moline, IL", "OMA"=>"Omaha, NE") , 'station[]');
+$ar = Array();
+$pgconn = iemdb("mesosite");
+$rs = pg_query(
+    $pgconn,
+    "SELECT id, name, state from stations t JOIN station_attributes a ".
+    "ON (t.iemid = a.iemid) WHERE t.network ~* 'ASOS' and ".
+    "a.attr = 'HAS1MIN' ORDER by id ASC");
+for($i=0; $row=pg_fetch_array($rs); $i++)
+{
+    $ar[$row[0]] = sprintf("[%s] %s, %s", $row[0], $row[1], $row[2]);
+}
+
+$sselect = make_select("station[]", "", $ar, "", "", TRUE);
 
 $y1select = yearSelect2(2000, date("Y"), "year1");
 $m1select = monthSelect($bogus, "month1"); 
@@ -60,7 +72,7 @@ observations from this network and for sites over the entire globe.</p>
 <i>The timestamps used in the downloaded files will be set in the
 timezone you specify.</i>
 <SELECT name="tz">
-	<option value="UTC">GMT (UTC) timestamps</option>
+	<option value="UTC">UTC Time</option>
 	<option value="CST6CDT">Central Standard/Daylight Time</option>
 </SELECT>
 
@@ -141,7 +153,8 @@ How shall the output values be seperated?
    </select>
 
 
-<h3>8. Include Station Latitude & Longitude values?</h3><img src="/images/gisready.png"><br>
+<h3>8. Include Station Latitude & Longitude values?</h3>
+<img src="/images/gisready.png"><br>
 <div class="story">
  <select name="gis">
    <option value="no">No

@@ -7,10 +7,7 @@ require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
 require_once "../../../include/network.php";
 
-$nt = new NetworkTable(Array("IA_ASOS","NE_ASOS","IL_ASOS", "SD_ASOS","KS_ASOS",
-"ME_ASOS", "MD_ASOS", "NY_ASOS"));
-$cities = $nt->table;
-
+$nt = new NetworkTable("IA_ASOS");
 
 $skycover = Array(
  0 => "NOREPORT",
@@ -46,15 +43,12 @@ $tz = isset($_REQUEST['tz']) ? $_REQUEST['tz']: 'UTC';
 $station = $_GET["station"];
 $stations = $_GET["station"];
 $stationString = "(";
-$selectAll = false;
 foreach ($stations as $key => $value){
-  if ($value == "_ALL"){
-    $selectAll = true;
-  } 
-  $stationString .= " '". $value ."',";
+    $sid = trim(substr($value[0], 0, 4));
+    $stationString .= " '". $sid ."',";
+    $nt->load_station($sid);
 }
-
-
+$cities = $nt->table;
 
 $stationString = substr($stationString, 0, -1);
 $stationString .= ")";
@@ -67,9 +61,6 @@ $ts1 = mktime($hour1, $minute1, 0, $month1, $day1, $year1) or
 $ts2 = mktime($hour2, $minute2, 0, $month2, $day2, $year2) or
   die("Invalid Date Format");
 
-if ($selectAll && $day1 != $day2)
-	$ts2 = $ts1 + 86400;
-
 $num_vars = count($vars);
 if ( $num_vars == 0 )  die("You did not specify data");
 
@@ -81,9 +72,6 @@ for ($i=0; $i< $num_vars;$i++){
 $sqlTS1 = strftime("%Y-%m-%d %H:%M", $ts1);
 $sqlTS2 = strftime("%Y-%m-%d %H:%M", $ts2);
 $table = strftime("alldata_1minute");
-if ($year1 == $year2){
-	$table = "t${year1}_1minute";
-}
 $nicedate = strftime("%Y-%m-%d", $ts1);
 
 $sampleStr = Array("1min" => "1",

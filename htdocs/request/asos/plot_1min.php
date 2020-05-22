@@ -1,6 +1,6 @@
 <?php
-include_once "../../../config/settings.inc.php";
-include_once "../../../include/database.inc.php";
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/database.inc.php";
 
 $sqlStr = "SELECT station, ";
 for ($i=0; $i< $num_vars;$i++){
@@ -10,7 +10,7 @@ for ($i=0; $i< $num_vars;$i++){
 $sqlStr .= "to_char(valid, 'YYYY-MM-DD HH24:MI') as dvalid from ".$table ;
 $sqlStr .= " WHERE valid >= '".$sqlTS1."' and valid <= '".$sqlTS2 ."' ";
 $sqlStr .= " and extract(minute from valid)::int % ".$sampleStr[$sample] ." = 0 ";
-$sqlStr .= " and station = '". $station ."' ORDER by valid ASC";
+$sqlStr .= " and station = '". $stations[0][0] ."' ORDER by valid ASC";
 
 $connection = iemdb("asos");
 

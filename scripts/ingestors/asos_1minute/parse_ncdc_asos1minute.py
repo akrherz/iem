@@ -5,7 +5,6 @@
 
  https://www1.ncdc.noaa.gov/pub/download/hidden/onemin/
 """
-from __future__ import print_function
 import re
 import os
 import subprocess
@@ -13,8 +12,9 @@ import sys
 import datetime
 
 import pytz
-import requests
 from pyiem.util import get_dbconn, logger
+import requests
+from tqdm import tqdm
 
 LOG = logger()
 BASEDIR = "/mesonet/ARCHIVE/raw/asos/"
@@ -29,11 +29,11 @@ P1_RE = re.compile(
 (?P<vis1_nd>[0-9A-Za-z\?\$/ ])\s+
 ((?P<vis2_coef>\d+\.\d*)|(?P<vis2_coef_miss>[M ]))\s+
 (?P<vis2_nd>[A-Za-z\?\$ ])\s+
-...............\s+
+..............\s+
 ((?P<drct>\d+)|(?P<drct_miss>M))\s+
 ((?P<sknt>\d+)|(?P<sknt_miss>M))\s+
 ((?P<gust_drct>\d+)\+?|(?P<gust_drct_miss>M))\s+
-((?P<gust_sknt>\d+)R?L?F*\d*\+?|(?P<gust_sknt_miss>M))\s+
+((?P<gust_sknt>\d+)C?R?L?F*\d*\+?|(?P<gust_sknt_miss>M))\s+
 (....)\s
 (...)
 """,
@@ -94,6 +94,9 @@ def p1_parser(ln):
     """
     Handle the parsing of a line found in the 6505 report, return QC dict
     """
+    # Some rectification
+    if ln[30:65].strip() == "":
+        ln = "%s  M  M         M   M               %s" % (ln[:30], ln[65:])
     m = P1_RE.match(ln.replace("]", "").replace("[", ""))
     if m is None:
         print("P1_FAIL:|%s|" % (ln,))
@@ -107,16 +110,17 @@ def download(station, monthts):
     """
     Download a month file from NCDC
     """
+    station4 = station if len(station) == 4 else f"K{station}"
     baseuri = "https://www1.ncdc.noaa.gov/pub/data/asos-onemin/"
     datadir = "%s/data/%s" % (BASEDIR, station)
     if not os.path.isdir(datadir):
         os.makedirs(datadir)
     for page in [5, 6]:
-        uri = baseuri + "640%s-%s/640%s0K%s%s.dat" % (
+        uri = baseuri + "640%s-%s/640%s0%s%s.dat" % (
             page,
             monthts.year,
             page,
-            station,
+            station4,
             monthts.strftime("%Y%m"),
         )
         req = requests.get(uri)
@@ -124,8 +128,8 @@ def download(station, monthts):
             LOG.info("dl %s failed with code %s", uri, req.status_code)
             continue
         with open(
-            "%s/640%s0K%s%s.dat"
-            % (datadir, page, station, monthts.strftime("%Y%m")),
+            "%s/640%s0%s%s.dat"
+            % (datadir, page, station4, monthts.strftime("%Y%m")),
             "wb",
         ) as fp:
             fp.write(req.content)
@@ -135,26 +139,27 @@ def runner(station, monthts):
     """
     Parse a month's worth of data please
     """
+    station4 = station if len(station) == 4 else f"K{station}"
 
     # Our final amount of data
     data = {}
     if os.path.isfile(
-        "64050K%s%s%02i" % (station, monthts.year, monthts.month)
+        "64050%s%s%02i" % (station4, monthts.year, monthts.month)
     ):
-        fn5 = "64050K%s%s%02i" % (station, monthts.year, monthts.month)
-        fn6 = "64060K%s%s%02i" % (station, monthts.year, monthts.month)
+        fn5 = "64050%s%s%02i" % (station4, monthts.year, monthts.month)
+        fn6 = "64060%s%s%02i" % (station4, monthts.year, monthts.month)
     else:
-        fn5 = ("%sdata/%s/64050K%s%s%02i.dat") % (
+        fn5 = ("%sdata/%s/64050%s%s%02i.dat") % (
             BASEDIR,
             station,
-            station,
+            station4,
             monthts.year,
             monthts.month,
         )
-        fn6 = ("%sdata/%s/64060K%s%s%02i.dat") % (
+        fn6 = ("%sdata/%s/64060%s%s%02i.dat") % (
             BASEDIR,
             station,
-            station,
+            station4,
             monthts.year,
             monthts.month,
         )
@@ -170,14 +175,12 @@ def runner(station, monthts):
                 )
                 return
     # We have two files to worry about
-    print("Processing 64050: %s" % (fn5,))
     for ln in open(fn5):
         d = p1_parser(ln)
         if d is None:
             continue
         data[d["ts"]] = d
 
-    print("Processing 64060: %s" % (fn6,))
     for ln in open(fn6):
         d = p2_parser(ln)
         if d is None:
@@ -209,9 +212,7 @@ def runner(station, monthts):
                valid >= '%s' and valid <= '%s';\n"""
         % (station, mints, maxts)
     )
-    out.write(
-        "COPY t%s_1minute FROM stdin WITH NULL as 'Null';\n" % (monthts.year,)
-    )
+    out.write("COPY alldata_1minute FROM stdin WITH NULL as 'Null';\n")
 
     # Loop over the data we got please
     keys = list(data.keys())
@@ -220,11 +221,8 @@ def runner(station, monthts):
     for ts in keys:
         if ts.year != monthts.year and not flipped:
             print("  Flipped years from %s to %s" % (monthts.year, ts.year))
-            out.write("\.\n")
-            out.write(
-                ("COPY t%s_1minute FROM stdin WITH NULL as 'Null';\n")
-                % (ts.year,)
-            )
+            out.write("\\.\n")
+            out.write("COPY alldata_1minute FROM stdin WITH NULL as 'Null';\n")
             flipped = True
         ln = ""
         data[ts]["station"] = station
@@ -249,7 +247,7 @@ def runner(station, monthts):
         ]:
             ln += "%s\t" % (data[ts].get(col) or "Null",)
         out.write(ln[:-1] + "\n")
-    out.write("\.\n")
+    out.write("\\.\n")
     out.close()
 
     proc = subprocess.Popen(
@@ -297,62 +295,44 @@ def update_iemprops():
     pgconn.commit()
 
 
+def get_stations():
+    """Figure out which stations we need to process."""
+    cursor = get_dbconn("mesosite").cursor()
+    res = []
+    cursor.execute(
+        "SELECT id from stations t JOIN station_attributes a on "
+        "(t.iemid = a.iemid) where a.attr = 'HAS1MIN' and t.network ~* 'ASOS'"
+    )
+    for row in cursor:
+        res.append(row[0])
+    return res
+
+
 def main(argv):
     """Go Main Go"""
+    stations = get_stations()
+    dates = []
     if len(argv) == 3:
-        for station in [
-            "DVN",
-            "LWD",
-            "FSD",
-            "MLI",
-            "OMA",
-            "MCW",
-            "BRL",
-            "AMW",
-            "MIW",
-            "SPW",
-            "OTM",
-            "CID",
-            "EST",
-            "IOW",
-            "SUX",
-            "DBQ",
-            "ALO",
-            "DSM",
-        ]:
-            runner(station, datetime.datetime(int(argv[1]), int(argv[2]), 1))
+        dates.append(datetime.datetime(int(argv[1]), int(argv[2]), 1))
     elif len(argv) == 4:
+        stations = [sys.argv[1]]
         if int(argv[3]) != 0:
             months = [int(argv[3])]
         else:
             months = range(1, 13)
         for month in months:
-            runner(sys.argv[1], datetime.datetime(int(argv[2]), month, 1))
+            dates.append(datetime.datetime(int(argv[2]), month, 1))
     else:
         # default to last month
         ts = datetime.date.today() - datetime.timedelta(days=19)
-        for station in [
-            "DVN",
-            "LWD",
-            "FSD",
-            "MLI",
-            "OMA",
-            "MCW",
-            "BRL",
-            "AMW",
-            "MIW",
-            "SPW",
-            "OTM",
-            "CID",
-            "EST",
-            "IOW",
-            "SUX",
-            "DBQ",
-            "ALO",
-            "DSM",
-        ]:
-            runner(station, datetime.datetime(ts.year, ts.month, 1))
+        dates.append(datetime.datetime(ts.year, ts.month, 1))
         update_iemprops()
+
+    progress = tqdm(stations, disable=not sys.stdout.isatty())
+    for station in progress:
+        for date in dates:
+            progress.set_description(f"{station} {date.strftime('%Y%m')}")
+            runner(station, date)
 
 
 if __name__ == "__main__":
@@ -361,8 +341,14 @@ if __name__ == "__main__":
 
 def test_parser():
     """test things"""
-    for ex in p1_examples:
-        p1_parser(ex)
+    for i, ex in enumerate(p1_examples):
+        res = p1_parser(ex)
+        if i == 0:
+            assert abs(float(res["vis1_coef"]) - 0.109) < 0.01
+        if i == 22:
+            assert abs(float(res["drct"]) - 155.0) < 0.01
+        assert res is not None
 
     for ex in p2_examples:
-        p2_parser(ex)
+        res = p2_parser(ex)
+        assert res is not None
