@@ -1,14 +1,16 @@
 """Process a network's worth of ISD data, please
 
-    python run_network_isd_ingest.py <network>
+    python run_network_isd_ingest.py <network> <lastyr_exclusive>
     ftp://ftp.ncdc.noaa.gov/pub/data/noaa
 """
-from __future__ import print_function
 import sys
 import datetime
 import subprocess
 
+from pyiem.util import logger
 from pyiem.network import Table as NetworkTable
+
+LOG = logger()
 
 
 def build_xref():
@@ -34,23 +36,25 @@ def build_xref():
 def main(argv):
     """Go Main Go"""
     network = argv[1]
+    till_year = int(argv[2])
     xref = build_xref()
-    nt = NetworkTable(network)
+    nt = NetworkTable(network, only_online=False)
     for station in nt.sts:
         if nt.sts[station]["archive_begin"] is None:
-            print("skipping %s as archive_begin is None" % (station,))
+            LOG.info("skipping %s as archive_begin is None", station)
             continue
-        eyear = nt.sts[station]["archive_begin"].year
+        # Loop over any matching stations above
         for option in xref.get(station, []):
-            if option[2].year > eyear:
-                print(
-                    ("    skipping %s as data starts %s after station sts %s")
-                    % (station, option[2].year, eyear)
+            if option[2].year >= till_year:
+                LOG.info(
+                    "skipping %s:%s as starts after %s",
+                    station,
+                    option,
+                    till_year,
                 )
                 continue
-            if option[2].year == eyear:
-                continue
             stid = station if len(station) == 4 else "K" + station
+            eyear = min([till_year, option[3].year])
             cmd = ("python ingest_isd.py %s %s %s %s %s") % (
                 option[0],
                 option[1],
@@ -58,7 +62,7 @@ def main(argv):
                 option[2].year,
                 eyear,
             )
-            print(cmd)
+            LOG.info(cmd)
             subprocess.call(cmd, shell=True)
 
 
