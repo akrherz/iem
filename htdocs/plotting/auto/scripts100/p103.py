@@ -57,15 +57,10 @@ def plotter(fdict):
         else "year"
     )
     df = read_sql(
-        """
+        f"""
     WITH obs as (
-        SELECT day, month, high, low,
-        """
-        + year
-        + """ as season
-        from """
-        + table
-        + """ WHERE station = %s),
+        SELECT day, month, high, low, {year} as season
+        from {table} WHERE station = %s),
     data as (
         SELECT season, day,
         max(high) OVER (PARTITION by season ORDER by day ASC

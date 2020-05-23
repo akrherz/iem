@@ -69,22 +69,16 @@ def plotter(fdict):
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
     df = read_sql(
-        """
+        f"""
     with data as (
-      select sday, day, precip from """
-        + table
-        + """
+      select sday, day, precip from {table}
       where station = %s),
 
     rains as (
-      SELECT day from """
-        + table
-        + """ WHERE station = %s and precip >= %s),
+      SELECT day from {table} WHERE station = %s and precip >= %s),
 
     rains2 as (
-      SELECT day from """
-        + table
-        + """ WHERE station = %s and precip >= %s),
+      SELECT day from {table} WHERE station = %s and precip >= %s),
 
     agg as (
       SELECT d.sday, d.day, d.precip, r.day as rday

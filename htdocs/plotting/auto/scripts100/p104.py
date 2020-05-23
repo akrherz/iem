@@ -157,8 +157,8 @@ def plotter(fdict):
     ax.set_xlim(0 - tmax, tmax)
     pmax = max([abs(np.min(psigma)), abs(np.max(psigma))]) + 0.5
     ax.set_ylim(0 - pmax, pmax)
-    ax.set_ylabel("Precipitation Departure $\sigma$")
-    ax.set_xlabel("Temperature Departure $\sigma$")
+    ax.set_ylabel(r"Precipitation Departure $\sigma$")
+    ax.set_xlabel(r"Temperature Departure $\sigma$")
     ax.set_title(
         (
             "%s - %s [%s] %s\n"
@@ -181,7 +181,7 @@ def plotter(fdict):
     ax.text(
         pos[1],
         y + 0.04,
-        "T $\sigma$",
+        r"T $\sigma$",
         transform=ax.transAxes,
         fontsize=10,
         ha="right",
@@ -189,13 +189,13 @@ def plotter(fdict):
     ax.text(
         pos[2],
         y + 0.04,
-        "P $\sigma$",
+        r"P $\sigma$",
         transform=ax.transAxes,
         fontsize=10,
         ha="right",
     )
-    for l, t, p, a in zip(lbls, tsigma, psigma, aligns):
-        ax.text(pos[0], y, "%s" % (l,), transform=ax.transAxes, fontsize=10)
+    for lbl, t, p, a in zip(lbls, tsigma, psigma, aligns):
+        ax.text(pos[0], y, "%s" % (lbl,), transform=ax.transAxes, fontsize=10)
         ax.text(
             pos[1],
             y,

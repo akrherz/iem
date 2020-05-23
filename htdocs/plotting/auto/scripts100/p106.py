@@ -107,16 +107,14 @@ def plotter(fdict):
         limiter = "round(tmpf::numeric,0) < %s" % (threshold,)
 
     cursor.execute(
-        """
+        f"""
         WITH obs as (
             SELECT valid, tmpf from alldata WHERE
             station = %s and extract(month from valid) in %s and tmpf > -80
         ),
         events as (
             SELECT distinct date(valid at time zone %s) from obs
-            WHERE """
-        + limiter
-        + """)
+            WHERE {limiter})
      SELECT valid at time zone %s + '10 minutes'::interval, tmpf
      from obs a JOIN events e on
      (date(a.valid at time zone %s) = e.date)

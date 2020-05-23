@@ -190,28 +190,17 @@ def plotter(fdict):
     if varname in ["tmpc", "dwpc", "height", "smps"]:
         leveltitle = " @ %s hPa" % (level,)
         dfin = read_sql(
-            """
+            f"""
             select extract(year from f.valid + '%s days'::interval) as year,
-            avg("""
-            + varname
-            + """) as avg_"""
-            + varname
-            + """,
-            min("""
-            + varname
-            + """) as min_"""
-            + varname
-            + """,
-            max("""
-            + varname
-            + """) as max_"""
-            + varname
-            + """,
+            avg({varname}) as avg_{varname},
+            min({varname}) as min_{varname},
+            max({varname}) as max_{varname},
             count(*)
             from raob_profile p JOIN raob_flights f on (p.fid = f.fid)
             WHERE f.station in %s and p.pressure = %s and
             extract(hour from f.valid at time zone 'UTC') = %s and
-            extract(month from f.valid) in %s
+            extract(month from f.valid) in %s and
+            {varname} is not null
             GROUP by year ORDER by year ASC
         """,
             pgconn,
@@ -221,28 +210,17 @@ def plotter(fdict):
     else:
         leveltitle = ""
         dfin = read_sql(
-            """
+            f"""
             select extract(year from f.valid + '%s days'::interval) as year,
-            count(*),
-            avg("""
-            + varname
-            + """) as avg_"""
-            + varname
-            + """,
-            min("""
-            + varname
-            + """) as min_"""
-            + varname
-            + """,
-            max("""
-            + varname
-            + """) as max_"""
-            + varname
-            + """
+            avg({varname}) as avg_{varname},
+            min({varname}) as min_{varname},
+            max({varname}) as max_{varname},
+            count(*)
             from raob_flights f
             WHERE f.station in %s and
             extract(hour from f.valid at time zone 'UTC') = %s and
-            extract(month from f.valid) in %s
+            extract(month from f.valid) in %s and
+            {varname} is not null
             GROUP by year ORDER by year ASC
         """,
             pgconn,
@@ -292,4 +270,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter(dict(station="_CRP", month="mjj", var="mlcape_jkg"))
