@@ -326,6 +326,8 @@
     RewriteRule grx/iadot_trucks.txt grx/iadot_trucks.py
     # Legacy link was removed 5 Jan 2015
     RewriteRule grx/idot_trucks.php grx/iadot_trucks.py
+    # PHP replaced by python 24 May 2020
+    RewriteRule grx/time_mot_loc.(php|txt) grx/time_mot_loc.py [QSA]
 
     # .php was legacy stuff, lets not break old paths
     RewriteRule grx/l3attr.(php|txt) grx/l3attr.py [QSA]

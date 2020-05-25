@@ -152,17 +152,27 @@ may be useful when looking at level2 data.  You can optionally pass a nexrad
 </tr>
 
 <tr>
-  <th><a href="time_mot_loc.php">NWS Warning TIME...MOT...LOC</a> (TOR)</th>
-  <td>https://mesonet.agron.iastate.edu/request/grx/time_mot_loc.php?<br />
+  <th><a href="time_mot_loc.txt">NWS Warning TIME...MOT...LOC</a> (TOR)</th>
+  <td>https://mesonet.agron.iastate.edu/request/grx/time_mot_loc.txt?<br />
   <i>Notes:</i> This provides lines indicating the path of travel for
   tornado warnings based on the coding within the warning.</td>
 </tr>
 
 <tr>
-  <th><a href="time_mot_loc.php?all">NWS Warning TIME...MOT...LOC</a> (TOR+SVR)</th>
-  <td>https://mesonet.agron.iastate.edu/request/grx/time_mot_loc.php?all<br />
+  <th><a href="time_mot_loc.txt?all">NWS Warning TIME...MOT...LOC</a> (TOR+SVR)</th>
+  <td>https://mesonet.agron.iastate.edu/request/grx/time_mot_loc.txt?all<br />
   <i>Notes:</i> This provides lines indicating the path of travel for
   tornado and severe thunderstorm warnings based on the coding within the warning.</td>
+</tr>
+
+<tr>
+  <th><a href="time_mot_loc.txt?all&amp;valid=2020-05-25T00:00Z">NWS Warning TIME...MOT...LOC (Historical)</a> (TOR+SVR)</th>
+  <td>https://mesonet.agron.iastate.edu/request/grx/time_mot_loc.txt?all&valid=2020-05-25T00:00Z<br />
+  <i>Notes:</i> Provides any TIME...MOT...LOC tracks for a four hour window of
+  time around the given UTC timestamp.  This uses the Gibson Ridge
+  <code>TimeRange</code> option to sync the data with RADAR display.  You'd have
+  to manually add this placefile for each four hour window of time you have interest
+  in!</td>
 </tr>
 
 
