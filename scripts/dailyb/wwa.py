@@ -86,7 +86,7 @@ def run(sts=None, ets=None):
     d["FFi"] = 0
     cursor.execute(
         f"select phenomena, count(*) as count from sbw_{sts.year} w, states s "
-        "WHERE ST_contains(s.the_geom, w.geom) and s.state_abbr = 'IA' "
+        "WHERE ST_intersects(s.the_geom, w.geom) and s.state_abbr = 'IA' "
         "and issue >= %s and issue < %s and status = 'NEW' "
         "and phenomena IN ('TO','SV','FF') GROUP by phenomena",
         (sts, ets),
