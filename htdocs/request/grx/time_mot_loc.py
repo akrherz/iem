@@ -101,7 +101,7 @@ def application(environ, start_response):
     t1 = valid
     t2 = valid
     tmlabel = valid.strftime("%H%Mz")
-    if grversion >= 1.5:
+    if "valid" in form:
         # Pull larger window of data to support TimeRange
         t1 = valid - datetime.timedelta(hours=2)
         t2 = valid + datetime.timedelta(hours=2)
