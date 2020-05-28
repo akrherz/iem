@@ -332,7 +332,11 @@ def main(argv):
     for station in progress:
         for date in dates:
             progress.set_description(f"{station} {date.strftime('%Y%m')}")
-            runner(station, date)
+            try:
+                runner(station, date)
+            except Exception as exp:
+                LOG.info("uncaught exception parsing %s %s", station, date)
+                LOG.exception(exp)
 
 
 if __name__ == "__main__":
