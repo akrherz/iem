@@ -214,7 +214,7 @@ def plotter(fdict):
         SELECT station,
         avg(avg_temp) as avg_temp,
         sum(precip_diff) as precip_depart,
-        sum(precip) / sum(cprecip) * 100. as precip_percent,
+        sum(precip) / greatest(sum(cprecip), 0.0001) * 100. as precip_percent,
         sum(snow_diff) as snow_depart,
         sum(snow) / greatest(sum(csnow), 0.0001) * 100. as snow_percent,
         sum(precip) as precip, sum(cprecip) as cprecip,
