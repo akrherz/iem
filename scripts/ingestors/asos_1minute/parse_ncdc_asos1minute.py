@@ -275,8 +275,7 @@ def runner(station, monthts):
         )
     )
 
-    if stderr == "":
-        os.unlink(tmpfn)
+    os.unlink(tmpfn)
 
 
 def update_iemprops():
