@@ -63,6 +63,9 @@ def process(cursor, df, meta):
     rows = []
     for _, row in df.iterrows():
         data = dict(row)
+        if "stationId" not in data:
+            LOG.info("hit data quirk with row %s", row)
+            continue
         key = f"{int(row['stationId'].replace('IA', ''))}_{row['sensorId']}"
         if key not in meta:
             create_sensor(cursor, key, row, meta)
@@ -101,7 +104,7 @@ def main():
             f"&endDate={edate}&units=us&precision=0"
         )
 
-        req = requests.get(URI, headers=headers)
+        req = requests.get(URI, timeout=60, headers=headers)
         res = req.json()
         if not res:
             continue
