@@ -10,13 +10,13 @@ from pyiem.util import ncopen
 from pyiem.meteorology import gdd
 
 
-def make_netcdf(fullpath, valid, west, south):
+def make_netcdf(ncfn, valid, west, south):
     """Make our netcdf"""
     totaldays = (
         valid.replace(month=12, day=31)
         - valid.replace(year=1980, month=1, day=1)
     ).days + 1
-    with ncopen(fullpath, "w") as nc:
+    with ncopen(ncfn, "w") as nc:
         # Dimensions
         nc.createDimension("time", totaldays)
         nc.createDimension("lat", 16)  # 0.125 grid over 2 degrees
@@ -65,9 +65,6 @@ def make_netcdf(fullpath, valid, west, south):
         )
         srad.units = "MJ"
         srad.long_name = "daylight average incident shortwave radiation"
-
-        # did not do vp or cropland
-    return fullpath
 
 
 def copy_iemre(nc, fromyear, ncdate0, ncdate1, islice, jslice):
@@ -125,21 +122,24 @@ def copy_iemre(nc, fromyear, ncdate0, ncdate1, islice, jslice):
             nc.variables["srad"][nt, :, :] = srad
 
 
-def tile_extraction(nc, valid, west, south):
+def tile_extraction(nc, valid, west, south, fullmode):
     """Do our tile extraction"""
     # update model metadata
     i, j = iemre.find_ij(west, south)
     islice = slice(i, i + 16)
     jslice = slice(j, j + 16)
-    for year in range(1980, valid.year + 1):
-        copy_iemre(
-            nc,
-            year,
-            datetime.date(year, 1, 1),
-            datetime.date(year, 12, 31),
-            islice,
-            jslice,
-        )
+    if fullmode:
+        for year in range(1980, valid.year + 1):
+            copy_iemre(
+                nc,
+                year,
+                datetime.date(year, 1, 1),
+                datetime.date(year, 12, 31),
+                islice,
+                jslice,
+            )
+    else:
+        copy_iemre(nc, valid.year, valid, valid, islice, jslice)
 
 
 def qc(nc):
@@ -153,23 +153,28 @@ def qc(nc):
     print("done...")
 
 
-def workflow(valid, ncfn, west, south):
+def workflow(valid, ncfn, west, south, fullmode):
     """Make the magic happen"""
     basedir = "/mesonet/share/pickup/yieldfx/baseline"
     if not os.path.isdir(basedir):
         os.makedirs(basedir)
-    fullpath = make_netcdf("%s/%s" % (basedir, ncfn), valid, west, south)
+    fullpath = f"{basedir}/{ncfn}"
+    if fullmode:
+        make_netcdf(fullpath, valid, west, south)
     with ncopen(fullpath, "a") as nc:
-        tile_extraction(nc, valid, west, south)
-        qc(nc)
+        tile_extraction(nc, valid, west, south, fullmode)
+        if fullmode:
+            qc(nc)
 
 
 def main(argv):
     """Go Main Go"""
+    # Can be run in two modes, full replacement up until this time
     valid = datetime.date(int(argv[1]), 12, 31)
-    # Run for the 12z file **two days ago**, the issue is that for a year
-    # without a leap day, previous year filling will ask for one too many
-    # days that currently does not have data
+    fullmode = True
+    if len(argv) == 4:
+        valid = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
+        fullmode = False
     # Create tiles to cover IA, IL, IN
     for west in np.arange(-104, -80, 2):
         for south in np.arange(36, 50, 2):
@@ -181,7 +186,7 @@ def main(argv):
                 (90 - south) / 2,
                 (180 - (0 - west)) / 2 + 1,
             )
-            workflow(valid, ncfn, west, south)
+            workflow(valid, ncfn, west, south, fullmode)
 
 
 if __name__ == "__main__":

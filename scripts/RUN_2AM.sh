@@ -68,7 +68,10 @@ fi
 
 
 cd ../../windrose
-python daily_drive_network.py
+python daily_drive_network.py &
+
+cd ../yieldfx
+python psims_baseline.py $(date --date '1 days ago' +'%Y %m %d')
 
 cd ../prism
 python ingest_prism.py $(date --date '7 days ago' +'%Y %m %d')
