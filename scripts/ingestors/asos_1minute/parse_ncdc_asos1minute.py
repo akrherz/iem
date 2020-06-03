@@ -251,7 +251,7 @@ def runner(station, monthts):
     out.close()
 
     proc = subprocess.Popen(
-        "psql -f %s -h iemdb-asos.local asos" % (tmpfn,),
+        "psql -f %s -h iemdb-asos1min.local asos" % (tmpfn,),
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

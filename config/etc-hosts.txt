@@ -124,6 +124,11 @@
 # VI_07(157) metvm9 <-> metvm6
 192.168.0.244 iemdb2-0.local
 
+### metvm1 PostgreSQL
+# VI_1_231(71) metvm1
+192.168.1.231    metvm1-iemdb.local
+192.168.1.231 iemdb-asos1min.local
+
 ##############################################################################
 
 #   VI_2(52) iem5 <-> metvm9

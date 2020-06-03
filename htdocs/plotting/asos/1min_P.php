@@ -23,7 +23,7 @@ $titleDate = strftime("%b %d, %Y", $myTime);
 $tableName = strftime("t%Y_1minute", $myTime);
 $sqlDate = strftime("%Y-%m-%d", $myTime);
 
-$connection = iemdb("asos");
+$connection = iemdb("asos1min");
 $rs = pg_prepare($connection, "SELECT", "SELECT " .
 		"to_char(valid, 'HH24:MI') as tvalid, precip, pres1 from " .
 		 $tableName ." WHERE station = $1 and " .

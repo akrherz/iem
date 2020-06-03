@@ -30,6 +30,8 @@ mailman | iem12 | None | None
 nwningest | iem12 | None    | cron scripts checks SNET sites for being online
 openfire | iem12 | None     | None
 postgres | metvm6 | metvm9  | None
+postgres2 | metvm4 | None | None
+postgres3 | metvm1 | None | None
 samba | iem12 | None | cron scripts check data availability
 SSH | iem12 | None | None
 RIDGE   | iem13    | None    | inbound file queue, check latency 7 radars

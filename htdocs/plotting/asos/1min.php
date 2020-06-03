@@ -25,7 +25,7 @@ $tableName = strftime("t%Y_1minute", $myTime);
 $sqlDate = strftime("%Y-%m-%d", $myTime);
 
 /** Time to get data from database **/
-$connection = iemdb("asos");
+$connection = iemdb("asos1min");
 $rs = pg_prepare($connection, "SELECT", "SELECT " .
 		"to_char(valid, 'HH24:MI') as tvalid, tmpf, dwpf from " .
 		 $tableName ." WHERE station = $1 and " .

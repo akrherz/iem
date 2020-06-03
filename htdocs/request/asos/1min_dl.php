@@ -109,7 +109,7 @@ if ($what == "download"){
 }
 
 /* Database Connection */
-$dbconn = iemdb("asos");
+$dbconn = iemdb("asos1min");
 
 if ($tz == 'UTC'){
 	pg_exec($dbconn, "SET TIME ZONE 'UTC'");

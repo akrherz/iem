@@ -40,7 +40,7 @@ $dups = 0;
 $missing = 0;
 
 
-$connection = iemdb("asos");
+$connection = iemdb("asos1min");
 $rs = pg_prepare($connection, "SELECT", "SELECT " .
 		"to_char(valid, 'HH24:MI') as tvalid, sknt, drct from " .
 		 $tableName ." WHERE station = $1 and " .
