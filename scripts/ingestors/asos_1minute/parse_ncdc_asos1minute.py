@@ -66,6 +66,21 @@ P2_RE = re.compile(
 p2_examples = open("p2_examples.txt").readlines()
 
 
+def qc(mydict, col):
+    """Primative QC."""
+    if col not in mydict:
+        return None
+    val = mydict[col]
+    if val is not None and col in ["tmpf", "dwpf"]:
+        try:
+            val = int(val)
+        except ValueError:
+            return None
+        if val < -90 or val > 150:
+            return None
+    return val
+
+
 def tstamp2dt(s):
     """ Convert a string to a datetime """
     ts = datetime.datetime(int(s[:4]), int(s[4:6]), int(s[6:8]))
@@ -245,7 +260,7 @@ def runner(station, monthts):
             "tmpf",
             "dwpf",
         ]:
-            ln += "%s\t" % (data[ts].get(col) or "Null",)
+            ln += "%s\t" % (qc(data[ts], col) or "Null",)
         out.write(ln[:-1] + "\n")
     out.write("\\.\n")
     out.close()
