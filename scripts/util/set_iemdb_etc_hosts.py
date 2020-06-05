@@ -4,17 +4,17 @@
 #127.0.0.1 iemdb iemdb2
 
 """
-from __future__ import print_function
 import sys
 import tempfile
 import os
 
-METVM4, METVM5, METVM6 = range(3)
+METVM4, METVM1, METVM6 = range(3)
 IPS = ["172.16.170.1", "172.16.171.1", "172.16.172.1"]
 LOOKUP = {
     "": IPS[METVM6],
     "-afos": IPS[METVM6],
     "-asos": IPS[METVM6],
+    "-asos1min": IPS[METVM1],
     "-awos": IPS[METVM4],
     "-coop": IPS[METVM6],
     "-frost": IPS[METVM6],
