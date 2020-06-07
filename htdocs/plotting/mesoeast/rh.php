@@ -61,7 +61,7 @@ foreach($fcontents as $line_num => $line){
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
 $graph->SetScale("datelin", 0, 100);
-$graph->img->SetMargin(65,40,45,60);
+$graph->img->SetMargin(65,40,45,80);
 $graph->xaxis->SetLabelFormatString("h:i A", true);
 
 $graph->xaxis->SetLabelAngle(90);

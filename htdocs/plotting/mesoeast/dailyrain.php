@@ -52,7 +52,7 @@ foreach($fcontents as $line_num => $line){
 $graph = new Graph(600,300,"example1");
 $graph->SetScale("datelin");
 
-$graph->img->SetMargin(65,40,45,60);
+$graph->img->SetMargin(65,40,45,80);
 $graph->xaxis->SetLabelFormatString("h:i A", true);
 
 $graph->xaxis->SetLabelAngle(90);

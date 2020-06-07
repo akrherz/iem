@@ -38,7 +38,7 @@ foreach($fcontents as $line_num => $line){
 $graph = new Graph(600,300,"example1");
 $graph->SetScale("datlin");
 $graph->SetY2Scale("lin");
-$graph->img->SetMargin(65,40,45,60);
+$graph->img->SetMargin(75,50,45,80);
 $graph->xaxis->SetLabelFormatString("h:i A", true);
 
 
@@ -49,32 +49,33 @@ $graph->title->Set("Temp & RH");
 $graph->subtitle->Set($titleDate );
 
 //$graph->legend->SetLayout(LEGEND_HOR);
-$graph->legend->Pos(0.1,0.01);
+$graph->legend->Pos(0.11, 0.14);
 
 $graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 $graph->yaxis->SetTitle("Temperature [F]");
+$graph->yaxis->SetTitleMargin(40);
 $graph->y2axis->SetTitle("Relative Humidity [%]");
-$graph->xaxis->SetLabelFormatString("h A", true);
+$graph->y2axis->SetTitleMargin(40);
+$graph->xaxis->SetLabelFormatString("h:i A", true);
 
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Local Time");
-$graph->xaxis->SetTitleMargin(30);
+$graph->xaxis->SetTitleMargin(50);
 //$graph->yaxis->SetTitleMargin(48);
-$graph->yaxis->SetTitleMargin(40);
 $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot
 $lineplot=new LinePlot($rh, $times);
+$graph->AddY2($lineplot);
 $lineplot->SetLegend("Outside RH");
 $lineplot->SetColor("blue");
-$graph->AddY2($lineplot);
 
 // Create the linear plot
 $lineplot2=new LinePlot($tmpf, $times);
+$graph->Add($lineplot2);
 $lineplot2->SetLegend("Air Temperature [F]");
 $lineplot2->SetColor("red");
-$graph->Add($lineplot2);
 
 $graph->Stroke();
 

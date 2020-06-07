@@ -57,7 +57,7 @@ foreach($fcontents as $linenum => $line){
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
 $graph->SetScale("datelin");
-$graph->img->SetMargin(65,40,45,60);
+$graph->img->SetMargin(85,40,45,80);
 $graph->xaxis->SetLabelFormatString("h:i A", true);
 
 $graph->xaxis->SetLabelAngle(90);
@@ -79,7 +79,7 @@ $graph->yaxis->SetTitle("Pressure [mb]");
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitleMargin(30);
 //$graph->yaxis->SetTitleMargin(48);
-$graph->yaxis->SetTitleMargin(45);
+$graph->yaxis->SetTitleMargin(55);
 $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 

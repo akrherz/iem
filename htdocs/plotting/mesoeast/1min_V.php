@@ -65,7 +65,7 @@ foreach($fcontents as $line_num => $line){
 $graph = new Graph(600,300,"example1");
 $graph->SetScale("datelin",0, 360);
 $graph->SetY2Scale("lin");
-$graph->img->SetMargin(55,40,55,60);
+$graph->img->SetMargin(65,50,55,80);
 $graph->xaxis->SetLabelFormatString("h:i A", true);
 $graph->xaxis->SetLabelAngle(90);
 
@@ -84,36 +84,35 @@ $graph->title->SetFont(FF_FONT1,FS_BOLD,14);
 
 $graph->yaxis->SetTitle("Wind Direction");
 $graph->y2axis->SetTitle("Wind Speed [MPH]");
+$graph->y2axis->SetTitleMargin(40);
 
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitleMargin(30);
-$graph->yaxis->SetTitleMargin(30);
-//$graph->y2axis->SetTitleMargin(28);
+$graph->yaxis->SetTitleMargin(40);
 $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot
 $lineplot=new LinePlot($mph, $times);
+$graph->AddY2($lineplot);
 $lineplot->SetLegend($wLabel);
 $lineplot->SetColor("red");
 
-if ($hasgust == 1){
-  // Create the linear plot
-  $lp1=new LinePlot($gust, $times);
-  $lp1->SetLegend("Peak Wind Gust");
-  $lp1->SetColor("black");
-}
-
 // Create the linear plot
 $sp1=new ScatterPlot($drct, $times);
+$graph->Add($sp1);
 $sp1->mark->SetType(MARK_FILLEDCIRCLE);
 $sp1->mark->SetFillColor("blue");
 $sp1->mark->SetWidth(3);
 
-$graph->Add($sp1);
-$graph->AddY2($lineplot);
 if ($hasgust == 1){
-  $graph->AddY2($lp1);
-}
+    // Create the linear plot
+    $lp1=new LinePlot($gust, $times);
+    $graph->AddY2($lp1);
+    $lp1->SetLegend("Peak Wind Gust");
+    $lp1->SetColor("black");
+  }
+  
+
 $graph->Stroke();
 ?>
