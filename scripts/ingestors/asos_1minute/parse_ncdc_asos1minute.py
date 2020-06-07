@@ -18,30 +18,6 @@ from tqdm import tqdm
 
 LOG = logger()
 BASEDIR = "/mesonet/ARCHIVE/raw/asos/"
-
-P1_RE = re.compile(
-    r"""
-(?P<wban>[0-9]{5})
-(?P<faaid>[0-9A-Z]{4})\s
-(?P<id3>[0-9A-Z]{3})
-(?P<tstamp>[0-9]{16})\s+
-((?P<vis1_coef>\-?\d+\.\d*)|(?P<vis1_coef_miss>M))\s*\s*
-(?P<vis1_nd>[0-9A-Za-z\?\$/ ])\s+
-((?P<vis2_coef>\d+\.\d*)|(?P<vis2_coef_miss>[M ]))\s+
-(?P<vis2_nd>[A-Za-z\?\$ ])\s+
-..............\s+
-((?P<drct>\d+)|(?P<drct_miss>M))\s+
-((?P<sknt>\d+)|(?P<sknt_miss>M))\s+
-((?P<gust_drct>\d+)\+?|(?P<gust_drct_miss>M))\s+
-((?P<gust_sknt>\d+)C?R?L?F*\d*\+?|(?P<gust_sknt_miss>M))\s+
-(....)\s
-(...)
-""",
-    re.VERBOSE,
-)
-
-p1_examples = open("p1_examples.txt").readlines()
-
 P2_RE = re.compile(
     r"""
 (?P<wban>[0-9]{5})
@@ -61,9 +37,8 @@ P2_RE = re.compile(
 """,
     re.VERBOSE,
 )
-
-
-p2_examples = open("p2_examples.txt").readlines()
+REAL_RE = re.compile(r"\-?\d+\.\d+")
+INT_RE = re.compile(r"\d+")
 
 
 def qc(mydict, col):
@@ -109,14 +84,29 @@ def p1_parser(ln):
     """
     Handle the parsing of a line found in the 6505 report, return QC dict
     """
-    # Some rectification
-    if ln[30:65].strip() == "":
-        ln = "%s  M  M         M   M               %s" % (ln[:30], ln[65:])
-    m = P1_RE.match(ln.replace("]", "").replace("[", ""))
-    if m is None:
-        print("P1_FAIL:|%s|" % (ln,))
+    res = {
+        "wban": ln[:5],
+        "faaid": ln[5:9],
+        "id3": ln[10:13],
+        "tstamp": ln[13:29],
+    }
+    ln = ln.replace("[", " ").replace("]", " ")
+    # Take the visibility chunk
+    i = 1
+    for token in ln[30:67].strip().split():
+        if REAL_RE.match(token):
+            res[f"vis{i}_coef"] = float(token)
+            i += 1
+            continue
+        if token in ["D", "M", "N"]:
+            res[f"vis{i - 1}_nd"] = token
+    # Take the wind chunk
+    tokens = ln[67:].strip().split()
+    if len(tokens) < 4:
+        print(f"P1_FAIL(2): |{ln}|")
         return None
-    res = m.groupdict()
+    for i, col in enumerate(["drct", "sknt", "gust_drct", "gust_sknt"]):
+        res[col] = None if not INT_RE.match(tokens[i]) else int(tokens[i])
     res["ts"] = tstamp2dt(res["tstamp"])
     return res
 
@@ -359,14 +349,16 @@ if __name__ == "__main__":
 
 def test_parser():
     """test things"""
+    p1_examples = open("p1_examples.txt").readlines()
     for i, ex in enumerate(p1_examples):
         res = p1_parser(ex)
         if i == 0:
             assert abs(float(res["vis1_coef"]) - 0.109) < 0.01
         if i == 22:
-            assert abs(float(res["drct"]) - 155.0) < 0.01
+            assert abs(float(res["drct"]) - 261.0) < 0.01
         assert res is not None
 
+    p2_examples = open("p2_examples.txt").readlines()
     for ex in p2_examples:
         res = p2_parser(ex)
         assert res is not None
