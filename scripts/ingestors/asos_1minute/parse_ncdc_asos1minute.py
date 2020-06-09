@@ -22,25 +22,7 @@ from tqdm import tqdm
 LOG = logger()
 BASEDIR = "/mesonet/ARCHIVE/raw/asos/data"
 TMPDIR = "/mesonet/tmp/asos1min"
-P2_RE = re.compile(
-    r"""
-(?P<wban>[0-9]{5})
-(?P<faaid>[0-9A-Z]{4})\s
-(?P<id3>[0-9A-Z]{3})
-(?P<tstamp>[0-9]{16})\s+
-\s?(?P<ptype>[a-zA-Z0-9\?\-\+\.]{1,2})\s?\s?\s?
-((?P<unk>\d+)V?|\s+(?P<unk_miss>[M ]))\s+\s?
-\s*((?P<precip>\d+\.\d*)|(?P<precip_miss>[M ]))\s*
-............\s+
-((?P<unk2>\d*)|(?P<unk2_miss>M))\s+
-((?P<pres1>\d+\.\d*)|(?P<pres1_miss>[M ]))\s*
-((?P<pres2>\d+\.\d*)|(?P<pres2_miss>[M ]))\s*
-((?P<pres3>\d+\.\d*)|(?P<pres3_miss>[M ]))\s*
-\s*((?P<tmpf>\-?\d+)|(?P<tmpf_miss>[M ]))\s*
-\s*((?P<dwpf>\-?\d+)|(?P<dwpf_miss>[M ]))\s+
-""",
-    re.VERBOSE,
-)
+
 REAL_RE = re.compile(r"^\-?\d+\.\d+$")
 INT_RE = re.compile(r"^\d+$")
 
@@ -77,12 +59,29 @@ def p2_parser(ln):
     """
     Handle the parsing of a line found in the 6506 report, return QC dict
     """
-    m = P2_RE.match(ln.replace("]", "").replace("[", ""))
-    if m is None:
-        print("P2_FAIL:|%s|" % (ln,))
-        return None
-    res = m.groupdict()
+    res = {
+        "wban": ln[:5],
+        "faaid": ln[5:9],
+        "id3": ln[10:13],
+        "tstamp": ln[13:29],
+    }
+    ln = ln.replace("[", " ").replace("]", " ")
     res["valid"] = tstamp2dt(res["tstamp"])
+    s = ln[31:34].strip()
+    res["ptype"] = None if s == "" else s[:2]
+    s = ln[44:48].strip()
+    res["precip"] = None if not REAL_RE.match(s) else float(s)
+    s = ln[69:77].strip()
+    res["pres1"] = None if not REAL_RE.match(s) else float(s)
+    s = ln[77:85].strip()
+    res["pres2"] = None if not REAL_RE.match(s) else float(s)
+    s = ln[85:93].strip()
+    res["pres3"] = None if not REAL_RE.match(s) else float(s)
+    s = ln[94:97].strip()
+    res["tmpf"] = None if not INT_RE.match(s) else int(s)
+    s = ln[99:102].strip()
+    res["dwpf"] = None if not INT_RE.match(s) else int(s)
+
     return res
 
 
@@ -268,7 +267,7 @@ def merge_archive_end(df, dt):
         pgconn,
         index_col="station",
     )
-    df["archive_end"] = df2["max"]
+    df.at[df2.index.values, "archive_end"] = df2["max"]
 
 
 def dl_realtime(df, dt):
@@ -343,6 +342,11 @@ def test_parser():
         assert res is not None
 
     p2_examples = open("p2_examples.txt").readlines()
-    for ex in p2_examples:
+    for i, ex in enumerate(p2_examples):
         res = p2_parser(ex)
+        if i == 0:
+            assert abs(res["tmpf"] - 29.0) < 0.01
+            assert abs(res["dwpf"] - 23.0) < 0.01
+        if i == 19:
+            assert abs(res["precip"] - 0.01) < 0.01
         assert res is not None
