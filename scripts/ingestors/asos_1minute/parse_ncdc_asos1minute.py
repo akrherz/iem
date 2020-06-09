@@ -22,6 +22,8 @@ from tqdm import tqdm
 LOG = logger()
 BASEDIR = "/mesonet/ARCHIVE/raw/asos/data"
 TMPDIR = "/mesonet/tmp/asos1min"
+if not os.path.isdir(TMPDIR):
+    os.makedirs(TMPDIR)
 
 REAL_RE = re.compile(r"^\-?\d+\.\d+$")
 INT_RE = re.compile(r"^\d+$")
@@ -65,7 +67,7 @@ def p2_parser(ln):
         "id3": ln[10:13],
         "tstamp": ln[13:29],
     }
-    ln = ln.replace("[", " ").replace("]", " ")
+    ln = ln.replace("[", " ").replace("]", " ").replace("\\", " ")
     res["valid"] = tstamp2dt(res["tstamp"])
     s = ln[31:34].strip()
     res["ptype"] = None if s == "" else s[:2]
@@ -156,10 +158,8 @@ def runner(pgconn, row, station):
         d = p2_parser(ln)
         if d is None or d["valid"] < row["archive_end"]:
             continue
-        if d["valid"] not in data:
-            data[d["valid"]] = {}
-        for k in d.keys():
-            data[d["valid"]][k] = d[k]
+        res = data.setdefault(d["valid"], {})
+        res.update(d)
 
     if not data:
         print("No data found for station: %s" % (station,))
@@ -235,9 +235,11 @@ def update_iemprops(ts):
 def init_dataframe(argv):
     """Build the processing dataframe."""
     pgconn = get_dbconn("mesosite")
+    # ASOS query limit keeps other sites out of result that may have 1min
     df = read_sql(
         "SELECT id from stations t JOIN station_attributes a on "
-        "(t.iemid = a.iemid) where a.attr = 'HAS1MIN' and t.network ~* 'ASOS'",
+        "(t.iemid = a.iemid) where a.attr = 'HAS1MIN' and t.network ~* 'ASOS' "
+        "ORDER by id ASC",
         pgconn,
         index_col="id",
     )
