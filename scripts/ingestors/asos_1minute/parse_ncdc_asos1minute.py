@@ -124,13 +124,14 @@ def dl_archive(df, dt):
         station4 = station if len(station) == 4 else f"K{station}"
         for page in [5, 6]:
             fn = "640%s0%s%s%02i.dat" % (page, station4, dt.year, dt.month)
-            uri = f"{baseuri}/640{page}-{dt.strftime('%Y')}/{fn}"
-            req = requests.get(uri, timeout=30)
-            if req.status_code != 200:
-                LOG.info("dl_archive failed %s %s", uri, req.status_code)
-                continue
-            with open(f"{datadir}/{fn}", "wb") as fh:
-                fh.write(req.content)
+            if not os.path.isfile(f"{datadir}/{fn}"):
+                uri = f"{baseuri}/640{page}-{dt.strftime('%Y')}/{fn}"
+                req = requests.get(uri, timeout=30)
+                if req.status_code != 200:
+                    LOG.info("dl_archive failed %s %s", uri, req.status_code)
+                    continue
+                with open(f"{datadir}/{fn}", "wb") as fh:
+                    fh.write(req.content)
             df.at[station, f"fn{page}"] = f"{datadir}/{fn}"
 
 
