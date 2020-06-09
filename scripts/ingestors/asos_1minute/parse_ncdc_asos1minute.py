@@ -26,7 +26,7 @@ if not os.path.isdir(TMPDIR):
     os.makedirs(TMPDIR)
 
 REAL_RE = re.compile(r"^\-?\d+\.\d+$")
-INT_RE = re.compile(r"^\d+$")
+INT_RE = re.compile(r"^\-?\d+$")
 
 
 def qc(mydict, col):
@@ -356,4 +356,6 @@ def test_parser():
             assert abs(res["dwpf"] - 23.0) < 0.01
         if i == 19:
             assert abs(res["precip"] - 0.01) < 0.01
+        if i == 28:
+            assert abs(res["dwpf"] - -2) < 0.01
         assert res is not None
