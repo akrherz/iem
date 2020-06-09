@@ -34,4 +34,9 @@ S=/opt/iem/scripts
 # Email Harry RR3 data
 14 14 * * 5 cd $S/coop; python email_rr3_to_harry.py
 
+# Process last month's asos 1 min
+4 4 9 * * cd $S/ingestors/asos_1minute; python parse_ncdc_asos1minute.py $(date --date '11 days ago' +'\%Y \%m')
+# Process RT asos 1 min
+6 6 * * * cd $S/ingestors/asos_1minute; python parse_ncdc_asos1minute.py
+
 03,13,24 * * * * cd $S/plots; ./HOURLY_PLOTS

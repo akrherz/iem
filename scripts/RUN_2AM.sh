@@ -59,14 +59,6 @@ if [ $DD -eq "15" ]
 	python ingest_fisherporter.py $(date --date '360 days ago' +'%Y %m')
 fi
 
-
-cd ../asos_1minute
-if [ $DD -eq "09" ]
-then
-	python parse_ncdc_asos1minute.py
-fi
-
-
 cd ../../windrose
 python daily_drive_network.py &
 

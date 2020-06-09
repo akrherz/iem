@@ -7,17 +7,21 @@
 """
 import re
 import os
-import subprocess
+from io import StringIO
 import sys
+import tarfile
 import datetime
 
 import pytz
-from pyiem.util import get_dbconn, logger
+import pandas as pd
+from pandas.io.sql import read_sql
+from pyiem.util import get_dbconn, logger, utc
 import requests
 from tqdm import tqdm
 
 LOG = logger()
-BASEDIR = "/mesonet/ARCHIVE/raw/asos/"
+BASEDIR = "/mesonet/ARCHIVE/raw/asos/data"
+TMPDIR = "/mesonet/tmp/asos1min"
 P2_RE = re.compile(
     r"""
 (?P<wban>[0-9]{5})
@@ -37,22 +41,24 @@ P2_RE = re.compile(
 """,
     re.VERBOSE,
 )
-REAL_RE = re.compile(r"\-?\d+\.\d+")
-INT_RE = re.compile(r"\d+")
+REAL_RE = re.compile(r"^\-?\d+\.\d+$")
+INT_RE = re.compile(r"^\d+$")
 
 
 def qc(mydict, col):
     """Primative QC."""
     if col not in mydict:
-        return None
+        return "null"
     val = mydict[col]
-    if val is not None and col in ["tmpf", "dwpf"]:
+    if val is None:
+        return "null"
+    if col in ["tmpf", "dwpf"]:
         try:
             val = int(val)
         except ValueError:
-            return None
+            return "null"
         if val < -90 or val > 150:
-            return None
+            return "null"
     return val
 
 
@@ -76,7 +82,7 @@ def p2_parser(ln):
         print("P2_FAIL:|%s|" % (ln,))
         return None
     res = m.groupdict()
-    res["ts"] = tstamp2dt(res["tstamp"])
+    res["valid"] = tstamp2dt(res["tstamp"])
     return res
 
 
@@ -107,97 +113,55 @@ def p1_parser(ln):
         return None
     for i, col in enumerate(["drct", "sknt", "gust_drct", "gust_sknt"]):
         res[col] = None if not INT_RE.match(tokens[i]) else int(tokens[i])
-    res["ts"] = tstamp2dt(res["tstamp"])
+    res["valid"] = tstamp2dt(res["tstamp"])
     return res
 
 
-def download(station, monthts):
-    """
-    Download a month file from NCDC
-    """
-    station4 = station if len(station) == 4 else f"K{station}"
-    baseuri = "https://www1.ncdc.noaa.gov/pub/data/asos-onemin/"
-    datadir = "%s/data/%s" % (BASEDIR, station)
-    if not os.path.isdir(datadir):
-        os.makedirs(datadir)
-    for page in [5, 6]:
-        uri = baseuri + "640%s-%s/640%s0%s%s.dat" % (
-            page,
-            monthts.year,
-            page,
-            station4,
-            monthts.strftime("%Y%m"),
-        )
-        req = requests.get(uri)
-        if req.status_code != 200:
-            LOG.info("dl %s failed with code %s", uri, req.status_code)
-            continue
-        with open(
-            "%s/640%s0%s%s.dat"
-            % (datadir, page, station4, monthts.strftime("%Y%m")),
-            "wb",
-        ) as fp:
-            fp.write(req.content)
+def dl_archive(df, dt):
+    """Do archived downloading."""
+    baseuri = "https://www1.ncdc.noaa.gov/pub/data/asos-onemin"
+    for station in df.index.values:
+        datadir = "%s/%s" % (BASEDIR, station)
+        station4 = station if len(station) == 4 else f"K{station}"
+        for page in [5, 6]:
+            fn = "640%s0%s%s%02i.dat" % (page, station4, dt.year, dt.month)
+            uri = f"{baseuri}/640{page}-{dt.strftime('%Y')}/{fn}"
+            req = requests.get(uri, timeout=30)
+            if req.status_code != 200:
+                LOG.info("dl_archive failed %s %s", uri, req.status_code)
+                continue
+            with open(f"{datadir}/{fn}", "wb") as fh:
+                fh.write(req.content)
+            df.at[station, f"fn{page}"] = f"{datadir}/{fn}"
 
 
-def runner(station, monthts):
-    """
-    Parse a month's worth of data please
-    """
-    station4 = station if len(station) == 4 else f"K{station}"
+def runner(pgconn, row, station):
+    """Do the work prescribed."""
+    if not os.path.isfile(row["fn5"]) or not os.path.isfile(row["fn6"]):
+        LOG.info("skipping %s due to missing files", station)
+        return 0
 
     # Our final amount of data
     data = {}
-    if os.path.isfile(
-        "64050%s%s%02i" % (station4, monthts.year, monthts.month)
-    ):
-        fn5 = "64050%s%s%02i" % (station4, monthts.year, monthts.month)
-        fn6 = "64060%s%s%02i" % (station4, monthts.year, monthts.month)
-    else:
-        fn5 = ("%sdata/%s/64050%s%s%02i.dat") % (
-            BASEDIR,
-            station,
-            station4,
-            monthts.year,
-            monthts.month,
-        )
-        fn6 = ("%sdata/%s/64060%s%s%02i.dat") % (
-            BASEDIR,
-            station,
-            station4,
-            monthts.year,
-            monthts.month,
-        )
-        if not os.path.isfile(fn5):
-            try:
-                download(station, monthts)
-            except Exception as exp:
-                print("download() error %s" % (exp,))
-            if not os.path.isfile(fn5) or not os.path.isfile(fn6):
-                print(
-                    ("NCDC did not have %s station for %s")
-                    % (station, monthts.strftime("%b %Y"))
-                )
-                return
     # We have two files to worry about
-    for ln in open(fn5):
+    for ln in open(row["fn5"]):
         d = p1_parser(ln)
-        if d is None:
+        if d is None or d["valid"] < row["archive_end"]:
             continue
-        data[d["ts"]] = d
+        data[d["valid"]] = d
 
-    for ln in open(fn6):
+    for ln in open(row["fn6"]):
         d = p2_parser(ln)
-        if d is None:
+        if d is None or d["valid"] < row["archive_end"]:
             continue
-        if d["ts"] not in data:
-            data[d["ts"]] = {}
+        if d["valid"] not in data:
+            data[d["valid"]] = {}
         for k in d.keys():
-            data[d["ts"]][k] = d[k]
+            data[d["valid"]][k] = d[k]
 
     if not data:
         print("No data found for station: %s" % (station,))
-        return
+        return 0
 
     mints = None
     maxts = None
@@ -210,137 +174,157 @@ def runner(station, monthts):
         if maxts < ts:
             maxts = ts
 
-    tmpfn = "/tmp/%s%s-dbinsert.sql" % (station, monthts.strftime("%Y%m"))
-    out = open(tmpfn, "w")
-    out.write(
-        """DELETE from alldata_1minute WHERE station = '%s' and
-               valid >= '%s' and valid <= '%s';\n"""
+    cursor = pgconn.cursor()
+    cursor.execute(
+        (
+            "DELETE from alldata_1minute WHERE station = '%s' and "
+            "valid >= '%s' and valid <= '%s';\n"
+        )
         % (station, mints, maxts)
     )
-    out.write("COPY alldata_1minute FROM stdin WITH NULL as 'Null';\n")
+    sio = StringIO()
+    cols = [
+        "station",
+        "valid",
+        "vis1_coeff",
+        "vis1_nd",
+        "vis2_coeff",
+        "vis2_nd",
+        "drct",
+        "sknt",
+        "gust_drct",
+        "gust_sknt",
+        "ptype",
+        "precip",
+        "pres1",
+        "pres2",
+        "pres3",
+        "tmpf",
+        "dwpf",
+    ]
 
     # Loop over the data we got please
-    keys = list(data.keys())
-    keys.sort()
-    flipped = False
-    for ts in keys:
-        if ts.year != monthts.year and not flipped:
-            print("  Flipped years from %s to %s" % (monthts.year, ts.year))
-            out.write("\\.\n")
-            out.write("COPY alldata_1minute FROM stdin WITH NULL as 'Null';\n")
-            flipped = True
-        ln = ""
-        data[ts]["station"] = station
-        for col in [
-            "station",
-            "ts",
-            "vis1_coeff",
-            "vis1_nd",
-            "vis2_coeff",
-            "vis2_nd",
-            "drct",
-            "sknt",
-            "gust_drct",
-            "gust_sknt",
-            "ptype",
-            "precip",
-            "pres1",
-            "pres2",
-            "pres3",
-            "tmpf",
-            "dwpf",
-        ]:
-            ln += "%s\t" % (qc(data[ts], col) or "Null",)
-        out.write(ln[:-1] + "\n")
-    out.write("\\.\n")
-    out.close()
-
-    proc = subprocess.Popen(
-        "psql -f %s -h iemdb-asos1min.local asos1min" % (tmpfn,),
-        shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    stdout = proc.stdout.read().decode("utf-8")
-    stderr = proc.stderr.read().decode("utf-8")
-
-    print(
-        (
-            "%s %s processed %s entries [%s to %s UTC]\n"
-            "STDOUT: %s\nSTDERR: %s"
-        )
-        % (
-            datetime.datetime.now().strftime("%H:%M %p"),
-            station,
-            len(data.keys()),
-            mints.strftime("%y%m%d %H:%M"),
-            maxts.strftime("%y%m%d %H:%M"),
-            stdout.replace("\n", " "),
-            stderr.replace("\n", " "),
-        )
-    )
-
-    os.unlink(tmpfn)
+    for ts in data:
+        entry = data[ts]
+        entry["station"] = station
+        sio.write("\t".join([str(qc(entry, col)) for col in cols]))
+        sio.write("\n")
+    sio.seek(0)
+    cursor.copy_from(sio, "alldata_1minute", columns=cols, null="null")
+    count = cursor.rowcount
+    cursor.close()
+    pgconn.commit()
+    return count
 
 
-def update_iemprops():
+def update_iemprops(ts):
     """db update"""
     pgconn = get_dbconn("mesosite")
     cursor = pgconn.cursor()
-    m1 = datetime.date.today().replace(day=1)
     cursor.execute(
-        """
-        UPDATE properties SET propvalue = %s
-        WHERE propname = 'asos.1min.end'
-    """,
-        (m1.strftime("%Y-%m-%d"),),
+        "UPDATE properties SET propvalue = %s "
+        "WHERE propname = 'asos.1min.end'",
+        (ts.strftime("%Y-%m-%d"),),
     )
     cursor.close()
     pgconn.commit()
 
 
-def get_stations():
-    """Figure out which stations we need to process."""
-    cursor = get_dbconn("mesosite").cursor()
-    res = []
-    cursor.execute(
+def init_dataframe(argv):
+    """Build the processing dataframe."""
+    pgconn = get_dbconn("mesosite")
+    df = read_sql(
         "SELECT id from stations t JOIN station_attributes a on "
-        "(t.iemid = a.iemid) where a.attr = 'HAS1MIN' and t.network ~* 'ASOS'"
+        "(t.iemid = a.iemid) where a.attr = 'HAS1MIN' and t.network ~* 'ASOS'",
+        pgconn,
+        index_col="id",
     )
-    for row in cursor:
-        res.append(row[0])
-    return res
+    df["archive_end"] = utc(1980, 1, 1)
+    df["fn5"] = ""
+    df["fn6"] = ""
+    if len(argv) >= 3:
+        if len(argv) == 4:
+            LOG.info("Limiting work to station %s", argv[1])
+            df = df.loc[[argv[1]]]
+            dt = utc(int(argv[2]), int(argv[3]))
+        else:
+            dt = utc(int(argv[1]), int(argv[2]))
+        dl_archive(df, dt)
+    else:
+        dt = utc() - datetime.timedelta(days=1)
+        merge_archive_end(df, dt)
+        dl_realtime(df, dt)
+        update_iemprops(dt)
+
+    return df
+
+
+def merge_archive_end(df, dt):
+    """Figure out our archive end times."""
+    pgconn = get_dbconn("asos1min")
+    df2 = read_sql(
+        f"SELECT station, max(valid) from t{dt.strftime('%Y%m')}_1minute "
+        "GROUP by station",
+        pgconn,
+        index_col="station",
+    )
+    df["archive_end"] = df2["max"]
+
+
+def dl_realtime(df, dt):
+    """Download and stage the 'real-time' processing."""
+    for page in [1, 2]:
+        tmpfn = f"om{page}_{dt.strftime('%Y%m')}.tar.Z"
+        uri = f"https://www1.ncdc.noaa.gov/pub/download/hidden/onemin/{tmpfn}"
+        res = requests.get(uri, timeout=60, stream=True)
+        with open(f"{TMPDIR}/{tmpfn}", "wb") as fh:
+            for chunk in res.iter_content(chunk_size=4096):
+                if chunk:
+                    fh.write(chunk)
+        with tarfile.open(f"{TMPDIR}/{tmpfn}", "r:gz") as tar:
+            for tarinfo in tar:
+                if not tarinfo.isreg():
+                    continue
+                if not tarinfo.name.startswith("640"):
+                    LOG.info("Unknown filename %s", tarinfo.name)
+                    continue
+                page = tarinfo.name[3]
+                station = tarinfo.name[5:9]
+                if station[0] == "K":
+                    station = station[1:]
+                if station not in df.index:
+                    LOG.info("Unknown station %s, FIXME!", station)
+                    continue
+                f = tar.extractfile(tarinfo.name)
+                with open(f"{TMPDIR}/{tarinfo.name}", "wb") as fh:
+                    fh.write(f.read())
+                df.at[station, f"fn{page}"] = f"{TMPDIR}/{tarinfo.name}"
+
+
+def cleanup(df):
+    """Pickup after ourselves."""
+    for _station, row in df.iterrows():
+        for page in [5, 6]:
+            fn = row[f"fn{page}"]
+            if not pd.isnull(fn) and fn.startswith(TMPDIR):
+                LOG.debug("removing %s", fn)
+                os.unlink(fn)
 
 
 def main(argv):
     """Go Main Go"""
-    stations = get_stations()
-    dates = []
-    if len(argv) == 3:
-        dates.append(datetime.datetime(int(argv[1]), int(argv[2]), 1))
-    elif len(argv) == 4:
-        stations = [sys.argv[1]]
-        if int(argv[3]) != 0:
-            months = [int(argv[3])]
-        else:
-            months = range(1, 13)
-        for month in months:
-            dates.append(datetime.datetime(int(argv[2]), month, 1))
-    else:
-        # default to last month
-        ts = datetime.date.today() - datetime.timedelta(days=19)
-        dates.append(datetime.datetime(ts.year, ts.month, 1))
-        update_iemprops()
+    # Build a dataframe to do work with
+    df = init_dataframe(argv)
 
-    progress = tqdm(stations, disable=not sys.stdout.isatty())
+    pgconn = get_dbconn("asos1min")
+    progress = tqdm(df.index.values, disable=not sys.stdout.isatty())
+    total = 0
     for station in progress:
-        for date in dates:
-            progress.set_description(f"{station} {date.strftime('%Y%m')}")
-            try:
-                runner(station, date)
-            except Exception as exp:
-                LOG.info("uncaught exception parsing %s %s", station, date)
-                LOG.exception(exp)
+        row = df.loc[station]
+        progress.set_description(f"{station}")
+        total += runner(pgconn, row, station)
+    LOG.info("Ingested %s observations", total)
+    cleanup(df)
 
 
 if __name__ == "__main__":
