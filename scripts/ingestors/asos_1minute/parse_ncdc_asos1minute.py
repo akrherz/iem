@@ -37,11 +37,13 @@ def qc(mydict, col):
     if val is None:
         return "null"
     if col in ["tmpf", "dwpf"]:
-        try:
-            val = int(val)
-        except ValueError:
-            return "null"
         if val < -90 or val > 150:
+            return "null"
+    if col in ["drct", "gust_drct"]:
+        if val < 0 or val > 360:
+            return "null"
+    if col in ["sknt", "gust_sknt"]:
+        if val < 0 or val > 360:
             return "null"
     return val
 
