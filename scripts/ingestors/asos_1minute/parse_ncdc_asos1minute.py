@@ -121,6 +121,8 @@ def dl_archive(df, dt):
     baseuri = "https://www1.ncdc.noaa.gov/pub/data/asos-onemin"
     for station in df.index.values:
         datadir = "%s/%s" % (BASEDIR, station)
+        if not os.path.isdir(datadir):
+            os.makedirs(datadir)
         station4 = station if len(station) == 4 else f"K{station}"
         for page in [5, 6]:
             fn = "640%s0%s%s%02i.dat" % (page, station4, dt.year, dt.month)
