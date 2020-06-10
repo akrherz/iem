@@ -40,13 +40,14 @@ rings specified at the given distance for a point.</p>
 
 
 <table class="table">
-<thead><tr><th>Ring</th><th>Miles</th><th>Red (0-255)</th><th>Green (0-255)</th>
+<thead><tr><th>Ring</th><th>Miles</th><th>Label (use \\n for line feed)</th><th>Red (0-255)</th><th>Green (0-255)</th>
 <th>Blue (0-255)</th><th>Alpha (0-255)</th></tr></thead>
 
 <tbody>
 <tr>
   <td>1</td>
   <td><input type="text" size="5" maxlength="5" name="m0" value="100"></td>
+  <td><input type="text" size="40" name="t0" value=""></td>
   <td><input type="text" size="5" maxlength="3" name="r0" value="255"></td>
   <td><input type="text" size="5" maxlength="3" name="g0" value="255"></td>
   <td><input type="text" size="5" maxlength="3" name="b0" value="0"></td>
@@ -55,6 +56,7 @@ rings specified at the given distance for a point.</p>
 <tr>
   <td>2</td>
   <td><input type="text" size="5" maxlength="5" name="m1" value="0"> (0 disables)</td>
+  <td><input type="text" size="40" name="t1" value=""></td>
   <td><input type="text" size="5" maxlength="3" name="r1" value="255"></td>
   <td><input type="text" size="5" maxlength="3" name="g1" value="255"></td>
   <td><input type="text" size="5" maxlength="3" name="b1" value="0"></td>
@@ -63,6 +65,7 @@ rings specified at the given distance for a point.</p>
 <tr>
   <td>3</td>
   <td><input type="text" size="5" maxlength="5" name="m2" value="0"> (0 disables)</td>
+  <td><input type="text" size="40" name="t2" value=""></td>
   <td><input type="text" size="5" maxlength="3" name="r2" value="255"></td>
   <td><input type="text" size="5" maxlength="3" name="g2" value="255"></td>
   <td><input type="text" size="5" maxlength="3" name="b2" value="0"></td>
@@ -71,6 +74,9 @@ rings specified at the given distance for a point.</p>
 
 </table>
 </table>
+
+<p>Download Filename: <input type="text" name="fn" value="placefile_rings.txt"></p>
+
 <input type="submit" value="Generate Placefile">
 </form>
 </div>

@@ -1,5 +1,6 @@
 """Author: Zach Hiris"""
 import math
+from html import escape
 from io import StringIO
 
 from paste.request import parse_formvars
@@ -47,9 +48,10 @@ def getLocation(lat1, lon1, brng, distanceMiles):
 def application(environ, start_response):
     """Go Main Go."""
     form = parse_formvars(environ)
+    fn = escape(form.get("fn", "placefile_rings.txt"))
     headers = [
         ("Content-type", "application/octet-stream"),
-        ("Content-Disposition", "attachment; filename=placefile_rings.txt"),
+        ("Content-Disposition", f"attachment; filename={fn}"),
     ]
     start_response("200 OK", headers)
 
@@ -77,6 +79,7 @@ def application(environ, start_response):
         g = int(form.get("g%s" % (i,), 255))
         b = int(form.get("b%s" % (i,), 0))
         a = int(form.get("a%s" % (i,), 255))
+        t = form.get("t%s" % (i,), "").replace("\n", "\\n")
 
         # Create the lon/lat pairs
         X, Y = createCircleAroundWithRadius(
@@ -84,8 +87,8 @@ def application(environ, start_response):
         )
 
         sio.write(
-            ("Color: %s %s %s %s\n" 'Line: 2, 0, "%.1f miles from %s" \n')
-            % (r, g, b, a, distanceInMiles, loc)
+            ("Color: %s %s %s %s\n" 'Line: 2, 0, "%s%s%.1f miles from %s" \n')
+            % (r, g, b, a, t, "\\n" if t != "" else "", distanceInMiles, loc)
         )
         for x, y in zip(X, Y):
             sio.write(" %s, %s\n" % (y, x))
