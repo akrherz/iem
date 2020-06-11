@@ -1,37 +1,38 @@
 <?php
 // 1 minute schoolnet data plotter
 // Cool.....
-include("../../../config/settings.inc.php");
-
-include("../../../include/database.inc.php");
-include("../../../include/network.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/database.inc.php";
+require_once "../../../include/network.php";
 $nt = new NetworkTable(Array("IA_ASOS","NE_ASOS","IL_ASOS", "SD_ASOS"));
 $cities = $nt->table;
-include ("../../../include/jpgraph/jpgraph.php");
-include ("../../../include/jpgraph/jpgraph_line.php");
-include ("../../../include/jpgraph/jpgraph_led.php");
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_led.php";
+require_once "../../../include/jpgraph/jpgraph_date.php";
 
 $station = isset($_GET["station"]) ? $_GET["station"] : "DSM";
 $year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"]: date("m");
 $day = isset($_GET["day"]) ? $_GET["day"]: date("d");
 
-
-  $myTime = strtotime($year."-".$month."-".$day);
-
+$myTime = strtotime($year."-".$month."-".$day);
 
 $titleDate = strftime("%b %d, %Y", $myTime);
-$tableName = strftime("t%Y_1minute", $myTime);
-$sqlDate = strftime("%Y-%m-%d", $myTime);
+$sqlDate1 = strftime("%Y-%m-%d 00:00", $myTime);
+$sqlDate2 = strftime("%Y-%m-%d 23:59", $myTime);
 
 /** Time to get data from database **/
 $connection = iemdb("asos1min");
-$rs = pg_prepare($connection, "SELECT", "SELECT " .
-		"to_char(valid, 'HH24:MI') as tvalid, tmpf, dwpf from " .
-		 $tableName ." WHERE station = $1 and " .
-		"date(valid) = $2 ORDER by tvalid");
+$rs = pg_prepare(
+    $connection,
+    "SELECT",
+    "SELECT valid, tmpf, dwpf from " .
+	"alldata_1minute WHERE station = $1 and " .
+    "valid >= $2 and valid <= $3 and tmpf is not null and dwpf is not null ".
+    "ORDER by valid ASC");
 
-$result = pg_execute($connection, "SELECT", Array($station, $sqlDate));
+$result = pg_execute($connection, "SELECT", Array($station, $sqlDate1, $sqlDate2));
 
 pg_close($connection);
 
@@ -43,6 +44,7 @@ if (pg_num_rows($result) == 0){
 
 $tmpf = array();
 $dwpf = array();
+$valid = array();
 $xlabel = array();
 
 $start = intval( $myTime );
@@ -54,94 +56,17 @@ $min_yaxis = 100;
 $max_yaxis = 0;
 
 for( $p=0; $row = pg_fetch_array($result); $p++)  {
-  $strDate = $sqlDate ." ". $row["tvalid"]; 
-  $timestamp = strtotime($strDate );
-#  echo $thisTime ."||";
-  
-  $thisTmpf = $row["tmpf"];
-  $thisDwpf = $row["dwpf"];
-  if ($thisTmpf < -50 || $thisTmpf > 150 ){
-    $thisTmpf = "";
-  } else {
-    if ($max_yaxis < $thisTmpf){
-      $max_yaxis = $thisTmpf;
-    }
-  }
-  if ($thisDwpf < -50 || $thisDwpf > 150 ){
-    $thisDwpf = "";
-  }  else {
-    if ($min_yaxis > $thisDwpf){
-      $min_yaxis = $thisDwpf;
-    }
-  }
-
-  $shouldbe = intval( $start ) + 60 * $i;
- 
-#  echo  $i ." - ". $p ."-". $shouldbe ." - ". $timestamp ;
-  
-  // We are good, write data, increment i
-  if ( $shouldbe == $timestamp ){
-#    echo " EQUALS <br>";
-    $tmpf[$i] = $thisTmpf;
-    $dwpf[$i] = $thisDwpf;
-    $xlabel[$i] = $row["tvalid"];
-    $i++;
-    continue;
-  
-  // Missed an ob, leave blank numbers, inc i
-  } else if (($timestamp - $shouldbe) > 0) {
-#    echo " TROUBLE <br>";
-    $tester = $shouldbe + 60;
-    while ($tester <= $timestamp ){
-      $tester = $tester + 60 ;
-      $tmpf[$i] = "";
-      $dwpf[$i] = "";
-      $xlabel[$i] ="";
-      $i++;
-      $missing++;
-    }
-    $tmpf[$i] = $thisTmpf;
-    $dwpf[$i] = $thisDwpf;
-    $i++;
-    continue;
-    
-    $q--;
-  } else if (($timestamp - $shouldbe) < 0) {
-#    echo "DUP <br>";
-     $dups++;
-    
-  }
-
+    $tmpf[] = $row["tmpf"];
+    $dwpf[] = $row["dwpf"];
+    $valid[] = strtotime($row["valid"]);
 } // End of while
-
-$xpre = array(0 => '12 AM', '1 AM', '2 AM', '3 AM', '4 AM', '5 AM',
-        '6 AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM', 'Noon',
-        '1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM', '7 PM',
-        '8 PM', '9 PM', '10 PM', '11 PM', 'Midnight');
-
-
-for ($j=0; $j<24; $j++){
-  $xlabel[$j*60] = $xpre[$j];
-}
-
-
-// Fix y[0] problems
-if ($tmpf[0] == ""){
-  $tmpf[0] = 0;
-}
-if ($dwpf[0] == ""){
-  $dwpf[0] = 0;
-}
-
-
-
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300,"example1");
-$graph->SetScale("textlin", $min_yaxis - 4, $max_yaxis +4);
+$graph->SetScale("datlin");
 $graph->img->SetMargin(55,40,55,60);
 //$graph->xaxis->SetFont(FONT1,FS_BOLD);
-$graph->xaxis->SetTickLabels($xlabel);
+//$graph->xaxis->SetTickLabels($xlabel);
 //$graph->xaxis->SetTextLabelInterval(60);
 $graph->xaxis->SetTextTickInterval(60);
 
@@ -167,28 +92,16 @@ $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot
-$lineplot=new LinePlot($tmpf);
+$lineplot=new LinePlot($tmpf, $valid);
 $graph->Add($lineplot);
 $lineplot->SetLegend("Temperature");
 $lineplot->SetColor("red");
 
 // Create the linear plot
-$lineplot2=new LinePlot($dwpf);
+$lineplot2=new LinePlot($dwpf, $valid);
 $graph->Add($lineplot2);
 $lineplot2->SetLegend("Dew Point");
 $lineplot2->SetColor("blue");
-
-// Box for error notations
-$t1 = new Text("Dups: ".$dups ." Missing: ".$missing );
-$t1->SetPos(0.4,0.95);
-$t1->SetOrientation("h");
-$t1->SetFont(FF_FONT1,FS_BOLD);
-//$t1->SetBox("white","black",true);
-$t1->SetColor("black");
-$graph->AddText($t1);
-
-
-
 
 $graph->Stroke();
 

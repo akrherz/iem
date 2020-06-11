@@ -112,7 +112,7 @@ def p1_parser(ln):
     # Take the wind chunk
     tokens = ln[67:].strip().split()
     if len(tokens) < 4:
-        print(f"P1_FAIL(2): |{ln}|")
+        LOG.debug("P1_FAIL(2): |%s|", ln)
         return None
     for i, col in enumerate(["drct", "sknt", "gust_drct", "gust_sknt"]):
         res[col] = None if not INT_RE.match(tokens[i]) else int(tokens[i])
@@ -152,13 +152,13 @@ def runner(pgconn, row, station):
     # We have two files to worry about
     for ln in open(row["fn5"]):
         d = p1_parser(ln)
-        if d is None or d["valid"] < row["archive_end"]:
+        if d is None or d["valid"] <= row["archive_end"]:
             continue
         data[d["valid"]] = d
 
     for ln in open(row["fn6"]):
         d = p2_parser(ln)
-        if d is None or d["valid"] < row["archive_end"]:
+        if d is None or d["valid"] <= row["archive_end"]:
             continue
         res = data.setdefault(d["valid"], {})
         res.update(d)

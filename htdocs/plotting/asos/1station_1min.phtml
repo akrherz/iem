@@ -1,16 +1,16 @@
 <?php 
-include("../../../config/settings.inc.php");
-include_once "../../../include/myview.php";
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/myview.php";
 $t = new MyView();
-include("../../../include/iemprop.php");
+require_once "../../../include/iemprop.php";
 $asos_archive_end = strtotime( get_iemprop("asos.1min.end") );
-include("../../../include/imagemaps.php");
+require_once "../../../include/imagemaps.php";
 require_once "../../../include/forms.php"; 
 
 $station = isset($_GET["station"]) ? xssafe($_GET["station"]): "";
-$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
-$month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
-$day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
+$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y", time() - 86400);
+$month = isset($_GET["month"]) ? intval($_GET["month"]): date("m", time() - 86400);
+$day = isset($_GET["day"]) ? intval($_GET["day"]): date("d", time() - 86400);
 
 $t = new MyView();
 $t->thispage = "networks-asos";
@@ -18,7 +18,20 @@ $t->title = "Iowa ASOS 1 Minute Time Series";
 
 $endts =  date("d M Y", $asos_archive_end);
 
-$nselect = networkSelect("IA_ASOS", $station, Array("FSD","MLI","OMA") ); 
+$ar = Array();
+$pgconn = iemdb("mesosite");
+$rs = pg_query(
+    $pgconn,
+    "SELECT id, name, state from stations t JOIN station_attributes a ".
+    "ON (t.iemid = a.iemid) WHERE t.network ~* 'ASOS' and ".
+    "a.attr = 'HAS1MIN' ORDER by id ASC");
+for($i=0; $row=pg_fetch_array($rs); $i++)
+{
+    $ar[$row[0]] = sprintf("[%s] %s, %s", $row[0], $row[1], $row[2]);
+}
+
+$sselect = make_select("station", $station, $ar);
+
 $ys = yearSelect(2000, $year, "year"); 
 $ms = monthSelect($month, "month"); 
 $ds = daySelect($day, "day"); 
@@ -45,17 +58,19 @@ EOF;
 }
 
 $t->content = <<<EOF
-<p><b>Note:</b>The archive currently contains data from 1 Jan 2000
-till {$endts} for Waterloo, Sioux City, Dubuque,
-and Des Moines.  Other ASOS sites have data from March 2003 to 
-{$endts}.
+
+<h3>ASOS Daily 1 Minute Data Traces</h3>
+
+<p>This page presents an one minute interval plot of available data for a given
+central time date.  Data for some sites goes back to the year 2000 and is mostly
+updated until {$endts}.</p>
 
 
 
   <form method="GET" action="1station_1min.phtml">
 
     Make plot selections: <br>
-   {$nselect}
+   {$sselect}
    {$ys} {$ms} {$ds}
 
   <input type="submit" value="Make Plot"></form>
