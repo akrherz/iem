@@ -5,15 +5,19 @@ import os
 from io import BytesIO, StringIO
 
 import shapefile
+import pandas as pd
+from pandas.io.sql import read_sql
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc
+
+EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 def get_time_domain(form):
     """Figure out the start and end timestamps"""
     if "recent" in form:
         # Allow for specifying a recent number of seconds
-        ets = datetime.datetime.utcnow()
+        ets = utc()
         seconds = abs(int(form.get("recent")))
         sts = ets - datetime.timedelta(seconds=seconds)
         return sts, ets
@@ -32,10 +36,59 @@ def get_time_domain(form):
     hour2 = int(form.get("hour2"))
     minute1 = int(form.get("minute1"))
     minute2 = int(form.get("minute2"))
-    sts = datetime.datetime(year1, month1, day1, hour1, minute1)
-    ets = datetime.datetime(year2, month2, day2, hour2, minute2)
+    sts = utc(year1, month1, day1, hour1, minute1)
+    ets = utc(year2, month2, day2, hour2, minute2)
 
     return sts, ets
+
+
+def do_excel(pgconn, sts, ets, wfolimiter):
+    """Export as Excel."""
+    df = read_sql(
+        "WITH wfos as (select case when length(id) = 4 then substr(id, 1, 3) "
+        "else id end as wfo, tzname from stations where network = 'WFO') "
+        "SELECT distinct "
+        "l.wfo as office, "
+        "to_char(valid at time zone w.tzname, "
+        " 'YYYY/MM/DD HH24:MI') as lvalid, "
+        "to_char(valid at time zone 'UTC', 'YYYY/MM/DD HH24:MI') as utcvalid, "
+        "county, city, state, typetext, magnitude, source, "
+        "ST_y(geom) as lat, ST_x(geom) as lon, remark "
+        "from lsrs l JOIN wfos w on (l.wfo = w.wfo) "
+        f"WHERE valid >= %s and valid < %s {wfolimiter} ORDER by utcvalid ASC",
+        pgconn,
+        params=(sts, ets),
+    )
+    df = df.rename(
+        {
+            "office": "Office",
+            "lvalid": "Report Time (Local WFO Timezone)",
+            "utcvalid": "Report Time (UTC Timezone)",
+            "county": "County",
+            "city": "Location",
+            "state": "ST",
+            "typetext": "Event Type",
+            "magnitude": "Mag.",
+            "source": "Source",
+            "lat": "Lat",
+            "lon": "Lon",
+            "remark": "Remark",
+        },
+        axis=1,
+    )
+    bio = BytesIO()
+    # pylint: disable=abstract-class-instantiated
+    writer = pd.ExcelWriter(bio, engine="xlsxwriter")
+    df.to_excel(writer, "Local Storm Reports", index=False)
+    worksheet = writer.sheets["Local Storm Reports"]
+    worksheet.set_column("B:C", 36)
+    worksheet.set_column("D:E", 24)
+    worksheet.set_column("G:G", 24)
+    worksheet.set_column("I:I", 24)
+    worksheet.set_column("L:L", 100)
+    worksheet.freeze_panes(1, 0)
+    writer.close()
+    return bio.getvalue()
 
 
 def application(environ, start_response):
@@ -50,7 +103,7 @@ def application(environ, start_response):
     # Get CGI vars
     form = parse_formvars(environ)
 
-    (sTS, eTS) = get_time_domain(form)
+    (sts, ets) = get_time_domain(form)
 
     wfoLimiter = ""
     if "wfo[]" in form:
@@ -59,8 +112,16 @@ def application(environ, start_response):
         if "ALL" not in aWFO:
             wfoLimiter = " and wfo in %s " % (str(tuple(aWFO)),)
 
+    fn = "lsr_%s_%s" % (sts.strftime("%Y%m%d%H%M"), ets.strftime("%Y%m%d%H%M"))
+    if form.get("fmt", "") == "excel":
+        headers = [
+            ("Content-type", EXL),
+            ("Content-disposition", f"attachment; Filename={fn}.xlsx"),
+        ]
+        start_response("200 OK", headers)
+        return [do_excel(pgconn, sts, ets, wfoLimiter)]
+
     os.chdir("/tmp")
-    fn = "lsr_%s_%s" % (sTS.strftime("%Y%m%d%H%M"), eTS.strftime("%Y%m%d%H%M"))
     for suffix in ["shp", "shx", "dbf", "csv"]:
         if os.path.isfile("%s.%s" % (fn, suffix)):
             os.remove("%s.%s" % (fn, suffix))
@@ -74,7 +135,7 @@ def application(environ, start_response):
     )
 
     cursor.execute(
-        """
+        f"""
         SELECT distinct
         to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as dvalid,
         magnitude, wfo, type, typetext,
@@ -82,14 +143,10 @@ def application(environ, start_response):
         ST_y(geom), ST_x(geom),
         to_char(valid at time zone 'UTC', 'YYYY/MM/DD HH24:MI') as dvalid2
         from lsrs WHERE
-        valid >= '%s+00' and valid < '%s+00' %s
+        valid >= %s and valid < %s {wfoLimiter}
         ORDER by dvalid ASC
-        """
-        % (
-            sTS.strftime("%Y-%m-%d %H:%M"),
-            eTS.strftime("%Y-%m-%d %H:%M"),
-            wfoLimiter,
-        )
+        """,
+        (sts, ets),
     )
 
     if cursor.rowcount == 0:
@@ -143,7 +200,7 @@ def application(environ, start_response):
                 )
             )
 
-    if "justcsv" in form:
+    if "justcsv" in form or form.get("fmt", "") == "csv":
         headers = [
             ("Content-type", "application/octet-stream"),
             ("Content-Disposition", "attachment; filename=%s.csv" % (fn,)),

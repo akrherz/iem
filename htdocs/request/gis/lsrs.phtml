@@ -46,9 +46,9 @@ files generated every 5 minutes:  <a href="/data/gis/shape/4326/us/lsr_24hour.zi
 <br />You can use the following URI form to get the most recent number of seconds
 worth of LSRs.  Note that these times are based on the valid time of the LSR and
 not the issuance of the text product itself that contained the LSR.
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py?wfo[]=ALL&amp;recent=86400&amp;justcsv=1</code>
-<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py?wfo[]=DMX&amp;wfo[]=DVN&amp;recent=86400&amp;justcsv=1</code>
-<br />Omit the justcsv portion to return the zipped shapefile.</p>
+<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py?wfo[]=ALL&amp;recent=86400&amp;fmt=csv</code>
+<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py?wfo[]=DMX&amp;wfo[]=DVN&amp;recent=86400&amp;fmt=csv</code>
+<br />Omit the <code>fmt=csv</code> portion to return the zipped shapefile.</p>
 		
 <form method="GET" action="/cgi-bin/request/gis/lsr.py">
 <h4>Limit Weather Forecast Office (WFO)</h4>
@@ -86,10 +86,14 @@ between these times selected below will be included in the output GIS file...)</
     </tbody>
 </table>
 
-<p><input type='checkbox' name='justcsv' value='true' /> 
-    		Giveme only a comma delimited file
-     		
-<p><input type="submit" value="Giveme shapefile now!">
+<p><strong>Download Format:</strong>
+<select name="fmt">
+  <option value="shp">ESRI Shapefile</option>
+  <option value="csv">Comma Delimited (.csv)</option>
+  <option value="excel">Microsoft Excel (.xlsx)</option>
+</select>
+
+<p><input type="submit" value="Giveme File Now Please!">
 </form>
 
 <h4>Shapefile DBF schema:</h4>
