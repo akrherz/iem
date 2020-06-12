@@ -46,7 +46,7 @@ def do_excel(pgconn, sts, ets, wfolimiter):
     """Export as Excel."""
     df = read_sql(
         "WITH wfos as (select case when length(id) = 4 then substr(id, 1, 3) "
-        "else id end as wfo, tzname from stations where network = 'WFO') "
+        "else id end as cwa, tzname from stations where network = 'WFO') "
         "SELECT distinct "
         "l.wfo as office, "
         "to_char(valid at time zone w.tzname, "
@@ -54,7 +54,7 @@ def do_excel(pgconn, sts, ets, wfolimiter):
         "to_char(valid at time zone 'UTC', 'YYYY/MM/DD HH24:MI') as utcvalid, "
         "county, city, state, typetext, magnitude, source, "
         "ST_y(geom) as lat, ST_x(geom) as lon, remark "
-        "from lsrs l JOIN wfos w on (l.wfo = w.wfo) "
+        "from lsrs l JOIN wfos w on (l.wfo = w.cwa) "
         f"WHERE valid >= %s and valid < %s {wfolimiter} ORDER by utcvalid ASC",
         pgconn,
         params=(sts, ets),
