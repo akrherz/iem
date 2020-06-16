@@ -2,13 +2,12 @@
  Backfill information into the IEM summary table, so the website tools are
  happier
 """
-from __future__ import print_function
 
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
 from pyiem.datatypes import speed, distance, temperature
 
+LOG = logger()
 ISUAG = get_dbconn("isuag", user="mesonet")
-
 IEM = get_dbconn("iem", user="mesonet")
 
 
@@ -36,9 +35,7 @@ def two():
             (valid, station),
         )
         if iemcursor.rowcount == 0:
-            print(
-                ("Adding summary_%s row %s %s") % (valid.year, station, valid)
-            )
+            LOG.info("Adding summary_%s row %s %s", valid.year, station, valid)
             iemcursor.execute(
                 """
             INSERT into summary_"""
@@ -59,9 +56,14 @@ def two():
             or round(row2[0], 2) != round(min_rh, 2)
             or round(row2[1], 2) != round(max_rh, 2)
         ):
-            print(
-                ("Mismatch %s %s min_rh: %s->%s max_rh: %s->%s")
-                % (station, valid, row2[0], min_rh, row2[1], max_rh)
+            LOG.info(
+                "Mismatch %s %s min_rh: %s->%s max_rh: %s->%s",
+                station,
+                valid,
+                row2[0],
+                min_rh,
+                row2[1],
+                max_rh,
             )
 
             iemcursor.execute(

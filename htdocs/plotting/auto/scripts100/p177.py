@@ -143,8 +143,8 @@ def make_daily_rad_plot(ctx):
         """
         SELECT valid, slrmj_tot_qc from sm_daily
         where station = '%s'
-        and valid >= '%s' and valid <= '%s' and slrmj_tot_qc is not null
-        ORDER by valid ASC
+        and valid >= '%s' and valid <= '%s' and slrmj_tot_qc > 0 and
+        slrmj_tot_qc < 40 ORDER by valid ASC
     """
         % (
             ctx["station"],
@@ -187,7 +187,8 @@ def make_daily_rad_plot(ctx):
         ("ISUSM Station: %s Timeseries\n" "Daily Solar Radiation")
         % (ctx["_nt"].sts[ctx["station"]]["name"],)
     )
-    ax.legend(loc="best", ncol=1, fontsize=10)
+    ax.set_ylim(0, 38)
+    ax.legend(loc=1, ncol=2, fontsize=10)
     return fig, df
 
 

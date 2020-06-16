@@ -204,14 +204,8 @@ def plot4(ctx):
 def plot5(ctx, col):
     """Daily ET."""
     df = read_sql(
-        """
-        SELECT station, """
-        + col
-        + """_qc from sm_daily WHERE
-        valid = %s and """
-        + col
-        + """_qc is not null
-    """,
+        f"SELECT station, {col}_qc from sm_daily WHERE valid = %s and "
+        f"{col}_qc is not null",
         ctx["pgconn"],
         params=(ctx["date"],),
         index_col="station",

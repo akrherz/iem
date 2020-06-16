@@ -164,7 +164,7 @@ def runner(pgconn, row, station):
         res.update(d)
 
     if not data:
-        print("No data found for station: %s" % (station,))
+        LOG.info("No data found for station: %s", station)
         return 0
 
     mints = None

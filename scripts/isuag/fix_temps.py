@@ -1,11 +1,12 @@
 """Use IEMRE estimated high and low temps"""
-from __future__ import print_function
 import json
 
 import requests
 from pyiem.datatypes import temperature
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
 def main():
@@ -33,11 +34,11 @@ def main():
         res = requests.get(uri)
         j = json.loads(res.content)
         if not j["data"]:
-            print(" %s %s IEMRE Failure" % (station, date))
+            LOG.info(" %s %s IEMRE Failure", station, date)
             continue
         highf = j["data"][0]["daily_high_f"]
         lowf = j["data"][0]["daily_low_f"]
-        print(" %s %s high: %.1f low: %.1f" % (station, date, highf, lowf))
+        LOG.info(" %s %s high: %.1f low: %.1f", station, date, highf, lowf)
         high = temperature(highf, "F").value("C")
         low = temperature(lowf, "F").value("C")
         avg = (high + low) / 2.0

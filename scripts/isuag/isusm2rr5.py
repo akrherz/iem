@@ -35,16 +35,13 @@ def generate_rr5():
         ": File generated %s UTC\n"
     ) % (datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M"),)
 
-    pgconn = get_dbconn("iem", user="nobody")
+    pgconn = get_dbconn("iem")
     cursor = pgconn.cursor()
     cursor.execute(
-        """
-        SELECT id, valid, tmpf, c1tmpf, c2tmpf, c3tmpf, c4tmpf,
-        c2smv, c3smv, c4smv, phour
-        from current c JOIN stations t
-        on (t.iemid = c.iemid) WHERE t.network = 'ISUSM' and
-        valid > (now() - '90 minutes'::interval)
-    """
+        "SELECT id, valid, tmpf, c1tmpf, c2tmpf, c3tmpf, c4tmpf, "
+        "c2smv, c3smv, c4smv, phour from current c JOIN stations t "
+        "on (t.iemid = c.iemid) WHERE t.network = 'ISUSM' and "
+        "valid > (now() - '90 minutes'::interval)"
     )
     for row in cursor:
         q = qcdict.get(row[0], dict())
@@ -76,13 +73,10 @@ def generate_rr5():
 def main():
     """Go Main Go"""
     rr5data = generate_rr5()
-    # print rr5data
     (tmpfd, tmpfn) = tempfile.mkstemp()
     os.write(tmpfd, rr5data.encode("utf-8"))
     os.close(tmpfd)
-    subprocess.call(
-        ("pqinsert -p 'SUADSMRR5DMX.dat' %s") % (tmpfn,), shell=True
-    )
+    subprocess.call(f"pqinsert -p 'SUADSMRR5DMX.dat' {tmpfn}", shell=True)
     os.unlink(tmpfn)
 
 
