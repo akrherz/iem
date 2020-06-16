@@ -208,6 +208,20 @@ def workflow():
     cursor.close()
     pgconn.commit()
 
+    # Special case of PET
+    cursor = pgconn.cursor()
+    cursor.execute(
+        "WITH data as ( "
+        "SELECT station, date(valid), "
+        "sum(etalfalfa_qc) as dailyet from sm_hourly WHERE "
+        "valid >= %s and etalfalfa_qc is not null GROUP by station, date) "
+        "UPDATE sm_daily s SET dailyet_qc = d.dailyet, dailyet = d.dailyet "
+        "FROM data d WHERE s.station = d.station and s.valid = d.date",
+        (sts,),
+    )
+    cursor.close()
+    pgconn.commit()
+
 
 def main():
     """Go Main Go."""
