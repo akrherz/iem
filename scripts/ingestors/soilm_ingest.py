@@ -132,8 +132,9 @@ def common_df_logic(filename, maxts, nwsli, tablename):
     df.rename(columns=VARCONV, inplace=True)
     if tablename == "sm_minute":
         # Some conversions needed to map this data back to 1min table
-        # slrkw_avg to slrkj_tot (* 15 * 60 / 15)
-        df["slrkj_tot"] = df["slrkw_avg"] * 60.0
+        # slrkw_avg SIC is actually W/m2 over 15 minutes, we want to store as
+        # a total over "one minute" W/m2 -> kJ/s/m2
+        df["slrkj_tot"] = df["slrkw_avg"] * 60.0 / 1000.0
         # rain_mm_tot to rain_in_tot
         df["rain_in_tot"] = df["rain_mm_tot"] / 25.4
         if "rain_mm_2_tot" in df.columns:
@@ -204,6 +205,9 @@ def common_df_logic(filename, maxts, nwsli, tablename):
     if tablename == "sm_daily":
         # Rework the valid column into the appropriate date
         df["valid"] = df["valid"].dt.date - datetime.timedelta(days=1)
+    if tablename == "sm_hourly":
+        # Correct incorrect units on radiation, the data is actually W/m2
+        df["slrkw_avg"] = df["slrkw_avg"] / 1000.0
     df = df[df["valid"] > maxts].copy()
     if df.empty:
         return
@@ -317,6 +321,7 @@ def hourly_process(nwsli, maxts):
             relh = humidity(row["rh_qc"], "%")
             ob.data["relh"] = relh.value("%")
             ob.data["dwpf"] = met.dewpoint(tmpc, relh).value("F")
+        # SIC the units of slrkw are actually W/m2
         ob.data["srad"] = row["slrkw_avg_qc"]
         ob.data["phour"] = round(
             distance(row["rain_mm_tot_qc"], "MM").value("IN"), 2
