@@ -2,11 +2,11 @@
 
 NOTE: I had to manually edit the .csv file to remove the first row
 """
-from __future__ import print_function
-
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.util import get_dbconn
+
+CSVFN = "/home/akrherz/Downloads/nwsli_database.csv"
 
 
 def dowork(df, nwsli):
@@ -19,10 +19,10 @@ def dowork(df, nwsli):
     print(row["NWSLI"])
     print(
         "%s %s%s - %s"
-        % (row["City"], row["Mileage"], row["Direction"], row["Station Name"])
+        % (row["City"], row["Detail"], row["Direction"], row["Station Name"])
     )
     print(row["State"])
-    print(row["Program Acronym"])
+    print(f"Program {row['Program']} Type: {row['Type']}")
     print(row["Latitude"])
     print(row["Longitude"])
 
@@ -31,14 +31,12 @@ def main():
     """Go Main Go!"""
     pgconn = get_dbconn("hads", user="mesonet")
     udf = read_sql(
-        """
-        SELECT distinct nwsli, 1 as col from unknown ORDER by nwsli
-    """,
+        "SELECT distinct nwsli, 1 as col from unknown ORDER by nwsli",
         pgconn,
         index_col="nwsli",
     )
     print("Found %s unknown entries" % (len(udf.index),))
-    df = pd.read_csv("/tmp/nwsli_database.csv", low_memory=False)
+    df = pd.read_csv(CSVFN, low_memory=False)
     for nwsli, _row in udf.iterrows():
         dowork(df, nwsli)
 

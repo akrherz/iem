@@ -89,8 +89,12 @@ def daily_process(cursor, station, date, df):
     """Process this date's dataframe."""
     sumdf = df.sum()
     avgdf = df.mean()
+    mindf = df.min()
+    maxdf = df.max()
     row = {"station": station, "date": date}
     row["obs_count"] = float(sumdf["obs_count"])
+    row["tair_c_max"] = maxdf["tair_c_max"]
+    row["tair_c_min"] = mindf["tair_c_min"]
     for colname in [
         "tsoil_c_avg",
         "t12_c_avg",
@@ -120,6 +124,8 @@ def daily_process(cursor, station, date, df):
     cursor.execute(
         """
         UPDATE sm_daily SET
+        tair_c_max_qc = coalesce(tair_c_max_qc, %(tair_c_max)s),
+        tair_c_min_qc = coalesce(tair_c_min_qc, %(tair_c_min)s),
         tsoil_c_avg = %(tsoil_c_avg)s,
         tsoil_c_avg_qc = %(tsoil_c_avg)s,
         t12_c_avg = %(t12_c_avg)s,
@@ -174,6 +180,8 @@ def workflow():
     station, hour,
     count(*) as obs_count,
     sum(slrkj_tot_qc) as slrkj_tot_sum,
+    min(tair_c_avg_qc) as tair_c_min,
+    max(tair_c_avg_qc) as tair_c_max,
     max(case when rn = 1 then rh_avg else null end) as rh_avg,
     max(case when rn = 1 then tair_c_avg else null end) as tair_c_avg,
     max(case when rn = 1 then tsoil_c_avg else null end) as tsoil_c_avg,

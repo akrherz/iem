@@ -157,7 +157,7 @@ if (substr($var, 0, 3) == 'gdd') {
   $level = intval(substr($var, 3, 2));
 	if ($year > 2013){
 		$q = <<<EOF
-  SELECT station, c2f(tair_c_max) as c11, c2f(tair_c_min) as c12 from sm_daily
+  SELECT station, c2f(tair_c_max_qc) as c11, c2f(tair_c_min_qc) as c12 from sm_daily
   WHERE valid >= '{$sstr}' and valid <= '{$estr}'
 EOF;
 	} else {
@@ -184,7 +184,7 @@ EOF;
 if ($var == 'sdd86') {
 	if ($year > 2013){
 		$q = <<<EOF
-  SELECT station, c2f(tair_c_max) as c11, c2f(tair_c_min) as c12 from sm_daily
+  SELECT station, c2f(tair_c_max_qc) as c11, c2f(tair_c_min_qc) as c12 from sm_daily
   WHERE valid >= '{$sstr}' and valid <= '{$estr}'
 EOF;
 	} else {
