@@ -88,32 +88,18 @@ def get_data(ctx):
         table = "summary"
         stationcol = "iemid"
     df = read_sql(
-        """
+        f"""
     WITH data as (
     SELECT day, extract(year from day + '%s months'::interval) as season,
-    avg(("""
-        + highcol
-        + """ + """
-        + lowcol
-        + """)/2.)
+    avg(({highcol} + {lowcol})/2.)
         OVER (ORDER by day ASC ROWS %s preceding) as avg_temp,
-    avg("""
-        + highcol
-        + """)
+    avg({highcol})
         OVER (ORDER by day ASC ROWS %s preceding) as avg_hitemp,
-    avg("""
-        + lowcol
-        + """)
+    avg({lowcol})
         OVER (ORDER by day ASC ROWS %s preceding) as avg_lotemp,
-    sum("""
-        + precipcol
-        + """)
+    sum({precipcol})
         OVER (ORDER by day ASC ROWS %s preceding) as sum_precip
-    from """
-        + table
-        + """ WHERE """
-        + stationcol
-        + """ = %s),
+    from {table} WHERE {stationcol} = %s and {highcol} is not null),
     agg1 as (
         SELECT season, day, avg_temp, avg_hitemp, avg_lotemp,
         sum_precip,
@@ -136,9 +122,7 @@ def get_data(ctx):
     SELECT season, day,
     extract(doy from day - '%s days'::interval)::int as doy,
     avg_temp, avg_hitemp, avg_lotemp,
-    sum_precip from agg1 where """
-        + varname
-        + """_rank = 1 and count > 240
+    sum_precip from agg1 where {varname}_rank = 1 and count > 240
     """,
         pgconn,
         params=(

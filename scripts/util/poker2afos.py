@@ -96,6 +96,7 @@ XREF_SOURCE = {
     "KSDF": "KLMK",
     "KSEA": "KSEW",
     "KMKE": "KMKX",
+    "KMSN": "KMKX",
     "KPHL": "KPHI",
     "KPWM": "KGYX",
     "KARB": "KDTX",
