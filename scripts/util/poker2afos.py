@@ -48,6 +48,7 @@ XREF_SOURCE = {
     "KOMA": "KOAX",
     "KORD": "KLOT",
     "KCHI": "KLOT",
+    "KMMO": "KLOT",
     "KPDX": "KPQR",
     "KPHX": "KPSR",
     "KPIT": "KPBZ",

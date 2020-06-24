@@ -16,6 +16,14 @@ $t->title = "NWS Text Product by Issuing Center by Date";
 $t->thispage ="archive-afos";
 $t->headextra = <<<EOF
  <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
+<style>
+.col-md-2 {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    max-height: 350px;
+
+}
+</style>
 EOF;
 $t->jsextra = <<<EOF
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
@@ -111,21 +119,21 @@ if ($view == "prod"){
         }
         $columns[$row["pil"]] .= sprintf("<a href=\"%s\">%s</a> (%s)<br />",
 				$url, $row["pil"], gmdate("H:i", $ts));
-	}
+    }
+    ksort($columns);
 	$keys = array_keys($columns);
-	asort($keys);
 	$table = "";
 	$atags .= '<div class="clearfix"></div><strong>Skip to PIL:</strong> ';
 	foreach($keys as $i => $k){
 		$atags .= sprintf("<a class=\"btn btn-default btn-sm\" href=\"javascript:void(0)\" onclick=\"j('%s');\">%s</a> ",
 		                  $k, $k);
-		if ($i % 6 == 0){
+        if ($i % 6 == 0){
 			if ($i > 0){
 				$table .= "</div>";
 			}
 			$table .= "<div class=\"row\">\n";
 		}
-		$table .= sprintf("<div id=\"sect$k\" class=\"col-lg-1 col-md-2 col-sm-2 col-xs-4 well\">%s</div>\n",
+		$table .= sprintf("<div id=\"sect$k\" class=\"col-lg-2 col-md-2 col-sm-2 col-xs-4 well\">%s</div>\n",
 		                  $columns[$k]);
 	}
 	$table .= "</div>\n";
@@ -153,7 +161,7 @@ if ($view == "prod"){
 				}
 				$table .= "<div class=\"container\"><div class=\"row\">\n";
 			}
-			$table .= "<div id=\"sect$lasthour\" class=\"col-lg-1 col-md-2 col-sm-2 col-xs-4 well\">";
+			$table .= "<div id=\"sect$lasthour\" class=\"col-lg-2 col-md-2 col-sm-2 col-xs-4 well\">";
 			$table .= sprintf("<strong>%s UTC</strong><br />", gmdate('d M Y : H', $ts));
 		    $colnum += 1;
 		}
