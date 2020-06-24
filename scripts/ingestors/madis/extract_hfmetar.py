@@ -17,23 +17,29 @@ from netCDF4 import chartostring
 from metpy.units import units, masked_array
 from pyiem.datatypes import temperature, distance, pressure
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn, ncopen
+from pyiem.util import get_dbconn, ncopen, logger
 from pyiem.reference import TRACE_VALUE
 
 warnings.simplefilter("ignore", RuntimeWarning)
+LOG = logger()
 
 
 def vsbyfmt(val):
     """ Tricky formatting of vis"""
+    # NB: we aren't dealing with exact round numbers here akrherz/iem#255
     if val == 0:
         return 0
-    if val <= 0.125:
+    if val <= 0.07:
+        LOG.debug("found 1/16 mile vis %s", val)
+        return "1/16"
+    if val <= 0.13:
+        LOG.debug("found 1/8 mile vis %s", val)
         return "1/8"
-    if val <= 0.25:
+    if val <= 0.26:
         return "1/4"
-    if val <= 0.375:
+    if val <= 0.38:
         return "3/8"
-    if val <= 0.5:
+    if val <= 0.51:
         return "1/2"
     if val <= 1.1:
         return "1"
