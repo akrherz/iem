@@ -547,7 +547,7 @@ def plot1(ctx):
     rain = df["rain_mm_tot_qc"]
     tair = df["tair_c_avg_qc"]
     tsoil = df["tsoil_c_avg_qc"]
-    valid = df.index.tz_convert(pytz.timezone("America/Chicago"))
+    valid = df.index
 
     (fig, ax) = plt.subplots(3, 1, sharex=True, figsize=(8, 8))
     ax[0].grid(True)
