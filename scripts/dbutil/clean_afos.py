@@ -2,9 +2,10 @@
 
 called from RUN_2AM.sh
 """
-from __future__ import print_function
 
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
 def main():
@@ -14,18 +15,17 @@ def main():
 
     # reflect changes to docs/datasets/afos.md
     acursor.execute(
-        """
-        delete from products WHERE
-        entered < ('YESTERDAY'::date - '7 days'::interval) and
-        entered > ('YESTERDAY'::date - '31 days'::interval) and
-    (pil ~* '^(RR[1-9SMA]|ROB|ECM|ECS|ECX|MAV|MET|MTR|MEX|NBE|NBH|NBP|NBS|NBX|RWR|STO|HML|WRK|OSO|SCV)'
-         or pil in ('HPTNCF', 'WTSNCF','WRKTTU','TSTNCF', 'HD3RSA', 'LAVUSA',
-            'XF03DY', 'XOBUS', 'ECMNC1', 'SYNBOU', 'MISWTM', 'MISWTX',
-            'MISMA1', 'MISAM1'))
-        """
+        "delete from products WHERE "
+        "entered < ('YESTERDAY'::date - '7 days'::interval) and "
+        "entered > ('YESTERDAY'::date - '31 days'::interval) and "
+        "(pil ~* '^(RR[1-9RSMAZ]|ROB|ECM|ECS|ECX|MAV|MET|MTR|MEX|NBE|"
+        "NBH|NBP|NBS|NBX|RWR|STO|HML|WRK|OSO|SCV)' "
+        "or pil in ('HPTNCF', 'WTSNCF','WRKTTU','TSTNCF', 'HD3RSA', 'LAVUSA', "
+        "'XF03DY', 'XOBUS', 'ECMNC1', 'SYNBOU', 'MISWTM', 'MISWTX', 'LEVUSA', "
+        "'MISMA1', 'MISAM1'))"
     )
     if acursor.rowcount == 0:
-        print("clean_afos.py: Found no products to delete between 7-31 days")
+        LOG.info("Found no products to delete between 7-31 days")
     acursor.close()
     pgconn.commit()
 
@@ -33,7 +33,7 @@ def main():
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
 
-    cursor.execute("""DELETE from text_products where geom is null""")
+    cursor.execute("DELETE from text_products where geom is null")
     cursor.close()
     pgconn.commit()
 
