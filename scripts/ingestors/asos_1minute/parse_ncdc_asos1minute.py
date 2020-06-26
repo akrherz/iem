@@ -6,6 +6,7 @@
  https://www1.ncdc.noaa.gov/pub/download/hidden/onemin/
 """
 import re
+import codecs
 import os
 from io import StringIO
 import sys
@@ -141,6 +142,11 @@ def dl_archive(df, dt):
             df.at[station, f"fn{page}"] = f"{datadir}/{fn}"
 
 
+def liner(fn):
+    """Hacky."""
+    return codecs.open(fn, "r", "utf-8", "ignore")
+
+
 def runner(pgconn, row, station):
     """Do the work prescribed."""
     if not os.path.isfile(row["fn5"]) or not os.path.isfile(row["fn6"]):
@@ -150,13 +156,13 @@ def runner(pgconn, row, station):
     # Our final amount of data
     data = {}
     # We have two files to worry about
-    for ln in open(row["fn5"]):
+    for ln in liner(row["fn5"]):
         d = p1_parser(ln)
         if d is None or d["valid"] <= row["archive_end"]:
             continue
         data[d["valid"]] = d
 
-    for ln in open(row["fn6"]):
+    for ln in liner(row["fn6"]):
         d = p2_parser(ln)
         if d is None or d["valid"] <= row["archive_end"]:
             continue
