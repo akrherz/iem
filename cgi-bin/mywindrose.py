@@ -13,6 +13,7 @@ from paste.request import parse_formvars
 from pyiem.plot.use_agg import plt
 from pyiem.windrose_utils import windrose
 from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn
 
 
 def send_error(form, msg, start_response):
@@ -71,20 +72,52 @@ def get_times(form):
     return sts, ets
 
 
+def guess_network(station):
+    """Guess the network identifier."""
+    with get_dbconn("mesosite") as dbconn:
+        cursor = dbconn.cursor()
+        cursor.execute(
+            "SELECT network from stations where id = %s and not metasite",
+            (station,),
+        )
+        if cursor.rowcount == 0:
+            raise ValueError(
+                "Failed to guess network for given station. Please provide "
+                "explicit network= to service."
+            )
+        res = cursor.fetchone()[0]
+    return res
+
+
+def get_station_info(form):
+    """Determine some metadata we need to process this form request."""
+    station = form["station"]
+    network = form.get("network")
+    if network is None:
+        network = guess_network(station)
+    dbname = "asos"
+    if network in ("KCCI", "KELO", "KIMT"):
+        dbname = "snet"
+    elif network.find("_RWIS") > 0:
+        dbname = "rwis"
+    elif network in ("ISUSM", "ISUAG"):
+        dbname = "isuag"
+    elif network == "RAOB":
+        dbname = "postgis"
+    elif network.find("_DCP") > 0:
+        dbname = "hads"
+
+    return dbname, network, station
+
+
 def application(environ, start_response):
     """ Query out the CGI variables"""
     form = parse_formvars(environ)
     try:
         sts, ets = get_times(form)
-    except Exception:
-        return [
-            send_error(
-                form,
-                "Invalid Times Selected, please try again",
-                start_response,
-            )
-        ]
-
+        dbname, network, station = get_station_info(form)
+    except Exception as exp:
+        return [send_error(form, str(exp), start_response)]
     if "hour1" in form and "hourlimit" in form:
         hours = numpy.array((int(form["hour1"]),))
     elif "hour1" in form and "hour2" in form and "hourrangelimit" in form:
@@ -108,18 +141,6 @@ def application(environ, start_response):
     else:
         months = numpy.arange(1, 13)
 
-    database = "asos"
-    if form["network"] in ("KCCI", "KELO", "KIMT"):
-        database = "snet"
-    elif form["network"] in ("IA_RWIS",):
-        database = "rwis"
-    elif form["network"] in ("ISUSM",):
-        database = "isuag"
-    elif form["network"] in ("RAOB",):
-        database = "postgis"
-    elif form["network"].find("_DCP") > 0:
-        database = "hads"
-
     try:
         nsector = int(form["nsector"])
     except Exception:
@@ -129,9 +150,9 @@ def application(environ, start_response):
     if "staticrange" in form and form["staticrange"] == "1":
         rmax = 100
 
-    nt = NetworkTable(form["network"], only_online=False)
-    tzname = nt.sts[form["station"]]["tzname"]
-    if form["network"] not in ["RAOB"]:
+    nt = NetworkTable(network, only_online=False)
+    tzname = nt.sts[station]["tzname"]
+    if network != "RAOB":
         # Assign the station time zone to the sts and ets
         sts = pytz.timezone(tzname).localize(sts)
         ets = pytz.timezone(tzname).localize(ets)
@@ -142,8 +163,8 @@ def application(environ, start_response):
         bins = [float(v) for v in form.get("bins").split(",")]
         bins.insert(0, 0)
     res = windrose(
-        form["station"],
-        database=database,
+        station,
+        database=dbname,
         sts=sts,
         ets=ets,
         months=months,
@@ -152,7 +173,7 @@ def application(environ, start_response):
         nsector=nsector,
         justdata=("justdata" in form),
         rmax=rmax,
-        sname=nt.sts[form["station"]]["name"],
+        sname=nt.sts[station]["name"],
         tzname=tzname,
         level=form.get("level", None),
         bins=bins,
