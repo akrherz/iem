@@ -150,7 +150,7 @@ def liner(fn):
 def runner(pgconn, row, station):
     """Do the work prescribed."""
     if not os.path.isfile(row["fn5"]) or not os.path.isfile(row["fn6"]):
-        LOG.info("skipping %s due to missing files", station)
+        LOG.debug("skipping %s due to missing files", station)
         return 0
 
     # Our final amount of data
@@ -170,7 +170,11 @@ def runner(pgconn, row, station):
         res.update(d)
 
     if not data:
-        LOG.info("No data found for station: %s", station)
+        LOG.debug(
+            "No data found station: %s, archive_end: %s",
+            station,
+            row["archive_end"],
+        )
         return 0
 
     mints = None
@@ -325,17 +329,19 @@ def cleanup(df):
 
 def main(argv):
     """Go Main Go"""
+    cronjob = not sys.stdout.isatty()
     # Build a dataframe to do work with
     df = init_dataframe(argv)
 
     pgconn = get_dbconn("asos1min")
-    progress = tqdm(df.index.values, disable=not sys.stdout.isatty())
+    progress = tqdm(df.index.values, disable=cronjob)
     total = 0
     for station in progress:
         row = df.loc[station]
         progress.set_description(f"{station}")
         total += runner(pgconn, row, station)
-    LOG.info("Ingested %s observations", total)
+    if not cronjob or total < 1e6:
+        LOG.info("Ingested %s observations", total)
     cleanup(df)
 
 
