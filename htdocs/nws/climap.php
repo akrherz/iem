@@ -8,20 +8,19 @@ require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Map of Daily NWS CLImage reports";
 $t->thispage = "climate-today";
-$OL = '6.2.1';
+$OL = '6.3.1';
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
 <style>
 .map {
-	height: 400px;
-	width: 100%;
-	background-color: #D2B48C;
+    height:70vh;
+    width: 100%;
 }
 .popover {
-		width: 300px;
-		}
+	width: 300px;
+}
 </style>
 EOF;
 $t->jsextra = <<<EOF
@@ -92,12 +91,15 @@ $t->content = <<<EOF
 		<input type="text" id="datepicker" size="30">
 		
 </form>
-</div></div>
+</div></div><!-- ./row -->
 
-		
+<div class="row">
+<div class="col-md-12">
+
 <div id="map" class="map">
 <div id="popup"></div>
-</div>
+
+</div></div><!-- ./row -->
 
 		
 <div class="row">
