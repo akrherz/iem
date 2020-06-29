@@ -1,5 +1,4 @@
 """ Create a simple prinout of observation quanity in the database """
-from __future__ import print_function
 import sys
 import datetime
 
@@ -37,14 +36,12 @@ def main(argv):
 
     stid = argv[1]
     acursor.execute(
-        """SELECT year, month,
+        f"""SELECT year, month,
      count(*),
      sum(case when high is null then 0 else 1 end),
      sum(case when low is null then 0 else 1 end),
      sum(case when precip is null then 0 else 1 end)
-     from alldata_"""
-        + stid[:2]
-        + """ WHERE
+     from alldata_{stid[:2]} WHERE
      station = %s and year > 1892 GROUP by year, month""",
         (stid,),
     )

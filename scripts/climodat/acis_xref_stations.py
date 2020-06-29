@@ -1,12 +1,12 @@
 """Mine the ACIS station cross-reference."""
-from __future__ import print_function
 import sys
 
 import requests
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import ncei_state_codes
 
+LOG = logger()
 SERVICE = "http://data.rcc-acis.org/StnMeta"
 MYATTR = "TRACKS_STATION"
 
@@ -34,10 +34,10 @@ def main(argv):
         j = req.json()
         meta = j["meta"]
         if not meta:
-            print("ACIS lookup of %s failed, sid: %s" % (acis_station, sid))
+            LOG.info("ACIS lookup of %s failed, sid: %s", acis_station, sid)
             continue
         meta = meta[0]
-        print("%s %s" % (sid, meta["sids"]))
+        LOG.info("%s %s", sid, meta["sids"])
         for entry in meta["sids"]:
             tokens = entry.split()
             if tokens[1] in ["3", "7"]:
@@ -46,9 +46,9 @@ def main(argv):
                     state,
                     "COOP" if tokens[1] == "7" else "ASOS",
                 )
-                print("    %s -> %s %s" % (sid, to_track, to_network))
+                LOG.info("    %s -> %s %s", sid, to_track, to_network)
                 if to_track not in nt[to_network].sts:
-                    print("    ERROR %s is unknown!" % (to_track,))
+                    LOG.info("    ERROR %s is unknown!", to_track)
                     continue
                 value = "%s|%s" % (to_track, to_network)
                 if tokens[1] == "3":

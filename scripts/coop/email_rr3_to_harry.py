@@ -2,13 +2,13 @@
 Send Harry Hillaker a weekly email summarizing the past seven days worth of
 RR3 products.
 """
-from __future__ import print_function
 import os
 import datetime
 import smtplib
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
+
 from pyiem.util import get_dbconn
 
 WFOS = ["KDMX", "KARX", "KDVN", "KFSD", "KOAX"]
@@ -24,12 +24,10 @@ def main():
     sts = sts.replace(hour=0)
 
     acursor.execute(
-        """
-      SELECT data, source from products where
-      pil in ('RR3DMX','RR3DVN','RR3ARX','RR3FSD','RR3OAX','RR1FSD')
-      and entered > '%s' ORDER by entered ASC
-    """
-        % (sts.strftime("%Y-%m-%d %H:%M"),)
+        "SELECT data, source from products where "
+        "pil in ('RR3DMX','RR3DVN','RR3ARX','RR3FSD','RR3OAX','RR1FSD') "
+        "and entered > %s ORDER by entered ASC",
+        (sts,),
     )
 
     files = {}
@@ -50,17 +48,15 @@ def main():
     )
     msg["From"] = "akrherz@iastate.edu"
     msg["To"] = "justin.glisan@iowaagriculture.gov"
-    # msg['To'] = 'akrherz@localhost'
     msg.preamble = "RR3 Report"
 
     fn = "RR3-%s-%s.txt" % (sts.strftime("%Y%m%d"), now.strftime("%Y%m%d"))
 
     for wfo in WFOS:
-        fp = open("/tmp/%sRR3.txt" % (wfo,), "rb")
         b = MIMEBase("Text", "Plain")
-        b.set_payload(fp.read())
+        with open("/tmp/%sRR3.txt" % (wfo,), "rb") as fp:
+            b.set_payload(fp.read())
         encoders.encode_base64(b)
-        fp.close()
         b.add_header(
             "Content-Disposition", 'attachment; filename="%s-%s"' % (wfo, fn)
         )
@@ -68,7 +64,7 @@ def main():
         os.unlink("/tmp/%sRR3.txt" % (wfo,))
 
     # Send the email via our own SMTP server.
-    s = smtplib.SMTP("localhost")
+    s = smtplib.SMTP("mailhub.iastate.edu")
     s.sendmail(msg["From"], msg["To"], msg.as_string())
     s.quit()
 

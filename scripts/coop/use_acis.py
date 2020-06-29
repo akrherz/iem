@@ -1,14 +1,14 @@
 """Use data provided by ACIS to replace IEM COOP data."""
-from __future__ import print_function
 import sys
 import datetime
 
 import requests
 from tqdm import tqdm
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconn, utc, logger
 from pyiem.reference import TRACE_VALUE
 
+LOG = logger()
 SERVICE = "http://data.rcc-acis.org/StnData"
 
 
@@ -21,8 +21,8 @@ def safe(val):
     try:
         return float(val)
     except Exception as exp:
-        print(
-            "%s failed to convert %s to float, using None" % (exp, repr(val))
+        LOG.info(
+            "%s failed to convert %s to float, using None", exp, repr(val)
         )
 
 

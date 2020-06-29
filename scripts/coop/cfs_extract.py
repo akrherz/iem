@@ -8,16 +8,14 @@ Attempt to derive climodat data from the CFS, we will use the 12 UTC
 files.
 
 """
-from __future__ import print_function
 import datetime
 import os
 
-import pytz
 import numpy as np
 import pygrib
 from pyiem.datatypes import temperature
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconn, logger, utc
 
 LOG = logger()
 nt = NetworkTable("IACLIMATE")
@@ -119,19 +117,14 @@ def dbsave(ts, data):
     if cursor.rowcount > 0:
         modelid = cursor.fetchone()[0]
         cursor.execute(
-            """
-            DELETE from alldata_forecast where modelid = %s
-        """,
-            (modelid,),
+            "DELETE from alldata_forecast where modelid = %s", (modelid,)
         )
         if cursor.rowcount > 0:
-            print("Removed %s previous entries" % (cursor.rowcount,))
+            LOG.info("Removed %s previous entries", cursor.rowcount)
     else:
         cursor.execute(
-            """
-            INSERT into forecast_inventory(model, modelts)
-            VALUES ('CFS', %s) RETURNING id
-        """,
+            "INSERT into forecast_inventory(model, modelts) "
+            "VALUES ('CFS', %s) RETURNING id",
             (ts,),
         )
         modelid = cursor.fetchone()[0]
@@ -177,10 +170,8 @@ def dbsave(ts, data):
 def main():
     """Go!"""
     # Extract 12 UTC Data
-    ts = datetime.datetime.utcnow() - datetime.timedelta(days=2)
-    ts = ts.replace(
-        tzinfo=pytz.utc, hour=12, minute=0, second=0, microsecond=0
-    )
+    ts = utc() - datetime.timedelta(days=2)
+    ts = ts.replace(hour=12, minute=0, second=0, microsecond=0)
     data = process(ts)
     dbsave(ts, data)
 

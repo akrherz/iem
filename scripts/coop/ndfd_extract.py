@@ -8,23 +8,18 @@ Attempt to derive climodat data from the NDFD database, we will use the 00 UTC
 files.
 
 """
-from __future__ import print_function
 import sys
 import datetime
 import os
-import logging
 
-import pytz
 import pyproj
 import numpy as np
 import pygrib
 from pyiem.datatypes import temperature
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger, utc
 
-logging.basicConfig()
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG if sys.stdout.isatty() else logging.WARNING)
+LOG = logger()
 
 nt = NetworkTable("IACLIMATE")
 
@@ -50,7 +45,7 @@ def do_precip(gribs, ftime, data):
     cst = ftime - datetime.timedelta(hours=6)
     key = cst.strftime("%Y-%m-%d")
     d = data["fx"].setdefault(key, dict(precip=None, high=None, low=None))
-    logger.debug("Writting precip %s from ftime: %s", key, ftime)
+    LOG.debug("Writting precip %s from ftime: %s", key, ftime)
     if d["precip"] is None:
         d["precip"] = sel[0].values
     else:
@@ -66,7 +61,7 @@ def do_temp(name, dkey, gribs, ftime, data):
     cst = ftime - datetime.timedelta(hours=6)
     key = cst.strftime("%Y-%m-%d")
     d = data["fx"].setdefault(key, dict(precip=None, high=None, low=None))
-    logger.debug("Writting %s %s from ftime: %s", name, key, ftime)
+    LOG.debug("Writting %s %s from ftime: %s", name, key, ftime)
     d[dkey] = temperature(sel[0].values, "K").value("F")
 
 
@@ -80,9 +75,9 @@ def process(ts):
             "ndfd.t%02iz.awp2p5f%03i.grib2"
         ) % (ts.year, ts.month, ts.day, ts.hour, ts.hour, fhour)
         if not os.path.isfile(fn):
-            logger.debug("ndfd_extract missing: %s", fn)
+            LOG.info("missing: %s", fn)
             continue
-        logger.debug("-> %s", fn)
+        LOG.debug("-> %s", fn)
         gribs = pygrib.open(fn)
         do_precip(gribs, ftime, data)
         do_temp("Maximum temperature", "high", gribs, ftime, data)
@@ -118,7 +113,7 @@ def dbsave(ts, data):
             (modelid,),
         )
         if cursor.rowcount > 0:
-            logger.warning("Removed %s previous entries", cursor.rowcount)
+            LOG.warning("Removed %s previous entries", cursor.rowcount)
     else:
         cursor.execute(
             """INSERT into forecast_inventory(model, modelts)
@@ -130,7 +125,7 @@ def dbsave(ts, data):
     for date in list(data["fx"].keys()):
         d = data["fx"][date]
         if d["high"] is None or d["low"] is None or d["precip"] is None:
-            logger.debug("Missing data for date: %s", date)
+            LOG.debug("Missing data for date: %s", date)
             del data["fx"][date]
 
     found_data = False
@@ -149,11 +144,8 @@ def dbsave(ts, data):
             if high is None or low is None or precip is None:
                 continue
             cursor.execute(
-                """
-                INSERT into alldata_forecast(modelid,
-                station, day, high, low, precip)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """,
+                "INSERT into alldata_forecast(modelid, station, day, high, "
+                "low, precip) VALUES (%s, %s, %s, %s, %s, %s)",
                 (modelid, sid, date, high, low, round(precip, 2)),
             )
             found_data = True
@@ -167,13 +159,12 @@ def main(argv):
     """Go!"""
     # Extract 00 UTC Data
     if len(argv) == 4:
-        ts = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]))
+        ts = utc(int(argv[1]), int(argv[2]), int(argv[3]))
     else:
-        ts = datetime.datetime.utcnow()
-    ts = ts.replace(tzinfo=pytz.utc, hour=0, minute=0, second=0, microsecond=0)
+        ts = utc().replace(hour=0, minute=0, second=0, microsecond=0)
     data = process(ts)
     if data["proj"] is None:
-        print("ERROR: ndfd_extract.py found no data!")
+        LOG.info("ERROR: found no data!")
     else:
         dbsave(ts, data)
 

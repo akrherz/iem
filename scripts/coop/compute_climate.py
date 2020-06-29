@@ -1,13 +1,13 @@
 """Computes the Climatology and fills out the table!"""
-from __future__ import print_function
 import datetime
 import psycopg2.extras
 
 from tqdm import tqdm
 from pyiem.reference import state_names
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
 
+LOG = logger()
 COOP = get_dbconn("coop")
 
 THISYEAR = datetime.date.today().year
@@ -39,14 +39,12 @@ def daily_averages(table):
         if st in ["DC", "AK", "HI"]:
             continue
         nt = NetworkTable("%sCLIMATE" % (st,))
-        print("Computing Daily Averages for state: %s" % (st,))
+        LOG.info("Computing Daily Averages for state: %s", st)
         ccursor = COOP.cursor()
         ccursor.execute(
-            """DELETE from %s WHERE substr(station, 1, 2) = '%s'
-        """
-            % (table, st)
+            f"DELETE from {table} WHERE substr(station, 1, 2) = %s", (st,)
         )
-        print("    removed %s rows from %s" % (ccursor.rowcount, table))
+        LOG.info("    removed %s rows from %s", ccursor.rowcount, table)
         sql = """
     INSERT into %s (station, valid, high, low,
         max_high, min_high,
@@ -86,7 +84,7 @@ def daily_averages(table):
             tuple(nt.sts.keys()),
         )
         ccursor.execute(sql)
-        print("    added %s rows to %s" % (ccursor.rowcount, table))
+        LOG.info("    added %s rows to %s", ccursor.rowcount, table)
         ccursor.close()
         COOP.commit()
 
@@ -110,7 +108,7 @@ def do_date(ccursor2, table, row, col, agg_col):
     ccursor2.execute(sql)
     row2 = ccursor2.fetchone()
     if row2 is None:
-        print("None %s %s %s" % (row, col, agg_col))
+        LOG.info("None %s %s %s", row, col, agg_col)
         return "null"
     return row2[0]
 

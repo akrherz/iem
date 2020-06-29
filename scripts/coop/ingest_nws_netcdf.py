@@ -1,12 +1,13 @@
 """Ingest the NWS provided netcdf file of COOP data"""
-from __future__ import print_function
 import sys
 import datetime
 
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn, ncopen
+from pyiem.util import get_dbconn, ncopen, logger
 from pyiem.reference import TRACE_VALUE
+
+LOG = logger()
 
 
 def convert(val, precision):
@@ -103,7 +104,7 @@ def main():
                         ),
                     )
 
-    print("added %s" % (added,))
+    LOG.info("added %s", added)
     ccursor.close()
     pgconn.commit()
 

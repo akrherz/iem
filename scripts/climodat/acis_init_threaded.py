@@ -1,12 +1,12 @@
 """Mine ACIS for threaded stations."""
-from __future__ import print_function
 import sys
 
 import requests
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import ncei_state_codes
 
+LOG = logger()
 SERVICE = "http://data.rcc-acis.org/StnMeta"
 MYATTR = "TRACKS_STATION"
 # One offs needing manual effort
@@ -35,20 +35,20 @@ def workflow(state):
         if threadid is None:
             continue
         if threadid in UNKNOWNS:
-            print("skipping %s" % (threadid,))
+            LOG.info("skipping %s", threadid)
             continue
         iemid = "%sT%s" % (state, threadid[:3])
         if iemid in nt["%sCLIMATE" % (state,)].sts:
-            print("%s is already known!" % (iemid,))
+            LOG.info("%s is already known!", iemid)
             continue
         to_track = threadid[:-3]
         to_network = "%s_%s" % (
             state,
             "COOP" if len(to_track) == 5 else "ASOS",
         )
-        print("%s will be %s and tracking %s" % (threadid, iemid, to_track))
+        LOG.info("%s will be %s and tracking %s", threadid, iemid, to_track)
         if to_track not in nt[to_network].sts:
-            print("ABORT!")
+            LOG.info("ABORT!")
             sys.exit()
         # Create station entry, we use the tracking station location for now
         geom = "SRID=4326;POINT(%s %s)" % (
@@ -79,10 +79,8 @@ def workflow(state):
 
         value = "%s|%s" % (to_track, to_network)
         cursor.execute(
-            """
-            INSERT into station_attributes(iemid, attr, value)
-            VALUES (%s, %s, %s)
-        """,
+            "INSERT into station_attributes(iemid, attr, value) "
+            "VALUES (%s, %s, %s)",
             (idnum, MYATTR, value),
         )
     cursor.close()

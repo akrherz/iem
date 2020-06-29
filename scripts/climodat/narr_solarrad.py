@@ -24,7 +24,6 @@ Review the following pdf file for details.
     http://rda.ucar.edu/datasets/ds608.0/docs/rr4.pdf
 
 """
-from __future__ import print_function
 import datetime
 import sys
 import os
@@ -32,8 +31,9 @@ import os
 import pyproj
 import numpy as np
 import pygrib
-from pyiem.util import get_dbconn, ncopen
+from pyiem.util import get_dbconn, ncopen, logger
 
+LOG = logger()
 P4326 = pyproj.Proj(init="epsg:4326")
 LCC = pyproj.Proj(
     (
@@ -102,10 +102,7 @@ def do(date):
     while now < ets:
         # See if we have Grib data first
         fn = now.strftime(
-            (
-                "/mesonet/ARCHIVE/data/%Y/%m/%d/model/NARR/"
-                "rad_%Y%m%d%H00.grib"
-            )
+            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/NARR/rad_%Y%m%d%H00.grib"
         )
         if os.path.isfile(fn):
             mode = GRIB_MODE
@@ -118,10 +115,10 @@ def do(date):
             now += interval
             continue
         fn = now.strftime(
-            ("/mesonet/ARCHIVE/data/%Y/%m/%d/model/NARR/" "rad_%Y%m%d%H00.nc")
+            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/NARR/rad_%Y%m%d%H00.nc"
         )
         if not os.path.isfile(fn):
-            print("MISSING NARR: %s" % (fn,))
+            LOG.info("MISSING NARR: %s", fn)
             sys.exit()
         with ncopen(fn, timeout=300) as nc:
             rad = nc.variables["Downward_shortwave_radiation_flux"][0, :, :]
@@ -168,10 +165,10 @@ def do(date):
         )
         rad_mj = float(val) / 1000000.0
         if rad_mj < 0:
-            print("WHOA! Negative RAD: %.2f, station: %s" % (rad_mj, row[0]))
+            LOG.info("WHOA! Negative RAD: %.2f, station: %s", rad_mj, row[0])
             continue
         if np.isnan(rad_mj):
-            print("NARR SRAD is NaN, station: %s" % (row[0],))
+            LOG.info("NARR SRAD is NaN, station: %s", row[0])
             rad_mj = None
 
         # if our station is 12z, then this day's data goes into 'tomorrow'
@@ -180,12 +177,8 @@ def do(date):
         if row[3] in range(4, 13):
             date2 = (date + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
         ccursor2.execute(
-            """
-            UPDATE alldata_"""
-            + row[0][:2]
-            + """ SET narr_srad = %s WHERE
-            day = %s and station = %s
-        """,
+            f"UPDATE alldata_{row[0][:2]} SET narr_srad = %s WHERE "
+            "day = %s and station = %s",
             (rad_mj, date2, row[0]),
         )
     ccursor2.close()

@@ -1,6 +1,5 @@
 """Generate a map of Yearly Precipitation
 """
-from __future__ import print_function
 import sys
 import datetime
 
@@ -11,6 +10,7 @@ from pyiem.util import get_dbconn
 
 
 def runYear(year):
+    """Do Work."""
     # Grab the data
     now = datetime.datetime.now()
     nt = NetworkTable("IACLIMATE")
