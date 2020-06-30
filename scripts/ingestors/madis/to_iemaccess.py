@@ -7,8 +7,6 @@ import subprocess
 import numpy as np
 import pytz
 import psycopg2.extras
-import metpy.calc as mcalc
-from metpy.units import units
 from netCDF4 import chartostring
 from pyiem.observation import Observation
 from pyiem.datatypes import temperature, distance, speed
@@ -25,17 +23,19 @@ def find_file():
         ts = datetime.datetime.utcnow() - datetime.timedelta(hours=i)
         testfn = ts.strftime("/mesonet/data/madis/mesonet1/%Y%m%d_%H00.nc")
         if os.path.isfile(testfn):
+            LOG.debug("processing %s", testfn)
             fn = testfn
             break
 
     if fn is None:
+        LOG.info("Found no available files to process")
         sys.exit()
     return fn
 
 
 def sanity_check(val, lower, upper):
     """Simple bounds check"""
-    if val > lower and val < upper:
+    if lower < val < upper:
         return float(val)
     return None
 
@@ -49,7 +49,7 @@ def provider2network(provider):
     if len(provider) == 5 or provider in ["KYTC-RWIS", "NEDOR"]:
         if provider[:2] == "IA":
             return None
-        return "%s_RWIS" % (provider[:2],)
+        return f"{provider[:2]}_RWIS"
     LOG.info("Unsure how to convert %s into a network", provider)
     return None
 
@@ -67,23 +67,23 @@ def main():
 
     tmpk = nc.variables["temperature"][:]
     dwpk = nc.variables["dewpoint"][:]
+    relh = nc.variables["relHumidity"][:]
 
     # Set some data bounds to keep mcalc from complaining
-    dwpk = np.where(
-        np.ma.logical_or(np.ma.less(dwpk, 200), np.ma.greater(dwpk, 320)),
-        np.nan,
-        dwpk,
-    )
     tmpk = np.where(
         np.ma.logical_or(np.ma.less(tmpk, 200), np.ma.greater(tmpk, 320)),
         np.nan,
         tmpk,
     )
-    relh = (
-        mcalc.relative_humidity_from_dewpoint(
-            tmpk * units.degK, dwpk * units.degK
-        ).magnitude
-        * 100.0
+    dwpk = np.where(
+        np.ma.logical_or(np.ma.less(dwpk, 200), np.ma.greater(dwpk, 320)),
+        np.nan,
+        dwpk,
+    )
+    relh = np.where(
+        np.ma.logical_and(np.ma.less(relh, 100.1), np.ma.greater(relh, 0)),
+        relh,
+        np.nan,
     )
     obtime = nc.variables["observationTime"][:]
     pressure = nc.variables["stationPressure"][:]
@@ -127,7 +127,7 @@ def main():
         db[this_station]["pres"] = sanity_check(pressure[recnum], 0, 1000000)
         db[this_station]["tmpk"] = sanity_check(tmpk[recnum], 200, 330)
         db[this_station]["dwpk"] = sanity_check(dwpk[recnum], 200, 330)
-        db[this_station]["relh"] = relh[recnum]
+        db[this_station]["relh"] = sanity_check(relh[recnum], 0, 100.1)
         db[this_station]["drct"] = sanity_check(drct[recnum], -1, 361)
         db[this_station]["smps"] = sanity_check(smps[recnum], -1, 200)
         db[this_station]["gmps"] = sanity_check(gmps[recnum], -1, 200)
