@@ -3,12 +3,7 @@ DD=$(date -u +'%d')
 MM=$(date -u +'%m')
 YYYY=$(date -u +'%Y')
 
-cd util
-python i5_2_cybox.py &
-sleep 30
-python autolapses2box.py &
-
-cd ../dbutil
+cd dbutil
 python asos2archive.py
 
 # Need this done so that certain variables are there for DEP
@@ -66,3 +61,5 @@ python ingest_ghcn.py
 # Ingest Poker
 cd ../../util
 python poker2afos.py
+python i5_2_cybox.py
+python autolapses2box.py
