@@ -4,7 +4,6 @@ Some care has to be made here such that trace values do not accumulate when
 there are actual measurable precip.  Eventually, the DSM or other summary
 messages come and overwrite the trouble. Run from RUN_10MIN.sh
 """
-from __future__ import print_function
 import datetime
 
 from pyiem.util import get_dbconn
@@ -22,7 +21,7 @@ def main():
 
     # Run for the previous hour, so that we don't skip totaling up 11 PM
     icursor.execute(
-        """
+        f"""
         WITH obs as (
             SELECT s.iemid, date(valid at time zone s.tzname) as d,
             max(phour) as rain,
@@ -44,9 +43,7 @@ def main():
                round(precip::numeric, 2) else precip end as pday
              from agg
          )
-        UPDATE summary_"""
-        + str(yyyy)
-        + """ s
+        UPDATE summary_{yyyy} s
         SET pday =
         case when a.pday < 0.009 and a.pday > 0 then %s else a.pday end
         FROM agg2 a

@@ -1,7 +1,6 @@
 """Hit up ESRIs elevation REST service to compute a station elevation
 
 """
-from __future__ import print_function
 import time
 import sys
 
@@ -33,9 +32,8 @@ def workflow():
     mcursor = pgconn.cursor()
     mcursor2 = pgconn.cursor()
     mcursor.execute(
-        """
-        SELECT network, ST_x(geom) as lon, ST_y(geom) as lat, elevation, id
-        from stations WHERE (elevation < -990 or elevation is null)"""
+        "SELECT network, ST_x(geom) as lon, ST_y(geom) as lat, elevation, id "
+        "from stations WHERE (elevation < -990 or elevation is null)"
     )
 
     for row in mcursor:
@@ -48,9 +46,8 @@ def workflow():
 
         print("%7s %s OLD: %s NEW: %.3f" % (sid, network, elev, newelev))
         mcursor2.execute(
-            """
-            UPDATE stations SET elevation = %s WHERE id = %s
-            and network = %s""",
+            "UPDATE stations SET elevation = %s WHERE id = %s "
+            "and network = %s",
             (newelev, sid, network),
         )
         time.sleep(2)

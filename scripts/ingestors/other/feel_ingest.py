@@ -1,5 +1,4 @@
 """Ingest the ISU FEEL Farm data."""
-from __future__ import print_function
 import datetime
 import os
 

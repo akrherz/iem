@@ -3,7 +3,6 @@
 
 Run from RUN_2AM.sh
 """
-from __future__ import print_function
 
 from pyiem.util import get_dbconn
 
@@ -16,19 +15,12 @@ def do_asos():
 
     print("----- Unknown IDs from METAR sites -----")
     acursor.execute(
-        """
-     select id, count(*), max(valid) from unknown
-     GROUP by id ORDER by count DESC
-    """
+        "select id, count(*), max(valid) from unknown GROUP by id "
+        "ORDER by count DESC"
     )
     for row in acursor:
         print("ASOS %7s %5s %s" % (row[0], row[1], row[2]))
-        acursor2.execute(
-            """
-            DELETE from unknown where id = %s
-        """,
-            (row[0],),
-        )
+        acursor2.execute("DELETE from unknown where id = %s", (row[0],))
 
     asos.commit()
 
@@ -59,7 +51,7 @@ def main():
     print("----- Unknown NWSLIs from SHEF Ingest -----")
     for priority in ["priority DESC"]:
         hcursor.execute(
-            """
+            f"""
          select nwsli, count(*) as tot, max(product) as maxp,
          count(distinct substr(product,1,8)),
          count(distinct product),
@@ -68,9 +60,7 @@ def main():
          else 0 end) as priority
          from unknown
          where nwsli ~ '^[A-Z]{4}[0-9]$'
-         GROUP by nwsli ORDER by """
-            + priority
-            + """, tot DESC LIMIT 50
+         GROUP by nwsli ORDER by {priority}, tot DESC LIMIT 50
         """
         )
         for row in hcursor:

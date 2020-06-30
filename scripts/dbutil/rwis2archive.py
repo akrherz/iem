@@ -5,7 +5,6 @@ The RWIS data is partitioned by UTC timestamp
 
 Run at 0Z and 12Z, provided with a timestamp to process
 """
-from __future__ import print_function
 import datetime
 import sys
 
@@ -22,21 +21,11 @@ def main(argv):
     ts2 = ts + datetime.timedelta(hours=24)
     rcursor = rwisdb.cursor()
     # Remove previous entries for this UTC date
-    rcursor.execute(
-        """DELETE from t%s WHERE valid >= '%s'
-        and valid < '%s'"""
-        % (ts.year, ts, ts2)
-    )
-    rcursor.execute(
-        """DELETE from t%s_soil WHERE valid >= '%s'
-        and valid < '%s'"""
-        % (ts.year, ts, ts2)
-    )
-    rcursor.execute(
-        """DELETE from t%s_traffic WHERE valid >= '%s'
-        and valid < '%s'"""
-        % (ts.year, ts, ts2)
-    )
+    for suffix in ["", "_soil", "_traffic"]:
+        rcursor.execute(
+            f"DELETE from t{ts.year}{suffix} WHERE valid >= %s and valid < %s",
+            (ts, ts2),
+        )
     rcursor.close()
 
     # Always delete stuff 3 or more days old from iemaccess
@@ -54,7 +43,7 @@ def main(argv):
     # Get traffic obs from access
     icursor = iemdb.cursor(cursor_factory=psycopg2.extras.DictCursor)
     icursor.execute(
-        """ SELECT l.nwsli as station, s.lane_id, d.* from
+        """SELECT l.nwsli as station, s.lane_id, d.* from
        rwis_traffic_data_log d, rwis_locations l, rwis_traffic_sensors s
        WHERE s.id = d.sensor_id and valid >= '%s' and valid < '%s'
        and s.location_id = l.id"""
@@ -68,9 +57,7 @@ def main(argv):
     # Write to archive
     rcursor = rwisdb.cursor()
     rcursor.executemany(
-        """INSERT into t"""
-        + repr(ts.year)
-        + """_traffic
+        f"""INSERT into t{ts.year}_traffic
         (station, valid,
         lane_id, avg_speed, avg_headway, normal_vol, long_vol, occupancy)
         VALUES (%(station)s,%(valid)s,
@@ -114,9 +101,7 @@ def main(argv):
     # Write to RWIS Archive
     rcursor = rwisdb.cursor()
     rcursor.executemany(
-        """INSERT into t"""
-        + repr(ts.year)
-        + """_soil
+        f"""INSERT into t{ts.year}_soil
         (station, valid,
         s0temp, s1temp, s2temp, s3temp, s4temp, s5temp, s6temp, s7temp,
         s8temp, s9temp, s10temp, s11temp, s12temp, s13temp, s14temp) VALUES (
@@ -134,11 +119,7 @@ def main(argv):
     icursor = iemdb.cursor(cursor_factory=psycopg2.extras.DictCursor)
     # Since we store drct in the RWIS archive as NaN, we better make sure
     # we don't attempt to use these values as it will error out
-    icursor.execute(
-        """
-        update current_log set drct = null where drct = 'NaN'
-    """
-    )
+    icursor.execute("update current_log set drct = null where drct = 'NaN'")
     sql = """SELECT c.*, t.id as station from current_log c, stations t
         WHERE valid >= '%s' and valid < '%s'
           and t.network ~* 'RWIS' and t.iemid = c.iemid""" % (
@@ -154,10 +135,7 @@ def main(argv):
     # Write to RWIS Archive
     rcursor = rwisdb.cursor()
     rcursor.executemany(
-        """INSERT into t"""
-        + repr(ts.year)
-        + """
-        (station, valid, tmpf,
+        f"""INSERT into t{ts.year} (station, valid, tmpf,
         dwpf, drct, sknt, tfs0, tfs1, tfs2, tfs3, subf, gust, tfs0_text,
         tfs1_text, tfs2_text, tfs3_text, pcpn, vsby) VALUES (%(station)s,
         %(valid)s,%(tmpf)s,%(dwpf)s,%(drct)s,%(sknt)s,%(tsf0)s,

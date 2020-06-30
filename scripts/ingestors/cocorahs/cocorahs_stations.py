@@ -2,7 +2,6 @@
 Hit cocorah's website API for a listing of stations and add entries for
 anything new found
 """
-from __future__ import print_function
 import sys
 
 import requests
@@ -17,10 +16,9 @@ def main():
     state = sys.argv[1]
 
     url = (
-        "http://data.cocorahs.org/cocorahs/export/"
-        "exportstations.aspx?State=%s&Format=CSV"
-        "&country=usa"
-    ) % (state,)
+        "http://data.cocorahs.org/cocorahs/export/exportstations.aspx?"
+        f"State={state}&Format=CSV&country=usa"
+    )
     data = requests.get(url, timeout=30).content.decode("ascii").split("\r\n")
 
     # Find current stations

@@ -2,7 +2,6 @@
 
 https://www.ncdc.noaa.gov/homr/reports
 """
-from __future__ import print_function
 
 from pandas.io.sql import read_sql
 from pyiem.util import get_dbconn
@@ -12,10 +11,8 @@ def main():
     """Go Main Go!"""
     pgconn = get_dbconn("hads")
     udf = read_sql(
-        """
-        SELECT distinct nwsli, 1 as col from unknown
-        WHERE length(nwsli) = 5 ORDER by nwsli
-    """,
+        "SELECT distinct nwsli, 1 as col from unknown WHERE "
+        "length(nwsli) = 5 ORDER by nwsli",
         pgconn,
         index_col="nwsli",
     )

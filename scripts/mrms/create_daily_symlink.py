@@ -6,17 +6,17 @@ like IDEP, we'd like predictable calendar day rasters
 Run from RUN_MIDNIGHT.sh
 
 """
-from __future__ import print_function
 import sys
 import os
 import datetime
+
 import pytz
 
 
 def workflow(basedate, utcdt):
     """ Create the sym link """
     basefn = utcdt.strftime(
-        ("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/" "mrms/p24h_%Y%m%d%H00")
+        "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/mrms/p24h_%Y%m%d%H00"
     )
     for suffix in ["png", "wld"]:
         target = "%s.%s" % (basefn, suffix)

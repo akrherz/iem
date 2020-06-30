@@ -1,5 +1,4 @@
 """attempt to rip out the METARs stored with the MTarchive files"""
-from __future__ import print_function
 import datetime
 import subprocess
 import re
@@ -20,11 +19,7 @@ def load_stations():
     """Get station timezone info?"""
     pgconn = get_dbconn("mesosite", user="nobody")
     cursor = pgconn.cursor()
-    cursor.execute(
-        """
-        SELECT id, network from stations where network ~* 'ASOS'
-    """
-    )
+    cursor.execute("SELECT id, network from stations where network ~* 'ASOS'")
     for row in cursor:
         XREF[row[0]] = row[1]
 
@@ -104,10 +99,8 @@ def workflow(ts):
     """We do work."""
     # 1. Get mtarchive file
     uri = ts.strftime(
-        (
-            "http://mtarchive.geol.iastate.edu/%Y/%m/%d/gempak/"
-            "surface/sao/%Y%m%d_sao.gem"
-        )
+        "http://mtarchive.geol.iastate.edu/%Y/%m/%d/gempak/"
+        "surface/sao/%Y%m%d_sao.gem"
     )
     req = requests.get(uri, timeout=30)
     if req.status_code != 200:

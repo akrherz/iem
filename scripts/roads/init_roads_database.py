@@ -2,7 +2,6 @@
 
  * JSON data is in Google 3857
 """
-from __future__ import print_function
 
 from shapely.geometry import LineString, MultiLineString
 import requests

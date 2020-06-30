@@ -1,9 +1,9 @@
 """ISU Agronomy Hall Vantage Pro 2 OT0010"""
-from __future__ import print_function
 import datetime
 import re
 import os
 import sys
+
 import pytz
 from pyiem.datatypes import speed, temperature, humidity
 from pyiem.observation import Observation

@@ -1,10 +1,8 @@
 """I produce the hourly analysis used by IEMRE"""
-from __future__ import print_function
 import sys
 import datetime
 
 import numpy as np
-import pytz
 import pandas as pd
 from pandas.io.sql import read_sql
 from metpy.units import masked_array
@@ -12,21 +10,12 @@ from metpy.interpolate import inverse_distance_to_grid
 from pyiem import iemre
 from pyiem import meteorology
 import pyiem.datatypes as dt
-from pyiem.util import get_dbconn, ncopen
+from pyiem.util import get_dbconn, ncopen, utc, logger
 
 # stop RuntimeWarning: invalid value encountered in greater
 np.warnings.filterwarnings("ignore")
-
+LOG = logger()
 MEMORY = {"ts": datetime.datetime.now()}
-
-
-def pprint(msg):
-    """A debug print statement"""
-    if not sys.stdout.isatty():
-        return
-    delta = (datetime.datetime.now() - MEMORY["ts"]).total_seconds()
-    MEMORY["ts"] = datetime.datetime.now()
-    print("%6.3f %s" % (delta, msg))
 
 
 def grid_wind(df, domain):
@@ -92,14 +81,12 @@ def grid_hour(ts):
     I proctor the gridding of data on an hourly basis
     @param ts Timestamp of the analysis, we'll consider a 20 minute window
     """
-    pprint("grid_hour called...")
-    nc = ncopen(iemre.get_hourly_ncname(ts.year), "a", timeout=300)
-    domain = nc.variables["hasdata"][:, :]
-    nc.close()
+    LOG.debug("grid_hour called...")
+    with ncopen(iemre.get_hourly_ncname(ts.year), "a", timeout=300) as nc:
+        domain = nc.variables["hasdata"][:, :]
     ts0 = ts - datetime.timedelta(minutes=10)
     ts1 = ts + datetime.timedelta(minutes=10)
-    utcnow = datetime.datetime.utcnow()
-    utcnow = utcnow.replace(tzinfo=pytz.utc) - datetime.timedelta(hours=36)
+    utcnow = utc() - datetime.timedelta(hours=36)
 
     # If we are near realtime, look in IEMAccess instead of ASOS database
     mybuf = 2.0
@@ -154,25 +141,25 @@ def grid_hour(ts):
  valid >= %s and valid < %s GROUP by station, lon, lat"""
 
     df = read_sql(sql, dbconn, params=params, index_col="station")
-    pprint("got database results")
+    LOG.debug("got database results")
     if df.empty:
-        print(("%s has no entries, FAIL") % (ts.strftime("%Y-%m-%d %H:%M"),))
+        LOG.info("%s has no entries, FAIL", ts)
         return
     ures, vres = grid_wind(df, domain)
-    pprint("grid_wind is done")
+    LOG.debug("grid_wind is done")
     if ures is None:
-        print("iemre.hourly_analysis failure for uwnd at %s" % (ts,))
+        LOG.debug("Failure for uwnd at %s", ts)
     else:
         write_grid(ts, "uwnd", ures)
         write_grid(ts, "vwnd", vres)
 
     tmpf = generic_gridder(df, "max_tmpf", domain)
-    pprint("grid tmpf is done")
+    LOG.debug("grid tmpf is done")
     if tmpf is None:
-        print("iemre.hourly_analysis failure for tmpk at %s" % (ts,))
+        LOG.info("Failure for tmpk at %s", ts)
     else:
         dwpf = generic_gridder(df, "max_dwpf", domain)
-        pprint("grid dwpf is done")
+        LOG.debug("grid dwpf is done")
         # require that dwpk <= tmpk
         mask = ~np.isnan(dwpf)
         mask[mask] &= dwpf[mask] > tmpf[mask]
@@ -185,9 +172,9 @@ def grid_hour(ts):
         )
 
     res = grid_skyc(df, domain)
-    pprint("grid skyc is done")
+    LOG.debug("grid skyc is done")
     if res is None:
-        print("iemre.hourly_analysis failure for skyc at %s" % (ts,))
+        LOG.info("Failure for skyc at %s", ts)
     else:
         write_grid(ts, "skyc", res)
 
@@ -198,22 +185,17 @@ def write_grid(valid, vname, grid):
     This is isolated so that we don't 'lock' up our file while intensive
     work is done
     """
-    nc = ncopen(iemre.get_hourly_ncname(valid.year), "a", timeout=300)
     offset = iemre.hourly_offset(valid)
-    nc.variables[vname][offset] = grid
-    nc.close()
+    with ncopen(iemre.get_hourly_ncname(valid.year), "a", timeout=300) as nc:
+        nc.variables[vname][offset] = grid
 
 
 def main(argv):
     """Go Main"""
     if len(argv) == 5:
-        ts = datetime.datetime(
-            int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4])
-        )
+        ts = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
     else:
-        ts = datetime.datetime.utcnow()
-        ts = ts.replace(second=0, minute=0)
-    ts = ts.replace(tzinfo=pytz.utc)
+        ts = utc().replace(second=0, minute=0)
     grid_hour(ts)
 
 

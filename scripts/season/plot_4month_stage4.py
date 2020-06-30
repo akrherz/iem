@@ -6,7 +6,6 @@
 
   We care about 4 months as it is used in drought analysis
 """
-from __future__ import print_function
 import datetime
 
 import numpy as np

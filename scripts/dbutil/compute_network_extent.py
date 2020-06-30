@@ -1,7 +1,8 @@
 """Compute the spatial extent of a network"""
-from __future__ import print_function
 
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
 def main():
@@ -24,13 +25,10 @@ def main():
     )
 
     if cursor.rowcount > 0:
-        print("compute_network_extent updated %s rows" % (cursor.rowcount,))
+        LOG.info("updated %s rows", cursor.rowcount)
     if cursor.rowcount < 50:
         for row in cursor:
-            print(
-                "   %s -> %.4f %.4f %.4f %.4f"
-                % (row[0], row[1], row[2], row[3], row[4])
-            )
+            LOG.info("   %s -> %.4f %.4f %.4f %.4f", *row)
 
     cursor.close()
     pgconn.commit()

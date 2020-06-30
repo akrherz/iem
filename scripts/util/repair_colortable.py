@@ -1,5 +1,4 @@
 """Need to fix some corrupted n0r NEXRAD color tables!"""
-from __future__ import print_function
 import datetime
 import subprocess
 import os
@@ -23,10 +22,8 @@ def get_colortable(prod):
 
     """
     CURSOR.execute(
-        """
-    select r,g,b from iemrasters_lookup l JOIN iemrasters r on
-    (r.id = l.iemraster_id) WHERE r.name = %s ORDER by l.coloridx ASC
-    """,
+        "select r,g,b from iemrasters_lookup l JOIN iemrasters r on "
+        "(r.id = l.iemraster_id) WHERE r.name = %s ORDER by l.coloridx ASC",
         ("composite_" + prod,),
     )
     ct = gdal.ColorTable()
@@ -41,7 +38,7 @@ n0rct = get_colortable("n0q")
 def do(ts):
     """Process!"""
     fn = ts.strftime(
-        ("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/" "uscomp/n0q_%Y%m%d%H%M.png")
+        "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0q_%Y%m%d%H%M.png"
     )
     if not os.path.isfile(fn):
         print("Missing %s" % (fn,))

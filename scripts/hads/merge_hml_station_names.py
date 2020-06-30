@@ -2,7 +2,6 @@
 
 HML files provide station names that are likely better than what I manually
 hacked into the database previously..."""
-from __future__ import print_function
 import sys
 
 from pyiem.nws.products.hml import parser
@@ -19,10 +18,8 @@ def build_stations():
     pgconn = get_dbconn("afos")
     cursor = pgconn.cursor("streamer")
     cursor.execute(
-        """
-        SELECT data from products WHERE
-        entered > 'YESTERDAY' and substr(pil, 1, 3) = 'HML'
-    """
+        "SELECT data from products WHERE entered > 'YESTERDAY' "
+        "and substr(pil, 1, 3) = 'HML'"
     )
     for row in cursor:
         hml = parser(row[0])
@@ -82,9 +79,7 @@ def should_switch_2dcp(rwcursor, icursor, nwsli, iemid):
         return
     print(" -> Switching site: %s to network: %s" % (nwsli, network))
     rwcursor.execute(
-        """UPDATE stations SET network = %s where iemid = %s
-    """,
-        (network, iemid),
+        "UPDATE stations SET network = %s where iemid = %s", (network, iemid)
     )
 
 
@@ -92,15 +87,14 @@ def merge(xref):
     """ Do some logic here to clean things up!"""
     pgconn = get_dbconn("mesosite", user="mesonet")
     ipgconn = get_dbconn("iem", user="mesonet")
-    for nwsli, name in xref.iteritems():
+    for nwsli, name in xref.items():
         cursor = pgconn.cursor()
         rwcursor = pgconn.cursor()
         icursor = ipgconn.cursor()
         name = name[:64]  # database name size limitation
         cursor.execute(
-            """SELECT id, name, network, iemid from stations WHERE
-        id = %s and (network ~* 'COOP' or network ~* 'DCP')
-        """,
+            "SELECT id, name, network, iemid from stations WHERE "
+            "id = %s and (network ~* 'COOP' or network ~* 'DCP')",
             (nwsli,),
         )
         if cursor.rowcount == 0:
@@ -113,8 +107,7 @@ def merge(xref):
             if row[1] != name:
                 print(" -> Update %s |%s| -> |%s|" % (nwsli, row[1], name))
                 rwcursor.execute(
-                    """UPDATE stations SET name = %s
-                WHERE iemid = %s""",
+                    "UPDATE stations SET name = %s WHERE iemid = %s",
                     (name, row[3]),
                 )
         elif cursor.rowcount == 2:
@@ -129,8 +122,7 @@ def merge(xref):
                 if _r[2].find("DCP") > -1 and _r[1] != name:
                     print(" -> Updating Name to |%s|" % (name,))
                     rwcursor.execute(
-                        """UPDATE stations SET name = %s
-                    WHERE iemid = %s""",
+                        "UPDATE stations SET name = %s WHERE iemid = %s",
                         (name, _r[3]),
                     )
         else:

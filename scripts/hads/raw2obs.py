@@ -1,5 +1,4 @@
 """Convert the raw table data into something faster for website to use"""
-from __future__ import print_function
 import datetime
 import sys
 from io import StringIO
@@ -25,12 +24,9 @@ def do(ts):
     sts = datetime.datetime(ts.year, ts.month, ts.day).replace(tzinfo=pytz.utc)
     ets = sts + datetime.timedelta(hours=24)
     df = read_sql(
-        """
+        f"""
         SELECT station, valid, substr(key, 1, 3) as vname, value
-        from """
-        + table
-        + """
-        WHERE valid >= %s and valid < %s and
+        from {table} WHERE valid >= %s and valid < %s and
         substr(key, 1, 3) in ('USI', 'UDI', 'TAI', 'TDI')
         and value > -999
     """,
@@ -64,11 +60,7 @@ def do(ts):
         )
     cursor = pgconn.cursor()
     cursor.execute(
-        """DELETE from """
-        + table
-        + """ WHERE valid between %s
-    and %s""",
-        (sts, ets),
+        f"DELETE from {table} WHERE valid between %s and %s", (sts, ets)
     )
     data.seek(0)
     cursor.copy_from(

@@ -1,7 +1,6 @@
 """
 Ingest files provided by NLAE containing flux information
 """
-from __future__ import print_function
 import os
 from io import StringIO
 import datetime
@@ -9,9 +8,10 @@ import datetime
 import pytz
 import pandas as pd
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
 from pyiem.datatypes import temperature, speed, pressure
 
+LOG = logger()
 DIR = "/mnt/home/mesonet/ot/ot0005/incoming/Fluxdata/"
 FILENAMES = {
     "NSTL10": ["Flux10_AF.dat", "Anc10_AF.dat"],
@@ -134,7 +134,7 @@ CONVERT = {
 
 def c(v):
     """convert"""
-    if v == "NAN" or v == "-INF" or v == "INF":
+    if v in ["NAN", "-INF", "INF"]:
         return None
     return v
 
@@ -155,10 +155,7 @@ def main():
     # Figure out max valid times
     maxts = {}
     cursor.execute(
-        """
-        SELECT station, max(valid) from flux_data
-        GROUP by station
-    """
+        "SELECT station, max(valid) from flux_data GROUP by station"
     )
     for row in cursor:
         maxts[row[0]] = row[1]
@@ -166,7 +163,7 @@ def main():
     processed = 0
     for station, fns in FILENAMES.items():
         if station not in maxts:
-            print("flux_ingest %s has no prior db archive" % (station,))
+            LOG.info("%s has no prior db archive", station)
             maxts[station] = datetime.datetime(1980, 1, 1).replace(
                 tzinfo=pytz.utc
             )
@@ -174,18 +171,18 @@ def main():
         for fn in fns:
             myfn = "%s%s" % (DIR, fn)
             if not os.path.isfile(myfn):
-                print("flux_ingest.py missing file: %s" % (myfn,))
+                LOG.info("missing file: %s", myfn)
                 continue
             df = pd.read_csv(
                 myfn, skiprows=[0, 2, 3], index_col=0, na_values=["NAN"]
             )
             df.drop("RECORD", axis=1, inplace=True)
             if df.empty:
-                print(("flux_ingest.py file: %s has no data") % (fn,))
+                LOG.info("file: %s has no data", fn)
                 continue
             dfs.append(df)
         if not dfs:
-            print("flux_ingest no data for: %s" % (station,))
+            LOG.info("no data for: %s", station)
             continue
         df = dfs[0]
         if len(dfs) > 1:
@@ -208,10 +205,7 @@ def main():
                 if colname not in DBCOLS:
                     exclude.append(colname)
                     if colname not in DROPCOLS:
-                        print(
-                            ("flux_ingest %s has additional cols: %s")
-                            % (station, exclude)
-                        )
+                        LOG.info("%s has more cols: %s", station, exclude)
             gdf2 = gdf[gdf.columns.difference(exclude)]
             processed += len(gdf2.index)
             output = StringIO()

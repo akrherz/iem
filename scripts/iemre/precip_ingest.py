@@ -3,7 +3,6 @@
     1. Copies to hourly stage IV netCDF files
     2. Copies hourly stage IV netCDF to hourly IEMRE
 """
-from __future__ import print_function
 import os
 import datetime
 import sys

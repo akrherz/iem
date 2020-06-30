@@ -1,7 +1,6 @@
 """
   Need to set station metadata for county name for a given site...
 """
-from __future__ import print_function
 import sys
 
 from pyiem.util import get_dbconn
@@ -24,7 +23,7 @@ def msg(text):
         return text
     if text == "OK":
         return "%s[ OK ]%s" % (bcolors.OKGREEN, bcolors.ENDC)
-    elif text == "FAIL":
+    if text == "FAIL":
         return "%s[FAIL]%s" % (bcolors.FAIL, bcolors.ENDC)
     return text
 
@@ -32,10 +31,7 @@ def msg(text):
 def set_county(mcursor2, iemid, ugc, ugcname):
     """set the county"""
     mcursor2.execute(
-        """
-        UPDATE stations SET county = %s, ugc_county = %s
-        WHERE iemid = %s
-    """,
+        "UPDATE stations SET county = %s, ugc_county = %s WHERE iemid = %s",
         (ugcname, ugc, iemid),
     )
 
@@ -43,11 +39,7 @@ def set_county(mcursor2, iemid, ugc, ugcname):
 def set_zone(mcursor2, iemid, ugc):
     """set the zone"""
     mcursor2.execute(
-        """
-        UPDATE stations SET ugc_zone = %s
-        WHERE iemid = %s
-    """,
-        (ugc, iemid),
+        "UPDATE stations SET ugc_zone = %s WHERE iemid = %s", (ugc, iemid)
     )
 
 

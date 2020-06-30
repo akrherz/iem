@@ -1,7 +1,7 @@
 """create initial database entries"""
-from __future__ import print_function
 import os
 import glob
+
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
 
@@ -25,12 +25,7 @@ def main():
     for fn in files:
         cid = fn[:11]
 
-        cursor.execute(
-            """
-            SELECT * from webcams WHERE id = %s
-        """,
-            (cid,),
-        )
+        cursor.execute("SELECT * from webcams WHERE id = %s", (cid,))
         if cursor.rowcount > 0:
             continue
 

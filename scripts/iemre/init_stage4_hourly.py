@@ -1,5 +1,4 @@
 """Generate the storage of stage IV hourly products"""
-from __future__ import print_function
 import datetime
 import sys
 

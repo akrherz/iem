@@ -3,7 +3,6 @@
  Use Unidata's motherlode server :)
 
 """
-from __future__ import print_function
 import sys
 from io import StringIO
 import datetime
@@ -110,12 +109,8 @@ def run(mcursor, model, station, lon, lat, ts):
 
     table = "model_gridpoint_%s" % (ts.year,)
     sql = (
-        """
-        DELETE from """
-        + table
-        + """ WHERE
-        station = %s and model = %s and runtime = %s
-        """
+        f"DELETE from {table} WHERE station = %s "
+        "and model = %s and runtime = %s"
     )
     args = (station, model, ts)
     mcursor.execute(sql, args)
@@ -142,14 +137,10 @@ def run(mcursor, model, station, lon, lat, ts):
             precipcon = None
         fts = datetime.datetime.strptime(row["time"], "%Y-%m-%dT%H:%M:%SZ")
         fts = fts.replace(tzinfo=pytz.utc)
-        sql = (
-            """INSERT into """
-            + table
-            + """ (station, model, runtime,
+        sql = f"""INSERT into {table} (station, model, runtime,
               ftime, sbcape, sbcin, pwater, precipcon, precip)
               VALUES (%s, %s , %s,
               %s, %s, %s, %s, %s, %s )"""
-        )
         args = (
             station,
             model,
@@ -185,12 +176,7 @@ def check_and_run(mcursor, model, runtime):
     """ Check the database for missing data """
     table = "model_gridpoint_%s" % (runtime.year,)
     mcursor.execute(
-        """
-        SELECT * from """
-        + table
-        + """ WHERE
-        runtime = %s and model = %s
-    """,
+        f"SELECT * from {table} WHERE runtime = %s and model = %s",
         (runtime, model),
     )
     if mcursor.rowcount < 10:

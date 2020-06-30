@@ -1,5 +1,4 @@
 """Delete a station and all references to it!"""
-from __future__ import print_function
 import sys
 
 from pyiem.util import get_dbconn
@@ -44,9 +43,7 @@ def delete_logic(icursor, mcursor, network, station):
         (station, network),
     )
     mcursor.execute(
-        """
-        DELETE from stations where id = %s and network = %s
-    """,
+        "DELETE from stations where id = %s and network = %s",
         (station, network),
     )
     print(

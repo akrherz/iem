@@ -5,7 +5,6 @@
 
       <b>Site elevation:</b> sea level<br />
 """
-from __future__ import print_function
 import requests
 
 from pyiem.reference import nwsli2country, nwsli2state
@@ -90,10 +89,8 @@ def main():
     pgconn = get_dbconn("hads", user="nobody")
     cursor = pgconn.cursor()
     cursor.execute(
-        """
-        SELECT distinct nwsli from unknown where
-        product ~* 'OSO' ORDER by nwsli
-    """
+        "SELECT distinct nwsli from unknown where "
+        "product ~* 'OSO' ORDER by nwsli"
     )
     for row in cursor:
         dowork(row[0])

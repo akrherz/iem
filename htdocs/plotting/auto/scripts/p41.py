@@ -1,5 +1,4 @@
 """Q/Q Plot"""
-from __future__ import print_function
 from collections import OrderedDict
 
 import numpy as np
@@ -333,8 +332,8 @@ def plotter(fdict):
         b.get_paths()[0].vertices[:, 0], -np.inf, m
     )
     b.set_color("r")
-    for l in ["cmins", "cmeans", "cmaxes"]:
-        v1[l].set_color("r")
+    for lbl in ["cmins", "cmeans", "cmaxes"]:
+        v1[lbl].set_color("r")
 
     v1 = ax.violinplot(m2data, positions=[0], showextrema=True, showmeans=True)
     b = v1["bodies"][0]
@@ -343,8 +342,8 @@ def plotter(fdict):
         b.get_paths()[0].vertices[:, 0], m, np.inf
     )
     b.set_color("b")
-    for l in ["cmins", "cmeans", "cmaxes"]:
-        v1[l].set_color("b")
+    for lbl in ["cmins", "cmeans", "cmaxes"]:
+        v1[lbl].set_color("b")
 
     pr0 = plt.Rectangle((0, 0), 1, 1, fc="r")
     pr1 = plt.Rectangle((0, 0), 1, 1, fc="b")

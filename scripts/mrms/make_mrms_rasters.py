@@ -4,7 +4,6 @@
  run from RUN_10_AFTER.sh
 
 """
-from __future__ import print_function
 import datetime
 import os
 import sys
@@ -12,7 +11,6 @@ import tempfile
 import subprocess
 import json
 import gzip
-import unittest
 
 import numpy as np
 from PIL import Image
@@ -324,10 +322,7 @@ if __name__ == "__main__":
     main(sys.argv)
 
 
-class test(unittest.TestCase):
-    """What, test code, Shirely you jest"""
-
-    def test_ramp(self):
-        """ Check our work """
-        img = convert_to_image(np.array([25]))
-        self.assertEquals(img[0], 100)
+def test_ramp():
+    """ Check our work """
+    img = convert_to_image(np.array([25]))
+    assert abs(img[0] - 100) < 0.01

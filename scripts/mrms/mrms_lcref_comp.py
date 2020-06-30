@@ -1,7 +1,6 @@
 """
  Generate a composite of the MRMS Lowest Composite Reflectvity
 """
-from __future__ import print_function
 import datetime
 import os
 import tempfile

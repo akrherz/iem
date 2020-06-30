@@ -2,7 +2,6 @@
 
 Likely due to water being dumped into the tipping bucket to clean it :/
 """
-from __future__ import print_function
 import sys
 import datetime
 
@@ -16,10 +15,8 @@ def zero_hourly(station, sts, ets):
     cursor = pgconn.cursor()
     for table in ["sm_hourly", "sm_minute"]:
         cursor.execute(
-            """
-            UPDATE """
-            + table
-            + """
+            f"""
+            UPDATE {table}
             SET rain_mm_tot_qc = 0, rain_mm_tot_f = 'Z', rain_mm_tot = 0
             WHERE station = %s and valid > %s and valid <= %s
         """,

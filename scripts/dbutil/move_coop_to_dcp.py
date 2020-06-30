@@ -2,7 +2,6 @@
  Loop over sites that we think are solely COOP, but report many times per day
  and so are likely DCP
 """
-from __future__ import print_function
 import subprocess
 
 from pyiem.util import get_dbconn
@@ -32,21 +31,15 @@ def main():
         if row[2] < 5:
             continue
         # Look for how many entries are in mesosite
-        mcursor.execute(
-            """SELECT network from stations where id = %s
-          """,
-            (sid,),
-        )
+        mcursor.execute("SELECT network from stations where id = %s", (sid,))
         if mcursor.rowcount == 1:
             newnetwork = network.replace("_COOP", "_DCP")
             print(
                 "We shall switch %s from %s to %s" % (sid, network, newnetwork)
             )
             mcursor2.execute(
-                """
-                UPDATE stations SET network = '%s' WHERE id = '%s'
-            """
-                % (newnetwork, sid)
+                "UPDATE stations SET network = %s WHERE id = %s",
+                (newnetwork, sid),
             )
         if mcursor.rowcount == 2:
             networks = []

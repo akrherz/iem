@@ -1,5 +1,4 @@
 """Generate the storage netcdf file for 0.01deg MRMS data over the Midwest"""
-from __future__ import print_function
 import datetime
 import sys
 

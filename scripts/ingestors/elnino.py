@@ -1,5 +1,4 @@
 """Ingest the El Nino"""
-from __future__ import print_function
 import datetime
 
 import requests
@@ -31,16 +30,11 @@ def main():
             print("Found ElNino3.4! %s %s" % (date, anom34))
             if current.get(date) is None:
                 mcursor.execute(
-                    """INSERT into elnino(monthdate) values (%s)
-                """,
-                    (date,),
+                    "INSERT into elnino(monthdate) values (%s)", (date,)
                 )
                 current[date] = dict(anom_34=anom34)
             mcursor.execute(
-                """
-                UPDATE elnino SET anom_34 = %s
-                WHERE monthdate = %s
-            """,
+                "UPDATE elnino SET anom_34 = %s WHERE monthdate = %s",
                 (anom34, date),
             )
 
@@ -63,15 +57,10 @@ def main():
                 print("Found SOI 3M! %s %s" % (date, soi))
                 if current.get(date) is None:
                     mcursor.execute(
-                        """INSERT into elnino(monthdate) values (%s)
-                    """,
-                        (date,),
+                        "INSERT into elnino(monthdate) values (%s)", (date,)
                     )
                 mcursor.execute(
-                    """
-                    UPDATE elnino SET soi_3m = %s
-                    WHERE monthdate = %s
-                """,
+                    "UPDATE elnino SET soi_3m = %s WHERE monthdate = %s",
                     (soi, date),
                 )
 

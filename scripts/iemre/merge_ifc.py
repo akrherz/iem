@@ -1,5 +1,4 @@
 """Merge the PNG IFC files into the daily netcdf file"""
-from __future__ import print_function
 import datetime
 import sys
 import os
@@ -8,7 +7,9 @@ import pytz
 from osgeo import gdal
 import numpy as np
 from pyiem import iemre
-from pyiem.util import ncopen
+from pyiem.util import ncopen, logger
+
+LOG = logger()
 
 
 def run(ts):
@@ -25,7 +26,7 @@ def run(ts):
         if gmt > currenttime:
             break
         fn = gmt.strftime(
-            ("/mesonet/ARCHIVE/data/%Y/%m/%d/" "GIS/ifc/p05m_%Y%m%d%H%M.png")
+            "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ifc/p05m_%Y%m%d%H%M.png"
         )
         if not os.path.isfile(fn):
             now += interval
@@ -40,7 +41,7 @@ def run(ts):
 
         now += interval
     if total is None:
-        print(("No IFC Data found for date: %s") % (now.strftime("%d %B %Y"),))
+        LOG.info("No IFC Data found for date: %s", now)
         return
 
     nc = ncopen(

@@ -4,7 +4,6 @@
   RLRI4
  Run from RUN_1MIN
 """
-from __future__ import print_function
 import datetime
 import sys
 from io import BytesIO

@@ -2,7 +2,6 @@
 
 https://www.ncdc.noaa.gov/homr/reports
 """
-from __future__ import print_function
 import sys
 
 from pandas.io.sql import read_sql
@@ -46,9 +45,8 @@ def main():
                 % (nwsli, enddate, state, country, name, platform)
             )
             cursor.execute(
-                """
-                UPDATE stations SET network = %s WHERE id = %s and network = %s
-            """,
+                "UPDATE stations SET network = %s "
+                "WHERE id = %s and network = %s",
                 (
                     str(df.at[nwsli, "network"]).replace("_DCP", "_COOP"),
                     nwsli,

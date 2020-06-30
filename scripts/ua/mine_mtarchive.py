@@ -1,5 +1,4 @@
 """Run to ingest gempak files from mtarchive"""
-from __future__ import print_function
 import subprocess
 import datetime
 
@@ -31,15 +30,15 @@ now = sts
 while now < ets:
     print(now)
     uri = now.strftime(
-        "http://mtarchive.geol.iastate.edu/%Y/%m/%d/gempak/upperair/%Y%m%d_upa.gem"
+        "http://mtarchive.geol.iastate.edu/%Y/%m/%d/"
+        "gempak/upperair/%Y%m%d_upa.gem"
     )
     try:
         req = requests.get(uri, timeout=30)
         if req.status_code != 200:
             raise Exception(uri)
-        o = open("data.gem", "wb")
-        o.write(req.content)
-        o.close()
+        with open("data.gem", "wb") as fp:
+            fp.write(req.content)
     except Exception as exp:
         print(exp)
         now += interval

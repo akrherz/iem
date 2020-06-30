@@ -1,5 +1,4 @@
 """Grid climate for netcdf usage"""
-from __future__ import print_function
 import sys
 import datetime
 

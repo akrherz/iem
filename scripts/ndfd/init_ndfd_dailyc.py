@@ -1,5 +1,4 @@
 """Generate the NDFD climatology file, hmmm"""
-from __future__ import print_function
 import datetime
 
 import numpy as np
@@ -19,10 +18,8 @@ def init_year(ts):
     )
 
     grbs = pygrib.open(
-        (
-            "/mesonet/ARCHIVE/data/2019/05/06/model/"
-            "ndfd/00/ndfd.t00z.awp2p5f001.grib2"
-        )
+        "/mesonet/ARCHIVE/data/2019/05/06/model/ndfd/"
+        "00/ndfd.t00z.awp2p5f001.grib2"
     )
     grb = grbs[1]
     shape = grb.values.shape

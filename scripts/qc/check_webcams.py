@@ -1,7 +1,6 @@
 """
 Check to see if there are webcams offline, generate emails and such
 """
-from __future__ import print_function
 import os
 import stat
 import datetime

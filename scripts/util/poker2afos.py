@@ -1,5 +1,4 @@
 """Ingest the files kindly sent to me by poker"""
-from __future__ import print_function
 import glob
 import re
 import datetime

@@ -1,5 +1,4 @@
 """Merge the 0.01x0.01 Q3 24 hour precip data estimates"""
-from __future__ import print_function
 import datetime
 import sys
 import os
@@ -11,8 +10,9 @@ import numpy as np
 import pygrib
 import pyiem.mrms as mrms
 from pyiem import iemre
-from pyiem.util import ncopen, utc
+from pyiem.util import ncopen, utc, logger
 
+LOG = logger()
 TMP = "/mesonet/tmp"
 
 
@@ -49,7 +49,7 @@ def run(ts):
             break
         if gribfn is None:
             if gmtts < utcnow:
-                print("merge_mrms_q3.py MISSING %s" % (gmtts,))
+                LOG.info("MISSING %s", gmtts)
             continue
         grbs = pygrib.open(gribfn)
         grb = grbs[1]
@@ -66,7 +66,7 @@ def run(ts):
             total += val
 
     if lats is None:
-        print("merge_mrms_q3 nodata for %s" % (ts.date(),))
+        LOG.info("nodata for %s", ts.date())
         return
     # CAREFUL HERE!  The MRMS grid is North to South
     # set top (smallest y)

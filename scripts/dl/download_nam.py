@@ -1,5 +1,4 @@
 """Get some soil grids from the NAM"""
-from __future__ import print_function
 import subprocess
 import sys
 import datetime
@@ -16,10 +15,8 @@ LOG = logger()
 def need_to_run(valid, hr):
     """ Check to see if we already have the radiation data we need"""
     gribfn = valid.strftime(
-        (
-            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/nam/"
-            "%H/nam.t%Hz.conusnest.hiresf0" + str(hr) + ".tm00.grib2"
-        )
+        "/mesonet/ARCHIVE/data/%Y/%m/%d/model/nam/%H/"
+        f"nam.t%Hz.conusnest.hiresf0{hr}.tm00.grib2"
     )
     if not os.path.isfile(gribfn):
         return True
@@ -37,11 +34,8 @@ def fetch(valid, hr):
     """ Fetch the data for this timestamp
     """
     uri = valid.strftime(
-        (
-            "https://ftpprd.ncep.noaa.gov/data/nccf/"
-            "com/nam/prod/nam.%Y%m%d/nam.t%Hz.conusnest."
-            "hiresf0" + str(hr) + ".tm00.grib2.idx"
-        )
+        "https://ftpprd.ncep.noaa.gov/data/nccf/com/nam/prod/"
+        f"nam.%Y%m%d/nam.t%Hz.conusnest.hiresf0{hr}.tm00.grib2.idx"
     )
     req = exponential_backoff(requests.get, uri, timeout=30)
     if req is None or req.status_code != 200:
@@ -72,10 +66,8 @@ def fetch(valid, hr):
                 neednext = True
 
     pqstr = valid.strftime(
-        (
-            "data u %Y%m%d%H00 bogus model/nam/"
-            "%H/nam.t%Hz.conusnest.hiresf0" + str(hr) + ".tm00.grib2 grib2"
-        )
+        "data u %Y%m%d%H00 bogus model/nam/"
+        f"%H/nam.t%Hz.conusnest.hiresf0{hr}.tm00.grib2 grib2"
     )
 
     if len(offsets) != 8:

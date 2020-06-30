@@ -1,5 +1,4 @@
 """Compare what we have for stations and what NCEI has for GHCN"""
-from __future__ import print_function
 import sys
 
 import pandas as pd

@@ -1,7 +1,6 @@
 """
  Dump a CSV file of the MADIS data, kind of sad that I do this, but alas
 """
-from __future__ import print_function
 import os
 import sys
 import time

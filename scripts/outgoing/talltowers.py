@@ -3,7 +3,6 @@
 Run from RUN_1MIN.sh
 """
 # pylint: disable=abstract-class-instantiated
-from __future__ import print_function
 import smtplib
 import time
 from email.mime.text import MIMEText
@@ -25,10 +24,8 @@ def gen_df(row):
     stations = row["stations"].split(",")
     towers = [TOWERS[station] for station in stations]
     df = read_sql(
-        """
-    SELECT * from data_analog WHERE tower in %s
-    and valid >= %s and valid < %s ORDER by tower, valid
-    """,
+        "SELECT * from data_analog WHERE tower in %s "
+        "and valid >= %s and valid < %s ORDER by tower, valid",
         pgconn,
         params=(tuple(towers), row["sts"], row["ets"]),
         index_col=None,
@@ -77,7 +74,7 @@ Thank you for requesting ISU Tall Towers data.  You can find your data here:
 
     try:
         s = smtplib.SMTP("mailhub.iastate.edu")
-    except Exception as _:
+    except Exception:
         time.sleep(57)
         s = smtplib.SMTP("mailhub.iastate.edu")
     part1 = MIMEText(text, "plain")
@@ -92,10 +89,7 @@ def main():
     pgconn = get_dbconn("mesosite")
     cursor = pgconn.cursor()
     df = read_sql(
-        """
-    SELECT * from talltowers_analog_queue
-    WHERE filled = 'f'
-    """,
+        "SELECT * from talltowers_analog_queue WHERE filled = 'f'",
         pgconn,
         index_col=None,
     )
@@ -107,10 +101,8 @@ def main():
         filename = do(row)
         print(" --> %s" % (filename,))
         cursor.execute(
-            """
-        UPDATE talltowers_analog_queue SET filled = 't'
-        WHERE valid = %s and email = %s
-        """,
+            "UPDATE talltowers_analog_queue SET filled = 't' "
+            "WHERE valid = %s and email = %s",
             (row["valid"], row["email"]),
         )
     cursor.close()

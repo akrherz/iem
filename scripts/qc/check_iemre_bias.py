@@ -1,5 +1,4 @@
 """Look to see if we have something systematic wrong with IEMRE"""
-from __future__ import print_function
 import json
 import sys
 

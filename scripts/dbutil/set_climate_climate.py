@@ -2,7 +2,6 @@
  We have a somewhat hack whereby we assign the proper sector to the climate
  site.  So a climate site like Ames gets assigned to the IAC005 (central Iowa)
 """
-from __future__ import print_function
 
 from pyiem.util import get_dbconn
 
@@ -15,9 +14,8 @@ def main():
 
     # Query out all sites with a null climate_site
     mcursor.execute(
-        """
-      SELECT id, state, climate_site from stations WHERE network ~* 'CLIMATE'
-    """
+        "SELECT id, state, climate_site from stations "
+        "WHERE network ~* 'CLIMATE'"
     )
 
     for row in mcursor:
@@ -39,10 +37,7 @@ def main():
         else:
             if row[2] != row2[0]:
                 mcursor2.execute(
-                    """
-                    UPDATE stations SET climate_site = %s WHERE
-                     id = %s
-                """,
+                    "UPDATE stations SET climate_site = %s WHERE id = %s",
                     (row2[0], sid),
                 )
                 print(

@@ -1,6 +1,5 @@
 """Ingest the rich metadata found within the AHPS2 website!
 """
-from __future__ import print_function
 import sys
 
 import requests

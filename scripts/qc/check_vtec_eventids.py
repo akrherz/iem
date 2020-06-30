@@ -3,7 +3,6 @@ My purpose in life is to daily check the VTEC database and see if there are
 any IDs that are missing.  daryl then follows up with the weather bureau
 reporting anything he finds after an investigation.
 """
-from __future__ import print_function
 import datetime
 
 from pyiem.util import get_dbconn
@@ -18,10 +17,8 @@ def main():
     year = datetime.datetime.now().year
 
     pcursor.execute(
-        """
-        SELECT wfo, phenomena, significance, eventid from
-        vtec_missing_events WHERE year = %s
-    """,
+        "SELECT wfo, phenomena, significance, eventid from "
+        "vtec_missing_events WHERE year = %s",
         (year,),
     )
     missing = []
@@ -29,10 +26,10 @@ def main():
         missing.append("%s.%s.%s.%s" % (row[0], row[1], row[2], row[3]))
 
     # Gap analysis!
-    sql = """
+    sql = f"""
     with data as (
         select distinct wfo, phenomena, significance, eventid
-        from warnings_%s),
+        from warnings_{year}),
     deltas as (
         SELECT wfo, eventid, phenomena, significance,
         eventid - lag(eventid) OVER (PARTITION by wfo, phenomena, significance
@@ -41,9 +38,7 @@ def main():
 
     SELECT wfo, eventid, phenomena, significance, delta from deltas
     WHERE delta > 1 ORDER by wfo ASC
-    """ % (
-        year,
-    )
+    """
     pcursor.execute(sql)
     for row in pcursor:
         phenomena = row[2]

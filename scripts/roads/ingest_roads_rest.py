@@ -29,7 +29,6 @@ Run every five minutes from RUN_5MIN.sh
       },
 
 """
-from __future__ import print_function
 import json
 import datetime
 import sys

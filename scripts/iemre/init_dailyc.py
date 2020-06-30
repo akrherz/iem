@@ -1,5 +1,4 @@
 """Generate the IEMRE climatology file, hmmm"""
-from __future__ import print_function
 import datetime
 
 import geopandas as gpd
@@ -100,10 +99,8 @@ def compute_hasdata():
     czs = CachingZonalStats(iemre.AFFINE)
     pgconn = get_dbconn("postgis")
     states = gpd.GeoDataFrame.from_postgis(
-        """
-    SELECT the_geom, state_abbr from states
-    where state_abbr not in ('AK', 'HI')
-    """,
+        "SELECT the_geom, state_abbr from state "
+        "where state_abbr not in ('AK', 'HI')",
         pgconn,
         index_col="state_abbr",
         geom_col="the_geom",

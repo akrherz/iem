@@ -1,5 +1,4 @@
 """IEM Processing of the USDM Shapefiles"""
-from __future__ import print_function
 import sys
 import datetime
 import tempfile
@@ -14,7 +13,7 @@ from shapely.geometry import shape, MultiPolygon
 from pyiem.util import get_dbconn, exponential_backoff
 
 BASEURL = "https://droughtmonitor.unl.edu/data/shapefiles_m/"
-PQINSERT = "/home/ldm/bin/pqinsert"
+PQINSERT = "pqinsert"
 
 
 def database_save(date, shpfn):
@@ -30,10 +29,8 @@ def database_save(date, shpfn):
             if geo.type == "Polygon":
                 geo = MultiPolygon([geo])
             cursor.execute(
-                """
-                INSERT into usdm(valid, dm, geom) VALUES
-                (%s, %s, st_setsrid(st_geomfromtext(%s), 4326))
-            """,
+                "INSERT into usdm(valid, dm, geom) VALUES "
+                "(%s, %s, st_setsrid(st_geomfromtext(%s), 4326))",
                 (date, shp["properties"]["DM"], geo.wkt),
             )
     cursor.close()
@@ -62,9 +59,8 @@ def workflow(date, routes):
     shpfn = None
     for name in zipfp.namelist():
         # print("    extracting: %s" % (name, ))
-        fp = open("/tmp/%s" % (name,), "wb")
-        fp.write(zipfp.read(name))
-        fp.close()
+        with open("/tmp/%s" % (name,), "wb") as fp:
+            fp.write(zipfp.read(name))
         if name[-3:] == "shp":
             shpfn = "/tmp/" + name
     # 2. Save it to the database

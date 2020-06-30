@@ -1,13 +1,13 @@
 """Dump NASS Quickstats to the IEM database"""
-from __future__ import print_function
 import sys
 import subprocess
 import datetime
 import os
 
 import pandas as pd
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
 
+LOG = logger()
 TMP = "/mesonet/tmp"
 
 
@@ -15,7 +15,7 @@ def get_file():
     """Download and gunzip the file from the FTP site"""
     os.chdir("/mesonet/tmp")
     if os.path.isfile("%s/qstats.txt" % (TMP,)):
-        print("    skipping download as we already have the file")
+        LOG.info("    skipping download as we already have the file")
         return
     for i in range(0, -7, -1):
         now = datetime.date.today() + datetime.timedelta(days=i)
@@ -104,13 +104,14 @@ def database(pgconn, df):
                 ),
             )
         except Exception as exp:
-            print(exp)
+            LOG.exception(exp)
             for key in row.keys():
-                print("%s %s %s" % (key, row[key], len(str(row[key]))))
+                LOG.info("%s %s %s", key, row[key], len(str(row[key])))
             sys.exit()
-    print(
-        "    processed %6s lines from %6s candidates"
-        % (len(df2.index), len(df.index))
+    LOG.info(
+        "    processed %6s lines from %6s candidates",
+        len(df2.index),
+        len(df.index),
     )
     cursor.close()
     pgconn.commit()
@@ -152,19 +153,18 @@ def process(pgconn):
 def cleanup():
     """Cleanup after ourselves"""
     for fn in ["%s/qstats.txt" % (TMP,), "%s/tempor.txt" % (TMP,)]:
-        print("    Deleted %s" % (fn,))
+        LOG.info("    Deleted %s", fn)
         os.unlink(fn)
 
 
 def main(argv):
     """Go Main Go"""
     pgconn = get_dbconn("coop")
-    print("scripts/ingestors/nass_quickstats.py")
     get_file()
     process(pgconn)
     if len(argv) == 1:
         cleanup()
-    print("done...")
+    LOG.info("done...")
 
 
 if __name__ == "__main__":

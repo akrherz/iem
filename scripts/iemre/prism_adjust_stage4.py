@@ -3,7 +3,6 @@
 Take the PRISM data, valid at 12z and bias correct the hourly stage IV data
 
 """
-from __future__ import print_function
 import sys
 import datetime
 

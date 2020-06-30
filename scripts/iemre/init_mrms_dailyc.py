@@ -1,5 +1,4 @@
 """Generate the IEMRE climatology file, hmmm"""
-from __future__ import print_function
 import datetime
 
 import numpy as np

@@ -2,8 +2,8 @@
 Check the status of our ISUSM sites being offline or online
 run from RUN_40_AFTER.sh
 """
-from __future__ import print_function
 import datetime
+
 import pytz
 from pyiem.tracker import TrackerEngine
 from pyiem.network import Table as NetworkTable

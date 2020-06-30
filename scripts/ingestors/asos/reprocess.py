@@ -9,7 +9,6 @@ Arguments
     python reprocess.py --monthdate=200003
 
 """
-from __future__ import print_function
 import datetime
 import sys
 import os
@@ -195,7 +194,7 @@ def process_rawtext(yyyymm):
                 else:
                     try:
                         out = open(fn, "w")
-                    except Exception as exp:
+                    except Exception:
                         continue
                     out.write("FullMetar,\n")
             if out is not None and not out.closed:
@@ -203,12 +202,14 @@ def process_rawtext(yyyymm):
 
 
 def stup(station):
+    """Fix station id."""
     if station[0] == "K":
         return station[1:]
     return station
 
 
 def clear_data(station, tzname, sts, ets):
+    """Go."""
     if tzname is None:
         tzname = "UTC"
     acursor = ASOS.cursor()
@@ -231,6 +232,7 @@ def clear_data(station, tzname, sts, ets):
 
 
 def read_legacy(fn):
+    """Go."""
     data = open(fn).read()
     lines = data.split("\n")
     headers = None
@@ -242,8 +244,8 @@ def read_legacy(fn):
         tokens = line.split(",")
         if headers is None:
             headers = {}
-            for i in range(len(tokens)):
-                headers[tokens[i]] = i
+            for i, token in enumerate(tokens):
+                headers[token] = i
             continue
         if "FullMetar" in headers and len(tokens) >= headers["FullMetar"]:
             mstr = (
@@ -259,7 +261,7 @@ def read_legacy(fn):
                 if value not in ["-", ""]:
                     try:
                         pres = float(value)
-                    except Exception as exp:
+                    except Exception:
                         print(
                             ("Failed to parse SLP: %s %s")
                             % (repr(headers[SLP]), fn)
@@ -277,7 +279,7 @@ def process_metar(mstr, now):
         except MetarParserError as exp:
             try:
                 msg = str(exp)
-            except Exception as exp:
+            except Exception:
                 return None
             if msg.find("day is out of range for month") > 0 and now.day == 1:
                 now -= datetime.timedelta(days=1)

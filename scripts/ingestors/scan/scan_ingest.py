@@ -1,5 +1,4 @@
 """Download and process the scan dataset"""
-from __future__ import print_function
 import datetime
 import sys
 
@@ -224,7 +223,7 @@ def main(argv):
             continue
         linesin = response.split("\n")
         # trim blank lines
-        lines = [l for l in linesin if l.strip() != ""]
+        lines = [li for li in linesin if li.strip() != ""]
         cols = lines[1].split(",")
         if not cols:
             print("scan_ingest.py for station: %s had no columns" % (sid,))

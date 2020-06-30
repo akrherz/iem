@@ -9,7 +9,6 @@
   http://www1.ncdc.noaa.gov/pub/data/normals/1981-2010/products/temperature/dly-tmax-normal.txt
 
 """
-from __future__ import print_function
 import datetime
 
 from pyiem.util import get_dbconn

@@ -1,5 +1,4 @@
 """Create WMS-T database entries as necessary."""
-from __future__ import print_function
 import datetime
 import sys
 
@@ -18,23 +17,17 @@ def main(argv):
     table = "nexrad_%s_tindex" % (product,)
 
     while now < ets:
-        cursor.execute(
-            """SELECT * from """ + table + """ WHERE datetime = %s""", (now,)
-        )
+        cursor.execute(f"SELECT * from {table} WHERE datetime = %s", (now,))
 
         if cursor.rowcount == 0:
             print("Insert %s" % (now,))
             fn = now.strftime(
-                (
-                    "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/"
-                    "uscomp/" + product + "_%Y%m%d%H%M.png"
-                )
+                "/mesonet/ARCHIVE/data/%Y/%m/%d/"
+                f"GIS/uscomp/{product}_%Y%m%d%H%M.png"
             )
             cursor.execute(
-                """
-            INSERT into """
-                + table
-                + """ (datetime, filepath, the_geom) VALUES
+                f"""
+            INSERT into {table} (datetime, filepath, the_geom) VALUES
             (%s, %s,
             'SRID=4326;
              MULTIPOLYGON(((-126 50,-66 50,-66 24,-126 24,-126 50)))')

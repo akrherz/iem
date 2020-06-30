@@ -6,7 +6,6 @@
 4. Copy data into netcdf file
 5. Cleanup
 """
-from __future__ import print_function
 import sys
 import datetime
 import os
@@ -35,26 +34,12 @@ def do_download(valid):
         d = "2"  # if varname == "ppt" else "1"
         for classify in ["stable", "provisional", "early"]:
             localfn = valid.strftime(
-                (
-                    "PRISM_"
-                    + varname
-                    + "_"
-                    + classify
-                    + "_4kmD"
-                    + d
-                    + "_%Y%m%d_bil"
-                )
+                f"PRISM_{varname}_{classify}_4kmD{d}_%Y%m%d_bil"
             )
             subprocess.call("rm -f %s*" % (localfn,), shell=True)
 
             uri = valid.strftime(
-                (
-                    "ftp://prism.nacse.org/daily/"
-                    + varname
-                    + "/%Y/"
-                    + localfn
-                    + ".zip"
-                )
+                f"ftp://prism.nacse.org/daily/{varname}/%Y/{localfn}.zip"
             )
             # prevent zero byte files
             subprocess.call(

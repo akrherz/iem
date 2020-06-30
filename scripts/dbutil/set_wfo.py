@@ -1,12 +1,12 @@
 """Assign a WFO to sites in the metadata tables that have no WFO set."""
-from __future__ import print_function
 
 from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
 def main():
     """Go Main"""
-    log = logger()
     mesosite = get_dbconn("mesosite")
     postgis = get_dbconn("postgis")
     mcursor = mesosite.cursor()
@@ -42,7 +42,7 @@ def main():
         if pcursor.rowcount > 0:
             row2 = pcursor.fetchone()
             wfo = row2[0][:3]
-            log.info(
+            LOG.info(
                 "Assinging WFO: %s to IEMID: %s ID: %s NETWORK: %s",
                 wfo,
                 iemid,
@@ -50,13 +50,10 @@ def main():
                 network,
             )
             mcursor2.execute(
-                """
-                UPDATE stations SET wfo = '%s' WHERE iemid = %s
-            """
-                % (wfo, iemid)
+                "UPDATE stations SET wfo = %s WHERE iemid = %s", (wfo, iemid)
             )
         else:
-            log.info(
+            LOG.info(
                 "ERROR assigning WFO to IEMID: %s ID: %s NETWORK: %s",
                 iemid,
                 sid,

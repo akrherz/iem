@@ -3,7 +3,6 @@
 Run from RUN_10MIN.sh
 Run from RUN_40_AFTER.sh for two hours ago
 """
-from __future__ import print_function
 import os
 import sys
 import datetime
@@ -58,10 +57,8 @@ def process(ncfn):
     icursor = pgconn.cursor()
     xref = {}
     icursor.execute(
-        """
-        SELECT id, network from stations where
-        network ~* 'ASOS' or network = 'AWOS' and country = 'US'
-    """
+        "SELECT id, network from stations where "
+        "network ~* 'ASOS' or network = 'AWOS' and country = 'US'"
     )
     for row in icursor:
         xref[row[0]] = row[1]

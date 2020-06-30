@@ -2,7 +2,6 @@
 Check the status of our AWOS sites being offline or online
 run from RUN_10_AFTER.sh
 """
-from __future__ import print_function
 import datetime
 
 import pytz

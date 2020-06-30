@@ -1,7 +1,6 @@
 """
  Extract MADIS METAR QC information to the database
 """
-from __future__ import print_function
 import os
 import sys
 import datetime
@@ -14,6 +13,7 @@ from pyiem.util import get_dbconn, ncopen
 
 
 def figure(val, qcval):
+    """Go."""
     if qcval > 1000:
         return "Null"
     tmpf = temperature(val, "K").value("F")
@@ -21,13 +21,15 @@ def figure(val, qcval):
     return qcval - tmpf
 
 
-def figure_alti(val, qcval):
+def figure_alti(qcval):
+    """Go."""
     if qcval > 100000.0:
         return "Null"
     return qcval / 100.0
 
 
 def check(val):
+    """Go."""
     if val > 200000.0:
         return "Null"
     return val
@@ -86,8 +88,8 @@ def main():
                 dwpf_qc_sc = figure(nc_dwpk[j], dwpkqcd[j, 6])
             if not np.ma.is_masked(nc_alti[j]):
                 alti = check(nc_alti[j] / 100.0 * 0.0295298)
-                alti_qc_av = figure_alti(alti, altiqcd[j, 0] * 0.0295298)
-                alti_qc_sc = figure_alti(alti, altiqcd[j, 6] * 0.0295298)
+                alti_qc_av = figure_alti(altiqcd[j, 0] * 0.0295298)
+                alti_qc_sc = figure_alti(altiqcd[j, 6] * 0.0295298)
             sql = """
                 UPDATE %s SET tmpf = %s, tmpf_qc_av = %s,
                 tmpf_qc_sc = %s, dwpf = %s, dwpf_qc_av = %s,

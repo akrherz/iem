@@ -2,7 +2,6 @@
 
     ftp://ftp.ncdc.noaa.gov/pub/data/noaa/isd-history.txt
 """
-from __future__ import print_function
 
 from pyiem.util import get_dbconn
 
@@ -42,9 +41,7 @@ def main():
         if row[1] != wban:
             print("%s %s -> %s" % (faa, row[1], wban))
             cursor.execute(
-                """
-            UPDATE stations SET synop = %s where iemid = %s
-            """,
+                "UPDATE stations SET synop = %s where iemid = %s",
                 (wban, row[0]),
             )
     cursor.close()

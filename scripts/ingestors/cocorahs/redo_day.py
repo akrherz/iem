@@ -1,7 +1,6 @@
 """
 Reprocess cocorahs data
 """
-from __future__ import print_function
 import datetime
 import sys
 
@@ -13,6 +12,7 @@ state = sys.argv[1]
 
 
 def safeP(v):
+    """Go."""
     v = v.strip()
     if v == "T":
         return TRACE_VALUE
@@ -22,6 +22,7 @@ def safeP(v):
 
 
 def runner(days):
+    """Go."""
     pgconn = get_dbconn("iem")
     icursor = pgconn.cursor()
     now = datetime.datetime.now() - datetime.timedelta(days=days)
@@ -37,8 +38,8 @@ def runner(days):
     # Process Header
     header = {}
     h = data[0].split(",")
-    for i in range(len(h)):
-        header[h[i]] = i
+    for i, he in enumerate(h):
+        header[he] = i
 
     for row in data[1:]:
         cols = row.split(",")

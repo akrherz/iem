@@ -1,5 +1,4 @@
 """Grid climate for netcdf usage"""
-from __future__ import print_function
 import datetime
 
 import numpy as np
@@ -85,9 +84,8 @@ def workflow(ts):
     # Load up a station table we are interested in
 
     # Load up our netcdf file!
-    nc = ncopen("/mesonet/data/ndfd/ndfd_dailyc.nc", "a")
-    grid_day(nc, ts)
-    nc.close()
+    with ncopen("/mesonet/data/ndfd/ndfd_dailyc.nc", "a") as nc:
+        grid_day(nc, ts)
 
 
 def main():

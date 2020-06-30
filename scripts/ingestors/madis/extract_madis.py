@@ -1,5 +1,4 @@
 """extract_madis.py Get the latest MADIS numbers from the data file!"""
-from __future__ import print_function
 import datetime
 import os
 import warnings

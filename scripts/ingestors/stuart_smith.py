@@ -1,7 +1,6 @@
 """
  My belief is that the data is always in standard time
 """
-from __future__ import print_function
 import subprocess
 import datetime
 import os
@@ -16,7 +15,7 @@ def main():
     mcursor = pgconn.cursor()
 
     # Do the bubbler file
-    mcursor.execute("""SELECT max(valid) from ss_bubbler""")
+    mcursor.execute("SELECT max(valid) from ss_bubbler")
     row = mcursor.fetchone()
     maxts = (
         None
@@ -58,8 +57,8 @@ def main():
     # Do the STS_GOLD file
     maxts = {}
     mcursor.execute(
-        """SELECT max(valid at time zone 'UTC'), site_serial
-                    from ss_logger_data GROUP by site_serial"""
+        "SELECT max(valid at time zone 'UTC'), site_serial "
+        "from ss_logger_data GROUP by site_serial"
     )
     for row in mcursor:
         # Max standard time value

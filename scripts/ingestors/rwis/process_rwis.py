@@ -1,5 +1,4 @@
 """Process the IDOT RWIS Data files"""
-from __future__ import print_function
 import datetime
 import os
 import sys

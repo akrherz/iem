@@ -1,5 +1,4 @@
 """Look into which autoplots have not been used in a while"""
-from __future__ import print_function
 import re
 
 import pandas as pd
@@ -44,9 +43,8 @@ def main():
     cursor = pgconn.cursor()
 
     cursor.execute(
-        """SELECT valid, appurl from feature WHERE appurl is not null
-        and appurl != ''
-        """
+        "SELECT valid, appurl from feature WHERE appurl is not null "
+        "and appurl != ''"
     )
     rows = {}
     for row in cursor:

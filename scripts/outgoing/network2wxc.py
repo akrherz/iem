@@ -1,7 +1,6 @@
 """
  Convert a network within the MADIS mesonet file to WXC format
 """
-from __future__ import print_function
 import datetime
 import os
 import sys

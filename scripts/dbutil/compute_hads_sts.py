@@ -1,5 +1,4 @@
 """Compute the archive start time of a HADS/DCP/COOP network"""
-from __future__ import print_function
 import sys
 import datetime
 
@@ -16,13 +15,7 @@ def get_minvalid(sid):
     cursor = HADSDB.cursor()
     for yr in range(2002, THISYEAR + 1):
         cursor.execute(
-            """
-            SELECT min(valid) from raw"""
-            + str(yr)
-            + """
-            WHERE station = %s
-        """,
-            (sid,),
+            f"SELECT min(valid) from raw{yr} WHERE station = %s", (sid,)
         )
         minv = cursor.fetchone()[0]
         if minv is not None:

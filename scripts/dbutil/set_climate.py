@@ -1,7 +1,6 @@
 """
  Assign a climate site to each site in the mesosite database, within reason
 """
-from __future__ import print_function
 
 from pyiem.util import get_dbconn
 
@@ -12,12 +11,8 @@ def workflow(col):
     mcursor = pgconn.cursor()
     mcursor2 = pgconn.cursor()
     mcursor.execute(
-        """
-        SELECT id, geom, state, iemid, network from stations
-        WHERE """
-        + col
-        + """ IS NULL and country = 'US' and state is not null
-    """
+        f"SELECT id, geom, state, iemid, network from stations WHERE {col} "
+        "IS NULL and country = 'US' and state is not null"
     )
 
     for row in mcursor:

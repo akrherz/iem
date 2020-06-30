@@ -1,7 +1,6 @@
 """
 Generate some sequential load to watch what happens to IEM's backend processing
 """
-from __future__ import print_function
 import datetime
 import random
 

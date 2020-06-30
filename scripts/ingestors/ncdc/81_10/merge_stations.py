@@ -3,7 +3,6 @@
 
   network: NCDC81
 """
-from __future__ import print_function
 
 from pyiem.util import get_dbconn
 

@@ -1,7 +1,6 @@
 """
 Extract station data from file and update any new stations we find, please
 """
-from __future__ import print_function
 import sys
 
 from netCDF4 import chartostring

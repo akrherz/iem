@@ -1,5 +1,4 @@
 """Ingest the RWIS rainwise data"""
-from __future__ import print_function
 import datetime
 from io import StringIO
 
@@ -54,7 +53,7 @@ def process(today, icursor, nwsli, lastts):
     try:
         sio = StringIO()
         sio.write(requests.get(myuri, timeout=15).text)
-    except Exception as exp:
+    except Exception:
         return
     try:
         sio.seek(0)

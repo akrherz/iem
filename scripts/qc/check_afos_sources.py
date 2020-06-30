@@ -2,7 +2,6 @@
  Look at the sources saved to the AFOS database and then whine about
  sources we do not understand!
 """
-from __future__ import print_function
 import datetime
 
 import pytz

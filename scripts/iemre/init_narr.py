@@ -1,5 +1,4 @@
 """Generate the storage of NARR 3 hourly products"""
-from __future__ import print_function
 import datetime
 import sys
 
@@ -9,7 +8,7 @@ from pyiem.util import ncopen
 
 # This exists on dev laptop :/
 TEMPLATE_FN = (
-    "/mesonet/ARCHIVE/data/1980/01/01/model/" "NARR/apcp_198001010000.grib"
+    "/mesonet/ARCHIVE/data/1980/01/01/model/NARR/apcp_198001010000.grib"
 )
 BASEDIR = "/mesonet/data/iemre"
 
