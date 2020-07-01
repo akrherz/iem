@@ -4,7 +4,7 @@ import datetime
 import numpy as np
 import pandas as pd
 from pyproj import Transformer
-from geopandas import read_postgis
+from geopandas import read_postgis, GeoDataFrame
 from shapely.geometry import Polygon, Point
 from scipy.interpolate import Rbf
 from scipy.ndimage import zoom
@@ -271,7 +271,9 @@ def add_zeros(df, ctx):
             df.loc[df2[df2["val"] >= (maxval * 0.2)].index, "plotme"] = True
 
     return pd.concat(
-        [df, pd.DataFrame(newrows)], ignore_index=True, sort=False
+        [df, GeoDataFrame(newrows, geometry="geo")],
+        ignore_index=True,
+        sort=False,
     )
 
 
