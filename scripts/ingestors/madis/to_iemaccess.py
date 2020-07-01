@@ -40,12 +40,17 @@ def sanity_check(val, lower, upper):
     return None
 
 
-def provider2network(provider):
+def provider2network(provider, name):
     """ Convert a MADIS network ID to one that I use, here in IEM land"""
-    if provider in ["KYMN"]:
+    if not provider.endswith("DOT") and provider not in MY_PROVIDERS:
+        return None
+    if provider == "KYMN":
         return provider
     if provider == "MesoWest":
-        return "VTWAC"
+        # get the network from the last portion of the name
+        network = name.split()[-1]
+        return None if network != "VTWAC" else network
+
     if len(provider) == 5 or provider in ["KYTC-RWIS", "NEDOR"]:
         if provider[:2] == "IA":
             return None
@@ -104,21 +109,12 @@ def main():
     db = {}
 
     for recnum, provider in enumerate(providers):
-        this_station = stations[recnum]
-        if not provider.endswith("DOT") and provider not in MY_PROVIDERS:
-            continue
         name = names[recnum]
-        if name == "":
-            continue
-        if provider == "MesoWest":
-            # get the network from the last portion of the name
-            network = name.split()[-1]
-            if network != "VTWAC":
-                continue
-        else:
-            network = provider2network(provider)
+        network = provider2network(provider, name)
         if network is None:
             continue
+        LOG.debug("provider: %s name: %s network: %s", provider, name, network)
+        this_station = stations[recnum]
         db[this_station] = {}
         ticks = obtime[recnum]
         ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=ticks)

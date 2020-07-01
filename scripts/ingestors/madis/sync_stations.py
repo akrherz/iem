@@ -1,25 +1,13 @@
-"""
-Extract station data from file and update any new stations we find, please
-"""
+"""Compare IEM station metadata with what current MADIS netcdf has."""
 import sys
 
 from netCDF4 import chartostring
-from pyiem.util import get_dbconn, ncopen
+from pyiem.util import get_dbconn, ncopen, logger
 
+sys.path.insert(0, ".")
+from to_iemaccess import provider2network
 
-MY_PROVIDERS = ["KYTC-RWIS", "KYMN", "NEDOR", "MesoWest"]
-
-
-def provider2network(p):
-    """ Convert a MADIS network ID to one that I use, here in IEM land"""
-    if p in ["KYMN"]:
-        return p
-    if len(p) == 5 or p in ["KYTC-RWIS", "NEDOR"]:
-        if p[:2] == "IA":
-            return None
-        return "%s_RWIS" % (p[:2],)
-    print("Unsure how to convert %s into a network" % (p,))
-    return None
+LOG = logger()
 
 
 def main(argv):
@@ -35,48 +23,51 @@ def main(argv):
     providers = chartostring(nc.variables["dataProvider"][:])
     latitudes = nc.variables["latitude"][:]
     longitudes = nc.variables["longitude"][:]
-    elevations = nc.variables["elevation"][:]
+    nc.close()
     for recnum, provider in enumerate(providers):
-        if not provider.endswith("DOT") and provider not in MY_PROVIDERS:
-            continue
-        stid = stations[recnum]
-        # can't have commas in the name, sigh
         name = names[recnum].replace(",", " ")
-        if provider == "MesoWest":
-            # get the network from the last portion of the name
-            network = name.split()[-1]
-            if network != "VTWAC":
-                continue
-        else:
-            network = provider2network(provider)
+        network = provider2network(provider, name)
         if network is None:
             continue
+        stid = stations[recnum]
         mcursor.execute(
-            """
-            SELECT * from stations where id = %s and network = %s
-        """,
+            "SELECT st_x(geom), st_y(geom) from stations "
+            "where id = %s and network = %s",
             (stid, network),
         )
-        if mcursor.rowcount > 0:
+        lon = float(longitudes[recnum])
+        lat = float(latitudes[recnum])
+        if mcursor.rowcount == 0:
+            LOG.info("Add network: %s station: %s %s", network, stid, name)
+            mcursor.execute(
+                "INSERT into stations(id, network, synop, country, plot_name, "
+                "name, state, online, geom, metasite) "
+                "VALUES (%s, %s, 9999, 'US', %s, %s, %s, 't', "
+                "'SRID=4326;POINT(%s %s)', 'f')",
+                (stid, network, name, name, network[:2], lon, lat),
+            )
             continue
-        print("Adding network: %s station: %s %s" % (network, stid, name))
-        sql = """
-            INSERT into stations(id, network, synop, country, plot_name,
-            name, state, elevation, online, geom, metasite)
-            VALUES ('%s', '%s', 9999, 'US',
-            '%s', '%s', '%s', %s, 't', 'SRID=4326;POINT(%s %s)', 'f')
-        """ % (
+        # Compare location
+        (olon, olat) = mcursor.fetchone()
+        distance = ((olon - lon) ** 2 + (olat - lat) ** 2) ** 0.5
+        if distance < 0.1:
+            continue
+        LOG.info(
+            "move %s %s dist: %s lon: %s -> %s lat: %s -> %s",
             stid,
             network,
-            name,
-            name,
-            network[:2],
-            elevations[recnum],
-            longitudes[recnum],
-            latitudes[recnum],
+            distance,
+            olon,
+            lon,
+            olat,
+            lat,
         )
-        mcursor.execute(sql)
-    nc.close()
+        mcursor.execute(
+            "UPDATE stations SET geom = 'SRID=4326;POINT(%s %s)' WHERE "
+            "id = %s and network = %s",
+            (lon, lat, stid, network),
+        )
+
     mcursor.close()
     pgconn.commit()
     pgconn.close()
