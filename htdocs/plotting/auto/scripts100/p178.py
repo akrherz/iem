@@ -19,6 +19,7 @@ HOURS = OrderedDict(
         ("1", "One Hour"),
         ("3", "Three Hour"),
         ("6", "Six Hour"),
+        ("12", "Twelve Hour"),
         ("24", "Twenty Four Hour"),
     ]
 )
@@ -52,6 +53,9 @@ def get_description():
 <a href="https://mesonet.agron.iastate.edu/archive/data/2019/04/25/model/ffg/">
 here</a>.
     </p>
+
+    <p>Additionally, there is a <a href="https://mesonet.agron.iastate.edu/api/1/docs#/default/ffg_bypoint_service_ffg_bypoint_json_get">FFG by Point</a>
+    web service that provides the raw values.</p>
 
     <p>For dates before 1 Jan 2019, this dataset is based on IEM processing
     of county/zone based FFG guidance found in the FFG text products.
@@ -189,7 +193,7 @@ def plotter(fdict):
             testfn = ts2.strftime(
                 (
                     "/mesonet/ARCHIVE/data/%Y/%m/%d/model/ffg/"
-                    "5kmffg_%Y%m%d00.grib2"
+                    "5kmffg_%Y%m%d%H.grib2"
                 )
             )
             if os.path.isfile(testfn):

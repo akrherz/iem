@@ -69,6 +69,11 @@ def process(ts):
     """Do Work"""
     data = {"x": None, "y": None, "proj": None, "fx": dict()}
     for fhour in range(1, 200):
+        # Hourly data only goes out 36 hours
+        if (36 < fhour < 72) and fhour % 3 != 0:
+            continue
+        if fhour > 72 and fhour % 6 != 0:
+            continue
         ftime = ts + datetime.timedelta(hours=fhour)
         fn = (
             "/mesonet/ARCHIVE/data/%s/%02i/%02i/model/ndfd/%02i/"
