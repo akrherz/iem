@@ -83,10 +83,17 @@ $oselect = make_select("order", $order, $ar);
 $table = "";
 $atags = "";
 pg_query($afos, "SET TIME ZONE 'UTC'");
+$pil_limiter = "";
+if ($dbsource == "KWNO"){
+    $pil_limiter = <<<EOM
+ and substr(pil, 1, 3) not in ('NBS', 'NBX', 'NBE', 'NBH', 'NBP', 'MAV', 'MET',
+ 'MEX', 'LAV', 'LEV')
+EOM;
+}
 $rs = pg_prepare($afos, "_SELECT",
 	"SELECT pil, entered from products ".
 	"WHERE source = $1 and entered BETWEEN $2 and $3 and ".
-	"pil is not null ORDER by entered $order");
+	"pil is not null $pil_limiter ORDER by entered $order");
 
 $rs = pg_execute($afos, "_SELECT", Array($dbsource, date("Y-m-d H:i", $ts)."+00",
 		date("Y-m-d H:i", $ts2)."+00"));
