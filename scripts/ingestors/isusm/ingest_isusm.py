@@ -75,7 +75,6 @@ STATIONS = {
     "CedarRapids": "CIRI4",
     "Marcus": "MCSI4",
     "AmesFinch": "AMFI4",
-    "AEAFarm": "BOOI4",
     # Temporary?
     # 'REFI4': 'Adel',
     # Vineyward

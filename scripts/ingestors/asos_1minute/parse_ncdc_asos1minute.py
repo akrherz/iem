@@ -16,7 +16,7 @@ import datetime
 import pytz
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn, logger, utc
+from pyiem.util import get_dbconn, logger, utc, exponential_backoff
 import requests
 from tqdm import tqdm
 
@@ -133,9 +133,12 @@ def dl_archive(df, dt):
             fn = "640%s0%s%s%02i.dat" % (page, station4, dt.year, dt.month)
             if not os.path.isfile(f"{datadir}/{fn}"):
                 uri = f"{baseuri}/640{page}-{dt.strftime('%Y')}/{fn}"
-                req = requests.get(uri, timeout=30)
+                req = exponential_backoff(requests.get, uri, timeout=60)
+                if req is None:
+                    LOG.info("total failure %s", uri)
+                    continue
                 if req.status_code != 200:
-                    LOG.info("dl_archive failed %s %s", uri, req.status_code)
+                    LOG.info("failed %s %s", uri, req.status_code)
                     continue
                 with open(f"{datadir}/{fn}", "wb") as fh:
                     fh.write(req.content)
