@@ -6,8 +6,11 @@ import sys
 import numpy as np
 from pyiem import iemre
 from pyiem.datatypes import temperature
-from pyiem.util import ncopen
+from pyiem.util import ncopen, logger
 from pyiem.meteorology import gdd
+from tqdm import tqdm
+
+LOG = logger()
 
 
 def make_netcdf(ncfn, valid, west, south):
@@ -67,48 +70,41 @@ def make_netcdf(ncfn, valid, west, south):
         srad.long_name = "daylight average incident shortwave radiation"
 
 
-def copy_iemre(nc, fromyear, ncdate0, ncdate1, islice, jslice):
+def copy_iemre(nc, ncdate0, ncdate1, islice, jslice):
     """Copy IEMRE data from a given year to **inclusive** dates."""
-    rencfn = iemre.get_daily_ncname(fromyear)
+    rencfn = iemre.get_daily_ncname(ncdate0.year)
     if not os.path.isfile(rencfn):
-        print("reanalysis fn %s missing" % (rencfn,))
+        LOG.info("reanalysis fn %s missing", rencfn)
         return
     with ncopen(rencfn) as renc:
+        # Compute offsets for yieldfx file
         tidx0 = (ncdate0 - datetime.date(1980, 1, 1)).days
         tidx1 = (ncdate1 - datetime.date(1980, 1, 1)).days
-        tslice = slice(tidx0, tidx1 + 1)
-        # time steps to fill
-        tsteps = (tidx1 - tidx0) + 1
-        # figure out the slice
-        if ncdate0.strftime("%m%d") == "0101":
-            retslice = slice(0, tsteps)
-        else:
-            retslice = slice(0 - tsteps, None)
-        # print("copy_iemre from %s filling %s steps nc: %s iemre: %s" % (
-        #    fromyear, tsteps, tslice, retslice
-        # ))
+        yfx_slice = slice(tidx0, tidx1 + 1)
+        # Compute offsets for the reanalysis file
+        tidx0 = (ncdate0 - datetime.date(ncdate0.year, 1, 1)).days
+        tidx1 = (ncdate1 - datetime.date(ncdate0.year, 1, 1)).days
+        re_slice = slice(tidx0, tidx1 + 1)
+
+        # LOG.debug("filling nc: %s iemre: %s", yfx_slice, re_slice)
         highc = temperature(
-            renc.variables["high_tmpk"][retslice, jslice, islice], "K"
+            renc.variables["high_tmpk"][re_slice, jslice, islice], "K"
         ).value("C")
         lowc = temperature(
-            renc.variables["low_tmpk"][retslice, jslice, islice], "K"
+            renc.variables["low_tmpk"][re_slice, jslice, islice], "K"
         ).value("C")
-        nc.variables["tmax"][tslice, :, :] = highc
-        nc.variables["tmin"][tslice, :, :] = lowc
-        nc.variables["gdd_f"][tslice, :, :] = gdd(
+        nc.variables["tmax"][yfx_slice, :, :] = highc
+        nc.variables["tmin"][yfx_slice, :, :] = lowc
+        nc.variables["gdd_f"][yfx_slice, :, :] = gdd(
             temperature(highc, "C"), temperature(lowc, "C")
         )
-        nc.variables["prcp"][tslice, :, :] = renc.variables["p01d"][
-            retslice, jslice, islice
+        nc.variables["prcp"][yfx_slice, :, :] = renc.variables["p01d"][
+            re_slice, jslice, islice
         ]
+        # Special care needed for solar radiation filling
         for rt, nt in zip(
-            list(
-                range(
-                    retslice.start,
-                    0 if retslice.stop is None else retslice.stop,
-                )
-            ),
-            list(range(tslice.start, tslice.stop)),
+            list(range(re_slice.start, re_slice.stop)),
+            list(range(yfx_slice.start, yfx_slice.stop)),
         ):
             # IEMRE power_swdn is MJ, test to see if data exists
             srad = renc.variables["power_swdn"][rt, jslice, islice]
@@ -132,14 +128,13 @@ def tile_extraction(nc, valid, west, south, fullmode):
         for year in range(1980, valid.year + 1):
             copy_iemre(
                 nc,
-                year,
                 datetime.date(year, 1, 1),
                 datetime.date(year, 12, 31),
                 islice,
                 jslice,
             )
     else:
-        copy_iemre(nc, valid.year, valid, valid, islice, jslice)
+        copy_iemre(nc, valid, valid, islice, jslice)
 
 
 def qc(nc):
@@ -176,7 +171,9 @@ def main(argv):
         valid = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
         fullmode = False
     # Create tiles to cover IA, IL, IN
-    for west in np.arange(-104, -80, 2):
+    progress = tqdm(np.arange(-104, -80, 2), disable=not sys.stdout.isatty())
+    for west in progress:
+        progress.set_description(f"{west:.2f}")
         for south in np.arange(36, 50, 2):
             # psims divides its data up into 2x2-degree tiles,
             # with the first number in the file name being number
