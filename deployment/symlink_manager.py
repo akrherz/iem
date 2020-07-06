@@ -8,8 +8,7 @@ LOG = logger()
 
 # LINK , TARGET
 PAIRS = [
-    ["/mesonet/merra", "/mnt/mtarchive/longterm/merra"],
-    ["/mesonet/merra2", "/mnt/mtarchive/longterm/merra2"],
+    ["/mesonet/data/merra2", "/mnt/mtarchive/longterm/merra2"],
     ["/mesonet/nawips", "/mnt/mesonet2/gempak"],
     ["/mesonet/scripts", "/mnt/mesonet2/scripts"],
     ["/mesonet/wepp", "/mnt/mesonet2/idep"],
@@ -35,9 +34,7 @@ PAIRS = [
     ["/mesonet/share/features", "/mnt/mesonet/share/features"],
     ["/mesonet/share/frost", "/mnt/mesonet/share/frost"],
     ["/mesonet/share/iemmaps", "/mnt/mesonet/share/iemmaps"],
-    ["/mesonet/share/iemre", "/mnt/mesonet/data/iemre"],
     ["/mesonet/share/lapses", "/mnt/mesonet/share/lapses"],
-    ["/mesonet/share/mec", "/mnt/mesonet/share/mec"],
     ["/mesonet/share/pickup", "/mnt/mesonet2/share/pickup"],
     ["/mesonet/share/pics", "/mnt/mesonet/share/pics"],
     ["/mesonet/share/present", "/mnt/mesonet/share/present"],

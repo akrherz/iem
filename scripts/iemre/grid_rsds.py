@@ -61,9 +61,9 @@ def do_coop(ts):
 def try_merra(ts):
     """Attempt to use MERRA data."""
     # Our files are UTC date based :/
-    ncfn1 = ts.strftime("/mesonet/merra2/%Y/%Y%m%d.nc")
+    ncfn1 = ts.strftime("/mesonet/data/merra2/%Y/%Y%m%d.nc")
     ncfn2 = (ts + datetime.timedelta(days=1)).strftime(
-        "/mesonet/merra2/%Y/%Y%m%d.nc"
+        "/mesonet/data/merra2/%Y/%Y%m%d.nc"
     )
     if not os.path.isfile(ncfn1) or not os.path.isfile(ncfn2):
         return False
@@ -98,10 +98,8 @@ def try_merra(ts):
 def do_hrrr(ts):
     """Convert the hourly HRRR data to IEMRE grid"""
     LCC = pyproj.Proj(
-        (
-            "+lon_0=-97.5 +y_0=0.0 +R=6367470. +proj=lcc +x_0=0.0"
-            " +units=m +lat_2=38.5 +lat_1=38.5 +lat_0=38.5"
-        )
+        "+lon_0=-97.5 +y_0=0.0 +R=6367470. +proj=lcc +x_0=0.0 "
+        "+units=m +lat_2=38.5 +lat_1=38.5 +lat_0=38.5"
     )
     total = None
     xaxis = None
@@ -113,10 +111,8 @@ def do_hrrr(ts):
         now += datetime.timedelta(hours=1)
         utcnow = now.astimezone(pytz.UTC)
         fn = utcnow.strftime(
-            (
-                "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
-                "hrrr.t%Hz.3kmf00.grib2"
-            )
+            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
+            "hrrr.t%Hz.3kmf00.grib2"
         )
         if not os.path.isfile(fn):
             continue

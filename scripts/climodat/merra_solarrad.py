@@ -47,8 +47,8 @@ def do(date):
     sts = date.replace(hour=6)  # 6z
     ets = sts + datetime.timedelta(days=1)
 
-    fn = sts.strftime("/mesonet/merra2/%Y/%Y%m%d.nc")
-    fn2 = ets.strftime("/mesonet/merra2/%Y/%Y%m%d.nc")
+    fn = sts.strftime("/mesonet/data/merra2/%Y/%Y%m%d.nc")
+    fn2 = ets.strftime("/mesonet/data/merra2/%Y/%Y%m%d.nc")
     if not os.path.isfile(fn):
         LOG.info("%s miss[%s] -> fail", sts.strftime("%Y%m%d"), fn)
         return
@@ -72,11 +72,9 @@ def do(date):
     cs_total = (np.sum(cs_rad, 0) + np.sum(cs_rad2, 0)) * 3600.0
 
     ccursor.execute(
-        """
-        SELECT station, ST_x(geom), ST_y(geom), temp24_hour
-        from alldata a JOIN stations t on
-        (a.station = t.id) where day = %s and network ~* 'CLIMATE'
-    """,
+        "SELECT station, ST_x(geom), ST_y(geom), temp24_hour "
+        "from alldata a JOIN stations t on "
+        "(a.station = t.id) where day = %s and network ~* 'CLIMATE'",
         (date.strftime("%Y-%m-%d"),),
     )
     for row in ccursor:
@@ -130,13 +128,8 @@ def do(date):
         if row[3] in range(4, 13):
             date2 = (date + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
         ccursor2.execute(
-            """
-            UPDATE alldata_"""
-            + row[0][:2]
-            + """ SET merra_srad = %s,
-            merra_srad_cs = %s WHERE
-            day = %s and station = %s
-        """,
+            f"UPDATE alldata_{row[0][:2]} SET merra_srad = %s, "
+            "merra_srad_cs = %s WHERE day = %s and station = %s",
             (rad_mj, cs_rad_mj, date2, row[0]),
         )
     ccursor2.close()

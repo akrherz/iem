@@ -63,10 +63,10 @@ def do_month(sts):
                 "LAYERS=&VERSION=1.02&VARIABLES=swgdn,swgdnclr,swtdn"
             )
         )
-        dirname = now.strftime("/mesonet/merra2/%Y")
+        dirname = now.strftime("/mesonet/data/merra2/%Y")
         if not os.path.isdir(dirname):
             os.makedirs(dirname)
-        localfn = now.strftime("/mesonet/merra2/%Y/%Y%m%d.nc")
+        localfn = now.strftime("/mesonet/data/merra2/%Y/%Y%m%d.nc")
         cmd = (
             "curl -n -c ~/.urscookies -b ~/.urscookies -L " "--url '%s' -o %s"
         ) % (uri, localfn)
