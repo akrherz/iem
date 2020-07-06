@@ -29,7 +29,8 @@ def get_description():
     This plot presents accumulated totals and departures
     of growing degree days, precipitation and stress degree days. Leap days
     are not considered for this plot. The light blue area represents the
-    range of accumulated values based on the climatology for the site.
+    range of accumulated values based on the climatology for the site. The
+    climatology is based on the closest nearby long-term climate site.
     """
     today = datetime.date.today()
     if today.month < 5:
@@ -120,58 +121,91 @@ def plotter(fdict):
     whichplots = ctx["which"]
     glabel = "gdd%s%s" % (gddbase, gddceil)
 
+    # Make sure we have climo info
+    if (
+        station not in ctx["_nt"].sts
+        or ctx["_nt"].sts[station]["climate_site"] is None
+    ):
+        raise NoDataFound("Unknown station metadata.")
+
     # build the climatology
-    table = "alldata_%s" % (ctx["_nt"].sts[station]["climate_site"][:2],)
+    climosite = ctx["_nt"].sts[station]["climate_site"]
     climo = read_sql(
-        """
-        SELECT sday, avg(gddxx(%s, %s, high, low)) as c"""
-        + glabel
-        + """,
-        avg(sdd86(high, low)) as csdd86, avg(precip) as cprecip
-        from """
-        + table
-        + """
-        WHERE station = %s GROUP by sday
-    """,
+        f"SELECT day, sday, gddxx(%s, %s, high, low) as {glabel}, "
+        "sdd86(high, low) as sdd86, precip "
+        f"from alldata_{climosite[:2]} WHERE station = %s and "
+        "year >= 1951 ORDER by day ASC",
         get_dbconn("coop"),
         params=(gddbase, gddceil, ctx["_nt"].sts[station]["climate_site"]),
-        index_col=None,
+        index_col="day",
     )
-    # build the obs
-    df = read_sql(
-        """
-        SELECT day, to_char(day, 'mmdd') as sday,
-        gddxx(%s, %s, max_tmpf, min_tmpf) as o"""
-        + glabel
-        + """,
-        pday as oprecip,
-        sdd86(max_tmpf, min_tmpf) as osdd86 from summary s JOIN stations t
-        ON (s.iemid = t.iemid)
-        WHERE t.id = %s and t.network = %s and to_char(day, 'mmdd') != '0229'
-        ORDER by day ASC
-    """,
-        pgconn,
-        params=(gddbase, gddceil, station, ctx["network"]),
-        index_col=None,
-    )
-    # Now we need to join the frames
-    df = pd.merge(df, climo, on="sday")
-    df.sort_values("day", ascending=True, inplace=True)
-    df.set_index("day", inplace=True)
-    df["precip_diff"] = df["oprecip"] - df["cprecip"]
-    df[glabel + "_diff"] = df["o" + glabel] - df["c" + glabel]
-
+    baseyear = int(climo.index.values[0].year)
+    years = (datetime.datetime.now().year - baseyear) + 1
     xlen = int((edate - sdate).days) + 1  # In case of leap day
-    ab = ctx["_nt"].sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata.")
-    years = (datetime.datetime.now().year - ab.year) + 1
     acc = np.zeros((years, xlen))
     acc[:] = np.nan
     pacc = np.zeros((years, xlen))
     pacc[:] = np.nan
     sacc = np.zeros((years, xlen))
     sacc[:] = np.nan
+    for year in range(baseyear, datetime.datetime.now().year + 1):
+        sts = sdate.replace(year=year)
+        ets = sts + datetime.timedelta(days=(xlen - 1))
+        x = climo.loc[sts:ets, glabel].cumsum()
+        if x.empty:
+            continue
+        acc[(year - baseyear), : len(x.index)] = x.values
+        x = climo.loc[sts:ets, "precip"].cumsum()
+        pacc[(year - baseyear), : len(x.index)] = x.values
+        x = climo.loc[sts:ets, "sdd86"].cumsum()
+        sacc[(year - baseyear), : len(x.index)] = x.values
+
+    sday_climo = climo.groupby("sday").mean()
+    rows = []
+    for i in range(xlen):
+        date = sdate + datetime.timedelta(days=i)
+        sday = date.strftime("%m%d")
+        rows.append(
+            {
+                "sday": sday,
+                f"c{glabel}": sday_climo.at[sday, glabel],
+                f"c{glabel}_acc": np.nanmean(acc[:, i]),
+                f"c{glabel}_min_acc": np.nanmin(acc[:, i]),
+                f"c{glabel}_max_acc": np.nanmax(acc[:, i]),
+                "cprecip": sday_climo.at[sday, "precip"],
+                "cprecip_acc": np.nanmean(pacc[:, i]),
+                "cprecip_min_acc": np.nanmin(pacc[:, i]),
+                "cprecip_max_acc": np.nanmax(pacc[:, i]),
+                "csdd86": sday_climo.at[sday, "sdd86"],
+                "csdd86_acc": np.nanmean(sacc[:, i]),
+                "csdd86_min_acc": np.nanmin(sacc[:, i]),
+                "csdd86_max_acc": np.nanmax(sacc[:, i]),
+            }
+        )
+    climo = pd.DataFrame(rows)
+
+    # build the obs
+    df = read_sql(
+        "SELECT day, to_char(day, 'mmdd') as sday, "
+        f"gddxx(%s, %s, max_tmpf, min_tmpf) as o{glabel}, pday as oprecip, "
+        "sdd86(max_tmpf, min_tmpf) as osdd86 from summary s JOIN stations t "
+        "ON (s.iemid = t.iemid) "
+        "WHERE t.id = %s and t.network = %s and "
+        "to_char(day, 'mmdd') != '0229' ORDER by day ASC",
+        pgconn,
+        params=(gddbase, gddceil, station, ctx["network"]),
+        index_col=None,
+    )
+    # Now we need to join the frames
+    df = pd.merge(df, climo, on="sday")
+    df = df.sort_values("day", ascending=True)
+    df = df.set_index("day")
+    df["precip_diff"] = df["oprecip"] - df["cprecip"]
+    df[glabel + "_diff"] = df["o" + glabel] - df["c" + glabel]
+
+    ab = ctx["_nt"].sts[station]["archive_begin"]
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
     if whichplots == "all":
         fig = plt.figure(figsize=(9, 12))
         ax1 = fig.add_axes([0.1, 0.7, 0.8, 0.2])
@@ -208,35 +242,27 @@ def plotter(fdict):
         fontsize=18 if whichplots == "all" else 14,
     )
 
-    for year in range(ab.year, datetime.datetime.now().year + 1):
+    for year in wantedyears:
+        if year == 0:
+            continue
         sts = sdate.replace(year=year)
         ets = sts + datetime.timedelta(days=(xlen - 1))
-        x = df.loc[sts:ets, "o" + glabel].cumsum()
-        if x.empty:
-            continue
-        acc[(year - sdate.year), : len(x.index)] = x.values
-        x = df.loc[sts:ets, "oprecip"].cumsum()
-        pacc[(year - sdate.year), : len(x.index)] = x.values
-        x = df.loc[sts:ets, "osdd86"].cumsum()
-        sacc[(year - sdate.year), : len(x.index)] = x.values
-
-        if year not in wantedyears:
-            continue
         color = yearcolors[wantedyears.index(year)]
         yearlabel = sts.year
+        x = df.loc[sts:ets]
         if sts.year != ets.year:
             yearlabel = "%s-%s" % (sts.year, ets.year)
         if whichplots in ["gdd", "all"]:
             ax1.plot(
                 range(len(x.index)),
-                df.loc[sts:ets, "o" + glabel].cumsum().values,
+                x[f"o{glabel}"].cumsum().values,
                 zorder=6,
                 color=color,
                 label="%s" % (yearlabel,),
                 lw=2,
             )
         # Get cumulated precip
-        p = df.loc[sts:ets, "oprecip"].cumsum()
+        p = x["oprecip"].cumsum()
         if whichplots in ["all", "precip"]:
             ax3.plot(
                 range(len(p.index)),
@@ -246,7 +272,7 @@ def plotter(fdict):
                 zorder=6,
                 label="%s" % (yearlabel,),
             )
-        p = df.loc[sts:ets, "osdd86"].cumsum()
+        p = x["osdd86"].cumsum()
         if whichplots in ["all", "sdd"]:
             ax4.plot(
                 range(len(p.index)),
@@ -329,20 +355,32 @@ def plotter(fdict):
         ax1.text(
             0.5,
             0.9,
-            "%s/%s - %s/%s" % (sdate.month, sdate.day, edate.month, edate.day),
+            "%s/%s - %s/%s\nClimatology %s %.0f-%.0f"
+            % (
+                sdate.month,
+                sdate.day,
+                edate.month,
+                edate.day,
+                climosite,
+                baseyear,
+                datetime.date.today().year,
+            ),
             transform=ax1.transAxes,
             ha="center",
+            va="center",
         )
 
         ylim = ax2.get_ylim()
         spread = max([abs(ylim[0]), abs(ylim[1])]) * 1.1
         ax2.set_ylim(0 - spread, spread)
         ax2.text(
-            0.02,
-            0.1,
-            " Accumulated Departure ",
+            0.0,
+            1.0,
+            "Accumulated Departure",
             transform=ax2.transAxes,
-            bbox=dict(facecolor="white", ec="#EEEEEE"),
+            bbox=dict(facecolor="white", ec="#EEEEEE", alpha=0.5),
+            va="top",
+            ha="left",
         )
         ax2.yaxis.tick_right()
 
