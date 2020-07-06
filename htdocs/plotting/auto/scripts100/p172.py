@@ -19,12 +19,11 @@ def get_description():
     long term average.  You can optionally plot up to three additional years
     of your choice.</p>
 
-    <p>You can specify the start date (ignore the year 2000) for when to start
-    the 365 day accumulation of precipitation.  If you pick a date after
-    1 July, the year plotted will represent the next calendar year.  For
-    example picking the start date of 1 Oct 2000, the year 2020 plotted would
-    represent the period 1 Oct 2019 thru 30 Sep 2020.  This is intended to
-    emulate the water year nomenclature.
+    <p>You can specify the start date (ignore the year) for when to start
+    the 365 day accumulation of precipitation.  The year shown is the year
+    for the start of the accumulation period.  For example, if you accumulate
+    after 1 October, the year 2020 would represent the period from 1 Oct 2020
+    to 30 Sep 2021.
     """
     thisyear = datetime.date.today().year
     desc["arguments"] = [
@@ -80,36 +79,20 @@ def plotter(fdict):
     year3 = ctx.get("year3")
     sdate = ctx["sdate"]
     table = "alldata_%s" % (station[:2],)
-    delta = 1 if sdate.month > 6 else 0
     df = read_sql(
-        """
-        WITH years as (
-            SELECT distinct year + %s as myyear from """
-        + table
-        + """
-            WHERE station = %s and sday = %s),
-        obs as (
+        f"""
+        with obs as (
             SELECT day, precip,
-            case when sday >= %s then year + %s else year end as year
-            from """
-        + table
-        + """ WHERE station = %s and precip is not null
+            case when sday >= %s then year else year - 1 end as binyear
+            from {table} WHERE station = %s and precip is not null
         )
-        SELECT day, year, precip,
-        row_number() OVER (PARTITION by year ORDER by day ASC) as row,
-        sum(precip) OVER (PARTITION by year ORDER by day ASC) as accum from
-        obs WHERE year in (select myyear from years)
-        ORDER by day ASC
+        SELECT day, binyear, precip,
+        row_number() OVER (PARTITION by binyear ORDER by day ASC) as row,
+        sum(precip) OVER (PARTITION by binyear ORDER by day ASC) as accum from
+        obs ORDER by day ASC
     """,
         pgconn,
-        params=(
-            delta,
-            station,
-            sdate.strftime("%m%d"),
-            sdate.strftime("%m%d"),
-            delta,
-            station,
-        ),
+        params=(sdate.strftime("%m%d"), station),
         index_col="day",
     )
     if df.empty:
@@ -154,7 +137,7 @@ def plotter(fdict):
         if year is None or year in plotted:
             continue
         plotted.append(year)
-        df2 = df[df["year"] == year]
+        df2 = df[df["binyear"] == year]
         ax.plot(
             range(1, len(df2.index) + 1),
             df2["accum"],
