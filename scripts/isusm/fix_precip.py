@@ -193,6 +193,9 @@ def main(argv):
                 row["obs"],
             )
             print_debugging(station)
+            if station == "MCSI4":
+                LOG.info("Not updating Marcus")
+                continue
             update_precip(date, station, hdf)
         else:
             set_iemacces(station, date, row["obs"])
