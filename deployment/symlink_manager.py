@@ -8,14 +8,12 @@ LOG = logger()
 
 # LINK , TARGET
 PAIRS = [
-    ["/mesonet/data/merra2", "/mnt/mtarchive/longterm/merra2"],
+    ["/mesonet/data/merra2", "/mnt/mesonet2/data/merra2"],
     ["/mesonet/nawips", "/mnt/mesonet2/gempak"],
     ["/mesonet/scripts", "/mnt/mesonet2/scripts"],
     ["/mesonet/wepp", "/mnt/mesonet2/idep"],
-    ["/mesonet/ARCHIVE/dailydata", "/mnt/mtarchive/longterm/dailydata"],
-    ["/mesonet/ARCHIVE/gempak", "/mnt/mtarchive/longterm/gempak"],
-    ["/mesonet/ARCHIVE/nexrad", "/mnt/mtarchive/longterm/nexrad3_iowa"],
-    ["/mesonet/ARCHIVE/raw", "/mnt/mtarchive/longterm/raw"],
+    ["/mesonet/ARCHIVE/gempak", "/mnt/mesonet2/longterm/gempak"],
+    ["/mesonet/ARCHIVE/raw", "/mnt/mesonet2/longterm/raw"],
     ["/mesonet/ARCHIVE/rer", "/mnt/mesonet/ARCHIVE/rer"],
     ["/mesonet/data/dotcams", "/mnt/mesonet2/data/dotcams"],
     ["/mesonet/data/gempak", "/mnt/mesonet2/data/gempak"],

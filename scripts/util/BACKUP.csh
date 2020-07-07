@@ -22,5 +22,4 @@ cd /mesonet/tmp
 tar -cf ${yyyymmdd}.tar ${dd}_backup/
 rm -Rf ${dd}_backup/
 
-mv ${yyyymmdd}.tar /mesonet/ARCHIVE/dailydata/
-#echo "Data Backup Done"
+rsync -a --remove-source-files ${yyyymmdd}.tar metl60:/stage/iemoffline/dailydata/
