@@ -21,7 +21,7 @@ daily_opts = [
             "(Long Term Climate)"
         ),
     },
-    {"id": "172", "label": "Accumulated Year to Date Precipitation"},
+    {"id": "172", "label": "Accumulated Year to Date / Period Precipitation"},
     {
         "id": "149",
         "label": "Arridity Index (High Temperature minus Precip Departures)",

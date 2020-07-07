@@ -25,7 +25,8 @@ def get_description():
     after 1 October, the year 2020 would represent the period from 1 Oct 2020
     to 30 Sep 2021.
     """
-    thisyear = datetime.date.today().year
+    today = datetime.date.today()
+    thisyear = today.year
     desc["arguments"] = [
         dict(
             type="station",
@@ -62,6 +63,15 @@ def get_description():
             max="2000/12/31",
             label="Start Day of Year for Plot: (ignore year)",
         ),
+        dict(
+            optional=True,
+            type="date",
+            name="edate",
+            default=f"2000/{today.strftime('%m/%d')}",
+            min="2000/01/01",
+            max="2000/12/31",
+            label="End Day of Year for Plot: (ignore year)",
+        ),
     ]
     return desc
 
@@ -97,6 +107,15 @@ def plotter(fdict):
     )
     if df.empty:
         raise NoDataFound("No data found!")
+    # Truncate plot
+    doy_trunc = 365
+    today = ctx.get("edate", datetime.date.today())
+    if ctx.get("edate") is not None:
+        today_doy = int(today.strftime("%j"))
+        sdate_doy = int(sdate.strftime("%j"))
+        offset = 0 if today_doy > sdate_doy else 365
+        doy_trunc = today_doy + offset - sdate_doy
+        df = df[df["row"] <= doy_trunc]
 
     (fig, ax) = plt.subplots(1, 1)
     # Average
@@ -127,7 +146,7 @@ def plotter(fdict):
     for year, color in zip(
         [
             df["accum"].idxmax().year,
-            df[df["row"] == 365]["accum"].idxmin().year,
+            df[df["row"] == doy_trunc]["accum"].idxmin().year,
             year1,
             year2,
             year3,
@@ -138,18 +157,26 @@ def plotter(fdict):
             continue
         plotted.append(year)
         df2 = df[df["binyear"] == year]
+        if df2.empty:
+            continue
+        lastrow = df2.iloc[-1]
+        extra = ""
+        if (lastrow["row"] + 2) < doy_trunc:
+            extra = f" to {df2.index.values[-1].strftime('%-d %b')}"
         ax.plot(
             range(1, len(df2.index) + 1),
             df2["accum"],
-            label="%s - %.2f" % (year, df2["accum"].iloc[-1]),
+            label="%s - %.2f%s" % (year, lastrow["accum"], extra),
             color=color,
             lw=2,
         )
 
+    extra = "" if doy_trunc == 365 else f" till {today.strftime('%-d %B')}"
     ax.set_title(
-        ("Accumulated Precipitation after %s\n" "[%s] %s (%s-%s)")
+        ("Accumulated Precipitation after %s%s\n" "[%s] %s (%s-%s)")
         % (
             sdate.strftime("%-d %B"),
+            extra,
             station,
             ctx["_nt"].sts[station]["name"],
             ab.year,
@@ -161,13 +188,13 @@ def plotter(fdict):
     ax.legend(loc=2)
     xticks = []
     xticklabels = []
-    for i in range(366):
+    for i in range(doy_trunc + 1):
         date = sdate + datetime.timedelta(days=i)
         if date.day != 1:
             continue
         xticks.append(i)
         xticklabels.append(date.strftime("%b"))
-    ax.set_xlim(0, 367)
+    ax.set_xlim(0, doy_trunc + 1)
     ax.set_ylim(bottom=-0.1)
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
@@ -176,4 +203,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(sdate="2000-10-01"))
+    plotter(dict(sdate="2000-10-01", stop="yes"))
