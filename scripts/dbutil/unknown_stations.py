@@ -30,10 +30,8 @@ def print_blank_sname():
     pgconn = get_dbconn("mesosite")
     cursor = pgconn.cursor()
     cursor.execute(
-        """
-        SELECT id, network from stations
-        WHERE name is null or name = '' ORDER by iemid ASC LIMIT 5
-    """
+        "SELECT id, network from stations "
+        "WHERE name is null or name = '' ORDER by iemid ASC LIMIT 5"
     )
     if cursor.rowcount > 0:
         print("------ Sites with empty station names ------")
@@ -59,7 +57,7 @@ def main():
          when substr(product, 14, 4) = 'KWOH' then 1
          else 0 end) as priority
          from unknown
-         where nwsli ~ '^[A-Z]{4}[0-9]$'
+         where nwsli ~ '^[A-Z]{{4}}[0-9]$'
          GROUP by nwsli ORDER by {priority}, tot DESC LIMIT 50
         """
         )
@@ -70,11 +68,9 @@ def main():
             )
             # Get vars reported for this site
             acursor.execute(
-                """
-                SELECT valid, physical_code || duration || source ||
-                extremum || probability as p, value from current_shef
-                WHERE station = %s ORDER by p ASC
-            """,
+                "SELECT valid, physical_code || duration || source || "
+                "extremum || probability as p, value from current_shef "
+                "WHERE station = %s ORDER by p ASC",
                 (row[0],),
             )
             for row2 in acursor:

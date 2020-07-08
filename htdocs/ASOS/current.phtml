@@ -233,8 +233,8 @@ foreach ($finalA as $key => $parts){
   
   $ptmpf = ($parts["tmpf"] !== null) ? round($parts["tmpf"],0): 'M';
   $pdwpf = ($parts["dwpf"] !== null) ? round($parts["dwpf"],0): 'M';
-  $pfeel = ($ptmpf === "M" || $pdwpf === "M") ? "M": round($parts["feel"], 0);
-  $prelh = ($ptmpf === "M" || $pdwpf === "M") ? "M": $parts["relh"];
+  $pfeel = ($ptmpf === "M" || $pdwpf === "M" || $parts["feel"] === null) ? "M": round($parts["feel"], 0);
+  $prelh = ($ptmpf === "M" || $pdwpf === "M" || $parts["relh"] === null) ? "M": $parts["relh"];
   $row .= ">". strftime($fmt, $parts["ts"]) ."</td>".
       "<td align='center'>". str_replace("}", " ", str_replace("{", " ", $parts["wxcodes"])) ."</td>".
   "<td align='center'>". $ptmpf ."</td><td><font color=\"#ff0000\">". round($parts["max_tmpf"],0) ."</font></td><td><font color=\"#0000ff\">". round($parts["min_tmpf"],0) ."</font></td>
