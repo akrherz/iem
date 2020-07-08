@@ -51,6 +51,9 @@ def qc(mydict, col):
 
 def tstamp2dt(s):
     """ Convert a string to a datetime """
+    if s[0] not in ["1", "2"]:
+        LOG.debug("bad timestamp |%s|", s)
+        return None
     ts = datetime.datetime(int(s[:4]), int(s[4:6]), int(s[6:8]))
     ts = ts.replace(tzinfo=pytz.timezone("UTC"))
     local_hr = int(s[8:10])
@@ -72,6 +75,8 @@ def p2_parser(ln):
     }
     ln = ln.replace("[", " ").replace("]", " ").replace("\\", " ")
     res["valid"] = tstamp2dt(res["tstamp"])
+    if res["valid"] is None:
+        return None
     s = ln[31:34].strip()
     res["ptype"] = None if s == "" else s[:2]
     s = ln[44:48].strip()
@@ -118,6 +123,8 @@ def p1_parser(ln):
     for i, col in enumerate(["drct", "sknt", "gust_drct", "gust_sknt"]):
         res[col] = None if not INT_RE.match(tokens[i]) else int(tokens[i])
     res["valid"] = tstamp2dt(res["tstamp"])
+    if res["valid"] is None:
+        return None
     return res
 
 
