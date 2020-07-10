@@ -40,12 +40,14 @@ the applications listed below.
    and by model run.</li>
  <li><a href="https://meteor.geol.iastate.edu/~ckarsten/bufkit/image_loader.phtml">Meteogram Generator</a>
   <br />Fancy application to generate graphs of current MOS data.</li>
- <li><a href="csv.php">Comma Delimited output</a>
-  <br />Simple web service provides csv data for a site and for a period
-   of ten days forecast.  An example URL call would be:<br />
+ <li><a href="/api/1/docs#/default/service_mos__fmt__get">Comma Delimited / JSON output</a>
+  <br />Simple web service provides csv/json data for one or more sites for a
+  given model and optional runtime.  An example URL call would be:<br />
   <pre>
-csv.php?station=KAMW&valid=2009-01-10%2012:00              (all data 10 days)
-csv.php?station=KAMW&runtime=2009-01-10%2012:00&model=GFS  (explicit)
+/api/1/mos.txt?station=KAMW&runtime=2009-01-10%2012:00Z&model=GFS  (explicit)
+/api/1/mos.txt?station=KAMW&model=GFS  (last available GFS run for Ames in csv)
+/api/1/mos.json?station=KAMW&model=GFS  (last available GFS run for Ames in JSON)
+/api/1/mos.txt?station=KDSM&station=KAMW&model=GFS  (last available GFS run for Ames and Des Moines)
 </pre></li>
  <li><a href="fe.phtml">Download the raw data!</a>
   <br />This application returns the raw MOS data for a location and time
