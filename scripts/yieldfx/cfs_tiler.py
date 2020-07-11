@@ -223,9 +223,9 @@ def main(argv):
         today = datetime.date.today() - datetime.timedelta(days=2)
     for hour in [0, 6, 12, 18]:
         valid = utc(today.year, today.month, today.day, hour)
-        # Create tiles to cover IA, IL, IN
-        for west in np.arange(-98, -84, 2):
-            for south in np.arange(36, 44, 2):
+        # Create tiles to cover 12 state region
+        for west in np.arange(-104, -80, 2):
+            for south in np.arange(36, 50, 2):
                 # psims divides its data up into 2x2-degree tiles,
                 # with the first number in the file name being number
                 # of tiles since 90 degrees north, and the second number

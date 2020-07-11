@@ -170,7 +170,7 @@ def main(argv):
     if len(argv) == 4:
         valid = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
         fullmode = False
-    # Create tiles to cover IA, IL, IN
+    # Create tiles to cover 12 states
     progress = tqdm(np.arange(-104, -80, 2), disable=not sys.stdout.isatty())
     for west in progress:
         progress.set_description(f"{west:.2f}")
