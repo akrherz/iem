@@ -25,6 +25,8 @@ local research and makes it available for others to use as well.</p>
 <tr><th>AVN</th><td>1 June 2000</td><td>16 Dec 2003</td></tr>
 <tr><th>ETA</th><td>24 Feb 2002</td><td>9 Dec 2008</td></tr>
 <tr><th>GFS</th><td>16 Dec 2003</td><td>--Realtime--</td></tr>
+<tr><th>GFS LAMP (abbr LAV) [0, 6, 12, 18]</th><td>12 Jul 2020</td><td>--Realtime--</td></tr>
+<tr><th>GFS Extended (abbr MEX)</th><td>12 Jul 2020</td><td>--Realtime--</td></tr>
 <tr><th>NAM</th><td>9 Dec 2008</td><td>--Realtime--</td></tr>
 <tr><th>NBS [0, 7, 12, 19z]</th><td>7 Nov 2018</td><td>25 Feb 2020</td></tr>
 <tr><th>NBS [1, 7, 13, 19z]</th><td>26 Feb 2020</td><td>--Realtime--</td></tr>
@@ -35,6 +37,19 @@ the applications listed below.
 
 <h3>Current Tools:</h3>
 <ul>
+ <li><a href="/wx/afos/">ASCII Data Tables</a>
+ <br />The raw text-based MOS data comes in collectives with multiple sites
+ found within one product.  The IEM splits these and then assigns 6 character
+ AWIPS/AFOS like IDs to them, such that you can easily retrieve the raw ASCII
+ MOS data.  The general identifier form is <code>&lt;model&gt;&lt;3-char station&gt;</code>.
+ For example, <code>LAVDSM</code> for GFS LAMP for Des Moines.</li>
+
+ <li><a href="/cgi-bin/afos/retrieve.py?pil=LAVDSM">Sample link to latest GFS LAMP for KDSM</a>
+ <br />Please see the discussion above about the identifiers used.  This page just
+ provides the text and not much else.  Best for if you want to bookmark direct links
+ or do some of your own MOS parsing, gasp.  Just adjust the <code>pil=</code> value
+ as you see fit.</li>
+
  <li><a href="table.phtml">Interactive MOS Tables</a>
   <br />Generates a simple table of how a variable changes over time
    and by model run.</li>

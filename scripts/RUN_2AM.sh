@@ -44,6 +44,7 @@ python warn_cache.py &
 
 cd ../dbutil
 python clean_afos.py
+python clean_mos.py &
 python compute_hads_sts.py
 python clean_unknown_hads.py
 python unknown_stations.py

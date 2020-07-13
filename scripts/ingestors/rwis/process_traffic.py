@@ -108,7 +108,13 @@ def main():
         res = req.json()
         if not res:
             continue
-        df = pd.DataFrame(res)
+        try:
+            df = pd.DataFrame(res)
+        except Exception as exp:
+            LOG.info(
+                "DataFrame construction failed with %s\n res: %s", exp, res
+            )
+            continue
         cursor = DBCONN.cursor()
         process(cursor, df, meta)
         cursor.close()
