@@ -439,9 +439,10 @@ def do_ugc(ctx):
         rows = []
         data = {}
         for row in cursor:
-            days = (
-                edate - row[1].replace(tzinfo=pytz.UTC)
-            ).total_seconds() / 86400.0
+            days = int(
+                (edate - row[1].replace(tzinfo=pytz.UTC)).total_seconds()
+                / 86400.0
+            )
             rows.append(
                 dict(days=days, valid=row[1], year=row[1].year, ugc=row[0])
             )
@@ -653,7 +654,7 @@ def do_ugc(ctx):
         ctx["units"] = "hour of day"
     else:
         bins = list(
-            range(np.min(df[datavar][:]), np.max(df[datavar][:]) + 2, 1)
+            np.arange(np.min(df[datavar][:]), np.max(df[datavar][:]) + 2, 1)
         )
         if len(bins) < 3:
             bins.append(bins[-1] + 1)
