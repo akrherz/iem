@@ -121,14 +121,11 @@ def underlay_usdm(axis, sts, ets, lon, lat):
     for row in data["data"]:
         ts = datetime.datetime.strptime(row["valid"], "%Y-%m-%d")
         date = datetime.date(ts.year, ts.month, ts.day)
-        axis.add_patch(
-            Rectangle(
-                (date.toordinal(), -100),
-                7,
-                200,
-                color=COLORS[row["category"]],
-                zorder=-3,
-            )
+        axis.axvspan(
+            date.toordinal(),
+            date.toordinal() + 7,
+            color=COLORS[row["category"]],
+            zorder=-3,
         )
 
 
