@@ -6,8 +6,8 @@
     $ python ingest_ghcn.py IA  # runs for given state
     $ python ingest_ghcn.py IA bogus  # allows inserts to happen
 
- http://www1.ncdc.noaa.gov/pub/data/ghcn/daily/all/USC00130200.dly
- http://www1.ncdc.noaa.gov/pub/data/ghcn/daily/readme.txt
+ https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/all/USC00130200.dly
+ https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/readme.txt
 
  ID            1-11   Character
 YEAR         12-15   Integer
@@ -157,7 +157,7 @@ DATARE = re.compile(
 def get_file(station):
     """Download the file from NCEI, if necessary!"""
     # IPv6, use 205.167.25.102 rather than www1.ncdc.noaa.gov
-    uri = ("http://www1.ncdc.noaa.gov/pub/data/ghcn/daily/all/%s.dly") % (
+    uri = ("https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/all/%s.dly") % (
         station,
     )
     localfn = "%s/%s.dly" % (BASEDIR, station)
@@ -262,12 +262,8 @@ def process(station, metadata, allow_inserts):
 
     table = "alldata_%s" % (station[:2],)
     current = read_sql(
-        """
-        SELECT day, high, low, precip, snow, snowd from
-        """
-        + table
-        + """ where station = %s ORDER by day ASC
-    """,
+        f"SELECT day, high, low, precip, snow, snowd from {table} "
+        "where station = %s ORDER by day ASC",
         PGCONN,
         params=(station,),
         index_col=None,
@@ -309,14 +305,8 @@ def process(station, metadata, allow_inserts):
         if not work:
             continue
         cursor.execute(
-            """
-            UPDATE """
-            + table
-            + """ SET """
-            + ",".join(work)
-            + """
-            WHERE station = %s and day = %s
-        """,
+            f"UPDATE {table} SET {','.join(work)} "
+            "WHERE station = %s and day = %s",
             (station, date),
         )
         if cursor.rowcount == 1:
@@ -328,14 +318,9 @@ def process(station, metadata, allow_inserts):
         cnts["adds"] += 1
         # Adding a row
         cursor.execute(
-            """
-            INSERT into """
-            + table
-            + """
-            (station, day, sday, year, month, high, low, precip,
-            snow, snowd)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """,
+            f"INSERT into {table} (station, day, sday, year, month, high, "
+            "low, precip, snow, snowd) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
             (
                 station,
                 date,
