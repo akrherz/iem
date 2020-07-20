@@ -65,7 +65,7 @@ def plot_sky(days, vsby, data, station, ctx, sts):
     fig = plt.figure(figsize=(8, 6))
     # vsby plot
     ax = plt.axes([0.1, 0.08, 0.8, 0.03])
-    ax.set_xticks(np.arange(0, days * 24 + 1, 24))
+    ax.set_xticks(np.arange(0, int(days * 24) - 1, 24))
     ax.set_xticklabels(np.arange(1, days + 1))
     ax.set_yticks([])
     cmap = cm.get_cmap("gray")
@@ -85,7 +85,7 @@ def plot_sky(days, vsby, data, station, ctx, sts):
     # clouds
     ax = plt.axes([0.1, 0.16, 0.8, 0.7])
     ax.set_facecolor("skyblue")
-    ax.set_xticks(np.arange(0, days * 24 + 1, 24))
+    ax.set_xticks(np.arange(0, days * 24, 24))
     ax.set_xticklabels(np.arange(1, days + 1))
 
     fig.text(
@@ -111,7 +111,7 @@ def plot_sky(days, vsby, data, station, ctx, sts):
         vmin=1,
     )
     ax.set_yticks(range(0, 260, 50))
-    ax.set_yticklabels(range(0, 25, 5))
+    ax.set_yticklabels(range(0, 26, 5))
     ax.set_ylabel("Cloud Levels [1000s feet]")
     fig.text(0.45, 0.02, "Day of %s (UTC Timezone)" % (sts.strftime("%b %Y"),))
 

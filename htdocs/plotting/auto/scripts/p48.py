@@ -120,7 +120,7 @@ def plotter(fdict):
         ax.set_ylim(0, 100)
         ax.set_yticks([0, 10, 25, 50, 75, 90, 100])
     ax.grid()
-    ax.set_xticks(range(0, 1440, 60))
+    ax.set_xticks(range(0, 1441, 60))
     ax.set_xticklabels(
         [
             "Mid",

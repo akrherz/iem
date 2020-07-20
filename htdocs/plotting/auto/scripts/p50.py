@@ -180,7 +180,7 @@ def plotter(fdict):
         )
 
     ax.set_xticks(range(len(uniquewind) + 1))
-    ax.set_yticks(range(-1, len(uniquehail) + 1))
+    ax.set_yticks(range(-1, len(uniquehail)))
     ax.set_xlim(-0.5, len(uniquewind) + 0.5)
     ax.set_ylim(-1.5, len(uniquehail) - 0.5)
     ax.set_xticklabels(uniquewind + ["Total"], fontsize=14)
