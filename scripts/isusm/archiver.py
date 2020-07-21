@@ -81,7 +81,7 @@ def process(files):
 
 def zip_and_delete(station, files):
     """zip em off to storage and delete them, gasp."""
-    archivedir = "%s/archived" % (PATH,)
+    archivedir = "%s/archived/%s/%02i" % (PATH, NOW.year, NOW.month)
     if not os.path.isdir(archivedir):
         os.makedirs(archivedir)
     savefn = "%s/%s_%s.zip" % (archivedir, station, NOW.strftime("%Y%m%d"))
@@ -96,6 +96,18 @@ def zip_and_delete(station, files):
         os.unlink(fn)
 
 
+def upload_to_staging():
+    """Move to staging for google drive upload."""
+    rempath = "/stage/iemoffline/isusm/"
+    cmd = (
+        "rsync -a --remove-source-files --rsync-path "
+        f'"mkdir -p {rempath} && rsync" archived/* '
+        f"mesonet@metl60.agron.iastate.edu:{rempath}"
+    )
+    LOG.debug(cmd)
+    subprocess.call(cmd, shell=True)
+
+
 def main():
     """Go Main Go."""
     os.chdir(PATH)
@@ -108,6 +120,7 @@ def main():
         content = process(files[station])
         save_content(station, content)
         zip_and_delete(station, files[station])
+    upload_to_staging()
 
 
 if __name__ == "__main__":
