@@ -12,7 +12,7 @@ $t->title = "River Forecast Point Monitor";
 $content = "";
 
 $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3): "DMX";
-$state = isset($_GET["state"]) ? substr($_GET["state"],0,3): "IA";
+$state = isset($_GET["state"]) ? substr($_GET["state"],0,2): "IA";
 
 $postgis = iemdb("postgis");
 $sevcol = Array(

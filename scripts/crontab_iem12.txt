@@ -10,8 +10,8 @@ S=/opt/iem/scripts
 0 18,19 * * * cd $S; sh RUN_0Z.sh
 0 0 * * * cd $S; sh RUN_MIDNIGHT.sh
 0 12 * * * cd $S; sh RUN_NOON.sh
-# Run at 1:59 to avoid issue with 2AM on DST switch
-59 1 * * * cd $S; sh RUN_2AM.sh
+# Run at 1:51 to avoid issue with 2AM on DST switch
+51 1 * * * cd $S; sh RUN_2AM.sh
 10 6,7 * * * cd $S; sh RUN_12Z.sh
 
 10 * * * * cd $S; sh RUN_10_AFTER.sh 

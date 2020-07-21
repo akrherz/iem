@@ -56,7 +56,7 @@ def do_hads():
         when substr(product, 14, 4) = 'KWOH' then 1
         else 0 end) as priority
         from unknown
-        where nwsli ~ '^[A-Z]{{4}}[0-9]$' and
+        where nwsli ~ '^[A-Z]{4}[0-9]$' and
         substr(product, 1, 6) = to_char(now(), 'YYYYmm')
         GROUP by nwsli ORDER by priority DESC, tot DESC LIMIT 50
     """
