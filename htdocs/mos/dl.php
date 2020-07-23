@@ -3,7 +3,7 @@ putenv("TZ=GMT");
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 $mos = iemdb("mos");
-pg_exec($mos, "SET TIME ZONE 'GMT'");
+pg_exec($mos, "SET TIME ZONE 'UTC'");
 
 $year1 = isset($_GET["year1"]) ? $_GET["year1"]: date("Y", time() + 86400);
 $year2 = isset($_GET["year2"]) ? $_GET["year2"]: date("Y", time() + 86400);

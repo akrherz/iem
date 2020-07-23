@@ -30,6 +30,7 @@ local research and makes it available for others to use as well.</p>
 <tr><th>NAM</th><td>9 Dec 2008</td><td>--Realtime--</td></tr>
 <tr><th>NBS [0, 7, 12, 19z]</th><td>7 Nov 2018</td><td>25 Feb 2020</td></tr>
 <tr><th>NBS [1, 7, 13, 19z]</th><td>26 Feb 2020</td><td>--Realtime--</td></tr>
+<tr><th>NBE [1, 7, 13, 19z]</th><td>23 Jul 2020</td><td>--Realtime--</td></tr>
 </tbody>
 </table>
 <br />The MOS products are processed in realtime and immediately available from
