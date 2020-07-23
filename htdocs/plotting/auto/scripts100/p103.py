@@ -119,9 +119,7 @@ def plotter(fdict):
         density=True,
         facecolor="tan",
     )
-    ax[2].set_xticks(
-        (1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365)
-    )
+    ax[2].set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax[2].set_xticklabels(calendar.month_abbr[1:])
     ax[2].set_xlim(df2["doy"].min() - 3, df2["doy"].max() + 3)
 

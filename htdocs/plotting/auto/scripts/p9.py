@@ -179,7 +179,7 @@ def plotter(fdict):
         )
     )
     ax.set_ylabel(r"Daily Accumulation $^{\circ}\mathrm{F}$")
-    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
+    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.legend(ncol=2)
     ax.set_xticklabels(calendar.month_abbr[1:])
 

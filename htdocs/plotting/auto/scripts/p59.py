@@ -126,7 +126,7 @@ def plotter(fdict):
         label="v, South(+) : North(-) component",
         lw=2,
     )
-    ax.set_xticks([1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365])
+    ax.set_xticks([1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335])
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.legend(ncol=2, fontsize=11, loc=(0.0, -0.21))
     ax.grid(True)
@@ -164,7 +164,7 @@ def plotter(fdict):
         label="Speed Magnitude",
     )
     ax.legend(loc="best")
-    ax.set_xticks([1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365])
+    ax.set_xticks([1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335])
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_ylabel("Average Speed %s" % (PDICT[plot_units],))
     ax.grid(True)

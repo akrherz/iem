@@ -37,7 +37,7 @@ def magic(ax, df, colname, title, ctx):
     ax.text(0, 1.02, title, transform=ax.transAxes)
     ax.set_xlim(0, 367)
     ax.grid(True)
-    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
+    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_xticklabels(calendar.month_abbr[1:])
 
     bbox = ax.get_position()

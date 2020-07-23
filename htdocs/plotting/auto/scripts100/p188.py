@@ -169,9 +169,7 @@ def plotter(fdict):
             df2["day_of_year"], df2["peak_value"], color="red", zorder=2
         )
     ax2.grid(True)
-    ax2.set_xticks(
-        (1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365)
-    )
+    ax2.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax2.set_xticklabels(calendar.month_abbr[1:])
     ax2.set_xlim(df["day_of_year"].min() - 10, df["day_of_year"].max() + 10)
     ax2.set_ylabel(ctx["ax1_ylabel"])

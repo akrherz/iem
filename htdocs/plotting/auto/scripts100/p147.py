@@ -120,7 +120,7 @@ def plotter(fdict):
         )
     )
     ax.set_xlim(0, 366)
-    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
+    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_xticklabels(calendar.month_abbr[1:])
 
     return fig, df

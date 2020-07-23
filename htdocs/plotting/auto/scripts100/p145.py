@@ -156,7 +156,7 @@ def plotter(fdict):
         )
     else:
         ax.set_ylabel("Daily Avg Volumetric Water Content [kg/kg]")
-    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
+    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xlim(0, 367)
     if varname == "tsoil":

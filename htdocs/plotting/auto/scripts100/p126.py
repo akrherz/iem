@@ -152,9 +152,7 @@ def plotter(fdict):
     ax[0].set_ylabel(lbl)
     ax[0].set_xlim(0, 366)
     ax[0].set_ylim(bottom=0)
-    ax[0].set_xticks(
-        (1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365)
-    )
+    ax[0].set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax[0].set_xticklabels(calendar.month_abbr[1:])
     ax[0].grid(True)
     ax[0].legend(loc=2, fontsize=10)
@@ -175,9 +173,7 @@ def plotter(fdict):
     plunits = "$g/kg$" if varname == "mixing_ratio" else "hPa"
     ax[1].set_ylabel("%.0f Departure (%s)" % (year, plunits))
     ax[1].set_xlim(0, 366)
-    ax[1].set_xticks(
-        (1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365)
-    )
+    ax[1].set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax[1].set_xticklabels(calendar.month_abbr[1:])
     ax[1].grid(True)
     return fig, df3

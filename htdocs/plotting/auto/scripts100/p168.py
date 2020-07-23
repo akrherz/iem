@@ -94,7 +94,7 @@ def plotter(fdict):
             va="center",
         )
     ax.barh(y, x, align="center")
-    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
+    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xlim(min(x) - 5, 400)
     ax.set_ylim(y[-1] - 1, y[0] + 1)

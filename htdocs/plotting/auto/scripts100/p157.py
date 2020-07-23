@@ -136,7 +136,7 @@ def plotter(fdict):
         label="%s Obs" % (year,),
     )
     ax.legend(ncol=4, loc=(0.05, -0.2), fontsize=12)
-    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
+    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_position([0.1, 0.2, 0.75, 0.7])
     ax.set_xlim(1, 365)

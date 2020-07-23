@@ -49,6 +49,7 @@ def get_description():
 
 
 def get_color(val, cat):
+    """Helper."""
     if cat == "t":
         if val > 0:
             return "r"
@@ -132,9 +133,7 @@ def plotter(fdict):
     ax[1].bar(np.arange(1, 366), df["maxp"], edgecolor="b", facecolor="b")
     ax[1].set_ylabel("Max 24 Hour Precip [inch]")
     ax[1].set_xlim(0.5, 366.5)
-    ax[1].set_xticks(
-        (1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365)
-    )
+    ax[1].set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax[1].set_xticklabels(calendar.month_abbr[1:])
     ax[1].grid(True)
 

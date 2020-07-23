@@ -98,7 +98,7 @@ def plotter(fdict):
         )
     ax.set_xticks(range(0, 25, 3))
     ax.set_xticklabels(
-        ["Mid", "3 AM", "6 AM", "9 AM", "Noon", "3 PM", "6 PM", "9 PM"]
+        ["Mid", "3 AM", "6 AM", "9 AM", "Noon", "3 PM", "6 PM", "9 PM", "Mid"]
     )
     ax.grid(True)
     ax.set_ylim(0, 100)

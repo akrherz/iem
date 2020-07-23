@@ -288,7 +288,7 @@ def plotter(fdict):
         % (station, nt.sts[station]["name"], title, threshold, units)
     )
     ax.legend(ncol=2, fontsize=14, labelspacing=2)
-    ax.set_yticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
+    ax.set_yticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_yticklabels(calendar.month_abbr[1:])
     ax.set_ylim(min(spring) - 5, max(fall) + 30)
     ax.set_xlim(min(years) - 1, max(years) + 1)

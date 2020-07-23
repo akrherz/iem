@@ -138,9 +138,7 @@ def plotter(fdict):
                     )
             if row == 0 and col == 0:
                 ax[row, col].legend(ncol=5, loc=(0.4, -0.19), prop=prop)
-            ax[row, col].set_xticks(
-                (121, 152, 182, 213, 244, 274, 305, 335, 365)
-            )
+            ax[row, col].set_xticks((121, 152, 182, 213, 244, 274, 305, 335))
             ax[row, col].set_xticklabels(calendar.month_abbr[5:])
             ax[row, col].set_xlim(120, 310)
             ax[row, col].grid(True)

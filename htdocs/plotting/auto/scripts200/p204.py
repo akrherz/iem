@@ -131,7 +131,7 @@ def plotter(fdict):
         ax=ax,
         cbar_kws={"spacing": "proportional", "label": label},
     )
-    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
+    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_xticklabels(calendar.month_abbr[1:], rotation=0)
     yticks = []
     yticklabels = []

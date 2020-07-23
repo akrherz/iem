@@ -103,9 +103,7 @@ def plotter(fdict):
     )
     ax[1].set_ylabel("Ratio SingleDay/Day2Day")
     ax[1].grid(True)
-    ax[1].set_xticks(
-        (1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365)
-    )
+    ax[1].set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax[1].set_xticklabels(calendar.month_abbr[1:])
     ax[1].set_xlim(0, 366)
     return fig, df

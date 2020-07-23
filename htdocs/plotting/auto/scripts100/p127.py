@@ -129,7 +129,7 @@ def plotter(fdict):
         cmap=cmap,
     )
     fig.colorbar(res)
-    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
+    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_xticklabels(calendar.month_abbr[1:])
     # We need to compute the domain of this plot
     maxv = np.max(data, 0)

@@ -231,7 +231,7 @@ def plotter(fdict):
     ax.set_title("%s %s" % (STATIONS[location], PLOTS[ptype]))
     ax.set_ylabel(PLOTS[ptype])
     ax.legend(loc=(0.03, -0.16), ncol=3, fontsize=12)
-    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
+    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.grid(True)
     ax.set_xlim(

@@ -296,7 +296,7 @@ def plotter(fdict):
             ann.remove(rm)
 
     ax.legend(loc=2, ncol=2, fontsize=10)
-    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
+    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_xticklabels(calendar.month_abbr[1:])
     plot_common(ctx, ax)
     ax.set_ylim(bottom=0)

@@ -115,11 +115,11 @@ def plotter(fdict):
     ax.set_title(
         (
             "%s [%s]\nFreq of Temp between "
-            "%s$^\circ$F and %s$^\circ$F of NCEI-81 Average"
+            r"%s$^\circ$F and %s$^\circ$F of NCEI-81 Average"
         )
         % (ctx["station"], ctx["_nt"].sts[ctx["station"]]["name"], minv, maxv)
     )
-    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
+    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.legend(loc="best")
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xlabel("* seven day smoother applied")

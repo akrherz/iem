@@ -69,23 +69,14 @@ def plotter(fdict):
     agg = "min" if mydir == "above" else "max"
     op = ">=" if mydir == "above" else "<"
     df = read_sql(
-        """
-        with data as (select day,
-        """
-        + agg
-        + """("""
-        + varname
-        + """)
+        f"""
+        with data as (select day, {agg}({varname})
             OVER (ORDER by day ASC ROWS BETWEEN %s PRECEDING
-        and CURRENT ROW) as agg from """
-        + table
-        + """
+        and CURRENT ROW) as agg from {table}
         where station = %s)
 
     select extract(doy from day) as doy,
-    sum(case when agg """
-        + op
-        + """ %s then 1 else 0 end)
+    sum(case when agg {op} %s then 1 else 0 end)
         / count(*)::float * 100. as freq
     from data GROUP by doy ORDER by doy asc
     """,
@@ -114,7 +105,7 @@ def plotter(fdict):
     ax.grid(True)
     ax.bar(df.index.values, df["freq"], width=1)
 
-    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365))
+    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xlim(0, 366)
     return fig, df
