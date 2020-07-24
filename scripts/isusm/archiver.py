@@ -100,7 +100,7 @@ def upload_to_staging():
     """Move to staging for google drive upload."""
     rempath = "/stage/iemoffline/isusm/"
     cmd = (
-        "rsync -a --remove-source-files --rsync-path "
+        "rsync -a --remove-source-files --groupmap=*:iem-friends --rsync-path "
         f'"mkdir -p {rempath} && rsync" archived/* '
         f"mesonet@metl60.agron.iastate.edu:{rempath}"
     )

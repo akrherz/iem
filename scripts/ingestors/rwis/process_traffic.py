@@ -16,9 +16,7 @@ def load_metadata():
     meta = {}
     cur = DBCONN.cursor()
     cur.execute(
-        """
-        SELECT location_id, lane_id, sensor_id from rwis_traffic_meta
-    """
+        "SELECT location_id, lane_id, sensor_id from rwis_traffic_meta"
     )
     rows = cur.fetchall()
     cur.close()
@@ -31,10 +29,8 @@ def load_metadata():
 def create_sensor(cursor, key, row, meta):
     """create an entry."""
     cursor.execute(
-        """
-            INSERT into rwis_traffic_sensors(location_id,
-            lane_id, name) VALUES (%s, %s, %s) RETURNING id
-     """,
+        "INSERT into rwis_traffic_sensors(location_id, lane_id, name) "
+        "VALUES (%s, %s, %s) RETURNING id",
         (
             row["stationId"].replace("IA", ""),
             row["sensorId"],
@@ -51,10 +47,7 @@ def create_sensor(cursor, key, row, meta):
     )
     meta[key] = sensor_id
     cursor.execute(
-        """
-        INSERT into rwis_traffic_data(sensor_id) VALUES (%s)
-        """,
-        (sensor_id,),
+        "INSERT into rwis_traffic_data(sensor_id) VALUES (%s)", (sensor_id,)
     )
 
 
@@ -105,6 +98,9 @@ def main():
         )
 
         req = requests.get(URI, timeout=60, headers=headers)
+        if req.status_code != 200:
+            LOG.info("Fetch %s got status_code %s", URI, req.status_code)
+            continue
         res = req.json()
         if not res:
             continue
