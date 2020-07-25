@@ -19,7 +19,7 @@ def main(argv):
     airforce = int(argv[1])
     wban = int(argv[2])
     faa = argv[3]
-    year = int(argv[4])
+    year = max([int(argv[4]), 1928])  # database starts in 1928
     year2 = int(argv[5])
     failedyears = []
     msgs = []
@@ -65,7 +65,12 @@ def main(argv):
                 current.append(row[0].strftime("%Y%m%d%H%M"))
         # ignore any bad bytes, sigh
         for line in open("%s/%s" % (TMPDIR, lfn), errors="ignore"):
-            data = ds3505.parser(line.strip(), faa, add_metar=True)
+            try:
+                data = ds3505.parser(line.strip(), faa, add_metar=True)
+            except Exception as exp:
+                print(f"failed to parse line: '{line.strip()}'")
+                print(exp)
+                data = None
             if data is None:
                 bad += 1
                 continue
