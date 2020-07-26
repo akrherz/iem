@@ -31,14 +31,27 @@ for realtime data.</p>
 
 <ul>
   <li><a href="https://drive.google.com/drive/folders/1JCajASK61bFp9h3khOb9PjoS04Um0DfQ?usp=sharing">~Complete Hourly Zipfiles on Google Drive</a> since 28 Sep 2019.
-  These are based on whatever was provided by the LDM NCEP feed and there is no mechanism
-  attempted to repair any holes (quasi rare) from the LDM feed.</li>
+  <br />These are based on whatever was provided by the LDM NCEP feed and
+  there is no mechanism attempted to repair any holes (quasi rare) from the
+  LDM feed.  Automated downloads from the Google Drive are difficult, but is
+  your only option if the next link below does not have your files of interest.</li>
+
+  <li><a href="http://metfs1.agron.iastate.edu/archive/mrms/">Local Cache of ~Complete Hourly Zip Files</a>
+  <br />Same files as found on the Google Drive, but served from a local
+  spinning disk and so is <strong>easy to script against</strong> to download
+  a large chunk of data.  The intention is to keep about the last year's worth
+  of data available here.</li>
+
   <li><a href="https://mtarchive.geol.iastate.edu/${d}/mrms/ncep/">Mtarchive Daily Selected Files</a> contains
   selected grib2 files of interest and has a more aggressive process that attempts to fill
   in holes based on NCEP LDM or HTTP outages.  This archive goes back to the beginning
   of MRMS, but the number of data types archived varies.</li>
-  <li><a href="http://metfs1.agron.iastate.edu/data/mrms/">Current MRMS Cache</a> provides
-  files in a staging area before they are zipped up and uploaded to CyBox at the link above.</li>
+
+  <li><a href="http://metfs1.agron.iastate.edu/data/mrms/">Current MRMS Files</a>
+  <br /> provides
+  files in a staging area before they are zipped up and uploaded to CyBox at
+  the link above.  This link does not provide anything more than the
+  <a href="https://mrms.ncep.noaa.gov/data/">MRMS Data Website</a> does.</li>
 </ul>
 
 <h3>NWS Watch/Warnings/Advisories</h3>
