@@ -67,6 +67,8 @@ def p2_parser(ln):
     """
     Handle the parsing of a line found in the 6506 report, return QC dict
     """
+    if len(ln) < 30:
+        return None
     res = {
         "wban": ln[:5],
         "faaid": ln[5:9],
@@ -99,6 +101,8 @@ def p1_parser(ln):
     """
     Handle the parsing of a line found in the 6505 report, return QC dict
     """
+    if len(ln) < 30:
+        return None
     res = {
         "wban": ln[:5],
         "faaid": ln[5:9],
