@@ -24,11 +24,13 @@ def download(now, offset):
     if now.hour == 12:
         hours.append(24)
     for hr in hours:
-        url = "%s.%02ih.gz" % (
+        # https://ftpprd.ncep.noaa.gov/data/nccf/com/pcpanl/prod/
+        # pcpanl.20200728/st4_conus.2020072800.01h.grb2
+        url = "%s.%02ih.grb2" % (
             now.strftime(
                 (
                     "https://ftpprd.ncep.noaa.gov/data/nccf/com/pcpanl/prod/"
-                    "pcpanl.%Y%m%d/ST4.%Y%m%d%H"
+                    "pcpanl.%Y%m%d/st4_conus.%Y%m%d%H"
                 )
             ),
             hr,
@@ -40,55 +42,12 @@ def download(now, offset):
                 LOG.info("dl %s failed", url)
             continue
         # Same temp file
-        with open("tmp.grib.gz", "wb") as fh:
+        with open("tmp.grib", "wb") as fh:
             fh.write(response.content)
-        subprocess.call("gunzip -f tmp.grib.gz", shell=True)
         # Inject into LDM
         cmd = (
             "pqinsert -p 'data a %s blah "
             "stage4/ST4.%s.%02ih.grib grib' tmp.grib"
-        ) % (now.strftime("%Y%m%d%H%M"), now.strftime("%Y%m%d%H"), hr)
-        subprocess.call(cmd, shell=True)
-        os.remove("tmp.grib")
-
-        # Do stage2 ml now
-        if hr == 1:
-            url = "%s.Grb.gz" % (
-                now.strftime(
-                    (
-                        "https://ftpprd.ncep.noaa.gov"
-                        "/data/nccf/com/pcpanl/prod/"
-                        "pcpanl.%Y%m%d/"
-                        "ST2ml%Y%m%d%H"
-                    )
-                ),
-            )
-        else:
-            url = "%s.%02ih.gz" % (
-                now.strftime(
-                    (
-                        "https://ftpprd.ncep.noaa.gov/"
-                        "data/nccf/com/pcpanl/prod/"
-                        "pcpanl.%Y%m%d/"
-                        "ST2ml%Y%m%d%H"
-                    )
-                ),
-                hr,
-            )
-        LOG.debug("fetching %s", url)
-        response = exponential_backoff(requests.get, url, timeout=60)
-        if response is None or response.status_code != 200:
-            if offset > 23:
-                LOG.info("dl %s failed", url)
-            continue
-        # Same temp file
-        with open("tmp.grib.gz", "wb") as fh:
-            fh.write(response.content)
-        subprocess.call("gunzip -f tmp.grib.gz", shell=True)
-        # Inject into LDM
-        cmd = (
-            "pqinsert -p 'data a %s blah "
-            "stage4/ST2ml.%s.%02ih.grib grib' tmp.grib"
         ) % (now.strftime("%Y%m%d%H%M"), now.strftime("%Y%m%d%H"), hr)
         subprocess.call(cmd, shell=True)
         os.remove("tmp.grib")
