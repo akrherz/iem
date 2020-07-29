@@ -50,7 +50,7 @@ function sqlForecasterBuilder(){
 	if ($this->fcster == '') {
 		return '';
 	}
-	return sprintf(" and fcster = '%s' ", $this->fcster);
+	return sprintf(" and fcster ILIKE '%s' ", $this->fcster);
 }
 function setWarningBuffer($b){
 	$this->warningbuffer = $b;
@@ -364,7 +364,6 @@ function loadWarnings(){
     for ($i=0;$row = pg_fetch_assoc($rs);$i++){
         $key = sprintf("%s-%s-%s-%s", $row["year"], $row["wfo"], 
                        $row["phenomena"], $row["eventid"]);
-
         $this->warnings[$key] = Array();
         $this->warnings[$key]["lead0"] = -1;
         $this->warnings[$key]["buffered"] = 0;
