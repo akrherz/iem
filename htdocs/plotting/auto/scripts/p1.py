@@ -16,6 +16,10 @@ PDICT = OrderedDict(
         ("total_precip", "Total Precipitation"),
         ("avg_temp", "Average Temperature"),
         ("max_high", "Maximum High Temperature"),
+        ("avg_high", "Average High Temperature"),
+        ("min_high", "Minimum High Temperature"),
+        ("max_low", "Maximum Low Temperature"),
+        ("avg_low", "Average Low Temperature"),
         ("min_low", "Minimum Low Temperature"),
         ("days_high_aoa", "Days with High At or Above"),
         ("cdd65", "Cooling Degree Days (base 65)"),
@@ -34,6 +38,10 @@ UNITS = {
     "total_precip": "inch",
     "avg_temp": "F",
     "max_high": "F",
+    "avg_high": "F",
+    "min_high": "F",
+    "max_low": "F",
+    "avg_low": "F",
     "min_low": "F",
     "days_high_aoa": "days",
     "cdd65": "F",
@@ -152,20 +160,7 @@ def combine(df, months, offsets):
         else:
             thisdf = df[df["month"] == month]
         # Do our combinations, we divide out later when necessary
-        for v in [
-            "avg_temp",
-            "total_precip",
-            "cdd65",
-            "hdd65",
-            "gdd32",
-            "gdd41",
-            "gdd46",
-            "gdd48",
-            "gdd50",
-            "gdd51",
-            "gdd52",
-            "days_high_aoa",
-        ]:
+        for v in PDICT:
             xdf[v] = xdf[v] + thisdf[v]
         tmpdf = pd.DataFrame({"a": xdf["max_high"], "b": thisdf["max_high"]})
         xdf["max_high"] = tmpdf.max(axis=1)
@@ -195,8 +190,10 @@ def plotter(fdict):
     nt = network.Table("%sCLIMATE" % (station[:2],))
     # Compute the monthly totals
     df = read_sql(
-        """
+        f"""
     SELECT year, month, avg((high+low)/2.) as avg_temp,
+    avg(high) as avg_high, min(high) as min_high,
+    avg(low) as avg_low, min(low) as min_low,
     sum(precip) as total_precip, max(high) as max_high, min(low) as min_low,
     sum(case when high >= %s then 1 else 0 end) as days_high_aoa,
     sum(cdd(high, low, 65)) as cdd65,
@@ -208,10 +205,7 @@ def plotter(fdict):
     sum(gddxx(50, 86, high, low)) as gdd50,
     sum(gddxx(51, 86, high, low)) as gdd51,
     sum(gddxx(52, 86, high, low)) as gdd52
-    from """
-        + table
-        + """
-    WHERE station = %s and day < %s GROUP by year, month
+    from {table} WHERE station = %s and day < %s GROUP by year, month
     """,
         pgconn,
         params=(threshold, station, today.replace(day=1)),
