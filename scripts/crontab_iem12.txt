@@ -19,6 +19,7 @@ S=/opt/iem/scripts
 40 * * * * cd $S; sh RUN_40_AFTER.sh 
 50 * * * * cd $S; sh RUN_50_AFTER.sh 
 59 * * * * cd $S; sh RUN_59_AFTER.sh 
+59 * * * * cd $S; sh RUN_STAGE4.sh 
 
 1 1,7 * * * cd $S; sh RUN_SUMMARY.sh
 10 6,7,8,9,10 * * * cd $S; sh RUN_COOP.sh

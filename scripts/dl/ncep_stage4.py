@@ -1,6 +1,8 @@
 """
  Script to download the NCEP stage4 data and then inject into LDM for
  sweet archival action
+
+run from RUN_STAGE4.sh
 """
 import datetime
 import os
