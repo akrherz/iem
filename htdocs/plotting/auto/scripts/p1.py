@@ -193,7 +193,7 @@ def plotter(fdict):
         f"""
     SELECT year, month, avg((high+low)/2.) as avg_temp,
     avg(high) as avg_high, min(high) as min_high,
-    avg(low) as avg_low, min(low) as min_low,
+    avg(low) as avg_low, max(low) as max_low,
     sum(precip) as total_precip, max(high) as max_high, min(low) as min_low,
     sum(case when high >= %s then 1 else 0 end) as days_high_aoa,
     sum(cdd(high, low, 65)) as cdd65,
