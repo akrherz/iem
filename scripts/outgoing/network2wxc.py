@@ -4,6 +4,7 @@
 import datetime
 import os
 import sys
+import warnings
 import subprocess
 
 from netCDF4 import chartostring
@@ -11,6 +12,8 @@ import pytz
 from pyiem.datatypes import temperature, speed
 from pyiem import meteorology
 from pyiem.util import ncopen
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 def s(val):

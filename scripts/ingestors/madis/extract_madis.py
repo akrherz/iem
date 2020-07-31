@@ -9,6 +9,7 @@ from netCDF4 import chartostring
 from pyiem.datatypes import temperature
 from pyiem.util import get_dbconn, ncopen
 
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.simplefilter("ignore", UserWarning)
 
 

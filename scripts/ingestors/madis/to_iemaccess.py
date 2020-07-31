@@ -2,6 +2,7 @@
 import datetime
 import os
 import sys
+import warnings
 import subprocess
 
 import numpy as np
@@ -14,6 +15,7 @@ from pyiem.util import get_dbconn, ncopen, logger
 
 LOG = logger()
 MY_PROVIDERS = ["KYTC-RWIS", "KYMN", "NEDOR", "MesoWest"]
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 def find_file():

@@ -19,6 +19,7 @@ from pyiem.observation import Observation
 from pyiem.util import get_dbconn, ncopen, logger
 from pyiem.reference import TRACE_VALUE
 
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.simplefilter("ignore", RuntimeWarning)
 LOG = logger()
 

@@ -14,6 +14,7 @@ import pytz
 from pyiem.util import ncopen
 from pyiem.datatypes import temperature
 
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 # prevent core.py:931: RuntimeWarning: overflow encountered in multiply
 warnings.simplefilter("ignore", RuntimeWarning)
 # prevent core.py:3785: UserWarning: Warning: converting a masked element
