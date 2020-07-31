@@ -88,7 +88,6 @@ def hourly_process(cursor, row):
 def daily_process(cursor, station, date, df):
     """Process this date's dataframe."""
     sumdf = df.sum()
-    avgdf = df.mean()
     mindf = df.min()
     maxdf = df.max()
     row = {"station": station, "date": date}
@@ -105,7 +104,7 @@ def daily_process(cursor, station, date, df):
         "calc_vwc_50_avg",
         "rh_avg",
     ]:
-        row[colname] = float(avgdf[colname])
+        row[colname] = float(df[colname].mean())
     cursor.execute(
         """
         SELECT obs_count from sm_daily where station = %s and valid = %s
