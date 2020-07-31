@@ -8,7 +8,7 @@ from pyiem.util import utc, ncopen
 from pyiem.iemre import daily_offset
 from pyiem.datatypes import temperature
 from pyiem.meteorology import gdd
-from pyiem.plot.use_agg import plt
+from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
 
 
@@ -45,7 +45,7 @@ def plot_gdd(ts):
         nc.variables["lat"][:],
         data,
         np.arange(-80, 81, 20),
-        cmap=plt.get_cmap("RdBu_r"),
+        cmap=get_cmap("RdBu_r"),
         units=r"$^\circ$F",
         spacing="proportional",
     )
@@ -87,7 +87,7 @@ def plot_maxmin(ts, field):
         nc.variables["lat"][:],
         data,
         np.arange(10, 121, 10),
-        cmap=plt.get_cmap("jet"),
+        cmap=get_cmap("jet"),
         units="Degrees F",
     )
     mp.drawcounties()

@@ -8,6 +8,7 @@ import matplotlib.colors as mpcolors
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.ticker import MaxNLocator
 from pyiem.plot.use_agg import plt
+from pyiem.plot import get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -162,7 +163,7 @@ def plotter(fdict):
         ("%s [%s]\n%i Day Period with %s")
         % (ctx["_nt"].sts[station]["name"], station, days, title)
     )
-    cmap = plt.get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx["cmap"])
     minval = df[XREF[varname]].min() - 1.0
     if varname == "wettest" and minval < 0:
         minval = 0

@@ -9,8 +9,8 @@ from rasterstats import zonal_stats
 from geopandas import read_postgis
 from affine import Affine
 import pandas as pd
-from pyiem.plot.use_agg import plt
 from pyiem.plot.geoplot import MapPlot
+from pyiem.plot import get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -360,7 +360,7 @@ def plotter(fdict):
         )
     ]
 
-    cmap = plt.get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx["cmap"])
     cmap.set_under("white")
     cmap.set_over("black")
     res = mp.pcolormesh(

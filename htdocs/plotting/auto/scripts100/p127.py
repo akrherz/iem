@@ -4,9 +4,9 @@ from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
-from matplotlib import cm
 from matplotlib import ticker
 from pyiem.plot.use_agg import plt
+from pyiem.plot import get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -120,7 +120,7 @@ def plotter(fdict):
         idx = np.digitize([dlast], data[year - year0, :])
         ax.text(idx[0], year, "X", va="center", zorder=2, color="white")
 
-    cmap = cm.get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx["cmap"])
     res = ax.imshow(
         data,
         extent=[1, 367, lastyear + 0.5, year0 - 0.5],

@@ -6,6 +6,7 @@ import pandas as pd
 import matplotlib.colors as mpcolors
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
+from pyiem.plot import get_cmap
 from pyiem.exceptions import NoDataFound
 
 
@@ -142,7 +143,7 @@ def plotter(fdict):
 
     (fig, ax) = plt.subplots(1, 2, sharey=True, figsize=(8, 6))
 
-    cmap = plt.get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx["cmap"])
     cmap.set_under("white")
     norm = mpcolors.BoundaryNorm(np.arange(0, 101, 5), cmap.N)
 

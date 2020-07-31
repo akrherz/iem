@@ -3,10 +3,9 @@ import datetime
 import calendar
 from collections import OrderedDict
 
-from matplotlib import cm
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.plot import MapPlot
+from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -322,7 +321,7 @@ def plotter(fdict):
         subtitle=subtitle,
         titlefontsize=14,
     )
-    cmap = cm.get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx["cmap"])
     bins = [
         1,
         5,

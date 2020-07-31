@@ -1,9 +1,8 @@
 """Output the 12z morning low temperature"""
 import datetime
 
-import matplotlib.cm as cm
 import numpy as np
-from pyiem.plot import MapPlot
+from pyiem.plot import MapPlot, get_cmap
 from pyiem.tracker import loadqc
 from pyiem.util import get_dbconn
 
@@ -59,7 +58,7 @@ def main():
     bottom = int(dsm) - 15
     top = int(dsm) + 15
     bins = np.linspace(bottom, top, 11)
-    cmap = cm.get_cmap("jet")
+    cmap = get_cmap("jet")
     mp.contourf(lons, lats, vals, bins, units="F", cmap=cmap)
     mp.plot_values(
         lons,

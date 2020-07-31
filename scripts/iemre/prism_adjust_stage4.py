@@ -10,6 +10,7 @@ import numpy as np
 from scipy.interpolate import NearestNDInterpolator
 from pyiem.iemre import daily_offset, hourly_offset
 from pyiem import prism as prismutil
+from pyiem.plot import get_cmap
 from pyiem.util import utc, ncopen, find_ij, logger
 
 DEBUGLON = -93.89
@@ -121,7 +122,7 @@ def workflow(valid):
     # import matplotlib.pyplot as plt
     # mp = MapPlot(sector='conus')
     # mp.pcolormesh(s4lons, s4lats, prism_on_s4grid,
-    #              np.arange(0, 25, 2), cmap=plt.get_cmap("jet"))
+    #              np.arange(0, 25, 2), cmap=get_cmap("jet"))
     # mp.drawcounties()
     # mp.postprocess(filename='test.png')
     # mp.close()

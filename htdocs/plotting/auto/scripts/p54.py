@@ -3,8 +3,8 @@ import datetime
 import calendar
 
 import numpy as np
-from matplotlib import cm
 from pandas.io.sql import read_sql
+from pyiem.plot import get_cmap
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -138,7 +138,7 @@ def plotter(fdict):
     H = np.ma.array(H)
     H.mask = np.ma.where(H < 1, True, False)
     ax[0].pcolormesh(
-        (xedges - 1) * 7, yedges, H.transpose(), cmap=cm.get_cmap(ctx["cmap"])
+        (xedges - 1) * 7, yedges, H.transpose(), cmap=get_cmap(ctx["cmap"])
     )
     ax[0].set_xticks(xticks)
     ax[0].set_xticklabels(calendar.month_abbr[1:])
@@ -183,7 +183,7 @@ def plotter(fdict):
     H = np.ma.array(H)
     H.mask = np.where(H < 1, True, False)
     ax[1].pcolormesh(
-        (xedges - 0.5), yedges, H.transpose(), cmap=cm.get_cmap(ctx["cmap"])
+        (xedges - 0.5), yedges, H.transpose(), cmap=get_cmap(ctx["cmap"])
     )
 
     y = []

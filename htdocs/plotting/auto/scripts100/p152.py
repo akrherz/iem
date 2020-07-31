@@ -1,8 +1,7 @@
 """Period differences"""
 
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
-from pyiem.plot import MapPlot, centered_bins
+from pyiem.plot import MapPlot, centered_bins, get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -171,7 +170,7 @@ def plotter(fdict):
             df["lat"].values,
             df[varname + "_delta"].values,
             levels,
-            cmap=plt.get_cmap(ctx["cmap"]),
+            cmap=get_cmap(ctx["cmap"]),
             units="days",
         )
     if sector == "state":

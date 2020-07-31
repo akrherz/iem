@@ -6,6 +6,7 @@ from collections import OrderedDict
 import matplotlib.colors as mpcolors
 import numpy as np
 from pandas.io.sql import read_sql
+from pyiem.plot import get_cmap
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -116,7 +117,7 @@ def plotter(fdict):
     baseyear = max([df["year"].min(), ctx["syear"]])
     endyear = min([df["year"].max(), ctx["eyear"]])
     years = endyear - baseyear + 1
-    cmap = plt.get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx["cmap"])
     norm = mpcolors.BoundaryNorm(levels, cmap.N)
     data = np.full((years, 366), np.nan)
     df2 = df[(df["year"] >= baseyear) & (df["year"] <= endyear)]

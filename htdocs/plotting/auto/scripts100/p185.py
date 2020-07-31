@@ -5,7 +5,7 @@ import os
 import numpy as np
 import geopandas as gpd
 from pyiem import iemre, util
-from pyiem.plot.use_agg import plt
+from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.datatypes import distance
@@ -121,7 +121,7 @@ def plotter(fdict):
         % (date.strftime("%-d %b %Y"),),
     )
     x, y = np.meshgrid(lon, lat)
-    cmap = plt.get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx["cmap"])
     cmap.set_over("k")
     cmap.set_under("white")
     mp.pcolormesh(x, y, grid, np.arange(0, 81, 10), cmap=cmap, units="days")

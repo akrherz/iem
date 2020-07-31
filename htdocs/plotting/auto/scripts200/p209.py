@@ -4,11 +4,11 @@ import datetime
 
 import pandas as pd
 from pandas.io.sql import read_sql
+from pyiem.plot import get_cmap
 from pyiem.plot.use_agg import plt
 from pyiem.reference import state_names
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
-from matplotlib import cm
 from matplotlib.colorbar import ColorbarBase
 import matplotlib.colors as mpcolors
 import numpy as np
@@ -120,7 +120,7 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     df = get_data(ctx)
 
-    cmap = cm.get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx["cmap"])
     maxval = df["delta"].max()
     if maxval > 50:
         bins = np.arange(0, 101, 10)

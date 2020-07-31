@@ -5,6 +5,7 @@ from collections import OrderedDict
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
 import matplotlib.colors as mpcolors
+from pyiem.plot import get_cmap
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -170,7 +171,7 @@ def plotter(fdict):
     diff = df[varname + "_" + how].values
     if how == "ptile" and "cmap" in ctx:
         bins = range(0, 101, 10)
-        cmap = plt.get_cmap(ctx["cmap"])
+        cmap = get_cmap(ctx["cmap"])
         norm = mpcolors.BoundaryNorm(bins, cmap.N)
         colors = cmap(norm(diff))
         ax.bar(df["day"].values, diff, color=colors, align="center")

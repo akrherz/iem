@@ -7,6 +7,7 @@ import pandas as pd
 from pandas.io.sql import read_sql
 import matplotlib.colors as mpcolors
 from pyiem.plot.use_agg import plt
+from pyiem.plot import get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -160,7 +161,7 @@ def plotter(fdict):
 
     bounds = np.arange(0, 1.2, 0.1)
     bounds = np.concatenate((bounds, np.arange(1.2, 2.2, 0.2)))
-    cmap = plt.get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx["cmap"])
     cmap.set_under("#F9CCCC")
     norm = mpcolors.BoundaryNorm(bounds, cmap.N)
 

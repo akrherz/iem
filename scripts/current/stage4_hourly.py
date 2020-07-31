@@ -7,9 +7,8 @@ import datetime
 
 import pygrib
 import pytz
-import matplotlib.cm as cm
 from pyiem.util import utc, logger
-from pyiem.plot import MapPlot
+from pyiem.plot import MapPlot, get_cmap
 
 LOG = logger()
 
@@ -37,7 +36,7 @@ def doit(ts):
     lats, lons = grib.latlons()
     vals = grib.values / 25.4
 
-    cmap = cm.get_cmap("jet")
+    cmap = get_cmap("jet")
     cmap.set_under("white")
     cmap.set_over("black")
     clevs = [

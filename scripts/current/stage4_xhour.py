@@ -8,9 +8,8 @@ import sys
 import pygrib
 import pytz
 from pyiem.datatypes import distance
-from pyiem.plot import MapPlot
+from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import logger
-import matplotlib.cm as cm
 
 LOG = logger()
 
@@ -50,7 +49,7 @@ def do(ts, hours):
     if lts is None:
         return
 
-    cmap = cm.get_cmap("jet")
+    cmap = get_cmap("jet")
     cmap.set_under("white")
     cmap.set_over("black")
     clevs = [0.01, 0.1, 0.25, 0.5, 1, 2, 3, 5, 8, 9.9]

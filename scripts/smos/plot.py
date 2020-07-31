@@ -4,8 +4,8 @@ import datetime
 
 import numpy as np
 import pytz
-import matplotlib.cm as cm
 from pandas.io.sql import read_sql
+from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_dbconn, logger
 
@@ -56,7 +56,7 @@ def makeplot(ts, routes="ac"):
         )
         if sector == "iowa":
             mp.drawcounties()
-        cmap = cm.get_cmap("jet_r")
+        cmap = get_cmap("jet_r")
         cmap.set_under("#EEEEEE")
         cmap.set_over("k")
         mp.hexbin(
@@ -92,7 +92,7 @@ def makeplot(ts, routes="ac"):
         )
         if sector == "iowa":
             mp.drawcounties()
-        cmap = cm.get_cmap("jet")
+        cmap = get_cmap("jet")
         cmap.set_under("#EEEEEE")
         cmap.set_over("k")
         mp.hexbin(

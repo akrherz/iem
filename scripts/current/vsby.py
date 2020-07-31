@@ -3,8 +3,7 @@ import datetime
 import warnings
 
 import numpy as np
-import matplotlib.cm as cm
-from pyiem.plot import MapPlot
+from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_dbconn
 
 # Stop whining about missing data for contourf
@@ -57,7 +56,7 @@ def main():
         vals,
         np.array([0.01, 0.1, 0.25, 0.5, 1, 2, 3, 5, 8, 9.9]),
         units="miles",
-        cmap=cm.get_cmap("gray"),
+        cmap=get_cmap("gray"),
     )
 
     mp.plot_values(lons, lats, vals, "%.1f", valmask)

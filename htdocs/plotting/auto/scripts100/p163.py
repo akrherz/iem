@@ -5,8 +5,7 @@ from collections import OrderedDict
 import numpy as np
 from pandas.io.sql import read_sql
 import pytz
-from pyiem.plot.use_agg import plt
-from pyiem.plot import MapPlot
+from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
 
 MDICT = OrderedDict(
@@ -169,7 +168,7 @@ def plotter(fdict):
             MDICT.get(myfilter),
         ),
     )
-    cmap = plt.get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx["cmap"])
     if by == "wfo":
         mp.fill_cwas(data, bins=bins, cmap=cmap, ilabel=True)
     else:

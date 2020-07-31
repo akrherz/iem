@@ -5,8 +5,7 @@ import datetime
 
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.plot import MapPlot
-from pyiem.plot.use_agg import plt
+from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 import cartopy.crs as ccrs
@@ -252,7 +251,7 @@ def plotter(fdict):
             df2[varname].values,
             levels,
             units=UNITS.get(varname, "F"),
-            cmap=plt.get_cmap(ctx["cmap"]),
+            cmap=get_cmap(ctx["cmap"]),
             clip_on=False,
         )
     if sector == "state":

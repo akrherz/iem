@@ -6,8 +6,7 @@ from pandas.io.sql import read_sql
 import numpy as np
 import pytz
 from pyiem.nws import vtec
-from pyiem.plot.use_agg import plt
-from pyiem.plot import MapPlot
+from pyiem.plot import MapPlot, get_cmap
 from pyiem.network import Table as NetworkTable  # This is needed.
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -136,7 +135,7 @@ def plotter(fdict):
         title = "VTEC Unique Event"
     pstr = " or ".join(pstr)
     pstr = "(%s)" % (pstr,)
-    cmap = plt.get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx["cmap"])
 
     if varname == "count":
         df = read_sql(

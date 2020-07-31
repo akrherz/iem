@@ -10,6 +10,7 @@ import matplotlib.colorbar as mpcolorbar
 import matplotlib.patheffects as PathEffects
 from paste.request import parse_formvars
 from pyiem.meteorology import uv
+from pyiem.plot import get_cmap
 from pyiem.plot.use_agg import plt
 from pyiem.datatypes import speed, direction
 from pyiem.util import get_dbconn
@@ -82,10 +83,10 @@ def do(valid):
     fig = plt.figure(figsize=(12.8, 7.2))
     ax = fig.add_axes([0.14, 0.1, 0.52, 0.8])
 
-    cmap = plt.cm.get_cmap("jet")
+    cmap = get_cmap("jet")
     cmap.set_under("tan")
     cmap.set_over("black")
-    # cmap = plt.cm.get_cmap('seismic')
+    # cmap = get_cmap('seismic')
     # clevs = np.arange(-250, 251, 50)
     clevs = np.arange(0, 1501, 150)
     norm = mpcolors.BoundaryNorm(clevs, cmap.N)

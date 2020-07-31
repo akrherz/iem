@@ -3,8 +3,8 @@ import datetime
 
 import numpy as np
 from pandas.io.sql import read_sql
-from matplotlib import cm
 from matplotlib.patches import Rectangle
+from pyiem.plot import get_cmap
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
@@ -68,7 +68,7 @@ def plot_sky(days, vsby, data, station, ctx, sts):
     ax.set_xticks(np.arange(0, int(days * 24) - 1, 24))
     ax.set_xticklabels(np.arange(1, days + 1))
     ax.set_yticks([])
-    cmap = cm.get_cmap("gray")
+    cmap = get_cmap("gray")
     cmap.set_bad("white")
     res = ax.imshow(
         vsby,
@@ -100,7 +100,7 @@ def plot_sky(days, vsby, data, station, ctx, sts):
         fontsize=14,
     )
 
-    cmap = cm.get_cmap("gray_r")
+    cmap = get_cmap("gray_r")
     cmap.set_bad("white")
     cmap.set_under("skyblue")
     ax.imshow(
@@ -167,7 +167,7 @@ def plot_vsby(days, vsby, station, ctx, sts):
         fontsize=14,
     )
 
-    cmap = cm.get_cmap("gray")
+    cmap = get_cmap("gray")
     cmap.set_bad("white")
     cmap.set_under("skyblue")
     res = ax.imshow(

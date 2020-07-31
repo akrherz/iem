@@ -8,8 +8,7 @@ from pandas.io.sql import read_sql
 from metpy.calc import apparent_temperature
 from metpy.units import units
 from pyiem import reference
-from pyiem.plot.use_agg import plt
-from pyiem.plot import MapPlot
+from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -214,7 +213,7 @@ def plotter(fdict):
         df[varname].values,
         ramp,
         units=valunit,
-        cmap=plt.get_cmap(ctx["cmap"]),
+        cmap=get_cmap(ctx["cmap"]),
     )
     if ctx["t"] == "state":
         df2 = df[df["state"] == ctx["state"]]

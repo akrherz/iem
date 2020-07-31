@@ -4,6 +4,7 @@ from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
+from pyiem.plot import get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem.exceptions import NoDataFound
@@ -106,7 +107,7 @@ def plotter(fdict):
         interpolation="nearest",
         vmin=(0 - maxv),
         vmax=maxv,
-        cmap=plt.get_cmap(ctx["cmap"]),
+        cmap=get_cmap(ctx["cmap"]),
     )
     a = fig.colorbar(cs)
     a.ax.set_ylabel(r"Temperature Departure $^{\circ}\mathrm{F}$")

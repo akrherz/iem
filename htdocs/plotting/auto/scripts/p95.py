@@ -7,6 +7,7 @@ import pandas as pd
 from scipy import stats
 import matplotlib.colors as mpcolors
 from pyiem import network
+from pyiem.plot import get_cmap
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -152,7 +153,7 @@ def plotter(fdict):
     )
     ax.set_title(msg)
 
-    cmap = plt.get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx["cmap"])
     zdata = np.arange(-2.0, 2.1, 0.5)
     norm = mpcolors.BoundaryNorm(zdata, cmap.N)
     rows = []

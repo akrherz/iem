@@ -3,7 +3,7 @@ import datetime
 
 import numpy as np
 from pandas.io.sql import read_sql
-import matplotlib.cm as cm
+from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -98,7 +98,7 @@ def plotter(fdict):
         df["lat"].values,
         df[varname].values,
         np.arange(0 - extent, extent + 1, 2),
-        cmap=cm.get_cmap(ctx["cmap"]),
+        cmap=get_cmap(ctx["cmap"]),
         units="F",
     )
 

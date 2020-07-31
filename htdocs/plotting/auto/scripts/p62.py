@@ -1,5 +1,6 @@
 """Snow depth."""
 import datetime
+import copy
 
 import numpy as np
 import matplotlib.colors as mpcolors
@@ -105,7 +106,7 @@ def plotter(fdict):
         % (station, ctx["_nt"].sts[station]["name"], minyear, eyear)
     )
 
-    cmap = nwssnow()
+    cmap = copy.copy(nwssnow())
     norm = mpcolors.BoundaryNorm(LEVELS, cmap.N)
     cmap.set_bad("#EEEEEE")
     cmap.set_under("white")

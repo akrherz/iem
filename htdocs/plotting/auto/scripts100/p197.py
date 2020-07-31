@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -196,7 +196,7 @@ def plotter(fdict):
 
     mp = MapPlot(sector="conus", title=ctx["title"], subtitle=ctx["subtitle"])
     levels = range(-40, 41, 10)
-    cmap = plt.get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx["cmap"])
     cmap.set_bad("white")
     mp.fill_states(
         data,

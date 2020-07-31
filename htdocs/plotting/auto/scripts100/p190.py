@@ -5,6 +5,7 @@ import numpy as np
 from pandas.io.sql import read_sql
 import matplotlib.colors as mpcolors
 from pyiem.plot.use_agg import plt
+from pyiem.plot import get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -45,7 +46,7 @@ def magic(ax, df, colname, title, ctx):
     ylim = [df["year"].min(), df["year"].max()]
     year0 = ylim[0] - (ylim[0] % 10)
     year1 = ylim[1] + (10 - ylim[1] % 10)
-    cmap = plt.get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx["cmap"])
     norm = mpcolors.BoundaryNorm(np.arange(year0, year1 + 1, 10), cmap.N)
     ax.scatter(df2["doy"], df2["year"], color=cmap(norm(df2["year"].values)))
     ax.set_yticks(np.arange(year0, year1, 20))

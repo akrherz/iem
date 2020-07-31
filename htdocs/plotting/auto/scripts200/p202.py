@@ -9,6 +9,7 @@ from pandas.io.sql import read_sql
 from metpy.units import units
 import metpy.calc as mcalc
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.plot import get_cmap
 from pyiem.plot.use_agg import plt
 from pyiem.plot.util import fitbox
 from pyiem.exceptions import NoDataFound
@@ -202,7 +203,7 @@ def plotter(fdict):
             xedges,
             yedges,
             H.transpose(),
-            cmap=plt.get_cmap(ctx["cmap"]),
+            cmap=get_cmap(ctx["cmap"]),
             alpha=0.5,
         )
 

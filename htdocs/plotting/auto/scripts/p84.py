@@ -5,7 +5,7 @@ from collections import OrderedDict
 
 import numpy as np
 from pyiem import iemre, util
-from pyiem.plot.use_agg import plt
+from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import state_bounds, SECTORS
 from pyiem.exceptions import NoDataFound
@@ -211,7 +211,7 @@ def plotter(fdict):
     if np.ma.is_masked(np.max(p01d)):
         raise NoDataFound("Data Unavailable")
     plot_units = "inches"
-    cmap = plt.get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx["cmap"])
     cmap.set_bad("white")
     if opt == "dep":
         # Do departure work now

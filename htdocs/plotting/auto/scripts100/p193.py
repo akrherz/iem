@@ -5,8 +5,7 @@ import os
 import numpy as np
 import pygrib
 from pyiem.datatypes import distance
-from pyiem.plot.use_agg import plt
-from pyiem.plot import MapPlot
+from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_autoplot_context, utc
 from pyiem.exceptions import NoDataFound
 
@@ -126,7 +125,7 @@ def plotter(fdict):
         continentalcolor="white",
         titlefontsize=16,
     )
-    cmap = plt.get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx["cmap"])
     cmap.set_under("#EEEEEE")
     cmap.set_over("black")
     if scale == "auto":

@@ -6,13 +6,14 @@ import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
+from pyiem.plot import get_cmap
 from pyiem.util import get_dbconn, utc
 from tqdm import tqdm
 
 
 def run(nexrad, name, network, cname):
     """Do some work!"""
-    cmap = plt.get_cmap(cname)
+    cmap = get_cmap(cname)
     cmap.set_bad("white")
 
     today = utc()

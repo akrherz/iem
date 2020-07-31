@@ -2,9 +2,8 @@
 import sys
 import datetime
 
-import matplotlib.cm as cm
 import pytz
-from pyiem.plot import MapPlot
+from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_dbconn
 
 
@@ -69,7 +68,7 @@ def doit(now, model):
         lons.append(row[3])
         vals.append(diff)
 
-    cmap = cm.get_cmap("RdYlBu_r")
+    cmap = get_cmap("RdYlBu_r")
     cmap.set_under("black")
     cmap.set_over("black")
 

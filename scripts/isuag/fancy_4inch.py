@@ -8,9 +8,8 @@ import os
 from pandas.io.sql import read_sql
 import numpy as np
 from scipy.signal import convolve2d
-import matplotlib.cm as cm
 import pygrib
-from pyiem.plot import MapPlot
+from pyiem.plot import MapPlot, get_cmap
 from pyiem.datatypes import temperature
 from pyiem.tracker import loadqc
 from pyiem.network import Table
@@ -181,7 +180,7 @@ def main(argv):
         hlats,
         nam,
         np.arange(10, 101, 5),
-        cmap=cm.get_cmap("jet"),
+        cmap=get_cmap("jet"),
         units=r"$^\circ$F",
     )
     mp.plot_values(

@@ -9,8 +9,7 @@ from metpy.units import units, masked_array
 from pandas.io.sql import read_sql
 import pandas as pd
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
-from pyiem.plot import MapPlot
+from pyiem.plot import MapPlot, get_cmap
 from pyiem.exceptions import NoDataFound
 
 
@@ -132,7 +131,7 @@ def plotter(fdict):
         )
         % (HOURS[ctx["hour"]],),
     )
-    cmap = plt.get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx["cmap"])
     bins = [
         0.01,
         0.6,

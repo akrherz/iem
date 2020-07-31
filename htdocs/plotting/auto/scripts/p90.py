@@ -10,7 +10,7 @@ from geopandas import read_postgis
 from affine import Affine
 from pyiem.nws import vtec
 from pyiem.reference import state_names, state_bounds, wfo_bounds
-from pyiem.plot.use_agg import plt
+from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -714,7 +714,7 @@ def plotter(fdict):
         nocaption=True,
         titlefontsize=16,
     )
-    cmap = plt.get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx["cmap"])
     cmap.set_under("white")
     cmap.set_over("white")
     if geo == "ugc":

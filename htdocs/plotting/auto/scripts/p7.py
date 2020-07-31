@@ -6,8 +6,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.dates as mdates
 import matplotlib.colors as mpcolors
-from pyiem.plot.use_agg import plt
 from pyiem import network
+from pyiem.plot import get_cmap
+from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -146,7 +147,7 @@ def plotter(fdict):
     success = np.array(success)
     starts = np.array(starts)
 
-    cmap = plt.get_cmap(ctx["cmap"])
+    cmap = get_cmap(ctx["cmap"])
     bmin = min(heights[success]) - 1
     bmax = max(heights[success]) + 1
     bins = np.arange(bmin, bmax + 1.1)
