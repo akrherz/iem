@@ -36,7 +36,10 @@ def get_description():
         "description"
     ] = """This chart presents a series of daily summary data
     as a calendar.  The daily totals should be valid for the local day of the
-    weather station.
+    weather station.  The climatology is based on the nearest NCEI 1981-2010
+    climate station, which in most cases is the same station.  Climatology
+    values are rounded to the nearest whole degree Fahrenheit and then compared
+    against the observed value to compute a departure.
     """
     today = datetime.date.today()
     m90 = today - datetime.timedelta(days=90)
@@ -101,11 +104,11 @@ def plotter(fdict):
 
     # Get Climatology
     cdf = read_sql(
-        """
-        SELECT to_char(valid, 'mmdd') as sday, high, low,
-        (high + low) / 2. as avg,
-        precip from ncdc_climate81 WHERE station = %s
-    """,
+        "SELECT to_char(valid, 'mmdd') as sday, "
+        "round(high::numeric, 0) as high, "
+        "round(low::numeric, 0) as low, "
+        "round(((high + low) / 2.)::numeric, 0) as avg, "
+        "precip from ncdc_climate81 WHERE station = %s ORDER by sday ASC",
         get_dbconn("coop"),
         params=(ctx["_nt"].sts[station]["ncdc81"],),
         index_col="sday",
