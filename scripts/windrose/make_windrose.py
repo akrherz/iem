@@ -32,7 +32,12 @@ def main():
     if not os.path.isdir(mydir):
         os.makedirs(mydir)
     fn = f"{mydir}/{sid}_yearly.png"
-    res = windrose(sid, database=database, sname=nt.sts[sid]["name"])
+    res = windrose(
+        sid,
+        database=database,
+        sname=nt.sts[sid]["name"],
+        tzname=nt.sts[sid]["tzname"],
+    )
     res.savefig(fn)
     plt.close()
     for month in range(1, 13):
