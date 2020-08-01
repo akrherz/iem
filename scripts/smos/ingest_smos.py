@@ -4,12 +4,14 @@ import os
 import re
 import datetime
 from io import StringIO
+import warnings
 
 import pytz
 from pyiem.util import get_dbconn, ncopen, logger
 
 LOG = logger()
 TSTAMP = re.compile("([0-9]{8}T[0-9]{6})")
+warnings.simplefilter("ignore", category=DeprecationWarning)
 
 
 def consume(scursor, fn, ts, grid_ids):

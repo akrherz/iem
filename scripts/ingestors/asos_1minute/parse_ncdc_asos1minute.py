@@ -298,7 +298,8 @@ def merge_archive_end(df, dt):
         pgconn,
         index_col="station",
     )
-    df.at[df2.index.values, "archive_end"] = df2["max"]
+    LOG.debug("found %s stations in the archive", len(df2.index))
+    df["archive_end"] = df2["max"]
 
 
 def dl_realtime(df, dt):
