@@ -54,7 +54,11 @@ def tstamp2dt(s):
     if s[0] not in ["1", "2"]:
         LOG.debug("bad timestamp |%s|", s)
         return None
-    ts = datetime.datetime(int(s[:4]), int(s[4:6]), int(s[6:8]))
+    try:
+        ts = datetime.datetime(int(s[:4]), int(s[4:6]), int(s[6:8]))
+    except Exception:
+        LOG.debug("bad timestamp |%s|", s)
+        return None
     ts = ts.replace(tzinfo=pytz.timezone("UTC"))
     local_hr = int(s[8:10])
     utc_hr = int(s[12:14])
