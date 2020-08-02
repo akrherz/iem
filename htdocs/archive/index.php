@@ -98,9 +98,8 @@ then, only base reflectivity was saved.</li>
 </ul>
 
 <h3>NWS Text Products</h3>
-<br />The IEM archives all NWS issued text products.  Unfortunately, the we 
-don't have this full archive online yet.  NCDC has a <a href="http://has.ncdc.noaa.gov/pls/plhas/HAS.FileAppSelect?datasetname=9957ANX">big archive</a> of
-this data back to 2001.  The IEM's archives can be found:
+<p>See this <a href="/onsite/news.phtml?id=1408">news item</a> for more details
+on this archive and how it is made available.</p>
 <ul>
  <li><a href="/wx/afos/">AFOS Product Finder</a>
   <br />If you know what you are looking for, this app works great!</li>
