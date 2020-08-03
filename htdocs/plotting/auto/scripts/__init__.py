@@ -672,6 +672,7 @@ data = {
                     "id": "37",
                     "label": "MOS Forecasted Temperature Ranges + Observations",
                 },
+                {"id": "211", "label": "One Minute Interval Plots"},
                 {
                     "id": "162",
                     "label": "Overcast Sky Condition 2D Histogram (Level by Week)",
