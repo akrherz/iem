@@ -25,7 +25,7 @@ def text_image(content):
     http://stackoverflow.com/questions/29760402
     """
     grayscale = "L"
-    content = content.replace("\r\r\n", "\n").replace("\001", "")
+    content = content.replace("\r", "").replace("\001", "")
     lines = content.split("\n")
     if len(lines) > 100:
         msg = "...truncated %s lines..." % (len(lines) - 100,)
