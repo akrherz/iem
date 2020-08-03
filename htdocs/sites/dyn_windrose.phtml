@@ -160,7 +160,8 @@ $content .= sprintf("<br /><input type=\"checkbox\" name=\"setbins\" ".
 		"<input type=\"text\" name=\"bin2\" value=\"%s\" size=\"4\"> - ".
 		"<input type=\"text\" name=\"bin3\" value=\"%s\" size=\"4\"> - ".
 		"<input type=\"text\" name=\"bin4\" value=\"%s\" size=\"4\"> - ".
-		"<input type=\"text\" name=\"bin5\" value=\"%s\" size=\"4\"> +".
+        "<input type=\"text\" name=\"bin5\" value=\"%s\" size=\"4\"> +".
+        "<br />Values between 0 and the first bin are counted as calm. ".
 		"</div>",
 		isset($_GET["setbins"]) ? " checked=\"checked\"": "",
 		isset($_GET["setbins"]) ? "block": "none",

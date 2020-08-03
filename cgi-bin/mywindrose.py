@@ -161,7 +161,6 @@ def application(environ, start_response):
     bins = []
     if "bins" in form:
         bins = [float(v) for v in form.get("bins").split(",")]
-        bins.insert(0, 0)
     res = windrose(
         station,
         database=dbname,
