@@ -7,6 +7,7 @@ define("IEM_APPID", 18);
 require_once "../../../include/forms.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/network.php";
+require_once "../../../include/vtec.php";
 
 $t = new MyView();
 $t->title = "NWS Watch Warning Archive Download";
@@ -143,6 +144,8 @@ for($group_idx=0;$group_idx<$location_select_group_count;$group_idx++){
     $content .= $location_select_html[$group_key];
     $content .= '</div>';
 }
+$pselect = make_select("phenomena", "TO", $vtec_phenomena);
+$sselect = make_select("phenomena", "W", $vtec_significance);
 $content .= <<<EOF
 
 <h4>Select time interval</h4>
@@ -185,13 +188,14 @@ $content .= <<<EOF
 
 <br /><input type="checkbox" name="limit0" value="yes">Limit Output to Tornado, Severe Thunderstorm, Marine, and Flash Flood Warnings
 <br /><input type="checkbox" name="limit1" value="yes">Limit Output to only Storm Based Warnings
-<!--
-<br /><input type="checkbox" name="simple" value="yes">Use simplified geometries
-instead of the high resolution AWIPS zones database.  This trims the file size
-significantly, but topology is not conserved. If you just want to make maps at
-state level scale, pick this option.
--->
-<script type="text/javascript">
+
+<table border="1">
+<tr><td colspan="2"><input type="checkbox" name="limitps" value="yes"> Limit output to selected VTEC
+phenomena and significance below.</td></tr>
+<tr><td>{$pselect}</td><td>{$sselect}</td></tr>
+</table>
+
+  <script type="text/javascript">
 function kmlsub(f, url){
 	f.action = url;
 	f.submit();

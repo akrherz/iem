@@ -109,9 +109,13 @@ def application(environ, start_response):
 
     limiter = ""
     if "limit0" in form:
-        limiter += (
+        limiter = (
             " and phenomena IN ('TO','SV','FF','MA') and significance = 'W' "
         )
+    if form.get("limitps", "no") == "yes":
+        phenom = form.get("phenomena", "TO")[:2]
+        sig = form.get("significance", "W")[:1]
+        limiter = f" and phenomena = '{phenom}' and significance = '{sig}' "
 
     sbwlimiter = " WHERE gtype = 'P' " if "limit1" in form else ""
 
