@@ -18,6 +18,8 @@ import datetime
 import pandas as pd
 from pyiem.util import get_dbconn
 
+# These sites have old sensors that still can be calibrated
+CALSITES = "TVK CKP FXY GGI IIB IFA MPZ I75 OOA PEA PRO VTI".split()
 CALINFO = re.compile(
     (
         r".*AWOS.*\s+([0-9\-\.]+)\s*/\s*([0-9\-\.]+)\s+"
@@ -42,6 +44,9 @@ def main(argv):
     df = pd.read_csv(argv[1])
 
     for _, row in df.iterrows():
+        faa = row["FAA Code"]
+        if faa not in CALSITES:
+            continue
         date = datetime.datetime.strptime(row["Visit Date"], "%d-%b-%y")
 
         if row["Description"].startswith("site offline"):
@@ -50,7 +55,6 @@ def main(argv):
         if not parts:
             print(FAIL + row["Description"] + ENDC)
             continue
-        faa = row["FAA Code"]
         sql = """
         INSERT into iem_calibration(station, portfolio, valid, parameter,
         adjustment, final, comments) values (%s, 'iaawos', %s, %s, %s, %s, %s)
