@@ -129,16 +129,15 @@ def get_daily_data(ctx):
     pgconn = get_dbconn("coop")
     sdate = ctx["sdate"]
     edate = ctx["edate"]
-    offset = "0 days"
     if edate <= sdate:
         raise NoDataFound("start date after end date, please correct")
     if (edate - sdate).days > 366:
         raise NoDataFound(
             "Sorry, too long of period selected. < 1 year please"
         )
+    yearcond = "false"
     if edate.year != sdate.year:
-        jan1 = (edate + datetime.timedelta(days=365)).replace(day=1, month=1)
-        offset = "%.0f days" % ((jan1 - edate).days + 1,)
+        yearcond = f"sday >= '{sdate.strftime('%m%d')}'"
         sday = " sday >= '%s' or sday <= '%s' " % (
             sdate.strftime("%m%d"),
             edate.strftime("%m%d"),
@@ -162,26 +161,17 @@ def get_daily_data(ctx):
         table = "alldata_%s" % (ctx["csector"],)
 
     ctx["df"] = read_sql(
-        """
+        f"""
     with monthly as (
         SELECT
-        extract(year from day + '"""
-        + offset
-        + """'::interval) as myyear,
+        case when {yearcond} then year + 1 else year end as myyear,
         station,
         sum(precip) as p,
         avg((high+low)/2.) as avgt,
         avg(low) as avglo,
         avg(high) as avghi
-        from """
-        + table
-        + """
-        WHERE substr(station,3,1) = 'C' and ( """
-        + sday
-        + """ )
-        """
-        + statelimiter
-        + """
+        from {table}
+        WHERE substr(station, 3, 1) = 'C' and ( {sday} ) {statelimiter}
         GROUP by myyear, station),
     ranks as (
         SELECT station, myyear as year,
