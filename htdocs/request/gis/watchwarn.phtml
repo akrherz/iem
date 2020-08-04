@@ -145,7 +145,7 @@ for($group_idx=0;$group_idx<$location_select_group_count;$group_idx++){
     $content .= '</div>';
 }
 $pselect = make_select("phenomena", "TO", $vtec_phenomena);
-$sselect = make_select("phenomena", "W", $vtec_significance);
+$sselect = make_select("significance", "W", $vtec_significance);
 $content .= <<<EOF
 
 <h4>Select time interval</h4>
