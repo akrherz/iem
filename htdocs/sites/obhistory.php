@@ -44,8 +44,8 @@ function precip_formatter($val){
     if ($val == 0.0001) return "T";
     return round($val, 2);
 }
-function formatter($i, $row){
-	$ts = strtotime(substr($row["valid"],0,16));
+function asos_formatter($i, $row){
+	$ts = strtotime(substr($row["local_valid"], 0, 16));
 	$relh = relh(f2c($row["tmpf"]), f2c($row["dwpf"]) );
 	$relh = (! is_null($relh)) ? intval($relh): "";
 	$ismadis = (strpos($row["raw"], "MADISHF") > 0); 
@@ -67,12 +67,27 @@ function formatter($i, $row){
 	temp_formatter($row["feel"]),
 	temp_formatter($row["max_tmpf_6hr"]), temp_formatter($row["min_tmpf_6hr"]), 
 	relh(f2c($row["tmpf"]), f2c($row["dwpf"])),
-    $row["alti"], $row["pres"],
+    $row["alti"], $row["mslp"],
     precip_formatter($row["phour"]),
     precip_formatter($row["p03i"]),
     precip_formatter($row["p06i"]),
 	($i % 2 == 0)? "#FFF": "#EEE",
 	$ismadis ? " hf": "", $row["raw"]
+	);
+}
+function formatter($i, $row){
+	$ts = strtotime(substr($row["local_valid"], 0, 16));
+	$relh = relh(f2c($row["tmpf"]), f2c($row["dwpf"]) );
+	$relh = (! is_null($relh)) ? intval($relh): "";
+	return sprintf("<tr style=\"background: %s;\">" .
+	"<td>%s</td><td>%s</td><td>%s</td>
+	<td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
+	($i % 2 == 0)? "#FFF": "#EEE",
+	date("g:i A", $ts), wind_formatter($row) , temp_formatter($row["tmpf"]), 
+	temp_formatter($row["dwpf"]),
+	temp_formatter($row["feel"]),
+	relh(f2c($row["tmpf"]), f2c($row["dwpf"])),
+    precip_formatter($row["phour"]),
 	);
 }
 $year = isset($_GET["year"])? intval($_GET["year"]): date("Y");
@@ -94,57 +109,6 @@ if ($metadata["archive_begin"]){
 } else {
 	$startyear = 2010;
 }
-
-$iemarchive = mktime(0,0,0,date("m"), date("d"), date("Y")) - 86400;
-if ($date >= $iemarchive && $network != 'ISUSM'){
-	$db = "iem";
-	$sql = sprintf("SELECT distinct c.*
-	from current_log c JOIN stations s on (s.iemid = c.iemid)
-	and s.id = $1 and s.network = $2 and 
-	valid  >= $3 and valid  < $4 
-	ORDER by valid DESC");
-} else {
-	if (preg_match("/RWIS/", $network)){
-		$db = "rwis";
-		$sql = sprintf("SELECT *, null as pres, null as raw, null as phour,
-				null as relh, null as skyc1, null as skyl1, 
-				null as skyc2, null as skyl2, null as alti,
-				null as skyc3, null as skyl3, null as wxcodes,
-				null as skyc4, null as skyl4, null as max_tmpf_6hr,
-				null as feel,
-				null as p06i, null as min_tmpf_6hr, null as p03i
-		from alldata where 
-		station = $1  and valid  >= $3 and valid  < $4 
-		and $2 = $2 ORDER by valid DESC");
-	} else if ($network == "ISUSM"){
-		$db = "isuag";
-		$sql = sprintf("SELECT *, null as pres, null as raw, null as feel
-		from alldata where 
-		station = $1  and valid  >= $3 and valid  < $4 
-		and $2 = $2 ORDER by valid DESC");
-	} else {
-		$db = "asos";
-		$sql = sprintf("SELECT *, mslp as pres, metar as raw, p01i as phour,
-				null as relh
-				from alldata where
-				station = $1  and valid  >= $3 and valid  < $4
-				and $2 = $2 ORDER by valid DESC");
-		
-	}
-}
-$dbconn = iemdb($db);
-pg_query($dbconn, "SET TIME ZONE '". $metadata["tzname"] ."'");
-$rs = pg_prepare($dbconn, "_MYSELECT", $sql);
-$rs = pg_execute($dbconn, "_MYSELECT", Array($station, $network,
-	date("Y-m-d", $date), date("Y-m-d", $date + 90400)));
-$table = "";
-for ($i=0;$row=pg_fetch_assoc($rs);$i++){
-	if (is_null($row['dwpf']) && ! is_null($row['relh'])){
-		$row['dwpf'] = dwpf($row["tmpf"], $row["relh"]);
-	}
-	$table .= formatter($i, $row);
-}
-pg_close($dbconn);
 
 $t = new MyView();
 
@@ -319,41 +283,96 @@ if (preg_match("/ASOS|AWOS/", $network)){
 <a href="https://madis.ncep.noaa.gov/madis_OMO.shtml">MADIS High Frequency METAR</a>
 dataset.  This dataset had a problem with temperatures detailed <a href="https://mesonet.agron.iastate.edu/onsite/news.phtml?id=1290">here</a>.</li>
 EOM;
+    $header = <<<EOM
+    <tr align="center" bgcolor="#b0c4de">
+    <th rowspan="3">Time</th>
+    <th rowspan="3">Wind<br>(mph)</th>
+    <th rowspan="3">Vis.<br>(mi.)</th>
+    <th rowspan="3">Sky Cond.<br />(100s ft)</th>
+    <th rowspan="3">Present Wx</th>
+    <th colspan="5">Temperature (&ordm;F)</th>
+    <th rowspan="3">Relative<br>Humidity</th>
+    <th colspan="2">Pressure</th>
+    <th colspan="3">Precipitation (in.)</th></tr>
+    
+    <tr align="center" bgcolor="#b0c4de">
+    <th rowspan="2">Air</th>
+    <th rowspan="2">Dwpt</th>
+    <th rowspan="2">Feels Like</th>
+    <th colspan="2">6 hour</th>
+    <th rowspan="2">altimeter<br>(in.)</th>
+    <th rowspan="2">sea level<br>(mb)</th>
+    <th rowspan="2">1 hr</th>
+    <th rowspan="2">3 hr</th>
+    <th rowspan="2">6 hr</th>
+    </tr>
+    
+    <tr align="center" bgcolor="#b0c4de"><th>Max.</th><th>Min.</th></tr>    
+EOM;
+} else {
+    $header = <<<EOM
+    <tr align="center" bgcolor="#b0c4de">
+    <th rowspan="2">Time</th>
+    <th rowspan="2">Wind<br>(mph)</th>
+    <th colspan="3">Temperature (&ordm;F)</th>
+    <th rowspan="3">Relative<br>Humidity</th>
+    <th>Precipitation (in.)</th></tr>
+    
+    <tr align="center" bgcolor="#b0c4de">
+    <th>Air</th>
+    <th>Dwpt</th>
+    <th>Feels Like</th>
+    <th>1 hr</th>
+    </tr>
+EOM;
+}
+
+// API endpoint
+$errmsg = "";
+$uri = sprintf(
+    "/api/1/obhistory.json?station=%s&network=%s&date=%s&full=1",
+    $station, $network, date("Y-m-d", $date));
+$jdata = @file_get_contents("http://iem.local${uri}");
+if ($jdata === FALSE){
+    $jobj = Array("data" => Array());
+    $errmsg = "Failed to fetch history from web service. No data was found.";
+} else {
+    $jobj = json_decode($jdata, $assoc=TRUE);
+}
+$table = "";
+$i = 0;
+foreach($jobj["data"] as $bogus => $row)
+{
+    if (preg_match("/ASOS|AWOS/", $network)){
+        $table .= asos_formatter($i, $row);
+    } else {
+        $table .= formatter($i, $row);
+    }
+    $i++;
+}
+$errdiv = "";
+if ($errmsg != ""){
+    $errdiv = <<<EOM
+<div class="alert alert-warning">{$errmsg}</div>
+EOM;
 }
 
 $content .= <<<EOF
+
+{$errdiv}
+
 <table class="table table-striped table-bordered" id="datatable">
 <thead>
-<tr align="center" bgcolor="#b0c4de">
-<th rowspan="3">Time</th>
-<th rowspan="3">Wind<br>(mph)</th>
-<th rowspan="3">Vis.<br>(mi.)</th>
-<th rowspan="3">Sky Cond.<br />(100s ft)</th>
-<th rowspan="3">Present Wx</th>
-<th colspan="5">Temperature (&ordm;F)</th>
-<th rowspan="3">Relative<br>Humidity</th>
-<th colspan="2">Pressure</th>
-<th colspan="3">Precipitation (in.)</th></tr>
-
-<tr align="center" bgcolor="#b0c4de">
-<th rowspan="2">Air</th>
-<th rowspan="2">Dwpt</th>
-<th rowspan="2">Feels Like</th>
-<th colspan="2">6 hour</th>
-<th rowspan="2">altimeter<br>(in.)</th>
-<th rowspan="2">sea level<br>(mb)</th>
-<th rowspan="2">1 hr</th>
-<th rowspan="2">3 hr</th>
-<th rowspan="2">6 hr</th>
-</tr>
-
-<tr align="center" bgcolor="#b0c4de"><th>Max.</th><th>Min.</th></tr>
-
+{$header}
 </thead>
 <tbody>
 {$table}
 </tbody>
 </table>
+
+<p>The <a href="{$uri}">IEM API webservice</a> that provided data to this
+page.  For more details, see <a href="/api/1/docs#/default/service_obhistory__fmt__get">documentation</a>.</p>
+
 <h4>Data Notes</h4>
 <ul>
 {$notes}
