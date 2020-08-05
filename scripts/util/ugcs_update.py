@@ -119,7 +119,10 @@ def db_fixes(cursor, valid):
         cursor.execute(
             """
             SELECT end_ts from ugcs
-            where begin_ts = %s and ST_IsEmpty(simple_geom)
+            where begin_ts = %s and (
+                ST_IsEmpty(simple_geom) or
+                ST_Area(simple_geom) / ST_Area(geom) < 0.9
+            )
         """,
             (valid,),
         )
@@ -127,7 +130,7 @@ def db_fixes(cursor, valid):
     _check()
     if cursor.rowcount > 0:
         LOG.info(
-            "Found %s rows with empty simple_geom, decreasing tolerance",
+            "%s rows with empty, too small simple_geom, decreasing tolerance",
             cursor.rowcount,
         )
         cursor.execute(
@@ -136,7 +139,10 @@ def db_fixes(cursor, valid):
             SET simple_geom = ST_Multi(
                 ST_Buffer(ST_SnapToGrid(geom, 0.0001), 0)
             )
-            WHERE begin_ts = %s and ST_IsEmpty(simple_geom)
+            WHERE begin_ts = %s and (
+                ST_IsEmpty(simple_geom) or
+                ST_Area(simple_geom) / ST_Area(geom) < 0.9
+            )
         """,
             (valid,),
         )
