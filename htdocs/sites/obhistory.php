@@ -90,6 +90,25 @@ function formatter($i, $row){
     precip_formatter($row["phour"]),
 	);
 }
+function hads_formatter($i, $row, $shefcols){
+	$ts = strtotime(substr($row["local_valid"], 0, 16));
+	$relh = relh(f2c($row["tmpf"]), f2c($row["dwpf"]) );
+	$relh = (! is_null($relh)) ? intval($relh): "";
+    $html = "";
+    foreach ($shefcols as $bogus => $name){
+        $html .= sprintf("<td>%s</td>", $row["$name"]);
+    }
+    return sprintf("<tr style=\"background: %s;\">" .
+	"<td>%s</td><td>%s</td><td>%s</td>
+	<td>%s</td><td>%s</td><td>%s</td><td>%s</td>%s</tr>",
+	($i % 2 == 0)? "#FFF": "#EEE",
+	date("g:i A", $ts), wind_formatter($row) , temp_formatter($row["tmpf"]), 
+	temp_formatter($row["dwpf"]),
+	temp_formatter($row["feel"]),
+	relh(f2c($row["tmpf"]), f2c($row["dwpf"])),
+    precip_formatter($row["phour"]), $html
+	);
+}
 $year = isset($_GET["year"])? intval($_GET["year"]): date("Y");
 $month = isset($_GET["month"])? intval($_GET["month"]): date("m");
 $day = isset($_GET["day"])? intval($_GET["day"]): date("d");
@@ -277,6 +296,20 @@ $notes = '';
 if ($network == "ISUSM"){
 	$notes .= "<li>Wind direction and wind speed are 10 minute averages at 10 feet above the ground.</li>";
 }
+
+// API endpoint
+$errmsg = "";
+$uri = sprintf(
+    "/api/1/obhistory.json?station=%s&network=%s&date=%s&full=1",
+    $station, $network, date("Y-m-d", $date));
+$jdata = @file_get_contents("http://iem.local${uri}");
+if ($jdata === FALSE){
+    $jobj = Array("data" => Array(), "schema" => Array("fields" => Array()));
+    $errmsg = "Failed to fetch history from web service. No data was found.";
+} else {
+    $jobj = json_decode($jdata, $assoc=TRUE);
+}
+
 if (preg_match("/ASOS|AWOS/", $network)){
 	$notes .= <<<EOM
 <li>For recent years, this page also optionally shows observations from the
@@ -294,7 +327,7 @@ EOM;
     <th rowspan="3">Relative<br>Humidity</th>
     <th colspan="2">Pressure</th>
     <th colspan="3">Precipitation (in.)</th></tr>
-    
+
     <tr align="center" bgcolor="#b0c4de">
     <th rowspan="2">Air</th>
     <th rowspan="2">Dwpt</th>
@@ -309,6 +342,41 @@ EOM;
     
     <tr align="center" bgcolor="#b0c4de"><th>Max.</th><th>Min.</th></tr>    
 EOM;
+} else if (preg_match("/DCP|COOP/", $network)){
+    // Figure out what extra columns we have here.
+    $shefcols = Array();
+    $shefextra = "";
+    foreach($jobj["schema"]["fields"] as $bogus => $field){
+        $name = $field["name"];
+        if (preg_match("/^[A-Z]/", $name)){
+            $shefcols[] = $name;
+        }
+    }
+    asort($shefcols);
+    $shefheader = sprintf(
+        "<th colspan=\"%s\">RAW SHEF CODES</th>", sizeof($shefcols));
+    foreach($shefcols as $bogus => $val){
+        $shefextra .= sprintf("<th>%s</th>", $val);
+    }
+    $header = <<<EOM
+    <tr align="center" bgcolor="#b0c4de">
+    <th rowspan="2">Time</th>
+    <th rowspan="2">Wind<br>(mph)</th>
+    <th colspan="3">Temperature (&ordm;F)</th>
+    <th rowspan="3">Relative<br>Humidity</th>
+    <th>Precipitation (in.)</th>
+    {$shefheader}
+    </tr>
+
+    <tr align="center" bgcolor="#b0c4de">
+    <th>Air</th>
+    <th>Dwpt</th>
+    <th>Feels Like</th>
+    <th>1 hr</th>
+    {$shefextra}
+    </tr>
+EOM;
+
 } else {
     $header = <<<EOM
     <tr align="center" bgcolor="#b0c4de">
@@ -317,7 +385,7 @@ EOM;
     <th colspan="3">Temperature (&ordm;F)</th>
     <th rowspan="3">Relative<br>Humidity</th>
     <th>Precipitation (in.)</th></tr>
-    
+
     <tr align="center" bgcolor="#b0c4de">
     <th>Air</th>
     <th>Dwpt</th>
@@ -327,24 +395,15 @@ EOM;
 EOM;
 }
 
-// API endpoint
-$errmsg = "";
-$uri = sprintf(
-    "/api/1/obhistory.json?station=%s&network=%s&date=%s&full=1",
-    $station, $network, date("Y-m-d", $date));
-$jdata = @file_get_contents("http://iem.local${uri}");
-if ($jdata === FALSE){
-    $jobj = Array("data" => Array());
-    $errmsg = "Failed to fetch history from web service. No data was found.";
-} else {
-    $jobj = json_decode($jdata, $assoc=TRUE);
-}
+
 $table = "";
 $i = 0;
 foreach($jobj["data"] as $bogus => $row)
 {
     if (preg_match("/ASOS|AWOS/", $network)){
         $table .= asos_formatter($i, $row);
+    } else if (preg_match("/DCP|COOP/", $network)){
+        $table .= hads_formatter($i, $row, $shefcols);
     } else {
         $table .= formatter($i, $row);
     }
