@@ -24,3 +24,6 @@ python compute_hads_pday.py
 
 cd ../ingestors
 python uscrn_ingest.py
+
+cd ../uscrn
+python compute_pday.py
