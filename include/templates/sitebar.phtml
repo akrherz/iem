@@ -72,7 +72,11 @@ foreach($o as $key => $val)
 	}
 	if (array_key_exists("networks", $val) && !in_array($network, $val["networks"])){
 		continue;
-	}
+    }
+    // network has no wind direction
+    if ($network == "USCRN" and ($key == 'custom_windrose' || $key == 'windrose')){
+        continue;
+    }
 	// Do not display links to pages that only work for sites that produce
 	// data that we consume!
 	if ($network == 'RAOB' && $key == 'custom_windrose'){

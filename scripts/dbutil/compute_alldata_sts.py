@@ -7,6 +7,7 @@ from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, logger
 
 LOG = logger()
+ALLDATA = {"USCRN": "uscrn_alldata"}
 
 
 def main(argv):
@@ -21,7 +22,8 @@ def main(argv):
     table = NetworkTable(network)
 
     rcursor.execute(
-        "SELECT station, min(valid), max(valid) from alldata "
+        "SELECT station, min(valid), max(valid) from "
+        f"{ALLDATA.get(network, 'alldata')} "
         "GROUP by station ORDER by min ASC"
     )
     for row in rcursor:

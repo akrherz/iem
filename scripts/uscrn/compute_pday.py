@@ -27,7 +27,7 @@ def run(valid):
     nt = NetworkTable("USCRN")
     pgconn = get_dbconn("other")
     iem_pgconn = get_dbconn("iem")
-    LOG.debug("Processing %s", valid)
+    LOG.debug("Processing %s", valid.date())
     # Fetch enough data to cross all the dates
     df = read_sql(
         "SELECT station, valid at time zone 'UTC' as utc_valid, precip_mm "
@@ -39,6 +39,9 @@ def run(valid):
         ),
         index_col=None,
     )
+    if df.empty:
+        LOG.info("No data found for date: %s", valid.date())
+        return
     df["utc_valid"] = df["utc_valid"].dt.tz_localize(datetime.timezone.utc)
     for station in nt.sts:
         iemid = nt.sts[station]["iemid"]
