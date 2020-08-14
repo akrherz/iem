@@ -68,7 +68,7 @@ function asos_formatter($i, $row){
 	temp_formatter($row["max_tmpf_6hr"]), temp_formatter($row["min_tmpf_6hr"]), 
 	relh(f2c($row["tmpf"]), f2c($row["dwpf"])),
     $row["alti"], $row["mslp"],
-    precip_formatter($row["phour"]),
+    precip_formatter($row["p01i"]),
     precip_formatter($row["p03i"]),
     precip_formatter($row["p06i"]),
 	($i % 2 == 0)? "#FFF": "#EEE",
