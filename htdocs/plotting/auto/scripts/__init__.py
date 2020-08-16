@@ -683,7 +683,10 @@ data = {
                 },
                 {
                     "id": "155",
-                    "label": "Top Ten Hourly Reports from ASOS Stations",
+                    "label": (
+                        "Top 10 / Most Recent Hourly Reports "
+                        "from ASOS Stations"
+                    ),
                 },
                 {
                     "id": "16",

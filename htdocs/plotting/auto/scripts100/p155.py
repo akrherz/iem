@@ -36,15 +36,26 @@ METRICS = OrderedDict(
     [
         ("max_tmpf", "Max Air Temperature"),
         ("min_tmpf", "Min Air Temperature"),
+        ("below_tmpf", "Air Temperature Below Threshold"),
+        ("above_tmpf", "Air Temperature At or Above Threshold"),
         ("min_alti", "Min Pressure Altimeter"),
         ("max_alti", "Max Pressure Altimeter"),
+        ("below_alti", "Altimeter Below Threshold"),
+        ("above_alti", "Altimeter At or Above Threshold"),
         ("max_dwpf", "Max Dewpoint Temperature"),
         ("min_dwpf", "Min Dewpoint Temperature"),
+        ("below_dwpf", "Dewpoint Temperature Below Threshold"),
+        ("above_dwpf", "Dewpoint Temperature At or Above Threshold"),
         ("max_feel", "Max Feels Like Temperature"),
         ("min_feel", "Min Feels Like Temperature"),
+        ("below_feel", "Feels Like Temperature Below Threshold"),
+        ("above_feel", "Feels Like Temperature At or Above Threshold"),
         ("max_p01i", "Max Hourly Precipitation"),
+        ("above_p01i", "Precipitation At or Above Threshold"),
         ("min_mslp", "Min Sea Level Pressure"),
         ("max_mslp", "Max Sea Level Pressure"),
+        ("below_mslp", "Sea Level Pressure Below Threshold"),
+        ("above_mslp", "Sea Level Pressure At or Above Threshold"),
     ]
 )
 UNITS = {
@@ -92,6 +103,19 @@ def get_description():
             default="max_p01i",
             label="Which Metric to Summarize",
             options=METRICS,
+        ),
+        dict(
+            type="float",
+            name="threshold",
+            default=100,
+            label="Set Threshold (where appropriate for metric above)",
+        ),
+        dict(
+            type="hour",
+            name="hour",
+            optional=True,
+            label="Limit Analysis to Given Local Timezone Hour (optional)",
+            default=12,
         ),
         dict(
             type="date",
@@ -177,32 +201,42 @@ def plotter(fdict):
             " and extract(month from valid at time zone '%s') in %s"
         ) % (tzname, tuple(months))
         title = MDICT[month]
-
+    if ctx.get("hour") is not None:
+        date_limiter += (
+            f" and extract(hour from valid at time zone '{tzname}' "
+            f"+ '10 minutes'::interval) = {ctx['hour']}"
+        )
+        dt = datetime.datetime(2000, 1, 1, ctx["hour"])
+        title += " @" + dt.strftime("%-I %p")
     (agg, dbvar) = varname.split("_")
-    sorder = "DESC" if agg == "max" else "ASC"
-    df = read_sql(
-        """
-        WITH data as (
-            SELECT valid at time zone %s as v, """
-        + dbvar
-        + """ from alldata
-            WHERE station = %s """
-        + date_limiter
-        + """)
+    if agg in ["max", "min"]:
+        titlelabel = "Top"
+        sorder = "DESC" if agg == "max" else "ASC"
+        df = read_sql(
+            f"""
+            WITH data as (
+                SELECT valid at time zone %s as v, {dbvar} from alldata
+                WHERE station = %s {date_limiter})
 
-        SELECT v as valid, """
-        + dbvar
-        + """ from data
-        ORDER by """
-        + dbvar
-        + """ """
-        + sorder
-        + """ NULLS LAST LIMIT 100
-    """,
-        pgconn,
-        params=(ctx["_nt"].sts[station]["tzname"], station),
-        index_col=None,
-    )
+            SELECT v as valid, {dbvar} from data
+            ORDER by {dbvar} {sorder} NULLS LAST LIMIT 100
+        """,
+            pgconn,
+            params=(ctx["_nt"].sts[station]["tzname"], station),
+            index_col=None,
+        )
+    else:
+        titlelabel = "Most Recent"
+        op = ">=" if agg == "above" else "<"
+        threshold = float(ctx.get("threshold", 100))
+        df = read_sql(
+            f"SELECT valid at time zone %s as valid, {dbvar} from alldata "
+            f"WHERE station = %s {date_limiter} and {dbvar} {op} {threshold} "
+            "ORDER by valid DESC LIMIT 100",
+            pgconn,
+            params=(ctx["_nt"].sts[station]["tzname"], station),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("Error, no results returned!")
     ylabels = []
@@ -251,11 +285,13 @@ def plotter(fdict):
         raise NoDataFound("Unknown station metadata.")
     fitbox(
         fig,
-        ("%s [%s] Top 10 Events\n%s (%s) (%s-%s)")
+        ("%s [%s] %s 10 Events\n%s %s (%s) (%s-%s)")
         % (
             ctx["_nt"].sts[station]["name"],
             station,
+            titlelabel,
             METRICS[varname],
+            ctx.get("threshold") if agg in ["above", "below"] else "",
             title,
             ab.year,
             datetime.datetime.now().year,
