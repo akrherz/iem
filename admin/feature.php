@@ -38,8 +38,7 @@ $story = isset($_REQUEST["story"]) ? $_REQUEST["story"] : null;
 $title = isset($_REQUEST["title"]) ? $_REQUEST["title"] : null;
 $caption = isset($_REQUEST["caption"]) ? $_REQUEST["caption"] : null;
 $tags = isset($_REQUEST["tags"]) ? $_REQUEST["tags"] : null;
-$voting = (isset($_REQUEST["voting"]) && $_REQUEST["voting"] == "yes") ?
-          true : false;
+$voting = (isset($_REQUEST["voting"]) && $_REQUEST["voting"] == "yes") ? 't' : 'f';
 $mediasuffix = isset($_REQUEST["mediasuffix"]) ? $_REQUEST["mediasuffix"]: "png";
 
 $mesosite = iemdb("mesosite", TRUE, TRUE);
