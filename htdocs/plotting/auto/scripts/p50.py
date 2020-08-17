@@ -8,6 +8,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"state": "Aggregate by State", "wfo": "Aggregate by WFO"}
+PDICT2 = {"percent": "Frequency [%]", "count": "Count"}
 FONTSIZE = 12
 
 
@@ -19,7 +20,7 @@ def get_description():
     desc[
         "description"
     ] = """This app produces a table of frequencies of
-    wind and hail tags used in NWS Warnings."""
+    wind and hail tags used in NWS Warnings at issuance."""
     today = datetime.datetime.today() + datetime.timedelta(days=1)
 
     desc["arguments"] = [
@@ -38,6 +39,13 @@ def get_description():
             default="wfo",
             label="Plot for WFO(all option) or State:",
             options=PDICT,
+        ),
+        dict(
+            type="select",
+            name="p",
+            default="percent",
+            label="What to plot:",
+            options=PDICT2,
         ),
         dict(
             type="date",
@@ -141,7 +149,7 @@ def plotter(fdict):
         ax.text(
             x,
             y,
-            "%.2f" % (val,),
+            "%.2f" % (val,) if ctx["p"] == "percent" else row["count"],
             ha="center",
             fontsize=FONTSIZE,
             color="r" if val >= 10 else "k",
@@ -156,7 +164,7 @@ def plotter(fdict):
         ax.text(
             x,
             y,
-            "%.2f" % (val,),
+            "%.2f" % (val,) if ctx["p"] == "percent" else int(row["count"]),
             ha="center",
             fontsize=FONTSIZE,
             color="r" if val >= 10 else "k",
@@ -171,7 +179,7 @@ def plotter(fdict):
         ax.text(
             x,
             y,
-            "%.2f" % (val,),
+            "%.2f" % (val,) if ctx["p"] == "percent" else int(row["count"]),
             ha="center",
             fontsize=FONTSIZE,
             color="r" if val >= 10 else "k",
@@ -192,12 +200,13 @@ def plotter(fdict):
     plt.tick_params(top=False, bottom=False, left=False, right=False)
     fig.suptitle(
         (
-            "Frequency [%%] of NWS Wind/Hail Tags for "
+            "%s of NWS Wind/Hail Tags for "
             "Severe Thunderstorm Warning Issuance\n"
             "%s through %s, %.0f warnings\n%s"
             "Values larger than 10%% in red"
         )
         % (
+            PDICT2[ctx["p"]],
             minvalid.strftime("%d %b %Y"),
             maxvalid.strftime("%d %b %Y"),
             df["count"].sum(),
