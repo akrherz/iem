@@ -257,7 +257,7 @@ def plotter(fdict):
         lbl = fmt % (row[dbvar],)
         lbl += " -- %s" % (row["valid"].strftime("%b %d, %Y %-I:%M %p"),)
         ylabels.append(lbl)
-        if row[dbvar] != lastval:
+        if row[dbvar] != lastval or agg in ["above", "below"]:
             currentrank += 1
         ranks.append(currentrank)
         lastval = row[dbvar]
@@ -269,13 +269,18 @@ def plotter(fdict):
     fig = plt.figure(figsize=(8, 6))
     ax = plt.axes([0.1, 0.1, 0.5, 0.8])
     ax.barh(
-        range(10, 0, -1), y, ec="green", fc="green", height=0.8, align="center"
+        range(len(y), 0, -1),
+        y,
+        ec="green",
+        fc="green",
+        height=0.8,
+        align="center",
     )
     ax2 = ax.twinx()
     ax2.set_ylim(0.5, 10.5)
     ax.set_ylim(0.5, 10.5)
-    ax2.set_yticks(range(1, 11))
-    ax.set_yticks(range(1, 11))
+    ax2.set_yticks(range(1, len(y) + 1))
+    ax.set_yticks(range(1, len(y) + 1))
     ax.set_yticklabels(["#%s" % (x,) for x in ranks][::-1])
     ax2.set_yticklabels(ylabels[::-1])
     ax.grid(True, zorder=11)
