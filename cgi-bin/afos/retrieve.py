@@ -173,12 +173,20 @@ def application(environ, start_response):
             sio.write("\001\n")
         # Remove control characters from the product as we are including
         # them manually here...
-        sio.write(
-            (row[0])
-            .replace("\003", "")
-            .replace("\001\r\r\n", "")
-            .replace("\r\r\n", "\n")
-        )
+        if fmt == "html":
+            sio.write(
+                html_escape(row[0])
+                .replace("\003", "")
+                .replace("\001\r\r\n", "")
+                .replace("\r\r\n", "\n")
+            )
+        else:
+            sio.write(
+                (row[0])
+                .replace("\003", "")
+                .replace("\001\r\r\n", "")
+                .replace("\r\r\n", "\n")
+            )
         if fmt == "html":
             sio.write("</pre><hr>\n")
         else:
