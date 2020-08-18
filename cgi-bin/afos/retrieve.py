@@ -2,7 +2,7 @@
 from io import StringIO
 
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, html_escape
 
 
 def pil_logic(s):
@@ -99,7 +99,10 @@ def application(environ, start_response):
                 sio.write("<pre>\n")
             else:
                 sio.write("\001\n")
-            sio.write(row[0].replace("\r\r\n", "\n"))
+            if fmt == "html":
+                sio.write(html_escape(row[0].replace("\r\r\n", "\n")))
+            else:
+                sio.write(row[0].replace("\r\r\n", "\n"))
             if fmt == "html":
                 sio.write("</pre>\n")
             else:
