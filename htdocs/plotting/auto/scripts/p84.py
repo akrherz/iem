@@ -1,5 +1,5 @@
 """Precip estimates"""
-import datetime
+from datetime import datetime, timedelta
 import os
 from collections import OrderedDict
 
@@ -42,16 +42,19 @@ def get_description():
     <ul>
       <li><a href="/iemre/">IEM Reanalysis</a>
       <br />A crude gridding of available COOP data and long term climate data
-      processed by the IEM.</li>
+      processed by the IEM. The plotted totals represent periods typical to
+      COOP data reporting, which is roughly 12 UTC (7 AM local) each day.</li>
       <li><a href="https://www.nssl.noaa.gov/projects/mrms/">NOAA MRMS</a>
       <br />A state of the art gridded analysis of RADAR data using
       observations and model data to help in the processing.</li>
       <li><a href="http://prism.oregonstate.edu">Oregon State PRISM</a>
       <br />The PRISM data is credit Oregon State University,
-      created 4 Feb 2004.  This information arrives with a few day lag.</li>
+      created 4 Feb 2004.  This information arrives with a few day lag. The
+      plotted totals represent periods typical to COOP data reporting, so
+      12 UTC (7 AM local) each day.</li>
     </ul>
     """
-    today = datetime.datetime.today() - datetime.timedelta(days=1)
+    today = datetime.today() - timedelta(days=1)
     desc["arguments"] = [
         dict(
             type="csector", name="sector", default="IA", label="Select Sector:"
@@ -98,7 +101,7 @@ def get_description():
             label="End Date:",
             min="1893/01/01",
         ),
-        dict(type="cmap", name="cmap", default="RdBu", label="Color Ramp:"),
+        dict(type="cmap", name="cmap", default="YlGnBu", label="Color Ramp:"),
     ]
     return desc
 
@@ -106,6 +109,33 @@ def get_description():
 def mm2inch(val):
     """Helper."""
     return masked_array(val, units("mm")).to(units("inch")).m
+
+
+def compute_title(src, sdate, edate):
+    """Figure out how to label this fun."""
+    title = "Fixme"
+    if src == "mrms":
+        # This is generally closer to 'daily
+        if sdate == edate:
+            title = sdate.strftime("%-d %B %Y")
+        else:
+            title = "%s to %s (inclusive)" % (
+                sdate.strftime("%-d %b"),
+                edate.strftime("%-d %b %Y"),
+            )
+    else:
+        # This is 12z to 12z totals.
+        if sdate == edate:
+            title = "%s ~12z to %s ~12z" % (
+                (sdate - timedelta(days=1)).strftime("%-d %B %Y"),
+                edate.strftime("%-d %B %Y"),
+            )
+        else:
+            title = "%s ~12z to %s ~12z" % (
+                (sdate - timedelta(days=1)).strftime("%-d %B %Y"),
+                (edate + timedelta(days=1)).strftime("%-d %B %Y"),
+            )
+    return title
 
 
 def plotter(fdict):
@@ -122,13 +152,6 @@ def plotter(fdict):
     days = (edate - sdate).days
     sector = ctx["sector"]
 
-    if sdate == edate:
-        title = sdate.strftime("%-d %B %Y")
-    else:
-        title = "%s to %s (inclusive)" % (
-            sdate.strftime("%-d %b"),
-            edate.strftime("%-d %b %Y"),
-        )
     x0 = 0
     x1 = -1
     y0 = 0
@@ -138,6 +161,7 @@ def plotter(fdict):
         state = sector
         sector = "state"
 
+    title = compute_title(src, sdate, edate)
     if src == "mrms":
         ncfn = iemre.get_daily_mrms_ncname(sdate.year)
         clncfn = iemre.get_dailyc_mrms_ncname()
