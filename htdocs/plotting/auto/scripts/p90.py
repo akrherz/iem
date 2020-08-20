@@ -6,6 +6,7 @@ import numpy as np
 import pytz
 from rasterstats import zonal_stats
 import pandas as pd
+from pandas.io.sql import read_sql
 from geopandas import read_postgis
 from affine import Affine
 from pyiem.nws import vtec
@@ -23,6 +24,9 @@ PDICT2 = {
     "total": "Total Count between Start and End Date",
     "lastyear": "Year of Last Issuance",
     "yearavg": "Yearly Average Count between Start and End Year",
+    "periodavg": "Yearly Average Count between Start and End Year Bounded by Years",
+    "periodmin": "Yearly Minimum Count between Start and End Year Bounded by Years",
+    "periodmax": "Yearly Maximum Count between Start and End Year Bounded by Years",
 }
 PDICT3 = {
     "yes": "YES: Label Counties/Zones",
@@ -99,6 +103,16 @@ def get_description():
     <td>This plots the number of events for a given year.  A year is defined
     as the calendar year in US Central Time.</td>
     </tr>
+
+    <tr>
+    <td>Yearly Min/Avg/Max Count bounded...</td>
+    <td>Start/End Date Time<br />Start/End Year</td>
+    <td>This plots the min/avg/max number of events per year between the
+    given dates.  For example, you could produce a plot of the average
+    number of Tornado Warnings during June.  Please note that only the
+    average plot works when summarizing by polygons.</td>
+    </tr>
+
     </table>
 
     <p>In general, it will produce
@@ -238,6 +252,12 @@ def do_polygon(ctx):
     else:
         sts = datetime.datetime(year, 1, 1).replace(tzinfo=pytz.utc)
         ets = datetime.datetime(year2, 12, 31, 23, 59).replace(tzinfo=pytz.utc)
+    daylimiter = ""
+    if varname.startswith("period"):
+        daylimiter = (
+            f"to_char(issue, 'mmdd') >= '{sdate.strftime('%m%d')}' and "
+            f"to_char(issue, 'mmdd') < '{edate.strftime('%m%d')}' and "
+        )
     # We need to figure out how to get the warnings either by state or by wfo
     if t == "cwa":
         (west, south, east, north) = wfo_bounds[station]
@@ -261,12 +281,10 @@ def do_polygon(ctx):
         wfolimiter = " wfo = '%s' and " % (station,)
     # do arbitrary buffer to prevent segfaults?
     df = read_postgis(
-        """
+        f"""
     SELECT ST_Forcerhr(ST_Buffer(geom, 0.0005)) as geom, issue, expire,
     extract(epoch from %s::timestamptz - issue) / 86400. as days
-    from sbw where """
-        + wfolimiter
-        + """
+    from sbw where {wfolimiter} {daylimiter}
     phenomena = %s and status = 'NEW' and significance = %s
     and ST_Within(geom, ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s %s,
     %s %s, %s %s, %s %s))')) and ST_IsValid(geom)
@@ -375,6 +393,21 @@ def do_polygon(ctx):
         years = (maxv.year - minv.year) + 1
         counts = counts / years
         ctx["units"] = "count per year"
+    elif varname == "periodavg":
+        ctx["title"] = ("Yearly %s between %s and %s [%s-%s]") % (
+            varname.replace("period", ""),
+            sdate.strftime("%d %b"),
+            edate.strftime("%d %b"),
+            year,
+            year2,
+        )
+        years = (maxv.year - minv.year) + 1
+        counts = counts / years
+        ctx["units"] = "count per year"
+    else:
+        raise NoDataFound(
+            "Sorry, your select combination is too complex for me!"
+        )
 
     maxv = np.max(counts)
     if varname not in ["lastyear", "days"]:
@@ -384,7 +417,7 @@ def do_polygon(ctx):
             else:
                 bins = np.linspace(1, maxv + 3, 10, dtype="i")
         else:
-            for delta in [500, 50, 5, 1, 0.5, 0.05]:
+            for delta in [500, 50, 5, 1, 0.5, 0.25, 0.10, 0.05]:
                 bins = np.arange(0, (maxv + 1.0) * 1.05, delta)
                 if len(bins) > 8:
                     break
@@ -409,6 +442,7 @@ def do_ugc(ctx):
     edate = ctx["edate"]
     year = ctx["year"]
     year2 = ctx["year2"]
+    df = None
     if varname in ["lastyear", "days"]:
         if t == "cwa":
             cursor.execute(
@@ -457,10 +491,8 @@ def do_ugc(ctx):
         table = "warnings_%s" % (year,)
         if t == "cwa":
             cursor.execute(
-                """
-            select ugc, count(*) from """
-                + table
-                + """
+                f"""
+            select ugc, count(*) from {table}
             WHERE wfo = %s and phenomena = %s and significance = %s
             GROUP by ugc
             """,
@@ -472,10 +504,8 @@ def do_ugc(ctx):
             )
         else:
             cursor.execute(
-                """
-            select ugc, count(*) from """
-                + table
-                + """
+                f"""
+            select ugc, count(*) from {table}
             WHERE substr(ugc, 1, 2) = %s and phenomena = %s
             and significance = %s GROUP by ugc
             """,
@@ -631,16 +661,94 @@ def do_ugc(ctx):
             maxv.strftime("%d %b %Y"),
         )
         datavar = "average"
+    elif varname.startswith("period"):
+        daylimiter = (
+            f"and to_char(issue, 'mmdd') >= '{sdate.strftime('%m%d')}' and "
+            f"to_char(issue, 'mmdd') < '{edate.strftime('%m%d')}' "
+        )
+        aggstat = varname.replace("period", "")
+        if t == "cwa":
+            df = read_sql(
+                f"""WITH data as (
+            select ugc, extract(year from issue) as year,
+            count(*), min(issue at time zone 'UTC') as nv,
+            max(issue at time zone 'UTC') as mv from warnings
+            WHERE wfo = %s and phenomena = %s and significance = %s
+            and issue >= %s and issue <= %s {daylimiter}
+            GROUP by ugc, year
+            )
+            SELECT ugc, sum(count) as total, {aggstat}(count) as datum,
+            min(nv) as minvalid, max(mv) as maxvalid, count(*)::int as years
+            from data GROUP by ugc
+            """,
+                pgconn,
+                params=(
+                    station if len(station) == 3 else station[1:],
+                    phenomena,
+                    significance,
+                    datetime.date(year, 1, 1),
+                    datetime.date(year2 + 1, 1, 1),
+                ),
+                index_col="ugc",
+            )
+        else:
+            df = read_sql(
+                f"""WITH data as (
+            select ugc, extract(year from issue) as year,
+            count(*), min(issue at time zone 'UTC') as nv,
+            max(issue at time zone 'UTC') as mv from warnings
+            WHERE substr(ugc, 1, 2) = %s and phenomena = %s
+            and significance = %s and issue >= %s and issue < %s {daylimiter}
+            GROUP by ugc, year
+            )
+            SELECT ugc, sum(count) as total, {aggstat}(count) as datum,
+            min(nv) as minvalid, max(mv) as maxvalid, count(*)::int as years
+            from data GROUP by ugc
+            """,
+                pgconn,
+                params=(
+                    state,
+                    phenomena,
+                    significance,
+                    datetime.date(year, 1, 1),
+                    datetime.date(year2 + 1, 1, 1),
+                ),
+                index_col="ugc",
+            )
+        if df.empty:
+            raise NoDataFound("No events found for query.")
+        df["minvalid"] = pd.to_datetime(df["minvalid"])
+        df["maxvalid"] = pd.to_datetime(df["maxvalid"])
+        minv = df["minvalid"].min()
+        maxv = df["maxvalid"].max()
+        ctx["title"] = ("Yearly %s between %s and %s [%s-%s]") % (
+            aggstat,
+            minv.strftime("%d %b"),
+            maxv.strftime("%d %b"),
+            year,
+            year2,
+        )
+        datavar = "datum"
+        if varname == "periodavg":
+            data = df["total"].to_dict()
+            datavar = "total"
+        elif varname == "periodmin":
+            years = maxv.year - minv.year + 1
+            df.at[df["years"] != years, "datum"] = 0
+            data = df["datum"].to_dict()
+        else:
+            data = df["datum"].to_dict()
 
-    if not rows:
+    if df is None and not rows:
         raise NoDataFound("Sorry, no data found for query!")
-    df = pd.DataFrame(rows)
-    if varname == "yearavg":
+    if df is None:
+        df = pd.DataFrame(rows)
+    if varname in ["yearavg", "periodavg"]:
         years = maxv.year - minv.year + 1
-        df["average"] = df["count"] / years
+        df["average"] = df[datavar] / years
         for key in data:
             data[key] = round(data[key] / float(years), 2)
-        maxv = df[datavar].max()
+        maxv = df["average"].max()
         for delta in [500, 50, 5, 1, 0.5, 0.05]:
             bins = np.arange(0, (maxv + 1.0) * 1.05, delta)
             if len(bins) > 8:
