@@ -131,7 +131,7 @@ def application(environ, start_response):
 
     cols = """geo, wfo, utc_issue, utc_expire, utc_prodissue, utc_init_expire,
         phenomena, gtype, significance, eventid,  status, ugc, area2d,
-        utc_updated """
+        utc_updated, hvtec_nwsli, hvtec_severity, hvtec_cause, hvtec_record """
 
     timelimit = "issue >= '%s' and issue < '%s'" % (sts, ets)
     if timeopt == 2:
@@ -153,7 +153,8 @@ def application(environ, start_response):
      to_char(init_expire at time zone 'UTC',
              'YYYYMMDDHH24MI') as utc_init_expire,
      to_char(updated at time zone 'UTC',
-             'YYYYMMDDHH24MI') as utc_updated
+             'YYYYMMDDHH24MI') as utc_updated,
+     hvtec_nwsli, hvtec_severity, hvtec_cause, hvtec_record
      from {sbw_table} w {table_extra}
      WHERE status = 'NEW' and {timelimit}
      {wfo_limiter} {limiter}
@@ -170,7 +171,8 @@ def application(environ, start_response):
      to_char(init_expire at time zone 'UTC',
              'YYYYMMDDHH24MI') as utc_init_expire,
      to_char(updated at time zone 'UTC',
-             'YYYYMMDDHH24MI') as utc_updated
+             'YYYYMMDDHH24MI') as utc_updated,
+     hvtec_nwsli, hvtec_severity, hvtec_cause, hvtec_record
      from {warnings_table} w JOIN ugcs u on (u.gid = w.gid) WHERE
      {timelimit} {wfo_limiter2} {limiter}
      )
@@ -188,7 +190,8 @@ def application(environ, start_response):
     csv.write(
         (
             "WFO,ISSUED,EXPIRED,INIT_ISS,INIT_EXP,PHENOM,GTYPE,SIG,ETN,"
-            "STATUS,NWS_UGC,AREA_KM2,UPDATED\n"
+            "STATUS,NWS_UGC,AREA_KM2,UPDATED,HVTEC_NWSLI,HVTEC_SEVERITY,"
+            "HVTEC_CAUSE,HVTEC_RECORD\n"
         )
     )
     with fiona.open(
@@ -212,6 +215,10 @@ def application(environ, start_response):
                 "NWS_UGC": "str:6",
                 "AREA_KM2": "float",
                 "UPDATED": "str:12",
+                "HV_NWSLI": "str:5",
+                "HV_SEV": "str:1",
+                "HV_CAUSE": "str:2",
+                "HV_REC": "str:2",
             },
         },
     ) as output:
@@ -222,7 +229,8 @@ def application(environ, start_response):
                     "%(wfo)s,%(utc_issue)s,%(utc_expire)s,%(utc_prodissue)s,"
                     "%(utc_init_expire)s,%(phenomena)s,%(gtype)s,"
                     "%(significance)s,%(eventid)s,%(status)s,%(ugc)s,"
-                    "%(area2d).2f,%(utc_updated)s\n"
+                    "%(area2d).2f,%(utc_updated)s,%(hvtec_nwsli)s,"
+                    "%(hvtec_severity)s,%(hvtec_cause)s,%(hvtec_record)s\n"
                 )
                 % row
             )
@@ -242,6 +250,10 @@ def application(environ, start_response):
                         "NWS_UGC": row["ugc"],
                         "AREA_KM2": row["area2d"],
                         "UPDATED": row["utc_updated"],
+                        "HV_NWSLI": row["hvtec_nwsli"],
+                        "HV_SEV": row["hvtec_severity"],
+                        "HV_CAUSE": row["hvtec_cause"],
+                        "HV_REC": row["hvtec_record"],
                     },
                     "geometry": mapping(mp),
                 }

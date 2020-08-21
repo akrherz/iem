@@ -56,6 +56,10 @@ The pyIEM parsers send emails to the IEM developer when issues are found.  The p
 | NWS_UGC | 6 Char | For county,zone,parish warnings `GTYPE=C`, the Universal Geographic Code that the NWS uses.  Sadly, this is not exactly FIPS. |
 | AREA_KM2 | Number | The IEM computed area of this event, this area computation is done in Albers (EPSG:2163). |
 | UPDATED | 12 Char | The timestamp when this event's lifecycle was last updated by the NWS. |
+| HV_NWSLI | 5 Char | For events that have H-VTEC (Hydro VTEC), this is the five character NWS Location Identifier. |
+| HV_SEV | 1 Char | For events that have H-VTEC (Hydro VTEC), this is the one character flood severity **at issuance**. |
+| HV_CAUSE | 2 Char | For events that have H-VTEC (Hydro VTEC), this is the two character cause of the flood. |
+| HV_REC | 2 Char | For events that have H-VTEC (Hydro VTEC), this is the code denoting if a record crest is expected **at issuance.** |
 
     Whew, so let us do a practical example to try to illustrate what the above schema is attempting to capture.  The NWS in Des Moines `wfo=DMX` issues a Winter Storm Watch `phenom=WS` `sig=A` for Story County (`nws_ugc=IAZ048`).  This product was issued at noon on 19 March 2019 `INIT_ISS=201903191700` and goes into effect at 6 PM on 20 March `ISSUE=201903202300` `INIT_ISS=201903202300` until 6 AM 21 March `EXPIRE=201903211100` `INIT_EXP=201903211100`.  At 7 PM on 19 March, DMX decides to upgrade the event to a Winter Storm Warning.  The Winter Storm Watch then gets updated with `EXPIRE=201903200000` `UPDATED=201903200000` `STATUS=UPG`.  So the confusing aspect here becomes that the database representation has an `EXPIRE` that is before the `ISSUE` column.  This is just tricky to resolve, so good luck.  It is a long standing annoyance of how NWS handles VTEC events like this with `ISSUE` times well into the future.  For all practical purposes, once a winter storm watch is issued, it is valid **now**, but the encoding does not follow this.
 
