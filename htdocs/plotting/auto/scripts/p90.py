@@ -24,9 +24,9 @@ PDICT2 = {
     "total": "Total Count between Start and End Date",
     "lastyear": "Year of Last Issuance",
     "yearavg": "Yearly Average Count between Start and End Year",
-    "periodavg": "Yearly Average Count between Start and End Year Bounded by Years",
-    "periodmin": "Yearly Minimum Count between Start and End Year Bounded by Years",
-    "periodmax": "Yearly Maximum Count between Start and End Year Bounded by Years",
+    "periodavg": "Yearly Average Count between Start and End DateTime Bounded by Years",
+    "periodmin": "Yearly Minimum Count between Start and End DateTime Bounded by Years",
+    "periodmax": "Yearly Maximum Count between Start and End DateTime Bounded by Years",
 }
 PDICT3 = {
     "yes": "YES: Label Counties/Zones",
@@ -223,6 +223,16 @@ def get_description():
             label="Select Watch/Warning Significance Level:",
         ),
         dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
+        dict(
+            optional=True,
+            name="interval",
+            type="float",
+            default=1,
+            label=(
+                "Specify an interval for the colorbar to use instead of "
+                "dynamic. (optional)"
+            ),
+        ),
     ]
     return desc
 
@@ -254,10 +264,17 @@ def do_polygon(ctx):
         ets = datetime.datetime(year2, 12, 31, 23, 59).replace(tzinfo=pytz.utc)
     daylimiter = ""
     if varname.startswith("period"):
-        daylimiter = (
-            f"to_char(issue, 'mmdd') >= '{sdate.strftime('%m%d')}' and "
-            f"to_char(issue, 'mmdd') < '{edate.strftime('%m%d')}' and "
-        )
+        if sdate.strftime("%m%d") > edate.strftime("%m%d"):
+            daylimiter = (
+                f"(to_char(issue, 'mmdd') >= '{sdate.strftime('%m%d')}' or "
+                f"to_char(issue, 'mmdd') < '{edate.strftime('%m%d')}') and "
+            )
+            (sdate, edate) = (edate, sdate)
+        else:
+            daylimiter = (
+                f"to_char(issue, 'mmdd') >= '{sdate.strftime('%m%d')}' and "
+                f"to_char(issue, 'mmdd') < '{edate.strftime('%m%d')}' and "
+            )
     # We need to figure out how to get the warnings either by state or by wfo
     if t == "cwa":
         (west, south, east, north) = wfo_bounds[station]
@@ -411,7 +428,11 @@ def do_polygon(ctx):
 
     maxv = np.max(counts)
     if varname not in ["lastyear", "days"]:
-        if varname == "total":
+        if ctx.get("interval") is not None:
+            interval = float(ctx["interval"])
+            bins = np.arange(0, interval * 10.1, interval)
+            bins[0] = 0.01
+        elif varname == "total":
             if maxv < 8:
                 bins = np.arange(1, 8, 1)
             else:
@@ -662,10 +683,17 @@ def do_ugc(ctx):
         )
         datavar = "average"
     elif varname.startswith("period"):
-        daylimiter = (
-            f"and to_char(issue, 'mmdd') >= '{sdate.strftime('%m%d')}' and "
-            f"to_char(issue, 'mmdd') < '{edate.strftime('%m%d')}' "
-        )
+        if sdate.strftime("%m%d") > edate.strftime("%m%d"):
+            daylimiter = (
+                f"and (to_char(issue, 'mmdd') >= '{sdate.strftime('%m%d')}' "
+                f"or to_char(issue, 'mmdd') < '{edate.strftime('%m%d')}') "
+            )
+            (sdate, edate) = (edate, sdate)
+        else:
+            daylimiter = (
+                f"and to_char(issue, 'mmdd') >= '{sdate.strftime('%m%d')}' "
+                f"and to_char(issue, 'mmdd') < '{edate.strftime('%m%d')}' "
+            )
         aggstat = varname.replace("period", "")
         if t == "cwa":
             df = read_sql(
@@ -725,8 +753,8 @@ def do_ugc(ctx):
             aggstat,
             minv.strftime("%d %b"),
             maxv.strftime("%d %b"),
-            year,
-            year2,
+            minv.year,
+            maxv.year,
         )
         datavar = "datum"
         if varname == "periodavg":
@@ -744,18 +772,23 @@ def do_ugc(ctx):
     if df is None:
         df = pd.DataFrame(rows)
     if varname in ["yearavg", "periodavg"]:
-        years = maxv.year - minv.year + 1
         df["average"] = df[datavar] / years
-        for key in data:
-            data[key] = round(data[key] / float(years), 2)
-        maxv = df["average"].max()
-        for delta in [500, 50, 5, 1, 0.5, 0.05]:
-            bins = np.arange(0, (maxv + 1.0) * 1.05, delta)
+        if ctx.get("interval") is not None:
+            interval = float(ctx["interval"])
+            bins = np.arange(0, interval * 10.1, interval)
+            bins[0] = 0.01
+        else:
+            years = maxv.year - minv.year + 1
+            for key in data:
+                data[key] = round(data[key] / float(years), 2)
+            maxv = df["average"].max()
+            for delta in [500, 50, 5, 1, 0.5, 0.05]:
+                bins = np.arange(0, (maxv + 1.0) * 1.05, delta)
+                if len(bins) > 8:
+                    break
             if len(bins) > 8:
-                break
-        if len(bins) > 8:
-            bins = bins[:: int(len(bins) / 8.0)]
-        bins[0] = 0.01
+                bins = bins[:: int(len(bins) / 8.0)]
+            bins[0] = 0.01
         ctx["units"] = "count per year"
     elif varname == "hour":
         bins = list(range(0, 25))
