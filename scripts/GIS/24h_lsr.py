@@ -52,7 +52,7 @@ def main():
         county as COUNTY,
         state as STATE,
         source as SOURCE,
-        substr(remark, 1, 200) as REMARK,
+        substr(coalesce(remark, ''), 1, 200) as REMARK,
         ST_x(geom) as LON,
         ST_y(geom) as LAT
         from lsrs WHERE valid > (now() -'1 day'::interval)

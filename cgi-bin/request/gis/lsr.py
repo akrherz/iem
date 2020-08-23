@@ -53,7 +53,7 @@ def do_excel(pgconn, sts, ets, wfolimiter):
         " 'YYYY/MM/DD HH24:MI') as lvalid, "
         "to_char(valid at time zone 'UTC', 'YYYY/MM/DD HH24:MI') as utcvalid, "
         "county, city, state, typetext, magnitude, source, "
-        "ST_y(geom) as lat, ST_x(geom) as lon, remark "
+        "ST_y(geom) as lat, ST_x(geom) as lon, coalesce(remark, '') as remark "
         "from lsrs l JOIN wfos w on (l.wfo = w.cwa) "
         f"WHERE valid >= %s and valid < %s {wfolimiter} ORDER by utcvalid ASC",
         pgconn,
@@ -139,7 +139,8 @@ def application(environ, start_response):
         SELECT distinct
         to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as dvalid,
         magnitude, wfo, type, typetext,
-        city, county, state, source, substr(remark,0,200) as tremark,
+        city, county, state, source,
+        substr(coalesce(remark, ''),0,200) as tremark,
         ST_y(geom), ST_x(geom),
         to_char(valid at time zone 'UTC', 'YYYY/MM/DD HH24:MI') as dvalid2
         from lsrs WHERE

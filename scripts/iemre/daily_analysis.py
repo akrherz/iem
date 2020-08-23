@@ -349,7 +349,9 @@ def grid_day(ts, ds):
         ds["avg_dwpk"].values = datatypes.temperature(
             (hres + lres) / 2.0, "F"
         ).value("K")
-    res = generic_gridder(df, "avgsknt")
+    # Don't have data till after midnight
+    if ts < datetime.date().today():
+        res = generic_gridder(df, "avgsknt")
     if res is not None:
         ds["wind_speed"].values = (
             masked_array(res, units.knots).to(units.meters / units.second).m
