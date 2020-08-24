@@ -350,7 +350,7 @@ def grid_day(ts, ds):
             (hres + lres) / 2.0, "F"
         ).value("K")
     # Don't have data till after midnight
-    if ts < datetime.date().today():
+    if ts < datetime.date.today():
         res = generic_gridder(df, "avgsknt")
     if res is not None:
         ds["wind_speed"].values = (
