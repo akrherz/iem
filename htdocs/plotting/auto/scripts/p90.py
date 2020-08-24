@@ -24,9 +24,15 @@ PDICT2 = {
     "total": "Total Count between Start and End Date",
     "lastyear": "Year of Last Issuance",
     "yearavg": "Yearly Average Count between Start and End Year",
-    "periodavg": "Yearly Average Count between Start and End DateTime Bounded by Years",
-    "periodmin": "Yearly Minimum Count between Start and End DateTime Bounded by Years",
-    "periodmax": "Yearly Maximum Count between Start and End DateTime Bounded by Years",
+    "periodavg": (
+        "Yearly Average Count between Start and End DateTime Bounded by Years"
+    ),
+    "periodmin": (
+        "Yearly Minimum Count between Start and End DateTime Bounded by Years"
+    ),
+    "periodmax": (
+        "Yearly Maximum Count between Start and End DateTime Bounded by Years"
+    ),
 }
 PDICT3 = {
     "yes": "YES: Label Counties/Zones",
@@ -772,13 +778,13 @@ def do_ugc(ctx):
     if df is None:
         df = pd.DataFrame(rows)
     if varname in ["yearavg", "periodavg"]:
+        years = maxv.year - minv.year + 1
         df["average"] = df[datavar] / years
         if ctx.get("interval") is not None:
             interval = float(ctx["interval"])
             bins = np.arange(0, interval * 10.1, interval)
             bins[0] = 0.01
         else:
-            years = maxv.year - minv.year + 1
             for key in data:
                 data[key] = round(data[key] / float(years), 2)
             maxv = df["average"].max()
