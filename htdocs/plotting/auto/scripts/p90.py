@@ -900,10 +900,17 @@ def plotter(fdict):
                 labels=ctx["labels"],
                 clevstride=2,
                 clevlabels=cl,
+                labelbuffer=0,
                 extend="neither",
             )
         else:
-            m.fill_ugcs(ctx["data"], ctx["bins"], cmap=cmap, ilabel=ilabel)
+            m.fill_ugcs(
+                ctx["data"],
+                ctx["bins"],
+                cmap=cmap,
+                ilabel=ilabel,
+                labelbuffer=0,
+            )
     else:
         res = m.pcolormesh(
             ctx["lons"],
@@ -923,17 +930,23 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
+    fig, _df = plotter(
         dict(
-            geo="polygon",
+            network="WFO",
+            station="GJT",
+            geo="ugc",
+            drawc="yes",
             state="IA",
-            phenomena="TO",
-            significance="W",
-            v="days",
-            t="state",
+            phenomena="WW",
+            significance="Y",
+            interval=2,
+            v="periodavg",
+            ilabel="yes",
+            t="cwa",
             year=1986,
-            year2=2017,
-            sdate="2020-01-01 0000",
-            edate="2020-04-04 0000",
+            year2=2020,
+            sdate="2019-11-01 0000",
+            edate="2019-02-15 0000",
         )
     )
+    fig.savefig("/tmp/test.png")
