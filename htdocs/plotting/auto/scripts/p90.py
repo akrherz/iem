@@ -780,14 +780,14 @@ def do_ugc(ctx):
     if varname in ["yearavg", "periodavg"]:
         years = maxv.year - minv.year + 1
         df["average"] = df[datavar] / years
+        for key in data:
+            data[key] = round(data[key] / float(years), 2)
+        maxv = df["average"].max()
         if ctx.get("interval") is not None:
             interval = float(ctx["interval"])
             bins = np.arange(0, interval * 10.1, interval)
             bins[0] = 0.01
         else:
-            for key in data:
-                data[key] = round(data[key] / float(years), 2)
-            maxv = df["average"].max()
             for delta in [500, 50, 5, 1, 0.5, 0.05]:
                 bins = np.arange(0, (maxv + 1.0) * 1.05, delta)
                 if len(bins) > 8:
