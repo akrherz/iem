@@ -851,6 +851,10 @@ data = {
                         "Single Sounding Mandatory Level Percentile Ranks"
                     ),
                 },
+                {
+                    "id": "212",
+                    "label": "Sounding Parameter / Variable Yearly Timeseries",
+                },
             ],
         },
     ]
