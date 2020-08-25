@@ -88,20 +88,11 @@ def plotter(fdict):
             typetext_limiter = " and typetext in %s" % (tuple(ltype),)
 
     df = read_sql(
-        """
+        f"""
         select extract(year from valid)::int as yr, upper(source) as src,
         count(*) from lsrs
-        where valid > '"""
-        + str(syear)
-        + """-01-01' and
-        valid < '"""
-        + str(eyear + 1)
-        + """-01-01' """
-        + wfo_limiter
-        + """
-        """
-        + typetext_limiter
-        + """
+        where valid > '{syear}-01-01' and
+        valid < '{eyear + 1}-01-01' {wfo_limiter} {typetext_limiter}
         GROUP by yr, src
     """,
         pgconn,

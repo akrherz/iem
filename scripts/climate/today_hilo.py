@@ -9,23 +9,20 @@ from pyiem.util import get_dbconn
 
 def main():
     """Go Main Go"""
-    now = datetime.datetime.now()
+    today = datetime.date.today()
+    now = today.replace(year=2000)
     nt = NetworkTable("IACLIMATE")
     nt.sts["IA0200"]["lon"] = -93.6
     nt.sts["IA5992"]["lat"] = 41.65
     coop = get_dbconn("coop", user="nobody")
 
-    # Compute normal from the climate database
-    sql = """
-        SELECT station, high, low from climate WHERE valid = '2000-%s'
-        and substr(station,0,3) = 'IA'
-    """ % (
-        now.strftime("%m-%d"),
-    )
-
     obs = []
     cursor = coop.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cursor.execute(sql)
+    cursor.execute(
+        "SELECT station, high, low from climate WHERE valid = %s "
+        "and substr(station,0,3) = 'IA'",
+        (now,),
+    )
     for row in cursor:
         sid = row["station"]
         if sid[2] == "C" or sid[2:] == "0000" or sid not in nt.sts:
@@ -41,7 +38,7 @@ def main():
         )
 
     mp = MapPlot(
-        title=("Average High + Low Temperature [F] (1893-%s)") % (now.year,),
+        title=("Average High + Low Temperature [F] (1893-%s)") % (today.year,),
         subtitle="For Date: %s" % (now.strftime("%d %b"),),
         axisbg="white",
     )
@@ -50,7 +47,7 @@ def main():
     pqstr = (
         "plot ac %s0000 climate/iowa_today_avg_hilo_pt.png "
         "coop_avg_temp.png png"
-    ) % (now.strftime("%Y%m%d"),)
+    ) % (today.strftime("%Y%m%d"),)
     mp.postprocess(view=False, pqstr=pqstr)
     mp.close()
 

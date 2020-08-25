@@ -67,12 +67,10 @@ def plotter(fdict):
         wfo_limiter = ""
 
     pcursor.execute(
-        """
+        f"""
         select phenomena, significance, min(issue), count(*) from warnings
         where ugc is not null and issue > %s
-        and issue < %s """
-        + wfo_limiter
-        + """
+        and issue < %s {wfo_limiter}
         GROUP by phenomena, significance ORDER by count DESC
     """,
         (sts, ets),

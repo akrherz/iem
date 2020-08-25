@@ -99,7 +99,7 @@ def plotter(fdict):
         raise NoDataFound("Unknown station metadata.")
 
     df = read_sql(
-        """
+        f"""
     SELECT year,
     max(high) as "max-high",
     min(high) as "min-high",
@@ -115,11 +115,9 @@ def plotter(fdict):
     avg(precip) as "avg-precip",
     avg(case when precip >= 0.01 then precip else null end) as "avg-precip2",
     sum(case when precip >= %s then 1 else 0 end) as "days-precip"
-  from """
-        + table
-        + """
-  where station = %s and year >= %s and year <= %s
-  GROUP by year ORDER by year ASC
+    from {table}
+    where station = %s and year >= %s and year <= %s
+    GROUP by year ORDER by year ASC
     """,
         pgconn,
         params=(

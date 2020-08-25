@@ -205,7 +205,7 @@ def plot5(ctx, col):
     """Daily ET."""
     df = read_sql(
         f"SELECT station, {col}_qc from sm_daily WHERE valid = %s and "
-        f"{col}_qc > 0",
+        f"{col}_qc >= 0",
         ctx["pgconn"],
         params=(ctx["date"],),
         index_col="station",
