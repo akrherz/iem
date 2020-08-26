@@ -68,6 +68,9 @@ def get_description():
         "description"
     ] = """This plot presents the daily climatology range of a sounding
     variable along with a given year's values.
+
+    <p>The Storm Prediction Center website has a
+    <a href="https://www.spc.noaa.gov/exper/soundingclimo/">very similiar tool</a> that you may want to check out.</p>
     """
     desc["arguments"] = [
         dict(

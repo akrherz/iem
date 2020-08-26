@@ -70,12 +70,9 @@ def plotter(fdict):
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
     df = read_sql(
-        """
+        f"""
         SELECT year, sum(precip) as total_precip,
-        sum(gddxx(%s, %s, high::numeric,low::numeric)) as gdd from
-        """
-        + table
-        + """
+        sum(gddxx(%s, %s, high::numeric,low::numeric)) as gdd from {table}
         WHERE station = %s and month = %s GROUP by year
     """,
         pgconn,

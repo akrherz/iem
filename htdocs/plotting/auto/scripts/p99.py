@@ -58,7 +58,7 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2],)
     df = read_sql(
-        """
+        f"""
         WITH days as (
             select generate_series('%s-01-01'::date, '%s-12-31'::date,
                 '1 day'::interval)::date as day,
@@ -67,15 +67,11 @@ def plotter(fdict):
         ),
         climo as (
             SELECT sday, avg(high) as avg_high, stddev(high) as stddev_high,
-            avg(low) as avg_low, stddev(low) as stddev_low from """
-        + table
-        + """
+            avg(low) as avg_low, stddev(low) as stddev_low from {table}
             WHERE station = %s GROUP by sday
         ),
         thisyear as (
-            SELECT day, sday, high, low from """
-        + table
-        + """
+            SELECT day, sday, high, low from {table}
             WHERE station = %s and year = %s
         ),
         thisyear2 as (

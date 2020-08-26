@@ -41,13 +41,11 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2],)
     df = read_sql(
-        """
+        f"""
         SELECT year, month,
-        sum(case when precip >= 0.01 then 1 else 0 end) as precip_days,
-        sum(case when snow >= 0.01 then 1 else 0 end) as snow_days
-        from """
-        + table
-        + """ WHERE station = %s
+        sum(case when precip > 0.009 then 1 else 0 end) as precip_days,
+        sum(case when snow > 0.009 then 1 else 0 end) as snow_days
+        from {table} WHERE station = %s
         GROUP by year, month
     """,
         pgconn,

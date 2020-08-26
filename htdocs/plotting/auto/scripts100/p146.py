@@ -46,7 +46,7 @@ def plotter(fdict):
         """
     WITH obs as (
         SELECT date_trunc('hour', valid) as t, avg(tmpf) as avgt from alldata
-        WHERE station = %s and p01i >= 0.01 and tmpf is not null
+        WHERE station = %s and p01i > 0.009 and tmpf is not null
         GROUP by t
     )
 

@@ -87,34 +87,26 @@ def plotter(fdict):
         wfolimiter = " substr(ugc, 1, 2) = '%s' " % (state,)
 
     if split == "jan1":
-        sql = (
-            """
+        sql = f"""
             SELECT extract(year from issue)::int as year,
             min(issue at time zone 'UTC') as min_issue,
             max(issue at time zone 'UTC') as max_issue,
             count(distinct wfo || eventid)
-            from warnings where """
-            + wfolimiter
-            + """
+            from warnings where {wfolimiter}
             and phenomena = %s and significance = %s
             GROUP by year ORDER by year ASC
         """
-        )
     else:
-        sql = (
-            """
+        sql = f"""
             SELECT
             extract(year from issue - '6 months'::interval)::int as year,
             min(issue at time zone 'UTC') as min_issue,
             max(issue at time zone 'UTC') as max_issue,
             count(distinct wfo || eventid)
-            from warnings where """
-            + wfolimiter
-            + """
+            from warnings where {wfolimiter}
             and phenomena = %s and significance = %s
             GROUP by year ORDER by year ASC
         """
-        )
     df = read_sql(
         sql, pgconn, params=(phenomena, significance), index_col=None
     )

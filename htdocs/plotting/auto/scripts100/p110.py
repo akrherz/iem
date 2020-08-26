@@ -87,20 +87,18 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2],)
     df = read_sql(
-        """
+        f"""
     with events as (
-        SELECT c.climoweek, a.precip, a.year from """
-        + table
-        + """ a
+        SELECT c.climoweek, a.precip, a.year from {table} a
         JOIN climoweek c on (c.sday = a.sday) WHERE a.station = %s
-        and precip >= 0.01),
+        and precip > 0.009),
     ranks as (
         SELECT climoweek, year,
         rank() OVER (PARTITION by climoweek ORDER by precip DESC)
         from events),
     stats as (
     SELECT climoweek, max(precip), avg(precip),
-    sum(case when precip >= 0.01 and precip < 0.26 then 1 else 0 end) as cat1,
+    sum(case when precip > 0.009 and precip < 0.26 then 1 else 0 end) as cat1,
     sum(case when precip >= 0.26 and precip < 0.51 then 1 else 0 end) as cat2,
     sum(case when precip >= 0.51 and precip < 1.01 then 1 else 0 end) as cat3,
     sum(case when precip >= 1.01 and precip < 2.01 then 1 else 0 end) as cat4,

@@ -121,7 +121,7 @@ def plotter(fdict):
     sum(cdd(high,low,65)) as cdd65,
     sum(hdd(high,low,60)) as hdd60,
     sum(hdd(high,low,65)) as hdd65,
-    sum(case when precip >= 0.01 then 1 else 0 end) as rain_days,
+    sum(case when precip > 0.009 then 1 else 0 end) as rain_days,
     sum(case when snow >= 0.1 then 1 else 0 end) as snow_days,
     sum(gddxx(40,86,high,low)) as gdd40,
     sum(gddxx(48,86,high,low)) as gdd48,

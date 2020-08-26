@@ -102,25 +102,19 @@ def plotter(fdict):
         months = [ts.month, 999]
 
     df = read_sql(
-        """
+        f"""
       WITH avgs as (
         SELECT sday, avg(high) as avg_high,
         avg(low) as avg_low,
-        avg((high+low)/2.) as avg_temp from """
-        + table
-        + """ WHERE
+        avg((high+low)/2.) as avg_temp from {table} WHERE
         station = %s GROUP by sday)
 
-      SELECT """
-        + yr
-        + """,
+      SELECT {yr},
       sum(case when o.high > a.avg_high then 1 else 0 end) as high_above,
       sum(case when o.low > a.avg_low then 1 else 0 end) as low_above,
       sum(case when (o.high+o.low)/2. > a.avg_temp then 1 else 0 end)
           as avg_above,
-      count(*) as days from """
-        + table
-        + """ o, avgs a WHERE o.station = %s
+      count(*) as days from {table} o, avgs a WHERE o.station = %s
       and o.sday = a.sday and month in %s
       GROUP by yr ORDER by yr ASC
     """,
@@ -144,10 +138,10 @@ def plotter(fdict):
     bars = ax.bar(
         df.index.values, data, fc=colorabove, ec=colorabove, align="center"
     )
-    for i, bar in enumerate(bars):
+    for i, mybar in enumerate(bars):
         if data[i] < avgv:
-            bar.set_facecolor(colorbelow)
-            bar.set_edgecolor(colorbelow)
+            mybar.set_facecolor(colorbelow)
+            mybar.set_edgecolor(colorbelow)
     ax.axhline(avgv, lw=2, color="k", zorder=2)
     txt = ax.text(
         bars[10].get_x(),

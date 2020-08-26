@@ -117,13 +117,8 @@ def plotter(fdict):
         elnino[row[0].year + yearoffset] = dict(soi_3m=row[1], anom_34=row[2])
 
     ccursor.execute(
-        """
-        SELECT year, month, sum(precip), avg((high+low)/2.)
-        from """
-        + table
-        + """
-        where station = %s GROUP by year, month
-    """,
+        "SELECT year, month, sum(precip), avg((high+low)/2.) "
+        f"from {table} where station = %s GROUP by year, month",
         (station,),
     )
     if ccursor.rowcount == 0:

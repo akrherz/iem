@@ -220,7 +220,7 @@ def process(ncfn):
         mtr += "RMK "
         val = decision(i, "precipAccum", 25)
         if val is not None:
-            if val >= 0.01:
+            if val > 0.009:
                 iem.data["phour"] = float(round(val, 2))
                 mtr += "P%04i " % (iem.data["phour"] * 100.0,)
             elif val > 0:

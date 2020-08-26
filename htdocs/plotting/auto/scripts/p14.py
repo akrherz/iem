@@ -55,13 +55,11 @@ def plotter(fdict):
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
     cursor.execute(
-        """
+        f"""
         select precip, sum(precip) OVER (ORDER by precip ASC) as rsum,
         sum(precip) OVER () as tsum,
-        min(year) OVER () as minyear from """
-        + table
-        + """ where
-        station = %s and precip >= 0.01 and extract(doy from day) < %s and
+        min(year) OVER () as minyear from {table} where
+        station = %s and precip > 0.009 and extract(doy from day) < %s and
         year < extract(year from now()) ORDER by precip ASC
     """,
         (station, jdaylimit),

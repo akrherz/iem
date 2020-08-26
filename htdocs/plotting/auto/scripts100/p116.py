@@ -1,6 +1,7 @@
 """Monthly HDD/CDD Totals."""
 import datetime
 
+import seaborn as sns
 from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_dbconn, get_autoplot_context
@@ -48,8 +49,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import seaborn as sns
-
     ctx = get_autoplot_context(fdict, get_description())
     pgconn = get_dbconn("coop")
 
@@ -59,7 +58,7 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
 
     df = read_sql(
-        """
+        f"""
         SELECT year, month, sum(precip) as sum_precip,
         avg(high) as avg_high,
         avg(low) as avg_low,
@@ -67,11 +66,9 @@ def plotter(fdict):
         sum(cdd(high,low,65)) as cdd65,
         sum(hdd(high,low,60)) as hdd60,
         sum(hdd(high,low,65)) as hdd65,
-        sum(case when precip >= 0.01 then 1 else 0 end) as rain_days,
+        sum(case when precip > 0.009 then 1 else 0 end) as rain_days,
         sum(case when snow >= 0.1 then 1 else 0 end) as snow_days
-        from """
-        + table
-        + """ WHERE station = %s GROUP by year, month
+        from {table} WHERE station = %s GROUP by year, month
     """,
         pgconn,
         params=(station,),

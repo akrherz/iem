@@ -55,7 +55,7 @@ def plotter(fdict):
     today = datetime.datetime.now()
     cursor.execute(
         "SELECT valid at time zone 'UTC', phour from hourly WHERE "
-        "iemid = %s and phour >= 0.01 and "
+        "iemid = %s and phour > 0.009 and "
         "valid >= '1973-01-01 00:00+00' and valid < %s",
         (ctx["_nt"].sts[station]["iemid"], jan1),
     )
@@ -108,7 +108,7 @@ def plotter(fdict):
     ax2.set_ylim(0 - maxv - 0.01, maxv + 0.01)
     ax2.set_ylabel("Bias with Average 24 Hour Precip [in/day]", color="r")
     ax.set_title(
-        ("[%s] %s %s-%s\n" "Bias of 24 Hour 'Day' Split for Precipitation")
+        ("[%s] %s %s-%s\nBias of 24 Hour 'Day' Split for Precipitation")
         % (
             station,
             ctx["_nt"].sts[station]["name"],

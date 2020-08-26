@@ -77,23 +77,13 @@ def get_context(fdict):
         raise NoDataFound("Unknown station metadata.")
     years = datetime.date.today().year - bs.year + 1.0
 
-    plimit = "" if varname != "precip" else " and precip >= 0.01 "
+    plimit = "" if varname != "precip" else " and precip > 0.009 "
     comp = ">=" if mydir == "above" else "<"
     df = read_sql(
-        """
+        f"""
     SELECT month,
-    sum(case when """
-        + varname
-        + """ """
-        + comp
-        + """ %s then 1 else 0 end) as hits,
-    count(*)
-    from """
-        + table
-        + """
-    WHERE station = %s """
-        + plimit
-        + """
+    sum(case when {varname} {comp} %s then 1 else 0 end) as hits,
+    count(*) from {table} WHERE station = %s {plimit}
     GROUP by month ORDER by month ASC
     """,
         pgconn,

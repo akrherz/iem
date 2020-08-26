@@ -11,6 +11,7 @@ import psycopg2.extras
 
 
 def runYear(year):
+    """Do as I say"""
     # Grab the data
     now = datetime.datetime.now()
     nt = NetworkTable("IACLIMATE")
@@ -26,7 +27,7 @@ def runYear(year):
     ccursor.execute(
         """
         SELECT station,
-        sum(case when precip >= 0.01 then 1 else 0 end) as days, max(day)
+        sum(case when precip > 0.009 then 1 else 0 end) as days, max(day)
         from alldata_ia WHERE year = %s and substr(station,3,1) != 'C'
         and station != 'IA0000' GROUP by station
     """,

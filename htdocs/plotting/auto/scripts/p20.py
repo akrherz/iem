@@ -42,11 +42,12 @@ def plotter(fdict):
     station = ctx["zstation"]
     year = ctx["year"]
 
+    # Oh, the pain of floating point comparison here.
     df = read_sql(
         """
     WITH obs as (
         SELECT distinct date_trunc('hour', valid) as t from alldata
-        WHERE station = %s and p01i >= 0.01
+        WHERE station = %s and p01i > 0.009
     ), agg1 as (
         SELECT extract(year from t) as year, extract(month from t) as month,
         count(*) from obs GROUP by year, month

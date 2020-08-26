@@ -82,18 +82,12 @@ def plotter(fdict):
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
     df = read_sql(
-        """
+        f"""
         SELECT sday,
-        sum(case when """
-        + varname
-        + """ """
-        + operator
-        + """ %s then 1 else 0 end)
+        sum(case when {varname} {operator} %s then 1 else 0 end)
         as hit,
         count(*) as total
-        from """
-        + table
-        + """ WHERE station = %s and month = %s
+        from {table} WHERE station = %s and month = %s
         GROUP by sday ORDER by sday ASC
         """,
         pgconn,

@@ -68,7 +68,7 @@ def plotter(fdict):
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
     ccursor.execute(
-        """
+        f"""
       SELECT extract(year from day + '%s month'::interval) as yr,
       sum(case when month in (12, 1, 2)
       then precip else 0 end) as winter,
@@ -81,9 +81,7 @@ def plotter(fdict):
       sum(case when month in (9, 10, 11)
       then precip else 0 end) as fall,
       sum(precip) as all
-      from """
-        + table
-        + """ WHERE station = %s GROUP by yr ORDER by yr ASC
+      from {table} WHERE station = %s GROUP by yr ORDER by yr ASC
     """,
         (1 if season != "all" else 0, station),
     )

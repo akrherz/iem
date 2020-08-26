@@ -39,7 +39,7 @@ def main():
             (s.iemid = o.iemid) GROUP by o.iemid, o.d
          ), agg2 as (
              SELECT iemid, d,
-             case when precip >= 0.01 then
+             case when precip > 0.009 then
                round(precip::numeric, 2) else precip end as pday
              from agg
          )
