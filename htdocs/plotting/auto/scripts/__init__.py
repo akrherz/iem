@@ -678,6 +678,10 @@ data = {
                     "label": "Overcast Sky Condition 2D Histogram (Level by Week)",
                 },
                 {
+                    "id": "213",
+                    "label": "Percentiles of Hourly ASOS Data by Day, Week, Month, or Year",
+                },
+                {
                     "id": "146",
                     "label": "Temperature Frequency by Week During Precipitation",
                 },
