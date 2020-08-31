@@ -71,13 +71,37 @@ def get_stations_from_networks():
     for network in networks:
         # Get metadata
         uri = (
-            "https://mesonet.agron.iastate.edu/" "geojson/network/%s.geojson"
+            "https://mesonet.agron.iastate.edu/geojson/network/%s.geojson"
         ) % (network,)
         data = urlopen(uri)
         jdict = json.load(data)
         for site in jdict["features"]:
             stations.append(site["properties"]["sid"])
     return stations
+
+
+def download_alldata():
+    """An alternative method that fetches all available data.
+
+    Service supports up to 24 hours worth of data at a time."""
+    # timestamps in UTC to request data for
+    startts = datetime.datetime(2012, 8, 1)
+    endts = datetime.datetime(2012, 9, 1)
+    interval = datetime.timedelta(hours=24)
+
+    service = SERVICE + "data=all&tz=Etc/UTC&format=comma&latlon=yes&"
+
+    now = startts
+    while now < endts:
+        thisurl = service
+        thisurl += now.strftime("year1=%Y&month1=%m&day1=%d&")
+        thisurl += (now + interval).strftime("year2=%Y&month2=%m&day2=%d&")
+        print("Downloading: %s" % (now,))
+        data = download_data(thisurl)
+        outfn = "%s.txt" % (now.strftime("%Y%m%d"),)
+        with open(outfn, "w") as fh:
+            fh.write(data)
+        now += interval
 
 
 def main():
@@ -109,4 +133,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    download_alldata()
+    # main()

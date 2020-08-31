@@ -65,7 +65,7 @@ def fmt_trace(val, missing, trace, _tzinfo):
     if val is None:
         return missing
     # careful with this comparison
-    if val < 0.009999 and val > 0:
+    if 0 < val < 0.009999:
         return trace
     return "%.2f" % (val,)
 
@@ -175,27 +175,6 @@ def build_querycols(form):
     return res
 
 
-def build_gisextra(form, dbstations, rD):
-    """Build lookup table."""
-    if form.get("latlon", "no") != "yes":
-        return {}
-    res = {}
-    mesosite = get_dbconn("mesosite")
-    mcursor = mesosite.cursor()
-    mcursor.execute(
-        """
-        SELECT id, ST_x(geom) as lon, ST_y(geom) as lat
-        from stations WHERE id in %s
-        and (network ~* 'AWOS' or network ~* 'ASOS')
-    """,
-        (tuple(dbstations),),
-    )
-    for row in mcursor:
-        res[row[0]] = "%.4f%s%.4f%s" % (row[1], rD, row[2], rD)
-    mesosite.close()
-    return res
-
-
 def application(environ, start_response):
     """ Go main Go """
     if environ["REQUEST_METHOD"] == "OPTIONS":
@@ -224,13 +203,6 @@ def application(environ, start_response):
     # Save direct to disk or view in browser
     direct = form.get("direct", "no") == "yes"
     report_type = form.getall("report_type")
-    stations = get_stations(form)
-    if not stations:
-        start_response(
-            "500 Internal Server Error", [("Content-type", "text/plain")]
-        )
-        yield b"No stations provided."
-        return
     sts, ets = get_time_bounds(form, tzinfo)
     if sts is None:
         start_response(
@@ -238,22 +210,29 @@ def application(environ, start_response):
         )
         yield b"Invalid times provided."
         return
+    stations = get_stations(form)
+    if not stations:
+        # We are asking for all-data.  We limit the amount of data returned to
+        # one day or less
+        if (ets - sts) > datetime.timedelta(hours=24):
+            start_response(
+                "500 Internal Server Error", [("Content-type", "text/plain")]
+            )
+            yield b"When requesting all-stations, must be less than 24 hours."
+            return
     headers = []
     if direct:
         headers.append(("Content-type", "application/octet-stream"))
-        fn = "%s.txt" % (stations[0],)
-        if len(stations) > 1:
+        if not stations or len(stations) > 1:
             fn = "asos.txt"
+        else:
+            fn = "%s.txt" % (stations[0],)
         headers.append(
             ("Content-Disposition", "attachment; filename=%s" % (fn,))
         )
     else:
         headers.append(("Content-type", "text/plain"))
     start_response("200 OK", headers)
-
-    dbstations = stations
-    if len(dbstations) == 1:
-        dbstations.append("XYZXYZ")
 
     delim = form.get("format", "onlycomma")
     # How should null values be represented
@@ -268,8 +247,14 @@ def application(environ, start_response):
     else:
         rD = ","
 
-    gtxt = build_gisextra(form, dbstations, rD)
     gisextra = form.get("latlon", "no") == "yes"
+    table = "alldata"
+    metalimiter = ""
+    colextra = "0 as lon, 0 as lat, "
+    if gisextra:
+        colextra = "ST_X(geom) as lon, ST_Y(geom) as lat, "
+        table = "alldata a JOIN stations t on (a.station = t.id)"
+        metalimiter = "(t.network ~* 'ASOS' or t.network = 'AWOS') and "
 
     rlimiter = ""
     if len(report_type) == 1:
@@ -279,18 +264,20 @@ def application(environ, start_response):
             tuple([int(a) for a in report_type]),
         )
     sqlcols = ",".join(querycols)
-    acursor.execute(
-        """
-        SELECT station, valid, """
-        + sqlcols
-        + """ from alldata
-        WHERE valid >= %s and valid < %s and station in %s """
-        + rlimiter
-        + """
-        ORDER by valid ASC
-    """,
-        (sts, ets, tuple(dbstations)),
-    )
+    if stations:
+        acursor.execute(
+            f"SELECT station, valid, {colextra} {sqlcols} from {table} "
+            f"WHERE {metalimiter} valid >= %s and valid < %s and "
+            f"station in %s {rlimiter} ORDER by valid ASC",
+            (sts, ets, tuple(stations)),
+        )
+    else:
+        acursor.execute(
+            f"SELECT station, valid, {colextra} {sqlcols} from {table} "
+            f"WHERE {metalimiter} valid >= %s and valid < %s {rlimiter} "
+            "ORDER by valid ASC",
+            (sts, ets),
+        )
 
     sio = StringIO()
     if delim not in ["onlytdf", "onlycomma"]:
@@ -304,9 +291,9 @@ def application(environ, start_response):
             )
         )
         sio.write("#DEBUG: Entries Found -> %s\n" % (acursor.rowcount,))
-    sio.write("station" + rD + "valid" + rD)
+    sio.write(f"station{rD}valid{rD}")
     if gisextra:
-        sio.write("lon%slat%s" % (rD, rD))
+        sio.write(f"lon{rD}lat{rD}")
     # hack to convert tmpf as tmpc to tmpc
     sio.write("%s\n" % (rD.join([c.split(" as ")[-1] for c in querycols]),))
 
@@ -327,17 +314,16 @@ def application(environ, start_response):
     # The default is the %.2f formatter
     formatters = [ff.get(col, fmt_f2) for col in querycols]
 
-    gismiss = "%s%s%s%s" % (missing, rD, missing, rD)
     for rownum, row in enumerate(acursor):
         sio.write(row[0] + rD)
         sio.write((row[1].astimezone(tzinfo)).strftime("%Y-%m-%d %H:%M") + rD)
         if gisextra:
-            sio.write(gtxt.get(row[0], gismiss))
+            sio.write(f"{row[2]:.4f}{rD}{row[3]:.4f}{rD}")
         sio.write(
             rD.join(
                 [
                     func(val, missing, trace, tzinfo)
-                    for func, val in zip(formatters, row[2:])
+                    for func, val in zip(formatters, row[4:])
                 ]
             )
             + "\n"
