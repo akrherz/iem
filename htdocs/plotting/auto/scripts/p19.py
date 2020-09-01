@@ -103,13 +103,8 @@ def plotter(fdict):
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
     ddf = read_sql(
-        """
-        SELECT high, low, year, month from """
-        + table
-        + """
-        WHERE station = %s and year > 1892 and high >= low
-        and month in %s
-    """,
+        f"SELECT high, low, year, month from {table} WHERE station = %s "
+        "and year > 1892 and high >= low and month in %s",
         pgconn,
         params=(station, tuple(months)),
         index_col=None,

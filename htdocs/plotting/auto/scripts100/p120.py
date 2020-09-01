@@ -59,13 +59,10 @@ def plotter(fdict):
     for base in thresholds:
         # Query Last doy for each year in archive
         df2 = read_sql(
-            """
+            f"""
             select year,
             max(case when low <= %s then extract(doy from day)
-                else 0 end) as doy from
-            """
-            + table
-            + """
+                else 0 end) as doy from {table}
             WHERE month < 7 and station = %s and year < %s
             GROUP by year
         """,

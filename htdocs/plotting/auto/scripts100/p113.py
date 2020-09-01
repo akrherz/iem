@@ -62,37 +62,36 @@ def plotter(fdict):
         ctx["_nt"].sts[station]["name"],
     )
     if varname == "maxmin":
-        res += """\
-# DAILY RECORD HIGHS AND LOWS OCCURRING DURING %s-%s FOR STATION NUMBER  %s
-     JAN     FEB     MAR     APR     MAY     JUN     JUL     AUG     SEP     OCT     NOV     DEC
- DY  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN
-""" % (
-            bs.year,
-            datetime.date.today().year,
-            station,
-        )
+        res += (
+            "# DAILY RECORD HIGHS AND LOWS OCCURRING DURING %s-%s FOR "
+            "STATION NUMBER  %s\n"
+            "     JAN     FEB     MAR     APR     MAY     JUN     JUL     "
+            "AUG     SEP     OCT     NOV     DEC\n"
+            " DY  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  "
+            "MN  MX  MN  MX  MN  MX  MN  MX  MN\n"
+        ) % (bs.year, datetime.date.today().year, station)
     elif varname == "means":
-        res += """\
-# DAILY MEAN HIGHS AND LOWS FOR STATION NUMBER  %s
-     JAN     FEB     MAR     APR     MAY     JUN     JUL     AUG     SEP     OCT     NOV     DEC
- DY  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN
-""" % (
-            station,
-        )
+        res += (
+            "# DAILY MEAN HIGHS AND LOWS FOR STATION NUMBER  %s\n"
+            "     JAN     FEB     MAR     APR     MAY     JUN     JUL     "
+            "AUG     SEP     OCT     NOV     DEC\n"
+            " DY  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  "
+            "MX  MN  MX  MN  MX  MN  MX  MN  MX  MN\n"
+        ) % (station,)
     elif varname == "range":
-        res += """\
-# RECORD LARGEST AND SMALLEST DAILY RANGES (MAX-MIN) FOR STATION NUMBER  %s
-     JAN     FEB     MAR     APR     MAY     JUN     JUL     AUG     SEP     OCT     NOV     DEC
- DY  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN
-""" % (
-            station,
-        )
+        res += (
+            "# RECORD LARGEST AND SMALLEST DAILY RANGES (MAX-MIN) "
+            "FOR STATION NUMBER  %s\n"
+            "     JAN     FEB     MAR     APR     MAY     JUN     JUL     "
+            "AUG     SEP     OCT     NOV     DEC\n"
+            " DY  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  "
+            "MX  MN  MX  MN  MX  MN  MX  MN  MX  MN\n"
+        ) % (station,)
     else:
-        res += """\
-# DAILY MAXIMUM PRECIPITATION FOR STATION NUMBER %s
-     JAN   FEB   MAR   APR   MAY   JUN   JUL   AUG   SEP   OCT   NOV   DEC
-""" % (
-            station,
+        res += (
+            f"# DAILY MAXIMUM PRECIPITATION FOR STATION NUMBER {station}\n"
+            "     JAN   FEB   MAR   APR   MAY   JUN   JUL   "
+            "AUG   SEP   OCT   NOV   DEC\n"
         )
 
     df = read_sql(

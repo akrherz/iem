@@ -50,10 +50,7 @@ def add_job(row):
     mcursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     LOG.info("setting racoon jobid: %s back to unprocessed", row["jobid"])
     mcursor.execute(
-        """
-        UPDATE racoon_jobs SET processed = False
-        WHERE jobid = %s
-    """,
+        "UPDATE racoon_jobs SET processed = False WHERE jobid = %s",
         (row["jobid"],),
     )
     mcursor.close()
@@ -66,17 +63,15 @@ def check_for_work():
     mcursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     mcursor2 = pgconn.cursor()
     mcursor.execute(
-        """SELECT jobid, wfo, radar,
-        sts at time zone 'UTC' as sts,
-        ets at time zone 'UTC' as ets, nexrad_product, wtype
-        from racoon_jobs WHERE processed = False"""
+        "SELECT jobid, wfo, radar, sts at time zone 'UTC' as sts, "
+        "ets at time zone 'UTC' as ets, nexrad_product, wtype "
+        "from racoon_jobs WHERE processed = False"
     )
     jobs = []
     for row in mcursor:
         jobs.append(row)
         mcursor2.execute(
-            """UPDATE racoon_jobs SET processed = True
-        WHERE jobid = %s""",
+            "UPDATE racoon_jobs SET processed = True WHERE jobid = %s",
             (row[0],),
         )
     pgconn.commit()

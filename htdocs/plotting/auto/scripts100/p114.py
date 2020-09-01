@@ -32,10 +32,8 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2],)
     df = read_sql(
-        """
-     SELECT year, count(low) from """
-        + table
-        + """ WHERE
+        f"""
+     SELECT year, count(low) from {table} WHERE
      station = %s and low >= 32
     and year < %s GROUP by year ORDER by year ASC
     """,

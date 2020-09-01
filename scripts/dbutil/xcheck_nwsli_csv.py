@@ -22,7 +22,7 @@ def dowork(df, nwsli):
         % (row["City"], row["Detail"], row["Direction"], row["Station Name"])
     )
     print(row["State"])
-    print(f"Program {row['Program']} Type: {row['Type']}")
+    print(f"Program {row['Program']}")
     print(row["Latitude"])
     print(row["Longitude"])
 

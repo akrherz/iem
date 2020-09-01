@@ -25,11 +25,11 @@ MDICT = OrderedDict(
     ]
 )
 UNITS = {
-    "tmpf": u"°F",
-    "dwpf": u"°F",
+    "tmpf": "°F",
+    "dwpf": "°F",
     "alti": "inch",
     "mslp": "mb",
-    "feel": u"°F",
+    "feel": "°F",
     "relh": "%",
 }
 
@@ -170,17 +170,10 @@ def get_data(fdict):
     col = "tmpf::int" if ctx["var"] == "tmpf" else ctx["var"]
     col = "dwpf::int" if ctx["var"] == "dwpf" else col
     ctx["df"] = read_sql(
-        """
-        SELECT valid at time zone 'UTC' as valid,
-        extract(epoch from valid) * 1000 as ticks,
-        """
-        + col
-        + """ as datum from alldata WHERE station = %s
-        and valid > %s and valid < %s and """
-        + ctx["var"]
-        + """ is not null
-        and report_type = 2 ORDER by valid ASC
-    """,
+        "SELECT valid at time zone 'UTC' as valid, "
+        f"extract(epoch from valid) * 1000 as ticks, {col} as datum "
+        "from alldata WHERE station = %s and valid > %s and valid < %s and "
+        f" {ctx['var']} is not null and report_type = 2 ORDER by valid ASC",
         asos_pgconn,
         params=(ctx["station"], sdate, sdate + datetime.timedelta(days=days)),
         index_col="valid",

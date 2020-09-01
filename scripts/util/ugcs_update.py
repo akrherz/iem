@@ -45,22 +45,20 @@ def do_download(zipfn):
     """Do the download steps"""
     if not os.path.isfile(zipfn):
         req = requests.get(
-            ("https://www.weather.gov/source/gis/Shapefiles/%s/" "%s")
+            ("https://www.weather.gov/source/gis/Shapefiles/%s/%s")
             % ("County" if zipfn.startswith("c_") else "WSOM", zipfn)
         )
         LOG.info("Downloading %s ...", zipfn)
-        fh = open(zipfn, "wb")
-        fh.write(req.content)
-        fh.close()
+        with open(zipfn, "wb") as fh:
+            fh.write(req.content)
 
     LOG.info("Unzipping")
     zipfp = zipfile.ZipFile(zipfn, "r")
     shpfn = None
     for name in zipfp.namelist():
         LOG.info("Extracting %s", name)
-        fh = open(name, "wb")
-        fh.write(zipfp.read(name))
-        fh.close()
+        with open(name, "wb") as fh:
+            fh.write(zipfp.read(name))
         if name[-3:] == "shp":
             shpfn = name
     return shpfn
@@ -90,10 +88,8 @@ def new_poly(geo):
 def db_fixes(cursor, valid):
     """Fix some issues in the database"""
     cursor.execute(
-        """
-     update ugcs SET geom = st_makevalid(geom) where end_ts is null
-     and not st_isvalid(geom) and begin_ts = %s
-    """,
+        "update ugcs SET geom = st_makevalid(geom) where end_ts is null "
+        "and not st_isvalid(geom) and begin_ts = %s",
         (valid,),
     )
     LOG.info("Fixed %s entries that were ST_Invalid()", cursor.rowcount)
@@ -182,10 +178,7 @@ def workflow(argv, pgconn, cursor):
         wfocol = "CWA"
 
     postgis = pd.read_postgis(
-        """
-        SELECT * from ugcs where end_ts is null
-        and substr(ugc, 3, 1) = %s
-    """,
+        "SELECT * from ugcs where end_ts is null and substr(ugc, 3, 1) = %s",
         pgconn,
         params=(geo_type,),
         geom_col="geom",
@@ -223,9 +216,7 @@ def workflow(argv, pgconn, cursor):
 
         # Go find the previous geom and truncate the time
         cursor.execute(
-            """
-            UPDATE ugcs SET end_ts = %s WHERE ugc = %s and end_ts is null
-            """,
+            "UPDATE ugcs SET end_ts = %s WHERE ugc = %s and end_ts is null",
             (valid, ugc),
         )
 

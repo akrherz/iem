@@ -57,13 +57,10 @@ def plotter(fdict):
     e = datetime.date.today().year + 1
 
     df = read_sql(
-        """
+        f"""
         SELECT year, month, sum(case when high > 86 then 1 else 0 end) as days,
         sum(case when high > 86 then high - 86 else 0 end) as sdd
-        from """
-        + table
-        + """ WHERE
-        station = %s GROUP by year, month
+        from {table} WHERE station = %s GROUP by year, month
     """,
         pgconn,
         params=(station,),
