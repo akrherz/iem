@@ -100,14 +100,9 @@ def plotter(fdict):
     if not params:
         raise NoDataFound("Please select some options for plotting.")
     df = read_sql(
-        """
-        SELECT """
-        + " , ".join(params)
-        + """
-        , extract(doy from day) as doy
-        from summary s JOIN stations t
-        ON (s.iemid = t.iemid) WHERE t.id = %s and t.network = %s
-    """,
+        f"SELECT {' , '.join(params)}, extract(doy from day) as doy "
+        "from summary s JOIN stations t "
+        "ON (s.iemid = t.iemid) WHERE t.id = %s and t.network = %s",
         pgconn,
         params=(station, ctx["network"]),
     )
@@ -148,7 +143,7 @@ def plotter(fdict):
     ab = "N/A" if ab is None else ab
     ax.set_title(
         ("%s [%s] (%s-)\nDaily Observed Frequency")
-        % (ctx["_nt"].sts[station]["name"], ab.year, station)
+        % (ctx["_nt"].sts[station]["name"], station, ab.year)
     )
     ax2 = ax.twinx()
     ax2.set_ylabel("Daily Frequency [%]")
