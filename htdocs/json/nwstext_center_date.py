@@ -1,8 +1,8 @@
 """
-Provide nws text for one center for one date.
+Provide nws text for one center for one date, or not.
 """
 # stdlib
-import datetime
+from datetime import timezone, datetime, timedelta
 import json
 
 # extras
@@ -17,11 +17,22 @@ def application(environ, start_response):
     acursor = pgconn.cursor()
     center = fields.get("center", "KOKX")[:4]
     cb = fields.get("callback")
-    date = datetime.datetime.strptime(
-        fields.get("date", "2020-03-15"), "%Y-%m-%d"
-    )
-    sts = utc(date.year, date.month, date.day)
-    ets = sts + datetime.timedelta(days=1)
+    if fields.get("date") is not None:
+        date = datetime.strptime(fields.get("date", "2020-03-15"), "%Y-%m-%d")
+        sts = utc(date.year, date.month, date.day)
+        ets = sts + timedelta(days=1)
+    else:
+        sts = datetime.strptime(
+            fields.get("sts", "2020-03-15T00:00")[:16], "%Y-%m-%dT%H:%M"
+        )
+        ets = datetime.strptime(
+            fields.get("ets", "2020-03-16T00:00")[:16], "%Y-%m-%dT%H:%M"
+        )
+        if (ets - sts) > timedelta(days=14):
+            ets = sts + timedelta(days=14)
+        sts = sts.replace(tzinfo=timezone.utc)
+        ets = ets.replace(tzinfo=timezone.utc)
+
     root = {"products": []}
     pil_limiter = ""
     if int(fields.get("opt", 0)) == 1:
@@ -33,13 +44,8 @@ def application(environ, start_response):
         """
 
     acursor.execute(
-        """
-        SELECT data from products where source = %s and
-        entered >= %s and entered < %s """
-        + pil_limiter
-        + """
-        ORDER by entered ASC
-        """,
+        "SELECT data from products where source = %s and entered >= %s and "
+        f"entered < %s {pil_limiter} ORDER by entered ASC",
         (center, sts, ets),
     )
     for row in acursor:
