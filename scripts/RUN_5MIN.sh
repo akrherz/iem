@@ -1,6 +1,6 @@
 # Run every 5 minutes...
 cd cache 
-bash download_wwa.sh &
+python nws_wawa_archive.py &
 
 cd ../isusm
 python csv2ldm.py &
