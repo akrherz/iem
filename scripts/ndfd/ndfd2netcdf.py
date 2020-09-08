@@ -17,10 +17,8 @@ def create_netcdf(ts):
     nc.history = "%s Generated" % (utc().strftime("%Y-%m-%dT%H:%MZ"),)
 
     grbs = pygrib.open(
-        (
-            "/mesonet/ARCHIVE/data/2019/05/06/model/"
-            "ndfd/00/ndfd.t00z.awp2p5f001.grib2"
-        )
+        "/mesonet/ARCHIVE/data/2019/05/06/model/"
+        "ndfd/00/ndfd.t00z.awp2p5f001.grib2"
     )
     grb = grbs[1]
     shape = grb.values.shape

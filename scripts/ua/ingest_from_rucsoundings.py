@@ -117,18 +117,14 @@ class RAOB:
     def database_save(self, txn):
         """ Save this to the provided database cursor """
         txn.execute(
-            """
-        SELECT fid from raob_flights where station = %s and valid = %s
-        """,
+            "SELECT fid from raob_flights where station = %s and valid = %s",
             (self.station, self.valid),
         )
         if txn.rowcount == 0:
             txn.execute(
-                """
-                INSERT into raob_flights (valid, station, release_time,
-                hydro_level, maxwd_level, tropo_level)
-                values (%s,%s,%s,%s,%s,%s) RETURNING fid
-                """,
+                "INSERT into raob_flights (valid, station, release_time, "
+                "hydro_level, maxwd_level, tropo_level) "
+                "values (%s,%s,%s,%s,%s,%s) RETURNING fid",
                 (
                     self.valid,
                     self.station,
@@ -140,7 +136,7 @@ class RAOB:
             )
         row = txn.fetchone()
         fid = row[0]
-        txn.execute("""DELETE from raob_profile where fid = %s""", (fid,))
+        txn.execute("DELETE from raob_profile where fid = %s", (fid,))
         if txn.rowcount > 0 and self.valid.hour in [0, 12]:
             LOG.info(
                 "RAOB del %s rows for sid: %s valid: %s",
@@ -151,13 +147,9 @@ class RAOB:
         table = "raob_profile_%s" % (self.valid.year,)
         for d in self.profile:
             txn.execute(
-                """INSERT into """
-                + table
-                + """
-            (fid, ts, levelcode,
-            pressure, height, tmpc, dwpc, drct, smps, bearing, range_miles)
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-            """,
+                f"INSERT into {table} (fid, ts, levelcode, pressure, height, "
+                "tmpc, dwpc, drct, smps, bearing, range_miles) "
+                "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
                 (
                     fid,
                     d["ts"],
@@ -251,14 +243,10 @@ def main(valid):
     dbconn = get_dbconn("postgis")
     # check what we have
     obs = read_sql(
-        """
-        SELECT station, count(*) from
-        raob_flights f JOIN raob_profile_"""
-        + str(valid.year)
-        + """ p
-        ON (f.fid = p.fid) where valid = %s GROUP by station
-        ORDER by station ASC
-    """,
+        "SELECT station, count(*) from "
+        f"raob_flights f JOIN raob_profile_{valid.year} p "
+        "ON (f.fid = p.fid) where valid = %s GROUP by station "
+        "ORDER by station ASC",
         dbconn,
         params=(valid,),
         index_col="station",

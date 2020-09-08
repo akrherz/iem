@@ -1,23 +1,20 @@
 """Analysis of current MOS temperature bias."""
 import sys
-import datetime
 
 import pytz
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc
 
 
 def doit(now, model):
     """ Figure out the model runtime we care about """
-    mos_pgconn = get_dbconn("mos", user="nobody")
-    iem_pgconn = get_dbconn("iem", user="nobody")
+    mos_pgconn = get_dbconn("mos")
+    iem_pgconn = get_dbconn("iem")
     mcursor = mos_pgconn.cursor()
     icursor = iem_pgconn.cursor()
     mcursor.execute(
-        """
-      SELECT max(runtime at time zone 'UTC') from alldata
-      where station = 'KDSM' and ftime = %s and model = %s
-    """,
+        "SELECT max(runtime at time zone 'UTC') from alldata "
+        "where station = 'KDSM' and ftime = %s and model = %s",
         (now, model),
     )
     row = mcursor.fetchone()
@@ -28,10 +25,8 @@ def doit(now, model):
 
     # Load up the mos forecast for our given
     mcursor.execute(
-        """
-        SELECT station, tmp FROM alldata
-        WHERE model = %s and runtime = %s and ftime = %s and tmp < 999
-    """,
+        "SELECT station, tmp FROM alldata "
+        "WHERE model = %s and runtime = %s and ftime = %s and tmp < 999",
         (model, runtime, now),
     )
     forecast = {}
@@ -118,15 +113,12 @@ def doit(now, model):
 
 def main(argv):
     """ Go main go"""
-    ts = datetime.datetime.utcnow()
+    ts = utc()
     model = argv[1]
     if len(argv) == 6:
-        ts = datetime.datetime(
-            int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4])
-        )
+        ts = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
         model = sys.argv[5]
     ts = ts.replace(minute=0, second=0, microsecond=0)
-    ts = ts.replace(tzinfo=pytz.utc)
     doit(ts, model)
 
 

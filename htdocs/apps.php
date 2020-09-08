@@ -1,9 +1,9 @@
 <?php
 require_once "../config/settings.inc.php";
-include_once "../include/myview.php";
+require_once "../include/myview.php";
 $t = new MyView();
 define("IEM_APPID", 39);
-include_once "../include/database.inc.php";
+require_once "../include/database.inc.php";
 $dbconn = iemdb("mesosite");
  
 $t->title = "Application Listing";

@@ -24,7 +24,7 @@ def workflow(basedate, utcdt):
             print("MRMS create_daily_symlink ERROR: %s not found" % (target,))
             return
         linkfn = basedate.strftime(
-            ("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/" "mrms_calday_%Y%m%d")
+            "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/mrms_calday_%Y%m%d"
         )
         link = "%s.%s" % (linkfn, suffix)
         if os.path.islink(link):

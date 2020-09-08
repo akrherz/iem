@@ -314,12 +314,10 @@ def main(argv):
     cursor = dbconn.cursor()
     nt = NetworkTable("RAOB")
     df = read_sql(
-        """
+        f"""
         select f.fid, f.station, pressure, dwpc, tmpc, drct, smps, height,
         levelcode from
-        raob_profile_"""
-        + str(year)
-        + """ p JOIN raob_flights f
+        raob_profile_{year} p JOIN raob_flights f
         on (p.fid = f.fid) WHERE not computed and height is not null
         and pressure is not null
         ORDER by pressure DESC
@@ -348,10 +346,7 @@ def main(argv):
                 exp,
             )
             cursor.execute(
-                """
-                UPDATE raob_flights SET computed = 't' WHERE fid = %s
-            """,
-                (fid,),
+                "UPDATE raob_flights SET computed = 't' WHERE fid = %s", (fid,)
             )
         if count % 100 == 0:
             cursor.close()

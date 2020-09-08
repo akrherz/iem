@@ -14,7 +14,7 @@ def run(station, syear, eyear):
 
     table = "alldata_%s" % (station[:2],)
     cursor.execute(
-        """
+        f"""
     WITH data as (
       SELECT sday, year, precip,
       avg(precip) OVER (PARTITION by sday) as avg_precip,
@@ -25,9 +25,7 @@ def run(station, syear, eyear):
       avg(low) OVER (PARTITION by sday) as avg_low,
       rank() OVER (PARTITION by sday ORDER by low ASC) as min_low,
       rank() OVER (PARTITION by sday ORDER by precip DESC) as max_precip
-      from """
-        + table
-        + """ WHERE station = %s and year >= %s and year < %s),
+      from {table} WHERE station = %s and year >= %s and year < %s),
 
     max_highs as (
       SELECT sday, high, array_agg(year) as years from data

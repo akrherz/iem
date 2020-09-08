@@ -23,10 +23,8 @@ def main():
             # Magic
             stations = nt.sts[station]["name"].split("--")[1].strip().split()
         pcursor.execute(
-            """
-            SELECT min(valid), max(valid), count(*) from
-            raob_flights WHERE station in %s
-        """,
+            "SELECT min(valid), max(valid), count(*) from raob_flights "
+            "WHERE station in %s",
             (tuple(stations),),
         )
         row = pcursor.fetchone()
@@ -37,19 +35,15 @@ def main():
         if current_sts is None or current_sts != sts:
             LOG.info("%s sts %s->%s", station, current_sts, sts)
             mcursor.execute(
-                """
-                UPDATE stations SET archive_begin = %s where id = %s and
-                network = 'RAOB'
-            """,
+                "UPDATE stations SET archive_begin = %s where id = %s and "
+                "network = 'RAOB'",
                 (sts, station),
             )
         if current_ets is None and ets.year < 2018:
             LOG.info("%s ets %s->%s", station, current_ets, ets)
             mcursor.execute(
-                """
-                UPDATE stations SET archive_end = %s where id = %s and
-                network = 'RAOB'
-            """,
+                "UPDATE stations SET archive_end = %s where id = %s and "
+                "network = 'RAOB'",
                 (ets, station),
             )
 

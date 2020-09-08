@@ -1,6 +1,6 @@
 <?php 
-include("../config/settings.inc.php");
-include("../include/myview.php");
+require_once "../config/settings.inc.php";
+require_once "../include/myview.php";
 $t = new MyView();
 $t->title = "Disclaimer";
 $t->content = <<< EOF

@@ -17,8 +17,16 @@ def main():
     """Go Main Go."""
     utcnow = utc()
     req = exponential_backoff(requests.get, SRC, timeout=15)
-    if req is None or req.status_code != 200:
+    if req is None:
         LOG.info("Failed to fetch %s", SRC)
+        return
+    if req.status_code != 200 or len(req.content) == 0:
+        LOG.info(
+            "Fail %s status_code: %s len(content): %s",
+            SRC,
+            req.status_code,
+            len(req.content),
+        )
         return
     tmpfd = tempfile.NamedTemporaryFile(delete=False)
     with open(tmpfd.name, "wb") as fh:
