@@ -152,6 +152,9 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("Error, no results returned!")
 
+    # Don't plot zeros for precip
+    if varname == "wettest":
+        df = df[df["sum_precip"] > 0]
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_axes([0.1, 0.3, 0.75, 0.6])
     lax = fig.add_axes([0.1, 0.1, 0.75, 0.2])
