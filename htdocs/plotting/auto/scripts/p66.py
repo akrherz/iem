@@ -70,15 +70,16 @@ def plotter(fdict):
     op = ">=" if mydir == "above" else "<"
     df = read_sql(
         f"""
-        with data as (select day, {agg}({varname})
+        with data as (
+            select day, {agg}({varname})
             OVER (ORDER by day ASC ROWS BETWEEN %s PRECEDING
-        and CURRENT ROW) as agg from {table}
-        where station = %s)
+            and CURRENT ROW) as agg from {table}
+            where station = %s)
 
-    select extract(doy from day) as doy,
-    sum(case when agg {op} %s then 1 else 0 end)
-        / count(*)::float * 100. as freq
-    from data GROUP by doy ORDER by doy asc
+        select extract(doy from day) as doy,
+        sum(case when agg {op} %s then 1 else 0 end)
+            / count(*)::float * 100. as freq
+        from data GROUP by doy ORDER by doy asc
     """,
         pgconn,
         params=(days - 1, station, threshold),
@@ -89,7 +90,7 @@ def plotter(fdict):
 
     label = "AOA" if mydir == "above" else "below"
     ax.set_title(
-        ("[%s] %s\nFrequency of %s Consec Days" r" with %s %s %s$^\circ$F ")
+        (r"[%s] %s\nFrequency of %s Consec Days with %s %s %s$^\circ$F ")
         % (
             station,
             ctx["_nt"].sts[station]["name"],

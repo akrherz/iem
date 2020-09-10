@@ -104,19 +104,26 @@ def get_data(ctx):
     agg1 as (
         SELECT season, day, avg_temp, avg_hitemp, avg_lotemp,
         sum_precip,
-        rank() OVER (PARTITION by season ORDER by avg_temp ASC)
+        row_number()
+            OVER (PARTITION by season ORDER by avg_temp ASC, day ASC)
             as coldest_temp_rank,
-        rank() OVER (PARTITION by season ORDER by avg_hitemp ASC)
+        row_number()
+            OVER (PARTITION by season ORDER by avg_hitemp ASC, day ASC)
             as coldest_hitemp_rank,
-        rank() OVER (PARTITION by season ORDER by avg_lotemp ASC)
+        row_number()
+            OVER (PARTITION by season ORDER by avg_lotemp ASC, day ASC)
             as coldest_lotemp_rank,
-        rank() OVER (PARTITION by season ORDER by avg_temp DESC)
+        row_number()
+            OVER (PARTITION by season ORDER by avg_temp DESC, day ASC)
             as warmest_temp_rank,
-        rank() OVER (PARTITION by season ORDER by avg_hitemp DESC)
+        row_number()
+            OVER (PARTITION by season ORDER by avg_hitemp DESC, day ASC)
             as warmest_hitemp_rank,
-        rank() OVER (PARTITION by season ORDER by avg_lotemp DESC)
+        row_number()
+            OVER (PARTITION by season ORDER by avg_lotemp DESC, day ASC)
             as warmest_lotemp_rank,
-        rank() OVER (PARTITION by season ORDER by sum_precip DESC)
+        row_number()
+            OVER (PARTITION by season ORDER by sum_precip DESC, day ASC)
             as wettest_rank,
         count(*) OVER (PARTITION by season)
         from data)
