@@ -98,19 +98,19 @@ $( document ).ready(function() {
     $("select[name='station']").change(function(){
 		//console.log("change() called...");
 		station = this.value;
-		window.location.href = '#'+station+'_'+year;
+		window.location.href = '#'+station+':'+year;
 		fetch();
 	});
 	$("select[name='year']").change(function(){
 		//console.log("change() called...");
 		year = this.value;
-		window.location.href = '#'+station+'_'+year;
+		window.location.href = '#'+station+':'+year;
 		fetch();
 	});
 	
 	var tokens = window.location.href.split("#");
 	if (tokens.length == 2){
-		var tokens2 = tokens[1].split("_");
+		var tokens2 = tokens[1].split(":");
         if (tokens2.length == 2){
             station = tokens2[0];
             year = tokens2[1];
