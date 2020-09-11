@@ -28,7 +28,7 @@ function endsWith($haystack, $needle)
 }
 
 function make_select($name, $selected, $ar, $jscallback="", $cssclass='',
-                     $multiple=FALSE){
+                     $multiple=FALSE, $showvalue=FALSE){
         // Create a simple HTML select box
         // If multiple, then we arb append [] onto the $name
         $myselected = $selected;
@@ -45,13 +45,15 @@ function make_select($name, $selected, $ar, $jscallback="", $cssclass='',
                 if (is_array($val)){
                         $s .= "<optgroup label=\"$key\">\n";
                         foreach($val as $k2 => $v2){
-                                $s .= sprintf("<option value=\"%s\"%s>%s</option>\n", $k2,
-                                                in_array($k2, $myselected)? " SELECTED": "", $v2);
+                            $vv = ($showvalue) ? sprintf("[%s] %s", $k2, $v2): $v2;
+                            $s .= sprintf("<option value=\"%s\"%s>%s</option>\n", $k2,
+                                                in_array($k2, $myselected)? " SELECTED": "", $vv);
                         }
                         $s .= "</optgroup>";
                 } else {
-                        $s .= sprintf("<option value=\"%s\"%s>%s</option>\n", $key,
-                                in_array($key, $myselected)? " SELECTED": "", $val);
+                    $vv = ($showvalue) ? sprintf("[%s] %s", $key, $val): $val;
+                    $s .= sprintf("<option value=\"%s\"%s>%s</option>\n", $key,
+                                in_array($key, $myselected)? " SELECTED": "", $vv);
                 }
         }
         $s .= "</select>\n";
