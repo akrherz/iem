@@ -24,6 +24,7 @@ def get_data(q):
     data = {"type": "FeatureCollection", "features": []}
 
     # Fetch the values
+    countrysql = ""
     if q == "snowdepth":
         datasql = "substring(raw, ' 4/([0-9]{3})')::int"
         wheresql = "raw ~* ' 4/'"
@@ -42,9 +43,11 @@ def get_data(q):
     elif q == "gr":
         datasql = "''"
         wheresql = "'GR' = ANY(wxcodes)"
-    elif q == "50":
+    elif q in ["50", "50A"]:
         datasql = "greatest(sknt, gust)"
         wheresql = "(sknt >= 50 or gust >= 50)"
+        if q == "50":
+            countrysql = "and country = 'US'"
     else:
         return json.dumps(data)
     cursor.execute(
@@ -52,7 +55,7 @@ def get_data(q):
     select id, network, name, st_x(geom) as lon, st_y(geom) as lat,
     valid at time zone 'UTC' as utc_valid, {datasql} as data, raw
     from current_log c JOIN stations t on (c.iemid = t.iemid)
-    WHERE network ~* 'ASOS' and country = 'US'
+    WHERE network ~* 'ASOS' {countrysql}
     and {wheresql} ORDER by valid DESC
     """
     )
@@ -99,3 +102,7 @@ def application(environ, start_response):
 
     start_response("200 OK", headers)
     return [data.encode("ascii")]
+
+
+if __name__ == "__main__":
+    print(get_data("50A"))
