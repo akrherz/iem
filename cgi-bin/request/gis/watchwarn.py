@@ -12,6 +12,13 @@ from paste.request import parse_formvars
 from pyiem.util import get_dbconn, utc
 
 
+def df(text):
+    """Produce a prettier format for CSV."""
+    if text is None or len(text) != 12:
+        return ""
+    return f"{text[:4]}-{text[4:6]}-{text[6:8]} {text[8:10]}:{text[10:12]}"
+
+
 def get_time_extent(form):
     """ Figure out the time extent of this request"""
     if "year" in form:
@@ -225,14 +232,13 @@ def application(environ, start_response):
         for row in cursor:
             mp = loads(row["geo"], hex=True)
             csv.write(
-                (
-                    "%(wfo)s,%(utc_issue)s,%(utc_expire)s,%(utc_prodissue)s,"
-                    "%(utc_init_expire)s,%(phenomena)s,%(gtype)s,"
-                    "%(significance)s,%(eventid)s,%(status)s,%(ugc)s,"
-                    "%(area2d).2f,%(utc_updated)s,%(hvtec_nwsli)s,"
-                    "%(hvtec_severity)s,%(hvtec_cause)s,%(hvtec_record)s\n"
-                )
-                % row
+                f"{row['wfo']},{df(row['utc_issue'])},{df(row['utc_expire'])},"
+                f"{df(row['utc_prodissue'])},{df(row['utc_init_expire'])},"
+                f"{row['phenomena']},{row['gtype']},"
+                f"{row['significance']},{row['eventid']},{row['status']},"
+                f"{row['ugc']},{row['area2d']:.2f},{df(row['utc_updated'])},"
+                f"{row['hvtec_nwsli']},{row['hvtec_severity']},"
+                f"{row['hvtec_cause']},{row['hvtec_record']}\n"
             )
             output.write(
                 {
