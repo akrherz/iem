@@ -42,19 +42,18 @@ def get_data(q):
     elif q == "gr":
         datasql = "''"
         wheresql = "'GR' = ANY(wxcodes)"
+    elif q == "50":
+        datasql = "greatest(sknt, gust)"
+        wheresql = "(sknt >= 50 or gust >= 50)"
     else:
         return json.dumps(data)
     cursor.execute(
-        """
+        f"""
     select id, network, name, st_x(geom) as lon, st_y(geom) as lat,
-    valid at time zone 'UTC' as utc_valid,
-    """
-        + datasql
-        + """ as data, raw
+    valid at time zone 'UTC' as utc_valid, {datasql} as data, raw
     from current_log c JOIN stations t on (c.iemid = t.iemid)
-    WHERE network ~* 'ASOS' and """
-        + wheresql
-        + """ ORDER by valid DESC
+    WHERE network ~* 'ASOS' and country = 'US'
+    and {wheresql} ORDER by valid DESC
     """
     )
     for i, row in enumerate(cursor):
