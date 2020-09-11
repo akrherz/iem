@@ -1,0 +1,128 @@
+<?php 
+ require_once "../../../config/settings.inc.php";
+ define("IEM_APPID", 124);
+ require_once "../../../include/forms.php";
+ require_once "../../../include/myview.php";
+ require_once "../../../include/imagemaps.php";
+ $t = new MyView();
+ $t->thispage = 'archive-raob'; 
+ $t->title = "List Sounding Parameters by Year";
+
+$stationselect = networkselect("RAOB", "_OAX");
+$year = date("Y");
+$yearselect = yearSelect(1947, $year);
+$t->headextra = <<<EOM
+<link type="text/css" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" rel="stylesheet" />
+EOM;
+ $t->content = <<<EOF
+ <ol class="breadcrumb">
+ 	<li><a href="/archive/raob/">Sounding Archive Mainpage</a></li>
+	<li class="active">List Soundings by Year/li>
+ </ol>
+<p>This page presents a yearly listing of sounding parameters computed by the
+IEM. A <a href="/api/1/docs/">JSON Webservice</a> backends this page.</p>
+
+<p>
+ <form name="local">
+ <div class="row">
+ <div class="col-md-6">
+ <strong>Select Site:</strong>
+ 	{$stationselect}
+ </div>
+ <div class="col-md-6">
+ <strong>Select Year:</strong>
+    {$yearselect}
+ </div>
+</form>
+</p>
+
+<br />
+<p><button id="makefancy" type="button">Make Table Interactive</button></p>
+<br />
+
+<p>
+ <div id="thetable">
+ <table class="table table-bordered table-striped" id="datatable">
+ <thead><tr><th>ID</th><th>Valid</th><th>SBCAPE J/kg</th><th>MUCAPE J/kg</th><th>PrecipWater mm</th></tr></thead>
+ <tbody>
+ </tbody>
+ </table>
+ </div>
+ </p>
+
+EOF;
+$t->jsextra = <<<EOF
+<script src='/vendor/jquery-datatables/1.10.20/datatables.min.js'></script>
+<script>
+var station = '_OAX';
+var year = {$year};
+var j2 = null;
+var dt;
+
+function zero(val){
+    return (val === null) ? "": val;
+}
+function fetch(){
+	$('#datatable tbody').empty();
+	$('#datatable tbody').append('<tr><th colspan="5">Querying server, one moment</th></tr>');
+	$.get('/api/1/raobs_by_year.json?station='+station+'&year='+year).done(function(j){
+        if (dt){
+            dt.destroy();
+        }
+        $('#datatable tbody').empty();
+        for (var i=0; i < j.data.length; i++){
+			var feat = j.data[i];
+			var row = ['<tr>',
+				'<td>'+ feat.station +'</td>',
+				'<td>'+ feat.valid +'</td>',
+				'<td>'+ zero(feat.sbcape_jkg) +'</td>',
+				'<td>'+ zero(feat.mucape_jkg) +'</td>',
+				'<td>'+ zero(feat.pwater_mm) +'</td>',
+				'</tr>'];
+			$('#datatable tbody').append(row.join(''));
+		}
+		if (j.data.length == 0){
+			$('#datatable tbody').append('<tr><th colspan="5">No results were found, sorry!</th></tr>');
+        }
+        if (dt){
+            dt = $("#thetable table").DataTable();
+        }
+    });
+}
+
+$( document ).ready(function() {
+    $('#makefancy').click(function(){
+        dt = $("#thetable table").DataTable();
+    });
+
+    $("select[name='station']").change(function(){
+		//console.log("change() called...");
+		station = this.value;
+		window.location.href = '#'+station+'_'+year;
+		fetch();
+	});
+	$("select[name='year']").change(function(){
+		//console.log("change() called...");
+		year = this.value;
+		window.location.href = '#'+station+'_'+year;
+		fetch();
+	});
+	
+	var tokens = window.location.href.split("#");
+	if (tokens.length == 2){
+		var tokens2 = tokens[1].split("_");
+        if (tokens2.length == 2){
+            station = tokens2[0];
+            year = tokens2[1];
+            $("select[name='station']").val(station);
+            $("select[name='year']").val(year);
+        }
+	}
+    fetch();
+    
+});
+</script>
+EOF;
+ 
+$t->render('single.phtml');
+ ?>

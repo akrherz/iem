@@ -1,7 +1,7 @@
 <?php 
-include("../../../config/settings.inc.php");
-include("../../../include/imagemaps.php");
-include("../../../include/myview.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/imagemaps.php";
+require_once "../../../include/myview.php";
 define("IEM_APPID", 146);
 $t = new MyView();
 $t->thispage = "archive-raob";
@@ -12,12 +12,12 @@ $t->jsextra=<<<EOF
 $(function(){
 	$("#startdate").datetimepicker({
 		controlType: 'select',
-		minDate: new Date(1990, 1, 1, 0, 0),
+		minDate: new Date(1947, 1, 1, 0, 0),
 		showMinute: false
 });
 	$("#enddate").datetimepicker({
 		controlType: 'select',
-		minDate: new Date(1990, 1, 1, 0, 0),
+		minDate: new Date(1947, 1, 1, 0, 0),
 		showMinute: false
 });
 });
@@ -40,6 +40,15 @@ $t->content = <<<EOF
  data are vertical profiles of the atmosphere taken from weather balloons released
  twice daily.</p>
  
+ <h4>Available Tools:</h4>
+<ul>
+    <li><a href="list.phtml">List Sounding Parameters per Year</a></li>
+    <li><a href="/plotting/auto/?q=150">View Sounding Percentiles</a> (Autoplot 150)</li>
+    <li><a href="/plotting/auto/?q=198">Sounding Monthly Min/Max values</a> (Autoplot 198)</li>
+    <li><a href="/plotting/auto/?q=212">Sounding Yearly Timeseries</a> (Autoplot 212)</li>
+    <li><a href="https://www.spc.noaa.gov/exper/soundingclimo/">SPC Sounding Climatology Page</a></li>
+</ul>
+
 <h4>Download Data</h4>
 
 <p>This form provides a simple comma delimited file of RAOB data, the columns
@@ -47,10 +56,6 @@ $t->content = <<<EOF
  provide metadata on that level of data.  The start time is inclusive and
  end time is exclusive.  Special soundings should be in this archive as well.
 
- <p><a class="btn btn-default" href="/plotting/auto/?q=150">View Sounding Percentiles</a></p>
- 
- <p><a href="http://www.spc.noaa.gov/exper/soundingclimo/">SPC Sounding Climatology Page</a></p>
- 
 <table><tr><td valign="top">
 <strong>Level Codes</strong><br />
 <ul>
@@ -98,9 +103,6 @@ the example URI is:
 
 <p><a href="/json/raob.py?ts=199905031200&station=KOUN">https://mesonet.agron.iastate.edu/json/raob.py?ts=199305031200&amp;station=KOUN</a>
 
-<h4>Comments / Suggestions?</h4>
-
-<p><a href="/info/contacts.php">Contact us</a>!
 EOF;
 $t->render('single.phtml');
 ?>
