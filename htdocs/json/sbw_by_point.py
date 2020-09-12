@@ -2,7 +2,7 @@
 Get storm based warnings by lat lon point, optionally a time
 """
 import sys
-from io import BytesIO
+from io import BytesIO, StringIO
 import json
 import datetime
 
@@ -35,6 +35,10 @@ def get_events(ctx):
             'YYYY-MM-DDThh24:MIZ') as iso_issued,
     to_char(expire at time zone 'UTC',
             'YYYY-MM-DDThh24:MIZ') as iso_expired,
+  to_char(issue at time zone 'UTC',
+            'YYYY-MM-DD hh24:MI') as issued,
+    to_char(expire at time zone 'UTC',
+            'YYYY-MM-DD hh24:MI') as expired,
     eventid,
   tml_direction, tml_sknt, hvtec_nwsli from sbw
   where status = 'NEW' and
@@ -114,6 +118,16 @@ def application(environ, start_response):
         bio = BytesIO()
         df.to_excel(bio, index=False)
         return [bio.getvalue()]
+    if fmt == "csv":
+        fn = "sbw_%.4fN_%.4fW.csv" % (ctx["lat"], 0 - ctx["lon"])
+        headers = [
+            ("Content-type", "application/octet-stream"),
+            ("Content-disposition", "attachment; Filename=" + fn),
+        ]
+        start_response("200 OK", headers)
+        bio = StringIO()
+        df.to_csv(bio, index=False)
+        return [bio.getvalue().encode("utf-8")]
     res = to_json(data, df)
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)

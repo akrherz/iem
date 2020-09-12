@@ -136,7 +136,7 @@ function setupUI() {
                 defaultUGC = "";
                 if (record){
                     ugcCombobox.select(record);
-                    upcCombobox.fireEvent("select", ugcCombobox, record);
+                    ugcCombobox.fireEvent("select", ugcCombobox, record);
                 }
                 return false;
             }
@@ -302,6 +302,21 @@ function setupUI() {
                                 Ext.getCmp('edate').getValue(), 'Y/m/d');
                         window.location = url;
 					}
+				},{
+					id : 'grid-csv-button',
+					text : 'Export to CSV...',
+					handler : function(b, e) {
+                        var url = eventStore.getProxy().getUrl();
+                        // Send both sets of vals to whatever backend is active
+                        url = url + "?fmt=csv&ugc=" + ugcCombobox.getValue()
+                            + "&lat=" + $("#lat2").val()
+                            + "&lon=" + $("#lon2").val()
+                            + "&sdate=" + Ext.Date.format(
+                                Ext.getCmp('sdate').getValue(), 'Y/m/d')
+                            + "&edate=" + Ext.Date.format(
+                                Ext.getCmp('edate').getValue(), 'Y/m/d');
+                        window.location = url;
+					}
 				}],
 				columns : [{
 							'header' : 'Event ID',
@@ -374,6 +389,19 @@ function setupUI() {
 			handler : function(b, e) {
                 var url = warnStore.getProxy().getUrl();
                 url = url + "?fmt=xlsx&lon=" + $("#lon").val()
+                    + "&lat=" + $("#lat").val()
+                    + "&sdate=" + Ext.Date.format(
+                        Ext.getCmp('sdate').getValue(), 'Y/m/d')
+                    + "&edate=" + Ext.Date.format(
+                        Ext.getCmp('edate').getValue(), 'Y/m/d');
+                window.location = url;
+			}
+		},{
+			id : 'grid-csv-button22',
+			text : 'Export to CSV...',
+			handler : function(b, e) {
+                var url = warnStore.getProxy().getUrl();
+                url = url + "?fmt=csv&lon=" + $("#lon").val()
                     + "&lat=" + $("#lat").val()
                     + "&sdate=" + Ext.Date.format(
                         Ext.getCmp('sdate').getValue(), 'Y/m/d')

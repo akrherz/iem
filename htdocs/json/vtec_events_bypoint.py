@@ -1,6 +1,6 @@
 """ Find VTEC events by a given Lat / Lon pair """
 import json
-from io import BytesIO
+from io import BytesIO, StringIO
 import datetime
 
 from paste.request import parse_formvars
@@ -29,6 +29,8 @@ def get_df(lon, lat, sdate, edate):
     SELECT
     to_char(issue at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ') as iso_issued,
   to_char(expire at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ') as iso_expired,
+    to_char(issue at time zone 'UTC', 'YYYY-MM-DD hh24:MI') as issued,
+  to_char(expire at time zone 'UTC', 'YYYY-MM-DD hh24:MI') as expired,
     eventid, phenomena, significance, wfo, hvtec_nwsli
     from warnings w JOIN myugcs u on (w.gid = u.gid) WHERE
     issue > %s and issue < %s ORDER by issue ASC
@@ -98,6 +100,21 @@ def application(environ, start_response):
         bio = BytesIO()
         df.to_excel(bio, index=False)
         return [bio.getvalue()]
+    if fmt == "csv":
+        fn = "vtec_%.4fW_%.4fN_%s_%s.csv" % (
+            0 - lon,
+            lat,
+            sdate.strftime("%Y%m%d"),
+            edate.strftime("%Y%m%d"),
+        )
+        headers = [
+            ("Content-type", "application/octet-stream"),
+            ("Content-disposition", "attachment; Filename=" + fn),
+        ]
+        start_response("200 OK", headers)
+        bio = StringIO()
+        df.to_csv(bio, index=False)
+        return [bio.getvalue().encode("utf-8")]
 
     res = to_json(df)
     if cb is None:
