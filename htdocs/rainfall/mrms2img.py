@@ -84,7 +84,7 @@ def workflow(valid, period, start_response):
 
     # Send file back to client
     headers = [
-        ("Content-type", "application/octet/stream"),
+        ("Content-type", "application/octet-stream"),
         ("Content-Disposition", "attachment; filename=%s" % (zipfn,)),
     ]
     start_response("200 OK", headers)
