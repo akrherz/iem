@@ -6,6 +6,8 @@ import pytz
 import pandas as pd
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
+from matplotlib.patches import Patch
+from matplotlib.lines import Line2D
 from pyiem import meteorology
 from pyiem.plot.use_agg import plt
 from pyiem.datatypes import temperature, distance
@@ -590,15 +592,19 @@ def plot1(ctx):
     ax2.set_position(
         [box.x0, box.y0 + box.height * 0.05, box.width, box.height * 0.95]
     )
-    if None not in [l1, l2, l3]:
-        ax[0].legend(
-            [l1, l2, l3, b1],
-            ["12 inch", "24 inch", "50 inch", "Hourly Precip"],
-            bbox_to_anchor=(0.5, -0.15),
-            ncol=4,
-            loc="center",
-            fontsize=12,
-        )
+    handles = [
+        Line2D([0], [0], color="r", lw=3, label="12 inch"),
+        Line2D([0], [0], color="purple", lw=3, label="24 inch"),
+        Line2D([0], [0], color="black", lw=3, label="50 inch"),
+        Patch(facecolor="b", edgecolor="b", label="Hourly Precip"),
+    ]
+    ax[0].legend(
+        handles=handles,
+        bbox_to_anchor=(0.5, -0.15),
+        ncol=4,
+        loc="center",
+        fontsize=12,
+    )
 
     # ----------------------------------------
     if not d12t.isnull().all():
@@ -626,7 +632,7 @@ def plot1(ctx):
             label="50in",
         )
     ax[1].grid(True)
-    ax[1].set_ylabel(r"Temperature $^\circ$F")
+    ax[1].set_ylabel(r"Soil Temperature $^\circ$F")
     box = ax[1].get_position()
     ax[1].set_position(
         [box.x0, box.y0 + box.height * 0.05, box.width, box.height * 0.95]
