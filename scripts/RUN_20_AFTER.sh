@@ -26,4 +26,4 @@ cd ../ingestors
 python uscrn_ingest.py
 
 cd ../uscrn
-python compute_pday.py
+python compute_uscrn_pday.py

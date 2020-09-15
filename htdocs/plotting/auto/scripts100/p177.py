@@ -561,23 +561,14 @@ def plot1(ctx):
     ax2.set_yticklabels([0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0])
     ax2.set_ylim(-0.6, 0)
     ax2.set_ylabel("Hourly Precipitation [inch]")
-    b1 = ax2.bar(valid, 0 - rain / 25.4, width=0.04, fc="b", ec="b", zorder=4)
+    ax2.bar(valid, 0 - rain / 25.4, width=0.04, fc="b", ec="b", zorder=4)
 
-    l1 = None
-    l2 = None
-    l3 = None
     if not d12sm.isnull().all():
-        l1, = ax[0].plot(
-            valid, d12sm * 100.0, linewidth=2, color="r", zorder=5
-        )
+        ax[0].plot(valid, d12sm * 100.0, linewidth=2, color="r", zorder=5)
     if not d24sm.isnull().all():
-        l2, = ax[0].plot(
-            valid, d24sm * 100.0, linewidth=2, color="purple", zorder=5
-        )
+        ax[0].plot(valid, d24sm * 100.0, linewidth=2, color="purple", zorder=5)
     if not d50sm.isnull().all():
-        l3, = ax[0].plot(
-            valid, d50sm * 100.0, linewidth=2, color="black", zorder=5
-        )
+        ax[0].plot(valid, d50sm * 100.0, linewidth=2, color="black", zorder=5)
     ax[0].set_ylabel("Volumetric Soil Water Content [%]", fontsize=10)
 
     ax[0].set_title(
