@@ -38,9 +38,11 @@ def get_context(environ):
         ets = sts
         sts = s
 
-    fmt = form.get("fmt", "shp")
+    form["fmt"] = form.get("fmt", "shp")
+    form["sts"] = sts
+    form["ets"] = ets
 
-    return dict(sts=sts, ets=ets, fmt=fmt)
+    return form
 
 
 def run(ctx, start_response):
@@ -48,16 +50,25 @@ def run(ctx, start_response):
     pgconn = get_dbconn("postgis", user="nobody")
     cursor = pgconn.cursor()
 
-    if (ctx["ets"] - ctx["sts"]).days > 120:
-        ctx["ets"] = ctx["sts"] + datetime.timedelta(days=120)
-
-    sql = """
+    spatialsql = ""
+    if ctx.get("filter", "0") == "1":
+        distance = float(ctx.get("degrees", 1.0))
+        lon = float(ctx.get("lon", -91.99))
+        lat = float(ctx.get("lat", 41.99))
+        spatialsql = (
+            f"ST_Distance(geom::geometry, ST_SetSRID(ST_Point({lon}, {lat}), "
+            f"4326)) <= {distance} and "
+        )
+    else:
+        if (ctx["ets"] - ctx["sts"]).days > 120:
+            ctx["ets"] = ctx["sts"] + datetime.timedelta(days=120)
+    sql = f"""
         SELECT to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as utctime,
         case when is_urgent then 'T' else 'F' end,
         substr(aircraft_type, 0, 40), substr(report, 0, 255),
         ST_y(geom::geometry) as lat, ST_x(geom::geometry) as lon
-        from pireps WHERE
-        valid >= '%s' and valid < '%s'  ORDER by valid ASC
+        from pireps WHERE {spatialsql}
+        valid >= '%s' and valid < '%s' ORDER by valid ASC
         """ % (
         ctx["sts"].strftime("%Y-%m-%d %H:%M+00"),
         ctx["ets"].strftime("%Y-%m-%d %H:%M+00"),

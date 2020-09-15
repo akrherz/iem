@@ -26,22 +26,39 @@ considered 'complete'.</p>
 </div>
 
 <p>Due to filesize and speed, you can only request up to 120 days of data
-at a time!</p>
+at a time!  If you request data with the spatial filter, you can download
+longer periods of data.</p>
 
 <form method="GET" action="/cgi-bin/request/gis/pireps.py">
 <h4>Select time interval</h4>
 <i>(Times are in UTC.)</i>
 <table class="table">
-<thead><tr><th colspan="6">Time Interval</th>
-		<th>Format</th></tr></thead>
+<thead>
+    <tr>
+    <th colspan="6">Time Interval</th>
+    <th>Format</th>
+    <th>Spatial Filter (Optional)</th>
+    </tr>
+</thead>
 <tr>
 	<th></th>
     <th>Year</th><th>Month</th><th>Day</th>
     <th>Hour</th><th>Minute</th>
-    <td rowspan="3"><select name="fmt">
+    <td rowspan="3">
+    <select name="fmt">
 		<option value="shp">ESRI Shapefile</option>
 		<option value="csv">Comma Delimited</option>
-		</select></td>
+    </select>
+    </td>
+    <td rowspan="3">
+        <input type="checkbox" name="filter" value="1">
+        <label for="filter">Enable Spatial Filter</label><br />
+        Filter reports to a Latitude + Longitude circle of
+        <input type="text" name="degrees" size="5" value="3.0">
+        degrees to point
+        <input type="text" name="lon" size="10" value="-91.99"> East and
+        <input type="text" name="lon" size="10" value="41.99"> North
+    </td>
 </tr>
 
 <tr>
