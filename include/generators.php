@@ -148,10 +148,11 @@ EOM;
 <a href="$imghref"><img src="$imghref" alt="Feature" class="img img-responsive" /></a>
 </div>
 EOF;
+        $HC = "8.2.0";
 		$jsextra = <<<EOF
-<script src="/vendor/highcharts/6.0.7/highcharts.js"></script>		
-<script src="/vendor/highcharts/6.0.7/highcharts-more.js"></script>		
-<script src="/vendor/highcharts/6.0.7/modules/exporting.js"></script>		
+<script src="/vendor/highcharts/{$HC}/highcharts.js"></script>
+<script src="/vendor/highcharts/{$HC}/highcharts-more.js"></script>
+<script src="/vendor/highcharts/{$HC}/modules/exporting.js"></script>
 <script src="{$row["javascripturl"]}"></script>
 EOF;
 	}
