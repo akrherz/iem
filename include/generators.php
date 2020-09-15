@@ -149,9 +149,9 @@ EOM;
 </div>
 EOF;
 		$jsextra = <<<EOF
-<script src="/vendor/highcharts/4.2.0/highcharts.js"></script>		
-<script src="/vendor/highcharts/4.2.0/highcharts-more.js"></script>		
-<script src="/vendor/highcharts/4.2.0/modules/exporting.js"></script>		
+<script src="/vendor/highcharts/6.0.7/highcharts.js"></script>		
+<script src="/vendor/highcharts/6.0.7/highcharts-more.js"></script>		
+<script src="/vendor/highcharts/6.0.7/modules/exporting.js"></script>		
 <script src="{$row["javascripturl"]}"></script>
 EOF;
 	}
