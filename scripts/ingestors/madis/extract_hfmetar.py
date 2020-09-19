@@ -128,7 +128,9 @@ def process(ncfn):
         total=len(stations),
         disable=(not sys.stdout.isatty()),
     ):
-        sid3 = sid[1:] if sid[0] == "K" else sid
+        if len(sid) < 3:
+            continue
+        sid3 = sid[1:] if sid.startswith("K") else sid
         ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(
             seconds=data["observationTime"][i]
         )
