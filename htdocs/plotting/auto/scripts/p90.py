@@ -687,7 +687,7 @@ def do_ugc(ctx):
             minv.strftime("%d %b %Y"),
             maxv.strftime("%d %b %Y"),
         )
-        datavar = "average"
+        datavar = "count"
     elif varname.startswith("period"):
         if sdate.strftime("%m%d") > edate.strftime("%m%d"):
             daylimiter = (
