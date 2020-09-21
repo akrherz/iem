@@ -11,6 +11,7 @@ from paste.request import parse_formvars
 from pyiem.util import get_dbconn, utc
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+ISO8660 = "%Y-%m-%dT%H:%M"
 
 
 def get_time_domain(form):
@@ -22,6 +23,13 @@ def get_time_domain(form):
         sts = ets - datetime.timedelta(seconds=seconds)
         return sts, ets
 
+    if "sts" in form and "ets" in form:
+        sts = datetime.datetime.strptime(form.get("sts")[:16], ISO8660)
+        ets = datetime.datetime.strptime(form.get("ets")[:16], ISO8660)
+        return (
+            sts.replace(tzinfo=datetime.timezone.utc),
+            ets.replace(tzinfo=datetime.timezone.utc),
+        )
     if "year" in form:
         year1 = int(form.get("year"))
         year2 = int(form.get("year"))
