@@ -9,12 +9,13 @@ import sys
 import gzip
 import subprocess
 
-import pytz
 import numpy as np
 from PIL import Image
 import pygrib
 import pyiem.mrms as mrms
-from pyiem.util import utc
+from pyiem.util import utc, logger
+
+LOG = logger()
 
 
 def make_colorramp():
@@ -57,9 +58,8 @@ def do(now, realtime=False):
 
     fp = gzip.GzipFile(gribfn, "rb")
     (_, tmpfn) = tempfile.mkstemp()
-    tmpfp = open(tmpfn, "wb")
-    tmpfp.write(fp.read())
-    tmpfp.close()
+    with open(tmpfn, "wb") as fh:
+        fh.write(fp.read())
     grbs = pygrib.open(tmpfn)
     grb = grbs[1]
     os.unlink(tmpfn)
@@ -87,28 +87,33 @@ def do(now, realtime=False):
     mrms.write_worldfile("%s.wld" % (tmpfn,))
     # Inject WLD file
     prefix = "lcref"
+    routes = "ac" if realtime else "a"
     pqstr = (
-        "pqinsert -i -p 'plot ac %s "
+        "pqinsert -i -p 'plot %s %s "
         "gis/images/4326/mrms/%s.wld GIS/mrms/%s_%s.wld wld' %s.wld"
     ) % (
+        routes,
         now.strftime("%Y%m%d%H%M"),
         prefix,
         prefix,
         now.strftime("%Y%m%d%H%M"),
         tmpfn,
     )
+    LOG.debug(pqstr)
     subprocess.call(pqstr, shell=True)
     # Now we inject into LDM
     pqstr = (
-        "pqinsert -i -p 'plot ac %s "
+        "pqinsert -i -p 'plot %s %s "
         "gis/images/4326/mrms/%s.png GIS/mrms/%s_%s.png png' %s.png"
     ) % (
+        routes,
         now.strftime("%Y%m%d%H%M"),
         prefix,
         prefix,
         now.strftime("%Y%m%d%H%M"),
         tmpfn,
     )
+    LOG.debug(pqstr)
     subprocess.call(pqstr, shell=True)
     # Create 3857 image
     cmd = (
@@ -127,11 +132,12 @@ def do(now, realtime=False):
         now.strftime("%Y%m%d%H%M"),
         tmpfn,
     )
-    subprocess.call(pqstr, shell=True)
+    if realtime:
+        LOG.debug(pqstr)
+        subprocess.call(pqstr, shell=True)
 
-    j = open("%s.json" % (tmpfn,), "w")
-    j.write(json.dumps(dict(meta=metadata)))
-    j.close()
+    with open("%s.json" % (tmpfn,), "w") as fh:
+        fh.write(json.dumps(dict(meta=metadata)))
 
     # Insert into LDM
     pqstr = (
@@ -144,10 +150,12 @@ def do(now, realtime=False):
         now.strftime("%Y%m%d%H%M"),
         tmpfn,
     )
-    subprocess.call(pqstr, shell=True)
+    if realtime:
+        LOG.debug(pqstr)
+        subprocess.call(pqstr, shell=True)
 
     for suffix in ["tif", "json", "png", "wld"]:
-        os.unlink("%s.%s" % (tmpfn, suffix))
+        os.unlink(f"{tmpfn}.{suffix}")
 
     os.close(tmpfp)
     os.unlink(tmpfn)
@@ -155,7 +163,7 @@ def do(now, realtime=False):
 
 def main(argv):
     """ Go Main Go """
-    utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+    utcnow = utc()
     if len(argv) == 6:
         utcnow = utc(
             int(argv[1]),
