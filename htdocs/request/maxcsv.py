@@ -126,7 +126,7 @@ def do_iarwis():
 
 def do_ahps_obs(nwsli):
     """Create a dataframe with AHPS river stage and CFS information"""
-    pgconn = get_dbconn("hads")
+    pgconn = get_dbconn("hml")
     cursor = pgconn.cursor()
     # Get metadata
     cursor.execute(
@@ -204,7 +204,7 @@ def do_ahps_obs(nwsli):
 
 def do_ahps_fx(nwsli):
     """Create a dataframe with AHPS river stage and CFS information"""
-    pgconn = get_dbconn("hads")
+    pgconn = get_dbconn("hml")
     cursor = pgconn.cursor()
     # Get metadata
     cursor.execute(
@@ -295,7 +295,7 @@ def feet(val, suffix="'"):
 
 def do_ahps(nwsli):
     """Create a dataframe with AHPS river stage and CFS information"""
-    pgconn = get_dbconn("hads")
+    pgconn = get_dbconn("hml")
     cursor = pgconn.cursor()
     # Get metadata
     cursor.execute(

@@ -105,7 +105,7 @@ def sync(mesosite, dbname, do_delete):
 def main(argv):
     """Go Main Go"""
     mesosite = get_dbconn("mesosite")
-    subscribers = ["iem", "coop", "hads", "asos", "asos1min", "postgis"]
+    subscribers = ["iem", "coop", "hads", "hml", "asos", "asos1min", "postgis"]
 
     do_delete = False
     if len(argv) == 2:

@@ -108,13 +108,11 @@
 # VI_1_233(69)
 192.168.1.233 metvm4-iemdb.local
 192.168.1.233 iemdb-hads iemdb-hads.local
-192.168.1.233 iemdb-awos.local
 192.168.1.233 iemdb-mos iemdb-mos.local
 192.168.1.233 iemdb-talltowers.local
 192.168.1.233 iemdb-radar.local
 192.168.1.233 iemdb-nldn.local
 192.168.1.233 iemdb-smos.local
-192.168.1.233 iemdb-snet.local
 
 #### metvm9 PostgreSQL
 # VI_7(57) metvm9 <-> metvm6
@@ -131,7 +129,10 @@
 ### metvm7 PostgreSQL
 # VI_1_230(72) metvm7
 192.168.1.230    metvm7-iemdb.local
+192.168.1.233 iemdb-awos.local
+192.168.1.230 iemdb-hml.local
 192.168.1.230 iemdb-mec.local
+192.168.1.230 iemdb-snet.local
 
 ##############################################################################
 

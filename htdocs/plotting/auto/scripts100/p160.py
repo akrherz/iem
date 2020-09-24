@@ -56,7 +56,7 @@ def get_description():
 
 def get_context(fdict):
     """Do the common work"""
-    pgconn = get_dbconn("hads")
+    pgconn = get_dbconn("hml")
     cursor = pgconn.cursor()
     ctx = get_autoplot_context(fdict, get_description())
 

@@ -13,7 +13,7 @@ LOG = logger()
 
 def workflow(ts):
     """Deduplicate this timestep"""
-    pgconn = get_dbconn("hads")
+    pgconn = get_dbconn("hml")
     cursor = pgconn.cursor()
     table = "hml_forecast_data_%s" % (ts.year,)
     cursor.execute(
