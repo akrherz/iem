@@ -87,7 +87,6 @@
 192.168.1.245 iemdb-iemre.local
 192.168.1.245 iemdb-isuag.local
 192.168.1.245 iemdb-kcci.local
-192.168.1.245 iemdb-mec.local
 192.168.1.245 iemdb-mesonet.local
 192.168.1.245 iemdb-mesosite.local
 192.168.1.245 iemdb-nc1018.local
@@ -128,6 +127,11 @@
 # VI_1_231(71) metvm1
 192.168.1.231    metvm1-iemdb.local
 192.168.1.231 iemdb-asos1min.local
+
+### metvm7 PostgreSQL
+# VI_1_230(72) metvm7
+192.168.1.230    metvm7-iemdb.local
+192.168.1.230 iemdb-mec.local
 
 ##############################################################################
 
