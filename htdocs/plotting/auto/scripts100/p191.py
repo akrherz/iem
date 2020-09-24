@@ -115,6 +115,8 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     sts = ctx["sdate"]
     ets = ctx["edate"]
+    if (ets - sts).days > 366:
+        raise NoDataFound("Chart duration needs to be less than 1 year.")
     wfo = ctx["wfo"]
     p1 = ctx["phenomenav1"]
     p2 = ctx["phenomenav2"]
@@ -161,16 +163,12 @@ def plotter(fdict):
         tzname = "America/Chicago"
 
     df = read_sql(
-        """
+        f"""
 with events as (
   select wfo, min(issue at time zone %s) as localissue,
   extract(year from issue) as year,
   phenomena, significance, eventid from warnings
-  where """
-        + pstr
-        + """ """
-        + wfo_limiter
-        + """ and
+  where {pstr} {wfo_limiter} and
   issue >= %s and issue < %s GROUP by wfo, year, phenomena, significance,
   eventid
 )
