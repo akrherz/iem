@@ -27,7 +27,7 @@ import pyiem.mrms as mrms
 from pyiem.util import exponential_backoff, logger
 
 LOG = logger()
-BASEURL = "http://rainproc.its.uiowa.edu/Products/IFC7ADV"
+BASEURL = "http://s-iihr75.iihr.uiowa.edu//Products/IFC7ADV"
 
 
 def get_file(now, routes):
