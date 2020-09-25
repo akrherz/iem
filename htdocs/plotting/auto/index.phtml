@@ -1,7 +1,7 @@
 <?php 
-
 require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 92);
+
 $HC = "8.2.0";
 require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
@@ -13,6 +13,7 @@ $formhtml = "";
 $image = "";
 $extrascripts = "";
 $headextra = "";
+$expiry = 60*60*24*100; // 100 days
 $t = new MyView();
 $t->thispage = "current-plotter";
 $t->title = "Automated Data Plotter";
@@ -196,8 +197,11 @@ EOF;
 			}else {
 				$networkcgi = "network";
 			}
-			$defaultnetwork = isset($v->network) ? $v->network : "IA_ASOS"; 
-			$network = isset($_GET[$networkcgi]) ? xssafe($_GET[$networkcgi]): $defaultnetwork;
+            $defaultnetwork = isset($v->network) ? $v->network : "IA_ASOS";
+            $cookiename = sprintf("%s_%s", $v->type, $networkcgi);
+            $defaultnetwork = isset($_COOKIE[$cookiename]) ? xssafe($_COOKIE[$cookiename]) : $defaultnetwork;
+            $network = isset($_GET[$networkcgi]) ? xssafe($_GET[$networkcgi]): $defaultnetwork;
+            setcookie($cookiename, $network, time() + $expiry, "/plotting/auto/");
 			$netselect = make_select($networkcgi, $network, $networks, "onNetworkChange");
 			$thisrow = $netselect ." ". networkSelect($network, $value, Array(), $v->name);
 			$pltvars[] = sprintf("%s:%s", $networkcgi, $network);
@@ -219,8 +223,11 @@ EOF;
 			}else {
 				$networkcgi = "network";
 			}
-			$defaultnetwork = isset($v->network) ? $v->network : "IA_ASOS"; 
-			$network = isset($_GET[$networkcgi]) ? xssafe($_GET[$networkcgi]): $defaultnetwork;
+            $defaultnetwork = isset($v->network) ? $v->network : "IA_ASOS"; 
+            $cookiename = sprintf("%s_%s", $v->type, $networkcgi);
+            $defaultnetwork = isset($_COOKIE[$cookiename]) ? xssafe($_COOKIE[$cookiename]) : $defaultnetwork;
+            $network = isset($_GET[$networkcgi]) ? xssafe($_GET[$networkcgi]): $defaultnetwork;
+            setcookie($cookiename, $network, time() + $expiry, "/plotting/auto/");
 			$netselect = make_select($networkcgi, $network, $networks, "onNetworkChange");
 			$thisrow = $netselect ." ". networkSelect($network, $value, Array(), $v->name);
 			$pltvars[] = sprintf("%s:%s", $networkcgi, $network);
@@ -247,7 +254,10 @@ EOF;
 				$networkcgi = "network";
 			}
 			$defaultnetwork = isset($v->network) ? $v->network : "IACLIMATE";
-			$network = isset($_GET[$networkcgi]) ? xssafe($_GET[$networkcgi]): $defaultnetwork;
+            $cookiename = sprintf("%s_%s", $v->type, $networkcgi);
+            $defaultnetwork = isset($_COOKIE[$cookiename]) ? xssafe($_COOKIE[$cookiename]) : $defaultnetwork;
+            $network = isset($_GET[$networkcgi]) ? xssafe($_GET[$networkcgi]): $defaultnetwork;
+            setcookie($cookiename, $network, time() + $expiry, "/plotting/auto/");
 			$netselect = make_select($networkcgi, $network, $networks, "onNetworkChange",
 					"iemselect2");
 			$thisrow = $netselect ." ". networkSelect($network, $value, Array(), $v->name);
