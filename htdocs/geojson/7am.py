@@ -14,7 +14,7 @@ def p(val, precision=2):
     """see if we can round values better?"""
     if val is None:
         return None
-    if val > 0 and val < 0.001:
+    if 0 > val < 0.001:
         return TRACE_VALUE
     return round(val, precision)
 
@@ -30,6 +30,7 @@ def router(group, ts):
         return run(ts)
     if group == "azos":
         return run_azos(ts)
+    return None
 
 
 def run_azos(ts):
@@ -43,9 +44,10 @@ def run_azos(ts):
     ts1 = ts.replace(hour=7)
     ts0 = ts1 - datetime.timedelta(hours=24)
     cursor.execute(
-        "select t.id, t.name, sum(phour) from hourly h JOIN stations t ON "
+        "select t.id, t.name, sum(phour), st_x(geom), st_y(geom) "
+        "from hourly h JOIN stations t ON "
         "(h.iemid = t.iemid) where t.network in ('AWOS', 'IA_ASOS') and "
-        "valid >= %s and valid < %s GROUP by t.id, t.name",
+        "valid >= %s and valid < %s GROUP by t.id, t.name, t.geom",
         (ts0, ts1),
     )
 
@@ -140,3 +142,7 @@ def application(environ, start_response):
 
     start_response("200 OK", headers)
     return [data.encode("ascii")]
+
+
+if __name__ == "__main__":
+    run(datetime.datetime(2020, 9, 9))
