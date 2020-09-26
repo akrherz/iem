@@ -14,9 +14,9 @@ import sys
 import pytz
 import requests
 import pandas as pd
+from metpy.units import units
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from pyiem.datatypes import distance
 from pyiem.util import get_dbconn, logger, utc
 
 LOG = logger()
@@ -27,12 +27,9 @@ def print_debugging(station):
     pgconn = get_dbconn("isuag")
     cursor = pgconn.cursor()
     cursor.execute(
-        """
-        SELECT valid, rain_mm_tot / 25.4, rain_mm_tot_qc / 25.4,
-        rain_mm_tot_f from sm_daily
-        WHERE station = %s and (rain_mm_tot > 0 or rain_mm_tot_qc > 0)
-        ORDER by valid DESC LIMIT 10
-    """,
+        "SELECT valid, rain_mm_tot / 25.4, rain_mm_tot_qc / 25.4, "
+        "rain_mm_tot_f from sm_daily WHERE station = %s and "
+        "(rain_mm_tot > 0 or rain_mm_tot_qc > 0) ORDER by valid DESC LIMIT 10",
         (station,),
     )
     LOG.info("     Date           Obs     QC  Flag")
@@ -79,11 +76,9 @@ def set_iemacces(station, date, precip_inch):
     cursor = pgconn.cursor()
     LOG.debug("Update iemaccess %s %s %.4f", station, date, precip_inch)
     cursor.execute(
-        (
-            "UPDATE summary s SET pday = %s FROM stations t "
-            "WHERE t.iemid = s.iemid and s.day = %s and t.id = %s and "
-            "t.network = 'ISUSM'"
-        ),
+        "UPDATE summary s SET pday = %s FROM stations t WHERE "
+        "t.iemid = s.iemid and s.day = %s and t.id = %s and "
+        "t.network = 'ISUSM'",
         (precip_inch, date, station),
     )
     cursor.close()
@@ -92,8 +87,7 @@ def set_iemacces(station, date, precip_inch):
 
 def update_precip(date, station, hdf):
     """Do the update work"""
-    sts = datetime.datetime(date.year, date.month, date.day, 7)
-    sts = sts.replace(tzinfo=pytz.utc)
+    sts = utc(date.year, date.month, date.day, 7)
     ets = sts + datetime.timedelta(hours=24)
     ldf = hdf[
         (hdf["station"] == station)
@@ -101,45 +95,69 @@ def update_precip(date, station, hdf):
         & (hdf["valid"] < ets)
     ]
 
-    newpday = distance(ldf["precip_in"].sum(), "IN")
-    set_iemacces(station, date, newpday.value("IN"))
+    newpday = ldf["precip_in"].sum()
+    newpday_mm = (units("inch") * newpday).to(units("mm")).m
+    set_iemacces(station, date, newpday)
     # update isusm
     pgconn = get_dbconn("isuag")
     cursor = pgconn.cursor()
     # daily
     cursor.execute(
-        """
-        UPDATE sm_daily
-        SET rain_mm_tot_qc = %s, rain_mm_tot_f = 'E'
-        WHERE valid = %s and station = %s
-    """,
-        (newpday.value("MM"), date, station),
+        "UPDATE sm_daily SET rain_mm_tot_qc = %s, rain_mm_tot_f = 'E' "
+        "WHERE valid = %s and station = %s",
+        (newpday_mm, date, station),
     )
     for _, row in ldf.iterrows():
         # hourly
-        total = distance(row["precip_in"], "IN").value("MM")
+        LOG.debug(
+            "set hourly %s %s %s", station, row["valid"], row["precip_in"]
+        )
+        total = (units("mm") * row["precip_in"]).to(units("inch")).m
         cursor.execute(
-            """
-            UPDATE sm_hourly
-            SET rain_mm_tot_qc = %s, rain_mm_tot_f = 'E'
-            WHERE valid = %s and station = %s
-        """,
+            "UPDATE sm_hourly SET rain_mm_tot_qc = %s, rain_mm_tot_f = 'E' "
+            "WHERE valid = %s and station = %s",
             (total, row["valid"], station),
         )
-        # minute
-        for minute in range(60):
-            cursor.execute(
-                """
-                UPDATE sm_minute
-                SET rain_in_tot_qc = %s, rain_in_tot_f = 'E'
-                WHERE valid = %s and station = %s
-            """,
-                (
-                    total / 60.0 / 25.4,
-                    row["valid"] - datetime.timedelta(minutes=minute),
-                    station,
-                ),
-            )
+        # For minute data, we just apply a linear offset
+        cursor.execute(
+            "SELECT sum(rain_in_tot) from sm_minute WHERE station = %s and "
+            "valid > %s and valid <= %s",
+            (
+                station,
+                row["valid"],
+                row["valid"] + datetime.timedelta(minutes=60),
+            ),
+        )
+        if cursor.rowcount == 0:
+            LOG.info("Can't adjust %s %s, no data", station, row["valid"])
+            continue
+        current_in = cursor.fetchone()[0]
+        multi = 0
+        value = None
+        if current_in == 0:
+            value = row["precip_in"] / 60.0
+        elif row["precip_in"] > 0:
+            multi = row["precip_in"] / current_in
+        cursor.execute(
+            "UPDATE sm_minute "
+            "SET rain_in_tot_qc = coalesce(%s, rain_in_tot_qc * %s), "
+            "rain_in_tot_f = 'E' WHERE valid > %s and valid <= %s "
+            "and station = %s",
+            (
+                value,
+                multi,
+                row["valid"],
+                row["valid"] + datetime.timedelta(minutes=60),
+                station,
+            ),
+        )
+        LOG.debug(
+            "minute %s multi %.4f value %.4f rows updated %s",
+            row["valid"],
+            multi,
+            value,
+            cursor.rowcount,
+        )
     cursor.close()
     pgconn.commit()
 
@@ -147,19 +165,23 @@ def update_precip(date, station, hdf):
 def main(argv):
     """ Go main go """
     date = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
+    LOG.debug("Processing date: %s", date)
     pgconn = get_dbconn("isuag")
     nt = NetworkTable("ISUSM")
 
     # Get our obs
     df = read_sql(
-        """
-        SELECT station, rain_mm_tot_qc / 25.4 as obs from sm_daily where
-        valid = %s ORDER by station ASC
-    """,
+        "SELECT station, rain_mm_tot from sm_daily where "
+        "valid = %s ORDER by station ASC",
         pgconn,
         params=(date,),
         index_col="station",
     )
+    if df.empty:
+        LOG.info("no observations found for %s, aborting", date)
+        return
+    # Covert to inches
+    df["obs"] = (units("mm") * df["rain_mm_tot"].values).to(units("inch")).m
     hdf = get_hdf(nt, date)
     if hdf.empty:
         LOG.info("hdf is empty, abort fix_precip for %s", date)
@@ -181,6 +203,7 @@ def main(argv):
 
     df["diff"] = df["obs"] - df["stage4"]
     for station, row in df.iterrows():
+        LOG.debug("%s stage4: %s ob: %s", station, row["stage4"], row["obs"])
         # We want to QC the case of having too low of precip.
         # How low is too low?
         # if stageIV > 0.1 and obs < 0.05
