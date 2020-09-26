@@ -118,6 +118,8 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 <br /><input type="checkbox" name="vars" value="lwmwet_2_tot">lwmwet_2_tot
 <br /><input type="checkbox" name="vars" value="bpres_avg">bpres_avg
 
+{$qcbox}
+
 <p><strong>View on web browser or</strong> &nbsp; 
  <br /><input type="checkbox" name="todisk" value="yes">Download directly to disk
 

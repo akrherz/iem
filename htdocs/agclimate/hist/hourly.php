@@ -112,7 +112,8 @@ wish to change this to <a href="daily.php">daily data</a>.
 <br /><input type="checkbox" name="vars" value="lwmwet_2_tot">lwmwet_2_tot
 <br /><input type="checkbox" name="vars" value="bpres_avg">bpres_avg
  		
- 		
+{$qcbox}
+
 <p><input type="checkbox" name="todisk" value="yes">Download directly to disk
 
  <p><strong>How should the data be formatted?:</strong> &nbsp; 

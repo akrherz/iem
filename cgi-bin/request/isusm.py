@@ -335,19 +335,15 @@ def fetch_hourly(form, cols):
         if "bp_mb" in cols:
             cols.remove("bp_mb")
     cursor.execute(
-        """SELECT station, valid, tair_c_avg_qc, rh_qc,
+        f"""SELECT station, valid, tair_c_avg_qc, rh_qc,
     slrkw_avg_qc,
     rain_mm_tot_qc, ws_mps_s_wvt_qc, winddir_d1_wvt_qc,
     tsoil_c_avg_qc,
     t12_c_avg_qc, t24_c_avg_qc, t50_c_avg_qc, calc_vwc_12_avg_qc,
     calc_vwc_24_avg_qc, calc_vwc_50_avg_qc, lwmv_1_qc, lwmv_2_qc,
     lwmdry_1_tot_qc, lwmcon_1_tot_qc, lwmwet_1_tot_qc, lwmdry_2_tot_qc,
-    lwmcon_2_tot_qc, lwmwet_2_tot_qc, bpres_avg_qc """
-        + sqlextra
-        + """
-    from """
-        + table
-        + """
+    lwmcon_2_tot_qc, lwmwet_2_tot_qc, bpres_avg_qc {sqlextra}
+    from {table}
     WHERE valid >= '%s 00:00' and valid < '%s 00:00' and station in %s
     ORDER by valid ASC
     """

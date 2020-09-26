@@ -142,7 +142,7 @@
 192.168.1.248    iem-memcached1
 #   VI_4(54) metvm8 <-> metvm3
 192.168.1.247    iem-memcached2
-# VI12(62) metvm7 <-> metvm0
+# VI12(62) metvm0 <-> metvm7
 192.168.1.239    iem-memcached3
 
 #   VI_5(55) iem13
