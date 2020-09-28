@@ -177,10 +177,12 @@ EOF;
 	$pltvars = Array();
 	$form = "";
 	foreach($jobj->arguments as $k => $v){
-		$value = isset($_GET[$v->name]) ? xssafe($_GET[$v->name]): $v->default;
+        $defaultvalue = isset($_COOKIE[$v->type]) ? xssafe($_COOKIE[$v->type]) : $v->default;
+		$value = isset($_GET[$v->name]) ? xssafe($_GET[$v->name]): $defaultvalue;
 		$thisrow = null;
 		// BEGIN generation of interfaces based on types
 		if ($v->type == "zstation"){
+            setcookie($v->type, $value, time() + $expiry, "/plotting/auto/");
 			// Build out listing of networks, if we have not already
 			if (sizeof($networks) == 0){
 				$rs = pg_query($mesosite, "SELECT id, name from networks 
@@ -207,6 +209,7 @@ EOF;
 			$pltvars[] = sprintf("%s:%s", $networkcgi, $network);
 		}
 		elseif ($v->type == "sid"){
+            setcookie($v->type, $value, time() + $expiry, "/plotting/auto/");
 			// Build out listing of networks, if we have not already
 			if (sizeof($networks) == 0){
 				$rs = pg_query($mesosite, "SELECT id, name from networks ".
@@ -238,6 +241,7 @@ EOF;
 			$pltvars[] = sprintf("%s:%s", "state", $state);
 		}
 		elseif ($v->type == "station"){
+            setcookie($v->type, $value, time() + $expiry, "/plotting/auto/");
 			if (sizeof($networks) == 0){
 				$rs = pg_query($mesosite, "SELECT id, name from networks ". 
 					"where id ~* 'CLIMATE' ORDER by name ASC");
@@ -264,7 +268,12 @@ EOF;
 			$pltvars[] = sprintf("%s:%s", $networkcgi, $network);
 		}
 		elseif ($v->type == "networkselect"){
-			$extra = Array();
+            $cookiename = sprintf("networkselect_%s", $v->network);
+            // Check again if we were given anything
+            $defaultvalue = isset($_COOKIE[$cookiename]) ? xssafe($_COOKIE[$cookiename]): $defaultvalue;
+            $value = isset($_GET[$v->name]) ? xssafe($_GET[$v->name]): $defaultvalue;
+            setcookie($cookiename, $value, time() + $expiry, "/plotting/auto/");
+            $extra = Array();
 			if (isset($v->all)){
 				$extra["_ALL"] = Array('name'=>' -- All Sites --');
 			}
@@ -290,10 +299,12 @@ EOF;
 			$thisrow = sprintf("%s &nbsp; %s", $netselect, $netselect2);
 		}
 		elseif ($v->type == "state"){
+            setcookie($v->type, $value, time() + $expiry, "/plotting/auto/");
 			$netselect = stateSelect($value, '', $v->name);
 			$thisrow = $netselect;
 		}
 		elseif ($v->type == 'csector'){
+            setcookie($v->type, $value, time() + $expiry, "/plotting/auto/");
 			// CONUS plotting sectors
 			$netselect = make_select($v->name, $value, $csectors);
 			$thisrow = $netselect;
