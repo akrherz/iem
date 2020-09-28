@@ -129,7 +129,7 @@
 ### metvm7 PostgreSQL
 # VI_1_230(72) metvm7
 192.168.1.230    metvm7-iemdb.local
-192.168.1.233 iemdb-awos.local
+192.168.1.230 iemdb-awos.local
 192.168.1.230 iemdb-hml.local
 192.168.1.230 iemdb-mec.local
 192.168.1.230 iemdb-snet.local
