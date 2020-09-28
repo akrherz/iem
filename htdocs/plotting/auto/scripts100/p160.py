@@ -119,14 +119,9 @@ def get_context(fdict):
         mints = dt - datetime.timedelta(days=3)
         maxts = dt + datetime.timedelta(days=3)
     df = read_sql(
-        """
-    SELECT valid, h.label, value
-    from hml_observed_data_"""
-        + str(dt.year)
-        + """ d JOIN hml_observed_keys h
-    on (d.key = h.id)
-    WHERE station = %s and valid between %s and %s ORDER by valid
-    """,
+        "SELECT valid, h.label, value from hml_observed_data d "
+        "JOIN hml_observed_keys h on (d.key = h.id) WHERE station = %s and "
+        "valid between %s and %s ORDER by valid ASC",
         pgconn,
         params=(station, mints, maxts),
         index_col=None,
