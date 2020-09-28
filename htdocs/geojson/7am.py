@@ -14,7 +14,7 @@ def p(val, precision=2):
     """see if we can round values better?"""
     if val is None:
         return None
-    if 0 > val < 0.001:
+    if 0 < val < 0.001:
         return TRACE_VALUE
     return round(val, precision)
 
