@@ -900,7 +900,7 @@ def plotter(fdict):
                 labels=ctx["labels"],
                 clevstride=2,
                 clevlabels=cl,
-                labelbuffer=0,
+                labelbuffer=1,  # Texas yall
                 extend="neither",
             )
         else:
@@ -909,7 +909,7 @@ def plotter(fdict):
                 ctx["bins"],
                 cmap=cmap,
                 ilabel=ilabel,
-                labelbuffer=0,
+                labelbuffer=1,  # Texas yall
             )
     else:
         res = m.pcolormesh(

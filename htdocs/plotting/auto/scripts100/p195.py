@@ -33,7 +33,8 @@ def get_description():
     ] = """Some of the warnings that the National Weather
     Service issues includes a storm motion vector.  This application
     plots the speed vs direction of the vector and includes a kernel density
-    estimate (KDE) overlay.
+    estimate (KDE) overlay.  You can optionally pick a date to highlight on the
+    chart.  This date is a central time zone date.
     """
     today = datetime.date.today()
     desc["arguments"] = [
@@ -76,7 +77,7 @@ def plotter(fdict):
         ps = ["TO", "SV"]
     df = read_sql(
         """
-        SELECT issue at time zone 'UTC' as issue,
+        SELECT issue at time zone 'America/Chicago' as issue,
         tml_direction, tml_sknt from sbw
         WHERE phenomena in %s and wfo = %s and status = 'NEW' and
         tml_direction is not null and tml_sknt is not null ORDER by issue
@@ -88,10 +89,9 @@ def plotter(fdict):
         raise NoDataFound("No Data Found.")
 
     g = sns.jointplot(
-        df["tml_direction"],
-        speed(df["tml_sknt"], "KT").value("MPH"),
+        x=df["tml_direction"].values,
+        y=speed(df["tml_sknt"], "KT").value("MPH"),
         s=40,
-        stat_func=None,
         zorder=1,
         color="tan",
         xlim=(0, 360),
@@ -124,7 +124,7 @@ def plotter(fdict):
             df["issue"].max().date().strftime("%b %-d, %Y"),
         )
     )
-    g.fig.subplots_adjust(top=0.9)
+    g.fig.subplots_adjust(top=0.9, bottom=0.1)
     return g.fig, df
 
 
