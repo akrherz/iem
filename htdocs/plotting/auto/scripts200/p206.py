@@ -24,7 +24,7 @@ VARUNITS = {
     "max_tmpf": "F",
     "min_tmpf": "F",
     "max_gust": "mph",
-    "max_sknt": "knots",
+    "max_sknt": "mph",
 }
 PDICT3 = {"both": "Plot and Contour Values", "plot": "Only Plot Values"}
 
@@ -246,8 +246,8 @@ def plotter(fdict):
         df2["lon"].values,
         df2["lat"].values,
         df2[varname].values,
-        "%.1f",
-        labelbuffer=10,
+        "%.1f" if varname in ["max_gust", "max_sknt"] else "%.0f",
+        labelbuffer=3,
     )
     mp.drawcounties()
     if ctx["t"] == "cwa":
