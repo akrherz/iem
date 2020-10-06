@@ -204,11 +204,12 @@ def workflow(environ, form, fmt):
 
     # memcache keys can not have spaces
     mckey = get_mckey(scriptnum, fdict, fmt)
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
-    # Don't fetch memcache when we have _cb set for an inbound CGI
-    res = mc.get(mckey) if fdict.get("_cb") is None else None
-    if res:
-        return HTTP200, res
+    if len(mckey) < 250:
+        mc = memcache.Client(["iem-memcached:11211"], debug=0)
+        # Don't fetch memcache when we have _cb set for an inbound CGI
+        res = mc.get(mckey) if fdict.get("_cb") is None else None
+        if res:
+            return HTTP200, res
     # memcache failed to save us work, so work we do!
     start_time = datetime.datetime.utcnow()
     # res should be a 3 length tuple
