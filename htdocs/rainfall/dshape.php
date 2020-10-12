@@ -1,6 +1,6 @@
 <?php
  /* Download .zip files of rainfall estimates! */
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y", time() - 86400);
 $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m", time() - 86400);

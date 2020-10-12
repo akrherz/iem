@@ -13,15 +13,11 @@ def main():
     """Go Main, please"""
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
-    cursor.execute(
-        """
-    DELETE from roads_current
-    """
-    )
+    cursor.execute("DELETE from roads_current")
     print("removed %s rows from roads_current" % (cursor.rowcount,))
     req = requests.get(URI, timeout=30)
     jobj = req.json()
-    archive_begin = "2018-10-09 00:00"
+    archive_begin = "2020-10-12 12:00"
     print("adding %s rows to roads_base" % (len(jobj["features"]),))
     for feat in jobj["features"]:
         props = feat["attributes"]
@@ -30,7 +26,7 @@ def main():
         # segid is defined by the database insert
         major = props["ROUTE_NAME"]
         minor = props["NAMEID"].split(":", 1)[1]
-        (typ, num) = major.replace("-", " ").split()
+        (typ, num) = major.replace("-", " ").split()[:2]
         int1 = num if typ == "I" else None
         us1 = num if typ == "US" else None
         st1 = num if typ == "IA" else None
@@ -43,13 +39,10 @@ def main():
         ) % (path.wkt)
         idot_id = props["SEGMENT_ID"]
         cursor.execute(
-            """
+            f"""
             INSERT into roads_base (major, minor, us1, st1, int1, type,
             longname, geom, idot_id, archive_begin)
-            VALUES (%s, %s, %s, %s, %s, %s, %s,
-            """
-            + geom
-            + """, %s, %s) RETURNING segid
+            VALUES (%s, %s, %s, %s, %s, %s, %s, {geom}, %s, %s) RETURNING segid
         """,
             (
                 major[:10],
@@ -84,10 +77,7 @@ def main():
         )
         wfo = cursor.fetchone()[0]
         cursor.execute(
-            """
-            UPDATE roads_base SET wfo = %s WHERE segid = %s
-        """,
-            (wfo, segid),
+            "UPDATE roads_base SET wfo = %s WHERE segid = %s", (wfo, segid)
         )
         # Add a roads_current entry, 85 is a hack
         cursor.execute(
