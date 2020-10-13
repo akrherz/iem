@@ -5,7 +5,9 @@ require_once "../../include/myview.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/imagemaps.php";
 require_once "../../include/forms.php";
+require_once "../../include/iemprop.php";
 
+$asos_archive_end = get_iemprop("asos2archive_last");
 $t = new MyView();
 $t->iemss = True;
 
@@ -56,10 +58,14 @@ observations from around the world!  These observations are typically called
 which is a term that describes the format the data is transmitted as. If you 
 don't get data for a request, please feel free to 
 <a href="/info/contacts.php">contact us</a> for help. The IEM also has a one
-minute interval dataset for Iowa <a href="asos/1min.phtml">ASOS</a> (2000-) 
-and <a href="awos/1min.php">AWOS</a> (1995-2011) sites.  This archive
+minute interval dataset for <a href="asos/1min.phtml">US ASOS</a> (2000-) 
+and <a href="awos/1min.php">Iowa AWOS</a> (1995-2011) sites.  This archive
 simply provides the as-is collection of historical observations, very little 
-quality control is done. "M" is used to denote missing data.</p>
+quality control is done.</p>
+
+<p>This archive contains processed observations up until
+<code>{$asos_archive_end}</code>. Data
+is synced from the real-time ingest every 10 minutes.</p>
 
 <p>Here is a 
 <a href="https://github.com/akrherz/iem/blob/master/scripts/asos/iem_scraper_example.py">python script example</a> 

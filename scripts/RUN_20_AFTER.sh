@@ -16,9 +16,6 @@ python agg_1minute.py
 cd ../isuag
 python isusm2rr5.py
 
-cd ../dbutil
-python asos2archive.py hourly
-
 cd ../hads
 python compute_hads_pday.py
 

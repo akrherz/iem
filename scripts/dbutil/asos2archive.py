@@ -1,85 +1,102 @@
 """
- Dump ASOS observations into the long term archive...
+Dump ASOS observations into the long term archive...
 
- Database partitioning is now based on the UTC day, so we need to make sure
- we are not inserting where we should not be...
+This script copies from the iem->current_log database table to the asos
+database.  This data is a result of the pyWWA/metar_parser.py process.
 
- This script copies from the iem->current_log database table to the asos
- database.  This data is a result of the pyWWA/metar_parser.py process
+The script looks for any updated rows since the last time it ran, this is
+tracked in the properties table.
 
- We run in two modes, once every hour to copy over the past hour's data and
- then once at midnight to recopy the previous day's data.
-
- RUN_20_AFTER.sh
- RUN_MIDNIGHT.sh
-
+Run from RUN_10MIN.sh
 """
 import datetime
 import sys
 
-import pytz
 import psycopg2.extras
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconn, logger, utc
 
 LOG = logger()
+PROPERTY_NAME = "asos2archive_last"
+ISO9660 = "%Y-%m-%dT%H:%M:%SZ"
 
 
-def compute_time(is_hourly):
+def get_first_updated():
+    """Figure out which is the last updated timestamp we ran for."""
+    pgconn = get_dbconn("mesosite")
+    cursor = pgconn.cursor()
+    cursor.execute(
+        "SELECT propvalue from properties where propname = %s",
+        (PROPERTY_NAME,),
+    )
+    if cursor.rowcount == 0:
+        LOG.info("iem property %s is not set, abort!", PROPERTY_NAME)
+        sys.exit()
+
+    dt = datetime.datetime.strptime(cursor.fetchone()[0], ISO9660)
+    return dt.replace(tzinfo=datetime.timezone.utc)
+
+
+def set_last_updated(value):
+    """Update the database."""
+    pgconn = get_dbconn("mesosite")
+    cursor = pgconn.cursor()
+    cursor.execute(
+        "UPDATE properties SET propvalue = %s where propname = %s",
+        (value.strftime(ISO9660), PROPERTY_NAME),
+    )
+    if cursor.rowcount == 0:
+        LOG.info("iem property %s did not update, abort!", PROPERTY_NAME)
+        sys.exit()
+
+    cursor.close()
+    pgconn.commit()
+
+
+def compute_time(argv):
     """Figure out the proper start and end time"""
-    utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+    utcnow = utc()
     utcnow = utcnow.replace(minute=0, second=0, microsecond=0)
 
-    if is_hourly:
-        lasthour = utcnow - datetime.timedelta(minutes=60)
-        sts = lasthour.replace(minute=0)
-        ets = lasthour.replace(minute=59)
-    else:
+    if len(argv) == 1:  # noargs
         yesterday = utcnow - datetime.timedelta(hours=24)
         sts = yesterday.replace(hour=0)
         ets = sts.replace(hour=23, minute=59)
+    elif len(argv) == 4:
+        sts = utc(int(argv[1]), int(argv[2]), int(argv[3]))
+        ets = sts.replace(hour=23, minute=59)
+    else:
+        lasthour = utcnow - datetime.timedelta(minutes=60)
+        sts = lasthour.replace(minute=0)
+        ets = lasthour.replace(minute=59)
     return sts, ets
 
 
-def main(argv):
-    """Do Something Good"""
-    asospgconn = get_dbconn("asos")
-    iempgconn = get_dbconn("iem")
-    acursor = asospgconn.cursor()
-    icursor = iempgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    is_hourly = len(argv) > 1
+def do_insert(source_cursor):
+    """Insert the rows into the archive."""
+    pgconn = get_dbconn("asos")
+    cursor = pgconn.cursor()
 
-    (sts, ets) = compute_time(is_hourly)
-    LOG.debug(
-        "Processing %s thru %s",
-        sts.strftime("%Y-%m-%dT%H:%M:%SZ"),
-        ets.strftime("%Y-%m-%dT%H:%M:%SZ"),
-    )
+    (inserts, skips, deletes) = (0, 0, 0)
+    for row in source_cursor:
+        # Look for previous entries
+        cursor.execute(
+            "SELECT metar from alldata where station = %s and valid = %s",
+            (row["id"], row["valid"]),
+        )
+        if cursor.rowcount > 0:
+            metar = cursor.fetchone()
+            # Skip if old metar is longer and new metar is not a COR
+            if len(metar) > len(row["raw"]) and row["raw"].find(" COR ") == 0:
+                skips += 1
+                continue
+            cursor.execute(
+                "DELETE from alldata where station = %s and valid = %s",
+                (row["id"], row["valid"]),
+            )
+            deletes += cursor.rowcount
 
-    # Delete any duplicate obs
-    acursor.execute(
-        f"DELETE from t{sts.year} WHERE valid >= %s and valid <= %s",
-        (sts, ets),
-    )
-
-    # Get obs from access, prioritize observations by if they are a CORrection
-    # or not and then their length :?
-    icursor.execute(
-        """
-        WITH data as (
-            SELECT c.*, t.network, t.id, row_number() OVER
-            (PARTITION by c.iemid, valid
-             ORDER by
-              (case when strpos(raw, ' COR ') > 0 then 1 else 0 end) DESC,
-              length(raw) DESC) from
-            current_log c JOIN stations t on (t.iemid = c.iemid) WHERE
-            valid >= %s and valid <= %s and
-            (network ~* 'ASOS' or network = 'AWOS'))
-        SELECT * from data where row_number = 1
-        """,
-        (sts, ets),
-    )
-    for row in icursor:
-        sql = f"""INSERT into t{sts.year} (station, valid, tmpf,
+        sql = """
+        INSERT into alldata (station, valid, tmpf,
         dwpf, drct, sknt,  alti, p01i, gust, vsby, skyc1, skyc2, skyc3, skyc4,
         skyl1, skyl2, skyl3, skyl4, metar, p03i, p06i, p24i, max_tmpf_6hr,
         min_tmpf_6hr, max_tmpf_24hr, min_tmpf_24hr, mslp, wxcodes,
@@ -87,7 +104,8 @@ def main(argv):
         report_type, feel, relh, peak_wind_gust, peak_wind_drct,
         peak_wind_time)
         values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
-        %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+        %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        """
 
         # see @akrherz/iem#104 as an enhancement to differentiate rtype
         rtype = (
@@ -135,21 +153,54 @@ def main(argv):
             row["peak_wind_time"],
         )
 
-        acursor.execute(sql, args)
+        cursor.execute(sql, args)
+        inserts += 1
+
+    LOG.debug("insert %s, skip %s delete %s rows", inserts, skips, deletes)
+    cursor.close()
+    pgconn.commit()
+
+
+def main():
+    """Do Something Good"""
+    last_updated = utc()
+    first_updated = get_first_updated()
+    iempgconn = get_dbconn("iem")
+    icursor = iempgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    LOG.debug(
+        "Processing %s thru %s",
+        first_updated.strftime(ISO9660),
+        last_updated.strftime(ISO9660),
+    )
+
+    # Get obs from access, prioritize observations by if they are a CORrection
+    # or not and then their length :?
+    icursor.execute(
+        """
+        WITH data as (
+            SELECT c.*, t.network, t.id, row_number() OVER
+            (PARTITION by c.iemid, valid
+             ORDER by
+              (case when strpos(raw, ' COR ') > 0 then 1 else 0 end) DESC,
+              length(raw) DESC) from
+            current_log c JOIN stations t on (t.iemid = c.iemid) WHERE
+            updated >= %s and updated <= %s and
+            (network ~* 'ASOS' or network = 'AWOS'))
+        SELECT * from data where row_number = 1
+        """,
+        (first_updated, last_updated),
+    )
+    do_insert(icursor)
 
     if icursor.rowcount == 0:
         LOG.info(
             "%s - %s Nothing done?",
-            sts.strftime("%Y-%m-%dT%H:%M"),
-            ets.strftime("%Y-%m-%dT%H:%M"),
+            first_updated.strftime("%Y-%m-%dT%H:%M"),
+            last_updated.strftime("%Y-%m-%dT%H:%M"),
         )
-
-    icursor.close()
-    iempgconn.commit()
-    asospgconn.commit()
-    asospgconn.close()
-    iempgconn.close()
+    set_last_updated(last_updated)
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

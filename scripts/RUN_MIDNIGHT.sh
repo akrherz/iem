@@ -3,11 +3,8 @@ DD=$(date -u +'%d')
 MM=$(date -u +'%m')
 YYYY=$(date -u +'%Y')
 
-cd dbutil
-python asos2archive.py
-
 # Need this done so that certain variables are there for DEP
-cd ../asos
+cd asos
 python compute_daily.py
 
 # Need this done so that IEMRE daily grids are there for DEP
