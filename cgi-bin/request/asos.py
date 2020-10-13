@@ -9,6 +9,7 @@ import datetime
 
 import pytz
 from paste.request import parse_formvars
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
 
 NULLS = {"M": "M", "null": "null", "empty": ""}
@@ -126,6 +127,9 @@ def check_load():
 def get_stations(form):
     """ Figure out the requested station """
     if "station" not in form:
+        if "network" in form:
+            nt = NetworkTable(form.get("network"), only_online=False)
+            return nt.sts.keys()
         return []
     stations = form.getall("station")
     if not stations:
