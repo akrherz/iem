@@ -56,22 +56,21 @@ def main(argv):
     )
 
     # Delete any duplicate obs
-    table = "t%s" % (sts.year,)
     acursor.execute(
-        """
-        DELETE from """
-        + table
-        + """ WHERE valid >= %s and valid <= %s
-        """,
+        f"DELETE from t{sts.year} WHERE valid >= %s and valid <= %s",
         (sts, ets),
     )
 
-    # Get obs from Access
+    # Get obs from access, prioritize observations by if they are a CORrection
+    # or not and then their length :?
     icursor.execute(
         """
         WITH data as (
             SELECT c.*, t.network, t.id, row_number() OVER
-            (PARTITION by c.iemid, valid ORDER by length(raw) DESC) from
+            (PARTITION by c.iemid, valid
+             ORDER by
+              (case when strpos(raw, ' COR ') > 0 then 1 else 0 end) DESC,
+              length(raw) DESC) from
             current_log c JOIN stations t on (t.iemid = c.iemid) WHERE
             valid >= %s and valid <= %s and
             (network ~* 'ASOS' or network = 'AWOS'))
@@ -80,10 +79,7 @@ def main(argv):
         (sts, ets),
     )
     for row in icursor:
-        sql = (
-            """INSERT into t"""
-            + repr(sts.year)
-            + """ (station, valid, tmpf,
+        sql = f"""INSERT into t{sts.year} (station, valid, tmpf,
         dwpf, drct, sknt,  alti, p01i, gust, vsby, skyc1, skyc2, skyc3, skyc4,
         skyl1, skyl2, skyl3, skyl4, metar, p03i, p06i, p24i, max_tmpf_6hr,
         min_tmpf_6hr, max_tmpf_24hr, min_tmpf_24hr, mslp, wxcodes,
@@ -92,7 +88,6 @@ def main(argv):
         peak_wind_time)
         values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
         %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
-        )
 
         # see @akrherz/iem#104 as an enhancement to differentiate rtype
         rtype = (
