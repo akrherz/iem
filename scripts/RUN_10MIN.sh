@@ -10,7 +10,7 @@ python today_high.py
 python rwis_station.py
 
 cd ../dbutil
-python asos2archive.py &
+timeout 540 python asos2archive.py &
 
 cd ../plots
 csh MW_overlay.csh
