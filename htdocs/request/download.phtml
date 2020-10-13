@@ -52,6 +52,9 @@ $t->content = <<<EOF
  <li class="active">ASOS-AWOS-METAR Data Download</li>
 </ol>
 
+<div class="row">
+<div class="col-md-8">
+
 <p>The IEM maintains an ever growing archive of automated airport weather
 observations from around the world!  These observations are typically called 
 'ASOS' or sometimes 'AWOS' sensors.  A more generic term may be METAR data, 
@@ -63,15 +66,26 @@ and <a href="awos/1min.php">Iowa AWOS</a> (1995-2011) sites.  This archive
 simply provides the as-is collection of historical observations, very little 
 quality control is done.</p>
 
-<p>This archive contains processed observations up until
-<code>{$asos_archive_end}</code>. Data
-is synced from the real-time ingest every 10 minutes.</p>
+</div>
+<div class="col-md-4">
+
+<p><strong>Tools/Libaries</strong></p>
 
 <p>Here is a 
 <a href="https://github.com/akrherz/iem/blob/master/scripts/asos/iem_scraper_example.py">python script example</a> 
 <i class="fa fa-download"></i> that automates the download
 of data from this interface.  A community user has contributed <a href="https://github.com/realmiketalbot/R-scripts/blob/master/iem_scraper_example.
-r">R language</a> <i class="fa fa-download"></i> version of the python script.</p>
+r">R language</a> <i class="fa fa-download"></i> version of the python script.
+There is also a <a href="https://docs.ropensci.org/riem/">riem R package</a> 
+<i class="fa fa-download"></i> allowing for easy access to this archive.</p>
+
+</div>
+</div>
+
+<p>This archive contains processed observations up until
+<code>{$asos_archive_end}</code>. Data
+is synced from the real-time ingest every 10 minutes.</p>
+
 
 <div class="alert alert-warning">Please be patient with this page as it will take a number
 of seconds to process your request and provide the result.</div>
