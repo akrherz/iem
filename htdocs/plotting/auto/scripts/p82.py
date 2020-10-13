@@ -91,6 +91,13 @@ def safe(row, varname):
     return "%i" % (val,)
 
 
+def diff(val, climo):
+    """Safe subtraction."""
+    if val is None or climo is None:
+        return None
+    return val - climo
+
+
 def plotter(fdict):
     """ Go """
     pgconn = get_dbconn("iem")
@@ -129,9 +136,9 @@ def plotter(fdict):
     rows = []
     data = {}
     for row in cursor:
-        hd = row["max_tmpf"] - cdf.at[row[0].strftime("%m%d"), "high"]
-        ld = row["min_tmpf"] - cdf.at[row[0].strftime("%m%d"), "low"]
-        ad = row["avg_tmpf"] - cdf.at[row[0].strftime("%m%d"), "avg"]
+        hd = diff(row["max_tmpf"], cdf.at[row[0].strftime("%m%d"), "high"])
+        ld = diff(row["min_tmpf"], cdf.at[row[0].strftime("%m%d"), "low"])
+        ad = diff(row["avg_tmpf"], cdf.at[row[0].strftime("%m%d"), "avg"])
         avg_sknt = row["avg_sknt"]
         if avg_sknt is None:
             if varname == "avg_smph":
