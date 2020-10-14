@@ -10,7 +10,7 @@ import datetime
 import pytz
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc
 
 NULLS = {"M": "M", "null": "null", "empty": ""}
 TRACE_OPTS = {"T": "T", "null": "null", "empty": "", "0.0001": "0.0001"}
@@ -143,6 +143,10 @@ def get_stations(form):
 
 def get_time_bounds(form, tzinfo):
     """ Figure out the exact time bounds desired """
+    if "hours" in form:
+        ets = utc()
+        sts = ets - datetime.timedelta(hours=int(form.get("hours")))
+        return sts, ets
     # Here lie dragons, so tricky to get a proper timestamp
     try:
         y1 = int(form.get("year1"))
@@ -268,18 +272,19 @@ def application(environ, start_response):
             tuple([int(a) for a in report_type]),
         )
     sqlcols = ",".join(querycols)
+    sorder = "DESC" if "hours" in form else "ASC"
     if stations:
         acursor.execute(
             f"SELECT station, valid, {colextra} {sqlcols} from {table} "
             f"WHERE {metalimiter} valid >= %s and valid < %s and "
-            f"station in %s {rlimiter} ORDER by valid ASC",
+            f"station in %s {rlimiter} ORDER by valid {sorder}",
             (sts, ets, tuple(stations)),
         )
     else:
         acursor.execute(
             f"SELECT station, valid, {colextra} {sqlcols} from {table} "
             f"WHERE {metalimiter} valid >= %s and valid < %s {rlimiter} "
-            "ORDER by valid ASC",
+            f"ORDER by valid {sorder}",
             (sts, ets),
         )
 
@@ -295,11 +300,15 @@ def application(environ, start_response):
             )
         )
         sio.write("#DEBUG: Entries Found -> %s\n" % (acursor.rowcount,))
-    sio.write(f"station{rD}valid{rD}")
-    if gisextra:
-        sio.write(f"lon{rD}lat{rD}")
-    # hack to convert tmpf as tmpc to tmpc
-    sio.write("%s\n" % (rD.join([c.split(" as ")[-1] for c in querycols]),))
+    nometa = "nometa" in form
+    if not nometa:
+        sio.write(f"station{rD}valid{rD}")
+        if gisextra:
+            sio.write(f"lon{rD}lat{rD}")
+        # hack to convert tmpf as tmpc to tmpc
+        sio.write(
+            "%s\n" % (rD.join([c.split(" as ")[-1] for c in querycols]),)
+        )
 
     ff = {
         "wxcodes": fmt_wxcodes,
@@ -319,8 +328,11 @@ def application(environ, start_response):
     formatters = [ff.get(col, fmt_f2) for col in querycols]
 
     for rownum, row in enumerate(acursor):
-        sio.write(row[0] + rD)
-        sio.write((row[1].astimezone(tzinfo)).strftime("%Y-%m-%d %H:%M") + rD)
+        if not nometa:
+            sio.write(row[0] + rD)
+            sio.write(
+                (row[1].astimezone(tzinfo)).strftime("%Y-%m-%d %H:%M") + rD
+            )
         if gisextra:
             sio.write(f"{row[2]:.4f}{rD}{row[3]:.4f}{rD}")
         sio.write(
