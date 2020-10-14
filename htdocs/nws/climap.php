@@ -65,6 +65,7 @@ $t->content = <<<EOF
 	<option value="precip_month">Precipitation this month</option>
 	<option value="precip_jan1">Precipitation since January 1</option>
 	<option value="precip_jan1_normal">Precipitation since January 1 Normal</option>
+	<option value="precip_jan1_depart">Precipitation since January 1 Departure</option>
     <option value="precip_jun1">Precipitation since June 1</option>
     <option value="precip_jun1_normal">Precipitation since June 1 Normal</option>
 	<option value="precip_dec1">Precipitation since December 1</option>
