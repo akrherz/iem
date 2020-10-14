@@ -167,7 +167,7 @@ def plotter(fdict):
         clncfn = iemre.get_dailyc_mrms_ncname()
         ncvar = "p01d"
         source = "MRMS Q3"
-        subtitle = "NOAA MRMS Project, GaugeCorr and RadarOnly"
+        subtitle = "NOAA MRMS Project, MultiSensorPass2 and RadarOnly"
     elif src == "iemre":
         ncfn = iemre.get_daily_ncname(sdate.year)
         clncfn = iemre.get_dailyc_ncname()

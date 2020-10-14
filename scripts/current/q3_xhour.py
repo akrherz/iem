@@ -31,8 +31,8 @@ def doit(ts, hours):
     while now < ets:
         gmt = now.astimezone(pytz.utc)
         gribfn = None
-        for prefix in ["GaugeCorr", "RadarOnly"]:
-            gribfn = mrms.fetch(prefix + "_QPE_01H", gmt)
+        for prefix in ["MultiSensor_QPE_01H_Pass2", "RadarOnly_QPE_01H"]:
+            gribfn = mrms.fetch(prefix, gmt)
             if gribfn is None:
                 continue
             break

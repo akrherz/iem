@@ -36,7 +36,7 @@ def run(ts):
         if gmtts > utcnow:
             continue
         gribfn = None
-        for prefix in ["GaugeCorr_QPE_01H", "RadarOnly_QPE_01H"]:
+        for prefix in ["MultiSensor_QPE_01H_Pass2", "RadarOnly_QPE_01H"]:
             fn = mrms.fetch(prefix, gmtts)
             if fn is None:
                 continue

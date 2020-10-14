@@ -115,7 +115,7 @@ def plotter(fdict):
         % (threshold,),
         subtitle=(
             "valid %s: based on per calendar day "
-            "estimated preciptation, GaugeCorr and "
+            "estimated preciptation, MultiSensorPass2 and "
             "RadarOnly products"
         )
         % (date.strftime("%-d %b %Y"),),
