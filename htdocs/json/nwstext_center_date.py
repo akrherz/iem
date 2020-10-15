@@ -44,12 +44,14 @@ def application(environ, start_response):
         """
 
     acursor.execute(
-        "SELECT data from products where source = %s and entered >= %s and "
+        "SELECT data, to_char(entered at time zone 'UTC', "
+        "'YYYY-MM-DDThh24:MI:00Z') from products "
+        "where source = %s and entered >= %s and "
         f"entered < %s {pil_limiter} ORDER by entered ASC",
         (center, sts, ets),
     )
     for row in acursor:
-        root["products"].append({"data": row[0]})
+        root["products"].append({"data": row[0], "entered": row[1]})
 
     if cb is None:
         data = json.dumps(root)
