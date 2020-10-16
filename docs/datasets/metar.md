@@ -6,7 +6,7 @@ The primary format that worldwide airport weather station data is reported in is
 
 * __Download Interface__: [IEM On-Demand](https://mesonet.agron.iastate.edu/request/download.phtml)
 * __Spatial Domain__: Worldwide
-* __Temporal Domain__: 1928-present (US), 2012-present (Worldwide)
+* __Temporal Domain__: 1928-present
 
 ### Justification for processing
 
@@ -36,3 +36,12 @@ In general, the ASOS stations operate in local standard time for the entire year
 
 Not all stations have DSM and/or CLI products, so the manual totaling provides a minimum accounting.  The complication is that this total does not cover the same period that a CLI/DSM product does.  So complicated!
 
+3. Please explain the temperature units, storage and processing.
+
+This is why we can not have nice things.  The following discussion generally applies to the US observation sites.  No matter what you see in various data feeds, the ASOS stations internally store their temperatures in **whole degree Fahrenheit**. The issues happen when the station transmits the data in whole degree Celsius and thus not have enough precision to covert back to Fahrenheit.  For example, if the station observed a 78F temperature and then transmitted a 26C value, that 26C value converts back to 78.8F, which rounds to 79F.  And down the rabbit-hole we go!
+
+The IEM's archive of ASOS/METAR data comes from 3 main sources and some minor auxillary ones.  The main source is the NOAA satellite feed, called NOAAPort.  This feed provides data in METAR format, so the transmitted units are always whole degree Celsius, but sometimes the METAR `T-group` is included, so there is enough added precision to reliabily convert back to whole degree Fahrenheit.  The IEM's processing attempts to prioritize those METARs that include the `T-group`, so that reliable Fahrenheit storage can occur.
+
+The next main source is from the MADIS 5-minute ASOS dataset, previously called High Frequency METAR.  This data feed has a significant issue whereby the transmitted data from the FAA to the NWS is only in whole degree Celsius.  Such data can not be reliably converted back to whole degree Fahrenheit.  For this reason, the IEM database stores these values as missing and they are not included in the data download.  BUT, for those that really want this information, these values are included in the IEM-encoded raw METAR string that you can download with the data.  You can find further discussion on this [IEM News Item](https://mesonet.agron.iastate.edu/onsite/news.phtml?id=1290).
+
+The third main source is from the [NCEI ISD](https://www.ncdc.noaa.gov/isd).  At this time, there are no known issues with the temperature data in this feed being reliable for whole degree Fahrenheit.
