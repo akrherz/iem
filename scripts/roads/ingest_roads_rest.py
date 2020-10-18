@@ -77,7 +77,7 @@ ROADCOND = {
     "partially covered with snow": 39,
     "partially covered with ice": 27,
     "partially covered with slush": 56,
-    "partially covered with mix": 15,
+    "partially covered with mixed": 15,
     "completely covered with frost": 11,
     "completely covered with snow": 47,
     "completely covered with ice": 35,
@@ -208,7 +208,7 @@ def main():
         raw = props["HL_PAVEMENT_CONDITION"]
         if raw is None:
             continue
-        cond = ROADCOND.get(raw)
+        cond = ROADCOND.get(raw.lower())
         if cond is None:
             print(
                 ("ingest_roads_reset longname '%s' has unknown cond '%s'\n%s")
