@@ -213,7 +213,7 @@ def main():
             print(
                 ("ingest_roads_reset longname '%s' has unknown cond '%s'\n%s")
                 % (
-                    props["LONGNAME"],
+                    props["LONG_NAME"],
                     props["HL_PAVEMENT_CONDITION"],
                     json.dumps(
                         props, sort_keys=True, indent=4, separators=(",", ": ")
