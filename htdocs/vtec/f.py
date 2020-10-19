@@ -23,7 +23,8 @@ def get_data(ctx):
         (
             "SELECT max(report) as r, sumtxt(name::text || ', ') as cnties, "
             "max(case when is_emergency then 1 else 0 end), "
-            "max(case when is_pds then 1 else 0 end) from "
+            "max(case when is_pds then 1 else 0 end), "
+            "max(updated at time zone 'UTC') from "
             f"{table} w JOIN ugcs u on (w.gid = u.gid) WHERE "
             "w.wfo = %s and phenomena = %s and significance = %s "
             "and eventid = %s"
@@ -42,6 +43,7 @@ def get_data(ctx):
     ctx["desc"] = "" if row[1] is None else html_escape(row[1][:-2])
     ctx["is_emergency"] = row[2] == 1
     ctx["is_pds"] = row[3] == 1
+    ctx["updated"] = row[4]
 
 
 def as_html(ctx):
@@ -67,7 +69,7 @@ def as_html(ctx):
     ctx["ogimg"] = (
         "https://mesonet.agron.iastate.edu/plotting/auto/plot/208/"
         "network:WFO::wfo:%s::year:%s::phenomenav:%s::significancev:%s::"
-        "etn:%s.png"
+        "etn:%s"
     ) % (
         ctx["wfo4"] if ctx["wfo4"].startswith("P") else ctx["wfo4"][-3:],
         ctx["year"],
@@ -77,9 +79,9 @@ def as_html(ctx):
     )
     if ctx["valid"] is not None:
         ctx["ogurl"] += "_" + ctx["valid"].strftime("%Y-%m-%dT%H:%MZ")
-        ctx["ogimg"] = "%s::valid:%s.png" % (
-            ctx["ogimg"][:-4],
+        ctx["ogimg"] += "::valid:%s::_updated:%s" % (
             ctx["valid"].strftime("%Y-%m-%d%%20%H%M"),
+            ctx["updated"].strftime("%Y-%m-%d%%20%H%M"),
         )
     return (
         """
@@ -90,7 +92,7 @@ def as_html(ctx):
 <title>%(ogtitle)s</title>
 <meta property="og:title" content="%(ogtitle)s">
 <meta property="og:description" content="%(desc)s">
-<meta property="og:image" content="%(ogimg)s">
+<meta property="og:image" content="%(ogimg)s.png">
 <meta property="og:url" content="%(ogurl)s">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@akrherz">
