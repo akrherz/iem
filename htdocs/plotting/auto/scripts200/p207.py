@@ -270,11 +270,13 @@ def add_zeros(df, ctx):
             df.loc[df2[df2["val"] >= (maxval * 0.2)].index, USEME] = True
             df.loc[df2[df2["val"] >= (maxval * 0.2)].index, "plotme"] = True
 
-    return pd.concat(
-        [df, GeoDataFrame(newrows, geometry="geo")],
-        ignore_index=True,
-        sort=False,
-    )
+    if newrows:
+        df = pd.concat(
+            [df, GeoDataFrame(newrows, geometry="geo")],
+            ignore_index=True,
+            sort=False,
+        )
+    return df
 
 
 def do_analysis(df, ctx):
