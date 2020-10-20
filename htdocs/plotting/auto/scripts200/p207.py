@@ -134,7 +134,7 @@ def get_description():
             type="select",
             options=PDICT2,
             label="Which SciPy.interpolate.Rbf function to use? r=grid size",
-            default="thin_plate",
+            default="linear",
             name="f",
         ),
         dict(
@@ -235,47 +235,67 @@ def add_zeros(df, ctx):
     """ Add values of zero where we believe appropriate."""
     cellsize = ctx["sz"] * 1000.0
     newrows = []
-    # loop over the grid looking for spots to add a zero
-    for y in np.arange(ctx["bnds2163"][1], ctx["bnds2163"][3], cellsize):
-        for x in np.arange(ctx["bnds2163"][0], ctx["bnds2163"][2], cellsize):
-            # search a 2x radius for any obs
-            poly = Polygon(
-                [
-                    [x - cellsize, y - cellsize],
-                    [x - cellsize, y + cellsize],
-                    [x + cellsize, y + cellsize],
-                    [x + cellsize, y - cellsize],
-                ]
-            )
-            df2 = df[df["geo"].within(poly)]
-            if df2.empty:
+    if ctx["z"] in ["yes", "plot"]:
+        # loop over the grid looking for spots to add a zero
+        for y in np.arange(
+            ctx["bnds2163"][1], ctx["bnds2163"][3], cellsize * 3
+        ):
+            for x in np.arange(
+                ctx["bnds2163"][0], ctx["bnds2163"][2], cellsize * 3
+            ):
+                # search a 2x radius for any obs
+                poly = Polygon(
+                    [
+                        [x - cellsize * 1.5, y - cellsize * 1.5],
+                        [x - cellsize * 1.5, y + cellsize * 1.5],
+                        [x + cellsize * 1.5, y + cellsize * 1.5],
+                        [x + cellsize * 1.5, y - cellsize * 1.5],
+                    ]
+                )
+                df2 = df[df["geo"].within(poly)]
+                if not df2.empty:
+                    continue
                 # Add a zero at this "point"
                 (lon, lat) = T2163_4326.transform(x, y)
-                if ctx["z"] != "no":
-                    newrows.append(
-                        {
-                            "geo": Point(x, y),
-                            "lon": lon,
-                            "lat": lat,
-                            "val": 0,
-                            "nwsli": "Z%s" % (len(newrows) + 1,),
-                            USEME: True,
-                            "plotme": False,
-                            "state": "Z",
-                        }
-                    )
-                continue
-            # For this grid cell, remove any values 20% of the max
-            maxval = df.at[df2.index[0], "val"]
-            df.loc[df2[df2["val"] >= (maxval * 0.2)].index, USEME] = True
-            df.loc[df2[df2["val"] >= (maxval * 0.2)].index, "plotme"] = True
-
+                newrows.append(
+                    {
+                        "geo": Point(x, y),
+                        "lon": lon,
+                        "lat": lat,
+                        "val": 0,
+                        "nwsli": "Z%s" % (len(newrows) + 1,),
+                        USEME: True,
+                        "plotme": False,
+                        "state": "Z",
+                    }
+                )
     if newrows:
         df = pd.concat(
             [df, GeoDataFrame(newrows, geometry="geo")],
             ignore_index=True,
             sort=False,
         )
+    # Loop again, figuring out which points we want to keep
+    for y in np.arange(ctx["bnds2163"][1], ctx["bnds2163"][3], cellsize):
+        for x in np.arange(ctx["bnds2163"][0], ctx["bnds2163"][2], cellsize):
+            # search a 2x radius for any obs
+            poly = Polygon(
+                [
+                    [x - cellsize / 2.0, y - cellsize / 2.0],
+                    [x - cellsize / 2.0, y + cellsize / 2.0],
+                    [x + cellsize / 2.0, y + cellsize / 2.0],
+                    [x + cellsize / 2.0, y - cellsize / 2.0],
+                ]
+            )
+            df2 = df[df["geo"].within(poly)]
+            if df2.empty:
+                continue
+            # For this grid cell, remove any values < 80% of the max
+            maxval = df.at[df2.index[0], "val"]
+            if maxval == 0:
+                continue
+            df.loc[df2[df2["val"] >= (maxval * 0.2)].index, USEME] = True
+            df.loc[df2[df2["val"] >= (maxval * 0.2)].index, "plotme"] = True
     return df
 
 
@@ -289,8 +309,9 @@ def do_analysis(df, ctx):
         .reset_index()
     )
     sz = ctx["sz"] * 1000.0
-    xi = np.arange(ctx["bnds2163"][0], ctx["bnds2163"][2] + sz, sz)
-    yi = np.arange(ctx["bnds2163"][1], ctx["bnds2163"][3] + sz, sz)
+    # Introduce some jitter
+    xi = np.arange(ctx["bnds2163"][0], ctx["bnds2163"][2] + sz, sz / 1.9)
+    yi = np.arange(ctx["bnds2163"][1], ctx["bnds2163"][3] + sz, sz / 1.9)
     xi, yi = np.meshgrid(xi, yi)
     lons, lats = T2163_4326.transform(xi, yi)
     gridder = Rbf(
@@ -301,8 +322,18 @@ def do_analysis(df, ctx):
     )
     vals = gridder(xi, yi)
     vals[np.isnan(vals)] = 0
+    vals[vals < 0] = 0
     # Apply a smoother
-    return zoom(lons, 3), zoom(lats, 3), zoom(vals, 3)
+    return lons, lats, vals
+
+
+def prettyprint(val):
+    """Make trace pretty."""
+    if val == 0:
+        return "0"
+    if 0 < val < 0.1:
+        return "T"
+    return "%.1f" % (val,)
 
 
 def plotter(fdict):
@@ -320,6 +351,7 @@ def plotter(fdict):
     ctx["bnds2163"] = compute_grid_bounds(ctx)
     # add zeros and QC
     df = add_zeros(df, ctx)
+    df["label"] = df["val"].apply(prettyprint)
     # do gridding
     df2 = df[df[USEME]]
     lons, lats, vals = do_analysis(df2, ctx)
@@ -365,8 +397,8 @@ def plotter(fdict):
         mp.plot_values(
             df2["lon"].values,
             df2["lat"].values,
-            df2["val"].values,
-            fmt="%.1f",
+            df2["label"].values,
+            fmt="%s",
             labelbuffer=2,
         )
     if ctx["z"] == "plot":
@@ -385,13 +417,16 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
+    fig, _df = plotter(
         dict(
-            csector="KS",
-            endts="2020-01-29 1000",
-            hours=48,
-            z="plot",
+            csector="IA",
+            endts="2020-10-19 2000",
+            hours=12,
+            z="yes",
             p="both",
             coop="yes",
+            sz=15,
+            f="linear",
         )
     )
+    fig.savefig("/tmp/test.png")
