@@ -123,8 +123,9 @@ $ys = yearSelect($minyear, $year);
 $plot1 = sprintf("/plotting/auto/plot/17/month:%s"
       ."::year:%s::station:%s::network:%s::dpi:100.png", $month, 
       $year, $station, $network);
-$plot2 = sprintf("/plotting/month/rainfall_plot.php?month=%s&amp;".
-      "year=%s&amp;network=%s&amp;station=%s", $month, $year, $network, $station);
+$plot2 = sprintf(
+    "/plotting/auto/plot/17/month:%s::year:%s::station:%s". 
+    "::network:%s::p:precip.png", $month, $year, $station, $network);
 
 $jsextracaller = isset($_GET["year"]) ? "go();": "";
 $t->jsextra = <<<EOM

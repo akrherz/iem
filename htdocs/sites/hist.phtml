@@ -235,7 +235,7 @@ $db[ $row["dvalid"] ] = Array("content"=>$str, "cv"=>$row["cv"]);
 The bars are the observations and the dots are climatology.
 
 <h3>Daily Rainfall</h3>
-<img src="/plotting/month/rainfall_plot.php?network=${network}&station=${station}&month=${month}&year=${year}" class="img img-responsive">
+<img src="/plotting/auto/plot/17/month:{$month}::year:{$year}::station:{$station}::network:{$network}::p:precip.png" class="img img-responsive">
 <br /><strong>Description:</strong> This chart is of daily precipitation for the month. 
 The red line would be an average month while the blue line and bars are observations.
 
@@ -244,8 +244,6 @@ The red line would be an average month while the blue line and bars are observat
 <br /><strong>Description:</strong> This chart is of the daily average wind speeds.
 EOM;
  
- sprintf('<p><img src="/plotting/month/rainfall_plot.php?network=%s&station=%s&month=%s&year=%s"><br /><strong>Description:</strong> Here is a chart of the monthly precipitation data.  The red line would be an average month while the blue line and bars are observations.',
-     $network, $station, $month, $year);
  
 } else {
 	$t->title = sprintf("%s Network Summary for %s", $network, $nicedate);

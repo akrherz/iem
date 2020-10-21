@@ -221,7 +221,10 @@ data = {
                     "label": "Comparison of Multi-Month Totals/Averages",
                 },
                 {"id": "55", "label": "Daily Climatology Comparison"},
-                {"id": "17", "label": "Daily High/Low Temps with Climatology"},
+                {
+                    "id": "17",
+                    "label": "Daily High/Low Temps or Precip with Climatology",
+                },
                 {
                     "id": "129",
                     "label": "Daily Observation Percentiles/Frequencies by Month",

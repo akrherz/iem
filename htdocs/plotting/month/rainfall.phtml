@@ -63,7 +63,7 @@ if (strlen($station) > 0 ) {
 <input type="submit" value="Make Plot">
 </form>
 
-<p><img src="rainfall_plot.php?station={$station}&month={$month}&year={$year}" alt="Time Series" />
+<p><img src="/plotting/auto/plot/17/month:{$month}::year:{$year}::station:{$station}::network:{$network}::p:precip.png" alt="Time Series" />
 EOF;
 } else { 
 	$nselect = networkSelect($network, "");
