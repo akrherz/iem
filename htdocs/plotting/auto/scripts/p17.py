@@ -197,7 +197,7 @@ def do_temperature_plot(ctx):
     """Make the temperature plot."""
     ax = ctx["fig"].gca()
     df = ctx["df"]
-    if not df[pd.isna(df["climo_high"])].empty:
+    if df["climo_high"].notnull().any():
         ax.plot(
             df.index.values,
             df["climo_high"].values,
