@@ -88,7 +88,6 @@ ROADCOND = {
     "completely covered with mixed snow ice or slush": 23,
     "icy bridges": 27,
     "seasonal": 0,
-    "Seasonal": 0,
     "seasonal roadway conditions": 0,
     "impassable": 86,
 }

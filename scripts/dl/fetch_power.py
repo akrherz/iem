@@ -60,7 +60,7 @@ def main(argv):
             LOG.debug(str(js))
             continue
         fn = js["outputs"]["netcdf"]
-        req = requests.get(fn, timeout=60, stream=True)
+        req = exponential_backoff(requests.get, fn, timeout=60, stream=True)
         ncfn = "/tmp/power%s.nc" % (year,)
         with open(ncfn, "wb") as fh:
             for chunk in req.iter_content(chunk_size=1024):

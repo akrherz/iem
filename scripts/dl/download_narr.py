@@ -12,7 +12,7 @@ import subprocess
 
 import requests
 import pygrib
-from pyiem.util import get_properties, logger
+from pyiem.util import get_properties, logger, exponential_backoff
 
 LOG = logger()
 TMP = "/mesonet/tmp"
@@ -82,7 +82,9 @@ def fetch_rda(year, month):
             "https://rda.ucar.edu/data/ds608.0/3HRLY/"
             "%i/NARRsfc_%i%02i_%s.tar"
         ) % (year, year, month, day)
-        req = requests.get(uri, timeout=30, cookies=cookies, stream=True)
+        req = exponential_backoff(
+            requests.get, uri, timeout=30, cookies=cookies, stream=True
+        )
         tmpfn = "%s/narr.tar" % (TMP,)
         with open(tmpfn, "wb") as fh:
             for chunk in req.iter_content(chunk_size=1024):

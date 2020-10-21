@@ -7,7 +7,7 @@ import tempfile
 import os
 
 import requests
-from pyiem.util import logger, utc
+from pyiem.util import logger, utc, exponential_backoff
 
 LOG = logger()
 
@@ -23,9 +23,12 @@ def do(ts):
         ) + "%02i" % (hr,)
 
         try:
-            req = requests.get(uri, timeout=60)
-            if req.status_code != 200:
-                raise Exception("status code is %s" % (req.status_code,))
+            req = exponential_backoff(requests.get, uri, timeout=60)
+            if req is None or req.status_code != 200:
+                raise Exception(
+                    "status code is %s"
+                    % (0 if req is None else req.status_code,)
+                )
         except Exception:
             LOG.info("download failed for: %s", uri)
             continue

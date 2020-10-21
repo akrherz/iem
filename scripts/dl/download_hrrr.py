@@ -53,8 +53,8 @@ def fetch(valid):
             "wrfprsf00.grib2.idx"
         )
     )
-    req = requests.get(uri, timeout=30)
-    if req.status_code != 200:
+    req = exponential_backoff(requests.get, uri, timeout=30)
+    if req is None or req.status_code != 200:
         LOG.info("failed to get idx %s", uri)
         return
 
