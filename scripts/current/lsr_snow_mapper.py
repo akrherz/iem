@@ -34,20 +34,20 @@ def main():
     """Go Main Go."""
     url = (
         "http://iem.local/plotting/auto/plot/207/t:state::csector:IA"
-        "::p:both::hours:12.png"
+        "::p:both::hours:12::sz:25.png"
     )
     do(url, "lsr_snowfall.png")
 
     url = (
         "http://iem.local/plotting/auto/plot/207/t:state::csector:IA"
-        "::p:contour::hours:12.png"
+        "::p:contour::hours:12::sz:25.png"
     )
     do(url, "lsr_snowfall_nv.png")
 
     # -----------------
     url = (
         "http://iem.local/plotting/auto/plot/207/t:state::csector:midwest"
-        "::p:contour::hours:12.png"
+        "::p:contour::hours:12::sz:25.png"
     )
     do(url, "mw_lsr_snowfall.png")
 
