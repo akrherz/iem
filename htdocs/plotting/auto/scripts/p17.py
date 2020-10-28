@@ -214,7 +214,7 @@ def do_temperature_plot(ctx):
             color="skyblue",
             label="Climate Low",
         )
-    if not df[pd.isna(df["max_tmpf"])].empty:
+    if not all(pd.isnull(df["max_tmpf"])):
         ax.bar(
             df.index.values - 0.3,
             df["max_tmpf"].values,
@@ -238,7 +238,7 @@ def do_temperature_plot(ctx):
         ax.set_ylim(0, 1)
 
     i = 0
-    if not df[pd.isna(df["max_tmpf"])].empty:
+    if not all(pd.isnull(df["max_tmpf"])):
         for _, row in df.iterrows():
             if np.isnan(row["max_tmpf"]) or np.isnan(row["min_tmpf"]):
                 i += 1
@@ -297,11 +297,5 @@ def plotter(fdict):
 
 if __name__ == "__main__":
     plotter(
-        {
-            "month": 10,
-            "year": 2020,
-            "station": "DSM",
-            "network": "IA_ASOS",
-            "p": "precip",
-        }
+        {"month": 10, "year": 2020, "station": "MULM4", "network": "MI_DCP"}
     )
