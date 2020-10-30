@@ -10,18 +10,27 @@
  $t->thispage = "iem-sites";
  $t->title = "Satellite Cloud Product";
  $t->sites_current = "scp";
+$sortdir = isset($_GET["sortdir"]) ? xssafe($_GET["sortdir"]) : $_GET["sortdir"];
  $year = isset($_GET["year"])? intval($_GET["year"]): date("Y");
  $month = isset($_GET["month"])? intval($_GET["month"]): date("m");
  $day = isset($_GET["day"])? intval($_GET["day"]): date("d");
  $date = mktime(0,0,0,$month, $day, $year);
  
- if ($metadata["archive_begin"]){
-    $startyear = intval(date("Y", $metadata["archive_begin"]));
+$sortopts = Array(
+    "asc" => "Ascending",
+    "desc" => "Descending",
+);
+$sortform = make_select("sortdir", $sortdir, $sortopts);
+
+$startyear = 1993;
+if ($metadata["archive_begin"]){
+    $astart = intval(date("Y", $metadata["archive_begin"]));
+    if ($astart > $startyear){
+        $startyear = $astart;
+    }
     if ($date < $metadata['archive_begin']){
         $date = $metadata['archive_begin'];
     }
-} else {
-    $startyear = 1993;
 }
 
 $wsuri = sprintf("http://iem.local/api/1/scp.json?station=%s&date=%s",
@@ -41,35 +50,58 @@ foreach($possible as $value => $label){
     if (array_key_exists($lookup, $json["data"][0])){
         $birds[] = $value;
         $header .= "<th colspan=\"4\">Satellite $label</th>";
-        $header2 .= "<th>Mid</th><th>High</th><th>Levels</th><th>ECA</th>";
+        $header2 .= "<th>Mid</th><th>High</th><th>Levels kft</th><th>ECA</th>";
     }
+}
+
+function cldtop($val1, $val2){
+    if ($val1 === null || $val2 === null){
+        return "-";
+    }
+    return sprintf("%s-%s", $val1 / 1000, $val2 / 1000);
+}
+function skyc($coverage, $level){
+    $res = "";
+    if ($coverage !== null){
+        $res .= $coverage;
+    }
+    if ($level > 0){
+        $res .= sprintf("@%s<br />", $level);
+    }
+    return $res;
 }
 
 $table = <<<EOM
 <table class="table table-striped table-bordered">
 <thead>
 <tr><th rowspan="2">SCP Valid UTC</th>$header<th colspan="2">ASOS METAR Report</th></tr>
-<tr>$header2<th>Levels</th><th>METAR</th></tr> 
+<tr>$header2<th>Levels ft</th><th>METAR</th></tr> 
 </thead>
 <tbody>
 EOM;
-foreach($json["data"] as $key => $row){
+$data = $json["data"];
+if ($sortdir == "desc"){
+    $data = array_reverse($data);
+}
+foreach($data as $key => $row){
     $table .= sprintf("<tr><td>%sZ</td>", gmdate("Hi", strtotime($row["utc_scp_valid"])));
     foreach($birds as $b){
         $table .= sprintf(
-            "<td>%s</td><td>%s</td><td>%s - %s</td><td>%s</td>",
-            $row["mid_$b"], $row["high_$b"], $row["cldtop1_$b"],
-            $row["cldtop2_$b"], $row["eca_$b"]);
+            "<td>%s</td><td>%s</td><td>%s</td><td>%s</td>",
+            $row["mid_$b"], $row["high_$b"],
+            cldtop($row["cldtop1_$b"], $row["cldtop2_$b"]), $row["eca_$b"]);
     }
     $table .= sprintf(
-        "<td>%s %s<br />%s %s<br />%s %s<br />%s %s<td>%s</td></tr>",
-        $row["skyc1"], $row["skyl1"],$row["skyc2"], $row["skyl2"],
-        $row["skyc3"], $row["skyl3"], $row["skyc4"], $row["skyl4"],
+        "<td>%s %s %s %s<td>%s</td></tr>",
+        skyc($row["skyc1"], $row["skyl1"]),
+        skyc($row["skyc2"], $row["skyl2"]),
+        skyc($row["skyc3"], $row["skyl3"]),
+        skyc($row["skyc4"], $row["skyl4"]),
         $row["metar"]);
 }
 $table .= "</tbody></table>";
 
-$ys = yearSelect($startyear,date("Y", $date));
+$ys = yearSelect($startyear, date("Y", $date));
 $ms = monthSelect(date("m", $date));
 $ds = daySelect(date("d", $date));
 
@@ -80,7 +112,11 @@ $t->content = <<<EOF
 <p><a href="https://www.nesdis.noaa.gov/">NESDIS</a> produces a 
 <a href="https://www.ospo.noaa.gov/Products/atmosphere/soundings/index.html">Satellite Cloud Product</a> (SCP)
 that supplements the ASOS ceilometer readings.  This page merges the SCP data
-with the METAR observations for a given UTC date.</p>
+with the METAR observations for a given <strong>UTC date</strong>. Cloud level
+values are presented in thousands of feet (kft) for the SCP.  An 
+<a href="/api/1/docs#/default/service_scp_json_get">IEM Web Service</a> provided
+the following <a href="$exturi">JSON dataset</a> for this page. Data is available
+for some sites back to 1993.</p>
 
 <form method="GET">
 <input type="hidden" name="station" value="$station">
@@ -90,6 +126,8 @@ Year: {$ys}
 Month: {$ms}
 
 Day:{$ds}
+
+Time Order:{$sortform}
 <input type="submit" value="View Date">
 
 </form>

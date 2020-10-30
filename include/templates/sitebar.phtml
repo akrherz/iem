@@ -93,10 +93,12 @@ foreach($o as $key => $val)
 }
 
 if (preg_match('/ASOS|AWOS/', $network) > 0){
-    $uri = sprintf("/sites/scp.php?station=%s&amp;network=%s", $station, $network);
-    echo sprintf("<a href=\"%s\" class=\"btn btn-default\"><span class=\"fa fa-cloud\"></span> Satellite Cloud Product</a>", 
-            $uri);
-	$uri = sprintf("/request/download.phtml?network=%s", $network);
+    if ($metadata["country"] == "US") {
+        $uri = sprintf("/sites/scp.php?station=%s&amp;network=%s", $station, $network);
+        echo sprintf("<a href=\"%s\" class=\"btn btn-default\"><span class=\"fa fa-cloud\"></span> Satellite Cloud Product</a>", 
+                $uri);
+    }
+    $uri = sprintf("/request/download.phtml?network=%s", $network);
 	echo sprintf("<a href=\"%s\" class=\"btn btn-default\"><span class=\"fa fa-download\"></span> Download</a>", 
 			$uri);
 }elseif (preg_match('/DCP/', $network) > 0){
