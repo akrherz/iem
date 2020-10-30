@@ -82,11 +82,8 @@ def plotter(fdict):
     elnino = []
     elninovalid = []
     cursor.execute(
-        """
-        SELECT anom_34, monthdate from elnino
-        where monthdate >= %s and monthdate < %s
-        ORDER by monthdate ASC
-    """,
+        "SELECT anom_34, monthdate from elnino where monthdate >= %s and "
+        "monthdate < %s ORDER by monthdate ASC",
         (sts, ets),
     )
     for row in cursor:
@@ -96,13 +93,11 @@ def plotter(fdict):
     elnino = np.array(elnino)
 
     df = read_sql(
-        """
+        f"""
      WITH climo2 as (
          SELECT year, month, avg((high+low)/2.), sum(precip),
          avg(high) as avg_high, avg(low) as avg_low
-         from """
-        + table
-        + """ where station = %s
+         from {table} where station = %s
          and day < %s GROUP by year, month),
      climo as (
          select month, avg(avg) as t, avg(sum) as p,
@@ -111,9 +106,7 @@ def plotter(fdict):
     obs as (
          SELECT year, month, avg((high+low)/2.), avg(high) as avg_high,
          avg(low) as avg_low,
-         sum(precip) from """
-        + table
-        + """ where station = %s
+         sum(precip) from {table} where station = %s
          and day < %s and year >= %s and year < %s GROUP by year, month)
 
     SELECT obs.year, obs.month, obs.avg - climo.t as avg_temp,
@@ -160,13 +153,12 @@ def plotter(fdict):
         xticks = xticks[::2]
         xticklabels = xticklabels[::2]
 
-    _a = "r"
-    _b = "b"
+    _a = "pink"
+    _b = "skyblue"
     if varname == "precip":
-        _a = "b"
-        _b = "r"
+        _a, _b = _b, _a
     bars = ax.bar(
-        df["date"].values,
+        df["date"].dt.date.values,
         df[varname].values,
         fc=_a,
         ec=_a,
