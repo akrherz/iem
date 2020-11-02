@@ -10,6 +10,9 @@ function wind_formatter($row){
 	if (is_null($row["drct"]) && ($row["sknt"] > 0) && ($row["sknt"] < 10)) {
 		return sprintf("VRB %.0f", $row["sknt"] * 1.15);
 	}
+	if (($row["drct"] == 0) && ($row["sknt"] == 0)) {
+		return "Calm";
+	}
 	if (is_null($row["drct"])){
 		return "M";
 	} 
