@@ -114,12 +114,20 @@ $month = isset($_GET["month"])? intval($_GET["month"]): date("m");
 $day = isset($_GET["day"])? intval($_GET["day"]): date("d");
 $metar = (isset($_GET["metar"]) && $_GET["metar"] == "1") ? "1": "0";
 $madis = (isset($_GET["madis"]) && $_GET["madis"] == "1") ? "1": "0";
+$sortdir = isset($_GET["sortdir"]) ? xssafe($_GET["sortdir"]) : $_GET["sortdir"];
 $date = mktime(0,0,0,$month, $day, $year);
 $yesterday = $date - 86400;
 $tomorrow = $date + 86400;
 if ($tomorrow > time()){
 	$tomorrow = null;
 }
+
+$sortopts = Array(
+    "asc" => "Ascending",
+    "desc" => "Descending",
+);
+$sortform = make_select("sortdir", $sortdir, $sortopts);
+
 if ($metadata["archive_begin"]){
 	$startyear = intval(date("Y", $metadata["archive_begin"]));
 	if ($date < $metadata['archive_begin']){
@@ -271,6 +279,7 @@ $content = <<<EOF
 {$ys}
 {$ms}
 {$ds}
+Time Order:{$sortform}
 <input type="submit" value="Change Date" />
 </form>
 <p>{$mbutton}</p>
@@ -398,7 +407,11 @@ EOM;
 
 $table = "";
 $i = 0;
-foreach($jobj["data"] as $bogus => $row)
+$data = $jobj["data"];
+if ($sortdir == "desc"){
+    $data = array_reverse($data);
+}
+foreach($data as $bogus => $row)
 {
     if (preg_match("/ASOS|AWOS/", $network)){
         $table .= asos_formatter($i, $row);

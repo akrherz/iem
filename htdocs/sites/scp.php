@@ -49,8 +49,8 @@ foreach($possible as $value => $label){
     $lookup = sprintf("mid_%s", $value);
     if (array_key_exists($lookup, $json["data"][0])){
         $birds[] = $value;
-        $header .= "<th colspan=\"4\">Satellite $label</th>";
-        $header2 .= "<th>Mid</th><th>High</th><th>Levels kft</th><th>ECA</th>";
+        $header .= "<th colspan=\"4\" class=\"rl\">Satellite $label</th>";
+        $header2 .= "<th>Mid Clouds</th><th>High Clouds</th><th>Levels [ft]</th><th class=\"rl\">ECA [%]</th>";
     }
 }
 
@@ -58,7 +58,7 @@ function cldtop($val1, $val2){
     if ($val1 === null || $val2 === null){
         return "-";
     }
-    return sprintf("%s-%s", $val1 / 1000, $val2 / 1000);
+    return sprintf("%s - %s", $val1, $val2);
 }
 function skyc($coverage, $level){
     $res = "";
@@ -72,9 +72,9 @@ function skyc($coverage, $level){
 }
 
 $table = <<<EOM
-<table class="table table-striped table-bordered">
+<table>
 <thead>
-<tr><th rowspan="2">SCP Valid UTC</th>$header<th colspan="2">ASOS METAR Report</th></tr>
+<tr><th rowspan="2" class="rl">SCP Valid UTC</th>$header<th colspan="2">ASOS METAR Report</th></tr>
 <tr>$header2<th>Levels ft</th><th>METAR</th></tr> 
 </thead>
 <tbody>
@@ -84,10 +84,10 @@ if ($sortdir == "desc"){
     $data = array_reverse($data);
 }
 foreach($data as $key => $row){
-    $table .= sprintf("<tr><td>%sZ</td>", gmdate("Hi", strtotime($row["utc_scp_valid"])));
+    $table .= sprintf("<tr><td class=\"rl\">%sZ</td>", gmdate("Hi", strtotime($row["utc_scp_valid"])));
     foreach($birds as $b){
         $table .= sprintf(
-            "<td>%s</td><td>%s</td><td>%s</td><td>%s</td>",
+            "<td>%s</td><td>%s</td><td>%s</td><td class=\"rl\">%s</td>",
             $row["mid_$b"], $row["high_$b"],
             cldtop($row["cldtop1_$b"], $row["cldtop2_$b"]), $row["eca_$b"]);
     }
@@ -106,6 +106,14 @@ $ms = monthSelect(date("m", $date));
 $ds = daySelect(date("d", $date));
 
 $t->content = <<<EOF
+<style>
+.rl {
+    border-right: 2px solid;
+}
+tbody>tr:nth-child(even) {
+    background-color: #dddddd;
+}
+</style>
 
 <h3>Satellite Cloud Product</h3>
 
@@ -113,7 +121,8 @@ $t->content = <<<EOF
 <a href="https://www.ospo.noaa.gov/Products/atmosphere/soundings/index.html">Satellite Cloud Product</a> (SCP)
 that supplements the ASOS ceilometer readings.  This page merges the SCP data
 with the METAR observations for a given <strong>UTC date</strong>. Cloud level
-values are presented in thousands of feet (kft) for the SCP.  An 
+values are presented in feet above ground level.  <strong>ECA</strong> represents
+estimated cloud amount expressed in percentage. An 
 <a href="/api/1/docs#/default/service_scp_json_get">IEM Web Service</a> provided
 the following <a href="$exturi">JSON dataset</a> for this page. Data is available
 for some sites back to 1993.</p>
@@ -131,6 +140,8 @@ Time Order:{$sortform}
 <input type="submit" value="View Date">
 
 </form>
+
+<p>&nbsp;</p>
 
 {$table}
 
