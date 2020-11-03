@@ -51,7 +51,11 @@ def provider2network(provider, name):
     if provider == "MesoWest":
         # get the network from the last portion of the name
         network = name.split()[-1]
-        return None if network != "VTWAC" else network
+        if network == "VTWAC":
+            return network
+        if network.endswith("DOT") and len(network) == 5:
+            return f"{network[:2]}_RWIS"
+        return None
 
     if len(provider) == 5 or provider in ["KYTC-RWIS", "NEDOR"]:
         if provider[:2] == "IA":
