@@ -111,7 +111,16 @@ def application(environ, start_response):
     # Get CGI vars
     form = parse_formvars(environ)
 
-    (sts, ets) = get_time_domain(form)
+    try:
+        sts, ets = get_time_domain(form)
+    except ValueError:
+        start_response(
+            "500 Internal Server Error", [("Content-type", "text/plain")]
+        )
+        return [
+            b"An invalid date was specified, please check that the day of the "
+            b"month exists for your selection (ie June 31st vs June 30th)."
+        ]
 
     wfoLimiter = ""
     if "wfo[]" in form:

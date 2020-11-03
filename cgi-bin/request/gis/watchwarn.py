@@ -68,7 +68,16 @@ def parse_wfo_location_group(form):
 def application(environ, start_response):
     """Go Main Go"""
     form = parse_formvars(environ)
-    sts, ets = get_time_extent(form)
+    try:
+        sts, ets = get_time_extent(form)
+    except ValueError:
+        start_response(
+            "500 Internal Server Error", [("Content-type", "text/plain")]
+        )
+        return [
+            b"An invalid date was specified, please check that the day of the "
+            b"month exists for your selection (ie June 31st vs June 30th)."
+        ]
 
     table_extra = ""
     location_group = form.get("location_group", "wfo")
