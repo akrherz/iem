@@ -61,6 +61,8 @@ def main():
         index_col=None,
         geom_col="geom",
     )
+    if df.empty:
+        return
     df.columns = [s.upper() if s != "geom" else "geom" for s in df.columns]
     df.to_file("lsr_24hour.shp", schema=SCHEMA)
     df.to_file("lsr_24hour.geojson", driver="GeoJSON")

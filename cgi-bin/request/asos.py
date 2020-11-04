@@ -259,7 +259,7 @@ def application(environ, start_response):
     elev_extra = form.get("elev", "no") == "yes"
     table = "alldata"
     metalimiter = ""
-    colextra = "0 as lon, 0 as lat, "
+    colextra = "0 as lon, 0 as lat, 0 as elev, "
     if gisextra or elev_extra:
         colextra = "ST_X(geom) as lon, ST_Y(geom) as lat, elevation, "
         table = "alldata a JOIN stations t on (a.station = t.id)"
