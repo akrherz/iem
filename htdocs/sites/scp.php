@@ -11,9 +11,9 @@
  $t->title = "Satellite Cloud Product";
  $t->sites_current = "scp";
 $sortdir = isset($_GET["sortdir"]) ? xssafe($_GET["sortdir"]) : $_GET["sortdir"];
- $year = isset($_GET["year"])? intval($_GET["year"]): date("Y");
- $month = isset($_GET["month"])? intval($_GET["month"]): date("m");
- $day = isset($_GET["day"])? intval($_GET["day"]): date("d");
+ $year = isset($_GET["year"])? intval($_GET["year"]): gmdate("Y");
+ $month = isset($_GET["month"])? intval($_GET["month"]): gmdate("m");
+ $day = isset($_GET["day"])? intval($_GET["day"]): gmdate("d");
  $date = mktime(0,0,0,$month, $day, $year);
  
 $sortopts = Array(
