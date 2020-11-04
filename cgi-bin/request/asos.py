@@ -256,11 +256,12 @@ def application(environ, start_response):
         rD = ","
 
     gisextra = form.get("latlon", "no") == "yes"
+    elev_extra = form.get("elev", "no") == "yes"
     table = "alldata"
     metalimiter = ""
     colextra = "0 as lon, 0 as lat, "
-    if gisextra:
-        colextra = "ST_X(geom) as lon, ST_Y(geom) as lat, "
+    if gisextra or elev_extra:
+        colextra = "ST_X(geom) as lon, ST_Y(geom) as lat, elevation, "
         table = "alldata a JOIN stations t on (a.station = t.id)"
         metalimiter = "(t.network ~* 'ASOS' or t.network = 'AWOS') and "
 
@@ -305,6 +306,8 @@ def application(environ, start_response):
         sio.write(f"station{rD}valid{rD}")
         if gisextra:
             sio.write(f"lon{rD}lat{rD}")
+        if elev_extra:
+            sio.write(f"elevation{rD}")
         # hack to convert tmpf as tmpc to tmpc
         sio.write(
             "%s\n" % (rD.join([c.split(" as ")[-1] for c in querycols]),)
@@ -335,11 +338,13 @@ def application(environ, start_response):
             )
         if gisextra:
             sio.write(f"{row[2]:.4f}{rD}{row[3]:.4f}{rD}")
+        if elev_extra:
+            sio.write(f"{row[4]:.2f}{rD}")
         sio.write(
             rD.join(
                 [
                     func(val, missing, trace, tzinfo)
-                    for func, val in zip(formatters, row[4:])
+                    for func, val in zip(formatters, row[5:])
                 ]
             )
             + "\n"
