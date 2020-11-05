@@ -44,7 +44,7 @@ PDICT5 = {
     "climate71": "1971-Present Climatology",
     "climate81": "1981-Present Climatology",
     "ncdc_climate71": "NCEI 1971-2000 Climatology",
-    "ncdc_climate81": "NCEI 1981-2000 Climatology",
+    "ncdc_climate81": "NCEI 1981-2010 Climatology",
 }
 UNITS = {"total_precip": "inch"}
 PRECISION = {

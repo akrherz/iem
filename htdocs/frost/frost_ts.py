@@ -67,7 +67,7 @@ def get_icond_color(model, val):
     METRO: 1-8 dry, wet, ice/snow, mix, dew, melting snow, blk ice, icing rain
     BRIDGET: 0-5 dry, frosty, icy/snowy, melting, freezing, wet
     """
-    if val is None or val < 0:
+    if val is None or val < 0 or np.ma.is_masked(val):
         return "none"
     if model == "metro":
         colors = [

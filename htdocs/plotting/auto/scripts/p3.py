@@ -228,30 +228,24 @@ def get_context(fdict):
         label = calendar.month_name[int(month)]
 
     df = read_sql(
-        """
+        f"""
     WITH climo as (
         SELECT to_char(valid, 'mmdd') as sday,
         high, low from ncdc_climate81 WHERE station = %s),
     day2day as (
         SELECT
-        extract(year from day + '"""
-        + lag
-        + """'::interval)::int as myyear,
+        extract(year from day + '{lag}'::interval)::int as myyear,
         month,
         abs(high - lag(high) OVER (ORDER by day ASC)) as dhigh,
         abs(low - lag(low) OVER (ORDER by day ASC)) as dlow,
     abs((high+low)/2. - lag((high+low)/2.) OVER (ORDER by day ASC)) as dtemp
-        from """
-        + table
-        + """ WHERE station = %s),
+        from {table} WHERE station = %s),
     agg as (
         SELECT myyear, avg(dhigh) as dhigh, avg(dlow) as dlow,
         avg(dtemp) as dtemp from day2day WHERE month in %s GROUP by myyear),
     agg2 as (
         SELECT
-        extract(year from day + '"""
-        + lag
-        + """'::interval)::int as myyear,
+        extract(year from day + '{lag}'::interval)::int as myyear,
         max(o.high) as "max-high",
         min(o.high) as "min-high",
         avg(o.high) as "avg-high",
@@ -271,9 +265,7 @@ def get_context(fdict):
         sum(case when o.low >= %s then 1 else 0 end) as "days-lows-above",
     sum(case when o.low < c.low then 1 else 0 end) as "days-lows-below-avg",
         sum(case when o.low < %s then 1 else 0 end) as "days-lows-below"
-        from """
-        + table
-        + """ o JOIN climo c on (o.sday = c.sday)
+        from {table} o JOIN climo c on (o.sday = c.sday)
       where station = %s and month in %s GROUP by myyear)
 
     SELECT b.*, a.dhigh as "delta-high", a.dlow as "delta-low",
