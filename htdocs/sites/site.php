@@ -18,7 +18,26 @@ if (isset($_GET["lat"]) &&
 		floatval($_GET["lon"]) != 0 &&
 		floatval($_GET["lon"]) != 1 &&
 		floatval($_GET["lon"]) != -1){
-	$newlat = floatval($_GET["lat"]);
+    // Log the request so to effectively do some DOS protection.
+    $pgconn = iemdb("mesosite");
+    $rs = pg_prepare(
+        $pgconn,
+        "INSERT",
+        "INSERT into weblog(client_addr, uri, referer, http_status) ".
+        "VALUES ($1, $2, $3, $4)"
+    );
+    pg_execute(
+        $pgconn,
+        "INSERT",
+        Array(
+            $_SERVER["REMOTE_ADDR"],
+            "/sites/site.php?network={$network}&station={$station}",
+            $_SERVER["HTTP_REFERER"],
+            404)
+    );
+    pg_close($pgconn);
+
+    $newlat = floatval($_GET["lat"]);
 	$newlon = floatval($_GET["lon"]);
 	$email = isset($_GET["email"]) ? xssafe($_GET["email"]): 'n/a';
 	$name = isset($_GET["name"]) ? xssafe($_GET["name"]): "n/a";
