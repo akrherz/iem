@@ -6,6 +6,7 @@ import pytz
 import numpy as np
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
+from matplotlib.font_manager import FontProperties
 from matplotlib.colorbar import ColorbarBase
 
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -83,6 +84,27 @@ def get_description():
     return desc
 
 
+def print_table(fig, df, varname):
+    """Add a pretty table."""
+    monofont = FontProperties(family="monospace")
+    ranks = df[varname].quantile(np.arange(0, 1.0001, 0.0025))
+    xpos = 0.72
+    ypos = 0.9
+    title = "Raw Percentiles (All Hours)"
+    fitbox(fig, title, 0.7, 0.95, 0.91, 0.97, ha="center", va="center")
+    fig.text(xpos - 0.01, ypos - 0.01, "Percentile   Value")
+    for (q, val) in ranks.iteritems():
+        if 0.02 < q < 0.98 and (q * 100.0 % 5) != 0:
+            continue
+        if abs(q - 0.5) < 0.001:
+            xpos = 0.85
+            ypos = 0.9
+            fig.text(xpos - 0.01, ypos - 0.01, "Percentile   Value")
+        ypos -= 0.035
+        label = f"{q * 100:-6g} {val:-6.2f}"
+        fig.text(xpos, ypos, label, fontproperties=monofont)
+
+
 def plotter(fdict):
     """ Go """
     pgconn = get_dbconn("asos")
@@ -120,7 +142,7 @@ def plotter(fdict):
             f"For Month of {date.strftime('%B')}, "
             f"{date.strftime('%b %Y')} plotted in bottom panel"
         )
-        datefmt = "%-d"
+        datefmt = "%-d\n%-I %p"
     else:
         subtitle = f"All Year, {date.year} plotted in bottom panel"
         datefmt = "%-d %b"
@@ -152,22 +174,25 @@ def plotter(fdict):
         .reset_index()
     )
     qtile = qtile.rename(columns={"level_1": "quantile"})
-    (fig, ax) = plt.subplots(2, 1)
+    fig = plt.figure(figsize=(1.91 * 6.0, 6.0))  # twitter friendly
+    tp = fig.add_axes([0.1, 0.57, 0.5, 0.33])
+    bp = fig.add_axes([0.1, 0.13, 0.6, 0.35])
+    # Plot total percentiles on the figure
+    print_table(fig, obsdf, varname)
     cmap = get_cmap(ctx["cmap"])
     for hr, gdf in qtile.groupby("hr"):
-        ax[0].plot(
+        tp.plot(
             gdf["quantile"].values * 100.0,
             gdf[varname].values,
             color=cmap(hr / 23.0),
             label=str(hr),
         )
-    ax[0].set_xlim(0, 100)
-    ax[0].grid(True)
-    ax[0].set_ylabel(PDICT[varname])
-    ax[0].set_xlabel("Percentile")
-    ax[0].set_position([0.13, 0.55, 0.71, 0.34])
+    tp.set_xlim(0, 100)
+    tp.grid(True)
+    tp.set_ylabel(PDICT[varname])
+    tp.set_xlabel("Percentile")
     cax = plt.axes(
-        [0.86, 0.55, 0.03, 0.33], frameon=False, yticks=[], xticks=[]
+        [0.613, 0.55, 0.01, 0.33], frameon=False, yticks=[], xticks=[]
     )
     cb = ColorbarBase(cax, cmap=cmap)
     cb.set_ticks(np.arange(0, 1, 4.0 / 24.0))
@@ -176,24 +201,24 @@ def plotter(fdict):
 
     thisyear = obsdf[obsdf["year"] == date.year]
     if not thisyear.empty:
-        ax[1].plot(
+        bp.plot(
             thisyear["utc_valid"].values, thisyear["quantile"].values * 100.0
         )
-        ax[1].grid(True)
-        ax[1].set_ylabel("Percentile")
-        ax[1].set_ylim(-1, 101)
-        ax[1].xaxis.set_major_formatter(
+        bp.grid(True)
+        bp.set_ylabel("Percentile")
+        bp.set_ylim(-1, 101)
+        bp.xaxis.set_major_formatter(
             mdates.DateFormatter(datefmt, tz=pytz.timezone(tzname))
         )
         if opt == "day":
-            ax[1].set_xlabel(f"Timezone: {tzname}")
+            bp.set_xlabel(f"Timezone: {tzname}")
     title = ("%s %s %s Percentiles\n%s") % (
         station,
         ctx["_nt"].sts[station]["name"],
         PDICT[varname],
         subtitle,
     )
-    fitbox(fig, title, 0.01, 0.99, 0.91, 0.99, ha="center", va="center")
+    fitbox(fig, title, 0.01, 0.59, 0.91, 0.99, ha="center", va="center")
     return fig, qtile
 
 
