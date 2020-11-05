@@ -90,7 +90,7 @@ def plotter(fdict):
 
     label = "AOA" if mydir == "above" else "below"
     ax.set_title(
-        (r"[%s] %s\nFrequency of %s Consec Days with %s %s %s$^\circ$F ")
+        ("[%s] %s\n" r"Frequency of %s Consec Days with %s %s %s$^\circ$F ")
         % (
             station,
             ctx["_nt"].sts[station]["name"],
