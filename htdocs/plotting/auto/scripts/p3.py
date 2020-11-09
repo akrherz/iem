@@ -45,7 +45,7 @@ PDICT = OrderedDict(
         ("days-lows-below-avg", "Days with Low Temp Below Average"),
     ]
 )
-
+PDICT2 = {"no": "Plot Yearly Values", "yes": "Plot Decadal Values"}
 MDICT = OrderedDict(
     [
         ("spring", "Spring (MAM)"),
@@ -94,6 +94,12 @@ def get_description():
      between the current day and previous day and then averaging those values.
      This is another measure of variability during the month.</li>
      </ul></p>
+
+    <p>You can optionally summarize by decades.  For this plot and for example,
+    the decade of the 90s represents the inclusive years 1990 thru 1999.
+    Please use care to specify start and end years that make sense for this
+    presentation.  For example, if the year is only 2020, the 2020 decade
+    values would only have one year included!</p>
     """
     today = datetime.date.today()
     desc["arguments"] = [
@@ -124,6 +130,27 @@ def get_description():
             default="-99",
             label="Threshold (optional, specify when appropriate):",
         ),
+        dict(
+            type="year",
+            default=1890,
+            label="Potential Minimum Year (inclusive) to use in plot:",
+            name="syear",
+            min=1850,
+        ),
+        dict(
+            type="year",
+            default=today.year,
+            label="Potential Maximum Year (inclusive) to use in plot:",
+            name="eyear",
+            min=1850,
+        ),
+        dict(
+            type="select",
+            options=PDICT2,
+            name="decadal",
+            default="no",
+            label="Aggregate plot by decades:",
+        ),
     ]
     return desc
 
@@ -131,6 +158,7 @@ def get_description():
 def highcharts(fdict):
     """Go high charts"""
     ctx = get_context(fdict)
+    ptinterval = "10" if ctx["decadal"] else "1"
     return (
         """
 $("#ap_container").highcharts({
@@ -157,7 +185,9 @@ yAxis: {title: {text: '"""
         pointStart: """
         + str(ctx["df"].index.min())
         + """,
-        pointInterval: 1,
+        pointInterval: """
+        + ptinterval
+        + """,
         tooltip: {
             valueDecimals: 2
         },
@@ -170,12 +200,14 @@ yAxis: {title: {text: '"""
         },
         name: '30 Year Trailing Avg',
         pointStart: """
-        + str(ctx["df"].index.min() + 30)
+        + str(ctx["df"].index.min() + (3 if ctx["decadal"] else 30))
         + """,
-        pointInterval: 1,
+        pointInterval: """
+        + ptinterval
+        + """,
             width: 2,
         data: """
-        + str(ctx["tavg"][30:])
+        + str(ctx["tavg"][(3 if ctx["decadal"] else 30) :])
         + """
         },{
             tooltip: {
@@ -187,7 +219,9 @@ yAxis: {title: {text: '"""
             pointStart: """
         + str(ctx["df"].index.min())
         + """,
-            pointInterval: 1,
+            pointInterval: """
+        + ptinterval
+        + """,
             data: """
         + str([ctx["avgv"]] * len(ctx["df"].index))
         + """
@@ -201,6 +235,10 @@ def get_context(fdict):
     """ Get the context"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
+    ctx["decadal"] = ctx.get("decadal") == "yes"
+    # Lower the start year if decadal
+    if ctx["decadal"]:
+        ctx["syear"] -= ctx["syear"] % 10
     station = ctx["station"]
     month = ctx["month"]
     ptype = ctx["type"]
@@ -227,6 +265,7 @@ def get_context(fdict):
         months = [int(month)]
         label = calendar.month_name[int(month)]
 
+    decagg = 10 if ctx["decadal"] else 1
     df = read_sql(
         f"""
     WITH climo as (
@@ -234,18 +273,19 @@ def get_context(fdict):
         high, low from ncdc_climate81 WHERE station = %s),
     day2day as (
         SELECT
-        extract(year from day + '{lag}'::interval)::int as myyear,
+        extract(year from day + '{lag}'::interval)::int / {decagg} as myyear,
         month,
         abs(high - lag(high) OVER (ORDER by day ASC)) as dhigh,
         abs(low - lag(low) OVER (ORDER by day ASC)) as dlow,
-    abs((high+low)/2. - lag((high+low)/2.) OVER (ORDER by day ASC)) as dtemp
+        abs((high+low)/2. - lag((high+low)/2.)
+            OVER (ORDER by day ASC)) as dtemp
         from {table} WHERE station = %s),
     agg as (
         SELECT myyear, avg(dhigh) as dhigh, avg(dlow) as dlow,
         avg(dtemp) as dtemp from day2day WHERE month in %s GROUP by myyear),
     agg2 as (
         SELECT
-        extract(year from day + '{lag}'::interval)::int as myyear,
+        extract(year from day + '{lag}'::interval)::int / {decagg} as myyear,
         max(o.high) as "max-high",
         min(o.high) as "min-high",
         avg(o.high) as "avg-high",
@@ -270,7 +310,9 @@ def get_context(fdict):
 
     SELECT b.*, a.dhigh as "delta-high", a.dlow as "delta-low",
     a.dtemp as "delta-temp" from agg a JOIN agg2 b
-    on (a.myyear = b.myyear) ORDER by b.myyear ASC
+    on (a.myyear = b.myyear) WHERE b.myyear * {decagg} >= %s
+    and b.myyear * {decagg} <= %s
+    ORDER by b.myyear ASC
     """,
         pgconn,
         params=(
@@ -283,11 +325,15 @@ def get_context(fdict):
             threshold,
             station,
             tuple(months),
+            ctx["syear"],
+            ctx["eyear"],
         ),
         index_col="myyear",
     )
     if df.empty:
         raise NoDataFound("No data was found for query")
+    if ctx["decadal"]:
+        df.index = df.index * 10
 
     # Figure out the max min values to add to the row
     df2 = df[df[ptype] == df[ptype].max()]
@@ -314,6 +360,11 @@ def get_context(fdict):
     tavg = [None] * 30
     for i in range(30, len(data)):
         tavg.append(np.average(data[i - 30 : i]))
+    if ctx["decadal"]:
+        tavg = [None] * 3
+        for i in range(3, len(data)):
+            tavg.append(np.average(data[i - 3 : i]))
+
     ctx["tavg"] = tavg
     # End interval is inclusive
     ctx["a1981_2010"] = df.loc[1981:2010, ptype].mean()
@@ -354,12 +405,15 @@ def plotter(fdict):
         colorbelow = "tomato"
         precision = "%.2f"
     bars = ax.bar(
-        ctx["df"].index.values - 0.4, ctx["data"], fc=colorabove, ec=colorabove
+        ctx["df"].index.values,
+        ctx["data"],
+        color=colorabove,
+        align="edge",
+        width=9 if ctx["decadal"] else 1,
     )
     for i, mybar in enumerate(bars):
         if ctx["data"][i] < ctx["avgv"]:
-            mybar.set_facecolor(colorbelow)
-            mybar.set_edgecolor(colorbelow)
+            mybar.set_color(colorbelow)
     lbl = "Avg: " + precision % (ctx["avgv"],)
     ax.axhline(ctx["avgv"], lw=2, color="k", zorder=2, label=lbl)
     lbl = "1981-2010: " + precision % (ctx["a1981_2010"],)
@@ -375,7 +429,10 @@ def plotter(fdict):
     ax.plot(
         ctx["df"].index.values, ctx["tavg"], lw=3, color="yellow", zorder=3
     )
-    ax.set_xlim(ctx["df"].index.min() - 1, ctx["df"].index.max() + 1)
+    ax.set_xlim(
+        ctx["df"].index.min() - 1,
+        ctx["df"].index.max() + (11 if ctx["decadal"] else 1),
+    )
     if ctx["ptype"].find("precip") == -1 and ctx["ptype"].find("days") == -1:
         ax.set_ylim(min(ctx["data"]) - 5, max(ctx["data"]) + 5)
 
@@ -391,10 +448,11 @@ def plotter(fdict):
 if __name__ == "__main__":
     plotter(
         dict(
-            station="TN6402",
-            network="TNCLIMATE",
-            type="delta-temp",
-            month="5",
+            station="IATDSM",
+            network="IACLIMATE",
+            type="max-high",
+            month="11",
             threshold=-99,
+            decadal="yes",
         )
     )
