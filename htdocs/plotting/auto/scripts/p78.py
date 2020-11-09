@@ -40,7 +40,8 @@ def get_description():
     desc[
         "description"
     ] = """This plot displays the average dew point at
-    a given air temperature.  The average dew point is computed by taking the
+    a given air temperature along with the envelope between the 5th and 95th
+    percentile.  The average dew point is computed by taking the
     observations of mixing ratio, averaging those, and then back computing
     the dew point temperature.  With that averaged dew point temperature a
     relative humidity value is computed."""
@@ -91,7 +92,7 @@ def plotter(fdict):
         coalesce(mslp, alti * 33.8639, 1013.25) as slp
         from alldata where station = %s
         and drct is not null and dwpf is not null and dwpf <= tmpf
-        and sknt > 3 and drct::int %% 10 = 0
+        and relh is not null
         and extract(month from valid) in %s
         and report_type = 2
     """,
@@ -100,6 +101,12 @@ def plotter(fdict):
     )
     if df.empty:
         raise NoDataFound("No Data Found.")
+    # Cull any low ob count data points
+    counts = df.groupby("tmpf").count()
+    drops = []
+    for tmpf, row in counts.iterrows():
+        if row["slp"] < 6:
+            drops.append(tmpf)
     # Convert sea level pressure to station pressure
     df["pressure"] = mcalc.add_height_to_pressure(
         df["slp"].values * units("millibars"),
@@ -117,30 +124,39 @@ def plotter(fdict):
         df["mixingratio"].values * units("kg/kg"),
     ).to(units("kPa"))
 
-    means = df.groupby("tmpf").mean().copy()
+    qtiles = df.groupby("tmpf").quantile([0.05, 0.25, 0.5, 0.75, 0.95]).copy()
+    qtiles = qtiles.reset_index()
+    # Remove low counts
+    qtiles = qtiles[~qtiles["tmpf"].isin(drops)]
     # compute dewpoint now
-    means["dwpf"] = (
-        mcalc.dewpoint(means["vapor_pressure"].values * units("kPa"))
+    qtiles["dwpf"] = (
+        mcalc.dewpoint(qtiles["vapor_pressure"].values * units("kPa"))
         .to(units("degF"))
         .m
     )
-    means.reset_index(inplace=True)
     # compute RH again
-    means["relh"] = (
+    qtiles["relh"] = (
         mcalc.relative_humidity_from_dewpoint(
-            means["tmpf"].values * units("degF"),
-            means["dwpf"].values * units("degF"),
+            qtiles["tmpf"].values * units("degF"),
+            qtiles["dwpf"].values * units("degF"),
         )
         * 100.0
     )
 
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
-    ax.bar(
-        means["tmpf"].values - 0.5,
-        means["dwpf"].values - 0.5,
-        ec="green",
-        fc="green",
-        width=1,
+    means = qtiles[qtiles["level_1"] == 0.5]
+    for l0, l1, color in zip(
+        [0.05, 0.25], [0.95, 0.75], ["lightgreen", "violet"]
+    ):
+        ax.fill_between(
+            qtiles[qtiles["level_1"] == l0]["tmpf"].values,
+            qtiles[qtiles["level_1"] == l0]["dwpf"].values,
+            qtiles[qtiles["level_1"] == l1]["dwpf"].values,
+            color=color,
+            label="%.0f-%.0f %%tile" % (l0 * 100, l1 * 100),
+        )
+    ax.plot(
+        means["tmpf"].values, means["dwpf"].values, c="blue", lw=3, label="Avg"
     )
     ax.grid(True, zorder=11)
     ab = ctx["_nt"].sts[station]["archive_begin"]
@@ -148,9 +164,9 @@ def plotter(fdict):
         raise NoDataFound("Unknown station metadata.")
     ax.set_title(
         (
-            "%s [%s]\nAverage Dew Point by Air Temperature (month=%s) "
-            "(%s-%s)\n"
-            "(must have 3+ hourly observations at the given temperature)"
+            "%s [%s]\nDew Point Distribution by Air Temperature (month=%s) "
+            "(%s-%s), n=%.0f\n"
+            "(must have 6+ hourly observations at the given temperature)"
         )
         % (
             ctx["_nt"].sts[station]["name"],
@@ -158,23 +174,26 @@ def plotter(fdict):
             month.upper(),
             ab.year,
             datetime.datetime.now().year,
+            len(df.index),
         ),
         size=10,
     )
 
-    ax.plot([0, 140], [0, 140], color="b")
+    xmin, xmax = means["tmpf"].min() - 2, means["tmpf"].max() + 2
+    ax.plot([xmin, xmax], [xmin, xmax], color="tan", lw=1.5)
+    ax.legend(loc=4, ncol=3)
     ax.set_ylabel("Dew Point [F]")
     y2 = ax.twinx()
     y2.plot(means["tmpf"].values, means["relh"].values, color="k")
     y2.set_ylabel("Relative Humidity [%] (black line)")
     y2.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     y2.set_ylim(0, 100)
-    ax.set_ylim(0, means["tmpf"].max() + 2)
-    ax.set_xlim(0, means["tmpf"].max() + 2)
+    ax.set_ylim(xmin, xmax)
+    ax.set_xlim(xmin, xmax)
     ax.set_xlabel(r"Air Temperature $^\circ$F")
 
     return fig, means[["tmpf", "dwpf", "relh"]]
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter(dict(month="nov"))
