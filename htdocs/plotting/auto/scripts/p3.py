@@ -286,6 +286,7 @@ def get_context(fdict):
     agg2 as (
         SELECT
         extract(year from day + '{lag}'::interval)::int / {decagg} as myyear,
+        max(o.year) - min(o.year) + 1 as years,
         max(o.high) as "max-high",
         min(o.high) as "min-high",
         avg(o.high) as "avg-high",
@@ -334,6 +335,17 @@ def get_context(fdict):
         raise NoDataFound("No data was found for query")
     if ctx["decadal"]:
         df.index = df.index * 10
+        # Need to fix the sum() operations above
+        for colname in [
+            "sum-precip",
+            "days-high-above",
+            "days-high-below",
+            "days-high-above-avg",
+            "days-lows-above",
+            "days-lows-below-avg",
+            "days-lows-below",
+        ]:
+            df[colname] = df[colname] / df["years"]
 
     # Figure out the max min values to add to the row
     df2 = df[df[ptype] == df[ptype].max()]
