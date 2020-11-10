@@ -219,7 +219,7 @@ def main(argv):
     for state in state_names:
         if state in ["AK", "HI", "DC"]:
             continue
-        table = "alldata_%s" % (state,)
+        table = f"alldata_{state}"
         cursor = pgconn.cursor()
         df = load_table(state, date)
         df = merge_network_obs(df, f"{state}_COOP", date)

@@ -240,19 +240,12 @@ def plotter(fdict):
         months = [ts.month, 999]
 
     cursor.execute(
-        """
-        SELECT valid, round("""
-        + varname
-        + """::numeric,0)
-        from alldata where station = %s """
-        + year_limiter
-        + """
-        and """
-        + varname
-        + """ is not null and
-        extract(month from valid) in %s
+        f"""
+        SELECT valid, round({varname}::numeric,0)
+        from alldata where station = %s {year_limiter}
+        and {varname} is not null and extract(month from valid) in %s
         ORDER by valid ASC
-    """,
+        """,
         (station, tuple(months)),
     )
 
@@ -322,10 +315,8 @@ def plotter(fdict):
     # ax.axhline(32, linestyle='-.', linewidth=2, color='k')
     # ax.set_ylim(bottom=43)
     ax.set_xlabel(
-        (
-            "* Due to timezones and leapday, there is some ambiguity"
-            " with the plotted dates"
-        )
+        "* Due to timezones and leapday, there is some ambiguity"
+        " with the plotted dates"
     )
     ax.set_position([0.1, 0.25, 0.85, 0.65])
     ax.legend(

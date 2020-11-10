@@ -251,15 +251,12 @@ def get_context(fdict):
         title = r"Dew Point at or above %s$^\circ$F" % (ctx["threshold"],)
 
     ctx["df"] = read_sql(
-        """
-     SELECT valid at time zone 'UTC' as valid,
-     drct, sknt * 1.15 as smph from alldata
-     where station = %s and
-     """
-        + limiter
-        + """ and sknt > 0 and drct >= 0 and drct <= 360
-     and extract(month from valid) in %s
-    """,
+        f"""
+        SELECT valid at time zone 'UTC' as valid,
+        drct, sknt * 1.15 as smph from alldata
+        where station = %s and {limiter} and sknt > 0 and drct >= 0 and
+        drct <= 360 and extract(month from valid) in %s
+        """,
         pgconn,
         params=(ctx["station"], tuple(months)),
         index_col="valid",
