@@ -58,12 +58,10 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
 
     df = read_sql(
-        """
+        f"""
     with obs as
     (select month, year, high, lag(high) OVER (ORDER by day ASC) as lhigh,
-    low, lag(low) OVER (ORDER by day ASC) as llow from """
-        + table
-        + """
+    low, lag(low) OVER (ORDER by day ASC) as llow from {table}
     where station = %s)
 
     SELECT year, month,
@@ -189,16 +187,15 @@ def plotter(fdict):
             )
         offset += 0.4
 
-    ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xticks(np.arange(1, 13))
+    ax.set_xticklabels(calendar.month_abbr[1:])
     ax.legend(ncol=3, fontsize=12, loc=9, framealpha=1)
     ax.set_xlim(0.5, 12.5)
     ax.set_ylim(0, 100)
     ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     ax.set_ylabel("Percentage of Days [%]")
     ax.set_xlabel(
-        ("Dark Shades are long term averages, lighter are %s " "actuals")
-        % (year,)
+        f"Dark Shades are long term averages, lighter are {year} actuals"
     )
     ax.set_title(
         ("%s [%s]\nDay to Day %s Temperature Change")

@@ -52,14 +52,12 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
 
     cursor.execute(
-        """
+        f"""
     select year, extract(doy from day) as d from
         (select day, year, rank() OVER (PARTITION by year ORDER by avg DESC)
         from
             (select day, year, avg((high+low)/2.) OVER
-            (ORDER by day ASC rows 91 preceding) from """
-        + table
-        + """
+            (ORDER by day ASC rows 91 preceding) from {table}
             where station = %s and day > '1893-01-01') as foo)
             as foo2 where rank = 1
             ORDER by year ASC
@@ -86,7 +84,7 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_ylabel("%s Date" % ("End" if delta == 0 else "Start",))
     ax.set_title(
-        ("%s [%s] %s\n" "%s Date of Warmest (Avg Temp) 91 Day Period")
+        ("%s [%s] %s\n%s Date of Warmest (Avg Temp) 91 Day Period")
         % (
             ctx["_nt"].sts[station]["name"],
             station,

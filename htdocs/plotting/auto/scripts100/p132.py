@@ -122,7 +122,7 @@ def plotter(fdict):
 
     sorder = "ASC" if varname in ["min_greatest_low"] else "DESC"
     df = read_sql(
-        """WITH data as (
+        f"""WITH data as (
         SELECT month, day, day - '%s days'::interval as start_date,
         count(*) OVER (ORDER by day ASC ROWS BETWEEN %s preceding and
         current row) as count,
@@ -132,20 +132,13 @@ def plotter(fdict):
         current row) as max_least_high,
         max(low) OVER (ORDER by day ASC ROWS BETWEEN %s preceding and
         current row) as min_greatest_low
-        from """
-        + table
-        + """ WHERE station = %s)
+        from {table} WHERE station = %s)
 
-        SELECT day as end_date, start_date, """
-        + varname
-        + """ from data WHERE
+        SELECT day as end_date, start_date, {varname} from data WHERE
         month in %s and
-        extract(month from start_date) in %s and count = %s
-        ORDER by """
-        + varname
-        + """ """
-        + sorder
-        + """ LIMIT 10
+        extract(month from start_date) in %s and count = %s and
+        {varname} is not null
+        ORDER by {varname} {sorder} LIMIT 10
         """,
         pgconn,
         params=(

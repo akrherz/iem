@@ -36,7 +36,7 @@ for realtime data.</p>
   LDM feed.  Automated downloads from the Google Drive are difficult, but is
   your only option if the next link below does not have your files of interest.</li>
 
-  <li><a href="http://metfs1.agron.iastate.edu/archive/mrms/">Local Cache of ~Complete Hourly Zip Files</a>
+  <li><a href="https://mrms.agron.iastate.edu">Local Cache of ~Complete Hourly Zip Files</a>
   <br />Same files as found on the Google Drive, but served from a local
   spinning disk and so is <strong>easy to script against</strong> to download
   a large chunk of data.  The intention is to keep about the last year's worth

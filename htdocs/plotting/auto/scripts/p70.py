@@ -4,8 +4,11 @@ import datetime
 from pandas.io.sql import read_sql
 import numpy as np
 from matplotlib.ticker import FormatStrFormatter
+import matplotlib.colors as mpcolors
+from matplotlib.colorbar import ColorbarBase
 from pyiem import reference
 from pyiem.plot.use_agg import plt
+from pyiem.plot import get_cmap
 from pyiem.nws import vtec
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -77,6 +80,7 @@ def get_description():
             default="jan1",
             name="split",
         ),
+        dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
     ]
     return desc
 
@@ -131,7 +135,21 @@ def plotter(fdict):
     df["doy"] = df["doy"].dt.days
 
     fig = plt.figure(figsize=(12.0, 6.75))
-    ax = plt.axes([0.07, 0.1, 0.65, 0.8])
+    ax = plt.axes([0.11, 0.1, 0.61, 0.8])
+
+    # Create a color bar for the number of events per day
+    cmap = get_cmap(ctx["cmap"])
+    cmap.set_under("tan")
+    cmap.set_over("black")
+    bins = [1, 2, 3, 4, 5, 7, 10, 15, 20, 25, 50]
+    norm = mpcolors.BoundaryNorm(bins, cmap.N)
+    cax = plt.axes(
+        [0.01, 0.12, 0.02, 0.6], frameon=False, yticks=[], xticks=[]
+    )
+    cb = ColorbarBase(
+        cax, norm=norm, cmap=cmap, extend="max", spacing="proportional"
+    )
+    cb.set_label("Daily Count", loc="bottom")
 
     for year, gdf in df.groupby("year"):
         size = gdf["doy"].max() - gdf["doy"].min()
@@ -149,15 +167,15 @@ def plotter(fdict):
             gdf["year"].values,
             [1] * len(gdf.index),
             left=gdf["doy"].values,
-            color="blue",
             zorder=3,
+            color=cmap(norm([gdf["count"]]))[0],
         )
     gdf = df[["year", "doy"]].groupby("year").agg(["min", "max"])
     # Exclude first and last year in the average
     avg_start = np.average(gdf["doy", "min"].values[1:-1])
     avg_end = np.average(gdf["doy", "max"].values[1:-1])
-    ax.axvline(avg_start, lw=2, color="k")
-    ax.axvline(avg_end, lw=2, color="k")
+    ax.axvline(avg_start, ls=":", lw=2, color="k")
+    ax.axvline(avg_end, ls=":", lw=2, color="k")
     x0 = datetime.date(2000, 1 if split == "jan1" else 7, 1)
     ax.set_xlabel(
         ("Average Start Date: %s, End Date: %s")

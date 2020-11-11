@@ -23,7 +23,7 @@ LOOKUP = {
     "-id3b": IPS[METVM6],
     "-idep": IPS[METVM6],
     "-iem": IPS[METVM6],
-    "-iemre": IPS[METVM6],
+    "-iemre": IPS[METVM4],
     "-isuag": IPS[METVM6],
     "-kcci": IPS[METVM6],
     "-mec": IPS[METVM7],
