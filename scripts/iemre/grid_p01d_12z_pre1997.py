@@ -9,7 +9,7 @@ import pyproj
 from metpy.units import units as mpunits
 from metpy.units import masked_array
 from pandas.io.sql import read_sql
-from pyiem.iemre import get_grids, XAXIS, YAXIS
+from pyiem.iemre import get_grids, XAXIS, YAXIS, set_grids
 from pyiem.util import get_dbconn
 
 
@@ -56,10 +56,13 @@ def main(argv):
     pgconn = get_dbconn("coop")
     df = read_sql(
         """
-        SELECT a.precip, st_x(t.geom) as lon, st_y(t.geom) as lat
+        SELECT
+        case when a.precip < 0.005 then 0 else a.precip end as precip,
+        st_x(t.geom) as lon, st_y(t.geom) as lat
         from alldata a JOIN stations t ON (a.station = t.id)
         WHERE a.day = %s and t.network ~* 'CLIMATE' and
-        substr(a.station,3,4) != '0000' and substr(station,3,1) != 'C'
+        substr(a.station,3,4) != '0000' and
+        substr(station,3,1) not in ('C', 'T')
         and precip >= 0 and precip < 50
     """,
         pgconn,
@@ -69,6 +72,7 @@ def main(argv):
     if res is not None:
         ds = get_grids(day, varnames="p01d_12z")
         ds["p01d_12z"].values = res.to(mpunits("mm")).magnitude[0, :, :]
+        set_grids(day, ds)
         subprocess.call(
             "python db_to_netcdf.py %s" % (day.strftime("%Y %m %d"),),
             shell=True,
