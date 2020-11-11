@@ -1,5 +1,4 @@
 """period between first and last watch"""
-import calendar
 import datetime
 
 from pandas.io.sql import read_sql
@@ -25,12 +24,23 @@ def get_description():
     desc["cache"] = 86400
     desc[
         "description"
-    ] = """This chart shows the period between the first
-    and last watch, warning, advisory (WWA) issued by an office per year. The
-    right hand chart displays the number of unique WWA events issued for
-    that year.  The number of events is <strong>not</strong> the combination of
-    a WWA product and alerted counties/zones, but an attempt at counting
-    distinct WWA. For VTEC, this is the number of unique event ids.
+    ] = """
+    This chart attempts to display the period between the first and last VTEC
+    enabled watch, warning or advisory <strong>issuance</strong> by year.  For
+    some long term products, like Flood Warnings, this plot does not attempt
+    to show the time domain that those products were valid, only the issuance.
+    The individual ticks within the bars on the left hand side plot are
+    individual dates during the period that had an issuance event.  The right
+    two plots display the total number of events and the total number of dates
+    with at least one event.</p>
+
+    <p>For the purposes of this plot, an event is defined by a single VTEC
+    event identifier usage.  For example, a single Tornado Watch covering
+    10 counties only counts as one event. The simple average is computed
+    over the years excluding the first and last year.</p>
+
+    <p>When you split this plot by 1 July, the year shown is for the year of
+    the second half of this period, ie 2020 is 1 Jul 2019 - 30 Jun 2020.</p>
     """
     desc["arguments"] = [
         dict(
@@ -86,29 +96,17 @@ def plotter(fdict):
     if opt == "state":
         wfolimiter = " substr(ugc, 1, 2) = '%s' " % (state,)
 
-    if split == "jan1":
-        sql = f"""
-            SELECT extract(year from issue)::int as year,
-            min(issue at time zone 'UTC') as min_issue,
-            max(issue at time zone 'UTC') as max_issue,
-            count(distinct wfo || eventid)
-            from warnings where {wfolimiter}
-            and phenomena = %s and significance = %s
-            GROUP by year ORDER by year ASC
-        """
-    else:
-        sql = f"""
-            SELECT
-            extract(year from issue - '6 months'::interval)::int as year,
-            min(issue at time zone 'UTC') as min_issue,
-            max(issue at time zone 'UTC') as max_issue,
-            count(distinct wfo || eventid)
-            from warnings where {wfolimiter}
-            and phenomena = %s and significance = %s
-            GROUP by year ORDER by year ASC
-        """
     df = read_sql(
-        sql, pgconn, params=(phenomena, significance), index_col=None
+        f"""WITH data as (
+            SELECT eventid, extract(year from issue) as year,
+            min(date(issue)) as date from warnings where {wfolimiter}
+            and phenomena = %s and significance = %s GROUP by eventid, year)
+        SELECT year::int, date, count(*) from data GROUP by year, date
+        ORDER by year ASC, date ASC
+        """,
+        pgconn,
+        params=(phenomena, significance),
+        index_col=None,
     )
     if df.empty:
         raise NoDataFound("No data found for query")
@@ -117,49 +115,56 @@ def plotter(fdict):
     # data that has its first year in 2005
     if df["year"].min() == 2005:
         df = df[df["year"] > 2005]
+    # Split the season at jul 1, if requested
+    if split == "jul1":
+        df["year"] = df.apply(
+            lambda x: x["year"] + 1 if x["date"].month > 6 else x["year"],
+            axis=1,
+        )
+        df["doy"] = df.apply(
+            lambda x: x["date"] - datetime.date(x["year"] - 1, 7, 1), axis=1
+        )
+    else:
+        df["doy"] = df.apply(
+            lambda x: x["date"] - datetime.date(x["year"], 1, 1), axis=1
+        )
+    df["doy"] = df["doy"].dt.days
 
-    def myfunc(row):
-        year = row[0]
-        valid = row[1]
-        if year == valid.year:
-            return int(valid.strftime("%j"))
-        else:
-            days = (
-                datetime.date(year + 1, 1, 1) - datetime.date(year, 1, 1)
-            ).days
-            return int(valid.strftime("%j")) + days
+    fig = plt.figure(figsize=(12.0, 6.75))
+    ax = plt.axes([0.07, 0.1, 0.65, 0.8])
 
-    df["startdoy"] = df[["year", "min_issue"]].apply(myfunc, axis=1)
-    df["enddoy"] = df[["year", "max_issue"]].apply(myfunc, axis=1)
-    df.set_index("year", inplace=True)
-
-    # allow for small bars when there is just one event
-    df.loc[df["enddoy"] == df["startdoy"], "enddoy"] = df["enddoy"] + 1
-    ends = df["enddoy"].values
-    starts = df["startdoy"].values
-    if len(starts) < 2:
-        raise NoDataFound("No Data Found.")
-    years = df.index.values
-
-    fig = plt.figure(figsize=(8, 6))
-    ax = plt.axes([0.1, 0.1, 0.7, 0.8])
-
-    ax.barh(years, (ends - starts), left=starts, fc="blue", align="center")
-    ax.axvline(np.average(starts[:-1]), lw=2, color="red")
-    ax.axvline(np.average(ends[:-1]), lw=2, color="red")
+    for year, gdf in df.groupby("year"):
+        size = gdf["doy"].max() - gdf["doy"].min()
+        if size < 1:
+            size = 1
+        ax.barh(
+            year,
+            size,
+            left=gdf["doy"].min(),
+            ec="brown",
+            fc="tan",
+            align="center",
+        )
+        ax.barh(
+            gdf["year"].values,
+            [1] * len(gdf.index),
+            left=gdf["doy"].values,
+            color="blue",
+            zorder=3,
+        )
+    gdf = df[["year", "doy"]].groupby("year").agg(["min", "max"])
+    # Exclude first and last year in the average
+    avg_start = np.average(gdf["doy", "min"].values[1:-1])
+    avg_end = np.average(gdf["doy", "max"].values[1:-1])
+    ax.axvline(avg_start, lw=2, color="k")
+    ax.axvline(avg_end, lw=2, color="k")
+    x0 = datetime.date(2000, 1 if split == "jan1" else 7, 1)
     ax.set_xlabel(
-        ("Avg Start Date: %s, End Date: %s")
+        ("Average Start Date: %s, End Date: %s")
         % (
-            (
-                datetime.date(2000, 1, 1)
-                + datetime.timedelta(days=int(np.average(starts[:-1])))
-            ).strftime("%-d %b"),
-            (
-                datetime.date(2000, 1, 1)
-                + datetime.timedelta(days=int(np.average(ends[:-1])))
-            ).strftime("%-d %b"),
-        ),
-        color="red",
+            (x0 + datetime.timedelta(days=int(avg_start))).strftime("%-d %b"),
+            (x0 + datetime.timedelta(days=int(avg_end))).strftime("%-d %b"),
+        )
     )
     title = "[%s] NWS %s" % (station, ctx["_nt"].sts[station]["name"])
     if opt == "state":
@@ -167,26 +172,50 @@ def plotter(fdict):
             reference.state_names[state],
         )
     ax.set_title(
-        ("%s\nPeriod between First and Last %s")
-        % (title, vtec.get_ps_string(phenomena, significance))
+        ("%s\nPeriod between First and Last %s (%s.%s)")
+        % (
+            title,
+            vtec.get_ps_string(phenomena, significance),
+            phenomena,
+            significance,
+        )
     )
     ax.grid()
-    days = [1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335]
-    days = days + [x + 365 for x in days]
-    ax.set_xticks(days)
-    ax.set_xticklabels(calendar.month_abbr[1:] + calendar.month_abbr[1:])
-    ax.set_xlim(df["startdoy"].min() - 10, df["enddoy"].max() + 10)
+    xticks = []
+    xticklabels = []
+    for i in range(367):
+        date = x0 + datetime.timedelta(days=i)
+        if date.day == 1:
+            xticks.append(i)
+            xticklabels.append(date.strftime("%b"))
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(xticklabels)
+    ax.set_xlim(df["doy"].min() - 10, df["doy"].max() + 10)
     ax.set_ylabel("Year")
-    ax.set_ylim(years[0] - 0.5, years[-1] + 0.5)
+    ax.set_ylim(df["year"].min() - 0.5, df["year"].max() + 0.5)
     xFormatter = FormatStrFormatter("%d")
     ax.yaxis.set_major_formatter(xFormatter)
 
-    ax = plt.axes([0.82, 0.1, 0.13, 0.8])
-    ax.barh(years, df["count"], fc="blue", align="center")
-    ax.set_ylim(years[0] - 0.5, years[-1] + 0.5)
+    # ______________________________________________
+    ax = plt.axes([0.75, 0.1, 0.1, 0.8])
+    gdf = df[["year", "count"]].groupby("year").sum()
+    ax.barh(gdf.index.values, gdf["count"].values, fc="blue", align="center")
+    ax.set_ylim(df["year"].min() - 0.5, df["year"].max() + 0.5)
     plt.setp(ax.get_yticklabels(), visible=False)
     ax.grid(True)
     ax.set_xlabel("# Events")
+    ax.yaxis.set_major_formatter(xFormatter)
+    xloc = plt.MaxNLocator(3)
+    ax.xaxis.set_major_locator(xloc)
+
+    # __________________________________________
+    ax = plt.axes([0.88, 0.1, 0.1, 0.8])
+    gdf = df[["year", "count"]].groupby("year").count()
+    ax.barh(gdf.index.values, gdf["count"].values, fc="blue", align="center")
+    ax.set_ylim(df["year"].min() - 0.5, df["year"].max() + 0.5)
+    plt.setp(ax.get_yticklabels(), visible=False)
+    ax.grid(True)
+    ax.set_xlabel("# Dates")
     ax.yaxis.set_major_formatter(xFormatter)
     xloc = plt.MaxNLocator(3)
     ax.xaxis.set_major_locator(xloc)
@@ -195,4 +224,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter(dict(split="jul1"))
