@@ -25,7 +25,7 @@ def generic_gridder(day, df, idx):
     chain = vd.Chain(
         [
             ("mean", vd.BlockReduce(np.mean, spacing=spacing * 111e3)),
-            ("spline", vd.Spline(damping=1e-10, mindist=100e3)),
+            ("spline", vd.ScipyGridder(method="nearest")),
         ]
     )
     train, test = vd.train_test_split(
