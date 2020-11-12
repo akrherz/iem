@@ -41,7 +41,7 @@ def get_description():
     number of dates with at least one event.</p>
 
     <p>The left plot can be colorized by either coloring the event counts per
-    day or the accumulated "year/season to date" total.</p> 
+    day or the accumulated "year/season to date" total.</p>
 
     <p>For the purposes of this plot, an event is defined by a single VTEC
     event identifier usage.  For example, a single Tornado Watch covering
@@ -257,7 +257,12 @@ def plotter(fdict):
     # ______________________________________________
     ax = plt.axes([0.75, 0.1, 0.1, 0.8])
     gdf = df[["year", "count"]].groupby("year").sum()
-    ax.barh(gdf.index.values, gdf["count"].values, fc="blue", align="center")
+    ax.barh(
+        gdf.index.values,
+        gdf["count"].values,
+        color="blue" if ctx["f"] != "accum" else cmap(norm([gdf["count"]]))[0],
+        align="center",
+    )
     ax.set_ylim(df["year"].min() - 0.5, df["year"].max() + 0.5)
     plt.setp(ax.get_yticklabels(), visible=False)
     ax.grid(True)
