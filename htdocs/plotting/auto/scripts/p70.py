@@ -18,6 +18,11 @@ PDICT2 = {
     "wfo": "View by Single NWS Forecast Office",
     "state": "View by State",
 }
+PDICT3 = {
+    "daily": "Color bars with daily issuance totals",
+    "accum": "Color bars with accumulated year to date totals",
+    "none": "Bars should not be colored, please",
+}
 
 
 def get_description():
@@ -32,10 +37,11 @@ def get_description():
     enabled watch, warning or advisory <strong>issuance</strong> by year.  For
     some long term products, like Flood Warnings, this plot does not attempt
     to show the time domain that those products were valid, only the issuance.
-    The individual ticks within the bars on the left hand side plot are
-    individual dates during the period that had an issuance event.  The right
-    two plots display the total number of events and the total number of dates
-    with at least one event.</p>
+    The right two plots display the total number of events and the total
+    number of dates with at least one event.</p>
+
+    <p>The left plot can be colorized by either coloring the event counts per
+    day or the accumulated "year/season to date" total.</p> 
 
     <p>For the purposes of this plot, an event is defined by a single VTEC
     event identifier usage.  For example, a single Tornado Watch covering
@@ -79,6 +85,13 @@ def get_description():
             label="Split the year on date:",
             default="jan1",
             name="split",
+        ),
+        dict(
+            type="select",
+            options=PDICT3,
+            label="How to color bars for left plot:",
+            default="daily",
+            name="f",
         ),
         dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
     ]
@@ -135,21 +148,34 @@ def plotter(fdict):
     df["doy"] = df["doy"].dt.days
 
     fig = plt.figure(figsize=(12.0, 6.75))
-    ax = plt.axes([0.11, 0.1, 0.61, 0.8])
+    ax = plt.axes([0.12, 0.1, 0.61, 0.8])
 
     # Create a color bar for the number of events per day
     cmap = get_cmap(ctx["cmap"])
     cmap.set_under("tan")
     cmap.set_over("black")
     bins = [1, 2, 3, 4, 5, 7, 10, 15, 20, 25, 50]
+    if ctx["f"] == "accum":
+        maxval = int(df[["year", "count"]].groupby("year").sum().max()) + 1
+        if maxval < 11:
+            bins = np.arange(1, 11)
+        elif maxval < 21:
+            bins = np.arange(1, 21)
+        else:
+            bins = np.linspace(1, maxval, 20, dtype="i")
+
     norm = mpcolors.BoundaryNorm(bins, cmap.N)
-    cax = plt.axes(
-        [0.01, 0.12, 0.02, 0.6], frameon=False, yticks=[], xticks=[]
-    )
-    cb = ColorbarBase(
-        cax, norm=norm, cmap=cmap, extend="max", spacing="proportional"
-    )
-    cb.set_label("Daily Count", loc="bottom")
+    if ctx["f"] != "none":
+        cax = plt.axes(
+            [0.01, 0.12, 0.02, 0.6], frameon=False, yticks=[], xticks=[]
+        )
+        cb = ColorbarBase(
+            cax, norm=norm, cmap=cmap, extend="max", spacing="proportional"
+        )
+        cb.set_label(
+            "Daily Count" if ctx["f"] == "daily" else "Accum Count",
+            loc="bottom",
+        )
 
     for year, gdf in df.groupby("year"):
         size = gdf["doy"].max() - gdf["doy"].min()
@@ -163,12 +189,25 @@ def plotter(fdict):
             fc="tan",
             align="center",
         )
+        if ctx["f"] == "none":
+            continue
+        elif ctx["f"] == "daily":
+            ax.barh(
+                gdf["year"].values,
+                [1] * len(gdf.index),
+                left=gdf["doy"].values,
+                zorder=3,
+                color=cmap(norm([gdf["count"]]))[0],
+            )
+            continue
+        # Do the fancy pants accum
+        gdf["cumsum"] = gdf["count"].cumsum()
         ax.barh(
-            gdf["year"].values,
-            [1] * len(gdf.index),
-            left=gdf["doy"].values,
+            gdf["year"].values[::-1],
+            gdf["doy"].values[::-1] - gdf["doy"].values[0] + 1,
+            left=[gdf["doy"].values[0]] * len(gdf.index),
             zorder=3,
-            color=cmap(norm([gdf["count"]]))[0],
+            color=cmap(norm([gdf["cumsum"].values[::-1]]))[0],
         )
     gdf = df[["year", "doy"]].groupby("year").agg(["min", "max"])
     # Exclude first and last year in the average
@@ -242,4 +281,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(split="jul1"))
+    plotter(dict(split="jul1", f="accum"))
