@@ -115,9 +115,10 @@ def plotter(fdict):
 
     df = read_sql(
         f"""WITH data as (
-            SELECT eventid, extract(year from issue) as year,
+            SELECT eventid, wfo, extract(year from issue) as year,
             min(date(issue)) as date from warnings where {wfolimiter}
-            and phenomena = %s and significance = %s GROUP by eventid, year)
+            and phenomena = %s and significance = %s
+            GROUP by eventid, wfo, year)
         SELECT year::int, date, count(*) from data GROUP by year, date
         ORDER by year ASC, date ASC
         """,
