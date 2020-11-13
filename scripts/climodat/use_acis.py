@@ -59,13 +59,10 @@ def main(station, acis_station):
             sday = "%02i%02i" % (date.month, date.day)
             LOG.info("Adding entry for %s", date)
             cursor.execute(
-                """
-                INSERT into """
-                + table
-                + """ (station, day,
-                high, low, precip, snow, snowd, sday, year, month, estimated)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'f')
-            """,
+                f"INSERT into {table} (station, day, high, low, precip, "
+                "snow, snowd, sday, year, month, temp_estimated, "
+                "precip_estimated) VALUES (%s, %s, %s, %s, %s, %s, %s, "
+                "%s, %s, %s, 'f', 'f')",
                 (
                     station,
                     date,

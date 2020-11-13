@@ -162,7 +162,8 @@ def commit(cursor, table, df, ts):
             """inline."""
             sql = (
                 f"UPDATE {table} SET high = %s, low = %s, precip = %s, "
-                "snow = %s, snowd = %s, estimated = 't' WHERE day = %s "
+                "snow = %s, snowd = %s, temp_estimated = 't', "
+                "precip_estimated = 't' WHERE day = %s "
                 "and station = %s"
             )
             args = (

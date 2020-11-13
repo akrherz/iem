@@ -54,6 +54,8 @@ def main(argv):
     """Do work please"""
     day = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
     pgconn = get_dbconn("coop")
+    # Omit any current estimates as these likely have a feedback loop on the
+    # IEMRE analysis
     df = read_sql(
         """
         SELECT
@@ -64,6 +66,7 @@ def main(argv):
         substr(a.station,3,4) != '0000' and
         substr(station,3,1) not in ('C', 'T')
         and precip >= 0 and precip < 50
+        and not precip_estimated
     """,
         pgconn,
         params=(day,),

@@ -76,9 +76,9 @@ def process(cursor, station, df, meta):
             newvals["precip"],
         )
         sql = """
-            UPDATE alldata_%s SET estimated = true,
-            high = %.0f, low = %.0f, precip = %.2f WHERE
-            station = '%s' and day = '%s'
+            UPDATE alldata_%s SET temp_estimated = true,
+            precip_estimated = true, high = %.0f, low = %.0f, precip = %.2f
+            WHERE station = '%s' and day = '%s'
             """ % (
             station[:2],
             newvals["high"],

@@ -51,13 +51,9 @@ def update_database(stid, valid, row):
 
     if not do_update(row):
         ccursor.execute(
-            """
-            INSERT into """
-            + table
-            + """ (station, day,
-            estimated, year, month, sday) VALUES
-            (%s, %s, 't', %s, %s, %s)
-        """,
+            f"INSERT into {table} (station, day, temp_estimated, "
+            "precip_estimated, year, month, sday) VALUES "
+            "(%s, %s, 't', 't', %s, %s, %s)",
             (stid, valid, valid.year, valid.month, valid.strftime("%m%d")),
         )
         do_update(row)
@@ -84,10 +80,8 @@ def do_day(valid):
     # build out the state mappers
     pgconn = get_dbconn("postgis")
     states = gpd.GeoDataFrame.from_postgis(
-        """
-        SELECT the_geom, state_abbr from states
-        where state_abbr not in ('AK', 'HI', 'DC')
-    """,
+        "SELECT the_geom, state_abbr from states "
+        "where state_abbr not in ('AK', 'HI', 'DC')",
         pgconn,
         index_col="state_abbr",
         geom_col="the_geom",
@@ -112,10 +106,8 @@ def do_day(valid):
 
     # build out climate division mappers
     climdiv = gpd.GeoDataFrame.from_postgis(
-        """
-        SELECT geom, iemid from climdiv
-        where st_abbrv not in ('AK', 'HI', 'DC')
-    """,
+        "SELECT geom, iemid from climdiv "
+        "where st_abbrv not in ('AK', 'HI', 'DC')",
         pgconn,
         index_col="iemid",
         geom_col="geom",
