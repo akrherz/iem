@@ -15,12 +15,7 @@ def delete_data(pgconn, station, state):
     """Remove whatever data we have for this station."""
     cursor = pgconn.cursor()
     cursor.execute(
-        """
-    DELETE from alldata_"""
-        + state
-        + """ WHERE station = %s
-    """,
-        (station,),
+        f"DELETE from alldata_{state} WHERE station = %s", (station,)
     )
     LOG.info("Removed %s database entries", cursor.rowcount)
     cursor.close()
@@ -33,12 +28,8 @@ def main(argv):
     nt = NetworkTable("%sCLIMATE" % (state,))
     pgconn = get_dbconn("coop")
     df = read_sql(
-        """
-        SELECT station, year, day from alldata_"""
-        + state
-        + """
-        ORDER by station, day
-    """,
+        f"SELECT station, year, day from alldata_{state} "
+        "ORDER by station, day",
         pgconn,
         index_col=None,
         parse_dates=["day"],

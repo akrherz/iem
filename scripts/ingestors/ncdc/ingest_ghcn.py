@@ -156,10 +156,7 @@ DATARE = re.compile(
 
 def get_file(station):
     """Download the file from NCEI, if necessary!"""
-    # IPv6, use 205.167.25.102 rather than www1.ncdc.noaa.gov
-    uri = ("https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/all/%s.dly") % (
-        station,
-    )
+    uri = f"https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/all/{station}.dly"
     localfn = "%s/%s.dly" % (BASEDIR, station)
     if not os.path.isfile(localfn):
         LOG.info("dl from NCEI station: %s", station)
@@ -277,37 +274,41 @@ def process(station, metadata, allow_inserts):
     for dt, row in df.iterrows():
         date = datetime.date(dt.year, dt.month, dt.day)
         work = []
+        temp_estimated = True
+        precip_estimated = True
         for dbcol, obcol in zip(
             ["high", "low", "precip", "snow", "snowd"],
             ["TMAX", "TMIN", "PRCP", "SNOW", "SNWD"],
         ):
-            if not pd.isna(row[obcol]) and row[obcol] != row[dbcol]:
-                work.append(" %s = %s " % (dbcol, row[obcol]))
-                if (
-                    dbcol in ["high", "low"]
-                    and abs(row[dbcol] - row[obcol]) > 5
-                ):
-                    LOG.debug(
-                        "%5s %s large diff %s %s",
-                        dbcol,
-                        date,
-                        row[obcol],
-                        row[dbcol],
-                    )
-                if dbcol == "precip" and abs(row[dbcol] - row[obcol]) > 0.25:
-                    LOG.debug(
-                        "%5s %s large diff %s %s",
-                        dbcol,
-                        date,
-                        row[obcol],
-                        row[dbcol],
-                    )
+            if pd.isna(row[obcol]) or row[obcol] == row[dbcol]:
+                continue
+            if dbcol in ["high", "low"]:
+                temp_estimated = False
+            elif dbcol == "precip":
+                precip_estimated = False
+            work.append(" %s = %s " % (dbcol, row[obcol]))
+            if dbcol in ["high", "low"] and abs(row[dbcol] - row[obcol]) > 5:
+                LOG.debug(
+                    "%5s %s large diff %s %s",
+                    dbcol,
+                    date,
+                    row[obcol],
+                    row[dbcol],
+                )
+            if dbcol == "precip" and abs(row[dbcol] - row[obcol]) > 0.25:
+                LOG.debug(
+                    "%5s %s large diff %s %s",
+                    dbcol,
+                    date,
+                    row[obcol],
+                    row[dbcol],
+                )
         if not work:
             continue
         cursor.execute(
-            f"UPDATE {table} SET {','.join(work)} "
-            "WHERE station = %s and day = %s",
-            (station, date),
+            f"UPDATE {table} SET {','.join(work)}, precip_estimated = %s, "
+            "temp_estimated = %s WHERE station = %s and day = %s",
+            (precip_estimated, temp_estimated, station, date),
         )
         if cursor.rowcount == 1:
             cnts["updates"] += 1
@@ -319,8 +320,8 @@ def process(station, metadata, allow_inserts):
         # Adding a row
         cursor.execute(
             f"INSERT into {table} (station, day, sday, year, month, high, "
-            "low, precip, snow, snowd) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            "low, precip, snow, snowd, precip_estimated, temp_estimated) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
             (
                 station,
                 date,
@@ -332,6 +333,8 @@ def process(station, metadata, allow_inserts):
                 None if pd.isna(row["PRCP"]) else row["PRCP"],
                 None if pd.isna(row["SNOW"]) else row["SNOW"],
                 None if pd.isna(row["SNWD"]) else row["SNWD"],
+                precip_estimated,
+                temp_estimated,
             ),
         )
 

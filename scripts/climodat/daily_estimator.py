@@ -49,6 +49,8 @@ def load_table(state, date):
     df.set_index("station", inplace=True)
     for key in ["high", "low", "precip", "snow", "snowd"]:
         df[key] = None
+    for key in ["precip_estimated", "temp_estimated"]:
+        df[key] = False
     return df
 
 
@@ -62,8 +64,9 @@ def estimate_precip(df, ds):
             precip = grid00[row["gridj"], row["gridi"]]
         else:
             precip = grid12[row["gridj"], row["gridi"]]
+        df.at[sid, "precip_estimated"] = True
         # denote trace
-        if precip > 0 and precip < 0.01:
+        if 0 < precip < 0.01:
             df.at[sid, "precip"] = TRACE_VALUE
         elif precip < 0:
             df.at[sid, "precip"] = 0
@@ -110,21 +113,22 @@ def estimate_hilo(df, ds):
     highgrid00 = k2f(ds["high_tmpk"].values)
     lowgrid00 = k2f(ds["low_tmpk"].values)
 
-    for sid, row in df.iterrows():
-        if pd.isnull(row["high"]):
-            if row["temp24_hour"] in [0, 22, 23]:
-                val = highgrid00[row["gridj"], row["gridi"]]
-            else:
-                val = highgrid12[row["gridj"], row["gridi"]]
-            if not np.ma.is_masked(val):
-                df.at[sid, "high"] = val
-        if pd.isnull(row["low"]):
-            if row["temp24_hour"] in [0, 22, 23]:
-                val = lowgrid00[row["gridj"], row["gridi"]]
-            else:
-                val = lowgrid12[row["gridj"], row["gridi"]]
-            if not np.ma.is_masked(val):
-                df.at[sid, "low"] = val
+    for sid, row in df[pd.isna(df["high"])].iterrows():
+        if row["temp24_hour"] in [0, 22, 23]:
+            val = highgrid00[row["gridj"], row["gridi"]]
+        else:
+            val = highgrid12[row["gridj"], row["gridi"]]
+        if not np.ma.is_masked(val):
+            df.at[sid, "temp_estimated"] = True
+            df.at[sid, "high"] = val
+    for sid, row in df[pd.isna(df["low"])].iterrows():
+        if row["temp24_hour"] in [0, 22, 23]:
+            val = lowgrid00[row["gridj"], row["gridi"]]
+        else:
+            val = lowgrid12[row["gridj"], row["gridi"]]
+        if not np.ma.is_masked(val):
+            df.at[sid, "temp_estimated"] = True
+            df.at[sid, "low"] = val
 
 
 def nonan(val, precision):

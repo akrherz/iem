@@ -15,7 +15,7 @@ from pyiem.util import get_dbconn, logger
 
 LOG = logger()
 URI = (
-    "http://iem.local/iemre/multiday/"
+    "http://mesonet.agron.iastate.edu/iemre/multiday/"
     "%(sdate)s/%(edate)s/%(lat)s/%(lon)s/json"
 )
 
@@ -42,14 +42,21 @@ def process(cursor, station, df, meta):
             "\n%s Failure:%s\n%s\nExp: %s", station, req.content, wsuri, exp
         )
         return
-    estimated["date"] = pd.to_datetime(estimated["date"])
-    estimated.set_index("date", inplace=True)
+    estimated["date"] = pd.to_datetime(estimated["date"]).dt.date
+    estimated = estimated.set_index("date")
     for _, row in df.iterrows():
         newvals = row.to_dict()
+        precip_estimated = False
+        temp_estimated = False
         for col in ["high", "low", "precip"]:
-            units = "f" if col != "precip" else "in"
+            # If current ob is not null, don't replace it with an estimate!
             if not pd.isna(row[col]):
                 continue
+            if col in ["high", "low"]:
+                temp_estimated = True
+            elif col == "precip":
+                precip_estimated = True
+            units = "f" if col != "precip" else "in"
             if (
                 col == "precip"
                 and prefix == "12z"
@@ -68,19 +75,25 @@ def process(cursor, station, df, meta):
             )
             continue
         LOG.info(
-            "Set station: %s day: %s high: %.0f low: %.0f precip: %.2f",
+            "Set station: %s day: %s "
+            "high: %.0f(%s) low: %.0f(%s) precip: %.2f(%s)",
             station,
             row["day"],
             newvals["high"],
+            temp_estimated,
             newvals["low"],
+            temp_estimated,
             newvals["precip"],
+            precip_estimated,
         )
         sql = """
-            UPDATE alldata_%s SET temp_estimated = true,
-            precip_estimated = true, high = %.0f, low = %.0f, precip = %.2f
+            UPDATE alldata_%s SET temp_estimated = %s,
+            precip_estimated = %s, high = %.0f, low = %.0f, precip = %.2f
             WHERE station = '%s' and day = '%s'
             """ % (
             station[:2],
+            temp_estimated,
+            precip_estimated,
             newvals["high"],
             newvals["low"],
             newvals["precip"],
@@ -96,14 +109,9 @@ def main(argv):
     nt = NetworkTable("%sCLIMATE" % (state,))
     pgconn = get_dbconn("coop")
     df = read_sql(
-        """
-        SELECT station, year, day, high, low, precip
-        from alldata_"""
-        + state
-        + """
-        WHERE (high is null or low is null or precip is null) and year >= 1893
-        ORDER by station, day
-    """,
+        f"SELECT station, year, day, high, low, precip from alldata_{state} "
+        "WHERE (high is null or low is null or precip is null) "
+        "and year >= 1893 ORDER by station, day",
         pgconn,
         index_col=None,
     )
