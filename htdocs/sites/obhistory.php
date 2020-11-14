@@ -120,7 +120,7 @@ $month = isset($_GET["month"])? intval($_GET["month"]): date("m");
 $day = isset($_GET["day"])? intval($_GET["day"]): date("d");
 $metar = (isset($_GET["metar"]) && $_GET["metar"] == "1") ? "1": "0";
 $madis = (isset($_GET["madis"]) && $_GET["madis"] == "1") ? "1": "0";
-$sortdir = isset($_GET["sortdir"]) ? xssafe($_GET["sortdir"]) : $_GET["sortdir"];
+$sortdir = isset($_GET["sortdir"]) ? xssafe($_GET["sortdir"]) : "asc";
 $date = mktime(0,0,0,$month, $day, $year);
 $yesterday = $date - 86400;
 $tomorrow = $date + 86400;
