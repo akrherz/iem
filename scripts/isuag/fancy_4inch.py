@@ -13,7 +13,9 @@ from pyiem.plot import MapPlot, get_cmap
 from pyiem.datatypes import temperature
 from pyiem.tracker import loadqc
 from pyiem.network import Table
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
 def get_idx(lons, lats, lon, lat):
@@ -31,10 +33,14 @@ def get_grib(now, fhour):
         )
     )
     if not os.path.isfile(gribfn):
-        print("fancy_4inch NAM missing: %s" % (gribfn,))
-        return
+        LOG.info("NAM missing: %s", gribfn)
+        return None
     grbs = pygrib.open(gribfn)
-    gs = grbs.select(shortName="st")
+    try:
+        gs = grbs.select(shortName="st")
+    except ValueError:
+        LOG.info("failed to find st in %s", gribfn)
+        return None
     for g in gs:
         if str(g).find("levels 0.0-0.1 m") > 0:
             return g
@@ -58,7 +64,7 @@ def do_nam(valid):
                 lats, lons = grib.latlons()
                 data = np.zeros(np.shape(lats))
     if grib is None or lats is None:
-        print("fancy_4inch failed to find NAM data for %s" % (valid,))
+        LOG.info("Failed to find NAM data for %s", valid)
         return
     data += grib.values
     count += 1
@@ -133,22 +139,20 @@ def main(argv):
     df["diff"] = df["ob"] - df["nam"]
     bias = df["diff"].mean()
     nam = nam + bias
-    print("fancy_4inch NAM bias correction of: %.2fF applied" % (bias,))
+    LOG.info("NAM bias correction of: %.2fF applied", bias)
     # apply nam bias to sampled data
     df["nam"] += bias
     df["diff"] = df["ob"] - df["nam"]
     # we are going to require data be within 1 SD of sampled or 5 deg
     std = 5.0 if df["nam"].std() < 5.0 else df["nam"].std()
     for station in df[df["diff"].abs() > std].index.values:
-        print(
-            ("fancy_4inch %s QC'd %s out std: %.2f, ob:%.1f nam:%.1f")
-            % (
-                ts.strftime("%Y%m%d"),
-                station,
-                std,
-                df.at[station, "ob"],
-                df.at[station, "nam"],
-            )
+        LOG.info(
+            "%s QC'd %s out std: %.2f, ob:%.1f nam:%.1f",
+            ts.strftime("%Y%m%d"),
+            station,
+            std,
+            df.at[station, "ob"],
+            df.at[station, "nam"],
         )
         df.drop(station, inplace=True)
 
