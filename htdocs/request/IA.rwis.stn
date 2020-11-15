@@ -50,6 +50,17 @@ XWBG     999999 Williamsburg (I-80)              IA US  4168  -9201   260  0
 XHAN     999999 Hanlontown (I-35)                IA US  4339  -9334   333  0
 XRSB     999999 Steamboat Rock (US20)            IA US  4245  -9306   348  0
 XRCR     999999 Cedar Rapids (US 30)             IA US  4193  -9155   232  0
-XCTI       9999 Cantril                          IA US  4066  -9206  211   
-XDNI       9999 Denison                          IA US  4192  -9534  426   
-XPFI       9999 Plainfield                       IA US  4283  -9254  294   
+XCTI       9999 Cantril                          IA US  4066  -9206   211   
+XDNI       9999 Denison                          IA US  4192  -9534   426   
+XPFI       9999 Plainfield                       IA US  4283  -9254   294   
+XQCI     9999   Quad Cities                      IA US  4152  -9051   177
+XSMI     9999   Sioux City Maintenance           IA US  4255  -9635   347
+XRWI     9999   Rockwell City                    IA US  4245  -9467   392
+XETI     9999   Estherville - Hwy 9              IA US  4340  -9480   389
+XCCI            Council Bluffs No2               IA US  4126  -9580   314
+XKSI            Elkhart I-35 No1                 IA US  4178  -9357   291
+XKNI            Elkhart I-35 No2                 IA US  4181  -9357   300
+XCMI            Cambridge I-35                   IA US  4186  -9357   294
+XRGI            Saratoga                         IA US  4337  -9247   414
+XKYI            Hawkeye                          IA US  4297  -9195   328
+XCTI            Victor                           IA US  4170  -9228   264
