@@ -138,7 +138,7 @@ def application(environ, start_response):
     res = mc.get(mckey)
     if not res:
         res = run(ts, sid, pressure)
-        mc.set(mckey, res)
+        mc.set(mckey, res, 600)
 
     if cb is None:
         data = res
