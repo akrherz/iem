@@ -1,11 +1,11 @@
 <?php
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 27);
-include("../../include/forms.php");
-include("../../include/imagemaps.php");
-include("../../include/database.inc.php");
-include("../../include/myview.php");
-include("../../include/network.php");
+require_once "../../include/forms.php";
+require_once "../../include/imagemaps.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/myview.php";
+require_once "../../include/network.php";
 $nt = new NetworkTable("NSTLFLUX");
 $t = new MyView();
 

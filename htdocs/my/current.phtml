@@ -1,8 +1,6 @@
 <?php
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 93);
-// This page uses cookies to store the favorited stations
-session_start();
 
 require_once "../../include/mlib.php";
 require_once "../../include/forms.php";
@@ -15,36 +13,27 @@ $sortdir = isset($_GET["sortdir"]) ? xssafe($_GET['sortdir']): 'asc';
 $rsortdir = ($sortdir == 'asc') ? 'desc' : 'asc';
 $expiry = 60*60*24*100; // 100 days
 
-
 $t = new MyView();
-
-$_SESSION['stations'] = Array();
-if (isset($_COOKIE['stations'])){
-    $_SESSION['stations'] = explode(",", $_COOKIE['stations']);
-}
- 
+// Clear duplicates from cookies
+$stations = isset($_COOKIE["stations"]) ? array_unique(explode(",", $_COOKIE["stations"])): Array();
 $st = isset($_GET["st"]) ? $_GET["st"] : "";
 $str = isset($_GET["str"]) ? $_GET["str"] : "";
 
 if ($st != ""){
   foreach ($st as $key => $value) {
-    if (strlen($value) > 0 && $value != "ahack") {
-        array_push( $_SESSION['stations'], $value);
+    if (strlen($value) > 0 && !in_array($value, $stations)) {
+        $stations[] = $value;
     }
   }
 }
 if ($str != ""){
   foreach ($str as $key => $value) {
-    if (strlen($value) > 0 && $value != "ahack") {
-      foreach ($_SESSION['stations'] as $key2 => $value2){
-        if ($value2 == $value){
-          unset($_SESSION['stations'][$key2]);
-        }
-      }
+    if (($key2 = array_search($value, $stations)) !== false) {
+        unset($stations[$key2]);
     }
   } 
 }
-setcookie("stations", implode(",", $_SESSION['stations']), time() + $expiry, "/my/");
+setcookie("stations", implode(",", $stations), time() + $expiry, "/my/");
  
 $t->title = "My IEM Current Conditions";
 if ($refresh == 'yes'){
@@ -91,7 +80,7 @@ $refresh_select = make_select("refresh", $refresh, $ar);
 // Build a listing of stations to get data for
 $reqstations = "";
 $doSF = FALSE;
-foreach ($_SESSION['stations'] as $key => $value){
+foreach ($stations as $key => $value){
     if (strpos($value, '_SF') == 5){
         $value = substr($value, 0, 5);
         $doSF = TRUE;
@@ -249,9 +238,8 @@ Click on a column to sort it.<br>
 </form>
 EOF;
 if ($doSF){
-    reset($_SESSION["stations"]);
     $sfstations = Array();
- foreach ($_SESSION['stations'] as $key => $value){
+ foreach ($stations as $key => $value){
    if (strpos($value, '_SF') == 5){
      $value = substr($value, 0, 5);
      $sfstations[] = $value;

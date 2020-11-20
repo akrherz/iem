@@ -18,7 +18,10 @@ def main():
         if os.path.isfile("%s.%s" % (fp, suffix)):
             os.remove("%s.%s" % (fp, suffix))
 
-    source = ogr.Open("PG:host=iemdb-postgis.local dbname=postgis user=nobody")
+    source = ogr.Open(
+        "PG:host=iemdb-postgis.local dbname=postgis user=nobody "
+        "gssencmode=disable"
+    )
 
     out_driver = ogr.GetDriverByName("ESRI Shapefile")
     out_ds = out_driver.CreateDataSource("%s.shp" % (fp,))
