@@ -1,203 +1,121 @@
+"""Ingest DOT RWIS Webcams.
+
+RUN from RUN_10MIN.sh
 """
- Need something to make sense of a bunch of downloaded images....
- Vid-000512014-00-03-2009-12-17-17-42.jpg
-           Site Identifier
-               CameraID (may have more than one camera in the future)
-                  ViewID
-                     GMT Timestamp....
-"""
+from datetime import datetime, timedelta, timezone
 import os
-import re
+import tempfile
 import subprocess
 
 # third party
-from PIL import Image, ImageDraw, ImageFont
-import psycopg2.extras
-import pytz
+import requests
 import pyiem.util as util
 
 LOG = util.logger()
-FONT = ImageFont.truetype("veramono.ttf", 10)
+URI = (
+    "https://services.arcgis.com/8lRhdTsQyJpO52F1/ArcGIS/rest/services/"
+    "RWIS_Camera_Info_View/FeatureServer/0/query?where=1%3D1&outFields=*&"
+    "f=json"
+)
 
 
-def do_imagework(cameras, cid, tokens, now):
-    """Process the images"""
-    # Hard coded...
-    drct = cameras[cid]["pan0"]
-    drct_text = util.drct2text(drct)
-
-    # Create 320x240 variant
-    fn = "165.206.203.34/rwis_images/Vid-000512%s.jpg" % ("-".join(tokens),)
-    try:
-        i0 = Image.open(fn)
-        i320 = i0.resize((320, 240), Image.ANTIALIAS)
-    except Exception:
-        if os.path.isfile(fn):
-            os.unlink(fn)
-        return
-
-    draw = ImageDraw.Draw(i0)
-    text = "(%s) %s %s" % (
-        drct_text,
-        cameras[cid]["name"],
-        now.strftime("%-2I:%M:%S %p - %d %b %Y"),
-    )
-    (width, height) = FONT.getsize(text)
-    draw.rectangle([5, 475 - height, 5 + width, 475], fill="#000000")
-    draw.text((5, 475 - height), text, font=FONT)
-
-    # Save 640x480
-    i0.save("%s-640x480.jpg" % (cid,))
-
-    draw = ImageDraw.Draw(i320)
-    text = "(%s) %s %s" % (
-        drct_text,
-        cameras[cid]["name"],
-        now.strftime("%-2I:%M:%S %p - %d %b %Y"),
-    )
-    (width, height) = FONT.getsize(text)
-    draw.rectangle([5, 235 - height, 5 + width, 235], fill="#000000")
-    draw.text((5, 235 - height), text, font=FONT)
-
-    # Save 640x480
-    i320.save("%s-320x240.jpg" % (cid,))
-    del i0
-    del i320
-    return drct
-
-
-def process(tokens, cameras, mcursor):
-    """Process this line from what we downloaded"""
-    cid = "IDOT-%s-%s" % (tokens[0], tokens[2])
-    gmt = util.utc(
-        int(tokens[3]),
-        int(tokens[4]),
-        int(tokens[5]),
-        int(tokens[6]),
-        int(tokens[7]),
-    )
-    now = gmt.astimezone(pytz.timezone("America/Chicago"))
-    if cid not in cameras:
-        LOG.info("unknown CameraID: %s", cid)
-        cameras[cid] = {"pan0": 0, "name": "unknown"}
-
-    drct = do_imagework(cameras, cid, tokens, now)
-    if drct is None:
-        return
-    # Insert into LDM
-    cmd = (
-        "pqinsert -p 'webcam c %s camera/stills/%s.jpg "
-        "camera/%s/%s_%s.jpg jpg' %s-320x240.jpg"
-        ""
-    ) % (
-        gmt.strftime("%Y%m%d%H%M"),
-        cid,
-        cid,
-        cid,
-        gmt.strftime("%Y%m%d%H%M"),
-        cid,
-    )
-    proc = subprocess.Popen(
-        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
-    proc.communicate()
-
-    cmd = (
-        "pqinsert -p 'webcam ac %s camera/640x480/%s.jpg "
-        "camera/%s/%s_%s.jpg jpg' %s-640x480.jpg"
-        ""
-    ) % (
-        gmt.strftime("%Y%m%d%H%M"),
-        cid,
-        cid,
-        cid,
-        gmt.strftime("%Y%m%d%H%M"),
-        cid,
-    )
-    proc = subprocess.Popen(
-        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
-    proc.communicate()
-
-    # Insert into webcam log please
-    sql = """INSERT into camera_log (cam, valid, drct) VALUES
-             (%s, %s, %s)"""
-    args = (cid, now, drct)
-    mcursor.execute(sql, args)
-
-    mcursor.execute(
-        """
-        UPDATE camera_current SET valid = %s, drct = %s WHERE cam = %s
-    """,
-        (now, drct, cid),
-    )
-    if mcursor.rowcount == 0:
-        LOG.info(
-            "ingest_dot_webcams adding camera_current entry for cam: %s", cid
+def process_feature(cursor, feat):
+    """Do what we need to do with this feature."""
+    props = feat["attributes"]
+    rpuid = int(props["RPUID"])
+    scene = int(props["SCANWEB_POSITIONID"])
+    # Imagery is stored as IDOT-<RPUID:03i>-<SCENE-02i>.jpg
+    cam = f"IDOT-{rpuid:03.0f}-{scene:02.0f}"
+    # Loop over 10 possible images found with this feature
+    for i in range(1, 11):
+        suffix = f"_{i}" if i > 1 else ""
+        key = f"IMAGE_DATE{suffix}"
+        timestamp = props.get(key)
+        if timestamp is None:
+            continue
+        valid = datetime(1970, 1, 1) + timedelta(seconds=timestamp / 1000.0)
+        valid = valid.replace(tzinfo=timezone.utc)
+        LOG.debug("%s %s", cam, valid)
+        # Do we have this image?
+        cursor.execute(
+            "SELECT drct from camera_log where valid = %s and cam = %s",
+            (valid, cam),
         )
-        mcursor.execute(
-            """
-            INSERT into camera_current(cam, valid, drct) values (%s,%s,%s)
-        """,
-            (cid, now, drct),
+        if cursor.rowcount > 0:
+            continue
+        url = props[f"IMAGE_URL{suffix}"]
+        req = requests.get(url, timeout=15)
+        if req.status_code != 200:
+            LOG.info("Fetching %s resulted in status %s", url, req.status_code)
+            continue
+        tmpfd = tempfile.NamedTemporaryFile(mode="wb", delete=False)
+        tmpfd.write(req.content)
+        tmpfd.close()
+        # Create log entry
+        cursor.execute(
+            "INSERT into camera_log(cam, valid, drct) VALUES (%s, %s, %s)",
+            (cam, valid, 0),
         )
+        # Get current entry
+        cursor.execute(
+            "SELECT valid from camera_current where cam = %s", (cam,)
+        )
+        if cursor.rowcount == 0:
+            LOG.info("Creating camera_current entry for %s", cam)
+            cursor.execute(
+                "INSERT into camera_current(cam, valid, drct) "
+                "VALUES (%s, %s, %s)",
+                (cam, valid - timedelta(minutes=1), 0),
+            )
+            cursor.execute(
+                "SELECT valid from camera_current where cam = %s", (cam,)
+            )
+        lastvalid = cursor.fetchone()[0]
+        routes = "a"
+        if valid > lastvalid:
+            routes = "ac"
+            cursor.execute(
+                "UPDATE camera_current SET valid = %s where cam = %s",
+                (valid, cam),
+            )
+        cmd = (
+            "pqinsert -p 'webcam %s %s camera/stills/%s.jpg "
+            "camera/%s/%s_%s.jpg jpg' %s"
+        ) % (
+            routes,
+            valid.strftime("%Y%m%d%H%M"),
+            cam,
+            cam,
+            cam,
+            valid.strftime("%Y%m%d%H%M"),
+            tmpfd.name,
+        )
+        LOG.debug(cmd)
+        proc = subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+        proc.communicate()
+        os.unlink(tmpfd.name)
 
 
 def main():
     """Go Main Go"""
     pgconn = util.get_dbconn("mesosite")
-    mcursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    props = util.get_properties()
-    ftp_pass = props["rwis_ftp_password"]
-    utcnow = util.utc()
-
-    # we work from here
-    os.chdir("/mesonet/data/dotcams")
-
-    # Every three hours, clean up after ourselves :)
-    if utcnow.hour % 3 == 0 and utcnow.minute < 5:
-        subprocess.call(
-            "/usr/sbin/tmpwatch 6 165.206.203.34/rwis_images", shell=True
-        )
-
-    # Make dictionary of webcams we are interested in
-    cameras = {}
-    mcursor.execute("SELECT * from webcams WHERE network = 'IDOT'")
-    for row in mcursor:
-        cameras[row["id"]] = row
-
-    proc = subprocess.Popen(
-        (
-            "wget --timeout=20 -m --ftp-user=rwis "
-            "--ftp-password=%s "
-            "ftp://165.206.203.34/rwis_images/*.jpg"
-        )
-        % (ftp_pass,),
-        shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    _stdout, stderr = proc.communicate()
-    stderr = stderr.decode("utf-8")
-    lines = stderr.split("\n")
-    for line in lines:
-        # Look for RETR (.*)
-        tokens = re.findall(
-            (
-                "RETR Vid-000512([0-9]{3})-([0-9][0-9])-([0-9][0-9])"
-                "-([0-9]{4})-([0-9][0-9])-([0-9][0-9])-([0-9][0-9])-"
-                "([0-9][0-9]).jpg"
-            ),
-            line,
-        )
-        if not tokens:
-            continue
-        process(tokens[0], cameras, mcursor)
-
-    mcursor.close()
-    pgconn.commit()
-    pgconn.close()
+    # Fetch the REST service
+    req = util.exponential_backoff(requests.get, URI, timeout=30)
+    if req is None:
+        LOG.info("Failed to fetch REST service, aborting.")
+        return
+    jobj = req.json()
+    for feat in jobj["features"]:
+        mcursor = pgconn.cursor()
+        try:
+            process_feature(mcursor, feat)
+        except Exception as exp:
+            LOG.error(exp)
+        mcursor.close()
+        pgconn.commit()
 
 
 if __name__ == "__main__":

@@ -18,7 +18,10 @@ csh MW_overlay.csh
 cd ../ingestors
 python dot_truckcams.py &
 
-cd ../summary
+cd dotcams
+python ingest_dot_webcams.py &
+
+cd ../../summary
 python update_dailyrain.py
 
 cd ../outgoing

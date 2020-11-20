@@ -24,6 +24,3 @@ python lsr_snow_mapper.py &
 cd ../ingestors/rwis
 csh download.csh &
 python ingest_rw.py &
-
-cd ../dotcams
-python ingest_dot_webcams.py 
