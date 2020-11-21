@@ -45,6 +45,11 @@ def process_feature(cursor, feat):
             continue
         url = props[f"IMAGE_URL{suffix}"]
         req = requests.get(url, timeout=15)
+        if req.status_code == 404:
+            LOG.debug("cloud 404 %s", url)
+            with open("/mesonet/tmp/dotcloud404.txt", "a") as fh:
+                fh.write(f"{url}\n")
+                continue
         if req.status_code != 200:
             LOG.info("Fetching %s resulted in status %s", url, req.status_code)
             continue
