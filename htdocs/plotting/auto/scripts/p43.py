@@ -205,7 +205,8 @@ def plotter(fdict):
         transform=ax.transAxes,
         verticalalignment="bottom",
     )
-    ax.set_ylim(bottom=(df["dwpf"].min() - 3))
+    if not df2.empty:
+        ax.set_ylim(bottom=(df["dwpf"].min() - 3))
     plt.setp(ax.get_xticklabels(), visible=True)
     date_ticker(ax, pytz.timezone(tzname))
     ax.set_xlim(xmin, xmax)
@@ -296,4 +297,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="AMW", network="IA_ASOS"))
+    plotter(dict(station="WAYT1", network="TN_COOP"))
