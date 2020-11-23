@@ -87,7 +87,7 @@ def do_labels(
 ):
     """Helper."""
     ax.set_title(
-        ("%s [%s] %s Date and Days\n" "%s %s$^\circ$F")
+        ("%s [%s] %s Date and Days\n" r"%s %s$^\circ$F")
         % (
             ctx["_nt"].sts[station]["name"],
             station,
@@ -108,7 +108,7 @@ def do_labels(
         )
     )
     ax.set_ylabel(
-        ("Days with %s %s %s$^\circ$F")
+        (r"Days with %s %s %s$^\circ$F")
         % (
             varname.capitalize(),
             "At or Above" if direction == "above" else "Below",
@@ -131,25 +131,17 @@ def plotter(fdict):
 
     op = "%s %s" % (varname, ">=" if direction == "above" else "<")
     df = read_sql(
-        """
+        f"""
         with data as (
             SELECT extract(year from day + '%s months'::interval) as season,
-            high, low, day from """
-        + table
-        + """ WHERE station = %s
+            high, low, day from {table} WHERE station = %s
             and day >= '1893-01-01'),
         agg1 as (
             SELECT season - %s as season,
             count(*) as obs,
-            min(case when """
-        + op
-        + """ %s then day else null end) as nday,
-            max(case when """
-        + op
-        + """ %s then day else null end) as xday,
-            sum(case when """
-        + op
-        + """ %s then 1 else 0 end) as count
+            min(case when {op} %s then day else null end) as nday,
+            max(case when {op} %s then day else null end) as xday,
+            sum(case when {op} %s then 1 else 0 end) as count
             from data GROUP by season)
     SELECT season::int, count, obs, nday, extract(doy from nday) as nday_doy,
     xday, extract(doy from xday) as xday_doy from agg1

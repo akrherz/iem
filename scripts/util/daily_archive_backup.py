@@ -30,7 +30,7 @@ def run(date):
     LOG.debug(cmd)
     subprocess.call(cmd, shell=True)
     cmd = date.strftime(
-        "rsync -a --remove-source-files " + tarfn + " "
+        f"rsync -a --remove-source-files {tarfn} "
         "mesonet@metl60.agron.iastate.edu:/stage/IEMArchive/%Y/%m"
     )
     LOG.debug(cmd)

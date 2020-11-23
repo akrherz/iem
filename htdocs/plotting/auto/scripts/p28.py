@@ -86,11 +86,9 @@ def get_ctx(fdict):
     table = "alldata_%s" % (station[:2],)
 
     cursor.execute(
-        """
+        f"""
         SELECT year,  extract(doy from day) as doy, precip
-        from """
-        + table
-        + """ where station = %s and precip is not null
+        from {table} where station = %s and precip is not null
     """,
         (station,),
     )

@@ -222,11 +222,9 @@ def workflow(argv, pgconn, cursor):
 
         # Finally, insert the new geometry
         cursor.execute(
-            """
-        INSERT into ugcs (ugc, name, state, begin_ts, wfo, geom)
-        VALUES (%s, %s, %s, %s, %s,
-        ST_Multi(ST_SetSRID(ST_GeomFromEWKT(%s),4326)))
-        """,
+            "INSERT into ugcs (ugc, name, state, begin_ts, wfo, geom) "
+            "VALUES (%s, %s, %s, %s, %s, "
+            "ST_Multi(ST_SetSRID(ST_GeomFromEWKT(%s),4326)))",
             (
                 ugc,
                 row["NAME"],

@@ -6,13 +6,13 @@
 Since we have web scrapers, we need to have empty folders to keep the Server
 from having lots of 404s
 """
-import datetime
 import os
 import sys
 import grp
 import subprocess
 
 from pyiem.network import Table as NetworkTable
+from pyiem.util import utc
 
 PRODS = {
     "NEXRAD": ["N0Q", "N0S", "N0U", "N0Z", "NET"],
@@ -46,9 +46,9 @@ def supermakedirs(path, mode, group):
 def main(argv):
     """Go Main Go"""
     if len(argv) == 1:
-        ts = datetime.datetime.utcnow()
+        ts = utc()
     else:
-        ts = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]))
+        ts = utc(int(argv[1]), int(argv[2]), int(argv[3]))
     nt = NetworkTable(["NEXRAD", "TWDR"])
     basedir = ts.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ridge")
     for sid in nt.sts:
@@ -64,7 +64,7 @@ def main(argv):
     for pil in PILS:
         fn = "%s_%s.txt" % (pil, ts.strftime("%Y%m%d"))
         if not os.path.isfile(fn):
-            subprocess.call("touch %s" % (fn,), shell=True)
+            subprocess.call(f"touch {fn}", shell=True)
             os.chmod(fn, 0o664)
             chgrp(fn, grp.getgrnam("iem-friends")[2])
 

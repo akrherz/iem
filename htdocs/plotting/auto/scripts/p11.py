@@ -88,22 +88,12 @@ def plotter(fdict):
     table = "summary_%s" % (year,)
 
     df = read_sql(
-        """
-        select day, max_"""
-        + varname
-        + """, min_"""
-        + varname
-        + """
-        from """
-        + table
-        + """ s JOIN stations t on (s.iemid = t.iemid)
+        f"""
+        select day, max_{varname}, min_{varname}
+        from {table} s JOIN stations t on (s.iemid = t.iemid)
         where t.id = %s and t.network = %s and
-        max_"""
-        + varname
-        + """ is not null and
-        min_"""
-        + varname
-        + """ is not null
+        max_{varname} is not null and
+        min_{varname} is not null
         ORDER by day ASC
     """,
         pgconn,

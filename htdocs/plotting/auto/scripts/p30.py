@@ -97,11 +97,9 @@ def plotter(fdict):
 
     if ctx["opt"] == "monthly":
         df = read_sql(
-            """
+            f"""
         SELECT year,  max(high) as max_high,  min(low) as min_low
-        from """
-            + table
-            + """ where station = %s and month = %s and
+        from {table} where station = %s and month = %s and
         high is not null and low is not null
         and year <= %s GROUP by year
         ORDER by year ASC
@@ -112,11 +110,9 @@ def plotter(fdict):
         )
     else:
         df = read_sql(
-            """
+            f"""
         SELECT year,  max(high) as max_high,  min(low) as min_low
-        from """
-            + table
-            + """ where station = %s and
+        from {table} where station = %s and
         high is not null and low is not null
         and year <= %s GROUP by year
         ORDER by year ASC

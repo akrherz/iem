@@ -8,10 +8,9 @@ import warnings
 import subprocess
 
 from netCDF4 import chartostring
-import pytz
 from pyiem.datatypes import temperature, speed
 from pyiem import meteorology
-from pyiem.util import ncopen
+from pyiem.util import ncopen, utc
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -41,8 +40,7 @@ def main(argv):
     network = argv[1]
     wxcfn = argv[2]
 
-    utc = datetime.datetime.utcnow()
-    utc = utc.replace(tzinfo=pytz.UTC)
+    utcnow = utc()
 
     out = open(wxcfn, "w")
     out.write(
@@ -61,12 +59,12 @@ def main(argv):
    5 Heat Index F
    5 Wind Chill F
 """
-        % (utc.strftime("%Y.%m.%d.%H%M"),)
+        % (utcnow.strftime("%Y.%m.%d.%H%M"),)
     )
 
     fn = None
     for i in range(4):
-        now = utc - datetime.timedelta(hours=i)
+        now = utcnow - datetime.timedelta(hours=i)
         testfn = now.strftime("/mesonet/data/madis/mesonet1/%Y%m%d_%H00.nc")
         if os.path.isfile(testfn):
             fn = testfn
@@ -76,8 +74,7 @@ def main(argv):
         sys.exit()
 
     indices = {}
-    BOGUS = datetime.datetime(2000, 1, 1)
-    BOGUS = BOGUS.replace(tzinfo=pytz.UTC)
+    BOGUS = utc(2000, 1, 1)
 
     nc = ncopen(fn)
 
@@ -90,8 +87,7 @@ def main(argv):
         sid = stations[i]
         # We have an ob!
         ticks = int(nc.variables["observationTime"][i])
-        ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=ticks)
-        ts = ts.replace(tzinfo=pytz.UTC)
+        ts = utc(1970, 1, 1) + datetime.timedelta(seconds=ticks)
 
         if ts > indices.get(sid, {"ts": BOGUS})["ts"]:
             indices[sid] = {"ts": ts, "idx": i}

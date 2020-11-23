@@ -44,16 +44,14 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
 
     df = read_sql(
-        """
+        f"""
       with data as (
         select day,
         (case when month < 6 then year - 1 else year end) as myyear,
         month, low,
         min(low)
         OVER (ORDER by day ASC ROWS between 121 PRECEDING and 1 PRECEDING) as p
-        from """
-        + table
-        + """ where station = %s)
+        from {table} where station = %s)
 
       SELECT myyear as year, max(p - low) as largest_change, count(*) from data
       GROUP by year ORDER by year ASC
@@ -75,7 +73,7 @@ def plotter(fdict):
     ax.axhline(0 - df["largest_change"].mean(), lw=2, color="k")
     ax.grid(True)
     ax.set_ylabel(
-        ("Largest Low Temp Drop $^\circ$F, Avg: %.1f")
+        (r"Largest Low Temp Drop $^\circ$F, Avg: %.1f")
         % (df["largest_change"].mean(),)
     )
     ax.set_xlabel("%s value is %s" % (year, df.at[year, "largest_change"]))
