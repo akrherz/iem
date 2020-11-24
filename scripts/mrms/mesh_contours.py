@@ -5,6 +5,7 @@ import json
 import os
 import subprocess
 import sys
+import pathlib
 import tempfile
 
 import pygrib
@@ -31,7 +32,8 @@ def pqinsert(tmpfn, ets, interval):
     )
     LOG.debug(name)
     cmd = f"pqinsert -i -p '{name}' {tmpfn}.geojson"
-    subprocess.call(cmd, shell=True)
+    if pathlib.Path(f"{tmpfn}.geojson").stat().st_size > 0:
+        subprocess.call(cmd, shell=True)
     cmd = (
         f"pqinsert -i -p '{name.replace('.geojson', '_meta.json')}' "
         f"{tmpfn}_meta.json"
@@ -119,7 +121,7 @@ def main(argv):
     with tempfile.NamedTemporaryFile() as tmp:
         maxval, hits, misses = agg(sts, ets)
         if maxval is None:
-            LOG.info("Aborting, no data! %s", ctx)
+            LOG.debug("Aborting, no data! %s", ctx)
             return
         make_raster(maxval, tmp.name)
         make_contours(tmp.name)
