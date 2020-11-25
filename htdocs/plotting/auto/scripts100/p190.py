@@ -39,18 +39,20 @@ def magic(ax, df, colname, title, ctx):
     ax.set_xlim(0, 367)
     ax.grid(True)
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
-    ax.set_xticklabels(calendar.month_abbr[1:])
+    ax.set_xticklabels(calendar.month_abbr[1:], rotation=45)
 
     bbox = ax.get_position()
-    sideax = plt.axes([bbox.x1 + 0.01, bbox.y0, 0.09, 0.35])
-    ylim = [df["year"].min(), df["year"].max()]
+    sideax = plt.axes([bbox.x1 + 0.002, bbox.y0, 0.04, 0.35])
+    ylim = [df["year"].min() - 1, df["year"].max() + 1]
     year0 = ylim[0] - (ylim[0] % 10)
     year1 = ylim[1] + (10 - ylim[1] % 10)
     cmap = get_cmap(ctx["cmap"])
     norm = mpcolors.BoundaryNorm(np.arange(year0, year1 + 1, 10), cmap.N)
     ax.scatter(df2["doy"], df2["year"], color=cmap(norm(df2["year"].values)))
     ax.set_yticks(np.arange(year0, year1, 20))
-    ax.set_ylim(*ylim)
+    if colname.find("_high_") == -1:
+        ax.set_yticklabels([])
+    ax.set_ylim(year0, year1)
     cnts, edges = np.histogram(
         df2["year"].values, np.arange(year0, year1 + 1, 10)
     )
@@ -59,9 +61,9 @@ def magic(ax, df, colname, title, ctx):
     )
     sideax.set_yticks(np.arange(year0, year1, 20))
     sideax.set_yticklabels([])
-    sideax.set_ylim(*ylim)
+    sideax.set_ylim(year0, year1)
     sideax.grid(True)
-    sideax.set_xlabel("Decade Count")
+    sideax.set_xlabel("Decade\nCount")
 
 
 def plotter(fdict):
@@ -73,22 +75,26 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
 
     df = read_sql(
-        """
+        f"""
     WITH data as (
         SELECT sday, day, year,
-        rank() OVER (PARTITION by sday ORDER by high DESC) as max_high_rank,
-        rank() OVER (PARTITION by sday ORDER by high ASC) as min_high_rank,
-        rank() OVER (PARTITION by sday ORDER by low DESC) as max_low_rank,
-        rank() OVER (PARTITION by sday ORDER by low ASC) as min_low_rank
-        from """
-        + table
-        + """ WHERE station = %s and high is not null
-        and low is not null)
+        rank() OVER (PARTITION by sday ORDER by high DESC NULLS LAST)
+            as max_high_rank,
+        rank() OVER (PARTITION by sday ORDER by high ASC NULLS LAST)
+            as min_high_rank,
+        rank() OVER (PARTITION by sday ORDER by low DESC NULLS LAST)
+            as max_low_rank,
+        rank() OVER (PARTITION by sday ORDER by low ASC NULLS LAST)
+            as min_low_rank,
+        rank() OVER (PARTITION by sday ORDER by precip DESC NULLS LAST)
+            as max_precip_rank
+        from {table} WHERE station = %s)
     SELECT *,
     extract(doy from
     ('2000-'||substr(sday, 1, 2)||'-'||substr(sday, 3, 2))::date) as doy
     from data WHERE max_high_rank = 1 or min_high_rank = 1 or
-    max_low_rank = 1 or min_low_rank = 1 ORDER by day ASC
+    max_low_rank = 1 or min_low_rank = 1 or max_precip_rank = 1
+    ORDER by day ASC
     """,
         pgconn,
         params=(station,),
@@ -97,7 +103,7 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No Data Found.")
 
-    fig = plt.figure(figsize=(12, 6))
+    fig = plt.figure(figsize=(12, 6.75))
     fig.text(
         0.5,
         0.95,
@@ -106,14 +112,18 @@ def plotter(fdict):
         ha="center",
         fontsize=16,
     )
-    ax = plt.axes([0.04, 0.55, 0.35, 0.35])
+    axwidth = 0.265
+    x0 = 0.04
+    ax = plt.axes([x0, 0.56, axwidth, 0.35])
     magic(ax, df, "max_high_rank", "Maximum High (warm)", ctx)
-    ax = plt.axes([0.04, 0.1, 0.35, 0.35])
+    ax = plt.axes([x0, 0.11, axwidth, 0.35])
     magic(ax, df, "min_high_rank", "Minimum High (cold)", ctx)
-    ax = plt.axes([0.54, 0.55, 0.35, 0.35])
+    ax = plt.axes([x0 + 0.32, 0.56, axwidth, 0.35])
     magic(ax, df, "max_low_rank", "Maximum Low (warm)", ctx)
-    ax = plt.axes([0.54, 0.1, 0.35, 0.35])
+    ax = plt.axes([x0 + 0.32, 0.11, axwidth, 0.35])
     magic(ax, df, "min_low_rank", "Minimum Low (cold)", ctx)
+    ax = plt.axes([x0 + 0.64, 0.11, axwidth, 0.35])
+    magic(ax, df, "max_precip_rank", "Maximum Precipitation", ctx)
 
     return plt.gcf(), df
 
