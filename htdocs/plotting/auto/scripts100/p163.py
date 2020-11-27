@@ -12,6 +12,7 @@ MDICT = OrderedDict(
     [
         ("NONE", "All LSR Types"),
         ("NRS", "All LSR Types except HEAVY RAIN + SNOW"),
+        ("H1", "One Inch and Larger Hail "),
         ("CON", "Convective LSRs (Tornado, TStorm Gst/Dmg, Hail)"),
         ("AVALANCHE", "AVALANCHE"),
         ("BLIZZARD", "BLIZZARD"),
@@ -121,6 +122,8 @@ def plotter(fdict):
         tlimiter = ""
     elif myfilter == "NRS":
         tlimiter = " and typetext not in ('HEAVY RAIN', 'SNOW', 'HEAVY SNOW') "
+    elif myfilter == "H1":
+        tlimiter = " and typetext = 'HAIL' and magnitude >= 1 "
     elif myfilter == "CON":
         tlimiter = (
             " and typetext in ('TORNADO', 'HAIL', 'TSTM WND GST', "
@@ -130,18 +133,12 @@ def plotter(fdict):
         tlimiter = " and typetext = '%s' " % (myfilter,)
 
     df = read_sql(
-        """
+        f"""
     WITH data as (
         SELECT distinct wfo, state, valid, type, magnitude, geom from lsrs
-        where valid >= %s and valid < %s """
-        + tlimiter
-        + """
+        where valid >= %s and valid < %s {tlimiter}
     )
-    SELECT """
-        + by
-        + """, count(*) from data GROUP by """
-        + by
-        + """
+    SELECT {by}, count(*) from data GROUP by {by}
     """,
         pgconn,
         params=(sts, ets),
@@ -158,8 +155,7 @@ def plotter(fdict):
     mp = MapPlot(
         sector="nws",
         axisbg="white",
-        title=("Preliminary/Unfiltered Local Storm Report Counts %s")
-        % (PDICT[by],),
+        title=f"Preliminary/Unfiltered Local Storm Report Counts {PDICT[by]}",
         subtitlefontsize=10,
         subtitle=("Valid %s - %s UTC, type limiter: %s")
         % (
