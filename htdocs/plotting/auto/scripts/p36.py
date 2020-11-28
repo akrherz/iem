@@ -41,10 +41,8 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
 
     cursor.execute(
-        """
-        SELECT year, month, avg((high+low)/2.) from """
-        + table
-        + """
+        f"""
+        SELECT year, month, avg((high+low)/2.) from {table}
         WHERE station = %s and day < %s and year > 1892
         GROUP by year, month ORDER by year ASC
     """,

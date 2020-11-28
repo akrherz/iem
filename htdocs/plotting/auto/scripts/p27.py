@@ -48,16 +48,14 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
 
     df = read_sql(
-        """
+        f"""
         SELECT year,
         min(low) as min_low,
         min(case when low < %s then extract(doy from day)
             else 999 end) as t1_doy,
         min(case when low < %s then extract(doy from day)
             else 999 end) as t2_doy
-        from """
-        + table
-        + """ where station = %s and month > 6
+        from {table} where station = %s and month > 6
         GROUP by year ORDER by year ASC
     """,
         pgconn,

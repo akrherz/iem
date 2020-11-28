@@ -49,9 +49,9 @@ def plotter(fdict):
         df = read_sql(
             """
             SELECT distinct extract(year from issue) as year,
-                phenomena, significance from warnings WHERE
-                phenomena is not null and significance is not null and
-                issue > '2005-01-01'
+            phenomena, significance from warnings WHERE
+            phenomena is not null and significance is not null and
+            issue > '2005-01-01'
             """,
             pgconn,
             index_col=None,

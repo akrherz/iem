@@ -215,7 +215,7 @@ def plotter(fdict):
     ax.scatter(days - 0.1, lobs, zorder=2, s=40, c="blue", label="Actual Low")
 
     ax.set_ylabel(r"Temperature $^{\circ}\mathrm{F}$")
-    ax.grid(True)
+    ax.grid()
 
     next1 = ets.replace(day=1)
     days = (next1 - month1).days

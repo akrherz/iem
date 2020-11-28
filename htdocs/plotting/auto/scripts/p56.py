@@ -94,13 +94,11 @@ def plotter(fdict):
         title = "State of %s" % (reference.state_names[state],)
         limiter = " substr(ugc, 1, 2) = '%s' " % (state,)
     df = read_sql(
-        """
+        f"""
     with obs as (
         SELECT distinct extract(year from issue) as yr,
         extract(week from issue) as week, wfo, eventid from warnings WHERE
-        """
-        + limiter
-        + """ and phenomena = %s and significance = %s
+        {limiter} and phenomena = %s and significance = %s
     )
     SELECT yr, week, count(*) from obs GROUP by yr, week ORDER by yr ASC
     """,

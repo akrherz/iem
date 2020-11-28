@@ -113,7 +113,6 @@ def plotter(fdict):
     (fig, ax) = plt.subplots(2, 1, figsize=(8, 6))
 
     ax[0].barh(ys - 0.4, freq, ec="b", fc="b")
-    # ax[0].set_ylim(-60.5, 0.5)
     ax[0].set_ylabel(r"Minimum Wind Chill $^\circ$F")
     ax[0].set_xlabel("Frequency [%]")
     ax[0].set_title(

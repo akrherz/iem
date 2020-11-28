@@ -63,12 +63,10 @@ def plotter(fdict):
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
     cursor.execute(
-        """
+        f"""
     with months as (
       select year, month, p, avg(p) OVER (PARTITION by month) from (
-        select year, month, sum(precip) as p from """
-        + table
-        + """
+        select year, month, sum(precip) as p from {table}
         where station = %s and year < extract(year from now())
         GROUP by year, month) as foo)
 

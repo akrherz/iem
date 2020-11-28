@@ -48,12 +48,10 @@ def plotter(fdict):
 
     # beat month
     cursor.execute(
-        """
+        f"""
     with obs as (
      SELECT sday, avg(high) as avgh, avg(low) as avgl,
-     avg((high+low)/2.) as avgt from """
-        + table
-        + """
+     avg((high+low)/2.) as avgt from {table}
      WHERE station = %s and month = %s GROUP by sday
     ), c81 as (
      SELECT to_char(valid, 'mmdd') as sday, high, low, (high+low)/2. as avgt
@@ -121,7 +119,7 @@ def plotter(fdict):
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
     ax[0].set_title(
-        ("%s %s Daily Climate Comparison\n" "Observation Period: %s-%s for %s")
+        ("%s %s Daily Climate Comparison\nObservation Period: %s-%s for %s")
         % (
             station,
             ctx["_nt"].sts[station]["name"],

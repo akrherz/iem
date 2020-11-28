@@ -74,12 +74,10 @@ def plotter(fdict):
         lastday = lastday.replace(day=1)
 
     df = read_sql(
-        """SELECT year, month, avg((high+low)/2.) as avg_temp,
+        f"""SELECT year, month, avg((high+low)/2.) as avg_temp,
       avg(high) as avg_high_temp, avg(low) as avg_low_temp,
       sum(precip) as total_precip
-      from """
-        + table
-        + """ where station = %s and day < %s GROUP by year, month
+      from {table} where station = %s and day < %s GROUP by year, month
       """,
         pgconn,
         params=(station, lastday),

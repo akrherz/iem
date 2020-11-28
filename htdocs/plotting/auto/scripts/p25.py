@@ -41,12 +41,8 @@ def plotter(fdict):
     state = ctx["state"][:2]
     table = "alldata_%s" % (state,)
     cursor.execute(
-        """
-    SELECT high, low from """
-        + table
-        + """ where sday = %s and
-    high is not null and low is not null
-     """,
+        f"SELECT high, low from {table} where sday = %s and high is not null "
+        "and low is not null",
         ("%02i%02i" % (month, day),),
     )
     if cursor.rowcount == 0:
@@ -79,8 +75,13 @@ def plotter(fdict):
     ax.text(
         0.8,
         0.98,
-        ("High Temp\n$\mu$ = %.1f$^\circ$F\n$\sigma$ = %.2f" "\n$n$ = %s")
-        % (mu, std, len(highs)),
+        "\n".join(
+            [
+                rf"High Temp\n$\mu$ = {mu:.1f}$^\circ$F",
+                rf"$\sigma$ = {std:.2f}",
+                rf"$n$ = {len(highs)}",
+            ]
+        ),
         va="top",
         ha="left",
         color="r",
@@ -114,8 +115,13 @@ def plotter(fdict):
     ax.text(
         0.02,
         0.98,
-        ("Low Temp\n$\mu$ = %.1f$^\circ$F\n$\sigma$ = %.2f" "\n$n$ = %s")
-        % (mu, std, len(lows)),
+        "\n".join(
+            [
+                rf"Low Temp\n$\mu$ = {mu:.1f}$^\circ$F",
+                rf"$\sigma$ = {std:.2f}",
+                rf"$n$ = {len(lows)}",
+            ]
+        ),
         va="top",
         ha="left",
         color="b",

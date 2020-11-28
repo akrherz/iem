@@ -60,18 +60,12 @@ def plotter(fdict):
 
     s = "ASC" if mydir == "cold" else "DESC"
     df = read_sql(
-        """
+        f"""
         with ranks as (
             select day, high, low,
-    rank() OVER (PARTITION by year ORDER by high """
-        + s
-        + """) as high_rank,
-    rank() OVER (PARTITION by year ORDER by low """
-        + s
-        + """) as low_rank
-            from """
-        + table
-        + """ where station = %s and month = %s),
+    rank() OVER (PARTITION by year ORDER by high {s}) as high_rank,
+    rank() OVER (PARTITION by year ORDER by low {s}) as low_rank
+            from {table} where station = %s and month = %s),
         highs as (
             SELECT extract(day from day) as dom, count(*) from ranks
             where high_rank = 1 GROUP by dom),

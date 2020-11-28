@@ -50,10 +50,8 @@ def plotter(fdict):
     eyear = datetime.datetime.now().year
 
     cursor.execute(
-        """
-        SELECT sday, year, high, low, precip, day from """
-        + table
-        + """
+        f"""
+        SELECT sday, year, high, low, precip, day from {table}
         where station = %s and sday != '0229'
         and year >= %s ORDER by day ASC
     """,
@@ -86,11 +84,6 @@ def plotter(fdict):
         if high > hrecords[sday]:
             hrecords[sday] = row["high"]
             hyears[year - syear - 1] += 1
-            # hstraight += 1
-            # if hstraight > 3:
-            #    print hstraight, sday, row[4]
-        # else:
-        #     hstraight = 0
         if low < lrecords[sday]:
             lrecords[sday] = low
             lyears[year - syear - 1] += 1
@@ -158,7 +151,7 @@ def plotter(fdict):
     ax[1].text(
         eyear - 70,
         32,
-        "Min Low Temperature, %.1f events/year" % (rate,),
+        f"Min Low Temperature, {rate:.1f} events/year",
         bbox=dict(color="white"),
     )
 
@@ -175,7 +168,7 @@ def plotter(fdict):
     ax[2].text(
         eyear - 50,
         32,
-        "Precipitation, %.1f events/year" % (rate,),
+        f"Precipitation, {rate:.1f} events/year",
         bbox=dict(color="white"),
     )
 

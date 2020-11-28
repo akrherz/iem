@@ -119,6 +119,8 @@ data available from this archive!</p>
 
 <h4>2) Select From Available Data:</h4>
 
+<p><strong>Note:</strong> Precipitation data is unavailable for non-US sites.</p>
+
 <select name="data" size="10" MULTIPLE>
 	<option value="all" SELECTED>All Available</option>
 	<option value="tmpf">Air Temperature [F]</option>
@@ -313,5 +315,5 @@ by site. Values are in inches. This value may or may not contain frozen
 </dl>
 
 EOF;
-$t->render('single.phtml');
+$t->render('full.phtml');
 ?>

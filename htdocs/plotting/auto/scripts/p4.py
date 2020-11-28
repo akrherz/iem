@@ -57,9 +57,7 @@ def plotter(fdict):
 
     pgconn = get_dbconn("postgis")
     states = gpd.GeoDataFrame.from_postgis(
-        """
-    SELECT the_geom, state_abbr from states where state_abbr = %s
-    """,
+        "SELECT the_geom, state_abbr from states where state_abbr = %s",
         pgconn,
         params=(state,),
         index_col="state_abbr",

@@ -98,14 +98,14 @@ def plotter(fdict):
     txt = ax.text(
         tmpf[10],
         avgval + 1,
-        "Average: %.1f%%" % (avgval,),
+        f"Average: {avgval:.1f}%",
         va="bottom",
         zorder=2,
         color="yellow",
         fontsize=14,
     )
     txt.set_path_effects([PathEffects.withStroke(linewidth=2, foreground="k")])
-    ax.grid(True, zorder=11)
+    ax.grid(zorder=11)
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")

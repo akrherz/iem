@@ -69,12 +69,8 @@ def get_data(ctx):
     snow = np.zeros((eyear - syear + 1, 366))
     snowd = np.zeros((eyear - syear + 1, 366))
     cursor.execute(
-        """
-        SELECT extract(doy from day), year, snow, snowd from """
-        + table
-        + """
-        where station = %s and year >= %s
-    """,
+        f"SELECT extract(doy from day), year, snow, snowd from {table} "
+        "where station = %s and year >= %s",
         (station, syear),
     )
     for row in cursor:

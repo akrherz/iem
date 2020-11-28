@@ -49,10 +49,8 @@ def plotter(fdict):
 
     # beat month
     df = read_sql(
-        """
-    SELECT year, sum(precip) as precip, sum(snow) as snow from """
-        + table
-        + """
+        f"""
+    SELECT year, sum(precip) as precip, sum(snow) as snow from {table}
     WHERE station = %s and month = %s and precip >= 0
     and snow >= 0 GROUP by year ORDER by year ASC
     """,

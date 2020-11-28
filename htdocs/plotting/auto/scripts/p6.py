@@ -64,13 +64,11 @@ def plotter(fdict):
 
     # Compute the bulk statistics for climatology
     df = read_sql(
-        """
+        f"""
     WITH yearly as (
         SELECT station, year, sum(precip) as sum_precip,
         avg(high) as avg_high, avg(low) as avg_low,
-        avg((high+low)/2.) as avg_temp from """
-        + table
-        + """
+        avg((high+low)/2.) as avg_temp from {table}
         WHERE month = %s GROUP by station, year)
 
     SELECT avg(sum_precip) as avg_precip, stddev(sum_precip) as std_precip,
@@ -87,13 +85,11 @@ def plotter(fdict):
     climo_avg = df.at[0, "avg_" + ptype_climo]
     climo_std = df.at[0, "std_" + ptype_climo]
     df = read_sql(
-        """
+        f"""
     WITH yearly as (
         SELECT station, year, sum(precip) as sum_precip,
         avg(high) as avg_high, avg(low) as avg_low,
-        avg((high+low)/2.) as avg_temp from """
-        + table
-        + """
+        avg((high+low)/2.) as avg_temp from {table}
         WHERE month = %s GROUP by station, year),
     agg1 as (
         SELECT station, avg(sum_precip) as precip,

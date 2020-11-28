@@ -127,7 +127,7 @@ def plotter(fdict):
     ax[0].set_xticklabels(calendar.month_abbr[1:])
     ax[0].set_ylabel("Frequency [%]")
     ax[0].set_title(
-        ("%.0f-%s [%s] %s\n" "Frequency of %s Cloud Observation of Overcast")
+        ("%.0f-%s [%s] %s\nFrequency of %s Cloud Observation of Overcast")
         % (
             df["year"].min(),
             datetime.datetime.now().year,
@@ -144,7 +144,7 @@ def plotter(fdict):
     ax[1].grid(True)
     ax[1].set_yticks([0, 10, 25, 50, 75, 90, 100])
     ax[1].axhline(obs["freq"].mean())
-    ax[1].set_ylabel("%s Frequency [%%]" % (calendar.month_abbr[month],))
+    ax[1].set_ylabel(f"{calendar.month_abbr[month]} Frequency [%]")
     ax[1].set_xlim(obs["year"].min() - 2, obs["year"].max() + 2)
     return fig, df
 

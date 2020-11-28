@@ -71,16 +71,12 @@ def plotter(fdict):
     else:
         orderer += " DESC"
     df = read_sql(
-        """
+        f"""
     WITH ranks as (
         SELECT month, day, high, low, precip, snow,
         rank() OVER (
-            PARTITION by month ORDER by """
-        + orderer
-        + """ NULLS LAST)
-        from """
-        + table
-        + """ WHERE station = %s)
+            PARTITION by month ORDER by {orderer} NULLS LAST)
+        from {table} WHERE station = %s)
 
     select month, to_char(day, 'Mon dd, YYYY') as dd, high, low, precip, snow,
     (high - low) as range from ranks
@@ -118,7 +114,7 @@ def plotter(fdict):
     ax.set_yticks(range(0, 13))
     ax.set_ylim(0, 13)
     ax.set_xlabel(
-        ("Date most recently set/tied shown, " "* indicates ties are present")
+        "Date most recently set/tied shown, * indicates ties are present"
     )
     fig.text(
         0.5,
