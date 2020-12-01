@@ -15,20 +15,18 @@ def run(wfo, year, phenomena, significance, etn):
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    table = "warnings_%s" % (year,)
     # This is really a BUG here and we need to rearch the database
     cursor.execute(
-        """
+        f"""
     SELECT
     first_value(report) OVER (ORDER by product_issue ASC) as report,
-    first_value(svs) OVER (ORDER by product_issue ASC) as svs_updates,
+    first_value(svs) OVER (ORDER by length(svs) DESC NULLS LAST
+        ) as svs_updates,
     first_value(issue at time zone 'UTC')
         OVER (ORDER by issue ASC NULLS LAST) as utc_issue,
     first_value(expire at time zone 'UTC')
         OVER (ORDER by expire DESC NULLS LAST) as utc_expire
-    from """
-        + table
-        + """ w
+    from warnings_{year} w
     WHERE w.wfo = %s and eventid = %s and
     phenomena = %s and significance = %s
     """,
@@ -57,7 +55,7 @@ def run(wfo, year, phenomena, significance, etn):
 
     # Now lets get UGC information
     cursor.execute(
-        """
+        f"""
     SELECT
     u.ugc,
     u.name,
@@ -67,9 +65,7 @@ def run(wfo, year, phenomena, significance, etn):
     w.expire at time zone 'UTC' utc_expire,
     w.init_expire at time zone 'UTC' utc_init_expire,
     w.updated at time zone 'UTC' utc_updated, hvtec_nwsli
-    from """
-        + table
-        + """ w JOIN ugcs u on (w.gid = u.gid)
+    from warnings_{year} w JOIN ugcs u on (w.gid = u.gid)
     WHERE w.wfo = %s and eventid = %s and
     phenomena = %s and significance = %s
     ORDER by u.ugc ASC

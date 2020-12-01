@@ -1,15 +1,8 @@
-"""
- Parse the monthly maint file I get from the DOT
+"""Parse monthly IDOT Maint Report.
 
-  id         | integer |
- station    | character varying(10)    |
- portfolio  | character varying(10)    |
- valid      | timestamp with time zone |
- parameter  | character varying(10)    |
- adjustment | real                     |
- final      | real                     |
- comments   | text                     |
-
+1. Only sites in `CALSITES` get calibrated as others will just have their
+entire sensors replaced when outside of bounds.
+2. There is no flag that denotes if a calibration even happened :/
 """
 import sys
 import re
@@ -45,8 +38,9 @@ def main(argv):
 
     for _, row in df.iterrows():
         faa = row["FAA Code"]
+        comment = ""
         if faa not in CALSITES:
-            continue
+            comment = " [FYI Check Made]"
         date = datetime.datetime.strptime(row["Visit Date"], "%d-%b-%y")
 
         if row["Description"].startswith("site offline"):
@@ -66,7 +60,7 @@ def main(argv):
             "tmpf",
             tempadj,
             parts[0][2],
-            row["Description"].replace('"', ""),
+            row["Description"].replace('"', "") + comment,
         )
         if len(sys.argv) > 1:
             pcursor.execute(sql, args)
@@ -78,14 +72,14 @@ def main(argv):
             "dwpf",
             float(parts[0][3]) - float(parts[0][1]),
             parts[0][3],
-            row["Description"].replace('"', ""),
+            row["Description"].replace('"', "") + comment,
         )
         if len(sys.argv) > 1:
             pcursor.execute(sql, args)
 
         print(
-            ("--> %s [%s] TMPF: %s (%s) DWPF: %s (%s)")
-            % (faa, date, parts[0][2], tempadj, parts[0][3], dewpadj)
+            ("--> %s [%s] TMPF: %s (%s) DWPF: %s (%s)%s")
+            % (faa, date, parts[0][2], tempadj, parts[0][3], dewpadj, comment)
         )
 
     if len(argv) == 2:
