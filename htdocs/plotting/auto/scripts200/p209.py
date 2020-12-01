@@ -111,7 +111,7 @@ def get_data(ctx):
     df["week_ending"] = pd.to_datetime(df["week_ending"])
     df["doy"] = pd.to_numeric(df["week_ending"].dt.strftime("%j"))
     df = df.set_index("week_ending")
-    df["delta"] = df.groupby("year")["num_value"].diff()
+    df["delta"] = df.groupby("year")["num_value"].diff().fillna(0)
     return df
 
 
@@ -205,4 +205,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(commodity_desc="CORN", unit_desc="PCT PLANTED"))
+    plotter(dict(commodity_desc="CORN", unit_desc="PCT HARVESTED"))
