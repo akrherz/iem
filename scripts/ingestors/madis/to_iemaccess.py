@@ -65,6 +65,14 @@ def provider2network(provider, name):
     return None
 
 
+def build_roadstate_xref(ncvar):
+    """Figure out how values map."""
+    xref = {}
+    for myattr in [x for x in ncvar.ncattrs() if x.startswith("value")]:
+        xref[int(myattr.replace("value", ""))] = ncvar.getncattr(myattr)
+    return xref
+
+
 def main():
     """Do Something"""
     pgconn = get_dbconn("iem")
@@ -110,6 +118,11 @@ def main():
     rtk3 = nc.variables["roadTemperature3"][:]
     rtk4 = nc.variables["roadTemperature4"][:]
     subk1 = nc.variables["roadSubsurfaceTemp1"][:]
+    rstate1 = nc.variables["roadState1"][:]
+    road_state_xref = build_roadstate_xref(nc.variables["roadState1"])
+    rstate2 = nc.variables["roadState2"][:]
+    rstate3 = nc.variables["roadState3"][:]
+    rstate4 = nc.variables["roadState4"][:]
     nc.close()
 
     db = {}
@@ -139,9 +152,19 @@ def main():
         db[this_station]["rtk4"] = sanity_check(rtk4[recnum], 0, 500)
         db[this_station]["subk"] = sanity_check(subk1[recnum], 0, 500)
         db[this_station]["pday"] = sanity_check(pcpn[recnum], -1, 5000)
+        if rstate1[recnum] is not np.ma.masked:
+            db[this_station]["scond0"] = road_state_xref.get(rstate1[recnum])
+        if rstate2[recnum] is not np.ma.masked:
+            db[this_station]["scond1"] = road_state_xref.get(rstate2[recnum])
+        if rstate3[recnum] is not np.ma.masked:
+            db[this_station]["scond2"] = road_state_xref.get(rstate3[recnum])
+        if rstate4[recnum] is not np.ma.masked:
+            db[this_station]["scond3"] = road_state_xref.get(rstate4[recnum])
 
     for sid in db:
         iem = Observation(sid, db[sid]["network"], db[sid]["ts"])
+        for colname in ["scond0", "scond1", "scond2", "scond3"]:
+            iem.data[colname] = db[sid].get(colname)
         if db[sid]["tmpk"] is not None:
             iem.data["tmpf"] = temperature(db[sid]["tmpk"], "K").value("F")
         if db[sid]["dwpk"] is not None:
