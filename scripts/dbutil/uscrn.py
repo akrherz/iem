@@ -18,16 +18,12 @@ def main():
         if station == "UN" or pd.isnull(station):
             continue
         cursor.execute(
-            """
-            SELECT * from stations where id = %s and network = 'USCRN'
-        """,
+            "SELECT * from stations where id = %s and network = 'USCRN'",
             (station,),
         )
         if cursor.rowcount == 0:
             cursor.execute(
-                """
-            INSERT into stations (id, network) VALUES (%s, 'USCRN')
-            """,
+                "INSERT into stations (id, network) VALUES (%s, 'USCRN')",
                 (station,),
             )
         cursor.execute(

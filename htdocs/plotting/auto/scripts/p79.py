@@ -139,21 +139,13 @@ def plotter(fdict):
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
-    ax.set_title(
-        (
-            "%s [%s]\nAverage Dew Point by Wind Direction (month=%s) "
-            "(%s-%s)\n"
-            "(must have 3+ hourly obs > 3 knots at given direction)"
-        )
-        % (
-            ctx["_nt"].sts[station]["name"],
-            station,
-            month.upper(),
-            max([1973, ab.year]),
-            datetime.datetime.now().year,
-        ),
-        size=10,
-    )
+    titles = [
+        f"{ctx['_nt'].sts[station]['name']} [{station}]",
+        f"Average Dew Point by Wind Direction (month={month.upper()}) "
+        f"({max([1973, ab.year])}-{datetime.datetime.now().year})",
+        "(must have 3+ hourly obs > 3 knots at given direction)",
+    ]
+    ax.set_title("\n".join(titles), size=10)
 
     ax.set_ylabel("Dew Point [F]")
     ax.set_ylim(means["dwpf"].min() - 5, means["dwpf"].max() + 5)

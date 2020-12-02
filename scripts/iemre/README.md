@@ -1,12 +1,10 @@
-IEM Reanalysis
-==============
+# IEM Reanalysis
 
 daryl can't keep the code logic of all these straight, so I had better document
 this for myself!  There is also some chicken/egg stuff that goes on here, so we
 shall clarify that as well.
 
-Yearly NetCDF storage
----------------------
+## Yearly NetCDF storage
 
 The basic storage unit of IEMRE are yearly netCDF files. You can find most of these files [here](https://mesonet.agron.iastate.edu/onsite/iemre/).  For yearly file storage, there are
 
@@ -15,8 +13,7 @@ The basic storage unit of IEMRE are yearly netCDF files. You can find most of th
 | ${YEAR}_iemre_daily.nc | 12z and calendar day totals |
 | ${YEAR}_iemre_hourly.nc | Hourly analyses |
 
-Daily Analysis Variable Sourcing
---------------------------------
+## Daily Analysis Variable Sourcing
 
 ### high_tmpk_12z low_tmpk_12z snow_12z snowd_12z
 

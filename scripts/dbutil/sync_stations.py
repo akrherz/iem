@@ -19,11 +19,7 @@ def sync(mesosite, dbname, do_delete):
     dbconn = get_dbconn(dbname)
     dbcursor = dbconn.cursor()
     # Figure out our latest revision
-    dbcursor.execute(
-        """
-        SELECT max(modified), max(iemid) from stations
-    """
-    )
+    dbcursor.execute("SELECT max(modified), max(iemid) from stations")
     row = dbcursor.fetchone()
     maxts = row[0] or datetime.datetime(1980, 1, 1)
     maxid = row[1] or -1
@@ -31,21 +27,18 @@ def sync(mesosite, dbname, do_delete):
     todelete = []
     if do_delete:
         # Generate massive listing of all NWSLIs
-        cur.execute("""SELECT iemid from stations""")
+        cur.execute("SELECT iemid from stations")
         iemids = []
         for row in cur:
             iemids.append(row[0])
         # Find what iemids we have in local database
-        dbcursor.execute("""SELECT iemid from stations""")
+        dbcursor.execute("SELECT iemid from stations")
         for row in dbcursor:
             if row[0] not in iemids:
                 todelete.append(row[0])
         if todelete:
             dbcursor.execute(
-                """
-                DELETE from stations where iemid in %s
-            """,
-                (tuple(todelete),),
+                "DELETE from stations where iemid in %s", (tuple(todelete),)
             )
     # figure out what has changed!
     cur.execute(
@@ -114,10 +107,7 @@ def main(argv):
 
     if len(argv) == 3:
         LOG.info(
-            (
-                "Running laptop syncing from upstream, "
-                "assume iemdb is localhost!"
-            )
+            "Running laptop syncing from upstream, assume iemdb is localhost!"
         )
         # HACK
         mesosite = get_dbconn("mesosite", host="172.16.172.1", user="nobody")

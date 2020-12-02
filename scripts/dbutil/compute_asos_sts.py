@@ -22,18 +22,13 @@ def main(network):
     mesosite = get_dbconn("mesosite")
     mcursor = mesosite.cursor()
 
-    table = NetworkTable(network)
-    keys = list(table.sts.keys())
-    if len(keys) > 1:
-        ids = repr(tuple(keys))
-    else:
-        ids = "('%s')" % (keys[0],)
+    table = NetworkTable(network, only_online=False)
+    ids = list(table.sts.keys())
 
     acursor.execute(
-        """SELECT station, min(valid), max(valid) from alldata
-        WHERE station in %s GROUP by station
-        ORDER by min ASC"""
-        % (ids,)
+        "SELECT station, min(valid), max(valid) from alldata WHERE "
+        "station in %s GROUP by station ORDER by min ASC",
+        (tuple(ids),),
     )
     for row in acursor:
         station = row[0]
@@ -46,8 +41,8 @@ def main(network):
             )
 
             mcursor.execute(
-                """UPDATE stations SET archive_begin = %s
-                 WHERE id = %s and network = %s""",
+                "UPDATE stations SET archive_begin = %s WHERE id = %s "
+                "and network = %s",
                 (row[1], station, network),
             )
             if mcursor.rowcount == 0:
@@ -64,10 +59,8 @@ def main(network):
                 )
 
                 mcursor.execute(
-                    """
-                    UPDATE stations SET archive_end = %s
-                    WHERE id = %s and network = %s
-                """,
+                    "UPDATE stations SET archive_end = %s WHERE id = %s "
+                    "and network = %s",
                     (row[2], station, network),
                 )
 
@@ -82,8 +75,8 @@ def main(network):
             )
 
             mcursor.execute(
-                """UPDATE stations SET archive_end = null
-                     WHERE id = %s and network = %s""",
+                "UPDATE stations SET archive_end = null WHERE id = %s "
+                "and network = %s",
                 (station, network),
             )
 

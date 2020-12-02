@@ -17,21 +17,17 @@ def dowork(ts, ts2):
     # Delete any obs from yesterday
     ocursor = OTHER.cursor(cursor_factory=psycopg2.extras.DictCursor)
     icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    sql = "DELETE from t%s WHERE valid >= '%s' and valid < '%s'" % (
-        ts.year,
-        ts,
-        ts2,
+    ocursor.execute(
+        f"DELETE from t{ts.year} WHERE valid >= %s and valid < %s", (ts, ts2)
     )
-    ocursor.execute(sql)
 
     # Get obs from Access
-    sql = """SELECT c.*, t.id from current_log c JOIN stations t on
-        (t.iemid = c.iemid) WHERE valid >= '%s' and valid < '%s'
-        and t.network = 'OT'""" % (
-        ts,
-        ts2,
+    icursor.execute(
+        "SELECT c.*, t.id from current_log c JOIN stations t on "
+        "(t.iemid = c.iemid) WHERE valid >= %s and valid < %s "
+        "and t.network = 'OT'",
+        (ts, ts2),
     )
-    icursor.execute(sql)
     if icursor.rowcount == 0:
         LOG.info("found no results for ts: %s ts2: %s", ts, ts2)
 

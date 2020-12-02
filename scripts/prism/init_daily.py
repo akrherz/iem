@@ -1,10 +1,13 @@
 """Generate the yearly PRISM file to hold our data """
 import datetime
 import sys
+import os
 
 import numpy as np
 from pyiem import prism
-from pyiem.util import ncopen
+from pyiem.util import ncopen, logger
+
+LOG = logger()
 
 
 def init_year(ts):
@@ -13,6 +16,9 @@ def init_year(ts):
     """
 
     fn = "/mesonet/data/prism/%s_daily.nc" % (ts.year,)
+    if os.path.isfile(fn):
+        LOG.info("Cowardly refusing to overwrite file %s.", fn)
+        sys.exit()
     nc = ncopen(fn, "w")
     nc.title = "PRISM Daily Data for %s" % (ts.year,)
     nc.platform = "Grided Observations"

@@ -6,10 +6,9 @@ import os
 import subprocess
 import datetime
 
-import pytz
 from pyiem.tracker import loadqc
 from pyiem import network
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc
 
 
 def main():
@@ -20,10 +19,7 @@ def main():
     icursor = pgconn.cursor()
 
     # We run at 12z
-    now12z = datetime.datetime.utcnow()
-    now12z = now12z.replace(
-        hour=12, minute=0, second=0, microsecond=0, tzinfo=pytz.utc
-    )
+    now12z = utc().replace(hour=12, minute=0, second=0, microsecond=0)
     today6z = now12z.replace(hour=6)
     today0z = now12z.replace(hour=0)
     yesterday6z = today6z - datetime.timedelta(days=1)
@@ -117,7 +113,7 @@ def main():
     out.close()
 
     cmd = (
-        "pqinsert -p 'plot ac %s0000 awos_rtp.shef " "awos_rtp.shef shef' %s"
+        "pqinsert -p 'plot ac %s0000 awos_rtp.shef awos_rtp.shef shef' %s"
     ) % (now12z.strftime("%Y%m%d"), shef_fn)
     subprocess.call(cmd, shell=True)
     os.unlink(shef_fn)

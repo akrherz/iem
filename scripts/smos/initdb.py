@@ -28,11 +28,9 @@ def main():
         if gridx > 9000:
             gridx = gridx - 9236
         scursor.execute(
-            """
-        INSERT into grid(idx,gridx,gridy,geom) VALUES
-        (%s, %s, %s, 'SRID=4326;POINT(%s %s)')
-        """
-            % (sid, gridx, gridy, lon, lat)
+            "INSERT into grid(idx,gridx,gridy,geom) VALUES (%s, %s, %s, "
+            "'SRID=4326;POINT(%s %s)'",
+            (sid, gridx, gridy, lon, lat),
         )
 
     pgconn.commit()

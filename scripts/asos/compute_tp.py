@@ -45,11 +45,9 @@ def do(ts):
     # Load up current data
     current = {}
     icursor.execute(
-        """
+        f"""
         SELECT id, network, d.iemid, max_tmpf, min_tmpf,
-        max_dwpf, min_dwpf, pday from """
-        + table
-        + """ d JOIN stations t
+        max_dwpf, min_dwpf, pday from {table} d JOIN stations t
         on (t.iemid = d.iemid) WHERE day = %s and
         (network ~* 'ASOS' or network = 'AWOS')
     """,
@@ -91,12 +89,7 @@ def do(ts):
         if stid not in current:
             LOG.info("Adding %s for %s %s %s", table, station, network, ts)
             icursor.execute(
-                """
-                INSERT into """
-                + table
-                + """
-                (iemid, day) values (%s, %s)
-            """,
+                f"INSERT into {table} (iemid, day) values (%s, %s)",
                 (iemid, ts),
             )
             current[stid] = dict()
@@ -116,15 +109,7 @@ def do(ts):
 
         cols = ", ".join(tokens)
         icursor.execute(
-            """
-            UPDATE """
-            + table
-            + """
-            SET """
-            + cols
-            + """ WHERE
-            iemid = %s and day = %s
-        """,
+            f"UPDATE {table} SET {cols} WHERE iemid = %s and day = %s",
             (iemid, ts),
         )
 

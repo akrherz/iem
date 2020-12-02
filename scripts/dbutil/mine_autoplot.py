@@ -14,7 +14,7 @@ LOGFN = "/var/log/app/www_log"
 
 def get_dbendts(cursor):
     """Figure out when we have data until"""
-    cursor.execute("""SELECT max(valid) from autoplot_timing""")
+    cursor.execute("SELECT max(valid) from autoplot_timing")
     ts = cursor.fetchone()[0]
     if ts is None:
         ts = datetime.datetime.now() - datetime.timedelta(days=1)
@@ -41,10 +41,9 @@ def find_and_save(cursor, dbendts):
             continue
         hostname = line.split()[3]
         cursor.execute(
-            """
-        INSERT into autoplot_timing (appid, valid, timing, uri, hostname)
-        VALUES (%s, %s, %s, %s, %s)
-        """,
+            "INSERT into autoplot_timing "
+            "(appid, valid, timing, uri, hostname) "
+            "VALUES (%s, %s, %s, %s, %s)",
             (appid, valid, timing, uri, hostname),
         )
         inserts += 1

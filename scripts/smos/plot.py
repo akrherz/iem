@@ -3,11 +3,10 @@ import sys
 import datetime
 
 import numpy as np
-import pytz
 from pandas.io.sql import read_sql
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconn, logger, utc
 
 LOG = logger()
 
@@ -115,25 +114,17 @@ def main(argv):
     if len(argv) == 2:
         hr = int(argv[1])
         if hr == 12:  # Run for the previous UTC day
-            ts = datetime.datetime.utcnow() - datetime.timedelta(days=1)
-            ts = ts.replace(tzinfo=pytz.utc).replace(
-                hour=12, minute=0, second=0, microsecond=0
-            )
+            ts = utc() - datetime.timedelta(days=1)
+            ts = ts.replace(hour=12, minute=0, second=0, microsecond=0)
         else:
-            ts = datetime.datetime.utcnow()
-            ts = ts.replace(tzinfo=pytz.utc).replace(
-                hour=0, minute=0, second=0, microsecond=0
-            )
+            ts = utc().replace(hour=0, minute=0, second=0, microsecond=0)
         makeplot(ts)
         # Run a day, a week ago ago as well
         for d in [1, 5]:
             ts -= datetime.timedelta(days=d)
             makeplot(ts, "a")
     else:
-        ts = datetime.datetime(
-            int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4])
-        )
-        ts = ts.replace(tzinfo=pytz.utc)
+        ts = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
         makeplot(ts, "a")
 
 

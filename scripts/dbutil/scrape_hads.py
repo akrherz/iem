@@ -14,10 +14,8 @@ def main():
     mesosite_pgconn = get_dbconn("mesosite")
     mcursor = mesosite_pgconn.cursor()
     udf = read_sql(
-        """
-        select distinct nwsli from unknown where length(nwsli) = 5
-        ORDER by nwsli
-    """,
+        "select distinct nwsli from unknown where length(nwsli) = 5 "
+        "ORDER by nwsli",
         hads_pgconn,
         index_col=None,
     )
@@ -69,12 +67,12 @@ def main():
                 continue
             row = df2.iloc[0]
             tokens = row["lon"].split()
-            lon = "%i.%04i" % (
+            lon = "%.0f.%04i" % (
                 float(tokens[0]),
                 (float(tokens[1]) + float(tokens[2]) / 60.0) / 60.0 * 10000.0,
             )
             tokens = row["lat"].split()
-            lat = "%i.%04i" % (
+            lat = "%.0f.%04i" % (
                 float(tokens[0]),
                 (float(tokens[1]) + float(tokens[2]) / 60.0) / 60.0 * 10000.0,
             )
@@ -84,9 +82,7 @@ def main():
                 % (nwsli, network, country, state)
             )
             mcursor.execute(
-                """
-            SELECT online from stations where network = %s and id = %s
-            """,
+                "SELECT online from stations where network = %s and id = %s",
                 (network, nwsli),
             )
             if mcursor.rowcount == 1:
@@ -95,6 +91,7 @@ def main():
                     (" %s already in database online:%s") % (nwsli, dbrow[0])
                 )
                 continue
+            sname = row["location"].strip()[:64].replace(",", " ")
             mcursor.execute(
                 """
             INSERT into stations(id, name, network, country, state,
@@ -104,11 +101,11 @@ def main():
             """,
                 (
                     nwsli,
-                    row["location"].strip()[:64],
+                    sname,
                     network,
                     country,
                     state,
-                    row["location"].strip()[:64],
+                    sname,
                     -999,
                     float(lon),
                     float(lat),

@@ -196,9 +196,7 @@ def plotter(fdict):
             sqllimiter = " and t.end_ts is null "
             cursor = pgconn.cursor()
             cursor.execute(
-                """
-                SELECT name from ugcs where ugc = %s and end_ts is null
-            """,
+                "SELECT name from ugcs where ugc = %s and end_ts is null",
                 (ugc,),
             )
             name = "Unknown"
@@ -217,22 +215,13 @@ def plotter(fdict):
             title2 = state_names[ctx["mystate"]]
 
         df = read_sql(
-            """
+            f"""
         with data as (
-            select expire, o.threshold from spc_outlooks o,
-            """
-            + table
-            + """ t
-            WHERE t."""
-            + abbrcol
-            + """ = %s and category = %s
-            and ST_Intersects(st_buffer(o.geom, 0), t."""
-            + geomcol
-            + """)
+            select expire, o.threshold from spc_outlooks o, {table} t
+            WHERE t.{abbrcol} = %s and category = %s
+            and ST_Intersects(st_buffer(o.geom, 0), t.{geomcol})
             and o.day = %s and o.outlook_type = %s and expire > %s
-            and expire < %s """
-            + sqllimiter
-            + """),
+            and expire < %s {sqllimiter}),
         agg as (
             select date(expire - '1 day'::interval), d.threshold, priority,
             rank() OVER (PARTITION by date(expire - '1 day'::interval)

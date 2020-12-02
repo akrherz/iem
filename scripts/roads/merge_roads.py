@@ -48,13 +48,11 @@ def main():
         ) % (path.wkt)
         LOG.info("idot_id %s [%s] is new", idot_id, major)
         cursor.execute(
-            """
+            f"""
             INSERT into roads_base (major, minor, us1, st1, int1, type,
             longname, geom, idot_id, archive_begin, archive_end)
-            VALUES (%s, %s, %s, %s, %s, %s, %s,
-            """
-            + geom
-            + """, %s, %s, %s) RETURNING segid
+            VALUES (%s, %s, %s, %s, %s, %s, %s, {geom}
+            %s, %s, %s) RETURNING segid
         """,
             (
                 major[:10],
@@ -90,10 +88,7 @@ def main():
         )
         wfo = cursor.fetchone()[0]
         cursor.execute(
-            """
-            UPDATE roads_base SET wfo = %s WHERE segid = %s
-        """,
-            (wfo, segid),
+            "UPDATE roads_base SET wfo = %s WHERE segid = %s", (wfo, segid)
         )
         # Add a roads_current entry, 85 is a hack
         cursor.execute(

@@ -1,9 +1,12 @@
 """Generate the storage netcdf file for Iowa Flood Center Precip"""
 import datetime
 import sys
+import os
 
 import numpy as np
-from pyiem.util import ncopen
+from pyiem.util import ncopen, logger
+
+LOG = logger()
 
 
 def init_year(ts):
@@ -12,6 +15,9 @@ def init_year(ts):
     """
 
     fp = "/mesonet/data/iemre/%s_ifc_daily.nc" % (ts.year,)
+    if os.path.isfile(fp):
+        LOG.info("Cowardly refusing to overwrite file %s.", fp)
+        sys.exit()
     nc = ncopen(fp, "w")
     nc.title = "IFC Daily Precipitation %s" % (ts.year,)
     nc.platform = "Grided Estimates"

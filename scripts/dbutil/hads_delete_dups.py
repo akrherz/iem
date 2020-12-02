@@ -21,7 +21,7 @@ def query(sql, args=None):
     hcursor.execute("set work_mem='16GB'")
     hcursor.execute(sql, args if args is not None else [])
     ets = datetime.datetime.now()
-    LOG.info(
+    LOG.debug(
         "%7s [%8.4fs] %s", hcursor.rowcount, (ets - sts).total_seconds(), sql
     )
     hcursor.close()
@@ -36,22 +36,18 @@ def workflow(valid):
     query("DROP TABLE IF EXISTS tmp")
     # Extract unique obs to special table
     sql = (
-        """
-        CREATE table tmp as select distinct * from """
-        + tbl
-        + """
-        WHERE valid BETWEEN %s and %s
-    """
+        f"CREATE table tmp as select distinct * from {tbl} "
+        "WHERE valid BETWEEN %s and %s"
     )
     args = (valid, valid + datetime.timedelta(hours=24))
     query(sql, args)
 
     # Delete them all!
-    sql = """delete from """ + tbl + """ WHERE valid BETWEEN %s and %s"""
+    sql = f"delete from {tbl} WHERE valid BETWEEN %s and %s"
     query(sql, args)
 
     # Insert from special table
-    sql = "INSERT into " + tbl + " SELECT * from tmp"
+    sql = f"INSERT into {tbl} SELECT * from tmp"
     query(sql)
 
     sql = "DROP TABLE IF EXISTS tmp"

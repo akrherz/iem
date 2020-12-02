@@ -1,9 +1,11 @@
+# Notes about PRISM data
+
 When referring to the data, the
-source must be clearly and prominently stated and include, 
+source must be clearly and prominently stated and include,
 at a minimum, our name, URL, and the date of data
 creation. For example:
 
-PRISM Climate Group, Oregon State University, http://prism.oregonstate.edu, created 4 Feb 2004.
+PRISM Climate Group, Oregon State University, [website](http://prism.oregonstate.edu), created 4 Feb 2004.
 
 gdalinfo says the grid is:
 
@@ -22,4 +24,4 @@ YDIM           0.04166666666667
 
 ulxmap – The x-axis map coordinate of the center of the upper-left pixel.
 
-ftp://prism.nacse.org/daily/ppt/2016/
+[link](ftp://prism.nacse.org/daily/ppt/2016/)

@@ -11,7 +11,7 @@ def fmter(val):
     """Make pretty text"""
     if val is None:
         return 0
-    if val > 0 and val < 0.01:
+    if 0 < val < 0.009:
         return "T"
     return "%.2f" % (val,)
 
@@ -45,7 +45,7 @@ def main(days, argv):
     df["label"] = df["rainfall"].apply(fmter)
 
     mp = MapPlot(
-        title=("Iowa %s Day Precipitation Total [inch] (ASOS/AWOS)") % (days,),
+        title=f"Iowa {days} Day Precipitation Total [inch] (ASOS/AWOS)",
         subtitle=("%s - %s inclusive")
         % (sixago.strftime("%d %b %Y"), today.strftime("%d %b %Y")),
         continentalcolor="white",

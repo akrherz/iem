@@ -28,14 +28,8 @@ def main(argv):
     added = 0
     while day < maxday:
         added += 1
-        table = "summary_%s" % (day.year,)
         cursor.execute(
-            """
-        INSERT into """
-            + table
-            + """ (iemid, day) VALUES (%s, %s)
-        """,
-            (iemid, day),
+            "INSERT into summary (iemid, day) VALUES (%s, %s)", (iemid, day)
         )
         day += datetime.timedelta(days=1)
     LOG.info("Added %s rows for station %s[%s]", added, station, network)

@@ -2,7 +2,9 @@
 import sys
 
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconn, utc, logger
+
+LOG = logger()
 
 
 def main(argv):
@@ -28,9 +30,11 @@ def main(argv):
         if station not in nt.sts:
             continue
         if nt.sts[station]["archive_begin"] != ts:
-            print(
-                ("Updated %s STS WAS: %s NOW: %s" "")
-                % (station, nt.sts[station]["archive_begin"], ts)
+            LOG.info(
+                "Updated %s STS WAS: %s NOW: %s" "",
+                station,
+                nt.sts[station]["archive_begin"],
+                ts,
             )
 
             mcursor.execute(

@@ -1,16 +1,18 @@
 """Generate the storage of NARR 3 hourly products"""
 import datetime
 import sys
+import os
 
 import numpy as np
 import pygrib
-from pyiem.util import ncopen
+from pyiem.util import ncopen, logger
 
 # This exists on dev laptop :/
 TEMPLATE_FN = (
     "/mesonet/ARCHIVE/data/1980/01/01/model/NARR/apcp_198001010000.grib"
 )
 BASEDIR = "/mesonet/data/iemre"
+LOG = logger()
 
 
 def init_year(ts):
@@ -24,6 +26,9 @@ def init_year(ts):
     lats, lons = grb.latlons()
 
     fp = "%s/%s_narr.nc" % (BASEDIR, ts.year)
+    if os.path.isfile(fp):
+        LOG.info("Cowardly refusing to overwrite file %s.", fp)
+        sys.exit()
     nc = ncopen(fp, "w")
     nc.title = "IEM Packaged NARR for %s" % (ts.year,)
     nc.platform = "Grided Reanalysis"

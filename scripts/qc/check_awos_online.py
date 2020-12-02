@@ -4,10 +4,11 @@ run from RUN_10_AFTER.sh
 """
 import datetime
 
-import pytz
 from pyiem.tracker import TrackerEngine
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc, logger
+
+LOG = logger()
 
 
 def main():
@@ -16,15 +17,12 @@ def main():
     IEM = get_dbconn("iem")
     PORTFOLIO = get_dbconn("portfolio")
 
-    threshold = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
-    threshold = threshold.replace(tzinfo=pytz.utc)
+    threshold = utc() - datetime.timedelta(hours=1)
 
     icursor = IEM.cursor()
     icursor.execute(
-        """
-        SELECT id, valid from current c JOIN stations t
-         ON (t.iemid = c.iemid) WHERE t.network = 'AWOS'
-        """
+        "SELECT id, valid from current c JOIN stations t ON "
+        "(t.iemid = c.iemid) WHERE t.network = 'AWOS'"
     )
     obs = {}
     for row in icursor:
@@ -35,7 +33,7 @@ def main():
     tracker.send_emails()
     tac = tracker.action_count
     if tac > 6:
-        print("check_awos_online.py had %s actions, did not email" % (tac,))
+        LOG.info("Had %s actions, did not email", tac)
     IEM.commit()
     PORTFOLIO.commit()
 

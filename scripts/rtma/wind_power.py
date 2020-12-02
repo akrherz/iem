@@ -19,7 +19,7 @@ import numpy as np
 import pygrib
 import pytz
 from pyiem.plot import MapPlot
-from pyiem.util import logger
+from pyiem.util import logger, utc
 
 LOG = logger()
 LEVELS = [
@@ -79,7 +79,7 @@ def run(ts, routes):
     mp = MapPlot(
         sector="midwest",
         title=(
-            r"Wind Power Potential :: " "(speed_mps_10m * 1.35)$^3$ * 0.002641"
+            "Wind Power Potential :: (speed_mps_10m * 1.35)$^3$ * 0.002641"
         ),
         subtitle=("valid: %s based on NOAA Realtime " "Mesoscale Analysis")
         % (lts.strftime("%d %b %Y %I %p")),
@@ -93,17 +93,14 @@ def run(ts, routes):
 def main(argv):
     """Main()"""
     if len(sys.argv) == 5:
-        now = datetime.datetime(
-            int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4])
-        )
+        now = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
         routes = "a"
     else:
-        now = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+        now = utc() - datetime.timedelta(hours=1)
         routes = "ac"
         # the 3z RTMA is always late, so we shall wait
         if now.hour == 3:
             time.sleep(60 * 10)
-    now = now.replace(tzinfo=pytz.utc)
 
     run(now, routes)
 

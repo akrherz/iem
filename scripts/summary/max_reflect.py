@@ -15,7 +15,6 @@ from pyiem.util import get_dbconn, logger, utc
 LOG = logger()
 PGCONN = get_dbconn("mesosite", user="nobody")
 CURSOR = PGCONN.cursor()
-PQINSERT = "/home/ldm/bin/pqinsert"
 URLBASE = "http://iem.local/GIS/radmap.php?width=1280&height=720&"
 
 
@@ -30,10 +29,8 @@ def get_colortable(prod):
 
     """
     CURSOR.execute(
-        """
-    select r,g,b from iemrasters_lookup l JOIN iemrasters r on
-    (r.id = l.iemraster_id) WHERE r.name = %s ORDER by l.coloridx ASC
-    """,
+        "select r,g,b from iemrasters_lookup l JOIN iemrasters r on "
+        "(r.id = l.iemraster_id) WHERE r.name = %s ORDER by l.coloridx ASC",
         ("composite_" + prod,),
     )
     ct = gdal.ColorTable()
@@ -95,9 +92,9 @@ def run(prod, sts):
     subprocess.call("convert max.tiff max.png", shell=True)
     # Insert into LDM
     cmd = (
-        "%s -p 'plot a %s0000 bogus GIS/uscomp/max_%s_0z0z_%s.png "
+        "pqinsert -p 'plot a %s0000 bogus GIS/uscomp/max_%s_0z0z_%s.png "
         "png' max.png"
-    ) % (PQINSERT, sts.strftime("%Y%m%d"), prod, sts.strftime("%Y%m%d"))
+    ) % (sts.strftime("%Y%m%d"), prod, sts.strftime("%Y%m%d"))
     subprocess.call(cmd, shell=True)
 
     # Create tmp world file
@@ -126,9 +123,9 @@ def run(prod, sts):
 
     # Insert world file as well
     cmd = (
-        "%s -i -p 'plot a %s0000 bogus GIS/uscomp/max_%s_0z0z_%s.wld "
+        "pqinsert -i -p 'plot a %s0000 bogus GIS/uscomp/max_%s_0z0z_%s.wld "
         "wld' %s"
-    ) % (PQINSERT, sts.strftime("%Y%m%d"), prod, sts.strftime("%Y%m%d"), wldfn)
+    ) % (sts.strftime("%Y%m%d"), prod, sts.strftime("%Y%m%d"), wldfn)
     subprocess.call(cmd, shell=True)
 
     # cleanup
@@ -152,9 +149,9 @@ def run(prod, sts):
     fp.write(png.content)
     fp.close()
     cmd = (
-        "%s -p 'plot ac %s0000 summary/max_%s_0z0z_comprad.png "
+        "pqinsert -p 'plot ac %s0000 summary/max_%s_0z0z_comprad.png "
         "comprad/max_%s_0z0z_%s.png png' tmp.png"
-    ) % (PQINSERT, sts.strftime("%Y%m%d"), prod, prod, sts.strftime("%Y%m%d"))
+    ) % (sts.strftime("%Y%m%d"), prod, prod, sts.strftime("%Y%m%d"))
     subprocess.call(cmd, shell=True)
 
     # US
@@ -170,9 +167,9 @@ def run(prod, sts):
     fp.write(png.content)
     fp.close()
     cmd = (
-        "%s -p 'plot ac %s0000 summary/max_%s_0z0z_usrad.png "
+        "pqinsert -p 'plot ac %s0000 summary/max_%s_0z0z_usrad.png "
         "usrad/max_%s_0z0z_%s.png png' tmp.png"
-    ) % (PQINSERT, sts.strftime("%Y%m%d"), prod, prod, sts.strftime("%Y%m%d"))
+    ) % (sts.strftime("%Y%m%d"), prod, prod, sts.strftime("%Y%m%d"))
     subprocess.call(cmd, shell=True)
     os.remove("tmp.png")
 

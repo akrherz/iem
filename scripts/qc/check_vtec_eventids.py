@@ -5,7 +5,9 @@ reporting anything he finds after an investigation.
 """
 import datetime
 
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
 def main():
@@ -60,14 +62,16 @@ def main():
             if lookup in missing:
                 continue
             pcursor2.execute(
-                """INSERT into vtec_missing_events(year, wfo,
-                phenomena, significance, eventid) VALUES (%s,%s,%s,%s,%s)
-                """,
+                "INSERT into vtec_missing_events(year, wfo, phenomena, "
+                "significance, eventid) VALUES (%s,%s,%s,%s,%s)",
                 (year, wfo, phenomena, sig, eid),
             )
-            print(
-                ("WWA missing WFO: %s phenomena: %s sig: %s eventid: %s")
-                % (wfo, phenomena, sig, eid)
+            LOG.info(
+                "WWA missing WFO: %s phenomena: %s sig: %s eventid: %s",
+                wfo,
+                phenomena,
+                sig,
+                eid,
             )
 
     pcursor2.close()

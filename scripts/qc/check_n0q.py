@@ -15,10 +15,10 @@ def run(sts, ets):
     interval = datetime.timedelta(minutes=5)
     while now < ets:
         fn = now.strftime(
-            ("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/" "uscomp/n0q_%Y%m%d%H%M.png")
+            "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0q_%Y%m%d%H%M.png"
         )
         if not os.path.isfile(fn):
-            LOG.info("%s is missing", fn.split("/")[-1])
+            LOG.info("%s is missing", os.path.basename(fn))
         else:
             if os.stat(fn)[6] < 200000:
                 LOG.info(

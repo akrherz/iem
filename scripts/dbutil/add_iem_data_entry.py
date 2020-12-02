@@ -12,25 +12,15 @@ LOG = logger()
 
 def add_summary(cursor, date, iemid):
     """Add a summary entry for the given date."""
-    table = "summary_%s" % (date.year,)
     cursor.execute(
-        """
-        SELECT iemid from """
-        + table
-        + """ WHERE day = %s and iemid = %s
-    """,
+        "SELECT iemid from summary WHERE day = %s and iemid = %s",
         (date, iemid),
     )
     if cursor.rowcount == 1:
-        LOG.info("%s entry already exists for date %s", table, date)
+        LOG.info("Entry already exists for date %s", date)
         return
     cursor.execute(
-        """
-        INSERT into """
-        + table
-        + """ (day, iemid) values (%s, %s)
-    """,
-        (date, iemid),
+        "INSERT into summary (day, iemid) values (%s, %s)", (date, iemid)
     )
 
 
@@ -61,11 +51,9 @@ def main():
 
         for date in [now, now - datetime.timedelta(days=1)]:
             add_summary(icursor2, date, row["iemid"])
-        tbl = "current"
         icursor2.execute(
-            """INSERT into %s ( valid, iemid)
-              VALUES ('1980-01-01', %s) """
-            % (tbl, row["iemid"])
+            "INSERT into current ( valid, iemid) VALUES ('1980-01-01', %s)",
+            (row["iemid"],),
         )
 
     icursor2.close()

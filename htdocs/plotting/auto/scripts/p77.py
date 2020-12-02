@@ -6,8 +6,8 @@ import numpy as np
 from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
-from pandas.io.sql import read_sql
 from pyiem.exceptions import NoDataFound
+from pandas.io.sql import read_sql
 
 
 def get_description():
@@ -45,12 +45,10 @@ def plotter(fdict):
     thisyear = today.year
 
     df = read_sql(
-        """
+        f"""
     with data as (
         select year, month, extract(doy from day) as doy,
-        generate_series(32, high) as t from """
-        + table
-        + """
+        generate_series(32, high) as t from {table}
         where station = %s and year < %s),
     agger as (
         SELECT year, t, min(doy), max(doy) from data GROUP by year, t)
@@ -106,7 +104,7 @@ def plotter(fdict):
     months = calendar.month_abbr[1:] + calendar.month_abbr[1:]
     ax.set_xticklabels(months)
 
-    ax.set_ylabel("High Temperature $^\circ$F")
+    ax.set_ylabel(r"High Temperature $^\circ$F")
     ax.set_xlim(min(df["max_jday"]) - 1, max(df["max_jday"] + height) + 1)
     ax.grid(True)
 

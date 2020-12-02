@@ -79,7 +79,7 @@ for ($i=0; $row = pg_fetch_array($rs); $i++) {
   $sql = "select count(distinct valid) as c from sm_hourly 
       WHERE station = '$key' and valid > '$bdate' and valid < '$edate'
       and tair_c_avg >= f2c(32.0) and tair_c_avg <= f2c(45.0)";
-  //echo $sql ."<br />";
+ 
   $rs2 = pg_exec($c,$sql);
   if (pg_num_rows($rs2) == 0) continue;
   $r = pg_fetch_array($rs2,0);
@@ -114,11 +114,6 @@ for ($i=0; $row = pg_fetch_array($rs); $i++) {
   $pt = ms_newPointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
   $pt->draw($map, $snet, $img, 1, $val);
-
-
-  //$pt = ms_newPointObj();
-  //$pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
-  //$pt->draw($map, $snet, $img, 2, "(".round($val - $avg,0).")");
 
   // City Name
   $pt = ms_newPointObj();

@@ -90,23 +90,13 @@ def lookforfiles():
         if ts is None:
             LOG.info("ingest_smos: fn2datetime fail: %s", fn)
             continue
-        scursor.execute(
-            """
-            SELECT * from obtimes where valid = %s
-        """,
-            (ts,),
-        )
+        scursor.execute("SELECT * from obtimes where valid = %s", (ts,))
         row = scursor.fetchone()
         if row is None:
             if not grid_ids:
                 load_grid_ids(scursor, grid_ids)
             consume(scursor, fn, ts, grid_ids)
-            scursor.execute(
-                """
-            INSERT into obtimes(valid) values (%s)
-            """,
-                (ts,),
-            )
+            scursor.execute("INSERT into obtimes(valid) values (%s)", (ts,))
             pgconn.commit()
 
 

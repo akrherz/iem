@@ -21,20 +21,16 @@ def main():
 
     # Find blank start stations!
     mcursor.execute(
-        """
-        select id, network from stations where archive_begin is null
-        and network ~* 'ASOS' and online ORDER by network
-    """
+        "select id, network from stations where archive_begin is null "
+        "and network ~* 'ASOS' and online ORDER by network"
     )
     for row in mcursor:
         sid = row[0]
         network = row[1]
         # Look in current for valid
         icursor.execute(
-            """
-          SELECT valid from current c JOIN stations t on (t.iemid = c.iemid)
-          where t.id = %s and t.network = %s
-          """,
+            "SELECT valid from current c JOIN stations t "
+            "on (t.iemid = c.iemid) where t.id = %s and t.network = %s",
             (sid, network),
         )
         row = icursor.fetchone()
@@ -44,17 +40,14 @@ def main():
                 LOG.info("No current data for %s %s", sid, network)
         else:
             mcursor2.execute(
-                """ UPDATE stations SET online = 'f' where
-                id = %s and network = %s """,
+                "UPDATE stations SET online = 'f' where "
+                "id = %s and network = %s",
                 (sid, network),
             )
             LOG.info("Setting %s %s to offline", sid, network)
             continue
         acursor.execute(
-            """
-           SELECT min(valid) from alldata where station = %s
-          """,
-            (sid,),
+            "SELECT min(valid) from alldata where station = %s", (sid,)
         )
         row = acursor.fetchone()
         LOG.info("%s %s IEMDB: %s ASOSDB: %s", sid, network, valid, row[0])

@@ -15,8 +15,12 @@ def get_description():
     desc["cache"] = 86400
     desc[
         "description"
-    ] = """This plot presents the accumulated frequency of
-    duration for a given NWS VTEC Watch, Warning, Advisory product."""
+    ] = """
+    This plot presents the accumulated frequency of duration for a given
+    NWS VTEC Watch, Warning, Advisory product.  The complication with this
+    tool is that some alerts are issued for zones and others are for
+    counties.  If you do not find results for one, try switching to the
+    other."""
     desc["arguments"] = [
         dict(
             type="ugc",
@@ -122,9 +126,9 @@ def plotter(fdict):
         ax.set_xticks(np.arange(0, xmax + 1, 60))
         ax.set_xticklabels(np.arange(0, (xmax + 1) / 60.0))
         ax.set_xlabel("Duration [hours]")
-    ax.set_ylabel("Frequency [%%] out of %s Events" % (y[-1],))
+    ax.set_ylabel(f"Frequency [%] out of {y[-1]} Events")
     ax.set_title(
-        ("[%s] %s :: %s (%s.%s)\n" "Distribution of Event Time Duration %s-%s")
+        ("[%s] %s :: %s (%s.%s)\nDistribution of Event Time Duration %s-%s")
         % (
             ugc,
             name,

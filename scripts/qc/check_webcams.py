@@ -8,7 +8,7 @@ import datetime
 import pytz
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import TrackerEngine
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc
 
 
 def workflow(netname, pname):
@@ -18,10 +18,9 @@ def workflow(netname, pname):
     pgconn_portfolio = get_dbconn("portfolio")
 
     # Now lets check files
-    mydir = "/home/ldm/data/camera/stills"
+    mydir = "/home/meteor_ldm/data/camera/stills"
 
-    threshold = datetime.datetime.utcnow() - datetime.timedelta(hours=2)
-    threshold = threshold.replace(tzinfo=pytz.UTC)
+    threshold = utc() - datetime.timedelta(hours=2)
     mcursor = pgconn_mesosite.cursor()
     mcursor.execute(
         """
