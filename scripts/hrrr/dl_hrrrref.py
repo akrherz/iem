@@ -5,47 +5,22 @@ import subprocess
 import logging
 import datetime
 
-import pytz
 import requests
 import pygrib
 from pyiem.util import utc, exponential_backoff, logger
 
 LOG = logger()
 # HRRR model hours available
-HOURS = [
-    36,
-    18,
-    18,
-    18,
-    18,
-    18,
-    36,
-    18,
-    18,
-    18,
-    18,
-    18,
-    36,
-    18,
-    18,
-    18,
-    18,
-    18,
-    36,
-    18,
-    18,
-    18,
-    18,
-    18,
-]
-BASE = "http://www.ftp.ncep.noaa.gov/data/nccf/com/hrrr/prod/"
+HOURS = [18] * 24
+for _hr in range(0, 24, 6):
+    HOURS[_hr] = 48
+BASE = "https://www.ftp.ncep.noaa.gov/data/nccf/com/hrrr/prod/"
 
 
 def upstream_has_data(valid):
     """Does data exist upstream to even attempt a download"""
-    utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
     # NCEP should have at least 24 hours of data
-    return (utcnow - datetime.timedelta(hours=24)) < valid
+    return (utc() - datetime.timedelta(hours=24)) < valid
 
 
 def run(valid):
@@ -53,10 +28,7 @@ def run(valid):
     if not upstream_has_data(valid):
         return
     gribfn = valid.strftime(
-        (
-            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
-            "hrrr.t%Hz.refd.grib2"
-        )
+        "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.refd.grib2"
     )
     if os.path.isfile(gribfn):
         # See how many grib messages we have
@@ -73,21 +45,11 @@ def run(valid):
         shr = "%02i" % (hr,)
         if hr <= 18:
             uri = valid.strftime(
-                (
-                    BASE
-                    + "hrrr.%Y%m%d/conus/hrrr.t%Hz.wrfsubhf"
-                    + shr
-                    + ".grib2.idx"
-                )
+                f"{BASE}hrrr.%Y%m%d/conus/hrrr.t%Hz.wrfsubhf{shr}.grib2.idx"
             )
         else:
             uri = valid.strftime(
-                (
-                    BASE
-                    + "hrrr.%Y%m%d/conus/hrrr.t%Hz.wrfsfcf"
-                    + shr
-                    + ".grib2.idx"
-                )
+                f"{BASE}hrrr.%Y%m%d/conus/hrrr.t%Hz.wrfsfcf{shr}.grib2.idx"
             )
         req = exponential_backoff(requests.get, uri, timeout=30)
         if req is None or req.status_code != 200:
@@ -109,7 +71,7 @@ def run(valid):
                 offsets.append([int(tokens[1])])
                 neednext = True
 
-        if hr > 0 and hr < 19 and len(offsets) != 4:
+        if 0 < hr < 19 and len(offsets) != 4:
             LOG.info(
                 "[%s] hr: %s offsets: %s",
                 valid.strftime("%Y%m%d%H"),

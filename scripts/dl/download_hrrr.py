@@ -21,10 +21,8 @@ LOG = logger()
 def need_to_run(valid):
     """ Check to see if we already have the radiation data we need"""
     gribfn = valid.strftime(
-        (
-            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/"
-            "%H/hrrr.t%Hz.3kmf00.grib2"
-        )
+        "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/"
+        "%H/hrrr.t%Hz.3kmf00.grib2"
     )
     if not os.path.isfile(gribfn):
         return True
@@ -83,10 +81,7 @@ def fetch(valid):
                 neednext = True
 
     pqstr = valid.strftime(
-        (
-            "data u %Y%m%d%H00 bogus model/hrrr/%H/hrrr.t%Hz.3kmf00.grib2 "
-            "grib2"
-        )
+        "data u %Y%m%d%H00 bogus model/hrrr/%H/hrrr.t%Hz.3kmf00.grib2 grib2"
     )
 
     if len(offsets) != 13:

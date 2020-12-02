@@ -16,32 +16,9 @@ import pyiem.reference as ref
 from pyiem.util import utc, logger
 
 LOG = logger()
-HOURS = [
-    36,
-    18,
-    18,
-    18,
-    18,
-    18,
-    36,
-    18,
-    18,
-    18,
-    18,
-    18,
-    36,
-    18,
-    18,
-    18,
-    18,
-    18,
-    36,
-    18,
-    18,
-    18,
-    18,
-    18,
-]
+HOURS = [18] * 24
+for _hr in range(0, 24, 6):
+    HOURS[_hr] = 48
 
 
 def compute_bounds(lons, lats):
