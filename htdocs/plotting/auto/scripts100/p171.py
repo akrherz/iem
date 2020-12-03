@@ -58,6 +58,7 @@ def get_description():
             default="W",
             label="Select Watch/Warning Significance Level:",
         ),
+        dict(type="cmap", name="cmap", default="Greens", label="Color Ramp:"),
     ]
     return desc
 
@@ -124,7 +125,15 @@ def plotter(fdict):
         significance,
     )
     ax.set_title(title)
-    sns.heatmap(df2, annot=True, fmt=".0f", linewidths=0.5, ax=ax, vmin=1)
+    sns.heatmap(
+        df2,
+        annot=True,
+        fmt=".0f",
+        linewidths=0.5,
+        ax=ax,
+        vmin=1,
+        cmap=ctx["cmap"],
+    )
     ax.set_xticks(np.arange(12) + 0.5)
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_ylabel("Year")
