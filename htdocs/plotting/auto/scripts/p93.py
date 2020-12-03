@@ -127,9 +127,11 @@ def get_doylimit(ytd, varname):
         return ""
     if varname != "windchill":
         return "and extract(doy from valid) < extract(doy from 'TODAY'::date)"
-    today = datetime.date.today()
-    if today.month > 7:
-        return "and extract(doy from valid) < extract(doy from 'TODAY'::date)"
+    if datetime.date.today().month > 7:
+        res = "and extract(doy from valid) < extract(doy from 'TODAY'::date) "
+        if varname == "windchill":
+            res += "and extract(month from valid) > 6"
+        return res
 
     return (
         "and (extract(doy from valid) < extract(doy from 'TODAY'::date) "
