@@ -181,8 +181,8 @@ def get_data(ctx, startyear):
         try:
             tokens = [int(i.strip()) for i in ctx["hours"].split("-")]
             hours = range(tokens[0], tokens[1] + 1)
-        except ValueError:
-            raise Exception("malformed hour limiter, sorry.")
+        except ValueError as exp:
+            raise Exception("malformed hour limiter, sorry.") from exp
         ctx["hour_limiter"] = "[%s-%s]" % (
             utc(2017, 1, 1, tokens[0]).strftime("%-I %p"),
             utc(2017, 1, 1, tokens[1]).strftime("%-I %p"),

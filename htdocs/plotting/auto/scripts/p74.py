@@ -93,30 +93,18 @@ def plotter(fdict):
     )
 
     df = read_sql(
-        """
+        f"""
       SELECT extract(year from day + '%s month'::interval) as yr,
-      sum(case when month in (12, 1, 2) and """
-        + b
-        + """
+      sum(case when month in (12, 1, 2) and {b}
       then 1 else 0 end) as winter,
-      sum(case when month in (3, 4, 5) and """
-        + b
-        + """
+      sum(case when month in (3, 4, 5) and {b}
       then 1 else 0 end) as spring,
-      sum(case when month in (6, 7, 8) and """
-        + b
-        + """
+      sum(case when month in (6, 7, 8) and {b}
       then 1 else 0 end) as summer,
-      sum(case when month in (9, 10, 11) and """
-        + b
-        + """
+      sum(case when month in (9, 10, 11) and {b}
       then 1 else 0 end) as fall,
-      sum(case when """
-        + b
-        + """ then 1 else 0 end) as all
-      from """
-        + table
-        + """ WHERE station = %s and year >= %s
+      sum(case when {b} then 1 else 0 end) as all
+      from {table} WHERE station = %s and year >= %s
       GROUP by yr ORDER by yr ASC
     """,
         pgconn,

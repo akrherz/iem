@@ -36,7 +36,7 @@ def plotter(fdict):
     station = ctx["station"].upper()
     table = "alldata_%s" % (station[:2],)
     df = read_sql(
-        """
+        f"""
         SELECT year, month,
         avg(high) as avg_high_all, avg(low) as avg_low_all,
         avg(case when snowd > 0 then high else null end) as avg_high_snow,
@@ -44,11 +44,7 @@ def plotter(fdict):
         avg(case when snowd = 0 then high else null end) as avg_high_nosnow,
         avg(case when snowd = 0 then low else null end) as avg_low_nosnow,
         sum(case when snowd > 0 then 1 else 0 end) as coverdays
-        from """
-        + table
-        + """
-        WHERE station = %s
-        GROUP by year, month
+        from {table} WHERE station = %s GROUP by year, month
     """,
         pgconn,
         params=(station,),

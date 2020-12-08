@@ -14,8 +14,8 @@ def main():
     table = NetworkTable("ISUSM")
 
     icursor.execute(
-        """SELECT station, min(valid), max(valid) from sm_hourly
-                    GROUP by station ORDER by min ASC"""
+        "SELECT station, min(valid), max(valid) from sm_hourly "
+        "GROUP by station ORDER by min ASC"
     )
     for row in icursor:
         station = row[0]

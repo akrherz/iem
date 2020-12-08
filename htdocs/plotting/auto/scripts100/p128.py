@@ -63,21 +63,17 @@ def plotter(fdict):
     varname = ctx["var"]
 
     df = read_sql(
-        """WITH one as (
+        f"""WITH one as (
       SELECT year, sum(precip) as one_total_precip,
       avg(high) as one_avg_high, avg(low) as one_avg_low,
       avg((high+low)/2.) as one_avg_temp, max(high) as one_max_high,
-      min(low) as one_min_low from """
-        + table1
-        + """ WHERE
+      min(low) as one_min_low from {table1} WHERE
       station = %s GROUP by year),
     two as (
       SELECT year, sum(precip) as two_total_precip,
       avg(high) as two_avg_high, avg(low) as two_avg_low,
       avg((high+low)/2.) as two_avg_temp, max(high) as two_max_high,
-      min(low) as two_min_low from """
-        + table2
-        + """ WHERE
+      min(low) as two_min_low from {table2} WHERE
       station = %s GROUP by year
     )
 

@@ -48,16 +48,14 @@ def get_data(fdict):
     offset = int((date - jul1).days)
     table = "alldata_%s" % (station[:2],)
     df = read_sql(
-        """
+        f"""
     with obs as (
         select day,
         day -
         ((case when month > 6 then year else year - 1 end)||'-07-01')::date
         as doy,
         (case when month > 6 then year else year - 1 end) as eyear, snow
-        from """
-        + table
-        + """ where station = %s)
+        from {table} where station = %s)
 
         SELECT eyear, sum(case when doy < %s then snow else 0 end) as before,
         sum(case when doy >= %s then snow else 0 end) as after,

@@ -32,13 +32,8 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2],)
     df = read_sql(
-        """
-        SELECT day, precip from """
-        + table
-        + """ WHERE station = %s
-        and precip is not null
-        ORDER by precip DESC LIMIT 30
-    """,
+        f"SELECT day, precip from {table} WHERE station = %s and "
+        "precip is not null ORDER by precip DESC LIMIT 30",
         pgconn,
         params=(station,),
         index_col=None,

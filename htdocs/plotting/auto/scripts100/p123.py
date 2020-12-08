@@ -109,11 +109,8 @@ def plotter(fdict):
     )
 
     cursor.execute(
-        """SELECT high, low from """
-        + table
-        + """
-    WHERE station = %s and day >= '1900-01-01' ORDER by day ASC
-    """,
+        f"SELECT high, low from {table} WHERE station = %s and "
+        "day >= '1900-01-01' ORDER by day ASC",
         (station,),
     )
     highs = np.zeros((cursor.rowcount,), "f")

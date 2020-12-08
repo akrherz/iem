@@ -64,7 +64,7 @@ def plotter(fdict):
     )
 
     df = read_sql(
-        """SELECT year,
+        f"""SELECT year,
        sum(case when low <= -20 THEN 1 ELSE 0 END) as m20,
        sum(case when low <= -10 THEN 1 ELSE 0 END) as m10,
        sum(case when low <=  0 THEN 1 ELSE 0 END) as m0,
@@ -74,10 +74,7 @@ def plotter(fdict):
        sum(case when high >= 80 THEN 1 ELSE 0 END) as e80,
        sum(case when high >= 93 THEN 1 ELSE 0 END) as e93,
        sum(case when high >= 100 THEN 1 ELSE 0 END) as e100
-       from """
-        + table
-        + """ WHERE station = %s
-       GROUP by year ORDER by year ASC
+       from {table} WHERE station = %s GROUP by year ORDER by year ASC
     """,
         pgconn,
         params=(station,),

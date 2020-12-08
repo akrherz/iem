@@ -94,12 +94,10 @@ def plotter(fdict):
         ctx["ets"] = utc()
 
     df = read_sql(
-        (
-            "SELECT source, pil, min(entered at time zone 'UTC') as first, "
-            "max(entered at time zone 'UTC') as last, count(*) from products "
-            "WHERE substr(pil, 1, 3) = %s and entered >= %s and entered < %s "
-            "GROUP by source, pil ORDER by source, pil ASC"
-        ),
+        "SELECT source, pil, min(entered at time zone 'UTC') as first, "
+        "max(entered at time zone 'UTC') as last, count(*) from products "
+        "WHERE substr(pil, 1, 3) = %s and entered >= %s and entered < %s "
+        "GROUP by source, pil ORDER by source, pil ASC",
         pgconn,
         params=(pil, ctx["sts"], ctx["ets"]),
         index_col=None,

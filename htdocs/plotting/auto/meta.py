@@ -17,17 +17,15 @@ def get_timing(pidx):
     pgconn = get_dbconn("mesosite")
     cursor = pgconn.cursor()
     cursor.execute(
-        """
-        SELECT avg(timing) from autoplot_timing where appid = %s
-        and valid > (now() - '7 days'::interval)
-    """,
+        "SELECT avg(timing) from autoplot_timing where appid = %s "
+        "and valid > (now() - '7 days'::interval)",
         (pidx,),
     )
     timing = cursor.fetchone()[0]
     return timing if timing is not None else -1
 
 
-def generate_html(fields, pidx, appdata):
+def generate_html(appdata):
     """Fun to be had here!"""
     html = ""
     for arg in appdata["arguments"]:
@@ -35,7 +33,7 @@ def generate_html(fields, pidx, appdata):
     return html
 
 
-def do_html(fields, pidx):
+def do_html(pidx):
     """Generate the HTML interface for this autoplot."""
     response_headers = [("Content-type", "text/html")]
     name = get_script_name(pidx)
@@ -48,7 +46,7 @@ def do_html(fields, pidx):
     app = imp.load_module(name, fp, pathname, description)
     # see how we are called, finally
     appdata = app.get_description()
-    html = generate_html(fields, pidx, appdata)
+    html = generate_html(appdata)
     return html, "200 OK", response_headers
 
 
@@ -67,7 +65,7 @@ def do_json(pidx):
     """Do what needs to be done for JSON requests."""
     status = "200 OK"
     if pidx == 0:
-        import scripts  # @UnresolvedImport
+        import scripts  # pylint: disable=import-outside-toplevel
 
         data = scripts.data
     else:
@@ -113,7 +111,7 @@ def application(environ, start_response):
     pidx = int(fields.get("p", 0))
     fmt = fields.get("_fmt", "json")
     if fmt == "html":
-        output, status, response_headers = do_html(fields, pidx)
+        output, status, response_headers = do_html(pidx)
     else:
         output, status, response_headers = do_json(pidx)
 

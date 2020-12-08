@@ -42,7 +42,7 @@ def plotter(fdict):
     startyear = bs.year
     # 0.01, 0.5, 1, 2, 3, 4
     df = read_sql(
-        """
+        f"""
         SELECT year, month,
         sum(case when precip >= %s then 1 else 0 end) as cat1,
         sum(case when precip >= %s then 1 else 0 end) as cat2,
@@ -50,9 +50,7 @@ def plotter(fdict):
         sum(case when precip >= %s then 1 else 0 end) as cat4,
         sum(case when precip >= %s then 1 else 0 end) as cat5,
         sum(case when precip >= %s then 1 else 0 end) as cat6
-        from """
-        + table
-        + """ WHERE station = %s GROUP by year, month
+        from {table} WHERE station = %s GROUP by year, month
         ORDER by year, month
     """,
         pgconn,

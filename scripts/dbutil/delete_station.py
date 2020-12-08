@@ -35,11 +35,8 @@ def delete_logic(icursor, mcursor, network, station):
         )
 
     mcursor.execute(
-        """
-        DELETE from station_attributes where iemid = (
-            SELECT iemid from stations where id = %s and network = %s
-        )
-    """,
+        "DELETE from station_attributes where iemid = ( "
+        "SELECT iemid from stations where id = %s and network = %s)",
         (station, network),
     )
     mcursor.execute(

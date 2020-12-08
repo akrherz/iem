@@ -160,23 +160,15 @@ def get_data(pgconn, table, station, month, period, varname, days, opt):
         ylimiter = "WHERE myyear >= %s and myyear <= %s" % (y1, y2)
     if days == 1:
         df = read_sql(
-            """
+            f"""
         WITH data as (
             SELECT
-            extract(year from day + '"""
-            + doffset
-            + """'::interval)::int
+            extract(year from day + '{doffset}'::interval)::int
               as myyear,
-            high, low, (high+low)/2. as avg from """
-            + table
-            + """
+            high, low, (high+low)/2. as avg from {table}
             WHERE station = %s and high is not null
-            and low is not null """
-            + mlimiter
-            + """)
-        SELECT * from data """
-            + ylimiter
-            + """
+            and low is not null {mlimiter})
+        SELECT * from data {ylimiter}
         """,
             pgconn,
             params=(station,),
@@ -188,29 +180,17 @@ def get_data(pgconn, table, station, month, period, varname, days, opt):
             " CURRENT ROW) "
         ) % (opt, varname, days - 1)
         df = read_sql(
-            """
+            f"""
         WITH data as (
             SELECT
-            extract(year from day + '"""
-            + doffset
-            + """'::interval)::int
+            extract(year from day + '{doffset}'::interval)::int
               as myyear,
-            high, low, (high+low)/2. as avg, day, month from """
-            + table
-            + """
+            high, low, (high+low)/2. as avg, day, month from {table}
             WHERE station = %s and high is not null and low is not null),
         agg1 as (
-            SELECT myyear, month, """
-            + res
-            + """ as """
-            + varname
-            + """
-            from data WHERE 1 = 1 """
-            + mlimiter
-            + """)
-        SELECT * from agg1 """
-            + ylimiter
-            + """
+            SELECT myyear, month, {res} as {varname}
+            from data WHERE 1 = 1 {mlimiter})
+        SELECT * from agg1 {ylimiter}
         """,
             pgconn,
             params=(station,),
@@ -260,7 +240,7 @@ def plotter(fdict):
     s_slp, s_int, s_r, _, _ = stats.linregress(pc1, pc2)
 
     fig = plt.gcf()
-    fig.set_size_inches(10.24, 7.68)
+    fig.set_size_inches(12.0, 6.75)
     ax = plt.axes([0.1, 0.11, 0.4, 0.76])
     ax.scatter(pc1[::5], pc2[::5], s=40, marker="s", color="b", zorder=3)
     ax.plot(
@@ -313,17 +293,17 @@ def plotter(fdict):
         r"%s (%s-%s) %s $^\circ$F" % (MDICT[month2], y3, y4, PDICT[varname])
     )
     ax.text(
-        0.95,
-        0.05,
+        0.5,
+        1.01,
         "Quantile - Quantile Plot",
         transform=ax.transAxes,
-        ha="right",
+        ha="center",
     )
     ax.grid(True)
     ax.legend(loc=2)
 
     # Second
-    ax = plt.axes([0.55, 0.18, 0.27, 0.68])
+    ax = plt.axes([0.56, 0.18, 0.26, 0.68])
     ax.set_title("Distribution")
     v1 = ax.violinplot(m1data, positions=[0], showextrema=True, showmeans=True)
     b = v1["bodies"][0]
@@ -356,7 +336,7 @@ def plotter(fdict):
             % (MDICT[month2], y3, y4, np.mean(m2data)),
         ),
         ncol=1,
-        loc=(0.5, -0.15),
+        loc=(0.1, -0.2),
     )
     ax.set_ylabel(r"%s $^\circ$F" % (PDICT[varname],))
     ax.grid()

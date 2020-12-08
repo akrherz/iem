@@ -184,7 +184,7 @@ def plotter(fdict):
         size=10,
     )
 
-    ax.set_ylabel("%s Frequency [%%]" % (PDICT[varname],))
+    ax.set_ylabel(f"{PDICT[varname]} Frequency [%]")
     ax.set_ylim(0, 100)
     ax.set_xlabel(r"Air Temperature $^\circ$F")
     if df2["t"].min() < 30:
