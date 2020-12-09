@@ -1,6 +1,5 @@
 """ISUSM ingest."""
 import datetime
-from io import StringIO
 import os
 import subprocess
 import traceback
@@ -24,7 +23,12 @@ TSOIL_COLS = [
     "t24_c_avg",
     "t50_c_avg",
 ]
-TABLES = {"MinSI": "sm_minute", "HrlySI": "sm_hourly", "DailySI": "sm_daily"}
+TABLES = {
+    "MinSI": "sm_minute",
+    "Min5SI": "sm_minute",
+    "HrlySI": "sm_hourly",
+    "DailySI": "sm_daily",
+}
 VARCONV = {
     "timestamp": "valid",
     "vwc06_avg": "vwc_06_avg",
@@ -33,6 +37,8 @@ VARCONV = {
     "vwc_avg12in": "vwc_12_avg",
     "vwc24_avg": "vwc_24_avg",
     "vwc_avg24in": "vwc_24_avg",
+    "vwc_avg30in": "calcvwc30_avg",
+    "vwc_avg40in": "calcvwc40_avg",
     "vwc50_avg": "vwc_50_avg",
     "calcvwc06_avg": "calc_vwc_06_avg",
     "calcvwc12_avg": "calc_vwc_12_avg",
@@ -51,6 +57,8 @@ VARCONV = {
     "temp_avg6in": "t06_c_avg",
     "temp_avg12in": "t12_c_avg",
     "temp_avg24in": "t24_c_avg",
+    "temp_avg30in": "t30_c_avg",
+    "temp_avg40in": "t40_c_avg",
     "bp_mmhg_avg": "bpres_avg",
     "bp_mb": "bpres_avg",
     "battv": "battv_min",
@@ -215,9 +223,8 @@ def process(path, fn):
     df["station"] = station
     if "ws_mph_tmx" in df.columns:
         df["ws_mph_tmx"] = df["ws_mph_tmx"].apply(make_time)
-    output = StringIO()
-    df.to_csv(output, sep="\t", header=False, index=False)
-    output.seek(0)
+
+    # Begin database work.
     pgconn = get_dbconn("isuag")
     icursor = pgconn.cursor()
     if tabletype == "MinSI":
@@ -225,10 +232,34 @@ def process(path, fn):
     # Delete away any old data
     for _, row in df.iterrows():
         icursor.execute(
-            f"DELETE from {tablename} WHERE station = %s and valid = %s",
+            f"SELECT 1 from {tablename} WHERE station = %s and valid = %s",
             (row["station"], row["valid"]),
         )
-    icursor.copy_from(output, tablename, columns=df.columns, null="")
+        if icursor.rowcount == 0:
+            icursor.execute(
+                f"INSERT into {tablename} (station, valid) VALUES (%s, %s)",
+                (row["station"], row["valid"]),
+            )
+        opts = []
+        params = []
+        for col in df.columns:
+            opts.append(f"{col} = %s")
+            params.append(row[col])
+
+        params.extend([row["station"], row["valid"]])
+        # Do the update
+        icursor.execute(
+            f"UPDATE {tablename} SET {','.join(opts)} WHERE "
+            "station = %s and valid = %s",
+            params,
+        )
+        if icursor.rowcount != 1:
+            LOG.info(
+                "station %s valid: %s table: %s did non-1 rows",
+                row["station"],
+                row["valid"],
+                tablename,
+            )
     icursor.close()
     pgconn.commit()
     if tabletype == "MinSI":
@@ -252,6 +283,7 @@ def main():
             try:
                 process(watch_path, fn)
             except Exception as exp:
+                LOG.error("filename: %s errored: %s", fn, exp)
                 with open("%s/%s.error" % (STOREPATH, fn), "w") as fp:
                     fp.write(str(exp) + "\n")
                     traceback.print_exc(file=fp)
