@@ -193,6 +193,8 @@ def plotter(fdict):
 
     colorabove = "r"
     colorbelow = "b"
+    if ctx["which"] == "below":
+        colorabove, colorbelow = colorbelow, colorabove
     data = df[varname + suffix].values
     bars = ax.bar(
         df.index.values, data, fc=colorabove, ec=colorabove, align="center"
