@@ -34,9 +34,14 @@ def find_and_save(cursor, dbendts):
         if len(tokens) != 1:
             continue
         (appid, timing, uri) = tokens[0]
-        valid = datetime.datetime.strptime(
-            "%s %s" % (thisyear, line[:15]), "%Y %b %d %H:%M:%S"
-        )
+        try:
+            valid = datetime.datetime.strptime(
+                "%s %s" % (thisyear, line[:15]), "%Y %b %d %H:%M:%S"
+            )
+        except ValueError as exp:
+            LOG.info(line)
+            LOG.error(exp)
+            continue
         if valid > now or valid <= dbendts:
             continue
         hostname = line.split()[3]
@@ -50,7 +55,7 @@ def find_and_save(cursor, dbendts):
     # Don't complain during the early morning hours
     if inserts == 0 and now.hour > 5:
         LOG.info(
-            "mine_autoplot: no new entries found for databasing " "since %s",
+            "mine_autoplot: no new entries found for databasing since %s",
             dbendts,
         )
 
