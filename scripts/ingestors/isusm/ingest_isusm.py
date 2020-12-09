@@ -1,8 +1,9 @@
 """ISUSM ingest."""
-from io import StringIO
 import datetime
-import traceback
+from io import StringIO
+import os
 import subprocess
+import traceback
 
 import inotify.adapters
 import pytz
@@ -88,7 +89,7 @@ STATIONS = {
 
 
 def make_time(string):
-    """Convert a time in the file to a datetime"""
+    """Convert a CST timestamp in the file to a datetime"""
     tstamp = datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
     tstamp = tstamp.replace(tzinfo=pytz.FixedOffset(-360))
     return tstamp
@@ -115,9 +116,8 @@ def minute_iemaccess(df):
     pgconn = get_dbconn("iem")
     cursor = pgconn.cursor()
     for _i, row in df.iterrows():
-        # Update IEMAccess
-        # print nwsli, valid
-        ob = Observation(row["station"], "ISUSM", row["valid"])
+        # Update IEMAccess, pandas.Timestamp causes grief
+        ob = Observation(row["station"], "ISUSM", row["valid"].to_pydatetime())
         tmpc = temperature(row["tair_c_avg_qc"], "C")
         if tmpc.value("F") > -50 and tmpc.value("F") < 140:
             ob.data["tmpf"] = tmpc.value("F")
@@ -158,7 +158,9 @@ def process(path, fn):
     station = STATIONS[tokens[0]]
     tabletype = tokens[1]
     tablename = TABLES[tabletype]
-    df = pd.read_csv(path + "/" + fn, skiprows=[0, 2, 3], na_values=["NAN"])
+    df = pd.read_csv(
+        os.path.join(path, fn), skiprows=[0, 2, 3], na_values=["NAN", "-100"]
+    )
     if df.empty:
         return
     # convert all columns to lowercase
@@ -170,7 +172,7 @@ def process(path, fn):
         df = df.rename(columns={"timestamp": "valid"})
     df["valid"] = df["valid"].apply(make_time)
     if tabletype == "DailySI":
-        # Rework the valid column into the appropriate date
+        # This is kludgy, during CDT, timestamp is 1 AM, CST, midnight
         df["valid"] = df["valid"].dt.date - datetime.timedelta(days=1)
         df["rain_mm_tot"] = df["rain_in_tot"] * 25.4
         df = df.drop("rain_in_tot", axis=1)
@@ -193,7 +195,7 @@ def process(path, fn):
     for colname in df.columns:
         if colname == "valid":
             continue
-        elif tabletype != "MinSI" and colname == "rain_in_tot":
+        if tabletype != "MinSI" and colname == "rain_in_tot":
             # Database currently only has mm column :/
             df["rain_mm_tot"] = df["rain_in_tot"] * 25.4
             df["rain_mm_tot_qc"] = df["rain_in_tot"] * 25.4
@@ -219,21 +221,13 @@ def process(path, fn):
     pgconn = get_dbconn("isuag")
     icursor = pgconn.cursor()
     if tabletype == "MinSI":
-        # partitioned tables, BUG
-        tablename = "sm_minute_%s" % (df.iloc[0]["valid"].strftime("%Y"),)
+        tablename = "sm_minute"
     # Delete away any old data
     for _, row in df.iterrows():
         icursor.execute(
-            """
-            DELETE from """
-            + tablename
-            + """ WHERE station = %s and valid = %s
-        """,
+            f"DELETE from {tablename} WHERE station = %s and valid = %s",
             (row["station"], row["valid"]),
         )
-        # LOG.debug(
-        #    "deleted %s rows for %s %s", icursor.rowcount, row['station'],
-        #    row['valid'])
     icursor.copy_from(output, tablename, columns=df.columns, null="")
     icursor.close()
     pgconn.commit()
