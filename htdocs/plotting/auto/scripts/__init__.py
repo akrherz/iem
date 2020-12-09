@@ -479,7 +479,7 @@ data = {
                 },
                 {
                     "id": "69",
-                    "label": "Percentage of Days each Year Above Average",
+                    "label": "Percentage of Days each Year Above/Below Average",
                 },
                 {
                     "id": "77",
