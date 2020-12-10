@@ -122,8 +122,8 @@ def underlay_usdm(axis, sts, ets, lon, lat):
         ts = datetime.datetime.strptime(row["valid"], "%Y-%m-%d")
         date = datetime.date(ts.year, ts.month, ts.day)
         axis.axvspan(
-            date.toordinal(),
-            date.toordinal() + 7,
+            date,
+            date + datetime.timedelta(days=7),
             color=COLORS[row["category"]],
             zorder=-3,
         )
@@ -146,7 +146,7 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2],)
     df = read_sql(
-        """
+        f"""
     -- Get all period averages
     with avgs as (
         SELECT day, sday,
@@ -166,9 +166,7 @@ def plotter(fdict):
         sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as p1_precip,
         sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as p2_precip,
         sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as p3_precip
-        from """
-        + table
-        + """ WHERE station = %s
+        from {table} WHERE station = %s
     ),
     -- Get sday composites
     sdays as (
@@ -309,7 +307,8 @@ def plotter(fdict):
             )
         except Exception as exp:
             sys.stderr.write(str(exp))
-    ax.set_xlim(df.index.min().toordinal() - 2, df.index.max().toordinal() + 2)
+    offset = datetime.timedelta(days=2)
+    ax.set_xlim(df.index.min() - offset, df.index.max() + offset)
 
     return fig, df
 
