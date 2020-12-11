@@ -315,6 +315,14 @@ def main():
                 with open("%s/%s.error" % (STOREPATH, fn), "w") as fp:
                     fp.write(str(exp) + "\n")
                     traceback.print_exc(file=fp)
+                # Copy the file to an error location
+                errordir = os.path.join(STOREPATH, "error.d")
+                if not os.path.isdir("error.d"):
+                    os.makedirs(errordir)
+                subprocess.call(
+                    "cp %s %s" % (os.path.join(watch_path, fn), errordir),
+                    shell=True,
+                )
             finally:
                 subprocess.call(
                     "mv %s/%s %s/%s" % (watch_path, fn, STOREPATH, fn),
