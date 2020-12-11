@@ -82,7 +82,7 @@ def plotter(fdict):
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
     df = read_sql(
-        """
+        f"""
     with data as (
         SELECT day, year,
         count(*) OVER
@@ -101,9 +101,7 @@ def plotter(fdict):
             (ORDER by day ASC ROWS BETWEEN 1 FOLLOWING AND %s FOLLOWING) as la,
         sum(precip) OVER
             (ORDER by day ASC ROWS BETWEEN 1 FOLLOWING AND %s FOLLOWING) as pa
-        from """
-        + table
-        + """ WHERE station = %s)
+        from {table} WHERE station = %s)
 
     SELECT year, hb as high_before, lb as low_before, pb as precip_before,
     ha as high_after, la as low_after, pa as precip_after from

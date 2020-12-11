@@ -219,7 +219,6 @@ def plotter(fdict):
     )
 
     ax.set_xlim(df2[col].min() - 10, df2[col].max() + 10)
-    ax.set_ylim(0, df2["count"].max() * 1.2)
     ax2.set_ylim(0, 100)
 
     idx = df2[col].idxmax()

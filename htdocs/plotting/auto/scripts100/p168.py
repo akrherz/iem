@@ -43,13 +43,11 @@ def plotter(fdict):
     station = ctx["station"]
     table = "alldata_%s" % (station[:2],)
     df = read_sql(
-        """
+        f"""
     with data as (
         select day, high, year,
         rank() OVER (PARTITION by high ORDER by sday DESC)
-        from """
-        + table
-        + """ where station = %s)
+        from {table} where station = %s)
     SELECT day, year, high, rank from data WHERE rank = 1
     ORDER by high DESC, day DESC
     """,
@@ -69,9 +67,9 @@ def plotter(fdict):
     x = []
     y = []
     for level in np.arange(df["high"].max(), 0, -1):
-        if level not in df["high"]:
-            continue
         df2 = df[df["high"] == level]
+        if df2.empty:
+            continue
         row = df2.iloc[0]
         if row["day"].replace(year=2000) > current["d2000"]:
             current["d2000"] = row["day"].replace(year=2000)
@@ -103,7 +101,7 @@ def plotter(fdict):
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
     ax.set_title(
-        ("Most Recent & Latest Date of High Temperature\n" "[%s] %s (%s-%s)")
+        ("Most Recent & Latest Date of High Temperature\n[%s] %s (%s-%s)")
         % (
             station,
             ctx["_nt"].sts[station]["name"],
@@ -118,4 +116,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter(dict(station="IA7594", network="IACLIMATE"))

@@ -73,25 +73,16 @@ def plotter(fdict):
     rows = []
     for dy in range(1, 32):
         ccursor.execute(
-            """
+            f"""
             with data as (
             select day,
-            avg("""
-            + varname
-            + """) OVER
+            avg({varname}) OVER
                 (ORDER by day ASC rows between %s preceding and current row),
-            min("""
-            + varname
-            + """) OVER
+            min({varname}) OVER
                 (ORDER by day ASC rows between %s preceding and current row),
-            max("""
-            + varname
-            + """) OVER
+            max({varname}) OVER
                 (ORDER by day ASC rows between %s preceding and current row)
-            from """
-            + table
-            + """
-            where station = %s)
+            from {table} where station = %s)
         SELECT max(avg), min(avg), max(min), min(min), max(max), min(max)
         from data
         """,

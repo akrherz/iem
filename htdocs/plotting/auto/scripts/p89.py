@@ -85,9 +85,7 @@ def get_data(ctx):
     """Do the processing work, please"""
     pgconn = get_dbconn("postgis")
     states = gpd.GeoDataFrame.from_postgis(
-        """
-    SELECT the_geom, state_abbr from states where state_abbr = %s
-    """,
+        "SELECT the_geom, state_abbr from states where state_abbr = %s",
         pgconn,
         params=(ctx["state"],),
         index_col="state_abbr",
