@@ -255,8 +255,10 @@ def process(path, fn):
     icursor = pgconn.cursor()
     if tabletype == "MinSI":
         tablename = "sm_minute"
+    # Convert any nan values to None for purposes of database work
+    df2 = df.replace({np.nan: None})
     # Delete away any old data
-    for _, row in df.iterrows():
+    for _, row in df2.iterrows():
         icursor.execute(
             f"SELECT 1 from {tablename} WHERE station = %s and valid = %s",
             (row["station"], row["valid"]),
