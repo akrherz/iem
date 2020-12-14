@@ -6,7 +6,9 @@ import pytz
 import requests
 from pyiem.observation import Observation
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
 def safeP(v):
@@ -19,12 +21,12 @@ def safeP(v):
     return float(v)
 
 
-def main():
+def main(daysago):
     """Go Main Go"""
     dbconn = get_dbconn("iem")
     cursor = dbconn.cursor()
 
-    now = datetime.datetime.now() - datetime.timedelta(hours=3)
+    now = datetime.datetime.now() - datetime.timedelta(days=daysago)
 
     lts = datetime.datetime.utcnow()
     lts = lts.replace(tzinfo=pytz.utc)
@@ -35,8 +37,9 @@ def main():
     url = (
         "http://data.cocorahs.org/Cocorahs/export/exportreports.aspx"
         "?ReportType=Daily&dtf=1&Format=CSV&State=%s&"
-        "ReportDateType=timestamp&Date=%s&TimesInGMT=False"
-    ) % (state, now.strftime("%m/%d/%Y%%20%H:00%%20%P"))
+        "ReportDateType=date&Date=%s&TimesInGMT=False"
+    ) % (state, now.strftime("%m/%d/%Y"))
+    LOG.debug(url)
     data = requests.get(url, timeout=30).content.decode("ascii").split("\r\n")
 
     # Process Header
@@ -67,6 +70,7 @@ def main():
             minute=ts.minute,
         )
         iem = Observation(sid, "%sCOCORAHS" % (state,), lts)
+        iem.data["coop_valid"] = lts
         iem.data["pday"] = safeP(cols[header["TotalPrecipAmt"]])
         if cols[header["NewSnowDepth"]].strip() != "NA":
             iem.data["snow"] = safeP(cols[header["NewSnowDepth"]])
@@ -79,5 +83,13 @@ def main():
     dbconn.commit()
 
 
+def frontend():
+    """Do Logic."""
+    main(0)
+    if datetime.datetime.now().hour == 1:
+        for offset in range(1, 15):
+            main(offset)
+
+
 if __name__ == "__main__":
-    main()
+    frontend()

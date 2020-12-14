@@ -7,7 +7,6 @@ from pyproj import Transformer
 from geopandas import read_postgis, GeoDataFrame
 from shapely.geometry import Polygon, Point
 from scipy.interpolate import Rbf
-from scipy.ndimage import zoom
 from pyiem import reference
 from pyiem.plot import MapPlot, nwssnow
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -190,7 +189,8 @@ def load_data(ctx, basets, endts):
         sum(snow) as val, ST_x(geom) as lon, ST_y(geom) as lat,
         ST_Transform(geom, 2163) as geo
         from summary s JOIN stations t on (s.iemid = t.iemid)
-        WHERE s.day in %s and t.network ~* 'COOP' and snow >= 0 and
+        WHERE s.day in %s and (t.network ~* 'COOP' or t.network = 'IACOCORAHS')
+        and snow >= 0 and
         coop_valid >= %s and coop_valid <= %s
         GROUP by state, wfo, nwsli, lon, lat, geo
         ORDER by val DESC
