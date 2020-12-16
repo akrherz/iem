@@ -75,20 +75,6 @@ def plotter(fdict):
             vopts = dict(
                 positions=[j], showmeans=False, showextrema=False, widths=0.8
             )
-            # LHS
-            vals = nocoverdf[nocoverdf["month"] == month][lbl]
-            v = ax[i].violinplot(vals, **vopts)
-            meanval = vals.mean()
-            ax[i].plot([j - 0.4, j], [meanval, meanval], c=colors[0])
-            ax[i].text(
-                j, meanval, rf"{meanval:.0f}$^\circ$", c=colors[0], ha="right"
-            )
-            b = v["bodies"][0]
-            m = np.mean(b.get_paths()[0].vertices[:, 0])
-            b.get_paths()[0].vertices[:, 0] = np.clip(
-                b.get_paths()[0].vertices[:, 0], -np.inf, m
-            )
-            b.set_color(colors[0])
 
             # RHS
             vals = coverdf[coverdf["month"] == month][lbl]
@@ -96,7 +82,7 @@ def plotter(fdict):
             meanval2 = vals.mean()
             ax[i].plot([j, j + 0.4], [meanval2, meanval2], c=colors[1])
             ax[i].text(
-                j, meanval2, rf"{meanval:.0f}$^\circ$", c=colors[1], ha="left"
+                j, meanval2, rf"{meanval2:.0f}$^\circ$", c=colors[1], ha="left"
             )
             b = v["bodies"][0]
             m = np.mean(b.get_paths()[0].vertices[:, 0])
@@ -104,6 +90,27 @@ def plotter(fdict):
                 b.get_paths()[0].vertices[:, 0], m, np.inf
             )
             b.set_color(colors[1])
+
+            # LHS
+            vals = nocoverdf[nocoverdf["month"] == month][lbl]
+            meanval = vals.mean()
+            if not vals.empty:
+                v = ax[i].violinplot(vals, **vopts)
+                ax[i].plot([j - 0.4, j], [meanval, meanval], c=colors[0])
+                ax[i].text(
+                    j,
+                    meanval,
+                    rf"{meanval:.0f}$^\circ$",
+                    c=colors[0],
+                    ha="right",
+                )
+                b = v["bodies"][0]
+                m = np.mean(b.get_paths()[0].vertices[:, 0])
+                b.get_paths()[0].vertices[:, 0] = np.clip(
+                    b.get_paths()[0].vertices[:, 0], -np.inf, m
+                )
+                b.set_color(colors[0])
+
             res.append(
                 {
                     "month": month,
@@ -143,4 +150,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="IATDSM", network="IACLIMATE"))
+    plotter(dict(station="MNTINL", network="MNCLIMATE"))
