@@ -344,10 +344,10 @@ def plotter(fdict):
     subtitle = (
         ""
         if ctx["thres"] is None
-        else "\nBack Threshold of at least %.0f $^\circ$F" % (ctx["thres"],)
+        else rf"\nBack Threshold of at least {ctx['thres']:.0f} $^\circ$F"
     )
     ax.set_title(
-        ("%s %s (%.0f-%.0f)\n" "Max Change in %s %s (%s)\n" "%s%s")
+        ("%s %s (%.0f-%.0f)\nMax Change in %s %s (%s)\n%s%s")
         % (
             station,
             ctx["_nt"].sts[station]["name"],

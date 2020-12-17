@@ -93,7 +93,7 @@ def plotter(fdict):
         ax.text(
             row["sped_%s" % (units,)] * 0.98,
             mon,
-            "%.1f" % (row["sped_%s" % (units,)],),
+            "%.1f" % (row[f"sped_{units}"],),
             ha="right",
             va="center",
             bbox=dict(color="white", boxstyle="square,pad=0.03"),

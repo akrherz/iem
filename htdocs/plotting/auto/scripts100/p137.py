@@ -64,13 +64,11 @@ def plotter(fdict):
 
     # Have to do a redundant query to get the running values
     obs = read_sql(
-        """
+        f"""
     WITH trail as (
         SELECT day, year,
         avg((high+low)/2.) OVER (ORDER by day ASC ROWS 91 PRECEDING) as avgt
-        from """
-        + table
-        + """ WHERE station = %s)
+        from {table} WHERE station = %s)
 
     SELECT day, avgt from trail WHERE year between %s and %s ORDER by day ASC
     """,
@@ -82,13 +80,11 @@ def plotter(fdict):
         raise NoDataFound("No Data Found.")
 
     df = read_sql(
-        """
+        f"""
     WITH trail as (
         SELECT day, year,
         avg((high+low)/2.) OVER (ORDER by day ASC ROWS 91 PRECEDING) as avgt
-        from """
-        + table
-        + """ WHERE station = %s),
+        from {table} WHERE station = %s),
     extremes as (
         SELECT day, year, avgt,
         rank() OVER (PARTITION by year ORDER by avgt ASC) as minrank,

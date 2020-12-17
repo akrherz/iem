@@ -77,38 +77,20 @@ def plotter(fdict):
     v = ctx["var"]
 
     df = read_sql(
-        """
+        f"""
         SELECT extract(week from valid) as week,
-        sum(case when """
-        + v
-        + """::int < %s then 1 else 0 end) as d1,
-        sum(case when """
-        + v
-        + """::int < %s and """
-        + v
-        + """::int >= %s then 1 else 0 end) as d2,
-        sum(case when """
-        + v
-        + """::int < %s and """
-        + v
-        + """::int >= %s then 1 else 0 end) as d3,
-        sum(case when """
-        + v
-        + """::int < %s and """
-        + v
-        + """::int >= %s then 1 else 0 end) as d4,
-        sum(case when """
-        + v
-        + """::int < %s and """
-        + v
-        + """::int >= %s then 1 else 0 end) as d5,
-        sum(case when """
-        + v
-        + """::int >= %s then 1 else 0 end) as d6,
+        sum(case when {v}::int < %s then 1 else 0 end) as d1,
+        sum(case when {v}::int < %s and {v}::int >= %s then 1 else 0 end)
+          as d2,
+        sum(case when {v}::int < %s and {v}::int >= %s then 1 else 0 end)
+          as d3,
+        sum(case when {v}::int < %s and {v}::int >= %s then 1 else 0 end)
+          as d4,
+        sum(case when {v}::int < %s and {v}::int >= %s then 1 else 0 end)
+          as d5,
+        sum(case when {v}::int >= %s then 1 else 0 end) as d6,
         count(*)
-        from alldata where station = %s and """
-        + v
-        + """ is not null
+        from alldata where station = %s and {v} is not null
         and extract(minute  from valid  - '1 minute'::interval) > 49
         and report_type = 2
         GROUP by week ORDER by week ASC

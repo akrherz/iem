@@ -71,7 +71,9 @@ def highcharts(fdict):
     j = dict()
     j["tooltip"] = {
         "shared": True,
-        "headerFormat": '<span style="font-size: 10px">{point.key: %b %e}</span><br/>',
+        "headerFormat": (
+            '<span style="font-size: 10px">{point.key: %b %e}</span><br/>'
+        ),
     }
     j["title"] = {
         "text": "%s [%s] %s %sF"
@@ -217,7 +219,7 @@ def plotter(fdict):
     ax.plot(df.index.values, df["max"], c="r", lw=2, label="Max")
     ax.plot(df.index.values, df["min"], c="b", lw=2, label="Min")
     ax.set_title(
-        ("%s [%s]\n%s %.0f$^\circ$F")
+        (r"%s [%s]\n%s %.0f$^\circ$F")
         % (ctx["_nt"].sts[station]["name"], station, PDICT[varname], threshold)
     )
     ax.legend(ncol=1, loc=2)
