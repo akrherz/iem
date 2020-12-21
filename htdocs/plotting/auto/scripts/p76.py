@@ -148,6 +148,7 @@ def get_data(ctx, startyear):
     elif ctx["season"] == "water_year":
         deltadays = 92
         months = range(1, 13)
+        lastyear += 1
     elif ctx["season"] == "spring":
         months = [3, 4, 5]
         if today.month > 5:
@@ -307,6 +308,12 @@ def plotter(fdict):
 
 if __name__ == "__main__":
     _fig, _df = plotter(
-        dict(varname="dwpf", season="winter", station="DSM", network="IA_ASOS")
+        dict(
+            varname="vpd",
+            season="water_year",
+            station="DSM",
+            network="IA_ASOS",
+            year=2020,
+        )
     )
     print(_df)
