@@ -5,8 +5,14 @@ if [ "$HH" -ne "12" ]
 		exit
 fi
 
+cd asos
+python cf6_to_iemaccess.py $(date --date '1 days ago' +'%Y %m %d')
+python cf6_to_iemaccess.py $(date --date '2 days ago' +'%Y %m %d')
+python cf6_to_iemaccess.py $(date --date '30 days ago' +'%Y %m %d')
+python cf6_to_iemaccess.py $(date --date '60 days ago' +'%Y %m %d')
+
 # DVN wants this to run at 12:10 UTC, so we start the cron script a bit late
-cd 12z
+cd ../12z
 python awos_rtp.py
 
 cd ../hads
