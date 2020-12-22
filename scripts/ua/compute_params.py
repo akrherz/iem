@@ -10,7 +10,6 @@ from tqdm import tqdm
 import pandas as pd
 import numpy as np
 from scipy.interpolate import interp1d
-from metpy.future import precipitable_water, storm_relative_helicity
 from metpy.calc import (
     surface_based_cape_cin,
     most_unstable_cape_cin,
@@ -19,6 +18,8 @@ from metpy.calc import (
     lfc,
     lcl,
     bunkers_storm_motion,
+    precipitable_water,
+    storm_relative_helicity,
     wind_components,
     wind_direction,
     wind_speed,
