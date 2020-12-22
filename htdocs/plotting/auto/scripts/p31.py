@@ -280,12 +280,12 @@ def plotter(fdict):
             ts = sts.replace(month=i)
             xticks.append(int(ts.strftime("%j")))
 
-        ax.set_xticklabels(calendar.month_abbr[1:])
         ax.set_xticks(xticks)
+        ax.set_xticklabels(calendar.month_abbr[1:])
         ax.set_xlim(0, 366)
     elif agg == "month":
-        ax.set_xticklabels(calendar.month_abbr[1:])
         ax.set_xticks(range(1, 13))
+        ax.set_xticklabels(calendar.month_abbr[1:])
         ax.set_xlim(0, 13)
     elif agg == "year":
         for col in ["max", "min"]:

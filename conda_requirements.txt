@@ -28,7 +28,7 @@ matplotlib-base
 # various places
 metar
 # duh
-metpy
+metpy>=1.0.0
 # yup
 netcdf4
 # yup

@@ -29,7 +29,7 @@ LOOKUP = {
     "-mec": IPS[METVM7],
     "-mesonet": IPS[METVM6],
     "-mesosite": IPS[METVM6],
-    "-mos": IPS[METVM4],
+    "-mos": IPS[METVM7],
     "-nc1018": IPS[METVM6],
     "-nldn": IPS[METVM4],
     "-nwx": IPS[METVM6],

@@ -144,8 +144,8 @@ def plotter(fdict):
         ylabel = "Precipitation [inch]"
     ax.set_ylabel(ylabel)
     ax.grid(True)
-    ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xticks(np.arange(1, 13))
+    ax.set_xticklabels(calendar.month_abbr[1:])
 
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width, box.height * 0.95])

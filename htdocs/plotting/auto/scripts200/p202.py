@@ -169,9 +169,9 @@ def plotter(fdict):
         # compute mixing ratio
         df["q"] = (
             mcalc.mixing_ratio_from_relative_humidity(
-                df["relh"].values * units("percent"),
-                df["tmpf"].values * units("degF"),
                 df["pressure"].values * units("millibars"),
+                df["tmpf"].values * units("degF"),
+                df["relh"].values * units("percent"),
             )
             * 1000.0
         )

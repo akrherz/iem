@@ -46,11 +46,9 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
 
     cursor.execute(
-        """
+        f"""
          WITH monthly as (
-         SELECT year, month, max(precip), sum(precip) from """
-        + table
-        + """
+         SELECT year, month, max(precip), sum(precip) from {table}
          WHERE station = %s and precip is not null GROUP by year, month)
 
          SELECT month, sum(case when max > (sum * %s) then 1 else 0 end),
@@ -87,8 +85,8 @@ def plotter(fdict):
     ax.set_ylim(0, 100)
     ax.set_ylabel("Percentage of Years")
     ax.set_yticks([0, 10, 25, 50, 75, 90, 100])
-    ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xticks(range(1, 13))
+    ax.set_xticklabels(calendar.month_abbr[1:])
 
     return fig, df
 

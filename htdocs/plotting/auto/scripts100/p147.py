@@ -70,17 +70,13 @@ def plotter(fdict):
     table1 = "alldata_%s" % (station1[:2],)
     table2 = "alldata_%s" % (station2[:2],)
     df = read_sql(
-        """
+        f"""
     WITH obs1 as (
-        SELECT day, high, low, precip, (high+low)/2. as avgt from
-        """
-        + table1
-        + """ WHERE station = %s),
+        SELECT day, high, low, precip, (high+low)/2. as avgt from {table1}
+        WHERE station = %s),
     obs2 as (
-        SELECT day, high, low, precip, (high+low)/2. as avgt from
-        """
-        + table2
-        + """ WHERE station = %s)
+        SELECT day, high, low, precip, (high+low)/2. as avgt from {table2}
+        WHERE station = %s)
 
     SELECT extract(doy from o.day) as doy, count(*),
     sum(case when o.high >= (t.high + %s) then 1 else 0 end) as high_hits,

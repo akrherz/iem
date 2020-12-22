@@ -110,8 +110,8 @@ def plotter(fdict):
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
     ax.barh(np.arange(1, 13), ranges, align="center")
-    ax.set_yticklabels(calendar.month_name)
     ax.set_yticks(range(0, 13))
+    ax.set_yticklabels(calendar.month_name)
     ax.set_ylim(0, 13)
     ax.set_xlabel(
         "Date most recently set/tied shown, * indicates ties are present"

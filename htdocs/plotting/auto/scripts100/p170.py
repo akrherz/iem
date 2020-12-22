@@ -100,13 +100,10 @@ def plotter(fdict):
             "'-TSSN'::varchar, '-TSDZ'::varchar] && wxcodes"
         )
     df = read_sql(
-        """
+        f"""
     WITH data as (
         SELECT distinct date(valid at time zone %s) from alldata
-        where station = %s and
-        """
-        + limiter
-        + """
+        where station = %s and {limiter}
         and valid > '1973-01-01' and report_type = 2)
 
     SELECT extract(year from date)::int as year,
@@ -154,8 +151,8 @@ def plotter(fdict):
     for x, y in zip(df2.index.values, yvals):
         ax.text(x, y + 0.2, "%.1f" % (y,))
     ax.set_xlim(0.5, 12.5)
-    ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xticks(range(1, 13))
+    ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_ylabel("Days Per Month")
     ax.set_ylim(top=(ax.get_ylim()[1] + 2))
     ax.legend(loc="best")

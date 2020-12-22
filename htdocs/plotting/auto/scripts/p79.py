@@ -108,9 +108,9 @@ def plotter(fdict):
     ).to(units("millibar"))
     # compute mixing ratio
     df["mixingratio"] = mcalc.mixing_ratio_from_relative_humidity(
-        df["relh"].values * units("percent"),
-        df["tmpf"].values * units("degF"),
         df["pressure"].values * units("millibars"),
+        df["tmpf"].values * units("degF"),
+        df["relh"].values * units("percent"),
     )
     # compute pressure
     df["vapor_pressure"] = mcalc.vapor_pressure(
