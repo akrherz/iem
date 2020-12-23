@@ -596,6 +596,10 @@ data = {
                     "label": "Cloudiness Impact on Hourly Temperatures",
                 },
                 {
+                    "id": "214",
+                    "label": "Combos of Hourly Observations Var Vs Var",
+                },
+                {
                     "id": "59",
                     "label": "Daily u and vs Wind Component Climatologies",
                 },
