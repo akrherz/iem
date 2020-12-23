@@ -23,7 +23,7 @@ def comp(old, new):
         return True
     if old == new:
         return False
-    if abs(new - old) < 0.5:
+    if abs(new - old) < 0.01:
         return False
     return True
 
