@@ -195,7 +195,7 @@ def get_data(fdict):
             SELECT {x}::{cast} as x, ({y}) as yv,
             first_value(valid at time zone 'UTC') OVER (
                 PARTITION by {x}::{cast}
-                ORDER by {y} {direction} valid DESC) as timestamp
+                ORDER by {y} {direction}, valid DESC) as timestamp
             from alldata where station = %s
             and extract(month from valid) in %s
             and report_type = 2 and valid >= %s
