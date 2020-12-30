@@ -365,6 +365,7 @@ def plotter(fdict):
 
     mp = MapPlot(
         sector=sector,
+        twitter=True,
         state=ctx["csector"],
         cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),
         axisbg="white",
