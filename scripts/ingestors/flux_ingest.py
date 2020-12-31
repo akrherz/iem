@@ -8,11 +8,11 @@ import datetime
 import pytz
 import pandas as pd
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconn, logger, utc
 from pyiem.datatypes import temperature, speed, pressure
 
 LOG = logger()
-DIR = "/mnt/home/mesonet/ot/ot0005/incoming/Fluxdata/"
+BASEDIR = "/mnt/home/mesonet/ot/ot0005/incoming/Fluxdata"
 FILENAMES = {
     "NSTL10": ["Flux10_AF.dat", "Anc10_AF.dat"],
     "NSTL11": ["Flux11_AF.dat", "Anc11_AF.dat"],
@@ -121,6 +121,9 @@ DBCOLS = [
     "p",
     "pa",
     "vr",
+    "lithium_bv_avg",
+    "solarrad_mj_tot",
+    "par_tot_tot",
 ]
 DROPCOLS = ["lithium_bv_avg", "utcyear", "fw_avg", "site"]
 CONVERT = {
@@ -164,17 +167,18 @@ def main():
     for station, fns in FILENAMES.items():
         if station not in maxts:
             LOG.info("%s has no prior db archive", station)
-            maxts[station] = datetime.datetime(1980, 1, 1).replace(
-                tzinfo=pytz.utc
-            )
+            maxts[station] = utc(1980, 1, 1)
         dfs = []
         for fn in fns:
-            myfn = "%s%s" % (DIR, fn)
+            myfn = os.path.join(BASEDIR, str(datetime.date.today().year), fn)
             if not os.path.isfile(myfn):
                 LOG.info("missing file: %s", myfn)
                 continue
             df = pd.read_csv(
-                myfn, skiprows=[0, 2, 3], index_col=0, na_values=["NAN"]
+                open(myfn, encoding="ISO-8859-1"),
+                skiprows=[0, 2, 3],
+                index_col=0,
+                na_values=["NAN"],
             )
             df.drop("RECORD", axis=1, inplace=True)
             if df.empty:
@@ -220,7 +224,9 @@ def main():
             pgconn.commit()
         icursor = ipgconn.cursor()
         for _i, row in df.iterrows():
-            iemob = Observation(station, "NSTLFLUX", row["valid"])
+            iemob = Observation(
+                station, "NSTLFLUX", row["valid"].to_pydatetime()
+            )
             if "t_hmp_avg" in df.columns:
                 iemob.data["tmpf"] = temperature(row["t_hmp_avg"], "C").value(
                     "F"
@@ -240,9 +246,7 @@ def main():
             iemob.save(icursor)
         icursor.close()
         ipgconn.commit()
-        # print("Processed %s rows for %s" % (processed, station))
-    # if processed == 0:
-    #    print("NLAE flux_ingest found no new records")
+        LOG.debug("Processed %s rows for %s", processed, station)
 
 
 if __name__ == "__main__":
