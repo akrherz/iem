@@ -213,6 +213,7 @@ def get_data(fdict):
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
+    minyear = ctx["df"]["utc_valid"].dt.year.min()
     ctx["xlabel"] = VDICT[ctx["x"]]
     ctx["ylabel"] = ADICT[ctx["agg"]] + " " + VDICT[ctx["y"]]
     ctx["title"] = ("%s [%s]") % (ctx["_nt"].sts[station]["name"], station)
@@ -221,7 +222,7 @@ def get_data(fdict):
         VDICT[y],
         VDICT[x],
         month.upper(),
-        min([ab.year, basets.year]),
+        minyear,
         datetime.datetime.now().year,
     )
     return ctx
