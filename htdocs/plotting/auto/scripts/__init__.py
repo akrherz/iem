@@ -44,6 +44,10 @@ daily_opts = [
     {"id": "21", "label": "Change in NCDC 81 Daily Climatology over X Days"},
     {"id": "174", "label": "Compare Daily High/Low Temps for ASOS Stations"},
     {
+        "id": "215",
+        "label": "Compare Daily High/Low Temps Distributions over Two Periods of Years",
+    },
+    {
         "id": "91",
         "label": "Consecutative Day Statistics of High+Low Temps / Precip",
     },
