@@ -11,6 +11,8 @@ if (isset($_GET["station"]) && isset($_GET["network"]))
   	header("Location: $uri");
   	exit();
 }
+ require_once "../../include/mlib.php";
+ force_https();
  require_once "../../config/settings.inc.php";
  define("IEM_APPID", 5);
  require_once "../../include/database.inc.php";

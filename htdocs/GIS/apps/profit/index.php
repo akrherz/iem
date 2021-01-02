@@ -2,7 +2,8 @@
 require_once "../../../../config/settings.inc.php";
 
 require_once "../../../../include/myview.php";
-
+require_once "../../../../include/mlib.php";
+force_https();
 $OL = "6.2.1";
 $t = new MyView();
 $t->title = "Profitability Map";

@@ -4,6 +4,8 @@
  */
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 119);
+require_once "../../include/mlib.php";
+force_https();
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "SHEF Physical Code Map";

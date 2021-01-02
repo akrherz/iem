@@ -1,5 +1,7 @@
 <?php
 require_once "../../config/settings.inc.php";
+require_once "../../include/mlib.php";
+force_https();
 require_once "../../include/forms.php";
 require_once "../../include/myview.php";
 $OL = "6.2.1";

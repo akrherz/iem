@@ -2,6 +2,8 @@
 $OL = "6.2.1";
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 86);
+require_once "../../include/mlib.php";
+force_https();
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "7 AM 24 Hour Precipitation Analysis";

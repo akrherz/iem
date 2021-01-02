@@ -5,6 +5,8 @@
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 76);
 require_once "../../include/myview.php";
+require_once "../../include/mlib.php";
+force_https();
 $t = new MyView();
 $t->title = "Map of Daily NWS CLImage reports";
 $t->thispage = "climate-today";
