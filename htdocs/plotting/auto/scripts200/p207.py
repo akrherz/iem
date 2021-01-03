@@ -171,9 +171,9 @@ def load_data(ctx, basets, endts):
         index_col=None,
         geom_col="geo",
     )
-    df[USEME] = False
+    df[USEME] = True
     df["nwsli"] = df.index.values
-    df["plotme"] = False
+    df["plotme"] = True
     df["source"] = "LSR"
     if ctx["coop"] == "no":
         return df
@@ -200,8 +200,8 @@ def load_data(ctx, basets, endts):
         index_col=None,
         geom_col="geo",
     )
-    df2[USEME] = False
-    df2["plotme"] = False
+    df2[USEME] = True
+    df2["plotme"] = True
     df2["source"] = "COOP"
     return pd.concat([df, df2], ignore_index=True, sort=False)
 
@@ -265,7 +265,7 @@ def add_zeros(df, ctx):
                         "val": 0,
                         "nwsli": "Z%s" % (len(newrows) + 1,),
                         USEME: True,
-                        "plotme": False,
+                        "plotme": True,
                         "state": "Z",
                     }
                 )
@@ -292,10 +292,8 @@ def add_zeros(df, ctx):
                 continue
             # For this grid cell, remove any values < 80% of the max
             maxval = df.at[df2.index[0], "val"]
-            if maxval == 0:
-                continue
-            df.loc[df2[df2["val"] >= (maxval * 0.2)].index, USEME] = True
-            df.loc[df2[df2["val"] >= (maxval * 0.2)].index, "plotme"] = True
+            df.loc[df2[df2["val"] < (maxval * 0.8)].index, USEME] = False
+            df.loc[df2[df2["val"] < (maxval * 0.8)].index, "plotme"] = False
     return df
 
 
