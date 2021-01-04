@@ -1,5 +1,4 @@
 """Mine ACIS for threaded stations."""
-import sys
 
 import requests
 from pyiem.util import get_dbconn, logger
@@ -42,14 +41,18 @@ def workflow(state):
             LOG.info("%s is already known!", iemid)
             continue
         to_track = threadid[:-3]
+        if state in ["AK", "HI"]:
+            to_track = "P" + to_track
+        if state == "PR":
+            to_track = "T" + to_track
         to_network = "%s_%s" % (
             state,
             "COOP" if len(to_track) == 5 else "ASOS",
         )
         LOG.info("%s will be %s and tracking %s", threadid, iemid, to_track)
         if to_track not in nt[to_network].sts:
-            LOG.info("ABORT!")
-            sys.exit()
+            LOG.info("Skipping, as %s not in %s", to_track, to_network)
+            continue
         # Create station entry, we use the tracking station location for now
         geom = "SRID=4326;POINT(%s %s)" % (
             nt[to_network].sts[to_track]["lon"],
@@ -92,8 +95,6 @@ def main():
     states = list(ncei_state_codes.keys())
     states.sort()
     for statecode in states:
-        if statecode in ["AK", "HI", "DC"]:
-            continue
         workflow(statecode)
 
 

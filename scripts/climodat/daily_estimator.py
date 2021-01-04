@@ -222,16 +222,15 @@ def main(argv):
     ds = iemre.get_grids(date)
     pgconn = get_dbconn("coop")
     for state in state_names:
-        if state in ["AK", "HI", "DC"]:
-            continue
         table = f"alldata_{state}"
         cursor = pgconn.cursor()
         df = load_table(state, date)
         df = merge_network_obs(df, f"{state}_COOP", date)
         df = merge_network_obs(df, f"{state}_ASOS", date)
-        estimate_hilo(df, ds)
-        estimate_precip(df, ds)
-        estimate_snow(df, ds)
+        if state not in ["AK", "HI", "PR"]:
+            estimate_hilo(df, ds)
+            estimate_precip(df, ds)
+            estimate_snow(df, ds)
         if not commit(cursor, table, df, date):
             return
         cursor.close()

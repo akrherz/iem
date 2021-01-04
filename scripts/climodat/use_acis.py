@@ -46,12 +46,8 @@ def main(station, acis_station):
         if all([a is None for a in (high, low, precip, snow, snowd)]):
             continue
         cursor.execute(
-            """
-            UPDATE """
-            + table
-            + """ SET high = %s, low = %s, precip = %s,
-            snow = %s, snowd = %s WHERE station = %s and day = %s
-        """,
+            f"UPDATE {table} SET high = %s, low = %s, precip = %s, "
+            "snow = %s, snowd = %s WHERE station = %s and day = %s",
             (high, low, precip, snow, snowd, station, date),
         )
         if cursor.rowcount == 0:
