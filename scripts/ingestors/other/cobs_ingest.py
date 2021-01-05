@@ -1,6 +1,6 @@
 """Ingest the COBS data file
 
-  Run from RUN_20_AFTER.sh
+No longer is relayed via NLAE.
 """
 import datetime
 import os

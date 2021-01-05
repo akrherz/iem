@@ -133,7 +133,7 @@ def estimate_hilo(df, ds):
 
 def nonan(val, precision):
     """Can't have NaN."""
-    if np.isnan(val):
+    if val is None or np.isnan(val):
         return None
     return np.round(val, precision)
 
@@ -227,7 +227,8 @@ def main(argv):
         df = load_table(state, date)
         df = merge_network_obs(df, f"{state}_COOP", date)
         df = merge_network_obs(df, f"{state}_ASOS", date)
-        if state not in ["AK", "HI", "PR"]:
+        # IEMRE does not exist for these states, so we skip this
+        if state not in ["AK", "HI", "PR", "VI"]:
             estimate_hilo(df, ds)
             estimate_precip(df, ds)
             estimate_snow(df, ds)
