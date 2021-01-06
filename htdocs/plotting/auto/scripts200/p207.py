@@ -39,9 +39,10 @@ PDICT4 = {
     "plot": "Inject zeros and show on plot as red 'Z'",
 }
 PDICT5 = {
-    "yes": "Include any NWS COOP Reports.",
+    "yes": "Include any NWS COOP Reports, if possible.",
     "no": "Do not include any COOP reports.",
 }
+PDICT6 = {"snow": "Snowfall", "ice": "Freezing Rain / Ice Storm (LSRs Only)"}
 
 
 def get_description():
@@ -51,8 +52,9 @@ def get_description():
     desc["cache"] = 60
     desc[
         "description"
-    ] = """Generates an analysis map of snowfall data based on NWS Local
-    Storm Reports.  This autoplot presents a number of tunables including:
+    ] = """Generates an analysis map of snowfall or freezing rain data
+    based on NWS Local Storm Reports and NWS COOP Data.  This autoplot
+    presents a number of tunables including:
     <ul>
        <li>The window of hours to look before the specified valid time to
        find Local Storm Reports (LSR).</li>
@@ -81,6 +83,13 @@ def get_description():
     )
     now = datetime.datetime.now()
     desc["arguments"] = [
+        dict(
+            type="select",
+            name="v",
+            default="snow",
+            label="Which variable to analyze?",
+            options=PDICT6,
+        ),
         dict(
             type="select",
             name="t",
@@ -161,13 +170,13 @@ def load_data(ctx, basets, endts):
         """SELECT state, wfo,
         max(magnitude::real) as val, ST_x(geom) as lon, ST_y(geom) as lat,
         ST_Transform(geom, 2163) as geo
-        from lsrs WHERE type in ('S') and magnitude >= 0 and
+        from lsrs WHERE type = %s and magnitude >= 0 and
         valid >= %s and valid <= %s
         GROUP by state, wfo, lon, lat, geo
         ORDER by val DESC
         """,
         pgconn,
-        params=(basets, endts),
+        params=("S" if ctx["v"] == "snow" else "5", basets, endts),
         index_col=None,
         geom_col="geo",
     )
@@ -175,7 +184,7 @@ def load_data(ctx, basets, endts):
     df["nwsli"] = df.index.values
     df["plotme"] = True
     df["source"] = "LSR"
-    if ctx["coop"] == "no":
+    if ctx["coop"] == "no" or ctx["v"] == "ice":
         return df
     # More work to do
     pgconn = get_dbconn("iem")
@@ -355,20 +364,26 @@ def plotter(fdict):
     lons, lats, vals = do_analysis(df2, ctx)
 
     rng = [0.01, 1, 2, 3, 4, 6, 8, 12, 18, 24, 30, 36]
+    if ctx["v"] == "ice":
+        rng = [0.01, 0.02, 0.05, 0.07, 0.1, 0.2, 0.3, 0.4, 0.5, 0.75, 1]
     cmap = nwssnow()
     if ctx["t"] == "cwa":
         sector = "cwa"
     else:
         sector = "state" if len(ctx["csector"]) == 2 else ctx["csector"]
 
+    title = "NWS Local Storm Report%s Snowfall Total Analysis" % (
+        " & COOP" if ctx["coop"] == "yes" else "",
+    )
+    if ctx["v"] == "ice":
+        title = "NWS Local Storm Reports of Freezing Rain + Ice"
     mp = MapPlot(
         sector=sector,
         twitter=True,
         state=ctx["csector"],
         cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),
         axisbg="white",
-        title=("NWS Local Storm Report%s Snowfall Total Analysis")
-        % (" & COOP" if ctx["coop"] == "yes" else "",),
+        title=title,
         subtitle=(
             "%.0f reports over past %.0f hours till %s, "
             "grid size: %.0fkm, Rbf: %s"
