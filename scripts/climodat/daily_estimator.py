@@ -45,8 +45,11 @@ def load_table(state, date):
                 .split("|")[0],
             }
         )
+    if not rows:
+        LOG.info("No data found for state: %s", state)
+        return None
     df = pd.DataFrame(rows)
-    df.set_index("station", inplace=True)
+    df = df.set_index("station")
     for key in ["high", "low", "precip", "snow", "snowd"]:
         df[key] = None
     for key in ["precip_estimated", "temp_estimated"]:
@@ -225,6 +228,8 @@ def main(argv):
         table = f"alldata_{state}"
         cursor = pgconn.cursor()
         df = load_table(state, date)
+        if df is None:
+            continue
         df = merge_network_obs(df, f"{state}_COOP", date)
         df = merge_network_obs(df, f"{state}_ASOS", date)
         # IEMRE does not exist for these states, so we skip this

@@ -81,11 +81,9 @@ def run(ts):
     total = (total * 3600.0) / 1000000.0
 
     cursor.execute(
-        """
-        SELECT station, ST_x(geom), ST_y(geom), temp24_hour from
-        alldata a JOIN stations t on
-        (a.station = t.id) where day = %s and network ~* 'CLIMATE'
-        """,
+        "SELECT station, ST_x(geom), ST_y(geom), temp24_hour from "
+        "alldata a JOIN stations t on (a.station = t.id) where day = %s "
+        "and network ~* 'CLIMATE' ",
         (ts.strftime("%Y-%m-%d"),),
     )
     for row in cursor:
@@ -93,7 +91,11 @@ def run(ts):
         i = np.digitize([x], xaxis)[0]
         j = np.digitize([y], yaxis)[0]
 
-        rad_mj = float(total[j, i])
+        try:
+            rad_mj = float(total[j, i])
+        except IndexError:
+            LOG.debug("station %s outside of bounds j:%s i:%s", row[0], j, i)
+            continue
 
         if rad_mj < 0:
             LOG.info("WHOA! Negative RAD: %.2f, station: %s", rad_mj, row[0])
