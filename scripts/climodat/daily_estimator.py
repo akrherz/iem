@@ -136,7 +136,7 @@ def estimate_hilo(df, ds):
 
 def nonan(val, precision):
     """Can't have NaN."""
-    if val is None or np.isnan(val):
+    if pd.isnull(val):
         return None
     return np.round(val, precision)
 
@@ -155,7 +155,7 @@ def commit(cursor, table, df, ts):
             row["snow"],
             row["snowd"],
         )
-        if any(np.isnan(x) for x in [row["high"], row["low"], row["precip"]]):
+        if any(pd.isnull(x) for x in [row["high"], row["low"], row["precip"]]):
             if allowed_failures < 0:
                 LOG.warning("aborting commit due too many failures")
                 return False

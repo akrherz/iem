@@ -4,6 +4,8 @@ DOW=$(date +%u)
 
 cd isuag
 bash run_plots.sh
+
+cd ../isusm
 if [ $DD -eq "07" ]
 	then
 		python nmp_monthly_email.py
