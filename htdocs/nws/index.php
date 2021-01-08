@@ -149,7 +149,8 @@ events.</li>
 <ul>
  <li><a href="vtec_obs.php">ASOS/AWOS Obs during WFO WWA</a>
   <br />Prints out ASOS/AWOS observations during selected VTEC warning types.</li>
- <li><a href="/cow/">IEM Cow</a>
+ <li><a href="/nws/debug_latlon/">Debug / Create Simple Graphic</a> from LAT...LON text.</li>
+  <li><a href="/cow/">IEM Cow</a>
   <br />Interactive Storm Based Warning verification app</li>
 </ul>
 

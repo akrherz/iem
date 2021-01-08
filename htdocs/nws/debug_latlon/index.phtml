@@ -1,0 +1,40 @@
+<?php
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/myview.php";
+$t = new MyView();
+$t->title = "Debug + Create Simple Graphic from LAT...LON text";
+$t->thispage = "iem-nws";
+
+$imgurl = "/images/wait24trans.gif";
+$t->content = <<<EOF
+
+<ol class="breadcrumb">
+ <li><a href="/nws/">IEM NWS Homepage</a></li>
+ <li class="active">Debug / Create Simple Graphic from LAT...LON</li>
+</ol>
+
+<p>This page generates a simple diagnostic plot of a parsed polygon from a
+NWS Text Product.</p>
+
+<textarea id="thetext" cols="80" rows="5">
+LAT...LON 3310 11199 3329 11199 3328 11156 3304 11157
+</textarea>
+<br />
+Title: <input id="thetitle" type="text" maxlength="120 length="80" value="My Title">
+<br />
+<input id="thebutton" type="button" role="button" value="Create Graphic Now, Please!">
+
+<h4>Image will appear here:</h4>
+<p><img id="theimage" src="{$imgurl}" class="img img-responsive"></p>
+
+<h4>GeoJSON representation here:</h4>
+<pre id="thegeojson">
+
+</pre>
+
+EOF;
+$t->jsextra = <<<EOM
+<script type="text/javascript" src="index.js"></script>
+EOM;
+$t->render('single.phtml');
+?>
