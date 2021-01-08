@@ -65,7 +65,8 @@ def run(ctx, start_response):
     sql = f"""
         SELECT to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as utctime,
         case when is_urgent then 'T' else 'F' end,
-        substr(aircraft_type, 0, 40), substr(report, 0, 255),
+        substr(aircraft_type, 0, 40),
+        substr(replace(report, ',', ' '), 0, 255),
         ST_y(geom::geometry) as lat, ST_x(geom::geometry) as lon
         from pireps WHERE {spatialsql}
         valid >= '%s' and valid < '%s' ORDER by valid ASC
@@ -109,6 +110,8 @@ def run(ctx, start_response):
         shp.field("LAT", "F", 7, 4)
         shp.field("LON", "F", 9, 4)
         for row in cursor:
+            if row[-1] is None:
+                continue
             shp.point(row[-1], row[-2])
             shp.record(*row)
 

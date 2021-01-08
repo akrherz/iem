@@ -121,6 +121,10 @@ Field 5: Type=N/Double, Title='LON', Longitude
 <h4>Archive notes:</h4>
 <ul>
  <li>Archive starts 20 Jan 2015</li>
+ <li><strong>8 January 2020</strong>: Previously, the ingest process would not
+ consider PIPEPs with unknown / bad location details.  These are now included
+ in the CSV option with a "None" column for the latitude and longitude.  On a
+ typical day, less than five PIREPs have unknown location details.</li>
  </ul>
 EOF;
 $t->content = $content;
