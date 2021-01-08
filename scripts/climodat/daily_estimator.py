@@ -19,6 +19,7 @@ from pyiem.util import get_dbconn, logger
 from pyiem.reference import TRACE_VALUE, state_names
 
 LOG = logger()
+NON_CONUS = ["AK", "HI", "PR", "VI", "GU"]
 
 
 def load_table(state, date):
@@ -38,6 +39,7 @@ def load_table(state, date):
                 "station": sid,
                 "gridi": i,
                 "gridj": j,
+                "state": nt.sts[sid]["state"],
                 "temp24_hour": nt.sts[sid]["temp24_hour"],
                 "precip24_hour": nt.sts[sid]["precip24_hour"],
                 "tracks": nt.sts[sid]["attributes"]
@@ -159,10 +161,10 @@ def commit(cursor, table, df, ts):
             if allowed_failures < 0:
                 LOG.warning("aborting commit due too many failures")
                 return False
-            LOG.info(
-                "daily_estimator cowardly refusing %s %s\n%s", sid, ts, row
-            )
-            allowed_failures -= 1
+            # These sites could have false positives due to timezone issues
+            if row["state"] not in NON_CONUS:
+                LOG.info("cowardly refusing %s %s\n%s", sid, ts, row)
+                allowed_failures -= 1
             continue
 
         def do_update(_sid, _row):
@@ -233,7 +235,7 @@ def main(argv):
         df = merge_network_obs(df, f"{state}_COOP", date)
         df = merge_network_obs(df, f"{state}_ASOS", date)
         # IEMRE does not exist for these states, so we skip this
-        if state not in ["AK", "HI", "PR", "VI"]:
+        if state not in NON_CONUS:
             estimate_hilo(df, ds)
             estimate_precip(df, ds)
             estimate_snow(df, ds)

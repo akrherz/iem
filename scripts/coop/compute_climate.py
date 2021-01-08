@@ -36,8 +36,6 @@ def daily_averages(table):
     Compute and Save the simple daily averages
     """
     for st in state_names:
-        if st in ["DC", "AK", "HI"]:
-            continue
         nt = NetworkTable("%sCLIMATE" % (st,))
         LOG.info("Computing Daily Averages for state: %s", st)
         ccursor = COOP.cursor()
