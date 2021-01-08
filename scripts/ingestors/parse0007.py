@@ -17,9 +17,7 @@ def main():
 
     now = datetime.datetime.now()
 
-    fn = ("/mesonet/ARCHIVE/data/%s/text/ot/ot0007.dat" "") % (
-        now.strftime("%Y/%m/%d"),
-    )
+    fn = now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/text/ot/ot0007.dat")
 
     if not os.path.isfile(fn):
         sys.exit(0)

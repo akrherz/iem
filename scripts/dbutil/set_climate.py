@@ -21,20 +21,14 @@ def workflow(col):
         st = row[2]
         iemid = row[3]
         network = row[4]
-        # Don't attempt to assign a climate_site to sites outside of mainland
+        # Don't attempt to assign a climate_site for places we have no data
         if col == "climate_site" and st in [
-            "PR",
-            "DC",
-            "GU",
             "PU",
             "P1",
             "P2",
             "P3",
             "P4",
             "P5",
-            "VI",
-            "HI",
-            "AK",
         ]:
             continue
         # Find the closest site
@@ -59,9 +53,7 @@ def workflow(col):
         if row2 is None:
             print("Could not find %s site for: %s" % (col, sid))
         else:
-            sql = """
-                UPDATE stations SET %s = '%s' WHERE iemid = %s
-            """ % (
+            sql = "UPDATE stations SET %s = '%s' WHERE iemid = %s" % (
                 col,
                 row2[0],
                 iemid,

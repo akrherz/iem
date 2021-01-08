@@ -49,9 +49,8 @@ def process(tmpfn):
         mints = df2["cst"].min()
         # Delete out old data
         cursor.execute(
-            """DELETE from hpd_alldata where station = '%s'
-        and valid >= '%s-06' and valid <= '%s-06'
-        """
+            "DELETE from hpd_alldata where station = '%s' and "
+            "valid >= '%s-06' and valid <= '%s-06'"
             % (
                 sid,
                 mints.strftime("%Y-%m-%d %H:%M:%S"),
@@ -82,12 +81,9 @@ def process(tmpfn):
             counter = float(row["counter"])
             tbl = "hpd_%s" % (row["cst"] + datetime.timedelta(hours=6)).year
             cursor.execute(
-                """INSERT into """
-                + tbl
-                + """
-            (station, valid, counter, tmpc, battery, calc_precip)
-            VALUES ('%s', '%s-06', %s, %s, %s, %s)
-            """
+                f"INSERT into {tbl} (station, valid, counter, tmpc, "
+                "battery, calc_precip) VALUES "
+                "('%s', '%s-06', %s, %s, %s, %s)"
                 % (
                     sid,
                     row["cst"].strftime("%Y-%m-%d %H:%M:%S"),
@@ -105,7 +101,7 @@ def process(tmpfn):
 def dowork(valid):
     """Process a month's worth of data"""
     uri = valid.strftime(
-        ("https://www1.ncdc.noaa.gov/pub/data/hpd/data/" "hpd_%Y%m.csv")
+        "https://www1.ncdc.noaa.gov/pub/data/hpd/data/hpd_%Y%m.csv"
     )
     tmpfn = valid.strftime("/mesonet/tmp/hpd_%Y%m.csv")
     if not os.path.isfile(tmpfn):

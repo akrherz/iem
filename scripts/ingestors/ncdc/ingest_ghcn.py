@@ -44,7 +44,7 @@ import requests
 import pandas as pd
 from pandas.io.sql import read_sql
 import numpy as np
-from pyiem.reference import TRACE_VALUE
+from pyiem.reference import TRACE_VALUE, state_names
 from pyiem.datatypes import temperature, distance
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, exponential_backoff, logger
@@ -55,63 +55,6 @@ PGCONN = get_dbconn("coop")
 BASEDIR = "/mesonet/tmp"
 BASE = datetime.date(1850, 1, 1)
 TODAY = datetime.date.today()
-
-STCONV = {
-    "WA": "45",
-    "DE": "07",
-    "DC": "18",
-    "WI": "47",
-    "WV": "46",
-    "HI": "51",
-    "FL": "08",
-    "WY": "48",
-    "NH": "27",
-    "NJ": "28",
-    "NM": "29",
-    "TX": "41",
-    "LA": "16",
-    "AK": "50",
-    "NC": "31",
-    "ND": "32",
-    "NE": "25",
-    "TN": "40",
-    "NY": "30",
-    "PA": "36",
-    "PI": "91",
-    "RI": "37",
-    "NV": "26",
-    "VA": "44",
-    "CO": "05",
-    "CA": "04",
-    "AL": "01",
-    "AR": "03",
-    "VT": "43",
-    "IL": "11",
-    "GA": "09",
-    "IN": "12",
-    "IA": "13",
-    "OK": "34",
-    "AZ": "02",
-    "ID": "10",
-    "CT": "06",
-    "ME": "17",
-    "MD": "18",
-    "MA": "19",
-    "OH": "33",
-    "UT": "42",
-    "MO": "23",
-    "MN": "21",
-    "MI": "20",
-    "KS": "14",
-    "MT": "24",
-    "MS": "22",
-    "SC": "38",
-    "KY": "15",
-    "OR": "35",
-    "SD": "39",
-}
-
-
 DATARE = re.compile(
     r"""
 (?P<id>[A-Z0-9]{11})
@@ -198,7 +141,7 @@ def get_obs(metadata):
     # The GHCN station ID is based on what the database has for its 11 char
     fn = get_file(metadata["ncdc81"])
     if fn is None:
-        return
+        return None
     rows = []
     for line in open(fn):
         m = DATARE.match(line)
@@ -353,7 +296,7 @@ def main(argv):
     """ go main go """
     if len(argv) == 1:
         # Run for our linear random state
-        states = list(STCONV.keys())
+        states = list(state_names.keys())
         states.sort()
         doy = int(datetime.date.today().strftime("%j"))
         station = states[doy % len(states)]
@@ -368,7 +311,7 @@ def main(argv):
                 continue
             process(sid, nt.sts[sid], allow_inserts)
     elif station == "ALL":
-        for state in STCONV:
+        for state in state_names:
             nt = NetworkTable("%sCLIMATE" % (state,))
             for sid in nt.sts:
                 if sid[2:] == "0000" or sid[2] == "C":

@@ -69,23 +69,25 @@ def main(argv):
         if not useme:
             continue
         print("Candidate %s" % (sid,))
-        sql = """
+        output.write(
+            """
         INSERT into stations(id, name, network, country, state,
         plot_name, elevation, online, metasite, geom) VALUES
         ('%s%s', '%s', '%sCLIMATE',
          'US', '%s', '%s', %s, 't', 't', 'SRID=4326;POINT(%s %s)');
-        """ % (
-            state,
-            sid[-4:],
-            row["name"],
-            state,
-            state,
-            row["name"],
-            row["elev"],
-            row["lon"],
-            row["lat"],
+        """
+            % (
+                state,
+                sid[-4:],
+                row["name"],
+                state,
+                state,
+                row["name"],
+                row["elev"],
+                row["lon"],
+                row["lat"],
+            )
         )
-        output.write(sql)
     output.close()
 
 

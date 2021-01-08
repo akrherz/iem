@@ -55,7 +55,7 @@ def main(argv):
                 continue
             stid = station if len(station) == 4 else "K" + station
             eyear = min([till_year, option[3].year])
-            cmd = ("python ingest_isd.py %s %s %s %s %s") % (
+            cmd = "python ingest_isd.py %s %s %s %s %s" % (
                 option[0],
                 option[1],
                 stid,

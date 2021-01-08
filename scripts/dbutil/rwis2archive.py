@@ -31,12 +31,12 @@ def main(argv):
     # Always delete stuff 3 or more days old from iemaccess
     icursor = iemdb.cursor()
     icursor.execute(
-        """DELETE from rwis_traffic_data_log WHERE
-      valid < ('TODAY'::date - '3 days'::interval)"""
+        "DELETE from rwis_traffic_data_log WHERE "
+        "valid < ('TODAY'::date - '3 days'::interval)"
     )
     icursor.execute(
-        """DELETE from rwis_soil_data_log WHERE
-      valid < ('TODAY'::date - '3 days'::interval)"""
+        "DELETE from rwis_soil_data_log WHERE "
+        "valid < ('TODAY'::date - '3 days'::interval)"
     )
     icursor.close()
 

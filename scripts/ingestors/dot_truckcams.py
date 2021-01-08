@@ -93,7 +93,7 @@ def workflow():
         tmp = tempfile.NamedTemporaryFile(delete=False)
         tmp.write(req.content)
         tmp.close()
-        cmd = ("pqinsert -p 'plot ac %s %s %s jpg' %s") % (
+        cmd = "pqinsert -p 'plot ac %s %s %s jpg' %s" % (
             valid.strftime("%Y%m%d%H%M"),
             get_current_fn(label),
             get_archive_fn(label, valid),
@@ -107,10 +107,8 @@ def workflow():
         geom = "SRID=4326;POINT(%s %s)" % (pt[0], pt[1])
         # This table has an insert trigger that logs the entry as well
         cursor.execute(
-            """
-            INSERT into idot_dashcam_current(label, valid, idnum,
-            geom) VALUES (%s, %s, %s, %s)
-        """,
+            "INSERT into idot_dashcam_current(label, valid, idnum, "
+            "geom) VALUES (%s, %s, %s, %s)",
             (label, valid, idnum, geom),
         )
 

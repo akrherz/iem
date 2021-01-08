@@ -66,7 +66,7 @@ def main():
 
     msg = MIMEText(report)
     msg["Subject"] = "[IEM] Synoptic Contract Deliverables Report"
-    msg["From"] = "IEM Automation <mesonet@mesonet.agron.iastate.edu>"
+    msg["From"] = "IEM Automation <akrherz@iastate.edu>"
     msg["To"] = ", ".join(emails)
     msg.add_header("reply-to", "akrherz@iastate.edu")
 

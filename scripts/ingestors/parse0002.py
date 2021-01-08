@@ -17,7 +17,7 @@ def main():
     fn = valid.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/text/ot/ot0002.dat")
 
     if not os.path.isfile(fn):
-        sys.exit(0)
+        sys.exit()
 
     lines = open(fn, "r").readlines()
     lastline = lines[-1]

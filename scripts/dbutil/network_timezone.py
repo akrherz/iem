@@ -16,10 +16,9 @@ def main():
         netid = row[0]
 
         mcursor2.execute(
-            """SELECT tzname, count(*) from stations
-        where network = '%s' and tzname is not null
-        GROUP by tzname ORDER by count DESC"""
-            % (netid,)
+            "SELECT tzname, count(*) from stations where network = %s and "
+            "tzname is not null GROUP by tzname ORDER by count DESC",
+            (netid,),
         )
         row2 = mcursor2.fetchone()
         if row2 is None or row2[0] == "uninhabited":

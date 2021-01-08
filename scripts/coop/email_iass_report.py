@@ -101,7 +101,7 @@ STIDS = [
 
 def compute_weekly(fp, sts, ets):
     """ Compute the weekly stats we need """
-    pgconn = get_dbconn("iem", user="nobody")
+    pgconn = get_dbconn("iem")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     # Max daily high
@@ -204,7 +204,7 @@ def compute_weekly(fp, sts, ets):
 
 def compute_monthly(fp, year, month):
     """ Compute the monthly data we need to compute """
-    pgconn = get_dbconn("iem", user="nobody")
+    pgconn = get_dbconn("iem")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     # Max daily high
@@ -339,7 +339,7 @@ def email_report(report, subject):
     """ Actually do the emailing stuff """
     msg = MIMEMultipart()
     msg["Subject"] = subject
-    msg["From"] = "mesonet@mesonet.agron.iastate.edu"
+    msg["From"] = "akrherz@iastate.edu"
     msg["Cc"] = "akrherz@iastate.edu"
     msg["To"] = "akrherz@localhost"
     msg.preamble = "Report"

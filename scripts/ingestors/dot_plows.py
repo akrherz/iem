@@ -31,7 +31,7 @@ def workflow():
     cursor = postgis.cursor()
 
     current = {}
-    cursor.execute("""SELECT label, valid from idot_snowplow_current""")
+    cursor.execute("SELECT label, valid from idot_snowplow_current")
     for row in cursor:
         current[row[0]] = row[1]
 
@@ -40,7 +40,7 @@ def workflow():
         return
     if req.status_code != 200:
         LOG.info(
-            ("dot_plows got non-200 status_code: %s\n" "Content: %s"),
+            "dot_plows got non-200 status_code: %s\nContent: %s",
             req.status_code,
             req.content,
         )
@@ -66,9 +66,8 @@ def workflow():
             # allows subsequent data insert to work
             current[label] = valid - datetime.timedelta(minutes=1)
             cursor.execute(
-                """
-                INSERT into idot_snowplow_current(label, valid) VALUES (%s,%s)
-            """,
+                "INSERT into idot_snowplow_current (label, valid) "
+                "VALUES (%s, %s)",
                 (label, valid),
             )
         LOG.debug(
@@ -130,10 +129,8 @@ def workflow():
         )
         # Archive it too
         cursor.execute(
-            """
-            INSERT into idot_snowplow_"""
-            + str(valid.year)
-            + """
+            f"""
+            INSERT into idot_snowplow_{valid.year}
             (label, valid, heading, velocity, roadtemp, airtemp, solidmaterial,
             liquidmaterial, prewetmaterial, solidsetrate, liquidsetrate,
             prewetsetrate, leftwingplowstate, rightwingplowstate,
