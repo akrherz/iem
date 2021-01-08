@@ -51,13 +51,15 @@ longer periods of data.</p>
     </select>
     </td>
     <td rowspan="3">
-        <input type="checkbox" name="filter" value="1">
+        <input type="checkbox" name="filter" value="1" id="filter">
         <label for="filter">Enable Spatial Filter</label><br />
+        <div id="spatialfilter" style="display: none;">
         Filter reports to a Latitude + Longitude circle of
         <input type="text" name="degrees" size="5" value="3.0">
         degrees to point
         <input type="text" name="lon" size="10" value="-91.99"> East and
         <input type="text" name="lon" size="10" value="41.99"> North
+        </div>
     </td>
 </tr>
 
@@ -122,5 +124,13 @@ Field 5: Type=N/Double, Title='LON', Longitude
  </ul>
 EOF;
 $t->content = $content;
+$t->jsextra = <<<EOM
+<script>
+$("input[name='filter']").click(function(){
+    var display = (this.checked) ? "block": "none";
+    $("#spatialfilter").css("display", display);
+});
+</script>
+EOM;
 $t->render('single.phtml');
 ?>
