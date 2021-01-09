@@ -37,14 +37,18 @@ def daily_averages(table):
     """
     for st in state_names:
         nt = NetworkTable("%sCLIMATE" % (st,))
+        if not nt.sts:
+            LOG.info("Skipping %s as it has no stations", st)
+            continue
         LOG.info("Computing Daily Averages for state: %s", st)
         ccursor = COOP.cursor()
         ccursor.execute(
             f"DELETE from {table} WHERE substr(station, 1, 2) = %s", (st,)
         )
         LOG.info("    removed %s rows from %s", ccursor.rowcount, table)
-        sql = """
-    INSERT into %s (station, valid, high, low,
+        ccursor.execute(
+            f"""
+    INSERT into {table} (station, valid, high, low,
         max_high, min_high,
         max_low, min_low,
         max_precip, precip,
@@ -70,18 +74,16 @@ def daily_averages(table):
     avg(cdd65(high,low)) as cdd65,
     max( high - low) as max_range, min(high - low) as min_range,
     avg(merra_srad) as srad
-    from alldata_%s WHERE day >= '%s' and day < '%s' and
+    from alldata_{st} WHERE day >= %s and day < %s and
     precip is not null and high is not null and low is not null
     and station in %s
-    GROUP by d, station)
-        """ % (
-            table,
-            st,
-            META[table]["sts"].strftime("%Y-%m-%d"),
-            META[table]["ets"].strftime("%Y-%m-%d"),
-            tuple(nt.sts.keys()),
+    GROUP by d, station)""",
+            (
+                META[table]["sts"].strftime("%Y-%m-%d"),
+                META[table]["ets"].strftime("%Y-%m-%d"),
+                tuple(nt.sts.keys()),
+            ),
         )
-        ccursor.execute(sql)
         LOG.info("    added %s rows to %s", ccursor.rowcount, table)
         ccursor.close()
         COOP.commit()
@@ -89,21 +91,19 @@ def daily_averages(table):
 
 def do_date(ccursor2, table, row, col, agg_col):
     """Process date"""
-    sql = """
-    SELECT year from alldata_%s where station = '%s' and %s = %s
-    and sday = '%s'
-    and day >= '%s' and day < '%s'
-    ORDER by year ASC
-    """ % (
-        row["station"][:2],
-        row["station"],
-        col,
-        row[agg_col],
-        row["valid"].strftime("%m%d"),
-        META[table]["sts"],
-        META[table]["ets"],
+    ccursor2.execute(
+        f"""
+        SELECT year from alldata_{row['station'][:2]} where station = %s and
+        {col} = {row[agg_col]} and sday = %s and day >= %s and day < %s
+        ORDER by year ASC
+    """,
+        (
+            row["station"],
+            row["valid"].strftime("%m%d"),
+            META[table]["sts"],
+            META[table]["ets"],
+        ),
     )
-    ccursor2.execute(sql)
     row2 = ccursor2.fetchone()
     if row2 is None:
         LOG.info("None %s %s %s", row, col, agg_col)
