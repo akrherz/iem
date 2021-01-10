@@ -307,14 +307,14 @@ def main(argv):
         # we have a state!
         nt = NetworkTable("%sCLIMATE" % (station,))
         for sid in nt.sts:
-            if sid[2:] == "0000" or sid[2] == "C":
+            if sid[2:] == "0000" or sid[2] in ["C", "T"]:
                 continue
             process(sid, nt.sts[sid], allow_inserts)
     elif station == "ALL":
         for state in state_names:
             nt = NetworkTable("%sCLIMATE" % (state,))
             for sid in nt.sts:
-                if sid[2:] == "0000" or sid[2] == "C":
+                if sid[2:] == "0000" or sid[2] in ["C", "T"]:
                     continue
                 process(sid, nt.sts[sid], allow_inserts)
     else:
