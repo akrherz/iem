@@ -6,6 +6,7 @@ from collections import OrderedDict
 import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
+from pyiem.exceptions import NoDataFound
 from pyiem.reference import TWITTER_RESOLUTION_INCH
 from pyiem.plot.use_agg import plt
 from pyiem.plot import fitbox
@@ -129,6 +130,8 @@ def plotter(fdict):
         params=(clstation, station),
         index_col="day",
     )
+    if obs.empty:
+        raise NoDataFound("No observations found for given station.")
     obs["threshold"] = threshold
 
     maxperiod = [0] * 367

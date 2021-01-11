@@ -14,10 +14,10 @@ from pyiem.datatypes import temperature, speed, pressure
 LOG = logger()
 BASEDIR = "/mnt/home/mesonet/ot/ot0005/incoming/Fluxdata"
 FILENAMES = {
-    "NSTL10": ["Flux10_AF.dat", "Anc10_AF.dat"],
-    "NSTL11": ["Flux11_AF.dat", "Anc11_AF.dat"],
-    "NSTL30FT": ["30ft.dat"],
-    "NSTLNSPR": ["NSP_Flux.dat"],
+    "NSTL10": ["Flux10_AF_15.dat", "Anc10_AF_15.dat"],
+    "NSTL11": ["Flux11_AF_15.dat", "Anc11_AF_15.dat"],
+    "NSTL30FT": ["30ft_15.dat"],
+    "NSTLNSPR": ["NSP_Flux_15.dat"],
 }
 
 DBCOLS = [
