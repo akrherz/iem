@@ -121,7 +121,7 @@ daily_opts = [
     {"id": "97", "label": "Map of Departures/Stats over One Period of Days"},
     {
         "id": "34",
-        "label": "Max Stretch of Days with High/Low Above/Below Threshold",
+        "label": "Max Stretch of Days with High/Low Above/Below Threshold or Climatology",
     },
     {
         "id": "26",

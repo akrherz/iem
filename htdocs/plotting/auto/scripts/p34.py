@@ -3,11 +3,15 @@ import datetime
 import calendar
 from collections import OrderedDict
 
-import psycopg2.extras
 import numpy as np
 import pandas as pd
+from pandas.io.sql import read_sql
+from pyiem.reference import TWITTER_RESOLUTION_INCH
 from pyiem.plot.use_agg import plt
+from pyiem.plot import fitbox
 from pyiem.util import get_autoplot_context, get_dbconn
+from matplotlib.font_manager import FontProperties
+
 
 PDICT = OrderedDict(
     [
@@ -17,6 +21,15 @@ PDICT = OrderedDict(
         ("low_under", "Low Temperature Below"),
     ]
 )
+TDICT = {
+    "threshold": "Compare against prescribed threshold",
+    "average": "Compare against climatological average",
+}
+ADICT = {
+    "por": "Period of Record",
+    "1951": "1951-present",
+    "ncei81": "NCEI 1981-2010 Climate Normals",
+}
 
 
 def get_description():
@@ -43,6 +56,20 @@ def get_description():
             options=PDICT,
         ),
         dict(
+            type="select",
+            options=TDICT,
+            default="threshold",
+            name="which",
+            label="Which baseline to compare against?",
+        ),
+        dict(
+            type="select",
+            options=ADICT,
+            default="por",
+            label="For Climatology Comparison, which climatolog to use?",
+            name="climo",
+        ),
+        dict(
             type="int",
             name="threshold",
             default=32,
@@ -65,7 +92,6 @@ def less_than(one, two):
 def plotter(fdict):
     """ Go """
     pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     threshold = ctx["threshold"]
@@ -73,30 +99,51 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2],)
 
-    cursor.execute(
-        """
-        SELECT extract(doy from day)::int as d, high, low, day
-        from """
-        + table
-        + """ where station = %s ORDER by day ASC
-    """,
-        (station,),
+    # Get averages
+    if ctx["climo"] == "por":
+        cltable = "climate"
+        clstation = station
+    elif ctx["climo"] == "1951":
+        cltable = "climate51"
+        clstation = station
+    elif ctx["climo"] == "ncei81":
+        cltable = "ncdc_climate81"
+        clstation = ctx["_nt"].sts[station]["ncdc81"]
+
+    obs = read_sql(
+        f"""
+        WITH myclimo as (
+            select to_char(valid, 'mmdd') as sday, high, low from
+            {cltable} WHERE station = %s
+        )
+        SELECT extract(doy from day)::int as d, o.high, o.low, o.day,
+        c.high as climo_high, c.low as climo_low
+        from {table} o JOIN myclimo c on (o.sday = c.sday)
+        where o.station = %s and o.high is not null ORDER by day ASC
+        """,
+        pgconn,
+        params=(clstation, station),
+        index_col="day",
     )
+    obs["threshold"] = threshold
 
     maxperiod = [0] * 367
     enddate = [""] * 367
     running = 0
     col = "high" if varname.find("high") == 0 else "low"
     myfunc = greater_than_or_equal if varname.find("over") > 0 else less_than
-    for row in cursor:
-        doy = row["d"]
-        if myfunc(row[col], threshold):
+    compcol = "threshold"
+    if ctx["which"] == "average":
+        compcol = f"climo_{col}"
+    for day, row in obs.iterrows():
+        doy = int(row["d"])
+        if myfunc(row[col], row[compcol]):
             running += 1
         else:
             running = 0
         if running > maxperiod[doy]:
             maxperiod[doy] = running
-            enddate[doy] = row["day"]
+            enddate[doy] = day
 
     sts = datetime.datetime(2012, 1, 1)
     xticks = []
@@ -112,20 +159,63 @@ def plotter(fdict):
             enddate=pd.Series(enddate[1:]),
         )
     )
-    (fig, ax) = plt.subplots(1, 1, sharex=True)
+    df["startdate"] = df["enddate"]
+    fig = plt.figure(figsize=TWITTER_RESOLUTION_INCH)
+    ax = fig.add_axes([0.1, 0.1, 0.55, 0.8])
     ax.bar(np.arange(1, 367), maxperiod[1:], fc="b", ec="b")
     ax.grid(True)
     ax.set_ylabel("Consecutive Days")
-    ax.set_title(
-        ("%s %s\nMaximum Straight Days with %s %s$^\circ$F")
-        % (station, ctx["_nt"].sts[station]["name"], PDICT[varname], threshold)
+    ttitle = r"%s$^\circ$F" % (threshold,)
+    if ctx["which"] == "average":
+        ttitle = f"Average ({ADICT[ctx['climo']]})"
+    title = "\n".join(
+        [
+            "%s %s (%s-%s)"
+            % (
+                station,
+                ctx["_nt"].sts[station]["name"],
+                obs.index.values[0].strftime("%Y %b %d"),
+                obs.index.values[-1].strftime("%Y %b %d"),
+            ),
+            "Maximum Straight Days with %s %s" % (PDICT[varname], ttitle),
+        ]
     )
+    fitbox(fig, title, 0.1, 0.92, 0.9, 0.97)
     ax.set_xticks(xticks)
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xlim(0, 366)
+
+    # List top 20 periods
+    ypos = 0.8
+    fig.text(
+        0.7, ypos, "Top 20 Distinct Periods\nRank: Days - Inclusive Period"
+    )
+    ypos -= 0.06
+    hits = []
+    monofont = FontProperties(family="monospace")
+    for idx, row in df.sort_values("maxperiod", ascending=False).iterrows():
+        d2 = row["enddate"]
+        d1 = d2 - datetime.timedelta(days=row["maxperiod"] - 1)
+        df.at[idx, "startdate"] = d1
+        if d1 in hits or len(hits) > 19:
+            continue
+        hits.append(d1)
+        fig.text(
+            0.7,
+            ypos,
+            "%s - %s -> %s"
+            % (
+                row["maxperiod"],
+                d1.strftime("%Y %b %d"),
+                d2.strftime("%Y %b %d"),
+            ),
+            fontproperties=monofont,
+        )
+        ypos -= 0.03
+    fig.text(0.7, ypos, "* Overlapping Periods Not Listed")
 
     return fig, df
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter(dict(station="MATBOS", network="MACLIMATE", var="high_under"))
