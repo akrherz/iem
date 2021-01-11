@@ -199,9 +199,7 @@ def plotter(fdict):
 
     # List top 20 periods
     ypos = 0.8
-    fig.text(
-        0.7, ypos, "Top 20 Distinct Periods\nRank: Days - Inclusive Period"
-    )
+    fig.text(0.7, ypos, "Top 20 Distinct Periods\nDays - Inclusive Period")
     ypos -= 0.06
     monofont = FontProperties(family="monospace")
     today = datetime.date.today()
