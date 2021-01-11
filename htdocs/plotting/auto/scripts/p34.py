@@ -135,15 +135,22 @@ def plotter(fdict):
     compcol = "threshold"
     if ctx["which"] == "average":
         compcol = f"climo_{col}"
+    streaks = []
+    running = 0
+    day = None
     for day, row in obs.iterrows():
         doy = int(row["d"])
         if myfunc(row[col], row[compcol]):
             running += 1
         else:
+            if running > 0:
+                streaks.append([running, day - datetime.timedelta(days=1)])
             running = 0
         if running > maxperiod[doy]:
             maxperiod[doy] = running
             enddate[doy] = day
+    if running > 0:
+        streaks.append([running, day - datetime.timedelta(days=1)])
 
     sts = datetime.datetime(2012, 1, 1)
     xticks = []
@@ -151,6 +158,7 @@ def plotter(fdict):
         ts = sts.replace(month=i)
         xticks.append(int(ts.strftime("%j")))
 
+    sdf = pd.DataFrame(streaks, columns=["period", "enddate"])
     df = pd.DataFrame(
         dict(
             mmdd=pd.date_range("1/1/2000", "12/31/2000").strftime("%m%d"),
@@ -191,24 +199,24 @@ def plotter(fdict):
         0.7, ypos, "Top 20 Distinct Periods\nRank: Days - Inclusive Period"
     )
     ypos -= 0.06
-    hits = []
     monofont = FontProperties(family="monospace")
-    for idx, row in df.sort_values("maxperiod", ascending=False).iterrows():
+    today = datetime.date.today()
+    for idx, row in (
+        sdf.sort_values("period", ascending=False).head(20).iterrows()
+    ):
         d2 = row["enddate"]
-        d1 = d2 - datetime.timedelta(days=row["maxperiod"] - 1)
+        d1 = d2 - datetime.timedelta(days=row["period"] - 1)
         df.at[idx, "startdate"] = d1
-        if d1 in hits or len(hits) > 19:
-            continue
-        hits.append(d1)
         fig.text(
             0.7,
             ypos,
             "%s - %s -> %s"
             % (
-                row["maxperiod"],
+                row["period"],
                 d1.strftime("%Y %b %d"),
                 d2.strftime("%Y %b %d"),
             ),
+            color="red" if d2.year == today.year else "k",
             fontproperties=monofont,
         )
         ypos -= 0.03
@@ -218,4 +226,12 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="MATBOS", network="MACLIMATE", var="high_under"))
+    plotter(
+        dict(
+            station="MATBOS",
+            network="MACLIMATE",
+            var="high_over",
+            which="average",
+            climo="ncei81",
+        )
+    )
