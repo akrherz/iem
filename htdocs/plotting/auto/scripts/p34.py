@@ -17,6 +17,8 @@ PDICT = OrderedDict(
     [
         ("high_over", "High Temperature At or Above"),
         ("high_under", "High Temperature Below"),
+        ("avgt_over", "Daily Average Temperature At or Above"),
+        ("avgt_under", "Daily Average Temperature Below"),
         ("low_over", "Low Temperature At or Above"),
         ("low_under", "Low Temperature Below"),
     ]
@@ -113,11 +115,13 @@ def plotter(fdict):
     obs = read_sql(
         f"""
         WITH myclimo as (
-            select to_char(valid, 'mmdd') as sday, high, low from
+            select to_char(valid, 'mmdd') as sday, high, low,
+            (high + low) / 2. as avgt from
             {cltable} WHERE station = %s
         )
         SELECT extract(doy from day)::int as d, o.high, o.low, o.day,
-        c.high as climo_high, c.low as climo_low
+        (o.high + o.low) / 2. as avgt,
+        c.high as climo_high, c.low as climo_low, c.avgt as climo_avgt
         from {table} o JOIN myclimo c on (o.sday = c.sday)
         where o.station = %s and o.high is not null ORDER by day ASC
         """,
@@ -130,7 +134,7 @@ def plotter(fdict):
     maxperiod = [0] * 367
     enddate = [""] * 367
     running = 0
-    col = "high" if varname.find("high") == 0 else "low"
+    col = varname.replace("_over", "").replace("_under", "")
     myfunc = greater_than_or_equal if varname.find("over") > 0 else less_than
     compcol = "threshold"
     if ctx["which"] == "average":
@@ -150,7 +154,7 @@ def plotter(fdict):
             maxperiod[doy] = running
             enddate[doy] = day
     if running > 0:
-        streaks.append([running, day - datetime.timedelta(days=1)])
+        streaks.append([running, day])
 
     sts = datetime.datetime(2012, 1, 1)
     xticks = []
