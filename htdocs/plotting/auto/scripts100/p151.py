@@ -27,6 +27,9 @@ PDICT3 = OrderedDict(
         ("avg_high", "Average High Temperature"),
         ("avg_low", "Average Low Temperature"),
         ("days_high_above", "Days with High Temp At or Above [Threshold]"),
+        ("days_high_below", "Days with High Temp Below [Threshold]"),
+        ("days_low_above", "Days with Low Temp At or Above [Threshold]"),
+        ("days_low_below", "Days with Low Temp Below [Threshold]"),
     ]
 )
 UNITS = {
@@ -37,16 +40,11 @@ UNITS = {
     "avg_high": "F",
     "avg_low": "F",
     "days_high_above": "days",
+    "days_high_below": "days",
+    "days_low_above": "days",
+    "days_low_below": "days",
 }
-PRECISION = {
-    "total_precip": 2,
-    "gdd": 1,
-    "sdd": 1,
-    "avg_temp": 1,
-    "avg_high": 1,
-    "avg_low": 1,
-    "days_high_above": 1,
-}
+PRECISION = {"total_precip": 2}
 MDICT = OrderedDict(
     [
         ("all", "Annual"),
@@ -204,17 +202,18 @@ def plotter(fdict):
         table = "alldata_%s" % (state,)
 
     df = read_sql(
-        """
+        f"""
     WITH period1 as (
         SELECT station, year, sum(precip) as total_precip,
         avg((high+low) / 2.) as avg_temp, avg(high) as avg_high,
         avg(low) as avg_low,
         sum(gddxx(50, 86, high, low)) as sum_gdd,
         sum(case when high > 86 then high - 86 else 0 end) as sum_sdd,
-        sum(case when high >= %s then 1 else 0 end) as days_high_above
-        from """
-        + table
-        + """ WHERE year >= %s and year < %s
+        sum(case when high >= %s then 1 else 0 end) as days_high_above,
+        sum(case when high < %s then 1 else 0 end) as days_high_below,
+        sum(case when low >= %s then 1 else 0 end) as days_low_above,
+        sum(case when low < %s then 1 else 0 end) as days_low_below
+        from {table} WHERE year >= %s and year < %s
         and month in %s GROUP by station, year),
     period2 as (
         SELECT station, year, sum(precip) as total_precip,
@@ -222,10 +221,11 @@ def plotter(fdict):
         avg(low) as avg_low,
         sum(gddxx(50, 86, high, low)) as sum_gdd,
         sum(case when high > 86 then high - 86 else 0 end) as sum_sdd,
-        sum(case when high >= %s then 1 else 0 end) as days_high_above
-        from """
-        + table
-        + """ WHERE year >= %s and year < %s
+        sum(case when high >= %s then 1 else 0 end) as days_high_above,
+        sum(case when high < %s then 1 else 0 end) as days_high_below,
+        sum(case when low >= %s then 1 else 0 end) as days_low_above,
+        sum(case when low < %s then 1 else 0 end) as days_low_below
+        from {table} WHERE year >= %s and year < %s
         and month in %s GROUP by station, year),
     p1agg as (
         SELECT station, avg(total_precip) as precip,
@@ -233,6 +233,9 @@ def plotter(fdict):
         avg(avg_low) as avg_low, avg(sum_sdd) as sdd,
         avg(sum_gdd) as gdd,
         avg(days_high_above) as avg_days_high_above,
+        avg(days_high_below) as avg_days_high_below,
+        avg(days_low_above) as avg_days_low_above,
+        avg(days_low_below) as avg_days_low_below,
         count(*) as count
         from period1 GROUP by station),
     p2agg as (
@@ -241,6 +244,9 @@ def plotter(fdict):
         avg(avg_low) as avg_low, avg(sum_sdd) as sdd,
         avg(sum_gdd) as gdd,
         avg(days_high_above) as avg_days_high_above,
+        avg(days_high_below) as avg_days_high_below,
+        avg(days_low_above) as avg_days_low_above,
+        avg(days_low_below) as avg_days_low_below,
         count(*) as count
         from period2 GROUP by station),
     agg as (
@@ -252,7 +258,13 @@ def plotter(fdict):
         p1.avg_high as p1_avg_high, p2.avg_high as p2_avg_high,
         p1.avg_low as p1_avg_low, p2.avg_low as p2_avg_low,
         p1.avg_days_high_above as p1_days_high_above,
-        p2.avg_days_high_above as p2_days_high_above
+        p2.avg_days_high_above as p2_days_high_above,
+        p1.avg_days_high_below as p1_days_high_below,
+        p2.avg_days_high_below as p2_days_high_below,
+        p1.avg_days_low_above as p1_days_low_above,
+        p2.avg_days_low_above as p2_days_low_above,
+        p1.avg_days_low_below as p1_days_low_below,
+        p2.avg_days_low_below as p2_days_low_below
         from p1agg p1 JOIN p2agg p2 on
         (p1.station = p2.station)
         WHERE p1.count >= %s and p2.count >= %s)
@@ -265,9 +277,15 @@ def plotter(fdict):
         pgconn,
         params=[
             threshold,
+            threshold,
+            threshold,
+            threshold,
             p1syear,
             p1eyear,
             tuple(months),
+            threshold,
+            threshold,
+            threshold,
             threshold,
             p2syear,
             p2eyear,
@@ -286,6 +304,9 @@ def plotter(fdict):
     df["gdd"] = df["p2_gdd"] - df["p1_gdd"]
     df["sdd"] = df["p2_sdd"] - df["p1_sdd"]
     df["days_high_above"] = df["p2_days_high_above"] - df["p1_days_high_above"]
+    df["days_high_below"] = df["p2_days_high_below"] - df["p1_days_high_below"]
+    df["days_low_above"] = df["p2_days_low_above"] - df["p1_days_low_above"]
+    df["days_low_below"] = df["p2_days_low_below"] - df["p1_days_low_below"]
     column = varname
     title = "%s %s" % (MDICT[month], PDICT3[varname])
     title = title.replace("[Threshold]", "%.1f" % (threshold,))
@@ -321,7 +342,7 @@ def plotter(fdict):
         levels = centered_bins(abval)
     else:
         levels = [
-            round(v, PRECISION[varname])
+            round(v, PRECISION.get(varname, 1))
             for v in np.percentile(df2[column].values, range(0, 101, 10))
         ]
     if opt in ["both", "contour"]:
@@ -340,7 +361,7 @@ def plotter(fdict):
             df2["lon"].values,
             df2["lat"].values,
             df2[column].values,
-            fmt="%%.%if" % (PRECISION[varname],),
+            fmt="%%.%if" % (PRECISION.get(varname, 1),),
             labelbuffer=5,
         )
 

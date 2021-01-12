@@ -113,16 +113,16 @@ def do_date(ccursor2, table, row, col, agg_col):
 
 def set_daily_extremes(table):
     """Set the extremes on a given table"""
-    sql = """
-    SELECT * from %s WHERE max_high_yr is null and max_high is not null
-    and min_high_yr is null and min_high is not null
-    and max_low_yr is null and max_low is not null
-    and min_low_yr is null and min_low is not null
-    """ % (
-        table,
-    )
     ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    ccursor.execute(sql)
+    ccursor.execute(
+        f"""
+        SELECT {table} from %s WHERE max_high_yr is null and
+        max_high is not null
+        and min_high_yr is null and min_high is not null
+        and max_low_yr is null and max_low is not null
+        and min_low_yr is null and min_low is not null
+        """
+    )
     ccursor2 = COOP.cursor()
     cnt = 0
     total = ccursor.rowcount
@@ -136,13 +136,12 @@ def set_daily_extremes(table):
             ccursor2, table, row, "precip", "max_precip"
         )
         ccursor2.execute(
-            """
-            UPDATE %s SET max_high_yr = %s, min_high_yr = %s,
+            f"""
+            UPDATE {table} SET max_high_yr = %s, min_high_yr = %s,
             max_low_yr = %s, min_low_yr = %s, max_precip_yr = %s
-            WHERE station = '%s' and valid = '%s'
-        """
-            % (
-                table,
+            WHERE station = %s and valid = %s
+        """,
+            (
                 data["max_high_yr"],
                 data["min_high_yr"],
                 data["max_low_yr"],
@@ -150,7 +149,7 @@ def set_daily_extremes(table):
                 data["max_precip_yr"],
                 row["station"],
                 row["valid"],
-            )
+            ),
         )
         cnt += 1
         if cnt % 1000 == 0:

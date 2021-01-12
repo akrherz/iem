@@ -28,6 +28,7 @@ if not os.path.isdir(TMPDIR):
 
 REAL_RE = re.compile(r"^\-?\d+\.\d+$")
 INT_RE = re.compile(r"^\-?\d+$")
+DT1980 = datetime.datetime(1980, 1, 1, tzinfo=pytz.utc)
 
 
 def qc(mydict, col):
@@ -287,7 +288,7 @@ def init_dataframe(argv):
     else:
         dt = utc() - datetime.timedelta(days=1)
         merge_archive_end(df, dt)
-        df["archive_end"] = df["archive_end"].fillna(utc(1980, 1, 1))
+        df["archive_end"] = df["archive_end"].fillna(DT1980)
         dl_realtime(df, dt)
         update_iemprops(dt)
 

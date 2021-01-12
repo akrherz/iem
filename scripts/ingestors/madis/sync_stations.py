@@ -52,7 +52,7 @@ def main(argv):
         # Compare location
         (olon, olat) = mcursor.fetchone()
         distance = ((olon - lon) ** 2 + (olat - lat) ** 2) ** 0.5
-        if distance < 0.1:
+        if distance < 0.001:
             continue
         LOG.info(
             "move %s %s dist: %s lon: %s -> %s lat: %s -> %s",
