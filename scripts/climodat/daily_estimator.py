@@ -48,7 +48,7 @@ def load_table(state, date):
             }
         )
     if not rows:
-        LOG.info("No data found for state: %s", state)
+        LOG.debug("No applicable stations found for state: %s", state)
         return None
     df = pd.DataFrame(rows)
     df = df.set_index("station")
