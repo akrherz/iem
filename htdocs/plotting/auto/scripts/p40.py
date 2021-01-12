@@ -4,6 +4,7 @@ import datetime
 import numpy as np
 from pandas.io.sql import read_sql
 from matplotlib.patches import Rectangle
+from pyiem.reference import TWITTER_RESOLUTION_INCH
 from pyiem.plot import get_cmap
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, utc
@@ -62,7 +63,7 @@ def get_description():
 
 def plot_sky(days, vsby, data, station, ctx, sts):
     """Sky plot variant."""
-    fig = plt.figure(figsize=(8, 6))
+    fig = plt.figure(figsize=TWITTER_RESOLUTION_INCH)
     # vsby plot
     ax = plt.axes([0.1, 0.08, 0.8, 0.03])
     ax.set_xticks(np.arange(0, int(days * 24) - 1, 24))
@@ -85,7 +86,7 @@ def plot_sky(days, vsby, data, station, ctx, sts):
     # clouds
     ax = plt.axes([0.1, 0.16, 0.8, 0.7])
     ax.set_facecolor("skyblue")
-    ax.set_xticks(np.arange(0, days * 24, 24))
+    ax.set_xticks(np.arange(0, int(days * 24) - 1, 24))
     ax.set_xticklabels(np.arange(1, days + 1))
 
     fig.text(
@@ -137,7 +138,7 @@ def plot_sky(days, vsby, data, station, ctx, sts):
 
 def plot_vsby(days, vsby, station, ctx, sts):
     """Sky plot variant."""
-    fig = plt.figure(figsize=(8, 6))
+    fig = plt.figure(figsize=TWITTER_RESOLUTION_INCH)
 
     # need to convert vsby to 2-d
     data = np.ones((100, days * 24)) * -3
@@ -153,7 +154,7 @@ def plot_vsby(days, vsby, station, ctx, sts):
     # clouds
     ax = plt.axes([0.1, 0.1, 0.8, 0.8])
     ax.set_facecolor("skyblue")
-    ax.set_xticks(np.arange(0, days * 24 + 1, 24))
+    ax.set_xticks(np.arange(1, days * 24 + 1, 24))
     ax.set_xticklabels(np.arange(1, days + 1))
 
     fig.text(
