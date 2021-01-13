@@ -23,6 +23,16 @@ PDICT2 = {
     "7": "Seven Day Centered Smooth",
     "14": "Fourteen Day Centered Smooth",
 }
+PDICT3 = {
+    "temps": "Plot High and Low Temperatures",
+    "precip": "Precipitation",
+    "snow": "Snowfall",
+}
+LABELS = {
+    "temps": r"Temperature $^\circ\mathrm{F}$",
+    "precip": "Precipitation [inch/day]",
+    "snow": "Snowfall [inch/day]",
+}
 
 
 def get_description():
@@ -37,6 +47,13 @@ def get_description():
     but using a different climatology.
     """
     desc["arguments"] = [
+        dict(
+            type="select",
+            options=PDICT3,
+            default="temps",
+            name="v",
+            label="Which Variable(s) to Plot",
+        ),
         dict(
             type="station",
             name="station1",
@@ -123,6 +140,7 @@ def pick_climate(ctx, idx):
 def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
+    varname = ctx["v"]
     station1 = ctx["station1"]
     station2 = ctx.get("station2")
     c1 = ctx["c1"]
@@ -134,7 +152,8 @@ def plotter(fdict):
 
     if c1 == "custom":
         df = read_sql(
-            "SELECT sday, station, avg(high) as high, avg(low) as low "
+            "SELECT sday, station, avg(high) as high, avg(low) as low, "
+            "avg(precip) as precip, avg(snow) as snow "
             f"from alldata_{station1[:2]} WHERE "
             "station = %s and sday != '0229' and year >= %s and year <= %s "
             "and high is not null and "
@@ -147,10 +166,11 @@ def plotter(fdict):
         df = df.set_index("valid")
     else:
         df = read_sql(
-            f"SELECT valid, station, high, low from {cltable1} WHERE "
-            "station = %s and valid != '2000-02-29' ORDER by valid ASC",
+            f"SELECT valid, station, high, low, precip, snow from {cltable1} "
+            "WHERE station = %s and valid != '2000-02-29' ORDER by valid ASC",
             dbconn,
             params=(clstation1,),
+            parse_dates="valid",
             index_col="valid",
         )
     if df.empty:
@@ -158,7 +178,8 @@ def plotter(fdict):
     if station2:
         if c2 == "custom":
             df2 = read_sql(
-                "SELECT sday, station, avg(high) as high, avg(low) as low "
+                "SELECT sday, station, avg(high) as high, avg(low) as low, "
+                "avg(precip) as precip, avg(snow) as snow "
                 f"from alldata_{station2[:2]} WHERE "
                 "station = %s and sday != '0229' and year >= %s and "
                 "year <= %s and high is not null and "
@@ -174,19 +195,20 @@ def plotter(fdict):
 
         else:
             df2 = read_sql(
-                f"SELECT valid, station, high, low from {cltable2} WHERE "
-                "station = %s and valid != '2000-02-29' ORDER by valid ASC",
+                "SELECT valid, station, high, low, precip, snow from "
+                f"{cltable2} WHERE station = %s and valid != '2000-02-29' "
+                "ORDER by valid ASC",
                 dbconn,
                 params=(clstation2,),
+                parse_dates="valid",
                 index_col="valid",
             )
         if df2.empty:
             raise NoDataFound("Failed to find data for station2")
         df["station2"] = station2
-        df["high2"] = df2["high"]
-        df["low2"] = df2["low"]
-        df["highdiff"] = df["high"] - df["high2"]
-        df["lowdiff"] = df["low"] - df["low2"]
+        for v in ["high", "low", "precip", "snow"]:
+            df[f"{v}2"] = df2[v]
+            df[f"{v}diff"] = df[v] - df[f"{v}2"]
 
     fig = plt.figure(figsize=TWITTER_RESOLUTION_INCH)
 
@@ -204,20 +226,23 @@ def plotter(fdict):
     c2label = c2
     if c2 == "custom":
         c2label = "[%s-%s]" % (ctx["sy2"], ctx["ey2"])
+    var1 = "high" if varname == "temps" else varname
+    var2 = "low" if varname == "temps" else None
     ax0.plot(
         df.index.values,
-        df["high"],
+        df[var1],
         color="r",
         linestyle="-",
-        label="High %s (%s)" % (station1, c1label),
+        label="%s %s (%s)" % (var1.capitalize(), station1, c1label),
     )
-    ax0.plot(
-        df.index.values,
-        df["low"],
-        color="b",
-        label="Low %s (%s)" % (station1, c1label),
-    )
-    ax0.set_ylabel(r"Temperature $^\circ\mathrm{F}$")
+    if var2 is not None:
+        ax0.plot(
+            df.index.values,
+            df[var2],
+            color="b",
+            label="Low %s (%s)" % (station1, c1label),
+        )
+    ax0.set_ylabel(LABELS[varname])
     title = "[%s] %s %s Daily Averages" % (
         station1,
         ctx["_nt1"].sts[station1]["name"],
@@ -246,17 +271,18 @@ def plotter(fdict):
             label = "%s (%s) - %s (%s)" % (station1, c1, station2, c2)
         ax0.plot(
             df.index.values,
-            df["high2"],
-            color="brown",
-            label="High %s (%s)" % (station2, c2label),
+            df[f"{var1}2"],
+            color="brown" if var2 is not None else "blue",
+            label="%s %s (%s)" % (var1.capitalize(), station2, c2label),
         )
-        ax0.plot(
-            df.index.values,
-            df["low2"],
-            color="green",
-            label="Low %s (%s)" % (station2, c2label),
-        )
-        delta = df["highdiff"]
+        if var2 is not None:
+            ax0.plot(
+                df.index.values,
+                df[f"{var2}2"],
+                color="green",
+                label="Low %s (%s)" % (station2, c2label),
+            )
+        delta = df[f"{var1}diff"]
         if ctx["s"] != "0":
             ax1.text(
                 0.01,
@@ -270,13 +296,16 @@ def plotter(fdict):
             df.index.values,
             delta.values,
             color="r",
-            label=f"High Diff {label}",
+            label=f"{var1.capitalize()} Diff {label}",
         )
-        delta = df["lowdiff"]
-        if ctx["s"] != "0":
-            delta = delta.rolling(window=int(ctx["s"])).mean()
-        ax1.plot(df.index.values, delta, color="b", label=f"Low Diff {label}")
-        ax1.set_ylabel(r"Temp Difference $^\circ\mathrm{F}$")
+        if var2 is not None:
+            delta = df["lowdiff"]
+            if ctx["s"] != "0":
+                delta = delta.rolling(window=int(ctx["s"])).mean()
+            ax1.plot(
+                df.index.values, delta, color="b", label=f"Low Diff {label}"
+            )
+        ax1.set_ylabel(f"{LABELS[varname]} Difference")
         ax1.legend(ncol=1, loc="center", bbox_to_anchor=(0.5, -0.2))
         ax1.grid()
         ax1.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
@@ -284,6 +313,7 @@ def plotter(fdict):
 
         # Compute monthly
         gdf = df.groupby(df.index.month).mean()
+        print(df)
         ax2.text(
             0.01,
             1.0,
@@ -291,9 +321,17 @@ def plotter(fdict):
             transform=ax2.transAxes,
             va="bottom",
         )
-        ax2.bar(gdf.index.values - 0.2, gdf["highdiff"], width=0.4, color="r")
-        ax2.bar(gdf.index.values + 0.2, gdf["lowdiff"], width=0.4, color="b")
-        ax2.set_ylabel(r"Temp Difference $^\circ\mathrm{F}$")
+        ax2.bar(
+            gdf.index.values - (0.2 if var2 is not None else 0),
+            gdf[f"{var1}diff"],
+            width=0.4 if var2 is not None else 0.8,
+            color="r",
+        )
+        if var2 is not None:
+            ax2.bar(
+                gdf.index.values + 0.2, gdf["lowdiff"], width=0.4, color="b"
+            )
+        ax2.set_ylabel(f"{LABELS[varname]} Difference")
         ax2.set_xticks(range(1, 13))
         ax2.set_xticklabels(calendar.month_abbr[1:])
         ax2.grid()
@@ -312,12 +350,13 @@ def plotter(fdict):
 if __name__ == "__main__":
     plotter(
         dict(
+            v="snow",
             network1="IACLIMATE",
             station1="IA0112",
-            c1="custom",
+            c1="1951",
             network2="IACLIMATE",
             station2="IA0112",
-            c2="por",
+            c2="ncei81",
             s="0",
             sy1=1981,
             ey1=2010,

@@ -93,7 +93,6 @@
 192.168.1.245 iemdb-openfire.local
 192.168.1.245 iemdb-other.local
 192.168.1.245 iemdb-portfolio.local
-192.168.1.233 iemdb-postgis.local
 192.168.1.245 iemdb-rtstats.local
 192.168.1.245 iemdb-rwis.local
 192.168.1.245 iemdb-scada.local
@@ -110,6 +109,7 @@
 192.168.1.233 iemdb-iemre.local
 192.168.1.233 iemdb-talltowers.local
 192.168.1.233 iemdb-radar.local
+192.168.1.233 iemdb-postgis.local
 192.168.1.233 iemdb-nldn.local
 192.168.1.233 iemdb-smos.local
 

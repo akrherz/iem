@@ -28,16 +28,19 @@ def compute_stations(cursor):
         name = line[41:71].strip()
 
         cursor.execute(
-            """
-        INSERT into stations
-        (id, network, geom, elevation, name, country,
-        state, online, plot_name, archive_begin, archive_end, metasite)
-        VALUES
-        (%s, 'NCDC81', 'SRID=4326;POINT(%s %s)', %s, %s, %s,
-        %s, 't', %s, '1981-01-01', '2010-12-31', 't')
-        """,
+            "SELECT id from stations where id = %s and network = 'NCDC81'",
+            (sid,),
+        )
+        if cursor.rowcount == 1:
+            continue
+        cursor.execute(
+            "INSERT into stations (id, network, geom, elevation, name, "
+            "country, state, online, plot_name, archive_begin, archive_end, "
+            "metasite) VALUES (%s, 'NCDC81', 'SRID=4326;POINT(%s %s)', %s, "
+            "%s, %s, %s, 't', %s, '1981-01-01', '2010-12-31', 't')",
             (sid, lon, lat, elev, name, sid[:2], state, name),
         )
+        print(f"adding {sid}")
 
 
 def main():

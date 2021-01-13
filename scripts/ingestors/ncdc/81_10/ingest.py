@@ -10,7 +10,9 @@
 
 """
 import datetime
+import sys
 
+from tqdm import tqdm
 from pyiem.util import get_dbconn
 
 
@@ -55,6 +57,22 @@ def ingest(stations, pgconn):
             data[dbid][d] = {}
             data[dbid][d]["precip"] = val
 
+    print("Process SNOW")
+    for line in open("ytd-snow-normal.txt"):
+        if line[:11] not in stations:
+            continue
+        tokens = line.split()
+        dbid = tokens[0]
+
+        month = tokens[1]
+        for t in range(2, len(tokens)):
+            token = tokens[t]
+            val = int(token[:-1]) / 10.0
+            if val == "-8888":
+                continue
+            d = "2000-%s-%02i" % (month, t - 1)
+            data[dbid][d]["snow"] = val
+
     print("Process TMIN")
     for line in open("dly-tmin-normal.txt"):
         if line[:11] not in stations:
@@ -87,35 +105,53 @@ def ingest(stations, pgconn):
             d = "2000-%s-%02i" % (month, t - 1)
             data[dbid][d]["tmax"] = val
 
-    for dbid in data:
+    progress = tqdm(data.keys())
+    for dbid in progress:
+        progress.set_description(dbid)
         ccursor = pgconn.cursor()
         now = datetime.datetime(2000, 1, 1)
         ets = datetime.datetime(2001, 1, 1)
         interval = datetime.timedelta(days=1)
-        running = 0
+        prunning = 0
+        srunning = 0
         while now < ets:
             d = now.strftime("%Y-%m-%d")
             # Precip data is always missing on leap day, sigh
             if d == "2000-02-29":
                 precip = 0
+                snow = 0
             else:
-                precip = data[dbid][d]["precip"] - running
-                running = data[dbid][d]["precip"]
+                precip = data[dbid][d]["precip"] - prunning
+                snow = data[dbid][d].get("snow", 0) - srunning
+                prunning = data[dbid][d]["precip"]
+                srunning = data[dbid][d].get("snow", 0)
 
             ccursor.execute(
-                """
-                INSERT into ncdc_climate81
-                (station, valid, high, low, precip)
-                VALUES (%s, %s, %s, %s, %s)
-            """,
+                "SELECT * from ncdc_climate81 where station = %s and "
+                "valid = %s",
+                (dbid, d),
+            )
+            if ccursor.rowcount == 0:
+                ccursor.execute(
+                    "INSERT into ncdc_climate81 (station, valid) "
+                    "VALUES (%s, %s)",
+                    (dbid, d),
+                )
+            ccursor.execute(
+                "UPDATE ncdc_climate81 SET high = %s, low = %s, precip = %s, "
+                "snow = %s WHERE station = %s and valid = %s",
                 (
-                    dbid,
-                    d,
                     data[dbid][d]["tmax"],
                     data[dbid][d]["tmin"],
                     precip,
+                    snow,
+                    dbid,
+                    d,
                 ),
             )
+            if ccursor.rowcount != 1:
+                print(dbid, d)
+                sys.exit()
             now += interval
         ccursor.close()
         pgconn.commit()
