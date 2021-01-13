@@ -1,4 +1,6 @@
 """Daily Climatology"""
+# stdlib
+import calendar
 
 # third party
 import pandas as pd
@@ -183,12 +185,15 @@ def plotter(fdict):
         df["station2"] = station2
         df["high2"] = df2["high"]
         df["low2"] = df2["low"]
+        df["highdiff"] = df["high"] - df["high2"]
+        df["lowdiff"] = df["low"] - df["low2"]
 
     fig = plt.figure(figsize=TWITTER_RESOLUTION_INCH)
 
     if station2 is not None:
         ax0 = fig.add_axes([0.05, 0.15, 0.43, 0.75])
-        ax1 = fig.add_axes([0.55, 0.15, 0.43, 0.75])
+        ax1 = fig.add_axes([0.55, 0.55, 0.43, 0.35])
+        ax2 = fig.add_axes([0.55, 0.07, 0.43, 0.35])
     else:
         ax0 = fig.add_axes([0.05, 0.15, 0.8, 0.75])
         ax1 = None
@@ -251,12 +256,12 @@ def plotter(fdict):
             color="green",
             label="Low %s (%s)" % (station2, c2label),
         )
-        delta = df["high"] - df["high2"]
+        delta = df["highdiff"]
         if ctx["s"] != "0":
             ax1.text(
                 0.01,
                 0.99,
-                "%s Day Smoother Applied" % (int(ctx["s"]),),
+                "** %s Day Smoother Applied" % (int(ctx["s"]),),
                 transform=ax1.transAxes,
                 va="top",
             )
@@ -267,15 +272,31 @@ def plotter(fdict):
             color="r",
             label=f"High Diff {label}",
         )
-        delta = df["low"] - df["low2"]
+        delta = df["lowdiff"]
         if ctx["s"] != "0":
             delta = delta.rolling(window=int(ctx["s"])).mean()
         ax1.plot(df.index.values, delta, color="b", label=f"Low Diff {label}")
         ax1.set_ylabel(r"Temp Difference $^\circ\mathrm{F}$")
-        ax1.legend(ncol=1, loc="center", bbox_to_anchor=(0.5, -0.1))
-        ax1.grid(True)
+        ax1.legend(ncol=1, loc="center", bbox_to_anchor=(0.5, -0.2))
+        ax1.grid()
         ax1.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
         ax1.xaxis.set_major_formatter(mdates.DateFormatter("%b"))
+
+        # Compute monthly
+        gdf = df.groupby(df.index.month).mean()
+        ax2.text(
+            0.01,
+            1.0,
+            "Monthly Average Difference",
+            transform=ax2.transAxes,
+            va="bottom",
+        )
+        ax2.bar(gdf.index.values - 0.2, gdf["highdiff"], width=0.4, color="r")
+        ax2.bar(gdf.index.values + 0.2, gdf["lowdiff"], width=0.4, color="b")
+        ax2.set_ylabel(r"Temp Difference $^\circ\mathrm{F}$")
+        ax2.set_xticks(range(1, 13))
+        ax2.set_xticklabels(calendar.month_abbr[1:])
+        ax2.grid()
 
     fitbox(fig, title, 0.05, 0.94, 0.95, 0.99)
     if subtitle is not None:
