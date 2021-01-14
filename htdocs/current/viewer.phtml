@@ -1,5 +1,5 @@
 <?php
-$OL = "6.2.1";
+$OL = "6.4.3";
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 95);
 require_once "../../include/mlib.php";
@@ -8,7 +8,7 @@ require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 $t = new MyView();
  require_once "../../include/cameras.inc.php"; 
- $id = isset($_GET["id"]) ? xssafe($_GET["id"]): "KCCI-016";
+ $id = isset($_GET["id"]) ? xssafe($_GET["id"]): "ISUC-003";
 
  $camselect = "";
  $cnt = 0;
@@ -17,7 +17,7 @@ $t = new MyView();
  	if ($v["active"] && $v["network"] != "IDOT"){
  		$camselect .= "<div class=\"col-md-2\"><label class=\"radio-inline\"><input type=\"radio\" name=\"id\" value=\"$cid\" id=\"c$cid\" ";
  		if ($cid == $id) { $camselect .= "checked=\"checked\""; }
- 		$camselect .= " onClick=\"setCameraFromForm('{$cid}');\">". $v["name"] ."</label></div>\n";
+ 		$camselect .= " onClick=\"setCamera('{$cid}');\">". $v["name"] ."</label></div>\n";
  		$cnt += 1;
  	}
  }
@@ -32,7 +32,7 @@ $t = new MyView();
  <script>
  	var cameraID = "{$id}";
  </script>
- <script src='viewer.js?v=3'></script>
+ <script src='viewer.js?v=4'></script>
 EOF;
  $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
@@ -78,6 +78,7 @@ EOF;
 <div class="row">
 <div class="col-md-6">
 <img id="webcam_image" name="camera" src="/data/camera/stills/{$id}.jpg" class="img img-responsive" />
+<br />
 <h3 id="webcam_title">Application is Loading...</h3>
 </div>
 <div class="col-md-6">
@@ -93,7 +94,7 @@ EOF;
 <div class="row">
 {$camselect}
 </div>
-<p><input type="submit" onclick="liveShot(); return false;" value="Live Shot!"></p>
+<p><input role="button" id="lsbutton" value="Live Shot!"></p>
 
 </form>
 
