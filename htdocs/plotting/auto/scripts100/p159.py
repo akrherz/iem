@@ -130,21 +130,14 @@ def plotter(fdict):
 
     opp = ">=" if mydir == "aoa" else "<"
     df = read_sql(
-        """WITH hourly as (
+        f"""WITH hourly as (
         SELECT date_trunc('hour', valid + '10 minutes'::interval)
         at time zone %s as ts,
-        max(case when """
-        + varname
-        + """::int """
-        + opp
-        + """ %s
-            then 1 else 0 end) as hit
+        max(case when {varname}::int {opp} %s then 1 else 0 end) as hit
         from alldata where station = %s and report_type = 2
         GROUP by ts)
 
-        SELECT extract(year from """
-        + offset
-        + """)::int as year,
+        SELECT extract(year from {offset})::int as year,
         extract(hour from ts)::int as hour,
         sum(hit) as hits, count(*) as obs from hourly
         WHERE extract(month from ts) in %s GROUP by year, hour

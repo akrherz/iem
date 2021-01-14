@@ -313,7 +313,6 @@ def plotter(fdict):
 
         # Compute monthly
         gdf = df.groupby(df.index.month).mean()
-        print(df)
         ax2.text(
             0.01,
             1.0,

@@ -118,14 +118,12 @@ def plotter(fdict):
     else:
         data = np.ma.zeros((24, 366), "f")
         df = read_sql(
-            """
+            f"""
         WITH data as (
             SELECT valid at time zone %s + '10 minutes'::interval as v
             from alldata where
             station = %s and
-            array_to_string(wxcodes, '') LIKE '%%"""
-            + code
-            + """%%'
+            array_to_string(wxcodes, '') LIKE '%%{code}%%'
             and valid > %s and valid < %s),
         agg as (
             SELECT distinct
@@ -165,7 +163,7 @@ def plotter(fdict):
     ax.set_ylabel("Local Time, %s" % (ctx["_nt"].sts[station]["tzname"],))
     ax.set_yticklabels(("Mid", "4 AM", "8 AM", "Noon", "4 PM", "8 PM"))
     ax.set_title(
-        ("[%s] %s %s Reports\n[%.0f - %.0f]" " by hour and %s")
+        ("[%s] %s %s Reports\n[%.0f - %.0f] by hour and %s")
         % (
             station,
             ctx["_nt"].sts[station]["name"],
@@ -200,9 +198,7 @@ def plotter(fdict):
         )
         lax.bar(np.arange(0, 366), np.ma.sum(data, 0), facecolor="tan")
         lax.set_xlim(-0.5, 365.5)
-        lax.set_xticks(
-            [1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 365]
-        )
+        lax.set_xticks([1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335])
         lax.set_xticklabels(calendar.month_abbr[1:])
     plt.setp(ax.get_xticklabels(), visible=False)
 
