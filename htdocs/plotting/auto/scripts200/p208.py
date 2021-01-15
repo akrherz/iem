@@ -6,14 +6,15 @@ from pyiem.nws import vtec
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
-from pyiem.reference import Z_OVERLAY2
+from pyiem.reference import Z_OVERLAY2, TWITTER_RESOLUTION_INCH
 import cartopy.crs as ccrs
 import pytz
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
 PDICT = {
-    "twitter": "Twitter Friendly 1200x628",
-    "normal": "IEM Default 640x480",
+    "single": "Plot just this single VTEC Event",
+    "expand": "Plot same VTEC Phenom/Sig from any WFO coincident with event",
+    "etn": "Plot same VTEC Phenom/Sig + Event ID from any WFO",
 }
 
 
@@ -25,21 +26,28 @@ def get_description():
     desc[
         "description"
     ] = """This application generates a map showing the coverage of a given
-    VTEC alert for a given office.  The tricky part here is how time is handled
+    VTEC alert.  The tricky part here is how time is handled
     for events whereby zones/counties can be added / removed from the alert.
     If you specific an exact time, you should get the proper extent of the
     alert at that time.  If you do not specify the time, you should get the
     total inclusion of any zones/counties that were added to the alert.
+
+    <p>This plot can be run in three special modes, those are:
+    <ul>
+      <li><strong>Single Event</strong>: Plots for a given WFO and event id.
+      </li>
+      <li><strong>Same Phen/Sig over multiple WFOs</strong>: The given single
+      event is expanded in space to cover any coincident events for the given
+      single event.</li>
+      <li><strong>Same Phen/Sig over multiple WFOs</strong>: In this case, the
+      event id is used to expand the plot.  This makes most sense for SVR + TOR
+      watches along with Tropical Alerts as the same event id is used over
+      multiple WFOs.</li>
+    </ul>
+    </p>
     """
     now = utc()
     desc["arguments"] = [
-        dict(
-            type="select",
-            name="res",
-            default="twitter",
-            label="Output Image Resolution",
-            options=PDICT,
-        ),
         dict(
             optional=True,
             type="datetime",
@@ -68,6 +76,13 @@ def get_description():
             label="VTEC Event Identifier / Sequence Number",
             name="etn",
         ),
+        dict(
+            type="select",
+            default="single",
+            name="opt",
+            options=PDICT,
+            label="Special Plot Options / Modes",
+        ),
     ]
     return desc
 
@@ -84,18 +99,15 @@ def plotter(fdict):
     etn = int(ctx["etn"])
     year = int(ctx["year"])
 
-    table = "warnings_%s" % (year,)
     df = read_postgis(
-        """
+        f"""
         SELECT w.ugc, simple_geom, u.name,
         issue at time zone 'UTC' as issue,
         expire at time zone 'UTC' as expire,
         init_expire at time zone 'UTC' as init_expire,
         1 as val,
-        status, is_emergency, is_pds
-        from """
-        + table
-        + """ w JOIN ugcs u on (w.gid = u.gid)
+        status, is_emergency, is_pds, w.wfo
+        from warnings_{year} w JOIN ugcs u on (w.gid = u.gid)
         WHERE w.wfo = %s and eventid = %s and significance = %s and
         phenomena = %s ORDER by issue ASC
     """,
@@ -106,15 +118,52 @@ def plotter(fdict):
     )
     if df.empty:
         raise NoDataFound("VTEC Event was not found, sorry.")
-    table = "sbw_%s" % (year,)
+    if ctx["opt"] == "expand":
+        # Get all phenomena coincident with the above alert
+        df = read_postgis(
+            f"""
+            SELECT w.ugc, simple_geom, u.name,
+            issue at time zone 'UTC' as issue,
+            expire at time zone 'UTC' as expire,
+            init_expire at time zone 'UTC' as init_expire,
+            1 as val,
+            status, is_emergency, is_pds, w.wfo
+            from warnings_{year} w JOIN ugcs u on (w.gid = u.gid)
+            WHERE significance = %s and
+            phenomena = %s and issue < %s and expire > %s
+            ORDER by issue ASC
+        """,
+            pgconn,
+            params=(s1, p1, df["expire"].min(), df["issue"].min()),
+            index_col="ugc",
+            geom_col="simple_geom",
+        )
+    elif ctx["opt"] == "etn":
+        # Get all phenomena coincident with the above alert
+        df = read_postgis(
+            f"""
+            SELECT w.ugc, simple_geom, u.name,
+            issue at time zone 'UTC' as issue,
+            expire at time zone 'UTC' as expire,
+            init_expire at time zone 'UTC' as init_expire,
+            1 as val,
+            status, is_emergency, is_pds, w.wfo
+            from warnings_{year} w JOIN ugcs u on (w.gid = u.gid)
+            WHERE significance = %s and
+            phenomena = %s and eventid = %s
+            ORDER by issue ASC
+        """,
+            pgconn,
+            params=(s1, p1, etn),
+            index_col="ugc",
+            geom_col="simple_geom",
+        )
+
     sbwdf = read_postgis(
-        """
-        SELECT status, geom,
+        f"""
+        SELECT status, geom, wfo,
         polygon_begin at time zone 'UTC' as polygon_begin,
-        polygon_end at time zone 'UTC' as polygon_end
-        from """
-        + table
-        + """
+        polygon_end at time zone 'UTC' as polygon_end from sbw_{year}
         WHERE wfo = %s and eventid = %s and significance = %s and
         phenomena = %s ORDER by polygon_begin ASC
     """,
@@ -122,6 +171,36 @@ def plotter(fdict):
         params=(wfo[-3:], etn, s1, p1),
         geom_col="geom",
     )
+    if not sbwdf.empty and ctx["opt"] == "expand":
+        # Get all phenomena coincident with the above alert
+        sbwdf = read_postgis(
+            f"""
+            SELECT status, geom, wfo,
+            polygon_begin at time zone 'UTC' as polygon_begin,
+            polygon_end at time zone 'UTC' as polygon_end from sbw_{year}
+            WHERE status = 'NEW' and significance = %s and
+            phenomena = %s and issue < %s and expire > %s
+            ORDER by polygon_begin ASC
+        """,
+            pgconn,
+            params=(s1, p1, df["expire"].min(), df["issue"].min()),
+            geom_col="geom",
+        )
+    elif not sbwdf.empty and ctx["opt"] == "etn":
+        # Get all phenomena coincident with the above alert
+        sbwdf = read_postgis(
+            f"""
+            SELECT status, geom, wfo,
+            polygon_begin at time zone 'UTC' as polygon_begin,
+            polygon_end at time zone 'UTC' as polygon_end from sbw_{year}
+            WHERE status = 'NEW' and significance = %s and
+            phenomena = %s and eventid = %s
+            ORDER by polygon_begin ASC
+        """,
+            pgconn,
+            params=(s1, p1, etn),
+            geom_col="geom",
+        )
 
     if utcvalid is None:
         utcvalid = df["issue"].max()
@@ -140,38 +219,53 @@ def plotter(fdict):
     df["color"] = vtec.NWS_COLORS.get("%s.%s" % (p1, s1), "#FF0000")
     if not sbwdf.empty:
         df["color"] = "tan"
-    bounds = df["simple_geom"].total_bounds
+    if len(df["wfo"].unique()) == 1:
+        bounds = df["simple_geom"].total_bounds
+    else:
+        df2 = df[~df["wfo"].isin(["AJK", "AFC", "AFG", "HFO", "JSJ"])]
+        bounds = df2["simple_geom"].total_bounds
     buffer = 0.4
+    title = "%s %s %s%s %s (%s.%s) #%s" % (
+        year,
+        wfo,
+        vtec.VTEC_PHENOMENA.get(p1, p1),
+        " (PDS) " if True in df["is_pds"].values else "",
+        (
+            "Emergency"
+            if True in df["is_emergency"].values
+            else vtec.VTEC_SIGNIFICANCE.get(s1, s1)
+        ),
+        p1,
+        s1,
+        etn,
+    )
+    if ctx["opt"] in ["expand", "etn"]:
+        title = (
+            f"{year} NWS {vtec.VTEC_PHENOMENA.get(p1, p1)} "
+            f"{vtec.VTEC_SIGNIFICANCE.get(s1, s1)} ({p1}.{s1})"
+        )
+        if ctx["opt"] == "etn":
+            title += f" #{etn}"
     mp = MapPlot(
         subtitle="Map Valid: %s, Event: %s to %s"
         % (m(utcvalid), m(df["issue"].min()), m(df["expire"].max())),
-        title="%s %s %s%s %s (%s.%s) #%s"
-        % (
-            year,
-            wfo,
-            vtec.VTEC_PHENOMENA.get(p1, p1),
-            " (PDS) " if True in df["is_pds"].values else "",
-            (
-                "Emergency"
-                if True in df["is_emergency"].values
-                else vtec.VTEC_SIGNIFICANCE.get(s1, s1)
-            ),
-            p1,
-            s1,
-            etn,
-        ),
+        title=title,
         sector="custom",
         west=bounds[0] - buffer,
         south=bounds[1] - buffer,
         east=bounds[2] + buffer,
         north=bounds[3] + buffer,
         nocaption=True,
-        figsize=(12.00, 6.28) if ctx["res"] == "twitter" else None,
+        figsize=TWITTER_RESOLUTION_INCH,
     )
-    mp.sector = "cwa"
-    mp.cwa = wfo[-3:]
+    if len(df["wfo"].unique()) == 1:
+        mp.sector = "cwa"
+        mp.cwa = wfo[-3:]
     # CAN statements come here with time == expire :/
-    df2 = df[(df["issue"] <= utcvalid) & (df["expire"] > utcvalid)]
+    if ctx["opt"] == "single":
+        df2 = df[(df["issue"] <= utcvalid) & (df["expire"] > utcvalid)]
+    else:
+        df2 = df
     if df2.empty:
         mp.ax.text(
             0.5,
@@ -225,11 +319,11 @@ def plotter(fdict):
 if __name__ == "__main__":
     plotter(
         dict(
-            phenomenav="SV",
+            phenomenav="BZ",
             significancev="W",
             wfo="DMX",
-            valid="2019-04-11 0000",
-            year=2019,
+            year=2021,
             etn=1,
+            opt="expand",
         )
     )
