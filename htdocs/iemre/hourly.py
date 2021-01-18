@@ -44,6 +44,8 @@ def workflow(sts, ets, i, j):
     if i is None or j is None:
         return {"error": "Coordinates outside of domain"}
 
+    res["grid_i"] = int(i)
+    res["grid_j"] = int(j)
     with ncopen(fn) as nc:
         now = sts
         while now <= ets:
@@ -51,7 +53,7 @@ def workflow(sts, ets, i, j):
             res["data"].append(
                 {
                     "valid_utc": now.astimezone(pytz.UTC).strftime(ISO),
-                    "valid_local": now.strftime(ISO),
+                    "valid_local": now.strftime(ISO[:-1]),
                     "skyc_%": myrounder(nc.variables["skyc"][offset, j, i], 1),
                     "air_temp_f": myrounder(
                         datatypes.temperature(
@@ -104,3 +106,7 @@ def application(environ, start_response):
         sys.stderr.write("Using cached %s\n" % (mckey,))
 
     return [res]
+
+
+if __name__ == "__main__":
+    print(workflow(utc(2018, 6, 1, 21), utc(2018, 6, 1, 21), 259, 151))

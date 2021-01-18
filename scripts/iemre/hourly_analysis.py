@@ -146,7 +146,11 @@ def grid_hour(ts):
         LOG.info("%s has no entries, FAIL", ts)
         return
     ures, vres = grid_wind(df, domain)
-    LOG.debug("grid_wind is done")
+    LOG.debug(
+        "grid_wind is done. max(ures): %s max(vres): %s",
+        np.max(ures),
+        np.max(vres),
+    )
     if ures is None:
         LOG.debug("Failure for uwnd at %s", ts)
     else:
@@ -187,6 +191,13 @@ def write_grid(valid, vname, grid):
     """
     offset = iemre.hourly_offset(valid)
     with ncopen(iemre.get_hourly_ncname(valid.year), "a", timeout=300) as nc:
+        LOG.debug(
+            "writing %s with min: %s max: %s Ames: %s",
+            vname,
+            np.ma.min(grid),
+            np.ma.max(grid),
+            grid[151, 259],
+        )
         nc.variables[vname][offset] = grid
 
 
