@@ -1,12 +1,15 @@
 """Generate the IEMRE hourly analysis file for a year"""
 import datetime
 import sys
+import os
 
 import geopandas as gpd
 import numpy as np
 from pyiem import iemre
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_dbconn, ncopen
+from pyiem.util import get_dbconn, ncopen, logger
+
+LOG = logger()
 
 
 def init_year(ts):
@@ -14,6 +17,9 @@ def init_year(ts):
     Create a new NetCDF file for a year of our specification!
     """
     fn = iemre.get_hourly_ncname(ts.year)
+    if os.path.isfile(fn):
+        LOG.info("Cowardly refusing to overwrite: %s", fn)
+        return
     nc = ncopen(fn, "w")
     nc.title = "IEM Hourly Reanalysis %s" % (ts.year,)
     nc.platform = "Grided Observations"
@@ -34,7 +40,7 @@ def init_year(ts):
     nc.createDimension("lon", iemre.NX)
     ts2 = datetime.datetime(ts.year + 1, 1, 1)
     days = (ts2 - ts).days
-    print("Year %s has %s days" % (ts.year, days))
+    LOG.info("Year %s has %s days", ts.year, days)
     nc.createDimension("time", int(days) * 24)
 
     # Setup Coordinate Variables
@@ -97,22 +103,24 @@ def init_year(ts):
     dwpk.standard_name = "2m Air Dew Point Temperature"
     dwpk.coordinates = "lon lat"
 
-    # 0->65535 0 to 65.535
+    # NOTE: we need to store negative numbers here, gasp
+    # -32768 to 32767 so -65.5 to 65.5 mps
     uwnd = nc.createVariable(
-        "uwnd", np.uint16, ("time", "lat", "lon"), fill_value=65335
+        "uwnd", np.int16, ("time", "lat", "lon"), fill_value=32767
     )
+    uwnd.scale_factor = 0.002
     uwnd.units = "meters per second"
-    uwnd.scale_factor = 0.001
     uwnd.long_name = "U component of the wind"
     uwnd.standard_name = "U component of the wind"
     uwnd.coordinates = "lon lat"
 
-    # 0->65535 0 to 65.535
+    # NOTE: we need to store negative numbers here, gasp
+    # -32768 to 32767 so -65.5 to 65.5 mps
     vwnd = nc.createVariable(
-        "vwnd", np.uint16, ("time", "lat", "lon"), fill_value=65535
+        "vwnd", np.int16, ("time", "lat", "lon"), fill_value=32767
     )
+    vwnd.scale_factor = 0.002
     vwnd.units = "meters per second"
-    vwnd.scale_factor = 0.001
     vwnd.long_name = "V component of the wind"
     vwnd.standard_name = "V component of the wind"
     vwnd.coordinates = "lon lat"
