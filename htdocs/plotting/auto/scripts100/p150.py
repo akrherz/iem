@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
 
@@ -21,6 +21,10 @@ PDICT3 = OrderedDict(
         ("smps", "Wind Speed (mps)"),
     ]
 )
+PDICT4 = {
+    "same": "Compare against soundings for same hour",
+    "all": "Compare against soundings at any hour",
+}
 
 
 def get_description():
@@ -75,7 +79,14 @@ def get_description():
             name="which",
             default="month",
             options=PDICT2,
-            label="Compare this sounding against:",
+            label="Compare this sounding against (dates):",
+        ),
+        dict(
+            type="select",
+            name="h",
+            default="same",
+            options=PDICT4,
+            label="Compare this sounding against (hour):",
         ),
         dict(
             type="select",
@@ -111,8 +122,11 @@ def plotter(fdict):
         )
     pgconn = get_dbconn("postgis")
 
+    hrlimit = f"and extract(hour from f.valid at time zone 'UTC') = {hour} "
+    if ctx["h"] == "ALL":
+        hrlimit = ""
     df = read_sql(
-        """
+        f"""
     with data as (
         select f.valid,
         p.pressure, count(*) OVER (PARTITION by p.pressure),
@@ -136,18 +150,14 @@ def plotter(fdict):
         min(p.smps) OVER (PARTITION by p.pressure) as smps_min,
         max(p.smps) OVER (PARTITION by p.pressure) as smps_max
         from raob_flights f JOIN raob_profile p on (f.fid = p.fid)
-        WHERE f.station in %s
-        and extract(hour from f.valid at time zone 'UTC') = %s
-        """
-        + vlimit
-        + """
+        WHERE f.station in %s {hrlimit} {vlimit}
         and p.pressure in (925, 850, 700, 500, 400, 300, 250, 200,
         150, 100, 70, 50, 10))
 
     select * from data where valid = %s ORDER by pressure DESC
     """,
         pgconn,
-        params=(tuple(stations), hour, ts),
+        params=(tuple(stations), ts),
         index_col="pressure",
     )
     if df.empty:
@@ -162,7 +172,20 @@ def plotter(fdict):
         df.loc[df[key] == df[key + "_max"], key + "_percentile"] = 100.0
         df.loc[df[key] == df[key + "_min"], key + "_percentile"] = 0.0
 
-    ax = plt.axes([0.1, 0.12, 0.65, 0.75])
+    title = "%s %s %s Sounding" % (
+        station,
+        name,
+        ts.strftime("%Y/%m/%d %H UTC"),
+    )
+    subtitle = "(%s-%s) Percentile Ranks (%s) for %s at %s" % (
+        pd.Timestamp(df.iloc[0]["min_valid"]).year,
+        pd.Timestamp(df.iloc[0]["max_valid"]).year,
+        ("All Year" if which == "none" else calendar.month_name[ts.month]),
+        PDICT3[varname],
+        "Any Hour" if ctx["h"] == "all" else f"{hour} UTC",
+    )
+    fig = figure(title=title, subtitle=subtitle)
+    ax = fig.add_axes([0.1, 0.1, 0.75, 0.78])
     bars = ax.barh(
         range(len(df.index)), df[varname + "_percentile"], align="center"
     )
@@ -189,23 +212,6 @@ def plotter(fdict):
     ax.set_ylim(-0.5, len(df.index) - 0.5)
     ax.set_xlabel("Percentile [100 = highest]")
     ax.set_ylabel("Mandatory Pressure Level (hPa)")
-    plt.gcf().text(
-        0.5,
-        0.9,
-        ("%s %s %s Sounding\n" "(%s-%s) Percentile Ranks (%s) for %s at %sz")
-        % (
-            station,
-            name,
-            ts.strftime("%Y/%m/%d %H UTC"),
-            pd.Timestamp(df.iloc[0]["min_valid"]).year,
-            pd.Timestamp(df.iloc[0]["max_valid"]).year,
-            ("All Year" if which == "none" else calendar.month_name[ts.month]),
-            PDICT3[varname],
-            hour,
-        ),
-        ha="center",
-        va="bottom",
-    )
     ax.grid(True)
     ax.set_xticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     ax.set_xlim(0, 110)
@@ -215,7 +221,7 @@ def plotter(fdict):
     ax2.set_ylim(-0.5, len(df.index) - 0.5)
     ax2.set_yticks(range(len(df.index)))
     ax2.set_yticklabels(y2labels)
-    return plt.gcf(), df
+    return fig, df
 
 
 if __name__ == "__main__":

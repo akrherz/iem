@@ -3,11 +3,11 @@ import datetime
 from collections import OrderedDict
 
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = {"00": "00 UTC", "12": "12 UTC"}
+PDICT = {"00": "00 UTC", "12": "12 UTC", "ALL": "Any Hour"}
 MDICT = OrderedDict(
     [
         ("all", "No Month/Time Limit"),
@@ -98,9 +98,7 @@ def get_description():
     locations, the place that the sounding is made has moved over the years..
 
     <br /><br />
-    <strong>Some derived parameters are a work-in-progress.</strong>  The IEM
-    is presently computing a host of sounding parameters and with millions of
-    soundings, this computation will take a number of days to complete.
+    <strong>Some derived parameters are a work-in-progress.</strong>
     """
     desc["arguments"] = [
         dict(
@@ -155,7 +153,9 @@ def plotter(fdict):
     if station not in ctx["_nt"].sts:  # This is needed.
         raise NoDataFound("Unknown station metadata.")
     varname = ctx["var"]
-    hour = int(ctx["hour"])
+    hour = ctx["hour"]
+    if hour != "ALL":
+        hour = int(hour)
     month = ctx["month"]
     level = ctx["level"]
     agg = ctx["agg"]
@@ -187,6 +187,9 @@ def plotter(fdict):
         )
     pgconn = get_dbconn("postgis")
 
+    hrlimiter = f" extract(hour from f.valid at time zone 'UTC') = {hour} and "
+    if hour == "ALL":
+        hrlimiter = ""
     if varname in ["tmpc", "dwpc", "height", "smps"]:
         leveltitle = " @ %s hPa" % (level,)
         dfin = read_sql(
@@ -197,14 +200,13 @@ def plotter(fdict):
             max({varname}) as max_{varname},
             count(*)
             from raob_profile p JOIN raob_flights f on (p.fid = f.fid)
-            WHERE f.station in %s and p.pressure = %s and
-            extract(hour from f.valid at time zone 'UTC') = %s and
+            WHERE f.station in %s and p.pressure = %s and {hrlimiter}
             extract(month from f.valid) in %s and
             {varname} is not null
             GROUP by year ORDER by year ASC
         """,
             pgconn,
-            params=(offset, tuple(stations), level, hour, tuple(months)),
+            params=(offset, tuple(stations), level, tuple(months)),
             index_col="year",
         )
     else:
@@ -217,14 +219,13 @@ def plotter(fdict):
             max({varname}) as max_{varname},
             count(*)
             from raob_flights f
-            WHERE f.station in %s and
-            extract(hour from f.valid at time zone 'UTC') = %s and
+            WHERE f.station in %s and {hrlimiter}
             extract(month from f.valid) in %s and
             {varname} is not null
             GROUP by year ORDER by year ASC
         """,
             pgconn,
-            params=(offset, tuple(stations), hour, tuple(months)),
+            params=(offset, tuple(stations), tuple(months)),
             index_col="year",
         )
     # need quorums
@@ -232,7 +233,18 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No data was found!")
     colname = "%s_%s" % (agg, varname)
-    fig, ax = plt.subplots(1, 1)
+    title = "%s %s %s Sounding" % (
+        station,
+        name,
+        f"{hour:02d} UTC" if hour != "ALL" else PDICT[hour],
+    )
+    subtitle = "%s %s%s over %s" % (
+        PDICT4[agg],
+        PDICT3[varname],
+        leveltitle,
+        MDICT[month],
+    )
+    fig, ax = figure_axes(title=title, subtitle=subtitle)
     avgv = df[colname].mean()
     bars = ax.bar(df.index.values, df[colname], align="center")
     for i, _bar in enumerate(bars):
@@ -248,22 +260,6 @@ def plotter(fdict):
     ax.text(df.index.values[-1] + 2, avgv, "Avg:\n%.1f" % (avgv,))
     ax.set_xlabel("Year")
     ax.set_ylabel("%s %s%s" % (PDICT4[agg], PDICT3[varname], leveltitle))
-    plt.gcf().text(
-        0.5,
-        0.9,
-        ("%s %s %02i UTC Sounding\n" "%s %s%s over %s")
-        % (
-            station,
-            name,
-            hour,
-            PDICT4[agg],
-            PDICT3[varname],
-            leveltitle,
-            MDICT[month],
-        ),
-        ha="center",
-        va="bottom",
-    )
     ax.grid(True)
 
     return fig, df
