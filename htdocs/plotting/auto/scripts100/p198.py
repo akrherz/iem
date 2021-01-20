@@ -80,6 +80,10 @@ PDICT3 = OrderedDict(
 PDICT4 = OrderedDict(
     (("min", "Minimum"), ("avg", "Average"), ("max", "Maximum"))
 )
+PDICT5 = {
+    "no": "Plot All Available Data",
+    "yes": "Only Plot Years with ~75% Data Availability",
+}
 
 
 def get_description():
@@ -142,8 +146,35 @@ def get_description():
             default=500,
             label="Which Pressure (hPa) level:",
         ),
+        dict(
+            type="select",
+            name="quorum",
+            default="yes",
+            options=PDICT5,
+            label="Should there be a quorum check before plotting?",
+        ),
     ]
     return desc
+
+
+def compute(dfin, varname):
+    """Compute our needed yearly aggregates."""
+    if dfin.empty:
+        raise ValueError("No Data Found")
+    # create final DataFrame holding our agg computations
+    df = dfin.groupby("year").agg(["min", "mean", "max", "count"]).copy()
+    df.columns = df.columns.map("_".join)
+    df = df.rename({f"{varname}_mean": f"{varname}_avg"}, axis=1)
+    # compute the min and max value timestamps
+    for year, df2 in dfin.groupby("year"):
+        for agg in ["min", "max"]:
+            rows = df2[df2[varname] == df.at[year, f"{varname}_{agg}"]]
+            vals = []
+            for _i, row in rows.iterrows():
+                vals.append(row["utc_valid"].strftime("%Y-%m-%d %H:%M"))
+            extra = "" if len(vals) < 5 else ";+ %s more" % (len(vals) - 4,)
+            df.at[year, f"{varname}_{agg}_valid"] = "; ".join(vals[:4]) + extra
+    return df
 
 
 def plotter(fdict):
@@ -190,49 +221,39 @@ def plotter(fdict):
     hrlimiter = f" extract(hour from f.valid at time zone 'UTC') = {hour} and "
     if hour == "ALL":
         hrlimiter = ""
+    yrcol = f"extract(year from f.valid + '{offset:0d} days'::interval)::int"
     if varname in ["tmpc", "dwpc", "height", "smps"]:
         leveltitle = " @ %s hPa" % (level,)
         dfin = read_sql(
             f"""
-            select extract(year from f.valid + '%s days'::interval) as year,
-            avg({varname}) as avg_{varname},
-            min({varname}) as min_{varname},
-            max({varname}) as max_{varname},
-            count(*)
+            select {yrcol} as year, {varname},
+            valid at time zone 'UTC' as utc_valid
             from raob_profile p JOIN raob_flights f on (p.fid = f.fid)
             WHERE f.station in %s and p.pressure = %s and {hrlimiter}
-            extract(month from f.valid) in %s and
-            {varname} is not null
-            GROUP by year ORDER by year ASC
+            extract(month from f.valid) in %s and {varname} is not null
         """,
             pgconn,
-            params=(offset, tuple(stations), level, tuple(months)),
-            index_col="year",
+            params=(tuple(stations), level, tuple(months)),
         )
     else:
         leveltitle = ""
         dfin = read_sql(
             f"""
-            select extract(year from f.valid + '%s days'::interval) as year,
-            avg({varname}) as avg_{varname},
-            min({varname}) as min_{varname},
-            max({varname}) as max_{varname},
-            count(*)
-            from raob_flights f
-            WHERE f.station in %s and {hrlimiter}
-            extract(month from f.valid) in %s and
-            {varname} is not null
-            GROUP by year ORDER by year ASC
+            select {yrcol} as year, {varname},
+            valid at time zone 'UTC' as utc_valid
+            from raob_flights f WHERE f.station in %s and {hrlimiter}
+            extract(month from f.valid) in %s and {varname} is not null
         """,
             pgconn,
-            params=(offset, tuple(stations), tuple(months)),
-            index_col="year",
+            params=(tuple(stations), tuple(months)),
         )
-    # need quorums
-    df = dfin[dfin["count"] > ((len(months) * 28) * 0.75)]
+    df = compute(dfin, varname)
+    if ctx["quorum"] == "yes":
+        # need quorums
+        df = df[df[f"{varname}_count"] > ((len(months) * 28) * 0.75)]
     if df.empty:
         raise NoDataFound("No data was found!")
-    colname = "%s_%s" % (agg, varname)
+    colname = f"{varname}_{agg}"
     title = "%s %s %s Sounding" % (
         station,
         name,
@@ -266,4 +287,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="_CRP", month="mjj", var="mlcape_jkg"))
+    plotter(dict(station="_CRP", month="mjj", var="mlcape_jkg", agg="avg"))
