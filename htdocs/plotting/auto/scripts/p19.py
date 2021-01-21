@@ -5,8 +5,9 @@ from collections import OrderedDict
 import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
+from matplotlib.font_manager import FontProperties
 from pyiem import network
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure, get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -74,6 +75,7 @@ def get_description():
             label="Optional: Overlay Observations for given year",
             name="year",
         ),
+        dict(type="cmap", name="cmap", default="Blues", label="Color Ramp:"),
     ]
     return desc
 
@@ -111,10 +113,13 @@ def plotter(fdict):
     )
     if ddf.empty:
         raise NoDataFound("No Data Found.")
+    ddf["range"] = ddf["high"] - ddf["low"]
+    xbins = np.arange(ddf["low"].min() - 3, ddf["low"].max() + 3, binsize)
+    ybins = np.arange(ddf["high"].min() - 3, ddf["high"].max() + 3, binsize)
 
-    bins = np.arange(-40, 121, binsize)
-
-    hist, xedges, yedges = np.histogram2d(ddf["low"], ddf["high"], bins)
+    hist, xedges, yedges = np.histogram2d(
+        ddf["low"], ddf["high"], [xbins, ybins]
+    )
     rows = []
     for i, xedge in enumerate(xedges[:-1]):
         for j, yedge in enumerate(yedges[:-1]):
@@ -128,14 +133,65 @@ def plotter(fdict):
     hist.mask = np.where(hist < (1.0 / years), True, False)
     ar = np.argwhere(hist.max() == hist)
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
-    res = ax.pcolormesh(xedges, yedges, hist.T)
-    fig.colorbar(res, label="Days per Year")
-    ax.grid(True)
-    ax.set_title(
-        ("%s [%s]\n" "Daily High vs Low Temp Histogram (month=%s)")
-        % (nt.sts[station]["name"], station, month.upper())
+    title = f"[{station}] {nt.sts[station]['name']}"
+    subtitle = (
+        "Daily High vs Low Temperature Histogram + Range between Low + High "
+        f"(month={month.upper()})"
     )
+    fig = figure(title=title, subtitle=subtitle)
+    kax = fig.add_axes([0.65, 0.5, 0.3, 0.36])
+    kax.grid(True)
+    kax.text(
+        0.02,
+        1.02,
+        "Daily Temperature Range Histogram + CDF",
+        transform=kax.transAxes,
+        bbox=dict(color="tan"),
+        va="bottom",
+    )
+    kax.hist(ddf["range"].values, density=True, color="lightgreen")
+    kax.set_ylabel("Density")
+    kax2 = kax.twinx()
+    kax2.set_ylabel("Cumulative Density")
+    kax2.hist(
+        ddf["range"].values,
+        density=True,
+        cumulative=100,
+        histtype="step",
+        color="k",
+    )
+    kax.set_xlim((kax.get_xlim()[0], ddf["range"].max()))
+
+    # Table of Percentiles
+    ranks = ddf["range"].quantile(np.arange(0, 1.0001, 0.0025))
+    xpos = 0.62
+    ypos = 0.37
+    fig.text(
+        0.65,
+        ypos + 0.03,
+        "Daily Temperature Range Percentiles",
+        bbox=dict(color="tan"),
+    )
+    fig.text(xpos - 0.01, ypos - 0.01, "Percentile   Value")
+    ypos -= 0.01
+    monofont = FontProperties(family="monospace")
+    for (q, val) in ranks.iteritems():
+        if 0.02 < q < 0.98 and (q * 100.0 % 10) != 0:
+            continue
+        if q > 0.1 and int(q * 100) in [20, 90]:
+            xpos += 0.13
+            ypos = 0.37
+            fig.text(xpos - 0.01, ypos - 0.01, "Percentile   Value")
+            ypos -= 0.01
+        ypos -= 0.025
+        label = f"{q * 100:-6g} {val:-6.0f}"
+        fig.text(xpos, ypos, label, fontproperties=monofont)
+
+    ax = fig.add_axes([0.07, 0.17, 0.5, 0.73])
+    res = ax.pcolormesh(xedges, yedges, hist.T, cmap=get_cmap(ctx["cmap"]))
+    cax = fig.add_axes([0.07, 0.08, 0.5, 0.01])
+    fig.colorbar(res, label="Days per Year", orientation="horizontal", cax=cax)
+    ax.grid(True)
     ax.set_ylabel(r"High Temperature $^{\circ}\mathrm{F}$")
     ax.set_xlabel(r"Low Temperature $^{\circ}\mathrm{F}$")
 
@@ -144,7 +200,7 @@ def plotter(fdict):
     ax.text(
         0.65,
         0.15,
-        ("Largest Frequency: %.1f days\n" "High: %.0f-%.0f Low: %.0f-%.0f")
+        ("Largest Frequency: %.1d days\n" "High: %.0d-%.0d Low: %.0d-%.0d")
         % (
             hist[xmax, ymax],
             yedges[ymax],
@@ -157,9 +213,10 @@ def plotter(fdict):
         transform=ax.transAxes,
         bbox=dict(color="white"),
     )
-    ax.axhline(32, linestyle="-", lw=1, color="k")
+    if ddf["high"].min() < 32:
+        ax.axhline(32, linestyle="-", lw=1, color="k")
     ax.text(
-        120,
+        ax.get_xlim()[1],
         32,
         r"32$^\circ$F",
         va="center",
@@ -168,10 +225,11 @@ def plotter(fdict):
         bbox=dict(color="k"),
         fontsize=8,
     )
-    ax.axvline(32, linestyle="-", lw=1, color="k")
+    if ddf["low"].min() < 32:
+        ax.axvline(32, linestyle="-", lw=1, color="k")
     ax.text(
         32,
-        117,
+        ax.get_ylim()[1],
         r"32$^\circ$F",
         va="top",
         ha="center",
@@ -190,9 +248,10 @@ def plotter(fdict):
         ax.scatter(
             ddf2["low"],
             ddf2["high"],
-            marker="x",
+            marker="o",
+            s=30,
             label=label,
-            edgecolor="white",
+            edgecolor="yellow",
             facecolor="red",
         )
         ax.legend()
