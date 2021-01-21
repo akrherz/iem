@@ -1,4 +1,4 @@
-#set echo
+#set -x
 
 cd current
 python plot_hilo.py 1

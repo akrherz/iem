@@ -58,7 +58,7 @@ def workflow(now, realtime):
     os.unlink(gribfn)
 
     val = grb["values"]
-    # Convert into units of 0.1 mm accumulation
+    # Convert into units of 0.02 mm accumulation
     val = val / 60.0 * 2.0 * 50.0
     val = np.where(val < 0.0, 255.0, val)
     imgdata[:, :] = np.flipud(val.astype("int"))

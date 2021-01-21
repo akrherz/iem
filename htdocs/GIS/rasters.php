@@ -6,7 +6,7 @@
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 82);
 require_once "../../include/database.inc.php";
-include_once "../../include/myview.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 $mesosite = iemdb("mesosite");
 
