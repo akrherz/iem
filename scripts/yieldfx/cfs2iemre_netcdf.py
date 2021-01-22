@@ -69,7 +69,7 @@ def merge(nc, valid, gribname, vname):
 
 def create_netcdf(valid):
     """Create and return the netcdf file"""
-    ncfn = "/mesonet/data/iemre/cfs_%s.nc" % (valid.strftime("%Y%m%d%H"),)
+    ncfn = "/mesonet/data/iemre/temp_cfs_%s.nc" % (valid.strftime("%Y%m%d%H"),)
     nc = ncopen(ncfn, "w")
     nc.title = "IEM Regridded CFS Member 1 Forecast %s" % (valid.year,)
     nc.platform = "Grided Forecast"
@@ -157,6 +157,17 @@ def create_netcdf(valid):
     return nc
 
 
+def finalize(nc):
+    """Cleanup after our work."""
+    filename = nc.filepath()
+    # Close the netcdf file
+    nc.close()
+    # Rename it
+    newfilename = filename.replace("temp_", "")
+    LOG.debug("Renaming %s to %s", filename, newfilename)
+    os.rename(filename, newfilename)
+
+
 def main(argv):
     """Go Main Go"""
     if len(argv) == 4:
@@ -176,7 +187,7 @@ def main(argv):
         ):
             merge(nc, valid, gribname, vname)
         # profit
-        nc.close()
+        finalize(nc)
 
 
 if __name__ == "__main__":
