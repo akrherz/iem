@@ -59,7 +59,8 @@ def main(argv):
     minval = min(gdd50)
     rng = max([int(max(gdd50) - minval), 10])
     ramp = np.linspace(minval, minval + rng, 10, dtype=np.int)
-    mp.contourf(lons, lats, gdd50, ramp)
+    if max(gdd50) > 0:
+        mp.contourf(lons, lats, gdd50, ramp)
     pqstr = "plot c 000000000000 summary/gdd_jan1.png bogus png"
     if gbase == 52:
         pqstr = "plot c 000000000000 summary/gdd52_jan1.png bogus png"

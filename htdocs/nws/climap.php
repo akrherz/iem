@@ -13,7 +13,7 @@ $t->thispage = "climate-today";
 $OL = '6.3.1';
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
-<link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
+<link rel="stylesheet" href="/vendor/jquery-ui/1.12.1/jquery-ui.min.css" />
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
 <style>
 .map {
@@ -23,11 +23,12 @@ $t->headextra = <<<EOF
 .popover {
 	width: 300px;
 }
+
 </style>
 EOF;
 $t->jsextra = <<<EOF
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
-<script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
+<script src="/vendor/jquery-ui/1.12.1/jquery-ui.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
 <script src='climap.js?v=10'></script>
 EOF;
@@ -90,8 +91,7 @@ $t->content = <<<EOF
     <option value="average_wind_speed">Average Wind Speed [mph]</option>
     </select>	
 		
-<strong>For Date:</strong>
-		<input type="text" id="datepicker" size="30">
+<strong>For Date:</strong><input type="text" id="datepicker" size="30">
 		
 </form>
 </div></div><!-- ./row -->

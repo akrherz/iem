@@ -494,3 +494,5 @@ a.down-big {
     font-size: 16px;
     padding: 10px 15px;
 }
+
+.ui-datepicker {z-index:10000 !important;}
