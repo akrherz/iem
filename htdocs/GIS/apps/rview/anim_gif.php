@@ -1,6 +1,9 @@
 <?php
 /* Create animated GIF! and then send it to them... */
 
+// Prevent client abort from leaving temp files around
+ignore_user_abort(true);
+
 $fts = isset($_GET["fts"]) ? intval($_GET["fts"]): exit();
 
 $memcache = new Memcached();

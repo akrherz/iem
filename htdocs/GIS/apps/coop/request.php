@@ -5,6 +5,8 @@ include("../../../../config/settings.inc.php");
  //   Give the user the climate data in the format they want...
  // -----------------------------------------------------------------
 
+// Prevent client abort from leaving temp files around
+ignore_user_abort(true);
 
 include_once "../../../../include/database.inc.php";
 include_once "../../../../include/network.php";

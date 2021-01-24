@@ -2,6 +2,9 @@
  /* Download .zip files of rainfall estimates! */
 require_once "../../config/settings.inc.php";
 
+// Prevent client abort from leaving temp files around
+ignore_user_abort(true);
+
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y", time() - 86400);
 $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m", time() - 86400);
 $day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d", time() - 86400);
