@@ -1,6 +1,9 @@
 """ Process Soil Data"""
+# stdlib
 import datetime
+import json
 
+# third party
 import pytz
 import pandas as pd
 from pandas.io.sql import read_sql
@@ -60,6 +63,13 @@ def main():
         LOG.info("failed to fetch %s", URI)
         return
     data = res.json()
+    if "features" not in data:
+        LOG.info(
+            "Got status_code: %s, invalid result of: %s",
+            res.status_code,
+            json.dumps(data, sort_keys=True, indent=4, separators=(",", ": ")),
+        )
+        return
     df = process_features(data["features"])
 
     pgconn = get_dbconn("iem")

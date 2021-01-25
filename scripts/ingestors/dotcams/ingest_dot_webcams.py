@@ -2,8 +2,10 @@
 
 RUN from RUN_10MIN.sh
 """
+# stdlib
 from datetime import datetime, timedelta, timezone
 import os
+import json
 import tempfile
 import subprocess
 
@@ -116,6 +118,13 @@ def main():
         LOG.info("Failed to fetch REST service, aborting.")
         return
     jobj = req.json()
+    if "features" not in jobj:
+        LOG.info(
+            "Got status_code: %s, invalid result of: %s",
+            req.status_code,
+            json.dumps(jobj, sort_keys=True, indent=4, separators=(",", ": ")),
+        )
+        return
     for feat in jobj["features"]:
         mcursor = pgconn.cursor()
         try:
