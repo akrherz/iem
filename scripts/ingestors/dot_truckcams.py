@@ -7,6 +7,7 @@ import datetime
 import subprocess
 import tempfile
 import os
+import json
 
 import pytz
 import requests
@@ -18,18 +19,17 @@ P3857 = pyproj.Proj(init="EPSG:3857")
 URI = (
     "https://services.arcgis.com/8lRhdTsQyJpO52F1/ArcGIS/rest/services/"
     "AVL_Images_Past_1HR_View/FeatureServer/0/query?"
-    "where=PHOTO_ANUMBER+IS+NOT+NULL&"
-    "objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&"
+    "where=PHOTO_ANUMBER+IS+NOT+NULL&resultRecordCount=1000&"
+    "geometryType=esriGeometryEnvelope&"
     "spatialRel=esriSpatialRelIntersects&resultType=none&distance=0.0&"
     "units=esriSRUnit_Meter&returnGeodetic=false&outFields=*&"
-    "returnGeometry=true&multipatchOption=xyFootprint&maxAllowableOffset="
-    "&geometryPrecision=&outSR=&datumTransformation=&"
+    "returnGeometry=true&multipatchOption=xyFootprint&"
     "applyVCSProjection=false&returnIdsOnly=false&returnUniqueIdsOnly=false&"
     "returnCountOnly=false&returnExtentOnly=false&returnDistinctValues=false&"
-    "orderByFields=PHOTO_UID&groupByFieldsForStatistics=&outStatistics="
-    "&having=&resultOffset=&resultRecordCount=&returnZ=false&returnM=false&"
+    "orderByFields=PHOTO_UID"
+    "&returnZ=false&returnM=false&"
     "returnExceededLimitFeatures=true&quantizationParameters=&"
-    "sqlFormat=none&f=pjson&token="
+    "sqlFormat=none&f=json"
 )
 
 
@@ -47,13 +47,38 @@ def get_archive_fn(label, utc):
     )
 
 
-def workflow():
-    """ Do stuff """
-    req = exponential_backoff(requests.get, URI, timeout=30)
+def fetch_features(offset):
+    """Fetch Features with the defined offset."""
+    LOG.debug("fetch_features for offset: %s", offset)
+    url = URI + f"&resultOffset={offset}"
+    req = exponential_backoff(requests.get, url, timeout=30)
     if req is None or req.status_code != 200:
-        return
+        return False, []
     data = req.json()
-    features = data.get("features", [])
+    if "features" not in data:
+        LOG.info(
+            "Got status_code: %s, invalid result of: %s",
+            req.status_code,
+            json.dumps(data, sort_keys=True, indent=4, separators=(",", ": ")),
+        )
+        return False, []
+    hasmore = data.get("exceededTransferLimit", False)
+    return hasmore, data["features"]
+
+
+def workflow():
+    """Our workflow."""
+    offset = 0
+    while offset < 20000:
+        hasmore, features = fetch_features(offset)
+        process_features(features)
+        offset += 1000
+        if not hasmore:
+            offset = 1e6
+
+
+def process_features(features):
+    """ Do stuff """
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
 
