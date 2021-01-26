@@ -222,6 +222,13 @@ def compute_grid_bounds(ctx):
             bnds = reference.SECTORS[ctx["csector"]]
             # suck
             bnds = [bnds[0], bnds[2], bnds[1], bnds[3]]
+        elif ctx["csector"] == "conus":
+            bnds = [
+                reference.CONUS_WEST,
+                reference.CONUS_SOUTH,
+                reference.CONUS_EAST,
+                reference.CONUS_NORTH,
+            ]
         else:
             bnds = reference.state_bounds[ctx["csector"]]
     else:
@@ -405,7 +412,8 @@ def plotter(fdict):
         if ctx["t"] == "cwa":
             mp.draw_mask(sector="conus")
             mp.draw_cwas(linewidth=2)
-    mp.drawcounties()
+    if sector not in ["conus", "midwest"]:
+        mp.drawcounties()
     if not df.empty and ctx["p"] in ["both", "plot"]:
         df2 = df[df["plotme"]]
         mp.plot_values(
@@ -433,13 +441,13 @@ def plotter(fdict):
 if __name__ == "__main__":
     fig, _df = plotter(
         dict(
-            csector="IA",
+            csector="conus",
             endts="2020-10-19 2000",
             hours=12,
             z="yes",
             p="both",
             coop="yes",
-            sz=15,
+            sz=105,
             f="linear",
         )
     )
