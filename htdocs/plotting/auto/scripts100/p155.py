@@ -4,8 +4,7 @@ from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 import pandas as pd
-from pyiem.plot.use_agg import plt
-from pyiem.plot.util import fitbox
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -56,6 +55,8 @@ METRICS = OrderedDict(
         ("max_mslp", "Max Sea Level Pressure"),
         ("below_mslp", "Sea Level Pressure Below Threshold"),
         ("above_mslp", "Sea Level Pressure At or Above Threshold"),
+        ("max_sknt", "Max Wind Speed Sustained"),
+        ("max_gust", "Max Wind Speed Gust"),
     ]
 )
 UNITS = {
@@ -65,6 +66,8 @@ UNITS = {
     "p01i": "inch",
     "mslp": "hPa",
     "alti": "inch",
+    "sknt": "knots",
+    "gust": "knots",
 }
 
 
@@ -88,6 +91,9 @@ def get_description():
 
     <p>If you pick the same start and end date, you effectively get the
     extremes for that date.</p>
+
+    <p>The CSV/Excel download option for this autoplot will return 100
+    unfiltered events for further usage as you see fit.</p>
     """
     desc["arguments"] = [
         dict(
@@ -169,7 +175,7 @@ def plotter(fdict):
             tzname,
             ctx["edate"].strftime("%m%d"),
         )
-        title = "between %s and %s" % (
+        title2 = "between %s and %s" % (
             ctx["sdate"].strftime("%-d %b"),
             ctx["edate"].strftime("%-d %b"),
         )
@@ -177,7 +183,7 @@ def plotter(fdict):
             date_limiter = (
                 "and to_char(valid at time zone '%s', 'mmdd') = '%s'"
             ) % (tzname, ctx["sdate"].strftime("%m%d"))
-            title = "on %s" % (ctx["sdate"].strftime("%-d %b"),)
+            title2 = "on %s" % (ctx["sdate"].strftime("%-d %b"),)
     else:
         if month == "all":
             months = range(1, 13)
@@ -200,14 +206,14 @@ def plotter(fdict):
         date_limiter = (
             " and extract(month from valid at time zone '%s') in %s"
         ) % (tzname, tuple(months))
-        title = MDICT[month]
+        title2 = MDICT[month]
     if ctx.get("hour") is not None:
         date_limiter += (
             f" and extract(hour from valid at time zone '{tzname}' "
             f"+ '10 minutes'::interval) = {ctx['hour']}"
         )
         dt = datetime.datetime(2000, 1, 1, ctx["hour"])
-        title += " @" + dt.strftime("%-I %p")
+        title2 += " @" + dt.strftime("%-I %p")
     (agg, dbvar) = varname.split("_")
     if agg in ["max", "min"]:
         titlelabel = "Top"
@@ -240,7 +246,7 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("Error, no results returned!")
     ylabels = []
-    fmt = "%.0f" if dbvar in ["tmpf", "dwpf"] else "%.2f"
+    fmt = "%.0f" if dbvar in ["tmpf", "dwpf", "sknt", "gust"] else "%.2f"
     hours = []
     y = []
     lastval = -99
@@ -266,8 +272,23 @@ def plotter(fdict):
     if not y:
         raise NoDataFound("No data found.")
 
-    fig = plt.figure(figsize=(8, 6))
-    ax = plt.axes([0.1, 0.1, 0.5, 0.8])
+    ab = ctx["_nt"].sts[station]["archive_begin"]
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
+    title = "%s [%s] %s 10 Events" % (
+        ctx["_nt"].sts[station]["name"],
+        station,
+        titlelabel,
+    )
+    subtitle = "%s %s (%s) (%s-%s)" % (
+        METRICS[varname],
+        ctx.get("threshold") if agg in ["above", "below"] else "",
+        title2,
+        ab.year,
+        datetime.datetime.now().year,
+    )
+    fig = figure(title=title, subtitle=subtitle)
+    ax = fig.add_axes([0.15, 0.1, 0.65, 0.8])
     ax.barh(
         range(len(y), 0, -1),
         y,
@@ -285,36 +306,15 @@ def plotter(fdict):
     ax2.set_yticklabels(ylabels[::-1])
     ax.grid(True, zorder=11)
     ax.set_xlabel("%s %s" % (METRICS[varname], UNITS[dbvar]))
-    ab = ctx["_nt"].sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata.")
-    fitbox(
-        fig,
-        ("%s [%s] %s 10 Events\n%s %s (%s) (%s-%s)")
-        % (
-            ctx["_nt"].sts[station]["name"],
-            station,
-            titlelabel,
-            METRICS[varname],
-            ctx.get("threshold") if agg in ["above", "below"] else "",
-            title,
-            ab.year,
-            datetime.datetime.now().year,
-        ),
-        0.01,
-        0.99,
-        0.91,
-        0.99,
-        ha="center",
-    )
     fig.text(
         0.98,
         0.03,
         "Timezone: %s" % (ctx["_nt"].sts[station]["tzname"],),
         ha="right",
+        fontsize=14,
     )
 
-    return fig, df.loc[rows2keep]
+    return fig, df
 
 
 if __name__ == "__main__":
