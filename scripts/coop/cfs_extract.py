@@ -13,9 +13,8 @@ import os
 
 import numpy as np
 import pygrib
-from pyiem.datatypes import temperature
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, logger, utc
+from pyiem.util import get_dbconn, logger, utc, convert_value
 
 LOG = logger()
 nt = NetworkTable("IACLIMATE")
@@ -24,13 +23,11 @@ nt = NetworkTable("IACLIMATE")
 def do_agg(dkey, fname, ts, data):
     """Do aggregate"""
     fn = ts.strftime(
-        (
-            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/cfs/%H/"
-            + fname
-            + ".01.%Y%m%d%H.daily.grib2"
-        )
+        f"/mesonet/ARCHIVE/data/%Y/%m/%d/model/cfs/%H/{fname}.01."
+        "%Y%m%d%H.daily.grib2"
     )
     if not os.path.isfile(fn):
+        LOG.debug("missing %s", fn)
         return
     # Precip
     gribs = pygrib.open(fn)
@@ -149,8 +146,10 @@ def dbsave(ts, data):
         j = np.digitize([nt.sts[sid]["lat"]], data["y"])[0]
         for date in data["fx"]:
             d = data["fx"][date]
-            high = bnds(temperature(d["high"][j, i], "K").value("F"), -70, 140)
-            low = bnds(temperature(d["low"][j, i], "K").value("F"), -90, 120)
+            high = bnds(
+                convert_value(d["high"][j, i], "degK", "degF"), -70, 140
+            )
+            low = bnds(convert_value(d["low"][j, i], "degK", "degF"), -90, 120)
             precip = bnds(round(float(d["precip"][j, i] / 25.4), 2), 0, 30)
             srad = bnds(d["srad"][j, i] / 1000000.0, 0, 50)
             if high is None or low is None or precip is None or srad is None:

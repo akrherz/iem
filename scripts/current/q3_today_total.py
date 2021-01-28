@@ -7,9 +7,8 @@ import os
 
 import numpy as np
 import pytz
-from pyiem.datatypes import distance
 from pyiem.plot import MapPlot, nwsprecip
-from pyiem.util import utc, ncopen, logger
+from pyiem.util import utc, ncopen, logger, mm2inch
 import pyiem.iemre as iemre
 
 LOG = logger()
@@ -84,12 +83,7 @@ def doday(ts, realtime):
         )
 
         mp.pcolormesh(
-            xx,
-            yy,
-            distance(precip, "MM").value("IN"),
-            clevs,
-            cmap=nwsprecip(),
-            units="inch",
+            xx, yy, mm2inch(precip), clevs, cmap=nwsprecip(), units="inch"
         )
         if sector == "iowa":
             mp.drawcounties()

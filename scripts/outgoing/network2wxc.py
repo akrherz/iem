@@ -8,9 +8,9 @@ import warnings
 import subprocess
 
 from netCDF4 import chartostring
-from pyiem.datatypes import temperature, speed
-from pyiem import meteorology
-from pyiem.util import ncopen, utc
+from metpy.units import units
+from metpy.calc import heat_index, windchill
+from pyiem.util import ncopen, utc, convert_value
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -22,7 +22,7 @@ def s(val):
             return "M"
     except Exception:
         pass
-    return "%5.1f" % (temperature(val, "K").value("F"),)
+    return "%5.1f" % (convert_value(val, "degK", "degF"),)
 
 
 def s2(val):
@@ -105,10 +105,10 @@ def main(argv):
             dwpf = "M"
         heat = "M"
         if tmpf != "M" and dwpf != "M":
-            t = temperature(nc.variables["temperature"][idx], "K")
-            d = temperature(nc.variables["dewpoint"][idx], "K")
+            t = units("degK") * nc.variables["temperature"][idx]
+            d = units("degK") * nc.variables["dewpoint"][idx]
             # relh = meteorology.relh(t, d).value("%")
-            heat = "%5.1f" % (meteorology.heatindex(t, d).value("F"),)
+            heat = "%5.1f" % (heat_index(t, d).to(units("degF")).m,)
         drct = s2(nc.variables["windDir"][idx])
         smps = s2(nc.variables["windSpeed"][idx])
         sped = "M"
@@ -117,9 +117,9 @@ def main(argv):
 
         wcht = "M"
         if tmpf != "M" and sped != "M":
-            t = temperature(nc.variables["temperature"][idx], "K")
-            sped = speed(nc.variables["windSpeed"][idx], "MPS")
-            wcht = "%5.1f" % (meteorology.windchill(t, sped).value("F"),)
+            t = units("degK") * nc.variables["temperature"][idx]
+            sped = units("meter / second") * nc.variables["windSpeed"][idx]
+            wcht = "%5.1f" % (windchill(t, sped).to(units("degF")).m,)
 
         ts = indices[sid]["ts"]
 

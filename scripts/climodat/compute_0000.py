@@ -7,8 +7,7 @@ import numpy as np
 import geopandas as gpd
 from pyiem import iemre
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.datatypes import temperature, distance
-from pyiem.util import get_dbconn, ncopen, logger
+from pyiem.util import get_dbconn, ncopen, logger, mm2inch, convert_value
 
 LOG = logger()
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -58,19 +57,15 @@ def do_day(valid):
     """ Process a day please """
     idx = iemre.daily_offset(valid)
     with ncopen(iemre.get_daily_ncname(valid.year), "r", timeout=300) as nc:
-        high = temperature(
-            nc.variables["high_tmpk_12z"][idx, :, :], "K"
-        ).value("F")
-        low = temperature(nc.variables["low_tmpk_12z"][idx, :, :], "K").value(
-            "F"
+        high = convert_value(
+            nc.variables["high_tmpk_12z"][idx, :, :], "degK", "degF"
         )
-        precip = distance(nc.variables["p01d_12z"][idx, :, :], "MM").value(
-            "IN"
+        low = convert_value(
+            nc.variables["low_tmpk_12z"][idx, :, :], "degK", "degF"
         )
-        snow = distance(nc.variables["snow_12z"][idx, :, :], "MM").value("IN")
-        snowd = distance(nc.variables["snowd_12z"][idx, :, :], "MM").value(
-            "IN"
-        )
+        precip = mm2inch(nc.variables["p01d_12z"][idx, :, :])
+        snow = mm2inch(nc.variables["snow_12z"][idx, :, :])
+        snowd = mm2inch(nc.variables["snowd_12z"][idx, :, :])
 
     # build out the state mappers
     pgconn = get_dbconn("postgis")

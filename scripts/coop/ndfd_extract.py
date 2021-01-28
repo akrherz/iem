@@ -15,9 +15,8 @@ import os
 import pyproj
 import numpy as np
 import pygrib
-from pyiem.datatypes import temperature
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, logger, utc
+from pyiem.util import get_dbconn, logger, utc, convert_value
 
 LOG = logger()
 
@@ -62,7 +61,7 @@ def do_temp(name, dkey, gribs, ftime, data):
     key = cst.strftime("%Y-%m-%d")
     d = data["fx"].setdefault(key, dict(precip=None, high=None, low=None))
     LOG.debug("Writting %s %s from ftime: %s", name, key, ftime)
-    d[dkey] = temperature(sel[0].values, "K").value("F")
+    d[dkey] = convert_value(sel[0].values, "degK", "degF")
 
 
 def process(ts):

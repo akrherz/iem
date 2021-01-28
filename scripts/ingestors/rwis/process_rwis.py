@@ -8,10 +8,7 @@ import subprocess
 import pandas as pd
 import pytz
 import numpy as np
-from metpy.units import units
-import metpy.calc as mcalc
 from pyiem.tracker import TrackerEngine
-from pyiem.datatypes import temperature, speed
 from pyiem.network import Table as NetworkTable
 from pyiem.observation import Observation
 from pyiem import util
@@ -112,14 +109,14 @@ def get_temp(val):
     """Attempt to convert a RWIS temperature into F"""
     if val in ["", 32767]:
         return None
-    return temperature(val / 100.0, "C").value("F")
+    return util.c2f(val / 100.0)
 
 
 def get_speed(val):
     """ Convert a speed value """
     if val in ["", 255]:
         return None
-    return speed(val, "KMH").value("KT")
+    return util.convert_value(val, "kilometer / hour", "knot")
 
 
 def merge(atmos, surface):
@@ -150,15 +147,6 @@ def merge(atmos, surface):
         data[nwsli]["valid"] = ts.replace(tzinfo=pytz.UTC)
         data[nwsli]["tmpf"] = get_temp(row["AirTemp"])
         data[nwsli]["dwpf"] = get_temp(row["Dewpoint"])
-        if data[nwsli]["tmpf"] is not None and data[nwsli]["dwpf"] is not None:
-            data[nwsli]["relh"] = (
-                mcalc.relative_humidity_from_dewpoint(
-                    data[nwsli]["tmpf"] * units("degF"),
-                    data[nwsli]["dwpf"] * units("degF"),
-                ).magnitude
-                * 100.0
-            )
-        # Rh is unused
         data[nwsli]["sknt"] = get_speed(row["SpdAvg"])
         data[nwsli]["gust"] = get_speed(row["SpdGust"])
         if row["DirMin"] not in ["", 32767, np.nan]:
@@ -285,8 +273,12 @@ def gen_metars(obs, filename, convids=False):
         if ob.get("sknt") is not None and ob.get("drct") is not None:
             windtxt = METARwind(ob["sknt"], ob["drct"], ob.get("gust"))
         if obs.get("tmpf") is not None and obs.get("dwpf") is not None:
-            m_tmpc, t_tmpc = METARtemp(temperature(ob["tmpf"], "F").value("C"))
-            m_dwpc, t_dwpc = METARtemp(temperature(ob["dwpf"], "F").value("C"))
+            m_tmpc, t_tmpc = METARtemp(
+                util.convert_value(ob["tmpf"], "degF", "degC")
+            )
+            m_dwpc, t_dwpc = METARtemp(
+                util.convert_value(ob["dwpf"], "degF", "degC")
+            )
             temptxt = "%s/%s" % (m_tmpc, m_dwpc)
             t_temptxt = "T%s%s " % (t_tmpc, t_dwpc)
         fp.write(

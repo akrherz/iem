@@ -9,8 +9,7 @@ import warnings
 import numpy as np
 import pytz
 from netCDF4 import chartostring
-from pyiem.datatypes import temperature
-from pyiem.util import get_dbconn, ncopen
+from pyiem.util import get_dbconn, ncopen, convert_value
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -19,8 +18,8 @@ def figure(val, qcval):
     """Go."""
     if qcval > 1000:
         return "Null"
-    tmpf = temperature(val, "K").value("F")
-    qcval = temperature(val + qcval, "K").value("F")
+    tmpf = convert_value(val, "degK", "degF")
+    qcval = convert_value(val + qcval, "degK", "degF")
     return qcval - tmpf
 
 
@@ -78,7 +77,7 @@ def main():
                 and not np.ma.is_masked(tmpkqcd[j, 0])
                 and not np.ma.is_masked(tmpkqcd[j, 6])
             ):
-                tmpf = check(temperature(nc_tmpk[j], "K").value("F"))
+                tmpf = check(convert_value(nc_tmpk[j], "degK", "degF"))
                 tmpf_qc_av = figure(nc_tmpk[j], tmpkqcd[j, 0])
                 tmpf_qc_sc = figure(nc_tmpk[j], tmpkqcd[j, 6])
             if (
@@ -86,7 +85,7 @@ def main():
                 and not np.ma.is_masked(dwpkqcd[j, 0])
                 and not np.ma.is_masked(dwpkqcd[j, 6])
             ):
-                dwpf = check(temperature(nc_dwpk[j], "K").value("F"))
+                dwpf = check(convert_value(nc_dwpk[j], "degK", "degF"))
                 dwpf_qc_av = figure(nc_dwpk[j], dwpkqcd[j, 0])
                 dwpf_qc_sc = figure(nc_dwpk[j], dwpkqcd[j, 6])
             if not np.ma.is_masked(nc_alti[j]):

@@ -7,8 +7,8 @@ import os
 import numpy as np
 import memcache
 from paste.request import parse_formvars
-from pyiem import iemre, datatypes
-from pyiem.util import utc, ncopen, html_escape
+from pyiem import iemre
+from pyiem.util import utc, ncopen, html_escape, mm2inch
 
 
 def myrounder(val, precision):
@@ -51,9 +51,7 @@ def dowork(fields):
         res["data"].append(
             {
                 "end_valid": valid.strftime("%Y-%m-%dT%H:00:00Z"),
-                "precip_in": myrounder(
-                    datatypes.distance(pt, "MM").value("IN"), 2
-                ),
+                "precip_in": myrounder(mm2inch(pt), 2),
             }
         )
 

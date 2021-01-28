@@ -5,11 +5,10 @@ import datetime
 import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
-from metpy.units import masked_array
+from metpy.units import masked_array, units
+from metpy.calc import wind_components
 from metpy.interpolate import inverse_distance_to_grid
 from pyiem import iemre
-from pyiem import meteorology
-import pyiem.datatypes as dt
 from pyiem.util import get_dbconn, ncopen, utc, logger
 
 # stop RuntimeWarning: invalid value encountered in greater
@@ -27,11 +26,11 @@ def grid_wind(df, domain):
     u = []
     v = []
     for _station, row in df.iterrows():
-        (_u, _v) = meteorology.uv(
-            dt.speed(row["sknt"], "KT"), dt.direction(row["drct"], "DEG")
+        (_u, _v) = wind_components(
+            units("knot") * row["sknt"], units("degree") * row["drct"]
         )
-        u.append(_u.value("MPS"))
-        v.append(_v.value("MPS"))
+        u.append(_u.to("meter / second").m)
+        v.append(_v.to("meter / second").m)
     df["u"] = u
     df["v"] = v
     ugrid = generic_gridder(df, "u", domain)

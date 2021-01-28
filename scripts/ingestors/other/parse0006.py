@@ -5,8 +5,7 @@ import sys
 
 import pytz
 from pyiem.observation import Observation
-from pyiem.datatypes import speed
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, convert_value
 
 
 def main():
@@ -47,7 +46,7 @@ def main():
 
     iemob.data["tmpf"] = float(tokens[5])
     iemob.data["relh"] = float(tokens[8])
-    iemob.data["sknt"] = speed(float(tokens[9]), "MPH").value("KT")
+    iemob.data["sknt"] = convert_value(float(tokens[9]), "mile / hour", "knot")
     iemob.data["drct"] = tokens[10]
     iemob.data["alti"] = float(tokens[13])
     iemob.data["pday"] = float(tokens[14])

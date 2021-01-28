@@ -2,9 +2,8 @@
 
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable  # This is needed.
-from pyiem.datatypes import temperature
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pyiem.util import get_autoplot_context, get_dbconn, utc, convert_value
 from pyiem.exceptions import NoDataFound
 
 XREF = {
@@ -67,7 +66,7 @@ def plotter(fdict):
     pgconn = get_dbconn("isuag")
     ctx = get_autoplot_context(fdict, get_description())
     threshold = 50
-    threshold_c = temperature(threshold, "F").value("C")
+    threshold_c = convert_value(threshold, "degF", "degC")
     hours1 = ctx["hours1"]
     hours2 = ctx["hours2"]
     station = ctx["station"]

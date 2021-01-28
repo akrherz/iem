@@ -5,8 +5,7 @@ from io import StringIO, BytesIO
 import pandas as pd
 import psycopg2.extras
 from paste.request import parse_formvars
-from pyiem.datatypes import temperature, distance
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, c2f, mm2inch
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 MISSING = {"", "M", "-99"}
@@ -139,88 +138,70 @@ def fetch_daily(form, cols):
         valid = row["valid"]
         station = row["station"]
         high = (
-            temperature(row["tair_c_max_qc"], "C").value("F")
+            c2f(row["tair_c_max_qc"])
             if row["tair_c_max_qc"] is not None
             else miss
         )
         low = (
-            temperature(row["tair_c_min_qc"], "C").value("F")
+            c2f(row["tair_c_min_qc"])
             if row["tair_c_min_qc"] is not None
             else miss
         )
         precip = (
-            distance(row["rain_mm_tot_qc"], "MM").value("IN")
-            if row["rain_mm_tot_qc"] > 0
-            else 0
+            mm2inch(row["rain_mm_tot_qc"]) if row["rain_mm_tot_qc"] > 0 else 0
         )
         et = (
-            distance(row["dailyet_qc"], "MM").value("IN")
+            mm2inch(row["dailyet_qc"])
             if row["dailyet_qc"] is not None and row["dailyet_qc"] > 0
             else 0
         )
 
         soil04t = (
-            temperature(row["tsoil_c_avg_qc"], "C").value("F")
+            c2f(row["tsoil_c_avg_qc"])
             if row["tsoil_c_avg_qc"] is not None
             else miss
         )
         soil04tn = (
-            temperature(row["soil04tn"], "C").value("F")
-            if row["soil04tn"] is not None
-            else miss
+            c2f(row["soil04tn"]) if row["soil04tn"] is not None else miss
         )
         soil04tx = (
-            temperature(row["soil04tx"], "C").value("F")
-            if row["soil04tx"] is not None
-            else miss
+            c2f(row["soil04tx"]) if row["soil04tx"] is not None else miss
         )
 
         soil12t = (
-            temperature(row["t12_c_avg_qc"], "C").value("F")
+            c2f(row["t12_c_avg_qc"])
             if row["t12_c_avg_qc"] is not None
             else miss
         )
         soil12tn = (
-            temperature(row["soil12tn"], "C").value("F")
-            if row["soil12tn"] is not None
-            else miss
+            c2f(row["soil12tn"]) if row["soil12tn"] is not None else miss
         )
         soil12tx = (
-            temperature(row["soil12tx"], "C").value("F")
-            if row["soil12tx"] is not None
-            else miss
+            c2f(row["soil12tx"]) if row["soil12tx"] is not None else miss
         )
 
         soil24t = (
-            temperature(row["t24_c_avg_qc"], "C").value("F")
+            c2f(row["t24_c_avg_qc"])
             if row["t24_c_avg_qc"] is not None
             else miss
         )
         soil24tn = (
-            temperature(row["soil24tn"], "C").value("F")
-            if row["soil24tn"] is not None
-            else miss
+            c2f(row["soil24tn"]) if row["soil24tn"] is not None else miss
         )
         soil24tx = (
-            temperature(row["soil24tx"], "C").value("F")
-            if row["soil24tx"] is not None
-            else miss
+            c2f(row["soil24tx"]) if row["soil24tx"] is not None else miss
         )
 
         soil50t = (
-            temperature(row["t50_c_avg_qc"], "C").value("F")
+            c2f(row["t50_c_avg_qc"])
             if row["t50_c_avg_qc"] is not None
             else miss
         )
         soil50tn = (
-            temperature(row["soil50tn"], "C").value("F")
-            if row["soil50tn"] is not None
-            else miss
+            c2f(row["soil50tn"]) if row["soil50tn"] is not None else miss
         )
         soil50tx = (
-            temperature(row["soil50tx"], "C").value("F")
-            if row["soil50tx"] is not None
-            else miss
+            c2f(row["soil50tx"]) if row["soil50tx"] is not None else miss
         )
 
         soil12vwc = (
@@ -362,7 +343,7 @@ def fetch_hourly(form, cols):
         valid = row["valid"]
         station = row["station"]
         tmpf = (
-            temperature(row["tair_c_avg_qc"], "C").value("F")
+            c2f(row["tair_c_avg_qc"])
             if row["tair_c_avg_qc"] is not None
             else miss
         )
@@ -373,7 +354,7 @@ def fetch_hourly(form, cols):
             else miss
         )
         precip = (
-            distance(row["rain_mm_tot_qc"], "MM").value("IN")
+            mm2inch(row["rain_mm_tot_qc"])
             if row["rain_mm_tot_qc"] is not None
             else miss
         )
@@ -388,27 +369,27 @@ def fetch_hourly(form, cols):
             else miss
         )
         et = (
-            distance(row["etalfalfa_qc"], "MM").value("IN")
+            mm2inch(row["etalfalfa_qc"])
             if row["etalfalfa_qc"] is not None
             else miss
         )
         soil04t = (
-            temperature(row["tsoil_c_avg_qc"], "C").value("F")
+            c2f(row["tsoil_c_avg_qc"])
             if row["tsoil_c_avg_qc"] is not None
             else miss
         )
         soil12t = (
-            temperature(row["t12_c_avg_qc"], "C").value("F")
+            c2f(row["t12_c_avg_qc"])
             if row["t12_c_avg_qc"] is not None
             else miss
         )
         soil24t = (
-            temperature(row["t24_c_avg_qc"], "C").value("F")
+            c2f(row["t24_c_avg_qc"])
             if row["t24_c_avg_qc"] is not None
             else miss
         )
         soil50t = (
-            temperature(row["t50_c_avg_qc"], "C").value("F")
+            c2f(row["t50_c_avg_qc"])
             if row["t50_c_avg_qc"] is not None
             else miss
         )

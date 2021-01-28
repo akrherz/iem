@@ -10,8 +10,7 @@ import pytz
 import psycopg2.extras
 from netCDF4 import chartostring
 from pyiem.observation import Observation
-from pyiem.datatypes import temperature, distance, speed
-from pyiem.util import get_dbconn, ncopen, logger
+from pyiem.util import get_dbconn, ncopen, logger, convert_value, mm2inch
 
 LOG = logger()
 MY_PROVIDERS = ["KYTC-RWIS", "KYMN", "NEDOR", "MesoWest"]
@@ -166,35 +165,37 @@ def main():
         for colname in ["scond0", "scond1", "scond2", "scond3"]:
             iem.data[colname] = db[sid].get(colname)
         if db[sid]["tmpk"] is not None:
-            iem.data["tmpf"] = temperature(db[sid]["tmpk"], "K").value("F")
+            iem.data["tmpf"] = convert_value(db[sid]["tmpk"], "degK", "degF")
         if db[sid]["dwpk"] is not None:
-            iem.data["dwpf"] = temperature(db[sid]["dwpk"], "K").value("F")
+            iem.data["dwpf"] = convert_value(db[sid]["dwpk"], "degK", "degF")
         if db[sid]["relh"] is not None and db[sid]["relh"] is not np.ma.masked:
             iem.data["relh"] = float(db[sid]["relh"])
         if db[sid]["drct"] is not None:
             iem.data["drct"] = db[sid]["drct"]
         if db[sid]["smps"] is not None:
-            iem.data["sknt"] = speed(db[sid]["smps"], "MPS").value("KT")
+            iem.data["sknt"] = convert_value(
+                db[sid]["smps"], "meter / second", "knot"
+            )
         if db[sid]["gmps"] is not None:
-            iem.data["gust"] = speed(db[sid]["gmps"], "MPS").value("KT")
+            iem.data["gust"] = convert_value(
+                db[sid]["gmps"], "meter / second", "knot"
+            )
         if db[sid]["pres"] is not None:
             iem.data["pres"] = (float(db[sid]["pres"]) / 100.00) * 0.02952
         if db[sid]["rtk1"] is not None:
-            iem.data["tsf0"] = temperature(db[sid]["rtk1"], "K").value("F")
+            iem.data["tsf0"] = convert_value(db[sid]["rtk1"], "degK", "degF")
         if db[sid]["rtk2"] is not None:
-            iem.data["tsf1"] = temperature(db[sid]["rtk2"], "K").value("F")
+            iem.data["tsf1"] = convert_value(db[sid]["rtk2"], "degK", "degF")
         if db[sid]["rtk3"] is not None:
-            iem.data["tsf2"] = temperature(db[sid]["rtk3"], "K").value("F")
+            iem.data["tsf2"] = convert_value(db[sid]["rtk3"], "degK", "degF")
         if db[sid]["rtk4"] is not None:
-            iem.data["tsf3"] = temperature(db[sid]["rtk4"], "K").value("F")
+            iem.data["tsf3"] = convert_value(db[sid]["rtk4"], "degK", "degF")
         if db[sid]["subk"] is not None:
-            iem.data["rwis_subf"] = temperature(db[sid]["subk"], "K").value(
-                "F"
+            iem.data["rwis_subf"] = convert_value(
+                db[sid]["subk"], "degK", "degF"
             )
         if db[sid]["pday"] is not None:
-            iem.data["pday"] = round(
-                distance(db[sid]["pday"], "MM").value("IN"), 2
-            )
+            iem.data["pday"] = round(mm2inch(db[sid]["pday"]), 2)
         if not iem.save(icursor):
             LOG.info(
                 "MADIS Extract: %s found new station: %s network: %s" "",

@@ -9,10 +9,10 @@ import matplotlib.colors as mpcolors
 import matplotlib.colorbar as mpcolorbar
 import matplotlib.patheffects as PathEffects
 from paste.request import parse_formvars
-from pyiem.meteorology import uv
+from metpy.calc import wind_components
+from metpy.units import units
 from pyiem.plot.use_agg import plt
 from pyiem.plot import get_cmap
-from pyiem.datatypes import speed, direction
 from pyiem.util import get_dbconn
 
 
@@ -79,9 +79,11 @@ def do(valid, yawsource):
         vals.append(row[1])
         ws.append(row[5])
         yaw.append(row[4])
-        a, b = uv(speed(row[5], "MPS"), direction(row[4], "deg"))
-        u.append(a.value("MPS"))
-        v.append(b.value("MPS"))
+        a, b = wind_components(
+            units("meter / second") * row[5], units("degree") * row[4]
+        )
+        u.append(a.m)
+        v.append(b.m)
         pitch.append(row[6])
     pitch = np.array(pitch)
     vals = np.array(vals)
@@ -133,8 +135,8 @@ def do(valid, yawsource):
         % (np.average(ws), np.std(ws)),
         transform=ax.transAxes,
     )
-    ax.set_xlabel("Longitude $^\circ$E")
-    ax.set_ylabel("Latitude $^\circ$N")
+    ax.set_xlabel(r"Longitude $^\circ$E")
+    ax.set_ylabel(r"Latitude $^\circ$N")
     ax.set_xlim(-94.832, -94.673)
     ax.set_ylim(42.545, 42.671)
     ax.get_xaxis().set_ticks([])

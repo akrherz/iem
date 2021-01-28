@@ -4,8 +4,7 @@ import subprocess
 
 import dropbox
 from pyiem.network import Table as NetworkTable
-from pyiem.datatypes import speed
-from pyiem.util import get_properties, get_dbconn, logger
+from pyiem.util import get_properties, get_dbconn, logger, convert_value
 
 LOG = logger()
 SITES = ["ames", "nashua", "sutherland", "crawfordsville", "lewis"]
@@ -51,9 +50,9 @@ def main():
         for row in icursor:
             if row[1] is None or row[2] is None:
                 continue
-            thisyear[row[0].strftime("%m%d")]["windspeed"] = speed(
-                row[1], "KTS"
-            ).value("MPS")
+            thisyear[row[0].strftime("%m%d")]["windspeed"] = convert_value(
+                row[1], "knot", "meter / second"
+            )
             thisyear[row[0].strftime("%m%d")]["rh"] = row[2]
 
         fn = "%s_HM_%s.wth" % (site, today.strftime("%Y%m%d"))
@@ -95,7 +94,9 @@ year    day     Solar   T-High  T-Low   RelHum  Precip  WndSpd\r
                     row[3],
                     row[4],
                     row[5],
-                    speed(row[6], "MPS").value("KMH"),
+                    convert_value(
+                        row[6], "meter / second", "kilometer / hour"
+                    ),
                 )
             )
             now += datetime.timedelta(days=1)

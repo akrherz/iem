@@ -7,9 +7,8 @@ import numpy as np
 import pytz
 import matplotlib.dates as mdates
 from paste.request import parse_formvars
-from pyiem.util import ncopen
+from pyiem.util import ncopen, convert_value
 from pyiem.plot.use_agg import plt
-from pyiem.datatypes import temperature
 
 
 def get_latest_time(model):
@@ -117,19 +116,19 @@ def process(model, lon, lat):
 
     ax.plot(
         times,
-        temperature(nc.variables["bdeckt"][:, i, j], "K").value("F"),
+        convert_value(nc.variables["bdeckt"][:, i, j], "degK", "degF"),
         color="k",
         label="Bridge Deck Temp" if model == "bridget" else "Pavement",
     )
     ax.plot(
         times,
-        temperature(nc.variables["tmpk"][:, i, j], "K").value("F"),
+        convert_value(nc.variables["tmpk"][:, i, j], "degK", "degF"),
         color="r",
         label="Air Temp",
     )
     ax.plot(
         times,
-        temperature(nc.variables["dwpk"][:, i, j], "K").value("F"),
+        convert_value(nc.variables["dwpk"][:, i, j], "degK", "degF"),
         color="g",
         label="Dew Point",
     )

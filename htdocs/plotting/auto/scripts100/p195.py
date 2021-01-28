@@ -3,8 +3,7 @@ import datetime
 from collections import OrderedDict
 
 from pandas.io.sql import read_sql
-from pyiem.datatypes import speed
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconn, convert_value
 from pyiem.exceptions import NoDataFound
 import seaborn as sns
 
@@ -76,12 +75,10 @@ def plotter(fdict):
     if phenomena == "_A":
         ps = ["TO", "SV"]
     df = read_sql(
-        """
-        SELECT issue at time zone 'America/Chicago' as issue,
-        tml_direction, tml_sknt from sbw
-        WHERE phenomena in %s and wfo = %s and status = 'NEW' and
-        tml_direction is not null and tml_sknt is not null ORDER by issue
-    """,
+        "SELECT issue at time zone 'America/Chicago' as issue, "
+        "tml_direction, tml_sknt from sbw WHERE phenomena in %s and "
+        "wfo = %s and status = 'NEW' and tml_direction is not null and "
+        "tml_sknt is not null ORDER by issue",
         pgconn,
         params=(tuple(ps), wfo),
     )
@@ -90,7 +87,7 @@ def plotter(fdict):
 
     g = sns.jointplot(
         x=df["tml_direction"].values,
-        y=speed(df["tml_sknt"], "KT").value("MPH"),
+        y=convert_value(df["tml_sknt"], "knot", "mile / hour"),
         s=40,
         zorder=1,
         color="tan",
@@ -106,7 +103,7 @@ def plotter(fdict):
         df2 = df[df["issue"].dt.date == date]
         g.ax_joint.scatter(
             df2["tml_direction"],
-            speed(df2["tml_sknt"], "KT").value("MPH"),
+            convert_value(df2["tml_sknt"], "knot", "mile / hour"),
             color="r",
             s=50,
             label=date.strftime("%b %-d, %Y"),

@@ -4,9 +4,8 @@ import os
 
 import numpy as np
 import pygrib
-from pyiem.datatypes import distance
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_autoplot_context, utc
+from pyiem.util import get_autoplot_context, utc, mm2inch
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"120": "Five Day", "168": "Seven Day"}
@@ -104,11 +103,11 @@ def plotter(fdict):
 
     grbs = pygrib.open(gribfn)
     grb = grbs[1]
-    precip = distance(grb.values, "MM").value("IN")
+    precip = mm2inch(grb.values)
     lats, lons = grb.latlons()
 
     title = (
-        "Weather Prediction Center %s Quantitative " "Precipitation Forecast"
+        "Weather Prediction Center %s Quantitative Precipitation Forecast"
     ) % (PDICT[period])
     subtitle = ("%sWPC Forecast %s UTC to %s UTC") % (
         ("US Drought Monitor Overlaid, " if ctx["opt"] == "both" else ""),

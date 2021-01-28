@@ -8,7 +8,6 @@ from pyiem import iemre, util
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.datatypes import distance
 from pyiem.exceptions import NoDataFound
 
 
@@ -51,7 +50,7 @@ def plotter(fdict):
     date = ctx["date"]
     sector = ctx["sector"]
     threshold = ctx["threshold"]
-    threshold_mm = distance(threshold, "IN").value("MM")
+    threshold_mm = util.convert_value(threshold, "inch", "millimeter")
     window_sts = date - datetime.timedelta(days=90)
     if window_sts.year != date.year:
         raise NoDataFound("Sorry, do not support multi-year plots yet!")
@@ -65,9 +64,7 @@ def plotter(fdict):
 
     # Get the state weight
     df = gpd.GeoDataFrame.from_postgis(
-        """
-    SELECT the_geom from states where state_abbr = %s
-    """,
+        "SELECT the_geom from states where state_abbr = %s",
         util.get_dbconn("postgis"),
         params=(sector,),
         index_col=None,

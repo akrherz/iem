@@ -6,10 +6,10 @@ import traceback
 
 import inotify.adapters
 import pytz
+from metpy.units import units
+from metpy.calc import dewpoint_from_relative_humidity
 from pyiem.observation import Observation
-from pyiem.datatypes import temperature, humidity, speed
-import pyiem.meteorology as met
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconn, logger, convert_value, c2f
 import numpy as np
 import pandas as pd
 
@@ -152,29 +152,32 @@ def minute_iemaccess(df):
     for _i, row in df.iterrows():
         # Update IEMAccess, pandas.Timestamp causes grief
         ob = Observation(row["station"], "ISUSM", row["valid"].to_pydatetime())
-        tmpc = temperature(row["tair_c_avg_qc"], "C")
-        if tmpc.value("F") > -50 and tmpc.value("F") < 140:
-            ob.data["tmpf"] = tmpc.value("F")
-            relh = humidity(row["rh_avg_qc"], "%")
-            ob.data["relh"] = relh.value("%")
-            ob.data["dwpf"] = met.dewpoint(tmpc, relh).value("F")
+        tmpc = units("degC") * row["tair_c_avg_qc"]
+        tmpf = tmpc.to(units("degF")).m
+        if -50 < tmpf < 140:
+            ob.data["tmpf"] = tmpf
+            relh = units("percent") * row["rh_avg_qc"]
+            ob.data["relh"] = relh.m
+            ob.data["dwpf"] = (
+                dewpoint_from_relative_humidity(tmpc, relh).to(units("degF")).m
+            )
         # database srad is W/ms2
         ob.data["srad"] = row["slrkj_tot_qc"] / 60.0 * 1000.0
         ob.data["pcounter"] = row["rain_in_tot_qc"]
-        ob.data["sknt"] = speed(row["ws_mph_s_wvt_qc"], "MPH").value("KT")
+        ob.data["sknt"] = convert_value(
+            row["ws_mph_s_wvt_qc"], "mile / hour", "knot"
+        )
         if "ws_mph_max" in df.columns:
-            ob.data["gust"] = speed(row["ws_mph_max_qc"], "MPH").value("KT")
+            ob.data["gust"] = convert_value(
+                row["ws_mph_max_qc"], "mile / hour", "knot"
+            )
         ob.data["drct"] = row["winddir_d1_wvt_qc"]
         if "tsoil_c_avg" in df.columns:
-            ob.data["c1tmpf"] = temperature(row["tsoil_c_avg_qc"], "C").value(
-                "F"
-            )
-        ob.data["c2tmpf"] = temperature(row["t12_c_avg_qc"], "C").value("F")
-        ob.data["c3tmpf"] = temperature(row["t24_c_avg_qc"], "C").value("F")
+            ob.data["c1tmpf"] = c2f(row["tsoil_c_avg_qc"])
+        ob.data["c2tmpf"] = c2f(row["t12_c_avg_qc"])
+        ob.data["c3tmpf"] = c2f(row["t24_c_avg_qc"])
         if "t50_c_avg" in df.columns:
-            ob.data["c4tmpf"] = temperature(row["t50_c_avg_qc"], "C").value(
-                "F"
-            )
+            ob.data["c4tmpf"] = c2f(row["t50_c_avg_qc"])
         if "calcvwc12_avg" in df.columns:
             ob.data["c2smv"] = row["calcvwc12_avg_qc"] * 100.0
         if "calcvwc24_avg" in df.columns:
@@ -208,14 +211,18 @@ def process(path, fn):
     if tabletype == "DailySI":
         # This is kludgy, during CDT, timestamp is 1 AM, CST, midnight
         df["valid"] = df["valid"].dt.date - datetime.timedelta(days=1)
-        df["rain_mm_tot"] = df["rain_in_tot"] * 25.4
+        df["rain_mm_tot"] = convert_value(
+            df["rain_in_tot"], "inch", "millimeter"
+        )
         df = df.drop("rain_in_tot", axis=1)
         df["slrmj_tot"] = df["slrw_avg"] * 86400.0 / 1000000.0
         df = df.drop("slrw_avg", axis=1)
     elif tabletype == "HrlySI":
         df["slrmj_tot"] = df["slrw_avg"] * 3600.0 / 1000000.0
         df = df.drop("slrw_avg", axis=1)
-        df["rain_mm_tot"] = df["rain_in_tot"] * 25.4
+        df["rain_mm_tot"] = convert_value(
+            df["rain_in_tot"], "inch", "millimeter"
+        )
         df = df.drop("rain_in_tot", axis=1)
         df["ws_mps_s_wvt"] = df["ws_mph_s_wvt"] * 0.44704
         df = df.drop("ws_mph_s_wvt", axis=1)
@@ -231,8 +238,12 @@ def process(path, fn):
             continue
         if tabletype != "MinSI" and colname == "rain_in_tot":
             # Database currently only has mm column :/
-            df["rain_mm_tot"] = df["rain_in_tot"] * 25.4
-            df["rain_mm_tot_qc"] = df["rain_in_tot"] * 25.4
+            df["rain_mm_tot"] = convert_value(
+                df["rain_in_tot"], "inch", "millimeter"
+            )
+            df["rain_mm_tot_qc"] = convert_value(
+                df["rain_in_tot"], "inch", "millimeter"
+            )
             df["rain_mm_tot_f"] = None
         df["%s_qc" % (colname,)] = df[colname]
         if colname.startswith("calc_vwc"):

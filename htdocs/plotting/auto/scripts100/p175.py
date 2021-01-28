@@ -12,8 +12,7 @@ import matplotlib.dates as mdates
 from pyiem import iemre
 from pyiem.plot.use_agg import plt
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.datatypes import distance
-from pyiem.util import get_autoplot_context, get_dbconn, ncopen
+from pyiem.util import get_autoplot_context, get_dbconn, ncopen, convert_value
 from pyiem import reference
 from pyiem.exceptions import NoDataFound
 
@@ -66,7 +65,7 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     year = ctx["year"]
     thres = ctx["thres"]
-    metric = distance(thres, "IN").value("MM")
+    metric = convert_value(thres, "inch", "millimeter")
     state = ctx["state"][:2]
 
     sts = datetime.datetime(year, 10, 1)
@@ -75,9 +74,7 @@ def plotter(fdict):
 
     pgconn = get_dbconn("postgis")
     states = gpd.GeoDataFrame.from_postgis(
-        """
-    SELECT the_geom, state_abbr from states where state_abbr = %s
-    """,
+        "SELECT the_geom, state_abbr from states where state_abbr = %s",
         pgconn,
         params=(state,),
         index_col="state_abbr",

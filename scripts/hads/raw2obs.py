@@ -6,8 +6,9 @@ from io import StringIO
 import pytz
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.datatypes import speed
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, convert_value, logger
+
+LOG = logger()
 
 
 def v(val):
@@ -35,14 +36,14 @@ def do(ts):
         index_col=None,
     )
     if df.empty:
-        print("No data found for hads/raw2obs.py date: %s" % (ts,))
+        LOG.info("No data found for date: %s", ts)
         return
 
     pdf = pd.pivot_table(
         df, values="value", index=["station", "valid"], columns="vname"
     )
     if "USI" in pdf.columns:
-        pdf["sknt"] = speed(pdf["USI"].values, "MPH").value("KT")
+        pdf["sknt"] = convert_value(pdf["USI"].values, "mile / hour", "knot")
 
     table = ts.strftime("t%Y")
     data = StringIO()

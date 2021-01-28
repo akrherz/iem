@@ -2,13 +2,19 @@
 import calendar
 
 from pandas.io.sql import read_sql
-from pyiem import meteorology
+from metpy.units import units as munits
+from metpy.calc import wind_components, wind_direction
 from pyiem.plot.use_agg import plt
-from pyiem.util import drct2text, get_autoplot_context, get_dbconn
-from pyiem.datatypes import direction, speed
+from pyiem.util import (
+    drct2text,
+    get_autoplot_context,
+    get_dbconn,
+    convert_value,
+)
 from pyiem.exceptions import NoDataFound
 
 UNITS = {"mph": "miles per hour", "kt": "knots", "mps": "meters per second"}
+UNITCONV = {"mph": "miles / hour", "kt": "knot", "mps": "meter / second"}
 
 
 def get_description():
@@ -59,23 +65,29 @@ def plotter(fdict):
     )
     if df.empty:
         raise NoDataFound("No Data Found.")
-    sknt = speed(df["sknt"].values, "KT")
-    drct = direction(df["drct"].values, "DEG")
-    df["u"], df["v"] = [x.value("MPS") for x in meteorology.uv(sknt, drct)]
+    sknt = munits("knot") * df["sknt"].values
+    drct = munits("degree") * df["drct"].values
+    df["u"], df["v"] = [
+        x.to(munits("meter / second")).m for x in wind_components(sknt, drct)
+    ]
     df["month"] = df["ts"].dt.month
     grp = df[["month", "u", "v", "sknt"]].groupby("month").mean()
-    grp["u_%s" % (units,)] = speed(grp["u"].values, "KT").value(units.upper())
-    grp["v_%s" % (units,)] = speed(grp["u"].values, "KT").value(units.upper())
-    grp["sped_%s" % (units,)] = speed(grp["sknt"].values, "KT").value(
-        units.upper()
+    grp["u_%s" % (units,)] = convert_value(
+        grp["u"].values, "meter / second", UNITCONV[units]
     )
-    drct = meteorology.drct(
-        speed(grp["u"].values, "KT"), speed(grp["v"].values, "KT")
+    grp["v_%s" % (units,)] = convert_value(
+        grp["v"].values, "meter / second", UNITCONV[units]
     )
-    grp["drct"] = drct.value("DEG")
-    maxval = grp["sped_%s" % (units,)].max()
+    grp["sped_%s" % (units,)] = convert_value(
+        grp["sknt"].values, "knot", UNITCONV[units]
+    )
+    grp["drct"] = wind_direction(
+        munits("meter / second") * grp["u"].values,
+        munits("meter / second") * grp["v"].values,
+    ).m
+    maxval = grp[f"sped_{units}"].max()
     (fig, ax) = plt.subplots(1, 1)
-    ax.barh(grp.index.values, grp["sped_%s" % (units,)].values, align="center")
+    ax.barh(grp.index.values, grp[f"sped_{units}"].values, align="center")
     ax.set_xlabel("Average Wind Speed [%s]" % (UNITS[units],))
     ax.set_yticks(grp.index.values)
     ax.set_yticklabels(calendar.month_abbr[1:])

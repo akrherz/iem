@@ -3,8 +3,7 @@
  happier
 """
 
-from pyiem.util import get_dbconn, logger
-from pyiem.datatypes import speed, distance, temperature
+from pyiem.util import get_dbconn, logger, convert_value, c2f, mm2inch
 
 LOG = logger()
 ISUAG = get_dbconn("isuag", user="mesonet")
@@ -93,11 +92,11 @@ def one():
     )
 
     for row in icursor:
-        avg_sknt = speed(row[2], "MPS").value("KT")
+        avg_sknt = convert_value(row[2], "meter / second", "knot")
         avg_drct = row[3]
-        pday = distance(row[4], "MM").value("IN")
-        high = temperature(row[5], "C").value("F")
-        low = temperature(row[6], "C").value("F")
+        pday = mm2inch(row[4])
+        high = c2f(row[5])
+        low = c2f(row[6])
         iemcursor.execute(
             """
         UPDATE summary SET avg_sknt = %s, vector_avg_drct = %s, pday = %s,

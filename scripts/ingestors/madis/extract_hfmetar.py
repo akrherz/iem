@@ -14,9 +14,8 @@ from tqdm import tqdm
 from metar import Metar
 from netCDF4 import chartostring
 from metpy.units import units, masked_array
-from pyiem.datatypes import temperature, distance, pressure
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn, ncopen, logger
+from pyiem.util import get_dbconn, ncopen, logger, convert_value, mm2inch
 from pyiem.reference import TRACE_VALUE
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -89,8 +88,8 @@ def process(ncfn):
             if vname2 in nc.variables:
                 data[vname2] = nc.variables[vname2][:]
     for vname in ["temperature", "dewpoint"]:
-        data[vname + "C"] = temperature(data[vname], "K").value("C")
-        data[vname] = temperature(data[vname], "K").value("F")
+        data[vname + "C"] = convert_value(data[vname], "degK", "degC")
+        data[vname] = convert_value(data[vname], "degK", "degF")
     for vname in ["windSpeed", "windGust"]:
         data[vname] = (
             masked_array(data[vname], units("meter / second"))
@@ -98,12 +97,12 @@ def process(ncfn):
             .magnitude
         )
 
-    data["altimeter"] = pressure(data["altimeter"], "PA").value("IN")
-    data["skyCovLayerBase"] = distance(data["skyCovLayerBase"], "M").value(
-        "FT"
+    data["altimeter"] = convert_value(data["altimeter"], "pascal", "inch_Hg")
+    data["skyCovLayerBase"] = convert_value(
+        data["skyCovLayerBase"], "meter", "foot"
     )
-    data["visibility"] = distance(data["visibility"], "M").value("MI")
-    data["precipAccum"] = distance(data["precipAccum"], "MM").value("IN")
+    data["visibility"] = convert_value(data["visibility"], "meter", "mile")
+    data["precipAccum"] = mm2inch(data["precipAccum"])
     stations = chartostring(data["stationId"][:])
     presentwxs = chartostring(data["presWx"][:])
     skycs = chartostring(data["skyCvr"][:])

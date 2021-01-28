@@ -3,9 +3,8 @@ import datetime
 import sys
 
 import numpy as np
-from pyiem.datatypes import distance
 from pyiem.plot import MapPlot
-from pyiem.util import ncopen
+from pyiem.util import ncopen, mm2inch
 from pyiem import iemre
 
 
@@ -27,9 +26,7 @@ def do_month(year, month, routes):
 
     lats = nc.variables["lat"][:]
     lons = nc.variables["lon"][:]
-    p01d = distance(
-        np.sum(nc.variables["p01d"][idx0:idx1, :, :], 0), "MM"
-    ).value("IN")
+    p01d = mm2inch(np.sum(nc.variables["p01d"][idx0:idx1, :, :], 0))
     nc.close()
 
     mp = MapPlot(

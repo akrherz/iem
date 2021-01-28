@@ -8,8 +8,8 @@ import shutil
 import numpy as np
 import shapefile
 from paste.request import parse_formvars
-from pyiem import iemre, datatypes
-from pyiem.util import get_dbconn, ncopen
+from pyiem import iemre
+from pyiem.util import get_dbconn, ncopen, convert_value
 
 
 def application(environ, start_response):
@@ -39,14 +39,14 @@ def application(environ, start_response):
         )
 
         # GDD
-        H = datatypes.temperature(
-            nc.variables["high_tmpk"][offset0:offset1], "K"
-        ).value("F")
+        H = convert_value(
+            nc.variables["high_tmpk"][offset0:offset1], "degK", "degF"
+        )
         H = np.where(H < base, base, H)
         H = np.where(H > ceil, ceil, H)
-        L = datatypes.temperature(
-            nc.variables["low_tmpk"][offset0:offset1], "K"
-        ).value("F")
+        L = convert_value(
+            nc.variables["low_tmpk"][offset0:offset1], "degK", "degF"
+        )
         L = np.where(L < base, base, L)
         gdd = np.sum((H + L) / 2.0 - base, axis=0)
 

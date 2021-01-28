@@ -18,8 +18,7 @@ import pyproj
 import numpy as np
 import psycopg2.extras
 from paste.request import parse_formvars
-from pyiem.datatypes import speed
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, convert_value
 
 # Do geo math in US National Atlas Equal Area
 P3857 = pyproj.Proj(init="epsg:3857")
@@ -260,7 +259,7 @@ def rabbit_tracks(row):
     drct = row["drct"]
     sknt = row["sknt"]
     x0, y0 = P3857(lon0, lat0)
-    smps = speed(sknt, "KTS").value("MPS")
+    smps = convert_value(sknt, "knot", "meter / second")
     angle = dir2ccwrot(drct)
     rotation = (drct + 180) % 360
     rad = math.radians(angle)
@@ -293,12 +292,10 @@ def produce_content(nexrad):
         title = "IEM %s NEXRAD L3 Attributes" % (nexrad,)
         threshold = 45
     cursor.execute(
-        """
-        SELECT *, ST_x(geom) as lon, ST_y(geom) as lat,
-        valid at time zone 'UTC' as utc_valid
-        from nexrad_attributes WHERE valid > now() - '15 minutes'::interval
-    """
-        + limiter
+        "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat, "
+        "valid at time zone 'UTC' as utc_valid "
+        "from nexrad_attributes WHERE valid > now() - '15 minutes'::interval "
+        f"{limiter}"
     )
     res = (
         "Refresh: 3\n"

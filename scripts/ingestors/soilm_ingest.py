@@ -16,10 +16,10 @@ import psycopg2
 import pytz
 import numpy as np
 import pandas as pd
+from metpy.units import units
+from metpy.calc import dewpoint_from_relative_humidity
 from pyiem.observation import Observation
-from pyiem.datatypes import temperature, humidity, distance, speed
-import pyiem.meteorology as met
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconn, logger, convert_value, c2f, mm2inch
 
 LOG = logger()
 ISUAG = get_dbconn("isuag")
@@ -260,36 +260,35 @@ def m15_process(nwsli, maxts):
     acursor = ACCESS.cursor()
     for _i, row in df.iterrows():
         ob = Observation(nwsli, "ISUSM", row["valid"])
-        tmpc = temperature(row["tair_c_avg_qc"], "C")
-        if tmpc.value("F") > -50 and tmpc.value("F") < 140:
-            ob.data["tmpf"] = tmpc.value("F")
-            relh = humidity(row["rh_avg_qc"], "%")
-            ob.data["relh"] = relh.value("%")
-            ob.data["dwpf"] = met.dewpoint(tmpc, relh).value("F")
+        tmpc = units("degC") * row["tair_c_avg_qc"]
+        tmpf = tmpc.to(units("degF")).m
+        if -50 < tmpf < 140:
+            ob.data["tmpf"] = tmpf
+            relh = units("percent") * row["rh_avg_qc"]
+            ob.data["relh"] = relh.m
+            ob.data["dwpf"] = (
+                dewpoint_from_relative_humidity(tmpc, relh).to(units("degF")).m
+            )
         # ob.data["srad"] = row["slrkw_avg_qc"]
         # ob.data["pcounter"] = round(
         #    distance(row["rain_mm_tot_qc"], "MM").value("IN"), 2
         # )
-        ob.data["sknt"] = speed(row["ws_mph_s_wvt_qc"], "MPH").value("KT")
-        ob.data["gust"] = speed(row["ws_mph_max_qc"], "MPH").value("KT")
+        ob.data["sknt"] = convert_value(
+            row["ws_mph_s_wvt_qc"], "mile / hour", "knot"
+        )
+        ob.data["gust"] = convert_value(
+            row["ws_mph_max_qc"], "mile / hour", "knot"
+        )
         # ob.data["max_gust_ts"] = row["ws_mph_tmx"]
         ob.data["drct"] = row["winddir_d1_wvt_qc"]
         if "tsoil_c_avg" in df.columns:
-            ob.data["c1tmpf"] = temperature(row["tsoil_c_avg_qc"], "C").value(
-                "F"
-            )
+            ob.data["c1tmpf"] = c2f(row["tsoil_c_avg_qc"])
         if "t12_c_avg" in df.columns:
-            ob.data["c2tmpf"] = temperature(row["t12_c_avg_qc"], "C").value(
-                "F"
-            )
+            ob.data["c2tmpf"] = c2f(row["t12_c_avg_qc"])
         if "t24_c_avg" in df.columns:
-            ob.data["c3tmpf"] = temperature(row["t24_c_avg_qc"], "C").value(
-                "F"
-            )
+            ob.data["c3tmpf"] = c2f(row["t24_c_avg_qc"])
         if "t50_c_avg" in df.columns:
-            ob.data["c4tmpf"] = temperature(row["t50_c_avg_qc"], "C").value(
-                "F"
-            )
+            ob.data["c4tmpf"] = c2f(row["t50_c_avg_qc"])
         if "calc_vwc_12_avg" in df.columns:
             ob.data["c2smv"] = row["calc_vwc_12_avg_qc"] * 100.0
         if "calc_vwc_24_avg" in df.columns:
@@ -315,38 +314,35 @@ def hourly_process(nwsli, maxts):
     for _i, row in df.iterrows():
         # Update IEMAccess
         ob = Observation(nwsli, "ISUSM", row["valid"])
-        tmpc = temperature(row["tair_c_avg_qc"], "C")
-        if tmpc.value("F") > -50 and tmpc.value("F") < 140:
-            ob.data["tmpf"] = tmpc.value("F")
-            relh = humidity(row["rh_qc"], "%")
-            ob.data["relh"] = relh.value("%")
-            ob.data["dwpf"] = met.dewpoint(tmpc, relh).value("F")
+        tmpc = units("degC") * row["tair_c_avg_qc"]
+        tmpf = tmpc.to(units("degF")).m
+        if -50 < tmpf < 140:
+            ob.data["tmpf"] = tmpf
+            relh = units("percent") * row["rh_qc"]
+            ob.data["relh"] = relh.m
+            ob.data["dwpf"] = (
+                dewpoint_from_relative_humidity(tmpc, relh).to(units("degF")).m
+            )
         # SIC the units of slrkw are actually W/m2
         ob.data["srad"] = row["slrkw_avg_qc"]
-        ob.data["phour"] = round(
-            distance(row["rain_mm_tot_qc"], "MM").value("IN"), 2
+        ob.data["phour"] = round(mm2inch(row["rain_mm_tot_qc"]), 2)
+        ob.data["sknt"] = convert_value(
+            row["ws_mps_s_wvt_qc"], "meter / second", "knot"
         )
-        ob.data["sknt"] = speed(row["ws_mps_s_wvt_qc"], "MPS").value("KT")
         if "ws_mph_max" in df.columns:
-            ob.data["gust"] = speed(row["ws_mph_max_qc"], "MPH").value("KT")
+            ob.data["gust"] = convert_value(
+                row["ws_mph_max_qc"], "mile / hour", "knot"
+            )
             ob.data["max_gust_ts"] = row["ws_mph_tmx"]
         ob.data["drct"] = row["winddir_d1_wvt_qc"]
         if "tsoil_c_avg" in df.columns:
-            ob.data["c1tmpf"] = temperature(row["tsoil_c_avg_qc"], "C").value(
-                "F"
-            )
+            ob.data["c1tmpf"] = c2f(row["tsoil_c_avg_qc"])
         if "t12_c_avg_qc" in df.columns:
-            ob.data["c2tmpf"] = temperature(row["t12_c_avg_qc"], "C").value(
-                "F"
-            )
+            ob.data["c2tmpf"] = c2f(row["t12_c_avg_qc"])
         if "t24_c_avg_qc" in df.columns:
-            ob.data["c3tmpf"] = temperature(row["t24_c_avg_qc"], "C").value(
-                "F"
-            )
+            ob.data["c3tmpf"] = c2f(row["t24_c_avg_qc"])
         if "t50_c_avg" in df.columns:
-            ob.data["c4tmpf"] = temperature(row["t50_c_avg_qc"], "C").value(
-                "F"
-            )
+            ob.data["c4tmpf"] = c2f(row["t50_c_avg_qc"])
         if "calc_vwc_12_avg" in df.columns:
             ob.data["c2smv"] = row["calc_vwc_12_avg_qc"] * 100.0
         if "calc_vwc_24_avg" in df.columns:
@@ -376,14 +372,12 @@ def daily_process(nwsli, maxts):
         )
         valid = valid.replace(tzinfo=pytz.timezone("America/Chicago"))
         ob = Observation(nwsli, "ISUSM", valid)
-        ob.data["max_tmpf"] = temperature(row["tair_c_max_qc"], "C").value("F")
-        ob.data["min_tmpf"] = temperature(row["tair_c_min_qc"], "C").value("F")
-        ob.data["pday"] = round(
-            distance(row["rain_mm_tot_qc"], "MM").value("IN"), 2
-        )
+        ob.data["max_tmpf"] = c2f(row["tair_c_max_qc"])
+        ob.data["min_tmpf"] = c2f(row["tair_c_min_qc"])
+        ob.data["pday"] = round(mm2inch(row["rain_mm_tot_qc"]), 2)
         if valid not in EVENTS["days"]:
             EVENTS["days"].append(valid)
-        ob.data["et_inch"] = distance(row["dailyet_qc"], "MM").value("IN")
+        ob.data["et_inch"] = mm2inch(row["dailyet_qc"])
         ob.data["srad_mj"] = row["slrmj_tot_qc"]
         # Someday check if this is apples to apples here
         ob.data["vector_avg_drct"] = row["winddir_d1_wvt_qc"]
@@ -397,10 +391,12 @@ def daily_process(nwsli, maxts):
             )
             EVENTS["reprocess_solar"] = True
         if "ws_mps_max" in df.columns:
-            ob.data["max_sknt"] = speed(row["ws_mps_max_qc"], "MPS").value(
-                "KT"
+            ob.data["max_sknt"] = convert_value(
+                row["ws_mps_max_qc"], "meter / second", "knot"
             )
-        ob.data["avg_sknt"] = speed(row["ws_mps_s_wvt_qc"], "MPS").value("KT")
+        ob.data["avg_sknt"] = convert_value(
+            row["ws_mps_s_wvt_qc"], "meter / second", "knot"
+        )
         ob.save(acursor)
 
         processed += 1

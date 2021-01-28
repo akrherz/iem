@@ -8,8 +8,8 @@ import numpy as np
 import memcache
 from paste.request import parse_formvars
 import pytz
-from pyiem import iemre, datatypes
-from pyiem.util import ncopen, utc
+from pyiem import iemre
+from pyiem.util import ncopen, utc, convert_value
 
 ISO = "%Y-%m-%dT%H:%MZ"
 
@@ -56,15 +56,15 @@ def workflow(sts, ets, i, j):
                     "valid_local": now.strftime(ISO[:-1]),
                     "skyc_%": myrounder(nc.variables["skyc"][offset, j, i], 1),
                     "air_temp_f": myrounder(
-                        datatypes.temperature(
-                            nc.variables["tmpk"][offset, j, i], "K"
-                        ).value("F"),
+                        convert_value(
+                            nc.variables["tmpk"][offset, j, i], "degK", "degF"
+                        ),
                         1,
                     ),
                     "dew_point_f": myrounder(
-                        datatypes.temperature(
-                            nc.variables["dwpk"][offset, j, i], "K"
-                        ).value("F"),
+                        convert_value(
+                            nc.variables["dwpk"][offset, j, i], "degK", "degF"
+                        ),
                         1,
                     ),
                     "uwnd_mps": myrounder(

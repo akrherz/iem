@@ -6,7 +6,6 @@ import numpy as np
 from metpy.units import masked_array, units
 from pyiem.util import utc, ncopen
 from pyiem.iemre import daily_offset
-from pyiem.datatypes import temperature
 from pyiem.meteorology import gdd
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
@@ -19,8 +18,8 @@ def plot_gdd(ts):
     gddtot = np.zeros(np.shape(nc.variables["lon"][:]))
     for i in range(7):
         gddtot += gdd(
-            temperature(nc.variables["high_tmpk"][i, :, :], "K"),
-            temperature(nc.variables["low_tmpk"][i, :, :], "K"),
+            units("degK") * nc.variables["high_tmpk"][i, :, :],
+            units("degK") * nc.variables["low_tmpk"][i, :, :],
         )
     cnc = ncopen("/mesonet/data/ndfd/ndfd_dailyc.nc")
     offset = daily_offset(ts)

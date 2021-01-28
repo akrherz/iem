@@ -9,9 +9,8 @@ import sys
 
 import numpy as np
 from scipy.interpolate import NearestNDInterpolator
-from pyiem.datatypes import temperature
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, c2f
 
 nt = NetworkTable("ISUSM")
 
@@ -51,7 +50,7 @@ def load_soilt(data):
         stid = row[0]
         if stid not in nt.sts:
             continue
-        soil_obs.append(temperature(row[1], "C").value("F"))
+        soil_obs.append(c2f(row[1]))
         lats.append(nt.sts[stid]["lat"])
         lons.append(nt.sts[stid]["lon"])
     if len(lons) < 4:

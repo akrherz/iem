@@ -11,8 +11,7 @@ import datetime
 from netCDF4 import chartostring  # @UnresolvedImport
 import numpy.ma
 import pytz
-from pyiem.util import ncopen
-from pyiem.datatypes import temperature
+from pyiem.util import ncopen, convert_value
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 # prevent core.py:931: RuntimeWarning: overflow encountered in multiply
@@ -60,8 +59,8 @@ def main():
 
     stations = chartostring(nc.variables["stationId"][:])
     stationname = chartostring(nc.variables["stationName"][:])
-    tmpf = temperature(nc.variables["temperature"][:], "K").value("F")
-    dwpf = temperature(nc.variables["dewpoint"][:], "K").value("F")
+    tmpf = convert_value(nc.variables["temperature"][:], "degK", "degF")
+    dwpf = convert_value(nc.variables["dewpoint"][:], "degK", "degF")
     drct = nc.variables["windDir"][:]
     smps = nc.variables["windSpeed"][:] * 1.94384449
     alti = nc.variables["altimeter"][:] * 29.9196 / 1013.2  # in hPa
@@ -71,14 +70,22 @@ def main():
     lon = nc.variables["longitude"][:]
     # ele = nc.variables["elevation"][:]
     p01m = nc.variables["precipAccum"][:] * 25.4
-    ptmp1 = temperature(nc.variables["roadTemperature1"][:], "K").value("F")
-    ptmp2 = temperature(nc.variables["roadTemperature2"][:], "K").value("F")
-    ptmp3 = temperature(nc.variables["roadTemperature3"][:], "K").value("F")
-    ptmp4 = temperature(nc.variables["roadTemperature4"][:], "K").value("F")
-    subs1 = temperature(nc.variables["roadSubsurfaceTemp1"][:], "K").value("F")
-    subs2 = temperature(nc.variables["roadSubsurfaceTemp2"][:], "K").value("F")
-    subs3 = temperature(nc.variables["roadSubsurfaceTemp3"][:], "K").value("F")
-    subs4 = temperature(nc.variables["roadSubsurfaceTemp4"][:], "K").value("F")
+    ptmp1 = convert_value(nc.variables["roadTemperature1"][:], "degK", "degF")
+    ptmp2 = convert_value(nc.variables["roadTemperature2"][:], "degK", "degF")
+    ptmp3 = convert_value(nc.variables["roadTemperature3"][:], "degK", "degF")
+    ptmp4 = convert_value(nc.variables["roadTemperature4"][:], "degK", "degF")
+    subs1 = convert_value(
+        nc.variables["roadSubsurfaceTemp1"][:], "degK", "degF"
+    )
+    subs2 = convert_value(
+        nc.variables["roadSubsurfaceTemp2"][:], "degK", "degF"
+    )
+    subs3 = convert_value(
+        nc.variables["roadSubsurfaceTemp3"][:], "degK", "degF"
+    )
+    subs4 = convert_value(
+        nc.variables["roadSubsurfaceTemp4"][:], "degK", "degF"
+    )
     times = nc.variables["observationTime"][:]
     nc.close()
 

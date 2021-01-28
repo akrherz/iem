@@ -4,9 +4,8 @@ import os
 import sys
 
 import pytz
-from pyiem.datatypes import speed
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconn, utc, convert_value
 
 
 def main():
@@ -30,7 +29,7 @@ def main():
 
     iem = Observation("OT0002", "OT", valid)
 
-    sknt = speed(float(tokens[8]), "MPH").value("KT")
+    sknt = convert_value(float(tokens[8]), "mile / hour", "knot")
 
     iem.data["sknt"] = sknt
     iem.data["drct"] = tokens[9]

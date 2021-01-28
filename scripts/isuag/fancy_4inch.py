@@ -10,10 +10,9 @@ import numpy as np
 from scipy.signal import convolve2d
 import pygrib
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.datatypes import temperature
 from pyiem.tracker import loadqc
 from pyiem.network import Table
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconn, logger, c2f, convert_value
 
 LOG = logger()
 
@@ -93,7 +92,7 @@ def main(argv):
     day_ago = int(argv[1])
     ts = datetime.date.today() - datetime.timedelta(days=day_ago)
     hlons, hlats, hvals = do_nam(ts)
-    nam = temperature(hvals, "K").value("F")
+    nam = convert_value(hvals, "degK", "degF")
     window = np.ones((3, 3))
     nam = convolve2d(nam, window / window.sum(), mode="same", boundary="symm")
 
@@ -125,7 +124,7 @@ def main(argv):
         ["tsoil_c_avg_qc", "hourly_min_c", "hourly_max_c"],
         ["ob", "min", "max"],
     ):
-        df[newcol] = temperature(df[col].values, "C").value("F")
+        df[newcol] = c2f(df[col].values)
         df.drop(col, axis=1, inplace=True)
 
     for stid, row in df.iterrows():

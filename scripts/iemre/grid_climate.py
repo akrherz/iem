@@ -5,8 +5,8 @@ import datetime
 import numpy as np
 from pandas.io.sql import read_sql
 from scipy.interpolate import NearestNDInterpolator
-from pyiem import iemre, datatypes
-from pyiem.util import get_dbconn, ncopen
+from pyiem import iemre
+from pyiem.util import get_dbconn, ncopen, convert_value
 
 
 def generic_gridder(nc, df, idx):
@@ -52,18 +52,18 @@ def grid_day(nc, ts):
         if "high_tmpk" in nc.variables:
             res = generic_gridder(nc, df, "high")
             if res is not None:
-                nc.variables["high_tmpk"][offset] = datatypes.temperature(
-                    res, "F"
-                ).value("K")
+                nc.variables["high_tmpk"][offset] = convert_value(
+                    res, "degF", "degK"
+                )
             res = generic_gridder(nc, df, "low")
             if res is not None:
-                nc.variables["low_tmpk"][offset] = datatypes.temperature(
-                    res, "F"
-                ).value("K")
+                nc.variables["low_tmpk"][offset] = convert_value(
+                    res, "degF", "degK"
+                )
         res = generic_gridder(nc, df, "precip")
         if res is not None:
-            nc.variables["p01d"][offset] = datatypes.distance(res, "IN").value(
-                "MM"
+            nc.variables["p01d"][offset] = convert_value(
+                res, "inch", "millimeter"
             )
     else:
         print(

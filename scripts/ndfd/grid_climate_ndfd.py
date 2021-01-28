@@ -4,10 +4,10 @@ import datetime
 import numpy as np
 import psycopg2.extras
 from scipy.interpolate import NearestNDInterpolator
-from pyiem import iemre, datatypes
+from pyiem import iemre
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import state_names
-from pyiem.util import get_dbconn, ncopen
+from pyiem.util import get_dbconn, ncopen, convert_value
 
 NT = NetworkTable(["%sCLIMATE" % (abbr,) for abbr in state_names])
 COOP = get_dbconn("coop", user="nobody")
@@ -60,19 +60,15 @@ def grid_day(nc, ts):
     )
     cursor.execute(sql)
     res = generic_gridder(nc, cursor, "high")
-    nc.variables["high_tmpk"][offset] = datatypes.temperature(res, "F").value(
-        "K"
-    )
+    nc.variables["high_tmpk"][offset] = convert_value(res, "degF", "degK")
 
     cursor.scroll(0, mode="absolute")
     res = generic_gridder(nc, cursor, "low")
-    nc.variables["low_tmpk"][offset] = datatypes.temperature(res, "F").value(
-        "K"
-    )
+    nc.variables["low_tmpk"][offset] = convert_value(res, "degF", "degK")
 
     cursor.scroll(0, mode="absolute")
     res = generic_gridder(nc, cursor, "precip")
-    nc.variables["p01d"][offset] = datatypes.distance(res, "IN").value("MM")
+    nc.variables["p01d"][offset] = convert_value(res, "inch", "millimeter")
 
     cursor.scroll(0, mode="absolute")
     res = generic_gridder(nc, cursor, "gdd50")

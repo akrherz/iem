@@ -2,9 +2,8 @@
 import json
 
 import requests
-from pyiem.datatypes import temperature
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconn, logger, convert_value
 
 LOG = logger()
 
@@ -39,8 +38,8 @@ def main():
         highf = j["data"][0]["daily_high_f"]
         lowf = j["data"][0]["daily_low_f"]
         LOG.info(" %s %s high: %.1f low: %.1f", station, date, highf, lowf)
-        high = temperature(highf, "F").value("C")
-        low = temperature(lowf, "F").value("C")
+        high = convert_value(highf, "degF", "degC")
+        low = convert_value(lowf, "degF", "degC")
         avg = (high + low) / 2.0
         cursor2.execute(
             """

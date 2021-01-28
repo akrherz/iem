@@ -6,9 +6,9 @@ import os
 import sys
 
 import numpy as np
+from metpy.units import units
 from pyiem import iemre
-from pyiem.datatypes import temperature
-from pyiem.util import utc, ncopen
+from pyiem.util import utc, ncopen, convert_value
 from pyiem.meteorology import gdd
 
 
@@ -88,16 +88,16 @@ def replace_cfs(nc, valid, islice, jslice):
     nc.variables["srad"][tslice, :, :] = (
         cfsnc.variables["srad"][tidx:, jslice, islice] * 86400.0 / 1000000.0
     )
-    highc = temperature(
-        cfsnc.variables["high_tmpk"][tidx:, jslice, islice], "K"
-    ).value("C")
-    lowc = temperature(
-        cfsnc.variables["low_tmpk"][tidx:, jslice, islice], "K"
-    ).value("C")
+    highc = convert_value(
+        cfsnc.variables["high_tmpk"][tidx:, jslice, islice], "degK", "degC"
+    )
+    lowc = convert_value(
+        cfsnc.variables["low_tmpk"][tidx:, jslice, islice], "degK", "degC"
+    )
     nc.variables["tmax"][tslice, :, :] = highc
     nc.variables["tmin"][tslice, :, :] = lowc
     nc.variables["gdd_f"][tslice, :, :] = gdd(
-        temperature(highc, "C"), temperature(lowc, "C")
+        units("degC") * highc, units("degC") * lowc
     )
     nc.variables["prcp"][tslice, :, :] = cfsnc.variables["p01d"][
         tidx:, jslice, islice
@@ -125,16 +125,16 @@ def copy_iemre(nc, fromyear, ncdate0, ncdate1, islice, jslice):
     # print("copy_iemre from %s filling %s steps nc: %s iemre: %s" % (
     #    fromyear, tsteps, tslice, retslice
     # ))
-    highc = temperature(
-        renc.variables["high_tmpk"][retslice, jslice, islice], "K"
-    ).value("C")
-    lowc = temperature(
-        renc.variables["low_tmpk"][retslice, jslice, islice], "K"
-    ).value("C")
+    highc = convert_value(
+        renc.variables["high_tmpk"][retslice, jslice, islice], "degK", "degC"
+    )
+    lowc = convert_value(
+        renc.variables["low_tmpk"][retslice, jslice, islice], "degK", "degC"
+    )
     nc.variables["tmax"][tslice, :, :] = highc
     nc.variables["tmin"][tslice, :, :] = lowc
     nc.variables["gdd_f"][tslice, :, :] = gdd(
-        temperature(highc, "C"), temperature(lowc, "C")
+        units("degC") * highc, units("degC") * lowc
     )
     nc.variables["prcp"][tslice, :, :] = renc.variables["p01d"][
         retslice, jslice, islice

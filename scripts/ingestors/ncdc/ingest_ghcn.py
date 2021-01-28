@@ -45,9 +45,8 @@ import pandas as pd
 from pandas.io.sql import read_sql
 import numpy as np
 from pyiem.reference import TRACE_VALUE, state_names
-from pyiem.datatypes import temperature, distance
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, exponential_backoff, logger
+from pyiem.util import get_dbconn, exponential_backoff, logger, c2f, mm2inch
 
 LOG = logger()
 PGCONN = get_dbconn("coop")
@@ -125,13 +124,13 @@ def varconv(val, element):
     """Convert NCDC to something we use in the database"""
     ret = None
     if element in ["TMAX", "TMIN"]:
-        fv = round(temperature(float(val) / 10.0, "C").value("F"), 0)
+        fv = round(c2f(float(val) / 10.0), 0)
         ret = None if (fv < -100 or fv > 150) else fv
     elif element in ["PRCP"]:
-        fv = round(distance(float(val) / 10.0, "MM").value("IN"), 2)
+        fv = round(mm2inch(float(val) / 10.0), 2)
         ret = None if fv < 0 else fv
     elif element in ["SNOW", "SNWD"]:
-        fv = round(distance(float(val), "MM").value("IN"), 1)
+        fv = round(mm2inch(float(val)), 1)
         ret = None if fv < 0 else fv
     return ret
 

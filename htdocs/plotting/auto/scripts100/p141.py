@@ -5,10 +5,10 @@ from collections import OrderedDict
 import datetime
 
 import pandas as pd
+from metpy.units import units
 from pyiem.meteorology import gdd
 from pyiem.plot.use_agg import plt
-from pyiem.datatypes import temperature, distance
-from pyiem.util import get_autoplot_context
+from pyiem.util import get_autoplot_context, mm2inch, c2f
 from pyiem.exceptions import NoDataFound
 
 STATIONS = OrderedDict(
@@ -104,13 +104,13 @@ def load(dirname, location, sdate):
         df[col] = pd.to_numeric(df[col], errors="coerce")
     if len(data[0]) < 10:
         df["gdd"] = gdd(
-            temperature(df["maxt"].values, "C"),
-            temperature(df["mint"].values, "C"),
+            units("degC") * df["maxt"].values,
+            units("degC") * df["mint"].values,
         )
     df["gddcum"] = df.groupby(["year"])["gdd"].apply(lambda x: x.cumsum())
-    df["raincum"] = distance(
-        df.groupby(["year"])["rain"].apply(lambda x: x.cumsum()), "MM"
-    ).value("IN")
+    df["raincum"] = mm2inch(
+        df.groupby(["year"])["rain"].apply(lambda x: x.cumsum())
+    )
     return df
 
 
@@ -145,10 +145,8 @@ def plotter(fdict):
     for _v, _u in zip(["gddcum", "raincum"], ["F", "in"]):
         resdf["%s[%s]" % (_v, _u)] = thisyear[_v]
     for _v in ["mint", "maxt"]:
-        resdf["%s[F]" % (_v)] = temperature(thisyear[_v].values, "C").value(
-            "F"
-        )
-    resdf["rain[in]"] = distance(thisyear["rain"], "MM").value("IN")
+        resdf["%s[F]" % (_v)] = c2f(thisyear[_v].values)
+    resdf["rain[in]"] = mm2inch(thisyear["rain"])
     for _ptype, unit in zip(["gdd", "rain"], ["F", "in"]):
         resdf[_ptype + "cum_climo[%s]" % (unit,)] = cdf.groupby("doy")[
             _ptype + "cum"
@@ -160,15 +158,11 @@ def plotter(fdict):
             _ptype + "cum"
         ].max()
     for _ptype in ["maxt", "mint"]:
-        resdf[_ptype + "_climo[F]"] = temperature(
-            cdf.groupby("doy")[_ptype].mean().values, "C"
-        ).value("F")
-        resdf[_ptype + "_min[F]"] = temperature(
-            df.groupby("doy")[_ptype].min().values, "C"
-        ).value("F")
-        resdf[_ptype + "_max[F]"] = temperature(
-            df.groupby("doy")[_ptype].max().values, "C"
-        ).value("F")
+        resdf[_ptype + "_climo[F]"] = c2f(
+            cdf.groupby("doy")[_ptype].mean().values
+        )
+        resdf[_ptype + "_min[F]"] = c2f(df.groupby("doy")[_ptype].min().values)
+        resdf[_ptype + "_max[F]"] = c2f(df.groupby("doy")[_ptype].max().values)
 
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     if ptype in ["gdd", "rain"]:
@@ -202,7 +196,7 @@ def plotter(fdict):
     else:
         ax.plot(
             thisyear.index.values,
-            temperature(thisyear[ptype], "C").value("F"),
+            c2f(thisyear[ptype]),
             zorder=4,
             color="b",
             lw=2,
@@ -211,7 +205,7 @@ def plotter(fdict):
         climo = cdf.groupby("doy")[ptype].mean()
         ax.plot(
             climo.index.values,
-            temperature(climo.values, "C").value("F"),
+            c2f(climo.values),
             lw=2,
             color="k",
             label="Climatology",
@@ -221,8 +215,8 @@ def plotter(fdict):
         nrng = df.groupby("doy")[ptype].min()
         ax.fill_between(
             xrng.index.values,
-            temperature(nrng.values, "C").value("F"),
-            temperature(xrng.values, "C").value("F"),
+            c2f(nrng.values),
+            c2f(xrng.values),
             color="tan",
             label="Range",
             zorder=2,
@@ -245,4 +239,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter(dict(location="ames", ptype="gdd", sdate="mar15"))

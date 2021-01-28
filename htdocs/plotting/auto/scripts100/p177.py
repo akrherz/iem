@@ -10,8 +10,7 @@ from matplotlib.patches import Patch
 from matplotlib.lines import Line2D
 from pyiem import meteorology
 from pyiem.plot.use_agg import plt
-from pyiem.datatypes import temperature, distance
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconn, c2f, mm2inch
 from pyiem.exceptions import NoDataFound
 
 
@@ -214,9 +213,9 @@ def make_daily_plot(ctx):
     if df.empty:
         raise NoDataFound("No Data Found for Query")
 
-    mins = temperature(df["min"].values, "C").value("F")
-    maxs = temperature(df["max"].values, "C").value("F")
-    avgs = temperature(df["avg"].values, "C").value("F")
+    mins = c2f(df["min"].values)
+    maxs = c2f(df["max"].values)
+    avgs = c2f(df["avg"].values)
     (fig, ax) = plt.subplots(1, 1)
     ax.bar(
         df.index.values,
@@ -415,7 +414,7 @@ def make_daily_water_change_plot(ctx):
     if (ctx["ets"] - ctx["sts"]).total_seconds() < (60 * 86400):
         ylim = ax[1].get_ylim()[1]
         # Attempt to place precip text above this plot
-        pdf["pday"] = distance(pdf["rain_mm_tot_qc"].values, "MM").value("IN")
+        pdf["pday"] = mm2inch(pdf["rain_mm_tot_qc"].values)
         for valid, row in pdf.iterrows():
             if row["pday"] > 0:
                 ax[1].text(
@@ -464,37 +463,13 @@ def plot2(ctx):
         ("ISUSM Station: %s Timeseries\n" "Soil Temperature at Depth\n ")
         % (ctx["_nt"].sts[ctx["station"]]["name"],)
     )
-    ax.plot(
-        valid,
-        temperature(tsoil, "C").value("F"),
-        linewidth=2,
-        color="brown",
-        label="4 inch",
-    )
+    ax.plot(valid, c2f(tsoil), linewidth=2, color="brown", label="4 inch")
     if not d12t.isnull().any():
-        ax.plot(
-            valid,
-            temperature(d12t, "C").value("F"),
-            linewidth=2,
-            color="r",
-            label="12 inch",
-        )
+        ax.plot(valid, c2f(d12t), linewidth=2, color="r", label="12 inch")
     if not d24t.isnull().any():
-        ax.plot(
-            valid,
-            temperature(d24t, "C").value("F"),
-            linewidth=2,
-            color="purple",
-            label="24 inch",
-        )
+        ax.plot(valid, c2f(d24t), linewidth=2, color="purple", label="24 inch")
     if not d50t.isnull().any():
-        ax.plot(
-            valid,
-            temperature(d50t, "C").value("F"),
-            linewidth=2,
-            color="black",
-            label="50 inch",
-        )
+        ax.plot(valid, c2f(d50t), linewidth=2, color="black", label="50 inch")
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width, box.height * 0.9])
     ax.legend(bbox_to_anchor=(0.5, 1.02), ncol=4, loc="center", fontsize=12)
@@ -599,29 +574,11 @@ def plot1(ctx):
 
     # ----------------------------------------
     if not d12t.isnull().all():
-        ax[1].plot(
-            valid,
-            temperature(d12t, "C").value("F"),
-            linewidth=2,
-            color="r",
-            label="12in",
-        )
+        ax[1].plot(valid, c2f(d12t), linewidth=2, color="r", label="12in")
     if not d24t.isnull().all():
-        ax[1].plot(
-            valid,
-            temperature(d24t, "C").value("F"),
-            linewidth=2,
-            color="purple",
-            label="24in",
-        )
+        ax[1].plot(valid, c2f(d24t), linewidth=2, color="purple", label="24in")
     if not d50t.isnull().all():
-        ax[1].plot(
-            valid,
-            temperature(d50t, "C").value("F"),
-            linewidth=2,
-            color="black",
-            label="50in",
-        )
+        ax[1].plot(valid, c2f(d50t), linewidth=2, color="black", label="50in")
     ax[1].grid(True)
     ax[1].set_ylabel(r"Soil Temperature $^\circ$F")
     box = ax[1].get_position()
@@ -635,20 +592,8 @@ def plot1(ctx):
     l3, = ax2.plot(valid, slrkw * 1000.0, color="g", zorder=1, lw=2)
     ax2.set_ylabel("Solar Radiation [W/m^2]", color="g")
 
-    l1, = ax[2].plot(
-        valid,
-        temperature(tair, "C").value("F"),
-        linewidth=2,
-        color="blue",
-        zorder=2,
-    )
-    l2, = ax[2].plot(
-        valid,
-        temperature(tsoil, "C").value("F"),
-        linewidth=2,
-        color="brown",
-        zorder=2,
-    )
+    l1, = ax[2].plot(valid, c2f(tair), linewidth=2, color="blue", zorder=2)
+    l2, = ax[2].plot(valid, c2f(tsoil), linewidth=2, color="brown", zorder=2)
     ax[2].grid(True)
     ax[2].legend(
         [l1, l2, l3],

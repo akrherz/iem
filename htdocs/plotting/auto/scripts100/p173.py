@@ -5,11 +5,11 @@ import datetime
 from pandas.io.sql import read_sql
 import pandas as pd
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.datatypes import speed
+from pyiem.util import get_autoplot_context, get_dbconn, convert_value
 from pyiem.exceptions import NoDataFound
 
 UNITS = {"mph": "miles per hour", "kt": "knots", "mps": "meters per second"}
+UNITCONV = {"mph": "mile / hour", "kt": "knot", "mps": "meter / second"}
 
 
 def get_description():
@@ -192,8 +192,8 @@ def get_context(fdict):
             ctx["subtitle"] = "Period Average Wind Speed by Hour"
         df = pd.concat(dfs)
 
-    df["avg_%s" % (units,)] = speed(df["avg_sknt"].values, "KT").value(
-        units.upper()
+    df["avg_%s" % (units,)] = convert_value(
+        df["avg_sknt"].values, "knot", UNITCONV[units]
     )
     ctx["df"] = df
     ctx["ylabel"] = "Average Wind Speed [%s]" % (UNITS[units],)

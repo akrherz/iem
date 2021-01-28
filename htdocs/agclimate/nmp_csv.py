@@ -5,8 +5,7 @@ import numpy as np
 import psycopg2.extras
 from metpy.units import units
 from pyiem.network import Table as NetworkTable
-from pyiem.datatypes import distance, temperature
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, convert_value
 
 
 def nan(val):
@@ -25,7 +24,7 @@ def p2(val, prec, minv, maxv):
     """rounder"""
     if val is None or val < minv or val > maxv:
         return "null"
-    return round(temperature(val, "C").value("K"), prec)
+    return round(convert_value(val, "degC", "degK"), prec)
 
 
 def use_table(table, sio):
@@ -62,17 +61,17 @@ def use_table(table, sio):
                 nt.sts[sid]["lon"],
                 row["utc_valid"].strftime("%Y-%m-%dT%H:%M:%SZ"),
                 nt.sts[sid]["elevation"],
-                distance(4, "IN").value("M"),
-                distance(12, "IN").value("M"),
-                distance(24, "IN").value("M"),
-                distance(50, "IN").value("M"),
+                convert_value(4, "inch", "meter"),
+                convert_value(12, "inch", "meter"),
+                convert_value(24, "inch", "meter"),
+                convert_value(40, "inch", "meter"),
                 p2(row["tsoil_c_avg_qc"], 3, -90, 90),
                 p2(row["t12_c_avg_qc"], 3, -90, 90),
                 p2(row["t24_c_avg_qc"], 3, -90, 90),
                 p2(row["t50_c_avg_qc"], 3, -90, 90),
-                distance(12, "IN").value("M"),
-                distance(24, "IN").value("M"),
-                distance(50, "IN").value("M"),
+                convert_value(12, "inch", "meter"),
+                convert_value(24, "inch", "meter"),
+                convert_value(40, "inch", "meter"),
                 p(row["calcvwc12_avg_qc"], 1, 0, 100),
                 p(row["calcvwc24_avg_qc"], 1, 0, 100),
                 p(row["calcvwc50_avg_qc"], 1, 0, 100),

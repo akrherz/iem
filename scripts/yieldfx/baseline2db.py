@@ -3,8 +3,7 @@ import glob
 import os
 import datetime
 
-from pyiem.datatypes import speed
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconn, logger, convert_value
 
 LOG = logger()
 
@@ -28,7 +27,7 @@ def main():
             dsm[row[0]] = dsm[row[0] - datetime.timedelta(days=1)]
         else:
             dsm[row[0]] = {
-                "wind_speed": speed(row[1], "KTS").value("MPS"),
+                "wind_speed": convert_value(row[1], "knot", "meter / second"),
                 "avg_rh": row[2],
             }
 
@@ -36,10 +35,7 @@ def main():
     for fn in glob.glob("*.met"):
         location = fn[:-4]
         cursor.execute(
-            """
-            DELETE from yieldfx_baseline where station = %s
-        """,
-            (location,),
+            "DELETE from yieldfx_baseline where station = %s", (location,)
         )
         LOG.info("Removed %s rows for station: %s", cursor.rowcount, location)
         for line in open(fn):

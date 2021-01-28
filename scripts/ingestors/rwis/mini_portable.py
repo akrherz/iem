@@ -4,8 +4,6 @@ import datetime
 import pytz
 import psycopg2.extras
 from pyiem.observation import Observation
-from pyiem.datatypes import temperature, humidity
-from pyiem import meteorology
 from pyiem.util import get_dbconn
 
 
@@ -73,11 +71,6 @@ def processfile(icursor, filename):
         iem.data["tsf1"] = float(data["pave_temp2"])
     if data.get("press", "") != "":
         iem.data["alti"] = float(data["press"])
-    if data.get("RH", "") != "":
-        if float(data["RH"]) > 1:
-            t = temperature(iem.data["tmpf"], "F")
-            rh = humidity(float(data["RH"]), "%")
-            iem.data["dwpf"] = meteorology.dewpoint(t, rh).value("F")
     if data.get("wind_dir", "") != "":
         iem.data["drct"] = float(data["wind_dir"])
     iem.save(icursor)

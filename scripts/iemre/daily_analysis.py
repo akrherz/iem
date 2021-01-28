@@ -16,9 +16,9 @@ from pandas.io.sql import read_sql
 from scipy.stats import zscore
 from metpy.units import units, masked_array
 from metpy.interpolate import inverse_distance_to_grid
-from pyiem import iemre, datatypes
+from pyiem import iemre
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconn, utc, ncopen, logger
+from pyiem.util import get_dbconn, utc, ncopen, logger, convert_value
 
 PGCONN = get_dbconn("iem")
 COOP_PGCONN = get_dbconn("coop")
@@ -245,16 +245,16 @@ def grid_day12(ts, ds):
 
     if len(df.index) > 4:
         res = generic_gridder(df, "highdata")
-        ds["high_tmpk_12z"].values = datatypes.temperature(res, "F").value("K")
+        ds["high_tmpk_12z"].values = convert_value(res, "degF", "degK")
 
         res = generic_gridder(df, "lowdata")
-        ds["low_tmpk_12z"].values = datatypes.temperature(res, "F").value("K")
+        ds["low_tmpk_12z"].values = convert_value(res, "degF", "degK")
 
         res = generic_gridder(df, "snowdata")
-        ds["snow_12z"].values = datatypes.distance(res, "IN").value("MM")
+        ds["snow_12z"].values = convert_value(res, "inch", "millimeter")
 
         res = generic_gridder(df, "snowddata")
-        ds["snowd_12z"].values = datatypes.distance(res, "IN").value("MM")
+        ds["snowd_12z"].values = convert_value(res, "inch", "millimeter")
     else:
         LOG.info(
             "%s has %02i entries, FAIL", ts.strftime("%Y-%m-%d"), len(df.index)
@@ -342,15 +342,15 @@ def grid_day(ts, ds):
         )
         return
     res = generic_gridder(df, "highdata")
-    ds["high_tmpk"].values = datatypes.temperature(res, "F").value("K")
+    ds["high_tmpk"].values = convert_value(res, "degF", "degK")
     res = generic_gridder(df, "lowdata")
-    ds["low_tmpk"].values = datatypes.temperature(res, "F").value("K")
+    ds["low_tmpk"].values = convert_value(res, "degF", "degK")
     hres = generic_gridder(df, "highdwpf")
     lres = generic_gridder(df, "lowdwpf")
     if hres is not None and lres is not None:
-        ds["avg_dwpk"].values = datatypes.temperature(
-            (hres + lres) / 2.0, "F"
-        ).value("K")
+        ds["avg_dwpk"].values = convert_value(
+            (hres + lres) / 2.0, "degF", "degK"
+        )
     # Don't have data till after midnight
     if ts < datetime.date.today():
         res = generic_gridder(df, "avgsknt")

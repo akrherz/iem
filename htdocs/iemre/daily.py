@@ -5,8 +5,8 @@ import json
 
 import numpy as np
 from paste.request import parse_formvars
-from pyiem import iemre, datatypes
-from pyiem.util import ncopen
+from pyiem import iemre
+from pyiem.util import ncopen, convert_value
 import pyiem.prism as prismutil
 
 
@@ -80,45 +80,59 @@ def application(environ, start_response):
                     "prism_precip_in": myrounder(prism_precip, 2),
                     "mrms_precip_in": myrounder(mrms_precip, 2),
                     "daily_high_f": myrounder(
-                        datatypes.temperature(
-                            nc.variables["high_tmpk"][offset, j, i], "K"
-                        ).value("F"),
+                        convert_value(
+                            nc.variables["high_tmpk"][offset, j, i],
+                            "degK",
+                            "degF",
+                        ),
                         1,
                     ),
                     "12z_high_f": myrounder(
-                        datatypes.temperature(
-                            nc.variables["high_tmpk_12z"][offset, j, i], "K"
-                        ).value("F"),
+                        convert_value(
+                            nc.variables["high_tmpk_12z"][offset, j, i],
+                            "degK",
+                            "degF",
+                        ),
                         1,
                     ),
                     "climate_daily_high_f": myrounder(
-                        datatypes.temperature(
-                            cnc.variables["high_tmpk"][coffset, j, i], "K"
-                        ).value("F"),
+                        convert_value(
+                            cnc.variables["high_tmpk"][coffset, j, i],
+                            "degK",
+                            "degF",
+                        ),
                         1,
                     ),
                     "daily_low_f": myrounder(
-                        datatypes.temperature(
-                            nc.variables["low_tmpk"][offset, j, i], "K"
-                        ).value("F"),
+                        convert_value(
+                            nc.variables["low_tmpk"][offset, j, i],
+                            "degK",
+                            "degF",
+                        ),
                         1,
                     ),
                     "12z_low_f": myrounder(
-                        datatypes.temperature(
-                            nc.variables["low_tmpk_12z"][offset, j, i], "K"
-                        ).value("F"),
+                        convert_value(
+                            nc.variables["low_tmpk_12z"][offset, j, i],
+                            "degK",
+                            "degF",
+                        ),
                         1,
                     ),
                     "avg_dewpoint_f": myrounder(
-                        datatypes.temperature(
-                            nc.variables["avg_dwpk"][offset, j, i], "K"
-                        ).value("F"),
+                        convert_value(
+                            nc.variables["avg_dwpk"][offset, j, i],
+                            "degK",
+                            "degF",
+                        ),
                         1,
                     ),
                     "climate_daily_low_f": myrounder(
-                        datatypes.temperature(
-                            cnc.variables["low_tmpk"][coffset, j, i], "K"
-                        ).value("F"),
+                        convert_value(
+                            cnc.variables["low_tmpk"][coffset, j, i],
+                            "degK",
+                            "degF",
+                        ),
                         1,
                     ),
                     "daily_precip_in": myrounder(

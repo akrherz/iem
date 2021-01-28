@@ -19,9 +19,9 @@ import requests
 import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.datatypes import temperature, distance
+from metpy.units import units
 from pyiem.meteorology import gdd
-from pyiem.util import get_properties, get_dbconn, logger
+from pyiem.util import get_properties, get_dbconn, logger, convert_value
 
 LOG = logger()
 XREF = {
@@ -257,9 +257,9 @@ def replace_forecast(df, location):
     rcols = ["maxt", "mint", "rain"]
     for row in cursor:
         valid = row[0]
-        maxc = temperature(row[1], "F").value("C")
-        minc = temperature(row[2], "F").value("C")
-        rain = distance(row[3], "IN").value("MM")
+        maxc = convert_value(row[1], "degF", "degC")
+        minc = convert_value(row[2], "degF", "degC")
+        rain = convert_value(row[3], "inch", "millimeter")
         for year in years:
             # This fails for leap year, just silently skip it when it does.
             try:
@@ -309,10 +309,11 @@ def replace_cfs(df, location):
     if cursor.rowcount == 0:
         LOG.info("  replace_cfs found zero rows!")
         return
+    row = []
     for row in cursor:
-        maxt = temperature(row[1], "F").value("C")
-        mint = temperature(row[2], "F").value("C")
-        rain = distance(row[3], "IN").value("MM")
+        maxt = convert_value(row[1], "degF", "degC")
+        mint = convert_value(row[2], "degF", "degC")
+        rain = convert_value(row[3], "inch", "millimeter")
         radn = row[4]
         df.loc[row[0], rcols] = [maxt, mint, rain, radn]
 
@@ -366,22 +367,22 @@ def replace_obs_iem(df, location):
         dont_replace = not np.isnan(df.at[valid, "mint"])
         if not dont_replace:
             replaced.append(valid)
-        _gdd = gdd(temperature(row[1], "F"), temperature(row[2], "F"))
+        _gdd = gdd(units("degF") * row[1], units("degF") * row[2])
         for year in years:
             if valid.month == 2 and valid.day == 29 and year % 4 != 0:
                 continue
             if dont_replace:
                 df.loc[valid.replace(year=year), rcols[3:]] = (
                     _gdd,
-                    distance(row[4], "in").value("mm"),
+                    convert_value(row[4], "inch", "millimeter"),
                 )
                 continue
             df.loc[valid.replace(year=year), rcols] = (
-                temperature(row[1], "F").value("C"),
-                temperature(row[2], "F").value("C"),
+                convert_value(row[1], "degF", "degC"),
+                convert_value(row[2], "degF", "degC"),
                 row[3],
                 _gdd,
-                distance(row[4], "in").value("mm"),
+                convert_value(row[4], "inch", "millimeter"),
             )
     if replaced:
         LOG.info(
@@ -444,7 +445,7 @@ def replace_obs(df, location):
         dont_replace = not np.isnan(df.at[valid, "mint"])
         if not dont_replace:
             replaced.append(valid)
-        _gdd = gdd(temperature(row[1], "C"), temperature(row[2], "C"))
+        _gdd = gdd(units("degC") * row[1], units("degC") * row[2])
         for year in years:
             if valid.month == 2 and valid.day == 29 and year % 4 != 0:
                 continue
@@ -486,8 +487,7 @@ def replace_obs(df, location):
 def compute_gdd(df):
     """Compute GDDs Please"""
     df["gdd"] = gdd(
-        temperature(df["maxt"].values, "C"),
-        temperature(df["mint"].values, "C"),
+        units("degC") * df["maxt"].values, units("degC") * df["mint"].values
     )
 
 

@@ -5,10 +5,9 @@ import sys
 import pytz
 import requests
 import urllib3
-from pyiem.datatypes import temperature
 from pyiem.observation import Observation
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, c2f
 
 # Stop the SSL cert warning :/
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -138,18 +137,14 @@ def savedata(reprocessing, data, maxts):
 
     iem.data["valid"] = ts
     if iem.data.get("tmpc") is not None:
-        iem.data["tmpf"] = temperature(float(iem.data.get("tmpc")), "C").value(
-            "F"
-        )
+        iem.data["tmpf"] = c2f(float(iem.data.get("tmpc")))
     if iem.data.get("dwpc") is not None:
-        iem.data["dwpf"] = temperature(float(iem.data.get("dwpc")), "C").value(
-            "F"
-        )
+        iem.data["dwpf"] = c2f(float(iem.data.get("dwpc")))
     for i in range(1, 6):
         if iem.data.get("c%stmpf" % (i,)) is not None:
-            iem.data["c%stmpf" % (i,)] = temperature(
-                float(iem.data.get("c%stmpc" % (i,))), "C"
-            ).value("F")
+            iem.data["c%stmpf" % (i,)] = c2f(
+                float(iem.data.get("c%stmpc" % (i,)))
+            )
         if iem.data.get("c%ssmv" % (i,)) is not None:
             iem.data["c%ssmv" % (i,)] = float(iem.data.get("c%ssmv" % (i,)))
     if iem.data.get("phour") is not None:

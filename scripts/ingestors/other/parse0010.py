@@ -5,10 +5,10 @@ import os
 import sys
 
 import pytz
-from pyiem.datatypes import speed, temperature, humidity
+from metpy.units import units
+from metpy.calc import dewpoint_from_relative_humidity
 from pyiem.observation import Observation
-from pyiem.meteorology import dewpoint
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, convert_value
 
 
 def main():
@@ -41,12 +41,19 @@ def main():
     iem.data["max_tmpf"] = float(tokens[5])
     iem.data["min_tmpf"] = float(tokens[6])
     iem.data["relh"] = int(tokens[7])
-    iem.data["dwpf"] = dewpoint(
-        temperature(iem.data["tmpf"], "F"), humidity(iem.data["relh"], "%")
-    ).value("F")
-    iem.data["sknt"] = speed(float(tokens[8]), "mph").value("KT")
+    iem.data["dwpf"] = (
+        dewpoint_from_relative_humidity(
+            units("degF") * iem.data["tmpf"],
+            units("percent") * iem.data["relh"],
+        )
+        .to(units("degF"))
+        .m
+    )
+    iem.data["sknt"] = convert_value(float(tokens[8]), "mile / hour", "knot")
     iem.data["drct"] = int(tokens[9])
-    iem.data["max_sknt"] = speed(float(tokens[10]), "mph").value("KT")
+    iem.data["max_sknt"] = convert_value(
+        float(tokens[10]), "mile / hour", "knot"
+    )
     iem.data["alti"] = float(tokens[12])
     iem.data["pday"] = float(tokens[13])
     iem.data["srad"] = None if tokens[18] == "n/a" else float(tokens[18])

@@ -6,8 +6,8 @@ import json
 import numpy as np
 import memcache
 from paste.request import parse_formvars
-from pyiem import prism, datatypes
-from pyiem.util import ncopen, html_escape
+from pyiem import prism
+from pyiem.util import ncopen, html_escape, c2f, mm2inch
 
 
 def myrounder(val, precision):
@@ -86,15 +86,9 @@ def dowork(valid, lon, lat):
             res["data"].append(
                 {
                     "valid": valid.strftime("%Y-%m-%dT12:00:00Z"),
-                    "high_f": myrounder(
-                        datatypes.temperature(mt, "C").value("F"), 1
-                    ),
-                    "low_f": myrounder(
-                        datatypes.temperature(nt, "C").value("F"), 1
-                    ),
-                    "precip_in": myrounder(
-                        datatypes.distance(pt, "MM").value("IN"), 2
-                    ),
+                    "high_f": myrounder(c2f(mt), 1),
+                    "low_f": myrounder(c2f(nt), 1),
+                    "precip_in": myrounder(mm2inch(pt), 2),
                 }
             )
 

@@ -5,20 +5,19 @@ import json
 import pytz
 import psycopg2.extras
 from paste.request import parse_formvars
-from pyiem.datatypes import temperature
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import loadqc
-from pyiem.util import drct2text, get_dbconn, utc
+from pyiem.util import drct2text, get_dbconn, utc, convert_value
 
 ISUAG = get_dbconn("isuag")
 IEM = get_dbconn("iem")
 
 
-def safe_t(val, units="C"):
+def safe_t(val, units="degC"):
     """Safe value."""
     if val is None:
         return "M"
-    return "%.1f" % (temperature(val, units).value("F"),)
+    return "%.1f" % (convert_value(val, units, "degF"),)
 
 
 def safe_p(val):
@@ -123,10 +122,10 @@ def get_data(ts):
                     "radmj": safe(row["slrmj_tot"], 2),
                     "tmpf": safe_t(row["tair_c_avg"]),
                     "high": safe_t(
-                        daily.get(sid, {}).get("max_tmpf", None), "F"
+                        daily.get(sid, {}).get("max_tmpf", None), "degF"
                     ),
                     "low": safe_t(
-                        daily.get(sid, {}).get("min_tmpf", None), "F"
+                        daily.get(sid, {}).get("min_tmpf", None), "degF"
                     ),
                     "pday": (
                         safe(daily.get(sid, {}).get("pday", None), 2)

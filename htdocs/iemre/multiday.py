@@ -5,8 +5,8 @@ import warnings
 
 import numpy as np
 from paste.request import parse_formvars
-from pyiem import iemre, datatypes
-from pyiem.util import ncopen
+from pyiem import iemre
+from pyiem.util import ncopen, convert_value
 import pyiem.prism as prismutil
 
 warnings.simplefilter("ignore", UserWarning)
@@ -70,18 +70,20 @@ def application(environ, start_response):
 
     # Get our netCDF vars
     with ncopen(iemre.get_daily_ncname(ts1.year)) as nc:
-        hightemp = datatypes.temperature(
-            nc.variables["high_tmpk"][offset1:offset2, j, i], "K"
-        ).value("F")
-        high12temp = datatypes.temperature(
-            nc.variables["high_tmpk_12z"][offset1:offset2, j, i], "K"
-        ).value("F")
-        lowtemp = datatypes.temperature(
-            nc.variables["low_tmpk"][offset1:offset2, j, i], "K"
-        ).value("F")
-        low12temp = datatypes.temperature(
-            nc.variables["low_tmpk_12z"][offset1:offset2, j, i], "K"
-        ).value("F")
+        hightemp = convert_value(
+            nc.variables["high_tmpk"][offset1:offset2, j, i], "degK", "degF"
+        )
+        high12temp = convert_value(
+            nc.variables["high_tmpk_12z"][offset1:offset2, j, i],
+            "degK",
+            "degF",
+        )
+        lowtemp = convert_value(
+            nc.variables["low_tmpk"][offset1:offset2, j, i], "degK", "degF"
+        )
+        low12temp = convert_value(
+            nc.variables["low_tmpk_12z"][offset1:offset2, j, i], "degK", "degF"
+        )
         precip = nc.variables["p01d"][offset1:offset2, j, i] / 25.4
         precip12 = nc.variables["p01d_12z"][offset1:offset2, j, i] / 25.4
 
@@ -91,12 +93,12 @@ def application(environ, start_response):
     c2000 = ts2.replace(year=2000)
     coffset2 = iemre.daily_offset(c2000) + 1
     with ncopen(iemre.get_dailyc_ncname()) as cnc:
-        chigh = datatypes.temperature(
-            cnc.variables["high_tmpk"][coffset1:coffset2, j, i], "K"
-        ).value("F")
-        clow = datatypes.temperature(
-            cnc.variables["low_tmpk"][coffset1:coffset2, j, i], "K"
-        ).value("F")
+        chigh = convert_value(
+            cnc.variables["high_tmpk"][coffset1:coffset2, j, i], "degK", "degF"
+        )
+        clow = convert_value(
+            cnc.variables["low_tmpk"][coffset1:coffset2, j, i], "degK", "degF"
+        )
         cprecip = cnc.variables["p01d"][coffset1:coffset2, j, i] / 25.4
 
     if ts1.year > 1980:

@@ -3,7 +3,7 @@ import glob
 import os
 import datetime
 
-from pyiem.datatypes import temperature, distance
+from metpy.units import units
 import pyiem.meteorology as met
 
 
@@ -26,17 +26,17 @@ def main():
             valid = datetime.date(int(tokens[0]), 1, 1) + datetime.timedelta(
                 days=int(tokens[1]) - 1
             )
-            high = temperature(float(tokens[3]), "C")
-            low = temperature(float(tokens[4]), "C")
+            high = units("degC") * float(tokens[3])
+            low = units("degC") * float(tokens[4])
             gdd = met.gdd(high, low, 50, 86)
-            precip = distance(float(tokens[5]), "MM")
+            precip = units("millimeter") * float(tokens[5])
             output.write(
                 ("%s,%.1f,%.1f,%.2f,%.1f\n")
                 % (
                     valid.strftime("%Y-%m-%d"),
-                    high.value("F"),
-                    low.value("F"),
-                    precip.value("IN"),
+                    high.to("degF").m,
+                    low.to("degF").m,
+                    precip.to("inch").m,
                     gdd,
                 )
             )

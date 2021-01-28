@@ -8,7 +8,6 @@ from pyiem import iemre, util
 from pyiem.plot.use_agg import plt
 from pyiem.reference import state_names
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.datatypes import distance
 from pyiem.exceptions import NoDataFound
 
 
@@ -106,48 +105,42 @@ def plotter(fdict):
             islice = slice(nav.x0, nav.x0 + nav.xsz)
         hasdata = np.flipud(hasdata)
 
-        today = distance(
-            nc.variables[ncvar][idx1, jslice, islice], "MM"
-        ).value("IN")
+        today = util.mm2inch(nc.variables[ncvar][idx1, jslice, islice])
         if (idx1 - idx0) < 32:
-            p01d = distance(
-                np.sum(nc.variables[ncvar][idx0:idx1, jslice, islice], 0), "MM"
-            ).value("IN")
+            p01d = util.mm2inch(
+                np.sum(nc.variables[ncvar][idx0:idx1, jslice, islice], 0)
+            )
         else:
             # Too much data can overwhelm this app, need to chunk it
             for i in range(idx0, idx1, 10):
                 i2 = min([i + 10, idx1])
                 if idx0 == i:
-                    p01d = distance(
-                        np.sum(nc.variables[ncvar][i:i2, jslice, islice], 0),
-                        "MM",
-                    ).value("IN")
+                    p01d = util.mm2inch(
+                        np.sum(nc.variables[ncvar][i:i2, jslice, islice], 0)
+                    )
                 else:
-                    p01d += distance(
-                        np.sum(nc.variables[ncvar][i:i2, jslice, islice], 0),
-                        "MM",
-                    ).value("IN")
+                    p01d += util.mm2inch(
+                        np.sum(nc.variables[ncvar][i:i2, jslice, islice], 0)
+                    )
 
     # Get climatology
     with util.ncopen(iemre.get_dailyc_mrms_ncname()) as nc:
         if (idx1 - idx0) < 32:
-            c_p01d = distance(
-                np.sum(nc.variables[ncvar][idx0:idx1, jslice, islice], 0), "MM"
-            ).value("IN")
+            c_p01d = util.mm2inch(
+                np.sum(nc.variables[ncvar][idx0:idx1, jslice, islice], 0)
+            )
         else:
             # Too much data can overwhelm this app, need to chunk it
             for i in range(idx0, idx1, 10):
                 i2 = min([i + 10, idx1])
                 if idx0 == i:
-                    c_p01d = distance(
-                        np.sum(nc.variables[ncvar][i:i2, jslice, islice], 0),
-                        "MM",
-                    ).value("IN")
+                    c_p01d = util.mm2inch(
+                        np.sum(nc.variables[ncvar][i:i2, jslice, islice], 0)
+                    )
                 else:
-                    c_p01d += distance(
-                        np.sum(nc.variables[ncvar][i:i2, jslice, islice], 0),
-                        "MM",
-                    ).value("IN")
+                    c_p01d += util.mm2inch(
+                        np.sum(nc.variables[ncvar][i:i2, jslice, islice], 0)
+                    )
 
     # we actually don't care about weights at this fine of scale
     cells = np.sum(np.where(hasdata > 0, 1, 0))

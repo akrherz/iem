@@ -7,8 +7,7 @@ import sys
 import numpy as np
 from pyiem.iemre import daily_offset
 from pyiem.plot import MapPlot, nwsprecip
-from pyiem.datatypes import distance
-from pyiem.util import ncopen
+from pyiem.util import ncopen, mm2inch
 
 
 def doday(ts, realtime):
@@ -17,7 +16,7 @@ def doday(ts, realtime):
     """
     idx = daily_offset(ts)
     with ncopen(
-        "/mesonet/data/iemre/%s_ifc_daily.nc" % (ts.year,), timeout=300
+        f"/mesonet/data/iemre/{ts.year}_ifc_daily.nc", timeout=300
     ) as nc:
         xaxis = nc.variables["lon"][:]
         yaxis = nc.variables["lat"][:]
@@ -68,12 +67,7 @@ def doday(ts, realtime):
     (lons, lats) = np.meshgrid(xaxis, yaxis)
 
     mp.pcolormesh(
-        lons,
-        lats,
-        distance(total, "MM").value("IN"),
-        clevs,
-        cmap=nwsprecip(),
-        units="inch",
+        lons, lats, mm2inch(total), clevs, cmap=nwsprecip(), units="inch"
     )
     mp.drawcounties()
     mp.postprocess(pqstr=pqstr, view=False)

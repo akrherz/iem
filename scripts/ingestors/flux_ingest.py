@@ -8,8 +8,7 @@ import datetime
 import pytz
 import pandas as pd
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn, logger, utc
-from pyiem.datatypes import temperature, speed, pressure
+from pyiem.util import get_dbconn, logger, utc, convert_value, c2f
 
 LOG = logger()
 BASEDIR = "/mnt/home/mesonet/ot/ot0005/incoming/Fluxdata"
@@ -228,15 +227,15 @@ def main():
                 station, "NSTLFLUX", row["valid"].to_pydatetime()
             )
             if "t_hmp_avg" in df.columns:
-                iemob.data["tmpf"] = temperature(row["t_hmp_avg"], "C").value(
-                    "F"
-                )
+                iemob.data["tmpf"] = c2f(row["t_hmp_avg"])
             if "wnd_spd" in df.columns:
-                iemob.data["sknt"] = speed(row["wnd_spd"], "MPS").value("KT")
+                iemob.data["sknt"] = convert_value(
+                    row["wnd_spd"], "meter / second", "knot"
+                )
             if "press_avg" in df.columns:
-                iemob.data["pres"] = pressure(
-                    row["press_avg"] * 1000.0, "PA"
-                ).value("MB")
+                iemob.data["pres"] = convert_value(
+                    row["press_avg"] * 1000.0, "pascal", "millibar"
+                )
             for cvar, ivar in zip(
                 ["solarrad_w_avg", "rh_hmp_avg", "wnd_dir_compass"],
                 ["srad", "rh", "drct"],

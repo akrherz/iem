@@ -8,10 +8,9 @@ import tempfile
 import numpy as np
 import pytz
 import pygrib
-from pyiem.datatypes import distance
 import pyiem.mrms as mrms
 from pyiem.plot import MapPlot, nwsprecip
-from pyiem.util import utc, logger
+from pyiem.util import utc, logger, mm2inch
 
 LOG = logger()
 TMP = "/mesonet/tmp"
@@ -90,7 +89,7 @@ def doit(ts, hours):
     mp.contourf(
         mrms.XAXIS,
         mrms.YAXIS,
-        distance(np.flipud(total), "MM").value("IN"),
+        mm2inch(np.flipud(total)),
         clevs,
         cmap=nwsprecip(),
     )

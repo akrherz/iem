@@ -4,9 +4,9 @@ import os
 import sys
 
 import numpy as np
+from metpy.units import units
 from pyiem import iemre
-from pyiem.datatypes import temperature
-from pyiem.util import ncopen, logger
+from pyiem.util import ncopen, logger, convert_value
 from pyiem.meteorology import gdd
 from tqdm import tqdm
 
@@ -87,16 +87,20 @@ def copy_iemre(nc, ncdate0, ncdate1, islice, jslice):
         re_slice = slice(tidx0, tidx1 + 1)
 
         # LOG.debug("filling nc: %s iemre: %s", yfx_slice, re_slice)
-        highc = temperature(
-            renc.variables["high_tmpk"][re_slice, jslice, islice], "K"
-        ).value("C")
-        lowc = temperature(
-            renc.variables["low_tmpk"][re_slice, jslice, islice], "K"
-        ).value("C")
+        highc = convert_value(
+            renc.variables["high_tmpk"][re_slice, jslice, islice],
+            "degK",
+            "degC",
+        )
+        lowc = convert_value(
+            renc.variables["low_tmpk"][re_slice, jslice, islice],
+            "degK",
+            "degC",
+        )
         nc.variables["tmax"][yfx_slice, :, :] = highc
         nc.variables["tmin"][yfx_slice, :, :] = lowc
         nc.variables["gdd_f"][yfx_slice, :, :] = gdd(
-            temperature(highc, "C"), temperature(lowc, "C")
+            units("degC") * highc, units("degC") * lowc
         )
         nc.variables["prcp"][yfx_slice, :, :] = renc.variables["p01d"][
             re_slice, jslice, islice

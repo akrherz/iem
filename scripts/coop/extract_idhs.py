@@ -13,34 +13,27 @@ def main(argv):
     pgconn2 = get_dbconn("coop")
     cursor3 = pgconn2.cursor()
     cursor.execute(
-        """
-        SELECT ugc, ST_X(centroid), ST_Y(centroid)
-        from ugcs where state = 'IA' and substr(ugc,3,1) = 'C'
-        and end_ts is null ORDER by ugc ASC
-    """
+        "SELECT ugc, ST_X(centroid), ST_Y(centroid) "
+        "from ugcs where state = 'IA' and substr(ugc,3,1) = 'C' "
+        "and end_ts is null ORDER by ugc ASC"
     )
     for row in cursor:
         fips = row[0][3:]
         # Get closest climodat site
         cursor2.execute(
-            """
-            SELECT id, ST_Distance(geom,
-            ST_SetSRID(ST_GeomFromText('POINT(%s %s)'), 4326))
-            from stations where network = 'IACLIMATE' and id != 'IA0000'
-            and substr(id,3,1) != 'C' ORDER by st_distance ASC LIMIT 1
-            """,
+            "SELECT id, ST_Distance(geom, "
+            "ST_SetSRID(ST_GeomFromText('POINT(%s %s)'), 4326)) "
+            "from stations where network = 'IACLIMATE' and id != 'IA0000' "
+            "and substr(id,3,1) != 'C' ORDER by st_distance ASC LIMIT 1",
             (row[1], row[2]),
         )
         sid = cursor2.fetchone()[0]
 
         cursor3.execute(
-            """
-            SELECT year, month,
-            max(high), min(low), avg((high+low)/2.), sum(precip),
-            sum(case when high >= 95 then 1 else 0 end),
-            sum(case when low >= 70 then 1 else 0 end) from alldata_ia WHERE
-            station = %s and year = %s GROUP by year, month
-        """,
+            "SELECT year, month, max(high), min(low), avg((high+low)/2.), "
+            "sum(precip), sum(case when high >= 95 then 1 else 0 end), "
+            "sum(case when low >= 70 then 1 else 0 end) from alldata_ia WHERE "
+            "station = %s and year = %s GROUP by year, month",
             (sid, year),
         )
         for row2 in cursor3:

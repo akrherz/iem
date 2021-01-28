@@ -8,11 +8,11 @@ import numpy as np
 import matplotlib.colors as mpcolors
 import matplotlib.colorbar as mpcolorbar
 import matplotlib.patheffects as PathEffects
+from metpy.calc import wind_components
+from metpy.units import units
 from paste.request import parse_formvars
-from pyiem.meteorology import uv
 from pyiem.plot import get_cmap
 from pyiem.plot.use_agg import plt
-from pyiem.datatypes import speed, direction
 from pyiem.util import get_dbconn
 
 
@@ -72,9 +72,11 @@ def do(valid):
         vals.append(row[1])
         ws.append(row[5])
         yaw.append(row[4])
-        a, b = uv(speed(row[5], "MPS"), direction(row[4], "deg"))
-        u.append(a.value("MPS"))
-        v.append(b.value("MPS"))
+        a, b = wind_components(
+            units("meter / second") * row[5], units("degree") * row[4]
+        )
+        u.append(a.m)
+        v.append(b.m)
         pitch.append(row[6])
     pitch = np.array(pitch)
     vals = np.array(vals)
@@ -114,18 +116,18 @@ def do(valid):
     ax.text(
         0.05,
         0.05,
-        "Turbine Power: $\mu$= %.1f $\sigma$= %.1f kW" % (avgv, np.std(vals)),
+        r"Turbine Power: $\mu$= %.1f $\sigma$= %.1f kW" % (avgv, np.std(vals)),
         transform=ax.transAxes,
     )
     ax.text(
         0.05,
         0.01,
-        "Wind $\mu$= %.1f $\sigma$= %.1f $ms^{-1}$"
+        r"Wind $\mu$= %.1f $\sigma$= %.1f $ms^{-1}$"
         % (np.average(ws), np.std(ws)),
         transform=ax.transAxes,
     )
-    ax.set_xlabel("Longitude $^\circ$E")
-    ax.set_ylabel("Latitude $^\circ$N")
+    ax.set_xlabel(r"Longitude $^\circ$E")
+    ax.set_ylabel(r"Latitude $^\circ$N")
     ax.set_xlim(-93.475, -93.328)
     ax.set_ylim(42.20, 42.31)
 
@@ -157,7 +159,7 @@ def do(valid):
     ax4 = fig.add_axes([0.7, 0.32, 0.28, 0.18], sharey=ax2)
     ax4.scatter(pitch, vals, edgecolor="k", c="k")
     ax4.text(
-        0.5, -0.25, "Pitch $^\circ$", transform=ax4.transAxes, ha="center"
+        0.5, -0.25, r"Pitch $^\circ$", transform=ax4.transAxes, ha="center"
     )
     ax4.set_ylim(-10, 1600)
     ax4.grid(True)
@@ -166,7 +168,7 @@ def do(valid):
     ax5 = fig.add_axes([0.7, 0.07, 0.28, 0.18], sharex=ax4)
     ax5.scatter(pitch, ws, edgecolor="k", c="k")
     ax5.text(
-        0.5, -0.25, "Pitch $^\circ$", transform=ax5.transAxes, ha="center"
+        0.5, -0.25, r"Pitch $^\circ$", transform=ax5.transAxes, ha="center"
     )
     ax5.grid(True)
     ax5.set_ylim(bottom=-10)

@@ -7,10 +7,10 @@ import pandas as pd
 from scipy import stats
 from pandas.io.sql import read_sql
 import matplotlib.patheffects as PathEffects
+from metpy.units import units
 from pyiem.meteorology import gdd
 from pyiem.plot.use_agg import plt
-from pyiem.datatypes import temperature, distance
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconn, mm2inch, c2f
 from pyiem.exceptions import NoDataFound
 
 STATIONS = OrderedDict(
@@ -152,8 +152,8 @@ def load(dirname, location, sdate):
         df[col] = pd.to_numeric(df[col], errors="coerce")
     if len(data[0]) < 10:
         df["gdd"] = gdd(
-            temperature(df["maxt"].values, "C"),
-            temperature(df["mint"].values, "C"),
+            units("degC") * df["maxt"].values,
+            units("degC") * df["mint"].values,
         )
     bins = []
     today = datetime.date.today()
@@ -172,8 +172,8 @@ def load(dirname, location, sdate):
             continue
         bins.append(0)
     df["bin"] = bins
-    df["rain"] = distance(df["rain"].values, "MM").value("IN")
-    df["avgt"] = temperature((df["maxt"] + df["mint"]) / 2.0, "C").value("F")
+    df["rain"] = mm2inch(df["rain"].values)
+    df["avgt"] = c2f((df["maxt"] + df["mint"]) / 2.0)
     return df
 
 

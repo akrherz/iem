@@ -7,9 +7,8 @@ import sys
 
 import pygrib
 import pytz
-from pyiem.datatypes import distance
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import logger
+from pyiem.util import logger, mm2inch
 
 LOG = logger()
 
@@ -64,9 +63,7 @@ def do(ts, hours):
             subtitle="Total up to %s"
             % (localtime.strftime("%d %B %Y %I %p %Z"),),
         )
-        mp.pcolormesh(
-            lons, lats, distance(total, "MM").value("IN"), clevs, units="inch"
-        )
+        mp.pcolormesh(lons, lats, mm2inch(total), clevs, units="inch")
         pqstr = "plot %s %s00 %s_stage4_%sh.png %s_stage4_%sh_%s.png png" % (
             "ac",
             ts.strftime("%Y%m%d%H"),

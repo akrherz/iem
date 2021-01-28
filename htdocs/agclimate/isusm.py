@@ -4,9 +4,8 @@
 from io import BytesIO
 
 from pyiem.network import Table as NetworkTable
-from pyiem.datatypes import temperature
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, c2f
 from paste.request import parse_formvars
 
 CTX = {
@@ -43,13 +42,10 @@ def get_currents():
 
     # Go get daily values
     cursor2.execute(
-        """SELECT station, tair_c_max from sm_daily
-    where valid = %s
-    """,
-        (valid,),
+        "SELECT station, tair_c_max from sm_daily where valid = %s", (valid,)
     )
     for row in cursor2:
-        data[row[0]]["high"] = temperature(row[1], "C").value("F")
+        data[row[0]]["high"] = c2f(row[1])
 
     cursor.close()
     dbconn.close()
