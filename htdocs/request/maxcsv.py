@@ -6,16 +6,99 @@ ID,Station,Latitude,Longitude
 import datetime
 import sys
 
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    from backports.zoneinfo import ZoneInfo
+
+# third party
+import ephem
 import pytz
 import pandas as pd
 from pandas.io.sql import read_sql
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc
 
 # DOT plows
 # RWIS sensor data
 # River gauges
 # Ag data (4" soil temps)
+# Moon
+
+
+def figurePhase(p1, p2):
+    """ Return a string of the moon phase! """
+    if p2 < p1:  # Waning!
+        if p1 < 0.1:
+            return "New Moon"
+        if p1 < 0.4:
+            return "Waning Crescent"
+        if p1 < 0.6:
+            return "Last Quarter"
+        if p1 < 0.9:
+            return "Waning Gibbous"
+        return "Full Moon"
+
+    if p1 < 0.1:
+        return "New Moon"
+    if p1 < 0.4:
+        return "Waxing Crescent"
+    if p1 < 0.6:
+        return "First Quarter"
+    if p1 < 0.9:
+        return "Waxing Gibbous"
+    return "Full Moon"
+
+
+def do_moon(lon, lat):
+    """Moon fun."""
+    moon = ephem.Moon()
+    obs = ephem.Observer()
+    obs.lat = str(lat)
+    obs.long = str(lon)
+    obs.date = utc().strftime("%Y/%m/%d %H:%M")
+    r1 = obs.next_rising(moon).datetime().replace(tzinfo=datetime.timezone.utc)
+    p1 = moon.moon_phase
+    obs.date = r1.strftime("%Y/%m/%d %H:%M")
+    s1 = (
+        obs.next_setting(moon).datetime().replace(tzinfo=datetime.timezone.utc)
+    )
+    # Figure out the next rise time
+    obs.date = s1.strftime("%Y/%m/%d %H:%M")
+    r2 = obs.next_rising(moon).datetime().replace(tzinfo=datetime.timezone.utc)
+    p2 = moon.moon_phase
+    obs.date = r2.strftime("%Y/%m/%d %H:%M")
+    s2 = (
+        obs.next_setting(moon).datetime().replace(tzinfo=datetime.timezone.utc)
+    )
+    label = figurePhase(p1, p2)
+    # Figure out the timezone
+    cursor = get_dbconn("mesosite").cursor()
+    cursor.execute(
+        "select tzid from tz_world WHERE "
+        "st_contains(geom, st_setsrid(ST_Point(%s, %s), 4326))",
+        (lon, lat),
+    )
+    if cursor.rowcount == 0:
+        tzid = "UTC"
+    else:
+        tzid = cursor.fetchone()[0]
+    tz = ZoneInfo(tzid)
+    return pd.DataFrame(
+        {
+            "longitude": lon,
+            "latitude": lat,
+            "moon_rise": r1.astimezone(tz).strftime("%Y/%m/%d %-I:%M %P"),
+            "moon_set": s1.astimezone(tz).strftime("%Y/%m/%d %-I:%M %P"),
+            "percent_illum_at_rise": p1 * 100,
+            "phase": label,
+            "next_moon_rise": r2.astimezone(tz).strftime("%Y/%m/%d %-I:%M %P"),
+            "next_moon_set": s2.astimezone(tz).strftime("%Y/%m/%d %-I:%M %P"),
+            "next_percent_illum_at_rise": p2 * 100,
+            "timezone": tzid,
+        },
+        index=[0],
+    )
 
 
 def do_iaroadcond():
@@ -455,6 +538,9 @@ def router(appname):
         df = do_iowa_azos(datetime.date.today(), True)
     elif appname == "kcrgcitycam":
         df = do_webcams("KCRG")
+    elif appname.startswith("moon"):
+        tokens = appname.replace(".txt", "").split("_")
+        df = do_moon(float(tokens[1]), float(tokens[2]))
     else:
         df = """ERROR, unknown report specified"""
     return df
