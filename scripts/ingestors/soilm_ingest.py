@@ -270,9 +270,6 @@ def m15_process(nwsli, maxts):
                 dewpoint_from_relative_humidity(tmpc, relh).to(units("degF")).m
             )
         # ob.data["srad"] = row["slrkw_avg_qc"]
-        # ob.data["pcounter"] = round(
-        #    distance(row["rain_mm_tot_qc"], "MM").value("IN"), 2
-        # )
         ob.data["sknt"] = convert_value(
             row["ws_mph_s_wvt_qc"], "mile / hour", "knot"
         )

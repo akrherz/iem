@@ -107,7 +107,6 @@ def main(argv):
         if tmpf != "M" and dwpf != "M":
             t = units("degK") * nc.variables["temperature"][idx]
             d = units("degK") * nc.variables["dewpoint"][idx]
-            # relh = meteorology.relh(t, d).value("%")
             heat = "%5.1f" % (heat_index(t, d).to(units("degF")).m,)
         drct = s2(nc.variables["windDir"][idx])
         smps = s2(nc.variables["windSpeed"][idx])
