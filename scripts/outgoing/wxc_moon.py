@@ -4,21 +4,29 @@
 
  Run from RUN_MIDNIGHT.sh
 """
+# stdlib
 import datetime
 import os
 import subprocess
 
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    from backports.zoneinfo import ZoneInfo
+
+# third party
 import ephem
-import pytz
-from pyiem.util import utc
+from pyiem.util import utc, logger
 from pyiem.network import Table as NetworkTable
 
+LOG = logger()
 nt = NetworkTable(("AWOS", "IA_ASOS"))
+UTC = datetime.timezone.utc
 
 
 def figurePhase(p1, p2):
     """ Return a string of the moon phase! """
-    if p2 > p1:  # Waning!
+    if p2 < p1:  # Waning!
         if p1 < 0.1:
             return "New Moon"
         if p1 < 0.4:
@@ -40,18 +48,6 @@ def figurePhase(p1, p2):
     return "Full Moon"
 
 
-def mydate(d):
-    """ Convert string into a datetime obj """
-    if d is None:
-        return datetime.datetime(1989, 1, 1)
-    if d == "":
-        return datetime.datetime(1989, 1, 1)
-
-    gts = datetime.datetime.strptime(str(d), "%Y/%m/%d %H:%M:%S")
-    gts = gts.replace(tzinfo=pytz.UTC)
-    return gts.astimezone(pytz.timezone("America/Chicago"))
-
-
 def main():
     """Go Main Go"""
     m = ephem.Moon()
@@ -59,56 +55,58 @@ def main():
     out = open("/tmp/wxc_moon.txt", "w")
     out.write(
         """Weather Central 001d0300 Surface Data
-   8
+   9
    4 Station
   30 Location
    6 Lat
    8 Lon
-   8 MOON_RISE
-   8 MOON_SET
+  19 MOON_RISE
+  19 MOON_SET
   30 MOON_PHASE
+   6 PERCENT ILLUMINATED
    2 BOGUS
 """
     )
 
-    # Run for tomorrow
-    now = utc() + datetime.timedelta(days=1)
+    # Compute midnight tomorrow
+    tm = utc() + datetime.timedelta(days=1)
+    tz = ZoneInfo("America/Chicago")
+    midnight = datetime.datetime(tm.year, tm.month, tm.day, tzinfo=tz)
+    utc_midnight = midnight.astimezone(UTC)
+    LOG.debug("midnight is %s", midnight)
     for station in nt.sts:
         ia = ephem.Observer()
         ia.lat = str(nt.sts[station]["lat"])
         ia.long = str(nt.sts[station]["lon"])
-        ia.date = now.strftime("%Y/%m/%d 00:00")
-        r1 = mydate(ia.next_rising(m))
-        s1 = mydate(ia.next_setting(m))
+        # Figure out the first rise after midnight
+        ia.date = utc_midnight.strftime("%Y/%m/%d %H:00")
+        r1 = ia.next_rising(m).datetime().replace(tzinfo=UTC)
+        # Figure out when it sets after this date
+        ia.date = r1.strftime("%Y/%m/%d %H:%M")
+        s1 = ia.next_setting(m).datetime().replace(tzinfo=UTC)
+        LOG.debug("r1: %s s1: %s", r1, s1)
         p1 = m.moon_phase
 
-        # Get tomorrow's value to figure out moon direction
-        ia.date = utc().strftime("%Y/%m/%d 00:00")
-        r2 = mydate(ia.next_rising(m))
-        s2 = mydate(ia.next_setting(m))
+        # Get the next rise after the first set
+        ia.date = s1.strftime("%Y/%m/%d %H:%M")
+        # to advance API?
+        ia.next_rising(m)
         p2 = m.moon_phase
+        LOG.debug("p1: %s p2: %s", p1, p2)
 
         mp = figurePhase(p1, p2)
-        find_d = now.strftime("%Y%m%d")
-
-        my_rise = r2
-        if r1.strftime("%Y%m%d") == find_d:
-            my_rise = r1
-
-        my_set = s2
-        if s1.strftime("%Y%m%d") == find_d:
-            my_set = s1
 
         out.write(
-            ("K%s %-30.30s %6.3f %8.3f %8s %8s %30s AA\n")
+            ("K%s %-30.30s %6.3f %8.3f %19s %19s %30s %6.2f AA\n")
             % (
                 station,
                 nt.sts[station]["name"],
                 nt.sts[station]["lat"],
                 nt.sts[station]["lon"],
-                my_rise.strftime("%-I:%M %P"),
-                my_set.strftime("%-I:%M %P"),
+                r1.astimezone(tz).strftime("%Y/%m/%d %-I:%M %P"),
+                s1.astimezone(tz).strftime("%Y/%m/%d %-I:%M %P"),
                 mp,
+                p1,
             )
         )
 
