@@ -106,7 +106,7 @@ def main():
                 r1.astimezone(tz).strftime("%Y/%m/%d %-I:%M %P"),
                 s1.astimezone(tz).strftime("%Y/%m/%d %-I:%M %P"),
                 mp,
-                p1,
+                p1 * 100.0,
             )
         )
 
