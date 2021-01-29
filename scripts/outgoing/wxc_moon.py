@@ -1,6 +1,8 @@
 """
- Generate a WXC formatted file with moon conditions for Iowa sites.  I am
- unsure if the TV folks are still using this or not.  Its easy to generate
+ Generate a WXC formatted file with moon conditions for Iowa sites. At least
+ one TV station is using this.
+
+ Run from RUN_MIDNIGHT.sh
 """
 import datetime
 import os
@@ -8,6 +10,7 @@ import subprocess
 
 import ephem
 import pytz
+from pyiem.util import utc
 from pyiem.network import Table as NetworkTable
 
 nt = NetworkTable(("AWOS", "IA_ASOS"))
@@ -23,21 +26,18 @@ def figurePhase(p1, p2):
         if p1 < 0.6:
             return "Last Quarter"
         if p1 < 0.9:
-            return "Waning_Gibbous"
-        else:
-            return "Full Moon"
+            return "Waning Gibbous"
+        return "Full Moon"
 
-    else:  # Waxing!
-        if p1 < 0.1:
-            return "New Moon"
-        if p1 < 0.4:
-            return "Waxing Crescent"
-        if p1 < 0.6:
-            return "First Quarter"
-        if p1 < 0.9:
-            return "Waxing_Gibbous"
-        else:
-            return "Full Moon"
+    if p1 < 0.1:
+        return "New Moon"
+    if p1 < 0.4:
+        return "Waxing Crescent"
+    if p1 < 0.6:
+        return "First Quarter"
+    if p1 < 0.9:
+        return "Waxing Gibbous"
+    return "Full Moon"
 
 
 def mydate(d):
@@ -71,22 +71,19 @@ def main():
 """
     )
 
+    # Run for tomorrow
+    now = utc() + datetime.timedelta(days=1)
     for station in nt.sts:
         ia = ephem.Observer()
         ia.lat = str(nt.sts[station]["lat"])
         ia.long = str(nt.sts[station]["lon"])
-        ia.date = "%s 00:00" % (
-            datetime.datetime.utcnow().strftime("%Y/%m/%d"),
-        )
+        ia.date = now.strftime("%Y/%m/%d 00:00")
         r1 = mydate(ia.next_rising(m))
         s1 = mydate(ia.next_setting(m))
         p1 = m.moon_phase
 
-        ia.date = "%s 00:00" % (
-            (datetime.datetime.utcnow() - datetime.timedelta(days=1)).strftime(
-                "%Y/%m/%d"
-            ),
-        )
+        # Get tomorrow's value to figure out moon direction
+        ia.date = utc().strftime("%Y/%m/%d 00:00")
         r2 = mydate(ia.next_rising(m))
         s2 = mydate(ia.next_setting(m))
         p2 = m.moon_phase
