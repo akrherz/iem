@@ -89,7 +89,7 @@ def main():
         p2 = m.moon_phase
 
         mp = figurePhase(p1, p2)
-        find_d = datetime.datetime.now().strftime("%Y%m%d")
+        find_d = now.strftime("%Y%m%d")
 
         my_rise = r2
         if r1.strftime("%Y%m%d") == find_d:
