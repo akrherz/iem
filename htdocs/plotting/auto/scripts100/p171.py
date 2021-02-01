@@ -3,9 +3,10 @@ import calendar
 
 import numpy as np
 from pandas.io.sql import read_sql
+import seaborn as sns
 import pyiem.nws.vtec as vtec
 from pyiem import reference
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -65,8 +66,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    import seaborn as sns
-
     pgconn = get_dbconn("postgis")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
@@ -87,15 +86,13 @@ def plotter(fdict):
     # NB we added a hack here that may lead to some false positives when events
     # cross over months, sigh, recall the 2017 eventid pain
     df = read_sql(
-        """
+        f"""
         with data as (
             SELECT distinct
             extract(year from issue)::int as yr,
             extract(month from issue)::int as mo, wfo, eventid
             from warnings where phenomena = %s and significance = %s
-            """
-        + wfo_limiter
-        + """
+            {wfo_limiter}
             GROUP by yr, mo, wfo, eventid)
 
         SELECT yr, mo, count(*) from data GROUP by yr, mo ORDER by yr, mo ASC
@@ -107,11 +104,10 @@ def plotter(fdict):
 
     if df.empty:
         raise NoDataFound("Sorry, no data found!")
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 8))
 
     df2 = df.pivot("yr", "mo", "count")
     df2 = df2.reindex(
-        index=range(df2.index.min(), df2.index.max() + 1), columns=range(1, 13)
+        index=range(df["yr"].min(), df["yr"].max() + 1), columns=range(1, 13)
     )
 
     title = "NWS %s" % (ctx["_nt"].sts[station]["name"],)
@@ -119,12 +115,12 @@ def plotter(fdict):
         title = ("NWS Issued for Counties/Zones for State of %s") % (
             reference.state_names[state],
         )
-    title += ("\n%s (%s.%s) Issued by Year,Month") % (
+    subtitle = ("%s (%s.%s) Issued by Year, Month") % (
         vtec.get_ps_string(phenomena, significance),
         phenomena,
         significance,
     )
-    ax.set_title(title)
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle)
     sns.heatmap(
         df2,
         annot=True,
@@ -133,9 +129,18 @@ def plotter(fdict):
         ax=ax,
         vmin=1,
         cmap=ctx["cmap"],
+        zorder=2,
     )
+    # Add some horizontal lines
+    for i, year in enumerate(range(df["yr"].min(), df["yr"].max() + 1)):
+        if year % 5 != 0:
+            continue
+        ax.axhline(i, zorder=3, lw=1, color="gray")
+    # Add some vertical lines
+    for i in range(1, 12):
+        ax.axvline(i, zorder=3, lw=1, color="gray")
     ax.set_xticks(np.arange(12) + 0.5)
-    ax.set_xticklabels(calendar.month_abbr[1:])
+    ax.set_xticklabels(calendar.month_abbr[1:], rotation=0)
     ax.set_ylabel("Year")
     ax.set_xlabel("Month")
 

@@ -3,8 +3,13 @@ import datetime
 
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
+
+PDICT = {
+    "precip": "Precipitation",
+    "snow": "Snow",
+}
 
 
 def get_description():
@@ -23,7 +28,11 @@ def get_description():
     the 365 day accumulation of precipitation.  The year shown is the year
     for the start of the accumulation period.  For example, if you accumulate
     after 1 October, the year 2020 would represent the period from 1 Oct 2020
-    to 30 Sep 2021.
+    to 30 Sep 2021.</p>
+
+    <p>Accumulating snowfall data is frought with peril, but this app will let
+    you do it!  The app has a tight requirement of no less than 3 days of
+    missing data for the year to be considered in the plot.</p>
     """
     today = datetime.date.today()
     thisyear = today.year
@@ -34,6 +43,13 @@ def get_description():
             default="IATDSM",
             label="Select Station:",
             network="IACLIMATE",
+        ),
+        dict(
+            type="select",
+            options=PDICT,
+            name="var",
+            default="precip",
+            label="Accumulate Precipitation or Snow?",
         ),
         dict(
             type="year",
@@ -72,8 +88,26 @@ def get_description():
             max="2000/12/31",
             label="End Day of Year for Plot: (ignore year)",
         ),
+        dict(
+            type="int",
+            default="3",
+            label="Number of missing days to allow before excluding year",
+            name="m",
+        ),
     ]
     return desc
+
+
+def cull_missing(df, colname, missingdays):
+    """Figure out which years need to go from the analysis."""
+    df2 = df[["binyear", colname]]
+    nancounts = df2.groupby("binyear").agg(lambda x: x.isnull().sum())
+    # cull anything with more than 3 days NaN
+    df2 = nancounts[nancounts[colname] > missingdays]
+    years = []
+    if not df2.empty:
+        years = list(df2.index.values)
+    return df[~df["binyear"].isin(years)], years
 
 
 def plotter(fdict):
@@ -89,17 +123,19 @@ def plotter(fdict):
     year3 = ctx.get("year3")
     sdate = ctx["sdate"]
     table = "alldata_%s" % (station[:2],)
+    # belt and suspenders
+    assert ctx["var"] in PDICT
     df = read_sql(
         f"""
         with obs as (
-            SELECT day, precip,
+            SELECT day, {ctx["var"]},
             case when sday >= %s then year else year - 1 end as binyear
-            from {table} WHERE station = %s and precip is not null
+            from {table} WHERE station = %s
         )
-        SELECT day, binyear, precip,
+        SELECT day, binyear::int, {ctx["var"]},
         row_number() OVER (PARTITION by binyear ORDER by day ASC) as row,
-        sum(precip) OVER (PARTITION by binyear ORDER by day ASC) as accum from
-        obs ORDER by day ASC
+        sum({ctx["var"]}) OVER (PARTITION by binyear ORDER by day ASC) as accum
+        from obs ORDER by day ASC
     """,
         pgconn,
         params=(sdate.strftime("%m%d"), station),
@@ -117,7 +153,27 @@ def plotter(fdict):
         doy_trunc = today_doy + offset - sdate_doy
         df = df[df["row"] <= doy_trunc]
 
-    (fig, ax) = plt.subplots(1, 1)
+    df, cullyears = cull_missing(df, ctx["var"], ctx["m"])
+
+    extra = "" if doy_trunc == 365 else f" till {today.strftime('%-d %B')}"
+    title = "Accumulated %s after %s%s" % (
+        sdate.strftime("%-d %B"),
+        PDICT[ctx["var"]],
+        extra,
+    )
+    subtitle = "[%s] %s (%s-%s)" % (
+        station,
+        ctx["_nt"].sts[station]["name"],
+        df["binyear"].min(),
+        datetime.date.today().year,
+    )
+    if cullyears:
+        subtitle += (
+            f", {len(cullyears)} years excluded due to "
+            f"missing > {ctx['m']} days"
+        )
+
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle)
     # Average
     jday = df[["row", "accum"]].groupby("row").mean()
     jday["accum"].values[-1] = jday["accum"].values[-2]
@@ -145,8 +201,8 @@ def plotter(fdict):
     plotted = []
     for year, color in zip(
         [
-            df["accum"].idxmax().year,
-            df[df["row"] == doy_trunc]["accum"].idxmin().year,
+            df["binyear"][df["accum"].idxmax()],
+            df["binyear"][df[df["row"] == doy_trunc]["accum"].idxmin()],
             year1,
             year2,
             year3,
@@ -163,27 +219,21 @@ def plotter(fdict):
         extra = ""
         if (lastrow["row"] + 2) < doy_trunc:
             extra = f" to {df2.index.values[-1].strftime('%-d %b')}"
+        labelyear = year
+        if df2.index.values[0].year != df2.index.values[-1].year:
+            labelyear = "%s-%s" % (
+                df2.index.values[0].year,
+                df2.index.values[-1].year,
+            )
         ax.plot(
             range(1, len(df2.index) + 1),
             df2["accum"],
-            label="%s - %.2f%s" % (year, lastrow["accum"], extra),
+            label="%s - %.2f%s" % (labelyear, lastrow["accum"], extra),
             color=color,
             lw=2,
         )
 
-    extra = "" if doy_trunc == 365 else f" till {today.strftime('%-d %B')}"
-    ax.set_title(
-        ("Accumulated Precipitation after %s%s\n" "[%s] %s (%s-%s)")
-        % (
-            sdate.strftime("%-d %B"),
-            extra,
-            station,
-            ctx["_nt"].sts[station]["name"],
-            ab.year,
-            datetime.date.today().year,
-        )
-    )
-    ax.set_ylabel("Precipitation [inch]")
+    ax.set_ylabel(PDICT[ctx["var"]] + " [inch]")
     ax.grid(True)
     ax.legend(loc=2)
     xticks = []
@@ -203,4 +253,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(sdate="2000-10-01", stop="yes"))
+    plotter(dict(sdate="2000-07-01", station="IA8706", var="snow"))
