@@ -50,7 +50,7 @@ def get_time_domain(form):
     return sts, ets
 
 
-def do_excel(pgconn, sts, ets, wfolimiter):
+def do_excel(pgconn, sts, ets, wfolimiter, statelimiter):
     """Export as Excel."""
     df = read_sql(
         "WITH wfos as (select case when length(id) = 4 then substr(id, 1, 3) "
@@ -63,7 +63,8 @@ def do_excel(pgconn, sts, ets, wfolimiter):
         "county, city, state, typetext, magnitude, source, "
         "ST_y(geom) as lat, ST_x(geom) as lon, coalesce(remark, '') as remark "
         "from lsrs l JOIN wfos w on (l.wfo = w.cwa) "
-        f"WHERE valid >= %s and valid < %s {wfolimiter} ORDER by utcvalid ASC",
+        f"WHERE valid >= %s and valid < %s {wfolimiter} {statelimiter} "
+        "ORDER by utcvalid ASC",
         pgconn,
         params=(sts, ets),
     )
@@ -122,6 +123,13 @@ def application(environ, start_response):
             b"month exists for your selection (ie June 31st vs June 30th)."
         ]
 
+    statelimiter = ""
+    if "state" in form:
+        aStates = form.getall("state")
+        aStates.append("XX")
+        if "_ALL" not in aStates:
+            statelimiter = " and state in %s " % (str(tuple(aStates)),)
+
     wfoLimiter = ""
     if "wfo[]" in form:
         aWFO = form.getall("wfo[]")
@@ -136,7 +144,7 @@ def application(environ, start_response):
             ("Content-disposition", f"attachment; Filename={fn}.xlsx"),
         ]
         start_response("200 OK", headers)
-        return [do_excel(pgconn, sts, ets, wfoLimiter)]
+        return [do_excel(pgconn, sts, ets, wfoLimiter, statelimiter)]
 
     os.chdir("/tmp")
     for suffix in ["shp", "shx", "dbf", "csv"]:
@@ -161,7 +169,7 @@ def application(environ, start_response):
         ST_y(geom), ST_x(geom),
         to_char(valid at time zone 'UTC', 'YYYY/MM/DD HH24:MI') as dvalid2
         from lsrs WHERE
-        valid >= %s and valid < %s {wfoLimiter}
+        valid >= %s and valid < %s {wfoLimiter} {statelimiter}
         ORDER by dvalid ASC
         """,
         (sts, ets),

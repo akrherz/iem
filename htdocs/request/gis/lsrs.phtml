@@ -20,7 +20,7 @@ $ms2 = monthSelect2(0,"month2");
 $ds2 = daySelect2(0, "day2");
 $hs2 = gmtHourSelect(0, "hour2");
 $ns2 = minuteSelect(0, "minute2");
-
+$stateselect = stateSelect("_ALL", '', "state", 5, true, true);
 $ss = "";
 foreach($nt->table as $key => $value){
 	$ss .= "<option value='$key'>[$key] ". $value["name"] ."</option>\n";
@@ -48,6 +48,7 @@ worth of LSRs.  Note that these times are based on the valid time of the LSR and
 not the issuance of the text product itself that contained the LSR.
 <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py?wfo[]=ALL&amp;recent=86400&amp;fmt=csv</code>
 <br /><code>https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py?wfo[]=DMX&amp;wfo[]=DVN&amp;recent=86400&amp;fmt=csv</code>
+<br /><code>https://mesonet.agron.iastate.edu/cgi-bin/request/gis/lsr.py?state=IA&amp;recent=86400&amp;fmt=csv</code>
 <br />Omit the <code>fmt=csv</code> portion to return the zipped shapefile.</p>
 
 <p>Example to fetch a month's worth of data
@@ -55,11 +56,20 @@ not the issuance of the text product itself that contained the LSR.
 </p>
 
 <form method="GET" action="/cgi-bin/request/gis/lsr.py">
-<h4>Limit Weather Forecast Office (WFO)</h4>
-<select name="wfo[]" MULTIPLE size="5">
- <option value="ALL" SELECTED>All Available</option>
- {$ss}
-</select>
+<div class="row">
+<div class="col-md-6">
+    <h4>Limit Weather Forecast Office (WFO)</h4>
+    <select name="wfo[]" MULTIPLE size="5">
+    <option value="ALL" SELECTED>All Available</option>
+    {$ss}
+    </select>
+</div>
+<div class="col-md-6">
+    <h4>Limit by State</h4>
+    {$stateselect}
+</div>
+</div><!-- ./row -->
+
 <h4>Select time interval</h4>
 <i>(Times are in UTC.  Local Storm Reports with an event time <b>valid</b>
 between these times selected below will be included in the output GIS file...)</i>

@@ -60,7 +60,9 @@ function make_select($name, $selected, $ar, $jscallback="", $cssclass='',
         return $s;
 }
 
-function stateSelect($selected, $jscallback='', $name='state', $size = 1, $multiple = false){
+function stateSelect(
+    $selected, $jscallback='', $name='state', $size = 1, $multiple = false,
+    $all = false){
     // Create pull down for selecting a state
     $states = Array("AL" => "Alabama",
         "AK" => "Alaska",
@@ -116,13 +118,18 @@ function stateSelect($selected, $jscallback='', $name='state', $size = 1, $multi
     );
     $s = sprintf("<select name=\"%s\"%s\n", $name,
         ($jscallback != "")? " onChange=\"$jscallback(this.value)\"" : "");
-    if(1 > $size){
+    if($size > 1){
         $s .= ' size="' . $size . '"';
     }
     if($multiple){
         $s .= ' MULTIPLE';
     }
     $s .= '>';
+    if ($all){
+        $s .= sprintf(
+            "<option value=\"_ALL\"%s>All Available</option>",
+        ($selected == "_ALL") ? " SELECTED": "");
+    }
     foreach($states as $key => $val){
         $s .= "<option value=\"$key\"";
         if ($selected == $key) $s .= " SELECTED";
