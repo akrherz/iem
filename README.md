@@ -19,22 +19,19 @@ limited time.
 
 Process | Primary | Backup | Monitor
 ------- | ------- | ------ | -------
-Apache ErrorLog | iem12 | None | None
 GOES R/S | iem8-dc | iem19 | None
-hads-database | metvm4 | None | [check_hads_ingest.py](https://github.com/akrherz/nagios-checks)
 iembot  | iem13    | iem12  | nagios checks for twistd processes running
-iem-web-services | iem14 | iem16 | None
-LDM | iem12 | None | None
-LoggerNet | iem12 | None | None
-mailman | iem12 | None | None
-nwningest | iem12 | None    | cron scripts checks SNET sites for being online
-openfire | iem12 | None     | None
+iem-web-services | iem16 | iem14 | None
+LDM | iem14 | None | None
+LoggerNet | iem15 | None | None
+NEXRAD Mosaics | iem8-dc | iem16 | nagios checks archive
+openfire | iem14 | None     | None
 postgres | metvm6 | metvm9  | None
 postgres2 | metvm4 | None | None
 postgres3 | metvm1 | None | None
 postgres4 | metvm7 | None | None
 samba | iem12 | None | cron scripts check data availability
-SSH | iem12 | None | None
+SSH | iem14 | None | None
 RIDGE   | iem13    | None    | inbound file queue, check latency 7 radars
 webalizer | iem19 | None | None
 Webcam Current | iem13 | None | cron script monitors for offline webcams

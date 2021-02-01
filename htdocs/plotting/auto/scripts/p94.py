@@ -4,7 +4,7 @@ import datetime
 import numpy as np
 import pandas as pd
 import psycopg2.extras
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -72,26 +72,21 @@ def plotter(fdict):
     highs[0] = highs[24]
     lows[0] = lows[24]
     df = pd.DataFrame(rows)
-    (fig, ax) = plt.subplots(1, 1)
+    ab = ctx["_nt"].sts[station]["archive_begin"]
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
+    title = "[%s] %s %s-%s" % (
+        station,
+        ctx["_nt"].sts[station]["name"],
+        ab.year,
+        datetime.date.today().year,
+    )
+    subtitle = "Bias of 24 Hour 'Day' Split for Average High + Low Temp"
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle)
     ax.plot(
         hrs, np.array(highs) - highs[0], label="High Temp", lw=2, color="r"
     )
     ax.plot(hrs, np.array(lows) - lows[0], label="Low Temp", lw=2, color="b")
-    ab = ctx["_nt"].sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata.")
-    ax.set_title(
-        (
-            "[%s] %s %s-%s\n"
-            "Bias of 24 Hour 'Day' Split for Average High + Low Temp"
-        )
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            ab.year,
-            datetime.date.today().year,
-        )
-    )
     ax.set_ylabel(r"Average Temperature Difference $^\circ$F")
     ax.set_xlim(0, 24)
     ax.set_xticks((0, 4, 8, 12, 16, 20, 24))

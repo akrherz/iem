@@ -2,7 +2,7 @@
 
 ### Summary
 
-This archive consistents of raw ASCII text products issued by the National
+This archive consists of raw ASCII text products issued by the National
 Weather Service.  Some places on the website will refer to this as "AFOS", which
 is an archaic old abbreviation associated with this dataset.  The realtime source
 of this dataset is the processing of text products sent over the NOAAPort SBN, but

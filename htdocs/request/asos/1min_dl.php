@@ -1,4 +1,6 @@
 <?php
+// Big downloads exceed 30 second limit.
+set_time_limit(300);
 /*
  * This thing does the work of getting the data from the database and either
  * plotting it (via plot_1min.php) or displaying it for download

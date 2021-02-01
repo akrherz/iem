@@ -28,7 +28,7 @@ if not os.path.isdir(TMPDIR):
 
 REAL_RE = re.compile(r"^\-?\d+\.\d+$")
 INT_RE = re.compile(r"^\-?\d+$")
-DT1980 = datetime.datetime(1980, 1, 1, tzinfo=pytz.utc)
+DT1980 = utc(1980, 1, 1)
 
 
 def qc(mydict, col):
