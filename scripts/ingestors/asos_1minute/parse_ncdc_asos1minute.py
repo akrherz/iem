@@ -28,6 +28,7 @@ if not os.path.isdir(TMPDIR):
 
 REAL_RE = re.compile(r"^\-?\d+\.\d+$")
 INT_RE = re.compile(r"^\-?\d+$")
+RUNWAY_RE = re.compile(r" \d+\s\d+\+?\s*$")
 DT1980 = utc(1980, 1, 1)
 
 
@@ -102,38 +103,66 @@ def p2_parser(ln):
     return res
 
 
-def p1_parser(ln):
+def p1_parser(line):
     """
     Handle the parsing of a line found in the 6505 report, return QC dict
     """
-    if len(ln) < 30:
+    if len(line) < 30:
         return None
     res = {
-        "wban": ln[:5],
-        "faaid": ln[5:9],
-        "id3": ln[10:13],
-        "tstamp": ln[13:29],
+        "wban": line[:5],
+        "faaid": line[5:9],
+        "id3": line[10:13],
+        "tstamp": line[13:29],
     }
-    ln = ln.replace("[", " ").replace("]", " ")
-    # Take the visibility chunk
-    i = 1
-    for token in ln[30:67].strip().split():
-        if REAL_RE.match(token):
-            res[f"vis{i}_coef"] = float(token)
-            i += 1
-            continue
-        if token in ["D", "M", "N"]:
-            res[f"vis{i - 1}_nd"] = token
-    # Take the wind chunk
-    tokens = ln[67:].strip().split()
-    if len(tokens) < 4:
-        LOG.debug("P1_FAIL(2): |%s|", ln)
-        return None
-    for i, col in enumerate(["drct", "sknt", "gust_drct", "gust_sknt"]):
-        res[col] = None if not INT_RE.match(tokens[i]) else int(tokens[i])
     res["valid"] = tstamp2dt(res["tstamp"])
     if res["valid"] is None:
         return None
+    # Ignore [], but leave spaces in their place
+    ln = line[30:].replace("[", " ").replace("]", " ").strip()
+    # The runway pattern at the end causes pain, remove 90% of the trouble
+    ln = re.sub(RUNWAY_RE, " _", ln)
+    # Split the rest into tokens
+    tokens = ln.split()
+    sz = len(tokens)
+    # Look for viz pairs, these will be some decimal value followed by 1 char
+    vispos = 1
+    ints = []
+    i = 0
+    while i < len(tokens):
+        token = tokens[i]
+        if token.find(".") > -1 and (i + 1) < sz:
+            # Corrupt data at this point, abandon ship
+            if vispos == 4:
+                break
+            res[f"vis{vispos}_coef"] = float(token)
+            i += 1
+            if len(tokens[i]) == 1 and tokens[i].isalpha():
+                res[f"vis{vispos}_nd"] = tokens[i]
+                i += 1
+            vispos += 1
+            continue
+        # Once we find an int, we are done with viz work and the pain starts
+        if token.isalnum() or token == "M":
+            # Get the remainder
+            ints = tokens[i:]
+            # Can we find 4 ints in a row within that list?
+            if all([INT_RE.match(t) is not None for t in ints[:4]]):
+                ints = ints[:4]
+            elif all([INT_RE.match(t) is not None for t in ints[1:5]]):
+                ints = ints[1:5]
+            else:
+                ints = []
+            break
+        i += 1
+    if len(ints) >= 4:
+        for i, col in enumerate(["drct", "sknt", "gust_drct", "gust_sknt"]):
+            res[col] = None if not INT_RE.match(ints[i]) else int(ints[i])
+    # Some gentle QC
+    for col in ["sknt", "gust_sknt"]:
+        if res.get(col) is not None and res[col] > 125:
+            LOG.info("ln: |%s| yielded %s(%s) > 125", line[:-1], col, res[col])
+            res[col] = None
     return res
 
 
@@ -379,6 +408,10 @@ def test_parser():
             assert abs(float(res["vis1_coef"]) - 0.109) < 0.01
         if i == 22:
             assert abs(float(res["drct"]) - 261.0) < 0.01
+        if i == 24:
+            assert abs(float(res["drct"]) - 305.0) < 0.01
+        if i == 26:
+            assert res.get("drct") is None
         assert res is not None
 
     p2_examples = open("p2_examples.txt").readlines()
