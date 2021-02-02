@@ -22,7 +22,7 @@ def make_colorramp():
     """
     Make me a crude color ramp
     """
-    c = np.zeros((256, 3), np.int)
+    c = np.zeros((256, 3), int)
 
     # Gray for missing
     c[255, :] = [144, 144, 144]

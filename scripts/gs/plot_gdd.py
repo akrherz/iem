@@ -41,7 +41,7 @@ def run(base, ceil, now, fn):
         % (now.strftime("%-d %B %Y"),),
         subtitle="base %s" % (base,),
     )
-    bins = np.linspace(min(gdd50) - 1, max(gdd50) + 1, num=10, dtype=np.int)
+    bins = np.linspace(min(gdd50) - 1, max(gdd50) + 1, num=10, dtype=int)
     mp.contourf(lons, lats, gdd50, bins)
     mp.drawcounties()
 

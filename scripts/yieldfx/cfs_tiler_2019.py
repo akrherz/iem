@@ -22,7 +22,7 @@ def make_netcdf(fullpath, valid, west, south):
     nc.createDimension("lat", 16)  # 0.125 grid over 2 degrees
     nc.createDimension("lon", 16)
     # Coordinate Dimensions
-    time = nc.createVariable("time", np.int, ("time",))
+    time = nc.createVariable("time", int, ("time",))
     time.units = "days since %s-01-01 00:00:00" % (valid.year,)
     time[:] = np.arange(0, totaldays)
 
