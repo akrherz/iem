@@ -328,7 +328,7 @@ def main():
                     traceback.print_exc(file=fp)
                 # Copy the file to an error location
                 errordir = os.path.join(STOREPATH, "error.d")
-                if not os.path.isdir("error.d"):
+                if not os.path.isdir(errordir):
                     os.makedirs(errordir)
                 subprocess.call(
                     "cp %s %s" % (os.path.join(watch_path, fn), errordir),
