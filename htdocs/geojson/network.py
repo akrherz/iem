@@ -10,16 +10,23 @@ from pyiem.util import get_dbconn, html_escape
 
 def run(network):
     """Generate a GeoJSON dump of the provided network"""
-    pgconn = get_dbconn("postgis")
+    pgconn = get_dbconn("mesosite")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    cursor.execute(
-        """
-        SELECT ST_asGeoJson(geom, 4) as geojson, * from stations
-        WHERE network = %s ORDER by name ASC
-    """,
-        (network,),
-    )
+    # One off special
+    if network == "ASOS1MIN":
+        cursor.execute(
+            "SELECT ST_asGeoJson(geom, 4) as geojson, t.* "
+            "from stations t JOIN station_attributes a "
+            "ON (t.iemid = a.iemid) WHERE t.network ~* 'ASOS' and "
+            "a.attr = 'HAS1MIN' ORDER by id ASC",
+        )
+    else:
+        cursor.execute(
+            "SELECT ST_asGeoJson(geom, 4) as geojson, * from stations "
+            "WHERE network = %s ORDER by name ASC",
+            (network,),
+        )
 
     res = {
         "type": "FeatureCollection",

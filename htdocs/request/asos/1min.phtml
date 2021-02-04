@@ -8,6 +8,7 @@ require_once "../../../include/database.inc.php";
 
 define("IEM_APPID", 73);
 $t = new MyView();
+$t->iemss = True;
 $t->title = "ASOS One Minute Data Download";
 $t->thispage = "networks-asos";
 
@@ -15,20 +16,6 @@ $asos_archive_end = strtotime( get_iemprop("asos.1min.end") );
 $bogus = 0;
 
 $archive_end = date('d M Y', $asos_archive_end);
-
-$ar = Array();
-$pgconn = iemdb("mesosite");
-$rs = pg_query(
-    $pgconn,
-    "SELECT id, name, state from stations t JOIN station_attributes a ".
-    "ON (t.iemid = a.iemid) WHERE t.network ~* 'ASOS' and ".
-    "a.attr = 'HAS1MIN' ORDER by id ASC");
-for($i=0; $row=pg_fetch_array($rs); $i++)
-{
-    $ar[$row[0]] = sprintf("[%s] %s, %s", $row[0], $row[1], $row[2]);
-}
-
-$sselect = make_select("station[]", "", $ar, "", "", TRUE);
 
 $y1select = yearSelect2(2000, date("Y"), "year1");
 $m1select = monthSelect($bogus, "month1"); 
@@ -42,6 +29,15 @@ $d2select = daySelect2($bogus, "day2");
 $h2select = gmtHourSelect($bogus, "hour2");
 $min2select = minuteSelect($bogus, "minute2");
 
+$t->headextra = <<<EOM
+<style type="text/css">
+        #map {
+            width: 100%;
+            height: 450px;
+            border: 2px solid black;
+        }
+</style>
+EOM;
 $t->content = <<<EOF
 <ol class="breadcrumb">
  <li><a href="/ASOS/">ASOS Mainpage</a></li>
@@ -66,7 +62,10 @@ observations from this network and for sites over the entire globe.</p>
 <p><h3>1. Select Station:</h3><br>
 <i>Select One or More or All stations in the network.</i><br>
 <br />
-{$sselect}
+<div id="iemss" data-network="ASOS1MIN" data-name="station"></div>
+
+</div>
+<div class="col-md-6">
 
 <h3>2. Timezone of Observations:</h3>
 <i>The timestamps used in the downloaded files will be set in the
@@ -122,9 +121,6 @@ the default is UTC.</i>
   <option value="pres3">Sensor 3 Station Pressure [inches]
 </select>
 
-</div>
-<div class="col-md-6">
-
 <h3>5. Data Sampling?</h3><br>
 <i>Data is potentially available every minute, but you don't have to download
 it at that frequency. This setting <b>does not bin</b> the values, but rather
@@ -161,13 +157,14 @@ How shall the output values be seperated?
    <option value="yes">Yes
  </select>
 </div>
-
-</div></div>
-
 <p><h3 class="subtitle">Submit Form:</h3><br>
 <input type="submit" value="Process Data Request">
 <input type="reset">
+
+</div></div>
+
 </form>
+
 EOF;
-$t->render('single.phtml');
+$t->render('full.phtml');
 ?>
