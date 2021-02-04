@@ -46,12 +46,11 @@ $station = $_GET["station"];
 $stations = $_GET["station"];
 $stationString = "(";
 foreach ($stations as $key => $value){
-    $sid = trim(substr($value[0], 0, 4));
+    $sid = trim(substr($value, 0, 4));
     $stationString .= " '". $sid ."',";
     $nt->load_station($sid);
 }
 $cities = $nt->table;
-
 $stationString = substr($stationString, 0, -1);
 $stationString .= ")";
 
@@ -68,7 +67,7 @@ if ( $num_vars == 0 )  die("You did not specify data");
 
 $sqlStr = "SELECT station, ";
 for ($i=0; $i< $num_vars;$i++){
-  $sqlStr .= $vars[$i] ." as var".$i.", ";
+  $sqlStr .= substr($vars[$i], 0, 11) ." as var".$i.", ";
 }
 
 $sqlTS1 = strftime("%Y-%m-%d %H:%M", $ts1);
@@ -88,7 +87,6 @@ $sqlStr .= "to_char(valid, 'YYYY-MM-DD HH24:MI') as dvalid from ".$table ;
 $sqlStr .= " WHERE valid >= '".$sqlTS1."' and valid <= '".$sqlTS2 ."' ";
 $sqlStr .= " and extract(minute from valid)::int % ".$sampleStr[$sample] ." = 0 ";
 $sqlStr .= " and station IN ". $stationString ." ORDER by valid ASC";
-
 
 /**
  * Must handle different ideas for what to do...
