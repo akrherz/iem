@@ -5,6 +5,7 @@
 
  https://www1.ncdc.noaa.gov/pub/download/hidden/onemin/
 """
+# stdlib
 import re
 import codecs
 import os
@@ -13,7 +14,7 @@ import sys
 import tarfile
 import datetime
 
-import pytz
+# third party
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.util import get_dbconn, logger, utc, exponential_backoff
@@ -32,44 +33,29 @@ RUNWAY_RE = re.compile(r" \d+\s\d+\+?\s*$")
 DT1980 = utc(1980, 1, 1)
 
 
-def qc(mydict, col):
-    """Primative QC."""
-    if col not in mydict:
-        return "null"
-    val = mydict[col]
-    if val is None:
-        return "null"
-    if col in ["tmpf", "dwpf"]:
-        if val < -90 or val > 150:
-            return "null"
-    if col in ["drct", "gust_drct"]:
-        if val < 0 or val > 360:
-            return "null"
-    if col in ["sknt", "gust_sknt"]:
-        if val < 0 or val > 360:
-            return "null"
-    return val
-
-
-def tstamp2dt(s):
+def tstamp2dt(s, metadata):
     """ Convert a string to a datetime """
     if s[0] not in ["1", "2"]:
         LOG.debug("bad timestamp |%s|", s)
         return None
     try:
-        ts = datetime.datetime(int(s[:4]), int(s[4:6]), int(s[6:8]))
+        ts = utc(int(s[:4]), int(s[4:6]), int(s[6:8]))
     except Exception:
         LOG.debug("bad timestamp |%s|", s)
         return None
-    ts = ts.replace(tzinfo=pytz.timezone("UTC"))
     local_hr = int(s[8:10])
     utc_hr = int(s[12:14])
-    if utc_hr < local_hr:  # Next day assumption valid in United States
+    utc_is_ahead = metadata["utc_direction"] == 1
+    # PAIN
+    if utc_is_ahead and utc_hr < local_hr:
         ts += datetime.timedelta(hours=24)
+    elif not utc_is_ahead and utc_hr > local_hr:
+        ts -= datetime.timedelta(hours=24)
+
     return ts.replace(hour=utc_hr, minute=int(s[14:16]))
 
 
-def p2_parser(ln):
+def p2_parser(ln, metadata):
     """
     Handle the parsing of a line found in the 6506 report, return QC dict
     """
@@ -82,37 +68,50 @@ def p2_parser(ln):
         "tstamp": ln[13:29],
     }
     ln = ln.replace("[", " ").replace("]", " ").replace("\\", " ")
-    res["valid"] = tstamp2dt(res["tstamp"])
+    res["valid"] = tstamp2dt(res["tstamp"], metadata)
     if res["valid"] is None:
         return None
     s = ln[31:34].strip()
     res["ptype"] = None if s == "" else s[:2]
     s = ln[44:48].strip()
-    res["precip"] = None if not REAL_RE.match(s) else float(s)
+    res["precip"] = make_real(s, 0, 0.5)
     s = ln[69:77].strip()
-    res["pres1"] = None if not REAL_RE.match(s) else float(s)
+    res["pres1"] = make_real(s, 10, 40)
     s = ln[77:85].strip()
-    res["pres2"] = None if not REAL_RE.match(s) else float(s)
+    res["pres2"] = make_real(s, 10, 40)
     s = ln[85:93].strip()
-    res["pres3"] = None if not REAL_RE.match(s) else float(s)
+    res["pres3"] = make_real(s, 10, 40)
     s = ln[94:97].strip()
-    res["tmpf"] = None if not INT_RE.match(s) else int(s)
+    res["tmpf"] = make_int(s, -90, 150)
     s = ln[99:102].strip()
-    res["dwpf"] = None if not INT_RE.match(s) else int(s)
+    res["dwpf"] = make_int(s, -90, 150)
 
     return res
 
 
-def safe_float(text):
-    """Catch troubles."""
-    try:
-        return float(text)
-    except ValueError:
-        LOG.debug("failed converting %s to float, returning None", text)
+def make_real(s, minval, maxval):
+    """Make an integer, if we can!"""
+    if REAL_RE.match(s):
+        val = float(s)
+        if minval <= val <= maxval:
+            return val
+        LOG.debug("val %s outside of bounds %s %s", val, minval, maxval)
+
     return None
 
 
-def p1_parser(line):
+def make_int(s, minval, maxval):
+    """Make an integer, if we can!"""
+    if INT_RE.match(s):
+        val = int(s)
+        if minval <= val <= maxval:
+            return val
+        LOG.debug("val %s outside of bounds %s %s", val, minval, maxval)
+
+    return None
+
+
+def p1_parser(line, metadata):
     """
     Handle the parsing of a line found in the 6505 report, return QC dict
     """
@@ -124,7 +123,7 @@ def p1_parser(line):
         "id3": line[10:13],
         "tstamp": line[13:29],
     }
-    res["valid"] = tstamp2dt(res["tstamp"])
+    res["valid"] = tstamp2dt(res["tstamp"], metadata)
     if res["valid"] is None:
         return None
     # Ignore [], but leave spaces in their place
@@ -144,7 +143,7 @@ def p1_parser(line):
             # Corrupt data at this point, abandon ship
             if vispos == 4:
                 break
-            res[f"vis{vispos}_coef"] = safe_float(token)
+            res[f"vis{vispos}_coeff"] = make_real(token, 0, 100)
             i += 1
             if len(tokens[i]) == 1 and tokens[i].isalpha():
                 res[f"vis{vispos}_nd"] = tokens[i]
@@ -155,23 +154,29 @@ def p1_parser(line):
         if token.isdigit() or token == "M":
             # Get the remainder
             ints = tokens[i:]
-            # Can we find 4 ints in a row within that list?
-            if all([INT_RE.match(t) is not None for t in ints[:4]]):
+            # Ideally, we find 4 ints in a row in the -5 to -2 positions as the
+            # last is the runway value
+            if len(ints) > 4 and all(
+                [INT_RE.match(t) is not None for t in ints[-5:-1]]
+            ):
+                ints = ints[-5:-1]
+            # So if that failed, try the first four positions
+            elif all([INT_RE.match(t) is not None for t in ints[:4]]):
                 ints = ints[:4]
-            elif all([INT_RE.match(t) is not None for t in ints[1:5]]):
-                ints = ints[1:5]
+            # So if that failed, try the last four positions
+            elif len(ints) > 4 and all(
+                [INT_RE.match(t) is not None for t in ints[-4:]]
+            ):
+                ints = ints[-4:]
             else:
                 ints = []
             break
         i += 1
     if len(ints) >= 4:
-        for i, col in enumerate(["drct", "sknt", "gust_drct", "gust_sknt"]):
-            res[col] = None if not INT_RE.match(ints[i]) else int(ints[i])
-    # Some gentle QC
-    for col in ["sknt", "gust_sknt"]:
-        if res.get(col) is not None and res[col] > 125:
-            LOG.info("ln: |%s| yielded %s(%s) > 125", line[:-1], col, res[col])
-            res[col] = None
+        res["drct"] = make_int(ints[0], 0, 360)
+        res["sknt"] = make_int(ints[1], 0, 125)
+        res["gust_drct"] = make_int(ints[2], 0, 360)
+        res["gust_sknt"] = make_int(ints[3], 0, 125)
     return res
 
 
@@ -204,24 +209,26 @@ def liner(fn):
     return codecs.open(fn, "r", "utf-8", "ignore")
 
 
-def runner(pgconn, row, station):
+def runner(pgconn, metadata, station):
     """Do the work prescribed."""
-    if not os.path.isfile(row["fn5"]) or not os.path.isfile(row["fn6"]):
+    if not os.path.isfile(metadata["fn5"]) or not os.path.isfile(
+        metadata["fn6"]
+    ):
         LOG.debug("skipping %s due to missing files", station)
         return 0
 
     # Our final amount of data
     data = {}
     # We have two files to worry about
-    for ln in liner(row["fn5"]):
-        d = p1_parser(ln)
-        if d is None or d["valid"] <= row["archive_end"]:
+    for ln in liner(metadata["fn5"]):
+        d = p1_parser(ln, metadata)
+        if d is None or d["valid"] <= metadata["archive_end"]:
             continue
         data[d["valid"]] = d
 
-    for ln in liner(row["fn6"]):
-        d = p2_parser(ln)
-        if d is None or d["valid"] <= row["archive_end"]:
+    for ln in liner(metadata["fn6"]):
+        d = p2_parser(ln, metadata)
+        if d is None or d["valid"] <= metadata["archive_end"]:
             continue
         res = data.setdefault(d["valid"], {})
         res.update(d)
@@ -230,28 +237,18 @@ def runner(pgconn, row, station):
         LOG.debug(
             "No data found station: %s, archive_end: %s",
             station,
-            row["archive_end"],
+            metadata["archive_end"],
         )
         return 0
 
-    mints = None
-    maxts = None
-    for ts in data:
-        if mints is None or maxts is None:
-            mints = ts
-            maxts = ts
-        if mints > ts:
-            mints = ts
-        if maxts < ts:
-            maxts = ts
+    mints = min(data)
+    maxts = max(data)
 
     cursor = pgconn.cursor()
     cursor.execute(
-        (
-            "DELETE from alldata_1minute WHERE station = '%s' and "
-            "valid >= '%s' and valid <= '%s';\n"
-        )
-        % (station, mints, maxts)
+        "DELETE from alldata_1minute WHERE station = %s and "
+        "valid >= %s and valid <= %s",
+        (station, mints, maxts),
     )
     LOG.debug(
         "removed %s rows between %s and %s", cursor.rowcount, mints, maxts
@@ -264,6 +261,8 @@ def runner(pgconn, row, station):
         "vis1_nd",
         "vis2_coeff",
         "vis2_nd",
+        "vis3_coeff",
+        "vis3_nd",
         "drct",
         "sknt",
         "gust_drct",
@@ -278,13 +277,14 @@ def runner(pgconn, row, station):
     ]
 
     # Loop over the data we got please
+    fmt = "\t".join(["%s"] * len(cols[2:]))
     for ts in data:
         entry = data[ts]
-        entry["station"] = station
-        sio.write("\t".join([str(qc(entry, col)) for col in cols]))
+        sio.write("%s\t%s\t" % (station, ts))
+        sio.write(fmt % (*[entry.get(col) for col in cols[2:]],))
         sio.write("\n")
     sio.seek(0)
-    cursor.copy_from(sio, "alldata_1minute", columns=cols, null="null")
+    cursor.copy_from(sio, "alldata_1minute", columns=cols, null="None")
     count = cursor.rowcount
     cursor.close()
     pgconn.commit()
@@ -308,13 +308,18 @@ def init_dataframe(argv):
     """Build the processing dataframe."""
     pgconn = get_dbconn("mesosite")
     # ASOS query limit keeps other sites out of result that may have 1min
+    # Do a time zone trick to figure out UTC offset 1 is ahead
     df = read_sql(
-        "SELECT id from stations t JOIN station_attributes a on "
+        "SELECT id, "
+        "case when extract(year from ('2020-01-01 00:00+00' at time zone "
+        "tzname)) = 2019 then 1 else -1 end as utc_direction from "
+        "stations t JOIN station_attributes a on "
         "(t.iemid = a.iemid) where a.attr = 'HAS1MIN' and t.network ~* 'ASOS' "
         "ORDER by id ASC",
         pgconn,
         index_col="id",
     )
+    # Set a currently impossible floor for a bounds check.
     df["archive_end"] = utc(1980, 1, 1)
     df["fn5"] = ""
     df["fn6"] = ""
@@ -411,13 +416,26 @@ if __name__ == "__main__":
     main(sys.argv)
 
 
+def test_timestamp():
+    """Test that coversion of timestamps."""
+    res = tstamp2dt("2001100100021402", {"utc_direction": -1})
+    assert res == utc(2001, 9, 30, 14, 2)
+    res = tstamp2dt("2001100110000000", {"utc_direction": -1})
+    assert res == utc(2001, 10, 1)
+    res = tstamp2dt("2001100100000600", {"utc_direction": 1})
+    assert res == utc(2001, 10, 1, 6)
+    res = tstamp2dt("2001100123000500", {"utc_direction": 1})
+    assert res == utc(2001, 10, 2, 5)
+
+
 def test_parser():
     """test things"""
+    metadata = {"utc_direction": 1}
     p1_examples = open("p1_examples.txt").readlines()
     for i, ex in enumerate(p1_examples):
-        res = p1_parser(ex)
+        res = p1_parser(ex, metadata)
         if i == 0:
-            assert abs(float(res["vis1_coef"]) - 0.109) < 0.01
+            assert abs(float(res["vis1_coeff"]) - 0.109) < 0.01
         if i == 22:
             assert abs(float(res["drct"]) - 261.0) < 0.01
         if i == 24:
@@ -428,7 +446,7 @@ def test_parser():
 
     p2_examples = open("p2_examples.txt").readlines()
     for i, ex in enumerate(p2_examples):
-        res = p2_parser(ex)
+        res = p2_parser(ex, metadata)
         if i == 0:
             assert abs(res["tmpf"] - 29.0) < 0.01
             assert abs(res["dwpf"] - 23.0) < 0.01
