@@ -103,6 +103,15 @@ def p2_parser(ln):
     return res
 
 
+def safe_float(text):
+    """Catch troubles."""
+    try:
+        return float(text)
+    except ValueError:
+        LOG.debug("failed converting %s to float, returning None", text)
+    return None
+
+
 def p1_parser(line):
     """
     Handle the parsing of a line found in the 6505 report, return QC dict
@@ -135,7 +144,7 @@ def p1_parser(line):
             # Corrupt data at this point, abandon ship
             if vispos == 4:
                 break
-            res[f"vis{vispos}_coef"] = float(token)
+            res[f"vis{vispos}_coef"] = safe_float(token)
             i += 1
             if len(tokens[i]) == 1 and tokens[i].isalpha():
                 res[f"vis{vispos}_nd"] = tokens[i]
@@ -143,7 +152,7 @@ def p1_parser(line):
             vispos += 1
             continue
         # Once we find an int, we are done with viz work and the pain starts
-        if token.isalnum() or token == "M":
+        if token.isdigit() or token == "M":
             # Get the remainder
             ints = tokens[i:]
             # Can we find 4 ints in a row within that list?
@@ -243,6 +252,9 @@ def runner(pgconn, row, station):
             "valid >= '%s' and valid <= '%s';\n"
         )
         % (station, mints, maxts)
+    )
+    LOG.debug(
+        "removed %s rows between %s and %s", cursor.rowcount, mints, maxts
     )
     sio = StringIO()
     cols = [
@@ -410,7 +422,7 @@ def test_parser():
             assert abs(float(res["drct"]) - 261.0) < 0.01
         if i == 24:
             assert abs(float(res["drct"]) - 305.0) < 0.01
-        if i == 26:
+        if i in [26, 27]:
             assert res.get("drct") is None
         assert res is not None
 
