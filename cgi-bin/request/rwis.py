@@ -55,21 +55,25 @@ def application(environ, start_response):
     tbl = ""
     if src in ["soil", "traffic"]:
         tbl = "_%s" % (src,)
-    sql = (
-        """SELECT *, valid at time zone %s as obtime from
-    alldata"""
-        + tbl
-        + """
-    WHERE station in %s and valid BETWEEN %s and %s ORDER by valid ASC
-    """
-    )
     pgconn = get_dbconn("rwis")
-    df = read_sql(sql, pgconn, params=(tzname, tuple(stations), sts, ets))
+    if "_ALL" in stations:
+        sql = (
+            f"SELECT *, valid at time zone %s as obtime from alldata{tbl} "
+            "WHERE valid BETWEEN %s and %s ORDER by valid ASC"
+        )
+        df = read_sql(sql, pgconn, params=(tzname, sts, ets))
+    else:
+        sql = (
+            f"SELECT *, valid at time zone %s as obtime from alldata{tbl} "
+            "WHERE station in %s and valid BETWEEN %s and %s "
+            "ORDER by valid ASC"
+        )
+        df = read_sql(sql, pgconn, params=(tzname, tuple(stations), sts, ets))
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
         return [b"Sorry, no results found for query!"]
     if include_latlon:
-        network = form.get("network")
+        network = form.get("network", "IA_RWIS")
         nt = NetworkTable(network, only_online=False)
         myvars.insert(2, "longitude")
         myvars.insert(3, "latitude")
