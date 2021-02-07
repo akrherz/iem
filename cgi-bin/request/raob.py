@@ -24,7 +24,7 @@ def fetcher(station, sts, ets):
     cursor = dbconn.cursor("raobstreamer")
     stations = [station]
     if station.startswith("_"):
-        nt = NetworkTable("RAOB")
+        nt = NetworkTable("RAOB", only_online=False)
         stations = nt.sts[station]["name"].split("--")[1].strip().split(",")
 
     cursor.execute(

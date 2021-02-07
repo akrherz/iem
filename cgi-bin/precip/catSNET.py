@@ -9,7 +9,7 @@ from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
 
-nt = NetworkTable(("KCCI", "KIMIT", "KELO"))
+nt = NetworkTable(("KCCI", "KIMIT", "KELO"), only_online=False)
 IEM = get_dbconn("iem")
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 

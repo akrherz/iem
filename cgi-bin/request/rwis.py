@@ -70,7 +70,7 @@ def application(environ, start_response):
         return [b"Sorry, no results found for query!"]
     if include_latlon:
         network = form.get("network")
-        nt = NetworkTable(network)
+        nt = NetworkTable(network, only_online=False)
         myvars.insert(2, "longitude")
         myvars.insert(3, "latitude")
 
