@@ -90,7 +90,7 @@ def application(environ, start_response):
         df["longitude"] = [get_lon(x) for x in df["station"]]
 
     sio = StringIO()
-    if what == "txt":
+    if what in ["txt", "download"]:
         headers = [
             ("Content-type", "application/octet-stream"),
             ("Content-disposition", "attachment; filename=rwis.txt"),
@@ -98,11 +98,11 @@ def application(environ, start_response):
         start_response("200 OK", headers)
         df.to_csv(sio, index=False, sep=delimiter, columns=myvars)
         return [sio.getvalue().encode("ascii")]
-    elif what == "html":
+    if what == "html":
         start_response("200 OK", [("Content-type", "text/html")])
         df.to_html(sio, columns=myvars)
         return [sio.getvalue().encode("ascii")]
-    elif what == "excel":
+    if what == "excel":
         bio = BytesIO()
         with pd.ExcelWriter(bio) as writer:
             df.to_excel(writer, "Data", index=False, columns=myvars)
