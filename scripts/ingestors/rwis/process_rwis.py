@@ -95,14 +95,14 @@ RWIS2METAR = {
 }
 ATMOS_URI = (
     "https://services.arcgis.com/8lRhdTsQyJpO52F1/arcgis/rest/services/"
-    "RWIS_Atmospheric_Data_View/FeatureServer/0/query?where=1%3D1&f=json&"
-    "outFields=DATA_LAST_UPDATED,AIR_TEMP,RELATIVE_HUMIDITY,DEW_POINT,"
+    "RWIS_Atmospheric_Data_View/FeatureServer/0/query?where=STATUS%3D1"
+    "&f=json&outFields=DATA_LAST_UPDATED,AIR_TEMP,RELATIVE_HUMIDITY,DEW_POINT,"
     "VISIBILITY,AVG_WINDSPEED_KNOTS,MAX_WINDSPEED_KNOTS,WIND_DIRECTION_DEG,"
     "PRECIPITATION_RATE,PRECIPITATION_ACCUMULATION,NWS_ID"
 )
 SURFACE_URI = (
     "https://services.arcgis.com/8lRhdTsQyJpO52F1/arcgis/rest/services/"
-    "RWIS_Surface_Data_View/FeatureServer/0/query?where=1%3D1&f=json&"
+    "RWIS_Surface_Data_View/FeatureServer/0/query?where=STATUS%3D1&f=json&"
     "outFields=NWS_ID,SURFACE_CONDITION,SURFACE_TEMP,ICE_PERCENTAGE,"
     "FREEZE_TEMP,SENSOR_ID,FrictionIndex,DATA_LAST_UPDATED"
 )
@@ -222,6 +222,9 @@ def gen_metars(obs, filename, convids=False):
             continue
         metarid = sid[:4]
         remoteid = NT.sts[sid]["remote_id"]
+        if remoteid is None:
+            LOG.info("nwsli: %s is unknown remote_id", sid)
+            continue
         if convids:
             metarid = RWIS2METAR.get("%02i" % (remoteid,), "XXXX")
         temptxt = ""
