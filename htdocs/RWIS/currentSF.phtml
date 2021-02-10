@@ -28,7 +28,6 @@ $vals = Array("tsf0" => "Sensor 1 - Temp [F]",
   "dry3" => "Sensor 4 - Cond [F]",
   "ts" => "Observation Time",
   "name" => "Site Name",
-  "rwis_subf" => "Sub-Surface Temperature"
 );
 
 $t->breadcrumbs = <<<EOF
@@ -120,20 +119,18 @@ foreach($finalA as $key => $parts){
 	else $tmpf2 = round($parts["tsf2"], 1);
 	if ($parts["tsf3"] < -90) $tmpf3 = "M";
 	else $tmpf3 = round($parts["tsf3"], 1);
-	if ($parts["rwis_subf"] < -90) $subt = "M";
-	else $subt = round($parts["rwis_subf"], 1);
 	if ($parts["pave_avg"] < -90) $pave_avg = "M";
 	else $pave_avg = round($parts["pave_avg"], 1);
 
-	$table .= "<td>". $parts["tmpf"] ."</td>
-	    <td>". $parts["dwpf"] ."</td>
-	    <td>". $tmpf0 ."</td>
-	    <td>". $tmpf1 ."</td>
-	    <td>". $tmpf2 ."</td>
-	    <td>". $tmpf3 ."</td>
-            <td>". $subt ."</td>
-            <td>". $pave_avg ."</td>
-	    </tr>\n";
+	$table .= <<< EOM
+<td>{$parts["tmpf"]}</td><td>{$parts["dwpf"]}</td>
+<td>{$tmpf0} ({$parts["scond0"]})</td>
+<td>{$tmpf1} ({$parts["scond1"]})</td>
+<td>{$tmpf2} ({$parts["scond2"]})</td>
+<td>{$tmpf3} ({$parts["scond3"]})</td>
+<td>{$pave_avg}</td>
+</tr>
+EOM;
 }
 
 $content = <<<EOF
@@ -164,7 +161,6 @@ $content = <<<EOF
   <th>Sensor 3</th>
   <th>Sensor 4</th>
   <th>&nbsp;</th>
-  <th>&nbsp;</th>
 <tr>
   
   <th><a href="currentSF.phtml?network={$network}&sortcol=tmpf">Temp</a></th>
@@ -173,7 +169,6 @@ $content = <<<EOF
   <th><a href="currentSF.phtml?network={$network}&sortcol=tsf1">Temp</a></th>
   <th><a href="currentSF.phtml?network={$network}&sortcol=tsf2">Temp</a></th>
   <th><a href="currentSF.phtml?network={$network}&sortcol=tsf3">Temp</a></th>
-  <th><a href="currentSF.phtml?network={$network}&sortcol=rwis_subf">Sub T</a></th>
   <th><a href="currentSF.phtml?network={$network}&sortcol=pave_avg">Ave Surface Temp</a> [<b>1</b>]</th>
 </tr></thead>
 <tbody>

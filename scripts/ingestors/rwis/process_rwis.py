@@ -1,23 +1,24 @@
 """Process the IDOT RWIS Data files"""
+# stdlib
 import datetime
+import json
 import os
 import sys
-import ftplib
 import subprocess
 
+# third party
+import requests
 import pandas as pd
-import pytz
 import numpy as np
 from pyiem.tracker import TrackerEngine
 from pyiem.network import Table as NetworkTable
 from pyiem.observation import Observation
 from pyiem import util
 
-GTS = sys.argv[1]
+LOG = util.logger()
 NT = NetworkTable("IA_RWIS")
 IEM = util.get_dbconn("iem")
 PORTFOLIO = util.get_dbconn("portfolio")
-INCOMING = "/mesonet/data/incoming/rwis"
 RWIS2METAR = {
     "00": "XADA",
     "01": "XALG",
@@ -92,35 +93,23 @@ RWIS2METAR = {
     "70": "XKYI",
     "72": "XCTI",
 }
-
-KNOWN_UNKNOWNS = []
-
-
-def get_nwsli(rpuid):
-    """Lookup a rpuid and return the NWSLI"""
-    rpuid = int(rpuid)
-    for sid in NT.sts:
-        if NT.sts[sid]["remote_id"] == rpuid:
-            return sid
-    return None
-
-
-def get_temp(val):
-    """Attempt to convert a RWIS temperature into F"""
-    if val in ["", 32767]:
-        return None
-    return util.c2f(val / 100.0)
-
-
-def get_speed(val):
-    """ Convert a speed value """
-    if val in ["", 255]:
-        return None
-    return util.convert_value(val, "kilometer / hour", "knot")
+ATMOS_URI = (
+    "https://services.arcgis.com/8lRhdTsQyJpO52F1/arcgis/rest/services/"
+    "RWIS_Atmospheric_Data_View/FeatureServer/0/query?where=1%3D1&f=json&"
+    "outFields=DATA_LAST_UPDATED,AIR_TEMP,RELATIVE_HUMIDITY,DEW_POINT,"
+    "VISIBILITY,AVG_WINDSPEED_KNOTS,MAX_WINDSPEED_KNOTS,WIND_DIRECTION_DEG,"
+    "PRECIPITATION_RATE,PRECIPITATION_ACCUMULATION,NWS_ID"
+)
+SURFACE_URI = (
+    "https://services.arcgis.com/8lRhdTsQyJpO52F1/arcgis/rest/services/"
+    "RWIS_Surface_Data_View/FeatureServer/0/query?where=1%3D1&f=json&"
+    "outFields=NWS_ID,SURFACE_CONDITION,SURFACE_TEMP,ICE_PERCENTAGE,"
+    "FREEZE_TEMP,SENSOR_ID,FrictionIndex,DATA_LAST_UPDATED"
+)
 
 
 def merge(atmos, surface):
-    """Create a dictionary of data based on these two dataframes
+    """Merge the surface data into the atmospheric one, return a dict.
 
     Args:
       atmos (DataFrame): atmospherics
@@ -129,79 +118,48 @@ def merge(atmos, surface):
     Returns:
       dictionary of values
     """
+    atmos = atmos.set_index("NWS_ID")
+    # pivot
+    surface["SENSOR_ID"] = surface["SENSOR_ID"].astype(int)
+    surface = surface.pivot(
+        index="NWS_ID",
+        columns="SENSOR_ID",
+        values=[
+            "valid",
+            "SURFACE_CONDITION",
+            "SURFACE_TEMP",
+            "ICE_PERCENTAGE",
+            "FREEZE_TEMP",
+            "FrictionIndex",
+        ],
+    )
+    surface.columns = surface.columns.to_flat_index()
+    df = atmos.join(surface)
+    LOG.debug("We have %s rows of data", len(df.index))
     data = {}
-    # Do what we can with the atmospheric data
-    for _, row in atmos.iterrows():
-        nwsli = get_nwsli(row["Rpuid"])
-        if nwsli is None:
-            if int(row["Rpuid"]) not in KNOWN_UNKNOWNS:
-                print(
-                    ("process_rwis: Unknown Rpuid: %s in atmos" "")
-                    % (row["Rpuid"],)
-                )
+    for nwsli, row in df.iterrows():
+        if nwsli not in NT.sts:
+            LOG.debug("station %s is unknown to us, skipping", nwsli)
             continue
-        if nwsli not in data:
-            data[nwsli] = {}
-        # Timestamp
-        ts = datetime.datetime.strptime(row["DtTm"], "%m/%d/%y %H:%M")
-        data[nwsli]["valid"] = ts.replace(tzinfo=pytz.UTC)
-        data[nwsli]["tmpf"] = get_temp(row["AirTemp"])
-        data[nwsli]["dwpf"] = get_temp(row["Dewpoint"])
-        data[nwsli]["sknt"] = get_speed(row["SpdAvg"])
-        data[nwsli]["gust"] = get_speed(row["SpdGust"])
-        if row["DirMin"] not in ["", 32767, np.nan]:
-            data[nwsli]["drct"] = row["DirMin"]
-        # DirMax is unused
-        # Pressure is not reported
-        # PcIntens
-        # PcType
-        # PcRate
-        if row["PcAccum"] not in ["", -1, 32767, np.nan]:
-            data[nwsli]["pday"] = row["PcAccum"] * 0.00098425
-        if row["Visibility"] not in ["", -1, 32767, np.nan]:
-            data[nwsli]["vsby"] = row["Visibility"] / 1609.344
-
-    # Do what we can with the surface data
-    for _, row in surface.iterrows():
-        nwsli = get_nwsli(row["Rpuid"])
-        if nwsli is None:
-            if int(row["Rpuid"]) not in KNOWN_UNKNOWNS:
-                print(
-                    ("process_rwis: Unknown Rpuid: %s in sfc" "")
-                    % (row["Rpuid"],)
-                )
-            continue
-        ts = datetime.datetime.strptime(row["DtTm"], "%m/%d/%y %H:%M")
-        ts = ts.replace(tzinfo=pytz.UTC)
-        if nwsli not in data:
-            data[nwsli] = {"valid": ts}
-        sensorid = int(row["Senid"])
-        key = "sfvalid%s" % (sensorid,)
-        data[nwsli][key] = ts
-        key = "scond%s" % (sensorid,)
-        data[nwsli][key] = row["sfcond"]
-        # sftemp                   -150
-        key = "tsf%s" % (sensorid,)
-        data[nwsli][key] = get_temp(row["sftemp"])
-        # frztemp                 32767
-        # chemfactor                  0
-        # chempct                   101
-        # depth                   32767
-        # icepct                    101
-        # subsftemp                 NaN
-        key = "tsub%s" % (sensorid,)
-        data[nwsli][key] = get_temp(row["subsftemp"])
-        # waterlevel                NaN
-        # Unnamed: 13               NaN
-        # Unnamed: 14               NaN
-
+        data[nwsli] = {
+            "valid": row["valid"].to_pydatetime(),
+            "tmpf": row["AIR_TEMP"],
+            "dwpf": row["DEW_POINT"],
+            "relh": row["RELATIVE_HUMIDITY"],
+            "sknt": row["AVG_WINDSPEED_KNOTS"],
+            "gust": row["MAX_WINDSPEED_KNOTS"],
+            "drct": row["WIND_DIRECTION_DEG"],
+            "pday": row["PRECIPITATION_ACCUMULATION"],
+        }
+        for sid in range(4):
+            data[nwsli][f"scond{sid}"] = row[("SURFACE_CONDITION", sid)]
+            data[nwsli][f"tsf{sid}"] = row[("SURFACE_TEMP", sid)]
     return data
 
 
 def do_iemtracker(obs):
     """Iterate over the obs and do IEM Tracker related activities """
-    threshold = datetime.datetime.utcnow() - datetime.timedelta(hours=3)
-    threshold = threshold.replace(tzinfo=pytz.UTC)
+    threshold = util.utc() - datetime.timedelta(hours=3)
 
     tracker = TrackerEngine(IEM.cursor(), PORTFOLIO.cursor())
     tracker.process_network(obs, "iarwis", NT, threshold)
@@ -251,9 +209,8 @@ def gen_metars(obs, filename, convids=False):
       convids (bool): should we use special logic for ID conversion
 
     """
-    mtime = datetime.datetime.utcnow().strftime("%d%H%M")
-    thres = datetime.datetime.utcnow() - datetime.timedelta(hours=3)
-    thres = thres.replace(tzinfo=pytz.UTC)
+    mtime = util.utc().strftime("%d%H%M")
+    thres = util.utc() - datetime.timedelta(hours=3)
     fp = open(filename, "w")
     fp.write("\001\015\015\012001\n")
     fp.write("SAUS43 KDMX %s\015\015\012METAR\015\015\012" % (mtime,))
@@ -303,24 +260,9 @@ def update_iemaccess(obs):
     for sid in obs:
         ob = obs[sid]
         iemob = Observation(sid, "IA_RWIS", ob["valid"])
-        for varname in [
-            "tmpf",
-            "dwpf",
-            "drct",
-            "sknt",
-            "gust",
-            "vsby",
-            "pday",
-            "tsf0",
-            "tsf1",
-            "tsf2",
-            "tsf3",
-            "scond0",
-            "scond1",
-            "scond2",
-            "scond3",
-            "relh",
-        ]:
+        for varname in ob:
+            if varname in ["valid"]:
+                continue
             # Don't insert NaN values into iemaccess
             thisval = ob.get(varname)
             if thisval is None:
@@ -330,44 +272,40 @@ def update_iemaccess(obs):
                 iemob.data[varname] = ob.get(varname)
             elif not np.isnan(thisval):
                 iemob.data[varname] = ob.get(varname)
-        for varname in ["tsub0", "tsub1", "tsub2", "tsub3"]:
-            if ob.get(varname) is not None:
-                iemob.data["rwis_subf"] = ob.get(varname)
-                break
         iemob.save(icursor)
     icursor.close()
     IEM.commit()
 
 
-def fetch_files():
+def process_features(features):
+    """Make a dataframe."""
+    rows = []
+    for feat in features:
+        props = feat["attributes"]
+        props["valid"] = (
+            datetime.datetime(1970, 1, 1)
+            + datetime.timedelta(seconds=props["DATA_LAST_UPDATED"] / 1000.0)
+        ).replace(tzinfo=datetime.timezone.utc)
+        rows.append(props)
+    return pd.DataFrame(rows).replace({9999: np.nan})
+
+
+def fetch(uri):
     """Download the files we need"""
-    props = util.get_properties()
-    # get atmosfn
-    atmosfn = "%s/rwis.txt" % (INCOMING,)
-    try:
-        ftp = ftplib.FTP("165.206.203.34")
-    except TimeoutError:
-        print("process_rwis FTP Server Timeout")
+    res = util.exponential_backoff(requests.get, uri, timeout=30)
+    if res is None:
+        LOG.info("failed to fetch %s", uri)
         sys.exit()
-    ftp.login("rwis", props["rwis_ftp_password"])
-    ftp.retrbinary("RETR ExpApAirData.txt", open(atmosfn, "wb").write)
-    # Insert into LDM
-    pqstr = "plot ac %s rwis.txt raw/rwis/%sat.txt txt" % (GTS, GTS)
-    subprocess.call(
-        ("pqinsert -i -p '%s' %s " "") % (pqstr, atmosfn), shell=True
-    )
-
-    # get sfcfn
-    sfcfn = "%s/rwis_sf.txt" % (INCOMING,)
-    ftp.retrbinary("RETR ExpSfData.txt", open(sfcfn, "wb").write)
-    ftp.close()
-    # Insert into LDM
-    pqstr = "plot ac %s rwis_sf.txt raw/rwis/%ssf.txt txt" % (GTS, GTS)
-    subprocess.call(
-        ("pqinsert -i -p '%s' %s " "") % (pqstr, sfcfn), shell=True
-    )
-
-    return atmosfn, sfcfn
+    data = res.json()
+    if "features" not in data:
+        LOG.info(
+            "Got status_code: %s for %s, invalid result of: %s",
+            res.status_code,
+            uri,
+            json.dumps(data, sort_keys=True, indent=4, separators=(",", ": ")),
+        )
+        sys.exit()
+    return process_features(data["features"])
 
 
 def ldm_insert_metars(fn1, fn2):
@@ -385,21 +323,18 @@ def ldm_insert_metars(fn1, fn2):
 
 def main():
     """Go Main Go"""
-    (atmosfn, sfcfn) = fetch_files()
-    atmos = pd.read_csv(atmosfn)
-    surface = pd.read_csv(sfcfn)
+    atmos = fetch(ATMOS_URI)
+    surface = fetch(SURFACE_URI)
 
     obs = merge(atmos, surface)
     do_iemtracker(obs)
 
-    ts = datetime.datetime.utcnow().strftime("%d%H%M")
-    fn1 = "/tmp/IArwis%s.sao" % (ts,)
-    fn2 = "/tmp/IA.rwis%s.sao" % (ts,)
+    ts = util.utc().strftime("%d%H%M")
+    fn1 = f"/tmp/IArwis{ts}.sao"
+    fn2 = f"/tmp/IA.rwis{ts}.sao"
     gen_metars(obs, fn1, False)
     gen_metars(obs, fn2, True)
     ldm_insert_metars(fn1, fn2)
-
-    # Discontinued rwis.csv generation, does not appear to be used, I hope
 
     update_iemaccess(obs)
 

@@ -1,6 +1,6 @@
 """Ingest Iowa DOT RWIS data provided by DTN."""
-from datetime import timezone
 
+# third party
 from pyiem.observation import Observation
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_properties, get_dbconn, utc, logger

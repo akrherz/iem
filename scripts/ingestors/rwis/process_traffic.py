@@ -1,4 +1,7 @@
-"""Ingest Iowa DOT RWIS data provided by DTN."""
+"""Ingest Iowa DOT RWIS data provided by DTN.
+
+called from RUN_10_AFTER.sh
+"""
 import datetime
 
 from pyiem.network import Table as NetworkTable
