@@ -116,6 +116,13 @@ $().ready(function() {
 	$("#iemss-network").html(network);
 	$("#iemss-metadata-link").attr('href', '/sites/networks.php?network='+network);
 	
+    $("#stations_in").dblclick(function() {
+		return !$('#stations_in option:selected').remove().appendTo('#stations_out');
+    });
+    $("#stations_out").dblclick(function() {
+		return !$('#stations_out option:selected').remove().appendTo('#stations_in');
+    });
+
 	$('#stations_add').click(function() {  
 		return !$('#stations_in option:selected').remove().appendTo('#stations_out');  
 	});  
