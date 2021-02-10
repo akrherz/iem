@@ -14,8 +14,8 @@ from pyiem.util import get_dbconn, logger, exponential_backoff
 LOG = logger()
 URI = (
     "https://services.arcgis.com/8lRhdTsQyJpO52F1/arcgis/rest/services/"
-    "RWIS_Deep_Probe_Data_View/FeatureServer/0/query?where=1%3D1&f=pjson&"
-    "outFields=*"
+    "RWIS_SubSurface_All_View/FeatureServer/0/query?where=1%3D1&f=pjson&"
+    "outFields=NWS_ID,TEMPERATURE,MOISTURE,DATA_LAST_UPDATED,SENSOR_ID"
 )
 
 
@@ -26,6 +26,8 @@ def clean2(val):
 
 def clean(val):
     """Clean our value."""
+    if val is None:
+        return None
     try:
         val = float(val)
         if val > 200 or val < -50:
@@ -71,7 +73,6 @@ def main():
         )
         return
     df = process_features(data["features"])
-
     pgconn = get_dbconn("iem")
     xref = read_sql(
         "SELECT id, nwsli from rwis_locations", pgconn, index_col="nwsli"
