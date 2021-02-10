@@ -9,23 +9,24 @@ $sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']): 'valid';
 
 /* Query out the data */
 $rs = pg_prepare($dbconn, "SELECT", "select t.valid, s.name as sname,
-     max(case when sensor_id = 0 then temp else null end) as s0,
-     max(case when sensor_id = 1 then temp else null end) as s1,
-     max(case when sensor_id = 2 then temp else null end) as s2,
-     max(case when sensor_id = 3 then temp else null end) as s3,
-     max(case when sensor_id = 4 then temp else null end) as s4,
-     max(case when sensor_id = 5 then temp else null end) as s5,
-     max(case when sensor_id = 6 then temp else null end) as s6,
-     max(case when sensor_id = 7 then temp else null end) as s7,
-     max(case when sensor_id = 8 then temp else null end) as s8,
-     max(case when sensor_id = 9 then temp else null end) as s9,
-     max(case when sensor_id = 10 then temp else null end) as s10,
-     max(case when sensor_id = 11 then temp else null end) as s11,
-     max(case when sensor_id = 12 then temp else null end) as s12,
-     max(case when sensor_id = 13 then temp else null end) as s13,
-     max(case when sensor_id = 14 then temp else null end) as s14
+    max(case when sensor_id = 1 then temp else null end) as tmpf_1in,
+    max(case when sensor_id = 3 then temp else null end) as tmpf_3in,
+    max(case when sensor_id = 6 then temp else null end) as tmpf_6in,
+    max(case when sensor_id = 9 then temp else null end) as tmpf_9in,
+    max(case when sensor_id = 12 then temp else null end) as tmpf_12in,
+    max(case when sensor_id = 18 then temp else null end) as tmpf_18in,
+    max(case when sensor_id = 24 then temp else null end) as tmpf_24in,
+    max(case when sensor_id = 30 then temp else null end) as tmpf_30in,
+    max(case when sensor_id = 36 then temp else null end) as tmpf_36in,
+    max(case when sensor_id = 42 then temp else null end) as tmpf_42in,
+    max(case when sensor_id = 48 then temp else null end) as tmpf_48in,
+    max(case when sensor_id = 54 then temp else null end) as tmpf_54in,
+    max(case when sensor_id = 60 then temp else null end) as tmpf_60in,
+    max(case when sensor_id = 66 then temp else null end) as tmpf_66in,
+    max(case when sensor_id = 72 then temp else null end) as tmpf_72in
       from rwis_soil_data t, stations s
-      where s.remote_id = t.location_id GROUP by sname, valid ORDER by $sortcol DESC");
+      where s.remote_id = t.location_id GROUP by sname, valid
+      ORDER by $sortcol DESC NULLS LAST");
 $rs = pg_execute($dbconn, "SELECT", Array());
 
  $t->title = "RWIS Current Soil Probe Data";
@@ -40,38 +41,43 @@ $rs = pg_execute($dbconn, "SELECT", Array());
  	if (($now - $ts) < 600){ return date("h:i A", $ts); }
  	else { return date("M d h:i A", $ts); }
  }
+ function f($val){
+     return $val;
+ }
  $vals = Array(
- 		"sname" => "Station Name",
- 		"valid" => "Observation Time",
- 		"s0" => "1 inch Depth Temperature",
- 		"s1" => "3 inch Depth Temperature",
- 		"s2" => "6 inch Depth Temperature",
- 		"s3" => "9 inch Depth Temperature",
- 		"s4" => "12 inch Depth Temperature",
- 		"s5" => "18 inch Depth Temperature",
- 		"s6" => "24 inch Depth Temperature",
- 		"s7" => "30 inch Depth Temperature",
- 		"s8" => "36 inch Depth Temperature",
- 		"s9" => "42 inch Depth Temperature",
- 		"s10" => "48 inch Depth Temperature",
- 		"s11" => "54 inch Depth Temperature",
- 		"s12" => "60 inch Depth Temperature",
- 		"s13" => "66 inch Depth Temperature",
- 		"s14" => "72 inch Depth Temperature",
+"sname" => "Station Name",
+"valid" => "Observation Time",
+"tmpf_1in" => "1 inch Depth Temperature",
+"tmpf_3in" => "3 inch Depth Temperature",
+"tmpf_6in" => "6 inch Depth Temperature",
+"tmpf_9in" => "9 inch Depth Temperature",
+"tmpf_12in" => "12 inch Depth Temperature",
+"tmpf_18in" => "18 inch Depth Temperature",
+"tmpf_24in" => "24 inch Depth Temperature",
+"tmpf_30in" => "30 inch Depth Temperature",
+"tmpf_36in" => "36 inch Depth Temperature",
+"tmpf_42in" => "42 inch Depth Temperature",
+"tmpf_48in" => "48 inch Depth Temperature",
+"tmpf_54in" => "54 inch Depth Temperature",
+"tmpf_60in" => "60 inch Depth Temperature",
+"tmpf_66in" => "66 inch Depth Temperature",
+"tmpf_72in" => "72 inch Depth Temperature",
  );
  
  $data = Array();
  $table  = "";
  for($i=0;$row=pg_fetch_array($rs);$i++){
  	$table .= sprintf("<tr><th>%s</th><th>%s</th>
-   <td>%.1f</td><td>%.1f</td><td>%.1f</td><td>%.1f</td>
-   <td>%.1f</td><td>%.1f</td><td>%.1f</td><td>%.1f</td><td>%.1f</td>
-   <td>%.1f</td><td>%.1f</td><td>%.1f</td><td>%.1f</td><td>%.1f</td>
-   <td>%.1f</td></tr>\n",
- 			$row["sname"], fancytime($row["valid"]),
- 			$row["s0"], $row["s1"],$row["s2"],$row["s3"],$row["s4"],$row["s5"],
- 			$row["s6"],$row["s7"],$row["s8"],$row["s9"],$row["s10"],$row["s11"],
- 			$row["s12"],$row["s13"], $row["s14"]);
+   <td>%s</td><td>%s</td><td>%s</td><td>%s</td>
+   <td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>
+   <td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>
+   <td>%s</td></tr>\n",
+    $row["sname"], fancytime($row["valid"]),
+    f($row["tmpf_1in"]), f($row["tmpf_3in"]), f($row["tmpf_6in"]),
+    f($row["tmpf_9in"]), f($row["tmpf_12in"]), f($row["tmpf_18in"]),
+    f($row["tmpf_24in"]), f($row["tmpf_30in"]), f($row["tmpf_36in"]),
+    f($row["tmpf_42in"]), f($row["tmpf_48in"]), f($row["tmpf_54in"]),
+    f($row["tmpf_60in"]), f($row["tmpf_66in"]), f($row["tmpf_72in"]));
  }
  
  $t->content = <<<EOF
@@ -91,21 +97,21 @@ $rs = pg_execute($dbconn, "SELECT", Array());
   <th colspan="15">Soil Problems Located at Specified Depth</th>
 </tr>
 <tr>
-  <th><a href="soil.phtml?sortcol=s0">1</a></th>
-  <th><a href="soil.phtml?sortcol=s1">3</a></th>
-  <th><a href="soil.phtml?sortcol=s2">6</a></th>
-  <th><a href="soil.phtml?sortcol=s3">9</a></th>
-  <th><a href="soil.phtml?sortcol=s4">12</a></th>
-  <th><a href="soil.phtml?sortcol=s5">18</a></th>
-  <th><a href="soil.phtml?sortcol=s6">24</a></th>
-  <th><a href="soil.phtml?sortcol=s7">30</a></th>
-  <th><a href="soil.phtml?sortcol=s8">36</a></th>
-  <th><a href="soil.phtml?sortcol=s9">42</a></th>
-  <th><a href="soil.phtml?sortcol=s10">48</a></th>
-  <th><a href="soil.phtml?sortcol=s11">54</a></th>
-  <th><a href="soil.phtml?sortcol=s12">60</a></th>
-  <th><a href="soil.phtml?sortcol=s13">66</a></th>
-  <th><a href="soil.phtml?sortcol=s14">72</a></th>
+  <th><a href="soil.phtml?sortcol=tmpf_1in">1</a></th>
+  <th><a href="soil.phtml?sortcol=tmpf_3in">3</a></th>
+  <th><a href="soil.phtml?sortcol=tmpf_6in">6</a></th>
+  <th><a href="soil.phtml?sortcol=tmpf_9in">9</a></th>
+  <th><a href="soil.phtml?sortcol=tmpf_12in">12</a></th>
+  <th><a href="soil.phtml?sortcol=tmpf_18in">18</a></th>
+  <th><a href="soil.phtml?sortcol=tmpf_24in">24</a></th>
+  <th><a href="soil.phtml?sortcol=tmpf_30in">30</a></th>
+  <th><a href="soil.phtml?sortcol=tmpf_36in">36</a></th>
+  <th><a href="soil.phtml?sortcol=tmpf_42in">42</a></th>
+  <th><a href="soil.phtml?sortcol=tmpf_48in">48</a></th>
+  <th><a href="soil.phtml?sortcol=tmpf_54in">54</a></th>
+  <th><a href="soil.phtml?sortcol=tmpf_60in">60</a></th>
+  <th><a href="soil.phtml?sortcol=tmpf_66in">66</a></th>
+  <th><a href="soil.phtml?sortcol=tmpf_72in">72</a></th>
 </tr>
 </thead>
 <tbody>

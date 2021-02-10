@@ -71,21 +71,21 @@ def main(argv):
     # Get soil obs from access
     icursor = iemdb.cursor(cursor_factory=psycopg2.extras.DictCursor)
     sql = """SELECT l.nwsli as station, d.valid,
-         max(case when sensor_id = 0 then temp else null end) as s0temp,
-         max(case when sensor_id = 1 then temp else null end) as s1temp,
-         max(case when sensor_id = 2 then temp else null end) as s2temp,
-         max(case when sensor_id = 3 then temp else null end) as s3temp,
-         max(case when sensor_id = 4 then temp else null end) as s4temp,
-         max(case when sensor_id = 5 then temp else null end) as s5temp,
-         max(case when sensor_id = 6 then temp else null end) as s6temp,
-         max(case when sensor_id = 7 then temp else null end) as s7temp,
-         max(case when sensor_id = 8 then temp else null end) as s8temp,
-         max(case when sensor_id = 9 then temp else null end) as s9temp,
-         max(case when sensor_id = 10 then temp else null end) as s10temp,
-         max(case when sensor_id = 11 then temp else null end) as s11temp,
-         max(case when sensor_id = 12 then temp else null end) as s12temp,
-         max(case when sensor_id = 13 then temp else null end) as s13temp,
-         max(case when sensor_id = 14 then temp else null end) as s14temp
+         max(case when sensor_id = 1 then temp else null end) as tmpf_1in,
+         max(case when sensor_id = 3 then temp else null end) as tmpf_3in,
+         max(case when sensor_id = 6 then temp else null end) as tmpf_6in,
+         max(case when sensor_id = 9 then temp else null end) as tmpf_9in,
+         max(case when sensor_id = 12 then temp else null end) as tmpf_12in,
+         max(case when sensor_id = 18 then temp else null end) as tmpf_18in,
+         max(case when sensor_id = 24 then temp else null end) as tmpf_24in,
+         max(case when sensor_id = 30 then temp else null end) as tmpf_30in,
+         max(case when sensor_id = 36 then temp else null end) as tmpf_36in,
+         max(case when sensor_id = 42 then temp else null end) as tmpf_42in,
+         max(case when sensor_id = 48 then temp else null end) as tmpf_48in,
+         max(case when sensor_id = 54 then temp else null end) as tmpf_54in,
+         max(case when sensor_id = 60 then temp else null end) as tmpf_60in,
+         max(case when sensor_id = 66 then temp else null end) as tmpf_66in,
+         max(case when sensor_id = 72 then temp else null end) as tmpf_72in
          from rwis_soil_data_log d, rwis_locations l
          WHERE valid >= '%s' and valid < '%s' and d.location_id = l.id
          GROUP by station, valid""" % (
@@ -103,13 +103,14 @@ def main(argv):
     rcursor.executemany(
         f"""INSERT into t{ts.year}_soil
         (station, valid,
-        s0temp, s1temp, s2temp, s3temp, s4temp, s5temp, s6temp, s7temp,
-        s8temp, s9temp, s10temp, s11temp, s12temp, s13temp, s14temp) VALUES (
+        tmpf_1in, tmpf_3in, tmpf_6in, tmpf_9in, tmpf_12in, tmpf_18in,
+        tmpf_24in, tmpf_30in, tmpf_36in, tmpf_42in, tmpf_48in, tmpf_54in,
+        tmpf_60in, tmpf_66in, tmpf_72in) VALUES (
         %(station)s,%(valid)s,
-        %(s0temp)s, %(s1temp)s, %(s2temp)s, %(s3temp)s, %(s4temp)s, %(s5temp)s,
-        %(s6temp)s, %(s7temp)s,
-        %(s8temp)s, %(s9temp)s, %(s10temp)s, %(s11temp)s, %(s12temp)s,
-        %(s13temp)s, %(s14temp)s)
+        %(tmpf_1in)s, %(tmpf_3in)s, %(tmpf_6in)s, %(tmpf_9in)s, %(tmpf_12in)s,
+        %(tmpf_18in)s, %(tmpf_24in)s, %(tmpf_30in)s, %(tmpf_36in)s,
+        %(tmpf_42in)s, %(tmpf_48in)s, %(tmpf_54in)s, %(tmpf_60in)s,
+        %(tmpf_66in)s, %(tmpf_72in)s)
         """,
         rows,
     )

@@ -1,13 +1,14 @@
 <?php 
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 81);
 include_once "../../../include/myview.php";
 $t = new MyView();
-include("../../../include/imagemaps.php");
-include("../../../include/forms.php");
+require_once "../../../include/imagemaps.php";
+require_once "../../../include/forms.php";
 
 $t->title = "RWIS Soil Probe Data Download";
 $t->thispage = "networks-rwis";
+$t->iemss = True;
 
 $ys = yearSelect2(2008, date("Y"), "year1");
 $ms = monthSelect("", "month1");
@@ -35,44 +36,38 @@ $t->content = <<<EOF
  <li class="active">Iowa Soil Data Download</li>
 </ol>
 
-<p>This page provides access to the Iowa RWIS Soil Probe sensor data. The
-data columns are 15 temperature values at these depths (1,3,6,9,12,18,24,
-30,36,42,48,54,60,66,72 inches).  They are labelled s0temp thru s14temp.
-Values are in Fahrenheit.
+<p>This page provides a download of the soil temperature information collected
+by some of the Iowa RWIS sites.  This page was updated on 10 Feb 2021 to use
+more explicit column headings within the download file to denote the depth
+the temperature reading in Fahrenheit was recorded.</p>
 
 <form method="GET" action="/cgi-bin/request/rwis.py">
+<input type="hidden" name="network" value="IA_RWIS">
 <input type="hidden" name="src" value="soil">
-<input type="hidden" name="vars" value="s0temp">
-<input type="hidden" name="vars" value="s1temp">
-<input type="hidden" name="vars" value="s2temp">
-<input type="hidden" name="vars" value="s3temp">
-<input type="hidden" name="vars" value="s4temp">
-<input type="hidden" name="vars" value="s5temp">
-<input type="hidden" name="vars" value="s6temp">
-<input type="hidden" name="vars" value="s7temp">
-<input type="hidden" name="vars" value="s8temp">
-<input type="hidden" name="vars" value="s9temp">
-<input type="hidden" name="vars" value="s10temp">
-<input type="hidden" name="vars" value="s11temp">
-<input type="hidden" name="vars" value="s12temp">
-<input type="hidden" name="vars" value="s13temp">
-<input type="hidden" name="vars" value="s14temp">
+<input type="hidden" name="vars" value="tmpf_1in">
+<input type="hidden" name="vars" value="tmpf_3in">
+<input type="hidden" name="vars" value="tmpf_6in">
+<input type="hidden" name="vars" value="tmpf_9in">
+<input type="hidden" name="vars" value="tmpf_12in">
+<input type="hidden" name="vars" value="tmpf_18in">
+<input type="hidden" name="vars" value="tmpf_24in">
+<input type="hidden" name="vars" value="tmpf_30in">
+<input type="hidden" name="vars" value="tmpf_36in">
+<input type="hidden" name="vars" value="tmpf_42in">
+<input type="hidden" name="vars" value="tmpf_48in">
+<input type="hidden" name="vars" value="tmpf_54in">
+<input type="hidden" name="vars" value="tmpf_60in">
+<input type="hidden" name="vars" value="tmpf_66in">
+<input type="hidden" name="vars" value="tmpf_72in">
 
 <table>
 <tr><td width="50%">
 
 <p><h3>1. Select Station:</h3><br>
-<i>Select One or More or All stations in the network.</i><br />
-<select name="stations" size="5" MULTIPLE>
-  <option value="RCRI4">Anamosa
-  <option value="RCLI4">Cantril
-  <option value="RDNI4">Denison
-  <option value="ROSI4">Osceola (I-35)
-  <option value="RPFI4">Plainfield
-  <option value="RSGI4">Sigourney
-  <option value="RSCI4">Sioux City / Moville
-  <option value="RTPI4">Tipton
-</select>
+
+<p>Note that not all stations have soil probe data.</p>
+
+<div id="iemss" data-network="IA_RWIS"></div>
 
 
 <p><h3>2. Select Start/End Time:</h3><br>

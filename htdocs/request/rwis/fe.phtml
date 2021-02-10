@@ -12,8 +12,6 @@ $t->iemss = True;
 $t->title = "RWIS Data Download";
 $t->thispage = "networks-rwis";
 
-$rselect = networkMultiSelect($network, "", Array("_ALL" => "All Sites"),
-	'station[]');
 $startyr = ($network == 'IA_RWIS') ? 1995: 2009;
 $ys1 = yearSelect2($startyr, date("Y"), "year1");
 $ms1 = monthSelect("", "month1");
