@@ -14,7 +14,7 @@ from pyiem.util import get_dbconn, logger, exponential_backoff
 LOG = logger()
 URI = (
     "https://services.arcgis.com/8lRhdTsQyJpO52F1/arcgis/rest/services/"
-    "RWIS_SubSurface_All_View/FeatureServer/0/query?where=1%3D1&f=pjson&"
+    "RWIS_SubSurface_All_View/FeatureServer/0/query?where=STATUS%3D1&f=pjson&"
     "outFields=NWS_ID,TEMPERATURE,MOISTURE,DATA_LAST_UPDATED,SENSOR_ID"
 )
 
