@@ -15,6 +15,7 @@ PDICT = OrderedDict(
         ("1", "Thunder Reports (excluding VCTS)"),
         ("-SN", "Light Snow (-SN)"),
         ("PSN", "Heavy Snow (+SN)"),  # +SN causes CGI issues
+        ("SN", "Any Snow (*SN*)"),
         ("FZFG", "Freezing Fog (FZFG)"),
         ("FZRA", "Freezing Rain (FZRA)"),
         ("FG", "Fog (FG)"),
