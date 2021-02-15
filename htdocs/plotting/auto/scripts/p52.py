@@ -4,8 +4,9 @@ import datetime
 import pytz
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
+from matplotlib import ticker
 from pyiem.nws import vtec
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -60,6 +61,7 @@ def plotter(fdict):
     df = read_sql(
         """
         SELECT phenomena, significance, eventid,
+        min(product_issue at time zone 'UTC') as minproductissue,
         min(issue at time zone 'UTC') as minissue,
         max(expire at time zone 'UTC') as maxexpire,
         max(coalesce(init_expire, expire) at time zone 'UTC') as maxinitexpire,
@@ -67,7 +69,7 @@ def plotter(fdict):
         from warnings
         WHERE wfo = %s and issue > %s and issue < %s
         GROUP by phenomena, significance, eventid, year
-        ORDER by minissue ASC
+        ORDER by minproductissue ASC
     """,
         pgconn,
         params=(station, sts, ets),
@@ -87,12 +89,18 @@ def plotter(fdict):
 
     # If we have lots of WWA, we need to expand vertically a bunch, lets
     # assume we can plot 5 WAA per 100 pixels
+    title = "%s-%s NWS %s issued Watch/Warning/Advisories" % (
+        sts.strftime("%-d %b %Y"),
+        ets.strftime("%-d %b %Y"),
+        ctx["_nt"].sts[station]["name"],
+    )
+    fig = figure(title=title)
+    ax = fig.add_axes([0.05, 0.08, 0.73, 0.82])
     if len(events) > 20:
         height = int(len(events) / 6.0) + 1
-        (fig, ax) = plt.subplots(figsize=(8, height))
+        fig.set_size_inches(12, height)
         fontsize = 8
     else:
-        (fig, ax) = plt.subplots(figsize=(8, 6))
         fontsize = 10
 
     used = []
@@ -135,16 +143,10 @@ def plotter(fdict):
             fontsize=fontsize,
         )
 
-    ax.set_ylabel("Sequential Product Number")
-    ax.set_title(
-        ("%s-%s NWS %s\nissued Watch/Warning/Advisories")
-        % (
-            sts.strftime("%-d %b %Y"),
-            ets.strftime("%-d %b %Y"),
-            ctx["_nt"].sts[station]["name"],
-        )
-    )
-    ax.set_ylim(0.4, len(events) + 1)
+    ax.set_ylabel("Sequential Product Issuance")
+
+    ax.set_ylim(0, len(events) + 1)
+    ax.yaxis.set_major_locator(ticker.MaxNLocator(integer=True))
     ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1, tz=tz))
     xinterval = int(days / 7) + 1
     ax.xaxis.set_major_locator(mdates.DayLocator(interval=xinterval, tz=tz))
@@ -154,18 +156,12 @@ def plotter(fdict):
 
     ax.set_xlim(sts, ets)
 
-    # Shrink current axis's height by 10% on the bottom
-    box = ax.get_position()
-    ax.set_position(
-        [box.x0, box.y0 + box.height * 0.2, box.width, box.height * 0.8]
-    )
-
     ax.legend(
-        loc="upper center",
-        bbox_to_anchor=(0.5, -0.1),
+        loc="upper left",
+        bbox_to_anchor=(1.0, 1.0),
         fancybox=True,
         shadow=True,
-        ncol=3,
+        ncol=1,
         scatterpoints=1,
         fontsize=8,
     )

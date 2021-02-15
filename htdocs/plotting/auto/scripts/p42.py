@@ -40,6 +40,7 @@ PDICT2 = {
     "tmpf": "Air Temperature",
     "feel": "Feels Like Temperature",
     "dwpf": "Dew Point Temperature",
+    "mslp": "Sea Level Pressure",
 }
 MDICT = OrderedDict(
     [
@@ -120,10 +121,10 @@ def get_description():
             options=PDICT2,
         ),
         dict(
-            type="int",
+            type="float",
             name="threshold",
             default=50,
-            label="Temperature (F) Threshold:",
+            label="Temperature (F) / Pressure (mb) Threshold:",
         ),
         dict(
             type="int",
@@ -241,7 +242,7 @@ def plotter(fdict):
 
     cursor.execute(
         f"""
-        SELECT valid, round({varname}::numeric,0)
+        SELECT valid, round({varname}::numeric,{0 if varname != 'mslp' else 2})
         from alldata where station = %s {year_limiter}
         and {varname} is not null and extract(month from valid) in %s
         ORDER by valid ASC
@@ -294,12 +295,15 @@ def plotter(fdict):
     df = pd.DataFrame(rows)
 
     ax.grid(True)
-    ax.set_ylabel(r"%s $^\circ$F" % (PDICT2.get(varname),))
+    units = r"$^\circ$F"
+    if varname == "mslp":
+        units = "mb"
+    ax.set_ylabel(r"%s %s" % (PDICT2.get(varname), units))
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
     ax.set_title(
-        ("%s-%s [%s] %s\n" r"%s :: %.0fd%.0fh+ Streaks %s %s$^\circ$F")
+        ("%s-%s [%s] %s\n" r"%s :: %.0fd%.0fh+ Streaks %s %s %s")
         % (
             y1 if y1 is not None else ab.year,
             y2 if y2 is not None else datetime.datetime.now().year,
@@ -310,6 +314,7 @@ def plotter(fdict):
             hours % 24,
             mydir,
             threshold,
+            units,
         )
     )
     # ax.axhline(32, linestyle='-.', linewidth=2, color='k')
