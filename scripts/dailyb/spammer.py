@@ -25,7 +25,7 @@ def mywrap(text):
 
 
 def get_github_commits():
-    """ Get the recent day's worth of github code commits
+    """Get the recent day's worth of github code commits
 
     Returns:
       txt (str): text variant result
@@ -39,11 +39,11 @@ def get_github_commits():
     txt = ["> IEM Code Pushes <to branch> on Github\n"]
     html = ["<h3>IEM Code Pushes &lt;to branch&gt; on Github</h3>"]
 
-    # get branches, master is first!
-    branches = ["master"]
+    # get branches, main is first!
+    branches = ["main"]
     req = exponential_backoff(requests.get, IEM_BRANCHES, timeout=30)
     for branch in req.json():
-        if branch["name"] == "master":
+        if branch["name"] == "main":
             continue
         branches.append(branch["name"])
 

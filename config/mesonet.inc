@@ -1,6 +1,5 @@
 #
 # Apache vhost configuration for IEM
-# the master file for this is on github, so edit there!
 # I have this set in dev: SetEnv PYTHONPATH "/home/akrherz/projects/pyIEM/src"
 
   ServerName mesonet.agron.iastate.edu

@@ -12,7 +12,7 @@ $content = <<<EOF
 <h3>Archived Pilot Reports (PIREPs)</h3>
 
 <p>The IEM attempts to process a feed of Pilot Reports (PIREPs). This
-processing is done via the <a href="https://github.com/akrherz/pyIEM/blob/master/src/pyiem/nws/products/pirep.py">PyIEM Library</a>.
+processing is done via the <a href="https://github.com/akrherz/pyIEM/blob/main/src/pyiem/nws/products/pirep.py">PyIEM Library</a>.
 Sadly, there is not strict coherence to a format specification and so a 
 number of reports are simply unparsable.  This archive should not be
 considered 'complete'.</p>

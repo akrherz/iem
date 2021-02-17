@@ -26,7 +26,7 @@ The [NCEI Site](https://www.ncei.noaa.gov) would be an authoritative source, but
 
 Generally, some quality control is done to ensure that the data is ASCII format and not filled with control characters.  There are also checks that product timestamps are sane and represent a timestamp that is close to reality.  For example over the NOAAPort SBN feed, there is about one product per day that is a misfire or some other error that is not allowed to be inserted into the database.
 
-This database culls some of the more frequently issued text products.  The reason being to save space and some of the text products are not very appropriate for long term archives.  The most significant deletion are the SHEF products, which would overwhelm my storage system if I attempted to save the data! [The script](https://github.com/akrherz/iem/blob/master/scripts/dbutil/clean_afos.py) that does the database culling each day contains the exact AWIPS IDs used for this cleaning.
+This database culls some of the more frequently issued text products.  The reason being to save space and some of the text products are not very appropriate for long term archives.  The most significant deletion are the SHEF products, which would overwhelm my storage system if I attempted to save the data! [The script](https://github.com/akrherz/iem/blob/main/scripts/dbutil/clean_afos.py) that does the database culling each day contains the exact AWIPS IDs used for this cleaning.
 
 ### <a name="faq"></a> Frequently Asked Questions
 

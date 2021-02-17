@@ -48,7 +48,7 @@ The pyIEM parsers send emails to the IEM developer when issues are found.  The p
 | EXPIRED  | 12 Char  | Similiar to the ISSUED column above, this represents the products event end time.  Again, this value is updated as the event lifecycle happens with updates made by the NWS. |
 | INIT_ISS | 12 Char | This is timestamp of the NWS Text Product that started the event.  This timestamp is important for products like Winter Storm Watch, which have a begin time a number of days/hours into the future, but are typically considered to be in effect at the time of the text product issuace.  Yeah, this is where the headaches start.  This timestamp can also be used to form a canonical URL back to the IEM to fetch the raw NWS Text for this event. It is **not** updated during the event's lifecycle. |
 | INIT_EXP | 12 Char | Similiar to `INIT_ISS` above, this is the expiration of the event denoted with the first issuance of the event.  It is **not** updated during the event's lifecycle. |
-| PHENOM or TYPE | 2 Char | This is the two character NWS identifier used to denote the VTEC event type.  For example, `TO` for Tornado and `SV` for Severe Thunderstorm.  A lookup table of these codes exists [here](https://github.com/akrherz/pyIEM/blob/master/src/pyiem/nws/vtec.py). |
+| PHENOM or TYPE | 2 Char | This is the two character NWS identifier used to denote the VTEC event type.  For example, `TO` for Tornado and `SV` for Severe Thunderstorm.  A lookup table of these codes exists [here](https://github.com/akrherz/pyIEM/blob/main/src/pyiem/nws/vtec.py). |
 | SIG | 1 Char | This is the one character NWS identifier used to denote the VTEC significance.  The same link above for `PHENOM` has a lookup table for these. |
 | GTYPE | 1 Char | Either `P` for polygon or `C` for county/zone/parish.  The shapefiles you download could contain both so-called storm-based (polygon) events and traditional county/zone based events. |
 | ETN | Int | The VTEC event identifier.  A tracking number that should be unique for this event, but sometimes it is not.  Yes, more headaches. Note that the uniqueness is not based on the combination of a UGC code, but the issuance center and a continuous spatial region for the event. |
@@ -73,7 +73,7 @@ The pyIEM parsers send emails to the IEM developer when issues are found.  The p
 
 1. What are the VTEC phenomena and significance codes?
 
-    The phenomena code (two characters) and significance code (one character) denote the particular WWA hazzard at play with the product. The [NWS VTEC Site](http://www.nws.noaa.gov/om/vtec/) contains a one pager PDF that documents these codes.  The NWS uses these codes to color encode their WAWA Map found on their homepage.  You can find a lookup reference table of these codes and colors [here](https://github.com/akrherz/pyIEM/blob/master/src/pyiem/nws/vtec.py).
+    The phenomena code (two characters) and significance code (one character) denote the particular WWA hazzard at play with the product. The [NWS VTEC Site](http://www.nws.noaa.gov/om/vtec/) contains a one pager PDF that documents these codes.  The NWS uses these codes to color encode their WAWA Map found on their homepage.  You can find a lookup reference table of these codes and colors [here](https://github.com/akrherz/pyIEM/blob/main/src/pyiem/nws/vtec.py).
 
 1. How do polygon warnings exist in the IEM archive prior to being official?
 
