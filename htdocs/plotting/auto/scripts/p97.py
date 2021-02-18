@@ -189,7 +189,7 @@ def plotter(fdict):
         sday, high, low, precip, snow,
         (high + low)/2. as avg_temp
         from {table} WHERE
-        day >= %s and day < %s and
+        day >= %s and day <= %s and
         substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000' and
         station not in %s),
     climo as (
@@ -277,7 +277,7 @@ def plotter(fdict):
         sector="state" if len(sector) == 2 else sector,
         state=sector,
         axisbg="white",
-        title="%s - %s %s [%s]"
+        title="%s thru %s %s [%s]"
         % (
             date1.strftime(datefmt),
             date2.strftime(datefmt),
