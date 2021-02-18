@@ -7,8 +7,7 @@ from pandas.io.sql import read_sql
 import matplotlib.colors as mpcolors
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.ticker import MaxNLocator
-from pyiem.plot.use_agg import plt
-from pyiem.plot import get_cmap
+from pyiem.plot import get_cmap, figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -44,7 +43,8 @@ def get_description():
         "description"
     ] = """This plot displays the period of consecutive days
     each year with the extreme criterion meet. In the case of a tie, the
-    first period of the season is used for the analysis.
+    first period of the season is used for the analysis.  For a season to
+    count within the analysis, it must have had at least 200 days with data.
     """
     desc["arguments"] = [
         dict(
@@ -130,7 +130,7 @@ def get_data(ctx):
     SELECT season, day,
     extract(doy from day - '%s days'::interval)::int as doy,
     avg_temp, avg_hitemp, avg_lotemp,
-    sum_precip from agg1 where {varname}_rank = 1 and count > 240
+    sum_precip from agg1 where {varname}_rank = 1 and count > 200
     """,
         pgconn,
         params=(
@@ -162,17 +162,15 @@ def plotter(fdict):
     # Don't plot zeros for precip
     if varname == "wettest":
         df = df[df["sum_precip"] > 0]
-    fig = plt.figure(figsize=(8, 6))
-    ax = fig.add_axes([0.1, 0.3, 0.75, 0.6])
-    lax = fig.add_axes([0.1, 0.1, 0.75, 0.2])
-    cax = fig.add_axes([0.87, 0.3, 0.03, 0.6])
-    title = PDICT.get(varname)
+    title = "%s [%s]" % (ctx["_nt"].sts[station]["name"], station)
+    subtitle = PDICT.get(varname)
     if days == 1:
-        title = title.replace("Average ", "")
-    ax.set_title(
-        ("%s [%s]\n%i Day Period with %s")
-        % (ctx["_nt"].sts[station]["name"], station, days, title)
-    )
+        subtitle = subtitle.replace("Average ", "")
+    subtitle = f"{days} Day Period with {subtitle}"
+    fig = figure(title=title, subtitle=subtitle)
+    ax = fig.add_axes([0.05, 0.3, 0.45, 0.54])
+    lax = fig.add_axes([0.05, 0.1, 0.45, 0.2])
+    cax = fig.add_axes([0.05, 0.875, 0.4, 0.02])
     cmap = get_cmap(ctx["cmap"])
     minval = df[XREF[varname]].min() - 1.0
     if varname == "wettest" and minval < 0:
@@ -182,8 +180,10 @@ def plotter(fdict):
         minval, maxval, min([int(maxval - minval), 10]), dtype="i"
     )
     norm = mpcolors.BoundaryNorm(ramp, cmap.N)
-    cb = ColorbarBase(cax, norm=norm, cmap=cmap)
-    cb.set_label("inch" if varname == "wettest" else r"$^\circ$F")
+    ColorbarBase(cax, norm=norm, cmap=cmap, orientation="horizontal")
+    units = "inch" if varname == "wettest" else r"$^\circ$F"
+    fig.text(0.47, 0.88, units)
+    bboxprops = dict(color="tan", alpha=0.5, boxstyle="round")
     ax.barh(
         df.index.values,
         [days] * len(df.index),
@@ -215,12 +215,69 @@ def plotter(fdict):
         "Frequency of Day\nwithin period",
         transform=lax.transAxes,
         va="top",
+        bbox=bboxprops,
     )
     ax.set_ylim(df.index.values.min() - 3, df.index.values.max() + 3)
 
     ax.set_xlim(df["doy"].min() - 10, df["doy"].max() + 10)
     lax.set_xlim(df["doy"].min() - 10, df["doy"].max() + 10)
     ax.yaxis.set_major_locator(MaxNLocator(prune="lower"))
+
+    # Plot per year
+    series = df[XREF[varname]]
+    ax = fig.add_axes([0.55, 0.5, 0.43, 0.4])
+    ax.bar(df.index.values, series.values, color="blue", width=1)
+    ax.text(
+        0.03,
+        1.01,
+        "Value by Year",
+        transform=ax.transAxes,
+        va="bottom",
+        bbox=bboxprops,
+    )
+    ax.grid(True)
+
+    # CDF
+    ax = fig.add_axes([0.55, 0.1, 0.43, 0.3])
+    X2 = np.sort(series.values)
+    ptile = np.percentile(X2, [0, 5, 50, 95, 100])
+    N = len(series.values)
+    F2 = np.array(range(N)) / float(N) * 100.0
+    ax.plot(X2, 100.0 - F2)
+    ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
+    mysort = df.sort_values(by=XREF[varname], ascending=True)
+    info = (
+        "Min: %.2f %.0f\n95th: %.2f\nMean: %.2f\nSTD: %.2f\n5th: %.2f\n"
+        "Max: %.2f %.0f"
+    ) % (
+        series.min(),
+        mysort.index[0],
+        ptile[1],
+        series.mean(),
+        series.std(),
+        ptile[3],
+        series.max(),
+        mysort.index[-1],
+    )
+    ax.text(
+        0.75,
+        0.95,
+        info,
+        transform=ax.transAxes,
+        va="top",
+        bbox=dict(facecolor="white", edgecolor="k"),
+    )
+    ax.text(
+        0.03,
+        1.01,
+        "Cumulative Distribution Function",
+        transform=ax.transAxes,
+        va="bottom",
+        bbox=bboxprops,
+    )
+    ax.set_ylabel("Percentile")
+    ax.grid(True)
+    ax.set_xlabel(units)
     return fig, df
 
 
