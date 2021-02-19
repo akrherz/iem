@@ -448,6 +448,22 @@ function setupUI() {
 				return Ext.Date.format(value,
 						'M d, Y g:i A');
 			}
+		}, {
+			'header' : 'Issue Hail Tag',
+			sortable : true,
+			dataIndex : 'issue_hailtag'
+		}, {
+			'header' : 'Issue Wind Tag',
+			sortable : true,
+			dataIndex : 'issue_windtag'
+		}, {
+			'header' : 'Issue Tornadp Tag',
+			sortable : true,
+			dataIndex : 'issue_tornadotag'
+		}, {
+			'header' : 'Issue Tornado Damage Tag',
+			sortable : true,
+			dataIndex : 'issue_tornadodamagetag'
 		}]
 	});
 	warntable.render('warntable');
