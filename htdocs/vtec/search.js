@@ -279,7 +279,7 @@ function setupUI() {
 		}]
 	});
 	eventTable = Ext.create('Ext.grid.GridPanel', {
-        width: '100%',
+        width: 700,
 			ugc : '',
 				height : 500,
 				title : 'Events Listing',
@@ -378,7 +378,7 @@ function setupUI() {
 	
 	warntable = Ext.create('Ext.grid.GridPanel', {
 		height : 500,
-        width: '100%',
+        width: 700,
 		title : 'Drag marker on map to load data...',
 		loadMask : {
 			msg : 'Loading Data...'
