@@ -525,7 +525,9 @@ function updateMarkerPosition(lon, lat) {
 		latLng.lat().toFixed(4), latLng.lng().toFixed(4) ));
 	window.location.href = Ext.String.format("#bypoint/{0}/{1}", 
 			latLng.lng().toFixed(4), latLng.lat().toFixed(4)  );
-	mapwidget1.map.setCenter(latLng);
+	if (mapwidget1){
+        mapwidget1.map.setCenter(latLng);
+    }
 }
 
 function updateMarkerPosition2(lon, lat) {
@@ -544,7 +546,9 @@ function updateMarkerPosition2(lon, lat) {
 		latLng.lat().toFixed(4), latLng.lng().toFixed(4) ));
 	window.location.href = Ext.String.format("#eventsbypoint/{0}/{1}", 
 			latLng.lng().toFixed(4), latLng.lat().toFixed(4)  );
-	mapwidget2.map.setCenter(latLng);
+	if (mapwidget2){
+        mapwidget2.map.setCenter(latLng);
+    }
 }
 
 function initialize() {
