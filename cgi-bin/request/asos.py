@@ -228,13 +228,15 @@ def application(environ, start_response):
             )
             yield b"When requesting all-stations, must be less than 24 hours."
             return
+    delim = form.get("format", "onlycomma")
     headers = []
     if direct:
         headers.append(("Content-type", "application/octet-stream"))
+        suffix = "tsv" if delim in ["tdf", "onlytdf"] else "csv"
         if not stations or len(stations) > 1:
-            fn = "asos.txt"
+            fn = f"asos.{suffix}"
         else:
-            fn = "%s.txt" % (stations[0],)
+            fn = f"{stations[0]}.{suffix}"
         headers.append(
             ("Content-Disposition", "attachment; filename=%s" % (fn,))
         )
@@ -242,7 +244,6 @@ def application(environ, start_response):
         headers.append(("Content-type", "text/plain"))
     start_response("200 OK", headers)
 
-    delim = form.get("format", "onlycomma")
     # How should null values be represented
     missing = NULLS.get(form.get("missing"), "M")
     # How should trace values be represented
