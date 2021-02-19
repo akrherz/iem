@@ -34,15 +34,10 @@ function addPoint( $row, $lon, $lat , $name){
    $row["low"],
    $row["precip"],
    $row["max_precip"],
-   $row["max_precip_yr"],
    $row["max_high"],
    $row["max_low"],
    $row["min_high"],
-   $row["min_low"],
-   $row["max_high_yr"],
-   $row["max_low_yr"],
-   $row["min_high_yr"],
-   $row["min_low_yr"]
+   $row["min_low"]
 ));
 } // End addPoint 
 
@@ -68,7 +63,6 @@ pg_close($pgcon);
 @mkdir("/tmp/cli2shp");
 chdir("/tmp/cli2shp");
 
-
 $shpFname =  $filePre;
 $shpFile = ms_newShapeFileObj($shpFname, MS_SHP_POINT);
 $dbfFile = dbase_create( $shpFname.".dbf", array(
@@ -80,15 +74,10 @@ $dbfFile = dbase_create( $shpFname.".dbf", array(
    array("AVG_LOW", "N", 3, 0), 
    array("AVG_PREC", "N", 8, 2), 
    array("MAX_PREC", "N", 8, 2), 
-   array("MAX_PR_YR", "N", 4, 0), 
    array("MAX_HIGH", "N", 3, 0), 
    array("MAX_LOW", "N", 3, 0), 
    array("MIN_HIGH", "N", 3, 0), 
-   array("MIN_LOW", "N", 3, 0), 
-   array("MAX_HI_YR", "N", 4, 0), 
-   array("MAX_LO_YR", "N", 4, 0), 
-   array("MIN_HI_YR", "N", 4, 0), 
-   array("MIN_LO_YR", "N", 4, 0) 
+   array("MIN_LOW", "N", 3, 0)
 ));
 
 

@@ -31,7 +31,7 @@ from collections import OrderedDict
 
 import psycopg2.extras
 import pandas as pd
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -249,8 +249,27 @@ def plotter(fdict):
         """,
         (station, tuple(months)),
     )
-
-    (fig, ax) = plt.subplots(1, 1, figsize=(9, 6))
+    ab = ctx["_nt"].sts[station]["archive_begin"]
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
+    units = r"$^\circ$F"
+    if varname == "mslp":
+        units = "mb"
+    title = "%s-%s [%s] %s" % (
+        y1 if y1 is not None else ab.year,
+        y2 if y2 is not None else datetime.datetime.now().year,
+        station,
+        ctx["_nt"].sts[station]["name"],
+    )
+    subtitle = r"%s :: %.0fd%.0fh+ Streaks %s %s %s" % (
+        MDICT.get(month),
+        hours / 24,
+        hours % 24,
+        mydir,
+        threshold,
+        units,
+    )
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle)
     interval = datetime.timedelta(hours=hours)
 
     valid = []
@@ -295,28 +314,7 @@ def plotter(fdict):
     df = pd.DataFrame(rows)
 
     ax.grid(True)
-    units = r"$^\circ$F"
-    if varname == "mslp":
-        units = "mb"
     ax.set_ylabel(r"%s %s" % (PDICT2.get(varname), units))
-    ab = ctx["_nt"].sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata.")
-    ax.set_title(
-        ("%s-%s [%s] %s\n" r"%s :: %.0fd%.0fh+ Streaks %s %s %s")
-        % (
-            y1 if y1 is not None else ab.year,
-            y2 if y2 is not None else datetime.datetime.now().year,
-            station,
-            ctx["_nt"].sts[station]["name"],
-            MDICT.get(month),
-            hours / 24,
-            hours % 24,
-            mydir,
-            threshold,
-            units,
-        )
-    )
     # ax.axhline(32, linestyle='-.', linewidth=2, color='k')
     # ax.set_ylim(bottom=43)
     ax.set_xlabel(

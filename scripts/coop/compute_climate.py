@@ -104,11 +104,12 @@ def do_date(ccursor2, table, row, col, agg_col):
             META[table]["ets"],
         ),
     )
-    row2 = ccursor2.fetchone()
-    if row2 is None:
+    years = []
+    for row in ccursor2:
+        years.append(row[0])
+    if not years:
         LOG.info("None %s %s %s", row, col, agg_col)
-        return "null"
-    return row2[0]
+    return years
 
 
 def set_daily_extremes(table):
@@ -116,7 +117,7 @@ def set_daily_extremes(table):
     ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ccursor.execute(
         f"""
-        SELECT {table} from %s WHERE max_high_yr is null and
+        SELECT * from {table} WHERE max_high_yr is null and
         max_high is not null
         and min_high_yr is null and min_high is not null
         and max_low_yr is null and max_low is not null
