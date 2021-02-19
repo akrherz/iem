@@ -1,9 +1,12 @@
 """daily records"""
+from calendar import month_abbr
 import datetime
 
-from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context
+from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
+import pandas as pd
+import requests
 
 PDICT = {
     "maxmin": "Daily Maximum / Minimums",
@@ -18,7 +21,10 @@ def get_description():
     desc = dict()
     desc["data"] = True
     desc["report"] = True
-    desc["description"] = """ """
+    desc[
+        "description"
+    ] = """Presents the simple daily climatology as
+    computed by period of record data."""
     desc["arguments"] = [
         dict(
             type="station",
@@ -40,7 +46,6 @@ def get_description():
 
 def plotter(fdict):
     """ Go """
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     varname = ctx["var"]
@@ -61,6 +66,19 @@ def plotter(fdict):
         station,
         ctx["_nt"].sts[station]["name"],
     )
+    df = pd.DataFrame(
+        requests.get(
+            f"http://iem.local/json/climodat_stclimo.py?station={station}",
+            timeout=10,
+        ).json()["climatology"]
+    )
+    df["valid"] = pd.to_datetime(
+        {"year": 2000, "month": df["month"], "day": df["day"]}
+    )
+    for col in df.columns:
+        if col.find("_years") == -1:
+            continue
+        df[col] = df[col].apply(lambda x: " ".join([str(i) for i in x]))
     if varname == "maxmin":
         res += (
             "# DAILY RECORD HIGHS AND LOWS OCCURRING DURING %s-%s FOR "
@@ -94,13 +112,6 @@ def plotter(fdict):
             "AUG   SEP   OCT   NOV   DEC\n"
         )
 
-    df = read_sql(
-        "SELECT * from climate WHERE station = %s",
-        pgconn,
-        params=(station,),
-        index_col="valid",
-    )
-
     bad = "  ****" if varname == "precip" else " *** ***"
     for day in range(1, 32):
         res += "%3i" % (day,)
@@ -122,12 +133,26 @@ def plotter(fdict):
             elif varname == "range":
                 res += "%4i%4i" % (row["max_range"], row["min_range"])
             elif varname == "means":
-                res += "%4i%4i" % (row["high"], row["low"])
+                res += "%4i%4i" % (row["avg_high"], row["avg_low"])
             else:
                 res += "%6.2f" % (row["max_precip"],)
         res += "\n"
 
-    return None, df, res
+    title = "[%s] %s Daily Climatology" % (
+        station,
+        ctx["_nt"].sts[station]["name"],
+    )
+    (fig, ax) = figure_axes(title=title)
+    x = df["valid"].values
+    ax.plot(range(len(x)), df["avg_high"].values, color="r", label="High")
+    ax.plot(range(len(x)), df["avg_low"].values, color="b", label="Low")
+    ax.grid(True)
+    ax.legend()
+    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
+    ax.set_xticklabels(month_abbr[1:])
+    ax.set_xlim(0, 366)
+
+    return fig, df, res
 
 
 if __name__ == "__main__":

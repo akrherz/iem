@@ -77,6 +77,7 @@ daily_opts = [
             "(snow, precip, temps)"
         ),
     },
+    {"id": "113", "label": "Daily Climatology"},
     {"id": "176", "label": "Daily Records Beat Margin"},
     {"id": "5", "label": "Daily Records for each month of year"},
     {
