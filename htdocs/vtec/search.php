@@ -9,22 +9,23 @@ $gmapskey = get_iemprop("google.maps.key");
 $t = new MyView();
 
 $t->jsextra = <<<EOF
-<script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/5.1.0/build/ext-all.js"></script>
 <script type="text/javascript" src="/js/mapping.js"></script>
-<script type="text/javascript" src="search.js?v=19"></script>
+<script src="/vendor/jquery-datatables/1.10.20/datatables.min.js"></script>
+<script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
+<script src="/vendor/select2/4.1.0rc0/select2.min.js"></script>
+<script type="text/javascript" src="search.js"></script>
 EOF;
 $t->headextra = <<<EOF
 <script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}" type="text/javascript"></script>
-<link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/5.1.0/build/packages/ext-theme-neptune/build/resources/ext-theme-neptune-all.css"/>
+<link rel="stylesheet" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" />
+<link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
+<link rel="stylesheet" type="text/css" href="/vendor/select2/4.1.0rc0/select2.min.css"/ >
 <style>
   .map {
     width: 100%;
     height: 400px;
     float: left;
   }
-.x-grid-cell-inner {
-    padding: 0px !important;
-}
 </style>
 EOF;
 $t->thispage ="severe-search";
@@ -37,12 +38,6 @@ Warning, and Advisories.  There are currently two options:
 	<li><a href="#bypoint">1. Search for Storm Based Warnings by Point</a></li>
 	<li><a href="#byugc">2. Search of Watch/Warning/Advisories by County/Zone or by Point</a></li>
 </ul>
-
-<div class="alert alert-info"><strong>Troubles downloading Excel File?</strong>
-<br />On 15 Feb 2020, this application was updated to export Excel files via
-a more robust mechanism.  If you have troubles opening the downloaded Excel files,
-please <a href="/info/contacts.php">contact us</a>.
-		</div>
 		
 <h3><a name="bypoint">1.</a> Search for Storm Based Warnings by Point</h3>
 
@@ -54,15 +49,24 @@ grid will update and provide a listing of storm based warnings found.
 <div class="row">
 	<div class="col-md-4">
 		<p><strong>Either enter coordinates manually:</strong><br />
-		<i>Latitude (deg N):</i> <input size="8" id="lat"><br />
-		<i>Longitude (deg E):</i> <input size="8" id="lon">
-		<button class="btn btn-default" id="manualpt">Update</button>
+		<i>Latitude (deg N):</i> <input size="8" id="lat" value="41.53"><br />
+		<i>Longitude (deg E):</i> <input size="8" id="lon" value="-93.653">
+		<button type="button" class="btn btn-default" id="manualpt">Update</button>
 		</p>
 		<p><strong>Or drag marker to select coordinate:</strong><br />
 		<div id="map" class="map"></div>
 	</div>
 	<div class="col-md-8">
-        <div id="warntable"></div>
+    <h4 id="table1title"></h4>
+    <button type="button" data-table="1" data-opt="excel" class="btn btn-default iemtool"><i class="fa fa-download"></i> Export to Excel...</button>
+    <button type="button" data-table="1" data-opt="csv" class="btn btn-default iemtool"><i class="fa fa-download"></i> Export to CSV...</button>
+
+    <table id="table1" data-order='[[ 3, "desc" ]]'>
+    <thead>
+    <tr><th>Event</th><th>Phenomena</th><th>Significance</th><th>Issued</th>
+    <th>Expired</th><th>Issue Hail Tag</th><th>Issue Wind Tag</th>
+    <th>Issue Tornado Tag</th><th>Issue Tornado Damage Tag</th></tr></thead>
+    </table>
     </div>
 </div>
 
@@ -96,23 +100,40 @@ an office that did not exist at the time.
 		</div>
 <br />
 
+<form id="form2">
 <div class="row">
 	<div class="col-md-4">
-		<div id="myform" style="width:100%"></div>
+        <label for="state">Select State:
+        <select name="state" style="width: 100%"></select></label>
+        <br /><label for="ugc">Select County/Zone:
+        <select name="ugc" style="width: 100%"></select></label>
+        <br /><label for="sdate">Start Date:
+        <input name="sdate" type="text"></label>
+        <br /><label for="edate">End Date:
+        <input name="edate" type="text"></label>
 		
 		<p><strong>You can otherwise search by lat/lon point. The start and
 		end date set above are used with this option as well:</strong><br />
-		<i>Latitude (deg N):</i> <input size="8" id="lat2"><br />
-		<i>Longitude (deg E):</i> <input size="8" id="lon2">
-		<button class="btn btn-default" id="manualpt2">Update</button>
+		<i>Latitude (deg N):</i> <input size="8" id="lat2" value="41.53"><br />
+		<i>Longitude (deg E):</i> <input size="8" id="lon2" value="-93.653">
+		<button type="button" class="btn btn-default" id="manualpt2">Update</button>
 		</p>
 		<p><strong>Or drag marker to select coordinate:</strong><br />
 		<div id="map2" class="map"></div>
 	</div>
 	<div class="col-md-8">
-		<div id="mytable"></div>
+    <h4 id="table2title"></h4>
+    <button type="button" data-table="2" data-opt="excel" class="btn btn-default iemtool"><i class="fa fa-download"></i> Export to Excel...</button>
+    <button type="button" data-table="2" data-opt="csv" class="btn btn-default iemtool"><i class="fa fa-download"></i> Export to CSV...</button>
+
+    <table id="table2" data-order='[[ 3, "desc" ]]'>
+    <thead>
+    <tr><th>Event</th><th>Phenomena</th><th>Significance</th><th>Issued</th>
+    <th>Expired</th></tr></thead>
+    </table>
 	</div>
-</div>
+</div><!-- ./row -->
+</form><!-- ./form2 -->
 		
 EOF;
 $t->render('full.phtml');
