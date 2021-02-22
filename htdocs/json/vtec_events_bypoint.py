@@ -11,6 +11,17 @@ from pandas.io.sql import read_sql
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
+def make_url(row):
+    """Build URL."""
+    return "/vtec/#%s-O-NEW-K%s-%s-%s-%04i" % (
+        row["iso_issued"][:4],
+        row["wfo"],
+        row["phenomena"],
+        row["significance"],
+        row["eventid"],
+    )
+
+
 def get_df(lon, lat, sdate, edate):
     """Generate a report of VTEC ETNs used for a WFO and year
 
@@ -45,6 +56,8 @@ def get_df(lon, lat, sdate, edate):
     )
     df["ph_name"] = df["phenomena"].map(VTEC_PHENOMENA)
     df["sig_name"] = df["significance"].map(VTEC_SIGNIFICANCE)
+    # Construct a URL
+    df["url"] = df.apply(make_url, axis=1)
     return df
 
 

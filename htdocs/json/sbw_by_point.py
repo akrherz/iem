@@ -6,6 +6,7 @@ from io import BytesIO, StringIO
 import json
 import datetime
 
+import numpy as np
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, utc
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
@@ -13,6 +14,17 @@ from pandas.io.sql import read_sql
 
 ISO = "%Y-%m-%dT%H:%M:%SZ"
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+
+def make_url(row):
+    """Build URL."""
+    return "/vtec/#%s-O-NEW-K%s-%s-%s-%04i" % (
+        row["iso_issued"][:4],
+        row["wfo"],
+        row["phenomena"],
+        row["significance"],
+        row["eventid"],
+    )
 
 
 def get_events(ctx):
@@ -51,11 +63,14 @@ def get_events(ctx):
     )
     if df.empty:
         return data, df
+    df = df.replace({np.nan: None})
     df["name"] = df[["phenomena", "significance"]].apply(
         lambda x: get_ps_string(x[0], x[1]), axis=1
     )
     df["ph_name"] = df["phenomena"].map(VTEC_PHENOMENA)
     df["sig_name"] = df["significance"].map(VTEC_SIGNIFICANCE)
+    # Construct a URL
+    df["url"] = df.apply(make_url, axis=1)
     return data, df
 
 
@@ -64,6 +79,7 @@ def to_json(data, df):
     for _, row in df.iterrows():
         data["sbws"].append(
             {
+                "url": row["url"],
                 "phenomena": row["phenomena"],
                 "eventid": row["eventid"],
                 "significance": row["significance"],
