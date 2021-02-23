@@ -20,7 +20,8 @@ def get_description():
         "description"
     ] = """This chart presents the daily frequency of the
     given date having the prescribed number of previous days above or below
-    some provided treshold."""
+    some provided treshold. <a href="/plotting/auto/?q=216">Autoplot 216</a>
+    provides actual streaks and yearly maximum values."""
     desc["arguments"] = [
         dict(
             type="station",

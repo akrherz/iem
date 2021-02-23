@@ -60,7 +60,15 @@ daily_opts = [
     {
         "id": "66",
         "label": (
-            "Consecutative Days with High/Low Temp Above/Below Threshold"
+            "Consecutative Days Frequency by DOY for High/Low Temp "
+            "Above/Below Threshold"
+        ),
+    },
+    {
+        "id": "216",
+        "label": (
+            "Consecutative Days by Year with High/Low Temp "
+            "Above/Below Threshold"
         ),
     },
     {

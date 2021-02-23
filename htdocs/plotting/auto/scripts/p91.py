@@ -39,6 +39,8 @@ def get_description():
     temperature
     above or below a given threshold.  For precipitation, it is only a period
     with each day above a given threshold and the average over that period.
+    <a href="/plotting/auto/?q=216">Autoplot 216</a>
+    provides actual streaks and yearly maximum values
     """
     desc["arguments"] = [
         dict(
