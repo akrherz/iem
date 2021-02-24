@@ -4,6 +4,7 @@ import datetime
 import numpy as np
 import pandas as pd
 from matplotlib.font_manager import FontProperties
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -76,6 +77,8 @@ def plotter(fdict):
     """,
         (station,),
     )
+    if cursor.rowcount == 0:
+        raise NoDataFound("Did not find any observations for station.")
     rows = []
     startdate = None
     running = 0
@@ -105,6 +108,8 @@ def plotter(fdict):
                 "enddate": row[0],
             }
         )
+    if not rows:
+        raise NoDataFound("Failed to find any streaks for given threshold.")
     df = pd.DataFrame(rows)
 
     label = "AOA" if mydir == "above" else "below"

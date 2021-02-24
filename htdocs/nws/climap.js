@@ -27,20 +27,38 @@ function updateDate(){
 
 var vectorStyleFunction = function(feature, resolution){
 	var style;
-	if (feature.get(renderattr) != "M"){
+    var value = feature.get(renderattr);
+    var color = "#FFFFFF";
+    var outlinecolor = "#000000";
+    if (value != "M"){
+        if (renderattr.indexOf("depart") > -1){
+            if (renderattr.indexOf("high") > -1 || renderattr.indexOf("low") > -1){
+                if (value > 0){
+                    color = "#FF0000";
+                } else if (value < 0){
+                    color = "#00FFFF";
+                }
+            } else {
+                if (value < 0){
+                    color = "#FF0000";
+                } else if (value > 0){
+                    color = "#00FFFF";
+                }
+            }
+        }
   		style = [new ol.style.Style({
   	        fill: new ol.style.Fill({
   	          color: 'rgba(255, 255, 255, 0.6)'
   	        }),
   	        text: new ol.style.Text({
   	          font: fontSize+'px Calibri,sans-serif',
-  	          text: feature.get(renderattr).toString(),
+  	          text: value.toString(),
   	          fill: new ol.style.Fill({
-  	            color: '#FFFFFF',
+  	            color: color,
   	            width: 1
   	          }),
   	          stroke: new ol.style.Stroke({
-  	        	  color: '#000000',
+  	        	  color: outlinecolor,
     	          width: 3
     	      })
   	        })

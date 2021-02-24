@@ -10,7 +10,7 @@ force_https();
 $t = new MyView();
 $t->title = "Map of Daily NWS CLImage reports";
 $t->thispage = "climate-today";
-$OL = '6.3.1';
+$OL = '6.4.3';
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link rel="stylesheet" href="/vendor/jquery-ui/1.12.1/jquery-ui.min.css" />
@@ -30,7 +30,7 @@ $t->jsextra = <<<EOF
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
 <script src="/vendor/jquery-ui/1.12.1/jquery-ui.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
-<script src='climap.js?v=10'></script>
+<script src='climap.js'></script>
 EOF;
 
 $t->content = <<<EOF
