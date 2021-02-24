@@ -5,11 +5,10 @@ Run from RUN_40_AFTER.sh
 import datetime
 import subprocess
 import tempfile
-from functools import partial
-from ftplib import FTP, error_perm
 import os
 
-from pyiem.util import logger, utc
+from pyiem.util import logger, utc, exponential_backoff
+import requests
 
 LOG = logger()
 
@@ -22,25 +21,20 @@ def do(ts):
     if os.path.isfile(localfn):
         return
     remotefn = ts.strftime("5kmffg_%Y%m%d%H.grb2")
-    ftp = FTP("ftp.wpc.ncep.noaa.gov")
-    ftp.login()
-    ftp.cwd("workoff/ffg")
+    url = f"https://ftp.wpc.ncep.noaa.gov/workoff/ffg/{remotefn}"
+    LOG.debug("fetching %s", url)
+    req = exponential_backoff(requests.get, url, timeout=20)
+    if req is None or req.status_code != 200:
+        LOG.info("Download of %s failed", url)
+        return
     tmpfd, tmpfn = tempfile.mkstemp()
-    errored = False
-    writer = partial(os.write, tmpfd)
-    try:
-        ftp.retrbinary("RETR " + remotefn, writer)
-    except error_perm as err:
-        LOG.info("failed to fetch: %s %s", remotefn, err)
-        errored = True
-    ftp.close()
+    os.write(tmpfd, req.content)
     os.close(tmpfd)
     cmd = (
         "pqinsert -i -p 'data a %s bogus " "model/ffg/%s.grib2 grib2' %s"
     ) % (ts.strftime("%Y%m%d%H%M"), remotefn[:-5], tmpfn)
-    if not errored:
-        LOG.debug(cmd)
-        subprocess.call(cmd, shell=True)
+    LOG.debug(cmd)
+    subprocess.call(cmd, shell=True)
 
     os.remove(tmpfn)
 
