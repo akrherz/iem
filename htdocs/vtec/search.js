@@ -126,8 +126,8 @@ function updateTable2ByPoint(){
     // Do what we need to for table 2
     $.ajax({
         data: {
-            lat: $("lat2").val(),
-            lon: $("lon2").val(),
+            lat: $("#lat2").val(),
+            lon: $("#lon2").val(),
             sdate: $.datepicker.formatDate("yy/mm/dd", sdate.datepicker("getDate")),
             edate: $.datepicker.formatDate("yy/mm/dd", edate.datepicker("getDate"))
         },
