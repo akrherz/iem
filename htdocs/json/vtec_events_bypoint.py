@@ -67,6 +67,7 @@ def to_json(df):
     for _, row in df.iterrows():
         res["events"].append(
             {
+                "url": row["url"],
                 "issue": row["iso_issued"],
                 "expire": row["iso_expired"],
                 "eventid": row["eventid"],
