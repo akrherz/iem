@@ -78,6 +78,10 @@ def main():
     fd.SetWidth(6)
     out_layer.CreateField(fd)
 
+    fd = ogr.FieldDefn("FL_NWSLI", ogr.OFTString)
+    fd.SetWidth(5)
+    out_layer.CreateField(fd)
+
     sql = """
      SELECT geom, 'P' as gtype, significance, wfo, status, eventid,
      null as ugc, phenomena,
@@ -86,7 +90,8 @@ def main():
      to_char(polygon_begin at time zone 'UTC', 'YYYYMMDDHH24MI') as utcupdated,
      to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_prodissue,
      to_char(init_expire at time zone 'UTC', 'YYYYMMDDHH24MI')
-         as utc_init_expire
+         as utc_init_expire,
+     hvtec_nwsli
      from sbw_%s WHERE polygon_begin <= '%s' and polygon_end > '%s'
 
     UNION
@@ -99,7 +104,8 @@ def main():
      to_char(product_issue at time zone 'UTC', 'YYYYMMDDHH24MI')
          as utc_prodissue,
      to_char(init_expire at time zone 'UTC', 'YYYYMMDDHH24MI')
-         as utc_init_expire
+         as utc_init_expire,
+     hvtec_nwsli
      from warnings_%s w JOIN ugcs u on (u.gid = w.gid) WHERE
      expire > '%s' and w.gid is not null
 
@@ -138,6 +144,7 @@ def main():
         featDef.SetField("STATUS", feat.GetField("status"))
         featDef.SetField("ETN", feat.GetField("eventid"))
         featDef.SetField("NWS_UGC", feat.GetField("ugc"))
+        featDef.SetField("FL_NWSLI", feat.GetField("hvtec_nwsli"))
 
         out_layer.CreateFeature(featDef)
         feat.Destroy()
