@@ -47,21 +47,16 @@ def do_month(sts):
     now = sts
     while now < ets:
         LOG.debug(now)
+        # We only fetch the northern hemisphere, for better or worse
         uri = now.strftime(
-            (
-                "http://goldsmr4.gesdisc.eosdis.nasa.gov/daac-bin/OTF/"
-                "HTTP_services.cgi?FILENAME=/data/s4pa/MERRA2"
-                "/M2T1NXRAD.5.12.4/%Y/%m/MERRA2_"
-                + trans(now)
-                + ".tavg1_2d_rad_"
-                "Nx.%Y%m%d.nc4&FORMAT=bmM0Lw&"
-                "BBOX=22.852,-129.727,52.383,-60.117"
-                "&LABEL=MERRA2_"
-                + trans(now)
-                + ".tavg1_2d_rad_Nx.%Y%m%d.SUB.nc"
-                "&FLAGS=&SHORTNAME=M2T1NXRAD&SERVICE=SUBSET_MERRA2&"
-                "LAYERS=&VERSION=1.02&VARIABLES=swgdn,swgdnclr,swtdn"
-            )
+            "http://goldsmr4.gesdisc.eosdis.nasa.gov/daac-bin/OTF/"
+            "HTTP_services.cgi?FILENAME=/data/s4pa/MERRA2"
+            f"/M2T1NXRAD.5.12.4/%Y/%m/MERRA2_{trans(now)}.tavg1_2d_rad_"
+            "Nx.%Y%m%d.nc4&FORMAT=bmM0Lw&"
+            "BBOX=0,-180,90,180&"
+            f"LABEL=MERRA2_{trans(now)}.tavg1_2d_rad_Nx.%Y%m%d.SUB.nc"
+            "&FLAGS=&SHORTNAME=M2T1NXRAD&SERVICE=SUBSET_MERRA2&"
+            "LAYERS=&VERSION=1.02&VARIABLES=swgdn,swgdnclr,swtdn"
         )
         dirname = now.strftime("/mesonet/data/merra2/%Y")
         if not os.path.isdir(dirname):

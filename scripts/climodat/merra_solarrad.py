@@ -25,6 +25,9 @@ def get_gp(xc, yc, x, y):
     yidx = (np.abs(yc - y)).argmin()
     dx = x - xc[xidx]
     dy = y - yc[yidx]
+    # LOG.debug("xidx: %s yidx: %s dx: %s dy: %s", xidx, yidx, dx, dy)
+    if abs(dx) > 1 or abs(dy) > 1:
+        return None, None, None
     movex = -1
     if dx >= 0:
         movex = 1
@@ -41,6 +44,7 @@ def get_gp(xc, yc, x, y):
 
 def do(date):
     """ Process for a given date."""
+    LOG.debug("do(%s)", date)
     pgconn = get_dbconn("coop")
     ccursor = pgconn.cursor()
     ccursor2 = pgconn.cursor()
@@ -80,6 +84,9 @@ def do(date):
     for row in ccursor:
         (x, y) = (row[1], row[2])
         (gridxs, gridys, distances) = get_gp(xc, yc, x, y)
+        if gridxs is None:
+            LOG.debug("station %s outside of bounds?", row[0])
+            continue
 
         z0 = total[gridys[0], gridxs[0]]
         z1 = total[gridys[1], gridxs[1]]
