@@ -62,7 +62,8 @@ def process(fields):
     """Make something pretty."""
     text = fields.get("text")
     text = text.replace("LAT...LON", "").replace("\n", " ")
-    poly = str2polygon(text)
+    # Add extra whitespace to account for upstream issues
+    poly = str2polygon(text + " \n")
     plt.close()
     fig = plt.figure(figsize=TWITTER_RESOLUTION_INCH)
 

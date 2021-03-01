@@ -121,7 +121,7 @@ def plotter(fdict):
             df["issue"].max().date().strftime("%b %-d, %Y"),
         )
     )
-    g.fig.subplots_adjust(top=0.9, bottom=0.1)
+    g.fig.subplots_adjust(top=0.9, bottom=0.1, left=0.1)
     return g.fig, df
 
 
