@@ -103,6 +103,9 @@ def application(environ, start_response):
         df.to_html(sio, columns=myvars)
         return [sio.getvalue().encode("ascii")]
     if what == "excel":
+        if len(df.index) >= 1048576:
+            start_response("200 OK", [("Content-type", "text/plain")])
+            return [b"Dataset too large for excel format."]
         bio = BytesIO()
         with pd.ExcelWriter(bio) as writer:
             df.to_excel(writer, "Data", index=False, columns=myvars)
