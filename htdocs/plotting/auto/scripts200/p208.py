@@ -285,6 +285,7 @@ def plotter(fdict):
             missingval="",
             ilabel=(len(df2.index) <= 10),
             labelbuffer=5,
+            is_firewx=(p1 == "FW"),
         )
     if not sbwdf.empty:
         color = vtec.NWS_COLORS.get("%s.%s" % (p1, s1), "#FF0000")

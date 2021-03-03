@@ -902,6 +902,7 @@ def plotter(fdict):
                 clevlabels=cl,
                 labelbuffer=1,  # Texas yall
                 extend="neither",
+                is_firewx=(phenomena == "FW"),
             )
         else:
             m.fill_ugcs(
@@ -910,6 +911,7 @@ def plotter(fdict):
                 cmap=cmap,
                 ilabel=ilabel,
                 labelbuffer=1,  # Texas yall
+                is_firewx=(phenomena == "FW"),
             )
     else:
         res = m.pcolormesh(
