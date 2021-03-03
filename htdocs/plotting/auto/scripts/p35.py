@@ -5,7 +5,7 @@ import calendar
 
 import psycopg2.extras
 import numpy as np
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -79,14 +79,10 @@ def plotter(fdict):
         )
 
     cursor.execute(
-        """
+        f"""
     WITH one as (
-        select valid, """
-        + varname
-        + """ as t from alldata where
-        station = %s and """
-        + varname
-        + """ is not null
+        select valid, {varname} as t from alldata where
+        station = %s and {varname} is not null
         ),
         two as (SELECT valid + '%s hours'::interval as v, t from one
         )
@@ -119,20 +115,19 @@ def plotter(fdict):
     hist = np.ma.array(hist / years / 7.0)
     hist.mask = np.where(hist < (1.0 / years), True, False)
 
-    (fig, ax) = plt.subplots(1, 1)
+    title = "%s [%s] Histogram" % (
+        ctx["_nt"].sts[station]["name"],
+        station,
+    )
+    subtitle = "(bin=%s) of %s Hour %s Change" % (
+        interval,
+        hours,
+        PDICT[varname],
+    )
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle)
     res = ax.pcolormesh((xedges - 1) * 7, yedges, hist.transpose())
     fig.colorbar(res, label="Hours per Day")
     ax.grid(True)
-    ax.set_title(
-        ("%s [%s] Histogram\n(bin=%s) of %s Hour %s Change")
-        % (
-            ctx["_nt"].sts[station]["name"],
-            station,
-            interval,
-            hours,
-            PDICT[varname],
-        )
-    )
     ax.set_ylabel("%s Change" % (PDICT[varname],))
 
     ax.set_xticks(xticks)

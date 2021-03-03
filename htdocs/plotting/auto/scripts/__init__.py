@@ -268,7 +268,7 @@ monthly_opts = [
     {"id": "57", "label": "Monthly Precipitation/Temperature Records"},
     {
         "id": "95",
-        "label": "Monthly Precipitation/Temperature with El Nino Indices",
+        "label": "Monthly Precipitation/Temperature with El Nino SOI Index",
     },
     {
         "id": "24",

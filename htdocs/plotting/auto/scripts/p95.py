@@ -7,7 +7,7 @@ import pandas as pd
 from scipy import stats
 import matplotlib.colors as mpcolors
 from pyiem import network
-from pyiem.plot import get_cmap
+from pyiem.plot import get_cmap, figure
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -72,7 +72,7 @@ def title(wanted):
     """ Make a title """
     t1 = datetime.date(2000, wanted[0], 1)
     t2 = datetime.date(2000, wanted[-1], 1)
-    return "Avg Precip + Temp for %s%s," % (
+    return "Avg Precip + Temp for %s%s" % (
         t1.strftime("%B"),
         " thru %s" % (t2.strftime("%B"),) if wanted[0] != wanted[-1] else "",
     )
@@ -110,7 +110,7 @@ def plotter(fdict):
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
     elnino = {}
-    ccursor.execute("""SELECT monthdate, soi_3m, anom_34 from elnino""")
+    ccursor.execute("SELECT monthdate, soi_3m, anom_34 from elnino")
     for row in ccursor:
         if row[0].month != wantmonth:
             continue
@@ -138,15 +138,16 @@ def plotter(fdict):
         data["precip"] += _precip
         data["temp"].append(float(_temp))
 
-    fig = plt.figure(figsize=(10, 6))
-    ax = plt.axes([0.1, 0.12, 0.5, 0.75])
-    msg = ("[%s] %s\n%s\n%s SOI (3 month average)") % (
+    title2 = "[%s] %s %s" % (
         station,
         nt.sts[station]["name"],
         title(wanted),
+    )
+    subtitle = "%s SOI (3 month average)" % (
         datetime.date(2000, wantmonth, 1).strftime("%B"),
     )
-    ax.set_title(msg)
+    fig = figure(title=title2, subtitle=subtitle)
+    ax = fig.add_axes([0.07, 0.12, 0.53, 0.75])
 
     cmap = get_cmap(ctx["cmap"])
     zdata = np.arange(-2.0, 2.1, 0.5)
@@ -186,7 +187,7 @@ def plotter(fdict):
 
     sm = plt.cm.ScalarMappable(norm, cmap)
     sm.set_array(zdata)
-    cb = plt.colorbar(sm, extend="both")
+    cb = fig.colorbar(sm, extend="both")
     cb.set_label("<-- El Nino :: SOI :: La Nina -->")
 
     ax.grid(True)
@@ -196,7 +197,7 @@ def plotter(fdict):
         (r"Average Temperature $^\circ$F, " "Avg: %.1f") % (np.average(ys),)
     )
     df = pd.DataFrame(rows)
-    ax2 = plt.axes([0.67, 0.6, 0.28, 0.35])
+    ax2 = fig.add_axes([0.67, 0.55, 0.28, 0.35])
     ax2.scatter(df["soi3m"].values, df["tmpf"].values)
     ax2.set_xlabel("<-- El Nino :: SOI :: La Nina -->")
     ax2.set_ylabel(r"Avg Temp $^\circ$F")
@@ -216,7 +217,7 @@ def plotter(fdict):
     )
     ax2.grid(True)
 
-    ax3 = plt.axes([0.67, 0.1, 0.28, 0.35])
+    ax3 = fig.add_axes([0.67, 0.1, 0.28, 0.35])
     ax3.scatter(df["soi3m"].values, df["precip"].values)
     ax3.set_xlabel("<-- El Nino :: SOI :: La Nina -->")
     ax3.set_ylabel("Total Precip [inch]")

@@ -5,7 +5,7 @@ import datetime
 import matplotlib.dates as mdates
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -139,7 +139,16 @@ def plotter(fdict):
     # calculate the frequency
     df["freq"] = df["hits"] / df["total"] * 100.0
 
-    (fig, ax) = plt.subplots(1, 1)
+    title = (
+        f"{station} {ctx['_nt'].sts[station]['name']} "
+        f"({df['min_date'].min().year}-{df['max_date'].max().year})"
+    )
+    subtitle = (
+        f"Frequency of {PDICT[varname]} {PDICT2[ctx['opt']]} {threshold}"
+    )
+    if days > 1:
+        subtitle += f" {PDICT3[func]} over inclusive forward {days} days"
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle)
     ax.bar(df.index.values, df["freq"], ec="b", fc="b")
     ax.set_xlim(
         df.index.min() - datetime.timedelta(days=1),
@@ -149,14 +158,6 @@ def plotter(fdict):
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b"))
     ax.grid(True)
     ax.set_ylabel("Frequency [%]")
-    title = (
-        f"{station} {ctx['_nt'].sts[station]['name']} "
-        f"({df['min_date'].min().year}-{df['max_date'].max().year})\n"
-        f"Frequency of {PDICT[varname]} {PDICT2[ctx['opt']]} {threshold}"
-    )
-    if days > 1:
-        title += f"\n{PDICT3[func]} over inclusive forward {days} days"
-    ax.set_title(title)
     df.drop(["min_date", "max_date"], axis=1, inplace=True)
     return fig, df
 

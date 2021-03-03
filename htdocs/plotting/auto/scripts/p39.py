@@ -4,7 +4,7 @@ import calendar
 
 import psycopg2.extras
 import numpy as np
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -73,13 +73,9 @@ def plotter(fdict):
 
     # beat month
     cursor.execute(
-        """
-        SELECT extract(day from day), (high+low)/2. from
-        """
-        + table
-        + """ WHERE station = %s and year = %s and month = %s
-        ORDER by day ASC
-    """,
+        f"SELECT extract(day from day), (high+low)/2. from {table} "
+        "WHERE station = %s and year = %s and month = %s "
+        "ORDER by day ASC",
         (station, year, month),
     )
     if cursor.rowcount == 0:
@@ -91,14 +87,9 @@ def plotter(fdict):
 
     # build history
     cursor.execute(
-        """
-        SELECT year, day, (high+low)/2. from
-        """
-        + table
-        + """ WHERE station = %s and month = %s and
-        extract(day from day) <= %s and day < %s
-        ORDER by day ASC
-    """,
+        f"SELECT year, day, (high+low)/2. from {table} WHERE station = %s "
+        "and month = %s and extract(day from day) <= %s and day < %s "
+        "ORDER by day ASC",
         (station, effective_date.month, days, ets),
     )
 
@@ -121,12 +112,32 @@ def plotter(fdict):
         prevavg.append(np.sum(prevmonth[: i + 1]) / float(i + 1))
     avgs.mask = data.mask
 
-    (fig, ax) = plt.subplots(1, 1)
-
     beats = 0
     for yr in range(np.shape(data)[0] - 1):
         if avgs[yr, -1] > prevavg[-1]:
             beats += 1
+    title = "[%s] %s scenarios for %s" % (
+        station,
+        ctx["_nt"].sts[station]["name"],
+        effective_date.strftime("%b %Y"),
+    )
+    subtitle = "1-%s [%s] + %s-%s [%s-%s] beats %s %s %s/%s (%.1f%%)" % (
+        effective_date.day,
+        effective_date.year,
+        effective_date.day + 1,
+        days,
+        baseyear,
+        effective_date.year - 1,
+        calendar.month_abbr[oldmonth.month],
+        oldmonth.year,
+        beats,
+        np.shape(data)[0] - 1,
+        beats / float(np.shape(data)[0] - 1) * 100.0,
+    )
+
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle)
+
+    for yr in range(np.shape(data)[0] - 1):
         ax.plot(np.arange(1, days + 1), avgs[yr, :], zorder=1, color="tan")
 
     lv = avgs[-1, effective_date.day - 1]
@@ -168,28 +179,6 @@ def plotter(fdict):
         % (calendar.month_abbr[oldmonth.month], oldmonth.year, prevavg[-1]),
     )
 
-    ax.set_title(
-        (
-            "[%s] %s scenarios for %s\n"
-            "1-%s [%s] + %s-%s [%s-%s] beats %s %s %s/%s (%.1f%%)"
-        )
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            effective_date.strftime("%b %Y"),
-            effective_date.day,
-            effective_date.year,
-            effective_date.day + 1,
-            days,
-            baseyear,
-            effective_date.year - 1,
-            calendar.month_abbr[oldmonth.month],
-            oldmonth.year,
-            beats,
-            np.shape(data)[0] - 1,
-            beats / float(np.shape(data)[0] - 1) * 100.0,
-        )
-    )
     ax.set_xlim(1, days)
     ax.set_ylabel(r"Month to Date Average Temp $^\circ$F")
     ax.set_xlabel("Day of Month")
