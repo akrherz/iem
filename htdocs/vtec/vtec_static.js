@@ -81,6 +81,7 @@ iemdata.vtec_sig_dict = [
 ];
 
 iemdata.wfos = [
+ ['PAAQ','National Tsunami Warning Center'],
  ['KABQ','ALBUQUERQUE'],
  ['KABR','ABERDEEN'],
  ['PAFC','ANCHORAGE'],
@@ -132,6 +133,7 @@ iemdata.wfos = [
  ['KGSP','GREENVILLE/SPARTANBURG'],
  ['PGUM','GUAM'],
  ['KGYX','GRAY'],
+ ['PHEB','Pacific Tsunami Warning Center'],
  ['PHFO','HONOLULU'],
  ['KHGX','HOUSTON/GALVESTON'],
  ['KHNX','SAN_JOAQUIN_VALLEY/HANFORD'],
