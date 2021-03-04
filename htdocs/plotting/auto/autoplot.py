@@ -56,8 +56,8 @@ def format_mapbox_response(js):
 
 
 def parser(cgistr):
-    """ Convert a CGI string into a dict that gets passed to the plotting
-    routine """
+    """Convert a CGI string into a dict that gets passed to the plotting
+    routine"""
     # want predictable / stable URIs, generally.
     data = OrderedDict()
     for token in cgistr.split("::"):
@@ -289,6 +289,11 @@ def application(environ, start_response):
     """Our Application!"""
     # Parse the request that was sent our way
     fields = parse_formvars(environ)
+    # HACK
+    if fields.get("q", "").find("network:WFO::wfo:PHEB") > -1:
+        fields["q"] = fields["q"].replace("network:WFO", "network:NWS")
+    if fields.get("q", "").find("network:WFO::wfo:PAAQ") > -1:
+        fields["q"] = fields["q"].replace("network:WFO", "network:NWS")
     # Figure out the format that was requested from us, default to png
     fmt = fields.get("fmt", "png")[:6]
     # Figure out what our response headers should be

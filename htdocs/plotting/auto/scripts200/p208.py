@@ -258,7 +258,7 @@ def plotter(fdict):
         nocaption=True,
         figsize=TWITTER_RESOLUTION_INCH,
     )
-    if len(df["wfo"].unique()) == 1:
+    if len(df["wfo"].unique()) == 1 and wfo not in ["PHEB", "PAAQ"]:
         mp.sector = "cwa"
         mp.cwa = wfo[-3:]
     # CAN statements come here with time == expire :/
