@@ -108,7 +108,7 @@ def get_data(ctx):
             color = "r"
         # print("year: %s idx: %s days: %s %s" % (year, idx, days, snowdepth))
         dt = datetime.date(year, 1, 1) + datetime.timedelta(
-            days=(int(idx) + 183)
+            days=(int(idx) + 183 - 1)
         )
         rows.append(
             dict(
