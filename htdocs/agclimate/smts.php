@@ -42,14 +42,17 @@ $m2 = monthSelect($month2, "month2");
 $d2 = daySelect2($day2, "day2");
 $h2 = hourSelect($hour2, "hour2");
 
-$ar = Array("1" => "3 Panel Plot",
-		"2" => "Just Soil Temps",
-		"3" => "Daily Max/Min 4 Inch Soil Temps",
-		"4" => "Daily Solar Radiation",
-		"5" => "Daily Potential Evapotranspiration",
-		"6" => "Histogram of Volumetric Soil Moisture",
-		"7" => "Daily Soil Water + Change",
-		"8" => "Battery Voltage");
+$ar = Array(
+    "1" => "3 Panel Plot",
+    "2" => "Just Soil Temps",
+    "3" => "Daily Max/Min 4 Inch Soil Temps",
+    "4" => "Daily Solar Radiation",
+    "5" => "Daily Potential Evapotranspiration",
+    "6" => "Histogram of Volumetric Soil Moisture",
+    "7" => "Daily Soil Water + Change",
+    "8" => "Battery Voltage",
+    "9" => "Daily Rainfall, 4 inch Soil Temp, and RH",
+);
 $dd = "This plot is a time series graph of
 observations from a time period and ISU Soil Moisture station of your choice.";
 $desc = Array("1" => $dd,

@@ -1,6 +1,7 @@
 """ISU Soil Moisture Network Time Series"""
 import datetime
 
+import numpy as np
 import psycopg2
 import pytz
 import pandas as pd
@@ -10,6 +11,7 @@ from matplotlib.patches import Patch
 from matplotlib.lines import Line2D
 from pyiem import meteorology
 from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn, c2f, mm2inch
 from pyiem.exceptions import NoDataFound
 
@@ -23,6 +25,7 @@ PLOTTYPES = {
     "6": "Histogram of Volumetric Soil Moisture",
     "7": "Daily Soil Water + Change",
     "8": "Battery Voltage",
+    "9": "Daily Rainfall, 4 inch Soil Temp, and RH",
 }
 
 
@@ -190,6 +193,74 @@ def make_daily_rad_plot(ctx):
     )
     ax.set_ylim(0, 38)
     ax.legend(loc=1, ncol=2, fontsize=10)
+    return fig, df
+
+
+def make_daily_rainfall_soil_rh(ctx):
+    """Give them what they want."""
+    df = read_sql(
+        "SELECT valid, rain_mm_tot_qc, tsoil_c_avg_qc, rh_avg_qc "
+        "from sm_daily where station = %s and valid >= %s and valid <= %s "
+        "ORDER by valid ASC",
+        ctx["pgconn"],
+        params=(
+            ctx["station"],
+            ctx["sts"].strftime("%Y-%m-%d"),
+            ctx["ets"].strftime("%Y-%m-%d"),
+        ),
+        index_col="valid",
+    )
+    if df.empty:
+        raise NoDataFound("No Data Found for Query")
+
+    title = "ISUSM Station: %s Timeseries" % (
+        ctx["_nt"].sts[ctx["station"]]["name"],
+    )
+    subtitle = "Daily Precipitation, 4 Inch Soil Temperature, and Avg RH"
+
+    fig = figure(title=title, subtitle=subtitle)
+
+    def common(ax):
+        """do common things."""
+        ax.grid(True)
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d %b\n%Y"))
+        interval = int(len(df.index) / 7.0 + 1)
+        ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
+
+    ax = fig.add_axes([0.1, 0.7, 0.8, 0.2])
+    ax.bar(
+        df.index.values,
+        mm2inch(df["rain_mm_tot_qc"].values),
+        color="blue",
+        align="center",
+    )
+    ax.set_ylim(bottom=0)
+    ax.set_ylabel("Precipitation [inch]")
+    common(ax)
+
+    ax = fig.add_axes([0.1, 0.4, 0.8, 0.2])
+    vals = c2f(df["tsoil_c_avg_qc"].values)
+    ax.bar(
+        df.index.values,
+        vals,
+        color="brown",
+        align="center",
+    )
+    ax.set_ylim(np.min(vals) - 5, np.max(vals) + 5)
+    ax.set_ylabel(r"4 Inch Soil Temp [$^\circ$F]")
+    common(ax)
+
+    ax = fig.add_axes([0.1, 0.1, 0.8, 0.2])
+    ax.bar(
+        df.index.values,
+        df["rh_avg_qc"].values,
+        color="blue",
+        align="center",
+    )
+    ax.set_ylim(0, 100)
+    ax.set_ylabel("Average\nRelative Humidity [%]")
+    common(ax)
+
     return fig, df
 
 
@@ -589,11 +660,11 @@ def plot1(ctx):
     # ------------------------------------------------------
 
     ax2 = ax[2].twinx()
-    l3, = ax2.plot(valid, slrkw * 1000.0, color="g", zorder=1, lw=2)
+    (l3,) = ax2.plot(valid, slrkw * 1000.0, color="g", zorder=1, lw=2)
     ax2.set_ylabel("Solar Radiation [W/m^2]", color="g")
 
-    l1, = ax[2].plot(valid, c2f(tair), linewidth=2, color="blue", zorder=2)
-    l2, = ax[2].plot(valid, c2f(tsoil), linewidth=2, color="brown", zorder=2)
+    (l1,) = ax[2].plot(valid, c2f(tair), linewidth=2, color="blue", zorder=2)
+    (l2,) = ax[2].plot(valid, c2f(tsoil), linewidth=2, color="brown", zorder=2)
     ax[2].grid(True)
     ax[2].legend(
         [l1, l2, l3],
@@ -657,6 +728,8 @@ def plotter(fdict):
         fig, df = make_daily_water_change_plot(ctx)
     elif ctx["opt"] == "8":
         fig, df = make_battery_plot(ctx)
+    elif ctx["opt"] == "9":
+        fig, df = make_daily_rainfall_soil_rh(ctx)
 
     # removal of timestamps, sigh
     df = df.reset_index()
