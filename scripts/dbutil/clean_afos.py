@@ -29,14 +29,6 @@ def main():
     acursor.close()
     pgconn.commit()
 
-    # Clean Postgis
-    pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor()
-
-    cursor.execute("DELETE from text_products where geom is null")
-    cursor.close()
-    pgconn.commit()
-
 
 if __name__ == "__main__":
     main()

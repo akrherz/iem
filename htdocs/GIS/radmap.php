@@ -182,7 +182,7 @@ if (isset($_REQUEST['pid']))
   $rs = pg_prepare($postgis, "SELECTPID", 
   	"SELECT ST_xmax(ST_extent(geom)) as x1, ST_xmin(ST_extent(geom)) as x0, "
     ."ST_ymin(ST_extent(geom)) as y0, ST_ymax(ST_extent(geom)) as y1 "
-    ."from text_products WHERE product_id = $1");
+    ."from sps WHERE product_id = $1");
   $result = pg_execute($postgis, "SELECTPID", Array($pid));
   $row = pg_fetch_array($result, 0);
   $lpad = 0.5;
@@ -436,8 +436,8 @@ if (isset($_REQEST["pid"]))
   $wc->setConnectionType( MS_POSTGIS );
   $wc->set("connection", get_dbconn_str("postgis"));
   $wc->set("status", MS_ON );
-  $sql = sprintf("geom from (select geom, id from text_products "
-  		."WHERE product_id = '$pid') as foo using unique id using SRID=4326");
+  $sql = sprintf("geom from (select geom, product_id from sps "
+  		."WHERE product_id = '$pid') as foo using unique product_id using SRID=4326");
   $wc->set("data", $sql);
   $wc->set("type", MS_LAYER_LINE);
   $wc->setProjection("init=epsg:4326");

@@ -22,9 +22,8 @@ def run():
         SELECT ST_asGeoJson(geom) as geojson, product_id,
         issue at time zone 'UTC' as utc_issue,
         expire at time zone 'UTC' as utc_expire
-        from text_products WHERE issue < now() and expire > now()
-        and not ST_IsEmpty(geom) and geom is not null and
-        substr(product_id,26, 3) = 'SPS'
+        from sps WHERE issue < now() and expire > now()
+        and not ST_IsEmpty(geom) and geom is not null
     """
     )
 
