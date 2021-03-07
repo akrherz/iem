@@ -53,7 +53,7 @@ def get_events(ctx):
             'YYYY-MM-DD hh24:MI') as expired,
     eventid,
   tml_direction, tml_sknt, hvtec_nwsli, windtag, hailtag, tornadotag,
-  tornadodamagetag from sbw
+  damagetag from sbw
   where status = 'NEW' and
   ST_Contains(geom, ST_SetSRID(ST_GeomFromEWKT('POINT(%s %s)'),4326)) and
   issue > '2005-10-01' {valid_limiter} ORDER by issue ASC
@@ -95,7 +95,13 @@ def to_json(data, df):
                 "issue_windtag": row["windtag"],
                 "issue_hailtag": row["hailtag"],
                 "issue_tornadotag": row["tornadotag"],
-                "issue_tornadodamagetag": row["tornadodamagetag"],
+                "issue_damagetag": row["damagetag"],
+                "issue_tornadodamagetag": (
+                    row["damagetag"] if row["phenomena"] == "TO" else None
+                ),
+                "issue_thunderstormdamagetag": (
+                    row["damagetag"] if row["phenomena"] == "SV" else None
+                ),
             }
         )
     return data

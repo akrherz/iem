@@ -111,7 +111,7 @@ function do_row($row){
  			."<td>%02.0f</td><td>%4.2f</td><td>%s</td><td>%s</td><td>%02.0f</td></tr>", do_col1($row), do_col2($row),
  			do_col3($row),
  			$row["locations"], $row["windtag"], $row["hailtag"],
- 			$row["tornadotag"], $row["tornadodamagetag"], $row["tml_sknt"]);
+ 			$row["tornadotag"], $row["damagetag"], $row["tml_sknt"]);
 }
 
 function do_row_ffw($row){
@@ -129,7 +129,7 @@ function do_row_ffw($row){
  <table id='svr' class="table table-condensed table-striped table-bordered">
  <thead><tr><th>Eventid</th><th>Start (UTC)</th><th>End</th>
  <th>Counties/Parishes</th>
- <th>Wind Tag</th><th>Hail Tag</th><th>Tornado Tag</th><th>Tornado Damage Tag</th>
+ <th>Wind Tag</th><th>Hail Tag</th><th>Tornado Tag</th><th>Damage Tag</th>
  <th>Storm Speed (kts)</th></tr></thead>
  <tbody>
 EOF;

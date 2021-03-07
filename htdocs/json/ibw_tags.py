@@ -25,7 +25,7 @@ def run(wfo, year):
      expire at time zone 'UTC' as utc_expire,
      polygon_begin at time zone 'UTC' as utc_polygon_begin,
      polygon_end at time zone 'UTC' as utc_polygon_end,
-     status, windtag, hailtag, tornadotag, tml_sknt, tornadodamagetag, wfo,
+     status, windtag, hailtag, tornadotag, tml_sknt, damagetag, wfo,
      floodtag_flashflood, floodtag_damage, floodtag_heavyrain,
      floodtag_dam, floodtag_leeve
      from sbw_"""
@@ -47,7 +47,7 @@ def run(wfo, year):
 
  SELECT c.eventid, c.locations, s.utc_issue, s.utc_expire,
  s.utc_polygon_begin, s.utc_polygon_end, s.status, s.windtag, s.hailtag,
- s.tornadotag, s.tml_sknt, s.tornadodamagetag, s.wfo, s.phenomena,
+ s.tornadotag, s.tml_sknt, s.damagetag, s.wfo, s.phenomena,
  s.floodtag_flashflood, s.floodtag_damage, s.floodtag_heavyrain,
  s.floodtag_dam, s.floodtag_leeve
  from countybased c, stormbased s WHERE c.eventid = s.eventid and
@@ -84,7 +84,9 @@ def run(wfo, year):
             hailtag=row[8],
             tornadotag=row[9],
             tml_sknt=row[10],
-            tornadodamagetag=row[11],
+            damagetag=row[11],
+            tornadodamagetag=row[11] if row[13] == "TO" else None,
+            thunderstormdamagetag=row[11] if row[13] == "SV" else None,
             href=href,
             wfo=row[12],
             phenomena=row[13],

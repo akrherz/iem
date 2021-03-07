@@ -88,7 +88,7 @@ function updateTable(){
                 table1.row.add(
                     [uri, row.ph_name, row.sig_name, row.issue,
                     row.expire, row.issue_hailtag, row.issue_windtag,
-                    row.issue_tornadotag, row.issue_tornadodamagetag]);
+                    row.issue_tornadotag, row.issue_damagetag]);
             });
             table1.draw();
         }

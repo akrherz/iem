@@ -65,7 +65,7 @@ grid will update and provide a listing of storm based warnings found.
     <thead>
     <tr><th>Event</th><th>Phenomena</th><th>Significance</th><th>Issued</th>
     <th>Expired</th><th>Issue Hail Tag</th><th>Issue Wind Tag</th>
-    <th>Issue Tornado Tag</th><th>Issue Tornado Damage Tag</th></tr></thead>
+    <th>Issue Tornado Tag</th><th>Issue Damage Tag</th></tr></thead>
     </table>
     </div>
 </div>
