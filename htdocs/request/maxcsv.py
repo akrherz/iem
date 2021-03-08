@@ -4,6 +4,7 @@ first four columns need to be
 ID,Station,Latitude,Longitude
 """
 import datetime
+import re
 import sys
 
 try:
@@ -12,6 +13,7 @@ except ImportError:
     from backports.zoneinfo import ZoneInfo
 
 # third party
+import requests
 import ephem
 import pytz
 import pandas as pd
@@ -518,6 +520,34 @@ def do_ahps(nwsli):
     return res
 
 
+def do_uvi():
+    """UVI index."""
+    PATTERN = re.compile(
+        r"(?P<c1>[A-Z\s]+)\s+(?P<s1>[A-Z][A-Z])\s+(?P<u1>\d+)\s+"
+        r"(?P<c2>[A-Z\s]+)\s+(?P<s2>[A-Z][A-Z])\s+(?P<u2>\d+)",
+    )
+    URL = (
+        "https://www.cpc.ncep.noaa.gov/"
+        "products/stratosphere/uv_index/bulletin.txt"
+    )
+    req = requests.get(URL, timeout=20)
+    rows = []
+    for line in req.content.decode("ascii").split("\n"):
+        m = PATTERN.match(line)
+        if not m:
+            continue
+        data = m.groupdict()
+        for i in ["1", "2"]:
+            rows.append(
+                {
+                    "City": data[f"c{i}"].strip(),
+                    "State": data[f"s{i}"].strip(),
+                    "UVI": data[f"u{i}"].strip(),
+                }
+            )
+    return pd.DataFrame(rows)
+
+
 def router(appname):
     """Process and return dataframe"""
     # elif appname == 'iadotplows':
@@ -542,6 +572,8 @@ def router(appname):
         df = do_iowa_azos(datetime.date.today(), True)
     elif appname == "kcrgcitycam":
         df = do_webcams("KCRG")
+    elif appname == "uvi":
+        df = do_uvi()
     elif appname.startswith("moon"):
         tokens = appname.replace(".txt", "").split("_")
         df = do_moon(float(tokens[1]), float(tokens[2]))
