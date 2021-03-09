@@ -3,7 +3,7 @@ import datetime
 from collections import OrderedDict
 
 import psycopg2.extras
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {
@@ -40,9 +40,11 @@ def get_description():
     desc[
         "description"
     ] = """
-    This plot displays hourly temperature distributions
-    for a given time period and temperature threshold of your choice.  The
-    temperature threshold is for one or more exceedences for the day.
+    This plot displays hourly temperature distributions on dates having at
+    least one hourly observation meeting the given requirement.  The
+    distributions are presented as "violins" with the width of the violin
+    providing some insight into the population density at the given
+    temperature.
     """
     desc["arguments"] = [
         dict(
@@ -133,25 +135,27 @@ def plotter(fdict):
     for row in cursor:
         data[row[0].hour].append(row[1])
 
-    fig, ax = plt.subplots(1, 1)
-    ax.boxplot(data)
-    ax.grid(True)
-    ax.set_title(
-        "%s [%s] Hourly Temps on\nDays (%s) with %s %.0f"
-        % (
-            ctx["_nt"].sts[station]["name"],
-            station,
-            month.capitalize(),
-            PDICT[opt],
-            threshold,
-        )
+    title = "%s [%s] Hourly Temp Distributions over (%s)" % (
+        ctx["_nt"].sts[station]["name"],
+        station,
+        month.capitalize(),
     )
+    subtitle = "On Dates with at least one temperature ob %s %.0f" % (
+        PDICT[opt],
+        threshold,
+    )
+    fig, ax = figure_axes(title=title, subtitle=subtitle)
+    v1 = ax.violinplot(data, showextrema=True, showmeans=True, widths=0.7)
+    for lbl in ["cmins", "cmeans", "cmaxes"]:
+        v1[lbl].set_color("r")
+
+    ax.grid(True)
     ax.set_ylabel(r"Temperature $^\circ$F")
     ax.set_xlabel(
         "Local Hour for Timezone: %s" % (ctx["_nt"].sts[station]["tzname"],)
     )
-    ax.set_xticks(range(1, 25, 4))
-    ax.set_xticklabels(["Mid", "4 AM", "8 AM", "Noon", "4 PM", "8 PM"])
+    ax.set_xticks(range(1, 25, 3))
+    ax.set_xticklabels("Mid,3 AM,6 AM,9 AM,Noon,3 PM,6 PM,9 PM".split(","))
     return fig
 
 
