@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 import numpy as np
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -86,16 +86,7 @@ def do_labels(
     ax, extrenum, varname, direction, threshold, station, ctx, season
 ):
     """Helper."""
-    ax.set_title(
-        ("%s [%s] %s Date and Days\n" r"%s %s$^\circ$F")
-        % (
-            ctx["_nt"].sts[station]["name"],
-            station,
-            extrenum.capitalize(),
-            PDICT["%s_%s_%s" % (extrenum, varname, direction)],
-            threshold,
-        )
-    )
+
     ax.set_xlabel(
         ("Date of %s Occurrence%s")
         % (
@@ -170,9 +161,23 @@ def plotter(fdict):
     df2 = df[df["count"] > 0]
     if df2.empty:
         raise NoDataFound("No data found.")
-
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
-    ax.scatter(df2[col], df2["count"])
+    title = "%s [%s] %s Date and Days" % (
+        ctx["_nt"].sts[station]["name"],
+        station,
+        extrenum.capitalize(),
+    )
+    subtitle = r"%s %s$^\circ$F" % (
+        PDICT["%s_%s_%s" % (extrenum, varname, direction)],
+        threshold,
+    )
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle)
+    # The present year value may be so low that it destorts the plot
+    lastval = df2.iloc[-1]["count"]
+    minval = df2[df2["count"] > lastval]["count"].min()
+    pltdf = df2
+    if lastval < 10 and (minval - lastval) > 30:
+        pltdf = df2[df2["count"] > lastval]
+    ax.scatter(pltdf[col], pltdf["count"])
     ax.grid(True)
     do_labels(
         ax, extrenum, varname, direction, threshold, station, ctx, season
@@ -247,18 +252,35 @@ def plotter(fdict):
         )
     if year in df2.index:
         df3 = df2.loc[year]
-        ax.scatter(df3[col], df3["count"], zorder=5, color="r")
-        ax.text(
-            df3[col], df3["count"] + 1, "%s" % (year,), zorder=5, color="r"
-        )
-        ax.axhline(df3["count"])
+        if df3["count"] >= minval:
+            ax.scatter(df3[col], df3["count"], zorder=5, color="r")
+            ax.text(
+                df3[col], df3["count"] + 1, "%s" % (year,), zorder=5, color="r"
+            )
+            ax.axhline(df3["count"])
+        else:
+            fig.text(
+                0.04,
+                0.05,
+                f"{year} value of {df3['count']} day(s) not shown",
+            )
         ax.axvline(df3[col])
+        ax.annotate(
+            str(year),
+            (df3[col], 0.99),
+            xycoords=("data", "axes fraction"),
+            color="b",
+            rotation=90,
+            va="top",
+        )
     return fig, df
 
 
 if __name__ == "__main__":
     plotter(
         dict(
-            which="first_high_below", threshold=32, year=2016, season="winter"
+            which="first_high_above",
+            threshold=70,
+            year=2021,
         )
     )
