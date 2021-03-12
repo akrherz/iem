@@ -62,7 +62,6 @@ def plotter(fdict):
     months2 = [x for x in monthsall if x < 7]
     months.extend(months2)
 
-    (fig, ax) = plt.subplots(2, 1)
     fig = plt.figure()
     ax = [
         fig.add_axes([0.12, 0.56, 0.83, 0.32]),

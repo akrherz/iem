@@ -6,6 +6,8 @@ var table1;
 var table2;
 var table2IsByPoint = true;
 var hashlinkUGC;
+var edate;
+var sdate;
 var BACKEND_EVENTS_BYPOINT = '/json/vtec_events_bypoint.py';
 var BACKEND_EVENTS_BYUGC = '/json/vtec_events_byugc.py';
 var BACKEND_SBW_BYPOINT = '/json/sbw_by_point.py';
@@ -226,7 +228,7 @@ function buildUI(){
             success: function(data){
                 ugcSelect.empty();
                 $.map(data.ugcs, function(obj){
-                    extra = (obj.ugc.substr(2, 1) == "Z") ? " (Zone)": "";
+                    var extra = (obj.ugc.substr(2, 1) == "Z") ? " (Zone)": "";
                     ugcSelect.append(new Option("[" + obj.ugc + "] "+ obj.name + extra, obj.ugc, false, false));
                 });
                 ugcSelect.val('').trigger("change");

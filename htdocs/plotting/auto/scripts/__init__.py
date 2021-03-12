@@ -590,7 +590,7 @@ mopts = [
     },
     {"id": "16", "label": "Wind Rose when specified criterion is meet"},
 ]
-uopts = [
+nsopts = [
     {"id": "156", "label": ("Crop Condition by Year for Six States")},
     {"id": "127", "label": ("Crop Progress by Year")},
     {"id": "197", "label": ("Crop Progress State Average Map")},
@@ -711,7 +711,7 @@ data = {
         {"label": "Yearly", "options": yearly_opts},
         {"label": "Hydrology / Drought Monitor Plots", "options": hopts},
         {"label": "METAR ASOS Special Plots", "options": mopts},
-        {"label": "NASS Quickstats (USDA Crop Statistics)", "options": uopts},
+        {"label": "NASS Quickstats (USDA Crop Statistics)", "options": nsopts},
         {"label": "NWS Warning Plots", "options": nopts},
         {"label": "Tall Towers Plots", "options": topts},
         {"label": "Upper Air / RAOB Sounding Plots", "options": uopts},
