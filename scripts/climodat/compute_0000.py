@@ -24,6 +24,9 @@ def zero(val):
 
 def update_database(stid, valid, row):
     """Update the database with these newly computed values!"""
+    if row["precip"] is None:
+        LOG.debug("Skipping %s as has missing data %s", stid, row)
+        return
     table = "alldata_%s" % (stid[:2],)
 
     def do_update(_row):

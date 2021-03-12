@@ -4,7 +4,7 @@
 import sys
 import datetime
 
-import psycopg2.extras
+from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
 from pyiem.util import get_dbconn
@@ -17,22 +17,24 @@ def runYear(year):
     nt.sts["IA0200"]["lon"] = -93.4
     nt.sts["IA5992"]["lat"] = 41.65
     pgconn = get_dbconn("coop", user="nobody")
-    ccursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    sql = """SELECT station, avg(high) as avg_high, avg(low) as avg_low,
-           avg( (high+low)/2 ) as avg_tmp, max(day)
-           from alldata_ia WHERE year = %s and station != 'IA0000' and
-           high is not Null and low is not Null and substr(station,3,1) != 'C'
-           GROUP by station""" % (
-        year,
+    df = read_sql(
+        """
+        SELECT station, avg(high) as avg_high, avg(low) as avg_low,
+        avg( (high+low)/2 ) as avg_tmp, max(day)
+        from alldata_ia WHERE year = %s and station != 'IA0000' and
+        high is not Null and low is not Null and substr(station,3,1) != 'C'
+        GROUP by station
+        """,
+        pgconn,
+        params=(year,),
+        index_col="station",
     )
-    ccursor.execute(sql)
     # Plot Average Highs
     lats = []
     lons = []
     vals = []
     labels = []
-    for row in ccursor:
-        sid = row["station"].upper()
+    for sid, row in df.iterrows():
         if sid not in nt.sts:
             continue
         labels.append(sid[2:])
@@ -68,9 +70,7 @@ def runYear(year):
     lons = []
     vals = []
     labels = []
-    ccursor.execute(sql)
-    for row in ccursor:
-        sid = row["station"].upper()
+    for sid, row in df.iterrows():
         if sid not in nt.sts:
             continue
         labels.append(sid[2:])
@@ -105,9 +105,7 @@ def runYear(year):
     lons = []
     vals = []
     labels = []
-    ccursor.execute(sql)
-    for row in ccursor:
-        sid = row["station"].upper()
+    for sid, row in df.iterrows():
         if sid not in nt.sts:
             continue
         labels.append(sid[2:])
