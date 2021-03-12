@@ -10,7 +10,6 @@ import numpy as np
 from scipy.interpolate import NearestNDInterpolator
 from pyiem.iemre import daily_offset, hourly_offset
 from pyiem import prism as prismutil
-from pyiem.plot import get_cmap
 from pyiem.util import utc, ncopen, find_ij, logger
 
 DEBUGLON = -93.89

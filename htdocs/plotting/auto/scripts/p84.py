@@ -113,7 +113,6 @@ def mm2inch(val):
 
 def compute_title(src, sdate, edate):
     """Figure out how to label this fun."""
-    title = "Fixme"
     if src == "mrms":
         # This is generally closer to 'daily
         if sdate == edate:

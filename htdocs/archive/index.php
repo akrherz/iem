@@ -128,14 +128,16 @@ on this archive and how it is made available.</p>
 		
 <h3>Raw Data</h3>
 <ul>
- <li>Bufkit archives
+ <li>BUFKIT archives
   <br /><a href="/archive/data/">Iowa Only</a> The general IEM data archive
   contains a sub-directory called 'bufkit'.
    This directory contains model point soundings for locations near Iowa. The
    archive started 25 January 2006 - 27 March 2015.
-  <br /><a href="https://mtarchive.geol.iastate.edu/">Mtarchive Bufkit Archive</a>
-  This archive contains data for many more sites and models, including SREF.
-   </li>
+  <br /><a href="https://mtarchive.geol.iastate.edu/">Mtarchive BUFKIT Archive</a>
+  This archive contains data for many more sites and models.
+  <br /><a href="/api/1/docs#/default/service_nws_bufkit__fmt__get">IEM API BUFKIT Webservice</a>
+  allows for nearest in space/time searches, atomic data download and more.
+  </li>
 
  <li><a href="https://mtarchive.geol.iastate.edu/">GEMPAK data archive</a>
   <br />Archive of gempak products taken from the UNIDATA NOAAPORT feed.  This
