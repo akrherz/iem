@@ -52,13 +52,10 @@ def plotter(fdict):
 
     # Get total issued
     df = read_sql(
-        """
+        f"""
         Select extract(year from issued)::int as year,
         count(*) as national_count from watches
-        where """
-        + sqllimit
-        + """
-        num < 3000 GROUP by year ORDER by year ASC
+        where {sqllimit} num < 3000 GROUP by year ORDER by year ASC
     """,
         pgconn,
         index_col="year",
@@ -68,14 +65,10 @@ def plotter(fdict):
 
     # Get total issued
     odf = read_sql(
-        """
+        f"""
         select extract(year from issued)::int as year, count(*) as state_count
         from watches w, states s where w.geom && s.the_geom and
-        ST_Intersects(w.geom, s.the_geom) and
-        """
-        + sqllimit
-        + """
-        s.state_abbr = %s
+        ST_Intersects(w.geom, s.the_geom) and {sqllimit} s.state_abbr = %s
         GROUP by year ORDER by year ASC
     """,
         pgconn,

@@ -105,7 +105,7 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2],)
     df = read_sql(
-        """
+        f"""
     WITH agg as (
         SELECT o.day, o.sday,
         avg(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as avgt,
@@ -117,9 +117,7 @@ def plotter(fdict):
         avg(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as avgt3,
         sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as sump3,
         count(*) OVER (ORDER by day ASC ROWS %s PRECEDING) as cnt3
-        from """
-        + table
-        + """ o WHERE station = %s),
+        from {table} o WHERE station = %s),
     agg2 as (
         SELECT sday,
         avg(avgt) as avg_avgt, stddev(avgt) as std_avgt,

@@ -143,13 +143,8 @@ def get_context(fdict):
     table = "alldata_%s" % (station[:2],)
     if date == "exact":
         ctx["df"] = read_sql(
-            """
-            SELECT year, high, day, precip from """
-            + table
-            + """
-            WHERE station = %s
-            and sday = %s ORDER by year ASC
-        """,
+            f"SELECT year, high, day, precip from {table} WHERE station = %s "
+            "and sday = %s ORDER by year ASC",
             pgconn,
             params=(station, thedate.strftime("%m%d")),
             index_col="year",
@@ -168,13 +163,8 @@ def get_context(fdict):
             days = labor_days()
 
         ctx["df"] = read_sql(
-            """
-        SELECT year, high, day, precip from """
-            + table
-            + """
-        WHERE station = %s
-        and day in %s ORDER by year ASC
-        """,
+            f"SELECT year, high, day, precip from {table} WHERE station = %s "
+            "and day in %s ORDER by year ASC",
             pgconn,
             params=(station, tuple(days)),
             index_col="year",

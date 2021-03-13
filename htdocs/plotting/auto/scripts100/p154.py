@@ -6,7 +6,7 @@ from pandas.io.sql import read_sql
 from scipy import stats
 from matplotlib.font_manager import FontProperties
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict([("avg_tmpf", "Average Temperature")])
@@ -139,8 +139,16 @@ def plotter(fdict):
         raise NoDataFound("No data was found.")
     minfreq = len(months) * 30 * 0.8
     df2 = df[df["cnt"] > minfreq]
-
-    (fig, ax) = plt.subplots(1, 1)
+    lts = datetime.datetime(2000, 1, 1, int(hour), 0)
+    title = "%s [%s] %s Local %s-%s" % (
+        ctx["_nt"].sts[station]["name"],
+        station,
+        lts.strftime("%-I %p"),
+        df2.index.min(),
+        df2.index.max(),
+    )
+    subtitle = "%s [%s]" % (PDICT[varname], MDICT[month])
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle)
     ax.bar(df2.index.values, df2[varname], align="center", ec="b", fc="b")
     m = df2[varname].mean()
     ax.axhline(m, lw=2, zorder=5, color="k")
@@ -166,22 +174,6 @@ def plotter(fdict):
 
     ax.set_ylim([df2[varname].min() - 5, df2[varname].max() + 5])
     ax.grid(True)
-    lts = datetime.datetime(2000, 1, 1, int(hour), 0)
-    fig.text(
-        0.5,
-        0.91,
-        ("%s [%s] %s Local %s-%s\n" "%s [%s]")
-        % (
-            ctx["_nt"].sts[station]["name"],
-            station,
-            lts.strftime("%-I %p"),
-            df2.index.min(),
-            df2.index.max(),
-            PDICT[varname],
-            MDICT[month],
-        ),
-        ha="center",
-    )
 
     return fig, df
 
