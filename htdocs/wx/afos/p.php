@@ -82,7 +82,7 @@ else {
 	$ts = gmmktime( substr($e,8,2), substr($e,10,2), 0,
 			substr($e,4,2), substr($e,6,2), substr($e,0,4) );
 	$rs = pg_prepare($conn, "_LSELECT", "SELECT data,
-			entered at time zone 'UTC' as mytime, source from products
+			entered at time zone 'UTC' as mytime, source, wmo from products
 			WHERE pil = $1 and entered = $2");
 	$rs = pg_execute($conn, "_LSELECT", Array($pil,
 			date("Y-m-d H:i", $ts)));
@@ -94,14 +94,24 @@ $content = "<h3>National Weather Service Raw Text Product</h3>";
 if (is_null($rs) || pg_numrows($rs) < 1){
 	$content .= "<div class=\"alert alert-warning\">Sorry, could not find product.</div>";
 }
+$img = "";
 for ($i=0; $row = pg_fetch_assoc($rs); $i++)
 {
-	if ($i == 0){ 
+	if ($i == 0){
 		$basets = strtotime($row["mytime"]); 
 		$newe = date("YmdHi", $basets);
+        $product_id = sprintf(
+            "%s-%s-%s-%s", $newe, $row["source"], $row["wmo"], $pil);
 		$t->twitter_description = sprintf("%s issued by NWS %s at %s UTC",
 				substr($pil,0,3), substr($pil,3,3), date("d M Y H:i", $basets));
-		$t->twitter_image = "/wx/afos/${newe}_${pil}.png";
+		if (substr($pil, 0, 3) == "SPS"){
+            $t->twitter_image = "/plotting/auto/plot/217/pid:${product_id}.png";
+            $img = <<<EOM
+<p><img src="/plotting/auto/plot/217/pid:${product_id}.png" class="img img-responsive"></p>
+EOM;
+        } else {
+            $t->twitter_image = "/wx/afos/${newe}_${pil}.png";
+        }
 		$t->twitter_card = "summary_large_image";
 		$dstamp = date("Y-m-d H:i", $basets);
 		$listlink = sprintf("list.phtml?source=%s&amp;day=%s&amp;month=%s&amp;year=%s", 
@@ -148,6 +158,8 @@ EOF;
 		$content .= "<pre>". htmlentities($d) ."</pre>\n";
 	}
 }
+
+$content .= $img;
 
 $t->content = $content;
 $t->render('single.phtml');
