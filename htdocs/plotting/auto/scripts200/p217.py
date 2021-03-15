@@ -17,7 +17,7 @@ TFORMAT = "%b %-d %Y %-I:%M %p %Z"
 def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
-    desc["cache"] = 300
+    desc["cache"] = 3600
     desc["data"] = True
     desc[
         "description"
@@ -53,32 +53,53 @@ def plotter(fdict):
     )
     if df.empty:
         raise NoDataFound("SPS Event was not found, sorry.")
+    row = df.iloc[0]
     wfo = df["wfo"].values[0]
     tz = pytz.timezone(nt.sts[wfo]["tzname"])
     expire = df["expire"].dt.tz_convert(tz)[0]
 
-    bounds = df["geom"].total_bounds
+    if row["geom"].is_empty:
+        mp = MapPlot(
+            title=(
+                f"{wfo} Special Weather Statement (SPS) "
+                f"till {expire.strftime(TFORMAT)}"
+            ),
+            sector="cwa",
+            cwa=wfo,
+            twitter=True,
+        )
 
-    mp = MapPlot(
-        title=(
-            f"{wfo} Special Weather Statement (SPS) "
-            f"till {expire.strftime(TFORMAT)}"
-        ),
-        sector="custom",
-        west=bounds[0] - 0.02,
-        south=bounds[1] - 0.3,
-        east=bounds[2] + (bounds[2] - bounds[0]) + 0.02,
-        north=bounds[3] + 0.3,
-        nocaption=True,
-        twitter=True,
-    )
+    else:
+        bounds = df["geom"].total_bounds
+
+        mp = MapPlot(
+            title=(
+                f"{wfo} Special Weather Statement (SPS) "
+                f"till {expire.strftime(TFORMAT)}"
+            ),
+            sector="custom",
+            west=bounds[0] - 0.02,
+            south=bounds[1] - 0.3,
+            east=bounds[2] + (bounds[2] - bounds[0]) + 0.02,
+            north=bounds[3] + 0.3,
+            twitter=True,
+        )
     # Hackish
     mp.sector = "cwa"
     mp.cwa = wfo
 
     # Plot text on the page, hehe
-    report = df["product"].values[0].replace("\r", "").replace("\003", "")
-    report = report[report.find("...") : report.find("LAT...LON")]
+    report = (
+        row["product"]
+        .replace("\r", "")
+        .replace("\003", "")
+        .replace("\001", "")
+        .replace("$$", "  ")
+    )
+    pos = report.find("...")
+    if pos == -1:
+        pos = 0
+    report = report[pos : report.find("LAT...LON")]
     mp.fig.text(
         0.5,
         0.85,
@@ -122,7 +143,7 @@ def plotter(fdict):
     )
     radtime = mp.overlay_nexrad(df["issue"][0].to_pydatetime())
     mp.fig.text(
-        0.5,
+        0.65,
         0.02,
         "RADAR Valid: %s" % (radtime.astimezone(tz).strftime(TFORMAT),),
         ha="center",
@@ -133,4 +154,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({})
+    plotter({"pid": "202103150006-KOKX-WWUS81-SPSOKX"})
