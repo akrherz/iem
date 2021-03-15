@@ -61,7 +61,7 @@ def get_data(ts, fmt):
     low, low_normal, low_record, low_record_years, low_time,
     precip, precip_normal, precip_month, precip_jan1, precip_jan1_normal,
     precip_jul1, precip_dec1, precip_dec1_normal, precip_record,
-    precip_record_years,
+    precip_record_years, snow_normal,
     precip_month_normal, snow, snow_month, snow_jun1, snow_jul1,
     snow_dec1, snow_record, snow_jul1_normal,
     snow_dec1_normal, snow_month_normal, snow_record_years,
@@ -129,6 +129,7 @@ def get_data(ts, fmt):
                     "precip_record": f2_sanitize(row["precip_record"]),
                     "precip_record_years": row["precip_record_years"],
                     "snow": f1_sanitize(row["snow"]),
+                    "snow_normal": f1_sanitize(row["snow_normal"]),
                     "snow_month": f1_sanitize(row["snow_month"]),
                     "snow_jun1": f1_sanitize(row["snow_jun1"]),
                     "snow_jul1": f1_sanitize(row["snow_jul1"]),
@@ -176,8 +177,8 @@ def get_data(ts, fmt):
         "low_time,precip,precip_normal,precip_month,precip_jan1,"
         "precip_jan1_normal,precip_jul1,precip_dec1,precip_dec1_normal,"
         "precip_record,precip_record_years,precip_jan1_depart,"
-        "snow,snow_month,snow_jun1,snow_jul1,snow_dec1,snow_record,"
-        "snow_record_years,snow_jul1_normal,snow_dec1_normal,"
+        "snow,snow_normal,snow_month,snow_jun1,snow_jul1,snow_dec1,"
+        "snow_record,snow_record_years,snow_jul1_normal,snow_dec1_normal,"
         "snow_month_normal,snow_jul1_depart,average_sky_cover"
     )
     res = cols + "\n"
