@@ -62,7 +62,9 @@ def gauge(ax, row, col):
     ax.set_xticks([0 if col == "high" else pi, pi / 2])
     maxval = row[f"{col}_record"]
     normal = row[f"{col}_normal"]
-    minval = normal - (row[f"{col}_record"] - normal)
+    if maxval is None:
+        maxval = normal + (10 if col == "high" else -10)
+    minval = normal - (maxval - normal)
     ratio = (row[col] - minval) / (maxval - minval)
     if col == "high":
         ratio = 1 - ratio
@@ -75,7 +77,7 @@ def gauge(ax, row, col):
     ax.set_xticklabels(
         [
             f"{label}\n"
-            rf"{maxval}$^\circ$F"
+            rf"{row[col + '_record']}$^\circ$F"
             f"\n{', '.join([str(s) for s in row[col + '_record_years']])}",
             rf"Avg: {normal}$^\circ$F",
         ]
@@ -200,7 +202,10 @@ def plotter(fdict):
         projection="polar",
         anchor="SW",
     )
-    gauge(ax, row, "high")
+    try:
+        gauge(ax, row, "high")
+    except Exception:
+        pass
 
     # Low Temp
     fig.text(0.05, 0.42, "Low Temperature", fontsize=24)
@@ -209,18 +214,28 @@ def plotter(fdict):
         projection="polar",
         anchor="SW",
     )
-    gauge(ax, row, "low")
+    try:
+        gauge(ax, row, "low")
+    except Exception:
+        pass
 
     fig.text(0.5, 0.85, "Precipitation", fontsize=24)
-    precip(fig, row, "precip")
+    if row["precip_normal"] is not None:
+        try:
+            precip(fig, row, "precip")
+        except Exception:
+            pass
 
     if row["snow_jul1_normal"] is not None:
         fig.text(0.5, 0.42, "Snowfall", fontsize=24)
-        precip(fig, row, "snow")
+        try:
+            precip(fig, row, "snow")
+        except Exception:
+            pass
 
     fig.text(0.3, 0.01, f"Based on text: {row['product']}")
     return fig, df
 
 
 if __name__ == "__main__":
-    plotter({})
+    plotter({"station": "KFFC", "date": "2014-10-03"})
