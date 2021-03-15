@@ -42,6 +42,7 @@ daily_opts = [
         "id": "82",
         "label": "Calendar of Daily Observations from Automated Stations",
     },
+    {"id": "218", "label": "Daily NWS CLImate Report Infographic"},
     {"id": "180", "label": "Daily Temperature/Precip/Snowfall Climatology"},
     {"id": "32", "label": "Daily Temperature Departures for One Year"},
     {"id": "21", "label": "Change in NCDC 81 Daily Climatology over X Days"},
