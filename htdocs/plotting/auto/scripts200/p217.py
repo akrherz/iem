@@ -31,6 +31,12 @@ def get_description():
             default="202012300005-KDVN-WWUS83-SPSDVN",
             label="IEM Generated 32-character Product Identifier:",
         ),
+        dict(
+            type="int",
+            default=0,
+            name="segnum",
+            label="Product Segment Number (starts at 0):",
+        ),
     ]
     return desc
 
@@ -40,12 +46,13 @@ def plotter(fdict):
     pgconn = get_dbconn("postgis")
     ctx = get_autoplot_context(fdict, get_description())
     pid = ctx["pid"][:32]
+    segnum = ctx["segnum"]
     nt = NetworkTable("WFO")
 
     df = read_postgis(
         "SELECT geom, ugcs, wfo, issue, expire, landspout, waterspout, "
-        f"max_hail_size, max_wind_gust, product from sps_{pid[:4]} "
-        "where product_id = %s LIMIT 1",
+        "max_hail_size, max_wind_gust, product, segmentnum "
+        f"from sps_{pid[:4]} where product_id = %s",
         pgconn,
         params=(pid,),
         index_col=None,
@@ -53,37 +60,39 @@ def plotter(fdict):
     )
     if df.empty:
         raise NoDataFound("SPS Event was not found, sorry.")
-    row = df.iloc[0]
-    wfo = df["wfo"].values[0]
+    df2 = df[df["segmentnum"] == segnum]
+    if df2.empty:
+        raise NoDataFound("SPS Event Segment was not found, sorry.")
+    row = df2.iloc[0]
+    wfo = row["wfo"]
     tz = pytz.timezone(nt.sts[wfo]["tzname"])
     expire = df["expire"].dt.tz_convert(tz)[0]
 
     if row["geom"].is_empty:
-        mp = MapPlot(
-            title=(
-                f"{wfo} Special Weather Statement (SPS) "
-                f"till {expire.strftime(TFORMAT)}"
-            ),
-            sector="cwa",
-            cwa=wfo,
-            twitter=True,
+        # Need to go looking for UGCs to compute the bounds
+        ugcdf = read_postgis(
+            "SELECT simple_geom, ugc from ugcs where wfo = %s and ugc in %s "
+            "and end_ts is null",
+            pgconn,
+            params=(wfo, tuple(row["ugcs"])),
+            geom_col="simple_geom",
         )
-
+        bounds = ugcdf["simple_geom"].total_bounds
     else:
-        bounds = df["geom"].total_bounds
+        bounds = row["geom"].bounds
 
-        mp = MapPlot(
-            title=(
-                f"{wfo} Special Weather Statement (SPS) "
-                f"till {expire.strftime(TFORMAT)}"
-            ),
-            sector="custom",
-            west=bounds[0] - 0.02,
-            south=bounds[1] - 0.3,
-            east=bounds[2] + (bounds[2] - bounds[0]) + 0.02,
-            north=bounds[3] + 0.3,
-            twitter=True,
-        )
+    mp = MapPlot(
+        title=(
+            f"{wfo} Special Weather Statement (SPS) "
+            f"till {expire.strftime(TFORMAT)}"
+        ),
+        sector="custom",
+        west=bounds[0] - 0.02,
+        south=bounds[1] - 0.3,
+        east=bounds[2] + (bounds[2] - bounds[0]) + 0.02,
+        north=bounds[3] + 0.3,
+        twitter=True,
+    )
     # Hackish
     mp.sector = "cwa"
     mp.cwa = wfo
@@ -91,6 +100,7 @@ def plotter(fdict):
     # Plot text on the page, hehe
     report = (
         row["product"]
+        .split("$$")[segnum]
         .replace("\r", "")
         .replace("\003", "")
         .replace("\001", "")
@@ -111,7 +121,7 @@ def plotter(fdict):
     # Tags
     msg = ""
     for col in "landspout waterspout max_hail_size max_wind_gust".split():
-        val = df[col].values[0]
+        val = row[col]
         if val is None:
             continue
         msg += f"{col}: {val}\n"
@@ -124,23 +134,26 @@ def plotter(fdict):
             bbox=dict(color="white"),
         )
 
-    ugcs = {k: 1 for k in df["ugcs"].values[0]}
-    cugcs = {k: "None" for k in df["ugcs"].values[0]}
-    mp.fill_ugcs(
-        ugcs,
-        color=cugcs,
-        nocbar=True,
-        plotmissing=False,
-    )
-    poly = df.iloc[0]["geom"]
-    mp.ax.add_geometries(
-        [poly],
-        ccrs.PlateCarree(),
-        facecolor="None",
-        edgecolor="k",
-        linewidth=4,
-        zorder=Z_OVERLAY2,
-    )
+    ugcs = {k: 1 for k in row["ugcs"]}
+    if not row["geom"].is_empty:
+        mp.ax.add_geometries(
+            [row["geom"]],
+            ccrs.PlateCarree(),
+            facecolor="None",
+            edgecolor="k",
+            linewidth=4,
+            zorder=Z_OVERLAY2,
+        )
+    else:
+        mp.fill_ugcs(
+            ugcs,
+            ec="r",
+            fc="None",
+            lw=2,
+            nocbar=True,
+            plotmissing=False,
+            zorder=Z_OVERLAY2 - 1,
+        )
     radtime = mp.overlay_nexrad(df["issue"][0].to_pydatetime())
     mp.fig.text(
         0.65,
@@ -154,4 +167,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"pid": "202103150006-KOKX-WWUS81-SPSOKX"})
+    plotter({"pid": "202103152025-KRIW-WWUS85-SPSRIW", "segnum": 0})

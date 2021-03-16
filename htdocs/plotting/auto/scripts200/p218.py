@@ -5,6 +5,7 @@ from math import pi
 
 # third party
 import numpy as np
+import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import figure, get_cmap
@@ -44,6 +45,11 @@ def get_description():
     return desc
 
 
+def miss(val):
+    """Pretty."""
+    return "Missing" if pd.isna(val) else val
+
+
 def gauge(ax, row, col):
     """Make the gauge plot."""
     cmap = get_cmap("RdBu")
@@ -59,11 +65,11 @@ def gauge(ax, row, col):
         shading="auto",
     )
     ax.set_xlim(0, pi)
-    ax.set_xticks([0 if col == "high" else pi, pi / 2])
+    ax.set_xticks([])
     maxval = row[f"{col}_record"]
     normal = row[f"{col}_normal"]
     if maxval is None:
-        maxval = normal + (10 if col == "high" else -10)
+        maxval = normal + (20 if col == "high" else -20)
     minval = normal - (maxval - normal)
     ratio = (row[col] - minval) / (maxval - minval)
     if col == "high":
@@ -73,14 +79,20 @@ def gauge(ax, row, col):
     elif ratio > 1:
         ratio = 1
     theta = ratio * pi
-    label = "    Record:" if col == "high" else "Record:    "
-    ax.set_xticklabels(
-        [
-            f"{label}\n"
-            rf"{row[col + '_record']}$^\circ$F"
-            f"\n{', '.join([str(s) for s in row[col + '_record_years']])}",
-            rf"Avg: {normal}$^\circ$F",
-        ]
+    ax.text(
+        0 if col == "high" else pi,
+        3.25,
+        f"Record:\n"
+        rf"{miss(row[col + '_record'])}$^\circ$F"
+        f"\n{', '.join([str(s) for s in row[col + '_record_years']])}",
+        va="center",
+        ha="left" if col == "high" else "right",
+    )
+    ax.text(
+        pi / 2,
+        3.25,
+        rf"Avg: {normal}$^\circ$F",
+        ha="center",
     )
     ax.set_rorigin(-4.5)
     ax.set_yticks([])
@@ -111,7 +123,7 @@ def precip(fig, row, col):
     for side in ["left", "top", "right"]:
         ax.spines[side].set_visible(False)
     jan1 = "jan1" if col == "precip" else "jul1"
-    c1 = row[f"{col}_record"]
+    c1 = row[f"{col}_record"] or 0
     c2 = max([row[f"{col}_month"], row[f"{col}_month_normal"], 0.01])
     c3 = max([row[f"{col}_{jan1}"], row[f"{col}_{jan1}_normal"], 0.01])
     ax.bar(
@@ -140,7 +152,7 @@ def precip(fig, row, col):
     ax.text(
         0.2,
         1,
-        f"Record: {row[col + '_record']}\"\n"
+        f"Record: {miss(row[col + '_record'])}\"\n"
         f"{', '.join([str(s) for s in row[col + '_record_years']])}",
         va="center",
         ha="left",
@@ -220,13 +232,12 @@ def plotter(fdict):
         pass
 
     fig.text(0.5, 0.85, "Precipitation", fontsize=24)
-    if row["precip_normal"] is not None:
-        try:
-            precip(fig, row, "precip")
-        except Exception:
-            pass
+    try:
+        precip(fig, row, "precip")
+    except Exception:
+        pass
 
-    if row["snow_jul1_normal"] is not None:
+    if row["snow"] is not None:
         fig.text(0.5, 0.42, "Snowfall", fontsize=24)
         try:
             precip(fig, row, "snow")
@@ -238,4 +249,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"station": "KFFC", "date": "2014-10-03"})
+    plotter({"station": "KCMI", "date": "2021-03-15"})
