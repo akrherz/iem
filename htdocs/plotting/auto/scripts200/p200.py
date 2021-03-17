@@ -333,7 +333,7 @@ def plotter(fdict):
         ),
         subtitle=subtitle,
         nocaption=True,
-        titlefontsize=16,
+        twitter=True,
     )
     # Get the main axes bounds
     if t == "state" and ctx["csector"] == "conus":
@@ -356,7 +356,7 @@ def plotter(fdict):
     rng = [
         round(x, 2)
         for x in np.linspace(
-            max([0.01, np.min(domain) - 0.5]), np.max(domain) + 0.5, 10
+            max([0.01, np.min(domain) - 0.5]), np.max(domain) + 0.1, 10
         )
     ]
 

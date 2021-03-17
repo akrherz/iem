@@ -7,6 +7,7 @@ from math import pi
 import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
+from pyiem.reference import TRACE_VALUE
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import figure, get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -47,7 +48,11 @@ def get_description():
 
 def miss(val):
     """Pretty."""
-    return "Missing" if pd.isna(val) else val
+    if pd.isna(val):
+        return "Missing"
+    if np.allclose(val, TRACE_VALUE, 0.00001):
+        return "Trace"
+    return val
 
 
 def gauge(ax, row, col):
@@ -160,25 +165,25 @@ def precip(fig, row, col):
     ax.text(
         1.2,
         row[col + "_month_normal"] / c2,
-        f"Avg: {row[col + '_month_normal']}\"",
+        f"Avg: {miss(row[col + '_month_normal'])}\"",
         va="center",
         ha="left",
     )
     ax.text(
         2.2,
         row[col + "_" + jan1 + "_normal"] / c3,
-        f"Avg: {row[col + '_' + jan1 + '_normal']}\"",
+        f"Avg: {miss(row[col + '_' + jan1 + '_normal'])}\"",
         va="center",
         ha="left",
     )
-    ax.text(0, vals[0] + 0.04, str(row[col]), ha="center")
-    ax.text(1, vals[1] + 0.04, str(row[col + "_month"]), ha="center")
-    ax.text(2, vals[2] + 0.04, str(row[col + "_" + jan1]), ha="center")
+    # ax.text(0, vals[0] + 0.04, str(row[col]), ha="center")
+    # ax.text(1, vals[1] + 0.04, str(row[col + "_month"]), ha="center")
+    # ax.text(2, vals[2] + 0.04, str(row[col + "_" + jan1]), ha="center")
     ax.set_xticks(range(3))
     ax.set_xticklabels(
         [
-            f'Day:\n{row[col]}"',
-            f"Month:\n{row[col + '_month']}\"",
+            f'Day:\n{miss(row[col])}"',
+            f"Month:\n{miss(row[col + '_month'])}\"",
             f"Since {jan1.capitalize()}:\n{row[col + '_' + jan1]}\"",
         ],
         fontsize=14,
