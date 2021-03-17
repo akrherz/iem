@@ -168,7 +168,7 @@ def plotter(fdict):
         df2 = df[df["ztype"] == "C"]
         plot.fill_ugcs(
             df2[column].to_dict(),
-            bins,
+            bins=bins,
             cmap=cmap,
             plotmissing=False,
             ilabel=ilabel,
@@ -176,7 +176,7 @@ def plotter(fdict):
         df2 = df[df["ztype"] == "Z"]
         plot.fill_ugcs(
             df2[column].to_dict(),
-            bins,
+            bins=bins,
             cmap=cmap,
             plotmissing=False,
             units="inches",

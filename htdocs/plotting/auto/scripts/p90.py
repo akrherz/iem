@@ -894,7 +894,7 @@ def plotter(fdict):
             ]
             m.fill_ugcs(
                 ctx["data"],
-                ctx["bins"],
+                bins=ctx["bins"],
                 cmap=cmap,
                 ilabel=ilabel,
                 labels=ctx["labels"],
@@ -907,7 +907,7 @@ def plotter(fdict):
         else:
             m.fill_ugcs(
                 ctx["data"],
-                ctx["bins"],
+                bins=ctx["bins"],
                 cmap=cmap,
                 ilabel=ilabel,
                 labelbuffer=1,  # Texas yall

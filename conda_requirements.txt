@@ -49,6 +49,8 @@ pip
 postgresql
 # important
 psycopg2
+# for pyiem
+pyarrow
 # lots of places
 pygrib
 # various places
