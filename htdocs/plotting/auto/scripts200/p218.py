@@ -129,14 +129,16 @@ def precip(fig, row, col):
         ax.spines[side].set_visible(False)
     jan1 = "jan1" if col == "precip" else "jul1"
     c1 = row[f"{col}_record"] or 0
-    c2 = max([row[f"{col}_month"], row[f"{col}_month_normal"], 0.01])
-    c3 = max([row[f"{col}_{jan1}"], row[f"{col}_{jan1}_normal"], 0.01])
+    c2 = max([row[f"{col}_month"] or 0, row[f"{col}_month_normal"] or 0, 0.01])
+    c3 = max(
+        [row[f"{col}_{jan1}"] or 0, row[f"{col}_{jan1}_normal"] or 0, 0.01]
+    )
     ax.bar(
         range(3),
         [
             c1 / max([c1, 0.01]),
-            row[f"{col}_month_normal"] / c2,
-            row[f"{col}_{jan1}_normal"] / c3,
+            (row[f"{col}_month_normal"] or 0) / c2,
+            (row[f"{col}_{jan1}_normal"] or 0) / c3,
         ],
         width=0.3,
         color="tan",
@@ -144,8 +146,8 @@ def precip(fig, row, col):
     )
     vals = [
         row[col] / max([c1, 0.01]),
-        row[f"{col}_month"] / c2,
-        row[f"{col}_{jan1}"] / c3,
+        (row[f"{col}_month"] or 0) / c2,
+        (row[f"{col}_{jan1}"] or 0) / c3,
     ]
     ax.bar(
         range(3),
@@ -162,20 +164,22 @@ def precip(fig, row, col):
         va="center",
         ha="left",
     )
-    ax.text(
-        1.2,
-        row[col + "_month_normal"] / c2,
-        f"Avg: {miss(row[col + '_month_normal'])}\"",
-        va="center",
-        ha="left",
-    )
-    ax.text(
-        2.2,
-        row[col + "_" + jan1 + "_normal"] / c3,
-        f"Avg: {miss(row[col + '_' + jan1 + '_normal'])}\"",
-        va="center",
-        ha="left",
-    )
+    if not pd.isna(row[col + "_month_normal"]):
+        ax.text(
+            1.2,
+            row[col + "_month_normal"] / c2,
+            f"Avg: {miss(row[col + '_month_normal'])}\"",
+            va="center",
+            ha="left",
+        )
+    if not pd.isna(row[col + "_" + jan1 + "_normal"]):
+        ax.text(
+            2.2,
+            row[col + "_" + jan1 + "_normal"] / c3,
+            f"Avg: {miss(row[col + '_' + jan1 + '_normal'])}\"",
+            va="center",
+            ha="left",
+        )
     # ax.text(0, vals[0] + 0.04, str(row[col]), ha="center")
     # ax.text(1, vals[1] + 0.04, str(row[col + "_month"]), ha="center")
     # ax.text(2, vals[2] + 0.04, str(row[col + "_" + jan1]), ha="center")
@@ -254,4 +258,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"station": "KCMI", "date": "2021-03-15"})
+    plotter({"station": "KSAT", "date": "2021-03-17"})
