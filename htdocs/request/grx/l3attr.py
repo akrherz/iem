@@ -302,7 +302,7 @@ def produce_content(nexrad, poh, meso, tvs):
     if poh > 0:
         titleadd += f", POH >= {poh}"
     tvs_limiter = ""
-    if tvs is not None:
+    if tvs:
         titleadd += ", all TVS"
         tvs_limiter = " and tvs = 'TVS' "
     cursor.execute(
