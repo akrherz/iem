@@ -26,9 +26,9 @@
 127.0.0.1 iemdb-portfolio.local
 127.0.0.1 iemdb-smos.local
 127.0.0.1 iemdb-talltowers.local
+127.0.0.1 iemdb-td.local
+127.0.0.1 iemdb-sustainablecorn.local
+127.0.0.1 iemdb-asos1min.local
 127.0.0.1 iem-memcached3
 127.0.0.1 iem-memcached
 127.0.0.1 iem-web-services.local
-127.0.0.1 iem-td.local
-127.0.0.1 iem-sustainablecorn.local
-127.0.0.1 iem-asos1min.local
