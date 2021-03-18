@@ -41,13 +41,13 @@ jobs:
         cat config/mesonet.inc | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
         echo '</VirtualHost>' | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
         # This may be a requirement for mod-wsgi to properly find python tooling?
-        echo "export PATH=/home/travis/miniconda/envs/prod/bin:$PATH" | sudo tee -a /etc/apache2/envvars > /dev/null
+        echo "export PATH=/home/runner/miniconda/envs/prod/bin:$PATH" | sudo tee -a /etc/apache2/envvars > /dev/null
         # Newer PROJ needs this
-        echo "export PROJ_LIB=/home/travis/miniconda/envs/prod/share/proj" | sudo tee -a /etc/apache2/envvars > /dev/null
+        echo "export PROJ_LIB=/home/runner/miniconda/envs/prod/share/proj" | sudo tee -a /etc/apache2/envvars > /dev/null
         . .ci_tooling/miniconda.sh
         # https://travis-ci.community/t/t/712/12
         export PATH="/usr/lib/postgresql/11/bin:$PATH"
-        psql -c 'CREATE ROLE travis SUPERUSER LOGIN CREATEDB;' -U postgres || true
+        psql -c 'CREATE ROLE runner SUPERUSER LOGIN CREATEDB;' -U postgres || true
         cd database; sh bootstrap.sh
         python schema_manager.py
         cd ..
