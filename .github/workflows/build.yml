@@ -2,11 +2,13 @@ name: Install and Test
 on: [push]
 jobs:
   build-linux:
-    name: Python (${{ matrix.python-version }})
+    name: Python (${{ matrix.PYTHON_VERSION }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8"]
+        PYTHON_VERSION: ["3.8"]
+    env:
+      PYTHON_VERSION: ${{ matrix.PYTHON_VERSION }}
     steps:
     - uses: actions/checkout@v2
 

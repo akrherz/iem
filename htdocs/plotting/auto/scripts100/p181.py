@@ -5,7 +5,7 @@ from collections import OrderedDict
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict(
@@ -22,7 +22,7 @@ PDICT = OrderedDict(
 
 def parse_range(rng):
     """Convert this into bins"""
-    return [float(f) for f in rng.split("-")]
+    return [float(f) for f in rng.split()]
 
 
 def get_description():
@@ -36,6 +36,9 @@ def get_description():
     inclusive ranges and may overlap, if so desired.  The range entries below
     are in units of inches or Fahrenheit where appropriate.  The date selection
     sets the year-to-date period used for each year.
+
+    <p><strong>Updated 17 March 2021</strong>: The range parameters were
+    updated to be space delimited so to allow negative numbers to be used.
     """
     today = datetime.date.today()
     desc["arguments"] = [
@@ -68,32 +71,32 @@ def get_description():
         dict(
             type="text",
             name="r1",
-            default="50-59",
-            label="Range #1 (inclusive)",
+            default="50 59",
+            label="Range #1 (inclusive, space separated)",
         ),
         dict(
             type="text",
             name="r2",
-            default="60-69",
-            label="Range #2 (inclusive)",
+            default="60 69",
+            label="Range #2 (inclusive, space separated)",
         ),
         dict(
             type="text",
             name="r3",
-            default="70-79",
-            label="Range #3 (inclusive)",
+            default="70 79",
+            label="Range #3 (inclusive, space separated)",
         ),
         dict(
             type="text",
             name="r4",
-            default="80-89",
-            label="Range #4 (inclusive)",
+            default="80 89",
+            label="Range #4 (inclusive, space separated)",
         ),
         dict(
             type="text",
             name="r5",
-            default="90-99",
-            label="Range #5 (inclusive)",
+            default="90 99",
+            label="Range #5 (inclusive, space separated)",
         ),
     ]
     return desc
@@ -116,11 +119,9 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2],)
     df = read_sql(
-        """
+        f"""
         SELECT year, day, high, low, precip, snow,
-        (high + low) / 2. as avgt from """
-        + table
-        + """ WHERE
+        (high + low) / 2. as avgt from {table} WHERE
         station = %s and extract(doy from day) <= extract(doy from %s::date)
     """,
         dbconn,
@@ -142,15 +143,23 @@ def plotter(fdict):
         .sum()
     )
 
-    (fig, ax) = plt.subplots(1, 1)
+    title = "[%s] %s :: Jan 1 - %s %s Days" % (
+        station,
+        ctx["_nt"].sts[station]["name"],
+        date.strftime("%b %-d"),
+        PDICT[varname],
+    )
+    (fig, ax) = figure_axes(title=title)
     bars = ax.bar(
         np.arange(1, 6) - 0.25, gdf.mean().values, width=-0.25, label="Average"
     )
     for i, mybar in enumerate(bars):
         ax.text(
-            mybar.get_x() - 0.35,
+            mybar.get_x() - 0.125,
             mybar.get_height() + 0.5,
             "%.1f" % (mybar.get_height(),),
+            fontsize=14,
+            ha="center",
         )
 
     bars = ax.bar(
@@ -158,9 +167,11 @@ def plotter(fdict):
     )
     for i, mybar in enumerate(bars):
         ax.text(
-            mybar.get_x(),
+            mybar.get_x() + 0.125,
             mybar.get_height() + 0.5,
             "%.0f" % (mybar.get_height(),),
+            fontsize=14,
+            ha="center",
         )
 
     bars = ax.bar(
@@ -171,27 +182,21 @@ def plotter(fdict):
     )
     for i, mybar in enumerate(bars):
         ax.text(
-            mybar.get_x(),
+            mybar.get_x() + 0.125,
             mybar.get_height() + 0.5,
             "%.0f" % (mybar.get_height(),),
+            fontsize=14,
+            ha="center",
         )
     ax.grid(True)
     ax.set_xticks(range(1, 6))
     ax.set_xticklabels(
-        ["%g - %g" % (one, two) for (one, two) in [r1, r2, r3, r4, r5]]
+        ["%g thru %g" % (one, two) for (one, two) in [r1, r2, r3, r4, r5]]
     )
     ax.legend(loc="best")
     ax.set_ylabel("Days")
+    ax.set_ylim(top=ax.get_ylim()[1] + 1)
     ax.set_xlabel("%s (Ranges Inclusive)" % (PDICT[varname],))
-    ax.set_title(
-        ("Jan 1 - %s %s Days\n" "[%s] %s")
-        % (
-            date.strftime("%b %-d"),
-            PDICT[varname],
-            station,
-            ctx["_nt"].sts[station]["name"],
-        )
-    )
 
     return fig, gdf
 
