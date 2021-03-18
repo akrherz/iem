@@ -1,7 +1,7 @@
 --extra-index-url https://pypi.anaconda.org/pypi/simple
 inotify
 PyRSS2Gen
-mod_wsgi<4.7.0
+mod_wsgi
 git+https://github.com/akrherz/smartsheet-python-sdk.git@issue38
 git+https://github.com/akrherz/windrose.git@darylchanges
 git+https://github.com/akrherz/pyIEM.git
