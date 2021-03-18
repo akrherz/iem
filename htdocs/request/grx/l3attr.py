@@ -308,7 +308,7 @@ def produce_content(nexrad):
         text = ("K%s [%s] %s Z\\n" "Drct: %s Speed: %s kts\\n") % (
             row["nexrad"],
             row["storm_id"],
-            row["utc_valid"].strftime("%H:%I"),
+            row["utc_valid"].strftime("%H:%M"),
             row["drct"],
             row["sknt"],
         )
