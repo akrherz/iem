@@ -141,9 +141,17 @@ only use this layer when you are using the data!  Thanks...</td>
   <i>Notes:</i> This is a placefile of the level3 NEXRAD storm attributes. This
 may be useful when looking at level2 data.  You can optionally pass a nexrad
 		3 character ID to limit the display to a certain NEXRAD. ie)
-		l3attr.txt?nexrad=DMX .  Otherwise, the service will utilize the
+		<code>l3attr.txt?nexrad=DMX</code>.  Otherwise, the service will utilize the
 		longitude and latitude passed to the server by the Gibson Ridge Client
-		to limit the displayed attributes.</td>
+		to limit the displayed attributes.
+
+    <br /><strong>Additional Query Parameters</strong>: You can provide additional
+    URL parameters to limit the returned attributes. For example,
+    <code>l3attr.txt?tvs</code> will only return attrs with TVS flagged.
+    <code>l3attr.txt?poh=50</code> will only return attrs with a probability of
+    hail at least of 50%.  The third option is <code>l3attr.txt?meso=4</code>
+    will return attrs with at least a MESO value of 4.  You can combine these
+    all in any order if you want along with the <code>nexrad</code> value.</td>
 </tr>
 
 <tr>

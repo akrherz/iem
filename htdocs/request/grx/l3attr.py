@@ -280,7 +280,7 @@ def rabbit_tracks(row):
     return res
 
 
-def produce_content(nexrad):
+def produce_content(nexrad, poh, meso, tvs):
     """Do Stuff"""
     pgconn = get_dbconn("radar")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -291,19 +291,34 @@ def produce_content(nexrad):
         limiter = " and nexrad = '%s' " % (nexrad,)
         title = "IEM %s NEXRAD L3 Attributes" % (nexrad,)
         threshold = 45
+    meso_limiter = ""
+    titleadd = ""
+    if meso >= 0:
+        titleadd = ", all MESO"
+        meso_limiter = " and meso != 'NONE' "
+        if meso > 1:
+            titleadd = f", MESO >= {meso}"
+            meso_limiter += f" and meso::float >= {meso} "
+    if poh > 0:
+        titleadd += f", POH >= {poh}"
+    tvs_limiter = ""
+    if tvs is not None:
+        titleadd += ", all TVS"
+        tvs_limiter = " and tvs = 'TVS' "
     cursor.execute(
         "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat, "
         "valid at time zone 'UTC' as utc_valid "
         "from nexrad_attributes WHERE valid > now() - '15 minutes'::interval "
-        f"{limiter}"
+        f"{limiter} and poh >= %s {meso_limiter} {tvs_limiter}",
+        (poh,),
     )
     res = (
         "Refresh: 3\n"
         "Threshold: %s\n"
-        "Title: %s\n"
+        "Title: %s%s\n"
         'IconFile: 1, 32, 32, 16, 16, "%s"\n'
         'Font: 1, 11, 1, "Courier New"\n'
-    ) % (threshold, title, ICONFILE)
+    ) % (threshold, title, titleadd, ICONFILE)
     for row in cursor:
         text = ("K%s [%s] %s Z\\n" "Drct: %s Speed: %s kts\\n") % (
             row["nexrad"],
@@ -353,11 +368,14 @@ def application(environ, start_response):
                 if line.find(lon) > 0:
                     nexrad = line[1:4].upper()
 
-    mckey = "/request/grx/i3attr|%s" % (nexrad,)
+    poh = float(form.get("poh", 0))
+    meso = float(form.get("meso", -1))
+    tvs = "tvs" in form
+    mckey = "/request/grx/i3attr|%s|%s|%s|%s" % (nexrad, poh, meso, tvs)
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
     if not res:
-        res = produce_content(nexrad)
+        res = produce_content(nexrad, poh, meso, tvs)
         mc.set(mckey, res, 60)
     start_response("200 OK", [("Content-type", "text/plain")])
     return [res.encode("ascii")]
