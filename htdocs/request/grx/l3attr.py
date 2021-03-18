@@ -280,7 +280,7 @@ def rabbit_tracks(row):
     return res
 
 
-def produce_content(nexrad, poh, meso, tvs):
+def produce_content(nexrad, poh, meso, tvs, max_size):
     """Do Stuff"""
     pgconn = get_dbconn("radar")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -305,12 +305,15 @@ def produce_content(nexrad, poh, meso, tvs):
     if tvs:
         titleadd += ", all TVS"
         tvs_limiter = " and tvs = 'TVS' "
+    if max_size > 0:
+        titleadd += f", Max Size >= {max_size}"
     cursor.execute(
         "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat, "
         "valid at time zone 'UTC' as utc_valid "
         "from nexrad_attributes WHERE valid > now() - '15 minutes'::interval "
-        f"{limiter} and poh >= %s {meso_limiter} {tvs_limiter}",
-        (poh,),
+        f"{limiter} and poh >= %s {meso_limiter} {tvs_limiter} and "
+        "max_size >= %s",
+        (poh, max_size),
     )
     res = (
         "Refresh: 3\n"
@@ -371,11 +374,18 @@ def application(environ, start_response):
     poh = float(form.get("poh", 0))
     meso = float(form.get("meso", -1))
     tvs = "tvs" in form
-    mckey = "/request/grx/i3attr|%s|%s|%s|%s" % (nexrad, poh, meso, tvs)
+    max_size = float(form.get("max_size", 0))
+    mckey = "/request/grx/i3attr|%s|%s|%s|%s|%s" % (
+        nexrad,
+        poh,
+        meso,
+        tvs,
+        max_size,
+    )
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
     if not res:
-        res = produce_content(nexrad, poh, meso, tvs)
+        res = produce_content(nexrad, poh, meso, tvs, max_size)
         mc.set(mckey, res, 60)
     start_response("200 OK", [("Content-type", "text/plain")])
     return [res.encode("ascii")]
