@@ -3,11 +3,16 @@ import datetime
 from collections import OrderedDict
 
 import numpy as np
+import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
+PDICT = {
+    "sector": "Plot by Sector / State",
+    "wfo": "Plot by NWS Weather Forecast Office (WFO)",
+}
 PDICT2 = OrderedDict(
     [
         ("max_high_temp", "Maximum High Temperature"),
@@ -90,7 +95,21 @@ def get_description():
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc["arguments"] = [
         dict(
+            type="select",
+            options=PDICT,
+            default="sector",
+            label="Select spatial domain type to plot:",
+            name="d",
+        ),
+        dict(
             type="csector", name="sector", default="IA", label="Plot Sector:"
+        ),
+        dict(
+            type="networkselect",
+            default="DMX",
+            network="WFO",
+            label="NWS WFO to plot (when selected above for domain):",
+            name="wfo",
         ),
         dict(
             type="select",
@@ -164,6 +183,21 @@ def cull_to_list(vals):
     return res
 
 
+def compute_tables_wfo(wfo):
+    """Figure out which WFOs we need."""
+    pgconn = get_dbconn("postgis")
+    tables = []
+    cursor = pgconn.cursor()
+    cursor.execute(
+        "SELECT distinct substr(ugc, 1, 2) from ugcs where substr(ugc, 3, 1) "
+        "= 'C' and end_ts is null and wfo = %s",
+        (wfo,),
+    )
+    for row in cursor:
+        tables.append(f"alldata_{row[0].lower()}")
+    return tables
+
+
 def plotter(fdict):
     """ Go """
 
@@ -176,94 +210,100 @@ def plotter(fdict):
     cull = cull_to_list(ctx["cull"])
 
     table = "alldata_%s" % (sector,) if len(sector) == 2 else "alldata"
-    state_limiter = ""
+    tables = [table]
+    dfs = []
+    wfo_limiter = ""
     if sector == "iailin":
-        state_limiter = (
-            " and network in ('IACLIMATE', 'ILCLIMATE', 'INCLIMATE') "
-        )
-    df = read_sql(
-        f"""
-    WITH obs as (
-        SELECT station, gddxx(%s, 86, high, low) as gdd,
-        cdd(high, low, 65) as cdd65, hdd(high, low, 65) as hdd65,
-        sday, high, low, precip, snow,
-        (high + low)/2. as avg_temp
-        from {table} WHERE
-        day >= %s and day <= %s and
-        substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000' and
-        station not in %s),
-    climo as (
-        SELECT station, to_char(valid, 'mmdd') as sday, precip, high, low,
-        gdd{ctx["gddbase"]} as gdd, cdd65, hdd65, snow
-        from climate51),
-    combo as (
-        SELECT o.station, o.precip - c.precip as precip_diff,
-        o.precip as precip, c.precip as cprecip,
-        o.avg_temp, o.cdd65, o.hdd65,
-        o.high, o.low, o.gdd, c.gdd as cgdd,
-        o.gdd - c.gdd as gdd_diff,
-        o.cdd65 - c.cdd65 as cdd_diff,
-        o.hdd65 - c.hdd65 as hdd_diff,
-        o.avg_temp - (c.high + c.low)/2. as temp_diff,
-        o.snow as snow, c.snow as csnow,
-        o.snow - c.snow as snow_diff
-        from obs o JOIN climo c ON
-        (o.station = c.station and o.sday = c.sday)),
-    agg as (
-        SELECT station,
-        avg(avg_temp) as avg_temp,
-        sum(precip_diff) as precip_depart,
-        sum(precip) / greatest(sum(cprecip), 0.0001) * 100. as precip_percent,
-        sum(snow_diff) as snow_depart,
-        sum(snow) / greatest(sum(csnow), 0.0001) * 100. as snow_percent,
-        sum(precip) as precip, sum(cprecip) as cprecip,
-        sum(snow) as snow, sum(csnow) as csnow,
-        avg(high) as avg_high_temp,
-        avg(low) as avg_low_temp,
-        max(high) as max_high_temp,
-        min(low) as min_low_temp, sum(gdd_diff) as gdd_depart,
-        sum(gdd) / greatest(1, sum(cgdd)) * 100. as gdd_percent,
-        avg(temp_diff) as avg_temp_depart, sum(gdd) as gdd_sum,
-        sum(cgdd) as cgdd_sum,
-        sum(cdd65) as cdd_sum,
-        sum(hdd65) as hdd_sum,
-        sum(cdd_diff) as cdd_depart,
-        sum(hdd_diff) as hdd_depart
-        from combo GROUP by station)
+        tables = ["alldata_ia", "alldata_il", "alldata_in"]
+    if ctx["d"] == "wfo":
+        tables = compute_tables_wfo(ctx["wfo"])
+        wfo_limiter = f" and t.wfo = '{ctx['wfo']}'"
+    for table in tables:
+        df = read_sql(
+            f"""
+        WITH obs as (
+            SELECT station, gddxx(%s, 86, high, low) as gdd,
+            cdd(high, low, 65) as cdd65, hdd(high, low, 65) as hdd65,
+            sday, high, low, precip, snow,
+            (high + low)/2. as avg_temp
+            from {table} WHERE
+            day >= %s and day <= %s and
+            substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000' and
+            station not in %s),
+        climo as (
+            SELECT station, to_char(valid, 'mmdd') as sday, precip, high, low,
+            gdd{ctx["gddbase"]} as gdd, cdd65, hdd65, snow
+            from climate51),
+        combo as (
+            SELECT o.station, o.precip - c.precip as precip_diff,
+            o.precip as precip, c.precip as cprecip,
+            o.avg_temp, o.cdd65, o.hdd65,
+            o.high, o.low, o.gdd, c.gdd as cgdd,
+            o.gdd - c.gdd as gdd_diff,
+            o.cdd65 - c.cdd65 as cdd_diff,
+            o.hdd65 - c.hdd65 as hdd_diff,
+            o.avg_temp - (c.high + c.low)/2. as temp_diff,
+            o.snow as snow, c.snow as csnow,
+            o.snow - c.snow as snow_diff
+            from obs o JOIN climo c ON
+            (o.station = c.station and o.sday = c.sday)),
+        agg as (
+            SELECT station,
+            avg(avg_temp) as avg_temp,
+            sum(precip_diff) as precip_depart,
+            sum(precip) / greatest(sum(cprecip), 0.0001) * 100. as precip_percent,
+            sum(snow_diff) as snow_depart,
+            sum(snow) / greatest(sum(csnow), 0.0001) * 100. as snow_percent,
+            sum(precip) as precip, sum(cprecip) as cprecip,
+            sum(snow) as snow, sum(csnow) as csnow,
+            avg(high) as avg_high_temp,
+            avg(low) as avg_low_temp,
+            max(high) as max_high_temp,
+            min(low) as min_low_temp, sum(gdd_diff) as gdd_depart,
+            sum(gdd) / greatest(1, sum(cgdd)) * 100. as gdd_percent,
+            avg(temp_diff) as avg_temp_depart, sum(gdd) as gdd_sum,
+            sum(cgdd) as cgdd_sum,
+            sum(cdd65) as cdd_sum,
+            sum(hdd65) as hdd_sum,
+            sum(cdd_diff) as cdd_depart,
+            sum(hdd_diff) as hdd_depart
+            from combo GROUP by station)
 
-    SELECT d.station, t.name,
-    avg_temp,
-    precip as precip_sum,
-    cprecip as cprecip_sum,
-    precip_depart,
-    precip_percent,
-    snow as snow_sum,
-    csnow as csnow_sum,
-    snow_depart,
-    snow_percent,
-    min_low_temp,
-    avg_temp_depart,
-    gdd_depart,
-    gdd_sum,
-    gdd_percent,
-    cgdd_sum,
-    max_high_temp,
-    avg_high_temp,
-    avg_low_temp,
-    cdd_sum, hdd_sum, cdd_depart, hdd_depart,
-    ST_x(t.geom) as lon, ST_y(t.geom) as lat
-    from agg d JOIN stations t on (d.station = t.id)
-    WHERE t.network ~* 'CLIMATE' {state_limiter}
-    """,
-        pgconn,
-        params=(ctx["gddbase"], date1, date2, tuple(cull)),
-        index_col="station",
-    )
+        SELECT d.station, t.name,
+        avg_temp,
+        precip as precip_sum,
+        cprecip as cprecip_sum,
+        precip_depart,
+        precip_percent,
+        snow as snow_sum,
+        csnow as csnow_sum,
+        snow_depart,
+        snow_percent,
+        min_low_temp,
+        avg_temp_depart,
+        gdd_depart,
+        gdd_sum,
+        gdd_percent,
+        cgdd_sum,
+        max_high_temp,
+        avg_high_temp,
+        avg_low_temp,
+        cdd_sum, hdd_sum, cdd_depart, hdd_depart,
+        ST_x(t.geom) as lon, ST_y(t.geom) as lat
+        from agg d JOIN stations t on (d.station = t.id)
+        WHERE t.network ~* 'CLIMATE' {wfo_limiter}
+        """,
+            pgconn,
+            params=(ctx["gddbase"], date1, date2, tuple(cull)),
+            index_col="station",
+        )
+        dfs.append(df)
+    df = pd.concat(dfs)
     if df.empty:
         raise NoDataFound("No Data Found.")
     df = df.reindex(df[varname].abs().sort_values(ascending=False).index)
 
-    datefmt = "%d %b %Y" if varname != "cgdd_sum" else "%d %b"
+    datefmt = "%-d %b %Y" if varname != "cgdd_sum" else "%-d %b"
     subtitle = ""
     if varname.find("depart") > -1:
         subtitle = (
@@ -273,9 +313,18 @@ def plotter(fdict):
         subtitle = ("Climatology is based on data from 1951-%s") % (
             datetime.date.today().year - 1,
         )
+    if ctx["d"] == "sector":
+        sector = "state" if len(sector) == 2 else sector
+        state = sector
+        cwa = None
+    else:
+        sector = "cwa"
+        cwa = ctx["wfo"]
+        state = None
     mp = MapPlot(
-        sector="state" if len(sector) == 2 else sector,
-        state=sector,
+        sector=sector,
+        state=state,
+        cwa=cwa,
         axisbg="white",
         title="%s thru %s %s [%s]"
         % (
@@ -285,6 +334,7 @@ def plotter(fdict):
             UNITS.get(varname),
         ),
         subtitle=subtitle,
+        twitter=True,
     )
     fmt = "%.2f"
     cmap = get_cmap(ctx["cmap"])
@@ -333,7 +383,7 @@ def plotter(fdict):
             fmt=fmt,
             labelbuffer=5,
         )
-    if len(sector) == 2 or sector == "iailin":
+    if len(sector) == 2 or sector == "iailin" or ctx["d"] == "wfo":
         mp.drawcounties()
     if ctx["usdm"] == "yes":
         mp.draw_usdm(date2, filled=False, hatched=True)
@@ -342,4 +392,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter(dict(wfo="DVN", d="wfo"))
