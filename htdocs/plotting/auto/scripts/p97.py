@@ -205,7 +205,7 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     sector = ctx["sector"]
     date1 = ctx["date1"]
-    date2 = ctx["date2"]
+    date2 = min([ctx["date2"], datetime.date.today()])
     varname = ctx["var"]
     cull = cull_to_list(ctx["cull"])
 
@@ -228,8 +228,8 @@ def plotter(fdict):
             (high + low)/2. as avg_temp
             from {table} WHERE
             day >= %s and day <= %s and
-            substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000' and
-            station not in %s),
+            substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000'
+            and station not in %s),
         climo as (
             SELECT station, to_char(valid, 'mmdd') as sday, precip, high, low,
             gdd{ctx["gddbase"]} as gdd, cdd65, hdd65, snow
@@ -251,7 +251,8 @@ def plotter(fdict):
             SELECT station,
             avg(avg_temp) as avg_temp,
             sum(precip_diff) as precip_depart,
-            sum(precip) / greatest(sum(cprecip), 0.0001) * 100. as precip_percent,
+            sum(precip) / greatest(sum(cprecip), 0.0001) * 100.
+                as precip_percent,
             sum(snow_diff) as snow_depart,
             sum(snow) / greatest(sum(csnow), 0.0001) * 100. as snow_percent,
             sum(precip) as precip, sum(cprecip) as cprecip,
@@ -383,8 +384,9 @@ def plotter(fdict):
             fmt=fmt,
             labelbuffer=5,
         )
-    if len(sector) == 2 or sector == "iailin" or ctx["d"] == "wfo":
-        mp.drawcounties()
+    if state is not None or sector == "iailin" or ctx["d"] == "wfo":
+        if sector != "conus":
+            mp.drawcounties()
     if ctx["usdm"] == "yes":
         mp.draw_usdm(date2, filled=False, hatched=True)
 
