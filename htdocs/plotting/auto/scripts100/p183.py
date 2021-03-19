@@ -5,7 +5,7 @@ import requests
 import pandas as pd
 import matplotlib.dates as mdates
 from pyiem import util
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.reference import state_names, state_fips
 from pyiem.exceptions import NoDataFound
 
@@ -90,7 +90,16 @@ def plotter(fdict):
     df.set_index("Date", inplace=True)
     df.index.name = "Date"
 
-    (fig, ax) = plt.subplots(1, 1)
+    df = df.reset_index()
+    title = (
+        "Areal coverage of Drought for %s\n" "from US Drought Monitor %s - %s"
+    ) % (
+        state_names[state] if ctx["s"] == "state" else "CONUS",
+        df["Date"].min().strftime("%-d %B %Y"),
+        df["Date"].max().strftime("%-d %B %Y"),
+    )
+
+    (fig, ax) = figure_axes(title=title)
 
     # HACK to get a datetime64 to datetime so matplotlib works
     xs = df["x"].to_list()
@@ -145,25 +154,13 @@ def plotter(fdict):
 
     ax.set_ylim(0, 100)
     ax.set_yticks([0, 10, 30, 50, 70, 90, 100])
-    ax.set_ylabel("Percentage of Iowa Area [%]")
-    df.reset_index(inplace=True)
-    ax.set_title(
-        (
-            "Areal coverage of Drought for %s\n"
-            "from US Drought Monitor %s - %s"
-        )
-        % (
-            state_names[state] if ctx["s"] == "state" else "CONUS",
-            df["Date"].min().strftime("%-d %B %Y"),
-            df["Date"].max().strftime("%-d %B %Y"),
-        )
-    )
+    ax.set_ylabel("Percentage of Area [%]")
     ax.grid(True)
     ax.set_xlim(
         df["Date"].min(), df["Date"].max() + datetime.timedelta(days=7)
     )
-    ax.legend(loc=(0.1, -0.3), ncol=3)
-    ax.set_position([0.1, 0.25, 0.8, 0.65])
+    ax.legend(loc=(-0.04, -0.15), ncol=5, fontsize=14)
+    ax.set_position([0.1, 0.15, 0.8, 0.75])
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b\n%Y"))
 
     return fig, df[["Date", "NONE", "D0", "D1", "D2", "D3", "D4"]]

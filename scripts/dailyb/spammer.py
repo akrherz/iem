@@ -163,7 +163,6 @@ def feature():
  +---------------------------------------------------------------
 
 %(story)s
-
 """
     htmlfmt = """
 <p><a href="%(link)s">%(title)s</a>
@@ -172,8 +171,7 @@ def feature():
 Bad: %(bad)s  Abstain: %(abstain)s
 <br /><img src="%(imgurl)s">
 
-<p>%(story)s
-
+<p>%(story)s</p>
 """
     txt = "> Daily Feature\n"
     html = "<h3>Daily Feature</h3>"
@@ -193,6 +191,18 @@ Bad: %(bad)s  Abstain: %(abstain)s
             row["valid"].strftime("%y%m%d"),
             row["mediasuffix"],
         )
+        if row2["appurl"] is not None:
+            if not row2["appurl"].startswith("http"):
+                row2["appurl"] = (
+                    "https://mesonet.agron.iastate.edu" + row2["appurl"]
+                )
+            textfmt += (
+                "\n\nThe featured media can be generated here: %(appurl)s"
+            )
+            htmlfmt += (
+                "<p>The featured media can be generated on-demand "
+                '<a href="%(appurl)s">here</a></p>.'
+            )
         txt += textfmt % row2
         html += htmlfmt % row2
     if mcursor.rowcount == 0:
@@ -301,13 +311,13 @@ def main():
     with open("tmp.txt", "w") as fh:
         fh.write(text)
     subprocess.call(
-        ('pqinsert -p "plot c 000000000000 ' 'iemdb.txt bogus txt" tmp.txt'),
+        'pqinsert -p "plot c 000000000000 iemdb.txt bogus txt" tmp.txt',
         shell=True,
     )
     with open("tmp.txt", "w") as fh:
         fh.write(html)
     subprocess.call(
-        ('pqinsert -p "plot c 000000000000 ' 'iemdb.html bogus txt" tmp.txt'),
+        'pqinsert -p "plot c 000000000000 iemdb.html bogus txt" tmp.txt',
         shell=True,
     )
     os.unlink("tmp.txt")
