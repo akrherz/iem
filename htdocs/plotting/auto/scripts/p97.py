@@ -314,8 +314,8 @@ def plotter(fdict):
             datetime.date.today().year - 1,
         )
     if ctx["d"] == "sector":
-        sector = "state" if len(sector) == 2 else sector
         state = sector
+        sector = "state" if len(sector) == 2 else sector
         cwa = None
     else:
         sector = "cwa"
