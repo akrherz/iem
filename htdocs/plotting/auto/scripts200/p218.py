@@ -75,6 +75,8 @@ def gauge(ax, row, col):
     normal = row[f"{col}_normal"]
     if maxval is None:
         maxval = normal + (20 if col == "high" else -20)
+    if normal is None:
+        normal = row[col]
     minval = normal - (maxval - normal)
     ratio = (row[col] - minval) / (maxval - minval)
     if col == "high":
@@ -96,7 +98,7 @@ def gauge(ax, row, col):
     ax.text(
         pi / 2,
         3.25,
-        rf"Avg: {normal}$^\circ$F",
+        rf"Avg: {miss(row[f'{col}_normal'])}$^\circ$F",
         ha="center",
     )
     ax.set_rorigin(-4.5)
@@ -258,4 +260,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"station": "KSAT", "date": "2021-03-17"})
+    plotter({"station": "KRDU", "date": "2021-03-19"})
