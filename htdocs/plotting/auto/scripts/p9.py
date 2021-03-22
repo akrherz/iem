@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem import network
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -101,18 +101,8 @@ def plotter(fdict):
         title = "base=%s" % (ceiling,)
 
     df = read_sql(
-        """
-        SELECT year, sday,
-        """
-        + gfunc
-        + """ as """
-        + glabel
-        + """
-        from """
-        + table
-        + """ WHERE station = %s and year > 1892
-        and sday != '0229'
-    """,
+        f"SELECT year, sday, {gfunc} as {glabel} from {table} WHERE "
+        "station = %s and year > 1892 and sday != '0229'",
         pgconn,
         params=(station,),
     )
@@ -126,7 +116,16 @@ def plotter(fdict):
         .describe(percentiles=[0.05, 0.25, 0.75, 0.95])
     )
     df2 = df2.unstack(level=-1)
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    title = "%s-%s %s [%s]\n%s %s (%s)" % (
+        syear,
+        thisyear,
+        nt.sts[station]["name"],
+        station,
+        year,
+        PDICT[varname],
+        title,
+    )
+    (fig, ax) = figure_axes(title=title)
     ax.plot(
         np.arange(1, 366),
         df2[(glabel, "mean")],
@@ -166,22 +165,10 @@ def plotter(fdict):
     if varname == "gdd":
         ax.set_ylim(-0.25, 40)
     ax.grid(True)
-    ax.set_title(
-        "%s-%s %s [%s]\n%s %s (%s)"
-        % (
-            syear,
-            thisyear,
-            nt.sts[station]["name"],
-            station,
-            year,
-            PDICT[varname],
-            title,
-        )
-    )
     ax.set_ylabel(r"Daily Accumulation $^{\circ}\mathrm{F}$")
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
-    ax.legend(ncol=2)
     ax.set_xticklabels(calendar.month_abbr[1:])
+    ax.legend(ncol=2)
 
     # collapse the multiindex for columns
     df = pd.DataFrame(df2)

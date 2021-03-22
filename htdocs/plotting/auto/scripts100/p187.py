@@ -35,12 +35,9 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
 
     df = read_sql(
-        """
+        f"""
     with data as (
-        select station, year, sum(precip) from """
-        + table
-        + """
-        WHERE year >= 1893
+        select station, year, sum(precip) from {table} WHERE year >= 1893
         GROUP by station, year),
     stdata as (
         select year, sum from data where station = %s

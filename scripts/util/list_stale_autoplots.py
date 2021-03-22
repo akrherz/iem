@@ -10,6 +10,7 @@ NO_FEATURES = [
     28,  # too complex and generally hated by the public
     38,  # radiation plot that is complex
     68,  # nws unique VTEC types per year
+    91,  # hated by myself and the general public
     96,  # one-off showing precip biases
     94,  # one-off showing temp biases
     102,  # LSR report types

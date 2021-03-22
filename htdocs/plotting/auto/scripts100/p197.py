@@ -111,15 +111,11 @@ def get_df(ctx):
     else:
         dlimit = " unit_desc = '%s' " % (params[2],)
     df = read_sql(
-        """
+        f"""
         select year, week_ending,
         sum(num_value) as value, state_alpha from nass_quickstats
         where commodity_desc = %s and statisticcat_desc = %s
-        and """
-        + dlimit
-        + """ and
-        util_practice_desc = %s
-        and num_value is not null
+        and {dlimit} and util_practice_desc = %s and num_value is not null
         GROUP by year, week_ending, state_alpha
         ORDER by state_alpha, week_ending
     """,
@@ -135,8 +131,7 @@ def get_df(ctx):
     syear = max([1981, date.year - 10])
     eyear = syear + 10
     for state, gdf in df.groupby("state_alpha"):
-        sdf = gdf.copy()
-        sdf.set_index("week_ending", inplace=True)
+        sdf = gdf.copy().set_index("week_ending")
         # TOO DIFFICULT to know what to do in this case.
         if date.strftime("%Y-%m-%d") not in sdf.index:
             continue
@@ -157,7 +152,7 @@ def get_df(ctx):
     ctx["df"] = pd.DataFrame.from_dict(data, orient="index")
     if ctx["df"].empty:
         raise NoDataFound("No Data Found.")
-    ctx["df"].dropna(how="all", inplace=True)
+    ctx["df"] = ctx["df"].dropna(how="all")
     ctx["df"].index.name = "state"
     ctx["df"]["departure"] = ctx["df"]["thisval"] - ctx["df"]["avg"]
     ctx["title"] = "%s USDA NASS %s" % (

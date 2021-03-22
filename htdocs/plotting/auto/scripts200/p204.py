@@ -6,8 +6,7 @@ from collections import OrderedDict
 import matplotlib.colors as mpcolors
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.plot import get_cmap
-from pyiem.plot.use_agg import plt
+from pyiem.plot import get_cmap, figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -78,14 +77,8 @@ def plotter(fdict):
     pgconn = get_dbconn("coop")
     table = "alldata_%s" % (ctx["station"][:2],)
     df = read_sql(
-        """
-        select day, sday, precip, high,
-        extract(doy from day)::int as doy, year
-        from """
-        + table
-        + """  WHERE
-        station = %s ORDER by day ASC
-    """,
+        "select day, sday, precip, high, extract(doy from day)::int as doy, "
+        f"year from {table}  WHERE station = %s ORDER by day ASC",
         pgconn,
         params=(ctx["station"],),
         index_col="day",
@@ -124,7 +117,14 @@ def plotter(fdict):
     for day, row in df2.iterrows():
         data[day.year - baseyear, row["doy"] - 1] = row[ctx["var"]]
 
-    fig, ax = plt.subplots(1, 1)
+    title = "[%s] %s (%s-%s)\n%s" % (
+        ctx["station"],
+        ctx["_nt"].sts[ctx["station"]]["name"],
+        ctx["syear"],
+        ctx["eyear"],
+        PDICT[ctx["var"]].replace("XX", str(ctx["days"])),
+    )
+    fig, ax = figure_axes(title=title)
     heatmap(
         data,
         cmap=cmap,
@@ -144,17 +144,6 @@ def plotter(fdict):
     ax.set_yticks(yticks[::-1])
     ax.set_yticklabels(yticklabels[::-1], rotation=0)
     ax.xaxis.grid(True, color="k")
-    ax.set_title(
-        "[%s] %s (%s-%s)\n%s"
-        % (
-            ctx["station"],
-            ctx["_nt"].sts[ctx["station"]]["name"],
-            ctx["syear"],
-            ctx["eyear"],
-            PDICT[ctx["var"]].replace("XX", str(ctx["days"])),
-        )
-    )
-
     return fig, df
 
 

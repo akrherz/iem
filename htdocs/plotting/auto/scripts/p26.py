@@ -6,7 +6,7 @@ import psycopg2.extras
 import numpy as np
 import pandas as pd
 from matplotlib.patches import Rectangle
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -82,29 +82,19 @@ def get_context(fdict):
     data = np.ma.ones((thisyear - startyear + 1, 366)) * 199
     if half == "fall":
         cursor.execute(
-            """SELECT
+            f"""SELECT
             CASE WHEN month < 7 then
             extract(doy from day) + 366 else
             extract(doy from day) end,
-            CASE WHEN month < 7 then year - 1 else year end,
-            """
-            + varname
-            + """, day from
-            """
-            + table
-            + """ WHERE station = %s and low is not null and
+            CASE WHEN month < 7 then year - 1 else year end, {varname}, day
+            from {table} WHERE station = %s and low is not null and
             high is not null and day >= %s ORDER by day ASC""",
             (station, datetime.date(startyear, 7, 1)),
         )
     else:
         cursor.execute(
-            """SELECT extract(doy from day), year,
-            """
-            + varname
-            + """ from
-            """
-            + table
-            + """ WHERE station = %s and high is not null and
+            f"""SELECT extract(doy from day), year, {varname} from
+            {table} WHERE station = %s and high is not null and
             low is not null and year >= %s ORDER by day ASC""",
             (station, startyear),
         )
@@ -159,7 +149,7 @@ def get_context(fdict):
     df = pd.DataFrame(d)
     sts = datetime.date(2000, 1, 1) + datetime.timedelta(days=doys[0] - 1)
     df["dates"] = pd.date_range(sts, periods=len(doys))
-    df.set_index("doy", inplace=True)
+    df = df.set_index("doy")
     ctx["df"] = df
     ctx["year"] = year
     ctx["half"] = half
@@ -261,7 +251,7 @@ def plotter(fdict):
     ctx = get_context(fdict)
     df = ctx["df"]
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = figure_axes(title=ctx["title"])
     doys = df.index.values
     ax.fill_between(
         doys, df["mins"], df["maxs"], color="pink", zorder=1, label="Range"
@@ -293,7 +283,6 @@ def plotter(fdict):
         labels.extend(calendar.month_abbr[1:7])
         ax.set_xticklabels(labels)
     ax.set_ylabel(r"%s $^\circ$F" % (ctx["ylabel"],))
-    ax.set_title(ctx["title"])
     ax.axhline(ctx["t"], linestyle="--", lw=1, color="k", zorder=6)
     ax.text(
         ax.get_xlim()[1], ctx["t"], r"%.0f$^\circ$F" % (ctx["t"],), va="center"

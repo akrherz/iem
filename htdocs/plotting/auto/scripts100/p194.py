@@ -111,11 +111,13 @@ def plotter(fdict):
         ),
         subtitle=(
             "based on weekly US Drought Monitor Analysis, "
-            "%.2f$^\circ$ grid analysis"
+            r"%.2f$^\circ$ grid analysis"
         )
         % (griddelta,),
         continentalcolor="white",
         titlefontsize=14,
+        nocaption=True,
+        twitter=True,
     )
 
     # compute the affine

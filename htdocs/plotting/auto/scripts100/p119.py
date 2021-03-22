@@ -4,7 +4,7 @@ import datetime
 from pandas.io.sql import read_sql
 import pandas as pd
 import matplotlib.dates as mdates
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -69,16 +69,11 @@ def plotter(fdict):
     for base in thresholds:
         # Find first dates by winter season
         df2 = read_sql(
-            """
+            f"""
             select
             case when month > 7 then year + 1 else year end as winter,
-            min(case when """
-            + ctx["var"]
-            + """ <= %s
-            then day else '2099-01-01'::date end) as mindate from
-            """
-            + table
-            + """
+            min(case when {ctx["var"]} <= %s
+            then day else '2099-01-01'::date end) as mindate from {table}
             WHERE month not in (6, 7) and station = %s and year < %s
             GROUP by winter
         """,
@@ -92,9 +87,7 @@ def plotter(fdict):
             jan1 = datetime.date(row["winter"] - 1, 1, 1)
             doy = (row["mindate"] - jan1).days
             df.loc[doy:sz, "%scnts" % (base,)] += 1
-        df["%sfreq" % (base,)] = (
-            df["%scnts" % (base,)] / len(df2.index) * 100.0
-        )
+        df[f"{base}freq"] = df[f"{base}cnts"] / len(df2.index) * 100.0
 
     bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:
@@ -144,7 +137,16 @@ def plotter(fdict):
     if maxdate is None:
         maxdate = datetime.datetime(2001, 6, 1)
 
-    (fig, ax) = plt.subplots(1, 1)
+    title = (
+        "Frequency of First Fall %s At or Below Threshold\n%s %s (%s-%s)"
+    ) % (
+        PDICT[ctx["var"]],
+        station,
+        ctx["_nt"].sts[station]["name"],
+        bs.year,
+        datetime.date.today().year,
+    )
+    (fig, ax) = figure_axes(title=title)
     for base in thresholds:
         ax.plot(
             df["dates"].values,
@@ -159,20 +161,10 @@ def plotter(fdict):
     dl = [1] if days > 120 else [1, 7, 14, 21]
     ax.xaxis.set_major_locator(mdates.DayLocator(dl))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d\n%b"))
-    ax.set_title(
-        ("Frequency of First Fall %s At or Below Threshold\n" "%s %s (%s-%s)")
-        % (
-            PDICT[ctx["var"]],
-            station,
-            ctx["_nt"].sts[station]["name"],
-            bs.year,
-            datetime.date.today().year,
-        )
-    )
     ax.grid(True)
     ax.set_yticks([0, 10, 25, 50, 75, 90, 100])
     ax.set_ylabel("Accumulated to Date Frequency [%]")
-    df.reset_index(inplace=True)
+    df = df.reset_index()
     return fig, df, res
 
 

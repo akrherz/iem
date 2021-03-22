@@ -4,7 +4,7 @@ import datetime
 from scipy.stats import linregress
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
 BOOLS = {
@@ -119,60 +119,61 @@ META = {
 }
 
 
-def yearly_plot(ax, ctx):
+def yearly_plot(ctx):
     """
     Make a yearly plot of something
     """
     pgconn = get_dbconn("coop", user="nobody")
+    st = ctx["station"][:2]
 
     if ctx["plot_type"] == "frost_free":
-        ctx["st"] = ctx["station"][:2]
         df = read_sql(
-            """
+            f"""
         select fall.year as yr, fall.s - spring.s as data from
           (select year, max(extract(doy from day)) as s
-           from alldata_%(st)s where station = '%(station)s' and
-           month < 7 and low <= 32 and year >= %(first_year)s and
-           year <= %(last_year)s GROUP by year) as spring,
+           from alldata_{st} where station = %s and
+           month < 7 and low <= 32 and year >= %s and
+           year <= %s GROUP by year) as spring,
           (select year, min(extract(doy from day)) as s
-           from alldata_%(st)s where station = '%(station)s' and
-           month > 7 and low <= 32 and year >= %(first_year)s and
-           year <= %(last_year)s GROUP by year) as fall
+           from alldata_{st} where station = %s and
+           month > 7 and low <= 32 and year >= %s and
+           year <= %s GROUP by year) as fall
          WHERE spring.year = fall.year ORDER by fall.year ASC
-        """
-            % ctx,
+        """,
             pgconn,
+            params=(
+                ctx["station"],
+                ctx["first_year"],
+                ctx["last_year"],
+                ctx["station"],
+                ctx["first_year"],
+                ctx["last_year"],
+            ),
         )
     else:
+        off = META[ctx["plot_type"]]["valid_offset"]
+        func = META[ctx["plot_type"]]["func"]
+        bnds = META[ctx["plot_type"]]["month_bounds"]
         df = read_sql(
-            """
-        SELECT extract(year from (day %s)) as yr, %s as data
-        from alldata_%s WHERE station = '%s'
-         %s GROUP by yr ORDER by yr ASC
-        """
-            % (
-                META[ctx["plot_type"]]["valid_offset"],
-                META[ctx["plot_type"]]["func"],
-                ctx["station"][:2],
-                ctx["station"],
-                META[ctx["plot_type"]]["month_bounds"],
-            ),
+            f"SELECT extract(year from (day {off})) as yr, {func} as data "
+            f"from alldata_{st} WHERE station = %s {bnds} "
+            "GROUP by yr ORDER by yr ASC",
             pgconn,
+            params=(ctx["station"],),
         )
     df = df[(df["yr"] >= ctx["first_year"]) & (df["yr"] <= ctx["last_year"])]
     if df.empty:
         raise NoDataFound("no data found, sorry")
 
-    ax.plot(df["yr"].values, df["data"].values, "bo-")
-    ax.set_title(
-        ("%s (%s - %s)\nLocation Name: %s")
-        % (
-            META[ctx["plot_type"]].get("title", "TITLE"),
-            ctx["first_year"],
-            ctx["last_year"],
-            ctx["_nt"].sts[ctx["station"]]["name"],
-        )
+    title = "%s (%s - %s)\nLocation ID: %s Name: %s" % (
+        META[ctx["plot_type"]].get("title", "TITLE"),
+        ctx["first_year"],
+        ctx["last_year"],
+        ctx["station"],
+        ctx["_nt"].sts[ctx["station"]]["name"],
     )
+    fig, ax = figure_axes(title=title)
+    ax.plot(df["yr"].values, df["data"].values, "bo-")
     ax.set_xlabel(META[ctx["plot_type"]].get("xlabel", "XLABEL"))
     ax.set_ylabel(META[ctx["plot_type"]].get("ylabel", "YLABEL"))
     ax.set_xlim(ctx["first_year"] - 1, ctx["last_year"] + 1)
@@ -197,7 +198,7 @@ def yearly_plot(ax, ctx):
             color="#CC6633",
         )
 
-    return df
+    return fig, df
 
 
 def get_description():
@@ -261,12 +262,7 @@ def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    # Transparent background for the plot area
-    ax.patch.set_alpha(1.0)
-
-    df = yearly_plot(ax, ctx)
+    fig, df = yearly_plot(ctx)
 
     return fig, df
 

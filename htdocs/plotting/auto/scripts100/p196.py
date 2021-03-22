@@ -94,14 +94,9 @@ def get_df(ctx):
     pgconn = get_dbconn("asos")
     thres = "tmpf > 70" if ctx["var"] == "heat" else "tmpf < 40"
     obs = read_sql(
-        """
-        SELECT valid, tmpf::int as tmpf, feel
-        from alldata where station = %s
-        and valid > %s and """
-        + thres
-        + """
-        and feel is not null ORDER by valid
-    """,
+        "SELECT valid, tmpf::int as tmpf, feel from alldata where "
+        f"station = %s and valid > %s and {thres} and feel is not null "
+        "ORDER by valid ASC",
         pgconn,
         params=(ctx["station"], str(events.index.values[0])),
         index_col="valid",
@@ -122,14 +117,15 @@ def get_df(ctx):
         else:
             obs = obs[obs["feel"] < obs["tmpf"]]
     obs["feel"] = obs["feel"].round(0)
-    res = obs.join(events)
-    res.fillna("None", inplace=True)
+    res = obs.join(events).fillna("None")
     counts = res[["feel", "vtec"]].groupby(["feel", "vtec"]).size()
     df = pd.DataFrame(counts)
     df.columns = ["count"]
-    df.reset_index(inplace=True)
-    ctx["df"] = df.pivot(index="feel", columns="vtec", values="count")
-    ctx["df"].fillna(0, inplace=True)
+    ctx["df"] = (
+        df.reset_index()
+        .pivot(index="feel", columns="vtec", values="count")
+        .fillna(0)
+    )
     ctx["df"]["Total"] = ctx["df"].sum(axis=1)
     for vtec in [
         "%s.%s" % (ctx["p1"], ctx["s1"]),

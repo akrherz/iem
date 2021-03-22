@@ -46,13 +46,8 @@ def get_context(fdict):
     opt = ctx["opt"]
     table = "alldata_%s" % (station[:2],)
     cursor.execute(
-        """
-        SELECT day, sday, high, low from """
-        + table
-        + """ WHERE station = %s
-        and high is not null and low is not null
-        ORDER by day ASC
-    """,
+        f"SELECT day, sday, high, low from {table} WHERE station = %s "
+        "and high is not null and low is not null ORDER by day ASC",
         (station,),
     )
     if cursor.rowcount == 0:

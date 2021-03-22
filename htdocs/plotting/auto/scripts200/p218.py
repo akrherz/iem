@@ -73,10 +73,10 @@ def gauge(ax, row, col):
     ax.set_xticks([])
     maxval = row[f"{col}_record"]
     normal = row[f"{col}_normal"]
-    if maxval is None:
-        maxval = normal + (20 if col == "high" else -20)
-    if normal is None:
+    if pd.isna(normal):
         normal = row[col]
+    if pd.isna(maxval):
+        maxval = normal + (20 if col == "high" else -20)
     minval = normal - (maxval - normal)
     ratio = (row[col] - minval) / (maxval - minval)
     if col == "high":
@@ -220,27 +220,29 @@ def plotter(fdict):
 
     # High Temp
     fig.text(0.05, 0.85, "High Temperature", fontsize=24)
-    ax = fig.add_axes(
-        [0.05, 0.48, 0.3, 0.4],
-        projection="polar",
-        anchor="SW",
-    )
-    try:
-        gauge(ax, row, "high")
-    except Exception:
-        pass
+    if not pd.isna(row["high"]):
+        ax = fig.add_axes(
+            [0.05, 0.48, 0.3, 0.4],
+            projection="polar",
+            anchor="SW",
+        )
+        try:
+            gauge(ax, row, "high")
+        except Exception:
+            pass
 
     # Low Temp
     fig.text(0.05, 0.42, "Low Temperature", fontsize=24)
-    ax = fig.add_axes(
-        [0.05, 0.05, 0.3, 0.4],
-        projection="polar",
-        anchor="SW",
-    )
-    try:
-        gauge(ax, row, "low")
-    except Exception:
-        pass
+    if not pd.isna(row["low"]):
+        ax = fig.add_axes(
+            [0.05, 0.05, 0.3, 0.4],
+            projection="polar",
+            anchor="SW",
+        )
+        try:
+            gauge(ax, row, "low")
+        except Exception:
+            pass
 
     fig.text(0.5, 0.85, "Precipitation", fontsize=24)
     try:
@@ -260,4 +262,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"station": "KRDU", "date": "2021-03-19"})
+    plotter({"station": "KRDU", "date": "2021-03-20"})

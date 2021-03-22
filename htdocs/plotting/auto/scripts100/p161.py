@@ -118,17 +118,9 @@ def get_context(fdict):
 
     opp = ">=" if mydir == "aoa" else "<"
     ctx["df"] = read_sql(
-        """
-        SELECT extract(year from """
-        + offset
-        + """)::int as year,
-        sum(case when """
-        + varname
-        + """::int """
-        + opp
-        + """ %s
-            then 1 else 0 end)
-        as count
+        f"""
+        SELECT extract(year from {offset})::int as year,
+        sum(case when {varname}::int {opp} %s then 1 else 0 end) as count
         from summary s JOIN stations t on (s.iemid = t.iemid)
         WHERE t.id = %s and t.network = %s and extract(month from day) in %s
         GROUP by year ORDER by year ASC

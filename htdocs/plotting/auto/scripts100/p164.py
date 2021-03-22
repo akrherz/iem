@@ -129,7 +129,7 @@ def plotter(fdict):
     ax.set_xlim(-100, 100)
     ax.grid(True)
     ax.set_title(
-        ("Percentage of CONUS NWS First Order CLImate Sites\n" "(%s - %s) %s")
+        ("Percentage of CONUS NWS First Order CLImate Sites\n(%s - %s) %s")
         % (
             sts.strftime("%-d %b %Y"),
             ets.strftime("%-d %b %Y"),

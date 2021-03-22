@@ -3,7 +3,7 @@ import psycopg2.extras
 import numpy as np
 import pandas as pd
 from pyiem.nws import vtec
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -54,14 +54,10 @@ def plotter(fdict):
     phenomena = ctx["phenomena"]
     significance = ctx["significance"]
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
-
     cursor.execute(
-        """
-    SELECT s.wfo, s.tzname, u.name from ugcs u
-    JOIN stations s on (u.wfo = s.id)
-    where ugc = %s and end_ts is null and s.network = 'WFO'
-    """,
+        "SELECT s.wfo, s.tzname, u.name from ugcs u JOIN stations s on "
+        "(u.wfo = s.id) where ugc = %s and end_ts is null and "
+        "s.network = 'WFO' LIMIT 1",
         (ugc,),
     )
     wfo = None
@@ -115,6 +111,18 @@ def plotter(fdict):
     )
 
     vals = data / float(cnt) * 100.0
+    title = "[%s] %s :: %s (%s.%s)\n%s Events - %s to %s" % (
+        ugc,
+        name,
+        vtec.get_ps_string(phenomena, significance),
+        phenomena,
+        significance,
+        cnt,
+        sts.strftime("%Y-%m-%d %I:%M %p"),
+        ets.strftime("%Y-%m-%d %I:%M %p"),
+    )
+
+    (fig, ax) = figure_axes(title=title)
     ax.bar(np.arange(1440), vals, ec="b", fc="b")
     if np.max(vals) > 50:
         ax.set_ylim(0, 100)
@@ -150,21 +158,8 @@ def plotter(fdict):
             "Mid",
         ]
     )
-    ax.set_xlabel("Timezone: %s (Daylight or Standard)" % (tzname,))
-    ax.set_ylabel("Frequency [%%] out of %s Events" % (cnt,))
-    ax.set_title(
-        ("[%s] %s :: %s (%s.%s)\n%s Events - %s to %s")
-        % (
-            ugc,
-            name,
-            vtec.get_ps_string(phenomena, significance),
-            phenomena,
-            significance,
-            cnt,
-            sts.strftime("%Y-%m-%d %I:%M %p"),
-            ets.strftime("%Y-%m-%d %I:%M %p"),
-        )
-    )
+    ax.set_xlabel(f"Timezone: {tzname} (Daylight or Standard)")
+    ax.set_ylabel(f"Frequency [%] out of {cnt} Events")
     ax.set_xlim(0, 1441)
     return fig, df
 

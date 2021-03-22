@@ -56,11 +56,9 @@ def plotter(fdict):
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
     cursor.execute(
-        """
-    SELECT s.wfo, s.tzname, u.name from ugcs u  JOIN stations s
-    on (u.wfo = s.id)
-    where ugc = %s and end_ts is null and s.network = 'WFO'
-    """,
+        "SELECT s.wfo, s.tzname, u.name from ugcs u  JOIN stations s "
+        "on (u.wfo = s.id) where ugc = %s and end_ts is null and "
+        "s.network = 'WFO' LIMIT 1",
         (ugc,),
     )
     wfo = None

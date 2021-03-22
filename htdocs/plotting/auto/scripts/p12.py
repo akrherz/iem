@@ -152,7 +152,7 @@ def plotter(fdict):
     # We need to do some magic to julian dates straight
     if season == "winter":
         # drop the first row
-        df.drop(df.index.values[0], inplace=True)
+        df = df.drop(df.index.values[0])
         df.loc[df["nday_doy"] < 183, "nday_doy"] += 365.0
         df.loc[df["xday_doy"] < 183, "xday_doy"] += 365.0
     # Set NaN where we did not meet conditions
@@ -161,16 +161,14 @@ def plotter(fdict):
     df2 = df[df["count"] > 0]
     if df2.empty:
         raise NoDataFound("No data found.")
-    title = "%s [%s] %s Date and Days" % (
+    title = ("%s [%s] %s Date and Days\n" r"%s %s$^\circ$F") % (
         ctx["_nt"].sts[station]["name"],
         station,
         extrenum.capitalize(),
-    )
-    subtitle = r"%s %s$^\circ$F" % (
         PDICT["%s_%s_%s" % (extrenum, varname, direction)],
         threshold,
     )
-    (fig, ax) = figure_axes(title=title, subtitle=subtitle)
+    (fig, ax) = figure_axes(title=title)
     # The present year value may be so low that it destorts the plot
     lastval = df2.iloc[-1]["count"]
     minval = df2[df2["count"] > lastval]["count"].min()

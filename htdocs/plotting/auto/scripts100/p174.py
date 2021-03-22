@@ -78,38 +78,20 @@ def plotter(fdict):
 
     d = "tmpf" if varname == "temp" else "dwpf"
     df = read_sql(
-        """
+        f"""
     WITH one as (
-        SELECT day, max_"""
-        + d
-        + """, min_"""
-        + d
-        + """
-        from summary s JOIN stations t on
+        SELECT day, max_{d}, min_{d} from summary s JOIN stations t on
         (s.iemid = t.iemid) WHERE t.id = %s and t.network = %s and
         s.day >= %s and s.day <= %s),
 
     two as (
-        SELECT day, max_"""
-        + d
-        + """, min_"""
-        + d
-        + """
-        from summary s JOIN stations t on
+        SELECT day, max_{d}, min_{d} from summary s JOIN stations t on
         (s.iemid = t.iemid) WHERE t.id = %s and t.network = %s and
         s.day >= %s and s.day <= %s)
 
     SELECT one.day as day,
-    one.max_"""
-        + d
-        + """ as one_high, one.min_"""
-        + d
-        + """ as one_low,
-    two.max_"""
-        + d
-        + """ as two_high, two.min_"""
-        + d
-        + """ as two_low
+    one.max_{d} as one_high, one.min_{d} as one_low,
+    two.max_{d} as two_high, two.min_{d} as two_low
     from one JOIN two on (one.day = two.day) ORDER by day ASC
     """,
         pgconn,
@@ -133,7 +115,7 @@ def plotter(fdict):
     (fig, ax) = plt.subplots(2, 1, sharex=True)
 
     ax[0].set_title(
-        ("[%s] %s minus [%s] %s\n" "%s Difference: %s - %s")
+        ("[%s] %s minus [%s] %s\n%s Difference: %s - %s")
         % (
             station1,
             ctx["_nt1"].sts[station1]["name"],

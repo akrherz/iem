@@ -66,16 +66,8 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2],)
     df = read_sql(
-        """
-        SELECT year, day, high from """
-        + table
-        + """ WHERE
-        station = %s and high is not null
-        """
-        + limitsql
-        + """
-        ORDER by day ASC
-     """,
+        f"SELECT year, day, high from {table} WHERE station = %s and "
+        f"high is not null {limitsql} ORDER by day ASC",
         dbconn,
         params=(station,),
         index_col="day",

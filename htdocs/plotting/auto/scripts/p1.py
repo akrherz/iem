@@ -7,7 +7,7 @@ import numpy as np
 from scipy import stats
 from pandas.io.sql import read_sql
 import pandas as pd
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem import network, util
 from pyiem.exceptions import NoDataFound
 
@@ -223,8 +223,17 @@ def plotter(fdict):
             "%s_2" % (varname2,): ydf[varname2],
         }
     )
-    resdf.dropna(inplace=True)
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    resdf = resdf.dropna()
+    title = (
+        "%s-%s %s [%s]\n"
+        "Comparison of Monthly Periods, Quadrant Frequency Labelled"
+    ) % (
+        resdf.index.min(),
+        resdf.index.max(),
+        nt.sts[station]["name"],
+        station,
+    )
+    (fig, ax) = figure_axes(title=title)
     ax.scatter(
         resdf[varname1 + "_1"],
         resdf[varname2 + "_2"],
@@ -233,18 +242,6 @@ def plotter(fdict):
         edgecolor="b",
         label=None,
         zorder=3,
-    )
-    ax.set_title(
-        (
-            "%s-%s %s [%s]\n"
-            "Comparison of Monthly Periods, Quadrant Frequency Labelled"
-        )
-        % (
-            resdf.index.min(),
-            resdf.index.max(),
-            nt.sts[station]["name"],
-            station,
-        )
     )
     ax.grid(True)
 

@@ -3,7 +3,7 @@ import calendar
 
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -72,7 +72,7 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
 
     df = read_sql(
-        """
+        f"""
     WITH climate as (
         SELECT to_char(valid, 'mmdd') as sday, high, low from
         ncdc_climate81 where station = %s
@@ -82,10 +82,7 @@ def plotter(fdict):
             then 1 else 0 end) as high_count,
     SUM(case when a.low >= (c.low + %s) and a.low < (c.low + %s)
             then 1 else 0 end) as low_count
-    FROM """
-        + table
-        + """ a JOIN climate c
-    on (a.sday = c.sday)
+    FROM {table} a JOIN climate c on (a.sday = c.sday)
     WHERE a.sday != '0229' and station = %s GROUP by doy ORDER by doy ASC
     """,
         pgconn,
@@ -106,22 +103,19 @@ def plotter(fdict):
     df["low_freq"] = df["low_count"] / df["count"] * 100.0
     hvals = smooth(df["high_freq"].values, 7, "flat")
     lvals = smooth(df["low_freq"].values, 7, "flat")
-    (fig, ax) = plt.subplots(1, 1)
+    title = (
+        "%s [%s]\nFreq of Temp between "
+        r"%s$^\circ$F and %s$^\circ$F of NCEI-81 Average"
+    ) % (ctx["station"], ctx["_nt"].sts[ctx["station"]]["name"], minv, maxv)
+    (fig, ax) = figure_axes(title=title)
 
     ax.plot(df.index.values, hvals[3:-3], color="r", label="High", zorder=1)
     ax.plot(df.index.values, lvals[3:-3], color="b", label="Low", zorder=1)
     ax.axhline(50, lw=2, color="green", zorder=2)
     ax.set_ylabel("Percentage of Years [%]")
-    ax.set_title(
-        (
-            "%s [%s]\nFreq of Temp between "
-            r"%s$^\circ$F and %s$^\circ$F of NCEI-81 Average"
-        )
-        % (ctx["station"], ctx["_nt"].sts[ctx["station"]]["name"], minv, maxv)
-    )
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
-    ax.legend(loc="best")
     ax.set_xticklabels(calendar.month_abbr[1:])
+    ax.legend(loc="best")
     ax.set_xlabel("* seven day smoother applied")
     ax.set_xlim(1, 367)
     ax.set_ylim(0, 100)

@@ -196,7 +196,8 @@ def plotter(fdict):
             sqllimiter = " and t.end_ts is null "
             cursor = pgconn.cursor()
             cursor.execute(
-                "SELECT name from ugcs where ugc = %s and end_ts is null",
+                "SELECT name from ugcs where ugc = %s and end_ts is null "
+                "LIMIT 1",
                 (ugc,),
             )
             name = "Unknown"
