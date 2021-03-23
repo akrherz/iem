@@ -705,6 +705,9 @@ uopts = [
     },
     {"id": "212", "label": "Sounding Parameter / Variable Yearly Timeseries"},
 ]
+misc = [
+    {"id": "219", "label": "Terminal Aerodome Forecast (TAF) Infographic"},
+]
 data = {
     "plots": [
         {"label": "Daily", "options": daily_opts},
@@ -716,5 +719,6 @@ data = {
         {"label": "NWS Warning Plots", "options": nopts},
         {"label": "Tall Towers Plots", "options": topts},
         {"label": "Upper Air / RAOB Sounding Plots", "options": uopts},
+        {"label": "Miscellaneous", "options": misc},
     ]
 }
