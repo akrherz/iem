@@ -137,7 +137,7 @@ def plotter(fdict):
 
     ###
     text = get_text(product_id)
-    res = fig.text(0.5, 0.01, text.strip(), va="bottom", fontsize=12)
+    res = fig.text(0.43, 0.01, text.strip(), va="bottom", fontsize=12)
     bbox = res.get_window_extent(fig.canvas.get_renderer())
     figbbox = fig.get_window_extent()
     yndc = bbox.y1 / figbbox.y1
@@ -180,7 +180,7 @@ def plotter(fdict):
         if not pd.isna(row["ws_sknt"]):
             ax.text(
                 valid,
-                4 + (0.25 if row["v"] > 0 else -0.25),
+                3.8 + (0.5 if row["v"] > 0 else 0.5),
                 "WS%g" % (row["ws_sknt"],),
                 ha="center",
                 fontsize=TEXTARGS["fontsize"],
@@ -193,8 +193,8 @@ def plotter(fdict):
         if not pd.isna(row["sknt"]):
             ax.text(
                 valid,
-                4 + (0.1 if row["v"] > 0 else -0.1),
-                f"{text}",
+                3.8 + (0.35 if row["v"] > 0 else 0.35),
+                f"{text}KT",
                 ha="center",
                 fontsize=TEXTARGS["fontsize"],
                 color=TEXTARGS["color"],
@@ -214,7 +214,7 @@ def plotter(fdict):
     # Between 3.5-4.5 plot the wind arrows
     ax.barbs(
         df.index.values,
-        [4] * sz,
+        [3.8] * sz,
         df["u"].values,
         df["v"].values,
         zorder=3,
@@ -222,7 +222,7 @@ def plotter(fdict):
     )
     ax.barbs(
         df.index.values,
-        [4] * sz,
+        [3.8] * sz,
         df["ws_u"].values,
         df["ws_v"].values,
         zorder=4,
@@ -231,7 +231,7 @@ def plotter(fdict):
 
     padding = datetime.timedelta(minutes=60)
     ax.set_xlim(df.index.min() - padding, df.index.max() + padding)
-    ax.set_yticks([0.9, 1.5, 2, 2.5, 3, 3.25, 4])
+    ax.set_yticks([0.9, 1.5, 2, 2.5, 3, 3.25, 3.8])
     ax.set_yticklabels(
         [
             "WX",
