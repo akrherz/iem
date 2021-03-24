@@ -124,6 +124,9 @@ def plotter(fdict):
             raise NoDataFound("TAF data was not found!")
         df = fetch(valid)
     df = df.fillna(np.nan)
+    df["next_valid"] = (
+        df.reset_index().shift(-1)["valid"].values - df.index.values
+    )
     product_id = df.iloc[0]["product_id"]
     title = (
         f"{ctx['station']} Terminal Aerodome Forecast by NWS "
@@ -162,8 +165,16 @@ def plotter(fdict):
             ax.text(valid, level, skyc, **TEXTARGS).set_path_effects(PE)
 
         # At 0.9 present weather
+        delta = row["next_valid"]
+        rotation = 0
+        if not pd.isna(delta) and delta < datetime.timedelta(hours=2):
+            rotation = 45
         ax.text(
-            valid, 0.9, " ".join(row["presentwx"]), **TEXTARGS
+            valid,
+            0.9,
+            "\n".join(row["presentwx"]),
+            rotation=rotation,
+            **TEXTARGS,
         ).set_path_effects(PE)
         # Plot wind as text string
         if not pd.isna(row["ws_sknt"]):
@@ -192,9 +203,10 @@ def plotter(fdict):
 
         df.at[valid, "fcond"] = compute_flight_condition(row)
         # At 3.25 plot the visibility
-        ax.text(
-            valid, 3.25, f"{row['visibility']:g}", **TEXTARGS
-        ).set_path_effects(PE)
+        if not pd.isna(row["visibility"]):
+            ax.text(
+                valid, 3.25, f"{row['visibility']:g}", **TEXTARGS
+            ).set_path_effects(PE)
 
     if clevels:
         ax.plot(df.index.values, clevels, linestyle=":", zorder=2)
@@ -273,8 +285,8 @@ def plotter(fdict):
         shadow=True,
     )
 
-    return fig, df
+    return fig, df.drop("next_valid", axis=1)
 
 
 if __name__ == "__main__":
-    plotter(dict(station="KOLM", valid="2021-03-23 1720"))
+    plotter(dict(station="KDFW", valid="2021-03-24 1742"))
