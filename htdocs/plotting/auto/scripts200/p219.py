@@ -1,16 +1,12 @@
 """Visualization of TAFs"""
-import calendar
 import datetime
-from collections import OrderedDict
 
 # third party
 import requests
-import matplotlib.colors as mpcolors
-import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.plot import get_cmap, figure
-from pyiem.util import get_autoplot_context, get_dbconn, drct2text
+from pyiem.plot import figure
+from pyiem.util import get_autoplot_context, get_dbconn, drct2text, utc
 from pyiem.exceptions import NoDataFound
 
 
@@ -23,19 +19,22 @@ def get_description():
         "description"
     ] = """
     This app generates infographics for Terminal Aerodome Forecasts (TAF).
+    You need not provide an exact valid timestamp for the TAF issuance, the
+    app will search backwards in time up to 24 hours to find the nearest
+    issuance stored in the database.
     """
     desc["arguments"] = [
         dict(
             type="text",
-            default="KENW",
+            default="KDSM",
             name="station",
             label="Select station to plot:",
         ),
         dict(
             type="datetime",
             name="valid",
-            default="2021/03/23 1720",
-            label="TAF Issuance Timestamp (UTC Timestamp):",
+            default=utc().strftime("%Y/%m/%d %H%M"),
+            label="TAF Issuance/Valid Timestamp (UTC Timezone):",
             min="1995/01/01 0000",
         ),
     ]
@@ -56,24 +55,46 @@ def get_text(product_id):
     return text
 
 
+def taf_search(pgconn, station, valid):
+    """Go look for a nearest in time TAF."""
+    cursor = pgconn.cursor()
+    cursor.execute(
+        "SELECT valid at time zone 'UTC' from taf "
+        "WHERE station = %s and valid > %s and "
+        "valid < %s ORDER by valid DESC",
+        (station, valid - datetime.timedelta(hours=24), valid),
+    )
+    if cursor.rowcount == 0:
+        return None
+    return cursor.fetchone()[0].replace(tzinfo=datetime.timezone.utc)
+
+
 def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
     valid = ctx["valid"].replace(tzinfo=datetime.timezone.utc)
     pgconn = get_dbconn("asos")
-    df = read_sql(
-        "SELECT f.*, t.product_id from taf t JOIN taf_forecast f on "
-        "(t.id = f.taf_id) WHERE t.station = %s and t.valid = %s "
-        "ORDER by f.valid ASC",
-        pgconn,
-        params=(ctx["station"], valid),
-        index_col="valid",
-    )
+
+    def fetch(ts):
+        """Getme data."""
+        return read_sql(
+            "SELECT f.*, t.product_id from taf t JOIN taf_forecast f on "
+            "(t.id = f.taf_id) WHERE t.station = %s and t.valid = %s "
+            "ORDER by f.valid ASC",
+            pgconn,
+            params=(ctx["station"], ts),
+            index_col="valid",
+        )
+
+    df = fetch(valid)
     if df.empty:
-        raise NoDataFound("TAF data was not found!")
+        valid = taf_search(pgconn, ctx["station"], valid)
+        if valid is None:
+            raise NoDataFound("TAF data was not found!")
+        df = fetch(valid)
     title = (
         f"{ctx['station']} Terminal Aerodome Forecast\n"
-        f"Valid: {ctx['valid'].strftime('%-d %b %Y %H:%M UTC')}"
+        f"Valid: {valid.strftime('%-d %b %Y %H:%M UTC')}"
     )
     fig = figure(title=title)
 
