@@ -4,10 +4,24 @@ import datetime
 # third party
 import requests
 import pandas as pd
+import numpy as np
+import matplotlib.patheffects as PathEffects
+from matplotlib.patches import Rectangle
+from metpy.units import units
+from metpy.calc import wind_components
 from pandas.io.sql import read_sql
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn, drct2text, utc
+from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
+
+TEXTARGS = {
+    "fontsize": 12,
+    "color": "k",
+    "ha": "center",
+    "va": "center",
+    "zorder": 3,
+}
+PE = [PathEffects.withStroke(linewidth=3, foreground="white")]
 
 
 def get_description():
@@ -49,6 +63,7 @@ def get_text(product_id):
         req = requests.get(uri, timeout=5)
         if req.status_code == 200:
             text = req.content.decode("ascii", "ignore").replace("\001", "")
+            text = "\n".join(text.replace("\r", "").split("\n")[5:])
     except Exception:
         pass
 
@@ -67,6 +82,22 @@ def taf_search(pgconn, station, valid):
     if cursor.rowcount == 0:
         return None
     return cursor.fetchone()[0].replace(tzinfo=datetime.timezone.utc)
+
+
+def compute_flight_condition(row):
+    """What's our status."""
+    if row["visibility"] >= 5:
+        return "VFR"
+    level = 10000
+    if "OVC" in row["skyc"]:
+        level = row["skyl"][row["skyc"].index("OVC")]
+    if level < 500 or row["visibility"] < 1:
+        return "LIFR"
+    if level < 1000 or row["visibility"] < 3:
+        return "IFR"
+    if level < 3000 or row["visibility"] < 5:
+        return "MVFR"
+    return "UNK"
 
 
 def plotter(fdict):
@@ -92,92 +123,158 @@ def plotter(fdict):
         if valid is None:
             raise NoDataFound("TAF data was not found!")
         df = fetch(valid)
+    df = df.fillna(np.nan)
+    product_id = df.iloc[0]["product_id"]
     title = (
-        f"{ctx['station']} Terminal Aerodome Forecast\n"
+        f"{ctx['station']} Terminal Aerodome Forecast by NWS "
+        f"{product_id[14:17]}\n"
         f"Valid: {valid.strftime('%-d %b %Y %H:%M UTC')}"
     )
     fig = figure(title=title)
 
-    xcols = [0.05, 0.55]
-    yrows = [0.4, 0.85]
-    gwidth = 0.4
-    gheight = 0.32
     ###
-    df2 = df[~pd.isna(df["sknt"])]
-    sz = len(df2.index)
-    xlabels = [s.strftime("%-d/%HZ") for s in df2.index]
-    fig.text(xcols[0], yrows[1], "Surface Wind", fontsize=16)
-    ax = fig.add_axes([xcols[0], 0.5, gwidth, gheight])
-    ax.bar(range(sz), df2["gust"], color="orange", zorder=4, label="Gust")
-    ax.bar(range(sz), df2["sknt"], color="blue", zorder=5, label="Sustained")
-    ax.legend(ncol=2, bbox_to_anchor=(0.99, 1), loc="lower right")
-    ax.grid(True)
-    ax.set_ylabel("Wind Speed [kts]")
-    ax.set_xticks(range(sz))
-    ax.set_xticklabels(xlabels)
-    ymax = ax.get_ylim()[1]
-    ax.set_ylim(0, ymax * 1.3)
-    for i, val in enumerate(df2["drct"].values):
+    text = get_text(product_id)
+    res = fig.text(0.5, 0.01, text.strip(), va="bottom", fontsize=12)
+    bbox = res.get_window_extent(fig.canvas.get_renderer())
+    figbbox = fig.get_window_extent()
+    yndc = bbox.y1 / figbbox.y1
+
+    # Create the main axes that will hold all our hackery
+    ax = fig.add_axes([0.08, yndc + 0.05, 0.9, 0.9 - yndc - 0.05])
+    fig.text(0.015, 0.3, "Cloud Coverage & Level", rotation=90)
+
+    df["u"], df["v"] = wind_components(
+        units("knot") * df["sknt"].values,
+        units("degree") * df["drct"].values,
+    )
+    df["ws_u"], df["ws_v"] = wind_components(
+        units("knot") * df["ws_sknt"].values,
+        units("degree") * df["ws_drct"].values,
+    )
+    sz = len(df.index)
+    clevels = []
+    for valid, row in df.iterrows():
+        # Between 1-3 plot the clouds
+        for j, skyc in enumerate(row["skyc"]):
+            level = min([3200, row["skyl"][j]]) / 1600 + 1
+            if j + 1 == len(row["skyc"]):
+                clevels.append(level)
+            ax.text(valid, level, skyc, **TEXTARGS).set_path_effects(PE)
+
+        # At 0.9 present weather
         ax.text(
-            i,
-            ymax * 1.04,
-            ("%s\n" r"(%.0f$^\circ$)") % (drct2text(val), val),
-            ha="center",
-            bbox=dict(color="white"),
+            valid, 0.9, " ".join(row["presentwx"]), **TEXTARGS
+        ).set_path_effects(PE)
+        # Plot wind as text string
+        if not pd.isna(row["ws_sknt"]):
+            ax.text(
+                valid,
+                4 + (0.25 if row["v"] > 0 else -0.25),
+                "WS%g" % (row["ws_sknt"],),
+                ha="center",
+                fontsize=TEXTARGS["fontsize"],
+                va="top" if row["v"] < 0 else "bottom",
+                color="r",
+            ).set_path_effects(PE)
+        text = f"{row['sknt']:.0f}"
+        if not pd.isna(row["gust"]) and row["gust"] > 0:
+            text += f"G{row['gust']:.0f}"
+        if not pd.isna(row["sknt"]):
+            ax.text(
+                valid,
+                4 + (0.1 if row["v"] > 0 else -0.1),
+                f"{text}",
+                ha="center",
+                fontsize=TEXTARGS["fontsize"],
+                color=TEXTARGS["color"],
+                va="top" if row["v"] < 0 else "bottom",
+            ).set_path_effects(PE)
+
+        df.at[valid, "fcond"] = compute_flight_condition(row)
+        # At 3.25 plot the visibility
+        ax.text(
+            valid, 3.25, f"{row['visibility']:g}", **TEXTARGS
+        ).set_path_effects(PE)
+
+    if clevels:
+        ax.plot(df.index.values, clevels, linestyle=":", zorder=2)
+
+    # Between 3.5-4.5 plot the wind arrows
+    ax.barbs(
+        df.index.values,
+        [4] * sz,
+        df["u"].values,
+        df["v"].values,
+        zorder=3,
+        color="k",
+    )
+    ax.barbs(
+        df.index.values,
+        [4] * sz,
+        df["ws_u"].values,
+        df["ws_v"].values,
+        zorder=4,
+        color="r",
+    )
+
+    padding = datetime.timedelta(minutes=60)
+    ax.set_xlim(df.index.min() - padding, df.index.max() + padding)
+    ax.set_yticks([0.9, 1.5, 2, 2.5, 3, 3.25, 4])
+    ax.set_yticklabels(
+        [
+            "WX",
+            "800ft",
+            "1600ft",
+            "2400ft",
+            "3200+ft",
+            "Vis (mile)",
+            "Wind (KT)",
+        ]
+    )
+    ax.set_ylim(0.8, 4.5)
+    for y in [1, 3.125, 3.375]:
+        ax.axhline(
+            y,
+            color="blue",
+            lw=0.5,
         )
 
-    ###
-    df2 = df[~pd.isna(df["visibility"])]
-    sz = len(df2.index)
-    xlabels = [s.strftime("%-d/%HZ") for s in df2.index]
-    fig.text(xcols[0], yrows[0], "Visibility", fontsize=16)
-    ax = fig.add_axes([xcols[0], 0.07, gwidth, gheight])
-    ax.bar(range(sz), df2["visibility"])
-    ax.set_xticks(range(sz))
-    ax.set_xticklabels(xlabels)
-    ax.grid(True)
-    ax.set_ylabel("Visibility [miles]")
+    colors = {
+        "UNK": "#EEEEEE",
+        "VFR": "green",
+        "MVFR": "blue",
+        "IFR": "red",
+        "LIFR": "magenta",
+    }
+    # Colorize things by flight condition
+    xs = df.index.to_list()
+    xs[0] = xs[0] - padding
+    xs.append(df.index.max() + padding)
+    for i, val in enumerate(df["fcond"].values):
+        ax.axvspan(
+            xs[i],
+            xs[i + 1],
+            fc=colors.get(val, "white"),
+            ec="None",
+            alpha=0.5,
+            zorder=2,
+        )
+    rects = []
+    for fcond in colors:
+        rects.append(Rectangle((0, 0), 1, 1, fc=colors[fcond], alpha=0.5))
+    ax.legend(
+        rects,
+        colors.keys(),
+        ncol=3,
+        loc="upper left",
+        fontsize=14,
+        bbox_to_anchor=(0.0, -0.04),
+        fancybox=True,
+        shadow=True,
+    )
 
-    ###
-    sz = len(df.index)
-    xlabels = [s.strftime("%-d/%HZ") for s in df.index]
-    fig.text(xcols[1], yrows[1], "Clouds, Weather & Shear", fontsize=16)
-    ax = fig.add_axes([xcols[1], 0.5, gwidth, gheight])
-    lmax = 10000
-    xl = []
-    for i, val in enumerate(df["skyc"].values):
-        for j, skyc in enumerate(val):
-            level = df["skyl"].values[i][j]
-            lmax = max([level, lmax])
-            ax.text(i, level, skyc, ha="center")
-        xl.append(" ".join(df["presentwx"].values[i]) + "\n" + xlabels[i])
-        if not pd.isna(df["ws_sknt"].values[i]):
-            ax.annotate(
-                "WS%03.0f/%02.0f%03.0fKT"
-                % (
-                    df["ws_level"].values[i] / 100,
-                    df["ws_drct"].values[i],
-                    df["ws_sknt"].values[i],
-                ),
-                xy=(i, 1),
-                xycoords=("data", "axes fraction"),
-                color="blue",
-                ha="center",
-            )
-            ax.axvline(i, color="b")
-    ax.set_ylim(0, lmax * 1.2)
-    ax.set_xticks(range(sz))
-    ax.set_xticklabels(xl)
-    ax.set_xlim(-0.5, sz - 0.5)
-    ax.grid(axis="y")
-    ax.set_ylabel("Cloud Height [ft]")
-
-    ###
-    fig.text(xcols[1], yrows[0], "Raw TAF Text", fontsize=16)
-    text = get_text(df.iloc[0]["product_id"])
-    fig.text(xcols[1] - 0.05, yrows[0], text.strip(), va="top", fontsize=12)
     return fig, df
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter(dict(station="KOLM", valid="2021-03-23 1720"))
