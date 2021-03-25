@@ -21,7 +21,7 @@ TEXTARGS = {
     "va": "center",
     "zorder": 3,
 }
-PE = [PathEffects.withStroke(linewidth=3, foreground="white")]
+PE = [PathEffects.withStroke(linewidth=5, foreground="white")]
 
 
 def get_description():
@@ -140,6 +140,7 @@ def plotter(fdict):
     res = fig.text(0.43, 0.01, text.strip(), va="bottom", fontsize=12)
     bbox = res.get_window_extent(fig.canvas.get_renderer())
     figbbox = fig.get_window_extent()
+    # TODO impossibly small TAF may be too small, need to check this
     yndc = bbox.y1 / figbbox.y1
 
     # Create the main axes that will hold all our hackery
@@ -156,11 +157,16 @@ def plotter(fdict):
     )
     sz = len(df.index)
     clevels = []
-    for valid, row in df.iterrows():
+    clevelx = []
+    for valid0, row in df.iterrows():
+        valid = valid0
+        if not pd.isna(row["end_valid"]):
+            valid = valid + (row["end_valid"] - valid) / 2
         # Between 1-3 plot the clouds
         for j, skyc in enumerate(row["skyc"]):
             level = min([3200, row["skyl"][j]]) / 1600 + 1
             if j + 1 == len(row["skyc"]):
+                clevelx.append(valid)
                 clevels.append(level)
             ax.text(valid, level, skyc, **TEXTARGS).set_path_effects(PE)
 
@@ -201,7 +207,7 @@ def plotter(fdict):
                 va="top" if row["v"] < 0 else "bottom",
             ).set_path_effects(PE)
 
-        df.at[valid, "fcond"] = compute_flight_condition(row)
+        df.at[valid0, "fcond"] = compute_flight_condition(row)
         # At 3.25 plot the visibility
         if not pd.isna(row["visibility"]):
             ax.text(
@@ -209,7 +215,7 @@ def plotter(fdict):
             ).set_path_effects(PE)
 
     if clevels:
-        ax.plot(df.index.values, clevels, linestyle=":", zorder=2)
+        ax.plot(clevelx, clevels, linestyle=":", zorder=2)
 
     # Between 3.5-4.5 plot the wind arrows
     ax.barbs(
@@ -289,4 +295,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="KDFW", valid="2021-03-24 1742"))
+    plotter(dict(station="KJBR", valid="2021-03-25 1742"))
