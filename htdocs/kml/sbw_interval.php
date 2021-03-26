@@ -1,8 +1,8 @@
 <?php
 /* Sucks to render a KML */
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
-include("../../include/vtec.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/vtec.php";
 $connect = iemdb("postgis");
 
 $has_error = false;
@@ -60,7 +60,8 @@ else{
 
     $year = date("Y", $ts);
 
-    $result = pull_vtec_events_by_wfo_year($connect, $year, $mywfos, $tsSQL, $tsSQL2);
+    $result = pull_vtec_events_by_wfo_year(
+        $connect, $year, $mywfos, $tsSQL, $tsSQL2, $_GET);
 }
 
 header('Content-disposition: attachment; filename=sbw_interval.kml');
@@ -155,12 +156,21 @@ function pull_wfos_in_states($db, $state_abbreviations){
     return $wfos;
 }
 
-function pull_vtec_events_by_wfo_year($db, $year, $wfos, $tsSQL, $tsSQL2){
+function pull_vtec_events_by_wfo_year(
+        $db, $year, $wfos, $tsSQL, $tsSQL2, $form){
     if(count($wfos) > 0 && ! in_array("ALL", $wfos)){
         $wfolimiter = 'wfo IN (\'' . implode("','", $wfos) . '\') and';
     }
     else{
         $wfolimiter = '';
+    }
+    $pslimiter = "";
+    if (isset($form["limitps"]) && ($form["limitps"] == "yes")){
+        $pslimiter = sprintf(
+            " and phenomena = '%s' and significance = '%s' ",
+            $form["phenomena"],
+            $form["significance"],
+        );
     }
     $rs = pg_prepare($db, "SELECT-INT", "SELECT 
 		issue, expire, phenomena, significance, eventid, wfo, status,
@@ -168,14 +178,14 @@ function pull_vtec_events_by_wfo_year($db, $year, $wfos, $tsSQL, $tsSQL2){
            round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize
            from sbw_$year 
            WHERE $wfolimiter issue >= $1 and issue <= $2
-           and status = 'NEW' and eventid > 0");
+           and status = 'NEW' and eventid > 0 $pslimiter");
     $rs = pg_prepare($db, "SELECT", "SELECT
 		issue, expire, phenomena, significance, eventid, wfo, status,
            ST_askml(geom) as kml,
            round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize
            from sbw_$year 
            WHERE $wfolimiter issue <= $1 and expire > $2
-           and status = 'NEW' and eventid > 0");
+           and status = 'NEW' and eventid > 0 $pslimiter");
 
     if ($tsSQL != $tsSQL2)
     {

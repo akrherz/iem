@@ -291,6 +291,13 @@ def plotter(fdict):
         shadow=True,
     )
 
+    # Need to get rid of timezones
+    df = df.reset_index()
+    for col in ["valid", "end_valid"]:
+        # some rows could be NaN
+        df[col] = df[~pd.isna(df[col])][col].apply(
+            lambda x: x.strftime("%Y-%m-%d %H:%M")
+        )
     return fig, df.drop("next_valid", axis=1)
 
 
