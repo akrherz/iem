@@ -707,6 +707,7 @@ uopts = [
 ]
 misc = [
     {"id": "219", "label": "Terminal Aerodome Forecast (TAF) Infographic"},
+    {"id": "220", "label": "SPC Convective / Fire Weather Outlook Graphics"},
 ]
 data = {
     "plots": [
