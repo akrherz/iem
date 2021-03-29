@@ -144,9 +144,10 @@ def plotter(fdict):
     def fetch(ts):
         """Getme data."""
         return read_postgis(
-            "SELECT o.*, t.priority from spc_outlooks o JOIN "
-            "spc_outlook_thresholds t on (o.threshold = t.threshold) "
-            "where product_issue = %s and day = %s and category = %s and "
+            "SELECT o.*, g.*, t.priority from spc_outlook o, "
+            "spc_outlook_geometries g, spc_outlook_thresholds t WHERE "
+            "o.id = g.spc_outlook_id and g.threshold = t.threshold and "
+            "product_issue = %s and day = %s and category = %s and "
             "outlook_type = %s ORDER by t.priority ASC",
             pgconn,
             params=(ts, day, category, outlook_type),

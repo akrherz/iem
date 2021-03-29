@@ -154,7 +154,8 @@ def plotter(fdict):
         df = read_sql(
             """
         with data as (
-            select expire, o.threshold from spc_outlooks o
+            select expire, g.threshold from spc_outlook o JOIN
+            spc_outlook_geometries g on (o.id = g.spc_outlook_id)
             WHERE category = %s
             and o.day = %s and o.outlook_type = %s and expire > %s
             and expire < %s),
@@ -218,9 +219,11 @@ def plotter(fdict):
         df = read_sql(
             f"""
         with data as (
-            select expire, o.threshold from spc_outlooks o, {table} t
-            WHERE t.{abbrcol} = %s and category = %s
-            and ST_Intersects(st_buffer(o.geom, 0), t.{geomcol})
+            select expire, g.threshold from
+            spc_outlook o, spc_outlook_geometries g, {table} t
+            WHERE o.id = g.spc_outlook_id and t.{abbrcol} = %s
+            and category = %s
+            and ST_Intersects(st_buffer(g.geom, 0), t.{geomcol})
             and o.day = %s and o.outlook_type = %s and expire > %s
             and expire < %s {sqllimiter}),
         agg as (

@@ -242,7 +242,8 @@ def plotter(fdict):
     WITH data as (
         select product_issue, issue, expire, geom,
         rank() OVER (PARTITION by issue ORDER by product_issue DESC)
-        from spc_outlooks where
+        from spc_outlook o JOIN spc_outlook_geometries g on
+        (o.id = g.spc_outlook_id) where
         outlook_type = %s and day = %s and threshold = %s and
         category = %s and
         ST_Within(geom, ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s %s,
