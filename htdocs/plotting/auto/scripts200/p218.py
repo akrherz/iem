@@ -147,7 +147,7 @@ def precip(fig, row, col):
         zorder=8,
     )
     vals = [
-        row[col] / max([c1, 0.01]),
+        (row[col] or 0) / max([c1, 0.01]),
         (row[f"{col}_month"] or 0) / c2,
         (row[f"{col}_{jan1}"] or 0) / c3,
     ]
@@ -181,6 +181,7 @@ def precip(fig, row, col):
             f"Avg: {miss(row[col + '_' + jan1 + '_normal'])}\"",
             va="center",
             ha="left",
+            bbox=dict(color="white"),
         )
     # ax.text(0, vals[0] + 0.04, str(row[col]), ha="center")
     # ax.text(1, vals[1] + 0.04, str(row[col + "_month"]), ha="center")
@@ -190,7 +191,7 @@ def precip(fig, row, col):
         [
             f'Day:\n{miss(row[col])}"',
             f"Month:\n{miss(row[col + '_month'])}\"",
-            f"Since {jan1.capitalize()}:\n{row[col + '_' + jan1]}\"",
+            f"Since {jan1.capitalize()}:\n{miss(row[col + '_' + jan1])}\"",
         ],
         fontsize=14,
     )
@@ -250,7 +251,7 @@ def plotter(fdict):
     except Exception:
         pass
 
-    if row["snow"] is not None:
+    if row["snow"] is not None or row["snow_month"] is not None:
         fig.text(0.5, 0.42, "Snowfall", fontsize=24)
         try:
             precip(fig, row, "snow")
@@ -262,4 +263,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"station": "KRDU", "date": "2021-03-20"})
+    plotter({"station": "KUKI", "date": "2021-03-28"})
