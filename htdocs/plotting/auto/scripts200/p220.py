@@ -31,6 +31,14 @@ PDICT3 = {
     "tornado": "Tornado (D1-2)",
     "wind": "Wind (D1-2)",
 }
+THRESHOLD_LEVELS = {
+    "TSTM": "Thunderstorms",
+    "MRGL": "1. Marginal",
+    "SLGT": "2. Slight",
+    "ENH": "3. Enhanced",
+    "MDT": "4. Moderate",
+    "HIGH": "5. High",
+}
 COLORS = {
     "TSTM": "#c0e8c0",
     "MRGL": "#66c57d",
@@ -48,6 +56,14 @@ COLORS = {
     "0.30": "#ff00ff",
     "0.45": "#912cee",
     "0.60": "#104e8b",
+}
+OUTLINE_COLORS = {
+    "TSTM": "#566453",
+    "MRGL": "#437a43",
+    "SLGT": "#d8a31f",
+    "ENH": "#d9921c",
+    "MDT": "#a6160b",
+    "HIGH": "#d21fc3",
 }
 ISO = "%Y-%m-%d %H:%M"
 
@@ -119,7 +135,7 @@ def outlook_search(pgconn, valid, day, outlook_type):
     """Go look for a nearest in time TAF."""
     cursor = pgconn.cursor()
     cursor.execute(
-        "SELECT product_issue at time zone 'UTC' from spc_outlooks "
+        "SELECT product_issue at time zone 'UTC' from spc_outlook "
         "WHERE day = %s and outlook_type = %s and product_issue > %s and "
         "product_issue < %s ORDER by product_issue DESC",
         (day, outlook_type, valid - datetime.timedelta(hours=24), valid),
@@ -195,7 +211,7 @@ def plotter(fdict):
                 [row["geom"]],
                 ccrs.PlateCarree(),
                 facecolor=COLORS[row["threshold"]],
-                edgecolor="k",
+                edgecolor=OUTLINE_COLORS.get(row["threshold"], "k"),
                 linewidth=2,
                 zorder=Z_POLITICAL - 1,
             )
@@ -203,7 +219,7 @@ def plotter(fdict):
         rects.append(rect)
     mp.ax.legend(
         rects,
-        df["threshold"].to_list(),
+        [THRESHOLD_LEVELS.get(x, x) for x in df["threshold"]],
         ncol=1,
         loc="lower right",
         fontsize=12,
@@ -213,7 +229,9 @@ def plotter(fdict):
     ).set_zorder(Z_OVERLAY2_LABEL + 100)
 
     if sector == "cwa":
-        mp.draw_cwas()
+        mp.draw_cwas(color="k", linewidth=2.5)
+        mp.drawcounties()
+        mp.drawcities()
 
     for col in ["product_issue", "issue", "expire", "updated"]:
         # some rows could be NaN
@@ -222,4 +240,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(cat="tornado", valid="2021-03-25 1742"))
+    plotter(dict(cat="categorical", valid="2021-03-30 2022"))
