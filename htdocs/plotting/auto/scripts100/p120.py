@@ -4,7 +4,7 @@ import datetime
 from pandas.io.sql import read_sql
 import pandas as pd
 import matplotlib.dates as mdates
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -30,6 +30,20 @@ def get_description():
         dict(type="int", name="t2", default=28, label="Second Threshold (F)"),
         dict(type="int", name="t3", default=26, label="Third Threshold (F)"),
         dict(type="int", name="t4", default=22, label="Fourth Threshold (F)"),
+        dict(
+            type="year",
+            name="syear",
+            min=1880,
+            label="Potential (if data exists) minimum year",
+            default=1880,
+        ),
+        dict(
+            type="year",
+            name="eyear",
+            min=1880,
+            label="Potential (if data exists) exclusive maximum year",
+            default=datetime.date.today().year,
+        ),
     ]
     return desc
 
@@ -63,11 +77,11 @@ def plotter(fdict):
             select year,
             max(case when low <= %s then extract(doy from day)
                 else 0 end) as doy from {table}
-            WHERE month < 7 and station = %s and year < %s
+            WHERE month < 7 and station = %s and year > %s and year < %s
             GROUP by year
         """,
             pgconn,
-            params=(base, station, datetime.date.today().year),
+            params=(base, station, ctx["syear"], ctx["eyear"]),
             index_col=None,
         )
         for _, row in df2.iterrows():
@@ -93,8 +107,8 @@ def plotter(fdict):
  DOY Date    <%s  <%s  <%s  <%s
 """ % (
         datetime.date.today().strftime("%d %b %Y"),
-        bs.date(),
-        datetime.date.today(),
+        max([bs.date(), datetime.date(ctx["syear"], 1, 1)]),
+        min([datetime.date.today(), datetime.date(ctx["eyear"] - 1, 12, 31)]),
         station,
         ctx["_nt"].sts[station]["name"],
         thresholds[0] + 1,
@@ -118,7 +132,14 @@ def plotter(fdict):
             row[fcols[3]],
         )
 
-    (fig, ax) = plt.subplots(1, 1)
+    title = "Frequency of Last Spring Temperature"
+    subtitle = "%s %s (%s-%s)" % (
+        station,
+        ctx["_nt"].sts[station]["name"],
+        max([bs.date(), datetime.date(ctx["syear"], 1, 1)]),
+        min([datetime.date.today(), datetime.date(ctx["eyear"] - 1, 12, 31)]),
+    )
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle)
     for base in thresholds:
         ax.plot(
             df["dates"].values,
@@ -131,15 +152,6 @@ def plotter(fdict):
     ax.set_xlim(mindate)
     ax.xaxis.set_major_locator(mdates.DayLocator([1, 7, 14, 21]))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d\n%b"))
-    ax.set_title(
-        ("Frequency of Last Spring Temperature\n" "%s %s (%s-%s)")
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            bs.year,
-            datetime.date.today().year,
-        )
-    )
     ax.grid(True)
     df.reset_index(inplace=True)
     return fig, df, res
