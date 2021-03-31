@@ -1,0 +1,98 @@
+<?php 
+require_once "../../../config/settings.inc.php";
+define("IEM_APPID", 125);
+require_once "../../../include/myview.php";
+require_once "../../../include/forms.php";
+require_once "../../../include/imagemaps.php";
+
+$t = new MyView();
+$t->thispage = "gis-";
+$t->title = "Download SPC Convective/Fire Weather Outlooks Shapefile";
+$content = <<<EOF
+<h3>Storm Prediction Center Convective and Fire Weather Outlooks</h3>
+
+<p>The IEM attempts to process and archive the convective and fire weather
+outlooks issued by the Storm Prediction Center. This processing is done by
+parsing the PTS product via <a href="https://github.com/akrherz/pyIEM/blob/main/src/pyiem/nws/products/spcpts.py">pyIEM decoder</a>. 
+Recently, the SPC website has added direct single outlook downloads in various
+GIS formats. 
+<strong>Your best data quality will come from scraping their website</strong>, but
+maybe that approach is not for all users of this data! So here it is, a means
+to bulk download the IEM's SPC Outlook database.</p>
+ 
+<form method="GET" action="/cgi-bin/request/gis/spc_outlooks.py">
+<table class="table">
+<thead><tr><th colspan="6">Time Interval for Outlook *Issuance* (UTC)</th></tr></thead>
+<tr>
+    <th>Year</th><th>Month</th><th>Day</th>
+    <th>Hour</th><th>Minute</th>
+</tr>
+
+<tr>
+EOF;
+$content .= "<th>Start:</th>
+    <td>
+     ". yearSelect2(2002, date("Y"), "year1") ."
+    </td>
+    <td>
+     ". monthSelect2(0,"month1") ."
+    </td>
+    <td>
+     ". daySelect2(0, "day1") ."
+    </td>
+    <td>
+     ". gmtHourSelect(0, "hour1") ."
+    </td>
+    <td>
+     ". minuteSelect(0, "minute1") ."
+    </td>
+  </tr>
+
+  <tr>
+    <th>End:</th>
+    <td>
+     ". yearSelect2(2002, date("Y"), "year2") ."
+    </td>
+    <td>
+     ". monthSelect2(0,"month2") ."
+    </td>
+    <td>
+     ". daySelect2(0, "day2") ."
+    </td>
+    <td>
+     ". gmtHourSelect(0, "hour2") ."
+    </td>
+    <td>
+     ". minuteSelect(0, "minute2") ."
+    </td>
+  </tr>
+</table>";
+
+$content .= <<<EOM
+<p><input type="submit" value="Giveme data right now!">
+</form>
+
+<h4>Shapefile DBF schema:</h4>
+<pre>
+Field 0: Type=C/String, Title=`ISSUE', Outlook Beginning Valid Time UTC
+Field 1: Type=C/String, Title=`EXPIRE', Outlook Ending Valid Time UTC
+Field 2: Type=C/String, Title=`PRODISS', Timestamp of Product Issuance UTC
+Field 3: Type=C/String, Title=`TYPE', Either C=Convective, F=Fire Weather
+Field 4: Type=N/Double, Title=`DAY', Day 1 through 8 for the outlook
+Field 5: Type=C/String, Title=`THRESHOLD', Threshold Label
+Field 6: Type=C/String, Title=`CATEGORY', Category of Threshold Label
+</pre>
+
+<h4>Archive / Usage Notes:</h4>
+<ol>
+ <li><strong>30 Mar 2021:</strong> an ongoing assessment is being done to see
+ how complete this archive is and how it compares with SPC's website data.
+ Stay tuned!</li>
+</ol>
+</form>
+EOM;
+
+$t->content = $content;
+$t->render('single.phtml');
+
+?>

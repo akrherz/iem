@@ -256,13 +256,14 @@ first guess at fields the NWS needs for their RTP product.</p>
   <div class="panel-heading">Storm Prediction Center Products</div>
   <div class="panel-body">
 <ul>
+ <li><a href="/request/gis/spc_outlooks.phtml"><i class="fa fa-download"></i> Bulk SPC Outlook Shapefile Download</a></li>
  <li><a href="/GIS/apps/rview/watch.phtml">Convective Watches Information</a>
   <br />Lists out some simple details on each convective watch.</li>
  <li><a href="/nws/spc_outlook_search/"><i class="fa fa-search"></i> SPC Outlook / MCD search by point</a>
   <br />Allows answering of the question of when was a given point last under
 some convective outlook or the number of outlooks for a given point.</li>
 </ul>
-  </div>
+ </div>
 </div>
 
 
