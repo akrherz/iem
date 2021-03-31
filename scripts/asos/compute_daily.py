@@ -164,6 +164,12 @@ def do(ts):
             newdata,
         )
         is_new(
+            "max_sknt",
+            clean(ldf["sknt"].max(), 0, 150),
+            currentrow,
+            newdata,
+        )
+        is_new(
             "max_feel",
             clean(ldf["feel"].max(), -150, 200),
             currentrow,
