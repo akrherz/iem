@@ -11,7 +11,10 @@ from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import Z_OVERLAY2_LABEL, Z_POLITICAL
 
-PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
+PDICT = {
+    "cwa": "Plot by NWS Forecast Office",
+    "state": "Plot by State/Sector",
+}
 PDICT2 = {
     "1C": "Day 1 Convective",
     "2C": "Day 2 Convective",
@@ -21,9 +24,10 @@ PDICT2 = {
     "6C": "Day 6 Convective",
     "7C": "Day 7 Convective",
     "8C": "Day 8 Convective",
+    "0C": "Day 4-8 Convective",
     "1F": "Day 1 Fire Weather",
     "2F": "Day 2 Fire Weather",
-    "3F": "Day 3 Fire Weather",
+    "0F": "Day 3-8 Fire Weather",
 }
 PDICT3 = {
     "categorical": "Categorical (D1-3), Any Severe (D4-8)",
@@ -56,6 +60,14 @@ COLORS = {
     "0.30": "#ff00ff",
     "0.45": "#912cee",
     "0.60": "#104e8b",
+}
+DAY_COLORS = {
+    3: "#ff00ff",
+    4: "#ff0000",
+    5: "#ffff00",
+    6: "#edbf7c",
+    7: "#f67a7d",
+    8: "#ff78ff",
 }
 OUTLINE_COLORS = {
     "TSTM": "#566453",
@@ -131,14 +143,14 @@ def get_description():
     return desc
 
 
-def outlook_search(pgconn, valid, day, outlook_type):
+def outlook_search(pgconn, valid, days, outlook_type):
     """Go look for a nearest in time TAF."""
     cursor = pgconn.cursor()
     cursor.execute(
         "SELECT product_issue at time zone 'UTC' from spc_outlook "
-        "WHERE day = %s and outlook_type = %s and product_issue > %s and "
+        "WHERE day in %s and outlook_type = %s and product_issue > %s and "
         "product_issue < %s ORDER by product_issue DESC",
-        (day, outlook_type, valid - datetime.timedelta(hours=24), valid),
+        (days, outlook_type, valid - datetime.timedelta(hours=24), valid),
     )
     if cursor.rowcount == 0:
         return None
@@ -150,12 +162,19 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     valid = ctx["valid"].replace(tzinfo=datetime.timezone.utc)
     pgconn = get_dbconn("postgis")
-    day, outlook_type = ctx["which"][0], ctx["which"][1]
+    day, outlook_type = int(ctx["which"][0]), ctx["which"][1]
     category = ctx["cat"].upper()
     if outlook_type == "F":
         category = "FIRE WEATHER CATEGORICAL"
-    if int(day) > 3 and outlook_type == "C":
+    if (day == 0 or day > 2) and outlook_type == "F":
+        category = "CRITICAL FIRE WEATHER AREA"
+    if (day == 0 or day > 3) and outlook_type == "C":
         category = "ANY SEVERE"
+    days = (day,)
+    if day == 0:
+        days = tuple(range(4, 9))
+        if outlook_type == "F":
+            days = tuple(range(3, 9))
 
     def fetch(ts):
         """Getme data."""
@@ -163,17 +182,17 @@ def plotter(fdict):
             "SELECT o.*, g.*, t.priority from spc_outlook o, "
             "spc_outlook_geometries g, spc_outlook_thresholds t WHERE "
             "o.id = g.spc_outlook_id and g.threshold = t.threshold and "
-            "product_issue = %s and day = %s and category = %s and "
-            "outlook_type = %s ORDER by t.priority ASC",
+            "product_issue = %s and day in %s and category = %s and "
+            "outlook_type = %s ORDER by o.day ASC, t.priority ASC",
             pgconn,
-            params=(ts, day, category, outlook_type),
+            params=(ts, days, category, outlook_type),
             index_col=None,
             geom_col="geom",
         )
 
     df = fetch(valid)
     if df.empty:
-        valid = outlook_search(pgconn, valid, day, outlook_type)
+        valid = outlook_search(pgconn, valid, days, outlook_type)
         if valid is None:
             raise NoDataFound("SPC Outlook data was not found!")
         df = fetch(valid)
@@ -181,12 +200,15 @@ def plotter(fdict):
         sector = "cwa"
     else:
         sector = "state" if len(ctx["csector"]) == 2 else ctx["csector"]
+    daylabel = day if day > 0 else "%s-%s" % (days[0], days[-1])
     mp = MapPlot(
-        title=f"Storm Prediction Center Day {day} {category.capitalize()}",
+        title=(
+            f"Storm Prediction Center Day {daylabel} {category.capitalize()}"
+        ),
         subtitle=(
             f"Issued: {df.iloc[0]['product_issue'].strftime(ISO)} UTC "
-            f"Valid: {df.iloc[0]['issue'].strftime(ISO)} UTC "
-            f"Expire: {df.iloc[0]['expire'].strftime(ISO)} UTC"
+            f"Valid: {df['issue'].min().strftime(ISO)} UTC "
+            f"Expire: {df['expire'].max().strftime(ISO)} UTC"
         ),
         sector=sector,
         twitter=True,
@@ -195,6 +217,7 @@ def plotter(fdict):
         nocaption=True,
     )
     rects = []
+    rectlabels = []
     for _idx, row in df.iterrows():
         if row["threshold"] == "SIGN":
             mp.ax.add_geometries(
@@ -208,19 +231,29 @@ def plotter(fdict):
             )
             rect = Rectangle((0, 0), 1, 1, fc="None", hatch="/")
         else:
+            fc = COLORS[row["threshold"]]
+            ec = OUTLINE_COLORS.get(row["threshold"], "k")
+            if day == 0:
+                fc, ec = "None", DAY_COLORS[row["day"]]
+                if row["threshold"] == "0.30":
+                    fc, ec = ec, ec
             mp.ax.add_geometries(
                 [row["geom"]],
                 ccrs.PlateCarree(),
-                facecolor=COLORS[row["threshold"]],
-                edgecolor=OUTLINE_COLORS.get(row["threshold"], "k"),
+                facecolor=fc,
+                edgecolor=ec,
                 linewidth=2,
                 zorder=Z_POLITICAL - 1,
             )
-            rect = Rectangle((0, 0), 1, 1, fc=COLORS[row["threshold"]])
+            rect = Rectangle((0, 0), 1, 1, fc=fc, ec=ec)
         rects.append(rect)
+        label = THRESHOLD_LEVELS.get(row["threshold"], row["threshold"])
+        if day == 0:
+            label = f"D{row['day']} {label}"
+        rectlabels.append(label)
     mp.ax.legend(
         rects,
-        [THRESHOLD_LEVELS.get(x, x) for x in df["threshold"]],
+        rectlabels,
         ncol=1,
         loc="lower right",
         fontsize=12,
@@ -241,4 +274,7 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(cat="categorical", valid="2021-03-30 2022"))
+    # has all 5 days with something included
+    # plotter(dict(cat="categorical", which="0C", valid="2019-05-14 2022"))
+    # has three days of F
+    plotter(dict(cat="categorical", which="0F", valid="2018-05-07 2322"))
