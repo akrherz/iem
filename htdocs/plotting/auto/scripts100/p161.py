@@ -40,9 +40,9 @@ METRICS = {
     "max_feel": "Max Feels Like Temperature (F)",
     "avg_feel": "Avg Feels Like Temperature (F)",
     "min_feel": "Min Feels Like Temperature (F)",
-    "max_relh": "Max Relative Humidity (%)",
-    "avg_relh": "Avg Relative Humidity (%)",
-    "min_relh": "Min Relative Humidity (%)",
+    "max_rh": "Max Relative Humidity (%)",
+    "avg_rh": "Avg Relative Humidity (%)",
+    "min_rh": "Min Relative Humidity (%)",
     "pday": "Precipitation (inch)",
 }
 
