@@ -179,11 +179,14 @@ def plotter(fdict):
     def fetch(ts):
         """Getme data."""
         return read_postgis(
-            "SELECT o.*, g.*, t.priority from spc_outlook o, "
-            "spc_outlook_geometries g, spc_outlook_thresholds t WHERE "
-            "o.id = g.spc_outlook_id and g.threshold = t.threshold and "
-            "product_issue = %s and day in %s and category = %s and "
-            "outlook_type = %s ORDER by o.day ASC, t.priority ASC",
+            "WITH data as ("
+            "SELECT o.*, g.* from spc_outlook o LEFT JOIN "
+            "spc_outlook_geometries g on (o.id = g.spc_outlook_id) WHERE "
+            "product_issue = %s and day in %s and "
+            "(category is null or category = %s) and outlook_type = %s) "
+            "SELECT d.*, t.priority from data d LEFT JOIN "
+            "spc_outlook_thresholds t on (d.threshold = t.threshold) "
+            "ORDER by day ASC, priority ASC",
             pgconn,
             params=(ts, days, category, outlook_type),
             index_col=None,
@@ -218,7 +221,7 @@ def plotter(fdict):
     )
     rects = []
     rectlabels = []
-    for _idx, row in df.iterrows():
+    for _idx, row in df[~pd.isna(df["threshold"])].iterrows():
         if row["threshold"] == "SIGN":
             mp.ax.add_geometries(
                 [row["geom"]],
@@ -251,16 +254,32 @@ def plotter(fdict):
         if day == 0:
             label = f"D{row['day']} {label}"
         rectlabels.append(label)
-    mp.ax.legend(
-        rects,
-        rectlabels,
-        ncol=1,
-        loc="lower right",
-        fontsize=12,
-        bbox_to_anchor=(1.08, 0.01),
-        fancybox=True,
-        framealpha=1,
-    ).set_zorder(Z_OVERLAY2_LABEL + 100)
+    if rects:
+        mp.ax.legend(
+            rects,
+            rectlabels,
+            ncol=1,
+            loc="lower right",
+            fontsize=12,
+            bbox_to_anchor=(1.08, 0.01),
+            fancybox=True,
+            framealpha=1,
+        ).set_zorder(Z_OVERLAY2_LABEL + 100)
+    else:
+        emptytext = "Potential Too Low"
+        if outlook_type == "C" and day in [1, 2, 3]:
+            emptytext = "No Thunderstorms Forecast"
+        mp.ax.text(
+            0.5,
+            0.5,
+            emptytext,
+            transform=mp.ax.transAxes,
+            fontsize=30,
+            ha="center",
+            color="yellow",
+            bbox=dict(color="black", alpha=0.5),
+            zorder=Z_OVERLAY2_LABEL,
+        )
 
     if sector == "cwa":
         mp.draw_cwas(color="k", linewidth=2.5)
