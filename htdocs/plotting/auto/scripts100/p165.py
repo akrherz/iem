@@ -156,7 +156,7 @@ def plotter(fdict):
     syear = ctx.get("syear", 1893)
     eyear = ctx.get("eyear", datetime.date.today().year)
     df = read_sql(
-        """
+        f"""
         -- get the domain of data
         WITH events as (
             SELECT
@@ -165,12 +165,7 @@ def plotter(fdict):
             year,
             extract(doy from day) as doy,
             day
-            from """
-        + table
-        + """
-            WHERE """
-        + SQLOPT[varname]
-        + """ and
+            from {table} WHERE {SQLOPT[varname]} and
             month in %s and
             substr(station, 3, 4) != '0000'
             and substr(station, 3, 1) not in ('C', 'T')
@@ -179,12 +174,8 @@ def plotter(fdict):
             SELECT station, winter_year, year, doy, day,
             case when month < 7 then doy + 366 else doy end as winter_doy,
             rank() OVER (
-                PARTITION by """
-        + YRGP[varname]
-        + """, station
-                ORDER by day """
-        + ORDER[varname]
-        + """)
+                PARTITION by {YRGP[varname]}, station
+                ORDER by day {ORDER[varname]})
             from events)
         select * from agg where rank = 1
         """,

@@ -192,6 +192,7 @@ def plotter(fdict):
         twitter=True,
         state=ctx["csector"],
         cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),
+        nocaption=True,
     )
     rects = []
     for _idx, row in df.iterrows():

@@ -87,19 +87,16 @@ def plotter(fdict):
     today = datetime.date.today().replace(day=1)
 
     df = read_sql(
-        """
+        f"""
         SELECT year, month,
         case when month in (10, 11, 12) then year + 1 else year end
           as water_year,
         sum(precip) as precip,
         sum(snow) as snow,
         avg(high) as avg_high, avg(low) as avg_low,
-        avg((high+low)/2.) as avg_temp from """
-        + table
-        + """ WHERE
+        avg((high+low)/2.) as avg_temp from {table} WHERE
         station = %s and day < %s
-        GROUP by year, water_year, month
-        ORDER by year ASC, month ASC
+        GROUP by year, water_year, month ORDER by year ASC, month ASC
     """,
         pgconn,
         params=(station, today),

@@ -1,9 +1,9 @@
 <?php 
-include("../../../config/settings.inc.php");
-include("../../../include/myview.php");
-include("../../../include/forms.php");
-include("../../../include/imagemaps.php");
+require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 109);
+require_once "../../../include/myview.php";
+require_once "../../../include/forms.php";
+require_once "../../../include/imagemaps.php";
 
 $t = new MyView();
 $t->thispage = "gis-";
@@ -31,11 +31,11 @@ $content = <<<EOF
  shapefile format. <strong>Holes do exist in this archive!</strong>  If you find
  a data hole and would like it filled, please let us know.
 
-<div class="alert alert-warning">The <a href="http://www.ncdc.noaa.gov">National Climatic Data Center</a> now
+<div class="alert alert-warning">The <a href="https://www.ncdc.noaa.gov">National Climatic Data Center</a> now
 		has a very impressive archive and interface to download these attributes.
-		You can find it on their <a href="http://www.ncdc.noaa.gov/swdi/">Severe
+		You can find it on their <a href="https://www.ncdc.noaa.gov/swdi/">Severe
 		Weather Data Inventory</a>.  For programic access, check out their 
-		<a href="http://www.ncdc.noaa.gov/swdiws/">web services</a>.</div>
+		<a href="https://www.ncdc.noaa.gov/swdiws/">web services</a>.</div>
 		
 <p>The archive behind this application is large, so please be patient after clicking
  the Givme button below.  If you request all RADARs, you can only request up to 

@@ -130,13 +130,8 @@ YEAR   SPRING  FALL    SPRING  FALL    SPRING  FALL    SPRING  FALL
     cycle_pos = [-1, -1, -1, -1]
 
     cursor.execute(
-        """
-        SELECT day, high, low from """
-        + table
-        + """
-        WHERE station = %s and high is not null and low is not null
-        ORDER by day ASC
-    """,
+        f"SELECT day, high, low from {table} WHERE station = %s and "
+        "high is not null and low is not null ORDER by day ASC",
         (station,),
     )
     for row in cursor:
