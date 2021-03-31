@@ -29,9 +29,22 @@ MDICT = OrderedDict(
     ]
 )
 
-METRICS = OrderedDict(
-    [("max_dwpf", "Max Dew Point (F)"), ("max_tmpf", "Max Air Temp (F)")]
-)
+METRICS = {
+    "avg_sknt": "Avg Wind Speed (kts)",
+    "max_sknt": "Max Wind Speed (kts)",
+    "max_gust": "Max Wind Speed Gust (kts)",
+    "max_tmpf": "Max Air Temp (F)",
+    "min_tmpf": "Min Air Temp (F)",
+    "max_dwpf": "Max Dew Point Temp (F)",
+    "min_dwpf": "Min Dew Point Temp (F)",
+    "max_feel": "Max Feels Like Temperature (F)",
+    "avg_feel": "Avg Feels Like Temperature (F)",
+    "min_feel": "Min Feels Like Temperature (F)",
+    "max_relh": "Max Relative Humidity (%)",
+    "avg_relh": "Avg Relative Humidity (%)",
+    "min_relh": "Min Relative Humidity (%)",
+    "pday": "Precipitation (inch)",
+}
 
 DIRS = OrderedDict([("aoa", "At or Above"), ("below", "Below")])
 
@@ -123,6 +136,7 @@ def get_context(fdict):
         sum(case when {varname}::int {opp} %s then 1 else 0 end) as count
         from summary s JOIN stations t on (s.iemid = t.iemid)
         WHERE t.id = %s and t.network = %s and extract(month from day) in %s
+        and {varname} is not null
         GROUP by year ORDER by year ASC
         """,
         pgconn,
