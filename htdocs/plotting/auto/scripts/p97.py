@@ -167,6 +167,13 @@ def get_description():
             label="Label Values?",
         ),
         dict(
+            type="select",
+            options=PDICT6,
+            label="Which IEM Computed Climatology to Use",
+            default="climate51",
+            name="ct",
+        ),
+        dict(
             type="text",
             name="cull",
             default="",
@@ -174,13 +181,6 @@ def get_description():
                 "Space or comma separated IEM stations ids (ST####) to cull "
                 "from the plot."
             ),
-        ),
-        dict(
-            type="select",
-            options=PDICT6,
-            label="Which IEM Computed Climatology to Use",
-            default="climate51",
-            name="ct",
         ),
     ]
     return desc
@@ -407,4 +407,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(wfo="DVN", d="wfo"))
+    plotter(dict(wfo="DVN", d="wfo", ct="climate81"))
