@@ -6,7 +6,7 @@ from pyiem.nws import vtec
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
-from pyiem.reference import Z_OVERLAY2, TWITTER_RESOLUTION_INCH
+from pyiem.reference import Z_OVERLAY2
 import cartopy.crs as ccrs
 import pytz
 
@@ -256,7 +256,7 @@ def plotter(fdict):
         east=bounds[2] + buffer,
         north=bounds[3] + buffer,
         nocaption=True,
-        figsize=TWITTER_RESOLUTION_INCH,
+        twitter=True,
     )
     if len(df["wfo"].unique()) == 1 and wfo not in ["PHEB", "PAAQ"]:
         mp.sector = "cwa"
@@ -274,6 +274,7 @@ def plotter(fdict):
             zorder=1000,
             transform=mp.ax.transAxes,
             fontsize=24,
+            bbox=dict(color="white"),
             ha="center",
         )
     else:
@@ -304,16 +305,20 @@ def plotter(fdict):
                 zorder=Z_OVERLAY2,
             )
             poly = df2.iloc[0]["geom"]
-        mp.ax.add_geometries(
-            [poly],
-            ccrs.PlateCarree(),
-            facecolor=color,
-            alpha=0.5,
-            edgecolor="k",
-            zorder=Z_OVERLAY2,
-        )
+            mp.ax.add_geometries(
+                [poly],
+                ccrs.PlateCarree(),
+                facecolor=color,
+                alpha=0.5,
+                edgecolor="k",
+                zorder=Z_OVERLAY2,
+            )
     if len(df.index) > 10:
         mp.drawcities()
+    mp.drawcounties()
+    # if p1 in ['SV', 'TO', 'FF', 'MA']:
+    #    mp.overlay_nexrad(
+    #        utcvalid.to_pydatetime().replace(tzinfo=timezone.utc))
     return mp.fig, df.drop("simple_geom", axis=1)
 
 
