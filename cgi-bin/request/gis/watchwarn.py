@@ -37,6 +37,8 @@ def get_time_extent(form):
     minute2 = form.get("minute2")
     sts = utc(int(year1), int(month1), int(day1), int(hour1), int(minute1))
     ets = utc(int(year2), int(month2), int(day2), int(hour2), int(minute2))
+    if ets < sts:
+        sts, ets = ets, sts
     return sts, ets
 
 
