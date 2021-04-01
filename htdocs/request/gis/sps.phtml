@@ -1,0 +1,96 @@
+<?php 
+require_once "../../../config/settings.inc.php";
+define("IEM_APPID", 126);
+require_once "../../../include/myview.php";
+require_once "../../../include/forms.php";
+require_once "../../../include/imagemaps.php";
+
+$t = new MyView();
+$t->thispage = "gis-";
+$t->title = "Download SPS Special Weather Statement Shapefile";
+$content = <<<EOF
+<h3>NWS Special Weather Statement (SPS) Polygons</h3>
+
+<p>The IEM attempts to process and archive special weather statements (SPS)
+This page offers a download of the SPS polygons and some limited associated
+metadata.</p>
+ 
+<form method="GET" action="/cgi-bin/request/gis/sps.py">
+<table class="table">
+<thead><tr><th colspan="6">Time Interval for SPS *Issuance* (UTC)</th></tr></thead>
+<tr>
+    <th>Year</th><th>Month</th><th>Day</th>
+    <th>Hour</th><th>Minute</th>
+</tr>
+
+<tr>
+EOF;
+$content .= "<th>Start:</th>
+    <td>
+     ". yearSelect2(2002, date("Y"), "year1") ."
+    </td>
+    <td>
+     ". monthSelect2(0,"month1") ."
+    </td>
+    <td>
+     ". daySelect2(0, "day1") ."
+    </td>
+    <td>
+     ". gmtHourSelect(0, "hour1") ."
+    </td>
+    <td>
+     ". minuteSelect(0, "minute1") ."
+    </td>
+  </tr>
+
+  <tr>
+    <th>End:</th>
+    <td>
+     ". yearSelect2(2002, date("Y"), "year2") ."
+    </td>
+    <td>
+     ". monthSelect2(0,"month2") ."
+    </td>
+    <td>
+     ". daySelect2(0, "day2") ."
+    </td>
+    <td>
+     ". gmtHourSelect(0, "hour2") ."
+    </td>
+    <td>
+     ". minuteSelect(0, "minute2") ."
+    </td>
+  </tr>
+</table>";
+
+$content .= <<<EOM
+<p><input type="submit" value="Giveme data right now!">
+</form>
+
+<h4>Shapefile DBF schema:</h4>
+<pre>
+Field 0: Type=C/String, Title=`ISSUE', SPS Issuance Timestamp UTC
+Field 1: Type=C/String, Title=`EXPIRE', SPS Expiration Timestamp UTC
+Field 2: Type=C/String, Title=`PROD_ID', IEM Text Product Identifier
+Field 3: Type=C/String, Title=`WFO', 3 Character Issuance WFO
+Field 4: Type=C/String, Title=`LNDSPOUT', Landspout IBW Tag
+Field 5: Type=C/String, Title=`WTRSPOUT', Waterspout IBW Tag
+Field 6: Type=C/String, Title=`MAX_HAIL', Max Hail Size
+Field 7: Type=C/String, Title=`MAX_WIND', Max Wind Gust
+Field 8: Type=C/String, Title=`TML_VALD', Time-Motion-Location Timestamp UTC
+Field 9: Type=N/Double, Title=`TML_DRCT', Time-Motion-Location Storm Motion
+Field 10: Type=N/Double, Title=`TML_SKNT', Time-Motion-Location Storm Speed kt
+
+</pre>
+
+<h4>Archive / Usage Notes:</h4>
+<ol>
+ <li>Presently, only those SPS products with a polygon are returned.</li>
+</ol>
+</form>
+EOM;
+
+$t->content = $content;
+$t->render('single.phtml');
+
+?>

@@ -93,6 +93,8 @@ options listed.</p>
   <br />of archived Storm Based Warning polygons.</li>
  <li><a href="/iembot/">IEMBot</a>
   <br />Realtime chatrooms, twitter posting service, RSS feeds and more.</li> 
+  <li><a href="/request/gis/sps.phtml">Special Weather Statement (SPS) Polygons</a><br />
+    Shapefile download of SPS polygons and IBW tags.</li>
 </ul>
 
 <p><strong>Maps and Graphics</strong></p>

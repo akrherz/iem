@@ -126,8 +126,10 @@ This file is updated every minute.</li>
  of your choice from the archive.</li>
  <li><a href="/data/gis/shape/4326/iem/coopobs.zip">NWS COOP Observations</a>
    <br>Today's climate reports</li>
+ <li><a href="/request/gis/sps.phtml">Special Weather Statement (SPS) Polygons</a><br />
+ Shapefile download of SPS polygons and IBW tags.</li>
  <li><a href="/data/gis/">Browse</a> GIS data stored on the IEM website.</li>
-</ul>
+ </ul>
 
 </div></div>
 EOM;
