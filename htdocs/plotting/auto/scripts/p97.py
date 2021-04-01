@@ -78,6 +78,11 @@ PDICT3 = {
     "text": "Plot just values without contours",
 }
 PDICT5 = {"yes": "Label Station Values", "no": "Do Not Label Station Values"}
+PDICT6 = {
+    "climate51": "IEM Climatology 1951-present",
+    "climate71": "IEM Climatology 1971-present",
+    "climate81": "IEM Climatology 1981-present",
+}
 
 
 def get_description():
@@ -89,8 +94,8 @@ def get_description():
     ] = """This application plots an analysis of station
     data for a period of your choice.  Spatially aggregated values like those
     for climate districts and statewide averages are not included.  For this
-    application, climatology is based on averaged observations between 1951
-    till the present day.
+    application, climatology is based on averaged observations for the
+    climatology period you pick.
     """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc["arguments"] = [
@@ -170,6 +175,13 @@ def get_description():
                 "from the plot."
             ),
         ),
+        dict(
+            type="select",
+            options=PDICT6,
+            label="Which IEM Computed Climatology to Use",
+            default="climate51",
+            name="ct",
+        ),
     ]
     return desc
 
@@ -233,7 +245,7 @@ def plotter(fdict):
         climo as (
             SELECT station, to_char(valid, 'mmdd') as sday, precip, high, low,
             gdd{ctx["gddbase"]} as gdd, cdd65, hdd65, snow
-            from climate51),
+            from {ctx['ct']}),
         combo as (
             SELECT o.station, o.precip - c.precip as precip_diff,
             o.precip as precip, c.precip as cprecip,
@@ -308,10 +320,11 @@ def plotter(fdict):
     subtitle = ""
     if varname.find("depart") > -1:
         subtitle = (
-            "%s is compared with 1951-%s Climatology" " to compute departures"
-        ) % (date1.year, datetime.date.today().year - 1)
+            "%s is compared with 19%s-%s Climatology to compute departures"
+        ) % (date1.year, ctx["ct"][-2:], datetime.date.today().year - 1)
     elif varname.startswith("c"):
-        subtitle = ("Climatology is based on data from 1951-%s") % (
+        subtitle = ("Climatology is based on data from 19%s-%s") % (
+            ctx["ct"][-2:],
             datetime.date.today().year - 1,
         )
     if ctx["d"] == "sector":
