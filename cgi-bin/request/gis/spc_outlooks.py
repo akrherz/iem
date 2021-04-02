@@ -35,7 +35,13 @@ def get_context(environ):
     if ets < sts:
         sts, ets = ets, sts
 
-    return dict(sts=sts, ets=ets)
+    types = [x[0].upper() for x in form.getall("type")]
+    if not types:
+        types = ["C", "F"]
+    days = [int(x) for x in form.getall("d")]
+    if not days:
+        days = list(range(1, 9))
+    return dict(sts=sts, ets=ets, types=types, days=days)
 
 
 def run(ctx, start_response):
@@ -53,21 +59,27 @@ def run(ctx, start_response):
                 ("DAY", "int"),
                 ("THRESHOLD", "str:4"),
                 ("CATEGORY", "str:64"),
+                ("CYCLE", "int"),
             ]
         ),
     }
-
     df = read_postgis(
         "select "
         f"to_char(issue {common}) as issue, "
         f"to_char(expire {common}) as expire, "
         f"to_char(product_issue {common}) as prodiss, "
-        "outlook_type as type, day, threshold, category, geom "
+        "outlook_type as type, day, threshold, category, cycle, geom "
         "from spc_outlook o JOIN spc_outlook_geometries g on "
         "(o.id = g.spc_outlook_id) WHERE product_issue >= %s and "
-        "product_issue < %s ORDER by product_issue ASC",
+        "product_issue < %s and outlook_type in %s and day in %s "
+        "ORDER by product_issue ASC",
         pgconn,
-        params=(ctx["sts"], ctx["ets"]),
+        params=(
+            ctx["sts"],
+            ctx["ets"],
+            tuple(ctx["types"]),
+            tuple(ctx["days"]),
+        ),
         geom_col="geom",
     )
     if df.empty:

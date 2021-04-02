@@ -24,8 +24,8 @@ to bulk download the IEM's SPC Outlook database.</p>
 <table class="table">
 <thead><tr><th colspan="6">Time Interval for Outlook *Issuance* (UTC)</th></tr></thead>
 <tr>
-    <th>Year</th><th>Month</th><th>Day</th>
-    <th>Hour</th><th>Minute</th>
+    <td></td><th>Year</th><th>Month</th><th>Day</th>
+    <th>Hour</th><th>Minute</th><th>Outlook Type:</th><th>Outlook Day:</th>
 </tr>
 
 <tr>
@@ -45,6 +45,30 @@ $content .= "<th>Start:</th>
     </td>
     <td>
      ". minuteSelect(0, "minute1") ."
+    </td>
+    <td rowspan=\"2\">
+    <input id=\"tc\" type=\"checkbox\" name=\"type\" value=\"C\" checked>
+    <label for=\"tc\">Convective</label>
+    <br /><input id=\"tf\" type=\"checkbox\" name=\"type\" value=\"F\" checked>
+    <label for=\"tf\">Fire Weather</label>
+    </td>
+    <td rowspan=\"2\">
+    <input id=\"d1\" type=\"checkbox\" name=\"d\" value=\"1\" checked>
+    <label for=\"d1\">1</label>
+    <input id=\"d2\" type=\"checkbox\" name=\"d\" value=\"2\" checked>
+    <label for=\"d2\">2</label>
+    <input id=\"d3\" type=\"checkbox\" name=\"d\" value=\"3\" checked>
+    <label for=\"d3\">3</label>
+    <input id=\"d4\" type=\"checkbox\" name=\"d\" value=\"4\" checked>
+    <label for=\"d4\">4</label><br />
+    <input id=\"d5\" type=\"checkbox\" name=\"d\" value=\"5\" checked>
+    <label for=\"d5\">5</label>
+    <input id=\"d6\" type=\"checkbox\" name=\"d\" value=\"6\" checked>
+    <label for=\"d6\">6</label>
+    <input id=\"d7\" type=\"checkbox\" name=\"d\" value=\"7\" checked>
+    <label for=\"d7\">7</label>
+    <input id=\"d8\" type=\"checkbox\" name=\"d\" value=\"8\" checked>
+    <label for=\"d8\">8</label>
     </td>
   </tr>
 
@@ -74,21 +98,35 @@ $content .= <<<EOM
 
 <h4>Shapefile DBF schema:</h4>
 <pre>
-Field 0: Type=C/String, Title=`ISSUE', Outlook Beginning Valid Time UTC
-Field 1: Type=C/String, Title=`EXPIRE', Outlook Ending Valid Time UTC
-Field 2: Type=C/String, Title=`PRODISS', Timestamp of Product Issuance UTC
-Field 3: Type=C/String, Title=`TYPE', Either C=Convective, F=Fire Weather
-Field 4: Type=N/Double, Title=`DAY', Day 1 through 8 for the outlook
-Field 5: Type=C/String, Title=`THRESHOLD', Threshold Label
-Field 6: Type=C/String, Title=`CATEGORY', Category of Threshold Label
+Field 0: Type=C/String, Title='ISSUE', Outlook Beginning Valid Time UTC
+Field 1: Type=C/String, Title='EXPIRE', Outlook Ending Valid Time UTC
+Field 2: Type=C/String, Title='PRODISS', Timestamp of Product Issuance UTC
+Field 3: Type=C/String, Title='TYPE', Either C=Convective, F=Fire Weather
+Field 4: Type=N/Double, Title='DAY', Day 1 through 8 for the outlook
+Field 5: Type=C/String, Title='THRESHOLD', Threshold Label
+Field 6: Type=C/String, Title='CATEGORY', Category of Threshold Label
+Field 7: Type=N/Double, Title='CYCLE', The generalized forecast issuance hour
 </pre>
 
 <h4>Archive / Usage Notes:</h4>
 <ol>
- <li><strong>30 Mar 2021:</strong> an ongoing assessment is being done to see
- how complete this archive is and how it compares with SPC's website data.
- Stay tuned!</li>
-</ol>
+ <li><strong>1 Apr 2021:</strong> An assessment was made of the archive
+ completeness and found 99.9% coverage.  Some of the holes are due to
+ lost PTS text products yet to be found and others are due to errors within
+ the PTS product causing it to be generally unusable.</li>
+ <li>The polygons returned by this download represent the full extent of the
+ threshold bounds and not some bisected area only valid for the given threshold.
+ Rewording, if you download an outlook that had a moderate risk polygon.  That area
+ would also be covered by an enhanced, slight, and general thunderstorm polygon.</li>
+ <li>A complication with using this dataset is that all outlooks are returned, the
+ <code>CYCLE</code> attribute attempts to define a canonical outlook for a given
+ issuance cycle.  For example, the Day 1 20Z convective outlook may get issued three
+ times for various reasons.  The download contains all three, but two of them will
+ have a cycle of `-1` and the other will have a `20`.</li>
+ <li>Presently, the service only returns outlooks that had actual geographies
+ associated with the outlook.  For example, if there was no Day 5 area in the
+ outlook, no entries are included in the download result.</li>
+ </ol>
 </form>
 EOM;
 
