@@ -84,10 +84,10 @@ def plotter(fdict):
     sum(case when low_delta > 0 then 1 else 0 end) as low_above,
     sum(case when low_delta = 0 then 1 else 0 end) as low_equal,
     sum(case when low_delta < 0 then 1 else 0 end) as low_below,
-    sum(case when precip > 0 then 1 else 0 end) as precip_above,
-    sum(case when precip = 0 then 1 else 0 end) as precip_below,
-    sum(case when snow > 0 then 1 else 0 end) as snow_above,
-    sum(case when snow = 0 then 1 else 0 end) as snow_below
+    sum(case when precip > 0.005 then 1 else 0 end) as precip_above,
+    sum(case when precip < 0.005 then 1 else 0 end) as precip_below,
+    sum(case when snow > 0.005 then 1 else 0 end) as snow_above,
+    sum(case when snow < 0.005 then 1 else 0 end) as snow_below
     from data GROUP by valid ORDER by valid ASC
     """,
         pgconn,
@@ -98,7 +98,7 @@ def plotter(fdict):
         raise NoDataFound("Error, no results returned!")
     for v in ["precip", "snow"]:
         if varname == v:
-            xlabel = "<-- No %s %%   |     %s   %% -->" % (
+            xlabel = "<-- No/Trace %s %%   |     Measurable %s   %% -->" % (
                 v.capitalize(),
                 v.capitalize(),
             )
