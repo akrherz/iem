@@ -3,6 +3,7 @@ import datetime
 from collections import OrderedDict
 
 from pandas.io.sql import read_sql
+from pyiem.plot import figure_axes
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -101,17 +102,23 @@ def plotter(fdict):
                 v.capitalize(),
                 v.capitalize(),
             )
+            colors = ["r", "b"]
         df[v + "_count"] = df[v + "_above"] + df[v + "_below"]
-        colors = ["r", "b"]
     for v in ["high", "low"]:
         df[v + "_count"] = (
             df[v + "_above"] + df[v + "_below"] + df[v + "_equal"]
         )
         if varname == v:
             xlabel = "<-- Below Average %    |    Above Average % -->"
-        colors = ["b", "r"]
-
-    (fig, ax) = plt.subplots(1, 1)
+            colors = ["b", "r"]
+    title = (
+        "Percentage of CONUS NWS First Order CLImate Sites\n(%s - %s) %s"
+    ) % (
+        sts.strftime("%-d %b %Y"),
+        ets.strftime("%-d %b %Y"),
+        MDICT.get(varname),
+    )
+    (fig, ax) = figure_axes(title=title)
     ax.barh(
         df.index.values,
         0 - (df[varname + "_below"] / df[varname + "_count"] * 100.0),
@@ -128,20 +135,12 @@ def plotter(fdict):
     )
     ax.set_xlim(-100, 100)
     ax.grid(True)
-    ax.set_title(
-        ("Percentage of CONUS NWS First Order CLImate Sites\n(%s - %s) %s")
-        % (
-            sts.strftime("%-d %b %Y"),
-            ets.strftime("%-d %b %Y"),
-            MDICT.get(varname),
-        )
-    )
     ax.set_xlabel(xlabel)
     ticks = [-100, -90, -75, -50, -25, -10, 0, 10, 25, 50, 75, 90, 100]
     ax.set_xticks(ticks)
     ax.set_xticklabels([abs(x) for x in ticks])
     plt.setp(ax.get_xticklabels(), rotation=30)
-    ax.set_position([0.2, 0.15, 0.75, 0.75])
+    ax.set_position([0.1, 0.15, 0.85, 0.75])
 
     return fig, df
 

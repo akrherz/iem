@@ -5,8 +5,9 @@ import datetime
 import psycopg2.extras
 import numpy as np
 import pandas as pd
+from matplotlib.patches import Rectangle
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.reference import TRACE_VALUE
 from pyiem.exceptions import NoDataFound
 
@@ -129,8 +130,17 @@ def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())
     df = get_data(ctx)
-
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    title = "[%s] %s %s %s Snowfall\n(color is how long snow remained)" % (
+        ctx["station"],
+        ctx["_nt"].sts[ctx["station"]]["name"],
+        "Last" if ctx["dir"] == "last" else "First",
+        (
+            "Trace+"
+            if ctx["threshold"] == "T"
+            else "%.2f+ Inch" % (float(ctx["threshold"]),)
+        ),
+    )
+    (fig, ax) = figure_axes(title=title)
 
     ax.scatter(
         df["snow_doy"],
@@ -192,23 +202,10 @@ def plotter(fdict):
         % ("Start" if ctx["dir"] == "first" else "Last",)
     )
     ax.set_ylabel("Snowfall [inch], Avg: %.1f inch" % (df["snowfall"].mean(),))
-    ax.set_title(
-        ("[%s] %s %s %s Snowfall\n(color is how long snow remained)")
-        % (
-            ctx["station"],
-            ctx["_nt"].sts[ctx["station"]]["name"],
-            "Last" if ctx["dir"] == "last" else "First",
-            (
-                "Trace+"
-                if ctx["threshold"] == "T"
-                else "%.2f+ Inch" % (float(ctx["threshold"]),)
-            ),
-        )
-    )
-    p0 = plt.Rectangle((0, 0), 1, 1, fc="purple")
-    p1 = plt.Rectangle((0, 0), 1, 1, fc="g")
-    p2 = plt.Rectangle((0, 0), 1, 1, fc="b")
-    p3 = plt.Rectangle((0, 0), 1, 1, fc="r")
+    p0 = Rectangle((0, 0), 1, 1, fc="purple")
+    p1 = Rectangle((0, 0), 1, 1, fc="g")
+    p2 = Rectangle((0, 0), 1, 1, fc="b")
+    p3 = Rectangle((0, 0), 1, 1, fc="r")
     ax.legend(
         (p0, p1, p2, p3),
         (
