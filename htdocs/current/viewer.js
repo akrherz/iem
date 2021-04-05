@@ -8,7 +8,7 @@ var ts = null;
 var aqlive = 0;
 var realtimeMode = true;
 var currentCameraFeature;
-var hashLinkCameraID;
+var cameraID = "ISUC-003";
 var ISOFMT = "Y-MM-DD[T]HH:mm:ss[Z]";
 
 var sbwLookup = {
@@ -93,17 +93,21 @@ function findFeatureByCid(cid) {
     return feature;
 }
 
+// main workflow for updating the webcam image shown to the user
 function updateCamera() {
     if (!currentCameraFeature){
-        return;
+        currentCameraFeature = findFeatureByCid(cameraID);
+        if (!currentCameraFeature){
+            return;
+        }
     }
     var url = currentCameraFeature.get("url");
     if (url === undefined) {
         url = currentCameraFeature.get("imgurl");
     }
     var valid = currentCameraFeature.get("valid");
-    if (url === undefined) {
-        url = currentCameraFeature.get("utc_valid");
+    if (valid === undefined) {
+        valid = currentCameraFeature.get("utc_valid");
     }
     var name = currentCameraFeature.get("name");
     if (name === undefined) {
@@ -123,7 +127,6 @@ function cronMinute() {
     if (!realtimeMode) return;
     refreshRADAR();
     refreshJSON();
-    updateCamera();
 }
 
 function getRADARSource() {
@@ -153,7 +156,7 @@ function refreshJSON() {
         format: new ol.format.GeoJSON()
     });
     newsource.on('change', function () {
-        setCameraByHashLink();
+        updateCamera();
     });
     webcamGeoJsonLayer.setSource(newsource);
 
@@ -167,7 +170,7 @@ function refreshJSON() {
         format: new ol.format.GeoJSON()
     });
     newsource.on('change', function () {
-        setCameraByHashLink();
+        updateCamera();
     });
     idotdashcamGeoJsonLayer.setSource(newsource);
 
@@ -180,18 +183,6 @@ function refreshJSON() {
         url: url,
         format: new ol.format.GeoJSON()
     }));
-}
-
-function setCameraByHashLink(){
-    if (!hashLinkCameraID){
-        return;
-    }
-    var feature = findFeatureByCid(hashLinkCameraID);
-    if (feature){
-        currentCameraFeature = feature;
-        hashLinkCameraID = null;
-        updateCamera();
-    }
 }
 
 // Set the current camera by cid
@@ -210,9 +201,9 @@ function parseURI() {
     if (tokens.length == 2) {
         var tokens2 = tokens[1].split("/");
         if (tokens2.length == 1) {
-            hashLinkCameraID = tokens[1];
+            cameraID = tokens[1];
         } else {
-            hashLinkCameraID = tokens2[0];
+            cameraID = tokens2[0];
             $('#toggle_event_mode button').eq(1).click();
             $('#dtpicker').data('DateTimePicker').date(moment(tokens2[1]));
         }
@@ -278,10 +269,6 @@ $().ready(function () {
     });
     idotdashcamGeoJsonLayer = new ol.layer.Vector({
         title: 'Iowa DOT Truck Dashcams',
-        source: new ol.source.Vector({
-            url: "/api/1/idot_dashcam.geojson",
-            format: new ol.format.GeoJSON()
-        }),
         style: function (feature, resolution) {
             if (currentCameraFeature &&
                 currentCameraFeature.get("cid") == feature.get("cid")) {
@@ -293,10 +280,6 @@ $().ready(function () {
     });
     webcamGeoJsonLayer = new ol.layer.Vector({
         title: 'Webcams',
-        source: new ol.source.Vector({
-            url: "/geojson/webcam.php?network=TV",
-            format: new ol.format.GeoJSON()
-        }),
         style: function (feature, resolution) {
             if (currentCameraFeature &&
                 currentCameraFeature.get("cid") == feature.get("cid")) {
@@ -361,6 +344,8 @@ $().ready(function () {
     });
 
     parseURI();
+    refreshJSON();
+    updateCamera();
 
     window.setInterval(cronMinute, 60000);
 });
