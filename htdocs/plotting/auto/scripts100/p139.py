@@ -95,16 +95,14 @@ def plotter(fdict):
 
     order = "DESC" if ctx["v"] == "largest" else "ASC"
     df = read_sql(
-        """
+        f"""
         SELECT day as date, max_tmpf as max, min_tmpf as min,
         max_tmpf::int - min_tmpf::int as difference
         from summary s JOIN stations t on (s.iemid = t.iemid)
         where t.id = %s and t.network = %s
         and extract(month from day) in %s
         and max_tmpf is not null and min_tmpf is not null
-        ORDER by difference """
-        + order
-        + """, date DESC LIMIT 10
+        ORDER by difference {order}, date DESC LIMIT 10
     """,
         pgconn,
         params=(station, ctx["network"], tuple(months)),

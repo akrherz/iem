@@ -135,7 +135,7 @@ def plotter(fdict):
         months = [ts.month]
 
     df = read_sql(
-        """
+        f"""
     WITH obs as (
         SELECT (valid + '10 minutes'::interval) at time zone %s as ts,
         tmpf::int as itmpf, dwpf::int as idwpf,
@@ -156,15 +156,9 @@ def plotter(fdict):
         min(mslp) as min_mslp
         from obs GROUP by hr)
     SELECT o.ts, a.hr::int as hr,
-        a."""
-        + varname
-        + """ from agg1 a JOIN obs o on
+        a.{varname} from agg1 a JOIN obs o on
         (a.hr = extract(hour from o.ts)
-        and a."""
-        + varname
-        + """ = o."""
-        + varname2
-        + """)
+        and a.{varname} = o.{varname2})
         ORDER by a.hr ASC, o.ts DESC
     """,
         pgconn,

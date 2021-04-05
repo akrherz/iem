@@ -108,10 +108,8 @@ def plotter(fdict):
 
     doff = (days + 1) if ets.year != sts.year else 0
     df = read_sql(
-        """
-    SELECT extract(year from day - '"""
-        + str(doff)
-        + """ days'::interval) as yr,
+        f"""
+    SELECT extract(year from day - '{doff} days'::interval) as yr,
     avg((max_tmpf+min_tmpf)/2.) as avg_temp, avg(max_tmpf) as avg_high_temp,
     avg(min_tmpf) as avg_low_temp,
     sum(pday) as precip, avg(avg_sknt) * 1.15 as avg_wind_speed,

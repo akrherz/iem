@@ -69,13 +69,10 @@ def plotter(fdict):
     obs = np.ma.ones((eyear - syear + 1, 183), "f") * -1
 
     df = read_sql(
-        """
+        f"""
         SELECT year, extract(doy from day) as doy, snowd, day,
         case when month < 6 then year - 1 else year end as winter_year
-        from """
-        + table
-        + """
-        WHERE station = %s and
+        from {table} WHERE station = %s and
         month in (11, 12, 1, 2, 3, 4) and snowd >= 0 and day between %s and %s
     """,
         pgconn,

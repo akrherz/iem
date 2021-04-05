@@ -7,7 +7,7 @@ import psycopg2.extras
 import numpy as np
 import pandas as pd
 from pyiem.nws import vtec
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem import reference
 from pyiem.exceptions import NoDataFound
@@ -117,13 +117,13 @@ def plot_common(ctx, ax):
     """Common plot stuff."""
     ax.set_ylabel("Accumulated Count")
     ax.grid(True)
-    ax.set_title(ctx["title"])
     ax.set_xlabel(ctx["xlabel"])
 
 
 def make_barplot(ctx, df):
     """Create a bar plot."""
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    fig = figure(title=ctx["title"])
+    ax = fig.add_axes([0.1, 0.1, 0.8, 0.8])
     df2 = (
         df.groupby("year").max().reindex(range(ctx["syear"], ctx["eyear"] + 1))
     )
@@ -181,18 +181,14 @@ def plotter(fdict):
         significance = "W"
 
     cursor.execute(
-        """
+        f"""
     WITH data as (
         SELECT extract(year from issue)::int as yr,
         issue, phenomena, significance, eventid, wfo from warnings WHERE
-        ((phenomena = %s and significance = %s) """
-        + eventlimiter
-        + """)
+        ((phenomena = %s and significance = %s) {eventlimiter})
         and extract(year from issue) >= %s and
         extract(year from issue) <= %s
-        and extract(doy from issue) <= %s """
-        + wfolimiter
-        + """),
+        and extract(doy from issue) <= %s {wfolimiter}),
     agg1 as (
         SELECT yr, min(issue) as min_issue, eventid, wfo, phenomena,
         significance from data
@@ -246,7 +242,8 @@ def plotter(fdict):
 
     if ctx["plot"] == "bar":
         return make_barplot(ctx, df)
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    fig = figure(title=ctx["title"])
+    ax = fig.add_axes([0.05, 0.1, 0.65, 0.8])
     ann = []
     for yr in range(ctx["syear"], eyear + 1):
         if len(data[yr]["doy"]) < 2:
@@ -295,7 +292,7 @@ def plotter(fdict):
         for rm in removals:
             ann.remove(rm)
 
-    ax.legend(loc=2, ncol=2, fontsize=10)
+    ax.legend(loc=(1.07, 0), ncol=2, fontsize=10)
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_xticklabels(calendar.month_abbr[1:])
     plot_common(ctx, ax)

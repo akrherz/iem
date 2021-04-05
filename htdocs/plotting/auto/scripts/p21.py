@@ -88,8 +88,7 @@ def plotter(fdict):
     extent = int(df[varname].abs().max())
     mp = MapPlot(
         sector="conus",
-        title=("%s Day Change in %s NCDC 81 Climatology")
-        % (days, PDICT[varname]),
+        title=f"{days} Day Change in {PDICT[varname]} NCDC 81 Climatology",
         subtitle="from %s to %s"
         % (date1.strftime("%-d %B"), date2.strftime("%-d %B")),
     )

@@ -140,10 +140,8 @@ def plotter(fdict):
 
     doff = (days + 1) if ets.year != sts.year else 0
     df = read_sql(
-        """
-    SELECT extract(year from day - '"""
-        + str(doff)
-        + """ days'::interval) as yr,
+        f"""
+    SELECT extract(year from day - '{doff} days'::interval) as yr,
     avg((high+low)/2.) as avg_temp, avg(high) as avg_high_temp,
     sum(gddxx(%s, %s, high, low)) as gdd,
     avg(low) as avg_low_temp,
@@ -158,10 +156,7 @@ def plotter(fdict):
     sum(case when low >= %s then 1 else 0 end) as "days-lows-above",
     sum(case when low < %s then 1 else 0 end) as "days-lows-below",
     count(*)
-    from """
-        + table
-        + """
-    WHERE station = %s and sday in %s
+    from {table} WHERE station = %s and sday in %s
     GROUP by yr ORDER by yr ASC
     """,
         pgconn,

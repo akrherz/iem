@@ -52,14 +52,10 @@ def plotter(fdict):
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
     df = read_sql(
-        """
+        f"""
     with data as (
         select extract(doy from day) as doy,
-        day, """
-        + varname
-        + """ as v from """
-        + table
-        + """ WHERE
+        day, {varname} as v from {table} WHERE
         station = %s),
     doyagg as (
         SELECT doy, stddev(v) from data GROUP by doy),

@@ -70,18 +70,14 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
 
     df = read_sql(
-        """
+        f"""
         WITH agg as (
             SELECT sday, max(coalesce(narr_srad, 0))
-            from """
-        + table
-        + """ where
+            from {table} where
             station = %s  and year > 1978 GROUP by sday),
         obs as (
             SELECT sday, day, narr_srad, merra_srad, hrrr_srad
-            from """
-        + table
-        + """ WHERE
+            from {table} WHERE
             station = %s and year = %s)
         SELECT a.sday, a.max as max_narr, o.day, o.narr_srad, o.merra_srad,
         o.hrrr_srad from agg a LEFT JOIN obs o on (a.sday = o.sday)

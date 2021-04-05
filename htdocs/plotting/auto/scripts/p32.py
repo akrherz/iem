@@ -100,7 +100,7 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
 
     df = read_sql(
-        """
+        f"""
     WITH data as (
      select day, year, sday,
      high,
@@ -112,9 +112,7 @@ def plotter(fdict):
      rank() OVER (PARTITION by sday ORDER by low ASC) as low_ptile,
      rank() OVER (PARTITION by sday
         ORDER by gddxx(%s, %s, high, low) ASC) as gdd_ptile
-     from """
-        + table
-        + """ where station = %s
+     from {table} where station = %s
     ), climo as (
      SELECT sday, avg(high) as avg_high, avg(low) as avg_low,
      avg((high+low)/2.) as avg_temp, stddev(high) as stddev_high,
@@ -122,9 +120,7 @@ def plotter(fdict):
      avg(gddxx(%s, %s, high, low)) as avg_gdd,
      stddev(gddxx(%s, %s, high, low)) as stddev_gdd,
      count(*)::float as years
-     from """
-        + table
-        + """ WHERE station = %s GROUP by sday
+     from {table} WHERE station = %s GROUP by sday
     )
     SELECT day,
     d.high - c.avg_high as high_diff,

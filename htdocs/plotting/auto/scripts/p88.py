@@ -57,7 +57,7 @@ def plotter(fdict):
 
     sql = "in ('BKN','OVC')" if which == "cloudy" else "= 'CLR'"
     df = read_sql(
-        """
+        f"""
     WITH data as (
      SELECT valid at time zone %s + '10 minutes'::interval as v,
      tmpf, skyc1, skyc2, skyc3, skyc4 from alldata WHERE station = %s
@@ -73,17 +73,8 @@ def plotter(fdict):
     cloudy as (
      select extract(week from v) as w,
      extract(hour from v) as hr,
-     avg(tmpf) from data WHERE skyc1 """
-        + sql
-        + """ or
-     skyc2 """
-        + sql
-        + """ or skyc3 """
-        + sql
-        + """ or skyc4 """
-        + sql
-        + """
-     GROUP by w, hr)
+     avg(tmpf) from data WHERE skyc1 {sql} or skyc2 {sql} or
+     skyc3 {sql} or skyc4 {sql} GROUP by w, hr)
 
     SELECT l.w as week, l.hr as hour, l.avg - c.avg as difference
     from cloudy l JOIN climo c on

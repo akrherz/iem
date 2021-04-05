@@ -104,7 +104,7 @@ def plotter(fdict):
     ax.set_ylim(0, 100)
     ax.set_yticks([0, 25, 50, 75, 100])
     ax.set_ylabel("Frequency [%]")
-    ax.set_xlabel("Hour Timezone: %s" % (tzname,))
+    ax.set_xlabel(f"Hour Timezone: {tzname}")
     ax.set_xlim(-0.5, 23.5)
     ax.set_title(
         ("(%s - %s) %s [%s]\n" r"Frequency of %s Hour, %s: %s$^\circ$F")

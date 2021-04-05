@@ -142,7 +142,7 @@ def plotter(fdict):
             f"For Month of {date.strftime('%B')}, "
             f"{date.strftime('%b %Y')} plotted in bottom panel"
         )
-        datefmt = "%-d\n%-I %p"
+        datefmt = "%-d %b\n%-I %p"
     else:
         subtitle = f"All Year, {date.year} plotted in bottom panel"
         datefmt = "%-d %b"
@@ -188,6 +188,7 @@ def plotter(fdict):
             label=str(hr),
         )
     tp.set_xlim(0, 100)
+    tp.set_xticks([0, 10, 25, 50, 75, 90, 100])
     tp.grid(True)
     tp.set_ylabel(PDICT[varname])
     tp.set_xlabel("Percentile")

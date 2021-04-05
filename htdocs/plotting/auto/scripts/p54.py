@@ -70,25 +70,17 @@ def plotter(fdict):
         aggfunc = "max"
         tlimit = "12 and 20"
     df = read_sql(
-        """
+        f"""
     WITH one as (
-      SELECT date(valid), """
-        + aggfunc
-        + """(tmpf::int) as d, avg(sknt)
+      SELECT date(valid), {aggfunc}(tmpf::int) as d, avg(sknt)
       from alldata where station = %s
-      and extract(hour from valid at time zone %s) between """
-        + tlimit
-        + """
+      and extract(hour from valid at time zone %s) between {tlimit}
       and tmpf between -70 and 140  GROUP by date),
 
     two as (
-      SELECT date(valid), """
-        + aggfunc
-        + """(tmpf::int) as d, avg(sknt)
+      SELECT date(valid), {aggfunc}(tmpf::int) as d, avg(sknt)
       from alldata where station = %s
-      and extract(hour from valid at time zone %s) between """
-        + tlimit
-        + """
+      and extract(hour from valid at time zone %s) between {tlimit}
       and tmpf between -70 and 140 GROUP by date)
 
     SELECT one.date as day,

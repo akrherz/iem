@@ -1,12 +1,15 @@
 """A fancy pants plot of a given VTEC headline."""
+# local
+from datetime import timezone
 
+# third party
 import pandas as pd
 from geopandas import read_postgis
 from pyiem.nws import vtec
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
-from pyiem.reference import Z_OVERLAY2
+from pyiem.reference import Z_OVERLAY2, Z_OVERLAY2_LABEL
 import cartopy.crs as ccrs
 import pytz
 
@@ -15,6 +18,11 @@ PDICT = {
     "single": "Plot just this single VTEC Event",
     "expand": "Plot same VTEC Phenom/Sig from any WFO coincident with event",
     "etn": "Plot same VTEC Phenom/Sig + Event ID from any WFO",
+}
+PDICT3 = {
+    "on": "Overlay NEXRAD Mosaic",
+    "auto": "Let autoplot decide when to include NEXRAD overlay",
+    "off": "No NEXRAD Mosaic Please",
 }
 
 
@@ -82,6 +90,13 @@ def get_description():
             name="opt",
             options=PDICT,
             label="Special Plot Options / Modes",
+        ),
+        dict(
+            type="select",
+            options=PDICT3,
+            default="auto",
+            name="n",
+            label="Should a NEXRAD Mosaic be overlain:",
         ),
     ]
     return desc
@@ -316,9 +331,24 @@ def plotter(fdict):
     if len(df.index) > 10:
         mp.drawcities()
     mp.drawcounties()
-    # if p1 in ['SV', 'TO', 'FF', 'MA']:
-    #    mp.overlay_nexrad(
-    #        utcvalid.to_pydatetime().replace(tzinfo=timezone.utc))
+    if ctx["n"] != "on":
+        if p1 in ["SV", "TO", "FF", "MA"] or ctx["n"] == "on":
+            radval = mp.overlay_nexrad(
+                utcvalid.to_pydatetime().replace(tzinfo=timezone.utc),
+                caxpos=(0.02, 0.07, 0.3, 0.005),
+            )
+            tstamp = radval.astimezone(pytz.timezone(tzname)).strftime(
+                "%-I:%M %p"
+            )
+            mp.ax.text(
+                0.01,
+                0.99,
+                f"NEXRAD: {tstamp}",
+                transform=mp.ax.transAxes,
+                bbox=dict(color="white"),
+                va="top",
+                zorder=Z_OVERLAY2_LABEL + 100,
+            )
     return mp.fig, df.drop("simple_geom", axis=1)
 
 

@@ -79,23 +79,17 @@ def plotter(fdict):
     mydir = "<" if direction == "below" else ">="
 
     df = read_sql(
-        """
-    WITH data as (
- SELECT extract(week from valid) as week,
- extract(hour from (valid + '10 minutes'::interval) at time zone %s) as hour,
- """
-        + varname
-        + """ as d from alldata where
-      station = %s and """
-        + varname
-        + """ between -70 and 140
-    )
-    SELECT week::int, hour::int,
-    sum(case when d """
-        + mydir
-        + """ %s then 1 else 0 end),
-    count(*) from data GROUP by week, hour
-    """,
+        f"""
+        WITH data as (
+            SELECT extract(week from valid) as week,
+            extract(hour from (valid + '10 minutes'::interval)
+              at time zone %s) as hour, {varname} as d from alldata where
+            station = %s and {varname} between -70 and 140
+        )
+        SELECT week::int, hour::int,
+        sum(case when d {mydir} %s then 1 else 0 end),
+        count(*) from data GROUP by week, hour
+        """,
         pgconn,
         params=(ctx["_nt"].sts[station]["tzname"], station, threshold),
         index_col=None,

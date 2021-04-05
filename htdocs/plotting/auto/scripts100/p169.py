@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -100,7 +100,7 @@ def plotter(fdict):
     # backwards intuitive
     sortdir = "ASC" if mydir == "warm" else "DESC"
     df = read_sql(
-        """
+        f"""
     WITH data as (
         SELECT valid at time zone %s as valid, tmpf from alldata
         where station = %s and tmpf between -100 and 150
@@ -112,9 +112,7 @@ def plotter(fdict):
         from data d JOIN doffset o on (d.valid = o.valid))
     SELECT valid as valid1, valid + '%s hours'::interval as valid2,
     tmpf1, tmpf2 from agg
-    ORDER by (tmpf1 - tmpf2) """
-        + sortdir
-        + """ LIMIT 50
+    ORDER by (tmpf1 - tmpf2) {sortdir} LIMIT 50
     """,
         pgconn,
         params=(tzname, station, tuple(months), hours, hours),
@@ -125,28 +123,20 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No database entries found for station, sorry!")
 
-    fig = plt.figure()
-    ax = plt.axes([0.55, 0.1, 0.4, 0.8])
-
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
-    fig.text(
-        0.5,
-        0.95,
-        ("[%s] %s Top 10 %s\n" "Over %s Hour Period (%s-%s) [%s]")
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            MDICT[mydir],
-            hours,
-            ab.year,
-            datetime.date.today().year,
-            MDICT2[month],
-        ),
-        ha="center",
-        va="center",
+    title = "[%s] %s Top 10 %s\n" "Over %s Hour Period (%s-%s) [%s]" % (
+        station,
+        ctx["_nt"].sts[station]["name"],
+        MDICT[mydir],
+        hours,
+        ab.year,
+        datetime.date.today().year,
+        MDICT2[month],
     )
+    fig = figure(title=title)
+    ax = fig.add_axes([0.4, 0.1, 0.55, 0.8])
 
     labels = []
     for i in range(10):
@@ -160,14 +150,15 @@ def plotter(fdict):
                 row["tmpf1"],
                 row["tmpf2"],
                 row["diff"],
-                sts.strftime("%-d %b %Y %I:%M %p"),
-                ets.strftime("%-d %b %Y %I:%M %p"),
+                sts.strftime("%-d %b %Y %-I:%M %p"),
+                ets.strftime("%-d %b %Y %-I:%M %p"),
             )
         )
     ax.set_yticks(range(1, 11))
-    ax.set_yticklabels(labels)
+    ax.set_yticklabels(labels, fontsize=14)
     ax.set_ylim(10.5, 0.5)
     ax.grid(True)
+    ax.set_xlabel("Delta Degrees Fahrenheit")
     return fig, df
 
 

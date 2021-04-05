@@ -33,6 +33,7 @@ def get_description():
     """ Return a dict describing how to call this plotter """
     desc = dict()
     desc["data"] = True
+    desc["report"] = True
     desc[
         "description"
     ] = """This plot presents the period between the first
@@ -90,77 +91,41 @@ def plotter(fdict):
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
     if direction == "below":
-        sql = (
-            """select year,
-        max(case when """
-            + varname
-            + """ < %s and month < 7
+        sql = f"""select year,
+        max(case when {varname} < %s and month < 7
             then extract(doy from day) else 0 end) as spring,
-        max(case when """
-            + varname
-            + """ < %s and month < 7
+        max(case when {varname} < %s and month < 7
             then day else null end) as spring_date,
-        min(case when """
-            + varname
-            + """ < %s and month > 6
+        min(case when {varname} < %s and month > 6
             then extract(doy from day) else 388 end) as fall,
-        min(case when """
-            + varname
-            + """ < %s and month > 6
+        min(case when {varname} < %s and month > 6
             then day else null end) as fall_date
-        from """
-            + table
-            + """ where station = %s
+        from {table} where station = %s
         GROUP by year ORDER by year ASC"""
-        )
     elif direction == "above":
-        sql = (
-            """select year,
-             min(case when """
-            + varname
-            + """ >= %s and month < 7
+        sql = f"""select year,
+             min(case when {varname} >= %s and month < 7
                  then extract(doy from day) else 183 end) as spring,
-             min(case when """
-            + varname
-            + """ >= %s and month < 7
+             min(case when {varname} >= %s and month < 7
                  then day else null end) as spring_date,
-             max(case when """
-            + varname
-            + """ >= %s and month > 6
+             max(case when {varname} >= %s and month > 6
                  then extract(doy from day) else 183 end) as fall,
-             max(case when """
-            + varname
-            + """ >= %s and month > 6
+             max(case when {varname} >= %s and month > 6
                  then day else null end) as fall_date
-            from """
-            + table
-            + """ where station = %s
+            from {table} where station = %s
             GROUP by year ORDER by year ASC"""
-        )
     elif direction == "above2":
-        sql = (
-            """select year,
-             max(case when """
-            + varname
-            + """ >= %s and month < 7
+        sql = f"""select year,
+             max(case when {varname} >= %s and month < 7
                  then extract(doy from day) else 0 end) as spring,
-             max(case when """
-            + varname
-            + """ >= %s and month < 7
+             max(case when {varname} >= %s and month < 7
                  then day else null end) as spring_date,
-             min(case when """
-            + varname
-            + """ >= %s and month > 6
+             min(case when {varname} >= %s and month > 6
                  then extract(doy from day) else 388 end) as fall,
-             min(case when """
-            + varname
-            + """ >= %s and month > 6
+             min(case when {varname} >= %s and month > 6
                  then day else null end) as fall_date
-            from """
-            + table
-            + """ where station = %s
+            from {table} where station = %s
             GROUP by year ORDER by year ASC"""
-        )
 
     ccursor.execute(sql, (threshold, threshold, threshold, threshold, station))
     if ccursor.rowcount == 0:

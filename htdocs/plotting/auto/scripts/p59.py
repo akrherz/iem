@@ -70,10 +70,8 @@ def plotter(fdict):
     plot_units = ctx["units"]
 
     df = read_sql(
-        """
-        SELECT extract(doy from valid) as doy, sknt, drct from alldata
-        where station = %s and sknt >= 0 and drct >= 0 and report_type = 2
-    """,
+        "SELECT extract(doy from valid) as doy, sknt, drct from alldata "
+        "where station = %s and sknt >= 0 and drct >= 0 and report_type = 2",
         asos,
         params=(station,),
         index_col=None,
@@ -138,7 +136,6 @@ def plotter(fdict):
         (
             "[%s] %s Daily Average Component Wind Speed\n"
             "[%s-%s] 7 day smooth filter applied, %.0f obs found"
-            ""
         )
         % (
             station,

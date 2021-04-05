@@ -232,23 +232,16 @@ def get_monthly_data(ctx):
         table = "alldata_%s" % (ctx["csector"],)
 
     ctx["df"] = read_sql(
-        """
+        f"""
     with monthly as (
         SELECT
-        extract(year from day + '"""
-        + offset
-        + """'::interval) as myyear,
+        extract(year from day + '{offset}'::interval) as myyear,
         station, sum(precip) as p,
         avg((high+low)/2.) as avgt,
         avg(low) as avglo,
         avg(high) as avghi
-        from """
-        + table
-        + """
-        WHERE substr(station,3,1) = 'C' and month in %s
-        """
-        + statelimiter
-        + """
+        from {table}
+        WHERE substr(station,3,1) = 'C' and month in %s {statelimiter}
         GROUP by myyear, station),
     ranks as (
         SELECT station, myyear as year,
