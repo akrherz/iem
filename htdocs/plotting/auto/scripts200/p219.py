@@ -86,16 +86,18 @@ def taf_search(pgconn, station, valid):
 
 def compute_flight_condition(row):
     """What's our status."""
-    if row["visibility"] >= 5:
-        return "VFR"
     level = 10000
     if "OVC" in row["skyc"]:
         level = row["skyl"][row["skyc"].index("OVC")]
+    if level == 10000 and "BKN" in row["skyc"]:
+        level = row["skyl"][row["skyc"].index("BKN")]
+    if row["visibility"] >= 5 and level > 3000:
+        return "VFR"
     if level < 500 or row["visibility"] < 1:
         return "LIFR"
     if level < 1000 or row["visibility"] < 3:
         return "IFR"
-    if level < 3000 or row["visibility"] < 5:
+    if level <= 3000 or row["visibility"] < 5:
         return "MVFR"
     return "UNK"
 
@@ -302,4 +304,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="KJBR", valid="2021-03-25 1742"))
+    plotter(dict(station="KSTL", valid="2021-04-06 2026"))

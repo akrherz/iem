@@ -116,14 +116,19 @@ def plotter(fdict):
             level = [row["skyl1"], row["skyl2"], row["skyl3"], row["skyl4"]][
                 idx
             ]
-        if level < 500 or row["vsby"] < 1:
+        if "BKN" in coverages and level == 10000:
+            idx = coverages.index("BKN")
+            level = [row["skyl1"], row["skyl2"], row["skyl3"], row["skyl4"]][
+                idx
+            ]
+        if row["vsby"] >= 5 and level > 3000:
+            val = 1
+        elif level < 500 or row["vsby"] < 1:
             val = 4
         elif level < 1000 or row["vsby"] < 3:
             val = 3
-        elif level < 3000 or row["vsby"] < 5:
+        elif level <= 3000 or row["vsby"] < 5:
             val = 2
-        elif row["vsby"] >= 5:
-            val = 1
         else:
             val = 0
         data[y, x] = max(data[y, x], val)
