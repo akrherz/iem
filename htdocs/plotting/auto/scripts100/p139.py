@@ -2,10 +2,15 @@
 import datetime
 from collections import OrderedDict
 
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    from backports.zoneinfo import ZoneInfo
+
 from pandas.io.sql import read_sql
 from matplotlib.font_manager import FontProperties
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.exceptions import NoDataFound
 
 MDICT = OrderedDict(
@@ -41,7 +46,12 @@ def get_description():
         "description"
     ] = """This table presents the 10 largest or smallest differences
     between the lowest and highest air temperature for a local calendar
-    day."""
+    day.  Some stations have auxillary products that provide 'daily' values
+    over a date defined always in standard time.  This plot also presents
+    sprites of the temperature time series starting at 12 hours before the
+    denoted date and ending at 12 hours after the date.  The sprite often
+    quickly points out bad data points, sigh, but also easily shows if the
+    temperature change was an increase during the day or decrease."""
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -66,6 +76,38 @@ def get_description():
         ),
     ]
     return desc
+
+
+def plot_date(dbconn, ax, i, date, station, tz):
+    """plot date."""
+    # request 36 hours
+    sts = datetime.datetime(date.year, date.month, date.day, tzinfo=tz)
+    sts = sts - datetime.timedelta(hours=12)
+    ets = sts + datetime.timedelta(hours=48)
+    df = read_sql(
+        "SELECT valid at time zone 'UTC' as valid, tmpf from alldata "
+        "where station = %s and "
+        "valid >= %s and valid <= %s and tmpf is not null ORDER by valid ASC",
+        dbconn,
+        params=(station, sts, ets),
+        index_col=None,
+    )
+    df["valid"] = df["valid"].dt.tz_localize(ZoneInfo("UTC"))
+    df["norm"] = (df["tmpf"] - df["tmpf"].min()) / (
+        df["tmpf"].max() - df["tmpf"].min()
+    )
+    df["xnorm"] = [
+        x.total_seconds() for x in (df["valid"].dt.to_pydatetime() - sts)
+    ]
+
+    lp = ax.plot(df["xnorm"], df["norm"] + i)
+    ax.text(
+        df["xnorm"].values[-1],
+        df["norm"].values[-1] + i,
+        date.strftime("%-d %b %Y"),
+        va="center",
+        color=lp[0].get_color(),
+    )
 
 
 def plotter(fdict):
@@ -114,32 +156,29 @@ def plotter(fdict):
     df["rank"] = df["difference"].rank(
         ascending=(ctx["v"] == "smallest"), method="min"
     )
-    fig = plt.figure(figsize=(5.5, 4))
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
-    fig.text(
-        0.5,
-        0.9,
-        (
-            "%s [%s] %s-%s\n"
-            "Top 10 %s Local Calendar Day [%s] "
-            "Temperature Differences"
-        )
-        % (
-            ctx["_nt"].sts[station]["name"],
-            station,
-            ab.year,
-            datetime.date.today().year,
-            PDICT[ctx["v"]],
-            month.capitalize(),
-        ),
-        ha="center",
+    tz = ZoneInfo(ctx["_nt"].sts[station]["tzname"])
+    title = (
+        "%s [%s] %s-%s\n"
+        "Top 10 %s Local Calendar Day [%s] Temperature Differences"
+    ) % (
+        ctx["_nt"].sts[station]["name"],
+        station,
+        ab.year,
+        datetime.date.today().year,
+        PDICT[ctx["v"]],
+        month.capitalize(),
     )
+    fig = figure(title=title)
     fig.text(
         0.1, 0.81, " #  Date         Diff   Low High", fontproperties=font0
     )
     y = 0.74
+    ax = fig.add_axes([0.5, 0.1, 0.3, 0.69])
+    i = 10
+    dbconn = get_dbconn("asos")
     for _, row in df.iterrows():
         fig.text(
             0.1,
@@ -154,9 +193,16 @@ def plotter(fdict):
             ),
             fontproperties=font0,
         )
+        plot_date(dbconn, ax, i, row["date"], station, tz)
         y -= 0.07
+        i -= 1
+    ax.set_title("Hourly Temps On Date & +/-12 Hrs")
+    ax.set_ylim(1, 11)
+    ax.axvline(12 * 3600, color="tan")
+    ax.axvline(36 * 3600, color="tan")
+    ax.axis("off")
     return fig, df
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter(dict(zstation="MCW", network="IA_ASOS"))
