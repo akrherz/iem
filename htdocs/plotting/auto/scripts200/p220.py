@@ -2,6 +2,7 @@
 import datetime
 
 # third party
+import pytz
 import pandas as pd
 from geopandas import read_postgis
 import cartopy.crs as ccrs
@@ -11,6 +12,7 @@ from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import Z_OVERLAY2_LABEL, Z_POLITICAL
 
+CENTRALTZ = pytz.timezone("America/Chicago")
 PDICT = {
     "cwa": "Plot by NWS Forecast Office",
     "state": "Plot by State/Sector",
@@ -94,8 +96,11 @@ def get_description():
     looks backwards in time for the most recent issuance to that timestamp.
 
     <p>Another bit of ambiguity is which outlook you get between about
-    midnight and the 12z issuance of the Day 1 Outlook.  In this case and
+    midnight and the 13z issuance of the Day 1 Outlook.  In this case and
     as the code stands now, you get the next day's outlook.
+
+    <p>A <a href="/request/gis/spc_outlooks.phtml">GIS Shapefile</a> download
+    option exists for downloading these outlooks in-bulk.</p>
     """
     desc["arguments"] = [
         dict(
@@ -137,7 +142,7 @@ def get_description():
             name="valid",
             default=utc().strftime("%Y/%m/%d %H%M"),
             label="Outlook Issuance/Valid Timestamp (UTC Timezone):",
-            min="2002/01/01 0000",
+            min="1987/01/01 0000",
         ),
     ]
     return desc
@@ -155,6 +160,23 @@ def outlook_search(pgconn, valid, days, outlook_type):
     if cursor.rowcount == 0:
         return None
     return cursor.fetchone()[0].replace(tzinfo=datetime.timezone.utc)
+
+
+def compute_datelabel(df):
+    """Figure out something pretty."""
+    date1 = df["issue"].min().tz_convert(CENTRALTZ).to_pydatetime()
+    date2 = df["issue"].max().tz_convert(CENTRALTZ).to_pydatetime()
+    if date1 == date2:
+        return date1.strftime("%B %-d, %Y")
+    if date1.month == date2.month:
+        return (
+            date1.strftime("%B %-d-")
+            + date2.strftime("%-d ")
+            + str(date2.year)
+        )
+    return (
+        date1.strftime("%b %-d-") + date2.strftime("%b %-d ") + str(date2.year)
+    )
 
 
 def plotter(fdict):
@@ -204,14 +226,18 @@ def plotter(fdict):
     else:
         sector = "state" if len(ctx["csector"]) == 2 else ctx["csector"]
     daylabel = day if day > 0 else "%s-%s" % (days[0], days[-1])
+    datelabel = compute_datelabel(df)
+
+    catlabel = " ".join([x.capitalize() for x in category.split()])
     mp = MapPlot(
         title=(
-            f"Storm Prediction Center Day {daylabel} {category.capitalize()}"
+            f"{datelabel} Storm Prediction Center Day {daylabel} "
+            f"{catlabel} Outlook"
         ),
         subtitle=(
             f"Issued: {df.iloc[0]['product_issue'].strftime(ISO)} UTC "
-            f"Valid: {df['issue'].min().strftime(ISO)} UTC "
-            f"Expire: {df['expire'].max().strftime(ISO)} UTC"
+            f"| Valid: {df['issue'].min().strftime(ISO)} UTC "
+            f"| Expire: {df['expire'].max().strftime(ISO)} UTC"
         ),
         sector=sector,
         twitter=True,
@@ -296,4 +322,5 @@ if __name__ == "__main__":
     # has all 5 days with something included
     # plotter(dict(cat="categorical", which="0C", valid="2019-05-14 2022"))
     # has three days of F
-    plotter(dict(cat="categorical", which="0F", valid="2018-05-07 2322"))
+    # plotter(dict(cat="categorical", which="0F", valid="2018-05-07 2322"))
+    plotter(dict(cat="categorical", which="1C", valid="1995-07-30 0200"))
