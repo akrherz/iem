@@ -39,7 +39,6 @@ LAYER
   TYPE RASTER
   STATUS ON
   DEBUG ON
-  DUMP TRUE
   PROJECTION
      "proj=lcc"
    "lat_0=25"
@@ -68,7 +67,6 @@ LAYER
   TYPE RASTER
   STATUS ON
   DEBUG ON
-  DUMP TRUE
   PROJECTION
     "init=epsg:4326"
   END

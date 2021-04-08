@@ -64,7 +64,6 @@ LAYER
   NAME counties
   STATUS DEFAULT
   TYPE POLYGON
-  DUMP true
   DATA shape/4326/iowa/iacounties.shp
   METADATA 
     "wfs_title" "Iowa Counties"
@@ -86,7 +85,6 @@ LAYER
   CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select u.geom, phenomena, issue, expire, w.wfo,  significance, eventid, random() as boid from warnings_%YEAR% w JOIN ugcs u on (u.gid = w.gid) WHERE expire < '%ENDTS%' and issue > '%STARTTS%' and issue < '%ENDTS%' ORDER by expire, phenomena ASC) as foo USING unique boid USING SRID=4326"
   STATUS ON
-  DUMP true
   TYPE POLYGON
   PROJECTION
    "init=epsg:4326"
@@ -128,7 +126,6 @@ LAYER
   CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select u.geom, phenomena, issue, expire, w.wfo,  significance, eventid, random() as oid from sbw_%YEAR% w JOIN ugcs u on (u.gid = w.gid) WHERE status = 'NEW' and expire < '%ENDTS%' and issue > '%STARTTS%' and issue < '%ENDTS%' ORDER by expire, phenomena ASC) as foo USING unique oid USING SRID=4326"
   STATUS ON
-  DUMP true
   TYPE POLYGON
   PROJECTION
    "init=epsg:4326"
@@ -156,7 +153,6 @@ LAYER
   CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select w.geom, phenomena, issue, expire, w.wfo,  significance, eventid, random() as oid from sbw w  WHERE status = 'NEW' and expire > CURRENT_TIMESTAMP ORDER by expire, phenomena ASC) as foo USING unique oid USING SRID=4326"
   STATUS ON
-  DUMP true
   TYPE POLYGON
   PROJECTION
    "init=epsg:4326"
@@ -183,7 +179,6 @@ LAYER
   CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select u.geom, phenomena, issue, expire, w.wfo, significance, eventid,  significance, eventid, random() as oid from warnings w JOIN ugcs u on (u.gid = w.gid) WHERE  expire > CURRENT_TIMESTAMP ORDER by expire, phenomena ASC) as foo USING unique oid USING SRID=4326"
   STATUS ON
-  DUMP true
   TYPE POLYGON
   PROJECTION
    "init=epsg:4326"
