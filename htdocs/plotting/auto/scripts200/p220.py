@@ -203,14 +203,14 @@ def plotter(fdict):
         return read_postgis(
             "WITH data as ("
             "SELECT o.*, g.* from spc_outlook o LEFT JOIN "
-            "spc_outlook_geometries g on (o.id = g.spc_outlook_id) WHERE "
-            "product_issue = %s and day in %s and "
-            "(category is null or category = %s) and outlook_type = %s) "
+            "spc_outlook_geometries g on (o.id = g.spc_outlook_id and "
+            "g.category = %s) WHERE product_issue = %s and day in %s and "
+            "outlook_type = %s) "
             "SELECT d.*, t.priority from data d LEFT JOIN "
             "spc_outlook_thresholds t on (d.threshold = t.threshold) "
             "ORDER by day ASC, priority ASC",
             pgconn,
-            params=(ts, days, category, outlook_type),
+            params=(category, ts, days, outlook_type),
             index_col=None,
             geom_col="geom",
         )
@@ -323,4 +323,4 @@ if __name__ == "__main__":
     # plotter(dict(cat="categorical", which="0C", valid="2019-05-14 2022"))
     # has three days of F
     # plotter(dict(cat="categorical", which="0F", valid="2018-05-07 2322"))
-    plotter(dict(cat="categorical", which="1C", valid="1995-07-30 0200"))
+    plotter(dict(cat="tornado", which="1C", valid="2011-04-07 2058"))
