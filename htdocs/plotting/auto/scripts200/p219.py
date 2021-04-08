@@ -91,13 +91,13 @@ def compute_flight_condition(row):
         level = row["skyl"][row["skyc"].index("OVC")]
     if level == 10000 and "BKN" in row["skyc"]:
         level = row["skyl"][row["skyc"].index("BKN")]
-    if row["visibility"] >= 5 and level > 3000:
+    if row["visibility"] > 5 and level > 3000:
         return "VFR"
     if level < 500 or row["visibility"] < 1:
         return "LIFR"
     if level < 1000 or row["visibility"] < 3:
         return "IFR"
-    if level <= 3000 or row["visibility"] < 5:
+    if level <= 3000 or row["visibility"] <= 5:
         return "MVFR"
     return "UNK"
 

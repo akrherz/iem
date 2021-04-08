@@ -28,13 +28,13 @@ def get_description():
 <tr><td>Unknown</td><td>Unknown</td><td>No report or missing visibility for
 that hour</td></tr>
 <tr><td>VFR</td><td>Visual Flight Rules</td><td>
-Ceiling >3000' AGL and visibility >5 statutes miles (green)</td></tr>
+Ceiling &gt; 3000' AGL and visibility &gt; 5 statutes miles (green)</td></tr>
 <tr><td>MVFR</td><td>Marginal Visual Flight Rules</td><td>
 1000-3000' ceilings and/or 3-5 statute miles, inclusive (blue)</td></tr>
 <tr><td>IFR</td><td>Instrument Fight Rules</td><td>
-500 - <1000' ceilings and/or 1 to <3 statute miles (red)</td></tr>
+500 - &lt; 1000' ceilings and/or 1 to  &lt; 3 statute miles (red)</td></tr>
 <tr><td>LIFR</td><td>Low Instrument Flight Rules</td><td>
-< 500' AGL ceilings and/or < 1 mile (magenta)</td></tr>
+&lt; 500' AGL ceilings and/or &lt; 1 mile (magenta)</td></tr>
 </tbody>
 </table>
 </tbody>
@@ -121,13 +121,13 @@ def plotter(fdict):
             level = [row["skyl1"], row["skyl2"], row["skyl3"], row["skyl4"]][
                 idx
             ]
-        if row["vsby"] >= 5 and level > 3000:
+        if row["vsby"] > 5 and level > 3000:
             val = 1
         elif level < 500 or row["vsby"] < 1:
             val = 4
         elif level < 1000 or row["vsby"] < 3:
             val = 3
-        elif level <= 3000 or row["vsby"] < 5:
+        elif level <= 3000 or row["vsby"] <= 5:
             val = 2
         else:
             val = 0
