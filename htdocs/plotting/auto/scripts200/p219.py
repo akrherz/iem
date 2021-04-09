@@ -14,6 +14,7 @@ from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
 
+VIS = "visibility"
 TEXTARGS = {
     "fontsize": 12,
     "color": "k",
@@ -86,18 +87,21 @@ def taf_search(pgconn, station, valid):
 
 def compute_flight_condition(row):
     """What's our status."""
+    # TEMPO may not address sky or vis
+    if row["is_tempo"] and (not row["skyc"] or pd.isna(row[VIS])):
+        return None
     level = 10000
     if "OVC" in row["skyc"]:
         level = row["skyl"][row["skyc"].index("OVC")]
     if level == 10000 and "BKN" in row["skyc"]:
         level = row["skyl"][row["skyc"].index("BKN")]
-    if row["visibility"] > 5 and level > 3000:
+    if row[VIS] > 5 and level > 3000:
         return "VFR"
-    if level < 500 or row["visibility"] < 1:
+    if level < 500 or row[VIS] < 1:
         return "LIFR"
-    if level < 1000 or row["visibility"] < 3:
+    if level < 1000 or row[VIS] < 3:
         return "IFR"
-    if level <= 3000 or row["visibility"] <= 5:
+    if level <= 3000 or row[VIS] <= 5:
         return "MVFR"
     return "UNK"
 
@@ -211,7 +215,7 @@ def plotter(fdict):
 
         df.at[valid0, "fcond"] = compute_flight_condition(row)
         # At 3.25 plot the visibility
-        if not pd.isna(row["visibility"]):
+        if not pd.isna(row[VIS]):
             ax.text(
                 valid, 3.25, f"{row['visibility']:g}", **TEXTARGS
             ).set_path_effects(PE)
@@ -270,7 +274,11 @@ def plotter(fdict):
     xs = df.index.to_list()
     xs[0] = xs[0] - padding
     xs.append(df.index.max() + padding)
+    previous = "VFR"
     for i, val in enumerate(df["fcond"].values):
+        if val is None:
+            val = previous
+        previous = val
         ax.axvspan(
             xs[i],
             xs[i + 1],
@@ -304,4 +312,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="KSTL", valid="2021-04-06 2026"))
+    plotter(dict(station="KSTL", valid="2021-04-08 1522"))

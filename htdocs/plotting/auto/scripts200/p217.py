@@ -12,6 +12,10 @@ import cartopy.crs as ccrs
 
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
+UNITS = {
+    "max_hail_size": "inch",
+    "max_wind_gust": "MPH",
+}
 
 
 def get_description():
@@ -119,19 +123,21 @@ def plotter(fdict):
     )
 
     # Tags
-    msg = ""
+    msg = []
     for col in "landspout waterspout max_hail_size max_wind_gust".split():
         val = row[col]
         if val is None:
             continue
-        msg += f"{col}: {val}\n"
-    if msg != "":
+        msg.append(f"{col.replace('_', ' ')}: {val} {UNITS.get(col)}")
+    if msg:
         mp.ax.text(
             0.01,
             0.95,
-            msg,
+            "\n".join(msg),
             transform=mp.ax.transAxes,
             bbox=dict(color="white"),
+            va="top",
+            zorder=Z_OVERLAY2 + 100,
         )
 
     ugcs = {k: 1 for k in row["ugcs"]}
