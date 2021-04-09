@@ -45,6 +45,7 @@ iemdata.vtec_phenomena_dict = [
 ['MS', 'Marine Dense Smoke'],
 ['RB','Small Craft for Rough Bar'],
 ['RH','Radiological Hazard'],
+['RP','Rip Current'],
 ['SB','Snow and Blowing Snow'],
 ['SC','Small Craft'],
 ['SE','Hazardous Seas'],
