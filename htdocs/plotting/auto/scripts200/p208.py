@@ -331,7 +331,7 @@ def plotter(fdict):
     if len(df.index) > 10:
         mp.drawcities()
     mp.drawcounties()
-    if ctx["n"] != "on":
+    if ctx["n"] != "off":
         if p1 in ["SV", "TO", "FF", "MA"] or ctx["n"] == "on":
             radval = mp.overlay_nexrad(
                 utcvalid.to_pydatetime().replace(tzinfo=timezone.utc),
