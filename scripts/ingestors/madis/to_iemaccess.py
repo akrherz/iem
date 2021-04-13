@@ -122,6 +122,7 @@ def main():
     rstate2 = nc.variables["roadState2"][:]
     rstate3 = nc.variables["roadState3"][:]
     rstate4 = nc.variables["roadState4"][:]
+    vsby = convert_value(nc.variables["visibility"][:], "meter", "mile")
     nc.close()
 
     db = {}
@@ -151,6 +152,7 @@ def main():
         db[this_station]["rtk4"] = sanity_check(rtk4[recnum], 0, 500)
         db[this_station]["subk"] = sanity_check(subk1[recnum], 0, 500)
         db[this_station]["pday"] = sanity_check(pcpn[recnum], -1, 5000)
+        db[this_station]["vsby"] = sanity_check(vsby[recnum], 0, 30)
         if rstate1[recnum] is not np.ma.masked:
             db[this_station]["scond0"] = road_state_xref.get(rstate1[recnum])
         if rstate2[recnum] is not np.ma.masked:
@@ -190,6 +192,8 @@ def main():
             iem.data["tsf2"] = convert_value(db[sid]["rtk3"], "degK", "degF")
         if db[sid]["rtk4"] is not None:
             iem.data["tsf3"] = convert_value(db[sid]["rtk4"], "degK", "degF")
+        if db[sid]["vsby"] is not None:
+            iem.data["vsby"] = db[sid]["vsby"]
         if db[sid]["subk"] is not None:
             iem.data["rwis_subf"] = convert_value(
                 db[sid]["subk"], "degK", "degF"
