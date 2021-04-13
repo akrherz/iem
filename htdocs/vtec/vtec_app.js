@@ -357,7 +357,7 @@ function lsrFeatureHTML(feature){
 	  '<div class="panel-body">',
 	    '<strong>Event</strong>: '+ feature.get('event') +'<br />',
 	    '<strong>Location</strong>: '+ feature.get('city') +'<br />',
-	    '<strong>Time</strong>: '+ moment(feature.get('utc_valid')).format('MMM Do, h:mm a') +'<br />',
+	    '<strong>Time</strong>: '+ moment.utc(feature.get('utc_valid')).format('MMM Do, h:mm a') +'<br />',
 	    '<strong>Magnitude</strong>: '+ feature.get('magnitude') +'<br />',
 	    '<strong>Remark</strong>: '+ feature.get('remark') +'<br />',
 	  '</div>',
@@ -382,7 +382,7 @@ function updateRADARTimeSlider(){
 			// remove previous options
 			radartimes = [];
 			$.each(data.scans, function(idx, scan){
-				radartimes.push(moment(scan.ts));
+				radartimes.push(moment.utc(scan.ts));
 			});
 			if (CONFIG.radarProductTime == null && radartimes.length > 0){
 				CONFIG.radarProducTime = radartimes[0];
@@ -649,8 +649,8 @@ function loadTabs(){
 					ugc.utc_init_expire, ugc.utc_expire]);		
 			});
 			ugcTable.draw();
-			CONFIG.issue = moment(data.utc_issue);
-			CONFIG.expire = moment(data.utc_expire);
+			CONFIG.issue = moment.utc(data.utc_issue);
+			CONFIG.expire = moment.utc(data.utc_expire);
 			getVTECGeometry();
 		}
 	});
@@ -810,7 +810,7 @@ function buildUI(){
         		return;
         	}
         	CONFIG.radarProductTime = radartimes[ui.value];
-        	$("#radartime").html(radartimes[ui.value].format("D MMM YYYY h:m A"));
+            $("#radartime").html(radartimes[ui.value].local().format("D MMM YYYY h:mm A"));
         	radarTMSLayer.setSource(getRADARSource());
     		updateHash();
         }

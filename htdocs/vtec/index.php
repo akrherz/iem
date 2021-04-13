@@ -3,7 +3,7 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/mlib.php";
 force_https();
 require_once "../../include/myview.php";
-$OL = "6.2.1";
+$OL = "6.4.3";
 $t = new MyView();
 $t->thispage = "severe-vtec";
 $t->title = "Valid Time Event Code (VTEC) App";
