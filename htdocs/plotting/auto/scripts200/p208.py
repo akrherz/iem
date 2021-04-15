@@ -332,34 +332,35 @@ def plotter(fdict):
         mp.drawcities()
     mp.drawcounties()
     if ctx["n"] != "off":
-        if p1 in ["SV", "TO", "FF", "MA"] or ctx["n"] == "on":
+        if (p1 in ["SV", "TO", "FF", "MA"] and s1 == "W") or ctx["n"] == "on":
             radval = mp.overlay_nexrad(
                 utcvalid.to_pydatetime().replace(tzinfo=timezone.utc),
                 caxpos=(0.02, 0.07, 0.3, 0.005),
             )
-            tstamp = radval.astimezone(pytz.timezone(tzname)).strftime(
-                "%-I:%M %p"
-            )
-            mp.ax.text(
-                0.01,
-                0.99,
-                f"NEXRAD: {tstamp}",
-                transform=mp.ax.transAxes,
-                bbox=dict(color="white"),
-                va="top",
-                zorder=Z_OVERLAY2_LABEL + 100,
-            )
+            if radval is not None:
+                tstamp = radval.astimezone(pytz.timezone(tzname)).strftime(
+                    "%-I:%M %p"
+                )
+                mp.ax.text(
+                    0.01,
+                    0.99,
+                    f"NEXRAD: {tstamp}",
+                    transform=mp.ax.transAxes,
+                    bbox=dict(color="white"),
+                    va="top",
+                    zorder=Z_OVERLAY2_LABEL + 100,
+                )
     return mp.fig, df.drop("simple_geom", axis=1)
 
 
 if __name__ == "__main__":
     plotter(
         dict(
-            phenomenav="BZ",
-            significancev="W",
-            wfo="DMX",
+            phenomenav="FF",
+            significancev="A",
+            wfo="MOB",
             year=2021,
-            etn=1,
-            opt="expand",
+            etn=5,
+            valid="2021-04-17 0000",
         )
     )
