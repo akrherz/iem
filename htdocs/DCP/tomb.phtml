@@ -1,8 +1,8 @@
 <?php 
-include_once "../../config/settings.inc.php";
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 99);
-include_once "../../include/myview.php";
-include_once "../../include/database.inc.php";
+require_once "../../include/myview.php";
+require_once "../../include/database.inc.php";
 
 $pgconn = iemdb('hads');
 $rs = pg_query($pgconn, "SELECT nwsli, max(product) from unknown"
@@ -49,7 +49,7 @@ specification for site identifiers.  The most common set of identifiers are
 found within the <a href="http://www.nws.noaa.gov/directives/sym/pd03012004curr.pdf">National Weather Service Location Identifier (NWSLI)</a> database.
 Unfortunately, not all site ids used by issuance centers are contained within
 NWSLI.  This page lists out unknown NWSLI'ish identifiers.  The IEM attempts
-to rectify this list daily, so there may be some false positive listed. The
+to rectify this list quarterly, so there may be some false positive listed. The
 IEM maintains a week of raw SHEF data, so links to indicated products
 older than a week old will not work.</p>
 

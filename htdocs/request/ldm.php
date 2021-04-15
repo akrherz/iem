@@ -1,6 +1,6 @@
 <?php 
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "LDM Request HOWTO";
 
@@ -84,7 +84,7 @@ breaks!</p>
 <br>You don't have to complete this step, but you can keep up-to-date with
 IEM news and events with the IEM Daily Bulletin.  You can sign up for it
 <a 
-href="https://mailman.iastate.edu/mailman/listinfo/iem-dailyb">here</a>.
+href="mailto:mailman@iastate.edu?subject=subscribe%20iem-dailyb">here</a>.
  If this service generates enough interest, I will set up a dedicated 
 email
 list for it.
