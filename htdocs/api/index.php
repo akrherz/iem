@@ -9,7 +9,7 @@ $t->content = <<< EOF
 
 <h2>IEM API</h2>
 
-<p><a class="btn btn-default" href="/api/1/docs/"><i class="fa fa-info"></i> IEM API v1 Docs</a></p>
+<p><a class="btn btn-default" href="/api/1/docs"><i class="fa fa-info"></i> IEM API v1 Docs</a></p>
 
 <p>The primary goal of this website is to make data freely available in an
 open manner. This page presents details the IEM's Application Programming
@@ -25,8 +25,8 @@ not be implied as an endorsement. Of course, you can just search google for
 
 <ul>
  <li><a href="https://www.aerisweather.com/develop/">Aeris Weather</a></li>
- <li><a href="https://darksky.net/dev/">DarkSky</a></li>
  <li><a href="https://realearth.ssec.wisc.edu/doc/api.php">SSEC RealEarth API</a></li>
+ <li><a href="https://www.visualcrossing.com/weather-api">Visual Crossing Weather</a></li>
  <li><a href="https://www.wunderground.com/weather/api/">Wunderground API</a></li>
 </ul>
 </blockquote>
