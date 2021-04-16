@@ -14,6 +14,9 @@
             var subtokens = tokens[1].split("_");
             if (subtokens.length == 2){
                  revdiv(subtokens[1]);
+                 $([document.documentElement, document.body]).animate({
+                    scrollTop: $("#" + tokens[1]).offset().top
+                }, 2000);
             }
         }
     });

@@ -1,25 +1,23 @@
 
-    <style>
-    .badge {
-        background-color: #EEEEEE;
-        color: #000;
-    }
-    .dl-horizontal dt {
-        white-space: normal;
-        padding-bottom: 10px;
-    }
-    </style>
-    
-
+        <style>
+        .badge {
+            background-color: #EEEEEE;
+            color: #000;
+        }
+        .dl-horizontal dt {
+            white-space: normal;
+            padding-bottom: 10px;
+        }
+        </style>
+        
     <h3>NWS Products with P-VTEC and/or H-VTEC Included</h3>
     <table class="table table-bordered table-condensed">
     <thead>
     <tr><td></td><th>AFOS PIL + Product Name</th><th>Directive</th>
     <th>Channel Templates Used</th></tr>
     </thead>
-    
-<tr><td><a name="channel_CFW"/>
-        <a id="CFW_btn" class="btn btn-small" role="button"
+    <tr><td>
+        <a id="channel_CFW" class="btn btn-small" role="button"
  href="javascript: revdiv('CFW');"><i class="fa fa-plus"></i></a>
         </td><td>Coastal Hazzard Message (CFW)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01003020curr.pdf">10-320</a></td><td><span class="badge">&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;</span> <span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;ugc&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;state&gt;</span> <span class="badge">&lt;ugc&gt;</span></td></tr>
         <tr><td colspan="4"><div id="CFW" style="display:none;">
@@ -27,16 +25,15 @@
         
         <dt>Example Raw Text:</dt>
 <dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=201505272345-KMOB-WHUS44-CFWMOB">View Text</a></dd>
-        <dt>Channels for Product Example:</dt><dd><span class="badge">ALZ063</span> <span class="badge">ALZ064</span> <span class="badge">CFW...</span> <span class="badge">CFWMOB</span> <span class="badge">FLZ002</span> <span class="badge">FLZ004</span> <span class="badge">FLZ006</span> <span class="badge">MOB</span> <span class="badge">RP.S</span> <span class="badge">RP.S.AL</span> <span class="badge">RP.S.ALZ063</span> <span class="badge">RP.S.ALZ064</span> <span class="badge">RP.S.FL</span> <span class="badge">RP.S.FLZ002</span> <span class="badge">RP.S.FLZ004</span> <span class="badge">RP.S.FLZ006</span> <span class="badge">RP.S.MOB</span></dd>
-        <dt>XMPP Chatroom Example:</dt><dd><p>MOB <a href="https://mesonet.agron.iastate.edu/vtec/2015-O-CON-KMOB-RP-S-0015_2015-05-27T23:45Z">continues Rip Currents Statement</a> for Lower Baldwin, Lower Mobile [AL] and Coastal Escambia, Coastal Okaloosa, Santa Rosa [FL] till May 28, 7:00 AM CDT </p></dd>
-        <dt>Twitter Example:</dt><dd>MOB continues Rip Currents Statement for Lower Baldwin, Lower Mobile [AL] and Coastal Escambia, Coastal Okaloosa, Santa Rosa [FL] till May 28, 7:00 AM CDT https://mesonet.agron.iastate.edu/vtec/2015-O-CON-KMOB-RP-S-0015_2015-05-27T23:45Z<br /></dd>
+        <dt>Channels for Product Example:</dt><dd><span class="badge">ALZ063</span> <span class="badge">ALZ064</span> <span class="badge">CFW...</span> <span class="badge">CFWMOB</span> <span class="badge">FLZ002</span> <span class="badge">FLZ004</span> <span class="badge">FLZ006</span> <span class="badge">RP.S</span> <span class="badge">RP.S.AL</span> <span class="badge">RP.S.ALZ063</span> <span class="badge">RP.S.ALZ064</span> <span class="badge">RP.S.FL</span> <span class="badge">RP.S.FLZ002</span> <span class="badge">RP.S.FLZ004</span> <span class="badge">RP.S.FLZ006</span> <span class="badge">RP.S.MOB</span></dd>
+        <dt>XMPP Chatroom Example:</dt><dd><p>MOB <a href="https://mesonet.agron.iastate.edu/vtec/2015-O-CON-KMOB-RP-S-0015_2015-05-27T23:45Z">continues Rip Currents Statement</a> for ((ALZ063)), ((ALZ064)) [AL] and ((FLZ002)), ((FLZ004)), ((FLZ006)) [FL] till May 28, 7:00 AM CDT </p></dd>
+        <dt>Twitter Example:</dt><dd>MOB continues Rip Currents Statement for ((ALZ063)), ((ALZ064)) [AL] and ((FLZ002)), ((FLZ004)), ((FLZ006)) [FL] till May 28, 7:00 AM CDT https://mesonet.agron.iastate.edu/vtec/2015-O-CON-KMOB-RP-S-0015_2015-05-27T23:45Z<br /></dd>
         </dl>
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_EWW"/>
-        <a id="EWW_btn" class="btn btn-small" role="button"
+        <tr><td>
+        <a id="channel_EWW" class="btn btn-small" role="button"
  href="javascript: revdiv('EWW');"><i class="fa fa-plus"></i></a>
         </td><td>Extreme Wind Warning (EWW)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01006001curr.pdf">10-601</a></td><td><span class="badge">&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;</span> <span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;ugc&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;state&gt;</span> <span class="badge">&lt;ugc&gt;</span></td></tr>
         <tr><td colspan="4"><div id="EWW" style="display:none;">
@@ -51,9 +48,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_FFA"/>
-        <a id="FFA_btn" class="btn btn-small" role="button"
+        <tr><td>
+        <a id="channel_FFA" class="btn btn-small" role="button"
  href="javascript: revdiv('FFA');"><i class="fa fa-plus"></i></a>
         </td><td>Flood Watch (FFA)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01009022curr.pdf">10-922</a></td><td><span class="badge">&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;</span> <span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;ugc&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;state&gt;</span> <span class="badge">&lt;ugc&gt;</span></td></tr>
         <tr><td colspan="4"><div id="FFA" style="display:none;">
@@ -68,9 +64,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_FFS"/>
-        <a id="FFS_btn" class="btn btn-small" role="button"
+        <tr><td>
+        <a id="channel_FFS" class="btn btn-small" role="button"
  href="javascript: revdiv('FFS');"><i class="fa fa-plus"></i></a>
         </td><td>Flash Flood Statement (FFS)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01009022curr.pdf">10-922</a></td><td><span class="badge">&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;</span> <span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;ugc&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;state&gt;</span> <span class="badge">&lt;ugc&gt;</span></td></tr>
         <tr><td colspan="4"><div id="FFS" style="display:none;">
@@ -85,9 +80,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_FFW"/>
-        <a id="FFW_btn" class="btn btn-small" role="button"
+        <tr><td>
+        <a id="channel_FFW" class="btn btn-small" role="button"
  href="javascript: revdiv('FFW');"><i class="fa fa-plus"></i></a>
         </td><td>Flash Flood Warning (FFW)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01009022curr.pdf">10-922</a></td><td><span class="badge">&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;</span> <span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;ugc&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;state&gt;</span> <span class="badge">&lt;ugc&gt;</span></td></tr>
         <tr><td colspan="4"><div id="FFW" style="display:none;">
@@ -102,9 +96,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_FLS"/>
-        <a id="FLS_btn" class="btn btn-small" role="button"
+        <tr><td>
+        <a id="channel_FLS" class="btn btn-small" role="button"
  href="javascript: revdiv('FLS');"><i class="fa fa-plus"></i></a>
         </td><td>Flood Advisory (FLS)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01009022curr.pdf">10-922</a></td><td><span class="badge">&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;</span> <span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;ugc&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;state&gt;</span> <span class="badge">&lt;ugc&gt;</span></td></tr>
         <tr><td colspan="4"><div id="FLS" style="display:none;">
@@ -119,9 +112,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_FLW"/>
-        <a id="FLW_btn" class="btn btn-small" role="button"
+        <tr><td>
+        <a id="channel_FLW" class="btn btn-small" role="button"
  href="javascript: revdiv('FLW');"><i class="fa fa-plus"></i></a>
         </td><td>Flood Warning (FLW)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01009022curr.pdf">10-922</a></td><td><span class="badge">&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;</span> <span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;ugc&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;state&gt;</span> <span class="badge">&lt;ugc&gt;</span></td></tr>
         <tr><td colspan="4"><div id="FLW" style="display:none;">
@@ -136,9 +128,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_MWW"/>
-        <a id="MWW_btn" class="btn btn-small" role="button"
+        <tr><td>
+        <a id="channel_MWW" class="btn btn-small" role="button"
  href="javascript: revdiv('MWW');"><i class="fa fa-plus"></i></a>
         </td><td>Marine Weather Warning (MWW)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01003015curr.pdf">10-315</a></td><td><span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;</span> <span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;ugc&gt;</span> <span class="badge">&lt;ugc&gt;</span></td></tr>
         <tr><td colspan="4"><div id="MWW" style="display:none;">
@@ -153,9 +144,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_NPW"/>
-        <a id="NPW_btn" class="btn btn-small" role="button"
+        <tr><td>
+        <a id="channel_NPW" class="btn btn-small" role="button"
  href="javascript: revdiv('NPW');"><i class="fa fa-plus"></i></a>
         </td><td>Non Convective Advisory (NPW)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01005015curr.pdf">10-515</a></td><td><span class="badge">&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;</span> <span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;ugc&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;state&gt;</span> <span class="badge">&lt;ugc&gt;</span></td></tr>
         <tr><td colspan="4"><div id="NPW" style="display:none;">
@@ -170,9 +160,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_RFW"/>
-        <a id="RFW_btn" class="btn btn-small" role="button"
+        <tr><td>
+        <a id="channel_RFW" class="btn btn-small" role="button"
  href="javascript: revdiv('RFW');"><i class="fa fa-plus"></i></a>
         </td><td>Red Flag Warning (RFW)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01004001curr.pdf">10-401</a></td><td><span class="badge">&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;</span> <span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;ugc&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;state&gt;</span> <span class="badge">&lt;ugc&gt;</span></td></tr>
         <tr><td colspan="4"><div id="RFW" style="display:none;">
@@ -181,15 +170,14 @@
         <dt>Example Raw Text:</dt>
 <dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=201504231901-KMAF-WWUS84-RFWMAF">View Text</a></dd>
         <dt>Channels for Product Example:</dt><dd><span class="badge">FW.A</span> <span class="badge">FW.A.MAF</span> <span class="badge">FW.A.NM</span> <span class="badge">FW.A.NMZ114</span> <span class="badge">FW.A.NMZ115</span> <span class="badge">FW.A.TX</span> <span class="badge">FW.A.TXZ057</span> <span class="badge">FW.A.TXZ258</span> <span class="badge">NMZ114</span> <span class="badge">NMZ115</span> <span class="badge">RFW...</span> <span class="badge">RFWMAF</span> <span class="badge">TXZ057</span> <span class="badge">TXZ258</span></dd>
-        <dt>XMPP Chatroom Example:</dt><dd><p>MAF <a href="https://mesonet.agron.iastate.edu/vtec/2015-O-CON-KMAF-FW-A-0009_2015-04-24T14:00Z">continues Fire Weather Watch</a> valid at Apr 24, 9:00 AM CDT for Guadalupe Mountains, Southeast Plains [NM] and Guadalupe Mountains, Van Horn and Highway 54 Corridor [TX] till Apr 24, 11:00 PM CDT </p></dd>
-        <dt>Twitter Example:</dt><dd>MAF continues Fire Weather Watch valid at Apr 24, 9:00 AM CDT for Guadalupe Mountains, Southeast Plains [NM] and Guadalupe Mountains, Van Horn and Highway 54 Corridor [TX] till Apr 24, 11:00 PM CDT https://mesonet.agron.iastate.edu/vtec/2015-O-CON-KMAF-FW-A-0009_2015-04-24T14:00Z<br /></dd>
+        <dt>XMPP Chatroom Example:</dt><dd><p>MAF <a href="https://mesonet.agron.iastate.edu/vtec/2015-O-CON-KMAF-FW-A-0009_2015-04-24T14:00Z">continues Fire Weather Watch</a> valid at Apr 24, 9:00 AM CDT for ((NMZ114)), ((NMZ115)) [NM] and ((TXZ057)), ((TXZ258)) [TX] till Apr 24, 11:00 PM CDT </p></dd>
+        <dt>Twitter Example:</dt><dd>MAF continues Fire Weather Watch valid at Apr 24, 9:00 AM CDT for ((NMZ114)), ((NMZ115)) [NM] and ((TXZ057)), ((TXZ258)) [TX] till Apr 24, 11:00 PM CDT https://mesonet.agron.iastate.edu/vtec/2015-O-CON-KMAF-FW-A-0009_2015-04-24T14:00Z<br /></dd>
         </dl>
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_SMW"/>
-        <a id="SMW_btn" class="btn btn-small" role="button"
+        <tr><td>
+        <a id="channel_SMW" class="btn btn-small" role="button"
  href="javascript: revdiv('SMW');"><i class="fa fa-plus"></i></a>
         </td><td>Special Marine Warning (SMW)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01003013curr.pdf">10-313</a></td><td><span class="badge">&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;</span> <span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;ugc&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;state&gt;</span> <span class="badge">&lt;ugc&gt;</span></td></tr>
         <tr><td colspan="4"><div id="SMW" style="display:none;">
@@ -204,9 +192,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_SVR"/>
-        <a id="SVR_btn" class="btn btn-small" role="button"
+        <tr><td>
+        <a id="channel_SVR" class="btn btn-small" role="button"
  href="javascript: revdiv('SVR');"><i class="fa fa-plus"></i></a>
         </td><td>Severe Thunderstorm Warning (SVR)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01005011curr.pdf">10-511</a></td><td><span class="badge">&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;</span> <span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;ugc&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;state&gt;</span> <span class="badge">&lt;ugc&gt;</span></td></tr>
         <tr><td colspan="4"><div id="SVR" style="display:none;">
@@ -221,9 +208,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_SVS"/>
-        <a id="SVS_btn" class="btn btn-small" role="button"
+        <tr><td>
+        <a id="channel_SVS" class="btn btn-small" role="button"
  href="javascript: revdiv('SVS');"><i class="fa fa-plus"></i></a>
         </td><td>Severe Weather Statement (SVS)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01005011curr.pdf">10-511</a></td><td><span class="badge">&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;</span> <span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;ugc&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;state&gt;</span> <span class="badge">&lt;ugc&gt;</span></td></tr>
         <tr><td colspan="4"><div id="SVS" style="display:none;">
@@ -238,9 +224,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_TOR"/>
-        <a id="TOR_btn" class="btn btn-small" role="button"
+        <tr><td>
+        <a id="channel_TOR" class="btn btn-small" role="button"
  href="javascript: revdiv('TOR');"><i class="fa fa-plus"></i></a>
         </td><td>Tornado Warning (TOR)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01005011curr.pdf">10-511</a></td><td><span class="badge">&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;</span> <span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;ugc&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;state&gt;</span> <span class="badge">&lt;ugc&gt;</span></td></tr>
         <tr><td colspan="4"><div id="TOR" style="display:none;">
@@ -255,9 +240,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_WCN"/>
-        <a id="WCN_btn" class="btn btn-small" role="button"
+        <tr><td>
+        <a id="channel_WCN" class="btn btn-small" role="button"
  href="javascript: revdiv('WCN');"><i class="fa fa-plus"></i></a>
         </td><td>Watch County Notification (WCN)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01005011curr.pdf">10-511</a></td><td><span class="badge">&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;</span> <span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;ugc&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;state&gt;</span> <span class="badge">&lt;ugc&gt;</span></td></tr>
         <tr><td colspan="4"><div id="WCN" style="display:none;">
@@ -272,9 +256,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_WSW"/>
-        <a id="WSW_btn" class="btn btn-small" role="button"
+        <tr><td>
+        <a id="channel_WSW" class="btn btn-small" role="button"
  href="javascript: revdiv('WSW');"><i class="fa fa-plus"></i></a>
         </td><td>Winter Weather Message (WSW)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01005013curr.pdf">10-513</a></td><td><span class="badge">&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;</span> <span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;wfo&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;ugc&gt;</span> <span class="badge">&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;state&gt;</span> <span class="badge">&lt;ugc&gt;</span></td></tr>
         <tr><td colspan="4"><div id="WSW" style="display:none;">
@@ -289,52 +272,47 @@
         </div>
         </td>
         </tr>
-        
-</table>
-
+        </table>
     <h3>NWS Local Office / National Products</h3>
     <table class="table table-bordered table-condensed">
     <thead>
     <tr><td></td><th>AFOS PIL + Product Name</th><th>Directive</th>
     <th>Channel Templates Used</th></tr>
     </thead>
-    
-<tr><td><a name="channel_ADA"/>
-<a id="ADA_btn" class="btn btn-small" role="button"
+    <tr><td>
+<a id="channel_ADA" class="btn btn-small" role="button"
  href="javascript: revdiv('ADA');"><i class="fa fa-plus"></i></a>
         </td><td>Administrative Message (ADA)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="ADA" style="display:none;">
         <dl class="dl-horizontal">
         
         <dt>Example Raw Text:</dt>
-<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202012281506-KNCF-NOUS71-ADANCF">View Text</a></dd>
+<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202104281506-KNCF-NOUS71-ADANCF">View Text</a></dd>
         <dt>Channels for Product Example:</dt><dd><span class="badge">ADA...</span> <span class="badge">ADANCF</span></dd>
-        <dt>XMPP Chatroom Example:</dt><dd><p>NCF issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202012281506-KNCF-NOUS71-ADANCF">Administrative Message (ADA)</a> at Dec 28, 15:06 UTC</p></dd>
-        <dt>Twitter Example:</dt><dd>NCF issues Administrative Message (ADA) at Dec 28, 15:06 UTC https://mesonet.agron.iastate.edu/p.php?pid=202012281506-KNCF-NOUS71-ADANCF<br /></dd>
+        <dt>XMPP Chatroom Example:</dt><dd><p>NCF issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202104281506-KNCF-NOUS71-ADANCF">Administrative Message (ADA)</a> at Apr 28, 15:06 UTC</p></dd>
+        <dt>Twitter Example:</dt><dd>NCF issues Administrative Message (ADA) at Apr 28, 15:06 UTC https://mesonet.agron.iastate.edu/p.php?pid=202104281506-KNCF-NOUS71-ADANCF<br /></dd>
         </dl>
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_ADM"/>
-<a id="ADM_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_ADM" class="btn btn-small" role="button"
  href="javascript: revdiv('ADM');"><i class="fa fa-plus"></i></a>
         </td><td>Administrative Message (ADM)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="ADM" style="display:none;">
         <dl class="dl-horizontal">
         
         <dt>Example Raw Text:</dt>
-<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202012181523-KNCF-NOUS72-ADMNCF">View Text</a></dd>
+<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202104181523-KNCF-NOUS72-ADMNCF">View Text</a></dd>
         <dt>Channels for Product Example:</dt><dd><span class="badge">ADM...</span> <span class="badge">ADMNCF</span></dd>
-        <dt>XMPP Chatroom Example:</dt><dd><p>NCF issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202012181523-KNCF-NOUS72-ADMNCF">Administrative Message (ADM)</a> at Dec 18, 15:23 UTC</p></dd>
-        <dt>Twitter Example:</dt><dd>NCF issues Administrative Message (ADM) at Dec 18, 15:23 UTC https://mesonet.agron.iastate.edu/p.php?pid=202012181523-KNCF-NOUS72-ADMNCF<br /></dd>
+        <dt>XMPP Chatroom Example:</dt><dd><p>NCF issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202104181523-KNCF-NOUS72-ADMNCF">Administrative Message (ADM)</a> at Apr 18, 15:23 UTC</p></dd>
+        <dt>Twitter Example:</dt><dd>NCF issues Administrative Message (ADM) at Apr 18, 15:23 UTC https://mesonet.agron.iastate.edu/p.php?pid=202104181523-KNCF-NOUS72-ADMNCF<br /></dd>
         </dl>
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_AFD"/>
-<a id="AFD_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_AFD" class="btn btn-small" role="button"
  href="javascript: revdiv('AFD');"><i class="fa fa-plus"></i></a>
         </td><td>Area Forecast Discussion (AFD)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="AFD" style="display:none;">
@@ -349,9 +327,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_AQI"/>
-<a id="AQI_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_AQI" class="btn btn-small" role="button"
  href="javascript: revdiv('AQI');"><i class="fa fa-plus"></i></a>
         </td><td>Ground Level Ozone Forecast (AQI)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="AQI" style="display:none;">
@@ -366,9 +343,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_AWU"/>
-<a id="AWU_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_AWU" class="btn btn-small" role="button"
  href="javascript: revdiv('AWU');"><i class="fa fa-plus"></i></a>
         </td><td>Area Weather Update (AWU)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="AWU" style="display:none;">
@@ -383,9 +359,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_AWW"/>
-<a id="AWW_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_AWW" class="btn btn-small" role="button"
  href="javascript: revdiv('AWW');"><i class="fa fa-plus"></i></a>
         </td><td>Airport Weather Warning (AWW)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="AWW" style="display:none;">
@@ -400,26 +375,24 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_AVA"/>
-<a id="AVA_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_AVA" class="btn btn-small" role="button"
  href="javascript: revdiv('AVA');"><i class="fa fa-plus"></i></a>
         </td><td>Avalanche Watch (AVA)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="AVA" style="display:none;">
         <dl class="dl-horizontal">
         
         <dt>Example Raw Text:</dt>
-<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202101040211-KSEW-WOUS46-AVASEW">View Text</a></dd>
+<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202104040211-KSEW-WOUS46-AVASEW">View Text</a></dd>
         <dt>Channels for Product Example:</dt><dd><span class="badge">AVA...</span> <span class="badge">AVASEW</span></dd>
-        <dt>XMPP Chatroom Example:</dt><dd><p>SEW issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202101040211-KSEW-WOUS46-AVASEW">Avalanche Watch (AVA)</a> at Jan 4, 02:11 UTC</p></dd>
-        <dt>Twitter Example:</dt><dd>SEW issues Avalanche Watch (AVA) at Jan 4, 02:11 UTC ...AVALANCHE WATCH IN EFFECT FOR THE WASHINGTON CASCADES NEAR AND WEST OF THE CREST SUNDAY NIGHT AND MONDAY... https://mesonet.agron.iastate.edu/p.php?pid=202101040211-KSEW-WOUS46-AVASEW<br /></dd>
+        <dt>XMPP Chatroom Example:</dt><dd><p>SEW issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202104040211-KSEW-WOUS46-AVASEW">Avalanche Watch (AVA)</a> at Apr 4, 02:11 UTC</p></dd>
+        <dt>Twitter Example:</dt><dd>SEW issues Avalanche Watch (AVA) at Apr 4, 02:11 UTC ...AVALANCHE WATCH IN EFFECT FOR THE WASHINGTON CASCADES NEAR AND WEST OF THE CREST SUNDAY NIGHT AND MONDAY... https://mesonet.agron.iastate.edu/p.php?pid=202104040211-KSEW-WOUS46-AVASEW<br /></dd>
         </dl>
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_AVW"/>
-<a id="AVW_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_AVW" class="btn btn-small" role="button"
  href="javascript: revdiv('AVW');"><i class="fa fa-plus"></i></a>
         </td><td>Avalanche Warning (AVW)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="AVW" style="display:none;">
@@ -434,9 +407,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_AQA"/>
-<a id="AQA_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_AQA" class="btn btn-small" role="button"
  href="javascript: revdiv('AQA');"><i class="fa fa-plus"></i></a>
         </td><td>Air Quality Alert (AQA)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="AQA" style="display:none;">
@@ -451,9 +423,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_BLU"/>
-<a id="BLU_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_BLU" class="btn btn-small" role="button"
  href="javascript: revdiv('BLU');"><i class="fa fa-plus"></i></a>
         </td><td>Blue Alert (BLU)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="BLU" style="display:none;">
@@ -468,9 +439,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_CAE"/>
-<a id="CAE_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_CAE" class="btn btn-small" role="button"
  href="javascript: revdiv('CAE');"><i class="fa fa-plus"></i></a>
         </td><td>Child Abduction Emergency (CAE)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="CAE" style="display:none;">
@@ -485,9 +455,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_CEM"/>
-<a id="CEM_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_CEM" class="btn btn-small" role="button"
  href="javascript: revdiv('CEM');"><i class="fa fa-plus"></i></a>
         </td><td>Civil Emergency Message (CEM)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="CEM" style="display:none;">
@@ -502,9 +471,24 @@
         </div>
         </td>
         </tr>
+        <tr><td>
+<a id="channel_CF6" class="btn btn-small" role="button"
+ href="javascript: revdiv('CF6');"><i class="fa fa-plus"></i></a>
+        </td><td>CF6 (CF6)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01010004curr.pdf">10-1004</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
+        <tr><td colspan="4"><div id="CF6" style="display:none;">
+        <dl class="dl-horizontal">
         
-<tr><td><a name="channel_CGR"/>
-<a id="CGR_btn" class="btn btn-small" role="button"
+        <dt>Example Raw Text:</dt>
+<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202104250920-KDMX-CXUS53-CF6DSM">View Text</a></dd>
+        <dt>Channels for Product Example:</dt><dd><span class="badge">CF6...</span> <span class="badge">CF6DSM</span></dd>
+        <dt>XMPP Chatroom Example:</dt><dd><p>DMX issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202104250920-KDMX-CXUS53-CF6DSM">CF6DSM (CF6)</a> at Apr 25, 09:20 UTC</p></dd>
+        <dt>Twitter Example:</dt><dd>DMX issues CF6DSM (CF6) at Apr 25, 09:20 UTC https://mesonet.agron.iastate.edu/p.php?pid=202104250920-KDMX-CXUS53-CF6DSM<br /></dd>
+        </dl>
+        </div>
+        </td>
+        </tr>
+        <tr><td>
+<a id="channel_CGR" class="btn btn-small" role="button"
  href="javascript: revdiv('CGR');"><i class="fa fa-plus"></i></a>
         </td><td>Coastal Weather Observations (CGR)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="CGR" style="display:none;">
@@ -519,11 +503,10 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_CLI"/>
-<a id="CLI_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_CLI" class="btn btn-small" role="button"
  href="javascript: revdiv('CLI');"><i class="fa fa-plus"></i></a>
-        </td><td>Daily Climate Report (CLI)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
+        </td><td>Daily Climate Report (CLI)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01010004curr.pdf">10-1004</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="CLI" style="display:none;">
         <dl class="dl-horizontal">
         
@@ -531,14 +514,13 @@
 <dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=201506090651-KFGF-CDUS43-CLIFGF">View Text</a></dd>
         <dt>Channels for Product Example:</dt><dd><span class="badge">CLI...</span> <span class="badge">CLIFGF</span></dd>
         <dt>XMPP Chatroom Example:</dt><dd>GRAND FORKS UNIV. (NWS) ND <a href="https://mesonet.agron.iastate.edu/p.php?pid=201506090651-KFGF-CDUS43-CLIFGF">Jun 8 Climate Report</a>: High: 86 Low: 54 Precip: 0.12 Snow: 0.0</dd>
-        <dt>Twitter Example:</dt><dd>GRAND FORKS UNIV. (NWS) ND Jun 8 Climate: Hi: 86 Lo: 54 Precip: 0.12 Snow: 0.0 https://mesonet.agron.iastate.edu/p.php?pid=201506090651-KFGF-CDUS43-CLIFGF<br /></dd>
+        <dt>Twitter Example:</dt><dd>GRAND FORKS UNIV. (NWS) ND Jun 8 Climate: High: 86 Low: 54 Precip: 0.12 Snow: 0.0 https://mesonet.agron.iastate.edu/p.php?pid=201506090651-KFGF-CDUS43-CLIFGF<br /></dd>
         </dl>
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_CRF"/>
-<a id="CRF_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_CRF" class="btn btn-small" role="button"
  href="javascript: revdiv('CRF');"><i class="fa fa-plus"></i></a>
         </td><td>Contingency River Forecast (CRF)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01009012curr.pdf">10-912</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="CRF" style="display:none;">
@@ -553,9 +535,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_CWF"/>
-<a id="CWF_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_CWF" class="btn btn-small" role="button"
  href="javascript: revdiv('CWF');"><i class="fa fa-plus"></i></a>
         </td><td>Coastal Waters Forecast (CWF)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="CWF" style="display:none;">
@@ -570,9 +551,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_DGT"/>
-<a id="DGT_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_DGT" class="btn btn-small" role="button"
  href="javascript: revdiv('DGT');"><i class="fa fa-plus"></i></a>
         </td><td>Drought Information (DGT)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="DGT" style="display:none;">
@@ -587,9 +567,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_ESF"/>
-<a id="ESF_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_ESF" class="btn btn-small" role="button"
  href="javascript: revdiv('ESF');"><i class="fa fa-plus"></i></a>
         </td><td>Hydrologic Outlook (ESF)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="ESF" style="display:none;">
@@ -604,9 +583,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_EQI"/>
-<a id="EQI_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_EQI" class="btn btn-small" role="button"
  href="javascript: revdiv('EQI');"><i class="fa fa-plus"></i></a>
         </td><td>Earthquake Information (EQI)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="EQI" style="display:none;">
@@ -621,9 +599,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_EQR"/>
-<a id="EQR_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_EQR" class="btn btn-small" role="button"
  href="javascript: revdiv('EQR');"><i class="fa fa-plus"></i></a>
         </td><td>Earthquake Report (EQR)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="EQR" style="display:none;">
@@ -638,9 +615,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_EVI"/>
-<a id="EVI_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_EVI" class="btn btn-small" role="button"
  href="javascript: revdiv('EVI');"><i class="fa fa-plus"></i></a>
         </td><td>Evacuation Immediate (EVI)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="EVI" style="display:none;">
@@ -655,9 +631,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_FRW"/>
-<a id="FRW_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_FRW" class="btn btn-small" role="button"
  href="javascript: revdiv('FRW');"><i class="fa fa-plus"></i></a>
         </td><td>Fire Warning (FRW)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="FRW" style="display:none;">
@@ -672,26 +647,24 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_FTM"/>
-<a id="FTM_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_FTM" class="btn btn-small" role="button"
  href="javascript: revdiv('FTM');"><i class="fa fa-plus"></i></a>
         </td><td>Free Text Message (FTM)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="FTM" style="display:none;">
         <dl class="dl-horizontal">
         
         <dt>Example Raw Text:</dt>
-<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202012201914-KRLX-NOUS61-FTMRLX">View Text</a></dd>
+<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202104201914-KRLX-NOUS61-FTMRLX">View Text</a></dd>
         <dt>Channels for Product Example:</dt><dd><span class="badge">FTM...</span> <span class="badge">FTMRLX</span></dd>
-        <dt>XMPP Chatroom Example:</dt><dd><p>RLX issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202012201914-KRLX-NOUS61-FTMRLX">Free Text Message (FTM)</a> at Dec 20, 19:14 UTC</p></dd>
-        <dt>Twitter Example:</dt><dd>RLX issues Free Text Message (FTM) at Dec 20, 19:14 UTC https://mesonet.agron.iastate.edu/p.php?pid=202012201914-KRLX-NOUS61-FTMRLX<br /></dd>
+        <dt>XMPP Chatroom Example:</dt><dd><p>RLX issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202104201914-KRLX-NOUS61-FTMRLX">Free Text Message (FTM)</a> at Apr 20, 19:14 UTC</p></dd>
+        <dt>Twitter Example:</dt><dd>RLX issues Free Text Message (FTM) at Apr 20, 19:14 UTC https://mesonet.agron.iastate.edu/p.php?pid=202104201914-KRLX-NOUS61-FTMRLX<br /></dd>
         </dl>
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_FWA"/>
-<a id="FWA_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_FWA" class="btn btn-small" role="button"
  href="javascript: revdiv('FWA');"><i class="fa fa-plus"></i></a>
         </td><td>Fire Weather Administrative Message (FWA)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="FWA" style="display:none;">
@@ -706,9 +679,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_FWF"/>
-<a id="FWF_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_FWF" class="btn btn-small" role="button"
  href="javascript: revdiv('FWF');"><i class="fa fa-plus"></i></a>
         </td><td>Fire Weather Planning Forecast (FWF)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="FWF" style="display:none;">
@@ -723,9 +695,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_FWS"/>
-<a id="FWS_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_FWS" class="btn btn-small" role="button"
  href="javascript: revdiv('FWS');"><i class="fa fa-plus"></i></a>
         </td><td>Fire Weather Spot Forecast (FWS)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="FWS" style="display:none;">
@@ -740,9 +711,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_GLF"/>
-<a id="GLF_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_GLF" class="btn btn-small" role="button"
  href="javascript: revdiv('GLF');"><i class="fa fa-plus"></i></a>
         </td><td>Open Lake Forecast (GLF)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="GLF" style="display:none;">
@@ -757,9 +727,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_HLS"/>
-<a id="HLS_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_HLS" class="btn btn-small" role="button"
  href="javascript: revdiv('HLS');"><i class="fa fa-plus"></i></a>
         </td><td>Hurricane Local Statement (HLS)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01006001curr.pdf">10-601</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="HLS" style="display:none;">
@@ -774,9 +743,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_HCM"/>
-<a id="HCM_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_HCM" class="btn btn-small" role="button"
  href="javascript: revdiv('HCM');"><i class="fa fa-plus"></i></a>
         </td><td>Hydromet Coordination Message (HCM)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="HCM" style="display:none;">
@@ -791,26 +759,24 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_HMD"/>
-<a id="HMD_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_HMD" class="btn btn-small" role="button"
  href="javascript: revdiv('HMD');"><i class="fa fa-plus"></i></a>
         </td><td>Rainfall and Flood Outlook Product (HMD)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="HMD" style="display:none;">
         <dl class="dl-horizontal">
         
         <dt>Example Raw Text:</dt>
-<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202012091602-KKRF-AGUS73-HMDKRF">View Text</a></dd>
+<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202104091602-KKRF-AGUS73-HMDKRF">View Text</a></dd>
         <dt>Channels for Product Example:</dt><dd><span class="badge">HMD...</span> <span class="badge">HMDKRF</span></dd>
-        <dt>XMPP Chatroom Example:</dt><dd><p>KRF issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202012091602-KKRF-AGUS73-HMDKRF">Rainfall and Flood Outlook Product (HMD)</a> at Dec 9, 16:02 UTC</p></dd>
-        <dt>Twitter Example:</dt><dd>KRF issues Rainfall and Flood Outlook Product (HMD) at Dec 9, 16:02 UTC https://mesonet.agron.iastate.edu/p.php?pid=202012091602-KKRF-AGUS73-HMDKRF<br /></dd>
+        <dt>XMPP Chatroom Example:</dt><dd><p>KRF issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202104091602-KKRF-AGUS73-HMDKRF">Rainfall and Flood Outlook Product (HMD)</a> at Apr 9, 16:02 UTC</p></dd>
+        <dt>Twitter Example:</dt><dd>KRF issues Rainfall and Flood Outlook Product (HMD) at Apr 9, 16:02 UTC https://mesonet.agron.iastate.edu/p.php?pid=202104091602-KKRF-AGUS73-HMDKRF<br /></dd>
         </dl>
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_HWO"/>
-<a id="HWO_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_HWO" class="btn btn-small" role="button"
  href="javascript: revdiv('HWO');"><i class="fa fa-plus"></i></a>
         </td><td>Hazardous Weather Outlook (HWO)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01005017curr.pdf">10-517</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="HWO" style="display:none;">
@@ -825,9 +791,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_HYD"/>
-<a id="HYD_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_HYD" class="btn btn-small" role="button"
  href="javascript: revdiv('HYD');"><i class="fa fa-plus"></i></a>
         </td><td>Supplementary Temp and Precip (HYD)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="HYD" style="display:none;">
@@ -842,9 +807,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_ICE"/>
-<a id="ICE_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_ICE" class="btn btn-small" role="button"
  href="javascript: revdiv('ICE');"><i class="fa fa-plus"></i></a>
         </td><td>Ice Outlook (ICE)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01003030curr.pdf">10-330</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="ICE" style="display:none;">
@@ -859,9 +823,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_LAE"/>
-<a id="LAE_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_LAE" class="btn btn-small" role="button"
  href="javascript: revdiv('LAE');"><i class="fa fa-plus"></i></a>
         </td><td>Local Area Emergency (LAE)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="LAE" style="display:none;">
@@ -876,9 +839,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_LCO"/>
-<a id="LCO_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_LCO" class="btn btn-small" role="button"
  href="javascript: revdiv('LCO');"><i class="fa fa-plus"></i></a>
         </td><td>Local Cooperative Observation (LCO)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="LCO" style="display:none;">
@@ -893,9 +855,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_LSR"/>
-<a id="LSR_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_LSR" class="btn btn-small" role="button"
  href="javascript: revdiv('LSR');"><i class="fa fa-plus"></i></a>
         </td><td>Local Storm Report (LSR)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01005017curr.pdf">10-517</a></td><td><span class="badge">LSR.ALL</span> <span class="badge">LSR.&lt;typetext&gt;</span> <span class="badge">LSR.&lt;state&gt;</span> <span class="badge">LSR.&lt;state&gt;.&lt;typetext&gt;</span></td></tr>
         <tr><td colspan="4"><div id="LSR" style="display:none;">
@@ -910,9 +871,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_MCD"/>
-<a id="MCD_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_MCD" class="btn btn-small" role="button"
  href="javascript: revdiv('MCD');"><i class="fa fa-plus"></i></a>
         </td><td>Mesoscale Convective Discussion (MCD)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01005017curr.pdf">10-517</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil&gt;.&lt;wfo&gt;</span></td></tr>
         <tr><td colspan="4"><div id="MCD" style="display:none;">
@@ -927,9 +887,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_MPD"/>
-<a id="MPD_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_MPD" class="btn btn-small" role="button"
  href="javascript: revdiv('MPD');"><i class="fa fa-plus"></i></a>
         </td><td>Mesoscale Precipitation Discussion (MPD)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01005017curr.pdf">10-517</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil&gt;.&lt;wfo&gt;</span></td></tr>
         <tr><td colspan="4"><div id="MPD" style="display:none;">
@@ -944,9 +903,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_MIS"/>
-<a id="MIS_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_MIS" class="btn btn-small" role="button"
  href="javascript: revdiv('MIS');"><i class="fa fa-plus"></i></a>
         </td><td>Meteorological Impact Statement (MIS)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="MIS" style="display:none;">
@@ -961,9 +919,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_MWS"/>
-<a id="MWS_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_MWS" class="btn btn-small" role="button"
  href="javascript: revdiv('MWS');"><i class="fa fa-plus"></i></a>
         </td><td>Marine Weather Statement (MWS)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01003014curr.pdf">10-314</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="MWS" style="display:none;">
@@ -978,11 +935,10 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_NOW"/>
-<a id="NOW_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_NOW" class="btn btn-small" role="button"
  href="javascript: revdiv('NOW');"><i class="fa fa-plus"></i></a>
-        </td><td>Short-term Forecast (NOW)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
+        </td><td>Short-term Forecast (NOW)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01005017curr.pdf">10-517</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="NOW" style="display:none;">
         <dl class="dl-horizontal">
         
@@ -995,9 +951,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_NSH"/>
-<a id="NSH_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_NSH" class="btn btn-small" role="button"
  href="javascript: revdiv('NSH');"><i class="fa fa-plus"></i></a>
         </td><td>Nearshore Marine Forecast (NSH)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="NSH" style="display:none;">
@@ -1012,43 +967,40 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_OAV"/>
-<a id="OAV_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_OAV" class="btn btn-small" role="button"
  href="javascript: revdiv('OAV');"><i class="fa fa-plus"></i></a>
         </td><td>Other Aviation Report (OAV)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="OAV" style="display:none;">
         <dl class="dl-horizontal">
         
         <dt>Example Raw Text:</dt>
-<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202012161848-PAWU-NOAK58-OAVAWU">View Text</a></dd>
+<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202104161848-PAWU-NOAK58-OAVAWU">View Text</a></dd>
         <dt>Channels for Product Example:</dt><dd><span class="badge">OAV...</span> <span class="badge">OAVAWU</span></dd>
-        <dt>XMPP Chatroom Example:</dt><dd><p>AWU issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202012161848-PAWU-NOAK58-OAVAWU">Other Aviation Report (OAV)</a> at Dec 16, 18:48 UTC</p></dd>
-        <dt>Twitter Example:</dt><dd>AWU issues Other Aviation Report (OAV) at Dec 16, 18:48 UTC https://mesonet.agron.iastate.edu/p.php?pid=202012161848-PAWU-NOAK58-OAVAWU<br /></dd>
+        <dt>XMPP Chatroom Example:</dt><dd><p>AWU issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202104161848-PAWU-NOAK58-OAVAWU">Other Aviation Report (OAV)</a> at Apr 16, 18:48 UTC</p></dd>
+        <dt>Twitter Example:</dt><dd>AWU issues Other Aviation Report (OAV) at Apr 16, 18:48 UTC https://mesonet.agron.iastate.edu/p.php?pid=202104161848-PAWU-NOAK58-OAVAWU<br /></dd>
         </dl>
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_OMR"/>
-<a id="OMR_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_OMR" class="btn btn-small" role="button"
  href="javascript: revdiv('OMR');"><i class="fa fa-plus"></i></a>
         </td><td>Other Marine Reports (OMR)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="OMR" style="display:none;">
         <dl class="dl-horizontal">
         
         <dt>Example Raw Text:</dt>
-<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202012091553-KCLE-SXUS81-OMRCLE">View Text</a></dd>
+<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202104091553-KCLE-SXUS81-OMRCLE">View Text</a></dd>
         <dt>Channels for Product Example:</dt><dd><span class="badge">OMR...</span> <span class="badge">OMRCLE</span></dd>
-        <dt>XMPP Chatroom Example:</dt><dd><p>CLE issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202012091553-KCLE-SXUS81-OMRCLE">Other Marine Reports (OMR)</a> at Dec 9, 15:53 UTC</p></dd>
-        <dt>Twitter Example:</dt><dd>CLE issues Other Marine Reports (OMR) at Dec 9, 15:53 UTC https://mesonet.agron.iastate.edu/p.php?pid=202012091553-KCLE-SXUS81-OMRCLE<br /></dd>
+        <dt>XMPP Chatroom Example:</dt><dd><p>CLE issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202104091553-KCLE-SXUS81-OMRCLE">Other Marine Reports (OMR)</a> at Apr 9, 15:53 UTC</p></dd>
+        <dt>Twitter Example:</dt><dd>CLE issues Other Marine Reports (OMR) at Apr 9, 15:53 UTC https://mesonet.agron.iastate.edu/p.php?pid=202104091553-KCLE-SXUS81-OMRCLE<br /></dd>
         </dl>
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_PFM"/>
-<a id="PFM_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_PFM" class="btn btn-small" role="button"
  href="javascript: revdiv('PFM');"><i class="fa fa-plus"></i></a>
         </td><td>Point Forecast Matrices (PFM)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="PFM" style="display:none;">
@@ -1063,9 +1015,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_PNS"/>
-<a id="PNS_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_PNS" class="btn btn-small" role="button"
  href="javascript: revdiv('PNS');"><i class="fa fa-plus"></i></a>
         </td><td>Public Information Statement (PNS)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="PNS" style="display:none;">
@@ -1080,26 +1031,88 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_PSH"/>
-<a id="PSH_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_PSH" class="btn btn-small" role="button"
  href="javascript: revdiv('PSH');"><i class="fa fa-plus"></i></a>
         </td><td>Post Tropical Event Report (PSH)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="PSH" style="display:none;">
         <dl class="dl-horizontal">
         
         <dt>Example Raw Text:</dt>
-<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202012211351-PGUM-ACPQ70-PSHPQ">View Text</a></dd>
+<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202104211351-PGUM-ACPQ70-PSHPQ">View Text</a></dd>
         <dt>Channels for Product Example:</dt><dd><span class="badge">PSH...</span> <span class="badge">PSHPQ</span></dd>
-        <dt>XMPP Chatroom Example:</dt><dd><p>GUM issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202012211351-PGUM-ACPQ70-PSHPQ">Post Tropical Event Report (PSH)</a> at Dec 21, 13:51 UTC</p></dd>
-        <dt>Twitter Example:</dt><dd>GUM issues Post Tropical Event Report (PSH) at Dec 21, 13:51 UTC https://mesonet.agron.iastate.edu/p.php?pid=202012211351-PGUM-ACPQ70-PSHPQ<br /></dd>
+        <dt>XMPP Chatroom Example:</dt><dd><p>GUM issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202104211351-PGUM-ACPQ70-PSHPQ">Post Tropical Event Report (PSH)</a> at Apr 21, 13:51 UTC</p></dd>
+        <dt>Twitter Example:</dt><dd>GUM issues Post Tropical Event Report (PSH) at Apr 21, 13:51 UTC https://mesonet.agron.iastate.edu/p.php?pid=202104211351-PGUM-ACPQ70-PSHPQ<br /></dd>
         </dl>
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_REC"/>
-<a id="REC_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_PFWFD1" class="btn btn-small" role="button"
+ href="javascript: revdiv('PFWFD1');"><i class="fa fa-plus"></i></a>
+        </td><td>Storm Prediction Center Day 1 Fire Weather Outlook (PFWFD1)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01005012curr.pdf">10-512</a></td><td><span class="badge">&lt;wfo&gt;</span> <span class="badge">&lt;wfo&gt;.SPCFD1</span> <span class="badge">&lt;wfo&gt;.SPCFD1.&lt;threshold&gt;</span></td></tr>
+        <tr><td colspan="4"><div id="PFWFD1" style="display:none;">
+        <dl class="dl-horizontal">
+        <dt>Notes</dt><dd>There is no present means for county/zone based channels.</dd>
+        <dt>Example Raw Text:</dt>
+<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202103250549-KWNS-FNUS31-PFWFD1">View Text</a></dd>
+        <dt>Channels for Product Example:</dt><dd><span class="badge">ABQ</span> <span class="badge">ABQ.SPCFD1</span> <span class="badge">ABQ.SPCFD1.ELEV</span></dd>
+        <dt>XMPP Chatroom Example:</dt><dd><p>The Storm Prediction Center issues <a href="https://www.spc.noaa.gov/products/fire_wx/2021/210325_1200_fwdy1_print.html">Day 1 Elevated Fire Weather Risk</a> at Mar 25, 5:49z for portions of ABQ's area</p></dd>
+        <dt>Twitter Example:</dt><dd>SPC issues Day 1 Elevated Fire Weather Risk at Mar 25, 5:49z for ABQ https://www.spc.noaa.gov/products/fire_wx/2021/210325_1200_fwdy1_print.html<br /></dd>
+        </dl>
+        </div>
+        </td>
+        </tr>
+        <tr><td>
+<a id="channel_PFWFD2" class="btn btn-small" role="button"
+ href="javascript: revdiv('PFWFD2');"><i class="fa fa-plus"></i></a>
+        </td><td>Storm Prediction Center Day 2 Fire Weather Outlook (PFWFD2)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01005012curr.pdf">10-512</a></td><td><span class="badge">&lt;wfo&gt;</span> <span class="badge">&lt;wfo&gt;.SPCFD2</span> <span class="badge">&lt;wfo&gt;.SPCFD2.&lt;threshold&gt;</span></td></tr>
+        <tr><td colspan="4"><div id="PFWFD2" style="display:none;">
+        <dl class="dl-horizontal">
+        <dt>Notes</dt><dd>There is no present means for county/zone based channels.</dd>
+        <dt>Example Raw Text:</dt>
+<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202103250550-KWNS-FNUS32-PFWFD2">View Text</a></dd>
+        <dt>Channels for Product Example:</dt><dd><span class="badge">ABQ</span> <span class="badge">ABQ.SPCFD2</span> <span class="badge">ABQ.SPCFD2.CRIT</span></dd>
+        <dt>XMPP Chatroom Example:</dt><dd><p>The Storm Prediction Center issues <a href="https://www.spc.noaa.gov/products/fire_wx/2021/210326_1200_fwdy2_print.html">Day 2 Critical Fire Weather Risk</a> at Mar 25, 5:50z for portions of ABQ's area</p></dd>
+        <dt>Twitter Example:</dt><dd>SPC issues Day 2 Critical Fire Weather Risk at Mar 25, 5:50z for ABQ https://www.spc.noaa.gov/products/fire_wx/2021/210326_1200_fwdy2_print.html<br /></dd>
+        </dl>
+        </div>
+        </td>
+        </tr>
+        <tr><td>
+<a id="channel_PTSDY1" class="btn btn-small" role="button"
+ href="javascript: revdiv('PTSDY1');"><i class="fa fa-plus"></i></a>
+        </td><td>Storm Prediction Center Day 1 Convective Outlook (PTSDY1)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01005012curr.pdf">10-512</a></td><td><span class="badge">&lt;wfo&gt;</span> <span class="badge">&lt;wfo&gt;.SPCDY1</span> <span class="badge">&lt;wfo&gt;.SPCDY1.&lt;threshold&gt;</span></td></tr>
+        <tr><td colspan="4"><div id="PTSDY1" style="display:none;">
+        <dl class="dl-horizontal">
+        <dt>Notes</dt><dd>There is no present means for county/zone based channels.</dd>
+        <dt>Example Raw Text:</dt>
+<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202103251306-KWNS-WUUS01-PTSDY1">View Text</a></dd>
+        <dt>Channels for Product Example:</dt><dd><span class="badge">BMX</span> <span class="badge">BMX.SPCDY1</span> <span class="badge">BMX.SPCDY1.HIGH</span></dd>
+        <dt>XMPP Chatroom Example:</dt><dd><p>The Storm Prediction Center issues <a href="https://www.spc.noaa.gov/products/outlook/archive/2021/day1otlk_20210325_1300.html">Day 1 High Convective Risk</a> at Mar 25, 13:06z for portions of BMX's area</p></dd>
+        <dt>Twitter Example:</dt><dd>SPC issues Day 1 High Convective Risk at Mar 25, 13:06z for BMX https://www.spc.noaa.gov/products/outlook/archive/2021/day1otlk_20210325_1300.html<br /></dd>
+        </dl>
+        </div>
+        </td>
+        </tr>
+        <tr><td>
+<a id="channel_PTSDY2" class="btn btn-small" role="button"
+ href="javascript: revdiv('PTSDY2');"><i class="fa fa-plus"></i></a>
+        </td><td>Storm Prediction Center Day 2 Convective Outlook (PTSDY2)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01005012curr.pdf">10-512</a></td><td><span class="badge">&lt;wfo&gt;</span> <span class="badge">&lt;wfo&gt;.SPCDY2</span> <span class="badge">&lt;wfo&gt;.SPCDY2.&lt;threshold&gt;</span></td></tr>
+        <tr><td colspan="4"><div id="PTSDY2" style="display:none;">
+        <dl class="dl-horizontal">
+        <dt>Notes</dt><dd>There is no present means for county/zone based channels.</dd>
+        <dt>Example Raw Text:</dt>
+<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202103250559-KWNS-WUUS02-PTSDY2">View Text</a></dd>
+        <dt>Channels for Product Example:</dt><dd><span class="badge">AKQ</span> <span class="badge">AKQ.SPCDY2</span> <span class="badge">AKQ.SPCDY2.MRGL</span></dd>
+        <dt>XMPP Chatroom Example:</dt><dd><p>The Storm Prediction Center issues <a href="https://www.spc.noaa.gov/products/outlook/archive/2021/day2otlk_20210325_0600.html">Day 2 Marginal Convective Risk</a> at Mar 25, 5:59z for portions of AKQ's area</p></dd>
+        <dt>Twitter Example:</dt><dd>SPC issues Day 2 Marginal Convective Risk at Mar 25, 5:59z for AKQ https://www.spc.noaa.gov/products/outlook/archive/2021/day2otlk_20210325_0600.html<br /></dd>
+        </dl>
+        </div>
+        </td>
+        </tr>
+        <tr><td>
+<a id="channel_REC" class="btn btn-small" role="button"
  href="javascript: revdiv('REC');"><i class="fa fa-plus"></i></a>
         </td><td>Recreational Forecast (REC)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="REC" style="display:none;">
@@ -1114,11 +1127,10 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_RER"/>
-<a id="RER_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_RER" class="btn btn-small" role="button"
  href="javascript: revdiv('RER');"><i class="fa fa-plus"></i></a>
-        </td><td>Record Event Report (RER)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
+        </td><td>Record Event Report (RER)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01010004curr.pdf">10-1004</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="RER" style="display:none;">
         <dl class="dl-horizontal">
         
@@ -1131,26 +1143,24 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_RRM"/>
-<a id="RRM_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_RRM" class="btn btn-small" role="button"
  href="javascript: revdiv('RRM');"><i class="fa fa-plus"></i></a>
         </td><td>Rainfall Storm Total (RRM)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="RRM" style="display:none;">
         <dl class="dl-horizontal">
         
         <dt>Example Raw Text:</dt>
-<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202012091646-KLOT-SRUS43-RRMLOT">View Text</a></dd>
+<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202104091646-KLOT-SRUS43-RRMLOT">View Text</a></dd>
         <dt>Channels for Product Example:</dt><dd><span class="badge">RRM...</span> <span class="badge">RRMLOT</span></dd>
-        <dt>XMPP Chatroom Example:</dt><dd><p>LOT issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202012091646-KLOT-SRUS43-RRMLOT">Rainfall Storm Total (RRM)</a> at Dec 9, 16:46 UTC</p></dd>
-        <dt>Twitter Example:</dt><dd>LOT issues Rainfall Storm Total (RRM) at Dec 9, 16:46 UTC https://mesonet.agron.iastate.edu/p.php?pid=202012091646-KLOT-SRUS43-RRMLOT<br /></dd>
+        <dt>XMPP Chatroom Example:</dt><dd><p>LOT issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202104091646-KLOT-SRUS43-RRMLOT">Rainfall Storm Total (RRM)</a> at Apr 9, 16:46 UTC</p></dd>
+        <dt>Twitter Example:</dt><dd>LOT issues Rainfall Storm Total (RRM) at Apr 9, 16:46 UTC https://mesonet.agron.iastate.edu/p.php?pid=202104091646-KLOT-SRUS43-RRMLOT<br /></dd>
         </dl>
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_RFD"/>
-<a id="RFD_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_RFD" class="btn btn-small" role="button"
  href="javascript: revdiv('RFD');"><i class="fa fa-plus"></i></a>
         </td><td>Grassland Fire Danger (RFD)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="RFD" style="display:none;">
@@ -1165,9 +1175,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_RTP"/>
-<a id="RTP_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_RTP" class="btn btn-small" role="button"
  href="javascript: revdiv('RTP');"><i class="fa fa-plus"></i></a>
         </td><td>Regional Temperature and Precipitation (RTP)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="RTP" style="display:none;">
@@ -1182,9 +1191,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_RVA"/>
-<a id="RVA_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_RVA" class="btn btn-small" role="button"
  href="javascript: revdiv('RVA');"><i class="fa fa-plus"></i></a>
         </td><td>Hydrologic Summary (RVA)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="RVA" style="display:none;">
@@ -1199,9 +1207,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_RVD"/>
-<a id="RVD_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_RVD" class="btn btn-small" role="button"
  href="javascript: revdiv('RVD');"><i class="fa fa-plus"></i></a>
         </td><td>River and Lake Summary (RVD)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01009022curr.pdf">10-922</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="RVD" style="display:none;">
@@ -1216,9 +1223,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_RVF"/>
-<a id="RVF_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_RVF" class="btn btn-small" role="button"
  href="javascript: revdiv('RVF');"><i class="fa fa-plus"></i></a>
         </td><td>River Forecast (RVF)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01009012curr.pdf">10-912</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="RVF" style="display:none;">
@@ -1233,9 +1239,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_RWS"/>
-<a id="RWS_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_RWS" class="btn btn-small" role="button"
  href="javascript: revdiv('RWS');"><i class="fa fa-plus"></i></a>
         </td><td>Regional Weather Summary (RWS)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="RWS" style="display:none;">
@@ -1250,9 +1255,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_RVS"/>
-<a id="RVS_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_RVS" class="btn btn-small" role="button"
  href="javascript: revdiv('RVS');"><i class="fa fa-plus"></i></a>
         </td><td>Hydrologic Statement (RVS)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="RVS" style="display:none;">
@@ -1267,9 +1271,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_STF"/>
-<a id="STF_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_STF" class="btn btn-small" role="button"
  href="javascript: revdiv('STF');"><i class="fa fa-plus"></i></a>
         </td><td>Tabular State Forecast (STF)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="STF" style="display:none;">
@@ -1284,11 +1287,10 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_SPS"/>
-<a id="SPS_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_SPS" class="btn btn-small" role="button"
  href="javascript: revdiv('SPS');"><i class="fa fa-plus"></i></a>
-        </td><td>Special Weather Statement (SPS)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span> <span class="badge">&lt;ugc&gt;</span> <span class="badge">&lt;afos_pil&gt;.&lt;ugc&gt;</span></td></tr>
+        </td><td>Special Weather Statement (SPS)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01005017curr.pdf">10-517</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span> <span class="badge">&lt;ugc&gt;</span> <span class="badge">&lt;afos_pil&gt;.&lt;ugc&gt;</span></td></tr>
         <tr><td colspan="4"><div id="SPS" style="display:none;">
         <dl class="dl-horizontal">
         
@@ -1301,9 +1303,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_SRF"/>
-<a id="SRF_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_SRF" class="btn btn-small" role="button"
  href="javascript: revdiv('SRF');"><i class="fa fa-plus"></i></a>
         </td><td>Surf Zone Forecast (SRF)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="SRF" style="display:none;">
@@ -1318,9 +1319,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_SPW"/>
-<a id="SPW_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_SPW" class="btn btn-small" role="button"
  href="javascript: revdiv('SPW');"><i class="fa fa-plus"></i></a>
         </td><td>Shelter In Place Warning (SPW)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="SPW" style="display:none;">
@@ -1335,26 +1335,24 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_TAF"/>
-<a id="TAF_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_TAF" class="btn btn-small" role="button"
  href="javascript: revdiv('TAF');"><i class="fa fa-plus"></i></a>
         </td><td>Terminal Aerodrome Forecast (TAF)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span> <span class="badge">&lt;wmo_source&gt;.&lt;aaa&gt;</span></td></tr>
         <tr><td colspan="4"><div id="TAF" style="display:none;">
         <dl class="dl-horizontal">
         
         <dt>Example Raw Text:</dt>
-<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202012091553-KLOT-FTUS43-TAFORD">View Text</a></dd>
+<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202104091553-KLOT-FTUS43-TAFORD">View Text</a></dd>
         <dt>Channels for Product Example:</dt><dd><span class="badge">KLOT.TAF</span> <span class="badge">TAF...</span> <span class="badge">TAFORD</span></dd>
-        <dt>XMPP Chatroom Example:</dt><dd><p>LOT issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202012091553-KLOT-FTUS43-TAFORD">Terminal Aerodrome Forecast (TAF)</a> at Dec 9, 15:53 UTC for ORD</p></dd>
-        <dt>Twitter Example:</dt><dd>LOT issues Terminal Aerodrome Forecast (TAF) at Dec 9, 15:53 UTC for ORD https://mesonet.agron.iastate.edu/p.php?pid=202012091553-KLOT-FTUS43-TAFORD<br /></dd>
+        <dt>XMPP Chatroom Example:</dt><dd><p>LOT issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202104091553-KLOT-FTUS43-TAFORD">Terminal Aerodrome Forecast (TAF)</a> at Apr 9, 15:53 UTC for ORD</p></dd>
+        <dt>Twitter Example:</dt><dd>LOT issues Terminal Aerodrome Forecast (TAF) at Apr 9, 15:53 UTC for ORD https://mesonet.agron.iastate.edu/p.php?pid=202104091553-KLOT-FTUS43-TAFORD<br /></dd>
         </dl>
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_TCD"/>
-<a id="TCD_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_TCD" class="btn btn-small" role="button"
  href="javascript: revdiv('TCD');"><i class="fa fa-plus"></i></a>
         </td><td>TCD (TCD)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span> <span class="badge">&lt;afos_pil_first5&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="TCD" style="display:none;">
@@ -1369,26 +1367,24 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_TCM"/>
-<a id="TCM_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_TCM" class="btn btn-small" role="button"
  href="javascript: revdiv('TCM');"><i class="fa fa-plus"></i></a>
         </td><td>Tropical Storm Forecast (TCM)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span> <span class="badge">&lt;afos_pil_first5&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="TCM" style="display:none;">
         <dl class="dl-horizontal">
         
         <dt>Example Raw Text:</dt>
-<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202012280237-PHFO-WTPA21-TCMCP1">View Text</a></dd>
+<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202006280300-PHFO-WTPA21-TCMCP1">View Text</a></dd>
         <dt>Channels for Product Example:</dt><dd><span class="badge">TCM...</span> <span class="badge">TCMCP</span> <span class="badge">TCMCP1</span></dd>
-        <dt>XMPP Chatroom Example:</dt><dd><p>HFO issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202012280237-PHFO-WTPA21-TCMCP1">Tropical Storm Forecast (TCM)</a> at Dec 28, 02:37 UTC</p></dd>
-        <dt>Twitter Example:</dt><dd>HFO issues Tropical Storm Forecast (TCM) at Dec 28, 02:37 UTC https://mesonet.agron.iastate.edu/p.php?pid=202012280237-PHFO-WTPA21-TCMCP1<br /></dd>
+        <dt>XMPP Chatroom Example:</dt><dd><p>HFO issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202006280300-PHFO-WTPA21-TCMCP1">Tropical Storm Forecast (TCM)</a> at Jun 28, 3:00 AM UTC</p></dd>
+        <dt>Twitter Example:</dt><dd>HFO issues Tropical Storm Forecast (TCM) at Jun 28, 3:00 AM UTC https://mesonet.agron.iastate.edu/p.php?pid=202006280300-PHFO-WTPA21-TCMCP1<br /></dd>
         </dl>
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_TCP"/>
-<a id="TCP_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_TCP" class="btn btn-small" role="button"
  href="javascript: revdiv('TCP');"><i class="fa fa-plus"></i></a>
         </td><td>TCP (TCP)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span> <span class="badge">&lt;afos_pil_first5&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="TCP" style="display:none;">
@@ -1403,9 +1399,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_TCU"/>
-<a id="TCU_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_TCU" class="btn btn-small" role="button"
  href="javascript: revdiv('TCU');"><i class="fa fa-plus"></i></a>
         </td><td>Tropical Cyclone Update (TCU)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span> <span class="badge">&lt;afos_pil_first5&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="TCU" style="display:none;">
@@ -1420,26 +1415,24 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_TIB"/>
-<a id="TIB_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_TIB" class="btn btn-small" role="button"
  href="javascript: revdiv('TIB');"><i class="fa fa-plus"></i></a>
         </td><td>Tsunami Information Statement (TIB)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="TIB" style="display:none;">
         <dl class="dl-horizontal">
         
         <dt>Example Raw Text:</dt>
-<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202012301133-PHEB-WEPA42-TIBPAC">View Text</a></dd>
+<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=201505301133-PHEB-WEPA42-TIBPAC">View Text</a></dd>
         <dt>Channels for Product Example:</dt><dd><span class="badge">TIB...</span> <span class="badge">TIBPAC</span></dd>
-        <dt>XMPP Chatroom Example:</dt><dd><p>HEB issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202012301133-PHEB-WEPA42-TIBPAC">Tsunami Information Statement (TIB)</a> at Dec 30, 11:33 UTC</p></dd>
-        <dt>Twitter Example:</dt><dd>HEB issues Tsunami Information Statement (TIB) at Dec 30, 11:33 UTC https://mesonet.agron.iastate.edu/p.php?pid=202012301133-PHEB-WEPA42-TIBPAC<br /></dd>
+        <dt>XMPP Chatroom Example:</dt><dd><p>HEB issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=201505301133-PHEB-WEPA42-TIBPAC">Tsunami Information Statement (TIB)</a> at May 30, 11:33 AM UTC</p></dd>
+        <dt>Twitter Example:</dt><dd>HEB issues Tsunami Information Statement (TIB) at May 30, 11:33 AM UTC https://mesonet.agron.iastate.edu/p.php?pid=201505301133-PHEB-WEPA42-TIBPAC<br /></dd>
         </dl>
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_TID"/>
-<a id="TID_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_TID" class="btn btn-small" role="button"
  href="javascript: revdiv('TID');"><i class="fa fa-plus"></i></a>
         </td><td>Tide Data (TID)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01003020curr.pdf">10-320</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="TID" style="display:none;">
@@ -1454,9 +1447,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_TOE"/>
-<a id="TOE_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_TOE" class="btn btn-small" role="button"
  href="javascript: revdiv('TOE');"><i class="fa fa-plus"></i></a>
         </td><td>Telephone Outage Emergency (TOE)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="TOE" style="display:none;">
@@ -1471,9 +1463,8 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_TWO"/>
-<a id="TWO_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_TWO" class="btn btn-small" role="button"
  href="javascript: revdiv('TWO');"><i class="fa fa-plus"></i></a>
         </td><td>Tropical Weather Outlook (TWO)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span> <span class="badge">&lt;afos_pil_first5&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="TWO" style="display:none;">
@@ -1488,60 +1479,56 @@
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_WSV"/>
-<a id="WSV_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_WSV" class="btn btn-small" role="button"
  href="javascript: revdiv('WSV');"><i class="fa fa-plus"></i></a>
         </td><td>Volcanic Ash Sigmet (WSV)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="WSV" style="display:none;">
         <dl class="dl-horizontal">
         
         <dt>Example Raw Text:</dt>
-<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202012070608-PAWU-WVAK01-WSVAK1">View Text</a></dd>
+<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202104070608-PAWU-WVAK01-WSVAK1">View Text</a></dd>
         <dt>Channels for Product Example:</dt><dd><span class="badge">WSV...</span> <span class="badge">WSVAK1</span></dd>
-        <dt>XMPP Chatroom Example:</dt><dd><p>AWU issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202012070608-PAWU-WVAK01-WSVAK1">Volcanic Ash Sigmet (WSV)</a> at Dec 7, 06:08 UTC</p></dd>
-        <dt>Twitter Example:</dt><dd>AWU issues Volcanic Ash Sigmet (WSV) at Dec 7, 06:08 UTC https://mesonet.agron.iastate.edu/p.php?pid=202012070608-PAWU-WVAK01-WSVAK1<br /></dd>
+        <dt>XMPP Chatroom Example:</dt><dd><p>AWU issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202104070608-PAWU-WVAK01-WSVAK1">Volcanic Ash Sigmet (WSV)</a> at Apr 7, 06:08 UTC</p></dd>
+        <dt>Twitter Example:</dt><dd>AWU issues Volcanic Ash Sigmet (WSV) at Apr 7, 06:08 UTC https://mesonet.agron.iastate.edu/p.php?pid=202104070608-PAWU-WVAK01-WSVAK1<br /></dd>
         </dl>
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_VAA"/>
-<a id="VAA_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_VAA" class="btn btn-small" role="button"
  href="javascript: revdiv('VAA');"><i class="fa fa-plus"></i></a>
         </td><td>Volcanic Ash Advisory (VAA)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="VAA" style="display:none;">
         <dl class="dl-horizontal">
         
         <dt>Example Raw Text:</dt>
-<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202012090612-PAWU-FVAK21-VAAAK1">View Text</a></dd>
+<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202104090612-PAWU-FVAK21-VAAAK1">View Text</a></dd>
         <dt>Channels for Product Example:</dt><dd><span class="badge">VAA...</span> <span class="badge">VAAAK1</span></dd>
-        <dt>XMPP Chatroom Example:</dt><dd><p>AWU issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202012090612-PAWU-FVAK21-VAAAK1">Volcanic Ash Advisory (VAA)</a> at Dec 9, 06:12 UTC</p></dd>
-        <dt>Twitter Example:</dt><dd>AWU issues Volcanic Ash Advisory (VAA) at Dec 9, 06:12 UTC https://mesonet.agron.iastate.edu/p.php?pid=202012090612-PAWU-FVAK21-VAAAK1<br /></dd>
+        <dt>XMPP Chatroom Example:</dt><dd><p>AWU issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202104090612-PAWU-FVAK21-VAAAK1">Volcanic Ash Advisory (VAA)</a> at Apr 9, 06:12 UTC</p></dd>
+        <dt>Twitter Example:</dt><dd>AWU issues Volcanic Ash Advisory (VAA) at Apr 9, 06:12 UTC https://mesonet.agron.iastate.edu/p.php?pid=202104090612-PAWU-FVAK21-VAAAK1<br /></dd>
         </dl>
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_WRK"/>
-<a id="WRK_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_WRK" class="btn btn-small" role="button"
  href="javascript: revdiv('WRK');"><i class="fa fa-plus"></i></a>
         </td><td>Work Product (WRK)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="WRK" style="display:none;">
         <dl class="dl-horizontal">
         
         <dt>Example Raw Text:</dt>
-<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202012201703-KLZK-NZUS03-WRKPUG">View Text</a></dd>
+<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=202104201703-KLZK-NZUS03-WRKPUG">View Text</a></dd>
         <dt>Channels for Product Example:</dt><dd><span class="badge">WRK...</span> <span class="badge">WRKPUG</span></dd>
-        <dt>XMPP Chatroom Example:</dt><dd><p>LZK issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202012201703-KLZK-NZUS03-WRKPUG">Work Product (WRK)</a> at Dec 20, 17:03 UTC</p></dd>
-        <dt>Twitter Example:</dt><dd>LZK issues Work Product (WRK) at Dec 20, 17:03 UTC https://mesonet.agron.iastate.edu/p.php?pid=202012201703-KLZK-NZUS03-WRKPUG<br /></dd>
+        <dt>XMPP Chatroom Example:</dt><dd><p>LZK issues <a href="https://mesonet.agron.iastate.edu/p.php?pid=202104201703-KLZK-NZUS03-WRKPUG">Work Product (WRK)</a> at Apr 20, 17:03 UTC</p></dd>
+        <dt>Twitter Example:</dt><dd>LZK issues Work Product (WRK) at Apr 20, 17:03 UTC https://mesonet.agron.iastate.edu/p.php?pid=202104201703-KLZK-NZUS03-WRKPUG<br /></dd>
         </dl>
         </div>
         </td>
         </tr>
-        
-<tr><td><a name="channel_ZFP"/>
-<a id="ZFP_btn" class="btn btn-small" role="button"
+        <tr><td>
+<a id="channel_ZFP" class="btn btn-small" role="button"
  href="javascript: revdiv('ZFP');"><i class="fa fa-plus"></i></a>
         </td><td>Zone Forecast Package (ZFP)</td><td><a href="https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf">10-1701</a></td><td><span class="badge">&lt;afos_pil&gt;</span> <span class="badge">&lt;afos_pil_prefix&gt;...</span></td></tr>
         <tr><td colspan="4"><div id="ZFP" style="display:none;">
@@ -1556,21 +1543,19 @@
         </div>
         </td>
         </tr>
+        </table>
+        <script>
+        function revdiv(myid){
+        var $a = $('#'+myid);
+        if ($a.css('display') == 'block'){
+            $a.css('display', 'none');
+            $("#channel_"+myid).html('<i class="fa fa-plus"></i>');
+        } else {
+            window.location.hash = '#channel_'+myid;
+            $("#channel_"+myid).parent().parent().addClass('info');
+            $a.css('display', 'block');
+            $("#channel_"+myid).html('<i class="fa fa-minus"></i>');
+        }
+        }
+        </script>
         
-</table>
-
-    <script>
-    function revdiv(myid){
-      var $a = $('#'+myid);
-      if ($a.css('display') == 'block'){
-        $a.css('display', 'none');
-        $("#"+myid+"_btn").html('<i class="fa fa-plus"></i>');
-      } else {
-        window.location.hash = '#channel_'+myid;
-        $("#"+myid+"_btn").parent().parent().addClass('info');
-        $a.css('display', 'block');
-        $("#"+myid+"_btn").html('<i class="fa fa-minus"></i>');
-      }
-    }
-    </script>
-    
