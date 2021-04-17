@@ -38,7 +38,7 @@ two portals with information about IEM APIs:
  <li><a href="/json/">Legacy ad-hoc/legancy (Geo)JSON services</a>
   <br />These have been around for a while and while they work, they are generally
   somewhat brittle.</li>
- <li><a href="/api/1/docs/">IEM API v1 Documentation</a>
+ <li><a href="/api/1/docs">IEM API v1 Documentation</a>
   <br />Work is ongoing now to migrate the services found in #1 above into a more
   robust and self-documenting API system.  This is the future and will see
   significant expansion during 2020.</li> 

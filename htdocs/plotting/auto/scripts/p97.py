@@ -282,7 +282,7 @@ def plotter(fdict):
             sum(hdd_diff) as hdd_depart
             from combo GROUP by station)
 
-        SELECT d.station, t.name,
+        SELECT d.station, t.name, t.wfo,
         avg_temp,
         precip as precip_sum,
         cprecip as cprecip_sum,
