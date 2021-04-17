@@ -58,6 +58,10 @@ def compare_and_update(ccursor, currentob, newob):
             continue
         updates.append(f"{col} = {newob[col]}")
         messages.append(f"{col} {currentob[col]}->{newob[col]}")
+        if col in ["precip", "high", "low"]:
+            updates.append(
+                f"{'temp' if col != 'precip' else 'precip'}_estimated = 'f'"
+            )
     if not updates:
         return 0
     LOG.debug(
@@ -101,7 +105,10 @@ def main():
                 (climostation, row["date"]),
             )
             currentob = ccursor.fetchone()
-            updates += compare_and_update(ccursor, currentob, newob)
+            updated = compare_and_update(ccursor, currentob, newob)
+            if updated == 0:
+                continue
+            updates += updated
             if updates > 0 and updates % 100 == 0:
                 LOG.debug("database commit after %s updates", updates)
                 ccursor.close()
