@@ -58,7 +58,7 @@ def compare_and_update(ccursor, currentob, newob):
             continue
         updates.append(f"{col} = {newob[col]}")
         messages.append(f"{col} {currentob[col]}->{newob[col]}")
-        if col in ["precip", "high", "low"]:
+        if col in ["precip", "high"]:
             updates.append(
                 f"{'temp' if col != 'precip' else 'precip'}_estimated = 'f'"
             )
