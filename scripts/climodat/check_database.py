@@ -1,6 +1,5 @@
 """Rectify climodat database entries."""
 from io import StringIO
-import subprocess
 import sys
 
 import pandas as pd
@@ -11,13 +10,14 @@ from pyiem.util import get_dbconn, logger
 LOG = logger()
 
 
-def delete_data(pgconn, station, state):
-    """Remove whatever data we have for this station."""
+def set_offline(iemid):
+    """Set this station to offline stations."""
+    pgconn = get_dbconn("mesosite")
     cursor = pgconn.cursor()
     cursor.execute(
-        f"DELETE from alldata_{state} WHERE station = %s", (station,)
+        "UPDATE stations SET online = 'f' where iemid = %s",
+        (iemid,),
     )
-    LOG.info("Removed %s database entries", cursor.rowcount)
     cursor.close()
     pgconn.commit()
 
@@ -25,7 +25,7 @@ def delete_data(pgconn, station, state):
 def main(argv):
     """Go Main"""
     state = argv[1]
-    nt = NetworkTable("%sCLIMATE" % (state,))
+    nt = NetworkTable(f"{state}CLIMATE", only_online=False)
     pgconn = get_dbconn("coop")
     df = read_sql(
         f"SELECT station, year, day from alldata_{state} "
@@ -38,14 +38,15 @@ def main(argv):
     for station, gdf in df.groupby("station"):
         if station not in nt.sts:
             LOG.info(
-                "station: %s is unknown to %sCLIMATE network", station, state
+                "station: %s is unknown to %sCLIMATE, skip", station, state
             )
-            delete_data(pgconn, station, state)
             continue
         # Make sure that our data archive starts on the first of a month
         minday = gdf["day"].min().replace(day=1)
         days = pd.date_range(minday, gdf["day"].max())
         missing = [x for x in days.values if x not in gdf["day"].values]
+        if not missing:
+            continue
         LOG.info(
             "station: %s has %s rows between: %s and %s, missing %s/%s days",
             station,
@@ -55,16 +56,14 @@ def main(argv):
             len(missing),
             len(days.values),
         )
-        coverage = len(missing) / float(len(days.values))
-        if coverage > 0.33:
-            cmd = ("python ../dbutil/delete_station.py %sCLIMATE %s") % (
-                state,
-                station,
+        missing_ratio = len(missing) / float(len(days.values))
+        if missing_ratio > 0.33 and nt.sts[station]["online"]:
+            LOG.info(
+                "Online %s missing %.2f data, setting offline",
+                (station, missing_ratio),
             )
-            LOG.info(cmd)
-            subprocess.call(cmd, shell=True)
-            delete_data(pgconn, station, state)
-            continue
+            set_offline(nt.sts[station]["iemid"])
+
         sio = StringIO()
         for day in missing:
             now = pd.Timestamp(day).to_pydatetime()

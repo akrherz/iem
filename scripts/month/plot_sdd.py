@@ -13,26 +13,23 @@ def main():
     """Go Main Go"""
     now = datetime.datetime.now()
 
-    pgconn = get_dbconn("coop", user="nobody")
+    pgconn = get_dbconn("coop")
     ccursor = pgconn.cursor()
 
     nt = NetworkTable("IACLIMATE")
-
-    # Compute normal from the climate database
-    sql = """SELECT station,
-       sum(sdd86(high, low)) as sdd
-       from alldata_ia WHERE year = %s and month = %s
-       GROUP by station""" % (
-        now.year,
-        now.month,
-    )
 
     lats = []
     lons = []
     sdd86 = []
     valmask = []
-    ccursor.execute(sql)
+    ccursor.execute(
+        "SELECT station, sum(sdd86(high, low)) as sdd from alldata_ia "
+        "WHERE year = %s and month = %s GROUP by station",
+        (now.year, now.month),
+    )
     for row in ccursor:
+        if row[0] not in nt.sts:
+            continue
         lats.append(nt.sts[row[0]]["lat"])
         lons.append(nt.sts[row[0]]["lon"])
         sdd86.append(float(row[1]))

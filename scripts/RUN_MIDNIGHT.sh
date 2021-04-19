@@ -54,6 +54,8 @@ fi
 # Pick a sequential state
 cd ../util
 STATE=$(python pick_state.py)
+cd ../climodat
+python check_database.py $STATE
 cd ../coop
 python use_acis.py $STATE
 cd ../ingestors/ncdc
