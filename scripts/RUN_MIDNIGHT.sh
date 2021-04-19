@@ -51,9 +51,13 @@ then
 	python grid_rsds.py $YYYY $MM
 fi
 
-# Process the GHCN dataset
+# Pick a sequential state
+cd ../util
+STATE=$(python pick_state.py)
+cd ../coop
+python use_acis.py $STATE
 cd ../ingestors/ncdc
-python ingest_ghcn.py
+python ingest_ghcn.py $STATE
 
 # Ingest Poker
 cd ../../util
