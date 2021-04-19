@@ -7,6 +7,7 @@ run from RUN_NOON.sh
 """
 
 from pyiem.util import get_dbconn, logger
+import pandas as pd
 from pandas.io.sql import read_sql
 from psycopg2.extras import DictCursor
 
@@ -16,7 +17,7 @@ LOG = logger()
 def load_changes(accessdb):
     """Find what has changed."""
     df = read_sql(
-        "SELECT distinct id, c.iemid, network, "
+        "SELECT distinct id, c.iemid, network, tzname, "
         "date(valid at time zone t.tzname) from current_log c JOIN "
         "stations t on (c.iemid = t.iemid) WHERE t.network ~* 'COOP' and "
         "updated > now() - '25 hours'::interval",
@@ -45,7 +46,7 @@ def load_xref():
 
 def compare_and_update(ccursor, currentob, newob):
     """Do we need to make updates?"""
-    if currentob is None or newob is None:
+    if newob is None:
         return 0
     updates = []
     messages = []
@@ -61,6 +62,10 @@ def compare_and_update(ccursor, currentob, newob):
         if col in ["precip", "high"]:
             updates.append(
                 f"{'temp' if col != 'precip' else 'precip'}_estimated = 'f'"
+            )
+            chour = "null" if pd.isna(newob["chour"]) else newob["chour"]
+            updates.append(
+                f"{'temp' if col != 'precip' else 'precip'}_hour = {chour}"
             )
     if not updates:
         return 0
@@ -84,27 +89,48 @@ def main():
     df = load_changes(accessdb)
     xref = load_xref()
     updates = 0
+    unknown_keys = 0
     for _, row in df.iterrows():
         key = f"{row['id']}|{row['network']}"
         if key not in xref:
+            unknown_keys += 1
             continue
         # Load the changed data
         acursor.execute(
             "SELECT max_tmpf::int as high, min_tmpf::int as low, "
-            "pday as precip, snow, snowd from summary "
+            "pday as precip, snow, snowd, "
+            "extract(hour from (coop_valid + '1 minute'::interval) at "
+            "time zone %s) as chour from summary "
             "WHERE iemid = %s and day = %s",
-            (row["iemid"], row["date"]),
+            (row["tzname"], row["iemid"], row["date"]),
         )
         newob = acursor.fetchone()
         for climostation in xref[key]:
             table = f"alldata_{climostation[:2]}"
             # Load the current data for the station
-            ccursor.execute(
-                "SELECT high, low, precip, snow, snowd, station, day from "
-                f"{table} WHERE station = %s and day = %s",
-                (climostation, row["date"]),
-            )
-            currentob = ccursor.fetchone()
+
+            def _fetch():
+                ccursor.execute(
+                    "SELECT high, low, precip, snow, snowd, station, day from "
+                    f"{table} WHERE station = %s and day = %s",
+                    (climostation, row["date"]),
+                )
+                return ccursor.fetchone()
+
+            currentob = _fetch()
+            if currentob is None:
+                ccursor.execute(
+                    f"INSERT into {table}(station, day, year, month, sday) "
+                    "VALUES (%s, %s, %s, %s, %s)",
+                    (
+                        climostation,
+                        row["date"],
+                        row["date"].year,
+                        row["date"].month,
+                        row["date"].strftime("%m%d"),
+                    ),
+                )
+                currentob = _fetch()
             updated = compare_and_update(ccursor, currentob, newob)
             if updated == 0:
                 continue
@@ -115,7 +141,7 @@ def main():
                 coopdb.commit()
                 ccursor = coopdb.cursor(cursor_factory=DictCursor)
 
-    LOG.info("synced %s rows", updates)
+    LOG.info("synced %s rows, %s unknown keys", updates, unknown_keys)
     ccursor.close()
     coopdb.commit()
 

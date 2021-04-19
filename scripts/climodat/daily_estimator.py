@@ -42,9 +42,11 @@ def load_table(state, date):
                 "state": nt.sts[sid]["state"],
                 "temp24_hour": nt.sts[sid]["temp24_hour"],
                 "precip24_hour": nt.sts[sid]["precip24_hour"],
-                "tracks": nt.sts[sid]["attributes"]
-                .get("TRACKS_STATION", "|")
-                .split("|")[0],
+                "tracks": (
+                    nt.sts[sid]["attributes"]
+                    .get("TRACKS_STATION", "|")
+                    .split("|")[0]
+                ),
             }
         )
     if not rows:
@@ -52,7 +54,7 @@ def load_table(state, date):
         return None
     df = pd.DataFrame(rows)
     df = df.set_index("station")
-    for key in ["high", "low", "precip", "snow", "snowd"]:
+    for key in "high low precip snow snowd temp_hour precip_hour".split():
         df[key] = None
     for key in ["precip_estimated", "temp_estimated"]:
         df[key] = False
@@ -67,9 +69,12 @@ def estimate_precip(df, ds):
     for sid, row in df[pd.isna(df["precip"])].iterrows():
         if row["precip24_hour"] in [0, 22, 23]:
             precip = grid00[row["gridj"], row["gridi"]]
+            precip_hour = 0
         else:
             precip = grid12[row["gridj"], row["gridi"]]
+            precip_hour = 7  # not precise
         df.at[sid, "precip_estimated"] = True
+        df.at[sid, "precip_hour"] = precip_hour
         # denote trace
         if 0 < precip < 0.01:
             df.at[sid, "precip"] = TRACE_VALUE
@@ -121,17 +126,23 @@ def estimate_hilo(df, ds):
     for sid, row in df[pd.isna(df["high"])].iterrows():
         if row["temp24_hour"] in [0, 22, 23]:
             val = highgrid00[row["gridj"], row["gridi"]]
+            temp_hour = 0
         else:
             val = highgrid12[row["gridj"], row["gridi"]]
+            temp_hour = 7  # Not precise
         if not np.ma.is_masked(val):
+            df.at[sid, "temp_hour"] = temp_hour
             df.at[sid, "temp_estimated"] = True
             df.at[sid, "high"] = val
     for sid, row in df[pd.isna(df["low"])].iterrows():
         if row["temp24_hour"] in [0, 22, 23]:
             val = lowgrid00[row["gridj"], row["gridi"]]
+            temp_hour = 0
         else:
             val = lowgrid12[row["gridj"], row["gridi"]]
+            temp_hour = 7  # Not precise
         if not np.ma.is_masked(val):
+            df.at[sid, "temp_hour"] = temp_hour
             df.at[sid, "temp_estimated"] = True
             df.at[sid, "low"] = val
 
@@ -172,8 +183,8 @@ def commit(cursor, table, df, ts):
             sql = (
                 f"UPDATE {table} SET high = %s, low = %s, precip = %s, "
                 "snow = %s, snowd = %s, temp_estimated = 't', "
-                "precip_estimated = 't' WHERE day = %s "
-                "and station = %s"
+                "precip_estimated = 't', temp_hour = %s, precip_hour = %s "
+                "WHERE day = %s and station = %s"
             )
             args = (
                 nonan(_row["high"], 0),
@@ -181,6 +192,8 @@ def commit(cursor, table, df, ts):
                 nonan(_row["precip"], 2),
                 nonan(_row["snow"], 1),
                 nonan(_row["snowd"], 1),
+                _row["temp_hour"],
+                _row["precip_hour"],
                 ts,
                 _sid,
             )
@@ -202,12 +215,15 @@ def merge_network_obs(df, network, ts):
     pgconn = get_dbconn("iem")
     obs = read_sql(
         "SELECT t.id as station, max_tmpf as high, min_tmpf as low, "
-        "pday as precip, snow, snowd from summary s JOIN stations t "
+        "pday as precip, snow, snowd, "
+        "extract(hour from (coop_valid + '1 minute'::interval) "
+        "  at time zone tzname) as temp_hour from summary s JOIN stations t "
         "on (t.iemid = s.iemid) WHERE t.network = %s and s.day = %s",
         pgconn,
         params=(network, ts),
         index_col="station",
     )
+    obs["precip_hour"] = obs["temp_hour"]
     # Some COOP sites may not report 'daily' high and low, so we cull those
     # out as nulls
     obs.at[obs["high"] <= obs["low"], ["high", "low"]] = None

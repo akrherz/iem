@@ -33,7 +33,8 @@ def update_database(stid, valid, row):
         """Do the database work, please."""
         ccursor.execute(
             f"UPDATE {table} SET high = %s, low = %s, precip = %s, snow = %s, "
-            "snowd = %s WHERE station = %s and day = %s",
+            "snowd = %s, temp_hour = 7, precip_hour = 7 "
+            "WHERE station = %s and day = %s",
             (
                 _row["high"],
                 _row["low"],

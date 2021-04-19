@@ -50,15 +50,26 @@ def main(argv):
         "sid": acis_station,
         "sdate": "1850-01-01",
         "edate": datetime.date.today().strftime("%Y-%m-%d"),
-        "elems": "maxt,mint,pcpn,snow,snwd",
+        "elems": [
+            {"name": "maxt", "add": "t"},
+            {"name": "mint", "add": "t"},
+            {"name": "pcpn", "add": "t"},
+            {"name": "snow", "add": "t"},
+            {"name": "snwd", "add": "t"},
+        ],
     }
     LOG.debug("Call ACIS server for: %s to update: %s", acis_station, station)
     req = requests.post(SERVICE, json=payload)
     j = req.json()
     acis = pd.DataFrame(
         j["data"],
-        columns=["day", "ahigh", "alow", "aprecip", "asnow", "asnowd"],
+        columns="day ahigh alow aprecip asnow asnowd".split(),
     )
+    for col in "ahigh alow aprecip asnow asnowd".split():
+        acis[[col, f"{col}_hour"]] = pd.DataFrame(
+            acis[col].tolist(),
+            index=acis.index,
+        )
     LOG.debug("Loaded %s rows from ACIS", len(acis.index))
     acis["day"] = pd.to_datetime(acis["day"])
     acis = acis.set_index("day")
@@ -81,9 +92,15 @@ def main(argv):
         work = []
         args = []
         for col in ["high", "low", "precip", "snow", "snowd"]:
-            if compare(row, col):
-                work.append(f"{col} = %s")
-                args.append(safe(row[f"a{col}"]))
+            if not compare(row, col):
+                continue
+            work.append(f"{col} = %s")
+            args.append(safe(row[f"a{col}"]))
+            if col in ["high", "precip"]:
+                work.append(
+                    f"{'temp' if col == 'high' else 'precip'}_hour = %s"
+                )
+                args.append(row[f"a{col}_hour"])
         if not work:
             continue
         if row["dbhas"] != 1:
