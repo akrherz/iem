@@ -8,15 +8,32 @@ class NetworkTable {
   function __construct($a, $force3char=FALSE)
   {
     $this->table = Array();
+    $sql_template = <<<EOM
+    WITH attrs as (
+        SELECT t.iemid, array_to_json(array_agg(a.attr)) as attrs,
+        array_to_json(array_agg(a.value)) as attr_values
+        from stations t LEFT JOIN station_attributes a
+        on (t.iemid = a.iemid) WHERE %s
+        GROUP by t.iemid)
+    SELECT t.*, ST_X(t.geom) as lon, ST_Y(t.geom) as lat,
+    a.attrs, a.attr_values from stations t JOIN attrs a on
+    (t.iemid = a.iemid) ORDER by t.name ASC
+EOM;
     // We force new here to prevent reused prepared statement names, hack
     $this->dbconn = iemdb("mesosite", PGSQL_CONNECT_FORCE_NEW);
-    $rs = pg_prepare($this->dbconn, "SELECT", "SELECT *, ST_x(geom) as lon, 
-    	ST_y(geom) as lat from stations WHERE network = $1 ORDER by name ASC");
-    $rs = pg_prepare($this->dbconn, "SELECTST", "SELECT *, ST_x(geom) as lon, 
-    	ST_y(geom) as lat from stations WHERE id = $1");
-    if (is_string($a)) $this->load_network($a, $force3char);
-    else if (is_array($a)) 
-    {
+    $rs = pg_prepare(
+        $this->dbconn,
+        "SELECT",
+        sprintf($sql_template, "network = $1")
+    );
+    $rs = pg_prepare(
+        $this->dbconn,
+        "SELECTST",
+        sprintf($sql_template, "id = $1")
+    );
+    if (is_string($a)) {
+        $this->load_network($a, $force3char);
+    } else if (is_array($a)) {
       foreach($a as $network) { $this->load_network($network, $force3char); }
     }
   }
@@ -55,6 +72,17 @@ class NetworkTable {
       }
       if ($this->table[$id]["archive_end"] != null){
         $this->table[$id]["archive_end"] = strtotime($this->table[$id]["archive_end"]);
+    }
+    // Make attributes more accessible
+    $this->table[$id]["attrs"] = array_filter(
+        json_decode($this->table[$id]["attrs"])
+    );
+    $this->table[$id]["attr_values"] = array_filter(
+        json_decode($this->table[$id]["attr_values"])
+    );
+    $this->table[$id]["attributes"] = array();
+    foreach ($this->table[$id]["attrs"] as $key => $value){
+      $this->table[$id]["attributes"][$value] = $this->table[$id]["attr_values"][$key];
     }
 }
 
