@@ -5,35 +5,51 @@ require_once "../../include/database.inc.php";
 require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 require_once "../../include/imagemaps.php";
+require_once "../../include/network.php";
 
 $pgconn = iemdb("mesosite");
 
 $network = isset($_GET['network']) ? xssafe($_GET['network']): 'IA_ASOS';
 
-if ($network == '_ALL_'){
-	$sql = "SELECT *,
-            ST_x(geom) as longitude, ST_y(geom) as latitude from stations
-            WHERE online = 'y' and '_ALL_' = $1 ORDER by name";
-} else if (isset($_GET["special"]) && $_GET["special"] == 'allasos'){
-	$sql = "SELECT *,
-            ST_x(geom) as longitude, ST_y(geom) as latitude from stations
-            WHERE online = 'y' and
-			(network ~* 'ASOS' or network = 'AWOS') and
-			'IA_ASOS' = $1 ORDER by name";
-	$network = "IA_ASOS";
-} else {
-	$sql = "SELECT *,
-            ST_x(geom) as longitude, ST_y(geom) as latitude from stations
-            WHERE network = $1 ORDER by name";
+function attrs2str($arr){
+    $s = "";
+    if (is_array($arr)) { 
+        foreach($arr as $key => $value){
+            $s .= sprintf("%s=%s<br />", $key, $value);
+        }
+    }
+    return $s;
 }
-$rs = pg_prepare($pgconn, "NTSELECT", $sql);
+
+if ($network == '_ALL_'){
+	$rs = pg_query(
+        $pgconn,
+        "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat, null as attributes
+        from stations WHERE online = 'y' ORDER by name");
+    $cities = Array();
+    for ($i=0; $row = pg_fetch_array($rs); $i++) {
+        $cities[$row["id"]] = $row;
+    }
+} else if (isset($_GET["special"]) && $_GET["special"] == 'allasos'){
+	$rs = pg_query(
+        $pgconn,
+        "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat, null as attributes
+        from stations WHERE online = 'y' and
+        (network ~* 'ASOS' or network = 'AWOS') ORDER by name");
+    $cities = Array();
+    for ($i=0; $row = pg_fetch_array($rs); $i++) {
+        $cities[$row["id"]] = $row;
+    }
+} else {
+	$nt = new NetworkTable($network);
+    $cities = $nt->table;
+}
 
 $format = isset($_GET['format']) ? xssafe($_GET['format']): 'html';
 $nohtml = isset($_GET['nohtml']);
 
 $table = "";
 if (strlen($network) > 0){
-	$result = pg_execute($pgconn, "NTSELECT", Array($network) );
 	if ($format == "html"){
 		$table .= "<p><table class=\"table table-striped\">\n";
 		$table .= "<caption><b>". $network ." Network</b></caption>\n";
@@ -43,20 +59,22 @@ if (strlen($network) > 0){
 <th>ID</th><th>Station Name</td><th>Latitude<sup>1</sup></th>
 <th>Longitude<sup>1</sup></th><th>Elevation [m]</th>
 <th>Archive Begins</th><th>Archive Ends</th><th>IEM Network</th>
+<th>Attributes</th>
 </tr>
 </thead>
 EOM;
-		for ($i=0; $row = pg_fetch_array($result); $i++) {
+		foreach($cities as $sid => $row) {
 			$table .= "<tr>\n
-			  <td><a href=\"site.php?station=". $row["id"] ."&amp;network=". $row["network"] ."\">". $row["id"] ."</a></td>
+			  <td><a href=\"site.php?station={$sid}&amp;network=". $row["network"] ."\">{$sid}</a></td>
 			  <td>". $row["name"] ."</td>
-			  <td>". round($row["latitude"],5) . "</td>
-			  <td>". round($row["longitude"],5) . "</td>
+			  <td>". round($row["lat"],5) . "</td>
+			  <td>". round($row["lon"],5) . "</td>
 			  <td>". $row["elevation"]. "</td>
 			  <td>". $row["archive_begin"]. "</td>
 			  <td>". $row["archive_end"]. "</td>
 			  <td><a href=\"locate.php?network=". $row["network"] ."\">". $row["network"]. "</a></td>
-			  </tr>";
+			  <td>". attrs2str($row["attributes"]) ."</td>
+              </tr>";
 		}
 		$table .= "</table>\n";
 
@@ -64,11 +82,11 @@ EOM;
 		if (! $nohtml) $table .= "<p><b>". $network ." Network</b></p>\n";
 		if (! $nohtml) $table .= "<pre>\n";
 		$table .= "stid,station_name,lat,lon,elev,begints,iem_network\n";
-		for ($i=0; $row = pg_fetch_array($result); $i++) {
-			$table .= $row["id"] .","
+		foreach ($cities as $sid => $row) {
+			$table .= $sid .","
 					. $row["name"] .","
-					. round($row["latitude"],5). ","
-					. round($row["longitude"],5). ","
+					. round($row["lat"],5). ","
+					. round($row["lon"],5). ","
 					. $row["elevation"]. ","
 					. $row["archive_begin"]. ","
 					. $row["network"]. "\n";
@@ -93,9 +111,9 @@ EOM;
 					array("BEGINTS","C",16),
 			));
 	
-			for ($i=0; $row = pg_fetch_array($result); $i++) {
+			foreach ($cities as $sid => $row) {
 				$pt = ms_newPointobj();
-				$pt->setXY( $row["longitude"], $row["latitude"], 0);
+				$pt->setXY( $row["lon"], $row["lat"], 0);
 				$shpFile->addPoint($pt);
 	
 				dbase_add_record($dbfFile, array(
@@ -116,8 +134,8 @@ EOM;
 }
 else if ($format == "awips") {
 	if (! $nohtml) $table .= "<pre>\n";
-	for ($i=0; $row = pg_fetch_array($result); $i++) {
-		$table .= sprintf("%s|%s|%-30s|%4.1f|%2.5f|%3.5f|GMT|||1||||\n", $row["id"], $row["id"], $row["name"], $row["elevation"], $row["latitude"], $row["longitude"]);
+	foreach ($cities as $sid => $row) {
+		$table .= sprintf("%s|%s|%-30s|%4.1f|%2.5f|%3.5f|GMT|||1||||\n", $row["id"], $row["id"], $row["name"], $row["elevation"], $row["lat"], $row["lon"]);
 	} // End of for
 	if (! $nohtml) $table .= "</pre>\n";
 }
@@ -125,25 +143,25 @@ else if ($format == "awips") {
 else if ($format == "madis") {
 	if (! $nohtml) $table .= "<pre>\n";
 
-	for ($i=0; $row = pg_fetch_array($result); $i++) {
+	foreach ($cities as $sid => $row) {
 		if (substr($row["network"],0,4) == "KCCI") $row["network"] = "KCCI-TV";
 		if (substr($row["network"],0,4) == "KELO") $row["network"] = "KELO-TV";
 		if (substr($row["network"],0,4) == "KIMT") $row["network"] = "KIMT-TV";
-		$table .= sprintf("%s|%s|%-39s%-11s|%4.1f|%2.5f|%3.5f|GMT|||1||||\n", $row["id"], $row["id"], $row["name"], $row["network"], $row["elevation"], $row["latitude"], $row["longitude"]);
+		$table .= sprintf("%s|%s|%-39s%-11s|%4.1f|%2.5f|%3.5f|GMT|||1||||\n", $row["id"], $row["id"], $row["name"], $row["network"], $row["elevation"], $row["lat"], $row["lon"]);
 	} // End of for
 	if (! $nohtml) $table .= "</pre>\n";
 }
 
 else if ($format == "gempak") {
 	if (! $nohtml) $table .= "<pre>\n";
-	for ($i=0; $row = pg_fetch_array($result); $i++) {
+	foreach ($cities as $sid => $row) {
 		$table .= str_pad($row["id"], 9)
 		.  str_pad($row["synop"], 7)
 		.  str_pad($row["name"], 33)
 		.  str_pad($row["state"], 3)
 		.  str_pad($row["country"], 2)
-		.  sprintf("%6.0f", $row["latitude"] * 100)
-		.  sprintf("%7.0f", $row["longitude"] * 100)
+		.  sprintf("%6.0f", $row["lat"] * 100)
+		.  sprintf("%7.0f", $row["lon"] * 100)
 		.  sprintf("%6.0f", $row["elevation"])
 		. "\n";
 	}

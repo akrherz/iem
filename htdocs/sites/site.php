@@ -77,6 +77,42 @@ $t->sites_current = "base";
 $lat = sprintf("%.5f", $cities[$station]["lat"]);
 $lon = sprintf("%.5f", $cities[$station]["lon"]);
 
+function pretty_key($key){
+    if ($key == "TRACKS_STATION"){
+        return "Data tracks station";
+    }
+    return $key;
+}
+function pretty_value($key, $value){
+    if ($key == "TRACKS_STATION"){
+        $tokens = explode("|", $value);
+        return sprintf(
+            '<a href="/sites/site.php?station=%s&network=%s">%s [%s]</a>',
+            $tokens[0], $tokens[1], $tokens[0], $tokens[1]
+        );
+    }
+    return $value;
+}
+
+$attrtable = "";
+if (sizeof($cities[$station]["attributes"]) > 0){
+    $attrtable .= <<<EOM
+    <h3>Station Attributes:</h3>
+    <p><i>These are key value pairs used by the IEM to do data management.</i></p>
+    <table class="table table-condensed table-striped">
+    <thead><tr><th>Key / Description</th><th>Value</th></tr></thead>
+    <tbody>
+EOM;
+    foreach($cities[$station]["attributes"] as $key => $value){
+        $attrtable .= sprintf(
+            "<tr><td>%s</td><td>%s</td></tr>",
+            pretty_key($key),
+            pretty_value($key, $value)
+        );
+    }
+    $attrtable .= "</tbody></table>";
+}
+
 $t->content = <<<EOF
 
 {$alertmsg}
@@ -95,6 +131,8 @@ $t->content = <<<EOF
 <tr><th>Elevation [m]:</th><td>{$cities[$station]["elevation"]}</td></tr>
 <tr><th>Time Zone:</th><td>{$cities[$station]["tzname"]}</td></tr>
 </table>
+
+{$attrtable}
 
 <a href="networks.php?station={$station}&amp;network={$network}" class="btn btn-primary"><span class="fa fa-menu-hamburger"></span> View {$network} Network Table</a>
 

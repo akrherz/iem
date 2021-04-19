@@ -117,7 +117,7 @@ if ($mode == "monthly"){
 				null as min_rh, null as max_rh,
 				null as max_dwpf, null as min_dwpf,
 				null as min_feel, null as avg_feel, null as max_feel,
-				null as cv from $table WHERE
+				temp_hour as cv from $table WHERE
 				month = $month and year = $year and
 				station = '".$station."' ORDER by day ASC";
 	} else {
