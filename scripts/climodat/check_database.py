@@ -60,7 +60,8 @@ def main(argv):
         if missing_ratio > 0.33 and nt.sts[station]["online"]:
             LOG.info(
                 "Online %s missing %.2f data, setting offline",
-                (station, missing_ratio),
+                station,
+                missing_ratio,
             )
             set_offline(nt.sts[station]["iemid"])
 

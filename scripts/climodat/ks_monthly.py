@@ -79,14 +79,14 @@ def process(sid, csv, yr):
     ogdd = []
     osdd = []
     for i in range(1, 13):
-        sql = """
+        cursor.execute(
+            f"""
         WITH yearly as (
             SELECT year, avg(high) as ah, avg(low) as al,
             sum(precip) as sp,
             sum(gdd50(high, low)) as sgdd50,
             sum(sdd86(high, low)) as ssdd86
-            from alldata_%s
-            WHERE station = '%s' and month = %s
+            from alldata_{sid[:2]} WHERE station = %s and month = %s
             GROUP by year)
 
         SELECT
@@ -101,17 +101,9 @@ def process(sid, csv, yr):
         max(case when year = %s then sgdd50 else null end) as ob_gdd50,
         max(case when year = %s then ssdd86 else null end) as ob_sdd86
         from yearly
-        """ % (
-            sid[:2],
-            sid,
-            i,
-            yr,
-            yr,
-            yr,
-            yr,
-            yr,
+            """,
+            (sid, i, yr, yr, yr, yr, yr),
         )
-        cursor.execute(sql)
         row = cursor.fetchone()
         avgHigh = row[0]
         avgLow = row[1]

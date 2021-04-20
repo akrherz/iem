@@ -33,32 +33,25 @@ def workflow(col):
             continue
         # Find the closest site
         if col == "climate_site":
-            sql = """
-                select id from stations WHERE network = '%sCLIMATE'
-                and substr(id,3,4) != '0000' and substr(id,3,1) != 'C'
-                ORDER by ST_distance(geom, '%s') ASC LIMIT 1
-            """ % (
-                st,
-                geom,
+            sql = (
+                f"select id from stations WHERE network = '{st}CLIMATE' "
+                "and substr(id,3,4) != '0000' and substr(id,3,1) != 'C' "
+                "and online ORDER by ST_distance(geom, %s) ASC LIMIT 1"
             )
         else:
-            sql = """
-                select id from stations WHERE network = 'NCDC81'
-                ORDER by ST_distance(geom, '%s') ASC LIMIT 1
-            """ % (
-                geom,
+            sql = (
+                "select id from stations WHERE network = 'NCDC81' "
+                "ORDER by ST_distance(geom, %s) ASC LIMIT 1"
             )
-        mcursor2.execute(sql)
+        mcursor2.execute(sql, (geom,))
         row2 = mcursor2.fetchone()
         if row2 is None:
             print("Could not find %s site for: %s" % (col, sid))
         else:
-            sql = "UPDATE stations SET %s = '%s' WHERE iemid = %s" % (
-                col,
-                row2[0],
-                iemid,
+            mcursor2.execute(
+                f"UPDATE stations SET {col} = %s WHERE iemid = %s",
+                (row2[0], iemid),
             )
-            mcursor2.execute(sql)
             print("Set %s: %s for ID: %s[%s]" % (col, row2[0], sid, network))
     mcursor2.close()
     pgconn.commit()
