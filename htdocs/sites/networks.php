@@ -20,11 +20,21 @@ function attrs2str($arr){
     }
     return $s;
 }
+function pretty_date($val){
+    if ($val === null){
+        return "";
+    }
+    if (is_string($val)){
+        $val = strtotime($val);
+    }
+    return date("M d, Y", $val);
+}
 
 if ($network == '_ALL_'){
 	$rs = pg_query(
         $pgconn,
-        "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat, null as attributes
+        "SELECT id, name, elevation, archive_begin, archive_end, network, ".
+        "ST_x(geom) as lon, ST_y(geom) as lat, null as attributes
         from stations WHERE online = 'y' ORDER by name");
     $cities = Array();
     for ($i=0; $row = pg_fetch_array($rs); $i++) {
@@ -33,7 +43,8 @@ if ($network == '_ALL_'){
 } else if (isset($_GET["special"]) && $_GET["special"] == 'allasos'){
 	$rs = pg_query(
         $pgconn,
-        "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat, null as attributes
+        "SELECT id, name, elevation, archive_begin, archive_end, network, ".
+        "ST_x(geom) as lon, ST_y(geom) as lat, null as attributes
         from stations WHERE online = 'y' and
         (network ~* 'ASOS' or network = 'AWOS') ORDER by name");
     $cities = Array();
@@ -70,8 +81,8 @@ EOM;
 			  <td>". round($row["lat"],5) . "</td>
 			  <td>". round($row["lon"],5) . "</td>
 			  <td>". $row["elevation"]. "</td>
-			  <td>". $row["archive_begin"]. "</td>
-			  <td>". $row["archive_end"]. "</td>
+			  <td>". pretty_date($row["archive_begin"]) . "</td>
+			  <td>". pretty_date($row["archive_end"]) . "</td>
 			  <td><a href=\"locate.php?network=". $row["network"] ."\">". $row["network"]. "</a></td>
 			  <td>". attrs2str($row["attributes"]) ."</td>
               </tr>";
