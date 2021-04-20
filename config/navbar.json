@@ -1,0 +1,336 @@
+{
+    "tabs": [
+        {
+            "title": "Apps",
+            "subs": [
+                {
+                    "title": "Application Index",
+                    "url": "/apps.php"
+                },
+                {
+                    "title": "Auto Data Plotter",
+                    "url": "/plotting/auto/"
+                },
+                {
+                    "title": "Climodat",
+                    "url": "/climodat/"
+                },
+                {
+                    "title": "Climodat Monitor",
+                    "url": "/climodat/monitor.php"
+                },
+                {
+                    "title": "Hourly Precip",
+                    "url": "/rainfall/obhour.phtml"
+                },
+                {
+                    "title": "Interact Radar",
+                    "url": "/GIS/apps/rview/warnings.phtml"
+                },
+                {
+                    "title": "Sortable Currents",
+                    "url": "/my/current.phtml"
+                },
+                {
+                    "title": "Time Machine",
+                    "url": "/timemachine/"
+                },
+                {
+                    "title": "Wind Roses",
+                    "url": "/sites/windrose.phtml?station=AMW&network=IA_ASOS"
+                }
+            ]
+        },
+        {
+            "title": "Areas",
+            "subs": [
+                {
+                    "title": "Ag Weather/Climate Info",
+                    "url": "/agweather/"
+                },
+                {
+                    "title": "Archive Mainpage",
+                    "url": "/archive/"
+                },
+                {
+                    "title": "Climate Mainpage",
+                    "url": "/climate/"
+                },
+                {
+                    "title": "Current Mainpage",
+                    "url": "/current/"
+                },
+                {
+                    "title": "Drought",
+                    "url": "/dm/"
+                },
+                {
+                    "title": "GIS Mainpage",
+                    "url": "/GIS/"
+                },
+                {
+                    "title": "NWS Mainpage",
+                    "url": "/nws/"
+                },
+                {
+                    "title": "Severe Weather Mainpage",
+                    "url": "/current/severe.phtml"
+                }
+            ]
+        },
+        {
+            "title": "Datasets",
+            "subs": [
+                {
+                    "title": "Daily Climatology",
+                    "url": "/COOP/extremes.php"
+                },
+                {
+                    "title": "IEM Reanalysis",
+                    "url": "/iemre/"
+                },
+                {
+                    "title": "Model Output Statistics",
+                    "url": "/mos/"
+                },
+                {
+                    "title": "NEXRAD Mosaic",
+                    "url": "/docs/nexrad_mosaic/"
+                },
+                {
+                    "title": "PIREPs",
+                    "url": "/request/gis/pireps.php"
+                },
+                {
+                    "title": "Roads Mainpage",
+                    "url": "/roads/"
+                },
+                {
+                    "title": "RADAR & Satellite",
+                    "url": "/current/radar.phtml"
+                },
+                {
+                    "title": "Rainfall Data",
+                    "url": "/rainfall/"
+                },
+                {
+                    "title": "Sounding Archive",
+                    "url": "/archive/raob/"
+                },
+                {
+                    "title": "Soil Moisture Satellite",
+                    "url": "/smos/"
+                }
+            ]
+        },
+        {
+            "title": "Info",
+            "subs": [
+                {
+                    "title": "Info Mainpage",
+                    "url": "/info.php"
+                },
+                {
+                    "title": "Daily Features",
+                    "url": "/onsite/features/past.php"
+                },
+                {
+                    "title": "Links",
+                    "url": "/info/links.php"
+                },
+                {
+                    "title": "News",
+                    "url": "/onsite/news.phtml"
+                },
+                {
+                    "title": "Presentations",
+                    "url": "/present/"
+                },
+                {
+                    "title": "Station Data and Metadata",
+                    "url": "/sites/locate.php"
+                },
+                {
+                    "title": "Quality Control",
+                    "url": "/QC/"
+                },
+                {
+                    "title": "Variables",
+                    "url": "/info/variables.phtml"
+                }
+            ]
+        },
+        {
+            "title": "Networks",
+            "subs": [
+                {
+                    "title": "Network Tables",
+                    "url": "/sites/networks.php"
+                },
+                {
+                    "title": "ASOS",
+                    "url": "/ASOS/"
+                },
+                {
+                    "title": "AWOS",
+                    "url": "/AWOS/"
+                },
+                {
+                    "title": "CoCoRaHS",
+                    "url": "/cocorahs/"
+                },
+                {
+                    "title": "NWS COOP",
+                    "url": "/COOP/"
+                },
+                {
+                    "title": "DCP",
+                    "url": "/DCP/"
+                },
+                {
+                    "title": "ISU Soil Moisture",
+                    "url": "/agclimate/"
+                },
+                {
+                    "title": "NLAE Flux",
+                    "url": "/nstl_flux/"
+                },
+                {
+                    "title": "RWIS",
+                    "url": "/RWIS/"
+                },
+                {
+                    "title": "SCAN",
+                    "url": "/scan/"
+                },
+                {
+                    "title": "SchoolNet",
+                    "url": "/schoolnet/"
+                },
+                {
+                    "title": "Other",
+                    "url": "/other/"
+                }
+            ]
+        },
+        {
+            "title": "NWS Data",
+            "subs": [
+                {
+                    "title": "NWS Mainpage",
+                    "url": "/nws/"
+                },
+                {
+                    "title": "Local Storm Report App",
+                    "url": "/lsr/"
+                },
+                {
+                    "title": "IEM Cow (SBW Verification)",
+                    "url": "/cow/"
+                },
+                {
+                    "title": "IEM Raccoon (SBW Powerpoints)",
+                    "url": "/raccoon/"
+                },
+                {
+                    "title": "River Summary",
+                    "url": "/river/"
+                },
+                {
+                    "title": "Satellite Data",
+                    "url": "/GIS/goes.phtml"
+                },
+                {
+                    "title": "Search for Warnings",
+                    "url": "/vtec/search.php"
+                },
+                {
+                    "title": "SPC Convective Outlook / MCD Search",
+                    "url": "/nws/spc_outlook_search/"
+                },
+                {
+                    "title": "SPC Watches",
+                    "url": "/GIS/apps/rview/watch.phtml"
+                },
+                {
+                    "title": "Text by WFO/Center",
+                    "url": "/wx/afos/list.phtml"
+                },
+                {
+                    "title": "Text by Product ID",
+                    "url": "/wx/afos/"
+                },
+                {
+                    "title": "VTEC Browser",
+                    "url": "/vtec/"
+                }
+            ]
+        },
+        {
+            "title": "Services",
+            "subs": [
+                {
+                    "title": "API",
+                    "url": "/api/"
+                },
+                {
+                    "title": "Gibson Ridge Placefiles",
+                    "url": "/request/grx/"
+                },
+                {
+                    "title": "iembot",
+                    "url": "/projects/iembot/"
+                },
+                {
+                    "title": "JSON Webservices",
+                    "url": "/json/"
+                },
+                {
+                    "title": "OGC Webservices",
+                    "url": "/ogc/"
+                },
+                {
+                    "title": "RadMap API",
+                    "url": "/GIS/radmap_api.phtml"
+                },
+                {
+                    "title": "RADAR Services",
+                    "url": "/GIS/radview.phtml"
+                }
+            ]
+        },
+        {
+            "title": "Webcams",
+            "subs": [
+                {
+                    "title": "Webcam mainpage",
+                    "url": "/projects/webcam.php"
+                },
+                {
+                    "title": "Build your own lapses",
+                    "url": "/current/bloop.phtml"
+                },
+                {
+                    "title": "Cool lapses",
+                    "url": "/cool/"
+                },
+                {
+                    "title": "IEM Webcam Viewer",
+                    "url": "/current/viewer.phtml"
+                },
+                {
+                    "title": "ISU Campus Webcams",
+                    "url": "/current/isucams.phtml"
+                },
+                {
+                    "title": "Recent lapses",
+                    "url": "/current/camlapse/"
+                },
+                {
+                    "title": "Still images",
+                    "url": "/current/webcam.php"
+                }
+            ]
+        }
+    ]
+}
