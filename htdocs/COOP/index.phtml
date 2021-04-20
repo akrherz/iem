@@ -3,7 +3,6 @@
  require_once "../../include/myview.php";
  require_once "../../include/generators.php";
  $t = new MyView();
-
  $t->title = "NWS COOP Data";
 
  $yr = date("Y");
@@ -99,42 +98,47 @@ EOF;
 $news = get_news_by_tag("coop");
  
 $t->content = <<<EOF
+
+<h3>National Weather Service Cooperative Observer Program (COOP)</h3>
+
+<p>The COOP network is generally comprised of volunteer observers
+reporting once-daily high and low air temperature, liquid precipitation,
+snow fall and snow depth.  Here are some popular IEM COOP apps.</p>
+
+<a class="btn btn-info" href="current.phtml">
+<i class="fa fa-refresh"></i> Sortable Currents</a>
+
+<a class="btn btn-primary" href="/request/coop/obs-fe.phtml">
+<i class="fa fa-cloud-download"></i> Download Observations</a>
+
+<a class="btn btn-info" href="/sites/locate.php?network=IA_COOP">
+<i class="fa fa-search"></i> Locate Sites</a>
+
+<a class="btn btn-info" href="cat.phtml">
+<i class="fa fa-eye"></i> View Obs by Day/Year</a>
+
+<h3>IEM Value-Added Climodat Dataset</h3>
+
+<p>The IEM takes these preliminary COOP reports, does some limited quality
+control, and attempts to estimate any missing data to provide a coherent
+dataset called <strong>"Climodat"</strong>.  Here are some popular IEM Climodat
+apps.</p>
+
+<a class="btn btn-info stretched-link" href="/climodat/">
+<i class="fa fa-file"></i> Climodat Reports</a>
+
+<a class="btn btn-primary" href="/request/coop/fe.phtml">
+<i class="fa fa-cloud-download"></i> Download Quality Controlled</a>
+
+<a class="btn btn-info" href="/sites/locate.php?network=IACLIMATE">
+<i class="fa fa-search"></i> Locate Sites</a>
+
+<a class="btn btn-info" href="/GIS/apps/coop/gsplot.phtml">
+<i class="fa fa-image"></i> Growing Season Plotter</a>
+
+
 <div class="row">
- <div class="col-md-2 col-sm-2">
- <span style="font-size: 1.3em;">NWS COOP<br />Quick Links</span>
- </div>
- <div class="col-md-1 col-sm-1">
- <a href="/climodat/"><img src="/images/fileprint.png" /><br />Climodat</a>
- </div>
- <div class="col-md-1 col-sm-1">
- <a href="current.phtml"><img src="/images/view_text.png" /><br />Currents</a>
- </div>
-  <div class="col-md-1 col-sm-1">
-  <a href="/request/coop/obs-fe.phtml"><img src="/images/down.png" /><br />Download Raw</a>
- </div>
-  <div class="col-md-1 col-sm-1">
-  <a href="/request/coop/fe.phtml"><img src="/images/down.png" /><br />Download QC</a>
- </div>
-  <div class="col-md-2 col-sm-2">
-  <a href="/sites/locate.php?network=IA_COOP"><img src="/images/find.png" /><br />Locate Site</a>
- </div>
-  <div class="col-md-2 col-sm-2">
-  <a href="cat.phtml"><img src="/images/misc.png" /><br />2004-{$yr}</a>
- </div>
-  <div class="col-md-2 col-sm-2">
-  <a href="/GIS/apps/coop/gsplot.phtml"><img src="/images/view_icon.png" /><br />Growing Season</a>
- </div>
- </div>
-
-
-<p>The National Weather Service [NWS] Cooperative Observer Program [COOP]
-is a nation-wide network of people making daily weather observations. These
-volunteers are invaluable in times of severe weather and heavy snowfall.  Their
-observations also provide a 'ground truth' to compare against remote sensing
-techniques.
-
-<div class="row">
-<div class="col-md-4 col-sm-4">
+<div class="col-md-5 col-sm-5">
 
 {$news}
 
@@ -148,8 +152,6 @@ techniques.
 	<li><a href="/data/coopSnowDepth.gif">Snow depth this morning</a></li>
     <li><a href="/data/coopHighLow.gif">High + Low Temperatures this morning</a></li>
 </ul>
-
-</div><div class="col-md-4 col-sm-4">
 
 <h3>Data + Summaries</h3>
 
@@ -165,14 +167,8 @@ techniques.
 	<br />Rainfall totals for this month along with climatology.</li>
  <li><a href="/data/text/IEMNWSYPR.txt">This Year's Totals</a>
 	<br />Rainfall totals this year along with climatology.</li>
- <li><a href="current.phtml">Sortable Observations</a>
-	<br />For all COOP sites in the Upper Midwest.</li>
+
 </ul>
-
-
-
-</div><div class="col-md-4 col-sm-4">
-
 
 <p><h3>Download Data</h3>
 <ul>
@@ -191,16 +187,17 @@ techniques.
     <br>Download daily normal high and low temperatures and average rainfall.</li>
 </ul>
 
-</div></div>
 
-<p><h3>COOP Data Applications:</h3><br>
+</div><div class="col-md-7 col-sm-7">
+
+
+<h3>Data Applications:</h3>
 
 <style>
 div.tease {
  margin: 5px;
  padding: 5px;
  width: 400px;
- height: 100px;
  background: #e8cc84;
  float: left;
 }
@@ -215,7 +212,11 @@ div.tease a {
 </style>
 
 {$content}
+
+</div>
+</div><!-- ./row -->
+
 <br clear="all" />
 EOF;
-$t->render('single.phtml');
+$t->render('full.phtml');
 ?>
