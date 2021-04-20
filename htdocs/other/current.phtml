@@ -22,7 +22,6 @@
   
  $t->title = "Other Currents";
  $t->refresh = 600;
- $t->thispage = "current-sort";
 
  $jdata = file_get_contents("http://iem.local/api/1/currents.json?network=$network");
  $jobj = json_decode($jdata, $assoc=TRUE);

@@ -13,7 +13,6 @@ define("IEM_APPID", 44);
 $mesosite = iemdb('mesosite');
  
 $t->title = "DCP/HADS Data Download";
-$t->thispage = "networks-dcp";
 
  $nselect = "<select name=\"network\">";
 $rs = pg_query($mesosite, "SELECT id, name from networks ".

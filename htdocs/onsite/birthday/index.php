@@ -3,7 +3,6 @@ include("../../../config/settings.inc.php");
 include("../../../include/myview.php");
 $t = new MyView();
   $t->title = "Birthday Weather";
-$t->thispage = "archive-birthday";
 include("../../../include/forms.php");
 include("../../../include/imagemaps.php");
 

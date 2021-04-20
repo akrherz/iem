@@ -14,8 +14,7 @@
 
  $imgurl = sprintf("/plotting/auto/plot/179/network:%s::station:%s".
  		"::gddbase:%s::dpi:100.png", $network, $station, $gddbase);
- 
-$t->thispage = "networks-coop";
+
 $t->title = "Growing Degree Day Scenarios / Probabilities";
 $nselect = networkSelect($network, $station);
 $sselect = selectClimodatNetwork($network, "network");

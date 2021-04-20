@@ -6,7 +6,6 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Time Machine";
-$t->thispage="archive-tm";
 
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.css">

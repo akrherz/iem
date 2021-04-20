@@ -4,7 +4,6 @@ require_once "../include/myview.php";
 $t = new MyView();
 define("IEM_APPID", 61);
 $t->title = "Information Mainpage";
-$t->thispage = "iem-base";
 
 $t->content = <<<EOF
 <h3>Information/Documents</h3><p>

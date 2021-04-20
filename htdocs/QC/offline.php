@@ -4,7 +4,6 @@ define("IEM_APPID", 101);
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Quality Control, Sites Offline";
-$t->thispage = "iem-qc";
 
 require_once "../../include/database.inc.php";
 require_once "../../include/network.php";

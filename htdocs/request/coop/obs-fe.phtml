@@ -11,7 +11,6 @@ $network = isset($_REQUEST['network']) ? xssafe($_REQUEST["network"]): 'IA_COOP'
 define("IEM_APPID", 45);
 $t = new MyView();
 $t->title = "NWS COOP Raw Observations Download"; 
-$t->thispage = "networks-coop";
 
 $content = <<<EOF
 <ol class="breadcrumb">

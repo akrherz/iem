@@ -5,8 +5,6 @@ include_once '../../include/myview.php';
 
 $t = new MyView();
 $t->title = "Drought Monitoring Products";
-$t->thispage = "climatology-drought";
-
 $startyear = intval(date("Y"));
 if (intval(date("m")) < 10){
     $startyear -= 1;

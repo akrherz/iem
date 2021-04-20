@@ -7,8 +7,6 @@ include_once "../../include/myview.php";
 
 $t = new MyView();
 $t->title = "ISU Soil Moisture Plots";
-$t->thispage = "networks-agclimate";
-
 
 $now = time();
 $d2 = time() - 5 * 86400;

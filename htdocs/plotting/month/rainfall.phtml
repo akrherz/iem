@@ -12,7 +12,6 @@ $OL = "6.2.1";
  $year = isset($_GET['year']) ? intval($_GET['year']): date("Y");
  $month = isset($_GET['month']) ? intval($_GET['month']): date("m");
 
-$t->thispage = "climatology-month";
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />

@@ -6,7 +6,6 @@ require_once "../../../include/imagemaps.php";
 define("IEM_APPID", 111);
 
 $t = new MyView();
-$t->thispage = "archive-pireps";
 $t->title = "Download PIREPs";
 $content = <<<EOF
 <h3>Archived Pilot Reports (PIREPs)</h3>

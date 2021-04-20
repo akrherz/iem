@@ -5,7 +5,6 @@ require_once "setup.php";
 require_once "../../include/myview.php";
 
 $t = new MyView();
-$t->thispage="iem-sites";
 $t->title = "Site Neighbors";
 $t->sites_current="neighbors"; 
 

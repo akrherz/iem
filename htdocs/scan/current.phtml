@@ -11,7 +11,6 @@ $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): 'station';
 $t = new MyView();
 $t->title = "SCAN Sortable Currents";
 $t->refresh = 3600;
-$t->thispage = "current-sort";
 
 function make_link($sid){
 	return sprintf("/sites/site.php?network=SCAN&station=%s", $sid);

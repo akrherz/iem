@@ -4,7 +4,6 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Model Output Statistics (MOS)";
-$t->thispage = "archive-mos"; 
 
 $t->content = <<<EOF
 

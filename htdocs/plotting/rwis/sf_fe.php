@@ -47,7 +47,6 @@ $(document).ready(function(){
 </script>
 EOF;
 $t->title = "RWIS Timeseries Plots";
-$t->thispage = "networks-rwis";
 
 $content = <<<EOF
 <style type="text/css">

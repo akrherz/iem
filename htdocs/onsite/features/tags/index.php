@@ -22,7 +22,6 @@ if (! isset($_GET["tag"])){
     }
   }
 
-  $t->thispage = "iem-feature";
   $t->title = "Feature Tags";
 
   $keys = array_keys($tags);
@@ -56,7 +55,6 @@ EOF;
 }
 
 $tag = isset($_GET["tag"]) ? xssafe($_GET["tag"]): "";
-$t->thispage = "iem-feature";
 $t->title = "Features Tagged: $tag";
 
 $winterextra = "";

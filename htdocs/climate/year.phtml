@@ -4,7 +4,6 @@ require_once "../../include/myview.php";
 $t = new MyView();
 require_once "../../include/forms.php"; 
 $t->title = "Climatology by Year";
-$t->thispage = "climatology-year";
 require_once "../../include/adodb-time.inc.php";
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y") - 1;

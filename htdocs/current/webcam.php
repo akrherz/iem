@@ -40,7 +40,6 @@ cfg.jsonSource = '/json/webcams.php';
 </style>
 EOF;
 $t->title = "Webcams";
-$t->thispage = "webcam-stills";
 $t->content = <<<EOF
 <div id="main">
 </div>

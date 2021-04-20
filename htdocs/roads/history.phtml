@@ -12,7 +12,6 @@ $year = isset($_GET["year"]) ? intval($_GET["year"]) : intval(date("Y"));
 $segid = isset($_GET["segid"]) ? intval($_GET["segid"]) : "";
 $valid = isset($_GET["valid"]) ? DateTime::createFromFormat("Y-m-d H:i", $_GET['valid']) : null;
 
-$t->thispage = "roads-history";
 $t->title = "Historical Iowa Winter Road Conditions";
 $t->headextra = <<<EOM
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >

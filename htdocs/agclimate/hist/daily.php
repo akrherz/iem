@@ -10,7 +10,6 @@
  
  $t = new MyView();
  $t->title = "ISU Soil Moisture Daily Data Request";
- $t->thispage = "networks-agclimate";
  
  $nt = new NetworkTable("ISUSM");
  

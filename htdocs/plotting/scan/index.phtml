@@ -6,7 +6,6 @@ require_once "../../../include/myview.php";
 require_once "../../../include/imagemaps.php";
 
 $t = new MyView();
-$t->thispage = "networks-scan";
 $t->title = "SCAN Plotting";
 
  $station = isset($_GET["station"]) ? xssafe($_GET["station"]): "S2031";

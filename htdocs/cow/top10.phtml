@@ -50,7 +50,6 @@ WHERE status = 'NEW' and phenomena in ($lstring) $wlimit and
 significance = 'W' and issue > '$tstring'  ORDER by area DESC LIMIT 10");
 
 $t->title = "NWS SVR/TOR Storm Based Warnings by Size";
-$t->thispage ="severe-cow";
 
 $extra = Array("ALL" => Array("name" => "--- ALL Forecast Offices ---"));
 $sselect = networkSelect("WFO", $wfo, $extra, "wfo");

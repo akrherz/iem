@@ -8,9 +8,6 @@ require_once "../../include/myview.php";
 require_once "../../include/network.php";
 $nt = new NetworkTable("NSTLFLUX");
 $t = new MyView();
-
-
-$t->thispage = "networks-flux";
 $t->title = "NLAE Flux Sites";
 
 $ys = yearSelect2(2002, date("Y"), "syear");

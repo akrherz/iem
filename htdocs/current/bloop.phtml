@@ -10,8 +10,6 @@ $t = new MyView();
 $java = isset($_GET["java"]) ? xssafe($_GET["java"]): 'script';
 $cid = isset($_GET['cid']) ? xssafe($_GET['cid']): 'KCCI-016';
 
-$t->thispage = "webcam-loop";
-
 $frames  = isset($_GET['frames']) ? intval($_GET['frames']): 12;
 $interval = isset($_GET['interval']) ? intval($_GET['interval']): 300;
 $day = isset($_GET['day']) ? intval($_GET["day"]): date("d", time() - 3600);

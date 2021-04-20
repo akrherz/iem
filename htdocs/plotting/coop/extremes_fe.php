@@ -5,8 +5,6 @@ include_once "../../../include/imagemaps.php";
 require_once "../../../include/forms.php";
 $t = new MyView();
 $t->title = "COOP Extremes Plots";
-$t->thispage="networks-coop";
-
 $station = isset($_GET["station"]) ? xssafe($_GET["station"]): ""; 
 $var = isset($_GET["var"]) ? xssafe($_GET["var"]): "";
 

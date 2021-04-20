@@ -7,7 +7,6 @@ require_once "../../../include/forms.php";
 
 $t = new MyView();
 $t->title = "NWS COOP Daily Normals";
-$t->thispage = "climatology-today";
 
 $year = date("Y");
 $network = isset($_REQUEST['network']) ? xssafe($_REQUEST['network']) : 'IACLIMATE';

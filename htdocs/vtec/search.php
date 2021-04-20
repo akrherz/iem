@@ -28,7 +28,6 @@ $t->headextra = <<<EOF
   }
 </style>
 EOF;
-$t->thispage ="severe-search";
 $t->title = "NWS Warning Search by Point or County/Zone";
 
 $t->content = <<<EOF

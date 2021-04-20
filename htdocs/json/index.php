@@ -2,7 +2,6 @@
   require_once "../../config/settings.inc.php";
   require_once "../../include/myview.php";
   $t = new MyView();
-  $t->thispage = "current-jsonp";
   $t->title = "JSON(P) Web Services";
 
 

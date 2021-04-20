@@ -8,7 +8,6 @@
  $sel = isset($_GET["sel"]) ? intval($_GET["sel"]) : -1;
  $t->refresh = 300;
  $t->title = "SPC Watches Overview";
- $t->thispage = "current-radar";
  
  $metdata = Array();
  $rs = pg_query($conn, "SELECT * from watches_current");

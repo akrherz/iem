@@ -9,7 +9,6 @@ force_https();
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "SHEF Physical Code Map";
-$t->thispage = "networks-dcp";
 $OL = '6.2.1';
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">

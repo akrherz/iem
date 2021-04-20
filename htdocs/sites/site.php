@@ -67,7 +67,6 @@ EOM;
 }
 
 $t = new MyView();
-$t->thispage="iem-sites";
 $t->title = sprintf("Site Info: %s %s", $station, $cities[$station]["name"]);
 $t->headextra = <<<EOF
 <script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}" type="text/javascript"></script>

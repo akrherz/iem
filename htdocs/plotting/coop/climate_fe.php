@@ -10,8 +10,6 @@ $station1 = isset($_GET["station1"]) ? xssafe($_GET["station1"]): "IA0000";
 $station2 = isset($_GET["station2"]) ? xssafe($_GET["station2"]): null;
 $mode = isset($_GET["mode"]) ? xssafe($_GET["mode"]): "";
 
-$t->thispage = "networks-coop";
-
 $imgurl = sprintf("/plotting/auto/plot/180/network1:IACLIMATE::station1:%s", $station1);
 if ($mode == 'c'){
 	$imgurl .= sprintf("::station2:%s", $station2);

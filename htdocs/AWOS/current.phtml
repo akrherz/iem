@@ -11,8 +11,6 @@ $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "station";
 $t->refresh = 60;
 $t->title = "AWOS Network Current Conditions";
 $t->current_network = "AWOS";
-$t->thispage = "current-sort";
-
 
   $vals = Array("station" => "Station ID", "ts" => "Ob Time",
   		"relh" => "Relative Humidity", "name" => "Site Name",

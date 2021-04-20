@@ -20,8 +20,6 @@ $ts = mktime($hour, $minute, 0, $month, $day, $year);
 $nt = new NetworkTable( Array($network) );
 $cities = $nt->table;
 
-
-$t->thispage = "networks-dcp";
 $t->title = "GOES/DCP/HADS Display Observations";
 
 $dstr = date("d M Y h:i a", $ts);

@@ -184,7 +184,6 @@ else if ($format == "gempak") {
 if (! $nohtml || $format == 'shapefile') {
 	$t = new MyView();	
 	$t->title = "Network Station Tables";
-	$t->thispage = "iem-networks";
 	$page = 'full.phtml';
 	$sextra = "";
 	if (isset($_REQUEST['station'])){

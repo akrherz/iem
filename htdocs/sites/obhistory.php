@@ -145,7 +145,6 @@ if ($metadata["archive_begin"]){
 
 $t = new MyView();
 
-$t->thispage = "iem-sites";
 $t->title = "Observation History";
 $t->sites_current = 'obhistory';
 

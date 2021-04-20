@@ -5,7 +5,6 @@ force_https();
 require_once "../../include/myview.php";
 $OL = "6.4.3";
 $t = new MyView();
-$t->thispage = "severe-vtec";
 $t->title = "Valid Time Event Code (VTEC) App";
 
 $v = isset($_GET["vtec"]) ? $_GET["vtec"] : "2012-O-NEW-KBMX-TO-W-0001";

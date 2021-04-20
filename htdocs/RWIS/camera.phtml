@@ -14,7 +14,6 @@ $t->jsextra = <<<EOF
  <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
  <script src="camera.js"></script>
 EOF;
-$t->thispage = "networks-rwis";
 
 $conn = iemdb("mesosite");
 $rs = pg_query($conn, "SELECT id, name, date(sts) as s from webcams WHERE network = 'IDOT'

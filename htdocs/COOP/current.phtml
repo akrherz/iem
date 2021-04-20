@@ -129,7 +129,6 @@ function get_sortdir($baseurl, $column, $sortCol, $sortDir){
 	return "${baseurl}&sortcol=$column&sortdir=$sortDir";
 }
 
-
 $t->title = "NWS COOP Current Sortables";
 $t->headextra = <<<EOF
  <script language="JavaScript" type="text/javascript">
@@ -140,7 +139,6 @@ $t->headextra = <<<EOF
 	//END Script-->
 	</script>
 EOF;
-$t->thispage = "current-sort";
 
 $cols = Array("ts" => "Valid", "county" => "County",
   "sid" => "Site ID", "name" => "Station Name", 

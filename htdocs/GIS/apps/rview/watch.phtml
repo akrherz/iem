@@ -1,7 +1,7 @@
 <?php
-include("../../../../config/settings.inc.php");
+require_once "../../../../config/settings.inc.php";
 putenv("TZ=UTC");
-include("../../../../include/myview.php");
+require_once "../../../../include/myview.php";
 
 /* Needed GET variables */
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y");
@@ -10,9 +10,9 @@ $num = isset($_GET["num"]) ? intval($_GET["num"]) : 1;
 $t = new MyView();
 $t->title = "SPC $year Convective Watch $num";
 
-include("../../../../include/forms.php");
-include("../../../../include/database.inc.php");
-include("lib.php");
+require_once "../../../../include/forms.php";
+require_once "../../../../include/database.inc.php";
+require_once "lib.php";
 $db = iemdb("postgis");
 pg_exec($db, "SET TIME ZONE 'UTC'");
 
@@ -22,7 +22,6 @@ $rs = pg_prepare($db, "CHECK4WATCH", "SELECT *, ST_xmin(geom) as x0,
 		ST_asGeoJSON(geom) as geojson from watches 
       where extract(year from issued) = $1 and num = $2");
 
-$t->thispage = "severe-watch";
 $ERROR = "";
 
 

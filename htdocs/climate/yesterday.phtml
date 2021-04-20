@@ -3,7 +3,6 @@ include("../../config/settings.inc.php");
 include("../../include/myview.php");
 $t = new MyView();
 $t->title = "Climatology Plots for Yesterday";
-$t->thispage="climatology-yesterday";
 
 $u1 = sprintf("/archive/data/%scoop_avg_temp.png", 
 		date("Y/m/d/" , date("U") - 86400 ));

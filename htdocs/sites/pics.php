@@ -22,8 +22,6 @@ if ($dir != ""){
 if (! file_exists($filename)){
 	$puri = '/images/nophoto.png';
 }
-
-$t->thispage = "iem-sites";
 $t->title = "Site Photos";
 
 $t->sites_current = "pics"; 

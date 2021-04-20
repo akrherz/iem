@@ -1,145 +1,117 @@
 <?php 
-if (isset($this)){
-	$THISPAGE = array_key_exists('thispage', $this->vars)? $this->thispage : 'xxx-xxx';
-} else{
-	$THISPAGE = isset($THISPAGE) ? $THISPAGE: 'xxx-xxx';
-}
 $_pages = Array(
-	"archive" => Array(
-		"title" => "Archive", 
+	"apps" => Array(
+		"title" => "Apps", 
 		"subs" => Array(
-			"base" => Array("title" => "Archive Mainpage", "url" => "/archive/"),
-			"api" => Array("title" => "API", "url" => "/api/"),
-			"schema" => Array("title" => "Archive Schema", "url" => "/archive/schema.php"),
-			"browse" => Array("title" => "Browse data/", "url" => "/archive/data/"),
-			"hrain" => Array("title" => "Hourly Precip", "url" => "/rainfall/obhour.phtml"),
-			"iemre" => Array("title" => "IEM Reanalysis", "url" => "/iemre/"),
-			"cases" => Array("title" => "Interesting Cases", "url" => "/cases/"),
-			"mos" => Array("title" => "Model Output Statistics", "url" => "/mos/"),
-			"afos" => Array("title" => "NWS Text Products", "url" => "/wx/afos/list.phtml"),
-			"pireps" => Array("title" => "PIREPs", "url" => "/request/gis/pireps.php"),
-			"smos" => Array("title" => "Soil Moisture Satellite", "url" => "/smos/"),
-			"raob" => Array("title" => "Sounding Archive", "url" => "/archive/raob/"),
-			"tm" => Array("title" => "Time Machine", "url" => "/timemachine/"),
+            Array("title" => "Application Index", "url" => "/apps.php"),
+            Array("title" => "Auto Data Plotter", "url" => "/plotting/auto/"),
+            Array("title" => "Climodat", "url" => "/climodat/"),
+            Array("title" => "Climodat Monitor", "url" => "/climodat/monitor.php"),
+            Array("title" => "Hourly Precip", "url" => "/rainfall/obhour.phtml"),
+            Array("title" => "Interact Radar", "url" => "/GIS/apps/rview/warnings.phtml"),
+            Array("title" => "Sortable Currents", "url" => "/my/current.phtml"),
+            Array("title" => "Time Machine", "url" => "/timemachine/"),
+            Array("title" => "Wind Roses", "url" => "/sites/windrose.phtml?station=AMW&network=IA_ASOS"),
 		),
 	),
-	"climatology" => Array(
-		"title" => "Climate",
+	"areas" => Array(
+		"title" => "Areas",
 		"subs" => Array(
-			"base" => Array("title" => "Climate Mainpage", "url" => "/climate/"),
-			"extremes" => Array("title" => "Daily Climatology", "url" => "/COOP/extremes.php"),
-			"main" => Array("title" => "Mainpage", "url" => "/climate/"),
-			"climodat" => Array("title" => "Climodat", "url" => "/climodat/"),
-			"climodatm" => Array("title" => "Climodat Monitor", "url" => "/climodat/monitor.php"),
-			"drought" => Array("title" => "Drought", "url" => "/dm/"),
-			"today" => Array("title" => "Today", "url" => "/climate/today.phtml"),
-			"yesterday" => Array("title" => "Yesterday", "url" => "/climate/yesterday.phtml"),
-			"week" => Array("title" => "Week", "url" => "/climate/week.phtml"),
-			"month" => Array("title" => "Month", "url" => "/climate/month.phtml"),
-			"gs" => Array("title" => "Growing Season", "url" => "/climate/gs.phtml"),
-			"year" => Array("title" => "Year", "url" => "/climate/year.phtml"),
+            Array("title" => "Ag Weather/Climate Info", "url" => "/agweather/"),
+            Array("title" => "Archive Mainpage", "url" => "/archive/"),
+            Array("title" => "Climate Mainpage", "url" => "/climate/"),
+            Array("title" => "Current Mainpage", "url" => "/current/"),
+            Array("title" => "Drought", "url" => "/dm/"),
+            Array("title" => "GIS Mainpage", "url" => "/GIS/"),
+            Array("title" => "NWS Mainpage", "url" => "/nws/"),
+            Array("title" => "Severe Weather Mainpage", "url" => "/current/severe.phtml"),
 		),
 	),
-	"current" => Array(
-		"title" => "Current",
+	"datasets" => Array(
+		"title" => "Datasets",
 		"subs" => Array(
-			"base" => Array("title" => "Current Mainpage", "url" => "/current/"),
-			"api" => Array("title" => "API", "url" => "/api/"),
-			"plotter" => Array("title" => "Auto Data Plotter", "url" => "/plotting/auto/"),
-			"placefiles" => Array("title" => "Gibson Ridge Placefiles", "url" => "/request/grx/"),
-			"gs" => Array("title" => "Growing Season", "url" => "/current/gs.phtml"),
-			"jsonp" => Array("title" => "JSON Webservices", "url" => "/json/"),
-			"afos" => Array("title" => "NWS Text", "url" => "/wx/afos/"),
-			"products" => Array("title" => "Products", "url" => "/current/"),
-			"radar" => Array("title" => "RADAR & Satellite", "url" => "/current/radar.phtml"),
-			"sort" => Array("title" => "Sortable Currents", "url" => "/my/current.phtml"),
-		),
+            Array("title" => "Daily Climatology", "url" => "/COOP/extremes.php"),
+            Array("title" => "IEM Reanalysis", "url" => "/iemre/"),
+            Array("title" => "Model Output Statistics", "url" => "/mos/"),
+            Array("title" => "NEXRAD Mosaic", "url" => "/docs/nexrad_mosaic/"),
+            Array("title" => "PIREPs", "url" => "/request/gis/pireps.php"),
+            Array("title" => "Roads Mainpage", "url" => "/roads/"),
+            Array("title" => "RADAR & Satellite", "url" => "/current/radar.phtml"),
+            Array("title" => "Rainfall Data", "url" => "/rainfall/"),
+            Array("title" => "Sounding Archive", "url" => "/archive/raob/"),
+            Array("title" => "Soil Moisture Satellite", "url" => "/smos/"),
+        ),
 	),
-	"iem" => Array(
+	"info" => Array(
 		"title" => "Info",
 		"subs" => Array(
-			"base" => Array("title" => "Info Mainpage", "url" => "/info.php"),
-			"agweater" => Array("title" => "Ag Weather/Climate Info", "url" => "/agweather/"),
-			"apps" => Array("title" => "Application Index", "url" => "/apps.php"),
-			"feature" => Array("title" => "Daily Features", "url" => "/onsite/features/past.php"),
-			"links" => Array("title" => "Links", "url" => "/info/links.php"),
-			"networks" => Array("title" => "Network Tables", "url" => "/sites/networks.php"),
-			"news" => Array("title" => "News", "url" => "/onsite/news.phtml"),
-			"present" => Array("title" => "Presentations", "url" => "/present/"),
-			"sites" => Array("title" => "Station Data and Metadata", "url" => "/sites/locate.php"),
-			"qc" => Array("title" => "Quality Control", "url" => "/QC/"),
-			"variables" => Array("title" => "Variables", "url" => "/info/variables.phtml"),
-		),
-	),
-	"gis" => Array(
-		"title" => "GIS",
-		"subs" => Array(
-			"base" => Array("title" => "GIS Mainpage", "url" => "/GIS/"),
-			"browse" => Array("title" => "Browse Data", "url" => "/data/gis/"),
-			"nexrad" => Array("title" => "NEXRAD Mosaic", "url" => "/docs/nexrad_mosaic/"),
-			"ogc" => Array("title" => "OGC Webservices", "url" => "/ogc/"),
-			"rainfall" => Array("title" => "Rainfall Data", "url" => "/rainfall/"),
-			"radmap" => Array("title" => "RadMap API", "url" => "/GIS/radmap_api.phtml"),
-			"radview" => Array("title" => "RADAR Services", "url" => "/GIS/radview.phtml"),
-			"satellite" => Array("title" => "Satellite Data", "url" => "/GIS/goes.phtml"),
-		),
+            Array("title" => "Info Mainpage", "url" => "/info.php"),
+            Array("title" => "Daily Features", "url" => "/onsite/features/past.php"),
+            Array("title" => "Links", "url" => "/info/links.php"),
+            Array("title" => "News", "url" => "/onsite/news.phtml"),
+            Array("title" => "Presentations", "url" => "/present/"),
+            Array("title" => "Station Data and Metadata", "url" => "/sites/locate.php"),
+            Array("title" => "Quality Control", "url" => "/QC/"),
+            Array("title" => "Variables", "url" => "/info/variables.phtml"),
+        ),
 	),
 	"networks" => Array(
 		"title" => "Networks",
 		"subs" => Array(
-			"base" => Array("title" => "Networks Mainpage", "url" => "/"),
-			"asos" => Array("title" => "ASOS", "url" => "/ASOS/"),
-			"awos" => Array("title" => "AWOS", "url" => "/AWOS/"),
-			"cocorahs" => Array("title"=> "CoCoRaHS", "url" => "/cocorahs/"),
-			"coop" => Array("title" => "NWS COOP", "url" => "/COOP/"),
-			"dcp" => Array("title" => "DCP", "url" => "/DCP/"),
-			"agclimate" => Array("title" => "ISU Soil Moisture", "url" => "/agclimate/"),
-			"flux" => Array("title" => "NLAE Flux", "url" => "/nstl_flux/"),
-			"rwis" => Array("title" => "RWIS", "url" => "/RWIS/"),
-			"scan" => Array("title" => "SCAN", "url" => "/scan/"),
-			"schoolnet" => Array("title" => "SchoolNet", "url" => "/schoolnet/"),
-			"other" => Array("title" => "Other", "url" => "/other/"),
-		),
+            Array("title" => "Network Tables", "url" => "/sites/networks.php"),
+            Array("title" => "ASOS", "url" => "/ASOS/"),
+            Array("title" => "AWOS", "url" => "/AWOS/"),
+            Array("title"=> "CoCoRaHS", "url" => "/cocorahs/"),
+            Array("title" => "NWS COOP", "url" => "/COOP/"),
+            Array("title" => "DCP", "url" => "/DCP/"),
+            Array("title" => "ISU Soil Moisture", "url" => "/agclimate/"),
+            Array("title" => "NLAE Flux", "url" => "/nstl_flux/"),
+            Array("title" => "RWIS", "url" => "/RWIS/"),
+            Array("title" => "SCAN", "url" => "/scan/"),
+            Array("title" => "SchoolNet", "url" => "/schoolnet/"),
+            Array("title" => "Other", "url" => "/other/"),
+        ),
 	),
-	"roads" => Array(
-		"title" => "Roads",
+	"nws" => Array(
+		"title" => "NWS Data",
 		"subs" => Array(
-			"base" => Array("title" => "Roads Mainpage", "url" => "/roads/"),
-			"gis" => Array("title" => "GIS Products", "url" => "/roads/gis.phtml"),
-			"history" => Array("title" => "Historical", "url" => "/roads/history.phtml"),
-			"maps" => Array("title" => "Interactive Map", "url" => "/roads/maps.phtml"),
-			"sort" => Array("title" => "Sortable Text", "url" => "/roads/rc.phtml"),
-		),
+            Array("title" => "NWS Mainpage", "url" => "/nws/"),
+            Array("title" => "Local Storm Report App", "url" => "/lsr/"),
+            Array("title" => "IEM Cow (SBW Verification)", "url" => "/cow/"),
+            Array("title" => "IEM Raccoon (SBW Powerpoints)", "url" => "/raccoon/"),
+            Array("title" => "River Summary", "url" => "/river/"),
+            Array("title" => "Satellite Data", "url" => "/GIS/goes.phtml"),
+            Array("title" => "Search for Warnings", "url" => "/vtec/search.php"),
+            Array("title" => "SPC Convective Outlook / MCD Search", "url" => "/nws/spc_outlook_search/"),
+            Array("title" => "SPC Watches", "url" => "/GIS/apps/rview/watch.phtml"),
+            Array("title" => "Text by WFO/Center", "url" => "/wx/afos/list.phtml"),
+            Array("title" => "Text by Product ID", "url" => "/wx/afos/"),
+            Array("title" => "VTEC Browser", "url" => "/vtec/"),
+        ),
 	), 
-	"severe" => Array(
-		"title" => "Svr Wx",
-		"icon" => "flash",
+	"services" => Array(
+		"title" => "Services",
 		"subs" => Array(
-			"base" => Array("title" => "Severe Weather Mainpage", "url" => "/current/severe.phtml"),
-			"cow" => Array("title" => "IEM Cow (SBW Verification)", "url" => "/cow/"),
-			"iembot" => Array("title" => "iembot", "url" => "/projects/iembot/"),
-			"interact" => Array("title" => "Interact Radar", "url" => "/GIS/apps/rview/warnings.phtml"),
-			"lsr" => Array("title" => "Local Storm Report App", "url" => "/lsr/"),
-			"raccoon" => Array("title" => "IEM Raccoon (SBW Powerpoints)", "url" => "/raccoon/"),
-			"river" => Array("title" => "River Summary", "url" => "/river/"),
-			"search" => Array("title" => "Search for Warnings", "url" => "/vtec/search.php"),
-			"spcoutlook" => Array("title" => "SPC Convective Outlook / MCD Search", "url" => "/nws/spc_outlook_search/"),
-			"watch" => Array("title" => "SPC Watches", "url" => "/GIS/apps/rview/watch.phtml"),
-			"vtec" => Array("title" => "VTEC Browser", "url" => "/vtec/"),
-		),
+            Array("title" => "API", "url" => "/api/"),
+            Array("title" => "Gibson Ridge Placefiles", "url" => "/request/grx/"),
+            Array("title" => "iembot", "url" => "/projects/iembot/"),
+            Array("title" => "JSON Webservices", "url" => "/json/"),
+            Array("title" => "OGC Webservices", "url" => "/ogc/"),
+            Array("title" => "RadMap API", "url" => "/GIS/radmap_api.phtml"),
+            Array("title" => "RADAR Services", "url" => "/GIS/radview.phtml"),
+        ),
 	),
 	"webcam" => Array(
 		"title" => "Webcams",
-		"icon" => "camera",
 		"subs" => Array(
-			"base" => Array("title" => "Webcam mainpage", "url" => "/projects/webcam.php"),
-			"loop" => Array("title" => "Build your own lapses", "url" => "/current/bloop.phtml"),
-			"cool" => Array("title" => "Cool lapses", "url" => "/cool/"),
-			"viewer" => Array("title" => "IEM Webcam Viewer", "url" => "/current/viewer.phtml"),
-		    "isu" => Array("title" => "ISU Campus Webcams", "url" => "/current/isucams.phtml"),
-		    "lapse" => Array("title" => "Recent lapses", "url" => "/current/camlapse/"),
-			"stills" => Array("title" => "Still images", "url" => "/current/webcam.php"),
-			),
+            Array("title" => "Webcam mainpage", "url" => "/projects/webcam.php"),
+            Array("title" => "Build your own lapses", "url" => "/current/bloop.phtml"),
+            Array("title" => "Cool lapses", "url" => "/cool/"),
+            Array("title" => "IEM Webcam Viewer", "url" => "/current/viewer.phtml"),
+            Array("title" => "ISU Campus Webcams", "url" => "/current/isucams.phtml"),
+            Array("title" => "Recent lapses", "url" => "/current/camlapse/"),
+            Array("title" => "Still images", "url" => "/current/webcam.php"),
+        ),
 	),
 );
 ?>
@@ -283,30 +255,26 @@ $_pages = Array(
 		<li><a href="https://weather.im">Weather.IM Project</a></li>
 	</ul></li>
         
-<?php 
-$ar = preg_split('/-/', $THISPAGE);
-function get_title($page){
-	/*if (array_key_exists("icon", $page)){
-		return sprintf("<span class=\"fa fa-%s visible-sm\"></span>"
-				."<div class=\"hidden-sm\">%s</div>",
-				$page["icon"], $page["title"]);
-	}*/
-	return sprintf("%s", $page["title"]);
-}
-
+<?php
+$lookfor = $_SERVER["SCRIPT_URL"];
 foreach($_pages as $idx => $page)
 {
-  	echo sprintf("<li class=\"dropdown%s\">\n<a class=\"dropdown-toggle\" 
-		data-toggle=\"dropdown\" href=\"#\">%s</a>\n", 
-      ($ar[0] == $idx) ? " active" : "", get_title($page));
-
-    echo "<ul class=\"dropdown-menu\">\n";
+    $s = "<ul class=\"dropdown-menu\">\n";
+    $hit = FALSE;
     foreach($page["subs"] as $idx2 => $page2)
     {
-       echo sprintf("<li><a%s href=\"%s\">%s</a></li>\n", 
-         ($ar[1] == $idx2 && $ar[0] == $idx) ? " class=\"active\"" : "",
+        if ($lookfor == $page2["url"]){
+            $hit = TRUE;
+        }
+        $s .= sprintf("<li><a%s href=\"%s\">%s</a></li>\n", 
+         ($lookfor == $page2["url"]) ? " class=\"active\"" : "",
            $page2["url"],  $page2["title"] );
     }
+    echo sprintf(
+        "<li class=\"dropdown%s\">\n<a class=\"dropdown-toggle\" ".
+        "data-toggle=\"dropdown\" href=\"#\">%s</a>\n", 
+        ($hit) ? " active" : "", $page["title"]);
+    echo $s;
     echo "</ul>\n</li>\n";
 }
   ?>

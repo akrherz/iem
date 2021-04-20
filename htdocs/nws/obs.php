@@ -16,8 +16,6 @@
 
  $t->refresh = 60;
  $t->title = "Obs by NWS Forecast Office";
-
-  $t->thispage = "current-sort";
   $nt = new NetworkTable("WFO");
  
  $jdata = file_get_contents("http://iem.local/api/1/currents.json?wfo=$wfo");

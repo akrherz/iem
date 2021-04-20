@@ -6,7 +6,6 @@ require_once "../../include/imagemaps.php";
 require_once "../../include/myview.php";
 
 $t = new MyView();
-$t->thispage = "severe-river";
 $t->title = "River Forecast Point Monitor";
 $content = "";
 

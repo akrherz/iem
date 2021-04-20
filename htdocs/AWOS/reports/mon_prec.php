@@ -11,7 +11,6 @@ $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
 $yselect = yearSelect2(2004, $year, "year");
 
 $t = new MyView();
-$t->thispage = "networks-awos";
 $t->title = "Iowa AWOS Monthly Precipitation";
 
 $pgconn = iemdb("iem");

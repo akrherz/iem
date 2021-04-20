@@ -37,7 +37,6 @@
  }
  
  $t->title = "NWS COOP Daily Climatology";
- $t->thispage = "climatology-extremes";
 
 $nt = new NetworkTable($network);
 $cities = $nt->table;

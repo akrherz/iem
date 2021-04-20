@@ -9,7 +9,6 @@ $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
 $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
 
 $t = new MyView();
-$t->thispage="iem-sites";
 $t->title = "Monthly Summaries";
 $t->sites_current="monthsum"; 
 

@@ -50,7 +50,6 @@ $t->headextra = <<<EOF
 <link rel="stylesheet" type="text/css" href="/vendor/ext/superboxselect.css" />
 EOF;
 $t->title = "Local Storm Report App";
-$t->thispage ="severe-lsr";
 $t->content = <<<EOF
 <div id="iem-header">
 <a href="/">IEM Homepage</a> &gt; <a href="/current/severe.phtml">Severe Weather Mainpage</a>

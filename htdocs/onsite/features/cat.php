@@ -55,7 +55,6 @@ if ($row["appurl"] != ""){
 }
 
 $t->title = "$day Feature - ". $row["title"]; 
-$t->thispage = "iem-feature";
 $t->twitter_image = $big;
 if ($row["mediasuffix"] == 'mp4'){
   $media = <<<EOM

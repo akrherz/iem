@@ -5,7 +5,6 @@ require_once "../../../include/mlib.php";
 require_once "../../../include/forms.php";
 $t = new MyView();
 $t->title = "Central Command Time Series";
-$t->thispage = "networks-other";
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
 $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");

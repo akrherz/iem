@@ -8,7 +8,6 @@
  require_once "../../../include/network.php";
 
  $t = new MyView();
- $t->thispage = "iem-qc";
  $t->title = "Quality Control, MADIS Raw QC";
  $dbconn = iemdb("iem");
  $rs = pg_prepare($dbconn, "SELECT", "SELECT * from current_qc WHERE 

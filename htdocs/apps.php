@@ -7,7 +7,6 @@ require_once "../include/database.inc.php";
 $dbconn = iemdb("mesosite");
  
 $t->title = "Application Listing";
-$t->thispage = "iem-apps";
 $t->jsextra = <<<EOF
 <script src="/vendor/jquery-filtertable/1.5.7/jquery.filtertable.min.js"></script>
 <script>

@@ -3,7 +3,6 @@ require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "School Net Data Format";
-$t->thispage = "networks-schoolnet";
 $t->content = <<<EOF
 
 <h3 class="heading">Data Format</h3><br /><br />

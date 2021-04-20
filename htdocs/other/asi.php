@@ -55,7 +55,6 @@ include("../../include/myview.php");
 $t = new MyView();
 
 $t->title = "Atmospheric Structure Instrumentation";
-$t->thispage = "networks-other";
 
 $channels = Array(
 	"ch1" => "Wind Speed @48.5m [m/s]",

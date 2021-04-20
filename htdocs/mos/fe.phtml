@@ -17,7 +17,6 @@ $hour2 = isset($_GET["hour2"]) ? intval($_GET["hour2"]): 12;
 $model = isset($_GET["model"]) ? xssafe($_GET["model"]): "GFS";
 $station = isset($_GET["station"]) ? strtoupper(xssafe($_GET["station"])): "KAMW";
 
-$t->thispage = "archive-mos";
 $t->title = "NWS MOS Download Interface";
 
 $ys1 = yearSelect2(2000,$year1, "year1");

@@ -10,11 +10,6 @@
  $id = isset($_GET["id"]) ? intval($_GET["id"]): null;
  $q = isset($_GET["q"]) ? pg_escape_string(xssafe($_GET["q"])) : "";
  $tag = isset($_GET['tag']) ? pg_escape_string(xssafe($_GET['tag'])) : null;
- 
-
- $t->thispage = "iem-news";
-
-
 $content = <<< EOF
 <p><form method="GET" action="news.phtml" name="searchnews">
 <b>Search Archive:</b> <input type="text" name="q" value="{$q}" size="20"><input type="submit" value="Go!">

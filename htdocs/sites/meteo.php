@@ -5,7 +5,6 @@ require_once "../../include/forms.php";
 require_once "setup.php";
 require_once "../../include/myview.php";
 $t = new MyView();
-$t->thispage = "iem-sites";
 $t->title = "Site Meteorograms";
 $t->sites_current="meteo"; 
 

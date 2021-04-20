@@ -5,7 +5,6 @@ require_once "../../../include/myview.php";
 $t = new MyView();
 
 define("IEM_APPID", 47);
-$t->thispage = "archive-afos";
 
 $e = isset($_GET['e']) ? intval($_GET['e']) : null;
 $pil = isset($_GET['pil']) ? strtoupper(substr($_GET['pil'],0,6)) : null;

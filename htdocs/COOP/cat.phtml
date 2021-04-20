@@ -1,5 +1,5 @@
 <?php
- include("../../config/settings.inc.php");
+ require_once "../../config/settings.inc.php";
  define("IEM_APPID", 4);
  
  $station = isset($_GET["station"])? substr($_GET["station"],0,5) : "";
@@ -9,13 +9,12 @@
  $year = isset($_GET["year"]) ? substr($_GET["year"], 0, 4): date("Y");
 
  if ($date == "" && $station == "") $station = "AMSI4";
- include("../../include/forms.php");
- include("../../include/myview.php");
- include_once "../../include/imagemaps.php";
- include("../../include/network.php");
+ require_once "../../include/forms.php";
+ require_once "../../include/myview.php";
+ require_once "../../include/imagemaps.php";
+ require_once "../../include/network.php";
  $t = new MyView();
  $t->title = "NWS COOP Observations by Date by Site";
- $t->thispage = "networks-coop";
 
  $content = <<<EOF
  <ol class="breadcrumb">

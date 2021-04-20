@@ -4,7 +4,6 @@ define("IEM_APPID", 98);
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Webcam Project";
-$t->thispage = "webcam-base";
 
 $t->content = <<<EOM
 <h3>IEM Webcam Project</h3>

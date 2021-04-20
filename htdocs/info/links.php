@@ -3,7 +3,6 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Links";
-$t->thispage = "iem-links";
 $t->content = <<<EOF
 
 <h3>Links</h3><p>

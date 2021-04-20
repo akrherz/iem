@@ -23,7 +23,6 @@ $p1 = make_select("phenomena", $phenomena, $vtec_phenomena);
 $s1 = make_select("significance", $significance, $vtec_significance);
 
 $t = new MyView();
-$t->thispage = "severe-main";
 $t->title = "VTEC Yearly Event Counts";
 
 function get_data(){

@@ -47,7 +47,6 @@ $ourl = sprintf("rby-overview.php?BBOX=%s,%s,%s,%s",  $extents[0], $extents[1], 
 $image_url = sprintf("rad-by-year.php?month=%s&day=%s&hour=%s&minute=%s&BBOX=%s,%s,%s,%s", $month, $day, $hour, $minute, $extents[0], $extents[1], $extents[2], $extents[3]);
 
 $t = new MyView();
-$t->thispage = "gis-nexrad";
 $t->title = "IEM NEXRAD by Year";
 $er = implode(",", $extents);
 

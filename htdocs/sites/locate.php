@@ -23,7 +23,6 @@ $network = isset($_GET["network"]) ? xssafe($_GET["network"]): "IA_ASOS";
   
 $t = new MyView();
 $t->title = "Site Locator";
-$t->thispage = "iem-sites";
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />

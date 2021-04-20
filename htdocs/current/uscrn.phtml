@@ -11,8 +11,6 @@
  $t->refresh = 60;
  $t->title = "US Climate Reference Network Latest Reports";
 
- $t->thispage = "current-sort";
-
  $jdata = file_get_contents("http://iem.local/api/1/currents.json?network=USCRN");
  $jobj = json_decode($jdata, $assoc=TRUE);
 

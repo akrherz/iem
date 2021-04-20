@@ -13,8 +13,6 @@
  $t->refresh = 60;
  $t->title = "$state Current Conditions";
 
- $t->thispage = "current-sort";
-
  $jdata = file_get_contents("http://iem.local/api/1/currents.json?state=$state");
  $jobj = json_decode($jdata, $assoc=TRUE);
 

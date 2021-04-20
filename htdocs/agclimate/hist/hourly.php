@@ -6,7 +6,6 @@
  require_once "../../../include/myview.php";
  $t = new MyView();
  $t->title = "ISU Soil Moisture Hourly Data Request";
- $t->thispage = "networks-agclimate";
  
  require_once "../../../include/network.php";
  $nt = new NetworkTable("ISUSM");

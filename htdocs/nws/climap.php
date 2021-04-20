@@ -9,7 +9,6 @@ require_once "../../include/mlib.php";
 force_https();
 $t = new MyView();
 $t->title = "Map of Daily NWS CLImage reports";
-$t->thispage = "climate-today";
 $OL = '6.4.3';
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">

@@ -5,7 +5,6 @@ require_once "../../include/forms.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Freezing Dates";
-$t->thispage = "climatology-year";
 
 require_once "../../include/database.inc.php"; 
 require_once "../../include/network.php";

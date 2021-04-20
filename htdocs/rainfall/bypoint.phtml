@@ -151,9 +151,8 @@ if ($view == "download")
 	die();
 }
 
-include("../../include/myview.php");
+require_once "../../include/myview.php";
 $t = new MyView();
-$t->thispage = "gis-rainfall";
 $t->title = "Rainfall by Point";
 $t->content = "<pre>\n{$data}\n</pre>";
 $t->render("single.phtml");

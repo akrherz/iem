@@ -1,12 +1,12 @@
 <?php
-include("../../config/settings.inc.php");
+require_once "../../config/settings.inc.php";
 define("IEM_APPID", 42);
-include("../../include/myview.php");
+require_once "../../include/myview.php";
 $t = new MyView();
 
-include("../../include/imagemaps.php");
+require_once "../../include/imagemaps.php";
 require_once "../../include/forms.php";
-include("../../include/database.inc.php");
+require_once "../../include/database.inc.php";
 $coopdb = iemdb('coop');
 $station = isset($_GET["station"]) ? xssafe($_GET["station"]): 'IA0200';
 $month = isset($_GET["month"]) ? intval($_GET["month"]): 12;
@@ -46,7 +46,6 @@ if (pg_num_rows($rs) > 0){
 }
 $table .= "</table>";
 
-$t->thispage = "networks-coop";
 $t->title = "COOP Snow Depth Duration";
 $nselect = networkSelect("IACLIMATE", $station);
 $mselect = monthSelect($month);

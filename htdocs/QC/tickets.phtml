@@ -5,7 +5,6 @@ require_once "../../include/myview.php";
 require_once "../../include/database.inc.php";
 $t = new MyView();
 $t->title = "Quality Control, Active Trouble Tickets";
-$t->thispage = "iem-qc";
 
 $conn = iemdb("portfolio");
 $rs = pg_exec($conn, "SELECT *, getSiteName(s_mid) as s_name from tt_base ".

@@ -156,7 +156,6 @@ $t->headextra = $headextra;
 
 if ($autopilot) $t->bodyextra = "onLoad=\"handsOff2();\"";
 
-$t->thispage = "severe-interact"; 
 $content = <<<EOF
 <form style="display: inline;" method="GET" name="myform" action="{$baseuri}">
 <input type="hidden" value="{$autopilot}" name="autopilot">

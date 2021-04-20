@@ -3,8 +3,6 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 
 $t = new MyView();
-$t->thispage = 'networks-schoolnet';
-$t->title = "School Network";
 
 $t->content = <<<EOF
 

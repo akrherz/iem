@@ -3,7 +3,6 @@ require_once "../../../../config/settings.inc.php";
 define("IEM_APPID", 52);
 require_once "../../../../include/myview.php";
 $t = new MyView();
-$t->thispage = "networks-coop";
 $t->title = "NWS COOP Plotting";
 
 require_once "../../../../include/database.inc.php";

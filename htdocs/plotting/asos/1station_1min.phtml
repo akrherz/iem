@@ -13,7 +13,6 @@ $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m", time() - 8640
 $day = isset($_GET["day"]) ? intval($_GET["day"]): date("d", time() - 86400);
 
 $t = new MyView();
-$t->thispage = "networks-asos";
 $t->title = "Iowa ASOS 1 Minute Time Series";
 
 $endts =  date("d M Y", $asos_archive_end);

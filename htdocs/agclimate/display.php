@@ -5,7 +5,6 @@
 
  $t = new MyView();
  $t->title = "Ag Climate";
- $t->thispage = "networks-agclimate";
  $prod = isset($_GET["prod"]) ? intval($_GET["prod"]) : 1;
  $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y");
  $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m");

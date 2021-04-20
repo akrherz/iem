@@ -7,7 +7,6 @@
  include_once "boxinc.phtml";
  $t = new MyView();
  $t->title = "ISU AgClimate Legacy Daily Data Request";
- $t->thispage ="networks-agclimate";
 
  $ys = yearSelect2(1986, date("Y"), "startYear", '', 2014); 
  $ms = monthSelect(1, "startMonth"); 

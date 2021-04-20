@@ -3,7 +3,6 @@ include("../../config/settings.inc.php");
 include("../../include/database.inc.php");
 $con = iemdb("postgis");
 
-
 // kvillewxguy@hotmail.com
 $metroview = isset($_GET["metro"]);
 
@@ -12,9 +11,6 @@ $rs = pg_query($con, $sql);
 
 $row = pg_fetch_array($rs, 0);
 $valid = substr($row["valid"],0,16);
-
-
-
 
 $map = ms_newMapObj('roads.map');
 //$map->setProjection("init=epsg:4326");

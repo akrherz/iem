@@ -7,7 +7,6 @@
 
  $t = new MyView();
  
- $t->thispage = "iem-sites";
  $t->title = "Satellite Cloud Product";
  $t->sites_current = "scp";
 $sortdir = isset($_GET["sortdir"]) ? xssafe($_GET["sortdir"]) : $_GET["sortdir"];

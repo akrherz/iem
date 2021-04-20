@@ -133,7 +133,6 @@ if (isset($_GET['map'])){
 	$showmap = "";
 }
 $t->title = "Climodat Station Monitor";
-$t->thispage = "climatology-climodatm";
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
 EOF;

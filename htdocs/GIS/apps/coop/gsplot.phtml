@@ -34,9 +34,7 @@ if ($ets >= $aend){ $ets = $aend; }
 $imgurl = sprintf("gsplot.php?network=%s&smonth=%s&sday=%s&var=%s&emonth=%s&eday=%s&year=%s",
   $network, $smonth, $sday, $var, $emonth, $eday, $year);
 
-
 $t->title = "NWS COOP Growing Season Data";
-$t->thispage = "current-gs";
 
 $tr = sprintf("# IEM Estimated COOP Accumulations (start: %s to inclusive date: %s)\n", 
 		adodb_date("Y-m-d", $sts),

@@ -32,7 +32,6 @@ $(document).ready(function(){
 EOF;
 }
 $t->title = "SchoolNet One Minute Time Series";
-$t->thispage = "networks-schoolnet"; 
 
 $nselect = networkSelect($network, $station); 
 $ys = yearSelect2(2002, $year, "year");

@@ -6,7 +6,6 @@ require_once "../../../include/forms.php";
 require_once "../../../include/imagemaps.php";
 
 $t = new MyView();
-$t->thispage = "gis-";
 $t->jsextra = <<<EOF
 <script>
 $('select[name=station]').change( function() {

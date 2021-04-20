@@ -11,7 +11,6 @@ $yselect = yearSelect2(2004, $year, "year");
 
 define("IEM_APPID", 29);
 $t = new MyView();
-$t->thispage = "networks-asos";
 $t->title = "Iowa ASOS Monthly Precipitation";
 
 $pgconn = iemdb("iem");

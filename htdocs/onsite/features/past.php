@@ -10,7 +10,6 @@ $month = isset($_REQUEST["month"]) ? intval($_REQUEST["month"]) : date("m");
 
 $t = new MyView();
 $t->title = "Past Features";
-$t->thispage = "iem-feature";
 
 $ts = mktime(0,0,0,$month,1,$year);
 $prev = $ts - 15*86400;

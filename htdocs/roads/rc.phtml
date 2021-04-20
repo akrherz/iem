@@ -10,8 +10,7 @@
 
  $conn = iemdb("postgis");
 
- $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "segid";
- $t->thispage = "roads-sort"; 
+ $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "segid"; 
  $t->refresh = 600;
 
 

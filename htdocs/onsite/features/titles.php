@@ -2,7 +2,6 @@
 include("../../../config/settings.inc.php");
 include("../../../include/myview.php");
 $t = new MyView();
-$t->thispage = "iem-feature";
 $t->title = "List of Daily Feature Titles";
 include("../../../include/database.inc.php");
 

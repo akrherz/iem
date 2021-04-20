@@ -47,7 +47,6 @@ EOF;
 	}
 	$table .= "</tbody></table>";
 	$t = new MyView();
-	$t->thispage = "iem-sites";
  	$t->title = "Sites";
  	$t->content = $table;
  	

@@ -5,7 +5,6 @@ require_once "../../include/forms.php";
 
 $t = new MyView();
 $t->title = "GIS-Ready Rainfall Data";
-$t->thispage = "gis-rainfall";
 
 $mselect = monthSelect( date("m", time() - 86400) );
 $dselect = daySelect( date("d", time() - 86400) );

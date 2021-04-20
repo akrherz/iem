@@ -10,9 +10,7 @@ $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
 $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
 $day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
 
-$t->thispage = "networks-awos";
 $t->title = "AWOS 1 Minute Time Series";
-
 
 $nselect = networkSelect("AWOS", $station);
 $yselect = yearSelect(1995, 2011, $year);

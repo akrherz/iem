@@ -5,7 +5,6 @@ define("IEM_APPID", 88);
 include_once "../../include/myview.php";
 $t = new MyView();
 require_once "../../include/database.inc.php";
-$t->thispage = "networks-agclimate";
 require_once "../../include/imagemaps.php";
 require_once "../../include/forms.php";
 

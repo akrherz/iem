@@ -3,8 +3,6 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "GIS Mainpage";
-$t->thispage = "gis-home";
-
 $t->content = <<<EOM
 
 <h3>IEM GIS Information</h3>

@@ -5,7 +5,6 @@ require_once "../../include/generators.php";
 
 define("IEM_APPID", 19);
 $t = new MyView();
-$t->thispage = "archive-main";
 $t->title = "Archived Data Resources";
 
 $dllist = get_iemapps_tags("download");

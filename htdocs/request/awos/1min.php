@@ -3,7 +3,6 @@ include("../../../config/settings.inc.php");
 define("IEM_APPID", 65);
 include_once "../../../include/myview.php";
 $t = new MyView();
-$t->thispage = "networks-awos";
 $t->title = "AWOS One Minute Data Download";
 
 include("../../../include/iemprop.php");

@@ -12,7 +12,6 @@ $network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,10) : "IA
 $t = new MyView();
 $t->iemss = True;
 $t->title = "COOP Quality Controlled and Estimated Data Download";
-$t->thispage = "networks-coop";
 
 $coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
 

@@ -7,7 +7,6 @@ require_once "../../include/myview.php";
 $OL = "6.2.1";
 $t = new MyView();
 $t->title = "SMOS Data";
-$t->thispage = "archive-smos";
 $t->headextra = <<<EOF
 <link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
 EOF;

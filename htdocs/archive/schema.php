@@ -3,7 +3,6 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 define("IEM_APPID", 20);
-$t->thispage = "archive-schema";
 $t->title = "Archived Data Schema";
 
 $url = sprintf("https://mesonet.agron.iastate.edu/archive/data/%s", gmdate('Y/m/d'));
