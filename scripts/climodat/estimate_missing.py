@@ -23,6 +23,7 @@ URI = (
 def process(cursor, station, df, meta):
     """do work for this station."""
     prefix = "daily" if meta["precip24_hour"] not in range(4, 11) else "12z"
+    hour = 0 if meta["precip24_hour"] not in range(4, 11) else 7
     sdate = df["day"].min()
     edate = df["day"].max()
     wsuri = URI % {
@@ -88,7 +89,9 @@ def process(cursor, station, df, meta):
         )
         sql = """
             UPDATE alldata_%s SET temp_estimated = %s,
-            precip_estimated = %s, high = %.0f, low = %.0f, precip = %.2f
+            precip_estimated = %s, high = %.0f, low = %.0f, precip = %.2f,
+            temp_hour = coalesce(temp_hour, %s),
+            precip_hour = coalesce(precip_hour, %s)
             WHERE station = '%s' and day = '%s'
             """ % (
             station[:2],
@@ -97,6 +100,8 @@ def process(cursor, station, df, meta):
             newvals["high"],
             newvals["low"],
             newvals["precip"],
+            hour,
+            hour,
             station,
             row["day"],
         )
@@ -106,7 +111,7 @@ def process(cursor, station, df, meta):
 def main(argv):
     """Go Main Go"""
     state = argv[1]
-    nt = NetworkTable("%sCLIMATE" % (state,))
+    nt = NetworkTable(f"{state}CLIMATE", only_online=False)
     pgconn = get_dbconn("coop")
     df = read_sql(
         f"SELECT station, year, day, high, low, precip from alldata_{state} "
@@ -119,6 +124,9 @@ def main(argv):
     for (_year, station), gdf in df.groupby(["year", "station"]):
         if station not in nt.sts:
             LOG.info("station %s is unknown, skipping...", station)
+            continue
+        # Offline stations we do not fill
+        if not nt.sts[station]["online"]:
             continue
         cursor = pgconn.cursor()
         process(cursor, station, gdf, nt.sts[station])
