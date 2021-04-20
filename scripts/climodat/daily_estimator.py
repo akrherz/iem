@@ -55,7 +55,7 @@ def load_table(state, date):
     df = pd.DataFrame(rows)
     df = df.set_index("station")
     for key in "high low precip snow snowd temp_hour precip_hour".split():
-        df[key] = None
+        df[key] = np.nan
     for key in ["precip_estimated", "temp_estimated"]:
         df[key] = False
     return df
@@ -88,7 +88,7 @@ def estimate_precip(df, ds):
 
 def snowval(val):
     """Make sure our snow value makes database sense."""
-    if val is None:
+    if pd.isna(val):
         return None
     return round(float(val), 1)
 
@@ -147,9 +147,9 @@ def estimate_hilo(df, ds):
             df.at[sid, "low"] = val
 
 
-def nonan(val, precision):
+def nonan(val, precision=0):
     """Can't have NaN."""
-    if pd.isnull(val):
+    if pd.isna(val):
         return None
     return np.round(val, precision)
 
@@ -187,13 +187,13 @@ def commit(cursor, table, df, ts):
                 "WHERE day = %s and station = %s"
             )
             args = (
-                nonan(_row["high"], 0),
-                nonan(_row["low"], 0),
+                nonan(_row["high"]),
+                nonan(_row["low"]),
                 nonan(_row["precip"], 2),
                 nonan(_row["snow"], 1),
                 nonan(_row["snowd"], 1),
-                _row["temp_hour"],
-                _row["precip_hour"],
+                nonan(_row["temp_hour"]),
+                nonan(_row["precip_hour"]),
                 ts,
                 _sid,
             )
@@ -223,16 +223,17 @@ def merge_network_obs(df, network, ts):
         params=(network, ts),
         index_col="station",
     )
-    obs["precip_hour"] = obs["temp_hour"]
-    # Some COOP sites may not report 'daily' high and low, so we cull those
-    # out as nulls
-    obs.at[obs["high"] <= obs["low"], ["high", "low"]] = None
     if obs.empty:
         LOG.warning("loading obs for network %s yielded no data", network)
         return df
+    obs["precip_hour"] = obs["temp_hour"]
+    # Some COOP sites may not report 'daily' high and low, so we cull those
+    # out as nulls
+    obs.loc[obs["high"] <= obs["low"], ("high", "low")] = np.nan
     df = df.join(obs, how="left", on="tracks", rsuffix="b")
     for col in ["high", "low", "precip", "snow", "snowd"]:
-        df[col].update(df[col + "b"])
+        # using DataSeries.update() caused SettingWithCopyError, shrug
+        df.loc[~pd.isna(df[f"{col}b"]), col] = df[f"{col}b"]
         df = df.drop(col + "b", axis=1)
     return df
 
