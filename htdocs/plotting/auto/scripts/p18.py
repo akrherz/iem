@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
-"""Time series plot.
-
-    The coding line above needs to be first for python2.7.
-"""
+"""Time series plot."""
 import datetime
 from collections import OrderedDict
 
@@ -10,7 +6,7 @@ import pytz
 import psycopg2.extras
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -77,7 +73,8 @@ def highcharts(fdict):
     ctx = get_data(fdict)
     ranges = []
     now = ctx["sdate"]
-    while ctx["climo"] is not None and now <= ctx["edate"]:
+    oneday = datetime.timedelta(days=1)
+    while ctx["climo"] is not None and (now - oneday) <= ctx["edate"]:
         ranges.append(
             [
                 int(now.strftime("%s")) * 1000.0,
@@ -85,7 +82,7 @@ def highcharts(fdict):
                 ctx["climo"][now.strftime("%m%d")]["high"],
             ]
         )
-        now += datetime.timedelta(days=1)
+        now += oneday
 
     j = dict()
     j["title"] = dict(
@@ -102,7 +99,7 @@ def highcharts(fdict):
         "valueSuffix": " %s" % (UNITS[ctx["var"]],),
     }
     j["legend"] = dict()
-    j["global"] = {"useUTC": False}
+    j["time"] = {"useUTC": False}
     j["exporting"] = {"enabled": True}
     j["chart"] = {"zoomType": "x"}
     j["plotOptions"] = {"line": {"turboThreshold": 0}}
@@ -115,7 +112,7 @@ def highcharts(fdict):
                     ctx["df"].datum.values.tolist(),
                 )
             ),
-            "zIndex": 1,
+            "zIndex": 2,
             "color": "#FF0000",
             "lineWidth": 2,
             "marker": {"enabled": False},
@@ -125,16 +122,25 @@ def highcharts(fdict):
     if ranges:
         j["series"].append(
             {
-                "name": "Range",
+                "name": "Climo Hi/Lo Range",
                 "data": ranges,
                 "type": "arearange",
                 "lineWidth": 0,
-                "linkedTo": ":previous",
                 "color": "#ADD8E6",
                 "fillOpacity": 0.3,
                 "zIndex": 0,
             }
         )
+    if ctx["var"] in ["tmpf", "dwpf"]:
+        j["yAxis"]["plotLines"] = [
+            {
+                "value": 32,
+                "width": 2,
+                "zIndex": 1,
+                "color": "#000",
+                "label": {"text": "32°F"},
+            }
+        ]
 
     return j
 
@@ -158,9 +164,7 @@ def get_data(fdict):
     if ctx["var"] == "tmpf":
         ctx["climo"] = {}
         ccursor.execute(
-            """
-            SELECT valid, high, low from ncdc_climate81 where station = %s
-        """,
+            "SELECT valid, high, low from ncdc_climate81 where station = %s",
             (ctx["_nt"].sts[ctx["station"]]["ncdc81"],),
         )
         for row in ccursor:
@@ -187,8 +191,14 @@ def get_data(fdict):
 def plotter(fdict):
     """ Go """
     ctx = get_data(fdict)
-
-    (fig, ax) = plt.subplots(1, 1)
+    title = "%s [%s]\n%s Timeseries %s - %s" % (
+        ctx["_nt"].sts[ctx["station"]]["name"],
+        ctx["station"],
+        MDICT[ctx["var"]],
+        ctx["sdate"].strftime("%d %b %Y"),
+        ctx["edate"].strftime("%d %b %Y"),
+    )
+    (fig, ax) = figure_axes(title=title)
 
     xticks = []
     xticklabels = []
@@ -196,7 +206,8 @@ def plotter(fdict):
     cdates = []
     chighs = []
     clows = []
-    while ctx["climo"] is not None and now <= ctx["edate"]:
+    oneday = datetime.timedelta(days=1)
+    while ctx["climo"] is not None and (now - oneday) <= ctx["edate"]:
         cdates.append(now)
         chighs.append(ctx["climo"][now.strftime("%m%d")]["high"])
         clows.append(ctx["climo"][now.strftime("%m%d")]["low"])
@@ -207,15 +218,15 @@ def plotter(fdict):
                 fmt = "%-d\n%b"
             xticklabels.append(now.strftime(fmt))
 
-        now += datetime.timedelta(days=1)
-    while now <= ctx["edate"]:
+        now += oneday
+    while (now - oneday) <= ctx["edate"]:
         if now.day == 1 or (now.day % 12 == 0 and ctx["days"] < 180):
             xticks.append(now)
             fmt = "%-d"
             if now.day == 1:
                 fmt = "%-d\n%b"
             xticklabels.append(now.strftime(fmt))
-        now += datetime.timedelta(days=1)
+        now += oneday
 
     if chighs:
         chighs = np.array(chighs)
@@ -224,6 +235,8 @@ def plotter(fdict):
             cdates,
             chighs - clows,
             bottom=clows,
+            width=1,
+            align="edge",
             fc="lightblue",
             ec="lightblue",
             label="Daily Climatology",
@@ -239,21 +252,11 @@ def plotter(fdict):
     ax.set_ylabel("%s %s" % (MDICT[ctx["var"]], UNITS[ctx["var"]]))
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
-    ax.set_xlim(ctx["sdate"], ctx["edate"])
+    ax.set_xlim(ctx["sdate"], ctx["edate"] + oneday)
     ax.set_ylim(top=ctx["df"].datum.max() + 15.0)
     ax.legend(loc=2, ncol=2)
     ax.axhline(32, linestyle="-.")
     ax.grid(True)
-    ax.set_title(
-        ("%s [%s]\n%s Timeseries %s - %s")
-        % (
-            ctx["_nt"].sts[ctx["station"]]["name"],
-            ctx["station"],
-            MDICT[ctx["var"]],
-            ctx["sdate"].strftime("%d %b %Y"),
-            ctx["edate"].strftime("%d %b %Y"),
-        )
-    )
     return fig, ctx["df"]
 
 

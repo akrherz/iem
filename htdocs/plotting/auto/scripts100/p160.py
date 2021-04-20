@@ -193,7 +193,7 @@ def highcharts(fdict):
     return (
         """
 $("#ap_container").highcharts({
-    global: {useUTC: false},
+    time: {useUTC: false},
     title: {text: '"""
         + ctx["title"]
         + """'},

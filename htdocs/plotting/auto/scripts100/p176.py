@@ -126,7 +126,7 @@ def highcharts(fdict):
     return (
         """
     $("#ap_container").highcharts({
-        global: {useUTC: true}, // needed since we are using dates here :/
+        time: {useUTC: true}, // needed since we are using dates here :/
         chart: {
             type: 'scatter',
             zoomType: 'x'
