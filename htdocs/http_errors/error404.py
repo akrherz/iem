@@ -35,7 +35,8 @@ def log_request(environ):
 
 def application(environ, start_response):
     """mod-wsgi handler."""
-    start_response("200 OK", [("Content-type", "text/html")])
+    # We should re-assert the HTTP status code that brought us here :/
+    start_response("404 Not Found", [("Content-type", "text/html")])
     content = """
 <h3>Requested file was not found</h3>
 <img src="/images/cow404.jpg" class="img img-responsive" alt="404 Cow" />
