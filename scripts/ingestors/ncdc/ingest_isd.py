@@ -19,6 +19,9 @@ def main(argv):
     airforce = int(argv[1])
     wban = int(argv[2])
     faa = argv[3]
+    if len(faa) == 3:
+        LOG.error("Provided faa ID should be 4 chars, abort")
+        return
     year = max([int(argv[4]), 1928])  # database starts in 1928
     year2 = int(argv[5])
     failedyears = []
@@ -54,11 +57,9 @@ def main(argv):
         if ADD_ONLY:
             # build out our current obs
             cursor.execute(
-                """
-                SELECT valid at time zone 'UTC'
-                from alldata where station = %s and
-                valid >= %s and valid < %s ORDER by valid ASC
-            """,
+                "SELECT valid at time zone 'UTC' from alldata where "
+                "station = %s and valid >= %s and valid < %s "
+                "ORDER by valid ASC",
                 (dbid, sts, ets),
             )
             for row in cursor:
@@ -76,14 +77,12 @@ def main(argv):
                 continue
             if added == 0 and not ADD_ONLY:
                 cursor.execute(
-                    """
-                    DELETE from alldata where station = %s
-                    and valid >= %s and valid < %s
-                """,
+                    "DELETE from alldata where station = %s and "
+                    "valid >= %s and valid < %s",
                     (dbid, sts, ets),
                 )
                 if cursor.rowcount > 0:
-                    print("deleted %s rows for %s" % (cursor.rowcount, dbid))
+                    LOG.info("deleted %s rows for %s", cursor.rowcount, dbid)
                 removed = cursor.rowcount
             if ADD_ONLY and data["valid"].strftime("%Y%m%d%H%M") in current:
                 skipped += 1

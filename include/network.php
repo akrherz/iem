@@ -5,15 +5,16 @@ require_once dirname(__FILE__) ."/database.inc.php";
 
 class NetworkTable {
 
-  function __construct($a, $force3char=FALSE)
+  function __construct($a, $force3char=FALSE, $only_online=FALSE)
   {
     $this->table = Array();
+    $ol = ($only_online) ? " and online = 't' ": "";
     $sql_template = <<<EOM
     WITH attrs as (
         SELECT t.iemid, array_to_json(array_agg(a.attr)) as attrs,
         array_to_json(array_agg(a.value)) as attr_values
         from stations t LEFT JOIN station_attributes a
-        on (t.iemid = a.iemid) WHERE %s
+        on (t.iemid = a.iemid) WHERE %s {$ol}
         GROUP by t.iemid)
     SELECT t.*, ST_X(t.geom) as lon, ST_Y(t.geom) as lat,
     a.attrs, a.attr_values from stations t JOIN attrs a on

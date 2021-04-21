@@ -26,7 +26,7 @@ def f2c(val):
 
 
 def get_scenario_period(ctx):
-    """ Compute the inclusive start and end dates to fetch scenario data for
+    """Compute the inclusive start and end dates to fetch scenario data for
     Arguments:
         ctx dictionary context this app was called with
     """
@@ -41,8 +41,8 @@ def get_database():
 
 
 def sane_date(year, month, day):
-    """ Attempt to account for usage of days outside of the bounds for
-    a given month """
+    """Attempt to account for usage of days outside of the bounds for
+    a given month"""
     # Calculate the last date of the given month
     nextmonth = datetime.date(year, month, 1) + datetime.timedelta(days=35)
     lastday = nextmonth.replace(day=1) - datetime.timedelta(days=1)
@@ -50,8 +50,8 @@ def sane_date(year, month, day):
 
 
 def get_cgi_dates(form):
-    """ Figure out which dates are requested via the form, we shall attempt
-    to account for invalid dates provided! """
+    """Figure out which dates are requested via the form, we shall attempt
+    to account for invalid dates provided!"""
     y1 = int(form.get("year1"))
     m1 = int(form.get("month1"))
     d1 = int(form.get("day1"))
@@ -76,7 +76,7 @@ def get_cgi_stations(form):
         return []
     if "_ALL" in reqlist:
         network = form.get("network")
-        nt = NetworkTable(network)
+        nt = NetworkTable(network, only_online=False)
         return nt.sts.keys()
 
     return reqlist
@@ -91,7 +91,7 @@ def do_apsim(ctx):
     year          day           radn          maxt          mint          rain
     ()            ()            (MJ/m^2)      (oC)          (oC)          (mm)
      1986          1             7.38585       0.8938889    -7.295556      0
-     """
+    """
     if len(ctx["stations"]) > 1:
         return (
             "ERROR: APSIM output is only "
@@ -104,7 +104,7 @@ def do_apsim(ctx):
     station = ctx["stations"][0]
     table = get_tablename(ctx["stations"])
     network = "%sCLIMATE" % (station[:2],)
-    nt = NetworkTable(network)
+    nt = NetworkTable(network, only_online=False)
 
     thisyear = datetime.datetime.now().year
     extra = {}
@@ -257,7 +257,7 @@ def do_apsim(ctx):
 
 
 def do_century(ctx):
-    """ Materialize the data in Century Format
+    """Materialize the data in Century Format
     * Century format  (precip cm, avg high C, avg low C)
     prec  1980   2.60   6.40   0.90   1.00   0.70   0.00
     tmin  1980  14.66  12.10   7.33  -0.89  -5.45  -7.29
@@ -274,7 +274,7 @@ def do_century(ctx):
 
     station = ctx["stations"][0]
     network = "%sCLIMATE" % (station[:2],)
-    nt = NetworkTable(network)
+    nt = NetworkTable(network, only_online=False)
 
     dbconn = get_database()
     cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -366,7 +366,7 @@ def do_century(ctx):
 
 
 def do_daycent(ctx):
-    """ Materialize data for daycent
+    """Materialize data for daycent
 
     Daily Weather Data File (use extra weather drivers = 0):
     > 1 1 1990 1 7.040 -10.300 0.000
@@ -501,7 +501,7 @@ def get_stationtable(stations):
         if sid[:2] not in states:
             states.append(sid[:2])
             networks.append("%sCLIMATE" % (sid[:2],))
-    return NetworkTable(networks)
+    return NetworkTable(networks, only_online=False)
 
 
 def do_simple(ctx):
@@ -622,7 +622,7 @@ def do_simple(ctx):
 
 
 def do_salus(ctx):
-    """ Generate SALUS
+    """Generate SALUS
     StationID, Year, DOY, SRAD, Tmax, Tmin, Rain, DewP, Wind, Par, dbnum
     CTRL, 1981, 1, 5.62203, 2.79032, -3.53361, 5.43766, NaN, NaN, NaN, 2
     CTRL, 1981, 2, 3.1898, 1.59032, -6.83361, 1.38607, NaN, NaN, NaN, 3
@@ -704,7 +704,7 @@ def do_salus(ctx):
 
 
 def do_dndc(ctx):
-    """ Process DNDC
+    """Process DNDC
     * One file per year! named StationName / StationName_YYYY.txt
     * julian day, tmax C , tmin C, precip cm seperated by space
     """
@@ -780,7 +780,7 @@ def do_dndc(ctx):
 
 
 def do_swat(ctx):
-    """ SWAT
+    """SWAT
 
     Two files, one for precip [mm] and one for hi and low temperature [C]
     """

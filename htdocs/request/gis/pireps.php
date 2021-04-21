@@ -124,6 +124,9 @@ Field 5: Type=N/Double, Title='LON', Longitude
  consider PIPEPs with unknown / bad location details.  These are now included
  in the CSV option with a "None" column for the latitude and longitude.  On a
  typical day, less than five PIREPs have unknown location details.</li>
+ <li><strong>21 April 2021</strong>: It was kindly pointed out that location
+ offsets are in nautical miles and not miles.  The archive was reprocessed
+ to properly use nautical miles.</li>
  </ul>
 EOF;
 $t->content = $content;
