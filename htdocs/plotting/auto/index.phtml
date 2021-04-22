@@ -3,6 +3,7 @@ require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 92);
 
 $HC = "8.2.2";
+$OL = '6.4.3';
 require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
 require_once "../../../include/vtec.php";
@@ -482,6 +483,29 @@ EOF;
             <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.css' rel='stylesheet' />
 EOF;
             $extrascripts .= "<script src=\"${imguri}.mapbox\"></script>";
+		} elseif ($fmt == 'maptable'){
+			// Add debug to the screen so to allow easy copy/paste
+			$image = ($_SERVER['SERVER_NAME'] == 'iem.local') ? "<pre>iem.local: ${imguri}.geojson</pre>": ""; 
+			$image .= "<div class=\"iem-maptable row\" data-geojson-src=\"${imguri}.geojson\"></div>";
+			$headextra .= <<<EOM
+<link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
+<link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
+<link type="text/css" href="/vendor/jquery-datatables/1.10.24/datatables.min.css" rel="stylesheet" />
+
+EOM;
+            $extrascripts .= <<<EOF
+<script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
+<script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
+<script src='/vendor/jquery-datatables/1.10.24/datatables.min.js'></script>
+<script src="/js/maptable.js"></script>
+<script>
+var maptable;
+$(document).ready(function(){
+    maptable = $("div.iem-maptable").MapTable();
+});
+</script>
+
+EOF;
 		} elseif ($fmt == 'png' || $fmt == 'svg') {
 			$timing_secs = intval($jobj->{"timing[secs]"}) + 1;
 			if ($timing_secs < 1) $timing_secs = 5;
@@ -532,6 +556,9 @@ EOF;
 	}
 	elseif (isset($jobj->mapbox) && $jobj->mapbox){
 		$ar["mapbox"] = "Interactive Map";
+	}
+	elseif (isset($jobj->maptable) && $jobj->maptable){
+		$ar["maptable"] = "Interactive Map + Table";
 	}
 	$thisi = make_select("_fmt", $fmt, $ar);
 	$form .= sprintf("<tr><td>Select Output Format</td><td>%s</td></tr>",

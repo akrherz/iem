@@ -31,6 +31,16 @@ if BASEDIR not in sys.path:
     sys.path.insert(0, BASEDIR)
 
 
+def format_geojson_response(gdf, defaultcol):
+    """Convert geodataframe into GeoJson."""
+    # Avert your eyes children
+    jdict = json.loads(gdf.to_json(), parse_float=lambda x: round(float(x), 2))
+    jdict["meta"] = {}
+    jdict["meta"]["propdefault"] = defaultcol
+    jdict["meta"]["proporder"] = [x for x in gdf.columns if x != "geom"]
+    return json.dumps(jdict)
+
+
 def format_mapbox_response(js):
     """Wrap the given javascript in a mapbox wrapper."""
 
@@ -81,6 +91,8 @@ def get_response_headers(fmt):
         ctype = "image/png"
     elif fmt in ["js", "mapbox"]:
         ctype = "application/javascript"
+    elif fmt == "geojson":
+        ctype = "application/vnd.geo+json"
     elif fmt == "svg":
         ctype = "image/svg+xml"
     elif fmt == "pdf":
@@ -144,6 +156,8 @@ def get_res_by_fmt(p, fmt, fdict):
         res = a.highcharts(fdict)
     elif fmt == "mapbox":
         res = format_mapbox_response(a.mapbox(fdict))
+    elif fmt == "geojson":
+        res = format_geojson_response(*a.geojson(fdict))
     else:
         res = a.plotter(fdict)
     # res should be either a 2 or 3 length tuple, rectify this otherwise
@@ -233,7 +247,7 @@ def workflow(environ, form, fmt):
         content = ('$("#ap_container").highcharts(%s);') % (
             json.dumps(mixedobj),
         )
-    elif fmt in ["js", "mapbox"]:
+    elif fmt in ["js", "mapbox", "geojson"]:
         content = mixedobj
     elif fmt in ["svg", "png", "pdf"] and isinstance(mixedobj, plt.Figure):
         # if our content is a figure, then add some fancy metadata to plot
@@ -295,7 +309,7 @@ def application(environ, start_response):
     if fields.get("q", "").find("network:WFO::wfo:PAAQ") > -1:
         fields["q"] = fields["q"].replace("network:WFO", "network:NWS")
     # Figure out the format that was requested from us, default to png
-    fmt = fields.get("fmt", "png")[:6]
+    fmt = fields.get("fmt", "png")[:7]
     # Figure out what our response headers should be
     response_headers = get_response_headers(fmt)
     try:
