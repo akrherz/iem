@@ -158,41 +158,6 @@ def get_data(ctx):
     ) % (today.strftime("%-d %b %Y"),)
 
 
-def mapbox(fdict):
-    """mapbox interface output."""
-    ctx = get_autoplot_context(fdict, get_description())
-    get_data(ctx)
-    geojson = ctx["df"][["label", "val", "geometry", "color"]].to_json()
-    return (
-        """
-
-    var ap_geodata = """
-        + geojson
-        + """;
-
-    map.addLayer({
-        "id": "points",
-        "type": "symbol",
-        "source": {
-            "type": "geojson",
-            "data": ap_geodata
-        },
-        "paint": {
-            "text-color": {"type": "identity", "property": "color"},
-            "text-halo-color": "#FFFFFF",
-            "text-halo-width": 4
-        },
-        "layout": {
-            "text-field": "{val}",
-            "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-            "text-offset": [0, 0.6],
-            "text-anchor": "top"
-        }
-    });
-    """
-    )
-
-
 def plotter(fdict):
     """ Go """
     ctx = get_autoplot_context(fdict, get_description())

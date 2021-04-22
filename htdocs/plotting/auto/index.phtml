@@ -474,15 +474,6 @@ EOF;
 <script src="/vendor/highcharts/{$HC}/modules/exporting.js"></script>		
 <script src="${imguri}.js"></script>		
 EOF;
-		} elseif ($fmt == 'mapbox'){
-			// Add debug to the screen so to allow easy copy/paste
-			$image = ($_SERVER['SERVER_NAME'] == 'iem.local') ? "<pre>iem.local: ${imguri}.mapbox</pre>": ""; 
-			$image .= '<div id="map" style="width:100%s;height:400px;"></div>';
-			$headextra .= <<<EOF
-            <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.js'></script>
-            <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.css' rel='stylesheet' />
-EOF;
-            $extrascripts .= "<script src=\"${imguri}.mapbox\"></script>";
 		} elseif ($fmt == 'maptable'){
 			// Add debug to the screen so to allow easy copy/paste
 			$image = ($_SERVER['SERVER_NAME'] == 'iem.local') ? "<pre>iem.local: ${imguri}.geojson</pre>": ""; 
@@ -553,9 +544,6 @@ EOF;
 	}
 	elseif (isset($jobj->highcharts) && $jobj->highcharts){
 		$ar["js"] = "Interactive Chart";
-	}
-	elseif (isset($jobj->mapbox) && $jobj->mapbox){
-		$ar["mapbox"] = "Interactive Map";
 	}
 	elseif (isset($jobj->maptable) && $jobj->maptable){
 		$ar["maptable"] = "Interactive Map + Table";

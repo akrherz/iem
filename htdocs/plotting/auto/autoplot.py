@@ -41,30 +41,6 @@ def format_geojson_response(gdf, defaultcol):
     return json.dumps(jdict)
 
 
-def format_mapbox_response(js):
-    """Wrap the given javascript in a mapbox wrapper."""
-
-    return (
-        """
-    mapboxgl.accessToken = 'pk.eyJ1IjoiYWtyaGVyeiIsImEiOiJjanNveG5sOWowc' +
-        'm0yNDlwMXlsbXVpeXJoIn0.Qwjhi5VK_ADPbHd2jz01Sw';
-    var map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/dark-v9',
-        center: [-91.9, 42.0],
-        zoom: 3
-    });
-
-    map.on('load', function () {
-        """
-        + js
-        + """
-
-    });
-    """
-    )
-
-
 def parser(cgistr):
     """Convert a CGI string into a dict that gets passed to the plotting
     routine"""
@@ -89,7 +65,7 @@ def get_response_headers(fmt):
     extra = None
     if fmt == "png":
         ctype = "image/png"
-    elif fmt in ["js", "mapbox"]:
+    elif fmt == "js":
         ctype = "application/javascript"
     elif fmt == "geojson":
         ctype = "application/vnd.geo+json"
@@ -154,8 +130,6 @@ def get_res_by_fmt(p, fmt, fdict):
     # Allow returning of javascript as a string
     if fmt == "js":
         res = a.highcharts(fdict)
-    elif fmt == "mapbox":
-        res = format_mapbox_response(a.mapbox(fdict))
     elif fmt == "geojson":
         res = format_geojson_response(*a.geojson(fdict))
     else:
@@ -247,7 +221,7 @@ def workflow(environ, form, fmt):
         content = ('$("#ap_container").highcharts(%s);') % (
             json.dumps(mixedobj),
         )
-    elif fmt in ["js", "mapbox", "geojson"]:
+    elif fmt in ["js", "geojson"]:
         content = mixedobj
     elif fmt in ["svg", "png", "pdf"] and isinstance(mixedobj, plt.Figure):
         # if our content is a figure, then add some fancy metadata to plot
