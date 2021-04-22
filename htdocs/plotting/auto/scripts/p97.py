@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
-from pandas.io.sql import read_sql
+import geopandas as gpd
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -210,17 +210,13 @@ def compute_tables_wfo(wfo):
     return tables
 
 
-def plotter(fdict):
-    """ Go """
-
-    pgconn = get_dbconn("coop")
-    ctx = get_autoplot_context(fdict, get_description())
-    sector = ctx["sector"]
+def get_data(ctx):
+    """Compute the data needed for this app."""
+    cull = cull_to_list(ctx["cull"])
     date1 = ctx["date1"]
     date2 = min([ctx["date2"], datetime.date.today()])
-    varname = ctx["var"]
-    cull = cull_to_list(ctx["cull"])
-
+    pgconn = get_dbconn("coop")
+    sector = ctx["sector"]
     table = "alldata_%s" % (sector,) if len(sector) == 2 else "alldata"
     tables = [table]
     dfs = []
@@ -231,7 +227,7 @@ def plotter(fdict):
         tables = compute_tables_wfo(ctx["wfo"])
         wfo_limiter = f" and t.wfo = '{ctx['wfo']}'"
     for table in tables:
-        df = read_sql(
+        df = gpd.read_postgis(
             f"""
         WITH obs as (
             SELECT station, gddxx(%s, 86, high, low) as gdd,
@@ -302,19 +298,37 @@ def plotter(fdict):
         avg_high_temp,
         avg_low_temp,
         cdd_sum, hdd_sum, cdd_depart, hdd_depart,
-        ST_x(t.geom) as lon, ST_y(t.geom) as lat
+        ST_x(t.geom) as lon, ST_y(t.geom) as lat,
+        t.geom
         from agg d JOIN stations t on (d.station = t.id)
         WHERE t.network ~* 'CLIMATE' {wfo_limiter}
         """,
             pgconn,
             params=(ctx["gddbase"], date1, date2, tuple(cull)),
             index_col="station",
+            geom_col="geom",
         )
         dfs.append(df)
     df = pd.concat(dfs)
     if df.empty:
         raise NoDataFound("No Data Found.")
-    df = df.reindex(df[varname].abs().sort_values(ascending=False).index)
+    return df.reindex(df[ctx["var"]].abs().sort_values(ascending=False).index)
+
+
+def geojson(fdict):
+    """Generate a GeoDataFrame ready for geojson."""
+    ctx = get_autoplot_context(fdict, get_description())
+    return (get_data(ctx).drop(["lat", "lon"], axis=1)), ctx["var"]
+
+
+def plotter(fdict):
+    """ Go """
+    ctx = get_autoplot_context(fdict, get_description())
+    df = get_data(ctx)
+    sector = ctx["sector"]
+    date1 = ctx["date1"]
+    date2 = min([ctx["date2"], datetime.date.today()])
+    varname = ctx["var"]
 
     datefmt = "%-d %b %Y" if varname != "cgdd_sum" else "%-d %b"
     subtitle = ""
@@ -403,7 +417,7 @@ def plotter(fdict):
     if ctx["usdm"] == "yes":
         mp.draw_usdm(date2, filled=False, hatched=True)
 
-    return mp.fig, df
+    return mp.fig, df.round(2)
 
 
 if __name__ == "__main__":
