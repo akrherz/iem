@@ -82,8 +82,13 @@ def main(argv):
                 {"name": "snwd", "add": "t"},
             ],
         }
-        req = requests.post(SERVICE, json=payload, timeout=30)
-        j = req.json()
+        try:
+            req = requests.post(SERVICE, json=payload, timeout=30)
+            j = req.json()
+        except Exception as exp:
+            LOG.info("download and processing failed for %s", nwsli)
+            LOG.exception(exp)
+            continue
         cursor = pgconn.cursor()
         if "data" not in j:
             LOG.info("Did not get data for %s ACIS request", nwsli)

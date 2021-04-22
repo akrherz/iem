@@ -4,6 +4,7 @@ import os
 import subprocess
 import logging
 import datetime
+import time
 
 import requests
 import pygrib
@@ -42,6 +43,9 @@ def run(valid):
     tmpfn = "/tmp/%s.grib2" % (valid.strftime("%Y%m%d%H"),)
     output = open(tmpfn, "wb")
     for hr in range(0, min([39, HOURS[valid.hour]]) + 1):
+        if hr > 30:
+            # Add some delays to work around upstream connection throttling
+            time.sleep(60)
         shr = "%02i" % (hr,)
         if hr <= 18:
             uri = valid.strftime(
