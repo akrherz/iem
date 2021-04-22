@@ -55,7 +55,7 @@ def do_month(sts):
             "Nx.%Y%m%d.nc4&FORMAT=bmM0Lw&"
             "BBOX=0,-180,90,180&"
             f"LABEL=MERRA2_{trans(now)}.tavg1_2d_rad_Nx.%Y%m%d.SUB.nc"
-            "&FLAGS=&SHORTNAME=M2T1NXRAD&SERVICE=SUBSET_MERRA2&"
+            "&FLAGS=&SHORTNAME=M2T1NXRAD&SERVICE=L34RS_MERRA2&"
             "LAYERS=&VERSION=1.02&VARIABLES=swgdn,swgdnclr,swtdn"
         )
         dirname = now.strftime("/mesonet/data/merra2/%Y")
