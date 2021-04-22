@@ -164,6 +164,9 @@ if (isset($_GET["q"])){
 	if (isset($jobj->highcharts) && $jobj->highcharts && ! isset($_GET["_fmt"])){
 		$fmt = "js";
 	}
+	if (isset($jobj->maptable) && $jobj->maptable && ! isset($_GET["_fmt"])){
+		$fmt = "maptable";
+	}
 	if (isset($jobj->nass) && $jobj->nass){
 		$nassmsg = <<<EOF
 <div class="alert alert-warning">This data presentation utilizes the
@@ -588,14 +591,19 @@ $dhtml = "";
 if ($description != null){
 	$dhtml = sprintf("<div class=\"alert alert-info\"><h4>Plot Description:</h4>%s</div>", $description);
 }
-$dataextra= "";
+$dataextra = "<p>";
 if (isset($jobj->data) && $jobj->data){
-	$dataextra = <<<EOF
-<p><a href="{$imguri}.csv" class="btn btn-default"><i class="fa fa-pencil"></i> View Data (as csv)</a>
-<a href="{$imguri}.xlsx" class="btn btn-default"><i class="fa fa-pencil"></i> Download as Excel</a>
-</p>
+	$dataextra .= <<<EOF
+<a href="{$imguri}.csv" class="btn btn-primary"><i class="fa fa-table"></i> View Data (as csv)</a> &nbsp;
+<a href="{$imguri}.xlsx" class="btn btn-primary"><i class="fa fa-table"></i> Download as Excel</a> &nbsp;
 EOF;
 }
+if (isset($jobj->maptable) && $jobj->maptable){
+    $dataextra .= <<<EOM
+<a href="{$imguri}.geojson" class="btn btn-primary"><i class="fa fa-map"></i> Download as GeoJSON</a>
+EOM;
+}
+$dataextra .= "</p>";
 
 $issues = "";
 if ($q > 0){

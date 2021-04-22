@@ -301,7 +301,7 @@ def get_data(ctx):
         ST_x(t.geom) as lon, ST_y(t.geom) as lat,
         t.geom
         from agg d JOIN stations t on (d.station = t.id)
-        WHERE t.network ~* 'CLIMATE' {wfo_limiter}
+        WHERE t.network ~* 'CLIMATE' and t.online {wfo_limiter}
         """,
             pgconn,
             params=(ctx["gddbase"], date1, date2, tuple(cull)),
