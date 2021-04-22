@@ -4,6 +4,7 @@ from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
+from pandas.io.sql import read_sql
 import geopandas as gpd
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -21,10 +22,13 @@ PDICT2 = OrderedDict(
         ("avg_temp", "Average Temperature"),
         ("min_low_temp", "Minimum Low Temperature"),
         ("avg_low_temp", "Average Low Temperature"),
-        ("gdd_sum", "Growing Degree Days ($base/86) Total"),
-        ("cgdd_sum", "Growing Degree Days Climatology ($base/86)"),
-        ("gdd_depart", "Growing Degree Days ($base/86) Departure"),
-        ("gdd_percent", "GDD ($base/86) Percent of Average"),
+        ("gdd_sum", "Growing Degree Days ($base/$ceil) Total"),
+        ("cgdd_sum", "Growing Degree Days ($base/$ceil) Climatology"),
+        ("gdd_depart", "Growing Degree Days ($base/$ceil) Departure"),
+        (
+            "gdd_percent",
+            "Growing Degree Days ($base/$ceil) Percent of Average",
+        ),
         ("cdd65_sum", "Cooling Degree Days (base 65)"),
         ("cdd65_depart", "Cooling Degree Days Departure (base 65)"),
         ("hdd65_sum", "Heating Degree Days (base 65)"),
@@ -35,17 +39,6 @@ PDICT2 = OrderedDict(
         ("snow_depart", "Snowfall Departure"),
         ("snow_percent", "Snowfall Percent of Average"),
         ("snow_sum", "Snowfall Total"),
-    ]
-)
-BASES = OrderedDict(
-    [
-        ("32", 32),
-        ("41", 41),
-        ("46", 46),
-        ("48", 48),
-        ("50", 50),
-        ("51", 51),
-        ("52", 52),
     ]
 )
 PDICT4 = {
@@ -83,6 +76,7 @@ PDICT6 = {
     "climate71": "IEM Climatology 1971-present",
     "climate81": "IEM Climatology 1981-present",
 }
+GDD_KNOWN_BASES = [32, 41, 46, 48, 50, 51, 52]
 
 
 def get_description():
@@ -124,11 +118,24 @@ def get_description():
             options=PDICT2,
         ),
         dict(
-            type="select",
-            options=BASES,
+            type="int",
             default=50,
             name="gddbase",
-            label="Available Growing Degree Day bases (F)",
+            label=(
+                "Growing Degree Day base(F)<br />if you choose a sector "
+                "covering more than 10 states, you are limited to values of "
+                "32, 41, 46, 48, 50, 51, 52 (long story why)"
+            ),
+        ),
+        dict(
+            type="int",
+            default=86,
+            name="gddceil",
+            label=(
+                "Growing Degree Day ceiling(F)<br />if you choose a sector "
+                "covering more than 10 states, thist must be 86 "
+                "(long story why)"
+            ),
         ),
         dict(
             type="date",
@@ -210,6 +217,34 @@ def compute_tables_wfo(wfo):
     return tables
 
 
+def replace_gdd_climo(ctx, pgconn, df, table, date1, date2):
+    """Here we are, incredible pain."""
+    d1 = date1.strftime("%m%d")
+    d2 = date2.strftime("%m%d")
+    daylimit = f"sday >= '{d1}' and sday <= '{d2}'"
+    if d1 > d2:
+        daylimit = f"sday >= '{d2}' or sday <= '{d1}'"
+    if (date2 - date1) > datetime.timedelta(days=365):
+        daylimit = ""
+
+    climo = read_sql(
+        f"""WITH obs as (
+            SELECT station, sday, avg(gddxx(%s, %s, high, low)) as datum from
+            {table} GROUP by station, sday)
+        select station, sum(datum) as gdd from obs
+        WHERE {daylimit} GROUP by station ORDER by station
+        """,
+        pgconn,
+        params=(ctx["gddbase"], ctx["gddceil"]),
+        index_col="station",
+    )
+    climo.loc[climo["gdd"] == 0, "gdd"] = 1
+    df["cgdd_sum"] = climo["gdd"]
+    df["gdd_percent"] = df["gdd_sum"] / df["cgdd_sum"] * 100.0
+    df["gdd_depart"] = df["gdd_sum"] - df["cgdd_sum"]
+    return df
+
+
 def get_data(ctx):
     """Compute the data needed for this app."""
     cull = cull_to_list(ctx["cull"])
@@ -226,11 +261,18 @@ def get_data(ctx):
     if ctx["d"] == "wfo":
         tables = compute_tables_wfo(ctx["wfo"])
         wfo_limiter = f" and t.wfo = '{ctx['wfo']}'"
+    if "alldata" in tables or len(tables) > 9:
+        if ctx["gddbase"] not in GDD_KNOWN_BASES:
+            raise NoDataFound(f"GDD Base must be {','.join(GDD_KNOWN_BASES)}")
+        ctx["gddceil"] = 86
+    gddclimocol = "0"
+    if ctx["gddbase"] in GDD_KNOWN_BASES:
+        gddclimocol = f"gdd{ctx['gddbase']}"
     for table in tables:
         df = gpd.read_postgis(
             f"""
         WITH obs as (
-            SELECT station, gddxx(%s, 86, high, low) as gdd,
+            SELECT station, gddxx(%s, %s, high, low) as gdd,
             cdd(high, low, 65) as cdd65, hdd(high, low, 65) as hdd65,
             sday, high, low, precip, snow,
             (high + low)/2. as avg_temp
@@ -240,7 +282,7 @@ def get_data(ctx):
             and station not in %s),
         climo as (
             SELECT station, to_char(valid, 'mmdd') as sday, precip, high, low,
-            gdd{ctx["gddbase"]} as gdd, cdd65, hdd65, snow
+            {gddclimocol} as gdd, cdd65, hdd65, snow
             from {ctx['ct']}),
         combo as (
             SELECT o.station, o.precip - c.precip as precip_diff,
@@ -304,10 +346,19 @@ def get_data(ctx):
         WHERE t.network ~* 'CLIMATE' and t.online {wfo_limiter}
         """,
             pgconn,
-            params=(ctx["gddbase"], date1, date2, tuple(cull)),
+            params=(
+                ctx["gddbase"],
+                ctx["gddceil"],
+                date1,
+                date2,
+                tuple(cull),
+            ),
             index_col="station",
             geom_col="geom",
         )
+        if ctx["gddbase"] not in GDD_KNOWN_BASES or ctx["gddceil"] != 86:
+            # We need to compute our own GDD Climatology, Le Sigh
+            df = replace_gdd_climo(ctx, pgconn, df, table, date1, date2)
         dfs.append(df)
     df = pd.concat(dfs)
     if df.empty:
@@ -332,7 +383,11 @@ def plotter(fdict):
 
     datefmt = "%-d %b %Y" if varname != "cgdd_sum" else "%-d %b"
     subtitle = ""
-    if varname.find("depart") > -1:
+    if varname.find("gdd") > -1 and (
+        ctx["gddbase"] not in GDD_KNOWN_BASES or ctx["gddceil"] != 86
+    ):
+        subtitle = "Period of Record Climatology is used for custom GDD"
+    elif varname.find("depart") > -1:
         subtitle = (
             "%s is compared with 19%s-%s Climatology to compute departures"
         ) % (date1.year, ctx["ct"][-2:], datetime.date.today().year - 1)
@@ -358,7 +413,11 @@ def plotter(fdict):
         % (
             date1.strftime(datefmt),
             date2.strftime(datefmt),
-            PDICT2.get(varname).replace("$base", str(ctx["gddbase"])),
+            (
+                PDICT2.get(varname)
+                .replace("$base", str(ctx["gddbase"]))
+                .replace("$ceil", str(ctx["gddceil"]))
+            ),
             UNITS.get(varname),
         ),
         subtitle=subtitle,
@@ -421,4 +480,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(wfo="DVN", d="wfo", ct="climate81"))
+    plotter(dict(wfo="DVN", d="wfo", ct="climate81", var="gdd", gddbase=49))

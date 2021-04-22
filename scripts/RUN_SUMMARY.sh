@@ -28,6 +28,6 @@ python plot_cli_jul1_snow.py
 cd ../year
 python plot_stage4.py
 python precip.py
-python plot_gdd.py
-python plot_gdd.py gdd52
-python plot_gdd.py gdd48
+python plot_gdd.py 50
+python plot_gdd.py 52
+python plot_gdd.py 48

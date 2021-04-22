@@ -65,12 +65,22 @@ data from the NWS COOP network.
 <td>The <a href="/COOP/">NWS COOP</a> network data contains the best quality 
 information for daily temperatures, but they are not always on a calendar date.
 </td>
-<td colspan="3">The <a href="/climodat/">Climodat</a> reports present summarized GDD data.
+<td colspan="3">
+The <a href="/climodat/">Climodat</a> reports present summarized GDD data.
 <ul>
  <li><a href="/climodat/monitor.php">Climodat Station Monitor</a></li>
  <li><a href="/plotting/coop/gddprobs.phtml">Probabilies + Scenarios</a></li>
  <li><a href="/GIS/apps/coop/gsplot.phtml?var=gdd50&year={$y}">Map of Totals</a></li>
  <li><a href="/plotting/auto/?q=108">Single Site Graphs</a></li>
+</ul>
+
+<p>Maps of Growing Degree Days:
+<ul>
+ <li><a href="/data/summary/gdd_mon.png">This Month's GDD 50/86</a></li>
+ <li><a href="/data/summary/gdd_jan1.png">This Years's GDD 50/86</a></li>
+ <li><a href="/data/summary/gdd_may1.png">May 1 - Nov 1 GDD 50/86</a></li>
+ <li><a href="/data/summary/gdd_may1_6086.png">May 1 - Nov 1 GDD 60/86</a></li>
+ <li><a href="/data/summary/gdd_may1_6586.png">May 1 - Nov 1 GDD 65/86</a></li>
 </ul>
 </td>
 </tr>

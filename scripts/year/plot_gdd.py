@@ -2,73 +2,31 @@
 import sys
 import datetime
 
-import numpy as np
-from pyiem.plot import MapPlot
-from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import logger, web2ldm
+
+LOG = logger()
 
 
 def main(argv):
     """Go Main Go"""
-    st = NetworkTable("IACLIMATE")
-    now = datetime.datetime.now() - datetime.timedelta(days=1)
-    pgconn = get_dbconn("coop", user="nobody")
-    ccursor = pgconn.cursor()
+    gddbase = int(argv[1])
+    now = datetime.date.today() - datetime.timedelta(days=1)
+    jan1 = now.replace(month=1, day=1)
 
-    gfunc = "gdd50"
-    gbase = 50
-    if len(argv) == 2 and argv[1] == "gdd52":
-        gfunc = "gdd52"
-        gbase = 52
-    if len(argv) == 2 and argv[1] == "gdd48":
-        gfunc = "gdd48"
-        gbase = 48
-
-    # Compute normal from the climate database
-    ccursor.execute(
-        """
-        SELECT station,
-        sum(%s(high, low)) as gdd
-        from alldata_ia WHERE station != 'IA0000'
-        and substr(station, 3, 1) != 'C' and year = %s
-        GROUP by station
-    """
-        % (gfunc, now.year)
+    url = (
+        "http://iem.local/plotting/auto/plot/97/d:sector::sector:IA::"
+        f"var:gdd_sum::gddbase:{gddbase}::gddceil:86::"
+        f"date1:{jan1.strftime('%Y-%m-%d')}::usdm:no::"
+        f"date2:{now.strftime('%Y-%m-%d')}::p:contour::cmap:RdBu_r::c:yes"
+        ".png"
     )
-
-    lats = []
-    lons = []
-    gdd50 = []
-    valmask = []
-
-    for row in ccursor:
-        station = row[0]
-        if station not in st.sts:
-            continue
-        lats.append(st.sts[station]["lat"])
-        lons.append(st.sts[station]["lon"])
-        gdd50.append(float(row[1]))
-        valmask.append(True)
-
-    mp = MapPlot(
-        axisbg="white",
-        title=("Iowa %s GDD (base=%s) Accumulation")
-        % (now.strftime("%Y"), gbase),
-        subtitle="1 Jan - %s" % (now.strftime("%d %b %Y"),),
-    )
-    minval = min(gdd50)
-    rng = max([int(max(gdd50) - minval), 10])
-    ramp = np.linspace(minval, minval + rng, 10, dtype=np.int)
-    if max(gdd50) > 0:
-        mp.contourf(lons, lats, gdd50, ramp)
-    pqstr = "plot c 000000000000 summary/gdd_jan1.png bogus png"
-    if gbase == 52:
-        pqstr = "plot c 000000000000 summary/gdd52_jan1.png bogus png"
-    elif gbase == 48:
-        pqstr = "plot c 000000000000 summary/gdd48_jan1.png bogus png"
-    mp.drawcounties()
-    mp.postprocess(view=False, pqstr=pqstr)
-    mp.close()
+    name = "gdd" if gddbase == 50 else f"gdd{gddbase}"
+    pqstr = f"plot c 000000000000 summary/{name}_jan1.png bogus png"
+    LOG.debug(url)
+    LOG.debug(pqstr)
+    res = web2ldm(url, pqstr)
+    if not res:
+        LOG.info("failed for gddbase: %s", gddbase)
 
 
 if __name__ == "__main__":
