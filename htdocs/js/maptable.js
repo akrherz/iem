@@ -51,14 +51,22 @@ function get_style(color, text) {
     });
 }
 
+function getLabelForFeature(inst, feat) {
+    var label = "TBD";
+    if (inst.label_field == "id") {
+        label = feat.getId();
+    } else if (inst.label_field) {
+        label = feat.get(inst.label_field).toString();
+    }
+    return label;
+}
+
 function highlightFeature(inst, feat) {
     if (inst.selectedFeature) {
         inst.selectedFeature.setStyle(null);
     }
     inst.selectedFeature = feat;
-    feat.setStyle(
-        get_style("#F00", feat.get(inst.label_field).toString())
-    );
+    feat.setStyle(get_style("#F00", getLabelForFeature(inst, feat)));
 }
 
 function init_map(idx, inst) {
@@ -69,11 +77,8 @@ function init_map(idx, inst) {
             format: new ol.format.GeoJSON()
         }),
         style: function (feature) {
-            var style = get_style(
-                "#000",
-                inst.label_field ? feature.get(inst.label_field).toString() : "TBD"
-            );
-            return [style];
+            var label = "TBD";
+            return [get_style("#000", getLabelForFeature(inst, feature))];
         }
     });
     $.ajax({
@@ -130,7 +135,7 @@ function init_map(idx, inst) {
     });
 
     inst.vectorLayer.getSource().on('change', function (e) {
-        if (inst.vectorLayer.getSource().getState() == 'ready') {
+        if (inst.vectorLayer.getSource().getState() == 'ready' && inst.zoomReset === false) {
             inst.map.getView().fit(
                 inst.vectorLayer.getSource().getExtent(),
                 {
@@ -138,11 +143,15 @@ function init_map(idx, inst) {
                     padding: [50, 50, 50, 50]
                 }
             );
+            inst.zoomReset = true;
         }
         if (inst.table) {
             return;
         }
-        var columns = [{ visible: false, data: 'id' }];
+        var columns = [{ title: 'ID', data: 'id' }];
+        $(inst.select).append(
+            "<option value=\"id\">ID</option>"
+        );
         var data = [];
         // If we have a column order, use it!
         if (inst.proporder) {
@@ -156,20 +165,17 @@ function init_map(idx, inst) {
         inst.vectorLayer.getSource().getFeatures().forEach(function (feat) {
             if (columns.length == 1) {
                 feat.getKeys().forEach(function (key) {
-                    if (key != "geometry") {
-                        $(inst.select).append(
-                            "<option value=\"" + key + "\">" + key + "</option>"
-                        );
+                    if (key == "geometry") {
+                        return;
                     }
-                    columns.push({
-                        title: key,
-                        data: key,
-                        visible: (key != "geometry")
-                    });
+                    $(inst.select).append(
+                        "<option value=\"" + key + "\">" + key + "</option>"
+                    );
+                    columns.push({ title: key, data: key });
                 });
             }
             if (!inst.label_field) {
-                inst.label_field = columns[2].data;
+                inst.label_field = "id";
             }
             $(inst.select).val(inst.label_field);
             var props = feat.getProperties();
@@ -201,6 +207,7 @@ function init(idx, div) {
     // Add left and right hand side divs
     var inst = {};
     inst.proporder;
+    inst.zoomReset = false;
     inst.geojson_src = $(div).data('geojson-src');
     inst.label_field = $(div).data('label-field');
     var leftcol = document.createElement('div');
