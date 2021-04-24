@@ -313,9 +313,9 @@ def hourly_process(nwsli, maxts):
         ob = Observation(nwsli, "ISUSM", row["valid"])
         tmpc = units("degC") * row["tair_c_avg_qc"]
         tmpf = tmpc.to(units("degF")).m
-        if -50 < tmpf < 140:
+        relh = units("percent") * row["rh_qc"]
+        if -40 < tmpf < 140 and 0 < relh < 101:
             ob.data["tmpf"] = tmpf
-            relh = units("percent") * row["rh_qc"]
             ob.data["relh"] = relh.m
             ob.data["dwpf"] = (
                 dewpoint_from_relative_humidity(tmpc, relh).to(units("degF")).m
