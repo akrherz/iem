@@ -262,9 +262,9 @@ def m15_process(nwsli, maxts):
         ob = Observation(nwsli, "ISUSM", row["valid"])
         tmpc = units("degC") * row["tair_c_avg_qc"]
         tmpf = tmpc.to(units("degF")).m
-        if -39 < tmpf < 140:
+        relh = units("percent") * row["rh_avg_qc"]
+        if (-39 < tmpf < 140) and (0 < relh < 101):
             ob.data["tmpf"] = tmpf
-            relh = units("percent") * row["rh_avg_qc"]
             ob.data["relh"] = relh.m
             ob.data["dwpf"] = (
                 dewpoint_from_relative_humidity(tmpc, relh).to(units("degF")).m
