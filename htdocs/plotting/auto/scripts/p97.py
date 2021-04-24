@@ -9,6 +9,7 @@ import geopandas as gpd
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
+from pyiem.reference import wfo_bounds
 
 PDICT = {
     "sector": "Plot by Sector / State",
@@ -204,17 +205,24 @@ def cull_to_list(vals):
 
 def compute_tables_wfo(wfo):
     """Figure out which WFOs we need."""
-    pgconn = get_dbconn("postgis")
+    xmin, ymin, xmax, ymax = wfo_bounds[wfo]
+    # buffer by a "county" or two
+    xmin -= 0.5
+    ymin -= 0.5
+    xmax += 0.5
+    ymax += 0.5
+    pgconn = get_dbconn("mesosite")
     tables = []
     cursor = pgconn.cursor()
     cursor.execute(
-        "SELECT distinct substr(ugc, 1, 2) from ugcs where substr(ugc, 3, 1) "
-        "= 'C' and end_ts is null and wfo = %s",
-        (wfo,),
+        "SELECT distinct substr(id, 1, 2) from stations where "
+        "network ~* 'CLIMATE' and ST_Contains("
+        "ST_MakeEnvelope(%s, %s, %s, %s, 4326), geom)",
+        (xmin, ymin, xmax, ymax),
     )
     for row in cursor:
         tables.append(f"alldata_{row[0].lower()}")
-    return tables
+    return tables, [xmin, ymin, xmax, ymax]
 
 
 def replace_gdd_climo(ctx, pgconn, df, table, date1, date2):
@@ -259,8 +267,11 @@ def get_data(ctx):
     if sector == "iailin":
         tables = ["alldata_ia", "alldata_il", "alldata_in"]
     if ctx["d"] == "wfo":
-        tables = compute_tables_wfo(ctx["wfo"])
-        wfo_limiter = f" and t.wfo = '{ctx['wfo']}'"
+        tables, bnds = compute_tables_wfo(ctx["wfo"])
+        wfo_limiter = (
+            f" and ST_Contains(St_MakeEnvelope({bnds[0]}, {bnds[1]}, "
+            f"{bnds[2]}, {bnds[3]}, 4326), geom) "
+        )
     if "alldata" in tables or len(tables) > 9:
         if ctx["gddbase"] not in GDD_KNOWN_BASES:
             raise NoDataFound(f"GDD Base must be {','.join(GDD_KNOWN_BASES)}")
@@ -463,10 +474,13 @@ def plotter(fdict):
             units=UNITS.get(varname),
         )
     if ctx["c"] == "yes":
+        df2 = df
+        if ctx["d"] == "wfo":
+            df2 = df[df["wfo"] == ctx["wfo"]]
         mp.plot_values(
-            df["lon"].values,
-            df["lat"].values,
-            df[varname].values,
+            df2["lon"].values,
+            df2["lat"].values,
+            df2[varname].values,
             fmt=fmt,
             labelbuffer=5,
         )
