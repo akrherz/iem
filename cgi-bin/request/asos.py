@@ -149,19 +149,25 @@ def get_time_bounds(form, tzinfo):
         return sts, ets
     # Here lie dragons, so tricky to get a proper timestamp
     try:
-        y1 = int(form.get("year1"))
-        y2 = int(form.get("year2"))
-        m1 = int(form.get("month1"))
-        m2 = int(form.get("month2"))
-        d1 = int(form.get("day1"))
-        d2 = int(form.get("day2"))
-        sts = tzinfo.localize(datetime.datetime(y1, m1, d1))
-        ets = tzinfo.localize(datetime.datetime(y2, m2, d2))
+
+        def _get(num):
+            return datetime.datetime(
+                int(form[f"year{num}"]),
+                int(form[f"month{num}"]),
+                int(form[f"day{num}"]),
+                int(form.get(f"hour{num}", 0)),
+                int(form.get(f"minute{num}", 0)),
+            )
+
+        sts = tzinfo.localize(_get("1"))
+        ets = tzinfo.localize(_get("2"))
     except Exception:
         return None, None
 
     if sts == ets:
         ets += datetime.timedelta(days=1)
+    if sts > ets:
+        sts, ets = ets, sts
     return sts, ets
 
 
