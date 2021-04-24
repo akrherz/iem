@@ -91,11 +91,6 @@ def sync(mesosite, dbname, do_delete):
     )
     dbcursor.close()
     dbconn.commit()
-    # We have had issues with the stations table getting out of sync with
-    # a simple lookup failing without a vacuum
-    dbconn.autocommit = True
-    dbcursor = dbconn.cursor()
-    dbcursor.execute("vacuum full stations")
     # close connection
     dbconn.close()
 
