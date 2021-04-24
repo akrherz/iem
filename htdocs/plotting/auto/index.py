@@ -381,6 +381,8 @@ def generate_form(apid, fdict, headers, cookies):
         "dataextra": "",
         "issues": "",
     }
+    if apid == 0:
+        return res
     fmt = fdict.get("_fmt")
     req = requests.get(
         f"http://iem.local/plotting/auto/meta/{apid}.json",
