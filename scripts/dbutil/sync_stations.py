@@ -89,12 +89,14 @@ def sync(mesosite, dbname, do_delete):
         maxts.strftime("%Y/%m/%d %H:%M"),
         maxid,
     )
-    # We have had issues with the stations table getting out of sync with
-    # a simple lookup failing without a vacuum
-    dbcursor.execute("vacuum full stations")
-    # close connection
     dbcursor.close()
     dbconn.commit()
+    # We have had issues with the stations table getting out of sync with
+    # a simple lookup failing without a vacuum
+    dbconn.autocommit = True
+    dbcursor = dbconn.cursor()
+    dbcursor.execute("vacuum full stations")
+    # close connection
     dbconn.close()
 
 
