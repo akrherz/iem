@@ -63,8 +63,7 @@ jobs:
         sudo cat /var/log/apache2/error.log
         sudo systemctl status apache2.service -l
         # Run autoplot tests with basically no data in database
-        SERVICE=http://iem.local pytest -n 8 -x .ipc/tests/test_autoplot.py
-        sudo cat /var/log/apache2/error.log
+        SERVICE=http://iem.local pytest -n 8 -x .ipc/tests/test_autoplot.py || sudo cat /var/log/apache2/error.log
         # Add some test data to the database
         python database/store_test_data.py
         python scripts/dbutil/sync_stations.py
