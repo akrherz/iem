@@ -67,5 +67,4 @@ jobs:
         python database/store_test_data.py
         python scripts/dbutil/sync_stations.py
         # Run autoplot testing a second time
-        SERVICE=http://iem.local pytest -n 6 -x .ipc/tests/test_autoplot.py
-        sudo cat /var/log/apache2/error.log
+        SERVICE=http://iem.local pytest -n 6 -x .ipc/tests/test_autoplot.py || sudo cat /var/log/apache2/error.log
