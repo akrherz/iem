@@ -56,10 +56,11 @@ cd ../util
 STATE=$(python pick_state.py)
 cd ../climodat
 python check_database.py $STATE
+python use_acis.py $STATE
 cd ../coop
 python use_acis.py $STATE
-cd ../ingestors/ncdc
-python ingest_ghcn.py $STATE
+cd ../dbutil
+python compute_climate_sts.py ${STATE}CLIMATE
 
 # Ingest Poker
 cd ../../util

@@ -5,8 +5,9 @@ import datetime
 import requests
 import pandas as pd
 from pandas.io.sql import read_sql
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, logger
-from pyiem.reference import TRACE_VALUE
+from pyiem.reference import TRACE_VALUE, ncei_state_codes
 
 LOG = logger()
 SERVICE = "http://data.rcc-acis.org/StnData"
@@ -37,14 +38,13 @@ def compare(row, colname):
     return False
 
 
-def main(argv):
+def do(station, acis_station):
     """Do the query and work
 
     Args:
       station (str): IEM Station identifier ie IA0200
       acis_station (str): the ACIS identifier ie 130197
     """
-    (station, acis_station) = argv[1], argv[2]
     table = "alldata_%s" % (station[:2],)
     payload = {
         "sid": acis_station,
@@ -121,6 +121,21 @@ def main(argv):
     LOG.info("Updates: %s Inserts: %s", updates, inserts)
     cursor.close()
     pgconn.commit()
+
+
+def main(argv):
+    """Do what is asked."""
+    if len(argv) == 2:
+        state = argv[1]
+        nt = NetworkTable(f"{state}CLIMATE", only_online=False)
+        for sid in nt.sts:
+            if sid[2] in ["T", "C"] or sid[2:] == "0000":
+                continue
+            acis_station = ncei_state_codes[state] + sid[2:]
+            do(sid, acis_station)
+    else:
+        (station, acis_station) = argv[1], argv[2]
+        do(station, acis_station)
 
 
 if __name__ == "__main__":
