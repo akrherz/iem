@@ -54,6 +54,9 @@ jobs:
         echo $MOD_WSGI_SO
         echo "LoadModule wsgi_module $MOD_WSGI_SO" | sudo tee -a /etc/apache2/mods-enabled/wsgi.load > /dev/null;
         echo "WSGIApplicationGroup %{GLOBAL}" | sudo tee -a /etc/apache2/mods-enabled/wsgi.load > /dev/null;
+        # Create tmp folder for matplotlib
+        sudo mkdir -p /var/cache/matplotlib
+        sudo chown www-data /var/cache/matplotlib
         # restart apache
         sudo service apache2 stop
         sudo service apache2 start
