@@ -89,11 +89,12 @@ def main():
     df = load_changes(accessdb)
     xref = load_xref()
     updates = 0
-    unknown_keys = 0
+    unused = 0
+    dups = 0
     for _, row in df.iterrows():
         key = f"{row['id']}|{row['network']}"
         if key not in xref:
-            unknown_keys += 1
+            unused += 1
             continue
         # Load the changed data
         acursor.execute(
@@ -133,6 +134,7 @@ def main():
                 currentob = _fetch()
             updated = compare_and_update(ccursor, currentob, newob)
             if updated == 0:
+                dups += 1
                 continue
             updates += updated
             if updates > 0 and updates % 100 == 0:
@@ -141,7 +143,7 @@ def main():
                 coopdb.commit()
                 ccursor = coopdb.cursor(cursor_factory=DictCursor)
 
-    LOG.info("synced %s rows, %s unknown keys", updates, unknown_keys)
+    LOG.info("synced %s rows, %s unused, %s dups", updates, unused, dups)
     ccursor.close()
     coopdb.commit()
 

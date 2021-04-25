@@ -57,7 +57,11 @@ def main(argv):
             len(days.values),
         )
         missing_ratio = len(missing) / float(len(days.values))
-        if missing_ratio > 0.33 and nt.sts[station]["online"]:
+        if (
+            len(days.values) > 3000
+            and missing_ratio > 0.33
+            and nt.sts[station]["online"]
+        ):
             LOG.info(
                 "Online %s missing %.2f data, setting offline",
                 station,

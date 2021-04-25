@@ -61,6 +61,9 @@ def do(station, acis_station):
     LOG.debug("Call ACIS server for: %s to update: %s", acis_station, station)
     req = requests.post(SERVICE, json=payload)
     j = req.json()
+    if "data" not in j:
+        LOG.info("No Data!, content=%s", req.content)
+        return
     acis = pd.DataFrame(
         j["data"],
         columns="day ahigh alow aprecip asnow asnowd".split(),

@@ -63,7 +63,6 @@ cd ../dbutil
 python compute_climate_sts.py ${STATE}CLIMATE
 
 # Ingest Poker
-cd ../../util
-python poker2afos.py
+cd ../util
 python i5_2_cybox.py
 python autolapses2box.py
