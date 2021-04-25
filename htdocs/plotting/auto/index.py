@@ -384,9 +384,11 @@ def generate_form(apid, fdict, headers, cookies):
     if apid == 0:
         return res
     fmt = fdict.get("_fmt")
+    # This should be instant, but the other end may be doing a thread
+    # restart, which takes a bit of time.
     req = requests.get(
         f"http://iem.local/plotting/auto/meta/{apid}.json",
-        timeout=10,
+        timeout=60,
     )
     if req.status_code != 200:
         return res
