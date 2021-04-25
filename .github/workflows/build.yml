@@ -61,12 +61,12 @@ jobs:
         python /opt/iem/deployment/mod_wsgi_startup.py
         sudo systemctl status apache2.service -l
         # Run autoplot tests with basically no data in database
-        SERVICE=http://iem.local pytest -n 6 -x .ipc/tests/test_autoplot.py
+        SERVICE=http://iem.local pytest -n 4 -x .ipc/tests/test_autoplot.py
         # Add some test data to the database
         python database/store_test_data.py
         python scripts/dbutil/sync_stations.py
         # Run autoplot testing a second time
-        SERVICE=http://iem.local pytest -n 6 -x .ipc/tests/test_autoplot.py
+        SERVICE=http://iem.local pytest -n 4 -x .ipc/tests/test_autoplot.py
 
     - name: View Apache Logs
       if: failure()
