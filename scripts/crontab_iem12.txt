@@ -9,6 +9,7 @@ S=/opt/iem/scripts
 #
 0 18,19 * * * cd $S; sh RUN_0Z.sh
 0 0 * * * cd $S; sh RUN_MIDNIGHT.sh
+30 4 * * * cd $S; sh RUN_CLIMODAT_STATE.sh
 0 12 * * * cd $S; sh RUN_NOON.sh
 # Run at 1:51 to avoid issue with 2AM on DST switch
 51 1 * * * cd $S; sh RUN_2AM.sh
