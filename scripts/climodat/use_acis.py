@@ -63,7 +63,14 @@ def do(station, acis_station):
     }
     LOG.debug("Call ACIS server for: %s to update: %s", acis_station, station)
     req = requests.post(SERVICE, json=payload)
-    j = req.json()
+    if req.status_code != 200:
+        LOG.info("Got status_code %s for %s", req.status_code, acis_station)
+        return
+    try:
+        j = req.json()
+    except Exception as exp:
+        LOG.exception(exp)
+        return
     if "data" not in j:
         LOG.info("No Data!, content=%s", req.content)
         return
