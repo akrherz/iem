@@ -108,7 +108,8 @@ $().ready(function() {
 	
 	$("#iemss").append(htmlInterface.join(''));
 
-	network = $("#iemss").attr("data-network");
+	network = $("#iemss").data("network");
+    var only_online = ($("#iemss").data("only-online") == "1");
 	var select_name = $("#iemss").attr("data-name");
 	if (select_name){
 		$("#stations_out").attr("name", select_name);
@@ -153,7 +154,8 @@ $().ready(function() {
 	geojsonSource = new ol.source.Vector({
 		format: new ol.format.GeoJSON(),
 		projection : ol.proj.get('EPSG:3857'),
-		url : '/geojson/network/' + network + '.geojson'
+		url : '/geojson/network/' + network + '.geojson?only_online=' +
+            (only_online ? "1": "0")
 	});
 	geojson = new ol.layer.Vector({
 		source : geojsonSource,

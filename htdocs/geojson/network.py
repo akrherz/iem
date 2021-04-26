@@ -8,7 +8,7 @@ from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
 
 
-def run(network):
+def run(network, only_online):
     """Generate a GeoJSON dump of the provided network"""
     pgconn = get_dbconn("mesosite")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -22,9 +22,10 @@ def run(network):
             "a.attr = 'HAS1MIN' ORDER by id ASC",
         )
     else:
+        online = "and online" if only_online else ""
         cursor.execute(
             "SELECT ST_asGeoJson(geom, 4) as geojson, * from stations "
-            "WHERE network = %s ORDER by name ASC",
+            f"WHERE network = %s {online} ORDER by name ASC",
             (network,),
         )
 
@@ -69,12 +70,13 @@ def application(environ, start_response):
     form = parse_formvars(environ)
     cb = form.get("callback", None)
     network = form.get("network", "KCCI")
+    only_online = form.get("only_online", "0") == "1"
 
-    mckey = "/geojson/network/%s.geojson" % (network,)
+    mckey = "/geojson/network/%s.geojson|%s" % (network, only_online)
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
     if not res:
-        res = run(network)
+        res = run(network, only_online)
         mc.set(mckey, res, 3600)
 
     if cb is None:
