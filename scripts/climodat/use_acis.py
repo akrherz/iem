@@ -21,6 +21,9 @@ def safe(val):
         return None
     if val == "T":
         return TRACE_VALUE
+    # Multi-day we can't support
+    if isinstance(val, str) and val.endswith("A"):
+        return None
     try:
         return float(val)
     except ValueError:
@@ -113,7 +116,7 @@ def do(station, acis_station):
                 "VALUES (%s, %s, %s, %s, %s)",
                 (station, day, day.strftime("%m%d"), day.year, day.month),
             )
-        LOG.debug("%s -> %s %s", day, work, args)
+        # LOG.debug("%s -> %s %s", day, work, args)
         cursor.execute(
             f"UPDATE {table} SET {','.join(work)} WHERE station = %s and "
             "day = %s",

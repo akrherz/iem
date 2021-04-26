@@ -29,11 +29,9 @@ def main():
     # Now we load climatology
     mrain = {}
     ccursor.execute(
-        """
-        select station, precip as rain from climate WHERE
-        valid = '%s'
-    """
-        % (now.strftime("2000-%m-%d"),)
+        "select station, avg(precip) as rain from alldata_ia WHERE sday = %s "
+        "GROUP by station",
+        (now.strftime("%m%d"),),
     )
     for row in ccursor:
         mrain[row[0]] = row[1]

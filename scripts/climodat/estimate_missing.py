@@ -75,7 +75,7 @@ def process(cursor, station, df, meta):
                 "Skipping %s as there are missing values still", row["day"]
             )
             continue
-        LOG.info(
+        LOG.debug(
             "Set station: %s day: %s "
             "high: %.0f(%s) low: %.0f(%s) precip: %.2f(%s)",
             station,

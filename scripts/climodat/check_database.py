@@ -32,7 +32,6 @@ def main(argv):
         "ORDER by station, day",
         pgconn,
         index_col=None,
-        parse_dates=["day"],
     )
 
     for station, gdf in df.groupby("station"):
@@ -43,22 +42,22 @@ def main(argv):
             continue
         # Make sure that our data archive starts on the first of a month
         minday = gdf["day"].min().replace(day=1)
-        days = pd.date_range(minday, gdf["day"].max())
-        missing = [x for x in days.values if x not in gdf["day"].values]
-        if not missing:
+        missing = pd.date_range(minday, gdf["day"].max()).difference(
+            gdf["day"]
+        )
+        if missing.empty:
             continue
         LOG.info(
-            "station: %s has %s rows between: %s and %s, missing %s/%s days",
+            "station: %s [%s - %s], missing %s/%s days",
             station,
-            len(gdf.index),
             gdf["day"].min(),
             gdf["day"].max(),
             len(missing),
-            len(days.values),
+            len(gdf.index),
         )
-        missing_ratio = len(missing) / float(len(days.values))
+        missing_ratio = len(missing) / float(len(gdf.index))
         if (
-            len(days.values) > 3000
+            len(gdf.index) > 3000
             and missing_ratio > 0.33
             and nt.sts[station]["online"]
         ):
@@ -71,15 +70,14 @@ def main(argv):
 
         sio = StringIO()
         for day in missing:
-            now = pd.Timestamp(day).to_pydatetime()
             sio.write(
                 ("%s,%s,%s,%s,%s\n")
                 % (
                     station,
-                    now,
-                    "%02i%02i" % (now.month, now.day),
-                    now.year,
-                    now.month,
+                    day,
+                    "%02i%02i" % (day.month, day.day),
+                    day.year,
+                    day.month,
                 )
             )
         sio.seek(0)

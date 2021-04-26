@@ -6,7 +6,9 @@ import subprocess
 import os
 
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
 def main():
@@ -64,6 +66,10 @@ def main():
         thisPrec = row[2]
         thisCount = row[1]
         if thisStation in nt.sts:
+            climate_site = nt.sts[thisStation]["climate_site"]
+            if climate_site not in mrain:
+                LOG.debug("climate_site has no data: %s", climate_site)
+                continue
             d[thisStation] = {"prectot": thisPrec, "cnt": thisCount}
             d[thisStation]["name"] = nt.sts[thisStation]["name"]
             d[thisStation]["crain"] = mrain[

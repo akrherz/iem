@@ -28,6 +28,9 @@ def safe(val):
         return None
     if val == "T":
         return TRACE_VALUE
+    # Multi-day we can't support
+    if isinstance(val, str) and val.endswith("A"):
+        return None
     try:
         return float(val)
     except Exception as exp:
