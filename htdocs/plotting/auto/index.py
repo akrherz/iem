@@ -749,6 +749,8 @@ feel free to use these generated graphics in whatever way you wish.</p>
 
 {res["issues"]}
 
+{features_for_id(apid)}
+
 {generate_overview(apid)}
 
     """

@@ -2,7 +2,9 @@
  Assign a climate site to each site in the mesosite database, within reason
 """
 
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
 def workflow(col):
@@ -10,6 +12,18 @@ def workflow(col):
     pgconn = get_dbconn("mesosite")
     mcursor = pgconn.cursor()
     mcursor2 = pgconn.cursor()
+    if col == "climate":
+        # Update when sites come offline and online
+        mcursor.execute(
+            "update stations SET climate_site = null where "
+            "climate_site not in (select id from stations where "
+            "network ~* 'CLIMATE' and online)"
+        )
+        if mcursor.rowcount > 0:
+            LOG.info(
+                "Found %s entries with now offline climate stations",
+                mcursor.rowcount,
+            )
     mcursor.execute(
         f"SELECT id, geom, state, iemid, network from stations WHERE {col} "
         "IS NULL and country = 'US' and state is not null"
@@ -46,13 +60,13 @@ def workflow(col):
         mcursor2.execute(sql, (geom,))
         row2 = mcursor2.fetchone()
         if row2 is None:
-            print("Could not find %s site for: %s" % (col, sid))
+            LOG.info("Could not find %s site for: %s", col, sid)
         else:
             mcursor2.execute(
                 f"UPDATE stations SET {col} = %s WHERE iemid = %s",
                 (row2[0], iemid),
             )
-            print("Set %s: %s for ID: %s[%s]" % (col, row2[0], sid, network))
+            LOG.info("Set %s: %s for ID: %s[%s]", col, row2[0], sid, network)
     mcursor2.close()
     pgconn.commit()
 

@@ -51,18 +51,24 @@ then
 	python grid_rsds.py $YYYY $MM
 fi
 
-# Pick a sequential state
-cd ../util
-STATE=$(python pick_state.py)
-cd ../climodat
-python check_database.py $STATE
-python use_acis.py $STATE
-cd ../coop
-python use_acis.py $STATE
-cd ../dbutil
-python compute_climate_sts.py ${STATE}CLIMATE
-
-# Ingest Poker
+# Move content to offlining
 cd ../util
 python i5_2_cybox.py
 python autolapses2box.py
+
+# Pick a sequential state
+STATE=$(python pick_state.py)
+cd ../climodat
+# 1. Ensure database has entries between start and end dates
+python check_database.py $STATE
+# 2. Recompute sts, ets
+cd ../dbutil
+python compute_climate_sts.py ${STATE}CLIMATE
+# 3. Use ACIS
+cd ../climodat
+python use_acis.py $STATE
+# 4. Look for any gaps that need estimating
+python estimate_missing.py $STATE
+# 5. Sync our COOP archives the same
+cd ../coop
+python use_acis.py $STATE
