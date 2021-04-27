@@ -189,8 +189,8 @@ def commit(cursor, table, df, ts):
             """inline."""
             sql = (
                 f"UPDATE {table} SET high = %s, low = %s, precip = %s, "
-                "snow = %s, snowd = %s, temp_estimated = 't', "
-                "precip_estimated = 't', temp_hour = %s, precip_hour = %s "
+                "snow = %s, snowd = %s, temp_estimated = %s, "
+                "precip_estimated = %s, temp_hour = %s, precip_hour = %s "
                 "WHERE day = %s and station = %s"
             )
             args = (
@@ -199,6 +199,8 @@ def commit(cursor, table, df, ts):
                 nonan(_row["precip"], 2),
                 nonan(_row["snow"], 1),
                 nonan(_row["snowd"], 1),
+                _row["temp_estimated"],
+                _row["precip_estimated"],
                 nonan(_row["temp_hour"]),
                 nonan(_row["precip_hour"]),
                 ts,
@@ -223,8 +225,9 @@ def merge_network_obs(df, network, ts):
     obs = read_sql(
         "SELECT t.id as station, max_tmpf as high, min_tmpf as low, "
         "pday as precip, snow, snowd, "
-        "extract(hour from (coop_valid + '1 minute'::interval) "
-        "  at time zone tzname) as temp_hour from summary s JOIN stations t "
+        "coalesce(extract(hour from (coop_valid + '1 minute'::interval) "
+        "  at time zone tzname), 0) as temp_hour "
+        "from summary s JOIN stations t "
         "on (t.iemid = s.iemid) WHERE t.network = %s and s.day = %s",
         pgconn,
         params=(network, ts),
