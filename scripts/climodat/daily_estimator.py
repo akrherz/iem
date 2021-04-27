@@ -24,16 +24,23 @@ NON_CONUS = ["AK", "HI", "PR", "VI", "GU"]
 
 def load_table(state, date):
     """Update the station table"""
-    nt = NetworkTable(f"{state}CLIMATE")
+    # IMPORTANT: Only consider sites that are in an online state, so to
+    # not run the estimator for `offline` sites
+    nt = NetworkTable(f"{state}CLIMATE", only_online=True)
     rows = []
     istoday = date == datetime.date.today()
+    threaded = {}
     for sid in nt.sts:
         # handled by compute_0000
         if sid[2:] == "0000" or sid[2] == "C":
             continue
-        if istoday and not nt.sts[sid]["temp24_hour"] in range(3, 12):
+        entry = nt.sts[sid]
+        if istoday and not entry["temp24_hour"] in range(3, 12):
             continue
-        i, j = iemre.find_ij(nt.sts[sid]["lon"], nt.sts[sid]["lat"])
+        if entry["threading"]:
+            threaded[sid] = nt.get_threading_id(sid, date)
+            continue
+        i, j = iemre.find_ij(entry["lon"], entry["lat"])
         rows.append(
             {
                 "station": sid,
@@ -51,14 +58,14 @@ def load_table(state, date):
         )
     if not rows:
         LOG.debug("No applicable stations found for state: %s", state)
-        return None
+        return None, threaded
     df = pd.DataFrame(rows)
     df = df.set_index("station")
     for key in "high low precip snow snowd temp_hour precip_hour".split():
         df[key] = np.nan
     for key in ["precip_estimated", "temp_estimated"]:
         df[key] = False
-    return df
+    return df, threaded
 
 
 def estimate_precip(df, ds):
@@ -238,6 +245,14 @@ def merge_network_obs(df, network, ts):
     return df
 
 
+def merge_threaded(df, threaded):
+    """Duplicate some data for the threaded stations."""
+    for sid in threaded:
+        copysid = threaded[sid]
+        if copysid in df.index:
+            df.loc[sid] = df.loc[copysid]
+
+
 def main(argv):
     """Go Main Go."""
     date = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
@@ -246,7 +261,7 @@ def main(argv):
     for state in state_names:
         table = f"alldata_{state}"
         cursor = pgconn.cursor()
-        df = load_table(state, date)
+        df, threaded = load_table(state, date)
         if df is None:
             continue
         df = merge_network_obs(df, f"{state}_COOP", date)
@@ -256,6 +271,8 @@ def main(argv):
             estimate_hilo(df, ds)
             estimate_precip(df, ds)
             estimate_snow(df, ds)
+        if threaded:
+            merge_threaded(df, threaded)
         if not commit(cursor, table, df, date):
             return
         cursor.close()
