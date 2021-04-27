@@ -175,14 +175,13 @@ def ugc_select(state, ugc):
     return make_select("ugc", ugc, ar)
 
 
-def ugc_handler(value, state, res):
+def ugc_handler(name, value, fdict, res):
     """Handle selection of UGCs."""
-    if state is None:
-        state = "IA"
+    privfield = f"_{name}_state"
+    state = fdict.get(privfield, "IA")
     state_select = make_select(
-        "state", state, state_names, jscallback="onNetworkChange"
+        privfield, state, state_names, jscallback="onNetworkChange"
     )
-    res["pltvars"].append(f"state:{state}")
     return state_select + " " + ugc_select(state, value)
 
 
@@ -424,7 +423,7 @@ def generate_form(apid, fdict, headers, cookies):
         if arg["type"] in ["zstation", "sid", "station"]:
             form = station_handler(value, arg, fdict, res, arg["type"])
         elif arg["type"] == "ugc":
-            form = ugc_handler(value, fdict.get("state"), res)
+            form = ugc_handler(arg["name"], value, fdict, res)
         elif arg["type"] == "networkselect":
             form = networkselect_handler(value, arg, res)
         elif arg["type"] == "phenomena":
