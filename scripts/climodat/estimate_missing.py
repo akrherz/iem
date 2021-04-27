@@ -18,6 +18,7 @@ URI = (
     "http://mesonet.agron.iastate.edu/iemre/multiday/"
     "%(sdate)s/%(edate)s/%(lat)s/%(lon)s/json"
 )
+NON_CONUS = ["AK", "HI", "PR", "VI", "GU"]
 
 
 def process(cursor, station, df, meta):
@@ -111,6 +112,9 @@ def process(cursor, station, df, meta):
 def main(argv):
     """Go Main Go"""
     state = argv[1]
+    if state in NON_CONUS:
+        LOG.error("Script does not work for non-CONUS sites, exiting.")
+        return
     nt = NetworkTable(f"{state}CLIMATE", only_online=False)
     pgconn = get_dbconn("coop")
     df = read_sql(

@@ -60,9 +60,12 @@ def main():
         prec = row[2]
         count = row[1]
         if station in nt.sts:
+            clstation = nt.sts[station]["climate_site"]
+            if clstation not in mrain:
+                continue
             data[station] = {"prectot": prec, "cnt": count}
             data[station]["name"] = nt.sts[station]["name"]
-            data[station]["crain"] = mrain[nt.sts[station]["climate_site"]]
+            data[station]["crain"] = mrain[clstation]
 
     keys = list(data.keys())
     keys.sort()

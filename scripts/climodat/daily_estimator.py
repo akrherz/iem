@@ -234,7 +234,8 @@ def merge_network_obs(df, network, ts):
         index_col="station",
     )
     if obs.empty:
-        LOG.warning("loading obs for network %s yielded no data", network)
+        if network not in ["DC_ASOS"]:
+            LOG.warning("loading obs for network %s yielded no data", network)
         return df
     obs["precip_hour"] = obs["temp_hour"]
     # Some COOP sites may not report 'daily' high and low, so we cull those
