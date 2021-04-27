@@ -607,7 +607,7 @@ nopts = [
     },
     {
         "id": 191,
-        "label": "Calendar Plot of Watch/Warn/Adv Daily Counts by WFO",
+        "label": "Calendar Plot of Watch/Warn/Adv Daily Counts",
     },
     {"id": 92, "label": "Days since Last Watch/Warning/Advisory by WFO"},
     {

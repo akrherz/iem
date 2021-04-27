@@ -12,6 +12,7 @@ PDICT = {"yes": "Colorize Cells in Chart", "no": "Just plot values please"}
 PDICT2 = {
     "wfo": "Summarize by Selected WFO",
     "state": "Summarize by Selected State",
+    "ugc": "Summaryize by NWS County/Forecast Zone",
 }
 
 
@@ -72,6 +73,12 @@ def get_description():
             label="Select State (when appropriate):",
         ),
         dict(
+            type="ugc",
+            name="ugc",
+            default="IAC169",
+            label="Select UGC Zone/County:",
+        ),
+        dict(
             type="select",
             name="heatmap",
             options=PDICT,
@@ -107,6 +114,15 @@ def get_description():
         ),
     ]
     return desc
+
+
+def get_ugc_name(ugc):
+    """Return the WFO and county name."""
+    cursor = get_dbconn("postgis").cursor()
+    cursor.execute(
+        "SELECT name, wfo from ugcs where ugc = %s and end_ts is null", (ugc,)
+    )
+    return cursor.fetchone()
 
 
 def plotter(fdict):
@@ -158,9 +174,18 @@ def plotter(fdict):
         if wfo == "_ALL":
             wfo_limiter = ""
         tzname = ctx["_nt"].sts[wfo]["tzname"]
+        title2 = "NWS %s [%s]" % (ctx["_nt"].sts[wfo]["name"], wfo)
+        if wfo == "_ALL":
+            title2 = "All NWS Offices"
+    elif ctx["w"] == "ugc":
+        wfo_limiter = f" and ugc = '{ctx['ugc']}' "
+        name, wfo = get_ugc_name(ctx["ugc"])
+        tzname = ctx["_nt"].sts[wfo]["tzname"]
+        title2 = f"[{ctx['ugc']}] {name}"
     else:
         wfo_limiter = " and substr(ugc, 1, 2) = '%s' " % (ctx["state"],)
         tzname = "America/Chicago"
+        title2 = state_names[ctx["state"]]
 
     df = read_sql(
         f"""
@@ -191,12 +216,6 @@ SELECT date(localissue), count(*) from events GROUP by date(localissue)
         now += datetime.timedelta(days=1)
     for date, row in df.iterrows():
         data[date] = {"val": row["count"]}
-    if ctx["w"] == "wfo":
-        title2 = "NWS %s [%s]" % (ctx["_nt"].sts[wfo]["name"], wfo)
-        if wfo == "_ALL":
-            title2 = "All NWS Offices"
-    else:
-        title2 = state_names[ctx["state"]]
     fig = calendar_plot(
         sts,
         ets,

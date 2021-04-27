@@ -4,7 +4,7 @@ import datetime
 from pandas.io.sql import read_sql
 from matplotlib.ticker import MaxNLocator
 import pyiem.nws.vtec as vtec
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import state_names
@@ -13,6 +13,7 @@ PDICT = {"yes": "Limit Plot to Year-to-Date", "no": "Plot Entire Year"}
 PDICT2 = {
     "wfo": "View by Single NWS Forecast Office",
     "state": "View by State",
+    "ugc": "NWS County/Forecast Zone",
 }
 
 
@@ -40,7 +41,7 @@ def get_description():
             name="opt",
             default="wfo",
             options=PDICT2,
-            label="View by WFO or State?",
+            label="What to summarize data by:",
         ),
         dict(
             type="networkselect",
@@ -51,6 +52,12 @@ def get_description():
             all=True,
         ),
         dict(type="state", default="IA", name="state", label="Select State:"),
+        dict(
+            type="ugc",
+            name="ugc",
+            default="IAC169",
+            label="Select UGC Zone/County:",
+        ),
         dict(
             type="select",
             name="limit",
@@ -74,6 +81,15 @@ def get_description():
     return desc
 
 
+def get_ugc_name(ugc):
+    """Return the WFO and county name."""
+    cursor = get_dbconn("postgis").cursor()
+    cursor.execute(
+        "SELECT name, wfo from ugcs where ugc = %s and end_ts is null", (ugc,)
+    )
+    return cursor.fetchone()
+
+
 def plotter(fdict):
     """ Go """
     pgconn = get_dbconn("postgis")
@@ -94,6 +110,14 @@ def plotter(fdict):
         if station == "_ALL":
             wfo_limiter = ""
         title1 = "NWS %s" % (ctx["_nt"].sts[station]["name"],)
+    elif opt == "ugc":
+        wfo_limiter = f" and ugc = '{ctx['ugc']}' "
+        name, wfo = get_ugc_name(ctx["ugc"])
+        title1 = "NWS %s Issued for [%s] %s" % (
+            ctx["_nt"].sts[wfo]["name"],
+            ctx["ugc"],
+            name,
+        )
     else:
         wfo_limiter = f" and substr(ugc, 1, 2) = '{state}' "
         title1 = state_names[state]
@@ -124,6 +148,11 @@ def plotter(fdict):
         params=(phenomena, significance),
     )
     if df.empty:
+        if opt == "ugc":
+            raise NoDataFound(
+                "No events were found for this UGC + VTEC Phenomena\n"
+                "combination, try flipping between county/zone"
+            )
         raise NoDataFound("Sorry, no data found!")
 
     # Drop 2005 or 2008 if they are start years
@@ -131,7 +160,14 @@ def plotter(fdict):
         df = df[df["yr"] > 2005]
     elif df["yr"].min() == 2008:
         df = df[df["yr"] > 2008]
-    (fig, ax) = plt.subplots(1, 1)
+    title = ("%s [%s]\n%s (%s.%s) Count") % (
+        title1,
+        title,
+        vtec.get_ps_string(phenomena, significance),
+        phenomena,
+        significance,
+    )
+    (fig, ax) = figure_axes(title=title)
     ax.bar(df["yr"], df["count"], align="center")
     ax.set_xlim(df["yr"].min() - 0.5, df["yr"].max() + 0.5)
     ymax = df["count"].max()
@@ -146,21 +182,13 @@ def plotter(fdict):
         )
     ax.grid(True)
     ax.set_ylabel("Yearly Count")
-    ax.set_title(
-        ("%s [%s]\n%s (%s.%s) Count")
+    ax.set_xlabel(
+        ("%s thru approximately %s")
         % (
-            title1,
-            title,
-            vtec.get_ps_string(phenomena, significance),
-            phenomena,
-            significance,
+            "" if limit == "yes" else datetime.date.today().year,
+            datetime.date.today().strftime("%-d %b"),
         )
     )
-    if limit == "yes":
-        ax.set_xlabel(
-            ("thru approximately %s")
-            % (datetime.date.today().strftime("%-d %b"),)
-        )
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
     return fig, df
 

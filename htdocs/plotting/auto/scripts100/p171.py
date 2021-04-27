@@ -10,7 +10,11 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = {"wfo": "Select by NWS Forecast Office", "state": "Select by State"}
+PDICT = {
+    "wfo": "Select by NWS Forecast Office",
+    "state": "Select by State",
+    "ugc": "Select by NWS County/Forecast Zone",
+}
 
 
 def get_description():
@@ -36,7 +40,7 @@ def get_description():
             name="opt",
             default="wfo",
             options=PDICT,
-            label="Summarize by WFO or State?",
+            label="How to summarize the data?",
         ),
         dict(
             type="networkselect",
@@ -47,6 +51,12 @@ def get_description():
             all=True,
         ),
         dict(type="state", name="state", default="IA", label="Select State:"),
+        dict(
+            type="ugc",
+            name="ugc",
+            default="IAC169",
+            label="Select UGC Zone/County:",
+        ),
         dict(
             type="phenomena",
             name="phenomena",
@@ -62,6 +72,15 @@ def get_description():
         dict(type="cmap", name="cmap", default="Greens", label="Color Ramp:"),
     ]
     return desc
+
+
+def get_ugc_name(ugc):
+    """Return the WFO and county name."""
+    cursor = get_dbconn("postgis").cursor()
+    cursor.execute(
+        "SELECT name, wfo from ugcs where ugc = %s and end_ts is null", (ugc,)
+    )
+    return cursor.fetchone()
 
 
 def plotter(fdict):
@@ -82,6 +101,8 @@ def plotter(fdict):
         wfo_limiter = ""
     if opt == "state":
         wfo_limiter = " and substr(ugc, 1, 2) = '%s'" % (state,)
+    elif opt == "ugc":
+        wfo_limiter = f" and ugc = '{ctx['ugc']}' "
 
     # NB we added a hack here that may lead to some false positives when events
     # cross over months, sigh, recall the 2017 eventid pain
@@ -103,6 +124,11 @@ def plotter(fdict):
     )
 
     if df.empty:
+        if opt == "ugc":
+            raise NoDataFound(
+                "No events were found for this UGC + VTEC Phenomena\n"
+                "combination, try flipping between county/zone"
+            )
         raise NoDataFound("Sorry, no data found!")
 
     df2 = df.pivot("yr", "mo", "count")
@@ -114,6 +140,13 @@ def plotter(fdict):
     if opt == "state":
         title = ("NWS Issued for Counties/Zones for State of %s") % (
             reference.state_names[state],
+        )
+    elif opt == "ugc":
+        name, wfo = get_ugc_name(ctx["ugc"])
+        title = "NWS %s Issued for [%s] %s" % (
+            ctx["_nt"].sts[wfo]["name"],
+            ctx["ugc"],
+            name,
         )
     subtitle = ("%s (%s.%s) Issued by Year, Month") % (
         vtec.get_ps_string(phenomena, significance),
