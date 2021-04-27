@@ -37,7 +37,7 @@ def plot_gdd(ts):
             (ts + datetime.timedelta(days=6)).strftime("%-d %b"),
         ),
         subtitle=subtitle,
-        sector="iailin",
+        sector="midwest",
     )
     mp.pcolormesh(
         nc.variables["lon"][:],
@@ -79,7 +79,7 @@ def plot_maxmin(ts, field):
             "Maximum" if field == "high_tmpk" else "Minimum",
         ),
         subtitle=subtitle,
-        sector="iailin",
+        sector="midwest",
     )
     mp.pcolormesh(
         nc.variables["lon"][:],
