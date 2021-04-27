@@ -238,7 +238,7 @@ def merge_network_obs(df, network, ts):
     # out as nulls
     obs.loc[obs["high"] <= obs["low"], ("high", "low")] = np.nan
     df = df.join(obs, how="left", on="tracks", rsuffix="b")
-    for col in ["high", "low", "precip", "snow", "snowd"]:
+    for col in "high low precip snow snowd temp_hour precip_hour".split():
         # using DataSeries.update() caused SettingWithCopyError, shrug
         df.loc[~pd.isna(df[f"{col}b"]), col] = df[f"{col}b"]
         df = df.drop(col + "b", axis=1)
