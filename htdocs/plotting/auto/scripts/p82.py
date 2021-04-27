@@ -1,31 +1,28 @@
 """Calendar Plot of Automated Station Summaries"""
 import datetime
-from collections import OrderedDict
 
 import psycopg2.extras
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconn, convert_value
 from pyiem.reference import TRACE_VALUE
 from pyiem.plot import calendar_plot
 from pyiem.exceptions import NoDataFound
-from metpy.units import units
 
 
-PDICT = OrderedDict(
-    [
-        ("avg_smph", "Average Wind Speed [mph]"),
-        ("max_tmpf", "High Temperature"),
-        ("high_departure", "High Temperature Departure"),
-        ("min_tmpf", "Low Temperature"),
-        ("low_departure", "Low Temperature Departure"),
-        ("avg_tmpf", "Average Temperature"),
-        ("avg_departure", "Average Temperature Departure"),
-        ("max_dwpf", "Highest Dew Point Temperature"),
-        ("min_dwpf", "Lowest Dew Point Temperature"),
-        ("pday", "Precipitation"),
-    ]
-)
+PDICT = {
+    "max_tmpf": "High Temperature",
+    "high_departure": "High Temperature Departure",
+    "min_tmpf": "Low Temperature",
+    "low_departure": "Low Temperature Departure",
+    "avg_tmpf": "Average Temperature",
+    "avg_departure": "Average Temperature Departure",
+    "max_dwpf": "Highest Dew Point Temperature",
+    "min_dwpf": "Lowest Dew Point Temperature",
+    "avg_smph": "Average Wind Speed [mph]",
+    "max_smph": "Maximum Wind Speed/Gust [mph]",
+    "pday": "Precipitation",
+}
 
 
 def get_description():
@@ -127,7 +124,8 @@ def plotter(fdict):
         """
         SELECT day, max_tmpf, min_tmpf, max_dwpf, min_dwpf,
         (max_tmpf + min_tmpf) / 2. as avg_tmpf,
-        pday, avg_sknt from summary s JOIN stations t
+        pday, avg_sknt, coalesce(max_gust, max_sknt) as peak_wind
+        from summary s JOIN stations t
         on (t.iemid = s.iemid) WHERE s.day >= %s and s.day <= %s and
         t.id = %s and t.network = %s ORDER by day ASC
     """,
@@ -144,11 +142,17 @@ def plotter(fdict):
             if varname == "avg_smph":
                 continue
             avg_sknt = 0
+        peak_wind = row["peak_wind"]
+        if peak_wind is None:
+            if varname == "max_smph":
+                continue
+            peak_wind = 0
         rows.append(
             dict(
                 day=row["day"],
                 max_tmpf=row["max_tmpf"],
-                avg_smph=(avg_sknt * units("knot")).to(units("mile / hour")).m,
+                avg_smph=convert_value(avg_sknt, "knot", "mile / hour"),
+                max_smph=convert_value(peak_wind, "knot", "mile / hour"),
                 min_dwpf=row["min_dwpf"],
                 max_dwpf=row["max_dwpf"],
                 high_departure=hd,
