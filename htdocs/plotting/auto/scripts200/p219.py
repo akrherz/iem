@@ -216,9 +216,10 @@ def plotter(fdict):
         df.at[valid0, "fcond"] = compute_flight_condition(row)
         # At 3.25 plot the visibility
         if not pd.isna(row[VIS]):
-            ax.text(
-                valid, 3.25, f"{row['visibility']:g}", **TEXTARGS
-            ).set_path_effects(PE)
+            pltval = f"{row['visibility']:g}"
+            if row["visibility"] > 6:
+                pltval = "6+"
+            ax.text(valid, 3.25, pltval, **TEXTARGS).set_path_effects(PE)
 
     if clevels:
         ax.plot(clevelx, clevels, linestyle=":", zorder=2)
