@@ -1,6 +1,7 @@
 """Use data provided by ACIS to replace climodat data."""
 import sys
 import datetime
+import time
 
 import requests
 import pandas as pd
@@ -41,7 +42,7 @@ def compare(row, colname):
     return False
 
 
-def do(station, acis_station):
+def do(station, acis_station, interactive):
     """Do the query and work
 
     Args:
@@ -49,10 +50,12 @@ def do(station, acis_station):
       acis_station (str): the ACIS identifier ie 130197
     """
     table = "alldata_%s" % (station[:2],)
+    today = datetime.date.today()
+    fmt = "%Y-%m-%d"
     payload = {
         "sid": acis_station,
         "sdate": "1850-01-01",
-        "edate": datetime.date.today().strftime("%Y-%m-%d"),
+        "edate": today.strftime(fmt),
         "elems": [
             {"name": "maxt", "add": "t"},
             {"name": "mint", "add": "t"},
@@ -61,10 +64,14 @@ def do(station, acis_station):
             {"name": "snwd", "add": "t"},
         ],
     }
+    if not interactive:
+        payload["sdate"] = (today - datetime.timedelta(days=365)).strftime(fmt)
     LOG.debug("Call ACIS server for: %s to update: %s", acis_station, station)
     req = requests.post(SERVICE, json=payload)
     if req.status_code != 200:
         LOG.info("Got status_code %s for %s", req.status_code, acis_station)
+        # Give server some time to recover from transient errors
+        time.sleep(60)
         return
     try:
         j = req.json()
@@ -101,6 +108,8 @@ def do(station, acis_station):
     df = acis.join(obs, how="left")
     inserts = 0
     updates = 0
+    minday = None
+    maxday = None
     for day, row in df.iterrows():
         work = []
         args = []
@@ -116,6 +125,9 @@ def do(station, acis_station):
                 args.append(row[f"a{col}_hour"])
         if not work:
             continue
+        if minday is None:
+            minday = day
+        maxday = day
         if row["dbhas"] != 1:
             inserts += 1
             cursor.execute(
@@ -131,24 +143,33 @@ def do(station, acis_station):
         )
         updates += 1
 
-    LOG.info("Updates: %s Inserts: %s", updates, inserts)
+    LOG.info(
+        "%s[%s-%s] Updates: %s Inserts: %s",
+        station,
+        minday,
+        maxday,
+        updates,
+        inserts,
+    )
     cursor.close()
     pgconn.commit()
 
 
 def main(argv):
     """Do what is asked."""
+    interactive = sys.stdout.isatty()
     if len(argv) == 2:
         state = argv[1]
-        nt = NetworkTable(f"{state}CLIMATE", only_online=False)
+        # Only run cron job for online sites
+        nt = NetworkTable(f"{state}CLIMATE", only_online=not interactive)
         for sid in nt.sts:
             if sid[2] in ["T", "C"] or sid[2:] == "0000":
                 continue
             acis_station = ncei_state_codes[state] + sid[2:]
-            do(sid, acis_station)
+            do(sid, acis_station, interactive)
     else:
         (station, acis_station) = argv[1], argv[2]
-        do(station, acis_station)
+        do(station, acis_station, interactive)
 
 
 if __name__ == "__main__":

@@ -129,9 +129,6 @@ def main(argv):
         if station not in nt.sts:
             LOG.info("station %s is unknown, skipping...", station)
             continue
-        # Offline stations we do not fill
-        if not nt.sts[station]["online"]:
-            continue
         cursor = pgconn.cursor()
         process(cursor, station, gdf, nt.sts[station])
         cursor.close()
