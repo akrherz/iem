@@ -21,7 +21,8 @@ questions!</p>
 <p>IEM's most popular applications:
 <a role="button" class="btn btn-success" href="/plotting/auto/"><i class="fa fa-signal"></i> Automated Data Plotting</a>
 <a role="button" class="btn btn-success" href="/climodat/"><i class="fa fa-list-alt"></i> Climodat</a>
-<a role="button" class="btn btn-success" href="/plotting/auto/?q=108"><i class="fa fa-object-align-bottom"></i> Single Site Graphs</a>
+<a role="button" class="btn btn-success" href="/plotting/auto/?q=108"><i class="fa fa-signal"></i> Single Site Graphs</a>
+<a role="button" class="btn btn-success" href="/COOP/current.phtml"><i class="fa fa-refresh"></i> Sortable Currents</a>
 </p>
 
 
@@ -43,15 +44,28 @@ questions!</p>
 <tbody>
 
 <tr><td>Air Temperature</td>
-<td><a href="/schoolnet/">SchoolNet</a> is the only option for sub-hourly
-data, but it is not of the best quality and the sensors are located on the top
-of buildings.</td>
+<td>
+<a href="/agclimate/">ISU Soil Moisture</a> stations record real-time data
+at one minute intervals.  <a href="/ASOS/">ASOS</a> also provides data at
+such frequency, but it is delayed by ~24 hours.
+</td>
 <td><a href="/ASOS/">ASOS/AWOS</a> are stations located at airports and are
 the baseline weather observation network. The 
 <a href="/agclimate">ISU Soil Moisture</a> network has data for Iowa.</td>
 
-<td><a href="/COOP/">NWS COOP</a> has high quality high and low temperature
-reports for 24 hour periods, not always for the calendar day.</td>
+<td>
+<a href="/COOP/">NWS COOP</a> has high quality high and low temperature
+reports for 24 hour periods, not always for the calendar day.
+<ul>
+ <li><a href="/data/coopHighLow.gif">COOP High + Low Temperature</a></li>
+ <li><a href="/data/summary/asos_hilo.png">ASOS High/Low Temperature</a></li>
+ <li><a href="/data/awos_rtp.shef">12Z AWOS RTP First Guess</a> Formatted
+product generated for the National Weather Service for comparison.</li>
+<li><a href="/data/climate/iowa_today_avg_hilo_pt.png">Average Hi/Low Temp</a></li>
+<li><a href="/data/climate/iowa_today_rec_hilo_pt.png">Record Hi/Low Temp</a></li>
+<li><a href="/COOP/dl/normals.phtml">Download Climatology Data</a></li>
+</ul>
+</td>
 
 <td colspan="3">The <a href="/climodat/">Climodat</a> reports contain summarized
 data from the NWS COOP network.
@@ -173,8 +187,13 @@ at this time.</td>
  <td>Does not exist</td>
  <td>The NWS has paid snowfall observers that report 6 hour snowfall totals, but
  the IEM does not have a good interface to get this data.</td>
- <td>The IEM collects the <a href="/COOP/cat.phtml">24 hour snowfall reports</a>
- from the NWS COOP network.</td>
+ <td>
+ The IEM collects the <a href="/COOP/cat.phtml">24 hour snowfall reports</a>
+ from the NWS COOP network.
+ <ul>
+   <li><a href="/data/coopSnowDepth.gif">COOP Snow Depth</a></li>
+ </ul>
+ </td>
 <td colspan="3">Summarized data for this timescale does not exist on the IEM 
 at this time.</td>
 </tr>
@@ -192,6 +211,23 @@ summarized SDD data.
   	<li><a href="/plotting/auto/?q=108">Single Site Graphs</a></li>
 </ul>
   		</td>
+</tr>
+
+<tr><td>Wind</td>
+<td>
+<a href="/agclimate/">ISU Soil Moisture</a> stations record real-time data
+at one minute intervals.  <a href="/ASOS/">ASOS</a> also provides data at
+such frequency, but it is delayed by ~24 hours.
+</td>
+<td>
+<a href="/ASOS/">ASOS</a> data is typically the best at this temporal scale.
+</td>
+<td>
+<ul>
+  <li><a href="/data/summary/today_gust.png">Peak Wind Gust</a></li>
+</ul>
+</td>
+<td colspan="3">...</td>
 </tr>
 
 
