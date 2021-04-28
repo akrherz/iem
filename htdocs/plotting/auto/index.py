@@ -207,6 +207,7 @@ def cmap_handler(fdict, value, arg, res):
         value,
         CMAPS,
         cssclass="cmapselect",
+        showvalue=False,
     )
     checked = ' checked="checked"' if reverse_on else ""
     s += (
@@ -253,7 +254,7 @@ def datetypes_handler(arg, value):
         vmin = arg.get("min", 1893)
         vmax = arg.get("max", utc().year)
         items = zip(range(vmin, vmax + 1), range(vmin, vmax + 1))
-    return make_select(arg["name"], value, dict(items))
+    return make_select(arg["name"], value, dict(items), showvalue=False)
 
 
 def date_handler(value, arg, res):
@@ -445,7 +446,7 @@ def generate_form(apid, fdict, headers, cookies):
                 f'value="{value}">'
             )
         elif arg["type"] in ["month", "zhour", "hour", "day", "year"]:
-            form = datetypes_handler(arg, value)
+            form = datetypes_handler(arg, int(value))
         elif arg["type"] == "select":
             form = make_select(
                 arg["name"],
@@ -590,7 +591,7 @@ var progressBar = setInterval(function (){{
         opts["js"] = "Interactive Chart"
     if meta.get("maptable"):
         opts["maptable"] = "Interactive Map + Table"
-    sel = make_select("_fmt", fmt, opts)
+    sel = make_select("_fmt", fmt, opts, showvalue=False)
     formhtml += f"<tr><td>Select Output Format:</td><td>{sel}</td></tr>"
     res[
         "formhtml"
