@@ -84,7 +84,7 @@ breaks!</p>
 <br>You don't have to complete this step, but you can keep up-to-date with
 IEM news and events with the IEM Daily Bulletin.  You can sign up for it
 <a 
-href="mailto:mailman@iastate.edu?subject=subscribe%20iem-dailyb">here</a>.
+href="mailto:iem-dailyb-join@iastate.edu">here</a>.
  If this service generates enough interest, I will set up a dedicated 
 email
 list for it.
