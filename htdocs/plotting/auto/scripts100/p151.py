@@ -2,7 +2,7 @@
 import datetime
 from collections import OrderedDict
 
-from pandas.io.sql import read_sql
+from geopandas import read_postgis
 import numpy as np
 from pyiem.plot import MapPlot, centered_bins, get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -20,7 +20,7 @@ PDICT2 = {
 }
 PDICT3 = OrderedDict(
     [
-        ("total_precip", "Total Precipitation"),
+        ("total_precip", "Annual Precipitation"),
         ("gdd", "Growing Degree Days (base=50/86)"),
         ("sdd", "Stress Degree Days (High > 86)"),
         ("avg_temp", "Average Temperature"),
@@ -32,6 +32,10 @@ PDICT3 = OrderedDict(
         ("days_low_below", "Days with Low Temp Below [Threshold]"),
     ]
 )
+PDICT4 = {
+    "english": "English",
+    "metric": "Metric",
+}
 UNITS = {
     "total_precip": "inch",
     "gdd": "F",
@@ -39,6 +43,18 @@ UNITS = {
     "avg_temp": "F",
     "avg_high": "F",
     "avg_low": "F",
+    "days_high_above": "days",
+    "days_high_below": "days",
+    "days_low_above": "days",
+    "days_low_below": "days",
+}
+MUNITS = {
+    "total_precip": "mm",
+    "gdd": "C",
+    "sdd": "C",
+    "avg_temp": "C",
+    "avg_high": "C",
+    "avg_low": "C",
     "days_high_above": "days",
     "days_high_below": "days",
     "days_low_above": "days",
@@ -117,6 +133,13 @@ def get_description():
             label="Which Variable to Plot",
         ),
         dict(
+            type="select",
+            name="r",
+            options=PDICT4,
+            default="english",
+            label="Which Unit System to Use (GDD/SDD always english)",
+        ),
+        dict(
             type="float",
             name="threshold",
             default=-99,
@@ -160,24 +183,19 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
-    """ Go """
+def get_data(ctx):
+    """Get the data, please."""
     pgconn = get_dbconn("coop")
-    ctx = get_autoplot_context(fdict, get_description())
-
     state = ctx["state"]
-    varname = ctx["var"]
     sector = ctx["sector"]
     threshold = ctx["threshold"]
-    opt = ctx["opt"]
     month = ctx["month"]
     p1syear = ctx["p1syear"]
     p1eyear = ctx["p1eyear"]
-    p1yearreq = p1eyear - p1syear
+    p1years = p1eyear - p1syear + 1
     p2syear = ctx["p2syear"]
     p2eyear = ctx["p2eyear"]
-    p2yearreq = p2eyear - p2syear
-    opt1 = ctx["opt1"]
+    p2years = p2eyear - p2syear + 1
 
     if month == "all":
         months = range(1, 13)
@@ -195,37 +213,43 @@ def plotter(fdict):
         ts = datetime.datetime.strptime("2000-" + month + "-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month]
-
     table = "alldata"
     if sector == "state":
         # optimization
-        table = "alldata_%s" % (state,)
+        table = f"alldata_{state}"
+    hcol = "high"
+    lcol = "low"
+    pcol = "precip"
+    if ctx["r"] == "metric":
+        hcol = "f2c(high)"
+        lcol = "f2c(low)"
+        pcol = "precip * 25.4"
 
-    df = read_sql(
+    df = read_postgis(
         f"""
     WITH period1 as (
-        SELECT station, year, sum(precip) as total_precip,
-        avg((high+low) / 2.) as avg_temp, avg(high) as avg_high,
-        avg(low) as avg_low,
+        SELECT station, year, sum({pcol}) as total_precip,
+        avg(({hcol}+{lcol}) / 2.) as avg_temp, avg({hcol}) as avg_high,
+        avg({lcol}) as avg_low,
         sum(gddxx(50, 86, high, low)) as sum_gdd,
         sum(case when high > 86 then high - 86 else 0 end) as sum_sdd,
-        sum(case when high >= %s then 1 else 0 end) as days_high_above,
-        sum(case when high < %s then 1 else 0 end) as days_high_below,
-        sum(case when low >= %s then 1 else 0 end) as days_low_above,
-        sum(case when low < %s then 1 else 0 end) as days_low_below
-        from {table} WHERE year >= %s and year < %s
+        sum(case when {hcol} >= %s then 1 else 0 end) as days_high_above,
+        sum(case when {hcol} < %s then 1 else 0 end) as days_high_below,
+        sum(case when {lcol} >= %s then 1 else 0 end) as days_low_above,
+        sum(case when {lcol} < %s then 1 else 0 end) as days_low_below
+        from {table} WHERE year >= %s and year <= %s
         and month in %s GROUP by station, year),
     period2 as (
-        SELECT station, year, sum(precip) as total_precip,
-        avg((high+low) / 2.) as avg_temp, avg(high) as avg_high,
-        avg(low) as avg_low,
+        SELECT station, year, sum({pcol}) as total_precip,
+        avg(({hcol}+{lcol}) / 2.) as avg_temp, avg({hcol}) as avg_high,
+        avg({lcol}) as avg_low,
         sum(gddxx(50, 86, high, low)) as sum_gdd,
         sum(case when high > 86 then high - 86 else 0 end) as sum_sdd,
-        sum(case when high >= %s then 1 else 0 end) as days_high_above,
-        sum(case when high < %s then 1 else 0 end) as days_high_below,
-        sum(case when low >= %s then 1 else 0 end) as days_low_above,
-        sum(case when low < %s then 1 else 0 end) as days_low_below
-        from {table} WHERE year >= %s and year < %s
+        sum(case when {hcol} >= %s then 1 else 0 end) as days_high_above,
+        sum(case when {hcol} < %s then 1 else 0 end) as days_high_below,
+        sum(case when {lcol} >= %s then 1 else 0 end) as days_low_above,
+        sum(case when {lcol} < %s then 1 else 0 end) as days_low_below
+        from {table} WHERE year >= %s and year <= %s
         and month in %s GROUP by station, year),
     p1agg as (
         SELECT station, avg(total_precip) as precip,
@@ -251,7 +275,8 @@ def plotter(fdict):
         from period2 GROUP by station),
     agg as (
         SELECT p2.station,
-        p2.precip as p2_total_precip, p1.precip as p1_total_precip,
+        p2.precip as p2_total_precip,
+        p1.precip as p1_total_precip,
         p2.gdd as p2_gdd, p1.gdd as p1_gdd,
         p2.sdd as p2_sdd, p1.sdd as p1_sdd,
         p2.avg_temp as p2_avg_temp, p1.avg_temp as p1_avg_temp,
@@ -269,7 +294,7 @@ def plotter(fdict):
         (p1.station = p2.station)
         WHERE p1.count >= %s and p2.count >= %s)
 
-    SELECT station, ST_X(geom) as lon, ST_Y(geom) as lat,
+    SELECT ST_X(geom) as lon, ST_Y(geom) as lat, t.geom,
     d.* from agg d JOIN stations t ON (d.station = t.id)
     WHERE t.network ~* 'CLIMATE'
     and substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000'
@@ -290,10 +315,11 @@ def plotter(fdict):
             p2syear,
             p2eyear,
             tuple(months),
-            p1yearreq,
-            p2yearreq,
+            p1years,
+            p2years,
         ],
-        index_col=None,
+        index_col="station",
+        geom_col="geom",
     )
     if df.empty:
         raise NoDataFound("No Data Found.")
@@ -307,6 +333,31 @@ def plotter(fdict):
     df["days_high_below"] = df["p2_days_high_below"] - df["p1_days_high_below"]
     df["days_low_above"] = df["p2_days_low_above"] - df["p1_days_low_above"]
     df["days_low_below"] = df["p2_days_low_below"] - df["p1_days_low_below"]
+    return df
+
+
+def geojson(fdict):
+    """Handle GeoJSON output."""
+    ctx = get_autoplot_context(fdict, get_description())
+    return (get_data(ctx).drop(["lat", "lon"], axis=1)), ctx["var"]
+
+
+def plotter(fdict):
+    """ Go """
+    ctx = get_autoplot_context(fdict, get_description())
+    df = get_data(ctx)
+    state = ctx["state"]
+    varname = ctx["var"]
+    sector = ctx["sector"]
+    threshold = ctx["threshold"]
+    opt = ctx["opt"]
+    month = ctx["month"]
+    p1syear = ctx["p1syear"]
+    p1eyear = ctx["p1eyear"]
+    p2syear = ctx["p2syear"]
+    p2eyear = ctx["p2eyear"]
+    opt1 = ctx["opt1"]
+
     column = varname
     title = "%s %s" % (MDICT[month], PDICT3[varname])
     title = title.replace("[Threshold]", "%.1f" % (threshold,))
@@ -320,7 +371,7 @@ def plotter(fdict):
             p1syear,
             p1eyear,
             title,
-            UNITS[varname],
+            UNITS[varname] if ctx["r"] == "english" else MUNITS[varname],
         )
 
     # Reindex so that most extreme values are first
@@ -352,7 +403,7 @@ def plotter(fdict):
             df2[column].values,
             levels,
             cmap=get_cmap(ctx["cmap"]),
-            units=UNITS[varname],
+            units=UNITS[varname] if ctx["r"] == "english" else MUNITS[varname],
         )
     if sector == "state":
         mp.drawcounties()
@@ -365,7 +416,7 @@ def plotter(fdict):
             labelbuffer=5,
         )
 
-    return mp.fig, df
+    return mp.fig, df.drop("geom", axis=1).round(2)
 
 
 if __name__ == "__main__":
