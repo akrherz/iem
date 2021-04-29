@@ -119,7 +119,7 @@ def get_context(fdict):
         mints = dt - datetime.timedelta(days=3)
         maxts = dt + datetime.timedelta(days=3)
     df = read_sql(
-        "SELECT valid, h.label, value from hml_observed_data d "
+        "SELECT distinct valid, h.label, value from hml_observed_data d "
         "JOIN hml_observed_keys h on (d.key = h.id) WHERE station = %s and "
         "valid between %s and %s ORDER by valid ASC",
         pgconn,
@@ -253,4 +253,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="CIRI2"))
+    plotter(dict(station="COLO1", dt="2021-03-02 1200"))
