@@ -122,6 +122,9 @@ def do(station, acis_station, interactive):
                 work.append(
                     f"{'temp' if col == 'high' else 'precip'}_hour = %s"
                 )
+                work.append(
+                    f"{'temp' if col == 'high' else 'precip'}_estimated = 'f'"
+                )
                 args.append(row[f"a{col}_hour"])
         if not work:
             continue
