@@ -7,13 +7,12 @@ from datetime import datetime, date
 import calendar
 import os
 import sys
-from html import escape
 
 # Third Party
 import requests
 from paste.request import get_cookie_dict, parse_formvars
 from pyiem.htmlgen import make_select, station_select
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconn, utc, html_escape
 from pyiem.templates.iem import TEMPLATE
 from pyiem.reference import state_names, SECTORS
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
@@ -152,7 +151,7 @@ def station_handler(value, arg, fdict, res, typ):
     if arg["name"][-1].isdigit():
         networkcgi += arg["name"][-1]
     network = arg.get("network", "IA_ASOS")
-    network = fdict.get(networkcgi, network)
+    network = html_escape(fdict.get(networkcgi, network))
     netselect = make_select(
         networkcgi, network, networks, jscallback="onNetworkChange"
     )
@@ -189,9 +188,9 @@ def vtec_ps_handler(fdict, arg):
     """Handle VTEC Phenomena + Significance."""
     suffix = arg["name"]
     default_p, default_s = arg["default"].split(".")
-    value = escape(fdict.get(f"phenomena{suffix}", default_p))
+    value = html_escape(fdict.get(f"phenomena{suffix}", default_p))
     s = make_select(f"phenomena{suffix}", value, VTEC_PHENOMENA)
-    value = escape(fdict.get(f"significance{suffix}", default_s))
+    value = html_escape(fdict.get(f"significance{suffix}", default_s))
     s += make_select(f"significance{suffix}", value, VTEC_SIGNIFICANCE)
     return s
 
@@ -313,9 +312,9 @@ def add_to_plotvars(value, fdict, arg, res):
     """Add to our plotvars."""
     if arg["type"] == "vtec_ps":
         suffix = arg["name"]
-        value = fdict.get(f"phenomena{suffix}", "SV")
+        value = html_escape(fdict.get(f"phenomena{suffix}", "SV"))
         res["pltvars"].append(f"phenomena{suffix}:{value}")
-        value = fdict.get(f"significance{suffix}", "W")
+        value = html_escape(fdict.get(f"significance{suffix}", "W"))
         res["pltvars"].append(f"significance{suffix}:{value}")
         return
     if arg["type"] == "cmap":
@@ -399,13 +398,14 @@ def generate_form(apid, fdict, headers, cookies):
             f"{meta['description']}</div>"
         )
     if fmt is None:
-        if meta.get("report") is not None:
+        if meta.get("report", False):
             fmt = "text"
-        elif meta.get("highcharts") is not None:
+        elif meta.get("highcharts", False):
             fmt = "js"
-        elif meta.get("maptable") is not None:
+        elif meta.get("maptable", False):
             fmt = "maptable"
-        fmt = "png"
+        else:
+            fmt = "png"
     if meta.get("nass") is not None:
         res[
             "nassmsg"
@@ -419,6 +419,8 @@ def generate_form(apid, fdict, headers, cookies):
     formhtml = ""
     for arg in meta["arguments"]:
         value = fdict.get(arg["name"], get_cookie_value(arg, cookies))
+        if value is not None:
+            value = html_escape(value)
         if value is None:
             value = arg["default"]
         if arg["type"] in ["zstation", "sid", "station"]:

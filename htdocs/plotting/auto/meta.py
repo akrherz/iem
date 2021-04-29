@@ -88,6 +88,7 @@ def do_json(pidx):
         data = app.get_description()
         data["maptable"] = hasattr(app, "geojson")
         data["highcharts"] = hasattr(app, "highcharts")
+        data["report"] = hasattr(app, "report")
         data["timing[secs]"] = timing
 
         # Defaults
