@@ -14,8 +14,8 @@ from pyiem.util import get_dbconn, logger, exponential_backoff
 LOG = logger()
 URI = (
     "https://services.arcgis.com/8lRhdTsQyJpO52F1/arcgis/rest/services/"
-    "RWIS_SubSurface_All_View/FeatureServer/0/query?where=STATUS%3D1&f=pjson&"
-    "outFields=NWS_ID,TEMPERATURE,MOISTURE,DATA_LAST_UPDATED,SENSOR_ID"
+    "RWIS_SubSurface_All_View/FeatureServer/0/query?where=STATUS%3D1&f=json&"
+    "outFields=NWS_ID,TEMPERATURE,DATA_LAST_UPDATED,SENSOR_ID"
 )
 
 
@@ -50,7 +50,6 @@ def process_features(features):
             {
                 "nwsli": props["NWS_ID"],
                 "tmpf": clean(props.get("TEMPERATURE")),
-                "moisture": clean(props.get("MOISTURE")),
                 "valid": valid,
                 "sensor_id": props["SENSOR_ID"],
             }
@@ -99,11 +98,10 @@ def main():
         if row["valid"] <= current:
             continue
         cursor.execute(
-            "UPDATE rwis_soil_data SET valid = %s, moisture = %s, temp = %s "
+            "UPDATE rwis_soil_data SET valid = %s, temp = %s "
             "WHERE sensor_id = %s and location_id = %s",
             (
                 row["valid"],
-                clean2(row["moisture"]),
                 clean2(row["tmpf"]),
                 row["sensor_id"],
                 row["location_id"],
