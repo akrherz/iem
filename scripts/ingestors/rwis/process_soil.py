@@ -49,8 +49,8 @@ def process_features(features):
         rows.append(
             {
                 "nwsli": props["NWS_ID"],
-                "tmpf": clean(props["TEMPERATURE"]),
-                "moisture": clean(props["MOISTURE"]),
+                "tmpf": clean(props.get("TEMPERATURE")),
+                "moisture": clean(props.get("MOISTURE")),
                 "valid": valid,
                 "sensor_id": props["SENSOR_ID"],
             }
