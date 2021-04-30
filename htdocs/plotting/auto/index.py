@@ -245,6 +245,10 @@ $(".cmapselect").select2({
 
 def datetypes_handler(arg, value):
     """Handle simple forms."""
+    try:
+        value = int(value)
+    except ValueError:
+        pass
     if arg["type"] == "month":
         items = zip(range(1, 13), calendar.month_name[1:])
     elif arg["type"] in ["zhour", "hour"]:
@@ -428,7 +432,7 @@ def generate_form(apid, fdict, headers, cookies):
         if value is not None:
             value = html_escape(value)
         if value is None:
-            value = arg["default"]
+            value = str(arg["default"])
         if arg["type"] in ["zstation", "sid", "station"]:
             form = station_handler(value, arg, fdict, res, arg["type"])
         elif arg["type"] == "ugc":
