@@ -72,15 +72,15 @@ def do(station, acis_station, interactive):
         LOG.info("Got status_code %s for %s", req.status_code, acis_station)
         # Give server some time to recover from transient errors
         time.sleep(60)
-        return
+        return 0
     try:
         j = req.json()
     except Exception as exp:
         LOG.exception(exp)
-        return
+        return 0
     if "data" not in j:
         LOG.info("No Data!, content=%s", req.content)
-        return
+        return 0
     acis = pd.DataFrame(
         j["data"],
         columns="day ahigh alow aprecip asnow asnowd".split(),
@@ -156,11 +156,20 @@ def do(station, acis_station, interactive):
     )
     cursor.close()
     pgconn.commit()
+    return updates
 
 
 def main(argv):
     """Do what is asked."""
     interactive = sys.stdout.isatty()
+
+    def _worker(sid, acis_station):
+        """Do work."""
+        updates = do(sid, acis_station, interactive)
+        # If we found a lot of updates over the previous year, rerun for all
+        if not interactive and updates > 100:
+            do(sid, acis_station, True)
+
     if len(argv) == 2:
         state = argv[1]
         # Only run cron job for online sites
@@ -169,10 +178,10 @@ def main(argv):
             if sid[2] in ["T", "C"] or sid[2:] == "0000":
                 continue
             acis_station = ncei_state_codes[state] + sid[2:]
-            do(sid, acis_station, interactive)
+            _worker(sid, acis_station)
     else:
         (station, acis_station) = argv[1], argv[2]
-        do(station, acis_station, interactive)
+        _worker(station, acis_station)
 
 
 if __name__ == "__main__":
