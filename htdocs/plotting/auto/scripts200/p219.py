@@ -146,8 +146,8 @@ def plotter(fdict):
     res = fig.text(0.43, 0.01, text.strip(), va="bottom", fontsize=12)
     bbox = res.get_window_extent(fig.canvas.get_renderer())
     figbbox = fig.get_window_extent()
-    # TODO impossibly small TAF may be too small, need to check this
-    yndc = bbox.y1 / figbbox.y1
+    # one-two line TAFs cause the legend to go off-screen
+    yndc = max([bbox.y1 / figbbox.y1, 0.13])
 
     # Create the main axes that will hold all our hackery
     ax = fig.add_axes([0.08, yndc + 0.05, 0.9, 0.9 - yndc - 0.05])
