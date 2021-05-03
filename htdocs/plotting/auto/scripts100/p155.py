@@ -72,7 +72,7 @@ UNITS = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 86400
@@ -155,7 +155,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
 
@@ -215,7 +215,30 @@ def plotter(fdict):
         dt = datetime.datetime(2000, 1, 1, ctx["hour"])
         title2 += " @" + dt.strftime("%-I %p")
     (agg, dbvar) = varname.split("_")
-    if agg in ["max", "min"]:
+    # Special accounting for the peak_wind_gust column
+    tzname = ctx["_nt"].sts[station]["tzname"]
+    if dbvar == "gust":
+        titlelabel = "Top"
+        df = read_sql(
+            f"""
+            WITH data as (
+                SELECT
+                case when peak_wind_gust > gust then peak_wind_time
+                else valid end as v,
+                case when peak_wind_gust > gust then peak_wind_gust
+                else gust end as speed from alldata
+                WHERE station = %s {date_limiter})
+
+            SELECT v at time zone %s as valid, speed as gust from data
+            WHERE speed is not null
+            ORDER by gust DESC LIMIT 100
+        """,
+            pgconn,
+            params=(station, tzname),
+            index_col=None,
+        )
+
+    elif agg in ["max", "min"]:
         titlelabel = "Top"
         sorder = "DESC" if agg == "max" else "ASC"
         df = read_sql(
@@ -228,7 +251,7 @@ def plotter(fdict):
             ORDER by {dbvar} {sorder} NULLS LAST LIMIT 100
         """,
             pgconn,
-            params=(ctx["_nt"].sts[station]["tzname"], station),
+            params=(tzname, station),
             index_col=None,
         )
     else:
@@ -240,7 +263,7 @@ def plotter(fdict):
             f"WHERE station = %s {date_limiter} and {dbvar} {op} {threshold} "
             "ORDER by valid DESC LIMIT 100",
             pgconn,
-            params=(ctx["_nt"].sts[station]["tzname"], station),
+            params=(tzname, station),
             index_col=None,
         )
     if df.empty:
