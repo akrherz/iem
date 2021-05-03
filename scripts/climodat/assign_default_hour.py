@@ -25,7 +25,8 @@ def main():
             df2 = read_sql(
                 f"SELECT {col.replace('24', '')} as datum, count(*), "
                 f"min(day), max(day) from alldata_{sid[:2]} WHERE "
-                f"{col.replace('24', '')} is not null GROUP by datum "
+                f"{col.replace('24', '')} is not null and "
+                f"{col.replace('24_hour', '')}_estimated = 'f' GROUP by datum "
                 "ORDER by count DESC",
                 coop,
                 index_col=None,

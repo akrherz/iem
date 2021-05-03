@@ -74,7 +74,7 @@ def estimate_precip(df, ds):
     grid00 = mm2in(ds["p01d"].values)
 
     for sid, row in df[pd.isna(df["precip"])].iterrows():
-        if row["precip24_hour"] in [0, 22, 23]:
+        if row["precip24_hour"] in [0, 22, 23, 24]:
             precip = grid00[row["gridj"], row["gridi"]]
             precip_hour = 0
         else:
@@ -226,7 +226,7 @@ def merge_network_obs(df, network, ts):
         "SELECT t.id as station, max_tmpf as high, min_tmpf as low, "
         "pday as precip, snow, snowd, "
         "coalesce(extract(hour from (coop_valid + '1 minute'::interval) "
-        "  at time zone tzname), 0) as temp_hour "
+        "  at time zone tzname), 24) as temp_hour "
         "from summary s JOIN stations t "
         "on (t.iemid = s.iemid) WHERE t.network = %s and s.day = %s",
         pgconn,
