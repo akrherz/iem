@@ -11,15 +11,11 @@ python today_hilo.py
 python today_rec_hilo.py
 
 cd ../month
+python plot_gdd.py
 python obs_precip.py
 python obs_precip_coop.py
 python plot_avgt.py
-python plot_gdd.py
 python plot_sdd.py
-
-cd ../gs
-python plot_gdd.py
-
 
 cd ../season
 python plot_4month_stage4.py
@@ -31,3 +27,6 @@ python precip.py
 python plot_gdd.py 50
 python plot_gdd.py 52
 python plot_gdd.py 48
+
+cd ../gs
+python plot_gdd.py
