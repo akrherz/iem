@@ -71,17 +71,19 @@ def compute_time(argv):
     return sts, ets
 
 
-def do_insert(source_cursor):
+def do_insert(source_cursor, madis):
     """Insert the rows into the archive."""
     pgconn = get_dbconn("asos")
     cursor = pgconn.cursor()
 
     (inserts, skips, deletes) = (0, 0, 0)
+    report_type = 1 if madis else 2
     for row in source_cursor:
         # Look for previous entries
         cursor.execute(
-            "SELECT metar from alldata where station = %s and valid = %s",
-            (row["id"], row["valid"]),
+            "SELECT metar from alldata where station = %s and valid = %s "
+            "and report_type = %s",
+            (row["id"], row["valid"], report_type),
         )
         if cursor.rowcount > 0:
             metar = cursor.fetchone()
@@ -90,8 +92,9 @@ def do_insert(source_cursor):
                 skips += 1
                 continue
             cursor.execute(
-                "DELETE from alldata where station = %s and valid = %s",
-                (row["id"], row["valid"]),
+                "DELETE from alldata where station = %s and valid = %s "
+                "and report_type = %s",
+                (row["id"], row["valid"], report_type),
             )
             deletes += cursor.rowcount
 
@@ -106,13 +109,6 @@ def do_insert(source_cursor):
         values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
         %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """
-
-        # see @akrherz/iem#104 as an enhancement to differentiate rtype
-        rtype = (
-            1
-            if row["raw"] is not None and row["raw"].find(" MADISHF") > -1
-            else 2
-        )
         args = (
             row["id"],
             row["valid"],
@@ -145,7 +141,7 @@ def do_insert(source_cursor):
             row["ice_accretion_1hr"],
             row["ice_accretion_3hr"],
             row["ice_accretion_6hr"],
-            rtype,
+            report_type,
             row["feel"],
             row["relh"],
             row["peak_wind_gust"],
@@ -174,31 +170,34 @@ def main():
         last_updated.strftime(ISO9660),
     )
 
-    # Get obs from access, prioritize observations by if they are a CORrection
-    # or not and then their length :?
-    icursor.execute(
-        """
-        WITH data as (
-            SELECT c.*, t.network, t.id, row_number() OVER
-            (PARTITION by c.iemid, valid
-             ORDER by
-              (case when strpos(raw, ' COR ') > 0 then 1 else 0 end) DESC,
-              length(raw) DESC) from
-            current_log c JOIN stations t on (t.iemid = c.iemid) WHERE
-            updated >= %s and updated <= %s and
-            (network ~* 'ASOS' or network = 'AWOS'))
-        SELECT * from data where row_number = 1
-        """,
-        (first_updated, last_updated),
-    )
-    do_insert(icursor)
-
-    if icursor.rowcount == 0:
-        LOG.info(
-            "%s - %s Nothing done?",
-            first_updated.strftime("%Y-%m-%dT%H:%M"),
-            last_updated.strftime("%Y-%m-%dT%H:%M"),
+    for madis in [False, True]:
+        limiter = "~*" if madis else "!~*"
+        # Get obs from access, prioritize observations by if they are a
+        # CORrection or not and then their length :?
+        # see @akrherz/iem#104 as an enhancement to differentiate rtype
+        icursor.execute(
+            f"""
+            WITH data as (
+                SELECT c.*, t.network, t.id, row_number() OVER
+                (PARTITION by c.iemid, valid
+                ORDER by
+                (case when strpos(raw, ' COR ') > 0 then 1 else 0 end) DESC,
+                length(raw) DESC) from
+                current_log c JOIN stations t on (t.iemid = c.iemid) WHERE
+                updated >= %s and updated <= %s and raw {limiter} 'MADISHF'
+                and (network ~* 'ASOS' or network = 'AWOS'))
+            SELECT * from data where row_number = 1
+            """,
+            (first_updated, last_updated),
         )
+        do_insert(icursor, madis)
+
+        if icursor.rowcount == 0 and not madis:
+            LOG.info(
+                "%s - %s Nothing done?",
+                first_updated.strftime("%Y-%m-%dT%H:%M"),
+                last_updated.strftime("%Y-%m-%dT%H:%M"),
+            )
     set_last_updated(last_updated)
 
 
