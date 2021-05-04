@@ -86,7 +86,10 @@ def do_insert(source_cursor, madis):
             (row["id"], row["valid"], report_type),
         )
         if cursor.rowcount > 0:
-            metar = cursor.fetchone()
+            metar = cursor.fetchone()[0]
+            if metar == row["raw"]:
+                skips += 1
+                continue
             # Skip if old metar is longer and new metar is not a COR
             if len(metar) > len(row["raw"]) and row["raw"].find(" COR ") == 0:
                 skips += 1
@@ -151,6 +154,11 @@ def do_insert(source_cursor, madis):
 
         cursor.execute(sql, args)
         inserts += 1
+        if inserts % 1000 == 0:
+            LOG.debug("cycling cursor at %s inserts", inserts)
+            cursor.close()
+            pgconn.commit()
+            cursor = pgconn.cursor()
 
     LOG.debug("insert %s, skip %s delete %s rows", inserts, skips, deletes)
     cursor.close()
@@ -190,7 +198,9 @@ def main():
             """,
             (first_updated, last_updated),
         )
-        do_insert(icursor, madis)
+        LOG.debug("processing %s rows for madis: %s", icursor.rowcount, madis)
+        if icursor.rowcount > 0:
+            do_insert(icursor, madis)
 
         if icursor.rowcount == 0 and not madis:
             LOG.info(
