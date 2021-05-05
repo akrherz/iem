@@ -17,6 +17,9 @@ def main(argv):
     floor = datetime.date.today() - datetime.timedelta(days=7)
 
     net = argv[1]
+    if len(net) == 2:
+        LOG.info("Fixing invalid network name...")
+        net = f"{net}CLIMATE"
 
     nt = NetworkTable(net, only_online=False)
 
