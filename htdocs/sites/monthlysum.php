@@ -35,9 +35,9 @@ $pgconn = iemdb("coop");
 $rs = pg_prepare($pgconn, "SELECT", "SELECT ".
 "extract(month from valid) as month, avg(high) as avg_high, ".
 "avg(low) as avg_low, avg((high+low)/2.) as avg_temp, ".
-"sum(precip) as precip from ncdc_climate81 WHERE station = $1".
+"sum(precip) as precip from ncei_climate91 WHERE station = $1".
 " GROUP by month ORDER by month ASC");
-$rs = pg_execute($pgconn, "SELECT", Array($metadata["ncdc81"]));
+$rs = pg_execute($pgconn, "SELECT", Array($metadata["ncei91"]));
 for ($i=0; $row=pg_fetch_assoc($rs); $i++){
       $climo[$row["month"]] = $row;
 }
@@ -147,7 +147,7 @@ $t->content = <<<EOF
 <p>The following tables present IEM computed monthly data summaries based on
 daily data provided by or computed for the IEM. A <a href="/request/daily.phtml?network=${network}">download interface</a>
 exists for the daily summary information.  The climatology is provided by the
-nearest NCEI climate station ({$metadata["ncdc81"]}) within the current 1981-2010 
+nearest NCEI climate station ({$metadata["ncei91"]}) within the current 1991-2020 
 dataset.</p>
 
 <p><i class="fa fa-table"></i> To load shown data into Microsoft Excel,

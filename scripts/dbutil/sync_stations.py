@@ -76,6 +76,7 @@ def sync(mesosite, dbname, do_delete):
             sigstage_major = %(sigstage_major)s,
             sigstage_record = %(sigstage_record)s, ugc_county = %(ugc_county)s,
             ugc_zone = %(ugc_zone)s, id = %(id)s, ncdc81 = %(ncdc81)s,
+            ncei91 = %(ncei91)s,
             temp24_hour = %(temp24_hour)s, precip24_hour = %(precip24_hour)s
             WHERE iemid = %(iemid)s
        """,

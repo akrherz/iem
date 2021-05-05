@@ -27,6 +27,9 @@ if ($source == 'ncdc_climate71'){
 else if ($source == 'ncdc_climate81'){
     $station = $cities[$station]['ncdc81'];
 }
+else if ($source == 'ncei_climate91'){
+    $station = $cities[$station]['ncei91'];
+}
 
 
 switch ($mode){

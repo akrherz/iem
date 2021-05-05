@@ -45,6 +45,7 @@ PDICT5 = {
     "climate81": "1981-Present Climatology",
     "ncdc_climate71": "NCEI 1971-2000 Climatology",
     "ncdc_climate81": "NCEI 1981-2010 Climatology",
+    "ncei_climate91": "NCEI 1991-2020 Climatology",
 }
 UNITS = {"total_precip": "inch"}
 PRECISION = {
@@ -85,7 +86,7 @@ MDICT = OrderedDict(
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -113,7 +114,7 @@ def get_description():
         dict(
             type="select",
             name="src",
-            default="ncdc_climate81",
+            default="ncei_climate91",
             options=PDICT5,
             label=(
                 "Select Climatology Source to Use "
@@ -146,7 +147,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     state = ctx["state"][:2]
@@ -186,7 +187,11 @@ def plotter(fdict):
     )
     bnds = mp.ax.get_extent(crs=ccrs.PlateCarree())
 
-    joincol = "ncdc81" if ctx["src"] == "ncdc_climate81" else "id"
+    joincol = "id"
+    if ctx["src"] == "ncdc_climate81":
+        joincol = "ncdc81"
+    elif ctx["src"] == "ncei_climate91":
+        joincol = "ncei91"
     extra = ""
     if not ctx["src"].startswith("ncdc_"):
         extra = """,

@@ -32,11 +32,12 @@ ADICT = {
     "por": "Period of Record",
     "1951": "1951-present",
     "ncei81": "NCEI 1981-2010 Climate Normals",
+    "ncei91": "NCEI 1991-2020 Climate Normals",
 }
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -93,7 +94,7 @@ def less_than(one, two):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
@@ -112,6 +113,9 @@ def plotter(fdict):
     elif ctx["climo"] == "ncei81":
         cltable = "ncdc_climate81"
         clstation = ctx["_nt"].sts[station]["ncdc81"]
+    elif ctx["climo"] == "ncei91":
+        cltable = "ncei_climate91"
+        clstation = ctx["_nt"].sts[station]["ncei91"]
 
     obs = read_sql(
         f"""

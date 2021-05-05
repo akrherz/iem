@@ -67,7 +67,8 @@ if (isset($_REQUEST["longitude"]) && isset($_REQUEST["latitude"]))
    		plot_name = '%s', name = '%s', state = '%s', elevation = '%s', 
    		online = '%s', metasite = '%s', tzname = null, ncdc81 = null,
    		climate_site = null, county = null, ugc_county = null, ugc_zone = null,
-   		geom = 'SRID=4326;POINT(%s %s)' WHERE id = '%s' and network = '%s'", 
+   		geom = 'SRID=4326;POINT(%s %s)', ncei91 = null
+        WHERE id = '%s' and network = '%s'", 
    		$country, $sname, $sname, $state, $elevation, $online, $metasite, 
    		$longitude, $latitude,  $station, $network);
    $rs = pg_exec($pgconn, $sql);

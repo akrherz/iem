@@ -69,7 +69,7 @@ MDICT = OrderedDict(
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -232,7 +232,7 @@ yAxis: {title: {text: '"""
 
 
 def get_context(fdict):
-    """ Get the context"""
+    """Get the context"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     ctx["decadal"] = ctx.get("decadal") == "yes"
@@ -270,7 +270,7 @@ def get_context(fdict):
         f"""
     WITH climo as (
         SELECT to_char(valid, 'mmdd') as sday,
-        high, low from ncdc_climate81 WHERE station = %s),
+        high, low from ncei_climate91 WHERE station = %s),
     day2day as (
         SELECT
         extract(year from day + '{lag}'::interval)::int / {decagg} as myyear,
@@ -317,7 +317,7 @@ def get_context(fdict):
     """,
         pgconn,
         params=(
-            nt.sts[station]["ncdc81"],
+            nt.sts[station]["ncei91"],
             station,
             tuple(months),
             threshold,
@@ -404,7 +404,7 @@ def get_context(fdict):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_context(fdict)
 
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))

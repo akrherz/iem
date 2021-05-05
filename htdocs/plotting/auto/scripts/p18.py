@@ -31,7 +31,7 @@ UNITS = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     ts = datetime.date.today() - datetime.timedelta(days=365)
     desc["data"] = True
@@ -69,7 +69,7 @@ def get_description():
 
 
 def highcharts(fdict):
-    """ Highcharts output """
+    """Highcharts output"""
     ctx = get_data(fdict)
     ranges = []
     now = ctx["sdate"]
@@ -164,8 +164,8 @@ def get_data(fdict):
     if ctx["var"] == "tmpf":
         ctx["climo"] = {}
         ccursor.execute(
-            "SELECT valid, high, low from ncdc_climate81 where station = %s",
-            (ctx["_nt"].sts[ctx["station"]]["ncdc81"],),
+            "SELECT valid, high, low from ncei_climate91 where station = %s",
+            (ctx["_nt"].sts[ctx["station"]]["ncei91"],),
         )
         for row in ccursor:
             ctx["climo"][row[0].strftime("%m%d")] = dict(
@@ -189,7 +189,7 @@ def get_data(fdict):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_data(fdict)
     title = "%s [%s]\n%s Timeseries %s - %s" % (
         ctx["_nt"].sts[ctx["station"]]["name"],

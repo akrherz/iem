@@ -16,6 +16,7 @@ PDICT = {
     "por": "Period of Record (por) Climatology",
     "1951": "1951-present Climatology",
     "ncei81": "NCEI 1981-2010 Climatology",
+    "ncei91": "NCEI 1991-2020 Climatology",
     "custom": "Custom Climatology (pick years)",
 }
 PDICT2 = {
@@ -36,7 +37,7 @@ LABELS = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -134,11 +135,15 @@ def pick_climate(ctx, idx):
         cltable = "ncdc_climate81"
         if clstation in ctx[f"_nt{idx}"].sts:
             clstation = ctx[f"_nt{idx}"].sts[clstation]["ncdc81"]
+    elif climo == "ncei91":
+        cltable = "ncei_climate91"
+        if clstation in ctx[f"_nt{idx}"].sts:
+            clstation = ctx[f"_nt{idx}"].sts[clstation]["ncei91"]
     return cltable, clstation
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     varname = ctx["v"]
     station1 = ctx["station1"]

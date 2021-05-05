@@ -26,7 +26,7 @@ PDICT = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -96,7 +96,7 @@ def diff(val, climo):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("iem")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -112,9 +112,9 @@ def plotter(fdict):
         "round(high::numeric, 0) as high, "
         "round(low::numeric, 0) as low, "
         "round(((high + low) / 2.)::numeric, 0) as avg, "
-        "precip from ncdc_climate81 WHERE station = %s ORDER by sday ASC",
+        "precip from ncei_climate91 WHERE station = %s ORDER by sday ASC",
         get_dbconn("coop"),
-        params=(ctx["_nt"].sts[station]["ncdc81"],),
+        params=(ctx["_nt"].sts[station]["ncei91"],),
         index_col="sday",
     )
     if cdf.empty:

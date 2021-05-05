@@ -28,7 +28,6 @@ def workflow(col):
         f"SELECT id, geom, state, iemid, network from stations WHERE {col} "
         "IS NULL and country = 'US' and state is not null"
     )
-
     for row in mcursor:
         sid = row[0]
         geom = row[1]
@@ -53,8 +52,9 @@ def workflow(col):
                 "and online ORDER by ST_distance(geom, %s) ASC LIMIT 1"
             )
         else:
+            clnetwork = "NCDC81" if col == "ncdc81" else "NCEI91"
             sql = (
-                "select id from stations WHERE network = 'NCDC81' "
+                f"select id from stations WHERE network = '{clnetwork}' "
                 "ORDER by ST_distance(geom, %s) ASC LIMIT 1"
             )
         mcursor2.execute(sql, (geom,))
@@ -75,6 +75,7 @@ def main():
     """Go Main Go"""
     workflow("climate_site")
     workflow("ncdc81")
+    workflow("ncei91")
 
 
 if __name__ == "__main__":

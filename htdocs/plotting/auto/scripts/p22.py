@@ -26,7 +26,7 @@ def smooth(x, window_len=11, window="hanning"):
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -59,7 +59,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     minv = ctx["min"]
@@ -75,7 +75,7 @@ def plotter(fdict):
         f"""
     WITH climate as (
         SELECT to_char(valid, 'mmdd') as sday, high, low from
-        ncdc_climate81 where station = %s
+        ncei_climate91 where station = %s
     )
     SELECT extract(doy from day) as doy, count(*),
     SUM(case when a.high >= (c.high + %s) and a.high < (c.high + %s)
@@ -87,7 +87,7 @@ def plotter(fdict):
     """,
         pgconn,
         params=(
-            ctx["_nt"].sts[station]["ncdc81"],
+            ctx["_nt"].sts[station]["ncei91"],
             minv,
             maxv,
             minv,

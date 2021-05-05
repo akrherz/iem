@@ -15,7 +15,7 @@ PDICT = {"temps": "Plot High/Low Temperatures", "precip": "Plot Precipitation"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["cache"] = 300
     today = datetime.date.today()
@@ -89,10 +89,10 @@ def common(ctx):
     cdf = read_sql(
         "SELECT high as climo_high, low as climo_low, "
         "extract(day from valid)::int as day_of_month, "
-        "precip as climo_precip from ncdc_climate81 where station = %s and "
+        "precip as climo_precip from ncei_climate91 where station = %s and "
         "extract(month from valid) = %s ORDER by valid ASC",
         pgconn_coop,
-        params=(ctx["_nt"].sts[station]["ncdc81"], month),
+        params=(ctx["_nt"].sts[station]["ncei91"], month),
         index_col="day_of_month",
     )
     df = cdf.join(df)
@@ -112,11 +112,11 @@ def common(ctx):
     ax.set_xticklabels(np.arange(1, days + 1), fontsize=8)
     ax.set_xlabel(sts.strftime("%B %Y"))
 
-    if ctx["_nt"].sts[station]["ncdc81"] is None:
+    if ctx["_nt"].sts[station]["ncei91"] is None:
         subtitle = "Daily climatology unavailable for site"
     else:
-        subtitle = ("NCDC 1981-2010 Climate Site: %s") % (
-            ctx["_nt"].sts[station]["ncdc81"],
+        subtitle = ("NCEI 1991-2020 Climate Site: %s") % (
+            ctx["_nt"].sts[station]["ncei91"],
         )
 
     ax.text(
@@ -284,7 +284,7 @@ def do_temperature_plot(ctx):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     common(ctx)
     if ctx["p"] == "precip":

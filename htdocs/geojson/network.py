@@ -51,6 +51,7 @@ def run(network, only_online):
                     wfo=row["wfo"],
                     tzname=row["tzname"],
                     ncdc81=row["ncdc81"],
+                    ncei91=row["ncei91"],
                     ugc_county=row["ugc_county"],
                     ugc_zone=row["ugc_zone"],
                     county=row["county"],
