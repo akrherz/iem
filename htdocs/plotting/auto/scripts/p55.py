@@ -30,6 +30,20 @@ def get_description():
             label="Select Station:",
         ),
         dict(type="month", name="month", default="12", label="Select Month:"),
+        dict(
+            type="year",
+            min=1850,
+            label="Minimum Inclusive Year (if data exists) for IEM Average",
+            name="syear",
+            default=1850,
+        ),
+        dict(
+            type="year",
+            min=1850,
+            label="Maximum Inclusive Year (if data exists) for IEM Average",
+            name="eyear",
+            default=datetime.date.today().year,
+        ),
     ]
     return desc
 
@@ -48,8 +62,10 @@ def plotter(fdict):
         f"""
     with obs as (
      SELECT sday, avg(high) as avgh, avg(low) as avgl,
-     avg((high+low)/2.) as avgt from {table}
-     WHERE station = %s and month = %s GROUP by sday
+     avg((high+low)/2.) as avgt, min(year) as min_year,
+     max(year) as max_year from {table}
+     WHERE station = %s and month = %s and year >= %s and year <= %s
+     GROUP by sday
     ), c91 as (
      SELECT to_char(valid, 'mmdd') as sday, high, low, (high+low)/2. as avgt
      from ncei_climate91 where station = %s
@@ -61,7 +77,7 @@ def plotter(fdict):
      from ncdc_climate71 where station = %s
     )
 
-    SELECT o.sday,
+    SELECT o.sday, o.min_year, o.max_year,
     o.avgh as iem_avgh,
     c91.high as ncei91_avgh,
     c81.high as ncei81_avgh,
@@ -81,6 +97,8 @@ def plotter(fdict):
         params=(
             station,
             month,
+            ctx["syear"],
+            ctx["eyear"],
             ctx["_nt"].sts[station]["ncei91"],
             ctx["_nt"].sts[station]["ncdc81"],
             station,
@@ -92,16 +110,11 @@ def plotter(fdict):
 
     (fig, ax) = plt.subplots(3, 1, sharex=True, figsize=(8, 6))
 
-    ab = ctx["_nt"].sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata.")
     ax[0].set_title(
-        ("%s %s Daily Climate Comparison\nObservation Period: %s-%s for %s")
+        ("%s %s Daily Climate Comparison for %s")
         % (
             station,
             ctx["_nt"].sts[station]["name"],
-            ab.year,
-            datetime.datetime.now().year,
             calendar.month_name[month],
         ),
         fontsize=12,
@@ -114,7 +127,11 @@ def plotter(fdict):
             width=0.8,
             fc="tan",
             align="center",
-            label="IEM Observed Avg",
+            label="IEM %.0f-%.0f Obs Avg"
+            % (
+                df["min_year"].min(),
+                df["max_year"].max(),
+            ),
         )
         ax[i].plot(
             x,
@@ -154,7 +171,7 @@ def plotter(fdict):
 
     ax[2].legend(
         loc="lower center",
-        bbox_to_anchor=(0.5, 0.95),
+        bbox_to_anchor=(0.5, 1),
         fancybox=True,
         shadow=True,
         ncol=4,
@@ -164,6 +181,10 @@ def plotter(fdict):
 
     ax[2].set_xlabel("Day of %s" % (calendar.month_name[month],))
     ax[2].set_xlim(0.5, len(x) + 0.5)
+
+    ax[0].set_position([0.1, 0.7, 0.85, 0.24])
+    ax[1].set_position([0.1, 0.42, 0.85, 0.24])
+    ax[2].set_position([0.1, 0.1, 0.85, 0.24])
 
     return fig, df
 
