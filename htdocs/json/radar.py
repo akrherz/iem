@@ -19,6 +19,7 @@ NIDS = {
     "N0Z": "Base Reflectivity",
     "TR0": "TDWR Base Reflectivity",
     "TV0": "TDWR Radial Velocity",
+    "TZL": "TDWR Base Reflectivity",
 }
 
 

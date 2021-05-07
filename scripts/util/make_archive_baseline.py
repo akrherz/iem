@@ -16,7 +16,7 @@ from pyiem.util import utc
 
 PRODS = {
     "NEXRAD": ["N0Q", "N0S", "N0U", "N0Z", "NET"],
-    "TWDR": ["NET", "TR0", "TV0"],
+    "TWDR": ["NET", "TZL", "TV0"],
 }
 PILS = (
     "LSR|FWW|CFW|TCV|RFW|FFA|SVR|TOR|SVS|SMW|MWS|NPW|WCN|WSW|EWW|FLS"
@@ -31,7 +31,7 @@ def chgrp(filepath, gid):
 
 
 def supermakedirs(path, mode, group):
-    """"http://stackoverflow.com/questions/5231901"""
+    """ "http://stackoverflow.com/questions/5231901"""
     if not path or os.path.exists(path):
         return []
     (head, _) = os.path.split(path)

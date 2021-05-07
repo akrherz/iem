@@ -29,7 +29,12 @@ def get_description():
             network="IACLIMATE",
             label="Select Station:",
         ),
-        dict(type="month", name="month", default="12", label="Select Month:"),
+        dict(
+            type="month",
+            name="month",
+            default=datetime.date.today().month,
+            label="Select Month:",
+        ),
         dict(
             type="year",
             min=1850,
