@@ -219,7 +219,7 @@ def grid_day12(ts, ds):
             and substr(id, 3, 4) != '0000'
         )
         SELECT m.lon, m.lat, m.state, m.id as station, m.name as name,
-        case when precip_estimated then null else precip end) as precipdata,
+        case when precip_estimated then null else precip end as precipdata,
         snow as snowdata, snowd as snowddata,
         case when temp_estimated then null else high end as highdata,
         case when temp_estimated then null else low end as lowdata
