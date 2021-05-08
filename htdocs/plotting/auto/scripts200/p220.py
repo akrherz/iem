@@ -55,6 +55,8 @@ COLORS = {
     "ELEV": "#ffbb7c",
     "CRIT": "#ff787d",
     "EXTM": "#ff78ff",
+    "IDRT": "#c5a392",
+    "SDRT": "#ff7f7f",
     "0.02": "#008b00",
     "0.05": "#8b4726",
     "0.10": "#ffc800",
@@ -83,7 +85,7 @@ ISO = "%Y-%m-%d %H:%M"
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 600
@@ -180,7 +182,7 @@ def compute_datelabel(df):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     valid = ctx["valid"].replace(tzinfo=datetime.timezone.utc)
     pgconn = get_dbconn("postgis")
@@ -260,7 +262,7 @@ def plotter(fdict):
             )
             rect = Rectangle((0, 0), 1, 1, fc="None", hatch="/")
         else:
-            fc = COLORS[row["threshold"]]
+            fc = COLORS.get(row["threshold"], "red")
             ec = OUTLINE_COLORS.get(row["threshold"], "k")
             if day == 0:
                 fc, ec = "None", DAY_COLORS[row["day"]]
