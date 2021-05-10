@@ -171,14 +171,19 @@ def main(argv):
             do(sid, acis_station, True)
 
     if len(argv) == 2:
-        state = argv[1]
-        # Only run cron job for online sites
-        nt = NetworkTable(f"{state}CLIMATE", only_online=not interactive)
-        for sid in nt.sts:
-            if sid[2] in ["T", "C"] or sid[2:] == "0000":
-                continue
-            acis_station = ncei_state_codes[state] + sid[2:]
-            _worker(sid, acis_station)
+        arg = argv[1]
+        if len(arg) == 2:
+            # Only run cron job for online sites
+            nt = NetworkTable(f"{arg}CLIMATE", only_online=not interactive)
+            for sid in nt.sts:
+                if sid[2] in ["T", "C"] or sid[2:] == "0000":
+                    continue
+                acis_station = ncei_state_codes[arg] + sid[2:]
+                _worker(sid, acis_station)
+        else:
+            station = arg
+            acis_station = ncei_state_codes[station[:2]] + station[2:]
+            _worker(station, acis_station)
     else:
         (station, acis_station) = argv[1], argv[2]
         _worker(station, acis_station)
