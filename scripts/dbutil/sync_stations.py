@@ -5,13 +5,14 @@ databases.  This will hopefully remove some hackery
 import datetime
 import sys
 
+import numpy as np
 from pyiem.util import get_dbconn, logger
-import psycopg2.extras
+from pandas.io.sql import read_sql
 
 LOG = logger()
 
 
-def sync(mesosite, dbname, do_delete):
+def sync(df, dbname):
     """
     Actually do the syncing, please
     """
@@ -23,39 +24,33 @@ def sync(mesosite, dbname, do_delete):
     row = dbcursor.fetchone()
     maxts = row[0] or datetime.datetime(1980, 1, 1)
     maxid = row[1] or -1
-    cur = mesosite.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    todelete = []
-    if do_delete:
-        # Generate massive listing of all NWSLIs
-        cur.execute("SELECT iemid from stations")
-        iemids = []
-        for row in cur:
-            iemids.append(row[0])
-        # Find what iemids we have in local database
-        dbcursor.execute("SELECT iemid from stations")
-        for row in dbcursor:
-            if row[0] not in iemids:
-                todelete.append(row[0])
-        if todelete:
-            dbcursor.execute(
-                "DELETE from stations where iemid in %s", (tuple(todelete),)
-            )
-    # figure out what has changed!
-    cur.execute(
-        """
-        SELECT * from stations WHERE modified > %s or iemid > %s
-    """,
-        (maxts, maxid),
+    # Check for stations that were removed from mesosite
+    localdf = read_sql(
+        "SELECT iemid, modified from stations ORDER by iemid ASC",
+        dbconn,
+        index_col="iemid",
     )
-    for row in cur:
-        if row["iemid"] > maxid:
+    localdf["iemid"] = localdf.index.values
+    todelete = localdf.index.difference(df.index)
+    if not todelete.empty:
+        for iemid in todelete.values:
             dbcursor.execute(
-                """
-                INSERT into stations(iemid, network, id)
-                VALUES(%s,%s,%s)
-            """,
-                (row["iemid"], row["network"], row["id"]),
+                "DELETE from stations where iemid = %s",
+                (iemid,),
             )
+        dbcursor.close()
+        dbconn.commit()
+        dbcursor = dbconn.cursor()
+
+    changes = df[(df["iemid"] > maxid) | (df["modified"] > maxts)]
+    for iemid, row in changes.iterrows():
+        prow = row.replace({np.nan: None}).to_dict()
+        if prow["iemid"] not in localdf.index:
+            dbcursor.execute(
+                "INSERT into stations(iemid, network, id) VALUES(%s, %s, %s)",
+                (prow["iemid"], prow["network"], prow["id"]),
+            )
+
         # insert queried stations
         dbcursor.execute(
             """
@@ -80,13 +75,13 @@ def sync(mesosite, dbname, do_delete):
             temp24_hour = %(temp24_hour)s, precip24_hour = %(precip24_hour)s
             WHERE iemid = %(iemid)s
        """,
-            row,
+            prow,
         )
     LOG.info(
         "DB: %-7s Del %3s Mod %4s rows TS: %s IEMID: %s",
         dbname,
-        len(todelete),
-        cur.rowcount,
+        len(todelete.index),
+        len(changes.index),
         maxts.strftime("%Y/%m/%d %H:%M"),
         maxid,
     )
@@ -101,11 +96,6 @@ def main(argv):
     mesosite = get_dbconn("mesosite")
     subscribers = ["iem", "coop", "hads", "hml", "asos", "asos1min", "postgis"]
 
-    do_delete = False
-    if len(argv) == 2:
-        LOG.info("Running with delete option set, this will be slow")
-        do_delete = True
-
     if len(argv) == 3:
         LOG.info(
             "Running laptop syncing from upstream, assume iemdb is localhost!"
@@ -113,8 +103,14 @@ def main(argv):
         # HACK
         mesosite = get_dbconn("mesosite", host="172.16.172.1", user="nobody")
         subscribers.insert(0, "mesosite")
+    df = read_sql(
+        "SELECT * from stations ORDER by iemid ASC",
+        mesosite,
+        index_col="iemid",
+    )
+    df["iemid"] = df.index.values
     for sub in subscribers:
-        sync(mesosite, sub, do_delete)
+        sync(df, sub)
 
 
 if __name__ == "__main__":
