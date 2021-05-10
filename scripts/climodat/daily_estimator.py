@@ -49,6 +49,7 @@ def load_table(state, date):
                 "state": nt.sts[sid]["state"],
                 "temp24_hour": nt.sts[sid]["temp24_hour"],
                 "precip24_hour": nt.sts[sid]["precip24_hour"],
+                "dirty": False,
                 "tracks": (
                     nt.sts[sid]["attributes"]
                     .get("TRACKS_STATION", "|")
@@ -61,10 +62,21 @@ def load_table(state, date):
         return None, threaded
     df = pd.DataFrame(rows)
     df = df.set_index("station")
-    for key in "high low precip snow snowd temp_hour precip_hour".split():
-        df[key] = np.nan
-    for key in ["precip_estimated", "temp_estimated"]:
-        df[key] = False
+    # Load up any available observations
+    obs = read_sql(
+        "SELECT station, high, low, precip, snow, snowd, temp_hour, "
+        "precip_hour, coalesce(temp_estimated, true) as temp_estimated, "
+        "coalesce(precip_estimated, true) as precip_estimated "
+        f"from alldata_{state} WHERE day = %s and station in %s",
+        get_dbconn("coop"),
+        params=(date, tuple(df.index.values)),
+        index_col="station",
+    )
+    # combine this back into the main table
+    df = df.combine_first(obs)
+    # Set the default on the estimated columns to True
+    for col in ["temp_estimated", "precip_estimated"]:
+        df[col] = df[col].fillna(True)
     return df, threaded
 
 
@@ -82,6 +94,7 @@ def estimate_precip(df, ds):
             precip_hour = 7  # not precise
         df.at[sid, "precip_estimated"] = True
         df.at[sid, "precip_hour"] = precip_hour
+        df.at[sid, "dirty"] = True
         # denote trace
         if 0 < precip < 0.01:
             df.at[sid, "precip"] = TRACE_VALUE
@@ -113,8 +126,10 @@ def estimate_snow(df, ds):
     for sid, row in df.iterrows():
         if pd.isnull(row["snow"]):
             df.at[sid, "snow"] = snowgrid12[row["gridj"], row["gridi"]]
+            df.at[sid, "dirty"] = True
         if pd.isnull(row["snowd"]):
             df.at[sid, "snowd"] = snowdgrid12[row["gridj"], row["gridi"]]
+            df.at[sid, "dirty"] = True
 
 
 def k2f(val):
@@ -141,6 +156,7 @@ def estimate_hilo(df, ds):
             df.at[sid, "temp_hour"] = temp_hour
             df.at[sid, "temp_estimated"] = True
             df.at[sid, "high"] = val
+            df.at[sid, "dirty"] = True
     for sid, row in df[pd.isna(df["low"])].iterrows():
         if row["temp24_hour"] in [0, 22, 23]:
             val = lowgrid00[row["gridj"], row["gridi"]]
@@ -152,12 +168,15 @@ def estimate_hilo(df, ds):
             df.at[sid, "temp_hour"] = temp_hour
             df.at[sid, "temp_estimated"] = True
             df.at[sid, "low"] = val
+            df.at[sid, "dirty"] = True
 
 
 def nonan(val, precision=0):
     """Can't have NaN."""
     if pd.isna(val):
         return None
+    if precision == 0:
+        return int(np.round(val, 0))
     return np.round(val, precision)
 
 
@@ -165,7 +184,10 @@ def commit(cursor, table, df, ts):
     """Inject into the database!"""
     # Inject!
     allowed_failures = 10
-    for sid, row in df.iterrows():
+    df2 = df[pd.isna(df["dirty"])]
+    if not df2.empty:
+        print(df2)
+    for sid, row in df[df["dirty"]].iterrows():
         LOG.debug(
             "sid: %s high: %s low: %s precip: %s snow: %s snowd: %s",
             sid,
@@ -241,10 +263,25 @@ def merge_network_obs(df, network, ts):
     # Some COOP sites may not report 'daily' high and low, so we cull those
     # out as nulls
     obs.loc[obs["high"] <= obs["low"], ("high", "low")] = np.nan
+    # Tricky part here, if our present data table has data and is not
+    # estimated, we don't want to over-write it!
     df = df.join(obs, how="left", on="tracks", rsuffix="b")
     for col in "high low precip snow snowd temp_hour precip_hour".split():
+        estcol = (
+            "precip_estimated"
+            if col in ["precip", "snow", "snowd", "precip_hour"]
+            else "temp_estimated"
+        )
+        # Only use when we have observed data and estimated col is True
+        useidx = ~pd.isna(df[f"{col}b"]) & df[estcol]
+        LOG.debug(
+            "Found %s rows needing data for %s",
+            len(useidx.index),
+            col,
+        )
         # using DataSeries.update() caused SettingWithCopyError, shrug
-        df.loc[~pd.isna(df[f"{col}b"]), col] = df[f"{col}b"]
+        df.loc[useidx, col] = df[f"{col}b"]
+        df.loc[useidx, "dirty"] = True
         df = df.drop(col + "b", axis=1)
     return df
 
