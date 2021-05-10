@@ -101,6 +101,7 @@ for ($i=0;$row=pg_fetch_assoc($rs);$i++)
                 "issue"     => $row["iso_issue"],
                 "expire"     => $row["iso_expire"],
                 "hvtec_nwsli" => $row["hvtec_nwsli"],
+                "href" => $vtecurl,
                 "link"         => sprintf("<a href='%s'>%s %s %s</a> &nbsp; ",
          $vtecurl, $vtec_phenomena[$row["phenomena"]],
          $vtec_significance[$row["significance"]], $row["eventid"]),

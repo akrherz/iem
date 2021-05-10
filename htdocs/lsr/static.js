@@ -1,1055 +1,756 @@
-Ext.override(Date, {
-    toUTC : function() {
-                        // Convert the date to the UTC date
-        return this.add(Date.MINUTE, this.getTimezoneOffset());
-    },
+// TODO print grid
+var olmap; // Openlayers map
+var lsrtable; // LSR DataTable
+var sbwtable; // SBW DataTable
+var n0q; // RADAR Layer
+var lsrLayer;
+var sbwLayer;
+var counties;
+var wfoSelect;
+var lsrtypefilter;
+var sbwtypefilter;
+var dateFormat1 = "YYYYMMDDHHmm";
+var nexradBaseTime = moment().utc().subtract(moment().minutes() % 5, "minutes");
+var realtime = false;
+var TABLE_FILTERED_EVENT = "tfe";
 
-    fromUTC : function() {
-                        // Convert the date from the UTC date
-        return this.add(Date.MINUTE, -this.getTimezoneOffset());
+// Use momentjs for formatting
+$.datetimepicker.setDateFormatter('moment');
+
+// https://datatables.net/plug-ins/api/row().show()
+$.fn.dataTable.Api.register('row().show()', function () {
+    var page_info = this.table().page.info();
+    // Get row index
+    var new_row_index = this.index();
+    // Row position
+    var row_position = this.table()
+        .rows({ search: 'applied' })[0]
+        .indexOf(new_row_index);
+    // Already on right page ?
+    if ((row_position >= page_info.start && row_position < page_info.end) || row_position < 0) {
+        // Return row object
+        return this;
     }
+    // Find page number
+    var page_to_display = Math.floor(row_position / this.table().page.len());
+    // Go to that page
+    this.table().page(page_to_display);
+    // Return row object
+    return this;
 });
 
-/**
- * @class Ext.ux.SliderTip
- * @extends Ext.Tip
- * Simple plugin for using an Ext.Tip with a slider to show the slider value
- */
-Ext.ux.SliderTip = Ext.extend(Ext.Tip, {
-    minWidth: 10,
-    offsets : [0, -10],
-    init : function(slider){
-        slider.on('dragstart', this.onSlide, this);
-        slider.on('drag', this.onSlide, this);
-        slider.on('dragend', this.hide, this);
-        slider.on('destroy', this.destroy, this);
-    },
-
-    onSlide : function(slider){
-        this.show();
-        this.body.update(this.getText(slider));
-        this.doAutoWidth();
-        this.el.alignTo(slider.thumb, 'b-t?', this.offsets);
-    },
-
-    getText : function(slider){
-        return slider.getValue();
+function parse_href() {
+    // Figure out how we were called
+    var tokens = window.location.href.split('#');
+    if (tokens.length != 2) {
+        return;
     }
-});
-var options, lsrGridPanel, sbwGridPanel, nexradSlider, map, lsrLayer;
-
-Ext.onReady(function(){
-
-Ext.QuickTips.init();
-
-//var extent = new OpenLayers.Bounds(-120, 28, -60, 55);
-
-var expander = new Ext.grid.RowExpander({
-        width: 20,
-        tpl : new Ext.Template(
-            '<p><b>Source:</b> {source} <b>Remark:</b> {remark}<br><b>Active Products:</b> {prodlinks}'
-        )
-});
-
-var sbw_expander = new Ext.grid.RowExpander({
-        width: 20,
-        tpl : new Ext.Template(
-            '<p><b>Link:</b> {link}'
-        )
-});
-
-/* 
- * Figure out the last valid time for the slider
- */
-function setLastNEXRAD(){
-  var now = new Date();
-  var gmt = now.toUTC();
-  var gmtl5 = gmt.add(Date.MINUTE, 0 - (parseInt(gmt.format('i')) % 5));
-  Ext.getCmp('nexradslider').setMaxValue(gmtl5.fromUTC().getTime());
-  Ext.getCmp('nexradslider').setValue(gmtl5.fromUTC().getTime());
+    var tokens2 = tokens[1].split("/");
+    if (tokens2.length < 2) {
+        return;
+    }
+    var wfos = tokens2[0].split(",");
+    wfoSelect.val(wfos).trigger("change");
+    if (tokens2.length > 2) {
+        var sts = moment.utc(tokens2[1], dateFormat1);
+        var ets = moment.utc(tokens2[2], dateFormat1);
+    }
+    else {
+        realtime = true;
+        $("#realtime").prop('checked', true);
+        // Offset timing
+        var ets = moment.utc();
+        var sts = moment.utc(ets).add(parseInt(tokens2[1]), 'seconds');
+    }
+    $("#sts").val(sts.local().format("L LT"));
+    $("#ets").val(ets.local().format("L LT"));
+    updateRADARTimes();
+    if (tokens2.length > 3) {
+        // We have settings
+        applySettings(tokens2[3]);
+    }
+    loadData();
+}
+function cronMinute() {
+    if (!realtime) return;
+    // Compute the delta
+    var sts = moment($("#sts").val(), 'L LT').utc();
+    var ets = moment($("#ets").val(), 'L LT').utc();
+    $("#ets").val(moment().format('L LT'));
+    var seconds = ets.diff(sts) / 1000;  // seconds
+    $("#sts").val(moment().subtract(seconds, 'seconds').format('L LT'));
+    loadData();
+}
+function getRADARSource(dt) {
+    var prod = dt.year() < 2011 ? 'N0R' : 'N0Q';
+    return new ol.source.XYZ({
+        url: '/cache/tile.py/1.0.0/ridge::USCOMP-' + prod + '-' + dt.utc().format('YMMDDHHmm') + '/{z}/{x}/{y}.png'
+    });
 }
 
-function genSettings(){ 
-  /* Generate URL options set on this page */
-  var s = "";
-  s += (nexradWMS.visibility ? "1" : "0");
-  s += (lsrLayer.visibility ? "1" : "0");
-  s += (sbwLayer.visibility ? "1" : "0");
-  s += (counties.visibility ? "1" : "0");
-  return s;
+function make_iem_tms(title, layername, visible, type) {
+    return new ol.layer.Tile({
+        title: title,
+        visible: visible,
+        type: type,
+        source: new ol.source.XYZ({
+            url: '/c/tile.py/1.0.0/' + layername + '/{z}/{x}/{y}.png'
+        })
+    })
 }
-
-function applySettings(opts){
-  if (opts[0] == "1"){ /* Enable Warnings */
-    nexradWMS.setVisibility(true);
-  }
-  if (opts[1] == "1"){ /* Enable Warnings */
-    lsrLayer.setVisibility(true);
-  }
-  if (opts[2] == "1"){ /* Enable Warnings */
-    sbwLayer.setVisibility(true);
-  }
-  if (opts[3] == "1"){ /* Enable Warnings */
-    counties.setVisibility(true);
-  }
-}
-
-/* URL format #DMX,DVN,FSD/201001010101/201001010201 */
-function reloadData(){
-  /* Switch display to LSR tab */
-  Ext.getCmp("tabs").setActiveTab(1);
-  var s = Ext.getCmp("wfoselector").getValue();
-
-  var sts = Ext.getCmp("datepicker1").getValue().format('m/d/Y')
-                     +" "+ Ext.getCmp("timepicker1").getValue();
-  var sdt = new Date(sts);
-  var start_utc = sdt.toUTC();
-  /* Set the nexradSlider to the top of the hour */
-  Ext.getCmp("nexradslider").setMinValue(
-		  (start_utc.fromUTC()).add(Date.MINUTE, 
-                          0 - parseInt(start_utc.format('i')) ).getTime());
-
-  var ets = Ext.getCmp("datepicker2").getValue().format('m/d/Y')
-                     +" "+ Ext.getCmp("timepicker2").getValue();
-  var edt = new Date(ets);
-  var end_utc = edt.toUTC();
-  /* Set the nexradSlider to the top of the next hour */
-  Ext.getCmp("nexradslider").setMaxValue(
-		  (end_utc.fromUTC()).add(Date.MINUTE, 
-                          60 - parseInt(start_utc.format('i')) ).getTime());
-  if (Ext.getCmp('rtcheckbox').checked) {
-    setLastNEXRAD();
-  } else if (start_utc.getTime() == end_utc.getTime()){
-	  // Mod back 5
-	  var time = (start_utc.fromUTC()).add(Date.MINUTE, 
-              0 - (parseInt(start_utc.format('i')) % 5) ).getTime();
-	  Ext.getCmp("nexradslider").setValue(time);
-  } else {
-	Ext.getCmp("nexradslider").setValue(nexradSlider.minValue);
-  }
-  Ext.getCmp("nexradslider").fireEvent('changecomplete');
-
-  lsrGridPanel.getStore().reload({
-      add    : false,
-      params : {
-         'sts': start_utc.format('YmdHi'),
-         'ets': end_utc.format('YmdHi'),
-         'wfos': s
-       }
-   });
-  sbwGridPanel.getStore().reload({
-      add    : false,
-      params : {
-         'sts': start_utc.format('YmdHi'),
-         'ets': end_utc.format('YmdHi'),
-         'wfos': s
-       }
-   });
-   updateURL();
-}
-
-function updateURL(){
-   var s = Ext.getCmp("wfoselector").getValue();
-   var sts = Ext.getCmp("datepicker1").getValue().format('m/d/Y')
-                     +" "+ Ext.getCmp("timepicker1").getValue();
-   var sdt = new Date(sts);
-   var start_utc = sdt.toUTC();
-
-   var ets = Ext.getCmp("datepicker2").getValue().format('m/d/Y')
-                     +" "+ Ext.getCmp("timepicker2").getValue();
-   var edt = new Date(ets);
-   var end_utc = edt.toUTC();
-
-   window.location.href = "#"+ s +"/"+ start_utc.format('YmdHi') +
-                                  "/"+ end_utc.format('YmdHi') +
-                                  "/"+ genSettings();
-
-}
-
-options = {
-    projection    : new OpenLayers.Projection("EPSG:3857"),
-    units         : "m",
-    numZoomLevels : 18,
-    maxResolution : 156543.0339,
-    maxExtent     : new OpenLayers.Bounds(-20037508, -20037508,
-                                             20037508, 20037508.34)
-}
-
-nexradSlider = {
-	xtype: 'slider',
-  id          : 'nexradslider',
-  minValue    : (new Date()).getTime(),
-  value       : (new Date()).getTime(),
-  maxValue    : (new Date()).getTime() + 600000,
-  increment   : 300000,
-  isFormField : true,
-  width       : 360,
-  colspan     : 4,
-  plugins  : [new Ext.slider.Tip({
-	  getText: function(thumb){
-		  return String.format('<b>{0} Local Time</b>',
-	            (new Date(thumb.value)).format('Y-m-d g:i a'));
-	  }
-  })],
-  listeners   : {
-	  changecomplete: function(){
-            var dt = new Date(this.getValue());
-            // Need to rectify date to modulo 5
-            dt.setMinutes(5 * parseInt(dt.getMinutes() / 5));
-			nexradWMS.mergeNewParams({
-			     time: dt.toUTC().format('Y-m-d\\TH:i')
-			});
-		    Ext.getCmp("appTime").setText("NEXRAD Valid: "+ dt.format('Y-m-d g:i A'));
-	  }
-  }
-};
-
-var nexradWMS = new OpenLayers.Layer.WMS("NEXRAD",
-   "https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi?",
-   {
-     layers      : "nexrad-n0r-wmst",
-     maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
-     transparent : true,
-     sphericalMercator: true,
-     format      : 'image/png',
-     time        : '2017-01-01T00:00'
-   },{
-     singleTile  : true,
-     visibility  : false,
-     eventListeners: {
-      'visibilitychanged': function(){
-         updateURL();
-      }
-     }
-});
-
-
-var counties = new OpenLayers.Layer.WMS("Counties", "https://mesonet.agron.iastate.edu/c/c.py/",
-    {layers      : 'uscounties',
-     format      : 'image/png',
-     transparent : 'true'},{
-     opacity     : 1.0,
-     singleTile  : false,
-     isBaseLayer : false,
-     visibility  : false,
-     buffer      : 0,
-     eventListeners: {
-      'visibilitychanged': function(){
-         updateURL();
-      }
-     }
-});
-
-var states = new OpenLayers.Layer.WMS("States", "https://mesonet.agron.iastate.edu/c/c.py/",
-	    {layers      : 'usstates',
-	     format      : 'image/png',
-	     transparent : 'true'},{
-	     opacity     : 1.0,
-	     singleTile  : false,
-	     isBaseLayer : false,
-	     visibility  : false,
-	     buffer      : 0,
-	     eventListeners: {
-	      'visibilitychanged': function(){
-	         updateURL();
-	      }
-	     }
-	});
-
-
-map = new OpenLayers.Map(options);
-var ls = new OpenLayers.Control.LayerSwitcher();
-map.addControl(ls);
-
-/* Create LSR styler */
-var sbwStyleMap = new OpenLayers.StyleMap({
-       'default': {
-           strokeColor: 'black',
-           strokeWidth: 3,
-           fillOpacity  : 0,
-           strokeOpacity: 1
-       },
-       'select': {
-           strokeWidth: 5
-       }
-});
 
 var sbwLookup = {
- "TO": {strokeColor: 'red'},
- "MA": {strokeColor: 'purple'},
- "FF": {strokeColor: 'green'},
- "EW": {strokeColor: 'green'},
- "FA": {strokeColor: 'green'},
- "FL": {strokeColor: 'green'},
- "SV": {strokeColor: 'yellow'},
- "SQ": {strokeColor: "#C71585"},
- "DS": {strokeColor: "#FFE4C4"}
+    "TO": 'red',
+    "MA": 'purple',
+    "FF": 'green',
+    "EW": 'green',
+    "FA": 'green',
+    "FL": 'green',
+    "SV": 'yellow',
+    "SQ": "#C71585",
+    "DS": "#FFE4C4"
 }
 
 // Lookup 'table' for styling
 var lsrLookup = {
- "0": "icons/tropicalstorm.gif",
- "1": "icons/flood.png",
- "x": "icons/flood.png",
- "2": "icons/other.png",
- "3": "icons/other.png",
- "4": "icons/other.png",
- "5": "icons/ice.png",
- "6": "icons/cold.png",
- "7": "icons/cold.png",
- "8": "icons/fire.png",
- "9": "icons/other.png",
- "a": "icons/other.png",
- "A": "icons/wind.png",
- "B": "icons/downburst.png",
- "C": "icons/funnelcloud.png",
- "D": "icons/winddamage.png",
- "E": "icons/flood.png",
- "F": "icons/flood.png",
- "v": "icons/flood.png",
- "G": "icons/wind.png",
- "H": "icons/hail.png",
- "I": "icons/hot.png",
- "J": "icons/fog.png",
- "K": "icons/lightning.gif",
- "L": "icons/lightning.gif",
- "M": "icons/wind.png",
- "N": "icons/wind.png",
- "O": "icons/wind.png",
- "P": "icons/other.png",
- "Q": "icons/tropicalstorm.gif",
- "s": "icons/sleet.png",
- "T": "icons/tornado.png",
- "U": "icons/fire.png",
- "V": "icons/avalanche.gif",
- "W": "icons/waterspout.png",
- "X": "icons/funnelcloud.png",
- "Z": "icons/blizzard.png"};
-sbwStyleMap.addUniqueValueRules('default', 'phenomena', sbwLookup);
-
+    "0": "icons/tropicalstorm.gif",
+    "1": "icons/flood.png",
+    "x": "icons/flood.png",
+    "2": "icons/other.png",
+    "3": "icons/other.png",
+    "4": "icons/other.png",
+    "5": "icons/ice.png",
+    "6": "icons/cold.png",
+    "7": "icons/cold.png",
+    "8": "icons/fire.png",
+    "9": "icons/other.png",
+    "a": "icons/other.png",
+    "A": "icons/wind.png",
+    "B": "icons/downburst.png",
+    "C": "icons/funnelcloud.png",
+    "D": "icons/winddamage.png",
+    "E": "icons/flood.png",
+    "F": "icons/flood.png",
+    "v": "icons/flood.png",
+    "G": "icons/wind.png",
+    "H": "icons/hail.png",
+    "I": "icons/hot.png",
+    "J": "icons/fog.png",
+    "K": "icons/lightning.gif",
+    "L": "icons/lightning.gif",
+    "M": "icons/wind.png",
+    "N": "icons/wind.png",
+    "O": "icons/wind.png",
+    "P": "icons/other.png",
+    "Q": "icons/tropicalstorm.gif",
+    "s": "icons/sleet.png",
+    "T": "icons/tornado.png",
+    "U": "icons/fire.png",
+    "V": "icons/avalanche.gif",
+    "W": "icons/waterspout.png",
+    "X": "icons/funnelcloud.png",
+    "Z": "icons/blizzard.png"
+};
 
 var lsr_context = {
-    getText: function(feature) {
-    	if (feature.attributes['type'] == 'S'){
-        	return feature.attributes["magnitude"];
-    	} else if (feature.attributes['type'] == 'R'){
-        	return feature.attributes["magnitude"];    		
-    	}
-    	return "";
+    getText: function (feature) {
+        if (feature.attributes['type'] == 'S') {
+            return feature.attributes["magnitude"];
+        } else if (feature.attributes['type'] == 'R') {
+            return feature.attributes["magnitude"];
+        }
+        return "";
     },
-    getExternalGraphic: function(feature) {
-    	if (feature.attributes['type'] == 'S' ||
-    	    feature.attributes['type'] == 'R'){
-    		return "";
-    	} 
+    getExternalGraphic: function (feature) {
+        if (feature.attributes['type'] == 'S' ||
+            feature.attributes['type'] == 'R') {
+            return "";
+        }
         return lsrLookup[feature.attributes['type']];
     }
 };
-var lsr_template = {
-	externalGraphic: "${getExternalGraphic}",
-	graphicWidth: 20,
-	graphicHeight: 20,
-	graphicOpacity: 1,
-    label: "${getText}",
-    strokeColor: "#FFFFFF",
-    strokeOpacity: 0,
-    //strokeWidth: 3,
-    fillColor: "#FFFFFF",
-    fillOpacity: 0,
-    pointRadius: 10,
-    //pointerEvents: "visiblePainted",    
-    fontColor: "#000",
-    fontSize: "14px",
-    fontFamily: "Courier New, monospace",
-    fontWeight: "bold",
-    labelOutlineColor: "white",
-    labelOutlineWidth: 3
-};
-var lsr_style = new OpenLayers.Style(lsr_template, {context: lsr_context});
-// create vector layer
-lsrLayer = new OpenLayers.Layer.Vector("Local Storm Reports",{
-     styleMap  : new OpenLayers.StyleMap(lsr_style),
-     sphericalMercator: true,
-     maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
-     eventListeners: {
-      'visibilitychanged': function(){
-         updateURL();
-      }
-     }
+var sbwStyle = [new ol.style.Style({
+    stroke: new ol.style.Stroke({
+        color: '#000',
+        width: 4.5
+    })
+}), new ol.style.Style({
+    stroke: new ol.style.Stroke({
+        color: '#319FD3',
+        width: 3
+    })
+})
+];
+var lsrStyle = new ol.style.Style({
+    image: new ol.style.Icon({ src: lsrLookup['9'] })
 });
 
-function createPopup(feature) {
-      // Can't get valid as an object :(
-      var html = "Time: "+ feature.data.valid +" UTC"
-           +"<br />Event: "+ feature.data.magnitude +" "+ feature.data.typetext
-           +"<br />Source: "+ feature.data.source
-           +"<br />Remark: "+ feature.data.remark ;
-      var popup = new GeoExt.Popup({
-            title: feature.data.wfo +": "+ feature.data.city,
-            feature: feature,
-            width:200,
-            html: html,
-            maximizable: true,
-            collapsible: true
-        });
-        // unselect feature when the popup
-        // is closed
-        popup.show();
-}
-
-lsrLayer.events.on({
-        featureselected: function(e) {
-            createPopup(e.feature);
-        }
-});
-
-
-var sbwLayer = new OpenLayers.Layer.Vector("Storm Based Warnings",{
-      styleMap: sbwStyleMap,
-     sphericalMercator: true,
-      visibility: false,
-     maxExtent : new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
-     eventListeners: {
-      'visibilitychanged': function(){
-         updateURL();
-      }
-     }
-});
-
-function getShapefileLink(){
-    var uri = "/cgi-bin/request/gis/watchwarn.py?";
-    var s = Ext.getCmp("wfoselector").getValue();
-    var sts = Ext.getCmp("datepicker1").getValue().format('m/d/Y')
-       +" "+ Ext.getCmp("timepicker1").getValue();
-    var sdt = new Date(sts);
-    var start_utc = sdt.toUTC();
-    var ets = Ext.getCmp("datepicker2").getValue().format('m/d/Y')
-       +" "+ Ext.getCmp("timepicker2").getValue();
-    var edt = new Date(ets);
-    var end_utc = edt.toUTC();
-    if (s != ""){
-      var tokens = s.split(",");
-      for (var i=0;i<tokens.length;i++){
-        uri += "&wfo[]="+ tokens[i];
-      }
-    }
-    uri += "&year1="+ start_utc.format('Y');
-    uri += "&month1="+ start_utc.format('m');
-    uri += "&day1="+ start_utc.format('d');
-    uri += "&hour1="+ start_utc.format('H');
-    uri += "&minute1="+ start_utc.format('i');
-    uri += "&year2="+ end_utc.format('Y');
-    uri += "&month2="+ end_utc.format('m');
-    uri += "&day2="+ end_utc.format('d');
-    uri += "&hour2="+ end_utc.format('H');
-    uri += "&minute2="+ end_utc.format('i');
-    return uri;
-}
-
-
-
-sbwGridPanel = new Ext.grid.GridPanel({
-   autoScroll : true,
-   id         : 'sbwGridPanel',
-   title      : "Storm Based Warnings",
-   loadMask   : {msg:'Loading Data...'},
-   viewConfig : {forceFit: true},
-   tbar       : [{
-            text    : 'Print Data Grid',
-            icon    : 'icons/print.png',
-            cls     : 'x-btn-text-icon',
-            handler : function(){
-              Ext.ux.Printer.print(Ext.getCmp("sbwGridPanel"));
-            }
-    },{
-        icon    : 'icons/excel.png',
-        text    : 'Export to Excel...',
-        handler : function(){
-           var xd = sbwGridPanel.getExcelXml(true);
-         var dataURL = 'exportexcel.php';
-         var params =[{
-              name: 'ex',
-              value: xd
-         }];
-         post_to_url(dataURL, params, 'post');
-        }
-      },{
-            xtype     : 'button',
-            text      : 'Save Shapefile',
-            icon      : 'icons/shapefile.gif',
-            cls       : 'x-btn-text-icon',
-            listeners : {
-               click  : function() {
-                  var uri = getShapefileLink();
-                  window.location.href = uri;
-               }  // End of handler
-            }
-   },{
-    xtype     : 'button',
-    text      : 'Save SBW Shapefile',
-    icon      : 'icons/shapefile.gif',
-    cls       : 'x-btn-text-icon',
-    listeners : {
-       click  : function() {
-          var uri = getShapefileLink() + "&limit1=yes";
-          window.location.href = uri;
-       }  // End of handler
-    }
-},{
-       xtype     : 'button',
-       text      : 'Expand All',
-       listeners : {
-           click : function() {
-                var nRows=sbwGridPanel.getStore().getCount();
-                for(var i=0;i< nRows;i++)
-                   sbw_expander.expandRow(sbwGridPanel.view.getRow(i));
-           }
-       }
-   }],
-     store      : new GeoExt.data.FeatureStore({
-      layer     : sbwLayer,
-      fields    : [
-         {name: 'wfo'},
-         {name: 'issue', type: 'date', dateFormat: 'c'},
-         {name: 'utc_issue', type: 'date', mapping: 'issue', convert: utcdate},
-         {name: 'expire', type: 'date', dateFormat: 'c'},
-         {name: 'utc_expire', type: 'date', mapping: 'expire', convert: utcdate},
-         {name: 'phenomena'},
-         {name: 'significance'},
-         {name: 'eventid', type:'int'},
-         {name: 'link'}
-      ],
-      proxy: new GeoExt.data.ProtocolProxy({
-            protocol : new OpenLayers.Protocol.HTTP({
-              url      : "/geojson/sbw.php",
-              format   : new OpenLayers.Format.GeoJSON({
-                   externalProjection: new OpenLayers.Projection("EPSG:4326"),
-                   internalProjection: new OpenLayers.Projection("EPSG:3857")
-               })
-             })
-      }),
-      autoLoad  : false
-   }), 
-   plugins: [sbw_expander],
-   columns: [sbw_expander,{
-            header    : "Office",
-            width     : 50,
-            sortable  : true,
-            dataIndex : "wfo" 
-         }, {
-            header    : "Event",
-            sortable  : true,
-            dataIndex : "phenomena",
-            renderer  : function(value){
-                return iemdata.vtecPhenomenaStore.getById(value).data.name;
-            }
-         }, {
-            header    : "Significance",
-            sortable  : true,
-            dataIndex : "significance",
-            renderer  : function(value){
-                return iemdata.vtecSignificanceStore.getById(value).data.name;
-            }
-         }, {
-            header    : "Event ID",
-            sortable  : true,
-            dataIndex : "eventid",
-            width     : 50
-        }, {
-            header    : "Issued",
-            sortable  : true,
-            dataIndex : "issue",
-            renderer  : function(value){
-                return value.format('Y-m-d g:i A');
-            }
-        }, {
-            header    : "Issued UTC",
-            sortable  : true,
-            hidden : true,
-            dataIndex : "utc_issue",
-            renderer  : function(value){
-                return value.format('Y-m-d g:i');
-            }
-        }, {
-            header    : "Expired",
-            sortable  : true,
-            dataIndex : "expire",
-            renderer  : function(value){
-                return value.format('Y-m-d g:i A');
-            }
-        }, {
-            header    : "Expired UTC",
-            sortable  : true,
-            hidden : true,
-            dataIndex : "utc_expire",
-            renderer  : function(value){
-                return value.format('Y-m-d g:i');
-        }
-   }],
-   sm: new GeoExt.grid.FeatureSelectionModel() 
-});
-
-function post_to_url(path, params, method) {
-     method = method || "post"; 
-     var form = document.createElement("form");
-     form.setAttribute("method", method);
-     form.setAttribute("action", path);
-     for(var i=0; i<params.length; i++) {
-         var hiddenField = document.createElement("input");
-         hiddenField.setAttribute("type", "hidden");
-         hiddenField.setAttribute("name", params[i].name);
-         hiddenField.setAttribute("value", params[i].value);            
-         form.appendChild(hiddenField);
-     }   
-     document.body.appendChild(form);   
-     form.submit();
-}
-
-function utcdate(v, record){
-	return (new Date.parseDate(v, 'c')).toUTC();
-}
-function getLSRShapefileURI(){
-    var uri = "/cgi-bin/request/gis/lsr.py?";
-    var s = Ext.getCmp("wfoselector").getValue();
-    var sts = Ext.getCmp("datepicker1").getValue().format('m/d/Y')
-       +" "+ Ext.getCmp("timepicker1").getValue();
-    var sdt = new Date(sts);
-    var start_utc = sdt.toUTC();
-    var ets = Ext.getCmp("datepicker2").getValue().format('m/d/Y')
-       +" "+ Ext.getCmp("timepicker2").getValue();
-    var edt = new Date(ets);
-    var end_utc = edt.toUTC();
-    if (s != ""){
-      var tokens = s.split(",");
-      for (var i=0;i<tokens.length;i++){
-        uri += "&wfo[]="+ tokens[i];
-      }
-    }
-    uri += "&year1="+ start_utc.format('Y');
-    uri += "&month1="+ start_utc.format('m');
-    uri += "&day1="+ start_utc.format('d');
-    uri += "&hour1="+ start_utc.format('H');
-    uri += "&minute1="+ start_utc.format('i');
-    uri += "&year2="+ end_utc.format('Y');
-    uri += "&month2="+ end_utc.format('m');
-    uri += "&day2="+ end_utc.format('d');
-    uri += "&hour2="+ end_utc.format('H');
-    uri += "&minute2="+ end_utc.format('i');
-    return uri;
-}
-
-lsrGridPanel = new Ext.grid.GridPanel({
-   autoScroll : true,
-   id         : 'lsrGridPanel',
-   title      : "Local Storm Report Information",
-   loadMask   : {msg:'Loading Data...'},
-   viewConfig : {forceFit: true},
-   tbar       : [{
-            text    : 'Print Data Grid',
-            icon    : 'icons/print.png',
-            cls     : 'x-btn-text-icon',
-            handler : function(){
-              Ext.ux.Printer.print(Ext.getCmp("lsrGridPanel"));
-            }
-    },{
-     icon    : 'icons/excel.png',
-     text    : 'Export to Excel...',
-     listeners : {
-        click  : function() {
-            uri = getLSRShapefileURI() + "&fmt=excel";
-            window.location.href = uri;
-        }
-     }
-   },{
-        xtype     : 'button',
-        text      : 'Save Shapefile',
-        icon      : 'icons/shapefile.gif',
-        cls       : 'x-btn-text-icon',
-        listeners : {
-            click  : function() {
-                uri = getLSRShapefileURI();
-                window.location.href = uri;
-            }
-        }
-   },{
-       xtype     : 'button',
-       text      : 'Expand All',
-       listeners : {
-           click : function() {
-                var nRows=lsrGridPanel.getStore().getCount();
-                for(var i=0;i< nRows;i++)
-                   expander.expandRow(lsrGridPanel.view.getRow(i));
-           }
-       }
-   }],
-   store      : new GeoExt.data.FeatureStore({
-      layer     : lsrLayer,
-      fields    : [
-         {name: 'wfo', type: 'string'},
-         {name: 'valid', type: 'date', mapping: 'valid', dateFormat: 'c'},
-         {name: 'utc_valid', type: 'date', mapping: 'valid', convert: utcdate},
-         {name: 'county'},
-         {name: 'city'},
-         {name: 'st', type: 'string'},
-         {name: 'typetext', type: 'string'},
-         {name: 'remark'},
-         {name: 'prodlinks'},
-         {name: 'wfo'},
-         {name: 'source'},
-         {name: 'magnitude', type: 'float'},
-         {name: 'lat', type: 'float'},
-         {name: 'lon', type: 'float'}
-      ],
-      proxy: new GeoExt.data.ProtocolProxy({
-            protocol : new OpenLayers.Protocol.HTTP({
-              url      : "/geojson/lsr.php?inc_ap=yes",
-              format   : new OpenLayers.Format.GeoJSON({
-                   externalProjection: new OpenLayers.Projection("EPSG:4326"),
-                   internalProjection: new OpenLayers.Projection("EPSG:3857")
-               })
-             })
-      }),
-      autoLoad  : false
-   }), 
-   plugins: [expander],
-   columns: [expander,{
-            header    : "Office",
-            width     : 50,
-            sortable  : true,
-            dataIndex : "wfo"
-        }, {
-            header    : "Report Time",
-            sortable  : true,
-            dataIndex : "valid",
-            renderer  : function(value, metadata, record){
-                return value.format('Y-m-d g:i A');
-            }
-        }, {
-            header    : "Report Time UTC",
-            sortable  : true,
-            hidden : true,
-            dataIndex : "utc_valid",
-            renderer  : function(value){
-                return value.format('Y-m-d g:i');
-            }
-        },{
-            header: "County",
-            sortable  : true,
-            dataIndex: "county"
-        }, {
-            header: "Location",
-            sortable  : true,
-            dataIndex: "city"
-        }, {
-            header: "ST",
-            width: 30,
-            sortable  : true,
-            dataIndex: "st"
-        }, {
-            header: "Event Type",
-            sortable  : true,
-            dataIndex: "typetext"
-        }, {
-            header    : "Mag.",
-            sortable  : true,
-            dataIndex : "magnitude",
-            width     : 50
-        }, {
-            header    : "Source",
-            sortable  : true,
-            dataIndex : "source",
-            hidden    : true
-        }, {
-            header    : "Lat",
-            sortable  : true,
-            dataIndex : "lat",
-            hidden    : true
-        }, {
-            header    : "Lon",
-            sortable  : true,
-            dataIndex : "lon",
-            hidden    : true
-        },{
-        	header: 'Remark',
-        	sortable: true,
-        	dataIndex: 'remark',
-        	hidden: true
-        }],
-   sm: new GeoExt.grid.FeatureSelectionModel() 
-});
-
-lsrGridPanel.getStore().on("load", function(mystore, records, options){
-    if (records.length > 2999){
-        Ext.Msg.alert('Warning', 'Request exceeds 3000 size limit, sorry.');
-    }
-    if (records.length == 1){ 
-        map.setCenter(lsrLayer.getDataExtent().getCenterLonLat(), 9);
-    } else if (records.length > 0){ 
-        map.zoomToExtent( lsrLayer.getDataExtent() );
-    } else {
-        Ext.Msg.alert('Alert', 'No LSRs found, sorry.');
-    }
-});
-
-
-/* SuperBoxSelector to do a multi pick */
-var wfoSelector = {
-    store           : new Ext.data.SimpleStore({
-       fields : ['abbr', 'wfo'],
-       data   : iemdata.wfos
+var textStyle = new ol.style.Style({
+    image: new ol.style.Circle({
+        radius: 10,
+        stroke: new ol.style.Stroke({
+            color: '#fff'
+        }),
+        fill: new ol.style.Fill({
+            color: '#3399CC'
+        })
     }),
-    rowspan         : 2,
-    allowBlank      : false,
-    width           : 200,
-    id              : 'wfoselector',
-    xtype           : 'superboxselect',
-    emptyText       : 'NWS Office(s), default all',
-    resizable       : true,
-    name            : 'wfo',
-    mode            : 'local',
-    displayFieldTpl : '{abbr}',
-    tpl             : '<tpl for="."><div class="x-combo-list-item">[{abbr}] {wfo}</div></tpl>',
-    valueField      : 'abbr',
-    forceSelection  : true,
-    listeners       : {
-      collapse : function(){  }
-    }
-};
+    text: new ol.style.Text({
+        font: 'bold 11px "Open Sans", "Arial Unicode MS", "sans-serif"',
+        fill: new ol.style.Fill({
+            color: 'white'
+        })
+    })
+});
 
-
-var startDateSelector = {
-    xtype     : 'datefield',
-    id        : 'datepicker1',
-    maxValue  : new Date(),
-    minValue  : '07/23/2003',
-    format    : 'j M Y',
-    value     : new Date(),
-    disabled  : false,
-    width     : 105,
-    listeners : {
-       select : function(field, value){
-          Ext.getCmp("datepicker2").minValue = value;
-          if (value > Ext.getCmp("datepicker2").getValue()){
-            Ext.getCmp("datepicker2").setValue( value );
-          }
-       }
+// create vector layer
+lsrLayer = new ol.layer.Vector({
+    title: "Local Storm Reports",
+    source: new ol.source.Vector({
+        format: new ol.format.GeoJSON()
+    }),
+    style: function (feature, resolution) {
+        if (feature.hidden === true) {
+            return new ol.style.Style();
+        }
+        if (feature.get('type') == 'S' || feature.get('type') == 'R') {
+            textStyle.getText().setText(feature.get('magnitude').toString());
+            return textStyle;
+        }
+        var url = lsrLookup[feature.get('type')];
+        if (url) {
+            url = url.replace("${magnitude}", feature.get('magnitude'));
+            var icon = new ol.style.Icon({
+                src: url
+            });
+            lsrStyle.setImage(icon);
+        }
+        return lsrStyle;
     }
+});
+lsrLayer.addEventListener(TABLE_FILTERED_EVENT, function () {
+    // Turn all features back on
+    lsrLayer.getSource().getFeatures().forEach((feat) => {
+        feat.hidden = false;
+    });
+    // Filter out the map too
+    lsrtable.rows({ "search": "removed" }).every(function (idx) {
+        var feat = lsrLayer.getSource().getFeatureById(this.data().id);
+        feat.hidden = true;
+    });
+    lsrLayer.changed();
+});
+lsrLayer.getSource().on('change', function (e) {
+    if (lsrLayer.getSource().isEmpty()) {
+        return;
+    }
+    if (lsrLayer.getSource().getState() == 'ready') {
+        olmap.getView().fit(
+            lsrLayer.getSource().getExtent(),
+            {
+                size: olmap.getSize(),
+                padding: [50, 50, 50, 50]
+            }
+        );
+    }
+    lsrtable.rows().remove();
+    var data = [];
+    lsrLayer.getSource().getFeatures().forEach(function (feat) {
+        var props = feat.getProperties();
+        props.id = feat.getId();
+        data.push(props);
+    });
+    lsrtable.rows.add(data).draw();
+
+    // Build type filter
+    lsrtable.column(6).data().unique().sort().each(function (d, j) {
+        lsrtypefilter.append('<option value="' + d + '">' + d + '</option');
+    });
+});
+
+sbwLayer = new ol.layer.Vector({
+    title: "Storm Based Warnings",
+    source: new ol.source.Vector({
+        format: new ol.format.GeoJSON()
+    }),
+    visible: true,
+    style: function (feature, resolution) {
+        if (feature.hidden === true) {
+            return new ol.style.Style();
+        }
+        var color = sbwLookup[feature.get('phenomena')];
+        if (color === undefined) return;
+        sbwStyle[1].getStroke().setColor(color);
+        return sbwStyle;
+    }
+});
+sbwLayer.addEventListener(TABLE_FILTERED_EVENT, function () {
+    // Turn all features back on
+    sbwLayer.getSource().getFeatures().forEach((feat) => {
+        feat.hidden = false;
+    });
+    // Filter out the map too
+    sbwtable.rows({ "search": "removed" }).every(function (idx) {
+        var feat = sbwLayer.getSource().getFeatureById(this.data().id);
+        feat.hidden = true;
+    });
+    sbwLayer.changed();
+});
+sbwLayer.getSource().on('change', function (e) {
+    sbwtable.rows().remove();
+    var data = [];
+    sbwLayer.getSource().getFeatures().forEach(function (feat) {
+        var props = feat.getProperties();
+        props.id = feat.getId();
+        data.push(props);
+    });
+    sbwtable.rows.add(data).draw();
+
+    // Build type filter
+    sbwtable.column(1).data().unique().sort().each(function (d, j) {
+        sbwtypefilter.append('<option value="' + iemdata.vtec_phenomena[d] + '">' + iemdata.vtec_phenomena[d] + '</option');
+    });
+
+});
+
+function formatLSR(data) {
+    // Format what is presented
+    return '<div><strong>Source:</strong> ' + data.source +
+        ' &nbsp; <strong>UTC Valid:</strong> ' + data.valid +
+        '<br /><strong>Remark:</strong> ' + data.remark +
+        '</div>';
 }
 
-var startTimeSelector = {
-    xtype     : 'timefield',
-    allowBlank: false,
-    increment : 1,
-    width     : 100,
-    emptyText : 'Select Time',
-    id        : 'timepicker1',
-    value     : "12:00 AM",
-    disabled  : false,
-    listeners : {
-       select : function(field, value){
-       }
-    }
+function formatSBW(data) {
+    // Format what is presented
+    return '<div>' + data.link + '</div>';
 }
-
-var loadButton = {
-    xtype           : 'button',
-    id              : 'refresh',
-    text            : 'Load',
-    rowspan         : 2,
-    listeners       : {
-        click: function(){
-           reloadData();
+function revisedRandId() {
+    return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(2, 10);
+}
+function lsrHTML(feature) {
+    var lines = [];
+    var dt = moment.utc(feature.get("valid"));
+    var ldt = dt.local().format("M/D LT");
+    var z = dt.utc().format("kk:mm")
+    lines.push("<strong>Valid:</strong> " + ldt + " (" + z + "Z)");
+    var v = feature.get("source");
+    if (v !== null) {
+        lines.push("<strong>Source:</strong> " + v);
+    }
+    v = feature.get("typetext");
+    if (v !== null) {
+        lines.push("<strong>Type:</strong> " + v);
+    }
+    v = feature.get("magnitude");
+    if (v !== null && v != "") {
+        var unit = feature.get("unit");
+        if (unit === null) {
+            unit = "";
+        }
+        lines.push("<strong>Magnitude:</strong> " + v + " " + unit);
+    }
+    v = feature.get("remark");
+    if (v !== null) {
+        lines.push("<strong>Remark:</strong> " + v);
+    }
+    return lines.join("<br />");
+}
+function initUI() {
+    // Generate UI components of the page
+    var handle = $("#radartime");
+    $("#timeslider").slider({
+        min: 0,
+        max: 100,
+        create: function () {
+            handle.text(nexradBaseTime.local().format("L LT"));
         },
-        boilerup: function(opts){
-           applySettings(opts);
+        slide: function (event, ui) {
+            var dt = moment(nexradBaseTime);
+            dt.add(ui.value * 5, 'minutes');
+            handle.text(dt.local().format("L LT"));
+        },
+        change: function (event, ui) {
+            var dt = moment(nexradBaseTime);
+            dt.add(ui.value * 5, 'minutes');
+            n0q.setSource(getRADARSource(dt));
+            handle.text(dt.local().format("L LT"));
         }
-    }
-}
+    });
+    n0q = new ol.layer.Tile({
+        title: 'NEXRAD Base Reflectivity',
+        visible: true,
+        source: getRADARSource(nexradBaseTime)
+    });
+    lsrtypefilter = $("#lsrtypefilter").select2({
+        placeholder: "Filter LSRs by Event Type",
+        width: 300,
+        multiple: true
+    });
+    lsrtypefilter.on("change", function () {
+        var vals = $(this).val();
+        var val = vals ? vals.join("|") : null;
+        lsrtable.column(6).search(val ? '^' + val + '$' : '', true, false).draw();
+    });
+    sbwtypefilter = $("#sbwtypefilter").select2({
+        placeholder: "Filter SBWs by Event Type",
+        width: 300,
+        multiple: true
+    });
+    sbwtypefilter.on("change", function () {
+        var vals = $(this).val();
+        var val = vals ? vals.join("|") : null;
+        sbwtable.column(1).search(val ? '^' + val + '$' : '', true, false).draw();
+    });
+    wfoSelect = $("#wfo").select2({
+        templateSelection: function (state) {
+            return state.id;
+        }
+    });
+    $.each(iemdata.wfos, function (idx, entry) {
+        var opt = new Option("[" + entry[0] + "] " + entry[1], entry[0], false, false);
+        wfoSelect.append(opt);
+    });
 
-var endDateSelector = {
-    xtype     : 'datefield',
-    id        : 'datepicker2',
-    maxValue  : new Date(),
-    emptyText : 'Select Date',
-    minValue  : '07/23/2003',
-    value     : new Date(),
-    disabled  : false,
-    width     : 105,
-    format    : 'j M Y',
-    listeners : {
-       select : function(field, value){
-         Ext.getCmp("datepicker1").maxValue = value;
-         if (value < Ext.getCmp("datepicker1").getValue()){
-           Ext.getCmp("datepicker1").setValue( value );
-         }
-       }
-    }
-}
+    $(".iemdtp").datetimepicker({
+        format: "L LT",
+        step: 1,
+        onChangeDateTime: function (dp, $input) {
+            loadData();
+        }
+    });
+    var sts = moment().subtract(1, 'day');
+    var ets = moment();
+    $("#sts").val(sts.format('L LT'));
+    $("#ets").val(ets.format('L LT'));
+    updateRADARTimes();
 
-var endTimeSelector = {
-    xtype     : 'timefield',
-    allowBlank: false,
-    increment : 1,
-    width     : 100,
-    emptyText : 'Select Time',
-    id        : 'timepicker2',
-    value     : "12:00 PM",
-    disabled  : false,
-    listeners : {
-       select : function(field, value){
-       }
-    }
-}
+    $("#load").click(function () {
+        loadData();
+    });
+    $("#lsrshapefile").click(function () {
+        window.location.href = getShapefileLink("lsr");
+    });
+    $("#lsrexcel").click(function () {
+        window.location.href = getShapefileLink("lsr") + "&fmt=excel";
+    });
+    $("#warnshapefile").click(function () {
+        window.location.href = getShapefileLink("watchwarn");
+    });
+    $("#sbwshapefile").click(function () {
+        window.location.href = getShapefileLink("watchwarn") + "&limit1=yes";
+    });
+    $("#realtime").click(function () {
+        realtime = this.checked;
+        if (realtime) {
+            loadData();
+        }
+    });
 
+    olmap = new ol.Map({
+        target: 'map',
+        view: new ol.View({
+            enableRotation: false,
+            center: ol.proj.transform([-94.5, 42.1], 'EPSG:4326', 'EPSG:3857'),
+            zoom: 7
+        }),
+        layers: [
+            new ol.layer.Tile({
+                title: 'OpenStreetMap',
+                visible: true,
+                source: new ol.source.OSM()
+            }),
+            n0q,
+            make_iem_tms('US States', 'usstates', true, ''),
+            make_iem_tms('US Counties', 'uscounties', false, ''),
+            sbwLayer,
+            lsrLayer
+        ]
+    });
+    var ls = new ol.control.LayerSwitcher();
+    olmap.addControl(ls);
+    var dragPan;
+    olmap.getInteractions().forEach(function (interaction) {
+        if (interaction instanceof ol.interaction.DragPan) {
+            dragPan = interaction;
+        }
+    });
 
-
-
-
-
-
-var myForm = {
-   autoScroll  : true,
-   xtype       : 'form',
-   labelAlign  : 'top',
-   layout      : 'table',
-   bodyStyle   : 'padding: 3px;',
-   defaults    : {
-      bodyStyle : 'padding: 3px;'
-   },
-   layoutConfig: {
-       columns  : 5
-   },
-   items       : [
-       {html: 'Event Time Slider', border: false},
-       nexradSlider,
-       wfoSelector,
-       {html: 'Start', border: false},
-       startDateSelector,
-       startTimeSelector,
-       loadButton,
-       {html: 'End', border: false},
-       endDateSelector,
-       endTimeSelector
-   ]
-}
-
-var osmgray = new OpenLayers.Layer.OSM('Open Street Map (gray)', null, {
-	visible: false,
-    eventListeners: {
-        tileloaded: function(evt) {
-            var ctx = evt.tile.getCanvasContext();
-            if (ctx) {
-                var imgd = ctx.getImageData(0, 0, evt.tile.size.w, evt.tile.size.h);
-                var pix = imgd.data;
-                for (var i = 0, n = pix.length; i < n; i += 4) {
-                    pix[i] = pix[i + 1] = pix[i + 2] = (3 * pix[i] + 4 * pix[i + 1] + pix[i + 2]) / 8;
+    olmap.on('click', function (evt) {
+        var feature = olmap.forEachFeatureAtPixel(evt.pixel,
+            function (feature) {
+                return feature;
+            });
+        if (feature === undefined) {
+            return;
+        }
+        if (feature.get('magnitude') === undefined) return;
+        // evt.originalEvent.x
+        var divid = revisedRandId();
+        var div = document.createElement("div")
+        div.innerHTML = '<div class="panel panel-primary panel-popup" id="' + divid + '">' +
+            '<div class="panel-heading">' + feature.get("city") + ", " +
+            feature.get("st") +
+            ' &nbsp; <button type="button" class="close" ' +
+            'data-target="#' + divid + '" data-dismiss="alert"> ' +
+            '<span aria-hidden="true">&times;</span>' +
+            '<span class="sr-only">Close</span></button></div>' +
+            '<div class="panel-body">' + lsrHTML(feature) +
+            '</div>' +
+            '</div>';
+        var coordinates = feature.getGeometry().getCoordinates();
+        var marker = new ol.Overlay({
+            position: coordinates,
+            positioning: 'center-center',
+            element: div,
+            stopEvent: false,
+            dragging: false
+        });
+        olmap.addOverlay(marker);
+        div.addEventListener('mousedown', function (evt) {
+            dragPan.setActive(false);
+            marker.set('dragging', true);
+        });
+        olmap.on('pointermove', function (evt) {
+            if (marker.get('dragging') === true) {
+                marker.setPosition(evt.coordinate);
+            }
+        });
+        olmap.on('pointerup', function (evt) {
+            if (marker.get('dragging') === true) {
+                dragPan.setActive(true);
+                marker.set('dragging', false);
+            }
+        });
+        var id = feature.getId();
+        lsrtable.rows().deselect();
+        lsrtable.row(
+            lsrtable.rows(function (idx, data, node) {
+                if (data["id"] === id) {
+                    lsrtable.row(idx).select();
+                    return true;
                 }
-                ctx.putImageData(imgd, 0, 0);
-                evt.tile.imgDiv.removeAttribute("crossorigin");
-                evt.tile.imgDiv.src = ctx.canvas.toDataURL();
+                return false;
+            })
+        ).show().draw(false);
+
+
+    });
+
+    lsrtable = $("#lsrtable").DataTable({
+        select: true,
+        rowId: 'id',
+        columns: [
+            {
+                "className": 'details-control',
+                "orderable": false,
+                "data": null,
+                "defaultContent": ''
+            }, {
+                "data": "wfo"
+            }, {
+                "data": "valid",
+                "type": "datetime"
+            }, {
+                "data": "county"
+            }, {
+                "data": "city"
+            }, {
+                "data": "st"
+            }, {
+                "data": "typetext"
+            }, {
+                "data": "magnitude"
             }
+        ],
+        columnDefs: [
+            {
+                targets: 2,
+                render: function (data) {
+                    return moment.utc(data).local().format('M/D LT');
+                }
+            }
+        ]
+    });
+    lsrtable.on("search.dt", function () {
+        lsrLayer.dispatchEvent(TABLE_FILTERED_EVENT);
+    });
+    // Add event listener for opening and closing details
+    $('#lsrtable tbody').on('click', 'td.details-control', function () {
+        var tr = $(this).closest('tr');
+        var row = lsrtable.row(tr);
+
+        if (row.child.isShown()) {
+            // This row is already open - close it
+            row.child.hide();
+            tr.removeClass('shown');
+        }
+        else {
+            // Open this row
+            row.child(formatLSR(row.data())).show();
+            tr.addClass('shown');
+        }
+    });
+    sbwtable = $("#sbwtable").DataTable({
+        columns: [
+            {
+                "data": "wfo"
+            }, {
+                "data": "phenomena"
+            }, {
+                "data": "significance"
+            }, {
+                "data": "eventid"
+            }, {
+                "data": "issue"
+            }, {
+                "data": "expire"
+            }
+        ],
+        columnDefs: [
+            {
+                targets: 1,
+                render: function (data) {
+                    return data in iemdata.vtec_phenomena ? iemdata.vtec_phenomena[data] : data;
+                }
+            }, {
+                targets: 2,
+                render: function (data) {
+                    return data in iemdata.vtec_significance ? iemdata.vtec_significance[data] : data;
+                }
+            }, {
+                targets: 3,
+                render: function (data, type, row, meta) {
+                    if (type == 'display') {
+                        return '<a href="' + row.href + '">' + row.eventid + '</a>';
+                    }
+                    return row.eventid;
+                }
+            }, {
+                targets: [4, 5],
+                render: function (data) {
+                    return moment.utc(data).local().format('M/D LT');
+                }
+            }
+        ]
+    });
+    sbwtable.on("search.dt", function () {
+        sbwLayer.dispatchEvent(TABLE_FILTERED_EVENT);
+    });
+}
+
+function genSettings() {
+    /* Generate URL options set on this page */
+    var s = "";
+    s += (n0q.visibility ? "1" : "0");
+    s += (lsrLayer.visibility ? "1" : "0");
+    s += (sbwLayer.visibility ? "1" : "0");
+    s += (realtime ? "1" : "0");
+    return s;
+}
+
+function updateURL() {
+    var wfos = $("#wfo").val();  // null for all or array
+    var sts = moment($("#sts").val(), 'L LT').utc().format(dateFormat1);
+    var ets = moment($("#ets").val(), 'L LT').utc().format(dateFormat1);
+    var wstr = (wfos === null) ? "" : wfos.join(",");
+    window.location.href = "#" + wstr + "/" + sts + "/" + ets + "/" + genSettings();
+
+}
+function applySettings(opts) {
+    if (opts[0] == "1") { // Show RADAR
+        n0q.setVisibility(true);
+    }
+    if (opts[1] == "1") { // Show LSRs
+        lsrLayer.setVisibility(true);
+    }
+    if (opts[2] == "1") { // Show SBWs
+        sbwLayer.setVisibility(true);
+    }
+    if (opts[3] == "1") { // Realtime
+        realtime = true;
+        $("#realtime").prop('checked', true);
+    }
+}
+function updateRADARTimes() {
+    // Figure out what our time slider should look like
+    var sts = moment($("#sts").val(), 'L LT').utc();
+    var ets = moment($("#ets").val(), 'L LT').utc();
+    sts.subtract(sts.minute() % 5, 'minutes');
+    ets.add(5 - ets.minute() % 5, 'minutes');
+    var times = ets.diff(sts) / 300000;  // 5 minute bins
+    nexradBaseTime = sts;
+    $("#timeslider")
+        .slider("option", "max", times - 1)
+        .slider("value", realtime ? times - 1 : 0);
+}
+function loadData() {
+    // Load up the data please!
+    if ($(".tab .active > a").attr("href") != "#2a") {
+        $("#lsrtab").click();
+    }
+    var wfos = $("#wfo").val();  // null for all or array
+    var sts = moment($("#sts").val(), 'L LT').utc().format(dateFormat1);
+    var ets = moment($("#ets").val(), 'L LT').utc().format(dateFormat1);
+    updateRADARTimes();
+
+    var opts = {
+        sts: sts,
+        ets: ets,
+        wfos: (wfos === null) ? "" : wfos.join(",")
+    }
+    lsrLayer.getSource().clear(true);
+    sbwLayer.getSource().clear(true);
+
+    $.ajax({
+        data: opts,
+        method: "GET",
+        url: "/geojson/lsr.php",
+        dataType: 'json',
+        success: function (data) {
+            if (data.features.length == 3000) {
+                alert("App limit of 3,000 LSRs reached.");
+            }
+            lsrLayer.getSource().addFeatures(
+                (new ol.format.GeoJSON({ featureProjection: 'EPSG:3857' })
+                ).readFeatures(data)
+            );
+        }
+    });
+    $.ajax({
+        data: opts,
+        method: "GET",
+        url: "/geojson/sbw.php",
+        dataType: 'json',
+        success: function (data) {
+            sbwLayer.getSource().addFeatures(
+                (new ol.format.GeoJSON({ featureProjection: 'EPSG:3857' })
+                ).readFeatures(data)
+            );
+        }
+    });
+    updateURL();
+}
+
+function getShapefileLink(base) {
+    var uri = "/cgi-bin/request/gis/" + base + ".py?";
+    var wfos = $("#wfo").val();
+    if (wfos) {
+        for (var i = 0; i < wfos.length; i++) {
+            uri += "&wfo[]=" + tokens[i];
         }
     }
-});
-
-/* Construct the viewport */
-new Ext.Viewport({
-    layout:'border',
-    items:[{
-        region      : 'north',
-        title       : 'IEM Local Storm Report (LSR) Application',
-        collapsible : true,
-        collapsed   : false,
-        contentEl   : 'iem-header'
-    },{
-        xtype       : 'panel',
-        region      : 'west',
-        width       : 600,
-        split       : true,
-        layout      : 'border',
-        items       : [{
-              xtype       : 'panel',
-              layout      : 'fit',
-              height      : 100,
-              region      : 'north',
-              items       : myForm
-           },{
-              layout      : 'fit',
-              xtype       : 'panel',
-              region      : 'center',
-              items       : [{
-                xtype       : 'tabpanel',
-                id          : 'tabs',
-                activeTab   : 0,
-                items       : [{
-                    title     : 'Help', 
-                    contentEl : 'help', 
-                    unstyled  : true,
-                    autoScroll: true,
-                    padding   : 5}, 
-                   lsrGridPanel,
-                   sbwGridPanel
-                ]
-              }]
-          }]
-    },{
-        region   : "center",
-        id       : "mappanel",
-        title    : "Map",
-        tbar     : [{
-          xtype    : 'checkbox',
-          boxLabel : 'Real Time Mode',
-          id       : 'rtcheckbox',
-          handler  : function(box, checked){
-            if (checked){
-              setLastNEXRAD();
-              Ext.getCmp("datepicker2").setValue( new Date() );
-              Ext.getCmp("timepicker2").setValue( new Date() );
-              Ext.getCmp("datepicker2").disable();
-              Ext.getCmp("timepicker2").disable();
-            } else {
-              Ext.getCmp("datepicker2").enable();
-              Ext.getCmp("timepicker2").enable();
-            }
-          }
-        },{xtype: 'tbseparator'},{
-          xtype  : 'tbtext',
-          text   : 'NEXRAD Valid:',
-          id     : 'appTime'
-        },{
-         xtype: "gx_opacityslider",
-         layer: nexradWMS,
-         aggressive: true,
-         vertical: false,
-         width: 100
-        }],
-        xtype    : "gx_mappanel",
-        map      : map,
-        layers   : [new OpenLayers.Layer.OSM("Open Street Map"),
-        			new OpenLayers.Layer("Blank",{
-        				isBaseLayer: true,
-        				visible: false
-        			}), osmgray,
-                    nexradWMS, states, counties, lsrLayer, sbwLayer],
-        extent   : new OpenLayers.Bounds(-20037508, -20037508,
-                                             20037508, 20037508.34),
-        split    : true
-    }]
-});
-
-ls.maximizeControl();
-
-var task = {
-  run: function(){
-    if (Ext.getCmp('rtcheckbox').checked) {
-      Ext.getCmp("datepicker2").setValue( new Date() );
-      Ext.getCmp("timepicker2").setValue( new Date() );
-      reloadData();
-    }
-  },
-  interval: 300000
+    var sts = moment($("#sts").val(), 'L LT');
+    var ets = moment($("#ets").val(), 'L LT');
+    uri += "&year1=" + sts.utc().format('Y');
+    uri += "&month1=" + sts.utc().format('M');
+    uri += "&day1=" + sts.utc().format('D');
+    uri += "&hour1=" + sts.utc().format('H');
+    uri += "&minute1=" + sts.utc().format('m');
+    uri += "&year2=" + ets.utc().format('Y');
+    uri += "&month2=" + ets.utc().format('M');
+    uri += "&day2=" + ets.utc().format('D');
+    uri += "&hour2=" + ets.utc().format('H');
+    uri += "&minute2=" + ets.utc().format('m');
+    return uri;
 }
-Ext.TaskMgr.start(task);
-
-
-}); /* End of onReady */
