@@ -19,7 +19,7 @@ COLORS = ["#ffff00", "#fcd37f", "#ffaa00", "#e60000", "#730000"]
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -54,7 +54,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = util.get_autoplot_context(fdict, get_description())
     state = ctx["state"]
     syear = ctx["syear"]
@@ -71,7 +71,7 @@ def plotter(fdict):
     req = util.exponential_backoff(
         requests.post, SERVICE, payload, headers=headers
     )
-    if req is None:
+    if req is None or req.status_code != 200:
         raise NoDataFound("Drought Web Service failed to deliver data.")
     jdata = req.json()
     if "d" not in jdata:

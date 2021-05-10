@@ -18,7 +18,7 @@ PDICT = {"state": "Plot Individual State", "national": "Plot CONUS"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -58,7 +58,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = util.get_autoplot_context(fdict, get_description())
     sdate = ctx["sdate"]
     edate = ctx["edate"]
@@ -76,6 +76,8 @@ def plotter(fdict):
     headers["Accept"] = "application/json, text/javascript, */*; q=0.01"
     headers["Content-Type"] = "application/json; charset=UTF-8"
     req = requests.post(SERVICE + ctx["s"], payload, headers=headers)
+    if req.status_code != 200:
+        raise NoDataFound("API request to droughtmonitor website failed...")
     jdata = req.json()
     if "d" not in jdata:
         raise NoDataFound("No data Found.")
