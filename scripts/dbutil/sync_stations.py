@@ -80,7 +80,7 @@ def sync(df, dbname):
     LOG.info(
         "DB: %-7s Del %3s Mod %4s rows TS: %s IEMID: %s",
         dbname,
-        len(todelete.index),
+        len(todelete),
         len(changes.index),
         maxts.strftime("%Y/%m/%d %H:%M"),
         maxid,
