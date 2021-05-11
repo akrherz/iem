@@ -34,24 +34,23 @@ $channels = file_get_contents('channels.html');
  <li><a href="/current/severe.phtml">Severe Weather</a></li>
  <li class="active">IEMBot Project</li>
 </ol>
- 
+
+<p><i>iembot</i> is a XMPP chat bot that relays National Weather Service issued
+text products to XMPP chat rooms hosted on the conference.weather.im multi-user
+chat service. <i>iembot</i> was written to aid the dissemination and use of NWS issued 
+warnings by their chat partners.</p>
+
 <ul>
-  <li><a href="#channels">IEMBot Channels</a></li>
+  <li><a href="#channels"><i class="fa fa-list"></i> IEMBot Channels</a></li>
 </ul>
 
-<p><i>iembot</i> is a Jabber chat bot that relays National Weather Service issued
-text products to Jabber chat rooms hosted on the conference.weather.im multi-user
-chat service. 
-<i>iembot</i> was written to aid the dissemination and use of NWS issued 
-warnings by their chat partners.
 
 <h3>Where to access <i>iembot</i> messages?</h3>
 
 <ul>
- <li><a href="public.phtml">Public Chatrooms</a> (requires Jabber client and public Jabber account)</li>
+ <li><a href="public.phtml">Public Chatrooms</a> (requires XMPP client and public XMPP account)</li>
  <li><a href="https://weather.im/iembot/">HTML web interface</a>  anybody can view and monitor online!</li>
  <li><a href="https://weather.im/live/">Weather.IM Live Client</a>, interactive chat client.</li>
- <li>Follow iembot on <a href="http://www.twitter.com/iembot">Twitter</a></li>
  <li><a href="twitter.php">Configure IEMBot</a> to post messages to your twitter account.</li>
 </ul>
 
@@ -73,16 +72,24 @@ function urlChanger(){
 
 <h3>How does <i>iembot</i> work?</h3>
 
-<p><i>iembot</i> consists of two programs that run on the Iowa Mesonet server.  The first is a parser that ingests text products issued by the NWS.  The parser picks out the important information regarding the product and sends it via a Jabber instant message to the bot logged in on the chat server.  The bot then 
+<p><i>iembot</i> consists of two programs that run on the Iowa Mesonet server.  The first is a parser that ingests text products issued by the NWS.  The parser picks out the important information
+regarding the product and sends it via a XMPP instant message to the bot
+logged in on the chat server.  The bot then 
 routes the incoming message to a WFO chatroom from which the product was 
 issued.  The entire process takes much less than a second.</p>
 
 <h3>Why was <i>iembot</i> written?</h3>
 <ol>
- <li>During chats, the NWS should not need to relay details of already issued products to the chatroom.  Replication should always be avoided.</li>
- <li>During onair coverage, the media often are not able to quickly read severe text products that come off the printer.  Instead, they can quickly view the chatroom and clearly see what has just been issued.</li>
- <li>The NWS can get instant verification that their product was disseminated over NOAAport and processed by a computerized ingestor.</li>
- <li>With the advent of Valid Time Event Code (VTEC), the NWS can issue complex statements.  The bot's report of these products can help clear confusion with the media partners.</li>
+ <li>During chats, the NWS should not need to relay details of already issued
+ products to the chatroom.  Replication should always be avoided.</li>
+ <li>During onair coverage, the media often are not able to quickly read
+ severe text products that come off the printer.  Instead, they can quickly
+ view the chatroom and clearly see what has just been issued.</li>
+ <li>The NWS can get instant verification that their product was disseminated
+ over NOAAport and processed by a computerized ingestor.</li>
+ <li>With the advent of Valid Time Event Code (VTEC), the NWS can issue
+ complex statements.  The bot's report of these products can help clear
+ confusion with the media partners.</li>
  <li>With the products and timestamps in the chatroom logs, it is an outstanding log of how the severe weather event played out for historical review.</li>
  <li>It is a proof of concept for how NWS products can be disseminated securely and synchronously to clients in an Open Source and standards based framework.</li>
 </ol>
@@ -116,8 +123,6 @@ mean.</p>
  <dt>&lt;wmo_source&gt;</dt><dd>Full 4 Character WMO Source ID</dd>
  </dl>
  
-
-
 		{$channels}
 
 EOF;
