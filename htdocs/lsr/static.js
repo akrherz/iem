@@ -115,7 +115,6 @@ var sbwLookup = {
 var lsrLookup = {
     "0": "icons/tropicalstorm.gif",
     "1": "icons/flood.png",
-    "x": "icons/flood.png",
     "2": "icons/other.png",
     "3": "icons/other.png",
     "4": "icons/other.png",
@@ -149,6 +148,7 @@ var lsrLookup = {
     "V": "icons/avalanche.gif",
     "W": "icons/waterspout.png",
     "X": "icons/funnelcloud.png",
+    "x": "icons/debrisflow.png",
     "Z": "icons/blizzard.png"
 };
 
@@ -186,22 +186,23 @@ var lsrStyle = new ol.style.Style({
 });
 
 var textStyle = new ol.style.Style({
-    image: new ol.style.Circle({
-        radius: 10,
-        stroke: new ol.style.Stroke({
-            color: '#fff'
-        }),
-        fill: new ol.style.Fill({
-            color: '#3399CC'
-        })
-    }),
     text: new ol.style.Text({
         font: 'bold 11px "Open Sans", "Arial Unicode MS", "sans-serif"',
         fill: new ol.style.Fill({
             color: 'white'
-        })
+        }),
+        placement: 'point',
+        backgroundFill: new ol.style.Fill({
+            color: "black"
+        }),
+        padding: [2, 2, 2, 2]
     })
 });
+var lsrTextBackgroundColor = {
+    'S': 'purple',
+    'R': 'blue',
+    '5': 'pink'
+}
 
 // create vector layer
 lsrLayer = new ol.layer.Vector({
@@ -213,13 +214,19 @@ lsrLayer = new ol.layer.Vector({
         if (feature.hidden === true) {
             return new ol.style.Style();
         }
-        if (feature.get('type') == 'S' || feature.get('type') == 'R') {
-            textStyle.getText().setText(feature.get('magnitude').toString());
-            return textStyle;
+        var mag = feature.get('magnitude').toString();
+        var typ = feature.get('type');
+        if (mag != "") {
+            if (typ == 'S' || typ == 'R' || typ == '5') {
+                textStyle.getText().setText(mag);
+                textStyle.getText().getBackgroundFill().setColor(
+                    lsrTextBackgroundColor[typ]
+                );
+                return textStyle;
+            }
         }
-        var url = lsrLookup[feature.get('type')];
+        var url = lsrLookup[typ];
         if (url) {
-            url = url.replace("${magnitude}", feature.get('magnitude'));
             var icon = new ol.style.Icon({
                 src: url
             });
