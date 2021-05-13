@@ -1,61 +1,44 @@
 <?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
+$OL = "6.4.3";
+$DT = "1.10.24";
+$S2 = "4.1.0rc0";
+
 $t = new MyView();
 $t->jsextra = <<<EOF
-<script type="text/javascript" src="/vendor/ext/3.4.1/adapter/ext/ext-base.js"></script>
-<script type="text/javascript" src="/vendor/ext/3.4.1/ext-all.js"></script>
-<script src="/vendor/openlayers/2.13.1/OpenLayers.js"></script>
-<script type="text/javascript" src="/vendor/geoext/GeoExt.js"></script>
-<script type="text/javascript" src="/vendor/ext/RowExpander.js"></script>
-<script type="text/javascript" src="/vendor/ext/Printer-all.js"></script>
+<script src="/vendor/jquery-datatables/{$DT}/datatables.min.js"></script>
+<script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
+<script
+ src="/vendor/datetimepicker/2.5.20/jquery.datetimepicker.full.min.js">
+</script>
+<script src="/vendor/select2/{$S2}/select2.min.js"></script>
+<script src="/vendor/moment/2.13.0/moment.min.js"></script>
+<script src='/vendor/openlayers/{$OL}/ol.js'></script>
+<script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
+
 <script type="text/javascript" src="wfos.js"></script>
-<script type="text/javascript" src="/vendor/ext/SuperBoxSelect.js"></script>
-<script type="text/javascript" src="/vendor/ext/Exporter-all.js"></script>
-<script type="text/javascript" src="static.js?v=27"></script>
+<script type="text/javascript" src="static.js"></script>
 <script>
-Ext.onReady(function(){
-  var tokens = window.location.href.split('#');
-  if (tokens.length == 2){
-    var tokens2 = tokens[1].split("/");
-    if (tokens2.length == 2){
-      Ext.getCmp("wfoselector").setValue( tokens2[0].split(",") );
-      d = (new Date()).add(Date.SECOND, parseInt(tokens2[1]) );
-      Ext.getCmp("datepicker1").setValue( d );
-      Ext.getCmp("timepicker1").setValue( d );
-      Ext.getCmp("datepicker2").setValue( new Date() );
-      Ext.getCmp("timepicker2").setValue( new Date() );
-      Ext.getCmp('refresh').fireEvent('click', {});
-      Ext.getCmp('rtcheckbox').setValue(true);
-    }
-    if (tokens2.length > 2){
-      Ext.getCmp("wfoselector").setValue( tokens2[0].split(",") );
-      utc_start  = Date.parseDate(tokens2[1], 'YmdHi');
-      Ext.getCmp("datepicker1").setValue( utc_start.fromUTC() );
-      Ext.getCmp("timepicker1").setValue( utc_start.fromUTC() );
-      utc_end    = Date.parseDate(tokens2[2].split("?")[0], 'YmdHi');
-      Ext.getCmp("datepicker2").setValue( utc_end.fromUTC() );
-      Ext.getCmp("timepicker2").setValue( utc_end.fromUTC() );
-      Ext.getCmp('refresh').fireEvent('click', {});
-    }
-    if (tokens2.length == 4){ /* Extra options were specified */
-      Ext.getCmp('refresh').fireEvent('boilerup', tokens2[3]);
-    }
-  }
+$(document).ready(function(){
+    initUI(); // static.js
+    parse_href();
+    window.setInterval(cronMinute, 60000);
 });
 </script>
 EOF;
-$t->headextra = <<<EOF
-<link rel="stylesheet" type="text/css" href="/vendor/ext/3.4.1/resources/css/ext-all.css"/>
-<link rel="stylesheet" type="text/css" href="/vendor/ext/superboxselect.css" />
-EOF;
+$t->headextra = <<<EOM
+<link rel="stylesheet" href="/vendor/jquery-datatables/{$DT}/datatables.min.css" />
+<link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
+<link rel="stylesheet" type="text/css"
+href="/vendor/datetimepicker/2.5.20/jquery.datetimepicker.min.css" />
+<link rel="stylesheet" type="text/css" href="/vendor/select2/${S2}/select2.min.css"/ >
+<link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
+<link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
+<link type="text/css" href="static.css" rel="stylesheet" />
+EOM;
 $t->title = "Local Storm Report App";
-$t->content = <<<EOF
-<div id="iem-header">
-<a href="/">IEM Homepage</a> &gt; <a href="/current/severe.phtml">Severe Weather Mainpage</a>
-</div>
-
-<div id="help" style="padding:5px;">
+$tab1a = <<<EOM
 <h3>Local Storm Report App Help</h3>
 <br />
 <p>This application allows the quick viewing of National Weather Service (NWS)
@@ -92,7 +75,132 @@ generate links to it.  Currently, there are two calling modes:</p>
   past.  For example, <i>/lsr/#LWX/-86400</i> would produce LSRs from
   LWX for the past day (86400 seconds).</p>
 <br />
+EOM;
+$tab2a = <<<EOM
+<br />
+<p>
+<strong>Tools:</strong> &nbsp;
+<button id="lsrshapefile" class="btn btn-primary" role="button">Download Shapefile</button>
+<button id="lsrexcel" class="btn btn-primary" role="button">Download Excel</button>
+<select name="lt" id="lsrtypefilter" class="form-control"></select>
+</p>
+
+<br />
+<table id="lsrtable">
+<thead>
+<tr>
+  <td></td>
+  <th>WFO</th>
+  <th>Report Time</th>
+  <th>County</th>
+  <th>Location</th>
+  <th>State</th>
+  <th>Event Type</th>
+  <th>Magnitude</th>
+</tr>
+</thead>
+</table>
+
+EOM;
+$tab3a = <<<EOM
+<br />
+<p>
+<strong>Tools:</strong> &nbsp;
+<button id="warnshapefile" class="btn btn-primary" role="button">Download Shapefile</button>
+<button id="sbwshapefile" class="btn btn-primary" role="button">Download SBW Shapefile</button>
+<select name="lt" id="sbwtypefilter" class="form-control"></select>
+</p>
+
+
+<table id="sbwtable">
+<thead>
+<tr>
+  <th>WFO</th>
+  <th>Phenomena</th>
+  <th>Significance</th>
+  <th>Event ID</th>
+  <th>Issues</th>
+  <th>Expires</th>
+</tr>
+</thead>
+</table>
+EOM;
+$theform = <<<EOM
+<div class="row">
+<div class="col-md-6">
+<div class="form-group">
+<label for="wfo">Select WFO: (default ALL)</label>
+<select name="wfo" id="wfo" class="form-control" multiple="multiple"></select>
+<br /><input type="checkbox" id="realtime" name="rt">
+  <label for="realtime"> Auto Refresh/Realtime</label>
 </div>
-EOF;
-$t->render('app.phtml');
+</div><!-- ./col-md-6 -->
+<div class="col-md-6">
+
+<div class="form-group">
+<label for="sts">Start Time</label>
+<input id="sts" name="sts" class="iemdtp">
+</div>
+
+<div class="form-group">
+<label for="ets">End Time</label>
+<input id="ets" name="ets" class="iemdtp">
+</div>
+</div><!-- ./col-md-6 -->
+</div><!-- ./row -->
+
+<div class="row">
+<div class="col-md-10">
+
+<div class="form-group">
+<label for="timeslider">RADAR Time: <span id="radartime"></span></label>
+<div id="timeslider" class="form-control">
+<div id="custom-handle" class="ui-slider-handle"></div>
+</div>
+</div>
+
+</div>
+<div class="col-md-2">
+
+<button id="load" type="button" class="btn btn-primary">Load</button>
+
+</div><!-- ./col-md-2 -->
+</div><!-- ./row -->
+
+EOM;
+$t->content = <<<EOM
+
+<div class="row">
+  <div class="col-md-5">
+    ${theform}
+    <div id="map"></div>
+  </div><!-- ./col-md-5 -->
+  <div class="col-md-7">
+
+  <div class="tab", role="tabpanel">
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="active"><a href="#1a" data-toggle="tab">Help</a></li>
+        <li><a id="lsrtab" href="#2a" data-toggle="tab">Local Storm Reports</a></li>
+        <li><a href="#3a" data-toggle="tab">Storm Based Warnings</a></li>
+    </ul>
+
+    <div class="tab-content tabs clearfix">
+        <div role="tabpanel" class="tab-pane active" id="1a">
+            ${tab1a}
+        </div>
+        <div role="tabpanel" class="tab-pane" id="2a">
+            ${tab2a}
+        </div>
+        <div role="tabpanel" class="tab-pane" id="3a">
+            ${tab3a}
+        </div>
+
+    </div>
+  </div><!-- ./tabs -->
+  </div><!-- ./col-md-7 -->
+</div><!-- ./row -->
+
+
+EOM;
+$t->render('full.phtml');
 ?>

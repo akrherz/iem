@@ -116,6 +116,7 @@ for ($i=0;$row=pg_fetch_assoc($rs);$i++)
                 "remark"    => $row["remark"],
                 "city"      => $row["city"],
                 "source"    => $row["source"],
+                "unit" => $row["unit"],
                 "lat"      => $lat,
                 "lon"      => $lon,
                 "prodlinks" => $products,
