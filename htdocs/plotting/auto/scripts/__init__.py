@@ -468,7 +468,7 @@ yearly_opts = [
 hopts = [
     {
         "id": 160,
-        "label": ("River Guage Obs and Forecasts from HML Products"),
+        "label": ("River Gauge Obs and Forecasts from HML Products"),
     },
     {"id": 178, "label": ("NWS RFC Flash Flood Guidance Plots")},
     {"id": 183, "label": ("US Drought Monitor Areal Coverage by State")},
