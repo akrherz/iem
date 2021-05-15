@@ -11,7 +11,7 @@ $network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,10) : "IA
 
 $t = new MyView();
 $t->iemss = True;
-$t->title = "COOP Quality Controlled and Estimated Data Download";
+$t->title = "Climodat Dataset Daily Data Download";
 
 $coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
 
@@ -30,14 +30,15 @@ $sselect = selectClimodatNetwork($network, "network");
 $t->content = <<<EOF
 <ol class="breadcrumb">
 <li><a href="/COOP/">NWS COOP Network</a></li>
-<li class="active">Download Quality Controlled and Estimated Data</li>
+<li class="active">Download IEM Climodat Daily Data</li>
 </ol>
 
 <p>If you are looking for actual NWS COOP observations with no estimating and very little
  quality control done, check out <a href="obs-fe.phtml">this page</a>.</p>
 
 <p>This page allows you to download observed, sometimes quality controlled, 
- and sometimes estimated once daily reports from the NWS COOP network.  More detailed
+ and sometimes estimated once daily reports from various NWS networks including
+ COOP.  More detailed
  <a href="/info/datasets/climodat.html">documentation exists here</a> and should be 
  consulted before using the data.</p>
 
@@ -47,18 +48,9 @@ $t->content = <<<EOF
 <input type="submit" value="Select Network">
 </form>
 
-<p>This information is mostly
-estimated until <a href="http://www.ncdc.noaa.gov">NCDC</a> provides updated 
-GHCN datafiles, which the IEM then merges into this dataset.  The unfortunate
-side effect is that data changes as new information becomes available.
-
-<p>If you really need calendar day data and other variables like
- wind speed and relative humidity, check out the <a href="/iemre/">IEM Reanalysis</a>
- effort. 
-
 <div class="alert alert-warning">The purpose is to provide a dataset that does 
  not have holes in it for temperature and precipitation and is updated up 
- until yesterday.  Unfortunately, these
+ until yesterday for most sites.  Unfortunately, these
  values are not on a local calendar day, so please be very careful before
  use.  Unfortunately, long term observations that are on local calendar 
  days does not exist for many locations!</div>
@@ -69,14 +61,13 @@ side effect is that data changes as new information becomes available.
 <div class="row"><div class="col-sm-6">
 
 <h4>1. Select station(s):</h4>
-<div id="iemss" data-network="{$network}" data-only-online="1"></div>
+<div id="iemss" data-network="{$network}" data-only-online="0"></div>
 
 </div><div class="col-sm-6">
 
 <p><h4>2. Select Start/End Time:</h4>
-<i>Please note the start year in the station selector. Some sites start
-in 1951 others are earlier. If you only want data for one day, set the
-start and end times to the same value.</i>
+<i>Please note the start year in the station selector. If you only want data
+for one day, set the start and end times to the same value.</i>
 <table>
   <tr>
     <td></td>
@@ -107,8 +98,10 @@ start and end times to the same value.</i>
   <option value="highc">Variable: High Temperature [C]</option>
   <option value="low">Variable: Low Temperature [F]</option>
   <option value="lowc">Variable: Low Temperature [C]</option>
+  <option value="temp_estimated">Temperature Estimated Flag</option>
   <option value="precip">Variable: Precipitation (rain+melted snow) [inch]</option>
   <option value="precipmm">Variable: Precipitation (rain+melted snow) [mm]</option>
+  <option value="precip_estimated">Precipitation Estimated Flag</option>
   <option value="snow">Variable: Snowfall [inch]</option>
   <option value="snowd">Variable: Snow Depth (since 1991) [inch]</option>
   <option value="narr_srad">Estimate: NARR Sampled Solar Radiation [MJ/day] (1979-)</option>
@@ -147,13 +140,11 @@ This option is only relevant if you did not select "Excel File" from #5 above.
     <option value="tab">Tab
    </select>
 
-
 <p><h4>7. Include Latitude and Longitude in output?</h4>
  <select name="gis">
    <option value="no">No
    <option value="yes">Yes
  </select>
-
 
 <p><h4>8. Supplement {$thisyear}'s data with scenario year</h4>
 <i>Optional!</i> For some purposes, you may wish to have a complete (Jan 1 -
@@ -175,5 +166,5 @@ seconds to get a response.</i><br />
 
 </form>
 EOF;
-$t->render('single.phtml');
+$t->render('full.phtml');
 ?>

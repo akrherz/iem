@@ -5,8 +5,8 @@
 This document describes the once daily climate dataset that provides observations and estimates of high and low temperature, precipitation, snowfall, and snow depth.  Parts of this dataset have been curated over the years by a number of Iowa State employees including Dr Shaw, Dr Carlson, and Dr Todey.
 
 * __Download Interface__: [IEM On-Demand](https://mesonet.agron.iastate.edu/request/coop/fe.phtml)
-* __Spatial Domain__: Continental US
-* __Temporal Domain__: (1893,1951,varies)-today
+* __Spatial Domain__: United States
+* __Temporal Domain__: varies by station
 * __Variables Provided__: Once daily high and low temperature, precipitation, snowfall, snow depth
 
 ### Justification for processing
@@ -19,18 +19,17 @@ A great source of much of the same type of data is [Regional Climate Centers ACI
 
 ### Processing and Quality Control
 
-There is nothing easy or trivial about processing or quality control of this dataset. After centuries of work, plenty of issues remain.  Having human observers be the primary driver of this dataset is both a blessing and a curse.  The good aspects include the archive dating back to the late 1800s for some locations and relatively high data quality.  The bad aspects include lots of metadata issues due to observation timing, station moves, and equipment siting.
+There is nothing easy or trivial about processing or quality control of this dataset. After decades of work, plenty of issues remain.  Having human observers be the primary driver of this dataset is both a blessing and a curse.  The good aspects include the archive dating back to the late 1800s for some locations and relatively high data quality.  The bad aspects include lots of metadata issues due to observation timing, station moves, and equipment siting.
 
 The primary data source for this dataset is the National Weather Service COOP observers.  These reports come to the IEM over a variety of paths:
 
-- Realtime reports found in NWS SHEF Text Products, processed in realtime by the IEM
-- Quality controlled reports sent to the IEM by the State of Iowa Climatologist
-- Via manually downloaded data archives provided by NCEI
-- Via web services provided by RCC ACIS
+* Realtime reports found in NWS SHEF Text Products, processed in realtime by the IEM
+* Via manually downloaded data archives provided by NCEI
+* Via web services provided by RCC ACIS
 
 The merging of these four datasets creates a bit of a nightmare to manage.
 
-Snowfall and snowdepth data is always problematic.  First, lets clarify what the terms mean.  "Snowfall" is the amount of snow that fell from the sky over the previous 24 hour period.  "Snowdepth" is the amount of snow measured to be on the ground due to previous snowfalls.  These numbers may sometimes contradict with snowfall amounts being larger than snowdepth due to melting and/or compaction.  Care should be used when analyzing the snowfall and snowdepth reports.
+Snowfall and snow depth data is always problematic.  First, lets clarify what the terms mean.  "Snowfall" is the amount of snow that fell from the sky over the previous 24 hour period.  "Snow depth" is the amount of snow measured to be on the ground due to previous snowfalls.  These numbers may sometimes contradict with snowfall amounts being larger than snow depth due to melting and/or compaction.  Care should be used when analyzing the snowfall and snow depth reports.
 
 ### <a name="faq"></a> Frequently Asked Questions
 
@@ -49,3 +48,7 @@ Snowfall and snowdepth data is always problematic.  First, lets clarify what the
 1. Where does the non-radiation data come from?
 
     This information is primarily driven by the realtime processing of NWS COOP observations done by the IEM.  For data older than the past handful of years, it is taken from the NCEI databases and now the ACIS web services.  Some manual work is done to meld the differences in site identifiers used between the various online resources.
+
+1. How do I know which variables have been estimated and which are observations?
+
+    The download interface for this dataset provides an option to include a flag for which observations have estimated temperatures or precipitation.  Presently, a general flag is provided for both high and low temperature and no flag is provided for the snowfall and snow depth information.

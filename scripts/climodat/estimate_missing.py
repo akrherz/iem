@@ -120,7 +120,7 @@ def main(argv):
     df = read_sql(
         f"SELECT station, year, day, high, low, precip from alldata_{state} "
         "WHERE (high is null or low is null or precip is null) "
-        "and year >= 1893 ORDER by station, day",
+        "and year >= 1893 and day < 'TODAY' ORDER by station, day",
         pgconn,
         index_col=None,
     )

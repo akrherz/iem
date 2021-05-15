@@ -196,7 +196,7 @@ $().ready(function() {
 			$.each(geojsonSource.getFeatures(), function (index, feat) {
 				$('#stations_in').append($('<option/>', { 
 					value: feat.get('sid'),
-					text : "["+ feat.get('sid') +"] "+ feat.get('sname') 
+					text : "["+ feat.get('sid') +"] "+ feat.get('sname') +" "+ feat.get("time_domain")
 				}));
 			});
 			sortListing("id");
@@ -235,8 +235,9 @@ $().ready(function() {
 			var coord = geometry.getCoordinates();
 			var sid = feature.get('sid');
 			popup.setPosition(coord);
-			var content = "<p>"+ sid
-			+" "+ feature.get('sname') +"</p>";
+			var content = "<p><strong>SID: </strong>"+ sid
+			+"<br /><strong>Name: </strong>"+ feature.get('sname')
+            +"<br /><strong>Period:</strong> "+ feature.get("time_domain") +"</p>";
 			$('#popover-content').html(content);
 			$(element).popover('show');
 			$("#stations_in").find("option[value=\""+sid+"\"]").attr("selected", "selected");

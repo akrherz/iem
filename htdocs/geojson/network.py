@@ -38,6 +38,12 @@ def run(network, only_online):
         "count": cursor.rowcount,
     }
     for row in cursor:
+        ab = row["archive_begin"]
+        ae = row["archive_end"]
+        time_domain = "(%s-%s)" % (
+            "????" if ab is None else ab.year,
+            "Now" if ae is None else ae.year,
+        )
         res["features"].append(
             dict(
                 type="Feature",
@@ -45,6 +51,7 @@ def run(network, only_online):
                 properties=dict(
                     elevation=row["elevation"],
                     sname=row["name"],
+                    time_domain=time_domain,
                     state=row["state"],
                     country=row["country"],
                     climate_site=row["climate_site"],

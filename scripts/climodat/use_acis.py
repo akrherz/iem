@@ -42,7 +42,7 @@ def compare(row, colname):
     return False
 
 
-def do(station, acis_station, interactive):
+def do(meta, station, acis_station, interactive):
     """Do the query and work
 
     Args:
@@ -54,8 +54,8 @@ def do(station, acis_station, interactive):
     fmt = "%Y-%m-%d"
     payload = {
         "sid": acis_station,
-        "sdate": "1850-01-01",
-        "edate": today.strftime(fmt),
+        "sdate": meta["attributes"].get("FLOOR", "1850-01-01"),
+        "edate": meta["attributes"].get("CEILING", today.strftime(fmt)),
         "elems": [
             {"name": "maxt", "add": "t"},
             {"name": "mint", "add": "t"},
@@ -66,7 +66,13 @@ def do(station, acis_station, interactive):
     }
     if not interactive:
         payload["sdate"] = (today - datetime.timedelta(days=365)).strftime(fmt)
-    LOG.debug("Call ACIS server for: %s to update: %s", acis_station, station)
+    LOG.debug(
+        "Call ACIS for: %s[%s-%s] to update: %s",
+        acis_station,
+        payload["sdate"],
+        payload["edate"],
+        station,
+    )
     req = requests.post(SERVICE, json=payload)
     if req.status_code != 200:
         LOG.info("Got status_code %s for %s", req.status_code, acis_station)
@@ -162,19 +168,19 @@ def do(station, acis_station, interactive):
 def main(argv):
     """Do what is asked."""
     interactive = sys.stdout.isatty()
+    arg = argv[1]
+    # Only run cron job for online sites
+    nt = NetworkTable(f"{arg[:2]}CLIMATE", only_online=not interactive)
 
     def _worker(sid, acis_station):
         """Do work."""
-        updates = do(sid, acis_station, interactive)
+        updates = do(nt.sts[sid], sid, acis_station, interactive)
         # If we found a lot of updates over the previous year, rerun for all
         if not interactive and updates > 100:
-            do(sid, acis_station, True)
+            do(nt.sts[sid], sid, acis_station, True)
 
     if len(argv) == 2:
-        arg = argv[1]
         if len(arg) == 2:
-            # Only run cron job for online sites
-            nt = NetworkTable(f"{arg}CLIMATE", only_online=not interactive)
             for sid in nt.sts:
                 if sid[2] in ["T", "C"] or sid[2:] == "0000":
                     continue

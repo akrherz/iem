@@ -36,7 +36,7 @@ def get_scenario_period(ctx):
 
 
 def get_database():
-    """ Get database """
+    """Get database"""
     return get_dbconn("coop")
 
 
@@ -68,7 +68,7 @@ def get_cgi_dates(form):
 
 
 def get_cgi_stations(form):
-    """ Figure out which stations the user wants, return a list of them """
+    """Figure out which stations the user wants, return a list of them"""
     reqlist = form.getall("station[]")
     if not reqlist:
         reqlist = form.getall("stations")
@@ -483,7 +483,7 @@ def do_daycent(ctx):
 
 
 def get_tablename(stations):
-    """ Figure out the table that has the data for these stations """
+    """Figure out the table that has the data for these stations"""
     states = []
     for sid in stations:
         if sid[:2] not in states:
@@ -494,7 +494,7 @@ def get_tablename(stations):
 
 
 def get_stationtable(stations):
-    """ Figure out our station table! """
+    """Figure out our station table!"""
     states = []
     networks = []
     for sid in stations:
@@ -505,7 +505,7 @@ def get_stationtable(stations):
 
 
 def do_simple(ctx):
-    """ Generate Simple output  """
+    """Generate Simple output"""
 
     dbconn = get_database()
     cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -517,14 +517,12 @@ def do_simple(ctx):
     if len(ctx["stations"]) == 1:
         ctx["stations"].append("X")
 
-    sql = (
-        """
+    sql = f"""
     WITH scenario as (
         SELECT station, high, low, precip, snow, snowd, narr_srad,
+        temp_estimated, precip_estimated,
         merra_srad, merra_srad_cs, hrrr_srad,
- to_char(('"""
-        + str(thisyear)
-        + """-'||month||'-'||extract(day from day))::date,
+        to_char(('{thisyear}-'||month||'-'||extract(day from day))::date,
         'YYYY/mm/dd') as day,
         extract(doy from day) as doy,
         gddxx(50, 86, high, low) as gdd_50_86,
@@ -532,15 +530,12 @@ def do_simple(ctx):
         round((5.0/9.0 * (high - 32.0))::numeric,1) as highc,
         round((5.0/9.0 * (low - 32.0))::numeric,1) as lowc,
         round((precip * 25.4)::numeric,1) as precipmm
-        from """
-        + table
-        + """ WHERE
-        station IN """
-        + str(tuple(ctx["stations"]))
-        + """ and
+        from {table} WHERE
+        station IN {str(tuple(ctx["stations"]))} and
         day >= %s and day <= %s
     ), obs as (
         SELECT station, high, low, precip, snow, snowd, narr_srad,
+        temp_estimated, precip_estimated,
         merra_srad, merra_srad_cs, hrrr_srad,
         to_char(day, 'YYYY/mm/dd') as day,
         extract(doy from day) as doy,
@@ -549,19 +544,13 @@ def do_simple(ctx):
         round((5.0/9.0 * (high - 32.0))::numeric,1) as highc,
         round((5.0/9.0 * (low - 32.0))::numeric,1) as lowc,
         round((precip * 25.4)::numeric,1) as precipmm
-        from """
-        + table
-        + """ WHERE
-        station IN """
-        + str(tuple(ctx["stations"]))
-        + """ and
+        from {table} WHERE station IN {str(tuple(ctx["stations"]))} and
         day >= %s and day <= %s
     ), total as (
         SELECT * from obs UNION SELECT * from scenario
     )
 
     SELECT * from total ORDER by day ASC"""
-    )
     args = (ctx["scenario_sts"], ctx["scenario_ets"], ctx["sts"], ctx["ets"])
 
     cols = ["station", "station_name", "day", "doy"]
@@ -862,7 +851,7 @@ def do_swat(ctx):
 
 
 def application(environ, start_response):
-    """ go main go """
+    """go main go"""
     form = parse_formvars(environ)
     ctx = {}
     ctx["stations"] = get_cgi_stations(form)
@@ -942,7 +931,7 @@ def application(environ, start_response):
 
 
 def test_sane_date():
-    """ Test our sane_date() method"""
+    """Test our sane_date() method"""
     assert sane_date(2000, 9, 31) == datetime.date(2000, 9, 30)
     assert sane_date(2000, 2, 31) == datetime.date(2000, 2, 29)
     assert sane_date(2000, 1, 15) == datetime.date(2000, 1, 15)
