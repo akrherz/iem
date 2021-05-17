@@ -81,7 +81,7 @@ GDD_KNOWN_BASES = [32, 41, 46, 48, 50, 51, 52]
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -266,6 +266,11 @@ def get_data(ctx):
     wfo_limiter = ""
     if sector == "iailin":
         tables = ["alldata_ia", "alldata_il", "alldata_in"]
+    elif sector == "midwest":
+        tables = [
+            f"alldata_{x}"
+            for x in "nd mn wi mi sd ne ia il in oh ks mo ky".split()
+        ]
     if ctx["d"] == "wfo":
         tables, bnds = compute_tables_wfo(ctx["wfo"])
         wfo_limiter = (
@@ -384,7 +389,7 @@ def geojson(fdict):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     df = get_data(ctx)
     sector = ctx["sector"]
@@ -485,7 +490,9 @@ def plotter(fdict):
             labelbuffer=5,
         )
     if state is not None or sector == "iailin" or ctx["d"] == "wfo":
-        if sector != "conus":
+        if sector not in [
+            "conus",
+        ]:
             mp.drawcounties()
     if ctx["usdm"] == "yes":
         mp.draw_usdm(date2, filled=False, hatched=True)
