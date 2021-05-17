@@ -57,7 +57,7 @@ longer periods of data.</p>
         <input type="text" name="degrees" size="5" value="3.0">
         degrees to point
         <input type="text" name="lon" size="10" value="-91.99"> East and
-        <input type="text" name="lon" size="10" value="41.99"> North
+        <input type="text" name="lat" size="10" value="41.99"> North
         </div>
     </td>
 </tr>

@@ -34,9 +34,7 @@ def get_context(environ):
     sts = utc(int(year1), int(month1), int(day1), int(hour1), int(minute1))
     ets = utc(int(year2), int(month2), int(day2), int(hour2), int(minute2))
     if ets < sts:
-        s = ets
-        ets = sts
-        sts = s
+        (ets, sts) = (sts, ets)
 
     form["fmt"] = form.get("fmt", "shp")
     form["sts"] = sts
