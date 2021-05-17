@@ -744,7 +744,7 @@ function getShapefileLink(base) {
     var wfos = $("#wfo").val();
     if (wfos) {
         for (var i = 0; i < wfos.length; i++) {
-            uri += "&wfo[]=" + tokens[i];
+            uri += "&wfo[]=" + wfos[i];
         }
     }
     var sts = moment($("#sts").val(), 'L LT');
