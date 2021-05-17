@@ -3,7 +3,6 @@
 from collections import OrderedDict
 import sys
 import os
-import datetime
 import tempfile
 import imp
 import json
@@ -16,6 +15,7 @@ import pytz
 import pandas as pd
 from paste.request import parse_formvars
 from six import string_types
+from pyiem.util import utc
 from pyiem.plot.use_agg import plt
 from pyiem.exceptions import NoDataFound
 
@@ -143,17 +143,16 @@ def get_res_by_fmt(p, fmt, fdict):
     return res, meta
 
 
-def plot_metadata(fig, start_time, end_time, p):
+def plot_metadata(fig, start_time, p):
     """Place timestamp on the image"""
-    utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
-    now = utcnow.astimezone(pytz.timezone("America/Chicago"))
+    now = utc().astimezone(pytz.timezone("America/Chicago"))
     fig.text(
         0.01,
         0.005,
         ("Generated at %s in %.2fs")
         % (
             now.strftime("%-d %b %Y %-I:%M %p %Z"),
-            (end_time - start_time).total_seconds(),
+            (utc() - start_time).total_seconds(),
         ),
         va="bottom",
         ha="left",
@@ -198,8 +197,9 @@ def workflow(environ, form, fmt):
         res = mc.get(mckey) if fdict.get("_cb") is None else None
         if res:
             return HTTP200, res
+        sys.stderr.write(f"failed fetching '{mckey}'\n")
     # memcache failed to save us work, so work we do!
-    start_time = datetime.datetime.utcnow()
+    start_time = utc()
     # res should be a 3 length tuple
     try:
         res, meta = get_res_by_fmt(scriptnum, fmt, fdict)
@@ -208,11 +208,6 @@ def workflow(environ, form, fmt):
     except Exception as exp:
         # Everything else should be considered fatal
         return HTTP500, handle_error(exp, fmt, environ.get("REQUEST_URI"))
-    end_time = datetime.datetime.utcnow()
-    sys.stderr.write(
-        ("Autoplot[%3s] Timing: %7.3fs Key: %s\n")
-        % (scriptnum, (end_time - start_time).total_seconds(), mckey)
-    )
 
     [mixedobj, df, report] = res
     # Our output content
@@ -226,7 +221,7 @@ def workflow(environ, form, fmt):
     elif fmt in ["svg", "png", "pdf"] and isinstance(mixedobj, plt.Figure):
         # if our content is a figure, then add some fancy metadata to plot
         if meta.get("plotmetadata", True):
-            plot_metadata(mixedobj, start_time, end_time, scriptnum)
+            plot_metadata(mixedobj, start_time, scriptnum)
         ram = BytesIO()
         plt.savefig(ram, format=fmt, dpi=dpi)
         plt.close()
@@ -262,14 +257,20 @@ def workflow(environ, form, fmt):
         )
         raise Exception("Undefined autoplot action |%s|" % (fmt,))
 
+    dur = int(meta.get("cache", 43200))
     try:
-        mc.set(mckey, content, meta.get("cache", 43200))
+        mc.set(mckey, content, dur)
     except Exception as exp:
         sys.stderr.write(
             "Exception while writting key: %s\n%s\n" % (mckey, exp)
         )
     if isinstance(mixedobj, plt.Figure):
         plt.close()
+    end_time = utc()
+    sys.stderr.write(
+        ("Autoplot[%3s] Timing: %7.3fs Key: %s Cache: %s[s]\n")
+        % (scriptnum, (end_time - start_time).total_seconds(), mckey, dur)
+    )
     return HTTP200, content
 
 
