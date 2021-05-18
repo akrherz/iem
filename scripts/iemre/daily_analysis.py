@@ -174,7 +174,8 @@ def grid_day12(ts, ds):
     """Use the COOP data for gridding"""
     LOG.debug("12z hi/lo for %s", ts)
     mybuf = 2.0
-    if ts.year > 2010:
+    # non-midwest COOP ingest is not "complete" until start of 2012
+    if ts.year > 2011:
         sql = """
            SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, s.state,
            s.id as station, s.name as name,
