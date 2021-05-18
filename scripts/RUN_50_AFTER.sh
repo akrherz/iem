@@ -1,5 +1,7 @@
 # cronscript for 50 minutes after the hour
 
+python cache/cache_autoplots.py &
+
 cd ingestors/madis
 python extract_hfmetar.py 2 &
 
