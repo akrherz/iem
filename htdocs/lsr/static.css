@@ -80,3 +80,8 @@ a:hover,a:focus{
     font-size: 0.8em;
     max-width: 230px;
 }
+
+.close {
+    color: #FFF !important;
+    opacity: 1 !important;
+}
