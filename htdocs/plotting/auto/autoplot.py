@@ -4,7 +4,8 @@ from collections import OrderedDict
 import sys
 import os
 import tempfile
-import imp
+import importlib.machinery
+import importlib.util
 import json
 import traceback
 from io import BytesIO
@@ -27,8 +28,6 @@ HTTP200 = "200 OK"
 HTTP400 = "400 Bad Request"
 HTTP500 = "500 Internal Server Error"
 BASEDIR, WSGI_FILENAME = os.path.split(__file__)
-if BASEDIR not in sys.path:
-    sys.path.insert(0, BASEDIR)
 
 
 def format_geojson_response(gdf, defaultcol):
@@ -118,22 +117,25 @@ def handle_error(exp, fmt, uri):
 
 def get_res_by_fmt(p, fmt, fdict):
     """Do the work of actually calling things"""
+    suffix = ""
     if p >= 200:
-        name = "scripts200/p%s" % (p,)
+        suffix = "200"
     elif p >= 100:
-        name = "scripts100/p%s" % (p,)
-    else:
-        name = "scripts/p%s" % (p,)
-    fp, pathname, description = imp.find_module(name)
-    a = imp.load_module(name, fp, pathname, description)
-    meta = a.get_description()
+        suffix = "100"
+    fn = f"{BASEDIR}/scripts{suffix}/p{p}.py"
+    loader = importlib.machinery.SourceFileLoader(f"p{p}", fn)
+    spec = importlib.util.spec_from_loader(loader.name, loader)
+    mod = importlib.util.module_from_spec(spec)
+    loader.exec_module(mod)
+
+    meta = mod.get_description()
     # Allow returning of javascript as a string
     if fmt == "js":
-        res = a.highcharts(fdict)
+        res = mod.highcharts(fdict)
     elif fmt == "geojson":
-        res = format_geojson_response(*a.geojson(fdict))
+        res = format_geojson_response(*mod.geojson(fdict))
     else:
-        res = a.plotter(fdict)
+        res = mod.plotter(fdict)
     # res should be either a 2 or 3 length tuple, rectify this otherwise
     if not isinstance(res, tuple):
         res = [res, None, None]
@@ -266,10 +268,9 @@ def workflow(environ, form, fmt):
         )
     if isinstance(mixedobj, plt.Figure):
         plt.close()
-    end_time = utc()
     sys.stderr.write(
         ("Autoplot[%3s] Timing: %7.3fs Key: %s Cache: %s[s]\n")
-        % (scriptnum, (end_time - start_time).total_seconds(), mckey, dur)
+        % (scriptnum, (utc() - start_time).total_seconds(), mckey, dur)
     )
     return HTTP200, content
 

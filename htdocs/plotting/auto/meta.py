@@ -1,6 +1,6 @@
 """mod_wsgi handler for autoplot cache needs"""
 import sys
-import imp
+import importlib
 import os
 import json
 
@@ -8,8 +8,6 @@ from paste.request import parse_formvars
 from pyiem.util import get_dbconn
 
 BASEDIR, WSGI_FILENAME = os.path.split(__file__)
-if BASEDIR not in sys.path:
-    sys.path.insert(0, BASEDIR)
 
 
 def get_timing(pidx):
@@ -37,28 +35,29 @@ def do_html(pidx):
     """Generate the HTML interface for this autoplot."""
     response_headers = [("Content-type", "text/html")]
     name = get_script_name(pidx)
-    if not os.path.isfile("%s/%s.py" % (BASEDIR, name)):
+    if not os.path.isfile(name):
         sys.stderr.write("autoplot/meta 404 %s\n" % (name,))
         status = "404 Not Found"
         output = ""
         return output.encode(), status, response_headers
-    fp, pathname, description = imp.find_module(name)
-    app = imp.load_module(name, fp, pathname, description)
+    loader = importlib.machinery.SourceFileLoader(f"p{pidx}", name)
+    spec = importlib.util.spec_from_loader(loader.name, loader)
+    mod = importlib.util.module_from_spec(spec)
+    loader.exec_module(mod)
     # see how we are called, finally
-    appdata = app.get_description()
+    appdata = mod.get_description()
     html = generate_html(appdata)
     return html, "200 OK", response_headers
 
 
 def get_script_name(pidx):
     """Return where this script resides, so we can load it!"""
+    suffix = ""
     if pidx >= 200:
-        name = "scripts200/p%s" % (pidx,)
+        suffix = "200"
     elif pidx >= 100:
-        name = "scripts100/p%s" % (pidx,)
-    else:
-        name = "scripts/p%s" % (pidx,)
-    return name
+        suffix = "100"
+    return f"{BASEDIR}/scripts{suffix}/p{pidx}.py"
 
 
 def do_json(pidx):
@@ -70,7 +69,7 @@ def do_json(pidx):
         data = scripts.data
     else:
         name = get_script_name(pidx)
-        if not os.path.isfile("%s/%s.py" % (BASEDIR, name)):
+        if not os.path.isfile(name):
             sys.stderr.write("autoplot/meta 404 %s\n" % (name,))
             status = "404 Not Found"
             output = ""
@@ -83,12 +82,14 @@ def do_json(pidx):
             timing = get_timing(pidx)
         except Exception:
             timing = -1
-        fp, pathname, description = imp.find_module(name)
-        app = imp.load_module(name, fp, pathname, description)
-        data = app.get_description()
-        data["maptable"] = hasattr(app, "geojson")
-        data["highcharts"] = hasattr(app, "highcharts")
-        data["report"] = hasattr(app, "report")
+        loader = importlib.machinery.SourceFileLoader(f"p{pidx}", name)
+        spec = importlib.util.spec_from_loader(loader.name, loader)
+        mod = importlib.util.module_from_spec(spec)
+        loader.exec_module(mod)
+        data = mod.get_description()
+        data["maptable"] = hasattr(mod, "geojson")
+        data["highcharts"] = hasattr(mod, "highcharts")
+        data["report"] = hasattr(mod, "report")
         data["timing[secs]"] = timing
 
         # Defaults
