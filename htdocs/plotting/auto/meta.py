@@ -64,9 +64,12 @@ def do_json(pidx):
     """Do what needs to be done for JSON requests."""
     status = "200 OK"
     if pidx == 0:
-        import scripts  # pylint: disable=import-outside-toplevel
-
-        data = scripts.data
+        name = f"{BASEDIR}/scripts/__init__.py"
+        loader = importlib.machinery.SourceFileLoader("scripts", name)
+        spec = importlib.util.spec_from_loader(loader.name, loader)
+        mod = importlib.util.module_from_spec(spec)
+        loader.exec_module(mod)
+        data = mod.data
     else:
         name = get_script_name(pidx)
         if not os.path.isfile(name):
