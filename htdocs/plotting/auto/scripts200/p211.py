@@ -22,7 +22,7 @@ PDICT = OrderedDict(
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -92,6 +92,8 @@ def get_data(ctx):
     # Create a local valid time column
     ctx["tz"] = pytz.timezone(ctx["_nt"].sts[ctx["zstation"]]["tzname"])
     df["local_valid"] = df["utc_valid"].dt.tz_convert(ctx["tz"])
+    df["oprecip"] = df["precip"]
+    df["precip"] = df["precip"].fillna(0)
     return df
 
 
@@ -244,7 +246,7 @@ def make_precip_plot(ctx):
 
     ax.set_ylabel("Precipitation Rate [inch/hour]")
     ax.grid(True)
-    ax.legend(loc=1, ncol=1)
+    ax.legend(loc="best", ncol=1)
     ymax = max([7, df["precip_accum"].max(), df["precip_rate1"].max()])
     ax.set_ylim(0, int(ymax + 1))
     ax.set_yticks(range(0, int(ymax + 1), 1))
@@ -258,7 +260,7 @@ def make_precip_plot(ctx):
             ctx["_nt"].sts[ctx["zstation"]]["name"],
             ctx["zstation"],
             df["precip_accum"].max(),
-            df["precip"].isna().sum(),
+            df["oprecip"].isna().sum(),
         )
     )
     do_xaxis(ctx, ax)
@@ -267,7 +269,7 @@ def make_precip_plot(ctx):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     if "HAS1MIN" not in ctx["_nt"].sts[ctx["zstation"]]["attributes"]:
         raise NoDataFound("Sorry, the IEM has no one-minute data for station.")
