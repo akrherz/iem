@@ -21,14 +21,14 @@ def safe_t(val, units="degC"):
 
 
 def safe_p(val):
-    """ precipitation """
+    """precipitation"""
     if val is None or val < 0:
         return "M"
     return "%.2f" % (val / 25.4,)
 
 
 def safe(val, precision):
-    """ safe precision formatter """
+    """safe precision formatter"""
     if val is None or val < 0:
         return "M"
     return round(val, precision)
@@ -42,7 +42,7 @@ def safe_m(val):
 
 
 def get_data(ts):
-    """ Get the data for this timestamp """
+    """Get the data for this timestamp"""
     iemcursor = IEM.cursor()
     cursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
     qcdict = loadqc()
@@ -50,10 +50,8 @@ def get_data(ts):
     data = {"type": "FeatureCollection", "features": []}
     # Fetch the daily values
     iemcursor.execute(
-        """
-    SELECT id, pday, max_tmpf, min_tmpf from summary s JOIN stations t
-    on (t.iemid = s.iemid) WHERE t.network = 'ISUSM' and day = %s
-    """,
+        "SELECT id, pday, max_tmpf, min_tmpf from summary s JOIN stations t "
+        "on (t.iemid = s.iemid) WHERE t.network = 'ISUSM' and day = %s",
         (ts.date(),),
     )
     daily = {}
@@ -105,6 +103,7 @@ def get_data(ts):
                 "type": "Feature",
                 "id": sid,
                 "properties": {
+                    "valid_utc": ts.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "encrh_avg": (
                         "%s%%" % safe(row["encrh_avg"], 1)
                         if row["encrh_avg"] is not None

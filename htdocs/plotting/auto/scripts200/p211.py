@@ -10,6 +10,7 @@ from matplotlib.dates import DateFormatter
 from metpy.units import units, masked_array
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict(
@@ -181,8 +182,16 @@ def make_precip_plot(ctx):
     df["precip_rate1"] = df["precip"] * 60.0
     df["precip_rate15"] = df["precip"].rolling(window=15).sum() * 4.0
     df["precip_rate60"] = df["precip"].rolling(window=60).sum()
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
-    ax.set_position([0.06, 0.14, 0.77, 0.78])
+    subtitle = ("%.2f inches total plotted, %s missing minutes") % (
+        df["precip_accum"].max(),
+        df["oprecip"].isna().sum(),
+    )
+    title = (f"{get_ttitle(df)} %s (%s) One Minute Rainfall") % (
+        ctx["_nt"].sts[ctx["zstation"]]["name"],
+        ctx["zstation"],
+    )
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle)
+    ax.set_position([0.06, 0.1, 0.81, 0.78])
 
     ax.bar(
         df["local_valid"].values,
@@ -250,19 +259,6 @@ def make_precip_plot(ctx):
     ymax = max([7, df["precip_accum"].max(), df["precip_rate1"].max()])
     ax.set_ylim(0, int(ymax + 1))
     ax.set_yticks(range(0, int(ymax + 1), 1))
-    ax.set_title(
-        (
-            f"{get_ttitle(df)} %s (%s)\n"
-            "One Minute Rainfall, "
-            "%.2f inches total plotted, %s missing minutes"
-        )
-        % (
-            ctx["_nt"].sts[ctx["zstation"]]["name"],
-            ctx["zstation"],
-            df["precip_accum"].max(),
-            df["oprecip"].isna().sum(),
-        )
-    )
     do_xaxis(ctx, ax)
     ax.set_xlim(df["local_valid"].min(), df["local_valid"].max())
     return fig
