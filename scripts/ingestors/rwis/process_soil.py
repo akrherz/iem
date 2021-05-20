@@ -2,6 +2,7 @@
 # stdlib
 import datetime
 import json
+import sys
 
 # third party
 import pytz
@@ -54,6 +55,9 @@ def process_features(features):
                 "sensor_id": props["SENSOR_ID"],
             }
         )
+    if not rows:
+        LOG.info("No data, aborting")
+        sys.exit()
     return pd.DataFrame(rows).set_index("nwsli")
 
 

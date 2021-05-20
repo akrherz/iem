@@ -1,9 +1,9 @@
 <?php
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/database.inc.php";
+require_once "../../../include/network.php";
 $network = isset($_GET['network']) ? substr($_GET["network"],0,30) : 'IA_COOP';
-include("../../../include/database.inc.php");
- $connection = iemdb("iem");
-include("../../../include/network.php");
+$connection = iemdb("iem");
 $nt = new NetworkTable($network);
 $cities = $nt->table;
 
