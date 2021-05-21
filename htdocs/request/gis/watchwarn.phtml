@@ -185,8 +185,13 @@ $content .= <<<EOF
     
     </table>
 
-<br /><input type="checkbox" name="limit0" value="yes">Limit Output to Tornado, Severe Thunderstorm, Marine, and Flash Flood Warnings
-<br /><input type="checkbox" name="limit1" value="yes">Limit Output to only Storm Based Warnings
+<br /><input id="limit0" type="checkbox" name="limit0" value="yes">
+<label for="limit0">Limit output to Tornado, Severe Thunderstorm, Marine, and
+Flash Flood Warnings</label>
+<br /><input id="limit1" type="checkbox" name="limit1" value="yes">
+<label for="limit1">Limit output to only Storm Based Warnings</label>
+<br /><input id="limit2" type="checkbox" name="limit2" value="yes">
+<label for="limit2">Limit output to only Tornado/Flash Flood Emergencies</label>
 
 <table border="1">
 <tr><td colspan="2"><input type="checkbox" name="limitps" value="yes"> Limit output to selected VTEC
