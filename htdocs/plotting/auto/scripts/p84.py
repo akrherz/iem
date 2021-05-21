@@ -31,7 +31,7 @@ PDICT4 = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = False
     desc[
@@ -138,7 +138,7 @@ def compute_title(src, sdate, edate):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = util.get_autoplot_context(fdict, get_description())
     ptype = ctx["ptype"]
     sdate = ctx["sdate"]
@@ -251,8 +251,6 @@ def plotter(fdict):
                 np.sum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1], 0)
             )
         p01d = p01d / climo * 100.0
-        cmap.set_under("white")
-        cmap.set_over("black")
         clevs = [1, 10, 25, 50, 75, 100, 125, 150, 200, 300, 500]
         plot_units = "percent"
     else:
