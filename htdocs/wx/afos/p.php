@@ -87,7 +87,6 @@ else {
 			date("Y-m-d H:i", $ts)));
 }
 
-$t->title = sprintf("%s from NWS %s", substr($pil,0,3), substr($pil,3,3));
 $content = "<h3>National Weather Service Raw Text Product</h3>";
 
 if (is_null($rs) || pg_numrows($rs) < 1){
@@ -99,6 +98,11 @@ for ($i=0; $row = pg_fetch_assoc($rs); $i++)
 	if ($i == 0){
 		$basets = strtotime($row["mytime"]); 
 		$newe = date("YmdHi", $basets);
+        $t->title = sprintf(
+            "%s from NWS %s",
+            substr($pil,0,3),
+            substr($row["source"],1,3)
+        );
         $product_id = sprintf(
             "%s-%s-%s-%s", $newe, $row["source"], $row["wmo"], $pil);
 		$t->twitter_description = sprintf("%s issued by NWS %s at %s UTC",
