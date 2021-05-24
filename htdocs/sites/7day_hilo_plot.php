@@ -1,8 +1,12 @@
 <?php
  /* Make a nice simple plot of 7 day temperatures */
- include('../../config/settings.inc.php');
- include("../../include/database.inc.php");
- include("setup.php");
+ require_once '../../config/settings.inc.php';
+ require_once "../../include/database.inc.php";
+ require_once "setup.php";
+ require_once "../../include/jpgraph/jpgraph.php";
+ require_once "../../include/jpgraph/jpgraph_bar.php";
+ require_once "../../include/jpgraph/jpgraph_line.php";
+ 
 $cnetwork = sprintf("%sCLIMATE", $st->table[$station]["state"]);
 $st->load_station( $st->table[$station]["climate_site"], $cnetwork);
 $cities = $st->table;
@@ -43,7 +47,6 @@ $lows = array_reverse($lows);
 
 pg_close($db);
 
-
 if ($hasclimate){
  $db = iemdb("coop");
  $sqlDate = sprintf("2000-%s", date("m-d") );
@@ -77,9 +80,6 @@ if (!$hasclimate){
 }
 
 /* Time to plot */
-include("../../include/jpgraph/jpgraph.php");
-include("../../include/jpgraph/jpgraph_bar.php");
-include("../../include/jpgraph/jpgraph_line.php");
 
 $a0 = min($lows);
 $a2 = max($highs);

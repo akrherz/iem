@@ -139,7 +139,7 @@ if ($mode == "monthly"){
 		$table = sprintf("alldata_%s", substr($network,0,2));
 		$sql = "SELECT high as max_tmpf, to_char(day, 'YYYYMMDD') as dvalid,
 			low as min_tmpf, precip as pday,
-			Null as max_tmpf_qc, Null as max_gust,
+			Null as max_tmpf_qc, Null as max_gust, null as max_gust_ts,
 			null as min_rh, null as max_rh,
 			null as max_dwpf, null as min_dwpf,
 			null as min_feel, null as avg_feel, null as max_feel,

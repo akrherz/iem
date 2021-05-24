@@ -1,6 +1,6 @@
 <?php 
 /* 
- * RSS Feed of new IEM added station tables, default to 25 long?
+ * RSS Feed of new IEM added station tables
  */
  require_once "../../config/settings.inc.php";
  define("IEM_APPID", 37);
@@ -9,7 +9,7 @@
  $rs = pg_exec($conn, "SELECT s.*, ST_x(geom) as lon, ST_y(geom) as lat, ".
  		"t.name as netname from stations s JOIN networks t ".
  		"ON (t.id = s.network) WHERE s.elevation > -990 ".
- 		"ORDER by iemid DESC LIMIT 25");
+ 		"ORDER by iemid DESC LIMIT 50");
  pg_close($conn);
  
  
