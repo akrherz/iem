@@ -7,7 +7,7 @@ import psycopg2.extras
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import loadqc
-from pyiem.util import drct2text, get_dbconn, utc, convert_value
+from pyiem.util import drct2text, get_dbconn, utc, convert_value, mm2inch
 
 ISUAG = get_dbconn("isuag")
 IEM = get_dbconn("iem")
@@ -43,53 +43,64 @@ def safe_m(val):
 
 def get_data(ts):
     """Get the data for this timestamp"""
-    iemcursor = IEM.cursor()
     cursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
     qcdict = loadqc()
     nt = NetworkTable("ISUSM", only_online=False)
     data = {"type": "FeatureCollection", "features": []}
-    # Fetch the daily values
-    iemcursor.execute(
-        "SELECT id, pday, max_tmpf, min_tmpf from summary s JOIN stations t "
-        "on (t.iemid = s.iemid) WHERE t.network = 'ISUSM' and day = %s",
-        (ts.date(),),
-    )
-    daily = {}
-    for row in iemcursor:
-        daily[row[0]] = {
-            "pday": row[1],
-            "max_tmpf": row[2],
-            "min_tmpf": row[3],
-        }
+    midnight = ts.replace(hour=0)
+    h24 = ts - datetime.timedelta(hours=24)
     cursor.execute(
         """
-    SELECT h.station,
-        h.encrh_avg,
-        coalesce(m.rh_avg_qc, h.rh_qc) as rh,
-        h.rain_mm_tot,
-        etalfalfa,
-        battv_min,
-        coalesce(m.slrkj_tot_qc * 3600 / 1000000, h.slrmj_tot_qc) as slrmj_tot,
-        coalesce(m.tair_c_avg, h.tair_c_avg) as tair_c_avg,
-        coalesce(m.tsoil_c_avg_qc, h.tsoil_c_avg_qc) as tsoil_c_avg_qc,
-        coalesce(m.t12_c_avg_qc, h.t12_c_avg_qc) as t12_c_avg_qc,
-        coalesce(m.t24_c_avg_qc, h.t24_c_avg_qc) as t24_c_avg_qc,
-        coalesce(m.t50_c_avg_qc, h.t50_c_avg_qc) as t50_c_avg_qc,
-        coalesce(m.calcvwc12_avg_qc, h.calc_vwc_12_avg_qc)
-            as calc_vwc_12_avg_qc,
-        coalesce(m.calcvwc24_avg_qc, h.calc_vwc_24_avg_qc)
-            as calc_vwc_24_avg_qc,
-        coalesce(m.calcvwc50_avg_qc, h.calc_vwc_50_avg_qc)
-            as calc_vwc_50_avg_qc,
-        coalesce(m.ws_mph_max, h.ws_mph_max) as ws_mph_max,
-        coalesce(m.winddir_d1_wvt, h.winddir_d1_wvt) as winddir_d1_wvt,
-        coalesce(m.ws_mph_s_wvt * 0.447,
-                 coalesce(h.ws_mps_s_wvt, 0))as ws_mps_s_wvt
-    from sm_hourly h LEFT JOIN sm_minute m on (h.station = m.station and
-    h.valid = m.valid)
-    where h.valid = %s
+        with calendar_day as (
+            select
+            h.station,
+            max(coalesce(h.tair_c_avg_qc, m.tair_c_avg_qc)) as max_tmpc,
+            min(coalesce(h.tair_c_avg_qc, m.tair_c_avg_qc)) as min_tmpc,
+            sum(rain_mm_tot) as pday from
+            sm_minute m LEFT JOIN sm_hourly h on (m.station = h.station and
+            m.valid = h.valid) WHERE m.valid > %s and m.valid <= %s
+            GROUP by h.station
+        ),
+        twentyfour_hour as (
+            select
+            station,
+            sum(rain_mm_tot) as p24m from
+            sm_hourly WHERE valid > %s and valid <= %s
+            GROUP by station
+        ),
+        agg as (
+            SELECT h.station,
+            h.encrh_avg,
+            coalesce(m.rh_avg_qc, h.rh_qc) as rh,
+            h.rain_mm_tot,
+            etalfalfa,
+            battv_min,
+            coalesce(m.slrkj_tot_qc * 3600 / 1000000, h.slrmj_tot_qc)
+                as slrmj_tot,
+            coalesce(m.tair_c_avg_qc, h.tair_c_avg_qc) as tair_c_avg,
+            coalesce(m.tsoil_c_avg_qc, h.tsoil_c_avg_qc) as tsoil_c_avg_qc,
+            coalesce(m.t12_c_avg_qc, h.t12_c_avg_qc) as t12_c_avg_qc,
+            coalesce(m.t24_c_avg_qc, h.t24_c_avg_qc) as t24_c_avg_qc,
+            coalesce(m.t50_c_avg_qc, h.t50_c_avg_qc) as t50_c_avg_qc,
+            coalesce(m.calcvwc12_avg_qc, h.calc_vwc_12_avg_qc)
+                as calc_vwc_12_avg_qc,
+            coalesce(m.calcvwc24_avg_qc, h.calc_vwc_24_avg_qc)
+                as calc_vwc_24_avg_qc,
+            coalesce(m.calcvwc50_avg_qc, h.calc_vwc_50_avg_qc)
+                as calc_vwc_50_avg_qc,
+            coalesce(m.ws_mph_max, h.ws_mph_max) as ws_mph_max,
+            coalesce(m.winddir_d1_wvt, h.winddir_d1_wvt) as winddir_d1_wvt,
+            coalesce(m.ws_mph_s_wvt * 0.447,
+                    coalesce(h.ws_mps_s_wvt, 0))as ws_mps_s_wvt
+            from sm_hourly h LEFT JOIN sm_minute m on (
+                h.station = m.station and h.valid = m.valid)
+            where h.valid = %s
+        )
+        SELECT a.*, c.max_tmpc, c.min_tmpc, c.pday, h.p24m from
+        agg a LEFT JOIN calendar_day c on (a.station = c.station)
+        LEFT JOIN twentyfour_hour h on (a.station = h.station)
     """,
-        (ts,),
+        (midnight, ts, h24, ts, ts),
     )
     for row in cursor:
         sid = row["station"]
@@ -120,17 +131,10 @@ def get_data(ts):
                     "bat": safe(row["battv_min"], 2),
                     "radmj": safe(row["slrmj_tot"], 2),
                     "tmpf": safe_t(row["tair_c_avg"]),
-                    "high": safe_t(
-                        daily.get(sid, {}).get("max_tmpf", None), "degF"
-                    ),
-                    "low": safe_t(
-                        daily.get(sid, {}).get("min_tmpf", None), "degF"
-                    ),
-                    "pday": (
-                        safe(daily.get(sid, {}).get("pday", None), 2)
-                        if not q.get("precip", False)
-                        else "M"
-                    ),
+                    "high": safe_t(row["max_tmpc"], "degC"),
+                    "low": safe_t(row["min_tmpc"], "degC"),
+                    "pday": safe(mm2inch(row["pday"]), 2),
+                    "p24i": safe(mm2inch(row["p24m"]), 2),
                     "soil04t": (
                         safe_t(row["tsoil_c_avg_qc"])
                         if not q.get("soil4", False)
@@ -189,8 +193,8 @@ def application(environ, start_response):
         ts = utc().replace(minute=0, second=0, microsecond=0)
     else:
         ts = datetime.datetime.strptime(dt, "%Y-%m-%dT%H:%M:%S.000Z")
-        ts = ts.replace(tzinfo=pytz.UTC)
-    data = get_data(ts)
+        ts = ts.replace(tzinfo=datetime.timezone.utc)
+    data = get_data(ts.astimezone(pytz.timezone("America/Chicago")))
 
     start_response("200 OK", headers)
     return [data.encode("ascii")]
