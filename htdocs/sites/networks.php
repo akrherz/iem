@@ -34,8 +34,8 @@ if ($network == '_ALL_'){
 	$rs = pg_query(
         $pgconn,
         "SELECT id, name, elevation, archive_begin, archive_end, network, ".
-        "ST_x(geom) as lon, ST_y(geom) as lat, null as attributes
-        from stations WHERE online = 'y' ORDER by name");
+        "ST_x(geom) as lon, ST_y(geom) as lat, null as attributes, state, ".
+        "synop, country from stations WHERE online = 'y' ORDER by name");
     $cities = Array();
     for ($i=0; $row = pg_fetch_array($rs); $i++) {
         $cities[$row["id"]] = $row;
@@ -44,8 +44,8 @@ if ($network == '_ALL_'){
 	$rs = pg_query(
         $pgconn,
         "SELECT id, name, elevation, archive_begin, archive_end, network, ".
-        "ST_x(geom) as lon, ST_y(geom) as lat, null as attributes
-        from stations WHERE online = 'y' and
+        "ST_x(geom) as lon, ST_y(geom) as lat, null as attributes, state, ".
+        "synop, country from stations WHERE online and
         (network ~* 'ASOS' or network = 'AWOS') ORDER by name");
     $cities = Array();
     for ($i=0; $row = pg_fetch_array($rs); $i++) {

@@ -1,6 +1,17 @@
 Soil Moisture Network Meeting Notes
 ===================================
 
+17 May 2021 :: Planning with new hire Mark
+-----
+
+- [x] "Hourly Radiation" on pulldown is vague.
+- [ ] Frozen Soil on Sortable Currents is in poor taste.
+- There's a new Fruit + Vegetable hire coming, which may take over vineyards.
+- Decided to barry the soilvue to 12 inches depth and place a reflectometer
+at the 4inch depth.
+- [ ] no close icon on the popup for homepage map
+- [x] daily precip plotting does not work
+
 13 Jan 2020 :: Planning meeting with Dr Lamkey
 ----
 
