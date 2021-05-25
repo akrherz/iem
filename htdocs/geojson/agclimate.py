@@ -130,7 +130,11 @@ def get_data(ts):
                     "et": safe_p(row["etalfalfa"]),
                     "bat": safe(row["battv_min"], 2),
                     "radmj": safe(row["slrmj_tot"], 2),
-                    "tmpf": safe_t(row["tair_c_avg"]),
+                    "tmpf": (
+                        safe_t(row["tair_c_avg"])
+                        if not q.get("tmpf", False)
+                        else "M"
+                    ),
                     "high": safe_t(row["max_tmpc"], "degC"),
                     "low": safe_t(row["min_tmpc"], "degC"),
                     "pday": safe(mm2inch(row["pday"]), 2),
