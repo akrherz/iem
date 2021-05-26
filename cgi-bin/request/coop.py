@@ -158,10 +158,9 @@ def do_apsim(ctx):
 
     # Compute average temperature!
     cursor.execute(
-        """
-        SELECT avg((high+low)/2) as avgt from climate51 WHERE station = %s
-        """,
-        (station,),
+        "SELECT avg((high+low)/2) as avgt from ncei_climate91 "
+        "WHERE station = %s",
+        (nt.sts[station]["ncei91"],),
     )
     row = cursor.fetchone()
     sio.write(
@@ -174,10 +173,10 @@ def do_apsim(ctx):
         """
         select max(avg) as h, min(avg) as l from
             (SELECT extract(month from valid) as month, avg((high+low)/2.)
-             from climate51
+             from ncei_climate91
              WHERE station = %s GROUP by month) as foo
              """,
-        (station,),
+        (nt.sts[station]["ncei91"],),
     )
     row = cursor.fetchone()
     sio.write(
