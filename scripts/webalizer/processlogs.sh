@@ -52,7 +52,7 @@ mv combined.access_log combined-iem.log
 
 # Step 3, run webalizer against these log files
 /home/mesonet/bin/webalizer -c ${CONFBASE}/mesonet.conf -T combined-iem.log
-/home/mesonet/bin/webalizer -c ${CONFBASE}/cocorahs.conf combined-cocrahs.log
+/home/mesonet/bin/webalizer -c ${CONFBASE}/cocorahs.conf combined-cocorahs.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/sustainablecorn.conf combined-sustainablecorn.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/weatherim.conf combined-weatherim.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/datateam.conf combined-datateam.log
