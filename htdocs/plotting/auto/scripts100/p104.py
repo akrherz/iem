@@ -4,13 +4,13 @@ import datetime
 import numpy as np
 import pandas as pd
 from pyiem import network
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -75,7 +75,7 @@ def get_color(val, cat):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
 
@@ -89,7 +89,18 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    title = (
+        "%s - %s [%s] %s\n" "%s Day Trailing Departures plotted every %s days"
+    ) % (
+        date1.strftime("%d %b %Y"),
+        date2.strftime("%d %b %Y"),
+        station,
+        nt.sts[station]["name"],
+        days,
+        days2,
+    )
+
+    (fig, ax) = figure_axes(title=title)
 
     interval = datetime.timedelta(days=days2)
 
@@ -106,15 +117,15 @@ def plotter(fdict):
         for i in range(0, 0 - days, -1):
             sdays.append((now + datetime.timedelta(days=i)).strftime("%m%d"))
         cursor.execute(
-            """
+            f"""
         SELECT avg(p), stddev(p), avg(t), stddev(t),
         max(case when year = %s then p else -999 end),
         max(case when year = %s then t else -999 end) from
         (SELECT year, sum(precip) as p, avg((high+low)/2.) as t
-        from %s
-        WHERE station = '%s' and sday in %s GROUP by year) as foo
-        """
-            % (now.year, now.year, table, station, str(tuple(sdays)))
+        from {table}
+        WHERE station = %s and sday in %s GROUP by year) as foo
+        """,
+            (now.year, now.year, station, tuple(sdays)),
         )
         row = cursor.fetchone()
         if row[0] is None:
@@ -159,20 +170,6 @@ def plotter(fdict):
     ax.set_ylim(0 - pmax, pmax)
     ax.set_ylabel(r"Precipitation Departure $\sigma$")
     ax.set_xlabel(r"Temperature Departure $\sigma$")
-    ax.set_title(
-        (
-            "%s - %s [%s] %s\n"
-            "%s Day Trailing Departures plotted every %s days"
-        )
-        % (
-            date1.strftime("%d %b %Y"),
-            date2.strftime("%d %b %Y"),
-            station,
-            nt.sts[station]["name"],
-            days,
-            days2,
-        )
-    )
     ax.grid(True)
     ax.set_position([0.1, 0.1, 0.7, 0.8])
     y = 0.96

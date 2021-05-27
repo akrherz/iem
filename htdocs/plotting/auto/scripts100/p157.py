@@ -12,7 +12,7 @@ PDICT2 = {"max_rh": "Daily Max RH", "min_rh": "Daily Min RH"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -73,7 +73,7 @@ def nice(val):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("iem")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
@@ -84,16 +84,12 @@ def plotter(fdict):
 
     op = ">=" if mydir == "above" else "<"
     df = read_sql(
-        """
+        f"""
         SELECT day, extract(doy from day) as doy,
         extract(year from day) as year,
         extract(week from day) as week,
         max_rh, min_rh, avg_rh,
-        case when """
-        + varname
-        + """ """
-        + op
-        + """ %s then 1 else 0 end
+        case when {varname} {op} %s then 1 else 0 end
         as rh_exceed
         from summary s JOIN stations t
         ON (s.iemid = t.iemid) WHERE t.id = %s and t.network = %s

@@ -27,7 +27,7 @@ PDICT3 = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["cache"] = 300
     desc["data"] = True
@@ -103,7 +103,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("postgis")
     ctx = get_autoplot_context(fdict, get_description())
     utcvalid = ctx.get("valid")
@@ -328,8 +328,7 @@ def plotter(fdict):
                 edgecolor="k",
                 zorder=Z_OVERLAY2,
             )
-    if len(df.index) > 10:
-        mp.drawcities()
+    mp.drawcities(textsize=12, color="#fff", outlinecolor="#000")
     mp.drawcounties()
     if ctx["n"] != "off":
         if (p1 in ["SV", "TO", "FF", "MA"] and s1 == "W") or ctx["n"] == "on":

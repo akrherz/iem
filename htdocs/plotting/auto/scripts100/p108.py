@@ -19,7 +19,7 @@ PDICT = OrderedDict(
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -102,7 +102,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
 
@@ -121,26 +121,15 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2],)
     df = read_sql(
-        """
+        f"""
     WITH avgs as (
-        SELECT sday, avg(gddxx(%s, %s, high, low)) as c"""
-        + glabel
-        + """,
+        SELECT sday, avg(gddxx(%s, %s, high, low)) as c{glabel},
         avg(sdd86(high, low)) as csdd86, avg(precip) as cprecip
-        from """
-        + table
-        + """
-        WHERE station = %s GROUP by sday
+        from {table} WHERE station = %s GROUP by sday
     )
-    SELECT day, gddxx(%s, %s, high, low) as o"""
-        + glabel
-        + """,
-    c"""
-        + glabel
-        + """, o.precip as oprecip, cprecip,
-    sdd86(o.high, o.low) as osdd86, csdd86 from """
-        + table
-        + """ o
+    SELECT day, gddxx(%s, %s, high, low) as o{glabel}, c{glabel},
+    o.precip as oprecip, cprecip,
+    sdd86(o.high, o.low) as osdd86, csdd86 from {table} o
     JOIN avgs a on (o.sday = a.sday)
     WHERE station = %s and o.sday != '0229' ORDER by day ASC
     """,
@@ -341,7 +330,7 @@ def plotter(fdict):
 
     xticks = []
     xticklabels = []
-    wanted = [1] if xlen > 31 else [1, 7, 15, 22, 29]
+    wanted = [1] if xlen > 60 else [1, 7, 15, 22, 29]
     now = sdate
     i = 0
     while now <= edate:

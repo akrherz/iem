@@ -1,17 +1,10 @@
 <?php
 /* Giveme JSON data for zones affected by warning 
  * This is used by some random AWS EC2 host to get lastsvs=y 
- * 7 Sep 2020: try again to deprecate
+ * 25 May 2021: still used
  */
 require_once '../../config/settings.inc.php';
 require_once "../../include/database.inc.php";
-
-$ref = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : 'none';
-openlog("iem", LOG_PID | LOG_PERROR, LOG_LOCAL1);
-syslog(LOG_WARNING, "Deprecated ". $_SERVER["REQUEST_URI"] .
-    ' remote: '. $_SERVER["REMOTE_ADDR"] .
-    ' referer: '. $ref);
-closelog();
 
 $connect = iemdb("postgis");
 pg_exec($connect, "SET TIME ZONE 'UTC'");

@@ -199,7 +199,6 @@ def workflow(environ, form, fmt):
         res = mc.get(mckey) if fdict.get("_cb") is None else None
         if res:
             return HTTP200, res
-        sys.stderr.write(f"failed fetching '{mckey}'\n")
     # memcache failed to save us work, so work we do!
     start_time = utc()
     # res should be a 3 length tuple
