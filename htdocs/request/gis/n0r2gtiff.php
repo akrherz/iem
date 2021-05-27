@@ -2,6 +2,8 @@
 // Prevent client abort from leaving temp files around
 ignore_user_abort(true);
 
+require_once "../../../include/throttle.php";
+
 date_default_timezone_set('UTC');
 putenv("TZ=GMT");
  /* This bad boy converts a PNG to a geo-tiff */
