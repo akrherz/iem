@@ -2,11 +2,10 @@
  My purpose in life is to sync the mesosite stations table to other
 databases.  This will hopefully remove some hackery
 """
-import datetime
 import sys
 
 import numpy as np
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconn, logger, utc
 from pandas.io.sql import read_sql
 
 LOG = logger()
@@ -22,7 +21,7 @@ def sync(df, dbname):
     # Figure out our latest revision
     dbcursor.execute("SELECT max(modified), max(iemid) from stations")
     row = dbcursor.fetchone()
-    maxts = row[0] or datetime.datetime(1980, 1, 1)
+    maxts = row[0] or utc(1980, 1, 1)
     maxid = row[1] or -1
     # Check for stations that were removed from mesosite
     localdf = read_sql(
