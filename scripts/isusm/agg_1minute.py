@@ -59,9 +59,7 @@ def hourly_process(cursor, row):
     row["valid_cst"] = valid_cst.strftime(TIME_FORMAT)
     station = row["station"]
     cursor.execute(
-        """
-        SELECT obs_count from sm_hourly where station = %s and valid = %s
-    """,
+        "SELECT obs_count from sm_hourly where station = %s and valid = %s",
         (station, row["valid_cst"]),
     )
     if cursor.rowcount == 1:
@@ -77,9 +75,8 @@ def hourly_process(cursor, row):
     elif cursor.rowcount == 0:
         # Need to create an entry
         cursor.execute(
-            """
-        INSERT into sm_hourly(station, valid, obs_count) values (%s, %s, 0)
-        """,
+            "INSERT into sm_hourly(station, valid, obs_count) "
+            "values (%s, %s, 0)",
             (station, row["valid_cst"]),
         )
     do_updates(cursor, station, row)
@@ -106,9 +103,7 @@ def daily_process(cursor, station, date, df):
     ]:
         row[colname] = float(df[colname].mean())
     cursor.execute(
-        """
-        SELECT obs_count from sm_daily where station = %s and valid = %s
-    """,
+        "SELECT obs_count from sm_daily where station = %s and valid = %s",
         (station, date),
     )
     if cursor.rowcount == 0:
@@ -181,15 +176,18 @@ def workflow():
     sum(slrkj_tot_qc) as slrkj_tot_sum,
     min(tair_c_avg_qc) as tair_c_min,
     max(tair_c_avg_qc) as tair_c_max,
-    max(case when rn = 1 then rh_avg else null end) as rh_avg,
-    max(case when rn = 1 then tair_c_avg else null end) as tair_c_avg,
-    max(case when rn = 1 then tsoil_c_avg else null end) as tsoil_c_avg,
-    max(case when rn = 1 then t12_c_avg else null end) as t12_c_avg,
-    max(case when rn = 1 then t24_c_avg else null end) as t24_c_avg,
-    max(case when rn = 1 then t50_c_avg else null end) as t50_c_avg,
-    max(case when rn = 1 then calcVWC12_Avg else null end) as calc_vwc_12_avg,
-    max(case when rn = 1 then calcVWC24_Avg else null end) as calc_vwc_24_avg,
-    max(case when rn = 1 then calcVWC50_Avg else null end) as calc_vwc_50_avg
+    max(case when rn = 1 then rh_avg_qc else null end) as rh_avg,
+    max(case when rn = 1 then tair_c_avg_qc else null end) as tair_c_avg,
+    max(case when rn = 1 then tsoil_c_avg_qc else null end) as tsoil_c_avg,
+    max(case when rn = 1 then t12_c_avg_qc else null end) as t12_c_avg,
+    max(case when rn = 1 then t24_c_avg_qc else null end) as t24_c_avg,
+    max(case when rn = 1 then t50_c_avg_qc else null end) as t50_c_avg,
+    max(case when rn = 1 then calcVWC12_Avg_qc else null end)
+        as calc_vwc_12_avg,
+    max(case when rn = 1 then calcVWC24_Avg_qc else null end)
+        as calc_vwc_24_avg,
+    max(case when rn = 1 then calcVWC50_Avg_qc else null end)
+        as calc_vwc_50_avg
     from data GROUP by station, hour
     """,
         pgconn,
