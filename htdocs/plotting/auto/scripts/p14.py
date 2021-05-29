@@ -4,13 +4,13 @@ import datetime
 import psycopg2.extras
 import numpy as np
 import pandas as pd
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -39,7 +39,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
@@ -52,7 +52,6 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2],)
     endyear = int(datetime.datetime.now().year) + 1
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
 
     cursor.execute(
         f"""
@@ -95,7 +94,7 @@ def plotter(fdict):
     yearlytotals = np.zeros((endyear - minyear, 5), "f")
 
     cursor.execute(
-        """
+        f"""
     SELECT year,
     sum(case when precip >= %s and precip < %s then 1 else 0 end) as bin0,
     sum(case when precip >= %s and precip < %s then 1 else 0 end) as bin1,
@@ -107,9 +106,7 @@ def plotter(fdict):
     sum(case when precip >= %s and precip < %s then precip else 0 end) as tot2,
     sum(case when precip >= %s and precip < %s then precip else 0 end) as tot3,
     sum(case when precip >= %s and precip < %s then precip else 0 end) as tot4
-    from """
-        + table
-        + """ where extract(doy from day) < %s and
+    from {table} where extract(doy from day) < %s and
     station = %s and precip > 0 and year > 1879 GROUP by year
     """,
         (
@@ -150,6 +147,17 @@ def plotter(fdict):
     df["normal_%s" % (year,)] = normal / 5.0
 
     ybuffer = (max([max(avgs), max(dlast)]) + 2) * 0.05
+    addl = ""
+    if jdaylimit < 367:
+        addl = " thru %s" % (today.strftime("%-d %b"),)
+    title = ("%s [%s] [%s-%s]\nDaily Precipitation Contributions%s") % (
+        ctx["_nt"].sts[station]["name"],
+        station,
+        minyear,
+        endyear - 2,
+        addl,
+    )
+    (fig, ax) = figure_axes(title=title)
 
     bars = ax.bar(
         np.arange(5) - 0.2,
@@ -175,6 +183,7 @@ def plotter(fdict):
             ha="center",
             color="r",
             bbox=dict(pad=0, facecolor="white", edgecolor="white"),
+            fontsize="larger",
         )
 
     bars = ax.bar(
@@ -191,13 +200,13 @@ def plotter(fdict):
             dlast[i] + ybuffer,
             "%.0f" % (dlast[i],),
             ha="center",
+            fontsize="larger",
         )
 
     ax.text(
         0.7,
         0.8,
-        ("Red text represents %s bin total\nprecip " "departure from average")
-        % (year,),
+        f"Red text represents {year} bin total\nprecip departure from average",
         transform=ax.transAxes,
         color="r",
         ha="center",
@@ -210,27 +219,11 @@ def plotter(fdict):
     ax.text(
         0.5,
         -0.05,
-        (
-            "Precipitation Bins [inch], split into equal 20%%"
-            " by rain volume (%.2fin)"
-        )
-        % (normal / 5.0,),
+        "Precipitation Bins [inch], split into equal 20%"
+        f" by rain volume ({(normal / 5.):.2f}in)",
         transform=ax.transAxes,
         va="top",
         ha="center",
-    )
-    addl = ""
-    if jdaylimit < 367:
-        addl = " thru %s" % (today.strftime("%-d %b"),)
-    ax.set_title(
-        ("%s [%s] [%s-%s]\nDaily Precipitation Contributions%s")
-        % (
-            ctx["_nt"].sts[station]["name"],
-            station,
-            minyear,
-            endyear - 2,
-            addl,
-        )
     )
     ax.set_xticks(np.arange(0, 5))
     xlabels = []

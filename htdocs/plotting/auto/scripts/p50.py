@@ -13,7 +13,7 @@ FONTSIZE = 12
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 300
@@ -68,7 +68,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     ctx["_nt"].sts["_ALL"] = {"name": "All Offices"}
 
@@ -85,20 +85,16 @@ def plotter(fdict):
     )
     if station == "_ALL":
         wfo_limiter = ""
-    sql = """
+    sql = f"""
     select windtag, hailtag,
     min(issue at time zone 'UTC') as min_issue,
     max(issue at time zone 'UTC') as max_issue, count(*)
-    from sbw WHERE issue >= '%s' and issue <= '%s'
-    %s
+    from sbw WHERE issue >= %s and issue <= %s {wfo_limiter}
     and (windtag > 0 or hailtag > 0)
     and status = 'NEW' and phenomena = 'SV'
     GROUP by windtag, hailtag
-    """ % (
-        date1,
-        date2,
-        wfo_limiter,
-    )
+    """
+    args = (date1, date2)
     supextra = ""
     if opt == "wfo" and station != "_ALL":
         supextra = "For warnings issued by %s %s.\n" % (
@@ -115,18 +111,15 @@ def plotter(fdict):
         min(issue at time zone 'UTC') as min_issue,
         max(issue at time zone 'UTC') as max_issue, count(*)
         from sbw w, states s
-        WHERE issue >= '%s' and issue <= '%s' and
-        s.state_abbr = '%s' and ST_Intersects(s.the_geom, w.geom) and
+        WHERE issue >= %s and issue <= %s and
+        s.state_abbr = %s and ST_Intersects(s.the_geom, w.geom) and
         (windtag > 0 or hailtag > 0)
         and status = 'NEW' and phenomena = 'SV'
         GROUP by windtag, hailtag
-        """ % (
-            date1,
-            date2,
-            state,
-        )
+        """
+        args = (date1, date2, state)
 
-    df = read_sql(sql, pgconn, index_col=None)
+    df = read_sql(sql, pgconn, params=args, index_col=None)
     if df.empty:
         raise NoDataFound("No data was found.")
     minvalid = df["min_issue"].min()
@@ -207,13 +200,13 @@ def plotter(fdict):
         )
         % (
             PDICT2[ctx["p"]],
-            minvalid.strftime("%d %b %Y"),
-            maxvalid.strftime("%d %b %Y"),
+            minvalid.strftime("%-d %b %Y"),
+            maxvalid.strftime("%-d %b %Y"),
             df["count"].sum(),
             supextra,
         )
     )
-    ax.set_position([0.15, 0.05, 0.8, 0.72])
+    ax.set_position([0.12, 0.05, 0.86, 0.72])
 
     return fig, df
 

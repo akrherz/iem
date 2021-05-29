@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
 PDICT = OrderedDict(
@@ -21,7 +21,7 @@ PDICT = OrderedDict(
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     year = datetime.date.today().year - 7
     desc["data"] = True
@@ -62,7 +62,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
@@ -126,15 +126,11 @@ def plotter(fdict):
         {"year": df["year"], "month": df["month"], "day": 1}
     )
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
-    ax.set_title(
-        (
-            "[%s] %s\nMonthly Departure of %s + "
-            "El Nino 3.4 Index\n"
-            "Climatology computed from present day period of record"
-        )
-        % (station, ctx["_nt"].sts[station]["name"], PDICT.get(varname))
-    )
+    title = (
+        "[%s] %s Monthly Departure of %s + El Nino 3.4 Index\n"
+        "Climatology computed from present day period of record"
+    ) % (station, ctx["_nt"].sts[station]["name"], PDICT.get(varname))
+    (fig, ax) = figure_axes(title=title)
 
     xticks = []
     xticklabels = []

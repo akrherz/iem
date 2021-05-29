@@ -5,7 +5,7 @@ from collections import OrderedDict
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem import network
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -23,13 +23,14 @@ PDICT2 = {"above": "At or Above Threshold", "below": "Below Threshold"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
         "description"
     ] = """This plot produces the daily frequency of
-    a given criterion being meet for a station and month of your choice.
+    a given criterion being meet for a station and month of your choice. The
+    number labeled above each bar is the actual number of years.
     """
     desc["arguments"] = [
         dict(
@@ -65,7 +66,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
@@ -98,16 +99,7 @@ def plotter(fdict):
         raise NoDataFound("No Data Found.")
     df["freq"] = df["hit"] / df["total"] * 100.0
 
-    fig, ax = plt.subplots(1, 1, figsize=(8, 6))
-    bars = ax.bar(np.arange(1, len(df.index) + 1), df["freq"])
-    for i, mybar in enumerate(bars):
-        ax.text(
-            i + 1,
-            mybar.get_height() + 0.3,
-            "%s" % (df["hit"][i],),
-            ha="center",
-        )
-    msg = ("[%s] %s %s %s %s during %s (Avg: %.2f days/year)") % (
+    title = ("[%s] %s %s %s %s\nduring %s (Avg: %.2f days/year)") % (
         station,
         nt.sts[station]["name"],
         PDICT.get(varname),
@@ -116,12 +108,18 @@ def plotter(fdict):
         calendar.month_abbr[month],
         df["hit"].sum() / float(df["total"].sum()) * len(df.index),
     )
-    tokens = msg.split()
-    sz = int(len(tokens) / 2)
-    ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
+    fig, ax = figure_axes(title=title)
+    bars = ax.bar(np.arange(1, len(df.index) + 1), df["freq"])
+    for i, mybar in enumerate(bars):
+        ax.text(
+            i + 1,
+            mybar.get_height() + 0.3,
+            "%s" % (df["hit"][i],),
+            ha="center",
+        )
     ax.set_ylabel("Frequency (%)")
     ax.set_xlabel(
-        ("Day of %s, years (out of %s) meeting criteria labelled")
+        ("Day of %s, number of years (out of %s) meeting criteria labelled")
         % (calendar.month_name[month], np.max(df["total"]))
     )
     ax.grid(True)

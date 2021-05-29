@@ -4,13 +4,13 @@ import calendar
 
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     ts = datetime.date.today()
     desc["data"] = True
@@ -35,7 +35,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
 
@@ -76,7 +76,10 @@ def plotter(fdict):
     )
     if df.empty:
         raise NoDataFound("No Precipitation Data Found for Site")
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    title = (
+        "%s [%s]\n" "Number of Hours with *Measurable* Precipitation Reported"
+    ) % (ctx["_nt"].sts[station]["name"], station)
+    (fig, ax) = figure_axes(title=title)
     monthly = df["avg"].values.tolist()
     bars = ax.bar(
         df["month"] - 0.2,
@@ -137,19 +140,13 @@ def plotter(fdict):
     if not np.isnan(maxval):
         ax.set_yticks(np.arange(0, maxval + 20, 12))
     ax.set_ylabel("Hours with 0.01+ inch precip")
-    if datetime.date.today().year == year:
+    today = datetime.date.today()
+    if today.year == year:
         ax.set_xlabel(
-            "Valid till %s" % (datetime.date.today().strftime("%-d %B"),)
+            "For %s, valid till %s." % (year, today.strftime("%-d %B"))
         )
     ax.grid(True)
     ax.legend(ncol=3)
-    ax.set_title(
-        (
-            "%s [%s]\n"
-            "Number of Hours with *Measurable* Precipitation Reported"
-        )
-        % (ctx["_nt"].sts[station]["name"], station)
-    )
 
     return fig, df
 

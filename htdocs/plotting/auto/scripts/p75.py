@@ -7,7 +7,7 @@ import numpy as np
 from scipy import stats
 import pandas as pd
 from pyiem import network
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -24,7 +24,7 @@ PDICT2 = OrderedDict(
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -55,7 +55,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ccursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
@@ -101,8 +101,14 @@ def plotter(fdict):
 
     data = np.array(df["data"])
     years = np.array(df["year"])
-
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    title = ("[%s] %s %.0f-%.0f Precipitation [%s] ") % (
+        station,
+        nt.sts[station]["name"],
+        min(years),
+        max(years),
+        PDICT2[season],
+    )
+    (fig, ax) = figure_axes(title=title)
     avgv = np.average(data)
 
     colorabove = "seagreen"
@@ -136,16 +142,6 @@ def plotter(fdict):
     ax.set_ylim(0, max(data) + max(data) / 10.0)
     ax.set_ylabel("Precipitation [inches]")
     ax.grid(True)
-    msg = ("[%s] %s %.0f-%.0f Precipitation [%s] ") % (
-        station,
-        nt.sts[station]["name"],
-        min(years),
-        max(years),
-        PDICT2[season],
-    )
-    tokens = msg.split()
-    sz = int(len(tokens) / 2)
-    ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
     ax.legend(ncol=2, fontsize=10)
 
     return fig, df

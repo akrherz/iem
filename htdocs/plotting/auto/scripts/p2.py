@@ -6,13 +6,13 @@ from scipy import stats
 from pandas.io.sql import read_sql
 from matplotlib.patches import Circle
 from pyiem import network
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     today = datetime.datetime.now()
     desc["data"] = True
@@ -60,7 +60,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
@@ -70,11 +70,9 @@ def plotter(fdict):
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
     df = read_sql(
-        f"""
-        SELECT year, sum(precip) as total_precip,
-        sum(gddxx(%s, %s, high::numeric,low::numeric)) as gdd from {table}
-        WHERE station = %s and month = %s GROUP by year
-    """,
+        "SELECT year, sum(precip) as total_precip, "
+        f"sum(gddxx(%s, %s, high::numeric,low::numeric)) as gdd from {table} "
+        "WHERE station = %s and month = %s GROUP by year",
         pgconn,
         params=(ctx["gddbase"], ctx["gddceil"], station, month),
         index_col="year",
@@ -95,7 +93,17 @@ def plotter(fdict):
 
     y1 = -4.0 * h_slope + intercept
     y2 = 4.0 * h_slope + intercept
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    title = (
+        "[%s] %s -- For Month of %s\n"
+        "Growing Degree Day (base=%s, ceil=%s) + Precipitation Departure"
+    ) % (
+        station,
+        nt.sts[station]["name"],
+        calendar.month_name[month],
+        ctx["gddbase"],
+        ctx["gddceil"],
+    )
+    (fig, ax) = figure_axes(title=title)
     ax.set_position([0.1, 0.12, 0.8, 0.78])
 
     ax.scatter(df["gdd_sigma"], df["precip_sigma"], label=None)
@@ -121,25 +129,11 @@ def plotter(fdict):
         c = Circle((0, 0), radius=df.loc[year].distance, facecolor="none")
         ax.add_patch(c)
     ax.set_xlabel(
-        ("Growing Degree Day (base=%s, ceil=%s) " r"Departure ($\sigma$)")
-        % (ctx["gddbase"], ctx["gddceil"])
+        f"Growing Degree Day (base={ctx['gddbase']}, ceil={ctx['gddceil']}) "
+        r"Departure ($\sigma$)"
     )
     ax.set_ylabel(r"Precipitation Departure ($\sigma$)")
     ax.grid(True)
-    ax.set_title(
-        (
-            "%s %s [%s]\n"
-            "Growing Degree Day (base=%s, ceil=%s) "
-            "+ Precipitation Departure"
-        )
-        % (
-            calendar.month_name[month],
-            nt.sts[station]["name"],
-            station,
-            ctx["gddbase"],
-            ctx["gddceil"],
-        )
-    )
     ax.legend(
         loc="lower right", bbox_to_anchor=(1.05, 0.01), ncol=2, fontsize=10
     )
