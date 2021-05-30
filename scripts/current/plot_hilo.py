@@ -6,31 +6,32 @@ from pyiem.plot import MapPlot
 from pyiem.util import get_dbconn
 
 
-def main():
+def main(argv):
     """Go Main Go"""
-    now = datetime.datetime.now() - datetime.timedelta(days=int(sys.argv[1]))
-    pgconn = get_dbconn("iem", user="nobody")
+    now = datetime.date.today()
+    routes = "ac"
+    if len(argv) == 4:
+        routes = "a"
+        now = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
+    pgconn = get_dbconn("iem")
     icursor = pgconn.cursor()
 
     # Compute normal from the climate database
-    sql = """
+    data = []
+    icursor.execute(
+        f"""
     SELECT
       s.id as station, max_tmpf, min_tmpf,
       ST_x(s.geom) as lon, ST_y(s.geom) as lat
     FROM
-      summary_%s c, stations s
+      summary_{now.year} c JOIN stations s on (c.iemid = s.iemid)
     WHERE
-      c.iemid = s.iemid and
       s.network IN ('AWOS', 'IA_ASOS') and
-      day = '%s'
-      and max_tmpf > -50
-    """ % (
-        now.year,
-        now.strftime("%Y-%m-%d"),
+      day = %s
+      and max_tmpf is not null and min_tmpf is not null
+    """,
+        (now,),
     )
-
-    data = []
-    icursor.execute(sql)
     for row in icursor:
         data.append(
             dict(lat=row[4], lon=row[3], tmpf=row[1], dwpf=row[2], id=row[0])
@@ -43,13 +44,13 @@ def main():
     )
     mp.plot_station(data)
     mp.drawcounties()
-    if sys.argv[1] == "0":
-        pqstr = "plot c 000000000000 summary/asos_hilo.png bogus png"
-    else:
-        pqstr = "plot a %s0000 bogus hilow.gif png" % (now.strftime("%Y%m%d"),)
+    pqstr = "plot %s %s0000 bogus hilow.gif png" % (
+        routes,
+        now.strftime("%Y%m%d"),
+    )
     mp.postprocess(view=False, pqstr=pqstr)
     mp.close()
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

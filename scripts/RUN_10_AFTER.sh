@@ -58,7 +58,7 @@ cd ../../outgoing
 php wxc_cocorahs.php
 
 cd ../current
-python plot_hilo.py 0
+python plot_hilo.py
 python ifc_today_total.py
 python today_min_windchill.py
 

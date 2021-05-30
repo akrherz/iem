@@ -1,35 +1,43 @@
 """Output the 12z morning low temperature"""
 import datetime
+import sys
 
 import numpy as np
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.tracker import loadqc
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
-def main():
+def main(argv):
     """Go Main Go"""
-    now = datetime.datetime.now()
-    qdict = loadqc()
-    pgconn = get_dbconn("iem", user="nobody")
+    now = datetime.date.today()
+    mode = "ac"
+    if len(argv) == 4:
+        now = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
+        mode = "a"
+    qdict = loadqc(date=now)
+    pgconn = get_dbconn("iem")
     icursor = pgconn.cursor()
-
-    sql = """
-      select s.id,
-      ST_x(s.geom) as lon, ST_y(s.geom) as lat,
-      max_tmpf as high, s.network
-      from summary c, stations s
-      WHERE c.iemid = s.iemid and day = 'TODAY' and max_tmpf > -40
-      and s.network in ('IA_ASOS', 'AWOS', 'IL_ASOS','MO_ASOS','KS_ASOS',
-      'NE_ASOS','SD_ASOS','MN_ASOS','WI_ASOS') ORDER by high ASC
-    """
 
     lats = []
     lons = []
     vals = []
     valmask = []
     labels = []
-    icursor.execute(sql)
+    icursor.execute(
+        """
+      select s.id,
+      ST_x(s.geom) as lon, ST_y(s.geom) as lat,
+      max_tmpf as high, s.network
+      from summary c, stations s
+      WHERE c.iemid = s.iemid and day = %s and max_tmpf is not null
+      and s.network in ('IA_ASOS', 'AWOS', 'IL_ASOS','MO_ASOS','KS_ASOS',
+      'NE_ASOS','SD_ASOS','MN_ASOS','WI_ASOS') ORDER by high ASC
+    """,
+        (now,),
+    )
     dsm = None
     for row in icursor:
         if row[0] == "DSM":
@@ -43,6 +51,7 @@ def main():
         valmask.append(row[4] in ["AWOS", "IA_ASOS"])
 
     if len(lats) < 4:
+        LOG.debug("Aborting as only found %s reports", len(lats))
         return
 
     mp = MapPlot(
@@ -71,8 +80,9 @@ def main():
     )
     mp.drawcounties()
 
-    pqstr = "plot ac %s summary/iowa_asos_high.png iowa_asos_high.png png" % (
-        now.strftime("%Y%m%d%H%M"),
+    pqstr = "plot %s %s summary/iowa_asos_high.png iowa_asos_high.png png" % (
+        mode,
+        now.strftime("%Y%m%d0000"),
     )
 
     mp.postprocess(pqstr=pqstr)
@@ -80,4 +90,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

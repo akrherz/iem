@@ -13,7 +13,9 @@ def main():
     icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     # Compute normal from the climate database
-    sql = """
+    data = []
+    icursor.execute(
+        """
     SELECT
       s.id, tmpf, dwpf, sknt, drct,  ST_x(s.geom) as lon, ST_y(s.geom) as lat
     FROM
@@ -23,9 +25,7 @@ def main():
       valid + '20 minutes'::interval > now() and
       tmpf > -50 and dwpf > -50
     """
-
-    data = []
-    icursor.execute(sql)
+    )
     for row in icursor:
         data.append(row)
 
