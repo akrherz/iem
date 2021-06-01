@@ -206,11 +206,9 @@ def plotter(fdict):
         sum(gdd52) as total_gdd52
         """
     df = read_sql(
-        """
+        f"""
         WITH mystations as (
-            select """
-        + joincol
-        + """ as myid,
+            select {joincol} as myid,
             max(ST_x(geom)) as lon, max(ST_y(geom)) as lat from stations
             where network ~* 'CLIMATE' and
             ST_Contains(ST_MakeEnvelope(%s, %s, %s, %s, 4326), geom)
@@ -221,12 +219,7 @@ def plotter(fdict):
         sum(precip) as total_precip,
         avg(high) as avg_high,
         avg(low) as avg_low,
-        avg((high+low)/2.) as avg_temp """
-        + extra
-        + """
-        from """
-        + ctx["src"]
-        + """ c
+        avg((high+low)/2.) as avg_temp {extra} from {ctx["src"]} c
         JOIN mystations t on (c.station = t.myid)
         WHERE extract(month from valid) in %s
         GROUP by station, month

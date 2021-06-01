@@ -5,7 +5,7 @@ from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 from scipy import stats
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -45,7 +45,7 @@ MDICT = OrderedDict(
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -169,7 +169,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
@@ -204,32 +204,16 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
 
     obs = read_sql(
-        """WITH data as (
+        f"""WITH data as (
      select day, extract(week from day) - 1 as week, year, month, sday,
-     """
-        + ctx["fstat"]
-        + """("""
-        + ctx["var"]
-        + """) OVER
+     {ctx["fstat"]}({ctx["var"]}) OVER
         (ORDER by day ASC rows between %s FOLLOWING and %s FOLLOWING)
-        as forward_stat,
-     """
-        + ctx["mstat"]
-        + """("""
-        + ctx["var"]
-        + """) OVER
+        as forward_stat, {ctx["mstat"]}({ctx["var"]}) OVER
         (ORDER by day ASC rows between CURRENT ROW and %s FOLLOWING)
-        as middle_stat,
-     """
-        + ctx["stat"]
-        + """("""
-        + ctx["var"]
-        + """) OVER
+        as middle_stat, {ctx["stat"]}({ctx["var"]}) OVER
          (ORDER by day ASC rows between %s PRECEDING and 1 PRECEDING)
          as trailing_stat
-     from """
-        + table
-        + """ where station = %s)
+     from {table} where station = %s)
     SELECT * from data WHERE month in %s and year >= %s
         and year <= %s ORDER by day ASC
     """,
@@ -268,9 +252,38 @@ def plotter(fdict):
     df = weekly["change"]
 
     extreme = max([df["max"].max(), 0 - df["min"].min()]) + 10
-
-    fig = plt.figure()
-    ax = fig.add_axes([0.1, 0.1, 0.85, 0.65])
+    title = "Backward (%s) %.0f Days and Forward (%s) %.0f Inclusive Days" % (
+        PDICT2[ctx["stat"]],
+        days,
+        PDICT2[ctx["mstat"]],
+        mdays,
+    )
+    if ctx["how"] == "three":
+        title = ("Back (%s) %.0fd, Middle (%s) %.0fd, Forward (%s) %.0fd") % (
+            PDICT2[ctx["stat"]],
+            days,
+            PDICT2[ctx["mstat"]],
+            mdays,
+            PDICT2[ctx["fstat"]],
+            fdays,
+        )
+    subtitle = (
+        ""
+        if ctx["thres"] is None
+        else rf"\nBack Threshold of at least {ctx['thres']:.0f} $^\circ$F"
+    )
+    title = ("%s %s (%.0f-%.0f) Max Change in %s %s (%s)\n%s%s") % (
+        station,
+        ctx["_nt"].sts[station]["name"],
+        max([ctx["_nt"].sts[station]["archive_begin"].year, syear]),
+        eyear,
+        PDICT3[ctx["var"]].replace("Temperature", "Temp"),
+        PDICT[agg].replace("Aggregate", "Agg"),
+        MDICT[month],
+        title,
+        subtitle,
+    )
+    fig, ax = figure_axes(title=title)
     multiplier = 1
     if agg == "week":
         multiplier = 7
@@ -326,40 +339,6 @@ def plotter(fdict):
 
     ax.grid(True)
     ax.set_ylabel(r"Temperature Change $^\circ$F")
-    title = "Backward (%s) %.0f Days and Forward (%s) %.0f Inclusive Days" % (
-        PDICT2[ctx["stat"]],
-        days,
-        PDICT2[ctx["mstat"]],
-        mdays,
-    )
-    if ctx["how"] == "three":
-        title = ("Back (%s) %.0fd, Middle (%s) %.0fd, Forward (%s) %.0fd") % (
-            PDICT2[ctx["stat"]],
-            days,
-            PDICT2[ctx["mstat"]],
-            mdays,
-            PDICT2[ctx["fstat"]],
-            fdays,
-        )
-    subtitle = (
-        ""
-        if ctx["thres"] is None
-        else rf"\nBack Threshold of at least {ctx['thres']:.0f} $^\circ$F"
-    )
-    ax.set_title(
-        ("%s %s (%.0f-%.0f)\nMax Change in %s %s (%s)\n%s%s")
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            max([ctx["_nt"].sts[station]["archive_begin"].year, syear]),
-            eyear,
-            PDICT3[ctx["var"]].replace("Temperature", "Temp"),
-            PDICT[agg].replace("Aggregate", "Agg"),
-            MDICT[month],
-            title,
-            subtitle,
-        )
-    )
     ax.set_ylim(0 - extreme, extreme)
     xloc = (ax.get_xlim()[1] + ax.get_xlim()[0]) / 2.0
     ax.text(

@@ -14,7 +14,7 @@ PDICT = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -67,7 +67,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     varname = ctx["var"]
@@ -78,26 +78,20 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2],)
     if varname == "fall":
-        sql = (
-            """
+        sql = f"""
         WITH doy as (
-            SELECT year, min(day) from """
-            + table
-            + """ WHERE station = %s
+            SELECT year, min(day) from {table} WHERE station = %s
             and low < %s and month > 6 GROUP by year),
         agg as (
             SELECT a.year, max(high) as peak_value,
             sum(case when high >= %s then 1 else 0 end) as count_days
-            from """
-            + table
-            + """ a, doy d
+            from {table} a, doy d
             WHERE a.station = %s and a.year = d.year and a.day > d.min
             GROUP by a.year)
 
         SELECT d.year, d.min as date, extract(doy from d.min) as day_of_year,
         a.peak_value, a.count_days
         from doy d JOIN agg a on (d.year = a.year) ORDER by d.year"""
-        )
         title = ("Max high after first sub %.0f low, days over %.0f") % (
             thres,
             thres2,
@@ -105,19 +99,14 @@ def plotter(fdict):
         ctx["ax1_ylabel"] = r"Max High Temperature $^\circ$F"
         ctx["ax2_xlabel"] = "Date of First Sub %.0f Low" % (thres,)
     else:
-        sql = (
-            """
+        sql = f"""
         WITH doy as (
-            SELECT year, min(day) from """
-            + table
-            + """ WHERE station = %s
+            SELECT year, min(day) from {table} WHERE station = %s
             and high >= %s and month < 6 GROUP by year),
         agg as (
             SELECT a.year, min(low) as peak_value,
             sum(case when low < %s then 1 else 0 end) as count_days
-            from """
-            + table
-            + """ a, doy d
+            from {table} a, doy d
             WHERE a.station = %s and a.year = d.year and a.day > d.min
             and a.month < 6
             GROUP by a.year)
@@ -125,7 +114,6 @@ def plotter(fdict):
         SELECT d.year, d.min as date, extract(doy from d.min) as day_of_year,
         a.peak_value, a.count_days
         from doy d JOIN agg a on (d.year = a.year) ORDER by d.year"""
-        )
         title = (
             "Min low after first %.0f+ high, " "days below %.0f till 1 Jun"
         ) % (thres, thres2)

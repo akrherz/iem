@@ -1,12 +1,11 @@
-"""Generate a First Guess RTP that the bureau can use for their product
-"""
+"""Generate a First Guess RTP that the bureau can use for their product."""
 import datetime
 import subprocess
 
 import pytz
 from pyiem.tracker import loadqc
 from pyiem import network
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc
 
 
 def main():
@@ -16,8 +15,7 @@ def main():
     pgconn = get_dbconn("iem", user="nobody")
     icursor = pgconn.cursor()
 
-    utc = datetime.datetime.utcnow()
-    ets = utc.replace(
+    ets = utc().replace(
         tzinfo=pytz.utc, hour=0, minute=0, second=0, microsecond=0
     )
     sts12z = ets + datetime.timedelta(hours=-12)

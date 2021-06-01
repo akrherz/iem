@@ -6,7 +6,7 @@ from collections import OrderedDict
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem import util
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.network import Table as NetworkTable  # This is needed.
 
 VARS = OrderedDict(
@@ -39,7 +39,7 @@ XREF = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -78,7 +78,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = util.get_dbconn("isuag")
     nt = NetworkTable("ISUSM", only_online=False)
     oldnt = NetworkTable("ISUAG", only_online=False)
@@ -113,7 +113,13 @@ def plotter(fdict):
     df["doy"] = pd.to_numeric(df["valid"].dt.strftime("%j"))
     df["year"] = df["valid"].dt.year
 
-    (fig, ax) = plt.subplots()
+    title = ("ISU AgClimate [%s] %s [%s-]\n" "Site %s Yearly Timeseries") % (
+        station,
+        nt.sts[station]["name"],
+        df["valid"].min().year,
+        VARS[varname],
+    )
+    (fig, ax) = figure_axes(title=title)
     for dtype in ["L", "C"]:
         for year, df2 in df[df["dtype"] == dtype].groupby("year"):
             if year in [1997, 1988]:
@@ -136,20 +142,9 @@ def plotter(fdict):
 
     gdf = df.groupby("doy").mean()
     ax.plot(gdf.index.values, gdf[varname].values, color="k", label="Average")
-
-    ax.set_title(
-        ("ISU AgClimate [%s] %s [%s-]\n" "Site %s Yearly Timeseries")
-        % (
-            station,
-            nt.sts[station]["name"],
-            df["valid"].min().year,
-            VARS[varname],
-        )
-    )
-
     ax.grid(True)
     if varname == "tsoil":
-        ax.set_ylabel("Daily Avg Temp $^{\circ}\mathrm{F}$")
+        ax.set_ylabel(r"Daily Avg Temp $^{\circ}\mathrm{F}$")
         ax.set_xlabel(
             ("* pre-2014 data provided by [%s] %s")
             % (oldstation, oldnt.sts[oldstation]["name"])

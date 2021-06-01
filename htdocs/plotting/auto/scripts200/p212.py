@@ -59,7 +59,7 @@ PDICT3 = OrderedDict(
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["highcharts"] = True
@@ -70,7 +70,8 @@ def get_description():
     variable along with a given year's values.
 
     <p>The Storm Prediction Center website has a
-    <a href="https://www.spc.noaa.gov/exper/soundingclimo/">very similiar tool</a> that you may want to check out.</p>
+    <a href="https://www.spc.noaa.gov/exper/soundingclimo/">
+    very similiar tool</a> that you may want to check out.</p>
     """
     desc["arguments"] = [
         dict(
@@ -258,7 +259,7 @@ def highcharts(fdict):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     get_data(ctx)
     df = ctx["df"]

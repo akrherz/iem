@@ -23,7 +23,7 @@ def main():
     WHERE
       s.network IN ('IA_RWIS') and c.iemid = s.iemid and
       valid + '20 minutes'::interval > now() and
-      tmpf > -50 and dwpf > -50
+      tmpf > -50 and dwpf > -50 and drct is not null
     """
     )
     for row in icursor:

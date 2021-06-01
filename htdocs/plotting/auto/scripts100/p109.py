@@ -20,7 +20,7 @@ PDICT = OrderedDict(
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -99,7 +99,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("postgis")
     ctx = get_autoplot_context(fdict, get_description())
     sts = ctx["sdate"]
@@ -139,14 +139,11 @@ def plotter(fdict):
 
     if varname == "count":
         df = read_sql(
-            """
+            f"""
     with total as (
     select distinct wfo, extract(year from issue at time zone 'UTC') as year,
     phenomena, significance, eventid from warnings
-    where """
-            + pstr
-            + """ and
-    issue >= %s and issue < %s
+    where {pstr} and issue >= %s and issue < %s
     )
 
     SELECT wfo, phenomena, significance, year, count(*) from total
@@ -218,13 +215,11 @@ def plotter(fdict):
         lformat = "%.0f"
     elif varname == "days":
         df = read_sql(
-            """
+            f"""
         WITH data as (
             SELECT distinct wfo, generate_series(greatest(issue, %s),
             least(expire, %s), '1 minute'::interval) as ts from warnings
-            WHERE issue > %s and expire < %s and """
-            + pstr
-            + """
+            WHERE issue > %s and expire < %s and {pstr}
         ), agg as (
             SELECT distinct wfo, date(ts) from data
         )
@@ -253,13 +248,11 @@ def plotter(fdict):
     else:
         total_minutes = (ets - sts).total_seconds() / 60.0
         df = read_sql(
-            """
+            f"""
         WITH data as (
             SELECT distinct wfo, generate_series(greatest(issue, %s),
             least(expire, %s), '1 minute'::interval) as ts from warnings
-            WHERE issue > %s and expire < %s and """
-            + pstr
-            + """
+            WHERE issue > %s and expire < %s and {pstr}
         )
         select wfo, count(*) / %s * 100. as tpercent from data
         GROUP by wfo ORDER by tpercent DESC
