@@ -5,9 +5,10 @@ import warnings
 import numpy as np
 from pandas.io.sql import read_sql
 import pandas as pd
+import requests
 import matplotlib.patheffects as PathEffects
 from matplotlib.patches import Rectangle
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 
 warnings.simplefilter("ignore", UserWarning)
@@ -57,7 +58,6 @@ def get_description():
 
 def common(ctx):
     """Do things common to both plots."""
-    pgconn_iem = get_dbconn("iem")
     pgconn_coop = get_dbconn("coop")
     station = ctx["station"]
     year = ctx["year"]
@@ -73,32 +73,52 @@ def common(ctx):
         if now.weekday() in [5, 6]:
             weekends.append(now.day)
         now += datetime.timedelta(days=1)
-    df = read_sql(
-        "SELECT day, max_tmpf, min_tmpf, pday, "
-        "extract(day from day)::int as day_of_month "
-        f"from summary_{year} s JOIN "
-        "stations t on (t.iemid = s.iemid) WHERE id = %s and network = %s and "
-        "day >= %s and day < %s ORDER by day ASC",
-        pgconn_iem,
-        params=(station, ctx["network"], sts, ets),
-        index_col="day_of_month",
-    )
-    df["accum_pday"] = df["pday"].cumsum()
-
+    jsn = requests.get(
+        f"http://mesonet.agron.iastate.edu/api/1/daily.json?station={station}&"
+        f"network={ctx['network']}&year={year}&month={month}",
+        timeout=15,
+    ).json()
+    df = pd.DataFrame(jsn["data"])
+    df["day_of_month"] = pd.to_datetime(df["date"]).dt.day
+    df["accum_pday"] = df["precip"].cumsum()
+    df = df.set_index("day_of_month")
+    # Special case of climate districts and statewide avgs
+    table = "ncei_climate91"
+    clcol = "ncei91"
+    if ctx["network"].endswith("CLIMATE") and (
+        station.endswith("0000") or station[2] == "C"
+    ):
+        table = "climate"
+        clcol = "climate_site"
+        subtitle = "Climatology provided by period of record averages"
+    else:
+        if ctx["_nt"].sts[station]["ncei91"] is None:
+            subtitle = "Daily climatology unavailable for site"
+        else:
+            subtitle = ("NCEI 1991-2020 Climate Site: %s") % (
+                ctx["_nt"].sts[station]["ncei91"],
+            )
     # Get the normals
     cdf = read_sql(
         "SELECT high as climo_high, low as climo_low, "
         "extract(day from valid)::int as day_of_month, "
-        "precip as climo_precip from ncei_climate91 where station = %s and "
+        f"precip as climo_precip from {table} where station = %s and "
         "extract(month from valid) = %s ORDER by valid ASC",
         pgconn_coop,
-        params=(ctx["_nt"].sts[station]["ncei91"], month),
+        params=(ctx["_nt"].sts[station][clcol], month),
         index_col="day_of_month",
     )
     df = cdf.join(df)
     df["accum_climo_precip"] = df["climo_precip"].cumsum()
     df["depart_precip"] = df["accum_pday"] - df["accum_climo_precip"]
-    (ctx["fig"], ax) = plt.subplots(1, 1)
+    title = "[%s] %s :: %s for %s\n%s" % (
+        station,
+        ctx["_nt"].sts[station]["name"],
+        "Hi/Lo Temps" if ctx["p"] == "temps" else "Precipitation",
+        sts.strftime("%b %Y"),
+        subtitle,
+    )
+    (ctx["fig"], ax) = figure_axes(title=title)
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width, box.height * 0.94])
 
@@ -109,32 +129,8 @@ def common(ctx):
         ax.add_patch(rect)
     ax.set_xlim(0.5, days + 0.5)
     ax.set_xticks(range(1, days + 1))
-    ax.set_xticklabels(np.arange(1, days + 1), fontsize=8)
-    ax.set_xlabel(sts.strftime("%B %Y"))
-
-    if ctx["_nt"].sts[station]["ncei91"] is None:
-        subtitle = "Daily climatology unavailable for site"
-    else:
-        subtitle = ("NCEI 1991-2020 Climate Site: %s") % (
-            ctx["_nt"].sts[station]["ncei91"],
-        )
-
-    ax.text(
-        0,
-        1.1,
-        ("[%s] %s :: %s for %s\n%s")
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            "Hi/Lo Temps" if ctx["p"] == "temps" else "Precipitation",
-            sts.strftime("%b %Y"),
-            subtitle,
-        ),
-        transform=ax.transAxes,
-        ha="left",
-        va="bottom",
-    )
-
+    ax.set_xticklabels(np.arange(1, days + 1))
+    ax.set_xlabel(sts.strftime("%B %Y"), fontsize="larger")
     ax.yaxis.grid(linestyle="-")
     ctx["df"] = df
 
@@ -165,10 +161,10 @@ def do_precip_plot(ctx):
             label="Accum Diff",
         )
         ymin = min([0, df["depart_precip"].min() - 0.5])
-    if df["pday"].notnull().any():
+    if df["precip"].notnull().any():
         ax.bar(
             df.index.values + 0.2,
-            df["pday"].values,
+            df["precip"].values,
             width=0.4,
             align="center",
             zorder=3,
@@ -182,15 +178,8 @@ def do_precip_plot(ctx):
             color="b",
             label="Accum Obs",
         )
-
+    ax.set_ylabel("Precipitation [inch]", fontsize="large")
     ax.set_ylim(ymin, ymax)
-    ax.legend(
-        bbox_to_anchor=(-0.1, 1.01, 1.2, 0.102),
-        loc=3,
-        ncol=4,
-        mode="expand",
-        borderaxespad=0.0,
-    )
 
 
 def do_temperature_plot(ctx):
@@ -247,7 +236,6 @@ def do_temperature_plot(ctx):
                 i + 1 - 0.15,
                 row["max_tmpf"] + 0.5,
                 "%.0f" % (row["max_tmpf"],),
-                fontsize=10,
                 ha="center",
                 va="bottom",
                 color="k",
@@ -259,7 +247,6 @@ def do_temperature_plot(ctx):
                 i + 1 + 0.15,
                 row["min_tmpf"] + 0.5,
                 "%.0f" % (row["min_tmpf"],),
-                fontsize=10,
                 ha="center",
                 va="bottom",
                 color="k",
@@ -274,14 +261,6 @@ def do_temperature_plot(ctx):
         )
     ax.set_ylabel(r"Temperature $^\circ$F")
 
-    ax.legend(
-        bbox_to_anchor=(0.0, 1.01, 1.0, 0.102),
-        loc=3,
-        ncol=4,
-        mode="expand",
-        borderaxespad=0.0,
-    )
-
 
 def plotter(fdict):
     """Go"""
@@ -291,11 +270,17 @@ def plotter(fdict):
         do_precip_plot(ctx)
     else:
         do_temperature_plot(ctx)
-
+    ctx["fig"].gca().legend(
+        bbox_to_anchor=(0.0, 1.01, 1.0, 0.102),
+        loc=3,
+        ncol=4,
+        mode="expand",
+        borderaxespad=0.0,
+    )
     return ctx["fig"], ctx["df"]
 
 
 if __name__ == "__main__":
     plotter(
-        {"month": 10, "year": 2020, "station": "MULM4", "network": "MI_DCP"}
+        {"month": 6, "year": 2021, "station": "IA0000", "network": "IACLIMATE"}
     )

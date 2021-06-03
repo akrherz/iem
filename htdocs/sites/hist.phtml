@@ -108,119 +108,72 @@ EOF;
 } // End of printMonth
 
 if ($mode == "monthly"){
-	if (substr($network,2) == "CLIMATE"){
-		$table = sprintf("alldata_%s", substr($network,0,2));
-		$sql = "SELECT high as max_tmpf, to_char(day, 'YYYYMMDD') as dvalid,
-				low as min_tmpf, precip as pday,
-				Null as max_tmpf_qc, Null as max_gust,
-				null as min_tmpf_qc, snow, snowd,
-				null as min_rh, null as max_rh,
-				null as max_dwpf, null as min_dwpf,
-				null as min_feel, null as avg_feel, null as max_feel,
-				temp_hour as cv from $table WHERE
-				month = $month and year = $year and
-				station = '".$station."' ORDER by day ASC";
-	} else {
-		$sql = "SELECT s.*, to_char(day, 'YYYYMMDD') as dvalid,
-			to_char(coop_valid at time zone t.tzname, 'HH PM') as cv,
-		    max_gust_ts at time zone t.tzname as lmax_gust_ts
-		    from summary_". $year ." s, stations t
-            WHERE t.id = '". $station ."' and
-		    t.iemid = s.iemid and 
-		    extract(month from day) = ". $month ."
-		    ORDER by day ASC";
-	}
+    $wspath = sprintf(
+        "/api/1/daily.json?network=%s&station=%s&year=%s&month=%s",
+        $network, $station, $year, $month
+    );
 } else {
-	$sortorder = "ASC";
-	if ($sortvar == "pday" || $sortvar == "max_tmpf" || $sortvar == "max_gust"){
-	   $sortorder = "DESC";
-	}
-	if (substr($network,2) == "CLIMATE"){
-		$table = sprintf("alldata_%s", substr($network,0,2));
-		$sql = "SELECT high as max_tmpf, to_char(day, 'YYYYMMDD') as dvalid,
-			low as min_tmpf, precip as pday,
-			Null as max_tmpf_qc, Null as max_gust, null as max_gust_ts,
-			null as min_rh, null as max_rh,
-			null as max_dwpf, null as min_dwpf,
-			null as min_feel, null as avg_feel, null as max_feel,
-			null as min_tmpf_qc, station as id, snow, snowd,
-			null as cv from $table WHERE
-			day = '".$dateStr."' ORDER by $sortvar $sortorder NULLS LAST";
-	} else {
-		$sql = "SELECT t.id, s.*, to_char(day, 'YYYYMMDD') as dvalid,
-			to_char(coop_valid at time zone '". $metadata["tzname"] ."', 'HH PM') as cv,
-			max_gust_ts at time zone '". $metadata["tzname"] ."' as lmax_gust_ts
-		   from summary_". $year ." s, stations t WHERE t.iemid = s.iemid 
-		   and t.network = '$network' and
-		   day = '". $dateStr ."'  ORDER by $sortvar $sortorder NULLS LAST";
-	}
+    $wspath = sprintf(
+        "/api/1/daily.json?network=%s&date=%s-%s-%s",
+        $network, $year, $month, $day
+    );
 }
-
-if (substr($network,2) == "CLIMATE"){
-	$c = iemdb("coop");
-} else {
-	$c = iemdb("iem");
-}
-$rs = pg_exec($c, $sql);
+$jdata = file_get_contents("http://iem.local{$wspath}");
+$jobj = json_decode($jdata, TRUE);
 
 if ($mode == "monthly") {
 	$t->title = sprintf("%s Data Calendar for %s", $station, $nicemonthdate);
 	$db = Array();
- for( $i=0; $row = pg_fetch_assoc($rs); $i++){
-  $qc = $row["max_tmpf_qc"];
-  if ($row["max_tmpf"] == -99) $row["max_tmpf"] = "M";
-  if ($row["min_tmpf"] == 99) $row["min_tmpf"] = "M";
-  $str = "";
-  if (strstr($qc, 'H'))
-    $str .= "<strike>High: ". $row["max_tmpf"] ."</strike>" ;
-  else
-    $str .= "High: ". $row["max_tmpf"] ;
+    foreach($jobj["data"] as $bogus => $row){
+        $dvalid = date("Ymd", strtotime($row["date"] . " 12:00"));
+        if (is_null($row["max_tmpf"])) $row["max_tmpf"] = "M";
+        $str = "High: ". $row["max_tmpf"] ;
 
-  $qc = $row["min_tmpf_qc"];
-  if (strstr($qc, 'L'))
-    $str .= "<br><strike>Low: ". $row["min_tmpf"] ."</strike>";
-  else
-    $str .= "<br>Low: ". $row["min_tmpf"] ;
-  if ($row["pday"] >= 0){
-  	if ($row["pday"] < 0.01 && $row["pday"] > 0){
-  		$str .= "<br>Rain: Trace ";
-  	} elseif (is_null($row["pday"])) {
-  		$str .= "<br />Rain: ";
-  	} else {
-  		$str .= "<br>Rain: ". sprintf("%.2f", $row["pday"]);
-  	}
-  }
-  if (! is_null($row["snow"]) && $row["snow"] >= 0){
-  	 $str .= "<br>Snow: ". snowprint($row["snow"]);
-  }
-  if (! is_null($row["snowd"]) && $row["snowd"] >= 0){
-  	$str .= "<br>Snow Depth: ". snowprint($row["snowd"]);
-  }
-    if (isset($row["avg_sknt"])){
-        $str .= sprintf("<br />Avg Wind: %s @ %.1f",
-            drct2txt($row["vector_avg_drct"]), $row["avg_sknt"] * 1.15);
-    }
+        if (is_null($row["min_tmpf"])) $row["min_tmpf"] = "M";
+        $str .= "<br>Low: ". $row["min_tmpf"] ;
+
+        if ($row["precip"] < 0.01 && $row["precip"] > 0){
+            $str .= "<br>Rain: Trace ";
+        } elseif (is_null($row["precip"])) {
+            $str .= "<br />Rain: ";
+      	} else {
+  	    	$str .= "<br>Rain: ". sprintf("%.2f", $row["precip"]);
+  	    }
+
+        if (! is_null($row["snow"]) && $row["snow"] >= 0){
+            $str .= "<br>Snow: ". snowprint($row["snow"]);
+        }
+
+        if (! is_null($row["snowd"]) && $row["snowd"] >= 0){
+          	$str .= "<br>Snow Depth: ". snowprint($row["snowd"]);
+        }
+        if (isset($row["avg_sknt"])){
+            $str .= sprintf("<br />Avg Wind: %s @ %.1f",
+                drct2txt($row["vector_avg_drct"]), $row["avg_sknt"] * 1.15);
+        }
   
-  if (strlen($row["max_gust"]) > 0 && strlen($row["lmax_gust_ts"]) > 0) {
-    $gtim = strtotime(substr($row["lmax_gust_ts"],0,16));
-    $gs = date("g:i A", $gtim);
-	$g = round($row["max_gust"] * 1.15,0);
-	if (is_null($row["max_drct"])){
-		$str .= "<br>Gust: ". $g . " (". $gs .")";
-	} else {
-		$str .= "<br>Gust:<br> ". drct2txt($row["max_drct"]) ." @ ". $g .
-			"<br>(". $gs .")";
-	}
-  }
-  if (! is_null($row["min_rh"])){
-  	$str .= sprintf("<br />RH%% Min/Max: %.0f-%.0f", $row["min_rh"],
-  			$row["max_rh"]);
-  }
-  if (! is_null($row["min_feel"])){
-	$str .= sprintf("<br />Feel Min/Max: %.0f to %.0f", $row["min_feel"],
-			$row["max_feel"]);
-}
-$db[ $row["dvalid"] ] = Array("content"=>$str, "cv"=>$row["cv"]);
+        if (strlen($row["max_gust"]) > 0 && strlen($row["max_gust_localts"]) > 0) {
+            $gtim = strtotime(substr($row["max_gust_localts"],0,16));
+            $gs = date("g:i A", $gtim);
+            $g = round($row["max_gust"] * 1.15,0);
+            if (is_null($row["max_drct"])){
+                $str .= "<br>Gust: ". $g . " (". $gs .")";
+            } else {
+                $str .= "<br>Gust:<br> ". drct2txt($row["max_drct"]) ." @ ". $g .
+                    "<br>(". $gs .")";
+            }
+        }
+
+        if (! is_null($row["min_rh"])){
+            $str .= sprintf("<br />RH%% Min/Max: %.0f-%.0f", $row["min_rh"],
+                    $row["max_rh"]);
+        }
+
+        if (! is_null($row["min_feel"])){
+            $str .= sprintf("<br />Feel Min/Max: %.0f to %.0f", $row["min_feel"],
+                    $row["max_feel"]);
+        }
+        $db[$dvalid] = Array("content"=>$str, "cv"=>$row["temp_hour"]);
 
  } /* End of for */
  
@@ -229,7 +182,11 @@ $db[ $row["dvalid"] ] = Array("content"=>$str, "cv"=>$row["cv"]);
  		"/sites/hist.phtml?station=$station&network=$network&mode=daily&year=$year&month=$month&day=");
  
  $htmlout .= <<<EOM
-<h3>Daily High/Low Plot</h3>
+
+ <p>The data presented here provided by <a href="/api/">IEM API</a>
+ webservice: <a href="{$wspath}">daily.json</a>.</p>
+
+ <h3>Daily High/Low Plot</h3>
 <img src="/plotting/auto/plot/17/month:{$month}::year:{$year}::station:{$station}::network:{$network}.png" class="img img-responsive">
 <br /><strong>Description:</strong> This chart of the monthly temperature data.
 The bars are the observations and the dots are climatology.
@@ -262,39 +219,34 @@ summary information.</p>
 <table class="table table-striped table-bordered">
 <thead>
 <tr>
-<th><a href="{$uri}id">ID:</a></th>
-<th><a href="{$uri}station">Location:</a></th>
-<th><a href="{$uri}max_tmpf">High:</a></th>
-<th><a href="{$uri}min_tmpf">Low:</a></th>
-<th><a href="{$uri}min_feel">Min Feels Like[F]:</a></th>
-<th><a href="{$uri}max_feel">Max Feels Like [F]:</a></th>
-<th><a href="{$uri}min_dwpf">Min Dew Point [F]:</a></th>
-<th><a href="{$uri}max_dwpf">Max Dew Point [F]:</a></th>
-<th><a href="{$uri}pday">Rainfall</a></th>
-<th><a href="{$uri}max_gust">Peak Gust:</a></th>
-<th><a href="{$uri}max_gust_ts">Time of Gust</a></th>
-<th><a href="{$uri}snow">Snowfall:</a></th>
-<th><a href="{$uri}snowd">Snow Depth:</a></th>
+<th>ID:</th>
+<th>Location:</th>
+<th>High:</th>
+<th>Low:</th>
+<th>Min Feels Like[F]:</th>
+<th>Max Feels Like [F]:</th>
+<th>Min Dew Point [F]:</th>
+<th>Max Dew Point [F]:</th>
+<th>Rainfall:</th>
+<th>Peak Gust:</th>
+<th>Time of Gust:</th>
+<th>Snowfall:</th>
+<th>Snow Depth:</a></th>
 </tr>
 </thead>
 EOF;
- 	for( $i=0; $row = pg_fetch_assoc($rs); $i++){
-  		$qc = $row["max_tmpf_qc"];
-  		if (! $st->load_station($row["id"], $network) ) {
-  			continue;
+    foreach($jobj["data"] as $bogus => $row){
+  		if (is_null($row["max_tmpf"])) $row["max_tmpf"] = "M";
+  		if (is_null($row["min_tmpf"])) $row["min_tmpf"] = "M";
+  		$label = $row["name"];
+  		if ($row["temp_hour"]){
+  			$label .= sprintf(" (@ %s)", $row["temp_hour"]);
   		}
-  		if ($row["max_tmpf"] == -99) $row["max_tmpf"] = "M";
-  		if ($row["min_tmpf"] == 99) $row["min_tmpf"] = "M";
-  		$label = $st->table[$row["id"]]["name"];
-  		if ($row["cv"]){
-  			$label .= sprintf(" (@ %s)", $row["cv"]);
-  		}
-  		$htmlout .= "<tr><td>". $row['id'] ."</td>
-  		<td><a href=\"hist.phtml?network=$network&year=$year&month=$month&mode=monthly&station=". $row["id"] ."\">{$label}</a></td>";
+  		$htmlout .= "<tr><td>". $row['station'] ."</td>
+  		<td><a href=\"hist.phtml?network=$network&year=$year&month=$month&mode=monthly&station=". $row["station"] ."\">{$label}</a></td>";
 
     	$htmlout .= "<td>". $row["max_tmpf"] ."</td>";
 
-	  	$qc = $row["min_tmpf_qc"];
 	  	$htmlout .= "<td>". $row["min_tmpf"] ."</td>";
 		$htmlout .= "<td>". $row["min_feel"] ."</td>";
 		$htmlout .= "<td>". $row["max_feel"] ."</td>";
@@ -302,13 +254,13 @@ EOF;
 		$htmlout .= "<td>". $row["min_dwpf"] ."</td>";
 		$htmlout .= "<td>". $row["max_dwpf"] ."</td>";
 	    	
-	  	if ($row["pday"] < 0)
+	  	if ($row["precip"] < 0)
 	    	$htmlout .= "<td>M</td>";
 	  	else
-	    	$htmlout .= "<td>". snowprint($row["pday"]) ."</td>";
+	    	$htmlout .= "<td>". snowprint($row["precip"]) ."</td>";
 	
-	  	if (strlen($row["max_gust"]) > 0 && $row["lmax_gust_ts"] != "") {
-	    	$gtim = strtotime(substr($row["lmax_gust_ts"],0,16));
+	  	if (strlen($row["max_gust"]) > 0 && $row["max_gust_localts"] != "") {
+	    	$gtim = strtotime(substr($row["max_gust_localts"],0,16));
 	    	$gs = date("g:i A", $gtim);
 	    	$g = round($row["max_gust"] * 1.15,0);
 	
@@ -328,6 +280,10 @@ EOF;
  	$htmlout .= "</table>\n";
 }
   $t->sites_current="calendar"; 
+  $htmlout .= <<< EOM
+  <p>The data presented here provided by <a href="/api/">IEM API</a>
+  webservice: <a href="{$wspath}">daily.json</a>.</p> 
+EOM;
 
   $content = <<<EOF
 <div class="hidden-print">
