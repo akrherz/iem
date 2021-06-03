@@ -456,6 +456,7 @@ function initUI() {
 
     olmap = new ol.Map({
         target: 'map',
+        controls: ol.control.defaults().extend([new ol.control.FullScreen()]),
         view: new ol.View({
             enableRotation: false,
             center: ol.proj.transform([-94.5, 42.1], 'EPSG:4326', 'EPSG:3857'),
