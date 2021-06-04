@@ -8,6 +8,7 @@ import pandas as pd
 import requests
 import matplotlib.patheffects as PathEffects
 from matplotlib.patches import Rectangle
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -79,6 +80,8 @@ def common(ctx):
         timeout=15,
     ).json()
     df = pd.DataFrame(jsn["data"])
+    if df.empty:
+        raise NoDataFound("Data unavailable for station")
     df["day_of_month"] = pd.to_datetime(df["date"]).dt.day
     df["accum_pday"] = df["precip"].cumsum()
     df = df.set_index("day_of_month")
@@ -282,5 +285,5 @@ def plotter(fdict):
 
 if __name__ == "__main__":
     plotter(
-        {"month": 6, "year": 2021, "station": "IA0000", "network": "IACLIMATE"}
+        {"month": 6, "year": 2021, "station": "WV4755", "network": "WVCLIMATE"}
     )
