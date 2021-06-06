@@ -42,14 +42,17 @@ def sanity_check(val, lower, upper):
 
 
 def provider2network(provider, name):
-    """ Convert a MADIS network ID to one that I use, here in IEM land"""
+    """Convert a MADIS network ID to one that I use, here in IEM land"""
     if not provider.endswith("DOT") and provider not in MY_PROVIDERS:
         return None
     if provider == "KYMN":
         return provider
     if provider == "MesoWest":
         # get the network from the last portion of the name
-        network = name.split()[-1]
+        tokens = name.split()
+        if not tokens:
+            return None
+        network = tokens[-1]
         if network == "VTWAC":
             return network
         if network.endswith("DOT") and len(network) == 5:
