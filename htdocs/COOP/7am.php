@@ -1,12 +1,12 @@
 <?php
-$OL = "6.2.1";
+$OL = "6.4.3";
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 86);
 require_once "../../include/mlib.php";
 force_https();
 require_once "../../include/myview.php";
 $t = new MyView();
-$t->title = "7 AM 24 Hour Precipitation Analysis";
+$t->title = "Iowa Daily COOP Reports and Comparisons";
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
@@ -37,21 +37,7 @@ $t->content = <<<EOF
 </ol>
 
 <p>The purpose of this application is to provide a visual comparison of
-	various datasources for what they show for 24 hour precipitation
-	valid at 7 AM local central time.  This application helps in the
-	monthly quality control process of Iowa daily climate data.</p>
-		
-<h4>TODO list</h4>
-<ul>
- <li>Add SchoolNet Computed Totals</li>
- <li>Add DCP Computed Totals</li>
- <li>Add CoCoRaHS Totals</li>
- <li>Local Storm Reports</li>
- <li>ISU Soil Moisture Data</li>
- <li>Include nearby state's data</li>
- <li>Add option to plot SWE</li>
- <li>Add Fisher Porter totals</li>
-</ul>
+	various datasources for the once daily COOP Reports.</p>
 		
 <form name="bah">
 <div class="row">
@@ -61,6 +47,9 @@ $t->content = <<<EOF
 		<option value='pday'>Precipitation</option>
 		<option value='snow'>Snowfall</option>
 		<option value='snowd'>Snow Depth [inch]</option>	
+		<option value='high'>24 Hour High Temperature</option>
+		<option value='low'>24 Hour Low Temperature</option>
+		<option value='coop_tmpf'>Temperature at Observation Time</option>
 	</select>
 	<br /><strong>MRMS Legend:</strong> <img src="/images/mrms_q3_p24h.png" />
 </div>

@@ -34,7 +34,7 @@ def router(group, ts):
 
 
 def run_azos(ts):
-    """ Get the data please """
+    """Get the data please"""
     pgconn = get_dbconn("iem")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -46,8 +46,9 @@ def run_azos(ts):
     cursor.execute(
         "select t.id, t.name, sum(phour), st_x(geom), st_y(geom) "
         "from hourly h JOIN stations t ON "
-        "(h.iemid = t.iemid) where t.network in ('AWOS', 'IA_ASOS') and "
-        "valid >= %s and valid < %s GROUP by t.id, t.name, t.geom",
+        "(h.iemid = t.iemid) where t.network in ('AWOS', 'IA_ASOS', 'SD_ASOS',"
+        "'NE_ASOS', 'KS_ASOS', 'MO_ASOS', 'IL_ASOS', 'WI_ASOS', 'MN_ASOS') "
+        "and valid >= %s and valid < %s GROUP by t.id, t.name, t.geom",
         (ts0, ts1),
     )
 
@@ -75,7 +76,7 @@ def run_azos(ts):
 
 
 def run(ts):
-    """ Actually do the hard work of getting the current SPS in geojson """
+    """Actually do the hard work of getting the current SPS in geojson"""
     pgconn = get_dbconn("iem")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -84,8 +85,11 @@ def run(ts):
     cursor.execute(
         """
         select id, ST_x(geom), ST_y(geom), coop_valid, pday, snow, snowd,
+        extract(hour from coop_valid) as hour, max_tmpf as high,
+        min_tmpf as low, coop_tmpf,
         name from summary s JOIN stations t ON (t.iemid = s.iemid)
-        WHERE s.day = %s and t.network = 'IA_COOP' and pday >= 0
+        WHERE s.day = %s and t.network in ('IA_COOP', 'MO_COOP', 'KS_COOP',
+        'NE_COOP', 'SD_COOP', 'MN_COOP', 'WI_COOP', 'IL_COOP') and pday >= 0
         and extract(hour from coop_valid) between 5 and 10
     """,
         (ts.date(),),
@@ -107,6 +111,10 @@ def run(ts):
                     snow=p(row["snow"], 1),
                     snowd=p(row["snowd"], 1),
                     name=row["name"],
+                    hour=row["hour"],
+                    high=row["high"],
+                    low=row["low"],
+                    coop_tmpf=row["coop_tmpf"],
                 ),
                 geometry=dict(
                     type="Point", coordinates=[row["st_x"], row["st_y"]]

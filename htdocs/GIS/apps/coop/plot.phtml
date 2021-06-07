@@ -237,7 +237,15 @@ choice.
   </td>
   </tr>
 </table>
-<input type="checkbox" name="labels"{$showlabelson}>Show point labels
+
+<br />  <img src="{$url}" border=1>
+
+<p>Open this plot in a <a href="javascript:new_window('{$url}');">new window</a> for comparison with other plots. Once the
+image is loaded up in another window, you can modify this plots 
+parameters.
+
+<p><input type="checkbox" name="labels"{$showlabelson}>Show point labels
+
 </form>
 <ul>
 <li>Snowfall data is not complete.  Please be careful using the data.</li>
@@ -247,12 +255,6 @@ necessarily for the local date.  The reports are around 7 AM, so the high
 temperature (for example) was most likely for the previous date.</li>
 </ul>
 
-<p><h3>Plot</h3>
-  <p>Open this plot in a <a href="javascript:new_window('{$url}');">new window</a> for comparison with other plots. Once the
-image is loaded up in another window, you can modify this plots 
-parameters.
-
-<br />  <img src="{$url}" border=1>
 
 <p>
 <img src="/images/gisready.png"><h3> Data Listing</h3>

@@ -13,14 +13,14 @@ encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 
 
 def departure(ob, climo):
-    """ Compute a departure value """
+    """Compute a departure value"""
     if ob is None or climo is None:
         return "M"
     return ob - climo
 
 
 def int_sanitize(val):
-    """ convert to Ms"""
+    """convert to Ms"""
     if val is None:
         return "M"
     if val == TRACE_VALUE:
@@ -29,7 +29,7 @@ def int_sanitize(val):
 
 
 def f1_sanitize(val):
-    """ convert to Ms"""
+    """convert to Ms"""
     if val is None:
         return "M"
     if val == TRACE_VALUE:
@@ -38,7 +38,7 @@ def f1_sanitize(val):
 
 
 def f2_sanitize(val):
-    """ convert to Ms"""
+    """convert to Ms"""
     if val is None:
         return "M"
     if val == TRACE_VALUE:
@@ -47,7 +47,7 @@ def f2_sanitize(val):
 
 
 def get_data(ts, fmt):
-    """ Get the data for this timestamp """
+    """Get the data for this timestamp"""
     pgconn = get_dbconn("iem")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     data = {"type": "FeatureCollection", "features": []}
@@ -194,7 +194,7 @@ def get_data(ts, fmt):
 
 
 def application(environ, start_response):
-    """ see how we are called """
+    """see how we are called"""
     fields = parse_formvars(environ)
     dt = fields.get("dt", datetime.date.today().strftime("%Y-%m-%d"))
     ts = datetime.datetime.strptime(dt, "%Y-%m-%d")
@@ -207,7 +207,7 @@ def application(environ, start_response):
     else:
         headers.append(("Content-type", "text/plain"))
 
-    mckey = "/geojson/cli/%s?callback=%s&fmt=%s" % (
+    mckey = "/geojson/cli/%s?callback=%s&fmt=%s&v=2" % (
         ts.strftime("%Y%m%d"),
         cb,
         fmt,

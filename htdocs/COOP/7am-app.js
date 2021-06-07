@@ -137,7 +137,9 @@ $(document).ready(function(){
     $(element).popover({
             'placement': 'top',
             'html': true,
-            content: function() { return $('#popover-content').html(); }
+            content: function() {
+                return $('#popover-content').html();
+            }
     });
 
 	
@@ -153,6 +155,10 @@ $(document).ready(function(){
                     popup.setPosition(coord);
                     var content = "<p><strong>"
                     + feature.getId() +" "+ feature.get('name') +"</strong>"
+                    +"<br />Hour of Ob: "+ feature.get('hour')
+                    +"<br />High: "+ feature.get('high')
+                    +"<br />Low: "+ feature.get('low')
+                    +"<br />Temp at Ob: "+ feature.get('coop_tmpf')
                     +"<br />Precip: "+ feature.get('pday')
                     +"<br />Snow: "+ feature.get('snow')
                     +"<br />Snow Depth: "+ feature.get('snowd')
