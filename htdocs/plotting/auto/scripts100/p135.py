@@ -1,25 +1,22 @@
 """Accumuldated days"""
 import datetime
-from collections import OrderedDict
 
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
-    [
-        ("high_above", "High Temperature At or Above"),
-        ("high_below", "High Temperature Below"),
-        ("low_above", "Low Temperature At or Above"),
-        ("low_below", "Low Temperature Below"),
-    ]
-)
-PDICT2 = OrderedDict([("jan1", "January 1"), ("jul1", "July 1")])
+PDICT = {
+    "high_above": "High Temperature At or Above",
+    "high_below": "High Temperature Below",
+    "low_above": "Low Temperature At or Above",
+    "low_below": "Low Temperature Below",
+}
+PDICT2 = {"jan1": "January 1", "jul1": "July 1"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 86400
@@ -62,7 +59,7 @@ def get_description():
 
 
 def highcharts(fdict):
-    """ Highcharts Output """
+    """Highcharts Output"""
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     varname = ctx["var"]
@@ -147,7 +144,7 @@ def highcharts(fdict):
 
 
 def get_data(ctx):
-    """ Get the data"""
+    """Get the data"""
     pgconn = get_dbconn("coop")
     station = ctx["station"]
     threshold = ctx["threshold"]
@@ -169,18 +166,12 @@ def get_data(ctx):
     if split == "jul1":
         sts = sts.replace(month=7, day=1)
     df = read_sql(
-        """
+        f"""
     with data as (
         select extract(year from day + '%s days'::interval) as season,
         extract(doy from day + '%s days'::interval) as doy,
-        (case when """
-        + col
-        + """ """
-        + opp
-        + """ %s then 1 else 0 end) as hit
-        from """
-        + table
-        + """
+        (case when {col} {opp} %s then 1 else 0 end) as hit
+        from {table}
         where station = %s and day >= %s),
     agg1 as (
         SELECT season, doy,
@@ -203,7 +194,7 @@ def get_data(ctx):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     threshold = ctx["threshold"]
@@ -213,15 +204,18 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("Error, no results returned!")
 
-    (fig, ax) = plt.subplots(1, 1)
+    title = ("%s [%s]\n" r"%s %.0f$^\circ$F") % (
+        ctx["_nt"].sts[station]["name"],
+        station,
+        PDICT[varname],
+        threshold,
+    )
+
+    (fig, ax) = figure_axes(title=title)
     ax.plot(df.index.values, df["avg"], c="k", lw=2, label="Average")
     ax.plot(df.index.values, df["thisyear"], c="g", lw=2, label="%s" % (year,))
     ax.plot(df.index.values, df["max"], c="r", lw=2, label="Max")
     ax.plot(df.index.values, df["min"], c="b", lw=2, label="Min")
-    ax.set_title(
-        (r"%s [%s]\n%s %.0f$^\circ$F")
-        % (ctx["_nt"].sts[station]["name"], station, PDICT[varname], threshold)
-    )
     ax.legend(ncol=1, loc=2)
     xticks = []
     xticklabels = []

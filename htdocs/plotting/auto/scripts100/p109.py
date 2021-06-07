@@ -184,11 +184,12 @@ def get_count_df(ctx, pgconn, varname, pstr, sts, ets):
             where {pstr} and issue >= %s and issue < %s
             )
 
-            SELECT wfo, year, count(*) from total
-            GROUP by wfo, year
+            SELECT wfo, count(*) from total
+            GROUP by wfo
             """,
             pgconn,
             params=(sts, ets),
+            index_col="wfo",
         )
     return df
 
@@ -418,7 +419,7 @@ if __name__ == "__main__":
         {
             "sdate": "2021-05-01 0000",
             "edate": "2021-06-01 0000",
-            "var": "count_rank",
+            "var": "count",
             "phenomenav1": "SV",
             "significancev1": "W",
         }
