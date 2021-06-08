@@ -9,9 +9,6 @@ from pyiem.network import Table as NetworkTable
 from pyiem.tracker import loadqc
 from pyiem.util import drct2text, get_dbconn, utc, convert_value, mm2inch
 
-ISUAG = get_dbconn("isuag")
-IEM = get_dbconn("iem")
-
 
 def safe_t(val, units="degC"):
     """Safe value."""
@@ -41,9 +38,9 @@ def safe_m(val):
     return round(val * 100.0, 0)
 
 
-def get_data(ts):
+def get_data(pgconn, ts):
     """Get the data for this timestamp"""
-    cursor = ISUAG.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     qcdict = loadqc()
     nt = NetworkTable("ISUSM", only_online=False)
     data = {"type": "FeatureCollection", "features": []}
@@ -202,7 +199,11 @@ def application(environ, start_response):
     else:
         ts = datetime.datetime.strptime(dt, "%Y-%m-%dT%H:%M:%S.000Z")
         ts = ts.replace(tzinfo=datetime.timezone.utc)
-    data = get_data(ts.astimezone(pytz.timezone("America/Chicago")))
+    with get_dbconn("isuag") as pgconn:
+        data = get_data(
+            pgconn,
+            ts.astimezone(pytz.timezone("America/Chicago")),
+        )
 
     start_response("200 OK", headers)
     return [data.encode("ascii")]

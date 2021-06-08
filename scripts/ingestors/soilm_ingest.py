@@ -131,6 +131,8 @@ def common_df_logic(filename, maxts, nwsli, tablename):
     # rename columns to rectify differences
     df.rename(columns=VARCONV, inplace=True)
     if tablename == "sm_minute":
+        # Storage of how far this covers
+        df["duration"] = 15
         # Some conversions needed to map this data back to 1min table
         # slrkw_avg SIC is actually W/m2 over 15 minutes, we want to store as
         # a total over "one minute" W/m2 -> kJ/s/m2
@@ -236,7 +238,7 @@ def common_df_logic(filename, maxts, nwsli, tablename):
     df.drop("record", axis=1, inplace=True)
     # Create _qc and _f columns
     for colname in df.columns:
-        if colname == "valid":
+        if colname in ["valid", "duration"]:
             continue
         df["%s_qc" % (colname,)] = df[colname]
         if colname.startswith("calc_vwc"):
