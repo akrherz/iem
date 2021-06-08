@@ -6,8 +6,7 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/forms.php";
 require_once "../../include/database.inc.php";
 require_once "setup.php";
-
-include("../../include/myview.php");
+require_once "../../include/myview.php";
 $t = new MyView();
 
 $dir = isset($_GET["dir"]) ? xssafe($_GET["dir"]): "";

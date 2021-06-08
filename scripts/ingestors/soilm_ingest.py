@@ -205,9 +205,30 @@ def common_df_logic(filename, maxts, nwsli, tablename):
     if tablename == "sm_daily":
         # Rework the valid column into the appropriate date
         df["valid"] = df["valid"].dt.date - datetime.timedelta(days=1)
+        # Convert radiation to standardized slrkj_tot
+        df["slrkj_tot"] = df["slrmj_tot"] * 1000.0
+        # drop things we do not need
+        df = df.drop(
+            [
+                "slrmj_tot",
+                "solarradcalc",
+            ],
+            axis=1,
+            errors="ignore",
+        )
     if tablename == "sm_hourly":
-        # Correct incorrect units on radiation, the data is actually W/m2
-        df["slrkw_avg"] = df["slrkw_avg"] / 1000.0
+        # Convert radiation to standardized slrkj_tot
+        df["slrkj_tot"] = df["slrmj_tot"] * 1000.0
+        # drop things we do not need
+        df = df.drop(
+            [
+                "slrkw_avg",
+                "solarradcalc",
+                "slrmj_tot",
+            ],
+            axis=1,
+            errors="ignore",
+        )
     df = df[df["valid"] > maxts].copy()
     if df.empty:
         return
@@ -248,7 +269,7 @@ def common_df_logic(filename, maxts, nwsli, tablename):
 
 
 def m15_process(nwsli, maxts):
-    """ Process the 15minute file """
+    """Process the 15minute file"""
     fn = "%s/%s_Min15SI.dat" % (BASE, STATIONS[nwsli])
     df = common_df_logic(fn, maxts, nwsli, "sm_minute")
     if df is None:
@@ -259,7 +280,7 @@ def m15_process(nwsli, maxts):
     LOG.debug("processing %s rows from %s", len(df.index), fn)
     acursor = ACCESS.cursor()
     for _i, row in df.iterrows():
-        ob = Observation(nwsli, "ISUSM", row["valid"])
+        ob = Observation(nwsli, "ISUSM", row["valid"].to_pydatetime())
         tmpc = units("degC") * row["tair_c_avg_qc"]
         tmpf = tmpc.to(units("degF")).m
         relh = units("percent") * row["rh_avg_qc"]
@@ -300,7 +321,7 @@ def m15_process(nwsli, maxts):
 
 
 def hourly_process(nwsli, maxts):
-    """ Process the hourly file """
+    """Process the hourly file"""
     fn = "%s/%s_HrlySI.dat" % (BASE, STATIONS[nwsli])
     df = common_df_logic(fn, maxts, nwsli, "sm_hourly")
     if df is None:
@@ -310,7 +331,7 @@ def hourly_process(nwsli, maxts):
     acursor = ACCESS.cursor()
     for _i, row in df.iterrows():
         # Update IEMAccess
-        ob = Observation(nwsli, "ISUSM", row["valid"])
+        ob = Observation(nwsli, "ISUSM", row["valid"].to_pydatetime())
         tmpc = units("degC") * row["tair_c_avg_qc"]
         tmpf = tmpc.to(units("degF")).m
         relh = units("percent") * row["rh_qc"]
@@ -320,8 +341,6 @@ def hourly_process(nwsli, maxts):
             ob.data["dwpf"] = (
                 dewpoint_from_relative_humidity(tmpc, relh).to(units("degF")).m
             )
-        # SIC the units of slrkw are actually W/m2
-        ob.data["srad"] = row["slrkw_avg_qc"]
         ob.data["phour"] = round(mm2inch(row["rain_mm_tot_qc"]), 2)
         ob.data["sknt"] = convert_value(
             row["ws_mps_s_wvt_qc"], "meter / second", "knot"
@@ -354,7 +373,7 @@ def hourly_process(nwsli, maxts):
 
 
 def daily_process(nwsli, maxts):
-    """ Process the daily file """
+    """Process the daily file"""
     fn = "%s/%s_DailySI.dat" % (BASE, STATIONS[nwsli])
     df = common_df_logic(fn, maxts, nwsli, "sm_daily")
     if df is None:
@@ -375,7 +394,7 @@ def daily_process(nwsli, maxts):
         if valid not in EVENTS["days"]:
             EVENTS["days"].append(valid)
         ob.data["et_inch"] = mm2inch(row["dailyet_qc"])
-        ob.data["srad_mj"] = row["slrmj_tot_qc"]
+        ob.data["srad_mj"] = row["slrkj_tot_qc"] / 1000.0
         # Someday check if this is apples to apples here
         ob.data["vector_avg_drct"] = row["winddir_d1_wvt_qc"]
         if ob.data["max_tmpf"] is None:
@@ -403,7 +422,7 @@ def daily_process(nwsli, maxts):
 
 
 def update_pday():
-    """ Compute today's precip from the current_log archive of data """
+    """Compute today's precip from the current_log archive of data"""
     LOG.debug("update_pday() called...")
     acursor = ACCESS.cursor()
     acursor.execute(
@@ -430,7 +449,7 @@ def update_pday():
 
 
 def get_max_timestamps(nwsli):
-    """ Fetch out our max values """
+    """Fetch out our max values"""
     icursor = ISUAG.cursor()
     data = {
         "hourly": datetime.datetime(2012, 1, 1, tzinfo=pytz.FixedOffset(-360)),
@@ -479,7 +498,7 @@ def get_max_timestamps(nwsli):
 
 
 def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
-    """ Send the raw datafile to LDM """
+    """Send the raw datafile to LDM"""
     filename = "%s/%s_DailySI.dat" % (BASE, STATIONS[nwsli])
     if not os.path.isfile(filename):
         return
@@ -534,7 +553,7 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
 
 
 def main(argv):
-    """ Go main Go """
+    """Go main Go"""
     stations = STATIONS if len(argv) == 1 else [argv[1]]
     for nwsli in stations:
         LOG.debug("starting workflow for: %s", nwsli)

@@ -12,7 +12,7 @@ MISSING = {"", "M", "-99"}
 
 
 def get_stations(form):
-    """ Figure out which stations were requested """
+    """Figure out which stations were requested"""
     stations = form.getall("sts")
     if not stations:
         stations.append("XXXXX")
@@ -22,7 +22,7 @@ def get_stations(form):
 
 
 def get_dates(form):
-    """ Get the start and end dates requested """
+    """Get the start and end dates requested"""
     year1 = form.get("year1", 2013)
     month1 = form.get("month1", 1)
     day1 = form.get("day1", 1)
@@ -44,7 +44,7 @@ def get_dates(form):
 
 
 def get_delimiter(form):
-    """ Figure out what is the requested delimiter """
+    """Figure out what is the requested delimiter"""
     d = form.getvalue("delim", "comma")
     if d == "comma":
         return ","
@@ -52,7 +52,7 @@ def get_delimiter(form):
 
 
 def fetch_daily(form, cols):
-    """ Return a fetching of daily data """
+    """Return a fetching of daily data"""
     pgconn = get_dbconn("isuag", user="nobody")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     sts, ets = get_dates(form)
@@ -100,7 +100,7 @@ def fetch_daily(form, cols):
       valid >= '%s 00:00' and valid < '%s 00:00' and station in %s
       GROUP by station, date
     ), daily as (
-      SELECT station, valid, tair_c_max_qc, tair_c_min_qc, slrmj_tot_qc,
+      SELECT station, valid, tair_c_max_qc, tair_c_min_qc, slrkj_tot_qc,
       rain_mm_tot_qc, dailyet_qc, tsoil_c_avg_qc, t12_c_avg_qc, t24_c_avg_qc,
       t50_c_avg_qc, calc_vwc_12_avg_qc, calc_vwc_24_avg_qc, calc_vwc_50_avg_qc,
       ws_mps_s_wvt_qc, ws_mps_max_qc, lwmv_1_qc, lwmv_2_qc,
@@ -111,7 +111,7 @@ def fetch_daily(form, cols):
     SELECT d.station, d.valid, s.date, s.soil04tn, s.soil04tx, s.rh,
     s.rh_min, s.rh_max,
     s.soil12tn, s.soil12tx, s.soil24tn, s.soil24tx,
-    s.soil50tn, s.soil50tx, tair_c_max_qc, tair_c_min_qc, slrmj_tot_qc,
+    s.soil50tn, s.soil50tx, tair_c_max_qc, tair_c_min_qc, slrkj_tot_qc,
     rain_mm_tot_qc, dailyet_qc, tsoil_c_avg_qc, t12_c_avg_qc, t24_c_avg_qc,
     t50_c_avg_qc, calc_vwc_12_avg_qc, calc_vwc_24_avg_qc, calc_vwc_50_avg_qc,
     ws_mps_s_wvt_qc, ws_mps_max_qc, round(gddxx(50, 86, c2f( tair_c_max_qc ),
@@ -236,7 +236,7 @@ def fetch_daily(form, cols):
                 valid=valid.strftime("%Y-%m-%d"),
                 high=high,
                 low=low,
-                solar=row["slrmj_tot_qc"],
+                solar=row["slrkj_tot_qc"] / 1000.0,
                 rh=row["rh"],
                 rh_min=row["rh_min"],
                 rh_max=row["rh_max"],
@@ -276,7 +276,7 @@ def fetch_daily(form, cols):
 
 
 def fetch_hourly(form, cols):
-    """ Return a fetching of hourly data """
+    """Return a fetching of hourly data"""
     pgconn = get_dbconn("isuag", user="nobody")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     sts, ets = get_dates(form)
@@ -317,7 +317,7 @@ def fetch_hourly(form, cols):
             cols.remove("bp_mb")
     cursor.execute(
         f"""SELECT station, valid, tair_c_avg_qc, rh_qc,
-    slrkw_avg_qc,
+    slrkj_tot_qc,
     rain_mm_tot_qc, ws_mps_s_wvt_qc, winddir_d1_wvt_qc,
     tsoil_c_avg_qc,
     t12_c_avg_qc, t24_c_avg_qc, t50_c_avg_qc, calc_vwc_12_avg_qc,
@@ -349,8 +349,8 @@ def fetch_hourly(form, cols):
         )
         relh = row["rh_qc"] if row["rh_qc"] is not None else -99
         solar = (
-            (row["slrkw_avg_qc"] * 1000.0)
-            if row["slrkw_avg_qc"] is not None
+            (row["slrkj_tot_qc"] * 1000.0)
+            if row["slrkj_tot_qc"] is not None
             else miss
         )
         precip = (

@@ -30,7 +30,7 @@ PLOTTYPES = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -145,10 +145,10 @@ def make_daily_rad_plot(ctx):
     icursor = ctx["pgconn"].cursor(cursor_factory=psycopg2.extras.DictCursor)
     icursor.execute(
         """
-        SELECT valid, slrmj_tot_qc from sm_daily
+        SELECT valid, slrkj_tot_qc / 1000. from sm_daily
         where station = '%s'
-        and valid >= '%s' and valid <= '%s' and slrmj_tot_qc > 0 and
-        slrmj_tot_qc < 40 ORDER by valid ASC
+        and valid >= '%s' and valid <= '%s' and slrkj_tot_qc > 0 and
+        slrkj_tot_qc < 40000 ORDER by valid ASC
     """
         % (
             ctx["station"],
@@ -585,7 +585,7 @@ def plot1(ctx):
     )
     if df.empty:
         raise NoDataFound("No Data Found for This Plot.")
-    slrkw = df["slrkw_avg_qc"]
+    solar_wm2 = df["slrkj_tot_qc"] / 3600.0 * 1000.0
     d12sm = df["calc_vwc_12_avg_qc"]
     d12t = df["t12_c_avg_qc"]
     d24t = df["t24_c_avg_qc"]
@@ -660,7 +660,7 @@ def plot1(ctx):
     # ------------------------------------------------------
 
     ax2 = ax[2].twinx()
-    (l3,) = ax2.plot(valid, slrkw * 1000.0, color="g", zorder=1, lw=2)
+    (l3,) = ax2.plot(valid, solar_wm2, color="g", zorder=1, lw=2)
     ax2.set_ylabel("Solar Radiation [W/m^2]", color="g")
 
     (l1,) = ax[2].plot(valid, c2f(tair), linewidth=2, color="blue", zorder=2)
@@ -708,7 +708,7 @@ def plot1(ctx):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     ctx["pgconn"] = get_dbconn("isuag")
 

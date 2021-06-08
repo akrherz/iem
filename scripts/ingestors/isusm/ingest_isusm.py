@@ -214,22 +214,28 @@ def process(path, fn):
         df["rain_mm_tot"] = convert_value(
             df["rain_in_tot"], "inch", "millimeter"
         )
-        df = df.drop("rain_in_tot", axis=1)
-        df["slrmj_tot"] = df["slrw_avg"] * 86400.0 / 1000000.0
-        df = df.drop("slrw_avg", axis=1)
+        df["slrkj_tot"] = df["slrw_avg"] * 86400.0 / 1000.0
+        # Remove un-needed data
+        df = df.drop(
+            ["slrw_avg", "rain_in_tot", "solarradcalc"],
+            axis=1,
+            errors="ignore",
+        )
     elif tabletype == "HrlySI":
-        df["slrmj_tot"] = df["slrw_avg"] * 3600.0 / 1000000.0
-        df = df.drop("slrw_avg", axis=1)
+        df["slrkj_tot"] = df["slrw_avg"] * 3600.0 / 1000.0
         df["rain_mm_tot"] = convert_value(
             df["rain_in_tot"], "inch", "millimeter"
         )
-        df = df.drop("rain_in_tot", axis=1)
         df["ws_mps_s_wvt"] = df["ws_mph_s_wvt"] * 0.44704
-        df = df.drop("ws_mph_s_wvt", axis=1)
+        df = df.drop(
+            ["ws_mph_s_wvt", "rain_in_tot", "slrw_avg", "solarradcalc"],
+            axis=1,
+            errors="ignore",
+        )
     elif tabletype == "MinSI":
         # Rework solar rad
         df["slrkj_tot"] = df["slrw_avg"] * 60.0 / 1000.0
-        df = df.drop("slrw_avg", axis=1)
+        df = df.drop(["slrw_avg", "solarradcalc"], axis=1, errors="ignore")
 
     df = df.drop("record", axis=1)
     # Create _qc and _f columns

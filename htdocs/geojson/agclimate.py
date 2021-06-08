@@ -75,8 +75,11 @@ def get_data(ts):
             h.rain_mm_tot,
             etalfalfa,
             battv_min,
-            coalesce(m.slrkj_tot_qc * 3600 / 1000000, h.slrmj_tot_qc)
+            coalesce(m.slrkj_tot_qc * 60 / 1000, h.slrkj_tot_qc / 1000.)
                 as slrmj_tot,
+            coalesce(
+                m.slrkj_tot_qc * 1000. / 60., h.slrkj_tot_qc * 1000. / 60.)
+                as srad_wm2,
             coalesce(m.tair_c_avg_qc, h.tair_c_avg_qc) as tair_c_avg,
             coalesce(m.tsoil_c_avg_qc, h.tsoil_c_avg_qc) as tsoil_c_avg_qc,
             coalesce(m.t12_c_avg_qc, h.t12_c_avg_qc) as t12_c_avg_qc,
@@ -130,6 +133,7 @@ def get_data(ts):
                     "et": safe_p(row["etalfalfa"]),
                     "bat": safe(row["battv_min"], 2),
                     "radmj": safe(row["slrmj_tot"], 2),
+                    "srad_wm2": safe(row["srad_wm2"], 2),
                     "tmpf": (
                         safe_t(row["tair_c_avg"])
                         if not q.get("tmpf", False)

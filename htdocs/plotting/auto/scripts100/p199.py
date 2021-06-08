@@ -23,7 +23,7 @@ PLOTTYPES = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -174,8 +174,8 @@ def plot4(ctx):
     """Daily rad."""
     df = read_sql(
         """
-        SELECT station, slrmj_tot_qc from sm_daily WHERE
-        valid = %s and slrmj_tot_qc is not null
+        SELECT station, slrkj_tot_qc from sm_daily WHERE
+        valid = %s and slrkj_tot_qc is not null
     """,
         ctx["pgconn"],
         params=(ctx["date"],),
@@ -192,7 +192,7 @@ def plot4(ctx):
             {
                 "lon": ctx["nt"].sts[station]["lon"],
                 "lat": ctx["nt"].sts[station]["lat"],
-                "tmpf": row["slrmj_tot_qc"],
+                "tmpf": row["slrkj_tot_qc"] / 1000.0,
                 "id": ctx["nt"].sts[station]["plot_name"],
                 "id_color": "k",
             }
@@ -308,7 +308,7 @@ def plot8(ctx):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     ctx["qc"] = loadqc(date=ctx["date"])
     ctx["pgconn"] = get_dbconn("isuag")

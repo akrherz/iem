@@ -5,8 +5,11 @@
  */
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
-$connection = iemdb("coop");
 require_once "../../../include/mlib.php";
+require_once "../../../include/network.php";
+require_once "adodb-time.inc.php";
+
+$connection = iemdb("coop");
 $network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,10) : "IACLIMATE";
 $day1 = isset($_GET["day1"]) ? $_GET["day1"] : die("No day1 specified");
 $day2 = isset($_GET["day2"]) ? $_GET["day2"] : die("No day2 specified");
@@ -21,11 +24,8 @@ $delim = isset($_GET["delim"]) ? $_GET["delim"]: ",";
 $sample = isset($_GET["sample"]) ? $_GET["sample"]: "1min";
 $what = isset($_GET["what"]) ? $_GET["what"]: 'dl';
 
-
-include("../../../include/network.php");
 $nt = new NetworkTable($network);
 $cities = $nt->table;
-include("adodb-time.inc.php");
 
 $station = $_GET["station"];
 $stations = $_GET["station"];

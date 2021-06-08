@@ -18,7 +18,7 @@ def check_date(date):
 
     nt = NetworkTable("ISUSM")
     cursor.execute(
-        "SELECT station, slrmj_tot_qc from sm_daily where "
+        "SELECT station, slrkj_tot_qc from sm_daily where "
         "valid = %s ORDER by station ASC",
         (date,),
     )
@@ -36,19 +36,19 @@ def check_date(date):
         )
         res = requests.get(uri)
         j = json.loads(res.content)
-        estimate = j["data"][0]["srad_mj"]
-        if estimate is None:
+        if j["data"][0]["srad_mj"] is None:
             LOG.info("fix_solar %s %s estimate is missing", station, date)
             continue
+        estimate = j["data"][0]["srad_mj"] * 1000.0
         # Never pull data down
         if ob is not None and ob > estimate:
             continue
         # If ob is greater than 5 or the difference is less than 7 <arb>
-        if ob is not None and (ob > 5 or (estimate - ob) < 7):
+        if ob is not None and (ob > 5000 or (estimate - ob) < 7000):
             continue
         LOG.info("%s %s Ob:%s Est:%.1f", station, date, ob, estimate)
         cursor2.execute(
-            "UPDATE sm_daily SET slrmj_tot_qc = %s, slrmj_tot_f = 'E' "
+            "UPDATE sm_daily SET slrkj_tot_qc = %s, slrkj_tot_f = 'E' "
             "WHERE station = %s and valid = %s",
             (estimate, station, date),
         )
@@ -66,8 +66,8 @@ def fix_nulls():
     nt = NetworkTable("ISUSM")
     cursor.execute(
         """
-        SELECT station, valid from sm_daily where (slrmj_tot_qc is null or
-        slrmj_tot_qc = 0) and valid > '2019-04-14' ORDER by valid ASC
+        SELECT station, valid from sm_daily where (slrkj_tot_qc is null or
+        slrkj_tot_qc = 0) and valid > '2019-04-14' ORDER by valid ASC
     """
     )
     for row in cursor:
@@ -76,7 +76,7 @@ def fix_nulls():
         v2 = v1.replace(hour=23, minute=59)
         cursor2.execute(
             """
-            SELECT sum(slrmj_tot_qc), count(*) from sm_hourly WHERE
+            SELECT sum(slrkj_tot_qc), count(*) from sm_hourly WHERE
             station = %s and valid >= %s and valid < %s
         """,
             (station, v1, v2),
@@ -123,7 +123,7 @@ def fix_nulls():
         )
         cursor2.execute(
             """
-            UPDATE sm_daily SET slrmj_tot_qc = %s
+            UPDATE sm_daily SET slrkj_tot_qc = %s
             WHERE station = %s and valid = %s
         """,
             (row2[0], station, row[1]),

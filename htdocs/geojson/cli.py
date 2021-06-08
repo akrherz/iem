@@ -207,7 +207,7 @@ def application(environ, start_response):
     else:
         headers.append(("Content-type", "text/plain"))
 
-    mckey = "/geojson/cli/%s?callback=%s&fmt=%s&v=2" % (
+    mckey = "/geojson/cli/%s?callback=%s&fmt=%s" % (
         ts.strftime("%Y%m%d"),
         cb,
         fmt,

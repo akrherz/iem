@@ -16,10 +16,8 @@ def do_updates(cursor, station, row):
     cursor.execute(
         """
         UPDATE sm_hourly SET
-        slrmj_tot = coalesce(%(slrkj_tot_sum)s, 0) / 1000.,
-        slrmj_tot_qc = coalesce(%(slrkj_tot_sum)s, 0) / 1000.,
-        slrkw_avg = coalesce(%(slrkj_tot_sum)s, 0) / 3600.,
-        slrkw_avg_qc = coalesce(%(slrkj_tot_sum)s, 0) / 3600.,
+        slrkj_tot = coalesce(slrkj_tot, %(slrkj_tot_sum)s, 0),
+        slrkj_tot_qc = coalesce(slrkj_tot_qc, %(slrkj_tot_sum)s, 0),
         tair_c_avg = %(tair_c_avg)s,
         tair_c_avg_qc = %(tair_c_avg)s,
         rh = %(rh_avg)s,

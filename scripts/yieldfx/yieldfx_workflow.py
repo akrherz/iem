@@ -90,7 +90,7 @@ def upload_summary_plots():
 
 
 def write_and_upload(df, location):
-    """ We are done, whew!"""
+    """We are done, whew!"""
     props = get_properties()
     dbx = dropbox.Dropbox(props.get("dropbox.token"))
     (tmpfd, tmpfn) = tempfile.mkstemp(text=True)
@@ -413,7 +413,7 @@ def replace_obs(df, location):
 
     cursor.execute(
         """
-        select valid, tair_c_max_qc, tair_c_min_qc, slrmj_tot_qc,
+        select valid, tair_c_max_qc, tair_c_min_qc, slrkj_tot_qc / 1000.,
         vwc_12_avg_qc,
         vwc_24_avg_qc, vwc_50_avg_qc, tsoil_c_avg_qc, t12_c_avg_qc,
         t24_c_avg_qc, t50_c_avg_qc,
