@@ -204,6 +204,8 @@ def common_df_logic(filename, maxts, nwsli, tablename):
             }
         )
     df["valid"] = df["valid"].apply(make_time)
+    # drop duplicate valids?
+    df = df.groupby("valid").first().reset_index()
     if tablename == "sm_daily":
         # Rework the valid column into the appropriate date
         df["valid"] = df["valid"].dt.date - datetime.timedelta(days=1)
