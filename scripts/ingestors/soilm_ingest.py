@@ -138,6 +138,10 @@ def common_df_logic(filename, maxts, nwsli, tablename):
         [
             "rain_mm_tot",
             "rain_mm_2_tot",
+            "pa06",
+            "pa12",
+            "pa24",
+            "pa50",
         ],
         axis=1,
         errors="ignore",
