@@ -31,7 +31,7 @@ $PQI -p "plot c 000000000000 agclimate/${fp}.png bogus png" ${fp}.png
 rm -f ${fp}.png
 
 fp="mon-prec-out"
-wget -q http://${WEBHOST}/GIS/apps/agclimate/month.php\?dvar=rain_mm_tot\&direct=yes -O ${fp}.png
+wget -q http://${WEBHOST}/GIS/apps/agclimate/month.php\?dvar=rain_in_tot\&direct=yes -O ${fp}.png
 $PQI -p "plot c 000000000000 agclimate/${fp}.png bogus png" ${fp}.png
 rm -f ${fp}.png
 

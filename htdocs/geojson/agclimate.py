@@ -7,7 +7,7 @@ import psycopg2.extras
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.tracker import loadqc
-from pyiem.util import drct2text, get_dbconn, utc, convert_value, mm2inch
+from pyiem.util import drct2text, get_dbconn, utc, convert_value
 
 
 def safe_t(val, units="degC"):
@@ -21,7 +21,7 @@ def safe_p(val):
     """precipitation"""
     if val is None or val < 0:
         return "M"
-    return "%.2f" % (val / 25.4,)
+    return "%.2f" % (val,)
 
 
 def safe(val, precision):
@@ -53,7 +53,7 @@ def get_data(pgconn, ts):
             h.station,
             max(coalesce(h.tair_c_avg_qc, m.tair_c_avg_qc)) as max_tmpc,
             min(coalesce(h.tair_c_avg_qc, m.tair_c_avg_qc)) as min_tmpc,
-            sum(rain_mm_tot) as pday from
+            sum(rain_in_tot) as pday from
             sm_minute m LEFT JOIN sm_hourly h on (m.station = h.station and
             m.valid = h.valid) WHERE m.valid > %s and m.valid <= %s
             GROUP by h.station
@@ -61,7 +61,7 @@ def get_data(pgconn, ts):
         twentyfour_hour as (
             select
             station,
-            sum(rain_mm_tot) as p24m from
+            sum(rain_in_tot) as p24m from
             sm_hourly WHERE valid > %s and valid <= %s
             GROUP by station
         ),
@@ -69,7 +69,7 @@ def get_data(pgconn, ts):
             SELECT h.station,
             h.encrh_avg,
             coalesce(m.rh_avg_qc, h.rh_qc) as rh,
-            h.rain_mm_tot,
+            h.rain_in_tot,
             etalfalfa,
             battv_min,
             coalesce(m.slrkj_tot_qc * 60 / 1000, h.slrkj_tot_qc / 1000.)
@@ -123,7 +123,7 @@ def get_data(pgconn, ts):
                     ),
                     "rh": "%s%%" % (safe(row["rh"], 0),),
                     "hrprecip": (
-                        safe_p(row["rain_mm_tot"])
+                        safe_p(row["rain_in_tot"])
                         if not q.get("precip", False)
                         else "M"
                     ),
@@ -138,8 +138,8 @@ def get_data(pgconn, ts):
                     ),
                     "high": safe_t(row["max_tmpc"], "degC"),
                     "low": safe_t(row["min_tmpc"], "degC"),
-                    "pday": safe(mm2inch(row["pday"]), 2),
-                    "p24i": safe(mm2inch(row["p24m"]), 2),
+                    "pday": safe(row["pday"], 2),
+                    "p24i": safe(row["p24m"], 2),
                     "soil04t": (
                         safe_t(row["tsoil_c_avg_qc"])
                         if not q.get("soil4", False)

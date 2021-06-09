@@ -14,7 +14,6 @@ import sys
 import pytz
 import requests
 import pandas as pd
-from metpy.units import units
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, logger, utc
@@ -27,9 +26,9 @@ def print_debugging(station):
     pgconn = get_dbconn("isuag")
     cursor = pgconn.cursor()
     cursor.execute(
-        "SELECT valid, rain_mm_tot / 25.4, rain_mm_tot_qc / 25.4, "
-        "rain_mm_tot_f from sm_daily WHERE station = %s and "
-        "(rain_mm_tot > 0 or rain_mm_tot_qc > 0) ORDER by valid DESC LIMIT 10",
+        "SELECT valid, rain_in_tot, rain_in_tot_qc, "
+        "rain_in_tot_f from sm_daily WHERE station = %s and "
+        "(rain_in_tot > 0 or rain_in_tot_qc > 0) ORDER by valid DESC LIMIT 10",
         (station,),
     )
     LOG.info("     Date           Obs     QC  Flag")
@@ -96,27 +95,25 @@ def update_precip(date, station, hdf):
     ]
 
     newpday = ldf["precip_in"].sum()
-    newpday_mm = (units("inch") * newpday).to(units("mm")).m
     set_iemacces(station, date, newpday)
     # update isusm
     pgconn = get_dbconn("isuag")
     cursor = pgconn.cursor()
     # daily
     cursor.execute(
-        "UPDATE sm_daily SET rain_mm_tot_qc = %s, rain_mm_tot_f = 'E' "
+        "UPDATE sm_daily SET rain_in_tot_qc = %s, rain_in_tot_f = 'E' "
         "WHERE valid = %s and station = %s",
-        (newpday_mm, date, station),
+        (newpday, date, station),
     )
     for _, row in ldf.iterrows():
         # hourly
         LOG.debug(
             "set hourly %s %s %s", station, row["valid"], row["precip_in"]
         )
-        total = (units("mm") * row["precip_in"]).to(units("inch")).m
         cursor.execute(
-            "UPDATE sm_hourly SET rain_mm_tot_qc = %s, rain_mm_tot_f = 'E' "
+            "UPDATE sm_hourly SET rain_in_tot_qc = %s, rain_in_tot_f = 'E' "
             "WHERE valid = %s and station = %s",
-            (total, row["valid"], station),
+            (row["precip_in"], row["valid"], station),
         )
         # For minute data, we just apply a linear offset
         cursor.execute(
@@ -163,7 +160,7 @@ def update_precip(date, station, hdf):
 
 
 def main(argv):
-    """ Go main go """
+    """Go main go"""
     date = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
     LOG.debug("Processing date: %s", date)
     pgconn = get_dbconn("isuag")
@@ -171,7 +168,7 @@ def main(argv):
 
     # Get our obs
     df = read_sql(
-        "SELECT station, rain_mm_tot from sm_daily where "
+        "SELECT station, rain_in_tot from sm_daily where "
         "valid = %s ORDER by station ASC",
         pgconn,
         params=(date,),
@@ -180,8 +177,7 @@ def main(argv):
     if df.empty:
         LOG.info("no observations found for %s, aborting", date)
         return
-    # Covert to inches
-    df["obs"] = (units("mm") * df["rain_mm_tot"].values).to(units("inch")).m
+    df["obs"] = df["rain_in_tot"]
     hdf = get_hdf(nt, date)
     if hdf.empty:
         LOG.info("hdf is empty, abort fix_precip for %s", date)

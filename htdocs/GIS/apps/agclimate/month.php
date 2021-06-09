@@ -4,10 +4,10 @@ require_once "../../../../include/iemmap.php";
 require_once "../../../../include/database.inc.php";
 require_once "../../../../include/network.php";
 $dbconn = iemdb("isuag");
-$dvar = isset($_GET["dvar"]) ? $_GET["dvar"] : "rain_mm_tot";
+$dvar = isset($_GET["dvar"]) ? $_GET["dvar"] : "rain_in_tot";
 
 $title = Array(
-    "rain_mm_tot" => "Rainfall (inches)", 
+    "rain_in_tot" => "Rainfall (inches)", 
 	"dailyet" => "Potential Evapotrans. (in)");
 if (!array_key_exists($dvar, $title)) die();
 

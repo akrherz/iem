@@ -12,7 +12,7 @@ from matplotlib.lines import Line2D
 from pyiem import meteorology
 from pyiem.plot.use_agg import plt
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn, c2f, mm2inch
+from pyiem.util import get_autoplot_context, get_dbconn, c2f
 from pyiem.exceptions import NoDataFound
 
 
@@ -199,7 +199,7 @@ def make_daily_rad_plot(ctx):
 def make_daily_rainfall_soil_rh(ctx):
     """Give them what they want."""
     df = read_sql(
-        "SELECT valid, rain_mm_tot_qc, tsoil_c_avg_qc, rh_avg_qc "
+        "SELECT valid, rain_in_tot_qc, tsoil_c_avg_qc, rh_avg_qc "
         "from sm_daily where station = %s and valid >= %s and valid <= %s "
         "ORDER by valid ASC",
         ctx["pgconn"],
@@ -230,7 +230,7 @@ def make_daily_rainfall_soil_rh(ctx):
     ax = fig.add_axes([0.1, 0.7, 0.8, 0.2])
     ax.bar(
         df.index.values,
-        mm2inch(df["rain_mm_tot_qc"].values),
+        df["rain_in_tot_qc"].values,
         color="blue",
         align="center",
     )
@@ -409,7 +409,7 @@ def make_daily_water_change_plot(ctx):
     # Get daily precip
     pdf = read_sql(
         """
-    SELECT valid, rain_mm_tot_qc from sm_daily where station = %s
+    SELECT valid, rain_in_tot_qc from sm_daily where station = %s
     and valid >= %s and valid <= %s ORDER by valid ASC
     """,
         ctx["pgconn"],
@@ -485,7 +485,7 @@ def make_daily_water_change_plot(ctx):
     if (ctx["ets"] - ctx["sts"]).total_seconds() < (60 * 86400):
         ylim = ax[1].get_ylim()[1]
         # Attempt to place precip text above this plot
-        pdf["pday"] = mm2inch(pdf["rain_mm_tot_qc"].values)
+        pdf["pday"] = pdf["rain_in_tot_qc"].values
         for valid, row in pdf.iterrows():
             if row["pday"] > 0:
                 ax[1].text(
@@ -592,7 +592,7 @@ def plot1(ctx):
     d50t = df["t50_c_avg_qc"]
     d24sm = df["calc_vwc_24_avg_qc"]
     d50sm = df["calc_vwc_50_avg_qc"]
-    rain = df["rain_mm_tot_qc"]
+    rain = df["rain_in_tot_qc"]
     tair = df["tair_c_avg_qc"]
     tsoil = df["tsoil_c_avg_qc"]
     valid = df.index
@@ -607,7 +607,7 @@ def plot1(ctx):
     ax2.set_yticklabels([0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0])
     ax2.set_ylim(-0.6, 0)
     ax2.set_ylabel("Hourly Precipitation [inch]")
-    ax2.bar(valid, 0 - rain / 25.4, width=0.04, fc="b", ec="b", zorder=4)
+    ax2.bar(valid, 0 - rain, width=0.04, fc="b", ec="b", zorder=4)
 
     if not d12sm.isnull().all():
         ax[0].plot(valid, d12sm * 100.0, linewidth=2, color="r", zorder=5)

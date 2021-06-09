@@ -3,7 +3,7 @@
  happier
 """
 
-from pyiem.util import get_dbconn, logger, convert_value, c2f, mm2inch
+from pyiem.util import get_dbconn, logger, convert_value, c2f
 
 LOG = logger()
 ISUAG = get_dbconn("isuag", user="mesonet")
@@ -85,7 +85,7 @@ def one():
     iemcursor = IEM.cursor()
     icursor.execute(
         """
-        SELECT station, valid, ws_mps_s_wvt, winddir_d1_wvt, rain_mm_tot,
+        SELECT station, valid, ws_mps_s_wvt, winddir_d1_wvt, rain_in_tot,
         tair_c_max, tair_c_min
         from sm_daily
     """
@@ -94,7 +94,7 @@ def one():
     for row in icursor:
         avg_sknt = convert_value(row[2], "meter / second", "knot")
         avg_drct = row[3]
-        pday = mm2inch(row[4])
+        pday = row[4]
         high = c2f(row[5])
         low = c2f(row[6])
         iemcursor.execute(

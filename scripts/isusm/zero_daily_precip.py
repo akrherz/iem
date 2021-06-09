@@ -17,7 +17,7 @@ def zero_hourly(station, sts, ets):
         cursor.execute(
             f"""
             UPDATE {table}
-            SET rain_mm_tot_qc = 0, rain_mm_tot_f = 'Z', rain_mm_tot = 0
+            SET rain_in_tot_qc = 0, rain_in_tot_f = 'Z', rain_in_tot = 0
             WHERE station = %s and valid > %s and valid <= %s
         """,
             (station, sts, ets),
@@ -34,7 +34,7 @@ def zero_daily(station, date):
     cursor.execute(
         """
         UPDATE sm_daily
-        SET rain_mm_tot_qc = 0, rain_mm_tot_f = 'Z', rain_mm_tot = 0
+        SET rain_in_tot_qc = 0, rain_in_tot_f = 'Z', rain_in_tot = 0
         WHERE station = %s and valid = %s
     """,
         (station, date),

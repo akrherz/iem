@@ -4,7 +4,7 @@ import datetime
 from pandas.io.sql import read_sql
 from metpy.units import units
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconn, mm2inch
 from pyiem.network import Table as NetworkTable  # This is needed.
 from pyiem.tracker import loadqc
 from pyiem.exceptions import NoDataFound
@@ -212,7 +212,10 @@ def plot5(ctx, col):
     )
     if df.empty:
         raise NoDataFound("No Data Found for This Plot.")
-    df["data"] = (df[col + "_qc"].values * units("mm")).to(units("inch")).m
+    if col == "dailyet":
+        df["data"] = mm2inch(df["dailyet_qc"].values)
+    else:
+        df["data"] = df[col + "_qc"].values
 
     data = []
     for station, row in df.iterrows():
@@ -349,7 +352,7 @@ def plotter(fdict):
             "based on available daily summary data, liquid equiv of snow "
             "estimated"
         )
-        data, df = plot5(ctx, "rain_mm_tot")
+        data, df = plot5(ctx, "rain_in_tot")
     elif ctx["opt"] == "7":
         title = "ISU Soil Moisture Peak Wind Gust [MPH]"
         subtitle = "based on available daily summary data"

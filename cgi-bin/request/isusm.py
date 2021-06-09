@@ -101,7 +101,7 @@ def fetch_daily(form, cols):
       GROUP by station, date
     ), daily as (
       SELECT station, valid, tair_c_max_qc, tair_c_min_qc, slrkj_tot_qc,
-      rain_mm_tot_qc, dailyet_qc, tsoil_c_avg_qc, t12_c_avg_qc, t24_c_avg_qc,
+      rain_in_tot_qc, dailyet_qc, tsoil_c_avg_qc, t12_c_avg_qc, t24_c_avg_qc,
       t50_c_avg_qc, calc_vwc_12_avg_qc, calc_vwc_24_avg_qc, calc_vwc_50_avg_qc,
       ws_mps_s_wvt_qc, ws_mps_max_qc, lwmv_1_qc, lwmv_2_qc,
       lwmdry_1_tot_qc, lwmcon_1_tot_qc, lwmwet_1_tot_qc, lwmdry_2_tot_qc,
@@ -112,7 +112,7 @@ def fetch_daily(form, cols):
     s.rh_min, s.rh_max,
     s.soil12tn, s.soil12tx, s.soil24tn, s.soil24tx,
     s.soil50tn, s.soil50tx, tair_c_max_qc, tair_c_min_qc, slrkj_tot_qc,
-    rain_mm_tot_qc, dailyet_qc, tsoil_c_avg_qc, t12_c_avg_qc, t24_c_avg_qc,
+    rain_in_tot_qc, dailyet_qc, tsoil_c_avg_qc, t12_c_avg_qc, t24_c_avg_qc,
     t50_c_avg_qc, calc_vwc_12_avg_qc, calc_vwc_24_avg_qc, calc_vwc_50_avg_qc,
     ws_mps_s_wvt_qc, ws_mps_max_qc, round(gddxx(50, 86, c2f( tair_c_max_qc ),
     c2f( tair_c_min_qc ))::numeric,1) as gdd50, lwmv_1_qc, lwmv_2_qc,
@@ -147,9 +147,7 @@ def fetch_daily(form, cols):
             if row["tair_c_min_qc"] is not None
             else miss
         )
-        precip = (
-            mm2inch(row["rain_mm_tot_qc"]) if row["rain_mm_tot_qc"] > 0 else 0
-        )
+        precip = row["rain_in_tot_qc"] if row["rain_in_tot_qc"] > 0 else 0
         et = (
             mm2inch(row["dailyet_qc"])
             if row["dailyet_qc"] is not None and row["dailyet_qc"] > 0
@@ -318,7 +316,7 @@ def fetch_hourly(form, cols):
     cursor.execute(
         f"""SELECT station, valid, tair_c_avg_qc, rh_qc,
     slrkj_tot_qc,
-    rain_mm_tot_qc, ws_mps_s_wvt_qc, winddir_d1_wvt_qc,
+    rain_in_tot_qc, ws_mps_s_wvt_qc, winddir_d1_wvt_qc,
     tsoil_c_avg_qc,
     t12_c_avg_qc, t24_c_avg_qc, t50_c_avg_qc, calc_vwc_12_avg_qc,
     calc_vwc_24_avg_qc, calc_vwc_50_avg_qc, lwmv_1_qc, lwmv_2_qc,
@@ -354,8 +352,8 @@ def fetch_hourly(form, cols):
             else miss
         )
         precip = (
-            mm2inch(row["rain_mm_tot_qc"])
-            if row["rain_mm_tot_qc"] is not None
+            row["rain_in_tot_qc"]
+            if row["rain_in_tot_qc"] is not None
             else miss
         )
         speed = (

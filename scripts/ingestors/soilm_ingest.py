@@ -130,6 +130,18 @@ def common_df_logic(filename, maxts, nwsli, tablename):
     df.columns = map(str.lower, df.columns)
     # rename columns to rectify differences
     df.rename(columns=VARCONV, inplace=True)
+    # rain_mm_tot to rain_in_tot
+    for col in ["rain_mm_tot", "rain_mm_2_tot"]:
+        if col in df.columns:
+            df[col.replace("_mm_", "_in_")] = mm2inch(df[col])
+    df = df.drop(
+        [
+            "rain_mm_tot",
+            "rain_mm_2_tot",
+        ],
+        axis=1,
+        errors="ignore",
+    )
     if tablename == "sm_minute":
         # Storage of how far this covers
         df["duration"] = 15
@@ -137,11 +149,6 @@ def common_df_logic(filename, maxts, nwsli, tablename):
         # slrkw_avg SIC is actually W/m2 over 15 minutes, we want to store as
         # a total over "one minute" W/m2 -> kJ/s/m2
         df["slrkj_tot"] = df["slrkw_avg"] * 60.0 / 1000.0
-        # rain_mm_tot to rain_in_tot
-        df["rain_in_tot"] = df["rain_mm_tot"] / 25.4
-        if "rain_mm_2_tot" in df.columns:
-            df["rain_in_2_tot"] = df["rain_mm_2_tot"] / 25.4
-            df = df.drop("rain_mm_2_tot", axis=1)
         # Wind
         df["ws_mph_s_wvt"] = df["ws_mps_s_wvt"] * 2.23694
         # drop our no longer needed columns
@@ -149,7 +156,6 @@ def common_df_logic(filename, maxts, nwsli, tablename):
             [
                 "slrkw_avg",
                 "slrmj_tot",
-                "rain_mm_tot",
                 "ws_mps_s_wvt",
                 "winddir_sd1_wvt",
                 "ws_mph_tmx",
@@ -216,6 +222,7 @@ def common_df_logic(filename, maxts, nwsli, tablename):
             [
                 "slrmj_tot",
                 "solarradcalc",
+                "nancounttot",
             ],
             axis=1,
             errors="ignore",
@@ -229,6 +236,10 @@ def common_df_logic(filename, maxts, nwsli, tablename):
                 "slrkw_avg",
                 "solarradcalc",
                 "slrmj_tot",
+                "p06outofrange",
+                "p12outofrange",
+                "p24outofrange",
+                "p50outofrange",
             ],
             axis=1,
             errors="ignore",
@@ -345,7 +356,7 @@ def hourly_process(nwsli, maxts):
             ob.data["dwpf"] = (
                 dewpoint_from_relative_humidity(tmpc, relh).to(units("degF")).m
             )
-        ob.data["phour"] = round(mm2inch(row["rain_mm_tot_qc"]), 2)
+        ob.data["phour"] = round(row["rain_in_tot_qc"], 2)
         ob.data["sknt"] = convert_value(
             row["ws_mps_s_wvt_qc"], "meter / second", "knot"
         )
@@ -394,7 +405,7 @@ def daily_process(nwsli, maxts):
         ob = Observation(nwsli, "ISUSM", valid)
         ob.data["max_tmpf"] = c2f(row["tair_c_max_qc"])
         ob.data["min_tmpf"] = c2f(row["tair_c_min_qc"])
-        ob.data["pday"] = round(mm2inch(row["rain_mm_tot_qc"]), 2)
+        ob.data["pday"] = round(row["rain_in_tot_qc"], 2)
         if valid not in EVENTS["days"]:
             EVENTS["days"].append(valid)
         ob.data["et_inch"] = mm2inch(row["dailyet_qc"])

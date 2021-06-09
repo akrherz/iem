@@ -9,7 +9,7 @@ import pytz
 from metpy.units import units
 from metpy.calc import dewpoint_from_relative_humidity
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn, logger, convert_value, c2f
+from pyiem.util import get_dbconn, logger, convert_value, c2f, mm2inch
 import numpy as np
 import pandas as pd
 
@@ -44,10 +44,10 @@ VARCONV = {
     "calcvwc12_avg": "calc_vwc_12_avg",
     "calcvwc24_avg": "calc_vwc_24_avg",
     "calcvwc50_avg": "calc_vwc_50_avg",
-    "outofrange06": "P06OutOfRange",
-    "outofrange12": "P12OutOfRange",
-    "outofrange24": "P24OutOfRange",
-    "outofrange50": "P50OutOfRange",
+    "outofrange06": "p06outofrange",
+    "outofrange12": "p12outofrange",
+    "outofrange24": "p24outofrange",
+    "outofrange50": "p50outofrange",
     "ws_ms_s_wvt": "ws_mps_s_wvt",
     "ec6in": "ec06",
     "ec12in": "ec12",
@@ -208,27 +208,40 @@ def process(path, fn):
     else:
         df = df.rename(columns={"timestamp": "valid"})
     df["valid"] = df["valid"].apply(make_time)
+    for col in ["rain_mm_tot", "rain_mm_2_tot"]:
+        if col in df.columns:
+            df[col.replace("_mm_", "_in_")] = mm2inch(df[col])
+    df = df.drop(
+        [
+            "rain_mm_tot",
+            "rain_mm_2_tot",
+        ],
+        axis=1,
+        errors="ignore",
+    )
     if tabletype == "DailySI":
         # This is kludgy, during CDT, timestamp is 1 AM, CST, midnight
         df["valid"] = df["valid"].dt.date - datetime.timedelta(days=1)
-        df["rain_mm_tot"] = convert_value(
-            df["rain_in_tot"], "inch", "millimeter"
-        )
         df["slrkj_tot"] = df["slrw_avg"] * 86400.0 / 1000.0
         # Remove un-needed data
         df = df.drop(
-            ["slrw_avg", "rain_in_tot", "solarradcalc"],
+            ["slrw_avg", "solarradcalc", "nancounttot"],
             axis=1,
             errors="ignore",
         )
     elif tabletype == "HrlySI":
         df["slrkj_tot"] = df["slrw_avg"] * 3600.0 / 1000.0
-        df["rain_mm_tot"] = convert_value(
-            df["rain_in_tot"], "inch", "millimeter"
-        )
         df["ws_mps_s_wvt"] = df["ws_mph_s_wvt"] * 0.44704
         df = df.drop(
-            ["ws_mph_s_wvt", "rain_in_tot", "slrw_avg", "solarradcalc"],
+            [
+                "ws_mph_s_wvt",
+                "slrw_avg",
+                "solarradcalc",
+                "p06outofrange",
+                "p12outofrange",
+                "p24outofrange",
+                "p50outofrange",
+            ],
             axis=1,
             errors="ignore",
         )
@@ -242,15 +255,6 @@ def process(path, fn):
     for colname in df.columns:
         if colname == "valid":
             continue
-        if tabletype != "MinSI" and colname == "rain_in_tot":
-            # Database currently only has mm column :/
-            df["rain_mm_tot"] = convert_value(
-                df["rain_in_tot"], "inch", "millimeter"
-            )
-            df["rain_mm_tot_qc"] = convert_value(
-                df["rain_in_tot"], "inch", "millimeter"
-            )
-            df["rain_mm_tot_f"] = None
         df["%s_qc" % (colname,)] = df[colname]
         if colname.startswith("calc_vwc"):
             df["%s_f" % (colname,)] = qcval(

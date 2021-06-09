@@ -417,7 +417,7 @@ def replace_obs(df, location):
         vwc_12_avg_qc,
         vwc_24_avg_qc, vwc_50_avg_qc, tsoil_c_avg_qc, t12_c_avg_qc,
         t24_c_avg_qc, t50_c_avg_qc,
-        rain_mm_tot_qc from sm_daily WHERE station = %s and valid >= %s
+        rain_in_tot_qc * 25.4 from sm_daily WHERE station = %s and valid >= %s
         and tair_c_max_qc is not null and tair_c_min_qc is not null
         ORDER by valid
         """,

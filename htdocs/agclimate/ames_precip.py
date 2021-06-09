@@ -27,10 +27,10 @@ def application(_environ, start_response):
     SELECT to_char(valid, 'YYYY-MM-DD HH24:MI') as valid,
     case when extract(hour from valid) > 16 then
         date(valid + '8 hours'::interval) else date(valid) end as coop_date,
-    rain_mm_tot / 25.4 as bucket1_hourly,
-    coalesce(rain_in_2_tot, rain_mm_2_tot / 25.4) as bucket2_hourly
+    rain_in_tot as bucket1_hourly,
+    coalesce(rain_in_2_tot, rain_in_2_tot) as bucket2_hourly
     from sm_hourly where station = 'BOOI4'
-    and valid > '2017-07-25' and (rain_mm_tot > 0 or rain_mm_2_tot > 0)
+    and valid > '2017-07-25' and (rain_in_tot > 0 or rain_in_2_tot > 0)
     ORDER by valid ASC
     """,
         pgconn,
