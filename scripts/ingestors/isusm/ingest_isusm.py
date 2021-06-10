@@ -215,6 +215,7 @@ def process(path, fn):
         [
             "rain_mm_tot",
             "rain_mm_2_tot",
+            "winddir_sd1_wvt",
         ],
         axis=1,
         errors="ignore",
