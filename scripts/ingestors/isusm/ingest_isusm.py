@@ -79,7 +79,7 @@ VARCONV = {
     "temp_30in": "t30_c_avg",
     "temp_40in": "t40_c_avg",
     "ec24in": "ec24",
-    "rh_avg": "rh",
+    "rh": "rh_avg",
     "temp_avg6in": "t06_c_avg",
     "temp_avg12in": "t12_c_avg",
     "temp_avg24in": "t24_c_avg",

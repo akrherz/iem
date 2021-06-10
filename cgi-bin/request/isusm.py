@@ -90,8 +90,10 @@ def fetch_daily(form, cols):
     sql = """
     --- Get the Daily Max/Min soil values
     WITH soils as (
-      SELECT station, date(valid) as date, min(rh) as rh_min, avg(rh) as rh,
-      max(rh) as rh_max,
+      SELECT station, date(valid) as date,
+      min(rh_avg_qc) as rh_min,
+      avg(rh_avg_qc) as rh,
+      max(rh_avg_qc) as rh_max,
       min(tsoil_c_avg_qc) as soil04tn, max(tsoil_c_avg_qc) as soil04tx,
       min(t12_c_avg_qc) as soil12tn, max(t12_c_avg_qc) as soil12tx,
       min(t24_c_avg_qc) as soil24tn, max(t24_c_avg_qc) as soil24tx,
@@ -314,7 +316,7 @@ def fetch_hourly(form, cols):
         if "bp_mb" in cols:
             cols.remove("bp_mb")
     cursor.execute(
-        f"""SELECT station, valid, tair_c_avg_qc, rh_qc,
+        f"""SELECT station, valid, tair_c_avg_qc, rh_avg_qc,
     slrkj_tot_qc,
     rain_in_tot_qc, ws_mps_s_wvt_qc, winddir_d1_wvt_qc,
     tsoil_c_avg_qc,
@@ -345,7 +347,7 @@ def fetch_hourly(form, cols):
             if row["tair_c_avg_qc"] is not None
             else miss
         )
-        relh = row["rh_qc"] if row["rh_qc"] is not None else -99
+        relh = row["rh_avg_qc"] if row["rh_avg_qc"] is not None else -99
         solar = (
             (row["slrkj_tot_qc"] * 1000.0)
             if row["slrkj_tot_qc"] is not None

@@ -68,7 +68,7 @@ def get_data(pgconn, ts):
         agg as (
             SELECT h.station,
             h.encrh_avg,
-            coalesce(m.rh_avg_qc, h.rh_qc) as rh,
+            coalesce(m.rh_avg_qc, h.rh_avg_qc) as rh,
             h.rain_in_tot,
             etalfalfa,
             battv_min,

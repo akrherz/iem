@@ -54,6 +54,7 @@ VARCONV = {
     "temp_avg24in": "t24_c_avg",
     "bp_mmhg_avg": "bpres_avg",
     "bp_mb_avg": "bpres_avg",
+    "rh": "rh_avg",
 }
 
 TSOIL_COLS = [
@@ -142,6 +143,8 @@ def common_df_logic(filename, maxts, nwsli, tablename):
             "pa12",
             "pa24",
             "pa50",
+            "rhnans_tot",
+            "tairnans_tot",
         ],
         axis=1,
         errors="ignore",
@@ -210,7 +213,6 @@ def common_df_logic(filename, maxts, nwsli, tablename):
                 "temp_avg16in": "t16_c_avg",
                 "temp_avg20in": "t20_c_avg",
                 "bpres_avg": "bp_mb",
-                "rh": "rh_avg",
             }
         )
     df["valid"] = df["valid"].apply(make_time)
@@ -353,7 +355,7 @@ def hourly_process(nwsli, maxts):
         ob = Observation(nwsli, "ISUSM", row["valid"].to_pydatetime())
         tmpc = units("degC") * row["tair_c_avg_qc"]
         tmpf = tmpc.to(units("degF")).m
-        relh = units("percent") * row["rh_qc"]
+        relh = units("percent") * row["rh_avg_qc"]
         if -40 < tmpf < 140 and 0 < relh < 101:
             ob.data["tmpf"] = tmpf
             ob.data["relh"] = relh.m
