@@ -42,8 +42,8 @@ def load_soilt(data):
     if datetime.datetime.now().hour < 7:
         valid -= datetime.timedelta(days=1)
     icursor.execute(
-        """SELECT station, t04_c_avg from sm_daily WHERE
-         valid = %s and t04_c_avg is not null""",
+        """SELECT station, t4_c_avg from sm_daily WHERE
+         valid = %s and t4_c_avg is not null""",
         (valid,),
     )
     for row in icursor:

@@ -65,7 +65,7 @@ def use_table(table, sio):
                 convert_value(12, "inch", "meter"),
                 convert_value(24, "inch", "meter"),
                 convert_value(40, "inch", "meter"),
-                p2(row["t04_c_avg_qc"], 3, -90, 90),
+                p2(row["t4_c_avg_qc"], 3, -90, 90),
                 p2(row["t12_c_avg_qc"], 3, -90, 90),
                 p2(row["t24_c_avg_qc"], 3, -90, 90),
                 p2(row["t50_c_avg_qc"], 3, -90, 90),

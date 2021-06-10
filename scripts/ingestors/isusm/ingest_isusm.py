@@ -17,8 +17,8 @@ LOG = logger()
 DIRPATH = "/var/opt/CampbellSci/LoggerNet"
 STOREPATH = "/mesonet/data/isusm"
 TSOIL_COLS = [
-    "t04_c_avg",
-    "t06_c_avg",
+    "t4_c_avg",
+    "t6_c_avg",
     "t12_c_avg",
     "t24_c_avg",
     "t50_c_avg",
@@ -30,7 +30,7 @@ TABLES = {
     "DailySI": "sm_daily",
 }
 VARCONV = {
-    "tsoil_c_avg": "t04_c_avg",
+    "tsoil_c_avg": "t4_c_avg",
     "timestamp": "valid",
     "vwc06_avg": "vwc_06_avg",
     "vwc_avg6in": "vwc_06_avg",
@@ -81,7 +81,7 @@ VARCONV = {
     "temp_40in": "sv_t40",
     "ec24in": "ec24",
     "rh": "rh_avg",
-    "temp_avg6in": "t06_c_avg",
+    "temp_avg6in": "t6_c_avg",
     "temp_avg12in": "t12_c_avg",
     "temp_avg24in": "t24_c_avg",
     "temp_avg30in": "t30_c_avg",
@@ -173,8 +173,8 @@ def minute_iemaccess(df):
                 row["ws_mph_max_qc"], "mile / hour", "knot"
             )
         ob.data["drct"] = row["winddir_d1_wvt_qc"]
-        if "t04_c_avg" in df.columns:
-            ob.data["c1tmpf"] = c2f(row["t04_c_avg_qc"])
+        if "t4_c_avg" in df.columns:
+            ob.data["c1tmpf"] = c2f(row["t4_c_avg_qc"])
         ob.data["c2tmpf"] = c2f(row["t12_c_avg_qc"])
         ob.data["c3tmpf"] = c2f(row["t24_c_avg_qc"])
         if "t50_c_avg" in df.columns:
@@ -210,7 +210,7 @@ def process(path, fn):
         df = df.rename(
             columns={
                 "timestamp": "valid",
-                "tsoil_c_avg": "t04_c_avg",
+                "tsoil_c_avg": "t4_c_avg",
             }
         )
     df["valid"] = df["valid"].apply(make_time)

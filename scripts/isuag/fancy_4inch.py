@@ -106,22 +106,22 @@ def main(argv):
     df = read_sql(
         """
         WITH ranges as (
-            select station, count(*), min(t04_c_avg_qc),
-            max(t04_c_avg_qc) from sm_hourly WHERE
-            valid >= %s and valid < %s and t04_c_avg_qc > -40
-            and t04_c_avg_qc < 50 GROUP by station
+            select station, count(*), min(t4_c_avg_qc),
+            max(t4_c_avg_qc) from sm_hourly WHERE
+            valid >= %s and valid < %s and t4_c_avg_qc > -40
+            and t4_c_avg_qc < 50 GROUP by station
         )
-        SELECT d.station, d.t04_c_avg_qc,
+        SELECT d.station, d.t4_c_avg_qc,
         r.max as hourly_max_c, r.min as hourly_min_c, r.count
          from sm_daily d JOIN ranges r on (d.station = r.station)
-        where valid = %s and t04_c_avg_qc > -40 and r.count > 19
+        where valid = %s and t4_c_avg_qc > -40 and r.count > 19
     """,
         idbconn,
         params=(ts, ts + datetime.timedelta(days=1), ts),
         index_col="station",
     )
     for col, newcol in zip(
-        ["t04_c_avg_qc", "hourly_min_c", "hourly_max_c"],
+        ["t4_c_avg_qc", "hourly_min_c", "hourly_max_c"],
         ["ob", "min", "max"],
     ):
         df[newcol] = c2f(df[col].values)

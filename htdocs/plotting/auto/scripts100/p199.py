@@ -58,9 +58,9 @@ def plot1(ctx):
     )
     df = read_sql(
         """
-        SELECT station, max(t04_c_avg_qc) as max_tsoil_c,
-        min(t04_c_avg_qc) as min_tsoil_c from sm_hourly WHERE
-        valid BETWEEN %s and %s and t04_c_avg_qc is not null
+        SELECT station, max(t4_c_avg_qc) as max_tsoil_c,
+        min(t4_c_avg_qc) as min_tsoil_c from sm_hourly WHERE
+        valid BETWEEN %s and %s and t4_c_avg_qc is not null
         GROUP by station
     """,
         ctx["pgconn"],
@@ -140,8 +140,8 @@ def plot3(ctx):
     """Daily air high/low temp."""
     df = read_sql(
         """
-        SELECT station, t04_c_avg_qc from sm_daily WHERE
-        valid = %s and t04_c_avg_qc is not null
+        SELECT station, t4_c_avg_qc from sm_daily WHERE
+        valid = %s and t4_c_avg_qc is not null
     """,
         ctx["pgconn"],
         params=(ctx["date"],),
@@ -150,7 +150,7 @@ def plot3(ctx):
     if df.empty:
         raise NoDataFound("No Data Found for This Plot.")
     df["soil4_avg_f"] = (
-        (df["t04_c_avg_qc"].values * units("degC")).to(units("degF")).m
+        (df["t4_c_avg_qc"].values * units("degC")).to(units("degF")).m
     )
 
     data = []

@@ -28,7 +28,7 @@ ACCESS = get_dbconn("iem")
 
 EVENTS = {"reprocess_solar": False, "days": [], "reprocess_temps": False}
 VARCONV = {
-    "tsoil_c_avg": "t04_c_avg",
+    "tsoil_c_avg": "t4_c_avg",
     "timestamp": "valid",
     "vwc06_avg": "vwc_06_avg",
     "vwc_avg6in": "vwc_06_avg",
@@ -44,7 +44,7 @@ VARCONV = {
     "outofrange24": "p24outofrange",
     "outofrange50": "p50outofrange",
     "ws_ms_s_wvt": "ws_mps_s_wvt",
-    "temp_avg6in": "t06_c_avg",
+    "temp_avg6in": "t6_c_avg",
     "bp_mmhg_avg": "bpres_avg",
     "bp_mb_avg": "bpres_avg",
     "rh": "rh_avg",
@@ -91,8 +91,8 @@ VARCONV = {
 }
 
 TSOIL_COLS = [
-    "t04_c_avg",
-    "t06_c_avg",
+    "t4_c_avg",
+    "t6_c_avg",
     "t12_c_avg",
     "t24_c_avg",
     "t50_c_avg",
@@ -342,8 +342,8 @@ def m15_process(nwsli, maxts):
         )
         # ob.data["max_gust_ts"] = row["ws_mph_tmx"]
         ob.data["drct"] = row["winddir_d1_wvt_qc"]
-        if "t04_c_avg" in df.columns:
-            ob.data["c1tmpf"] = c2f(row["t04_c_avg_qc"])
+        if "t4_c_avg" in df.columns:
+            ob.data["c1tmpf"] = c2f(row["t4_c_avg_qc"])
         if "t12_c_avg" in df.columns:
             ob.data["c2tmpf"] = c2f(row["t12_c_avg_qc"])
         if "t24_c_avg" in df.columns:
@@ -394,8 +394,8 @@ def hourly_process(nwsli, maxts):
             )
             ob.data["max_gust_ts"] = row["ws_mph_tmx"]
         ob.data["drct"] = row["winddir_d1_wvt_qc"]
-        if "t04_c_avg" in df.columns:
-            ob.data["c1tmpf"] = c2f(row["t04_c_avg_qc"])
+        if "t4_c_avg" in df.columns:
+            ob.data["c1tmpf"] = c2f(row["t4_c_avg_qc"])
         if "t12_c_avg_qc" in df.columns:
             ob.data["c2tmpf"] = c2f(row["t12_c_avg_qc"])
         if "t24_c_avg_qc" in df.columns:

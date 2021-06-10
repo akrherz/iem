@@ -199,7 +199,7 @@ def make_daily_rad_plot(ctx):
 def make_daily_rainfall_soil_rh(ctx):
     """Give them what they want."""
     df = read_sql(
-        "SELECT valid, rain_in_tot_qc, t04_c_avg_qc, rh_avg_qc "
+        "SELECT valid, rain_in_tot_qc, t4_c_avg_qc, rh_avg_qc "
         "from sm_daily where station = %s and valid >= %s and valid <= %s "
         "ORDER by valid ASC",
         ctx["pgconn"],
@@ -239,7 +239,7 @@ def make_daily_rainfall_soil_rh(ctx):
     common(ax)
 
     ax = fig.add_axes([0.1, 0.4, 0.8, 0.2])
-    vals = c2f(df["t04_c_avg_qc"].values)
+    vals = c2f(df["t4_c_avg_qc"].values)
     ax.bar(
         df.index.values,
         vals,
@@ -268,10 +268,10 @@ def make_daily_plot(ctx):
     """Generate a daily plot of max/min 4 inch soil temps"""
     df = read_sql(
         """
-        SELECT date(valid), min(t04_c_avg_qc),
-        max(t04_c_avg_qc), avg(t04_c_avg_qc) from sm_hourly
+        SELECT date(valid), min(t4_c_avg_qc),
+        max(t4_c_avg_qc), avg(t4_c_avg_qc) from sm_hourly
         where station = %s and valid >= %s and valid < %s
-        and t04_c_avg is not null GROUP by date ORDER by date ASC
+        and t4_c_avg is not null GROUP by date ORDER by date ASC
     """,
         ctx["pgconn"],
         params=(
@@ -517,11 +517,11 @@ def plot2(ctx):
         params=(ctx["station"], ctx["sts"], ctx["ets"]),
         index_col="valid",
     )
-    d06t = df["t06_c_avg_qc"]
+    d06t = df["t6_c_avg_qc"]
     d12t = df["t12_c_avg_qc"]
     d24t = df["t24_c_avg_qc"]
     d50t = df["t50_c_avg_qc"]
-    d04t = df["t04_c_avg_qc"]
+    d04t = df["t4_c_avg_qc"]
     valid = df.index.values
 
     (fig, ax) = plt.subplots(1, 1)
@@ -593,7 +593,7 @@ def plot1(ctx):
     d50sm = df["calc_vwc_50_avg_qc"]
     rain = df["rain_in_tot_qc"]
     tair = df["tair_c_avg_qc"]
-    d04t = df["t04_c_avg_qc"]
+    d04t = df["t4_c_avg_qc"]
     valid = df.index
 
     (fig, ax) = plt.subplots(3, 1, sharex=True, figsize=(8, 8))

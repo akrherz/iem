@@ -118,13 +118,13 @@ def plotter(fdict):
     df2 = read_sql(
         """
     with obs as (
-        select valid, t04_c_avg,
-        lag(t04_c_avg) OVER (ORDER by valid ASC) from sm_hourly
+        select valid, t4_c_avg,
+        lag(t4_c_avg) OVER (ORDER by valid ASC) from sm_hourly
         where station = %s),
     agg1 as (
         select valid,
-        case when t04_c_avg > %s and lag < %s then 1
-             when t04_c_avg < %s and lag > %s then -1
+        case when t4_c_avg > %s and lag < %s then 1
+             when t4_c_avg < %s and lag > %s then -1
              else 0 end as t from obs),
     agg2 as (
         SELECT valid, t from agg1 where t != 0),
