@@ -18,7 +18,7 @@ LOG = logger()
 
 
 def get_idx(lons, lats, lon, lat):
-    """ Return the grid points closest to this point """
+    """Return the grid points closest to this point"""
     dist = ((lons - lon) ** 2 + (lats - lat) ** 2) ** 0.5
     return np.unravel_index(dist.argmin(), dist.shape)
 
@@ -106,22 +106,22 @@ def main(argv):
     df = read_sql(
         """
         WITH ranges as (
-            select station, count(*), min(tsoil_c_avg_qc),
-            max(tsoil_c_avg_qc) from sm_hourly WHERE
-            valid >= %s and valid < %s and tsoil_c_avg_qc > -40
-            and tsoil_c_avg_qc < 50 GROUP by station
+            select station, count(*), min(t04_c_avg_qc),
+            max(t04_c_avg_qc) from sm_hourly WHERE
+            valid >= %s and valid < %s and t04_c_avg_qc > -40
+            and t04_c_avg_qc < 50 GROUP by station
         )
-        SELECT d.station, d.tsoil_c_avg_qc,
+        SELECT d.station, d.t04_c_avg_qc,
         r.max as hourly_max_c, r.min as hourly_min_c, r.count
          from sm_daily d JOIN ranges r on (d.station = r.station)
-        where valid = %s and tsoil_c_avg_qc > -40 and r.count > 19
+        where valid = %s and t04_c_avg_qc > -40 and r.count > 19
     """,
         idbconn,
         params=(ts, ts + datetime.timedelta(days=1), ts),
         index_col="station",
     )
     for col, newcol in zip(
-        ["tsoil_c_avg_qc", "hourly_min_c", "hourly_max_c"],
+        ["t04_c_avg_qc", "hourly_min_c", "hourly_max_c"],
         ["ob", "min", "max"],
     ):
         df[newcol] = c2f(df[col].values)

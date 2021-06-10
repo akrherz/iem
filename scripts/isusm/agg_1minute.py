@@ -20,10 +20,10 @@ def do_updates(cursor, station, row):
         slrkj_tot_qc = coalesce(slrkj_tot_qc, %(slrkj_tot_sum)s, 0),
         tair_c_avg = %(tair_c_avg)s,
         tair_c_avg_qc = %(tair_c_avg)s,
-        rh = %(rh_avg)s,
-        rh_qc = %(rh_avg)s,
-        tsoil_c_avg = %(tsoil_c_avg)s,
-        tsoil_c_avg_qc = %(tsoil_c_avg)s,
+        rh_avg = %(rh_avg)s,
+        rh_avg_qc = %(rh_avg)s,
+        t04_c_avg = %(t04_c_avg)s,
+        t04_c_avg_qc = %(t04_c_avg)s,
         calc_vwc_12_avg = %(calc_vwc_12_avg)s,
         calc_vwc_12_avg_qc = %(calc_vwc_12_avg)s,
         calc_vwc_24_avg = %(calc_vwc_24_avg)s,
@@ -90,7 +90,7 @@ def daily_process(cursor, station, date, df):
     row["tair_c_max"] = maxdf["tair_c_max"]
     row["tair_c_min"] = mindf["tair_c_min"]
     for colname in [
-        "tsoil_c_avg",
+        "t04_c_avg",
         "t12_c_avg",
         "t24_c_avg",
         "t50_c_avg",
@@ -118,8 +118,8 @@ def daily_process(cursor, station, date, df):
         UPDATE sm_daily SET
         tair_c_max_qc = coalesce(tair_c_max_qc, %(tair_c_max)s),
         tair_c_min_qc = coalesce(tair_c_min_qc, %(tair_c_min)s),
-        tsoil_c_avg = %(tsoil_c_avg)s,
-        tsoil_c_avg_qc = %(tsoil_c_avg)s,
+        t04_c_avg = %(t04_c_avg)s,
+        t04_c_avg_qc = %(t04_c_avg)s,
         t12_c_avg = %(t12_c_avg)s,
         t12_c_avg_qc = %(t12_c_avg)s,
         rh_avg = %(rh_avg)s,
@@ -176,7 +176,7 @@ def workflow():
     max(tair_c_avg_qc) as tair_c_max,
     max(case when rn = 1 then rh_avg_qc else null end) as rh_avg,
     max(case when rn = 1 then tair_c_avg_qc else null end) as tair_c_avg,
-    max(case when rn = 1 then tsoil_c_avg_qc else null end) as tsoil_c_avg,
+    max(case when rn = 1 then t04_c_avg_qc else null end) as t04_c_avg,
     max(case when rn = 1 then t12_c_avg_qc else null end) as t12_c_avg,
     max(case when rn = 1 then t24_c_avg_qc else null end) as t24_c_avg,
     max(case when rn = 1 then t50_c_avg_qc else null end) as t50_c_avg,

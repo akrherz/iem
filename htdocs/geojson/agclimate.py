@@ -78,7 +78,7 @@ def get_data(pgconn, ts):
                 m.slrkj_tot_qc * 1000. / 60., h.slrkj_tot_qc * 1000. / 60.)
                 as srad_wm2,
             coalesce(m.tair_c_avg_qc, h.tair_c_avg_qc) as tair_c_avg,
-            coalesce(m.tsoil_c_avg_qc, h.tsoil_c_avg_qc) as tsoil_c_avg_qc,
+            coalesce(m.t04_c_avg_qc, h.t04_c_avg_qc) as t04_c_avg_qc,
             coalesce(m.t12_c_avg_qc, h.t12_c_avg_qc) as t12_c_avg_qc,
             coalesce(m.t24_c_avg_qc, h.t24_c_avg_qc) as t24_c_avg_qc,
             coalesce(m.t50_c_avg_qc, h.t50_c_avg_qc) as t50_c_avg_qc,
@@ -141,7 +141,7 @@ def get_data(pgconn, ts):
                     "pday": safe(row["pday"], 2),
                     "p24i": safe(row["p24m"], 2),
                     "soil04t": (
-                        safe_t(row["tsoil_c_avg_qc"])
+                        safe_t(row["t04_c_avg_qc"])
                         if not q.get("soil4", False)
                         else "M"
                     ),

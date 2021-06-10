@@ -17,7 +17,7 @@ LOG = logger()
 DIRPATH = "/var/opt/CampbellSci/LoggerNet"
 STOREPATH = "/mesonet/data/isusm"
 TSOIL_COLS = [
-    "tsoil_c_avg",
+    "t04_c_avg",
     "t06_c_avg",
     "t12_c_avg",
     "t24_c_avg",
@@ -30,6 +30,7 @@ TABLES = {
     "DailySI": "sm_daily",
 }
 VARCONV = {
+    "tsoil_c_avg": "t04_c_avg",
     "timestamp": "valid",
     "vwc06_avg": "vwc_06_avg",
     "vwc_avg6in": "vwc_06_avg",
@@ -51,33 +52,33 @@ VARCONV = {
     "ws_ms_s_wvt": "ws_mps_s_wvt",
     "ec6in": "ec06",
     "ec12in": "ec12",
-    "ec_2in": "ec2",
-    "ec_4in": "ec4",
-    "ec_8in": "ec8",
-    "ec_12in": "ec12",
-    "ec_16in": "ec16",
-    "ec_20in": "ec20",
-    "ec_24in": "ec24",
-    "ec_30in": "ec30",
-    "ec_40in": "ec40",
-    "vwc_2in": "vwc2",
-    "vwc_4in": "vwc4",
-    "vwc_8in": "vwc8",
-    "vwc_12in": "vwc12",
-    "vwc_16in": "vwc16",
-    "vwc_20in": "vwc20",
-    "vwc_24in": "vwc24",
-    "vwc_30in": "vwc30",
-    "vwc_40in": "vwc40",
-    "temp_2in": "t02_c_avg",
-    "temp_4in": "t04_c_avg",
-    "temp_8in": "t08_c_avg",
-    "temp_12in": "t12_c_avg",
-    "temp_16in": "t16_c_avg",
-    "temp_20in": "t20_c_avg",
-    "temp_24in": "t24_c_avg",
-    "temp_30in": "t30_c_avg",
-    "temp_40in": "t40_c_avg",
+    "ec_2in": "sv_ec2",
+    "ec_4in": "sv_ec4",
+    "ec_8in": "sv_ec8",
+    "ec_12in": "sv_ec12",
+    "ec_16in": "sv_ec16",
+    "ec_20in": "sv_ec20",
+    "ec_24in": "sv_ec24",
+    "ec_30in": "sv_ec30",
+    "ec_40in": "sv_ec40",
+    "vwc_2in": "sv_vwc2",
+    "vwc_4in": "sv_vwc4",
+    "vwc_8in": "sv_vwc8",
+    "vwc_12in": "sv_vwc12",
+    "vwc_16in": "sv_vwc16",
+    "vwc_20in": "sv_vwc20",
+    "vwc_24in": "sv_vwc24",
+    "vwc_30in": "sv_vwc30",
+    "vwc_40in": "sv_vwc40",
+    "temp_2in": "sv_t2",
+    "temp_4in": "sv_t4",
+    "temp_8in": "sv_t8",
+    "temp_12in": "sv_t12",
+    "temp_16in": "sv_t16",
+    "temp_20in": "sv_t20",
+    "temp_24in": "sv_t24",
+    "temp_30in": "sv_t30",
+    "temp_40in": "sv_t40",
     "ec24in": "ec24",
     "rh": "rh_avg",
     "temp_avg6in": "t06_c_avg",
@@ -172,8 +173,8 @@ def minute_iemaccess(df):
                 row["ws_mph_max_qc"], "mile / hour", "knot"
             )
         ob.data["drct"] = row["winddir_d1_wvt_qc"]
-        if "tsoil_c_avg" in df.columns:
-            ob.data["c1tmpf"] = c2f(row["tsoil_c_avg_qc"])
+        if "t04_c_avg" in df.columns:
+            ob.data["c1tmpf"] = c2f(row["t04_c_avg_qc"])
         ob.data["c2tmpf"] = c2f(row["t12_c_avg_qc"])
         ob.data["c3tmpf"] = c2f(row["t24_c_avg_qc"])
         if "t50_c_avg" in df.columns:
@@ -203,10 +204,15 @@ def process(path, fn):
     # convert all columns to lowercase
     df.columns = map(str.lower, df.columns)
     # rename columns to rectify differences
-    if tabletype != "MinSI":
+    if tabletype != "MinSI":  # TODO, yikes
         df = df.rename(columns=VARCONV)
     else:
-        df = df.rename(columns={"timestamp": "valid"})
+        df = df.rename(
+            columns={
+                "timestamp": "valid",
+                "tsoil_c_avg": "t04_c_avg",
+            }
+        )
     df["valid"] = df["valid"].apply(make_time)
     for col in ["rain_mm_tot", "rain_mm_2_tot"]:
         if col in df.columns:

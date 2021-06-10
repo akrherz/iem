@@ -28,13 +28,12 @@ ACCESS = get_dbconn("iem")
 
 EVENTS = {"reprocess_solar": False, "days": [], "reprocess_temps": False}
 VARCONV = {
+    "tsoil_c_avg": "t04_c_avg",
     "timestamp": "valid",
     "vwc06_avg": "vwc_06_avg",
     "vwc_avg6in": "vwc_06_avg",
     "vwc12_avg": "vwc_12_avg",
-    "vwc_avg12in": "vwc_12_avg",
     "vwc24_avg": "vwc_24_avg",
-    "vwc_avg24in": "vwc_24_avg",
     "vwc50_avg": "vwc_50_avg",
     "calcvwc06_avg": "calc_vwc_06_avg",
     "calcvwc12_avg": "calc_vwc_12_avg",
@@ -45,20 +44,54 @@ VARCONV = {
     "outofrange24": "p24outofrange",
     "outofrange50": "p50outofrange",
     "ws_ms_s_wvt": "ws_mps_s_wvt",
-    "ec6in": "ec06",
-    "ec12in": "ec12",
-    "ec_24in": "ec24",
-    "ec24in": "ec24",
     "temp_avg6in": "t06_c_avg",
-    "temp_avg12in": "t12_c_avg",
-    "temp_avg24in": "t24_c_avg",
     "bp_mmhg_avg": "bpres_avg",
     "bp_mb_avg": "bpres_avg",
     "rh": "rh_avg",
+    "ec6in": "ec6",
+    "ec12in": "ec12",
+    "ec24in": "ec24",
+    "ec50in": "ec50",
+    "ec_2in": "sv_ec2",
+    "ec_4in": "sv_ec4",
+    "ec_8in": "sv_ec8",
+    "ec_12in": "sv_ec12",
+    "ec_16in": "sv_ec16",
+    "ec_20in": "sv_ec20",
+    "ec_24in": "sv_ec24",
+    "ec_30in": "sv_ec30",
+    "ec_40in": "sv_ec40",
+    "vwc_2in": "sv_vwc2",
+    "vwc_4in": "sv_vwc4",
+    "vwc_8in": "sv_vwc8",
+    "vwc_12in": "sv_vwc12",
+    "vwc_16in": "sv_vwc16",
+    "vwc_20in": "sv_vwc20",
+    "vwc_24in": "sv_vwc24",
+    "vwc_30in": "sv_vwc30",
+    "vwc_40in": "sv_vwc40",
+    "vwc_avg2in": "sv_vwc2",
+    "vwc_avg4in": "sv_vwc4",
+    "vwc_avg8in": "sv_vwc8",
+    "vwc_avg12in": "sv_vwc12",
+    "vwc_avg16in": "sv_vwc16",
+    "vwc_avg20in": "sv_vwc20",
+    "vwc_avg24in": "sv_vwc24",
+    "vwc_avg30in": "sv_vwc30",
+    "vwc_avg40in": "sv_vwc40",
+    "temp_avg2in": "sv_t2",
+    "temp_avg4in": "sv_t4",
+    "temp_avg8in": "sv_t8",
+    "temp_avg12in": "sv_t12",
+    "temp_avg16in": "sv_t16",
+    "temp_avg20in": "sv_t20",
+    "temp_avg24in": "sv_t24",
+    "temp_avg30in": "sv_t30",
+    "temp_avg40in": "sv_t40",
 }
 
 TSOIL_COLS = [
-    "tsoil_c_avg",
+    "t04_c_avg",
     "t06_c_avg",
     "t12_c_avg",
     "t24_c_avg",
@@ -146,6 +179,7 @@ def common_df_logic(filename, maxts, nwsli, tablename):
             "rhnans_tot",
             "tairnans_tot",
             "winddir_sd1_wvt",
+            "ec6",
         ],
         axis=1,
         errors="ignore",
@@ -166,10 +200,6 @@ def common_df_logic(filename, maxts, nwsli, tablename):
                 "slrmj_tot",
                 "ws_mps_s_wvt",
                 "ws_mph_tmx",
-                "ec06",
-                "ec12",
-                "ec24",
-                "ec50",
                 "pa06",
                 "pa12",
                 "pa24",
@@ -179,12 +209,10 @@ def common_df_logic(filename, maxts, nwsli, tablename):
                 "p24outofrange",
                 "p50outofrange",
                 "battv_min",
-                "ec_2in",
-                "ec_4in",
-                "ec_8in",
-                "ec_12in",
-                "ec_16in",
-                "ec_20in",
+                "ec6",
+                "ec12",
+                "ec24",
+                "ec50",
             ],
             axis=1,
             errors="ignore",
@@ -206,12 +234,6 @@ def common_df_logic(filename, maxts, nwsli, tablename):
                 "calc_vwc_12_avg": "calcvwc12_avg",
                 "calc_vwc_24_avg": "calcvwc24_avg",
                 "calc_vwc_50_avg": "calcvwc50_avg",
-                "temp_avg2in": "t02_c_avg",
-                "temp_avg4in": "t04_c_avg",
-                "temp_avg8in": "t08_c_avg",
-                "temp_avg12in": "t12_c_avg",
-                "temp_avg16in": "t16_c_avg",
-                "temp_avg20in": "t20_c_avg",
                 "bpres_avg": "bp_mb",
             }
         )
@@ -320,8 +342,8 @@ def m15_process(nwsli, maxts):
         )
         # ob.data["max_gust_ts"] = row["ws_mph_tmx"]
         ob.data["drct"] = row["winddir_d1_wvt_qc"]
-        if "tsoil_c_avg" in df.columns:
-            ob.data["c1tmpf"] = c2f(row["tsoil_c_avg_qc"])
+        if "t04_c_avg" in df.columns:
+            ob.data["c1tmpf"] = c2f(row["t04_c_avg_qc"])
         if "t12_c_avg" in df.columns:
             ob.data["c2tmpf"] = c2f(row["t12_c_avg_qc"])
         if "t24_c_avg" in df.columns:
@@ -372,8 +394,8 @@ def hourly_process(nwsli, maxts):
             )
             ob.data["max_gust_ts"] = row["ws_mph_tmx"]
         ob.data["drct"] = row["winddir_d1_wvt_qc"]
-        if "tsoil_c_avg" in df.columns:
-            ob.data["c1tmpf"] = c2f(row["tsoil_c_avg_qc"])
+        if "t04_c_avg" in df.columns:
+            ob.data["c1tmpf"] = c2f(row["t04_c_avg_qc"])
         if "t12_c_avg_qc" in df.columns:
             ob.data["c2tmpf"] = c2f(row["t12_c_avg_qc"])
         if "t24_c_avg_qc" in df.columns:

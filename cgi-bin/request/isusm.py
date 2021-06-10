@@ -94,7 +94,7 @@ def fetch_daily(form, cols):
       min(rh_avg_qc) as rh_min,
       avg(rh_avg_qc) as rh,
       max(rh_avg_qc) as rh_max,
-      min(tsoil_c_avg_qc) as soil04tn, max(tsoil_c_avg_qc) as soil04tx,
+      min(t04_c_avg_qc) as soil04tn, max(t04_c_avg_qc) as soil04tx,
       min(t12_c_avg_qc) as soil12tn, max(t12_c_avg_qc) as soil12tx,
       min(t24_c_avg_qc) as soil24tn, max(t24_c_avg_qc) as soil24tx,
       min(t50_c_avg_qc) as soil50tn, max(t50_c_avg_qc) as soil50tx
@@ -103,7 +103,7 @@ def fetch_daily(form, cols):
       GROUP by station, date
     ), daily as (
       SELECT station, valid, tair_c_max_qc, tair_c_min_qc, slrkj_tot_qc,
-      rain_in_tot_qc, dailyet_qc, tsoil_c_avg_qc, t12_c_avg_qc, t24_c_avg_qc,
+      rain_in_tot_qc, dailyet_qc, t04_c_avg_qc, t12_c_avg_qc, t24_c_avg_qc,
       t50_c_avg_qc, calc_vwc_12_avg_qc, calc_vwc_24_avg_qc, calc_vwc_50_avg_qc,
       ws_mps_s_wvt_qc, ws_mps_max_qc, lwmv_1_qc, lwmv_2_qc,
       lwmdry_1_tot_qc, lwmcon_1_tot_qc, lwmwet_1_tot_qc, lwmdry_2_tot_qc,
@@ -114,7 +114,7 @@ def fetch_daily(form, cols):
     s.rh_min, s.rh_max,
     s.soil12tn, s.soil12tx, s.soil24tn, s.soil24tx,
     s.soil50tn, s.soil50tx, tair_c_max_qc, tair_c_min_qc, slrkj_tot_qc,
-    rain_in_tot_qc, dailyet_qc, tsoil_c_avg_qc, t12_c_avg_qc, t24_c_avg_qc,
+    rain_in_tot_qc, dailyet_qc, t04_c_avg_qc, t12_c_avg_qc, t24_c_avg_qc,
     t50_c_avg_qc, calc_vwc_12_avg_qc, calc_vwc_24_avg_qc, calc_vwc_50_avg_qc,
     ws_mps_s_wvt_qc, ws_mps_max_qc, round(gddxx(50, 86, c2f( tair_c_max_qc ),
     c2f( tair_c_min_qc ))::numeric,1) as gdd50, lwmv_1_qc, lwmv_2_qc,
@@ -157,8 +157,8 @@ def fetch_daily(form, cols):
         )
 
         soil04t = (
-            c2f(row["tsoil_c_avg_qc"])
-            if row["tsoil_c_avg_qc"] is not None
+            c2f(row["t04_c_avg_qc"])
+            if row["t04_c_avg_qc"] is not None
             else miss
         )
         soil04tn = (
@@ -319,7 +319,7 @@ def fetch_hourly(form, cols):
         f"""SELECT station, valid, tair_c_avg_qc, rh_avg_qc,
     slrkj_tot_qc,
     rain_in_tot_qc, ws_mps_s_wvt_qc, winddir_d1_wvt_qc,
-    tsoil_c_avg_qc,
+    t04_c_avg_qc,
     t12_c_avg_qc, t24_c_avg_qc, t50_c_avg_qc, calc_vwc_12_avg_qc,
     calc_vwc_24_avg_qc, calc_vwc_50_avg_qc, lwmv_1_qc, lwmv_2_qc,
     lwmdry_1_tot_qc, lwmcon_1_tot_qc, lwmwet_1_tot_qc, lwmdry_2_tot_qc,
@@ -374,8 +374,8 @@ def fetch_hourly(form, cols):
             else miss
         )
         soil04t = (
-            c2f(row["tsoil_c_avg_qc"])
-            if row["tsoil_c_avg_qc"] is not None
+            c2f(row["t04_c_avg_qc"])
+            if row["t04_c_avg_qc"] is not None
             else miss
         )
         soil12t = (

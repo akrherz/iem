@@ -28,7 +28,7 @@ XREF = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc[
         "description"
@@ -62,7 +62,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("isuag")
     ctx = get_autoplot_context(fdict, get_description())
     threshold = 50
@@ -118,13 +118,13 @@ def plotter(fdict):
     df2 = read_sql(
         """
     with obs as (
-        select valid, tsoil_c_avg,
-        lag(tsoil_c_avg) OVER (ORDER by valid ASC) from sm_hourly
+        select valid, t04_c_avg,
+        lag(t04_c_avg) OVER (ORDER by valid ASC) from sm_hourly
         where station = %s),
     agg1 as (
         select valid,
-        case when tsoil_c_avg > %s and lag < %s then 1
-             when tsoil_c_avg < %s and lag > %s then -1
+        case when t04_c_avg > %s and lag < %s then 1
+             when t04_c_avg < %s and lag > %s then -1
              else 0 end as t from obs),
     agg2 as (
         SELECT valid, t from agg1 where t != 0),

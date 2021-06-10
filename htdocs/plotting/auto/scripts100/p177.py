@@ -199,7 +199,7 @@ def make_daily_rad_plot(ctx):
 def make_daily_rainfall_soil_rh(ctx):
     """Give them what they want."""
     df = read_sql(
-        "SELECT valid, rain_in_tot_qc, tsoil_c_avg_qc, rh_avg_qc "
+        "SELECT valid, rain_in_tot_qc, t04_c_avg_qc, rh_avg_qc "
         "from sm_daily where station = %s and valid >= %s and valid <= %s "
         "ORDER by valid ASC",
         ctx["pgconn"],
@@ -239,7 +239,7 @@ def make_daily_rainfall_soil_rh(ctx):
     common(ax)
 
     ax = fig.add_axes([0.1, 0.4, 0.8, 0.2])
-    vals = c2f(df["tsoil_c_avg_qc"].values)
+    vals = c2f(df["t04_c_avg_qc"].values)
     ax.bar(
         df.index.values,
         vals,
@@ -268,10 +268,10 @@ def make_daily_plot(ctx):
     """Generate a daily plot of max/min 4 inch soil temps"""
     df = read_sql(
         """
-        SELECT date(valid), min(tsoil_c_avg_qc),
-        max(tsoil_c_avg_qc), avg(tsoil_c_avg_qc) from sm_hourly
+        SELECT date(valid), min(t04_c_avg_qc),
+        max(t04_c_avg_qc), avg(t04_c_avg_qc) from sm_hourly
         where station = %s and valid >= %s and valid < %s
-        and tsoil_c_avg is not null GROUP by date ORDER by date ASC
+        and t04_c_avg is not null GROUP by date ORDER by date ASC
     """,
         ctx["pgconn"],
         params=(
@@ -521,7 +521,7 @@ def plot2(ctx):
     d12t = df["t12_c_avg_qc"]
     d24t = df["t24_c_avg_qc"]
     d50t = df["t50_c_avg_qc"]
-    tsoil = df["tsoil_c_avg_qc"]
+    d04t = df["t04_c_avg_qc"]
     valid = df.index.values
 
     (fig, ax) = plt.subplots(1, 1)
@@ -530,8 +530,8 @@ def plot2(ctx):
         ("ISUSM Station: %s Timeseries\n" "Soil Temperature at Depth\n ")
         % (ctx["_nt"].sts[ctx["station"]]["name"],)
     )
-    if not tsoil.isnull().all():
-        ax.plot(valid, c2f(tsoil), linewidth=2, color="brown", label="4 inch")
+    if not d04t.isnull().all():
+        ax.plot(valid, c2f(d04t), linewidth=2, color="brown", label="4 inch")
     if not d06t.isnull().all():
         ax.plot(valid, c2f(d06t), linewidth=2, color="k", label="6 inch")
     if not d12t.isnull().all():
@@ -593,7 +593,7 @@ def plot1(ctx):
     d50sm = df["calc_vwc_50_avg_qc"]
     rain = df["rain_in_tot_qc"]
     tair = df["tair_c_avg_qc"]
-    tsoil = df["tsoil_c_avg_qc"]
+    d04t = df["t04_c_avg_qc"]
     valid = df.index
 
     (fig, ax) = plt.subplots(3, 1, sharex=True, figsize=(8, 8))
@@ -663,7 +663,7 @@ def plot1(ctx):
     ax2.set_ylabel("Solar Radiation [W/m^2]", color="g")
 
     (l1,) = ax[2].plot(valid, c2f(tair), linewidth=2, color="blue", zorder=2)
-    (l2,) = ax[2].plot(valid, c2f(tsoil), linewidth=2, color="brown", zorder=2)
+    (l2,) = ax[2].plot(valid, c2f(d04t), linewidth=2, color="brown", zorder=2)
     ax[2].grid(True)
     ax[2].legend(
         [l1, l2, l3],

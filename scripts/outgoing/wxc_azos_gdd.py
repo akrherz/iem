@@ -28,7 +28,7 @@ icursor = ISUAG.cursor()
 
 
 def sampler(xaxis, yaxis, vals, x, y):
-    """ This is lame sampler, should replace """
+    """This is lame sampler, should replace"""
     i = np.digitize([x], xaxis)
     j = np.digitize([y], yaxis)
     return vals[i[0], j[0]]
@@ -42,8 +42,8 @@ def load_soilt(data):
     if datetime.datetime.now().hour < 7:
         valid -= datetime.timedelta(days=1)
     icursor.execute(
-        """SELECT station, tsoil_c_avg from sm_daily WHERE
-         valid = %s and tsoil_c_avg is not null""",
+        """SELECT station, t04_c_avg from sm_daily WHERE
+         valid = %s and t04_c_avg is not null""",
         (valid,),
     )
     for row in icursor:
@@ -103,8 +103,7 @@ def compute_climate(sts, ets):
 
 
 def compute_obs(sts, ets):
-    """ Compute the GS values given a start/end time and networks to look at
-    """
+    """Compute the GS values given a start/end time and networks to look at"""
     sql = """
 SELECT
   id, ST_x(s.geom) as lon, ST_y(s.geom) as lat,
