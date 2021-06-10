@@ -511,22 +511,18 @@ def make_daily_water_change_plot(ctx):
 def plot2(ctx):
     """Just soil temps"""
     df = read_sql(
-        """
-        SELECT * from sm_hourly WHERE
-        station = %s and valid BETWEEN %s and %s ORDER by valid ASC
-    """,
+        "SELECT * from sm_hourly WHERE station = %s and "
+        "valid BETWEEN %s and %s ORDER by valid ASC",
         ctx["pgconn"],
         params=(ctx["station"], ctx["sts"], ctx["ets"]),
         index_col="valid",
     )
+    d06t = df["t06_c_avg_qc"]
     d12t = df["t12_c_avg_qc"]
     d24t = df["t24_c_avg_qc"]
     d50t = df["t50_c_avg_qc"]
     tsoil = df["tsoil_c_avg_qc"]
     valid = df.index.values
-
-    # maxy = max([np.max(d12sm), np.max(d24sm), np.max(d50sm)])
-    # miny = min([np.min(d12sm), np.min(d24sm), np.min(d50sm)])
 
     (fig, ax) = plt.subplots(1, 1)
     ax.grid(True)
@@ -534,12 +530,15 @@ def plot2(ctx):
         ("ISUSM Station: %s Timeseries\n" "Soil Temperature at Depth\n ")
         % (ctx["_nt"].sts[ctx["station"]]["name"],)
     )
-    ax.plot(valid, c2f(tsoil), linewidth=2, color="brown", label="4 inch")
-    if not d12t.isnull().any():
+    if not tsoil.isnull().all():
+        ax.plot(valid, c2f(tsoil), linewidth=2, color="brown", label="4 inch")
+    if not d06t.isnull().all():
+        ax.plot(valid, c2f(d06t), linewidth=2, color="k", label="6 inch")
+    if not d12t.isnull().all():
         ax.plot(valid, c2f(d12t), linewidth=2, color="r", label="12 inch")
-    if not d24t.isnull().any():
+    if not d24t.isnull().all():
         ax.plot(valid, c2f(d24t), linewidth=2, color="purple", label="24 inch")
-    if not d50t.isnull().any():
+    if not d50t.isnull().all():
         ax.plot(valid, c2f(d50t), linewidth=2, color="black", label="50 inch")
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width, box.height * 0.9])
@@ -759,7 +758,12 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter(
+        {
+            "station": "TPOI4",
+            "opt": "2",
+        }
+    )
     # fig, df = plotter(dict())
     # with pd.ExcelWriter("/tmp/ba.xlsx") as xl:
     #    df.to_excel(xl)
