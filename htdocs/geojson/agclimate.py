@@ -53,7 +53,7 @@ def get_data(pgconn, ts):
             h.station,
             max(coalesce(h.tair_c_avg_qc, m.tair_c_avg_qc)) as max_tmpc,
             min(coalesce(h.tair_c_avg_qc, m.tair_c_avg_qc)) as min_tmpc,
-            sum(rain_in_tot) as pday from
+            sum(h.rain_in_tot_qc) as pday from
             sm_minute m LEFT JOIN sm_hourly h on (m.station = h.station and
             m.valid = h.valid) WHERE m.valid > %s and m.valid <= %s
             GROUP by h.station
