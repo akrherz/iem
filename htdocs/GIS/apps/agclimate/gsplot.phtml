@@ -69,8 +69,9 @@ $jobj = json_decode($jdata, $assoc=TRUE);
 
 $tr = "# ".$year." ". $varDef[$var] ." ({$smonth}/{$sday} - {$emonth}/{$eday})\n";
 $tr .= "#-----------------------snip------------------\n";
-$tr .= sprintf("%-5s,%-40s,%-10s,%-10s,%-10s,climate_%s\n", 'ID', 'StationName',
-               'Latitude', 'Longitude', $var, $var);
+$tr .= sprintf(
+    "%-5s,%-40s,%-15s,%-10s,%-10s,%-10s,climate_%s\n",
+    'ID', 'StationName', 'City', 'Latitude', 'Longitude', $var, $var);
 
 $climovar = "climo_". $datavar;
 foreach($jobj["features"] as $bogus => $value) {
@@ -83,8 +84,11 @@ foreach($jobj["features"] as $bogus => $value) {
         $climo = round($props["climo_". $datavar], $round[$datavar]);
     }
     
-    $tr .= sprintf("%s,%-40.40s,%10.4f,%10.4f,%10s,%10s\n", $props["station"],
+    $tr .= sprintf(
+        "%s,%-40.40s,%-15.15s,%10.4f,%10.4f,%10s,%10s\n",
+        $props["station"],
         $props['name'],
+        $props["city"],
         $props['lat'], $props['lon'], 
         round($props[$datavar], $round[$datavar]),
         $climo
@@ -184,13 +188,29 @@ parameters.
   </div></div>
   
 <p>
-<center><img src="/images/gisready.png"><h3 class="subtitle"> Data Listing</h3></center>
-<pre>{$tr}</pre>
+<button type="button" role="button" id="save" class="btn btn-primary">Download CSV Text</button>
+<br />
+<pre id="datatable">{$tr}</pre>
 
 <p>You should be able to 'copy & paste' this raw data listing into a simple
 text editor and save the data file on your machine.  Most GIS systems can 
 then import this dataset as a layer.  You may have to omit the commented lines
 (#) if your GIS has trouble importing the data.
 EOF;
+$t->jsextra = <<<EOM
+<script>
+$(document).ready(function(){
+    $("#save").click(function(){
+        var content = $("#datatable").text().split(/\\n/).slice(2).join("\\n");
+
+        var link = document.createElement('a');
+        link.setAttribute('download', 'isusm.csv');    
+        link.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
+        link.click(); 
+    });
+});
+
+</script>
+EOM;
 $t->render('single.phtml');
 ?>
