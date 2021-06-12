@@ -11,7 +11,7 @@ from pyiem.exceptions import NoDataFound
 
 SERVICE = (
     "https://droughtmonitor.unl.edu"
-    "/Ajax2018.aspx/ReturnTabularDMAreaPercent_"
+    "/DmData/DataTables.aspx/ReturnTabularDMAreaPercent_"
 )
 COLORS = ["#ffff00", "#fcd37f", "#ffaa00", "#e60000", "#730000"]
 PDICT = {"state": "Plot Individual State", "national": "Plot CONUS"}
@@ -69,20 +69,22 @@ def plotter(fdict):
         if state_fips[key] == state:
             fips = key
     if ctx["s"] == "state":
-        payload = "{'area':'%s', 'type':'state', 'statstype':'2'}" % (fips,)
+        payload = {"area": fips, "statstype": "2"}
+        suffix = "state"
     else:
-        payload = "{'area':'conus', 'statstype':'2'}"
+        payload = {"area": "conus", "statstype": "2"}
+        suffix = "national"
     headers = {}
     headers["Accept"] = "application/json, text/javascript, */*; q=0.01"
     headers["Content-Type"] = "application/json; charset=UTF-8"
-    req = requests.post(SERVICE + ctx["s"], payload, headers=headers)
+    req = requests.get(SERVICE + suffix, payload, headers=headers)
     if req.status_code != 200:
         raise NoDataFound("API request to droughtmonitor website failed...")
     jdata = req.json()
     if "d" not in jdata:
         raise NoDataFound("No data Found.")
     df = pd.DataFrame(jdata["d"])
-    df["Date"] = pd.to_datetime(df["ReleaseDate"])
+    df["Date"] = pd.to_datetime(df["mapDate"], format="%m/%d/%Y")
     df = df[
         (df["Date"] >= pd.Timestamp(sdate))
         & (df["Date"] <= pd.Timestamp(edate))

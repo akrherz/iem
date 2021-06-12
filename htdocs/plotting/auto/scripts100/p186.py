@@ -13,7 +13,7 @@ from pyiem.exceptions import NoDataFound
 
 SERVICE = (
     "https://droughtmonitor.unl.edu"
-    "/Ajax2018.aspx/ReturnTabularDMAreaPercent_state"
+    "/DmData/DataTables.aspx/ReturnTabularDMAreaPercent_state"
 )
 COLORS = ["#ffff00", "#fcd37f", "#ffaa00", "#e60000", "#730000"]
 
@@ -64,20 +64,21 @@ def plotter(fdict):
     for key in state_fips:
         if state_fips[key] == state:
             fips = key
-    payload = "{'area':'%s', 'type':'state', 'statstype':'2'}" % (fips,)
+    payload = {"area": fips, "statstype": "2"}
     headers = {}
     headers["Accept"] = "application/json, text/javascript, */*; q=0.01"
     headers["Content-Type"] = "application/json; charset=UTF-8"
     req = util.exponential_backoff(
-        requests.post, SERVICE, payload, headers=headers
+        requests.get, SERVICE, payload, headers=headers
     )
     if req is None or req.status_code != 200:
+        print(req.content)
         raise NoDataFound("Drought Web Service failed to deliver data.")
     jdata = req.json()
     if "d" not in jdata:
         raise NoDataFound("Data Not Found.")
     df = pd.DataFrame(jdata["d"])
-    df["Date"] = pd.to_datetime(df["ReleaseDate"])
+    df["Date"] = pd.to_datetime(df["mapDate"], format="%m/%d/%Y")
     df.sort_values("Date", ascending=True, inplace=True)
     df["x"] = df["Date"] + datetime.timedelta(hours=(3.5 * 24))
 
