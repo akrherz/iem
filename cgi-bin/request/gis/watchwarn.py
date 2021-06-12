@@ -107,6 +107,11 @@ def application(environ, start_response):
         start_response("200 OK", [("Content-type", "text/plain")])
         return [msg.encode("ascii")]
 
+    # Keep size low
+    if wfo_limiter == "" and (ets - sts) > datetime.timedelta(days=5 * 365.25):
+        start_response("200 OK", [("Content-type", "text/plain")])
+        return [b"Please shorten request to less than 5 years."]
+
     # Change to postgis db once we have the wfo list
     pgconn = get_dbconn("postgis", user="nobody")
     fn = "wwa_%s_%s" % (sts.strftime("%Y%m%d%H%M"), ets.strftime("%Y%m%d%H%M"))

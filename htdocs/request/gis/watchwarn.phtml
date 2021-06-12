@@ -62,20 +62,20 @@ $location_select_html = array(
 );
 
 $y1select = yearSelect2(1986, date("Y"), "year1");
-$m1select = monthSelect2(0,"month1");
-$d1select = daySelect2(0, "day1");
+$m1select = monthSelect2(1, "month1");
+$d1select = daySelect2(1, "day1");
 $h1select = gmtHourSelect(0, "hour1");
 $mi1select = minuteSelect(0, "minute1");
 
 $y2select = yearSelect2(1986, date("Y"), "year2");
-$m2select = monthSelect2(0,"month2");
-$d2select = daySelect2(0, "day2");
+$m2select = monthSelect2(date("m"), "month2");
+$d2select = daySelect2(date("d"), "day2");
 $h2select = gmtHourSelect(0, "hour2");
 $mi2select = minuteSelect(0, "minute2");
 
 $y3select = yearSelect2(1986, date("Y"), "year3");
-$m3select = monthSelect2(0,"month3");
-$d3select = daySelect2(0, "day3");
+$m3select = monthSelect2(date("m"), "month3");
+$d3select = daySelect2(date("d"), "day3");
 $h3select = gmtHourSelect(0, "hour3");
 $mi3select = minuteSelect(0, "minute3");
 
@@ -108,11 +108,10 @@ archive status and dbf schema below. The IEM's archive is certainly not complete
 If you are looking for a real-time source of warning shapefiles, 
 you can find that <a href="/data/gis/shape/4326/us/current_ww.zip">here.</a></p>
 
-<div class="alert alert-warning"> Due to transient server load or other issues,
-this application sometimes fails to 
-generate output.  You may wish to try shorting the duration of your 
-request or email <a href="/info/contacts.php">us</a> for help.
-</div>
+<div class="alert alert-warning"> If you do not limit the state or WFO output,
+you are limited to downloading 5 years of data at a time.  The reason being
+to keep the requests from timing out as the response content is delivered on
+the fly.</div>
 
 <div class="row"><div class="col-sm-6">
 
