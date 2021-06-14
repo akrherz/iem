@@ -1,31 +1,32 @@
 """METAR frequency"""
 import calendar
 import datetime
-from collections import OrderedDict
 
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
-    [
-        ("TS", "All Thunder Reports (TS)"),
-        ("VCTS", "Thunder in Vicinity (VCTS)"),
-        ("1", "Thunder Reports (excluding VCTS)"),
-        ("-SN", "Light Snow (-SN)"),
-        ("PSN", "Heavy Snow (+SN)"),  # +SN causes CGI issues
-        ("SN", "Any Snow (*SN*)"),
-        ("FZFG", "Freezing Fog (FZFG)"),
-        ("FZRA", "Freezing Rain (FZRA)"),
-        ("FG", "Fog (FG)"),
-        ("BLSN", "Blowing Snow (BLSN)"),
-    ]
-)
+PDICT = {
+    "TS": "All Thunder Reports (TS)",
+    "VCTS": "Thunder in Vicinity (VCTS)",
+    "1": "Thunder Reports (excluding VCTS)",
+    "-SN": "Light Snow (-SN)",
+    "PSN": "Heavy Snow (+SN)",  # +SN causes CGI issues
+    "SN": "Any Snow (*SN*)",
+    "FZFG": "Freezing Fog (FZFG)",
+    "FZRA": "Freezing Rain (FZRA)",
+    "FG": "Fog (FG)",
+    "BLSN": "Blowing Snow (BLSN)",
+}
+PDICT2 = {
+    "day": "Count Distinct Days per Month per Year",
+    "hour": "Count Distinct Hours per Month per Year",
+}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 86400
@@ -72,12 +73,19 @@ def get_description():
             label="Present Weather Option:",
             options=PDICT,
         ),
+        dict(
+            type="select",
+            name="w",
+            default="day",
+            label="How to aggregate the data:",
+            options=PDICT2,
+        ),
     ]
     return desc
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
@@ -100,39 +108,39 @@ def plotter(fdict):
             "'-TS'::varchar, '+TSRA'::varchar, '+TSSN'::varchar,"
             "'-TSSN'::varchar, '-TSDZ'::varchar] && wxcodes"
         )
+    trunc = "day" if ctx["w"] == "day" else "hour"
     df = read_sql(
         f"""
     WITH data as (
-        SELECT distinct date(valid at time zone %s) from alldata
-        where station = %s and {limiter}
+        SELECT distinct date_trunc(%s,
+            valid at time zone %s + '10 minutes'::interval) as datum
+        from alldata where station = %s and {limiter}
         and valid > '1973-01-01' and report_type = 2)
 
-    SELECT extract(year from date)::int as year,
-    extract(month from date)::int as month,
+    SELECT extract(year from datum)::int as year,
+    extract(month from datum)::int as month,
     count(*) from data GROUP by year, month ORDER by year, month
     """,
         pgconn,
-        params=(tzname, station),
+        params=(trunc, tzname, station),
         index_col=None,
     )
 
     if df.empty:
         raise NoDataFound("No database entries found for station, sorry!")
-    (fig, ax) = plt.subplots(1, 1)
-    ax.set_title(
-        (
-            "[%s] %s %s Events\n"
-            "(%s-%s) Distinct Calendar Days with '%s' Reported"
-        )
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            PDICT[pweather],
-            syear,
-            datetime.date.today().year,
-            pweather if pweather != "1" else "TS",
-        )
+    title = (
+        "[%s] %s %s Events\n" "(%s-%s) Distinct %s with '%s' Reported%s"
+    ) % (
+        station,
+        ctx["_nt"].sts[station]["name"],
+        PDICT[pweather],
+        syear,
+        datetime.date.today().year,
+        "Calendar Dates" if ctx["w"] == "day" else "Hourly Observations",
+        pweather if pweather != "1" else "TS",
+        " with at least one hourly report" if ctx["w"] == "day" else "",
     )
+    (fig, ax) = figure_axes(title=title)
     df2 = df[df["year"] == year]
     if not df2.empty:
         ax.bar(
@@ -143,6 +151,8 @@ def plotter(fdict):
             ec="r",
             label="%s" % (year,),
         )
+        for x, y in zip(df2["month"].values, df2["count"].values):
+            ax.text(x - 0.2, y + 0.2, f"{y:.0f}", ha="center")
     df2 = df.groupby("month").sum()
     years = (datetime.date.today().year - syear) + 1
     yvals = df2["count"] / years
@@ -150,7 +160,7 @@ def plotter(fdict):
         df2.index.values + 0.2, yvals, width=0.4, fc="b", ec="b", label="Avg"
     )
     for x, y in zip(df2.index.values, yvals):
-        ax.text(x, y + 0.2, "%.1f" % (y,))
+        ax.text(x + 0.2, y + 0.2, f"{y:.1f}", ha="center")
     ax.set_xlim(0.5, 12.5)
     ax.set_xticks(range(1, 13))
     ax.set_xticklabels(calendar.month_abbr[1:])
