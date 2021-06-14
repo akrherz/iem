@@ -8,7 +8,6 @@ import pandas as pd
 import requests
 import matplotlib.patheffects as PathEffects
 from matplotlib.patches import Rectangle
-from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -80,11 +79,10 @@ def common(ctx):
         timeout=15,
     ).json()
     df = pd.DataFrame(jsn["data"])
-    if df.empty:
-        raise NoDataFound("Data unavailable for station")
-    df["day_of_month"] = pd.to_datetime(df["date"]).dt.day
-    df["accum_pday"] = df["precip"].cumsum()
-    df = df.set_index("day_of_month")
+    if not df.empty:
+        df["day_of_month"] = pd.to_datetime(df["date"]).dt.day
+        df["accum_pday"] = df["precip"].cumsum()
+        df = df.set_index("day_of_month")
     # Special case of climate districts and statewide avgs
     table = "ncei_climate91"
     clcol = "ncei91"
@@ -113,6 +111,8 @@ def common(ctx):
     )
     df = cdf.join(df)
     df["accum_climo_precip"] = df["climo_precip"].cumsum()
+    if "accum_pday" not in df.columns:
+        df["accum_pday"] = 0
     df["depart_precip"] = df["accum_pday"] - df["accum_climo_precip"]
     title = "[%s] %s :: %s for %s\n%s" % (
         station,
@@ -164,7 +164,7 @@ def do_precip_plot(ctx):
             label="Accum Diff",
         )
         ymin = min([0, df["depart_precip"].min() - 0.5])
-    if df["precip"].notnull().any():
+    if "precip" in df.columns and df["precip"].notnull().any():
         ax.bar(
             df.index.values + 0.2,
             df["precip"].values,
@@ -206,7 +206,7 @@ def do_temperature_plot(ctx):
             color="skyblue",
             label="Climate Low",
         )
-    if not all(pd.isnull(df["max_tmpf"])):
+    if "max_tmpf" in df.columns and not all(pd.isnull(df["max_tmpf"])):
         ax.bar(
             df.index.values - 0.3,
             df["max_tmpf"].values,
@@ -230,7 +230,7 @@ def do_temperature_plot(ctx):
         ax.set_ylim(0, 1)
 
     i = 0
-    if not all(pd.isnull(df["max_tmpf"])):
+    if "max_tmpf" in df.columns and not all(pd.isnull(df["max_tmpf"])):
         for _, row in df.iterrows():
             if np.isnan(row["max_tmpf"]) or np.isnan(row["min_tmpf"]):
                 i += 1
@@ -285,5 +285,5 @@ def plotter(fdict):
 
 if __name__ == "__main__":
     plotter(
-        {"month": 6, "year": 2021, "station": "WV4755", "network": "WVCLIMATE"}
+        {"month": 1, "year": 2021, "station": "TX1974", "network": "TXCLIMATE"}
     )
