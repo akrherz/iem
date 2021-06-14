@@ -164,7 +164,9 @@ def plotter(fdict):
     ax.set_xlim(0.5, 12.5)
     ax.set_xticks(range(1, 13))
     ax.set_xticklabels(calendar.month_abbr[1:])
-    ax.set_ylabel("Days Per Month")
+    ax.set_ylabel(
+        "%s Per Month" % ("Days" if ctx["w"] == "days" else "Hours",)
+    )
     ax.set_ylim(top=(ax.get_ylim()[1] + 2))
     ax.legend(loc="best")
     ax.grid(True)
