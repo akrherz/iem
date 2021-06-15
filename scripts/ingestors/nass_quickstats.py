@@ -16,6 +16,7 @@ PROPS = get_properties()
 TOPICS = [
     {"commodity_desc": "CORN"},
     {"commodity_desc": "SOYBEANS"},
+    {"commodity_desc": "SOIL", "statisticcat_desc": "MOISTURE"},
 ]
 SERVICE = "https://quickstats.nass.usda.gov/api/api_GET/"
 
