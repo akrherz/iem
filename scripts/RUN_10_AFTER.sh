@@ -51,6 +51,11 @@ python soilm_ingest.py
 python flux_ingest.py
 python stuart_smith.py &
 
+if [ $LHH -eq "15" ]
+then
+    python nass_quickstats.py &
+fi
+
 cd rwis
 python process_traffic.py &
 
