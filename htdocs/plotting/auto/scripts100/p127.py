@@ -1,31 +1,41 @@
 """Plot or Harvest Progress"""
 import calendar
-from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
 from matplotlib import ticker
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.plot import get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.reference import state_names
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
-    [
-        ("PCT PLANTED", "Planting"),
-        ("PCT EMERGED", "Emerged"),
-        ("PCT DENTED", "Percent Dented"),
-        ("PCT COLORING", "Percent Coloring"),
-        ("PCT SETTING PODS", "Percent Setting Pods"),
-        ("PCT DROPPING LEAVES", "Percent Dropping Leaves"),
-        ("PCT HARVESTED", "Harvest (Grain)"),
-    ]
-)
-PDICT2 = OrderedDict([("CORN", "Corn"), ("SOYBEANS", "Soybean")])
+PDICT = {
+    "CPR": "CORN - PROGRESS, MEASURED IN PCT SEEDBED PREPARED",
+    "CP": "CORN - PROGRESS, MEASURED IN PCT PLANTED",
+    "CE": "CORN - PROGRESS, MEASURED IN PCT EMERGED",
+    "CS": "CORN - PROGRESS, MEASURED IN PCT SILKING",
+    "CMI": "CORN - PROGRESS, MEASURED IN PCT MILK",
+    "CD": "CORN - PROGRESS, MEASURED IN PCT DENTED",
+    "CDO": "CORN - PROGRESS, MEASURED IN PCT DOUGH",
+    "CMA": "CORN - PROGRESS, MEASURED IN PCT MATURE",
+    "CH": "CORN, GRAIN - PROGRESS, MEASURED IN PCT HARVESTED",
+    "CSH": "CORN, SILAGE - PROGRESS, MEASURED IN PCT HARVESTED",
+    "SPR": "SOYBEANS - PROGRESS, MEASURED IN PCT SEEDBED PREPARED",
+    "SP": "SOYBEANS - PROGRESS, MEASURED IN PCT PLANTED",
+    "SE": "SOYBEANS - PROGRESS, MEASURED IN PCT EMERGED",
+    "SPO": "SOYBEANS - PROGRESS, MEASURED IN PCT FULLY PODDED",
+    "SB": "SOYBEANS - PROGRESS, MEASURED IN PCT BLOOMING",
+    "SM": "SOYBEANS - PROGRESS, MEASURED IN PCT MATURE",
+    "SL": "SOYBEANS - PROGRESS, MEASURED IN PCT DROPPING LEAVES",
+    "SS": "SOYBEANS - PROGRESS, MEASURED IN PCT SETTING PODS",
+    "SC": "SOYBEANS - PROGRESS, MEASURED IN PCT COLORING",
+    "SH": "SOYBEANS - PROGRESS, MEASURED IN PCT HARVESTED",
+}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["nass"] = True
@@ -34,22 +44,18 @@ def get_description():
     ] = """This chart presents the crop progress by year.
     The most recent value for the current year is denoted on each of the
     previous years on record.
+
+    <p><strong>Updated 15 June 2021</strong>: The options for this autoplot
+    were changed and not backwards compatable with previous URIs, sorry.</p>
     """
     desc["arguments"] = [
         dict(type="state", name="state", default="IA", label="Select State:"),
         dict(
             type="select",
-            name="unit_desc",
-            default="PCT HARVESTED",
+            name="short_desc",
+            default="CH",
             options=PDICT,
-            label="Which Operation?",
-        ),
-        dict(
-            type="select",
-            name="commodity_desc",
-            default="CORN",
-            options=PDICT2,
-            label="Which Crop?",
+            label="Which Statistical Category?",
         ),
         dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
     ]
@@ -57,40 +63,41 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     state = ctx["state"][:2]
-    unit_desc = ctx["unit_desc"].upper()
-    commodity_desc = ctx["commodity_desc"].upper()
-
-    util_practice_desc = (
-        "GRAIN"
-        if (unit_desc == "PCT HARVESTED" and commodity_desc == "CORN")
-        else "ALL UTILIZATION PRACTICES"
-    )
+    short_desc = PDICT[ctx["short_desc"].upper()]
 
     df = read_sql(
         """
         select year, week_ending, num_value,
         extract(doy from week_ending)::int as day_of_year from nass_quickstats
-        where commodity_desc = %s and statisticcat_desc = 'PROGRESS'
-        and unit_desc = %s and state_alpha = %s and
-        util_practice_desc = %s and num_value is not null
+        where short_desc = %s and state_alpha = %s and num_value is not null
         ORDER by week_ending ASC
     """,
         pgconn,
-        params=(commodity_desc, unit_desc, state, util_practice_desc),
+        params=(short_desc, state),
         index_col=None,
     )
     if df.empty:
         raise NoDataFound("ERROR: No data found!")
     df["yeari"] = df["year"] - df["year"].min()
 
-    (fig, ax) = plt.subplots(1, 1)
-
     year0 = int(df["year"].min())
     lastyear = int(df["year"].max())
+    title = (
+        "%s %s Progress\n"
+        "USDA NASS %i-%i -- Daily Linear Interpolated Values "
+        "Between Weekly Reports"
+    ) % (
+        state_names[state],
+        short_desc,
+        year0,
+        lastyear,
+    )
+    (fig, ax) = figure_axes(title=title)
+
     data = np.ma.ones((df["yeari"].max() + 1, 366), "f") * -1
     data.mask = np.where(data == -1, True, False)
 
@@ -142,22 +149,9 @@ def plotter(fdict):
     ax.set_xlabel(
         "X denotes %s value of %.0f%%" % (lastweek.strftime("%d %b %Y"), dlast)
     )
-    ax.set_title(
-        (
-            "USDA NASS %i-%i %s %s %s Progress\n"
-            "Daily Linear Interpolated Values Between Weekly Reports"
-        )
-        % (
-            year0,
-            lastyear,
-            state,
-            PDICT2.get(commodity_desc),
-            PDICT.get(unit_desc),
-        )
-    )
 
     return fig, df
 
 
 if __name__ == "__main__":
-    plotter(dict(unit_desc="PCT DENTED"))
+    plotter(dict(unit_desc="CP"))

@@ -1,6 +1,5 @@
 """Map of NASS Progress Data"""
 import datetime
-from collections import OrderedDict
 
 import pandas as pd
 from pandas.io.sql import read_sql
@@ -9,60 +8,39 @@ from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
-    (
-        ("corn_poor_verypoor", "Percentage Corn Poor + Very Poor Condition"),
-        ("corn_good_excellent", "Percentage Corn Good + Excellent Condition"),
-        ("corn_harvest", "Percentage Corn Harvested (Grain) Acres"),
-        ("corn_planting", "Percentage Corn Planted Acres"),
-        ("corn_silking", "Percentage Corn Silking Acres"),
-        ("soybeans_planting", "Percentage Soybean Planted Acres"),
-        ("soybeans_harvest", "Percentage Soybean Harvested Acres"),
-    )
-)
+PDICT = {
+    "corn_poor_verypoor": "Percentage Corn Poor + Very Poor Condition",
+    "corn_good_excellent": "Percentage Corn Good + Excellent Condition",
+    "corn_harvest": "Percentage Corn Harvested (Grain) Acres",
+    "corn_planting": "Percentage Corn Planted Acres",
+    "corn_silking": "Percentage Corn Silking Acres",
+    "soybeans_planting": "Percentage Soybean Planted Acres",
+    "soybeans_harvest": "Percentage Soybean Harvested Acres",
+    "soil_short_veryshort": "Percentage Topsoil Moisture Short + Very Short",
+}
 LOOKUP = {
-    "corn_planting": [
-        "CORN",
-        "PROGRESS",
-        "PCT PLANTED",
-        "ALL UTILIZATION PRACTICES",
-    ],
-    "corn_harvest": ["CORN", "PROGRESS", "PCT HARVESTED", "GRAIN"],
-    "soybeans_planting": [
-        "SOYBEANS",
-        "PROGRESS",
-        "PCT PLANTED",
-        "ALL UTILIZATION PRACTICES",
-    ],
-    "soybeans_harvest": [
-        "SOYBEANS",
-        "PROGRESS",
-        "PCT HARVESTED",
-        "ALL UTILIZATION PRACTICES",
-    ],
-    "corn_silking": [
-        "CORN",
-        "PROGRESS",
-        "PCT SILKING",
-        "ALL UTILIZATION PRACTICES",
-    ],
+    "corn_planting": "CORN - PROGRESS, MEASURED IN PCT PLANTED",
+    "corn_harvest": "CORN, GRAIN - PROGRESS, MEASURED IN PCT HARVESTED",
+    "soybeans_planting": "",
+    "soybeans_harvest": "",
+    "corn_silking": "",
     "corn_poor_verypoor": [
-        "CORN",
-        "CONDITION",
-        ["PCT POOR", "PCT VERY POOR"],
-        "ALL UTILIZATION PRACTICES",
+        "CORN - CONDITION, MEASURED IN PCT POOR",
+        "CORN - CONDITION, MEASURED IN PCT VERY POOR",
     ],
     "corn_good_excellent": [
-        "CORN",
-        "CONDITION",
-        ["PCT GOOD", "PCT EXCELLENT"],
-        "ALL UTILIZATION PRACTICES",
+        "CORN - CONDITION, MEASURED IN PCT GOOD",
+        "CORN - CONDITION, MEASURED IN PCT EXCELLENT",
+    ],
+    "soil_short_veryshort": [
+        "SOIL, SUBSOIL - MOISTURE, MEASURED IN PCT VERY SHORT",
+        "SOIL, SUBSOIL - MOISTURE, MEASURED IN PCT SHORT",
     ],
 }
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 3600
@@ -106,21 +84,19 @@ def get_df(ctx):
     varname = ctx["var"]
     pgconn = get_dbconn("coop")
     params = LOOKUP[varname]
-    if isinstance(params[2], list):
-        dlimit = " unit_desc in %s" % (str(tuple(params[2])))
+    if isinstance(params, list):
+        dlimit = " short_desc in %s" % (str(tuple(params)),)
     else:
-        dlimit = " unit_desc = '%s' " % (params[2],)
+        dlimit = " short_desc = '%s' " % (params,)
     df = read_sql(
         f"""
         select year, week_ending,
         sum(num_value) as value, state_alpha from nass_quickstats
-        where commodity_desc = %s and statisticcat_desc = %s
-        and {dlimit} and util_practice_desc = %s and num_value is not null
+        where {dlimit} and num_value is not null
         GROUP by year, week_ending, state_alpha
         ORDER by state_alpha, week_ending
     """,
         pgconn,
-        params=(params[0], params[1], params[3]),
         index_col=None,
     )
     if df.empty:
@@ -166,7 +142,7 @@ def get_df(ctx):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
 
     get_df(ctx)
@@ -201,10 +177,11 @@ def plotter(fdict):
         cmap=cmap,
         units="Absolute %",
         labelfontsize=16,
+        labelbuffer=0,
     )
 
     return mp.fig, ctx["df"]
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({"var": "corn_silking"})

@@ -14,8 +14,10 @@ LOG = logger()
 TMP = "/mesonet/tmp"
 PROPS = get_properties()
 TOPICS = [
-    {"commodity_desc": "CORN"},
-    {"commodity_desc": "SOYBEANS"},
+    {"commodity_desc": "CORN", "statisticcat_desc": "PROGRESS"},
+    {"commodity_desc": "SOYBEANS", "statisticcat_desc": "PROGRESS"},
+    {"commodity_desc": "CORN", "statisticcat_desc": "YIELD"},
+    {"commodity_desc": "SOYBEANS", "statisticcat_desc": "YIELD"},
     {"commodity_desc": "SOIL", "statisticcat_desc": "MOISTURE"},
 ]
 SERVICE = "https://quickstats.nass.usda.gov/api/api_GET/"
@@ -28,8 +30,6 @@ def get_df(year, sts, topic):
         "format": "JSON",
         "program_desc": "SURVEY",
         "sector_desc": "CROPS",
-        "agg_level_desc": "STATE",
-        "freq_desc": "WEEKLY",
     }
     if year is not None:
         params["year"] = year
@@ -48,28 +48,31 @@ def process(df):
     """Do some work"""
     # Try to get a number
     df["num_value"] = pd.to_numeric(df["Value"], errors="coerce")
-    for col in ["asd_code", "county_ansi", "zip_5"]:
-        df[col] = pd.to_numeric(df[col], errors="coerce")
     # Get load_time in proper order
     df["load_time"] = pd.to_datetime(
         df["load_time"], format="%Y-%m-%d %H:%M:%S"
     ).dt.tz_localize(pytz.timezone("America/New_York"))
-    df = df.replace({np.nan: None})
+    df = df.replace({np.nan: None, "": None})
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
     deleted = 0
     inserted = 0
     dups = 0
     for _, row in df.iterrows():
+        # Ignore duplicated data like CONDITION, 5 YEAR AVG
+        if row["statisticcat_desc"].find("YEAR") > 0:
+            continue
         # Uniqueness by short_desc, year, state_alpha, week_ending
         cursor.execute(
             "SELECT load_time from nass_quickstats where year = %s "
-            "and short_desc = %s and state_alpha = %s and week_ending = %s",
+            "and short_desc = %s and state_alpha = %s and week_ending = %s "
+            "and freq_desc = %s",
             (
                 row["year"],
                 row["short_desc"],
                 row["state_alpha"],
                 row["week_ending"],
+                row["freq_desc"],
             ),
         )
         if cursor.rowcount > 0:
@@ -80,12 +83,13 @@ def process(df):
             cursor.execute(
                 "DELETE from nass_quickstats where year = %s "
                 "and short_desc = %s and "
-                "state_alpha = %s and week_ending = %s",
+                "state_alpha = %s and week_ending = %s and freq_desc = %s",
                 (
                     row["year"],
                     row["short_desc"],
                     row["state_alpha"],
                     row["week_ending"],
+                    row["freq_desc"],
                 ),
             )
             deleted += cursor.rowcount
@@ -94,7 +98,7 @@ def process(df):
             """
             INSERT into nass_quickstats(
             short_desc,
-            source_desc, sector_desc,
+            sector_desc,
             group_desc,
             commodity_desc,
             class_desc,
@@ -104,9 +108,6 @@ def process(df):
             unit_desc,
             agg_level_desc,
             state_alpha,
-            asd_code,
-            county_ansi,
-            country_code,
             year,
             freq_desc,
             begin_code,
@@ -115,12 +116,12 @@ def process(df):
             load_time,
             value,
             cv,
+            county_ansi,
             num_value) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """,
             (
                 row["short_desc"],
-                row["source_desc"],
                 row["sector_desc"],
                 row["group_desc"],
                 row["commodity_desc"],
@@ -131,9 +132,6 @@ def process(df):
                 row["unit_desc"],
                 row["agg_level_desc"],
                 row["state_alpha"],
-                row["asd_code"],
-                row["county_ansi"],
-                row["country_code"],
                 row["year"],
                 row["freq_desc"],
                 row["begin_code"],
@@ -142,6 +140,7 @@ def process(df):
                 row["load_time"],
                 row["Value"],
                 row["CV (%)"],
+                row["county_ansi"],
                 row["num_value"],
             ),
         )

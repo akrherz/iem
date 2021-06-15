@@ -41,15 +41,15 @@ SDATES = OrderedDict(
     ]
 )
 COUNTY = {
-    "ames": 169,
-    "cobs": 169,
-    "crawfordsville": 183,
-    "lewis": 155,
-    "nashua": 67,
-    "sutherland": 141,
-    "mcnay": 117,
-    "kanawha": 81,
-    "muscatine": 139,
+    "ames": "169",
+    "cobs": "169",
+    "crawfordsville": "183",
+    "lewis": "155",
+    "nashua": "067",
+    "sutherland": "141",
+    "mcnay": "117",
+    "kanawha": "081",
+    "muscatine": "139",
 }
 PDICT = {"yes": "Colorize Labels by Corn Yield Trend", "no": "No Colorize"}
 
@@ -80,7 +80,7 @@ def load_yields(location):
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["description"] = """ """
     desc["arguments"] = [
@@ -110,7 +110,7 @@ def get_description():
 
 
 def load(dirname, location, sdate):
-    """ Read a file please """
+    """Read a file please"""
     data = []
     idx = []
     fn = "%s/%s.met" % (dirname, location)
@@ -178,7 +178,7 @@ def load(dirname, location, sdate):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     location = ctx["location"]
     opt = ctx["opt"]
