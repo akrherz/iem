@@ -16,5 +16,5 @@ python stage4_xhour.py 48
 
 cd ../iemre
 python precip_ingest.py $TSTAMP
-python precip_ingest.py `date -u --date '3 hours ago' +'%Y %m %d %H'`
+python precip_ingest.py `date -u --date '4 hours ago' +'%Y %m %d %H'`
 python precip_ingest.py `date -u --date '1 day ago' +'%Y %m %d %H'`

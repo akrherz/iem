@@ -2,6 +2,7 @@
 import sys
 import datetime
 import warnings
+import logging
 
 import numpy as np
 import geopandas as gpd
@@ -10,9 +11,12 @@ from pyiem.grid.zs import CachingZonalStats
 from pyiem.util import get_dbconn, ncopen, logger, mm2inch, convert_value
 
 LOG = logger()
+LOG.setLevel(logging.INFO)
 warnings.filterwarnings("ignore", category=FutureWarning)
 COOP = get_dbconn("coop")
 ccursor = COOP.cursor()
+
+SKIPSTATES = "AK HI DC AS PR VI GU MP".split()
 
 
 def zero(val):
@@ -58,7 +62,7 @@ def update_database(stid, valid, row):
 
 
 def do_day(valid):
-    """ Process a day please """
+    """Process a day please"""
     idx = iemre.daily_offset(valid)
     with ncopen(iemre.get_daily_ncname(valid.year), "r", timeout=300) as nc:
         high = convert_value(
@@ -75,8 +79,9 @@ def do_day(valid):
     pgconn = get_dbconn("postgis")
     states = gpd.GeoDataFrame.from_postgis(
         "SELECT the_geom, state_abbr from states "
-        "where state_abbr not in ('AK', 'HI', 'DC')",
+        "where state_abbr not in %s",
         pgconn,
+        params=(tuple(SKIPSTATES),),
         index_col="state_abbr",
         geom_col="the_geom",
     )
@@ -100,9 +105,9 @@ def do_day(valid):
 
     # build out climate division mappers
     climdiv = gpd.GeoDataFrame.from_postgis(
-        "SELECT geom, iemid from climdiv "
-        "where st_abbrv not in ('AK', 'HI', 'DC')",
+        "SELECT geom, iemid from climdiv " "where st_abbrv not in %s",
         pgconn,
+        params=(tuple(SKIPSTATES),),
         index_col="iemid",
         geom_col="geom",
     )
