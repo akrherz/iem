@@ -15,7 +15,7 @@ from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn, c2f
 from pyiem.exceptions import NoDataFound
 
-
+CENTRAL = pytz.timezone("America/Chicago")
 PLOTTYPES = {
     "1": "3 Panel Plot",
     "2": "Just Soil Temps",
@@ -26,6 +26,7 @@ PLOTTYPES = {
     "7": "Daily Soil Water + Change",
     "8": "Battery Voltage",
     "9": "Daily Rainfall, 4 inch Soil Temp, and RH",
+    "10": "Inversion Diagnostic Plot (BOOI4 Ames - AEA) Only",
 }
 
 
@@ -71,6 +72,57 @@ def get_description():
         ),
     ]
     return desc
+
+
+def make_inversion_plot(ctx):
+    """Generate an inversion plot"""
+    df = read_sql(
+        "SELECT * from sm_inversion where station = %s and "
+        "valid >= %s and valid < %s ORDER by valid ASC",
+        ctx["pgconn"],
+        params=(ctx["station"], ctx["sts"], ctx["ets"]),
+    )
+    if df.empty:
+        raise NoDataFound("No inversion data found for station!")
+
+    (fig, axes) = plt.subplots(2, 1, figsize=(8, 6))
+    ax = axes[0]
+    ax.plot(df["valid"], c2f(df["tair_15_c_avg_qc"].values), label="1.5 feet")
+    ax.plot(df["valid"], c2f(df["tair_5_c_avg_qc"].values), label="5 feet")
+    ax.plot(df["valid"], c2f(df["tair_10_c_avg_qc"].values), label="10 feet")
+    ax.grid(True)
+    ax.set_ylabel(r"Air Temperature $^\circ$F")
+    ax.set_title(
+        ("ISUSM Station: %s Inversion Timeseries")
+        % (ctx["_nt"].sts[ctx["station"]]["name"],)
+    )
+    ax.xaxis.set_major_formatter(
+        mdates.DateFormatter("%-I:%M %p\n%-d %b", tz=CENTRAL)
+    )
+    ax.legend(loc="best", ncol=3, fontsize=10)
+
+    ax = axes[1]
+    ax.plot(
+        df["valid"],
+        (
+            c2f(df["tair_10_c_avg_qc"].values)
+            - c2f(df["tair_15_c_avg_qc"].values)
+        ),
+    )
+    ax.grid(True)
+    ax.text(
+        0.01,
+        0.99,
+        "10 Foot Temperature minus 1.5 Foot Temperature",
+        transform=ax.transAxes,
+        va="top",
+        bbox=dict(color="white"),
+    )
+    ax.set_ylabel(r"Air Temperature Diff $^\circ$F")
+    ax.xaxis.set_major_formatter(
+        mdates.DateFormatter("%-I:%M %p\n%-d %b", tz=CENTRAL)
+    )
+    return fig, df
 
 
 def make_daily_pet_plot(ctx):
@@ -729,6 +781,8 @@ def plotter(fdict):
         fig, df = make_battery_plot(ctx)
     elif ctx["opt"] == "9":
         fig, df = make_daily_rainfall_soil_rh(ctx)
+    elif ctx["opt"] == "10":
+        fig, df = make_inversion_plot(ctx)
 
     # removal of timestamps, sigh
     df = df.reset_index()

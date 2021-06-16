@@ -50,6 +50,7 @@ $ar = Array(
     "7" => "Daily Soil Water + Change",
     "8" => "Battery Voltage",
     "9" => "Daily Rainfall, 4 inch Soil Temp, and RH",
+    "10" => "Inversion Diagnostic Plot (BOOI4 Ames - AEA) Only",
 );
 $dd = "This plot is a time series graph of
 observations from a time period and ISU Soil Moisture station of your choice.";

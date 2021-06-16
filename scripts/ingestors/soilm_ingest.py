@@ -129,6 +129,9 @@ STATIONS = {
     "TPOI4": "Masonville",
     "DOCI4": "Jefferson",
 }
+INVERSION = {
+    "BOOI4": "AEA",
+}
 
 
 def qcval(df, colname, floor, ceiling):
@@ -152,6 +155,51 @@ def make_time(string):
     tstamp = datetime.datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
     tstamp = tstamp.replace(tzinfo=pytz.FixedOffset(-360))
     return tstamp
+
+
+def do_inversion(filename, nwsli):
+    """Process Inversion Station Data."""
+    fn = f"/mnt/home/loggernet/{filename}_Inversion_MinSI.dat"
+    if not os.path.isfile(fn):
+        LOG.debug("missing filename %s", fn)
+        return
+    df = pd.read_csv(fn, skiprows=[0, 2, 3], na_values=["NAN"])
+    # convert all columns to lowercase
+    df.columns = map(str.lower, df.columns)
+    df["valid"] = df["timestamp"].apply(make_time)
+    cursor = ISUAG.cursor()
+    cursor.execute(
+        "SELECT max(valid) from sm_inversion where station = %s",
+        (nwsli,),
+    )
+    maxts = cursor.fetchone()[0]
+    if maxts is not None:
+        df = df[df["valid"] > maxts]
+    for _, row in df.iterrows():
+        cursor.execute(
+            "INSERT into sm_inversion(station, valid, tair_15_c_avg, "
+            "tair_15_c_avg_qc, tair_5_c_avg, tair_5_c_avg_qc, "
+            "tair_10_c_avg, tair_10_c_avg_qc, ws_ms_avg, ws_ms_avg_qc, "
+            "ws_ms_max, ws_ms_max_qc, duration) VALUES (%s, %s, %s, %s, "
+            "%s, %s, %s, %s, %s, %s, %s, %s, 1)",
+            (
+                nwsli,
+                row["valid"],
+                row["t15_avg"],
+                row["t15_avg"],
+                row["t5_avg"],
+                row["t5_avg"],
+                row["t10_avg"],
+                row["t10_avg"],
+                row["ws_ms_avg"],
+                row["ws_ms_avg"],
+                row["ws_ms_max"],
+                row["ws_ms_max"],
+            ),
+        )
+    LOG.debug("Inserted %s inversion rows for %s", len(df.index), nwsli)
+    cursor.close()
+    ISUAG.commit()
 
 
 def common_df_logic(filename, maxts, nwsli, tablename):
@@ -614,6 +662,8 @@ def main(argv):
             dyprocessed,
         )
     update_pday()
+    for nwsli in INVERSION:
+        do_inversion(INVERSION[nwsli], nwsli)
 
     if EVENTS["reprocess_solar"]:
         LOG.info("Calling fix_solar.py with no args")
