@@ -38,6 +38,40 @@ def safe_m(val):
     return round(val * 100.0, 0)
 
 
+def get_inversion_data(pgconn, ts):
+    """Retrieve inversion data."""
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    nt = NetworkTable("ISUSM", only_online=False)
+    data = {"type": "FeatureCollection", "features": []}
+    cursor.execute(
+        "select *, case when tair_10_c_avg > tair_15_c_avg then true else "
+        "false end as is_inversion from sm_inversion where valid = %s",
+        (ts,),
+    )
+    for row in cursor:
+        sid = row["station"]
+        if sid not in nt.sts:
+            continue
+        lon = nt.sts[sid]["lon"]
+        lat = nt.sts[sid]["lat"]
+        data["features"].append(
+            {
+                "type": "Feature",
+                "id": sid,
+                "properties": {
+                    "name": nt.sts[sid]["name"],
+                    "valid_utc": ts.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "tmpf_15": safe_t(row["tair_15_c_avg"]),
+                    "tmpf_5": safe_t(row["tair_5_c_avg"]),
+                    "tmpf_10": safe_t(row["tair_10_c_avg"]),
+                    "is_inversion": row["is_inversion"],
+                },
+                "geometry": {"type": "Point", "coordinates": [lon, lat]},
+            }
+        )
+    return json.dumps(data)
+
+
 def get_data(pgconn, ts):
     """Get the data for this timestamp"""
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -200,10 +234,16 @@ def application(environ, start_response):
         ts = datetime.datetime.strptime(dt, "%Y-%m-%dT%H:%M:%S.000Z")
         ts = ts.replace(tzinfo=datetime.timezone.utc)
     with get_dbconn("isuag") as pgconn:
-        data = get_data(
-            pgconn,
-            ts.astimezone(pytz.timezone("America/Chicago")),
-        )
+        if field.get("inversion") is None:
+            data = get_data(
+                pgconn,
+                ts.astimezone(pytz.timezone("America/Chicago")),
+            )
+        else:
+            data = get_inversion_data(
+                pgconn,
+                ts.astimezone(pytz.timezone("America/Chicago")),
+            )
 
     start_response("200 OK", headers)
     return [data.encode("ascii")]
