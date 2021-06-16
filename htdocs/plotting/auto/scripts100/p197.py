@@ -18,12 +18,16 @@ PDICT = {
     "soybeans_harvest": "Percentage Soybean Harvested Acres",
     "soil_short_veryshort": "Percentage Topsoil Moisture Short + Very Short",
 }
+PDICT2 = {
+    "avg": "Compare against 10 year average for date",
+    "week": "Compare against given number of weeks ago",
+}
 LOOKUP = {
     "corn_planting": "CORN - PROGRESS, MEASURED IN PCT PLANTED",
     "corn_harvest": "CORN, GRAIN - PROGRESS, MEASURED IN PCT HARVESTED",
-    "soybeans_planting": "",
-    "soybeans_harvest": "",
-    "corn_silking": "",
+    "soybeans_planting": "SOYBEANS - PROGRESS, MEASURED IN PCT PLANTED",
+    "soybeans_harvest": "SOYBEANS - PROGRESS, MEASURED IN PCT HARVESTED",
+    "corn_silking": "CORN - PROGRESS, MEASURED IN PCT SILKING",
     "corn_poor_verypoor": [
         "CORN - CONDITION, MEASURED IN PCT POOR",
         "CORN - CONDITION, MEASURED IN PCT VERY POOR",
@@ -58,9 +62,22 @@ def get_description():
         dict(
             type="select",
             options=PDICT,
-            default="corn_silking",
+            default="corn_planting",
             name="var",
             label="Available variables to plot:",
+        ),
+        dict(
+            type="select",
+            options=PDICT2,
+            default="avg",
+            label="What to compare present number against?",
+            name="w",
+        ),
+        dict(
+            type="int",
+            default=1,
+            label="Number of weeks ago to compare against (when appropriate):",
+            name="weeks",
         ),
         dict(
             type="date",
@@ -88,24 +105,23 @@ def get_df(ctx):
         dlimit = " short_desc in %s" % (str(tuple(params)),)
     else:
         dlimit = " short_desc = '%s' " % (params,)
+    # NB aggregate here needed for the multiple parameter short_desc above
     df = read_sql(
-        f"""
-        select year, week_ending,
-        sum(num_value) as value, state_alpha from nass_quickstats
-        where {dlimit} and num_value is not null
-        GROUP by year, week_ending, state_alpha
-        ORDER by state_alpha, week_ending
-    """,
+        "select year, week_ending, sum(num_value) as value, state_alpha "
+        f"from nass_quickstats where {dlimit} and num_value is not null "
+        "GROUP by year, week_ending, state_alpha "
+        "ORDER by state_alpha, week_ending",
         pgconn,
         index_col=None,
+        parse_dates="week_ending",
     )
     if df.empty:
         raise NoDataFound("No NASS Data was found for query, sorry.")
-    df["week_ending"] = pd.to_datetime(df["week_ending"])
     data = {}
-    # Average atleast ten years
+    # Average at least ten years
     syear = max([1981, date.year - 10])
     eyear = syear + 10
+    week_ending_start = date - datetime.timedelta(days=ctx["weeks"] * 7)
     for state, gdf in df.groupby("state_alpha"):
         sdf = gdf.copy().set_index("week_ending")
         # TOO DIFFICULT to know what to do in this case.
@@ -124,21 +140,37 @@ def get_df(ctx):
                 avgval = doyavgs.at[date.strftime("%m%d"), "value"]
             else:
                 avgval = None
-        data[state] = {"avg": avgval, "thisval": thisval}
+        pval = None
+        if week_ending_start.strftime("%Y-%m-%d") in sdf.index:
+            pval = sdf.loc[week_ending_start.strftime("%Y-%m-%d")]["value"]
+        data[state] = {
+            "avg": avgval,
+            "thisval": thisval,
+            f'week{ctx["weeks"]}ago': pval,
+        }
     ctx["df"] = pd.DataFrame.from_dict(data, orient="index")
     if ctx["df"].empty:
         raise NoDataFound("No Data Found.")
     ctx["df"] = ctx["df"].dropna(how="all")
     ctx["df"].index.name = "state"
-    ctx["df"]["departure"] = ctx["df"]["thisval"] - ctx["df"]["avg"]
+    col = "avg" if ctx["w"] == "avg" else f'week{ctx["weeks"]}ago'
+    ctx["df"]["departure"] = ctx["df"]["thisval"] - ctx["df"][col]
     ctx["title"] = "%s USDA NASS %s" % (
         date.strftime("%-d %b %Y"),
         PDICT[varname],
     )
-    ctx["subtitle"] = (
-        "Top value is %i percentage, bottom value is "
-        "departure from %i-%i avg" % (date.year, syear, eyear - 1)
-    )
+    if ctx["w"] == "avg":
+        ctx["subtitle"] = (
+            "Top value is %i percentage, bottom value is "
+            "departure from %i-%i avg" % (date.year, syear, eyear - 1)
+        )
+    else:
+        ctx[
+            "subtitle"
+        ] = "Top value is %i percentage, bottom value is " "precentage points change since %s" % (
+            date.year,
+            week_ending_start.strftime("%-d %b %Y"),
+        )
 
 
 def plotter(fdict):
@@ -184,4 +216,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"var": "corn_silking"})
+    plotter({})
