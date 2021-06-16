@@ -121,6 +121,9 @@ STATIONS = {
     "Glenwood": "GVNI4",
     "Masonville": "TPOI4",
 }
+INVERSION = {
+    "AEAInversion": "BOOI4",
+}
 
 
 def make_time(string):
@@ -144,6 +147,48 @@ def qcval2(df, colname, floor, ceiling):
     df.loc[df[colname] < floor, colname] = np.nan
     df.loc[df[colname] > ceiling, colname] = np.nan
     return np.where(pd.isnull(df[colname]), "B", None)
+
+
+def do_inversion(filename, nwsli):
+    """Process Inversion Station Data."""
+    df = pd.read_csv(filename, skiprows=[0, 2, 3], na_values=["NAN"])
+    # convert all columns to lowercase
+    df.columns = map(str.lower, df.columns)
+    df["valid"] = df["timestamp"].apply(make_time)
+    pgconn = get_dbconn("isuag")
+    cursor = pgconn.cursor()
+    cursor.execute(
+        "SELECT max(valid) from sm_inversion where station = %s",
+        (nwsli,),
+    )
+    maxts = cursor.fetchone()[0]
+    if maxts is not None:
+        df = df[df["valid"] > maxts]
+    for _, row in df.iterrows():
+        cursor.execute(
+            "INSERT into sm_inversion(station, valid, tair_15_c_avg, "
+            "tair_15_c_avg_qc, tair_5_c_avg, tair_5_c_avg_qc, "
+            "tair_10_c_avg, tair_10_c_avg_qc, ws_ms_avg, ws_ms_avg_qc, "
+            "ws_ms_max, ws_ms_max_qc, duration) VALUES (%s, %s, %s, %s, "
+            "%s, %s, %s, %s, %s, %s, %s, %s, 1)",
+            (
+                nwsli,
+                row["valid"],
+                row["t15_avg"],
+                row["t15_avg"],
+                row["t5_avg"],
+                row["t5_avg"],
+                row["t10_avg"],
+                row["t10_avg"],
+                row["ws_ms_avg"],
+                row["ws_ms_avg"],
+                row["ws_ms_max"],
+                row["ws_ms_max"],
+            ),
+        )
+    # LOG.debug("Inserted %s inversion rows for %s", len(df.index), nwsli)
+    cursor.close()
+    pgconn.commit()
 
 
 def minute_iemaccess(df):
@@ -193,8 +238,14 @@ def minute_iemaccess(df):
 def process(path, fn):
     """Attempt to do something with the file we found."""
     tokens = fn.split("_", 2)
-    station = STATIONS[tokens[0]]
     tabletype = tokens[1]
+    if tokens[0].find("Inversion") > 0:
+        station = INVERSION[tokens[0]]
+        tablename = "sm_inversion"
+        if tabletype == "MinSI":
+            do_inversion(os.path.join(path, fn), station)
+        return
+    station = STATIONS[tokens[0]]
     tablename = TABLES[tabletype]
     df = pd.read_csv(
         os.path.join(path, fn), skiprows=[0, 2, 3], na_values=["NAN", "-100"]
