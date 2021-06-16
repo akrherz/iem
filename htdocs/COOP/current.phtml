@@ -21,8 +21,8 @@ $sortdir = isset($_GET['sortdir']) ? xssafe($_GET['sortdir']): 'desc';
 if ($sortdir != "asc" && $sortdir != "desc") $sortdir = "desc";
 
 function precip_formatter($val){
-	if ($val == '') return '';
-	if ($val == 0.0001) return 'T';
+	if ($val === '') return '';
+	if ($val === 0.0001) return 'T';
 	if ($val < 0) return 'M';
 	return $val;
 }
@@ -55,9 +55,12 @@ EOF;
 			$dict["min_tmpf"] != "" ? $dict["min_tmpf"] : "M"
 	);
 
-	$s .= sprintf("<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>", precip_formatter($dict["pday"]),
-			precip_formatter($dict["snow"]), precip_formatter($dict["ratio"]), precip_formatter($dict["snowd"]),
-			precip_formatter($dict["snoww"]));
+	$s .= sprintf("<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>",
+        precip_formatter($dict["pday"]),
+		precip_formatter($dict["snow"]),
+        precip_formatter($dict["ratio"]),
+        precip_formatter($dict["snowd"]),
+		precip_formatter($dict["snoww"]));
 
 	$s .= "</tr>\n";
 	return $s;
