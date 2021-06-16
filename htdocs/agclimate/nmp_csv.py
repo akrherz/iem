@@ -2,6 +2,7 @@
 
 https://mesonet.agron.iastate.edu/agclimate/isusm.csv
 """
+from datetime import datetime
 from io import StringIO
 
 import numpy as np
@@ -10,6 +11,10 @@ from pandas.io.sql import read_sql
 from metpy.units import units
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, convert_value
+
+INVERSION = [
+    "BOOI4",
+]
 
 
 def nan(val):
@@ -36,6 +41,39 @@ def p2(val, prec, minv, maxv):
     if pd.isna(val) or val < minv or val > maxv:
         return ""
     return str(round(convert_value(val, "degC", "degK"), prec))
+
+
+def do_temp_rh(sid, row):
+    """Do air temp and RH%."""
+    heights = [
+        "2",
+    ]
+    temps = [
+        p2(row["tair_c_avg"], 1, -90, 90),
+    ]
+    rhs = [
+        p(row["rh_avg"], 1, 0, 100),
+    ]
+    if sid in INVERSION:
+        df = read_sql(
+            "SELECT * from sm_inversion WHERE station = %s and "
+            "valid > %s - '4 hours'::interval ORDER by valid DESC LIMIT 1",
+            get_dbconn("isuag"),
+            params=(sid, row["valid"]),
+        )
+        if not df.empty:
+            row2 = df.iloc[0]
+            for foot, col in [[1.5, "15"], [5, "5"], [10, "10"]]:
+                depth_mm = convert_value(foot * 12, "inch", "meter")
+                heights.append(f"{depth_mm:.3f}")
+                temps.append(p2(row2[f"tair_{col}_c_avg"], 1, -90, 90))
+                rhs.append("")
+
+    return "%s#%s#%s" % (
+        ";".join(heights),
+        ";".join(temps),
+        ";".join(rhs),
+    )
 
 
 def do_soil_moisture(row):
@@ -72,23 +110,23 @@ def do_soil_moisture(row):
 def use_table(sio):
     """Process for the given table."""
     nt = NetworkTable("ISUSM")
-    pgconn = get_dbconn("isuag")
+    table = f"sm_minute_{datetime.now().year}"
     obsdf = read_sql(
-        """
+        f"""
         WITH latest as (
             SELECT station, valid,
             row_number() OVER (PARTITION by station ORDER by valid DESC)
-            from sm_minute WHERE valid > now() - '48 hours'::interval
+            from {table} WHERE valid > now() - '48 hours'::interval
             and valid < now()
         ), agg as (
             select station, valid from latest where row_number = 1
         )
         select s.*, s.valid at time zone 'UTC' as utc_valid,
         case when s.valid = a.valid then true else false end as is_last
-        from sm_minute s, agg a WHERE s.station = a.station
+        from {table} s, agg a WHERE s.station = a.station
         and s.valid > (a.valid - '1 hour'::interval) and s.valid <= a.valid
         """,
-        pgconn,
+        get_dbconn("isuag"),
         index_col=None,
     )
     lastob = obsdf[obsdf["is_last"]].set_index("station")
@@ -98,7 +136,7 @@ def use_table(sio):
     for sid, row in lastob.iterrows():
         hr_row = hrtotal.loc[sid]
         sio.write(
-            ("%s,%.4f,%.4f,%s,%.1f," "%s," "%s,2#%s#%s,%s," "3#%s#%s#%s" "\n")
+            ("%s,%.4f,%.4f,%s,%.1f,%s,%s,%s,%s,3#%s#%s#%s\n")
             % (
                 sid,
                 nt.sts[sid]["lat"],
@@ -107,8 +145,7 @@ def use_table(sio):
                 nt.sts[sid]["elevation"],
                 do_soil_moisture(row),
                 p(hr_row["slrkj_tot"] * 1000.0 / 3600.0, 1, 0, 1600),
-                p2(row["tair_c_avg"], 1, -90, 90),
-                p(row["rh_avg"], 1, 0, 100),
+                do_temp_rh(sid, row),
                 p(
                     (nan(hr_row["rain_in_tot"]) * units("inch"))
                     .to(units("cm"))
