@@ -235,10 +235,9 @@ def common_df_logic(filename, maxts, nwsli, tablename):
     if tablename == "sm_minute":
         # Storage of how far this covers
         df["duration"] = 15
-        # Some conversions needed to map this data back to 1min table
         # slrkw_avg SIC is actually W/m2 over 15 minutes, we want to store as
-        # a total over "one minute" W/m2 -> kJ/s/m2
-        df["slrkj_tot"] = df["slrkw_avg"] * 60.0 / 1000.0
+        # a total over 15 minutes W/m2 -> kJ/s/m2
+        df["slrkj_tot"] = df["slrkw_avg"] * 60.0 * 15.0 / 1000.0
         # Wind
         df["ws_mph_s_wvt"] = df["ws_mps_s_wvt"] * 2.23694
         # drop our no longer needed columns
