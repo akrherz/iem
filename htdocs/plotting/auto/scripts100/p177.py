@@ -12,7 +12,7 @@ from matplotlib.lines import Line2D
 from pyiem import meteorology
 from pyiem.plot.use_agg import plt
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn, c2f
+from pyiem.util import convert_value, get_autoplot_context, get_dbconn, c2f
 from pyiem.exceptions import NoDataFound
 
 CENTRAL = pytz.timezone("America/Chicago")
@@ -85,8 +85,11 @@ def make_inversion_plot(ctx):
     if df.empty:
         raise NoDataFound("No inversion data found for station!")
 
-    (fig, axes) = plt.subplots(2, 1, figsize=(8, 6))
+    axwidth = 0.88
+    axheight = 0.25
+    (fig, axes) = plt.subplots(3, 1, figsize=(8, 8), sharex=True)
     ax = axes[0]
+    ax.set_position([0.07, 0.7, axwidth, axheight])
     ax.plot(df["valid"], c2f(df["tair_15_c_avg_qc"].values), label="1.5 feet")
     ax.plot(df["valid"], c2f(df["tair_5_c_avg_qc"].values), label="5 feet")
     ax.plot(df["valid"], c2f(df["tair_10_c_avg_qc"].values), label="10 feet")
@@ -102,6 +105,7 @@ def make_inversion_plot(ctx):
     ax.legend(loc="best", ncol=3, fontsize=10)
 
     ax = axes[1]
+    ax.set_position([0.07, 0.4, axwidth, axheight])
     ax.plot(
         df["valid"],
         (
@@ -110,18 +114,41 @@ def make_inversion_plot(ctx):
         ),
     )
     ax.grid(True)
-    ax.text(
-        0.01,
-        0.99,
+    ax.set_title(
         "10 Foot Temperature minus 1.5 Foot Temperature",
-        transform=ax.transAxes,
-        va="top",
-        bbox=dict(color="white"),
     )
     ax.set_ylabel(r"Air Temperature Diff $^\circ$F")
     ax.xaxis.set_major_formatter(
         mdates.DateFormatter("%-I:%M %p\n%-d %b", tz=CENTRAL)
     )
+
+    ax = axes[2]
+    ax.set_position([0.07, 0.1, axwidth, axheight])
+    ax.bar(
+        df["valid"],
+        convert_value(
+            df["ws_ms_max_qc"].values, "meter / second", "mile / hour"
+        ),
+        zorder=2,
+        color="red",
+        width=1 / 1440.0,
+        label="5 Second Gust",
+    )
+    ax.bar(
+        df["valid"],
+        convert_value(
+            df["ws_ms_avg_qc"].values, "meter / second", "mile / hour"
+        ),
+        zorder=3,
+        color="lightblue",
+        label="1 Minute Speed",
+        width=1 / 1440.0,
+    )
+    ax.set_title("10 Foot Wind Speed")
+    ax.grid(True)
+    ax.set_ylabel("Wind Speed/Gust [MPH]")
+    ax.legend(ncol=2)
+
     return fig, df
 
 
