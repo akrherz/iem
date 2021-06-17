@@ -1,6 +1,5 @@
 """wind rose"""
 import datetime
-from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
@@ -11,41 +10,37 @@ from pyiem.util import get_autoplot_context, get_dbconn, drct2text
 from pyiem.plot.use_agg import plt
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
-    [
-        ("ts", "Thunderstorm (TS) Reported"),
-        ("tmpf_above", "Temperature At or Above Threshold (F)"),
-        ("tmpf_below", "Temperature Below Threshold (F)"),
-        ("dwpf_above", "Dew Point At or Above Threshold (F)"),
-        ("dwpf_below", "Dew Point Below Threshold (F)"),
-    ]
-)
+PDICT = {
+    "ts": "Thunderstorm (TS) Reported",
+    "tmpf_above": "Temperature At or Above Threshold (F)",
+    "tmpf_below": "Temperature Below Threshold (F)",
+    "dwpf_above": "Dew Point At or Above Threshold (F)",
+    "dwpf_below": "Dew Point Below Threshold (F)",
+}
 
-MDICT = OrderedDict(
-    [
-        ("all", "No Month/Time Limit"),
-        ("spring", "Spring (MAM)"),
-        ("fall", "Fall (SON)"),
-        ("winter", "Winter (DJF)"),
-        ("summer", "Summer (JJA)"),
-        ("jan", "January"),
-        ("feb", "February"),
-        ("mar", "March"),
-        ("apr", "April"),
-        ("may", "May"),
-        ("jun", "June"),
-        ("jul", "July"),
-        ("aug", "August"),
-        ("sep", "September"),
-        ("oct", "October"),
-        ("nov", "November"),
-        ("dec", "December"),
-    ]
-)
+MDICT = {
+    "all": "No Month/Time Limit",
+    "spring": "Spring (MAM)",
+    "fall": "Fall (SON)",
+    "winter": "Winter (DJF)",
+    "summer": "Summer (JJA)",
+    "jan": "January",
+    "feb": "February",
+    "mar": "March",
+    "apr": "April",
+    "may": "May",
+    "jun": "June",
+    "jul": "July",
+    "aug": "August",
+    "sep": "September",
+    "oct": "October",
+    "nov": "November",
+    "dec": "December",
+}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -86,7 +81,7 @@ def get_description():
 
 
 def highcharts(fdict):
-    """ Generate the highcharts variant"""
+    """Generate the highcharts variant"""
     ctx = get_context(fdict)
     dir_edges, _, table = histogram(
         ctx["df"]["drct"].values,
@@ -288,7 +283,7 @@ def get_context(fdict):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_context(fdict)
 
     fig = plt.figure(figsize=(6, 7.2), facecolor="w", edgecolor="w")

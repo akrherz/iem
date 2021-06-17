@@ -7,7 +7,7 @@ import requests
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconn, logger, exponential_backoff
 from pyiem.reference import TRACE_VALUE, ncei_state_codes
 
 LOG = logger()
@@ -73,7 +73,10 @@ def do(meta, station, acis_station, interactive):
         payload["edate"],
         station,
     )
-    req = requests.post(SERVICE, json=payload)
+    req = exponential_backoff(requests.post, SERVICE, json=payload, timeout=30)
+    if req is None:
+        LOG.info("Total download failure for %s", acis_station)
+        return 0
     if req.status_code != 200:
         LOG.info("Got status_code %s for %s", req.status_code, acis_station)
         # Give server some time to recover from transient errors

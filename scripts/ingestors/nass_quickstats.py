@@ -38,7 +38,10 @@ def get_df(year, sts, topic):
     params.update(topic)
     req = requests.get(SERVICE, params, timeout=300)
     if req.status_code != 200:
-        LOG.info("Got status_code %s %s", req.status_code, req.url)
+        if req.status_code == 400:
+            LOG.debug("Got status_code=400 (no data) %s", req.url)
+        else:
+            LOG.info("Got status_code %s %s", req.status_code, req.url)
         return
     data = req.json()
     return pd.DataFrame(data["data"])

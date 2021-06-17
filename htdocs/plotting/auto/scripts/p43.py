@@ -1,6 +1,5 @@
 """Ob timeseries"""
 import datetime
-from collections import OrderedDict
 
 import pytz
 import matplotlib.dates as mdates
@@ -12,12 +11,10 @@ from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
 from metpy.units import units
 
-PDICT = OrderedDict(
-    (
-        ("default", "Temperatures | Winds | Clouds + Vis"),
-        ("two", "Temperatures | Winds | Pressure"),
-    )
-)
+PDICT = {
+    "default": "Temperatures | Winds | Clouds + Vis",
+    "two": "Temperatures | Winds | Pressure",
+}
 
 
 def date_ticker(ax, mytz):
@@ -47,7 +44,7 @@ def date_ticker(ax, mytz):
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 360
@@ -125,7 +122,7 @@ def get_data(network, station, tzname, sdate):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     sdate = ctx.get("sdate")

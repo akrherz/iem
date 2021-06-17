@@ -1,7 +1,6 @@
 """Climate District ranks"""
 import datetime
 import calendar
-from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
@@ -9,46 +8,41 @@ from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
-    (
-        ("arridity", "Arridity Index"),
-        ("avgt", "Average Temperature"),
-        ("high", "Average High Temperature"),
-        ("low", "Average Low Temperature"),
-        ("precip", "Total Precipitation"),
-    )
-)
-PDICT2 = OrderedDict(
-    (
-        ("month", "Plot by Month(s) [Option 1]"),
-        ("day", "Plot by Inclusive Date Period [Option 2]"),
-    )
-)
+PDICT = {
+    "arridity": "Arridity Index",
+    "avgt": "Average Temperature",
+    "high": "Average High Temperature",
+    "low": "Average Low Temperature",
+    "precip": "Total Precipitation",
+}
 
-MDICT = OrderedDict(
-    [
-        ("spring", "Spring (MAM)"),
-        ("fall", "Fall (SON)"),
-        ("winter", "Winter (DJF)"),
-        ("summer", "Summer (JJA)"),
-        ("1", "January"),
-        ("2", "February"),
-        ("3", "March"),
-        ("4", "April"),
-        ("5", "May"),
-        ("6", "June"),
-        ("7", "July"),
-        ("8", "August"),
-        ("9", "September"),
-        ("10", "October"),
-        ("11", "November"),
-        ("12", "December"),
-    ]
-)
+PDICT2 = {
+    "month": "Plot by Month(s) [Option 1]",
+    "day": "Plot by Inclusive Date Period [Option 2]",
+}
+
+MDICT = {
+    "spring": "Spring (MAM)",
+    "fall": "Fall (SON)",
+    "winter": "Winter (DJF)",
+    "summer": "Summer (JJA)",
+    "1": "January",
+    "2": "February",
+    "3": "March",
+    "4": "April",
+    "5": "May",
+    "6": "June",
+    "7": "July",
+    "8": "August",
+    "9": "September",
+    "10": "October",
+    "11": "November",
+    "12": "December",
+}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 86400
@@ -272,7 +266,7 @@ def get_monthly_data(ctx):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     if ctx["p"] == "day":
         get_daily_data(ctx)

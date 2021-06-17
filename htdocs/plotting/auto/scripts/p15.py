@@ -1,20 +1,19 @@
 """day to day temp changes"""
 import calendar
 import datetime
-from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
 import matplotlib.patheffects as PathEffects
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict([("high", "High Temperature"), ("low", "Low Temperature")])
+PDICT = {"high": "High Temperature", "low": "Low Temperature"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -48,7 +47,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
@@ -88,7 +87,12 @@ def plotter(fdict):
     nochange2 = gyear[varname + "_unch"]
     decrease2 = gyear[varname + "_lower"]
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    title = "%s [%s]\nDay to Day %s Temperature Change" % (
+        ctx["_nt"].sts[station]["name"],
+        station,
+        varname.title(),
+    )
+    (fig, ax) = figure_axes(title=title)
 
     total = decrease + nochange + increase
     total2 = decrease2 + nochange2 + increase2
@@ -196,10 +200,6 @@ def plotter(fdict):
     ax.set_ylabel("Percentage of Days [%]")
     ax.set_xlabel(
         f"Dark Shades are long term averages, lighter are {year} actuals"
-    )
-    ax.set_title(
-        ("%s [%s]\nDay to Day %s Temperature Change")
-        % (ctx["_nt"].sts[station]["name"], station, varname.title())
     )
 
     return fig, df

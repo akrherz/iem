@@ -5,7 +5,7 @@ import psycopg2.extras
 import numpy as np
 import pandas as pd
 from scipy import stats
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -14,7 +14,7 @@ PDICT = {"end_summer": "End of Summer", "start_summer": "Start of Summer"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -42,7 +42,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
@@ -79,19 +79,16 @@ def plotter(fdict):
     df = pd.DataFrame(dict(year=pd.Series(years), doy=pd.Series(maxsday)))
     maxsday = np.array(maxsday)
 
-    (fig, ax) = plt.subplots(1, 1)
+    title = "%s [%s] %s\n%s Date of Warmest (Avg Temp) 91 Day Period" % (
+        ctx["_nt"].sts[station]["name"],
+        station,
+        PDICT.get(which),
+        "End" if delta == 0 else "Start",
+    )
+    (fig, ax) = figure_axes(title=title)
     ax.scatter(years, maxsday)
     ax.grid(True)
     ax.set_ylabel("%s Date" % ("End" if delta == 0 else "Start",))
-    ax.set_title(
-        ("%s [%s] %s\n%s Date of Warmest (Avg Temp) 91 Day Period")
-        % (
-            ctx["_nt"].sts[station]["name"],
-            station,
-            PDICT.get(which),
-            "End" if delta == 0 else "Start",
-        )
-    )
 
     yticks = []
     yticklabels = []
