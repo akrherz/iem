@@ -282,6 +282,9 @@ def merge_network_obs(df, network, ts):
         # using DataSeries.update() caused SettingWithCopyError, shrug
         df.loc[useidx, col] = df[f"{col}b"]
         df.loc[useidx, "dirty"] = True
+        # suboptimal
+        if col in ["high", "precip"]:
+            df.loc[useidx, estcol] = False
         df = df.drop(col + "b", axis=1)
     return df
 
