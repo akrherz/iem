@@ -4,6 +4,7 @@ from collections import OrderedDict
 
 import pytz
 import numpy as np
+import pandas as pd
 from pandas.io.sql import read_sql
 from metpy.calc import apparent_temperature
 from metpy.units import units
@@ -19,7 +20,7 @@ PDICT2 = OrderedDict(
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 600
@@ -156,7 +157,7 @@ def get_df(ctx, bnds, buf=2.25):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     varname = ctx["v"]
 
@@ -196,6 +197,7 @@ def plotter(fdict):
             .to(units("degF"))
             .m
         )
+        df = df[~pd.isna(df["feel"])]
     # Data QC, cough
     if ctx.get("above"):
         df = df[df[varname] < ctx["above"]]
