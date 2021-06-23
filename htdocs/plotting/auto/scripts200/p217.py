@@ -19,7 +19,7 @@ UNITS = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["cache"] = 3600
     desc["data"] = True
@@ -46,7 +46,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("postgis")
     ctx = get_autoplot_context(fdict, get_description())
     pid = ctx["pid"][:32]
@@ -69,7 +69,12 @@ def plotter(fdict):
         raise NoDataFound("SPS Event Segment was not found, sorry.")
     row = df2.iloc[0]
     wfo = row["wfo"]
-    tz = pytz.timezone(nt.sts[wfo]["tzname"])
+    tzname = nt.sts.get(wfo, {}).get("tzname")
+    if tzname is None:
+        tzname = nt.sts.get(f"P{wfo}", {}).get("tzname")
+        if tzname is None:
+            tzname = "UTC"
+    tz = pytz.timezone(tzname)
     expire = df["expire"].dt.tz_convert(tz)[0]
 
     if row["geom"].is_empty:
@@ -173,4 +178,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"pid": "202103152025-KRIW-WWUS85-SPSRIW", "segnum": 0})
+    plotter({"pid": "202106232029-PAFG-WWAK83-SPSAFG", "segnum": 0})
