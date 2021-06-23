@@ -74,7 +74,11 @@ for ($i=0; $row = pg_fetch_assoc($rs); $i++) {
   if (is_null($maxvalid) || $row["max_valid"] > $maxvalid){
     $maxvalid = $row["max_valid"];
 }
-  $val = round($row["s"] / 25.4,2);
+    if ($dvar == "rain_in_tot"){
+        $val = round($row["s"],2);
+    } else {
+        $val = round($row["s"] / 25.4,2);
+    }
   $sdate = strtotime( $row["min"] );
   $edate = strtotime( $row["max"] );
   
