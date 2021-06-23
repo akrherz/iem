@@ -19,7 +19,7 @@ def v(val):
 
 
 def do(ts):
-    """ Do a UTC date's worth of data"""
+    """Do a UTC date's worth of data"""
     pgconn = get_dbconn("hads")
     table = ts.strftime("raw%Y_%m")
     sts = datetime.datetime(ts.year, ts.month, ts.day).replace(tzinfo=pytz.utc)
@@ -67,7 +67,7 @@ def do(ts):
     cursor.copy_from(
         data,
         table,
-        columns=("station, valid", "tmpf", "dwpf", "drct", "sknt"),
+        columns=("station", "valid", "tmpf", "dwpf", "drct", "sknt"),
         null="null",
     )
     cursor.close()
