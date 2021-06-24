@@ -60,7 +60,7 @@ def main(argv):
         cursor = pgconn.cursor()
         cursor.copy_from(
             sio,
-            "alldata_%s" % (state,),
+            f"alldata_{state.lower()}",
             columns=("station", "day", "sday", "year", "month"),
             sep=",",
         )
