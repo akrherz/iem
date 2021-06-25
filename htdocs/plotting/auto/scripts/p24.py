@@ -1,6 +1,5 @@
 """Climate District ranks"""
 import datetime
-import calendar
 
 import numpy as np
 from pandas.io.sql import read_sql
@@ -118,17 +117,16 @@ def get_description():
     return desc
 
 
-def get_daily_data(ctx):
+def get_daily_data(ctx, sdate, edate):
     """Do the data work"""
-    pgconn = get_dbconn("coop")
-    sdate = ctx["sdate"]
-    edate = ctx["edate"]
+    edate = min([edate, datetime.date.today()])
     if edate <= sdate:
         raise NoDataFound("start date after end date, please correct")
     if (edate - sdate).days > 366:
         raise NoDataFound(
             "Sorry, too long of period selected. < 1 year please"
         )
+    pgconn = get_dbconn("coop")
     yearcond = "false"
     if edate.year != sdate.year:
         yearcond = f"sday >= '{sdate.strftime('%m%d')}'"
@@ -166,7 +164,7 @@ def get_daily_data(ctx):
         GROUP by myyear, station),
     ranks as (
         SELECT station, myyear as year,
-        max(max_date) OVER (PARTITION by station) as max_date,
+        max(max_date) OVER (PARTITION by station, myyear) as max_date,
         avg(p) OVER (PARTITION by station) as avg_precip,
         stddev(p) OVER (PARTITION by station) as std_precip,
         p as precip,
@@ -184,8 +182,7 @@ def get_daily_data(ctx):
 
     SELECT station, precip_rank, avgt_rank, high_rank, low_rank,
     ((high - avg_high) / std_high) - ((precip - avg_precip) / std_precip)
-    as arridity, max_date from ranks
-    where year = %s
+    as arridity, max_date from ranks where year = %s
     """,
         pgconn,
         params=(edate.year,),
@@ -193,97 +190,39 @@ def get_daily_data(ctx):
     )
     if ctx["df"].empty:
         raise NoDataFound("No data found")
-    edate = min([edate, ctx["df"]["max_date"].max()])
-    ctx["label"] = "%s ~7 AM - %s ~7 AM" % (
-        sdate.strftime("%-d %b %Y"),
+    edate = ctx["df"]["max_date"].max()
+    ctx["label"] = "%s ~7 AM till %s ~7 AM" % (
+        (sdate - datetime.timedelta(days=1)).strftime("%-d %b %Y"),
         edate.strftime("%-d %b %Y"),
-    )
-
-
-def get_monthly_data(ctx):
-    """Do the data work"""
-    pgconn = get_dbconn("coop")
-    year = ctx["year"]
-    month = ctx["month"]
-    offset = "0 days"
-    if month == "fall":
-        months = [9, 10, 11]
-        ctx["label"] = "Fall (SON)"
-    elif month == "winter":
-        months = [12, 1, 2]
-        offset = "32 days"
-        ctx["label"] = "Winter (DJF)"
-    elif month == "spring":
-        months = [3, 4, 5]
-        ctx["label"] = "Spring (MAM)"
-    elif month == "summer":
-        months = [6, 7, 8]
-        ctx["label"] = "Summer (JJA)"
-    else:
-        months = [int(month)]
-        ctx["label"] = "%s %s" % (year, calendar.month_name[int(month)])
-    statelimiter = ""
-    table = "alldata"
-    if len(ctx["csector"]) == 2:
-        statelimiter = (" and substr(station, 1, 2) = '%s' ") % (
-            ctx["csector"],
-        )
-        table = "alldata_%s" % (ctx["csector"],)
-
-    ctx["df"] = read_sql(
-        f"""
-    with monthly as (
-        SELECT
-        extract(year from day + '{offset}'::interval) as myyear,
-        station, sum(precip) as p,
-        avg((high+low)/2.) as avgt,
-        avg(low) as avglo,
-        avg(high) as avghi
-        from {table}
-        WHERE substr(station,3,1) = 'C' and month in %s {statelimiter}
-        GROUP by myyear, station),
-    ranks as (
-        SELECT station, myyear as year,
-        avg(p) OVER (PARTITION by station) as avg_precip,
-        stddev(p) OVER (PARTITION by station) as std_precip,
-        p as precip,
-        avg(avghi) OVER (PARTITION by station) as avg_high,
-        stddev(avghi) OVER (PARTITION by station) as std_high,
-        avghi as high,
-        avg(avglo) OVER (PARTITION by station) as avg_low,
-        stddev(avglo) OVER (PARTITION by station) as std_low,
-        avglo as low,
-        rank() OVER (PARTITION by station ORDER by p DESC) as precip_rank,
-        rank() OVER (PARTITION by station ORDER by avghi DESC) as high_rank,
-        rank() OVER (PARTITION by station ORDER by avglo DESC) as low_rank,
-        rank() OVER (PARTITION by station ORDER by avgt DESC) as avgt_rank
-        from monthly)
-
-    SELECT station, precip_rank, avgt_rank, high_rank, low_rank,
-    ((high - avg_high) / std_high) - ((precip - avg_precip) / std_precip)
-    as arridity from ranks
-    where year = %s
-    """,
-        pgconn,
-        params=(tuple(months), year),
-        index_col="station",
     )
 
 
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
-    today = datetime.date.today()
     if ctx["p"] == "day":
-        get_daily_data(ctx)
+        get_daily_data(ctx, ctx["sdate"], ctx["edate"])
     else:
-        # Check that we are not running for the current month
-        if ctx["year"] == today.year and ctx["month"] == str(today.month):
-            ctx["sdate"] = today.replace(day=1)
-            ctx["edate"] = today
-            get_daily_data(ctx)
+        oneday = datetime.timedelta(days=1)
+        year = ctx["year"]
+        month = ctx["month"]
+        if month == "fall":
+            sts = datetime.date(year, 9, 1)
+            ets = datetime.date(year, 11, 30)
+        elif month == "winter":
+            sts = datetime.date(year, 12, 1)
+            ets = datetime.date(year, 3, 1) - oneday
+        elif month == "spring":
+            sts = datetime.date(year, 3, 1)
+            ets = datetime.date(year, 5, 31)
+        elif month == "summer":
+            sts = datetime.date(year, 6, 1)
+            ets = datetime.date(year, 8, 31)
         else:
-            get_monthly_data(ctx)
+            sts = datetime.date(year, int(month), 1)
+            ets = (sts + datetime.timedelta(days=34)).replace(day=1) - oneday
+
+        get_daily_data(ctx, sts, ets)
     ctx["lastyear"] = datetime.date.today().year
     ctx["years"] = ctx["lastyear"] - 1893 + 1
     csector = ctx["csector"]
