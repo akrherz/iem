@@ -1,7 +1,6 @@
 """Flash Flood Guidance Plots"""
 import datetime
 import os
-from collections import OrderedDict
 
 import pytz
 import pygrib
@@ -13,15 +12,13 @@ from pyiem.plot import MapPlot, get_cmap
 from pyiem.exceptions import NoDataFound
 
 
-HOURS = OrderedDict(
-    [
-        ("1", "One Hour"),
-        ("3", "Three Hour"),
-        ("6", "Six Hour"),
-        ("12", "Twelve Hour"),
-        ("24", "Twenty Four Hour"),
-    ]
-)
+HOURS = {
+    "1": "One Hour",
+    "3": "Three Hour",
+    "6": "Six Hour",
+    "12": "Twelve Hour",
+    "24": "Twenty Four Hour",
+}
 PDICT = {
     "cwa": "Plot by NWS Forecast Office",
     "midwest": "Midwestern US",
@@ -36,7 +33,7 @@ PDICT3 = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -105,7 +102,7 @@ here</a>.
         dict(
             type="cmap",
             name="cmap",
-            default="gist_rainbow_r",
+            default="gist_rainbow",
             label="Color Ramp:",
         ),
     ]
@@ -113,7 +110,7 @@ here</a>.
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     ts = ctx["ts"].replace(tzinfo=pytz.utc)
     hour = int(ctx["hour"])
