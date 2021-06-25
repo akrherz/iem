@@ -142,10 +142,6 @@ def get_daily_data(ctx):
             edate.strftime("%m%d"),
         )
 
-    ctx["label"] = "%s - %s" % (
-        sdate.strftime("%-d %b %Y"),
-        edate.strftime("%-d %b %Y"),
-    )
     statelimiter = ""
     table = "alldata"
     if len(ctx["csector"]) == 2:
@@ -163,12 +159,14 @@ def get_daily_data(ctx):
         sum(precip) as p,
         avg((high+low)/2.) as avgt,
         avg(low) as avglo,
-        avg(high) as avghi
+        avg(high) as avghi,
+        max(day) as max_date
         from {table}
         WHERE substr(station, 3, 1) = 'C' and ( {sday} ) {statelimiter}
         GROUP by myyear, station),
     ranks as (
         SELECT station, myyear as year,
+        max(max_date) OVER (PARTITION by station) as max_date,
         avg(p) OVER (PARTITION by station) as avg_precip,
         stddev(p) OVER (PARTITION by station) as std_precip,
         p as precip,
@@ -186,12 +184,19 @@ def get_daily_data(ctx):
 
     SELECT station, precip_rank, avgt_rank, high_rank, low_rank,
     ((high - avg_high) / std_high) - ((precip - avg_precip) / std_precip)
-    as arridity from ranks
+    as arridity, max_date from ranks
     where year = %s
     """,
         pgconn,
         params=(edate.year,),
         index_col="station",
+    )
+    if ctx["df"].empty:
+        raise NoDataFound("No data found")
+    edate = min([edate, ctx["df"]["max_date"].max()])
+    ctx["label"] = "%s ~7 AM - %s ~7 AM" % (
+        sdate.strftime("%-d %b %Y"),
+        edate.strftime("%-d %b %Y"),
     )
 
 
@@ -268,10 +273,17 @@ def get_monthly_data(ctx):
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
+    today = datetime.date.today()
     if ctx["p"] == "day":
         get_daily_data(ctx)
     else:
-        get_monthly_data(ctx)
+        # Check that we are not running for the current month
+        if ctx["year"] == today.year and ctx["month"] == str(today.month):
+            ctx["sdate"] = today.replace(day=1)
+            ctx["edate"] = today
+            get_daily_data(ctx)
+        else:
+            get_monthly_data(ctx)
     ctx["lastyear"] = datetime.date.today().year
     ctx["years"] = ctx["lastyear"] - 1893 + 1
     csector = ctx["csector"]
