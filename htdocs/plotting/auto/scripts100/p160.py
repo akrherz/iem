@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -16,7 +16,7 @@ MDICT = {"primary": "Primary Field", "secondary": "Secondary Field"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 3600
@@ -26,7 +26,9 @@ def get_description():
     and forecasts.  The plot is roughly centered on the date of your choice
     with the plot showing any forecasts made three days prior to the date
     and for one day afterwards.  Sorry that you have to know the station ID
-    prior to using this page (will fix at some point).
+    prior to using this page (will fix at some point).  Presented timestamps
+    are hopefully all in the local timezone of the reporting station.  If
+    you download the data, the timestamps are all in UTC.
     """
     utc = datetime.datetime.utcnow()
     desc["arguments"] = [
@@ -66,18 +68,18 @@ def get_context(fdict):
 
     # Attempt to get station information
     cursor.execute(
-        """
-    SELECT name from stations where id = %s and network ~* 'DCP'
-    """,
+        "SELECT name, tzname from stations where id = %s and network ~* 'DCP'",
         (station,),
     )
     ctx["name"] = ""
+    ctx["tzname"] = "UTC"
     if cursor.rowcount > 0:
         row = cursor.fetchone()
         ctx["name"] = row[0]
+        ctx["tzname"] = row[1]
 
     ctx["fdf"] = read_sql(
-        """with fx as (
+        f"""with fx as (
         select id, issued, primaryname, primaryunits, secondaryname,
         secondaryunits from hml_forecast where station = %s
         and generationtime between %s and %s)
@@ -87,9 +89,7 @@ def get_context(fdict):
     d.primary_value, f.primaryname,
     f.primaryunits, d.secondary_value, f.secondaryname,
     f.secondaryunits from
-    hml_forecast_data_"""
-        + str(dt.year)
-        + """ d JOIN fx f
+    hml_forecast_data_{dt.year} d JOIN fx f
     on (d.hml_forecast_id = f.id) ORDER by f.id ASC, d.valid ASC
     """,
         pgconn,
@@ -119,13 +119,15 @@ def get_context(fdict):
         mints = dt - datetime.timedelta(days=3)
         maxts = dt + datetime.timedelta(days=3)
     df = read_sql(
-        "SELECT distinct valid, h.label, value from hml_observed_data d "
+        "SELECT distinct valid at time zone 'UTC' as valid, "
+        "h.label, value from hml_observed_data d "
         "JOIN hml_observed_keys h on (d.key = h.id) WHERE station = %s and "
         "valid between %s and %s ORDER by valid ASC",
         pgconn,
         params=(station, mints, maxts),
         index_col=None,
     )
+    df["valid"] = df["valid"].dt.tz_localize(pytz.UTC)
     if df.empty:
         raise NoDataFound("No Data Found.")
     ctx["odf"] = df.pivot("valid", "label", "value")
@@ -140,7 +142,12 @@ def get_context(fdict):
             sort=False,
         )
     ctx["title"] = "[%s] %s" % (ctx["station"], ctx["name"])
-    ctx["subtitle"] = ctx["dt"].strftime("%d %b %Y %H:%M UTC")
+    ctx["subtitle"] = "+/- 72 hours around %s" % (
+        ctx["dt"]
+        .replace(tzinfo=pytz.UTC)
+        .astimezone(pytz.timezone(ctx["tzname"]))
+        .strftime("%d %b %Y %-I:%M %p %Z"),
+    )
     if "df" not in ctx or (ctx["df"].empty and not ctx["odf"].empty):
         ctx["primary"] = ctx["odf"].columns[0]
         ctx["secondary"] = ctx["odf"].columns[1]
@@ -158,7 +165,11 @@ def highcharts(fdict):
     fxs = df["id"].unique()
     for fx in fxs:
         df2 = df[df["id"] == fx]
-        issued = df2.iloc[0]["issued"].strftime("%-m/%-d %Hz")
+        issued = (
+            df2.iloc[0]["issued"]
+            .tz_convert(pytz.timezone(ctx["tzname"]))
+            .strftime("%-m/%-d %-I%p %Z")
+        )
         v = df2[["ticks", ctx["var"] + "_value"]].to_json(orient="values")
         lines.append(
             """{
@@ -193,7 +204,12 @@ def highcharts(fdict):
     return (
         """
 $("#ap_container").highcharts({
-    time: {useUTC: false},
+    time: {
+        useUTC: false,
+        timezone: '"""
+        + ctx["tzname"]
+        + """'
+    },
     title: {text: '"""
         + ctx["title"]
         + """'},
@@ -203,9 +219,14 @@ $("#ap_container").highcharts({
     chart: {zoomType: 'x'},
     tooltip: {
         shared: true,
-        crosshairs: true
+        crosshairs: true,
+        xDateFormat: '%d %b %Y %I:%M %p'
     },
-    xAxis: {type: 'datetime'},
+    xAxis: {
+        title: {text: '"""
+        + ctx["tzname"]
+        + """ Timezone'},
+        type: 'datetime'},
     yAxis: {title: {text: '"""
         + ctx.get(ctx["var"], "primary")
         + """'}},
@@ -218,16 +239,21 @@ $("#ap_container").highcharts({
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_context(fdict)
     if "df" not in ctx or (ctx["df"].empty and ctx["odf"].empty):
         raise NoDataFound("No Data Found!")
     df = ctx["df"]
-    (fig, ax) = plt.subplots(1, 1, figsize=(10, 6))
+    title = "\n".join([ctx["title"], ctx["subtitle"]])
+    (fig, ax) = figure_axes(title=title)
     fxs = df["id"].unique()
     for fx in fxs:
         df2 = df[df["id"] == fx]
-        issued = df2.iloc[0]["issued"].strftime("%-m/%-d %Hz")
+        issued = (
+            df2.iloc[0]["issued"]
+            .tz_convert(pytz.timezone(ctx["tzname"]))
+            .strftime("%-m/%-d %-I%p %Z")
+        )
         ax.plot(
             df2["valid"], df2[ctx["var"] + "_value"], zorder=2, label=issued
         )
@@ -241,11 +267,16 @@ def plotter(fdict):
             zorder=4,
         )
         ax.set_ylabel(ctx[ctx["var"]])
-    ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d %b\n%Y"))
+    ax.xaxis.set_major_locator(
+        mdates.AutoDateLocator(tz=pytz.timezone(ctx["tzname"]))
+    )
+    ax.xaxis.set_major_formatter(
+        mdates.DateFormatter("%-d %b\n%Y", tz=pytz.timezone(ctx["tzname"]))
+    )
     pos = ax.get_position()
     ax.grid(True)
-    ax.set_title("%s\n%s" % (ctx["title"], ctx["subtitle"]))
-    ax.set_position([pos.x0, pos.y0, 0.6, 0.8])
+    ax.set_position([pos.x0, pos.y0, 0.74, 0.8])
+    ax.set_xlabel(f"Timestamps in {ctx['tzname']} Timezone")
     ax.legend(loc=(1.0, 0.0))
     df["issued"] = df["issued"].apply(lambda x: x.strftime("%Y-%m-%d %H:%M"))
     df["valid"] = df["valid"].apply(lambda x: x.strftime("%Y-%m-%d %H:%M"))
@@ -253,4 +284,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="COLO1", dt="2021-03-02 1200"))
+    plotter(dict(station="MLGO1", dt="2021-06-19 1653"))

@@ -509,6 +509,7 @@ def generate_form(apid, fdict, headers, cookies):
             res[
                 "extrascripts"
             ] += f"""
+<script src="/vendor/moment/2.13.0/moment.min.js"></script>
 <script src="/vendor/highcharts/{HIGHCHARTS}/highcharts.js"></script>
 <script src="/vendor/highcharts/{HIGHCHARTS}/highcharts-more.js"></script>
 <script src="/vendor/highcharts/{HIGHCHARTS}/modules/exporting.js"></script>
