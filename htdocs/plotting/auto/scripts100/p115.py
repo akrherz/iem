@@ -25,7 +25,7 @@ LABELS = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["report"] = True
@@ -76,7 +76,7 @@ def p(df, year, month, varname, precision):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
 
@@ -84,7 +84,6 @@ def plotter(fdict):
     varname = ctx["var"]
 
     table = "alldata_%s" % (station[:2],)
-    today = datetime.date.today().replace(day=1)
 
     df = read_sql(
         f"""
@@ -94,12 +93,12 @@ def plotter(fdict):
         sum(precip) as precip,
         sum(snow) as snow,
         avg(high) as avg_high, avg(low) as avg_low,
-        avg((high+low)/2.) as avg_temp from {table} WHERE
-        station = %s and day < %s
+        avg((high+low)/2.) as avg_temp, max(day) as max_day from {table} WHERE
+        station = %s
         GROUP by year, water_year, month ORDER by year ASC, month ASC
     """,
         pgconn,
-        params=(station, today),
+        params=(station,),
         index_col=None,
     )
     if df.empty:
@@ -116,7 +115,7 @@ def plotter(fdict):
     ) % (
         datetime.date.today().strftime("%d %b %Y"),
         ctx["_nt"].sts[station]["archive_begin"].date(),
-        datetime.date.today(),
+        df["max_day"].max(),
         station,
         ctx["_nt"].sts[station]["name"],
     )

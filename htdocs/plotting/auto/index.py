@@ -499,7 +499,7 @@ def generate_form(apid, fdict, headers, cookies):
             content = requests.get(
                 f"http://iem.local{res['imguri']}.txt",
                 timeout=300,
-            ).content
+            ).text
             res["image"] = f"<pre>\n{content}</pre>"
         elif fmt == "js":
             res["image"] = (

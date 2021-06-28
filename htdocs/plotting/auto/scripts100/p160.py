@@ -127,9 +127,9 @@ def get_context(fdict):
         params=(station, mints, maxts),
         index_col=None,
     )
-    df["valid"] = df["valid"].dt.tz_localize(pytz.UTC)
     if df.empty:
         raise NoDataFound("No Data Found.")
+    df["valid"] = df["valid"].dt.tz_localize(pytz.UTC)
     ctx["odf"] = df.pivot("valid", "label", "value")
     if not ctx["fdf"].empty:
         ctx["fdf"].reset_index(inplace=True)
