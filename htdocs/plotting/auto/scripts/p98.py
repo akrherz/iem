@@ -1,6 +1,5 @@
 """Day of month frequency."""
 import calendar
-from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
@@ -9,15 +8,13 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
-    (
-        ("precip", "Daily Precipitation"),
-        ("snow", "Daily Snowfall"),
-        ("snowd", "Daily Snow Depth"),
-        ("high", "High Temperature"),
-        ("low", "Low Temperature"),
-    )
-)
+PDICT = {
+    "precip": "Daily Precipitation",
+    "snow": "Daily Snowfall",
+    "snowd": "Daily Snow Depth",
+    "high": "High Temperature",
+    "low": "Low Temperature",
+}
 
 PDICT2 = {"above": "At or Above Threshold", "below": "Below Threshold"}
 
@@ -105,7 +102,7 @@ def plotter(fdict):
         PDICT.get(varname),
         PDICT2.get(drct),
         threshold,
-        calendar.month_abbr[month],
+        calendar.month_name[month],
         df["hit"].sum() / float(df["total"].sum()) * len(df.index),
     )
     fig, ax = figure_axes(title=title)

@@ -1,13 +1,13 @@
 """Temp drops in the fall"""
 
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -36,7 +36,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
@@ -64,8 +64,13 @@ def plotter(fdict):
         raise NoDataFound("No Data Found.")
     # remove in-progress years
     df = df[df["count"] > 122]
+    title = (
+        "%s %s\n"
+        "Max Jul-Dec Low Temp Drop Exceeding "
+        "Previous Min Low for Fall"
+    ) % (station, ctx["_nt"].sts[station]["name"])
 
-    (fig, ax) = plt.subplots(1, 1, sharex=True, figsize=(8, 6))
+    (fig, ax) = figure_axes(title=title)
     ax.bar(df.index.values, 0 - df["largest_change"], fc="b", ec="b", zorder=1)
     ax.bar(
         year, 0 - df.at[year, "largest_change"], fc="red", ec="red", zorder=2
@@ -77,14 +82,6 @@ def plotter(fdict):
         % (df["largest_change"].mean(),)
     )
     ax.set_xlabel("%s value is %s" % (year, df.at[year, "largest_change"]))
-    ax.set_title(
-        (
-            "%s %s\n"
-            "Max Jul-Dec Low Temp Drop Exceeding "
-            "Previous Min Low for Fall"
-        )
-        % (station, ctx["_nt"].sts[station]["name"])
-    )
     ax.set_xlim(df.index.values.min() - 1, df.index.values.max() + 1)
 
     return fig, df

@@ -1,19 +1,21 @@
 """Hourly temp impacts from clouds"""
 import datetime
-from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.plot import get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict((["clear", "clear"], ["cloudy", "mostly cloudy"]))
+PDICT = {
+    "clear": "clear",
+    "cloudy": "mostly cloudy",
+}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -47,7 +49,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
@@ -88,8 +90,19 @@ def plotter(fdict):
         if row[0] > 52:
             continue
         data[int(row["hour"]), int(row["week"]) - 1] = row["difference"]
-
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    ab = ctx["_nt"].sts[station]["archive_begin"]
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
+    title = (
+        "[%s] %s %s-%s\nHourly Temp Departure " "(skies were %s vs all)"
+    ) % (
+        station,
+        ctx["_nt"].sts[station]["name"],
+        max([ab.year, 1973]),
+        datetime.date.today().year,
+        PDICT[ctx["which"]],
+    )
+    (fig, ax) = figure_axes(title=title)
 
     maxv = np.ceil(max([np.max(data), 0 - np.min(data)])) + 0.2
     cs = ax.imshow(
@@ -103,19 +116,6 @@ def plotter(fdict):
     a = fig.colorbar(cs)
     a.ax.set_ylabel(r"Temperature Departure $^{\circ}\mathrm{F}$")
     ax.grid(True)
-    ab = ctx["_nt"].sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata.")
-    ax.set_title(
-        ("[%s] %s %s-%s\nHourly Temp Departure " "(skies were %s vs all)")
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            max([ab.year, 1973]),
-            datetime.date.today().year,
-            PDICT[ctx["which"]],
-        )
-    )
     ax.set_ylim(-0.5, 23.5)
     ax.set_ylabel(
         "Local Hour of Day, %s" % (ctx["_nt"].sts[station]["tzname"],)

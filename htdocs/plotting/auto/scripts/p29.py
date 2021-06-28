@@ -4,13 +4,13 @@ import calendar
 import pytz
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc[
         "description"
@@ -47,7 +47,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
@@ -80,7 +80,20 @@ def plotter(fdict):
     df["freq"] = df["hits"] / df["count"] * 100.0
     df["above_freq"] = df["above"] / df["count"] * 100.0
     df["below_freq"] = df["below"] / df["count"] * 100.0
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    ut = utc(2000, 1, 1, hour, 0)
+    localt = ut.astimezone(pytz.timezone(ctx["_nt"].sts[station]["tzname"]))
+    title = (
+        "%s [%s]\nFrequency of %s UTC (%s LST) "
+        r"Temp between %s$^\circ$F and %s$^\circ$F"
+    ) % (
+        ctx["_nt"].sts[station]["name"],
+        station,
+        hour,
+        localt.strftime("%-I %p"),
+        t1,
+        t2,
+    )
+    (fig, ax) = figure_axes(title=title)
     ax.scatter(
         df.index.values,
         df["below_freq"],
@@ -126,23 +139,7 @@ def plotter(fdict):
     ax.set_ylim(0, 100)
     ax.set_yticks([0, 25, 50, 75, 100])
     ax.set_ylabel("Frequency [%]")
-    ut = utc(2000, 1, 1, hour, 0)
-    localt = ut.astimezone(pytz.timezone(ctx["_nt"].sts[station]["tzname"]))
     ax.set_xlim(0.5, 12.5)
-    ax.set_title(
-        (
-            "%s [%s]\nFrequency of %s UTC (%s LST) "
-            r"Temp between %s$^\circ$F and %s$^\circ$F"
-        )
-        % (
-            ctx["_nt"].sts[station]["name"],
-            station,
-            hour,
-            localt.strftime("%-I %p"),
-            t1,
-            t2,
-        )
-    )
     ax.legend(loc=(0.05, -0.14), ncol=3, fontsize=14)
     pos = ax.get_position()
     ax.set_position([pos.x0, pos.y0 + 0.07, pos.width, pos.height * 0.93])

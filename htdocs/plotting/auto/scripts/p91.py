@@ -1,22 +1,19 @@
 """Windows"""
-from collections import OrderedDict
 
 import psycopg2.extras
 import numpy as np
 import pandas as pd
 from pyiem import network
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 
-PDICT = OrderedDict(
-    (
-        ("high", "High Temperature"),
-        ("low", "Low Temperature"),
-        ("precip", "Precipitation"),
-        ("snow", "Snowfall"),
-        ("snowd", "Snow Depth"),
-    )
-)
+PDICT = {
+    "high": "High Temperature",
+    "low": "Low Temperature",
+    "precip": "Precipitation",
+    "snow": "Snowfall",
+    "snowd": "Snow Depth",
+}
 
 UNITS = {
     "precip": "inch",
@@ -28,7 +25,7 @@ UNITS = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -62,7 +59,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ccursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
@@ -104,7 +101,12 @@ def plotter(fdict):
         )
     df = pd.DataFrame(rows)
 
-    fig, ax = plt.subplots(1, 1, figsize=(8, 6))
+    title = ("[%s] %s Statistics of %s over 1-31 Consecutive Days") % (
+        station,
+        nt.sts[station]["name"],
+        PDICT.get(varname),
+    )
+    fig, ax = figure_axes(title=title)
     if varname == "precip":
         ax.plot(
             np.arange(1, 32),
@@ -138,14 +140,6 @@ def plotter(fdict):
             np.arange(1, 32), df["highest_min"], label="Highest Above", lw=2
         )
         ax.plot(np.arange(1, 32), df["lowest_max"], label="Lowest Below", lw=2)
-    msg = ("[%s] %s Statistics of %s over 1-31 Consecutive Days") % (
-        station,
-        nt.sts[station]["name"],
-        PDICT.get(varname),
-    )
-    tokens = msg.split()
-    sz = int(len(tokens) / 2)
-    ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
     ax.set_ylabel("%s (%s)" % (PDICT.get(varname), UNITS.get(varname)))
     ax.set_xlabel("Consecutive Days")
     ax.grid(True)

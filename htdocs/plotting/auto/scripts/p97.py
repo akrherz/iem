@@ -1,6 +1,5 @@
 """map of climodat departures"""
 import datetime
-from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
@@ -15,33 +14,28 @@ PDICT = {
     "sector": "Plot by Sector / State",
     "wfo": "Plot by NWS Weather Forecast Office (WFO)",
 }
-PDICT2 = OrderedDict(
-    [
-        ("max_high_temp", "Maximum High Temperature"),
-        ("avg_high_temp", "Average High Temperature"),
-        ("avg_temp_depart", "Average Temperature Departure"),
-        ("avg_temp", "Average Temperature"),
-        ("min_low_temp", "Minimum Low Temperature"),
-        ("avg_low_temp", "Average Low Temperature"),
-        ("gdd_sum", "Growing Degree Days ($base/$ceil) Total"),
-        ("cgdd_sum", "Growing Degree Days ($base/$ceil) Climatology"),
-        ("gdd_depart", "Growing Degree Days ($base/$ceil) Departure"),
-        (
-            "gdd_percent",
-            "Growing Degree Days ($base/$ceil) Percent of Average",
-        ),
-        ("cdd65_sum", "Cooling Degree Days (base 65)"),
-        ("cdd65_depart", "Cooling Degree Days Departure (base 65)"),
-        ("hdd65_sum", "Heating Degree Days (base 65)"),
-        ("hdd65_depart", "Heating Degree Days Departure (base 65)"),
-        ("precip_depart", "Precipitation Departure"),
-        ("precip_percent", "Precipitation Percent of Average"),
-        ("precip_sum", "Precipitation Total"),
-        ("snow_depart", "Snowfall Departure"),
-        ("snow_percent", "Snowfall Percent of Average"),
-        ("snow_sum", "Snowfall Total"),
-    ]
-)
+PDICT2 = {
+    "max_high_temp": "Maximum High Temperature",
+    "avg_high_temp": "Average High Temperature",
+    "avg_temp_depart": "Average Temperature Departure",
+    "avg_temp": "Average Temperature",
+    "min_low_temp": "Minimum Low Temperature",
+    "avg_low_temp": "Average Low Temperature",
+    "gdd_sum": "Growing Degree Days ($base/$ceil) Total",
+    "cgdd_sum": "Growing Degree Days ($base/$ceil) Climatology",
+    "gdd_depart": "Growing Degree Days ($base/$ceil) Departure",
+    "gdd_percent": "Growing Degree Days ($base/$ceil) Percent of Average",
+    "cdd65_sum": "Cooling Degree Days (base 65)",
+    "cdd65_depart": "Cooling Degree Days Departure (base 65)",
+    "hdd65_sum": "Heating Degree Days (base 65)",
+    "hdd65_depart": "Heating Degree Days Departure (base 65)",
+    "precip_depart": "Precipitation Departure",
+    "precip_percent": "Precipitation Percent of Average",
+    "precip_sum": "Precipitation Total",
+    "snow_depart": "Snowfall Departure",
+    "snow_percent": "Snowfall Percent of Average",
+    "snow_sum": "Snowfall Total",
+}
 PDICT4 = {
     "yes": "Yes, overlay Drought Monitor",
     "no": "No, do not overlay Drought Monitor",

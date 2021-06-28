@@ -1,11 +1,10 @@
 """hourly histogram"""
 import datetime
-from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 from metpy.units import units
@@ -16,14 +15,12 @@ PDICT = {
     "yes": "Yes, Include only Year to Date period each year",
     "no": "No, Include all available data for each year",
 }
-VDICT = OrderedDict(
-    [
-        ("tmpf", "Air Temperature"),
-        ("dwpf", "Dew Point Temperature"),
-        ("heatindex", "Heat Index"),
-        ("windchill", "Wind Chill Index"),
-    ]
-)
+VDICT = {
+    "tmpf": "Air Temperature",
+    "dwpf": "Dew Point Temperature",
+    "heatindex": "Heat Index",
+    "windchill": "Wind Chill Index",
+}
 LEVELS = {
     "tmpf": np.arange(85, 115),
     "dwpf": np.arange(60, 85),
@@ -37,7 +34,7 @@ OPTDICT = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -140,7 +137,7 @@ def get_doylimit(ytd, varname):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("asos")
 
     ctx = get_autoplot_context(fdict, get_description())
@@ -228,8 +225,19 @@ def plotter(fdict):
     x = []
     y = []
     y2 = []
-    fig = plt.figure(figsize=(9, 6))
-    ax = fig.add_axes([0.1, 0.1, 0.6, 0.8])
+    title = "till %s" % (datetime.date.today().strftime("%-d %b"),)
+    title = "Entire Year" if ytd == "no" else title
+    title = ("[%s] %s %s-%s\n" "%s Histogram (%s)%s") % (
+        station,
+        ctx["_nt"].sts[station]["name"],
+        minyear,
+        maxyear,
+        title2,
+        title,
+        inctitle,
+    )
+    fig, ax = figure_axes(title=title)
+    ax.set_position([0.06, 0.1, 0.64, 0.8])
     yloc = 1.0
     xloc = 1.13
     yrlabel = (
@@ -285,20 +293,6 @@ def plotter(fdict):
     ax2.set_ylabel("Expressed in 24 Hour Days")
     ax.set_ylabel("Hours Per Year")
     ax.set_xlabel(r"%s $^\circ$F" % (VDICT[varname],))
-    title = "till %s" % (datetime.date.today().strftime("%-d %b"),)
-    title = "Entire Year" if ytd == "no" else title
-    ax.set_title(
-        ("[%s] %s %s-%s\n" "%s Histogram (%s)%s")
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            minyear,
-            maxyear,
-            title2,
-            title,
-            inctitle,
-        )
-    )
     ax.legend(loc="best", scatterpoints=1)
     return fig, rdf
 

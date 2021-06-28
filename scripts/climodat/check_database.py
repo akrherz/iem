@@ -36,11 +36,11 @@ def main(argv):
         if missing.empty:
             continue
         LOG.info(
-            "station: %s [%s - %s], missing: %s has:%s days",
+            "station: %s, missing: %s [%s - %s] has:%s days",
             station,
-            gdf["day"].min(),
-            gdf["day"].max(),
             len(missing),
+            missing.min().date(),
+            missing.max().date(),
             len(gdf.index),
         )
 

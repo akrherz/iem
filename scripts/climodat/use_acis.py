@@ -67,7 +67,7 @@ def do(meta, station, acis_station, interactive):
     if not interactive:
         payload["sdate"] = (today - datetime.timedelta(days=365)).strftime(fmt)
     LOG.debug(
-        "Call ACIS for: %s[%s-%s] to update: %s",
+        "Call ACIS for: %s[%s %s] to update: %s",
         acis_station,
         payload["sdate"],
         payload["edate"],
@@ -155,14 +155,15 @@ def do(meta, station, acis_station, interactive):
         )
         updates += 1
 
-    LOG.info(
-        "%s[%s-%s] Updates: %s Inserts: %s",
-        station,
-        minday,
-        maxday,
-        updates,
-        inserts,
-    )
+    if minday is not None:
+        LOG.info(
+            "%s[%s %s] Updates: %s Inserts: %s",
+            station,
+            minday.date(),
+            maxday.date(),
+            updates,
+            inserts,
+        )
     cursor.close()
     pgconn.commit()
     return updates

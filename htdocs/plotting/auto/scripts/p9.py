@@ -1,7 +1,6 @@
 """GDD climo"""
 import calendar
 import datetime
-from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
@@ -11,18 +10,16 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
-    (
-        ("cdd", "Cooling Degree Days"),
-        ("gdd", "Growing Degree Days"),
-        ("hdd", "Heating Degree Days"),
-        ("sdd", "Stress Degree Days"),
-    )
-)
+PDICT = {
+    "cdd": "Cooling Degree Days",
+    "gdd": "Growing Degree Days",
+    "hdd": "Heating Degree Days",
+    "sdd": "Stress Degree Days",
+}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -70,7 +67,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop", user="nobody")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
@@ -170,7 +167,7 @@ def plotter(fdict):
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.legend(ncol=2)
 
-    # collapse the multiindex for columns
+    # collapse the multi-index for columns
     df = pd.DataFrame(df2)
     return fig, df
 

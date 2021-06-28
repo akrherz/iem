@@ -1,6 +1,5 @@
 """IEMAccess daily summary ranges"""
 import datetime
-from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
@@ -8,25 +7,22 @@ from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
-    (
-        ("below", "Daily Range Below Emphasis"),
-        ("touches", "Daily Range Touches Emphasis"),
-        ("above", "Daily Range At or Above Emphasis"),
-    )
-)
-PDICT2 = OrderedDict(
-    (
-        ("tmpf", "Air Temperature"),
-        ("dwpf", "Dew Point Temperature"),
-        ("feel", "Feels Like Temperature"),
-        ("rh", "Relative Humidity"),
-    )
-)
+PDICT = {
+    "below": "Daily Range Below Emphasis",
+    "touches": "Daily Range Touches Emphasis",
+    "above": "Daily Range At or Above Emphasis",
+}
+
+PDICT2 = {
+    "tmpf": "Air Temperature",
+    "dwpf": "Dew Point Temperature",
+    "feel": "Feels Like Temperature",
+    "rh": "Relative Humidity",
+}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     today = datetime.datetime.now()
     desc["data"] = True
@@ -76,7 +72,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("iem")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
@@ -85,12 +81,10 @@ def plotter(fdict):
     opt = ctx["opt"]
     varname = ctx["var"]
 
-    table = "summary_%s" % (year,)
-
     df = read_sql(
         f"""
         select day, max_{varname}, min_{varname}
-        from {table} s JOIN stations t on (s.iemid = t.iemid)
+        from summary_{year} s JOIN stations t on (s.iemid = t.iemid)
         where t.id = %s and t.network = %s and
         max_{varname} is not null and
         min_{varname} is not null
