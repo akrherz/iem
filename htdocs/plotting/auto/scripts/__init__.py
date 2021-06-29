@@ -596,6 +596,7 @@ nsopts = [
     {"id": 127, "label": ("Crop Progress by Year")},
     {"id": 197, "label": ("Crop Progress State Average Map")},
     {"id": 209, "label": ("Crop Progress Weekly Change")},
+    {"id": 221, "label": ("Crop Progress Weekly Time Series by State/Year")},
 ]
 nopts = [
     {
