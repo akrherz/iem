@@ -330,12 +330,15 @@ def make_daily_rainfall_soil_rh(ctx):
     common(ax)
 
     ax = fig.add_axes([0.1, 0.1, 0.8, 0.2])
-    ax.bar(
-        df.index.values,
-        df["rh_avg_qc"].values,
-        color="blue",
-        align="center",
-    )
+    if not pd.isna(df["rh_avg_qc"]).all():
+        ax.bar(
+            df.index.values,
+            df["rh_avg_qc"].values,
+            color="blue",
+            align="center",
+        )
+    else:
+        ax.text(0.5, 0.5, "Relative Humidity Missing", transform=ax.transAxes)
     ax.set_ylim(0, 100)
     ax.set_ylabel("Average\nRelative Humidity [%]")
     common(ax)
@@ -841,8 +844,8 @@ def plotter(fdict):
 if __name__ == "__main__":
     plotter(
         {
-            "station": "TPOI4",
-            "opt": "2",
+            "station": "BOOI4",
+            "opt": "9",
         }
     )
     # fig, df = plotter(dict())

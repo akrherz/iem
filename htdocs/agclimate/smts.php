@@ -74,6 +74,13 @@ the depths of 6 to 30 inches.  This is using only two measurements at
 6-18 inch layer and the 24 inch depth to cover 18-30 layer.  If you select a
 period of less than 60 days, the daily rainfall will be plotted as well.
 EOF;
+$desc["10"] = <<<EOF
+This plot provides a diagnostic of the data being provided by the inversion
+sensors.  These temperature sensors are installed at 1.5 and 10 feet above the
+ground, which then can sense if temperature increases with height.  This
+sensor package was installed in 2021 and only found at three sites BOOI4 - Ames
+AEA, CRFI4 - Crawfordsville, and CAMI4 - Sutherland.
+EOF;
 
 $thedescription = $desc[$opt];
 $oselect = make_select("opt", $opt, $ar);
