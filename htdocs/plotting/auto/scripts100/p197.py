@@ -8,7 +8,7 @@ from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = {
+NASS_CROP_PROGRESS = {
     "corn_poor_verypoor": "Percentage Corn Poor + Very Poor Condition",
     "corn_good_excellent": "Percentage Corn Good + Excellent Condition",
     "corn_harvest": "Percentage Corn Harvested (Grain) Acres",
@@ -16,13 +16,12 @@ PDICT = {
     "corn_silking": "Percentage Corn Silking Acres",
     "soybeans_planting": "Percentage Soybean Planted Acres",
     "soybeans_harvest": "Percentage Soybean Harvested Acres",
+    "soybeans_poor_verypoor": "Percentage Soybean Poor + Very Poor Condition",
+    "soybeans_good_excellent": "Percentage Soybean Good + Excellent Condition",
     "soil_short_veryshort": "Percentage Topsoil Moisture Short + Very Short",
 }
-PDICT2 = {
-    "avg": "Compare against 10 year average for date",
-    "week": "Compare against given number of weeks ago",
-}
-LOOKUP = {
+
+NASS_CROP_PROGRESS_LOOKUP = {
     "corn_planting": "CORN - PROGRESS, MEASURED IN PCT PLANTED",
     "corn_harvest": "CORN, GRAIN - PROGRESS, MEASURED IN PCT HARVESTED",
     "soybeans_planting": "SOYBEANS - PROGRESS, MEASURED IN PCT PLANTED",
@@ -36,10 +35,22 @@ LOOKUP = {
         "CORN - CONDITION, MEASURED IN PCT GOOD",
         "CORN - CONDITION, MEASURED IN PCT EXCELLENT",
     ],
+    "soybeans_poor_verypoor": [
+        "SOYBEANS - CONDITION, MEASURED IN PCT POOR",
+        "SOYBEANS - CONDITION, MEASURED IN PCT VERY POOR",
+    ],
+    "soybeans_good_excellent": [
+        "SOYBEANS - CONDITION, MEASURED IN PCT GOOD",
+        "SOYBEANS - CONDITION, MEASURED IN PCT EXCELLENT",
+    ],
     "soil_short_veryshort": [
         "SOIL, TOPSOIL - MOISTURE, MEASURED IN PCT VERY SHORT",
         "SOIL, TOPSOIL - MOISTURE, MEASURED IN PCT SHORT",
     ],
+}
+PDICT2 = {
+    "avg": "Compare against 10 year average for date",
+    "week": "Compare against given number of weeks ago",
 }
 
 
@@ -61,7 +72,7 @@ def get_description():
     desc["arguments"] = [
         dict(
             type="select",
-            options=PDICT,
+            options=NASS_CROP_PROGRESS,
             default="corn_planting",
             name="var",
             label="Available variables to plot:",
@@ -100,7 +111,7 @@ def get_df(ctx):
         date = date - datetime.timedelta(days=date.isoweekday())
     varname = ctx["var"]
     pgconn = get_dbconn("coop")
-    params = LOOKUP[varname]
+    params = NASS_CROP_PROGRESS_LOOKUP[varname]
     if isinstance(params, list):
         dlimit = " short_desc in %s" % (str(tuple(params)),)
     else:
@@ -157,7 +168,7 @@ def get_df(ctx):
     ctx["df"]["departure"] = ctx["df"]["thisval"] - ctx["df"][col]
     ctx["title"] = "%s USDA NASS %s" % (
         date.strftime("%-d %b %Y"),
-        PDICT[varname],
+        NASS_CROP_PROGRESS[varname],
     )
     if ctx["w"] == "avg":
         ctx["subtitle"] = (
@@ -165,9 +176,10 @@ def get_df(ctx):
             "departure from %i-%i avg" % (date.year, syear, eyear - 1)
         )
     else:
-        ctx[
-            "subtitle"
-        ] = "Top value is %i percentage, bottom value is " "precentage points change since %s" % (
+        ctx["subtitle"] = (
+            "Top value is %i percentage, bottom value is "
+            "precentage points change since %s"
+        ) % (
             date.year,
             week_ending_start.strftime("%-d %b %Y"),
         )
@@ -216,4 +228,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({})
+    plotter({"var": "soybeans_poor_verypoor"})
