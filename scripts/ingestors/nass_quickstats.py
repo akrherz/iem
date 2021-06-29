@@ -18,6 +18,8 @@ TOPICS = [
     {"commodity_desc": "SOYBEANS", "statisticcat_desc": "PROGRESS"},
     {"commodity_desc": "CORN", "statisticcat_desc": "YIELD"},
     {"commodity_desc": "SOYBEANS", "statisticcat_desc": "YIELD"},
+    {"commodity_desc": "CORN", "statisticcat_desc": "CONDITION"},
+    {"commodity_desc": "SOYBEANS", "statisticcat_desc": "CONDITION"},
     {"commodity_desc": "SOIL", "statisticcat_desc": "MOISTURE"},
 ]
 SERVICE = "https://quickstats.nass.usda.gov/api/api_GET/"
