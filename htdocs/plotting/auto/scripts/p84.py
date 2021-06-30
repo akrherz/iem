@@ -304,7 +304,7 @@ def plotter(fdict):
         res.set_rasterized(True)
     if sector != "midwest":
         mp.drawcounties()
-        mp.drawcities()
+        mp.drawcities(minpop=500 if sector == "custom" else 5000)
     if usdm == "yes":
         mp.draw_usdm(edate, filled=False, hatched=True)
 
