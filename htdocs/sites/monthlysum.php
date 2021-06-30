@@ -147,7 +147,7 @@ $t->content = <<<EOF
 <p>The following tables present IEM computed monthly data summaries based on
 daily data provided by or computed for the IEM. A <a href="/request/daily.phtml?network=${network}">download interface</a>
 exists for the daily summary information.  The climatology is provided by the
-nearest NCEI climate station ({$metadata["ncei91"]}) within the current 1991-2020 
+nearest NCEI climate station (<a href="/sites/site.php?station={$metadata["ncei91"]}&amp;network=NCEI91">{$metadata["ncei91"]}</a>) within the current 1991-2020 
 dataset.</p>
 
 <p><i class="fa fa-table"></i> To load shown data into Microsoft Excel,
