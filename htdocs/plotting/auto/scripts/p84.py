@@ -1,7 +1,6 @@
 """Precip estimates"""
 from datetime import datetime, timedelta
 import os
-from collections import OrderedDict
 
 import numpy as np
 from pyiem import iemre, util
@@ -9,16 +8,15 @@ from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import state_bounds, SECTORS
 from pyiem.exceptions import NoDataFound
+from pyiem.util import get_dbconn
 from metpy.units import units, masked_array
 
 PDICT2 = {"c": "Contour Plot", "g": "Grid Cell Mesh"}
-SRCDICT = OrderedDict(
-    (
-        ("iemre", "IEM Reanalysis (since 1 Jan 1893)"),
-        ("mrms", "NOAA MRMS (since 1 Jan 2014)"),
-        ("prism", "OSU PRISM (since 1 Jan 1981)"),
-    )
-)
+SRCDICT = {
+    "iemre": "IEM Reanalysis (since 1 Jan 1893)",
+    "mrms": "NOAA MRMS (since 1 Jan 2014)",
+    "prism": "OSU PRISM (since 1 Jan 1981)",
+}
 PDICT3 = {
     "acc": "Accumulation",
     "dep": "Departure from Average [inch]",
@@ -58,6 +56,13 @@ def get_description():
     desc["arguments"] = [
         dict(
             type="csector", name="sector", default="IA", label="Select Sector:"
+        ),
+        dict(
+            type="ugc",
+            name="ugc",
+            default="IAC153",
+            label="Plot zoomed in on given County/Parish/Forecast Zone:",
+            optional=True,
         ),
         dict(
             type="select",
@@ -137,6 +142,23 @@ def compute_title(src, sdate, edate):
     return title
 
 
+def get_ugc_bounds(ctx, sector):
+    """Do custom bounds stuff."""
+    if ctx.get("ugc") is None:
+        return sector, "", 0, 0, 0, 0
+    cursor = get_dbconn("postgis").cursor()
+    cursor.execute(
+        "SELECT st_xmin(geom), st_xmax(geom), st_ymin(geom), st_ymax(geom), "
+        "name from ugcs WHERE ugc = %s and end_ts is null",
+        (ctx["ugc"],),
+    )
+    if cursor.rowcount == 0:
+        return sector, "", 0, 0, 0, 0
+    row = cursor.fetchone()
+    b = 0.15  # arb
+    return "custom", row[4], row[0] + b, row[3] + b, row[1] - b, row[2] - b
+
+
 def plotter(fdict):
     """Go"""
     ctx = util.get_autoplot_context(fdict, get_description())
@@ -183,9 +205,17 @@ def plotter(fdict):
             "http://prism.oregonstate.edu, created 4 Feb 2004."
         )
 
+    sector, name, west, north, east, south = get_ugc_bounds(ctx, sector)
+    if ctx.get("ugc") is not None:
+        subtitle += f", zoomed on [{ctx['ugc']}] {name}"
+
     mp = MapPlot(
         sector=sector,
         state=state,
+        north=north,
+        east=east,
+        south=south,
+        west=west,
         axisbg="white",
         nocaption=True,
         title="%s:: %s Precip %s" % (source, title, PDICT3[opt]),
