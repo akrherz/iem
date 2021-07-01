@@ -92,17 +92,26 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
       <PolyStyle><color>7d00ff00</color></PolyStyle>
     </Style>";
 for ($i=0;$row=pg_fetch_array($result);$i++){
-  $sts = strtotime($row["issue"]);
-  $ets = strtotime($row["expire"]);
-  $uri = sprintf("<a href=\"%s/vtec/#%s-O-NEW-K%s-%s-%s-%04d\">%s</a>", ROOTURL, date('Y',$sts), $row["wfo"], $row["phenomena"], $row["significance"], $row["eventid"], $row["eventid"]);
+    $uri = sprintf(
+        "<a href=\"%s/vtec/#%s-O-NEW-K%s-%s-%s-%04d\">%s</a>",
+        ROOTURL, date('Y', strtotime($row["polygon_begin"])),
+        $row["wfo"], $row["phenomena"],
+        $row["significance"], $row["eventid"], $row["eventid"]
+    );
   echo "<Placemark>
     <description>
         <![CDATA[
   <p><font color=\"red\"><i>Polygon Size:</i></font> ". $row["psize"] ." sq km
   <br /><font color=\"red\"><i>Event ID:</i></font> $uri
-  <br /><font color=\"red\"><i>Issued:</i></font> ". gmdate('d M Y H:i', $sts) ." GMT
-  <br /><font color=\"red\"><i>Expires:</i></font> ". gmdate('d M Y H:i', $ets) ." GMT
+  <br /><font color=\"red\"><i>Issued:</i></font> ". gmdate('d M Y H:i', strtotime($row["issue"])) ." GMT
+  <br /><font color=\"red\"><i>Expires:</i></font> ". gmdate('d M Y H:i', strtotime($row["expire"])) ." GMT
+  <br /><font color=\"red\"><i>Polygon Begin:</i></font> ". gmdate('d M Y H:i', strtotime($row["polygon_begin"])) ." GMT
+  <br /><font color=\"red\"><i>Polygon End:</i></font> ". gmdate('d M Y H:i', strtotime($row["polygon_end"])) ." GMT
   <br /><font color=\"red\"><i>Status:</i></font> ". $vtec_status[$row["status"]] ."
+  <br /><font color=\"red\"><i>Hail Tag:</i></font> {$row["hailtag"]} IN
+  <br /><font color=\"red\"><i>Wind Tag:</i></font> {$row["windtag"]} MPH
+  <br /><font color=\"red\"><i>Tornado Tag:</i></font> {$row["tornadotag"]}
+  <br /><font color=\"red\"><i>Damage Tag:</i></font> {$row["damagetag"]}
    </p>
         ]]>
     </description>
@@ -179,7 +188,8 @@ function pull_vtec_events_by_wfo_year(
     $rs = pg_prepare($db, "SELECT-INT", "SELECT 
 		issue, expire, phenomena, significance, eventid, wfo, status,
            ST_askml(geom) as kml,
-           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize
+           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize,
+           polygon_begin, polygon_end, tornadotag, damagetag, windtag, hailtag
            from sbw_$year 
            WHERE $wfolimiter coalesce(issue, polygon_begin) >= $1
            and coalesce(issue, polygon_begin) <= $2
@@ -187,7 +197,8 @@ function pull_vtec_events_by_wfo_year(
     $rs = pg_prepare($db, "SELECT", "SELECT
 		issue, expire, phenomena, significance, eventid, wfo, status,
            ST_askml(geom) as kml,
-           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize
+           round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize,
+           polygon_begin, polygon_end, tornadotag, damagetag, windtag, hailtag
            from sbw_$year 
            WHERE $wfolimiter coalesce(issue, polygon_begin) <= $1 and
            expire > $2
