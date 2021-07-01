@@ -2,21 +2,27 @@
 
 import pandas as pd
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"0": "Max Highs / Min Lows", "1": "Min Highs / Max Lows"}
+PDICT2 = {
+    "daily": "New Daily Record",
+    "monthly": "New Monthly Record",
+    "yearly": "New Yearly Record",
+}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
         "description"
     ] = """
-    This chart shows the margin by which new daily high
-    and low temperatures set are beaten by.
+    This chart shows the margin by which a new daily high
+    and low temperatures record beat the previously set record.  Ties are not
+    presented on this plot.
     """
     desc["arguments"] = [
         dict(
@@ -33,12 +39,19 @@ def get_description():
             options=PDICT,
             label="Which metric to plot",
         ),
+        dict(
+            type="select",
+            name="w",
+            default="daily",
+            options=PDICT2,
+            label="Compute records over which time interval",
+        ),
     ]
     return desc
 
 
 def get_context(fdict):
-    """ Make the pandas Data Frame please"""
+    """Make the pandas Data Frame please"""
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
     ctx = get_autoplot_context(fdict, get_description())
@@ -52,49 +65,57 @@ def get_context(fdict):
     )
     if cursor.rowcount == 0:
         raise NoDataFound("No Data Found.")
-    dates = pd.date_range("2000/01/01", "2000/12/31").strftime("%m%d")
+    aggint = "%m%d"
+    if ctx["w"] == "monthly":
+        aggint = "%m"
+    elif ctx["w"] == "yearly":
+        aggint = "1"
+    dates = pd.date_range("2000/01/01", "2000/12/31").strftime(aggint).unique()
     if opt == "0":
         records = pd.DataFrame(dict(high=-9999, low=9999), index=dates)
         rows = []
         for row in cursor:
-            if row[2] > records.at[row[1], "high"]:
-                margin = row[2] - records.at[row[1], "high"]
-                records.at[row[1], "high"] = row[2]
+            key = row[0].strftime(aggint)
+            if row[2] > records.at[key, "high"]:
+                margin = row[2] - records.at[key, "high"]
+                records.at[key, "high"] = row[2]
                 if margin < 1000:
                     rows.append(dict(margin=margin, date=row[0]))
-            if row[3] < records.at[row[1], "low"]:
-                margin = row[3] - records.at[row[1], "low"]
-                records.at[row[1], "low"] = row[3]
+            if row[3] < records.at[key, "low"]:
+                margin = row[3] - records.at[key, "low"]
+                records.at[key, "low"] = row[3]
                 if margin > -1000:
                     rows.append(dict(margin=margin, date=row[0]))
     else:
         records = pd.DataFrame(dict(high=9999, low=-9999), index=dates)
         rows = []
         for row in cursor:
-            if row[2] < records.at[row[1], "high"]:
-                margin = row[2] - records.at[row[1], "high"]
-                records.at[row[1], "high"] = row[2]
+            key = row[0].strftime(aggint)
+            if row[2] < records.at[key, "high"]:
+                margin = row[2] - records.at[key, "high"]
+                records.at[key, "high"] = row[2]
                 if margin > -1000:
                     rows.append(dict(margin=margin, date=row[0]))
-            if row[3] > records.at[row[1], "low"]:
-                margin = row[3] - records.at[row[1], "low"]
-                records.at[row[1], "low"] = row[3]
+            if row[3] > records.at[key, "low"]:
+                margin = row[3] - records.at[key, "low"]
+                records.at[key, "low"] = row[3]
                 if margin < 1000:
                     rows.append(dict(margin=margin, date=row[0]))
 
     ctx["df"] = pd.DataFrame(rows)
-    ctx["title"] = "[%s] %s Daily Record Margin" % (
+    ctx["title"] = "[%s] %s %s Margin" % (
         station,
         ctx["_nt"].sts[station]["name"],
+        PDICT2[ctx["w"]],
     )
-    ctx["subtitle"] = (
-        "By how much did a new daily record beat the previous %s"
-    ) % (PDICT[opt],)
+    ctx[
+        "subtitle"
+    ] = f"By how much did a new record beat the previous {PDICT[opt]}"
     return ctx
 
 
 def highcharts(fdict):
-    """ Do highcharts option"""
+    """Do highcharts option"""
     ctx = get_context(fdict)
     ctx["df"]["date"] = pd.to_datetime(ctx["df"]["date"])
     df2 = ctx["df"][ctx["df"]["margin"] > 0]
@@ -153,10 +174,10 @@ def highcharts(fdict):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_context(fdict)
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    (fig, ax) = figure_axes(title=ctx["title"], subtitle=ctx["subtitle"])
     df2 = ctx["df"][ctx["df"]["margin"] > 0]
     ax.scatter(df2["date"].values, df2["margin"].values, color="r")
 
@@ -165,10 +186,9 @@ def plotter(fdict):
     ax.set_ylim(-30, 30)
     ax.grid(True)
     ax.set_ylabel(r"Temperature Beat Margin $^\circ$F")
-    ax.set_title("%s\n%s" % (ctx["title"], ctx["subtitle"]))
 
     return fig, ctx["df"]
 
 
 if __name__ == "__main__":
-    highcharts(dict())
+    highcharts({"station": "WATSEA", "network": "WACLIMATE", "w": "monthly"})
