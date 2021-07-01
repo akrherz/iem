@@ -223,7 +223,7 @@ def application(environ, start_response):
      SELECT {cols} from stormbased UNION ALL
      SELECT {cols} from countybased {sbwlimiter}
     """
-    print(sql)
+
     cursor = pgconn.cursor(cursor_factory=DictCursor)
     cursor.execute(sql)
     if cursor.rowcount == 0:
