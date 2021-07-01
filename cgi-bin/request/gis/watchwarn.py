@@ -85,7 +85,7 @@ def application(environ, start_response):
     location_group = form.get("location_group", "wfo")
     if location_group == "states":
         if "states[]" in form:
-            states = form.getall("states[]")
+            states = [x[:2].upper() for x in form.getall("states[]")]
             states.append("XX")  # Hack for 1 length
             wfo_limiter = (
                 " and ST_Intersects(s.the_geom, w.geom) "
@@ -157,7 +157,8 @@ def application(environ, start_response):
     cols = """geo, wfo, utc_issue, utc_expire, utc_prodissue, utc_init_expire,
         phenomena, gtype, significance, eventid,  status, ugc, area2d,
         utc_updated, hvtec_nwsli, hvtec_severity, hvtec_cause, hvtec_record,
-        is_emergency """
+        is_emergency, utc_polygon_begin, utc_polygon_end, windtag, hailtag,
+        tornadotag, damagetag """
 
     timelimit = "issue >= '%s' and issue < '%s'" % (sts, ets)
     if timeopt == 2:
@@ -166,7 +167,15 @@ def application(environ, start_response):
             sts + datetime.timedelta(days=-30),
             sts,
         )
-
+    sbwtimelimit = timelimit
+    statuslimit = " status = 'NEW' "
+    if form.get("addsvs", "no") == "yes":
+        statuslimit = " status != 'CAN' "
+        sbwtimelimit = timelimit.replace(
+            "issue",
+            "coalesce(issue, polygon_begin)",
+        )
+    # NB: need distinct since state join could return multiple
     sql = f"""
     WITH stormbased as (
      SELECT distinct w.geom as geo, 'P'::text as gtype, significance, wfo,
@@ -176,13 +185,18 @@ def application(environ, start_response):
      to_char(expire at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_expire,
      to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_issue,
      to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_prodissue,
+     to_char(polygon_begin at time zone 'UTC', 'YYYYMMDDHH24MI')
+        as utc_polygon_begin,
+     to_char(polygon_end at time zone 'UTC', 'YYYYMMDDHH24MI')
+        as utc_polygon_end,
      to_char(init_expire at time zone 'UTC',
              'YYYYMMDDHH24MI') as utc_init_expire,
      to_char(updated at time zone 'UTC',
              'YYYYMMDDHH24MI') as utc_updated,
-     hvtec_nwsli, hvtec_severity, hvtec_cause, hvtec_record, is_emergency
+     hvtec_nwsli, hvtec_severity, hvtec_cause, hvtec_record, is_emergency,
+     windtag, hailtag, tornadotag, damagetag
      from {sbw_table} w {table_extra}
-     WHERE status = 'NEW' and {timelimit}
+     WHERE {statuslimit} and {sbwtimelimit}
      {wfo_limiter} {limiter} {elimiter}
     ),
     countybased as (
@@ -194,18 +208,22 @@ def application(environ, start_response):
      to_char(issue at time zone 'UTC', 'YYYYMMDDHH24MI') as utc_issue,
      to_char(product_issue at time zone 'UTC',
              'YYYYMMDDHH24MI') as utc_prodissue,
+     null as utc_polygon_begin,
+     null as utc_polygon_end,
      to_char(init_expire at time zone 'UTC',
              'YYYYMMDDHH24MI') as utc_init_expire,
      to_char(updated at time zone 'UTC',
              'YYYYMMDDHH24MI') as utc_updated,
-     hvtec_nwsli, hvtec_severity, hvtec_cause, hvtec_record, is_emergency
+     hvtec_nwsli, hvtec_severity, hvtec_cause, hvtec_record, is_emergency,
+     null::real as windtag, null::real as hailtag, null::varchar as tornadotag,
+     null::varchar as damagetag
      from {warnings_table} w JOIN ugcs u on (u.gid = w.gid) WHERE
      {timelimit} {wfo_limiter2} {limiter} {elimiter}
      )
      SELECT {cols} from stormbased UNION ALL
      SELECT {cols} from countybased {sbwlimiter}
     """
-
+    print(sql)
     cursor = pgconn.cursor(cursor_factory=DictCursor)
     cursor.execute(sql)
     if cursor.rowcount == 0:
@@ -217,7 +235,8 @@ def application(environ, start_response):
         (
             "WFO,ISSUED,EXPIRED,INIT_ISS,INIT_EXP,PHENOM,GTYPE,SIG,ETN,"
             "STATUS,NWS_UGC,AREA_KM2,UPDATED,HVTEC_NWSLI,HVTEC_SEVERITY,"
-            "HVTEC_CAUSE,HVTEC_RECORD,IS_EMERGENCY\n"
+            "HVTEC_CAUSE,HVTEC_RECORD,IS_EMERGENCY,POLYBEGIN,POLYEND,WINDTAG,"
+            "HAILTAG,TORNADOTAG,DAMAGETAG\n"
         )
     )
     with fiona.open(
@@ -246,6 +265,12 @@ def application(environ, start_response):
                 "HV_CAUSE": "str:2",
                 "HV_REC": "str:2",
                 "EMERGENC": "bool",
+                "POLY_BEG": "str:12",
+                "POLY_END": "str:12",
+                "WINDTAG": "float",
+                "HAILTAG": "float",
+                "TORNTAG": "str:16",
+                "DAMAGTAG": "str:16",
             },
         },
     ) as output:
@@ -259,7 +284,9 @@ def application(environ, start_response):
                 f"{row['ugc']},{row['area2d']:.2f},{df(row['utc_updated'])},"
                 f"{row['hvtec_nwsli']},{row['hvtec_severity']},"
                 f"{row['hvtec_cause']},{row['hvtec_record']},"
-                f"{row['is_emergency']}\n"
+                f"{row['is_emergency']},{df(row['utc_polygon_begin'])},"
+                f"{df(row['utc_polygon_end'])},{row['windtag']},"
+                f"{row['hailtag']},{row['tornadotag']},{row['damagetag']}\n"
             )
             output.write(
                 {
@@ -282,6 +309,12 @@ def application(environ, start_response):
                         "HV_CAUSE": row["hvtec_cause"],
                         "HV_REC": row["hvtec_record"],
                         "EMERGENC": row["is_emergency"],
+                        "POLY_BEG": row["utc_polygon_begin"],
+                        "POLY_END": row["utc_polygon_end"],
+                        "WINDTAG": row["windtag"],
+                        "HAILTAG": row["hailtag"],
+                        "TORNTAG": row["tornadotag"],
+                        "DAMAGTAG": row["damagetag"],
                     },
                     "geometry": mapping(mp),
                 }
@@ -292,6 +325,7 @@ def application(environ, start_response):
         zf.write(fn + ".shp")
         zf.write(fn + ".shx")
         zf.write(fn + ".dbf")
+        zf.write(fn + ".cpg")
         zf.write(fn + ".prj")
         zf.write(fn + ".csv")
 
@@ -302,7 +336,9 @@ def application(environ, start_response):
     start_response("200 OK", headers)
     payload = open(fn + ".zip", "rb").read()
 
-    for suffix in ["zip", "shp", "shx", "dbf", "prj", "csv"]:
-        os.remove("%s.%s" % (fn, suffix))
+    for suffix in ["zip", "shp", "shx", "dbf", "prj", "csv", "cpg"]:
+        fullfn = f"{fn}.{suffix}"
+        if os.path.isfile(fullfn):
+            os.remove(fullfn)
 
     return [payload]

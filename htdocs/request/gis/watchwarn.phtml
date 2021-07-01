@@ -192,11 +192,21 @@ Flash Flood Warnings</label>
 <br /><input id="limit2" type="checkbox" name="limit2" value="yes">
 <label for="limit2">Limit output to only Tornado/Flash Flood Emergencies</label>
 
-<table border="1">
-<tr><td colspan="2"><input type="checkbox" name="limitps" value="yes"> Limit output to selected VTEC
-phenomena and significance below.</td></tr>
-<tr><td>{$pselect}</td><td>{$sselect}</td></tr>
-</table>
+<div class="row well">
+<input id="limitps" type="checkbox" name="limitps" value="yes">
+<label for="limitps">Limit output to selected VTEC
+phenomena and significance below.</label>
+
+<div class="row">
+<div class="col-md-6">{$pselect}</div>
+<div class="col-md-6">{$sselect}</div>
+</div><!-- ./row -->
+</div><!-- ./row -->
+
+<p><input id="addsvs" type="checkbox" name="addsvs" value="yes">
+<label for="addsvs">Include polygons/metadata found with any followup (SVS/MVS/etc)
+statements. [<sup>1</sup>]</label></p>
+
 
   <script type="text/javascript">
 function kmlsub(f, url){
@@ -208,6 +218,7 @@ function kmlsub(f, url){
 <input type="submit" value="Request KML (*)" onclick="kmlsub(this.form, '/kml/sbw_interval.php');" />
  <input type="reset" />
 <br />* Only Storm Based Warnings are available via KML.
+<br />[1] By default, only the issuance polygon is included.
 </form>
 </div>
 
@@ -226,7 +237,8 @@ roughly 2 AM this morning.</p>
 
 <table class="table table-bordered table-striped">
 <thead>
-<tr><th>Year</th><th>All</th><th>Limit Tor,Svr,Mar,FF</th><th>Limit Storm Based<br />Tor,Svr,Mar,FF</th></tr>
+<tr><th>Year</th><th>All</th><th>Limit Tor,Svr,Mar,FF</th>
+<th>Limit Storm Based<br />Tor,Svr,Mar,FF</th></tr>
 </thead>
 <tbody>
 {$table}

@@ -172,20 +172,26 @@ function pull_vtec_events_by_wfo_year(
             $form["significance"],
         );
     }
+    $statuslimiter = " status = 'NEW' ";
+    if (isset($form["addsvs"]) && ($form["addsvs"] == "yes")){
+        $statuslimiter = " status != 'CAN' ";
+    }
     $rs = pg_prepare($db, "SELECT-INT", "SELECT 
 		issue, expire, phenomena, significance, eventid, wfo, status,
            ST_askml(geom) as kml,
            round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize
            from sbw_$year 
-           WHERE $wfolimiter issue >= $1 and issue <= $2
-           and status = 'NEW' and eventid > 0 $pslimiter");
+           WHERE $wfolimiter coalesce(issue, polygon_begin) >= $1
+           and coalesce(issue, polygon_begin) <= $2
+           and $statuslimiter and eventid > 0 $pslimiter");
     $rs = pg_prepare($db, "SELECT", "SELECT
 		issue, expire, phenomena, significance, eventid, wfo, status,
            ST_askml(geom) as kml,
            round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize
            from sbw_$year 
-           WHERE $wfolimiter issue <= $1 and expire > $2
-           and status = 'NEW' and eventid > 0 $pslimiter");
+           WHERE $wfolimiter coalesce(issue, polygon_begin) <= $1 and
+           expire > $2
+           and $statuslimiter and eventid > 0 $pslimiter");
 
     if ($tsSQL != $tsSQL2)
     {
