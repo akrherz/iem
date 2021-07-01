@@ -7,6 +7,7 @@ import tempfile
 import importlib.machinery
 import importlib.util
 import json
+import syslog
 import traceback
 from io import BytesIO
 
@@ -267,9 +268,11 @@ def workflow(environ, form, fmt):
         )
     if isinstance(mixedobj, plt.Figure):
         plt.close()
-    sys.stderr.write(
-        ("Autoplot[%3s] Timing: %7.3fs Key: %s Cache: %s[s]\n")
-        % (scriptnum, (utc() - start_time).total_seconds(), mckey, dur)
+    syslog.syslog(
+        syslog.LOG_LOCAL1 | syslog.LOG_INFO,
+        f"Autoplot[{scriptnum:3.0f}] "
+        f"Timing: {(utc() - start_time).total_seconds():.3f}s "
+        f"Key: {mckey} Cache: {dur}[s]",
     )
     return HTTP200, content
 

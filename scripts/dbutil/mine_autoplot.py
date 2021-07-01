@@ -9,7 +9,7 @@ from pyiem.util import get_dbconn, logger
 
 LOG = logger()
 LOGRE = re.compile(r"Autoplot\[\s*(\d+)\] Timing:\s*(\d+\.\d+)s Key: ([^\s]*)")
-LOGFN = "/var/log/app/www_log"
+LOGFN = "/var/log/app/autoplot_log"
 
 
 def get_dbendts(cursor):
