@@ -26,7 +26,7 @@ PE = [PathEffects.withStroke(linewidth=5, foreground="white")]
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 600
@@ -107,7 +107,7 @@ def compute_flight_condition(row):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     valid = ctx["valid"].replace(tzinfo=datetime.timezone.utc)
     pgconn = get_dbconn("asos")
@@ -161,6 +161,8 @@ def plotter(fdict):
         units("knot") * df["ws_sknt"].values,
         units("degree") * df["ws_drct"].values,
     )
+    # Initialize a fcond with string type
+    df["fcond"] = ""
     sz = len(df.index)
     clevels = []
     clevelx = []
@@ -212,7 +214,6 @@ def plotter(fdict):
                 color=TEXTARGS["color"],
                 va="top" if row["v"] < 0 else "bottom",
             ).set_path_effects(PE)
-
         df.at[valid0, "fcond"] = compute_flight_condition(row)
         # At 3.25 plot the visibility
         if not pd.isna(row[VIS]):
@@ -313,4 +314,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="KSTL", valid="2021-04-08 1522"))
+    plotter(dict(station="KMDW", valid="2021-07-02 1427"))
