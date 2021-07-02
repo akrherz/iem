@@ -1,7 +1,6 @@
 """Departures over trailing days"""
 import datetime
 import sys
-from collections import OrderedDict
 
 import requests
 from pandas.io.sql import read_sql
@@ -12,20 +11,18 @@ from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 UNITS = {"precip": "inch", "avgt": "F", "high": "F", "low": "F"}
-PDICT = OrderedDict(
-    [
-        ("precip", "Precipitation"),
-        ("avgt", "Daily Average Temperature"),
-        ("high", "Daily High Temperature"),
-        ("low", "Daily Low Temperature"),
-    ]
-)
+PDICT = {
+    "precip": "Precipitation",
+    "avgt": "Daily Average Temperature",
+    "high": "Daily High Temperature",
+    "low": "Daily Low Temperature",
+}
 PDICT2 = {"diff": "Absolute Departure", "sigma": "Standard Deviation"}
 COLORS = ["#ffff00", "#fcd37f", "#ffaa00", "#e60000", "#730000"]
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 86400
@@ -112,13 +109,15 @@ def underlay_usdm(axis, sts, ets, lon, lat):
     )
     axis.add_artist(legend)
     uri = (
-        "http://iem.local/api/1/usdm_bypoint.json?sdate=%s&edate=%s&"
-        "lon=%s&lat=%s"
+        "http://mesonet.agron.iastate.edu/"
+        "api/1/usdm_bypoint.json?sdate=%s&edate=%s&lon=%s&lat=%s"
     ) % (sts.strftime("%Y-%m-%d"), ets.strftime("%Y-%m-%d"), lon, lat)
     data = requests.get(uri, timeout=30).json()
     if not data["data"]:
         return
     for row in data["data"]:
+        if row["category"] is None:
+            continue
         ts = datetime.datetime.strptime(row["valid"], "%Y-%m-%d")
         date = datetime.date(ts.year, ts.month, ts.day)
         axis.axvspan(
@@ -130,7 +129,7 @@ def underlay_usdm(axis, sts, ets, lon, lat):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     p1 = ctx["p1"]
@@ -242,21 +241,21 @@ def plotter(fdict):
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     ax.set_position([0.1, 0.14, 0.85, 0.71])
 
-    l1, = ax.plot(
+    (l1,) = ax.plot(
         df.index.values,
         df["p1_" + pvar + "_" + how],
         lw=2,
         label="%s Day" % (p1,),
         zorder=5,
     )
-    l2, = ax.plot(
+    (l2,) = ax.plot(
         df.index.values,
         df["p2_" + pvar + "_" + how],
         lw=2,
         label="%s Day" % (p2,),
         zorder=5,
     )
-    l3, = ax.plot(
+    (l3,) = ax.plot(
         df.index.values,
         df["p3_" + pvar + "_" + how],
         lw=2,

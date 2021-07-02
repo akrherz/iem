@@ -1,27 +1,25 @@
 """trailing day precip."""
 import datetime
-from collections import OrderedDict
 
+import requests
 import psycopg2.extras
 import numpy as np
 import pandas as pd
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
-    [
-        ("dep", "Departure [inch]"),
-        ("per", "Percent of Average [%]"),
-        ("ptile", "Percentile (1=wettest)"),
-        ("rank", "Rank (1=wettest)"),
-        ("spi", "Standardized Precip Index [sigma]"),
-    ]
-)
+PDICT = {
+    "dep": "Departure [inch]",
+    "per": "Percent of Average [%]",
+    "ptile": "Percentile (1=wettest)",
+    "rank": "Rank (1=wettest)",
+    "spi": "Standardized Precip Index [sigma]",
+}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     today = datetime.date.today()
     desc["data"] = True
@@ -30,7 +28,8 @@ def get_description():
     ] = """This plot presents trailing day precipitation
     metrics.  Each point on the x-axis represents a period from that date to
     the right-most date on the plot.  There are five options for units to
-    display the chart in, more specifically, the right hand axis.
+    display the chart in, more specifically, the right hand axis on the
+    interactive chart version.
     <br />
     <ul>
       <li><strong>Departure [inch]</strong>: the absolute amount of precip
@@ -61,7 +60,7 @@ def get_description():
             name="opt",
             default="rank",
             options=PDICT,
-            label="Chart Display Units",
+            label="Interative Chart Variable:",
         ),
         dict(
             type="date",
@@ -69,13 +68,13 @@ def get_description():
             default=today.strftime("%Y/%m/%d"),
             label="To Date:",
             min="1894/01/01",
-        ),  # Comes back to python as yyyy-mm-dd
+        ),
     ]
     return desc
 
 
 def get_ctx(fdict):
-    """Get the plotting context """
+    """Get the plotting context"""
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
@@ -86,10 +85,8 @@ def get_ctx(fdict):
     table = "alldata_%s" % (station[:2],)
 
     cursor.execute(
-        f"""
-        SELECT year,  extract(doy from day) as doy, precip
-        from {table} where station = %s and precip is not null
-    """,
+        "SELECT year,  extract(doy from day) as doy, precip "
+        f"from {table} where station = %s and precip is not null",
         (station,),
     )
     if cursor.rowcount == 0:
@@ -114,15 +111,33 @@ def get_ctx(fdict):
             "precip"
         ]
 
+    sts = date - datetime.timedelta(days=14)
+    uri = (
+        "http://mesonet.agron.iastate.edu/"
+        "api/1/usdm_bypoint.json?sdate=%s&edate=%s&lon=%s&lat=%s"
+    ) % (
+        sts.strftime("%Y-%m-%d"),
+        date.strftime("%Y-%m-%d"),
+        ctx["_nt"].sts[station]["lon"],
+        ctx["_nt"].sts[station]["lat"],
+    )
+    jdata = requests.get(uri, timeout=30).json()
+    dclass = "No Drought"
+    if jdata["data"]:
+        lastrow = jdata["data"][-1]
+        cat = lastrow["category"]
+        cat = "No Drought" if cat is None else f"D{cat}"
+        ts = datetime.datetime.strptime(lastrow["valid"], "%Y-%m-%d")
+        dclass = f"{cat} on {ts:%-d %b %Y}"
+
     _temp = date.replace(year=2000)
     _doy = int(_temp.strftime("%j"))
     xticks = []
     xticklabels = []
-    for i in range(-366, 0):
-        ts = _temp + datetime.timedelta(days=i)
-        if ts.day == 1:
-            xticks.append(i)
-            xticklabels.append(ts.strftime("%b"))
+    for i in range(-360, 1, 60):
+        ts = date + datetime.timedelta(days=i)
+        xticks.append(i)
+        xticklabels.append(ts.strftime("%b %-d\n'%y"))
     ranks = []
     departures = []
     percentages = []
@@ -153,12 +168,24 @@ def get_ctx(fdict):
         spi.append((thisyear - avgs[-1]) / np.nanstd(sums))
 
     ctx["sdate"] = date - datetime.timedelta(days=360)
-    ctx["title"] = "%s %s" % (station, ctx["_nt"].sts[station]["name"])
-    ctx["subtitle"] = ("Trailing Days Precip %s [%s-%s] to %s") % (
-        PDICT[opt],
+    ctx["title"] = "[%s-%s] %s %s" % (
         baseyear + 2,
         datetime.datetime.now().year,
+        station,
+        ctx["_nt"].sts[station]["name"],
+    )
+    ctx["subtitle"] = (
+        "%s from given x-axis date until %s, US Drought Monitor: %s"
+    ) % (
+        PDICT[opt],
         date.strftime("%-d %b %Y"),
+        dclass,
+    )
+    ctx["subtitle2"] = (
+        "From given x-axis date until %s, US Drought Monitor: %s"
+    ) % (
+        date.strftime("%-d %b %Y"),
+        dclass,
     )
 
     ctx["ranks"] = ranks
@@ -187,7 +214,7 @@ def get_ctx(fdict):
 
 
 def highcharts(fdict):
-    """ Go """
+    """Go"""
     ctx = get_ctx(fdict)
     dstart = "Date.UTC(%s, %s, %s)" % (
         ctx["sdate"].year,
@@ -290,52 +317,104 @@ $("#ap_container").highcharts({
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_ctx(fdict)
 
-    (fig, ax) = plt.subplots(1, 1)
-    ax.set_position([0.1, 0.1, 0.75, 0.75])
-    y2 = ax.twinx()
-    y2.set_position([0.1, 0.1, 0.75, 0.75])
+    fig = figure(title=ctx["title"], subtitle=ctx["subtitle2"])
+    width = 0.26
+    height = 0.38
+    x0 = 0.07
+    y0 = 0.1
+    x1 = x0 + width + 0.06
+    y1 = y0 + height + 0.03
+    x2 = x1 + width + 0.06
+    axes = [
+        fig.add_axes([x0, y1, width, height]),
+        fig.add_axes([x0, y0, width, height]),
+        fig.add_axes([x1, y1, width, height]),
+        fig.add_axes([x1, y0, width, height]),
+        fig.add_axes([x2, y1, width, height]),
+        fig.add_axes([x2, y0, width, height]),
+    ]
+    for i, ax in enumerate(axes):
+        ax.grid(True)
+        ax.set_xticks(ctx["xticks"])
+        if (i + 1) % 2 == 0:
+            ax.set_xticklabels(ctx["xticklabels"])
+        else:
+            ax.set_xticklabels([])
+        ax.set_xlim(-367, 0.5)
 
-    y2.plot(np.arange(-365, 0), ctx["y2"][::-1], color="b", lw=2)
-    if ctx["opt"] == "rank":
-        y2.axhline(ctx["years"], color="b", linestyle="-.")
-        y2.text(-180, ctx["years"] + 2, "Total Years", ha="center")
-        y2.set_ylim(0, ctx["years"] + 30)
-    ax.grid(True)
-    ax.set_xticks(ctx["xticks"])
-    ax.set_xticklabels(ctx["xticklabels"])
-    ax.set_title(("%s\n%s") % (ctx["title"], ctx["subtitle"]), fontsize=10)
-    y2.set_ylabel("%s (blue line)" % (ctx["y2label"],), color="b")
-    ax.set_xlim(-367, 0.5)
-
+    xaxis = np.arange(-365, 0)
+    # Upper Left, simple accums
+    ax = axes[0]
     ax.plot(
-        np.arange(-365, 0),
+        xaxis,
         ctx["totals"][::-1],
         color="r",
         lw=2,
         label="This Period",
     )
     ax.plot(
-        np.arange(-365, 0),
+        xaxis,
         ctx["avgs"][::-1],
         color="purple",
         lw=2,
         label="Average",
     )
     ax.plot(
-        np.arange(-365, 0),
+        xaxis,
         ctx["maxes"][::-1],
         color="g",
         lw=2,
         label="Maximum",
     )
-    ax.set_ylabel("Precipitation [inch]")
-    ax.set_zorder(y2.get_zorder() + 1)
-    ax.patch.set_visible(False)
-    ax.legend(loc="best", ncol=3)
+    ax.set_ylabel("Accum Precipitation [inch]")
+    ax.legend(loc=1, ncol=1)
     ax.set_ylim(bottom=0)
+
+    # Lower Left SPI
+    ax = axes[1]
+    ax.plot(xaxis, ctx["spi"][::-1], zorder=6)
+    ax.set_ylabel(r"Standardized Precip Index ($\sigma$)")
+    colors = ["#ffff00", "#fcd37f", "#ffaa00", "#e60000", "#730000"]
+    for i, spi in enumerate([-0.5, -0.8, -1.3, -1.6, -2]):
+        ax.axhline(spi, color=colors[i], lw=2, zorder=4)
+        ax.annotate(
+            f"D{i}",
+            (0.5, spi),
+            xycoords=("axes fraction", "data"),
+            va="center",
+            zorder=5,
+            color="k" if i < 3 else "white",
+            bbox=dict(color=colors[i]),
+        )
+
+    # Middle Upper
+    ax = axes[2]
+    ax.set_ylabel("Rank (wettest=1)")
+    ax.axhline(ctx["years"], color="b", linestyle="-.")
+    ax.plot(xaxis, ctx["ranks"][::-1], zorder=6)
+    ax.text(-180, ctx["years"] + 2, "Total Years", ha="center")
+    ax.set_ylim(1, ctx["years"] + 10)
+
+    # Middle Lower
+    ax = axes[3]
+    ax.set_ylabel("Percentile (wettest=1)")
+    ax.plot(xaxis, ctx["percentiles"][::-1], zorder=6)
+    ax.set_ylim(1, 101)
+    ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
+
+    # Upper Right
+    ax = axes[4]
+    ax.set_ylabel("Percent of Average [%]")
+    ax.plot(xaxis, ctx["percentages"][::-1], zorder=6)
+
+    # Lower Right
+    ax = axes[5]
+    ax.set_ylabel("Departure from Average [inch]")
+    ax.plot(xaxis, ctx["departures"][::-1], zorder=6)
+
     df = pd.DataFrame(
         dict(
             day=np.arange(-365, 0),
