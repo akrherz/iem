@@ -46,4 +46,4 @@ bash download_cpc.sh
 
 cd ../dl
 python download_cfs.py && cd ../yieldfx && python cfs2iemre_netcdf.py && python cfs_tiler.py
-python cfs_tiler_2019.py
+python cfs_tiler_lastyear.py
