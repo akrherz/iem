@@ -31,7 +31,7 @@ XREF = {
     "lewis": {"isusm": "OKLI4", "climodat": "IA0364"},
     "nashua": {"isusm": "NASI4", "climodat": "IA1402"},
     "sutherland": {"isusm": "CAMI4", "climodat": "IA1442"},
-    "kanawha": {"isusm": "KNAI4", "climodat": "IA0923"},
+    "kanawha": {"isusm": "KNAI4", "climodat": "IA1541"},
     "mcnay": {"isusm": "CHAI4", "climodat": "IA1394"},
     "muscatine": {"isusm": "FRUI4", "climodat": "IA5837"},
 }
@@ -307,7 +307,7 @@ def replace_cfs(df, location):
     )
     rcols = ["maxt", "mint", "rain", "radn"]
     if cursor.rowcount == 0:
-        LOG.info("  replace_cfs found zero rows!")
+        LOG.info("  replace_cfs found zero rows for coop %s!", coop)
         return
     row = []
     for row in cursor:
@@ -476,7 +476,7 @@ def replace_obs(df, location):
                 row[11],
             )
     if replaced:
-        LOG.info(
+        LOG.debug(
             "  replaced with obs from %s for %s->%s",
             isusm,
             replaced[0],
@@ -493,7 +493,7 @@ def compute_gdd(df):
 
 def do(location):
     """Workflow for a particular location"""
-    LOG.info("yieldfx_workflow: Processing '%s'", location)
+    LOG.debug("yieldfx_workflow: Processing '%s'", location)
     # 1. Read baseline
     df = load_baseline(location)
     # 2. Add columns and observed data
