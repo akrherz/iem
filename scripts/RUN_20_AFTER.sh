@@ -21,3 +21,13 @@ python uscrn_ingest.py
 
 cd ../uscrn
 python compute_uscrn_pday.py
+
+cd ../dl
+python download_imerg.py $(date -u --date '5 hours ago' +'%Y %m %d %H 00')
+python download_imerg.py $(date -u --date '5 hours ago' +'%Y %m %d %H 30') ac
+python download_imerg.py $(date -u --date '24 hours ago' +'%Y %m %d %H 00')
+python download_imerg.py $(date -u --date '24 hours ago' +'%Y %m %d %H 30')
+python download_imerg.py $(date -u --date '32 hours ago' +'%Y %m %d %H 00')
+python download_imerg.py $(date -u --date '32 hours ago' +'%Y %m %d %H 30')
+python download_imerg.py $(date -u --date '6 months ago' +'%Y %m %d %H 00')
+python download_imerg.py $(date -u --date '6 months ago' +'%Y %m %d %H 30')
