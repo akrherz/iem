@@ -1,23 +1,20 @@
 """Wind Chill Hours"""
 import datetime
-from collections import OrderedDict
 
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
-PDICT = OrderedDict(
-    [
-        ("0", "Include calm observations"),
-        ("2", "Include only non-calm observations >= 2kt"),
-        ("5", "Include only non-calm observations >= 5kt"),
-    ]
-)
+PDICT = {
+    "0": "Include calm observations",
+    "2": "Include only non-calm observations >= 2kt",
+    "5": "Include only non-calm observations >= 5kt",
+}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 86400
@@ -56,7 +53,7 @@ def get_description():
 
 
 def highcharts(fdict):
-    """ Do highcharts """
+    """Do highcharts"""
     ctx = get_context(fdict)
     season = ""
     if "season" in ctx["lines"]:
@@ -186,7 +183,7 @@ $("#ap_container").highcharts({
 
 
 def get_context(fdict):
-    """ Get the data"""
+    """Get the data"""
     pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
@@ -238,6 +235,8 @@ def get_context(fdict):
     colors = ["g", "k", "r", "orange"]
     for color, lbl in zip(colors, lbls):
         s = ctx["dfdescribe"].loc[[lbl]].transpose()
+        if all(pd.isna(s)):
+            continue
         s = s.dropna().astype("timedelta64[h]")
         ctx["lines"][lbl] = {
             "x": s.index.values[::-1],
@@ -250,7 +249,7 @@ def get_context(fdict):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_context(fdict)
 
     (fig, ax) = plt.subplots(1, 1)
@@ -268,6 +267,8 @@ def plotter(fdict):
             lw=2,
         )
     for lbl in ["25%", "mean", "75%"]:
+        if lbl not in ctx["lines"]:
+            continue
         ax.plot(
             ctx["lines"][lbl]["x"],
             ctx["lines"][lbl]["y"],
