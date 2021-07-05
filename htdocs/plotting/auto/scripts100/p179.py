@@ -11,7 +11,7 @@ from pyiem.exceptions import NoDataFound
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -67,7 +67,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     gddbase = ctx["gddbase"]
@@ -83,13 +83,8 @@ def plotter(fdict):
     cursor = pgconn.cursor()
     table = "alldata_%s" % (station[:2],)
     cursor.execute(
-        """
-        SELECT year, extract(doy from day), gddxx(%s, %s, high,low), low
-        from """
-        + table
-        + """ where station = %s and year > %s
-        and day < %s
-    """,
+        "SELECT year, extract(doy from day), gddxx(%s, %s, high,low), low "
+        f"from {table} where station = %s and year > %s and day < %s",
         (base, ceil, station, byear, today),
     )
 
@@ -165,17 +160,7 @@ def plotter(fdict):
     ax[0].set_xticklabels(("Apr 1", "15", "May 1", "15", "Jun 1", "15"))
     ax[0].set_yticks((244, 251, 258, 265, 274, 281, 288, 295, 305))
     ax[0].set_yticklabels(
-        (
-            "Sep 1",
-            "Sep 8",
-            "Sep 15",
-            "Sep 22",
-            "Oct 1",
-            "Oct 8",
-            "Oct 15",
-            "Oct 22",
-            "Nov",
-        )
+        "Sep 1,Sep 8,Sep 15,Sep 22,Oct 1,Oct 8,Oct 15,Oct 22,Nov".split(",")
     )
 
     res = ax[1].imshow(

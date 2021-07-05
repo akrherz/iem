@@ -16,7 +16,7 @@ PDICT = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     today = datetime.date.today()
     desc["data"] = True
@@ -60,7 +60,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
@@ -111,7 +111,8 @@ def plotter(fdict):
 
     dailymeans = df[["year", "doy", varname]].groupby(["year", "doy"]).mean()
     dailymeans = dailymeans.reset_index()
-
+    if varname not in dailymeans.columns:
+        raise NoDataFound("All data is missing.")
     df2 = dailymeans[["doy", varname]].groupby("doy").describe()
 
     dyear = df[df["year"] == year]

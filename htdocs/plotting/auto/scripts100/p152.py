@@ -19,7 +19,7 @@ PDICT3 = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -84,7 +84,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     state = ctx["state"][:2]
@@ -101,16 +101,14 @@ def plotter(fdict):
         table = "alldata_%s" % (state,)
 
     df = read_sql(
-        """
+        f"""
     WITH season1 as (
         SELECT station, year,
         min(case when month > 7 and low < 32 then
             extract(doy from day) else 366 end) as first_freeze,
         max(case when month < 7 and low < 32 then
             extract(doy from day) else 0 end) as last_freeze
-        from """
-        + table
-        + """ WHERE
+        from {table} WHERE
         year >= %s and year <= %s GROUP by station, year),
     season2 as (
         SELECT station, year,
@@ -118,9 +116,7 @@ def plotter(fdict):
             extract(doy from day) else 366 end) as first_freeze,
         max(case when month < 7 and low < 32 then
             extract(doy from day) else 0 end) as last_freeze
-        from """
-        + table
-        + """ WHERE
+        from {table} WHERE
         year >= %s and year <= %s GROUP by station, year),
     agg as (
         SELECT p1.station, avg(p1.first_freeze) as p1_first_fall,

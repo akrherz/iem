@@ -1,7 +1,6 @@
 """Monthly percentiles"""
 import calendar
 import datetime
-from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
@@ -9,19 +8,17 @@ from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
-    [
-        ("high", "High Temperature"),
-        ("low", "Low Temperature"),
-        ("precip", "Precipitation"),
-    ]
-)
+PDICT = {
+    "high": "High Temperature",
+    "low": "Low Temperature",
+    "precip": "Precipitation",
+}
 
 PDICT2 = {"above": "At or Above", "below": "Below"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -64,7 +61,7 @@ def get_description():
 
 
 def get_context(fdict):
-    """ Get the context """
+    """Get the context"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"].upper()
@@ -90,6 +87,8 @@ def get_context(fdict):
         params=(level, station),
         index_col="month",
     )
+    if df.empty:
+        raise NoDataFound("Did not find any data.")
     df["rank"] = (df["count"] - df["hits"]) / df["count"] * 100.0
     df["avg_days"] = df["hits"] / years
     df["return_interval"] = 1.0 / df["avg_days"]
@@ -116,7 +115,7 @@ def get_context(fdict):
 
 
 def highcharts(fdict):
-    """ Go """
+    """Go"""
     ctx = get_context(fdict)
 
     return (
@@ -187,7 +186,7 @@ s += '<br /><b>Avg Days per Month:</b> '+ (1. / this.points[1].y).toFixed(2);
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_context(fdict)
     (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
     df = ctx["df"]

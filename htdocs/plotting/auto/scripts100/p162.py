@@ -6,14 +6,14 @@ import numpy.ma as ma
 import pandas as pd
 from pandas.io.sql import read_sql
 import matplotlib.colors as mpcolors
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.plot import get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 86400
@@ -37,7 +37,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
 
@@ -59,90 +59,12 @@ def plotter(fdict):
         raise NoDataFound("Error, no results returned!")
 
     w = np.arange(1, 366, 7)
-    z = np.array(
-        [
-            100,
-            200,
-            300,
-            400,
-            500,
-            600,
-            700,
-            800,
-            900,
-            1000,
-            1100,
-            1200,
-            1300,
-            1400,
-            1500,
-            1600,
-            1700,
-            1800,
-            1900,
-            2000,
-            2100,
-            2200,
-            2300,
-            2400,
-            2500,
-            2600,
-            2700,
-            2800,
-            2900,
-            3000,
-            3100,
-            3200,
-            3300,
-            3400,
-            3500,
-            3600,
-            3700,
-            3800,
-            3900,
-            4000,
-            4100,
-            4200,
-            4300,
-            4400,
-            4500,
-            4600,
-            4700,
-            4800,
-            4900,
-            5000,
-            5500,
-            6000,
-            6500,
-            7000,
-            7500,
-            8000,
-            8500,
-            9000,
-            9500,
-            10000,
-            11000,
-            12000,
-            13000,
-            14000,
-            15000,
-            16000,
-            17000,
-            18000,
-            19000,
-            20000,
-            21000,
-            22000,
-            23000,
-            24000,
-            25000,
-            26000,
-            27000,
-            28000,
-            29000,
-            30000,
-            31000,
-        ]
+    z = np.append(
+        np.arange(100, 5001, 100),
+        np.append(
+            np.arange(5500, 10001, 500),
+            np.arange(11000, 31001, 1000),
+        ),
     )
 
     H, xedges, yedges = np.histogram2d(
@@ -157,7 +79,21 @@ def plotter(fdict):
     H = ma.array(H)
     H.mask = np.where(H < 1, True, False)
 
-    (fig, ax) = plt.subplots(1, 1)
+    ab = ctx["_nt"].sts[station]["archive_begin"]
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
+    syear = max([1973, ab.year])
+
+    title = (
+        "%s-%s [%s %s Ceilings Frequency\n"
+        "Level at which Overcast Conditions Reported"
+    ) % (
+        syear,
+        datetime.date.today().year,
+        station,
+        ctx["_nt"].sts[station]["name"],
+    )
+    (fig, ax) = figure_axes(title=title)
 
     bounds = np.arange(0, 1.2, 0.1)
     bounds = np.concatenate((bounds, np.arange(1.2, 2.2, 0.2)))
@@ -165,10 +101,6 @@ def plotter(fdict):
     cmap.set_under("#F9CCCC")
     norm = mpcolors.BoundaryNorm(bounds, cmap.N)
 
-    ab = ctx["_nt"].sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata.")
-    syear = max([1973, ab.year])
     years = (datetime.date.today().year - syear) + 1.0
     c = ax.imshow(
         H / years, aspect="auto", interpolation="nearest", norm=norm, cmap=cmap
@@ -177,18 +109,6 @@ def plotter(fdict):
     idx = [0, 4, 9, 19, 29, 39, 49, 54, 59, 64, 69, 74, 79]
     ax.set_yticks(idx)
     ax.set_yticklabels(z[idx])
-    ax.set_title(
-        (
-            "%s-%s [%s %s Ceilings Frequency\n"
-            "Level at which Overcast Conditions Reported"
-        )
-        % (
-            syear,
-            datetime.date.today().year,
-            station,
-            ctx["_nt"].sts[station]["name"],
-        )
-    )
     ax.set_ylabel("Overcast Level [ft AGL], irregular scale")
     ax.set_xlabel("Week of the Year")
     ax.set_xticks(np.arange(1, 55, 7))

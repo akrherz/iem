@@ -1,6 +1,5 @@
 """Top 10 largest, smallest"""
 import datetime
-from collections import OrderedDict
 
 try:
     from zoneinfo import ZoneInfo
@@ -13,32 +12,31 @@ from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot import figure
 from pyiem.exceptions import NoDataFound
 
-MDICT = OrderedDict(
-    [
-        ("all", "No Month/Time Limit"),
-        ("spring", "Spring (MAM)"),
-        ("fall", "Fall (SON)"),
-        ("winter", "Winter (DJF)"),
-        ("summer", "Summer (JJA)"),
-        ("jan", "January"),
-        ("feb", "February"),
-        ("mar", "March"),
-        ("apr", "April"),
-        ("may", "May"),
-        ("jun", "June"),
-        ("jul", "July"),
-        ("aug", "August"),
-        ("sep", "September"),
-        ("oct", "October"),
-        ("nov", "November"),
-        ("dec", "December"),
-    ]
-)
+MDICT = {
+    "all": "No Month/Time Limit",
+    "spring": "Spring (MAM)",
+    "fall": "Fall (SON)",
+    "winter": "Winter (DJF)",
+    "summer": "Summer (JJA)",
+    "jan": "January",
+    "feb": "February",
+    "mar": "March",
+    "apr": "April",
+    "may": "May",
+    "jun": "June",
+    "jul": "July",
+    "aug": "August",
+    "sep": "September",
+    "oct": "October",
+    "nov": "November",
+    "dec": "December",
+}
+
 PDICT = {"largest": "Largest", "smallest": "Smallest"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 86400
@@ -92,6 +90,8 @@ def plot_date(dbconn, ax, i, date, station, tz):
         params=(station, sts, ets),
         index_col=None,
     )
+    if df.empty:
+        return
     df["valid"] = df["valid"].dt.tz_localize(ZoneInfo("UTC"))
     df["norm"] = (df["tmpf"] - df["tmpf"].min()) / (
         df["tmpf"].max() - df["tmpf"].min()
@@ -111,7 +111,7 @@ def plot_date(dbconn, ax, i, date, station, tz):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     font0 = FontProperties()
     font0.set_family("monospace")
     font0.set_size(16)

@@ -18,7 +18,7 @@ UNITCONV = {"mph": "miles / hour", "kt": "knot", "mps": "meter / second"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 86400
@@ -46,7 +46,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
 
@@ -89,7 +89,7 @@ def plotter(fdict):
     (fig, ax) = plt.subplots(1, 1)
     ax.barh(grp.index.values, grp[f"sped_{units}"].values, align="center")
     ax.set_xlabel("Average Wind Speed [%s]" % (UNITS[units],))
-    ax.set_yticks(grp.index.values)
+    ax.set_yticks(range(1, 13))
     ax.set_yticklabels(calendar.month_abbr[1:])
     ax.grid(True)
     ax.set_xlim(0, maxval * 1.2)

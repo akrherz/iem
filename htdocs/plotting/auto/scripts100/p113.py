@@ -17,7 +17,7 @@ PDICT = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["report"] = True
@@ -45,7 +45,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     varname = ctx["var"]
@@ -72,6 +72,8 @@ def plotter(fdict):
             timeout=10,
         ).json()["climatology"]
     )
+    if df.empty:
+        raise NoDataFound("Climatology was not found.")
     df["valid"] = pd.to_datetime(
         {"year": 2000, "month": df["month"], "day": df["day"]}
     )

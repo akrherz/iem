@@ -1,6 +1,5 @@
 """Replicated 108 plot, but for non-climodat."""
 import datetime
-from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 import pandas as pd
@@ -9,18 +8,16 @@ from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
-    [
-        ("all", "Show All Three Plots"),
-        ("gdd", "Show just Growing Degree Days"),
-        ("precip", "Show just Precipitation"),
-        ("sdd", "Show just Stress Degree Days"),
-    ]
-)
+PDICT = {
+    "all": "Show All Three Plots",
+    "gdd": "Show just Growing Degree Days",
+    "precip": "Show just Precipitation",
+    "sdd": "Show just Stress Degree Days",
+}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -104,7 +101,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("iem")
     ctx = get_autoplot_context(fdict, get_description())
 
@@ -139,6 +136,8 @@ def plotter(fdict):
         params=(gddbase, gddceil, ctx["_nt"].sts[station]["climate_site"]),
         index_col="day",
     )
+    if climo.empty:
+        raise NoDataFound("Failed to find climatology")
     baseyear = int(climo.index.values[0].year)
     years = (datetime.datetime.now().year - baseyear) + 1
     xlen = int((edate - sdate).days) + 1  # In case of leap day

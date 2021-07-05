@@ -234,6 +234,8 @@ def get_context(fdict):
     lbls = ["25%", "mean", "75%", "max"]
     colors = ["g", "k", "r", "orange"]
     for color, lbl in zip(colors, lbls):
+        if lbl not in ctx["lines"]:
+            continue
         s = ctx["dfdescribe"].loc[[lbl]].transpose()
         if all(pd.isna(s)):
             continue
