@@ -181,6 +181,15 @@ def compute_datelabel(df):
     )
 
 
+def get_threshold_label(threshold):
+    """Make it pretty."""
+    if threshold in THRESHOLD_LEVELS:
+        return THRESHOLD_LEVELS.get(threshold)
+    if threshold.startswith("0."):
+        return "%.0f%%" % (float(threshold) * 100.0,)
+    return threshold
+
+
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
@@ -278,7 +287,7 @@ def plotter(fdict):
             )
             rect = Rectangle((0, 0), 1, 1, fc=fc, ec=ec)
         rects.append(rect)
-        label = THRESHOLD_LEVELS.get(row["threshold"], row["threshold"])
+        label = get_threshold_label(row["threshold"])
         if day == 0:
             label = f"D{row['day']} {label}"
         rectlabels.append(label)

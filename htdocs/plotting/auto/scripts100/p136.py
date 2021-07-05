@@ -4,6 +4,7 @@ import datetime
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
+from pyiem.exceptions import NoDataFound
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {
@@ -204,6 +205,8 @@ def get_context(fdict):
         params=(station, sknt),
         index_col=None,
     )
+    if df.empty:
+        raise NoDataFound("No data found for query.")
 
     df2 = pd.DataFrame()
     for i in range(32, -51, -1):
