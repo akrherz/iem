@@ -53,5 +53,4 @@ fi
 
 # Move content to offlining
 cd ../util
-python i5_2_cybox.py
 python autolapses2box.py
