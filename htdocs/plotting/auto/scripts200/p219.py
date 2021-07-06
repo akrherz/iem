@@ -153,14 +153,20 @@ def plotter(fdict):
     ax = fig.add_axes([0.08, yndc + 0.05, 0.9, 0.9 - yndc - 0.05])
     fig.text(0.015, 0.3, "Cloud Coverage & Level", rotation=90)
 
-    df["u"], df["v"] = wind_components(
-        units("knot") * df["sknt"].values,
-        units("degree") * df["drct"].values,
-    )
-    df["ws_u"], df["ws_v"] = wind_components(
-        units("knot") * df["ws_sknt"].values,
-        units("degree") * df["ws_drct"].values,
-    )
+    df["u"], df["v"] = [
+        x.m
+        for x in wind_components(
+            units("knot") * df["sknt"].values,
+            units("degree") * df["drct"].values,
+        )
+    ]
+    df["ws_u"], df["ws_v"] = [
+        x.m
+        for x in wind_components(
+            units("knot") * df["ws_sknt"].values,
+            units("degree") * df["ws_drct"].values,
+        )
+    ]
     # Initialize a fcond with string type
     df["fcond"] = ""
     sz = len(df.index)
@@ -314,4 +320,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="KMDW", valid="2021-07-02 1427"))
+    plotter(dict(station="KMCK", valid="2021-07-06 1606"))
