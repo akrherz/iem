@@ -43,7 +43,7 @@ def get_data(ctx):
     ctx["desc"] = "" if row[1] is None else html_escape(row[1][:-2])
     ctx["is_emergency"] = row[2] == 1
     ctx["is_pds"] = row[3] == 1
-    ctx["updated"] = row[4]
+    ctx["updated"] = utc() if row[4] is None else row[4]
 
 
 def as_html(ctx):
@@ -119,6 +119,8 @@ def get_context(url):
     # /vtec/f/2020-O-NEW-KLWX-SC-Y-0026_2020-02-18T17:00Z
     tokens = url.split("/")[-1].split("_")
     m = VTEC_RE.match(tokens[0])
+    if m is None:
+        return {}
     ctx = m.groupdict()
     if ctx["status"] is None:
         ctx["status"] = "NEW"
@@ -141,5 +143,8 @@ def get_context(url):
 def application(environ, start_response):
     """Answer the bell."""
     ctx = get_context(environ["SCRIPT_URL"])
+    if not ctx:
+        start_response("404 Not Found", [("Content-type", "text/plain")])
+        return [b"Resource Not Found"]
     start_response("200 OK", [("Content-type", "text/html")])
     return [as_html(ctx).encode("ascii")]

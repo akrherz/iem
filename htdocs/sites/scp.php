@@ -38,7 +38,11 @@ $exturi = sprintf("https://mesonet.agron.iastate.edu/".
     "api/1/scp.json?station=%s&amp;date=%s",
     $station, date("Y-m-d", $date));
 $data = file_get_contents($wsuri);
-$json = json_decode($data, $assoc=TRUE);
+if ($data === FALSE) {
+    $json = Array("data" => Array());
+} else {
+    $json = json_decode($data, $assoc=TRUE);
+}
 
 $birds = Array();
 $possible = Array("1" => "East Sounder", "2" => "West Sounder", "3" => "Imager");
@@ -83,7 +87,13 @@ if ($sortdir == "desc"){
     $data = array_reverse($data);
 }
 foreach($data as $key => $row){
-    $table .= sprintf("<tr><td class=\"rl\">%sZ</td>", gmdate("Hi", strtotime($row["utc_scp_valid"])));
+    if (!array_key_exists("utc_scp_valid", $row)){
+        continue;
+    }
+    $table .= sprintf(
+        "<tr><td class=\"rl\">%sZ</td>",
+        gmdate("Hi", strtotime($row["utc_scp_valid"]))
+    );
     foreach($birds as $b){
         $table .= sprintf(
             "<td>%s</td><td>%s</td><td>%s</td><td class=\"rl\">%s</td>",
