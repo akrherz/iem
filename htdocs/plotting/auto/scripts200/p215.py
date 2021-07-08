@@ -1,6 +1,5 @@
 """KDE of Temps."""
 import calendar
-from collections import OrderedDict
 from datetime import date, datetime
 
 import pandas as pd
@@ -19,7 +18,7 @@ PDICT = {
     "low": "Low Temperature [F]",
     "avgt": "Average Temperature [F]",
 }
-MDICT = OrderedDict(
+MDICT = dict(
     [
         ("all", "No Month/Time Limit"),
         ("spring", "Spring (MAM)"),
@@ -43,7 +42,7 @@ MDICT = OrderedDict(
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["cache"] = 3600
     desc["data"] = True
@@ -143,8 +142,13 @@ def get_df(ctx, period):
     )
 
 
+def f2s(value):
+    """HAAAAAAAAAAAAACK."""
+    return ("%.5f" % value).rstrip("0").rstrip(".")
+
+
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     df1 = get_df(ctx, "1")
     df2 = get_df(ctx, "2")
@@ -181,12 +185,28 @@ def plotter(fdict):
     C2 = "red"
     alpha = 0.4
 
-    ax.plot(df.index.values, df[label1], lw=2, c=C1, label=label1, zorder=4)
+    ax.plot(
+        df.index.values,
+        df[label1],
+        lw=2,
+        c=C1,
+        label=rf"{label1} - $\mu$={df1[ctx['v']].mean():.2f}",
+        zorder=4,
+    )
     ax.fill_between(xpos, 0, df[label1], color=C1, alpha=alpha, zorder=3)
-    ax.plot(df.index.values, df[label2], lw=2, c=C2, label=label2, zorder=4)
+    ax.axvline(df1[ctx["v"]].mean(), color=C1)
+    ax.plot(
+        df.index.values,
+        df[label2],
+        lw=2,
+        c=C2,
+        label=rf"{label2} - $\mu$={df2[ctx['v']].mean():.2f}",
+        zorder=4,
+    )
     ax.fill_between(xpos, 0, df[label2], color=C2, alpha=alpha, zorder=3)
+    ax.axvline(df2[ctx["v"]].mean(), color=C2)
     ax.set_ylabel("Guassian Kernel Density Estimate")
-    ax.legend(loc=2)
+    ax.legend(loc="best")
     ax.grid(True)
     ax.xaxis.set_major_locator(MaxNLocator(20))
 
@@ -205,17 +225,20 @@ def plotter(fdict):
     ax2.xaxis.set_major_locator(MaxNLocator(20))
 
     # Percentiles
-    p1 = df1[ctx["v"]].describe(percentiles=np.arange(0, 1.01, 0.01))
-    p2 = df2[ctx["v"]].describe(percentiles=np.arange(0, 1.01, 0.01))
+    levels = [0.001, 0.005, 0.01, 0.05, 0.1, 0.25, 0.5, 0.75]
+    levels.extend([0.9, 0.95, 0.99, 0.995, 0.999])
+    p1 = df1[ctx["v"]].describe(percentiles=levels)
+    p2 = df2[ctx["v"]].describe(percentiles=levels)
     y = 0.8
-    fig.text(0.88, y, "Percentile", rotation=45)
-    fig.text(0.91, y, period1, rotation=45)
-    fig.text(0.94, y, period2, rotation=45)
-    for ptile in [0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.99]:
+    fig.text(0.88, y, "Percentile", rotation=70)
+    fig.text(0.91, y, period1, rotation=70)
+    fig.text(0.945, y, period2, rotation=70)
+    for ptile in levels:
         y -= 0.03
-        fig.text(0.88, y, str(int(ptile * 100.0)))
-        fig.text(0.9, y, "%.1f" % (p1[f"{int(ptile * 100.)}%"],))
-        fig.text(0.94, y, "%.1f" % (p2[f"{int(ptile * 100.)}%"],))
+        val = f2s(ptile * 100.0)
+        fig.text(0.88, y, val)
+        fig.text(0.91, y, "%.1f" % (p1[f"{val}%"],))
+        fig.text(0.95, y, "%.1f" % (p2[f"{val}%"],))
 
     return fig, df
 
