@@ -44,7 +44,7 @@ DAYS = OrderedDict(
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -132,7 +132,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("postgis")
     ctx = get_autoplot_context(fdict, get_description())
     sts = ctx["sdate"]
@@ -154,11 +154,9 @@ def plotter(fdict):
         df = read_sql(
             """
         with data as (
-            select expire, g.threshold from spc_outlook o JOIN
-            spc_outlook_geometries g on (o.id = g.spc_outlook_id)
-            WHERE category = %s
-            and o.day = %s and o.outlook_type = %s and expire > %s
-            and expire < %s),
+            select expire, threshold from spc_outlooks
+            WHERE category = %s and day = %s and outlook_type = %s and
+            expire > %s and expire < %s),
         agg as (
             select date(expire - '1 day'::interval), d.threshold, priority,
             rank() OVER (PARTITION by date(expire - '1 day'::interval)
@@ -219,11 +217,10 @@ def plotter(fdict):
         df = read_sql(
             f"""
         with data as (
-            select expire, g.threshold from
-            spc_outlook o, spc_outlook_geometries g, {table} t
-            WHERE o.id = g.spc_outlook_id and t.{abbrcol} = %s
-            and category = %s
-            and ST_Intersects(st_buffer(g.geom, 0), t.{geomcol})
+            select expire, threshold from
+            spc_outlooks o, {table} t
+            WHERE t.{abbrcol} = %s and category = %s
+            and ST_Intersects(st_buffer(o.geom, 0), t.{geomcol})
             and o.day = %s and o.outlook_type = %s and expire > %s
             and expire < %s {sqllimiter}),
         agg as (

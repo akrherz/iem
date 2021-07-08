@@ -43,8 +43,7 @@ def dotime(time, lon, lat, day, cat):
     SELECT issue at time zone 'UTC' as i,
     expire at time zone 'UTC' as e,
     product_issue at time zone 'UTC' as v,
-    threshold, category from spc_outlook o JOIN spc_outlook_geometries g
-    on (o.id = g.spc_outlook_id) where
+    threshold, category from spc_outlooks where
     product_issue = (
         select product_issue from spc_outlook where
         issue <= %s and expire > %s and day = %s
@@ -81,7 +80,7 @@ def dotime(time, lon, lat, day, cat):
 
 
 def dowork(lon, lat, last, day, cat):
-    """ Actually do stuff"""
+    """Actually do stuff"""
     cursor = get_dbcursor()
 
     res = dict(outlooks=[])
@@ -92,17 +91,17 @@ def dowork(lon, lat, last, day, cat):
         SELECT issue at time zone 'UTC' as i,
         expire at time zone 'UTC' as e,
         product_issue at time zone 'UTC' as v,
-        g.threshold, category, t.priority,
+        o.threshold, category, t.priority,
         row_number() OVER (PARTITION by expire
             ORDER by priority DESC NULLS last, issue ASC) as rank,
-        case when g.threshold = 'SIGN' then rank()
-            OVER (PARTITION by g.threshold, expire
+        case when o.threshold = 'SIGN' then rank()
+            OVER (PARTITION by o.threshold, expire
             ORDER by product_issue ASC) else 2 end as sign_rank
-        from spc_outlook o, spc_outlook_thresholds t, spc_outlook_geometries g
-        where o.id = g.spc_outlook_id and g.threshold = t.threshold and
+        from spc_outlooks o, spc_outlook_thresholds t
+        where o.threshold = t.threshold and
         ST_Contains(geom, ST_GeomFromEWKT('SRID=4326;POINT(%s %s)'))
         and day = %s and outlook_type = 'C' and category = %s
-        and g.threshold not in ('TSTM') ORDER by issue DESC)
+        and o.threshold not in ('TSTM') ORDER by issue DESC)
     SELECT i, e, v, threshold, category from data
     where (rank = 1 or sign_rank = 1)
     ORDER by e DESC

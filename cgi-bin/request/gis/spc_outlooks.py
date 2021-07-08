@@ -69,8 +69,7 @@ def run(ctx, start_response):
         f"to_char(expire {common}) as expire, "
         f"to_char(product_issue {common}) as prodiss, "
         "outlook_type as type, day, threshold, category, cycle, geom "
-        "from spc_outlook o JOIN spc_outlook_geometries g on "
-        "(o.id = g.spc_outlook_id) WHERE product_issue >= %s and "
+        "from spc_outlooks WHERE product_issue >= %s and "
         "product_issue < %s and outlook_type in %s and day in %s "
         "ORDER by product_issue ASC",
         pgconn,

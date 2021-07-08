@@ -1,7 +1,5 @@
 """SPC Convective Outlook Heatmaps."""
 import datetime
-from collections import OrderedDict
-
 
 import cartopy.crs as ccrs
 import numpy as np
@@ -19,7 +17,7 @@ PDICT5 = {
     "yes": "YES: Draw Counties/Parishes",
     "no": "NO: Do Not Draw Counties/Parishes",
 }
-ISSUANCE = OrderedDict(
+ISSUANCE = dict(
     (
         ("1.C.1", "Day 1 Convective @1z"),
         ("1.C.5", "Day 1 Convective @5z"),
@@ -41,7 +39,7 @@ ISSUANCE = OrderedDict(
         ("8.C.8", "Day 8 Convective @8z"),
     )
 )
-OUTLOOKS = OrderedDict(
+OUTLOOKS = dict(
     (
         ("ANY SEVERE.0.02", "Any Severe 2% (Day 3+)"),
         ("ANY SEVERE.0.05", "Any Severe 5% (Day 3+)"),
@@ -99,7 +97,7 @@ OUTLOOKS = OrderedDict(
     )
 )
 PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State/Sector"}
-MDICT = OrderedDict(
+MDICT = dict(
     [
         ("all", "No Month/Time Limit"),
         ("spring", "Spring (MAM)"),
@@ -132,7 +130,7 @@ XSZ = (GRIDEAST - GRIDWEST) / griddelta
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 86400
@@ -206,7 +204,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     level = ctx["level"]
     station = ctx["station"][:4]
@@ -239,24 +237,18 @@ def plotter(fdict):
     hour = int(p.split(".")[2])
     df = read_postgis(
         """
-    WITH data as (
-        select product_issue, issue, expire, geom,
-        rank() OVER (PARTITION by issue ORDER by product_issue DESC)
-        from spc_outlook o JOIN spc_outlook_geometries g on
-        (o.id = g.spc_outlook_id) where
-        outlook_type = %s and day = %s and threshold = %s and
-        category = %s and
-        ST_Within(geom, ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s %s,
+        select product_issue, issue, expire, geom
+        from spc_outlooks where outlook_type = %s and day = %s and
+        cycle = %s and threshold = %s and category = %s and
+        ST_Intersects(geom, ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s %s,
         %s %s, %s %s, %s %s))'))
-        and extract(hour from product_issue at time zone 'UTC') in %s
         and extract(month from product_issue) in %s
-    )
-    SELECT * from data where rank = 1
     """,
         pgconn,
         params=(
             p.split(".")[1],
             p.split(".")[0],
+            hour,
             level.split(".", 1)[1],
             level.split(".")[0],
             GRIDWEST,
@@ -269,7 +261,6 @@ def plotter(fdict):
             GRIDSOUTH,
             GRIDWEST,
             GRIDSOUTH,
-            tuple([hour - 1, hour, hour + 1]),
             tuple(months),
         ),
         geom_col="geom",
@@ -382,4 +373,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(level="CATEGORICAL.HIGH"))
+    plotter(dict(level="CATEGORICAL.SLGT"))
