@@ -211,10 +211,13 @@ def plotter(fdict):
 
     def fetch(ts):
         """Getme data."""
+        # NB careful here with the joins and not to use the view!
         return read_postgis(
             "WITH data as ("
-            "SELECT * from spc_outlooks WHERE category = %s and "
-            "product_issue = %s and day in %s and outlook_type = %s) "
+            "SELECT o.*, g.* from spc_outlook o LEFT JOIN "
+            "spc_outlook_geometries g on (o.id = g.spc_outlook_id and "
+            "g.category = %s) WHERE product_issue = %s and day in %s and "
+            "outlook_type = %s) "
             "SELECT d.*, t.priority from data d LEFT JOIN "
             "spc_outlook_thresholds t on (d.threshold = t.threshold) "
             "ORDER by day ASC, priority ASC",
@@ -332,4 +335,4 @@ if __name__ == "__main__":
     # plotter(dict(cat="categorical", which="0C", valid="2019-05-14 2022"))
     # has three days of F
     # plotter(dict(cat="categorical", which="0F", valid="2018-05-07 2322"))
-    plotter(dict(cat="tornado", which="1C", valid="2011-04-07 2058"))
+    plotter(dict(cat="categorical", which="0C", valid="2021-07-09 0854"))
