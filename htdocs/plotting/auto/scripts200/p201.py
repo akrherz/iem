@@ -1,6 +1,5 @@
 """Calendar of SPC Outlooks by WFO/state."""
 import datetime
-from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 from pyiem.plot import calendar_plot
@@ -9,7 +8,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"C": "Convective", "F": "Fire Weather"}
-PDICT2 = OrderedDict(
+PDICT2 = dict(
     (
         ("all", "Summarize for CONUS"),
         ("ugc", "Summarize by Selected County/Zone/Parish"),
@@ -17,7 +16,7 @@ PDICT2 = OrderedDict(
         ("wfo", "Summarize by Selected WFO"),
     )
 )
-PDICT3 = OrderedDict((("yes", "Yes"), ("no", "No")))
+PDICT3 = dict((("yes", "Yes"), ("no", "No")))
 COLORS = {
     "TSTM": "#c0e8c0",
     "MRGL": "#66c57d",
@@ -29,7 +28,7 @@ COLORS = {
     "CRIT": "#ff787d",
     "EXTM": "#ff78ff",
 }
-DAYS = OrderedDict(
+DAYS = dict(
     (
         ("1", "Day 1"),
         ("2", "Day 2"),
@@ -70,7 +69,7 @@ def get_description():
             name="sdate",
             default=jan1.strftime("%Y/%m/%d"),
             label="Start Date (inclusive):",
-            min="2002/01/01",
+            min="1987/01/01",
         ),
         dict(
             type="date",
@@ -78,7 +77,7 @@ def get_description():
             default=today.strftime("%Y/%m/%d"),
             max=(today + datetime.timedelta(days=8)).strftime("%Y/%m/%d"),
             label="End Date (inclusive):",
-            min="2002/01/01",
+            min="1987/01/01",
         ),
         dict(
             type="select",

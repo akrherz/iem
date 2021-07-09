@@ -146,8 +146,8 @@ def get_description():
     this app to total slight risks, the moderate risk would count toward the
     slight risk total.</p>
 
-    <p><i class="fa fa-info"></i> This autoplot likely has some rough
-    edges yet, so please let us know of problems encountered.</p>
+    <p><i class="fa fa-info"></i> This autoplot currently only considers
+    outlooks since 2002.</p>
     """
     desc["arguments"] = [
         dict(
@@ -243,6 +243,7 @@ def plotter(fdict):
         ST_Intersects(geom, ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s %s,
         %s %s, %s %s, %s %s))'))
         and extract(month from product_issue) in %s
+        and product_issue > '2002-01-01'
     """,
         pgconn,
         params=(
