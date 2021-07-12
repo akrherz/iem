@@ -363,6 +363,7 @@ function lsrHTML(feature) {
     }
     return lines.join("<br />");
 }
+
 function initUI() {
     // Generate UI components of the page
     var handle = $("#radartime");
@@ -444,6 +445,9 @@ function initUI() {
     $("#warnshapefile").click(function () {
         window.location.href = getShapefileLink("watchwarn");
     });
+    $("#warnexcel").click(function () {
+        window.location.href = getShapefileLink("watchwarn") + "&accept=excel";
+    });
     $("#sbwshapefile").click(function () {
         window.location.href = getShapefileLink("watchwarn") + "&limit1=yes";
     });
@@ -453,7 +457,6 @@ function initUI() {
             loadData();
         }
     });
-
     olmap = new ol.Map({
         target: 'map',
         controls: ol.control.defaults().extend([new ol.control.FullScreen()]),

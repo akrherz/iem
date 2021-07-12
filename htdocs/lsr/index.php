@@ -1,7 +1,7 @@
 <?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
-$OL = "6.4.3";
+$OL = "6.6.0";
 $DT = "1.10.24";
 $S2 = "4.1.0rc0";
 
@@ -18,7 +18,7 @@ $t->jsextra = <<<EOF
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
 
 <script type="text/javascript" src="wfos.js"></script>
-<script type="text/javascript" src="static.js?v=2"></script>
+<script type="text/javascript" src="static.js?v=3"></script>
 <script>
 $(document).ready(function(){
     initUI(); // static.js
@@ -106,8 +106,9 @@ $tab3a = <<<EOM
 <br />
 <p>
 <strong>Tools:</strong> &nbsp;
-<button id="warnshapefile" class="btn btn-primary" role="button">Download Shapefile</button>
-<button id="sbwshapefile" class="btn btn-primary" role="button">Download SBW Shapefile</button>
+<button id="warnshapefile" class="btn btn-primary" role="button">Get Shapefile</button>
+<button id="warnexcel" class="btn btn-primary" role="button">Get Excel</button>
+<button id="sbwshapefile" class="btn btn-primary" role="button">Get SBW Shapefile</button>
 <select name="lt" id="sbwtypefilter" class="form-control"></select>
 </p>
 

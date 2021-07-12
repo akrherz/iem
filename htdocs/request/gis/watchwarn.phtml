@@ -10,7 +10,7 @@ require_once "../../../include/network.php";
 require_once "../../../include/vtec.php";
 
 $t = new MyView();
-$t->title = "NWS Watch Warning Archive Download";
+$t->title = "NWS Watches Warnings Advisories Download";
 
 $nt = new NetworkTable("WFO");
 
@@ -99,13 +99,15 @@ for($year=1986;$year<=date("Y");$year++){
 }
 
 $content = <<<EOF
-<h3>Archived NWS Watch/Warnings</h3>
+<h3>Archived NWS Watch, Warnings, Advisories</h3>
 
-<p>This page allows you to generate a custom GIS shapefile (with additional
-CSV file of events) or Google Earth KML of NWS issued watches
-and warnings for a time period of your choice.  Please be sure to read the
-archive status and dbf schema below. The IEM's archive is certainly not complete or official.  
-If you are looking for a real-time source of warning shapefiles, 
+<p>This page provides a download interface to IEM processed
+<strong>metadata/geometries</strong> associated with National Weather Service
+VTEC-enabled watch, warning, and advisory events.  You can download this
+information on-demand in a zip-file (containing a shapefile + CSV), KML, or
+Microsoft Excel format.</p>
+
+<p>If you are looking for a real-time source of warning shapefiles, 
 you can find that <a href="/data/gis/shape/4326/us/current_ww.zip">here.</a></p>
 
 <div class="alert alert-warning"> If you do not limit the state or WFO output,
@@ -119,6 +121,7 @@ the fly.</div>
 
 <form method="GET" action="/cgi-bin/request/gis/watchwarn.py">
 <input type="hidden" value="yes" name="simple">
+<input type="hidden" value="shapefile" name="accept" id="accept">
 EOF;
 
 for($group_idx=0;$group_idx<$location_select_group_count;$group_idx++){
@@ -213,8 +216,14 @@ function kmlsub(f, url){
 	f.action = url;
 	f.submit();
 }
+function excel(f){
+    $("#accept").val("excel");
+    f.submit();
+}
 </script>
-<p><input type="submit" value="Request Shapefile" onclick="kmlsub(this.form, '/cgi-bin/request/gis/watchwarn.py');"/>
+<p>
+<input type="submit" value="Request Shapefile" onclick="kmlsub(this.form, '/cgi-bin/request/gis/watchwarn.py');"/>
+<input type="submit" value="Request Excel" onclick="excel(this.form);"/>
 <input type="submit" value="Request KML (*)" onclick="kmlsub(this.form, '/kml/sbw_interval.php');" />
  <input type="reset" />
 <br />* Only Storm Based Warnings are available via KML.

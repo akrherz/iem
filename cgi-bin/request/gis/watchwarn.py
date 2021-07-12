@@ -1,4 +1,5 @@
 """Generate a shapefile of warnings based on the CGI request"""
+from io import BytesIO
 import zipfile
 import os
 import datetime
@@ -8,11 +9,15 @@ import fiona
 from fiona.crs import from_epsg
 from shapely.geometry import mapping
 from shapely.wkb import loads
+import pandas as pd
+from pandas.io.sql import read_sql
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, utc
 
+EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
-def df(text):
+
+def dfmt(text):
     """Produce a prettier format for CSV."""
     if text is None or len(text) != 12:
         return ""
@@ -67,19 +72,15 @@ def parse_wfo_location_group(form):
     return limiter
 
 
-def application(environ, start_response):
-    """Go Main Go"""
-    form = parse_formvars(environ)
+def build_sql(form):
+    """Build the SQL statement."""
     try:
         sts, ets = get_time_extent(form)
     except ValueError:
-        start_response(
-            "500 Internal Server Error", [("Content-type", "text/plain")]
+        raise ValueError(
+            "An invalid date was specified, please check that the day of the "
+            "month exists for your selection (ie June 31st vs June 30th)."
         )
-        return [
-            b"An invalid date was specified, please check that the day of the "
-            b"month exists for your selection (ie June 31st vs June 30th)."
-        ]
 
     table_extra = ""
     location_group = form.get("location_group", "wfo")
@@ -96,24 +97,19 @@ def application(environ, start_response):
             )
             table_extra = " , states s "
         else:
-            start_response("200 OK", [("Content-type", "text/plain")])
-            return [b"No state specified"]
+            raise ValueError("No state specified")
     elif location_group == "wfo":
         wfo_limiter = parse_wfo_location_group(form)
         wfo_limiter2 = wfo_limiter
     else:
         # Unknown location_group
-        msg = "Unknown location_group (%s)" % (location_group,)
-        start_response("200 OK", [("Content-type", "text/plain")])
-        return [msg.encode("ascii")]
+        raise ValueError(f"Unknown location_group ({location_group})")
 
     # Keep size low
     if wfo_limiter == "" and (ets - sts) > datetime.timedelta(days=5 * 365.25):
-        start_response("200 OK", [("Content-type", "text/plain")])
-        return [b"Please shorten request to less than 5 years."]
+        raise ValueError("Please shorten request to less than 5 years.")
 
     # Change to postgis db once we have the wfo list
-    pgconn = get_dbconn("postgis", user="nobody")
     fn = "wwa_%s_%s" % (sts.strftime("%Y%m%d%H%M"), ets.strftime("%Y%m%d%H%M"))
     timeopt = int(form.get("timeopt", [1])[0])
     if timeopt == 2:
@@ -176,7 +172,8 @@ def application(environ, start_response):
             "coalesce(issue, polygon_begin)",
         )
     # NB: need distinct since state join could return multiple
-    sql = f"""
+    return (
+        f"""
     WITH stormbased as (
      SELECT distinct w.geom as geo, 'P'::text as gtype, significance, wfo,
      status, eventid, ''::text as ugc,
@@ -222,7 +219,57 @@ def application(environ, start_response):
      )
      SELECT {cols} from stormbased UNION ALL
      SELECT {cols} from countybased {sbwlimiter}
-    """
+    """,
+        fn,
+    )
+
+
+def do_excel(pgconn, sql):
+    """Generate an Excel format response."""
+    df = read_sql(sql, pgconn, index_col=None)
+    # Drop troublesome columns
+    df = df.drop(
+        [
+            "geo",
+        ],
+        axis=1,
+        errors="ignore",
+    )
+    # Back-convert datetimes :/
+    for col in (
+        "utc_issue utc_expire utc_prodissue utc_updated utc_polygon_begin "
+        "utc_polygon_end"
+    ).split():
+        df[col] = pd.to_datetime(
+            df[col],
+            errors="coerce",
+            format="%Y%m%d%H%M",
+        ).dt.strftime("%Y-%m-%d %H:%M")
+    bio = BytesIO()
+    # pylint: disable=abstract-class-instantiated
+    with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
+        df.to_excel(writer, "VTEC WaWA", index=False)
+    return bio.getvalue()
+
+
+def application(environ, start_response):
+    """Go Main Go"""
+    form = parse_formvars(environ)
+    try:
+        sql, fn = build_sql(form)
+    except ValueError as exp:
+        start_response("200 OK", [("Content-type", "text/plain")])
+        return [exp.encode("ascii")]
+
+    accept = form.get("accept", "shapefile")
+    pgconn = get_dbconn("postgis", user="nobody")
+    if accept == "excel":
+        headers = [
+            ("Content-type", EXL),
+            ("Content-disposition", f"attachment; Filename={fn}.xlsx"),
+        ]
+        start_response("200 OK", headers)
+        return [do_excel(pgconn, sql)]
 
     cursor = pgconn.cursor(cursor_factory=DictCursor)
     cursor.execute(sql)
@@ -230,7 +277,7 @@ def application(environ, start_response):
         start_response("200 OK", [("Content-type", "text/plain")])
         return [b"ERROR: No results found for query, please try again"]
 
-    csv = open("%s.csv" % (fn,), "w")
+    csv = open(f"{fn}.csv", "w")
     csv.write(
         (
             "WFO,ISSUED,EXPIRED,INIT_ISS,INIT_EXP,PHENOM,GTYPE,SIG,ETN,"
@@ -240,7 +287,7 @@ def application(environ, start_response):
         )
     )
     with fiona.open(
-        "%s.shp" % (fn,),
+        f"{fn}.shp",
         "w",
         crs=from_epsg(4326),
         driver="ESRI Shapefile",
@@ -277,15 +324,16 @@ def application(environ, start_response):
         for row in cursor:
             mp = loads(row["geo"], hex=True)
             csv.write(
-                f"{row['wfo']},{df(row['utc_issue'])},{df(row['utc_expire'])},"
-                f"{df(row['utc_prodissue'])},{df(row['utc_init_expire'])},"
+                f"{row['wfo']},{dfmt(row['utc_issue'])},"
+                f"{dfmt(row['utc_expire'])},"
+                f"{dfmt(row['utc_prodissue'])},{dfmt(row['utc_init_expire'])},"
                 f"{row['phenomena']},{row['gtype']},"
                 f"{row['significance']},{row['eventid']},{row['status']},"
-                f"{row['ugc']},{row['area2d']:.2f},{df(row['utc_updated'])},"
+                f"{row['ugc']},{row['area2d']:.2f},{dfmt(row['utc_updated'])},"
                 f"{row['hvtec_nwsli']},{row['hvtec_severity']},"
                 f"{row['hvtec_cause']},{row['hvtec_record']},"
-                f"{row['is_emergency']},{df(row['utc_polygon_begin'])},"
-                f"{df(row['utc_polygon_end'])},{row['windtag']},"
+                f"{row['is_emergency']},{dfmt(row['utc_polygon_begin'])},"
+                f"{dfmt(row['utc_polygon_end'])},{row['windtag']},"
                 f"{row['hailtag']},{row['tornadotag']},{row['damagetag']}\n"
             )
             output.write(
@@ -322,19 +370,15 @@ def application(environ, start_response):
     csv.close()
 
     with zipfile.ZipFile(fn + ".zip", "w", zipfile.ZIP_DEFLATED) as zf:
-        zf.write(fn + ".shp")
-        zf.write(fn + ".shx")
-        zf.write(fn + ".dbf")
-        zf.write(fn + ".cpg")
-        zf.write(fn + ".prj")
-        zf.write(fn + ".csv")
+        for suffix in ["shp", "shx", "dbf", "cpg", "prj", "csv"]:
+            zf.write(f"{fn}.{suffix}")
 
     headers = [
         ("Content-type", "application/octet-stream"),
         ("Content-Disposition", "attachment; filename=%s.zip" % (fn,)),
     ]
     start_response("200 OK", headers)
-    payload = open(fn + ".zip", "rb").read()
+    payload = open(f"{fn}.zip", "rb").read()
 
     for suffix in ["zip", "shp", "shx", "dbf", "prj", "csv", "cpg"]:
         fullfn = f"{fn}.{suffix}"
