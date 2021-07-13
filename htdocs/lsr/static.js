@@ -470,7 +470,28 @@ function initUI() {
             new ol.layer.Tile({
                 title: 'OpenStreetMap',
                 visible: true,
+                type: 'base',
                 source: new ol.source.OSM()
+            }),
+            new ol.layer.Tile({
+                title: "MapTiler Toner (Black/White)",
+                type: 'base',
+                visible: false,
+                source: new ol.source.TileJSON({
+                    url: 'https://api.maptiler.com/maps/toner/tiles.json?key=d7EdAVvDI3ocoa9OUt9Z',
+                    tileSize: 512,
+                    crossOrigin: 'anonymous'
+                })
+            }),
+            new ol.layer.Tile({
+                title: "MapTiler Pastel",
+                type: 'base',
+                visible: false,
+                source: new ol.source.TileJSON({
+                    url: 'https://api.maptiler.com/maps/pastel/tiles.json?key=d7EdAVvDI3ocoa9OUt9Z',
+                    tileSize: 512,
+                    crossOrigin: 'anonymous'
+                })
             }),
             n0q,
             make_iem_tms('US States', 'usstates', true, ''),
