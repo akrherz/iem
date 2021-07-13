@@ -323,7 +323,10 @@ yearly_opts = [
     },
     {
         "id": 76,
-        "label": "Avg Dew Point / Vapor Pressure Deficit by Year or Season",
+        "label": (
+            "Dew Point / Vapor Pressure Deficit / RH Distributions "
+            "by Year or Season"
+        ),
     },
     {"id": 125, "label": "Climatological Maps of Annual/Monthly Averages"},
     {

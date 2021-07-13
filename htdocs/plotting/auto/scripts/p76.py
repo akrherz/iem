@@ -1,17 +1,16 @@
 """Seasonal averages of Humudity."""
 import datetime
-from collections import OrderedDict
 
 import numpy as np
 from scipy import stats
 from pandas.io.sql import read_sql
 import metpy.calc as mcalc
 from metpy.units import units
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
 
-MDICT = OrderedDict(
+MDICT = dict(
     [
         ("all", "No Month/Time Limit"),
         ("water_year", "Water Year"),
@@ -34,11 +33,28 @@ MDICT = OrderedDict(
         ("dec", "December"),
     ]
 )
-PDICT = {"dwpf": "Dew Point Temperature", "vpd": "Vapor Pressure Deficit"}
+PDICT = {
+    "tmpf": "Air Temperature",
+    "dwpf": "Dew Point Temperature",
+    "feel": "Feels Like Temperature",
+    "relh": "Relative Humidity",
+    "vpd": "Vapor Pressure Deficit",
+}
+UNITS = {
+    "tmpf": "F",
+    "dwpf": "F",
+    "feel": "F",
+    "relh": "%",
+    "vpd": "kPa",
+}
+PDICT2 = {
+    "bar": "Bar Plot",
+    "violin": "Violin Plot",
+}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -84,6 +100,13 @@ def get_description():
             type="year", name="year", default=1893, label="Start Year of Plot"
         ),
         dict(
+            type="select",
+            name="w",
+            default="violin",
+            label="Select plot type",
+            options=PDICT2,
+        ),
+        dict(
             type="text",
             name="hours",
             optional=True,
@@ -100,40 +123,44 @@ def get_description():
 def run_calcs(df, ctx):
     """Do our maths."""
     # Convert sea level pressure to station pressure
-    df["pressure"] = mcalc.add_height_to_pressure(
-        df["slp"].values * units("millibars"),
-        ctx["_nt"].sts[ctx["station"]]["elevation"] * units("m"),
-    ).to(units("millibar"))
+    df["pressure"] = (
+        mcalc.add_height_to_pressure(
+            df["slp"].values * units("millibars"),
+            ctx["_nt"].sts[ctx["station"]]["elevation"] * units("m"),
+        )
+        .to(units("millibar"))
+        .m
+    )
     # Compute the mixing ratio
     df["mixingratio"] = mcalc.mixing_ratio_from_relative_humidity(
         df["pressure"].values * units("millibars"),
         df["tmpf"].values * units("degF"),
         df["relh"].values * units("percent"),
-    )
+    ).m
     # Compute the saturation mixing ratio
     df["saturation_mixingratio"] = mcalc.saturation_mixing_ratio(
         df["pressure"].values * units("millibars"),
         df["tmpf"].values * units("degF"),
+    ).m
+    df["vapor_pressure"] = (
+        mcalc.vapor_pressure(
+            df["pressure"].values * units("millibars"),
+            df["mixingratio"].values * units("kg/kg"),
+        )
+        .to(units("kPa"))
+        .m
     )
-    df["vapor_pressure"] = mcalc.vapor_pressure(
-        df["pressure"].values * units("millibars"),
-        df["mixingratio"].values * units("kg/kg"),
-    ).to(units("kPa"))
-    df["saturation_vapor_pressure"] = mcalc.vapor_pressure(
-        df["pressure"].values * units("millibars"),
-        df["saturation_mixingratio"].values * units("kg/kg"),
-    ).to(units("kPa"))
+    df["saturation_vapor_pressure"] = (
+        mcalc.vapor_pressure(
+            df["pressure"].values * units("millibars"),
+            df["saturation_mixingratio"].values * units("kg/kg"),
+        )
+        .to(units("kPa"))
+        .m
+    )
     df["vpd"] = df["saturation_vapor_pressure"] - df["vapor_pressure"]
     # remove any NaN rows
     df = df.dropna()
-    group = df.groupby("year")
-    df = group.aggregate(np.average)
-
-    df["dwpf"] = (
-        mcalc.dewpoint(df["vapor_pressure"].values * units("kPa"))
-        .to(units("degF"))
-        .m
-    )
     return df
 
 
@@ -193,7 +220,8 @@ def get_data(ctx, startyear):
         """
         WITH obs as (
             SELECT valid at time zone %s as valid, tmpf, dwpf, relh,
-            coalesce(mslp, alti * 33.8639, 1013.25) as slp
+            coalesce(mslp, alti * 33.8639, 1013.25) as slp,
+            coalesce(feel, tmpf) as feel
             from alldata WHERE station = %s and dwpf > -90
             and dwpf < 100 and tmpf >= dwpf and
             extract(month from valid) in %s and
@@ -202,7 +230,7 @@ def get_data(ctx, startyear):
         )
       SELECT valid,
       extract(year from valid + '%s days'::interval)::int as year,
-      tmpf, dwpf, slp, relh from obs
+      tmpf, dwpf, slp, relh, feel from obs
     """,
         pgconn,
         params=(
@@ -223,97 +251,116 @@ def get_data(ctx, startyear):
 
 def make_plot(df, ctx):
     """Do the plotting"""
+
+    # Special case of computing means of non-linear dew point
+    means = df.groupby("year").mean()
+    means["dwpf"] = (
+        mcalc.dewpoint(means["vapor_pressure"].values * units("kPa"))
+        .to(units("degF"))
+        .m
+    )
+
     season = ctx["season"]
     varname = ctx["varname"]
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
-    avgv = df[varname].mean()
-
-    colorabove = "seagreen" if varname == "dwpf" else "lightsalmon"
-    colorbelow = "lightsalmon" if varname == "dwpf" else "seagreen"
-    cols = ax.bar(
-        df.index.values,
-        df[varname].values,
-        fc=colorabove,
-        ec=colorabove,
-        align="center",
-    )
-    for i, col in enumerate(cols):
-        if df.iloc[i][varname] < avgv:
-            col.set_facecolor(colorbelow)
-            col.set_edgecolor(colorbelow)
-    ax.axhline(avgv, lw=2, color="k", zorder=2, label="Average")
     h_slope, intercept, r_value, _, _ = stats.linregress(
-        df.index.values, df[varname].values
+        means.index.values, means[varname].values
     )
+    avgv = means[varname].mean()
+    title = (
+        "[%s] %s %.0f-%.0f\n"
+        "%s %s [%s] %s Avg: %.1f, slope: %.2f %s/century, R$^2$=%.2f"
+    ) % (
+        ctx["station"],
+        ctx["_nt"].sts[ctx["station"]]["name"],
+        means.index.min(),
+        means.index.max(),
+        PDICT[varname],
+        "Distribution" if ctx["w"] == "violin" else "Averages",
+        MDICT[season],
+        ctx.get("hour_limiter", ""),
+        avgv,
+        h_slope * 100.0,
+        UNITS[varname],
+        r_value ** 2,
+    )
+
+    (fig, ax) = figure_axes(title=title)
+    ax.set_position([0.05, 0.06, 0.93, 0.84])
+
+    ar = ["tmpf", "relh", "dwpf", "feel"]
+    colorabove = "seagreen" if varname in ar else "lightsalmon"
+    colorbelow = "lightsalmon" if varname in ar else "seagreen"
+    if ctx["w"] == "bar":
+        cols = ax.bar(
+            means.index.values,
+            means[varname].values,
+            fc=colorabove,
+            ec=colorabove,
+            align="center",
+        )
+        for i, col in enumerate(cols):
+            if means.iloc[i][varname] < avgv:
+                col.set_facecolor(colorbelow)
+                col.set_edgecolor(colorbelow)
+        ax.set_ylim(
+            0 if varname == "vpd" else (means[varname].min() - 5),
+            means[varname].max() + means[varname].max() / 10.0,
+        )
+    else:
+        data = df[["year", varname]].groupby("year")[varname].apply(list)
+        v1 = ax.violinplot(
+            data.values,
+            positions=data.index,
+            showextrema=True,
+            showmeans=True,
+            widths=1.5,
+        )
+        for i, b in enumerate(v1["bodies"]):
+            m = np.mean(b.get_paths()[0].vertices[:, 0])
+            # modify the paths to not go further left than the center
+            b.get_paths()[0].vertices[:, 0] = np.clip(
+                b.get_paths()[0].vertices[:, 0], m, np.inf
+            )
+            if means.iloc[i][varname] < avgv:
+                b.set_color(colorbelow)
+            else:
+                b.set_color(colorabove)
+    ax.axhline(avgv, lw=2, color="k", zorder=2, label="Average")
     ax.plot(
-        df.index.values,
-        h_slope * df.index.values + intercept,
+        means.index.values,
+        h_slope * means.index.values + intercept,
         "--",
         lw=2,
         color="k",
         label="Trend",
     )
-    ax.text(
-        0.01,
-        0.98,
-        "Avg: %.1f, slope: %.2f %s/century, R$^2$=%.2f"
-        % (
-            avgv,
-            h_slope * 100.0,
-            "F" if varname == "dwpf" else "kPa",
-            r_value ** 2,
-        ),
-        transform=ax.transAxes,
-        va="top",
-        bbox=dict(color="white"),
-    )
     ax.set_xlabel("Year")
-    ax.set_xlim(df.index.min() - 1, df.index.max() + 1)
-    ax.set_ylim(
-        (df[varname].min() - 5) if varname == "dwpf" else 0,
-        df[varname].max() + df[varname].max() / 10.0,
-    )
-    ax.set_ylabel(
-        ("Average %s [%s]")
-        % (PDICT[varname], "F" if varname == "dwpf" else "kPa")
-    )
+    ax.set_xlim(means.index.min() - 1, means.index.max() + 1)
+    ax.set_ylabel(("%s [%s]") % (PDICT[varname], UNITS[varname]))
     ax.grid(True)
-    ax.set_title(
-        ("[%s] %s %.0f-%.0f\nAverage %s [%s] %s")
-        % (
-            ctx["station"],
-            ctx["_nt"].sts[ctx["station"]]["name"],
-            df.index.min(),
-            df.index.max(),
-            PDICT[varname],
-            MDICT[season],
-            ctx.get("hour_limiter", ""),
-        )
-    )
-    ax.legend(ncol=1, loc=1)
-    return fig
+    ax.legend(ncol=1, loc=(0.9, 1.0))
+    return fig, means
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     startyear = ctx["year"]
 
     df = get_data(ctx, startyear)
     df = run_calcs(df, ctx)
-    fig = make_plot(df, ctx)
+    fig, means = make_plot(df, ctx)
 
-    return fig, df
+    return fig, means
 
 
 if __name__ == "__main__":
     _fig, _df = plotter(
         dict(
-            varname="vpd",
-            season="water_year",
+            varname="dwpf",
+            season="jul",
             station="DSM",
             network="IA_ASOS",
-            year=2020,
+            year=2000,
         )
     )
-    print(_df)
