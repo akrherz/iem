@@ -30,6 +30,9 @@ PDICT2 = {
     "1F": "Day 1 Fire Weather",
     "2F": "Day 2 Fire Weather",
     "0F": "Day 3-8 Fire Weather",
+    "1E": "Day 1 Excessive Rainfall Outlook",
+    "2E": "Day 2 Excessive Rainfall Outlook",
+    "3E": "Day 3 Excessive Rainfall Outlook",
 }
 PDICT3 = {
     "categorical": "Categorical (D1-3), Any Severe (D4-8)",
@@ -241,9 +244,12 @@ def plotter(fdict):
     datelabel = compute_datelabel(df)
 
     catlabel = " ".join([x.capitalize() for x in category.split()])
+    w = "Weather" if outlook_type == "E" else "Storm"
+    if outlook_type == "E":
+        catlabel = "Excessive Rainfall"
     mp = MapPlot(
         title=(
-            f"{datelabel} Storm Prediction Center Day {daylabel} "
+            f"{datelabel} {w} Prediction Center Day {daylabel} "
             f"{catlabel} Outlook"
         ),
         subtitle=(
@@ -335,4 +341,4 @@ if __name__ == "__main__":
     # plotter(dict(cat="categorical", which="0C", valid="2019-05-14 2022"))
     # has three days of F
     # plotter(dict(cat="categorical", which="0F", valid="2018-05-07 2322"))
-    plotter(dict(cat="categorical", which="0C", valid="2021-07-09 0854"))
+    plotter(dict(cat="categorical", which="1E", valid="2021-07-14 0300"))
