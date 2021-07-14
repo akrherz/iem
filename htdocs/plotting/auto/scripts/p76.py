@@ -6,6 +6,7 @@ from scipy import stats
 from pandas.io.sql import read_sql
 import metpy.calc as mcalc
 from metpy.units import units
+from matplotlib.ticker import MaxNLocator
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
@@ -336,6 +337,7 @@ def make_plot(df, ctx):
     )
     ax.set_xlabel("Year")
     ax.set_xlim(means.index.min() - 1, means.index.max() + 1)
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax.set_ylabel(("%s [%s]") % (PDICT[varname], UNITS[varname]))
     ax.grid(True)
     ax.legend(ncol=1, loc=(0.9, 1.0))
