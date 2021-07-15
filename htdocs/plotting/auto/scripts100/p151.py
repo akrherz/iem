@@ -1,6 +1,5 @@
 """Period deltas"""
 import datetime
-from collections import OrderedDict
 
 from geopandas import read_postgis
 import numpy as np
@@ -18,9 +17,9 @@ PDICT2 = {
     "values": "Show just the values",
     "contour": "Show just the contour",
 }
-PDICT3 = OrderedDict(
+PDICT3 = dict(
     [
-        ("total_precip", "Annual Precipitation"),
+        ("total_precip", "Total Precipitation"),
         ("gdd", "Growing Degree Days (base=50/86)"),
         ("sdd", "Stress Degree Days (High > 86)"),
         ("avg_temp", "Average Temperature"),
@@ -61,7 +60,7 @@ MUNITS = {
     "days_low_below": "days",
 }
 PRECISION = {"total_precip": 2}
-MDICT = OrderedDict(
+MDICT = dict(
     [
         ("all", "Annual"),
         ("spring", "Spring (MAM)"),
@@ -87,7 +86,7 @@ OPT1 = {"diff": "Plot Difference", "p1": "Just Plot Period One Values"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -343,7 +342,7 @@ def geojson(fdict):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     df = get_data(ctx)
     state = ctx["state"]

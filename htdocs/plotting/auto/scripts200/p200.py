@@ -26,12 +26,17 @@ ISSUANCE = dict(
         ("1.C.16", "Day 1 Convective @16z"),
         ("1.F.16", "Day 1 Fire Weather @16z"),
         ("1.C.20", "Day 1 Convective @20z"),
+        ("1.E.8", "Day 1 Excessive Rainfall @8z"),
+        ("1.E.16", "Day 1 Excessive Rainfall @16z"),
+        ("1.E.1", "Day 1 Excessive Rainfall @1z"),
         ("2.C.6", "Day 2 Convective @6z"),
         ("2.F.7", "Day 2 Fire Weather @7z"),
         ("2.C.17", "Day 2 Convective @17z"),
         ("2.F.19", "Day 2 Fire Weather @19z"),
+        ("2.E.9", "Day 1 Excessive Rainfall @9z"),
         ("3.C.7", "Day 3 Convective @7z"),
         ("3.F.21", "Day 3 Fire Weather @21z"),
+        ("3.E.9", "Day 1 Excessive Rainfall @9z"),
         ("4.C.8", "Day 4 Convective @8z"),
         ("5.C.8", "Day 5 Convective @8z"),
         ("6.C.8", "Day 6 Convective @8z"),
@@ -294,6 +299,8 @@ def plotter(fdict):
         mindate = datetime.datetime(2002, 1, 1)
     if p.split(".")[1] == "F":
         mindate = datetime.datetime(2017, 1, 1)
+    if p.split(".")[1] == "E":
+        mindate = datetime.datetime(2019, 1, 1)
     years = (
         (datetime.datetime.now() - mindate).total_seconds() / 365.25 / 86400.0
     )
@@ -318,8 +325,9 @@ def plotter(fdict):
         state=ctx["csector"],
         cwa=(station if len(station) == 3 else station[1:]),
         axisbg="white",
-        title="SPC %s Outlook [%s] of at least %s"
+        title="%s %s Outlook [%s] of at least %s"
         % (
+            "WPC" if p.split(".")[1] == "E" else "SPC",
             ISSUANCE[p],
             month.capitalize(),
             OUTLOOKS[level].split("(")[0].strip(),
