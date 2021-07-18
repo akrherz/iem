@@ -118,6 +118,7 @@ def get_data(ctx):
     if station not in ctx["_nt"].sts:  # This is needed.
         raise NoDataFound("Unknown station metadata.")
     stations = [station]
+    name = ctx["_nt"].sts[station]["name"]
     if station.startswith("_"):
         name = ctx["_nt"].sts[station]["name"].split("--")[0]
         stations = (
@@ -292,4 +293,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="_CRP", var="tmpc", level=500))
+    plotter(dict(station="KABR", var="tmpc", level=500))
