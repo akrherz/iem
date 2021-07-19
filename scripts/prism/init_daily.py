@@ -41,21 +41,21 @@ def init_year(ts):
     nc.createDimension("time", int(days))
 
     # Setup Coordinate Variables
-    lat = nc.createVariable("lat", np.float, ("lat",))
+    lat = nc.createVariable("lat", float, ("lat",))
     lat.units = "degrees_north"
     lat.long_name = "Latitude"
     lat.standard_name = "latitude"
     lat.axis = "Y"
     lat[:] = prism.YAXIS
 
-    lon = nc.createVariable("lon", np.float, ("lon",))
+    lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
     lon.long_name = "Longitude"
     lon.standard_name = "longitude"
     lon.axis = "X"
     lon[:] = prism.XAXIS
 
-    tm = nc.createVariable("time", np.float, ("time",))
+    tm = nc.createVariable("time", float, ("time",))
     tm.units = "Days since %s-01-01 00:00:0.0" % (ts.year,)
     tm.long_name = "Time"
     tm.standard_name = "time"
@@ -65,7 +65,7 @@ def init_year(ts):
 
     # Tracked variables
     high = nc.createVariable(
-        "tmax", np.float, ("time", "lat", "lon"), fill_value=-9999.0
+        "tmax", float, ("time", "lat", "lon"), fill_value=-9999.0
     )
     high.units = "C"
     high.long_name = "2m Air Temperature Daily High"
@@ -73,7 +73,7 @@ def init_year(ts):
     high.coordinates = "lon lat"
 
     low = nc.createVariable(
-        "tmin", np.float, ("time", "lat", "lon"), fill_value=-9999.0
+        "tmin", float, ("time", "lat", "lon"), fill_value=-9999.0
     )
     low.units = "C"
     low.long_name = "2m Air Temperature Daily High"
@@ -81,7 +81,7 @@ def init_year(ts):
     low.coordinates = "lon lat"
 
     p01d = nc.createVariable(
-        "ppt", np.float, ("time", "lat", "lon"), fill_value=-9999.0
+        "ppt", float, ("time", "lat", "lon"), fill_value=-9999.0
     )
     p01d.units = "mm"
     p01d.long_name = "Precipitation"

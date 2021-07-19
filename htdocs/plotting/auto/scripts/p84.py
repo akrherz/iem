@@ -8,7 +8,7 @@ from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import state_bounds, SECTORS
 from pyiem.exceptions import NoDataFound
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, get_properties
 from metpy.units import units, masked_array
 
 PDICT2 = {"c": "Contour Plot", "g": "Grid Cell Mesh"}
@@ -182,7 +182,6 @@ def plotter(fdict):
         state = sector
         sector = "state"
 
-    title = compute_title(src, sdate, edate)
     if src == "mrms":
         ncfn = iemre.get_daily_mrms_ncname(sdate.year)
         clncfn = iemre.get_dailyc_mrms_ncname()
@@ -196,6 +195,12 @@ def plotter(fdict):
         source = "IEM Reanalysis"
         subtitle = "IEM Reanalysis is derived from various NOAA datasets"
     else:
+        # Threshold edate
+        archive_end = datetime.strptime(
+            get_properties().get("prism.archive_end", "1980-01-01"),
+            "%Y-%m-%d",
+        ).date()
+        edate = min([archive_end, edate])
         ncfn = "/mesonet/data/prism/%s_daily.nc" % (sdate.year,)
         clncfn = "/mesonet/data/prism/prism_dailyc.nc"
         ncvar = "ppt"
@@ -204,6 +209,8 @@ def plotter(fdict):
             "PRISM Climate Group, Oregon State Univ., "
             "http://prism.oregonstate.edu, created 4 Feb 2004."
         )
+    # important to do here after fixing the edate above
+    title = compute_title(src, sdate, edate)
 
     sector, name, west, north, east, south = get_ugc_bounds(ctx, sector)
     if ctx.get("ugc") is not None:

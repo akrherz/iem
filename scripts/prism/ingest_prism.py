@@ -6,6 +6,7 @@
 4. Copy data into netcdf file
 5. Cleanup
 """
+import glob
 import sys
 import datetime
 import os
@@ -14,16 +15,20 @@ import subprocess
 import rasterio
 import numpy as np
 from pyiem.iemre import daily_offset
-from pyiem.util import ncopen
+from pyiem.util import ncopen, logger, get_properties, get_dbconn
+
+LOG = logger()
+PROPNAME = "prism.archive_end"
 
 
 def do_process(valid, fn):
-    """Process this file, please """
+    """Process this file, please"""
     # shape of data is (1, 621, 1405)
+    LOG.debug("Processing %s", fn)
     data = rasterio.open(fn).read()
     varname = fn.split("_")[1]
     idx = daily_offset(valid)
-    with ncopen("/mesonet/data/prism/%s_daily.nc" % (valid.year,), "a") as nc:
+    with ncopen(f"/mesonet/data/prism/{valid.year}_daily.nc", "a") as nc:
         nc.variables[varname][idx] = np.flipud(data[0])
 
 
@@ -36,7 +41,8 @@ def do_download(valid):
             localfn = valid.strftime(
                 f"PRISM_{varname}_{classify}_4kmD{d}_%Y%m%d_bil"
             )
-            subprocess.call("rm -f %s*" % (localfn,), shell=True)
+            for fn in glob.glob("{localfn}*"):
+                os.unlink(fn)
 
             uri = valid.strftime(
                 f"ftp://prism.nacse.org/daily/{varname}/%Y/{localfn}.zip"
@@ -63,6 +69,32 @@ def do_cleanup(valid):
     )
 
 
+def update_properties(valid):
+    """Conditionally update the database flag for when PRISM ends."""
+    props = get_properties()
+    current = datetime.datetime.strptime(
+        props.get(PROPNAME, "1980-01-01"),
+        "%Y-%m-%d",
+    ).date()
+    if current > valid:
+        return
+    with get_dbconn("mesosite") as dbconn:
+        cursor = dbconn.cursor()
+        args = (valid.strftime("%Y-%m-%d"), PROPNAME)
+        LOG.debug("setting %s", args)
+        cursor.execute(
+            "UPDATE properties SET propvalue = %s where propname = %s",
+            args,
+        )
+        if cursor.rowcount == 0:
+            cursor.execute(
+                "INSERT into properties(propvalue, propname) VALUES (%s, %s)",
+                args,
+            )
+        cursor.close()
+        dbconn.commit()
+
+
 def main(argv):
     """Do Something"""
     os.chdir("/mesonet/tmp")
@@ -72,6 +104,7 @@ def main(argv):
         do_process(valid, fn)
 
     do_cleanup(valid)
+    update_properties(valid)
 
 
 if __name__ == "__main__":
