@@ -9,6 +9,10 @@ from pyiem.exceptions import NoDataFound
 
 PDICT = {"state": "Aggregate by State", "wfo": "Aggregate by WFO"}
 PDICT2 = {"percent": "Frequency [%]", "count": "Count"}
+PDICT3 = {
+    "issuance": "Only Issuance Considered",
+    "max": "Computed Max over SVR+SVS",
+}
 FONTSIZE = 12
 
 
@@ -20,7 +24,9 @@ def get_description():
     desc[
         "description"
     ] = """This app produces a table of frequencies of
-    wind and hail tags used in NWS Warnings at issuance."""
+    wind and hail tags used in NWS Severe Thunderstorm Warnings. You have the
+    choice to only plot the issuance or use a computed max value over the
+    warning's lifecycle (including SVSs)."""
     today = datetime.datetime.today() + datetime.timedelta(days=1)
 
     desc["arguments"] = [
@@ -46,6 +52,13 @@ def get_description():
             default="percent",
             label="What to plot:",
             options=PDICT2,
+        ),
+        dict(
+            type="select",
+            options=PDICT3,
+            default="issuance",
+            label="How should SVS updates be considered?",
+            name="agg",
         ),
         dict(
             type="date",
@@ -85,14 +98,22 @@ def plotter(fdict):
     )
     if station == "_ALL":
         wfo_limiter = ""
+    status_limiter = "and status = 'NEW'"
+    if ctx["agg"] == "max":
+        status_limiter = ""
     sql = f"""
-    select windtag, hailtag,
-    min(issue at time zone 'UTC') as min_issue,
-    max(issue at time zone 'UTC') as max_issue, count(*)
-    from sbw WHERE issue >= %s and issue <= %s {wfo_limiter}
-    and (windtag > 0 or hailtag > 0)
-    and status = 'NEW' and phenomena = 'SV'
-    GROUP by windtag, hailtag
+    WITH data as (
+        SELECT wfo, eventid, extract(year from issue) as year,
+        min(issue) as min_issue,
+        max(windtag) as max_windtag, max(hailtag) as max_hailtag
+        from sbw WHERE issue >= %s and issue <= %s {wfo_limiter}
+        and (windtag > 0 or hailtag > 0) and phenomena = 'SV' and
+        significance = 'W' {status_limiter} GROUP by wfo, eventid, year
+    )
+    select max_windtag as windtag, max_hailtag as hailtag,
+    min(min_issue at time zone 'UTC') as min_issue,
+    max(min_issue at time zone 'UTC') as max_issue, count(*)
+    from data GROUP by windtag, hailtag
     """
     args = (date1, date2)
     supextra = ""
@@ -106,16 +127,21 @@ def plotter(fdict):
             state_names[state],
         )
 
-        sql = """
-        SELECT windtag, hailtag,
-        min(issue at time zone 'UTC') as min_issue,
-        max(issue at time zone 'UTC') as max_issue, count(*)
-        from sbw w, states s
-        WHERE issue >= %s and issue <= %s and
-        s.state_abbr = %s and ST_Intersects(s.the_geom, w.geom) and
-        (windtag > 0 or hailtag > 0)
-        and status = 'NEW' and phenomena = 'SV'
-        GROUP by windtag, hailtag
+        sql = f"""
+        WITH data as (
+            SELECT wfo, eventid, extract(year from issue) as year,
+            min(issue) as min_issue,
+            max(windtag) as max_windtag, max(hailtag) as max_hailtag
+            from sbw w, states s
+            WHERE issue >= %s and issue <= %s and
+            s.state_abbr = %s and ST_Intersects(s.the_geom, w.geom)
+            and (windtag > 0 or hailtag > 0) and phenomena = 'SV' and
+            significance = 'W' {status_limiter} GROUP by wfo, eventid, year
+        )
+        select max_windtag as windtag, max_hailtag as hailtag,
+        min(min_issue at time zone 'UTC') as min_issue,
+        max(min_issue at time zone 'UTC') as max_issue, count(*)
+        from data GROUP by windtag, hailtag
         """
         args = (date1, date2, state)
 
@@ -194,12 +220,13 @@ def plotter(fdict):
     fig.suptitle(
         (
             "%s of NWS Wind/Hail Tags for "
-            "Severe Thunderstorm Warning Issuance\n"
+            "Svr Tstorm Warn %s\n"
             "%s through %s, %.0f warnings\n%s"
             "Values larger than 10%% in red"
         )
         % (
             PDICT2[ctx["p"]],
+            PDICT3[ctx["agg"]],
             minvalid.strftime("%-d %b %Y"),
             maxvalid.strftime("%-d %b %Y"),
             df["count"].sum(),
