@@ -1,4 +1,4 @@
-"""xy point plot of arridity"""
+"""xy point plot of aridity"""
 import datetime
 import os
 from collections import OrderedDict

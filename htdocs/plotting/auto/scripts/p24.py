@@ -8,7 +8,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
-    "arridity": "Arridity Index",
+    "aridity": "Aridity Index",
     "avgt": "Average Temperature",
     "high": "Average High Temperature",
     "low": "Average Low Temperature",
@@ -182,7 +182,7 @@ def get_daily_data(ctx, sdate, edate):
 
     SELECT station, precip_rank, avgt_rank, high_rank, low_rank,
     ((high - avg_high) / std_high) - ((precip - avg_precip) / std_precip)
-    as arridity, max_date from ranks where year = %s
+    as aridity, max_date from ranks where year = %s
     """,
         pgconn,
         params=(edate.year,),
@@ -234,7 +234,7 @@ def plotter(fdict):
         ctx["years"],
         ctx["lastyear"],
     )
-    if ctx["var"] == "arridity":
+    if ctx["var"] == "aridity":
         subtitle = "Std Average High Temp Departure minus Std Precip Departure"
     mp = MapPlot(
         sector=("state" if len(csector) == 2 else csector),
@@ -244,7 +244,7 @@ def plotter(fdict):
         % (
             ctx["label"],
             PDICT[ctx["var"]],
-            "Ranks " if ctx["var"] != "arridity" else "",
+            "Ranks " if ctx["var"] != "aridity" else "",
         ),
         subtitle=subtitle,
         titlefontsize=14,
@@ -264,7 +264,7 @@ def plotter(fdict):
     ]
     pvar = ctx["var"] + "_rank"
     fmt = "%.0f"
-    if ctx["var"] == "arridity":
+    if ctx["var"] == "aridity":
         bins = np.arange(-4, 4.1, 1)
         pvar = ctx["var"]
         fmt = "%.1f"

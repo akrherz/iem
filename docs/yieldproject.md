@@ -47,7 +47,7 @@ FACTs Project Meeting Notes
 
 - Review Nov 1 to today plot, to ensure it is doing the right thing
 - [ ] remove the march 15 to today plot, not used
-- [ ] Add NASS county yield somehow to the arridity x/y plot
+- [ ] Add NASS county yield somehow to the aridity x/y plot
 - A new folder was created at dropbox for the uploads to go to
 
 11 Apr 2016 Dr Archontoulis

@@ -27,7 +27,7 @@ daily_opts = [
     },
     {
         "id": 149,
-        "label": "Arridity Index (High Temperature minus Precip Departures)",
+        "label": "Aridity Index (High Temperature minus Precip Departures)",
     },
     {
         "id": 11,
@@ -275,7 +275,7 @@ monthly_opts = [
         "id": 24,
         "label": (
             "Monthly Precipitation/Temperature "
-            "Climate District Ranks/Arridity"
+            "Climate District Ranks/Aridity"
         ),
     },
     {

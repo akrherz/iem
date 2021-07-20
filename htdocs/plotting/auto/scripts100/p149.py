@@ -1,4 +1,4 @@
-"""Arridity"""
+"""Aridity"""
 import datetime
 
 from pandas.io.sql import read_sql
@@ -10,14 +10,14 @@ from pyiem.exceptions import NoDataFound
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 86400
     desc[
         "description"
     ] = """
-    This plot presents a time series of Arridity Index.
+    This plot presents a time series of Aridity Index.
     This index computes the standardized high temperature departure subtracted
     by the standardized precipitation departure.  For the purposes of this
     plot, this index is computed daily over a trailing period of days of your
@@ -88,7 +88,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     days = ctx["days"]
@@ -156,51 +156,51 @@ def plotter(fdict):
     )
     if df.empty:
         raise NoDataFound("No Data Found.")
-    df["arridity"] = df["t"] - df["p"]
-    df["arridity2"] = df["t2"] - df["p2"]
-    df["arridity3"] = df["t3"] - df["p3"]
+    df["aridity"] = df["t"] - df["p"]
+    df["aridity2"] = df["t2"] - df["p2"]
+    df["aridity3"] = df["t3"] - df["p3"]
     (fig, ax) = plt.subplots(1, 1)
 
     if year2 is None:
         df2 = df.loc[sts:ets]
         ax.plot(
             df2.index.values,
-            df2["arridity"],
+            df2["aridity"],
             color="r",
             lw=2,
             label="%s days" % (days,),
         )
-        maxval = df2["arridity"].abs().max() + 0.25
+        maxval = df2["aridity"].abs().max() + 0.25
         if days2 > 0:
             ax.plot(
                 df2.index.values,
-                df2["arridity2"],
+                df2["aridity2"],
                 color="b",
                 lw=2,
                 label="%s days" % (days2,),
             )
-            maxval = max([maxval, df2["arridity2"].abs().max() + 0.25])
+            maxval = max([maxval, df2["aridity2"].abs().max() + 0.25])
         if days3 > 0:
             ax.plot(
                 df2.index.values,
-                df2["arridity3"],
+                df2["aridity3"],
                 color="g",
                 lw=2,
                 label="%s days" % (days3,),
             )
-            maxval = max([maxval, df2["arridity3"].abs().max() + 0.25])
+            maxval = max([maxval, df2["aridity3"].abs().max() + 0.25])
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d %b\n%Y"))
         title = ""
     else:
         df2 = df.loc[sts:ets]
         ax.plot(
             np.arange(len(df2.index)),
-            df2["arridity"],
+            df2["aridity"],
             color="r",
             lw=2,
             label="%s" % (ets.year,),
         )
-        maxval = df2["arridity"].abs().max() + 0.25
+        maxval = df2["aridity"].abs().max() + 0.25
         if year2 is not None:
             sts2 = sts.replace(year=(year2 - yrrange))
             ets2 = ets.replace(year=year2)
@@ -219,27 +219,27 @@ def plotter(fdict):
             df2 = df.loc[sts2:ets2]
             ax.plot(
                 np.arange(len(df2.index)),
-                df2["arridity"],
+                df2["aridity"],
                 color="b",
                 lw=2,
                 label="%s" % (year2,),
             )
-            maxval = max([maxval, df2["arridity"].abs().max() + 0.25])
+            maxval = max([maxval, df2["aridity"].abs().max() + 0.25])
         if year3 is not None:
             sts2 = sts.replace(year=(year3 - yrrange))
             ets2 = ets.replace(year=year3)
             df2 = df.loc[sts2:ets2]
             ax.plot(
                 np.arange(len(df2.index)),
-                df2["arridity"],
+                df2["aridity"],
                 color="g",
                 lw=2,
                 label="%s" % (year3,),
             )
-            maxval = max([maxval, df2["arridity"].abs().max() + 0.25])
+            maxval = max([maxval, df2["aridity"].abs().max() + 0.25])
 
         # Compute year of best fit
-        arridity = df.loc[sts:ets, "arridity"].values
+        aridity = df.loc[sts:ets, "aridity"].values
         mae = 100
         useyear = None
         for _year in range(1951, datetime.date.today().year + 1):
@@ -247,9 +247,9 @@ def plotter(fdict):
                 continue
             sts2 = sts.replace(year=(_year - yrrange))
             ets2 = ets.replace(year=_year)
-            arridity2 = df.loc[sts2:ets2, "arridity"].values
-            sz = min([len(arridity2), len(arridity)])
-            error = (np.mean((arridity2[:sz] - arridity[:sz]) ** 2)) ** 0.5
+            aridity2 = df.loc[sts2:ets2, "aridity"].values
+            sz = min([len(aridity2), len(aridity)])
+            error = (np.mean((aridity2[:sz] - aridity[:sz]) ** 2)) ** 0.5
             if error < mae:
                 mae = error
                 useyear = _year
@@ -259,12 +259,12 @@ def plotter(fdict):
             df2 = df.loc[sts2:ets2]
             ax.plot(
                 np.arange(len(df2.index)),
-                df2["arridity"],
+                df2["aridity"],
                 color="k",
                 lw=2,
                 label="%s (%s best match)" % (useyear, ets.year),
             )
-            maxval = max([maxval, df2["arridity"].abs().max() + 0.25])
+            maxval = max([maxval, df2["aridity"].abs().max() + 0.25])
         title = "%s Day" % (days,)
         ax.set_xlabel(
             "%s to %s" % (sts.strftime("%-d %b"), ets.strftime("%-d %b"))
@@ -272,13 +272,13 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_title(
         (
-            "%s [%s] %s Arridity Index\n"
+            "%s [%s] %s Aridity Index\n"
             "Std. High Temp Departure minus Std. Precip Departure"
         )
         % (ctx["_nt"].sts[station]["name"], station, title)
     )
     ax.set_ylim(0 - maxval, maxval)
-    ax.set_ylabel("Arridity Index")
+    ax.set_ylabel("Aridity Index")
     ax.text(
         1.01,
         0.75,
