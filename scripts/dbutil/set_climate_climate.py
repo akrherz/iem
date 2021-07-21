@@ -34,15 +34,13 @@ def main():
         row2 = mcursor2.fetchone()
         if row2 is None:
             print("Could not find Climate Site for: %s" % (sid,))
-        else:
-            if row[2] != row2[0]:
-                mcursor2.execute(
-                    "UPDATE stations SET climate_site = %s WHERE id = %s",
-                    (row2[0], sid),
-                )
-                print(
-                    "Set Climate: %s->%s for ID: %s" % (row[2], row2[0], sid)
-                )
+            continue
+        if row[2] != row2[0]:
+            mcursor2.execute(
+                "UPDATE stations SET climate_site = %s WHERE id = %s",
+                (row2[0], sid),
+            )
+            print("Set Climate: %s->%s for ID: %s" % (row[2], row2[0], sid))
 
     mcursor2.close()
     pgconn.commit()

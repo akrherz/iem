@@ -1,6 +1,4 @@
-"""Hit up ESRIs elevation REST service to compute a station elevation
-
-"""
+"""Hit up ESRIs elevation REST service to compute a station elevation."""
 import time
 import sys
 
@@ -11,13 +9,9 @@ from pyiem.util import get_dbconn
 def get_elevation(lon, lat):
     """Use arcgisonline"""
     req = requests.get(
-        (
-            "http://sampleserver4.arcgisonline.com/"
-            "ArcGIS/rest/services/Elevation/ESRI_Elevation_World/"
-            "MapServer/exts/ElevationsSOE/ElevationLayers/1/"
-            "GetElevationAtLonLat?lon=%s&lat=%s&f=pjson"
-        )
-        % (lon, lat),
+        "http://sampleserver4.arcgisonline.com/ArcGIS/rest/services/"
+        "Elevation/ESRI_Elevation_World/MapServer/exts/ElevationsSOE/"
+        f"ElevationLayers/1/GetElevationAtLonLat?lon={lon}&lat={lat}&f=pjson",
         timeout=30,
     )
     if req.status_code != 200:

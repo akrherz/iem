@@ -1,6 +1,4 @@
-"""
-  Need to set station metadata for county name for a given site...
-"""
+"""Need to set station metadata for county name for a given site."""
 import sys
 
 from pyiem.util import get_dbconn
