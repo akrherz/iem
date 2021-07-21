@@ -7,12 +7,12 @@ import numpy as np
 import pandas as pd
 import matplotlib.patheffects as PathEffects
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -32,7 +32,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
@@ -41,11 +41,8 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
 
     cursor.execute(
-        f"""
-        SELECT year, month, avg((high+low)/2.) from {table}
-        WHERE station = %s and day < %s and year > 1892
-        GROUP by year, month ORDER by year ASC
-    """,
+        f"SELECT year, month, avg((high+low)/2.) from {table} WHERE "
+        "station = %s and day < %s GROUP by year, month ORDER by year ASC",
         (station, datetime.date.today().replace(day=1)),
     )
     if cursor.rowcount == 0:
@@ -87,7 +84,11 @@ def plotter(fdict):
             )
     df = pd.DataFrame(rows)
 
-    (fig, ax) = plt.subplots(1, 1, sharex=True, figsize=(8, 6))
+    title = ("[%s] %s\nYears that Month was Warmer than other Month") % (
+        station,
+        ctx["_nt"].sts[station]["name"],
+    )
+    (fig, ax) = figure_axes(title=title)
     x, y = np.meshgrid(np.arange(-0.5, 12.5, 1), np.arange(-0.5, 12.5, 1))
     res = ax.pcolormesh(x, y, np.transpose(matrix))
     for i in range(12):
@@ -123,10 +124,6 @@ def plotter(fdict):
     ax.set_yticklabels(calendar.month_abbr[1:])
     ax.set_xlim(-0.5, 11.5)
     ax.set_ylim(-0.5, 11.5)
-    ax.set_title(
-        ("[%s] %s\nYears that Month was Warmer than other Month")
-        % (station, ctx["_nt"].sts[station]["name"])
-    )
     fig.colorbar(res)
     ax.set_xlabel("This Month was Warmer than...")
     ax.set_ylabel("...this month for same year")

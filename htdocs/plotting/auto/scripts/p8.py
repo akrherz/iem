@@ -6,13 +6,13 @@ import psycopg2.extras
 import numpy as np
 import pandas as pd
 from pyiem import network
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     y2 = datetime.date.today().year
     y1 = y2 - 20
@@ -50,7 +50,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     coop = get_dbconn("coop")
     cursor = coop.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
@@ -59,14 +59,13 @@ def plotter(fdict):
     eyear = ctx["eyear"]
     threshold = ctx["threshold"]
 
-    table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
     cursor.execute(
         f"""
     with months as (
       select year, month, p, avg(p) OVER (PARTITION by month) from (
-        select year, month, sum(precip) as p from {table}
+        select year, month, sum(precip) as p from alldata_{station[:2]}
         where station = %s and year < extract(year from now())
         GROUP by year, month) as foo)
 
@@ -87,7 +86,11 @@ def plotter(fdict):
         index=pd.Series(range(1, 13), name="month"),
     )
 
-    (fig, ax) = plt.subplots(1, 1)
+    title = (
+        "%s [%s] Monthly Precipitation Reliability\n"
+        "Period: %s-%s, %% of Months above %s%% of Long Term Avg"
+    ) % (nt.sts[station]["name"], station, syear, eyear, threshold)
+    (fig, ax) = figure_axes(title=title)
 
     ax.bar(np.arange(1, 13), vals, align="center")
     ax.set_xticks(np.arange(1, 13))
@@ -97,14 +100,6 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_xlim(0.5, 12.5)
     ax.set_ylabel("Percentage of Months, n=%.0f years" % (years,))
-    ax.set_title(
-        (
-            "%s [%s] Monthly Precipitation Reliability\n"
-            "Period: %s-%s, %% of Months above %s%% of Long Term Avg"
-        )
-        % (nt.sts[station]["name"], station, syear, eyear, threshold)
-    )
-
     return fig, df
 
 

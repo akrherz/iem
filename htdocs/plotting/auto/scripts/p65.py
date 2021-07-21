@@ -10,7 +10,7 @@ PDICT = {"cold": "Coldest Temperature", "hot": "Hottest Temperature"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -45,7 +45,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
@@ -109,7 +109,7 @@ def plotter(fdict):
     )
     ax[1].set_ylabel("Years (ties split)")
     ax[1].grid(True)
-    ax[1].set_xlabel("Day of %s" % (calendar.month_name[month],))
+    ax[1].set_xlabel(f"Day of {calendar.month_name[month]}")
     ax[1].bar(df["dom"], df["low_count"], align="center")
     ax[1].set_xlim(0.5, days + 0.5)
 

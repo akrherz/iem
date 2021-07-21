@@ -6,12 +6,12 @@ import matplotlib.patheffects as PathEffects
 import psycopg2.extras
 import pandas as pd
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 86400
@@ -40,7 +40,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("asos")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
@@ -85,7 +85,22 @@ def plotter(fdict):
         )
     )
 
-    (fig, ax) = plt.subplots(1, 1)
+    ab = ctx["_nt"].sts[station]["archive_begin"]
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
+    title = (
+        "%s [%s]\nFrequency of %s+ knot Wind Speeds by Temperature "
+        "for %s (%s-%s)\n"
+        "(must have 3+ hourly observations at the given temperature)"
+    ) % (
+        ctx["_nt"].sts[station]["name"],
+        station,
+        threshold,
+        calendar.month_name[month],
+        ab.year,
+        datetime.datetime.now().year,
+    )
+    (fig, ax) = figure_axes(title=title)
     ax.bar(
         tmpf,
         df["events"] / df["total"] * 100.0,
@@ -106,26 +121,6 @@ def plotter(fdict):
     )
     txt.set_path_effects([PathEffects.withStroke(linewidth=2, foreground="k")])
     ax.grid(zorder=11)
-    ab = ctx["_nt"].sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata.")
-    ax.set_title(
-        (
-            "%s [%s]\nFrequency of %s+ knot Wind Speeds by Temperature "
-            "for %s (%s-%s)\n"
-            "(must have 3+ hourly observations at the given temperature)"
-        )
-        % (
-            ctx["_nt"].sts[station]["name"],
-            station,
-            threshold,
-            calendar.month_name[month],
-            ab.year,
-            datetime.datetime.now().year,
-        ),
-        size=10,
-    )
-
     ax.set_ylabel("Frequency [%]")
     ax.set_ylim(0, 100)
     ax.set_xlim(min(tmpf) - 3, max(tmpf) + 3)

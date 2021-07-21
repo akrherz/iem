@@ -4,20 +4,22 @@ import datetime
 from pandas.io.sql import read_sql
 import numpy as np
 from scipy.stats import linregress
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
         "description"
     ] = """This chart presents the date of the first fall
     (date after 1 July) temperature below threshold 1 and then the number of
-    days after that date until threshold 2 was reached."""
+    days after that date until threshold 2 was reached. The slanted dashed
+    lines are used to translate the dots to the date of occurrence for the
+    second threshold."""
     desc["arguments"] = [
         dict(
             type="station",
@@ -37,15 +39,13 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["station"]
     t1 = ctx["t1"]
     t2 = ctx["t2"]
-
-    table = "alldata_%s" % (station[:2],)
 
     df = read_sql(
         f"""
@@ -55,7 +55,7 @@ def plotter(fdict):
             else 999 end) as t1_doy,
         min(case when low < %s then extract(doy from day)
             else 999 end) as t2_doy
-        from {table} where station = %s and month > 6
+        from alldata_{station[:2]} where station = %s and month > 6
         GROUP by year ORDER by year ASC
     """,
         pgconn,
@@ -79,7 +79,11 @@ def plotter(fdict):
             fmt = "%b %-d" if ts.day == 1 else "%-d"
             xticklabels.append(ts.strftime(fmt))
 
-    (fig, ax) = plt.subplots(1, 1)
+    title = ("[%s] %s\nFirst Fall Temperature Occurences") % (
+        station,
+        ctx["_nt"].sts[station]["name"],
+    )
+    (fig, ax) = figure_axes(title=title)
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
     ax.scatter(doy, doy2 - doy)
@@ -105,11 +109,6 @@ def plotter(fdict):
 
     ax.set_ylim(-1, max(doy2 - doy) + 4)
     ax.set_xlim(min(doy) - 4, max(doy) + 4)
-
-    ax.set_title(
-        "[%s] %s\nFirst Fall Temperature Occurences"
-        % (station, ctx["_nt"].sts[station]["name"])
-    )
     ax.set_ylabel(r"Days until first sub %s$^{\circ}\mathrm{F}$" % (t2,))
     ax.set_xlabel(r"First day of sub %s$^{\circ}\mathrm{F}$" % (t1,))
 

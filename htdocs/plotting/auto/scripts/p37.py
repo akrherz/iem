@@ -4,7 +4,7 @@ import datetime
 import psycopg2.extras
 import numpy as np
 import pandas as pd
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {
@@ -16,7 +16,7 @@ PDICT = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 86400
@@ -61,7 +61,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     asos_pgconn = get_dbconn("asos")
     acursor = asos_pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     mos_pgconn = get_dbconn("mos")
@@ -78,6 +78,7 @@ def plotter(fdict):
     month1 = datetime.datetime(year, month, 1)
     sts = month1 - datetime.timedelta(days=7)
     ets = month1 + datetime.timedelta(days=32)
+    station4 = f"K{station}" if len(station) == 3 else station
     mcursor.execute(
         """
     SELECT date(ftime),
@@ -96,7 +97,7 @@ def plotter(fdict):
     from alldata WHERE station = %s and runtime BETWEEN %s and %s
     and model = %s GROUP by date
     """,
-        ("K" + station, sts, ets, model),
+        (station4, sts, ets, model),
     )
 
     mosdata = {}
@@ -175,17 +176,13 @@ def plotter(fdict):
     hobs = np.ma.fix_invalid(hobs)
     lobs = np.ma.fix_invalid(lobs)
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
-
-    ax.set_title(
-        "[%s] %s Daily Temperatures\n%s Forecast MOS Range for %s"
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            model,
-            month1.strftime("%B %Y"),
-        )
+    title = "[%s] %s Daily Temperatures\n%s Forecast MOS Range for %s" % (
+        station,
+        ctx["_nt"].sts[station]["name"],
+        model,
+        month1.strftime("%B %Y"),
     )
+    (fig, ax) = figure_axes(title=title)
     arr = (df["high_max"] - df["high_min"]).values
     ax.bar(
         days + 0.1,

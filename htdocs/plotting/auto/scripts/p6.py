@@ -6,7 +6,7 @@ from pandas.io.sql import read_sql
 from scipy.stats import norm
 import numpy as np
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem import reference
 from pyiem.exceptions import NoDataFound
 
@@ -19,7 +19,7 @@ PDICT = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     today = datetime.date.today()
     desc[
@@ -52,7 +52,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     state = ctx["state"]
@@ -113,7 +113,14 @@ def plotter(fdict):
         raise NoDataFound("No Data Found")
     stateavg = df.at["%s0000" % (state,), ptype]
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    title = ("%s %s %s %s Distribution\nNumber of stations: %s") % (
+        reference.state_names[state],
+        year,
+        calendar.month_name[month],
+        PDICT[ptype],
+        len(df.index),
+    )
+    (fig, ax) = figure_axes(title=title)
     _, bins, _ = ax.hist(
         df[ptype].dropna(), 20, fc="lightblue", ec="lightblue", density=1
     )
@@ -157,16 +164,6 @@ def plotter(fdict):
         )
     ax.set_xlabel(PDICT[ptype])
     ax.set_ylabel("Normalized Frequency")
-    ax.set_title(
-        ("%s %s %s %s Distribution\nNumber of stations: %s")
-        % (
-            reference.state_names[state],
-            year,
-            calendar.month_name[month],
-            PDICT[ptype],
-            len(df.index),
-        )
-    )
     ax.grid(True)
     box = ax.get_position()
     ax.set_position([box.x0, 0.26, box.width, 0.65])

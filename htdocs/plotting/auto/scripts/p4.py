@@ -7,14 +7,14 @@ import geopandas as gpd
 import pandas as pd
 import matplotlib.dates as mdates
 from pyiem import iemre, reference
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.util import get_autoplot_context, get_dbconn, ncopen
 from pyiem.exceptions import NoDataFound
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -23,7 +23,8 @@ def get_description():
     precipitation.  This chart presents the areal coverage of some trailing
     number of days precipitation for a state of your choice.  This application
     does not properly account for the trailing period of precipitation during
-    the first few days of January."""
+    the first few days of January.  This application only works for CONUS
+    states eventhough it presents non-CONUS states as an option, sorry."""
     today = datetime.date.today()
     desc["arguments"] = [
         dict(
@@ -48,7 +49,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     year = ctx["year"]
     threshold = ctx["threshold"]
@@ -75,6 +76,8 @@ def plotter(fdict):
         )
         czs.gen_stats(hasdata, states["the_geom"])
         for nav in czs.gridnav:
+            if nav is None:
+                continue
             grid = np.ones((nav.ysz, nav.xsz))
             grid[nav.mask] = 0.0
             jslice = slice(nav.y0, nav.y0 + nav.ysz)
@@ -84,6 +87,8 @@ def plotter(fdict):
             )
         hasdata = np.flipud(hasdata)
         datapts = np.sum(np.where(hasdata > 0, 1, 0))
+        if datapts == 0:
+            raise ValueError("Application does not work for non-CONUS.")
 
         now = datetime.date(year, 1, 1)
         now += datetime.timedelta(days=(period - 1))
@@ -104,15 +109,12 @@ def plotter(fdict):
             now += datetime.timedelta(days=1)
     df = pd.DataFrame(dict(day=pd.Series(days), coverage=pd.Series(coverage)))
 
-    (fig, ax) = plt.subplots(1, 1)
+    title = (
+        "%s IEM Estimated Areal Coverage Percent of %s\n"
+        " receiving %.2f inches of rain over trailing %s day period"
+    ) % (year, reference.state_names[state], threshold, period)
+    (fig, ax) = figure_axes(title=title)
     ax.bar(days, coverage, fc="g", ec="g")
-    ax.set_title(
-        (
-            "%s IEM Estimated Areal Coverage Percent of %s\n"
-            " receiving %.2f inches of rain over trailing %s day period"
-        )
-        % (year, reference.state_names[state], threshold, period)
-    )
     ax.set_ylabel("Areal Coverage [%]")
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b\n%-d"))
     ax.set_yticks(range(0, 101, 25))
@@ -121,4 +123,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({"state": "HI"})
