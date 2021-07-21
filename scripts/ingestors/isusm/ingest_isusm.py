@@ -151,7 +151,12 @@ def qcval2(df, colname, floor, ceiling):
 
 def do_inversion(filename, nwsli):
     """Process Inversion Station Data."""
-    df = pd.read_csv(filename, skiprows=[0, 2, 3], na_values=["NAN"])
+    df = pd.read_csv(
+        filename,
+        skiprows=[0, 2, 3],
+        na_values=["NAN"],
+        encoding="ISO-8859-1",
+    )
     # convert all columns to lowercase
     df.columns = map(str.lower, df.columns)
     df["valid"] = df["timestamp"].apply(make_time)
@@ -248,7 +253,10 @@ def process(path, fn):
     station = STATIONS[tokens[0]]
     tablename = TABLES[tabletype]
     df = pd.read_csv(
-        os.path.join(path, fn), skiprows=[0, 2, 3], na_values=["NAN", "-100"]
+        os.path.join(path, fn),
+        skiprows=[0, 2, 3],
+        na_values=["NAN", "-100"],
+        encoding="ISO-8859-1",
     )
     if df.empty:
         return
