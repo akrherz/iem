@@ -92,7 +92,7 @@ postvars = {
     "site_network": "scan",
     "time_zone": "CST",
 }
-URI = "https://www.wcc.nrcs.usda.gov/nwcc/view"
+URI = "https://wcc.sc.egov.usda.gov/nwcc/view"
 
 
 def savedata(reprocessing, data, maxts):
