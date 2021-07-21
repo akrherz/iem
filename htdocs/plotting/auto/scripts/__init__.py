@@ -417,7 +417,7 @@ yearly_opts = [
         ),
     },
     {"id": 105, "label": "Maximum Period between Precipitation Amounts"},
-    {"id": 46, "label": "Minimum Wind Chill Temperature"},
+    {"id": 46, "label": "Minimum Wind Chill / Max Heat Index Temperature"},
     {"id": 30, "label": "Monthly Temperature Range"},
     {"id": 44, "label": "NWS Office Accumulated SVR+TOR Warnings"},
     {"id": 69, "label": "Percentage of Days each Year Above/Below Average"},

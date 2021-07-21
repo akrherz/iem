@@ -1,6 +1,5 @@
-"""Min wind chill frequency"""
+"""Min wind chill / max heat index frequency"""
 import datetime
-from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
@@ -8,7 +7,11 @@ from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-MDICT = OrderedDict(
+PDICT = {
+    "wcht": "Minimum Wind Chill",
+    "heat": "Maximum Heat Index",
+}
+MDICT = dict(
     [
         ("all", "No Month/Time Limit"),
         ("spring", "Spring (MAM)"),
@@ -32,14 +35,17 @@ MDICT = OrderedDict(
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
         "description"
     ] = """This chart presents the frequency of observed
-    minimum wind chill for a winter season each year over the period of
-    record for the observation site."""
+    minimum wind chill or maximum heat index over the period of
+    record for the observation site.  Please note that this application
+    requires the feels like temperature to be additive, so heat index
+    greater than air temperature and wind chill less than air temperature.
+    """
     desc["cache"] = 86400
     desc["arguments"] = [
         dict(
@@ -48,6 +54,13 @@ def get_description():
             default="DSM",
             label="Select Station:",
             network="IA_ASOS",
+        ),
+        dict(
+            type="select",
+            name="var",
+            default="wcht",
+            label="Which variable to analyze?",
+            options=PDICT,
         ),
         dict(
             type="select",
@@ -61,7 +74,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
@@ -85,13 +98,14 @@ def plotter(fdict):
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
+    additive = "feel < tmpf" if ctx["var"] == "wcht" else "feel > tmpf"
     df = read_sql(
-        """
+        f"""
         SELECT extract(year from valid + '%s months'::interval) as year,
-         min(wcht(tmpf::numeric,(sknt*1.15)::numeric)) as min_windchill
-         from alldata WHERE station = %s and sknt >= 0 and tmpf < 32
-         and extract(month from valid) in %s
-         GROUP by year ORDER by year ASC
+        min(feel) as min_feel, max(feel) as max_feel
+        from alldata WHERE station = %s and {additive}
+        and extract(month from valid) in %s
+        GROUP by year ORDER by year ASC
       """,
         pgconn,
         params=(offset, station, tuple(months)),
@@ -103,33 +117,41 @@ def plotter(fdict):
     ys = []
     freq = []
     sz = float(len(df.index))
-    for lev in range(
-        int(df["min_windchill"].max()), int(df["min_windchill"].min()) - 1, -1
-    ):
-        freq.append(len(df[df["min_windchill"] < lev].index) / sz * 100.0)
-        ys.append(lev)
+    if ctx["var"] == "wcht":
+        col = "min_feel"
+        for lev in range(int(df[col].max()), int(df[col].min()) - 1, -1):
+            freq.append(len(df[df[col] < lev].index) / sz * 100.0)
+            ys.append(lev)
+    else:
+        col = "max_feel"
+        for lev in range(int(df[col].min()), int(df[col].max()) + 1):
+            freq.append(len(df[df[col] > lev].index) / sz * 100.0)
+            ys.append(lev)
     ys = np.array(ys)
 
     (fig, ax) = plt.subplots(2, 1, figsize=(8, 6))
 
-    ax[0].barh(ys - 0.4, freq, ec="b", fc="b")
-    ax[0].set_ylabel(r"Minimum Wind Chill $^\circ$F")
+    color = "b" if ctx["var"] == "wcht" else "r"
+    ax[0].barh(ys - 0.4, freq, ec=color, fc=color)
+    ax[0].set_ylabel(rf"{PDICT[ctx['var']]} $^\circ$F")
     ax[0].set_xlabel("Frequency [%]")
     ax[0].set_title(
-        ("[%s] %s %.0f-%.0f\n" "Frequency of Observed Wind Chill over %s")
+        ("[%s] %s %.0f-%.0f\nFrequency of Observed %s over %s")
         % (
             station,
             ctx["_nt"].sts[station]["name"],
             df.index[0],
             df.index[-1],
+            PDICT[ctx["var"]],
             MDICT[ctx["month"]],
         )
     )
     ax[0].set_xticks([0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100])
     ax[0].grid(True)
 
-    ax[1].bar(df.index.values, df["min_windchill"], fc="b", ec="b")
-    ax[1].set_ylabel(r"Minimum Wind Chill $^\circ$F")
+    ax[1].bar(df.index.values, df[col], fc=color, ec=color)
+    ax[1].set_ylim(bottom=df[col].min() - 5)
+    ax[1].set_ylabel(rf"{PDICT[ctx['var']]} $^\circ$F")
     ax[1].grid(True)
     if offset > 0:
         ax[1].set_xlabel("Year label for spring portion of season")
