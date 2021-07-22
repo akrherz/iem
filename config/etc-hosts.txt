@@ -79,7 +79,6 @@
 192.168.1.245 iemdb iemdb.local
 192.168.1.245 iemdb-afos.local
 192.168.1.245 iemdb-asos.local
-192.168.1.245 iemdb-coop.local
 192.168.1.245 iemdb-frost.local
 192.168.1.245 iemdb-id3b.local
 192.168.1.245 iemdb-idep.local
@@ -133,6 +132,11 @@
 192.168.1.230 iemdb-mec.local
 192.168.1.230 iemdb-mos iemdb-mos.local
 192.168.1.230 iemdb-snet.local
+
+### metvm2 PostgreSQL
+# VI_1_222(73) metvm2
+192.168.1.222 metvm2-iemdb.local
+192.168.1.222 iemdb-coop.local
 
 ##############################################################################
 

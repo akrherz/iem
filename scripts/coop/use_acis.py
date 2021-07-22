@@ -54,7 +54,9 @@ def main(argv):
     """Run for a given state."""
     state = argv[1]
     network = f"{state}_COOP"
-    nt = NetworkTable(network, only_online=False)
+    # We are only asking for the last 720 days of data, so might as well only
+    # do stations that are currently known to be `online`
+    nt = NetworkTable(network, only_online=True)
     ets = datetime.date.today() - datetime.timedelta(days=1)
     sts = ets - datetime.timedelta(days=720)
     pgconn = get_dbconn("iem")
