@@ -1,6 +1,7 @@
 """Calendar Plot of Automated Station Summaries"""
 import datetime
 
+import numpy as np
 import psycopg2.extras
 import pandas as pd
 from pandas.io.sql import read_sql
@@ -22,7 +23,10 @@ PDICT = {
     "avg_smph": "Average Wind Speed [mph]",
     "max_smph": "Maximum Wind Speed/Gust [mph]",
     "pday": "Precipitation",
+    "max_rstage": "Maximum Water Stage [ft]",
 }
+STAGES = "action flood moderate major".split()
+COLORS = "white #ffff72 #ffc672 #ff7272 #e28eff".split()
 
 
 def get_description():
@@ -42,7 +46,7 @@ def get_description():
     m90 = today - datetime.timedelta(days=90)
     desc["arguments"] = [
         dict(
-            type="zstation",
+            type="sid",
             name="station",
             default="DSM",
             network="IA_ASOS",
@@ -84,6 +88,8 @@ def safe(row, varname):
         if val == 0:
             return "0"
         return "%.2f" % (val,)
+    if varname == "max_rstage":
+        return "%.2f" % (val,)
     # prevent -0 values
     return "%i" % (val,)
 
@@ -124,13 +130,15 @@ def plotter(fdict):
         """
         SELECT day, max_tmpf, min_tmpf, max_dwpf, min_dwpf,
         (max_tmpf + min_tmpf) / 2. as avg_tmpf,
-        pday, avg_sknt, coalesce(max_gust, max_sknt) as peak_wind
+        pday, avg_sknt, coalesce(max_gust, max_sknt) as peak_wind,
+        max_rstage
         from summary s JOIN stations t
         on (t.iemid = s.iemid) WHERE s.day >= %s and s.day <= %s and
         t.id = %s and t.network = %s ORDER by day ASC
     """,
         (sdate, edate, station, ctx["network"]),
     )
+    stagevals = []
     rows = []
     data = {}
     for row in cursor:
@@ -160,6 +168,7 @@ def plotter(fdict):
                 avg_departure=ad,
                 min_tmpf=row["min_tmpf"],
                 pday=row["pday"],
+                max_rstage=row["max_rstage"],
             )
         )
         data[row[0]] = {"val": safe(rows[-1], varname)}
@@ -171,6 +180,15 @@ def plotter(fdict):
             data[row[0]]["color"] = "b" if ld < 0 else "r"
         elif varname == "avg_departure":
             data[row[0]]["color"] = "b" if ad < 0 else "r"
+        elif varname == "max_rstage":
+            if not stagevals:
+                meta = ctx["_nt"].sts[station]
+                stagevals = [meta[f"sigstage_{x}"] for x in STAGES]
+                stagevals.insert(0, 0)
+                stagevals.append(1e9)
+            if not pd.isna(row["max_rstage"]):
+                idx = np.digitize(row["max_rstage"], stagevals)
+                data[row[0]]["cellcolor"] = COLORS[idx]
     df = pd.DataFrame(rows)
 
     title = "[%s] %s Daily %s" % (
@@ -188,4 +206,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"var": "avg_sknt"})
+    plotter({"var": "max_rstage"})

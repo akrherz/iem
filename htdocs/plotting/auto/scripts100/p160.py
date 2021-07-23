@@ -12,6 +12,13 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
+STAGES = "low action bankfull flood moderate major record".split()
+COLORS = {
+    "action": "#ffff72",
+    "flood": "#ffc672",
+    "moderate": "#ff7272",
+    "major": "#e28eff",
+}
 MDICT = {"primary": "Primary Field", "secondary": "Secondary Field"}
 
 
@@ -35,7 +42,7 @@ def get_description():
         dict(
             type="text",
             name="station",
-            default="EKDI4",
+            default="GTTI4",
             label="Enter 5 Char NWSLI Station Code (sorry):",
         ),
         dict(
@@ -59,24 +66,26 @@ def get_description():
 def get_context(fdict):
     """Do the common work"""
     pgconn = get_dbconn("hml")
-    cursor = pgconn.cursor()
     ctx = get_autoplot_context(fdict, get_description())
 
-    ctx["station"] = ctx["station"].upper()
+    ctx["station"] = ctx["station"].upper()[:8]
     station = ctx["station"]
     dt = ctx["dt"]
 
     # Attempt to get station information
-    cursor.execute(
-        "SELECT name, tzname from stations where id = %s and network ~* 'DCP'",
-        (station,),
+    df = read_sql(
+        "SELECT * from stations where id = %s and network ~* 'DCP'",
+        pgconn,
+        params=(station,),
+        index_col=None,
     )
-    ctx["name"] = ""
-    ctx["tzname"] = "UTC"
-    if cursor.rowcount > 0:
-        row = cursor.fetchone()
-        ctx["name"] = row[0]
-        ctx["tzname"] = row[1]
+    if df.empty:
+        raise NoDataFound("Could not find metadata for station.")
+    row = df.iloc[0]
+    cols = ["name", "tzname"]
+    cols.extend([f"sigstage_{x}" for x in STAGES])
+    for col in cols:
+        ctx[col] = row[col]
 
     ctx["fdf"] = read_sql(
         f"""with fx as (
@@ -201,6 +210,18 @@ def highcharts(fdict):
         """
         )
     series = ",".join(lines)
+    lines = []
+    for stage in STAGES:
+        val = ctx[f"sigstage_{stage}"]
+        if val is None:
+            continue
+        lines.append(
+            f"{{value: {val}, color: '{COLORS.get(stage, 'black')}', "
+            "dashStyle: 'shortdash', "
+            f"width: 2, label: {{text: '{stage}'}}}}"
+        )
+
+    plotlines = ",".join(lines)
     return (
         """
 $("#ap_container").highcharts({
@@ -216,7 +237,7 @@ $("#ap_container").highcharts({
     subtitle: {text: '"""
         + ctx["subtitle"]
         + """'},
-    chart: {zoomType: 'x'},
+    chart: {zoomType: 'xy'},
     tooltip: {
         shared: true,
         crosshairs: true,
@@ -227,9 +248,14 @@ $("#ap_container").highcharts({
         + ctx["tzname"]
         + """ Timezone'},
         type: 'datetime'},
-    yAxis: {title: {text: '"""
+    yAxis: {
+        title: {text: '"""
         + ctx.get(ctx["var"], "primary")
-        + """'}},
+        + """'},
+        plotLines: ["""
+        + plotlines
+        + """]
+    },
     series: ["""
         + series
         + """]
@@ -267,6 +293,18 @@ def plotter(fdict):
             zorder=4,
         )
         ax.set_ylabel(ctx[ctx["var"]])
+    ylim = ax.get_ylim()
+    for stage in STAGES:
+        val = ctx[f"sigstage_{stage}"]
+        if val is None:
+            continue
+        ax.axhline(
+            val,
+            linestyle="-.",
+            color=COLORS.get(stage, "#000000"),
+            label=f"{stage} - {val}",
+        )
+    ax.set_ylim(*ylim)
     ax.xaxis.set_major_locator(
         mdates.AutoDateLocator(tz=pytz.timezone(ctx["tzname"]))
     )
@@ -284,4 +322,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="MLGO1", dt="2021-06-19 1653"))
+    highcharts(dict(station="GTTI4", dt="2021-07-23 1653"))
