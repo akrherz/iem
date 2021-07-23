@@ -23,7 +23,7 @@ PDICT2 = {"weeks": "Number of Weeks", "percent": "Percentage of Weeks"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 600
@@ -91,7 +91,7 @@ def make_tuesday(date):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     csector = ctx["csector"]
     sdate = make_tuesday(ctx["sdate"])
@@ -177,7 +177,7 @@ def plotter(fdict):
     ramp = np.linspace(1, maxval + 1, 11, dtype="i")
     if ctx["w"] == "percent":
         ramp = np.arange(0, 101, 10)
-        ramp[0] = 1.0
+        ramp[0] = 0.01
         ramp[-1] = 100.1
         # we add one since we are rectified to tuesdays, so we have an extra
         # week in there
