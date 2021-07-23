@@ -142,6 +142,10 @@ if ($mode == "monthly") {
   	    	$str .= "<br>Rain: ". sprintf("%.2f", $row["precip"]);
   	    }
 
+        if (! is_null($row["max_rstage"]) && $row["max_rstage"] >= 0){
+            $str .= "<br>Max Stage[ft]: ". sprintf("%.2f", $row["max_rstage"]);
+        }
+
         if (! is_null($row["snow"]) && $row["snow"] >= 0){
             $str .= "<br>Snow: ". snowprint($row["snow"]);
         }

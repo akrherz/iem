@@ -23,8 +23,13 @@ def do_network(network):
             "python ../dbutil/compute_asos_sts.py %s" % (network,), shell=True
         )
     if network.find("_DCP") > 0:
+        # Special Logic to compute archive period.
         subprocess.call(
-            "python ../dbutil/compute_hads_sts.py %s" % (network,), shell=True
+            ["python", "../dbutil/compute_hads_sts.py", network],
+        )
+        # Update stage details.
+        subprocess.call(
+            ["python", "../hads/process_ahps_xml.py", network],
         )
     subprocess.call(
         "python drive_network_windrose.py %s" % (network,), shell=True

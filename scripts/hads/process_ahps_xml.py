@@ -1,20 +1,21 @@
-"""Ingest the rich metadata found within the AHPS2 website!
-"""
+"""Ingest the rich metadata found within the AHPS2 website!"""
 import sys
 
 import requests
 from twisted.words.xish import xpath, domish
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
-def process_site(mcursor, nwsli, network):
+def process_site(mcursor, nwsli, meta):
     """Do our processing work"""
 
     url = (
         "http://water.weather.gov/ahps2/hydrograph_to_xml.php?"
-        "gage=%s&output=xml"
-    ) % (nwsli,)
+        f"gage={nwsli}&output=xml"
+    )
 
     elementStream = domish.elementStream()
     roots = []
@@ -26,63 +27,48 @@ def process_site(mcursor, nwsli, network):
         req = requests.get(url, timeout=30)
         xml = req.content
         if xml.strip() == "No results found for this gage.":
-            print("No results for %s" % (nwsli,))
+            LOG.info("No results for %s", nwsli)
             return
     except Exception as exp:
-        print("DOWNLOAD ERROR")
-        print(url)
-        print(exp)
+        LOG.exception(exp)
         return
     try:
         elementStream.parse(xml)
     except Exception as exp:
-        print("XML ERROR")
-        print(url)
-        print(exp)
+        LOG.exception(exp)
         return
 
     elem = results[0]
 
     nodes = xpath.queryForNodes("/site/sigstages", elem)
     if nodes is None:
-        print("No data found for %s" % (nwsli,))
+        LOG.info("No sigstages data found for %s", nwsli)
         return
 
     sigstages = nodes[0]
-    data = {
-        "id": nwsli,
-        "network": network,
-        "sigstage_low": None,
-        "sigstage_action": None,
-        "sigstage_bankfull": None,
-        "sigstage_flood": None,
-        "sigstage_moderate": None,
-        "sigstage_major": None,
-        "sigstage_record": None,
-    }
+    diction = "low action bankfull flood moderate major record".split()
+    is_new = False
+    msg = ""
     for s in sigstages.children:
+        if s.name not in diction:
+            continue
         val = str(s)
         if val == "":
             continue
-        data["sigstage_%s" % (s.name,)] = float(val)
-
-    if "sigstage_low" not in data:
-        print("No Data %s %s" % (nwsli, network))
+        key = f"sigstage_{s.name}"
+        val = float(val)
+        if val < 0:
+            continue
+        # is this updated info?
+        current = meta.get(key)
+        if current is None or abs(current - val) > 0.01:
+            is_new = True
+            msg += f"{s.name}: {current}->{val} "
+        meta[key] = val
+    if not is_new:
         return
 
-    print(
-        ("%s %5.1f %5.1f %5.1f %5.1f %5.1f %5.1f %5.1f")
-        % (
-            data["id"],
-            data["sigstage_low"] or -99,
-            data["sigstage_action"] or -99,
-            data["sigstage_bankfull"] or -99,
-            data["sigstage_flood"] or -99,
-            data["sigstage_moderate"] or -99,
-            data["sigstage_major"] or -99,
-            data["sigstage_record"] or -99,
-        )
-    )
+    LOG.debug("updating %s with %s", nwsli, msg)
     mcursor.execute(
         """
         UPDATE stations SET sigstage_low = %(sigstage_low)s,
@@ -92,28 +78,22 @@ def process_site(mcursor, nwsli, network):
         sigstage_moderate = %(sigstage_moderate)s,
         sigstage_major = %(sigstage_major)s,
         sigstage_record = %(sigstage_record)s
-        WHERE id = %(id)s and network = %(network)s
+        WHERE iemid = %(iemid)s
     """,
-        data,
+        meta,
     )
 
 
-def main():
+def main(argv):
     """Go Main Go"""
-    mesosite = get_dbconn("mesosite")
-    mcursor = mesosite.cursor()
-    print(
-        ("%5s %5s %5s %5s %5s %5s %5s %5s")
-        % ("NWSLI", "LOW", "ACTN", "BANK", "FLOOD", "MOD", "MAJOR", "REC")
-    )
-    net = sys.argv[1]
-    nt = NetworkTable(net)
-    for sid in nt.sts:
-        process_site(mcursor, sid, net)
-    mcursor.close()
-    mesosite.commit()
-    mesosite.close()
+    nt = NetworkTable(argv[1])
+    with get_dbconn("mesosite") as dbconn:
+        for sid, meta in nt.sts.items():
+            mcursor = dbconn.cursor()
+            process_site(mcursor, sid, meta)
+            mcursor.close()
+            dbconn.commit()
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
