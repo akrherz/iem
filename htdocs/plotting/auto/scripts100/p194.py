@@ -176,7 +176,7 @@ def plotter(fdict):
     maxval = 10 if np.max(raster) < 11 else np.max(raster)
     ramp = np.linspace(1, maxval + 1, 11, dtype="i")
     if ctx["w"] == "percent":
-        ramp = np.arange(0, 101, 10)
+        ramp = np.arange(0, 101, 10, dtype=float)
         ramp[0] = 0.01
         ramp[-1] = 100.1
         # we add one since we are rectified to tuesdays, so we have an extra
@@ -207,5 +207,5 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    fig, _df = plotter(dict())
+    fig, _df = plotter({"w": "percent"})
     fig.savefig("/tmp/test.png")
