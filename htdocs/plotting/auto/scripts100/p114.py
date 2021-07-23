@@ -7,7 +7,7 @@ from pyiem.exceptions import NoDataFound
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["report"] = True
@@ -25,18 +25,15 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"].upper()
 
     table = "alldata_%s" % (station[:2],)
     df = read_sql(
-        f"""
-     SELECT year, count(low) from {table} WHERE
-     station = %s and low >= 32
-    and year < %s GROUP by year ORDER by year ASC
-    """,
+        f"SELECT year, count(low) from {table} WHERE station = %s and "
+        "low >= 32 and year < %s GROUP by year ORDER by year ASC",
         pgconn,
         params=(station, datetime.date.today().year),
         index_col=None,

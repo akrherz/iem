@@ -1,10 +1,9 @@
 """LSR ranks"""
 import datetime
-from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem import util
 from pyiem.reference import lsr_events
 from pyiem.exceptions import NoDataFound
@@ -13,7 +12,7 @@ MARKERS = ["8", ">", "<", "v", "o", "h", "*"]
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 3600
@@ -28,7 +27,7 @@ def get_description():
     today = datetime.date.today()
     ltypes = list(lsr_events.keys())
     ltypes.sort()
-    ev = OrderedDict(zip(ltypes, ltypes))
+    ev = dict(zip(ltypes, ltypes))
     desc["arguments"] = [
         dict(
             type="networkselect",
@@ -66,7 +65,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = util.get_dbconn("postgis")
     ctx = util.get_autoplot_context(fdict, get_description())
     ctx["_nt"].sts["_ALL"] = dict(name="All WFOs")
@@ -106,7 +105,15 @@ def plotter(fdict):
     df["rank"] = df.groupby(["yr"])["count"].rank(
         ascending=False, method="first"
     )
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    title = "NWS %s Local Storm Report Sources Ranks" % (
+        ctx["_nt"].sts[station]["name"],
+    )
+    if ltype:
+        label = "For LSR Types: %s" % (repr(ltype),)
+        if len(label) > 90:
+            label = "%s..." % (label[:90],)
+        title += f"\n{label}"
+    (fig, ax) = figure_axes(title=title)
     # Do syear as left side
     for year in range(syear, eyear):
         dyear = df[df["yr"] == year].sort_values(by=["rank"], ascending=True)
@@ -164,8 +171,9 @@ def plotter(fdict):
     ax2.set_yticklabels(["%s %s" % (i + 1, s) for i, s in enumerate(y2labels)])
     ax2.set_ylim(0.5, 20.5)
 
-    ax.set_position([0.3, 0.13, 0.4, 0.75])
-    ax2.set_position([0.3, 0.13, 0.4, 0.75])
+    pos = [0.2, 0.13, 0.6, 0.75]
+    ax.set_position(pos)
+    ax2.set_position(pos)
     ax.set_xticks(range(df["yr"].min(), df["yr"].max(), 2))
     for tick in ax.get_xticklabels():
         tick.set_rotation(90)
@@ -173,19 +181,6 @@ def plotter(fdict):
 
     fig.text(0.15, 0.88, "%s" % (syear,), fontsize=14, ha="center")
     fig.text(0.85, 0.88, "%s" % (eyear,), fontsize=14, ha="center")
-
-    fig.text(
-        0.5,
-        0.97,
-        "NWS %s Local Storm Report Sources Ranks"
-        % (ctx["_nt"].sts[station]["name"],),
-        ha="center",
-    )
-    if ltype:
-        label = "For LSR Types: %s" % (repr(ltype),)
-        if len(label) > 90:
-            label = "%s..." % (label[:90],)
-        fig.text(0.5, 0.93, label, ha="center")
 
     return fig, df
 

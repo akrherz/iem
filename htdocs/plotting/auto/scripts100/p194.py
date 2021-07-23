@@ -178,7 +178,7 @@ def plotter(fdict):
     if ctx["w"] == "percent":
         ramp = np.arange(0, 101, 10, dtype=float)
         ramp[0] = 0.01
-        ramp[-1] = 100.1
+        ramp[-1] = 100.0
         # we add one since we are rectified to tuesdays, so we have an extra
         # week in there
         raster = raster / ((edate - sdate).days / 7.0 + 1.0) * 100.0

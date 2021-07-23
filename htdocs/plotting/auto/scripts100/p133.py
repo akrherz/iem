@@ -2,13 +2,13 @@
 import datetime
 
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 86400
@@ -39,7 +39,7 @@ def get_description():
 
 
 def get_data(fdict):
-    """ Get the data"""
+    """Get the data"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
@@ -71,7 +71,7 @@ def get_data(fdict):
 
 
 def highcharts(fdict):
-    """ Highcharts Output """
+    """Highcharts Output"""
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     date = ctx["date"]
@@ -142,7 +142,7 @@ def highcharts(fdict):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     date = ctx["date"]
@@ -150,7 +150,12 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("Error, no results returned!")
 
-    (fig, ax) = plt.subplots(1, 1)
+    title = ("%s [%s] Snowfall Totals\nPrior to and after: %s") % (
+        ctx["_nt"].sts[station]["name"],
+        station,
+        date.strftime("%-d %B"),
+    )
+    (fig, ax) = figure_axes(title=title)
     ax.scatter(df["before"].values, df["after"].values)
     ax.set_xlim(left=-0.1)
     ax.set_ylim(bottom=-0.1)
@@ -161,10 +166,6 @@ def plotter(fdict):
         "Snowfall Total [inch] On and After %s" % (date.strftime("%-d %b"),)
     )
     ax.grid(True)
-    ax.set_title(
-        ("%s [%s] Snowfall Totals\nPrior to and after: %s")
-        % (ctx["_nt"].sts[station]["name"], station, date.strftime("%-d %B"))
-    )
     ax.axvline(
         df["before"].mean(),
         color="r",

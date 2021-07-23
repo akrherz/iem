@@ -8,17 +8,19 @@ import sys
 import tempfile
 import os
 
-METVM4, METVM1, METVM6, METVM7 = range(4)
-IPS = ["172.16.170.1", "172.16.171.1", "172.16.172.1", "172.16.173.1"]
+METVM4, METVM1, METVM6, METVM7, METVM2 = range(5)
+IPS = (
+    "172.16.170.1 172.16.171.1 172.16.172.1 172.16.173.1 172.16.174.1".split()
+)
 LOOKUP = {
     "": IPS[METVM6],
     "-afos": IPS[METVM6],
     "-asos": IPS[METVM6],
     "-asos1min": IPS[METVM1],
     "-awos": IPS[METVM7],
-    "-coop": IPS[METVM6],
+    "-coop": IPS[METVM2],
     "-frost": IPS[METVM6],
-    "-hads": IPS[METVM4],
+    "-hads": IPS[METVM2],
     "-hml": IPS[METVM7],
     "-id3b": IPS[METVM6],
     "-idep": IPS[METVM6],

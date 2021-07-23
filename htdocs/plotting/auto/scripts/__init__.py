@@ -206,6 +206,10 @@ daily_opts = [
         "id": 182,
         "label": "Precipitation (MRMS) Coverage Efficiency by State",
     },
+    {
+        "id": 110,
+        "label": "Precipitation Frequency Bins by Climate Week (climodat)",
+    },
     {"id": 43, "label": "Recent (Past 2-3 Days) Timeseries (Meteogram)"},
     {"id": 157, "label": "Relative Humidity Max/Min/Avg by Day of Year"},
     {"id": 62, "label": "Snow Depth"},

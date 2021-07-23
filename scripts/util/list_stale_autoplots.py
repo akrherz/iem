@@ -12,8 +12,6 @@ NO_FEATURES = [
     91,  # hated by myself and the general public
     96,  # one-off showing precip biases
     94,  # one-off showing temp biases
-    102,  # LSR report types
-    110,
     111,
     112,
     113,

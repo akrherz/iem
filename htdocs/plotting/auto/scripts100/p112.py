@@ -8,7 +8,7 @@ from pyiem.exceptions import NoDataFound
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["report"] = True
@@ -103,7 +103,7 @@ def modMonth(
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
@@ -113,7 +113,7 @@ def plotter(fdict):
 
     table = "alldata_%s" % (station[:2],)
     df = read_sql(
-        """
+        f"""
     SELECT year, month, sum(precip) as sum_precip,
     avg(high) as avg_high,
     avg(low) as avg_low,
@@ -126,13 +126,8 @@ def plotter(fdict):
     sum(gddxx(40,86,high,low)) as gdd40,
     sum(gddxx(48,86,high,low)) as gdd48,
     sum(gddxx(50,86,high,low)) as gdd50,
-    sum(gddxx(%s, %s, high, low)) as """
-        + varname
-        + """
-    from """
-        + table
-        + """ WHERE station = %s
-    GROUP by year, month
+    sum(gddxx(%s, %s, high, low)) as {varname}
+    from {table} WHERE station = %s GROUP by year, month
     """,
         pgconn,
         params=(gddbase, gddceil, station),

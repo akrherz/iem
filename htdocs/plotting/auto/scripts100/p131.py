@@ -1,14 +1,13 @@
 """Plot overcast conditions by temperature"""
 import datetime
-from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict((("CLR", "Clear (CLR)"), ("OVC", "Overcast (OVC)")))
-MDICT = OrderedDict(
+PDICT = {"CLR": "Clear (CLR)", "OVC": "Overcast (OVC)"}
+MDICT = dict(
     [
         ("all", "No Month/Time Limit"),
         ("spring", "Spring (MAM)"),
@@ -32,7 +31,7 @@ MDICT = OrderedDict(
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 86400
@@ -77,7 +76,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
@@ -156,34 +155,29 @@ def plotter(fdict):
     df2 = df[df["count"] > 2]
     avg = df["hits"].sum() / float(df["count"].sum()) * 100.0
 
-    (fig, ax) = plt.subplots(1, 1)
-    ax.bar(df2["t"], df2["freq"], ec="green", fc="green", width=1)
-    ax.grid(True, zorder=11)
+    ab = ctx["_nt"].sts[station]["archive_begin"]
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
     hrlabel = "ALL"
     if hour is not None:
         ts = datetime.datetime(2000, 1, 1, hour)
         hrlabel = ts.strftime("%-I %p")
-    ab = ctx["_nt"].sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata.")
-    ax.set_title(
-        (
-            "%s [%s]\nFrequency of %s by "
-            "Air Temp (month=%s,hour=%s) (%s-%s)\n"
-            "(must have 3+ hourly observations at the given temperature)"
-        )
-        % (
-            ctx["_nt"].sts[station]["name"],
-            station,
-            "Overcast Clouds" if varname == "OVC" else "Clear Skies",
-            month.upper(),
-            hrlabel,
-            ab.year,
-            datetime.datetime.now().year,
-        ),
-        size=10,
+    title = (
+        "%s [%s]\nFrequency of %s by "
+        "Air Temp (month=%s,hour=%s) (%s-%s)\n"
+        "(must have 3+ hourly observations at the given temperature)"
+    ) % (
+        ctx["_nt"].sts[station]["name"],
+        station,
+        "Overcast Clouds" if varname == "OVC" else "Clear Skies",
+        month.upper(),
+        hrlabel,
+        ab.year,
+        datetime.datetime.now().year,
     )
-
+    (fig, ax) = figure_axes(title=title)
+    ax.bar(df2["t"], df2["freq"], ec="green", fc="green", width=1)
+    ax.grid(True, zorder=11)
     ax.set_ylabel(f"{PDICT[varname]} Frequency [%]")
     ax.set_ylim(0, 100)
     ax.set_xlabel(r"Air Temperature $^\circ$F")

@@ -11,7 +11,7 @@ PDICT = {"cdd": "Cooling Degree Days", "hdd": "Heating Degree Days"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["report"] = True
@@ -48,7 +48,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     pgconn = get_dbconn("coop")
 

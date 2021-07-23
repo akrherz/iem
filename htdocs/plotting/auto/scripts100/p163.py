@@ -1,6 +1,5 @@
 """LSR map by WFO"""
 import datetime
-from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
@@ -8,7 +7,7 @@ import pytz
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
 
-MDICT = OrderedDict(
+MDICT = dict(
     [
         ("NONE", "All LSR Types"),
         ("NRS", "All LSR Types except HEAVY RAIN + SNOW"),
@@ -60,11 +59,11 @@ MDICT = OrderedDict(
         ("WILDFIRE", "WILDFIRE"),
     ]
 )
-PDICT = OrderedDict([("wfo", "By NWS Forecast Office"), ("state", "By State")])
+PDICT = dict([("wfo", "By NWS Forecast Office"), ("state", "By State")])
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -109,7 +108,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("postgis")
     ctx = get_autoplot_context(fdict, get_description())
     sts = ctx["sdate"]
@@ -153,6 +152,7 @@ def plotter(fdict):
     bins = np.linspace(1, maxv, 12, dtype="i")
     bins[-1] += 1
     mp = MapPlot(
+        twitter=True,
         sector="nws",
         axisbg="white",
         title=f"Preliminary/Unfiltered Local Storm Report Counts {PDICT[by]}",
@@ -166,9 +166,11 @@ def plotter(fdict):
     )
     cmap = get_cmap(ctx["cmap"])
     if by == "wfo":
-        mp.fill_cwas(data, bins=bins, cmap=cmap, ilabel=True)
+        mp.fill_cwas(data, bins=bins, lblformat="%.0f", cmap=cmap, ilabel=True)
     else:
-        mp.fill_states(data, bins=bins, cmap=cmap, ilabel=True)
+        mp.fill_states(
+            data, bins=bins, lblformat="%.0f", cmap=cmap, ilabel=True
+        )
 
     return mp.fig, df
 

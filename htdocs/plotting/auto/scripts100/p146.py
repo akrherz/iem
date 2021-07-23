@@ -6,13 +6,13 @@ import numpy as np
 from pandas.io.sql import read_sql
 import pandas as pd
 from pyiem.plot import get_cmap
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -37,7 +37,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
@@ -65,7 +65,19 @@ def plotter(fdict):
         ts = sts.replace(month=i)
         xticks.append(int(ts.strftime("%j")))
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    ab = ctx["_nt"].sts[station]["archive_begin"]
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
+    title = (
+        "[%s] %s (%s-%s)\n"
+        "Temperature Frequency During Precipitation by Week"
+    ) % (
+        station,
+        ctx["_nt"].sts[station]["name"],
+        ab.year,
+        datetime.date.today().year,
+    )
+    (fig, ax) = figure_axes(title=title)
 
     bins = np.arange(df["avgt"].min() - 5, df["avgt"].max() + 5, 2)
     H, xedges, yedges = np.histogram2d(
@@ -77,9 +89,6 @@ def plotter(fdict):
             rows.append(dict(tmpf=y, week=x, count=H[i, j]))
     resdf = pd.DataFrame(rows)
 
-    ab = ctx["_nt"].sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata.")
     years = datetime.date.today().year - ab.year
     H = np.ma.array(H) / float(years)
     H.mask = np.ma.where(H < 0.1, True, False)
@@ -99,18 +108,6 @@ def plotter(fdict):
     ax.plot(xedges[:-1] * 7, y, zorder=3, lw=1, color="k", label="Average")
     ax.legend(loc=2)
 
-    ax.set_title(
-        (
-            "[%s] %s (%s-%s)\n"
-            "Temperature Frequency During Precipitation by Week"
-        )
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            ab.year,
-            datetime.date.today().year,
-        )
-    )
     ax.grid(True)
     ax.set_ylabel(r"Temperature [$^\circ$F]")
 

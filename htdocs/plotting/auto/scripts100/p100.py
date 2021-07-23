@@ -1,14 +1,13 @@
 """Simple stats by year"""
 import datetime
-from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem import network, util
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
+PDICT = dict(
     [
         ("max-high", "Maximum High"),
         ("avg-high", "Average High"),
@@ -36,7 +35,7 @@ PDICT = OrderedDict(
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc[
         "description"
@@ -83,7 +82,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = util.get_dbconn("coop")
 
     ctx = util.get_autoplot_context(fdict, get_description())
@@ -135,10 +134,19 @@ def plotter(fdict):
         raise NoDataFound("No Data Found.")
     df["range-hilo"] = df["max-high"] - df["min-low"]
 
-    (fig, ax) = plt.subplots(1, 1)
+    years = df.index.values
+    title = ("[%s] %s %s-%s\n%s") % (
+        station,
+        nt.sts[station]["name"],
+        min(years),
+        max(years),
+        PDICT[ptype],
+    )
+    if ptype.find("days") == 0:
+        title += " (%s)" % (threshold,)
+    (fig, ax) = figure_axes(title=title)
     avgv = df[ptype].mean()
     data = df[ptype].values
-    years = df.index.values
 
     # Compute 30 year trailing average
     tavg = [None] * 30
@@ -184,18 +192,6 @@ def plotter(fdict):
     ax.set_ylabel("%s [%s]" % (PDICT[ptype], units))
     ax.grid(True)
     ax.legend(ncol=3, loc="best", fontsize=10)
-    msg = ("[%s] %s %s-%s %s") % (
-        station,
-        nt.sts[station]["name"],
-        min(years),
-        max(years),
-        PDICT[ptype],
-    )
-    if ptype.find("days") == 0:
-        msg += " (%s)" % (threshold,)
-    tokens = msg.split()
-    sz = int(len(tokens) / 2)
-    ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
 
     return fig, df
 

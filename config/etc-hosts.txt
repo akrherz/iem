@@ -104,7 +104,6 @@
 #### metvm4 PostgreSQL
 # VI_1_233(69)
 192.168.1.233 metvm4-iemdb.local
-192.168.1.233 iemdb-hads iemdb-hads.local
 192.168.1.233 iemdb-iemre.local
 192.168.1.233 iemdb-talltowers.local
 192.168.1.233 iemdb-radar.local
@@ -137,6 +136,7 @@
 # VI_1_222(73) metvm2
 192.168.1.222 metvm2-iemdb.local
 192.168.1.222 iemdb-coop.local
+192.168.1.222 iemdb-hads iemdb-hads.local
 
 ##############################################################################
 

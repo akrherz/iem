@@ -2,6 +2,7 @@
 import datetime
 
 from pandas.io.sql import read_sql
+from pyiem.plot import figure_axes
 from pyiem.util import get_dbconn, get_autoplot_context
 from pyiem.exceptions import NoDataFound
 
@@ -63,16 +64,20 @@ CWEEK = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["report"] = True
-    desc["description"] = """ """
+    desc[
+        "description"
+    ] = """This plot presents the weekly percentage of
+    precipitation events within a given rainfall bin."""
     desc["arguments"] = [
         dict(
             type="station",
             name="station",
             default="IATDSM",
+            network="IACLIMATE",
             label="Select Station",
         )
     ]
@@ -80,7 +85,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
@@ -94,7 +99,7 @@ def plotter(fdict):
         and precip > 0.009),
     ranks as (
         SELECT climoweek, year,
-        rank() OVER (PARTITION by climoweek ORDER by precip DESC)
+        rank() OVER (PARTITION by climoweek ORDER by precip DESC, year DESC)
         from events),
     stats as (
     SELECT climoweek, max(precip), avg(precip),
@@ -111,11 +116,18 @@ def plotter(fdict):
     """,
         pgconn,
         params=(station,),
-        index_col=None,
+        index_col="climoweek",
     )
     if df.empty:
         raise NoDataFound("No Data Found.")
 
+    bins = {
+        1: "0.01 - 0.25",
+        2: "0.26 - 0.50",
+        3: "0.51 - 1.00",
+        4: "1.01 - 2.00",
+        5: "2.01 +",
+    }
     res = """\
 # IEM Climodat https://mesonet.agron.iastate.edu/climodat/
 # Report Generated: %s
@@ -133,6 +145,32 @@ def plotter(fdict):
         station,
         ctx["_nt"].sts[station]["name"],
     )
+    title = "[%s] %s Precipitation Bin Histogram" % (
+        station,
+        ctx["_nt"].sts[station]["name"],
+    )
+    fig, ax = figure_axes(title=title)
+    df["total"] = (
+        df["cat1"] + df["cat2"] + df["cat3"] + df["cat4"] + df["cat5"]
+    )
+    for i in range(1, 6):
+        df[f"cat{i}f"] = df[f"cat{i}"] / df["total"] * 100.0
+    cs = df[["cat1f", "cat2f", "cat3f", "cat4f", "cat5f"]].cumsum(axis=1)
+    ax.bar(cs.index.values, cs["cat1f"].values, label=bins[1])
+    for i in range(2, 6):
+        ax.bar(
+            cs.index.values,
+            df[f"cat{i}f"].values,
+            bottom=cs[f"cat{i-1}f"].values,
+            label=bins[i],
+        )
+    ax.grid(True)
+    ax.legend(ncol=1, loc=(1, 0.5))
+    ax.set_ylabel("Frequency of Precip Bin by Climoweek [%]")
+    xticks = range(1, 52, 10)
+    ax.set_xticks(xticks)
+    ax.set_xticklabels([CWEEK[c].replace("-->", "\n") for c in xticks])
+    ax.set_xlabel("Climate Week")
 
     annEvents = 0
     cat1t = 0
@@ -142,13 +180,7 @@ def plotter(fdict):
     cat5t = 0
     maxRain = 0
     totRain = 0
-    lastcw = 0
-    for _, row in df.iterrows():
-        cw = int(row["climoweek"])
-        # Skip ties
-        if cw == lastcw:
-            continue
-        lastcw = cw
+    for cw, row in df.iterrows():
         cat1 = row["cat1"]
         cat2 = row["cat2"]
         cat3 = row["cat3"]
@@ -163,9 +195,8 @@ def plotter(fdict):
         if maxval > maxRain:
             maxRain = maxval
         meanval = row["avg"]
-        totEvents = cat1 + cat2 + cat3 + cat4 + cat5
-        annEvents += totEvents
-        totRain += totEvents * meanval
+        annEvents += row["total"]
+        totRain += row["total"] * meanval
 
         res += (
             "%3s %-13s %5.2f %i   %4.2f %4i(%2i) %4i(%2i) "
@@ -177,16 +208,16 @@ def plotter(fdict):
             row["year"],
             meanval,
             cat1,
-            round((float(cat1) / float(totEvents)) * 100.0),
+            round((float(cat1) / float(row["total"])) * 100.0),
             cat2,
-            round((float(cat2) / float(totEvents)) * 100.0),
+            round((float(cat2) / float(row["total"])) * 100.0),
             cat3,
-            round((float(cat3) / float(totEvents)) * 100.0),
+            round((float(cat3) / float(row["total"])) * 100.0),
             cat4,
-            round((float(cat4) / float(totEvents)) * 100.0),
+            round((float(cat4) / float(row["total"])) * 100.0),
             cat5,
-            round((float(cat5) / float(totEvents)) * 100.0),
-            totEvents,
+            round((float(cat5) / float(row["total"])) * 100.0),
+            row["total"],
         )
 
     res += (
@@ -209,7 +240,7 @@ def plotter(fdict):
         annEvents,
     )
 
-    return None, df, res
+    return fig, df, res
 
 
 if __name__ == "__main__":

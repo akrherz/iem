@@ -1,14 +1,13 @@
 """Top 10"""
 import datetime
 import calendar
-from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-MDICT = OrderedDict(
+MDICT = dict(
     [
         ("all", "No Month/Time Limit"),
         ("spring", "Spring (MAM)"),
@@ -31,7 +30,7 @@ MDICT = OrderedDict(
     ]
 )
 
-METRICS = OrderedDict(
+METRICS = dict(
     [
         ("total_precip", "Total Precipitation"),
         ("max_least_high", "Max Least High"),
@@ -41,7 +40,7 @@ METRICS = OrderedDict(
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 86400
@@ -93,7 +92,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
@@ -216,7 +215,7 @@ def plotter(fdict):
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
     ax.set_title(
-        ("%s [%s] Top 10 Events\n" "%s [days=%s] (%s) " "(%s-%s)")
+        ("%s [%s] Top 10 Events\n%s [days=%s] (%s) (%s-%s)")
         % (
             ctx["_nt"].sts[station]["name"],
             station,
