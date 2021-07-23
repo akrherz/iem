@@ -33,11 +33,9 @@ def main():
     # Find sites that are online and not metasites that are not in the current
     # table!
     icursor.execute(
-        """
-     select s.iemid, id, network from stations s LEFT JOIN current c
-     ON c.iemid = s.iemid where c.iemid is null and s.online and
-     not s.metasite
-    """
+        "select s.iemid, id, network from stations s LEFT JOIN current c "
+        "ON c.iemid = s.iemid where c.iemid is null and s.online and "
+        "not s.metasite"
     )
 
     now = datetime.datetime.now()
@@ -49,8 +47,8 @@ def main():
             row["network"],
         )
 
-        for date in [now, now - datetime.timedelta(days=1)]:
-            add_summary(icursor2, date, row["iemid"])
+        for valid in [now, now - datetime.timedelta(days=1)]:
+            add_summary(icursor2, valid.date(), row["iemid"])
         icursor2.execute(
             "INSERT into current ( valid, iemid) VALUES ('1980-01-01', %s)",
             (row["iemid"],),
