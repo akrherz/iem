@@ -302,11 +302,19 @@ def main(argv):
     date = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
     ds = iemre.get_grids(date)
     pgconn = get_dbconn("coop")
-    for state in state_names:
+    states = (
+        state_names.keys()
+        if len(argv) < 5
+        else [
+            argv[4],
+        ]
+    )
+    for state in states:
         table = f"alldata_{state}"
         cursor = pgconn.cursor()
         df, threaded = load_table(state, date)
         if df is None:
+            LOG.debug("skipping state %s as load_table empty", state)
             continue
         df = merge_network_obs(df, f"{state}_COOP", date)
         df = merge_network_obs(df, f"{state}_ASOS", date)
