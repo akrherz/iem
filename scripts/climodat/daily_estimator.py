@@ -266,7 +266,9 @@ def merge_network_obs(df, network, ts):
     # Tricky part here, if our present data table has data and is not
     # estimated, we don't want to over-write it!
     df = df.join(obs, how="left", on="tracks", rsuffix="b")
-    for col in "high low precip snow snowd temp_hour precip_hour".split():
+    # HACK the `high` and `precip` columns end up modifying the estimated
+    # column, which fouls up subsequent logic
+    for col in "low high snow snowd precip temp_hour precip_hour".split():
         estcol = (
             "precip_estimated"
             if col in ["precip", "snow", "snowd", "precip_hour"]
