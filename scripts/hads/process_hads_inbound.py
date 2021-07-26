@@ -1,6 +1,7 @@
-"""The pyWWA shef_parser dumps raw data into the raw_inbound table, this
-script sorts through that mess and files it away into the longterm storage
-tables.
+"""Moved staged SHEF data into long term tables.
+
+Note, we do not want to do TRUNCATE here to do ugly locking that happens and
+which can jam things up badly when we are doing upgrades, etc.
 """
 
 import pytz
@@ -10,7 +11,7 @@ LOG = logger()
 
 
 def main():
-    """ Do things """
+    """Do things"""
     pgconn = get_dbconn("hads")
     cursor2 = pgconn.cursor()
     cursor = pgconn.cursor()
@@ -18,7 +19,7 @@ def main():
         "INSERT into raw_inbound_tmp SELECT distinct station, valid, "
         "key, value from raw_inbound"
     )
-    cursor.execute("TRUNCATE raw_inbound")
+    cursor.execute("delete from raw_inbound")
     cursor.close()
     pgconn.commit()
     cursor = pgconn.cursor()
@@ -36,7 +37,7 @@ def main():
         )
     if cursor.rowcount == 0:
         LOG.info("found no data to insert...")
-    cursor.execute("TRUNCATE raw_inbound_tmp")
+    cursor.execute("delete from raw_inbound_tmp")
     cursor2.close()
     pgconn.commit()
     pgconn.close()
