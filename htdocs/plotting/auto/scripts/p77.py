@@ -4,14 +4,14 @@ import calendar
 
 import numpy as np
 from pyiem import network
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 from pandas.io.sql import read_sql
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -34,7 +34,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
@@ -62,14 +62,18 @@ def plotter(fdict):
     )
     if df.empty:
         raise NoDataFound("No Data Found.")
-
-    fig = plt.figure(figsize=(8, 6))
-    ax = plt.axes([0.1, 0.1, 0.7, 0.8])
-    ax2 = plt.axes([0.81, 0.1, 0.15, 0.8])
+    title = (
+        "[%s] %s Period Between\nAverage Last and "
+        "First High Temperature of Year"
+    ) % (station, nt.sts[station]["name"])
+    fig = figure(title=title)
+    ax = fig.add_axes([0.1, 0.1, 0.7, 0.8])
+    ax2 = fig.add_axes([0.81, 0.1, 0.15, 0.8])
     height = df["min_jday"][:] + 365.0 - df["max_jday"]
     ax2.plot(height, df.index.values)
     ax2.set_xticks([30, 90, 180, 365])
-    plt.setp(ax2.get_yticklabels(), visible=False)
+    for y in ax2.get_yticklabels():
+        y.set_visible(False)
     ax2.set_ylim(32, df.index.values.max() + 5)
     ax2.grid(True)
     ax2.text(
@@ -107,14 +111,6 @@ def plotter(fdict):
     ax.set_ylabel(r"High Temperature $^\circ$F")
     ax.set_xlim(min(df["max_jday"]) - 1, max(df["max_jday"] + height) + 1)
     ax.grid(True)
-
-    msg = (
-        "[%s] %s Period Between Average Last and "
-        "First High Temperature of Year"
-    ) % (station, nt.sts[station]["name"])
-    tokens = msg.split()
-    sz = int(len(tokens) / 2)
-    ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
 
     return fig, df
 

@@ -3,7 +3,7 @@
 from scipy import stats
 from pandas.io.sql import read_sql
 from pyiem import network
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -23,7 +23,7 @@ PDICT3 = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -73,7 +73,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
@@ -114,7 +114,18 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No data found for query")
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    title = ("[%s] %s %.0f-%.0f Number of Days\n[%s] with %s %s %g%s") % (
+        station,
+        nt.sts[station]["name"],
+        df.index.min(),
+        df.index.max(),
+        PDICT2[season],
+        PDICT3[varname],
+        PDICT[direction],
+        threshold,
+        r"$^\circ$F" if varname != "precip" else "inch",
+    )
+    (fig, ax) = figure_axes(title=title)
     avgv = df[season].mean()
 
     colorabove = "r"
@@ -159,20 +170,6 @@ def plotter(fdict):
     ax.set_ylim(0, max([df[season].max() + df[season].max() / 7.0, 3]))
     ax.set_ylabel("Number of Days")
     ax.grid(True)
-    msg = ("[%s] %s %.0f-%.0f Number of Days [%s] " "with %s %s %g%s") % (
-        station,
-        nt.sts[station]["name"],
-        df.index.min(),
-        df.index.max(),
-        PDICT2[season],
-        PDICT3[varname],
-        PDICT[direction],
-        threshold,
-        r"$^\circ$F" if varname != "precip" else "inch",
-    )
-    tokens = msg.split()
-    sz = int(len(tokens) / 2)
-    ax.set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
     ax.legend(ncol=1)
 
     return fig, df

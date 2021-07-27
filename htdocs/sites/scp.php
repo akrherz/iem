@@ -9,7 +9,7 @@
  
  $t->title = "Satellite Cloud Product";
  $t->sites_current = "scp";
-$sortdir = isset($_GET["sortdir"]) ? xssafe($_GET["sortdir"]) : $_GET["sortdir"];
+ $sortdir = isset($_GET["sortdir"]) ? xssafe($_GET["sortdir"]) : "asc";
  $year = isset($_GET["year"])? intval($_GET["year"]): gmdate("Y");
  $month = isset($_GET["month"])? intval($_GET["month"]): gmdate("m");
  $day = isset($_GET["day"])? intval($_GET["day"]): gmdate("d");

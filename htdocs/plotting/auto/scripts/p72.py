@@ -1,15 +1,13 @@
 """histogram of issuance time."""
-from collections import OrderedDict
 import datetime
 
 from pandas.io.sql import read_sql
 from pyiem.nws import vtec
-from pyiem.plot.use_agg import plt
-from pyiem.plot.util import fitbox
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-MDICT = OrderedDict(
+MDICT = dict(
     [
         ("all", "No Month/Time Limit"),
         ("water_year", "Water Year"),
@@ -35,7 +33,7 @@ MDICT = OrderedDict(
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["cache"] = 86400
     desc["data"] = True
@@ -84,7 +82,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("postgis")
     ctx = get_autoplot_context(fdict, get_description())
 
@@ -112,7 +110,17 @@ def plotter(fdict):
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
-    (fig, ax) = plt.subplots(1, 1)
+    title = "[%s] %s :: Time of Day Frequency" % (
+        wfo,
+        ctx["_nt"].sts[wfo]["name"],
+    )
+    subtitle = "%s (%s.%s) [%s]" % (
+        vtec.get_ps_string(phenomena, significance),
+        phenomena,
+        significance,
+        MDICT[ctx["season"]],
+    )
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle)
 
     tzname = ctx["_nt"].sts[wfo]["tzname"]
     df = read_sql(
@@ -184,18 +192,6 @@ def plotter(fdict):
     )
     ax.set_xlabel("Timezone: %s (Daylight or Standard)" % (tzname,))
     ax.set_ylabel("Percentage [%%] out of %.0f Events" % (df["total"].max(),))
-    title = "[%s] %s :: Time of Day Frequency" % (
-        wfo,
-        ctx["_nt"].sts[wfo]["name"],
-    )
-    subtitle = "%s (%s.%s) [%s]" % (
-        vtec.get_ps_string(phenomena, significance),
-        phenomena,
-        significance,
-        MDICT[ctx["season"]],
-    )
-    fitbox(fig, title, 0.05, 0.95, 0.95, 0.99, ha="center")
-    fitbox(fig, subtitle, 0.05, 0.95, 0.91, 0.945, ha="center")
 
     return fig, df
 

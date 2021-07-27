@@ -6,13 +6,13 @@ import numpy as np
 from scipy.stats import norm
 import pandas as pd
 from pyiem import reference
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -31,7 +31,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop", user="nobody")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
@@ -55,7 +55,12 @@ def plotter(fdict):
     highs = np.array(highs)
     lows = np.array(lows)
 
-    (fig, ax) = plt.subplots(1, 1)
+    ts = datetime.datetime(2000, month, day)
+    title = "%s %s Temperature Distribution" % (
+        reference.state_names[state],
+        ts.strftime("%d %B"),
+    )
+    (fig, ax) = figure_axes(title=title)
 
     n, bins, _ = ax.hist(
         highs,
@@ -67,7 +72,7 @@ def plotter(fdict):
     )
     high_freq = pd.Series(n, index=bins[:-1])
     mu, std = norm.fit(highs)
-    xmin, xmax = plt.xlim()
+    xmin, xmax = ax.get_xlim()
     x = np.linspace(xmin, xmax, 100)
     p = norm.pdf(x, mu, std)
     ax.plot(x, p, "r--", linewidth=2)
@@ -101,16 +106,10 @@ def plotter(fdict):
     df = pd.DataFrame(dict(low_freq=low_freq, high_freq=high_freq))
     df.index.name = "tmpf"
     mu, std = norm.fit(lows)
-    xmin, xmax = plt.xlim()
+    xmin, xmax = ax.get_xlim()
     x = np.linspace(xmin, xmax, 100)
     p = norm.pdf(x, mu, std)
     ax.plot(x, p, "b--", linewidth=2)
-
-    ts = datetime.datetime(2000, month, day)
-    ax.set_title(
-        ("%s %s Temperature Distribution")
-        % (reference.state_names[state], ts.strftime("%d %B"))
-    )
 
     ax.text(
         0.02,
