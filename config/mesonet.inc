@@ -241,6 +241,7 @@
     RewriteRule winter_roads.geojson(.*) winter_roads.py$1 [QSA]
     RewriteRule networks.geojson(.*) networks.py$1 [QSA]
     RewriteRule nexrad_attr.geojson(.*) nexrad_attr.py$1 [QSA]
+    RewriteRule nexrad_attr.csv(.*) nexrad_attr.py?$1&fmt=csv [QSA]
   </Directory>
 
   <Directory "/opt/iem/htdocs/iemre">
