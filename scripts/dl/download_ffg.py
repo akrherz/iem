@@ -14,7 +14,7 @@ LOG = logger()
 
 
 def do(ts):
-    """ Run for a given date! """
+    """Run for a given date!"""
     localfn = ts.strftime(
         "/mesonet/ARCHIVE/data/%Y/%m/%d/model/ffg/5kmffg_%Y%d%m%H.grib2"
     )
@@ -46,7 +46,8 @@ def main():
     ts = ts.replace(minute=0)
     if ts.hour % 6 > 0:
         return
-    for offset in [0, 24, 72]:
+    # NOTE website no longer has 3 days worth of data, but two
+    for offset in [0, 24, 36]:
         do(ts - datetime.timedelta(hours=offset))
 
 
