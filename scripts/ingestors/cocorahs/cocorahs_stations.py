@@ -38,6 +38,8 @@ def main(argv):
         cols = row.split(", ")
         if len(cols) < 4:
             continue
+        if cols[header["StationStatus"]].strip() == "Closed":
+            continue
         sid = cols[header["StationNumber"]]
         name = cols[header["StationName"]].strip().replace("'", " ")
         cnty = cols[header["County"]].strip().replace("'", " ")
