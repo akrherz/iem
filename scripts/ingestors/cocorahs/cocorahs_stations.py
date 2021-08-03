@@ -1,36 +1,29 @@
-"""
-Hit cocorah's website API for a listing of stations and add entries for
-anything new found
+"""Sync CoCoRaHS station details.
+
+Run from RUN_40_AFTER.sh
 """
 import sys
 
 import requests
-from pyiem.util import get_dbconn
+from pyiem.network import Table as NetworkTable
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
-def main():
+def main(argv):
     """Go Main Go"""
+    state = argv[1]
+    network = f"{state}COCORAHS"
+    nt = NetworkTable(network, only_online=False)
     pgconn = get_dbconn("mesosite")
     mcursor = pgconn.cursor()
-
-    state = sys.argv[1]
 
     url = (
         "http://data.cocorahs.org/cocorahs/export/exportstations.aspx?"
         f"State={state}&Format=CSV&country=usa"
     )
     data = requests.get(url, timeout=30).content.decode("ascii").split("\r\n")
-
-    # Find current stations
-    stations = []
-    sql = """
-        SELECT id from stations WHERE network = '%sCOCORAHS' and ST_y(geom) > 0
-        and name is not null and name != '' """ % (
-        state,
-    )
-    mcursor.execute(sql)
-    for row in mcursor:
-        stations.append(row[0])
 
     # Process Header
     header = {}
@@ -46,62 +39,62 @@ def main():
         if len(cols) < 4:
             continue
         sid = cols[header["StationNumber"]]
-        if sid in stations:
-            continue
-
         name = cols[header["StationName"]].strip().replace("'", " ")
         cnty = cols[header["County"]].strip().replace("'", " ")
         lat = float(cols[header["Latitude"]].strip())
         lon = float(cols[header["Longitude"]].strip())
-
-        if lat < 10 or lon > -60 or name == "":
+        if sid in nt.sts:
+            olat = nt.sts[sid]["lat"]
+            olon = nt.sts[sid]["lon"]
+            dist = ((olat - lat) ** 2 + (olon - lon) ** 2) ** 0.5
+            if dist < 0.01:
+                continue
+            LOG.info(
+                "%s is %.3f distance: %s->%s %s->%s",
+                sid,
+                dist,
+                olon,
+                lon,
+                olat,
+                lat,
+            )
+            mcursor.execute(
+                "UPDATE stations SET geom = 'SRID=4326;POINT(%s %s)', "
+                "elevation = -999, ugc_county = null, ugc_zone = null, "
+                "ncdc81 = null, climate_site = null, ncei91 = null WHERE "
+                "id = %s and network = %s",
+                (lon, lat, sid, network),
+            )
             continue
 
-        print(
-            ("ADD COCORAHS SID:%s Name:%s County:%s %.3f %.3f")
-            % (sid, name, cnty, lat, lon)
+        LOG.info(
+            "ADD COCORAHS SID:%s Name:%s County:%s %.3f %.3f",
+            sid,
+            name,
+            cnty,
+            lat,
+            lon,
         )
 
         sql = """
             INSERT into stations(id, synop, name, state, country, network,
             online, geom, county, plot_name , metasite)
-            VALUES ('%s', 99999, '%s', '%s', 'US', '%sCOCORAHS', 't',
+            VALUES ('%s', 99999, '%s', '%s', 'US', '%s', 't',
             'SRID=4326;POINT(%s %s)', '%s', '%s', 'f')
             """ % (
             sid,
             name,
             state,
-            state,
+            network,
             lon,
             lat,
             cnty,
             name,
         )
-        try:
-            mcursor = pgconn.cursor()
-            mcursor.execute(sql)
-            mcursor.close()
-            pgconn.commit()
-        except Exception:
-            mcursor.close()
-            pgconn.commit()
-            mcursor = pgconn.cursor()
-            sql = """
-                UPDATE stations SET geom = 'SRID=4326;POINT(%s %s)',
-                name = '%s', plot_name = '%s'
-                WHERE id = '%s' and network = '%sCOCORAHS'
-            """ % (
-                lon,
-                lat,
-                name,
-                name,
-                sid,
-                state,
-            )
-            mcursor.execute(sql)
-            mcursor.close()
-            pgconn.commit()
+        mcursor.execute(sql)
+    mcursor.close()
+    pgconn.commit()
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
