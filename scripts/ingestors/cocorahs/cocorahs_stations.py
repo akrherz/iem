@@ -44,7 +44,7 @@ def main(argv):
         lat = float(cols[header["Latitude"]].strip())
         lon = float(cols[header["Longitude"]].strip())
         # Always puzzled by this
-        if abs(lon - 0) < 0.1:
+        if abs(lon - 0) < 0.1 or abs(lat - 0) < 0.1:
             continue
         if sid in nt.sts:
             olat = nt.sts[sid]["lat"]
