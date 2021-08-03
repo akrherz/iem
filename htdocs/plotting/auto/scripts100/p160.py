@@ -140,7 +140,9 @@ def get_context(fdict):
         raise NoDataFound("No Data Found.")
     df["valid"] = df["valid"].dt.tz_localize(pytz.UTC)
     ctx["odf"] = df.pivot("valid", "label", "value")
-    if not ctx["fdf"].empty:
+    if ctx["fdf"].empty:
+        ctx["df"] = ctx["odf"].reset_index()
+    else:
         ctx["fdf"].reset_index(inplace=True)
         ctx["df"] = pd.merge(
             ctx["fdf"],
@@ -157,9 +159,14 @@ def get_context(fdict):
         .astimezone(pytz.timezone(ctx["tzname"]))
         .strftime("%d %b %Y %-I:%M %p %Z"),
     )
-    if "df" not in ctx or (ctx["df"].empty and not ctx["odf"].empty):
-        ctx["primary"] = ctx["odf"].columns[0]
-        ctx["secondary"] = ctx["odf"].columns[1]
+    # Attempt to find a column in ft
+    for i, col in enumerate(ctx["odf"].columns):
+        if col.find("[ft]") > -1:
+            ctx["primary"] = ctx["odf"].columns[i]
+            break
+    for i, col in enumerate(["primary", "secondary"]):
+        if col not in ctx:
+            ctx[col] = ctx["odf"].columns[i]
     return ctx
 
 
@@ -171,28 +178,29 @@ def highcharts(fdict):
     df = ctx["df"]
     df["ticks"] = df["valid"].astype(np.int64) // 10 ** 6
     lines = []
-    fxs = df["id"].unique()
-    for fx in fxs:
-        df2 = df[df["id"] == fx]
-        issued = (
-            df2.iloc[0]["issued"]
-            .tz_convert(pytz.timezone(ctx["tzname"]))
-            .strftime("%-m/%-d %-I%p %Z")
-        )
-        v = df2[["ticks", ctx["var"] + "_value"]].to_json(orient="values")
-        lines.append(
-            """{
-            name: '"""
-            + issued
-            + """',
-            type: 'line',
-            tooltip: {valueDecimal: 1},
-            data: """
-            + v
-            + """
-            }
-        """
-        )
+    if "id" in df.columns:
+        fxs = df["id"].unique()
+        for fx in fxs:
+            df2 = df[df["id"] == fx]
+            issued = (
+                df2.iloc[0]["issued"]
+                .tz_convert(pytz.timezone(ctx["tzname"]))
+                .strftime("%-m/%-d %-I%p %Z")
+            )
+            v = df2[["ticks", ctx["var"] + "_value"]].to_json(orient="values")
+            lines.append(
+                """{
+                name: '"""
+                + issued
+                + """',
+                type: 'line',
+                tooltip: {valueDecimal: 1},
+                data: """
+                + v
+                + """
+                }
+            """
+            )
     ctx["odf"]["ticks"] = ctx["odf"].index.values.astype(np.int64) // 10 ** 6
     if ctx["var"] in ctx:
         v = ctx["odf"][["ticks", ctx[ctx["var"]]]].to_json(orient="values")
@@ -272,17 +280,21 @@ def plotter(fdict):
     df = ctx["df"]
     title = "\n".join([ctx["title"], ctx["subtitle"]])
     (fig, ax) = figure_axes(title=title)
-    fxs = df["id"].unique()
-    for fx in fxs:
-        df2 = df[df["id"] == fx]
-        issued = (
-            df2.iloc[0]["issued"]
-            .tz_convert(pytz.timezone(ctx["tzname"]))
-            .strftime("%-m/%-d %-I%p %Z")
-        )
-        ax.plot(
-            df2["valid"], df2[ctx["var"] + "_value"], zorder=2, label=issued
-        )
+    if "id" in df.columns:
+        fxs = df["id"].unique()
+        for fx in fxs:
+            df2 = df[df["id"] == fx]
+            issued = (
+                df2.iloc[0]["issued"]
+                .tz_convert(pytz.timezone(ctx["tzname"]))
+                .strftime("%-m/%-d %-I%p %Z")
+            )
+            ax.plot(
+                df2["valid"],
+                df2[f"{ctx['var']}_value"],
+                zorder=2,
+                label=issued,
+            )
     if not ctx["odf"].empty:
         ax.plot(
             ctx["odf"].index.values,
@@ -316,10 +328,12 @@ def plotter(fdict):
     ax.set_position([pos.x0, pos.y0, 0.74, 0.8])
     ax.set_xlabel(f"Timestamps in {ctx['tzname']} Timezone")
     ax.legend(loc=(1.0, 0.0))
-    df["issued"] = df["issued"].apply(lambda x: x.strftime("%Y-%m-%d %H:%M"))
-    df["valid"] = df["valid"].apply(lambda x: x.strftime("%Y-%m-%d %H:%M"))
+    fmt = "%Y-%m-%d %H:%M"
+    if "issued" in df.columns:
+        df["issued"] = df["issued"].apply(lambda x: x.strftime(fmt))
+    df["valid"] = df["valid"].apply(lambda x: x.strftime(fmt))
     return fig, df
 
 
 if __name__ == "__main__":
-    highcharts(dict(station="GTTI4", dt="2021-07-23 1653"))
+    plotter(dict(station="STTM7", dt="2021-08-03 1653"))
