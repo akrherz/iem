@@ -20,7 +20,7 @@ for($i=0; $row=pg_fetch_array($rs); $i++){
 	if (substr($row[1], 0, 12) < $floor){
 		$link = $row[1];
 	}
-	$table .= sprintf("<tr><th>%s</th><td>%s</td><td>%s</td>\n",
+	$table .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td>\n",
 			$row[0], substr($row[1], 13, 4), $link);
 }
 $table .= "</tbody></table>";
@@ -54,8 +54,8 @@ IEM maintains a week of raw SHEF data, so links to indicated products
 older than a week old will not work.</p>
 
 <p>This page is similiar to
-<a href="http://www.nohrsc.noaa.gov/shef_archive/tomb.html">NOHRSC's Unknown Stations</a>
-page, but this page only contains <b>NWSLI-like identifiers</b>.</p>
+<a href="https://www.nohrsc.noaa.gov/shef_archive/tomb.html">NOHRSC's Unknown Stations</a>
+page, but this page only contains <strong>NWSLI-like identifiers</strong>.</p>
 
 {$table}
 
