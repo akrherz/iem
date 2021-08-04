@@ -8,7 +8,7 @@ from pyiem.exceptions import NoDataFound
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["report"] = True
@@ -41,7 +41,7 @@ def contiguous_regions(condition):
     # Find the indicies of changes in "condition"
     # d = np.diff(condition)
     d = np.subtract(condition[1:], condition[:-1], dtype=np.float)
-    idx, = d.nonzero()
+    (idx,) = d.nonzero()
 
     # We need to start things after the change in "condition". Therefore,
     # we'll shift the index by 1 to the right.
@@ -61,7 +61,7 @@ def contiguous_regions(condition):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
     ctx = get_autoplot_context(fdict, get_description())
@@ -71,15 +71,16 @@ def plotter(fdict):
     bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:
         raise NoDataFound("No Data Found.")
-    res = """\
-# IEM Climodat https://mesonet.agron.iastate.edu/climodat/
-# Report Generated: %s
-# Climate Record: %s -> %s
-# Site Information: [%s] %s
-# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
-# First occurance of record consecutive number of days
-# above or below a temperature threshold
-""" % (
+    res = (
+        "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
+        "# Report Generated: %s\n"
+        "# Climate Record: %s -> %s\n"
+        "# Site Information: [%s] %s\n"
+        "# Contact Information: Daryl Herzmann akrherz@iastate.edu "
+        "515.294.5978\n"
+        "# First occurance of record consecutive number of days\n"
+        "# above or below a temperature threshold\n"
+    ) % (
         datetime.date.today().strftime("%d %b %Y"),
         bs.date(),
         datetime.date.today(),

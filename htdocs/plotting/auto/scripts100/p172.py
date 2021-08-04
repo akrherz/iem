@@ -13,7 +13,7 @@ PDICT = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -111,7 +111,7 @@ def cull_missing(df, colname, missingdays):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
@@ -155,7 +155,7 @@ def plotter(fdict):
 
     df, cullyears = cull_missing(df, ctx["var"], ctx["m"])
 
-    extra = "" if doy_trunc == 365 else f" till {today.strftime('%-d %B')}"
+    extra = "" if doy_trunc == 365 else f" through {today.strftime('%-d %B')}"
     title = "Accumulated %s after %s%s" % (
         sdate.strftime("%-d %B"),
         PDICT[ctx["var"]],

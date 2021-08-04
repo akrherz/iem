@@ -10,7 +10,7 @@ CATS = np.array([0.01, 0.5, 1.0, 2.0, 3.0, 4.0])
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["report"] = True
@@ -28,7 +28,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
 
@@ -58,15 +58,18 @@ def plotter(fdict):
         index_col=["year", "month"],
     )
 
-    res = """\
-# IEM Climodat https://mesonet.agron.iastate.edu/climodat/
-# Report Generated: %s
-# Climate Record: %s -> %s
-# Site Information: [%s] %s
-# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
-# Number of days per year with precipitation at or above threshold [inch]
-# Partitioned by month of the year, 'ANN' represents the entire year
-""" % (
+    res = (
+        "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
+        "# Report Generated: %s\n"
+        "# Climate Record: %s -> %s\n"
+        "# Site Information: [%s] %s\n"
+        "# Contact Information: Daryl Herzmann akrherz@iastate.edu "
+        "515.294.5978\n"
+        "# Number of days per year with precipitation at or "
+        "above threshold [inch]\n"
+        "# Partitioned by month of the year, 'ANN' represents "
+        "the entire year\n"
+    ) % (
         datetime.date.today().strftime("%d %b %Y"),
         ctx["_nt"].sts[station]["archive_begin"].date(),
         datetime.date.today(),

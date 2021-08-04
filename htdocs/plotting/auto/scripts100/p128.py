@@ -1,12 +1,11 @@
 """compares yearly summaries"""
-from collections import OrderedDict
 
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
+PDICT = dict(
     [
         ("avg_high", "Average High Temperature"),
         ("avg_low", "Average Low Temperature"),
@@ -19,7 +18,7 @@ PDICT = OrderedDict(
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -53,7 +52,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station1 = ctx["station1"].upper()
@@ -100,7 +99,14 @@ def plotter(fdict):
     ]:
         df["diff_" + col] = df["one_" + col] - df["two_" + col]
 
-    (fig, ax) = plt.subplots(1, 1)
+    title = "Yearly %s [%s] %s\nminus [%s] %s" % (
+        PDICT[varname],
+        station1,
+        ctx["_nt1"].sts[station1]["name"],
+        station2,
+        ctx["_nt2"].sts[station2]["name"],
+    )
+    (fig, ax) = figure_axes(title=title)
     color_above = "b" if varname in ["total_precip"] else "r"
     color_below = "r" if color_above == "b" else "b"
 
@@ -111,17 +117,6 @@ def plotter(fdict):
         if val < 0:
             mybar.set_facecolor(color_below)
             mybar.set_edgecolor(color_below)
-
-    ax.set_title(
-        ("Yearly %s [%s] %s\nminus [%s] %s")
-        % (
-            PDICT[varname],
-            station1,
-            ctx["_nt1"].sts[station1]["name"],
-            station2,
-            ctx["_nt2"].sts[station2]["name"],
-        )
-    )
     units = "inch" if varname in ["total_precip"] else "F"
     lbl = "wetter" if units == "inch" else "warmer"
     wins = len(df[df["diff_" + varname] > 0].index)
