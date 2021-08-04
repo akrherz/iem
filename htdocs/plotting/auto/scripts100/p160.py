@@ -165,7 +165,7 @@ def get_context(fdict):
             ctx["primary"] = ctx["odf"].columns[i]
             break
     for i, col in enumerate(["primary", "secondary"]):
-        if col not in ctx:
+        if col not in ctx and i < len(ctx["odf"].columns):
             ctx[col] = ctx["odf"].columns[i]
     return ctx
 
@@ -295,7 +295,7 @@ def plotter(fdict):
                 zorder=2,
                 label=issued,
             )
-    if not ctx["odf"].empty:
+    if not ctx["odf"].empty and ctx["var"] in ctx:
         ax.plot(
             ctx["odf"].index.values,
             ctx["odf"][ctx[ctx["var"]]],
@@ -336,4 +336,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="STTM7", dt="2021-08-03 1653"))
+    plotter(dict(station="ALRW1", dt="2020-02-01 0000", var="secondary"))
