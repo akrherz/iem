@@ -236,6 +236,8 @@ def plotter(fdict):
         df["color"] = "tan"
     if len(df["wfo"].unique()) == 1:
         bounds = df["simple_geom"].total_bounds
+        if not sbwdf.empty:
+            bounds = sbwdf["geom"].total_bounds
     else:
         df2 = df[~df["wfo"].isin(["AJK", "AFC", "AFG", "HFO", "JSJ"])]
         bounds = df2["simple_geom"].total_bounds
@@ -356,10 +358,10 @@ if __name__ == "__main__":
     plotter(
         dict(
             phenomenav="FF",
-            significancev="A",
-            wfo="MOB",
+            significancev="W",
+            wfo="FGZ",
             year=2021,
-            etn=5,
-            valid="2021-04-17 0000",
+            etn=18,
+            valid="2021-07-29 0100",
         )
     )
