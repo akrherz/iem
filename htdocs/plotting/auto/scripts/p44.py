@@ -16,13 +16,14 @@ PDICT = {"yes": "Limit Plot to Year-to-Date", "no": "Plot Entire Year"}
 PDICT2 = {
     "single": "Plot Single VTEC Phenomena + Significance",
     "svrtor": "Plot Severe Thunderstorm + Tornado Warnings",
+    "all": "Plot All VTEC Events",
 }
 PDICT3 = {"wfo": "Plot for Single/All WFO", "state": "Plot for a Single State"}
 PDICT4 = {"line": "Accumulated line plot", "bar": "Single bar plot per year"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["cache"] = 86400
     desc["data"] = True
@@ -145,7 +146,7 @@ def make_barplot(ctx, df):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
@@ -153,7 +154,7 @@ def plotter(fdict):
     limit = ctx["limit"]
     combo = ctx["c"]
     phenomena = ctx["phenomena"][:2]
-    significance = ctx["significance"][:2]
+    significance = ctx["significance"][:1]
     if phenomena in ["SV", "TO", "FF"] and significance == "W":
         pass
     else:
@@ -179,14 +180,24 @@ def plotter(fdict):
         eventlimiter = " or (phenomena = 'SV' and significance = 'W') "
         phenomena = "TO"
         significance = "W"
+    args = [ctx["syear"], eyear, lastdoy]
+    if combo == "all":
+        pslimiter = ""
+    else:
+        pslimiter = "(phenomena = %s and significance = %s)"
+        args.insert(0, significance)
+        args.insert(0, phenomena)
+
+    limiter = ""
+    if pslimiter != "" or eventlimiter != "":
+        limiter = f" ({pslimiter} {eventlimiter}) and "
 
     cursor.execute(
         f"""
     WITH data as (
         SELECT extract(year from issue)::int as yr,
         issue, phenomena, significance, eventid, wfo from warnings WHERE
-        ((phenomena = %s and significance = %s) {eventlimiter})
-        and extract(year from issue) >= %s and
+        {limiter} extract(year from issue) >= %s and
         extract(year from issue) <= %s
         and extract(doy from issue) <= %s {wfolimiter}),
     agg1 as (
@@ -199,7 +210,7 @@ def plotter(fdict):
     SELECT yr, doy, sum(count) OVER (PARTITION by yr ORDER by doy ASC)
     from agg2 ORDER by yr ASC, doy ASC
     """,
-        (phenomena, significance, ctx["syear"], eyear, lastdoy),
+        args,
     )
     if cursor.rowcount == 0:
         raise NoDataFound("No Data Found.")
@@ -227,6 +238,8 @@ def plotter(fdict):
     title = vtec.get_ps_string(phenomena, significance)
     if combo == "svrtor":
         title = "Severe Thunderstorm + Tornado Warning"
+    elif combo == "all":
+        title = "All VTEC Events"
     ptitle = "NWS WFO: %s (%s)" % (ctx["_nt"].sts[station]["name"], station)
     if opt == "state":
         ptitle = ("NWS Issued for %s in %s") % (
@@ -304,5 +317,5 @@ def plotter(fdict):
 
 if __name__ == "__main__":
     plotter(
-        dict(limit="yes", station="UNR", opt="wfo", c="svrtor", plot="bar")
+        dict(limit="yes", station="UNR", opt="wfo", c="single", plot="bar")
     )

@@ -17,6 +17,10 @@ PDICT = {
     "count_departure": "Departure from Average of Event Count",
     "count_standard": "Standardized Departure from Average of Event Count",
 }
+PDICT2 = {
+    "all": "Use All VTEC Events",
+    "set": "Use Requested VTEC Events From Form",
+}
 
 
 def get_description():
@@ -87,6 +91,13 @@ def get_description():
             label="Which metric to plot:",
         ),
         dict(
+            type="select",
+            name="w",
+            default="set",
+            options=PDICT2,
+            label="Option to plot all or form set VTEC Events:",
+        ),
+        dict(
             type="vtec_ps",
             name="v1",
             default="SV.W",
@@ -140,12 +151,15 @@ def get_count_df(ctx, pgconn, varname, pstr, sts, ets):
             )
 
         # compute all the things.
+        sdate = "2002-01-01"
+        if pstr.find("1=1") > -1:
+            sdate = "2005-10-01"
         df = read_sql(
             f"""
             with events as (
                 select distinct wfo, {yearcol} as year,
                 phenomena, eventid from warnings where {pstr} and
-                {slimiter} and issue > '2002-01-01')
+                {slimiter} and issue > '{sdate}')
             select wfo, year::int as year, count(*) from events
             group by wfo, year
             """,
@@ -302,7 +316,11 @@ def plotter(fdict):
     if len(phenomena) > 1:
         title = "VTEC Unique Event"
     pstr = " or ".join(pstr)
-    pstr = "(%s)" % (pstr,)
+    pstr = f"({pstr})"
+    if ctx["w"] == "all":
+        pstr = " 1=1 "
+        subtitle = "All"
+        title = "All VTEC Events"
     cmap = get_cmap(ctx["cmap"])
 
     extend = "neither"
