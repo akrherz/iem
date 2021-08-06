@@ -184,7 +184,6 @@ def plotter(fdict):
             if not stagevals:
                 meta = ctx["_nt"].sts[station]
                 stagevals = [meta[f"sigstage_{x}"] for x in STAGES]
-                stagevals.insert(0, 0)
                 stagevals.append(1e9)
             if not pd.isna(row["max_rstage"]):
                 idx = np.digitize(row["max_rstage"], stagevals)
