@@ -15,19 +15,21 @@ LOG = logger()
 HOURS = [18] * 24
 for _hr in range(0, 24, 6):
     HOURS[_hr] = 48
-BASE = "https://www.ftp.ncep.noaa.gov/data/nccf/com/hrrr/prod/"
 
 
-def upstream_has_data(valid):
+def get_service(valid):
     """Does data exist upstream to even attempt a download"""
     # NCEP should have at least 24 hours of data
-    return (utc() - datetime.timedelta(hours=24)) < valid
+    if (utc() - datetime.timedelta(hours=24)) < valid:
+        return "https://www.ftp.ncep.noaa.gov/data/nccf/com/hrrr/prod/"
+    return "https://noaa-hrrr-bdp-pds.s3.amazonaws.com/"
 
 
 def run(valid):
-    """ run for this valid time! """
-    if not upstream_has_data(valid):
-        return
+    """run for this valid time!"""
+    service = get_service(valid)
+    should_throttle = service.find("noaa.gov") > -1
+    LOG.debug("using %s as dl service", service)
     gribfn = valid.strftime(
         "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.refd.grib2"
     )
@@ -43,21 +45,24 @@ def run(valid):
     tmpfn = "/tmp/%s.grib2" % (valid.strftime("%Y%m%d%H"),)
     output = open(tmpfn, "wb")
     for hr in range(0, min([39, HOURS[valid.hour]]) + 1):
-        if hr > 30:
+        if should_throttle and hr > 30:
             # Add some delays to work around upstream connection throttling
             time.sleep(60)
         shr = "%02i" % (hr,)
         if hr <= 18:
             uri = valid.strftime(
-                f"{BASE}hrrr.%Y%m%d/conus/hrrr.t%Hz.wrfsubhf{shr}.grib2.idx"
+                f"{service}hrrr.%Y%m%d/conus/hrrr.t%Hz.wrfsubhf{shr}.grib2.idx"
             )
         else:
             uri = valid.strftime(
-                f"{BASE}hrrr.%Y%m%d/conus/hrrr.t%Hz.wrfsfcf{shr}.grib2.idx"
+                f"{service}hrrr.%Y%m%d/conus/hrrr.t%Hz.wrfsfcf{shr}.grib2.idx"
             )
+        LOG.debug(uri)
         req = exponential_backoff(requests.get, uri, timeout=30)
         if req is None or req.status_code != 200:
             LOG.info("failed to fetch %s", uri)
+            if hr > 18:
+                continue
             LOG.info("ABORT")
             return
         data = req.text
@@ -93,7 +98,7 @@ def run(valid):
     output.close()
     # insert into LDM Please
     pqstr = (
-        "data a %s bogus " "model/hrrr/%02i/hrrr.t%02iz.refd.grib2 grib2"
+        "data a %s bogus model/hrrr/%02i/hrrr.t%02iz.refd.grib2 grib2"
     ) % (valid.strftime("%Y%m%d%H%M"), valid.hour, valid.hour)
     subprocess.call(
         "pqinsert -p '%s' %s" % (pqstr, tmpfn),
@@ -105,7 +110,7 @@ def run(valid):
 
 
 def main(argv):
-    """ Go Main Go """
+    """Go Main Go"""
     valid = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
     run(valid)
 
