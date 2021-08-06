@@ -20,6 +20,11 @@ COLORS = {
     "major": "#e28eff",
 }
 MDICT = {"primary": "Primary Field", "secondary": "Secondary Field"}
+PDICT = {
+    "both": "Plot both observations and forecasts",
+    "fx": "Just plot forecasts",
+    "obs": "Just plot observations",
+}
 
 
 def get_description():
@@ -35,7 +40,12 @@ def get_description():
     and for one day afterwards.  Sorry that you have to know the station ID
     prior to using this page (will fix at some point).  Presented timestamps
     are hopefully all in the local timezone of the reporting station.  If
-    you download the data, the timestamps are all in UTC.
+    you download the data, the timestamps are all in UTC.</p>
+
+    <p>For the image format output options, you can optionally control if
+    forecasts, observations, or both are plotted.  For the Interactive Chart
+    version, this is controlled by clicking on the legend items which will
+    hide and show the various lines.
     """
     utc = datetime.datetime.utcnow()
     desc["arguments"] = [
@@ -58,6 +68,13 @@ def get_description():
             options=MDICT,
             label="Which Variable to Plot:",
             default="primary",
+        ),
+        dict(
+            type="select",
+            name="w",
+            options=PDICT,
+            label="What all to plot:",
+            default="both",
         ),
     ]
     return desc
@@ -280,7 +297,7 @@ def plotter(fdict):
     df = ctx["df"]
     title = "\n".join([ctx["title"], ctx["subtitle"]])
     (fig, ax) = figure_axes(title=title)
-    if "id" in df.columns:
+    if ctx["w"] in ["fx", "both"] and "id" in df.columns:
         fxs = df["id"].unique()
         for fx in fxs:
             df2 = df[df["id"] == fx]
@@ -295,7 +312,11 @@ def plotter(fdict):
                 zorder=2,
                 label=issued,
             )
-    if not ctx["odf"].empty and ctx["var"] in ctx:
+    if (
+        ctx["w"] in ["obs", "both"]
+        and not ctx["odf"].empty
+        and ctx["var"] in ctx
+    ):
         ax.plot(
             ctx["odf"].index.values,
             ctx["odf"][ctx[ctx["var"]]],
