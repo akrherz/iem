@@ -4,14 +4,15 @@ Run daily from RUN_2AM.sh
 """
 
 import requests
+from pyiem.reference import nwsli2state
 from pyiem.util import get_dbconn, logger
 
 LOG = logger()
 SERVICE = (
     "https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS_Observations/"
     "ahps_riv_gauges/MapServer/0/query?where=1%3D1&"
-    "geometryType=esriGeometryPoint&outFields=PEDTS%2CGaugeLID"
-    "&returnGeometry=true&f=json"
+    "geometryType=esriGeometryPoint&"
+    "outFields=PEDTS%2CGaugeLID%2CLocation%2CState&returnGeometry=true&f=json"
 )
 
 
@@ -39,10 +40,36 @@ def get_idp():
     idp = {}
     for feat in jobj["features"]:
         attrs = feat["attributes"]
-        if attrs["pedts"] is None or attrs["pedts"] == "N/A":
-            continue
-        idp[attrs["gaugelid"]] = attrs["pedts"]
+        attrs["lon"] = feat["geometry"]["x"]
+        attrs["lat"] = feat["geometry"]["y"]
+        idp[attrs["gaugelid"]] = attrs
     return idp
+
+
+def add_station(dbconn, nwsli, attrs):
+    """Add the station."""
+    if len(nwsli) != 5 or nwsli2state.get(nwsli[-2:]) != attrs["state"]:
+        LOG.info("Skipping %s as un-rectified metadata", nwsli)
+        return None
+    cursor = dbconn.cursor()
+    cursor.execute(
+        "INSERT into stations(id, name, plot_name, state, country, geom, "
+        "network) VALUES (%s, %s, %s, %s, 'US', 'SRID=4326;POINT(%s %s)', "
+        "%s) RETURNING iemid",
+        (
+            nwsli,
+            attrs["location"],
+            attrs["location"],
+            attrs["state"],
+            attrs["lon"],
+            attrs["lat"],
+            f"{attrs['state']}_DCP",
+        ),
+    )
+    iemid = cursor.fetchone()[0]
+    cursor.close()
+    dbconn.commit()
+    return iemid
 
 
 def main():
@@ -50,27 +77,32 @@ def main():
     idp = get_idp()
     with get_dbconn("mesosite") as dbconn:
         current = get_current(dbconn)
-        for nwsli, pedts in idp.items():
+        for nwsli, attrs in idp.items():
             if nwsli not in current:
-                LOG.info("station %s is unknown to IEM", nwsli)
-                continue
+                iemid = add_station(dbconn, nwsli, attrs)
+                if iemid is None:
+                    continue
+                LOG.info("Adding station %s[%s]", nwsli, iemid)
+                current[nwsli] = {"pedts": "", "iemid": iemid}
             currentval = current[nwsli]["pedts"]
-            if currentval == pedts:
+            if attrs["pedts"] is None or attrs["pedts"] == "N/A":
+                continue
+            if currentval == attrs["pedts"]:
                 continue
             cursor = dbconn.cursor()
             if currentval is None:
                 cursor.execute(
                     "INSERT into station_attributes(iemid, attr, value) "
                     "VALUES (%s, %s, %s)",
-                    (current[nwsli]["iemid"], "PEDTS", pedts),
+                    (current[nwsli]["iemid"], "PEDTS", attrs["pedts"]),
                 )
             else:
                 cursor.execute(
                     "UPDATE station_attributes SET value = %s WHERE "
                     "iemid = %s and attr = 'PEDTS'",
-                    (pedts, current[nwsli]["iemid"]),
+                    (attrs["pedts"], current[nwsli]["iemid"]),
                 )
-            LOG.info("%s PEDTS %s -> %s", nwsli, currentval, pedts)
+            LOG.info("%s PEDTS %s -> %s", nwsli, currentval, attrs["pedts"])
             cursor.close()
             dbconn.commit()
 
