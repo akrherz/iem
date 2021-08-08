@@ -133,7 +133,7 @@ def plotter(fdict):
         0.5,
         0.05,
         "%s %s (%s/%s)"
-        % (ctx["_nt1"].sts[station2]["name"], lbl, wins, len(df.index)),
+        % (ctx["_nt2"].sts[station2]["name"], lbl, wins, len(df.index)),
         transform=ax.transAxes,
         ha="center",
     )
@@ -150,4 +150,12 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter(
+        dict(
+            var="max_high",
+            network1="NYCLIMATE",
+            station1="NYTNYC",
+            network2="MACLIMATE",
+            station2="MATBOS",
+        )
+    )
