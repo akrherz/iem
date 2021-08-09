@@ -41,7 +41,7 @@ def init_year(ts):
     nc.createDimension("nv", 2)
 
     # Setup Coordinate Variables
-    lat = nc.createVariable("lat", np.float, ("lat",))
+    lat = nc.createVariable("lat", float, ("lat",))
     lat.units = "degrees_north"
     lat.long_name = "Latitude"
     lat.standard_name = "latitude"
@@ -50,7 +50,7 @@ def init_year(ts):
     # Grid centers
     lat[:] = 40.133331 + np.arange(1057) * 0.004167
 
-    lon = nc.createVariable("lon", np.float, ("lon",))
+    lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
     lon.long_name = "Longitude"
     lon.standard_name = "longitude"
@@ -58,7 +58,7 @@ def init_year(ts):
     lon.axis = "X"
     lon[:] = -97.154167 + np.arange(1741) * 0.004167
 
-    tm = nc.createVariable("time", np.float, ("time",))
+    tm = nc.createVariable("time", float, ("time",))
     tm.units = "Days since %s-01-01 00:00:0.0" % (ts.year,)
     tm.long_name = "Time"
     tm.standard_name = "time"
@@ -67,7 +67,7 @@ def init_year(ts):
     tm[:] = np.arange(0, int(days))
 
     p01d = nc.createVariable(
-        "p01d", np.float, ("time", "lat", "lon"), fill_value=1.0e20
+        "p01d", float, ("time", "lat", "lon"), fill_value=1.0e20
     )
     p01d.units = "mm"
     p01d.long_name = "Precipitation"

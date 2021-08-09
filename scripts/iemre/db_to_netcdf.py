@@ -13,10 +13,11 @@ import numpy as np
 from pyiem.util import utc, ncopen, logger
 from pyiem import iemre
 
+LOG = logger()
+
 
 def main(argv):
     """Go Main Go."""
-    log = logger()
     if len(argv) == 6:
         valid = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
         ncfn = iemre.get_hourly_ncname(valid.year)
@@ -30,7 +31,7 @@ def main(argv):
         for vname in ds:
             if vname not in nc.variables:
                 continue
-            log.debug("copying database var %s to netcdf", vname)
+            LOG.debug("copying database var %s to netcdf", vname)
             # Careful here, ds could contain NaN values
             nc.variables[vname][idx, :, :] = np.ma.array(
                 ds[vname].values, mask=np.isnan(ds[vname].values)

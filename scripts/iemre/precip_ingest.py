@@ -51,40 +51,32 @@ def ingest_hourly_grib(valid):
     # values over 10 inches are bad
     val = np.where(val > 250.0, 0, val)
 
-    nc = ncopen(
-        ("/mesonet/data/stage4/%s_stage4_hourly.nc") % (valid.year,),
-        "a",
-        timeout=300,
-    )
-    p01m = nc.variables["p01m"]
-    # account for legacy grid prior to 2002
-    if val.shape == (880, 1160):
-        p01m[tidx, 1:, :] = val[:, 39:]
-    else:
-        p01m[tidx, :, :] = val
-    nc.variables["p01m_status"][tidx] = 1
+    ncfn = f"/mesonet/data/stage4/{valid.year}_stage4_hourly.nc"
+    with ncopen(ncfn, "a", timeout=300) as nc:
+        p01m = nc.variables["p01m"]
+        # account for legacy grid prior to 2002
+        if val.shape == (880, 1160):
+            p01m[tidx, 1:, :] = val[:, 39:]
+        else:
+            p01m[tidx, :, :] = val
+        nc.variables["p01m_status"][tidx] = 1
     LOG.debug(
         "write p01m to stage4 netcdf min: %.2f avg: %.2f max: %.2f",
         np.min(val),
         np.mean(val),
         np.max(val),
     )
-    nc.close()
     return 1
 
 
 def copy_to_iemre(valid):
     """verbatim copy over to IEMRE."""
     tidx = iemre.hourly_offset(valid)
-    nc = ncopen(
-        ("/mesonet/data/stage4/%s_stage4_hourly.nc") % (valid.year,),
-        "a",
-        timeout=300,
-    )
-    lats = nc.variables["lat"][:]
-    lons = nc.variables["lon"][:]
-    val = nc.variables["p01m"][tidx]
-    nc.close()
+    ncfn = f"/mesonet/data/stage4/{valid.year}_stage4_hourly.nc"
+    with ncopen(ncfn, "a", timeout=300) as nc:
+        lats = nc.variables["lat"][:]
+        lons = nc.variables["lon"][:]
+        val = nc.variables["p01m"][tidx]
 
     # Our data is 4km, iemre is 0.125deg, so we stride some to cut down on mem
     stride = slice(None, None, 3)

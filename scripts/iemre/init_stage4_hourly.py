@@ -1,14 +1,16 @@
 """Generate the storage of stage IV hourly products"""
 import datetime
 import sys
+import os
 
 import numpy as np
 import pygrib
-from pyiem.util import ncopen
+from pyiem.util import ncopen, logger
 
 # This exists on dev laptop :/
 TEMPLATE_FN = "/mesonet/ARCHIVE/data/2014/09/09/stage4/ST4.2014090900.01h.grib"
 BASEDIR = "/mesonet/data/stage4"
+LOG = logger()
 
 
 def init_year(ts):
@@ -22,6 +24,9 @@ def init_year(ts):
     lats, lons = grb.latlons()
 
     fp = "%s/%s_stage4_hourly.nc" % (BASEDIR, ts.year)
+    if os.path.isfile(fp):
+        LOG.warn("Cowardly refusing to overwrite %s", fp)
+        return
     nc = ncopen(fp, "w")
     nc.title = "IEM Packaged NOAA Stage IV for %s" % (ts.year,)
     nc.platform = "Grided Estimates"
@@ -47,21 +52,21 @@ def init_year(ts):
     nc.createDimension("time", int(days) * 24)
 
     # Setup Coordinate Variables
-    lat = nc.createVariable("lat", np.float, ("y", "x"))
+    lat = nc.createVariable("lat", float, ("y", "x"))
     lat.units = "degrees_north"
     lat.long_name = "Latitude"
     lat.standard_name = "latitude"
     lat.axis = "Y"
     lat[:] = lats
 
-    lon = nc.createVariable("lon", np.float, ("y", "x"))
+    lon = nc.createVariable("lon", float, ("y", "x"))
     lon.units = "degrees_east"
     lon.long_name = "Longitude"
     lon.standard_name = "longitude"
     lon.axis = "X"
     lon[:] = lons
 
-    tm = nc.createVariable("time", np.float, ("time",))
+    tm = nc.createVariable("time", float, ("time",))
     tm.units = "Hours since %s-01-01 00:00:0.0" % (ts.year,)
     tm.long_name = "Time"
     tm.standard_name = "time"

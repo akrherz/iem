@@ -43,21 +43,21 @@ def init_year(ts):
     nc.createDimension("time", int(days))
 
     # Setup Coordinate Variables
-    lat = nc.createVariable("lat", np.float, ("lat",))
+    lat = nc.createVariable("lat", float, ("lat",))
     lat.units = "degrees_north"
     lat.long_name = "Latitude"
     lat.standard_name = "latitude"
     lat.axis = "Y"
     lat[:] = iemre.YAXIS
 
-    lon = nc.createVariable("lon", np.float, ("lon",))
+    lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
     lon.long_name = "Longitude"
     lon.standard_name = "longitude"
     lon.axis = "X"
     lon[:] = iemre.XAXIS
 
-    tm = nc.createVariable("time", np.float, ("time",))
+    tm = nc.createVariable("time", float, ("time",))
     tm.units = "Days since %s-01-01 00:00:0.0" % (ts.year,)
     tm.long_name = "Time"
     tm.standard_name = "time"
@@ -181,7 +181,7 @@ def init_year(ts):
     v2.description = "Daily averaged wind speed magnitude"
 
     v1 = nc.createVariable(
-        "power_swdn", np.float, ("time", "lat", "lon"), fill_value=1.0e20
+        "power_swdn", float, ("time", "lat", "lon"), fill_value=1.0e20
     )
     v1.units = "MJ d-1"
     v1.long_name = "All Sky Insolation Incident on a Horizontal Surface"

@@ -25,7 +25,7 @@ def to_netcdf(valid):
     val = grb.values
 
     nc = ncopen(
-        ("/mesonet/data/iemre/%s_narr.nc") % (valid.year,), "a", timeout=300
+        "/mesonet/data/iemre/%s_narr.nc" % (valid.year,), "a", timeout=300
     )
     tidx = int((iemre.hourly_offset(valid) + 1) / 3)
     print("%s np.min: %s np.max: %s" % (tidx, np.min(val), np.max(val)))

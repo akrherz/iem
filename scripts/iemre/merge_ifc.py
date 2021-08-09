@@ -44,12 +44,10 @@ def run(ts):
         LOG.info("No IFC Data found for date: %s", now)
         return
 
-    nc = ncopen(
-        "/mesonet/data/iemre/%s_ifc_daily.nc" % (ts.year,), "a", timeout=300
-    )
+    ncfn = f"/mesonet/data/iemre/{ts.year}_ifc_daily.nc"
     idx = iemre.daily_offset(ts)
-    nc.variables["p01d"][idx, :, :] = np.flipud(total)
-    nc.close()
+    with ncopen(ncfn, "a", timeout=300) as nc:
+        nc.variables["p01d"][idx, :, :] = np.flipud(total)
 
 
 def main(argv):

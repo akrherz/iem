@@ -36,21 +36,21 @@ def init_year(ts):
     nc.createDimension("time", int(days))
 
     # Setup Coordinate Variables
-    lat = nc.createVariable("lat", np.float, ("lat",))
+    lat = nc.createVariable("lat", float, ("lat",))
     lat.units = "degrees_north"
     lat.long_name = "Latitude"
     lat.standard_name = "latitude"
     lat.axis = "Y"
     lat[:] = iemre.YAXIS
 
-    lon = nc.createVariable("lon", np.float, ("lon",))
+    lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
     lon.long_name = "Longitude"
     lon.standard_name = "longitude"
     lon.axis = "X"
     lon[:] = iemre.XAXIS
 
-    tm = nc.createVariable("time", np.float, ("time",))
+    tm = nc.createVariable("time", float, ("time",))
     tm.units = "Days since %s-01-01 00:00:0.0" % (ts.year,)
     tm.long_name = "Time"
     tm.standard_name = "time"
@@ -66,7 +66,7 @@ def init_year(ts):
     hasdata[:] = 0
 
     high = nc.createVariable(
-        "high_tmpk", np.float, ("time", "lat", "lon"), fill_value=1.0e20
+        "high_tmpk", float, ("time", "lat", "lon"), fill_value=1.0e20
     )
     high.units = "K"
     high.long_name = "2m Air Temperature Daily High"
@@ -74,7 +74,7 @@ def init_year(ts):
     high.coordinates = "lon lat"
 
     low = nc.createVariable(
-        "low_tmpk", np.float, ("time", "lat", "lon"), fill_value=1.0e20
+        "low_tmpk", float, ("time", "lat", "lon"), fill_value=1.0e20
     )
     low.units = "K"
     low.long_name = "2m Air Temperature Daily Low"
@@ -82,7 +82,7 @@ def init_year(ts):
     low.coordinates = "lon lat"
 
     p01d = nc.createVariable(
-        "p01d", np.float, ("time", "lat", "lon"), fill_value=1.0e20
+        "p01d", float, ("time", "lat", "lon"), fill_value=1.0e20
     )
     p01d.units = "mm"
     p01d.long_name = "Precipitation"

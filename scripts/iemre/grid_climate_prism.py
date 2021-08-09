@@ -8,8 +8,9 @@ from scipy.interpolate import NearestNDInterpolator
 from pyiem import iemre
 from pyiem.network import Table as NetworkTable
 from pyiem.reference import state_names
-from pyiem.util import get_dbconn, ncopen, convert_value
+from pyiem.util import get_dbconn, ncopen, convert_value, logger
 
+LOG = logger()
 NT = NetworkTable(["%sCLIMATE" % (abbr,) for abbr in state_names])
 COOP = get_dbconn("coop", user="nobody")
 
@@ -36,9 +37,12 @@ def generic_gridder(nc, cursor, idx):
     xi, yi = np.meshgrid(nc.variables["lon"][:], nc.variables["lat"][:])
     nn = NearestNDInterpolator((lons, lats), np.array(vals))
     grid = nn(xi, yi)
-    print(
-        ("%s %s %.3f %.3f")
-        % (cursor.rowcount, idx, np.max(grid), np.min(grid))
+    LOG.info(
+        "%s %s %.3f %.3f",
+        cursor.rowcount,
+        idx,
+        np.max(grid),
+        np.min(grid),
     )
     if grid is not None:
         return grid

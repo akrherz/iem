@@ -6,7 +6,9 @@ import numpy as np
 from pandas.io.sql import read_sql
 from scipy.interpolate import NearestNDInterpolator
 from pyiem import iemre
-from pyiem.util import get_dbconn, ncopen, convert_value
+from pyiem.util import get_dbconn, ncopen, convert_value, logger
+
+LOG = logger()
 
 
 def generic_gridder(nc, df, idx):
@@ -18,8 +20,12 @@ def generic_gridder(nc, df, idx):
         (df["lon"].values, df["lat"].values), df[idx].values
     )
     grid = nn(xi, yi)
-    print(
-        ("%s %s %.3f %.3f") % (len(df.index), idx, np.max(grid), np.min(grid))
+    LOG.info(
+        "%s %s %.3f %.3f",
+        len(df.index),
+        idx,
+        np.max(grid),
+        np.min(grid),
     )
     if grid is not None:
         return grid
@@ -42,7 +48,8 @@ def grid_day(nc, ts):
         SELECT c.*, st_x(t.geom) as lon, st_y(t.geom) as lat
         from ncdc_climate71 c JOIN stations t ON (c.station = t.id)
         WHERE valid = %s and
-        substr(station,3,4) != '0000' and substr(station,3,1) != 'C'
+        substr(station,3,4) != '0000' and
+        substr(station,3,1) not in ('C', 'T')
     """,
         pgconn,
         params=(ts,),
@@ -76,13 +83,11 @@ def workflow(ts):
     """Do Work"""
 
     # Load up our netcdf file!
-    nc = ncopen(iemre.get_dailyc_ncname(), "a", timeout=300)
-    grid_day(nc, ts)
-    nc.close()
+    with ncopen(iemre.get_dailyc_ncname(), "a", timeout=300) as nc:
+        grid_day(nc, ts)
 
-    nc = ncopen(iemre.get_dailyc_mrms_ncname(), "a", timeout=300)
-    grid_day(nc, ts)
-    nc.close()
+    with ncopen(iemre.get_dailyc_mrms_ncname(), "a", timeout=300) as nc:
+        grid_day(nc, ts)
 
 
 def main(argv):

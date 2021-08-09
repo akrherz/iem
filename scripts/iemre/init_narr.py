@@ -54,21 +54,21 @@ def init_year(ts):
     nc.createDimension("time", int(days) * 8)
 
     # Setup Coordinate Variables
-    lat = nc.createVariable("lat", np.float, ("y", "x"))
+    lat = nc.createVariable("lat", float, ("y", "x"))
     lat.units = "degrees_north"
     lat.long_name = "Latitude"
     lat.standard_name = "latitude"
     lat.axis = "Y"
     lat[:] = lats
 
-    lon = nc.createVariable("lon", np.float, ("y", "x"))
+    lon = nc.createVariable("lon", float, ("y", "x"))
     lon.units = "degrees_east"
     lon.long_name = "Longitude"
     lon.standard_name = "longitude"
     lon.axis = "X"
     lon[:] = lons
 
-    tm = nc.createVariable("time", np.float, ("time",))
+    tm = nc.createVariable("time", float, ("time",))
     tm.units = "Hours since %s-01-01 00:00:0.0" % (ts.year,)
     tm.long_name = "Time"
     tm.standard_name = "time"

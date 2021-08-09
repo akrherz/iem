@@ -20,7 +20,7 @@ LOG = logger()
 def workflow(valid):
     """Our workflow"""
     if valid.month == 1 and valid.day == 1:
-        print("prism_adjust_stage4, sorry Jan 1 processing is a TODO!")
+        LOG.info("sorry Jan 1 processing is a TODO!")
         return
     # read prism
     tidx = daily_offset(valid)
@@ -37,7 +37,7 @@ def workflow(valid):
 
     # Interpolate this onto the stage4 grid
     nc = ncopen(
-        ("/mesonet/data/stage4/%s_stage4_hourly.nc") % (valid.year,),
+        "/mesonet/data/stage4/%s_stage4_hourly.nc" % (valid.year,),
         "a",
         timeout=300,
     )

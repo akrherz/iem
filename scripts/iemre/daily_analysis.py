@@ -159,15 +159,15 @@ def do_precip12(ts, ds):
 
 def plot(df):
     """Diagnostic"""
-    m = MapPlot(sector="midwest", continentalcolor="white")
-    m.plot_values(
+    mp = MapPlot(sector="midwest", continentalcolor="white")
+    mp.plot_values(
         df["lon"].values,
         df["lat"].values,
         df["highdata"].values,
         labelbuffer=0,
     )
-    m.postprocess(filename="test.png")
-    m.close()
+    mp.postprocess(filename="test.png")
+    mp.close()
 
 
 def grid_day12(ts, ds):

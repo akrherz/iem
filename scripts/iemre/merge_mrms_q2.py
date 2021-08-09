@@ -16,7 +16,7 @@ def findfile(ts):
     for hr in [0, -1, 1, -2, 2, -3, 3]:
         ts2 = ts + datetime.timedelta(hours=hr)
         fn = ts2.strftime(
-            ("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/mrms/" "p24h_%Y%m%d%H00.png")
+            "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/mrms/p24h_%Y%m%d%H00.png"
         )
         if os.path.isfile(fn):
             return fn

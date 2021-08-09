@@ -35,7 +35,7 @@ def init_year(ts):
     nc.createDimension("nv", 2)
 
     # Setup Coordinate Variables
-    lat = nc.createVariable("lat", np.float, ("lat",))
+    lat = nc.createVariable("lat", float, ("lat",))
     lat.units = "degrees_north"
     lat.long_name = "Latitude"
     lat.standard_name = "latitude"
@@ -44,11 +44,11 @@ def init_year(ts):
     # Grid centers
     lat[:] = np.arange(iemre.SOUTH + 0.005, iemre.NORTH, 0.01)
 
-    lat_bnds = nc.createVariable("lat_bnds", np.float, ("lat", "nv"))
+    lat_bnds = nc.createVariable("lat_bnds", float, ("lat", "nv"))
     lat_bnds[:, 0] = np.arange(iemre.SOUTH, iemre.NORTH, 0.01)
     lat_bnds[:, 1] = np.arange(iemre.SOUTH + 0.01, iemre.NORTH + 0.01, 0.01)
 
-    lon = nc.createVariable("lon", np.float, ("lon",))
+    lon = nc.createVariable("lon", float, ("lon",))
     lon.units = "degrees_east"
     lon.long_name = "Longitude"
     lon.standard_name = "longitude"
@@ -56,11 +56,11 @@ def init_year(ts):
     lon.axis = "X"
     lon[:] = np.arange(iemre.WEST, iemre.EAST, 0.01)
 
-    lon_bnds = nc.createVariable("lon_bnds", np.float, ("lon", "nv"))
+    lon_bnds = nc.createVariable("lon_bnds", float, ("lon", "nv"))
     lon_bnds[:, 0] = np.arange(iemre.WEST, iemre.EAST, 0.01)
     lon_bnds[:, 1] = np.arange(iemre.WEST + 0.01, iemre.EAST + 0.01, 0.01)
 
-    tm = nc.createVariable("time", np.float, ("time",))
+    tm = nc.createVariable("time", float, ("time",))
     tm.units = "Days since %s-01-01 00:00:0.0" % (ts.year,)
     tm.long_name = "Time"
     tm.standard_name = "time"

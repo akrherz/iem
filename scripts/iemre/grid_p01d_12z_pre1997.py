@@ -10,7 +10,9 @@ from metpy.units import units as mpunits
 from metpy.units import masked_array
 from pandas.io.sql import read_sql
 from pyiem.iemre import get_grids, XAXIS, YAXIS, set_grids
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
 def generic_gridder(day, df, idx):
@@ -43,9 +45,14 @@ def generic_gridder(day, df, idx):
     )
     res = grid.to_array()
     res = np.ma.where(res < 0, 0, res)
-    print(
-        ("%s %s rows for %s column min:%.3f max:%.3f score: %.3f")
-        % (day, len(df.index), idx, np.nanmin(res), np.nanmax(res), score)
+    LOG.info(
+        "%s %s rows for %s column min:%.3f max:%.3f score: %.3f",
+        day,
+        len(df.index),
+        idx,
+        np.nanmin(res),
+        np.nanmax(res),
+        score,
     )
     return masked_array(res, mpunits("inch"))
 

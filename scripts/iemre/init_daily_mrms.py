@@ -1,10 +1,13 @@
 """Generate the storage netcdf file for 0.01deg MRMS data over the Midwest"""
 import datetime
 import sys
+import os
 
 import numpy as np
 from pyiem import iemre
-from pyiem.util import ncopen
+from pyiem.util import ncopen, logger
+
+LOG = logger()
 
 
 def init_year(ts):
@@ -13,6 +16,9 @@ def init_year(ts):
     """
 
     fn = iemre.get_daily_mrms_ncname(ts.year)
+    if os.path.isfile(fn):
+        LOG.warn("Cowardly refusing to overwrite %s", fn)
+        return
     nc = ncopen(fn, "w")
     nc.title = "MRMS Daily Precipitation %s" % (ts.year,)
     nc.platform = "Grided Estimates"
