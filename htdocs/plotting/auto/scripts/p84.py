@@ -16,7 +16,7 @@ SRCDICT = {
     "iemre": "IEM Reanalysis (since 1 Jan 1893)",
     "mrms": "NOAA MRMS (since 1 Jan 2014)",
     "prism": "OSU PRISM (since 1 Jan 1981)",
-    "stage4": "Stage IV (since 1 Jan 2007)",
+    "stage4": "Stage IV (since 1 Apr 1998)",
 }
 PDICT3 = {
     "acc": "Accumulation",

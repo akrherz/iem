@@ -21,7 +21,11 @@ def save12z(ts, val):
     idx = iemre.daily_offset(ts)
     LOG.debug("Writing 12z grid to %s at idx: %s", ncfn, idx)
     with ncopen(ncfn, "a") as nc:
-        nc.variables["p01d_12z"][idx] = val
+        # Account for pre-2002 shape difference
+        if val.shape == (880, 1160):
+            nc.variables["p01d_12z"][idx, 1:, :] = val[:, 39:]
+        else:
+            nc.variables["p01d_12z"][idx] = val
 
 
 def merge(ts):
