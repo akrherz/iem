@@ -9,7 +9,7 @@ from affine import Affine
 import pandas as pd
 from pyiem.plot.geoplot import MapPlot
 from pyiem.plot import get_cmap
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
 
 
@@ -33,10 +33,10 @@ ISSUANCE = dict(
         ("2.F.7", "Day 2 Fire Weather @7z"),
         ("2.C.17", "Day 2 Convective @17z"),
         ("2.F.19", "Day 2 Fire Weather @19z"),
-        ("2.E.9", "Day 1 Excessive Rainfall @9z"),
+        ("2.E.9", "Day 2 Excessive Rainfall @9z"),
         ("3.C.7", "Day 3 Convective @7z"),
         ("3.F.21", "Day 3 Fire Weather @21z"),
-        ("3.E.9", "Day 1 Excessive Rainfall @9z"),
+        ("3.E.9", "Day 3 Excessive Rainfall @9z"),
         ("4.C.8", "Day 4 Convective @8z"),
         ("5.C.8", "Day 5 Convective @8z"),
         ("6.C.8", "Day 6 Convective @8z"),
@@ -102,6 +102,16 @@ OUTLOOKS = dict(
     )
 )
 PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State/Sector"}
+PDICT2 = {
+    "avg": "Average Number of Days per Year",
+    "count": "Total Number of Days",
+    "lastyear": "Year of Last Issuance",
+}
+UNITS = {
+    "avg": "days per year",
+    "count": "days",
+    "lastyear": "year",
+}
 MDICT = dict(
     [
         ("all", "No Month/Time Limit"),
@@ -203,6 +213,21 @@ def get_description():
             options=PDICT5,
             label="Plot County/Parish borders on maps?",
         ),
+        dict(
+            type="select",
+            name="w",
+            default="avg",
+            options=PDICT2,
+            label="Which metric to plot?",
+        ),
+        dict(
+            optional=True,
+            type="date",
+            name="edate",
+            label="Optionally limit plot to this end date:",
+            min="2002/01/01",
+            default=utc().strftime("%Y/%m/%d"),
+        ),
         dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
     ]
     return desc
@@ -233,7 +258,7 @@ def plotter(fdict):
         months = [ts.month, 999]
 
     ones = np.ones((int(YSZ), int(XSZ)))
-    counts = np.zeros((int(YSZ), int(XSZ)))
+    data = np.zeros((int(YSZ), int(XSZ)))
     # counts = np.load('counts.npy')
     lons = np.arange(GRIDWEST, GRIDEAST, griddelta)
     lats = np.arange(GRIDSOUTH, GRIDNORTH, griddelta)
@@ -248,7 +273,8 @@ def plotter(fdict):
         ST_Intersects(geom, ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s %s,
         %s %s, %s %s, %s %s))'))
         and extract(month from product_issue) in %s
-        and product_issue > '2002-01-01'
+        and product_issue > '2002-01-01' and
+        product_issue < %s ORDER by product_issue ASC
     """,
         pgconn,
         params=(
@@ -268,6 +294,7 @@ def plotter(fdict):
             GRIDWEST,
             GRIDSOUTH,
             tuple(months),
+            ctx.get("edate", utc() + datetime.timedelta(days=2)),
         ),
         geom_col="geom",
     )
@@ -292,19 +319,16 @@ def plotter(fdict):
             dy, dx = np.shape(raster)
             x1 = x0 + dx
             y0 = y1 - dy
-            counts[y0:y1, x0:x1] += np.where(raster.mask, 0, 1)
+            if ctx["w"] == "lastyear":
+                data[y0:y1, x0:x1] = np.where(
+                    raster.mask, data[y0:y1, x0:x1], row["issue"].year
+                )
+            else:
+                data[y0:y1, x0:x1] += np.where(raster.mask, 0, 1)
 
-    mindate = datetime.datetime(2014, 10, 1)
-    if level not in ["CATEGORICAL.MRGL", "CATEGORICAL.ENH"]:
-        mindate = datetime.datetime(2002, 1, 1)
-    if p.split(".")[1] == "F":
-        mindate = datetime.datetime(2017, 1, 1)
-    if p.split(".")[1] == "E":
-        mindate = datetime.datetime(2019, 1, 1)
-    years = (
-        (datetime.datetime.now() - mindate).total_seconds() / 365.25 / 86400.0
-    )
-    data = counts / years
+    years = (utc() - df["issue"].min()).total_seconds() / 365.25 / 86400.0
+    if ctx["w"] == "avg":
+        data = data / years
     subtitle = "Found %s events for CONUS between %s and %s" % (
         len(df.index),
         df["issue"].min().strftime("%d %b %Y"),
@@ -332,7 +356,7 @@ def plotter(fdict):
             month.capitalize(),
             OUTLOOKS[level].split("(")[0].strip(),
         ),
-        subtitle=subtitle,
+        subtitle=f"{PDICT2[ctx['w']]}, {subtitle}",
         nocaption=True,
         twitter=True,
     )
@@ -354,12 +378,19 @@ def plotter(fdict):
         df2 = pd.DataFrame(
             {"lat": lats.ravel(), "lon": lons.ravel(), "freq": domain.ravel()}
         )
-    rng = [
-        round(x, 2)
-        for x in np.linspace(
-            max([0.01, np.min(domain) - 0.5]), np.max(domain) + 0.1, 10
-        )
-    ]
+    if ctx["w"] == "lastyear":
+        domain = np.where(domain < 1, np.nan, domain)
+        rng = range(int(np.nanmin(domain)), int(np.nanmax(domain)) + 2)
+    elif ctx["w"] == "count":
+        domain = np.where(domain < 1, np.nan, domain)
+        rng = np.unique(np.linspace(1, np.nanmax(domain) + 1, 10, dtype=int))
+    else:
+        rng = [
+            round(x, 2)
+            for x in np.linspace(
+                max([0.01, np.min(domain) - 0.5]), np.max(domain) + 0.1, 10
+            )
+        ]
 
     cmap = get_cmap(ctx["cmap"])
     cmap.set_under("white")
@@ -371,7 +402,7 @@ def plotter(fdict):
         rng,
         cmap=cmap,
         clip_on=False,
-        units="days per year",
+        units=UNITS[ctx["w"]],
     )
     # Cut down on SVG et al size
     res.set_rasterized(True)

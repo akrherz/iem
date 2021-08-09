@@ -661,10 +661,7 @@ nopts = [
         "id": 201,
         "label": "Storm Prediction Center (SPC) Convective Outlook Calendar",
     },
-    {
-        "id": 200,
-        "label": "Storm Prediction Center (SPC) Convective Outlook Heatmap",
-    },
+    {"id": 200, "label": "SPC + WPC Outlook Heatmap"},
     {
         "id": 166,
         "label": (
