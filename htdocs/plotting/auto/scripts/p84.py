@@ -14,6 +14,7 @@ from metpy.units import units, masked_array
 PDICT2 = {"c": "Contour Plot", "g": "Grid Cell Mesh"}
 SRCDICT = {
     "iemre": "IEM Reanalysis (since 1 Jan 1893)",
+    "ifc": "Iowa Flood Center (since 1 Jan 2016) [Iowa-Only]",
     "mrms": "NOAA MRMS (since 1 Jan 2014)",
     "prism": "OSU PRISM (since 1 Jan 1981)",
     "stage4": "Stage IV (since 1 Apr 1998)",
@@ -54,6 +55,7 @@ def get_description():
       <li>Stage IV is a legacy NOAA precipitation product that gets quality
       controlled by the River Forecast Centers. This page presents
       24 hours totals at 12 UTC each day.</li>
+      <li>Iowa Flood Center is an analysis produced by the U of Iowa IIHR.</li>
     </ul>
     """
     today = datetime.today() - timedelta(days=1)
@@ -122,7 +124,7 @@ def mm2inch(val):
 
 def compute_title(src, sdate, edate):
     """Figure out how to label this fun."""
-    if src == "mrms":
+    if src in ["mrms", "ifc"]:
         # This is generally closer to 'daily
         if sdate == edate:
             title = sdate.strftime("%-d %B %Y")
@@ -198,6 +200,12 @@ def plotter(fdict):
         ncvar = "p01d_12z"
         source = "IEM Reanalysis"
         subtitle = "IEM Reanalysis is derived from various NOAA datasets"
+    elif src == "ifc":
+        ncfn = f"/mesonet/data/iemre/{sdate.year}_ifc_daily.nc"
+        clncfn = "/mesonet/data/iemre/ifc_dailyc.nc"
+        ncvar = "p01d"
+        source = "Iowa Flood Center (Iowa Only)"
+        subtitle = "IFC analysis courtesy of U of Iowa IIHR"
     elif src == "stage4":
         ncfn = f"/mesonet/data/stage4/{sdate.year}_stage4_daily.nc"
         clncfn = "/mesonet/data/stage4/stage4_dailyc.nc"
