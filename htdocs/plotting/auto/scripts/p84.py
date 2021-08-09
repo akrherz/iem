@@ -16,6 +16,7 @@ SRCDICT = {
     "iemre": "IEM Reanalysis (since 1 Jan 1893)",
     "mrms": "NOAA MRMS (since 1 Jan 2014)",
     "prism": "OSU PRISM (since 1 Jan 1981)",
+    "stage4": "Stage IV (since 1 Jan 2007)",
 }
 PDICT3 = {
     "acc": "Accumulation",
@@ -50,6 +51,9 @@ def get_description():
       created 4 Feb 2004.  This information arrives with a few day lag. The
       plotted totals represent periods typical to COOP data reporting, so
       12 UTC (7 AM local) each day.</li>
+      <li>Stage IV is a legacy NOAA precipitation product that gets quality
+      controlled by the River Forecast Centers. This page presents
+      24 hours totals at 12 UTC each day.</li>
     </ul>
     """
     today = datetime.today() - timedelta(days=1)
@@ -194,6 +198,12 @@ def plotter(fdict):
         ncvar = "p01d_12z"
         source = "IEM Reanalysis"
         subtitle = "IEM Reanalysis is derived from various NOAA datasets"
+    elif src == "stage4":
+        ncfn = f"/mesonet/data/stage4/{sdate.year}_stage4_daily.nc"
+        clncfn = "/mesonet/data/stage4/stage4_dailyc.nc"
+        ncvar = "p01d_12z"
+        source = "NOAA StageIV"
+        subtitle = "NOAA/NWS River Forecast Centers"
     else:
         # Threshold edate
         archive_end = datetime.strptime(
@@ -248,8 +258,12 @@ def plotter(fdict):
                 nc.variables["lat"][:],
                 [bnds[0], bnds[2], bnds[1], bnds[3]],
             )
-        lats = nc.variables["lat"][y0:y1]
-        lons = nc.variables["lon"][x0:x1]
+        if src == "stage4":
+            lats = nc.variables["lat"][y0:y1, x0:x1]
+            lons = nc.variables["lon"][y0:y1, x0:x1]
+        else:
+            lats = nc.variables["lat"][y0:y1]
+            lons = nc.variables["lon"][x0:x1]
         if sdate == edate:
             p01d = mm2inch(nc.variables[ncvar][idx0, y0:y1, x0:x1])
         elif (idx1 - idx0) < 32:
@@ -301,7 +315,10 @@ def plotter(fdict):
         if days > 90:
             clevs = [0.01, 1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 25, 30, 35, 40]
 
-    x2d, y2d = np.meshgrid(lons, lats)
+    if len(lons.shape) == 1:
+        x2d, y2d = np.meshgrid(lons, lats)
+    else:
+        x2d, y2d = lons, lats
     if ptype == "c":
         mp.contourf(
             x2d, y2d, p01d, clevs, cmap=cmap, units=plot_units, iline=False
@@ -309,7 +326,7 @@ def plotter(fdict):
     else:
         res = mp.pcolormesh(x2d, y2d, p01d, clevs, cmap=cmap, units=plot_units)
         res.set_rasterized(True)
-    if sector != "midwest":
+    if sector not in ["midwest", "conus"]:
         mp.drawcounties()
         mp.drawcities(minpop=500 if sector == "custom" else 5000)
     if usdm == "yes":
@@ -319,4 +336,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter(dict(sdate="2020-01-01", edate="2020-01-01", src="stage4"))

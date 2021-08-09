@@ -158,8 +158,8 @@ daily_opts = [
     {
         "id": 84,
         "label": (
-            "MRMS Q3 / PRISM / IEM Reanalysis Estimated Precipitation "
-            "(multiday summaries/departures too)"
+            "MRMS Q3 / PRISM / Stage IV IEM Reanalysis Estimated "
+            "Precipitation (multiday summaries/departures)"
         ),
     },
     {

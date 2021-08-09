@@ -12,6 +12,18 @@ from pyiem.util import ncopen, logger, utc
 LOG = logger()
 
 
+def save12z(ts, val):
+    """Save the data to our daily 12z file."""
+    ncfn = f"/mesonet/data/stage4/{ts.year}_stage4_daily.nc"
+    if not os.path.isfile(ncfn):
+        LOG.warn("File not found! %s", ncfn)
+        return
+    idx = iemre.daily_offset(ts)
+    LOG.debug("Writing 12z grid to %s at idx: %s", ncfn, idx)
+    with ncopen(ncfn, "a") as nc:
+        nc.variables["p01d_12z"][idx] = val
+
+
 def merge(ts):
     """
     Process an hour's worth of stage4 data into the hourly RE
@@ -29,6 +41,7 @@ def merge(ts):
     grbs = pygrib.open(fn)
     grb = grbs[1]
     val = grb.values
+    save12z(ts, val)
     lats, lons = grb.latlons()
     # can save a bit of memory as we don't need all data
     stride = slice(None, None, 3)
