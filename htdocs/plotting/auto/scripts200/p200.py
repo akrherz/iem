@@ -403,6 +403,7 @@ def plotter(fdict):
         cmap=cmap,
         clip_on=False,
         units=UNITS[ctx["w"]],
+        extend="neither" if ctx["w"] in ["lastyear", "count"] else "max",
     )
     # Cut down on SVG et al size
     res.set_rasterized(True)
