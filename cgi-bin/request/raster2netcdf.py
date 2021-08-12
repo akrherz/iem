@@ -91,7 +91,7 @@ def do_work(valid, prod, start_response):
     with ncopen(tmpname, "a") as nc:
         # write data
         ncvar = nc.createVariable(
-            prod, np.float, ("lat", "lon"), zlib=True, fill_value=1.0e20
+            prod, float, ("lat", "lon"), zlib=True, fill_value=1.0e20
         )
         ncvar.units = units
         ncvar.long_name = long_name

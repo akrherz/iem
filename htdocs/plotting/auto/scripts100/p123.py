@@ -40,7 +40,7 @@ def contiguous_regions(condition):
 
     # Find the indicies of changes in "condition"
     # d = np.diff(condition)
-    d = np.subtract(condition[1:], condition[:-1], dtype=np.float)
+    d = np.subtract(condition[1:], condition[:-1], dtype=float)
     (idx,) = d.nonzero()
 
     # We need to start things after the change in "condition". Therefore,

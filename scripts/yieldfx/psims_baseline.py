@@ -29,42 +29,42 @@ def make_netcdf(ncfn, valid, west, south):
         time.units = "days since 1980-01-01 00:00:00"
         time[:] = np.arange(0, totaldays)
 
-        lat = nc.createVariable("lat", np.float, ("lat"))
+        lat = nc.createVariable("lat", float, ("lat"))
         lat.units = "degrees_north"
         lat.long_name = "latitude"
         lat[:] = np.arange(south + 0.125 / 2.0, south + 2.0, 0.125)
 
-        lon = nc.createVariable("lon", np.float, ("lon"))
+        lon = nc.createVariable("lon", float, ("lon"))
         lon.units = "degrees_east"
         lon.long_name = "longitude"
         lon[:] = np.arange(west + 0.125 / 2.0, west + 2.0, 0.125)
 
         prcp = nc.createVariable(
-            "prcp", np.float, ("time", "lat", "lon"), fill_value=1e20
+            "prcp", float, ("time", "lat", "lon"), fill_value=1e20
         )
         prcp.units = "mm/day"
         prcp.long_name = "daily total precipitation"
 
         tmax = nc.createVariable(
-            "tmax", np.float, ("time", "lat", "lon"), fill_value=1e20
+            "tmax", float, ("time", "lat", "lon"), fill_value=1e20
         )
         tmax.units = "degrees C"
         tmax.long_name = "daily maximum temperature"
 
         tmin = nc.createVariable(
-            "tmin", np.float, ("time", "lat", "lon"), fill_value=1e20
+            "tmin", float, ("time", "lat", "lon"), fill_value=1e20
         )
         tmin.units = "degrees C"
         tmin.long_name = "daily minimum temperature"
 
         gddf = nc.createVariable(
-            "gdd_f", np.float, ("time", "lat", "lon"), fill_value=1e20
+            "gdd_f", float, ("time", "lat", "lon"), fill_value=1e20
         )
         gddf.units = "degrees F"
         gddf.long_name = "Growing Degree Days F (base 50 ceiling 86)"
 
         srad = nc.createVariable(
-            "srad", np.float, ("time", "lat", "lon"), fill_value=1e20
+            "srad", float, ("time", "lat", "lon"), fill_value=1e20
         )
         srad.units = "MJ"
         srad.long_name = "daylight average incident shortwave radiation"

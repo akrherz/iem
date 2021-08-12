@@ -29,21 +29,21 @@ def create_netcdf(ts):
     nc.createDimension("day", 7)
 
     # Setup Coordinate Variables
-    lat = nc.createVariable("lat", np.float, ("lat", "lon"))
+    lat = nc.createVariable("lat", float, ("lat", "lon"))
     lat.units = "degrees_north"
     lat.long_name = "Latitude"
     lat.standard_name = "latitude"
     lat.axis = "Y"
     lat[:] = lats
 
-    lon = nc.createVariable("lon", np.float, ("lat", "lon"))
+    lon = nc.createVariable("lon", float, ("lat", "lon"))
     lon.units = "degrees_east"
     lon.long_name = "Longitude"
     lon.standard_name = "longitude"
     lon.axis = "X"
     lon[:] = lons
 
-    day = nc.createVariable("day", np.float, ("day",))
+    day = nc.createVariable("day", float, ("day",))
     day.units = "days since %s-01-01" % (ts.year,)
     doy = int(ts.strftime("%j")) - 1
     day[:] = range(doy, doy + 7)
