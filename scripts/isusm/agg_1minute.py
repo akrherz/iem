@@ -13,6 +13,7 @@ TIME_FORMAT = "%Y-%m-%d %H:%M-06"
 
 def do_updates(cursor, station, row):
     """Make the updates happen, captain."""
+    row = row.replace({np.nan: None})
     cursor.execute(
         """
         UPDATE sm_hourly SET
@@ -82,9 +83,9 @@ def hourly_process(cursor, row):
 
 def daily_process(cursor, station, date, df):
     """Process this date's dataframe."""
-    sumdf = df.sum()
-    mindf = df.min()
-    maxdf = df.max()
+    sumdf = df.sum(numeric_only=True)
+    mindf = df.min(numeric_only=True)
+    maxdf = df.max(numeric_only=True)
     row = {"station": station, "date": date}
     row["obs_count"] = float(sumdf["obs_count"])
     row["tair_c_max"] = maxdf["tair_c_max"]
@@ -113,6 +114,7 @@ def daily_process(cursor, station, date, df):
             "%s %s obs_count %s matches", date, station, row["obs_count"]
         )
         return
+    row = row.replace({np.nan: None})
     cursor.execute(
         """
         UPDATE sm_daily SET
@@ -194,8 +196,6 @@ def workflow():
     )
     # Compute the "date"
     df["date"] = df["hour"].dt.date
-    # We want NaN values as None
-    df = df.replace({np.nan: None})
 
     # Daily work
     cursor = pgconn.cursor()
