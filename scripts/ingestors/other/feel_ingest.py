@@ -3,26 +3,21 @@ import datetime
 import os
 
 import pandas as pd
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
 
+LOG = logger()
 BASE = "/mnt/home/mesonet/ot/ot0005/incoming/Pierson"
 
 
 def get_starttimes(cursor):
-    """ Figure out when we have data """
+    """Figure out when we have data"""
     cursor.execute(
-        """
-        SELECT max(valid at time zone 'UTC-06') from feel_data_hourly
-    """
+        "SELECT max(valid at time zone 'UTC-06') from feel_data_hourly"
     )
     row = cursor.fetchone()
     hstart = row[0]
 
-    cursor.execute(
-        """
-        SELECT max(valid) from feel_data_daily
-    """
-    )
+    cursor.execute("SELECT max(valid) from feel_data_daily")
     row = cursor.fetchone()
     dstart = row[0]
 
@@ -30,7 +25,7 @@ def get_starttimes(cursor):
 
 
 def ingest(cursor):
-    """ Lets do something """
+    """Lets do something"""
 
     dstart, hstart = get_starttimes(cursor)
     if dstart is None:
@@ -45,11 +40,11 @@ def ingest(cursor):
             datetime.date.today().year - 1,
         )
         if not os.path.isfile(fn):
-            print("feel_ingest.py double failure to find %s" % (fn,))
+            LOG.info("Double failure to find %s", fn)
             return
 
     df = pd.read_csv(
-        fn, header=0, skiprows=[0, 2, 3], quotechar='"', warn_bad_lines=True
+        fn, header=0, skiprows=[0, 2, 3], quotechar='"', on_bad_lines="warn"
     )
 
     for _, row in df.iterrows():
@@ -81,10 +76,10 @@ def ingest(cursor):
             datetime.date.today().year - 1,
         )
         if not os.path.isfile(fn):
-            print("feel_ingest.py double failure to find %s" % (fn,))
+            LOG.info("Double failure to find %s", fn)
             return
     df = pd.read_csv(
-        fn, header=0, skiprows=[0, 2, 3], quotechar='"', warn_bad_lines=True
+        fn, header=0, skiprows=[0, 2, 3], quotechar='"', on_bad_lines="warn"
     )
 
     for _, row in df.iterrows():
@@ -130,7 +125,7 @@ def ingest(cursor):
 
 
 def main():
-    """ Go Main """
+    """Go Main"""
     pgconn = get_dbconn("other")
     cursor = pgconn.cursor()
     ingest(cursor)
