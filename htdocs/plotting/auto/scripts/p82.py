@@ -4,6 +4,7 @@ import datetime
 import numpy as np
 import psycopg2.extras
 import pandas as pd
+from matplotlib.patches import Rectangle
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn, convert_value
 from pyiem.reference import TRACE_VALUE
@@ -99,6 +100,20 @@ def diff(val, climo):
     if val is None or climo is None:
         return None
     return val - climo
+
+
+def add_stages_legend(fig, stagevals):
+    """Add a stages legend."""
+    handles = []
+    labels = []
+    for i, val in enumerate(stagevals[:-1]):
+        if val is None:
+            continue
+        rect = Rectangle((0, 0), 1, 1, fc=COLORS[i + 1])
+        handles.append(rect)
+        labels.append(f"{STAGES[i]} {val}")
+    if handles:
+        fig.legend(handles, labels, ncol=4, loc=(0.4, 0.915))
 
 
 def plotter(fdict):
@@ -201,6 +216,8 @@ def plotter(fdict):
     )
 
     fig = calendar_plot(sdate, edate, data, title=title, subtitle=subtitle)
+    if varname == "max_rstage":
+        add_stages_legend(fig, stagevals)
     return fig, df
 
 
