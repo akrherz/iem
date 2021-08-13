@@ -103,8 +103,8 @@ def plotter(fdict):
         status_limiter = ""
     sql = f"""
     WITH data as (
-        SELECT wfo, eventid, extract(year from issue) as year,
-        min(issue) as min_issue,
+        SELECT wfo, eventid, extract(year from polygon_begin) as year,
+        min(polygon_begin) as min_issue,
         max(windtag) as max_windtag, max(hailtag) as max_hailtag
         from sbw WHERE polygon_begin >= %s and
         polygon_begin <= %s {wfo_limiter}
@@ -130,11 +130,11 @@ def plotter(fdict):
 
         sql = f"""
         WITH data as (
-            SELECT wfo, eventid, extract(year from issue) as year,
-            min(issue) as min_issue,
+            SELECT wfo, eventid, extract(year from polygon_begin) as year,
+            min(polygon_begin) as min_issue,
             max(windtag) as max_windtag, max(hailtag) as max_hailtag
             from sbw w, states s
-            WHERE issue >= %s and issue <= %s and
+            WHERE polygon_begin >= %s and polygon_begin <= %s and
             s.state_abbr = %s and ST_Intersects(s.the_geom, w.geom)
             and (windtag > 0 or hailtag > 0) and phenomena = 'SV' and
             significance = 'W' {status_limiter} GROUP by wfo, eventid, year
