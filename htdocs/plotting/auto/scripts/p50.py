@@ -106,7 +106,8 @@ def plotter(fdict):
         SELECT wfo, eventid, extract(year from issue) as year,
         min(issue) as min_issue,
         max(windtag) as max_windtag, max(hailtag) as max_hailtag
-        from sbw WHERE issue >= %s and issue <= %s {wfo_limiter}
+        from sbw WHERE polygon_begin >= %s and
+        polygon_begin <= %s {wfo_limiter}
         and (windtag > 0 or hailtag > 0) and phenomena = 'SV' and
         significance = 'W' {status_limiter} GROUP by wfo, eventid, year
     )
