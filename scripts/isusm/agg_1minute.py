@@ -4,6 +4,7 @@ Need to do some custom 1 minute data aggregation to fill out hourly table.
 import datetime
 
 import numpy as np
+import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.util import get_dbconn, utc, logger
 
@@ -114,7 +115,9 @@ def daily_process(cursor, station, date, df):
             "%s %s obs_count %s matches", date, station, row["obs_count"]
         )
         return
-    row = row.replace({np.nan: None})
+    for col in row:
+        if pd.isna(row[col]):
+            row[col] = None
     cursor.execute(
         """
         UPDATE sm_daily SET
