@@ -8,13 +8,13 @@ from pandas.io.sql import read_sql
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
+from pyiem.reference import SECTORS_NAME
 import cartopy.crs as ccrs
 
 PDICT = {
     "state": "State Level Maps (select state)",
-    "cornbelt": "Corn Belt",
-    "midwest": "Midwest Map",
 }
+PDICT.update(SECTORS_NAME)
 PDICT2 = {
     "both": "Show both contour and values",
     "values": "Show just the values",

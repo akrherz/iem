@@ -14,7 +14,7 @@ from paste.request import get_cookie_dict, parse_formvars
 from pyiem.htmlgen import make_select, station_select
 from pyiem.util import get_dbconn, utc, html_escape
 from pyiem.templates.iem import TEMPLATE
-from pyiem.reference import state_names
+from pyiem.reference import state_names, SECTORS_NAME
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
 
 BASEDIR, WSGI_FILENAME = os.path.split(__file__)
@@ -26,14 +26,7 @@ import scripts  # noqa
 HIGHCHARTS = "8.2.2"
 OPENLAYERS = "6.4.3"
 CSECTORS = state_names.copy()
-CSECTORS.update(
-    {
-        "conus": "CONUS",
-        "midwest": "Midwestern US",
-        "cornbelt": "Cornbelt",
-        "iailin": "Iowa, Illinois, Indiana",
-    }
-)
+CSECTORS.update(SECTORS_NAME)
 CMAPS = {
     "Perceptually Uniform Sequential": [
         "viridis",

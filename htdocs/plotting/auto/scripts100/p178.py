@@ -9,6 +9,7 @@ from pandas.io.sql import read_sql
 import pandas as pd
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot import MapPlot, get_cmap
+from pyiem.reference import SECTORS_NAME
 from pyiem.exceptions import NoDataFound
 
 
@@ -21,11 +22,9 @@ HOURS = {
 }
 PDICT = {
     "cwa": "Plot by NWS Forecast Office",
-    "midwest": "Midwestern US",
-    "cornbelt": "Corn Belt",
-    "conus": "Continental US",
     "state": "Plot by State",
 }
+PDICT.update(SECTORS_NAME)
 PDICT3 = {
     "yes": "YES: Label/Plot Counties/Zones",
     "no": "NO: Do not Label Counties/Zones",

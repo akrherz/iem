@@ -1,6 +1,5 @@
 """Streaks from CLI sites"""
 import datetime
-from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 import pandas as pd
@@ -9,27 +8,26 @@ from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
+from pyiem.reference import SECTORS_NAME
 
-PDICT = OrderedDict(
+PDICT = dict(
     [
         ("precip", "Last Measurable Precipitation"),
         ("low", "Low Temperature"),
         ("high", "High Temperature"),
     ]
 )
-SECTORS = OrderedDict(
+SECTORS = dict(
     [
-        ("conus", "CONUS"),
-        ("cornbelt", "Corn Belt"),
-        ("midwest", "Mid West"),
         ("state", "Select a State"),
         ("cwa", "Select a NWS Weather Forecast Office"),
     ]
 )
+SECTORS.update(SECTORS_NAME)
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 3600
@@ -159,7 +157,7 @@ def get_data(ctx):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     get_data(ctx)
 
