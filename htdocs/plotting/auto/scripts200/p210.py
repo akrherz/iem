@@ -25,7 +25,7 @@ def fix():
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     fix()
     desc = dict()
     desc["cache"] = 300
@@ -85,7 +85,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     fix()
     pgconn = get_dbconn("afos")
     ctx = get_autoplot_context(fdict, get_description())
@@ -144,6 +144,7 @@ def plotter(fdict):
         ),
         sector="nws",
         nocaption=True,
+        twitter=True,
     )
     mp.fill_cwas(
         data,

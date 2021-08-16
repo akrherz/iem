@@ -1,12 +1,10 @@
 """temperature above average frequency by year"""
-from collections import OrderedDict
 import datetime
 
 import matplotlib.patheffects as PathEffects
 from pandas.io.sql import read_sql
 from pyiem import network
-from pyiem.plot.use_agg import plt
-from pyiem.plot.util import fitbox
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -21,7 +19,7 @@ PDICT2 = {
 }
 PDICT3 = {"above": "Above", "below": "Below"}
 PDICT4 = {"percent": "Percentage", "number": "Number"}
-MDICT = OrderedDict(
+MDICT = dict(
     [
         ("all", "No Month/Season Limit"),
         ("spring", "Spring (MAM)"),
@@ -45,7 +43,7 @@ MDICT = OrderedDict(
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -108,7 +106,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
@@ -187,7 +185,17 @@ def plotter(fdict):
     df["low_freq"] = df[f"low_{which}"] / df["days"].astype("f") * 100.0
     df["avg_freq"] = df[f"avg_{which}"] / df["days"].astype("f") * 100.0
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    title = "\n".join(
+        [
+            f"[{station}] {nt.sts[station]['name']} "
+            f"{df.index.values.min()}-{df.index.values.max()} "
+            f"{PDICT4[ctx['opt']]} of Days",
+            f"with {PDICT[varname]} {metric} {PDICT3[ctx['which']]} "
+            f"Average (month={month.upper()})",
+            "Using Period of Record Simple Climatology",
+        ]
+    )
+    (fig, ax) = figure_axes(title=title)
     suffix = f"_{which}" if ctx["opt"] == "number" else "_freq"
     avgv = df[varname + suffix].mean()
 
@@ -220,17 +228,6 @@ def plotter(fdict):
         "Frequency [%]" if ctx["opt"] == "percent" else "Number of Days"
     )
     ax.grid(True)
-    title = "\n".join(
-        [
-            f"[{station}] {nt.sts[station]['name']} "
-            f"{df.index.values.min()}-{df.index.values.max()} "
-            f"{PDICT4[ctx['opt']]} of Days",
-            f"with {PDICT[varname]} {metric} {PDICT3[ctx['which']]} "
-            f"Average (month={month.upper()})",
-            "Using Period of Record Simple Climatology",
-        ]
-    )
-    fitbox(fig, title, 0.05, 0.95, 0.9, 0.99, ha="center")
     return fig, df
 
 

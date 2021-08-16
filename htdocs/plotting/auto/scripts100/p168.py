@@ -10,7 +10,7 @@ from pyiem.exceptions import NoDataFound
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -37,10 +37,13 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = util.get_dbconn("coop")
     ctx = util.get_autoplot_context(fdict, get_description())
     station = ctx["station"]
+    ab = ctx["_nt"].sts[station]["archive_begin"]
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
     table = "alldata_%s" % (station[:2],)
     df = read_sql(
         f"""
@@ -97,9 +100,6 @@ def plotter(fdict):
     ax.set_xlim(min(x) - 5, 400)
     ax.set_ylim(y[-1] - 1, y[0] + 1)
     ax.grid(True)
-    ab = ctx["_nt"].sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata.")
     ax.set_title(
         ("Most Recent & Latest Date of High Temperature\n[%s] %s (%s-%s)")
         % (

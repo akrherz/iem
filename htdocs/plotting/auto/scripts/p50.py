@@ -26,7 +26,9 @@ def get_description():
     ] = """This app produces a table of frequencies of
     wind and hail tags used in NWS Severe Thunderstorm Warnings. You have the
     choice to only plot the issuance or use a computed max value over the
-    warning's lifecycle (including SVSs)."""
+    warning's lifecycle (including SVSs).  The maximum wind and hail tags
+    are computed independently over the lifecycle of the Severe Thunderstorm
+    Warning."""
     today = datetime.datetime.today() + datetime.timedelta(days=1)
 
     desc["arguments"] = [

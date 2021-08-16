@@ -1,9 +1,7 @@
 """Visual summary of polygons for a given UTC date."""
 import datetime
 import os
-
 from io import StringIO
-from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 import pandas as pd
@@ -15,14 +13,14 @@ from pyiem.plot.util import fitbox
 from pyiem.nws.vtec import VTEC_PHENOMENA
 
 
-PDICT = OrderedDict(
+PDICT = dict(
     [
         ("W", "By Issuance Center"),
         ("S", "By Polygon Size"),
         ("T", "By Issuance Time"),
     ]
 )
-PDICT2 = OrderedDict(
+PDICT2 = dict(
     [
         ("W", "Tornado + Severe Thunderstorm Warnings"),
         ("F", "Flash Flood Warnings"),
@@ -33,7 +31,7 @@ COLORS = {"SV": "#ffff00", "TO": "#ff0000", "FF": "#00ff00", "MA": "#00ff00"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["text"] = True
@@ -72,7 +70,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     typ = ctx["typ"]
     sort = ctx["sort"]
@@ -100,7 +98,7 @@ def plotter(fdict):
 
     # Find largest polygon either in height or width
     gdf = read_postgis(
-        """
+        f"""
         SELECT wfo, phenomena, eventid, issue,
         ST_area2d(ST_transform(geom,2163)) as size,
         (ST_xmax(ST_transform(geom,2163)) +
@@ -112,14 +110,10 @@ def plotter(fdict):
          ST_xmin(ST_transform(geom,2163))) as width,
         (ST_ymax(ST_transform(geom,2163)) -
          ST_ymin(ST_transform(geom,2163))) as height
-        from sbw_"""
-        + str(sts.year)
-        + """
+        from sbw_{sts.year}
         WHERE status = 'NEW' and issue >= %s and issue < %s and
         phenomena IN %s and eventid is not null
-        ORDER by """
-        + opts[sort]["sortby"]
-        + """
+        ORDER by {opts[sort]["sortby"]}
     """,
         pgconn,
         params=(sts, ets, tuple(phenoms[typ])),
@@ -129,13 +123,10 @@ def plotter(fdict):
 
     # For size reduction work
     df = read_sql(
-        """
+        f"""
         SELECT w.wfo, phenomena, eventid,
         sum(ST_area2d(ST_transform(u.geom,2163))) as county_size
-        from
-        warnings_"""
-        + str(sts.year)
-        + """ w JOIN ugcs u on (u.gid = w.gid)
+        from warnings_{sts.year} w JOIN ugcs u on (u.gid = w.gid)
         WHERE issue >= %s and issue < %s and
         significance = 'W' and phenomena IN %s
         GROUP by w.wfo, phenomena, eventid

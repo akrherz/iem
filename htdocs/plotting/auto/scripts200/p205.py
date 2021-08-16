@@ -4,12 +4,12 @@ import itertools
 
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -60,7 +60,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("iem")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
@@ -116,7 +116,14 @@ def plotter(fdict):
         df.at[df[col] < 1, "all_hit"] = 0
     gdf = df.groupby("doy").mean()
 
-    (fig, ax) = plt.subplots(1, 1)
+    ab = ctx["_nt"].sts[station]["archive_begin"]
+    ab = "N/A" if ab is None else ab
+    title = "%s [%s] (%s-)\nDaily Observed Frequency" % (
+        ctx["_nt"].sts[station]["name"],
+        station,
+        ab.year,
+    )
+    (fig, ax) = figure_axes(title=title)
     colors = itertools.cycle(["r", "g", "b", "c", "m", "y"])
     for col in df.columns:
         if col == "doy":
@@ -139,12 +146,6 @@ def plotter(fdict):
     ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     ax.grid(True)
     ax.set_ylabel("Daily Frequency [%]")
-    ab = ctx["_nt"].sts[station]["archive_begin"]
-    ab = "N/A" if ab is None else ab
-    ax.set_title(
-        ("%s [%s] (%s-)\nDaily Observed Frequency")
-        % (ctx["_nt"].sts[station]["name"], station, ab.year)
-    )
     ax2 = ax.twinx()
     ax2.set_ylabel("Daily Frequency [%]")
     ax2.set_ylim(-2, 102)

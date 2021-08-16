@@ -7,7 +7,7 @@ from pandas.io.sql import read_sql
 import matplotlib.patheffects as PathEffects
 from pyiem.util import drct2text
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 from metpy.units import units
 
@@ -26,7 +26,7 @@ XREF_UNITS = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 86400
@@ -72,10 +72,10 @@ def get_description():
     return desc
 
 
-def draw_line(x, y, angle):
+def draw_line(ax, x, y, angle):
     """Draw a line"""
     r = 0.25
-    plt.arrow(
+    ax.arrow(
         x,
         y,
         r * np.cos(angle),
@@ -88,7 +88,7 @@ def draw_line(x, y, angle):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("iem")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
@@ -113,13 +113,18 @@ def plotter(fdict):
         raise NoDataFound("ERROR: No Data Found")
     df["day"] = pd.to_datetime(df["day"])
     sknt = (df["sknt"].values * units("knot")).to(XREF_UNITS[plot_units]).m
-    (fig, ax) = plt.subplots(1, 1)
+    title = "%s [%s]\n%s Daily Average Wind Speed and Direction" % (
+        ctx["_nt"].sts[station]["name"],
+        station,
+        sts.strftime("%b %Y"),
+    )
+    (fig, ax) = figure_axes(title=title)
     ax.bar(
         df["day"].dt.day.values, sknt, ec="green", fc="green", align="center"
     )
     pos = max([min(sknt) / 2.0, 0.5])
     for d, _, r in zip(df["day"].dt.day.values, sknt, df["drct"].values):
-        draw_line(d, max(sknt) + 0.5, (270.0 - r) / 180.0 * np.pi)
+        draw_line(ax, d, max(sknt) + 0.5, (270.0 - r) / 180.0 * np.pi)
         txt = ax.text(
             d,
             pos,
@@ -133,10 +138,6 @@ def plotter(fdict):
             [PathEffects.withStroke(linewidth=2, foreground="k")]
         )
     ax.grid(True, zorder=11)
-    ax.set_title(
-        ("%s [%s]\n%s Daily Average Wind Speed and Direction")
-        % (ctx["_nt"].sts[station]["name"], station, sts.strftime("%b %Y"))
-    )
     ax.set_xlim(0.5, 31.5)
     ax.set_xticks(range(1, 31, 5))
     ax.set_ylim(top=max(sknt) + 2)

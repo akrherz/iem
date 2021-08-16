@@ -1,5 +1,4 @@
 """NASS yearly bar plot."""
-from collections import OrderedDict
 import datetime
 
 import pandas as pd
@@ -13,7 +12,7 @@ from matplotlib.colorbar import ColorbarBase
 import matplotlib.colors as mpcolors
 import numpy as np
 
-PDICT = OrderedDict(
+PDICT = dict(
     [
         ("PCT PLANTED", "Planting"),
         ("PCT EMERGED", "Emerged"),
@@ -24,11 +23,11 @@ PDICT = OrderedDict(
         ("PCT HARVESTED", "Harvest (Grain)"),
     ]
 )
-PDICT2 = OrderedDict([("CORN", "Corn"), ("SOYBEANS", "Soybean")])
+PDICT2 = {"CORN": "Corn", "SOYBEANS": "Soybean"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["cache"] = 3600
     desc["data"] = True
@@ -116,7 +115,7 @@ def get_data(ctx):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     df = get_data(ctx)
 
