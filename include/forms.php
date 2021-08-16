@@ -11,11 +11,9 @@ function xssafe($data, $encoding='UTF-8')
     }
 	$res = htmlspecialchars($data, ENT_QUOTES | ENT_HTML401, $encoding);
     if ($res !== $data){
-        // Potentially start error_log this
-        openlog("iem", LOG_PID | LOG_PERROR, LOG_LOCAL1);
-        syslog(LOG_WARNING, "$data  url:". $_SERVER["REQUEST_URI"] .
-        ' remote: '. $_SERVER["REMOTE_ADDR"] );
-        closelog();
+        // 404 this
+        http_response_code(404);
+        die();
     }
 
     return $res;
