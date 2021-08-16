@@ -6,10 +6,19 @@
 //https://www.owasp.org/index.php/PHP_Security_Cheat_Sheet#XSS_Cheat_Sheet
 function xssafe($data, $encoding='UTF-8')
 {
-  if (is_array($data)){
-    return $data;
-  }
-	return htmlspecialchars($data, ENT_QUOTES | ENT_HTML401, $encoding);
+    if (is_array($data)){
+        return $data;
+    }
+	$res = htmlspecialchars($data, ENT_QUOTES | ENT_HTML401, $encoding);
+    if ($res !== $data){
+        // Potentially start error_log this
+        openlog("iem", LOG_PID | LOG_PERROR, LOG_LOCAL1);
+        syslog(LOG_WARNING, "$data  url:". $_SERVER["REQUEST_URI"] .
+        ' remote: '. $_SERVER["REMOTE_ADDR"] );
+        closelog();
+    }
+
+    return $res;
 }
 function xecho($data)
 {
