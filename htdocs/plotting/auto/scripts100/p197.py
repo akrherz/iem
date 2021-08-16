@@ -71,6 +71,12 @@ def get_description():
     today = datetime.date.today()
     desc["arguments"] = [
         dict(
+            type="csector",
+            name="sector",
+            default="conus",
+            label="Select Sector:",
+        ),
+        dict(
             type="select",
             options=NASS_CROP_PROGRESS,
             default="corn_planting",
@@ -209,7 +215,12 @@ def plotter(fdict):
             subscript,
         )
 
-    mp = MapPlot(sector="conus", title=ctx["title"], subtitle=ctx["subtitle"])
+    mp = MapPlot(
+        sector=ctx["sector"],
+        title=ctx["title"],
+        subtitle=ctx["subtitle"],
+        twitter=True,
+    )
     levels = range(-40, 41, 10)
     cmap = get_cmap(ctx["cmap"])
     cmap.set_bad("white")
@@ -219,7 +230,7 @@ def plotter(fdict):
         labels=labels,
         bins=levels,
         cmap=cmap,
-        units="Absolute %",
+        units="Percentage Points",
         labelfontsize=16,
         labelbuffer=0,
     )
