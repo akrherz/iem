@@ -3,6 +3,7 @@
 For now, we just run each Monday for the current year RUN_2AM.sh
 """
 import sys
+import time
 import datetime
 import subprocess
 
@@ -29,39 +30,47 @@ def main(argv):
             LOG.debug("adding %s as currently empty", now)
             current[now] = {"data": ds, "dirty": False}
         now -= datetime.timedelta(days=1)
+    if not current:
+        LOG.info("Nothing to be done...")
+        return
     sts = min(list(current.keys()))
     ets = max(list(current.keys()))
     LOG.debug("running between %s and %s", sts, ets)
 
     queue = []
-    for x0 in np.arange(iemre.WEST, iemre.EAST, 5.0):
-        for y0 in np.arange(iemre.SOUTH, iemre.NORTH, 5.0):
+    # 10x10 degree chunk is the max request size...
+    for x0 in np.arange(iemre.WEST, iemre.EAST, 10.0):
+        for y0 in np.arange(iemre.SOUTH, iemre.NORTH, 10.0):
             queue.append([x0, y0])
     for x0, y0 in tqdm(queue, disable=not sys.stdout.isatty()):
         url = (
-            "https://power.larc.nasa.gov/cgi-bin/v1/DataAccess.py?"
-            "request=execute&identifier=Regional&"
-            "parameters=ALLSKY_SFC_SW_DWN&"
-            "startDate=%s&endDate=%s&userCommunity=SSE&"
-            "tempAverage=DAILY&bbox=%s,%s,%s,%s&user=anonymous&"
-            "outputList=NETCDF"
+            "https://power.larc.nasa.gov/api/temporal/daily/regional?"
+            "latitude-min=%s&latitude-max=%s&longitude-min=%s&"
+            "longitude-max=%s&parameters=ALLSKY_SFC_SW_DWN&community=SB&"
+            "start=%s&end=%s&format=NETCDF"
         ) % (
+            y0,
+            y0 + 9.9,
+            x0,
+            x0 + 9.9,
             sts.strftime("%Y%m%d"),
             ets.strftime("%Y%m%d"),
-            y0,
-            x0,
-            min([y0 + 5.0, iemre.NORTH]) - 0.1,
-            min([x0 + 5.0, iemre.EAST]) - 0.1,
         )
         req = exponential_backoff(requests.get, url, timeout=60)
-        js = req.json()
-        if "outputs" not in js:
-            LOG.debug(url)
-            LOG.debug(str(js))
+        # Can't find docs on how many requests/sec are allowed...
+        if req is not None and req.status_code == 429:
+            LOG.debug("Got 429 (too-many-requests), sleeping 60")
+            time.sleep(60)
+            req = exponential_backoff(requests.get, url, timeout=60)
+        if req is None or req.status_code != 200:
+            LOG.info(
+                "failed to download %s with %s %s",
+                url,
+                "req is none" if req is None else req.status_code,
+                "req is none" if req is None else req.text,
+            )
             continue
-        fn = js["outputs"]["netcdf"]
-        req = exponential_backoff(requests.get, fn, timeout=60, stream=True)
-        ncfn = "/tmp/power%s.nc" % (year,)
+        ncfn = f"/tmp/power{year}.nc"
         with open(ncfn, "wb") as fh:
             for chunk in req.iter_content(chunk_size=1024):
                 if chunk:
@@ -72,8 +81,8 @@ def main(argv):
                 date = sts + datetime.timedelta(days=day)
                 if date not in current:
                     continue
-                # kwh to MJ/d  3600 * 1000 / 1e6
-                data = nc.variables["ALLSKY_SFC_SW_DWN"][day, :, :] * 3.6
+                # W/m2 to MJ/d 86400 / 1e6
+                data = nc.variables["ALLSKY_SFC_SW_DWN"][day, :, :] * 0.0864
                 # Sometimes there are missing values?
                 if np.ma.is_masked(data):
                     data[data.mask] = np.mean(data)
@@ -82,8 +91,14 @@ def main(argv):
                 data = np.repeat(np.repeat(data, 4, axis=0), 4, axis=1)
                 data = np.where(data < 0, np.nan, data)
                 shp = np.shape(data)
-                jslice = slice(j, j + shp[0])
-                islice = slice(i, i + shp[1])
+                jslice = slice(j, min([j + shp[0], iemre.NY]))
+                islice = slice(i, min([i + shp[1], iemre.NX]))
+                # LOG.debug("islice %s jslice: %s", islice, jslice)
+                # align grids
+                data = data[
+                    slice(0, jslice.stop - jslice.start),
+                    slice(0, islice.stop - islice.start),
+                ]
                 # get currentdata
                 present = current[date]["data"]["power_swdn"].values[
                     jslice, islice
