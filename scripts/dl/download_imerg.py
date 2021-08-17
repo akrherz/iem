@@ -55,6 +55,11 @@ def main(argv):
         "var=precipitationCal&time=%Y-%m-%dT%H%%3A%M%%3A00Z&accept=netcdf4"
     )
     req = requests.get(url, timeout=120)
+    # Sometimes this returns an HTML error with status 200 :(
+    if req.text:
+        LOG.info("returned text instead of netcdf %s %s", valid, source)
+        LOG.debug(url)
+        return
     if req.status_code != 200:
         LOG.info("failed to fetch %s using source %s", valid, source)
         LOG.debug(url)
