@@ -10,7 +10,7 @@ LOG = logger()
 def main():
     """Go Main Go"""
     nt = NetworkTable("RAOB", only_online=False)
-    pgconn = get_dbconn("postgis")
+    pgconn = get_dbconn("raob")
     pcursor = pgconn.cursor()
     pgconn2 = get_dbconn("mesosite", user="mesonet")
     mcursor = pgconn2.cursor()

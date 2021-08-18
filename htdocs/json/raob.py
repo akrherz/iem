@@ -27,15 +27,15 @@ json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 
 
 def safe(val):
-    """Be careful """
+    """Be careful"""
     if val is None:
         return None
     return float(val)
 
 
 def run(ts, sid, pressure):
-    """ Actually do some work! """
-    dbconn = get_dbconn("postgis")
+    """Actually do some work!"""
+    dbconn = get_dbconn("raob")
 
     res = {"profiles": []}
     table = "raob_profile_%s" % (ts.year,)

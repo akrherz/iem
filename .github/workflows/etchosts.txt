@@ -13,6 +13,7 @@
 127.0.0.1 iemdb-nldn.local
 127.0.0.1 iemdb-snet.local
 127.0.0.1 iemdb-mos.local
+127.0.0.1 iemdb-raob.local
 127.0.0.1 iemdb-rwis.local
 127.0.0.1 iemdb-squaw.local
 127.0.0.1 iemdb-awos.local

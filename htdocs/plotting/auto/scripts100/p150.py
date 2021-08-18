@@ -1,6 +1,5 @@
 """sounding stuff"""
 import calendar
-from collections import OrderedDict
 
 import pandas as pd
 from pandas.io.sql import read_sql
@@ -13,7 +12,7 @@ PDICT2 = {
     "none": "No Comparison Limit (All Soundings)",
     "month": "Month of the Selected Profile",
 }
-PDICT3 = OrderedDict(
+PDICT3 = dict(
     [
         ("tmpc", "Air Temperature (C)"),
         ("dwpc", "Dew Point (C)"),
@@ -28,7 +27,7 @@ PDICT4 = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 86400
@@ -100,7 +99,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     if station not in ctx["_nt"].sts:  # This is needed.
@@ -120,7 +119,7 @@ def plotter(fdict):
         stations = (
             ctx["_nt"].sts[station]["name"].split("--")[1].strip().split(" ")
         )
-    pgconn = get_dbconn("postgis")
+    pgconn = get_dbconn("raob")
 
     hrlimit = f"and extract(hour from f.valid at time zone 'UTC') = {hour} "
     if ctx["h"] == "ALL":

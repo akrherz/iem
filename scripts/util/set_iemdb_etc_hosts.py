@@ -40,6 +40,7 @@ LOOKUP = {
     "-portfolio": IPS[METVM6],
     "-postgis": IPS[METVM4],
     "-radar": IPS[METVM4],
+    "-raob": IPS[METVM2],
     "-rtstats": IPS[METVM6],
     "-rwis": IPS[METVM6],
     "-scada": IPS[METVM6],

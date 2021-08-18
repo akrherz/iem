@@ -93,7 +93,9 @@ def sync(df, dbname):
 def main(argv):
     """Go Main Go"""
     mesosite = get_dbconn("mesosite")
-    subscribers = "iem isuag coop hads hml asos asos1min postgis".split()
+    subscribers = (
+        "iem isuag coop hads hml asos asos1min postgis raob"
+    ).split()
 
     if len(argv) == 3:
         LOG.info(

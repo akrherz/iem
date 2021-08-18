@@ -311,7 +311,7 @@ def do_profile(cursor, fid, gdf, nt):
 def main(argv):
     """Go Main Go."""
     year = utc().year if len(argv) == 1 else int(argv[1])
-    dbconn = get_dbconn("postgis")
+    dbconn = get_dbconn("raob")
     cursor = dbconn.cursor()
     nt = NetworkTable("RAOB")
     df = read_sql(

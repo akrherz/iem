@@ -7,7 +7,7 @@ import pytz
 from ingest_from_rucsoundings import RAOB
 from pyiem.util import get_dbconn
 
-POSTGIS = get_dbconn("postgis")
+POSTGIS = get_dbconn("raob")
 
 
 def conv(raw):
@@ -18,7 +18,7 @@ def conv(raw):
 
 
 def conv_speed(raw):
-    """ convert sped to mps units """
+    """convert sped to mps units"""
     if raw in ["99999", "-9999.00"]:
         return None
     return float(raw) * 0.5144

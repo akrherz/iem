@@ -79,7 +79,7 @@ class RAOB:
     """Simple class representing a RAOB profile"""
 
     def __init__(self):
-        """ constructor"""
+        """constructor"""
         self.station = None
         self.valid = None
         self.release_time = None
@@ -90,7 +90,7 @@ class RAOB:
         self.tropo_level = None
 
     def conv_hhmm(self, raw):
-        """ Convert string to timestamp """
+        """Convert string to timestamp"""
         if raw == "99999":
             return None
         ts = self.valid.replace(hour=int(raw[:-2]), minute=int(raw[-2:]))
@@ -99,7 +99,7 @@ class RAOB:
         return ts
 
     def conv_speed(self, raw):
-        """ convert sped to mps units """
+        """convert sped to mps units"""
         if raw in ["99999", "-9999.00"]:
             return None
         if self.wind_units == "kt":
@@ -107,7 +107,7 @@ class RAOB:
         return float(raw)
 
     def __str__(self):
-        """ override str() """
+        """override str()"""
         return "RAOB from %s valid %s with %s levels" % (
             self.station,
             self.valid,
@@ -115,7 +115,7 @@ class RAOB:
         )
 
     def database_save(self, txn):
-        """ Save this to the provided database cursor """
+        """Save this to the provided database cursor"""
         txn.execute(
             "SELECT fid from raob_flights where station = %s and valid = %s",
             (self.station, self.valid),
@@ -167,28 +167,28 @@ class RAOB:
 
 
 def conv_press(raw):
-    """ Convert raw string to database value """
+    """Convert raw string to database value"""
     if raw == "99999":
         return None
     return float(raw) / 10.0
 
 
 def conv_temp(raw):
-    """ Convert raw string to database value """
+    """Convert raw string to database value"""
     if raw == "99999":
         return None
     return float(raw) / 10.0
 
 
 def conv_drct(raw):
-    """ Convert raw string to database value """
+    """Convert raw string to database value"""
     if raw == "99999":
         return None
     return float(raw)
 
 
 def parse(raw, sid):
-    """ Parse the raw data and yield RAOB objects """
+    """Parse the raw data and yield RAOB objects"""
     rob = None
     for line in raw.split("\n"):
         tokens = line.strip().split()
@@ -240,7 +240,7 @@ def parse(raw, sid):
 def main(valid):
     """Run for the given valid time!"""
     nt = NetworkTable("RAOB")
-    dbconn = get_dbconn("postgis")
+    dbconn = get_dbconn("raob")
     # check what we have
     obs = read_sql(
         "SELECT station, count(*) from "
@@ -302,7 +302,7 @@ def main(valid):
 
 
 def frontend(argv):
-    """Figure out what we need to do here! """
+    """Figure out what we need to do here!"""
     valid = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
     main(valid)
     for days in [3, 14, 365]:

@@ -1,6 +1,5 @@
 """Plot Time Series for Sounding Parameter."""
 import datetime
-from collections import OrderedDict
 
 import pandas as pd
 from pandas.io.sql import read_sql
@@ -9,7 +8,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"00": "00 UTC", "12": "12 UTC"}
-PDICT3 = OrderedDict(
+PDICT3 = dict(
     [
         ("tmpc", "Air Temperature (C)"),
         ("dwpc", "Dew Point (C)"),
@@ -127,7 +126,7 @@ def get_data(ctx):
     varname = ctx["var"]
     hour = int(ctx["hour"])
     level = ctx["level"]
-    pgconn = get_dbconn("postgis")
+    pgconn = get_dbconn("raob")
     if varname in ["tmpc", "dwpc", "height", "smps"]:
         ctx["leveltitle"] = f" @ {level} hPa"
         dfin = read_sql(

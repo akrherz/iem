@@ -20,7 +20,7 @@ def m(val):
 def fetcher(station, sts, ets):
     """Do fetching"""
     sio = StringIO()
-    dbconn = get_dbconn("postgis")
+    dbconn = get_dbconn("raob")
     cursor = dbconn.cursor("raobstreamer")
     stations = [station]
     if station.startswith("_"):

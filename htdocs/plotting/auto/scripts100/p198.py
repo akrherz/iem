@@ -1,6 +1,5 @@
 """Monthly Sounding Averages"""
 import datetime
-from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 from pyiem.plot import figure_axes
@@ -8,7 +7,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"00": "00 UTC", "12": "12 UTC", "ALL": "Any Hour"}
-MDICT = OrderedDict(
+MDICT = dict(
     [
         ("all", "No Month/Time Limit"),
         ("spring", "Spring (MAM)"),
@@ -30,7 +29,7 @@ MDICT = OrderedDict(
         ("dec", "December"),
     ]
 )
-PDICT3 = OrderedDict(
+PDICT3 = dict(
     [
         ("tmpc", "Air Temperature (C)"),
         ("dwpc", "Dew Point (C)"),
@@ -77,9 +76,7 @@ PDICT3 = OrderedDict(
         ("smps", "Wind Speed (mps)"),
     ]
 )
-PDICT4 = OrderedDict(
-    (("min", "Minimum"), ("avg", "Average"), ("max", "Maximum"))
-)
+PDICT4 = dict((("min", "Minimum"), ("avg", "Average"), ("max", "Maximum")))
 PDICT5 = {
     "no": "Plot All Available Data",
     "yes": "Only Plot Years with ~75% Data Availability",
@@ -87,7 +84,7 @@ PDICT5 = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 86400
@@ -178,7 +175,7 @@ def compute(dfin, varname):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     if station not in ctx["_nt"].sts:  # This is needed.
@@ -216,7 +213,7 @@ def plotter(fdict):
         stations = (
             ctx["_nt"].sts[station]["name"].split("--")[1].strip().split(" ")
         )
-    pgconn = get_dbconn("postgis")
+    pgconn = get_dbconn("raob")
 
     hrlimiter = f" extract(hour from f.valid at time zone 'UTC') = {hour} and "
     if hour == "ALL":
