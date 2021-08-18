@@ -3,6 +3,7 @@
 Run from RUN_10_AFTER.sh at 3 PM each day."""
 import sys
 from datetime import datetime, timedelta
+from urllib3.exceptions import InsecureRequestWarning
 
 import requests
 import pytz
@@ -10,6 +11,8 @@ import numpy as np
 import pandas as pd
 from pyiem.util import get_dbconn, logger, get_properties
 
+# Suppress only the single warning from urllib3 needed.
+requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 LOG = logger()
 TMP = "/mesonet/tmp"
 PROPS = get_properties()
@@ -38,7 +41,7 @@ def get_df(year, sts, topic):
     if sts is not None:
         params["load_time__GE"] = sts.strftime("%Y-%m-%d %H:%M:%S")
     params.update(topic)
-    req = requests.get(SERVICE, params, timeout=300)
+    req = requests.get(SERVICE, params, timeout=300, verify=False)
     if req.status_code != 200:
         if req.status_code == 400:
             LOG.debug("Got status_code=400 (no data) %s", req.url)
