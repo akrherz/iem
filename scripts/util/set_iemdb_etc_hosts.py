@@ -48,7 +48,7 @@ LOOKUP = {
     "-snet": IPS[METVM7],
     "-squaw": IPS[METVM6],
     "-sustainablecorn": IPS[METVM6],
-    "-talltowers": IPS[METVM4],
+    "-talltowers": IPS[METVM2],
     "-td": IPS[METVM6],
     "-wepp": IPS[METVM6],
 }
