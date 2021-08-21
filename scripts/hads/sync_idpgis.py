@@ -54,8 +54,9 @@ def add_station(dbconn, nwsli, attrs):
     cursor = dbconn.cursor()
     cursor.execute(
         "INSERT into stations(id, name, plot_name, state, country, geom, "
-        "network) VALUES (%s, %s, %s, %s, 'US', 'SRID=4326;POINT(%s %s)', "
-        "%s) RETURNING iemid",
+        "network, online, metasite) VALUES "
+        "(%s, %s, %s, %s, 'US', 'SRID=4326;POINT(%s %s)', "
+        "%s, %s, %s) RETURNING iemid",
         (
             nwsli,
             attrs["location"],
@@ -64,6 +65,8 @@ def add_station(dbconn, nwsli, attrs):
             attrs["lon"],
             attrs["lat"],
             f"{attrs['state']}_DCP",
+            True,
+            False,
         ),
     )
     iemid = cursor.fetchone()[0]
