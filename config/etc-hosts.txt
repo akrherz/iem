@@ -101,10 +101,6 @@
 192.168.1.245 iemdb-td.local
 192.168.1.245 iemdb-wepp.local
 
-#### metvm4 PostgreSQL
-# VI_1_233(69)
-192.168.1.233 metvm4-iemdb.local
-
 #### metvm9 PostgreSQL
 # VI_7(57) metvm9 <-> metvm6
 192.168.1.244 metvm9-iemdb.local
@@ -144,7 +140,7 @@
 # runs with special 10 MB size and 8 GB memory size
 #   VI_2(52) metvm3 <-> metvm9
 192.168.1.249    iem-memcached
-#   VI_3(53) metvm4 <-> metvm8
+#   VI_3(53) metvm2 <-> metvm8
 192.168.1.248    iem-memcached1
 #   VI_4(54) metvm8 <-> metvm3
 192.168.1.247    iem-memcached2
@@ -157,7 +153,7 @@
 192.168.1.241    iem-web-services.local
 #   VI11(61) iem12
 192.168.0.240    iem-openfire openfire-bosh
-# VI_13(63) metvm4
+# VI_13(63) metvm2
 192.168.1.238    iem-rabbitmq.local
 # VI_1_235(66) iem12
 192.168.1.235    iem-ldm.local

@@ -27,7 +27,6 @@ LoggerNet | iem15 | None | None
 NEXRAD Mosaics | iem8-dc | iem16 | nagios checks archive
 openfire | iem14 | None     | None
 postgres | metvm6 | metvm9  | None
-postgres2 | metvm4 | None | None
 postgres3 | metvm1 | None | None
 postgres4 | metvm7 | None | None
 samba | iem12 | None | cron scripts check data availability
