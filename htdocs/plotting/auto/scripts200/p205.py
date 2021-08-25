@@ -29,10 +29,45 @@ def get_description():
         ),
         dict(
             type="int",
+            name="max_tmpf_above",
+            default=90,
+            optional=True,
+            label="Daily Max Temperature Above (threshold F): [optional]",
+        ),
+        dict(
+            type="int",
+            name="min_tmpf_below",
+            default=70,
+            optional=True,
+            label="Daily Min Temperature Below (threshold F): [optional]",
+        ),
+        dict(
+            type="int",
+            name="max_feel_above",
+            default=90,
+            optional=True,
+            label="Daily Max Feels Like Temp Above (threshold F): [optional]",
+        ),
+        dict(
+            type="int",
+            name="min_feel_below",
+            default=0,
+            optional=True,
+            label="Daily Min Feels Like Temp Below (threshold F): [optional]",
+        ),
+        dict(
+            type="int",
             name="max_dwpf_below",
             default=50,
             optional=True,
             label="Daily Maximum Dewpoint Below (threshold F): [optional]",
+        ),
+        dict(
+            type="int",
+            name="max_dwpf_above",
+            default=70,
+            optional=True,
+            label="Daily Maximum Dewpoint Above (threshold F): [optional]",
         ),
         dict(
             type="int",
@@ -66,12 +101,20 @@ def plotter(fdict):
     station = ctx["station"]
     params = []
     labels = {"all_hit": "All Combined"}
-    if ctx.get("max_rh_below"):
+    for ez in (
+        "max_rh_below max_feel_above min_feel_below max_dwpf_below "
+        "max_tmpf_above max_dwpf_above min_tmpf_below"
+    ).split():
+        val = ctx.get(ez)
+        if val is None:
+            continue
+        col, op = ez.rsplit("_", 1)
+        units = "%" if col.endswith("rh") else "F"
+        op = ">=" if op == "above" else "<"
         params.append(
-            ("case when max_rh < %.0f " "then 1 else 0 end as rh_hit")
-            % (ctx["max_rh_below"],)
+            f"case when {col} {op} {val:.0f} then 1 else 0 end as {ez}_hit"
         )
-        labels["rh_hit"] = "Max RH < %.0f%%" % (ctx["max_rh_below"],)
+        labels[f"{ez}_hit"] = f"{col} {op} {val:.0f} {units}"
     if ctx.get("max_tmpf_range"):
         tokens = [int(i) for i in ctx["max_tmpf_range"].split("to")]
         params.append(
@@ -82,12 +125,6 @@ def plotter(fdict):
             % (tokens[0], tokens[1])
         )
         labels["tmpf_hit"] = "High Temp %.0fF - %.0fF" % (tokens[0], tokens[1])
-    if ctx.get("max_dwpf_below"):
-        params.append(
-            ("case when max_dwpf < %.0f " "then 1 else 0 end as dwpf_hit")
-            % (ctx["max_dwpf_below"],)
-        )
-        labels["dwpf_hit"] = "Max Dewpoint < %.0fF" % (ctx["max_dwpf_below"],)
     if ctx.get("avg_smph_below"):
         params.append(
             (
@@ -137,7 +174,7 @@ def plotter(fdict):
             color=color,
         )
 
-    ax.legend(ncol=3, loc=(-0.05, -0.21), fontsize=10)
+    ax.legend(ncol=4, loc=(-0.05, -0.21), fontsize=14)
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_position([0.1, 0.2, 0.75, 0.7])
