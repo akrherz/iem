@@ -322,6 +322,8 @@ def application(environ, start_response):
         },
     ) as output:
         for row in cursor:
+            if row["geo"] is None:
+                continue
             mp = loads(row["geo"], hex=True)
             csv.write(
                 f"{row['wfo']},{dfmt(row['utc_issue'])},"
