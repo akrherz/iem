@@ -11,7 +11,8 @@ import os
 import numpy as np
 import pytz
 import pygrib
-from pyiem.plot import MapPlot
+import matplotlib.colors as mpcolors
+from pyiem.plot import MapPlot, ramp2df
 import pyiem.reference as ref
 from pyiem.util import utc, logger
 
@@ -33,12 +34,9 @@ def compute_bounds(lons, lats):
 
 
 def run(valid, routes):
-    """ Generate the plot for the given UTC time """
+    """Generate the plot for the given UTC time"""
     fn = valid.strftime(
-        (
-            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
-            "hrrr.t%Hz.refd.grib2"
-        )
+        "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/hrrr.t%Hz.refd.grib2"
     )
 
     if not os.path.isfile(fn):
@@ -49,6 +47,9 @@ def run(valid, routes):
     lats = None
     lons = None
     i = 0
+    rampdf = ramp2df("composite_n0q")
+    cmap = mpcolors.ListedColormap(rampdf[["r", "g", "b"]].to_numpy() / 256)
+    cmap.set_under("white")
     for minute in range(0, HOURS[valid.hour] * 60 + 1, 15):
         if minute > (18 * 60) and minute % 60 != 0:
             continue
@@ -75,7 +76,7 @@ def run(valid, routes):
             reflect = gs[-1]["values"][x1:x2, y1:y2]
         else:
             reflect = gs[0]["values"][x1:x2, y1:y2]
-
+        reflect = np.where(reflect < -9, -100, reflect)
         mp = MapPlot(
             sector="midwest",
             axisbg="tan",
@@ -83,22 +84,23 @@ def run(valid, routes):
             % (valid.strftime("%-d %b %Y %H"),),
             subtitle=("valid: %s") % (now.strftime("%-d %b %Y %I:%M %p %Z"),),
         )
-
+        levels = [-32, -30]
+        levels.extend(range(-10, 96, 5))
         mp.pcolormesh(
             lons,
             lats,
             reflect,
-            np.arange(0, 75, 5),
+            range(-30, 96, 4),
+            spacing="proportional",
+            cmap=cmap,
             units="dBZ",
             clip_on=False,
+            clevstride=5,
         )
         pngfn = "/tmp/hrrr_ref_%s_%03i.png" % (valid.strftime("%Y%m%d%H"), i)
         mp.postprocess(filename=pngfn)
         mp.close()
-
-        subprocess.call(
-            ("convert %s " "%s.gif") % (pngfn, pngfn[:-4]), shell=True
-        )
+        subprocess.call("convert %s %s.gif" % (pngfn, pngfn[:-4]), shell=True)
 
         i += 1
 
@@ -125,10 +127,7 @@ def run(valid, routes):
         stderr=subprocess.PIPE,
         stdout=subprocess.PIPE,
     )
-
-    subprocess.call(
-        "rm -f /tmp/hrrr_ref_%s*" % (valid.strftime("%Y%m%d%H"),), shell=True
-    )
+    subprocess.call(f"rm -f /tmp/hrrr_ref_{valid:%Y%m%d%H}*", shell=True)
 
 
 def main(argv):
@@ -146,5 +145,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    # go go gadget
     main(sys.argv)
