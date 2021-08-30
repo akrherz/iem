@@ -374,7 +374,7 @@ def m15_process(nwsli, maxts):
         tmpc = units("degC") * row["tair_c_avg_qc"]
         tmpf = tmpc.to(units("degF")).m
         relh = units("percent") * row["rh_avg_qc"]
-        if (-39 < tmpf < 140) and (0 < relh < 101):
+        if (-39 < tmpf < 140) and (0 < relh.m < 101):
             ob.data["tmpf"] = tmpf
             ob.data["relh"] = relh.m
             ob.data["dwpf"] = (
@@ -425,7 +425,7 @@ def hourly_process(nwsli, maxts):
         tmpc = units("degC") * row["tair_c_avg_qc"]
         tmpf = tmpc.to(units("degF")).m
         relh = units("percent") * row["rh_avg_qc"]
-        if -40 < tmpf < 140 and 0 < relh < 101:
+        if -40 < tmpf < 140 and 0 < relh.m < 101:
             ob.data["tmpf"] = tmpf
             ob.data["relh"] = relh.m
             ob.data["dwpf"] = (
