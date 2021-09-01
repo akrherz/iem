@@ -2,7 +2,6 @@
 import datetime
 import json
 
-import pytz
 import psycopg2.extras
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
@@ -234,16 +233,10 @@ def application(environ, start_response):
         ts = datetime.datetime.strptime(dt, "%Y-%m-%dT%H:%M:%S.000Z")
         ts = ts.replace(tzinfo=datetime.timezone.utc)
     with get_dbconn("isuag") as pgconn:
-        if field.get("inversion") is None:
-            data = get_data(
-                pgconn,
-                ts.astimezone(pytz.timezone("America/Chicago")),
-            )
-        else:
-            data = get_inversion_data(
-                pgconn,
-                ts.astimezone(pytz.timezone("America/Chicago")),
-            )
+        func = (
+            get_data if field.get("inversion") is None else get_inversion_data
+        )
+        data = func(pgconn, ts)
 
     start_response("200 OK", headers)
     return [data.encode("ascii")]
