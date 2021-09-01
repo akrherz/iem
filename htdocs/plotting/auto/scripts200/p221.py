@@ -157,7 +157,7 @@ def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     valid = ctx["valid"].replace(tzinfo=datetime.timezone.utc)
-    ramp = ramp2df("composite_n0q.txt")
+    ramp = ramp2df("composite_n0q")
     ctx["cmap"] = mpcolors.ListedColormap(
         ramp[["r", "g", "b"]].to_numpy() / 256,
     )
