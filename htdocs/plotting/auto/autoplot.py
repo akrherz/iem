@@ -15,6 +15,7 @@ import numpy as np
 import memcache
 import pytz
 import pandas as pd
+from PIL import Image
 from paste.request import parse_formvars
 from six import string_types
 from pyiem.util import utc
@@ -220,23 +221,31 @@ def workflow(environ, form, fmt):
         )
     elif fmt in ["js", "geojson"]:
         content = mixedobj
-    elif fmt in ["svg", "png", "pdf"] and isinstance(mixedobj, plt.Figure):
-        # if our content is a figure, then add some fancy metadata to plot
-        if meta.get("plotmetadata", True):
-            plot_metadata(mixedobj, start_time, scriptnum)
-        ram = BytesIO()
-        plt.savefig(ram, format=fmt, dpi=dpi)
-        plt.close()
-        ram.seek(0)
-        content = ram.read()
-        del ram
-    elif fmt in ["svg", "png", "pdf"] and mixedobj is None:
-        return (
-            HTTP400,
-            error_image(
-                ("plot requested but backend " "does not support plots"), fmt
-            ),
-        )
+    elif fmt in ["svg", "png", "pdf"]:
+        if isinstance(mixedobj, plt.Figure):
+            # if our content is a figure, then add some fancy metadata to plot
+            if meta.get("plotmetadata", True):
+                plot_metadata(mixedobj, start_time, scriptnum)
+            ram = BytesIO()
+            plt.savefig(ram, format=fmt, dpi=dpi)
+            plt.close()
+            ram.seek(0)
+            content = ram.read()
+            del ram
+        elif isinstance(mixedobj, Image.Image):
+            ram = BytesIO()
+            mixedobj.save(ram, fmt)
+            ram.seek(0)
+            content = ram.read()
+            del ram
+
+        elif mixedobj is None:
+            return (
+                HTTP400,
+                error_image(
+                    ("plot requested but backend does not support plots"), fmt
+                ),
+            )
     elif fmt == "txt" and report is not None:
         content = report
     elif fmt in ["csv", "xlsx"] and df is not None:
