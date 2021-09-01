@@ -659,7 +659,10 @@ nopts = [
     {"id": 195, "label": "Storm Motion distribution based on NWS Warnings"},
     {
         "id": 201,
-        "label": "Storm Prediction Center (SPC) Convective Outlook Calendar",
+        "label": (
+            "SPC Convective/Fire Wx or "
+            "WPC Excessive Rainfall Outlook Calendar"
+        ),
     },
     {"id": 200, "label": "SPC + WPC Outlook Heatmap"},
     {

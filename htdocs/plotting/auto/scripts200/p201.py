@@ -7,7 +7,11 @@ from pyiem.reference import state_names
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = {"C": "Convective", "F": "Fire Weather"}
+PDICT = {
+    "C": "Convective",
+    "E": "Excessive Rainfall",
+    "F": "Fire Weather",
+}
 PDICT2 = dict(
     (
         ("all", "Summarize for CONUS"),
@@ -49,13 +53,14 @@ def get_description():
     desc[
         "description"
     ] = """This application presents a calendar of Storm
-    Prediction Center outlooks by state, WFO, or county.
+    Prediction Center or Weather Prediction Center
+    outlooks by state, WFO, or county.
     The GIS spatial operation
     done is a simple touches.  So an individual outlook that just barely
     scrapes the selected area would count for this presentation.  Suggestions
     would be welcome as to how this could be improved.
 
-    <p>This app attempts to not double-count outlook days.  A SPC Outlook
+    <p>This app attempts to not double-count outlook days.  A SPC/WPC Outlook
     technically crosses two calendar days ending at 12 UTC (~7 AM). This
     application considers the midnight to ~7 AM period to be for the
     previous day, which is technically not accurate but the logic that most
@@ -260,8 +265,13 @@ def plotter(fdict):
         sts,
         ets,
         data,
-        title="Highest SPC Day %s %s Outlook for %s"
-        % (day, PDICT[outlook_type], title2),
+        title="Highest %s Day %s %s Outlook for %s"
+        % (
+            "WPC" if outlook_type == "E" else "SPC",
+            day,
+            PDICT[outlook_type],
+            title2,
+        ),
         subtitle="Valid %s - %s"
         % (sts.strftime("%d %b %Y"), ets.strftime("%d %b %Y")),
     )
