@@ -6,9 +6,8 @@ from io import BytesIO
 import pygrib
 from PIL import Image
 import numpy as np
-import pandas as pd
 import matplotlib.colors as mpcolors
-from pyiem.plot import MapPlot
+from pyiem.plot import MapPlot, ramp2df
 from pyiem.util import get_autoplot_context, utc
 
 PDICT = {
@@ -158,10 +157,7 @@ def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     valid = ctx["valid"].replace(tzinfo=datetime.timezone.utc)
-    ramp = pd.read_csv(
-        "/home/akrherz/projects/pyIEM/src/pyiem/data/ramps/"
-        "composite_n0q.txt"
-    )
+    ramp = ramp2df("composite_n0q.txt")
     ctx["cmap"] = mpcolors.ListedColormap(
         ramp[["r", "g", "b"]].to_numpy() / 256,
     )
