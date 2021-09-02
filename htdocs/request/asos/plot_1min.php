@@ -12,7 +12,7 @@ $sqlStr .= " WHERE valid >= '".$sqlTS1."' and valid <= '".$sqlTS2 ."' ";
 $sqlStr .= " and extract(minute from valid)::int % ".$sampleStr[$sample] ." = 0 ";
 $sqlStr .= " and station = '". $stations[0][0] ."' ORDER by valid ASC";
 
-$connection = iemdb("asos");
+$connection = iemdb("asos1min");
 
 if ($tz == 'UTC'){
 	$query1 = "SET TIME ZONE 'GMT'";
