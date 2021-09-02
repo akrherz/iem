@@ -21,6 +21,10 @@ PDICT2 = {
     "all": "Use All VTEC Events",
     "set": "Use Requested VTEC Events From Form",
 }
+PDICT3 = {
+    "yes": "Only Emergencies",
+    "all": "All Events",
+}
 
 
 def get_description():
@@ -124,6 +128,13 @@ def get_description():
             optional=True,
             label="VTEC Phenomena and Significance 4",
         ),
+        dict(
+            type="select",
+            name="e",
+            default="all",
+            label="Only plot Emergencies?",
+            options=PDICT3,
+        ),
         dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
     ]
     return desc
@@ -132,6 +143,9 @@ def get_description():
 def get_count_df(ctx, pgconn, varname, pstr, sts, ets):
     """Oh boy, do complex things."""
 
+    emerg_extra = ""
+    if ctx["e"] == "yes":
+        emerg_extra = " and is_emergency "
     if varname.startswith("count_"):
         if (ets - sts).days > 366:
             raise ValueError("Can't compute over period > 366 days")
@@ -159,7 +173,7 @@ def get_count_df(ctx, pgconn, varname, pstr, sts, ets):
             with events as (
                 select distinct wfo, {yearcol} as year,
                 phenomena, eventid from warnings where {pstr} and
-                {slimiter} and issue > '{sdate}')
+                {slimiter} and issue > '{sdate}' {emerg_extra})
             select wfo, year::int as year, count(*) from events
             group by wfo, year
             """,
@@ -195,7 +209,7 @@ def get_count_df(ctx, pgconn, varname, pstr, sts, ets):
             select distinct wfo,
             extract(year from issue at time zone 'UTC') as year,
             phenomena, significance, eventid from warnings
-            where {pstr} and issue >= %s and issue < %s
+            where {pstr} and issue >= %s and issue < %s {emerg_extra}
             )
 
             SELECT wfo, count(*) from total
@@ -324,6 +338,10 @@ def plotter(fdict):
     cmap = get_cmap(ctx["cmap"])
 
     extend = "neither"
+    emerg_extra = ""
+    if ctx["e"] == "yes":
+        emerg_extra = " and is_emergency "
+        title += " (Emergencies) "
     if varname.startswith("count"):
         df = get_count_df(ctx, pgconn, varname, pstr, sts, ets)
 
@@ -347,7 +365,7 @@ def plotter(fdict):
         WITH data as (
             SELECT distinct wfo, generate_series(greatest(issue, %s),
             least(expire, %s), '1 minute'::interval) as ts from warnings
-            WHERE issue > %s and expire < %s and {pstr}
+            WHERE issue > %s and expire < %s and {pstr} {emerg_extra}
         ), agg as (
             SELECT distinct wfo, date(ts) from data
         )
@@ -380,7 +398,7 @@ def plotter(fdict):
         WITH data as (
             SELECT distinct wfo, generate_series(greatest(issue, %s),
             least(expire, %s), '1 minute'::interval) as ts from warnings
-            WHERE issue > %s and expire < %s and {pstr}
+            WHERE issue > %s and expire < %s and {pstr} {emerg_extra}
         )
         select wfo, count(*) / %s * 100. as tpercent from data
         GROUP by wfo ORDER by tpercent DESC

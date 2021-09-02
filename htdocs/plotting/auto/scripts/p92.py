@@ -8,9 +8,14 @@ from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
 
+PDICT = {
+    "yes": "Only Emergencies",
+    "all": "All Events",
+}
+
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 3600
@@ -34,6 +39,13 @@ def get_description():
             label="Select Watch/Warning Significance Level:",
         ),
         dict(
+            type="select",
+            options=PDICT,
+            default="all",
+            label="For TOR/FFW Warnings, plot emergencies?",
+            name="e",
+        ),
+        dict(
             type="date",
             default=datetime.date.today().strftime("%Y/%m/%d"),
             optional=True,
@@ -45,7 +57,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     bins = [0, 1, 14, 31, 91, 182, 273, 365, 730, 1460, 2920, 3800]
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -53,22 +65,25 @@ def plotter(fdict):
     phenomena = ctx["phenomena"]
     significance = ctx["significance"]
     edate = ctx.get("edate")
+    emerg_extra = ""
+    if ctx["e"] == "yes":
+        emerg_extra = " and is_emergency "
     if edate is not None:
         edate = utc(edate.year, edate.month, edate.day, 0, 0)
         cursor.execute(
-            """
+            f"""
          select wfo,  extract(days from (%s::date - max(issue))) as m
          from warnings where significance = %s and phenomena = %s
-         and issue < %s
+         and issue < %s {emerg_extra}
          GROUP by wfo ORDER by m ASC
         """,
             (edate, significance, phenomena, edate),
         )
     else:
         cursor.execute(
-            """
+            f"""
          select wfo,  extract(days from ('TODAY'::date - max(issue))) as m
-         from warnings where significance = %s and phenomena = %s
+         from warnings where significance = %s and phenomena = %s {emerg_extra}
          GROUP by wfo ORDER by m ASC
         """,
             (significance, phenomena),
@@ -97,8 +112,11 @@ def plotter(fdict):
         sector="nws",
         axisbg="white",
         nocaption=True,
-        title="Days since Last %s by NWS Office"
-        % (vtec.get_ps_string(phenomena, significance),),
+        title="Days since Last %s%s by NWS Office"
+        % (
+            vtec.get_ps_string(phenomena, significance),
+            " (Emergency) " if ctx["e"] == "yes" else "",
+        ),
         subtitle="Valid %s" % (edate.strftime("%d %b %Y %H%M UTC"),),
     )
     mp.fill_cwas(data, bins=bins, ilabel=True, units="Days", lblformat="%.0f")
