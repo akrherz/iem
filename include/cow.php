@@ -404,7 +404,7 @@ function loadLSRs() {
         	ST_astext(geom) as tgeom,
         	ST_astext(ST_buffer( ST_transform(geom,2163), %s000)) as buffered
         	from lsrs w WHERE %s and 
-        	valid >= '%s' and valid < '%s' and %s and
+            valid >= '%s' and valid <= '%s' and %s and
         	((type = 'M' and magnitude >= 34) or type = '2' or
          	(type = 'H' and magnitude >= %s) or type = 'W' or
          	type = 'T' or (type = 'G' and magnitude >= %s) or type = 'D'
