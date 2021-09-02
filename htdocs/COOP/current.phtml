@@ -67,14 +67,18 @@ EOF;
 }
 
 if (is_null($wfo)){
-    $uri = "http://iem.local/api/1/currents.json?network=$network";
+    $arr = Array(
+        "network" => $network,
+    );
     $baseurl = "current.phtml?network=$network";
 } else {
-    $uri = "http://iem.local/api/1/currents.json?networkclass=COOP&wfo=$wfo";
+    $arr = Array(
+        "networkclass" => "COOP",
+        "wfo" => $wfo,
+    );
     $baseurl = "current.phtml?wfo=$wfo";
 }
-$jdata = file_get_contents($uri);
-$jobj = json_decode($jdata, $assoc=TRUE);
+$jobj = iemws_json("currents.json", $arr);
 
 $db = Array();
 foreach($jobj["data"] as $bogus => $iemob){

@@ -7,12 +7,11 @@
  require_once "../../include/mlib.php";
  $nt = new NetworkTable("ISUSM");
 
- $ENDPOINT_URI = "http://iem.local/api/1/currents.json?network=ISUSM";
- $PUBLIC_URI = str_replace(
-	 "iem.local", "mesonet.agron.iastate.edu", $ENDPOINT_URI
+ $PUBLIC_URI = "https://mesonet.agron.iastate.edu/api/1/currents.json?network=ISUSM";
+$arr = Array(
+    "network" => "ISUSM",
 );
- $jdata = file_get_contents($ENDPOINT_URI);
- $jobj = json_decode($jdata, $assoc=TRUE);
+$jobj = iemws_json("currents.json", $arr);
 
  function pretty($val, $fmt){
 	 // Pretty print things for the table

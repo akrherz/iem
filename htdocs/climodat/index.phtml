@@ -234,9 +234,6 @@ EOF;
 				$xref[$report], $station, $network);
 		$content .= file_get_contents($uri);
 	} 
-	elseif (is_file("/mesonet/share/climodat/reports/${station}_$report.txt")){
-		$content .= file_get_contents("/mesonet/share/climodat/reports/${station}_$report.txt");
-	}
 	$content .= "</pre>\n";
 } else {
 	$content .= <<<EOF

@@ -1,6 +1,39 @@
 <?php
-//   mlib.php
-// Library of functions
+// Helper to make an IEM webservice call, returns FALSE if fails
+function iemws_json($endpoint, $args){
+    // Everything is method get at the moment
+    $cgi = http_build_query($args);
+    $uri = "http://iem-web-services.local:8000/${endpoint}?${cgi}";
+    // Try twice to get the content
+    $jobj = FALSE;
+    for ($i=0; $i < 2; $i++){
+        $res = file_get_contents($uri);
+        if ($res === FALSE){
+            openlog("iem", LOG_PID | LOG_PERROR, LOG_LOCAL1);
+            syslog(LOG_WARNING, "iemws fail  from:". $_SERVER["REQUEST_URI"] .
+            ' remote: '. $_SERVER["REMOTE_ADDR"] .
+            ' to: '. $uri);
+            closelog();
+            sleep(3);
+            continue;
+        }
+        try {
+            $jobj = json_decode($res, $assoc=TRUE);
+            break;
+        } catch (Exception $e) {
+            // Log
+            openlog("iem", LOG_PID | LOG_PERROR, LOG_LOCAL1);
+            syslog(
+                LOG_WARNING,
+                "iemws jsonfail  from:". $_SERVER["REQUEST_URI"] .
+                ' remote: '. $_SERVER["REMOTE_ADDR"] .
+                ' msg: '. $e .
+                ' to: '. $uri);
+            closelog();
+        }
+    }
+    return $jobj;
+}
 
 // Make sure a page is HTTPS when called
 function force_https(){

@@ -18,9 +18,10 @@ function make_link($sid){
 
 
 $mydata = Array();
-
-$jdata = file_get_contents("http://iem.local/api/1/currents.json?network=SCAN");
-$jobj = json_decode($jdata, $assoc=TRUE);
+$arr = Array(
+    "network" => "SCAN",
+);
+$jobj = iemws_json("currents.json", $arr);
 
 foreach($jobj["data"] as $bogus => $iemob){
     $key = $iemob["station"];

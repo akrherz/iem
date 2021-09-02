@@ -39,8 +39,10 @@ $uri = "current.phtml?network=${network}&sortcol=";
 
 $mydata = Array();
 
-$jdata = file_get_contents("http://iem.local/api/1/currents.json?network=${network}");
-$jobj = json_decode($jdata, $assoc=TRUE);
+$arr = Array(
+    "network" => $network,
+);
+$jobj = iemws_json("currents.json", $arr);
 
 foreach($jobj["data"] as $bogus => $ob){
     $key = $ob["station"];
