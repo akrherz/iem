@@ -13,3 +13,8 @@ import cartopy
 
 print("cartopy.config is...")
 print(cartopy.config)
+
+if cartopy.config.get("pre_existing_data_dir", "") == "":
+    cartopy.config[
+        "pre_existing_data_dir"
+    ] = "/opt/miniconda3/envs/prod/share/cartopy"
