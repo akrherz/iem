@@ -43,6 +43,8 @@ jobs:
         echo "export PATH=/home/runner/miniconda/envs/prod/bin:$PATH" | sudo tee -a /etc/apache2/envvars > /dev/null
         # Newer PROJ needs this
         echo "export PROJ_LIB=/home/runner/miniconda/envs/prod/share/proj" | sudo tee -a /etc/apache2/envvars > /dev/null
+        # cartopy_offline SciTools/cartopy#1298
+        echo "export CARTOPY_OFFLINE_SHARED=/home/runner/miniconda/envs/prod/share/cartopy" | sudo tee -a /etc/apache2/envvars > /dev/null
         . .ci_tooling/miniconda.sh
         # https://travis-ci.community/t/t/712/12
         export PATH="/usr/lib/postgresql/12/bin:$PATH"
