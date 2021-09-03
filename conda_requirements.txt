@@ -84,6 +84,8 @@ setuptools-markdown
 shapely
 # various dumpers
 simplejson
+# setuptools_scm pain
+tomli
 # scripts
 tqdm
 # AHPS scripts
