@@ -76,6 +76,8 @@ requests
 scipy
 # autoplots
 seaborn
+# workaround pip issues?
+setuptools_scm
 # needed for downstream pip install?
 setuptools-markdown
 # cow et al
