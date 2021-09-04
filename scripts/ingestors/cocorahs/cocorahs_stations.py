@@ -41,7 +41,9 @@ def main(argv):
         if cols[header["StationStatus"]].strip() == "Closed":
             continue
         sid = cols[header["StationNumber"]]
-        name = cols[header["StationName"]].strip().replace("'", " ")
+        name = cols[header["StationName"]].strip().replace("'", " ").strip()
+        if name == "":
+            name = sid
         cnty = cols[header["County"]].strip().replace("'", " ")
         lat = float(cols[header["Latitude"]].strip())
         lon = float(cols[header["Longitude"]].strip())
@@ -70,6 +72,18 @@ def main(argv):
                 "id = %s and network = %s",
                 (lon, lat, sid, network),
             )
+            if name != nt.sts[sid]["name"]:
+                LOG.info(
+                    "Updating %s name '%s' -> '%s'",
+                    sid,
+                    nt.sts[sid]["name"],
+                    name,
+                )
+                mcursor.execute(
+                    "UPDATE stations SET name = %s, plot_name = %s where "
+                    "id = %s and network = %s",
+                    (name, name, sid, network),
+                )
             continue
 
         LOG.info(

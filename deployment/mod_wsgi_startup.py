@@ -7,3 +7,10 @@ os.environ["MPLCONFIGDIR"] = "/var/cache/matplotlib"
 
 from pyiem.plot.use_agg import plt
 import pandas
+
+import cartopy
+
+if cartopy.config.get("pre_existing_data_dir", "") == "":
+    cartopy.config[
+        "pre_existing_data_dir"
+    ] = "/opt/miniconda3/envs/prod/share/cartopy"

@@ -5,6 +5,8 @@ affine
 beautifulsoup4
 # plotting
 cartopy
+# don't download stuff
+cartopy_offlinedata
 # pytest
 coverage
 # upload scripts
