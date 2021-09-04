@@ -94,7 +94,7 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 <br /><input type="checkbox" name="vars" value="rh">Average Relative Humidity [%]
 <br /><input type="checkbox" name="vars" value="rh_max">Maximum Relative Humidity [%]
 <br /><input type="checkbox" name="vars" value="gdd50">Growing Degree Days (base 50) [F]
-<br /><input type="checkbox" name="vars" value="solar">Solar Radiation [MJ]
+<br /><input type="checkbox" name="vars" value="solar">Solar Radiation [MJ/m^2]
 <br /><input type="checkbox" name="vars" value="precip">Precipitation [inch]
 <br /><input type="checkbox" name="vars" value="sped">Average Wind Speed [mph]
 <br /><input type="checkbox" name="vars" value="gust">Wind Gust [mph]
