@@ -8,11 +8,7 @@ os.environ["MPLCONFIGDIR"] = "/var/cache/matplotlib"
 from pyiem.plot.use_agg import plt
 import pandas
 
-# Temp debugging
 import cartopy
-
-print("cartopy.config is...")
-print(cartopy.config)
 
 if cartopy.config.get("pre_existing_data_dir", "") == "":
     cartopy.config[
