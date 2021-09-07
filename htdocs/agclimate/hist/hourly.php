@@ -84,7 +84,7 @@ wish to change this to <a href="daily.php">daily data</a>.
 <strong>Select from available variables</strong><br />
 <input type="checkbox" name="vars" value="tmpf">Air Temperature [F]
 <br /><input type="checkbox" name="vars" value="relh">Relative Humidity [%]
-<br /><input type="checkbox" name="vars" value="solar">Solar Radiation [J]
+<br /><input type="checkbox" name="vars" value="solar">Solar Radiation [J/m2]
 <br /><input type="checkbox" name="vars" value="precip">Precipitation [inch]
 <br /><input type="checkbox" name="vars" value="speed">Average Wind Speed [mph]
 <br /><input type="checkbox" name="vars" value="drct">Wind Direction [deg]
@@ -146,7 +146,7 @@ wish to change this to <a href="daily.php">daily data</a>.
  <dt>valid</dt><dd>Timestamp of the observation either in CST or CDT</dd>
  <dt>tmpf</dt><dd>Air Temperature [F]</dd>
  <dt>relh</dt><dd>Relative Humidity [%]</dd>
- <dt>solar</dt><dd>Solar Radiation [Joules]</dd>
+ <dt>solar</dt><dd>Solar Radiation [Joule/m2]</dd>
  <dt>precip</dt><dd>One Hour Precipitation [inch]</dd>
  <dt>sped</dt><dd>Wind Speed [mph], 10 minute average, 10 ft above ground</dd>
  <dt>drct</dt><dd>Wind Direction [degrees North], 10 minute average, 10 ft above ground</dd>
