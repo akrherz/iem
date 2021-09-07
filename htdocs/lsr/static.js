@@ -575,6 +575,9 @@ function initUI() {
         rowId: 'id',
         columns: [
             {
+                "data": "valid",
+                "visible": false
+            }, {
                 "className": 'details-control',
                 "orderable": false,
                 "data": null,
@@ -583,7 +586,8 @@ function initUI() {
                 "data": "wfo"
             }, {
                 "data": "valid",
-                "type": "datetime"
+                "type": "datetime",
+                "orderData": [0]
             }, {
                 "data": "county"
             }, {
@@ -598,7 +602,7 @@ function initUI() {
         ],
         columnDefs: [
             {
-                targets: 2,
+                targets: 3,
                 render: function (data) {
                     return moment.utc(data).local().format('M/D LT');
                 }
@@ -627,6 +631,12 @@ function initUI() {
     sbwtable = $("#sbwtable").DataTable({
         columns: [
             {
+                "data": "issue",
+                "visible": false
+            }, {
+                "data": "expire",
+                "visible": false
+            }, {
                 "data": "wfo"
             }, {
                 "data": "phenomena"
@@ -635,24 +645,26 @@ function initUI() {
             }, {
                 "data": "eventid"
             }, {
-                "data": "issue"
+                "data": "issue",
+                "orderData": [0]
             }, {
-                "data": "expire"
+                "data": "expire",
+                "orderData": [1]
             }
         ],
         columnDefs: [
             {
-                targets: 1,
+                targets: 3,
                 render: function (data) {
                     return data in iemdata.vtec_phenomena ? iemdata.vtec_phenomena[data] : data;
                 }
             }, {
-                targets: 2,
+                targets: 4,
                 render: function (data) {
                     return data in iemdata.vtec_significance ? iemdata.vtec_significance[data] : data;
                 }
             }, {
-                targets: 3,
+                targets: 5,
                 render: function (data, type, row, meta) {
                     if (type == 'display') {
                         return '<a href="' + row.href + '">' + row.eventid + '</a>';
@@ -660,7 +672,7 @@ function initUI() {
                     return row.eventid;
                 }
             }, {
-                targets: [4, 5],
+                targets: [6, 7],
                 render: function (data) {
                     return moment.utc(data).local().format('M/D LT');
                 }
