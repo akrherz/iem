@@ -357,11 +357,11 @@ def plotter(fdict):
 if __name__ == "__main__":
     plotter(
         dict(
-            phenomenav="FF",
-            significancev="W",
-            wfo="FGZ",
+            phenomenav="HT",
+            significancev="Y",
+            wfo="HNX",
             year=2021,
-            etn=18,
-            valid="2021-07-29 0100",
+            etn=10,
+            valid="2021-09-08 1450",
         )
     )

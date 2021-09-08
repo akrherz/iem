@@ -32,16 +32,16 @@ if ($metadata["archive_begin"]){
     }
 }
 
-$wsuri = sprintf("http://iem.local/api/1/scp.json?station=%s&date=%s",
-    $station, date("Y-m-d", $date));
 $exturi = sprintf("https://mesonet.agron.iastate.edu/".
     "api/1/scp.json?station=%s&amp;date=%s",
     $station, date("Y-m-d", $date));
-$data = file_get_contents($wsuri);
-if ($data === FALSE) {
+$arr = Array(
+    "station" => $station,
+    "date" => date("Y-m-d", $date),
+);
+$json = iemws_json("scp.json", $arr);
+if ($json === FALSE) {
     $json = Array("data" => Array());
-} else {
-    $json = json_decode($data, $assoc=TRUE);
 }
 
 $birds = Array();
@@ -50,7 +50,7 @@ $header = "";
 $header2 = "";
 foreach($possible as $value => $label){
     $lookup = sprintf("mid_%s", $value);
-    if (array_key_exists($lookup, $json["data"][0])){
+    if (sizeof($json["data"]) > 0 && array_key_exists($lookup, $json["data"][0])){
         $birds[] = $value;
         $header .= "<th colspan=\"4\" class=\"rl\">Satellite $label</th>";
         $header2 .= "<th>Mid Clouds</th><th>High Clouds</th><th>Levels [ft]</th><th class=\"rl\">ECA [%]</th>";

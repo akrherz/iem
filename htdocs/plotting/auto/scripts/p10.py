@@ -1,25 +1,23 @@
 """First and Last Date"""
 import calendar
 import datetime
-from collections import OrderedDict
 
 import psycopg2.extras
 import numpy as np
 from scipy import stats
 import pandas as pd
-from pyiem import network
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
+PDICT = dict(
     (
         ("above", "First Spring/Last Fall Temperature Above (>=) Threshold"),
         ("above2", "Last Spring/First Fall Temperature Above (>=) Threshold"),
         ("below", "Last Spring/First Fall Temperature Below Threshold"),
     )
 )
-PDICT2 = OrderedDict(
+PDICT2 = dict(
     (
         ("high", "High Temperature"),
         ("low", "Low Temperature"),
@@ -30,7 +28,7 @@ PDICT2 = OrderedDict(
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["report"] = True
@@ -77,7 +75,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ccursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
@@ -88,7 +86,6 @@ def plotter(fdict):
     startyear = ctx["year"]
 
     table = "alldata_%s" % (station[:2],)
-    nt = network.Table("%sCLIMATE" % (station[:2],))
 
     if direction == "below":
         sql = f"""select year,
@@ -163,10 +160,10 @@ def plotter(fdict):
    YEAR MONTH DAY DOY         MONTH DAY DOY   LENGTH OF SEASON
 """ % (
         datetime.date.today().strftime("%d %b %Y"),
-        nt.sts[station]["archive_begin"].date(),
+        ctx["_nt"].sts[station]["archive_begin"].date(),
         datetime.date.today(),
         station,
-        nt.sts[station]["name"],
+        ctx["_nt"].sts[station]["name"],
         station,
         threshold,
     )
@@ -250,7 +247,7 @@ def plotter(fdict):
     units = r"$^\circ$F" if not varname.startswith("snow") else "inch"
     ax.set_title(
         ("[%s] %s\n" r"%s %s%s")
-        % (station, nt.sts[station]["name"], title, threshold, units)
+        % (station, ctx["_nt"].sts[station]["name"], title, threshold, units)
     )
     ax.legend(ncol=2, fontsize=14, labelspacing=2)
     ax.set_yticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))

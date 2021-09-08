@@ -165,17 +165,19 @@ def plotter(fdict):
             plotmissing=False,
             zorder=Z_OVERLAY2 - 1,
         )
-    radtime = mp.overlay_nexrad(df["issue"][0].to_pydatetime())
-    mp.fig.text(
-        0.65,
-        0.02,
-        "RADAR Valid: %s" % (radtime.astimezone(tz).strftime(TFORMAT),),
-        ha="center",
-    )
+    prod = "N0Q" if df["issue"][0].year > 2010 else "N0R"
+    radtime = mp.overlay_nexrad(df["issue"][0].to_pydatetime(), product=prod)
+    if radtime is not None:
+        mp.fig.text(
+            0.65,
+            0.02,
+            "RADAR Valid: %s" % (radtime.astimezone(tz).strftime(TFORMAT),),
+            ha="center",
+        )
     mp.drawcities()
     mp.drawcounties()
     return mp.fig, df.drop("geom", axis=1)
 
 
 if __name__ == "__main__":
-    plotter({"pid": "202106232029-PAFG-WWAK83-SPSAFG", "segnum": 0})
+    plotter({"pid": "200202021200-KTSA-WWUS84-SPSTUL", "segnum": 0})

@@ -153,7 +153,6 @@ def plotter(fdict):
 
     dbconn = get_dbconn("coop")
     cltable1, clstation1 = pick_climate(ctx, "1")
-    cltable2, clstation2 = pick_climate(ctx, "2")
 
     if c1 == "custom":
         df = read_sql(
@@ -181,6 +180,7 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("Failed to find data for station1")
     if station2:
+        cltable2, clstation2 = pick_climate(ctx, "2")
         if c2 == "custom":
             df2 = read_sql(
                 "SELECT sday, station, avg(high) as high, avg(low) as low, "

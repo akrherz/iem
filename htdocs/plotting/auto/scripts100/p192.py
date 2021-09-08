@@ -1,6 +1,5 @@
 """Generalized mapper of AZOS data"""
 import datetime
-from collections import OrderedDict
 
 import pytz
 import numpy as np
@@ -14,9 +13,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
-PDICT2 = OrderedDict(
-    (("vsby", "Visibility"), ("feel", "Feels Like Temperature"))
-)
+PDICT2 = {"vsby": "Visibility", "feel": "Feels Like Temperature"}
 
 
 def get_description():
@@ -193,11 +190,14 @@ def plotter(fdict):
                 df["tmpf"].values * units("degF"),
                 df["relh"].values * units("percent"),
                 df["sknt"].values * units("knots"),
+                mask_undefined=False,
             )
             .to(units("degF"))
             .m
         )
         df = df[~pd.isna(df["feel"])]
+    if df.empty:
+        raise ValueError("No Data Found")
     # Data QC, cough
     if ctx.get("above"):
         df = df[df[varname] < ctx["above"]]
@@ -208,7 +208,6 @@ def plotter(fdict):
         ramp = np.linspace(
             df[varname].min() - 5, df[varname].max() + 5, 10, dtype="i"
         )
-
     mp.contourf(
         df["lon"].values,
         df["lat"].values,
@@ -237,4 +236,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(v="feel"))
+    plotter(dict(v="feel", valid="2021-09-08 1500"))

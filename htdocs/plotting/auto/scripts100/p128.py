@@ -11,7 +11,9 @@ PDICT = dict(
         ("avg_low", "Average Low Temperature"),
         ("avg_temp", "Average Temperature"),
         ("max_high", "Maximum Daily High"),
+        ("min_high", "Minimum Daily High"),
         ("max_low", "Maximum Daily Low"),
+        ("min_low", "Minimum Daily Low"),
         ("total_precip", "Total Precipitation"),
     ]
 )
@@ -65,20 +67,28 @@ def plotter(fdict):
         f"""WITH one as (
       SELECT year, sum(precip) as one_total_precip,
       avg(high) as one_avg_high, avg(low) as one_avg_low,
-      avg((high+low)/2.) as one_avg_temp, max(high) as one_max_high,
-      min(low) as one_min_low from {table1} WHERE
+      avg((high+low)/2.) as one_avg_temp,
+      max(high) as one_max_high,
+      min(high) as one_min_high,
+      min(low) as one_min_low,
+      max(low) as one_max_low from {table1} WHERE
       station = %s GROUP by year),
     two as (
       SELECT year, sum(precip) as two_total_precip,
       avg(high) as two_avg_high, avg(low) as two_avg_low,
-      avg((high+low)/2.) as two_avg_temp, max(high) as two_max_high,
-      min(low) as two_min_low from {table2} WHERE
+      avg((high+low)/2.) as two_avg_temp,
+      max(high) as two_max_high,
+      min(high) as two_min_high,
+      min(low) as two_min_low,
+      max(low) as two_max_low from {table2} WHERE
       station = %s GROUP by year
     )
 
     SELECT o.year, one_total_precip, one_avg_high, one_avg_low,
-    one_avg_temp, one_max_high, one_min_low, two_total_precip, two_avg_high,
-    two_avg_low, two_avg_temp, two_max_high, two_min_low from one o JOIN two t
+    one_avg_temp, one_max_high, one_min_low, one_min_high, one_max_low,
+    two_total_precip, two_avg_high,
+    two_avg_low, two_avg_temp, two_max_high, two_min_low, two_min_high,
+    two_max_low from one o JOIN two t
     on (o.year = t.year) ORDER by o.year ASC
     """,
         pgconn,
@@ -89,14 +99,7 @@ def plotter(fdict):
         raise NoDataFound("No Data Found.")
     df["one_station"] = station1
     df["two_station"] = station2
-    for col in [
-        "total_precip",
-        "avg_high",
-        "avg_low",
-        "max_high",
-        "min_low",
-        "avg_temp",
-    ]:
+    for col in PDICT:
         df["diff_" + col] = df["one_" + col] - df["two_" + col]
 
     title = "Yearly %s [%s] %s\nminus [%s] %s" % (
@@ -152,7 +155,7 @@ def plotter(fdict):
 if __name__ == "__main__":
     plotter(
         dict(
-            var="max_high",
+            var="max_low",
             network1="NYCLIMATE",
             station1="NYTNYC",
             network2="MACLIMATE",

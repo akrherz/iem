@@ -23,7 +23,8 @@ def get_description():
     source of the report.  This plot summarizes the number of reports
     received each year by each source type.  The values are the ranks for
     that year with 1 indicating the largest.  The values following the LSR
-    event type in parenthesis are the raw LSR counts for that year."""
+    event type in parenthesis are the raw LSR counts for that year. You need
+    to graph at least two years worth of data to make this plot type work."""
     today = datetime.date.today()
     ltypes = list(lsr_events.keys())
     ltypes.sort()
@@ -72,6 +73,8 @@ def plotter(fdict):
     station = ctx["station"][:4]
     syear = ctx["year"]
     eyear = ctx["eyear"]
+    if syear == eyear:
+        syear = eyear - 1
     # optional parameter, this could return null
     ltype = ctx.get("ltype")
     wfo_limiter = " and wfo = '%s' " % (
@@ -120,7 +123,6 @@ def plotter(fdict):
         if not dyear.empty:
             break
         year += 1
-    syear = year
     i = 1
     ylabels = []
     leftsrcs = []
