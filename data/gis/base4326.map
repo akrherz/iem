@@ -694,6 +694,22 @@ LAYER
       SYMBOL  'circle'
     END
   END
+  # SQ
+  CLASS
+    EXPRESSION /SQ/
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 0 0 0
+      SIZE    4
+      SYMBOL  'circle'
+    END
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 199 21 133
+      SIZE    2
+      SYMBOL  'circle'
+    END
+  END
   # Flood
   CLASS
     EXPRESSION /FF|FA/
