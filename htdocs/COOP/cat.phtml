@@ -143,7 +143,7 @@ EOF;
    $rain = $row["pday"];
    if ($rain == 0.0001) $rain = "T";
    if ($rain == -99 || $rain == "") $rain = "M";
-   if ($rain > 10 || $rain < 0) $rain = "M";
+   if ($rain > 30 || $rain < 0) $rain = "M";
 
    $snow = $row["snow"];
    if ($snow == 0.0001) $snow = "T";
