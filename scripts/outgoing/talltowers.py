@@ -35,7 +35,7 @@ def gen_df(row):
 
 
 def do(row):
-    """Process an actual request for data, please """
+    """Process an actual request for data, please"""
     df = gen_df(row)
     filename = ("/mesonet/share/pickup/talltowers/%s.") % (
         row["valid"].strftime("%Y%m%d%H%M%S"),

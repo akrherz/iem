@@ -28,7 +28,7 @@ def make_url(row):
 
 
 def get_events(ctx):
-    """ Get Events """
+    """Get Events"""
     data = {"sbws": [], "lon": ctx["lon"], "lat": ctx["lat"], "valid": None}
     data["generation_time"] = utc().strftime(ISO)
     valid_limiter = ""

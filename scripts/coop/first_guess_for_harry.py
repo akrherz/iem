@@ -395,7 +395,7 @@ def runner(year, month):
 
 
 def main():
-    """Go Main Go """
+    """Go Main Go"""
     if len(sys.argv) == 1:
         lastmonth = datetime.datetime.now() - datetime.timedelta(days=15)
         fn = runner(lastmonth.year, lastmonth.month)

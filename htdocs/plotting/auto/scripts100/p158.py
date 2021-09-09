@@ -10,7 +10,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -420,7 +420,7 @@ $('<div class="chart">')
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_context(fdict)
 
     (fig, [ax1, ax2, ax3, ax4]) = plt.subplots(

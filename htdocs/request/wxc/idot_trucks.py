@@ -6,7 +6,7 @@ from pyiem.util import get_dbconn
 
 
 def get_data():
-    """ Get the data we want and desire """
+    """Get the data we want and desire"""
     data = """Weather Central 001d0300 IDOT Snow Plows TimeStamp=%s
    6
    20 Station

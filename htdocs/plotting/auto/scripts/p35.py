@@ -22,7 +22,7 @@ PDICT = OrderedDict(
 
 
 def compute_bins(interval):
-    """ Make even intervals centered around zero"""
+    """Make even intervals centered around zero"""
     halfsz = interval / 2.0
     multi = int(80.0 / interval)
     v = halfsz + interval * multi
@@ -31,7 +31,7 @@ def compute_bins(interval):
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["cache"] = 86400
     desc[
@@ -65,7 +65,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("asos")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())

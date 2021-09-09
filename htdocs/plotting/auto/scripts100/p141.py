@@ -36,7 +36,7 @@ PLOTS = OrderedDict(
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["description"] = """ """
@@ -61,7 +61,7 @@ def get_description():
 
 
 def load(dirname, location, sdate):
-    """ Read a file please """
+    """Read a file please"""
     data = []
     idx = []
     mindoy = int(sdate.strftime("%j"))
@@ -115,7 +115,7 @@ def load(dirname, location, sdate):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
 
     location = ctx["location"]

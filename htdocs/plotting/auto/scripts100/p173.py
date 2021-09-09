@@ -13,7 +13,7 @@ UNITCONV = {"mph": "mile / hour", "kt": "knot", "mps": "meter / second"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 86400
@@ -261,7 +261,7 @@ def highcharts(fdict):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_context(fdict)
     (fig, ax) = plt.subplots(1, 1)
     colors = [

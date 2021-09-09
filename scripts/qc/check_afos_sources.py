@@ -18,7 +18,7 @@ nt = NetworkTable(["WFO", "RFC", "NWS", "NCEP", "CWSU", "WSO"])
 
 
 def sample(source, ts):
-    """ Print out something to look at """
+    """Print out something to look at"""
     cursor2.execute(
         "SELECT pil, entered, wmo from products where entered >= %s "
         "and entered < %s and source = %s",
@@ -37,7 +37,7 @@ def sample(source, ts):
 
 
 def look4(ts):
-    """ Let us investigate """
+    """Let us investigate"""
     cursor.execute(
         "SELECT source, count(*) from products WHERE entered >= %s "
         "and entered < %s and source is not null "
@@ -53,7 +53,7 @@ def look4(ts):
 
 
 def main(argv):
-    """ Go Main Go """
+    """Go Main Go"""
     if len(argv) == 4:
         ts = utc(int(argv[1]), int(argv[2]), int(argv[3]))
     else:

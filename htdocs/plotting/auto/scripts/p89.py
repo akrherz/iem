@@ -14,7 +14,7 @@ from pyiem.exceptions import NoDataFound
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     today = datetime.date.today()
     desc[
@@ -131,7 +131,7 @@ def get_data(ctx):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     daythres = ctx["daythres"]
     trailthres = ctx["trailthres"]

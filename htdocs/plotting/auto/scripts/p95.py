@@ -16,7 +16,7 @@ PDICT = {"none": "Show all values", "hide": 'Show "strong" events'}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -69,7 +69,7 @@ def get_description():
 
 
 def title(wanted):
-    """ Make a title """
+    """Make a title"""
     t1 = datetime.date(2000, wanted[0], 1)
     t2 = datetime.date(2000, wanted[-1], 1)
     return "Avg Precip + Temp for %s%s" % (
@@ -79,7 +79,7 @@ def title(wanted):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ccursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())

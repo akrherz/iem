@@ -47,7 +47,7 @@ LEVELS = [
 
 
 def run(ts, routes):
-    """ Run for a given UTC timestamp """
+    """Run for a given UTC timestamp"""
     fn = ts.strftime(
         (
             "/mesonet/ARCHIVE/data/%Y/%m/%d/model/rtma/%H/"

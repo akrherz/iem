@@ -114,7 +114,7 @@ def get_file(station):
 
 
 def get_days_for_month(day):
-    """ Compute the number of days this month """
+    """Compute the number of days this month"""
     nextmo = day + datetime.timedelta(days=35)
     nextmo = nextmo.replace(day=1)
     return (nextmo - day).days
@@ -292,7 +292,7 @@ def process(station, metadata, allow_inserts):
 
 
 def main(argv):
-    """ go main go """
+    """go main go"""
     if len(argv) == 1:
         # Run for our linear random state
         states = list(state_names.keys())

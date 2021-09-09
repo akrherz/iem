@@ -11,7 +11,7 @@ from pyiem.util import html_escape
 
 
 def run():
-    """ Generate json response """
+    """Generate json response"""
     iso = "%Y-%m-%dT%H:%M:%SZ"
     res = {
         "generation_utc_time": datetime.datetime.utcnow().strftime(iso),

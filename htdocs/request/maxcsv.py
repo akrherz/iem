@@ -29,7 +29,7 @@ from pyiem.util import get_dbconn, utc
 
 
 def figurePhase(p1, p2):
-    """ Return a string of the moon phase! """
+    """Return a string of the moon phase!"""
     if p2 < p1:  # Waning!
         if p1 < 0.1:
             return "New Moon"
@@ -140,7 +140,7 @@ def do_webcams(network):
 
 
 def do_iowa_azos(date, itoday=False):
-    """Dump high and lows for Iowa ASOS + AWOS """
+    """Dump high and lows for Iowa ASOS + AWOS"""
     pgconn = get_dbconn("iem")
     df = read_sql(
         f"""

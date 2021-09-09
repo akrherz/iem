@@ -8,7 +8,7 @@ from pyiem.util import get_dbconn
 
 
 def do(environ, headers, vote):
-    """ Do Something, yes do something """
+    """Do Something, yes do something"""
     cookie = SimpleCookie(environ.get("HTTP_COOKIE", ""))
     myoid = 0
     if "foid" in cookie:

@@ -13,7 +13,7 @@ ISO = "%Y-%m-%dT%H:%M:%SZ"
 
 
 def run(product):
-    """ Actually run for this product """
+    """Actually run for this product"""
 
     res = {
         "generation_time_utc": datetime.datetime.utcnow().strftime(ISO),

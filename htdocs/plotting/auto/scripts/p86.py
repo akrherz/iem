@@ -35,7 +35,7 @@ PDICT2 = {"c": "Contour Plot", "g": "Grid Cell Mesh"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc[
         "description"
@@ -77,7 +77,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     ptype = ctx["ptype"]
     date = ctx["date"]

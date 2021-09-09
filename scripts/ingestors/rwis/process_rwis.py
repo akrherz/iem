@@ -158,7 +158,7 @@ def merge(atmos, surface):
 
 
 def do_iemtracker(obs):
-    """Iterate over the obs and do IEM Tracker related activities """
+    """Iterate over the obs and do IEM Tracker related activities"""
     threshold = util.utc() - datetime.timedelta(hours=3)
 
     tracker = TrackerEngine(IEM.cursor(), PORTFOLIO.cursor())
@@ -312,7 +312,7 @@ def fetch(uri):
 
 
 def ldm_insert_metars(fn1, fn2):
-    """ Insert into LDM please """
+    """Insert into LDM please"""
     for fn in [fn1, fn2]:
         proc = subprocess.Popen(
             ("pqinsert -p '%s' %s") % (fn.replace("/tmp/", ""), fn),

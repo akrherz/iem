@@ -9,7 +9,7 @@ from pyiem import iemre
 
 
 def do_month(year, month, routes):
-    """ Generate a MRMS plot for the month!"""
+    """Generate a MRMS plot for the month!"""
 
     sts = datetime.datetime(year, month, 1)
     ets = sts + datetime.timedelta(days=35)

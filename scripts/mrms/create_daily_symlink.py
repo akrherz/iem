@@ -14,7 +14,7 @@ import pytz
 
 
 def workflow(basedate, utcdt):
-    """ Create the sym link """
+    """Create the sym link"""
     basefn = utcdt.strftime(
         "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/mrms/p24h_%Y%m%d%H00"
     )

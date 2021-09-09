@@ -173,7 +173,7 @@ def run_model(mcursor, model, runtime):
 
 
 def check_and_run(mcursor, model, runtime):
-    """ Check the database for missing data """
+    """Check the database for missing data"""
     table = "model_gridpoint_%s" % (runtime.year,)
     mcursor.execute(
         f"SELECT * from {table} WHERE runtime = %s and model = %s",

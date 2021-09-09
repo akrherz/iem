@@ -8,8 +8,8 @@ from pyiem.util import get_dbconn
 
 
 def compute_stations(cursor):
-    """ Logic to resolve, which stations we care about and add necessary
-    station metadata about them! """
+    """Logic to resolve, which stations we care about and add necessary
+    station metadata about them!"""
 
     pass1 = []
     for line in open("temp-inventory.txt"):
@@ -44,7 +44,7 @@ def compute_stations(cursor):
 
 
 def main():
-    """ Go main Go """
+    """Go main Go"""
     pgconn = get_dbconn("mesosite")
     cursor = pgconn.cursor()
     compute_stations(cursor)

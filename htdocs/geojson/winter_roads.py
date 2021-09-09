@@ -8,7 +8,7 @@ from pyiem.util import get_dbconn, html_escape
 
 
 def run():
-    """ Actually do the hard work of getting the current SBW in geojson """
+    """Actually do the hard work of getting the current SBW in geojson"""
     utcnow = datetime.datetime.utcnow()
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()

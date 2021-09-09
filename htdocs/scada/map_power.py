@@ -17,7 +17,7 @@ from pyiem.util import get_dbconn
 
 
 def make_colorbar(clevs, norm, cmap):
-    """ Manual Color Bar """
+    """Manual Color Bar"""
 
     ax = plt.axes([0.02, 0.1, 0.05, 0.8], frameon=False, yticks=[], xticks=[])
 
@@ -46,7 +46,7 @@ def make_colorbar(clevs, norm, cmap):
 
 
 def do(valid):
-    """ Generate plot for a given timestamp """
+    """Generate plot for a given timestamp"""
     pgconn = get_dbconn("scada")
     cursor = pgconn.cursor()
 

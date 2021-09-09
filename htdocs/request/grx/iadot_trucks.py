@@ -11,7 +11,7 @@ ARROWS = "https://mesonet.agron.iastate.edu/request/grx/arrows.png"
 
 
 def produce_content():
-    """ Generate content """
+    """Generate content"""
 
     res = """Title: Iowa DOT Trucks @%sZ
 Refresh: 5
@@ -60,7 +60,7 @@ Font: 1, 11, 1, "Courier New"
 
 
 def application(_environ, start_response):
-    """ Go Main Go """
+    """Go Main Go"""
     start_response("200 OK", [("Content-type", "text/plain")])
 
     mckey = "/request/grx/iadot_trucks.txt"

@@ -15,7 +15,7 @@ def ptime(val):
 
 
 def run(wfo, year):
-    """ Actually generate output """
+    """Actually generate output"""
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
     cursor.execute(

@@ -17,8 +17,8 @@ from pyiem.util import get_dbconn
 
 
 def compute_stations():
-    """ Logic to resolve, which stations we care about and add necessary
-    station metadata about them! """
+    """Logic to resolve, which stations we care about and add necessary
+    station metadata about them!"""
     stations = []
     pass1 = []
     for line in open("temp-inventory.txt"):
@@ -34,7 +34,7 @@ def compute_stations():
 
 
 def ingest(stations, pgconn):
-    """ Ingest the data into the database! """
+    """Ingest the data into the database!"""
 
     data = {}
 
@@ -158,7 +158,7 @@ def ingest(stations, pgconn):
 
 
 def main():
-    """ Go main Go """
+    """Go main Go"""
     pgconn = get_dbconn("coop")
 
     stations = compute_stations()

@@ -101,7 +101,7 @@ def run(nexrad, name, network, cname):
 
 
 def main(argv):
-    """ See how we are called """
+    """See how we are called"""
     nt = NetworkTable(["NEXRAD", "TWDR"])
     stations = list(nt.sts.keys())
     stations.sort()

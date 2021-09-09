@@ -56,7 +56,7 @@ OAX = Omaha, NE     FSD = Sioux Falls, SD
 
 
 def run(sts=None, ets=None):
-    """ Generate listing of warning counts """
+    """Generate listing of warning counts"""
     # default for CST yesterday
     if sts is None or ets is None:
         yest = utc() - datetime.timedelta(hours=24)
@@ -136,7 +136,7 @@ def run(sts=None, ets=None):
 
 
 def main():
-    """Lets actually do something """
+    """Lets actually do something"""
     sts = utc(2015, 5, 4, 0)
     sts = sts.astimezone(pytz.timezone("America/Chicago"))
     sts = sts.replace(hour=0)

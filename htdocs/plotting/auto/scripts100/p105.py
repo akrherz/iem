@@ -12,7 +12,7 @@ PDICT = {"yes": "Yes, consider trace reports", "no": "No, omit trace reports"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -60,7 +60,7 @@ def get_color(val, cat):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]

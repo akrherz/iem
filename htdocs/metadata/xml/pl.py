@@ -5,7 +5,7 @@ from pyiem.network import Table as NetworkTable
 
 
 def application(environ, start_response):
-    """ Do Something"""
+    """Do Something"""
     form = parse_formvars(environ)
     network = form.get("network", "ISUSM")
     nt = NetworkTable(network, only_online=False)

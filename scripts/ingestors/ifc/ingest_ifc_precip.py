@@ -31,7 +31,7 @@ BASEURL = "http://s-iihr77.iihr.uiowa.edu//Products/IFC7ADV"
 
 
 def get_file(now, routes):
-    """ Download the file, save to /tmp and return fn """
+    """Download the file, save to /tmp and return fn"""
     data = None
     for i in [7, 6, 5, 4]:
         if data is not None:
@@ -62,7 +62,7 @@ def get_file(now, routes):
 
 
 def to_raster(tmpfn, now):
-    """ Convert the raw data into a RASTER Image
+    """Convert the raw data into a RASTER Image
     5 inch rain per hour is ~ 125 mm/hr, so over 5min that is 10 mm
     Index 255 is missing
     0 is zero
@@ -92,7 +92,7 @@ def to_raster(tmpfn, now):
 
 
 def ldm(tmpfn, now, routes):
-    """ Send stuff to ldm """
+    """Send stuff to ldm"""
     pqstr = (
         "pqinsert -i -p 'plot %s %s gis/images/4326/ifc/p05m.wld "
         "GIS/ifc/p05m_%s.wld wld' %s.wld"
@@ -129,7 +129,7 @@ def do_time(now, routes="ac"):
 
 
 def main():
-    """ main method """
+    """main method"""
     now = datetime.datetime.utcnow()
     now = now.replace(second=0, microsecond=0)
     # Round back to the nearest 5 minute, plus 10

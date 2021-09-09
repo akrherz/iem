@@ -46,7 +46,7 @@ PDICT6 = {"snow": "Snowfall", "ice": "Freezing Rain / Ice Storm (LSRs Only)"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 60
@@ -248,7 +248,7 @@ def compute_grid_bounds(ctx):
 
 
 def add_zeros(df, ctx):
-    """ Add values of zero where we believe appropriate."""
+    """Add values of zero where we believe appropriate."""
     cellsize = ctx["sz"] * 1000.0
     newrows = []
     if ctx["z"] in ["yes", "plot"]:
@@ -351,7 +351,7 @@ def prettyprint(val):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     if ctx["sz"] < 5:
         ctx["sz"] = 5

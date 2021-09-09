@@ -8,7 +8,7 @@ from pyiem.util import get_dbconn
 
 
 def run(sid):
-    """ run() """
+    """run()"""
     dbconn = get_dbconn("iem", user="nobody")
     cursor = dbconn.cursor()
     cursor.execute(

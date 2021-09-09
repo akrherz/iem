@@ -18,7 +18,7 @@ from pyiem.exceptions import NoDataFound
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     today = datetime.date.today()
     year = today.year if today.month > 9 else today.year - 1
@@ -61,7 +61,7 @@ def f(st, snowd, metric, stpts):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     year = ctx["year"]
     thres = ctx["thres"]

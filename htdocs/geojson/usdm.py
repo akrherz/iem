@@ -28,7 +28,7 @@ def rectify_date(tstamp):
 
 
 def run(ts):
-    """ Actually do the hard work of getting the USDM in geojson """
+    """Actually do the hard work of getting the USDM in geojson"""
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 

@@ -30,7 +30,7 @@ def parse_time(text):
 
 
 def find_scans(root, bird, product, start_gts, end_gts):
-    """ Find GOES SCANs """
+    """Find GOES SCANs"""
     if bird not in BIRDS or product not in PRODUCTS:
         return
     now = start_gts.replace(hour=0, minute=0, second=0)

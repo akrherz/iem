@@ -12,7 +12,7 @@ N0QBASE = utc(2010, 11, 14)
 
 
 def save(sectorName, file_name, dir_name, ts, bbox=None, routes="ac"):
-    """ Get an image and write it back to LDM for archiving """
+    """Get an image and write it back to LDM for archiving"""
     tstamp = ts.strftime("%Y%m%d%H%M")
     nexrad = "nexrad" if ts < N0QBASE else "n0q"
     layers = (
@@ -58,7 +58,7 @@ def save(sectorName, file_name, dir_name, ts, bbox=None, routes="ac"):
 
 
 def runtime(ts):
-    """ Actually run for a time """
+    """Actually run for a time"""
     pgconn = get_dbconn("postgis")
     pcursor = pgconn.cursor()
 

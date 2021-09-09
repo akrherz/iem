@@ -29,7 +29,7 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 def gage_run(sts, ets, stations, excel, start_response):
-    """ run() """
+    """run()"""
     if not stations:
         stations = LOOKUP.keys()
     if len(stations) == 1:
@@ -71,7 +71,7 @@ def gage_run(sts, ets, stations, excel, start_response):
 
 
 def bubbler_run(sts, ets, excel, start_response):
-    """ run() """
+    """run()"""
     dbconn = get_dbconn("other", user="nobody")
     sql = """
     WITH one as (SELECT valid, value from ss_bubbler WHERE
@@ -112,7 +112,7 @@ def bubbler_run(sts, ets, excel, start_response):
 
 
 def application(environ, start_response):
-    """ Go Main Go """
+    """Go Main Go"""
     form = parse_formvars(environ)
     opt = form.get("opt", "bubbler")
 

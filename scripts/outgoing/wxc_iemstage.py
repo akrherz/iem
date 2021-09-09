@@ -41,7 +41,7 @@ def main():
     os.write(tmpfd, s.encode("ascii", "ignore"))
 
     def compute_text(row):
-        """ Generate text of what this current stage is """
+        """Generate text of what this current stage is"""
         stage = row["value"]
         for s in [
             "Record",

@@ -36,7 +36,7 @@ MDICT = OrderedDict(
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -79,7 +79,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     font0 = FontProperties()
     font0.set_family("monospace")
     font0.set_size(16)

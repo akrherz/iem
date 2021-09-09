@@ -54,7 +54,7 @@ def do(cursor, wfo):
 
 
 def application(_environ, start_response):
-    """ Do Stuff """
+    """Do Stuff"""
     pgconn = get_dbconn("afos", user="nobody")
     cursor = pgconn.cursor()
     headers = [("Content-type", "text/plain")]

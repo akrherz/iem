@@ -77,7 +77,7 @@ def sum_hourly(hdf, date, col):
 
 
 def clean(key, value):
-    """"Clean the values"""
+    """ "Clean the values"""
     if key.startswith("WS"):
         return QUANTITY(value, UREG.mph).to(UREG.knots).m
     if key.startswith("RH") and value > 100:
@@ -143,7 +143,7 @@ def get_last():
 
 
 def campbell2df(year):
-    """"Process the file for any timestamps after the lastob"""
+    """ "Process the file for any timestamps after the lastob"""
     dailyfn = "%s/%s/Daily.dat" % (DIRPATH, year)
     hourlyfn = "%s/%s/Hourly.dat" % (DIRPATH, year)
     if not os.path.isfile(dailyfn):

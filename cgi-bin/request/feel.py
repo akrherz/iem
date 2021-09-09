@@ -11,7 +11,7 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 def run(sts, ets, start_response):
-    """ Get data! """
+    """Get data!"""
     dbconn = get_dbconn("other", user="nobody")
     sql = """SELECT * from feel_data_daily where
     valid >= '%s' and valid < '%s' ORDER by valid ASC""" % (
@@ -47,7 +47,7 @@ def run(sts, ets, start_response):
 
 
 def application(environ, start_response):
-    """ Get stuff """
+    """Get stuff"""
     form = parse_formvars(environ)
     year1 = int(form.get("year1"))
     year2 = int(form.get("year2"))

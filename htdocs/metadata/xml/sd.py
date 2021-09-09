@@ -7,7 +7,7 @@ IEM = "https://mesonet.agron.iastate.edu/metadata/xml"
 
 
 def application(environ, start_response):
-    """ Do Something"""
+    """Do Something"""
     form = parse_formvars(environ)
     network = form.get("network", "ISUSM")
     nt = NetworkTable(network, only_online=False)

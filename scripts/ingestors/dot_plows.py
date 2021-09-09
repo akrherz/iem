@@ -26,7 +26,7 @@ CEILING = utc() + datetime.timedelta(hours=3)
 
 
 def workflow():
-    """ Do stuff """
+    """Do stuff"""
     postgis = get_dbconn("postgis")
     cursor = postgis.cursor()
 

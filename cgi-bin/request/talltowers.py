@@ -7,13 +7,13 @@ from pyiem.util import get_dbconn
 
 
 def get_stations(form):
-    """ Figure out the requested station """
+    """Figure out the requested station"""
     stations = form.getall("station")
     return stations
 
 
 def get_time_bounds(form, tzinfo):
-    """ Figure out the exact time bounds desired """
+    """Figure out the exact time bounds desired"""
     y1 = int(form.get("year1"))
     y2 = int(form.get("year2"))
     m1 = int(form.get("month1"))
@@ -42,7 +42,7 @@ def get_time_bounds(form, tzinfo):
 
 
 def application(environ, start_response):
-    """ Go main Go """
+    """Go main Go"""
     pgconn = get_dbconn("mesosite")
     form = parse_formvars(environ)
     tzname = form.get("tz", "Etc/UTC")

@@ -15,7 +15,7 @@ MDICT = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -38,7 +38,7 @@ def get_description():
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = util.get_dbconn("postgis")
     ctx = util.get_autoplot_context(fdict, get_description())
     state = ctx["state"][:2].upper()

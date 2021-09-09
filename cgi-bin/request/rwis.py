@@ -14,7 +14,7 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 def get_time(form, tzname):
-    """ Get timestamps """
+    """Get timestamps"""
     ts = datetime.datetime.utcnow()
     ts = ts.replace(tzinfo=pytz.UTC)
     ts = ts.astimezone(pytz.timezone(tzname))
@@ -34,7 +34,7 @@ def get_time(form, tzname):
 
 
 def application(environ, start_response):
-    """ Go do something """
+    """Go do something"""
     form = parse_formvars(environ)
     include_latlon = form.get("gis", "no").lower() == "yes"
     myvars = form.getall("vars")

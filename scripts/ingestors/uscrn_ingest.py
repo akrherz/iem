@@ -42,29 +42,29 @@ def init_year(year):
 
 def process_file(icursor, ocursor, year, filename, size, reprocess):
     """Ingest these files, please
-   1    WBANNO                         XXXXX
-   2    UTC_DATE                       YYYYMMDD
-   3    UTC_TIME                       HHmm
-   4    LST_DATE                       YYYYMMDD
-   5    LST_TIME                       HHmm
-   6    CRX_VN                         XXXXXX
-   7    LONGITUDE                      Decimal_degrees
-   8    LATITUDE                       Decimal_degrees
-   9    AIR_TEMPERATURE                Celsius
-   10   PRECIPITATION                  mm
-   11   SOLAR_RADIATION                W/m^2
-   12   SR_FLAG                        X
-   13   SURFACE_TEMPERATURE            Celsius
-   14   ST_TYPE                        X
-   15   ST_FLAG                        X
-   16   RELATIVE_HUMIDITY              %
-   17   RH_FLAG                        X
-   18   SOIL_MOISTURE_5                m^3/m^3
-   19   SOIL_TEMPERATURE_5             Celsius
-   20   WETNESS                        Ohms
-   21   WET_FLAG                       X
-   22   WIND_1_5                       m/s
-   23   WIND_FLAG                      X
+    1    WBANNO                         XXXXX
+    2    UTC_DATE                       YYYYMMDD
+    3    UTC_TIME                       HHmm
+    4    LST_DATE                       YYYYMMDD
+    5    LST_TIME                       HHmm
+    6    CRX_VN                         XXXXXX
+    7    LONGITUDE                      Decimal_degrees
+    8    LATITUDE                       Decimal_degrees
+    9    AIR_TEMPERATURE                Celsius
+    10   PRECIPITATION                  mm
+    11   SOLAR_RADIATION                W/m^2
+    12   SR_FLAG                        X
+    13   SURFACE_TEMPERATURE            Celsius
+    14   ST_TYPE                        X
+    15   ST_FLAG                        X
+    16   RELATIVE_HUMIDITY              %
+    17   RH_FLAG                        X
+    18   SOIL_MOISTURE_5                m^3/m^3
+    19   SOIL_TEMPERATURE_5             Celsius
+    20   WETNESS                        Ohms
+    21   WET_FLAG                       X
+    22   WIND_1_5                       m/s
+    23   WIND_FLAG                      X
     """
     with open(filename, "rb") as fp:
         if size > 0:

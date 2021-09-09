@@ -111,7 +111,7 @@ def get_station_info(form):
 
 
 def application(environ, start_response):
-    """ Query out the CGI variables"""
+    """Query out the CGI variables"""
     form = parse_formvars(environ)
     try:
         sts, ets = get_times(form)

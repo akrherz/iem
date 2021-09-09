@@ -10,7 +10,7 @@ from pyiem.util import get_dbconn, html_escape
 
 
 def run(ts):
-    """ Actually do the hard work of getting the current SBW in geojson """
+    """Actually do the hard work of getting the current SBW in geojson"""
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 

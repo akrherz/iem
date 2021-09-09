@@ -125,7 +125,7 @@ def check_load():
 
 
 def get_stations(form):
-    """ Figure out the requested station """
+    """Figure out the requested station"""
     if "station" not in form:
         if "network" in form:
             nt = NetworkTable(form.get("network"), only_online=False)
@@ -142,7 +142,7 @@ def get_stations(form):
 
 
 def get_time_bounds(form, tzinfo):
-    """ Figure out the exact time bounds desired """
+    """Figure out the exact time bounds desired"""
     if "hours" in form:
         ets = utc()
         sts = ets - datetime.timedelta(hours=int(form.get("hours")))
@@ -190,7 +190,7 @@ def build_querycols(form):
 
 
 def application(environ, start_response):
-    """ Go main Go """
+    """Go main Go"""
     if environ["REQUEST_METHOD"] == "OPTIONS":
         start_response("400 Bad Request", [("Content-type", "text/plain")])
         yield b"Allow: GET,POST,OPTIONS"

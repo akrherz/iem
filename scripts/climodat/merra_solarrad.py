@@ -19,7 +19,7 @@ LOG = logger()
 
 
 def get_gp(xc, yc, x, y):
-    """ Return the grid point closest to this point """
+    """Return the grid point closest to this point"""
     distance = []
     xidx = (np.abs(xc - x)).argmin()
     yidx = (np.abs(yc - y)).argmin()
@@ -43,7 +43,7 @@ def get_gp(xc, yc, x, y):
 
 
 def do(date):
-    """ Process for a given date."""
+    """Process for a given date."""
     LOG.debug("do(%s)", date)
     pgconn = get_dbconn("coop")
     ccursor = pgconn.cursor()

@@ -29,7 +29,7 @@ def query(sql, args=None):
 
 
 def workflow(valid):
-    """ Do the work for this date, which is set to 00 UTC """
+    """Do the work for this date, which is set to 00 UTC"""
     tbl = "raw%s" % (valid.strftime("%Y_%m"),)
 
     # make sure our tmp table does not exist

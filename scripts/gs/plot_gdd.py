@@ -7,7 +7,7 @@ LOG = logger()
 
 
 def run(gddbase, now, fn):
-    """ Generate the plot """
+    """Generate the plot"""
     url = (
         "http://iem.local/plotting/auto/plot/97/d:sector::sector:IA::"
         f"var:gdd_sum::gddbase:{gddbase}::gddceil:86::"

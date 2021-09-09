@@ -29,7 +29,7 @@ def build_stations():
 
 
 def should_delete_coop(rwcursor, icursor, nwsli):
-    """ Should this site be moved from COOP to DCP"""
+    """Should this site be moved from COOP to DCP"""
     icursor.execute(
         """SELECT distinct physical_code || duration
     from current_shef WHERE station = %s""",
@@ -50,7 +50,7 @@ def should_delete_coop(rwcursor, icursor, nwsli):
 
 
 def should_switch_2dcp(rwcursor, icursor, nwsli, iemid):
-    """ Should this site be moved from COOP to DCP"""
+    """Should this site be moved from COOP to DCP"""
     icursor.execute(
         """SELECT distinct physical_code || duration
     from current_shef WHERE station = %s""",
@@ -84,7 +84,7 @@ def should_switch_2dcp(rwcursor, icursor, nwsli, iemid):
 
 
 def merge(xref):
-    """ Do some logic here to clean things up!"""
+    """Do some logic here to clean things up!"""
     pgconn = get_dbconn("mesosite", user="mesonet")
     ipgconn = get_dbconn("iem", user="mesonet")
     for nwsli, name in xref.items():

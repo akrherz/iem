@@ -67,7 +67,7 @@ MDICT = OrderedDict(
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["cache"] = 86400
     desc["data"] = True
@@ -137,7 +137,7 @@ def get_description():
 
 
 def plot(ax, interval, valid, tmpf, lines, mydir, month):
-    """ Our plotting function """
+    """Our plotting function"""
     if len(lines) > 10 or len(valid) < 2 or (valid[-1] - valid[0]) < interval:
         return lines
     if len(lines) == 10:
@@ -207,7 +207,7 @@ def compute_xlabels(ax):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("asos", user="nobody")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 

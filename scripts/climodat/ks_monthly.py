@@ -32,7 +32,7 @@ cursor = pgconn.cursor()
 
 
 def setup_csv(yr):
-    """ Setup the output file """
+    """Setup the output file"""
     mydir = "/mesonet/share/climodat/ks"
     if not os.path.isdir(mydir):
         os.makedirs(mydir)
@@ -52,7 +52,7 @@ def setup_csv(yr):
 
 
 def metadata(sid, csv):
-    """ write metadata to csv file """
+    """write metadata to csv file"""
     csv.write(
         "%s,%s,%s,%s,"
         % (sid, nt.sts[sid]["name"], nt.sts[sid]["lat"], nt.sts[sid]["lon"])
@@ -67,7 +67,7 @@ def fmt(val):
 
 
 def process(sid, csv, yr):
-    """ Actually process a station for a csv file and year """
+    """Actually process a station for a csv file and year"""
     ah = []
     al = []
     ap = []
@@ -175,7 +175,7 @@ def process(sid, csv, yr):
 
 
 def main(yr):
-    """ main ! """
+    """main !"""
     csv = setup_csv(yr)
     for sid in tqdm(nt.sts, disable=not sys.stdout.isatty()):
         metadata(sid, csv)

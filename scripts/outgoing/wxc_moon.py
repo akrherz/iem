@@ -25,7 +25,7 @@ UTC = datetime.timezone.utc
 
 
 def figurePhase(p1, p2):
-    """ Return a string of the moon phase! """
+    """Return a string of the moon phase!"""
     if p2 < p1:  # Waning!
         if p1 < 0.1:
             return "New Moon"

@@ -56,7 +56,7 @@ def download(now, offset):
 
 
 def main():
-    """ Do something """
+    """Do something"""
     # We want this hour UTC
     utcnow = utc()
     utcnow = utcnow.replace(minute=0, second=0, microsecond=0)

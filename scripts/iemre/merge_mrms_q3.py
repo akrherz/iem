@@ -81,7 +81,7 @@ def run(ts):
 
 
 def main(argv):
-    """ go main go """
+    """go main go"""
     if len(argv) == 4:
         # 12 noon to prevent ugliness with timezones
         ts = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]), 12, 0)

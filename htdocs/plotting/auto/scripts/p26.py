@@ -18,7 +18,7 @@ PDICT2 = {"high": "High Temperature", "low": "Low Temperature"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -62,7 +62,7 @@ def get_description():
 
 
 def get_context(fdict):
-    """ Get the raw infromations we need"""
+    """Get the raw infromations we need"""
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -170,7 +170,7 @@ def get_context(fdict):
 
 
 def highcharts(fdict):
-    """ Do highcharts """
+    """Do highcharts"""
     ctx = get_context(fdict)
 
     rng = ctx["df"][["dates", "mins", "maxs"]].to_json(orient="values")
@@ -247,7 +247,7 @@ $("#ap_container").highcharts({
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_context(fdict)
     df = ctx["df"]
 

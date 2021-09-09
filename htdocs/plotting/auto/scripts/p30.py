@@ -12,7 +12,7 @@ PDICT = {"monthly": "Plot Single Month", "yearly": "Plot Entire Year"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc[
@@ -86,7 +86,7 @@ def plot_trailing(ax, df, colname):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]

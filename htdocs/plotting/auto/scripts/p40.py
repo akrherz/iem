@@ -14,7 +14,7 @@ PDICT = {"sky": "Sky Coverage + Visibility", "vsby": "Just Visibility"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 3600
@@ -192,7 +192,7 @@ def plot_vsby(days, vsby, station, ctx, sts):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]

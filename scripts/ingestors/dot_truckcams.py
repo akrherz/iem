@@ -34,12 +34,12 @@ URI = (
 
 
 def get_current_fn(label):
-    """ Return how this is stored for current data """
+    """Return how this is stored for current data"""
     return "camera/idot_trucks/%s.jpg" % (label,)
 
 
 def get_archive_fn(label, utc):
-    """ Return how this is stored for current data """
+    """Return how this is stored for current data"""
     return "camera/idot_trucks/%s/%s_%s.jpg" % (
         label,
         label,
@@ -78,7 +78,7 @@ def workflow():
 
 
 def process_features(features):
-    """ Do stuff """
+    """Do stuff"""
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
 

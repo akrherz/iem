@@ -21,7 +21,7 @@ def pretty(val, precision=2):
 
 
 def plot_hilo(valid):
-    """ Go Main Go
+    """Go Main Go
 
     Args:
       valid (datetime): The timestamp we are interested in!
@@ -67,7 +67,7 @@ def plot_hilo(valid):
 
 
 def plot_snowdepth(valid):
-    """ Go Main Go
+    """Go Main Go
 
     Args:
       valid (datetime): The timestamp we are interested in!
@@ -116,7 +116,7 @@ def plot_snowdepth(valid):
 
 
 def plot_snow(valid):
-    """ Go Main Go
+    """Go Main Go
 
     Args:
       valid (datetime): The timestamp we are interested in!
@@ -165,7 +165,7 @@ def plot_snow(valid):
 
 
 def plot_snow_month(valid):
-    """ Go Main Go
+    """Go Main Go
 
     Args:
       valid (datetime): The timestamp we are interested in!
@@ -219,7 +219,7 @@ def plot_snow_month(valid):
 
 
 def plot_precip_month(valid):
-    """ Go Main Go
+    """Go Main Go
 
     Args:
       valid (datetime): The timestamp we are interested in!
@@ -273,7 +273,7 @@ def plot_precip_month(valid):
 
 
 def plot_precip(valid):
-    """ Go Main Go
+    """Go Main Go
 
     Args:
       valid (datetime): The timestamp we are interested in!

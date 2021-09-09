@@ -7,7 +7,7 @@ from pyiem.util import get_dbconn, utc
 
 
 def doit(now, model):
-    """ Figure out the model runtime we care about """
+    """Figure out the model runtime we care about"""
     mos_pgconn = get_dbconn("mos")
     iem_pgconn = get_dbconn("iem")
     mcursor = mos_pgconn.cursor()
@@ -112,7 +112,7 @@ def doit(now, model):
 
 
 def main(argv):
-    """ Go main go"""
+    """Go main go"""
     ts = utc()
     model = argv[1]
     if len(argv) == 6:

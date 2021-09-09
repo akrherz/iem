@@ -34,7 +34,7 @@ DT1980 = utc(1980, 1, 1)
 
 
 def tstamp2dt(s, metadata):
-    """ Convert a string to a datetime """
+    """Convert a string to a datetime"""
     if s[0] not in ["1", "2"]:
         LOG.debug("bad timestamp |%s|", s)
         return None

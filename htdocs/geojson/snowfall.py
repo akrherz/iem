@@ -12,7 +12,7 @@ json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 
 
 def sanitize(val):
-    """ convert to Ms"""
+    """convert to Ms"""
     if val is None:
         return "M"
     if val == TRACE_VALUE:
@@ -21,7 +21,7 @@ def sanitize(val):
 
 
 def get_data(ts):
-    """ Get the data for this timestamp """
+    """Get the data for this timestamp"""
     pgconn = get_dbconn("iem")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     data = {"type": "FeatureCollection", "features": []}

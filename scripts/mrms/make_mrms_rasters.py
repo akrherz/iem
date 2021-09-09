@@ -309,7 +309,7 @@ def doit(gts, hr):
 
 
 def main(argv):
-    """ We are always explicitly called """
+    """We are always explicitly called"""
     gts = datetime.datetime(
         int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]), 0
     )
@@ -323,6 +323,6 @@ if __name__ == "__main__":
 
 
 def test_ramp():
-    """ Check our work """
+    """Check our work"""
     img = convert_to_image(np.array([25]))
     assert abs(img[0] - 100) < 0.01

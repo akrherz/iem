@@ -10,7 +10,7 @@ from pyiem.util import get_dbconn
 
 
 def dance(cid, start_ts, end_ts):
-    """ Go get the dictionary of data we need and deserve """
+    """Go get the dictionary of data we need and deserve"""
     dbconn = get_dbconn("mesosite")
     cursor = dbconn.cursor()
     data = {"images": []}

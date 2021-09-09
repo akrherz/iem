@@ -440,7 +440,7 @@ XREF_SOURCE = {
 
 
 def process(order):
-    """ Process this timestamp """
+    """Process this timestamp"""
     cursor = PGCONN.cursor()
     ts = datetime.datetime.strptime(order[:6], "%y%m%d").replace(
         tzinfo=pytz.utc
@@ -519,7 +519,7 @@ def process(order):
 
 
 def main():
-    """ Go Main Go """
+    """Go Main Go"""
     os.chdir("/mesonet/tmp/poker")
     for order in glob.glob("??????.DDPLUS.tar.gz"):
         process(order)

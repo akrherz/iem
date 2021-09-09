@@ -14,7 +14,7 @@ warnings.simplefilter("ignore", UserWarning)
 
 def doit(now):
     """
-      Generate some plots for the COOP data!
+    Generate some plots for the COOP data!
     """
     st = NetworkTable(
         [

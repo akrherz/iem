@@ -79,7 +79,7 @@ def doday(ts, realtime):
 
 
 def main(argv):
-    """ Go Main Go
+    """Go Main Go
 
     So the past hour's stage IV is available by about 50 after, so we should
     run for a day that is 90 minutes in the past by default

@@ -121,7 +121,7 @@ def run(ts):
 
 
 def main(argv):
-    """ Do Something"""
+    """Do Something"""
     if len(argv) == 4:
         sts = utc(int(argv[1]), int(argv[2]), int(argv[3]), 12, 0)
         sts = sts.astimezone(pytz.timezone("America/Chicago"))

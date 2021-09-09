@@ -22,7 +22,7 @@ def clean(val):
 
 
 def send_error(start_response, msg):
-    """ Send an error when something bad happens(tm)"""
+    """Send an error when something bad happens(tm)"""
     headers = [("Content-type", "application/json")]
     start_response("500 Internal Server Error", headers)
     return json.dumps({"error": msg}).encode("ascii")

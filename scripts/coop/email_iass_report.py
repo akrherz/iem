@@ -100,7 +100,7 @@ STIDS = [
 
 
 def compute_weekly(fp, sts, ets):
-    """ Compute the weekly stats we need """
+    """Compute the weekly stats we need"""
     pgconn = get_dbconn("iem")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -203,7 +203,7 @@ def compute_weekly(fp, sts, ets):
 
 
 def compute_monthly(fp, year, month):
-    """ Compute the monthly data we need to compute """
+    """Compute the monthly data we need to compute"""
     pgconn = get_dbconn("iem")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -297,7 +297,7 @@ def compute_monthly(fp, year, month):
 
 
 def monthly_header(fp, sts, ets):
-    """ Write the monthly header information """
+    """Write the monthly header information"""
     fp.write(
         """Weather Summary For Iowa Agricultural Statistics Service
 Prepared By Iowa Environmental Mesonet
@@ -316,7 +316,7 @@ STATION          HI  LO AVG DFN  TOTAL    DFN DAYS   TOT   DFN COLD COLD
 
 
 def weekly_header(fp, sts, ets):
-    """ Write the header information """
+    """Write the header information"""
     fp.write(
         """Weather Summary For Iowa Agricultural Statistics Service
 Prepared By Iowa Environmental Mesonet
@@ -336,7 +336,7 @@ STATION          HI  LO AVG DFN  TOTAL    DFN   TOTAL    DFN   TOTAL   DFN
 
 
 def email_report(report, subject):
-    """ Actually do the emailing stuff """
+    """Actually do the emailing stuff"""
     msg = MIMEMultipart()
     msg["Subject"] = subject
     msg["From"] = "akrherz@iastate.edu"

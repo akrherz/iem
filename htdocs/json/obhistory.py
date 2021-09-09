@@ -58,7 +58,7 @@ def do_asos(table, station, _network, date):
 
 
 def workflow(station, network, date):
-    """ Go get the dictionary of data we need and deserve """
+    """Go get the dictionary of data we need and deserve"""
     date = parse(date).date()
     table = {"fields": [], "rows": []}
     if date == datetime.date.today():

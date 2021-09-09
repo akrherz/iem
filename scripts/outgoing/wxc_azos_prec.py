@@ -34,8 +34,7 @@ def compute_climate(sts, ets):
 
 
 def compute_obs():
-    """ Compute the GS values given a start/end time and networks to look at
-    """
+    """Compute the GS values given a start/end time and networks to look at"""
     sql = """
 SELECT
   s.id, ST_x(s.geom) as lon, ST_y(s.geom) as lat,

@@ -11,7 +11,7 @@ from pyiem.util import get_dbconn, html_escape
 
 
 def run(sts, ets, awipsid):
-    """ Actually do some work! """
+    """Actually do some work!"""
     dbconn = get_dbconn("afos")
     cursor = dbconn.cursor()
 

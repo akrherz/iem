@@ -12,7 +12,7 @@ from pyiem.plot.use_agg import plt
 
 
 def get_latest_time(model):
-    """ Figure out the latest model runtime """
+    """Figure out the latest model runtime"""
     utc = datetime.datetime.utcnow()
     utc = utc.replace(tzinfo=pytz.UTC)
     utc = utc.replace(hour=12, minute=0, second=0, microsecond=0)
@@ -30,7 +30,7 @@ def get_latest_time(model):
 
 
 def get_times(nc):
-    """ Return array of datetimes for the time array """
+    """Return array of datetimes for the time array"""
     tm = nc.variables["time"]
     sts = datetime.datetime.strptime(
         tm.units.replace("minutes since ", ""), "%Y-%m-%d %H:%M:%S"
@@ -43,7 +43,7 @@ def get_times(nc):
 
 
 def get_ij(lon, lat, nc):
-    """ Figure out the closest grid cell """
+    """Figure out the closest grid cell"""
     dist = (
         (nc.variables["lon"][:] - lon) ** 2
         + (nc.variables["lat"][:] - lat) ** 2
@@ -61,7 +61,7 @@ def add_labels(fig):
 
 
 def get_icond_color(model, val):
-    """ Get the color for this Model and icond
+    """Get the color for this Model and icond
 
     METRO: 1-8 dry, wet, ice/snow, mix, dew, melting snow, blk ice, icing rain
     BRIDGET: 0-5 dry, frosty, icy/snowy, melting, freezing, wet
@@ -99,7 +99,7 @@ def get_ifrost_color(val):
 
 
 def process(model, lon, lat):
-    """ Generate a plot for this given combination """
+    """Generate a plot for this given combination"""
     fig = plt.figure()
     ax = fig.add_axes([0.1, 0.1, 0.7, 0.8])
     modelts = get_latest_time(model)
@@ -195,7 +195,7 @@ def process(model, lon, lat):
 
 
 def application(environ, start_response):
-    """ Go Main Go """
+    """Go Main Go"""
     form = parse_formvars(environ)
     if "lon" in form and "lat" in form:
         process(

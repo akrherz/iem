@@ -13,7 +13,7 @@ LOG = logger()
 
 
 def do(ts):
-    """ Run for a given date! """
+    """Run for a given date!"""
     for hr in range(24):
         now = ts.replace(hour=hr, minute=0, second=0)
 

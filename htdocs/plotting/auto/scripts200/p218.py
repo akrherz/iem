@@ -17,7 +17,7 @@ TFORMAT = "%b %-d %Y %-I:%M %p %Z"
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["cache"] = 3600
     desc["data"] = True
@@ -200,7 +200,7 @@ def precip(fig, row, col):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     nt = NetworkTable("NWSCLI")
 

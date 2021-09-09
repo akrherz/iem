@@ -23,7 +23,7 @@ def make_url(row):
 
 
 def get_df(ugc, sdate, edate):
-    """ Answer the request! """
+    """Answer the request!"""
     pgconn = get_dbconn("postgis")
 
     df = read_sql(

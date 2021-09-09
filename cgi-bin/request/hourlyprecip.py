@@ -32,7 +32,7 @@ def get_data(network, sts, ets, tzinfo, stations):
 
 
 def application(environ, start_response):
-    """ run rabbit run """
+    """run rabbit run"""
     start_response("200 OK", [("Content-type", "text/plain")])
     form = parse_formvars(environ)
     tzinfo = pytz.timezone(form.get("tz", "America/Chicago"))

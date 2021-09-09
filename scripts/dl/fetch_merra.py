@@ -27,7 +27,7 @@ PROPS = get_properties()
 
 
 def trans(now):
-    """ Hacky hack hack """
+    """Hacky hack hack"""
     if now.year < 1992:
         return "100"
     if now.year < 2001:
@@ -38,7 +38,7 @@ def trans(now):
 
 
 def do_month(sts):
-    """ Run for a given month """
+    """Run for a given month"""
 
     ets = sts + datetime.timedelta(days=35)
     ets = ets.replace(day=1)
@@ -73,7 +73,7 @@ def do_month(sts):
 
 
 def main(argv):
-    """ Run for last month month """
+    """Run for last month month"""
     now = datetime.datetime.now()
     if len(argv) == 3:
         now = datetime.datetime(int(argv[1]), int(argv[2]), 1)

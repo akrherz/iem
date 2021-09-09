@@ -50,7 +50,7 @@ DIRS = OrderedDict([("aoa", "At or Above"), ("below", "Below")])
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 86400
@@ -187,7 +187,7 @@ def highcharts(fdict):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_context(fdict)
     df = ctx["df"]
     if df.empty:

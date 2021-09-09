@@ -102,7 +102,7 @@ def get_github_commits():
 
 
 def cowreport():
-    """ Generate something from the Cow, moooo! """
+    """Generate something from the Cow, moooo!"""
     central = pytz.timezone("America/Chicago")
     yesterday = (utc() - datetime.timedelta(days=1)).astimezone(central)
     midnight = yesterday.replace(hour=0, minute=0)
@@ -145,7 +145,7 @@ def cowreport():
 
 
 def feature():
-    """ Print the feature for yesterday """
+    """Print the feature for yesterday"""
     mesosite = get_dbconn("mesosite", user="nobody")
     mcursor = mesosite.cursor(cursor_factory=psycopg2.extras.DictCursor)
     lastts = datetime.datetime.now() + datetime.timedelta(days=-1)
@@ -213,7 +213,7 @@ Bad: %(bad)s  Abstain: %(abstain)s
 
 
 def news():
-    """ Print the news that is fit to print """
+    """Print the news that is fit to print"""
     mesosite = get_dbconn("mesosite", user="nobody")
     mcursor = mesosite.cursor(cursor_factory=psycopg2.extras.DictCursor)
     # Last dailyb delivery
@@ -259,7 +259,7 @@ def news():
 
 
 def main():
-    """ Go Main! """
+    """Go Main!"""
     msg = MIMEMultipart("alternative")
     now = datetime.datetime.now()
     msg["Subject"] = "IEM Daily Bulletin for %s" % (now.strftime("%b %-d %Y"),)

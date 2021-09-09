@@ -13,14 +13,14 @@ encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 
 
 def departure(ob, climo):
-    """ Compute a departure value """
+    """Compute a departure value"""
     if ob is None or climo is None:
         return "M"
     return ob - climo
 
 
 def int_sanitize(val):
-    """ convert to Ms"""
+    """convert to Ms"""
     if val is None:
         return "M"
     if val == TRACE_VALUE:
@@ -29,7 +29,7 @@ def int_sanitize(val):
 
 
 def f1_sanitize(val):
-    """ convert to Ms"""
+    """convert to Ms"""
     if val is None:
         return "M"
     if val == TRACE_VALUE:
@@ -38,7 +38,7 @@ def f1_sanitize(val):
 
 
 def f2_sanitize(val):
-    """ convert to Ms"""
+    """convert to Ms"""
     if val is None:
         return "M"
     if val == TRACE_VALUE:
@@ -47,7 +47,7 @@ def f2_sanitize(val):
 
 
 def get_data(station, year, fmt):
-    """ Get the data for this timestamp """
+    """Get the data for this timestamp"""
     pgconn = get_dbconn("iem")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     data = {"results": []}

@@ -13,7 +13,7 @@ LOG = logger()
 
 
 def need_to_run(valid, hr):
-    """ Check to see if we already have the radiation data we need"""
+    """Check to see if we already have the radiation data we need"""
     gribfn = valid.strftime(
         "/mesonet/ARCHIVE/data/%Y/%m/%d/model/nam/%H/"
         f"nam.t%Hz.conusnest.hiresf0{hr}.tm00.grib2"
@@ -31,8 +31,7 @@ def need_to_run(valid, hr):
 
 
 def fetch(valid, hr):
-    """ Fetch the data for this timestamp
-    """
+    """Fetch the data for this timestamp"""
     uri = valid.strftime(
         "https://ftpprd.ncep.noaa.gov/data/nccf/com/nam/prod/"
         f"nam.%Y%m%d/nam.t%Hz.conusnest.hiresf0{hr}.tm00.grib2.idx"
@@ -90,7 +89,7 @@ def fetch(valid, hr):
 
 
 def main():
-    """ Go Main Go"""
+    """Go Main Go"""
     ts = datetime.datetime(
         int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4])
     )

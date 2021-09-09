@@ -16,7 +16,7 @@ CTX = {
 
 
 def get_currents():
-    """ Return dict of current values """
+    """Return dict of current values"""
     dbconn = get_dbconn("iem")
     cursor = dbconn.cursor()
     dbconn2 = get_dbconn("isuag")
@@ -53,7 +53,7 @@ def get_currents():
 
 
 def plot(data, v):
-    """ Actually plot this data """
+    """Actually plot this data"""
     nt = NetworkTable("ISUSM")
     lats = []
     lons = []

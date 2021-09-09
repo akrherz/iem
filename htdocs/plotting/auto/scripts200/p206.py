@@ -30,7 +30,7 @@ PDICT3 = {"both": "Plot and Contour Values", "plot": "Only Plot Values"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 600
@@ -154,7 +154,7 @@ def get_df(ctx, buf=2.25):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     varname = ctx["v"]
 

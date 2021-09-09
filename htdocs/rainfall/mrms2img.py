@@ -15,7 +15,7 @@ from paste.request import parse_formvars
 
 
 def workflow(valid, period, start_response):
-    """ Actually do the work! """
+    """Actually do the work!"""
     fn = valid.strftime(
         (
             "/mesonet/ARCHIVE/data/%Y/%m/%d/"

@@ -17,7 +17,7 @@ PDICT2 = {"heat": "Heat Index", "chill": "Wind Chill"}
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 3600
@@ -138,7 +138,7 @@ def get_df(ctx):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
 
     get_df(ctx)

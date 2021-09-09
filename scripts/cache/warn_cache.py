@@ -32,7 +32,7 @@ def get_uri(uri, localfn):
 
 
 def get_files(year):
-    """Go get our files and then cache them! """
+    """Go get our files and then cache them!"""
     myuri = (
         "%s?simple=yes&year1=%s&month1=1&day1=1&hour1=0&minute1=0"
         "&year2=%s&month2=12&day2=31&hour2=23&minute2=59"

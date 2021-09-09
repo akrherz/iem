@@ -10,7 +10,7 @@ ISO9660 = "%Y-%m-%dT%H:%MZ"
 
 
 def dowork(lon, lat):
-    """ Actually do stuff"""
+    """Actually do stuff"""
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
 

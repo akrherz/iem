@@ -96,7 +96,7 @@ def bnds(val, lower, upper):
 
 
 def dbsave(ts, data):
-    """Save the data! """
+    """Save the data!"""
     if data["x"] is None:
         LOG.warning("No longitude info found, aborting")
         return

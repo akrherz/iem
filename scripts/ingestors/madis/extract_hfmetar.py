@@ -24,7 +24,7 @@ LOG = logger()
 
 
 def vsbyfmt(val):
-    """ Tricky formatting of vis"""
+    """Tricky formatting of vis"""
     # NB: we aren't dealing with exact round numbers here akrherz/iem#255
     if val == 0:
         return 0
@@ -52,7 +52,7 @@ def vsbyfmt(val):
 
 
 def process(ncfn):
-    """Process this file """
+    """Process this file"""
     pgconn = get_dbconn("iem")
     icursor = pgconn.cursor()
     xref = {}

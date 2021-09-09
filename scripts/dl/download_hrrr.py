@@ -19,7 +19,7 @@ LOG = logger()
 
 
 def need_to_run(valid):
-    """ Check to see if we already have the radiation data we need"""
+    """Check to see if we already have the radiation data we need"""
     gribfn = valid.strftime(
         "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/"
         "%H/hrrr.t%Hz.3kmf00.grib2"
@@ -40,7 +40,7 @@ def need_to_run(valid):
 
 
 def fetch(valid):
-    """ Fetch the radiation data for this timestamp
+    """Fetch the radiation data for this timestamp
     80:54371554:d=2014101002:ULWRF:top of atmosphere:anl:
     81:56146124:d=2014101002:DSWRF:surface:anl:
     """
@@ -104,7 +104,7 @@ def fetch(valid):
 
 
 def main(argv):
-    """ Go Main Go"""
+    """Go Main Go"""
     times = []
     if len(argv) == 5:
         times.append(

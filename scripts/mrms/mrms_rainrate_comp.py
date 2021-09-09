@@ -23,7 +23,7 @@ LOG = logger()
 
 
 def workflow(now, realtime):
-    """ Generate for this timestep! """
+    """Generate for this timestep!"""
     szx = 7000
     szy = 3500
     # Create the image data
@@ -147,7 +147,7 @@ def workflow(now, realtime):
 
 
 def main(argv):
-    """ Go Main Go """
+    """Go Main Go"""
     utcnow = utc()
     if len(argv) == 6:
         utcnow = utc(

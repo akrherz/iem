@@ -45,7 +45,7 @@ NC_MODE, GRIB_MODE = range(2)
 
 
 def get_gp2(lons, lats, lon, lat):
-    """ Return the grid points closest to this point """
+    """Return the grid points closest to this point"""
     dist = ((lons - lon) ** 2 + (lats - lat) ** 2) ** 0.5
     (xidx, yidx) = np.unravel_index(dist.argmin(), dist.shape)
     dx = lon - lons[xidx, yidx]
@@ -66,7 +66,7 @@ def get_gp2(lons, lats, lon, lat):
 
 
 def get_gp(xc, yc, x, y):
-    """ Return the grid point closest to this point """
+    """Return the grid point closest to this point"""
     distance = []
     xidx = (np.abs(xc - x)).argmin()
     yidx = (np.abs(yc - y)).argmin()
@@ -87,7 +87,7 @@ def get_gp(xc, yc, x, y):
 
 
 def do(date):
-    """ Process for a given date
+    """Process for a given date
     6z file has 6z to 9z data
     """
     pgconn = get_dbconn("coop")

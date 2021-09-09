@@ -13,7 +13,7 @@ EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 def get_time(form):
-    """ Get timestamps """
+    """Get timestamps"""
     y1 = int(form.get("year"))
     m1 = int(form.get("month1"))
     m2 = int(form.get("month2"))
@@ -29,7 +29,7 @@ def get_time(form):
 
 
 def threshold_search(table, threshold, thresholdvar):
-    """ Do the threshold searching magic """
+    """Do the threshold searching magic"""
     cols = list(table.columns.values)
     searchfor = "HGI%s" % (thresholdvar.upper(),)
     cols5 = [s[:5] for s in cols]
@@ -82,7 +82,7 @@ def threshold_search(table, threshold, thresholdvar):
 
 
 def application(environ, start_response):
-    """ Go do something """
+    """Go do something"""
     form = parse_formvars(environ)
     # network = form.get('network')
     delimiter = DELIMITERS.get(form.get("delim", "comma"))

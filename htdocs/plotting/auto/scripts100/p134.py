@@ -35,7 +35,7 @@ XREF = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     desc["cache"] = 86400
@@ -68,7 +68,7 @@ def get_description():
 
 
 def get_data(ctx):
-    """ Get the data"""
+    """Get the data"""
     days = ctx["days"]
     varname = ctx["var"]
     offset = 6 if varname.startswith("coldest") else 0
@@ -150,7 +150,7 @@ def get_data(ctx):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     days = ctx["days"]

@@ -15,8 +15,7 @@ warnings.simplefilter("ignore", category=DeprecationWarning)
 
 
 def consume(scursor, fn, ts, grid_ids):
-    """Actually process the filename at given timestamp
-    """
+    """Actually process the filename at given timestamp"""
     table = "data_%s" % (ts.strftime("%Y_%m"),)
     LOG.debug("Processing %s for table %s", fn, table)
     nc = ncopen(fn)

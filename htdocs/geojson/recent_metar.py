@@ -18,7 +18,7 @@ def trace(val):
 
 
 def get_data(q):
-    """ Get the data for this query """
+    """Get the data for this query"""
     pgconn = get_dbconn("iem")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     data = {"type": "FeatureCollection", "features": []}
@@ -82,7 +82,7 @@ def get_data(q):
 
 
 def application(environ, start_response):
-    """ see how we are called """
+    """see how we are called"""
     field = parse_formvars(environ)
     q = field.get("q", "snowdepth")[:10]
     cb = field.get("callback", None)

@@ -198,7 +198,7 @@ def application(environ, start_response):
 
 
 def test_pil_logic():
-    """Make sure our pil logic works! """
+    """Make sure our pil logic works!"""
     res = pil_logic("AFDDMX")
     assert len(res) == 1
     assert res[0] == "AFDDMX"

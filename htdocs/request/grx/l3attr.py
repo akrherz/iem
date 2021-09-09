@@ -361,7 +361,7 @@ def produce_content(nexrad, poh, meso, tvs, max_size):
 
 
 def application(environ, start_response):
-    """ Go Main Go """
+    """Go Main Go"""
     form = parse_formvars(environ)
     nexrad = form.get("nexrad", "").upper()[:3]
     if nexrad == "":

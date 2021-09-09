@@ -57,7 +57,7 @@ UNITS = {
 
 
 def get_description():
-    """ Return a dict describing how to call this plotter """
+    """Return a dict describing how to call this plotter"""
     desc = dict()
     desc["data"] = True
     today = datetime.date.today()
@@ -128,7 +128,7 @@ def get_description():
 
 
 def compute_months_and_offsets(start, count):
-    """ Figure out an array of values """
+    """Figure out an array of values"""
     months = [start]
     offsets = [0]
     for i in range(1, count):
@@ -171,7 +171,7 @@ def combine(df, months, offsets):
 
 
 def plotter(fdict):
-    """ Go """
+    """Go"""
     pgconn = util.get_dbconn("coop")
 
     today = datetime.date.today()

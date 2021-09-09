@@ -8,7 +8,7 @@ IEM = get_dbconn("iem", user="nobody")
 
 
 def cln(vals):
-    """ Clean the value for plotting"""
+    """Clean the value for plotting"""
     a = []
     for v in vals:
         if v is not None:
