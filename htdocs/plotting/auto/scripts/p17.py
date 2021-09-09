@@ -216,15 +216,16 @@ def do_temperature_plot(ctx):
             linewidth=0.6,
             label="Ob High",
         )
-        ax.bar(
-            df.index.values,
-            df["min_tmpf"].values,
-            fc="b",
-            ec="k",
-            width=0.3,
-            linewidth=0.6,
-            label="Ob Low",
-        )
+        if "min_tmpf" in df.columns and not all(pd.isnull(df["min_tmpf"])):
+            ax.bar(
+                df.index.values,
+                df["min_tmpf"].values,
+                fc="b",
+                ec="k",
+                width=0.3,
+                linewidth=0.6,
+                label="Ob Low",
+            )
     else:
         ax.text(0.5, 0.5, "No Data Found", transform=ax.transAxes, ha="center")
         ax.set_ylim(0, 1)
@@ -232,7 +233,7 @@ def do_temperature_plot(ctx):
     i = 0
     if "max_tmpf" in df.columns and not all(pd.isnull(df["max_tmpf"])):
         for _, row in df.iterrows():
-            if np.isnan(row["max_tmpf"]) or np.isnan(row["min_tmpf"]):
+            if pd.isna(row["max_tmpf"]) or pd.isna(row["min_tmpf"]):
                 i += 1
                 continue
             txt = ax.text(
@@ -285,5 +286,5 @@ def plotter(fdict):
 
 if __name__ == "__main__":
     plotter(
-        {"month": 1, "year": 2021, "station": "TX1974", "network": "TXCLIMATE"}
+        {"month": 5, "year": 2012, "station": "MIRT2", "network": "TX_DCP"}
     )

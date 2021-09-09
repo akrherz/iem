@@ -188,6 +188,7 @@ def plotter(fdict):
         state = sector
         sector = "state"
 
+    clncvar = "p01d"
     if src == "mrms":
         ncfn = iemre.get_daily_mrms_ncname(sdate.year)
         clncfn = iemre.get_dailyc_mrms_ncname()
@@ -198,6 +199,7 @@ def plotter(fdict):
         ncfn = iemre.get_daily_ncname(sdate.year)
         clncfn = iemre.get_dailyc_ncname()
         ncvar = "p01d_12z"
+        clncvar = "p01d"
         source = "IEM Reanalysis"
         subtitle = "IEM Reanalysis is derived from various NOAA datasets"
     elif src == "ifc":
@@ -210,6 +212,7 @@ def plotter(fdict):
         ncfn = f"/mesonet/data/stage4/{sdate.year}_stage4_daily.nc"
         clncfn = "/mesonet/data/stage4/stage4_dailyc.nc"
         ncvar = "p01d_12z"
+        clncvar = "p01d_12z"
         source = "NOAA StageIV"
         subtitle = "NOAA/NWS River Forecast Centers"
     else:
@@ -222,6 +225,7 @@ def plotter(fdict):
         ncfn = "/mesonet/data/prism/%s_daily.nc" % (sdate.year,)
         clncfn = "/mesonet/data/prism/prism_dailyc.nc"
         ncvar = "ppt"
+        clncvar = "ppt"
         source = "OSU PRISM"
         subtitle = (
             "PRISM Climate Group, Oregon State Univ., "
@@ -299,7 +303,7 @@ def plotter(fdict):
         # Do departure work now
         with util.ncopen(clncfn) as nc:
             climo = mm2inch(
-                np.sum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1], 0)
+                np.sum(nc.variables[clncvar][idx0:idx1, y0:y1, x0:x1], 0)
             )
         p01d = p01d - climo
         [maxv] = np.percentile(np.abs(p01d), [99])
@@ -307,7 +311,7 @@ def plotter(fdict):
     elif opt == "per":
         with util.ncopen(clncfn) as nc:
             climo = mm2inch(
-                np.sum(nc.variables[ncvar][idx0:idx1, y0:y1, x0:x1], 0)
+                np.sum(nc.variables[clncvar][idx0:idx1, y0:y1, x0:x1], 0)
             )
         p01d = p01d / climo * 100.0
         clevs = [1, 10, 25, 50, 75, 100, 125, 150, 200, 300, 500]

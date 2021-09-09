@@ -147,4 +147,4 @@ def application(environ, start_response):
         start_response("404 Not Found", [("Content-type", "text/plain")])
         return [b"Resource Not Found"]
     start_response("200 OK", [("Content-type", "text/html")])
-    return [as_html(ctx).encode("ascii")]
+    return [as_html(ctx).encode("ascii", errors="ignore")]
