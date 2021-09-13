@@ -97,7 +97,17 @@ $().ready(function() {
 	// Make sure clicking the submit button selects all of the selected 
 	// stations, this avoids user confusion
 	$("form[name='iemss'] :submit").click(function (){
-		$('#stations_out option').prop('selected', true);
+        // Empty input implies that all are selected!
+        if ($("#iemss").data("supports-all") != "0" && $('#stations_in option').length == 0){
+            // Deselect anything selected so that it does not submit
+            $('#stations_out option').prop('selected', false);
+            // Add a faked _ALL station
+            $("#stations_out").append(
+                '<option value="_ALL" selected="selected">ALL</option>'
+            );
+            return true;
+        }
+        $('#stations_out option').prop('selected', true);
 		// Stop us if we have no stations selected!
 		if ($('#stations_out option').length == 0){
 			alert("No stations listed in 'Selected Stations'!");

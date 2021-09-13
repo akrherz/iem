@@ -226,7 +226,7 @@ for a bias assessment of these values.</p>
 <input type="hidden" name="network" value="{$network}">
 {$hiddendates}
 {$hiddenstations}
-<div id="iemss" data-network="{$network}"></div>
+<div id="iemss" data-network="{$network}" data-supports-all="0"></div>
 
 <br /><input id="addmapstations" type="submit" value="Add Station(s)">
 </form>
