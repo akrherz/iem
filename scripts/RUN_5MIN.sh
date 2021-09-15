@@ -22,5 +22,6 @@ cd ../current
 python lsr_snow_mapper.py &
 
 cd ../ingestors/rwis
-csh download.csh &
-python ingest_rw.py &
+python process_rwis.py &
+python process_soil.py &
+python ingest_rw.py

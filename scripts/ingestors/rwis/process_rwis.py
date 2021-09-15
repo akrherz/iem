@@ -329,7 +329,10 @@ def main():
     atmos = fetch(ATMOS_URI)
     surface = fetch(SURFACE_URI)
     if atmos.empty or surface.empty:
-        LOG.info(f"FAIL, empty dataframe atmos:{atmos}\nsurface:{surface}")
+        LOG.info(
+            f"FAIL, empty dataframe atmos sz:{len(atmos.index)}, "
+            f"surface sz:{len(surface.index)}"
+        )
         return
     obs = merge(atmos, surface)
     do_iemtracker(obs)

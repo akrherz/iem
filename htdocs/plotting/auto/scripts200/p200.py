@@ -22,7 +22,7 @@ ISSUANCE = dict(
         ("1.C.1", "Day 1 Convective @1z"),
         ("1.C.5", "Day 1 Convective @5z"),
         ("1.F.6", "Day 1 Fire Weather @6z"),
-        ("1.C.12", "Day 1 Convective @12z"),
+        ("1.C.13", "Day 1 Convective @13z"),
         ("1.C.16", "Day 1 Convective @16z"),
         ("1.F.16", "Day 1 Fire Weather @16z"),
         ("1.C.20", "Day 1 Convective @20z"),
