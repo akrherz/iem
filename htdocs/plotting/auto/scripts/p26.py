@@ -136,7 +136,7 @@ def get_context(fdict):
 
     # http://stackoverflow.com/questions/19736080
     d = dict(
-        doy=pd.Series(doys),
+        doy=pd.Series(doys) + subval,
         mins=pd.Series(mins),
         maxs=pd.Series(maxs),
         p2p5=pd.Series(p2p5),
@@ -147,7 +147,8 @@ def get_context(fdict):
         thisyear=pd.Series(dyear),
     )
     df = pd.DataFrame(d)
-    sts = datetime.date(2000, 1, 1) + datetime.timedelta(days=doys[0] - 1)
+    addval = int(df["doy"].values[0] - 1)
+    sts = datetime.date(2000, 1, 1) + datetime.timedelta(days=addval)
     df["dates"] = pd.date_range(sts, periods=len(doys))
     df = df.set_index("doy")
     ctx["df"] = df
@@ -275,10 +276,14 @@ def plotter(fdict):
         zorder=6,
         label="%s" % (ctx["year"],),
     )
-    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     if ctx["half"] == "spring":
+        ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
         ax.set_xticklabels(calendar.month_abbr[1:])
     if ctx["half"] == "fall":
+        ax.set_xticks(
+            np.array([1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335])
+            + 183
+        )
         labels = calendar.month_abbr[7:]
         labels.extend(calendar.month_abbr[1:7])
         ax.set_xticklabels(labels)
@@ -310,4 +315,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    highcharts(dict())
+    highcharts(dict(network="IACLIMATE", station="IA0200", half="fall"))
