@@ -578,6 +578,7 @@ mopts = [
     },
     {"id": 37, "label": "MOS Forecasted Temperature Ranges + Observations"},
     {"id": 211, "label": "One Minute Interval Plots"},
+    {"id": 222, "label": "One Minute Precipitation During Severe Weather"},
     {
         "id": 162,
         "label": "Overcast Sky Condition 2D Histogram (Level by Week)",
