@@ -38,7 +38,8 @@ def workflow(now, realtime):
 
     gribfn = mrms.fetch("PrecipRate", now)
     if gribfn is None:
-        LOG.info("NODATA for PrecipRate: %s", now.strftime("%Y-%m-%dT%H:%MZ"))
+        lf = LOG.info if realtime else LOG.debug
+        lf("Missing PrecipRate: %s", now.strftime("%Y-%m-%dT%H:%MZ"))
         return
 
     # http://www.nssl.noaa.gov/projects/mrms/operational/tables.php

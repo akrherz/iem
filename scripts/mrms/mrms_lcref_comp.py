@@ -50,10 +50,8 @@ def do(now, realtime=False):
 
     gribfn = mrms.fetch("SeamlessHSR", now)
     if gribfn is None:
-        print(
-            ("mrms_lcref_comp.py NODATA for SeamlessHSR: %s")
-            % (now.strftime("%Y-%m-%dT%H:%MZ"),)
-        )
+        lf = LOG.info if realtime else LOG.debug
+        lf("Missing SeamlessHSR: %s", now.strftime("%Y-%m-%dT%H:%MZ"))
         return
 
     fp = gzip.GzipFile(gribfn, "rb")
