@@ -73,7 +73,7 @@ def p2_parser(ln, metadata):
         return None
     s = ln[31:34].strip()
     res["ptype"] = None if s == "" else s[:2]
-    s = ln[44:48].strip()
+    s = ln[43:48].strip()
     res["precip"] = make_real(s, 0, 0.5)
     s = ln[69:77].strip()
     res["pres1"] = make_real(s, 10, 40)
@@ -452,6 +452,8 @@ def test_parser():
             assert abs(res["dwpf"] - 23.0) < 0.01
         if i == 19:
             assert abs(res["precip"] - 0.01) < 0.01
+        if i == 29:
+            assert abs(res["precip"] - 0.03) < 0.01
         if i == 28:
             assert abs(res["dwpf"] - -2) < 0.01
         assert res is not None
