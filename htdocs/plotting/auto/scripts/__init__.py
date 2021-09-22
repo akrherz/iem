@@ -56,19 +56,19 @@ daily_opts = [
     },
     {
         "id": 91,
-        "label": "Consecutative Day Statistics of High+Low Temps / Precip",
+        "label": "Consecutive Day Statistics of High+Low Temps / Precip",
     },
     {
         "id": 66,
         "label": (
-            "Consecutative Days Frequency by DOY for High/Low Temp "
+            "Consecutive Days Frequency by DOY for High/Low Temp "
             "Above/Below Threshold"
         ),
     },
     {
         "id": 216,
         "label": (
-            "Consecutative Days by Year with High/Low Temp "
+            "Consecutive Days by Year with High/Low Temp "
             "Above/Below Threshold"
         ),
     },

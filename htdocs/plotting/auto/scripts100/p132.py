@@ -78,7 +78,7 @@ def get_description():
             type="int",
             name="days",
             default=1,
-            label="Over how many consecutative days",
+            label="Over how many consecutive days",
         ),
         dict(
             type="select",
