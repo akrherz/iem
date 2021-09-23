@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import os
 
 import numpy as np
+import cartopy.crs as ccrs
 from pyiem import iemre, util
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
@@ -162,7 +163,14 @@ def get_ugc_bounds(ctx, sector):
         return sector, "", 0, 0, 0, 0
     row = cursor.fetchone()
     b = 0.15  # arb
-    return "custom", row[4], row[0] + b, row[3] + b, row[1] - b, row[2] - b
+    return (
+        "custom",
+        row[4],
+        row[0] - b,
+        row[3] + b,
+        row[1] + b,
+        row[2] - b,
+    )
 
 
 def plotter(fdict):
@@ -251,13 +259,20 @@ def plotter(fdict):
         subtitle="Data from %s" % (subtitle,),
         titlefontsize=14,
     )
+    (west, east, south, north) = mp.ax.get_extent(ccrs.PlateCarree())
 
     idx0 = iemre.daily_offset(sdate)
     idx1 = iemre.daily_offset(edate) + 1
     if not os.path.isfile(ncfn):
         raise NoDataFound("No data for that year, sorry.")
     with util.ncopen(ncfn) as nc:
-        if state is not None:
+        if sector == "custom":
+            x0, y0, x1, y1 = util.grid_bounds(
+                nc.variables["lon"][:],
+                nc.variables["lat"][:],
+                [west, south, east, north],
+            )
+        elif state is not None:
             x0, y0, x1, y1 = util.grid_bounds(
                 nc.variables["lon"][:],
                 nc.variables["lat"][:],
@@ -319,13 +334,30 @@ def plotter(fdict):
     else:
         p01d = np.where(p01d < 0.001, np.nan, p01d)
         cmap.set_under("white")
+        # Dynamic Range based on min/max grid value, since we restrict plot
+        minval = np.floor(np.nanmin(p01d))
+        maxval = np.ceil(np.nanmax(p01d))
         clevs = [0.01, 0.1, 0.3, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5, 6, 8, 10]
-        if days > 6:
-            clevs = [0.01, 0.3, 0.5, 1, 1.5, 2, 3, 4, 5, 6, 7, 8, 10, 15, 20]
-        if days > 29:
-            clevs = [0.01, 0.5, 1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 25, 30, 35]
-        if days > 90:
-            clevs = [0.01, 1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 25, 30, 35, 40]
+        if minval == 0:
+            if maxval <= 1:
+                clevs = np.arange(0, 1.01, 0.1)
+            elif maxval <= 3:
+                clevs = np.arange(0, 3.01, 0.25)
+            elif maxval <= 5:
+                clevs = np.arange(0, 5.01, 0.5)
+            elif maxval <= 10:
+                clevs = np.arange(0, 10.01, 1.0)
+        else:
+            # Find an interval that encloses the bounds
+            rng = maxval - minval
+            for interval in [0.1, 0.25, 0.5, 1, 1.5, 2, 3, 5, 10]:
+                if interval * 10 >= rng:
+                    clevs = np.arange(
+                        minval, minval + interval * 10 + 0.01, interval
+                    )
+                    break
+        if minval == 0:
+            clevs[0] = 0.01
 
     if len(lons.shape) == 1:
         x2d, y2d = np.meshgrid(lons, lats)
@@ -348,4 +380,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(sdate="2020-01-01", edate="2020-01-01", src="stage4"))
+    plotter(dict(sdate="2019-01-01", edate="2019-02-01", src="stage4"))
