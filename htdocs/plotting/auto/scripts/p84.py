@@ -336,7 +336,7 @@ def plotter(fdict):
         cmap.set_under("white")
         # Dynamic Range based on min/max grid value, since we restrict plot
         minval = np.floor(np.nanmin(p01d))
-        maxval = np.ceil(np.nanmax(p01d))
+        maxval = np.ceil(np.percentile(p01d, [95])[0])
         clevs = [0.01, 0.1, 0.3, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5, 6, 8, 10]
         if minval == 0:
             if maxval <= 1:
