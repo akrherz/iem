@@ -184,7 +184,6 @@ def plotter(fdict):
     usdm = ctx["usdm"]
     if sdate.year != edate.year:
         raise NoDataFound("Sorry, do not support multi-year plots yet!")
-    days = (edate - sdate).days
     sector = ctx["sector"]
 
     x0 = 0

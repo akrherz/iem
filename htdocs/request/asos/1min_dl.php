@@ -6,6 +6,8 @@ set_time_limit(300);
  * plotting it (via plot_1min.php) or displaying it for download
  */
 require_once "../../../config/settings.inc.php";
+// This script can be too intensive and jam up php-fpm, so we throttle
+require_once "../../../include/throttle.php";
 require_once "../../../include/database.inc.php";
 require_once "../../../include/network.php";
 
