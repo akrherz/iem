@@ -102,6 +102,7 @@ putenv("TZ=UTC");
  	"1.00" => "1.00",
  "1.75" => "1.75",
  "2.00" => "2.00",
+ "2.75" => "2.75",
  "7.00" => "7.00");
  
  $hselect = make_select("hail", $hail, $ar);
@@ -112,7 +113,7 @@ putenv("TZ=UTC");
  $ar = Array("0" => "0", "0.01" => "0.01");
  $wbuffer = make_select("warnbuffer", $warnbuffer, $ar);
  
- $ar = Array(58 => "58 mph", 70 => "70 mph", 75 => "75 mph", 150 => "150 mph");
+ $ar = Array(58 => "58 mph", 70 => "70 mph", 75 => "75 mph", 80 => "80 mph", 150 => "150 mph");
  $wiselect = make_select("wind", $wind, $ar);
 
  $tagselect = "<input name=\"windhailtag\" type=\"checkbox\" value=\"Y\" ";
