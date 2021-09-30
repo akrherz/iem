@@ -80,7 +80,7 @@ def main():
     from current_shef c JOIN stations s on (c.station = s.id) WHERE
      s.network in ('%s_DCP') and c.valid > now() - '4 hours'::interval
      and c.physical_code in ('HG','HP', 'HT') and c.duration = 'I'
-     and c.extremum = 'Z' ORDER by rank DESC
+     and c.extremum = 'Z' and c.value is not null ORDER by rank DESC
     """
         % (state,)
     )
