@@ -60,7 +60,7 @@ cd rwis
 python process_traffic.py &
 
 cd ../../outgoing
-php wxc_cocorahs.php
+iemphp wxc_cocorahs.php
 
 cd ../current
 python plot_hilo.py

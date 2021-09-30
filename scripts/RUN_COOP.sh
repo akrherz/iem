@@ -3,7 +3,7 @@
 
 cd outgoing
 python wxc_azos_gdd.py
-php wxc_coop.php
+iemphp wxc_coop.php
 
 cd ../coop
 bash PREC.sh

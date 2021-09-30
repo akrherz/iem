@@ -23,21 +23,24 @@ $t->breadcrumbs = <<<EOF
 		</ol>
 EOF;
 $cols = Array(
-	"valid" => "Timestamp",		
-		'station' => "Station ID",
-		'name' => 'Station Name',
-		'HGIZ' => 'Water Stage Height',
-		'TAIZ' => 'Air Temperature',
-		'PPHZ' => '1 Hour Precip',
-		'PPDZ' => 'Today Precip',
-		'VBIZ' => 'Battery Voltage',
-		'TWIZ' => 'Water Temperature',
-		);
+    "valid" => "Timestamp",		
+    'station' => "Station ID",
+    'name' => 'Station Name',
+    'HGIZ' => 'Water Stage Height',
+    'TAIZ' => 'Air Temperature',
+    'PPHZ' => '1 Hour Precip',
+    'PPDZ' => 'Today Precip',
+    'VBIZ' => 'Battery Voltage',
+    'TWIZ' => 'Water Temperature',
+);
 
- $rs = pg_prepare($pgconn, "SELECT", "select station, valid, value, 
- 		physical_code, duration, source, extremum , name from 
- 		current_shef c JOIN stations s on (c.station = s.id) 
- 		where s.network = $1");
+ $rs = pg_prepare(
+     $pgconn,
+     "SELECT",
+     "select c.*, s.name, ".
+     "c.valid at time zone s.tzname as localvalid ".
+     "from current_shef c JOIN stations s ".
+     "on (c.station = s.id) where s.network = $1");
  $rs = pg_execute($pgconn, "SELECT", Array($network));
 
  $obs = Array();
@@ -45,11 +48,11 @@ $cols = Array(
  	$datakey = sprintf("%s%s%s", $row["physical_code"], $row["duration"],
  			$row["extremum"]);
  	$obs[ $row['station'] ][ $datakey ] = $row["value"]; 
- 	$obs[ $row['station'] ][ 'valid' ] = strtotime($row["valid"]);
- 	$obs[ $row['station'] ][ 'name' ] = $row["name"];
+ 	$obs[ $row['station'] ]['valid'] = strtotime($row["localvalid"]);
+ 	$obs[ $row['station'] ]['name'] = $row["name"];
  }
 
- $final = aSortBySecondIndex($obs, $sortcol);
+ $final = aSortBySecondIndex($obs, $sortcol, "desc");
  
  $nselect = "<select name=\"network\">";
  $rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'DCP' ORDER by name ASC");

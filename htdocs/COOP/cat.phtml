@@ -110,16 +110,16 @@ EOF;
    $sortdir = "DESC";
  if (strlen($station) > 0) {
      $rs = pg_prepare($iemdb, "SELECT", "SELECT c.*, s.id as station, 
-     s.name as sname, c.coop_valid at time zone s.tzname as cts 
+     s.name as sname, c.coop_valid at time zone s.tzname as cts, c.report 
      from summary_$year c, stations s
      WHERE s.id = $1 and s.network = $2 and c.iemid = s.iemid 
      and c.day <= 'TODAY' ORDER by $sortvar $sortdir");
      $rs = pg_execute($iemdb, "SELECT", Array($station, $network));
  } else {
     $rs = pg_prepare($iemdb, "SELECT", "SELECT c2.*, s.id as station, 
-     s.name as sname, c2.coop_valid at time zone s.tzname as cts
+     s.name as sname, c2.coop_valid at time zone s.tzname as cts, c.report
      from summary_$year c2, stations s
-     WHERE c2.day = $1  
+     WHERE c2.day = $1
      and s.network = $2 and c2.iemid = s.iemid ORDER by $sortvar $sortdir");
     $rs = pg_execute($iemdb, "SELECT", Array($date, $network));
 
@@ -188,7 +188,13 @@ EOF;
 	      $rowcontent .= "<a href=\"cat.phtml?date=". $row["day"] ."&network=". $network ."\">". $dstring ."</a>";
 	   }
 	   $rowcontent .= "</td><td>". $tmpf ."</td><td>". $high ."</td><td>". $low ."</td><td>". $rain ."</td><td>". $snow ."</td><td>". $snowd ."</td><td>". $snoww ."</td></tr>\n";
-   }
+       if (! is_null($row["report"])){
+           $rowcontent .= sprintf(
+               '<tr><td colspan="8">%s</td></tr>',
+               $row["report"],
+           );
+       }
+    }
    $content .= $rowcontent;
  }
 

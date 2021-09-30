@@ -52,19 +52,37 @@ function fmt($val, $varname){
  			"from current_shef ".
  			"where station = $2 ORDER by physical_code ASC");
  	$rs = pg_execute($pgconn, "SELECT", Array($metadata['tzname'], $station));
-	$table .= "<table class=\"table table-striped\">
-			<thead><tr><th>Physical Code</th><th>Duration</th><th>Extremum</th>
-			<th>Source</th><th>Valid</th><th>Value</th></thead>";
+	$table .= <<<EOM
+<table class="table table-striped">
+<thead>
+    <tr><th>Physical Code</th><th>Duration</th><th>Type</th>
+	<th>Source</th><th>Extrenum</th><th>Valid</th><th>Value</th>
+    <th>Product</th></tr>
+</thead>
+EOM;
+    $baseprodvalid = time() - 5 * 86400;
  	for($i=0;$row=pg_fetch_assoc($rs);$i++){
  		$depth = "";
  		if ($row["depth"] > 0){
  			$depth = sprintf("%d inch", $row["depth"]);
  		}
- 		$table .= sprintf("<tr><td>[%s] %s %s</td><td>[%s] %s</td><td>[%s] %s</td><td>%s</td><td>%s</td><td>%s</td></tr>", 
- 				$row["physical_code"],$shefcodes[$row["physical_code"]], $depth,
- 				$row["duration"], $durationcodes[ $row["duration"] ], 
- 				$row["extremum"] == 'Z'? '-': $row['extremum'] , $extremumcodes[ $row["extremum"] ],
- 				$row["source"], $row["ts"], $row["value"]);
+        $plink = "N/A";
+        if (strtotime($row["valid"]) > $baseprodvalid){
+            if (! is_null($row["product_id"])){
+                $plink = sprintf(
+                    '<a href="/p.php?pid=%s">Source Text</a>',
+                    $row["product_id"]
+                );
+            }
+        }
+ 		$table .= sprintf(
+            "<tr><td>[%s] %s %s</td><td>[%s] %s</td><td>%s</td>".
+            "<td>%s</td><td>[%s] %s</td><td>%s</td><td>%s</td><td>%s</td></tr>", 
+ 			$row["physical_code"], $shefcodes[$row["physical_code"]], $depth,
+ 			$row["duration"], $durationcodes[ $row["duration"] ],
+            $row["type"], $row["source"], 
+ 			$row["extremum"] == 'Z'? '-': $row['extremum'] , $extremumcodes[ $row["extremum"] ],
+ 			$row["ts"], $row["value"], $plink);
  	}
  	$table .= "</table>";
 } else {
