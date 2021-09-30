@@ -117,7 +117,7 @@ EOF;
      $rs = pg_execute($iemdb, "SELECT", Array($station, $network));
  } else {
     $rs = pg_prepare($iemdb, "SELECT", "SELECT c2.*, s.id as station, 
-     s.name as sname, c2.coop_valid at time zone s.tzname as cts, c.report
+     s.name as sname, c2.coop_valid at time zone s.tzname as cts, c2.report
      from summary_$year c2, stations s
      WHERE c2.day = $1
      and s.network = $2 and c2.iemid = s.iemid ORDER by $sortvar $sortdir");
