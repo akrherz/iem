@@ -5,7 +5,30 @@ in the mesosite database, if so, then I set online to true!
 Run from RUN_2AM.sh
 """
 
-from pyiem.util import get_dbconn
+from pandas.io.sql import read_sql
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
+
+
+def review_iemaccess():
+    """Go find stations that have summary entries, but marked offline."""
+    pgconn = get_dbconn("iem")
+    df = read_sql(
+        "select s.iemid, t.id, t.network from "
+        "summary_2021 s JOIN stations t on (s.iemid = t.iemid) "
+        "where day = 'YESTERDAY' and not online",
+        pgconn,
+    )
+    LOG.info("Found %s stations offline, but having data", len(df.index))
+    pgconn = get_dbconn("mesosite")
+    cursor = pgconn.cursor()
+    cursor.execute(
+        "UPDATE stations SET online = 't' where iemid in %s",
+        (tuple(df["iemid"].to_list()),),
+    )
+    cursor.close()
+    pgconn.commit()
 
 
 def main():
@@ -53,3 +76,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    review_iemaccess()
