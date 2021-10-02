@@ -44,9 +44,7 @@ jobs:
         # Newer PROJ needs this
         echo "export PROJ_LIB=/home/runner/miniconda/envs/prod/share/proj" | sudo tee -a /etc/apache2/envvars > /dev/null
         . .ci_tooling/miniconda.sh
-        # https://travis-ci.community/t/t/712/12
-        export PATH="/usr/lib/postgresql/12/bin:$PATH"
-        psql -c 'CREATE ROLE runner SUPERUSER LOGIN CREATEDB;' -U postgres || true
+        export PATH="/usr/lib/postgresql/14/bin:$PATH"
         cd database; sh bootstrap.sh
         python schema_manager.py
         cd ..
