@@ -53,11 +53,13 @@ $asos = iemdb("asos");
 pg_query($postgis, "SET TIME ZONE 'UTC'");
 pg_query($asos, "SET TIME ZONE 'UTC'");
 
-$rs = pg_prepare($postgis, "FIND", "SELECT array_to_string(array_accum(ugc),',')
-		as a, eventid, issue, expire from
-		warnings_$year WHERE wfo = $1 and phenomena =  $4 and
-		significance = $5 and eventid >= $2 and eventid < $3
-		GROUP by issue, expire, eventid ORDER by issue ASC");
+$rs = pg_prepare(
+    $postgis,
+    "FIND",
+    "SELECT string_agg(ugc::text, ',') as a, eventid, issue, ".
+    "expire from warnings_$year WHERE wfo = $1 and phenomena =  $4 and ".
+	"significance = $5 and eventid >= $2 and eventid < $3 ".
+	"GROUP by issue, expire, eventid ORDER by issue ASC");
 
 $station2ugc = Array();
 $ugc2station = Array();
