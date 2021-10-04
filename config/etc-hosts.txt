@@ -77,8 +77,6 @@
 192.168.1.245 metvm6-iemdb.local
 # TODO removal of this line legacy names
 192.168.1.245 iemdb iemdb.local
-192.168.1.245 iemdb-afos.local
-192.168.1.245 iemdb-asos.local
 192.168.1.245 iemdb-frost.local
 192.168.1.245 iemdb-id3b.local
 192.168.1.245 iemdb-idep.local
@@ -108,10 +106,12 @@
 # VI_07(157) metvm9 <-> metvm6
 192.168.0.244 iemdb2-0.local
 
-### metvm1 PostgreSQL
-# VI_1_231(71) metvm1
+### metvm4 PostgreSQL
+# VI_1_231(71) metvm4
 192.168.1.231    metvm1-iemdb.local
+192.168.1.231 iemdb-afos.local
 192.168.1.231 iemdb-asos1min.local
+192.168.1.231 iemdb-asos.local
 
 ### metvm7 PostgreSQL
 # VI_1_230(72) metvm7
