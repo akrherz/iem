@@ -1,8 +1,8 @@
 """Map of dates"""
 import datetime
-from collections import OrderedDict
 
 import numpy as np
+import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.plot.geoplot import MapPlot
 from pyiem.network import Table as NetworkTable
@@ -10,13 +10,11 @@ from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 PDICT3 = {"contour": "Contour + Plot Values", "values": "Plot Values Only"}
-PDICT2 = OrderedDict(
-    (
-        ("spring_below", "Last Spring Date Below"),
-        ("high_above", "First Date of Year At or Above"),
-        ("fall_below", "First Fall Date Below"),
-    )
-)
+PDICT2 = {
+    "spring_below": "Last Spring Date Below",
+    "high_above": "First Date of Year At or Above",
+    "fall_below": "First Fall Date Below",
+}
 
 MONTH_DOMAIN = {
     "spring_below": range(1, 7),
@@ -218,6 +216,7 @@ def plotter(fdict):
         df2.at[station, "lat"] = nt.sts[station]["lat"]
         df2.at[station, "lon"] = nt.sts[station]["lon"]
 
+    df2 = df2[~pd.isnull(df2["lat"])]
     mp = MapPlot(
         sector="state",
         state=ctx["sector"],
@@ -248,4 +247,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter(dict(sector="IA", var="fall_below", popt="contour", year="2019"))

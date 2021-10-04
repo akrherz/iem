@@ -85,7 +85,7 @@
 
 ### metvm4 PostgreSQL
 # VI_1_231(71) metvm4
-192.168.1.231    metvm1-iemdb.local
+192.168.1.231    metvm4-iemdb.local
 192.168.1.231 iemdb-afos.local
 192.168.1.231 iemdb-asos1min.local
 192.168.1.231 iemdb-asos.local
