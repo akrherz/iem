@@ -80,9 +80,6 @@
 192.168.1.245 iemdb-iem.local
 192.168.1.245 iemdb-isuag.local
 192.168.1.245 iemdb-mesosite.local
-192.168.1.245 iemdb-other.local
-192.168.1.245 iemdb-portfolio.local
-192.168.1.245 iemdb-rwis.local
 
 #### metvm9 PostgreSQL
 # VI_7(57) metvm9 <-> metvm6
@@ -106,7 +103,10 @@
 192.168.1.231 iemdb-nc1018.local
 192.168.1.231 iemdb-nwx.local
 192.168.1.231 iemdb-openfire.local
+192.168.1.231 iemdb-other.local
+192.168.1.231 iemdb-portfolio.local
 192.168.1.231 iemdb-rtstats.local
+192.168.1.231 iemdb-rwis.local
 192.168.1.231 iemdb-scada.local
 192.168.1.231 iemdb-scan.local
 192.168.1.231 iemdb-squaw.local
