@@ -77,27 +77,12 @@
 192.168.1.245 metvm6-iemdb.local
 # TODO removal of this line legacy names
 192.168.1.245 iemdb iemdb.local
-192.168.1.245 iemdb-frost.local
-192.168.1.245 iemdb-id3b.local
-192.168.1.245 iemdb-idep.local
 192.168.1.245 iemdb-iem.local
 192.168.1.245 iemdb-isuag.local
-192.168.1.245 iemdb-kcci.local
-192.168.1.245 iemdb-mesonet.local
 192.168.1.245 iemdb-mesosite.local
-192.168.1.245 iemdb-nc1018.local
-192.168.1.245 iemdb-nwx.local
-192.168.1.245 iemdb-openfire.local
 192.168.1.245 iemdb-other.local
 192.168.1.245 iemdb-portfolio.local
-192.168.1.245 iemdb-rtstats.local
 192.168.1.245 iemdb-rwis.local
-192.168.1.245 iemdb-scada.local
-192.168.1.245 iemdb-scan.local
-192.168.1.245 iemdb-squaw.local
-192.168.1.245 iemdb-sustainablecorn.local
-192.168.1.245 iemdb-td.local
-192.168.1.245 iemdb-wepp.local
 
 #### metvm9 PostgreSQL
 # VI_7(57) metvm9 <-> metvm6
@@ -112,6 +97,22 @@
 192.168.1.231 iemdb-afos.local
 192.168.1.231 iemdb-asos1min.local
 192.168.1.231 iemdb-asos.local
+192.168.1.231 iemdb-frost.local
+192.168.1.231 iemdb-id3b.local
+192.168.1.231 iemdb-idep.local
+192.168.1.231 iemdb-kcci.local
+192.168.1.231 iemdb-mattermost.local
+192.168.1.231 iemdb-mesonet.local
+192.168.1.231 iemdb-nc1018.local
+192.168.1.231 iemdb-nwx.local
+192.168.1.231 iemdb-openfire.local
+192.168.1.231 iemdb-rtstats.local
+192.168.1.231 iemdb-scada.local
+192.168.1.231 iemdb-scan.local
+192.168.1.231 iemdb-squaw.local
+192.168.1.231 iemdb-sustainablecorn.local
+192.168.1.231 iemdb-td.local
+192.168.1.231 iemdb-wepp.local
 
 ### metvm7 PostgreSQL
 # VI_1_230(72) metvm7
