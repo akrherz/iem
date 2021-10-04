@@ -20,6 +20,8 @@ def review_iemaccess():
         "where day = 'YESTERDAY' and not online",
         pgconn,
     )
+    if df.empty:
+        return
     LOG.info("Found %s stations offline, but having data", len(df.index))
     pgconn = get_dbconn("mesosite")
     cursor = pgconn.cursor()
