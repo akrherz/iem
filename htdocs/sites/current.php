@@ -48,9 +48,9 @@ function fmt($val, $varname){
  	
  	$pgconn = iemdb("iem");
  	$rs = pg_prepare($pgconn, "SELECT", "SELECT *, ".
- 			"to_char(valid at time zone $1, 'dd Mon YYYY HH:MI AM') as ts ".
- 			"from current_shef ".
- 			"where station = $2 ORDER by physical_code ASC");
+        "to_char(valid at time zone $1, 'dd Mon YYYY HH:MI AM') as ts ".
+ 		"from current_shef ".
+ 		"where station = $2 ORDER by physical_code ASC");
  	$rs = pg_execute($pgconn, "SELECT", Array($metadata['tzname'], $station));
 	$table .= <<<EOM
 <table class="table table-striped">

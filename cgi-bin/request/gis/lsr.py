@@ -114,7 +114,7 @@ def application(environ, start_response):
 
     try:
         sts, ets = get_time_domain(form)
-    except ValueError:
+    except (ValueError, TypeError):
         start_response(
             "500 Internal Server Error", [("Content-type", "text/plain")]
         )

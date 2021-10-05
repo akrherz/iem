@@ -9,8 +9,6 @@ from geopandas import read_postgis
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, utc
 
-# cgitb.enable()
-
 
 def get_context(environ):
     """Figure out the CGI variables passed to this script"""
@@ -92,7 +90,7 @@ def run(ctx, start_response):
         zio, mode="w", compression=zipfile.ZIP_DEFLATED
     ) as zf:
         zf.writestr(
-            fn + ".prj", open(("/opt/iem/data/gis/meta/4326.prj")).read()
+            fn + ".prj", open("/opt/iem/data/gis/meta/4326.prj").read()
         )
         zf.write(f"{fn}.shp")
         zf.write(f"{fn}.shx")
@@ -101,7 +99,7 @@ def run(ctx, start_response):
         os.unlink(f"{fn}.{suffix}")
     headers = [
         ("Content-type", "application/octet-stream"),
-        ("Content-Disposition", "attachment; filename=%s.zip" % (fn,)),
+        ("Content-Disposition", f"attachment; filename={fn}.zip"),
     ]
     start_response("200 OK", headers)
 

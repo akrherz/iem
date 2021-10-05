@@ -3,3 +3,4 @@
 /.project
 /.pydevproject
 **/fe.py
+/.vscode

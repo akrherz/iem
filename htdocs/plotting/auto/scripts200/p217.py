@@ -33,7 +33,7 @@ def get_description():
             type="text",
             name="pid",
             default="202012300005-KDVN-WWUS83-SPSDVN",
-            label="IEM Generated 32-character Product Identifier:",
+            label="IEM generated up to 35 char product identifier:",
         ),
         dict(
             type="int",
@@ -49,7 +49,7 @@ def plotter(fdict):
     """Go"""
     pgconn = get_dbconn("postgis")
     ctx = get_autoplot_context(fdict, get_description())
-    pid = ctx["pid"][:32]
+    pid = ctx["pid"][:35]
     segnum = ctx["segnum"]
     nt = NetworkTable("WFO")
 

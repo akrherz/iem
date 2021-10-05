@@ -8,6 +8,7 @@ define("IEM_APPID", 47);
 
 $e = isset($_GET['e']) ? intval($_GET['e']) : null;
 $pil = isset($_GET['pil']) ? strtoupper(substr($_GET['pil'],0,6)) : null;
+$bbb = isset($_GET["bbb"]) ? strtoupper(substr($_GET["bbb"], 0, 3)) : null;
 $dir = isset($_REQUEST['dir']) ? $_REQUEST['dir'] : null;
 
 if (is_null($pil) || trim($pil) == ""){
@@ -80,11 +81,19 @@ else {
 	// Option 3: Explicit request
 	$ts = gmmktime( substr($e,8,2), substr($e,10,2), 0,
 			substr($e,4,2), substr($e,6,2), substr($e,0,4) );
-	$rs = pg_prepare($conn, "_LSELECT", "SELECT data,
-			entered at time zone 'UTC' as mytime, source, wmo from products
-			WHERE pil = $1 and entered = $2");
-	$rs = pg_execute($conn, "_LSELECT", Array($pil,
-			date("Y-m-d H:i", $ts)));
+    if (is_null($bbb)){
+        $rs = pg_prepare($conn, "_LSELECT", "SELECT data,
+            entered at time zone 'UTC' as mytime, source, wmo from products
+            WHERE pil = $1 and entered = $2");
+        $rs = pg_execute($conn, "_LSELECT", Array($pil,
+            date("Y-m-d H:i", $ts)));
+    } else {
+        $rs = pg_prepare($conn, "_LSELECT", "SELECT data,
+            entered at time zone 'UTC' as mytime, source, wmo from products
+            WHERE pil = $1 and entered = $2 and bbb = $3");
+        $rs = pg_execute($conn, "_LSELECT", Array($pil,
+            date("Y-m-d H:i", $ts), $bbb));
+    }
 }
 
 $content = "<h3>National Weather Service Raw Text Product</h3>";
