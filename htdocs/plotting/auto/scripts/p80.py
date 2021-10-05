@@ -3,7 +3,7 @@ import psycopg2.extras
 import numpy as np
 import pandas as pd
 import pyiem.nws.vtec as vtec
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -53,8 +53,6 @@ def plotter(fdict):
     phenomena = ctx["phenomena"]
     significance = ctx["significance"]
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
-
     cursor.execute(
         "SELECT s.wfo, s.tzname, u.name from ugcs u  JOIN stations s "
         "on (u.wfo = s.id) where ugc = %s and end_ts is null and "
@@ -90,6 +88,19 @@ def plotter(fdict):
         )
 
     df = pd.DataFrame(rows)
+    title = (
+        "[%s] %s :: %s (%s.%s)\nDistribution of Event Time Duration %s-%s"
+    ) % (
+        ugc,
+        name,
+        vtec.get_ps_string(phenomena, significance),
+        phenomena,
+        significance,
+        min(df["issue"]).strftime("%-d %b %Y"),
+        max(df["issue"]).strftime("%-d %b %Y"),
+    )
+    (fig, ax) = figure_axes(title=title)
+
     titles = {"initial": "Initial Issuance", "final": "Final Duration"}
     for col in ["final", "initial"]:
         sortd = df.sort_values(by=col)
@@ -121,22 +132,13 @@ def plotter(fdict):
     else:
         xmax = x[-1] + 60 - (x[-1] % 60)
         ax.set_xlim(0, xmax)
-        ax.set_xticks(np.arange(0, xmax + 1, 60))
-        ax.set_xticklabels(np.arange(0, (xmax + 1) / 60.0))
+        xticks = np.arange(0, xmax + 1, 60)
+        while len(xticks) > 20:
+            xticks = xticks[::2]
+        ax.set_xticks(xticks)
+        ax.set_xticklabels([int(i / 60) for i in xticks])
         ax.set_xlabel("Duration [hours]")
     ax.set_ylabel(f"Frequency [%] out of {y[-1]} Events")
-    ax.set_title(
-        ("[%s] %s :: %s (%s.%s)\nDistribution of Event Time Duration %s-%s")
-        % (
-            ugc,
-            name,
-            vtec.get_ps_string(phenomena, significance),
-            phenomena,
-            significance,
-            min(df["issue"]).strftime("%-d %b %Y"),
-            max(df["issue"]).strftime("%-d %b %Y"),
-        )
-    )
 
     return fig, df
 

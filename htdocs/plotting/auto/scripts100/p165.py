@@ -18,8 +18,8 @@ PDICT2 = {
 
 MONTH_DOMAIN = {
     "spring_below": range(1, 7),
-    "fall_below": range(1, 12),
-    "high_above": range(1, 12),
+    "fall_below": range(1, 13),
+    "high_above": range(1, 13),
 }
 SQLOPT = {
     "spring_below": " low < %s ",
@@ -31,12 +31,7 @@ YRGP = {
     "high_above": "year",
     "fall_below": "winter_year",
 }
-ORDER = {"spring_below": "DESC", "fall_below": "ASC", "high_above": "ASC"}
-USEDOY = {
-    "spring_below": "doy",
-    "high_above": "doy",
-    "fall_below": "winter_doy",
-}
+ORDER = {"spring_below": "max", "fall_below": "min", "high_above": "min"}
 
 
 def get_description():
@@ -149,64 +144,58 @@ def plotter(fdict):
     year = ctx["year"]
     popt = ctx["popt"]
     threshold = ctx["threshold"]
-    table = "alldata_%s" % (sector,)
-    nt = NetworkTable("%sCLIMATE" % (sector,))
+    nt = NetworkTable(f"{sector}CLIMATE")
     syear = ctx.get("syear", 1893)
     eyear = ctx.get("eyear", datetime.date.today().year)
     df = read_sql(
         f"""
-        -- get the domain of data
+        -- create virtual table with winter_year included
         WITH events as (
-            SELECT
-            station, month,
+            SELECT station, day, year, high, low,
             case when month < 7 then year - 1 else year end as winter_year,
-            year,
-            extract(doy from day) as doy,
-            day
-            from {table} WHERE {SQLOPT[varname]} and
-            month in %s and
+            extract(doy from day) as doy
+            from alldata_{sector} WHERE month in %s and
             substr(station, 3, 4) != '0000'
             and substr(station, 3, 1) not in ('C', 'T')
-            and year >= %s and year <= %s
-        ), agg as (
-            SELECT station, winter_year, year, doy, day,
-            case when month < 7 then doy + 366 else doy end as winter_doy,
-            rank() OVER (
-                PARTITION by {YRGP[varname]}, station
-                ORDER by day {ORDER[varname]})
-            from events)
-        select * from agg where rank = 1
+        )
+        SELECT station, {YRGP[varname]},
+        {ORDER[varname]}(case when {SQLOPT[varname]} then day else null end)
+            as event,
+        count(*),
+        min(day) as min_day,
+        max(day) as max_day
+        from events
+        WHERE {YRGP[varname]} >= %s and {YRGP[varname]} <= %s
+        GROUP by station, {YRGP[varname]}
         """,
         pgconn,
-        params=(threshold, tuple(MONTH_DOMAIN[varname]), syear, eyear),
+        params=(tuple(MONTH_DOMAIN[varname]), threshold, syear, eyear),
         index_col="station",
     )
+    if df.empty:
+        raise NoDataFound("No data found")
+    df = df[~pd.isnull(df["event"])]
+    df["doy"] = (df["event"] - df["min_day"]).dt.days
 
-    doy = USEDOY[varname]
-
-    def f(val):
-        """Make a pretty date."""
-        base = datetime.date(2000, 1, 1)
-        date = base + datetime.timedelta(days=int(val))
-        return date.strftime("%-m/%-d")
-
+    basedate = datetime.date(2000, 7 if varname == "fall_below" else 1, 1)
     if ctx.get("p") is None:
         df2 = df[df[YRGP[varname]] == year].copy()
+        # Require sites have enough data
+        df2 = df2[df2["count"] > (df2["count"].max() * 0.9)]
         title = r"%s %s %s$^\circ$F" % (year, PDICT2[varname], threshold)
-        df2["pdate"] = df2["day"].apply(lambda x: x.strftime("%-m/%-d"))
+        df2["pdate"] = df2["event"].apply(lambda x: x.strftime("%-m/%-d"))
         extra = ""
     else:
-        df2 = df[[doy]].groupby("station").quantile(ctx["p"] / 100.0).copy()
+        df2 = df[["doy"]].groupby("station").quantile(ctx["p"] / 100.0).copy()
         title = r"%.0f%s Percentile Date of %s %s$^\circ$F" % (
             ctx["p"],
             th(str(ctx["p"])),
             PDICT2[varname],
             threshold,
         )
-        df2["pdate"] = df2[doy].apply(f)
-        extra = ", period of record: %.0f-%.0f" % (
-            df["year"].min(),
-            df["year"].max(),
+        extra = (
+            ", period of record: "
+            f"{df[YRGP[varname]].min():.0f}-{df[YRGP[varname]].max():.0f}"
         )
     if df2.empty:
         raise NoDataFound("No Data was found")
@@ -223,19 +212,27 @@ def plotter(fdict):
         continental_color="white",
         nocaption=True,
         title=title,
-        subtitle="based on NWS COOP and IEM Daily Estimates%s" % (extra,),
+        subtitle=f"based on NWS COOP and IEM Daily Estimates{extra}",
     )
-    levs = np.linspace(df2[doy].min() - 1, df2[doy].max() + 1, 7, dtype="i")
+    levs = np.linspace(
+        df2["doy"].min() - 1, df2["doy"].max() + 1, 7, dtype="i"
+    )
     if "cint" in ctx:
         levs = np.arange(
-            df2[doy].min() - 1, df2[doy].max() + 1, ctx["cint"], dtype="i"
+            df2["doy"].min() - 1, df2["doy"].max() + 1, ctx["cint"], dtype="i"
         )
-    levlables = list(map(f, levs))
     if popt == "contour" and (levs[-1] - levs[0]) > 5:
+
+        def f(val):
+            return (basedate + datetime.timedelta(days=int(val))).strftime(
+                "%b %-d"
+            )
+
+        levlables = list(map(f, levs))
         mp.contourf(
             df2["lon"],
             df2["lat"],
-            df2[doy],
+            df2["doy"],
             levs,
             clevlabels=levlables,
             cmap=ctx["cmap"],
@@ -243,8 +240,8 @@ def plotter(fdict):
     mp.plot_values(df2["lon"], df2["lat"], df2["pdate"], labelbuffer=5)
     mp.drawcounties()
 
-    return mp.fig, df[["year", "winter_doy", "doy"]]
+    return mp.fig, df[[YRGP[varname], "event", "doy"]]
 
 
 if __name__ == "__main__":
-    plotter(dict(sector="IA", var="fall_below", popt="contour", year="2019"))
+    plotter(dict(sector="IA", var="spring_below", popt="contour", year="2019"))
