@@ -18,6 +18,7 @@ PDICT = {
     "FZRA": "Freezing Rain (FZRA)",
     "FG": "Fog (FG)",
     "BLSN": "Blowing Snow (BLSN)",
+    "FU": "Smoke (FU)",
 }
 PDICT2 = {
     "day": "Count Distinct Days per Month per Year",
@@ -149,7 +150,7 @@ def plotter(fdict):
             width=0.4,
             fc="r",
             ec="r",
-            label="%s" % (year,),
+            label=f"{year}",
         )
         for x, y in zip(df2["month"].values, df2["count"].values):
             ax.text(x - 0.2, y + 0.2, f"{y:.0f}", ha="center")
