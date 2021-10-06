@@ -268,7 +268,7 @@ def merge_network_obs(df, network, ts):
     df = df.join(obs, how="left", on="tracks", rsuffix="b")
     # HACK the `high` and `precip` columns end up modifying the estimated
     # column, which fouls up subsequent logic
-    for col in "low high snow snowd precip temp_hour precip_hour".split():
+    for col in "low temp_hour high snow snowd precip_hour precip".split():
         estcol = (
             "precip_estimated"
             if col in ["precip", "snow", "snowd", "precip_hour"]
