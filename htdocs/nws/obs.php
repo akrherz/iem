@@ -18,8 +18,10 @@
  $t->title = "Obs by NWS Forecast Office";
   $nt = new NetworkTable("WFO");
  
- $jdata = file_get_contents("http://iem.local/api/1/currents.json?wfo=$wfo");
- $jobj = json_decode($jdata, $assoc=TRUE);
+$arr = Array(
+    "wfo" => $wfo,
+);
+$jobj = iemws_json("currents.json", $arr);
 
 
 $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
@@ -164,18 +166,25 @@ $ar = Array("asc" => "Ascending", "desc" => "Descending");
 $sselect = make_select("sorder", $sorder, $ar);
 
 $t->content = <<<EOF
-<p>
 <form method="GET" action="obs.php" name="work">
 <input type="hidden" value="{$sortcol}" name="sortcol">
-<table class="table table-condensed">
-<tr>
- <th>Select WFO: {$wselect}</td>
-  <th>View Options:</th>
-  <td>Include METARS: {$mselect}
-</td>
-<td>Sort Order: {$sselect}</td>
-<td><input type="submit" value="Go!"></form></td>
-</tr></table>
+
+<div class="row">
+<div class="col-md-5">
+  <strong>Select WFO:</strong> {$wselect}
+</div>
+<div class="col-md-3">
+  <strong>Include METARS:</strong> {$mselect}
+</div>
+<div class="col-md-3">
+  <strong>Sort Order:</strong> {$sselect}
+</div>
+<div class="col-md-1">
+  <input type="submit" value="Go!">
+</div>
+</div>
+
+</form>
 
 <p>Sorted by column <b>{$vals[$sortcol]}</b>. 
 Timestamps displayed are the local time for the sensor.

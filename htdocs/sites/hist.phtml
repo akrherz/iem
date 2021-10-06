@@ -110,18 +110,20 @@ EOF;
 } // End of printMonth
 
 if ($mode == "monthly"){
-    $wspath = sprintf(
-        "/api/1/daily.json?network=%s&station=%s&year=%s&month=%s",
-        $network, $station, $year, $month
+    $arr = Array(
+        "network" => $network,
+        "station" => $station,
+        "month" => $month,
+        "year" => $year,
     );
 } else {
-    $wspath = sprintf(
-        "/api/1/daily.json?network=%s&date=%s-%s-%s",
-        $network, $year, $month, $day
+    $arr = Array(
+        "network" => $network,
+        "date" => sprintf("%s-%s-%s", $year, $month, $day),
     );
 }
-$jdata = file_get_contents("http://iem.local{$wspath}");
-$jobj = json_decode($jdata, TRUE);
+$wsuri = sprintf("/api/1/daily.json?%s", http_build_query($arr));
+$jobj = iemws_json("daily.json", $arr);
 
 if ($mode == "monthly") {
 	$t->title = sprintf("%s Data Calendar for %s", $station, $nicemonthdate);
@@ -190,7 +192,7 @@ if ($mode == "monthly") {
  $htmlout .= <<<EOM
 
  <p>The data presented here provided by <a href="/api/">IEM API</a>
- webservice: <a href="{$wspath}">daily.json</a>.</p>
+ webservice: <a href="{$wsuri}">daily.json</a>.</p>
 
  <h3>Daily High/Low Plot</h3>
 <img src="/plotting/auto/plot/17/month:{$month}::year:{$year}::station:{$station}::network:{$network}.png" class="img img-responsive">
@@ -288,7 +290,7 @@ EOF;
   $t->sites_current="calendar"; 
   $htmlout .= <<< EOM
   <p>The data presented here provided by <a href="/api/">IEM API</a>
-  webservice: <a href="{$wspath}">daily.json</a>.</p> 
+  webservice: <a href="{$wsuri}">daily.json</a>.</p> 
 EOM;
 
   $content = <<<EOF

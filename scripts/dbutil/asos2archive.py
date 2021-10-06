@@ -108,9 +108,9 @@ def do_insert(source_cursor, madis):
         min_tmpf_6hr, max_tmpf_24hr, min_tmpf_24hr, mslp, wxcodes,
         ice_accretion_1hr, ice_accretion_3hr, ice_accretion_6hr,
         report_type, feel, relh, peak_wind_gust, peak_wind_drct,
-        peak_wind_time)
+        peak_wind_time, snowdepth)
         values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
-        %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """
         args = (
             row["id"],
@@ -150,6 +150,7 @@ def do_insert(source_cursor, madis):
             row["peak_wind_gust"],
             row["peak_wind_drct"],
             row["peak_wind_time"],
+            row["snowdepth"],
         )
 
         cursor.execute(sql, args)

@@ -20,11 +20,10 @@ function get_dbconn_str($dbname){
 function iemdb($dbname, $force_new=0, $rw=FALSE)
 {
     $connstr = get_dbconn_str($dbname);
-	$db = pg_connect( $connstr , $force_new);
+	$db = pg_connect($connstr , $force_new);
 	if (! $db ){
-		$connstr = sprintf("dbname=%s host=%s user=nobody gssencmode=disable connect_timeout=5",
-				$dbname, "iemdb2.local");
-		$db = pg_connect( $connstr, $force_new);
+        // Try once more
+		$db = pg_connect($connstr, $force_new);
 	}
 	if (! $db){
 		database_failure($dbname);

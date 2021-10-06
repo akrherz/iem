@@ -61,7 +61,7 @@ function asos_formatter($i, $row){
 	<td><span class=\"high\">%s</span></td>
 	<td><span class=\"low\">%s</span></td>
 	<td>%s%%</td>
-	<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>
+	<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>
 	<tr style=\"background: %s;\" class=\"%smetar\">" .
 	"<td colspan=\"16\">%s</td></tr>", 
 	($i % 2 == 0)? "#FFF": "#EEE",
@@ -74,6 +74,7 @@ function asos_formatter($i, $row){
 	temp_formatter($row["max_tmpf_6hr"]), temp_formatter($row["min_tmpf_6hr"]), 
 	relh(f2c($row["tmpf"]), f2c($row["dwpf"])),
     $row["alti"], $row["mslp"],
+    $row["snowdepth"],
     precip_formatter($row["p01i"]),
     precip_formatter($row["p03i"]),
     precip_formatter($row["p06i"]),
@@ -313,15 +314,17 @@ if ($network == "ISUSM"){
 
 // API endpoint
 $errmsg = "";
-$uri = sprintf(
-    "/api/1/obhistory.json?station=%s&network=%s&date=%s&full=1",
-    $station, $network, date("Y-m-d", $date));
-$jdata = @file_get_contents("http://iem.local${uri}");
-if ($jdata === FALSE){
+$arr = Array(
+    "station" => $station,
+    "network" => $network,
+    "date" => date("Y-m-d", $date),
+    "full" => "1",
+);
+$wsuri = sprintf("/api/1/obhistory.json?%s", http_build_query($arr));
+$jobj = iemws_json("obhistory.json", $arr);
+if ($jobj === FALSE){
     $jobj = Array("data" => Array(), "schema" => Array("fields" => Array()));
     $errmsg = "Failed to fetch history from web service. No data was found.";
-} else {
-    $jobj = json_decode($jdata, $assoc=TRUE);
 }
 
 if (preg_match("/ASOS|AWOS/", $network)){
@@ -340,6 +343,7 @@ EOM;
     <th colspan="5">Temperature (&ordm;F)</th>
     <th rowspan="3">Relative<br>Humidity</th>
     <th colspan="2">Pressure</th>
+    <th rowspan="3">Snow<br />Depth<br />(in)</th>
     <th colspan="3">Precipitation (in.)</th></tr>
 
     <tr align="center" bgcolor="#b0c4de">

@@ -42,6 +42,7 @@ AVAILABLE = [
     "peak_wind_time",
     "feel",
     "metar",
+    "snowdepth",
 ]
 # inline is so much faster!
 CONV_COLS = {
@@ -90,6 +91,13 @@ def fmt_f2(val, missing, _trace, _tzinfo):
     if val is None:
         return missing
     return "%.2f" % (val,)
+
+
+def fmt_f0(val, missing, _trace, _tzinfo):
+    """Simple 0 place formatter."""
+    if val is None:
+        return missing
+    return f"{val:.0f}"
 
 
 def dance(val):
@@ -333,6 +341,7 @@ def application(environ, start_response):
         "ice_accretion_3hr": fmt_trace,
         "ice_accretion_6hr": fmt_trace,
         "peak_wind_time": fmt_time,
+        "snowdepth": fmt_f0,
     }
     # The default is the %.2f formatter
     formatters = [ff.get(col, fmt_f2) for col in querycols]
