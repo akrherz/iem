@@ -10,9 +10,8 @@ require_once "../../include/forms.php";
 $network = isset($_REQUEST["network"]) ? $_REQUEST["network"] : "IA_ASOS"; 
 $callback = isset($_REQUEST["callback"]) ? $_REQUEST["callback"] : null; 
 
-// TODO: migrate this to explicit backend
-$jdata = file_get_contents("http://iem.local/api/1/currents.json?network=$network");
-$jobj = json_decode($jdata, $assoc=TRUE);
+$arr = Array("network" => $network);
+$jobj = iemws_json("currents.json", $arr);
 
 $mydata = Array();
 

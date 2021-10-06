@@ -11,8 +11,8 @@
  $t->refresh = 60;
  $t->title = "US Climate Reference Network Latest Reports";
 
- $jdata = file_get_contents("http://iem.local/api/1/currents.json?network=USCRN");
- $jobj = json_decode($jdata, $assoc=TRUE);
+$arr = Array("network" => "USCRN");
+$jobj = iemws_json("currents.json", $arr);
 
 $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
   "sknt" => "Wind Speed [knots]", "drct" => "Wind Direction [deg]",

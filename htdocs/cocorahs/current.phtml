@@ -40,8 +40,8 @@ $t->current_network = "CoCoRaHS";
    $monthDict[ $row["id"] ] = Array("accum" => round($row["pmonth"],2), "missing" => $row["missing"] );
  }
 
- $jdata = file_get_contents("http://iem.local/api/1/currents.json?network=$network");
- $jobj = json_decode($jdata, $assoc=TRUE);
+$arr = Array("network" => $network);
+$jobj = iemws_json("currents.json", $arr);
 
  $db = Array();
  foreach($jobj["data"] as $bogus => $iemob){

@@ -451,7 +451,7 @@ $content .= <<<EOF
 </tbody>
 </table>
 
-<p>The <a href="{$uri}">IEM API webservice</a> that provided data to this
+<p>The <a href="{$wsuri}">IEM API webservice</a> that provided data to this
 page.  For more details, see <a href="/api/1/docs#/default/service_obhistory__fmt__get">documentation</a>.</p>
 
 <h4>Data Notes</h4>
