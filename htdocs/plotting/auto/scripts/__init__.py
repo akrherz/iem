@@ -265,10 +265,15 @@ monthly_opts = [
     },
     {"id": 154, "label": "Hourly Temperature Averages by Month"},
     {"id": 85, "label": "Hourly Temperature Frequencies by Month"},
+    {"id": 20, "label": "Hours of Precipitation by Month"},
     {"id": 177, "label": "ISU Soil Moisture Network Timeseries Plots"},
     {
         "id": 2,
         "label": "Month Precipitation vs Month Growing Degree Day Departures",
+    },
+    {
+        "id": 223,
+        "label": "Monthly/Seasonal Partition of Temperature/Precip Reports",
     },
     {"id": 57, "label": "Monthly Precipitation/Temperature Records"},
     {
@@ -304,7 +309,6 @@ monthly_opts = [
             "for Two Months/Periods"
         ),
     },
-    {"id": 20, "label": "Hours of Precipitation by Month"},
     {"id": 47, "label": "Snowfall vs Precipitation Total for a Month"},
     {
         "id": 39,
