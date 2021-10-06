@@ -72,19 +72,8 @@
 
 ##############################################################################
 
-#### metvm6 PostgreSQL
-# VI_6(56) metvm6 <-> metvm9
-192.168.1.245 metvm6-iemdb.local
-
-#### metvm9 PostgreSQL
-# VI_7(57) metvm9 <-> metvm6
-192.168.1.244 metvm9-iemdb.local
-192.168.1.244 iemdb2 iemdb2.local postgresread
-# VI_07(157) metvm9 <-> metvm6
-192.168.0.244 iemdb2-0.local
-
 ### metvm4 PostgreSQL
-# VI_1_231(71) metvm4
+# VI_1_231(71) metvm4 -> metvm9
 192.168.1.231    metvm4-iemdb.local
 192.168.1.231 iemdb-afos.local
 192.168.1.231 iemdb-asos1min.local
@@ -122,7 +111,7 @@
 192.168.1.230 iemdb-snet.local
 
 ### metvm2 PostgreSQL
-# VI_1_222(73) metvm2
+# VI_1_222(73) metvm2 -> metvm0
 192.168.1.222 metvm2-iemdb.local
 192.168.1.222 iemdb-coop.local
 192.168.1.222 iemdb-hads iemdb-hads.local

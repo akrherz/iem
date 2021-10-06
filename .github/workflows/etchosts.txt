@@ -4,7 +4,6 @@
 127.0.0.1 iemdb-mos.local
 127.0.0.1 iemdb-idep.local
 127.0.0.1 iemdb-iemre.local
-127.0.0.1 iemdb2.local
 127.0.0.1 iemdb-postgis.local
 127.0.0.1 iemdb-mesosite.local
 127.0.0.1 iemdb-afos.local

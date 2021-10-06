@@ -1,9 +1,4 @@
-"""A util script used on daryl's laptop to switch 'iemdb' /etc/hosts entry
-
-129.186.185.33 iemdb iemdb2
-#127.0.0.1 iemdb iemdb2
-
-"""
+"""A util script used on daryl's laptop to switch 'iemdb' /etc/hosts entry."""
 import sys
 import tempfile
 import os
