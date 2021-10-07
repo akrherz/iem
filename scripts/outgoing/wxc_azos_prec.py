@@ -79,24 +79,22 @@ def main():
         % (datetime.datetime.utcnow().strftime("%Y.%m.%d.%H%M"),)
     )
     data = compute_obs()
-    for sid in data:
+    for sid, entry in data.items():
         output.write(
             ("K%s %6.2f %6.2f %6.2f %6.3f %8.3f\n")
             % (
                 sid,
-                data[sid]["p01"],
-                data[sid]["p02"],
-                data[sid]["p03"],
-                data[sid]["lat"],
-                data[sid]["lon"],
+                entry["p01"],
+                entry["p02"],
+                entry["p03"],
+                entry["lat"],
+                entry["lon"],
             )
         )
     output.close()
 
     pqstr = "data c 000000000000 wxc/wxc_airport_precip.txt bogus text"
-    cmd = ("/home/ldm/bin/pqinsert -p '%s' /tmp/wxc_airport_precip.txt") % (
-        pqstr,
-    )
+    cmd = f"pqinsert -p '{pqstr}' /tmp/wxc_airport_precip.txt"
     subprocess.call(cmd, shell=True)
     os.remove("/tmp/wxc_airport_precip.txt")
 

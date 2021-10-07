@@ -14,16 +14,16 @@ from pyiem.util import get_dbconn, c2f
 
 nt = NetworkTable("ISUSM")
 
-ACCESS = get_dbconn("iem", user="nobody")
+ACCESS = get_dbconn("iem")
 acursor = ACCESS.cursor()
 
-COOP = get_dbconn("coop", user="nobody")
+COOP = get_dbconn("coop")
 ccursor = COOP.cursor()
 
-MESOSITE = get_dbconn("mesosite", user="nobody")
+MESOSITE = get_dbconn("mesosite")
 mcursor = MESOSITE.cursor()
 
-ISUAG = get_dbconn("isuag", user="nobody")
+ISUAG = get_dbconn("isuag")
 icursor = ISUAG.cursor()
 
 
@@ -42,8 +42,8 @@ def load_soilt(data):
     if datetime.datetime.now().hour < 7:
         valid -= datetime.timedelta(days=1)
     icursor.execute(
-        """SELECT station, t4_c_avg from sm_daily WHERE
-         valid = %s and t4_c_avg is not null""",
+        "SELECT station, t4_c_avg from sm_daily WHERE valid = %s and "
+        "t4_c_avg is not null",
         (valid,),
     )
     for row in icursor:
@@ -183,7 +183,7 @@ def main():
     output.close()
 
     pqstr = "data c 000000000000 wxc/wxc_iem_agdata.txt bogus text"
-    cmd = "/home/ldm/bin/pqinsert -p '%s' /tmp/wxc_iem_agdata.txt" % (pqstr,)
+    cmd = f"pqinsert -p '{pqstr}' /tmp/wxc_iem_agdata.txt"
     subprocess.call(cmd, shell=True)
     os.remove("/tmp/wxc_iem_agdata.txt")
 

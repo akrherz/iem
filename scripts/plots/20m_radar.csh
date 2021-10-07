@@ -128,11 +128,11 @@ EOF
 gpend
 
 if (-e 20radarOverlay.gif) then
-  /home/ldm/bin/pqinsert -p "plot r 000000000000 20radarOverlay_ bogus gif" 20radarOverlay.gif
+  pqinsert -p "plot r 000000000000 20radarOverlay_ bogus gif" 20radarOverlay.gif
   rm -f 20radarOverlay.gif
 endif
 
 if (-e 20radarOverlay_s.gif) then
-  /home/ldm/bin/pqinsert -p "plot r 000000000000 20radarOverlay_s_ bogus gif" 20radarOverlay_s.gif
+  pqinsert -p "plot r 000000000000 20radarOverlay_s_ bogus gif" 20radarOverlay_s.gif
   rm -f 20radarOverlay_s.gif
 endif

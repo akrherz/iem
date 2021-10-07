@@ -47,6 +47,6 @@ $GEMEXE/sfmap_gf << EOF > /tmp/sfmap.out
 EOF
 
 if (-e asos.gif ) then
-  /home/ldm/bin/pqinsert -p "plot c 000000000000 asos.gif bogus gif" asos.gif >& /dev/null
-rm asos.gif
+    pqinsert -p "plot c 000000000000 asos.gif bogus gif" asos.gif >& /dev/null
+    rm asos.gif
 endif

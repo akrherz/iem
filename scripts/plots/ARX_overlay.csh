@@ -113,6 +113,6 @@ EOF
 gpend
 
 if (-e ARX_radar.gif) then
-  /home/ldm/bin/pqinsert -p "plot c 000000000000 ARX_radar.gif bogus gif" ARX_radar.gif >& /dev/null
+  pqinsert -p "plot c 000000000000 ARX_radar.gif bogus gif" ARX_radar.gif >& /dev/null
 rm ARX_radar.gif
 endif

@@ -7,17 +7,6 @@ require_once "../../include/forms.php";
 require_once "../../include/imagemaps.php";
 require_once "../../include/mlib.php";
 
-/**
-$jdata = file_get_contents("http://iem.local/api/1/currents.json?station=RSAI4&station=RLRI4");
-$jobj = json_decode($jdata, $assoc=TRUE);
-foreach($jobj["data"] as $bogus => $iemob)
-{
-    $station = $iemob["station"];
-    if ($station == 'RSAI4') $rsai4 = $iemob;
-    else $rlri4 = $iemob;
-}
-*/
-
 $t->title = "Other Data Networks";
 
 $y1select = yearSelect2(2012, 2012, "year1");
@@ -31,18 +20,7 @@ $y22select = yearSelect2(2003, date("Y"), "year2");
 $y13select = yearSelect2(2014, date("Y"), "year1");
 $y23select = yearSelect2(2014, date("Y"), "year2");
 $nselect = networkSelect("OT", "");
-/**
-$table = sprintf("<tr><td>Saylorville Lake</td><td>%s</td><td>%.1f Gusts: %.1f</td>
-	<td>%.1f @ %s</td><td>%s</td></tr>", $rsai4['local_valid'], $rsai4['sknt'] * 1.15,
-		$rsai4['gust'] * 1.15, $rsai4['max_gust'] * 1.15,
-		@strftime('%I:%M %p', strtotime($rsai4['local_max_gust_ts'])),
-	drct2txt($rsai4['drct']) );
-$table .= sprintf("<tr><td>Lake Red Rock</td><td>%s</td><td>%.1f Gusts: %.1f</td>
-	<td>%.1f @ %s</td><td>%s</td></tr>", $rlri4['local_valid'], $rlri4['sknt'] * 1.15,
-	$rlri4['gust'] * 1.15, $rlri4['max_gust'] * 1.15, 
-	@strftime('%I:%M %p', strtotime($rlri4['local_max_gust_ts'])),
-	drct2txt($rlri4['drct']) );
-*/
+
 $t->content = <<<EOF
 <h3>Other Data Networks</h3>
 

@@ -64,8 +64,8 @@ $GEMEXE/sfmap_gf << EOF > /tmp/awos_plot_sfmap.out
 EOF
 
 if (-e awos.gif ) then
-  /home/ldm/bin/pqinsert -p "plot c 000000000000 awos.gif bogus gif" awos.gif
-  /home/ldm/bin/pqinsert -p "plot c 000000000000 ceil.gif bogus gif" ceil.gif
-rm awos.gif
-rm ceil.gif
+    pqinsert -p "plot c 000000000000 awos.gif bogus gif" awos.gif
+    pqinsert -p "plot c 000000000000 ceil.gif bogus gif" ceil.gif
+    rm awos.gif
+    rm ceil.gif
 endif

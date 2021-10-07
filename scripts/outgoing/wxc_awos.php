@@ -12,9 +12,10 @@ function fancy($v, $floor,$ceil, $p){
   if ($v < $floor || $v > $ceil) return "";
   return sprintf("%${p}.1f", $v);
 }
-
-$jdata = file_get_contents("http://iem.local/api/1/currents.json?network=AWOS");
-$jobj = json_decode($jdata, $assoc=TRUE);
+$arr = Array(
+    "network" => "AWOS",
+);
+$jobj = iemws_json("currents.json", $arr);
 
 $rwis = fopen('/tmp/wxc_ia_awos.txt', 'w');
 fwrite($rwis, "Weather Central 001d0300 Surface Data

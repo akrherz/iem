@@ -24,8 +24,8 @@ for ($i=0;$row=pg_fetch_array($rs);$i++){
 
 $tstamp = gmdate("Y-m-d\TH:i:s");
 
-$jdata = file_get_contents("http://iem.local/api/1/currents.json?network=IA_RWIS");
-$jobj = json_decode($jdata, $assoc=TRUE);
+$arr = Array("network" => "IA_RWIS");
+$jobj = iemws_json("currents.json", $arr);
 
 $rwis = fopen('/tmp/wxc_iadot.txt', 'w');
 fwrite($rwis, "Weather Central 001d0300 Surface Data TimeStamp=$tstamp
@@ -127,8 +127,8 @@ $cmd = sprintf("/home/ldm/bin/pqinsert -i -p '%s' /tmp/wxc_iadot.txt",
 system($cmd);
 unlink("/tmp/wxc_iadot.txt");
 
-$jdata = file_get_contents("http://iem.local/api/1/currents.json?network=IL_RWIS");
-$jobj = json_decode($jdata, $assoc=TRUE);
+$arr = Array("network" => "IL_RWIS");
+$jobj = iemws_json("currents.json", $arr);
 
 $rwis = fopen('/tmp/wxc_ildot.txt', 'w');
 fwrite($rwis, "Weather Central 001d0300 Surface Data TimeStamp=$tstamp

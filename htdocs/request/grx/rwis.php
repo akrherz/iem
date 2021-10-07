@@ -56,8 +56,10 @@ function s2icon($s)
   return "1,20";
 
 }
-$jdata = file_get_contents("http://iem.local/api/1/currents.json?network=IA_RWIS");
-$jobj = json_decode($jdata, $assoc=TRUE);
+$arr = Array(
+    "network" => "IA_RWIS",
+);
+$jobj = iemws_json("currents.json", $arr);
 
 $now = time();
 

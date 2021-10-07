@@ -43,9 +43,10 @@ function s2icon($s)
 }
 
 $now = time();
-
-$jdata = file_get_contents("http://iem.local/api/1/currents.json?network=AWOS");
-$jobj = json_decode($jdata, $assoc=TRUE);
+$arr = Array(
+    "network" => "AWOS",
+);
+$jobj = iemws_json("currents.json", $arr);
 
 foreach($jobj["data"] as $bogus => $iemob){
     $mydata = $iemob;

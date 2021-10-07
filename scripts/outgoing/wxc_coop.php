@@ -6,6 +6,7 @@
  */
 
 require_once '../../config/settings.inc.php';
+require_once '../../include/mlib.php';
 
 $coop = fopen('/tmp/wxc_coop.txt', 'w');
 fwrite($coop, "Weather Central 001d0300 Surface Data
@@ -23,9 +24,8 @@ fwrite($coop, "Weather Central 001d0300 Surface Data
    6 Snowfall
    6 Snowfall Depth
 ");
-
-$jdata = file_get_contents("http://iem.local/api/1/currents.json?network=IA_COOP");
-$jobj = json_decode($jdata, $assoc=TRUE);
+$arr = Array("network" => "IA_COOP");
+$jobj = iemws_json("currents.json", $arr);
 
 $now = time();
 

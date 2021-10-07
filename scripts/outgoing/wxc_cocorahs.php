@@ -23,9 +23,10 @@ fwrite($rwis, sprintf("Weather Central 001d0300 Surface Data timestamp=%s
 $states = Array("IA");
 $now = time();
 foreach($states as $k => $state){
-
-    $jdata = file_get_contents("http://iem.local/api/1/currents.json?network=${state}COCORAHS");
-    $jobj = json_decode($jdata, $assoc=TRUE);
+    $arr = Array(
+        "network" => "{$state}COCORAHS",
+    );
+    $jobj = iemws_json("currents.json", $arr);
 
 	foreach($jobj["data"] as $bogus => $val){
   		$tdiff = $now - strtotime($val["local_valid"]);

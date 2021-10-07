@@ -40,8 +40,9 @@ import psycopg2.extras
 from shapely.wkb import loads
 import shapefile
 import requests
-from pyiem.util import exponential_backoff, get_dbconn
+from pyiem.util import exponential_backoff, get_dbconn, logger
 
+LOG = logger()
 URI = (
     "https://services.arcgis.com/8lRhdTsQyJpO52F1/ArcGIS/rest/services/"
     "511_IA_Road_Conditions_View/FeatureServer/0/query?"
@@ -111,11 +112,8 @@ def export_shapefile(txn, utc):
     shp.field("LIM_VIS", "S", 1, 0)
 
     txn.execute(
-        """
-        select b.*, c.*, b.geom from
-         roads_base b, roads_current c WHERE b.segid = c.segid
-         and valid is not null and b.geom is not null
-    """
+        "select b.*, c.*, b.geom from roads_base b, roads_current c "
+        "WHERE b.segid = c.segid and valid is not null and b.geom is not null"
     )
     for row in txn:
         multiline = loads(row["geom"], hex=True)
@@ -136,29 +134,21 @@ def export_shapefile(txn, utc):
         )
 
     shp.close()
-    zfp = zipfile.ZipFile("iaroad_cond.zip", "w")
-    zfp.write("iaroad_cond.shp")
-    zfp.write("iaroad_cond.shx")
-    zfp.write("iaroad_cond.dbf")
-    fp = open("iaroad_cond.prj", "w")
-    fp.write(EPSG26915)
-    fp.close()
-    zfp.write("iaroad_cond.prj")
-    zfp.close()
+    with open("iaroad_cond.prj", "w") as fp:
+        fp.write(EPSG26915)
+    with zipfile.ZipFile("iaroad_cond.zip", "w") as zfp:
+        for suffix in ["shp", "shx", "dbf", "prj"]:
+            zfp.write(f"iaroad_cond.{suffix}")
 
     subprocess.call(
-        (
-            "/home/ldm/bin/pqinsert -p 'zip ac %s "
-            "gis/shape/26915/ia/iaroad_cond.zip "
-            "GIS/iaroad_cond_%s.zip zip' iaroad_cond.zip"
-            ""
-        )
-        % (utc.strftime("%Y%m%d%H%M"), utc.strftime("%Y%m%d%H%M")),
+        f"pqinsert -p 'zip ac {utc:%Y%m%d%H%M} "
+        "gis/shape/26915/ia/iaroad_cond.zip "
+        f"GIS/iaroad_cond_{utc:%Y%m%d%H%M}.zip zip' iaroad_cond.zip",
         shell=True,
     )
 
     for suffix in ["shp", "shx", "dbf", "prj", "zip"]:
-        os.unlink("iaroad_cond.%s" % (suffix,))
+        os.unlink(f"iaroad_cond.{suffix}")
 
 
 def main():
@@ -169,10 +159,8 @@ def main():
     lookup = {}
     current = {}
     cursor.execute(
-        """
-        select c.segid, b.longname, c.cond_code, b.idot_id from
-        roads_current c JOIN roads_base b on (c.segid = b.segid)
-        """
+        "select c.segid, b.longname, c.cond_code, b.idot_id from "
+        "roads_current c JOIN roads_base b on (c.segid = b.segid)"
     )
     for row in cursor:
         lookup[row[3]] = row[0]
@@ -184,24 +172,21 @@ def main():
     jobj = req.json()
 
     if "features" not in jobj:
-        print(
-            ("ingest_roads_rest got invalid RESULT:\n%s")
-            % (
-                json.dumps(
-                    jobj, sort_keys=True, indent=4, separators=(",", ": ")
-                )
-            )
+        LOG.info(
+            "Got invalid RESULT:\n%s",
+            json.dumps(jobj, sort_keys=True, indent=4, separators=(",", ": ")),
         )
-        sys.exit()
+        return
 
     dirty = False
     for feat in jobj["features"]:
         props = feat["attributes"]
         segid = lookup.get(props["SEGMENT_ID"])
         if segid is None:
-            print(
-                ("ingest_roads_rest unknown longname '%s' segment_id '%s'")
-                % (props["LONG_NAME"], props["SEGMENT_ID"])
+            LOG.info(
+                "Unknown longname '%s' segment_id '%s'",
+                props["LONG_NAME"],
+                props["SEGMENT_ID"],
             )
             continue
         raw = props["HL_PAVEMENT_CONDITION"]
@@ -209,15 +194,13 @@ def main():
             continue
         cond = ROADCOND.get(raw.lower())
         if cond is None:
-            print(
-                ("ingest_roads_reset longname '%s' has unknown cond '%s'\n%s")
-                % (
-                    props["LONG_NAME"],
-                    props["HL_PAVEMENT_CONDITION"],
-                    json.dumps(
-                        props, sort_keys=True, indent=4, separators=(",", ": ")
-                    ),
-                )
+            LOG.info(
+                "ingest_roads_reset longname '%s' has unknown cond '%s'\n%s",
+                props["LONG_NAME"],
+                props["HL_PAVEMENT_CONDITION"],
+                json.dumps(
+                    props, sort_keys=True, indent=4, separators=(",", ": ")
+                ),
             )
             continue
         # Timestamps appear to be UTC now
@@ -240,10 +223,8 @@ def main():
             dirty = True
         # Update currents
         cursor.execute(
-            """
-            UPDATE roads_current SET cond_code = %s, valid = %s,
-            raw = %s WHERE segid = %s
-        """,
+            "UPDATE roads_current SET cond_code = %s, valid = %s, "
+            "raw = %s WHERE segid = %s",
             (cond, valid.strftime("%Y-%m-%d %H:%M+00"), raw, segid),
         )
 

@@ -62,9 +62,7 @@ def main():
     out.close()
 
     pqstr = "data c 000000000000 wxc/wxc_iarwis_traffic.txt bogus text"
-    cmd = ("/home/ldm/bin/pqinsert -p '%s' /tmp/wxc_iarwis_traffic.txt") % (
-        pqstr,
-    )
+    cmd = f"pqinsert -p '{pqstr}' /tmp/wxc_iarwis_traffic.txt"
     subprocess.call(cmd, shell=True)
     os.remove("/tmp/wxc_iarwis_traffic.txt")
 
