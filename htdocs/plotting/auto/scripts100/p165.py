@@ -187,6 +187,11 @@ def plotter(fdict):
         extra = ""
     else:
         df2 = df[["doy"]].groupby("station").quantile(ctx["p"] / 100.0).copy()
+        df2["pdate"] = df2["doy"].apply(
+            lambda x: (basedate + datetime.timedelta(days=int(x))).strftime(
+                "%-m/%-d"
+            )
+        )
         title = r"%.0f%s Percentile Date of %s %s$^\circ$F" % (
             ctx["p"],
             th(str(ctx["p"])),
@@ -244,4 +249,6 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(sector="IA", var="spring_below", popt="contour", year="2019"))
+    plotter(
+        dict(p=50, sector="AL", var="fall_below", popt="contour", year="2019")
+    )
