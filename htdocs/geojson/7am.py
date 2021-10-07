@@ -85,7 +85,7 @@ def run(ts):
     cursor.execute(
         """
         select id, ST_x(geom), ST_y(geom), coop_valid, pday, snow, snowd,
-        extract(hour from coop_valid) as hour, max_tmpf as high,
+        extract(hour from coop_valid)::int as hour, max_tmpf as high,
         min_tmpf as low, coop_tmpf,
         name from summary s JOIN stations t ON (t.iemid = s.iemid)
         WHERE s.day = %s and t.network in ('IA_COOP', 'MO_COOP', 'KS_COOP',
@@ -136,7 +136,7 @@ def application(environ, start_response):
     ts = datetime.datetime.strptime(dt, "%Y-%m-%d")
     ts = ts.replace(hour=12, tzinfo=pytz.utc)
 
-    mckey = "/geojson/7am/%s/%s" % (dt, group)
+    mckey = f"/geojson/7am/{dt}/{group}"
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
     if not res:
@@ -146,7 +146,7 @@ def application(environ, start_response):
     if cb is None:
         data = res
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        data = f"{html_escape(cb)}({res})"
 
     start_response("200 OK", headers)
     return [data.encode("ascii")]

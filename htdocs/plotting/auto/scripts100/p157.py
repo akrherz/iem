@@ -67,9 +67,9 @@ def nice(val):
     """Helper."""
     if val == "M":
         return "M"
-    if val < 0.01 and val > 0:
+    if 0 < val < 0.01:
         return "Trace"
-    return "%.2f" % (val,)
+    return f"{val:.2f}"
 
 
 def plotter(fdict):
@@ -129,7 +129,7 @@ def plotter(fdict):
         bottom=thisyear["min_rh"].values,
         ec="lightblue",
         fc="lightblue",
-        label="%s Obs" % (year,),
+        label=f"{year} Obs",
     )
     ax.legend(ncol=4, loc=(0.05, -0.2), fontsize=12)
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
@@ -151,7 +151,7 @@ def plotter(fdict):
     )
     ax2 = ax.twinx()
     ax2.set_ylabel(
-        "Daily Frequency w/ %s %s %.0f%%" % (varname, op, threshold), color="r"
+        f"Daily Frequency w/ {varname} {op} {threshold:.0f}%", color="r"
     )
     ax2.set_ylim(0, 100)
     ax2.set_position([0.1, 0.2, 0.75, 0.7])
@@ -160,4 +160,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

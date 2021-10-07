@@ -196,7 +196,7 @@ def plotter(fdict):
         ax.text(
             pos[1],
             y,
-            "%.1f" % (t,),
+            f"{t:.1f}",
             transform=ax.transAxes,
             fontsize=10,
             color=get_color(t, "t"),
@@ -205,7 +205,7 @@ def plotter(fdict):
         ax.text(
             pos[2],
             y,
-            "%.1f" % (p,),
+            f"{p:.1f}",
             transform=ax.transAxes,
             fontsize=10,
             color=get_color(p, "p"),
@@ -216,4 +216,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})
