@@ -186,6 +186,9 @@ def plotter(fdict):
         df2["pdate"] = df2["event"].apply(lambda x: x.strftime("%-m/%-d"))
         extra = ""
     else:
+        # Remove low count stations
+        df2 = df[["doy"]].groupby("station").count()
+        df = df[~df.index.isin(df2[df2["doy"] < 10].index.values)]
         df2 = df[["doy"]].groupby("station").quantile(ctx["p"] / 100.0).copy()
         df2["pdate"] = df2["doy"].apply(
             lambda x: (basedate + datetime.timedelta(days=int(x))).strftime(
@@ -250,5 +253,12 @@ def plotter(fdict):
 
 if __name__ == "__main__":
     plotter(
-        dict(p=50, sector="AL", var="fall_below", popt="contour", year="2019")
+        dict(
+            p=50,
+            sector="IA",
+            threshold=32,
+            var="fall_below",
+            popt="contour",
+            year="2019",
+        )
     )
