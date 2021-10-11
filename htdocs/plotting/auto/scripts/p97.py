@@ -47,10 +47,10 @@ UNITS = {
     "gdd_depart": "F",
     "gdd_percet": "%",
     "gdd_sum": "F",
-    "cdd_sum": "F",
-    "hdd_sum": "F",
-    "cdd_depart": "F",
-    "hdd_depart": "F",
+    "cdd65_sum": "F",
+    "hdd65_sum": "F",
+    "cdd65_depart": "F",
+    "hdd65_depart": "F",
     "cgdd_sum": "F",
     "avg_temp_depart": "F",
     "avg_temp": "F",
@@ -254,7 +254,7 @@ def get_data(ctx):
     date2 = min([ctx["date2"], datetime.date.today()])
     pgconn = get_dbconn("coop")
     sector = ctx["sector"]
-    table = "alldata_%s" % (sector,) if len(sector) == 2 else "alldata"
+    table = f"alldata_{sector}" if len(sector) == 2 else "alldata"
     tables = [table]
     dfs = []
     wfo_limiter = ""
@@ -300,8 +300,8 @@ def get_data(ctx):
             o.avg_temp, o.cdd65, o.hdd65,
             o.high, o.low, o.gdd, c.gdd as cgdd,
             o.gdd - c.gdd as gdd_diff,
-            o.cdd65 - c.cdd65 as cdd_diff,
-            o.hdd65 - c.hdd65 as hdd_diff,
+            o.cdd65 - c.cdd65 as cdd65_diff,
+            o.hdd65 - c.hdd65 as hdd65_diff,
             o.avg_temp - (c.high + c.low)/2. as temp_diff,
             o.snow as snow, c.snow as csnow,
             o.snow - c.snow as snow_diff
@@ -324,10 +324,10 @@ def get_data(ctx):
             sum(gdd) / greatest(1, sum(cgdd)) * 100. as gdd_percent,
             avg(temp_diff) as avg_temp_depart, sum(gdd) as gdd_sum,
             sum(cgdd) as cgdd_sum,
-            sum(cdd65) as cdd_sum,
-            sum(hdd65) as hdd_sum,
-            sum(cdd_diff) as cdd_depart,
-            sum(hdd_diff) as hdd_depart
+            sum(cdd65) as cdd65_sum,
+            sum(hdd65) as hdd65_sum,
+            sum(cdd65_diff) as cdd65_depart,
+            sum(hdd65_diff) as hdd65_depart
             from combo GROUP by station)
 
         SELECT d.station, t.name, t.wfo,
@@ -349,7 +349,7 @@ def get_data(ctx):
         max_high_temp,
         avg_high_temp,
         avg_low_temp,
-        cdd_sum, hdd_sum, cdd_depart, hdd_depart,
+        cdd65_sum, hdd65_sum, cdd65_depart, hdd65_depart,
         ST_x(t.geom) as lon, ST_y(t.geom) as lat,
         t.geom
         from agg d JOIN stations t on (d.station = t.id)
@@ -399,8 +399,10 @@ def plotter(fdict):
         subtitle = "Period of Record Climatology is used for custom GDD"
     elif varname.find("depart") > -1:
         subtitle = (
-            "%s is compared with 19%s-%s Climatology to compute departures"
-        ) % (date1.year, ctx["ct"][-2:], datetime.date.today().year - 1)
+            f"{date1.year} is compared with 19{ctx['ct'][-2:]}-"
+            f"{datetime.date.today().year - 1} Climatology to "
+            "compute departures"
+        )
     elif varname.startswith("c"):
         subtitle = ("Climatology is based on data from 19%s-%s") % (
             ctx["ct"][-2:],
