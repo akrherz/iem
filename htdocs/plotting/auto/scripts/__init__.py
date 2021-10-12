@@ -275,7 +275,10 @@ monthly_opts = [
         "id": 223,
         "label": "Monthly/Seasonal Partition of Temperature/Precip Reports",
     },
-    {"id": 57, "label": "Monthly Precipitation/Temperature Records"},
+    {
+        "id": 57,
+        "label": "Monthly Precipitation/Temperature Records or Climatology",
+    },
     {
         "id": 95,
         "label": "Monthly Precipitation/Temperature with El Nino SOI Index",

@@ -1,35 +1,33 @@
-"""monthly temp records"""
+"""monthly temp record / climatology."""
 import datetime
 import calendar
-from collections import OrderedDict
 
 import pandas as pd
 from pandas.io.sql import read_sql
 import numpy as np
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
-    [
-        ("avg_temp", "Average Daily Temperature"),
-        ("avg_high_temp", "Average High Temperature"),
-        ("avg_low_temp", "Average Low Temperature"),
-        ("total_precip", "Total Precipitation"),
-    ]
-)
-PDICT2 = OrderedDict([("min", "Minimum"), ("max", "Maximum")])
+PDICT = {
+    "avg_temp": "Average Daily Temperature",
+    "avg_high_temp": "Average High Temperature",
+    "avg_low_temp": "Average Low Temperature",
+    "rain_days": "Days with Measurable Precipitation",
+    "total_precip": "Total Precipitation",
+}
+PDICT2 = {"min": "Minimum", "mean": "Climatology", "max": "Maximum"}
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["data"] = True
     desc[
         "description"
-    ] = """This plot displays the record months for a
-    statistic of your choice.  The current month for the current day is not
-    considered for the analysis."""
+    ] = """This plot displays the monthly records or climatology for
+    a station of your choice.  The current month for the current day is not
+    considered for the analysis, except for total precipitation."""
     desc["arguments"] = [
         dict(
             type="station",
@@ -65,8 +63,6 @@ def plotter(fdict):
     varname = ctx["varname"]
     agg = ctx["agg"]
 
-    table = "alldata_%s" % (station[:2],)
-
     lastday = datetime.date.today()
     if varname == "total_precip" and agg == "max":
         lastday += datetime.timedelta(days=1)
@@ -76,8 +72,10 @@ def plotter(fdict):
     df = read_sql(
         f"""SELECT year, month, avg((high+low)/2.) as avg_temp,
       avg(high) as avg_high_temp, avg(low) as avg_low_temp,
-      sum(precip) as total_precip
-      from {table} where station = %s and day < %s GROUP by year, month
+      sum(precip) as total_precip,
+      sum(case when precip > 0.005 then 1 else 0 end) as rain_days
+      from alldata_{station[:2]} where station = %s and day < %s
+      GROUP by year, month
       """,
         pgconn,
         params=(station, lastday),
@@ -95,50 +93,77 @@ def plotter(fdict):
             df2 = df2[
                 df[_varname] == df.groupby("month")[_varname].transform(_agg)
             ].copy()
-            df2.rename(
+            df2 = df2.rename(
                 columns={
-                    "year": "%s_%s_year" % (_agg.__name__, _varname),
-                    _varname: "%s_%s" % (_agg.__name__, _varname),
+                    "year": f"{_agg.__name__}_{_varname}_year",
+                    _varname: f"{_agg.__name__}_{_varname}",
                 },
-                inplace=True,
-            )
-            df2.set_index("month", inplace=True)
+            ).set_index("month")
             resdf = resdf.join(df2)
+        # Special for mean operation
+        df2 = (
+            df[[_varname, "month"]]
+            .groupby("month")
+            .mean()
+            .rename(columns={_varname: f"mean_{_varname}"})
+        )
+        resdf = resdf.join(df2)
 
     # The above can end up with duplicates
     resdf = resdf.groupby(level=0)
     resdf = resdf.last()
-
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
-
-    col = "%s_%s" % (agg, varname)
-    ax.bar(np.arange(1, 13), resdf[col], fc="pink", align="center")
-    for month, row in resdf.iterrows():
-        if np.isnan(row[col]):
-            continue
-        ax.text(
-            month,
-            row[col],
-            "%.0f\n%.2f" % (row[col + "_year"], row[col]),
-            ha="center",
-            va="bottom",
-        )
-    ax.set_xlim(0.5, 12.5)
-    ax.set_ylim(top=resdf[col].max() * 1.2)
+    col = f"{agg}_{varname}"
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown Station Metadata.")
-    ax.set_title(
-        ("[%s] %s\n%s %s [%s-%s]\n")
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            PDICT2[agg],
-            PDICT[varname],
-            ab.year,
-            lastday.year,
-        )
+    title = (
+        f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
+        f"{PDICT2[agg]} {PDICT[varname]} [{ab.year}-{lastday.year}]"
     )
+    if col == "mean_total_precip":
+        title += (
+            f" {resdf['mean_total_precip'].sum():.2f} inches over "
+            f"{resdf['mean_rain_days'].sum():.0f} days"
+        )
+    (fig, ax) = figure_axes(title=title)
+
+    offset = 0.2 if col == "mean_total_precip" else 0
+    ax.bar(
+        np.arange(1, 13) - offset,
+        resdf[col],
+        fc="pink",
+        align="center",
+        width=0.4 if col == "mean_total_precip" else 0.8,
+    )
+    for month, row in resdf.iterrows():
+        yearcol = f"{col}_year"
+        if np.isnan(row[col]):
+            continue
+        yearlabel = "" if yearcol not in resdf.columns else f"\n{row[yearcol]}"
+        ax.text(
+            month - offset,
+            row[col],
+            f"{row[col]:.2f}{yearlabel}",
+            ha="center",
+            va="bottom",
+            bbox={"color": "white", "boxstyle": "square,pad=0"},
+        )
+    if col == "mean_total_precip":
+        ax2 = ax.twinx()
+        bars = ax2.bar(
+            np.arange(1, 13) + 0.2, resdf["mean_rain_days"], width=0.4
+        )
+        for mybar in bars:
+            ax2.text(
+                mybar.get_x() + 0.2,
+                mybar.get_height() + 0.2,
+                f"{mybar.get_height():.1f}",
+                ha="center",
+                bbox={"color": "white", "boxstyle": "square,pad=0.1"},
+            )
+        ax2.set_ylabel("Measurable Precip Days")
+    ax.set_xlim(0.5, 12.5)
+    ax.set_ylim(top=resdf[col].max() * 1.2)
     ylabel = r"Temperature $^\circ$F"
     if varname in ["total_precip"]:
         ylabel = "Precipitation [inch]"
@@ -154,4 +179,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({"agg": "mean", "varname": "total_precip"})
