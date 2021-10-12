@@ -1,7 +1,11 @@
 """Wfo Gantt chart"""
 import datetime
 
-import pytz
+try:
+    from backports.zoneinfo import ZoneInfo
+except ImportError:
+    from zoneinfo import ZoneInfo  # type: ignore
+
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
 from matplotlib import ticker
@@ -51,12 +55,10 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     sts = ctx["sdate"]
-    sts = datetime.datetime(sts.year, sts.month, sts.day)
+    tz = ZoneInfo(ctx["_nt"].sts[station]["tzname"])
+    sts = datetime.datetime(sts.year, sts.month, sts.day, tzinfo=tz)
     days = ctx["days"]
 
-    tz = pytz.timezone(ctx["_nt"].sts[station]["tzname"])
-
-    sts = sts.replace(tzinfo=tz)
     ets = sts + datetime.timedelta(days=days)
     df = read_sql(
         """
@@ -82,17 +84,20 @@ def plotter(fdict):
     labels = []
     types = []
     for i, row in df.iterrows():
-        endts = max(row[4], row[5]).replace(tzinfo=pytz.utc)
-        events.append((row[3].replace(tzinfo=pytz.utc), endts, row[2]))
+        endts = max(row[4], row[5]).replace(tzinfo=datetime.timezone.utc)
+        events.append(
+            (row[3].replace(tzinfo=datetime.timezone.utc), endts, row[2])
+        )
         labels.append(vtec.get_ps_string(row[0], row[1]))
-        types.append("%s.%s" % (row[0], row[1]))
+        types.append(f"{row[0]}.{row[1]}")
 
     # If we have lots of WWA, we need to expand vertically a bunch, lets
     # assume we can plot 5 WAA per 100 pixels
-    title = "%s-%s NWS %s issued Watch/Warning/Advisories" % (
-        sts.strftime("%-d %b %Y"),
-        ets.strftime("%-d %b %Y"),
-        ctx["_nt"].sts[station]["name"],
+    title = (
+        f"NWS {ctx['_nt'].sts[station]['name']} "
+        "issued Watch/Warning/Advisories\n"
+        f"{sts:%-d %b %Y} through "
+        f"{(ets - datetime.timedelta(days=1)):%-d %b %Y}"
     )
     fig = figure(title=title)
     ax = fig.add_axes([0.05, 0.08, 0.73, 0.82])
@@ -109,7 +114,7 @@ def plotter(fdict):
         if types[i] in used:
             return ""
         used.append(types[i])
-        return "%s (%s)" % (labels[i], types[i])
+        return f"{labels[i]} ({types[i]})"
 
     halfway = sts + datetime.timedelta(days=days / 2.0)
 
@@ -170,4 +175,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})
