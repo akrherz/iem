@@ -48,6 +48,11 @@ THRESHOLD_LEVELS = {
     "MDT": "4. Moderate",
     "HIGH": "5. High",
 }
+# Overrides the above
+WPC_THRESHOLD_LEVELS = {
+    "MDT": "3. Moderate",
+    "HIGH": "4. High",
+}
 COLORS = {
     "TSTM": "#c0e8c0",
     "MRGL": "#66c57d",
@@ -184,10 +189,15 @@ def compute_datelabel(df):
     )
 
 
-def get_threshold_label(threshold):
+def get_threshold_label(threshold, outlook_type):
     """Make it pretty."""
     if threshold in THRESHOLD_LEVELS:
-        return THRESHOLD_LEVELS.get(threshold)
+        if outlook_type == "E":
+            return WPC_THRESHOLD_LEVELS.get(
+                threshold,
+                THRESHOLD_LEVELS[threshold],
+            )
+        return THRESHOLD_LEVELS[threshold]
     if threshold.startswith("0."):
         return "%.0f%%" % (float(threshold) * 100.0,)
     return threshold
@@ -294,7 +304,7 @@ def plotter(fdict):
             )
             rect = Rectangle((0, 0), 1, 1, fc=fc, ec=ec)
         rects.append(rect)
-        label = get_threshold_label(row["threshold"])
+        label = get_threshold_label(row["threshold"], outlook_type)
         if day == 0:
             label = f"D{row['day']} {label}"
         rectlabels.append(label)
