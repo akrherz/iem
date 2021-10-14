@@ -1,6 +1,5 @@
 """comparison"""
 import datetime
-from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
@@ -8,12 +7,10 @@ from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
-    (
-        ("temp", "High and Low Temperature"),
-        ("dewp", "High and Low Dew Point Temp"),
-    )
-)
+PDICT = {
+    "temp": "High and Low Temperature",
+    "dewp": "High and Low Dew Point Temp",
+}
 
 
 def get_description():
@@ -128,10 +125,8 @@ def plotter(fdict):
     )
 
     for i, vname in enumerate(["high", "low"]):
-        col = "%s_diff" % (vname,)
+        col = f"{vname}_diff"
         df2 = df[df[col] > 0]
-        if df2.empty:
-            continue
         freq1 = len(df2.index) / float(len(df.index)) * 100.0
         ax[i].bar(df2.index.values, df2[col].values, fc="r", ec="r")
         df2 = df[df[col] < 0]
@@ -181,4 +176,11 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter(
+        {
+            "zstation1": "CAR",
+            "network1": "ME_ASOS",
+            "zstation2": "PHX",
+            "network2": "AZ_ASOS",
+        }
+    )
