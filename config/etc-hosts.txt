@@ -61,8 +61,16 @@
 192.168.0.207    metvm7.local
 192.168.0.208    metvm8.local
 192.168.0.209    metvm9.local
-192.168.0.210    metvm10.local
-192.168.0.211    metvm11.local
+192.168.10.200    metvm0.ib
+192.168.10.201    metvm1.ib
+192.168.10.202    metvm2.ib
+192.168.10.203    metvm3.ib
+192.168.10.204    metvm4.ib
+192.168.10.205    metvm5.ib
+192.168.10.206    metvm6.ib
+192.168.10.207    metvm7.ib
+192.168.10.208    metvm8.ib
+192.168.10.209    metvm9.ib
 
 #
 # IPs that float thanks to the magic of pulse or keepalived
@@ -101,9 +109,9 @@
 192.168.1.231 iemdb-td.local
 192.168.1.231 iemdb-wepp.local
 
-### metvm7 PostgreSQL
-# VI_1_230(72) metvm7 -> metvm5
-192.168.1.230 metvm7-iemdb.local
+### iemdb3 PostgreSQL
+# VI_1_230(72) metvm6 -> metvm1
+192.168.1.230 metvm6-iemdb.local
 192.168.1.230 iemdb-awos.local
 192.168.1.230 iemdb-hml.local
 192.168.1.230 iemdb-mec.local
