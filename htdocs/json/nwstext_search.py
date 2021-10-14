@@ -20,13 +20,11 @@ def run(sts, ets, awipsid):
     if len(awipsid) == 3:
         pillimit = "substr(pil, 1, 3) "
     cursor.execute(
-        """
+        f"""
     SELECT data,
     to_char(entered at time zone 'UTC', 'YYYY-MM-DDThh24:MIZ'),
     source, wmo from products WHERE
-    entered >= %s and entered < %s and """
-        + pillimit
-        + """ = %s
+    entered >= %s and entered < %s and {pillimit} = %s
     ORDER by entered ASC
     """,
         (sts, ets, awipsid),
@@ -40,18 +38,17 @@ def run(sts, ets, awipsid):
 
 def application(environ, start_response):
     """Answer request."""
+    headers = [("Content-type", "application/json")]
+    if environ.get("REQUEST_METHOD") != "GET":
+        start_response("405 Method Not Allowed", headers)
+        return ['{"error": "Only HTTP GET Supported"}'.encode("utf8")]
     fields = parse_formvars(environ)
     awipsid = fields.get("awipsid", "AFDDMX")[:6]
     sts = fields.get("sts", "2019-10-03T00:00Z")
     ets = fields.get("ets", "2019-10-04T00:00Z")
     cb = fields.get("callback", None)
 
-    mckey = "/json/nwstext_search/%s/%s/%s?callback=%s" % (
-        sts,
-        ets,
-        awipsid,
-        cb,
-    )
+    mckey = f"/json/nwstext_search/{sts}/{ets}/{awipsid}?callback={cb}"
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
     if not res:
@@ -69,8 +66,7 @@ def application(environ, start_response):
     if cb is None:
         data = res
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        data = f"{html_escape(cb)}({res})"
 
-    headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
     return [data.encode("ascii")]
