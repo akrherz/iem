@@ -24,7 +24,6 @@ PAIRS = [
     ["/mesonet/data/madis", f"{M2}/data/madis"],
     ["/mesonet/data/model", f"{M2}/data/model"],
     ["/mesonet/data/ndfd", f"{M2}/data/ndfd"],
-    ["/mesonet/data/nexrad", "/data/gempak/nexrad"],
     ["/mesonet/data/smos", f"{M2}/data/smos"],
     ["/mesonet/data/stage4", f"{M2}/data/stage4"],
     ["/mesonet/data/text", f"{M2}/data/text"],
