@@ -6,7 +6,7 @@ import pandas as pd
 from pyiem.util import get_dbconn, logger
 
 LOG = logger()
-BASE = "/mnt/home/mesonet/ot/ot0005/incoming/Pierson"
+BASE = "/mesonet/home/mesonet/ot/ot0005/incoming/Pierson"
 
 
 def get_starttimes(cursor):

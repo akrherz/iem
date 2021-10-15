@@ -97,7 +97,7 @@ TSOIL_COLS = [
     "t24_c_avg",
     "t50_c_avg",
 ]
-BASE = "/mnt/home/loggernet"
+BASE = "/mesonet/home/loggernet"
 STATIONS = {
     "CAMI4": "Calumet",
     "BOOI4": "AEAFarm",
@@ -159,7 +159,7 @@ def make_time(string):
 
 def do_inversion(filename, nwsli):
     """Process Inversion Station Data."""
-    fn = f"/mnt/home/loggernet/{filename}_Inversion_MinSI.dat"
+    fn = f"{BASE}/{filename}_Inversion_MinSI.dat"
     if not os.path.isfile(fn):
         LOG.debug("missing filename %s", fn)
         return

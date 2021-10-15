@@ -11,7 +11,7 @@ from pyiem.observation import Observation
 from pyiem.util import get_dbconn, logger, utc, convert_value, c2f
 
 LOG = logger()
-BASEDIR = "/mnt/home/mesonet/ot/ot0005/incoming/Fluxdata"
+BASEDIR = "/mesonet/home/mesonet/ot/ot0005/incoming/Fluxdata"
 FILENAMES = {
     "NSTL10": ["Flux10_AF_15.dat", "Anc10_AF_15.dat"],
     "NSTL11": ["Flux11_AF_15.dat", "Anc11_AF_15.dat"],
