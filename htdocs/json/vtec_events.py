@@ -22,8 +22,8 @@ def run(wfo, year, phenomena, significance, combo):
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    table = "warnings_%s" % (year,)
-    sbwtable = "sbw_%s" % (year,)
+    table = f"warnings_{year}"
+    sbwtable = f"sbw_{year}"
     limits = ["phenomena is not null", "significance is not null"]
     orderby = "u.phenomena ASC, u.significance ASC, u.utc_issue ASC"
     if phenomena != "":
@@ -37,17 +37,12 @@ def run(wfo, year, phenomena, significance, combo):
         )
         orderby = "u.utc_issue ASC"
     cursor.execute(
-        """
+        f"""
     WITH polyareas as (
         SELECT phenomena, significance, eventid, round((ST_area(
         ST_transform(geom,2163)) / 1000000.0)::numeric,0) as area
-        from """
-        + sbwtable
-        + """ WHERE
-        wfo = %s and eventid is not null and
-        """
-        + plimit
-        + """ and status = 'NEW'
+        from {sbwtable} WHERE wfo = %s and eventid is not null and
+        {plimit} and status = 'NEW'
     ), ugcareas as (
         SELECT
         round(sum(ST_area(
@@ -59,23 +54,15 @@ def run(wfo, year, phenomena, significance, combo):
         min(product_issue) at time zone 'UTC' as utc_product_issue,
         max(init_expire) at time zone 'UTC' as utc_init_expire,
         max(hvtec_nwsli) as nwsli,
-        max(fcster) as fcster from
-        """
-        + table
-        + """ w JOIN ugcs u on (w.gid = u.gid)
-        WHERE w.wfo = %s and eventid is not null and
-        """
-        + plimit
-        + """
+        max(fcster) as fcster from {table} w JOIN ugcs u on (w.gid = u.gid)
+        WHERE w.wfo = %s and eventid is not null and {plimit}
         GROUP by phenomena, significance, eventid)
 
     SELECT u.*, coalesce(p.area, u.area) as myarea
     from ugcareas u LEFT JOIN polyareas p on
     (u.phenomena = p.phenomena and u.significance = p.significance
      and u.eventid = p.eventid)
-        ORDER by """
-        + orderby
-        + """
+        ORDER by {orderby}
     """,
         (wfo, wfo),
     )

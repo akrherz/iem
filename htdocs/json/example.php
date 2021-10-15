@@ -6,7 +6,12 @@ require_once "../../include/forms.php";
 
 header('Content-type: application/json; charset=utf-8');
 
-$json = '{"Name": "daryl", "Profession": "nerd", "Age": 99}';
+$arr = Array(
+    "Name" => "daryl",
+    "Profession" => "nerd",
+    "Age" => 99,
+);
+$json = json_encode($arr);
 
 // JSON if no callback
 if( ! isset($_REQUEST['callback']))

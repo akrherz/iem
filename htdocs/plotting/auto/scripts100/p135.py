@@ -213,7 +213,7 @@ def plotter(fdict):
 
     (fig, ax) = figure_axes(title=title)
     ax.plot(df.index.values, df["avg"], c="k", lw=2, label="Average")
-    ax.plot(df.index.values, df["thisyear"], c="g", lw=2, label="%s" % (year,))
+    ax.plot(df.index.values, df["thisyear"], c="g", lw=2, label=f"{year}")
     ax.plot(df.index.values, df["max"], c="r", lw=2, label="Max")
     ax.plot(df.index.values, df["min"], c="b", lw=2, label="Min")
     ax.legend(ncol=1, loc=2)

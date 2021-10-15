@@ -116,9 +116,9 @@ def application(environ, start_response):
     cb = fields.get("callback")
 
     if lat != 0 and lon != 0:
-        mckey = ("/json/spcwatch/%.4f/%.4f") % (lon, lat)
+        mckey = f"/json/spcwatch/{lon:.4f}/{lat:.4f}"
     else:
-        mckey = "/json/spcwatch/%s" % (ts.strftime("%Y%m%d%H%M"),)
+        mckey = f"/json/spcwatch/{ts:%Y%m%d%H%M}"
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
     if not res:

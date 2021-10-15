@@ -11,8 +11,10 @@ require_once "../../include/forms.php";
 $connect = iemdb("mesosite");
 
 /* Standard Issue Products :) */
-$result = pg_exec($connect, "SELECT * from archive_products 
-		ORDER by groupname, name");
+$result = pg_exec(
+    $connect,
+    "SELECT * from archive_products ORDER by groupname, name",
+);
 
 $ar = Array("products" => Array() );
 for( $i=0; $row = pg_fetch_assoc($result); $i++)
@@ -47,7 +49,6 @@ for( $i=0; $row = pg_fetch_assoc($result); $i++)
         "sts" => substr($row["sts"],0,10));
   $ar["products"][] = $z;
 }
-
 
 $json = json_encode($ar);
 

@@ -1,11 +1,10 @@
 """Current Observation for a station and network"""
 import json
-import datetime
 
 import memcache
 import psycopg2.extras
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, html_escape
+from pyiem.util import get_dbconn, html_escape, utc
 
 
 def run(network, station):
@@ -28,13 +27,11 @@ def run(network, station):
     if cursor.rowcount == 0:
         return "{}"
     row = cursor.fetchone()
-    data = dict()
-    data["server_gentime"] = datetime.datetime.utcnow().strftime(
-        "%Y-%m-%dT%H:%M:%SZ"
-    )
+    data = {}
+    data["server_gentime"] = utc().strftime("%Y-%m-%dT%H:%M:%SZ")
     data["id"] = station
     data["network"] = network
-    ob = data.setdefault("last_ob", dict())
+    ob = data.setdefault("last_ob", {})
     ob["local_valid"] = row["localtime"].strftime("%Y-%m-%d %H:%M")
     ob["utc_valid"] = row["utctime"].strftime("%Y-%m-%dT%H:%M:00Z")
     ob["airtemp[F]"] = row["tmpf"]
@@ -70,7 +67,7 @@ def application(environ, start_response):
     station = fields.get("station", "AMW")[:10].upper()
     cb = fields.get("callback", None)
 
-    mckey = "/json/current/%s/%s" % (network, station)
+    mckey = f"/json/current/{network}/{station}"
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
     if not res:
@@ -80,7 +77,7 @@ def application(environ, start_response):
     if cb is None:
         data = res
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        data = f"{html_escape(cb)}({res})"
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)

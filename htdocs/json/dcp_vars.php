@@ -11,8 +11,11 @@ require_once "../../include/forms.php";
 
 $hads = iemdb('hads');
 $table = sprintf("raw%s_%s", date("Y"), date("m"));
-$rs = pg_prepare($hads, "SELECT", "SELECT distinct key from $table " .
-		"WHERE station = $1");
+$rs = pg_prepare(
+    $hads,
+    "SELECT",
+    "SELECT distinct key from $table WHERE station = $1"
+);
 
 $station = isset($_REQUEST["station"]) ? strtoupper($_REQUEST["station"]) : 
 			die(json_encode('Please provide a station variable (NWSLI)')); 

@@ -224,9 +224,9 @@ def plotter(fdict):
     ax.legend(
         (p0, p1, p2),
         (
-            "First Period Above %s for %s+ Hours" % (threshold, hours1),
-            "Below %s for 1+ Hours" % (threshold,),
-            "Below %s for %s+ Hours" % (threshold, hours2),
+            f"First Period Above {threshold} for {hours1}+ Hours",
+            f"Below {threshold} for 1+ Hours",
+            f"Below {threshold} for {hours2}+ Hours",
         ),
         ncol=2,
         fontsize=11,
@@ -241,4 +241,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

@@ -76,7 +76,7 @@ def plotter(fdict):
 
     dbconn = get_dbconn("coop")
 
-    table = "alldata_%s" % (station[:2],)
+    table = f"alldata_{station[:2]}"
     if varname == "fall":
         sql = f"""
         WITH doy as (

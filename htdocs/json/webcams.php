@@ -42,7 +42,6 @@ if ($ts > 0){
 $result = pg_execute($connect, "CAMSEL", $ar);
 
 
-
 $ar = Array("images" => Array() );
 if ($ts > 0){
   $url = "https://mesonet.agron.iastate.edu/current/camrad.php?network=${network}&ts=". $_REQUEST["ts"];

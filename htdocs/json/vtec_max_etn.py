@@ -18,19 +18,13 @@ def run(year, fmt):
     cursor = pgconn.cursor()
     utcnow = datetime.datetime.utcnow()
 
-    table = "warnings_%s" % (year,)
     cursor.execute(
-        """
+        f"""
     SELECT wfo, phenomena, significance, max(eventid),
-    '/vtec/#"""
-        + str(year)
-        + """-O-NEW-K'||
+    '/vtec/#{year}-O-NEW-K'||
     wfo||'-'||phenomena||'-'||significance||'-'||
     LPAD(max(eventid)::text, 4, '0') as url
-     from
-    """
-        + table
-        + """ WHERE wfo is not null and eventid is not null and
+     from warnings_{year} WHERE wfo is not null and eventid is not null and
     phenomena is not null and significance is not null
     GROUP by wfo, phenomena, significance
     ORDER by wfo ASC, phenomena ASC, significance ASC
@@ -95,7 +89,7 @@ def application(environ, start_response):
     else:
         headers.append(("Content-type", "text/html"))
 
-    mckey = "/json/vtec_max_etn/%s/%s" % (year, fmt)
+    mckey = f"/json/vtec_max_etn/{year}/{fmt}"
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
     if res is None:

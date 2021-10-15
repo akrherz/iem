@@ -1,6 +1,5 @@
 """departures"""
 import datetime
-from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 import numpy as np
@@ -8,14 +7,12 @@ from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
-    [
-        ("all", "Show All Three Plots"),
-        ("gdd", "Show just Growing Degree Days"),
-        ("precip", "Show just Precipitation"),
-        ("sdd", "Show just Stress Degree Days"),
-    ]
-)
+PDICT = {
+    "all": "Show All Three Plots",
+    "gdd": "Show just Growing Degree Days",
+    "precip": "Show just Precipitation",
+    "sdd": "Show just Stress Degree Days",
+}
 
 
 def get_description():
@@ -118,8 +115,11 @@ def plotter(fdict):
     gddceil = ctx["ceil"]
     whichplots = ctx["which"]
     glabel = "gdd%s%s" % (gddbase, gddceil)
+    ab = ctx["_nt"].sts[station]["archive_begin"]
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
 
-    table = "alldata_%s" % (station[:2],)
+    table = f"alldata_{station[:2]}"
     df = read_sql(
         f"""
     WITH avgs as (
@@ -141,9 +141,6 @@ def plotter(fdict):
     df[glabel + "_diff"] = df["o" + glabel] - df["c" + glabel]
 
     xlen = int((edate - sdate).days) + 1  # In case of leap day
-    ab = ctx["_nt"].sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata.")
     years = (datetime.datetime.now().year - ab.year) + 1
     acc = np.zeros((years, xlen))
     acc[:] = np.nan
@@ -363,4 +360,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

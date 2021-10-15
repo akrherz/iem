@@ -1,7 +1,6 @@
 """4 inch soil temps or moisture"""
 import datetime
 import calendar
-from collections import OrderedDict
 
 import pandas as pd
 from pandas.io.sql import read_sql
@@ -9,14 +8,12 @@ from pyiem import util
 from pyiem.plot import figure_axes
 from pyiem.network import Table as NetworkTable  # This is needed.
 
-VARS = OrderedDict(
-    (
-        ("tsoil", "4 inch Soil Temperature"),
-        ("vwc12", "12 inch Volumetric Water Content"),
-        ("vwc24", "24 inch Volumetric Water Content"),
-        ("vwc50", "50 inch Volumetric Water Content"),
-    )
-)
+VARS = {
+    "tsoil": "4 inch Soil Temperature",
+    "vwc12": "12 inch Volumetric Water Content",
+    "vwc24": "24 inch Volumetric Water Content",
+    "vwc50": "50 inch Volumetric Water Content",
+}
 XREF = {
     "AEEI4": "A130209",
     "BOOI4": "A130209",
