@@ -16,7 +16,7 @@ LOG = logger()
 UREG = UnitRegistry()
 QUANTITY = UREG.Quantity
 SID = "OT0012"
-DIRPATH = "/mnt/mesonet/home/mesonet/ot/ot0005/incoming/Pederson"
+DIRPATH = "/mesonet/home/mesonet/ot/ot0005/incoming/Pederson"
 
 HOURLYCONV = {
     "Batt_Volt": "battery",
@@ -144,15 +144,15 @@ def get_last():
 
 def campbell2df(year):
     """ "Process the file for any timestamps after the lastob"""
-    dailyfn = "%s/%s/Daily.dat" % (DIRPATH, year)
-    hourlyfn = "%s/%s/Hourly.dat" % (DIRPATH, year)
+    dailyfn = f"{DIRPATH}/{year}/Daily.dat"
+    hourlyfn = f"{DIRPATH}/{year}/Hourly.dat"
     if not os.path.isfile(dailyfn):
-        dailyfn = "%s/%s/Daily.dat" % (DIRPATH, year - 1)
+        dailyfn = f"{DIRPATH}/{year - 1}/Daily.dat"
         if not os.path.isfile(dailyfn):
             LOG.info("missing %s", dailyfn)
             return None, None
     if not os.path.isfile(hourlyfn):
-        hourlyfn = "%s/%s/Hourly.dat" % (DIRPATH, year - 1)
+        hourlyfn = f"{DIRPATH}/{year - 1}/Hourly.dat"
         if not os.path.isfile(hourlyfn):
             LOG.info("missing %s", hourlyfn)
             return None, None
