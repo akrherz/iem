@@ -3,12 +3,12 @@ import datetime
 import math
 import calendar
 
-import psycopg2.extras
 import numpy as np
 import pandas as pd
+from pandas.io.sql import read_sql
 from pyiem.nws import vtec
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem import reference
 from pyiem.exceptions import NoDataFound
 
@@ -20,11 +20,12 @@ PDICT2 = {
 }
 PDICT3 = {"wfo": "Plot for Single/All WFO", "state": "Plot for a Single State"}
 PDICT4 = {"line": "Accumulated line plot", "bar": "Single bar plot per year"}
+PDICT5 = {"jan1": "January 1", "jul1": "July 1"}
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["cache"] = 86400
     desc["data"] = True
     desc[
@@ -39,7 +40,11 @@ def get_description():
     <p>Generally, the archive starts in Fall 2005 for most types.  Event
     counts do exist for Severe Thunderstorm, Tornado and Flash Flood warnings
     for dates back to 1986.  Data quality prior to 2001 is not the greatest
-    though.
+    though.</p>
+
+    <p>If you want to use the "cold season" as the basis of a year, pick the
+    "July 1" option below. The "year" label is then associated with the fall
+    portion of the cold season (1 Jul 2021 - 30 Jun 2022 is 2021).
     """
     desc["arguments"] = [
         dict(
@@ -110,6 +115,13 @@ def get_description():
             min=1986,
             label="Inclusive End Year (if data is available) for plot:",
         ),
+        dict(
+            type="select",
+            name="s",
+            default="jan1",
+            options=PDICT5,
+            label="Start date of the 'year' plotted",
+        ),
     ]
     return desc
 
@@ -134,7 +146,7 @@ def make_barplot(ctx, df):
         ax.text(
             year,
             float(row["count"]) + 3,
-            "%.0f" % (row["count"],),
+            f"{row['count']:.0f}",
             rotation=90 if len(df2.index) > 17 else 0,
             bbox=dict(color="white", boxstyle="square,pad=0.1"),
             ha="center",
@@ -147,8 +159,6 @@ def make_barplot(ctx, df):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     limit = ctx["limit"]
@@ -169,10 +179,12 @@ def plotter(fdict):
 
     lastdoy = 367
     if limit.lower() == "yes":
+        if ctx["s"] == "jul1":
+            raise ValueError("Sorry, combination of Jul 1 + limit supported")
         lastdoy = int(datetime.datetime.today().strftime("%j")) + 1
-    wfolimiter = " and wfo = '%s' " % (station,)
+    wfolimiter = f" and wfo = '{station}' "
     if opt == "state":
-        wfolimiter = " and substr(ugc, 1, 2) = '%s' " % (state,)
+        wfolimiter = f" and substr(ugc, 1, 2) = '{state}' "
     if opt == "wfo" and station == "_ALL":
         wfolimiter = ""
     eventlimiter = ""
@@ -192,66 +204,57 @@ def plotter(fdict):
     if pslimiter != "" or eventlimiter != "":
         limiter = f" ({pslimiter} {eventlimiter}) and "
 
-    cursor.execute(
+    df = read_sql(
         f"""
     WITH data as (
-        SELECT extract(year from issue)::int as yr,
+        SELECT extract(year from issue)::int as year,
         issue, phenomena, significance, eventid, wfo from warnings WHERE
         {limiter} extract(year from issue) >= %s and
         extract(year from issue) <= %s
         and extract(doy from issue) <= %s {wfolimiter}),
     agg1 as (
-        SELECT yr, min(issue) as min_issue, eventid, wfo, phenomena,
+        SELECT year, min(issue) as min_issue, eventid, wfo, phenomena,
         significance from data
-        GROUP by yr, eventid, wfo, phenomena, significance),
-    agg2 as (
-        SELECT yr, extract(doy from min_issue) as doy, count(*)
-        from agg1 GROUP by yr, doy)
-    SELECT yr, doy, sum(count) OVER (PARTITION by yr ORDER by doy ASC)
-    from agg2 ORDER by yr ASC, doy ASC
-    """,
-        args,
-    )
-    if cursor.rowcount == 0:
-        raise NoDataFound("No Data Found.")
+        GROUP by year, eventid, wfo, phenomena, significance)
 
-    data = {}
-    for yr in range(ctx["syear"], eyear + 1):
-        data[yr] = {"doy": [0], "counts": [0]}
-    rows = []
-    for row in cursor:
-        data[row[0]]["doy"].append(row[1])
-        data[row[0]]["counts"].append(row[2])
-        rows.append(dict(year=row[0], day_of_year=row[1], count=row[2]))
-    # append on a lastdoy value so all the plots go to the end
-    for yr in range(ctx["syear"], eyear + 1):
-        if data[yr]["doy"][-1] >= lastdoy:
-            continue
-        if yr == utc().year:
-            # append today
-            data[yr]["doy"].append(int(utc().strftime("%j")))
-        else:
-            data[yr]["doy"].append(lastdoy)
-        data[yr]["counts"].append(data[yr]["counts"][-1])
-    df = pd.DataFrame(rows)
+    SELECT date(min_issue) as date, count(*)
+    from agg1 GROUP by date ORDER by date ASC
+    """,
+        get_dbconn("postgis"),
+        params=args,
+        index_col="date",
+        parse_dates="date",
+    )
+    if df.empty:
+        raise NoDataFound("No Data Found.")
+    df = df.reindex(
+        pd.date_range(df.index.values[0], df.index.values[-1])
+    ).fillna(0)
+    df["year"] = df.index.year
+    df["month"] = df.index.month
+    if ctx["s"] == "jul1":
+        # Munge the year
+        df.at[df["month"] < 7, "year"] = df["year"] - 1
+    # Compute cumsum
+    df["cumsum"] = df[["year", "count"]].groupby("year").cumsum()
 
     title = vtec.get_ps_string(phenomena, significance)
     if combo == "svrtor":
         title = "Severe Thunderstorm + Tornado Warning"
     elif combo == "all":
         title = "All VTEC Events"
-    ptitle = "NWS WFO: %s (%s)" % (ctx["_nt"].sts[station]["name"], station)
+    ptitle = f"NWS WFO: {ctx['_nt'].sts[station]['name']} ({station})"
     if opt == "state":
         ptitle = ("NWS Issued for %s in %s") % (
             "Parishes" if state == "LA" else "Counties",
             reference.state_names[state],
         )
-    ctx["title"] = "%s\n %s Count" % (ptitle, title)
-    ctx["xlabel"] = "entire year plotted"
+    ctx["title"] = f"{ptitle}\n {title} Count"
+    ctx["xlabel"] = "all days plotted"
     if lastdoy < 367:
-        ctx["xlabel"] = ("thru approximately %s") % (
-            datetime.date.today().strftime("%-d %B"),
-        )
+        ctx["xlabel"] = f"thru approximately {datetime.date.today():%-d %B}"
+    if ctx["s"] == "jul1":
+        ctx["xlabel"] += ", year denotes start date of 1 July"
 
     if ctx["plot"] == "bar":
         return make_barplot(ctx, df)
@@ -259,20 +262,25 @@ def plotter(fdict):
     ax = fig.add_axes([0.05, 0.1, 0.65, 0.8])
     ann = []
     for yr in range(ctx["syear"], eyear + 1):
-        if len(data[yr]["doy"]) < 2:
+        df2 = df[df["year"] == yr]
+        if len(df2.index) < 2:
             continue
+        basedate = datetime.date(yr, 7 if ctx["s"] == "jul1" else 1, 1)
+        xr = [x.days for x in (df2.index.date - basedate)]
+        maxval = df2["cumsum"].max()
         lp = ax.plot(
-            data[yr]["doy"],
-            data[yr]["counts"],
+            xr,
+            df2["cumsum"],
             lw=2,
-            label="%s (%s)" % (str(yr), data[yr]["counts"][-1]),
+            label=f"{yr} ({maxval:.0f})",
             drawstyle="steps-post",
         )
+        lrow = df2[df2["cumsum"] == maxval].index.date[0]
         ann.append(
             ax.text(
-                data[yr]["doy"][-1] + 1,
-                data[yr]["counts"][-1],
-                "%s" % (yr,),
+                (lrow - basedate).days + 1,
+                maxval,
+                f"{yr}",
                 color="w",
                 va="center",
                 fontsize=10,
@@ -307,7 +315,12 @@ def plotter(fdict):
 
     ax.legend(loc=(1.07, 0), ncol=2, fontsize=10)
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
-    ax.set_xticklabels(calendar.month_abbr[1:])
+    if ctx["s"] == "jan1":
+        ax.set_xticklabels(calendar.month_abbr[1:])
+    else:
+        labels = calendar.month_abbr[7:]
+        labels.extend(calendar.month_abbr[1:7])
+        ax.set_xticklabels(labels)
     plot_common(ctx, ax)
     ax.set_ylim(bottom=0)
     ax.set_xlim(0, lastdoy)
@@ -317,5 +330,11 @@ def plotter(fdict):
 
 if __name__ == "__main__":
     plotter(
-        dict(limit="yes", station="UNR", opt="wfo", c="single", plot="bar")
+        {
+            "limit": "yes",
+            "station": "UNR",
+            "opt": "wfo",
+            "c": "single",
+            "s": "jul1",
+        }
     )
