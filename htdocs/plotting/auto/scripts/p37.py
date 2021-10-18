@@ -235,7 +235,7 @@ def plot_temps(ax, mosdata, month1, month, obs):
     ax.scatter(days - 0.1, lobs, zorder=2, s=40, c="blue", label="Actual Low")
 
     next1 = now.replace(day=1)
-    days = (next1 - month1).days
+    days = (next1 - month1.date()).days
     ax.set_xlim(0, days + 0.5)
     ax.set_xticks(range(1, days + 1, 2))
 
@@ -337,7 +337,7 @@ def plotter(fdict):
 if __name__ == "__main__":
     plotter(
         {
-            "var": "gst",
+            "var": "t",
             "network": "IA_ASOS",
             "zstation": "DSM",
             "month": 10,

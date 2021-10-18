@@ -3,30 +3,28 @@ import sys
 import tempfile
 import os
 
-METVM4, METVM1, METVM6, METVM7, METVM2 = range(5)
-IPS = (
-    "172.16.170.1 172.16.171.1 172.16.172.1 172.16.173.1 172.16.174.1".split()
-)
+METVM4, METVM6, METVM2 = range(3)
+IPS = "172.16.170.1 172.16.172.1 172.16.174.1".split()
 LOOKUP = {
     "": IPS[METVM4],
     "-afos": IPS[METVM4],
     "-asos": IPS[METVM4],
-    "-asos1min": IPS[METVM1],
-    "-awos": IPS[METVM7],
+    "-asos1min": IPS[METVM4],
+    "-awos": IPS[METVM6],
     "-coop": IPS[METVM2],
     "-frost": IPS[METVM4],
     "-hads": IPS[METVM2],
-    "-hml": IPS[METVM7],
+    "-hml": IPS[METVM6],
     "-id3b": IPS[METVM4],
     "-idep": IPS[METVM4],
     "-iem": IPS[METVM4],
     "-iemre": IPS[METVM2],
     "-isuag": IPS[METVM4],
     "-kcci": IPS[METVM4],
-    "-mec": IPS[METVM7],
+    "-mec": IPS[METVM6],
     "-mesonet": IPS[METVM4],
     "-mesosite": IPS[METVM4],
-    "-mos": IPS[METVM7],
+    "-mos": IPS[METVM6],
     "-nc1018": IPS[METVM4],
     "-nldn": IPS[METVM2],
     "-nwx": IPS[METVM4],
@@ -41,7 +39,7 @@ LOOKUP = {
     "-scada": IPS[METVM4],
     "-scan": IPS[METVM4],
     "-smos": IPS[METVM2],
-    "-snet": IPS[METVM7],
+    "-snet": IPS[METVM6],
     "-squaw": IPS[METVM4],
     "-sustainablecorn": IPS[METVM4],
     "-talltowers": IPS[METVM2],

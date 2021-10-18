@@ -14,10 +14,11 @@ def logic(counts, family):
     for addr, hits in counts.items():
         if len(hits) < 30:
             continue
-        cmd = "/usr/sbin/%s -A INPUT -s %s -j DROP" % (exe, addr)
+        # NOTE the insert to the front of the chain
+        cmd = f"/usr/sbin/{exe} -I INPUT -s {addr} -j DROP"
         print(cmd)
         for hit in hits[:10]:
-            print("%s uri:|%s| ref:|%s|" % (hit[0], hit[2], hit[3]))
+            print(f"{hit[0]} uri:|{hit[2]}| ref:|{hit[3]}|")
         print()
         subprocess.call(cmd, shell=True)
 
@@ -34,11 +35,8 @@ def main(argv):
     )
     cursor = pgconn.cursor()
     cursor.execute(
-        """
-        SELECT valid, client_addr, uri, referer from weblog
-        WHERE http_status = 404 and family(client_addr) = %s
-        ORDER by valid ASC
-    """,
+        "SELECT valid, client_addr, uri, referer from weblog WHERE "
+        "http_status = 404 and family(client_addr) = %s ORDER by valid ASC",
         (family,),
     )
     valid = None
@@ -52,9 +50,7 @@ def main(argv):
     if valid is None:
         return
     cursor.execute(
-        """
-        DELETE from weblog where valid <= %s and family(client_addr) = %s
-        """,
+        "DELETE from weblog where valid <= %s and family(client_addr) = %s",
         (valid, family),
     )
     cursor.close()
