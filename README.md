@@ -25,7 +25,7 @@ iem-web-services | iem16 | iem14 | None
 LDM | iem14 | None | None
 LoggerNet | iem15 | None | None
 NEXRAD Mosaics | iem8-dc | iem16 | nagios checks archive
-openfire | iem14 | None     | None
+openfire | iem16 | iem14 | None
 postgres | metvm2 | metvm9  | None
 postgres4 | metvm7 | None | None
 samba | iem12 | None | cron scripts check data availability

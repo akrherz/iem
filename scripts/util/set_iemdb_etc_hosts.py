@@ -28,7 +28,7 @@ LOOKUP = {
     "-nc1018": IPS[METVM4],
     "-nldn": IPS[METVM2],
     "-nwx": IPS[METVM4],
-    "-openfire": IPS[METVM4],
+    "-openfire": IPS[METVM6],
     "-other": IPS[METVM4],
     "-portfolio": IPS[METVM4],
     "-postgis": IPS[METVM2],

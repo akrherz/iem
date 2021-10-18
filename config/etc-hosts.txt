@@ -97,7 +97,6 @@
 192.168.1.231 iemdb-mesosite.local
 192.168.1.231 iemdb-nc1018.local
 192.168.1.231 iemdb-nwx.local
-192.168.1.231 iemdb-openfire.local
 192.168.1.231 iemdb-other.local
 192.168.1.231 iemdb-portfolio.local
 192.168.1.231 iemdb-rtstats.local
@@ -116,6 +115,7 @@
 192.168.1.230 iemdb-hml.local
 192.168.1.230 iemdb-mec.local
 192.168.1.230 iemdb-mos iemdb-mos.local
+192.168.1.230 iemdb-openfire.local
 192.168.1.230 iemdb-snet.local
 
 ### metvm2 PostgreSQL
