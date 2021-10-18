@@ -583,7 +583,7 @@ mopts = [
         "id": 67,
         "label": "Monthly Frequency of Wind Speeds by Air Temperature",
     },
-    {"id": 37, "label": "MOS Forecasted Temperature Ranges + Observations"},
+    {"id": 37, "label": "MOS Forecast Ranges + ASOS Observations"},
     {"id": 211, "label": "One Minute Interval Plots"},
     {"id": 222, "label": "One Minute Precipitation During Severe Weather"},
     {
