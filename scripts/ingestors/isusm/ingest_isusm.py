@@ -123,6 +123,8 @@ STATIONS = {
 }
 INVERSION = {
     "AEAInversion": "BOOI4",
+    "CalumetInversion": "CAMI4",
+    "CrawfordsvilleInversion": "CRFI4",
 }
 
 
