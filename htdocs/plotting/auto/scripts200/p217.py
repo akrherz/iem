@@ -16,6 +16,7 @@ UNITS = {
     "max_hail_size": "inch",
     "max_wind_gust": "MPH",
 }
+WFOCONV = {"JSJ": "SJU"}
 
 
 def get_description():
@@ -83,13 +84,12 @@ def plotter(fdict):
             "SELECT simple_geom, ugc from ugcs where wfo = %s and ugc in %s "
             "and end_ts is null",
             pgconn,
-            params=(wfo, tuple(row["ugcs"])),
+            params=(WFOCONV.get(wfo, wfo), tuple(row["ugcs"])),
             geom_col="simple_geom",
         )
         bounds = ugcdf["simple_geom"].total_bounds
     else:
         bounds = row["geom"].bounds
-
     mp = MapPlot(
         title=(
             f"{wfo} Special Weather Statement (SPS) "
@@ -171,7 +171,7 @@ def plotter(fdict):
         mp.fig.text(
             0.65,
             0.02,
-            "RADAR Valid: %s" % (radtime.astimezone(tz).strftime(TFORMAT),),
+            f"RADAR Valid: {radtime.astimezone(tz).strftime(TFORMAT)}",
             ha="center",
         )
     mp.drawcities()
@@ -180,4 +180,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"pid": "200202021200-KTSA-WWUS84-SPSTUL", "segnum": 0})
+    plotter({"pid": "202001111306-TJSJ-WWCA82-SPSSJU", "segnum": 0})
