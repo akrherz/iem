@@ -15,11 +15,13 @@ PDICT = {
 }
 PDICT2 = {
     "t": "12 Hour Max/Min Air Temperature [F]",
+    "tmp": "Air Temperature [F]",
     "dpt": "Dew Point Temperature [F]",
     "wsp": "10 meter Wind Speed [kts]",
 }
 LOOKUP = {
     "dpt": "dwpf",
+    "tmp": "tmpf",
     "wsp": "sknt",
 }
 T_SQL = """
@@ -57,7 +59,7 @@ SQL_OB = """
     select date_trunc('hour',
     valid at time zone 'UTC' + '10 minutes'::interval) as datum,
     avg(RPL) from alldata where station = %s and valid between %s and %s
-    and RPL is not null GROUP by datum
+    and extract(minute from valid) >= 50 and RPL is not null GROUP by datum
     """
 
 
