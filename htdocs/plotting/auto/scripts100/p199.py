@@ -367,7 +367,7 @@ def plotter(fdict):
         sector="iowa",
         continentalcolor="white",
         nocaption=True,
-        title="%s %s" % (tle, title),
+        title=f"{tle} {title}",
         subtitle=subtitle,
     )
     mp.drawcounties("#EEEEEE")

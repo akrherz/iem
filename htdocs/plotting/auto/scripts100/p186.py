@@ -20,7 +20,7 @@ COLORS = ["#ffff00", "#fcd37f", "#ffaa00", "#e60000", "#730000"]
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["data"] = True
     desc[
         "description"
@@ -61,8 +61,8 @@ def plotter(fdict):
     eyear = ctx["eyear"]
 
     fips = ""
-    for key in state_fips:
-        if state_fips[key] == state:
+    for key, _state in state_fips.items():
+        if _state == state:
             fips = key
     payload = {"area": fips, "statstype": "2"}
     headers = {}
@@ -129,11 +129,8 @@ def plotter(fdict):
     ax.set_ylim(eyear + 1, syear - 1)
     ax.set_xlim(0, 366)
     ax.set_xlabel(
-        (
-            "curve height of 1 year is 1 effective drought category "
-            "change over area of %s"
-        )
-        % (state_names[state],)
+        "curve height of 1 year is 1 effective drought category "
+        f"change over area of {state_names[state]}"
     )
     ax.set_ylabel("Year, thru %s" % (df.Date.max().strftime("%d %b %Y"),))
     ax.set_title(

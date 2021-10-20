@@ -19,7 +19,7 @@ UNITCONV = {"mph": "miles / hour", "kt": "knot", "mps": "meter / second"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["data"] = True
     desc["cache"] = 86400
     desc[
@@ -88,7 +88,7 @@ def plotter(fdict):
     maxval = grp[f"sped_{units}"].max()
     (fig, ax) = plt.subplots(1, 1)
     ax.barh(grp.index.values, grp[f"sped_{units}"].values, align="center")
-    ax.set_xlabel("Average Wind Speed [%s]" % (UNITS[units],))
+    ax.set_xlabel(f"Average Wind Speed [{UNITS[units]}]")
     ax.set_yticks(range(1, 13))
     ax.set_yticklabels(calendar.month_abbr[1:])
     ax.grid(True)
@@ -128,4 +128,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

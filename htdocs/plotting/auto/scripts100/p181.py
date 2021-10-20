@@ -1,6 +1,5 @@
 """Temperature/Precip/Snow Ranges"""
 import datetime
-from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
@@ -8,7 +7,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
+PDICT = dict(
     [
         ("precip", "Precipitation"),
         ("avgt", "Average Temperature"),
@@ -27,7 +26,7 @@ def parse_range(rng):
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["data"] = True
     desc[
         "description"
@@ -117,11 +116,10 @@ def plotter(fdict):
 
     dbconn = get_dbconn("coop")
 
-    table = "alldata_%s" % (station[:2],)
     df = read_sql(
         f"""
         SELECT year, day, high, low, precip, snow,
-        (high + low) / 2. as avgt from {table} WHERE
+        (high + low) / 2. as avgt from alldata_{station[:2]} WHERE
         station = %s and extract(doy from day) <= extract(doy from %s::date)
     """,
         dbconn,
@@ -196,7 +194,7 @@ def plotter(fdict):
     ax.legend(loc="best")
     ax.set_ylabel("Days")
     ax.set_ylim(top=ax.get_ylim()[1] + 1)
-    ax.set_xlabel("%s (Ranges Inclusive)" % (PDICT[varname],))
+    ax.set_xlabel(f"{PDICT[varname]} (Ranges Inclusive)")
 
     return fig, gdf
 

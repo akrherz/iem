@@ -23,7 +23,7 @@ COLORS = ["#ffff00", "#fcd37f", "#ffaa00", "#e60000", "#730000"]
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["data"] = True
     desc["cache"] = 86400
     desc[
@@ -313,4 +313,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

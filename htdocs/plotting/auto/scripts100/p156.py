@@ -54,7 +54,7 @@ NASS_CROP_PROGRESS_LOOKUP = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["data"] = True
     desc["nass"] = True
     desc[
@@ -135,7 +135,7 @@ def plotter(fdict):
     if isinstance(params, list):
         dlimit = " short_desc in %s" % (str(tuple(params)),)
     else:
-        dlimit = " short_desc = '%s' " % (params,)
+        dlimit = f" short_desc = '{params}' "
     df = read_sql(
         "select extract(year from week_ending) as year, week_ending, "
         "sum(num_value) as value, state_alpha "
@@ -223,8 +223,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(
-        {
-            "var": "soil_short_veryshort",
-        }
-    )
+    plotter({"var": "soil_short_veryshort"})

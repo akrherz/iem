@@ -16,7 +16,7 @@ PDICT = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["data"] = True
     desc["cache"] = 86400
     desc[
@@ -108,7 +108,7 @@ def highcharts(fdict):
             for a in zip(ctx["lines"]["max"]["x"], ctx["lines"]["max"]["y"])
         ]
     )
-    return (
+    res = (
         """
 $("#ap_container").highcharts({
     title: {text: '"""
@@ -129,7 +129,9 @@ $("#ap_container").highcharts({
     yAxis: {title: {text: 'Total Time Hours [expressed in days]'}},
     series: ["""
         + season
-        + """{
+    )
+    res += (
+        """{
         name: '25%',
         type: 'line',
         marker: {
@@ -181,6 +183,7 @@ $("#ap_container").highcharts({
 });
     """
     )
+    return res
 
 
 def get_context(fdict):
@@ -213,13 +216,10 @@ def get_context(fdict):
         df2[i] = df[df["wcht"] < i].groupby("season")["timedelta"].sum()
         df2[i] = df[df["wcht"] < i].groupby("season")["timedelta"].sum()
     ctx["df"] = df2
-    ctx["title"] = ("[%s] %s Wind Chill Hours") % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-    )
-    ctx["subtitle"] = ("Hours below threshold by season (wind >= %s kts)") % (
-        sknt,
-    )
+    ctx[
+        "title"
+    ] = f"[{station}] {ctx['_nt'].sts[station]['name']} Wind Chill Hours"
+    ctx["subtitle"] = f"Hours below threshold by season (wind >= {sknt} kts)"
     ctx["dfdescribe"] = df2.iloc[:-1].describe()
     ctx["season"] = int(fdict.get("season", datetime.datetime.now().year))
     ctx["lines"] = {}
@@ -231,16 +231,13 @@ def get_context(fdict):
             "x": s.index.values[::-1],
             "y": s[ctx["season"]].values[::-1] / 24.0,
             "c": "blue",
-            "label": str(ctx["season"]),
+            "label": f"{ctx['season']}",
         }
-
     lbls = ["25%", "mean", "75%", "max"]
     colors = ["g", "k", "r", "orange"]
     for color, lbl in zip(colors, lbls):
-        if lbl not in ctx["lines"]:
-            continue
         s = ctx["dfdescribe"].loc[[lbl]].transpose()
-        if all(pd.isna(s)):
+        if s[lbl].isnull().all():
             continue
         s = s.dropna().astype("timedelta64[h]")
         ctx["lines"][lbl] = {
@@ -287,9 +284,9 @@ def plotter(fdict):
     ax.set_xlim(-50, 32)
     ax.set_xlabel(r"Wind Chill Temperature $^\circ$F")
     ax.set_ylabel("Total Time Hours [expressed in days]")
-    ax.set_title("%s\n%s" % (ctx["title"], ctx["subtitle"]))
+    ax.set_title(f"{ctx['title']}\n{ctx['subtitle']}")
     return fig, ctx["df"]
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    highcharts({})

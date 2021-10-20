@@ -53,13 +53,14 @@ def plotter(fdict):
     bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:
         raise NoDataFound("No Metadata found.")
-    res = """\
-# IEM Climodat https://mesonet.agron.iastate.edu/climodat/
-# Report Generated: %s
-# Climate Record: %s -> %s
-# Site Information: [%s] %s
-# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
-""" % (
+    res = (
+        "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
+        "# Report Generated: %s\n"
+        "# Climate Record: %s -> %s\n"
+        "# Site Information: [%s] %s\n"
+        "# Contact Information: "
+        "Daryl Herzmann akrherz@iastate.edu 515.294.5978\n"
+    ) % (
         datetime.date.today().strftime("%d %b %Y"),
         bs.date(),
         datetime.date.today(),
@@ -158,4 +159,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

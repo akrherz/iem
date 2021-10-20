@@ -32,7 +32,7 @@ PLOTTYPES = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["data"] = True
     desc[
         "description"
@@ -114,9 +114,7 @@ def make_inversion_plot(ctx):
         ),
     )
     ax.grid(True)
-    ax.set_title(
-        "10 Foot Temperature minus 1.5 Foot Temperature",
-    )
+    ax.set_title("10 Foot Temperature minus 1.5 Foot Temperature")
     ax.set_ylabel(r"Air Temperature Diff $^\circ$F")
     ax.xaxis.set_major_formatter(
         mdates.DateFormatter("%-I:%M %p\n%-d %b", tz=CENTRAL)

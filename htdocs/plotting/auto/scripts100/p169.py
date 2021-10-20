@@ -1,6 +1,5 @@
 """x-hour temp change"""
 import datetime
-from collections import OrderedDict
 
 import pandas as pd
 from pandas.io.sql import read_sql
@@ -9,7 +8,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 MDICT = {"warm": "Temperature Rise", "cool": "Temperature Drop"}
-MDICT2 = OrderedDict(
+MDICT2 = dict(
     [
         ("all", "No Month/Time Limit"),
         ("spring", "Spring (MAM)"),
@@ -34,7 +33,7 @@ MDICT2 = OrderedDict(
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["data"] = True
     desc["cache"] = 86400
     desc[

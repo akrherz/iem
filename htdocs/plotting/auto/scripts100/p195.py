@@ -1,6 +1,5 @@
 """Storm Motion 2D Histogram."""
 import datetime
-from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn, convert_value
@@ -8,7 +7,7 @@ from pyiem.exceptions import NoDataFound
 import seaborn as sns
 
 
-PDICT = OrderedDict(
+PDICT = dict(
     (
         ("TO", "Tornado Warning"),
         ("SV", "Severe Thunderstorm Warning"),
@@ -24,7 +23,7 @@ PDICT = OrderedDict(
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["data"] = True
     desc["cache"] = 600
     desc[

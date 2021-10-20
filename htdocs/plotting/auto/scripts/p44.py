@@ -142,17 +142,18 @@ def make_barplot(ctx, df):
     )
     df2 = df2.fillna(0)
     ax.bar(df2.index.values, df2["count"])
+    top = max(5, float(df2["count"].max()) * 1.2)
     for year, row in df2.iterrows():
         ax.text(
             year,
-            float(row["count"]) + 3,
+            float(row["count"]) + (top * 0.025),
             f"{row['count']:.0f}",
             rotation=90 if len(df2.index) > 17 else 0,
-            bbox=dict(color="white", boxstyle="square,pad=0.1"),
+            bbox=dict(color="white", boxstyle="square,pad=0"),
             ha="center",
         )
     ax.set_xlim(ctx["syear"] - 0.5, ctx["eyear"] + 0.5)
-    ax.set_ylim(top=max(5, float(df2["count"].max()) * 1.2))
+    ax.set_ylim(top=top)
     plot_common(ctx, ax)
     return fig, df2
 
