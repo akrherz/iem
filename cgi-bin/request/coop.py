@@ -826,8 +826,8 @@ def do_swat(ctx):
     df["pcpn"] = (df["precip"].values * units("inch")).to(units("mm")).m
     zipfiles = {}
     for station, df2 in df.groupby(by="station"):
-        pcpfn = "swatfiles/%s.pcp" % (station,)
-        tmpfn = "swatfiles/%s.tmp" % (station,)
+        pcpfn = f"swatfiles/{station}.pcp"
+        tmpfn = f"swatfiles/{station}.tmp"
         zipfiles[pcpfn] = "IEM COOP %s\n\n\n\n" % (station,)
         zipfiles[tmpfn] = "IEM COOP %s\n\n\n\n" % (station,)
         for _i, row in df2.iterrows():
@@ -902,7 +902,7 @@ def application(environ, start_response):
     elif "swat" in ctx["myvars"]:
         headers.append(("Content-type", "application/octet-stream"))
         headers.append(
-            ("Content-Disposition", "attachment; filename=swatfiles")
+            ("Content-Disposition", "attachment; filename=swatfiles.zip")
         )
     elif ctx["what"] == "excel":
         headers.append(("Content-type", EXL))
