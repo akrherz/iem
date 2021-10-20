@@ -242,20 +242,20 @@ def minute_iemaccess(df):
     pgconn.commit()
 
 
-def process(path, fn):
+def process(fullfn):
     """Attempt to do something with the file we found."""
-    tokens = fn.split("_", 2)
+    tokens = os.path.basename(fullfn).split("_", 2)
     tabletype = tokens[1]
     if tokens[0].find("Inversion") > 0:
         station = INVERSION[tokens[0]]
         tablename = "sm_inversion"
         if tabletype == "MinSI":
-            do_inversion(os.path.join(path, fn), station)
+            do_inversion(fullfn, station)
         return
     station = STATIONS[tokens[0]]
     tablename = TABLES[tabletype]
     df = pd.read_csv(
-        os.path.join(path, fn),
+        fullfn,
         skiprows=[0, 2, 3],
         na_values=["NAN", "-100"],
         encoding="ISO-8859-1",
@@ -323,17 +323,13 @@ def process(path, fn):
     for colname in df.columns:
         if colname == "valid":
             continue
-        df["%s_qc" % (colname,)] = df[colname]
+        df[f"{colname}_qc"] = df[colname]
         if colname.startswith("calc_vwc"):
-            df["%s_f" % (colname,)] = qcval(
-                df, "%s_qc" % (colname,), 0.01, 0.7
-            )
+            df[f"{colname}_f"] = qcval(df, f"{colname}_qc", 0.01, 0.7)
         elif colname in TSOIL_COLS:
-            df["%s_f" % (colname,)] = qcval2(
-                df, "%s_qc" % (colname,), -20.0, 37.0
-            )
+            df[f"{colname}_f"] = qcval2(df, f"{colname}_qc", -20.0, 37.0)
         else:
-            df["%s_f" % (colname,)] = None
+            df[f"{colname}_f"] = None
 
     df["station"] = station
     if "ws_mph_tmx" in df.columns:
@@ -387,38 +383,39 @@ def main():
     """Go Main Go."""
     inotif = inotify.adapters.Inotify()
     inotif.add_watch(DIRPATH)
-    try:
-        for event in inotif.event_gen():
-            if event is None:
-                continue
-            (_header, type_names, watch_path, fn) = event
-            # LOG.debug("fn: %s type_names: %s", fn, str(type_names))
-            if "IN_CLOSE_WRITE" not in type_names:
-                continue
-            if not fn.endswith(".dat"):
-                continue
-            try:
-                process(watch_path, fn)
-            except Exception as exp:
-                LOG.error("filename: %s errored: %s", fn, exp)
-                with open("%s/%s.error" % (STOREPATH, fn), "w") as fp:
-                    fp.write(str(exp) + "\n")
-                    traceback.print_exc(file=fp)
-                # Copy the file to an error location
-                errordir = os.path.join(STOREPATH, "error.d")
-                if not os.path.isdir(errordir):
-                    os.makedirs(errordir)
-                subprocess.call(
-                    "cp %s %s" % (os.path.join(watch_path, fn), errordir),
-                    shell=True,
-                )
-            finally:
-                subprocess.call(
-                    "mv %s/%s %s/%s" % (watch_path, fn, STOREPATH, fn),
-                    shell=True,
-                )
-    finally:
-        inotif.remove_watch(DIRPATH)
+    for event in inotif.event_gen():
+        if event is None:
+            continue
+        (_header, type_names, watch_path, fn) = event
+        # LOG.debug("fn: %s type_names: %s", fn, str(type_names))
+        if "IN_CLOSE_WRITE" not in type_names:
+            continue
+        if not fn.endswith(".dat"):
+            continue
+        fullfn = os.path.join(watch_path, fn)
+        try:
+            process(fullfn)
+        except Exception as exp:
+            LOG.error("filename: %s errored: %s", fn, exp)
+            errorfn = os.path.join(STOREPATH, f"{fn}.error")
+            with open(errorfn, "w", encoding="utf8") as fp:
+                fp.write(f"{exp}\n")
+                traceback.print_exc(file=fp)
+            # Copy the file to an error location
+            errordir = os.path.join(STOREPATH, "error.d")
+            if not os.path.isdir(errordir):
+                os.makedirs(errordir)
+            subprocess.call(["cp", fullfn, errordir])
+        finally:
+            storefn = os.path.join(STOREPATH, fn)
+            # check that we not over-write data
+            if os.path.isfile(storefn):
+                _i = 0
+                while _i < 100 and os.path.isfile(storefn):
+                    LOG.info("Destination %s file exists", storefn)
+                    storefn = os.path.join(STOREPATH, f"{fn}.{_i}")
+                    _i += 1
+            subprocess.call(["mv", fullfn, storefn])
 
 
 if __name__ == "__main__":
