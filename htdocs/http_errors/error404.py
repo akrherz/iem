@@ -5,15 +5,11 @@ from pyiem.util import get_dbconn
 from pyiem.templates.iem import TEMPLATE
 
 
-def log_request(environ):
+def log_request(uri, environ):
     """Do some logging work."""
     sys.stderr.write(
-        "IEM 404 %s remote: %s referer: %s\n"
-        % (
-            environ.get("REQUEST_URI"),
-            environ.get("REMOTE_ADDR"),
-            environ.get("HTTP_REFERER"),
-        )
+        f"IEM 404 {uri} remote: {environ.get('REMOTE_ADDR')} "
+        f"referer: {environ.get('HTTP_REFERER')}\n"
     )
     pgconn = get_dbconn("mesosite")
     cursor = pgconn.cursor()
@@ -24,7 +20,7 @@ def log_request(environ):
     """,
         (
             environ.get("REMOTE_ADDR"),
-            environ.get("REQUEST_URI"),
+            uri,
             environ.get("HTTP_REFERER"),
             404,
         ),
@@ -35,6 +31,12 @@ def log_request(environ):
 
 def application(environ, start_response):
     """mod-wsgi handler."""
+    uri = environ.get("REQUEST_URI", "")
+    # Special handling of ancient broken windrose behaviour
+    if uri.startswith("/onsite/windrose/climate"):
+        start_response("410 Gone", [("Content-type", "text/plain")])
+        return [b"Resource is no longer available."]
+
     # We should re-assert the HTTP status code that brought us here :/
     start_response("404 Not Found", [("Content-type", "text/html")])
     content = """
@@ -43,7 +45,7 @@ def application(environ, start_response):
     """
     ctx = {"title": "File Not Found (404)", "content": content}
     try:
-        log_request(environ)
+        log_request(uri, environ)
     except Exception as exp:
         sys.stderr.write(str(exp) + "\n")
 

@@ -42,9 +42,8 @@ def main(argv):
     valid = None
     counts = {}
     for row in cursor:
-        if row[2].find("/windrose/") == -1:
-            d = counts.setdefault(row[1], [])
-            d.append(row)
+        d = counts.setdefault(row[1], [])
+        d.append(row)
         valid = row[0]
 
     if valid is None:
