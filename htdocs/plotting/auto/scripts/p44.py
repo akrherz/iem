@@ -138,7 +138,7 @@ def make_barplot(ctx, df):
     fig = figure(title=ctx["title"])
     ax = fig.add_axes([0.1, 0.1, 0.8, 0.8])
     df2 = (
-        df.groupby("year").max().reindex(range(ctx["syear"], ctx["eyear"] + 1))
+        df.groupby("year").sum().reindex(range(ctx["syear"], ctx["eyear"] + 1))
     )
     df2 = df2.fillna(0)
     ax.bar(df2.index.values, df2["count"])
@@ -333,8 +333,11 @@ if __name__ == "__main__":
         {
             "limit": "yes",
             "station": "UNR",
-            "opt": "wfo",
+            "opt": "state",
+            "state": "IA",
             "c": "single",
-            "s": "jul1",
+            "phenomena": "SV",
+            "significance": "W",
+            "s": "jan1",
         }
     )
