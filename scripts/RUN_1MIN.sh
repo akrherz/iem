@@ -21,9 +21,6 @@ cd other
 python parse0006.py &
 python parse0010.py &
 
-cd ../../outgoing
-python talltowers.py &
-
-cd ../mrms
+cd ../../mrms
 python mrms_rainrate_comp.py 
 python mrms_lcref_comp.py

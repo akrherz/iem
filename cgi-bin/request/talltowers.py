@@ -1,15 +1,31 @@
-"""Queue insertion for talltowers"""
+"""Process talltowers data request."""
+from io import StringIO, BytesIO
+
+try:
+    from backports.zoneinfo import ZoneInfo
+except ImportError:
+    from zoneinfo import ZoneInfo  # type: ignore
 import datetime
 
-import pytz
 from paste.request import parse_formvars
+import pandas as pd
+from pandas.io.sql import read_sql
 from pyiem.util import get_dbconn
+
+EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+TOWERIDS = {0: "ETTI4", 1: "MCAI4"}
 
 
 def get_stations(form):
     """Figure out the requested station"""
     stations = form.getall("station")
-    return stations
+    towers = []
+    for tid, nwsli in TOWERIDS.items():
+        if nwsli in stations:
+            towers.append(tid)
+
+    return towers
 
 
 def get_time_bounds(form, tzinfo):
@@ -22,56 +38,96 @@ def get_time_bounds(form, tzinfo):
     d2 = int(form.get("day2"))
     h1 = int(form.get("hour1"))
     h2 = int(form.get("hour2"))
-    # Construct dt instances in the right timezone, this logic sucks, but is
-    # valid, have to go to UTC first then back to the local timezone
-    sts = datetime.datetime.utcnow()
-    sts = sts.replace(tzinfo=pytz.UTC)
-    sts = sts.astimezone(tzinfo)
-
-    sts = sts.replace(
-        year=y1, month=m1, day=d1, hour=h1, minute=0, second=0, microsecond=0
-    )
-    ets = sts.replace(
-        year=y2, month=m2, day=d2, hour=h2, minute=0, second=0, microsecond=0
-    )
-
-    if sts == ets:
-        ets += datetime.timedelta(days=1)
+    sts = datetime.datetime(y1, m1, d1, h1, tzinfo=tzinfo)
+    ets = datetime.datetime(y2, m2, d2, h2, tzinfo=tzinfo)
+    if ets < sts:
+        sts, ets = ets, sts
+    ets = min([sts + datetime.timedelta(days=32), ets])
 
     return sts, ets
 
 
+def get_columns(cursor):
+    """What have we here."""
+    cursor.execute(
+        "SELECT column_name FROM information_schema.columns "
+        "WHERE table_schema = 'public' AND table_name   = 'data_analog'"
+    )
+    res = []
+    for row in cursor:
+        res.append(row[0])
+    return res
+
+
 def application(environ, start_response):
     """Go main Go"""
-    pgconn = get_dbconn("mesosite")
+    pgconn = get_dbconn("talltowers", user="tt_web")
+    columns = get_columns(pgconn.cursor())
     form = parse_formvars(environ)
     tzname = form.get("tz", "Etc/UTC")
-    start_response("200 OK", [("Content-type", "text/plain")])
-    try:
-        tzinfo = pytz.timezone(tzname)
-    except Exception:
-        return [b"Invalid Timezone (tz) provided"]
+    tzinfo = ZoneInfo(tzname)
 
     stations = get_stations(form)
     if not stations:
+        start_response(
+            "500 Internal Server Error", [("Content-type", "text/plain")]
+        )
         return [b"No stations provided"]
     sts, ets = get_time_bounds(form, tzinfo)
     fmt = form.get("format")
-    email = form.get("email")
-    aff = form.get("affiliation")
-    if email is None or email.find("@") == -1:
-        return [b"email is required"]
-    if aff is None or len(aff) < 2:
-        return [b"affiliation is required"]
+    # Build out our variable list
+    tokens = []
+    for z in form.getall("z"):
+        for v in form.getall("var"):
+            v1 = v
+            v2 = ""
+            if v.find("_") > -1:
+                v1, v2 = v.split("_")
+                v2 = f"_{v2}"
+            colname = f"{v1}_{z}m{v2}"
+            if colname not in columns:
+                continue
+            for agg in form.getall("agg"):
+                tokens.append(f"{agg}({colname}) as {colname}_{agg}")
 
-    cursor = pgconn.cursor()
-    cursor.execute(
-        """
-    INSERT into talltowers_analog_queue
-    (stations, sts, ets, fmt, email, aff) VALUES (%s, %s, %s, %s, %s, %s)
-    """,
-        (",".join(stations), sts, ets, fmt, email, aff),
+    tw = int(form.get("window", 1))
+
+    sql = f"""
+    SELECT tower,
+    (date_trunc('hour', valid) +
+    (((date_part('minute', valid)::integer / {tw}::integer) * {tw}::integer)
+     || ' minutes')::interval) at time zone %s as ts,
+    {','.join(tokens)} from
+    data_analog where tower in %s and valid >= %s and valid < %s
+    GROUP by tower, ts ORDER by tower, ts
+    """
+
+    df = read_sql(
+        sql,
+        pgconn,
+        params=(tzname, tuple(stations), sts, ets),
     )
-    cursor.close()
-    pgconn.commit()
-    return [b"Submitted, thank you!"]
+    df = df.rename(columns={"ts": "valid"})
+    df["tower"] = df["tower"].replace(TOWERIDS)
+    pgconn.close()
+    if fmt in ["tdf", "comma"]:
+        headers = [
+            ("Content-type", "application/octet-stream"),
+            ("Content-disposition", "attachment; filename=talltowers.txt"),
+        ]
+        start_response("200 OK", headers)
+        sio = StringIO()
+        df.to_csv(sio, sep="," if fmt == "comma" else "\t", index=False)
+        return [sio.getvalue().encode("utf8")]
+
+    # Excel
+    bio = BytesIO()
+    # pylint: disable=abstract-class-instantiated
+    with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
+        df.to_excel(writer, "Data", index=False)
+    headers = [
+        ("Content-type", EXL),
+        ("Content-disposition", "attachment; Filename=talltowers.xlsx"),
+    ]
+    start_response("200 OK", headers)
+    return [bio.getvalue()]
