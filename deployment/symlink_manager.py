@@ -37,7 +37,7 @@ PAIRS = [
     ["/mesonet/share/pics", f"{M7}/share/pics"],
     ["/mesonet/share/present", f"{M7}/share/present"],
     ["/mesonet/share/usage", f"{M7}/share/usage"],
-    ["/mesonet/share/windrose", f"{M2}/share/windrose"],
+    ["/mesonet/share/windrose", f"{M7}/share/windrose"],
     ["/mesonet/home", f"{M7}/home"],
 ]
 
