@@ -77,7 +77,7 @@ def do_temp(dkey, fname, func, ts, data):
 
 def process(ts):
     """Do Work"""
-    data = {"x": None, "y": None, "proj": None, "fx": dict()}
+    data = {"x": None, "y": None, "proj": None, "fx": {}}
     do_agg("precip", "prate", ts, data)
     do_temp("high", "tmax", np.maximum, ts, data)
     do_temp("low", "tmin", np.minimum, ts, data)

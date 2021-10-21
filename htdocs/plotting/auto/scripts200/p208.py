@@ -28,7 +28,7 @@ PDICT3 = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["cache"] = 300
     desc["data"] = True
     desc[

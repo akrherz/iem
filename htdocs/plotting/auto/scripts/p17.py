@@ -17,7 +17,7 @@ PDICT = {"temps": "Plot High/Low Temperatures", "precip": "Plot Precipitation"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["cache"] = 300
     today = datetime.date.today()
     mo = today.month

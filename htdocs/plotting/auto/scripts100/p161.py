@@ -51,7 +51,7 @@ DIRS = OrderedDict([("aoa", "At or Above"), ("below", "Below")])
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["data"] = True
     desc["cache"] = 86400
     desc[

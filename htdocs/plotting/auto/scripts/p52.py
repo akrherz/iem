@@ -17,7 +17,7 @@ from pyiem.exceptions import NoDataFound
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["cache"] = 600
     desc["data"] = True
     desc[

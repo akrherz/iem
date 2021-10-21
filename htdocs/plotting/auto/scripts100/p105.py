@@ -13,7 +13,7 @@ PDICT = {"yes": "Yes, consider trace reports", "no": "No, omit trace reports"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["data"] = True
     desc[
         "description"

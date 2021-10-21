@@ -11,7 +11,7 @@ CATS = np.array([0.01, 0.5, 1.0, 2.0, 3.0, 4.0])
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["data"] = True
     desc["report"] = True
     desc["description"] = """ """

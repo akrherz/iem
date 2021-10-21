@@ -29,7 +29,7 @@ XREF = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc[
         "description"
     ] = """This plot uses hourly 4 inch depth soil

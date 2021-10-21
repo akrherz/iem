@@ -27,7 +27,7 @@ def fix():
 def get_description():
     """Return a dict describing how to call this plotter"""
     fix()
-    desc = dict()
+    desc = {}
     desc["cache"] = 300
     desc["data"] = True
     desc[

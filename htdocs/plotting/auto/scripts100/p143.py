@@ -81,7 +81,7 @@ def load_yields(location):
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["description"] = """ """
     desc["arguments"] = [
         dict(

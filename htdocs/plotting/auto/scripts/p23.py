@@ -22,7 +22,7 @@ PDICT = OrderedDict(
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     year = datetime.date.today().year - 7
     desc["data"] = True
     desc[

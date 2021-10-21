@@ -17,7 +17,7 @@ PDICT2 = {"jan1": "January 1", "jul1": "July 1"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["data"] = True
     desc["cache"] = 86400
     desc[
@@ -65,7 +65,7 @@ def highcharts(fdict):
     varname = ctx["var"]
     df = get_data(ctx)
 
-    j = dict()
+    j = {}
     j["tooltip"] = {
         "shared": True,
         "headerFormat": (

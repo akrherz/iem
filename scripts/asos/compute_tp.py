@@ -72,7 +72,7 @@ def do(ts):
             continue
 
         station, network, iemid = stid.split("|")
-        computed = dict()
+        computed = {}
         computed["max_tmpf"] = np.nanmax(data[stid]["tmpf"])
         computed["min_tmpf"] = np.nanmin(data[stid]["tmpf"])
         computed["max_dwpf"] = np.nanmax(data[stid]["dwpf"])
@@ -92,7 +92,7 @@ def do(ts):
                 f"INSERT into {table} (iemid, day) values (%s, %s)",
                 (iemid, ts),
             )
-            current[stid] = dict()
+            current[stid] = {}
 
         tokens = []
         for vname in ["max_tmpf", "min_tmpf", "max_dwpf", "min_dwpf", "pday"]:

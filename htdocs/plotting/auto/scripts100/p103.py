@@ -13,7 +13,7 @@ PDICT = {"spring": "1 January - 31 December", "fall": "1 July - 30 June"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["data"] = True
     desc[
         "description"

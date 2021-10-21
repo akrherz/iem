@@ -13,7 +13,7 @@ PDICT = {"abs": "Departure in degrees", "sigma": "Depature in sigma"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc[
         "description"
     ] = """This plot produces a time series difference

@@ -58,7 +58,7 @@ UNITS = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["data"] = True
     today = datetime.date.today()
     yesterday = today - datetime.timedelta(days=60)

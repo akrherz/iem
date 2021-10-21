@@ -13,7 +13,7 @@ PDICT2 = {"max_rh": "Daily Max RH", "min_rh": "Daily Min RH"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["data"] = True
     desc[
         "description"

@@ -32,7 +32,7 @@ UNITS = {
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     ts = datetime.date.today() - datetime.timedelta(days=365)
     desc["data"] = True
     desc[
@@ -84,7 +84,7 @@ def highcharts(fdict):
         )
         now += oneday
 
-    j = dict()
+    j = {}
     j["title"] = dict(
         text=("[%s] %s Time Series")
         % (ctx["station"], ctx["_nt"].sts[ctx["station"]]["name"])
@@ -98,7 +98,7 @@ def highcharts(fdict):
         "shared": True,
         "valueSuffix": " %s" % (UNITS[ctx["var"]],),
     }
-    j["legend"] = dict()
+    j["legend"] = {}
     j["time"] = {"useUTC": False}
     j["exporting"] = {"enabled": True}
     j["chart"] = {"zoomType": "x"}

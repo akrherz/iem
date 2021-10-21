@@ -59,7 +59,7 @@ PDICT3 = dict(
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["data"] = True
     desc["highcharts"] = True
     desc["cache"] = 86400
@@ -184,7 +184,7 @@ def highcharts(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     get_data(ctx)
     ticks = (ctx["df"].index.astype("int64") // 1e6).tolist()
-    j = dict()
+    j = {}
     j["title"] = dict(text=ctx["title"])
     j["exporting"] = {"enabled": True}
     j["chart"] = {"zoomType": "x"}

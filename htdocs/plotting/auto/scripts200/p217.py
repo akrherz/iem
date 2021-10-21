@@ -21,7 +21,7 @@ WFOCONV = {"JSJ": "SJU"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["cache"] = 3600
     desc["data"] = True
     desc[

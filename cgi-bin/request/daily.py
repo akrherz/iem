@@ -12,16 +12,16 @@ def get_climate(network, stations):
     nt = NetworkTable(network, only_online=False)
     if not nt.sts:
         return "ERROR: Invalid network specified"
-    data = dict()
+    data = {}
     clisites = []
-    cldata = dict()
+    cldata = {}
     for station in stations:
         if station not in nt.sts:
             return ("ERROR: station: %s not found in network: %s") % (
                 station,
                 network,
             )
-        cldata[nt.sts[station]["ncdc81"]] = dict()
+        cldata[nt.sts[station]["ncdc81"]] = {}
         clisites.append(nt.sts[station]["ncdc81"])
     if not clisites:
         return data
@@ -45,7 +45,7 @@ def get_climate(network, stations):
     sts = datetime.datetime(2000, 1, 1)
     ets = datetime.datetime(2001, 1, 1)
     for stid in stations:
-        data[stid] = dict()
+        data[stid] = {}
         now = sts
         clsite = nt.sts[stid]["ncdc81"]
         while now < ets:

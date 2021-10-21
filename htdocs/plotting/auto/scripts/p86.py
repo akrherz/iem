@@ -36,7 +36,7 @@ PDICT2 = {"c": "Contour Plot", "g": "Grid Cell Mesh"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc[
         "description"
     ] = """This map presents a daily IEM ReAnalysis variable

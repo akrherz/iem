@@ -49,7 +49,7 @@ def run(ts, sid, pressure):
             # Magic here
             nt = NetworkTable("RAOB", only_online=False)
             ids = (
-                nt.sts.get(sid, dict())
+                nt.sts.get(sid, {})
                 .get("name", " -- %s" % (sid,))
                 .split("--")[1]
                 .strip()

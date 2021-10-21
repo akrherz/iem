@@ -66,7 +66,7 @@ def do_temp(name, dkey, gribs, ftime, data):
 
 def process(ts):
     """Do Work"""
-    data = {"x": None, "y": None, "proj": None, "fx": dict()}
+    data = {"x": None, "y": None, "proj": None, "fx": {}}
     # Only have data out 168 hours
     for fhour in range(1, 169):
         # Hourly data only goes out 36 hours

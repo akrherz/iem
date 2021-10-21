@@ -94,7 +94,7 @@ ISO = "%Y-%m-%d %H:%M"
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["data"] = True
     desc["cache"] = 600
     desc[

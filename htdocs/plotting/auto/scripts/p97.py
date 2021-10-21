@@ -76,7 +76,7 @@ GDD_KNOWN_BASES = [32, 41, 46, 48, 50, 51, 52]
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["data"] = True
     desc[
         "description"

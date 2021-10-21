@@ -44,7 +44,7 @@ def generate_rr5():
         "valid > (now() - '90 minutes'::interval)"
     )
     for row in cursor:
-        q = qcdict.get(row[0], dict())
+        q = qcdict.get(row[0], {})
         if "tmpf" in q or row[2] is None:
             tmpf = "M"
         else:
@@ -82,9 +82,9 @@ def main():
 
 def test_mt():
     """Conversion of values to SHEF encoded values"""
-    assert mt("TV", 4, 40, dict()) == "/TV 40.004"
-    assert mt("TV", -4, 40, dict()) == "/TV -40.004"
-    assert mt("TV", 104, 40, dict()) == "/TV 40.104"
+    assert mt("TV", 4, 40, {}) == "/TV 40.004"
+    assert mt("TV", -4, 40, {}) == "/TV -40.004"
+    assert mt("TV", 104, 40, {}) == "/TV 40.104"
 
 
 if __name__ == "__main__":

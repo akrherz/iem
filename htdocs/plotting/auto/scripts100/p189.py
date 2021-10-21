@@ -203,7 +203,7 @@ def yearly_plot(ctx):
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["data"] = True
     desc[
         "description"
@@ -216,7 +216,7 @@ def get_description():
      </li>
     </ul>
     """
-    pdict = dict()
+    pdict = {}
     for varname in META:
         pdict[varname] = META[varname]["title"]
     today = datetime.date.today()

@@ -13,7 +13,7 @@ from pyiem.exceptions import NoDataFound
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     y2 = datetime.date.today().year
     y1 = y2 - 20
     desc["arguments"] = [

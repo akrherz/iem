@@ -9,7 +9,7 @@ from pyiem.exceptions import NoDataFound
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["data"] = True
     desc["cache"] = 86400
     desc[
@@ -77,7 +77,7 @@ def highcharts(fdict):
     date = ctx["date"]
     df = get_data(fdict)
 
-    j = dict()
+    j = {}
     j["title"] = {
         "text": "%s [%s] Snowfall Totals"
         % (ctx["_nt"].sts[station]["name"], station)

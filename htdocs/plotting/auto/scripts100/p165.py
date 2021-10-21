@@ -36,7 +36,7 @@ ORDER = {"spring_below": "max", "fall_below": "min", "high_above": "min"}
 
 def get_description():
     """Return a dict describing how to call this plotter"""
-    desc = dict()
+    desc = {}
     desc["data"] = True
     desc[
         "description"
