@@ -23,6 +23,7 @@ PAIRS = [
     ["/mesonet/data/incoming", f"{M2}/data/incoming"],
     ["/mesonet/data/madis", f"{M2}/data/madis"],
     ["/mesonet/data/model", f"{M2}/data/model"],
+    ["/mesonet/data/mrms", f"{M2}/data/mrms"],
     ["/mesonet/data/ndfd", f"{M2}/data/ndfd"],
     ["/mesonet/data/smos", f"{M2}/data/smos"],
     ["/mesonet/data/stage4", f"{M2}/data/stage4"],
