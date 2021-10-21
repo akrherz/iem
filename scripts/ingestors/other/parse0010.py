@@ -8,7 +8,9 @@ import pytz
 from metpy.units import units
 from metpy.calc import dewpoint_from_relative_humidity
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn, convert_value
+from pyiem.util import get_dbconn, convert_value, logger
+
+LOG = logger()
 
 
 def main():
@@ -22,6 +24,7 @@ def main():
     fn = valid.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/text/ot/ot0010.dat")
 
     if not os.path.isfile(fn):
+        LOG.debug("missing %s", fn)
         sys.exit(0)
 
     lines = open(fn, "r").readlines()
@@ -40,15 +43,19 @@ def main():
     iem.data["tmpf"] = float(tokens[4])
     iem.data["max_tmpf"] = float(tokens[5])
     iem.data["min_tmpf"] = float(tokens[6])
-    iem.data["relh"] = int(tokens[7])
-    iem.data["dwpf"] = (
-        dewpoint_from_relative_humidity(
-            units("degF") * iem.data["tmpf"],
-            units("percent") * iem.data["relh"],
+    relh = int(tokens[7])
+    if 0 < relh <= 100:
+        iem.data["relh"] = int(tokens[7])
+        iem.data["dwpf"] = (
+            dewpoint_from_relative_humidity(
+                units("degF") * iem.data["tmpf"],
+                units("percent") * iem.data["relh"],
+            )
+            .to(units("degF"))
+            .m
         )
-        .to(units("degF"))
-        .m
-    )
+    else:
+        LOG.debug("relative humidity out of bounds: %s", relh)
     iem.data["sknt"] = convert_value(float(tokens[8]), "mile / hour", "knot")
     iem.data["drct"] = int(tokens[9])
     iem.data["max_sknt"] = convert_value(
