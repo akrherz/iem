@@ -16,6 +16,8 @@ PDICT = {
     "tmpf_below": "Temperature Below Threshold (F)",
     "dwpf_above": "Dew Point At or Above Threshold (F)",
     "dwpf_below": "Dew Point Below Threshold (F)",
+    "relh_above": "Relative Humidity At or Above Threshold (%)",
+    "relh_below": "Relative Humidity Below Threshold (%)",
 }
 
 MDICT = {
@@ -244,7 +246,12 @@ def get_context(fdict):
     elif ctx["opt"] == "dwpf_above":
         limiter = "round(tmpf::numeric,0) >= %s" % (ctx["threshold"],)
         title = r"Dew Point at or above %s$^\circ$F" % (ctx["threshold"],)
-
+    elif ctx["opt"] == "relh_above":
+        limiter = f"relh >= {ctx['threshold']}"
+        title = f"Relative Humidity at or above {ctx['threshold']}%"
+    elif ctx["opt"] == "relh_below":
+        limiter = f"relh < {ctx['threshold']}"
+        title = f"Relative Humidity below {ctx['threshold']}%"
     ctx["df"] = read_sql(
         f"""
         SELECT valid at time zone 'UTC' as valid,
