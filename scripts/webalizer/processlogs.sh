@@ -56,7 +56,8 @@ mv combined.access_log combined-iem.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/sustainablecorn.conf combined-sustainablecorn.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/weatherim.conf combined-weatherim.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/datateam.conf combined-datateam.log
-rsync -a /mnt/webalizer/usage/. iem12:/mesonet/share/usage/
+# Copy to shared NFS space
+rsync -a /mnt/webalizer/usage/. /mesonet/share/usage/
 
 grep " /agclimate" combined-iem.log > agclimate.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/agclimate.conf -T agclimate.log

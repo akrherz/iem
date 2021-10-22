@@ -20,7 +20,7 @@ limited time.
 Process | Primary | Backup | Monitor
 ------- | ------- | ------ | -------
 GOES R/S | iem8-dc | iem19 | None
-iembot  | iem13    | iem12  | nagios checks for twistd processes running
+iembot  | iem13    | None  | nagios checks for twistd processes running
 iem-web-services | iem16 | iem14 | None
 LDM | iem14 | None | None
 LoggerNet | iem15 | None | None
@@ -28,7 +28,7 @@ NEXRAD Mosaics | iem8-dc | iem16 | nagios checks archive
 openfire | iem16 | iem14 | None
 postgres | metvm2 | metvm9  | None
 postgres4 | metvm7 | None | None
-samba | iem12 | None | cron scripts check data availability
+samba | iem16 | None | cron scripts check data availability
 SSH | iem14 | None | None
 RIDGE   | iem13    | None    | inbound file queue, check latency 7 radars
 webalizer | iem19 | None | None
