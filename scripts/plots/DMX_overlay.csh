@@ -118,6 +118,6 @@ EOF
 gpend
 
 if (-e DMX_radar.gif) then
-/home/ldm/bin/pqinsert -p "plot c 000000000000 DMX_radar.gif bogus gif" DMX_radar.gif >& /dev/null
+pqinsert -p "plot c 000000000000 DMX_radar.gif bogus gif" DMX_radar.gif >& /dev/null
 rm DMX_radar.gif
 endif

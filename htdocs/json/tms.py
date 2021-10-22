@@ -17,7 +17,7 @@ def run():
         "generation_utc_time": datetime.datetime.utcnow().strftime(iso),
         "services": [],
     }
-    fn = "/home/ldm/data/gis/images/4326/USCOMP/n0q_0.json"
+    fn = "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_0.json"
     if not os.path.isfile(fn):
         return "ERROR"
     j = json.load(open(fn))
@@ -30,7 +30,7 @@ def run():
         }
     )
 
-    j = json.load(open("/home/ldm/data/gis/images/4326/USCOMP/n0r_0.json"))
+    j = json.load(open("/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.json"))
     vt = datetime.datetime.strptime(j["meta"]["valid"], iso)
     res["services"].append(
         {

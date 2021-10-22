@@ -128,6 +128,6 @@ EOF
 gpend
 
 if (-e DVN_radar.gif) then
-/home/ldm/bin/pqinsert -p "plot c 000000000000 DVN_radar.gif bogus gif" DVN_radar.gif >& /dev/null
+pqinsert -p "plot c 000000000000 DVN_radar.gif bogus gif" DVN_radar.gif >& /dev/null
 rm DVN_radar.gif
 endif

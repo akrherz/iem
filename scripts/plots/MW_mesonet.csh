@@ -97,7 +97,7 @@ EOF
 ${GEMEXE}/gpend
 
 if (-e MWmesonet.gif) then
-  /home/ldm/bin/pqinsert -p "plot ac $timestamp MWmesonet.gif MWmesonet_${hh}00.gif gif" MWmesonet.gif >& /dev/null
+  pqinsert -p "plot ac $timestamp MWmesonet.gif MWmesonet_${hh}00.gif gif" MWmesonet.gif >& /dev/null
   rm MWmesonet.gif
 endif
 

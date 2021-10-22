@@ -49,7 +49,7 @@ END
 LAYER
   NAME "nexrad-ntp"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/USCOMP/ntp_0.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/ntp_0.tif"
   TYPE RASTER
   PROJECTION
     "init=epsg:4326"

@@ -53,7 +53,7 @@ LAYER
   NAME "nexrad-n0q-900913-conus"
   GROUP "nexrad-n0q-900913"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0q_0.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0q_0.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -73,7 +73,7 @@ LAYER
   NAME "nexrad-n0q-900913-ak"
   GROUP "nexrad-n0q-900913"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/AKCOMP/n0q_0.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/AKCOMP/n0q_0.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -93,7 +93,7 @@ LAYER
   NAME "nexrad-n0q-900913-hi"
   GROUP "nexrad-n0q-900913"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/HICOMP/n0q_0.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/HICOMP/n0q_0.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -112,7 +112,7 @@ LAYER
   NAME "nexrad-n0q-900913-pr"
   GROUP "nexrad-n0q-900913"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/PRCOMP/n0q_0.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/PRCOMP/n0q_0.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -133,7 +133,7 @@ LAYER
   NAME "nexrad-n0q-900913-m05m-conus"
   GROUP "nexrad-n0q-900913-m05m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0q_1.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0q_1.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -152,7 +152,7 @@ LAYER
   NAME "nexrad-n0q-900913-m05m-hi"
   GROUP "nexrad-n0q-900913-m05m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/HICOMP/n0q_1.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/HICOMP/n0q_1.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -171,7 +171,7 @@ LAYER
   NAME "nexrad-n0q-900913-m05m-ak"
   GROUP "nexrad-n0q-900913-m05m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/AKCOMP/n0q_1.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/AKCOMP/n0q_1.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -190,7 +190,7 @@ LAYER
   NAME "nexrad-n0q-900913-m05m-pr"
   GROUP "nexrad-n0q-900913-m05m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/PRCOMP/n0q_1.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/PRCOMP/n0q_1.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -210,7 +210,7 @@ LAYER
   NAME "nexrad-n0q-900913-m10m-conus"
   GROUP "nexrad-n0q-900913-m10m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0q_2.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0q_2.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -229,7 +229,7 @@ LAYER
   NAME "nexrad-n0q-900913-m10m-ak"
   GROUP "nexrad-n0q-900913-m10m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/AKCOMP/n0q_2.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/AKCOMP/n0q_2.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -248,7 +248,7 @@ LAYER
   NAME "nexrad-n0q-900913-m10m-hi"
   GROUP "nexrad-n0q-900913-m10m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/HICOMP/n0q_2.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/HICOMP/n0q_2.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -267,7 +267,7 @@ LAYER
   NAME "nexrad-n0q-900913-m10m-pr"
   GROUP "nexrad-n0q-900913-m10m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/PRCOMP/n0q_2.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/PRCOMP/n0q_2.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -287,7 +287,7 @@ LAYER
   NAME "nexrad-n0q-900913-m15m-conus"
   GROUP "nexrad-n0q-900913-m15m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0q_3.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0q_3.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -306,7 +306,7 @@ LAYER
   NAME "nexrad-n0q-900913-m15m-ak"
   GROUP "nexrad-n0q-900913-m15m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/AKCOMP/n0q_3.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/AKCOMP/n0q_3.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -325,7 +325,7 @@ LAYER
   NAME "nexrad-n0q-900913-m15m-hi"
   GROUP "nexrad-n0q-900913-m15m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/HICOMP/n0q_3.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/HICOMP/n0q_3.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -344,7 +344,7 @@ LAYER
   NAME "nexrad-n0q-900913-m15m-pr"
   GROUP "nexrad-n0q-900913-m15m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/PRCOMP/n0q_3.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/PRCOMP/n0q_3.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -364,7 +364,7 @@ LAYER
   GROUP "nexrad-n0q-900913-m20m"
   NAME "nexrad-n0q-900913-m20m-conus"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0q_4.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0q_4.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -383,7 +383,7 @@ LAYER
   GROUP "nexrad-n0q-900913-m20m"
   NAME "nexrad-n0q-900913-m20m-hi"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/HICOMP/n0q_4.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/HICOMP/n0q_4.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -402,7 +402,7 @@ LAYER
   GROUP "nexrad-n0q-900913-m20m"
   NAME "nexrad-n0q-900913-m20m-ak"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/AKCOMP/n0q_4.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/AKCOMP/n0q_4.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -421,7 +421,7 @@ LAYER
   GROUP "nexrad-n0q-900913-m20m"
   NAME "nexrad-n0q-900913-m20m-pr"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/PRCOMP/n0q_4.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/PRCOMP/n0q_4.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -441,7 +441,7 @@ LAYER
   GROUP "nexrad-n0q-900913-m25m"
   NAME "nexrad-n0q-900913-m25m-conus"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0q_5.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0q_5.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -460,7 +460,7 @@ LAYER
   GROUP "nexrad-n0q-900913-m25m"
   NAME "nexrad-n0q-900913-m25m-hi"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/HICOMP/n0q_5.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/HICOMP/n0q_5.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -479,7 +479,7 @@ LAYER
   GROUP "nexrad-n0q-900913-m25m"
   NAME "nexrad-n0q-900913-m25m-ak"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/AKCOMP/n0q_5.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/AKCOMP/n0q_5.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -498,7 +498,7 @@ LAYER
   GROUP "nexrad-n0q-900913-m25m"
   NAME "nexrad-n0q-900913-m25m-pr"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/PRCOMP/n0q_5.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/PRCOMP/n0q_5.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -518,7 +518,7 @@ LAYER
   NAME "nexrad-n0q-900913-m30m-conus"
   GROUP "nexrad-n0q-900913-m30m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0q_6.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0q_6.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -537,7 +537,7 @@ LAYER
   NAME "nexrad-n0q-900913-m30m-hi"
   GROUP "nexrad-n0q-900913-m30m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/HICOMP/n0q_6.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/HICOMP/n0q_6.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -556,7 +556,7 @@ LAYER
   NAME "nexrad-n0q-900913-m30m-ak"
   GROUP "nexrad-n0q-900913-m30m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/AKCOMP/n0q_6.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/AKCOMP/n0q_6.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -575,7 +575,7 @@ LAYER
   NAME "nexrad-n0q-900913-m30m-pr"
   GROUP "nexrad-n0q-900913-m30m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/PRCOMP/n0q_6.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/PRCOMP/n0q_6.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -595,7 +595,7 @@ LAYER
   GROUP "nexrad-n0q-900913-m35m"
   NAME "nexrad-n0q-900913-m35m-conus"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0q_7.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0q_7.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -614,7 +614,7 @@ LAYER
   GROUP "nexrad-n0q-900913-m35m"
   NAME "nexrad-n0q-900913-m35m-hi"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/HICOMP/n0q_7.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/HICOMP/n0q_7.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -633,7 +633,7 @@ LAYER
   GROUP "nexrad-n0q-900913-m35m"
   NAME "nexrad-n0q-900913-m35m-ak"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/AKCOMP/n0q_7.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/AKCOMP/n0q_7.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -652,7 +652,7 @@ LAYER
   GROUP "nexrad-n0q-900913-m35m"
   NAME "nexrad-n0q-900913-m35m-pr"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/PRCOMP/n0q_7.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/PRCOMP/n0q_7.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -672,7 +672,7 @@ LAYER
   GROUP "nexrad-n0q-900913-m40m"
   NAME "nexrad-n0q-900913-m40m-conus"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0q_8.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0q_8.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -691,7 +691,7 @@ LAYER
   GROUP "nexrad-n0q-900913-m40m"
   NAME "nexrad-n0q-900913-m40m-hi"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/HICOMP/n0q_8.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/HICOMP/n0q_8.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -710,7 +710,7 @@ LAYER
   GROUP "nexrad-n0q-900913-m40m"
   NAME "nexrad-n0q-900913-m40m-ak"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/AKCOMP/n0q_8.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/AKCOMP/n0q_8.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -729,7 +729,7 @@ LAYER
   GROUP "nexrad-n0q-900913-m40m"
   NAME "nexrad-n0q-900913-m40m-pr"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/PRCOMP/n0q_8.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/PRCOMP/n0q_8.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -749,7 +749,7 @@ LAYER
   NAME "nexrad-n0q-900913-m45m-conus"
   GROUP "nexrad-n0q-900913-m45m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0q_9.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0q_9.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -768,7 +768,7 @@ LAYER
   NAME "nexrad-n0q-900913-m45m-hi"
   GROUP "nexrad-n0q-900913-m45m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/HICOMP/n0q_9.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/HICOMP/n0q_9.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -787,7 +787,7 @@ LAYER
   NAME "nexrad-n0q-900913-m45m-ak"
   GROUP "nexrad-n0q-900913-m45m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/AKCOMP/n0q_9.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/AKCOMP/n0q_9.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -806,7 +806,7 @@ LAYER
   NAME "nexrad-n0q-900913-m45m-pr"
   GROUP "nexrad-n0q-900913-m45m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/PRCOMP/n0q_9.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/PRCOMP/n0q_9.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -826,7 +826,7 @@ LAYER
   NAME "nexrad-n0q-900913-m50m-conus"
   GROUP "nexrad-n0q-900913-m50m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/USCOMP/n0q_10.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0q_10.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -845,7 +845,7 @@ LAYER
   NAME "nexrad-n0q-900913-m50m-ak"
   GROUP "nexrad-n0q-900913-m50m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/AKCOMP/n0q_10.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/AKCOMP/n0q_10.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -864,7 +864,7 @@ LAYER
   NAME "nexrad-n0q-900913-m50m-hi"
   GROUP "nexrad-n0q-900913-m50m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/HICOMP/n0q_10.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/HICOMP/n0q_10.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -883,7 +883,7 @@ LAYER
   NAME "nexrad-n0q-900913-m50m-pr"
   GROUP "nexrad-n0q-900913-m50m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/900913/PRCOMP/n0q_10.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/PRCOMP/n0q_10.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -905,7 +905,7 @@ LAYER
   NAME "nexrad-n0q-conus"
   GROUP "nexrad-n0q"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_0.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_0.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -924,7 +924,7 @@ LAYER
   NAME "nexrad-n0q-hi"
   GROUP "nexrad-n0q"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/HICOMP/n0q_0.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/HICOMP/n0q_0.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -943,7 +943,7 @@ LAYER
   NAME "nexrad-n0q-ak"
   GROUP "nexrad-n0q"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/AKCOMP/n0q_0.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/AKCOMP/n0q_0.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -962,7 +962,7 @@ LAYER
   NAME "nexrad-n0q-pr"
   GROUP "nexrad-n0q"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/PRCOMP/n0q_0.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/PRCOMP/n0q_0.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -982,7 +982,7 @@ LAYER
   NAME "nexrad-n0q-m05m-conus"
   GROUP "nexrad-n0q-m05m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_1.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_1.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1001,7 +1001,7 @@ LAYER
   NAME "nexrad-n0q-m05m-hi"
   GROUP "nexrad-n0q-m05m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/HICOMP/n0q_1.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/HICOMP/n0q_1.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1020,7 +1020,7 @@ LAYER
   NAME "nexrad-n0q-m05m-ak"
   GROUP "nexrad-n0q-m05m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/AKCOMP/n0q_1.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/AKCOMP/n0q_1.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1039,7 +1039,7 @@ LAYER
   NAME "nexrad-n0q-m05m-pr"
   GROUP "nexrad-n0q-m05m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/PRCOMP/n0q_1.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/PRCOMP/n0q_1.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1059,7 +1059,7 @@ LAYER
   NAME "nexrad-n0q-m10m-conus"
   GROUP "nexrad-n0q-m10m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_2.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_2.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1078,7 +1078,7 @@ LAYER
   NAME "nexrad-n0q-m10m-hi"
   GROUP "nexrad-n0q-m10m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/HICOMP/n0q_2.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/HICOMP/n0q_2.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1097,7 +1097,7 @@ LAYER
   NAME "nexrad-n0q-m10m-ak"
   GROUP "nexrad-n0q-m10m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/AKCOMP/n0q_2.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/AKCOMP/n0q_2.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1116,7 +1116,7 @@ LAYER
   NAME "nexrad-n0q-m10m-pr"
   GROUP "nexrad-n0q-m10m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/PRCOMP/n0q_2.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/PRCOMP/n0q_2.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1136,7 +1136,7 @@ LAYER
   NAME "nexrad-n0q-m15m-conus"
   GROUP "nexrad-n0q-m15m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_3.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_3.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1155,7 +1155,7 @@ LAYER
   NAME "nexrad-n0q-m15m-hi"
   GROUP "nexrad-n0q-m15m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/HICOMP/n0q_3.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/HICOMP/n0q_3.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1174,7 +1174,7 @@ LAYER
   NAME "nexrad-n0q-m15m-ak"
   GROUP "nexrad-n0q-m15m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/AKCOMP/n0q_3.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/AKCOMP/n0q_3.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1193,7 +1193,7 @@ LAYER
   NAME "nexrad-n0q-m15m-pr"
   GROUP "nexrad-n0q-m15m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/PRCOMP/n0q_3.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/PRCOMP/n0q_3.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1213,7 +1213,7 @@ LAYER
   NAME "nexrad-n0q-m20m-conus"
   GROUP "nexrad-n0q-m20m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_4.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_4.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1232,7 +1232,7 @@ LAYER
   NAME "nexrad-n0q-m20m-hi"
   GROUP "nexrad-n0q-m20m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/HICOMP/n0q_4.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/HICOMP/n0q_4.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1251,7 +1251,7 @@ LAYER
   NAME "nexrad-n0q-m20m-ak"
   GROUP "nexrad-n0q-m20m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/AKCOMP/n0q_4.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/AKCOMP/n0q_4.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1270,7 +1270,7 @@ LAYER
   NAME "nexrad-n0q-m20m-pr"
   GROUP "nexrad-n0q-m20m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/PRCOMP/n0q_4.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/PRCOMP/n0q_4.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1290,7 +1290,7 @@ LAYER
   NAME "nexrad-n0q-m25m-conus"
   GROUP "nexrad-n0q-m25m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_5.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_5.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1309,7 +1309,7 @@ LAYER
   NAME "nexrad-n0q-m25m-hi"
   GROUP "nexrad-n0q-m25m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/HICOMP/n0q_5.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/HICOMP/n0q_5.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1328,7 +1328,7 @@ LAYER
   NAME "nexrad-n0q-m25m-ak"
   GROUP "nexrad-n0q-m25m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/AKCOMP/n0q_5.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/AKCOMP/n0q_5.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1347,7 +1347,7 @@ LAYER
   NAME "nexrad-n0q-m25m-pr"
   GROUP "nexrad-n0q-m25m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/PRCOMP/n0q_5.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/PRCOMP/n0q_5.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1367,7 +1367,7 @@ LAYER
   NAME "nexrad-n0q-m30m-conus"
   GROUP "nexrad-n0q-m30m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_6.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_6.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1386,7 +1386,7 @@ LAYER
   NAME "nexrad-n0q-m30m-hi"
   GROUP "nexrad-n0q-m30m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/HICOMP/n0q_6.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/HICOMP/n0q_6.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1405,7 +1405,7 @@ LAYER
   NAME "nexrad-n0q-m30m-ak"
   GROUP "nexrad-n0q-m30m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/AKCOMP/n0q_6.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/AKCOMP/n0q_6.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1424,7 +1424,7 @@ LAYER
   NAME "nexrad-n0q-m30m-pr"
   GROUP "nexrad-n0q-m30m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/PRCOMP/n0q_6.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/PRCOMP/n0q_6.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1444,7 +1444,7 @@ LAYER
   NAME "nexrad-n0q-m35m-conus"
   GROUP "nexrad-n0q-m35m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_7.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_7.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1463,7 +1463,7 @@ LAYER
   NAME "nexrad-n0q-m35m-hi"
   GROUP "nexrad-n0q-m35m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/HICOMP/n0q_7.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/HICOMP/n0q_7.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1482,7 +1482,7 @@ LAYER
   NAME "nexrad-n0q-m35m-ak"
   GROUP "nexrad-n0q-m35m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/AKCOMP/n0q_7.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/AKCOMP/n0q_7.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1501,7 +1501,7 @@ LAYER
   NAME "nexrad-n0q-m35m-pr"
   GROUP "nexrad-n0q-m35m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/PRCOMP/n0q_7.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/PRCOMP/n0q_7.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1521,7 +1521,7 @@ LAYER
   GROUP "nexrad-n0q-m40m"
   NAME "nexrad-n0q-m40m-conus"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_8.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_8.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1540,7 +1540,7 @@ LAYER
   GROUP "nexrad-n0q-m40m"
   NAME "nexrad-n0q-m40m-ak"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/AKCOMP/n0q_8.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/AKCOMP/n0q_8.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1559,7 +1559,7 @@ LAYER
   GROUP "nexrad-n0q-m40m"
   NAME "nexrad-n0q-m40m-hi"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/HICOMP/n0q_8.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/HICOMP/n0q_8.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1578,7 +1578,7 @@ LAYER
   GROUP "nexrad-n0q-m40m"
   NAME "nexrad-n0q-m40m-pr"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/PRCOMP/n0q_8.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/PRCOMP/n0q_8.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1598,7 +1598,7 @@ LAYER
   NAME "nexrad-n0q-m45m-conus"
   GROUP "nexrad-n0q-m45m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_9.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_9.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1617,7 +1617,7 @@ LAYER
   NAME "nexrad-n0q-m45m-hi"
   GROUP "nexrad-n0q-m45m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/HICOMP/n0q_9.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/HICOMP/n0q_9.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1636,7 +1636,7 @@ LAYER
   NAME "nexrad-n0q-m45m-ak"
   GROUP "nexrad-n0q-m45m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/AKCOMP/n0q_9.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/AKCOMP/n0q_9.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1655,7 +1655,7 @@ LAYER
   NAME "nexrad-n0q-m45m-pr"
   GROUP "nexrad-n0q-m45m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/PRCOMP/n0q_9.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/PRCOMP/n0q_9.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1675,7 +1675,7 @@ LAYER
   GROUP "nexrad-n0q-m50m"
   NAME "nexrad-n0q-m50m-conus"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_10.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_10.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1694,7 +1694,7 @@ LAYER
   GROUP "nexrad-n0q-m50m"
   NAME "nexrad-n0q-m50m-ak"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/AKCOMP/n0q_10.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/AKCOMP/n0q_10.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1713,7 +1713,7 @@ LAYER
   GROUP "nexrad-n0q-m50m"
   NAME "nexrad-n0q-m50m-pr"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/PRCOMP/n0q_10.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/PRCOMP/n0q_10.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1732,7 +1732,7 @@ LAYER
   GROUP "nexrad-n0q-m50m"
   NAME "nexrad-n0q-m50m-hi"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/HICOMP/n0q_10.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/HICOMP/n0q_10.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000

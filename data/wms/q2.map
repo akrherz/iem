@@ -39,7 +39,7 @@ END
 LAYER
   NAME "q2_hsr"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/mrms/lcref.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/mrms/lcref.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -61,7 +61,7 @@ END
 LAYER
   NAME "q2_n1p"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/mrms/p1h.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/mrms/p1h.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -80,7 +80,7 @@ END
 LAYER
   NAME "q2_p24h"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/mrms/p24h.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/mrms/p24h.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -104,7 +104,7 @@ END
 LAYER
   NAME "q2_p48h"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/mrms/p48h.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/mrms/p48h.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -128,7 +128,7 @@ END
 LAYER
   NAME "q2_p72h"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/mrms/p72h.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/mrms/p72h.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000

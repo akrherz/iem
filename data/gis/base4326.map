@@ -88,7 +88,7 @@ LAYER
   NAME DMX
   STATUS ON
   TYPE RASTER
-  DATA /home/ldm/data/gis/images/4326/ridge/DMX/N0Q_0.png
+  DATA /mesonet/ldmdata/gis/images/4326/ridge/DMX/N0Q_0.png
   OFFSITE 255 255 255
   PROJECTION
    "init=epsg:4326"
@@ -100,7 +100,7 @@ LAYER
   NAME EAX
   STATUS ON
   TYPE RASTER
-  DATA /home/ldm/data/gis/images/4326/ridge/EAX/N0Q_0.png
+  DATA /mesonet/ldmdata/gis/images/4326/ridge/EAX/N0Q_0.png
   OFFSITE 255 255 255
   PROJECTION
    "init=epsg:4326"
@@ -111,7 +111,7 @@ LAYER
   NAME KCCI
   STATUS ON
   TYPE RASTER
-  DATA /home/ldm/data/gis/images/26915/KCCI/KCCI_N0R_0.tif
+  DATA /mesonet/ldmdata/gis/images/26915/KCCI/KCCI_N0R_0.tif
   #DATA /mesonet/data/gis/images/kcci2.tif
   OFFSITE  0 0 0
   TRANSPARENCY 80
@@ -125,7 +125,7 @@ LAYER
   NAME FSD
   STATUS ON
   TYPE RASTER
-  DATA /home/ldm/data/gis/images/4326/ridge/FSD/N0Q_0.png
+  DATA /mesonet/ldmdata/gis/images/4326/ridge/FSD/N0Q_0.png
   OFFSITE 255 255 255
 END
 
@@ -133,7 +133,7 @@ LAYER
   NAME ABR
   STATUS ON
   TYPE RASTER
-  DATA /home/ldm/data/gis/images/4326/ridge/ABR/N0Q_0.png
+  DATA /mesonet/ldmdata/gis/images/4326/ridge/ABR/N0Q_0.png
   OFFSITE 255 255 255
 END
 
@@ -141,7 +141,7 @@ LAYER
   NAME UDX
   STATUS ON
   TYPE RASTER
-  DATA /home/ldm/data/gis/images/4326/ridge/UDX/N0Q_0.png
+  DATA /mesonet/ldmdata/gis/images/4326/ridge/UDX/N0Q_0.png
   OFFSITE 255 255 255
 END
 
@@ -149,7 +149,7 @@ LAYER
   NAME MPX
   STATUS ON
   TYPE RASTER
-  DATA /home/ldm/data/gis/images/4326/ridge/MPX/N0Q_0.png
+  DATA /mesonet/ldmdata/gis/images/4326/ridge/MPX/N0Q_0.png
   OFFSITE 255 255 255
 END
 
@@ -158,7 +158,7 @@ LAYER
   NAME ARX
   STATUS ON
   TYPE RASTER
-  DATA /home/ldm/data/gis/images/4326/ridge/ARX/N0Q_0.png
+  DATA /mesonet/ldmdata/gis/images/4326/ridge/ARX/N0Q_0.png
   OFFSITE 255 255 255
 END
 
@@ -166,7 +166,7 @@ LAYER
   NAME DVN
   STATUS ON
   TYPE RASTER
-  DATA /home/ldm/data/gis/images/4326/ridge/DVN/N0Q_0.png
+  DATA /mesonet/ldmdata/gis/images/4326/ridge/DVN/N0Q_0.png
   OFFSITE 255 255 255
 END
 
@@ -174,7 +174,7 @@ LAYER
   NAME OAX
   STATUS ON
   TYPE RASTER
-  DATA /home/ldm/data/gis/images/4326/ridge/OAX/N0Q_0.png
+  DATA /mesonet/ldmdata/gis/images/4326/ridge/OAX/N0Q_0.png
   OFFSITE 255 255 255
 END
 
@@ -210,7 +210,7 @@ LAYER
   STATUS ON
   MINSCALE 0
   MAXSCALE 465000000
-  DATA "/home/ldm/data/gis/images/awips211/GOES13_EAST_VIS.png"
+  DATA "/mesonet/ldmdata/gis/images/awips211/GOES13_EAST_VIS.png"
   TYPE RASTER
   PROJECTION
      "proj=lcc"
@@ -234,8 +234,8 @@ LAYER
   NAME goes_east_2
   STATUS OFF
   TYPE RASTER
-  DATA /home/meteor_ldm/data/gis/images/GOES/conus/channel02/GOES-16_C02.png
-  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/conus/channel02/GOES-16_C02.msinc"
+  DATA /mesonet/ldmdata/gis/images/GOES/conus/channel02/GOES-16_C02.png
+  INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel02/GOES-16_C02.msinc"
 END
 
 LAYER
@@ -250,7 +250,7 @@ LAYER
   NAME goes_east04I4
   STATUS OFF
   TYPE RASTER
-  DATA /home/ldm/data/gis/images/4326/goes/east04I4_0.tif
+  DATA /mesonet/ldmdata/gis/images/4326/goes/east04I4_0.tif
   PROJECTION
     "init=epsg:4326"
   END
@@ -260,7 +260,7 @@ LAYER
   NAME goes_west04I4
   STATUS OFF
   TYPE RASTER
-  DATA /home/ldm/data/gis/images/4326/goes/west04I4_0.tif
+  DATA /mesonet/ldmdata/gis/images/4326/goes/west04I4_0.tif
   PROJECTION
     "init=epsg:4326"
   END
@@ -272,7 +272,7 @@ LAYER
   NAME goes_west1V
   STATUS OFF
   TYPE RASTER
-  DATA /home/ldm/data/gis/images/4326/goes/west1V_0.tif
+  DATA /mesonet/ldmdata/gis/images/4326/goes/west1V_0.tif
   PROJECTION
     "init=epsg:4326"
   END
@@ -419,7 +419,7 @@ LAYER
   NAME usdm_polygon
   STATUS OFF
   TYPE POLYGON
-  DATA /home/ldm/data/gis/shape/4326/us/dm_current.shp
+  DATA /mesonet/ldmdata/gis/shape/4326/us/dm_current.shp
   PROJECTION
    "init=epsg:4326"
   END
@@ -833,7 +833,7 @@ INCLUDE "inc_iem.map"
 
 LAYER
   NAME nexrad_n0r
-  DATA /home/ldm/data/gis/images/4326/USCOMP/n0r_0.tif
+  DATA /mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.tif
   TYPE RASTER
   STATUS OFF
   METADATA
@@ -849,7 +849,7 @@ END
 
 LAYER
   NAME nexrad_n0q
-  DATA /home/ldm/data/gis/images/4326/USCOMP/n0q_0.png
+  DATA /mesonet/ldmdata/gis/images/4326/USCOMP/n0q_0.png
   TYPE RASTER
   STATUS OFF
   METADATA

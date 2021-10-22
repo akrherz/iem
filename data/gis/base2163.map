@@ -197,7 +197,7 @@ LAYER
  NAME nexrad_n0r
  STATUS OFF
  TYPE RASTER
- DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_0.tif"
+ DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.tif"
  OFFSITE 0 0 0
  PROJECTION
   "init=epsg:4326"
@@ -208,7 +208,7 @@ LAYER
  NAME nexrad_n0q
  STATUS OFF
  TYPE RASTER
- DATA "/home/ldm/data/gis/images/4326/USCOMP/n0q_0.png"
+ DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_0.png"
  OFFSITE 0 0 0
  PROJECTION
   "init=epsg:4326"
@@ -221,7 +221,7 @@ LAYER
   STATUS ON
   MINSCALE 0
   MAXSCALE 465000000
-  DATA "/home/ldm/data/gis/images/awips211/GOES13_EAST_VIS.png"
+  DATA "/mesonet/ldmdata/gis/images/awips211/GOES13_EAST_VIS.png"
   TYPE RASTER
   PROJECTION
      "proj=lcc"

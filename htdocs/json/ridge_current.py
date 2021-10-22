@@ -22,7 +22,7 @@ def run(product):
     }
 
     for fn in glob.glob(
-        ("/home/ldm/data/gis/images/4326/" "ridge/???/%s_0.json") % (product,)
+        ("/mesonet/ldmdata/gis/images/4326/ridge/???/%s_0.json") % (product,)
     ):
         try:
             j = json.load(open(fn))

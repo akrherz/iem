@@ -90,7 +90,7 @@ EOF
 ${GEMEXE}/gpend
 
 if (-e mesonet.gif) then
-  /home/ldm/bin/pqinsert -p "plot c 000000000000 SD/mesonet.gif bogus gif" mesonet.gif >& /dev/null
+  pqinsert -p "plot c 000000000000 SD/mesonet.gif bogus gif" mesonet.gif >& /dev/null
   rm -f mesonet.gif
 endif
 

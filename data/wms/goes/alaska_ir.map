@@ -42,9 +42,9 @@ LAYER
   STATUS ON
   MINSCALE 0
   MAXSCALE 465000000
-  DATA "/home/meteor_ldm/data/gis/images/GOES/alaska/channel13/GOES-17_C13.png"
+  DATA "/mesonet/ldmdata/gis/images/GOES/alaska/channel13/GOES-17_C13.png"
   TYPE RASTER
-  INCLUDE "/home/meteor_ldm/data/gis/images/GOES/alaska/channel13/GOES-17_C13.msinc"
+  INCLUDE "/mesonet/ldmdata/gis/images/GOES/alaska/channel13/GOES-17_C13.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 

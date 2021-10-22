@@ -43,6 +43,6 @@ EOF
 gpend
 
 if (-e wcht.gif) then
-  /home/ldm/bin/pqinsert -p "plot ac $ftime wcht.gif wceq_${hh}00.gif gif" wcht.gif >& /dev/null
+pqinsert -p "plot ac $ftime wcht.gif wceq_${hh}00.gif gif" wcht.gif >& /dev/null
 rm  wcht.gif
 endif

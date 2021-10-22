@@ -57,7 +57,7 @@ LAYER
     "wms_srs"   "EPSG:4326 EPSG:3857"
     "wms_extent" "-171 15 -66 70"
   END
-  DATA "/home/ldm/data/gis/images/awips211/GOES_%bird%_%channel%.png"
+  DATA "/mesonet/ldmdata/gis/images/awips211/GOES_%bird%_%channel%.png"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 

@@ -18,7 +18,7 @@ def workflow(netname, pname):
     pgconn_portfolio = get_dbconn("portfolio")
 
     # Now lets check files
-    mydir = "/home/meteor_ldm/data/camera/stills"
+    mydir = "/mesonet/ldmdata/camera/stills"
 
     threshold = utc() - datetime.timedelta(hours=2)
     mcursor = pgconn_mesosite.cursor()

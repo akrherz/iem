@@ -28,7 +28,7 @@
     if ($cameras[$id]["network"] != $network) continue;
 
 	$cameras[$id]["url"] = sprintf("/data/camera/stills/%s.jpg?%s", $id, time() );
-    $camfn = "/home/meteor_ldm/data/camera/stills/${id}.jpg";
+    $camfn = "/mesonet/ldmdata/camera/stills/${id}.jpg";
     if (!is_file($camfn) || filemtime($camfn) < (time() - 1200))
     {      
         $cameras[$id]["active"] = false;

@@ -112,6 +112,6 @@ EOF
 gpend
 
 if (-e OAX_radar.gif) then
-/home/ldm/bin/pqinsert -p "plot c 000000000000 OAX_radar.gif bogus gif" OAX_radar.gif >& /dev/null
+pqinsert -p "plot c 000000000000 OAX_radar.gif bogus gif" OAX_radar.gif >& /dev/null
 rm OAX_radar.gif
 endif

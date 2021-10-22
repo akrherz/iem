@@ -52,7 +52,7 @@ LAYER
     "wms_extent" "-171 15 -66 70"
   END
   OFFSITE 255 255 255
-  DATA "/home/ldm/data/gis/images/4326/ridge/%sector%/%prod%_0.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/ridge/%sector%/%prod%_0.png"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
@@ -75,7 +75,7 @@ LAYER
     "wms_extent" "-171 15 -66 70"
   END
   OFFSITE 0 0 0
-  DATA "/home/ldm/data/gis/images/4326/%sector%/%prod%_0.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/%sector%/%prod%_0.png"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 

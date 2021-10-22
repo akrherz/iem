@@ -119,7 +119,7 @@ def main():
     os.close(tmpfd)
 
     pqstr = "data c 000000000000 wxc/%s bogus text" % (ldmname,)
-    cmd = "/home/ldm/bin/pqinsert -p '%s' %s" % (pqstr, tmpfn)
+    cmd = f"pqinsert -p '{pqstr}' {tmpfn}"
     subprocess.call(cmd, shell=True)
     os.remove(tmpfn)
 

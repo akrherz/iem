@@ -291,7 +291,7 @@ if (in_array("goes", $layers) && isset($_REQUEST["goes_sector"]) &&
 
 /* Draw NEXRAD Layer */
 if (in_array("nexrad", $layers) || in_array("nexrad_tc", $layers)){
-  $radarfp = "/home/ldm/data/gis/images/4326/USCOMP/n0r_0.tif";
+  $radarfp = "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.tif";
   if (($ts + 300) < time()) {
     $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png", $radts);
   }
@@ -307,7 +307,7 @@ if (in_array("nexrad", $layers) || in_array("nexrad_tc", $layers)){
 }
 
 if (in_array("n0q", $layers) || in_array("n0q_tc", $layers)){
-  $radarfp = "/home/ldm/data/gis/images/4326/USCOMP/n0q_0.png";
+  $radarfp = "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_0.png";
   if (($ts + 300) < time()) {
     $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0q_%Y%m%d%H%M.png", $radts);
   }

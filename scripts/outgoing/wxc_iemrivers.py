@@ -105,7 +105,7 @@ def main():
     fh.close()
 
     pqstr = "data c 000000000000 wxc/wxc_iemrivers.txt bogus text"
-    cmd = "/home/ldm/bin/pqinsert -p '%s' /tmp/wxc_iemrivers.txt" % (pqstr,)
+    cmd = f"pqinsert -p '{pqstr}' /tmp/wxc_iemrivers.txt"
     subprocess.call(cmd, shell=True)
     os.remove("/tmp/wxc_iemrivers.txt")
 

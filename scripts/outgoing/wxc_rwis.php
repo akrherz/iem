@@ -122,7 +122,7 @@ fclose($rwis);
 
 $pqstr = sprintf("data c %s wxc/wxc_iadot.txt bogus txt",
 		gmdate("YmdHi"));
-$cmd = sprintf("/home/ldm/bin/pqinsert -i -p '%s' /tmp/wxc_iadot.txt",
+$cmd = sprintf("pqinsert -i -p '%s' /tmp/wxc_iadot.txt",
 		$pqstr);
 system($cmd);
 unlink("/tmp/wxc_iadot.txt");
@@ -213,7 +213,7 @@ fclose($rwis);
 
 $pqstr = sprintf("data c %s wxc/wxc_ildot.txt bogus txt",
 		gmdate("YmdHi"));
-$cmd = sprintf("/home/ldm/bin/pqinsert -i -p '%s' /tmp/wxc_ildot.txt",
+$cmd = sprintf("pqinsert -i -p '%s' /tmp/wxc_ildot.txt",
 		$pqstr);
 system($cmd);
 unlink("/tmp/wxc_ildot.txt");

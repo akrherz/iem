@@ -113,8 +113,8 @@
 	 RewriteRule wfo.phtml index.php
   </Directory>
 
-  Alias /data "/home/ldm/data"
-  <Directory "/home/ldm/data">
+  Alias /data "/mesonet/ldmdata"
+  <Directory "/mesonet/ldmdata">
     Options Indexes MultiViews FollowSymLinks
     AllowOverride None
     Require all granted

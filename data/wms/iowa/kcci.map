@@ -46,7 +46,7 @@ END
 
 LAYER
   NAME kccidoppler
-  DATA  "/home/ldm/data/gis/images/26915/KCCI/KCCI_N0R_0.png"
+  DATA  "/mesonet/ldmdata/gis/images/26915/KCCI/KCCI_N0R_0.png"
   STATUS ON
   TYPE RASTER
   METADATA

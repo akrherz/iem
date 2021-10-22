@@ -60,6 +60,6 @@ EOF
 $GEMEXE/gpend
 
 if (-e winds.gif) then
-  /home/ldm/bin/pqinsert -p "plot c 000000000000 winds.gif bogus gif" winds.gif >& /dev/null
+  pqinsert -p "plot c 000000000000 winds.gif bogus gif" winds.gif >& /dev/null
   rm winds.gif
 endif

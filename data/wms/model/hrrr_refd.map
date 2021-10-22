@@ -65,7 +65,7 @@ END
 LAYER
   NAME "refd_0000"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0000.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0000.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -85,7 +85,7 @@ END
 LAYER
   NAME "refd_0015"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0015.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0015.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -105,7 +105,7 @@ END
 LAYER
   NAME "refd_0030"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0030.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0030.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -125,7 +125,7 @@ END
 LAYER
   NAME "refd_0045"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0045.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0045.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -145,7 +145,7 @@ END
 LAYER
   NAME "refd_0060"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0060.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0060.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -165,7 +165,7 @@ END
 LAYER
   NAME "refd_0075"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0075.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0075.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -185,7 +185,7 @@ END
 LAYER
   NAME "refd_0090"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0090.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0090.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -205,7 +205,7 @@ END
 LAYER
   NAME "refd_0105"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0105.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0105.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -225,7 +225,7 @@ END
 LAYER
   NAME "refd_0120"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0120.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0120.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -245,7 +245,7 @@ END
 LAYER
   NAME "refd_0135"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0135.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0135.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -265,7 +265,7 @@ END
 LAYER
   NAME "refd_0150"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0150.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0150.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -285,7 +285,7 @@ END
 LAYER
   NAME "refd_0165"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0165.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0165.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -305,7 +305,7 @@ END
 LAYER
   NAME "refd_0180"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0180.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0180.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -325,7 +325,7 @@ END
 LAYER
   NAME "refd_0195"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0195.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0195.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -345,7 +345,7 @@ END
 LAYER
   NAME "refd_0210"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0210.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0210.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -365,7 +365,7 @@ END
 LAYER
   NAME "refd_0225"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0225.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0225.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -385,7 +385,7 @@ END
 LAYER
   NAME "refd_0240"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0240.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0240.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -405,7 +405,7 @@ END
 LAYER
   NAME "refd_0255"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0255.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0255.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -425,7 +425,7 @@ END
 LAYER
   NAME "refd_0270"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0270.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0270.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -445,7 +445,7 @@ END
 LAYER
   NAME "refd_0285"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0285.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0285.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -465,7 +465,7 @@ END
 LAYER
   NAME "refd_0300"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0300.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0300.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -485,7 +485,7 @@ END
 LAYER
   NAME "refd_0315"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0315.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0315.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -505,7 +505,7 @@ END
 LAYER
   NAME "refd_0330"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0330.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0330.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -525,7 +525,7 @@ END
 LAYER
   NAME "refd_0345"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0345.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0345.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -545,7 +545,7 @@ END
 LAYER
   NAME "refd_0360"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0360.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0360.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -565,7 +565,7 @@ END
 LAYER
   NAME "refd_0375"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0375.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0375.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -585,7 +585,7 @@ END
 LAYER
   NAME "refd_0390"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0390.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0390.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -605,7 +605,7 @@ END
 LAYER
   NAME "refd_0405"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0405.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0405.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -625,7 +625,7 @@ END
 LAYER
   NAME "refd_0420"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0420.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0420.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -645,7 +645,7 @@ END
 LAYER
   NAME "refd_0435"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0435.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0435.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -665,7 +665,7 @@ END
 LAYER
   NAME "refd_0450"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0450.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0450.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -685,7 +685,7 @@ END
 LAYER
   NAME "refd_0465"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0465.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0465.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -705,7 +705,7 @@ END
 LAYER
   NAME "refd_0480"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0480.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0480.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -725,7 +725,7 @@ END
 LAYER
   NAME "refd_0495"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0495.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0495.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -745,7 +745,7 @@ END
 LAYER
   NAME "refd_0510"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0510.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0510.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -765,7 +765,7 @@ END
 LAYER
   NAME "refd_0525"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0525.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0525.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -785,7 +785,7 @@ END
 LAYER
   NAME "refd_0540"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0540.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0540.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -805,7 +805,7 @@ END
 LAYER
   NAME "refd_0555"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0555.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0555.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -825,7 +825,7 @@ END
 LAYER
   NAME "refd_0570"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0570.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0570.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -845,7 +845,7 @@ END
 LAYER
   NAME "refd_0585"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0585.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0585.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -865,7 +865,7 @@ END
 LAYER
   NAME "refd_0600"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0600.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0600.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -885,7 +885,7 @@ END
 LAYER
   NAME "refd_0615"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0615.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0615.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -905,7 +905,7 @@ END
 LAYER
   NAME "refd_0630"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0630.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0630.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -925,7 +925,7 @@ END
 LAYER
   NAME "refd_0645"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0645.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0645.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -945,7 +945,7 @@ END
 LAYER
   NAME "refd_0660"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0660.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0660.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -965,7 +965,7 @@ END
 LAYER
   NAME "refd_0675"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0675.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0675.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -985,7 +985,7 @@ END
 LAYER
   NAME "refd_0690"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0690.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0690.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1005,7 +1005,7 @@ END
 LAYER
   NAME "refd_0705"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0705.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0705.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1025,7 +1025,7 @@ END
 LAYER
   NAME "refd_0720"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0720.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0720.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1045,7 +1045,7 @@ END
 LAYER
   NAME "refd_0735"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0735.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0735.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1065,7 +1065,7 @@ END
 LAYER
   NAME "refd_0750"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0750.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0750.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1085,7 +1085,7 @@ END
 LAYER
   NAME "refd_0765"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0765.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0765.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1105,7 +1105,7 @@ END
 LAYER
   NAME "refd_0780"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0780.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0780.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1125,7 +1125,7 @@ END
 LAYER
   NAME "refd_0795"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0795.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0795.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1145,7 +1145,7 @@ END
 LAYER
   NAME "refd_0810"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0810.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0810.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1165,7 +1165,7 @@ END
 LAYER
   NAME "refd_0825"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0825.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0825.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1185,7 +1185,7 @@ END
 LAYER
   NAME "refd_0840"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0840.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0840.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1205,7 +1205,7 @@ END
 LAYER
   NAME "refd_0855"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0855.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0855.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1225,7 +1225,7 @@ END
 LAYER
   NAME "refd_0870"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0870.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0870.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1245,7 +1245,7 @@ END
 LAYER
   NAME "refd_0885"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0885.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0885.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1265,7 +1265,7 @@ END
 LAYER
   NAME "refd_0900"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0900.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0900.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1285,7 +1285,7 @@ END
 LAYER
   NAME "refd_0915"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0915.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0915.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1305,7 +1305,7 @@ END
 LAYER
   NAME "refd_0930"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0930.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0930.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1325,7 +1325,7 @@ END
 LAYER
   NAME "refd_0945"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0945.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0945.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1345,7 +1345,7 @@ END
 LAYER
   NAME "refd_0960"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0960.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0960.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1365,7 +1365,7 @@ END
 LAYER
   NAME "refd_0975"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0975.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0975.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1385,7 +1385,7 @@ END
 LAYER
   NAME "refd_0990"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0990.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0990.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1405,7 +1405,7 @@ END
 LAYER
   NAME "refd_1005"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1005.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1005.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1425,7 +1425,7 @@ END
 LAYER
   NAME "refd_1020"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1020.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1020.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1445,7 +1445,7 @@ END
 LAYER
   NAME "refd_1035"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1035.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1035.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1465,7 +1465,7 @@ END
 LAYER
   NAME "refd_1050"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1050.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1050.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1485,7 +1485,7 @@ END
 LAYER
   NAME "refd_1065"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1065.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1065.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1504,7 +1504,7 @@ END
 LAYER
   NAME "refd_1080"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1080.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1080.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1523,7 +1523,7 @@ END
 LAYER
   NAME "refd_1140"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1140.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1140.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1542,7 +1542,7 @@ END
 LAYER
   NAME "refd_1200"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1200.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1200.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1561,7 +1561,7 @@ END
 LAYER
   NAME "refd_1260"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1260.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1260.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1580,7 +1580,7 @@ END
 LAYER
   NAME "refd_1320"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1320.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1320.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1599,7 +1599,7 @@ END
 LAYER
   NAME "refd_1380"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1380.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1380.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1618,7 +1618,7 @@ END
 LAYER
   NAME "refd_1440"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1440.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1440.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1637,7 +1637,7 @@ END
 LAYER
   NAME "refd_1500"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1500.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1500.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1656,7 +1656,7 @@ END
 LAYER
   NAME "refd_1560"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1560.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1560.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1675,7 +1675,7 @@ END
 LAYER
   NAME "refd_1620"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1620.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1620.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1694,7 +1694,7 @@ END
 LAYER
   NAME "refd_1680"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1680.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1680.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1713,7 +1713,7 @@ END
 LAYER
   NAME "refd_1740"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1740.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1740.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1732,7 +1732,7 @@ END
 LAYER
   NAME "refd_1800"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1800.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1800.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1751,7 +1751,7 @@ END
 LAYER
   NAME "refd_1860"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1860.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1860.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1770,7 +1770,7 @@ END
 LAYER
   NAME "refd_1920"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1920.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1920.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1789,7 +1789,7 @@ END
 LAYER
   NAME "refd_1980"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_1980.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1980.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1808,7 +1808,7 @@ END
 LAYER
   NAME "refd_2040"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_2040.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_2040.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1827,7 +1827,7 @@ END
 LAYER
   NAME "refd_2100"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_2100.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_2100.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1846,7 +1846,7 @@ END
 LAYER
   NAME "refd_2160"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_2160.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_2160.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -1865,7 +1865,7 @@ END
 LAYER
   NAME "refd_XXXX"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/hrrr/refd_0000.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0000.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000

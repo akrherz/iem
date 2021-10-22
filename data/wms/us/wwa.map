@@ -42,7 +42,7 @@ LAYER
         NAME warnings_p
         STATUS OFF
         TYPE LINE
-        DATA "/home/meteor_ldm/data/gis/shape/4326/us/current_ww.shp"
+        DATA "/mesonet/ldmdata/gis/shape/4326/us/current_ww.shp"
         MINSCALE 0
         MAXSCALE 465000000
   METADATA
@@ -85,7 +85,7 @@ LAYER
         NAME warnings_c
         STATUS OFF
         TYPE LINE
-        DATA "/home/ldm/data/gis/shape/4326/us/current_ww.shp"
+        DATA "/mesonet/ldmdata/gis/shape/4326/us/current_ww.shp"
         MINSCALE 0
         MAXSCALE 465000000
   METADATA

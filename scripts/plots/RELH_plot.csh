@@ -43,6 +43,6 @@ $GEMEXE/sfmap_gf << EOF > /tmp/RELH_plot_sfmap.out
 EOF
 
 if (-e relh.gif) then
-  /home/ldm/bin/pqinsert -p "plot c 000000000000 relh.gif bogus gif" relh.gif >& /dev/null
+pqinsert -p "plot c 000000000000 relh.gif bogus gif" relh.gif >& /dev/null
 rm relh.gif
 endif

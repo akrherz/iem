@@ -112,6 +112,6 @@ EOF
 gpend
 
 if (-e FSD_radar.gif) then
-/home/ldm/bin/pqinsert -p "plot c 000000000000 FSD_radar.gif bogus gif" FSD_radar.gif >& /dev/null
+pqinsert -p "plot c 000000000000 FSD_radar.gif bogus gif" FSD_radar.gif >& /dev/null
 rm FSD_radar.gif
 endif

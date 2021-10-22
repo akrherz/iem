@@ -32,7 +32,7 @@ END
 LAYER
   NAME "mrms_p72h"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/mrms/p72h.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/mrms/p72h.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -58,7 +58,7 @@ END
 LAYER
   NAME "mrms_p48h"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/mrms/p48h.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/mrms/p48h.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -84,7 +84,7 @@ END
 LAYER
   NAME "mrms_p24h"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/mrms/p24h.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/mrms/p24h.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -110,7 +110,7 @@ END
 LAYER
   NAME "mrms_p1h"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/mrms/p1h.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/mrms/p1h.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -136,7 +136,7 @@ END
 LAYER
   NAME "mrms_a2m"
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/mrms/a2m.png"
+  DATA "/mesonet/ldmdata/gis/images/4326/mrms/a2m.png"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000

@@ -85,19 +85,6 @@ sfdelt << EOF > /tmp/oa_sfdelt.out
 exit
 EOF
 
-# SFFILE = /home/ldm/data/gempak/surface/sao/${yymmdd}_sao.gem
-#sfmod << EOF > /tmp/oa_sfmod.out
-# SFFILE = /mesonet/data/gempak/meso/${yymmdd}_meso.gem
-# SFOUTF = surface.gem
-# DATTIM = /${hh}00
-# AREA   = DSET
-# SFPARM = ALTM
-# list
-# run
-#
-#exit
-#EOF
-
 python dump_altm.py
 
 sfedit << EOF > /tmp/oa_sfedit.out
@@ -109,14 +96,6 @@ SFEFIL   = /mesonet/data/iemplot/altm.txt
 exit
 EOF
 
-
-
-# GUESS    = grid_oa.grd*${gtime}F001
-# SFFILE = surface.gem
-# SFFILE = /home/ldm/data/gempak/surface/sao/${yymmdd}_sao.gem
-# GDFILE   = grid_25_25.grd
-# GUESS    = grid_oa.grd*${gtime}F001
-# GUESFUN = ALTM
 oabsfc << EOF > /tmp/oa_oabsfc.out
  SFFILE = /mesonet/data/iemplot/surface.gem
  GDFILE   = /mesonet/data/iemplot/grid_25_25.grd

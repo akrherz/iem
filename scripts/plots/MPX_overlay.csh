@@ -110,6 +110,6 @@ $GEMEXE/sfmap_gf << EOF > /tmp/MPX_overlay_sfmap.out
 EOF
 
 if (-e MPX_radar.gif) then
-/home/ldm/bin/pqinsert -p "plot c 000000000000 MPX_radar.gif bogus gif" MPX_radar.gif >& /dev/null
+pqinsert -p "plot c 000000000000 MPX_radar.gif bogus gif" MPX_radar.gif >& /dev/null
 rm MPX_radar.gif
 endif

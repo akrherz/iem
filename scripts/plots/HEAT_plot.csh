@@ -47,6 +47,6 @@ EOF
 
 
 if (-e heat.gif) then
-  /home/ldm/bin/pqinsert -p "plot ac $ftime heat.gif heat_${hh}00.gif gif" heat.gif >& /dev/null
+  pqinsert -p "plot ac $ftime heat.gif heat_${hh}00.gif gif" heat.gif >& /dev/null
 rm heat.gif
 endif

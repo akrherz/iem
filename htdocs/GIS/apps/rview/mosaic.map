@@ -10,7 +10,7 @@ FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
 EXTENT -200000 4300000 1000000 5100000
 #EXTENT -104 37 -87 49
 UNITS METERS
-SHAPEPATH "/home/ldm/data/gis/"
+SHAPEPATH "/mesonet/ldmdata/gis/"
 SYMBOLSET "/opt/iem/data/gis/symbols/stations.sym"
 IMAGECOLOR 0 0 250
 IMAGETYPE PNG
@@ -155,7 +155,7 @@ END
 
 LAYER
  NAME KCCI
- DATA /home/ldm/data/gis/images/26915/KCCI/KCCI_N0R_0.png
+ DATA /mesonet/ldmdata/gis/images/26915/KCCI/KCCI_N0R_0.png
  TYPE RASTER
  STATUS ON
  PROJECTION
@@ -166,7 +166,7 @@ END
 
 LAYER
   NAME radar
-  DATA /home/ldm/data/gis/images/4326/USCOMP/n0r_0.tif
+  DATA /mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.tif
   TYPE RASTER
   STATUS ON
   METADATA
@@ -182,7 +182,7 @@ END
 
 LAYER
   NAME DMX
-  DATA /home/ldm/data/gis/images/4326/ridge/DMX/N0Q_0.png
+  DATA /mesonet/ldmdata/gis/images/4326/ridge/DMX/N0Q_0.png
   TYPE RASTER
   STATUS ON
   METADATA
@@ -199,7 +199,7 @@ END
 
 LAYER
   NAME radar2
-  DATA /home/ldm/data/gis/images/4326/USCOMP/n0r_0.tif
+  DATA /mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.tif
   TYPE RASTER
   STATUS ON
   METADATA

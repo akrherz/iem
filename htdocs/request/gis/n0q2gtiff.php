@@ -31,7 +31,7 @@ if (is_file($zipFile)){
 }
 
 if ($ts > ($now - 360.0)){  
-  $inFile = "/home/ldm/data/gis/images/4326/USCOMP/n0q_0.tif";
+  $inFile = "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_0.tif";
 } else {
   $inFile = sprintf("/mesonet/ARCHIVE/data/%s/GIS/uscomp/n0q_%s.png", date("Y/m/d", $ts), date("YmdHi", $ts) );
 

@@ -58,6 +58,6 @@ EOF
 $GEMEXE/gpend
 
 if (-e dewps.gif) then
-/home/ldm/bin/pqinsert -p "plot c 000000000000 dewps.gif dewps.gif gif" dewps.gif >& /dev/null
+pqinsert -p "plot c 000000000000 dewps.gif dewps.gif gif" dewps.gif >& /dev/null
 rm dewps.gif
 endif

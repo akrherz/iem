@@ -51,7 +51,7 @@ foreach($states as $k => $state){
 fclose($rwis);
 
 $pqstr = "data c 000000000000 wxc/wxc_cocorahs.txt bogus txt";
-$cmd = sprintf("/home/ldm/bin/pqinsert -p '%s' /tmp/wxc_cocorahs.txt", $pqstr);
+$cmd = sprintf("pqinsert -p '%s' /tmp/wxc_cocorahs.txt", $pqstr);
 system($cmd);
 unlink("/tmp/wxc_cocorahs.txt");
 

@@ -61,7 +61,7 @@ END
 LAYER
   NAME usradar
   STATUS ON
-  DATA "/home/ldm/data/gis/images/4326/USCOMP/n0r_0.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.tif"
   TYPE RASTER
   PROJECTION
     "init=epsg:4326"

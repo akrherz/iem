@@ -13,7 +13,7 @@ from pyiem.util import utc, logger
 
 LOG = logger()
 PALETTE = Image.open(
-    open("/home/meteor_ldm/data/gis/images/4326/USCOMP/n0q_0.png", "rb")
+    open("/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_0.png", "rb")
 ).getpalette()
 
 

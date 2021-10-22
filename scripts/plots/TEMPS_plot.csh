@@ -60,6 +60,6 @@ EOF
 $GEMEXE/gpend
 
 if (-e temps.gif) then
-  /home/ldm/bin/pqinsert -p "plot c 000000000000 temps.gif bogus gif" temps.gif >& /dev/null
+ pqinsert -p "plot c 000000000000 temps.gif bogus gif" temps.gif >& /dev/null
 	rm -f temps.gif
 endif

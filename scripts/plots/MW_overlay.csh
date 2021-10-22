@@ -108,6 +108,6 @@ EOF
 gpend
 
 if (-e MWoverlay.gif) then
-	/home/ldm/bin/pqinsert -p "plot acr $timestamp MWoverlay_ MWoverlay_${hh}${mm}.gif gif" MWoverlay.gif >& /dev/null
+	pqinsert -p "plot acr $timestamp MWoverlay_ MWoverlay_${hh}${mm}.gif gif" MWoverlay.gif >& /dev/null
 	rm MWoverlay.gif
 endif

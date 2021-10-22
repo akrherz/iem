@@ -216,33 +216,32 @@ EOF
 
 
 if (-e surfaceTW.gif ) then
-/home/ldm/bin/pqinsert -p "plot ar $ftime surfaceTW surfaceTW_${hhmm}.gif gif" surfaceTW.gif >& /dev/null
+pqinsert -p "plot ar $ftime surfaceTW surfaceTW_${hhmm}.gif gif" surfaceTW.gif >& /dev/null
 rm surfaceTW.gif
 endif
 
 if (-e surfaceDW.gif ) then
-  /home/ldm/bin/pqinsert -p "plot ar $ftime surfaceDW surfaceDW_${hhmm}.gif gif" surfaceDW.gif >& /dev/null
+pqinsert -p "plot ar $ftime surfaceDW surfaceDW_${hhmm}.gif gif" surfaceDW.gif >& /dev/null
 rm surfaceDW.gif
 endif
 
 if (-e surfaceMD.gif ) then
-  /home/ldm/bin/pqinsert -p "plot ar $ftime surfaceMD surfaceMD_${hhmm}.gif gif" surfaceMD.gif >& /dev/null
+pqinsert -p "plot ar $ftime surfaceMD surfaceMD_${hhmm}.gif gif" surfaceMD.gif >& /dev/null
 rm surfaceMD.gif
 endif
 
 if (-e surfaceTE.gif ) then
-  /home/ldm/bin/pqinsert -p "plot ar $ftime surfaceTE surfaceTE_${hhmm}.gif gif" surfaceTE.gif >& /dev/null
+pqinsert -p "plot ar $ftime surfaceTE surfaceTE_${hhmm}.gif gif" surfaceTE.gif >& /dev/null
 rm surfaceTE.gif
 endif
 
 if (-e surfaceDIV.gif ) then
-  /home/ldm/bin/pqinsert -p "plot ar $ftime surfaceDIV surfaceDIV_${hhmm}.gif gif" surfaceDIV.gif >& /dev/null
+pqinsert -p "plot ar $ftime surfaceDIV surfaceDIV_${hhmm}.gif gif" surfaceDIV.gif >& /dev/null
 rm surfaceDIV.gif
 endif
 
-
 if (-e surfaceFRNT.gif ) then
-  /home/ldm/bin/pqinsert -p "plot ar $ftime surfaceFRNT surfaceFRNT_${hhmm}.gif gif" surfaceFRNT.gif >& /dev/null
+pqinsert -p "plot ar $ftime surfaceFRNT surfaceFRNT_${hhmm}.gif gif" surfaceFRNT.gif >& /dev/null
 rm surfaceFRNT.gif
 endif
 

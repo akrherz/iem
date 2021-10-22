@@ -28,6 +28,7 @@ PAIRS = [
     ["/mesonet/data/smos", f"{M2}/data/smos"],
     ["/mesonet/data/stage4", f"{M2}/data/stage4"],
     ["/mesonet/data/text", f"{M2}/data/text"],
+    ["/mesonet/ldmdata", f"{M2}/ldmdata"],  # May fail if node writes data
     ["/mesonet/share/cases", f"{M7}/share/cases"],
     ["/mesonet/share/climodat", f"{M2}/share/climodat"],
     ["/mesonet/share/features", f"{M7}/share/features"],

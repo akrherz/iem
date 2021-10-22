@@ -141,7 +141,7 @@ $sz0 = $row["area"];
   $lakes->draw($img);
 
   /* Draw NEXRAD Layer */
-  $radarfp = "/home/ldm/data/gis/images/4326/USCOMP/n0r_0.tif";
+  $radarfp = "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.tif";
   if (($ts + 300) < time()) {
    $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png", $radts);
   }
