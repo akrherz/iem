@@ -7,24 +7,22 @@
 127.0.0.1        dailyerosion.local
 127.0.0.1        depbackend.local
 127.0.0.1        mesonet.agron.iastate.edu
-# 
-# Iron, in general, these IPs should not be used for services
-#
+
 192.168.0.1      iem-director0 iem-director0.local
 192.168.0.2      iem-director1 iem-director1.local
 192.168.0.3      nagios.local
 192.168.0.4      thumper-ah.local
-192.168.0.5      iem5.local
-192.168.0.9      metfs2.local  
+192.168.0.5      iem-syslog
 192.168.0.10      metfs1.local       iem-idd0      iem-idd0.local  
-192.168.0.11     iem-syslog
+
+# Service VMs
+192.168.0.11     iem11 iem11.local
 192.168.0.12     iem12 iem12.local
-192.168.0.13     iem13         iem13.local
-192.168.0.14     iem14.local   lesync.local
-192.168.0.15     iem15         iem15.local
-192.168.0.16     iem16.local
-192.168.0.19     iem19.local
-192.168.0.22     iem22.local
+192.168.0.13     iem13 iem13.local
+192.168.0.14     iem14 iem14.local lesync.local
+192.168.0.15     iem15 iem15.local
+192.168.0.16     iem16 iem16.local
+192.168.0.19     iem19 iem19.local
 
 # VM servers for webfarm nodes
 192.168.0.50     iemvm0 iemvm0.local 
