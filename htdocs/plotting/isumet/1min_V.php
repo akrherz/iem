@@ -1,8 +1,9 @@
 <?php
 require_once "../../../config/settings.inc.php";
-// 1 minute schoolnet data plotter
-// 18 Sep 2002 - Denote when the averaging scheme happened!
-//  3 Dec 2002 - Make sure that scale of wind axis is okay!
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_scatter.php";
+require_once "../../../include/jpgraph/jpgraph_date.php";
 
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
@@ -58,20 +59,20 @@ if ($station == null){
 		if ($v < $myTime || trim($tstring) == ""){
 			continue;
 		}
+        $speed = floatval($tokens[9]);
+        if ($speed < 0 || $speed > 100){
+        	continue;
+        }
 		$valid[] = $v;
-  		$mph[] = $tokens[9];
+  		$mph[] = $speed;
   		$drct[] = $tokens[10];
  	} // End of while
 	
 }
 
-require_once "../../../include/jpgraph/jpgraph.php";
-require_once "../../../include/jpgraph/jpgraph_line.php";
-require_once "../../../include/jpgraph/jpgraph_scatter.php";
-require_once "../../../include/jpgraph/jpgraph_date.php";
 
 // Create the graph. These two calls are always required
-$graph = new Graph(600,300,"example1");
+$graph = new Graph(600,400,"example1");
 $graph->SetScale("datelin",0, 360);
 $graph->SetY2Scale("lin");
 $graph->img->SetMargin(55,40,55,60);

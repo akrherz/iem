@@ -1,6 +1,9 @@
 <?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/mlib.php";
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_date.php";
 //  1 minute data plotter 
 
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
@@ -30,8 +33,12 @@ if ($station == null){
 		if ($v < $myTime){
 			continue;
 		}
-  		$valid[] = $v;
-  		$tmpf[] = round (substr($line, 36, 6),2);
+        $tval = round (substr($line, 36, 6),2);
+        if ($tval < -40 || $tval > 120){
+          continue;
+        }
+        $valid[] = $v;
+        $tmpf[] = $tval;
   		$relh[] = intval($parts[8]);
   		$d = dwpf(round (substr($line, 36, 6),2), intval($parts[8]) );
   		$dwpf[] = ($d > -40 && $d < 90)? $d : "";
@@ -56,19 +63,19 @@ if ($station == null){
 		if ($v < $myTime || trim($tstring) == ""){
 			continue;
 		}
+        $tval = floatval($tokens[5]);
+        if ($tval < -40 || $tval > 120){
+          continue;
+        }
 		$valid[] = $v;
-  		$tmpf[] = $tokens[5];
+  		$tmpf[] = $tval;
   		$relh[] = floatval($tokens[8]);
   		$dwpf[] = dwpf($tokens[5], floatval($tokens[8]));
  	} // End of while
-}
-	
-include ("../../../include/jpgraph/jpgraph.php");
-include ("../../../include/jpgraph/jpgraph_line.php");
-include ("../../../include/jpgraph/jpgraph_date.php");
+}	
 
 // Create the graph. These two calls are always required
-$graph = new Graph(600,300,"example1");
+$graph = new Graph(600,400,"example1");
 $graph->SetScale("datlin");
 if (isset($_REQUEST["rh"])){
 	$graph->SetY2Scale("lin",0,100);
@@ -78,7 +85,7 @@ if (isset($_REQUEST["rh"])){
 } else {
 	$graph->title->Set("$titleDate Outside Temperature");
 }
-$graph->img->SetMargin(65,40,55,70);
+$graph->img->SetMargin(65,40,55,80);
 //$graph->xaxis->SetFont(FONT1,FS_BOLD);
 
 $graph->xaxis->SetLabelAngle(90);
@@ -86,7 +93,6 @@ $graph->xaxis->SetLabelFormatString("h:i A", true);
 //$graph->yaxis->scale->ticks->SetPrecision(1);
 $graph->yaxis->scale->ticks->Set(1,0.5);
 //$graph->yscale->SetGrace(10);
-
 
 $graph->legend->SetLayout(LEGEND_HOR);
 $graph->legend->Pos(0.2,0.09);
@@ -97,7 +103,7 @@ $graph->yaxis->SetTitle("Temperature [F]");
 
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Local Time");
-$graph->xaxis->SetTitleMargin(40);
+$graph->xaxis->SetTitleMargin(50);
 //$graph->yaxis->SetTitleMargin(48);
 $graph->yaxis->SetTitleMargin(40);
 $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);

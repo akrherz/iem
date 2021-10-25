@@ -66,7 +66,7 @@ include ("../../../include/jpgraph/jpgraph_line.php");
 include ("../../../include/jpgraph/jpgraph_date.php");
 
 // Create the graph. These two calls are always required
-$graph = new Graph(600,300,"example1");
+$graph = new Graph(600,400,"example1");
 $graph->SetScale("datelin");
 //$graph->SetY2Scale("lin",0,100);
 $graph->img->SetMargin(65,40,55,70);

@@ -1,6 +1,10 @@
 <?php
 include("../../../config/settings.inc.php");
 include("../../../include/mlib.php");
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_scatter.php";
+require_once "../../../include/jpgraph/jpgraph_date.php";
 
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
@@ -56,23 +60,23 @@ if ($station == null){
 		if ($v < $myTime || trim($tstring) == ""){
 			continue;
 		}
+        $rval = floatval($tokens[8]);
+        if ($rval < 0 || $rval > 101){
+            continue;
+        }
 		$valid[] = $v;
-  		$orelh[] = floatval($tokens[8]);
+  		$orelh[] = $rval;
   		$irelh[] = $tokens[18];
   		$_dwpf[] = dwpf(floatval($tokens[5]), floatval($tokens[8]));
  	} // End of while
 	
 }
 
-include ("../../../include/jpgraph/jpgraph.php");
-include ("../../../include/jpgraph/jpgraph_line.php");
-include ("../../../include/jpgraph/jpgraph_scatter.php");
-include ("../../../include/jpgraph/jpgraph_date.php");
 
 // Create the graph. These two calls are always required
-$graph = new Graph(600,300,"example1");
+$graph = new Graph(600, 400,"example1");
 $graph->SetScale("datelin",0,100);
-$graph->img->SetMargin(65,40,55,70);
+$graph->img->SetMargin(65,40,55,80);
 
 //$graph->yaxis->scale->ticks->SetPrecision(1);
 $graph->title->Set("$titleDate Relative Humidity");
@@ -92,7 +96,7 @@ $graph->yaxis->SetTitle("Relative Humidity [%]");
 $graph->xaxis->SetLabelFormatString("h:i A", true);
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetTitle("Valid Local Time");
-$graph->xaxis->SetTitleMargin(40);
+$graph->xaxis->SetTitleMargin(50);
 $graph->yaxis->SetTitleMargin(30);
 //$graph->y2axis->SetTitleMargin(28);
 $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
