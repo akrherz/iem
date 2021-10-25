@@ -42,10 +42,6 @@ python ot2archive.py $(date -u +'%Y %m %d')
 cd ../util
 csh BACKUP.csh
 
-cd ../yieldfx
-python yieldfx_workflow.py
-python dump_hybridmaize.py
-
 cd ../uscrn
 python compute_uscrn_pday.py $(date --date '1 days ago' +'%Y %m %d')
 python compute_uscrn_pday.py $(date --date '7 days ago' +'%Y %m %d')
