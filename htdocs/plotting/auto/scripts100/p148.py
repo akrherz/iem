@@ -1,7 +1,6 @@
 """Special Days each year"""
 import datetime
 import calendar
-from collections import OrderedDict
 
 from dateutil.easter import easter as get_easter
 from pandas.io.sql import read_sql
@@ -9,7 +8,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
+PDICT = dict(
     [
         ("easter", "Easter (Western Church Dates)"),
         ("labor", "Labor Day"),
@@ -19,7 +18,7 @@ PDICT = OrderedDict(
         ("thanksgiving", "Thanksgiving"),
     ]
 )
-PDICT2 = OrderedDict(
+PDICT2 = dict(
     [
         ("high", "High Temperature [F]"),
         ("low", "Low Temperature [F]"),
@@ -63,6 +62,13 @@ def get_description():
             min="2000/01/01",
             max="2000/12/31",
             label="Same date each year to plot (when selected above):",
+        ),
+        dict(
+            type="int",
+            optional=True,
+            name="offset",
+            default=1,
+            label="Number of offset days from chosen date (minus is before)",
         ),
         dict(
             type="select",
@@ -137,10 +143,15 @@ def get_context(fdict):
     ctx["varname"] = ctx["var"]
     thedate = ctx["thedate"]
     date = ctx["date"]
+    offset = ctx.get("offset")
+    dtoff = None
+    if offset is not None and -367 < offset < 367:
+        dtoff = datetime.timedelta(days=offset)
+        thedate = thedate + dtoff
 
     pgconn = get_dbconn("coop")
 
-    table = "alldata_%s" % (station[:2],)
+    table = f"alldata_{station[:2]}"
     if date == "exact":
         ctx["df"] = read_sql(
             f"SELECT year, high, day, precip from {table} WHERE station = %s "
@@ -161,7 +172,13 @@ def get_context(fdict):
             days = mothers_day()
         else:
             days = labor_days()
-
+        ctx["subtitle"] = PDICT[date]
+        if dtoff:
+            ctx["subtitle"] = (
+                f"{abs(offset)} Days {'before' if offset < 0 else 'after'} "
+                f"{PDICT[date]}"
+            )
+            days = [day + dtoff for day in days]
         ctx["df"] = read_sql(
             f"SELECT year, high, day, precip from {table} WHERE station = %s "
             "and day in %s ORDER by year ASC",
@@ -169,7 +186,6 @@ def get_context(fdict):
             params=(station, tuple(days)),
             index_col="year",
         )
-        ctx["subtitle"] = PDICT[date]
     if ctx["df"].empty:
         raise NoDataFound("No Data Found.")
     ctx["title"] = ("%s [%s] Daily %s") % (

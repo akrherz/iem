@@ -1,7 +1,6 @@
 """METAR Code Climo"""
 import datetime
 import calendar
-from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
@@ -9,7 +8,7 @@ from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
+PDICT = dict(
     (
         ("BLSN", "Blowing Snow (BLSN)"),
         ("FG", "Fog (FG)"),
@@ -92,14 +91,12 @@ def plotter(fdict):
     if groupby == "week":
         data = np.ma.zeros((24, 52), "f")
         df = read_sql(
-            """
+            f"""
         WITH data as (
             SELECT valid at time zone %s + '10 minutes'::interval as v
             from alldata where
             station = %s and
-            array_to_string(wxcodes, '') LIKE '%%"""
-            + code
-            + """%%'
+            array_to_string(wxcodes, '') LIKE '%%{code}%%'
             and valid > %s and valid < %s),
         agg as (
             SELECT distinct extract(week from v)::int as week,
@@ -160,18 +157,12 @@ def plotter(fdict):
     cax.set_ylabel("Count")
     ax.set_ylim(-0.5, 23.5)
     ax.set_yticks((0, 4, 8, 12, 16, 20))
-    ax.set_ylabel("Local Time, %s" % (ctx["_nt"].sts[station]["tzname"],))
+    ax.set_ylabel(f"Local Time, {ctx['_nt'].sts[station]['tzname']}")
     ax.set_yticklabels(("Mid", "4 AM", "8 AM", "Noon", "4 PM", "8 PM"))
     ax.set_title(
-        ("[%s] %s %s Reports\n[%.0f - %.0f] by hour and %s")
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            PDICT[code],
-            minyear,
-            maxyear,
-            PDICT2[groupby].replace("group ", ""),
-        )
+        f"[{station}] {ctx['_nt'].sts[station]['name']} {PDICT[code]} "
+        f"Reports\n[{minyear:.0f} - {maxyear:.0f}] by hour and "
+        f"{PDICT2[groupby].replace('group ', '')}"
     )
     ax.grid(True)
     lax = plt.axes([0.11, 0.1, 0.7, 0.15])
@@ -222,4 +213,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

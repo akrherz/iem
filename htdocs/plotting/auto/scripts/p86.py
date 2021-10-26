@@ -1,18 +1,17 @@
 """Plot IEMRE"""
 import datetime
 import os
-from collections import OrderedDict
 
 import numpy as np
-import cartopy.crs as ccrs
 from pyiem import iemre
 from pyiem.plot import MapPlot
 from pyiem.plot.colormaps import stretch_cmap
 from pyiem.util import get_autoplot_context, ncopen
 from pyiem.exceptions import NoDataFound
+from pyiem.reference import LATLON
 from metpy.units import units, masked_array
 
-PDICT = OrderedDict(
+PDICT = dict(
     (
         ("p01d_12z", "24 Hour Precipitation at 12 UTC"),
         ("p01d", "Calendar Day Precipitation"),
@@ -89,10 +88,10 @@ def plotter(fdict):
         state=ctx["csector"],
         axisbg="white",
         nocaption=True,
-        title="IEM Reanalysis of %s for %s" % (PDICT.get(varname), title),
+        title=f"IEM Reanalysis of {PDICT.get(varname)} for {title}",
         subtitle="Data derived from various NOAA datasets",
     )
-    (west, east, south, north) = mp.ax.get_extent(ccrs.PlateCarree())
+    (west, east, south, north) = mp.ax.get_extent(LATLON)
     i0, j0 = iemre.find_ij(west, south)
     i1, j1 = iemre.find_ij(east, north)
     jslice = slice(j0, j1)
