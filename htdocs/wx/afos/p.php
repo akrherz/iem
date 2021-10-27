@@ -51,7 +51,7 @@ function locate_product($conn, $e, $pil, $dir){
 }
 function last_product($conn, $pil){
 	// Get the latest
-	$rs = pg_prepare($conn, "_LSELECT3", "SELECT data, "
+	$rs = pg_prepare($conn, "_LSELECT3", "SELECT data, bbb, "
 			." entered at time zone 'UTC' as mytime, source from products"
 			." WHERE pil = $1 and entered > (now() - '31 days'::interval)"
 			." ORDER by entered DESC LIMIT 1");
@@ -82,13 +82,13 @@ else {
 	$ts = gmmktime( substr($e,8,2), substr($e,10,2), 0,
 			substr($e,4,2), substr($e,6,2), substr($e,0,4) );
     if (is_null($bbb)){
-        $rs = pg_prepare($conn, "_LSELECT", "SELECT data,
+        $rs = pg_prepare($conn, "_LSELECT", "SELECT data, bbb,
             entered at time zone 'UTC' as mytime, source, wmo from products
             WHERE pil = $1 and entered = $2");
         $rs = pg_execute($conn, "_LSELECT", Array($pil,
             date("Y-m-d H:i", $ts)));
     } else {
-        $rs = pg_prepare($conn, "_LSELECT", "SELECT data,
+        $rs = pg_prepare($conn, "_LSELECT", "SELECT data, bbb,
             entered at time zone 'UTC' as mytime, source, wmo from products
             WHERE pil = $1 and entered = $2 and bbb = $3");
         $rs = pg_execute($conn, "_LSELECT", Array($pil,
@@ -114,10 +114,12 @@ for ($i=0; $row = pg_fetch_assoc($rs); $i++)
         );
         $product_id = sprintf(
             "%s-%s-%s-%s", $newe, $row["source"], $row["wmo"], $pil);
-		$t->twitter_description = sprintf("%s issued by NWS %s at %s UTC",
+		if (! is_null($row["bbb"])){
+            $product_id .= sprintf("-%s", $row["bbb"]);
+        }
+        $t->twitter_description = sprintf("%s issued by NWS %s at %s UTC",
 				substr($pil,0,3), substr($pil,3,3), date("d M Y H:i", $basets));
-		// Add bling for SPS products that appear to have polygons
-        if ((substr($pil, 0, 3) == "SPS") && (strpos($row["data"], "LAT...LON") !== false)){
+        if (substr($pil, 0, 3) == "SPS"){
             $t->twitter_image = "/plotting/auto/plot/217/pid:${product_id}.png";
             $img = <<<EOM
 <p><img src="/plotting/auto/plot/217/pid:${product_id}.png" class="img img-responsive"></p>
