@@ -116,7 +116,8 @@ for ($i=0; $row = pg_fetch_assoc($rs); $i++)
             "%s-%s-%s-%s", $newe, $row["source"], $row["wmo"], $pil);
 		$t->twitter_description = sprintf("%s issued by NWS %s at %s UTC",
 				substr($pil,0,3), substr($pil,3,3), date("d M Y H:i", $basets));
-		if (substr($pil, 0, 3) == "SPS"){
+		// Add bling for SPS products that appear to have polygons
+        if ((substr($pil, 0, 3) == "SPS") && (strpos($row["data"], "LAT...LON") !== false)){
             $t->twitter_image = "/plotting/auto/plot/217/pid:${product_id}.png";
             $img = <<<EOM
 <p><img src="/plotting/auto/plot/217/pid:${product_id}.png" class="img img-responsive"></p>
