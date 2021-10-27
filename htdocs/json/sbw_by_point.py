@@ -33,7 +33,7 @@ def get_events(ctx):
     data["generation_time"] = utc().strftime(ISO)
     valid_limiter = ""
     if "valid" in ctx:
-        valid_limiter = " and issue <= '%s+00' and expire > '%s' " % (
+        valid_limiter = " and issue <= '%s+00' and expire > '%s+00' " % (
             ctx["valid"].strftime("%Y-%m-%d %H:%M"),
             ctx["valid"].strftime("%Y-%m-%d %H:%M"),
         )
