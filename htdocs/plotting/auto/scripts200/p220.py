@@ -1,18 +1,21 @@
 """Plot SPC Outlook Infographics."""
 import datetime
 
+try:
+    from zoneinfo import ZoneInfo  # type: ignore
+except ImportError:
+    from backports.zoneinfo import ZoneInfo
+
 # third party
-import pytz
 import pandas as pd
 from geopandas import read_postgis
-import cartopy.crs as ccrs
 from matplotlib.patches import Rectangle
 from pyiem.plot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
-from pyiem.reference import Z_OVERLAY2_LABEL, Z_POLITICAL
+from pyiem.reference import Z_OVERLAY2_LABEL, Z_POLITICAL, LATLON
 
-CENTRALTZ = pytz.timezone("America/Chicago")
+CENTRALTZ = ZoneInfo("America/Chicago")
 PDICT = {
     "cwa": "Plot by NWS Forecast Office",
     "state": "Plot by State/Sector",
@@ -101,7 +104,8 @@ def get_description():
         "description"
     ] = """
     This app generates infographics for the Storm Prediction Center
-    outlooks.  The trick here is how the valid time works.  The app will first
+    or Weather Prediction Center outlooks.
+    The trick here is how the valid time works.  The app will first
     attempt to match an issuance to that timestamp, if it fails, it then
     looks backwards in time for the most recent issuance to that timestamp.
 
@@ -118,14 +122,14 @@ def get_description():
             default="1C",
             name="which",
             options=PDICT2,
-            label="Select SPC Outlook Day and Type",
+            label="Select SPC/WPC Outlook Day and Type",
         ),
         dict(
             type="select",
             default="categorical",
             name="cat",
             options=PDICT3,
-            label="Select SPC Outlook Category",
+            label="Select SPC/WPC Outlook Category",
         ),
         dict(
             type="select",
@@ -199,7 +203,7 @@ def get_threshold_label(threshold, outlook_type):
             )
         return THRESHOLD_LEVELS[threshold]
     if threshold.startswith("0."):
-        return "%.0f%%" % (float(threshold) * 100.0,)
+        return f"{(float(threshold) * 100.0):.0f}%"
     return threshold
 
 
@@ -250,7 +254,7 @@ def plotter(fdict):
         sector = "cwa"
     else:
         sector = "state" if len(ctx["csector"]) == 2 else ctx["csector"]
-    daylabel = day if day > 0 else "%s-%s" % (days[0], days[-1])
+    daylabel = day if day > 0 else f"{days[0]}-{days[-1]}"
     datelabel = compute_datelabel(df)
 
     catlabel = " ".join([x.capitalize() for x in category.split()])
@@ -279,7 +283,7 @@ def plotter(fdict):
         if row["threshold"] == "SIGN":
             mp.ax.add_geometries(
                 [row["geom"]],
-                ccrs.PlateCarree(),
+                LATLON,
                 facecolor="None",
                 edgecolor="k",
                 linewidth=2,
@@ -293,10 +297,10 @@ def plotter(fdict):
             if day == 0:
                 fc, ec = "None", DAY_COLORS[row["day"]]
                 if row["threshold"] == "0.30":
-                    fc, ec = ec, ec
+                    fc = ec
             mp.ax.add_geometries(
                 [row["geom"]],
-                ccrs.PlateCarree(),
+                LATLON,
                 facecolor=fc,
                 edgecolor=ec,
                 linewidth=2,
@@ -321,7 +325,11 @@ def plotter(fdict):
         ).set_zorder(Z_OVERLAY2_LABEL + 100)
     else:
         emptytext = "Potential Too Low"
-        if outlook_type == "C" and day in [1, 2, 3]:
+        if (
+            outlook_type == "C"
+            and day in [1, 2, 3]
+            and category == "categorical"
+        ):
             emptytext = "No Thunderstorms Forecast"
         mp.ax.text(
             0.5,
