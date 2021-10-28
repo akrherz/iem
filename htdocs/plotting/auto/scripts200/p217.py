@@ -7,8 +7,7 @@ from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
-from pyiem.reference import Z_OVERLAY2
-import cartopy.crs as ccrs
+from pyiem.reference import Z_OVERLAY2, LATLON
 
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
@@ -149,7 +148,7 @@ def plotter(fdict):
     if not row["geom"].is_empty:
         mp.ax.add_geometries(
             [row["geom"]],
-            ccrs.PlateCarree(),
+            LATLON,
             facecolor="None",
             edgecolor="k",
             linewidth=4,

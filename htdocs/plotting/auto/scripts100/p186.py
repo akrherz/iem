@@ -79,30 +79,25 @@ def plotter(fdict):
         raise NoDataFound("Data Not Found.")
     df = pd.DataFrame(jdata["d"])
     df["Date"] = pd.to_datetime(df["mapDate"], format="%m/%d/%Y")
-    df.sort_values("Date", ascending=True, inplace=True)
+    df = df.sort_values("Date", ascending=True)
     df["x"] = df["Date"] + datetime.timedelta(hours=(3.5 * 24))
+    # accounting
+    df["score"] = (
+        df["D4"] * 5 + df["D3"] * 4 + df["D2"] * 3 + df["D1"] * 2 + df["D0"]
+    )
+    df["delta"] = df["score"].diff()
+    df.iat[0, df.columns.get_loc("delta")] = 0
 
     fig = plt.figure(figsize=(7, 9))
     ax = fig.add_axes([0.1, 0.1, 0.87, 0.84])
-    lastrow = None
     for year, gdf in df.groupby(df.Date.dt.year):
         if year < syear or year > eyear:
             continue
         xs = []
         ys = []
         for _, row in gdf.iterrows():
-            if lastrow is None:
-                lastrow = row
-            delta = (
-                (lastrow["D4"] - row["D4"]) * 5.0
-                + (lastrow["D3"] - row["D3"]) * 4.0
-                + (lastrow["D2"] - row["D2"]) * 3.0
-                + (lastrow["D1"] - row["D1"]) * 2.0
-                + (lastrow["D0"] - row["D0"])
-            )
             xs.append(int(row["Date"].strftime("%j")))
-            ys.append(year + (0 - delta) / 100.0)
-            lastrow = row
+            ys.append(year + row["delta"] / 100.0)
         if len(xs) < 4:
             continue
         fcube = interp1d(xs, ys, kind="cubic")
@@ -132,13 +127,11 @@ def plotter(fdict):
         "curve height of 1 year is 1 effective drought category "
         f"change over area of {state_names[state]}"
     )
-    ax.set_ylabel("Year, thru %s" % (df.Date.max().strftime("%d %b %Y"),))
+    ax.set_ylabel(f"Year, thru {df.Date.max():%d %b %Y}")
     ax.set_title(
-        (
-            "%.0f-%.0f US Drought Monitor Weekly Change for %s\n"
-            "curve height represents change in intensity + coverage"
-        )
-        % (syear, eyear, state_names[state])
+        f"{syear:.0f}-{eyear:.0f} US Drought Monitor Weekly "
+        f"Change for {state_names[state]}\n"
+        "curve height represents change in intensity + coverage"
     )
 
     ax.grid(True)
@@ -151,8 +144,8 @@ def plotter(fdict):
     fig.text(0.02, 0.03, "Blue areas are improving conditions", color="b")
     fig.text(0.4, 0.03, "Red areas are degrading conditions", color="r")
 
-    return fig, df[["Date", "NONE", "D0", "D1", "D2", "D3", "D4"]]
+    return fig, df
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})
