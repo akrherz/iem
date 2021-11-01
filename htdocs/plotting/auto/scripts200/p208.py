@@ -9,8 +9,7 @@ from pyiem.nws import vtec
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
-from pyiem.reference import Z_OVERLAY2, Z_OVERLAY2_LABEL
-import cartopy.crs as ccrs
+from pyiem.reference import Z_OVERLAY2, Z_OVERLAY2_LABEL, LATLON
 import pytz
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
@@ -24,6 +23,13 @@ PDICT3 = {
     "auto": "Let autoplot decide when to include NEXRAD overlay",
     "off": "No NEXRAD Mosaic Please",
 }
+
+
+def proxy(mp):
+    """TODO removeme once pyiem updates"""
+    if hasattr(mp, "panels"):
+        return mp.panels[0]
+    return mp.max
 
 
 def get_description():
@@ -314,17 +320,17 @@ def plotter(fdict):
         ]
         if not df2.empty:
             # draw new
-            mp.ax.add_geometries(
+            proxy(mp).add_geometries(
                 [poly],
-                ccrs.PlateCarree(),
+                LATLON,
                 facecolor="None",
                 edgecolor="k",
                 zorder=Z_OVERLAY2,
             )
             poly = df2.iloc[0]["geom"]
-            mp.ax.add_geometries(
+            proxy(mp).add_geometries(
                 [poly],
-                ccrs.PlateCarree(),
+                LATLON,
                 facecolor=color,
                 alpha=0.5,
                 edgecolor="k",

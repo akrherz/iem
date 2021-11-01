@@ -1,5 +1,4 @@
 """Q/Q Plot"""
-from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
@@ -10,17 +9,15 @@ from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-ODICT = OrderedDict(
-    [("max", "Maximum"), ("min", "Minimum"), ("avg", "Average")]
-)
-PDICT = OrderedDict(
+ODICT = dict([("max", "Maximum"), ("min", "Minimum"), ("avg", "Average")])
+PDICT = dict(
     [
         ("high", "Daily High Temperature"),
         ("low", "Daily Low Temperature"),
         ("avg", "Daily Average Temperature"),
     ]
 )
-MDICT = OrderedDict(
+MDICT = dict(
     [
         ("all", "All Year"),
         ("spring", "Spring (MAM)"),
@@ -396,8 +393,16 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
-    # fig, df = plotter(dict(station='IA7708', network='IACLIMATE', month1='6',
-    #                       month2='1', var='low', highlight=44, days=1,
-    #                       opt='max'))
-    # fig.savefig('/tmp/bah.png')
+    fig, df = plotter(
+        dict(
+            station="IA7708",
+            network="IACLIMATE",
+            month1="6",
+            month2="1",
+            var="low",
+            highlight=44,
+            days=1,
+            opt="max",
+        )
+    )
+    fig.savefig("/tmp/bah.png")

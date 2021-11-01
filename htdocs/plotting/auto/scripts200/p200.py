@@ -1,7 +1,6 @@
 """SPC Convective Outlook Heatmaps."""
 import datetime
 
-import cartopy.crs as ccrs
 import numpy as np
 from rasterstats import zonal_stats
 from geopandas import read_postgis
@@ -11,6 +10,7 @@ from pyiem.plot.geoplot import MapPlot
 from pyiem.plot import get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
+from pyiem.reference import LATLON
 
 
 PDICT5 = {
@@ -142,6 +142,13 @@ GRIDSOUTH = 19.47
 PRECIP_AFF = Affine(griddelta, 0.0, GRIDWEST, 0.0, griddelta * -1, GRIDNORTH)
 YSZ = (GRIDNORTH - GRIDSOUTH) / griddelta
 XSZ = (GRIDEAST - GRIDWEST) / griddelta
+
+
+def proxy(mp):
+    """TODO remove once pyiem updates"""
+    if hasattr(mp, "panels"):
+        return mp.panels[0]
+    return mp.ax
 
 
 def get_description():
@@ -366,7 +373,7 @@ def plotter(fdict):
         lons, lats = np.meshgrid(lons, lats)
         df2 = pd.DataFrame()
     else:
-        (west, east, south, north) = mp.ax.get_extent(ccrs.PlateCarree())
+        (west, east, south, north) = proxy(mp).get_extent(LATLON)
         i0 = int((west - GRIDWEST) / griddelta)
         j0 = int((south - GRIDSOUTH) / griddelta)
         i1 = int((east - GRIDWEST) / griddelta)

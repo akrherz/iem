@@ -2,7 +2,6 @@
 import datetime
 
 import numpy as np
-import cartopy.crs as ccrs
 from affine import Affine
 import pandas as pd
 from geopandas import read_postgis
@@ -11,6 +10,7 @@ from pyiem.plot.colormaps import stretch_cmap
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
+from pyiem.reference import LATLON
 
 PDICT = {
     "0": "D0: Abnormally Dry",
@@ -20,6 +20,13 @@ PDICT = {
     "4": "D4: Exceptional Drought",
 }
 PDICT2 = {"weeks": "Number of Weeks", "percent": "Percentage of Weeks"}
+
+
+def proxy(mp):
+    """TODO remove once pyiem updates"""
+    if hasattr(mp, "panels"):
+        return mp.panels[0]
+    return mp.ax
 
 
 def get_description():
@@ -121,7 +128,7 @@ def plotter(fdict):
     )
 
     # compute the affine
-    (west, east, south, north) = mp.ax.get_extent(ccrs.PlateCarree())
+    (west, east, south, north) = proxy(mp).get_extent(LATLON)
     raster = np.zeros(
         (int((north - south) / griddelta), int((east - west) / griddelta))
     )

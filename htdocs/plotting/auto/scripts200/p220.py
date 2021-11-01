@@ -178,8 +178,9 @@ def outlook_search(pgconn, valid, days, outlook_type):
 
 def compute_datelabel(df):
     """Figure out something pretty."""
-    date1 = df["issue"].min().tz_convert(CENTRALTZ).to_pydatetime()
-    date2 = df["issue"].max().tz_convert(CENTRALTZ).to_pydatetime()
+    # Woof
+    date1 = df["issue"].min().to_pydatetime().astimezone(CENTRALTZ)
+    date2 = df["issue"].max().to_pydatetime().astimezone(CENTRALTZ)
     if date1 == date2:
         return date1.strftime("%B %-d, %Y")
     if date1.month == date2.month:
@@ -205,6 +206,13 @@ def get_threshold_label(threshold, outlook_type):
     if threshold.startswith("0."):
         return f"{(float(threshold) * 100.0):.0f}%"
     return threshold
+
+
+def proxy(mp):
+    """TODO removeme once pyiem updates"""
+    if hasattr(mp, "panels"):
+        return mp.panels[0]
+    return mp.max
 
 
 def plotter(fdict):
@@ -287,7 +295,7 @@ def plotter(fdict):
     rectlabels = []
     for _idx, row in df[~pd.isna(df["threshold"])].iterrows():
         if row["threshold"] == "SIGN":
-            mp.ax.add_geometries(
+            proxy(mp).add_geometries(
                 [row["geom"]],
                 LATLON,
                 facecolor="None",
@@ -304,7 +312,8 @@ def plotter(fdict):
                 fc, ec = "None", DAY_COLORS[row["day"]]
                 if row["threshold"] == "0.30":
                     fc = ec
-            mp.ax.add_geometries(
+            # TODO remove me once pyiem updates
+            proxy(mp).add_geometries(
                 [row["geom"]],
                 LATLON,
                 facecolor=fc,

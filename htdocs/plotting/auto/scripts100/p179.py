@@ -81,10 +81,10 @@ def plotter(fdict):
     eyear = today.year + 1
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
-    table = "alldata_%s" % (station[:2],)
     cursor.execute(
         "SELECT year, extract(doy from day), gddxx(%s, %s, high,low), low "
-        f"from {table} where station = %s and year > %s and day < %s",
+        f"from alldata_{station[:2]} where station = %s and "
+        "year > %s and day < %s",
         (base, ceil, station, byear, today),
     )
 
@@ -147,8 +147,6 @@ def plotter(fdict):
         aspect="auto",
         extent=[apr1, jun30, sep1, oct31],
         interpolation="nearest",
-        vmin=0,
-        vmax=100,
         cmap=cmap,
         norm=norm,
     )
@@ -168,13 +166,11 @@ def plotter(fdict):
         aspect="auto",
         extent=[apr1, jun30, sep1, oct31],
         interpolation="nearest",
-        vmin=0,
-        vmax=100,
         cmap=cmap,
         norm=norm,
     )
     ax[1].grid(True)
-    ax[1].set_title("Scenario after %s" % (today.strftime("%-d %B %Y"),))
+    ax[1].set_title(f"Scenario after {today:%-d %B %Y}")
     ax[1].set_xticks((91, 106, 121, 136, 152, 167))
     ax[1].set_xticklabels(("Apr 1", "15", "May 1", "15", "Jun 1", "15"))
     ax[1].set_xlabel("Growing Season Begin Date")

@@ -1,6 +1,5 @@
 """Maps of averages"""
 import calendar
-from collections import OrderedDict
 import datetime
 
 import numpy as np
@@ -8,8 +7,7 @@ from pandas.io.sql import read_sql
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
-from pyiem.reference import SECTORS_NAME
-import cartopy.crs as ccrs
+from pyiem.reference import SECTORS_NAME, LATLON
 
 PDICT = {
     "state": "State Level Maps (select state)",
@@ -20,7 +18,7 @@ PDICT2 = {
     "values": "Show just the values",
     "contour": "Show just the contour",
 }
-PDICT3 = OrderedDict(
+PDICT3 = dict(
     [
         ("avg_temp", "Average Temperature"),
         ("avg_high", "Average High Temperature"),
@@ -60,7 +58,7 @@ PRECISION = {
     "total_cdd65": 0,
     "total_hdd65": 0,
 }
-MDICT = OrderedDict(
+MDICT = dict(
     [
         ("all", "No Month/Time Limit"),
         ("spring", "Spring (MAM)"),
@@ -83,6 +81,13 @@ MDICT = OrderedDict(
         ("dec", "December"),
     ]
 )
+
+
+def proxy(mp):
+    """TODO remove once pyiem updates"""
+    if hasattr(mp, "panels"):
+        return mp.panels[0]
+    return mp.ax
 
 
 def get_description():
@@ -185,7 +190,7 @@ def plotter(fdict):
         title="%s %s for %s" % (PDICT5[ctx["src"]], PDICT3[varname], title),
         nocaption=True,
     )
-    bnds = mp.ax.get_extent(crs=ccrs.PlateCarree())
+    bnds = proxy(mp).get_extent(crs=LATLON)
 
     joincol = "id"
     if ctx["src"] == "ncdc_climate81":

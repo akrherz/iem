@@ -3,11 +3,10 @@ from datetime import datetime, timedelta
 import os
 
 import numpy as np
-import cartopy.crs as ccrs
 from pyiem import iemre, util
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
-from pyiem.reference import state_bounds, SECTORS
+from pyiem.reference import state_bounds, SECTORS, LATLON
 from pyiem.exceptions import NoDataFound
 from pyiem.util import get_dbconn, get_properties
 from metpy.units import units, masked_array
@@ -29,6 +28,13 @@ PDICT4 = {
     "yes": "Yes, overlay Drought Monitor",
     "no": "No, do not overlay Drought Monitor",
 }
+
+
+def proxy(mp):
+    """TODO remove once pyiem updates"""
+    if hasattr(mp, "panels"):
+        return mp.panels[0]
+    return mp.ax
 
 
 def get_description():
@@ -130,10 +136,7 @@ def compute_title(src, sdate, edate):
         if sdate == edate:
             title = sdate.strftime("%-d %B %Y")
         else:
-            title = "%s to %s (inclusive)" % (
-                sdate.strftime("%-d %b"),
-                edate.strftime("%-d %b %Y"),
-            )
+            title = f"{sdate:%-d %b} to {edate:%-d %b %Y} (inclusive)"
     else:
         # This is 12z to 12z totals.
         if sdate == edate:
@@ -258,7 +261,7 @@ def plotter(fdict):
         subtitle="Data from %s" % (subtitle,),
         titlefontsize=14,
     )
-    (west, east, south, north) = mp.ax.get_extent(ccrs.PlateCarree())
+    (west, east, south, north) = proxy(mp).get_extent(LATLON)
 
     idx0 = iemre.daily_offset(sdate)
     idx1 = iemre.daily_offset(edate) + 1

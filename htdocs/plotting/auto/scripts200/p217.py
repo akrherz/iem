@@ -45,6 +45,13 @@ def get_description():
     return desc
 
 
+def proxy(mp):
+    """TODO removeme once pyiem updates"""
+    if hasattr(mp, "panels"):
+        return mp.panels[0]
+    return mp.max
+
+
 def plotter(fdict):
     """Go"""
     pgconn = get_dbconn("postgis")
@@ -146,7 +153,7 @@ def plotter(fdict):
 
     ugcs = {k: 1 for k in row["ugcs"]}
     if not row["geom"].is_empty:
-        mp.ax.add_geometries(
+        proxy(mp).add_geometries(
             [row["geom"]],
             LATLON,
             facecolor="None",

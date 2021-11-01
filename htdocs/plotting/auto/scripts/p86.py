@@ -33,6 +33,13 @@ PDICT = dict(
 PDICT2 = {"c": "Contour Plot", "g": "Grid Cell Mesh"}
 
 
+def proxy(mp):
+    """TODO remove once pyiem updates"""
+    if hasattr(mp, "panels"):
+        return mp.panels[0]
+    return mp.ax
+
+
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {}
@@ -91,7 +98,7 @@ def plotter(fdict):
         title=f"IEM Reanalysis of {PDICT.get(varname)} for {title}",
         subtitle="Data derived from various NOAA datasets",
     )
-    (west, east, south, north) = mp.ax.get_extent(LATLON)
+    (west, east, south, north) = proxy(mp).get_extent(LATLON)
     i0, j0 = iemre.find_ij(west, south)
     i1, j1 = iemre.find_ij(east, north)
     jslice = slice(j0, j1)
