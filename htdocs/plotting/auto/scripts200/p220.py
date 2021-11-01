@@ -235,7 +235,11 @@ def plotter(fdict):
             "spc_outlook_geometries g on (o.id = g.spc_outlook_id and "
             "g.category = %s) WHERE product_issue = %s and day in %s and "
             "outlook_type = %s) "
-            "SELECT d.*, t.priority from data d LEFT JOIN "
+            "SELECT d.product_issue at time zone 'UTC' as product_issue, "
+            "expire at time zone 'UTC' as expire, d.geom, "
+            "issue at time zone 'UTC' as issue, d.threshold, "
+            "updated at time zone 'UTC' as updated, d.product_id, d.day, "
+            "d.cycle, d.outlook_type, t.priority from data d LEFT JOIN "
             "spc_outlook_thresholds t on (d.threshold = t.threshold) "
             "ORDER by day ASC, priority ASC",
             pgconn,
@@ -250,6 +254,8 @@ def plotter(fdict):
         if valid is None:
             raise NoDataFound("SPC Outlook data was not found!")
         df = fetch(valid)
+    for col in ["updated", "product_issue", "issue", "expire"]:
+        df[col] = df[col].dt.tz_localize(datetime.timezone.utc)
     if ctx["t"] == "cwa":
         sector = "cwa"
     else:
