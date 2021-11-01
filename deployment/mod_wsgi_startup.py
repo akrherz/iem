@@ -2,8 +2,10 @@
 
 import os
 
-os.environ["PROJ_LIB"] = "/opt/miniconda3/envs/prod/share/proj"
+envpath = "/opt/miniconda3/envs/prod"
+os.environ["PROJ_LIB"] = f"{envpath}/share/proj"
 os.environ["MPLCONFIGDIR"] = "/var/cache/matplotlib"
+os.environ["CARTOPY_OFFLINE_SHARED"] = f"{envpath}/share/cartopy"
 
 from pyiem.plot.use_agg import plt
 import pandas
@@ -11,6 +13,4 @@ import pandas
 import cartopy
 
 if cartopy.config.get("pre_existing_data_dir", "") == "":
-    cartopy.config[
-        "pre_existing_data_dir"
-    ] = "/opt/miniconda3/envs/prod/share/cartopy"
+    cartopy.config["pre_existing_data_dir"] = f"{envpath}/share/cartopy"
