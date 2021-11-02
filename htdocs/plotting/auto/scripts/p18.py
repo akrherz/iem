@@ -1,6 +1,5 @@
 """Time series plot."""
 import datetime
-from collections import OrderedDict
 
 import pytz
 import psycopg2.extras
@@ -10,7 +9,7 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-MDICT = OrderedDict(
+MDICT = dict(
     [
         ("tmpf", "Air Temperature"),
         ("dwpf", "Dew Point Temperature"),
@@ -261,4 +260,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

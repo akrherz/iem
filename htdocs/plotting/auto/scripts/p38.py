@@ -1,7 +1,6 @@
 """Radiation Plot"""
 import calendar
 import datetime
-from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
@@ -9,7 +8,7 @@ from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
+PDICT = dict(
     [
         ("best", "Use NARR, then MERRA, then HRRR"),
         ("narr_srad", "Use NARR (1979-2015)"),
@@ -67,7 +66,7 @@ def plotter(fdict):
     year = ctx["year"]
     varname = ctx["var"]
 
-    table = "alldata_%s" % (station[:2],)
+    table = f"alldata_{station[:2]}"
 
     df = read_sql(
         f"""

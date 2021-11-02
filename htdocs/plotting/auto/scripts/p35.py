@@ -1,6 +1,5 @@
 """x-hour changes."""
 import datetime
-from collections import OrderedDict
 import calendar
 
 import psycopg2.extras
@@ -9,7 +8,7 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
+PDICT = dict(
     (
         ("tmpf", "Air Temp (F)"),
         ("alti", "Altimeter (in)"),
@@ -141,4 +140,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

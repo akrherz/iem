@@ -1,6 +1,5 @@
 """histogram"""
 import datetime
-from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
@@ -11,8 +10,7 @@ from pyiem.plot import figure, get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-# Use OrderedDict to keep webform select in this same order!
-MDICT = OrderedDict(
+MDICT = dict(
     [
         ("all", "No Month/Season Limit"),
         ("spring", "Spring (MAM)"),
@@ -260,4 +258,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

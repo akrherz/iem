@@ -1,6 +1,5 @@
 """Our mod_wsgi frontend to autoplot generation"""
 # pylint: disable=abstract-class-instantiated
-from collections import OrderedDict
 import sys
 import os
 import tempfile
@@ -46,7 +45,7 @@ def parser(cgistr):
     """Convert a CGI string into a dict that gets passed to the plotting
     routine"""
     # want predictable / stable URIs, generally.
-    data = OrderedDict()
+    data = {}
     for token in cgistr.split("::"):
         token2 = token.split(":")
         if len(token2) != 2:

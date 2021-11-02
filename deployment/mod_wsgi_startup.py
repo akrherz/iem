@@ -9,3 +9,9 @@ os.environ["CARTOPY_OFFLINE_SHARED"] = f"{envpath}/share/cartopy"
 
 from pyiem.plot.use_agg import plt
 import pandas
+
+# TODO remove someday when pyiem is updated
+import cartopy
+
+if cartopy.config.get("pre_existing_data_dir", "") == "":
+    cartopy.config["pre_existing_data_dir"] = f"{envpath}/share/cartopy"

@@ -1,6 +1,5 @@
 """First or Last Date with temp"""
 import datetime
-from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 import numpy as np
@@ -8,7 +7,7 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
+PDICT = dict(
     [
         ("last_high_above", "Last Date At or Above (High Temperature)"),
         ("last_high_below", "Last Date Below (High Temperature)"),
@@ -20,7 +19,7 @@ PDICT = OrderedDict(
         ("last_low_below", "Last Date Below (Low Temperature)"),
     ]
 )
-PDICT2 = OrderedDict(
+PDICT2 = dict(
     [
         ("calendar", "Compute over Calendar Year"),
         ("winter", "Compute over Winter Season"),
@@ -82,9 +81,7 @@ def get_description():
     return desc
 
 
-def do_labels(
-    ax, extrenum, varname, direction, threshold, station, ctx, season
-):
+def do_labels(ax, extrenum, varname, direction, threshold, season):
     """Helper."""
 
     ax.set_xlabel(
@@ -177,9 +174,7 @@ def plotter(fdict):
         pltdf = df2[df2["count"] > lastval]
     ax.scatter(pltdf[col], pltdf["count"])
     ax.grid(True)
-    do_labels(
-        ax, extrenum, varname, direction, threshold, station, ctx, season
-    )
+    do_labels(ax, extrenum, varname, direction, threshold, season)
 
     xticks = []
     xticklabels = []
@@ -245,16 +240,14 @@ def plotter(fdict):
         ax.text(
             df2.at[idx, col] + 1,
             df2.at[idx, "count"],
-            "%s" % (idx,),
+            f"{idx}",
             va="bottom",
         )
     if year in df2.index:
         df3 = df2.loc[year]
         if df3["count"] >= minval:
             ax.scatter(df3[col], df3["count"], zorder=5, color="r")
-            ax.text(
-                df3[col], df3["count"] + 1, "%s" % (year,), zorder=5, color="r"
-            )
+            ax.text(df3[col], df3["count"] + 1, f"{year}", zorder=5, color="r")
             ax.axhline(df3["count"])
         else:
             fig.text(

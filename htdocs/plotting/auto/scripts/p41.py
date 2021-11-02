@@ -393,7 +393,7 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    fig, df = plotter(
+    fig, _df = plotter(
         dict(
             station="IA7708",
             network="IACLIMATE",

@@ -1,7 +1,6 @@
 """Plot monthly data over all years"""
 import calendar
 import datetime
-from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
@@ -10,7 +9,7 @@ from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
+PDICT = dict(
     [
         ("max-high", "Maximum High"),
         ("avg-high", "Average High"),
@@ -46,7 +45,7 @@ PDICT = OrderedDict(
     ]
 )
 PDICT2 = {"no": "Plot Yearly Values", "yes": "Plot Decadal Values"}
-MDICT = OrderedDict(
+MDICT = dict(
     [
         ("spring", "Spring (MAM)"),
         ("fall", "Fall (SON)"),

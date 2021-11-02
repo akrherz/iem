@@ -1,6 +1,5 @@
 """Daily departures"""
 import datetime
-from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
@@ -9,7 +8,7 @@ from pyiem.plot import get_cmap
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
-PDICT = OrderedDict(
+PDICT = dict(
     (
         ("avg", "Daily Average Temperature"),
         ("gdd", "Growing Degree Days"),
@@ -17,7 +16,7 @@ PDICT = OrderedDict(
         ("low", "Low Temperature"),
     )
 )
-OPTDICT = OrderedDict(
+OPTDICT = dict(
     (
         ("diff", "Difference in Degrees F"),
         ("sigma", "Difference in Standard Deviations"),
@@ -97,7 +96,7 @@ def plotter(fdict):
     gddbase = ctx["gddbase"]
     gddceil = ctx["gddceil"]
 
-    table = "alldata_%s" % (station[:2],)
+    table = f"alldata_{station[:2]}"
 
     df = read_sql(
         f"""
@@ -206,4 +205,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

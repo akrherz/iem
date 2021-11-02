@@ -1,7 +1,6 @@
 """monthly comparisons"""
 import datetime
 import calendar
-from collections import OrderedDict
 
 import numpy as np
 from scipy import stats
@@ -11,7 +10,7 @@ from pyiem.plot import figure_axes
 from pyiem import network, util
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
+PDICT = dict(
     (
         ("total_precip", "Total Precipitation"),
         ("avg_temp", "Average Temperature"),
@@ -186,8 +185,7 @@ def plotter(fdict):
     num2 = min([12, ctx["num2"]])
     months1, offsets1 = compute_months_and_offsets(month1, num1)
     months2, offsets2 = compute_months_and_offsets(month2, num2)
-    table = "alldata_%s" % (station[:2],)
-    nt = network.Table("%sCLIMATE" % (station[:2],))
+    nt = network.Table(f"{station[:2]}CLIMATE")
     # Compute the monthly totals
     df = read_sql(
         f"""
@@ -205,7 +203,8 @@ def plotter(fdict):
     sum(gddxx(50, 86, high, low)) as gdd50,
     sum(gddxx(51, 86, high, low)) as gdd51,
     sum(gddxx(52, 86, high, low)) as gdd52
-    from {table} WHERE station = %s and day < %s GROUP by year, month
+    from alldata_{station[:2]}
+    WHERE station = %s and day < %s GROUP by year, month
     """,
         pgconn,
         params=(threshold, station, today.replace(day=1)),
@@ -352,4 +351,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

@@ -1,7 +1,6 @@
 """jumps in temperature"""
 import datetime
 import calendar
-from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 from scipy import stats
@@ -20,7 +19,7 @@ PDICT4 = {
     "two": "Just consider trailing and middle period",
     "three": "Consider full cycle between trailing, middle, and forward",
 }
-MDICT = OrderedDict(
+MDICT = dict(
     [
         ("year", "All Year"),
         ("spring", "Spring (MAM)"),
@@ -201,8 +200,6 @@ def plotter(fdict):
     elif month != "year":
         months = [int(month)]
 
-    table = "alldata_%s" % (station[:2],)
-
     obs = read_sql(
         f"""WITH data as (
      select day, extract(week from day) - 1 as week, year, month, sday,
@@ -213,7 +210,7 @@ def plotter(fdict):
         as middle_stat, {ctx["stat"]}({ctx["var"]}) OVER
          (ORDER by day ASC rows between %s PRECEDING and 1 PRECEDING)
          as trailing_stat
-     from {table} where station = %s)
+     from alldata_{station[:2]} where station = %s)
     SELECT * from data WHERE month in %s and year >= %s
         and year <= %s ORDER by day ASC
     """,

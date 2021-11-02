@@ -1,7 +1,6 @@
 """Consec days"""
 import datetime
 import calendar
-from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
@@ -14,7 +13,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 from matplotlib.font_manager import FontProperties
 
 
-PDICT = OrderedDict(
+PDICT = dict(
     [
         ("high_over", "High Temperature At or Above"),
         ("high_under", "High Temperature Below"),

@@ -1,6 +1,5 @@
 """Monthly departures and elnino"""
 import datetime
-from collections import OrderedDict
 
 import psycopg2.extras
 import numpy as np
@@ -10,7 +9,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
+PDICT = dict(
     [
         ("avg_high", "Average High Temperature [F]"),
         ("avg_temp", "Average Temperature [F]"),
@@ -184,4 +183,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})
