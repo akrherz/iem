@@ -68,27 +68,24 @@ def doit(ts, hours):
     routes = "c"
     if ts.minute == 0:
         routes = "ac"
-    pqstr = "plot %s %s iowa_q2_%sh.png q2/iowa_q2_%sh_%s00.png png" % (
-        routes,
-        ts.strftime("%Y%m%d%H%M"),
-        hours,
-        hours,
-        ts.strftime("%H"),
+    pqstr = (
+        f"plot {routes} {ts:%Y%m%d%H%M} iowa_q2_{hours}h.png "
+        f"q2/iowa_q2_{hours}h_{ts:%H}00.png png"
     )
 
     lts = ts.astimezone(pytz.timezone("America/Chicago"))
-    subtitle = "Total up to %s" % (lts.strftime("%d %B %Y %I:%M %p %Z"),)
+    subtitle = f"Total up to {lts:%d %B %Y %I:%M %p %Z}"
     mp = MapPlot(
-        title=("NCEP MRMS Q3 (RADAR Only) %s Hour " "Precipitation [inch]")
-        % (hours,),
+        title=f"NCEP MRMS Q3 (RADAR Only) {hours} Hour Precipitation [inch]",
         subtitle=subtitle,
     )
 
     clevs = [0.01, 0.1, 0.3, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5, 6, 8, 10]
 
+    x, y = np.meshgrid(mrms.XAXIS, mrms.YAXIS)
     mp.contourf(
-        mrms.XAXIS,
-        mrms.YAXIS,
+        x,
+        y,
         mm2inch(np.flipud(total)),
         clevs,
         cmap=nwsprecip(),
@@ -111,11 +108,7 @@ def main(argv):
         doit(ts, int(sys.argv[6]))
     else:
         ts = utc()
-        try:
-            doit(ts, int(argv[1]))
-        except Exception as exp:
-            LOG.info("failure ts: %s argv: %s", ts, argv[1])
-            LOG.exception(exp)
+        doit(ts, int(argv[1]))
 
 
 if __name__ == "__main__":
