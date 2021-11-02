@@ -39,11 +39,11 @@ def plotter(fdict):
     month = ctx["month"]
     day = ctx["day"]
     state = ctx["state"][:2]
-    table = "alldata_%s" % (state,)
     cursor.execute(
-        f"SELECT high, low from {table} where sday = %s and high is not null "
-        "and low is not null",
-        ("%02i%02i" % (month, day),),
+        f"SELECT high, low from alldata_{state} "
+        "where sday = %s and high is not null and low is not null and "
+        "substr(station, 3, 1) != 'T' and substr(station, 3, 4) != '0000'",
+        (f"{month:02.0f}{day:02.0f}",),
     )
     if cursor.rowcount == 0:
         raise NoDataFound("No Data Found.")
@@ -56,9 +56,8 @@ def plotter(fdict):
     lows = np.array(lows)
 
     ts = datetime.datetime(2000, month, day)
-    title = "%s %s Temperature Distribution" % (
-        reference.state_names[state],
-        ts.strftime("%d %B"),
+    title = (
+        f"{reference.state_names[state]} {ts:%d %B} Temperature Distribution"
     )
     (fig, ax) = figure_axes(title=title)
 
@@ -76,13 +75,17 @@ def plotter(fdict):
     x = np.linspace(xmin, xmax, 100)
     p = norm.pdf(x, mu, std)
     ax.plot(x, p, "r--", linewidth=2)
+    plotted32 = False
+    if xmin < 32 < xmax:
+        ax.axvline(x=32, color="g", linestyle="--")
+        plotted32 = True
 
     ax.text(
         0.8,
         0.98,
         "\n".join(
             [
-                rf"High Temp\n$\mu$ = {mu:.1f}$^\circ$F",
+                "High Temp\n" rf"$\mu$ = {mu:.1f}$^\circ$F",
                 rf"$\sigma$ = {std:.2f}",
                 rf"$n$ = {len(highs)}",
             ]
@@ -110,13 +113,16 @@ def plotter(fdict):
     x = np.linspace(xmin, xmax, 100)
     p = norm.pdf(x, mu, std)
     ax.plot(x, p, "b--", linewidth=2)
+    if xmin < 32 < xmax:
+        ax.axvline(x=32, color="g", linestyle="--")
+        plotted32 = True
 
     ax.text(
         0.02,
         0.98,
         "\n".join(
             [
-                rf"Low Temp\n$\mu$ = {mu:.1f}$^\circ$F",
+                "Low Temp\n" rf"$\mu$ = {mu:.1f}$^\circ$F",
                 rf"$\sigma$ = {std:.2f}",
                 rf"$n$ = {len(lows)}",
             ]
@@ -128,11 +134,14 @@ def plotter(fdict):
         bbox=dict(color="white"),
     )
     ax.grid(True)
-    ax.set_xlabel(r"Temperature $^\circ$F")
+    extra = ""
+    if plotted32:
+        extra = r" (32$^\circ$F highlighted in green)"
+    ax.set_xlabel(r"Temperature $^\circ$F" + extra)
     ax.set_ylabel("Probability")
 
     return fig, df
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({"month": 11, "day": 2})

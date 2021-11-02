@@ -29,7 +29,7 @@ def proxy(mp):
     """TODO removeme once pyiem updates"""
     if hasattr(mp, "panels"):
         return mp.panels[0]
-    return mp.max
+    return mp.ax
 
 
 def get_description():
