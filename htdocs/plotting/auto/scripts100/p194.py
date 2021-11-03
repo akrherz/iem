@@ -117,10 +117,9 @@ def plotter(fdict):
             edate.strftime("%b %-d, %Y"),
         ),
         subtitle=(
-            "based on weekly US Drought Monitor Analysis, "
-            r"%.2f$^\circ$ grid analysis"
-        )
-        % (griddelta,),
+            f"based on weekly US Drought Monitor Analysis, {griddelta:.2f}"
+            r"$^\circ$ grid analysis"
+        ),
         continentalcolor="white",
         titlefontsize=14,
         nocaption=True,
@@ -193,9 +192,10 @@ def plotter(fdict):
     cmap = stretch_cmap(ctx["cmap"], ramp)
     cmap.set_under("white")
     cmap.set_bad("white")
+    xx, yy = np.meshgrid(lons, lats)
     mp.pcolormesh(
-        lons,
-        lats,
+        xx,
+        yy,
         np.flipud(raster),
         ramp,
         cmap=cmap,

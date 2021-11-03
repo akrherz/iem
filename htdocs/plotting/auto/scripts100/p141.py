@@ -1,7 +1,6 @@
 """yieldfx plot"""
 import calendar
 import os
-from collections import OrderedDict
 import datetime
 
 import pandas as pd
@@ -11,7 +10,7 @@ from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, mm2inch, c2f
 from pyiem.exceptions import NoDataFound
 
-STATIONS = OrderedDict(
+STATIONS = dict(
     [
         ("ames", "Central (Ames)"),
         ("cobs", "Central (COBS)"),
@@ -25,7 +24,7 @@ STATIONS = OrderedDict(
     ]
 )
 
-PLOTS = OrderedDict(
+PLOTS = dict(
     [
         ("gdd", "Growing Degree Days [F]"),
         ("rain", "Precipitation [in]"),
@@ -68,7 +67,7 @@ def load(dirname, location, sdate):
     fn = "%s/%s.met" % (dirname, location)
     if not os.path.isfile(fn):
         raise NoDataFound("Data file was not found.")
-    for line in open(fn):
+    for line in open(fn, encoding="utf8"):
         line = line.strip()
         if not line.startswith("19") and not line.startswith("20"):
             continue

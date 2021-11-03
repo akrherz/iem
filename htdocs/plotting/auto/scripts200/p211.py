@@ -1,6 +1,5 @@
 """Plot 1 minute ASOS data."""
 from datetime import timezone, timedelta
-from collections import OrderedDict
 
 import pytz
 import pandas as pd
@@ -13,7 +12,7 @@ from pyiem.plot.use_agg import plt
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
+PDICT = dict(
     [
         ("precip", "Precipitation Plot"),
         ("wind", "Wind Speed + Direction Plot [MPH]"),

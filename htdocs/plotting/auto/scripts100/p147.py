@@ -1,12 +1,11 @@
 """Two station temperature frequency"""
 import calendar
-from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 
-PDICT = OrderedDict(
+PDICT = dict(
     [
         ("precip", "Precipitation"),
         ("avgt", "Average Temperature"),
@@ -123,4 +122,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

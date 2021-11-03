@@ -1,6 +1,5 @@
 """Extreme period each year"""
 import datetime
-from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
@@ -11,7 +10,7 @@ from pyiem.plot import get_cmap, figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
+PDICT = dict(
     [
         ("coldest_temp", "Coldest Average Temperature"),
         ("coldest_hitemp", "Coldest Average High Temperature"),

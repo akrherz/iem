@@ -1,6 +1,5 @@
 """hourly histogram on days"""
 import datetime
-from collections import OrderedDict
 
 import psycopg2.extras
 from pyiem.plot import figure_axes
@@ -11,7 +10,7 @@ PDICT = {
     "tmpf_below": "Temperature Below Threshold (F)",
 }
 
-MDICT = OrderedDict(
+MDICT = dict(
     [
         ("all", "No Month/Time Limit"),
         ("spring", "Spring (MAM)"),
@@ -160,4 +159,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

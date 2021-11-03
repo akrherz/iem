@@ -66,7 +66,10 @@ $o = Array(
 
 foreach($o as $key => $val)
 {
-	if ((array_key_exists("azos", $val) &&  preg_match('/ASOS|AWOS|ISUSM/', $network) <= 0) &&
+    if (($key == "obhistory") && preg_match('/COCORAHS/', $network) > 0){
+        continue;
+    }
+ 	if ((array_key_exists("azos", $val) &&  preg_match('/ASOS|AWOS|ISUSM/', $network) <= 0) &&
 		(array_key_exists("rwis", $val) &&  preg_match('/RWIS/', $network) <= 0)){
 		continue;
 	}

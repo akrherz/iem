@@ -1,7 +1,6 @@
 """Dump 24 hour LSRs to a file"""
 import zipfile
 import os
-from collections import OrderedDict
 import shutil
 import subprocess
 import datetime
@@ -11,7 +10,7 @@ from pyiem.util import get_dbconn
 
 SCHEMA = {
     "geometry": "Point",
-    "properties": OrderedDict(
+    "properties": dict(
         [
             ("VALID", "str:12"),
             ("MAG", "float"),
@@ -68,13 +67,12 @@ def main():
     df.to_file("lsr_24hour.geojson", driver="GeoJSON")
     df.to_csv("lsr_24hour.csv", index=False)
 
-    zfh = zipfile.ZipFile("lsr_24hour.zip", "w", zipfile.ZIP_DEFLATED)
-    zfh.write("lsr_24hour.shp")
-    zfh.write("lsr_24hour.shx")
-    zfh.write("lsr_24hour.dbf")
-    shutil.copy("/opt/iem/data/gis/meta/4326.prj", "lsr_24hour.prj")
-    zfh.write("lsr_24hour.prj")
-    zfh.close()
+    with zipfile.ZipFile("lsr_24hour.zip", "w", zipfile.ZIP_DEFLATED) as zfh:
+        zfh.write("lsr_24hour.shp")
+        zfh.write("lsr_24hour.shx")
+        zfh.write("lsr_24hour.dbf")
+        shutil.copy("/opt/iem/data/gis/meta/4326.prj", "lsr_24hour.prj")
+        zfh.write("lsr_24hour.prj")
 
     cmd = (
         "pqinsert -i "
@@ -91,7 +89,7 @@ def main():
         subprocess.call(cmd, shell=True)
 
     for suffix in ["shp", "shx", "dbf", "prj", "zip", "geojson", "csv"]:
-        os.remove("lsr_24hour.%s" % (suffix,))
+        os.remove(f"lsr_24hour.{suffix}")
 
 
 if __name__ == "__main__":

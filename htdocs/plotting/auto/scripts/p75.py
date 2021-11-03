@@ -1,6 +1,5 @@
 """Totals"""
 import datetime
-from collections import OrderedDict
 
 import psycopg2.extras
 import numpy as np
@@ -11,7 +10,7 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT2 = OrderedDict(
+PDICT2 = dict(
     [
         ("winter", "Winter (Dec, Jan, Feb)"),
         ("fma", "FMA (Feb, Mar, Apr)"),
@@ -148,4 +147,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

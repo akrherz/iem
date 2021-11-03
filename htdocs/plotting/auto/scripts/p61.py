@@ -161,8 +161,9 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     get_data(ctx)
 
-    title = ("Consecutive Days with %s Temp " "above(+)/below(-) Average") % (
-        ctx["var"].capitalize(),
+    title = (
+        f"Consecutive Days with {ctx['var'].capitalize()} "
+        "Temp above(+)/below(-) Average"
     )
     if ctx["var"] == "precip":
         title = "Days Since Last Measurable Precipitation"

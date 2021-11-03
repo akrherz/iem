@@ -1,21 +1,19 @@
 """Heatmap of daily data."""
 import calendar
 import datetime
-from collections import OrderedDict
 
 import matplotlib.colors as mpcolors
 import numpy as np
+from seaborn import heatmap
 from pandas.io.sql import read_sql
 from pyiem.plot import get_cmap, figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
-    (
-        ("trail_precip_percent", "Trailing XX Days Precip Percent of Average"),
-        ("daily_high_depart", "Daily High Temperature Departure"),
-    )
-)
+PDICT = {
+    "trail_precip_percent": "Trailing XX Days Precip Percent of Average",
+    "daily_high_depart": "Daily High Temperature Departure",
+}
 
 
 def get_description():
@@ -71,7 +69,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    from seaborn import heatmap
 
     ctx = get_autoplot_context(fdict, get_description())
     pgconn = get_dbconn("coop")
@@ -148,4 +145,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

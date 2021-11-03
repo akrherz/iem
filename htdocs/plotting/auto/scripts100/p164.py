@@ -1,6 +1,5 @@
 """NWSLI stations over/under"""
 import datetime
-from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 from pyiem.plot import figure_axes
@@ -8,7 +7,7 @@ from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-MDICT = OrderedDict(
+MDICT = dict(
     [
         ("high", "High Temperature"),
         ("low", "Low Temperature"),

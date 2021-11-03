@@ -1,6 +1,5 @@
 """Hourly temperature averages"""
 import datetime
-from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 from scipy import stats
@@ -9,9 +8,9 @@ from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict([("avg_tmpf", "Average Temperature")])
+PDICT = dict([("avg_tmpf", "Average Temperature")])
 UNITS = {"avg_tmpf": "F"}
-MDICT = OrderedDict(
+MDICT = dict(
     [
         ("all", "No Month Limit"),
         ("spring", "Spring (MAM)"),

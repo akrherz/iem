@@ -1,6 +1,5 @@
 """Map of Daily Summaries."""
 import datetime
-from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
@@ -12,7 +11,7 @@ from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
-PDICT2 = OrderedDict(
+PDICT2 = dict(
     (
         ("max_tmpf", "Max Air Temperature [F]"),
         ("min_tmpf", "Min Air Temperature [F]"),

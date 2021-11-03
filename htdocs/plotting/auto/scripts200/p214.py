@@ -1,5 +1,4 @@
 """Metric Something by Something."""
-from collections import OrderedDict
 import datetime
 
 from pandas.io.sql import read_sql
@@ -20,7 +19,7 @@ VDICT = {
     "sknt": "Wind Speed [kts]",
 }
 ADICT = {"min": "Minimum", "avg": "Average", "max": "Maximum"}
-MDICT = OrderedDict(
+MDICT = dict(
     [
         ("all", "No Month/Time Limit"),
         ("spring", "Spring (MAM)"),

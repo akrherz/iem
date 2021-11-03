@@ -132,6 +132,8 @@ def plotter(fdict):
         raise NoDataFound(
             f"Network Identifier {ctx['network']} is unknown to IEM"
         )
+    if ctx["network"].find("COOP") > -1:
+        raise NoDataFound("This plot type does not work for COOP.")
     tzname = ctx["_nt"].sts[station]["tzname"]
 
     df = get_data(ctx["network"], station, tzname, sdate).reset_index()
@@ -185,13 +187,9 @@ def plotter(fdict):
     )
 
     ax.set_title(
-        "[%s] %s\nRecent Time Series %s - %s"
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            pd.to_datetime(df.index.values[0]).strftime("%Y %b %-d"),
-            pd.to_datetime(df.index.values[-1]).strftime("%Y %b %-d"),
-        )
+        f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
+        f"Recent Time Series {pd.to_datetime(df.index.values[0]):%Y %b %-d} - "
+        f"{pd.to_datetime(df.index.values[-1]):%Y %b %-d}"
     )
     ax.grid(True)
     ax.text(
@@ -285,7 +283,7 @@ def plotter(fdict):
 
     ax.set_xlim(xmin, xmax)
     date_ticker(ax, pytz.timezone(tzname))
-    ax.set_xlabel("Plot Time Zone: %s" % (tzname,))
+    ax.set_xlabel(f"Plot Time Zone: {tzname}")
     ax.yaxis.set_major_locator(ticker.LinearLocator(9))
     ax2.yaxis.set_major_locator(ticker.LinearLocator(9))
     ax.grid(True)

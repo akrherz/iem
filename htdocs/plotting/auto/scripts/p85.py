@@ -1,13 +1,12 @@
 """Hourly Temp Frequencies"""
 import calendar
-from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot.use_agg import plt
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
+PDICT = dict(
     [("above", "At or Above Temperature"), ("below", "Below Temperature")]
 )
 
@@ -123,4 +122,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

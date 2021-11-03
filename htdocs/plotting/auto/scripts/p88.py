@@ -93,9 +93,7 @@ def plotter(fdict):
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
-    title = (
-        "[%s] %s %s-%s\nHourly Temp Departure " "(skies were %s vs all)"
-    ) % (
+    title = ("[%s] %s %s-%s\nHourly Temp Departure (skies were %s vs all)") % (
         station,
         ctx["_nt"].sts[station]["name"],
         max([ab.year, 1973]),
@@ -141,4 +139,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

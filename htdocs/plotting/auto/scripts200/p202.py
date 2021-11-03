@@ -1,7 +1,6 @@
 """Comparison of hourly values for one station."""
 import datetime
 import calendar
-from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
@@ -14,7 +13,7 @@ from pyiem.plot.use_agg import plt
 from pyiem.plot.util import fitbox
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
+PDICT = dict(
     [
         ("tmpf", "Air Temperature [F]"),
         ("dwpf", "Dew Point Temperature [F]"),
@@ -22,12 +21,10 @@ PDICT = OrderedDict(
         ("q", "Specific Humidity [g/kg]"),
     ]
 )
-PDICT2 = OrderedDict(
-    [
-        ("no", "Plot Daily Differences"),
-        ("yes", "Accumulate the Daily Differences"),
-    ]
-)
+PDICT2 = {
+    "no": "Plot Daily Differences",
+    "yes": "Accumulate the Daily Differences",
+}
 
 
 def get_description():
@@ -227,7 +224,7 @@ def plotter(fdict):
 
     # Plot selected year
     for i in range(1, 5):
-        year = ctx.get("y%s" % (i,))
+        year = ctx.get(f"y{i}")
         if year is None:
             continue
         df2 = df[df["year"] == year]
@@ -267,4 +264,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

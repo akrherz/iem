@@ -1,6 +1,5 @@
 """daily ranges"""
 import calendar
-from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 import numpy as np
@@ -9,7 +8,7 @@ from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
+PDICT = dict(
     [
         ("min_range", "Minimum Daily High to Low Temperature Range"),
         ("max_range", "Maximum Daily High to Low Temperature Range"),

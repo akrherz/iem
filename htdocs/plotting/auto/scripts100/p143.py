@@ -1,7 +1,6 @@
 """xy point plot of aridity"""
 import datetime
 import os
-from collections import OrderedDict
 
 import pandas as pd
 from scipy import stats
@@ -13,7 +12,7 @@ from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, mm2inch, c2f
 from pyiem.exceptions import NoDataFound
 
-STATIONS = OrderedDict(
+STATIONS = dict(
     [
         ("ames", "Central (Ames)"),
         ("cobs", "Central (COBS)"),
@@ -27,7 +26,7 @@ STATIONS = OrderedDict(
     ]
 )
 
-SDATES = OrderedDict(
+SDATES = dict(
     [
         ("nov1", "November 1"),
         ("jan1", "January 1"),
@@ -116,7 +115,7 @@ def load(dirname, location, sdate):
     fn = "%s/%s.met" % (dirname, location)
     if not os.path.isfile(fn):
         raise NoDataFound("File was not found.")
-    for line in open(fn):
+    for line in open(fn, encoding="utf8"):
         line = line.strip()
         if not line.startswith("19") and not line.startswith("20"):
             continue
@@ -321,4 +320,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

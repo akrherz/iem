@@ -1,6 +1,5 @@
 """Plot up some percentiles please."""
 import datetime
-from collections import OrderedDict
 
 import pytz
 import numpy as np
@@ -15,7 +14,7 @@ from pyiem.plot.use_agg import plt
 from pyiem.plot.util import fitbox
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
+PDICT = dict(
     [
         ("tmpf", "Air Temperature [F]"),
         ("dwpf", "Dew Point Temperature [F]"),
@@ -23,7 +22,7 @@ PDICT = OrderedDict(
         ("relh", "Relative Humidity [%]"),
     ]
 )
-PDICT2 = OrderedDict(
+PDICT2 = dict(
     [
         ("day", "Percentiles for Date:"),
         ("week", "Percentiles for Week of Year Near:"),

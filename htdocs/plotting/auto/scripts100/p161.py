@@ -1,13 +1,12 @@
 """Max Dewpoint"""
 import datetime
-from collections import OrderedDict
 
 from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-MDICT = OrderedDict(
+MDICT = dict(
     [
         ("all", "No Month/Time Limit"),
         ("spring", "Spring (MAM)"),
@@ -46,7 +45,7 @@ METRICS = {
     "pday": "Precipitation (inch)",
 }
 
-DIRS = OrderedDict([("aoa", "At or Above"), ("below", "Below")])
+DIRS = {"aoa": "At or Above", "below": "Below"}
 
 
 def get_description():

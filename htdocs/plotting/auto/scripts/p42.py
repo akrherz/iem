@@ -27,7 +27,6 @@ SELECT a.rank, d.valid, d.val from agg3 a, data d WHERE
   d.valid <= a.valid and d.valid >= a.lag_valid ORDER by d.valid;
 """
 import datetime
-from collections import OrderedDict
 
 import psycopg2.extras
 import pandas as pd
@@ -42,7 +41,7 @@ PDICT2 = {
     "dwpf": "Dew Point Temperature",
     "mslp": "Sea Level Pressure",
 }
-MDICT = OrderedDict(
+MDICT = dict(
     [
         ("all", "Entire Year"),
         ("spring", "Spring (MAM)"),
@@ -335,4 +334,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

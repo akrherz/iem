@@ -1,5 +1,4 @@
 """Daily Frequency of Some Threshold."""
-from collections import OrderedDict
 import datetime
 
 import matplotlib.dates as mdates
@@ -9,7 +8,7 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
+PDICT = dict(
     [
         ("high", "High Temp (F)"),
         ("low", "Low Temp (F)"),
@@ -18,9 +17,7 @@ PDICT = OrderedDict(
         ("snowd", "Snow Depth (inch)"),
     ]
 )
-PDICT2 = OrderedDict(
-    [("gte", "Greater than or equal to"), ("lt", "Less than")]
-)
+PDICT2 = dict([("gte", "Greater than or equal to"), ("lt", "Less than")])
 XREF = {"gte": ">=", "lt": "<"}
 PDICT3 = {
     "min": "Minimum",
@@ -163,4 +160,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

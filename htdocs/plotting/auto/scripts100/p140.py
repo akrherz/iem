@@ -1,5 +1,4 @@
 """Period stats"""
-from collections import OrderedDict
 import datetime
 
 import numpy as np
@@ -9,7 +8,7 @@ from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
+PDICT = dict(
     [
         ("avg_high_temp", "Average High Temperature"),
         ("range_high_temp", "Range of High Temperature"),

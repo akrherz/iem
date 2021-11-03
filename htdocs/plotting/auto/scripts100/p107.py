@@ -1,6 +1,5 @@
 """COOP period stats"""
 import datetime
-from collections import OrderedDict
 
 import numpy as np
 from pandas.io.sql import read_sql
@@ -9,7 +8,7 @@ from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = OrderedDict(
+PDICT = dict(
     [
         ("avg_high_temp", "Average High Temperature"),
         ("avg_low_temp", "Average Low Temperature"),
@@ -113,7 +112,7 @@ def nice(val):
     """nice printer"""
     if val == "M":
         return "M"
-    if val < 0.01 and val > 0:
+    if 0 < val < 0.01:
         return "Trace"
     return "%.2f" % (val,)
 
@@ -267,4 +266,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})
