@@ -12,7 +12,7 @@ LOG = logger()
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconn("iem", user="nobody")
+    pgconn = get_dbconn("iem")
     now = utc().replace(hour=0, minute=0, second=0, microsecond=0)
 
     df = read_sql(
@@ -55,8 +55,7 @@ def main():
         mp = MapPlot(
             sector=sector if len(sector) > 2 else "state",
             state=sector if len(sector) == 2 else "IA",
-            title="%s ASOS/AWOS 01-12 UTC Low Temperature"
-            % (now.strftime("%-d %b %Y"),),
+            title=f"{now:%-d %b %Y} ASOS/AWOS 01-12 UTC Low Temperature",
             subtitle=(
                 "includes available 6z and 12z 6-hr mins, "
                 "does not include 0z observation"
@@ -75,15 +74,17 @@ def main():
         mp.plot_values(
             df2["lon"].values,
             df2["lat"].values,
-            df2["low"],
+            df2["low"].values,
             fmt="%.0f",
             labels=labels,
             labelbuffer=1,
             textsize=size,
         )
         pqstr = (
-            "plot ac %s summary/%s_asos_12z_low.png " "%s_asos_12z_low.png png"
-        ) % (now.strftime("%Y%m%d%H%M"), sector.lower(), sector.lower())
+            f"plot ac {now:%Y%m%d%H%M} "
+            f"summary/{sector.lower()}_asos_12z_low.png "
+            f"{sector.lower()}_asos_12z_low.png png"
+        )
         LOG.debug(pqstr)
         mp.postprocess(pqstr=pqstr)
         mp.close()

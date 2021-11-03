@@ -245,7 +245,7 @@ def plotter(fdict):
             clevlabels=levlables,
             cmap=ctx["cmap"],
         )
-    mp.plot_values(df2["lon"], df2["lat"], df2["pdate"], labelbuffer=5)
+    mp.plot_values(df2["lon"], df2["lat"], df2["pdate"].values, labelbuffer=5)
     mp.drawcounties()
 
     return mp.fig, df[[YRGP[varname], "event", "doy"]]
