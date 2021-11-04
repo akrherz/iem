@@ -106,7 +106,7 @@ def plotter(fdict):
         rows.append(dict(wfo=wfo, days=row[1]))
         data[wfo] = max([row[1], 0])
     df = pd.DataFrame(rows)
-    df.set_index("wfo", inplace=True)
+    df = df.set_index("wfo")
 
     mp = MapPlot(
         sector="nws",
@@ -117,7 +117,7 @@ def plotter(fdict):
             vtec.get_ps_string(phenomena, significance),
             " (Emergency) " if ctx["e"] == "yes" else "",
         ),
-        subtitle="Valid %s" % (edate.strftime("%d %b %Y %H%M UTC"),),
+        subtitle=f"Valid {edate:%d %b %Y %H%M} UTC",
     )
     mp.fill_cwas(data, bins=bins, ilabel=True, units="Days", lblformat="%.0f")
 
@@ -125,4 +125,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

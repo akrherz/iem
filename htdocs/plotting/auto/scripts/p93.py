@@ -292,7 +292,7 @@ def plotter(fdict):
     ax2.set_yticklabels(["%.0f" % (s,) for s in np.arange(0, ymax, dy) / 24])
     ax2.set_ylabel("Expressed in 24 Hour Days")
     ax.set_ylabel("Hours Per Year")
-    ax.set_xlabel(r"%s $^\circ$F" % (VDICT[varname],))
+    ax.set_xlabel(f"{VDICT[varname]} " r"$^\circ$F")
     ax.legend(loc="best", scatterpoints=1)
     return fig, rdf
 

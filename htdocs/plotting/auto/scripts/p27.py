@@ -79,9 +79,9 @@ def plotter(fdict):
             fmt = "%b %-d" if ts.day == 1 else "%-d"
             xticklabels.append(ts.strftime(fmt))
 
-    title = ("[%s] %s\nFirst Fall Temperature Occurences") % (
-        station,
-        ctx["_nt"].sts[station]["name"],
+    title = (
+        f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
+        "First Fall Temperature Occurences"
     )
     (fig, ax) = figure_axes(title=title)
     ax.set_xticks(xticks)
@@ -118,4 +118,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

@@ -146,7 +146,7 @@ def plotter(fdict):
         fc="g",
         ec="g",
         zorder=1,
-        label="Daily %.2fin" % (daythres,),
+        label=f"Daily {daythres:.2f}in",
     )
     ax[0].bar(
         ctx["days"],
@@ -158,11 +158,10 @@ def plotter(fdict):
     )
     ax[0].legend(loc=2, ncol=2, fontsize=10)
     ax[0].set_title(
-        (
-            "IEM Estimated Areal Coverage Percent of %s\n"
-            " receiving daily %.2fin vs trailing %s day %.2fin"
-        )
-        % (reference.state_names[state], daythres, period, trailthres)
+        "IEM Estimated Areal Coverage Percent of "
+        f"{reference.state_names[state]}\n"
+        f" receiving daily {daythres:.2f}in vs trailing {period} "
+        f"day {trailthres:.2f}in"
     )
     ax[0].set_ylabel("Areal Coverage [%]")
     ax[0].grid(True)
@@ -173,15 +172,13 @@ def plotter(fdict):
     ax[1].grid(True)
     ax[1].set_ylabel("Areal Coverage [%]")
     ax[1].set_title(
-        (
-            "Percentage of Dry Area (tan) below (%.2fin over %s days)"
-            " got %.2fin precip (blue) that day"
-        )
-        % (trailthres, period, daythres),
+        f"Percentage of Dry Area (tan) below ({trailthres:.2f}in "
+        f"over {period} days)"
+        f" got {daythres:.2f}in precip (blue) that day",
         fontsize=12,
     )
     return fig, df
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

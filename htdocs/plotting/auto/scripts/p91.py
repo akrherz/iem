@@ -66,8 +66,7 @@ def plotter(fdict):
     station = ctx["station"]
     varname = ctx["var"]
 
-    table = "alldata_%s" % (station[:2],)
-    nt = network.Table("%sCLIMATE" % (station[:2],))
+    nt = network.Table(f"{station[:2]}CLIMATE")
 
     rows = []
     for dy in range(1, 32):
@@ -81,7 +80,7 @@ def plotter(fdict):
                 (ORDER by day ASC rows between %s preceding and current row),
             max({varname}) OVER
                 (ORDER by day ASC rows between %s preceding and current row)
-            from {table} where station = %s)
+            from alldata_{station[:2]} where station = %s)
         SELECT max(avg), min(avg), max(min), min(min), max(max), min(max)
         from data
         """,
@@ -165,4 +164,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

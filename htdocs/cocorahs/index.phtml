@@ -1,6 +1,6 @@
 <?php 
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 
 $t->title = "CoCoRaHS";
@@ -9,7 +9,7 @@ $t->content = <<<EOF
 
 <h3>Community Collaborative Rain, Hail, and Snow Network</h3>
 		
-<p><a href="http://cocorahs.org">CoCoRaHS</a> is a nationwide effort to collect
+<p><a href="https://cocorahs.org">CoCoRaHS</a> is a nationwide effort to collect
 	observations of rain, hail, and snowfall.  This network is a lot like the
 	<a href="/COOP/">NWS Cooperative Observer (COOP)</a> network, but is not
 	official.  The IEM collects the daily reports from this network and
@@ -18,8 +18,8 @@ $t->content = <<<EOF
 <ul>
 	<li><a href="current.phtml">Sortable Currents</a></li>
 	<li><a href="obs.phtml">View Observations by date or site</a></li>
-	<li><a href="http://iowa.cocorahs.org">Dedicated Iowa CoCoRaHS website</a></li>
-	<li><a href="http://iowa.cocorahs.org/map.phtml">Mapping App for Iowa Data</a></li>
+	<li><a href="https://iowa.cocorahs.org">Dedicated Iowa CoCoRaHS website</a></li>
+	<li><a href="https://iowa.cocorahs.org/map.phtml">Mapping App for Iowa Data</a></li>
 </ul>
 	
 EOF;

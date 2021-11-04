@@ -122,7 +122,7 @@ def plotter(fdict):
     )
     for i, _bar in enumerate(bars):
         value = df.loc[i + 1, "hits"]
-        label = "%.1f%%" % (_bar.get_height(),)
+        label = f"{_bar.get_height():.1f}%"
         if value == 0:
             label = "None"
         ax.text(
@@ -147,4 +147,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

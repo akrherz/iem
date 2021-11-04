@@ -106,7 +106,6 @@ def plotter(fdict):
             wanted.append(m - 12)
             deltas.append(-1)
 
-    table = "alldata_%s" % (station[:2],)
     nt = network.Table("%sCLIMATE" % (station[:2],))
 
     elnino = {}
@@ -118,7 +117,7 @@ def plotter(fdict):
 
     ccursor.execute(
         "SELECT year, month, sum(precip), avg((high+low)/2.) "
-        f"from {table} where station = %s GROUP by year, month",
+        f"from alldata_{station[:2]} where station = %s GROUP by year, month",
         (station,),
     )
     if ccursor.rowcount == 0:
@@ -155,14 +154,14 @@ def plotter(fdict):
     rows = []
     xs = []
     ys = []
-    for year in yearly:
-        x = yearly[year]["precip"]
-        y = np.average(yearly[year]["temp"])
+    for year, item in yearly.items():
+        x = item["precip"]
+        y = np.average(item["temp"])
         xs.append(x)
         ys.append(y)
         val = yearly[year]["nino"]
         c = cmap(norm([val])[0])
-        if h == "hide" and val > -0.5 and val < 0.5:
+        if h == "hide" and -0.5 < val < 0.5:
             ax.scatter(
                 x,
                 y,
@@ -241,4 +240,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

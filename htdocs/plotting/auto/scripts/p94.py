@@ -75,11 +75,9 @@ def plotter(fdict):
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
-    title = "[%s] %s %s-%s" % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-        ab.year,
-        datetime.date.today().year,
+    title = (
+        f"[{station}] {ctx['_nt'].sts[station]['name']} "
+        f"{ab.year}-{datetime.date.today().year}"
     )
     subtitle = "Bias of 24 Hour 'Day' Split for Average High + Low Temp"
     (fig, ax) = figure_axes(title=title, subtitle=subtitle)

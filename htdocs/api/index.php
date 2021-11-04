@@ -35,7 +35,7 @@ not be implied as an endorsement. Of course, you can just search google for
 two portals with information about IEM APIs:
 
 <ol>
- <li><a href="/json/">Legacy ad-hoc/legancy (Geo)JSON services</a>
+ <li><a href="/json/">Legacy ad-hoc/legacy (Geo)JSON services</a>
   <br />These have been around for a while and while they work, they are generally
   somewhat brittle.</li>
  <li><a href="/api/1/docs">IEM API v1 Documentation</a>

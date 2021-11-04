@@ -508,6 +508,7 @@ def do_ugc(ctx):
                 dict(days=days, valid=row[1], year=row[1].year, ugc=row[0])
             )
             data[row[0]] = row[1].year if varname == "lastyear" else days
+        ctx["lblformat"] = "%.0f"
         ctx["title"] = "%s-%s %s" % (
             sdate.strftime("%-d %b %Y"),
             edate.strftime("%-d %b %Y"),
@@ -515,7 +516,7 @@ def do_ugc(ctx):
         )
         datavar = "year" if varname == "lastyear" else "days"
     elif varname == "yearcount":
-        table = "warnings_%s" % (year,)
+        table = f"warnings_{year}"
         if t == "cwa":
             cursor.execute(
                 f"""
@@ -543,7 +544,8 @@ def do_ugc(ctx):
         for row in cursor:
             rows.append(dict(count=row[1], year=year, ugc=row[0]))
             data[row[0]] = row[1]
-        ctx["title"] = "Count for %s" % (year,)
+        ctx["title"] = f"Count for {year}"
+        ctx["lblformat"] = "%.0f"
         datavar = "count"
     elif varname == "total":
         if t == "cwa":
@@ -588,10 +590,10 @@ def do_ugc(ctx):
             )
             data[row[0]] = row[1]
         ctx["title"] = "Total"
-        ctx["subtitle"] = (" between %s and %s UTC") % (
-            sdate.strftime("%d %b %Y %H%M"),
-            edate.strftime("%d %b %Y %H%M"),
-        )
+        ctx[
+            "subtitle"
+        ] = f" between {sdate:%d %b %Y %H%M} and {edate:%d %b %Y %H%M} UTC"
+        ctx["lblformat"] = "%.0f"
         datavar = "count"
     elif varname == "hour":
         cursor.execute(
@@ -683,22 +685,20 @@ def do_ugc(ctx):
                 )
             )
             data[row[0]] = row[1]
-        ctx["title"] = ("Yearly Avg: %s and %s") % (
-            minv.strftime("%d %b %Y"),
-            maxv.strftime("%d %b %Y"),
-        )
+        ctx["title"] = f"Yearly Avg: {minv:%d %b %Y} and {maxv:%d %b %Y}"
+        ctx["lblformat"] = "%.2f"
         datavar = "count"
     elif varname.startswith("period"):
         if sdate.strftime("%m%d") > edate.strftime("%m%d"):
             daylimiter = (
-                f"and (to_char(issue, 'mmdd') >= '{sdate.strftime('%m%d')}' "
-                f"or to_char(issue, 'mmdd') < '{edate.strftime('%m%d')}') "
+                f"and (to_char(issue, 'mmdd') >= '{sdate:%m%d}' "
+                f"or to_char(issue, 'mmdd') < '{edate:%m%d}') "
             )
             (sdate, edate) = (edate, sdate)
         else:
             daylimiter = (
-                f"and to_char(issue, 'mmdd') >= '{sdate.strftime('%m%d')}' "
-                f"and to_char(issue, 'mmdd') < '{edate.strftime('%m%d')}' "
+                f"and to_char(issue, 'mmdd') >= '{sdate:%m%d}' "
+                f"and to_char(issue, 'mmdd') < '{edate:%m%d}' "
             )
         aggstat = varname.replace("period", "")
         if t == "cwa":
@@ -836,7 +836,7 @@ def plotter(fdict):
     elif geo == "polygon":
         do_polygon(ctx)
 
-    subtitle = "based on IEM Archives %s" % (ctx.get("subtitle", ""),)
+    subtitle = f"based on IEM Archives {ctx.get('subtitle', '')}"
     if t == "cwa":
         subtitle = "Plotted for %s (%s), %s" % (
             ctx["_nt"].sts[station]["name"],
@@ -844,7 +844,7 @@ def plotter(fdict):
             subtitle,
         )
     else:
-        subtitle = "Plotted for %s, %s" % (state_names[state], subtitle)
+        subtitle = f"Plotted for {state_names[state]}, {subtitle}"
     m = MapPlot(
         sector=("state" if t == "state" else "cwa"),
         state=state,
@@ -891,6 +891,7 @@ def plotter(fdict):
                 "",
                 "10 PM",
                 "",
+                "",
             ]
             m.fill_ugcs(
                 ctx["data"],
@@ -910,6 +911,7 @@ def plotter(fdict):
                 bins=ctx["bins"],
                 cmap=cmap,
                 ilabel=ilabel,
+                lblformat=ctx.get("lblformat", "%s"),
                 labelbuffer=1,  # Texas yall
                 is_firewx=(phenomena == "FW"),
             )
