@@ -296,7 +296,7 @@ def plotter(fdict):
         raise NoDataFound("No Data Found!")
     df = ctx["df"]
     title = "\n".join([ctx["title"], ctx["subtitle"]])
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     if ctx["w"] in ["fx", "both"] and "id" in df.columns:
         fxs = df["id"].unique()
         for fx in fxs:

@@ -165,7 +165,7 @@ def plotter(fdict):
         PDICT["%s_%s_%s" % (extrenum, varname, direction)],
         threshold,
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     # The present year value may be so low that it destorts the plot
     lastval = df2.iloc[-1]["count"]
     minval = df2[df2["count"] > lastval]["count"].min()

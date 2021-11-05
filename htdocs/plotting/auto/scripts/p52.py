@@ -99,7 +99,7 @@ def plotter(fdict):
         f"{sts:%-d %b %Y} through "
         f"{(ets - datetime.timedelta(days=1)):%-d %b %Y}"
     )
-    fig = figure(title=title)
+    fig = figure(title=title, apctx=ctx)
     ax = fig.add_axes([0.05, 0.08, 0.73, 0.82])
     if len(events) > 20:
         height = int(len(events) / 6.0) + 1

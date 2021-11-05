@@ -4,7 +4,7 @@ import datetime
 
 from pandas.io.sql import read_sql
 import pandas as pd
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn, convert_value
 from pyiem.exceptions import NoDataFound
 
@@ -263,7 +263,7 @@ def highcharts(fdict):
 def plotter(fdict):
     """Go"""
     ctx = get_context(fdict)
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = figure_axes(apctx=ctx)
     colors = [
         None,
         "k",

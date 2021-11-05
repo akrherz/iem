@@ -4,7 +4,7 @@ import datetime
 
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -98,8 +98,8 @@ def plotter(fdict):
     if df["best"].loc["0229"] is None:
         df = df.drop("0229")
 
-    fig = plt.figure(figsize=(8, 6))
-    ax = plt.axes([0.1, 0.1, 0.6, 0.8])
+    fig = figure(apctx=ctx)
+    ax = fig.add_axes([0.1, 0.1, 0.6, 0.8])
 
     ax.fill_between(
         range(len(df.index)),
@@ -136,7 +136,7 @@ def plotter(fdict):
             ("hrrr_srad", "merra_srad"),
         ]
     ):
-        ax3 = plt.axes([0.78, 0.1 + (0.3 * i), 0.2, 0.2])
+        ax3 = fig.add_axes([0.78, 0.1 + (0.3 * i), 0.2, 0.2])
 
         xmax = df[combo[0]].max()
         xlabel = combo[0].replace("_srad", "").upper()

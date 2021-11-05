@@ -10,8 +10,7 @@ import matplotlib.dates as mdates
 from matplotlib.patches import Patch
 from matplotlib.lines import Line2D
 from pyiem import meteorology
-from pyiem.plot.use_agg import plt
-from pyiem.plot import figure
+from pyiem.plot import figure, figure_axes
 from pyiem.util import convert_value, get_autoplot_context, get_dbconn, c2f
 from pyiem.exceptions import NoDataFound
 
@@ -87,7 +86,8 @@ def make_inversion_plot(ctx):
 
     axwidth = 0.88
     axheight = 0.25
-    (fig, axes) = plt.subplots(3, 1, figsize=(8, 8), sharex=True)
+    fig = figure(apctx=ctx)
+    axes = fig.subplots(3, 1, sharex=True)
     ax = axes[0]
     ax.set_position([0.07, 0.7, axwidth, axheight])
     ax.plot(df["valid"], c2f(df["tair_15_c_avg_qc"].values), label="1.5 feet")
@@ -183,7 +183,7 @@ def make_daily_pet_plot(ctx):
     if df.empty:
         raise NoDataFound("No Data Found!")
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = figure_axes(apctx=ctx)
     ax.bar(
         dates,
         o_dailyet,
@@ -248,7 +248,7 @@ def make_daily_rad_plot(ctx):
 
     df = pd.DataFrame(dict(dates=dates, vals=vals, jday=jday, tmax=tmax))
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = figure_axes(apctx=ctx)
     ax.bar(
         dates,
         vals,
@@ -295,7 +295,7 @@ def make_daily_rainfall_soil_rh(ctx):
     )
     subtitle = "Daily Precipitation, 4 Inch Soil Temperature, and Avg RH"
 
-    fig = figure(title=title, subtitle=subtitle)
+    fig = figure(title=title, subtitle=subtitle, apctx=ctx)
 
     def common(ax):
         """do common things."""
@@ -367,7 +367,7 @@ def make_daily_plot(ctx):
     mins = c2f(df["min"].values)
     maxs = c2f(df["max"].values)
     avgs = c2f(df["avg"].values)
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = figure_axes(apctx=ctx)
     ax.bar(
         df.index.values,
         maxs - mins,
@@ -425,7 +425,7 @@ def make_battery_plot(ctx):
         battv.append(row[1])
 
     df = pd.DataFrame(dict(dates=dates, battv=battv))
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    (fig, ax) = figure_axes(apctx=ctx)
     ax.plot(dates, battv)
     ax.grid(True)
     ax.set_ylabel("Battery Voltage [V]")
@@ -453,8 +453,8 @@ def make_vsm_histogram_plot(ctx):
         params=(ctx["station"], ctx["sts"], ctx["ets"]),
         index_col=None,
     )
-
-    (fig, ax) = plt.subplots(3, 1, sharex=True)
+    fig = figure(apctx=ctx)
+    ax = fig.subplots(3, 1, sharex=True)
     ax[0].set_title(
         (
             "ISUSM Station: %s VWC Histogram\n"
@@ -526,7 +526,8 @@ def make_daily_water_change_plot(ctx):
     )
     df["depth"] = df["v12"] * l1 + df["v24"] * l2 + df["v50"] * l3
 
-    (fig, ax) = plt.subplots(2, 1, sharex=True)
+    fig = figure(apctx=ctx)
+    ax = fig.subplots(2, 1, sharex=True)
     if not df["depth"].isnull().all():
         ax[0].plot(df["valid"].values, df["depth"], color="b", lw=2)
     oneday = datetime.timedelta(days=1)
@@ -604,7 +605,7 @@ def plot2(ctx):
     d04t = df["t4_c_avg_qc"]
     valid = df.index.values
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = figure_axes(apctx=ctx)
     ax.grid(True)
     ax.set_title(
         ("ISUSM Station: %s Timeseries\n" "Soil Temperature at Depth\n ")
@@ -676,7 +677,8 @@ def plot1(ctx):
     d04t = df["t4_c_avg_qc"]
     valid = df.index
 
-    (fig, ax) = plt.subplots(3, 1, sharex=True, figsize=(8, 8))
+    fig = figure(apctx=ctx)
+    ax = fig.subplots(3, 1, sharex=True)
     ax[0].grid(True)
     ax2 = ax[0].twinx()
     ax[0].set_zorder(ax2.get_zorder() + 1)

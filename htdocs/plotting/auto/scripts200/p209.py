@@ -4,7 +4,7 @@ import datetime
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.plot import get_cmap
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.reference import state_names
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -130,7 +130,7 @@ def plotter(fdict):
     bins[0] = 0.01
     norm = mpcolors.BoundaryNorm(bins, cmap.N)
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(6.4, 6.4))
+    (fig, ax) = figure_axes(apctx=ctx)
 
     yearmax = df[["year", "delta"]].groupby("year").max()
     for year, df2 in df.groupby("year"):

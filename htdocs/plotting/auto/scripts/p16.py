@@ -7,6 +7,7 @@ from windrose.windrose import histogram
 from windrose import WindroseAxes
 from matplotlib.patches import Rectangle
 from pyiem.util import get_autoplot_context, get_dbconn, drct2text
+from pyiem.plot import figure
 from pyiem.plot.use_agg import plt
 from pyiem.exceptions import NoDataFound
 
@@ -45,6 +46,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {}
     desc["data"] = True
+    desc["defaults"] = {"_r": "88"}
     desc[
         "description"
     ] = """This application generates a wind rose for a given
@@ -268,13 +270,9 @@ def get_context(fdict):
     minvalid = ctx["df"].index.min()
     maxvalid = ctx["df"].index.max()
 
-    ctx["plottitle"] = ("%s-%s %s Wind Rose, month=%s\n%s\nWhen  " "%s") % (
-        minvalid.year,
-        maxvalid.year,
-        ctx["station"],
-        ctx["month"].upper(),
-        ctx["_nt"].sts[ctx["station"]]["name"],
-        title,
+    ctx["plottitle"] = (
+        f"{minvalid.year}-{maxvalid.year} {ctx['station']} Wind Rose, "
+        f"month={ctx['month'].upper()}"
     )
     ctx["title"] = "%s-%s %s Wind Rose, month=%s" % (
         minvalid.year,
@@ -293,9 +291,14 @@ def plotter(fdict):
     """Go"""
     ctx = get_context(fdict)
 
-    fig = plt.figure(figsize=(6, 7.2), facecolor="w", edgecolor="w")
-    rect = [0.08, 0.1, 0.8, 0.8]
-    ax = WindroseAxes(fig, rect, facecolor="w")
+    fig = figure(
+        title=ctx["plottitle"],
+        subtitle=ctx["subtitle"],
+        facecolor="w",
+        edgecolor="w",
+        apctx=ctx,
+    )
+    ax = WindroseAxes(fig, [0.08, 0.15, 0.86, 0.7], facecolor="w")
     fig.add_axes(ax)
     ax.bar(
         ctx["df"]["drct"].values,
@@ -317,20 +320,17 @@ def plotter(fdict):
         ("2-5", "5-7", "7-10", "10-15", "15-20", "20+"),
         loc=(0.01, 0.03),
         ncol=6,
-        title="Wind Speed [%s]" % ("mph",),
+        title="Wind Speed [mph]",
         mode=None,
         columnspacing=0.9,
         handletextpad=0.45,
     )
     plt.setp(legend.get_texts(), fontsize=10)
 
-    plt.gcf().text(
-        0.5, 0.99, ctx["plottitle"], fontsize=16, ha="center", va="top"
-    )
-    plt.gcf().text(
+    fig.text(
         0.95,
         0.12,
-        "n=%s" % (len(ctx["df"].index),),
+        f"n={len(ctx['df'].index)}",
         verticalalignment="bottom",
         ha="right",
     )

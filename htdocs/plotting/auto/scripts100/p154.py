@@ -147,7 +147,7 @@ def plotter(fdict):
         df2.index.max(),
     )
     subtitle = "%s [%s]" % (PDICT[varname], MDICT[month])
-    (fig, ax) = figure_axes(title=title, subtitle=subtitle)
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     ax.bar(df2.index.values, df2[varname], align="center", ec="b", fc="b")
     m = df2[varname].mean()
     ax.axhline(m, lw=2, zorder=5, color="k")

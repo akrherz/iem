@@ -4,7 +4,7 @@ import datetime
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -92,7 +92,7 @@ def plotter(fdict):
     df = pd.DataFrame(res)
     df.set_index("level", inplace=True)
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(6, 8))
+    (fig, ax) = figure_axes(apctx=ctx)
     ax.barh(df.index.values, df["max"].values, label="Max", zorder=2)
     ax.barh(
         df.index.values, df["thisyear"].values, label="%s" % (year,), zorder=3

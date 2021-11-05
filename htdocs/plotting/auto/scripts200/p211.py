@@ -189,7 +189,7 @@ def make_precip_plot(ctx):
         ctx["_nt"].sts[ctx["zstation"]]["name"],
         ctx["zstation"],
     )
-    (fig, ax) = figure_axes(title=title, subtitle=subtitle)
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     ax.set_position([0.06, 0.1, 0.81, 0.78])
 
     ax.bar(

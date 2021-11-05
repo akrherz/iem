@@ -4,7 +4,7 @@ import datetime
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem import network
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -179,7 +179,8 @@ def plotter(fdict):
     # require values , not nan
     df = df[df[varname].notnull()]
 
-    (fig, ax) = plt.subplots(2, 1, figsize=(8, 6))
+    fig = figure(apctx=ctx)
+    ax = fig.subplots(2, 1)
 
     bars = ax[0].bar(df["yr"], df[varname], facecolor="r", edgecolor="r")
     thisvalue = "M"

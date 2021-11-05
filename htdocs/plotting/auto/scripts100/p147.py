@@ -2,7 +2,7 @@
 import calendar
 
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = dict(
@@ -91,7 +91,7 @@ def plotter(fdict):
     for _v in ["high", "low", "avgt", "precip"]:
         df["%s_freq[%%]" % (_v,)] = df["%s_hits" % (_v,)] / df["count"] * 100.0
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = figure_axes(apctx=ctx)
 
     ax.bar(df.index.values, df[pvar + "_freq[%]"], fc="r", ec="r")
     ax.axhline(df[pvar + "_freq[%]"].mean())

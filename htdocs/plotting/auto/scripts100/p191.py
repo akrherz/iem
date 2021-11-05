@@ -220,6 +220,7 @@ SELECT date(localissue), count(*) from events GROUP by date(localissue)
         sts,
         ets,
         data,
+        apctx=ctx,
         heatmap=(ctx["heatmap"] == "yes"),
         title=("Number of VTEC Events for %s by Local Calendar Date")
         % (title2,),

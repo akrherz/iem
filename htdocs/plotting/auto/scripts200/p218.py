@@ -19,6 +19,7 @@ TFORMAT = "%b %-d %Y %-I:%M %p %Z"
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {}
+    desc["defaults"] = {"_r": "t"}
     desc["cache"] = 3600
     desc["data"] = True
     desc[
@@ -217,7 +218,7 @@ def plotter(fdict):
         f"{ctx['date'].strftime('%-d %b %Y')} CLImate Report for "
         f"{ctx['station']} {nt.sts[ctx['station']]['name']}"
     )
-    fig = figure(title=title)
+    fig = figure(title=title, apctx=ctx)
 
     # High Temp
     fig.text(0.05, 0.85, "High Temperature", fontsize=24)

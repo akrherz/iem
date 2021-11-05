@@ -4,7 +4,7 @@ import datetime
 import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -129,7 +129,8 @@ def plotter(fdict):
     df["range_high_temp"] = df["max_high"] - df["min_high"]
     df["range_low_temp"] = df["max_low"] - df["min_low"]
 
-    (fig, ax) = plt.subplots(2, 1, figsize=(8, 6))
+    fig = figure(apctx=ctx)
+    ax = fig.subplots(2, 1)
 
     bars = ax[0].bar(
         df["yr"], df[varname], facecolor="r", edgecolor="r", align="center"

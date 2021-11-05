@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -62,7 +63,7 @@ def plotter(fdict):
     months2 = [x for x in monthsall if x < 7]
     months.extend(months2)
 
-    fig = plt.figure()
+    fig = figure(apctx=ctx)
     ax = [
         fig.add_axes([0.12, 0.56, 0.83, 0.32]),
         fig.add_axes([0.12, 0.1, 0.83, 0.32]),

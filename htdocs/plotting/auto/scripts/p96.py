@@ -5,7 +5,7 @@ import psycopg2.extras
 import numpy as np
 import pandas as pd
 import pytz
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -92,7 +92,7 @@ def plotter(fdict):
         )
 
     df = pd.DataFrame(rows)
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    (fig, ax) = figure_axes(apctx=ctx)
     acount = np.average(cnts)
     years = today.year - minvalid.year
     arc = (np.array(cnts) - acount) / float(years)

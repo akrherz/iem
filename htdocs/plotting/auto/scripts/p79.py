@@ -4,7 +4,7 @@ import datetime
 from pandas.io.sql import read_sql
 from metpy.units import units
 import metpy.calc as mcalc
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -125,7 +125,7 @@ def plotter(fdict):
         .m
     )
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = figure_axes(apctx=ctx)
     ax.bar(
         means.index.values,
         means["dwpf"].values,

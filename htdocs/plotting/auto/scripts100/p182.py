@@ -5,7 +5,7 @@ import os
 import numpy as np
 import geopandas as gpd
 from pyiem import iemre, util
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.reference import state_names
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.exceptions import NoDataFound
@@ -169,7 +169,7 @@ def plotter(fdict):
         x.append(np.sum(np.where(hits, 1, 0)) / float(cells) * 100.0)
         x2.append(np.sum(np.where(hits2, 1, 0)) / float(cells) * 100.0)
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = figure_axes(apctx=ctx)
     ax.set_title(
         ("%s NOAA MRMS %s %.2f inch Precip Coverage")
         % (state_names[sector], date.strftime("%-d %b %Y"), threshold)

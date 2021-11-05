@@ -70,7 +70,7 @@ def plotter(fdict):
         "Previous Min Low for Fall"
     ) % (station, ctx["_nt"].sts[station]["name"])
 
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.bar(df.index.values, 0 - df["largest_change"], fc="b", ec="b", zorder=1)
     ax.bar(
         year, 0 - df.at[year, "largest_change"], fc="red", ec="red", zorder=2

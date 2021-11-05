@@ -120,7 +120,7 @@ def plotter(fdict):
         significance,
         MDICT[ctx["season"]],
     )
-    (fig, ax) = figure_axes(title=title, subtitle=subtitle)
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
 
     tzname = ctx["_nt"].sts[wfo]["tzname"]
     df = read_sql(

@@ -175,7 +175,7 @@ def plotter(fdict):
         ab.year,
         datetime.datetime.now().year,
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.bar(df2["t"], df2["freq"], ec="green", fc="green", width=1)
     ax.grid(True, zorder=11)
     ax.set_ylabel(f"{PDICT[varname]} Frequency [%]")

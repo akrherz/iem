@@ -161,6 +161,7 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No data was found for your query")
     mp = MapPlot(
+        apctx=ctx,
         sector=("state" if ctx["t"] == "state" else "cwa"),
         state=ctx["state"],
         cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),

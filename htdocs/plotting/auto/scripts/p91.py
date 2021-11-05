@@ -105,7 +105,7 @@ def plotter(fdict):
         nt.sts[station]["name"],
         PDICT.get(varname),
     )
-    fig, ax = figure_axes(title=title)
+    fig, ax = figure_axes(title=title, apctx=ctx)
     if varname == "precip":
         ax.plot(
             np.arange(1, 32),

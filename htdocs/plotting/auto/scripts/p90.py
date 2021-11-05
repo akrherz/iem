@@ -846,6 +846,7 @@ def plotter(fdict):
     else:
         subtitle = f"Plotted for {state_names[state]}, {subtitle}"
     m = MapPlot(
+        apctx=ctx,
         sector=("state" if t == "state" else "cwa"),
         state=state,
         cwa=(station if len(station) == 3 else station[1:]),

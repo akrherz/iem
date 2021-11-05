@@ -157,7 +157,7 @@ def plotter(fdict):
         endyear - 2,
         addl,
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     bars = ax.bar(
         np.arange(5) - 0.2,

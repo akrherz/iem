@@ -172,7 +172,7 @@ def yearly_plot(ctx):
         ctx["station"],
         ctx["_nt"].sts[ctx["station"]]["name"],
     )
-    fig, ax = figure_axes(title=title)
+    fig, ax = figure_axes(title=title, apctx=ctx)
     ax.plot(df["yr"].values, df["data"].values, "bo-")
     ax.set_xlabel(META[ctx["plot_type"]].get("xlabel", "XLABEL"))
     ax.set_ylabel(META[ctx["plot_type"]].get("ylabel", "YLABEL"))

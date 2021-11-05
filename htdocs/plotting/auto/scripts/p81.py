@@ -3,7 +3,7 @@ import calendar
 
 from pandas.io.sql import read_sql
 from pyiem import network
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {"high": "High Temperature", "low": "Low Temperature"}
@@ -73,7 +73,8 @@ def plotter(fdict):
         index_col="doy",
     )
 
-    fig, ax = plt.subplots(2, 1, sharex=True, figsize=(8, 6))
+    fig = figure(apctx=ctx)
+    ax = fig.subplots(2, 1, sharex=True)
     ax[0].plot(
         df.index.values, df["doy_stddev"], lw=2, color="r", label="Single Day"
     )

@@ -195,7 +195,7 @@ def plotter(fdict):
             "Using Period of Record Simple Climatology",
         ]
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     suffix = f"_{which}" if ctx["opt"] == "number" else "_freq"
     avgv = df[varname + suffix].mean()
 

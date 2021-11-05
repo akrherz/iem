@@ -4,7 +4,7 @@ import datetime
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
 from pyiem import network
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -92,7 +92,8 @@ def plotter(fdict):
     df["high_sigma"] = (df["high"] - df["avg_high"]) / df["stddev_high"]
     df["low_sigma"] = (df["low"] - df["avg_low"]) / df["stddev_low"]
 
-    (fig, ax) = plt.subplots(2, 1, sharex=True, figsize=(8, 6))
+    fig = figure(apctx=ctx)
+    ax = fig.subplots(2, 1, sharex=True)
 
     ax[0].plot(
         df.index.values,

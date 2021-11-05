@@ -7,9 +7,8 @@ import pandas as pd
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
 from pyiem.exceptions import NoDataFound
-from pyiem.reference import TWITTER_RESOLUTION_INCH
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.plot import fitbox
 
 PDICT = {
@@ -215,7 +214,7 @@ def plotter(fdict):
             df[f"{v}2"] = df2[v]
             df[f"{v}diff"] = df[v] - df[f"{v}2"]
 
-    fig = plt.figure(figsize=TWITTER_RESOLUTION_INCH)
+    fig = figure(apctx=ctx)
 
     if station2 is not None:
         ax0 = fig.add_axes([0.05, 0.15, 0.43, 0.75])

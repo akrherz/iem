@@ -155,7 +155,7 @@ def plotter(fdict):
         station,
         date.strftime("%-d %B"),
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.scatter(df["before"].values, df["after"].values)
     ax.set_xlim(left=-0.1)
     ax.set_ylim(bottom=-0.1)

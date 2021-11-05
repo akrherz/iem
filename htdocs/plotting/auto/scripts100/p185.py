@@ -101,6 +101,7 @@ def plotter(fdict):
         lat = nc.variables["lat"][jslice]
 
     mp = MapPlot(
+        apctx=ctx,
         sector="state",
         state=sector,
         titlefontsize=14,

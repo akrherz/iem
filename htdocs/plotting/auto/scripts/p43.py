@@ -6,6 +6,7 @@ import matplotlib.dates as mdates
 from matplotlib import ticker
 import pandas as pd
 from pandas.io.sql import read_sql
+from pyiem.plot import figure
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
@@ -46,6 +47,7 @@ def date_ticker(ax, mytz):
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {}
+    desc["defaults"] = {"_r": "88"}
     desc["data"] = True
     desc["cache"] = 360
     desc[
@@ -159,7 +161,7 @@ def plotter(fdict):
 
     df["ceiling"] = df.apply(ceilingfunc, axis=1)
 
-    fig = plt.figure(figsize=(9, 9))
+    fig = figure(apctx=ctx)
     xalign = 0.1
     xwidth = 0.8
     ax = fig.add_axes([xalign, 0.7, xwidth, 0.25])

@@ -4,9 +4,7 @@ import datetime
 import numpy as np
 from pandas.io.sql import read_sql
 from matplotlib.patches import Rectangle
-from pyiem.reference import TWITTER_RESOLUTION_INCH
-from pyiem.plot import get_cmap
-from pyiem.plot.use_agg import plt
+from pyiem.plot import get_cmap, figure
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
 
@@ -63,9 +61,9 @@ def get_description():
 
 def plot_sky(days, vsby, data, station, ctx, sts):
     """Sky plot variant."""
-    fig = plt.figure(figsize=TWITTER_RESOLUTION_INCH)
+    fig = figure(apctx=ctx)
     # vsby plot
-    ax = plt.axes([0.1, 0.08, 0.8, 0.03])
+    ax = fig.add_axes([0.1, 0.08, 0.8, 0.03])
     ax.set_xticks(np.arange(0, int(days * 24) - 1, 24))
     ax.set_xticklabels(np.arange(1, days + 1))
     ax.set_yticks([])
@@ -79,12 +77,12 @@ def plot_sky(days, vsby, data, station, ctx, sts):
         cmap=cmap,
         vmax=10,
     )
-    cax = plt.axes([0.915, 0.08, 0.035, 0.2])
+    cax = fig.add_axes([0.915, 0.08, 0.035, 0.2])
     fig.colorbar(res, cax=cax)
     fig.text(0.02, 0.09, "Visibility\n[miles]", va="center")
 
     # clouds
-    ax = plt.axes([0.1, 0.16, 0.8, 0.7])
+    ax = fig.add_axes([0.1, 0.16, 0.8, 0.7])
     ax.set_facecolor("skyblue")
     ax.set_xticks(np.arange(0, int(days * 24) - 1, 24))
     ax.set_xticklabels(np.arange(1, days + 1))
@@ -138,7 +136,7 @@ def plot_sky(days, vsby, data, station, ctx, sts):
 
 def plot_vsby(days, vsby, station, ctx, sts):
     """Sky plot variant."""
-    fig = plt.figure(figsize=TWITTER_RESOLUTION_INCH)
+    fig = figure(apctx=ctx)
 
     # need to convert vsby to 2-d
     data = np.ones((100, days * 24)) * -3
@@ -152,7 +150,7 @@ def plot_vsby(days, vsby, station, ctx, sts):
     data = np.ma.array(data, mask=np.where(data < -1, True, False))
 
     # clouds
-    ax = plt.axes([0.1, 0.1, 0.8, 0.8])
+    ax = fig.add_axes([0.1, 0.1, 0.8, 0.8])
     ax.set_facecolor("skyblue")
     ax.set_xticks(np.arange(1, days * 24 + 1, 24))
     ax.set_xticklabels(np.arange(1, days + 1))
@@ -179,12 +177,12 @@ def plot_vsby(days, vsby, station, ctx, sts):
         vmin=0,
         vmax=10,
     )
-    cax = plt.axes([0.915, 0.08, 0.035, 0.2])
+    cax = fig.add_axes([0.915, 0.08, 0.035, 0.2])
     fig.colorbar(res, cax=cax)
     ax.set_yticks(range(0, 101, 10))
     ax.set_yticklabels(range(0, 11, 1))
     ax.set_ylabel("Visibility [miles]")
-    fig.text(0.45, 0.02, "Day of %s (UTC Timezone)" % (sts.strftime("%b %Y"),))
+    fig.text(0.45, 0.02, f"Day of {sts:%b %Y} (UTC Timezone)")
 
     ax.grid(True)
 

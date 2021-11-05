@@ -4,7 +4,7 @@ import calendar
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem import network
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -110,7 +110,8 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No Data Found.")
 
-    (fig, ax) = plt.subplots(2, 1, sharex=True)
+    fig = figure(apctx=ctx)
+    ax = fig.subplots(2, 1, sharex=True)
 
     ax[0].plot(np.arange(1, 366), df["d1"], c="r", label="No Rain")
     ax[0].plot(

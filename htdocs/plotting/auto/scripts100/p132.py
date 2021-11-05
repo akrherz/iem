@@ -3,7 +3,7 @@ import datetime
 import calendar
 
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -186,8 +186,8 @@ def plotter(fdict):
             )
         ylabels.append(lbl)
 
-    ax = plt.axes([0.1, 0.1, 0.5, 0.8])
-    plt.gcf().set_size_inches(8, 6)
+    fig = figure(apctx=ctx)
+    ax = fig.add_axes([0.1, 0.1, 0.5, 0.8])
     ax.barh(
         range(10, 0, -1),
         df[varname],
@@ -228,7 +228,7 @@ def plotter(fdict):
         size=12,
     )
 
-    return plt.gcf(), df
+    return fig, df
 
 
 if __name__ == "__main__":

@@ -21,6 +21,7 @@ WFOCONV = {"JSJ": "SJU"}
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {}
+    desc["defaults"] = {"_r": "t"}
     desc["cache"] = 3600
     desc["data"] = True
     desc[
@@ -97,6 +98,7 @@ def plotter(fdict):
     else:
         bounds = row["geom"].bounds
     mp = MapPlot(
+        apctx=ctx,
         title=(
             f"{wfo} Special Weather Statement (SPS) "
             f"till {expire.strftime(TFORMAT)}"

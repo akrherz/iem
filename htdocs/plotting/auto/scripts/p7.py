@@ -7,8 +7,7 @@ import pandas as pd
 import matplotlib.dates as mdates
 import matplotlib.colors as mpcolors
 from pyiem import network
-from pyiem.plot import get_cmap
-from pyiem.plot.use_agg import plt
+from pyiem.plot import get_cmap, figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -148,7 +147,8 @@ def plotter(fdict):
     bins = np.arange(bmin, bmax + 1.1)
     norm = mpcolors.BoundaryNorm(bins, cmap.N)
 
-    ax = plt.axes([0.125, 0.125, 0.75, 0.75])
+    fig = figure(apctx=ctx)
+    ax = fig.add_axes([0.125, 0.125, 0.75, 0.75])
     bars = ax.bar(days2, heights, bottom=starts, fc="#EEEEEE")
     for i, mybar in enumerate(bars):
         if success[i]:
@@ -177,7 +177,9 @@ def plotter(fdict):
         )
     )
 
-    ax2 = plt.axes([0.92, 0.1, 0.07, 0.8], frameon=False, yticks=[], xticks=[])
+    ax2 = fig.add_axes(
+        [0.92, 0.1, 0.07, 0.8], frameon=False, yticks=[], xticks=[]
+    )
     ax2.set_xlabel("Days")
     for i, mybin in enumerate(bins):
         ax2.text(0.52, i, "%g" % (mybin,), ha="left", va="center", color="k")
@@ -192,8 +194,8 @@ def plotter(fdict):
     )
     ax2.set_xlim(0, 1)
 
-    return plt.gcf(), df
+    return fig, df
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

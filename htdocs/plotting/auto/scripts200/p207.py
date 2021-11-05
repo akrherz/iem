@@ -385,6 +385,7 @@ def plotter(fdict):
     if ctx["v"] == "ice":
         title = "NWS Local Storm Reports of Freezing Rain + Ice"
     mp = MapPlot(
+        apctx=ctx,
         sector=sector,
         twitter=True,
         state=ctx["csector"],

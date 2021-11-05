@@ -4,7 +4,7 @@ import datetime
 from pandas.io.sql import read_sql
 import pandas as pd
 import numpy as np
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -205,8 +205,8 @@ def plotter(fdict):
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
+    fig = figure(apctx=ctx)
     if whichplots == "all":
-        fig = plt.figure(figsize=(9, 12))
         ax1 = fig.add_axes([0.1, 0.7, 0.8, 0.2])
         ax2 = fig.add_axes(
             [0.1, 0.6, 0.8, 0.1], sharex=ax1, facecolor="#EEEEEE"
@@ -218,19 +218,16 @@ def plotter(fdict):
             gddceil,
         )
     elif whichplots == "gdd":
-        fig = plt.figure()
         ax1 = fig.add_axes([0.14, 0.31, 0.8, 0.57])
         ax2 = fig.add_axes(
             [0.14, 0.11, 0.8, 0.2], sharex=ax1, facecolor="#EEEEEE"
         )
         title = ("GDD(base=%.0f,ceil=%.0f)") % (gddbase, gddceil)
     elif whichplots == "precip":
-        fig = plt.figure()
         ax3 = fig.add_axes([0.1, 0.11, 0.8, 0.75])
         ax1 = ax3
         title = "Precipitation"
     elif whichplots == "sdd":
-        fig = plt.figure()
         ax4 = fig.add_axes([0.1, 0.1, 0.8, 0.8])
         ax1 = ax4
         title = "Stress Degree Days (base=86)"

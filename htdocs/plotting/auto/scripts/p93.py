@@ -236,7 +236,7 @@ def plotter(fdict):
         title,
         inctitle,
     )
-    fig, ax = figure_axes(title=title)
+    fig, ax = figure_axes(title=title, apctx=ctx)
     ax.set_position([0.06, 0.1, 0.64, 0.8])
     yloc = 1.0
     xloc = 1.13

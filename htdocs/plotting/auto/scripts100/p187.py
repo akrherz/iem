@@ -2,7 +2,7 @@
 
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -81,7 +81,7 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No Data Found.")
 
-    fig = plt.figure(figsize=(6, 7.5))
+    fig = figure(apctx=ctx)
     ax = fig.add_axes([0.13, 0.52, 0.78, 0.4])
     meanval = df["percentile"].mean()
     bars = ax.bar(df.index.values, df["percentile"], color="b")

@@ -92,7 +92,7 @@ def plotter(fdict):
         station,
         varname.title(),
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     total = decrease + nochange + increase
     total2 = decrease2 + nochange2 + increase2

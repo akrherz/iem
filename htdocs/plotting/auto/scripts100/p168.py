@@ -5,7 +5,7 @@ import datetime
 from pandas.io.sql import read_sql
 import numpy as np
 from pyiem import util
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
 
@@ -61,7 +61,7 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No data found!")
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(6, 8))
+    (fig, ax) = figure_axes(apctx=ctx)
     current = {
         "d2000": datetime.date(2000, 1, 1),
         "date": datetime.date(2000, 1, 1),

@@ -8,7 +8,7 @@ import pandas as pd
 from geopandas import read_postgis
 import matplotlib.image as mpimage
 from pyiem.util import get_autoplot_context, get_dbconn, utc
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.plot.util import fitbox
 from pyiem.nws.vtec import VTEC_PHENOMENA
 
@@ -33,6 +33,7 @@ COLORS = {"SV": "#ffff00", "TO": "#ff0000", "FF": "#00ff00", "MA": "#00ff00"}
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {}
+    desc["defaults"] = {"_r": None}
     desc["data"] = True
     desc["text"] = True
     desc["cache"] = 600
@@ -42,6 +43,9 @@ def get_description():
     ] = """
     This application generates a visual summary of polygons issued for a given
     UTC date.
+
+    <p>Due to the plot's oblong nature, there is no present way to control the
+    plot's resolution.
     """
     today = datetime.date.today()
     desc["arguments"] = [
@@ -147,8 +151,8 @@ def plotter(fdict):
     if rows == 0:
         rows = 1
     ypixels = (rows * thumbpx) + header
-    fig = plt.figure(figsize=(thumbpx * cols / 100.0, ypixels / 100.0))
-    plt.axes([0, 0, 1, 1], facecolor="black")
+    fig = figure(figsize=(thumbpx * cols / 100.0, ypixels / 100.0), apctx=ctx)
+    fig.add_axes([0, 0, 1, 1], facecolor="black")
 
     imagemap = StringIO()
     utcnow = utc()
@@ -227,7 +231,7 @@ def plotter(fdict):
         col = i % 10
         if col == 0:
             ybottom -= dy
-        ax = plt.axes(
+        ax = fig.add_axes(
             [col * 0.1, ybottom, 0.1, dy],
             facecolor="black",
             xticks=[],
@@ -304,7 +308,7 @@ def plotter(fdict):
         )
         i += 1
 
-    faux = plt.axes([0, 0, 1, 1], facecolor="None", zorder=100)
+    faux = fig.add_axes([0, 0, 1, 1], facecolor="None", zorder=100)
     for i in range(1, rows):
         faux.axhline(i * dy, lw=1.0, color="blue")
 

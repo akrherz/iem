@@ -100,7 +100,7 @@ def plotter(fdict):
         datetime.date.today().year,
         PDICT[ctx["which"]],
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     maxv = np.ceil(max([np.max(data), 0 - np.min(data)])) + 0.2
     cs = ax.imshow(

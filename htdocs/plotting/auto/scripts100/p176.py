@@ -177,7 +177,9 @@ def plotter(fdict):
     """Go"""
     ctx = get_context(fdict)
 
-    (fig, ax) = figure_axes(title=ctx["title"], subtitle=ctx["subtitle"])
+    (fig, ax) = figure_axes(
+        title=ctx["title"], subtitle=ctx["subtitle"], apctx=ctx
+    )
     df2 = ctx["df"][ctx["df"]["margin"] > 0]
     ax.scatter(df2["date"].values, df2["margin"].values, color="r")
 

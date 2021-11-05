@@ -105,7 +105,7 @@ def plotter(fdict):
         calendar.month_name[month],
         df["hit"].sum() / float(df["total"].sum()) * len(df.index),
     )
-    fig, ax = figure_axes(title=title)
+    fig, ax = figure_axes(title=title, apctx=ctx)
     bars = ax.bar(np.arange(1, len(df.index) + 1), df["freq"])
     for i, mybar in enumerate(bars):
         ax.text(

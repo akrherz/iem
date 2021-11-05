@@ -66,7 +66,7 @@ def plotter(fdict):
         "[%s] %s Period Between\nAverage Last and "
         "First High Temperature of Year"
     ) % (station, nt.sts[station]["name"])
-    fig = figure(title=title)
+    fig = figure(title=title, apctx=ctx)
     ax = fig.add_axes([0.1, 0.1, 0.7, 0.8])
     ax2 = fig.add_axes([0.81, 0.1, 0.15, 0.8])
     height = df["min_jday"][:] + 365.0 - df["max_jday"]

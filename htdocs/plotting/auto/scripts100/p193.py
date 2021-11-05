@@ -86,7 +86,6 @@ def get_description():
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
-    csector = ctx["csector"]
     date = ctx["date"]
     z = ctx["z"]
     period = ctx["f"]
@@ -117,8 +116,7 @@ def plotter(fdict):
         ),
     )
     mp = MapPlot(
-        sector=("state" if len(csector) == 2 else csector),
-        state=ctx["csector"],
+        apctx=ctx,
         title=title,
         subtitle=subtitle,
         continentalcolor="white",

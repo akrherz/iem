@@ -215,7 +215,14 @@ def plotter(fdict):
         edate.strftime("%-d %b %Y"),
     )
 
-    fig = calendar_plot(sdate, edate, data, title=title, subtitle=subtitle)
+    fig = calendar_plot(
+        sdate,
+        edate,
+        data,
+        title=title,
+        subtitle=subtitle,
+        apctx=ctx,
+    )
     if varname == "max_rstage":
         add_stages_legend(fig, stagevals)
     return fig, df

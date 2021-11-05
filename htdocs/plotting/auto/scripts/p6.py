@@ -120,7 +120,7 @@ def plotter(fdict):
         PDICT[ptype],
         len(df.index),
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     _, bins, _ = ax.hist(
         df[ptype].dropna(), 20, fc="lightblue", ec="lightblue", density=1
     )

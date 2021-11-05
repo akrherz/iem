@@ -5,7 +5,7 @@ import pytz
 import numpy as np
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 
 
@@ -423,9 +423,8 @@ def plotter(fdict):
     """Go"""
     ctx = get_context(fdict)
 
-    (fig, [ax1, ax2, ax3, ax4]) = plt.subplots(
-        4, 1, figsize=(12, 10), sharex=True
-    )
+    fig = figure(apctx=ctx)
+    [ax1, ax2, ax3, ax4] = fig.subplots(4, 1, sharex=True)
     for height in [5, 10, 20, 40, 80, 120]:
         x = "_1" if height == 120 else ""
         ax1.plot(

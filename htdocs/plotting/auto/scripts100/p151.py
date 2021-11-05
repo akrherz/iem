@@ -380,6 +380,7 @@ def plotter(fdict):
     df2 = df.iloc[int(len(df.index) * 0.05) :]
 
     mp = MapPlot(
+        apctx=ctx,
         sector=sector,
         state=state,
         axisbg="white",

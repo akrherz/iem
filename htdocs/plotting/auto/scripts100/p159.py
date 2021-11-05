@@ -4,7 +4,7 @@ import datetime
 from matplotlib.ticker import MaxNLocator
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.exceptions import NoDataFound
 
 MDICT = dict(
@@ -153,7 +153,8 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("Error, no results returned!")
 
-    (fig, ax) = plt.subplots(2, 1, figsize=(8, 6))
+    fig = figure(apctx=ctx)
+    ax = fig.subplots(2, 1)
     ydf = df.groupby("year").sum()
     ax[0].set_title(
         ("(%s) %s Hours %s %s%s\n" "%s [%s] (%.0f-%.0f)")

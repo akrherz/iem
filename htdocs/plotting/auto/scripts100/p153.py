@@ -5,7 +5,7 @@ import pandas as pd
 from pandas.io.sql import read_sql
 from matplotlib.font_manager import FontProperties
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
 PDICT = dict(
@@ -174,7 +174,7 @@ def plotter(fdict):
     y0 = 0.1
     yheight = 0.8
     dy = yheight / 24.0
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 8))
+    (fig, ax) = figure_axes(apctx=ctx)
     ax.set_position([0.12, y0, 0.57, yheight])
     ax.barh(df["hr"], df[varname], align="center")
     ax.set_ylim(-0.5, 23.5)
@@ -229,7 +229,7 @@ def plotter(fdict):
         fontproperties=font1,
     )
 
-    return plt.gcf(), df
+    return fig, df
 
 
 if __name__ == "__main__":

@@ -125,7 +125,7 @@ def plotter(fdict):
         threshold,
         r"$^\circ$F" if varname != "precip" else "inch",
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     avgv = df[season].mean()
 
     colorabove = "r"

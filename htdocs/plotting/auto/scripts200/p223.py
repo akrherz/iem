@@ -96,7 +96,7 @@ def plotter(fdict):
         f"Days {PDICT[ctx['w']]}"
     )
 
-    fig, ax = figure_axes(title=title)
+    fig, ax = figure_axes(title=title, apctx=ctx)
     ax.set_ylabel("Frequency [%]")
     ax.grid(True)
     if ctx["w"] == "month":

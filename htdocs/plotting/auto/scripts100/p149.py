@@ -4,7 +4,7 @@ import datetime
 from pandas.io.sql import read_sql
 import numpy as np
 import matplotlib.dates as mdates
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -159,7 +159,7 @@ def plotter(fdict):
     df["aridity"] = df["t"] - df["p"]
     df["aridity2"] = df["t2"] - df["p2"]
     df["aridity3"] = df["t3"] - df["p3"]
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = figure_axes(apctx=ctx)
 
     if year2 is None:
         df2 = df.loc[sts:ets]

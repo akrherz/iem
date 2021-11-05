@@ -88,7 +88,7 @@ def plotter(fdict):
         station,
         ctx["_nt"].sts[station]["name"],
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     x, y = np.meshgrid(np.arange(-0.5, 12.5, 1), np.arange(-0.5, 12.5, 1))
     res = ax.pcolormesh(x, y, np.transpose(matrix))
     for i in range(12):

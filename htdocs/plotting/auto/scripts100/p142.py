@@ -6,6 +6,7 @@ import requests
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
 from matplotlib.patches import Rectangle
+from pyiem.plot import figure_axes
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -238,7 +239,7 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No Data Found.")
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    (fig, ax) = figure_axes(apctx=ctx)
     ax.set_position([0.1, 0.14, 0.85, 0.71])
 
     (l1,) = ax.plot(

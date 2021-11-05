@@ -107,8 +107,7 @@ def plotter(fdict):
 
     griddelta = 0.1
     mp = MapPlot(
-        sector=("state" if len(csector) == 2 else csector),
-        state=ctx["csector"],
+        apctx=ctx,
         title=('%s at or above "%s" %s - %s')
         % (
             PDICT2[ctx["w"]],

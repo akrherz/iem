@@ -5,7 +5,7 @@ import numpy as np
 from pandas.io.sql import read_sql
 from scipy import stats
 from pyiem import network
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -130,7 +130,7 @@ def plotter(fdict):
 
     xvals = df[varname + "_before"].values
     yvals = df[varname + "_after"].values
-    fig, ax = plt.subplots(1, 1, sharex=True, figsize=(8, 6))
+    fig, ax = figure_axes(apctx=ctx)
     ax.scatter(xvals, yvals, zorder=2)
     if year in df.index:
         row = df.loc[year]

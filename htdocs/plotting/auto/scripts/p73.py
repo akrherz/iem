@@ -167,7 +167,7 @@ def plotter(fdict):
         phenomena,
         significance,
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.bar(df["yr"], df["count"], align="center")
     ax.set_xlim(df["yr"].min() - 0.5, df["yr"].max() + 0.5)
     ymax = df["count"].max()

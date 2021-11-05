@@ -100,7 +100,7 @@ def plotter(fdict):
         days2,
     )
 
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     interval = datetime.timedelta(days=days2)
 

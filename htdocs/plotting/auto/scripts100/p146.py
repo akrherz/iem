@@ -77,7 +77,7 @@ def plotter(fdict):
         ab.year,
         datetime.date.today().year,
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     bins = np.arange(df["avgt"].min() - 5, df["avgt"].max() + 5, 2)
     H, xedges, yedges = np.histogram2d(

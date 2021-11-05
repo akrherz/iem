@@ -123,7 +123,7 @@ def plotter(fdict):
         hours,
         PDICT[varname],
     )
-    (fig, ax) = figure_axes(title=title, subtitle=subtitle)
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     res = ax.pcolormesh((xedges - 1) * 7, yedges, hist.transpose())
     fig.colorbar(res, label="Hours per Day")
     ax.grid(True)

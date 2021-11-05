@@ -145,7 +145,7 @@ def plotter(fdict):
     )
     if days > 1:
         subtitle += f" {PDICT3[func]} over inclusive forward {days} days"
-    (fig, ax) = figure_axes(title=title, subtitle=subtitle)
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     ax.bar(df.index.values, df["freq"], ec="b", fc="b")
     ax.set_xlim(
         df.index.min() - datetime.timedelta(days=1),

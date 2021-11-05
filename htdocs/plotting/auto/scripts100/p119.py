@@ -146,7 +146,7 @@ def plotter(fdict):
         bs.year,
         datetime.date.today().year,
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     for base in thresholds:
         ax.plot(
             df["dates"].values,

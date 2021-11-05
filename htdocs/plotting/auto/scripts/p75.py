@@ -107,7 +107,7 @@ def plotter(fdict):
         max(years),
         PDICT2[season],
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     avgv = np.average(data)
 
     colorabove = "seagreen"

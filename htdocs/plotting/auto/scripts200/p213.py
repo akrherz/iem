@@ -10,7 +10,7 @@ from matplotlib.colorbar import ColorbarBase
 
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot import get_cmap
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.plot.util import fitbox
 from pyiem.exceptions import NoDataFound
 
@@ -173,7 +173,7 @@ def plotter(fdict):
         .reset_index()
     )
     qtile = qtile.rename(columns={"level_1": "quantile"})
-    fig = plt.figure(figsize=(1.91 * 6.0, 6.0))  # twitter friendly
+    fig = figure(apctx=ctx)
     tp = fig.add_axes([0.1, 0.57, 0.5, 0.33])
     bp = fig.add_axes([0.1, 0.13, 0.6, 0.35])
     # Plot total percentiles on the figure

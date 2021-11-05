@@ -135,7 +135,7 @@ def plotter(fdict):
         beats / float(np.shape(data)[0] - 1) * 100.0,
     )
 
-    (fig, ax) = figure_axes(title=title, subtitle=subtitle)
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
 
     for yr in range(np.shape(data)[0] - 1):
         ax.plot(np.arange(1, days + 1), avgs[yr, :], zorder=1, color="tan")

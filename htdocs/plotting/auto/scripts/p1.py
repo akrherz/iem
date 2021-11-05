@@ -232,7 +232,7 @@ def plotter(fdict):
         nt.sts[station]["name"],
         station,
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.scatter(
         resdf[varname1 + "_1"],
         resdf[varname2 + "_2"],

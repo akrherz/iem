@@ -3,6 +3,7 @@ import datetime
 
 from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.reference import state_names
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -163,7 +164,7 @@ def plotter(fdict):
 
     gdf = df.set_index(["hailtag", "windtag"])
 
-    (fig, ax) = plt.subplots(figsize=(8, 6))
+    (fig, ax) = figure_axes(apctx=ctx)
     for (hailtag, windtag), row in gdf.iterrows():
         y = uniquehail.index(hailtag)
         x = uniquewind.index(windtag)

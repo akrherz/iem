@@ -160,7 +160,7 @@ def plotter(fdict):
         station,
         ab.year,
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     colors = itertools.cycle(["r", "g", "b", "c", "m", "y"])
     for col in df.columns:
         if col == "doy":

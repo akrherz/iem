@@ -176,8 +176,11 @@ def get_mckey(scriptnum, fdict, fmt):
     vals = []
     for key in fdict:
         # Internal app controls should not be used on the memcache key
-        if not key.startswith("_"):
-            vals.append("%s:%s" % (key, fdict[key]))
+        # except when they should be, sigh
+        if not key.startswith("_") or key in [
+            "_r",
+        ]:
+            vals.append(f"{key}:{fdict[key]}")
     return (
         "/plotting/auto/plot/%s/%s.%s" % (scriptnum, "::".join(vals), fmt)
     ).replace(" ", "")

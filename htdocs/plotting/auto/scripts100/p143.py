@@ -8,7 +8,7 @@ from pandas.io.sql import read_sql
 import matplotlib.patheffects as PathEffects
 from metpy.units import units
 from pyiem.meteorology import gdd
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn, mm2inch, c2f
 from pyiem.exceptions import NoDataFound
 
@@ -210,7 +210,7 @@ def plotter(fdict):
     resdf = pd.DataFrame(rows)
     resdf.set_index("year", inplace=True)
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    (fig, ax) = figure_axes(apctx=ctx)
     for year, row in resdf.iterrows():
         c = "k"
         sz = 10.0

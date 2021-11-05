@@ -140,7 +140,7 @@ def plotter(fdict):
             else "%.2f+ Inch" % (float(ctx["threshold"]),)
         ),
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     ax.scatter(
         df["snow_doy"],

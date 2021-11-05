@@ -417,6 +417,7 @@ def plotter(fdict):
         cwa = ctx["wfo"]
         state = None
     mp = MapPlot(
+        apctx=ctx,
         sector=sector,
         state=state,
         cwa=cwa,

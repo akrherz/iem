@@ -28,6 +28,7 @@ PE = [PathEffects.withStroke(linewidth=5, foreground="white")]
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {}
+    desc["defaults"] = {"_r": "t"}
     desc["data"] = True
     desc["cache"] = 600
     desc[
@@ -139,7 +140,7 @@ def plotter(fdict):
         f"{product_id[14:17]}\n"
         f"Valid: {valid.strftime('%-d %b %Y %H:%M UTC')}"
     )
-    fig = figure(title=title)
+    fig = figure(title=title, apctx=ctx)
 
     ###
     text = get_text(product_id)

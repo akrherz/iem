@@ -3,7 +3,7 @@ import datetime
 
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -263,7 +263,7 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     get_data(ctx)
     df = ctx["df"]
-    fig, ax = plt.subplots(1, 1)
+    fig, ax = figure_axes(apctx=ctx)
     colname = f"{ctx['var']}_{ctx['year']}"
     x = df.index.values
     ax.plot(x, df[colname].values, label=str(ctx["year"]), zorder=4, color="r")

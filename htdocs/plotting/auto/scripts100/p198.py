@@ -262,7 +262,7 @@ def plotter(fdict):
         leveltitle,
         MDICT[month],
     )
-    fig, ax = figure_axes(title=title, subtitle=subtitle)
+    fig, ax = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     avgv = df[colname].mean()
     bars = ax.bar(df.index.values, df[colname], align="center")
     for i, _bar in enumerate(bars):

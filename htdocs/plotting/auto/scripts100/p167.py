@@ -6,7 +6,7 @@ import pytz
 from pandas.io.sql import read_sql
 import matplotlib.colors as mpcolors
 from matplotlib.patches import Rectangle
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn, utc
 from pyiem.exceptions import NoDataFound
 
@@ -137,7 +137,7 @@ def plotter(fdict):
 
     df["flstatus"] = conds
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    (fig, ax) = figure_axes(apctx=ctx)
 
     ax.set_facecolor("skyblue")
 

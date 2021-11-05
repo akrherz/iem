@@ -153,7 +153,7 @@ def plotter(fdict):
         phenomena,
         significance,
     )
-    (fig, ax) = figure_axes(title=title, subtitle=subtitle)
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     sns.heatmap(
         df2,
         annot=True,

@@ -5,7 +5,7 @@ import calendar
 from pandas.io.sql import read_sql
 from metpy.units import units
 import metpy.calc as mcalc
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -119,7 +119,8 @@ def plotter(fdict):
     df3 = dyear[["doy", varname]].groupby("doy").describe()
     df3[(varname, "diff")] = df3[(varname, "mean")] - df2[(varname, "mean")]
 
-    (fig, ax) = plt.subplots(2, 1, figsize=(8, 6))
+    fig = figure(apctx=ctx)
+    ax = fig.subplots(2, 1)
     multiplier = 1000.0 if varname == "mixing_ratio" else 10.0
 
     ax[0].fill_between(

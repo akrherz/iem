@@ -6,7 +6,7 @@ import datetime
 import pandas as pd
 from metpy.units import units
 from pyiem.meteorology import gdd
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, mm2inch, c2f
 from pyiem.exceptions import NoDataFound
 
@@ -163,7 +163,7 @@ def plotter(fdict):
         resdf[_ptype + "_min[F]"] = c2f(df.groupby("doy")[_ptype].min().values)
         resdf[_ptype + "_max[F]"] = c2f(df.groupby("doy")[_ptype].max().values)
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    (fig, ax) = figure_axes(apctx=ctx)
     if ptype in ["gdd", "rain"]:
         ax.plot(
             thisyear.index.values,

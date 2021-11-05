@@ -151,6 +151,7 @@ def plotter(fdict):
 
     title = PDICT3[varname]
     mp = MapPlot(
+        apctx=ctx,
         sector=sector,
         state=state,
         axisbg="white",

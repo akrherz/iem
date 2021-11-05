@@ -80,7 +80,7 @@ def plotter(fdict):
         f"{ab.year}-{datetime.date.today().year}"
     )
     subtitle = "Bias of 24 Hour 'Day' Split for Average High + Low Temp"
-    (fig, ax) = figure_axes(title=title, subtitle=subtitle)
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     ax.plot(
         hrs, np.array(highs) - highs[0], label="High Temp", lw=2, color="r"
     )

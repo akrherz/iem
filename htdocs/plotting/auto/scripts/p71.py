@@ -118,7 +118,7 @@ def plotter(fdict):
         station,
         sts.strftime("%b %Y"),
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.bar(
         df["day"].dt.day.values, sknt, ec="green", fc="green", align="center"
     )

@@ -4,7 +4,7 @@ import datetime
 from pandas.io.sql import read_sql
 import matplotlib.ticker as ticker
 from pyiem import util
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.reference import state_names
 from pyiem.exceptions import NoDataFound
 
@@ -79,7 +79,8 @@ def plotter(fdict):
     df["state_percent"] = df["state_count"] / df["national_count"] * 100.0
     df.fillna(0, inplace=True)
 
-    (fig, ax) = plt.subplots(3, 1, sharex=True, figsize=(8, 6))
+    fig = figure(apctx=ctx)
+    ax = fig.subplots(3, 1, sharex=True)
 
     ax[0].bar(df.index.values, df["national_count"].values, align="center")
     for year, row in df.iterrows():

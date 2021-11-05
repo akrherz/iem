@@ -112,6 +112,7 @@ def plotter(fdict):
         sector="nws",
         axisbg="white",
         nocaption=True,
+        apctx=ctx,
         title="Days since Last %s%s by NWS Office"
         % (
             vtec.get_ps_string(phenomena, significance),

@@ -260,6 +260,7 @@ def plotter(fdict):
         title="%s:: %s Precip %s" % (source, title, PDICT3[opt]),
         subtitle="Data from %s" % (subtitle,),
         titlefontsize=14,
+        apctx=ctx,
     )
     (west, east, south, north) = proxy(mp).get_extent(LATLON)
 

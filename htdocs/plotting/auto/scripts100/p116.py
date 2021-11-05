@@ -3,7 +3,7 @@ import datetime
 
 import seaborn as sns
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_dbconn, get_autoplot_context
 from pyiem.exceptions import NoDataFound
 
@@ -138,7 +138,7 @@ OCT    NOV    DEC
 
     y1 = int(fdict.get("syear", 1990))
 
-    fig, ax = plt.subplots(1, 1, figsize=(8.0, 6.0))
+    fig, ax = figure_axes(apctx=ctx)
     fig.text(
         0.5,
         0.95,

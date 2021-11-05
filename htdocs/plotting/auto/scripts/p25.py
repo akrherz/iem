@@ -59,7 +59,7 @@ def plotter(fdict):
     title = (
         f"{reference.state_names[state]} {ts:%d %B} Temperature Distribution"
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     n, bins, _ = ax.hist(
         highs,

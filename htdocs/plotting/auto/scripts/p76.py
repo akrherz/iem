@@ -285,7 +285,7 @@ def make_plot(df, ctx):
         r_value ** 2,
     )
 
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.set_position([0.05, 0.06, 0.93, 0.84])
 
     ar = ["tmpf", "relh", "dwpf", "feel"]

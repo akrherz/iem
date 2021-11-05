@@ -320,7 +320,7 @@ def plotter(fdict):
     """Go"""
     ctx = get_ctx(fdict)
 
-    fig = figure(title=ctx["title"], subtitle=ctx["subtitle2"])
+    fig = figure(title=ctx["title"], subtitle=ctx["subtitle2"], apctx=ctx)
     width = 0.26
     height = 0.38
     x0 = 0.07

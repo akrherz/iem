@@ -268,7 +268,7 @@ def plotter(fdict):
         threshold,
         units,
     )
-    (fig, ax) = figure_axes(title=title, subtitle=subtitle)
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     interval = datetime.timedelta(hours=hours)
 
     valid = []

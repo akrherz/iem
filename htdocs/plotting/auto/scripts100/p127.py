@@ -96,7 +96,7 @@ def plotter(fdict):
         year0,
         lastyear,
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     data = np.ma.ones((df["yeari"].max() + 1, 366), "f") * -1
     data.mask = np.where(data == -1, True, False)

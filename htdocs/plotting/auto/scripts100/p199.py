@@ -364,6 +364,7 @@ def plotter(fdict):
 
     tle = ctx["date"].strftime("%b %-d, %Y")
     mp = MapPlot(
+        apctx=ctx,
         sector="iowa",
         continentalcolor="white",
         nocaption=True,

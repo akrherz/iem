@@ -307,7 +307,7 @@ def plotter(fdict):
         f"[{station}] {ctx['_nt'].sts[station]['name']} {PDICT2[ctx['var']]}\n"
         f"{model} Forecast MOS Range for {month1:%B %Y}"
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     if is_temp:
         df = plot_temps(ax, mosdata, month1, month, obs)

@@ -5,8 +5,7 @@ from datetime import date, datetime
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.plot.util import fitbox
-from pyiem.plot.use_agg import plt
-from pyiem.reference import TWITTER_RESOLUTION_INCH
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 from matplotlib.ticker import MaxNLocator
@@ -169,7 +168,7 @@ def plotter(fdict):
 
     df = pd.DataFrame({label1: kern1(xpos), label2: kern2(xpos)}, index=xpos)
 
-    fig = plt.figure(figsize=TWITTER_RESOLUTION_INCH)
+    fig = figure(apctx=ctx)
     title = "[%s] %s %s Distribution\n%s vs %s over %s" % (
         ctx["station"],
         ctx["_nt"].sts[ctx["station"]]["name"],

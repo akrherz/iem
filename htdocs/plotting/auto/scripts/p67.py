@@ -100,7 +100,7 @@ def plotter(fdict):
         ab.year,
         datetime.datetime.now().year,
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.bar(
         tmpf,
         df["events"] / df["total"] * 100.0,

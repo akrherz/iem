@@ -79,7 +79,7 @@ def plotter(fdict):
     title = (
         "%s [%s]\n" "Number of Hours with *Measurable* Precipitation Reported"
     ) % (ctx["_nt"].sts[station]["name"], station)
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     monthly = df["avg"].values.tolist()
     bars = ax.bar(
         df["month"] - 0.2,

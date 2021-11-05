@@ -252,7 +252,7 @@ def plotter(fdict):
     ctx = get_context(fdict)
     df = ctx["df"]
 
-    (fig, ax) = figure_axes(title=ctx["title"])
+    (fig, ax) = figure_axes(title=ctx["title"], apctx=ctx)
     doys = df.index.values
     ax.fill_between(
         doys, df["mins"], df["maxs"], color="pink", zorder=1, label="Range"

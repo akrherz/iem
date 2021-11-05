@@ -309,7 +309,7 @@ def plotter(fdict):
         ab.year,
         datetime.datetime.now().year,
     )
-    fig = figure(title=title, subtitle=subtitle)
+    fig = figure(title=title, subtitle=subtitle, apctx=ctx)
     ax = fig.add_axes([0.15, 0.1, 0.65, 0.8])
     ax.barh(
         range(len(y), 0, -1),

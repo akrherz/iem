@@ -141,7 +141,7 @@ def plotter(fdict):
         pweather if pweather != "1" else "TS",
         " with at least one hourly report" if ctx["w"] == "day" else "",
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     df2 = df[df["year"] == year]
     if not df2.empty:
         ax.bar(

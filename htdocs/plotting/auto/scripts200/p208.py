@@ -35,6 +35,7 @@ def proxy(mp):
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {}
+    desc["defaults"] = {"_r": "t"}
     desc["cache"] = 300
     desc["data"] = True
     desc[
@@ -270,6 +271,7 @@ def plotter(fdict):
         if ctx["opt"] == "etn":
             title += f" #{etn}"
     mp = MapPlot(
+        apctx=ctx,
         subtitle="Map Valid: %s, Event: %s to %s"
         % (m(utcvalid), m(df["issue"].min()), m(df["expire"].max())),
         title=title,

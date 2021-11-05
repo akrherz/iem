@@ -125,7 +125,7 @@ def plotter(fdict):
             f" {resdf['mean_total_precip'].sum():.2f} inches over "
             f"{resdf['mean_rain_days'].sum():.0f} days"
         )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     offset = 0.2 if col == "mean_total_precip" else 0
     ax.bar(

@@ -145,7 +145,7 @@ def plotter(fdict):
     subtitle = "%s SOI (3 month average)" % (
         datetime.date(2000, wantmonth, 1).strftime("%B"),
     )
-    fig = figure(title=title2, subtitle=subtitle)
+    fig = figure(title=title2, subtitle=subtitle, apctx=ctx)
     ax = fig.add_axes([0.07, 0.12, 0.53, 0.75])
 
     cmap = get_cmap(ctx["cmap"])

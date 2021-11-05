@@ -136,7 +136,7 @@ def plotter(fdict):
         "Daily High vs Low Temperature Histogram + Range between Low + High "
         f"(month={month.upper()})"
     )
-    fig = figure(title=title, subtitle=subtitle)
+    fig = figure(title=title, subtitle=subtitle, apctx=ctx)
     kax = fig.add_axes([0.65, 0.5, 0.3, 0.36])
     kax.grid(True)
     kax.text(

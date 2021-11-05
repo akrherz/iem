@@ -93,7 +93,7 @@ def plotter(fdict):
         station,
         ctx["_nt"].sts[station]["name"],
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     bounds = np.arange(0, 1.2, 0.1)
     bounds = np.concatenate((bounds, np.arange(1.2, 2.2, 0.2)))

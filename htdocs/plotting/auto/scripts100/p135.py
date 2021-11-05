@@ -211,7 +211,7 @@ def plotter(fdict):
         threshold,
     )
 
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.plot(df.index.values, df["avg"], c="k", lw=2, label="Average")
     ax.plot(df.index.values, df["thisyear"], c="g", lw=2, label=f"{year}")
     ax.plot(df.index.values, df["max"], c="r", lw=2, label="Max")

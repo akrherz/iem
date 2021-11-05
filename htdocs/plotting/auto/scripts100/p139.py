@@ -171,7 +171,7 @@ def plotter(fdict):
         PDICT[ctx["v"]],
         month.capitalize(),
     )
-    fig = figure(title=title)
+    fig = figure(title=title, apctx=ctx)
     fig.text(
         0.1, 0.81, " #  Date         Diff   Low High", fontproperties=font0
     )

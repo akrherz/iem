@@ -94,7 +94,7 @@ def plotter(fdict):
     )
     x = df.index.astype(int).tolist()
 
-    fig, ax = figure_axes(title=title)
+    fig, ax = figure_axes(title=title, apctx=ctx)
     width = 0.45
     height = 0.36
     ax.set_position([0.05, 0.54, width, height])

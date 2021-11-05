@@ -133,6 +133,7 @@ def plotter(fdict):
             data[key] = row[ctx["var"]].year
 
     mp = MapPlot(
+        apctx=ctx,
         title="NWS %s of %s" % (PDICT[ctx["var"]], prodDefinitions[pil]),
         subtitle=(
             "Plot valid between %s UTC and %s UTC, "

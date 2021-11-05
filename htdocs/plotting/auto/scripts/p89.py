@@ -9,7 +9,7 @@ from metpy.units import units
 from pyiem import iemre, reference
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.util import get_autoplot_context, get_dbconn, ncopen
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.exceptions import NoDataFound
 
 
@@ -139,7 +139,8 @@ def plotter(fdict):
     state = ctx["state"][:2]
     df = get_data(ctx)
 
-    (fig, ax) = plt.subplots(2, 1, sharex=True, figsize=(10, 7))
+    fig = figure(apctx=ctx)
+    ax = fig.subplots(2, 1, sharex=True)
     ax[0].bar(
         ctx["days"],
         df["coverage"],

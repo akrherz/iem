@@ -166,7 +166,7 @@ def plotter(fdict):
     if days == 1:
         subtitle = subtitle.replace("Average ", "")
     subtitle = f"{days} Day Period with {subtitle}"
-    fig = figure(title=title, subtitle=subtitle)
+    fig = figure(title=title, subtitle=subtitle, apctx=ctx)
     ax = fig.add_axes([0.05, 0.3, 0.45, 0.54])
     lax = fig.add_axes([0.05, 0.1, 0.45, 0.2])
     cax = fig.add_axes([0.05, 0.875, 0.4, 0.02])

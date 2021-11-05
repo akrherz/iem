@@ -168,6 +168,7 @@ def plotter(fdict):
     if ctx["var"] == "precip":
         title = "Days Since Last Measurable Precipitation"
     mp = MapPlot(
+        apctx=ctx,
         sector=ctx["sector"],
         state=ctx["state"],
         cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),

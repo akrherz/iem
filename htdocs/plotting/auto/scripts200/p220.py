@@ -98,6 +98,7 @@ ISO = "%Y-%m-%d %H:%M"
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {}
+    desc["defaults"] = {"_r": "t"}
     desc["data"] = True
     desc["cache"] = 600
     desc[
@@ -276,6 +277,7 @@ def plotter(fdict):
     if outlook_type == "E":
         catlabel = "Excessive Rainfall"
     mp = MapPlot(
+        apctx=ctx,
         title=(
             f"{datelabel} {w} Prediction Center Day {daylabel} "
             f"{catlabel} Outlook"

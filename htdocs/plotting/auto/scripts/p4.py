@@ -113,7 +113,7 @@ def plotter(fdict):
         "%s IEM Estimated Areal Coverage Percent of %s\n"
         " receiving %.2f inches of rain over trailing %s day period"
     ) % (year, reference.state_names[state], threshold, period)
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.bar(days, coverage, fc="g", ec="g")
     ax.set_ylabel("Areal Coverage [%]")
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b\n%-d"))

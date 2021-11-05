@@ -85,7 +85,7 @@ def plotter(fdict):
         PDICT.get(which),
         "End" if delta == 0 else "Start",
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.scatter(years, maxsday)
     ax.grid(True)
     ax.set_ylabel("%s Date" % ("End" if delta == 0 else "Start",))

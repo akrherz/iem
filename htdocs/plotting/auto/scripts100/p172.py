@@ -173,7 +173,7 @@ def plotter(fdict):
             f"missing > {ctx['m']} days"
         )
 
-    (fig, ax) = figure_axes(title=title, subtitle=subtitle)
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     # Average
     jday = df[["row", "accum"]].groupby("row").mean()
     jday["accum"].values[-1] = jday["accum"].values[-2]

@@ -9,7 +9,7 @@ from metpy.units import units
 import metpy.calc as mcalc
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.plot import get_cmap
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.plot.util import fitbox
 from pyiem.exceptions import NoDataFound
 
@@ -181,7 +181,7 @@ def plotter(fdict):
     df["week"] = (df["doy"] / 7).astype(int)
     df["delta"] = df[h2] - df[h1]
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = figure_axes(apctx=ctx)
     if ctx["opt"] == "no":
         ax.set_xlabel(
             "Plotted lines are smoothed over %.0f days" % (ctx["smooth"],)

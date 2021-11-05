@@ -116,7 +116,7 @@ def plotter(fdict):
         if len(label) > 90:
             label = "%s..." % (label[:90],)
         title += f"\n{label}"
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     # Do syear as left side
     for year in range(syear, eyear):
         dyear = df[df["yr"] == year].sort_values(by=["rank"], ascending=True)

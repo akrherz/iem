@@ -93,7 +93,7 @@ def plotter(fdict):
         t1,
         t2,
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.scatter(
         df.index.values,
         df["below_freq"],

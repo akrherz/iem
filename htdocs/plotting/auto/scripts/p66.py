@@ -2,7 +2,7 @@
 import calendar
 
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = {
@@ -87,7 +87,7 @@ def plotter(fdict):
         index_col="doy",
     )
 
-    fig, ax = plt.subplots(1, 1, sharex=True)
+    fig, ax = figure_axes(apctx=ctx)
 
     label = "AOA" if mydir == "above" else "below"
     ax.set_title(

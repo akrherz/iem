@@ -3,7 +3,7 @@ import datetime
 
 import psycopg2.extras
 import pandas as pd
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -101,8 +101,8 @@ def plotter(fdict):
             year=years,
         )
     )
-
-    (fig, ax) = plt.subplots(3, 1, figsize=(7, 8), sharex=True, sharey=True)
+    fig = figure(apctx=ctx)
+    ax = fig.subplots(3, 1, sharex=True, sharey=True)
     rects = ax[0].bar(years, hyears, facecolor="b", edgecolor="b")
     for i, rect in enumerate(rects):
         if rect.get_height() > expect[i]:

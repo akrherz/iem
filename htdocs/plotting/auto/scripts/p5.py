@@ -4,7 +4,7 @@ import calendar
 from pandas.io.sql import read_sql
 import numpy as np
 from pyiem import network
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -106,7 +106,7 @@ def plotter(fdict):
             labels.append("%s - %s" % (row[tokens[1]], row["dd"]))
         ranges.append(row[tokens[1]])
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    (fig, ax) = figure_axes(apctx=ctx)
 
     ax.barh(np.arange(1, 13), ranges, align="center")
     ax.set_yticks(range(0, 13))

@@ -3,7 +3,7 @@ import datetime
 
 import numpy as np
 import pandas as pd
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 import pyiem.nws.vtec as vtec
 from pyiem.exceptions import NoDataFound
@@ -101,7 +101,7 @@ def plotter(fdict):
         )
         cnt += 1
     df = pd.DataFrame(rows)
-    (fig, ax) = plt.subplots(1, 1, figsize=(7, 10))
+    (fig, ax) = figure_axes(apctx=ctx)
     vals = np.array(vals)
 
     ax.barh(

@@ -197,7 +197,7 @@ def plotter(fdict):
         ctx["sdate"].strftime("%d %b %Y"),
         ctx["edate"].strftime("%d %b %Y"),
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     xticks = []
     xticklabels = []

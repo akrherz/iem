@@ -225,7 +225,6 @@ def plotter(fdict):
         get_daily_data(ctx, sts, ets)
     ctx["lastyear"] = datetime.date.today().year
     ctx["years"] = ctx["lastyear"] - 1893 + 1
-    csector = ctx["csector"]
 
     subtitle = (
         "Based on IEM Estimates, " "1 is %s out of %s total years (1893-%s)"
@@ -237,8 +236,7 @@ def plotter(fdict):
     if ctx["var"] == "aridity":
         subtitle = "Std Average High Temp Departure minus Std Precip Departure"
     mp = MapPlot(
-        sector=("state" if len(csector) == 2 else csector),
-        state=ctx["csector"],
+        apctx=ctx,
         continentalcolor="white",
         title="%s %s %sby Climate District"
         % (

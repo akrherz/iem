@@ -103,7 +103,7 @@ def plotter(fdict):
         ctx["gddbase"],
         ctx["gddceil"],
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.set_position([0.1, 0.12, 0.8, 0.78])
 
     ax.scatter(df["gdd_sigma"], df["precip_sigma"], label=None)
@@ -142,4 +142,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

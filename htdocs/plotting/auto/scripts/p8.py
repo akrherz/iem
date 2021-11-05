@@ -90,7 +90,7 @@ def plotter(fdict):
         "%s [%s] Monthly Precipitation Reliability\n"
         "Period: %s-%s, %% of Months above %s%% of Long Term Avg"
     ) % (nt.sts[station]["name"], station, syear, eyear, threshold)
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     ax.bar(np.arange(1, 13), vals, align="center")
     ax.set_xticks(np.arange(1, 13))
@@ -104,4 +104,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

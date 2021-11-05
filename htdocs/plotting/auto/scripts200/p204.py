@@ -121,7 +121,7 @@ def plotter(fdict):
         ctx["eyear"],
         PDICT[ctx["var"]].replace("XX", str(ctx["days"])),
     )
-    fig, ax = figure_axes(title=title)
+    fig, ax = figure_axes(title=title, apctx=ctx)
     heatmap(
         data,
         cmap=cmap,

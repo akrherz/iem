@@ -117,7 +117,7 @@ def plotter(fdict):
         ets.strftime("%-d %b %Y"),
         MDICT.get(varname),
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.barh(
         df.index.values,
         0 - (df[varname + "_below"] / df[varname + "_count"] * 100.0),

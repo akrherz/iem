@@ -122,7 +122,7 @@ def plotter(fdict):
         ets.strftime("%Y-%m-%d %I:%M %p"),
     )
 
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.bar(np.arange(1440), vals, ec="b", fc="b")
     if np.max(vals) > 50:
         ax.set_ylim(0, 100)

@@ -139,7 +139,7 @@ def plotter(fdict):
         max([bs.date(), datetime.date(ctx["syear"], 1, 1)]),
         min([datetime.date.today(), datetime.date(ctx["eyear"] - 1, 12, 31)]),
     )
-    (fig, ax) = figure_axes(title=title, subtitle=subtitle)
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     for base in thresholds:
         ax.plot(
             df["dates"].values,

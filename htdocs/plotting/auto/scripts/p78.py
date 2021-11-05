@@ -5,7 +5,7 @@ from pandas.io.sql import read_sql
 from metpy.units import units
 import metpy.calc as mcalc
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
 MDICT = dict(
@@ -142,7 +142,7 @@ def plotter(fdict):
         * 100.0
     )
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    (fig, ax) = figure_axes(apctx=ctx)
     means = qtiles[qtiles["level_1"] == 0.5]
     for l0, l1, color in zip(
         [0.05, 0.25], [0.95, 0.75], ["lightgreen", "violet"]

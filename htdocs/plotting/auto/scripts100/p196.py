@@ -4,7 +4,7 @@ Heat Advisory and Wind Chill alerts by temperature.
 
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.nws.vtec import NWS_COLORS, get_ps_string
 from pyiem.exceptions import NoDataFound
@@ -142,7 +142,7 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
 
     get_df(ctx)
-    (fig, ax) = plt.subplots()
+    (fig, ax) = figure_axes(apctx=ctx)
 
     v1 = "%s.%s" % (ctx["p1"], ctx["s1"])
     hty = ctx["df"][v1 + "%"]

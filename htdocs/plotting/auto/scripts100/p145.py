@@ -116,7 +116,7 @@ def plotter(fdict):
         df["valid"].min().year,
         VARS[varname],
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     for dtype in ["L", "C"]:
         for year, df2 in df[df["dtype"] == dtype].groupby("year"):
             if year in [1997, 1988]:

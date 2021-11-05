@@ -7,7 +7,7 @@ import requests
 import pandas as pd
 from scipy.interpolate import interp1d
 from pyiem import util
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.reference import state_names, state_fips
 from pyiem.exceptions import NoDataFound
 
@@ -88,7 +88,7 @@ def plotter(fdict):
     df["delta"] = df["score"].diff()
     df.iat[0, df.columns.get_loc("delta")] = 0
 
-    fig = plt.figure(figsize=(7, 9))
+    fig = figure(apctx=ctx)
     ax = fig.add_axes([0.1, 0.1, 0.87, 0.84])
     for year, gdf in df.groupby(df.Date.dt.year):
         if year < syear or year > eyear:

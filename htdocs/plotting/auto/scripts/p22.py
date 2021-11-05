@@ -107,7 +107,7 @@ def plotter(fdict):
         "%s [%s]\nFreq of Temp between "
         r"%s$^\circ$F and %s$^\circ$F of NCEI-81 Average"
     ) % (ctx["station"], ctx["_nt"].sts[ctx["station"]]["name"], minv, maxv)
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     ax.plot(df.index.values, hvals[3:-3], color="r", label="High", zorder=1)
     ax.plot(df.index.values, lvals[3:-3], color="b", label="Low", zorder=1)

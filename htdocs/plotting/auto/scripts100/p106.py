@@ -143,7 +143,7 @@ def plotter(fdict):
         PDICT[opt],
         threshold,
     )
-    fig, ax = figure_axes(title=title, subtitle=subtitle)
+    fig, ax = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     v1 = ax.violinplot(data, showextrema=True, showmeans=True, widths=0.7)
     for lbl in ["cmins", "cmeans", "cmaxes"]:
         v1[lbl].set_color("r")

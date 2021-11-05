@@ -4,8 +4,7 @@ import calendar
 
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.plot import get_cmap
-from pyiem.plot.use_agg import plt
+from pyiem.plot import get_cmap, figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -108,7 +107,8 @@ def plotter(fdict):
         ts = sts.replace(month=i)
         xticks.append(int(ts.strftime("%j")))
 
-    (fig, ax) = plt.subplots(2, 1, figsize=(8, 6))
+    fig = figure(apctx=ctx)
+    ax = fig.subplots(2, 1)
 
     ax[0].set_title(
         ("[%s] %s minus [%s] %s\n" "%s Temp Difference Period: %s - %s")

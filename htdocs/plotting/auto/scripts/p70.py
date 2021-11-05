@@ -7,8 +7,8 @@ from matplotlib.ticker import FormatStrFormatter
 import matplotlib.colors as mpcolors
 from matplotlib.colorbar import ColorbarBase
 from pyiem import reference
+from pyiem.plot import get_cmap, figure
 from pyiem.plot.use_agg import plt
-from pyiem.plot import get_cmap
 from pyiem.nws import vtec
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -148,8 +148,8 @@ def plotter(fdict):
         )
     df["doy"] = df["doy"].dt.days
 
-    fig = plt.figure(figsize=(12.0, 6.75))
-    ax = plt.axes([0.12, 0.1, 0.61, 0.8])
+    fig = figure(apctx=ctx)
+    ax = fig.add_axes([0.12, 0.1, 0.61, 0.8])
 
     # Create a color bar for the number of events per day
     cmap = get_cmap(ctx["cmap"])
@@ -167,7 +167,7 @@ def plotter(fdict):
 
     norm = mpcolors.BoundaryNorm(bins, cmap.N)
     if ctx["f"] != "none":
-        cax = plt.axes(
+        cax = fig.add_axes(
             [0.01, 0.12, 0.02, 0.6], frameon=False, yticks=[], xticks=[]
         )
         cb = ColorbarBase(
@@ -255,7 +255,7 @@ def plotter(fdict):
     ax.yaxis.set_major_formatter(xFormatter)
 
     # ______________________________________________
-    ax = plt.axes([0.75, 0.1, 0.1, 0.8])
+    ax = fig.add_axes([0.75, 0.1, 0.1, 0.8])
     gdf = df[["year", "count"]].groupby("year").sum()
     ax.barh(
         gdf.index.values,
@@ -272,7 +272,7 @@ def plotter(fdict):
     ax.xaxis.set_major_locator(xloc)
 
     # __________________________________________
-    ax = plt.axes([0.88, 0.1, 0.1, 0.8])
+    ax = fig.add_axes([0.88, 0.1, 0.1, 0.8])
     gdf = df[["year", "count"]].groupby("year").count()
     ax.barh(gdf.index.values, gdf["count"].values, fc="blue", align="center")
     ax.set_ylim(df["year"].min() - 0.5, df["year"].max() + 0.5)

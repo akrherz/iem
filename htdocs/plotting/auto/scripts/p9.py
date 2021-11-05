@@ -122,7 +122,7 @@ def plotter(fdict):
         PDICT[varname],
         title,
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.plot(
         np.arange(1, 366),
         df2[(glabel, "mean")],

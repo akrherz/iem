@@ -152,7 +152,7 @@ def plotter(fdict):
     bins = np.linspace(1, maxv, 12, dtype="i")
     bins[-1] += 1
     mp = MapPlot(
-        twitter=True,
+        apctx=ctx,
         sector="nws",
         axisbg="white",
         title=f"Preliminary/Unfiltered Local Storm Report Counts {PDICT[by]}",

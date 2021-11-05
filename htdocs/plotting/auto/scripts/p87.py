@@ -5,6 +5,7 @@ import calendar
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -144,9 +145,9 @@ def plotter(fdict):
         data[row["hour"], row[groupby] - 1] += 1
 
     data.mask = np.where(data == 0, True, False)
-    fig = plt.figure(figsize=(8, 6))
-    ax = plt.axes([0.11, 0.25, 0.7, 0.65])
-    cax = plt.axes([0.82, 0.04, 0.02, 0.15])
+    fig = figure(apctx=ctx)
+    ax = fig.add_axes([0.11, 0.25, 0.7, 0.65])
+    cax = fig.add_axes([0.82, 0.04, 0.02, 0.15])
 
     res = ax.imshow(
         data, aspect="auto", rasterized=True, interpolation="nearest"
@@ -165,7 +166,7 @@ def plotter(fdict):
         f"{PDICT2[groupby].replace('group ', '')}"
     )
     ax.grid(True)
-    lax = plt.axes([0.11, 0.1, 0.7, 0.15])
+    lax = fig.add_axes([0.11, 0.1, 0.7, 0.15])
     if groupby == "week":
         ax.set_xticks(np.arange(0, 55, 7))
         lax.bar(np.arange(0, 52), np.ma.sum(data, 0), facecolor="tan")
@@ -200,7 +201,7 @@ def plotter(fdict):
     lax.yaxis.get_major_ticks()[-1].label1.set_visible(False)
 
     # Right grid
-    rax = plt.axes([0.81, 0.25, 0.15, 0.65])
+    rax = fig.add_axes([0.81, 0.25, 0.15, 0.65])
     rax.barh(np.arange(0, 24) - 0.4, np.ma.sum(data, 1), facecolor="tan")
     rax.set_ylim(-0.5, 23.5)
     rax.set_yticks([])

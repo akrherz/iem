@@ -215,6 +215,7 @@ def plotter(fdict):
 
     df2 = df2[~pd.isnull(df2["lat"])]
     mp = MapPlot(
+        apctx=ctx,
         sector="state",
         state=ctx["sector"],
         continental_color="white",

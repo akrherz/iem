@@ -122,7 +122,7 @@ def plotter(fdict):
         label,
         threshold,
     )
-    fig = figure(title=title)
+    fig = figure(title=title, apctx=ctx)
     ax = fig.add_axes([0.1, 0.1, 0.5, 0.8])
     ax.set_ylabel(f"Max Streak by {label2} [days]")
     ax.grid(True)

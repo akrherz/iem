@@ -5,7 +5,7 @@ import datetime
 from pandas.io.sql import read_sql
 from pyiem.nws import vtec
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem import reference
 from pyiem.exceptions import NoDataFound
 
@@ -86,7 +86,8 @@ def plotter(fdict):
         ts = sts.replace(month=i)
         xticks.append(int(ts.strftime("%j")))
 
-    (fig, ax) = plt.subplots(2, 1, sharex=True)
+    fig = figure(apctx=ctx)
+    ax = fig.subplots(2, 1, sharex=True)
 
     limiter = " wfo = '%s' " % (station,)
     title = "[%s] NWS %s" % (station, ctx["_nt"].sts[station]["name"])

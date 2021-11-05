@@ -265,6 +265,7 @@ def plotter(fdict):
         sts,
         ets,
         data,
+        apctx=ctx,
         title="Highest %s Day %s %s Outlook for %s"
         % (
             "WPC" if outlook_type == "E" else "SPC",

@@ -3,7 +3,7 @@ import datetime
 
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -129,7 +129,8 @@ def plotter(fdict):
             ys.append(lev)
     ys = np.array(ys)
 
-    (fig, ax) = plt.subplots(2, 1, figsize=(8, 6))
+    fig = figure(apcx=ctx)
+    ax = fig.subplots(2, 1)
 
     color = "b" if ctx["var"] == "wcht" else "r"
     ax[0].barh(ys - 0.4, freq, ec=color, fc=color)

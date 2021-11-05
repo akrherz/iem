@@ -4,7 +4,7 @@ import calendar
 import numpy as np
 from pandas.io.sql import read_sql
 import matplotlib.colors as mpcolors
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.plot import get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -31,7 +31,7 @@ def get_description():
     return desc
 
 
-def magic(ax, df, colname, title, ctx):
+def magic(fig, ax, df, colname, title, ctx):
     """You can do magic"""
     df2 = df[df[colname] == 1]
 
@@ -42,7 +42,7 @@ def magic(ax, df, colname, title, ctx):
     ax.set_xticklabels(calendar.month_abbr[1:], rotation=45)
 
     bbox = ax.get_position()
-    sideax = plt.axes([bbox.x1 + 0.002, bbox.y0, 0.04, 0.35])
+    sideax = fig.add_axes([bbox.x1 + 0.002, bbox.y0, 0.04, 0.35])
     ylim = [df["year"].min() - 1, df["year"].max() + 1]
     year0 = ylim[0] - (ylim[0] % 10)
     year1 = ylim[1] + (10 - ylim[1] % 10)
@@ -103,7 +103,7 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No Data Found.")
 
-    fig = plt.figure(figsize=(12, 6.75))
+    fig = figure(apctx=ctx)
     fig.text(
         0.5,
         0.95,
@@ -114,18 +114,18 @@ def plotter(fdict):
     )
     axwidth = 0.265
     x0 = 0.04
-    ax = plt.axes([x0, 0.56, axwidth, 0.35])
-    magic(ax, df, "max_high_rank", "Maximum High (warm)", ctx)
-    ax = plt.axes([x0, 0.11, axwidth, 0.35])
-    magic(ax, df, "min_high_rank", "Minimum High (cold)", ctx)
-    ax = plt.axes([x0 + 0.32, 0.56, axwidth, 0.35])
-    magic(ax, df, "max_low_rank", "Maximum Low (warm)", ctx)
-    ax = plt.axes([x0 + 0.32, 0.11, axwidth, 0.35])
-    magic(ax, df, "min_low_rank", "Minimum Low (cold)", ctx)
-    ax = plt.axes([x0 + 0.64, 0.11, axwidth, 0.35])
-    magic(ax, df, "max_precip_rank", "Maximum Precipitation", ctx)
+    ax = fig.add_axes([x0, 0.56, axwidth, 0.35])
+    magic(fig, ax, df, "max_high_rank", "Maximum High (warm)", ctx)
+    ax = fig.add_axes([x0, 0.11, axwidth, 0.35])
+    magic(fig, ax, df, "min_high_rank", "Minimum High (cold)", ctx)
+    ax = fig.add_axes([x0 + 0.32, 0.56, axwidth, 0.35])
+    magic(fig, ax, df, "max_low_rank", "Maximum Low (warm)", ctx)
+    ax = fig.add_axes([x0 + 0.32, 0.11, axwidth, 0.35])
+    magic(fig, ax, df, "min_low_rank", "Minimum Low (cold)", ctx)
+    ax = fig.add_axes([x0 + 0.64, 0.11, axwidth, 0.35])
+    magic(fig, ax, df, "max_precip_rank", "Maximum Precipitation", ctx)
 
-    return plt.gcf(), df
+    return fig, df
 
 
 if __name__ == "__main__":

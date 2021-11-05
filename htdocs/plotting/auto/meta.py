@@ -5,6 +5,7 @@ import os
 import json
 
 from paste.request import parse_formvars
+from pyiem.reference import FIGSIZES_NAMES
 from pyiem.util import get_dbconn
 
 BASEDIR, WSGI_FILENAME = os.path.split(__file__)
@@ -90,16 +91,27 @@ def do_json(pidx):
         mod = importlib.util.module_from_spec(spec)
         loader.exec_module(mod)
         data = mod.get_description()
+        defaults = data.pop("defaults", {"_r": "t", "dpi": "100"})
         data["maptable"] = hasattr(mod, "geojson")
         data["highcharts"] = hasattr(mod, "highcharts")
         data["timing[secs]"] = timing
 
-        # Defaults
+        # Setting to None disables
+        if "_r" not in defaults or defaults["_r"] is not None:
+            data["arguments"].append(
+                dict(
+                    type="select",
+                    options=FIGSIZES_NAMES,
+                    name="_r",
+                    default=defaults.get("_r", "t"),
+                    label="Image Pixel Size @100 DPI",
+                )
+            )
         data["arguments"].append(
             dict(
                 type="int",
                 name="dpi",
-                default="100",
+                default=defaults.get("dpi", "100"),
                 label="Image Resolution (DPI)",
             )
         )

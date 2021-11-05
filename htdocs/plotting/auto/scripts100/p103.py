@@ -4,7 +4,7 @@ import calendar
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem import network
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -86,7 +86,8 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No Data Found.")
     df2 = df[df["typ"] == season]
-    (fig, ax) = plt.subplots(3, 1, figsize=(7, 10))
+    fig = figure(apctx=ctx)
+    ax = fig.subplots(3, 1)
     dyear = df2.groupby(["year"]).count()
     ax[0].bar(dyear.index, dyear["level"], facecolor="tan", edgecolor="tan")
     ax[0].axhline(dyear["level"].mean(), lw=2)

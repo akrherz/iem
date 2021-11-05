@@ -4,7 +4,7 @@ import datetime
 
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -15,6 +15,7 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {}
     desc["data"] = True
+    desc["defaults"] = {"_r": "96"}
     desc[
         "description"
     ] = """This chart presents the range between the warmest
@@ -125,25 +126,19 @@ def plotter(fdict):
         raise NoDataFound("No Data Found.")
     df["rng"] = df["max_high"] - df["min_low"]
 
-    (fig, ax) = plt.subplots(3, 1, sharex=True, figsize=(9, 6))
+    title = ("%s %s\n%s Temperature Range (Max High - Min Low)") % (
+        station,
+        ctx["_nt"].sts[station]["name"],
+        (calendar.month_name[month] if ctx["opt"] == "monthly" else "Yearly"),
+    )
+    fig = figure(title=title, apctx=ctx)
+    ax = fig.subplots(3, 1, sharex=True)
     ax[0].scatter(df.index.values, df["max_high"].values)
     if year in df.index:
         ax[0].scatter(
             year, df.at[year, "max_high"], marker="o", color="r", s=10
         )
     plot_trailing(ax[0], df, "max_high")
-    ax[0].set_title(
-        ("%s %s\n%s Temperature Range (Max High - Min Low)")
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            (
-                calendar.month_name[month]
-                if ctx["opt"] == "monthly"
-                else "Yearly"
-            ),
-        )
-    )
     ax[0].grid(True)
     ax[0].set_ylabel(r"Max Temp $^\circ$F")
     ax[0].set_xlim(df.index.min() - 1.5, df.index.max() + 1.5)

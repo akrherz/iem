@@ -5,7 +5,7 @@ from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
 import matplotlib.colors as mpcolors
 from pyiem.plot import get_cmap
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 
 PDICT = dict(
@@ -162,7 +162,7 @@ def plotter(fdict):
         index_col=None,
     )
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = figure_axes(apctx=ctx)
     diff = df[varname + "_" + how].values
     if how == "ptile" and "cmap" in ctx:
         bins = range(0, 101, 10)

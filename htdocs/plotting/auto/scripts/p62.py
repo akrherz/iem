@@ -5,7 +5,7 @@ import copy
 import numpy as np
 import matplotlib.colors as mpcolors
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.plot.colormaps import nwssnow
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -90,7 +90,7 @@ def plotter(fdict):
     obs.mask = np.where(obs < 0, True, False)
     # obs[obs == 0] = -1
 
-    fig = plt.figure(figsize=(8, 8))
+    fig = figure(apctx=ctx)
     ax = fig.add_axes([0.1, 0.1, 0.93, 0.8])
     ax.set_xticks((0, 29, 60, 91, 120, 151, 181))
     ax.set_xticklabels(

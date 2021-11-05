@@ -6,9 +6,7 @@ import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.exceptions import NoDataFound
-from pyiem.reference import TWITTER_RESOLUTION_INCH
-from pyiem.plot.use_agg import plt
-from pyiem.plot import fitbox
+from pyiem.plot import fitbox, figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from matplotlib.font_manager import FontProperties
 
@@ -178,7 +176,7 @@ def plotter(fdict):
         )
     )
     df["startdate"] = df["enddate"]
-    fig = plt.figure(figsize=TWITTER_RESOLUTION_INCH)
+    fig = figure(apctx=ctx)
     ax = fig.add_axes([0.1, 0.1, 0.55, 0.8])
     ax.bar(np.arange(1, 367), maxperiod[1:], fc="b", ec="b")
     ax.grid(True)

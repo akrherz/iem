@@ -216,6 +216,7 @@ def plotter(fdict):
         )
 
     mp = MapPlot(
+        apctx=ctx,
         sector=ctx["sector"],
         title=ctx["title"],
         subtitle=ctx["subtitle"],

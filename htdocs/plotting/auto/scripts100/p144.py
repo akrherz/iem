@@ -2,6 +2,7 @@
 
 from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable  # This is needed.
+from pyiem.plot import figure_axes
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn, utc, convert_value
 from pyiem.exceptions import NoDataFound
@@ -159,7 +160,7 @@ def plotter(fdict):
     if df2.empty:
         raise NoDataFound("No Data Found")
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    (fig, ax) = figure_axes(apctx=ctx)
 
     d2000 = utc(2000, 1, 1, 6)
     for d in [df, df2]:

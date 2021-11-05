@@ -3,7 +3,7 @@ import calendar
 
 import psycopg2.extras
 import pandas as pd
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 
 
@@ -68,7 +68,7 @@ def plotter(fdict):
         df.at[row[0], "events"] = row[1]
         df.at[row[0], "freq"] = row[1] / float(row[2]) * 100.0
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = figure_axes(apctx=ctx)
 
     ax.bar(df.index, df.freq, align="center")
     for i, row in df.iterrows():

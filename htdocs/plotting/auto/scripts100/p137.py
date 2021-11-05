@@ -5,7 +5,7 @@ import matplotlib.dates as mdates
 import pandas as pd
 from pandas.io.sql import read_sql
 from scipy import stats
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -127,7 +127,8 @@ def plotter(fdict):
     )
 
     df["fall_length"] = pd.to_numeric(df["fall_length"])
-    (fig, ax) = plt.subplots(3, 1, figsize=(8, 9))
+    fig = figure(apctx=ctx)
+    ax = fig.subplots(3, 1)
 
     ax[0].plot(obs.index.values, obs["avgt"].values)
     ax[0].set_ylim(obs["avgt"].min() - 8, obs["avgt"].max() + 8)

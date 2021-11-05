@@ -23,6 +23,12 @@ def get_description():
     threeweeks = today - datetime.timedelta(days=21)
     desc["arguments"] = [
         dict(
+            type="csector",
+            default="conus",
+            name="csector",
+            label="Geographical extent to plot:",
+        ),
+        dict(
             type="date",
             name="date1",
             default=threeweeks.strftime("%Y/%m/%d"),
@@ -87,10 +93,9 @@ def plotter(fdict):
     days = int((date2 - date1).days)
     extent = int(df[varname].abs().max())
     mp = MapPlot(
-        sector="conus",
+        apctx=ctx,
         title=f"{days} Day Change in {PDICT[varname]} NCDC 81 Climatology",
-        subtitle="from %s to %s"
-        % (date1.strftime("%-d %B"), date2.strftime("%-d %B")),
+        subtitle=f"from {date1:%-d %B} to {date2:%-d %B}",
     )
     mp.contourf(
         df["lon"].values,

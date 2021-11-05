@@ -173,7 +173,7 @@ def ugc_select(state, ugc):
     return make_select("ugc", ugc, ar)
 
 
-def ugc_handler(name, value, fdict, res):
+def ugc_handler(name, value, fdict):
     """Handle selection of UGCs."""
     privfield = f"_{name}_state"
     state = fdict.get(privfield, "IA")
@@ -429,7 +429,7 @@ def generate_form(apid, fdict, headers, cookies):
         if arg["type"] in ["zstation", "sid", "station"]:
             form = station_handler(value, arg, fdict, res, arg["type"])
         elif arg["type"] == "ugc":
-            form = ugc_handler(arg["name"], value, fdict, res)
+            form = ugc_handler(arg["name"], value, fdict)
         elif arg["type"] == "networkselect":
             form = networkselect_handler(value, arg, res)
         elif arg["type"] == "phenomena":
@@ -599,6 +599,7 @@ var progressBar = setInterval(function (){{
         opts["maptable"] = "Interactive Map + Table"
     sel = make_select("_fmt", fmt, opts, showvalue=False)
     formhtml += f"<tr><td>Select Output Format:</td><td>{sel}</td></tr>"
+
     res[
         "formhtml"
     ] = f"""
@@ -710,6 +711,7 @@ def generate_overview(apid):
     """If we don't have an apid set (==0), then fill in the overview."""
     if apid > 0:
         return ""
+    fn = "/mesonet/share/pickup/autoplot/overview.html"
     return f"""
 <h1>Visual Overview of All Autoplots</h1>
 
@@ -718,7 +720,7 @@ available.  Click on the image or title to navigate to that autoplot. These are
 grouped into sections as they also appear grouped in the dropdown selection
 box above.</p>
 
-    {open("/mesonet/share/pickup/autoplot/overview.html").read()}
+    {open(fn, encoding="utf8").read()}
     """
 
 

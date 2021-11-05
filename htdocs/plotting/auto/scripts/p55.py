@@ -3,7 +3,7 @@ import datetime
 import calendar
 
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -113,7 +113,8 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No Data Found.")
 
-    (fig, ax) = plt.subplots(3, 1, sharex=True, figsize=(8, 6))
+    fig = figure(apctx=ctx)
+    ax = fig.subplots(3, 1, sharex=True)
 
     ax[0].set_title(
         ("%s %s Daily Climate Comparison for %s")

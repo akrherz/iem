@@ -184,6 +184,7 @@ def plotter(fdict):
     else:
         title = "%s" % (MDICT[month],)
     mp = MapPlot(
+        apctx=ctx,
         sector=sector,
         state=state,
         axisbg="white",

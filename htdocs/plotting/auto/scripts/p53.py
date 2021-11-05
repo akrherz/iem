@@ -3,7 +3,7 @@ import datetime
 import calendar
 
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -110,7 +110,7 @@ def plotter(fdict):
         ts = sts.replace(month=i)
         xticks.append(float(ts.strftime("%j")) / 7.0)
 
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = figure_axes(apctx=ctx)
     x = df.index.values - 1
     val = df["d6"].sum() / df["count"].sum() * 100.0
     ax.bar(

@@ -144,7 +144,7 @@ def plotter(fdict):
     )
     if ptype.find("days") == 0:
         title += " (%s)" % (threshold,)
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     avgv = df[ptype].mean()
     data = df[ptype].values
 

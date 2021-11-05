@@ -75,6 +75,7 @@ def mp_factory(ctx):
         state = ""
         cwa = ctx["cwa"]
     return MapPlot(
+        apctx=ctx,
         sector=sector,
         nologo=True,
         state=state,

@@ -134,7 +134,7 @@ def plotter(fdict):
         datetime.date.today().year,
         MDICT2[month],
     )
-    fig = figure(title=title)
+    fig = figure(title=title, apctx=ctx)
     ax = fig.add_axes([0.4, 0.1, 0.55, 0.8])
 
     labels = []

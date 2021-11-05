@@ -3,7 +3,7 @@ import datetime
 
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -98,7 +98,7 @@ def plotter(fdict):
         raise NoDataFound("No Data Found!")
     df["range"] = df["max_" + varname] - df["min_" + varname]
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    (fig, ax) = figure(apctx=ctx)
     bars = ax.bar(
         df.index.values,
         df["range"].values,

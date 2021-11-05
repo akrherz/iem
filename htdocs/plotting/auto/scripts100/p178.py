@@ -115,6 +115,7 @@ def plotter(fdict):
     hour = int(ctx["hour"])
     ilabel = ctx["ilabel"] == "yes"
     plot = MapPlot(
+        apctx=ctx,
         sector=ctx["t"],
         continentalcolor="white",
         state=ctx["state"],

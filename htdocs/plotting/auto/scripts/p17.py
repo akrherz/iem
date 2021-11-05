@@ -121,7 +121,7 @@ def common(ctx):
         sts.strftime("%b %Y"),
         subtitle,
     )
-    (ctx["fig"], ax) = figure_axes(title=title)
+    (ctx["fig"], ax) = figure_axes(title=title, apctx=ctx)
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width, box.height * 0.94])
 

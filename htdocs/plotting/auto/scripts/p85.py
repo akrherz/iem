@@ -3,7 +3,7 @@ import calendar
 
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
 PDICT = dict(
@@ -85,7 +85,7 @@ def plotter(fdict):
     freq = df[mydir + "_freq"].values
     hours = df.index.values
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    (fig, ax) = figure_axes(apctx=ctx)
     bars = ax.bar(hours, freq, fc="blue", align="center")
     for i, mybar in enumerate(bars):
         ax.text(

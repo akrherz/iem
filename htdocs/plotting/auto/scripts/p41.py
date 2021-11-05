@@ -5,6 +5,7 @@ import pandas as pd
 from pandas.io.sql import read_sql
 from scipy import stats
 from matplotlib.font_manager import FontProperties
+from pyiem.plot import figure
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -236,9 +237,8 @@ def plotter(fdict):
     )
     s_slp, s_int, s_r, _, _ = stats.linregress(pc1, pc2)
 
-    fig = plt.gcf()
-    fig.set_size_inches(12.0, 6.75)
-    ax = plt.axes([0.1, 0.11, 0.4, 0.76])
+    fig = figure(apctx=ctx)
+    ax = fig.add_axes([0.1, 0.11, 0.4, 0.76])
     ax.scatter(pc1[::5], pc2[::5], s=40, marker="s", color="b", zorder=3)
     ax.plot(
         pc1,
@@ -300,7 +300,7 @@ def plotter(fdict):
     ax.legend(loc=2)
 
     # Second
-    ax = plt.axes([0.56, 0.18, 0.26, 0.68])
+    ax = fig.add_axes([0.56, 0.18, 0.26, 0.68])
     ax.set_title("Distribution")
     v1 = ax.violinplot(m1data, positions=[0], showextrema=True, showmeans=True)
     b = v1["bodies"][0]
@@ -393,7 +393,7 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    fig, _df = plotter(
+    _fig, _df = plotter(
         dict(
             station="IA7708",
             network="IACLIMATE",
@@ -405,4 +405,4 @@ if __name__ == "__main__":
             opt="max",
         )
     )
-    fig.savefig("/tmp/bah.png")
+    _fig.savefig("/tmp/bah.png")

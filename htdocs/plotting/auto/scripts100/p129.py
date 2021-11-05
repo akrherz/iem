@@ -4,7 +4,7 @@ import datetime
 
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -188,7 +188,7 @@ s += '<br /><b>Avg Days per Month:</b> '+ (1. / this.points[1].y).toFixed(2);
 def plotter(fdict):
     """Go"""
     ctx = get_context(fdict)
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    (fig, ax) = figure_axes(apctx=ctx)
     df = ctx["df"]
 
     ax.bar(

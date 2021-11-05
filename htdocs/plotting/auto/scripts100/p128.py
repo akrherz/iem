@@ -109,7 +109,7 @@ def plotter(fdict):
         station2,
         ctx["_nt2"].sts[station2]["name"],
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     color_above = "b" if varname in ["total_precip"] else "r"
     color_below = "r" if color_above == "b" else "b"
 

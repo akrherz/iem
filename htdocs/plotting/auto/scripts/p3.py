@@ -5,7 +5,7 @@ import datetime
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem import network
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -406,7 +406,11 @@ def plotter(fdict):
     """Go"""
     ctx = get_context(fdict)
 
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    (fig, ax) = figure_axes(
+        title=ctx["title"],
+        subtitle=ctx["subtitle"],
+        apctx=ctx,
+    )
 
     colorabove = "tomato"
     colorbelow = "dodgerblue"
@@ -451,7 +455,6 @@ def plotter(fdict):
     ax.set_ylabel(ctx["ylabel"])
     ax.grid(True)
     ax.legend(ncol=3, loc="best", fontsize=10)
-    ax.set_title("%s\n%s" % (ctx["title"], ctx["subtitle"]))
 
     return fig, ctx["df"]
 

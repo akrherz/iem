@@ -3,7 +3,7 @@ import datetime
 
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
 VDICT = {
@@ -231,7 +231,7 @@ def plotter(fdict):
     """Go"""
     ctx = get_data(fdict)
     df = ctx["df"]
-    (fig, ax) = plt.subplots(1, 1, figsize=(8, 6))
+    (fig, ax) = figure_axes(apctx=ctx)
     ax.bar(df["x"].values, df["y"].values, color="blue")
     ax.grid(True)
     ax.set_title(ctx["title"] + "\n" + ctx["subtitle"])

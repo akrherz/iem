@@ -352,6 +352,7 @@ def plotter(fdict):
         sector = "state" if len(ctx["csector"]) == 2 else ctx["csector"]
 
     mp = MapPlot(
+        apctx=ctx,
         sector=sector,
         state=ctx["csector"],
         cwa=(station if len(station) == 3 else station[1:]),

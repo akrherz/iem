@@ -1,6 +1,6 @@
 """VTEC combos"""
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -8,6 +8,7 @@ from pyiem.exceptions import NoDataFound
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {}
+    desc["defaults"] = {"_r": None}  # disables
     desc["data"] = True
     desc["cache"] = 86400
     desc[
@@ -19,6 +20,9 @@ def get_description():
     comparable to 2015.  Here is a
 <a href="http://www.nws.noaa.gov/os/vtec/pdfs/VTEC_explanation6.pdf">handy
  chart</a> with more details on VTEC and codes used in this graphic.
+
+    <p>Due to the chart's oblong nature, there is no way to control the
+    image size at this time.
     """
     desc["arguments"] = [
         dict(
@@ -40,10 +44,10 @@ def plotter(fdict):
     station = ctx["station"][:4]
     ctx["_nt"].sts["_ALL"] = {"name": "All Offices"}
 
-    fig = plt.figure(figsize=(8, 14 if station != "_ALL" else 21))
+    fig = figure(figsize=(8, 14 if station != "_ALL" else 21), apctx=ctx)
     ax = [None, None]
-    ax[0] = plt.axes([0.1, 0.75, 0.85, 0.2])
-    ax[1] = plt.axes([0.1, 0.05, 0.85, 0.65])
+    ax[0] = fig.add_axes([0.1, 0.75, 0.85, 0.2])
+    ax[1] = fig.add_axes([0.1, 0.05, 0.85, 0.65])
 
     if station == "_ALL":
         df = read_sql(

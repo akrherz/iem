@@ -5,7 +5,7 @@ import calendar
 import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 from metpy.units import units
@@ -108,7 +108,8 @@ def plotter(fdict):
         )
     )
 
-    (fig, axes) = plt.subplots(2, 1, figsize=(8, 9))
+    fig = figure(apctx=ctx)
+    axes = fig.subplots(2, 1)
     ax = axes[0]
     ax.plot(
         np.arange(1, 366),

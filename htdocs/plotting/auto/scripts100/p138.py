@@ -4,7 +4,7 @@ import calendar
 from pandas.io.sql import read_sql
 from metpy.units import units as munits
 from metpy.calc import wind_components, wind_direction
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.util import (
     drct2text,
     get_autoplot_context,
@@ -86,7 +86,7 @@ def plotter(fdict):
         munits("meter / second") * grp["v"].values,
     ).m
     maxval = grp[f"sped_{units}"].max()
-    (fig, ax) = plt.subplots(1, 1)
+    (fig, ax) = figure_axes(apctx=ctx)
     ax.barh(grp.index.values, grp[f"sped_{units}"].values, align="center")
     ax.set_xlabel(f"Average Wind Speed [{UNITS[units]}]")
     ax.set_yticks(range(1, 13))

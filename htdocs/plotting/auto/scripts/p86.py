@@ -88,11 +88,9 @@ def plotter(fdict):
     ptype = ctx["ptype"]
     date = ctx["date"]
     varname = ctx["var"]
-    csector = ctx["csector"]
     title = date.strftime("%-d %B %Y")
     mp = MapPlot(
-        sector=("state" if len(csector) == 2 else csector),
-        state=ctx["csector"],
+        apctx=ctx,
         axisbg="white",
         nocaption=True,
         title=f"IEM Reanalysis of {PDICT.get(varname)} for {title}",

@@ -424,6 +424,7 @@ def plotter(fdict):
         lformat = "%.1f"
 
     mp = MapPlot(
+        apctx=ctx,
         sector="nws",
         axisbg="white",
         twitter=True,

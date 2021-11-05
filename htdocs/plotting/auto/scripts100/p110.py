@@ -149,7 +149,7 @@ def plotter(fdict):
         station,
         ctx["_nt"].sts[station]["name"],
     )
-    fig, ax = figure_axes(title=title)
+    fig, ax = figure_axes(title=title, apctx=ctx)
     df["total"] = (
         df["cat1"] + df["cat2"] + df["cat3"] + df["cat4"] + df["cat5"]
     )

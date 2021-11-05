@@ -129,7 +129,7 @@ def plotter(fdict):
         "[%s] %s Monthly Departure of %s + El Nino 3.4 Index\n"
         "Climatology computed from present day period of record"
     ) % (station, ctx["_nt"].sts[station]["name"], PDICT.get(varname))
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     xticks = []
     xticklabels = []

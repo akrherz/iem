@@ -99,7 +99,7 @@ def plotter(fdict):
         min(df["issue"]).strftime("%-d %b %Y"),
         max(df["issue"]).strftime("%-d %b %Y"),
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     titles = {"initial": "Initial Issuance", "final": "Final Duration"}
     for col in ["final", "initial"]:

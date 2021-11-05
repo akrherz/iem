@@ -280,7 +280,7 @@ def plotter(fdict):
         title,
         subtitle,
     )
-    fig, ax = figure_axes(title=title)
+    fig, ax = figure_axes(title=title, apctx=ctx)
     multiplier = 1
     if agg == "week":
         multiplier = 7

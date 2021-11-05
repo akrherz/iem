@@ -4,7 +4,7 @@ import calendar
 
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -127,7 +127,8 @@ def plotter(fdict):
     df2 = None
     if ctx["year"] in df.index:
         df2 = df.loc[ctx["year"]]
-    (fig, (ax, ax2, ax3)) = plt.subplots(3, 1, figsize=(7, 9))
+    fig = figure(apctx=ctx)
+    (ax, ax2, ax3) = fig.subplots(3, 1)
     ax.set_position([0.1, 0.7, 0.85, 0.25])
     ax2.set_position([0.1, 0.4, 0.85, 0.25])
     ax3.set_position([0.1, 0.1, 0.85, 0.25])

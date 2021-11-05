@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.colors as mpcolors
 from pyiem.util import get_autoplot_context, get_dbconn
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.plot import get_cmap
 from pyiem.exceptions import NoDataFound
 
@@ -136,7 +136,8 @@ def plotter(fdict):
     probs = np.where(probs < 0.1, -1, probs)
     scenario_probs = np.where(scenario_probs < 0.1, -1, scenario_probs)
 
-    (fig, ax) = plt.subplots(1, 2, sharey=True, figsize=(8, 6))
+    fig = figure(apctx=ctx)
+    ax = fig.subplots(1, 2, sharey=True)
 
     cmap = get_cmap(ctx["cmap"])
     cmap.set_under("white")

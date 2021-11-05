@@ -183,7 +183,7 @@ def plotter(fdict):
         PDICT3[varname],
         "Any Hour" if ctx["h"] == "all" else f"{hour} UTC",
     )
-    fig = figure(title=title, subtitle=subtitle)
+    fig = figure(title=title, subtitle=subtitle, apctx=ctx)
     ax = fig.add_axes([0.1, 0.1, 0.75, 0.78])
     bars = ax.barh(
         range(len(df.index)), df[varname + "_percentile"], align="center"

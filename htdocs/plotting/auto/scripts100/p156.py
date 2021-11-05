@@ -158,7 +158,7 @@ def plotter(fdict):
         df["year"].min(),
         df["year"].max(),
     )
-    fig = figure(title=title)
+    fig = figure(title=title, apctx=ctx)
     width = 0.29
     height = 0.32
     x0 = 0.05

@@ -3,7 +3,7 @@ import datetime
 import calendar
 
 from pandas.io.sql import read_sql
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -85,7 +85,8 @@ def plotter(fdict):
     climo = df.groupby("month").sum()
     climo["freq"] = climo["hits"] / climo["count"] * 100.0
 
-    (fig, ax) = plt.subplots(2, 1)
+    fig = figure(apctx=ctx)
+    ax = fig.subplots(2, 1)
     ax[0].bar(
         climo.index.values - 0.2,
         climo["freq"].values,

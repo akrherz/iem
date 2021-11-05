@@ -135,7 +135,7 @@ def plot_common(ctx, ax):
 
 def make_barplot(ctx, df):
     """Create a bar plot."""
-    fig = figure(title=ctx["title"])
+    fig = figure(title=ctx["title"], apctx=ctx)
     ax = fig.add_axes([0.1, 0.1, 0.8, 0.8])
     df2 = (
         df.groupby("year").sum().reindex(range(ctx["syear"], ctx["eyear"] + 1))
@@ -259,7 +259,7 @@ def plotter(fdict):
 
     if ctx["plot"] == "bar":
         return make_barplot(ctx, df)
-    fig = figure(title=ctx["title"])
+    fig = figure(title=ctx["title"], apctx=ctx)
     ax = fig.add_axes([0.05, 0.1, 0.65, 0.8])
     ann = []
     for yr in range(ctx["syear"], eyear + 1):

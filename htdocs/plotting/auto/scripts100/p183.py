@@ -103,7 +103,7 @@ def plotter(fdict):
         df["Date"].max().strftime("%-d %B %Y"),
     )
 
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     # HACK to get a datetime64 to datetime so matplotlib works
     xs = df["x"].to_list()

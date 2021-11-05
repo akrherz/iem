@@ -10,7 +10,7 @@ import pandas as pd
 import geopandas as gpd
 import matplotlib.dates as mdates
 from pyiem import iemre
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure_axes
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.util import get_autoplot_context, get_dbconn, ncopen, convert_value
 from pyiem import reference
@@ -128,7 +128,7 @@ def plotter(fdict):
     df = pd.DataFrame(rows)
     df = df[np.isfinite(df["coverage"])]
 
-    (fig, ax) = plt.subplots(1, 1, sharex=True, figsize=(8, 6))
+    (fig, ax) = figure_axes(apctx=ctx)
     ax.bar(
         df["valid"].values,
         df["coverage"].values,

@@ -83,7 +83,7 @@ def plotter(fdict):
         f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
         "First Fall Temperature Occurences"
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
     ax.scatter(doy, doy2 - doy)

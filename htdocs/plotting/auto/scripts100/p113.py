@@ -145,7 +145,7 @@ def plotter(fdict):
         station,
         ctx["_nt"].sts[station]["name"],
     )
-    (fig, ax) = figure_axes(title=title)
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     x = df["valid"].values
     ax.plot(range(len(x)), df["avg_high"].values, color="r", label="High")
     ax.plot(range(len(x)), df["avg_low"].values, color="b", label="Low")

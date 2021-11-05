@@ -3,7 +3,7 @@ import datetime
 
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
-from pyiem.plot.use_agg import plt
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -109,7 +109,8 @@ def plotter(fdict):
     df["high_diff"] = df["one_high"] - df["two_high"]
     df["low_diff"] = df["one_low"] - df["two_low"]
 
-    (fig, ax) = plt.subplots(2, 1, sharex=True)
+    fig = figure(apctx=ctx)
+    ax = fig.subplots(2, 1, sharex=True)
 
     ax[0].set_title(
         ("[%s] %s minus [%s] %s\n%s Difference: %s - %s")
