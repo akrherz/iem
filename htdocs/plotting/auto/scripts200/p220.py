@@ -265,10 +265,11 @@ def plotter(fdict):
         df = fetch(valid)
     for col in ["updated", "product_issue", "issue", "expire"]:
         df[col] = df[col].dt.tz_localize(datetime.timezone.utc)
+    csector = ctx.pop("csector")
     if ctx["t"] == "cwa":
         sector = "cwa"
     else:
-        sector = "state" if len(ctx["csector"]) == 2 else ctx["csector"]
+        sector = "state" if len(csector) == 2 else csector
     daylabel = day if day > 0 else f"{days[0]}-{days[-1]}"
     datelabel = compute_datelabel(df)
 
@@ -289,7 +290,7 @@ def plotter(fdict):
         ),
         sector=sector,
         twitter=True,
-        state=ctx["csector"],
+        state=csector,
         cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),
         nocaption=True,
     )
