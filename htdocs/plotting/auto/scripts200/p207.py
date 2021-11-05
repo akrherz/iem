@@ -374,10 +374,11 @@ def plotter(fdict):
     if ctx["v"] == "ice":
         rng = [0.01, 0.02, 0.05, 0.07, 0.1, 0.2, 0.3, 0.4, 0.5, 0.75, 1]
     cmap = nwssnow()
+    csector = ctx.pop("csector")
     if ctx["t"] == "cwa":
         sector = "cwa"
     else:
-        sector = "state" if len(ctx["csector"]) == 2 else ctx["csector"]
+        sector = "state" if len(csector) == 2 else csector
 
     title = "NWS Local Storm Report%s Snowfall Total Analysis" % (
         " & COOP" if ctx["coop"] == "yes" else "",
@@ -388,7 +389,7 @@ def plotter(fdict):
         apctx=ctx,
         sector=sector,
         twitter=True,
-        state=ctx["csector"],
+        state=csector,
         cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),
         axisbg="white",
         title=title,

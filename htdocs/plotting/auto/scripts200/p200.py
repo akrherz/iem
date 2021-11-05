@@ -341,6 +341,7 @@ def plotter(fdict):
         df["issue"].min().strftime("%d %b %Y"),
         df["issue"].max().strftime("%d %b %Y"),
     )
+    csector = ctx.pop("csector")
     if t == "cwa":
         sector = "cwa"
         subtitle = "Plotted for %s (%s). %s" % (
@@ -349,12 +350,12 @@ def plotter(fdict):
             subtitle,
         )
     else:
-        sector = "state" if len(ctx["csector"]) == 2 else ctx["csector"]
+        sector = "state" if len(csector) == 2 else csector
 
     mp = MapPlot(
         apctx=ctx,
         sector=sector,
-        state=ctx["csector"],
+        state=csector,
         cwa=(station if len(station) == 3 else station[1:]),
         axisbg="white",
         title="%s %s Outlook [%s] of at least %s"
@@ -369,7 +370,7 @@ def plotter(fdict):
         twitter=True,
     )
     # Get the main axes bounds
-    if t == "state" and ctx["csector"] == "conus":
+    if t == "state" and csector == "conus":
         domain = data
         lons, lats = np.meshgrid(lons, lats)
         df2 = pd.DataFrame()

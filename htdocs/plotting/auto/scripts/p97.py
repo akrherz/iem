@@ -416,6 +416,8 @@ def plotter(fdict):
         sector = "cwa"
         cwa = ctx["wfo"]
         state = None
+    # This causes grief
+    ctx.pop("csector", None)
     mp = MapPlot(
         apctx=ctx,
         sector=sector,
