@@ -6,7 +6,7 @@ import psycopg2.extras
 import numpy as np
 from scipy import stats
 import pandas as pd
-from pyiem.plot import figure
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -203,7 +203,7 @@ def plotter(fdict):
     s_slp, s_int, s_r, _, _ = stats.linregress(years, spring)
     f_slp, f_int, f_r, _, _ = stats.linregress(years, fall)
 
-    (fig, ax) = figure(apctx=ctx)
+    (fig, ax) = figure_axes(apctx=ctx)
     ax.bar(years, fall - spring, bottom=spring, ec="tan", fc="tan", zorder=1)
     for _v in [fall, spring]:
         avgv = int(np.average(_v))

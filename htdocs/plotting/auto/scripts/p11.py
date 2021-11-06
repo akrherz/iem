@@ -3,7 +3,7 @@ import datetime
 
 from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
-from pyiem.plot import figure
+from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
@@ -98,7 +98,12 @@ def plotter(fdict):
         raise NoDataFound("No Data Found!")
     df["range"] = df["max_" + varname] - df["min_" + varname]
 
-    (fig, ax) = figure(apctx=ctx)
+    title = (
+        f"{ctx['_nt'].sts[station]['name']} [{station}] {year} "
+        f"Daily Min/Max {PDICT2[varname]}\n"
+        f"Period: {df.index.values[0]:%-d %b} to {df.index.values[-1]:%-d %b}"
+    )
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     bars = ax.bar(
         df.index.values,
         df["range"].values,
@@ -131,22 +136,6 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_ylabel(
         "%s %s" % (PDICT2[varname], r"$^\circ$F" if varname != "rh" else "%")
-    )
-    ax.set_title(
-        "%s [%s] %s Daily Min/Max %s\nPeriod: %s to %s"
-        % (
-            ctx["_nt"].sts[station]["name"],
-            station,
-            year,
-            PDICT2[varname],
-            df.index.values[0].strftime("%-d %b"),
-            df.index.values[-1].strftime("%-d %b"),
-        )
-    )
-
-    box = ax.get_position()
-    ax.set_position(
-        [box.x0, box.y0 + box.height * 0.05, box.width, box.height * 0.95]
     )
     ax.set_xlabel(
         ("Days meeting emphasis: %s, first: %s last: %s")
