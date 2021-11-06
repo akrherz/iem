@@ -129,7 +129,7 @@ def plotter(fdict):
             ys.append(lev)
     ys = np.array(ys)
 
-    fig = figure(apcx=ctx)
+    fig = figure(apctx=ctx)
     ax = fig.subplots(2, 1)
 
     color = "b" if ctx["var"] == "wcht" else "r"
@@ -161,4 +161,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})
