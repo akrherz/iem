@@ -194,7 +194,7 @@ def plotter(fdict):
     )
 
     ax.set_position([0.13, 0.1, 0.71, 0.78])
-    cax = plt.axes(
+    cax = fig.add_axes(
         [0.86, 0.12, 0.03, 0.75], frameon=False, yticks=[], xticks=[]
     )
     cb = ColorbarBase(cax, norm=norm, cmap=cmap)
