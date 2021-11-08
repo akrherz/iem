@@ -125,36 +125,33 @@ def plotter(fdict):
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
-    title = "[%s] %s Top 10 %s\n" "Over %s Hour Period (%s-%s) [%s]" % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-        MDICT[mydir],
-        hours,
-        ab.year,
-        datetime.date.today().year,
-        MDICT2[month],
+    title = (
+        f"[{station}] {ctx['_nt'].sts[station]['name']} Top 10 "
+        f"{MDICT[mydir]}\n"
+        f"Over {hours} Hour Period ({ab.year}-{datetime.date.today().year}) "
+        f"[{MDICT2[month]}]"
     )
     fig = figure(title=title, apctx=ctx)
-    ax = fig.add_axes([0.4, 0.1, 0.55, 0.8])
+    ax = fig.add_axes([0.45, 0.1, 0.53, 0.8])
 
     labels = []
-    for i in range(10):
+    i = 0
+    # workaround dups from above
+    while i < 50 and len(labels) < 10:
         row = df.iloc[i]
-        ax.barh(i + 1, row["diff"], color="b", align="center")
+        i += 1
         sts = pd.Timestamp(row["valid1"])
         ets = pd.Timestamp(row["valid2"])
-        labels.append(
-            ("%.0f to %.0f -> %.0f\n%s - %s")
-            % (
-                row["tmpf1"],
-                row["tmpf2"],
-                row["diff"],
-                sts.strftime("%-d %b %Y %-I:%M %p"),
-                ets.strftime("%-d %b %Y %-I:%M %p"),
-            )
+        lbl = (
+            f"{row['tmpf1']:.0f} to {row['tmpf2']:.0f} -> {row['diff']:.0f}\n"
+            f"{sts:%-d %b %Y %-I:%M %p} - {ets:%-d %b %Y %-I:%M %p}"
         )
+        if lbl in labels:
+            continue
+        labels.append(lbl)
+        ax.barh(len(labels), row["diff"], color="b", align="center")
     ax.set_yticks(range(1, 11))
-    ax.set_yticklabels(labels, fontsize=14)
+    ax.set_yticklabels(labels)
     ax.set_ylim(10.5, 0.5)
     ax.grid(True)
     ax.set_xlabel("Delta Degrees Fahrenheit")
@@ -162,4 +159,6 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter(
+        {"zstation": "TLH", "network": "FL_ASOS", "hours": 5, "month": "nov"}
+    )
