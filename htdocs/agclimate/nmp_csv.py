@@ -14,6 +14,8 @@ from pyiem.util import get_dbconn, convert_value
 
 INVERSION = [
     "BOOI4",
+    "CAMI4",
+    "CRFI4",
 ]
 
 
