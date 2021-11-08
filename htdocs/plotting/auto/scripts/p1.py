@@ -301,8 +301,7 @@ def plotter(fdict):
     )
     lr = len(
         resdf[
-            (resdf["%s_1" % (varname1,)] >= x)
-            & (resdf["%s_2" % (varname2,)] < y)
+            (resdf[f"{varname1}_1"] >= x) & (resdf[f"{varname2}_2"] < y)
         ].index
     )
     ax.text(

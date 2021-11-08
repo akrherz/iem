@@ -137,7 +137,7 @@ def add_obs(img, ctx, valid):
     mp.fig.text(
         0.05,
         0.92,
-        "NEXRAD MOSAIC %s UTC" % (valid.strftime("%Y-%m-%d %H:%M"),),
+        f"NEXRAD MOSAIC {valid:%Y-%m-%d %H:%M} UTC",
         fontsize=FONTSIZE,
         bbox=dict(color="white"),
     )

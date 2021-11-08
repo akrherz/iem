@@ -133,7 +133,7 @@ def plotter(fdict):
     ax.text(
         gdf.index.values[-1] + 2,
         val,
-        "Avg: %.1f" % (val,),
+        f"Avg: {val:.1f}",
         color="r",
         bbox=dict(color="white"),
     )

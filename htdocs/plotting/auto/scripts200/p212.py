@@ -285,7 +285,7 @@ def plotter(fdict):
     ax.plot(x, df[ctx["var"], "mean"].values, color="k", zorder=3, label="Avg")
     ax.legend()
     ax.set_ylabel(PDICT3[ctx["var"]])
-    plt.gcf().text(0.5, 0.9, ctx["title"], ha="center", va="bottom")
+    fig.text(0.5, 0.9, ctx["title"], ha="center", va="bottom")
     ax.grid(True)
 
     return fig, df

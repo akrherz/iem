@@ -308,7 +308,6 @@ def plotter(fdict):
                 fc, ec = "None", DAY_COLORS[row["day"]]
                 if row["threshold"] == "0.30":
                     fc = ec
-            # TODO remove me once pyiem updates
             mp.panels[0].add_geometries(
                 [row["geom"]],
                 LATLON,

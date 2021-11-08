@@ -297,8 +297,8 @@ def plotter(fdict):
             zorder=2,
         )
     rects = []
-    for fcond in colors:
-        rects.append(Rectangle((0, 0), 1, 1, fc=colors[fcond], alpha=0.5))
+    for _, item in colors.items():
+        rects.append(Rectangle((0, 0), 1, 1, fc=item, alpha=0.5))
     ax.legend(
         rects,
         colors.keys(),
