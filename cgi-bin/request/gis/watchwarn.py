@@ -259,7 +259,7 @@ def application(environ, start_response):
         sql, fn = build_sql(form)
     except ValueError as exp:
         start_response("200 OK", [("Content-type", "text/plain")])
-        return [exp.encode("ascii")]
+        return [str(exp).encode("ascii")]
 
     accept = form.get("accept", "shapefile")
     pgconn = get_dbconn("postgis", user="nobody")
