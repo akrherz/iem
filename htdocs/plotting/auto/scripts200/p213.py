@@ -191,7 +191,7 @@ def plotter(fdict):
     tp.grid(True)
     tp.set_ylabel(PDICT[varname])
     tp.set_xlabel("Percentile")
-    cax = plt.axes(
+    cax = fig.add_axes(
         [0.613, 0.55, 0.01, 0.33], frameon=False, yticks=[], xticks=[]
     )
     cb = ColorbarBase(cax, cmap=cmap)

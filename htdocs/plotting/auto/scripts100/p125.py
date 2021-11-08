@@ -83,13 +83,6 @@ MDICT = dict(
 )
 
 
-def proxy(mp):
-    """TODO remove once pyiem updates"""
-    if hasattr(mp, "panels"):
-        return mp.panels[0]
-    return mp.ax
-
-
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {}
@@ -191,7 +184,7 @@ def plotter(fdict):
         title="%s %s for %s" % (PDICT5[ctx["src"]], PDICT3[varname], title),
         nocaption=True,
     )
-    bnds = proxy(mp).get_extent(crs=LATLON)
+    bnds = mp.panels[0].get_extent(crs=LATLON)
 
     joincol = "id"
     if ctx["src"] == "ncdc_climate81":

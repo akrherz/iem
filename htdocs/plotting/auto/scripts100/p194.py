@@ -22,13 +22,6 @@ PDICT = {
 PDICT2 = {"weeks": "Number of Weeks", "percent": "Percentage of Weeks"}
 
 
-def proxy(mp):
-    """TODO remove once pyiem updates"""
-    if hasattr(mp, "panels"):
-        return mp.panels[0]
-    return mp.ax
-
-
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {}
@@ -126,7 +119,7 @@ def plotter(fdict):
     )
 
     # compute the affine
-    (west, east, south, north) = proxy(mp).get_extent(LATLON)
+    (west, east, south, north) = mp.panels[0].get_extent(LATLON)
     raster = np.zeros(
         (int((north - south) / griddelta), int((east - west) / griddelta))
     )

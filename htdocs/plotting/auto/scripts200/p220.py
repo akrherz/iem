@@ -209,13 +209,6 @@ def get_threshold_label(threshold, outlook_type):
     return threshold
 
 
-def proxy(mp):
-    """TODO removeme once pyiem updates"""
-    if hasattr(mp, "panels"):
-        return mp.panels[0]
-    return mp.ax
-
-
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
@@ -298,7 +291,7 @@ def plotter(fdict):
     rectlabels = []
     for _idx, row in df[~pd.isna(df["threshold"])].iterrows():
         if row["threshold"] == "SIGN":
-            proxy(mp).add_geometries(
+            mp.panels[0].add_geometries(
                 [row["geom"]],
                 LATLON,
                 facecolor="None",
@@ -316,7 +309,7 @@ def plotter(fdict):
                 if row["threshold"] == "0.30":
                     fc = ec
             # TODO remove me once pyiem updates
-            proxy(mp).add_geometries(
+            mp.panels[0].add_geometries(
                 [row["geom"]],
                 LATLON,
                 facecolor=fc,

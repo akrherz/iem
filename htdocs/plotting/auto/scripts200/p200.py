@@ -144,13 +144,6 @@ YSZ = (GRIDNORTH - GRIDSOUTH) / griddelta
 XSZ = (GRIDEAST - GRIDWEST) / griddelta
 
 
-def proxy(mp):
-    """TODO remove once pyiem updates"""
-    if hasattr(mp, "panels"):
-        return mp.panels[0]
-    return mp.ax
-
-
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {}
@@ -375,7 +368,7 @@ def plotter(fdict):
         lons, lats = np.meshgrid(lons, lats)
         df2 = pd.DataFrame()
     else:
-        (west, east, south, north) = proxy(mp).get_extent(LATLON)
+        (west, east, south, north) = mp.panels[0].get_extent(LATLON)
         i0 = int((west - GRIDWEST) / griddelta)
         j0 = int((south - GRIDSOUTH) / griddelta)
         i1 = int((east - GRIDWEST) / griddelta)

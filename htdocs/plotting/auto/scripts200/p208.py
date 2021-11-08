@@ -25,13 +25,6 @@ PDICT3 = {
 }
 
 
-def proxy(mp):
-    """TODO removeme once pyiem updates"""
-    if hasattr(mp, "panels"):
-        return mp.panels[0]
-    return mp.ax
-
-
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {}
@@ -322,7 +315,7 @@ def plotter(fdict):
         ]
         if not df2.empty:
             # draw new
-            proxy(mp).add_geometries(
+            mp.panels[0].add_geometries(
                 [poly],
                 LATLON,
                 facecolor="None",
@@ -330,7 +323,7 @@ def plotter(fdict):
                 zorder=Z_OVERLAY2,
             )
             poly = df2.iloc[0]["geom"]
-            proxy(mp).add_geometries(
+            mp.panels[0].add_geometries(
                 [poly],
                 LATLON,
                 facecolor=color,
