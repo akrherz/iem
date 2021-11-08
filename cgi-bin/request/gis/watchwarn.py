@@ -258,7 +258,7 @@ def application(environ, start_response):
     try:
         sql, fn = build_sql(form)
     except ValueError as exp:
-        start_response("200 OK", [("Content-type", "text/plain")])
+        start_response("400 Bad Request", [("Content-type", "text/plain")])
         return [str(exp).encode("ascii")]
 
     accept = form.get("accept", "shapefile")
