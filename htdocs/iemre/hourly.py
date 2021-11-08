@@ -2,7 +2,6 @@
 import os
 import datetime
 import json
-import sys
 
 import numpy as np
 import memcache
@@ -94,7 +93,7 @@ def application(environ, start_response):
     start_response("200 OK", headers)
 
     i, j = iemre.find_ij(lon, lat)
-    mckey = "iemre/hourly/%s/%s/%s" % (sts.strftime("%Y%m%d"), i, j)
+    mckey = f"iemre/hourly/{sts:%Y%m%d}/{i}/{j}"
 
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
@@ -102,8 +101,6 @@ def application(environ, start_response):
         res = workflow(sts, ets, i, j)
         res = json.dumps(res).encode("ascii")
         mc.set(mckey, res, 3600)
-    else:
-        sys.stderr.write("Using cached %s\n" % (mckey,))
 
     return [res]
 
