@@ -24,15 +24,17 @@ LOG = logger()
 
 def workflow(now, realtime):
     """Generate for this timestep!"""
+    minutes = 2 if now.year > 2011 else 5
     szx = 7000
     szy = 3500
     # Create the image data
     imgdata = np.zeros((szy, szx), "u1")
     sts = now - datetime.timedelta(minutes=2)
+    prefix = f"a{minutes}m"
     metadata = {
         "start_valid": sts.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "end_valid": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "product": "a2m",
+        "product": prefix,
         "units": "0.02 mm",
     }
 
@@ -59,8 +61,11 @@ def workflow(now, realtime):
     os.unlink(gribfn)
 
     val = grb["values"]
+    # If has a mask, convert those to -3
+    if hasattr(val, "mask"):
+        val = np.where(val.mask, -3, val)
     # Convert into units of 0.02 mm accumulation
-    val = val / 60.0 * 2.0 * 50.0
+    val = val / 60.0 * minutes * 50.0
     val = np.where(val < 0.0, 255.0, val)
     imgdata[:, :] = np.flipud(val.astype("int"))
 
@@ -69,37 +74,22 @@ def workflow(now, realtime):
     # Create Image
     png = Image.fromarray(np.flipud(imgdata))
     png.putpalette(mrms.make_colorramp())
-    png.save("%s.png" % (tmpfn,))
+    png.save(f"{tmpfn}.png")
 
-    mrms.write_worldfile("%s.wld" % (tmpfn,))
+    mrms.write_worldfile(f"{tmpfn}.wld")
     # Inject WLD file
     routes = "c" if realtime else ""
-    prefix = "a2m"
     pqstr = (
-        "pqinsert -i -p 'plot a%s %s "
-        "gis/images/4326/mrms/%s.wld GIS/mrms/%s_%s.wld wld' %s.wld"
-        ""
-    ) % (
-        routes,
-        now.strftime("%Y%m%d%H%M"),
-        prefix,
-        prefix,
-        now.strftime("%Y%m%d%H%M"),
-        tmpfn,
+        f"pqinsert -i -p 'plot a{routes} {now:%Y%m%d%H%M} "
+        f"gis/images/4326/mrms/{prefix}.wld GIS/mrms/{prefix}_"
+        f"{now:%Y%m%d%H%M}.wld wld' {tmpfn}.wld"
     )
     subprocess.call(pqstr, shell=True)
     # Now we inject into LDM
     pqstr = (
-        "pqinsert -i -p 'plot a%s %s "
-        "gis/images/4326/mrms/%s.png GIS/mrms/%s_%s.png png' %s.png"
-        ""
-    ) % (
-        routes,
-        now.strftime("%Y%m%d%H%M"),
-        prefix,
-        prefix,
-        now.strftime("%Y%m%d%H%M"),
-        tmpfn,
+        f"pqinsert -i -p 'plot a{routes} {now:%Y%m%d%H%M} "
+        f"gis/images/4326/mrms/{prefix}.png GIS/mrms/{prefix}_"
+        f"{now:%Y%m%d%H%M}.png png' {tmpfn}.png"
     )
     subprocess.call(pqstr, shell=True)
 
@@ -107,41 +97,29 @@ def workflow(now, realtime):
         # Create 3857 image
         cmd = (
             "gdalwarp -s_srs EPSG:4326 -t_srs EPSG:3857 -q -of GTiff "
-            "-tr 1000.0 1000.0 %s.png %s.tif"
-        ) % (tmpfn, tmpfn)
+            f"-tr 1000.0 1000.0 {tmpfn}.png {tmpfn}.tif"
+        )
         subprocess.call(cmd, shell=True)
         # Insert into LDM
         pqstr = (
-            "pqinsert -i -p 'plot c %s "
-            "gis/images/3857/mrms/%s.tif GIS/mrms/%s_%s.tif tif' %s.tif"
-            ""
-        ) % (
-            now.strftime("%Y%m%d%H%M"),
-            prefix,
-            prefix,
-            now.strftime("%Y%m%d%H%M"),
-            tmpfn,
+            f"pqinsert -i -p 'plot c {now:%Y%m%d%H%M} "
+            f"gis/images/3857/mrms/{prefix}.tif GIS/mrms/{prefix}_"
+            f"{now:%Y%m%d%H%M}.tif tif' {tmpfn}.tif"
         )
         subprocess.call(pqstr, shell=True)
 
-        with open("%s.json" % (tmpfn,), "w") as fh:
+        with open(f"{tmpfn}.json", "w", encoding="utf8") as fh:
             fh.write(json.dumps(dict(meta=metadata)))
         # Insert into LDM
         pqstr = (
-            "pqinsert -i -p 'plot c %s "
-            "gis/images/4326/mrms/%s.json GIS/mrms/%s_%s.json json' "
-            "%s.json"
-        ) % (
-            now.strftime("%Y%m%d%H%M"),
-            prefix,
-            prefix,
-            now.strftime("%Y%m%d%H%M"),
-            tmpfn,
+            f"pqinsert -i -p 'plot c {now:%Y%m%d%H%M} "
+            f"gis/images/4326/mrms/{prefix}.json GIS/mrms/{prefix}_"
+            f"{now:%Y%m%d%H%M}.json json' {tmpfn}.json"
         )
         subprocess.call(pqstr, shell=True)
     for suffix in ["tif", "json", "png", "wld"]:
-        if os.path.isfile("%s.%s" % (tmpfn, suffix)):
-            os.unlink("%s.%s" % (tmpfn, suffix))
+        if os.path.isfile(f"{tmpfn}.{suffix}"):
+            os.unlink(f"{tmpfn}.{suffix}")
 
     os.close(tmpfp)
     os.unlink(tmpfn)
@@ -170,10 +148,7 @@ def main(argv):
         for delta in [30, 90, 600, 1440, 2880]:
             ts = utcnow - datetime.timedelta(minutes=delta)
             fn = ts.strftime(
-                (
-                    "/mesonet/ARCHIVE/data/%Y/%m/%d/"
-                    "GIS/mrms/a2m_%Y%m%d%H%M.png"
-                )
+                "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/mrms/a2m_%Y%m%d%H%M.png"
             )
             if not os.path.isfile(fn):
                 workflow(ts, False)
