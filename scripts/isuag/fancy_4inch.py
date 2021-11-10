@@ -187,12 +187,17 @@ def main(argv):
         units=r"$^\circ$F",
     )
     mp.plot_values(
-        df["lon"], df["lat"], df["ob"], fmt="%.0f", color="r", labelbuffer=5
+        df["lon"],
+        df["lat"],
+        df["ob"].values,
+        fmt="%.0f",
+        color="r",
+        labelbuffer=5,
     )
     mp.plot_values(
         cdf["lon"],
         cdf["lat"],
-        cdf["nam"],
+        cdf["nam"].values,
         fmt="%.0f",
         textsize=11,
         labelbuffer=5,
