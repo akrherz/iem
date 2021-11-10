@@ -2,10 +2,10 @@
 import datetime
 
 import numpy as np
-from rasterstats import zonal_stats
 from geopandas import read_postgis
 from affine import Affine
 import pandas as pd
+from pyiem.grid.zs import CachingZonalStats
 from pyiem.plot.geoplot import MapPlot
 from pyiem.plot import get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn, utc
@@ -20,28 +20,30 @@ PDICT5 = {
 ISSUANCE = dict(
     (
         ("1.C.1", "Day 1 Convective @1z"),
-        ("1.C.5", "Day 1 Convective @5z"),
-        ("1.F.6", "Day 1 Fire Weather @6z"),
+        ("1.C.6", "Day 1 Convective @6z"),
+        ("1.F.7", "Day 1 Fire Weather @7z"),
         ("1.C.13", "Day 1 Convective @13z"),
         ("1.C.16", "Day 1 Convective @16z"),
-        ("1.F.16", "Day 1 Fire Weather @16z"),
+        ("1.F.17", "Day 1 Fire Weather @17z"),
         ("1.C.20", "Day 1 Convective @20z"),
         ("1.E.8", "Day 1 Excessive Rainfall @8z"),
         ("1.E.16", "Day 1 Excessive Rainfall @16z"),
+        ("1.E.20", "Day 1 Excessive Rainfall @20z"),
         ("1.E.1", "Day 1 Excessive Rainfall @1z"),
-        ("2.C.6", "Day 2 Convective @6z"),
-        ("2.F.7", "Day 2 Fire Weather @7z"),
+        ("2.C.7", "Day 2 Convective @7z"),
+        ("2.F.8", "Day 2 Fire Weather @8z"),
         ("2.C.17", "Day 2 Convective @17z"),
-        ("2.F.19", "Day 2 Fire Weather @19z"),
+        ("2.F.18", "Day 2 Fire Weather @18z"),
         ("2.E.9", "Day 2 Excessive Rainfall @9z"),
-        ("3.C.7", "Day 3 Convective @7z"),
+        ("2.E.21", "Day 2 Excessive Rainfall @21z"),
+        ("3.C.8", "Day 3 Convective @8z"),
         ("3.F.21", "Day 3 Fire Weather @21z"),
         ("3.E.9", "Day 3 Excessive Rainfall @9z"),
-        ("4.C.8", "Day 4 Convective @8z"),
-        ("5.C.8", "Day 5 Convective @8z"),
-        ("6.C.8", "Day 6 Convective @8z"),
-        ("7.C.8", "Day 7 Convective @8z"),
-        ("8.C.8", "Day 8 Convective @8z"),
+        ("4.C.10", "Day 4 Convective @10z"),
+        ("5.C.10", "Day 5 Convective @10z"),
+        ("6.C.10", "Day 6 Convective @10z"),
+        ("7.C.10", "Day 7 Convective @10z"),
+        ("8.C.10", "Day 8 Convective @10z"),
     )
 )
 OUTLOOKS = dict(
@@ -133,15 +135,10 @@ MDICT = dict(
         ("dec", "December"),
     ]
 )
-griddelta = 0.05
 GRIDWEST = -139.2
 GRIDEAST = -55.1
 GRIDNORTH = 54.51
 GRIDSOUTH = 19.47
-
-PRECIP_AFF = Affine(griddelta, 0.0, GRIDWEST, 0.0, griddelta * -1, GRIDNORTH)
-YSZ = (GRIDNORTH - GRIDSOUTH) / griddelta
-XSZ = (GRIDEAST - GRIDWEST) / griddelta
 
 
 def get_description():
@@ -162,7 +159,8 @@ def get_description():
     slight risk total.</p>
 
     <p><i class="fa fa-info"></i> This autoplot currently only considers
-    outlooks since 2002.</p>
+    outlooks since 2002.  This app is also horribly slow for reasons I have
+    yet to fully debug :(</p>
     """
     desc["arguments"] = [
         dict(
@@ -257,9 +255,11 @@ def plotter(fdict):
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
-    ones = np.ones((int(YSZ), int(XSZ)))
-    data = np.zeros((int(YSZ), int(XSZ)))
-    # counts = np.load('counts.npy')
+    griddelta = 0.05
+    YSZ = (GRIDNORTH - GRIDSOUTH) / griddelta
+    XSZ = (GRIDEAST - GRIDWEST) / griddelta
+
+    raster = np.zeros((int(YSZ), int(XSZ)))
     lons = np.arange(GRIDWEST, GRIDEAST, griddelta)
     lats = np.arange(GRIDSOUTH, GRIDNORTH, griddelta)
 
@@ -300,47 +300,33 @@ def plotter(fdict):
     )
     if df.empty:
         raise NoDataFound("No results found for query")
-    for _, row in df.iterrows():
-        zs = zonal_stats(
-            row["geom"],
-            ones,
-            affine=PRECIP_AFF,
-            nodata=-1,
-            all_touched=True,
-            raster_out=True,
-        )
-        for z in zs:
-            aff = z["mini_raster_affine"]
-            west = aff.c
-            north = aff.f
-            raster = np.flipud(z["mini_raster_array"])
-            x0 = int((west - GRIDWEST) / griddelta)
-            y1 = int((north - GRIDSOUTH) / griddelta)
-            dy, dx = np.shape(raster)
-            x1 = x0 + dx
-            y0 = y1 - dy
-            if ctx["w"] == "lastyear":
-                data[y0:y1, x0:x1] = np.where(
-                    raster.mask, data[y0:y1, x0:x1], row["issue"].year
-                )
-            else:
-                data[y0:y1, x0:x1] += np.where(raster.mask, 0, 1)
+    affine = Affine(griddelta, 0.0, GRIDWEST, 0.0, 0 - griddelta, GRIDNORTH)
+    czs = CachingZonalStats(affine)
+    czs.compute_gridnav(df["geom"], raster)
+    for nav in czs.gridnav:
+        if nav is None:
+            continue
+        grid = np.ones((nav.ysz, nav.xsz))
+        grid[nav.mask] = 0.0
+        jslice = slice(nav.y0, nav.y0 + nav.ysz)
+        islice = slice(nav.x0, nav.x0 + nav.xsz)
+        raster[jslice, islice] += grid
 
+    raster = np.flipud(raster)
     years = (utc() - df["issue"].min()).total_seconds() / 365.25 / 86400.0
     if ctx["w"] == "avg":
-        data = data / years
-    subtitle = "Found %s events for CONUS between %s and %s" % (
-        len(df.index),
-        df["issue"].min().strftime("%d %b %Y"),
-        df["issue"].max().strftime("%d %b %Y"),
+        raster = raster / years
+    subtitle = (
+        f"Found {len(df.index)} events for CONUS "
+        f"between {df['issue'].min():%d %b %Y} and "
+        f"{df['issue'].max():%d %b %Y}"
     )
     csector = ctx.pop("csector")
     if t == "cwa":
         sector = "cwa"
-        subtitle = "Plotted for %s (%s). %s" % (
-            ctx["_nt"].sts[station]["name"],
-            station,
-            subtitle,
+        subtitle = (
+            f"Plotted for {ctx['_nt'].sts[station]['name']} ({station}). "
+            f"{subtitle}"
         )
     else:
         sector = "state" if len(csector) == 2 else csector
@@ -351,12 +337,10 @@ def plotter(fdict):
         state=csector,
         cwa=(station if len(station) == 3 else station[1:]),
         axisbg="white",
-        title="%s %s Outlook [%s] of at least %s"
-        % (
-            "WPC" if p.split(".")[1] == "E" else "SPC",
-            ISSUANCE[p],
-            month.capitalize(),
-            OUTLOOKS[level].split("(")[0].strip(),
+        title=(
+            f"{'WPC' if p.split('.')[1] == 'E' else 'SPC'} {ISSUANCE[p]} "
+            f"Outlook [{month.capitalize()}] of at least "
+            f"{OUTLOOKS[level].split('(')[0].strip()}"
         ),
         subtitle=f"{PDICT2[ctx['w']]}, {subtitle}",
         nocaption=True,
@@ -364,7 +348,7 @@ def plotter(fdict):
     )
     # Get the main axes bounds
     if t == "state" and csector == "conus":
-        domain = data
+        domain = raster
         lons, lats = np.meshgrid(lons, lats)
         df2 = pd.DataFrame()
     else:
@@ -375,7 +359,7 @@ def plotter(fdict):
         j1 = int((north - GRIDSOUTH) / griddelta)
         jslice = slice(j0, j1)
         islice = slice(i0, i1)
-        domain = data[jslice, islice]
+        domain = raster[jslice, islice]
         lons, lats = np.meshgrid(lons[islice], lats[jslice])
         df2 = pd.DataFrame(
             {"lat": lats.ravel(), "lon": lons.ravel(), "freq": domain.ravel()}
@@ -395,6 +379,7 @@ def plotter(fdict):
         ]
 
     cmap = get_cmap(ctx["cmap"])
+    cmap.set_bad("white")
     cmap.set_under("white")
     cmap.set_over("black")
     res = mp.pcolormesh(
@@ -405,7 +390,7 @@ def plotter(fdict):
         cmap=cmap,
         clip_on=False,
         units=UNITS[ctx["w"]],
-        extend="neither" if ctx["w"] in ["lastyear", "count"] else "max",
+        extend="both",  # dragons
     )
     # Cut down on SVG et al size
     res.set_rasterized(True)
