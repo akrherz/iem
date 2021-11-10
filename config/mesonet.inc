@@ -125,6 +125,7 @@
   Alias "/onsite/lapses" "/mesonet/share/lapses"
   Alias "/onsite/windrose" "/mesonet/share/windrose"
   Alias "/onsite/iemre" "/mesonet/data/iemre"
+  Alias "/onsite/mrms" "/mesonet/data/mrms"
   Alias "/onsite/prism" "/mesonet/data/prism"
   Alias "/onsite/stage4" "/mesonet/data/stage4"
   Alias "/present" "/mesonet/share/present"
