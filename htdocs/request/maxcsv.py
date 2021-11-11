@@ -8,7 +8,7 @@ import re
 import sys
 
 try:
-    from zoneinfo import ZoneInfo
+    from zoneinfo import ZoneInfo  # type: ignore
 except ImportError:
     from backports.zoneinfo import ZoneInfo
 
@@ -210,6 +210,12 @@ def do_iarwis():
         .mean(axis=1)
         .map(lambda x: "%.0f" % x if not pd.isna(x) else "")
     )
+    df = df[df["paveavg"] != ""]
+
+    for col in range(1, 5):
+        df[f"pavetmp{col}"] = df[f"pavetmp{col}"].map(
+            lambda x: "{:.0f}".format(x) if not pd.isna(x) else ""
+        )
     return df
 
 
