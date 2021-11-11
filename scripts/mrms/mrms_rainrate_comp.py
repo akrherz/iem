@@ -15,7 +15,7 @@ import gzip
 
 import numpy as np
 from PIL import Image
-import pyiem.mrms as mrms
+from pyiem import mrms
 from pyiem.util import logger, utc
 import pygrib
 

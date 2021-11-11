@@ -14,11 +14,12 @@ import gzip
 
 import numpy as np
 from PIL import Image
-import pyiem.mrms as mrms
+from pyiem import mrms
+from pyiem.util import logger
 import pygrib
 
+LOG = logger()
 TMP = "/mesonet/tmp"
-PQI = "pqinsert"
 MISSED_FILES = []
 DOWNLOADED_FILES = []
 
@@ -98,18 +99,19 @@ def doit(gts, hr):
     for now in times:
         gribfn = mrms.fetch(mproduct, now)
         if gribfn is None:
-            print(
-                ("make_mrms_rasters.py[%s] MISSING %s\n  %s\n")
-                % (hr, now.strftime("%Y-%m-%dT%H:%MZ"), gribfn)
+            LOG.info(
+                "%s MISSING %s\n  %s\n",
+                hr,
+                now.strftime("%Y-%m-%dT%H:%MZ"),
+                gribfn,
             )
             MISSED_FILES.append(gribfn)
             return
         DOWNLOADED_FILES.append(gribfn)
-        fp = gzip.GzipFile(gribfn, "rb")
         (tmpfp, tmpfn) = tempfile.mkstemp()
-        tmpfp = open(tmpfn, "wb")
-        tmpfp.write(fp.read())
-        tmpfp.close()
+        with gzip.GzipFile(gribfn, "rb") as fp:
+            with open(tmpfn, "wb") as tmpfp:
+                tmpfp.write(fp.read())
         grbs = pygrib.open(tmpfn)
         grb = grbs[1]
         os.unlink(tmpfn)
@@ -131,66 +133,56 @@ def doit(gts, hr):
     # Create Image
     png = Image.fromarray(imgdata.astype("u1"))
     png.putpalette(mrms.make_colorramp())
-    png.save("%s.png" % (tmpfn,))
+    png.save(f"{tmpfn}.png")
 
     if irealtime:
         # create a second PNG with null values set to black
         imgdata = np.where(imgdata == 255, 0, imgdata)
         png = Image.fromarray(imgdata.astype("u1"))
         png.putpalette(mrms.make_colorramp())
-        png.save("%s_nn.png" % (tmpfn,))
+        png.save(f"{tmpfn}_nn.png")
 
     # Now we need to generate the world file
-    mrms.write_worldfile("%s.wld" % (tmpfn,))
+    mrms.write_worldfile(f"{tmpfn}.wld")
     if irealtime:
-        mrms.write_worldfile("%s_nn.wld" % (tmpfn,))
+        mrms.write_worldfile(f"{tmpfn}_nn.wld")
     # Inject WLD file
-    pqstr = (
-        "%s -i -p 'plot %s %s "
-        "gis/images/4326/mrms/p%ih.wld GIS/mrms/p%ih_%s.wld wld' "
-        "%s.wld"
-        ""
-    ) % (
-        PQI,
-        routes,
-        gts.strftime("%Y%m%d%H%M"),
-        hr,
-        hr,
-        gts.strftime("%Y%m%d%H%M"),
-        tmpfn,
+    tstr = gts.strftime("%Y%m%d%H%M")
+    cmd = (
+        f"pqinsert -i -p 'plot {routes} {tstr} "
+        f"gis/images/4326/mrms/p{hr}h.wld GIS/mrms/p{hr}h_{tstr}.wld wld' "
+        f"{tmpfn}.wld"
     )
-    subprocess.call(pqstr, shell=True)
+    subprocess.call(cmd, shell=True)
 
     if irealtime:
         pqstr = (
-            "%s -i -p 'plot c %s "
+            "pqinsert -i -p 'plot c %s "
             "gis/images/4326/mrms/p%ih_nn.wld "
             "GIS/mrms/p%ih_%s.wld wld' "
             "%s_nn.wld"
             ""
         ) % (
-            PQI,
-            gts.strftime("%Y%m%d%H%M"),
+            tstr,
             hr,
             hr,
-            gts.strftime("%Y%m%d%H%M"),
+            tstr,
             tmpfn,
         )
         subprocess.call(pqstr, shell=True)
 
     # Now we inject into LDM
     pqstr = (
-        "%s -i -p 'plot %s %s "
+        "pqinsert -i -p 'plot %s %s "
         "gis/images/4326/mrms/p%ih.png GIS/mrms/p%ih_%s.png png' "
         "%s.png"
         ""
     ) % (
-        PQI,
         routes,
-        gts.strftime("%Y%m%d%H%M"),
+        tstr,
         hr,
         hr,
-        gts.strftime("%Y%m%d%H%M"),
+        tstr,
         tmpfn,
     )
     subprocess.call(pqstr, shell=True)
@@ -198,17 +190,15 @@ def doit(gts, hr):
     if irealtime:
         # Now we inject into LDM
         pqstr = (
-            "%s -i -p 'plot c %s "
+            "pqinsert -i -p 'plot c %s "
             "gis/images/4326/mrms/p%ih_nn.png "
             "GIS/mrms/p%ih_%s.png png' "
             "%s_nn.png"
-            ""
         ) % (
-            PQI,
-            gts.strftime("%Y%m%d%H%M"),
+            tstr,
             hr,
             hr,
-            gts.strftime("%Y%m%d%H%M"),
+            tstr,
             tmpfn,
         )
         subprocess.call(pqstr, shell=True)
@@ -229,78 +219,72 @@ def doit(gts, hr):
 
         # Insert into LDM
         pqstr = (
-            "%s -i -p 'plot c %s "
+            "pqinsert -i -p 'plot c %s "
             "gis/images/3857/mrms/p%ih.tif "
             "GIS/mrms/p%ih_%s.tif tif' "
             "%s.tif"
             ""
         ) % (
-            PQI,
-            gts.strftime("%Y%m%d%H%M"),
+            tstr,
             hr,
             hr,
-            gts.strftime("%Y%m%d%H%M"),
+            tstr,
             tmpfn,
         )
         subprocess.call(pqstr, shell=True)
 
         pqstr = (
-            "%s -i -p 'plot c %s "
+            "pqinsert -i -p 'plot c %s "
             "gis/images/3857/mrms/p%ih_nn.tif "
             "GIS/mrms/p%ih_%s.tif tif' "
             "%s_nn.tif"
-            ""
         ) % (
-            PQI,
-            gts.strftime("%Y%m%d%H%M"),
+            tstr,
             hr,
             hr,
-            gts.strftime("%Y%m%d%H%M"),
+            tstr,
             tmpfn,
         )
         subprocess.call(pqstr, shell=True)
 
-        j = open("%s.json" % (tmpfn,), "w")
-        j.write(json.dumps(dict(meta=metadata)))
-        j.close()
+        with open(f"{tmpfn}.json", "w", encoding="utf8") as fh:
+            fh.write(json.dumps(dict(meta=metadata)))
 
         # Insert into LDM
         pqstr = (
-            "%s -i -p 'plot c %s "
+            "pqinsert -i -p 'plot c %s "
             "gis/images/4326/mrms/p%ih.json "
             "GIS/mrms/p%ih_%s.json json'"
             " %s.json"
         ) % (
-            PQI,
-            gts.strftime("%Y%m%d%H%M"),
+            tstr,
             hr,
             hr,
-            gts.strftime("%Y%m%d%H%M"),
+            tstr,
             tmpfn,
         )
         subprocess.call(pqstr, shell=True)
 
         pqstr = (
-            "%s -i -p 'plot c %s "
+            "pqinsert -i -p 'plot c %s "
             "gis/images/4326/mrms/p%ih_nn.json "
             "GIS/mrms/p%ih_%s.json json'"
             " %s.json"
         ) % (
-            PQI,
-            gts.strftime("%Y%m%d%H%M"),
+            tstr,
             hr,
             hr,
-            gts.strftime("%Y%m%d%H%M"),
+            tstr,
             tmpfn,
         )
         subprocess.call(pqstr, shell=True)
     for suffix in ["tif", "json", "png", "wld"]:
-        fn = "%s.%s" % (tmpfn, suffix)
+        fn = f"{tmpfn}.{suffix}"
         if os.path.isfile(fn):
             os.unlink(fn)
     if irealtime:
         for suffix in ["tif", "png", "wld"]:
-            fn = "%s_nn.%s" % (tmpfn, suffix)
+            fn = f"{tmpfn}_nn.{suffix}"
             if os.path.isfile(fn):
                 os.unlink(fn)
 
@@ -311,7 +295,7 @@ def doit(gts, hr):
 def main(argv):
     """We are always explicitly called"""
     gts = datetime.datetime(
-        int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]), 0
+        int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4])
     )
     for hr in [1, 24, 48, 72]:
         doit(gts, hr)
