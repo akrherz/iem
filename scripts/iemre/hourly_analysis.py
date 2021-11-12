@@ -202,7 +202,7 @@ def grid_hour(ts):
     # try first to use RTMA
     res = use_rtma(ts, "tmp")
     if res is not None:
-        tmpf = masked_array(res[0], data_units="degK").to("degF")
+        tmpf = masked_array(res[0], data_units="degK").to("degF").m
     else:
         tmpf = generic_gridder(df, "max_tmpf", domain)
 
