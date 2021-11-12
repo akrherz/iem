@@ -1,13 +1,16 @@
 """I produce the hourly analysis used by IEMRE"""
-import sys
 import datetime
+import os
+import sys
 
+import pygrib
 import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
 from metpy.units import masked_array, units
 from metpy.calc import wind_components
 from metpy.interpolate import inverse_distance_to_grid
+from scipy.interpolate import NearestNDInterpolator
 from pyiem import iemre
 from pyiem.util import get_dbconn, ncopen, utc, logger
 
@@ -15,6 +18,41 @@ from pyiem.util import get_dbconn, ncopen, utc, logger
 np.warnings.filterwarnings("ignore")
 LOG = logger()
 MEMORY = {"ts": datetime.datetime.now()}
+
+
+def use_rtma(ts, kind):
+    """Verbatim copy RTMA, if it exists."""
+    fn = ts.strftime(
+        "/mesonet/ARCHIVE/data/%Y/%m/%d/model/rtma/%H/"
+        "rtma.t%Hz.awp2p5f000.grib2"
+    )
+    tasks = {
+        "wind": [
+            "10 metre U wind component",
+            "10 metre V wind component",
+        ],
+        "tmp": [
+            "2 metre temperature",
+        ],
+    }
+    if not os.path.isfile(fn):
+        LOG.debug("Failed to find %s", fn)
+        return None
+    try:
+        grbs = pygrib.open(fn)
+        lats = None
+        res = []
+        for task in tasks[kind]:
+            grb = grbs.select(name=task)[0]
+            if lats is None:
+                lats, lons = [np.ravel(x) for x in grb.latlons()]
+            xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
+            nn = NearestNDInterpolator((lons, lats), np.ravel(grb.values))
+            res.append(nn(xi, yi))
+        return res
+    except Exception as exp:
+        LOG.debug("%s exp:%s", fn, exp)
+    return None
 
 
 def grid_wind(df, domain):
@@ -140,13 +178,18 @@ def grid_hour(ts):
  valid >= %s and valid < %s GROUP by station, lon, lat"""
 
     df = read_sql(sql, dbconn, params=params, index_col="station")
-    LOG.debug("got database results")
-    if df.empty:
-        LOG.info("%s has no entries, FAIL", ts)
-        return
-    ures, vres = grid_wind(df, domain)
+
+    # try first to use RTMA
+    res = use_rtma(ts, "wind")
+    if res is not None:
+        ures, vres = res
+    else:
+        if df.empty:
+            LOG.info("%s has no entries, FAIL", ts)
+            return
+        ures, vres = grid_wind(df, domain)
     LOG.debug(
-        "grid_wind is done. max(ures): %s max(vres): %s",
+        "wind is done. max(ures): %s max(vres): %s",
         np.max(ures),
         np.max(vres),
     )
@@ -156,11 +199,19 @@ def grid_hour(ts):
         write_grid(ts, "uwnd", ures)
         write_grid(ts, "vwnd", vres)
 
-    tmpf = generic_gridder(df, "max_tmpf", domain)
-    LOG.debug("grid tmpf is done")
+    # try first to use RTMA
+    res = use_rtma(ts, "tmp")
+    if res is not None:
+        tmpf = masked_array(res[0], data_units="degK").to("degF")
+    else:
+        tmpf = generic_gridder(df, "max_tmpf", domain)
+
     if tmpf is None:
         LOG.info("Failure for tmpk at %s", ts)
     else:
+        if df.empty:
+            LOG.info("%s has no entries, FAIL", ts)
+            return
         dwpf = generic_gridder(df, "max_dwpf", domain)
         LOG.debug("grid dwpf is done")
         # require that dwpk <= tmpk
@@ -191,7 +242,8 @@ def write_grid(valid, vname, grid):
     offset = iemre.hourly_offset(valid)
     with ncopen(iemre.get_hourly_ncname(valid.year), "a", timeout=300) as nc:
         LOG.debug(
-            "writing %s with min: %s max: %s Ames: %s",
+            "offset: %s writing %s with min: %s max: %s Ames: %s",
+            offset,
             vname,
             np.ma.min(grid),
             np.ma.max(grid),

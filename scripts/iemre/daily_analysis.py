@@ -14,10 +14,8 @@ import datetime
 import numpy as np
 from pandas.io.sql import read_sql
 from scipy.stats import zscore
-from metpy.units import units, masked_array
 from metpy.interpolate import inverse_distance_to_grid
 from pyiem import iemre
-from pyiem.plot import MapPlot
 from pyiem.util import get_dbconn, utc, ncopen, logger, convert_value
 
 PGCONN = get_dbconn("iem")
@@ -75,17 +73,14 @@ def generic_gridder(df, idx):
     return np.ma.array(res, mask=np.isnan(res))
 
 
-def do_precip(ts, ds):
-    """Compute the 6 UTC to 6 UTC precip
-
-    We need to be careful here as the timestamp sent to this app is today,
-    we are actually creating the analysis for yesterday
-    """
+def copy_iemre(ts, ds):
+    """Compute the 6 UTC to 6 UTC totals via IEMRE hourly values."""
     sts = utc(ts.year, ts.month, ts.day, 6)
     ets = sts + datetime.timedelta(hours=24)
     offset = iemre.daily_offset(ts)
     offset1 = iemre.hourly_offset(sts)
     offset2 = iemre.hourly_offset(ets)
+    windhours = 0
     if ts.month == 12 and ts.day == 31:
         LOG.warning(
             "p01d      for %s [idx:%s] %s(%s)->%s(%s) SPECIAL",
@@ -102,23 +97,54 @@ def do_precip(ts, ds):
             return
         with ncopen(ncfn, timeout=600) as hnc:
             phour = np.sum(hnc.variables["p01m"][:offset2, :, :], 0)
+            sped = None
+            for offset in range(offset):
+                uwnd = hnc.variables["uwnd"][offset, :, :]
+                vwnd = hnc.variables["vwnd"][offset, :, :]
+                if uwnd.mask.all():
+                    LOG.info("No wind for offset: %s", offset)
+                    continue
+                mag = (uwnd ** 2 + vwnd ** 2) ** 0.5
+                windhours += 1
+                if sped is None:
+                    sped = mag
+                else:
+                    sped += mag
         ncfn = iemre.get_hourly_ncname(sts.year)
         if os.path.isfile(ncfn):
             with ncopen(ncfn, timeout=600) as hnc:
                 phour += np.sum(hnc.variables["p01m"][offset1:, :, :], 0)
+                for offset in range(offset1, hnc.dimensions["time"].size):
+                    uwnd = hnc.variables["uwnd"][offset, :, :]
+                    vwnd = hnc.variables["vwnd"][offset, :, :]
+                    if uwnd.mask.all():
+                        LOG.info("No wind for offset: %s", offset)
+                        continue
+                    windhours += 1
+                    sped += (uwnd ** 2 + vwnd ** 2) ** 0.5
     else:
         ncfn = iemre.get_hourly_ncname(sts.year)
         if not os.path.isfile(ncfn):
             LOG.warning("Missing %s", ncfn)
             return
         with ncopen(ncfn, timeout=600) as hnc:
-            # for offset in range(offset1, offset2):
-            #    LOG.info(
-            #        "offset: %s min: %s max: %s",
-            #        offset, np.ma.min(hnc.variables['p01m'][offset, :, :]),
-            #        np.max(hnc.variables['p01m'][offset, :, :]))
             phour = np.sum(hnc.variables["p01m"][offset1:offset2, :, :], 0)
+            sped = None
+            for offset in range(offset1, offset2):
+                uwnd = hnc.variables["uwnd"][offset, :, :]
+                vwnd = hnc.variables["vwnd"][offset, :, :]
+                if uwnd.mask.all():
+                    LOG.info("No wind for offset: %s", offset)
+                    continue
+                windhours += 1
+                mag = (uwnd ** 2 + vwnd ** 2) ** 0.5
+                if sped is None:
+                    sped = mag
+                else:
+                    sped += mag
     ds["p01d"].values = np.where(phour < 0, 0, phour)
+    if windhours > 0:
+        ds["wind_speed"].values = sped / windhours
 
 
 def do_precip12(ts, ds):
@@ -157,26 +183,14 @@ def do_precip12(ts, ds):
     ds["p01d_12z"].values = np.where(phour < 0, 0, phour)
 
 
-def plot(df):
-    """Diagnostic"""
-    mp = MapPlot(sector="midwest", continentalcolor="white")
-    mp.plot_values(
-        df["lon"].values,
-        df["lat"].values,
-        df["highdata"].values,
-        labelbuffer=0,
-    )
-    mp.postprocess(filename="test.png")
-    mp.close()
-
-
 def grid_day12(ts, ds):
     """Use the COOP data for gridding"""
     LOG.debug("12z hi/lo for %s", ts)
     mybuf = 2.0
     # non-midwest COOP ingest is not "complete" until start of 2012
     if ts.year > 2011:
-        sql = """
+        df = read_sql(
+            f"""
            SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, s.state,
            s.id as station, s.name as name,
            (CASE WHEN pday >= 0 then pday else null end) as precipdata,
@@ -186,26 +200,27 @@ def grid_day12(ts, ds):
                then max_tmpf else null end) as highdata,
            (CASE WHEN min_tmpf > -50 and min_tmpf < 95
                then min_tmpf else null end) as lowdata
-           from summary_%s c, stations s WHERE day = '%s' and
+           from summary_{ts.year} c, stations s WHERE day = %s and
            ST_Contains(
   ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
   geom) and s.network ~* 'COOP' and c.iemid = s.iemid and
   extract(hour from c.coop_valid at time zone s.tzname) between 4 and 11
-            """ % (
-            ts.year,
-            ts.strftime("%Y-%m-%d"),
-            iemre.WEST - mybuf,
-            iemre.SOUTH - mybuf,
-            iemre.WEST - mybuf,
-            iemre.NORTH + mybuf,
-            iemre.EAST + mybuf,
-            iemre.NORTH + mybuf,
-            iemre.EAST + mybuf,
-            iemre.SOUTH - mybuf,
-            iemre.WEST - mybuf,
-            iemre.SOUTH - mybuf,
+            """,
+            PGCONN,
+            params=(
+                ts,
+                iemre.WEST - mybuf,
+                iemre.SOUTH - mybuf,
+                iemre.WEST - mybuf,
+                iemre.NORTH + mybuf,
+                iemre.EAST + mybuf,
+                iemre.NORTH + mybuf,
+                iemre.EAST + mybuf,
+                iemre.SOUTH - mybuf,
+                iemre.WEST - mybuf,
+                iemre.SOUTH - mybuf,
+            ),
         )
-        df = read_sql(sql, PGCONN)
         LOG.debug("loaded %s rows from iemaccess database", len(df.index))
     else:
         df = read_sql(
@@ -246,7 +261,6 @@ def grid_day12(ts, ds):
     # Require that high > low before any gridding, accounts for some COOP
     # sites that only report TOB and not 24 hour high/low
     df.at[df["highdata"] <= df["lowdata"], ["highdata", "lowdata"]] = None
-    # plot(df)
 
     if len(df.index) > 4:
         res = generic_gridder(df, "highdata")
@@ -270,7 +284,8 @@ def grid_day(ts, ds):
     """Do our gridding"""
     mybuf = 2.0
     if ts.year > 1927:
-        sql = """
+        df = read_sql(
+            f"""
            SELECT ST_x(s.geom) as lon, ST_y(s.geom) as lat, s.state,
            s.name, s.id as station,
            (CASE WHEN pday >= 0 then pday else null end) as precipdata,
@@ -282,31 +297,30 @@ def grid_day(ts, ds):
                then max_dwpf else null end) as highdwpf,
            (CASE WHEN min_dwpf > -50 and min_dwpf < 95
                then min_dwpf else null end) as lowdwpf,
-            (CASE WHEN avg_sknt >= 0 and avg_sknt < 100
-             then avg_sknt else null end) as avgsknt,
             (CASE WHEN min_rh > 0 and min_rh < 101
              then min_rh else null end) as minrh,
             (CASE WHEN max_rh > 0 and max_rh < 101
              then max_rh else null end) as maxrh
-           from summary_%s c, stations s WHERE day = '%s' and
+           from summary_{ts.year} c, stations s WHERE day = %s and
            ST_Contains(
   ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
   geom) and (s.network = 'AWOS' or s.network ~* 'ASOS') and c.iemid = s.iemid
-            """ % (
-            ts.year,
-            ts.strftime("%Y-%m-%d"),
-            iemre.WEST - mybuf,
-            iemre.SOUTH - mybuf,
-            iemre.WEST - mybuf,
-            iemre.NORTH + mybuf,
-            iemre.EAST + mybuf,
-            iemre.NORTH + mybuf,
-            iemre.EAST + mybuf,
-            iemre.SOUTH - mybuf,
-            iemre.WEST - mybuf,
-            iemre.SOUTH - mybuf,
+            """,
+            PGCONN,
+            params=(
+                ts,
+                iemre.WEST - mybuf,
+                iemre.SOUTH - mybuf,
+                iemre.WEST - mybuf,
+                iemre.NORTH + mybuf,
+                iemre.EAST + mybuf,
+                iemre.NORTH + mybuf,
+                iemre.EAST + mybuf,
+                iemre.SOUTH - mybuf,
+                iemre.WEST - mybuf,
+                iemre.SOUTH - mybuf,
+            ),
         )
-        df = read_sql(sql, PGCONN)
     else:
         df = read_sql(
             """
@@ -321,7 +335,7 @@ def grid_day(ts, ds):
         SELECT m.lon, m.lat, m.state, m.id as station, m.name as name,
         precip as precipdata, snow as snowdata, snowd as snowddata,
         high as highdata, low as lowdata,
-        null as highdwpf, null as lowdwpf, null as avgsknt,
+        null as highdwpf, null as lowdwpf,
         null as minrh, null as maxrh
         from alldata a JOIN mystations m
         ON (a.station = m.id) WHERE a.day = %s
@@ -356,18 +370,6 @@ def grid_day(ts, ds):
         ds["avg_dwpk"].values = convert_value(
             (hres + lres) / 2.0, "degF", "degK"
         )
-    # Don't have data till after midnight
-    if ts < datetime.date.today():
-        res = generic_gridder(df, "avgsknt")
-    if res is not None:
-        ds["wind_speed"].values = (
-            masked_array(res, units.knots).to(units.meters / units.second).m
-        )
-        LOG.debug(
-            "wind_speed min: %s max: %s",
-            np.nanmin(ds["wind_speed"].values),
-            np.nanmax(ds["wind_speed"].values),
-        )
     res = generic_gridder(df, "minrh")
     if res is not None:
         ds["min_rh"].values = res
@@ -389,21 +391,16 @@ def workflow(ts, irealtime, justprecip):
     # This is actually yesterday!
     if irealtime:
         iemre.set_grids(ts, ds)
-        subprocess.call(
-            "python db_to_netcdf.py %s" % (ts.strftime("%Y %m %d"),),
-            shell=True,
-        )
+        subprocess.call(f"python db_to_netcdf.py {ts:%Y %m %d}", shell=True)
         ts -= datetime.timedelta(days=1)
         ds = iemre.get_grids(ts)
     if not justprecip:
         LOG.debug("doing calendar day logic for %s", ts)
         grid_day(ts, ds)
-    do_precip(ts, ds)
+    copy_iemre(ts, ds)
     LOG.debug("calling iemre.set_grids()")
     iemre.set_grids(ts, ds)
-    subprocess.call(
-        "python db_to_netcdf.py %s" % (ts.strftime("%Y %m %d"),), shell=True
-    )
+    subprocess.call(f"python db_to_netcdf.py {ts:%Y %m %d}", shell=True)
 
 
 def main(argv):
