@@ -18,15 +18,10 @@ def do(url, fn):
     if res.status_code != 200:
         LOG.info("%s resulted in %s", url, res.status_code)
         return
-    tmpfd = tempfile.NamedTemporaryFile(delete=False)
-    tmpfd.write(res.content)
-    tmpfd.close()
-    pqstr = "plot c %s %s bogus%s png" % (
-        utc().strftime("%Y%m%d%H%M"),
-        fn,
-        utc().second,
-    )
-    subprocess.call("pqinsert -i -p '%s' %s" % (pqstr, tmpfd.name), shell=True)
+    with tempfile.NamedTemporaryFile(delete=False) as tmpfd:
+        tmpfd.write(res.content)
+    pqstr = f"plot c {utc():%Y%m%d%H%M} {fn} bogus{utc().second} png"
+    subprocess.call(f"pqinsert -i -p '{pqstr}' {tmpfd.name}", shell=True)
     os.unlink(tmpfd.name)
 
 

@@ -3,7 +3,7 @@ import datetime
 import simplejson as json
 from simplejson import encoder
 
-import memcache
+from pymemcache.client import Client
 import psycopg2.extras
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
@@ -160,9 +160,9 @@ def get_data(station, year, fmt):
         for col in cols.split(","):
             val = feat[col]
             if isinstance(val, (list, tuple)):
-                res += "%s," % (" ".join([str(s) for s in val]),)
+                res += f"{' '.join([str(s) for s in val])},"
             else:
-                res += "%s," % (val,)
+                res += f"{val},"
         res += "\n"
     return res
 
@@ -180,16 +180,16 @@ def application(environ, start_response):
         headers.append(("Content-type", "application/json"))
     else:
         headers.append(("Content-type", "text/plain"))
-    mckey = "/json/cli/%s/%s?callback=%s&fmt=%s" % (station, year, cb, fmt)
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
-    res = mc.get(mckey)
-    if not res:
-        res = get_data(station, year, fmt)
-        mc.set(mckey, res, 300)
-    if cb is None:
-        data = res
+    mckey = f"/json/cli/{station}/{year}?callback={cb}&fmt={fmt}"
+    mc = Client(["iem-memcached", 11211])
+    data = mc.get(mckey)
+    if data is not None:
+        data = data.decode("ascii")
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        data = get_data(station, year, fmt)
+        mc.set(mckey, data, 300)
+    if cb is not None:
+        data = f"{html_escape(cb)}({data})"
 
     start_response("200 OK", headers)
     return [data.encode("ascii")]

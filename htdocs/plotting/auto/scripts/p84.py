@@ -15,7 +15,7 @@ PDICT2 = {"c": "Contour Plot", "g": "Grid Cell Mesh"}
 SRCDICT = {
     "iemre": "IEM Reanalysis (since 1 Jan 1893)",
     "ifc": "Iowa Flood Center (since 1 Jan 2016) [Iowa-Only]",
-    "mrms": "NOAA MRMS (since 1 Jan 2014)",
+    "mrms": "NOAA MRMS (since 1 Jan 2001)",
     "prism": "OSU PRISM (since 1 Jan 1981)",
     "stage4": "Stage IV (since 1 Apr 1998)",
 }
@@ -250,8 +250,8 @@ def plotter(fdict):
         west=west,
         axisbg="white",
         nocaption=True,
-        title="%s:: %s Precip %s" % (source, title, PDICT3[opt]),
-        subtitle="Data from %s" % (subtitle,),
+        title=f"{source}:: {title} Precip {PDICT3[opt]}",
+        subtitle=f"Data from {subtitle}",
         titlefontsize=14,
         apctx=ctx,
     )
@@ -361,10 +361,25 @@ def plotter(fdict):
         x2d, y2d = lons, lats
     if ptype == "c":
         mp.contourf(
-            x2d, y2d, p01d, clevs, cmap=cmap, units=plot_units, iline=False
+            x2d,
+            y2d,
+            p01d,
+            clevs,
+            cmap=cmap,
+            units=plot_units,
+            iline=False,
+            clip_on=False,
         )
     else:
-        res = mp.pcolormesh(x2d, y2d, p01d, clevs, cmap=cmap, units=plot_units)
+        res = mp.pcolormesh(
+            x2d,
+            y2d,
+            p01d,
+            clevs,
+            cmap=cmap,
+            units=plot_units,
+            clip_on=False,
+        )
         res.set_rasterized(True)
     if sector not in ["midwest", "conus"]:
         mp.drawcounties()

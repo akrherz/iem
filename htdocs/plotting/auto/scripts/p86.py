@@ -39,7 +39,8 @@ def get_description():
     desc[
         "description"
     ] = """This map presents a daily IEM ReAnalysis variable
-    of your choice.
+    of your choice.  The concept of a day within this dataset is a period
+    between 6 UTC to 6 UTC, which is Central Standard Time all year round.
     """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc["arguments"] = [
@@ -159,12 +160,8 @@ def plotter(fdict):
             clevs = np.arange(-30, 120, 5)
             clevstride = 2
         elif varname in ["range_tmpk", "range_tmpk_12z"]:
-            vname1 = "high_tmpk%s" % (
-                "_12z" if varname == "range_tmpk_12z" else "",
-            )
-            vname2 = "low_tmpk%s" % (
-                "_12z" if varname == "range_tmpk_12z" else "",
-            )
+            vname2 = f"low_tmpk{'_12z' if varname == 'range_tmpk_12z' else ''}"
+            vname1 = vname2.replace("low", "high")
             d1 = nc.variables[vname1][idx0, jslice, islice]
             d2 = nc.variables[vname2][idx0, jslice, islice]
             data = (
