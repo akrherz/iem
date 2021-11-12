@@ -1,4 +1,4 @@
-"""I produce the hourly analysis used by IEMRE"""
+"""I produce the hourly analysis used by IEMRE."""
 import datetime
 import os
 import sys
@@ -28,11 +28,14 @@ def use_rtma(ts, kind):
     )
     tasks = {
         "wind": [
-            "10 metre U wind component",
-            "10 metre V wind component",
+            "10u",
+            "10v",
         ],
         "tmp": [
-            "2 metre temperature",
+            "2t",
+        ],
+        "dwp": [
+            "2d",
         ],
     }
     if not os.path.isfile(fn):
@@ -43,7 +46,7 @@ def use_rtma(ts, kind):
         lats = None
         res = []
         for task in tasks[kind]:
-            grb = grbs.select(name=task)[0]
+            grb = grbs.select(shortName=task)[0]
             if lats is None:
                 lats, lons = [np.ravel(x) for x in grb.latlons()]
             xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
@@ -119,13 +122,11 @@ def grid_hour(ts):
     @param ts Timestamp of the analysis, we'll consider a 20 minute window
     """
     LOG.debug("grid_hour called...")
-    with ncopen(iemre.get_hourly_ncname(ts.year), "a", timeout=300) as nc:
+    with ncopen(iemre.get_hourly_ncname(ts.year), "r", timeout=300) as nc:
         domain = nc.variables["hasdata"][:, :]
     ts0 = ts - datetime.timedelta(minutes=10)
     ts1 = ts + datetime.timedelta(minutes=10)
-    utcnow = utc() - datetime.timedelta(hours=36)
 
-    # If we are near realtime, look in IEMAccess instead of ASOS database
     mybuf = 2.0
     params = (
         iemre.WEST - mybuf,
@@ -141,27 +142,9 @@ def grid_hour(ts):
         ts0,
         ts1,
     )
-    if utcnow < ts:
-        dbconn = get_dbconn("iem", user="nobody")
-        sql = """SELECT t.id as station, ST_x(geom) as lon,
-        ST_y(geom) as lat,
- max(case when tmpf > -60 and tmpf < 130 THEN tmpf else null end) as max_tmpf,
- max(case when sknt > 0 and sknt < 100 then sknt else 0 end) as max_sknt,
- max(getskyc(skyc1)) as max_skyc1,
- max(getskyc(skyc2)) as max_skyc2,
- max(getskyc(skyc3)) as max_skyc3,
- max(case when phour > 0 and phour < 1000 then phour else 0 end) as phour,
- max(case when dwpf > -60 and dwpf < 100 THEN dwpf else null end) as max_dwpf,
- max(case when sknt >= 0 then sknt else 0 end) as sknt,
- max(case when sknt >= 0 then drct else 0 end) as drct
- from current_log s JOIN stations t on (s.iemid = t.iemid)
- WHERE ST_Contains(
-  ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
-  geom) and valid >= %s and valid < %s GROUP by station, lon, lat
-         """
-    else:
-        dbconn = get_dbconn("asos", user="nobody")
-        sql = """SELECT station, ST_x(geom) as lon, st_y(geom) as lat,
+
+    df = read_sql(
+        """SELECT station, ST_x(geom) as lon, st_y(geom) as lat,
  max(case when tmpf > -60 and tmpf < 130 THEN tmpf else null end) as max_tmpf,
  max(case when sknt > 0 and sknt < 100 then sknt else 0 end) as max_sknt,
  max(getskyc(skyc1)) as max_skyc1,
@@ -175,9 +158,11 @@ def grid_hour(ts):
  ST_Contains(
   ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
   geom) and (t.network ~* 'ASOS' or t.network = 'AWOS') and
- valid >= %s and valid < %s GROUP by station, lon, lat"""
-
-    df = read_sql(sql, dbconn, params=params, index_col="station")
+ valid >= %s and valid < %s and report_type = 2 GROUP by station, lon, lat""",
+        get_dbconn("asos"),
+        params=params,
+        index_col="station",
+    )
 
     # try first to use RTMA
     res = use_rtma(ts, "wind")
@@ -204,26 +189,27 @@ def grid_hour(ts):
     if res is not None:
         tmpf = masked_array(res[0], data_units="degK").to("degF").m
     else:
+        if df.empty:
+            LOG.info("%s has no entries, FAIL", ts)
+            return
         tmpf = generic_gridder(df, "max_tmpf", domain)
 
-    if tmpf is None:
-        LOG.info("Failure for tmpk at %s", ts)
+    # try first to use RTMA
+    res = use_rtma(ts, "dwp")
+    if res is not None:
+        dwpf = masked_array(res[0], data_units="degK").to("degF").m
     else:
         if df.empty:
             LOG.info("%s has no entries, FAIL", ts)
             return
         dwpf = generic_gridder(df, "max_dwpf", domain)
-        LOG.debug("grid dwpf is done")
-        # require that dwpk <= tmpk
-        mask = ~np.isnan(dwpf)
-        mask[mask] &= dwpf[mask] > tmpf[mask]
-        dwpf = np.where(mask, tmpf, dwpf)
-        write_grid(
-            ts, "tmpk", masked_array(tmpf, data_units="degF").to("degK")
-        )
-        write_grid(
-            ts, "dwpk", masked_array(dwpf, data_units="degF").to("degK")
-        )
+
+    # require that dwpk <= tmpk
+    mask = ~np.isnan(dwpf)
+    mask[mask] &= dwpf[mask] > tmpf[mask]
+    dwpf = np.where(mask, tmpf, dwpf)
+    write_grid(ts, "tmpk", masked_array(tmpf, data_units="degF").to("degK"))
+    write_grid(ts, "dwpk", masked_array(dwpf, data_units="degF").to("degK"))
 
     res = grid_skyc(df, domain)
     LOG.debug("grid skyc is done")
@@ -254,10 +240,7 @@ def write_grid(valid, vname, grid):
 
 def main(argv):
     """Go Main"""
-    if len(argv) == 5:
-        ts = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
-    else:
-        ts = utc().replace(second=0, minute=0)
+    ts = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
     grid_hour(ts)
 
 
