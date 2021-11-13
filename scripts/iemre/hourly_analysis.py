@@ -74,8 +74,8 @@ def grid_wind(df, domain):
         v.append(_v.to("meter / second").m)
     df["u"] = u
     df["v"] = v
-    ugrid = generic_gridder(df, "u", domain)
-    vgrid = generic_gridder(df, "v", domain)
+    ugrid = generic_gridder(df, "u", domain, applymask=False)
+    vgrid = generic_gridder(df, "v", domain, applymask=False)
     return ugrid, vgrid
 
 
@@ -89,13 +89,14 @@ def grid_skyc(df, domain):
     return generic_gridder(df, "skyc", domain)
 
 
-def generic_gridder(df, idx, domain):
+def generic_gridder(df, idx, domain, applymask=True):
     """Generic gridding algorithm for easy variables"""
     df2 = df[pd.notnull(df[idx])]
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
     res = np.ones(xi.shape) * np.nan
     # set a sentinel of where we won't be estimating
-    res = np.where(domain > 0, res, -9999)
+    if applymask:
+        res = np.where(domain > 0, res, -9999)
     # do our gridding
     grid = inverse_distance_to_grid(
         df2["lon"].values, df2["lat"].values, df2[idx].values, xi, yi, 1.5
