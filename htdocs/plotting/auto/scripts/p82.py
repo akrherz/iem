@@ -88,18 +88,18 @@ def safe(row, varname):
             return "T"
         if val == 0:
             return "0"
-        return "%.2f" % (val,)
+        return f"{val:.2f}"
     if varname == "max_rstage":
-        return "%.2f" % (val,)
+        return f"{val:.2f}"
     # prevent -0 values
-    return "%i" % (val,)
+    return f"{int(val):.0f}"
 
 
 def diff(val, climo):
     """Safe subtraction."""
     if val is None or climo is None:
         return None
-    return val - climo
+    return float(val) - climo
 
 
 def add_stages_legend(fig, stagevals):
@@ -141,18 +141,41 @@ def plotter(fdict):
     if cdf.empty:
         raise NoDataFound("No Data Found.")
 
-    cursor.execute(
-        """
-        SELECT day, max_tmpf, min_tmpf, max_dwpf, min_dwpf,
-        (max_tmpf + min_tmpf) / 2. as avg_tmpf,
-        pday, avg_sknt, coalesce(max_gust, max_sknt) as peak_wind,
-        max_rstage
-        from summary s JOIN stations t
-        on (t.iemid = s.iemid) WHERE s.day >= %s and s.day <= %s and
-        t.id = %s and t.network = %s ORDER by day ASC
-    """,
-        (sdate, edate, station, ctx["network"]),
-    )
+    if ctx["network"].find("CLIMATE") > -1:
+        cursor = get_dbconn("coop").cursor(
+            cursor_factory=psycopg2.extras.DictCursor
+        )
+        cursor.execute(
+            f"""
+            SELECT
+            day,
+            high as max_tmpf,
+            low as min_tmpf,
+            null as max_dwpf,
+            null as min_dwpf,
+            (high + low) / 2. as avg_tmpf,
+            precip as pday,
+            null as avg_sknt, null as peak_wind,
+            null as max_rstage
+            from alldata_{station[:2]}
+            WHERE day >= %s and day <= %s and
+            station = %s ORDER by day ASC
+        """,
+            (sdate, edate, station),
+        )
+    else:
+        cursor.execute(
+            """
+            SELECT day, max_tmpf, min_tmpf, max_dwpf, min_dwpf,
+            (max_tmpf + min_tmpf) / 2. as avg_tmpf,
+            pday, avg_sknt, coalesce(max_gust, max_sknt) as peak_wind,
+            max_rstage
+            from summary s JOIN stations t
+            on (t.iemid = s.iemid) WHERE s.day >= %s and s.day <= %s and
+            t.id = %s and t.network = %s ORDER by day ASC
+        """,
+            (sdate, edate, station, ctx["network"]),
+        )
     stagevals = []
     rows = []
     data = {}
@@ -205,15 +228,11 @@ def plotter(fdict):
                 data[row[0]]["cellcolor"] = COLORS[idx]
     df = pd.DataFrame(rows)
 
-    title = "[%s] %s Daily %s" % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-        PDICT.get(varname),
+    title = (
+        f"[{station}] {ctx['_nt'].sts[station]['name']} "
+        f"Daily {PDICT.get(varname)}"
     )
-    subtitle = "%s thru %s" % (
-        sdate.strftime("%-d %b %Y"),
-        edate.strftime("%-d %b %Y"),
-    )
+    subtitle = f"{sdate:%-d %b %Y} thru {edate:%-d %b %Y}"
 
     fig = calendar_plot(
         sdate,
@@ -229,4 +248,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"var": "max_rstage"})
+    plotter({"var": "pday", "station": "IA0000", "network": "IACLIMATE"})

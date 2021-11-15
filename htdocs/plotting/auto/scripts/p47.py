@@ -3,6 +3,7 @@ import calendar
 
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.reference import FIGSIZES
 from pyiem.exceptions import NoDataFound
 import seaborn as sns
 
@@ -10,6 +11,7 @@ import seaborn as sns
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {}
+    desc["defaults"] = {"_r": "86"}
     desc["data"] = True
     desc[
         "description"
@@ -46,12 +48,11 @@ def plotter(fdict):
     month = ctx["month"]
     year = ctx["year"]
 
-    table = "alldata_%s" % (station[:2],)
-
     # beat month
     df = read_sql(
         f"""
-    SELECT year, sum(precip) as precip, sum(snow) as snow from {table}
+    SELECT year, sum(precip) as precip, sum(snow) as snow from
+    alldata_{station[:2]}
     WHERE station = %s and month = %s and precip >= 0
     and snow >= 0 GROUP by year ORDER by year ASC
     """,
@@ -65,18 +66,13 @@ def plotter(fdict):
     g = sns.jointplot(
         x="precip", y="snow", data=df, s=50, color="tan"
     ).plot_joint(sns.kdeplot, n_levels=6)
-    g.fig.set_size_inches(8, 6)
+    g.fig.set_size_inches(*FIGSIZES[ctx["_r"]])
     g.fig.tight_layout()
     g.fig.subplots_adjust(top=0.91)
     g.fig.suptitle(
-        ("[%s] %s(%s-%s)\n%s Snowfall vs Precipitation Totals")
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            df.index.min(),
-            df.index.max(),
-            calendar.month_name[month],
-        )
+        f"[{station}] {ctx['_nt'].sts[station]['name']}"
+        f"({df.index.min()}-{df.index.max()})\n"
+        f"{calendar.month_name[month]} Snowfall vs Precipitation Totals"
     )
     if year in df.index:
         row = df.loc[year]
@@ -99,7 +95,7 @@ def plotter(fdict):
     g.ax_joint.text(
         df["precip"].mean(),
         ylim[1],
-        "%.2f" % (df["precip"].mean(),),
+        f"{df['precip'].mean():.2f}",
         va="top",
         ha="center",
         color="white",
@@ -109,7 +105,7 @@ def plotter(fdict):
     g.ax_joint.text(
         xlim[1],
         df["snow"].mean(),
-        "%.1f" % (df["snow"].mean(),),
+        f"{df['snow'].mean():.1f}",
         va="center",
         ha="right",
         color="white",
@@ -122,4 +118,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

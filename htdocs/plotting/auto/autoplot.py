@@ -11,7 +11,7 @@ import traceback
 from io import BytesIO
 
 import numpy as np
-import memcache
+from pymemcache.client import Client
 import pytz
 import pandas as pd
 from PIL import Image
@@ -88,7 +88,7 @@ def error_image(message, fmt):
     """Create an error image"""
     plt.close()
     _, ax = plt.subplots(1, 1)
-    msg = "IEM Autoplot generation resulted in an error\n%s" % (message,)
+    msg = f"IEM Autoplot generation resulted in an error\n{message}"
     ax.text(0.5, 0.5, msg, transform=ax.transAxes, ha="center", va="center")
     ram = BytesIO()
     plt.axis("off")
@@ -103,8 +103,8 @@ def handle_error(exp, fmt, uri):
     exc_type, exc_value, exc_traceback = sys.exc_info()
     tb = traceback.extract_tb(exc_traceback)[-1]
     sys.stderr.write(
-        ("URI:%s %s method:%s lineno:%s %s\n")
-        % (uri, exp.__class__.__name__, tb[2], tb[1], exp)
+        f"URI:{uri} {exp.__class__.__name__} "
+        f"method:{tb[2]} lineno:{tb[1]} {exp}\n"
     )
     if not isinstance(exp, NoDataFound):
         traceback.print_exc()
@@ -112,7 +112,7 @@ def handle_error(exp, fmt, uri):
     if fmt in ["png", "svg", "pdf"]:
         return error_image(str(exp), fmt)
     elif fmt == "js":
-        return "alert('%s');" % (str(exp),)
+        return f"alert('{exp}');"
     return str(exp)
 
 
@@ -152,11 +152,8 @@ def plot_metadata(fig, start_time, p):
     fig.text(
         0.01,
         0.005,
-        ("Generated at %s in %.2fs")
-        % (
-            now.strftime("%-d %b %Y %-I:%M %p %Z"),
-            (utc() - start_time).total_seconds(),
-        ),
+        f"Generated at {now:%-d %b %Y %-I:%M %p %Z} in "
+        f"{((utc() - start_time).total_seconds()):.2f}s",
         va="bottom",
         ha="left",
         fontsize=8,
@@ -164,7 +161,7 @@ def plot_metadata(fig, start_time, p):
     fig.text(
         0.99,
         0.005,
-        ("IEM Autoplot App #%s") % (p,),
+        f"IEM Autoplot App #{p}",
         va="bottom",
         ha="right",
         fontsize=8,
@@ -177,12 +174,10 @@ def get_mckey(scriptnum, fdict, fmt):
     for key in fdict:
         # Internal app controls should not be used on the memcache key
         # except when they should be, sigh
-        if not key.startswith("_") or key in [
-            "_r",
-        ]:
+        if not key.startswith("_") or key in ["_r"]:
             vals.append(f"{key}:{fdict[key]}")
     return (
-        "/plotting/auto/plot/%s/%s.%s" % (scriptnum, "::".join(vals), fmt)
+        f"/plotting/auto/plot/{scriptnum}/{'::'.join(vals)}.{fmt}"
     ).replace(" ", "")
 
 
@@ -197,7 +192,7 @@ def workflow(environ, form, fmt):
 
     # memcache keys can not have spaces
     mckey = get_mckey(scriptnum, fdict, fmt)
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    mc = Client(["iem-memcached", 11211])
     if len(mckey) < 250:
         # Don't fetch memcache when we have _cb set for an inbound CGI
         res = mc.get(mckey) if fdict.get("_cb") is None else None
@@ -218,9 +213,7 @@ def workflow(environ, form, fmt):
     # Our output content
     content = ""
     if fmt == "js" and isinstance(mixedobj, dict):
-        content = ('$("#ap_container").highcharts(%s);') % (
-            json.dumps(mixedobj),
-        )
+        content = f'$("#ap_container").highcharts({json.dumps(mixedobj)});'
     elif fmt in ["js", "geojson"]:
         content = mixedobj
     elif fmt in ["svg", "png", "pdf"]:
@@ -265,18 +258,16 @@ def workflow(environ, form, fmt):
         del df
     else:
         sys.stderr.write(
-            ("Undefined edge case: fmt: %s uri: %s\n")
-            % (fmt, environ.get("REQUEST_URI"))
+            f"Undefined edge case: fmt: {fmt} "
+            f"uri: {environ.get('REQUEST_URI')}\n"
         )
-        raise Exception("Undefined autoplot action |%s|" % (fmt,))
+        raise Exception(f"Undefined autoplot action |{fmt}|")
 
     dur = int(meta.get("cache", 43200))
     try:
         mc.set(mckey, content, dur)
     except Exception as exp:
-        sys.stderr.write(
-            "Exception while writting key: %s\n%s\n" % (mckey, exp)
-        )
+        sys.stderr.write(f"Exception while writting key: {mckey}\n{exp}\n")
     if isinstance(mixedobj, plt.Figure):
         plt.close()
     syslog.syslog(

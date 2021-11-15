@@ -130,23 +130,15 @@ def get_daily_data(ctx, sdate, edate):
     yearcond = "false"
     if edate.year != sdate.year:
         yearcond = f"sday >= '{sdate.strftime('%m%d')}'"
-        sday = " sday >= '%s' or sday <= '%s' " % (
-            sdate.strftime("%m%d"),
-            edate.strftime("%m%d"),
-        )
+        sday = f" sday >= '{sdate:%m%d}' or sday <= '{edate:%m%d}' "
     else:
-        sday = " sday >= '%s' and sday <= '%s' " % (
-            sdate.strftime("%m%d"),
-            edate.strftime("%m%d"),
-        )
+        sday = f" sday >= '{sdate:%m%d}' and sday <= '{edate:%m%d}' "
 
     statelimiter = ""
     table = "alldata"
     if len(ctx["csector"]) == 2:
-        statelimiter = (" and substr(station, 1, 2) = '%s' ") % (
-            ctx["csector"],
-        )
-        table = "alldata_%s" % (ctx["csector"],)
+        statelimiter = f" and substr(station, 1, 2) = '{ctx['csector']}' "
+        table = f"alldata_{ctx['csector']}"
 
     ctx["df"] = read_sql(
         f"""
@@ -191,10 +183,8 @@ def get_daily_data(ctx, sdate, edate):
     if ctx["df"].empty:
         raise NoDataFound("No data found")
     edate = ctx["df"]["max_date"].max()
-    ctx["label"] = "%s ~7 AM till %s ~7 AM" % (
-        (sdate - datetime.timedelta(days=1)).strftime("%-d %b %Y"),
-        edate.strftime("%-d %b %Y"),
-    )
+    dl = (sdate - datetime.timedelta(days=1)).strftime("%-d %b %Y")
+    ctx["label"] = f"{dl} ~7 AM till {edate:%-d %b %Y} ~7 AM"
 
 
 def plotter(fdict):
@@ -227,22 +217,19 @@ def plotter(fdict):
     ctx["years"] = ctx["lastyear"] - 1893 + 1
 
     subtitle = (
-        "Based on IEM Estimates, " "1 is %s out of %s total years (1893-%s)"
-    ) % (
-        "wettest" if ctx["var"] == "precip" else "hottest",
-        ctx["years"],
-        ctx["lastyear"],
+        "Based on IEM Estimates, 1 is "
+        f"{'wettest' if ctx['var'] == 'precip' else 'hottest'} out of "
+        f"{ctx['years']} total years (1893-{ctx['lastyear']})"
     )
     if ctx["var"] == "aridity":
         subtitle = "Std Average High Temp Departure minus Std Precip Departure"
     mp = MapPlot(
         apctx=ctx,
         continentalcolor="white",
-        title="%s %s %sby Climate District"
-        % (
-            ctx["label"],
-            PDICT[ctx["var"]],
-            "Ranks " if ctx["var"] != "aridity" else "",
+        title=(
+            f"{ctx['label']} {PDICT[ctx['var']]} "
+            f"{'Ranks ' if ctx['var'] != 'aridity' else ''}"
+            "by Climate District"
         ),
         subtitle=subtitle,
         titlefontsize=14,
@@ -279,4 +266,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

@@ -161,10 +161,15 @@ def plotter(fdict):
 
     df["ceiling"] = df.apply(ceilingfunc, axis=1)
 
-    fig = figure(apctx=ctx)
+    title = (
+        f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
+        f"Recent Time Series {pd.to_datetime(df.index.values[0]):%Y %b %-d} - "
+        f"{pd.to_datetime(df.index.values[-1]):%Y %b %-d}"
+    )
+    fig = figure(apctx=ctx, title=title)
     xalign = 0.1
     xwidth = 0.8
-    ax = fig.add_axes([xalign, 0.7, xwidth, 0.25])
+    ax = fig.add_axes([xalign, 0.7, xwidth, 0.2])
 
     xmin = df.index.min()
     xmax = df.index.max()
@@ -186,12 +191,6 @@ def plotter(fdict):
         label="Dew Point",
         color="#346633",
         zorder=3,
-    )
-
-    ax.set_title(
-        f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
-        f"Recent Time Series {pd.to_datetime(df.index.values[0]):%Y %b %-d} - "
-        f"{pd.to_datetime(df.index.values[-1]):%Y %b %-d}"
     )
     ax.grid(True)
     ax.text(

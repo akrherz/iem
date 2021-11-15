@@ -6,7 +6,7 @@ import numpy as np
 from pyiem import iemre, util
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
-from pyiem.reference import state_bounds, SECTORS, LATLON
+from pyiem.reference import LATLON
 from pyiem.exceptions import NoDataFound
 from pyiem.util import get_dbconn, get_properties
 from metpy.units import units, masked_array
@@ -133,14 +133,14 @@ def compute_title(src, sdate, edate):
     else:
         # This is 12z to 12z totals.
         if sdate == edate:
-            title = "%s ~12z to %s ~12z" % (
-                (sdate - timedelta(days=1)).strftime("%-d %B %Y"),
-                edate.strftime("%-d %B %Y"),
+            title = (
+                f"{(sdate - timedelta(days=1)):%-d %B %Y} ~12z to "
+                f"{edate:%-d %B %Y} ~12z"
             )
         else:
-            title = "%s ~12z to %s ~12z" % (
-                (sdate - timedelta(days=1)).strftime("%-d %B %Y"),
-                (edate + timedelta(days=1)).strftime("%-d %B %Y"),
+            title = (
+                f"{(sdate - timedelta(days=1)):%-d %B %Y} ~12z to "
+                f"{(edate + timedelta(days=1)):%-d %B %Y} ~12z"
             )
     return title
 
@@ -225,7 +225,7 @@ def plotter(fdict):
             "%Y-%m-%d",
         ).date()
         edate = min([archive_end, edate])
-        ncfn = "/mesonet/data/prism/%s_daily.nc" % (sdate.year,)
+        ncfn = f"/mesonet/data/prism/{sdate.year}_daily.nc"
         clncfn = "/mesonet/data/prism/prism_dailyc.nc"
         ncvar = "ppt"
         clncvar = "ppt"
@@ -262,25 +262,11 @@ def plotter(fdict):
     if not os.path.isfile(ncfn):
         raise NoDataFound("No data for that year, sorry.")
     with util.ncopen(ncfn) as nc:
-        if sector == "custom":
-            x0, y0, x1, y1 = util.grid_bounds(
-                nc.variables["lon"][:],
-                nc.variables["lat"][:],
-                [west, south, east, north],
-            )
-        elif state is not None:
-            x0, y0, x1, y1 = util.grid_bounds(
-                nc.variables["lon"][:],
-                nc.variables["lat"][:],
-                state_bounds[state],
-            )
-        elif sector in SECTORS:
-            bnds = SECTORS[sector]
-            x0, y0, x1, y1 = util.grid_bounds(
-                nc.variables["lon"][:],
-                nc.variables["lat"][:],
-                [bnds[0], bnds[2], bnds[1], bnds[3]],
-            )
+        x0, y0, x1, y1 = util.grid_bounds(
+            nc.variables["lon"][:],
+            nc.variables["lat"][:],
+            [west, south, east, north],
+        )
         if src == "stage4":
             lats = nc.variables["lat"][y0:y1, x0:x1]
             lons = nc.variables["lon"][y0:y1, x0:x1]
@@ -332,7 +318,7 @@ def plotter(fdict):
         cmap.set_under("white")
         # Dynamic Range based on min/max grid value, since we restrict plot
         minval = np.floor(np.nanmin(p01d))
-        maxval = np.ceil(np.percentile(p01d, [95])[0])
+        maxval = np.ceil(np.nanpercentile(p01d, [95])[0])
         clevs = [0.01, 0.1, 0.3, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5, 6, 8, 10]
         if minval == 0:
             if maxval <= 1:
@@ -381,7 +367,7 @@ def plotter(fdict):
             clip_on=False,
         )
         res.set_rasterized(True)
-    if sector not in ["midwest", "conus"]:
+    if (east - west) < 10:
         mp.drawcounties()
         mp.drawcities(minpop=500 if sector == "custom" else 5000)
     if usdm == "yes":

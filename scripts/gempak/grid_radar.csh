@@ -7,7 +7,7 @@ source /mesonet/nawips/Gemenviron
 # need to override default RAD
 setenv RAD /mnt/nexrad3/nexrad
 
-gddelt << EOF > /tmp/gddelt.out
+gddelt << EOF >& /tmp/gddelt.out
  GDFILE        = /mesonet/data/gempak/radar.gem
  GDATTIM = ALL
  GLEVEL        = ALL
@@ -19,7 +19,7 @@ gddelt << EOF > /tmp/gddelt.out
  exit
 EOF
 
-gdradr << EOF > /tmp/gridRADAR_gdradr.out
+gdradr << EOF >& /tmp/gridRADAR_gdradr.out
  GRDAREA  = 38.25;-99;45.75;-88
  PROJ     = MER
  KXKY     = 720;500

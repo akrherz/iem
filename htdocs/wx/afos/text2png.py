@@ -6,7 +6,7 @@
 import datetime
 from io import BytesIO
 
-import memcache
+from pymemcache.client import Client
 import pytz
 import PIL.ImageFont
 import PIL.ImageDraw
@@ -28,7 +28,7 @@ def text_image(content):
     content = content.replace("\r", "").replace("\001", "")
     lines = content.split("\n")
     if len(lines) > 100:
-        msg = "...truncated %s lines..." % (len(lines) - 100,)
+        msg = f"...truncated {len(lines) - 100} lines..."
         lines = lines[:100]
         lines.append(msg)
 
@@ -72,9 +72,7 @@ def make_image(e, pil):
     valid = valid.replace(tzinfo=pytz.UTC)
 
     cursor.execute(
-        """
-        SELECT data from products WHERE pil = %s and entered = %s
-    """,
+        "SELECT data from products WHERE pil = %s and entered = %s",
         (pil, valid),
     )
     content = ""
@@ -88,8 +86,8 @@ def application(environ, start_response):
     form = parse_formvars(environ)
     e = form.get("e", "201612141916")[:12]
     pil = form.get("pil", "ADMNFD")[:6].replace(" ", "")
-    key = "%s_%s.png" % (e, pil)
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    key = f"{e}_{pil}.png"
+    mc = Client(["iem-memcached", 11211])
     res = mc.get(key)
     if not res:
         res = make_image(e, pil)

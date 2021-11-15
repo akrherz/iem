@@ -134,7 +134,9 @@ def copy_iemre(ts, ds):
                 uwnd = hnc.variables["uwnd"][offset, :, :]
                 vwnd = hnc.variables["vwnd"][offset, :, :]
                 if uwnd.mask.all():
-                    LOG.info("No wind for offset: %s", offset)
+                    # Don't complain about the last timestamp being missing
+                    if offset != offset2 - 1:
+                        LOG.info("No wind for offset: %s", offset)
                     continue
                 windhours += 1
                 mag = (uwnd ** 2 + vwnd ** 2) ** 0.5

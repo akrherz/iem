@@ -28,7 +28,7 @@ def generate_html(appdata):
     """Fun to be had here!"""
     html = ""
     for arg in appdata["arguments"]:
-        html += "type: %s" % (arg["type"],)
+        html += f"type: {arg['type']}"
     return html
 
 
@@ -37,7 +37,7 @@ def do_html(pidx):
     response_headers = [("Content-type", "text/html")]
     name = get_script_name(pidx)
     if not os.path.isfile(name):
-        sys.stderr.write("autoplot/meta 404 %s\n" % (name,))
+        sys.stderr.write(f"autoplot/meta 404 {name}\n")
         status = "404 Not Found"
         output = ""
         return output.encode(), status, response_headers
@@ -74,7 +74,7 @@ def do_json(pidx):
     else:
         name = get_script_name(pidx)
         if not os.path.isfile(name):
-            sys.stderr.write("autoplot/meta 404 %s\n" % (name,))
+            sys.stderr.write(f"autoplot/meta 404 {name}\n")
             status = "404 Not Found"
             output = ""
             response_headers = [
