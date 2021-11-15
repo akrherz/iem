@@ -53,6 +53,8 @@ psycopg2
 pyarrow
 # lots of places
 pygrib
+# caching
+pymemcache
 # various places
 pyproj
 # various shapefile dumpers

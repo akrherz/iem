@@ -3,7 +3,6 @@ import calendar
 
 from pandas.io.sql import read_sql
 import numpy as np
-from pyiem import network
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -57,8 +56,6 @@ def plotter(fdict):
 
     station = ctx["station"]
     varname = ctx["var"]
-    table = "alldata_%s" % (station[:2],)
-    nt = network.Table("%sCLIMATE" % (station[:2],))
 
     tokens = varname.split("_")
     orderer = "(high - low)"
@@ -75,7 +72,7 @@ def plotter(fdict):
         SELECT month, day, high, low, precip, snow,
         rank() OVER (
             PARTITION by month ORDER by {orderer} NULLS LAST)
-        from {table} WHERE station = %s)
+        from alldata_{station[:2]} WHERE station = %s)
 
     select month, to_char(day, 'Mon dd, YYYY') as dd, high, low, precip, snow,
     (high - low) as range from ranks
@@ -99,14 +96,18 @@ def plotter(fdict):
         months.append(i)
         if tokens[1] == "range":
             labels.append(
-                "%s (%s/%s) - %s"
-                % (row[tokens[1]], row["high"], row["low"], row["dd"])
+                f"{row[tokens[1]]} ({row['high']}/{row['low']}) - {row['dd']}"
             )
         else:
-            labels.append("%s - %s" % (row[tokens[1]], row["dd"]))
+            labels.append(f"{row[tokens[1]]} - {row['dd']}")
         ranges.append(row[tokens[1]])
 
-    (fig, ax) = figure_axes(apctx=ctx)
+    title = (
+        f"{ctx['_nt'].sts[station]['name']} [{station}]\n"
+        f"{PDICT[varname]} by Month"
+    )
+
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     ax.barh(np.arange(1, 13), ranges, align="center")
     ax.set_yticks(range(0, 13))
@@ -115,24 +116,15 @@ def plotter(fdict):
     ax.set_xlabel(
         "Date most recently set/tied shown, * indicates ties are present"
     )
-    fig.text(
-        0.5,
-        0.99,
-        "%s [%s]\n%s by Month"
-        % (nt.sts[station]["name"], station, PDICT[varname]),
-        ha="center",
-        fontsize=14,
-        va="top",
-    )
 
     box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.7, box.height])
+    ax.set_position([0.15, box.y0, box.width * 0.7, box.height])
     ax.grid(True)
 
     ax2 = ax.twinx()
     ax2.set_yticks(range(1, 13))
     ax2.set_yticklabels(labels)
-    ax2.set_position([box.x0, box.y0, box.width * 0.7, box.height])
+    ax2.set_position([0.15, box.y0, box.width * 0.7, box.height])
     ax2.set_ylim(0, 13)
 
     return fig, df
