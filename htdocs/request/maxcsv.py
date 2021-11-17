@@ -208,13 +208,13 @@ def do_iarwis():
     df["paveavg"] = (
         df[["pavetmp1", "pavetmp2", "pavetmp3", "pavetmp4"]]
         .mean(axis=1)
-        .map(lambda x: "%.0f" % x if not pd.isna(x) else "")
+        .map(lambda x: f"{x:.0f}" if not pd.isna(x) else "")
     )
     df = df[df["paveavg"] != ""]
 
     for col in range(1, 5):
         df[f"pavetmp{col}"] = df[f"pavetmp{col}"].map(
-            lambda x: "{:.0f}".format(x) if not pd.isna(x) else ""
+            lambda x: f"{x:.0f}" if not pd.isna(x) else ""
         )
     return df
 
@@ -289,10 +289,9 @@ def do_ahps_obs(nwsli):
     res += "|Date|,|Stage|,|--Flow-|\n"
     odf = df[df["type"] == "O"]
     for _, row in odf.iterrows():
-        res += "%s,%.2fft,%.1fkcfs\n" % (
-            row["Time"],
-            row["Stage[ft]"],
-            row["Flow[kcfs]"],
+        res += (
+            f"{row['Time']},{row['Stage[ft]']:.2f}ft,"
+            f"{row['Flow[kcfs]']:.1f}kcfs\n"
         )
     return res
 
@@ -303,10 +302,8 @@ def do_ahps_fx(nwsli):
     cursor = pgconn.cursor()
     # Get metadata
     cursor.execute(
-        """
-        SELECT name, st_x(geom), st_y(geom), tzname from stations
-        where id = %s and network ~* 'DCP'
-    """,
+        "SELECT name, st_x(geom), st_y(geom), tzname from stations "
+        "where id = %s and network ~* 'DCP'",
         (nwsli,),
     )
     row = cursor.fetchone()
@@ -332,15 +329,12 @@ def do_ahps_fx(nwsli):
     primaryunits = row[4]
     secondaryname = row[5]
     secondaryunits = row[6]
-    y = "{}".format(generationtime.year)
     # Get the latest forecast
     df = read_sql(
-        """
+        f"""
     SELECT valid at time zone 'UTC' as valid,
     primary_value, secondary_value, 'F' as type from
-    hml_forecast_data_"""
-        + y
-        + """ WHERE hml_forecast_id = %s
+    hml_forecast_data_{generationtime.year} WHERE hml_forecast_id = %s
     ORDER by valid ASC
     """,
         pgconn,
@@ -348,11 +342,8 @@ def do_ahps_fx(nwsli):
         index_col=None,
     )
     # Get the obs
-    plabel = "{}[{}]".format(primaryname, primaryunits)
-    slabel = "{}[{}]".format(secondaryname, secondaryunits)
-
-    sys.stderr.write(str(primaryname))
-    sys.stderr.write(str(secondaryname))
+    plabel = f"{primaryname}[{primaryunits}]"
+    slabel = f"{secondaryname}[{secondaryunits}]"
 
     df["locationid"] = nwsli
     df["locationname"] = stationname
@@ -367,9 +358,7 @@ def do_ahps_fx(nwsli):
     df[plabel] = df["primary_value"]
     df[slabel] = df["secondary_value"]
     # we have to do the writing from here
-    res = "Forecast Data (Issued %s UTC):,\n" % (
-        generationtime.strftime("%m-%d-%Y %H:%M:%S"),
-    )
+    res = f"Forecast Data (Issued {generationtime:%m-%d-%Y %H:%M:%S} UTC):,\n"
     res += "|Date|,|Stage|,|--Flow-|\n"
     odf = df[df["type"] == "F"]
     for _, row in odf.iterrows():
@@ -394,10 +383,8 @@ def do_ahps(nwsli):
     cursor = pgconn.cursor()
     # Get metadata
     cursor.execute(
-        """
-        SELECT name, st_x(geom), st_y(geom), tzname from stations
-        where id = %s and network ~* 'DCP'
-    """,
+        "SELECT name, st_x(geom), st_y(geom), tzname from stations "
+        "where id = %s and network ~* 'DCP'",
         (nwsli,),
     )
     row = cursor.fetchone()
@@ -463,12 +450,10 @@ def do_ahps(nwsli):
     )
     # Get the latest forecast
     df = read_sql(
-        """
+        f"""
         SELECT valid at time zone 'UTC' as valid,
         primary_value, secondary_value, 'F' as type from
-        hml_forecast_data_"""
-        + y
-        + """ WHERE hml_forecast_id = %s
+        hml_forecast_data_{y} WHERE hml_forecast_id = %s
         ORDER by valid ASC
     """,
         pgconn,
@@ -556,12 +541,6 @@ def do_uvi():
 
 def router(appname):
     """Process and return dataframe"""
-    # elif appname == 'iadotplows':
-    #    df = do_iadotplows()
-    # elif appname == 'iariver':
-    #    df = do_iariver()
-    # elif appname == 'isusm':
-    #    df = do_isusm()
     if appname.startswith("ahpsobs_"):
         df = do_ahps_obs(appname[8:].upper())  # we write ourselves and exit
     elif appname.startswith("ahpsfx_"):
@@ -584,7 +563,7 @@ def router(appname):
         tokens = appname.replace(".txt", "").split("_")
         df = do_moon(float(tokens[1]), float(tokens[2]))
     else:
-        df = """ERROR, unknown report specified"""
+        df = "ERROR, unknown report specified"
     return df
 
 

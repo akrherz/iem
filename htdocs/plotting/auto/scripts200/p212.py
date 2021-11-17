@@ -131,51 +131,51 @@ def get_data(ctx):
         ctx["leveltitle"] = f" @ {level} hPa"
         dfin = read_sql(
             "select extract(year from f.valid at time zone 'UTC') as year, "
-            "to_char(f.valid at time zone 'UTC', 'mmdd') as sday, "
+            "f.valid at time zone 'UTC' as utc_valid, "
             f"{varname} from raob_profile p JOIN raob_flights f on "
             "(p.fid = f.fid) WHERE f.station in %s and p.pressure = %s and "
             "extract(hour from f.valid at time zone 'UTC') = %s and "
             f"{varname} is not null ORDER by valid ASC",
             pgconn,
             params=(tuple(stations), level, hour),
-            index_col=None,
+            index_col="utc_valid",
         )
     else:
         ctx["leveltitle"] = ""
         dfin = read_sql(
             "select extract(year from valid at time zone 'UTC') as year, "
-            "to_char(valid at time zone 'UTC', 'mmdd') as sday, "
+            "valid at time zone 'UTC' as utc_valid, "
             f"{varname} from raob_flights WHERE station in %s and "
             "extract(hour from valid at time zone 'UTC') = %s and "
             f"{varname} is not null ORDER by valid ASC",
             pgconn,
             params=(tuple(stations), hour),
+            index_col="utc_valid",
         )
     if dfin.empty:
         raise NoDataFound("No Data Found.")
+    dfin["sday"] = dfin.index.strftime("%m%d")
     # Drop leapday if this year does not have it.
     try:
         datetime.date(ctx["year"], 2, 29)
     except ValueError:
         dfin = dfin[dfin["sday"] != "0229"]
-    # Create a timestamp for this year
-    dfin["date"] = pd.to_datetime(
-        str(ctx["year"]) + dfin["sday"].astype(str), format="%Y%m%d"
-    )
     # create the climatology dataframe
-    df = dfin[["date", ctx["var"]]].groupby("date").describe()
+    df = dfin[["sday", ctx["var"]]].groupby("sday").describe()
     # Merge in this year's obs
     df[f"{ctx['var']}_{ctx['year']}"] = dfin[
         dfin["year"] == ctx["year"]
-    ].set_index("date")[ctx["var"]]
+    ].set_index("sday")[ctx["var"]]
+    # Create a utc_valid column for later usage
+    df["utc_valid"] = pd.to_datetime(
+        str(ctx["year"]) + df.index + f"{hour:02.0f}",
+        format="%Y%m%d%H",
+    ).tz_localize("UTC")
     ctx["df"] = df
 
-    ctx["title"] = "%s %s %02i UTC Sounding\n%s %s" % (
-        station,
-        name,
-        hour,
-        PDICT3[varname],
-        ctx["leveltitle"],
+    ctx["title"] = (
+        f"{station} {name} {hour:02.0f} UTC Sounding\n"
+        f"{PDICT3[varname]} {ctx['leveltitle']}"
     )
 
 
@@ -183,7 +183,7 @@ def highcharts(fdict):
     """Make highcharts output."""
     ctx = get_autoplot_context(fdict, get_description())
     get_data(ctx)
-    ticks = (ctx["df"].index.astype("int64") // 1e6).tolist()
+    ticks = (ctx["df"]["utc_valid"].view("int64") // 1e6).tolist()
     j = {}
     j["title"] = dict(text=ctx["title"])
     j["exporting"] = {"enabled": True}
@@ -265,7 +265,7 @@ def plotter(fdict):
     df = ctx["df"]
     fig, ax = figure_axes(apctx=ctx)
     colname = f"{ctx['var']}_{ctx['year']}"
-    x = df.index.values
+    x = df["utc_valid"].values
     ax.plot(x, df[colname].values, label=str(ctx["year"]), zorder=4, color="r")
     ax.fill_between(
         x,
@@ -292,4 +292,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="KABR", var="tmpc", level=500))
+    highcharts(dict(station="KABR", var="tmpc", level=500, hour="12"))

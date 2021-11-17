@@ -7,7 +7,7 @@ URIs look like so:
 from io import BytesIO
 import datetime
 
-import memcache
+from pymemcache.client import Client
 from PIL import Image, ImageDraw
 import requests
 from requests.auth import HTTPDigestAuth
@@ -21,10 +21,8 @@ def fetch(cid):
     pgconn = get_dbconn("mesosite")
     cursor = pgconn.cursor()
     cursor.execute(
-        """
-        SELECT ip, fqdn, online, name, port, is_vapix, scrape_url, network
-        from webcams WHERE id = %s
-        """,
+        "SELECT ip, fqdn, online, name, port, is_vapix, scrape_url, network "
+        "from webcams WHERE id = %s",
         (cid,),
     )
     if cursor.rowcount != 1:
@@ -44,8 +42,8 @@ def fetch(cid):
         return
     # Get IEM properties
     iemprops = get_properties()
-    user = iemprops.get("webcam.%s.user" % (network.lower(),))
-    passwd = iemprops.get("webcam.%s.pass" % (network.lower(),))
+    user = iemprops.get(f"webcam.{network.lower()}.user")
+    passwd = iemprops.get(f"webcam.{network.lower()}.pass")
     # Construct URI
     uribase = "http://%s:%s/-wvhttp-01-/GetOneShot"
     if is_vapix:
@@ -60,7 +58,7 @@ def fetch(cid):
     draw = ImageDraw.Draw(image)
     draw.rectangle([0, height - 12, width, height], fill="#000000")
     stamp = datetime.datetime.now().strftime("%d %b %Y %I:%M:%S %P")
-    title = "%s - %s Webcam Live Image at %s" % (name, network, stamp)
+    title = f"{name} - {network} Webcam Live Image at {stamp}"
     draw.text((5, height - 12), title)
     buf = BytesIO()
     image.save(buf, format="JPEG")
@@ -69,8 +67,8 @@ def fetch(cid):
 
 def workflow(cid):
     """The necessary workflow for this camera ID"""
-    mckey = "/current/live/%s.jpg" % (cid,)
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    mckey = f"/current/live/{cid}.jpg"
+    mc = Client(["iem-memcached", 11211])
     res = mc.get(mckey)
     if res:
         return res

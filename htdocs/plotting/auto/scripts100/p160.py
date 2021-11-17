@@ -129,14 +129,11 @@ def get_context(fdict):
     if not ctx["fdf"].empty:
         ctx["fdf"]["valid"] = ctx["fdf"]["valid"].dt.tz_localize(pytz.UTC)
         ctx["fdf"]["issued"] = ctx["fdf"]["issued"].dt.tz_localize(pytz.UTC)
-        ctx["primary"] = "%s[%s]" % (
-            ctx["fdf"].iloc[0]["primaryname"],
-            ctx["fdf"].iloc[0]["primaryunits"],
-        )
-        ctx["secondary"] = "%s[%s]" % (
-            ctx["fdf"].iloc[0]["secondaryname"],
-            ctx["fdf"].iloc[0]["secondaryunits"],
-        )
+        for lbl in ["primary", "secondary"]:
+            ctx[lbl] = (
+                f"{ctx['fdf'].iloc[0][lbl + 'name']}"
+                f"[{ctx['fdf'].iloc[0][lbl + 'units']}]"
+            )
 
         # get obs
         mints = ctx["fdf"]["valid"].min()
@@ -169,13 +166,13 @@ def get_context(fdict):
             how="left",
             sort=False,
         )
-    ctx["title"] = "[%s] %s" % (ctx["station"], ctx["name"])
-    ctx["subtitle"] = "+/- 72 hours around %s" % (
+    ctx["title"] = f"[{ctx['station']}] {ctx['name']}"
+    ldt = (
         ctx["dt"]
         .replace(tzinfo=pytz.UTC)
         .astimezone(pytz.timezone(ctx["tzname"]))
-        .strftime("%d %b %Y %-I:%M %p %Z"),
     )
+    ctx["subtitle"] = f"+/- 72 hours around {ldt:%d %b %Y %-I:%M %p %Z}"
     # Attempt to find a column in ft
     for i, col in enumerate(ctx["odf"].columns):
         if col.find("[ft]") > -1:
@@ -193,7 +190,7 @@ def highcharts(fdict):
     if "df" not in ctx:
         raise NoDataFound("No Data Found.")
     df = ctx["df"]
-    df["ticks"] = df["valid"].astype(np.int64) // 10 ** 6
+    df["ticks"] = df["valid"].view(np.int64) // 10 ** 6
     lines = []
     if "id" in df.columns:
         fxs = df["id"].unique()
@@ -218,7 +215,7 @@ def highcharts(fdict):
                 }
             """
             )
-    ctx["odf"]["ticks"] = ctx["odf"].index.values.astype(np.int64) // 10 ** 6
+    ctx["odf"]["ticks"] = ctx["odf"].index.values.view(np.int64) // 10 ** 6
     if ctx["var"] in ctx:
         v = ctx["odf"][["ticks", ctx[ctx["var"]]]].to_json(orient="values")
         lines.append(
@@ -357,4 +354,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="ALRW1", dt="2020-02-01 0000", var="secondary"))
+    highcharts({})

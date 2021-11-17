@@ -80,7 +80,7 @@ def highcharts(fdict):
     """Do highcharts variant"""
     ctx = get_context(fdict)
     df = ctx["df"]
-    df["ticks"] = df.index.values.astype(np.int64) // 10 ** 6
+    df["ticks"] = df.index.values.view(np.int64) // 10 ** 6
     lines = []
     lines2 = []
     lines3 = []
