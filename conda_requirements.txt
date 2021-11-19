@@ -23,8 +23,8 @@ geopandas
 imageio
 # soft requirement for pandas
 lxml
-# duh
-matplotlib-base
+# pin down until bugs are fixed
+matplotlib-base<3.5
 # various places
 metar
 # duh
