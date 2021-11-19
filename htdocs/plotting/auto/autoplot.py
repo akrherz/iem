@@ -13,6 +13,7 @@ from io import BytesIO
 import numpy as np
 from pymemcache.client import Client
 import pytz
+from pandas.api.types import is_datetime64_any_dtype as isdt
 import pandas as pd
 from PIL import Image
 from paste.request import parse_formvars
@@ -244,6 +245,11 @@ def workflow(environ, form, fmt):
     elif fmt == "txt" and report is not None:
         content = report
     elif fmt in ["csv", "xlsx"] and df is not None:
+        # Dragons: do timestamp conversion as pandas has many bugs
+        for column in df.columns:
+            if isdt(df[column]):
+                df[column] = df[column].dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+
         if fmt == "csv":
             content = df.to_csv(index=(df.index.name is not None), header=True)
         elif fmt == "xlsx":
