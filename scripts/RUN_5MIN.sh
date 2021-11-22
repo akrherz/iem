@@ -9,7 +9,10 @@ cd ../roads
 python archive_roadsplot.py $(date -u +'%Y %m %d %H %M') &
 python ingest_roads_rest.py &
 
-cd ../ingestors/ifc
+cd ../ingestors
+python soilm_ingest.py &
+
+cd ifc
 python ingest_ifc_precip.py &
 
 cd ../../dl

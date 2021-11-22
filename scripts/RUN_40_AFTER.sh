@@ -22,10 +22,7 @@ python wxc_iemrivers.py
 cd ../iemplot
 ./RUN.csh
 
-cd ../ingestors
-python soilm_ingest.py
-
-cd squaw
+cd ../ingestors/squaw
 python ingest_squaw.py
 
 cd ../scan

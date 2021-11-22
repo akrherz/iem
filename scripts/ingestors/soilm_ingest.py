@@ -1,7 +1,7 @@
 """
     LEGACY ISU SOIL MOISTURE INGEST!
 
- Run from RUN_10_AFTER.sh
+ Run from RUN_5MIN.sh
 """
 # stdlib
 import datetime
