@@ -57,7 +57,7 @@ def application(environ, start_response):
     else:
         prism_precip = None
 
-    if ts.year > 2010:
+    if ts.year > 2000:
         ncfn = iemre.get_daily_mrms_ncname(ts.year)
         if not os.path.isfile(ncfn):
             mrms_precip = None

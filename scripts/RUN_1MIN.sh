@@ -1,6 +1,4 @@
 # Run every minute!
-cd /opt/nwnwebsite/scripts
-iemphp drive_lsd_generation.php &
 
 cd /opt/iem/scripts/sbw
 python raccoon_sbw_to_ppt.py &

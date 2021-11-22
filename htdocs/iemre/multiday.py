@@ -108,7 +108,7 @@ def application(environ, start_response):
     else:
         prism_precip = [None] * (offset2 - offset1)
 
-    if ts1.year > 2010:
+    if ts1.year > 2000:
         j2 = int((lat - iemre.SOUTH) * 100.0)
         i2 = int((lon - iemre.WEST) * 100.0)
         with ncopen(iemre.get_daily_mrms_ncname(ts1.year)) as nc:
