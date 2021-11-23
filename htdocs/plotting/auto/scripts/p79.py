@@ -153,7 +153,7 @@ def plotter(fdict):
     ax.set_xticklabels(["N", "NE", "E", "SE", "S", "SW", "W", "NW", "N"])
     ax.set_xlabel("Wind Direction")
 
-    return fig, means["dwpf"]
+    return fig, means
 
 
 if __name__ == "__main__":
