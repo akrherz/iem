@@ -1,11 +1,11 @@
 """GDD vs precip departures"""
+# pylint: disable=no-member
 import datetime
 import calendar
 
 from scipy import stats
 from pandas.io.sql import read_sql
 from matplotlib.patches import Circle
-from pyiem import network
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -66,12 +66,11 @@ def plotter(fdict):
     station = ctx["station"]
     month = ctx["month"]
     year = ctx["year"]
-    table = "alldata_%s" % (station[:2],)
-    nt = network.Table("%sCLIMATE" % (station[:2],))
 
     df = read_sql(
         "SELECT year, sum(precip) as total_precip, "
-        f"sum(gddxx(%s, %s, high::numeric,low::numeric)) as gdd from {table} "
+        "sum(gddxx(%s, %s, high::numeric,low::numeric)) as gdd "
+        f"from alldata_{station[:2]} "
         "WHERE station = %s and month = %s GROUP by year",
         pgconn,
         params=(ctx["gddbase"], ctx["gddceil"], station, month),
@@ -94,14 +93,10 @@ def plotter(fdict):
     y1 = -4.0 * h_slope + intercept
     y2 = 4.0 * h_slope + intercept
     title = (
-        "[%s] %s -- For Month of %s\n"
-        "Growing Degree Day (base=%s, ceil=%s) + Precipitation Departure"
-    ) % (
-        station,
-        nt.sts[station]["name"],
-        calendar.month_name[month],
-        ctx["gddbase"],
-        ctx["gddceil"],
+        f"[{station}] {ctx['_nt'].sts[station]['name']} -- For Month of "
+        f"{calendar.month_name[month]}\n"
+        f"Growing Degree Day (base={ctx['gddbase']}, ceil={ctx['gddceil']}) "
+        "+ Precipitation Departure"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.set_position([0.1, 0.12, 0.8, 0.78])
@@ -110,20 +105,28 @@ def plotter(fdict):
     ax.plot(
         [-4, 4],
         [y1, y2],
-        label="Slope=%.2f R$^2$=%.2f" % (h_slope, r_value ** 2),
+        label=f"Slope={h_slope:.2f} R$^2$={(r_value ** 2):.2f}",
     )
     xmax = df.gdd_sigma.abs().max() + 0.25
     ymax = df.precip_sigma.abs().max() + 0.25
     ax.set_xlim(0 - xmax, xmax)
     ax.set_ylim(0 - ymax, ymax)
-    events = df.query("distance > 2.5 or year == %.0f" % (year,))
+    events = df.query(f"distance > 2.5 or year == {year:.0f}")
     for _year, row in events.iterrows():
         ax.text(
             row["gdd_sigma"],
             row["precip_sigma"],
-            " %.0f" % (_year,),
+            f" {_year:.0f}",
             va="center",
+            color="red" if _year == year else "b",
         )
+        if _year == year:
+            ax.scatter(
+                row["gdd_sigma"],
+                row["precip_sigma"],
+                color="red",
+                zorder=3,
+            )
 
     if year in df.index:
         c = Circle((0, 0), radius=df.loc[year].distance, facecolor="none")

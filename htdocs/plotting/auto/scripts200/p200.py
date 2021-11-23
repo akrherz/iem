@@ -173,7 +173,7 @@ def get_description():
         dict(
             type="select",
             name="p",
-            default="1.C.16",
+            default="3.C.8",  # day 1 is too slow to default to :(
             options=ISSUANCE,
             label="Select SPC Product Issuance",
         ),
