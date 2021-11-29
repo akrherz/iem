@@ -55,8 +55,15 @@ def main(argv):
         "var=precipitationCal&time=%Y-%m-%dT%H%%3A%M%%3A00Z&accept=netcdf4"
     )
     req = requests.get(url, timeout=120)
-    if req.status_code != 200:
-        LOG.info("failed to fetch %s using source %s", valid, source)
+    ct = req.headers["content-type"]
+    if req.status_code != 200 or not ct.startswith("application/x-netcdf4"):
+        LOG.info(
+            "failed to fetch %s [%s, %s] using source %s",
+            valid,
+            req.status_code,
+            ct,
+            source,
+        )
         LOG.debug(url)
         return
     tmp.write(req.content)
@@ -92,45 +99,30 @@ def main(argv):
         "source": "F" if source == "" else source,  # E, L, F
         "generation_time": utc().strftime(ISO),
     }
-    with open(f"{tmp.name}.json", "w") as fp:
+    with open(f"{tmp.name}.json", "w", encoding="utf8") as fp:
         fp.write(json.dumps(metadata))
     pqstr = (
-        "pqinsert -i -p 'plot %s %s "
-        "gis/images/4326/imerg/p30m.json GIS/imerg/p30m_%s.json json' "
-        "%s.json"
-    ) % (
-        routes,
-        valid.strftime("%Y%m%d%H%M"),
-        valid.strftime("%Y%m%d%H%M"),
-        tmp.name,
+        f"pqinsert -i -p 'plot {routes} {valid:%Y%m%d%H%M} "
+        "gis/images/4326/imerg/p30m.json "
+        f"GIS/imerg/p30m_{valid:%Y%m%d%H%M}.json json' {tmp.name}.json"
     )
     subprocess.call(pqstr, shell=True)
     os.unlink(f"{tmp.name}.json")
 
-    with open(f"{tmp.name}.wld", "w") as fp:
+    with open(f"{tmp.name}.wld", "w", encoding="utf8") as fp:
         fp.write("\n".join(["0.1", "0.0", "0.0", "-0.1", "-179.95", "89.95"]))
     pqstr = (
-        "pqinsert -i -p 'plot %s %s "
-        "gis/images/4326/imerg/p30m.wld GIS/imerg/p30m_%s.wld wld' "
-        "%s.wld"
-    ) % (
-        routes,
-        valid.strftime("%Y%m%d%H%M"),
-        valid.strftime("%Y%m%d%H%M"),
-        tmp.name,
+        f"pqinsert -i -p 'plot {routes} {valid:%Y%m%d%H%M} "
+        "gis/images/4326/imerg/p30m.wld "
+        f"GIS/imerg/p30m_{valid:%Y%m%d%H%M}.wld wld' {tmp.name}.wld"
     )
     subprocess.call(pqstr, shell=True)
     os.unlink(f"{tmp.name}.wld")
 
     pqstr = (
-        "pqinsert -i -p 'plot %s %s "
-        "gis/images/4326/imerg/p30m.png GIS/imerg/p30m_%s.png png' "
-        "%s.png"
-    ) % (
-        routes,
-        valid.strftime("%Y%m%d%H%M"),
-        valid.strftime("%Y%m%d%H%M"),
-        tmp.name,
+        f"pqinsert -i -p 'plot {routes} {valid:%Y%m%d%H%M} "
+        "gis/images/4326/imerg/p30m.png "
+        "GIS/imerg/p30m_{valid:%Y%m%d%H%M}.png png' {tmp.name}.png"
     )
     subprocess.call(pqstr, shell=True)
     os.unlink(f"{tmp.name}.png")
