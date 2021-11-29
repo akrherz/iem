@@ -23,27 +23,19 @@ REQUIRED_MSGS = 9 * 30 * 4
 
 def dl(now, varname, scenario):
     """get the files"""
-    s2 = "%02i" % (scenario,)
-    uri = now.strftime(
-        (
-            "https://ftpprd.ncep.noaa.gov/data/nccf/com/cfs/prod/"
-            "cfs/cfs.%Y%m%d/%H/time_grib_"
-            + s2
-            + "/"
-            + varname
-            + "."
-            + s2
-            + ".%Y%m%d%H.daily.grb2"
-        )
+    s2 = f"{scenario:02d}"
+    uri = (
+        "https://ftpprd.ncep.noaa.gov/data/nccf/com/cfs/prod/"
+        f"cfs/cfs.{now:%Y%m%d/%H}/time_grib_{s2}/{varname}.{s2}"
+        f".{now:%Y%m%d%H}.daily.grb2"
     )
     LOG.debug("fetching %s", uri)
     response = exponential_backoff(requests.get, uri, timeout=60)
     if response is None or response.status_code != 200:
         LOG.info("dl %s failed", uri)
         return
-    tmpfd = tempfile.NamedTemporaryFile(delete=False)
-    tmpfd.write(response.content)
-    tmpfd.close()
+    with tempfile.NamedTemporaryFile(delete=False) as tmpfd:
+        tmpfd.write(response.content)
     # Check out this file to see how much data we actually have, it had
     # better be a big number
     grb = pygrib.open(tmpfd.name)
@@ -59,15 +51,9 @@ def dl(now, varname, scenario):
     else:
         # Inject into LDM
         cmd = (
-            "pqinsert -p 'data a %s blah "
-            "model/cfs/%02i/%s.%s.%s.daily.grib2 grib' %s"
-        ) % (
-            now.strftime("%Y%m%d%H%M"),
-            now.hour,
-            varname,
-            s2,
-            now.strftime("%Y%m%d%H"),
-            tmpfd.name,
+            f"pqinsert -p 'data a {now:%Y%m%d%H%M} blah "
+            f"model/cfs/{now:%H}/{varname}.{s2}.{now:%Y%m%d%H}.daily.grib2 "
+            f"grib' {tmpfd.name}"
         )
         subprocess.call(cmd, shell=True)
 

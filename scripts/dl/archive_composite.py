@@ -10,16 +10,12 @@ LOG = logger()
 
 def main(argv):
     """Go Main Go"""
-    sts = utc(
-        int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]), int(argv[5])
-    )
-    ets = utc(
-        int(argv[6]), int(argv[7]), int(argv[8]), int(argv[9]), int(argv[10])
-    )
+    sts = utc(*[int(x) for x in argv[1:6]])
+    ets = utc(*[int(x) for x in argv[6:11]])
     interval = datetime.timedelta(minutes=5)
     now = sts
     while now < ets:
-        cmd = now.strftime("python radar_composite.py %Y %m %d %H %M")
+        cmd = f"python radar_composite.py {now:%Y %m %d %H %M}"
         LOG.debug(cmd)
         subprocess.call(cmd, shell=True)
         now += interval

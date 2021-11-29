@@ -63,12 +63,13 @@ def do_month(sts):
             os.makedirs(dirname)
         localfn = now.strftime("/mesonet/data/merra2/%Y/%Y%m%d.nc")
         cmd = (
-            "curl -n -c ~/.urscookies -b ~/.urscookies -L " "--url '%s' -o %s"
-        ) % (uri, localfn)
-        proc = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, shell=True, stderr=subprocess.PIPE
+            "curl -n -c ~/.urscookies -b ~/.urscookies -L "
+            f"--url '{uri}' -o {localfn}"
         )
-        proc.stderr.read()
+        with subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, shell=True, stderr=subprocess.PIPE
+        ) as proc:
+            proc.stderr.read()
         now += interval
 
 

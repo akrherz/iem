@@ -47,7 +47,6 @@ def main(argv):
     source = compute_source(valid)
     routes = "ac" if len(argv) > 6 else "a"
     LOG.debug("Using source: `%s` for valid: %s[%s]", source, valid, routes)
-    tmp = tempfile.NamedTemporaryFile(delete=False)
     url = valid.strftime(
         "https://gpm1.gesdisc.eosdis.nasa.gov/thredds/ncss/aggregation/"
         f"GPM_3IMERGHH{source}.06/%Y/GPM_3IMERGHH{source}"
@@ -56,6 +55,7 @@ def main(argv):
     )
     req = requests.get(url, timeout=120)
     ct = req.headers["content-type"]
+    # Sometimes, the service returns a 200 that is an error webpage :(
     if req.status_code != 200 or not ct.startswith("application/x-netcdf4"):
         LOG.info(
             "failed to fetch %s [%s, %s] using source %s",
@@ -66,6 +66,7 @@ def main(argv):
         )
         LOG.debug(url)
         return
+    tmp = tempfile.NamedTemporaryFile(delete=False)
     tmp.write(req.content)
     tmp.close()
     with ncopen(tmp.name) as nc:
