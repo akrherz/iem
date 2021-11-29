@@ -123,7 +123,7 @@ def main(argv):
     pqstr = (
         f"pqinsert -i -p 'plot {routes} {valid:%Y%m%d%H%M} "
         "gis/images/4326/imerg/p30m.png "
-        "GIS/imerg/p30m_{valid:%Y%m%d%H%M}.png png' {tmp.name}.png"
+        f"GIS/imerg/p30m_{valid:%Y%m%d%H%M}.png png' {tmp.name}.png"
     )
     subprocess.call(pqstr, shell=True)
     os.unlink(f"{tmp.name}.png")
