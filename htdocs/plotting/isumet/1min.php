@@ -39,9 +39,11 @@ if ($station == null){
         }
         $valid[] = $v;
         $tmpf[] = $tval;
-  		$relh[] = intval($parts[8]);
-  		$d = dwpf(round (substr($line, 36, 6),2), intval($parts[8]) );
-  		$dwpf[] = ($d > -40 && $d < 90)? $d : "";
+        $rh = intval($parts[8]);
+
+        $d = dwpf(round (substr($line, 36, 6),2), $rh);
+        $dwpf[] = ($d > -40 && $d < 90 && $rh > 1 && $rh < 100)? $d : "";
+        $relh[] = ($rh > 1 && $rh < 100)? $rh : "";
  	} // End of while
 } else {
 	$fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0010.dat");
@@ -69,8 +71,10 @@ if ($station == null){
         }
 		$valid[] = $v;
   		$tmpf[] = $tval;
-  		$relh[] = floatval($tokens[8]);
-  		$dwpf[] = dwpf($tokens[5], floatval($tokens[8]));
+        $rh = floatval($tokens[8]);
+        $relh[] = $rh;
+        $d = dwpf($tokens[5], $rh);
+        $dwpf[] = ($rh > 1 && $rh < 101) ? $d: "";
  	} // End of while
 }	
 
