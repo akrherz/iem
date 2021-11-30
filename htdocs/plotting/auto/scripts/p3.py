@@ -4,7 +4,6 @@ import datetime
 
 import numpy as np
 from pandas.io.sql import read_sql
-from pyiem import network
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -42,6 +41,7 @@ PDICT = dict(
         ),
         ("days-lows-below", "Days with Low Temp Below (threshold)"),
         ("days-lows-below-avg", "Days with Low Temp Below Average"),
+        ("days-precip-above", "Days with Precipitation Above (threshold)"),
     ]
 )
 PDICT2 = {"no": "Plot Yearly Values", "yes": "Plot Decadal Values"}
@@ -243,8 +243,7 @@ def get_context(fdict):
     ptype = ctx["type"]
     threshold = ctx["threshold"]
 
-    table = "alldata_%s" % (station[:2],)
-    nt = network.Table("%sCLIMATE" % (station[:2],))
+    table = f"alldata_{station[:2]}"
 
     lag = "0 days"
     if month == "fall":
@@ -304,7 +303,8 @@ def get_context(fdict):
     sum(case when o.high >= c.high then 1 else 0 end) as "days-high-above-avg",
         sum(case when o.low >= %s then 1 else 0 end) as "days-lows-above",
     sum(case when o.low < c.low then 1 else 0 end) as "days-lows-below-avg",
-        sum(case when o.low < %s then 1 else 0 end) as "days-lows-below"
+        sum(case when o.low < %s then 1 else 0 end) as "days-lows-below",
+        sum(case when o.precip >= %s then 1 else 0 end) as "days-precip-above"
         from {table} o JOIN climo c on (o.sday = c.sday)
       where station = %s and month in %s GROUP by myyear)
 
@@ -316,9 +316,10 @@ def get_context(fdict):
     """,
         pgconn,
         params=(
-            nt.sts[station]["ncei91"],
+            ctx["_nt"].sts[station]["ncei91"],
             station,
             tuple(months),
+            threshold,
             threshold,
             threshold,
             threshold,
@@ -343,6 +344,7 @@ def get_context(fdict):
             "days-lows-above",
             "days-lows-below-avg",
             "days-lows-below",
+            "days-precip-above",
         ]:
             df[colname] = df[colname] / df["years"]
 
@@ -385,7 +387,7 @@ def get_context(fdict):
     ctx["month"] = month
     ctx["title"] = ("[%s] %s %s-%s") % (
         station,
-        nt.sts[station]["name"],
+        ctx["_nt"].sts[station]["name"],
         df.index.min(),
         df.index.max(),
     )
@@ -415,7 +417,7 @@ def plotter(fdict):
     colorabove = "tomato"
     colorbelow = "dodgerblue"
     precision = "%.1f"
-    if ctx["ptype"] in ["max-precip", "sum-precip"]:
+    if ctx["ptype"] in ["max-precip", "sum-precip", "days-precip-above"]:
         colorabove = "dodgerblue"
         colorbelow = "tomato"
         precision = "%.2f"

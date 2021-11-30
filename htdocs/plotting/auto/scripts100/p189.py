@@ -28,6 +28,22 @@ META = {
         "month_bounds": "",
         "valid_offset": "",
     },
+    "annual_avg_high": {
+        "title": "Annual Average High Temperature",
+        "ylabel": "Temperature [F]",
+        "xlabel": "Year",
+        "func": "avg(high)",
+        "month_bounds": "",
+        "valid_offset": "",
+    },
+    "annual_avg_low": {
+        "title": "Annual Average Low Temperature",
+        "ylabel": "Temperature [F]",
+        "xlabel": "Year",
+        "func": "avg(low)",
+        "month_bounds": "",
+        "valid_offset": "",
+    },
     "winter_avg_temp": {
         "title": "Winter [DJF] Average Temperature",
         "ylabel": "Temperature [F]",
@@ -165,12 +181,11 @@ def yearly_plot(ctx):
     if df.empty:
         raise NoDataFound("no data found, sorry")
 
-    title = "%s (%s - %s)\nLocation ID: %s Name: %s" % (
-        META[ctx["plot_type"]].get("title", "TITLE"),
-        ctx["first_year"],
-        ctx["last_year"],
-        ctx["station"],
-        ctx["_nt"].sts[ctx["station"]]["name"],
+    title = (
+        f"{META[ctx['plot_type']].get('title', 'TITLE')} "
+        f"({ctx['first_year']} - {ctx['last_year']})\n"
+        f"Location ID: {ctx['station']} "
+        f"Name: {ctx['_nt'].sts[ctx['station']]['name']}"
     )
     fig, ax = figure_axes(title=title, apctx=ctx)
     ax.plot(df["yr"].values, df["data"].values, "bo-")
@@ -194,7 +209,7 @@ def yearly_plot(ctx):
         ax.text(
             ctx["first_year"],
             maxy,
-            "$R^2$=%.2f" % (r_value ** 2,),
+            f"$R^2$={(r_value ** 2):.2f}",
             color="#CC6633",
         )
 
@@ -217,8 +232,8 @@ def get_description():
     </ul>
     """
     pdict = {}
-    for varname in META:
-        pdict[varname] = META[varname]["title"]
+    for varname, item in META.items():
+        pdict[varname] = item["title"]
     today = datetime.date.today()
     desc["arguments"] = [
         dict(
@@ -268,4 +283,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})
