@@ -2,6 +2,7 @@
 import datetime
 
 import numpy as np
+import pandas as pd
 from pandas.io.sql import read_sql
 import pytz
 from pyiem.plot import MapPlot, get_cmap
@@ -60,6 +61,13 @@ MDICT = dict(
     ]
 )
 PDICT = dict([("wfo", "By NWS Forecast Office"), ("state", "By State")])
+PDICT2 = {
+    "count": "Event Count",
+    "days": "Days with 1+ Events",
+    "count_rank": "Rank of Event Count (1=lowest) Since 2003",
+    "count_departure": "Departure from Average of Event Count",
+    "count_standard": "Standardized Departure from Average of Event Count",
+}
 
 
 def get_description():
@@ -70,10 +78,21 @@ def get_description():
         "description"
     ] = """This application generates a map displaying the
     number of LSRs issued between a period of your choice by NWS Office. These
-    are the preliminary reports and not official totals of events."""
+    are the preliminary reports and not official totals of events.
+
+    <p><strong>NOTE:</strong> If you choose a period longer than one year,
+    only the "count" metric is available.  Sorry.
+    """
     today = datetime.date.today() + datetime.timedelta(days=1)
     jan1 = today.replace(month=1, day=1)
     desc["arguments"] = [
+        dict(
+            type="select",
+            name="var",
+            default="count",
+            options=PDICT2,
+            label="Which metric to plot:",
+        ),
         dict(
             type="datetime",
             name="sdate",
@@ -107,15 +126,86 @@ def get_description():
     return desc
 
 
+def get_count_bins(df, varname):
+    """Figure out sensible bins."""
+    minv = df[varname].min()
+    maxv = df[varname].max()
+    if varname == "count_rank":
+        bins = np.arange(1, maxv + 2)
+    elif varname == "count":
+        bins = [0, 1, 2, 3, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 200]
+        if maxv > 5000:
+            bins = [
+                0,
+                5,
+                10,
+                50,
+                100,
+                250,
+                500,
+                750,
+                1000,
+                1500,
+                2000,
+                3000,
+                5000,
+                7500,
+                10000,
+            ]
+        elif maxv > 1000:
+            bins = [
+                0,
+                1,
+                5,
+                10,
+                50,
+                100,
+                150,
+                200,
+                250,
+                500,
+                750,
+                1000,
+                1250,
+                1500,
+                2000,
+            ]
+        elif maxv > 200:
+            bins = [
+                0,
+                1,
+                3,
+                5,
+                10,
+                20,
+                35,
+                50,
+                75,
+                100,
+                150,
+                200,
+                250,
+                500,
+                750,
+                1000,
+            ]
+    elif max([abs(minv), abs(maxv)]) > 100:
+        bins = [-200, -150, -100, -50, -25, -10, 0, 10, 25, 50, 100, 150, 200]
+    elif max([abs(minv), abs(maxv)]) > 10:
+        bins = [-100, -50, -25, -10, -5, 0, 5, 10, 25, 50, 100]
+    else:
+        bins = np.arange(-3, 3.1, 0.5)
+    return bins
+
+
 def plotter(fdict):
     """Go"""
     pgconn = get_dbconn("postgis")
     ctx = get_autoplot_context(fdict, get_description())
-    sts = ctx["sdate"]
-    sts = sts.replace(tzinfo=pytz.utc)
-    ets = ctx["edate"]
+    sts = ctx["sdate"].replace(tzinfo=pytz.utc)
+    ets = ctx["edate"].replace(tzinfo=pytz.utc)
+    varname = ctx["var"]
     by = ctx["by"]
-    ets = ets.replace(tzinfo=pytz.utc)
     myfilter = ctx["filter"]
     if myfilter == "NONE":
         tlimiter = ""
@@ -129,51 +219,133 @@ def plotter(fdict):
             "'TSTM WND DMG') "
         )
     else:
-        tlimiter = " and typetext = '%s' " % (myfilter,)
+        tlimiter = f" and typetext = '{myfilter}' "
+    cmap = get_cmap(ctx["cmap"])
+    extend = "neither"
 
-    df = read_sql(
-        f"""
-    WITH data as (
-        SELECT distinct wfo, state, valid, type, magnitude, geom from lsrs
-        where valid >= %s and valid < %s {tlimiter}
-    )
-    SELECT {by}, count(*) from data GROUP by {by}
-    """,
-        pgconn,
-        params=(sts, ets),
-        index_col=by,
-    )
-    data = {}
-    for idx, row in df.iterrows():
-        if idx == "JSJ":
-            idx = "SJU"
-        data[idx] = row["count"]
-    maxv = df["count"].max()
-    bins = np.linspace(1, maxv, 12, dtype="i")
-    bins[-1] += 1
+    if varname == "days":
+        df = read_sql(
+            f"""
+        WITH data as (
+            SELECT distinct wfo, state, date(valid)
+            from lsrs where valid >= %s and valid < %s {tlimiter}
+        )
+        SELECT {by}, count(*) from data GROUP by {by}
+        """,
+            pgconn,
+            params=(sts, ets),
+            index_col=by,
+        )
+        df2 = df["count"]
+        if df2.max() < 10:
+            bins = list(range(1, 11, 1))
+        else:
+            bins = np.linspace(1, df2.max() + 11, 10, dtype="i")
+        units = "Days"
+        lformat = "%.0f"
+        cmap.set_under("white")
+        cmap.set_over("#EEEEEE")
+
+    else:
+        if (ets - sts).days > 366:
+            raise ValueError("Sorry, only count is available for 365+ days")
+        sday = sts.strftime("%m%d")
+        eday = ets.strftime("%m%d")
+        slimiter = (
+            f" (to_char(valid, 'mmdd') >= '{sday}' and "
+            f"to_char(valid, 'mmdd') <= '{eday}' ) "
+        )
+        yearcol = "extract(year from valid)"
+        if eday <= sday:
+            slimiter = slimiter.replace(" and ", " or ")
+            yearcol = (
+                f"case when to_char(issue, 'mmdd') <= '{eday}' then "
+                "extract(year from issue)::int - 1 else "
+                "extract(year from issue) end"
+            )
+        # Expensive
+        df = read_sql(
+            f"""
+        WITH data as (
+            SELECT distinct wfo, {yearcol} as year, state, valid, type,
+            magnitude, geom from lsrs
+            where {slimiter} {tlimiter}
+        )
+        SELECT {by}, year, count(*) from data GROUP by {by}, year
+        """,
+            pgconn,
+            index_col=None,
+        )
+        # Fill out zeros
+        idx = pd.MultiIndex.from_product(
+            [df["wfo"].unique(), df["year"].unique()],
+            names=["wfo", "year"],
+        )
+        df = df.set_index(["wfo", "year"]).reindex(idx).fillna(0).reset_index()
+        df["rank"] = df.groupby("wfo")["count"].rank(
+            method="min", ascending=True
+        )
+        thisyear = (
+            df[df["year"] == sts.year].set_index("wfo").drop("year", axis=1)
+        )
+        # Ready to construct final df.
+        df = df[["wfo", "count"]].groupby("wfo").agg(["mean", "std"]).copy()
+        df.columns = ["_".join(a) for a in df.columns.to_flat_index()]
+        df[["count", "count_rank"]] = thisyear[["count", "rank"]]
+        df["count_departure"] = df["count"] - df["count_mean"]
+        df["count_standard"] = df["count_departure"] / df["count_std"]
+        bins = get_count_bins(df, varname)
+        lformat = "%.0f"
+        units = "Count"
+        if varname == "count":
+            extend = "max"
+        elif varname == "count_rank":
+            extend = "neither"
+            units = "Rank"
+        else:
+            if varname == "count_standard":
+                lformat = "%.1f"
+                units = "sigma"
+            extend = "both"
+        df2 = df[varname]
+    # Switch JSJ to SJU in index
+    df2.index = df2.index.map(lambda x: x.replace("JSJ", "SJU"))
     mp = MapPlot(
         apctx=ctx,
         sector="nws",
         axisbg="white",
-        title=f"Preliminary/Unfiltered Local Storm Report Counts {PDICT[by]}",
-        subtitlefontsize=10,
-        subtitle=("Valid %s - %s UTC, type limiter: %s")
-        % (
-            sts.strftime("%d %b %Y %H:%M"),
-            ets.strftime("%d %b %Y %H:%M"),
-            MDICT.get(myfilter),
+        title=(
+            f"Preliminary/Unfiltered Local Storm Report {PDICT2[varname]} "
+            f"{PDICT[by]}"
+        ),
+        subtitle=(
+            f"Valid {sts:%d %b %Y %H:%M} - {ets:%d %b %Y %H:%M} UTC, "
+            f"type limiter: {MDICT.get(myfilter)}"
         ),
     )
-    cmap = get_cmap(ctx["cmap"])
     if by == "wfo":
-        mp.fill_cwas(data, bins=bins, lblformat="%.0f", cmap=cmap, ilabel=True)
+        mp.fill_cwas(
+            df2.to_dict(),
+            bins=bins,
+            lblformat=lformat,
+            cmap=cmap,
+            ilabel=True,
+            units=units,
+            extend=extend,
+        )
     else:
         mp.fill_states(
-            data, bins=bins, lblformat="%.0f", cmap=cmap, ilabel=True
+            df2.to_dict(),
+            bins=bins,
+            lblformat=lformat,
+            cmap=cmap,
+            ilabel=True,
+            units=units,
+            extend=extend,
         )
 
     return mp.fig, df
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({"var": "count_departure"})
