@@ -278,18 +278,16 @@ def plotter(fdict):
         )
         # Fill out zeros
         idx = pd.MultiIndex.from_product(
-            [df["wfo"].unique(), df["year"].unique()],
-            names=["wfo", "year"],
+            [df[by].unique(), df["year"].unique()],
+            names=[by, "year"],
         )
-        df = df.set_index(["wfo", "year"]).reindex(idx).fillna(0).reset_index()
-        df["rank"] = df.groupby("wfo")["count"].rank(
-            method="min", ascending=True
-        )
+        df = df.set_index([by, "year"]).reindex(idx).fillna(0).reset_index()
+        df["rank"] = df.groupby(by)["count"].rank(method="min", ascending=True)
         thisyear = (
-            df[df["year"] == sts.year].set_index("wfo").drop("year", axis=1)
+            df[df["year"] == sts.year].set_index(by).drop("year", axis=1)
         )
         # Ready to construct final df.
-        df = df[["wfo", "count"]].groupby("wfo").agg(["mean", "std"]).copy()
+        df = df[[by, "count"]].groupby(by).agg(["mean", "std"]).copy()
         df.columns = ["_".join(a) for a in df.columns.to_flat_index()]
         df[["count", "count_rank"]] = thisyear[["count", "rank"]]
         df["count_departure"] = df["count"] - df["count_mean"]
@@ -348,4 +346,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"var": "count_departure"})
+    plotter({"var": "count_departure", "by": "state"})

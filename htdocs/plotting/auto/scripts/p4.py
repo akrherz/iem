@@ -110,9 +110,11 @@ def plotter(fdict):
     df = pd.DataFrame(dict(day=pd.Series(days), coverage=pd.Series(coverage)))
 
     title = (
-        "%s IEM Estimated Areal Coverage Percent of %s\n"
-        " receiving %.2f inches of rain over trailing %s day period"
-    ) % (year, reference.state_names[state], threshold, period)
+        f"{year} IEM Estimated Areal "
+        f"Coverage Percent of {reference.state_names[state]}\n"
+        f" receiving {threshold:.2f} inches of rain over "
+        f"trailing {period} day period"
+    )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.bar(days, coverage, fc="g", ec="g")
     ax.set_ylabel("Areal Coverage [%]")
