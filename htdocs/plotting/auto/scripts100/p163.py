@@ -306,8 +306,6 @@ def plotter(fdict):
                 units = "sigma"
             extend = "both"
         df2 = df[varname]
-    # Switch JSJ to SJU in index
-    df2.index = df2.index.map(lambda x: x.replace("JSJ", "SJU"))
     mp = MapPlot(
         apctx=ctx,
         sector="nws",
