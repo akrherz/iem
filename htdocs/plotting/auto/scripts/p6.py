@@ -1,4 +1,5 @@
 """Distribution of obs"""
+# pylint: disable=no-member
 import calendar
 import datetime
 
@@ -60,7 +61,6 @@ def plotter(fdict):
     month = ctx["month"]
     ptype = ctx["type"]
     ptype_climo = ptype.split("-")[1]
-    table = "alldata_%s" % (state,)
 
     # Compute the bulk statistics for climatology
     df = read_sql(
@@ -68,7 +68,7 @@ def plotter(fdict):
     WITH yearly as (
         SELECT station, year, sum(precip) as sum_precip,
         avg(high) as avg_high, avg(low) as avg_low,
-        avg((high+low)/2.) as avg_temp from {table}
+        avg((high+low)/2.) as avg_temp from alldata_{state}
         WHERE month = %s GROUP by station, year)
 
     SELECT avg(sum_precip) as avg_precip, stddev(sum_precip) as std_precip,
@@ -89,7 +89,7 @@ def plotter(fdict):
     WITH yearly as (
         SELECT station, year, sum(precip) as sum_precip,
         avg(high) as avg_high, avg(low) as avg_low,
-        avg((high+low)/2.) as avg_temp from {table}
+        avg((high+low)/2.) as avg_temp from alldata_{state}
         WHERE month = %s GROUP by station, year),
     agg1 as (
         SELECT station, avg(sum_precip) as precip,
@@ -109,16 +109,13 @@ def plotter(fdict):
         params=(month, year),
         index_col="station",
     )
-    if "%s0000" % (state,) not in df.index:
+    if f"{state}0000" not in df.index:
         raise NoDataFound("No Data Found")
-    stateavg = df.at["%s0000" % (state,), ptype]
+    stateavg = df.at[f"{state}0000", ptype]
 
-    title = ("%s %s %s %s Distribution\nNumber of stations: %s") % (
-        reference.state_names[state],
-        year,
-        calendar.month_name[month],
-        PDICT[ptype],
-        len(df.index),
+    title = (
+        f"{reference.state_names[state]} {year} {calendar.month_name[month]} "
+        f"{PDICT[ptype]} Distribution\nNumber of stations: {len(df.index)}"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     _, bins, _ = ax.hist(
@@ -130,8 +127,13 @@ def plotter(fdict):
         y,
         "b--",
         lw=2,
-        label=(r"%s Normal Dist. $\sigma$=%.2f $\mu$=%.2f")
-        % (year, df[ptype].std(), df[ptype].mean()),
+        label=(
+            f"{year} Normal Dist. "
+            r"$\sigma$="
+            f"{df[ptype].std():.2f} "
+            r"$\mu$="
+            f"{df[ptype].mean():.2f}"
+        ),
     )
 
     bins = np.linspace(
@@ -143,22 +145,26 @@ def plotter(fdict):
         y,
         "g--",
         lw=2,
-        label=(r"Climo Normal Dist. $\sigma$=%.2f $\mu$=%.2f")
-        % (climo_std, climo_avg),
+        label=(
+            r"Climo Normal Dist. $\sigma$="
+            f"{climo_std:.2f} "
+            r"$\mu$="
+            f"{climo_avg:.2f}"
+        ),
     )
 
     if stateavg is not None:
         ax.axvline(
             stateavg,
-            label="%s Statewide Avg %.2f" % (year, stateavg),
+            label=f"{year} Statewide Avg {stateavg:.2f}",
             color="b",
             lw=2,
         )
-    stateavg = df.at["%s0000" % (state,), "climo_" + ptype_climo]
+    stateavg = df.at[f"{state}0000", "climo_" + ptype_climo]
     if stateavg is not None:
         ax.axvline(
             stateavg,
-            label="Climo Statewide Avg %.2f" % (stateavg,),
+            label=f"Climo Statewide Avg {stateavg:.2f}",
             color="g",
             lw=2,
         )

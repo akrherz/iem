@@ -34,20 +34,34 @@ def main(argv):
     pgconn = get_dbconn("portfolio", user="mesonet")
     pcursor = pgconn.cursor()
 
-    df = pd.read_csv(argv[1])
-
+    df = pd.read_csv(argv[1], encoding="cp1252")
+    done = []
     for _, row in df.iterrows():
         faa = row["FAA Code"]
         comment = ""
         if faa not in CALSITES:
             comment = " [FYI Check Made]"
-        date = datetime.datetime.strptime(row["Visit Date"], "%d-%b-%y")
-
-        if row["Description"].startswith("site offline"):
+        key = faa + row["Visit Date"]
+        if key in done:
             continue
-        parts = re.findall(CALINFO, row["Description"])
+        done.append(key)
+        date = datetime.datetime.strptime(row["Visit Date"], "%d-%b-%y")
+        descr = (
+            row["Description"]
+            .lower()
+            .replace("\r", "")
+            .replace("\n", " ")
+            .replace("std", "/")
+            .replace("/standard", "/")
+            .replace("standard", "/")
+            .replace("/ temp ", "/ ")
+            .replace("/ dew ", "/ ")
+        )
+        if descr.startswith("site offline"):
+            continue
+        parts = re.findall(CALINFO, descr)
         if not parts:
-            print(FAIL + row["Description"] + ENDC)
+            print(FAIL + descr + ENDC)
             continue
         sql = """
         INSERT into iem_calibration(station, portfolio, valid, parameter,
@@ -78,8 +92,8 @@ def main(argv):
             pcursor.execute(sql, args)
 
         print(
-            ("--> %s [%s] TMPF: %s (%s) DWPF: %s (%s)%s")
-            % (faa, date, parts[0][2], tempadj, parts[0][3], dewpadj, comment)
+            f"--> {faa} [{date}] TMPF: {parts[0][1]} ({tempadj}) "
+            f"DWPF: {parts[0][3]} ({dewpadj}){comment}"
         )
 
     if len(argv) == 2:

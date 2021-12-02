@@ -31,7 +31,6 @@ def plotter(fdict):
 
     station = ctx["station"]
 
-    table = "alldata_%s" % (station[:2],)
     bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:
         raise NoDataFound("No data Found.")
@@ -53,8 +52,7 @@ def plotter(fdict):
         station,
         ctx["_nt"].sts[station]["name"],
     )
-    res += ("%s %4s %4s %4s %4s %4s %4s %4s %4s %4s\n" "") % (
-        "YEAR",
+    res += ("YEAR %4s %4s %4s %4s %4s %4s %4s %4s %4s\n") % (
         -20,
         -10,
         0,
@@ -77,7 +75,8 @@ def plotter(fdict):
        sum(case when high >= 80 THEN 1 ELSE 0 END) as e80,
        sum(case when high >= 93 THEN 1 ELSE 0 END) as e93,
        sum(case when high >= 100 THEN 1 ELSE 0 END) as e100
-       from {table} WHERE station = %s GROUP by year ORDER by year ASC
+       from alldata_{station[:2]}
+       WHERE station = %s GROUP by year ORDER by year ASC
     """,
         pgconn,
         params=(station,),
@@ -94,4 +93,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

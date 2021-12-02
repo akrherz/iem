@@ -6,7 +6,7 @@ import pytz
 import requests
 from pyiem.observation import Observation
 from pyiem.reference import TRACE_VALUE
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconn, logger, utc
 
 LOG = logger()
 
@@ -28,17 +28,15 @@ def main(daysago):
 
     now = datetime.datetime.now() - datetime.timedelta(days=daysago)
 
-    lts = datetime.datetime.utcnow()
-    lts = lts.replace(tzinfo=pytz.utc)
-    lts = lts.astimezone(pytz.timezone("America/Chicago"))
+    lts = utc().astimezone(pytz.timezone("America/Chicago"))
 
     state = sys.argv[1]
 
     url = (
         "http://data.cocorahs.org/Cocorahs/export/exportreports.aspx"
-        "?ReportType=Daily&dtf=1&Format=CSV&State=%s&"
-        "ReportDateType=date&Date=%s&TimesInGMT=False"
-    ) % (state, now.strftime("%m/%d/%Y"))
+        f"?ReportType=Daily&dtf=1&Format=CSV&State={state}&"
+        f"ReportDateType=date&Date={now:%m/%d/%Y}&TimesInGMT=False"
+    )
     LOG.debug(url)
     data = requests.get(url, timeout=30).content.decode("ascii").split("\r\n")
 
@@ -57,9 +55,10 @@ def main(daysago):
             continue
         sid = cols[header["StationNumber"]].strip()
 
-        t = "%s %s" % (
-            cols[header["ObservationDate"]],
-            cols[header["ObservationTime"]].strip(),
+        t = (
+            cols[header["ObservationDate"]]
+            + " "
+            + cols[header["ObservationTime"]].strip()
         )
         ts = datetime.datetime.strptime(t, "%Y-%m-%d %I:%M %p")
         lts = lts.replace(
@@ -69,7 +68,7 @@ def main(daysago):
             hour=ts.hour,
             minute=ts.minute,
         )
-        iem = Observation(sid, "%sCOCORAHS" % (state,), lts)
+        iem = Observation(sid, f"{state}COCORAHS", lts)
         iem.data["coop_valid"] = lts
         iem.data["pday"] = safeP(cols[header["TotalPrecipAmt"]])
         if cols[header["NewSnowDepth"]].strip() != "NA":

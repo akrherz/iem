@@ -95,22 +95,22 @@ def main(argv):
             lon,
         )
 
-        sql = """
-            INSERT into stations(id, synop, name, state, country, network,
-            online, geom, county, plot_name , metasite)
-            VALUES ('%s', 99999, '%s', '%s', 'US', '%s', 't',
-            'SRID=4326;POINT(%s %s)', '%s', '%s', 'f')
-            """ % (
-            sid,
-            name,
-            state,
-            network,
-            lon,
-            lat,
-            cnty,
-            name,
+        mcursor.execute(
+            "INSERT into stations(id, synop, name, state, country, network, "
+            "online, geom, county, plot_name , metasite) "
+            "VALUES (%s, 99999, %s, %s, 'US', %s, 't', "
+            "'SRID=4326;POINT(%s %s)', %s, %s, 'f')",
+            (
+                sid,
+                name,
+                state,
+                network,
+                lon,
+                lat,
+                cnty,
+                name,
+            ),
         )
-        mcursor.execute(sql)
     mcursor.close()
     pgconn.commit()
 

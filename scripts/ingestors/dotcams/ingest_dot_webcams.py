@@ -19,6 +19,7 @@ URI = (
     "RWIS_Camera_Info_View/FeatureServer/0/query?where=1%3D1&outFields=*&"
     "f=json"
 )
+CLOUD404 = "/mesonet/tmp/dotcloud404.txt"
 
 
 def process_feature(cursor, feat):
@@ -52,7 +53,7 @@ def process_feature(cursor, feat):
         req = requests.get(url, timeout=15)
         if req.status_code == 404:
             LOG.debug("cloud 404 %s", url)
-            with open("/mesonet/tmp/dotcloud404.txt", "a") as fh:
+            with open(CLOUD404, "a", encoding="utf8") as fh:
                 fh.write(f"{url}\n")
                 continue
         if req.status_code != 200:
@@ -89,22 +90,15 @@ def process_feature(cursor, feat):
                 (valid, cam),
             )
         cmd = (
-            "pqinsert -p 'webcam %s %s camera/stills/%s.jpg "
-            "camera/%s/%s_%s.jpg jpg' %s"
-        ) % (
-            routes,
-            valid.strftime("%Y%m%d%H%M"),
-            cam,
-            cam,
-            cam,
-            valid.strftime("%Y%m%d%H%M"),
-            tmpfd.name,
+            f"pqinsert -p 'webcam {routes} {valid:%Y%m%d%H%M} "
+            f"camera/stills/{cam}.jpg "
+            f"camera/{cam}/{cam}_{valid:%Y%m%d%H%M}.jpg jpg' {tmpfd.name}"
         )
         LOG.debug(cmd)
-        proc = subprocess.Popen(
+        with subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
-        proc.communicate()
+        ) as proc:
+            proc.communicate()
         os.unlink(tmpfd.name)
 
 

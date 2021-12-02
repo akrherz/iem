@@ -7,17 +7,13 @@ import requests
 import urllib3
 from pyiem.observation import Observation
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, c2f
+from pyiem.util import get_dbconn, c2f, utc, logger
 
 # Stop the SSL cert warning :/
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+LOG = logger()
 
-nt = NetworkTable("SCAN")
-SCAN = get_dbconn("scan")
-scursor = SCAN.cursor()
-ACCESS = get_dbconn("iem")
-icursor = ACCESS.cursor()
 
 mapping = {
     "Site Id": {"iemvar": "station", "multiplier": 1},
@@ -95,20 +91,18 @@ postvars = {
 URI = "https://wcc.sc.egov.usda.gov/nwcc/view"
 
 
-def savedata(reprocessing, data, maxts):
+def savedata(icursor, scursor, reprocessing, data, maxts):
     """
     Save away our data into IEM Access
     """
     if "Time" in data:
-        tstr = "%s %s" % (data["Date"], data["Time"])
+        tstr = data["Date"] + " " + data["Time"]
     elif "Time (CST)" in data:
-        tstr = "%s %s" % (data["Date"], data["Time (CST)"])
+        tstr = data["Date"] + " " + data["Time (CST)"]
     else:
-        tstr = "%s %s" % (data["Date"], data["Time (CDT)"])
+        tstr = data["Date"] + " " + data["Time (CDT)"]
     ts = datetime.datetime.strptime(tstr, "%Y-%m-%d %H:%M")
-    utc = datetime.datetime.utcnow()
-    utc = utc.replace(tzinfo=pytz.utc)
-    localts = utc.astimezone(pytz.timezone("America/Chicago"))
+    localts = utc().astimezone(pytz.timezone("America/Chicago"))
     ts = localts.replace(
         year=ts.year,
         month=ts.month,
@@ -118,7 +112,7 @@ def savedata(reprocessing, data, maxts):
         second=0,
         microsecond=0,
     )
-    sid = "S%s" % (data["Site Id"],)
+    sid = f"S{data['Site Id']}"
 
     if not reprocessing and sid in maxts and maxts[sid] >= ts:
         return
@@ -142,18 +136,13 @@ def savedata(reprocessing, data, maxts):
         iem.data["dwpf"] = c2f(float(iem.data.get("dwpc")))
     for i in range(1, 6):
         if iem.data.get("c%stmpf" % (i,)) is not None:
-            iem.data["c%stmpf" % (i,)] = c2f(
-                float(iem.data.get("c%stmpc" % (i,)))
-            )
-        if iem.data.get("c%ssmv" % (i,)) is not None:
-            iem.data["c%ssmv" % (i,)] = float(iem.data.get("c%ssmv" % (i,)))
+            iem.data["c%stmpf" % (i,)] = c2f(float(iem.data.get(f"c{i}tmpc")))
+        if iem.data.get(f"c{i}smv") is not None:
+            iem.data[f"c{i}smv"] = float(iem.data.get(f"c{i}smv"))
     if iem.data.get("phour") is not None:
         iem.data["phour"] = float(iem.data.get("phour"))
     if not iem.save(icursor):
-        print(
-            ("scan_ingest.py iemaccess for sid: %s ts: %s updated no rows")
-            % (sid, ts)
-        )
+        LOG.info("iemaccess for sid: %s ts: %s updated no rows", sid, ts)
 
     if reprocessing:
         scursor.execute(
@@ -182,13 +171,13 @@ def savedata(reprocessing, data, maxts):
     scursor.execute(sql.replace("None", "null"))
 
 
-def load_times():
+def load_times(icursor):
     """
     Load the latest ob times from the database
     """
     icursor.execute(
-        """SELECT t.id, valid from current c, stations t
-        WHERE t.iemid = c.iemid and t.network = 'SCAN'"""
+        "SELECT t.id, valid from current c, stations t WHERE "
+        "t.iemid = c.iemid and t.network = 'SCAN'"
     )
     data = {}
     for row in icursor:
@@ -198,6 +187,11 @@ def load_times():
 
 def main(argv):
     """Go Main Go"""
+    nt = NetworkTable("SCAN")
+    SCAN = get_dbconn("scan")
+    scursor = SCAN.cursor()
+    ACCESS = get_dbconn("iem")
+    icursor = ACCESS.cursor()
     reprocessing = False
     if len(argv) == 4:
         postvars["intervalType"] = "View Historic"
@@ -206,7 +200,7 @@ def main(argv):
         postvars["day"] = argv[3]
         reprocessing = True
 
-    maxts = load_times()
+    maxts = load_times(icursor)
     for sid in nt.sts:
         # iem uses S<id> and scan site uses just <id>
         postvars["sitenum"] = sid[1:]
@@ -214,14 +208,14 @@ def main(argv):
             req = requests.get(URI, params=postvars, timeout=10, verify=False)
             response = req.content.decode("utf-8", "ignore")
         except Exception as exp:
-            print("scan_ingest.py Failed to download: %s %s" % (sid, exp))
+            LOG.info("Failed to download: %s %s", sid, exp)
             continue
         linesin = response.split("\n")
         # trim blank lines
         lines = [li for li in linesin if li.strip() != ""]
         cols = lines[1].split(",")
         if not cols:
-            print("scan_ingest.py for station: %s had no columns" % (sid,))
+            LOG.info("For station: %s had no columns", sid)
         data = {}
         for row in lines[2:]:
             if row.strip() == "":
@@ -233,12 +227,12 @@ def main(argv):
                 col = col.replace("  (loam)", "").replace("  (silt)", "")
                 data[col.strip()] = token
             if "Date" in data:
-                savedata(reprocessing, data, maxts)
-
-
-if __name__ == "__main__":
-    main(sys.argv)
+                savedata(icursor, scursor, reprocessing, data, maxts)
     icursor.close()
     scursor.close()
     ACCESS.commit()
     SCAN.commit()
+
+
+if __name__ == "__main__":
+    main(sys.argv)
