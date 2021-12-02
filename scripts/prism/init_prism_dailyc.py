@@ -1,10 +1,15 @@
-"""Generate the PRISM climatology file, hmmm"""
+"""Grid out dailyc for a daily climatology on PRISM grid.
+
+Note: PRISM's climatology is monthly/annual, so no daily :/
+"""
 import datetime
+import os
 
 import numpy as np
 from pyiem import prism
-from pyiem.util import ncopen
+from pyiem.util import ncopen, logger
 
+LOG = logger()
 BASEDIR = "/mesonet/data/prism"
 
 
@@ -13,9 +18,12 @@ def init_year(ts):
     Create a new NetCDF file for a year of our specification!
     """
 
-    fn = "%s/prism_dailyc.nc" % (BASEDIR,)
+    fn = f"{BASEDIR}/prism_dailyc.nc"
+    if os.path.exists(fn):
+        LOG.info("%s exists, skipping", fn)
+        return
     nc = ncopen(fn, "w")
-    nc.title = "PRISM Climatology %s" % (ts.year,)
+    nc.title = f"PRISM Climatology {ts.year}"
     nc.platform = "Grided Climatology"
     nc.description = "PRISM"
     nc.institution = "Iowa State University, Ames, IA, USA"
@@ -24,9 +32,7 @@ def init_year(ts):
     nc.realization = 1
     nc.Conventions = "CF-1.0"  # *cough*
     nc.contact = "Daryl Herzmann, akrherz@iastate.edu, 515-294-5978"
-    nc.history = "%s Generated" % (
-        datetime.datetime.now().strftime("%d %B %Y"),
-    )
+    nc.history = f"{datetime.datetime.now():%d %B %Y} Generated"
     nc.comment = "No Comment at this time"
 
     # Setup Dimensions
@@ -64,7 +70,7 @@ def init_year(ts):
     lon_bnds[:, 1] = prism.XAXIS + 0.04
 
     tm = nc.createVariable("time", float, ("time",))
-    tm.units = "Days since %s-01-01 00:00:0.0" % (ts.year,)
+    tm.units = f"Days since {ts.year}-01-01 00:00:0.0"
     tm.long_name = "Time"
     tm.standard_name = "time"
     tm.axis = "T"
