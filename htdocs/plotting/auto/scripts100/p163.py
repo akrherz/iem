@@ -328,6 +328,7 @@ def plotter(fdict):
             ilabel=True,
             units=units,
             extend=extend,
+            labelbuffer=0,
         )
     else:
         mp.fill_states(
@@ -338,6 +339,7 @@ def plotter(fdict):
             ilabel=True,
             units=units,
             extend=extend,
+            labelbuffer=0,
         )
 
     return mp.fig, df
