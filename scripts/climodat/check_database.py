@@ -46,16 +46,7 @@ def main(argv):
 
         sio = StringIO()
         for day in missing:
-            sio.write(
-                ("%s,%s,%s,%s,%s\n")
-                % (
-                    station,
-                    day,
-                    "%02i%02i" % (day.month, day.day),
-                    day.year,
-                    day.month,
-                )
-            )
+            sio.write(f"{station},{day},{day:%m%d},{day:%Y},{day:%m}\n")
         sio.seek(0)
         cursor = pgconn.cursor()
         cursor.copy_from(

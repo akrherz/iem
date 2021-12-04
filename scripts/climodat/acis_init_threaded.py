@@ -14,11 +14,11 @@ UNKNOWNS = ["LOXthr", "LHUthr", "CVGthr", "MQTthr", "FCAthr"]
 
 def workflow(state):
     """Do the query and work."""
-    network = "%sCLIMATE" % (state,)
+    network = f"{state}CLIMATE"
     nt = {
         network: NetworkTable(network),
-        "%s_COOP" % (state,): NetworkTable("%s_COOP" % (state,)),
-        "%s_ASOS" % (state,): NetworkTable("%s_ASOS" % (state,)),
+        f"{state}_COOP": NetworkTable(f"{state}_COOP"),
+        f"{state}_ASOS": NetworkTable(f"{state}_ASOS"),
     }
     pgconn = get_dbconn("mesosite")
     cursor = pgconn.cursor()
@@ -36,8 +36,8 @@ def workflow(state):
         if threadid in UNKNOWNS:
             LOG.info("skipping %s", threadid)
             continue
-        iemid = "%sT%s" % (state, threadid[:3])
-        if iemid in nt["%sCLIMATE" % (state,)].sts:
+        iemid = f"{state}T{threadid[:3]}"
+        if iemid in nt[f"{state}CLIMATE"].sts:
             LOG.info("%s is already known!", iemid)
             continue
         to_track = threadid[:-3]
@@ -45,25 +45,18 @@ def workflow(state):
             to_track = "P" + to_track
         if state == "PR":
             to_track = "T" + to_track
-        to_network = "%s_%s" % (
-            state,
-            "COOP" if len(to_track) == 5 else "ASOS",
-        )
+        to_network = f"{state}_{'COOP' if len(to_track) == 5 else 'ASOS'}"
         LOG.info("%s will be %s and tracking %s", threadid, iemid, to_track)
         if to_track not in nt[to_network].sts:
             LOG.info("Skipping, as %s not in %s", to_track, to_network)
             continue
         # Create station entry, we use the tracking station location for now
-        geom = "SRID=4326;POINT(%s %s)" % (
-            nt[to_network].sts[to_track]["lon"],
-            nt[to_network].sts[to_track]["lat"],
-        )
         cursor.execute(
             """
         INSERT into stations(id, name, state, country, elevation, network,
         online, plot_name, climate_site, metasite, geom, temp24_hour,
         precip24_hour) values (%s, %s, %s, %s, %s, %s, 't', %s, %s, 't',
-        %s, 0, 0)
+        'SRID=4326;POINT(%s %s)', 0, 0)
         returning iemid
         """,
             (
@@ -72,15 +65,16 @@ def workflow(state):
                 state,
                 "US",
                 -999,
-                "%sCLIMATE" % (state,),
+                f"{state}CLIMATE",
                 entry["name"],
                 iemid,
-                geom,
+                nt[to_network].sts[to_track]["lon"],
+                nt[to_network].sts[to_track]["lat"],
             ),
         )
         idnum = cursor.fetchone()[0]
 
-        value = "%s|%s" % (to_track, to_network)
+        value = f"{to_track}|{to_network}"
         cursor.execute(
             "INSERT into station_attributes(iemid, attr, value) "
             "VALUES (%s, %s, %s)",

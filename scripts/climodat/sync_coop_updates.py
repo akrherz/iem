@@ -5,6 +5,7 @@ data and then update the climodat database appropriately, ufff.
 
 run from RUN_NOON.sh
 """
+# pylint: disable=cell-var-from-loop
 
 from pyiem.util import get_dbconn, logger
 import pandas as pd
@@ -35,7 +36,7 @@ def load_xref():
     cursor.execute(
         "SELECT id, value from stations t JOIN station_attributes a "
         "on (t.iemid = a.iemid) WHERE t.network ~* 'CLIMATE' and "
-        "a.attr = 'TRACKS_STATION'"
+        "a.attr = 'TRACKS_STATION' and t.online"
     )
     xref = {}
     for row in cursor:
