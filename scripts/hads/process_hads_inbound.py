@@ -28,9 +28,11 @@ def main():
     cursor.close()
     pgconn.commit()
     cursor = pgconn.cursor()
+    # Sometimes we get old data that should not be in the database.
     cursor.execute(
         "SELECT station, valid at time zone 'UTC', key, value, depth, "
-        "unit_convention, qualifier, dv_interval from raw_inbound_tmp"
+        "unit_convention, qualifier, dv_interval from raw_inbound_tmp "
+        "WHERE valid > '2002-01-01'"
     )
     for row in cursor:
         table = f"raw{row[1]:%Y_%m}"
