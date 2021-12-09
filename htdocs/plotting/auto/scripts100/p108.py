@@ -23,7 +23,8 @@ def get_description():
         "description"
     ] = """
     This plot presents accumulated totals and departures
-    of growing degree days, precipitation and stress degree days. Leap days
+    of growing degree days (GDD), precipitation and stress degree days (SDD).
+    Leap days
     are not considered for this plot. The light blue area represents the
     range of accumulated values based on the observation history at the
     site."""
@@ -114,7 +115,7 @@ def plotter(fdict):
     gddbase = ctx["base"]
     gddceil = ctx["ceil"]
     whichplots = ctx["which"]
-    glabel = "gdd%s%s" % (gddbase, gddceil)
+    glabel = f"gdd{gddbase}{gddceil}"
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
@@ -156,9 +157,9 @@ def plotter(fdict):
         )
         ax3 = fig.add_axes([0.1, 0.35, 0.8, 0.2], sharex=ax1)
         ax4 = fig.add_axes([0.1, 0.1, 0.8, 0.2], sharex=ax1)
-        title = ("GDD(base=%.0f,ceil=%.0f), Precip, & " "SDD(base=86)") % (
-            gddbase,
-            gddceil,
+        title = (
+            f"GDD(base={gddbase:.0f},ceil={gddceil:.0f}), Precip, & "
+            "SDD(base=86)"
         )
     elif whichplots == "gdd":
         fig = figure(apctx=ctx)
@@ -166,7 +167,7 @@ def plotter(fdict):
         ax2 = fig.add_axes(
             [0.14, 0.11, 0.8, 0.2], sharex=ax1, facecolor="#EEEEEE"
         )
-        title = ("GDD(base=%.0f,ceil=%.0f)") % (gddbase, gddceil)
+        title = f"GDD(base={gddbase:.0f},ceil={gddceil:.0f})"
     elif whichplots == "precip":
         fig = figure(apctx=ctx)
         ax3 = fig.add_axes([0.1, 0.11, 0.8, 0.75])
@@ -179,8 +180,10 @@ def plotter(fdict):
         title = "Stress Degree Days (base=86)"
 
     ax1.set_title(
-        ("Accumulated %s\n%s %s")
-        % (title, station, ctx["_nt"].sts[station]["name"]),
+        (
+            f"Accumulated {title}\n"
+            f"{station} {ctx['_nt'].sts[station]['name']}"
+        ),
         fontsize=18 if whichplots == "all" else 14,
     )
 
@@ -204,14 +207,14 @@ def plotter(fdict):
         color = yearcolors[wantedyears.index(year)]
         yearlabel = sts.year
         if sts.year != ets.year:
-            yearlabel = "%s-%s" % (sts.year, ets.year)
+            yearlabel = f"{sts.year}-{ets.year}"
         if whichplots in ["gdd", "all"]:
             ax1.plot(
                 range(len(x.index)),
                 df.loc[sts:ets, "o" + glabel].cumsum().values,
                 zorder=6,
                 color=color,
-                label="%s" % (yearlabel,),
+                label=f"{yearlabel}",
                 lw=2,
             )
         # Get cumulated precip
@@ -223,7 +226,7 @@ def plotter(fdict):
                 color=color,
                 lw=2,
                 zorder=6,
-                label="%s" % (yearlabel,),
+                label=f"{yearlabel}",
             )
         p = df.loc[sts:ets, "osdd86"].cumsum()
         if whichplots in ["all", "sdd"]:
@@ -233,7 +236,7 @@ def plotter(fdict):
                 color=color,
                 lw=2,
                 zorder=6,
-                label="%s" % (yearlabel,),
+                label=f"{yearlabel}",
             )
 
         # Plot Climatology
@@ -300,15 +303,15 @@ def plotter(fdict):
 
     if whichplots in ["all", "gdd"]:
         ax1.set_ylabel(
-            (r"GDD Base %.0f Ceil %.0f $^{\circ}\mathrm{F}$")
-            % (gddbase, gddceil),
+            f"GDD Base {gddbase:.0f} Ceil {gddceil:.0f} "
+            r"$^{\circ}\mathrm{F}$",
             fontsize=16,
         )
 
         ax1.text(
             0.5,
             0.9,
-            "%s/%s - %s/%s" % (sdate.month, sdate.day, edate.month, edate.day),
+            f"{sdate.month}/{sdate.day} - {edate.month}/{edate.day}",
             transform=ax1.transAxes,
             ha="center",
         )

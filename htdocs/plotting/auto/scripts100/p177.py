@@ -1,4 +1,5 @@
 """ISU Soil Moisture Network Time Series"""
+# pylint: disable=no-member
 import datetime
 
 import numpy as np
@@ -605,12 +606,12 @@ def plot2(ctx):
     d04t = df["t4_c_avg_qc"]
     valid = df.index.values
 
-    (fig, ax) = figure_axes(apctx=ctx)
-    ax.grid(True)
-    ax.set_title(
-        ("ISUSM Station: %s Timeseries\n" "Soil Temperature at Depth\n ")
-        % (ctx["_nt"].sts[ctx["station"]]["name"],)
+    title = (
+        f"ISUSM Station: {ctx['_nt'].sts[ctx['station']]['name']} Timeseries\n"
+        "Soil Temperature at Depth"
     )
+    (fig, ax) = figure_axes(apctx=ctx, title=title)
+    ax.grid(True)
     if not d04t.isnull().all():
         ax.plot(valid, c2f(d04t), linewidth=2, color="brown", label="4 inch")
     if not d06t.isnull().all():
@@ -622,8 +623,10 @@ def plot2(ctx):
     if not d50t.isnull().all():
         ax.plot(valid, c2f(d50t), linewidth=2, color="black", label="50 inch")
     box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width, box.height * 0.9])
-    ax.legend(bbox_to_anchor=(0.5, 1.02), ncol=4, loc="center", fontsize=12)
+    ax.set_position([box.x0, box.y0, box.width, box.height * 0.94])
+    ax.legend(
+        bbox_to_anchor=(0.5, 1.0), ncol=4, loc="lower center", fontsize=12
+    )
     days = (ctx["ets"] - ctx["sts"]).days
     if days >= 3:
         interval = max(int(days / 7), 1)
