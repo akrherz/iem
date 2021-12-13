@@ -1,24 +1,24 @@
 <?php 
 require_once "../../../config/settings.inc.php";
-define("IEM_APPID", 127);
+define("IEM_APPID", 129);
 require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
 require_once "../../../include/imagemaps.php";
 
 $t = new MyView();
-$t->title = "Download SPC Mesoscale Discussion Shapefile";
+$t->title = "Download WPC Mesoscale Precipitation Discussion Shapefile";
 $content = <<<EOF
-<h3>Storm Prediction Center Mesoscale Discussions</h3>
+<h3>Weather Prediction Center Mesoscale Precipitation Discussions</h3>
 
-<p>The IEM has a database archive of SPC Mesocale Discussions since 2003. This
+<p>The IEM has a database archive of WPC Mesocale Precipitation Discussions since fall 2017. This
 page offers a shapefile download of these.</p>
 
 <p><strong>Related:</strong> <a href="spc_outlooks.phtml">SPC Outlooks</a>,
 <a href="watchwarn.phtml">NWS VTEC Watch Warning Advisory Shapefiles</a></p>
 
-<form method="GET" action="/cgi-bin/request/gis/spc_mcd.py">
+<form method="GET" action="/cgi-bin/request/gis/wpc_mpd.py">
 <table class="table">
-<thead><tr><th colspan="6">Time Interval for MCD *Issuance* (UTC)</th></tr></thead>
+<thead><tr><th colspan="6">Time Interval for MPD *Issuance* (UTC)</th></tr></thead>
 <tr>
     <td></td><th>Year</th><th>Month</th><th>Day</th>
     <th>Hour</th><th>Minute</th>
@@ -28,7 +28,7 @@ page offers a shapefile download of these.</p>
 EOF;
 $content .= "<th>Start:</th>
     <td>
-     ". yearSelect2(2003, date("Y"), "year1") ."
+     ". yearSelect2(2017, date("Y"), "year1") ."
     </td>
     <td>
      ". monthSelect2(0,"month1") ."
@@ -47,7 +47,7 @@ $content .= "<th>Start:</th>
   <tr>
     <th>End:</th>
     <td>
-     ". yearSelect2(2003, date("Y"), "year2") ."
+     ". yearSelect2(2017, date("Y"), "year2") ."
     </td>
     <td>
      ". monthSelect2(0,"month2") ."
@@ -75,8 +75,7 @@ Field 1: Type=C/String, Title=`EXPIRE', UTC MCD Expiration Timestamp
 Field 2: Type=C/String, Title=`PROD_ID', IEM Product ID (see below)
 Field 3: Type=N/Double, Title=`YEAR', YEAR of MCD
 Field 4: Type=N/Double, Title=`NUM', SPC MCD Number
-Field 5: Type=N/Double, Title=`CONFIDEN', SPC Watch issuance confidence
-Field 6: Type=C/String, Title=`CONCERN', SPC MCD concerning heading
+Field 6: Type=C/String, Title=`CONCERN', WPC MPD concerning heading
 
 </pre>
 

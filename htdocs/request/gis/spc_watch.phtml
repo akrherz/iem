@@ -1,24 +1,27 @@
 <?php 
 require_once "../../../config/settings.inc.php";
-define("IEM_APPID", 127);
+define("IEM_APPID", 128);
 require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
 require_once "../../../include/imagemaps.php";
 
 $t = new MyView();
-$t->title = "Download SPC Mesoscale Discussion Shapefile";
+$t->title = "Download SPC Watches Shapefile";
 $content = <<<EOF
-<h3>Storm Prediction Center Mesoscale Discussions</h3>
+<h3>Storm Prediction Center Watches</h3>
 
-<p>The IEM has a database archive of SPC Mesocale Discussions since 2003. This
-page offers a shapefile download of these.</p>
+<p>The IEM maintains an archive of the watch polygons issued by the
+Storm Prediction Center since 1997.  Please note that these watches are not the official
+spatial bounds anymore as the WCN/ watch by county product is the official
+coverage.</p>
 
 <p><strong>Related:</strong> <a href="spc_outlooks.phtml">SPC Outlooks</a>,
+<a href="spc_mcd.phtml">SPC MCDs</a>,
 <a href="watchwarn.phtml">NWS VTEC Watch Warning Advisory Shapefiles</a></p>
 
-<form method="GET" action="/cgi-bin/request/gis/spc_mcd.py">
+<form method="GET" action="/cgi-bin/request/gis/spc_watch.py">
 <table class="table">
-<thead><tr><th colspan="6">Time Interval for MCD *Issuance* (UTC)</th></tr></thead>
+<thead><tr><th colspan="6">Time Interval for Outlook *Issuance* (UTC)</th></tr></thead>
 <tr>
     <td></td><th>Year</th><th>Month</th><th>Day</th>
     <th>Hour</th><th>Minute</th>
@@ -28,7 +31,7 @@ page offers a shapefile download of these.</p>
 EOF;
 $content .= "<th>Start:</th>
     <td>
-     ". yearSelect2(2003, date("Y"), "year1") ."
+     ". yearSelect2(1997, date("Y"), "year1") ."
     </td>
     <td>
      ". monthSelect2(0,"month1") ."
@@ -47,7 +50,7 @@ $content .= "<th>Start:</th>
   <tr>
     <th>End:</th>
     <td>
-     ". yearSelect2(2003, date("Y"), "year2") ."
+     ". yearSelect2(1997, date("Y"), "year2") ."
     </td>
     <td>
      ". monthSelect2(0,"month2") ."
@@ -72,22 +75,15 @@ $content .= <<<EOM
 <pre>
 Field 0: Type=C/String, Title=`ISSUE', UTC Issuance Timestamp YYYYmmddHHMM
 Field 1: Type=C/String, Title=`EXPIRE', UTC MCD Expiration Timestamp
-Field 2: Type=C/String, Title=`PROD_ID', IEM Product ID (see below)
-Field 3: Type=N/Double, Title=`YEAR', YEAR of MCD
-Field 4: Type=N/Double, Title=`NUM', SPC MCD Number
-Field 5: Type=N/Double, Title=`CONFIDEN', SPC Watch issuance confidence
-Field 6: Type=C/String, Title=`CONCERN', SPC MCD concerning heading
-
+Field 2: Type=C/String, Title=`SEL', The 0-9 watch sequence number
+Field 3: Type=C/String, Title=`TYPE', TOR or SVR watch
+Field 4: Type=N/Double, Title=`NUM', SPC Watch Number
 </pre>
 
 <h4>Archive / Usage Notes:</h4>
 <ol>
-<li>The <code>PROD_ID</code> DBF field is a string the IEM uses to identify
-NWS Text products and can be used to call an IEM API to fetch the text of
-this product. https://mesonet.agron.iastate.edu/api/1/nwstext/{PROD_ID}</li>
-
-<li>The <code>YEAR</code> and <code>NUM</code> fields can be used to construct
-a stable URL into SPC's website like so: https://www.spc.noaa.gov/products/md/{year}/md{NUM:04i}.html</li>
+<li>To re-emphasize, these polygons are <strong>not the official</strong>
+watch anymore.  The official watch is issued on a county/zone basis.</li>
 </ol>
 </form>
 EOM;
