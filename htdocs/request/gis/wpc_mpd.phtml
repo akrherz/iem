@@ -8,13 +8,25 @@ require_once "../../../include/imagemaps.php";
 $t = new MyView();
 $t->title = "Download WPC Mesoscale Precipitation Discussion Shapefile";
 $content = <<<EOF
-<h3>Weather Prediction Center Mesoscale Precipitation Discussions</h3>
+<p>
+<ul class="breadcrumb">
+<li><a href="/nws/">NWS Mainpage</a></li>
+<li class="active">Weather Prediction Center Mesoscale Precipitation Discussions</li>
+</ul>
+</p>
 
 <p>The IEM has a database archive of WPC Mesocale Precipitation Discussions since fall 2017. This
 page offers a shapefile download of these.</p>
 
-<p><strong>Related:</strong> <a href="spc_outlooks.phtml">SPC Outlooks</a>,
-<a href="watchwarn.phtml">NWS VTEC Watch Warning Advisory Shapefiles</a></p>
+<p><strong>Related:</strong>
+<a class="btn btn-primary" href="watchwarn.phtml">NWS VTEC Watch Warning Advisory</a>
+&nbsp;
+<a class="btn btn-primary" href="spc_mcd.phtml">SPC Convective Discussions</a>
+&nbsp;
+<a class="btn btn-primary" href="spc_outlooks.phtml">SPC Outlooks</a>
+&nbsp;
+<a class="btn btn-primary" href="spc_watch.phtml">SPC Watch Polygons</a>
+</p>
 
 <form method="GET" action="/cgi-bin/request/gis/wpc_mpd.py">
 <table class="table">
@@ -50,10 +62,10 @@ $content .= "<th>Start:</th>
      ". yearSelect2(2017, date("Y"), "year2") ."
     </td>
     <td>
-     ". monthSelect2(0,"month2") ."
+     ". monthSelect2(date("m"), "month2") ."
     </td>
     <td>
-     ". daySelect2(0, "day2") ."
+     ". daySelect2(date("d"), "day2") ."
     </td>
     <td>
      ". gmtHourSelect(0, "hour2") ."

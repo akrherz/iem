@@ -8,7 +8,12 @@ require_once "../../../include/imagemaps.php";
 $t = new MyView();
 $t->title = "Download SPC Convective/Fire Weather Outlooks Shapefile";
 $content = <<<EOF
-<h3>Storm Prediction Center Convective and Fire Weather Outlooks</h3>
+<p>
+<ul class="breadcrumb">
+<li><a href="/nws/">NWS Mainpage</a></li>
+<li class="active">Storm Prediction Center Convective and Fire Weather Outlooks</li>
+</ul>
+</p>
 
 <p>The IEM attempts to process and archive the convective and fire weather
 outlooks issued by the Storm Prediction Center. This processing is done by
@@ -19,8 +24,15 @@ GIS formats.
 maybe that approach is not for all users of this data! So here it is, a means
 to bulk download the IEM's SPC Outlook database.</p>
 
-<p><strong>Related:</strong> <a href="spc_mcd.phtml">SPC MCDs</a>,
-<a href="watchwarn.phtml">NWS VTEC Watch Warning Advisory Shapefiles</a></p>
+<p><strong>Related:</strong>
+<a class="btn btn-primary" href="watchwarn.phtml">NWS VTEC Watch Warning Advisory</a>
+&nbsp;
+<a class="btn btn-primary" href="spc_mcd.phtml">SPC Convective Discussions</a>
+&nbsp;
+<a class="btn btn-primary" href="spc_watch.phtml">SPC Watch Polygons</a>
+&nbsp;
+<a class="btn btn-primary" href="wpc_mpd.phtml">WPC Precip Discussions</a>
+</p>
 
 <form method="GET" action="/cgi-bin/request/gis/spc_outlooks.py">
 <table class="table">
@@ -80,10 +92,10 @@ $content .= "<th>Start:</th>
      ". yearSelect2(1987, date("Y"), "year2") ."
     </td>
     <td>
-     ". monthSelect2(0,"month2") ."
+     ". monthSelect2(date("m"), "month2") ."
     </td>
     <td>
-     ". daySelect2(0, "day2") ."
+     ". daySelect2(date("d"), "day2") ."
     </td>
     <td>
      ". gmtHourSelect(0, "hour2") ."

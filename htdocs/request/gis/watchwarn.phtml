@@ -99,7 +99,12 @@ for($year=1986;$year<=date("Y");$year++){
 }
 
 $content = <<<EOF
-<h3>Archived NWS Watch, Warnings, Advisories</h3>
+<p>
+<ul class="breadcrumb">
+<li><a href="/nws/">NWS Mainpage</a></li>
+<li class="active">Archived NWS Watch, Warnings, Advisories</li>
+</ul>
+</p>
 
 <p>This page provides a download interface to IEM processed
 <strong>metadata/geometries</strong> associated with National Weather Service
@@ -114,6 +119,16 @@ you can find that <a href="/data/gis/shape/4326/us/current_ww.zip">here.</a></p>
 you are limited to downloading 5 years of data at a time.  The reason being
 to keep the requests from timing out as the response content is delivered on
 the fly.</div>
+
+<p><strong>Related:</strong>
+<a class="btn btn-primary" href="spc_mcd.phtml">SPC Convective Discussions</a>
+&nbsp;
+<a class="btn btn-primary" href="spc_outlooks.phtml">SPC Outlooks</a>
+&nbsp;
+<a class="btn btn-primary" href="spc_watch.phtml">SPC Watch Polygons</a>
+&nbsp;
+<a class="btn btn-primary" href="wpc_mpd.phtml">WPC Precip Discussions</a>
+</p>
 
 <div class="row"><div class="col-sm-6">
 

@@ -6,15 +6,30 @@ require_once "../../../include/forms.php";
 require_once "../../../include/imagemaps.php";
 
 $t = new MyView();
-$t->title = "Download SPC Mesoscale Discussion Shapefile";
+$t->title = "Download SPC Mesoscale Convective Discussion (MCD) Shapefile";
 $content = <<<EOF
-<h3>Storm Prediction Center Mesoscale Discussions</h3>
+<p>
+<ul class="breadcrumb">
+<li><a href="/nws/">NWS Mainpage</a></li>
+<li class="active">Storm Prediction Center Mesoscale Convective Discussions (MCD)</li>
+</ul>
+</p>
 
-<p>The IEM has a database archive of SPC Mesocale Discussions since 2003. This
-page offers a shapefile download of these.</p>
+<p>The IEM has a database archive of SPC MCDs since 2003. The
+download offered here does not contain the MCD text discussion, but the
+polygon geometry along with some metadata.  The backend database that
+services this download updates in realtime, so the data should be as current
+as your download.</p>
 
-<p><strong>Related:</strong> <a href="spc_outlooks.phtml">SPC Outlooks</a>,
-<a href="watchwarn.phtml">NWS VTEC Watch Warning Advisory Shapefiles</a></p>
+<p><strong>Related:</strong>
+<a class="btn btn-primary" href="watchwarn.phtml">NWS VTEC Watch Warning Advisory</a>
+&nbsp;
+<a class="btn btn-primary" href="spc_outlooks.phtml">SPC Outlooks</a>
+&nbsp;
+<a class="btn btn-primary" href="spc_watch.phtml">SPC Watch Polygons</a>
+&nbsp;
+<a class="btn btn-primary" href="wpc_mpd.phtml">WPC Precip Discussions</a>
+</p>
 
 <form method="GET" action="/cgi-bin/request/gis/spc_mcd.py">
 <table class="table">
@@ -50,10 +65,10 @@ $content .= "<th>Start:</th>
      ". yearSelect2(2003, date("Y"), "year2") ."
     </td>
     <td>
-     ". monthSelect2(0,"month2") ."
+     ". monthSelect2(date("m"), "month2") ."
     </td>
     <td>
-     ". daySelect2(0, "day2") ."
+     ". daySelect2(date("d"), "day2") ."
     </td>
     <td>
      ". gmtHourSelect(0, "hour2") ."

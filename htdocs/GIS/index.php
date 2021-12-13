@@ -101,7 +101,11 @@ back to 1951.</li>
 SPC Mesoscale Discussion Shapefile Download</a></li>
 
 <li><a href="/request/gis/spc_outlooks.phtml"><i class="fa fa-download"></i> SPC Outlook Shapefile Download</a></li>
- <li>Past 24 hours of Storm Reports
+
+<li><a href="/request/gis/spc_watch.phtml"><i class="fa fa-download"></i>
+SPC Watch Polygon Shapefile Download</a></li>
+
+<li>Past 24 hours of Storm Reports
  <br /><a href="/data/gis/shape/4326/us/lsr_24hour.zip">ESRI Shapefile</a>, 
  <a href="/data/gis/shape/4326/us/lsr_24hour.csv">Comma Delimited</a>,
  <a href="/data/gis/shape/4326/us/lsr_24hour.geojson">GeoJSON</a>
@@ -130,6 +134,10 @@ This file is updated every minute.</li>
  <li><a href="/request/gis/sps.phtml">Special Weather Statement (SPS) Polygons</a><br />
  Shapefile download of SPS polygons and IBW tags.</li>
  <li><a href="/data/gis/">Browse</a> GIS data stored on the IEM website.</li>
+
+ <li><a href="/request/gis/wpc_mpd.phtml"><i class="fa fa-download"></i>
+WPC Precip Discussion MPD Polygon Shapefile Download</a></li>
+
  </ul>
 
 </div></div>
