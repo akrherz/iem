@@ -1,0 +1,98 @@
+<?php 
+require_once "../../../config/settings.inc.php";
+define("IEM_APPID", 127);
+require_once "../../../include/myview.php";
+require_once "../../../include/forms.php";
+require_once "../../../include/imagemaps.php";
+
+$t = new MyView();
+$t->title = "Download SPC Mesoscale Discussion Shapefile";
+$content = <<<EOF
+<h3>Storm Prediction Center Mesoscale Discussions</h3>
+
+<p>The IEM has a database archive of SPC Mesocale Discussions since 2003. This
+page offers a shapefile download of these.</p>
+
+<p><strong>Related:</strong> <a href="spc_outlooks.phtml">SPC Outlooks</a>,
+<a href="watchwarn.phtml">NWS VTEC Watch Warning Advisory Shapefiles</a></p>
+
+<form method="GET" action="/cgi-bin/request/gis/spc_mcd.py">
+<table class="table">
+<thead><tr><th colspan="6">Time Interval for Outlook *Issuance* (UTC)</th></tr></thead>
+<tr>
+    <td></td><th>Year</th><th>Month</th><th>Day</th>
+    <th>Hour</th><th>Minute</th>
+</tr>
+
+<tr>
+EOF;
+$content .= "<th>Start:</th>
+    <td>
+     ". yearSelect2(2003, date("Y"), "year1") ."
+    </td>
+    <td>
+     ". monthSelect2(0,"month1") ."
+    </td>
+    <td>
+     ". daySelect2(0, "day1") ."
+    </td>
+    <td>
+     ". gmtHourSelect(0, "hour1") ."
+    </td>
+    <td>
+     ". minuteSelect(0, "minute1") ."
+    </td>
+  </tr>
+
+  <tr>
+    <th>End:</th>
+    <td>
+     ". yearSelect2(2003, date("Y"), "year2") ."
+    </td>
+    <td>
+     ". monthSelect2(0,"month2") ."
+    </td>
+    <td>
+     ". daySelect2(0, "day2") ."
+    </td>
+    <td>
+     ". gmtHourSelect(0, "hour2") ."
+    </td>
+    <td>
+     ". minuteSelect(0, "minute2") ."
+    </td>
+  </tr>
+</table>";
+
+$content .= <<<EOM
+<p><input type="submit" value="Giveme data right now!">
+</form>
+
+<h4>Shapefile DBF schema:</h4>
+<pre>
+Field 0: Type=C/String, Title=`ISSUE', UTC Issuance Timestamp YYYYmmddHHMM
+Field 1: Type=C/String, Title=`EXPIRE', UTC MCD Expiration Timestamp
+Field 2: Type=C/String, Title=`PROD_ID', IEM Product ID (see below)
+Field 3: Type=N/Double, Title=`YEAR', YEAR of MCD
+Field 4: Type=N/Double, Title=`NUM', SPC MCD Number
+Field 5: Type=N/Double, Title=`CONFIDEN', SPC Watch issuance confidence
+Field 6: Type=C/String, Title=`CONCERN', SPC MCD concerning heading
+
+</pre>
+
+<h4>Archive / Usage Notes:</h4>
+<ol>
+<li>The <code>PROD_ID</code> DBF field is a string the IEM uses to identify
+NWS Text products and can be used to call an IEM API to fetch the text of
+this product. https://mesonet.agron.iastate.edu/api/1/nwstext/{PROD_ID}</li>
+
+<li>The <code>YEAR</code> and <code>NUM</code> fields can be used to construct
+a stable URL into SPC's website like so: https://www.spc.noaa.gov/products/md/{year}/md{NUM:04i}.html</li>
+</ol>
+</form>
+EOM;
+
+$t->content = $content;
+$t->render('single.phtml');
+
+?>

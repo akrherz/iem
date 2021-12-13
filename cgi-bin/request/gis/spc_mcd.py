@@ -1,4 +1,4 @@
-"""Dump SPC Outlooks."""
+"""Dump SPC MCDs."""
 # Local
 from io import BytesIO
 import os
@@ -36,13 +36,7 @@ def get_context(environ):
     if ets < sts:
         sts, ets = ets, sts
 
-    types = [x[0].upper() for x in form.getall("type")]
-    if not types:
-        types = ["C", "F"]
-    days = [int(x) for x in form.getall("d")]
-    if not days:
-        days = list(range(1, 9))
-    return dict(sts=sts, ets=ets, types=types, days=days)
+    return dict(sts=sts, ets=ets)
 
 
 def run(ctx, start_response):
@@ -50,17 +44,16 @@ def run(ctx, start_response):
     pgconn = get_dbconn("postgis")
     common = "at time zone 'UTC', 'YYYYMMDDHH24MI'"
     schema = {
-        "geometry": "MultiPolygon",
+        "geometry": "Polygon",
         "properties": dict(
             [
                 ("ISSUE", "str:12"),
                 ("EXPIRE", "str:12"),
-                ("PRODISS", "str:12"),
-                ("TYPE", "str:1"),
-                ("DAY", "int"),
-                ("THRESHOLD", "str:4"),
-                ("CATEGORY", "str:64"),
-                ("CYCLE", "int"),
+                ("PROD_ID", "str:35"),
+                ("YEAR", "int"),
+                ("NUM", "int"),
+                ("CONFIDEN", "int"),
+                ("CONCERN", "str:64"),
             ]
         ),
     }
@@ -68,17 +61,14 @@ def run(ctx, start_response):
         "select "
         f"to_char(issue {common}) as issue, "
         f"to_char(expire {common}) as expire, "
-        f"to_char(product_issue {common}) as prodiss, "
-        "outlook_type as type, day, threshold, category, cycle, geom "
-        "from spc_outlooks WHERE product_issue >= %s and "
-        "product_issue < %s and outlook_type in %s and day in %s "
-        "ORDER by product_issue ASC",
+        "product_id as prod_id, year, num, watch_confidence as confiden, "
+        "concerning as concern, geom "
+        "from mcd WHERE issue >= %s and "
+        "issue < %s ORDER by issue ASC",
         pgconn,
         params=(
             ctx["sts"],
             ctx["ets"],
-            tuple(ctx["types"]),
-            tuple(ctx["days"]),
         ),
         geom_col="geom",
     )
@@ -86,7 +76,7 @@ def run(ctx, start_response):
         start_response("200 OK", [("Content-type", "text/plain")])
         return b"ERROR: no results found for your query"
     df.columns = [s.upper() if s != "geom" else "geom" for s in df.columns]
-    fn = f"outlooks_{ctx['sts']:%Y%m%d%H%M}_{ctx['ets']:%Y%m%d%H%M}"
+    fn = f"mcd_{ctx['sts']:%Y%m%d%H%M}_{ctx['ets']:%Y%m%d%H%M}"
 
     os.chdir("/tmp")
     df.to_file(f"{fn}.shp", schema=schema)

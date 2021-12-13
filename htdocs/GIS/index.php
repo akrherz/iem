@@ -97,7 +97,10 @@ back to 1951.</li>
 
 <p><h3>GIS Shapefiles:</h3>
 <ul>
- <li><a href="/request/gis/spc_outlooks.phtml"><i class="fa fa-download"></i> SPC Outlook Shapefile Download</a></li>
+<li><a href="/request/gis/spc_mcd.phtml"><i class="fa fa-download"></i>
+SPC Mesoscale Discussion Shapefile Download</a></li>
+
+<li><a href="/request/gis/spc_outlooks.phtml"><i class="fa fa-download"></i> SPC Outlook Shapefile Download</a></li>
  <li>Past 24 hours of Storm Reports
  <br /><a href="/data/gis/shape/4326/us/lsr_24hour.zip">ESRI Shapefile</a>, 
  <a href="/data/gis/shape/4326/us/lsr_24hour.csv">Comma Delimited</a>,
