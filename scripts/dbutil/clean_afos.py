@@ -19,8 +19,8 @@ def main():
         "entered < ('YESTERDAY'::date - '7 days'::interval) and "
         "entered > ('YESTERDAY'::date - '31 days'::interval) and "
         "(pil ~* '^(RR[1-9RSMAZ]|ECM|ECS|ECX|LAV|LEV|MAV|MET|MTR|MEX|NBE|"
-        "NBH|NBP|NBS|NBX|RWR|STO|HML|WRK|OSO|SCV)' "
-        "or pil in ('HPTNCF', 'WTSNCF','WRKTTU','TSTNCF', 'HD3RSA', "
+        "NBH|NBP|NBS|NBX|RWR|STO|HML|WRK|OSO|SCV|LLL)' "
+        "or pil in ('HPTNCF', 'WTSNCF', 'TSTNCF', 'HD3RSA', "
         "'XF03DY', 'XOBUS', 'ECMNC1', 'SYNBOU', 'MISWTM', 'MISWTX', "
         "'MISMA1', 'MISAM1'))"
     )

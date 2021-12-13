@@ -83,6 +83,9 @@ $table = "";
 $atags = "";
 pg_query($afos, "SET TIME ZONE 'UTC'");
 $pil_limiter = "";
+if (date("Y", $ts) > "2020"){
+    $pil_limiter = " and substr(pil, 1, 3) not in ('LLL', 'WRK') ";
+}
 if ($dbsource == "KWNO"){
     $pil_limiter = <<<EOM
  and substr(pil, 1, 3) not in ('NBS', 'NBX', 'NBE', 'NBH', 'NBP', 'MAV', 'MET',
