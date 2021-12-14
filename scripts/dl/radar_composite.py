@@ -1,4 +1,8 @@
-"""Cache NEXRAD composites for the website."""
+"""Write NEXRAD composite sector views to archive.
+
+run from RUN_5MIN.sh
+"""
+import datetime
 import tempfile
 import os
 import subprocess
@@ -11,28 +15,25 @@ LOG = logger()
 N0QBASE = utc(2010, 11, 14)
 
 
-def save(sectorName, file_name, dir_name, ts, bbox=None, routes="ac"):
+def save(sectorName, file_name, dir_name, ts, routes, bbox=None):
     """Get an image and write it back to LDM for archiving"""
     tstamp = ts.strftime("%Y%m%d%H%M")
     nexrad = "nexrad" if ts < N0QBASE else "n0q"
     layers = (
-        "layers[]=%s&layers[]=watch_by_county&layers[]=sbw&"
+        f"layers[]={nexrad}&layers[]=watch_by_county&layers[]=sbw&"
         "layers[]=uscounties"
-    ) % (nexrad,)
+    )
     if sectorName == "conus":
         layers = (
-            "layers[]=%s&layers[]=watch_by_county&layers[]=uscounties"
-        ) % (nexrad,)
-    uri = ("http://iem.local/GIS/radmap.php?sector=%s&ts=%s&%s") % (
-        sectorName,
-        tstamp,
-        layers,
+            f"layers[]={nexrad}&layers[]=watch_by_county&layers[]=uscounties"
+        )
+    uri = (
+        f"http://iem.local/GIS/radmap.php?sector={sectorName}&"
+        f"ts={tstamp}&{layers}"
     )
     if bbox is not None:
-        uri = ("http://iem.local/GIS/radmap.php?bbox=%s&ts=%s&%s") % (
-            bbox,
-            tstamp,
-            layers,
+        uri = (
+            f"http://iem.local/GIS/radmap.php?bbox={bbox}&ts={tstamp}&{layers}"
         )
     req = exponential_backoff(requests.get, uri, timeout=60)
     LOG.debug(uri)
@@ -40,63 +41,62 @@ def save(sectorName, file_name, dir_name, ts, bbox=None, routes="ac"):
         LOG.info("%s failure", uri)
         return
 
-    tmpfd = tempfile.NamedTemporaryFile(delete=False)
-    tmpfd.write(req.content)
-    tmpfd.close()
+    with tempfile.NamedTemporaryFile(delete=False) as tmpfd:
+        tmpfd.write(req.content)
 
-    cmd = ("pqinsert -p 'plot %s %s %s %s/n0r_%s_%s.png " "png' %s") % (
-        routes,
-        tstamp,
-        file_name,
-        dir_name,
-        tstamp[:8],
-        tstamp[8:],
-        tmpfd.name,
+    cmd = (
+        f"pqinsert -p 'plot {routes} {tstamp} {file_name} {dir_name}/"
+        f"n0r_{tstamp[:8]}_{tstamp[8:]}.png png' {tmpfd.name}"
     )
     subprocess.call(cmd, shell=True)
     os.unlink(tmpfd.name)
 
 
-def runtime(ts):
+def runtime(ts, routes):
     """Actually run for a time"""
     pgconn = get_dbconn("postgis")
     pcursor = pgconn.cursor()
 
-    save("conus", "uscomp.png", "usrad", ts)
-    save("iem", "mwcomp.png", "comprad", ts)
+    save("conus", "uscomp.png", "usrad", ts, routes)
+    save("iem", "mwcomp.png", "comprad", ts, routes)
     for i in ["lot", "ict", "sd", "hun"]:
-        save(i, "%scomp.png" % (i,), "%srad" % (i,), ts)
+        save(i, f"{i}comp.png", f"{i}rad", ts, routes)
 
     # Now, we query for watches.
     pcursor.execute(
-        """
-        select sel, ST_xmax(geom), ST_xmin(geom),
-        ST_ymax(geom), ST_ymin(geom) from watches_current
-        ORDER by issued DESC
-    """
+        "select sel, ST_xmax(geom), ST_xmin(geom), ST_ymax(geom), "
+        "ST_ymin(geom) from watches_current ORDER by issued DESC"
     )
     for row in pcursor:
         xmin = float(row[2]) - 0.75
         ymin = float(row[4]) - 0.75
         xmax = float(row[1]) + 0.75
         ymax = float(row[3]) + 1.5
-        bbox = "%s,%s,%s,%s" % (xmin, ymin, xmax, ymax)
+        bbox = f"{xmin},{ymin},{xmax},{ymax}"
         sel = row[0].lower()
-        save("custom", "%scomp.png" % (sel,), "%srad" % (sel,), ts, bbox)
+        save("custom", f"{sel}comp.png", f"{sel}rad", ts, routes, bbox)
 
 
 def main(argv):
     """Go Main Go"""
-    ts = utc()
-    if len(argv) == 6:
-        ts = utc(
-            int(argv[1]),
-            int(argv[2]),
-            int(argv[3]),
-            int(argv[4]),
-            int(argv[5]),
+    ts = utc(*[int(x) for x in argv[1:6]])
+    LOG.debug("Running for %s", ts)
+    # If we are near real-time, also check various archive points
+    if (utc() - ts).total_seconds() > 1000:
+        runtime(ts, "a")
+        return
+    else:
+        runtime(ts, "ac")
+    for hroff in [1, 3, 7, 12, 24]:
+        valid = ts - datetime.timedelta(hours=hroff)
+        uri = (
+            f"http://iem.local/archive/data/{valid:%Y}/{valid:%m}/{valid:%d}/"
+            f"comprad/n0r_{valid:%Y%m%d}_{valid:%H%M}.png"
         )
-    runtime(ts)
+        req = requests.get(uri, timeout=15)
+        if req.status_code == 404:
+            LOG.info("%s 404, rerunning %s", uri, valid)
+            runtime(valid, "a")
 
 
 if __name__ == "__main__":

@@ -1,4 +1,6 @@
 # Run every 5 minutes...
+export STAMP=$(date -u +'%Y %m %d %H %M')
+
 cd cache 
 python nws_wawa_archive.py &
 
@@ -6,7 +8,7 @@ cd ../isusm
 python csv2ldm.py &
 
 cd ../roads
-python archive_roadsplot.py $(date -u +'%Y %m %d %H %M') &
+python archive_roadsplot.py $STAMP &
 python ingest_roads_rest.py &
 
 cd ../ingestors
@@ -16,7 +18,7 @@ cd ifc
 python ingest_ifc_precip.py &
 
 cd ../../dl
-python radar_composite.py &
+python radar_composite.py $STAMP &
 
 cd ../GIS
 python 24h_lsr.py 
