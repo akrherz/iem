@@ -187,17 +187,20 @@ def grid_hour(ts):
 
     # try first to use RTMA
     res = use_rtma(ts, "tmp")
+    did_gridding = False
     if res is not None:
         tmpf = masked_array(res[0], data_units="degK").to("degF").m
     else:
         if df.empty:
             LOG.info("%s has no entries, FAIL", ts)
             return
+        did_gridding = True
         tmpf = generic_gridder(df, "max_tmpf", domain)
 
     # try first to use RTMA
     res = use_rtma(ts, "dwp")
-    if res is not None:
+    # Ensure we have RTMA temps available
+    if not did_gridding and res is not None:
         dwpf = masked_array(res[0], data_units="degK").to("degF").m
     else:
         if df.empty:
