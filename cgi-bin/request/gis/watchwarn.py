@@ -191,7 +191,8 @@ def build_sql(form):
      to_char(updated at time zone 'UTC',
              'YYYYMMDDHH24MI') as utc_updated,
      hvtec_nwsli, hvtec_severity, hvtec_cause, hvtec_record, is_emergency,
-     windtag, hailtag, tornadotag, damagetag
+     windtag, hailtag, tornadotag,
+     coalesce(damagetag, floodtag_damage) as damagetag
      from {sbw_table} w {table_extra}
      WHERE {statuslimit} and {sbwtimelimit}
      {wfo_limiter} {limiter} {elimiter}
