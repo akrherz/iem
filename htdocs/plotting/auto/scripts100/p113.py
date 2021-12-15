@@ -78,6 +78,7 @@ def plotter(fdict):
     df["valid"] = pd.to_datetime(
         {"year": 2000, "month": df["month"], "day": df["day"]}
     )
+    df = df.set_index("valid")
     for col in df.columns:
         if col.find("_years") == -1:
             continue
@@ -120,7 +121,7 @@ def plotter(fdict):
         res += "%3i" % (day,)
         for mo in range(1, 13):
             try:
-                ts = datetime.date(2000, mo, day)
+                ts = datetime.datetime(2000, mo, day)
                 if ts not in df.index:
                     res += bad
                     continue
@@ -146,7 +147,7 @@ def plotter(fdict):
         ctx["_nt"].sts[station]["name"],
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
-    x = df["valid"].values
+    x = df.index.values
     ax.plot(range(len(x)), df["avg_high"].values, color="r", label="High")
     ax.plot(range(len(x)), df["avg_low"].values, color="b", label="Low")
     ax.grid(True)

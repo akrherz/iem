@@ -665,13 +665,13 @@ def main(argv):
         do_inversion(INVERSION[nwsli], nwsli)
 
     if EVENTS["reprocess_solar"]:
-        LOG.info("Calling fix_solar.py with no args")
+        LOG.debug("Calling fix_solar.py with no args")
         subprocess.call("python ../isuag/fix_solar.py", shell=True)
     if EVENTS["reprocess_temps"]:
-        LOG.info("Calling fix_temps.py with no args")
+        LOG.debug("Calling fix_temps.py with no args")
         subprocess.call("python ../isuag/fix_temps.py", shell=True)
     for day in EVENTS["days"]:
-        LOG.info("Calling fix_{solar,precip}.py for %s", day)
+        LOG.debug("Calling fix_{solar,precip}.py for %s", day)
         subprocess.call(
             ("python ../isusm/fix_precip.py %s %s %s")
             % (day.year, day.month, day.day),
