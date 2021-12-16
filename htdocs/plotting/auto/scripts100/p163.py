@@ -259,9 +259,9 @@ def plotter(fdict):
         if eday <= sday:
             slimiter = slimiter.replace(" and ", " or ")
             yearcol = (
-                f"case when to_char(issue, 'mmdd') <= '{eday}' then "
-                "extract(year from issue)::int - 1 else "
-                "extract(year from issue) end"
+                f"case when to_char(valid, 'mmdd') <= '{eday}' then "
+                "extract(year from valid)::int - 1 else "
+                "extract(year from valid) end"
             )
         # Expensive
         df = read_sql(
