@@ -272,14 +272,14 @@ def do_polygon(ctx):
     if varname.startswith("period"):
         if sdate.strftime("%m%d") > edate.strftime("%m%d"):
             daylimiter = (
-                f"(to_char(issue, 'mmdd') >= '{sdate.strftime('%m%d')}' or "
-                f"to_char(issue, 'mmdd') < '{edate.strftime('%m%d')}') and "
+                f"(to_char(issue, 'mmdd') >= '{sdate:%m%d}' or "
+                f"to_char(issue, 'mmdd') < '{edate:%m%d}') and "
             )
             (sdate, edate) = (edate, sdate)
         else:
             daylimiter = (
-                f"to_char(issue, 'mmdd') >= '{sdate.strftime('%m%d')}' and "
-                f"to_char(issue, 'mmdd') < '{edate.strftime('%m%d')}' and "
+                f"to_char(issue, 'mmdd') >= '{sdate:%m%d}' and "
+                f"to_char(issue, 'mmdd') < '{edate:%m%d}' and "
             )
     # We need to figure out how to get the warnings either by state or by wfo
     if t == "cwa":
@@ -301,7 +301,7 @@ def do_polygon(ctx):
     counts = np.zeros((int(YSZ), int(XSZ)))
     wfolimiter = ""
     if ctx["t"] == "cwa":
-        wfolimiter = " wfo = '%s' and " % (station,)
+        wfolimiter = f" wfo = '{station}' and "
     # do arbitrary buffer to prevent segfaults?
     df = read_postgis(
         f"""
@@ -382,31 +382,28 @@ def do_polygon(ctx):
         else:
             bins = range(int(minv.year), int(maxv.year) + 2)
         ctx["units"] = "year"
-        ctx["subtitle"] = (" between %s and %s UTC") % (
-            sdate.strftime("%d %b %Y %H%M"),
-            edate.strftime("%d %b %Y %H%M"),
-        )
+        ctx[
+            "subtitle"
+        ] = f" between {sdate:%d %b %Y %H%M} and {edate:%d %b %Y %H%M} UTC"
     elif varname == "days":
         ctx["title"] = PDICT2[varname]
         bins = np.linspace(
             max([df["days"].min() - 7, 0]), df["days"].max() + 7, 12, dtype="i"
         )
         counts = np.where(counts < 0.0001, -1, counts)
-        ctx["subtitle"] = (" between %s and %s UTC") % (
-            sdate.strftime("%d %b %Y %H%M"),
-            edate.strftime("%d %b %Y %H%M"),
-        )
+        ctx[
+            "subtitle"
+        ] = f" between {sdate:%d %b %Y %H%M} and {edate:%d %b %Y %H%M} UTC"
         ctx["units"] = "days"
         ctx["extend"] = "neither"
     elif varname == "yearcount":
-        ctx["title"] = "Count for %s" % (year,)
+        ctx["title"] = f"Count for {year}"
         ctx["units"] = "count"
     elif varname == "total":
         ctx["title"] = "Total"
-        ctx["subtitle"] = (" between %s and %s UTC") % (
-            sdate.strftime("%d %b %Y %H%M"),
-            edate.strftime("%d %b %Y %H%M"),
-        )
+        ctx[
+            "subtitle"
+        ] = f" between {sdate:%d %b %Y %H%M} and {edate:%d %b %Y %H%M} UTC"
         ctx["units"] = "count"
     elif varname == "yearavg":
         ctx["title"] = ("Yearly Avg: %s and %s") % (
@@ -439,6 +436,8 @@ def do_polygon(ctx):
             bins = np.arange(0, interval * 10.1, interval)
             bins[0] = 0.01
         elif varname == "total":
+            counts = np.where(counts < 1, np.nan, counts)
+            ctx["extend"] = "neither"
             if maxv < 8:
                 bins = np.arange(1, 8, 1)
             else:
@@ -813,6 +812,7 @@ def do_ugc(ctx):
                 dtype="i",
             )
         ctx["units"] = "count"
+        ctx["extend"] = "neither"
     ctx["bins"] = bins
     ctx["data"] = data
     ctx["df"] = df
@@ -914,6 +914,7 @@ def plotter(fdict):
                 ilabel=ilabel,
                 lblformat=ctx.get("lblformat", "%s"),
                 labelbuffer=1,  # Texas yall
+                extend=ctx.get("extend", "both"),
                 is_firewx=(phenomena == "FW"),
             )
     else:
@@ -942,16 +943,15 @@ if __name__ == "__main__":
             geo="ugc",
             drawc="yes",
             state="IA",
-            phenomena="WW",
-            significance="Y",
-            interval=2,
-            v="periodavg",
+            phenomena="SV",
+            significance="W",
+            v="total",
             ilabel="yes",
-            t="cwa",
+            t="state",
             year=1986,
             year2=2020,
-            sdate="2019-11-01 0000",
-            edate="2019-02-15 0000",
+            sdate="2021-12-14 0000",
+            edate="2021-12-16 1200",
         )
     )
     fig.savefig("/tmp/test.png")
