@@ -199,9 +199,7 @@ def get_data(ctx, startyear):
         if today.month > 2:
             lastyear += 1
     else:
-        ts = datetime.datetime.strptime(
-            "2000-" + ctx["season"] + "-01", "%Y-%b-%d"
-        )
+        ts = datetime.datetime.strptime(f"2000-{ctx['season']}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
         lastyear += 1
@@ -212,9 +210,9 @@ def get_data(ctx, startyear):
             hours = range(tokens[0], tokens[1] + 1)
         except ValueError as exp:
             raise Exception("malformed hour limiter, sorry.") from exp
-        ctx["hour_limiter"] = "[%s-%s]" % (
-            utc(2017, 1, 1, tokens[0]).strftime("%-I %p"),
-            utc(2017, 1, 1, tokens[1]).strftime("%-I %p"),
+        ctx["hour_limiter"] = (
+            f"[{utc(2017, 1, 1, tokens[0]):%-I %p}-"
+            f"{utc(2017, 1, 1, tokens[1]):%-I %p}]"
         )
 
     df = read_sql(
@@ -311,7 +309,7 @@ def make_plot(df, ctx):
         data = df[["year", varname]].groupby("year")[varname].apply(list)
         v1 = ax.violinplot(
             data.values,
-            positions=data.index,
+            positions=list(data.index),
             showextrema=True,
             showmeans=True,
             widths=1.5,
@@ -338,7 +336,7 @@ def make_plot(df, ctx):
     ax.set_xlabel("Year")
     ax.set_xlim(means.index.min() - 1, means.index.max() + 1)
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-    ax.set_ylabel(("%s [%s]") % (PDICT[varname], UNITS[varname]))
+    ax.set_ylabel(f"{PDICT[varname]} [{UNITS[varname]}]")
     ax.grid(True)
     ax.legend(ncol=1, loc=(0.9, 1.0))
     return fig, means
@@ -358,11 +356,8 @@ def plotter(fdict):
 
 if __name__ == "__main__":
     _fig, _df = plotter(
-        dict(
-            varname="dwpf",
-            season="jul",
-            station="DSM",
-            network="IA_ASOS",
-            year=2000,
-        )
+        {
+            "station": "DSM",
+            "network": "IA_ASOS",
+        }
     )
