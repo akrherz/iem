@@ -41,7 +41,8 @@ WEB
    "wms_accessconstraints" "None"
    "wms_contactperson" "Daryl Herzmann"
    "wms_contactorganization" "Iowa State University"
-      "wms_enable_request" "*"
+    "wms_enable_request" "*"
+    "ows_http_max_age" "300"
   END
 END
 
