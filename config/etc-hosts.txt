@@ -134,9 +134,9 @@
 # runs with special 10 MB size and 8 GB memory size
 #   VI_2(52) metvm3 <-> metvm9
 192.168.1.249    iem-memcached
-#   VI_3(53) metvm2 <-> metvm6
+#   VI_3(53) metvm2 <-> metvm8
 192.168.1.248    iem-memcached1
-#   VI_4(54) metvm6 <-> metvm3
+#   VI_4(54) metvm8 <-> metvm3
 192.168.1.247    iem-memcached2
 # VI12(62) metvm1 <-> metvm7
 192.168.1.239    iem-memcached3
