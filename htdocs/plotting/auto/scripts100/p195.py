@@ -19,6 +19,10 @@ PDICT = dict(
         ("SQ", "Snow Squall"),
     )
 )
+PDICT2 = {
+    "NEW": "at Issuance",
+    "ANY": "at Issuance or Update",
+}
 
 
 def get_description():
@@ -59,6 +63,13 @@ def get_description():
             options=PDICT,
             label="Warning Type:",
         ),
+        dict(
+            type="select",
+            name="limit",
+            default="NEW",
+            options=PDICT2,
+            label="Include only issuance or also updated (SVS, etc):",
+        ),
     ]
     return desc
 
@@ -73,20 +84,28 @@ def plotter(fdict):
     ps = [phenomena]
     if phenomena == "_A":
         ps = ["TO", "SV"]
+    statuslimit = "status = 'NEW'"
+    title = "at Issuance"
+    if ctx["limit"] == "ANY":
+        title = "at Issuance or Update"
+        statuslimit = "status != 'CAN'"
     df = read_sql(
         "SELECT issue at time zone 'America/Chicago' as issue, "
         "tml_direction, tml_sknt from sbw WHERE phenomena in %s and "
-        "wfo = %s and status = 'NEW' and tml_direction is not null and "
+        f"wfo = %s and {statuslimit} and tml_direction is not null and "
         "tml_sknt is not null ORDER by issue",
         pgconn,
         params=(tuple(ps), wfo),
     )
     if df.empty:
         raise NoDataFound("No Data Found.")
+    plotdf = df
+    if date is not None:
+        plotdf = df[df["issue"].dt.date != date]
 
     g = sns.jointplot(
-        x=df["tml_direction"].values,
-        y=convert_value(df["tml_sknt"], "knot", "mile / hour"),
+        x=plotdf["tml_direction"].values,
+        y=convert_value(plotdf["tml_sknt"], "knot", "mile / hour"),
         s=40,
         zorder=1,
         color="tan",
@@ -95,14 +114,13 @@ def plotter(fdict):
     g.ax_joint.set_xlabel("Storm Motion From Direction")
     g.ax_joint.set_ylabel("Storm Speed [MPH]")
     g.ax_joint.set_xticks(range(0, 361, 45))
-    g.ax_joint.set_xticklabels(
-        ["N", "NE", "E", "SE", "S", "SW", "W", "NW", "N"]
-    )
+    g.ax_joint.set_xticklabels("N NE E SE S SW W NW N".split())
     if date:
         df2 = df[df["issue"].dt.date == date]
         g.ax_joint.scatter(
             df2["tml_direction"],
             convert_value(df2["tml_sknt"], "knot", "mile / hour"),
+            marker="+",
             color="r",
             s=50,
             label=date.strftime("%b %-d, %Y"),
@@ -111,18 +129,15 @@ def plotter(fdict):
         g.ax_joint.legend(loc="best")
     g.ax_joint.grid()
     g.ax_marg_x.set_title(
-        ("NWS %s\n%s Storm Motion\n" "%s warnings ploted between %s and %s")
-        % (
-            ctx["_nt"].sts[wfo]["name"],
-            PDICT[phenomena],
-            len(df.index),
-            df["issue"].min().date().strftime("%b %-d, %Y"),
-            df["issue"].max().date().strftime("%b %-d, %Y"),
-        )
+        f"NWS {ctx['_nt'].sts[wfo]['name']}\n"
+        f"{PDICT[phenomena]} Storm Motion {title}\n"
+        f"{len(df.index)} events ploted between "
+        f"{df['issue'].min().date():%b %-d, %Y} and "
+        f"{df['issue'].max().date():%b %-d, %Y}"
     )
     g.fig.subplots_adjust(top=0.9, bottom=0.1, left=0.1)
     return g.fig, df
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})
