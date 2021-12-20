@@ -162,7 +162,7 @@ def plotter(fdict):
             ec="r",
             fc="None",
             lw=2,
-            nocbar=True,
+            draw_colorbar=False,
             plotmissing=False,
             zorder=Z_OVERLAY2 - 1,
         )

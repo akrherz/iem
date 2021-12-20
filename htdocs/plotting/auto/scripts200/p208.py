@@ -299,7 +299,7 @@ def plotter(fdict):
         mp.fill_ugcs(
             df2["val"].to_dict(),
             color=df2["color"].to_dict(),
-            nocbar=True,
+            draw_colorbar=False,
             labels=df2["name"].to_dict(),
             missingval="",
             ilabel=(len(df2.index) <= 10),
