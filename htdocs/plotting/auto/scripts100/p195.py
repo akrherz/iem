@@ -1,5 +1,7 @@
 """Storm Motion 2D Histogram."""
+# pylint: disable=consider-using-f-string
 import datetime
+import json
 
 from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_dbconn, convert_value
@@ -74,38 +76,131 @@ def get_description():
     return desc
 
 
-def plotter(fdict):
-    """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
-    phenomena = ctx["p"]
-    date = ctx.get("date")
-    wfo = ctx["wfo"]
-    pgconn = get_dbconn("postgis")
-    ps = [phenomena]
-    if phenomena == "_A":
-        ps = ["TO", "SV"]
+def get_data(ctx):
+    """Do the data fetching portion of this autoplot's work."""
     statuslimit = "status = 'NEW'"
+    phenomena = ctx["p"]
+    wfo = ctx["wfo"]
     title = "at Issuance"
     if ctx["limit"] == "ANY":
         title = "at Issuance or Update"
         statuslimit = "status != 'CAN'"
+    ps = [phenomena]
+    if phenomena == "_A":
+        ps = ["TO", "SV"]
     df = read_sql(
-        "SELECT issue at time zone 'America/Chicago' as issue, "
+        "SELECT polygon_begin at time zone 'America/Chicago' as issue, "
+        "to_char(polygon_begin at time zone 'UTC', "
+        "'YYYY-MM-DD HH24:MI') as utc_issue, eventid, phenomena as ph, "
+        "significance as s, "
         "tml_direction, tml_sknt from sbw WHERE phenomena in %s and "
         f"wfo = %s and {statuslimit} and tml_direction is not null and "
         "tml_sknt is not null ORDER by issue",
-        pgconn,
+        get_dbconn("postgis"),
         params=(tuple(ps), wfo),
     )
     if df.empty:
         raise NoDataFound("No Data Found.")
+    df["tml_mph"] = convert_value(df["tml_sknt"], "knot", "mile / hour")
+    ctx["title"] = (
+        f"NWS {ctx['_nt'].sts[wfo]['name']}\n"
+        f"{PDICT[phenomena]} Storm Motion {title}\n"
+        f"{len(df.index)} events ploted between "
+        f"{df['issue'].min().date():%b %-d, %Y} and "
+        f"{df['issue'].max().date():%b %-d, %Y}"
+    )
+    return df
+
+
+def highcharts(fdict):
+    """Do the highcharts scatter plot of the data."""
+    ctx = get_autoplot_context(fdict, get_description())
+    df = get_data(ctx)
+    df["datetxt"] = df["issue"].dt.strftime("%b %-d, %Y")
+    date = ctx.get("date")
+    plotdf = df
+    if date:
+        plotdf = df[df["issue"].dt.date != date]
+    cols = (
+        "tml_direction tml_mph datetxt tml_sknt utc_issue ph s eventid"
+    ).split()
+    series = [
+        dict(
+            name="All Events",
+            data=(
+                plotdf[cols]
+                .rename(columns={"tml_direction": "x", "tml_mph": "y"})
+                .to_dict(orient="records")
+            ),
+        )
+    ]
+    if date:
+        series.append(
+            dict(
+                name=date.strftime("%b %-d, %Y"),
+                data=(
+                    df[df["issue"].dt.date == date][cols]
+                    .rename(columns={"tml_direction": "x", "tml_mph": "y"})
+                    .to_dict(orient="records")
+                ),
+            )
+        )
+    return """
+    $("#ap_container").highcharts({
+        chart: {
+            type: 'scatter',
+            zoomType: 'xy'
+        },
+        title: {
+            text: '%s'
+        },
+        xAxis: {
+            title: {
+                enabled: true,
+                text: 'Direction (degrees)'
+            },
+            startOnTick: true,
+            endOnTick: true,
+            showLastLabel: true
+        },
+        yAxis: {
+            title: {
+                text: 'Speed (MPH)'
+            }
+        },
+        tooltip: {
+            valueDecimals: 1,
+            formatter: function() {
+                return '<b>'+ this.point.datetxt +'</b><br /> '+
+                    this.point.tml_sknt +' KT ('+
+                    this.point.y.toFixed(1) +' MPH)<br />'+
+                    'From: '+ this.point.x +'°<br />'+
+                    'UTC: '+ this.point.utc_issue +'Z<br />'+
+                    'VTEC: '+ this.point.ph +'.'+ this.point.s +
+                    ' #'+ this.point.eventid
+                ;
+            }
+        },
+        series: %s
+    });
+    """ % (
+        ctx["title"].replace("\n", "<br>"),
+        json.dumps(series),
+    )
+
+
+def plotter(fdict):
+    """Go"""
+    ctx = get_autoplot_context(fdict, get_description())
+    date = ctx.get("date")
+    df = get_data(ctx)
     plotdf = df
     if date is not None:
         plotdf = df[df["issue"].dt.date != date]
 
     g = sns.jointplot(
         x=plotdf["tml_direction"].values,
-        y=convert_value(plotdf["tml_sknt"], "knot", "mile / hour"),
+        y=plotdf["tml_mph"],
         s=40,
         zorder=1,
         color="tan",
@@ -119,7 +214,7 @@ def plotter(fdict):
         df2 = df[df["issue"].dt.date == date]
         g.ax_joint.scatter(
             df2["tml_direction"],
-            convert_value(df2["tml_sknt"], "knot", "mile / hour"),
+            df2["tml_mph"],
             marker="+",
             color="r",
             s=50,
@@ -128,16 +223,10 @@ def plotter(fdict):
         )
         g.ax_joint.legend(loc="best")
     g.ax_joint.grid()
-    g.ax_marg_x.set_title(
-        f"NWS {ctx['_nt'].sts[wfo]['name']}\n"
-        f"{PDICT[phenomena]} Storm Motion {title}\n"
-        f"{len(df.index)} events ploted between "
-        f"{df['issue'].min().date():%b %-d, %Y} and "
-        f"{df['issue'].max().date():%b %-d, %Y}"
-    )
+    g.ax_marg_x.set_title(ctx["title"])
     g.fig.subplots_adjust(top=0.9, bottom=0.1, left=0.1)
     return g.fig, df
 
 
 if __name__ == "__main__":
-    plotter({})
+    highcharts({})
