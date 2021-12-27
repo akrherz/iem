@@ -26,7 +26,7 @@ from PIL import Image
 import numpy as np
 import requests
 from pyiem import mrms
-from pyiem.util import utc, ncopen, logger
+from pyiem.util import utc, ncopen, logger, exponential_backoff
 
 LOG = logger()
 
@@ -53,7 +53,7 @@ def main(argv):
         ".06_Aggregation_%Y%03j.ncml.ncml?"
         "var=precipitationCal&time=%Y-%m-%dT%H%%3A%M%%3A00Z&accept=netcdf4"
     )
-    req = requests.get(url, timeout=120)
+    req = exponential_backoff(requests.get, url, timeout=120)
     ct = req.headers["content-type"]
     # Sometimes, the service returns a 200 that is an error webpage :(
     if req.status_code != 200 or not ct.startswith("application/x-netcdf4"):
@@ -66,9 +66,8 @@ def main(argv):
         )
         LOG.debug(url)
         return
-    tmp = tempfile.NamedTemporaryFile(delete=False)
-    tmp.write(req.content)
-    tmp.close()
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        tmp.write(req.content)
     with ncopen(tmp.name) as nc:
         # x, y
         pmm = nc.variables["precipitationCal"][0, :, :] / 2.0  # mmhr to 30min

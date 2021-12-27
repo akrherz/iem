@@ -151,7 +151,7 @@ def plotter(fdict):
         from raob_flights f JOIN raob_profile p on (f.fid = p.fid)
         WHERE f.station in %s {hrlimit} {vlimit}
         and p.pressure in (925, 850, 700, 500, 400, 300, 250, 200,
-        150, 100, 70, 50, 10))
+        150, 100, 70, 50, 10)  and {varname} is not null)
 
     select * from data where valid = %s ORDER by pressure DESC
     """,
@@ -160,10 +160,7 @@ def plotter(fdict):
         index_col="pressure",
     )
     if df.empty:
-        raise NoDataFound(
-            ("Sounding for %s was not found!")
-            % (ts.strftime("%Y-%m-%d %H:%M"),)
-        )
+        raise NoDataFound(f"Sounding for {ts:%Y-%m-%d %H:%M} was not found!")
     df = df.drop("valid", axis=1)
     for key in PDICT3.keys():
         df[key + "_percentile"] = df[key + "_rank"] / df["count"] * 100.0
@@ -191,10 +188,13 @@ def plotter(fdict):
     y2labels = []
     fmt = "%.1f" if varname not in ["hght"] else "%.0f"
     for i, mybar in enumerate(bars):
+        ptile = mybar.get_width()
+        # Prevent 99.999 from showing up as 100.0
+        ptile = 99.9 if 99.94 < ptile < 100 else ptile
         ax.text(
             mybar.get_width() + 1,
             i,
-            "%.1f" % (mybar.get_width(),),
+            f"{ptile:.1f}",
             va="center",
             bbox=dict(color="white"),
         )
@@ -224,4 +224,13 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter(
+        {
+            "station": "KGJT",
+            "hour": "12",
+            "var": "smps",
+            "date": "2021-12-27",
+            "which": "none",
+            "h": "same",
+        },
+    )

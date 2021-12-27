@@ -11,7 +11,7 @@ LOG = logger()
 
 def do(url, fn):
     """Do the work."""
-    res = exponential_backoff(requests.get, url, timeout=30)
+    res = exponential_backoff(requests.get, url, timeout=60)
     if res is None:
         LOG.info("%s failure", url)
         return
