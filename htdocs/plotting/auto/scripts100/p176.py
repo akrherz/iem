@@ -1,4 +1,5 @@
 """Besting previous record"""
+# pylint: disable=no-member
 
 import pandas as pd
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -57,7 +58,7 @@ def get_context(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     opt = ctx["opt"]
-    table = "alldata_%s" % (station[:2],)
+    table = f"alldata_{station[:2]}"
     cursor.execute(
         f"SELECT day, sday, high, low from {table} WHERE station = %s "
         "and high is not null and low is not null ORDER by day ASC",
@@ -80,12 +81,12 @@ def get_context(fdict):
                 margin = row[2] - records.at[key, "high"]
                 records.at[key, "high"] = row[2]
                 if margin < 1000:
-                    rows.append(dict(margin=margin, date=row[0]))
+                    rows.append(dict(margin=margin, date=row[0], val=row[2]))
             if row[3] < records.at[key, "low"]:
                 margin = row[3] - records.at[key, "low"]
                 records.at[key, "low"] = row[3]
                 if margin > -1000:
-                    rows.append(dict(margin=margin, date=row[0]))
+                    rows.append(dict(margin=margin, date=row[0], val=row[3]))
     else:
         records = pd.DataFrame(dict(high=9999, low=-9999), index=dates)
         rows = []
@@ -95,18 +96,17 @@ def get_context(fdict):
                 margin = row[2] - records.at[key, "high"]
                 records.at[key, "high"] = row[2]
                 if margin > -1000:
-                    rows.append(dict(margin=margin, date=row[0]))
+                    rows.append(dict(margin=margin, date=row[0], val=row[2]))
             if row[3] > records.at[key, "low"]:
                 margin = row[3] - records.at[key, "low"]
                 records.at[key, "low"] = row[3]
                 if margin < 1000:
-                    rows.append(dict(margin=margin, date=row[0]))
+                    rows.append(dict(margin=margin, date=row[0], val=row[3]))
 
     ctx["df"] = pd.DataFrame(rows)
-    ctx["title"] = "[%s] %s %s Margin" % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-        PDICT2[ctx["w"]],
+    ctx["title"] = (
+        f"[{station}] {ctx['_nt'].sts[station]['name']} {PDICT2[ctx['w']]} "
+        "Margin"
     )
     ctx[
         "subtitle"
@@ -119,9 +119,11 @@ def highcharts(fdict):
     ctx = get_context(fdict)
     ctx["df"]["date"] = pd.to_datetime(ctx["df"]["date"])
     df2 = ctx["df"][ctx["df"]["margin"] > 0]
-    v = df2[["date", "margin"]].to_json(orient="values")
+    cols = ["date", "margin", "val"]
+    rename = {"date": "x", "margin": "y"}
+    v = df2[cols].rename(columns=rename).to_json(orient="records")
     df2 = ctx["df"][ctx["df"]["margin"] < 0]
-    v2 = df2[["date", "margin"]].to_json(orient="values")
+    v2 = df2[cols].rename(columns=rename).to_json(orient="records")
     a = "High" if ctx["opt"] == "0" else "Low"
     b = "High" if ctx["opt"] == "1" else "Low"
     series = (
@@ -152,10 +154,16 @@ def highcharts(fdict):
             type: 'scatter',
             zoomType: 'x'
         },
+        plotOptions: {
+            scatter: {
+                turboThreshold: 0
+            }
+        },
         tooltip: {
             valueDecimals: 0,
             pointFormat: 'Date: <b>{point.x:%b %d, %Y}</b>' +
-                          '<br/>Margin: <b>{point.y}</b><br/>'},
+                          '<br/>Margin: <b>{point.y}</b>' +
+                          '<br />Ob: <b>{point.val}</b>'},
         yAxis: {title: {text: 'Temperature Beat Margin F'}},
         xAxis: {type: 'datetime'},
         title: {text: '"""
