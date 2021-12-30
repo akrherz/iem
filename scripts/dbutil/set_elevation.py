@@ -3,21 +3,21 @@ import time
 import sys
 
 import requests
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
 def get_elevation(lon, lat):
     """Use arcgisonline"""
     req = requests.get(
-        "http://sampleserver4.arcgisonline.com/ArcGIS/rest/services/"
-        "Elevation/ESRI_Elevation_World/MapServer/exts/ElevationsSOE/"
-        f"ElevationLayers/1/GetElevationAtLonLat?lon={lon}&lat={lat}&f=pjson",
+        f"https://api.open-elevation.com/api/v1/lookup?locations={lat},{lon}",
         timeout=30,
     )
     if req.status_code != 200:
-        print("ERROR: %s" % (req.status_code,))
+        LOG.info("ERROR: %s", req.status_code)
         return None
-    return req.json()["elevation"]
+    return req.json()["results"][0]["elevation"]
 
 
 def workflow():
