@@ -45,13 +45,15 @@ function fmt($val, $varname){
  	for($i=0;$row=pg_fetch_assoc($rs);$i++){
  		$extremumcodes[ $row['code'] ] = $row['name'];
  	}
- 	
- 	$pgconn = iemdb("iem");
- 	$rs = pg_prepare($pgconn, "SELECT", "SELECT *, ".
-        "to_char(valid at time zone $1, 'dd Mon YYYY HH:MI AM') as ts ".
- 		"from current_shef ".
- 		"where station = $2 ORDER by physical_code ASC");
- 	$rs = pg_execute($pgconn, "SELECT", Array($metadata['tzname'], $station));
+    $arr = Array(
+        "station" => $station,
+    );
+ 	$jobj = iemws_json("last_shef.json", $arr);
+     $exturi = sprintf(
+         "https://mesonet.agron.iastate.edu/api/1/last_shef.json?".
+         "station=%s",
+         $station,
+     );
 	$table .= <<<EOM
 <table class="table table-striped">
 <thead>
@@ -60,14 +62,19 @@ function fmt($val, $varname){
     <th>Product</th></tr>
 </thead>
 EOM;
-    $baseprodvalid = time() - 5 * 86400;
- 	for($i=0;$row=pg_fetch_assoc($rs);$i++){
+     $localtz = new DateTimeZone($metadata["tzname"]);
+     $utctz = new DateTimeZone("UTC");
+    $baseprodvalid = new DateTime("now", $utctz);
+    $baseprodvalid->modify("-5 days");
+ 	foreach($jobj["data"] as $bogus => $row){
  		$depth = "";
  		if ($row["depth"] > 0){
  			$depth = sprintf("%d inch", $row["depth"]);
  		}
+         $valid = new DateTime($row["utc_valid"], $utctz);
+         $valid->setTimeZone($localtz);
         $plink = "N/A";
-        if (strtotime($row["valid"]) > $baseprodvalid){
+        if ($valid > $baseprodvalid){
             if (! is_null($row["product_id"])){
                 $plink = sprintf(
                     '<a href="/p.php?pid=%s">Source Text</a>',
@@ -82,7 +89,7 @@ EOM;
  			$row["duration"], $durationcodes[ $row["duration"] ],
             $row["type"], $row["source"], 
  			$row["extremum"] == 'Z'? '-': $row['extremum'] , $extremumcodes[ $row["extremum"] ],
- 			$row["ts"], $row["value"], $plink);
+ 			$valid->format("M j, Y h:i A"), $row["value"], $plink);
  	}
  	$table .= "</table>";
 } else {
@@ -152,10 +159,12 @@ EOM;
  	} // End if
  } // End if
  $table .= "</table>";
- $table .= sprintf("<p>This data was provided by a ".
- 		"<a href=\"%s\">JSON(P) webservice</a>. You can find ".
- 		"<a href=\"/json/\">more JSON services</a>.</p>", $exturi);
 }
+
+$table .= sprintf("<p>This data was provided by a ".
+"<a href=\"%s\">JSON(P) webservice</a>. You can find ".
+"<a href=\"/json/\">more JSON services</a>.</p>", $exturi);
+
 $interface = $table;
 if (array_key_exists($station, $SPECIAL)){
 	$interface = <<<EOM
