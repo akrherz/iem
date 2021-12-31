@@ -152,8 +152,11 @@ def merge(atmos, surface):
             "pday": row["PRECIPITATION_ACCUMULATION"],
         }
         for sid in range(4):
-            data[nwsli][f"scond{sid}"] = row[("SURFACE_CONDITION", sid)]
-            data[nwsli][f"tsf{sid}"] = row[("SURFACE_TEMP", sid)]
+            try:
+                data[nwsli][f"scond{sid}"] = row[("SURFACE_CONDITION", sid)]
+                data[nwsli][f"tsf{sid}"] = row[("SURFACE_TEMP", sid)]
+            except KeyError as exp:
+                LOG.info("KeyError raised for nwsli: '%s' %s", nwsli, exp)
     return data
 
 
@@ -211,50 +214,49 @@ def gen_metars(obs, filename, convids=False):
     """
     mtime = util.utc().strftime("%d%H%M")
     thres = util.utc() - datetime.timedelta(hours=3)
-    fp = open(filename, "w")
-    fp.write("\001\015\015\012001\n")
-    fp.write("SAUS43 KDMX %s\015\015\012METAR\015\015\012" % (mtime,))
-    for sid in obs:
-        ob = obs[sid]
-        if ob["valid"] < thres:
-            continue
-        if sid in ["RIOI4", "ROSI4", "RSMI4", "RMCI4"]:
-            continue
-        metarid = sid[:4]
-        remoteid = NT.sts[sid]["remote_id"]
-        if remoteid is None:
-            LOG.info("nwsli: %s is unknown remote_id", sid)
-            continue
-        if convids:
-            metarid = RWIS2METAR.get("%02i" % (remoteid,), "XXXX")
-        temptxt = ""
-        t_temptxt = ""
-        windtxt = ""
-        if ob.get("sknt") is not None and ob.get("drct") is not None:
-            windtxt = METARwind(ob["sknt"], ob["drct"], ob.get("gust"))
-        if obs.get("tmpf") is not None and obs.get("dwpf") is not None:
-            m_tmpc, t_tmpc = METARtemp(
-                util.convert_value(ob["tmpf"], "degF", "degC")
+    with open(filename, "w", encoding="utf-8") as fp:
+        fp.write("\001\015\015\012001\n")
+        fp.write(f"SAUS43 KDMX {mtime}\015\015\012METAR\015\015\012")
+        for sid in obs:
+            ob = obs[sid]
+            if ob["valid"] < thres:
+                continue
+            if sid in ["RIOI4", "ROSI4", "RSMI4", "RMCI4"]:
+                continue
+            metarid = sid[:4]
+            remoteid = NT.sts[sid]["remote_id"]
+            if remoteid is None:
+                LOG.info("nwsli: %s is unknown remote_id", sid)
+                continue
+            if convids:
+                metarid = RWIS2METAR.get("%02i" % (remoteid,), "XXXX")
+            temptxt = ""
+            t_temptxt = ""
+            windtxt = ""
+            if ob.get("sknt") is not None and ob.get("drct") is not None:
+                windtxt = METARwind(ob["sknt"], ob["drct"], ob.get("gust"))
+            if obs.get("tmpf") is not None and obs.get("dwpf") is not None:
+                m_tmpc, t_tmpc = METARtemp(
+                    util.convert_value(ob["tmpf"], "degF", "degC")
+                )
+                m_dwpc, t_dwpc = METARtemp(
+                    util.convert_value(ob["dwpf"], "degF", "degC")
+                )
+                temptxt = "%s/%s" % (m_tmpc, m_dwpc)
+                t_temptxt = "T%s%s " % (t_tmpc, t_dwpc)
+            fp.write(
+                ("%s %s %s %s RMK AO2 %s%s\015\015\012" "")
+                % (
+                    metarid,
+                    ob["valid"].strftime("%d%H%MZ"),
+                    windtxt,
+                    temptxt,
+                    t_temptxt,
+                    "=",
+                )
             )
-            m_dwpc, t_dwpc = METARtemp(
-                util.convert_value(ob["dwpf"], "degF", "degC")
-            )
-            temptxt = "%s/%s" % (m_tmpc, m_dwpc)
-            t_temptxt = "T%s%s " % (t_tmpc, t_dwpc)
-        fp.write(
-            ("%s %s %s %s RMK AO2 %s%s\015\015\012" "")
-            % (
-                metarid,
-                ob["valid"].strftime("%d%H%MZ"),
-                windtxt,
-                temptxt,
-                t_temptxt,
-                "=",
-            )
-        )
 
-    fp.write("\015\015\012\003")
-    fp.close()
+        fp.write("\015\015\012\003")
 
 
 def update_iemaccess(obs):
@@ -330,8 +332,9 @@ def main():
     surface = fetch(SURFACE_URI)
     if atmos.empty or surface.empty:
         LOG.info(
-            f"FAIL, empty dataframe atmos sz:{len(atmos.index)}, "
-            f"surface sz:{len(surface.index)}"
+            "FAIL, empty dataframe atmos sz:%s, surface sz:%s",
+            len(atmos.index),
+            len(surface.index),
         )
         return
     obs = merge(atmos, surface)
