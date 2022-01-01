@@ -245,10 +245,30 @@ def plotter(fdict):
         lformat = "%.0f"
         cmap.set_under("white")
         cmap.set_over("#EEEEEE")
-
+    elif varname == "count":
+        df = read_sql(
+            f"""
+        WITH data as (
+            SELECT distinct wfo, state, valid, type,
+            magnitude, geom from lsrs
+            where valid >= %s and valid < %s {tlimiter})
+        SELECT {by}, count(*) from data GROUP by {by}
+        """,
+            pgconn,
+            index_col=by,
+            params=(sts, ets),
+        )
+        df2 = df["count"]
+        if df2.max() < 10:
+            bins = list(range(1, 11, 1))
+        else:
+            bins = np.linspace(1, df2.max() + 11, 10, dtype="i")
+        units = "Count"
+        lformat = "%.0f"
+        cmap.set_under("white")
+        cmap.set_over("#EEEEEE")
+        extend = "max"
     else:
-        if varname != "count" and (ets - sts).days > 366:
-            raise ValueError("Sorry, only count is available for 365+ days")
         sday = sts.strftime("%m%d")
         eday = ets.strftime("%m%d")
         slimiter = (
@@ -295,9 +315,7 @@ def plotter(fdict):
         bins = get_count_bins(df, varname)
         lformat = "%.0f"
         units = "Count"
-        if varname == "count":
-            extend = "max"
-        elif varname == "count_rank":
+        if varname == "count_rank":
             extend = "neither"
             units = "Rank"
         else:
@@ -346,4 +364,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"var": "count_departure", "by": "state"})
+    plotter({"var": "count", "by": "state"})
