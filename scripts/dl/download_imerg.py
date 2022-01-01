@@ -54,7 +54,7 @@ def main(argv):
         "var=precipitationCal&time=%Y-%m-%dT%H%%3A%M%%3A00Z&accept=netcdf4"
     )
     req = exponential_backoff(requests.get, url, timeout=120)
-    ct = req.headers["content-type"]
+    ct = req.headers.get("content-type", "")
     # Sometimes, the service returns a 200 that is an error webpage :(
     if req.status_code != 200 or not ct.startswith("application/x-netcdf4"):
         LOG.info(
