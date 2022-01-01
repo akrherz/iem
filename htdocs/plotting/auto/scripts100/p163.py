@@ -247,7 +247,7 @@ def plotter(fdict):
         cmap.set_over("#EEEEEE")
 
     else:
-        if (ets - sts).days > 366:
+        if varname != "count" and (ets - sts).days > 366:
             raise ValueError("Sorry, only count is available for 365+ days")
         sday = sts.strftime("%m%d")
         eday = ets.strftime("%m%d")
