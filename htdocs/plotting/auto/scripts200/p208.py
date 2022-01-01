@@ -132,7 +132,27 @@ def plotter(fdict):
         geom_col="simple_geom",
     )
     if df.empty:
-        raise NoDataFound("VTEC Event was not found, sorry.")
+        if year == 2022:
+            year = 2021
+            df = read_postgis(
+                f"""
+                SELECT w.ugc, simple_geom, u.name,
+                issue at time zone 'UTC' as issue,
+                expire at time zone 'UTC' as expire,
+                init_expire at time zone 'UTC' as init_expire,
+                1 as val,
+                status, is_emergency, is_pds, w.wfo
+                from warnings_{year} w JOIN ugcs u on (w.gid = u.gid)
+                WHERE w.wfo = %s and eventid = %s and significance = %s and
+                phenomena = %s ORDER by issue ASC
+            """,
+                pgconn,
+                params=(wfo[-3:], etn, s1, p1),
+                index_col="ugc",
+                geom_col="simple_geom",
+            )
+        if df.empty:
+            raise NoDataFound("VTEC Event was not found, sorry.")
     if ctx["opt"] == "expand":
         # Get all phenomena coincident with the above alert
         df = read_postgis(
