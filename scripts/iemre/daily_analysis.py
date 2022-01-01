@@ -98,7 +98,7 @@ def copy_iemre(ts, ds):
         with ncopen(ncfn, timeout=600) as hnc:
             phour = np.sum(hnc.variables["p01m"][:offset2, :, :], 0)
             sped = None
-            for offset in range(offset):
+            for offset in range(offset2):
                 uwnd = hnc.variables["uwnd"][offset, :, :]
                 vwnd = hnc.variables["vwnd"][offset, :, :]
                 if uwnd.mask.all():
