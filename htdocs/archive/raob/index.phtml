@@ -5,27 +5,22 @@ require_once "../../../include/myview.php";
 define("IEM_APPID", 146);
 $t = new MyView();
 $t->jsextra=<<<EOF
-<script src='/vendor/jquery-ui/1.11.4/jquery-ui.min.js'></script>
-<script src='/vendor/jquery-ui-timepicker/1.5.3/jquery-ui-timepicker-addon.js'></script>
+<script src="/vendor/flatpickr/4.6.9/flatpickr.min.js"></script>
 <script type="text/javascript">
 $(function(){
-	$("#startdate").datetimepicker({
-		controlType: 'select',
+	$(".fdp").flatpickr({
 		minDate: new Date(1947, 1, 1, 0, 0),
-		showMinute: false
-});
-	$("#enddate").datetimepicker({
-		controlType: 'select',
-		minDate: new Date(1947, 1, 1, 0, 0),
-		showMinute: false
+        dateFormat: "m/d/Y H:i",
+        time_24hr: true,
+        allowInput: true,
+        enableTime: true
 });
 });
 </script>
 EOF;
 $t->headextra= <<<EOF
-<link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css">
-<link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.theme.min.css">
-<link rel="stylesheet" href="/vendor/jquery-ui-timepicker/1.5.3/jquery-ui-timepicker-addon.css">		
+<link rel="stylesheet" type="text/css"
+href="/vendor/flatpickr/4.6.9/flatpickr.min.css"/>
 EOF;
 $t->title = "Rawinsonde Data Archive";
 $nselect = networkSelect("RAOB", "OAX");
@@ -85,8 +80,8 @@ range_sm     Ballon range from launch in statute miles
 <form method="GET" action="/cgi-bin/request/raob.py">
 <table class="table table-bordered">
 <tr><th>Select Site: {$nselect}</th>
-<td>Start Time: <input type="text" name="sts" id="startdate" width="20"/></td>
-<td>End Time: <input type="text" name="ets" id="enddate" width="20" /></td>
+<td>Start Time: <input type="text" name="sts" class="fdp" width="20"/></td>
+<td>End Time: <input type="text" name="ets" class="fdp" width="20" /></td>
 <td><input type="checkbox" name="dl" />Download to disk</td>
 <td><input type="submit" value="Giveme Data!" /></td>
 </tr>

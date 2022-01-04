@@ -287,24 +287,19 @@ $("#{dpname}").datepicker(
 
 def datetime_handler(value, arg, res):
     """Handler for datetime instances."""
-    dpname = f"timepicker_{arg['name']}"
+    dpname = f"fp_{arg['name']}"
     vmax = arg.get("max", utc().strftime("%Y/%m/%d %H%M"))
     res[
         "jsextra"
     ] += f"""
-$( "#{dpname}" ).datetimepicker({{
-    controlType: 'select',
-    changeMonth: true,
-    changeYear: true,
-    dateFormat: "yy/mm/dd",
-    timeFormat: "HHmm",
-    maxDateTime: $.datepicker.parseDateTime(
-        'yy/mm/dd', 'HHmm', '{vmax}'),
-    minDateTime: $.datepicker.parseDateTime(
-        'yy/mm/dd', 'HHmm', '{arg['min']}')}});
-$("#{dpname}").datetimepicker('setDate',
-    $.datepicker.parseDateTime(
-        'yy/mm/dd', 'HHmm', '{value}'));
+$( "#{dpname}" ).flatpickr({{
+    enableTime: true,
+    dateFormat: "Y/m/d Hi",
+    time_24hr: true,
+    allowInput: true,
+    defaultDate: moment('{value}', 'YYYY/MM/DD HHmm').toDate(),
+    maxDate: moment('{vmax}', 'YYYY/MM/DD HHmm').toDate(),
+    minDate: moment('{arg['min']}', 'YYYY/MM/DD HHmm').toDate()}});
     """
     return (
         f"<input type=\"text\" name=\"{arg['name']}\" id=\"{dpname}\" "
@@ -503,7 +498,6 @@ def generate_form(apid, fdict, headers, cookies):
             res[
                 "extrascripts"
             ] += f"""
-<script src="/vendor/moment/2.13.0/moment.min.js"></script>
 <script src="/vendor/highcharts/{HIGHCHARTS}/highcharts.js"></script>
 <script src="/vendor/highcharts/{HIGHCHARTS}/highcharts-more.js"></script>
 <script src="/vendor/highcharts/{HIGHCHARTS}/modules/exporting.js"></script>
@@ -768,9 +762,8 @@ feel free to use these generated graphics in whatever way you wish.</p>
         "content": content,
         "jsextra": f"""
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
-<script
- src="/vendor/jquery-ui-timepicker/1.6.3/jquery-ui-timepicker-addon.min.js">
-</script>
+<script src="/vendor/moment/2.13.0/moment.min.js"></script>
+<script src="/vendor/flatpickr/4.6.9/flatpickr.min.js"></script>
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 {res['extrascripts']}
 <script>
@@ -805,8 +798,7 @@ $(document).ready(function(){{
         "headextra": f"""
  <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.css" />
  <link rel="stylesheet" type="text/css"
- href="/vendor/jquery-ui-timepicker/1.6.3/jquery-ui-timepicker-addon.min.css"/
- >
+ href="/vendor/flatpickr/4.6.9/flatpickr.min.css"/>
  <link rel="stylesheet" type="text/css"
  href="/vendor/select2/4.0.3/select2.min.css"/ >
 <style>
