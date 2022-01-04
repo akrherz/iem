@@ -270,7 +270,7 @@ lsrLayer.getSource().on('change', function (e) {
     lsrtable.rows.add(data).draw();
 
     // Build type filter
-    lsrtable.column(6).data().unique().sort().each(function (d, j) {
+    lsrtable.column(7).data().unique().sort().each(function (d, j) {
         lsrtypefilter.append('<option value="' + d + '">' + d + '</option');
     });
 });
@@ -314,7 +314,7 @@ sbwLayer.getSource().on('change', function (e) {
     sbwtable.rows.add(data).draw();
 
     // Build type filter
-    sbwtable.column(1).data().unique().sort().each(function (d, j) {
+    sbwtable.column(3).data().unique().sort().each(function (d, j) {
         sbwtypefilter.append('<option value="' + iemdata.vtec_phenomena[d] + '">' + iemdata.vtec_phenomena[d] + '</option');
     });
 
@@ -398,7 +398,7 @@ function initUI() {
     lsrtypefilter.on("change", function () {
         var vals = $(this).val();
         var val = vals ? vals.join("|") : null;
-        lsrtable.column(6).search(val ? '^' + val + '$' : '', true, false).draw();
+        lsrtable.column(7).search(val ? '^' + val + '$' : '', true, false).draw();
     });
     sbwtypefilter = $("#sbwtypefilter").select2({
         placeholder: "Filter SBWs by Event Type",
@@ -408,7 +408,7 @@ function initUI() {
     sbwtypefilter.on("change", function () {
         var vals = $(this).val();
         var val = vals ? vals.join("|") : null;
-        sbwtable.column(1).search(val ? '^' + val + '$' : '', true, false).draw();
+        sbwtable.column(3).search(val ? '^' + val + '$' : '', true, false).draw();
     });
     wfoSelect = $("#wfo").select2({
         templateSelection: function (state) {
