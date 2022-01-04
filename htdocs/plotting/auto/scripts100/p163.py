@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
 import pytz
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -324,6 +325,8 @@ def plotter(fdict):
                 units = "sigma"
             extend = "both"
         df2 = df[varname]
+    if df2.empty:
+        raise NoDataFound("No data found.")
     mp = MapPlot(
         apctx=ctx,
         sector="nws",
@@ -364,4 +367,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"var": "count", "by": "state"})
+    plotter({})
