@@ -112,7 +112,7 @@ def do_json(pidx):
                 type="int",
                 name="dpi",
                 default=defaults.get("dpi", "100"),
-                label="Image Resolution (DPI)",
+                label="Image Resolution (DPI) (max 500)",
             )
         )
     output = json.dumps(data)

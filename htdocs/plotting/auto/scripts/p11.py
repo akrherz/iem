@@ -42,7 +42,11 @@ def get_description():
             network="IA_ASOS",
         ),
         dict(
-            type="year", name="year", default=today.year, label="Select Year:"
+            type="year",
+            min=1928,
+            name="year",
+            default=today.year,
+            label="Select Year:",
         ),
         dict(
             type="int",
@@ -129,7 +133,7 @@ def plotter(fdict):
         ax.text(
             df.index.values[-1] + datetime.timedelta(days=2),
             emphasis,
-            "%s" % (emphasis,),
+            f"{emphasis}",
             ha="left",
             va="center",
         )
@@ -138,12 +142,9 @@ def plotter(fdict):
         "%s %s" % (PDICT2[varname], r"$^\circ$F" if varname != "rh" else "%")
     )
     ax.set_xlabel(
-        ("Days meeting emphasis: %s, first: %s last: %s")
-        % (
-            len(hits),
-            hits[0].strftime("%B %d") if hits else "None",
-            hits[-1].strftime("%B %d") if hits else "None",
-        )
+        f"Days meeting emphasis: {len(hits)}, "
+        f"first: {hits[0].strftime('%B %d') if hits else 'None'} "
+        f"last: {hits[-1].strftime('%B %d') if hits else 'None'}"
     )
     delta = datetime.timedelta(days=1)
     ax.set_xlim(df.index.values[0] - delta, df.index.values[-1] + delta)
@@ -151,4 +152,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

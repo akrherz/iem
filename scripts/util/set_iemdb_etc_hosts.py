@@ -17,7 +17,7 @@ LOOKUP = {
     "-hml": IPS[METVM6],
     "-id3b": IPS[METVM4],
     "-idep": IPS[METVM4],
-    "-iem": IPS[METVM4],
+    "-iem": IPS[METVM6],
     "-iemre": IPS[METVM2],
     "-isuag": IPS[METVM4],
     "-kcci": IPS[METVM4],
@@ -53,17 +53,18 @@ def main(argv):
     if len(argv) == 1:
         print("Usage: python set_iemdb_etc_hosts.py <local|proxy>")
         return
-    data = open("/etc/hosts").read()
+    with open("/etc/hosts", encoding="utf-8") as fh:
+        data = fh.read()
     result = []
     for line in data.split("\n"):
         result.append(line)
         if line.startswith("# ---AUTOGEN---"):
             print("Found ---AUTOGEN---")
             break
-    for dbname in LOOKUP:
-        ip = LOOKUP[dbname] if argv[1] == "proxy" else "127.0.0.1"
-        result.append("%s iemdb%s.local" % (ip, dbname))
-    print("added %s entries" % (len(LOOKUP),))
+    for dbname, lkp in LOOKUP.items():
+        ip = lkp if argv[1] == "proxy" else "127.0.0.1"
+        result.append(f"{ip} iemdb{dbname}.local")
+    print(f"added {len(LOOKUP)} entries")
     (tmpfd, tmpfn) = tempfile.mkstemp()
     os.write(tmpfd, ("\n".join(result)).encode("ascii"))
     os.write(tmpfd, b"\n")

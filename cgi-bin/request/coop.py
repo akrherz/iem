@@ -103,7 +103,7 @@ def do_apsim(ctx):
 
     station = ctx["stations"][0]
     table = get_tablename(ctx["stations"])
-    network = "%sCLIMATE" % (station[:2],)
+    network = f"{station[:2]}CLIMATE"
     nt = NetworkTable(network, only_online=False)
 
     thisyear = datetime.datetime.now().year
@@ -116,16 +116,11 @@ def do_apsim(ctx):
         if febtest.day == 28:
             sdaylimit = " and sday != '0229'"
         cursor.execute(
-            """
+            f"""
             SELECT day, high, low, precip, 1 as doy,
             coalesce(narr_srad, merra_srad, hrrr_srad) as srad
-            from """
-            + table
-            + """ WHERE station = %s
-            and day >= %s and day <= %s """
-            + sdaylimit
-            + """
-            """,
+            from {table} WHERE station = %s
+            and day >= %s and day <= %s {sdaylimit}""",
             (ctx["stations"][0], sts, ets),
         )
         for row in cursor:
@@ -208,15 +203,14 @@ def do_apsim(ctx):
         )
     else:
         cursor.execute(
-            """
+            f"""
             SELECT day, high, low, precip,
             extract(doy from day) as doy,
             coalesce(narr_srad, merra_srad, hrrr_srad) as srad
-            from """
-            + table
-            + """
+            from {table}
             WHERE station = %s and
-            day >= %s and day <= %s ORDER by day ASC
+            day >= %s and day <= %s and high is not null and
+            low is not null and precip is not null ORDER by day ASC
             """,
             (station, ctx["sts"], ctx["ets"]),
         )

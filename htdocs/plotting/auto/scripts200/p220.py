@@ -369,4 +369,4 @@ if __name__ == "__main__":
     # plotter(dict(cat="categorical", which="0C", valid="2019-05-14 2022"))
     # has three days of F
     # plotter(dict(cat="categorical", which="0F", valid="2018-05-07 2322"))
-    plotter(dict(cat="categorical", which="1E", valid="2021-07-14 0300"))
+    plotter(dict(cat="categorical", which="1C", valid="2000-03-08 1919"))

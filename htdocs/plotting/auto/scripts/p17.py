@@ -73,11 +73,14 @@ def common(ctx):
         if now.weekday() in [5, 6]:
             weekends.append(now.day)
         now += datetime.timedelta(days=1)
-    jsn = requests.get(
+    req = requests.get(
         f"http://mesonet.agron.iastate.edu/api/1/daily.json?station={station}&"
         f"network={ctx['network']}&year={year}&month={month}",
         timeout=15,
-    ).json()
+    )
+    if req.status_code != 200:
+        raise ValueError("Unable to fetch data from API service.")
+    jsn = req.json()
     df = pd.DataFrame(jsn["data"])
     if not df.empty:
         df["day_of_month"] = pd.to_datetime(df["date"]).dt.day
@@ -96,8 +99,9 @@ def common(ctx):
         if ctx["_nt"].sts[station]["ncei91"] is None:
             subtitle = "Daily climatology unavailable for site"
         else:
-            subtitle = ("NCEI 1991-2020 Climate Site: %s") % (
-                ctx["_nt"].sts[station]["ncei91"],
+            subtitle = (
+                "NCEI 1991-2020 Climate Site: "
+                f"{ctx['_nt'].sts[station]['ncei91']}"
             )
     # Get the normals
     cdf = read_sql(
@@ -114,12 +118,11 @@ def common(ctx):
     if "accum_pday" not in df.columns:
         df["accum_pday"] = 0
     df["depart_precip"] = df["accum_pday"] - df["accum_climo_precip"]
-    title = "[%s] %s :: %s for %s\n%s" % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-        "Hi/Lo Temps" if ctx["p"] == "temps" else "Precipitation",
-        sts.strftime("%b %Y"),
-        subtitle,
+    title = (
+        f"[{station}] {ctx['_nt'].sts[station]['name']} :: "
+        f"{'Hi/Lo Temps' if ctx['p'] == 'temps' else 'Precipitation'} "
+        f"for {sts:%b %Y}\n"
+        f"{subtitle}"
     )
     (ctx["fig"], ax) = figure_axes(title=title, apctx=ctx)
     box = ax.get_position()
@@ -239,7 +242,7 @@ def do_temperature_plot(ctx):
             txt = ax.text(
                 i + 1 - 0.15,
                 row["max_tmpf"] + 0.5,
-                "%.0f" % (row["max_tmpf"],),
+                f"{row['max_tmpf']:.0f}",
                 ha="center",
                 va="bottom",
                 color="k",
@@ -250,7 +253,7 @@ def do_temperature_plot(ctx):
             txt = ax.text(
                 i + 1 + 0.15,
                 row["min_tmpf"] + 0.5,
-                "%.0f" % (row["min_tmpf"],),
+                f"{row['min_tmpf']:.0f}",
                 ha="center",
                 va="bottom",
                 color="k",

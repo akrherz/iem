@@ -2,6 +2,7 @@
 
 IEM_APPID 92
 """
+# pylint: disable=wrong-import-position
 # stdlib
 from datetime import datetime, date
 import calendar

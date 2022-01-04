@@ -19,7 +19,7 @@ def rectify_date(tstamp):
         pgconn = get_dbconn("postgis")
         cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         # Go get the latest USDM stored in the database!
-        cursor.execute("""SELECT max(valid) from usdm""")
+        cursor.execute("SELECT max(valid) from usdm")
         return cursor.fetchone()[0]
 
     ts = datetime.datetime.strptime(tstamp, "%Y-%m-%d").date()
@@ -35,19 +35,15 @@ def run(ts):
     # Look for polygons into the future as well as we now have Flood products
     # with a start time in the future
     cursor.execute(
-        """
-        SELECT ST_asGeoJson(geom) as geojson, dm, valid
-        from usdm WHERE valid = %s ORDER by dm ASC
-    """,
+        "SELECT ST_asGeoJson(geom) as geojson, dm, valid "
+        "from usdm WHERE valid = %s ORDER by dm ASC",
         (ts,),
     )
     if cursor.rowcount == 0:
         # go back one week
         cursor.execute(
-            """
-            SELECT ST_asGeoJson(geom) as geojson, dm, valid
-            from usdm WHERE valid = %s ORDER by dm ASC
-        """,
+            "SELECT ST_asGeoJson(geom) as geojson, dm, valid "
+            "from usdm WHERE valid = %s ORDER by dm ASC",
             (ts - datetime.timedelta(days=7),),
         )
 
@@ -79,9 +75,14 @@ def application(environ, start_response):
 
     form = parse_formvars(environ)
     cb = form.get("callback", None)
-    ts = rectify_date(form.get("date", ""))
+    tstr = form.get("date", "")
+    if tstr == "qqq":  # from pyIEM automation
+        headers = [("Content-type", "text/plain")]
+        start_response("500 Internal Server Error", headers)
+        return [b"Sorry, I don't know how to handle this request"]
+    ts = rectify_date(tstr)
 
-    mckey = "/geojson/usdm.geojson|%s" % (ts,)
+    mckey = f"/geojson/usdm.geojson|{ts}"
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
     if not res:
@@ -91,7 +92,7 @@ def application(environ, start_response):
     if cb is None:
         data = res
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        data = f"{html_escape(cb)}({res})"
 
     start_response("200 OK", headers)
     return [data.encode("ascii")]

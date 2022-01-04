@@ -189,7 +189,7 @@ def workflow(environ, form, fmt):
     fdict = parser(q)
     # p=number is the python backend code called by this framework
     scriptnum = int(form.get("p", 0))
-    dpi = min([int(fdict.get("dpi", 100)), 500])
+    fdict["dpi"] = min([int(fdict.get("dpi", 100)), 500])
 
     # memcache keys can not have spaces
     mckey = get_mckey(scriptnum, fdict, fmt)
@@ -223,7 +223,7 @@ def workflow(environ, form, fmt):
             if meta.get("plotmetadata", True):
                 plot_metadata(mixedobj, start_time, scriptnum)
             ram = BytesIO()
-            plt.savefig(ram, format=fmt, dpi=dpi)
+            plt.savefig(ram, format=fmt, dpi=fdict["dpi"])
             plt.close()
             ram.seek(0)
             content = ram.read()
