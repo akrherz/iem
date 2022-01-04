@@ -262,6 +262,8 @@ def merge_network_obs(df, network, ts):
     obs["precip_hour"] = obs["temp_hour"]
     # Some COOP sites may not report 'daily' high and low, so we cull those
     # out as nulls
+    for col in ["high", "low"]:
+        obs.loc[pd.isnull(obs[col]), col] = np.nan
     obs.loc[obs["high"] <= obs["low"], ("high", "low")] = np.nan
     # Tricky part here, if our present data table has data and is not
     # estimated, we don't want to over-write it!
