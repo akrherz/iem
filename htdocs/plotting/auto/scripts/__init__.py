@@ -686,7 +686,10 @@ nopts = [
         "label": "Time Duration of a Watch/Warning/Advisory for a UGC",
     },
     {"id": 101, "label": "Top 25 Most Frequent VTEC Products by Office/NWS"},
-    {"id": 56, "label": "Weekly Frequency of a Watch/Warning/Advisory"},
+    {
+        "id": 56,
+        "label": "Weekly/Daily/Monthly Frequency of a Watch/Warning/Advisory",
+    },
     {
         "id": 109,
         "label": (

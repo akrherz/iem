@@ -13,6 +13,11 @@ OPT = {
     "state": "Summarize by State",
     "wfo": "Summarize by NWS Forecast Office",
 }
+PDICT = {
+    "doy": "Day of the Year",
+    "week": "Week of the Year",
+    "month": "Month of the Year",
+}
 
 
 def get_description():
@@ -22,17 +27,28 @@ def get_description():
     desc["cache"] = 86400
     desc[
         "description"
-    ] = """This chart shows the weekly frequency of having
+    ] = """This chart shows the time partitioned frequency of having
     at least one watch/warning/advisory (WWA) issued by the Weather Forecast
-    Office (top plot) and the overall number of WWA issued for
-    that week of the year (bottom plot).  For example, if 10 Tornado Warnings
-    were issued during the 30th week of 2014, this would count as 1 year in
-    the top plot and 10 events in the bottom plot.  This plot hopefully
-    answers the question of which week of the year is most common to get a
-    certain WWA type and which week has seen the most WWAs issued.  The plot
+    Office (top plot) and the overall number of WWA issued events
+    (bottom plot). This plot hopefully
+    answers the question of which day/week/month of the year is most common
+    to get a certain WWA type and which week has seen the most WWAs issued.
+    The plot
     only considers issuance date. When plotting for a state, an event is
-    defined on a per forecast office basis."""
+    defined on a per forecast office basis.
+
+    <p><strong>Updated 4 Jan 2022:</strong> The week aggregation was
+    previously done by iso-week, which is sub-optimal.  The new aggregation
+    for week is by day of the year divided by 7.
+    """
     desc["arguments"] = [
+        dict(
+            type="select",
+            options=PDICT,
+            default="week",
+            label="Partition By:",
+            name="how",
+        ),
         dict(
             type="select",
             name="opt",
@@ -80,28 +96,23 @@ def plotter(fdict):
     significance = ctx["significance"]
     station = ctx["station"][:4]
 
-    sts = datetime.datetime(2012, 1, 1)
-    xticks = []
-    for i in range(1, 13):
-        ts = sts.replace(month=i)
-        xticks.append(int(ts.strftime("%j")))
-
-    fig = figure(apctx=ctx)
-    ax = fig.subplots(2, 1, sharex=True)
-
-    limiter = " wfo = '%s' " % (station,)
-    title = "[%s] NWS %s" % (station, ctx["_nt"].sts[station]["name"])
+    limiter = f" wfo = '{station}' "
+    title = f"[{station}] NWS {ctx['_nt'].sts[station]['name']}"
     if opt == "state":
-        title = "State of %s" % (reference.state_names[state],)
-        limiter = " substr(ugc, 1, 2) = '%s' " % (state,)
+        title = f"State of {reference.state_names[state]}"
+        limiter = f" substr(ugc, 1, 2) = '{state}' "
+    agg = f"extract({ctx['how']} from issue)"
+    if ctx["how"] == "week":
+        agg = "(extract(doy from issue) / 7)::int"
     df = read_sql(
         f"""
     with obs as (
         SELECT distinct extract(year from issue) as yr,
-        extract(week from issue) as week, wfo, eventid from warnings WHERE
+        {agg} as datum, wfo, eventid
+        from warnings WHERE
         {limiter} and phenomena = %s and significance = %s
     )
-    SELECT yr, week, count(*) from obs GROUP by yr, week ORDER by yr ASC
+    SELECT yr::int, datum, count(*) from obs GROUP by yr, datum ORDER by yr ASC
     """,
         pgconn,
         params=(phenomena, significance),
@@ -110,36 +121,48 @@ def plotter(fdict):
 
     if df.empty:
         raise NoDataFound("ERROR: No Results Found!")
+    df = df.rename(columns={"datum": ctx["how"]})
 
     # Top Panel: count
-    gdf = df.groupby("week").count()
-    ax[0].bar((gdf.index.values - 1) * 7, gdf["yr"], width=7)
-    ax[0].set_title(
-        ("%s\n%s (%s.%s) Events - %i to %i")
-        % (
-            title,
-            vtec.get_ps_string(phenomena, significance),
-            phenomena,
-            significance,
-            df["yr"].min(),
-            df["yr"].max(),
-        )
+    title = (
+        f"{title}\n"
+        f"{vtec.get_ps_string(phenomena, significance)} "
+        f"({phenomena}.{significance}) Events - {df['yr'].min():.0f} to "
+        f"{df['yr'].max():.0f}"
     )
+    fig = figure(apctx=ctx, title=title)
+    ax = fig.subplots(2, 1, sharex=True)
+    gdf = df.groupby(ctx["how"]).count()
+    xaxis = gdf.index.values
+    width = 1
+    xticks = []
+    if ctx["how"] == "week":
+        xaxis = gdf.index.values * 7
+        width = 7
+    if ctx["how"] in ["doy", "week"]:
+        sts = datetime.datetime(2012, 1, 1)
+        for i in range(1, 13):
+            ts = sts.replace(month=i)
+            xticks.append(int(ts.strftime("%j")))
+    else:
+        xticks = range(1, 13)
+
+    ax[0].bar(xaxis, gdf["yr"], width=width)
     ax[0].grid()
     ax[0].set_ylabel("Years with 1+ Event")
 
     # Bottom Panel: events
-    gdf = df.groupby("week").sum()
-    ax[1].bar((gdf.index.values - 1) * 7, gdf["count"], width=7)
+    gdf = df.groupby(ctx["how"]).sum()
+    ax[1].bar(xaxis, gdf["count"], width=width)
     ax[1].set_ylabel("Total Event Count")
     ax[1].grid()
-    ax[1].set_xlabel("Partitioned by Week of the Year")
+    ax[1].set_xlabel(f"Partitioned by {PDICT[ctx['how']]}")
     ax[1].set_xticks(xticks)
     ax[1].set_xticklabels(calendar.month_abbr[1:])
-    ax[1].set_xlim(0, 366)
+    ax[1].set_xlim(0, 13 if ctx["how"] == "month" else 366)
 
     return fig, df
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({"how": "doy"})
