@@ -12,7 +12,7 @@ def run(station, syear, eyear):
     pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
 
-    table = "alldata_%s" % (station[:2],)
+    table = f"alldata_{station[:2]}"
     cursor.execute(
         f"""
     WITH data as (
@@ -24,7 +24,9 @@ def run(station, syear, eyear):
       low, rank() OVER (PARTITION by sday ORDER by low DESC) as max_low,
       avg(low) OVER (PARTITION by sday) as avg_low,
       rank() OVER (PARTITION by sday ORDER by low ASC) as min_low,
-      rank() OVER (PARTITION by sday ORDER by precip DESC) as max_precip
+      rank() OVER (PARTITION by sday ORDER by precip DESC) as max_precip,
+      max(high - low) OVER (PARTITION by sday) as max_range,
+      min(high - low) OVER (PARTITION by sday) as min_range
       from {table} WHERE station = %s and year >= %s and year < %s),
 
     max_highs as (
@@ -47,16 +49,16 @@ def run(station, syear, eyear):
 
     avgs as (
       SELECT sday, count(*) as cnt, max(avg_precip) as p,
+      max(max_range) as max_range, min(min_range) as min_range,
       max(avg_high) as h, max(avg_low) as l from data GROUP by sday)
 
     SELECT a.sday, a.cnt, a.h, xh.high, xh.years,
     nh.high, nh.years, a.l, xl.low, xl.years,
-    nl.low, nl.years, a.p, mp.precip, mp.years
+    nl.low, nl.years, a.p, mp.precip, mp.years, a.max_range, a.min_range
     from avgs a, max_highs xh, min_highs nh, max_lows xl, min_lows nl,
     max_precip mp
     WHERE xh.sday = a.sday and xh.sday = nh.sday and xh.sday = xl.sday and
     xh.sday = nl.sday and xh.sday = mp.sday ORDER by sday ASC
-
     """,
         (station, syear, eyear),
     )
@@ -85,6 +87,8 @@ def run(station, syear, eyear):
                 avg_precip=float(row[12]),
                 max_precip=row[13],
                 max_precip_years=row[14],
+                max_range=row[15],
+                min_range=row[16],
             )
         )
 

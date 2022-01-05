@@ -89,4 +89,4 @@ YEAR   JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC ANN
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

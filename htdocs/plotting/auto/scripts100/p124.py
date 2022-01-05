@@ -34,7 +34,7 @@ def plotter(fdict):
 
     station = ctx["station"]
 
-    table = "alldata_%s" % (station[:2],)
+    table = f"alldata_{station[:2]}"
 
     bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:
@@ -60,25 +60,19 @@ def plotter(fdict):
 
     res = (
         "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
-        "# Report Generated: %s\n"
-        "# Climate Record: %s -> %s\n"
-        "# Site Information: [%s] %s\n"
+        f"# Report Generated: {datetime.date.today():%d %b %Y}\n"
+        f"# Climate Record: {bs.date()} -> {datetime.date.today()}\n"
+        f"# Site Information: [{station}] {ctx['_nt'].sts[station]['name']}\n"
         "# Contact Information: Daryl Herzmann akrherz@iastate.edu "
         "515.294.5978\n"
         "# Number of days per year with precipitation at or "
         "above threshold [inch]\n"
         "# Partitioned by month of the year, 'ANN' represents "
         "the entire year\n"
-    ) % (
-        datetime.date.today().strftime("%d %b %Y"),
-        ctx["_nt"].sts[station]["archive_begin"].date(),
-        datetime.date.today(),
-        station,
-        ctx["_nt"].sts[station]["name"],
     )
 
     for i, cat in enumerate(CATS):
-        col = "cat%s" % (i + 1,)
+        col = f"cat{i + 1}"
         res += (
             "YEAR %4.2f JAN FEB MAR APR MAY JUN "
             "JUL AUG SEP OCT NOV DEC ANN\n"
@@ -89,11 +83,14 @@ def plotter(fdict):
                 if (yr, mo) in df.index:
                     res += "%3.0f " % (df.at[(yr, mo), col],)
                 else:
-                    res += "%3s " % ("M",)
-            res += "%3.0f\n" % (df.loc[(yr, slice(1, 12)), col].sum(),)
+                    res += "  M "
+            try:
+                res += "%3.0f\n" % (df.loc[(yr, slice(1, 12)), col].sum(),)
+            except KeyError:
+                res += "   M\n"
 
     return None, df, res
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

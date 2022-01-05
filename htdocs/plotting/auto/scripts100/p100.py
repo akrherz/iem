@@ -189,7 +189,7 @@ def plotter(fdict):
         units = "days"
     elif ptype.find("precip") > 0:
         units = "inches"
-    ax.set_ylabel("%s [%s]" % (PDICT[ptype], units))
+    ax.set_ylabel(f"{PDICT[ptype]} [{units}]")
     ax.grid(True)
     ax.legend(ncol=3, loc="best", fontsize=10)
 
@@ -197,4 +197,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

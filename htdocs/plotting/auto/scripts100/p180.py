@@ -255,11 +255,10 @@ def plotter(fdict):
     subtitle = None
     if station2 is not None:
         if station1 == station2:
-            title = "[%s] %s %s vs %s" % (
-                station1,
-                ctx["_nt1"].sts[station1]["name"],
-                PDICT[c1] if c1 != "custom" else c1label,
-                PDICT[c2] if c2 != "custom" else c2label,
+            title = (
+                f"[{station1}] {ctx['_nt1'].sts[station1]['name']} "
+                f"{PDICT[c1] if c1 != 'custom' else c1label} vs "
+                f"{PDICT[c2] if c2 != 'custom' else c2label}"
             )
             label = f"{c1label} - {c2label}"
         else:
@@ -272,12 +271,12 @@ def plotter(fdict):
                 ctx["_nt2"].sts[station2]["name"],
                 PDICT[ctx["c2"]],
             )
-            label = "%s (%s) - %s (%s)" % (station1, c1, station2, c2)
+            label = f"{station1} ({c1}) - {station2} ({c2})"
         ax0.plot(
             df.index.values,
             df[f"{var1}2"],
             color="brown" if var2 is not None else "blue",
-            label="%s %s (%s)" % (var1.capitalize(), station2, c2label),
+            label=f"{var1.capitalize()} {station2} ({c2label})",
         )
         if var2 is not None:
             ax0.plot(

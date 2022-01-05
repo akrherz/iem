@@ -182,4 +182,4 @@ YEAR   SPRING  FALL    SPRING  FALL    SPRING  FALL    SPRING  FALL
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

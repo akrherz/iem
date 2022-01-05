@@ -4,6 +4,8 @@ from io import StringIO
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
 
+WARPIL = "FLS FFS AWW TOR SVR FFW SVS LSR SPS WSW FFA WCN NPW".split()
+
 
 def pil_logic(s):
     """Convert the CGI pil value into something we can query
@@ -25,22 +27,8 @@ def pil_logic(s):
     res = []
     for pil in pils:
         if pil[:3] == "WAR":
-            for q in [
-                "FLS",
-                "FFS",
-                "AWW",
-                "TOR",
-                "SVR",
-                "FFW",
-                "SVS",
-                "LSR",
-                "SPS",
-                "WSW",
-                "FFA",
-                "WCN",
-                "NPW",
-            ]:
-                res.append("%s%s" % (q, pil[3:6]))
+            for q in WARPIL:
+                res.append(f"{q}{pil[3:6]}")
         else:
             res.append("%6.6s" % (pil.strip() + "      ",))
     return res
@@ -146,27 +134,19 @@ def application(environ, start_response):
 
     cursor.execute(sql)
     if cursor.rowcount != limit:
-        sql = """
-            SELECT data, pil,
-            to_char(entered at time zone 'UTC', 'YYYYMMDDHH24MI') as ts
-            from products WHERE %s %s %s %s
-            ORDER by entered DESC LIMIT %s """ % (
-            pillimit,
-            centerlimit,
-            timelimit,
-            ttlimit,
-            limit,
+        sql = (
+            "SELECT data, pil, "
+            "to_char(entered at time zone 'UTC', 'YYYYMMDDHH24MI') as ts "
+            "from products WHERE {pillimit} {centerlimit} {timelimit} "
+            f"{ttlimit} ORDER by entered DESC LIMIT {limit}"
         )
         cursor.execute(sql)
 
     for row in cursor:
         if fmt == "html":
             sio.write(
-                (
-                    '<a href="/wx/afos/p.php?pil=%s&e=%s">Permalink</a> '
-                    "for following product: "
-                )
-                % (row[1], row[2])
+                f'<a href="/wx/afos/p.php?pil={row[1]}&e={row[2]}">'
+                "Permalink</a> for following product: "
             )
             sio.write("<br /><pre>\n")
         else:
@@ -193,7 +173,7 @@ def application(environ, start_response):
             sio.write("\n\003\n")
 
     if cursor.rowcount == 0:
-        sio.write("ERROR: Could not Find: %s" % (",".join(pils),))
+        sio.write(f"ERROR: Could not Find: {','.join(pils)}")
     return [sio.getvalue().encode("ascii", "ignore")]
 
 
