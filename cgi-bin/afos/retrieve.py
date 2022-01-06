@@ -137,7 +137,7 @@ def application(environ, start_response):
         sql = (
             "SELECT data, pil, "
             "to_char(entered at time zone 'UTC', 'YYYYMMDDHH24MI') as ts "
-            "from products WHERE {pillimit} {centerlimit} {timelimit} "
+            f"from products WHERE {pillimit} {centerlimit} {timelimit} "
             f"{ttlimit} ORDER by entered DESC LIMIT {limit}"
         )
         cursor.execute(sql)
