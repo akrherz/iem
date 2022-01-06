@@ -18,7 +18,7 @@ def do(ts):
         now = ts.replace(hour=hr, minute=0, second=0)
 
         uri = now.strftime(
-            "https://ftpprd.ncep.noaa.gov/data/nccf/com/nldas/"
+            "https://nomads.ncep.noaa.gov/pub/data/nccf/com/nldas/"
             "prod/nldas.%Y%m%d/nldas.t12z.force-a.grb2f"
         ) + "%02i" % (hr,)
 

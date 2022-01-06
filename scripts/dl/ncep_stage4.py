@@ -17,7 +17,7 @@ LOG = logger()
 def download(now, offset):
     """
     Download a given timestamp from NCEP and inject into LDM
-    Example:  ftp://ftpprd.ncep.noaa.gov/pub/data/nccf/com/hourly/prod/
+    Example:  pub/data/nccf/com/hourly/prod/
               nam_pcpn_anal.20090916/ST4.2009091618.01h.gz
     """
     hours = [1]
@@ -26,14 +26,10 @@ def download(now, offset):
     if now.hour == 12:
         hours.append(24)
     for hr in hours:
-        # https://ftpprd.ncep.noaa.gov/data/nccf/com/pcpanl/prod/
-        # pcpanl.20200728/st4_conus.2020072800.01h.grb2
         url = "%s.%02ih.grb2" % (
             now.strftime(
-                (
-                    "https://ftpprd.ncep.noaa.gov/data/nccf/com/pcpanl/prod/"
-                    "pcpanl.%Y%m%d/st4_conus.%Y%m%d%H"
-                )
+                "https://nomads.ncep.noaa.gov/pub/data/nccf/com/pcpanl/"
+                "prod/pcpanl.%Y%m%d/st4_conus.%Y%m%d%H"
             ),
             hr,
         )

@@ -25,7 +25,7 @@ def dl(now, varname, scenario):
     """get the files"""
     s2 = f"{scenario:02d}"
     uri = (
-        "https://ftpprd.ncep.noaa.gov/data/nccf/com/cfs/prod/"
+        "https://nomads.ncep.noaa.gov/pub/data/nccf/com/cfs/prod/"
         f"cfs/cfs.{now:%Y%m%d/%H}/time_grib_{s2}/{varname}.{s2}"
         f".{now:%Y%m%d%H}.daily.grb2"
     )

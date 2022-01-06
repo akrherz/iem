@@ -33,7 +33,7 @@ def need_to_run(valid, hr):
 def fetch(valid, hr):
     """Fetch the data for this timestamp"""
     uri = valid.strftime(
-        "https://ftpprd.ncep.noaa.gov/data/nccf/com/nam/prod/"
+        "https://nomads.ncep.noaa.gov/pub/data/nccf/com/nam/prod/"
         f"nam.%Y%m%d/nam.t%Hz.conusnest.hiresf0{hr}.tm00.grib2.idx"
     )
     req = exponential_backoff(requests.get, uri, timeout=30)

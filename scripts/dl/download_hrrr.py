@@ -46,7 +46,7 @@ def fetch(valid):
     """
     uri = valid.strftime(
         (
-            "https://ftpprd.ncep.noaa.gov/data/nccf/"
+            "https://nomads.ncep.noaa.gov/pub/data/nccf/"
             "com/hrrr/prod/hrrr.%Y%m%d/conus/hrrr.t%Hz."
             "wrfprsf00.grib2.idx"
         )

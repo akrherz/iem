@@ -21,7 +21,7 @@ def get_service(valid):
     """Does data exist upstream to even attempt a download"""
     # NCEP should have at least 24 hours of data
     if (utc() - datetime.timedelta(hours=24)) < valid:
-        return "https://www.ftp.ncep.noaa.gov/data/nccf/com/hrrr/prod/"
+        return "https://nomads.ncep.noaa.gov/pub/data/nccf/com/hrrr/prod/"
     return "https://noaa-hrrr-bdp-pds.s3.amazonaws.com/"
 
 
