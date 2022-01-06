@@ -43,6 +43,7 @@ def get_description():
     long term COOP data.
     """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
+    sts = today - datetime.timedelta(days=14)
     desc["arguments"] = [
         dict(
             type="zstation",
@@ -54,13 +55,13 @@ def get_description():
         dict(
             type="month",
             name="month",
-            default=(today - datetime.timedelta(days=14)).month,
+            default=sts.month,
             label="Start Month:",
         ),
         dict(
             type="day",
             name="day",
-            default=(today - datetime.timedelta(days=14)).day,
+            default=sts.day,
             label="Start Day:",
         ),
         dict(type="int", name="days", default="14", label="Number of Days"),
@@ -74,7 +75,7 @@ def get_description():
         dict(
             type="year",
             name="year",
-            default=today.year,
+            default=sts.year,
             label="Year to Highlight in Chart:",
         ),
     ]
@@ -85,9 +86,9 @@ def nice(val):
     """pretty print"""
     if val == "M":
         return "M"
-    if val < 0.01 and val > 0:
+    if 0 < val < 0.01:
         return "Trace"
-    return "%.2f" % (val,)
+    return f"{val:.2f}"
 
 
 def plotter(fdict):
@@ -129,7 +130,11 @@ def plotter(fdict):
     df["range_high_temp"] = df["max_high"] - df["min_high"]
     df["range_low_temp"] = df["max_low"] - df["min_low"]
 
-    fig = figure(apctx=ctx)
+    title = (
+        f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
+        f"{PDICT.get(varname)} from {sts:%d %b} through {ets:%d %b}"
+    )
+    fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(2, 1)
 
     bars = ax[0].bar(
@@ -141,9 +146,11 @@ def plotter(fdict):
             mybar.set_facecolor("g")
             mybar.set_edgecolor("g")
             thisvalue = y
-    ax[0].set_xlabel("Year, %s = %s" % (year, nice(thisvalue)))
+    ax[0].set_xlabel(f"Year, {year} = {nice(thisvalue)}")
     ax[0].axhline(
-        df[varname].mean(), lw=2, label="Avg: %.2f" % (df[varname].mean(),)
+        df[varname].mean(),
+        lw=2,
+        label=f"Avg: {df[varname].mean():.2f}",
     )
     ylabel = r"Temperature $^\circ$F"
     if varname in ["precip"]:
@@ -151,16 +158,6 @@ def plotter(fdict):
     elif varname in ["avg_wind_speed"]:
         ylabel = "Wind Speed [MPH]"
     ax[0].set_ylabel(ylabel)
-    ax[0].set_title(
-        ("[%s] %s\n%s from %s through %s")
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            PDICT.get(varname),
-            sts.strftime("%d %b"),
-            ets.strftime("%d %b"),
-        )
-    )
     ax[0].grid(True)
     ax[0].legend(ncol=2, fontsize=10)
     ax[0].set_xlim(df["yr"].min() - 1, df["yr"].max() + 1)
@@ -176,23 +173,18 @@ def plotter(fdict):
     N = len(vals)
     F2 = np.array(range(N)) / float(N) * 100.0
     ax[1].plot(X2, 100.0 - F2)
-    ax[1].set_xlabel("based on summarized hourly reports, %s" % (ylabel,))
+    ax[1].set_xlabel(f"based on summarized hourly reports, {ylabel}")
     ax[1].set_ylabel("Observed Frequency [%]")
     ax[1].grid(True)
     ax[1].set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     mysort = df.sort_values(by=varname, ascending=True)
     info = (
-        "Min: %.2f %.0f\n95th: %.2f\nMean: %.2f\nSTD: %.2f\n5th: %.2f\n"
-        "Max: %.2f %.0f"
-    ) % (
-        df[varname].min(),
-        df["yr"][mysort.index[0]],
-        ptile[1],
-        df[varname].mean(),
-        df[varname].std(),
-        ptile[3],
-        df[varname].max(),
-        df["yr"][mysort.index[-1]],
+        f"Min: {df[varname].min():.2f} {df['yr'][mysort.index[0]]:.0f}\n"
+        f"95th: {ptile[1]:.2f}\n"
+        f"Mean: {df[varname].mean():.2f}\n"
+        f"STD: {df[varname].std():.2f}\n"
+        f"5th: {ptile[3]:.2f}\n"
+        f"Max: {df[varname].max():.2f} {df['yr'][mysort.index[-1]]:.0f}"
     )
     ax[1].axvline(thisvalue, lw=2, color="g")
     ax[1].text(
@@ -207,4 +199,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})
