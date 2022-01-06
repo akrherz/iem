@@ -4,8 +4,8 @@ import json
 import memcache
 import psycopg2.extras
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, html_escape
 from pyiem.reference import TRACE_VALUE
+from pyiem.util import get_dbconn, html_escape
 
 json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 
@@ -43,6 +43,9 @@ def get_data(q):
     elif q == "gr":
         datasql = "''"
         wheresql = "'GR' = ANY(wxcodes)"
+    elif q == "pno":
+        datasql = "''"
+        wheresql = "raw ~* ' PNO'"
     elif q in ["50", "50A"]:
         datasql = "greatest(sknt, gust)"
         wheresql = "(sknt >= 50 or gust >= 50)"
@@ -89,7 +92,7 @@ def application(environ, start_response):
 
     headers = [("Content-type", "application/vnd.geo+json")]
 
-    mckey = ("/geojson/recent_metar?callback=%s&q=%s") % (cb, q)
+    mckey = f"/geojson/recent_metar?callback={cb}&q={q}"
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
     if not res:
@@ -98,7 +101,7 @@ def application(environ, start_response):
     if cb is None:
         data = res
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        data = f"{html_escape(cb)}({res})"
 
     start_response("200 OK", headers)
     return [data.encode("ascii")]
