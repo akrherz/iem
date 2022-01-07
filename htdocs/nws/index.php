@@ -51,9 +51,12 @@ hole with hundreds of plotting options for many datasets of NWS interest.</p>
   <li><a href="/DCP/plot.phtml">Archived DCP Data Plotter</a>
     <br />Simple app to plot out current/historical DCP (river gauges) data for a site
     of your choice.</li>
-	<li>Daily Climate Summary (AFOS: CLI Product) 
-		<a href="climap.php">Interactive Map</a> or 
-		<a href="clitable.php">Text Table</a></li>
+    <li>Daily Climate Summary (AFOS: CLI Product) 
+        <a href="climap.php">Interactive Map</a> or 
+        <a href="clitable.php">Text Table</a></li>
+    <li>CF6 Summary (AFOS: CF6 Product) 
+        <a href="cf6map.php">Interactive Map</a> or 
+        <a href="cf6table.php">Text Table</a></li>
   <li><a href="/COOP/cat.phtml">Daily COOP Observations</a></li>
   <li><a href="/rainfall/obhour.phtml">Hourly Precipitation Summaries</a> for ASOS</li>
   <li><a href="/rainfall/">IEM GIS Rainfall</a><br />
