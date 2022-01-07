@@ -49,6 +49,13 @@ def get_description():
             options=PDICT,
             label="Include Calm Observations? (wind threshold)",
         ),
+        dict(
+            type="select",
+            name="todate",
+            default="no",
+            options={"no": "No", "yes": "Yes"},
+            label="Only consider season to date period?",
+        ),
     ]
     return desc
 
@@ -192,6 +199,7 @@ def get_context(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     sknt = ctx["wind"]
+    today = datetime.date.today()
     df = read_sql(
         """
     WITH data as (
@@ -199,10 +207,10 @@ def get_context(fdict):
         extract(year from valid + '5 months'::interval) as season,
         wcht(tmpf::numeric, (sknt * 1.15)::numeric) from alldata
         WHERE station = %s and tmpf is not null and sknt is not null
-        and tmpf < 50 and sknt >= %s ORDER by valid)
+        and tmpf < 50 and sknt >= %s and report_type = 2 ORDER by valid)
     SELECT case when (valid - lag) < '3 hours'::interval then (valid - lag)
     else '3 hours'::interval end as timedelta, wcht,
-    season from data
+    season, to_char(valid, 'mmdd') as sday from data
     """,
         pgconn,
         params=(station, sknt),
@@ -210,15 +218,25 @@ def get_context(fdict):
     )
     if df.empty:
         raise NoDataFound("No data found for query.")
+    textra = ""
+    if ctx["todate"] == "yes":
+        sday = today.strftime("%m%d")
+        textra = f"till {today:%-d %b}"
+        if sday < "0801":
+            df = df[(df["sday"] < sday) | (df["sday"] > "0801")]
+        else:
+            df = df[(df["sday"] < sday) & (df["sday"] > "0801")]
 
     df2 = pd.DataFrame()
     for i in range(32, -51, -1):
         df2[i] = df[df["wcht"] < i].groupby("season")["timedelta"].sum()
         df2[i] = df[df["wcht"] < i].groupby("season")["timedelta"].sum()
     ctx["df"] = df2
-    ctx[
-        "title"
-    ] = f"[{station}] {ctx['_nt'].sts[station]['name']} Wind Chill Hours"
+    ctx["title"] = (
+        f"[{station}] {ctx['_nt'].sts[station]['name']} "
+        f"Wind Chill Hours {textra} "
+        f"({df['season'].min():.0f}-{df['season'].max():.0f})"
+    )
     ctx["subtitle"] = f"Hours below threshold by season (wind >= {sknt} kts)"
     ctx["dfdescribe"] = df2.iloc[:-1].describe()
     ctx["season"] = int(fdict.get("season", datetime.datetime.now().year))
@@ -254,7 +272,10 @@ def plotter(fdict):
     """Go"""
     ctx = get_context(fdict)
 
-    (fig, ax) = figure_axes(apctx=ctx)
+    (fig, ax) = figure_axes(
+        apctx=ctx,
+        title=f"{ctx['title']}\n{ctx['subtitle']}",
+    )
     for year in ctx["df"].index.values:
         s = ctx["df"].loc[[year]].transpose()
         s = s.dropna().astype("timedelta64[h]")
@@ -266,7 +287,7 @@ def plotter(fdict):
             c=ctx["lines"]["season"]["c"],
             zorder=5,
             label=ctx["lines"]["season"]["label"],
-            lw=2,
+            lw=3,
         )
     for lbl in ["25%", "mean", "75%"]:
         if lbl not in ctx["lines"]:
@@ -284,9 +305,8 @@ def plotter(fdict):
     ax.set_xlim(-50, 32)
     ax.set_xlabel(r"Wind Chill Temperature $^\circ$F")
     ax.set_ylabel("Total Time Hours [expressed in days]")
-    ax.set_title(f"{ctx['title']}\n{ctx['subtitle']}")
     return fig, ctx["df"]
 
 
 if __name__ == "__main__":
-    highcharts({})
+    plotter({"todate": "yes"})
