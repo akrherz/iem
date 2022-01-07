@@ -9,8 +9,9 @@ from shapely.geometry import Polygon, Point
 from scipy.interpolate import Rbf
 from pyiem import reference
 from pyiem.plot import MapPlot, nwssnow
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconn, logger
 
+LOG = logger()
 T4326_2163 = Transformer.from_proj(4326, 2163, always_xy=True)
 T2163_4326 = Transformer.from_proj(2163, 4326, always_xy=True)
 USEME = "used_for_analysis"
@@ -165,6 +166,7 @@ def get_description():
 
 def load_data(ctx, basets, endts):
     """Generate a dataframe with the data we want to analyze."""
+    LOG.debug("call")
     pgconn = get_dbconn("postgis")
     df = read_postgis(
         """SELECT state, wfo,
@@ -180,6 +182,7 @@ def load_data(ctx, basets, endts):
         index_col=None,
         geom_col="geo",
     )
+    LOG.debug("Loaded %s rows", len(df.index))
     df[USEME] = True
     df["nwsli"] = df.index.values
     df["plotme"] = True
@@ -209,6 +212,7 @@ def load_data(ctx, basets, endts):
         index_col=None,
         geom_col="geo",
     )
+    LOG.debug("Loaded %s rows", len(df2.index))
     df2[USEME] = True
     df2["plotme"] = True
     df2["source"] = "COOP"
@@ -249,6 +253,7 @@ def compute_grid_bounds(ctx):
 
 def add_zeros(df, ctx):
     """Add values of zero where we believe appropriate."""
+    LOG.debug("call")
     cellsize = ctx["sz"] * 1000.0
     newrows = []
     if ctx["z"] in ["yes", "plot"]:
@@ -279,7 +284,7 @@ def add_zeros(df, ctx):
                         "lon": lon,
                         "lat": lat,
                         "val": 0,
-                        "nwsli": "Z%s" % (len(newrows) + 1,),
+                        "nwsli": f"Z{len(newrows) + 1}",
                         USEME: True,
                         "plotme": True,
                         "state": "Z",
@@ -291,25 +296,18 @@ def add_zeros(df, ctx):
             ignore_index=True,
             sort=False,
         )
-    # Loop again, figuring out which points we want to keep
-    for y in np.arange(ctx["bnds2163"][1], ctx["bnds2163"][3], cellsize):
-        for x in np.arange(ctx["bnds2163"][0], ctx["bnds2163"][2], cellsize):
-            # search a 2x radius for any obs
-            poly = Polygon(
-                [
-                    [x - cellsize / 2.0, y - cellsize / 2.0],
-                    [x - cellsize / 2.0, y + cellsize / 2.0],
-                    [x + cellsize / 2.0, y + cellsize / 2.0],
-                    [x + cellsize / 2.0, y - cellsize / 2.0],
-                ]
-            )
-            df2 = df[df["geo"].within(poly)]
-            if df2.empty:
-                continue
-            # For this grid cell, remove any values < 80% of the max
-            maxval = df.at[df2.index[0], "val"]
-            df.loc[df2[df2["val"] < (maxval * 0.8)].index, USEME] = False
-            df.loc[df2[df2["val"] < (maxval * 0.8)].index, "plotme"] = False
+    # compute a cell index for each row
+    df["xcell"] = ((df["geo"].x - ctx["bnds2163"][0]) / cellsize).astype(int)
+    df["ycell"] = ((df["geo"].y - ctx["bnds2163"][1]) / cellsize).astype(int)
+
+    for (x, y), gdf in df.groupby(["xcell", "ycell"]):
+        if len(gdf.index) == 1:
+            continue
+        # Find the max value in this cell
+        maxval = gdf["val"].max()
+        df.loc[gdf[gdf["val"] < (maxval * 0.8)].index, USEME] = False
+        df.loc[gdf[gdf["val"] < (maxval * 0.8)].index, "plotme"] = False
+    LOG.debug("done")
     return df
 
 
@@ -443,14 +441,15 @@ def plotter(fdict):
 if __name__ == "__main__":
     fig, _df = plotter(
         dict(
-            csector="conus",
-            endts="2020-10-19 2000",
+            csector="midwest",
+            endts="2022-1-7 2000",
             hours=12,
             z="yes",
-            p="both",
+            p="contour",
             coop="yes",
-            sz=105,
+            sz=25,
             f="linear",
         )
     )
+    LOG.debug("writing image")
     fig.savefig("/tmp/test.png")
