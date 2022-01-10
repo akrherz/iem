@@ -19,21 +19,17 @@ def do_network(network):
     # Update the STS while we are at it, this will help the database get
     # stuff cached too
     if network.find("_ASOS") > 0:
-        subprocess.call(
-            "python ../dbutil/compute_asos_sts.py %s" % (network,), shell=True
-        )
-    if network.find("_DCP") > 0:
+        subprocess.call(["python", "../dbutil/compute_asos_sts.py", network])
+    elif network.find("_DCP") > 0:
         # Special Logic to compute archive period.
-        subprocess.call(
-            ["python", "../dbutil/compute_hads_sts.py", network],
-        )
+        subprocess.call(["python", "../dbutil/compute_hads_sts.py", network])
         # Update stage details.
+        subprocess.call(["python", "../hads/process_ahps_xml.py", network])
+    elif network.find("_RWIS") > 0:
         subprocess.call(
-            ["python", "../hads/process_ahps_xml.py", network],
+            ["python", "../dbutil/compute_alldata_sts.py", "rwis", network],
         )
-    subprocess.call(
-        "python drive_network_windrose.py %s" % (network,), shell=True
-    )
+    subprocess.call(["python", "drive_network_windrose.py", network])
 
 
 def main():
@@ -42,19 +38,15 @@ def main():
     with get_dbconn("mesosite") as pgconn:
         df = read_sql(
             """SELECT max(id) as station, network from stations
-            WHERE (network ~* 'ASOS' or network = 'AWOS' or network ~* 'DCP')
+            WHERE (network ~* 'ASOS' or network = 'AWOS' or network ~* 'DCP'
+            or network ~* 'RWIS')
             and online = 't' GROUP by network ORDER by random()""",
             pgconn,
             index_col="network",
         )
     for network, row in df.iterrows():
         station = row["station"]
-        testfn = "%s/%s/%s/%s_yearly.png" % (
-            CACHEDIR,
-            network,
-            station,
-            station,
-        )
+        testfn = f"{CACHEDIR}/{network}/{station}/{station}_yearly.png"
         if not os.path.isfile(testfn):
             LOG.info(
                 "Driving network %s because no file for %s", network, station
