@@ -2,17 +2,18 @@
 putenv("TZ=GMT");
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
+require_once "../../include/forms.php";
 $mos = iemdb("mos");
 pg_exec($mos, "SET TIME ZONE 'UTC'");
 
-$year1 = isset($_GET["year1"]) ? $_GET["year1"]: date("Y", time() + 86400);
-$year2 = isset($_GET["year2"]) ? $_GET["year2"]: date("Y", time() + 86400);
-$month1 = isset($_GET["month1"]) ? $_GET["month1"]: date("m", time() + 86400);
-$month2 = isset($_GET["month2"]) ? $_GET["month2"]: date("m", time() + 86400);
-$day1 = isset($_GET["day1"]) ? $_GET["day1"]: date("d", time() + 86400);
-$day2 = isset($_GET["day2"]) ? $_GET["day2"]: date("d", time() + 86400);
-$hour1 = isset($_GET["hour1"]) ? $_GET["hour1"]: 0;
-$hour2 = isset($_GET["hour2"]) ? $_GET["hour2"]: 12;
+$year1 = isset($_GET["year1"]) ? int404($_GET["year1"]): date("Y", time() + 86400);
+$year2 = isset($_GET["year2"]) ? int404($_GET["year2"]): date("Y", time() + 86400);
+$month1 = isset($_GET["month1"]) ? int404($_GET["month1"]): date("m", time() + 86400);
+$month2 = isset($_GET["month2"]) ? int404($_GET["month2"]): date("m", time() + 86400);
+$day1 = isset($_GET["day1"]) ? int404($_GET["day1"]): date("d", time() + 86400);
+$day2 = isset($_GET["day2"]) ? int404($_GET["day2"]): date("d", time() + 86400);
+$hour1 = isset($_GET["hour1"]) ? int404($_GET["hour1"]): 0;
+$hour2 = isset($_GET["hour2"]) ? int404($_GET["hour2"]): 12;
 $model = isset($_GET["model"]) ? $_GET["model"]: "GFS";
 $station = isset($_GET["station"]) ? strtoupper($_GET["station"]): "KAMW";
 $sts = mktime($hour1, 0, 0, $month1, $day1, $year1);

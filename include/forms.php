@@ -23,6 +23,15 @@ function xecho($data)
 	echo xssafe($data);
 }
 
+// Ensure we are getting int values or we 404
+function int404($val){
+    if (!is_numeric($val)){
+        http_response_code(404);
+        die();
+    }
+    return intval($val);
+}
+
 // https://stackoverflow.com/questions/834303/startswith-and-endswith-functions-in-php
 function endsWith($haystack, $needle)
 {
