@@ -90,18 +90,19 @@ def plotter(fdict):
         ec="b",
         zorder=1,
     )
-    ax.bar(
-        year,
-        df.at[year, "largest_change"],
-        fc="red",
-        ec="red",
-        zorder=2,
-    )
+    if year in df.index:
+        ax.bar(
+            year,
+            df.at[year, "largest_change"],
+            fc="red",
+            ec="red",
+            zorder=2,
+        )
+        ax.set_xlabel(f"{year} value is {df.at[year, 'largest_change']}")
     mv = df["largest_change"].mean()
     ax.axhline(mv, lw=2, color="k")
     ax.grid(True)
     ax.set_ylabel(r"Largest Low Temp Drop $^\circ$F, " f"Avg: {mv:.1f}")
-    ax.set_xlabel(f"{year} value is {df.at[year, 'largest_change']}")
     ax.set_xlim(df.index.values.min() - 1, df.index.values.max() + 1)
 
     ax = fig.add_axes([0.58, 0.12, 0.4, 0.32])
@@ -128,4 +129,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({})
+    plotter({"year": 2022})

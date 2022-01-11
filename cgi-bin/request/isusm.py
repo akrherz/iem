@@ -149,7 +149,11 @@ def fetch_daily(form, cols):
             if row["tair_c_min_qc"] is not None
             else miss
         )
-        precip = row["rain_in_tot_qc"] if row["rain_in_tot_qc"] > 0 else 0
+        precip = (
+            row["rain_in_tot_qc"]
+            if row["rain_in_tot_qc"] is not None and row["rain_in_tot_qc"] > 0
+            else 0
+        )
         et = (
             mm2inch(row["dailyet_qc"])
             if row["dailyet_qc"] is not None and row["dailyet_qc"] > 0

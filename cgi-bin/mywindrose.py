@@ -31,7 +31,7 @@ def send_error(form, msg, start_response):
 
     fig, ax = plt.subplots(1, 1)
     ax.text(0.5, 0.5, msg, ha="center")
-    start_response("200 OK", [("Content-type", "%s" % (ct,))])
+    start_response("200 OK", [("Content-type", ct)])
     bio = BytesIO()
     fig.savefig(bio, format=fmt)
     return bio.getvalue()
@@ -91,7 +91,7 @@ def guess_network(station):
 
 def get_station_info(form):
     """Determine some metadata we need to process this form request."""
-    station = form["station"]
+    station = form["station"].upper()
     network = form.get("network")
     if network is None:
         network = guess_network(station)
