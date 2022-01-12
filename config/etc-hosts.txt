@@ -10,9 +10,8 @@
 
 192.168.0.1      iem-director0 iem-director0.local
 192.168.0.2      iem-director1 iem-director1.local
-192.168.0.3      nagios.local
 192.168.0.4      thumper-ah.local
-192.168.0.5      iem-syslog
+192.168.0.5      mtadmin.local
 192.168.0.10      metfs1.local       iem-idd0      iem-idd0.local  
 
 # Service VMs
