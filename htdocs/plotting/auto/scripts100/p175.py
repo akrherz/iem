@@ -128,8 +128,8 @@ def plotter(fdict):
         "IEM Estimated Areal Snow Coverage over "
         f"{reference.state_names[state]}\n"
         f"Percentage of state reporting at least {thres:.2f}in snow "
-        f"cover depth {rows[0]['valid']:%b %-d, %Y} - "
-        f"{rows[-1]['valid']:%b %-d %Y}"
+        f"cover depth {df['valid'].min():%b %-d, %Y} - "
+        f"{df['valid'].max():%b %-d %Y}"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.bar(
@@ -143,6 +143,8 @@ def plotter(fdict):
     ax.set_ylabel("Areal Coverage [%]")
     ax.xaxis.set_major_locator(mdates.DayLocator([1, 15]))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d %b\n%Y"))
+    one = datetime.timedelta(days=1)
+    ax.set_xlim(df["valid"].min() - one, df["valid"].max() + one)
     ax.set_yticks(range(0, 101, 25))
     ax.grid(True)
 
