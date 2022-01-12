@@ -1,7 +1,4 @@
-"""snow cover coverage.
-
-TODO: the database has this now as the 0000 sites
-"""
+"""snow cover coverage."""
 import os
 import datetime
 
@@ -68,8 +65,8 @@ def plotter(fdict):
     metric = convert_value(thres, "inch", "millimeter")
     state = ctx["state"][:2]
 
-    sts = datetime.datetime(year, 10, 1)
-    ets = datetime.datetime(year + 1, 5, 1)
+    sts = datetime.datetime(year, 10, 1, 12)
+    ets = datetime.datetime(year + 1, 5, 1, 12)
     rows = []
 
     pgconn = get_dbconn("postgis")
@@ -84,7 +81,7 @@ def plotter(fdict):
     sidx = iemre.daily_offset(sts)
     ncfn = iemre.get_daily_ncname(sts.year)
     if not os.path.isfile(ncfn):
-        raise NoDataFound("Data for year %s not found" % (sts.year,))
+        raise NoDataFound(f"Data for year {sts.year} not found")
     with ncopen(ncfn) as nc:
         czs = CachingZonalStats(iemre.AFFINE)
         hasdata = np.zeros(
@@ -114,21 +111,27 @@ def plotter(fdict):
     eidx = iemre.daily_offset(ets)
     ncfn = iemre.get_daily_ncname(ets.year)
     if not os.path.isfile(ncfn):
-        raise NoDataFound("Data for year %s not found" % (ets.year,))
+        raise NoDataFound(f"Data for year {ets.year} not found")
     with ncopen(ncfn) as nc:
         snowd = nc.variables["snowd_12z"][:eidx, :, :]
     for i in range(snowd.shape[0]):
         rows.append(
             {
-                "valid": datetime.date(ets.year, 1, 1)
+                "valid": datetime.datetime(ets.year, 1, 1, 12)
                 + datetime.timedelta(days=i),
                 "coverage": f(st, snowd[i], metric, stpts),
             }
         )
     df = pd.DataFrame(rows)
     df = df[np.isfinite(df["coverage"])]
-
-    (fig, ax) = figure_axes(apctx=ctx)
+    title = (
+        "IEM Estimated Areal Snow Coverage over "
+        f"{reference.state_names[state]}\n"
+        f"Percentage of state reporting at least {thres:.2f}in snow "
+        f"cover depth {rows[0]['valid']:%b %-d, %Y} - "
+        f"{rows[-1]['valid']:%b %-d %Y}"
+    )
+    (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.bar(
         df["valid"].values,
         df["coverage"].values,
@@ -136,14 +139,7 @@ def plotter(fdict):
         ec="tan",
         align="center",
     )
-    ax.set_title(
-        (
-            "IEM Estimated Areal Snow Coverage Percent of %s\n"
-            " percentage of state reporting at least  %.2fin snow"
-            " cover"
-        )
-        % (reference.state_names[state], thres)
-    )
+
     ax.set_ylabel("Areal Coverage [%]")
     ax.xaxis.set_major_locator(mdates.DayLocator([1, 15]))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d %b\n%Y"))
@@ -154,5 +150,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
-    # print df['coverage'].max()
+    plotter({})
