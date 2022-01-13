@@ -11,6 +11,9 @@ if [ $DD -eq "07" ]
 		python nmp_monthly_email.py
 fi
 
+cd ../swat
+python swat_realtime.py &
+
 # Run the climodat estimator to get sites that are valid at midnight
 cd ../climodat
 python daily_estimator.py $(date --date '1 days ago' +'%Y %m %d')
