@@ -25,10 +25,10 @@ def main():
         station = row[0]
         date = row[1]
         # Go fetch me the IEMRE value!
-        uri = ("http://iem.local/iemre/daily/%s/%.2f/%.2f/json") % (
-            date.strftime("%Y-%m-%d"),
-            nt.sts[station]["lat"],
-            nt.sts[station]["lon"],
+        uri = (
+            "http://mesonet.agron.iastate.edu/iemre/daily/"
+            f"{date:%Y-%m-%d}/{nt.sts[station]['lat']:.2f}/"
+            f"{nt.sts[station]['lon']:.2f}/json"
         )
         res = requests.get(uri)
         j = json.loads(res.content)

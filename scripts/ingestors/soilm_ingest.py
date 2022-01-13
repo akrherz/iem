@@ -212,6 +212,10 @@ def common_df_logic(filename, maxts, nwsli, tablename):
     df.columns = map(str.lower, df.columns)
     # rename columns to rectify differences
     df.rename(columns=VARCONV, inplace=True)
+    # QC out some bad temp values
+    if tablename == "sm_daily" and nwsli in ["GVNI4", "CSII4"]:
+        for col in ["tair_c_avg", "tair_c_min", "tair_c_max"]:
+            df[col] = np.nan
     # rain_mm_tot to rain_in_tot
     for col in ["rain_mm_tot", "rain_mm_2_tot"]:
         if col in df.columns:
@@ -323,12 +327,12 @@ def common_df_logic(filename, maxts, nwsli, tablename):
     if df.empty:
         return
 
-    df.drop("record", axis=1, inplace=True)
+    df = df.drop("record", axis=1)
     # Create _qc and _f columns
     for colname in df.columns:
         if colname in ["valid", "duration"]:
             continue
-        df["%s_qc" % (colname,)] = df[colname]
+        df[f"{colname}_qc"] = df[colname]
         if colname.startswith("calc_vwc"):
             df["%s_f" % (colname,)] = qcval(
                 df, "%s_qc" % (colname,), 0.01, 0.7
