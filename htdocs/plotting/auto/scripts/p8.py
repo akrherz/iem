@@ -20,7 +20,7 @@ def get_description():
         dict(
             type="station",
             name="station",
-            default="IA0200",
+            default="IATAME",
             label="Select Station:",
             network="IACLIMATE",
         ),
@@ -59,7 +59,7 @@ def plotter(fdict):
     eyear = ctx["eyear"]
     threshold = ctx["threshold"]
 
-    nt = network.Table("%sCLIMATE" % (station[:2],))
+    nt = network.Table(f"{station[:2]}CLIMATE")
 
     cursor.execute(
         f"""
@@ -87,9 +87,11 @@ def plotter(fdict):
     )
 
     title = (
-        "%s [%s] Monthly Precipitation Reliability\n"
-        "Period: %s-%s, %% of Months above %s%% of Long Term Avg"
-    ) % (nt.sts[station]["name"], station, syear, eyear, threshold)
+        f"{nt.sts[station]['name']} [{station}] "
+        "Monthly Precipitation Reliability\n"
+        f"Period: {syear}-{eyear}, % of Months above {threshold}% "
+        "of Long Term Avg"
+    )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     ax.bar(np.arange(1, 13), vals, align="center")
@@ -99,7 +101,7 @@ def plotter(fdict):
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.grid(True)
     ax.set_xlim(0.5, 12.5)
-    ax.set_ylabel("Percentage of Months, n=%.0f years" % (years,))
+    ax.set_ylabel(f"Percentage of Months, n={years:.0f} years")
     return fig, df
 
 

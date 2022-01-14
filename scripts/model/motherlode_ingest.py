@@ -11,8 +11,9 @@ import requests
 import pytz
 import pandas as pd
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
 
+LOG = logger()
 NT = NetworkTable(["AWOS", "IA_ASOS"])
 
 BASE_URL = "https://tds.scigw.unidata.ucar.edu/thredds/ncss/grib/NCEP/"
@@ -57,10 +58,7 @@ def xref(row, varname, model):
     """Safer lookup"""
     rowkey = VLOOKUP[varname][model]
     if rowkey not in row:
-        print(
-            ("motherload_ingest failed to find %s in %s\nrow:%s")
-            % (varname, model, row)
-        )
+        LOG.warning("Failed to find %s in %s\nrow:%s", varname, model, row)
         sys.exit()
     return row[rowkey]
 
@@ -71,9 +69,9 @@ def run(mcursor, model, station, lon, lat, ts):
     """
 
     vstring = ""
-    for v in VLOOKUP:
-        if VLOOKUP[v][model] is not None:
-            vstring += "var=%s&" % (VLOOKUP[v][model],)
+    for _k, val in VLOOKUP.items():
+        if val[model] is not None:
+            vstring += f"var={val[model]}&"
 
     url = (
         "%s%s?%slatitude=%s&longitude=%s&temporal=all&vertCoord="
@@ -95,19 +93,21 @@ def run(mcursor, model, station, lon, lat, ts):
     try:
         fp = requests.get(url, timeout=120)
         if fp.status_code == 404:
-            print("motherlode_ingest grid %s %s missing" % (model, ts))
+            LOG.warning("Grid %s %s missing", model, ts)
             return 0
         sio = StringIO(fp.text)
     except Exception as exp:
         print(exp)
         print(url)
-        print(
-            ("FAIL ts: %s station: %s model: %s")
-            % (ts.strftime("%Y-%m-%d %H"), station, model)
+        LOG.warning(
+            "FAIL ts: %s station: %s model: %s",
+            ts.strftime("%Y-%m-%d %H"),
+            station,
+            model,
         )
         return
 
-    table = "model_gridpoint_%s" % (ts.year,)
+    table = f"model_gridpoint_{ts.year}"
     sql = (
         f"DELETE from {table} WHERE station = %s "
         "and model = %s and runtime = %s"
@@ -115,9 +115,12 @@ def run(mcursor, model, station, lon, lat, ts):
     args = (station, model, ts)
     mcursor.execute(sql, args)
     if mcursor.rowcount > 0:
-        print(
-            "Deleted %s rows for ts: %s station: %s model: %s"
-            % (mcursor.rowcount, ts, station, model)
+        LOG.warning(
+            "Deleted %s rows for ts: %s station: %s model: %s",
+            mcursor.rowcount,
+            ts,
+            station,
+            model,
         )
 
     count = 0
@@ -169,20 +172,22 @@ def run_model(mcursor, model, runtime):
             runtime,
         )
         if cnt == 0:
-            print("No data K%s %s %s" % (sid, runtime, model))
+            LOG.warning("No data K%s %s %s", sid, runtime, model)
 
 
 def check_and_run(mcursor, model, runtime):
     """Check the database for missing data"""
-    table = "model_gridpoint_%s" % (runtime.year,)
+    table = f"model_gridpoint_{runtime.year}"
     mcursor.execute(
         f"SELECT * from {table} WHERE runtime = %s and model = %s",
         (runtime, model),
     )
     if mcursor.rowcount < 10:
-        print(
-            ("Rerunning %s [runtime=%s] due to rowcount %s")
-            % (model, runtime, mcursor.rowcount)
+        LOG.warning(
+            "Rerunning %s [runtime=%s] due to rowcount %s",
+            model,
+            runtime,
+            mcursor.rowcount,
         )
         run_model(mcursor, model, runtime)
 

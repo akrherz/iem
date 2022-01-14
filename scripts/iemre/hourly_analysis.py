@@ -83,7 +83,10 @@ def grid_skyc(df, domain):
     """Hmmmm"""
     v = []
     for _station, row in df.iterrows():
-        _v = max(row["max_skyc1"], row["max_skyc2"], row["max_skyc3"])
+        try:
+            _v = max(row["max_skyc1"], row["max_skyc2"], row["max_skyc3"])
+        except TypeError:
+            continue
         v.append(_v)
     df["skyc"] = v
     return generic_gridder(df, "skyc", domain)
