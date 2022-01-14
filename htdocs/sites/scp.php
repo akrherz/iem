@@ -4,15 +4,16 @@
  require_once "setup.php";
  require_once "../../include/myview.php";
  require_once "../../include/mlib.php";
+ require_once "../../include/forms.php";
 
  $t = new MyView();
  
  $t->title = "Satellite Cloud Product";
  $t->sites_current = "scp";
  $sortdir = isset($_GET["sortdir"]) ? xssafe($_GET["sortdir"]) : "asc";
- $year = isset($_GET["year"])? intval($_GET["year"]): gmdate("Y");
- $month = isset($_GET["month"])? intval($_GET["month"]): gmdate("m");
- $day = isset($_GET["day"])? intval($_GET["day"]): gmdate("d");
+ $year = get_int404("year", gmdate("Y"));
+ $month = get_int404("month", gmdate("m"));
+ $day = get_int404("day", gmdate("d"));
  $date = mktime(0,0,0,$month, $day, $year);
  
 $sortopts = Array(

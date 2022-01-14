@@ -1,8 +1,8 @@
 <?php
 require_once "../../config/settings.inc.php";
+define("IEM_APPID", 11);
 require_once "../../include/myview.php";
 $t = new MyView();
-define("IEM_APPID", 11);
 $t->title = "Agricultural Weather/Climate Information";
 
 $y = date("Y");

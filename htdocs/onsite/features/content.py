@@ -25,10 +25,7 @@ def dblog(yymmdd):
                 2000 + int(yymmdd[:2]), int(yymmdd[2:4]), int(yymmdd[4:6])
             )
             cursor.execute(
-                """
-                UPDATE feature SET views = views + 1
-                WHERE date(valid) = %s
-                """,
+                "UPDATE feature SET views = views + 1 WHERE date(valid) = %s",
                 (dt,),
             )
             pgconn.commit()
@@ -41,11 +38,11 @@ def get_content_type(val):
     if val == "text":
         ct = "text/plain"
     elif val in ["png", "gif", "jpg"]:
-        ct = "image/%s" % (val,)
+        ct = f"image/{val}"
     elif val in ["mp4"]:
-        ct = "video/%s" % (val,)
+        ct = f"video/{val}"
     elif val in ["pdf"]:
-        ct = "application/%s" % (val,)
+        ct = f"application/{val}"
     else:
         ct = "text/plain"
     return ("Content-type", ct)

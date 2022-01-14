@@ -23,8 +23,12 @@ function xecho($data)
 	echo xssafe($data);
 }
 
-// Ensure we are getting int values or we 404
-function int404($val){
+// Ensure we are getting int values from request or we 404
+function get_int404($name, $default=null){
+    if (! array_key_exists($name, $_REQUEST)){
+        return $default;
+    }
+    $val = $_GET[$name];
     if (!is_numeric($val)){
         http_response_code(404);
         die();

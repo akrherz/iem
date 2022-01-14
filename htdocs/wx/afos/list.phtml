@@ -58,13 +58,15 @@ if ((strlen($source) == 4) && (substr($source, 0, 1) == 'K')) { $sesource = subs
 if ($wfo != null){ $source = $wfo; }
 
 $view = isset($_GET["view"])? xssafe($_GET["view"]): 'grid';
-$year = isset($_GET["year"])? intval($_GET["year"]) : date("Y");
-$month = isset($_GET["month"])? intval($_GET["month"]) : date("m");
-$day = isset($_GET["day"])? intval($_GET["day"]) : date("d");
-$year2 = isset($_GET["year2"])? intval($_GET["year2"]) : date("Y");
-$month2 = isset($_GET["month2"])? intval($_GET["month2"]) : date("m");
-$day2 = isset($_GET["day2"])? intval($_GET["day2"]) : date("d");
 $order = isset($_GET["order"]) ? xssafe($_GET["order"]): "asc";
+
+$year = get_int404("year", date("Y"));
+$month = get_int404("month", date("m"));
+$day = get_int404("day", date("d"));
+$year2 = get_int404("year2", date("Y"));
+$month2 = get_int404("month2", date("m"));
+$day2 = get_int404("day2", date("d"));
+
 $ts = mktime(0,0,0, $month, $day, $year);
 $ts2 = $ts + 86400;
 $d2display = "none";

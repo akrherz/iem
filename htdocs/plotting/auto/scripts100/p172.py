@@ -83,7 +83,7 @@ def get_description():
             optional=True,
             type="date",
             name="edate",
-            default=f"2000/{today.strftime('%m/%d')}",
+            default=f"2000/{today:%m/%d}",
             min="2000/01/01",
             max="2000/12/31",
             label="End Day of Year for Plot: (ignore year)",
@@ -122,7 +122,7 @@ def plotter(fdict):
     year2 = ctx.get("year2")
     year3 = ctx.get("year3")
     sdate = ctx["sdate"]
-    table = "alldata_%s" % (station[:2],)
+    table = f"alldata_{station[:2]}"
     # belt and suspenders
     assert ctx["var"] in PDICT
     df = read_sql(
@@ -156,16 +156,10 @@ def plotter(fdict):
     df, cullyears = cull_missing(df, ctx["var"], ctx["m"])
 
     extra = "" if doy_trunc == 365 else f" through {today.strftime('%-d %B')}"
-    title = "Accumulated %s after %s%s" % (
-        sdate.strftime("%-d %B"),
-        PDICT[ctx["var"]],
-        extra,
-    )
-    subtitle = "[%s] %s (%s-%s)" % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-        df["binyear"].min(),
-        datetime.date.today().year,
+    title = f"Accumulated {sdate:%-d %B} after {PDICT[ctx['var']]}{extra}"
+    subtitle = (
+        f"[{station}] {ctx['_nt'].sts[station]['name']} "
+        f"({df['binyear'].min()}-{datetime.date.today().year})"
     )
     if cullyears:
         subtitle += (
@@ -183,7 +177,7 @@ def plotter(fdict):
         lw=2,
         zorder=5,
         color="k",
-        label="Average - %.2f" % (jday["accum"].iloc[-1],),
+        label=f"Average - {jday['accum'].iloc[-1]:.2f}",
     )
 
     # Min and Max
@@ -221,14 +215,13 @@ def plotter(fdict):
             extra = f" to {df2.index.values[-1].strftime('%-d %b')}"
         labelyear = year
         if df2.index.values[0].year != df2.index.values[-1].year:
-            labelyear = "%s-%s" % (
-                df2.index.values[0].year,
-                df2.index.values[-1].year,
+            labelyear = (
+                f"{df2.index.values[0].year}-{df2.index.values[-1].year}"
             )
         ax.plot(
             range(1, len(df2.index) + 1),
             df2["accum"],
-            label="%s - %.2f%s" % (labelyear, lastrow["accum"], extra),
+            label=f"{labelyear} - {lastrow['accum']:.2f}{extra}",
             color=color,
             lw=2,
         )

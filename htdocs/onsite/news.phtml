@@ -7,7 +7,7 @@
  require_once "../../include/forms.php";
  $dbconn = iemdb("mesosite", TRUE, TRUE);
 
- $id = isset($_GET["id"]) ? intval($_GET["id"]): null;
+ $id = get_int404("id");
  $q = isset($_GET["q"]) ? pg_escape_string(xssafe($_GET["q"])) : "";
  $tag = isset($_GET['tag']) ? pg_escape_string(xssafe($_GET['tag'])) : null;
 $content = <<< EOF
