@@ -14,6 +14,7 @@ PDICT = {
     "-SN": "Light Snow (-SN)",
     "PSN": "Heavy Snow (+SN)",  # +SN causes CGI issues
     "SN": "Any Snow (*SN*)",
+    "TSSN": "Thunder and Snow (TSSN)",
     "FZFG": "Freezing Fog (FZFG)",
     "FZRA": "Freezing Rain (FZRA)",
     "FG": "Fog (FG)",
@@ -129,17 +130,14 @@ def plotter(fdict):
 
     if df.empty:
         raise NoDataFound("No database entries found for station, sorry!")
+    t1 = "Calendar Dates" if ctx["w"] == "day" else "Hourly Observations"
+    t2 = pweather if pweather != "1" else "TS"
+    t3 = " with at least one hourly report" if ctx["w"] == "day" else ""
     title = (
-        "[%s] %s %s Events\n" "(%s-%s) Distinct %s with '%s' Reported%s"
-    ) % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-        PDICT[pweather],
-        syear,
-        datetime.date.today().year,
-        "Calendar Dates" if ctx["w"] == "day" else "Hourly Observations",
-        pweather if pweather != "1" else "TS",
-        " with at least one hourly report" if ctx["w"] == "day" else "",
+        f"[{station}] {ctx['_nt'].sts[station]['name']} {PDICT[pweather]} "
+        "Events\n"
+        f"({syear}-{datetime.date.today().year}) Distinct {t1} with "
+        f"'{t2}' Reported{t3}"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     df2 = df[df["year"] == year]
@@ -165,9 +163,8 @@ def plotter(fdict):
     ax.set_xlim(0.5, 12.5)
     ax.set_xticks(range(1, 13))
     ax.set_xticklabels(calendar.month_abbr[1:])
-    ax.set_ylabel(
-        "%s Per Month" % ("Days" if ctx["w"] == "days" else "Hours",)
-    )
+    t1 = "Days" if ctx["w"] == "days" else "Hours"
+    ax.set_ylabel(f"{t1} Per Month")
     ax.set_ylim(top=(ax.get_ylim()[1] + 2))
     ax.legend(loc="best")
     ax.grid(True)
