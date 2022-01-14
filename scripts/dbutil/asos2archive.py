@@ -91,7 +91,11 @@ def do_insert(source_cursor, madis):
                 skips += 1
                 continue
             # Skip if old metar is longer and new metar is not a COR
-            if len(metar) > len(row["raw"]) and row["raw"].find(" COR ") == 0:
+            if (
+                metar is not None
+                and len(metar) > len(row["raw"])
+                and row["raw"].find(" COR ") == 0
+            ):
                 skips += 1
                 continue
             cursor.execute(
