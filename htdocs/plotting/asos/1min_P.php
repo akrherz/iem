@@ -3,9 +3,7 @@
 
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
-require_once "../../../include/network.php";
-$nt = new NetworkTable(Array("IA_ASOS","NE_ASOS","IL_ASOS","SD_ASOS"));
-$cities = $nt->table;
+
 require_once "../../../include/jpgraph/jpgraph.php";
 require_once "../../../include/jpgraph/jpgraph_date.php";
 require_once "../../../include/jpgraph/jpgraph_line.php";
@@ -23,9 +21,9 @@ $sqlDate1 = strftime("%Y-%m-%d 00:00", $myTime);
 $sqlDate2 = strftime("%Y-%m-%d 23:59", $myTime);
 
 $connection = iemdb("asos1min");
-$rs = pg_prepare($connection, "SELECT", "SELECT " .
-	"valid, precip, pres1 from " .
-	"alldata_1minute WHERE station = $1 and " .
+$rs = pg_prepare($connection, "SELECT", "SELECT ".
+	"valid, precip, pres1 from ".
+	"alldata_1minute WHERE station = $1 and ".
 	"valid >= $2 and valid <= $3 ORDER by valid");
 
 $result = pg_execute($connection, "SELECT", Array($station, $sqlDate1, $sqlDate2));
@@ -66,7 +64,7 @@ $graph->img->SetMargin(55,40,55,60);
 //$graph->xaxis->SetTextLabelInterval(60);
 $graph->xaxis->SetTextTickInterval(60);
 $graph->xaxis->SetLabelAngle(90);
-$graph->title->Set($cities[$station]['name'] ." Time Series");
+$graph->title->Set("Time Series");
 $graph->subtitle->Set($titleDate );
 
 $graph->legend->SetLayout(LEGEND_HOR);
@@ -85,7 +83,7 @@ $graph->yaxis->SetTitle("Station Pressure [mb]");
 $graph->y2axis->SetTitle("Accumulated Precipitation [inches]");
 
 $graph->yaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
-$graph->xaxis->SetTitle("Valid Local Time");
+$graph->xaxis->SetTitle("Central Time Zone");
 $graph->xaxis->SetTitleMargin(30);
 $graph->yaxis->SetTitleMargin(43);
 //$graph->y2axis->SetTitleMargin(28);
@@ -93,13 +91,13 @@ $graph->xaxis->title->SetFont(FF_FONT1,FS_BOLD,12);
 $graph->xaxis->SetPos("min");
 
 // Create the linear plot
-$lineplot=new LinePlot($alti, $valid);
+$lineplot=new LinePlot($alti, $avalid);
 $graph->Add($lineplot);
 $lineplot->SetLegend("Altimeter");
 $lineplot->SetColor("black");
 
 // Create the linear plot
-$lineplot2=new LinePlot($prec, $valid);
+$lineplot2=new LinePlot($prec, $pvalid);
 $graph->AddY2($lineplot2);
 $lineplot2->SetLegend("Precipitation");
 $lineplot2->SetColor("blue");
