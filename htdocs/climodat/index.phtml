@@ -1,5 +1,5 @@
 <?php
-$OL = "6.2.1";
+$OL = "6.6.0";
  require_once "../../config/settings.inc.php";
  define("IEM_APPID", 15);
  require_once "../../include/mlib.php";
@@ -8,9 +8,10 @@ $OL = "6.2.1";
  require_once "../../include/iemprop.php";
  require_once "../../include/imagemaps.php";
  require_once "../../include/forms.php";
- $report = isset($_REQUEST["report"])? substr($_REQUEST["report"],0,2): "01";
- $station = isset($_REQUEST["station"])? substr($_REQUEST["station"],0,6) : "";
- $network = isset($_REQUEST['network']) ? xssafe($_REQUEST['network']) : 'IACLIMATE';
+ // hacky
+ $report = sprintf("%02d", get_int404("report", 1));
+ $station = isset($_REQUEST["station"])? strtoupper(substr(xssafe($_REQUEST["station"]),0,6)) : "";
+ $network = isset($_REQUEST['network']) ? strtoupper(xssafe($_REQUEST['network'])) : 'IACLIMATE';
 // Make sure that our network matches the station, silly bots
 if ($station != ""){
 	if (substr($station, 0, 2) != substr($network, 0, 2)){
@@ -19,7 +20,7 @@ if ($station != ""){
 }
  
  if (isset($_GET["id"])){
-   $station = substr($_REQUEST["id"],0,6);
+   $station = substr(xssafe($_GET["id"]),0,6);
  }
 
  $xref = Array("01" => "110/",
@@ -158,31 +159,13 @@ climate observations from the <a href="/COOP/">NWS COOP</a> network.  Some quali
 control is done and estimating is done to create a complete time series without
 missing data. You can <a href="/request/coop/fe.phtml">download the daily data</a>.</li>
 
-<li>We also provide <a href="index.phtml#ks">"kitchen sink"</a> data files 
-which contain the much of the raw information used to generate the reports.</li>
-
 <li>There is a <a href="monitor.php">station monitor app</a> that allows you to see
 current summarized statistics for a station collection of your choice.</li>
 
-<li>For the Iowa data, the <a href="http://www.iowaagriculture.gov/climatology.asp">Iowa State Climatologist</a> 
-provides the IEM with a monthly update of
-quality controlled observational data.  This procedure takes a good deal of 
-time on his behalf. Quality controlled information exists from 
-<b>1 Jan 1951 till {$enddate}</b>. Any months of data
-afterwards are based on preliminary data from 
-<a href="http://www.ncdc.noaa.gov">NCDC</a> and other sources.</li>
 
-<li>Some sites have 
-data back to 1893, so their reports contain data dating back to then.</li>
-
-<li>This <a href="/plotting/auto/">Automated Data Plotting</a> application on
+<li>The <a href="/plotting/auto/">Automated Data Plotting</a> application on
 this website contains charts and downloadable datasets that may interest you.</li>
 
-<li><strong>Update 27 Oct 2015:</strong> 
-The plain text reports are dynamically generated on this page and no
-longer directly available for bulk download. The format of the generated Excel
-files is somewhat different now as well.  If this causes you heartburn, please
-do <a href="/info/contacts.php">let us know</a>!</li>
 </ol>
 
 <p>Data is available from the following states: 
@@ -244,7 +227,12 @@ EOF;
    border: 2px solid black;
 }
 </style>
-<i>Click black dot to select your site and then select a report to view</i><br />
+
+<p>Available stations are presented on the map below. Green dots indicate sites
+that have data up until today.  Yellow dots have data, but not for a period
+ending today.  Clicking on one of the dots will change the station select
+form above.</p>
+
 <div id="map"></div>
 
 

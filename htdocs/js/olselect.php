@@ -8,7 +8,7 @@ require_once "../../include/forms.php";
 $network = isset($_GET['network']) ? xssafe($_GET['network']): 'IA_ASOS';
 $multi = isset($_GET["multi"]);
 header("Content-type: application/javascript");
-$uri = sprintf("/geojson/network/%s.geojson", $network);
+$uri = sprintf("/api/1/network/%s.geojson", $network);
 
 echo <<<EOF
 var map;
@@ -28,24 +28,20 @@ $(document).ready(function(){
 			format: new ol.format.GeoJSON()
 		}),
 		style: function(feature, resolution){
-			return [
+            var color = feature.get("online") ? '#00ff00' : '#ffff00';
+            var zindex = feature.get("online") ? 100 : 99;
+            return [
             	new ol.style.Style({
+                    zIndex: zindex,
                 	image: new ol.style.Circle({
                     	fill: new ol.style.Fill({
-                        	color: 'rgba(255,255,0,1)'
+                        	color: color
                         }),
                         stroke: new ol.style.Stroke({
                             color: '#000000',
                             width: 2.25
                         }),
                         radius: 7
-                    }),
-                    fill: new ol.style.Fill({
-                        color: 'rgba(255,255,0,1)'
-                    }),
-                    stroke: new ol.style.Stroke({
-                        color: '#3399CC',
-                        width: 1.25
                     })
                 })
             ];
@@ -91,7 +87,8 @@ $(document).ready(function(){
     map.addControl(layerSwitcher);
 					
 	jQuery('<div/>', {
-	    id: 'mappopup'
+	    id: 'mappopup',
+        style: 'width: 200px;'
 	}).appendTo('#map');									
 					
 	element = document.getElementById('mappopup');
@@ -117,11 +114,14 @@ $(document).ready(function(){
 			    'placement': 'top',
     			'animation': false,
     			'html': true,
-    			'content': '<p>' + feature.get('sname') + '</p>'
+    			'content': '<p>'+
+                    feature.get('name') +
+                    '<br /><strong>Online:</strong> ' + feature.get('online') +
+                    '</p>'
   			});
     		$(element).popover('show');
             // Set the select form to proper value
-   		    $('select[name="station"]').select2().val(feature.get('sid')).trigger('change');
+   		    $('select[name="station"]').select2().val(feature.get('id')).trigger('change');
   		} 
    });
 
