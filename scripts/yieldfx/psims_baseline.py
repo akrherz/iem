@@ -148,7 +148,7 @@ def qc(nc):
         avgv = np.mean(nc.variables["srad"][i, :, :])
         if avgv > 0:
             continue
-        print("ts: %s avgv: %s" % (ts, avgv))
+        print(f"ts: {ts} avgv: {avgv}")
     print("done...")
 
 
@@ -183,10 +183,9 @@ def main(argv):
             # with the first number in the file name being number
             # of tiles since 90 degrees north, and the second number
             # being number of tiles since -180 degrees eas
-            ncfn = "clim_%04i_%04i.tile.nc4" % (
-                (90 - south) / 2,
-                (180 - (0 - west)) / 2 + 1,
-            )
+            yt = (90 - south) / 2
+            xt = (180 - (0 - west)) / 2 + 1
+            ncfn = f"clim_{yt:04d}_{xt:04d}.tile.nc4"
             workflow(valid, ncfn, west, south, fullmode)
 
 
