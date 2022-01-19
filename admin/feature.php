@@ -4,6 +4,7 @@ session_start();
 require_once "../config/settings.inc.php";
 require_once "../include/database.inc.php";
 require_once "../include/myview.php";
+require_once "../include/forms.php";
 require_once "../include/Facebook/autoload.php";
 
 $t = new MyView();
@@ -40,6 +41,8 @@ $caption = isset($_REQUEST["caption"]) ? $_REQUEST["caption"] : null;
 $tags = isset($_REQUEST["tags"]) ? $_REQUEST["tags"] : null;
 $voting = (isset($_REQUEST["voting"]) && $_REQUEST["voting"] == "yes") ? 't' : 'f';
 $mediasuffix = isset($_REQUEST["mediasuffix"]) ? $_REQUEST["mediasuffix"]: "png";
+$media_height = get_int404("media_height", null);
+$media_width = get_int404("media_width", null);
 
 // Want appurl inserted as null if empty
 if (empty($appurl)) $appurl = null;
@@ -47,8 +50,8 @@ if (empty($appurl)) $appurl = null;
 $mesosite = iemdb("mesosite", TRUE, TRUE);
 pg_prepare($mesosite, "INJECTOR", "INSERT into feature ".
   "(title, story, caption, voting, tags, fbid, appurl, javascripturl, ".
-  "mediasuffix) VALUES ".
-  "($1, $2, $3, $4, $5, $6, $7, $8, $9)");
+  "mediasuffix, media_height, media_width) VALUES ".
+  "($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)");
 
 $app = "";
 if ($accessToken){
@@ -71,7 +74,7 @@ if ($story != null && $title != null &&
   pg_query($mesosite, "DELETE from feature WHERE date(valid) = 'TODAY'");
   pg_execute($mesosite, "INJECTOR", Array($title, $story, $caption,
 			 $voting, $tags, null, $appurl, $javascripturl,
-			 $mediasuffix) );
+			 $mediasuffix, $media_height, $media_width) );
 }
 
 if ( isset($_REQUEST["facebook"]) && $_REQUEST["facebook"] == "yes"){
@@ -103,7 +106,7 @@ if ($story != null && $title != null &&
   pg_query($mesosite, "DELETE from feature WHERE date(valid) = 'TODAY'");
   pg_execute($mesosite, "INJECTOR", Array($title, $story, $caption,
 			 $voting, $tags, $story_fbid, $appurl, $javascripturl,
-			 $mediasuffix) );
+			 $mediasuffix, $media_height, $media_width) );
 }
 
 $t->content = <<<EOF
@@ -134,6 +137,10 @@ $t->content = <<<EOF
 
 <p>Media Suffix:
 <br /><input type="text" name="mediasuffix" size="8" value="png" /></p>
+
+<p>For MP4, what is the width x height?
+<br /><input type="text" name="media_width" size="8" /> x
+<input type="text" name="media_height" size="8" /></p>
 
 <p>Javascript URI:
 <br /><input type="text" name="javascripturl" size="80" /></p>

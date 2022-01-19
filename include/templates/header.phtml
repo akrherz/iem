@@ -14,9 +14,13 @@ EOF;
 }
 $bodyextra = array_key_exists('bodyextra', $this->vars)? ' '. $this->bodyextra : '';
 $twimage = array_key_exists('twitter_image', $this->vars) ? 
-				$this->twitter_image : '/images/logo_small.png';
+				$this->twitter_image : '/images/logo_large.png';
 $twvideo = array_key_exists('twitter_video', $this->vars) ? 
 				$this->twitter_video : null;
+$twvideo_height = array_key_exists('twitter_video_height', $this->vars) ? 
+				$this->twitter_video_height : null;
+$twvideo_width = array_key_exists('twitter_video_width', $this->vars) ? 
+				$this->twitter_video_width : null;
 $twcard = array_key_exists('twitter_card', $this->vars) ? 
 				$this->twitter_card : 'summary';
 $twdescription = array_key_exists('twitter_description', $this->vars) ? 
@@ -55,6 +59,8 @@ $twdescription = array_key_exists('twitter_description', $this->vars) ?
         echo <<<EOM
     <meta property="og:video" content="https://mesonet.agron.iastate.edu{$twvideo}">
     <meta property="og:video:type" content="video/mp4">
+    <meta property="og:video:width" content="{$twvideo_width}">
+    <meta property="og:video:height" content="{$twvideo_height}">
 
 EOM;
     } ?>

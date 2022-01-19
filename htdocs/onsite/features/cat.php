@@ -56,7 +56,10 @@ if ($row["appurl"] != ""){
 
 $t->title = "$day Feature - ". $row["title"]; 
 if ($row["mediasuffix"] == 'mp4'){
+    // Get the video size and width
     $t->twitter_video = $big;
+    $t->twitter_video_height = $row["media_height"];
+    $t->twitter_video_width = $row["media_width"];
     $media = <<<EOM
   <video class="img img-responsive" controls>
 	<source src="${big}" type="video/mp4">

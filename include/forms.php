@@ -28,7 +28,8 @@ function get_int404($name, $default=null){
     if (! array_key_exists($name, $_REQUEST)){
         return $default;
     }
-    $val = $_GET[$name];
+    $val = $_REQUEST[$name];
+    if ($val != "0" && empty($val)) return $default;
     if (!is_numeric($val)){
         http_response_code(404);
         die();
