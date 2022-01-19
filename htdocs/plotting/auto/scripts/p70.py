@@ -109,9 +109,9 @@ def plotter(fdict):
     opt = ctx["opt"]
     state = ctx["state"]
 
-    wfolimiter = " wfo = '%s' " % (station,)
+    wfolimiter = f" wfo = '{station}' "
     if opt == "state":
-        wfolimiter = " substr(ugc, 1, 2) = '%s' " % (state,)
+        wfolimiter = f" substr(ugc, 1, 2) = '{state}' "
 
     df = read_sql(
         f"""WITH data as (
@@ -148,7 +148,19 @@ def plotter(fdict):
         )
     df["doy"] = df["doy"].dt.days
 
-    fig = figure(apctx=ctx)
+    title = f"[{station}] NWS {ctx['_nt'].sts[station]['name']}"
+    if opt == "state":
+        title = (
+            f"NWS Issued Alerts for State of {reference.state_names[state]}"
+        )
+    title += (
+        "\n"
+        "Period between First and Last "
+        f"{vtec.get_ps_string(phenomena, significance)} "
+        f"({phenomena}.{significance})"
+    )
+
+    fig = figure(apctx=ctx, title=title)
     ax = fig.add_axes([0.12, 0.1, 0.61, 0.8])
 
     # Create a color bar for the number of events per day
@@ -217,27 +229,9 @@ def plotter(fdict):
     ax.axvline(avg_start, ls=":", lw=2, color="k")
     ax.axvline(avg_end, ls=":", lw=2, color="k")
     x0 = datetime.date(2000, 1 if split == "jan1" else 7, 1)
-    ax.set_xlabel(
-        ("Average Start Date: %s, End Date: %s")
-        % (
-            (x0 + datetime.timedelta(days=int(avg_start))).strftime("%-d %b"),
-            (x0 + datetime.timedelta(days=int(avg_end))).strftime("%-d %b"),
-        )
-    )
-    title = "[%s] NWS %s" % (station, ctx["_nt"].sts[station]["name"])
-    if opt == "state":
-        title = ("NWS Issued Alerts for State of %s") % (
-            reference.state_names[state],
-        )
-    ax.set_title(
-        ("%s\nPeriod between First and Last %s (%s.%s)")
-        % (
-            title,
-            vtec.get_ps_string(phenomena, significance),
-            phenomena,
-            significance,
-        )
-    )
+    _1 = (x0 + datetime.timedelta(days=int(avg_start))).strftime("%-d %b")
+    _2 = (x0 + datetime.timedelta(days=int(avg_end))).strftime("%-d %b")
+    ax.set_xlabel(f"Average Start Date: {_1}, End Date: {_2}")
     ax.grid()
     xticks = []
     xticklabels = []

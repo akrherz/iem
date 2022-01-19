@@ -228,8 +228,9 @@ def plotter(fdict):
     )
     if df.empty:
         raise NoDataFound("No Data Found.")
+    # pylint: disable=no-member
     df = df.reindex(
-        pd.date_range(df.index.values[0], df.index.values[-1])
+        pd.date_range(df.index.values[0], datetime.date.today())
     ).fillna(0)
     df["year"] = df.index.year
     df["month"] = df.index.month
@@ -246,10 +247,8 @@ def plotter(fdict):
         title = "All VTEC Events"
     ptitle = f"NWS WFO: {ctx['_nt'].sts[station]['name']} ({station})"
     if opt == "state":
-        ptitle = ("NWS Issued for %s in %s") % (
-            "Parishes" if state == "LA" else "Counties",
-            reference.state_names[state],
-        )
+        _p = "Parishes" if state == "LA" else "Counties"
+        ptitle = f"NWS Issued for {_p} in {reference.state_names[state]}"
     ctx["title"] = f"{ptitle}\n {title} Count"
     ctx["xlabel"] = "all days plotted"
     if lastdoy < 367:
@@ -307,6 +306,7 @@ def plotter(fdict):
 
             s = np.s_[x0 : x1 + 1, y0 : y1 + 1]
             if np.any(mask[s]):
+                # pylint: disable=protected-access
                 a.set_position([a._x - int(lastdoy / 14), a._y])
             else:
                 mask[s] = True
