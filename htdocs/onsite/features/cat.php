@@ -55,16 +55,17 @@ if ($row["appurl"] != ""){
 }
 
 $t->title = "$day Feature - ". $row["title"]; 
-$t->twitter_image = $big;
 if ($row["mediasuffix"] == 'mp4'){
-  $media = <<<EOM
+    $t->twitter_video = $big;
+    $media = <<<EOM
   <video class="img img-responsive" controls>
 	<source src="${big}" type="video/mp4">
 	Your browser does not support the video tag.
 </video>
 EOM;
 } else {
-  $media = <<<EOM
+    $t->twitter_image = $big;
+    $media = <<<EOM
 <a href="{$big}"><img src="{$big}" class="img img-responsive"></a>
 <br /><a href="{$big}">View larger image</a>
 EOM;

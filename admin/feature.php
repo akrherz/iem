@@ -41,6 +41,9 @@ $tags = isset($_REQUEST["tags"]) ? $_REQUEST["tags"] : null;
 $voting = (isset($_REQUEST["voting"]) && $_REQUEST["voting"] == "yes") ? 't' : 'f';
 $mediasuffix = isset($_REQUEST["mediasuffix"]) ? $_REQUEST["mediasuffix"]: "png";
 
+// Want appurl inserted as null if empty
+if (empty($appurl)) $appurl = null;
+
 $mesosite = iemdb("mesosite", TRUE, TRUE);
 pg_prepare($mesosite, "INJECTOR", "INSERT into feature ".
   "(title, story, caption, voting, tags, fbid, appurl, javascripturl, ".

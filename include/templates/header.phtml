@@ -15,6 +15,8 @@ EOF;
 $bodyextra = array_key_exists('bodyextra', $this->vars)? ' '. $this->bodyextra : '';
 $twimage = array_key_exists('twitter_image', $this->vars) ? 
 				$this->twitter_image : '/images/logo_small.png';
+$twvideo = array_key_exists('twitter_video', $this->vars) ? 
+				$this->twitter_video : null;
 $twcard = array_key_exists('twitter_card', $this->vars) ? 
 				$this->twitter_card : 'summary';
 $twdescription = array_key_exists('twitter_description', $this->vars) ? 
@@ -49,7 +51,14 @@ $twdescription = array_key_exists('twitter_description', $this->vars) ?
 	<meta property="og:description" content="<?php echo $twdescription; ?>">
 	<meta property="og:image" content="https://mesonet.agron.iastate.edu<?php echo $twimage; ?>">
 	<meta property="og:url" content="https://mesonet.agron.iastate.edu<?php echo htmlentities($_SERVER["REQUEST_URI"]); ?>">
-	<meta name="twitter:card" content="<?php echo $twcard; ?>">
+	<?php if (!empty($twvideo)){ 
+        echo <<<EOM
+    <meta property="og:video" content="https://mesonet.agron.iastate.edu{$twvideo}">
+    <meta property="og:video:type" content="video/mp4">
+
+EOM;
+    } ?>
+    <meta name="twitter:card" content="<?php echo $twcard; ?>">
 
 	<!-- Non-essential -->
 	<meta name="twitter:creator" content="@akrherz">

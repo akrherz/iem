@@ -51,9 +51,9 @@ def get_github_commits():
     links = []
     for branch in branches:
         uri = (
-            "https://api.github.com/repos/akrherz/iem/commits?since=%s&"
-            "sha=%s"
-        ) % (iso, branch)
+            f"https://api.github.com/repos/akrherz/iem/commits?since={iso}&"
+            f"sha={branch}"
+        )
         req2 = exponential_backoff(requests.get, uri, timeout=30)
         # commits are in reverse order
         for commit in req2.json()[::-1]:
@@ -117,8 +117,8 @@ def cowreport():
     st = data["stats"]
     if st["events_total"] == 0:
         text = "No SVR+TOR Warnings Issued."
-        html = "<h3>IEM Cow Report</h3><pre>" + text + "</pre>"
-        txt = "> IEM Cow Report\n" + text + "\n"
+        html = f"<h3>IEM Cow Report</h3><pre>{text}</pre>"
+        txt = f"> IEM Cow Report\n{text}\n"
         return txt, html
 
     vp = st["events_verified"] / float(st["events_total"]) * 100.0
@@ -138,8 +138,8 @@ def cowreport():
         f"Critical Success Index (higher is better)  [{st['CSI[1]']:.2f}]\n"
     )
 
-    html = "<h3>IEM Cow Report</h3><pre>" + text + "</pre>"
-    txt = "> IEM Cow Report\n" + text + "\n"
+    html = f"<h3>IEM Cow Report</h3><pre>{text}</pre>"
+    txt = f"> IEM Cow Report\n{text}\n"
 
     return txt, html
 
@@ -169,7 +169,7 @@ def feature():
 <br /><strong>Date:</strong> %(nicedate)s
 <br /><strong>Votes:</strong> Good: %(good)s &nbsp;
 Bad: %(bad)s  Abstain: %(abstain)s
-<br /><img src="%(imgurl)s">
+<br />%(mediamarkup)s
 
 <p>%(story)s</p>
 """
@@ -180,17 +180,19 @@ Bad: %(bad)s  Abstain: %(abstain)s
         row2 = row.copy()
         row2["link"] = (
             "https://mesonet.agron.iastate.edu/onsite/features/"
-            "cat.php?day=%s"
-        ) % (lastts.strftime("%Y-%m-%d"),)
-        row2["imgurl"] = (
-            "https://mesonet.agron.iastate.edu/onsite/features/"
-            "%s/%02i/%s.%s"
-        ) % (
-            row["valid"].year,
-            row["valid"].month,
-            row["valid"].strftime("%y%m%d"),
-            row["mediasuffix"],
+            f"cat.php?day={lastts:%Y-%m-%d}"
         )
+        imgurl = (
+            "https://mesonet.agron.iastate.edu/onsite/features/"
+            f"{row['valid']:%Y/%m/%y%m%d}.{row['mediasuffix']}"
+        )
+        if row["mediatype"] in ["mp4"]:
+            row2["mediamarkup"] = (
+                f'<video controls><source src="{imgurl}" type="video/mp4">'
+                "</video>"
+            )
+        else:
+            row2["mediamarkup"] = f'<img src="{imgurl}">'
         if row2["appurl"] is not None:
             if not row2["appurl"].startswith("http"):
                 row2["appurl"] = (
@@ -262,18 +264,17 @@ def main():
     """Go Main!"""
     msg = MIMEMultipart("alternative")
     now = datetime.datetime.now()
-    msg["Subject"] = "IEM Daily Bulletin for %s" % (now.strftime("%b %-d %Y"),)
+    msg["Subject"] = f"IEM Daily Bulletin for {now:%b %-d %Y}"
     msg["From"] = "daryl herzmann <akrherz@iastate.edu>"
     if os.environ["USER"] == "akrherz":
         msg["To"] = "akrherz@iastate.edu"
     else:
         msg["To"] = "iem-dailyb@iastate.edu"
 
-    text = "Iowa Environmental Mesonet Daily Bulletin for %s\n\n" % (
-        now.strftime("%d %B %Y"),
-    )
-    html = "<h3>Iowa Environmental Mesonet Daily Bulletin for %s</h3>\n" % (
-        now.strftime("%d %B %Y"),
+    text = f"Iowa Environmental Mesonet Daily Bulletin for {now:%d %B %Y}\n\n"
+    html = (
+        f"<h3>Iowa Environmental Mesonet Daily Bulletin for {now:%d %B %Y}"
+        "</h3>\n"
     )
 
     t, h = news()
@@ -308,13 +309,13 @@ def main():
     exponential_backoff(send_email, msg)
 
     # Send forth LDM
-    with open("tmp.txt", "w") as fh:
+    with open("tmp.txt", "w", encoding="utf-8") as fh:
         fh.write(text)
     subprocess.call(
         'pqinsert -p "plot c 000000000000 iemdb.txt bogus txt" tmp.txt',
         shell=True,
     )
-    with open("tmp.txt", "w") as fh:
+    with open("tmp.txt", "w", encoding="utf-8") as fh:
         fh.write(html)
     subprocess.call(
         'pqinsert -p "plot c 000000000000 iemdb.html bogus txt" tmp.txt',
@@ -335,7 +336,7 @@ def tests():
     text, html = get_github_commits()
     LOG.info("Text Variant")
     LOG.info(text)
-    with open("/tmp/gh.html", "w") as fh:
+    with open("/tmp/gh.html", "w", encoding="utf-8") as fh:
         fh.write(html)
     subprocess.call("xdg-open /tmp/gh.html >& /dev/null", shell=True)
 
