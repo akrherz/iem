@@ -57,6 +57,7 @@ $twdescription = array_key_exists('twitter_description', $this->vars) ?
 	<meta property="og:url" content="https://mesonet.agron.iastate.edu<?php echo htmlentities($_SERVER["REQUEST_URI"]); ?>">
 	<?php if (!empty($twvideo)){ 
         echo <<<EOM
+    <meta property="og:type" content="video">
     <meta property="og:video" content="https://mesonet.agron.iastate.edu{$twvideo}">
     <meta property="og:video:type" content="video/mp4">
     <meta property="og:video:width" content="{$twvideo_width}">
