@@ -22,11 +22,11 @@ $t->jsextra = <<<EOF
 </style>
 EOF;
 
-$y1select = yearSelect2(2012, 2010, "year1");
+$y1select = yearSelect2(2010, 2010, "year1");
 $m1select = monthSelect2(1, "month1");
 $d1select = daySelect2(1, "day1");
 
-$y2select = yearSelect2(2012, 2010, "year2");
+$y2select = yearSelect2(date("Y"), 2010, "year2");
 $m2select = monthSelect2(1, "month2");
 $d2select = daySelect2(1, "day2");
 
@@ -89,43 +89,43 @@ to request a point outside of the domain.  Data is available since
 <p><h4>Recent Analysis Plots at 00 UTC</h4>
 <i>Click image for archived imagery</i>
 
-    		<div class="row">
-    		<div class="col-md-6">
-    		<a href="/timemachine/#56.0"><img src="/data/smos_iowa_sm00.png" class="img img-responsive" /></a>
-    		</div>
-    		<div class="col-md-6">
-    		<a href="/timemachine/#55.0"><img src="/data/smos_iowa_od00.png" class="img img-responsive" /></a>
-    		</div>
-    		</div>
+<div class="row">
+<div class="col-md-6">
+<a href="/timemachine/#56.0"><img src="/data/smos_iowa_sm00.png" class="img img-responsive" /></a>
+</div>
+<div class="col-md-6">
+<a href="/timemachine/#55.0"><img src="/data/smos_iowa_od00.png" class="img img-responsive" /></a>
+</div>
+</div>
 
-    		<div class="row">
-    		<div class="col-md-6">
-    		<a href="/timemachine/#53.0"><img src="/data/smos_midwest_sm00.png" class="img img-responsive" /></a>
-    		</div>
-    		<div class="col-md-6">
-    		<a href="/timemachine/#54.0"><img src="/data/smos_midwest_od00.png" class="img img-responsive" /></a>
-    		</div>
-    		</div>
+<div class="row">
+<div class="col-md-6">
+<a href="/timemachine/#53.0"><img src="/data/smos_midwest_sm00.png" class="img img-responsive" /></a>
+</div>
+<div class="col-md-6">
+<a href="/timemachine/#54.0"><img src="/data/smos_midwest_od00.png" class="img img-responsive" /></a>
+</div>
+</div>
 
-    		<h4>Recent Analysis Plots at 12 UTC</h4>
-    		
-    		<div class="row">
-    		<div class="col-md-6">
-    		<a href="/timemachine/#56.0"><img src="/data/smos_iowa_sm12.png" class="img img-responsive" /></a>
-    		</div>
-    		<div class="col-md-6">
-    		<a href="/timemachine/#55.0"><img src="/data/smos_iowa_od12.png" class="img img-responsive" /></a>
-    		</div>
-    		</div>
+<h4>Recent Analysis Plots at 12 UTC</h4>
 
-    		<div class="row">
-    		<div class="col-md-6">
-    		<a href="/timemachine/#53.0"><img src="/data/smos_midwest_sm12.png" class="img img-responsive" /></a>
-    		</div>
-    		<div class="col-md-6">
-    		<a href="/timemachine/#54.0"><img src="/data/smos_midwest_od12.png" class="img img-responsive" /></a>
-    		</div>
-    		</div>
+<div class="row">
+<div class="col-md-6">
+<a href="/timemachine/#56.0"><img src="/data/smos_iowa_sm12.png" class="img img-responsive" /></a>
+</div>
+<div class="col-md-6">
+<a href="/timemachine/#55.0"><img src="/data/smos_iowa_od12.png" class="img img-responsive" /></a>
+</div>
+</div>
+
+<div class="row">
+<div class="col-md-6">
+<a href="/timemachine/#53.0"><img src="/data/smos_midwest_sm12.png" class="img img-responsive" /></a>
+</div>
+<div class="col-md-6">
+<a href="/timemachine/#54.0"><img src="/data/smos_midwest_od12.png" class="img img-responsive" /></a>
+</div>
+</div>
     		
     		
 <br />

@@ -141,13 +141,15 @@ def common(ctx):
     ctx["df"] = df
 
 
-def do_precip_plot(ctx):
+def do_precip_plot(ctx) -> bool:
     """Make the precipitation plot."""
+    hasdata = False
     ax = ctx["fig"].gca()
     df = ctx["df"]
     ymax = 1
     ymin = 0
     if df["accum_climo_precip"].max() > 0:
+        hasdata = True
         ax.plot(
             df.index.values,
             df["accum_climo_precip"].values,
@@ -157,6 +159,7 @@ def do_precip_plot(ctx):
         )
         ymax = df["accum_climo_precip"].max() + 0.5
     if df["depart_precip"].notnull().any():
+        hasdata = True
         ax.bar(
             df.index.values - 0.2,
             df["depart_precip"].values,
@@ -168,6 +171,7 @@ def do_precip_plot(ctx):
         )
         ymin = min([0, df["depart_precip"].min() - 0.5])
     if "precip" in df.columns and df["precip"].notnull().any():
+        hasdata = True
         ax.bar(
             df.index.values + 0.2,
             df["precip"].values,
@@ -186,13 +190,16 @@ def do_precip_plot(ctx):
         )
     ax.set_ylabel("Precipitation [inch]", fontsize="large")
     ax.set_ylim(ymin, ymax)
+    return hasdata
 
 
-def do_temperature_plot(ctx):
+def do_temperature_plot(ctx) -> bool:
     """Make the temperature plot."""
     ax = ctx["fig"].gca()
     df = ctx["df"]
+    hasdata = False
     if df["climo_high"].notnull().any():
+        hasdata = True
         ax.plot(
             df.index.values,
             df["climo_high"].values,
@@ -210,6 +217,7 @@ def do_temperature_plot(ctx):
             label="Climate Low",
         )
     if "max_tmpf" in df.columns and not all(pd.isnull(df["max_tmpf"])):
+        hasdata = True
         ax.bar(
             df.index.values - 0.3,
             df["max_tmpf"].values,
@@ -267,6 +275,7 @@ def do_temperature_plot(ctx):
             np.nanmax([df["climo_high"].max(), df["max_tmpf"].max()]) + 5,
         )
     ax.set_ylabel(r"Temperature $^\circ$F")
+    return hasdata
 
 
 def plotter(fdict):
@@ -274,16 +283,18 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     common(ctx)
     if ctx["p"] == "precip":
-        do_precip_plot(ctx)
+        hasdata = do_precip_plot(ctx)
     else:
-        do_temperature_plot(ctx)
-    ctx["fig"].gca().legend(
-        bbox_to_anchor=(0.0, 1.01, 1.0, 0.102),
-        loc=3,
-        ncol=4,
-        mode="expand",
-        borderaxespad=0.0,
-    )
+        hasdata = do_temperature_plot(ctx)
+    # Prevent matplotlib warning about no artists
+    if hasdata:
+        ctx["fig"].gca().legend(
+            bbox_to_anchor=(0.0, 1.01, 1.0, 0.102),
+            loc=3,
+            ncol=4,
+            mode="expand",
+            borderaxespad=0.0,
+        )
     return ctx["fig"], ctx["df"]
 
 

@@ -6,10 +6,12 @@
  define("IEM_APPID", 37);
  require_once "../../include/database.inc.php";
  $conn = iemdb("mesosite");
- $rs = pg_exec($conn, "SELECT s.*, ST_x(geom) as lon, ST_y(geom) as lat, ".
- 		"t.name as netname from stations s JOIN networks t ".
- 		"ON (t.id = s.network) WHERE s.elevation > -990 ".
- 		"ORDER by iemid DESC LIMIT 50");
+ $rs = pg_exec(
+    $conn,
+    "SELECT s.*, ST_x(geom) as lon, ST_y(geom) as lat, t.name as netname ".
+    "from stations s JOIN networks t ON (t.id = s.network) ".
+    "WHERE s.elevation > -990 ORDER by iemid DESC LIMIT 50"
+);
  pg_close($conn);
  
  

@@ -21,8 +21,13 @@ $table = "";
 if ($portfolio != null)
 {
 	$conn = iemdb("portfolio");
-	$sql = "SELECT * from iem_calibration WHERE portfolio = '$portfolio' and station = '$station' ORDER by valid DESC";
-	$rs = pg_exec($conn, $sql);
+    $rs = pg_prepare(
+        $conn,
+        "SELECT",
+        "SELECT * from iem_calibration WHERE portfolio = $1 and ".
+        "station = $2 ORDER by valid DESC"
+    );
+	$rs = pg_execute($conn, "SELECT", array($portfolio, $station));
 
 	if (pg_numrows($rs) == 0){
 		$table .= "<tr><th colspan=6>No events found in database.</th></tr>";

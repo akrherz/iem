@@ -62,8 +62,10 @@ hole with hundreds of plotting options for many datasets of NWS interest.</p>
   <li><a href="/rainfall/">IEM GIS Rainfall</a><br />
     Mostly Midwest products, but includes a conversion of MRMS to ERDAS Imagine Files.</li>
   <li><a href="https://mtarchive.geol.iastate.edu">MRMS Grib Archive</a>
-    <br />Archive of a handful MRMS products in Grib Format.</li>
-  <li><a href="/ASOS/current.phtml">Sortable Currents</a> for ASOS, COOP, etc</li>
+    <br />Archive of a handful MRMS products in Grib Format. The
+    <a href="/archive/">IEM archive page</a> lists out additional MRMS archive
+    resources.</li>
+    <li><a href="/ASOS/current.phtml">Sortable Currents</a> for ASOS, COOP, etc</li>
 </ul>
 
 <p><strong>Flood Warnings/Forecasts</strong>

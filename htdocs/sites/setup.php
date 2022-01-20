@@ -22,7 +22,7 @@ $cities = $st->table;
  if (! array_key_exists($station, $cities))
  {
  	// Attempt to help the user find this station
- 	include_once "../../include/myview.php";
+ 	require_once "../../include/myview.php";
 	$iemdb = iemdb("mesosite");
 	$rs = pg_prepare($iemdb, "FIND", "SELECT id, name, network from stations ".
 			"WHERE id = $1");

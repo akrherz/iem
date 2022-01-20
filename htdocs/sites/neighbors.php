@@ -20,8 +20,11 @@ function neighbors($station,$lat,$lon){
    $s = "<table class=\"table table-striped\">
    <thead><tr><th>Distance [km]</th><th>Network</th><th>Station Name</th></tr></thead>";
    for( $i=0; $row = pg_fetch_assoc($result); $i++) {
-      $s .= sprintf("<tr><td>%.3f</td><td><a href=\"locate.php?network=%s\">%s</a></td><td><a href=\"site.php?station=%s&network=%s\">%s</a></td></tr>", 
-      $row["dist"], $row["network"], $row["network"], $row["id"],  $row["network"], $row["name"]);
+      $s .= sprintf(
+          "<tr><td>%.3f</td><td><a href=\"locate.php?network=%s\">%s</a></td>".
+          "<td><a href=\"site.php?station=%s&network=%s\">%s</a></td></tr>", 
+        $row["dist"], $row["network"], $row["network"], $row["id"],
+        $row["network"], $row["name"]);
      }
    $s .= "</table>";
 	return $s;

@@ -16,16 +16,16 @@
  $prod = isset($_GET["prod"]) ? xssafe($_GET["prod"]): "comprad";
  $java = isset($_GET["java"]) ? xssafe($_GET["java"]): "script";
  $mode = isset($_GET["mode"]) ? xssafe($_GET["mode"]): "realtime";
- $frames = isset($_GET["frames"]) ? intval($_GET["frames"]): 13;
- $interval = isset($_GET["interval"]) ? intval($_GET["interval"]): 5;
+ $frames = get_int404("frames", 13);
+ $interval = get_int404("interval", 5);
  $autopilot = isset($_GET["autopilot"]) ? xssafe($_GET["autopilot"]): "no";
 
 /* Lets see what the form is set to */
- $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y");
- $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
- $day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
- $hour = isset($_GET["hour"]) ? intval($_GET["hour"]): date("h");
- $minute = isset($_GET["minute"]) ? intval($_GET["minute"]): date("i");
+ $year = get_int404("year", date("Y"));
+ $month = get_int404("month", date("m"));
+ $day = get_int404("day", date("d"));
+ $hour = get_int404("hour", date("h"));
+ $minute = get_int404("minute", date("i"));
 
  // Used for the info presented below the plot on getting the raw data
  $gissource = ($year > 2014) ? 'n0q': 'n0r';

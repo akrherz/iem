@@ -153,7 +153,11 @@ $t->content = <<<EOF
 	<br />[1] Your email address will not be shared nor will you be added to any
 	lists. The IEM developer will simply email you back after consideration of
 	this request.
-	<input type="submit" value="Submit Update"></form>
+
+    <br /><strong>Note:</strong> If you are looking for a wind rose for a location
+    other than this, your only option on this website is to find the nearest station
+    with data.
+    <br /><input type="submit" value="I am asking the location be updated."></form>
 </div>
 </div>
 
