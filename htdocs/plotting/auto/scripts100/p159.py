@@ -10,6 +10,7 @@ from pyiem.exceptions import NoDataFound
 MDICT = dict(
     [
         ("all", "No Month/Time Limit"),
+        ("jul1", "Jul 1 - Jun 30"),
         ("spring", "Spring (MAM)"),
         ("fall", "Fall (SON)"),
         ("winter", "Winter (DJF)"),
@@ -111,7 +112,9 @@ def plotter(fdict):
     year = ctx["year"]
 
     offset = "ts"
-    if month == "all":
+    if month in ["all", "jul1"]:
+        if month == "jul1":
+            offset = "ts - '6 months'::interval"
         months = range(1, 13)
     elif month == "fall":
         months = [9, 10, 11]
@@ -153,23 +156,16 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("Error, no results returned!")
 
-    fig = figure(apctx=ctx)
-    ax = fig.subplots(2, 1)
     ydf = df.groupby("year").sum()
-    ax[0].set_title(
-        ("(%s) %s Hours %s %s%s\n" "%s [%s] (%.0f-%.0f)")
-        % (
-            MDICT[month],
-            METRICS[varname],
-            DIRS[mydir],
-            threshold,
-            "%" if varname == "relh" else "F",
-            ctx["_nt"].sts[station]["name"],
-            station,
-            ydf.index.min(),
-            ydf.index.max(),
-        )
+    mlabel = MDICT[month] if month != "jul1" else "Jul-Jun [year of Jul shown]"
+    title = (
+        f"({mlabel}) {METRICS[varname]} Hours {DIRS[mydir]} "
+        f"{threshold}{'%' if varname == 'relh' else 'F'}\n"
+        f"{ctx['_nt'].sts[station]['name']} [{station}] "
+        f"({ydf.index.min():.0f}-{ydf.index.max():.0f})"
     )
+    fig = figure(apctx=ctx, title=title)
+    ax = fig.subplots(2, 1)
     ax[0].bar(
         ydf.index.values, ydf["hits"], align="center", fc="green", ec="green"
     )
@@ -217,7 +213,7 @@ def plotter(fdict):
             zorder=5,
             fc="orange",
             ec="orange",
-            label="%s" % (year,),
+            label=f"{year}",
         )
     ax[1].set_xlim(-0.5, 23.5)
     ax[1].grid(True)
@@ -226,7 +222,7 @@ def plotter(fdict):
     ax[1].set_xticks(range(0, 24, 4))
     ax[1].set_xticklabels(["Mid", "4 AM", "8 AM", "Noon", "4 PM", "8 PM"])
     ax[1].set_xlabel(
-        "Hour of Day (%s)" % (ctx["_nt"].sts[station]["tzname"],), ha="right"
+        f"Hour of Day ({ctx['_nt'].sts[station]['tzname']})", ha="right"
     )
     return fig, df
 
