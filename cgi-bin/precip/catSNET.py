@@ -10,9 +10,6 @@ from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
 
 nt = NetworkTable(("KCCI", "KIMIT", "KELO"), only_online=False)
-IEM = get_dbconn("iem")
-icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
 
 requireHrs = [0] * 25
 stData = {}
@@ -30,11 +27,11 @@ def doHeader(environ, start_response, sio):
   <title>IEM | Hourly Precip Grid</title>
 </head>
 <body bgcolor="white">
-<a href="/index.php">Iowa Mesonet</a> > 
-<a href="/schoolnet/">School Net</a> >
+<a href="/index.php">Iowa Mesonet</a> &gt;
+<a href="/schoolnet/">School Net</a> &gt;
 Hourly Precipitation [SNET]
 <br>This archive starts on 12 Feb 2002 for KCCI sites and 12 Sept 2002 for
-KELO sites.  Data from the previous day is the most current available.
+KELO sites. SchoolNet data stops on 3 May 2019.
 
 """
     )
@@ -44,7 +41,7 @@ KELO sites.  Data from the previous day is the most current available.
         postDate = form.get("date")
         myTime = datetime.datetime.strptime(postDate, "%Y-%m-%d")
     except Exception:
-        myTime = datetime.datetime.now() - datetime.timedelta(days=1)
+        myTime = datetime.datetime(2019, 5, 3)
 
     sio.write("<table border=1><tr>")
     sio.write(
@@ -69,7 +66,7 @@ KELO sites.  Data from the previous day is the most current available.
 
     sio.write(
         """
-<td>Pick: (yyyy-mm-dd)  
+<td>Pick: (yyyy-mm-dd)
 <form method="GET" action="catSNET.py">
 <input type="text" size="8" name="date">
 <input type="submit" value="Submit Date">
@@ -115,14 +112,22 @@ table.main{
    <th rowspan="2">Station</th>
 </tr>
 <tr>
-  <td class="style0">Mid</td> <td class="style1">1</td> <td class="style2">2</td> 
-  <td class="style0">3</td> <td class="style1">4</td> <td class="style2">5</td> 
-  <td class="style0">6</td> <td class="style1">7</td> <td class="style2">8</td> 
-  <td class="style0">9</td> <td class="style1">10</td> <td class="style2">11</td> 
-  <td class="style0">Noon</td> <td class="style2">1</td> <td class="style2">2</td> 
-  <td class="style0">3</td> <td class="style1">4</td> <td class="style2">5</td> 
-  <td class="style0">6</td> <td class="style1">7</td> <td class="style2">8</td> 
-  <td class="style0">9</td> <td class="style1">10</td> <td class="style2">11</td> 
+  <td class="style0">Mid</td>
+  <td class="style1">1</td> <td class="style2">2</td>
+  <td class="style0">3</td>
+  <td class="style1">4</td> <td class="style2">5</td>
+  <td class="style0">6</td>
+  <td class="style1">7</td> <td class="style2">8</td>
+  <td class="style0">9</td>
+  <td class="style1">10</td> <td class="style2">11</td>
+  <td class="style0">Noon</td>
+  <td class="style2">1</td> <td class="style2">2</td>
+  <td class="style0">3</td>
+  <td class="style1">4</td> <td class="style2">5</td>
+  <td class="style0">6</td>
+  <td class="style1">7</td> <td class="style2">8</td>
+  <td class="style0">9</td>
+  <td class="style1">10</td> <td class="style2">11</td>
   <th>Tot:</th>
 </tr>
 """
@@ -148,7 +153,8 @@ def application(environ, start_response):
 
     sqlStr = """
         SELECT extract('hour' from valid) as vhour,
-        station, valid, phour from hourly_%s WHERE
+        id as station, valid, phour from hourly_%s h JOIN stations s on
+        (h.iemid = s.iemid) WHERE
         valid > '%s 00:00' and valid <= '%s 00:00'
         and network in ('KCCI','KIMT','KELO')
     """ % (
@@ -156,6 +162,8 @@ def application(environ, start_response):
         td,
         tm,
     )
+    pgconn = get_dbconn("iem")
+    icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     icursor.execute(sqlStr)
 
