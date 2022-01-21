@@ -49,15 +49,20 @@ function aSortBySecondIndex($multiArray, $secondIndex, $sorder="asc") {
     if (sizeof($multiArray) == 0){
         return array();
     }
-    foreach($multiArray as $firstIndex => $blah)
-        $indexMap[$firstIndex] = $multiArray[$firstIndex][$secondIndex];
-        if ($sorder == "asc")
-            asort($indexMap);
-            else
-                arsort($indexMap);
-                foreach($indexMap as $firstIndex => $unused)
-                    $sortedArray[$firstIndex] = $multiArray[$firstIndex];
-                    return $sortedArray;
+    $indexMap = Array();
+    foreach($multiArray as $firstIndex => $value) {
+        $indexMap[$firstIndex] = $value[$secondIndex];
+    }
+    if ($sorder == "asc") {
+        asort($indexMap);
+    } else {
+        arsort($indexMap);
+    }
+    $sortedArray = Array();
+    foreach($indexMap as $firstIndex => $unused) {
+        $sortedArray[$firstIndex] = $multiArray[$firstIndex];
+    }
+    return $sortedArray;
 }
 
 //_____________________________________________________________

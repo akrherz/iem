@@ -53,39 +53,6 @@ foreach($jobj["data"] as $bogus => $iemob)
     $mydata[$key]["ts"] = $mydata[$key]["local_valid"]; // legacy
 	$mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
 	$mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]), f2c($mydata[$key]["dwpf"]) );
-	if ($mydata[$key]["relh"] < 5)
-	{
-		$mydata[$key]["relh"] = "M";
-		$mydata[$key]["dewpf"] = "M";
-		if ($sortcol == "feel" || $sortcol == "dwpf" || $sortcol == "relh") {
-			$mydata[$key] = 0;
-			continue;
-		}
-	}
-	if ($mydata[$key]["tmpf"] < -60)
-	{
-		$mydata[$key]["tmpf"] = "M";
-		if ($sortcol == "tmpf" || $sortcol == "feel" || $sortcol == "dwpf" || $sortcol == "relh") {
-			$mydata[$key] = 0;
-			continue;
-		}
-	}
-	if ($mydata[$key]["alti"] < -60)
-	{
-		$mydata[$key]["alti"] = "M";
-		if ($sortcol == "alti") {
-			$mydata[$key] = 0;
-			continue;
-		}
-	}
-	if ($mydata[$key]["vsby"] < 0)
-	{
-		$mydata[$key]["vsby"] = "M";
-		if ($sortcol == "vsby") {
-			$mydata[$key] = 0;
-			continue;
-		}
-	}
 
 	if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
 		$mydata[$key]["peak"] = $mydata[$key]["max_gust"];
@@ -105,12 +72,9 @@ $table = "";
 $finalA = aSortBySecondIndex($mydata, $sortcol, $sorder);
 $now = time();
 $i = 0;
-foreach($finalA as $key => $val)
+foreach($finalA as $key => $parts)
 {
-	$i++;
-
-	$parts = $finalA[$key];
-
+    $i++;
 	$table .= "<tr";
 	if ($i % 2 == 0)  $table .= " bgcolor='#eeeeee'";
 	$table .= "><td><input type=\"checkbox\" name=\"st[]\" value=\"".$key."\"></td>";
