@@ -11,17 +11,23 @@ from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
-PDICT2 = dict(
-    (
-        ("max_tmpf", "Max Air Temperature [F]"),
-        ("min_tmpf", "Min Air Temperature [F]"),
-        ("max_gust", "Peak Wind Gust [MPH]"),
-        ("max_sknt", "Peak Wind Gust [MPH]"),
-    )
-)
+PDICT2 = {
+    "max_tmpf": "Max Air Temperature [F]",
+    "min_tmpf": "Min Air Temperature [F]",
+    "max_feel": "Max Feels Like Temperature [F]",
+    "min_feel": "Min Feels Like Temperature [F]",
+    "max_rh": "Max Relative Humidity [%]",
+    "min_rh": "Min Relative Humidity [%]",
+    "max_gust": "Peak Wind Gust [MPH]",
+    "max_sknt": "Peak Wind Gust [MPH]",
+}
 VARUNITS = {
     "max_tmpf": "F",
     "min_tmpf": "F",
+    "max_feel": "F",
+    "min_feel": "F",
+    "max_relh": "percent",
+    "min_relh": "percent",
     "max_gust": "mph",
     "max_sknt": "mph",
 }
@@ -122,6 +128,7 @@ def get_df(ctx, buf=2.25):
                 geom)
         )
         SELECT s.day, s.max_tmpf, s.min_tmpf,
+        s.min_rh, s.max_rh, s.min_feel, s.max_feel,
         max_sknt * 1.15 as max_sknt,
         max_gust * 1.15 as max_gust, t.id as station, t.lat, t.lon,
         t.wfo, t.state from
