@@ -188,6 +188,7 @@ def do_precip_plot(ctx) -> bool:
             color="b",
             label="Accum Obs",
         )
+        ymax = max([ymax, df["accum_pday"].max() + 0.5])
     ax.set_ylabel("Precipitation [inch]", fontsize="large")
     ax.set_ylim(ymin, ymax)
     return hasdata
