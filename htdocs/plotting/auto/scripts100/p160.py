@@ -157,7 +157,7 @@ def get_context(fdict):
     if ctx["fdf"].empty:
         ctx["df"] = ctx["odf"].reset_index()
     else:
-        ctx["fdf"].reset_index(inplace=True)
+        ctx["fdf"] = ctx["fdf"].reset_index()
         ctx["df"] = pd.merge(
             ctx["fdf"],
             ctx["odf"],

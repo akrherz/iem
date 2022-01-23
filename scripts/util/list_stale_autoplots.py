@@ -70,7 +70,7 @@ def main():
     for i in range(1, maxval):
         if i not in rows and i not in NO_FEATURES:
             print("No entries for: %4i" % (i,))
-    df.sort_values(by="valid", inplace=True)
+    df = df.sort_values(by="valid")
     print(df.head(10))
 
 

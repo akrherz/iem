@@ -186,7 +186,7 @@ def do_iowa_azos(date, itoday=False):
             df[col] = df2[col]
             # make sure the new column is >= precip
             df.loc[df[col] < df["precip"], col] = df["precip"]
-    df.reset_index(inplace=True)
+    df = df.reset_index()
     return df
 
 
@@ -463,7 +463,7 @@ def do_ahps(nwsli):
     # Get the obs
     # plabel = "{}[{}]".format(primaryname, primaryunits)
     # slabel = "{}[{}]".format(secondaryname, secondaryunits)
-    odf.rename({"value": "obstage"}, axis=1, inplace=True)
+    odf = odf.rename(columns={"value": "obstage"})
     df = df.join(odf[["obtime", "obstage"]], how="outer")
     # hoop jumping to get a timestamp in the local time of this sensor
     # see akrherz/iem#187

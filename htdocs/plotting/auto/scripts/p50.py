@@ -154,7 +154,7 @@ def plotter(fdict):
         raise NoDataFound("No data was found.")
     minvalid = df["min_issue"].min()
     maxvalid = df["max_issue"].max()
-    df.fillna(0, inplace=True)
+    df = df.fillna(0)
     total = df["count"].sum()
     uniquehail = df["hailtag"].unique().tolist()
     uniquehail.sort()
@@ -243,4 +243,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

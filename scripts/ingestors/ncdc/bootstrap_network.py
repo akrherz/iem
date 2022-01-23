@@ -39,7 +39,7 @@ def read_stations(state):
     df = pd.DataFrame(
         rows, columns=["sid", "lat", "lon", "elev", "state", "name"]
     )
-    df.set_index("sid", inplace=True)
+    df = df.set_index("sid")
     return df
 
 

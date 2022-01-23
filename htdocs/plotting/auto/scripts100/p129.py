@@ -92,7 +92,7 @@ def get_context(fdict):
     df["rank"] = (df["count"] - df["hits"]) / df["count"] * 100.0
     df["avg_days"] = df["hits"] / years
     df["return_interval"] = 1.0 / df["avg_days"]
-    df.replace([np.inf, -np.inf], np.nan, inplace=True)
+    df = df.replace([np.inf, -np.inf], np.nan)
     ctx["df"] = df
     ctx["station"] = station
     ctx["mydir"] = mydir
@@ -251,4 +251,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

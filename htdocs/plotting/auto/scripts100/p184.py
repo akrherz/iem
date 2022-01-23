@@ -90,7 +90,7 @@ def plotter(fdict):
         )
 
     df = pd.DataFrame(res)
-    df.set_index("level", inplace=True)
+    df = df.set_index("level")
 
     (fig, ax) = figure_axes(apctx=ctx)
     ax.barh(df.index.values, df["max"].values, label="Max", zorder=2)
@@ -126,4 +126,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

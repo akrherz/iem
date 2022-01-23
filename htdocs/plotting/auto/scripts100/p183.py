@@ -89,9 +89,9 @@ def plotter(fdict):
         (df["Date"] >= pd.Timestamp(sdate))
         & (df["Date"] <= pd.Timestamp(edate))
     ]
-    df.sort_values("Date", ascending=True, inplace=True)
+    df = df.sort_values("Date", ascending=True)
     df["x"] = df["Date"] + datetime.timedelta(hours=(3.5 * 24))
-    df.set_index("Date", inplace=True)
+    df = df.set_index("Date")
     df.index.name = "Date"
 
     df = df.reset_index()
@@ -171,4 +171,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

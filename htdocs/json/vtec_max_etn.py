@@ -54,14 +54,16 @@ def run(year, fmt):
     df["url"] = (
         '<a href="' + df["url"] + '">' + df["max_eventid"].apply(str) + "</a>"
     )
-    df.drop("max_eventid", axis=1, inplace=True)
-    df = df.pivot_table(
-        index="wfo",
-        columns=["phenomena", "significance"],
-        values="url",
-        aggfunc=lambda x: " ".join(x),
+    df = (
+        df.drop("max_eventid", axis=1)
+        .pivot_table(
+            index="wfo",
+            columns=["phenomena", "significance"],
+            values="url",
+            aggfunc=lambda x: " ".join(x),
+        )
+        .fillna("")
     )
-    df.fillna("", inplace=True)
 
     cls = ' class="table-bordered table-condensed table-striped"'
     html = ("<p><strong>Table generated at: %s</strong></p>\n%s") % (

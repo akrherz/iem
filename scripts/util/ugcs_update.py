@@ -192,7 +192,7 @@ def workflow(argv, pgconn, cursor):
 
     # Compute the area and then sort to order duplicated UGCs :/
     df["area"] = df["geometry"].area
-    df.sort_values(by="area", ascending=False, inplace=True)
+    df = df.sort_values(by="area", ascending=False)
     gdf = df.groupby("ugc").nth(0)
     LOG.info(
         "Loaded %s/%s unique entries from %s",

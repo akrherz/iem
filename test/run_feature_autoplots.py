@@ -78,9 +78,11 @@ def main():
     if not timing:
         print("WARNING: no timing results found!")
         return
-    df = pd.DataFrame(timing)
-    df.set_index("i", inplace=True)
-    df.sort_values("secs", ascending=False, inplace=True)
+    df = (
+        pd.DataFrame(timing)
+        .set_index("i")
+        .sort_values("secs", ascending=False)
+    )
     print(df.head(5))
     if failed:
         print("Failures:")

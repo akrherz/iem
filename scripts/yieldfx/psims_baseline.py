@@ -185,7 +185,7 @@ def main(argv):
             # being number of tiles since -180 degrees eas
             yt = (90 - south) / 2
             xt = (180 - (0 - west)) / 2 + 1
-            ncfn = f"clim_{yt:04d}_{xt:04d}.tile.nc4"
+            ncfn = f"clim_{yt:04.0f}_{xt:04.0f}.tile.nc4"
             workflow(valid, ncfn, west, south, fullmode)
 
 

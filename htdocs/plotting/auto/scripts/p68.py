@@ -101,7 +101,7 @@ def plotter(fdict):
 
     pos = {}
     i = 1
-    df.sort_values(["phenomena", "significance"], inplace=True)
+    df = df.sort_values(["phenomena", "significance"])
     for _, row in df.iterrows():
         key = "%s.%s" % (row["phenomena"], row["significance"])
         if key not in pos:
@@ -125,4 +125,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

@@ -518,7 +518,6 @@ def make_daily_water_change_plot(ctx):
         params=(ctx["station"], ctx["sts"], ctx["ets"]),
         index_col=None,
     )
-    # df.interpolate(inplace=True, axis=1, method='nearest')
     l1 = 12.0
     l2 = 12.0
     l3 = 0.0

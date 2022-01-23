@@ -64,7 +64,7 @@ def get_hdf(nt, date):
                     )
                 )
     df = pd.DataFrame(rows)
-    df.fillna(0, inplace=True)
+    df = df.fillna(0)
     return df
 
 

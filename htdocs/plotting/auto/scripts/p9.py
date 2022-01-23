@@ -77,8 +77,8 @@ def plotter(fdict):
     ceiling = ctx["ceiling"]
     varname = ctx["var"]
 
-    table = "alldata_%s" % (station[:2],)
-    nt = network.Table("%sCLIMATE" % (station[:2],))
+    table = f"alldata_{station[:2]}"
+    nt = network.Table(f"{station[:2]}CLIMATE")
     ab = nt.sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown Station Metadata.")
@@ -131,8 +131,7 @@ def plotter(fdict):
         lw=2.0,
         label="Average",
     )
-    _data = df[df["year"] == year][[glabel, "sday"]]
-    _data.sort_values(by="sday", inplace=True)
+    _data = df[df["year"] == year][[glabel, "sday"]].sort_values(by="sday")
     ax.scatter(
         np.arange(1, _data[glabel].shape[0] + 1),
         _data[glabel],

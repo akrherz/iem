@@ -69,7 +69,7 @@ def dotime(time, lon, lat, day, cat):
     if df.empty:
         return json.dumps(res)
     df["threshold_rank"] = df["threshold"].apply(get_order)
-    df.sort_values("threshold_rank", ascending=False, inplace=True)
+    df = df.sort_values("threshold_rank", ascending=False)
     res["outlook"] = {
         "threshold": df.iloc[0]["threshold"],
         "utc_product_issue": pd.Timestamp(df.iloc[0]["v"]).strftime(ISO9660),
@@ -142,14 +142,7 @@ def application(environ, start_response):
     cb = fields.get("callback")
 
     hostname = os.environ.get("SERVER_NAME", "")
-    mckey = ("/json/spcoutlook/%.4f/%.4f/%s/%s/%s/%s") % (
-        lon,
-        lat,
-        last,
-        day,
-        cat,
-        time,
-    )
+    mckey = f"/json/spcoutlook/{lon:.4f}/{lat:.4f}/{last}/{day}/{cat}/{time}"
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey) if hostname != "iem.local" else None
     if not res:
@@ -162,7 +155,7 @@ def application(environ, start_response):
     if cb is None:
         data = res
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        data = f"{html_escape(cb)}({res})"
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)

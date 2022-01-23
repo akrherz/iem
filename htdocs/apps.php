@@ -16,14 +16,23 @@ EOF;
 
 $table = "";
 $tags = Array();
-$rs = pg_exec($dbconn, "SELECT appid, string_agg(tag, ',') as t from iemapps_tags GROUP by appid");
+$rs = pg_exec(
+    $dbconn,
+    "SELECT appid, string_agg(tag, ',') as t from iemapps_tags ".
+    "GROUP by appid"
+);
 for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 	$tags[$row["appid"]] = $row["t"];
 }
 $rs = pg_exec($dbconn, "SELECT * from iemapps i ORDER by appid ASC");
 for ($i=0;$row=pg_fetch_assoc($rs);$i++){
-	$table .= sprintf("<tr><th><a href='%s'>%s</a></th><td>%s</td><td>%s</td></tr>\n", 
-			$row["url"],  $row["name"], $row["description"], @$tags[$row["appid"]]);
+    $tt = "";
+    if (array_key_exists($row["appid"], $tags)){
+        $tt = $tags[$row["appid"]];
+    }
+    $table .= sprintf(
+        "<tr><th><a href='%s'>%s</a></th><td>%s</td><td>%s</td></tr>\n", 
+		$row["url"],  $row["name"], $row["description"], $tt);
 }
 
 
@@ -32,7 +41,7 @@ $t->content = <<<EOF
  <p>This website contains a large number of 'applications' which allow for
  dynamic query and product generation.  This page displays a listing of these
  apps along with a brief description.  The tags shown are used to organize the
- apps and provide a 'Related' menu on individual pages.</p>
+ apps.</p>
  
  <p><table class="table table-striped table-bordered" id="table1">
  <thead>

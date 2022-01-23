@@ -158,7 +158,7 @@ def get_context(fdict):
 def highcharts(fdict):
     """Highcharts output"""
     ctx = get_context(fdict)
-    ctx["df"].reset_index(inplace=True)
+    ctx["df"] = ctx["df"].reset_index()
     data = ctx["df"][["year", "count"]].to_json(orient="values")
 
     return (

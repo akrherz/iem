@@ -77,7 +77,7 @@ def plotter(fdict):
     )
     df["state_count"] = odf["state_count"]
     df["state_percent"] = df["state_count"] / df["national_count"] * 100.0
-    df.fillna(0, inplace=True)
+    df = df.fillna(0)
 
     fig = figure(apctx=ctx)
     ax = fig.subplots(3, 1, sharex=True)
@@ -141,4 +141,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

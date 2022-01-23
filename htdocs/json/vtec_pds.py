@@ -16,7 +16,7 @@ def run():
 
     cursor.execute(
         """
-        SELECT extract(year from issue) as year, wfo, eventid,
+        SELECT extract(year from issue)::int as year, wfo, eventid,
         phenomena, significance,
         min(product_issue at time zone 'UTC') as utc_product_issue,
         min(init_expire at time zone 'UTC') as utc_init_expire,
@@ -32,12 +32,9 @@ def run():
     )
     res = {"events": []}
     for row in cursor:
-        uri = "/vtec/#%s-O-NEW-K%s-%s-%s-%04i" % (
-            row["year"],
-            row["wfo"],
-            row["phenomena"],
-            row["significance"],
-            row["eventid"],
+        uri = (
+            f"/vtec/#{row['year']}-O-NEW-K{row['wfo']}-{row['phenomena']}-"
+            f"{row['significance']}-{row['eventid']:04.0f}"
         )
         res["events"].append(
             dict(

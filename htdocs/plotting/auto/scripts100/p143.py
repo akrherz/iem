@@ -208,7 +208,7 @@ def plotter(fdict):
             rain = gcdf2[year]
         rows.append(dict(avgt=avgt, rain=rain, year=year))
     resdf = pd.DataFrame(rows)
-    resdf.set_index("year", inplace=True)
+    resdf = resdf.set_index("year")
 
     (fig, ax) = figure_axes(apctx=ctx)
     for year, row in resdf.iterrows():

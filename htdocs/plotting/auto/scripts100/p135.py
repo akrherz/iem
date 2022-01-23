@@ -151,7 +151,7 @@ def get_data(ctx):
     varname = ctx["var"]
     year = ctx["year"]
     split = ctx["split"]
-    table = "alldata_%s" % (station[:2],)
+    table = f"alldata_{station[:2]}"
     days = 0 if split == "jan1" else 183
     opp = " < " if varname.find("_below") > 0 else " >= "
     col = "high" if varname.find("high") == 0 else "low"
@@ -189,7 +189,7 @@ def get_data(ctx):
             datetime.date(2001, 1, 1) + datetime.timedelta(days=x)
         ).strftime("%-d %b")
     )
-    df.set_index("doy", inplace=True)
+    df = df.set_index("doy")
     return df
 
 

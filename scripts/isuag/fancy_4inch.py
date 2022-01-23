@@ -125,7 +125,7 @@ def main(argv):
         ["ob", "min", "max"],
     ):
         df[newcol] = c2f(df[col].values)
-        df.drop(col, axis=1, inplace=True)
+        df = df.drop(columns=col)
 
     for stid, row in df.iterrows():
         df.at[stid, "ticket"] = qdict.get(stid, {}).get("soil4", False)
@@ -153,7 +153,7 @@ def main(argv):
             df.at[station, "ob"],
             df.at[station, "nam"],
         )
-        df.drop(station, inplace=True)
+        df = df.drop(station)
 
     # Query out centroids of counties...
     cdf = read_sql(

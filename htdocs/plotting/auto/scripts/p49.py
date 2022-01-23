@@ -17,7 +17,7 @@ PDICT = dict(
         ("snowd", "Snow Depth (inch)"),
     ]
 )
-PDICT2 = dict([("gte", "Greater than or equal to"), ("lt", "Less than")])
+PDICT2 = {"gte": "Greater than or equal to", "lt": "Less than"}
 XREF = {"gte": ">=", "lt": "<"}
 PDICT3 = {
     "min": "Minimum",
@@ -108,7 +108,7 @@ def plotter(fdict):
     varname = ctx["var"]
     opt = XREF[ctx["opt"]]
     days = int(ctx["days"])
-    table = "alldata_%s" % (station[:2],)
+    table = f"alldata_{station[:2]}"
     func = "avg" if days == 1 else ctx["f"]
 
     df = read_sql(
@@ -132,7 +132,7 @@ def plotter(fdict):
         raise NoDataFound("No Data Found.")
     # Covert sday into year 2001 date
     df["date"] = pd.to_datetime(df["sday"] + "2001", format="%m%d%Y")
-    df.set_index("date", inplace=True)
+    df = df.set_index("date")
     # calculate the frequency
     df["freq"] = df["hits"] / df["total"] * 100.0
 
@@ -155,7 +155,7 @@ def plotter(fdict):
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b"))
     ax.grid(True)
     ax.set_ylabel("Frequency [%]")
-    df.drop(["min_date", "max_date"], axis=1, inplace=True)
+    df = df.drop(columns=["min_date", "max_date"])
     return fig, df
 
 

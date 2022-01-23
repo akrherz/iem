@@ -55,8 +55,6 @@ def plotter(fdict):
     station = ctx["station"]
     varname = ctx["var"]
 
-    table = "alldata_%s" % (station[:2],)
-
     df = read_sql(
         f"""
         SELECT year, month, sum(precip) as sum_precip,
@@ -68,7 +66,7 @@ def plotter(fdict):
         sum(hdd(high,low,65)) as hdd65,
         sum(case when precip > 0.009 then 1 else 0 end) as rain_days,
         sum(case when snow >= 0.1 then 1 else 0 end) as snow_days
-        from {table} WHERE station = %s GROUP by year, month
+        from alldata_{station[:2]} WHERE station = %s GROUP by year, month
     """,
         pgconn,
         params=(station,),
@@ -79,7 +77,7 @@ def plotter(fdict):
     df["monthdate"] = df[["year", "month"]].apply(
         lambda x: datetime.date(x[0], x[1], 1), axis=1
     )
-    df.set_index("monthdate", inplace=True)
+    df = df.set_index("monthdate")
 
     res = """\
 # IEM Climodat https://mesonet.agron.iastate.edu/climodat/

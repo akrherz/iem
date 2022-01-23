@@ -195,7 +195,7 @@ def write_and_upload(df, location):
 def qc(df):
     """Run some QC against the dataframe"""
     # Make sure our frame is sorted
-    df.sort_index(inplace=True)
+    df = df.sort_index()
 
 
 def load_baseline(location):

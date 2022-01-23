@@ -229,8 +229,7 @@ def plotter(fdict):
     )
     ax2.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     ax2.set_ylim(0, 101)
-    df.set_index("year", inplace=True)
-    del df["color"]
+    df = df.set_index("year").drop(columns=["color"])
     return fig, df
 
 

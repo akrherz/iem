@@ -134,13 +134,11 @@ def get_context(fdict):
         y2 = datetime.date.today().year
 
     df = read_sql(
-        """
+        f"""
     WITH obs as (
         SELECT (valid + '10 minutes'::interval) at time zone %s as ts,
         sknt from alldata where station = %s and sknt >= 0 and sknt < 150
-        and report_type = 2 """
-        + ylimiter
-        + """)
+        and report_type = 2 {ylimiter})
 
     select extract(month from ts)::int as month,
     extract(hour from ts)::int as hour, extract(day from ts)::int as day,
@@ -153,9 +151,12 @@ def get_context(fdict):
     )
     # Figure out which mode we are going to do
     if all([a is None for a in [p1, p2, p3, p4, p5, p6]]):
-        del df["day"]
-        df = df.groupby(["month", "hour"]).mean()
-        df.reset_index(inplace=True)
+        df = (
+            df.drop(columns="day")
+            .groupby(["month", "hour"])
+            .mean()
+            .reset_index()
+        )
         ctx["ncols"] = 6
         ctx["labels"] = calendar.month_abbr
         ctx["subtitle"] = "Monthly Average Wind Speed by Hour"
@@ -164,7 +165,7 @@ def get_context(fdict):
         df["fake_date"] = pd.to_datetime(
             {"year": 2000, "month": df["month"], "day": df["day"]}
         )
-        df.set_index("fake_date", inplace=True)
+        df = df.set_index("fake_date")
         dfs = []
         ctx["labels"] = [None]
         for p in [p1, p2, p3, p4, p5, p6]:
@@ -183,7 +184,7 @@ def get_context(fdict):
                 .groupby("hour")
                 .mean()
             )
-            ldf.reset_index(inplace=True)
+            ldf = ldf.reset_index()
             ldf["month"] = len(dfs) + 1
             dfs.append(ldf)
             ctx["labels"].append(
@@ -263,7 +264,9 @@ def highcharts(fdict):
 def plotter(fdict):
     """Go"""
     ctx = get_context(fdict)
-    (fig, ax) = figure_axes(apctx=ctx)
+    (fig, ax) = figure_axes(
+        apctx=ctx, title=ctx["title"], subtitle=ctx["subtitle"]
+    )
     colors = [
         None,
         "k",
@@ -299,7 +302,6 @@ def plotter(fdict):
         loc="center",
     )
     ax.set_xlabel(ctx["xlabel"])
-    ax.set_title("%s\n%s" % (ctx["title"], ctx["subtitle"]), fontsize=14)
     ax.set_xticks(range(0, 24, 4))
     ax.set_xticklabels(["Mid", "4 AM", "8 AM", "Noon", "4 PM", "8 PM"])
     ax.set_xlim(0, 23)
@@ -308,4 +310,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

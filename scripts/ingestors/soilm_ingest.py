@@ -211,7 +211,7 @@ def common_df_logic(filename, maxts, nwsli, tablename):
     # convert all columns to lowercase
     df.columns = map(str.lower, df.columns)
     # rename columns to rectify differences
-    df.rename(columns=VARCONV, inplace=True)
+    df = df.rename(columns=VARCONV)
     # QC out some bad temp values
     if tablename == "sm_daily" and nwsli in ["GVNI4", "CSII4"]:
         for col in ["tair_c_avg", "tair_c_min", "tair_c_max"]:

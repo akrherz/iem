@@ -67,7 +67,7 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
 
-    table = "alldata_%s" % (station[:2],)
+    table = f"alldata_{station[:2]}"
     bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:
         raise NoDataFound("No Data Found.")
@@ -212,7 +212,7 @@ def plotter(fdict):
         )
 
     df = pd.DataFrame(rows)
-    df.set_index("thres", inplace=True)
+    df = df.set_index("thres")
     df.index.name = "threshold"
     return None, df, res
 

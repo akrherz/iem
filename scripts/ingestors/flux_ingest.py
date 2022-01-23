@@ -179,7 +179,7 @@ def main():
                 index_col=0,
                 na_values=["NAN"],
             )
-            df.drop("RECORD", axis=1, inplace=True)
+            df = df.drop(columns="RECORD")
             if df.empty:
                 LOG.info("file: %s has no data", fn)
                 continue
@@ -191,14 +191,14 @@ def main():
         if len(dfs) > 1:
             df = df.join(dfs[1]).copy()
         # get index back into a column
-        df.reset_index(inplace=True)
+        df = df.reset_index()
         # lowercase all column names
         df.columns = [x.lower() for x in df.columns]
         df["timestamp"] = df["timestamp"].apply(make_time)
         df = df[df["timestamp"] > maxts[station]].copy()
         if df.empty:
             continue
-        df.rename(columns=CONVERT, inplace=True)
+        df = df.rename(columns=CONVERT)
         # We need a UTC year to allow for the database insert below to work
         df["utcyear"] = df["valid"].dt.tz_convert(pytz.utc).dt.year
         df["station"] = station
@@ -217,7 +217,7 @@ def main():
             cursor = pgconn.cursor()
             output.seek(0)
             cursor.copy_from(
-                output, "flux%s" % (year,), columns=gdf2.columns, null=""
+                output, f"flux{year}", columns=gdf2.columns, null=""
             )
             cursor.close()
             pgconn.commit()

@@ -24,14 +24,12 @@ STATIONS = dict(
     ]
 )
 
-PLOTS = dict(
-    [
-        ("gdd", "Growing Degree Days [F]"),
-        ("rain", "Precipitation [in]"),
-        ("maxt", "Daily Maximum Temperature [F]"),
-        ("mint", "Daily Minimum Temperature [F]"),
-    ]
-)
+PLOTS = {
+    "gdd": "Growing Degree Days [F]",
+    "rain": "Precipitation [in]",
+    "maxt": "Daily Maximum Temperature [F]",
+    "mint": "Daily Minimum Temperature [F]",
+}
 
 
 def get_description():
@@ -124,9 +122,9 @@ def plotter(fdict):
     cdf = load("/opt/iem/scripts/yieldfx/baseline", location, sdate)
 
     today = datetime.date.today()
-    thisyear = df[df["year"] == today.year].copy()
-    thisyear.reset_index(inplace=True)
-    thisyear.set_index("doy", inplace=True)
+    thisyear = (
+        df[df["year"] == today.year].copy().reset_index().set_index("doy")
+    )
 
     # Drop extra day from cdf during non-leap year
     if today.year % 4 != 0:
@@ -137,8 +135,7 @@ def plotter(fdict):
     resdf = pd.DataFrame(index=thisyear.index)
     resdf.index.name = "date"
     resdf["doy"] = thisyear.index.values
-    resdf.reset_index(inplace=True)
-    resdf.set_index("doy", inplace=True)
+    resdf = resdf.reset_index().set_index("doy")
 
     # write current year data back to resdf
     for _v, _u in zip(["gddcum", "raincum"], ["F", "in"]):
@@ -199,7 +196,7 @@ def plotter(fdict):
             zorder=4,
             color="b",
             lw=2,
-            label="%s Obs + CFS Forecast" % (today.year,),
+            label=f"{today.year} Obs + CFS Forecast",
         )
         climo = cdf.groupby("doy")[ptype].mean()
         ax.plot(

@@ -143,8 +143,8 @@ def plotter(fdict):
     for base in thresholds:
         ax.plot(
             df["dates"].values,
-            df["%sfreq" % (base,)],
-            label="%s" % (base,),
+            df[f"{base}freq"],
+            label=f"{base}",
             lw=2,
         )
 
@@ -153,9 +153,9 @@ def plotter(fdict):
     ax.xaxis.set_major_locator(mdates.DayLocator([1, 7, 14, 21]))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d\n%b"))
     ax.grid(True)
-    df.reset_index(inplace=True)
+    df = df.reset_index()
     return fig, df, res
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

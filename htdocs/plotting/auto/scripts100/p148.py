@@ -18,13 +18,11 @@ PDICT = dict(
         ("thanksgiving", "Thanksgiving"),
     ]
 )
-PDICT2 = dict(
-    [
-        ("high", "High Temperature [F]"),
-        ("low", "Low Temperature [F]"),
-        ("precip", "Precipitation [inch]"),
-    ]
-)
+PDICT2 = {
+    "high": "High Temperature [F]",
+    "low": "Low Temperature [F]",
+    "precip": "Precipitation [inch]",
+}
 
 
 def get_description():
@@ -199,7 +197,7 @@ def get_context(fdict):
 def highcharts(fdict):
     """Generate javascript (Highcharts) variant"""
     ctx = get_context(fdict)
-    ctx["df"].reset_index(inplace=True)
+    ctx["df"] = ctx["df"].reset_index()
     v2 = ctx["df"][["year", ctx["varname"]]].to_json(orient="values")
     avgval = ctx["df"][ctx["varname"]].mean()
     avgvallbl = "%.2f" % (avgval,)
