@@ -17,7 +17,7 @@ import pandas as pd
 from geopandas import read_postgis
 from pyiem.grid.zs import CachingZonalStats
 from pyiem import mrms, iemre
-from pyiem.util import get_dbconn, logger, ncopen, convert_value
+from pyiem.util import get_dbconnstr, logger, ncopen, convert_value
 from tqdm import tqdm
 
 LOG = logger()
@@ -129,7 +129,7 @@ def main():
     # 2. Load up HUC12 geometries
     huc12s = read_postgis(
         "SELECT simple_geom, huc12 from wbd_huc12 where umrb_realtime_swat",
-        get_dbconn("idep"),
+        get_dbconnstr("idep"),
         geom_col="simple_geom",
         index_col="huc12",
     )

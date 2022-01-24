@@ -34,7 +34,7 @@ import zipfile
 import requests
 import geopandas as pd
 from shapely.geometry import MultiPolygon
-from pyiem.util import get_dbconn, utc, logger
+from pyiem.util import get_dbconn, get_dbconnstr, utc, logger
 
 LOG = logger()
 # Change Directory to /tmp, so that we can rw
@@ -179,7 +179,7 @@ def workflow(argv, pgconn, cursor):
 
     postgis = pd.read_postgis(
         "SELECT * from ugcs where end_ts is null and substr(ugc, 3, 1) = %s",
-        pgconn,
+        get_dbconnstr("postgis"),
         params=(geo_type,),
         geom_col="geom",
         index_col="ugc",

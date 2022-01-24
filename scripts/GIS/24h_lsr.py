@@ -6,7 +6,7 @@ import subprocess
 import datetime
 
 from geopandas import read_postgis
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnstr
 
 SCHEMA = {
     "geometry": "Point",
@@ -31,7 +31,7 @@ SCHEMA = {
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconn("postgis", user="nobody")
+    pgconn = get_dbconnstr("postgis", user="nobody")
 
     os.chdir("/tmp/")
 

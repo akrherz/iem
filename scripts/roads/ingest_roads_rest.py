@@ -172,7 +172,7 @@ def main():
     jobj = req.json()
 
     if "features" not in jobj:
-        LOG.info(
+        LOG.warning(
             "Got invalid RESULT:\n%s",
             json.dumps(jobj, sort_keys=True, indent=4, separators=(",", ": ")),
         )
@@ -183,7 +183,7 @@ def main():
         props = feat["attributes"]
         segid = lookup.get(props["SEGMENT_ID"])
         if segid is None:
-            LOG.info(
+            LOG.warning(
                 "Unknown longname '%s' segment_id '%s'",
                 props["LONG_NAME"],
                 props["SEGMENT_ID"],
@@ -194,8 +194,8 @@ def main():
             continue
         cond = ROADCOND.get(raw.lower())
         if cond is None:
-            LOG.info(
-                "ingest_roads_reset longname '%s' has unknown cond '%s'\n%s",
+            LOG.warning(
+                "longname '%s' has unknown cond '%s'\n%s",
                 props["LONG_NAME"],
                 props["HL_PAVEMENT_CONDITION"],
                 json.dumps(
