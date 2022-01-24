@@ -3,8 +3,8 @@ import datetime
 
 from shapely.geometry import LineString, MultiLineString
 import requests
-from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn, logger, utc
+from pandas import read_sql
+from pyiem.util import get_dbconn, get_dbconnstr, logger, utc
 from ingest_roads_rest import URI
 
 LOG = logger()
@@ -18,7 +18,7 @@ def main():
         """
     SELECT idot_id, longname from roads_base where archive_end > 'TODAY'
     """,
-        pgconn,
+        get_dbconnstr("postgis"),
         index_col="idot_id",
     )
     LOG.info("found %s rows from roads_base", len(df.index))

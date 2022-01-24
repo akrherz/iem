@@ -31,7 +31,7 @@ def update_database(stid, valid, row):
     if row["precip"] is None:
         LOG.debug("Skipping %s as has missing data %s", stid, row)
         return
-    table = "alldata_%s" % (stid[:2],)
+    table = f"alldata_{stid[:2]}"
 
     def do_update(_row):
         """Do the database work, please."""
@@ -128,7 +128,7 @@ def do_day(valid):
         )
         # we must have temperature data
         if row["high"] is np.ma.masked or row["low"] is np.ma.masked:
-            LOG.info("%s has missing temperature data, using state", iemid)
+            LOG.warning("%s has missing temperature data, using state", iemid)
             row = statedata[iemid[:2]]
         update_database(iemid, valid, row)
 

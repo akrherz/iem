@@ -12,10 +12,10 @@ try:
 except ImportError:
     from backports.zoneinfo import ZoneInfo
 
-from pyiem.util import logger, get_dbconn
+from pyiem.util import logger, get_dbconn, get_dbconnstr
 from pyiem.network import Table as NetworkTable
 from metpy.units import units
-from pandas.io.sql import read_sql
+from pandas import read_sql
 
 LOG = logger()
 MM = units("mm")
@@ -25,14 +25,13 @@ INCH = units("inch")
 def run(valid):
     """Do Work."""
     nt = NetworkTable("USCRN")
-    pgconn = get_dbconn("other")
     iem_pgconn = get_dbconn("iem")
     LOG.debug("Processing %s", valid.date())
     # Fetch enough data to cross all the dates
     df = read_sql(
         "SELECT station, valid at time zone 'UTC' as utc_valid, precip_mm "
         "from uscrn_alldata where valid > %s and valid < %s",
-        pgconn,
+        get_dbconnstr("other"),
         params=(
             valid - datetime.timedelta(days=1),
             valid + datetime.timedelta(days=2),

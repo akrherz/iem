@@ -16,10 +16,10 @@ from pandas.io.sql import read_sql
 from scipy.stats import zscore
 from metpy.interpolate import inverse_distance_to_grid
 from pyiem import iemre
-from pyiem.util import get_dbconn, utc, ncopen, logger, convert_value
+from pyiem.util import get_dbconnstr, utc, ncopen, logger, convert_value
 
-PGCONN = get_dbconn("iem")
-COOP_PGCONN = get_dbconn("coop")
+PGCONN = get_dbconnstr("iem")
+COOP_PGCONN = get_dbconnstr("coop")
 LOG = logger()
 
 
@@ -50,7 +50,7 @@ def generic_gridder(df, idx):
 
     df2 = df[df[idx].notnull()]
     if len(df2.index) < 4:
-        LOG.info("Not enough data %s", idx)
+        LOG.warning("Not enough data %s", idx)
         return
     xi, yi = np.meshgrid(iemre.XAXIS, iemre.YAXIS)
     res = np.ones(xi.shape) * np.nan
@@ -102,7 +102,7 @@ def copy_iemre(ts, ds):
                 uwnd = hnc.variables["uwnd"][offset, :, :]
                 vwnd = hnc.variables["vwnd"][offset, :, :]
                 if uwnd.mask.all():
-                    LOG.info("No wind for offset: %s", offset)
+                    LOG.warning("No wind for offset: %s", offset)
                     continue
                 mag = (uwnd ** 2 + vwnd ** 2) ** 0.5
                 windhours += 1
@@ -118,7 +118,7 @@ def copy_iemre(ts, ds):
                     uwnd = hnc.variables["uwnd"][offset, :, :]
                     vwnd = hnc.variables["vwnd"][offset, :, :]
                     if uwnd.mask.all():
-                        LOG.info("No wind for offset: %s", offset)
+                        LOG.warning("No wind for offset: %s", offset)
                         continue
                     windhours += 1
                     sped += (uwnd ** 2 + vwnd ** 2) ** 0.5
@@ -136,7 +136,7 @@ def copy_iemre(ts, ds):
                 if uwnd.mask.all():
                     # Don't complain about the last timestamp being missing
                     if offset != offset2 - 1:
-                        LOG.info("No wind for offset: %s", offset)
+                        LOG.warning("No wind for offset: %s", offset)
                     continue
                 windhours += 1
                 mag = (uwnd ** 2 + vwnd ** 2) ** 0.5
@@ -277,7 +277,7 @@ def grid_day12(ts, ds):
         res = generic_gridder(df, "snowddata")
         ds["snowd_12z"].values = convert_value(res, "inch", "millimeter")
     else:
-        LOG.info(
+        LOG.warning(
             "%s has %02i entries, FAIL", ts.strftime("%Y-%m-%d"), len(df.index)
         )
 

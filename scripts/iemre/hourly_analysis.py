@@ -6,13 +6,12 @@ import sys
 import pygrib
 import numpy as np
 import pandas as pd
-from pandas.io.sql import read_sql
 from metpy.units import masked_array, units
 from metpy.calc import wind_components
 from metpy.interpolate import inverse_distance_to_grid
 from scipy.interpolate import NearestNDInterpolator
 from pyiem import iemre
-from pyiem.util import get_dbconn, ncopen, utc, logger
+from pyiem.util import get_dbconnstr, ncopen, utc, logger
 
 # stop RuntimeWarning: invalid value encountered in greater
 np.warnings.filterwarnings("ignore")
@@ -147,7 +146,7 @@ def grid_hour(ts):
         ts1,
     )
 
-    df = read_sql(
+    df = pd.read_sql(
         """SELECT station, ST_x(geom) as lon, st_y(geom) as lat,
  max(case when tmpf > -60 and tmpf < 130 THEN tmpf else null end) as max_tmpf,
  max(case when sknt > 0 and sknt < 100 then sknt else 0 end) as max_sknt,
@@ -163,7 +162,7 @@ def grid_hour(ts):
   ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
   geom) and (t.network ~* 'ASOS' or t.network = 'AWOS') and
  valid >= %s and valid < %s and report_type = 2 GROUP by station, lon, lat""",
-        get_dbconn("asos"),
+        get_dbconnstr("asos"),
         params=params,
         index_col="station",
     )

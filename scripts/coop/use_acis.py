@@ -10,10 +10,9 @@ except ImportError:
 import requests
 from tqdm import tqdm
 import pandas as pd
-from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconn, get_dbconnstr, logger
 from pyiem.reference import TRACE_VALUE
 
 LOG = logger()
@@ -64,12 +63,12 @@ def main(argv):
     for nwsli in progress:
         progress.set_description(nwsli)
         tz = ZoneInfo(nt.sts[nwsli]["tzname"])
-        obsdf = read_sql(
+        obsdf = pd.read_sql(
             "SELECT day, max_tmpf as maxt, min_tmpf as mint, "
             "pday as pcpn, snow, snowd as snwd, coop_tmpf as obst "
             "from summary WHERE iemid = %s and day >= %s and day <= %s "
             "ORDER by day ASC",
-            pgconn,
+            get_dbconnstr("iem"),
             params=(nt.sts[nwsli]["iemid"], sts, ets),
             index_col="day",
         )

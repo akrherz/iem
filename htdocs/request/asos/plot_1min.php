@@ -15,7 +15,7 @@ $sqlStr .= " and station = '". $stations[0][0] ."' ORDER by valid ASC";
 $connection = iemdb("asos1min");
 
 if ($tz == 'UTC'){
-	$query1 = "SET TIME ZONE 'GMT'";
+	$query1 = "SET TIME ZONE 'UTC'";
 	$result = pg_exec($connection, $query1);
 }
 $rs =  pg_exec($connection, $sqlStr);

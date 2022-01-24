@@ -3,10 +3,10 @@ import sys
 import datetime
 
 import numpy as np
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from scipy.interpolate import NearestNDInterpolator
 from pyiem import iemre
-from pyiem.util import get_dbconn, ncopen, convert_value, logger
+from pyiem.util import get_dbconnstr, ncopen, convert_value, logger
 
 LOG = logger()
 
@@ -38,7 +38,6 @@ def grid_day(nc, ts):
 
     @param ts Timestamp of the analysis, we'll consider a 20 minute window
     """
-    pgconn = get_dbconn("coop")
     offset = iemre.daily_offset(ts)
     if ts.day == 29 and ts.month == 2:
         ts = datetime.datetime(2000, 3, 1)
@@ -51,7 +50,7 @@ def grid_day(nc, ts):
         substr(station,3,4) != '0000' and
         substr(station,3,1) not in ('C', 'T')
     """,
-        pgconn,
+        get_dbconnstr("coop"),
         params=(ts,),
         index_col="station",
     )

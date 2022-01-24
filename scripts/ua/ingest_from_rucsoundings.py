@@ -68,9 +68,15 @@ import sys
 import pytz
 import requests
 from tqdm import tqdm
-from pyiem.util import exponential_backoff, get_dbconn, logger, utc
+from pyiem.util import (
+    exponential_backoff,
+    get_dbconn,
+    get_dbconnstr,
+    logger,
+    utc,
+)
 from pyiem.network import Table as NetworkTable
-from pandas.io.sql import read_sql
+from pandas import read_sql
 
 LOG = logger()
 
@@ -247,7 +253,7 @@ def main(valid):
         f"raob_flights f JOIN raob_profile_{valid.year} p "
         "ON (f.fid = p.fid) where valid = %s GROUP by station "
         "ORDER by station ASC",
-        dbconn,
+        get_dbconnstr("raob"),
         params=(valid,),
         index_col="station",
     )

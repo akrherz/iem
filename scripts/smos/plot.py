@@ -3,10 +3,10 @@ import sys
 import datetime
 
 import numpy as np
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_dbconn, logger, utc
+from pyiem.util import get_dbconnstr, logger, utc
 
 LOG = logger()
 
@@ -15,7 +15,6 @@ def makeplot(ts, routes="ac"):
     """
     Generate two plots for a given time GMT
     """
-    pgconn = get_dbconn("smos", user="nobody")
     df = read_sql(
         """
     WITH obs as (
@@ -28,7 +27,7 @@ def makeplot(ts, routes="ac"):
     CASE WHEN od is Null THEN -1 ELSE od END as od
     from obs o JOIN grid g ON (o.grid_idx = g.idx)
     """,
-        pgconn,
+        get_dbconnstr("smos"),
         params=(
             ts - datetime.timedelta(hours=6),
             ts + datetime.timedelta(hours=6),

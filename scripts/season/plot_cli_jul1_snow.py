@@ -1,14 +1,13 @@
 """Plot CLI snow"""
 import datetime
 
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnstr
 
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconn("iem", user="nobody")
     df = read_sql(
         """
      select station, st_x(geom), st_y(geom), snow_jul1, snow_jul1_normal
@@ -17,7 +16,7 @@ def main():
      and snow_jul1 is not null and snow_jul1_normal is not null
      and t.id not in ('RAP', 'DVN', 'FGF', 'OAX', 'MPX')
     """,
-        pgconn,
+        get_dbconnstr("iem"),
         index_col="station",
     )
     df["departure"] = df["snow_jul1"] - df["snow_jul1_normal"]

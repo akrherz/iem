@@ -5,8 +5,8 @@ databases.  This will hopefully remove some hackery
 import sys
 
 import numpy as np
-from pyiem.util import get_dbconn, logger, utc
-from pandas.io.sql import read_sql
+from pyiem.util import get_dbconn, get_dbconnstr, logger, utc
+from pandas import read_sql
 
 LOG = logger()
 
@@ -26,7 +26,7 @@ def sync(df, dbname):
     # Check for stations that were removed from mesosite
     localdf = read_sql(
         "SELECT iemid, modified from stations ORDER by iemid ASC",
-        dbconn,
+        get_dbconnstr(dbname),
         index_col="iemid",
     )
     localdf["iemid"] = localdf.index.values
@@ -92,7 +92,7 @@ def sync(df, dbname):
 
 def main(argv):
     """Go Main Go"""
-    mesosite = get_dbconn("mesosite")
+    mesosite = get_dbconnstr("mesosite")
     subscribers = (
         "iem isuag coop hads hml asos asos1min postgis raob"
     ).split()
@@ -102,7 +102,9 @@ def main(argv):
             "Running laptop syncing from upstream, assume iemdb is localhost!"
         )
         # HACK
-        mesosite = get_dbconn("mesosite", host="172.16.172.1", user="nobody")
+        mesosite = get_dbconnstr(
+            "mesosite", host="172.16.172.1", user="nobody"
+        )
         subscribers.insert(0, "mesosite")
     df = read_sql(
         "SELECT * from stations ORDER by iemid ASC",

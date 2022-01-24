@@ -20,11 +20,11 @@ LOG = logger()
 def workflow(valid):
     """Our workflow"""
     if valid.month == 1 and valid.day == 1:
-        LOG.info("sorry Jan 1 processing is a TODO!")
+        LOG.warning("sorry Jan 1 processing is a TODO!")
         return
     # read prism
     tidx = daily_offset(valid)
-    nc = ncopen("/mesonet/data/prism/%s_daily.nc" % (valid.year,), "r")
+    nc = ncopen(f"/mesonet/data/prism/{valid.year}_daily.nc", "r")
     ppt = nc.variables["ppt"][tidx, :, :]
     # missing as zero
     ppt = np.where(ppt.mask, 0, ppt)
@@ -37,7 +37,7 @@ def workflow(valid):
 
     # Interpolate this onto the stage4 grid
     nc = ncopen(
-        "/mesonet/data/stage4/%s_stage4_hourly.nc" % (valid.year,),
+        f"/mesonet/data/stage4/{valid.year}_stage4_hourly.nc",
         "a",
         timeout=300,
     )
@@ -104,27 +104,15 @@ def workflow(valid):
         if np.ma.max(newval) > 0:
             p01m_status[tidx] = 2
         else:
-            print(
-                ("prism_adjust_stage4 NOOP for time %s[idx:%s]")
-                % (
-                    (
-                        datetime.datetime(valid.year, 1, 1, 0)
-                        + datetime.timedelta(hours=tidx)
-                    ).strftime("%Y-%m-%dT%H"),
-                    tidx,
-                )
+            LOG.warning(
+                "NOOP for time %s[idx:%s]",
+                (
+                    datetime.datetime(valid.year, 1, 1, 0)
+                    + datetime.timedelta(hours=tidx)
+                ).strftime("%Y-%m-%dT%H"),
+                tidx,
             )
     nc.close()
-
-    # s4total_v2 = np.sum(p01m[sts_tidx:ets_tidx, :, :], axis=0)
-    # from pyiem.plot.geoplot import MapPlot
-    # import matplotlib.pyplot as plt
-    # mp = MapPlot(sector='conus')
-    # mp.pcolormesh(s4lons, s4lats, prism_on_s4grid,
-    #              np.arange(0, 25, 2), cmap=get_cmap("jet"))
-    # mp.drawcounties()
-    # mp.postprocess(filename='test.png')
-    # mp.close()
 
 
 def main(argv):

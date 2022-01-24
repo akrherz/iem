@@ -9,10 +9,9 @@ import warnings
 
 import numpy as np
 import pandas as pd
-from pandas.io.sql import read_sql
 import metpy.calc as mcalc
 from metpy.units import units as munits
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconn, get_dbconnstr, logger
 
 LOG = logger()
 # bad values into mcalc
@@ -64,18 +63,17 @@ def is_new(colname, newval, currentrow, newdata):
 
 def do(ts):
     """Process this date timestamp"""
-    asos = get_dbconn("asos", user="nobody")
     iemaccess = get_dbconn("iem")
     icursor = iemaccess.cursor()
     table = f"summary_{ts.year}"
     # Get what we currently know, just grab everything
-    current = read_sql(
+    current = pd.read_sql(
         f"SELECT * from {table} WHERE day = %s",
-        iemaccess,
+        get_dbconnstr("iem"),
         params=(ts.strftime("%Y-%m-%d"),),
         index_col="iemid",
     )
-    df = read_sql(
+    df = pd.read_sql(
         """
     select station, network, iemid, drct, sknt, gust,
     valid at time zone tzname as localvalid, valid,
@@ -88,7 +86,7 @@ def do(ts):
     and date(valid at time zone tzname) = %s
     ORDER by valid ASC
     """,
-        asos,
+        get_dbconn("asos"),
         params=(
             ts - datetime.timedelta(days=2),
             ts + datetime.timedelta(days=2),

@@ -4,10 +4,10 @@
 import sys
 import datetime
 
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnstr
 
 
 def runYear(year):
@@ -16,7 +16,6 @@ def runYear(year):
     nt = NetworkTable("IACLIMATE")
     nt.sts["IA0200"]["lon"] = -93.4
     nt.sts["IA5992"]["lat"] = 41.65
-    pgconn = get_dbconn("coop", user="nobody")
     df = read_sql(
         """
         SELECT station, avg(high) as avg_high, avg(low) as avg_low,
@@ -25,7 +24,7 @@ def runYear(year):
         high is not Null and low is not Null and substr(station,3,1) != 'C'
         GROUP by station
         """,
-        pgconn,
+        get_dbconnstr("coop"),
         params=(year,),
         index_col="station",
     )

@@ -3,8 +3,8 @@ import sys
 import datetime
 
 import numpy as np
-from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn, ncopen, logger
+from pandas import read_sql
+from pyiem.util import get_dbconn, get_dbconnstr, ncopen, logger
 from pyiem.reference import TRACE_VALUE
 
 LOG = logger()
@@ -35,11 +35,9 @@ def main():
         snwg = nc.variables["snwg"][:]
 
     current = read_sql(
-        """
-        SELECT day, high, low, precip, snow, snowd from
-        alldata_ia WHERE station = %s ORDER by day ASC
-    """,
-        pgconn,
+        "SELECT day, high, low, precip, snow, snowd from alldata_ia "
+        "WHERE station = %s ORDER by day ASC",
+        get_dbconnstr("coop"),
         params=(station,),
         index_col="day",
     )

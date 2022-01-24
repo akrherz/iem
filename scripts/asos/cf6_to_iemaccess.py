@@ -7,10 +7,9 @@ import sys
 from datetime import date
 
 # third party
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconnstr, logger
 from metpy.units import units
 import pandas as pd
-from pandas.io.sql import read_sql
 
 LOG = logger()
 
@@ -30,9 +29,9 @@ def comp(old, new):
 
 def main(argv):
     """Go Main Go."""
-    dbconn = get_dbconn("iem")
+    dbconn = get_dbconnstr("iem")
     valid = date(int(argv[1]), int(argv[2]), int(argv[3]))
-    cf6 = read_sql(
+    cf6 = pd.read_sql(
         "SELECT * from cf6_data where valid = %s ORDER by station ASC",
         dbconn,
         params=(valid,),
@@ -45,7 +44,7 @@ def main(argv):
     LOG.debug("Loaded %s CF6 entries for %s date", len(cf6.index), valid)
 
     table = f"summary_{valid.year}"
-    obs = read_sql(
+    obs = pd.read_sql(
         "SELECT s.*, t.network, "
         "case when length(t.id) = 3 then 'K'||t.id else t.id end as station "
         f"from {table} s JOIN "

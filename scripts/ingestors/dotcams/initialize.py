@@ -1,8 +1,8 @@
 """create initial database entries"""
 
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, logger
-from pandas.io.sql import read_sql
+from pyiem.util import get_dbconn, get_dbconnstr, logger
+from pandas import read_sql
 
 LOG = logger()
 
@@ -24,7 +24,7 @@ def main():
     # Load up our current webcams
     df = read_sql(
         "SELECT cam, valid from camera_current where cam ~* 'IDOT'",
-        mesosite,
+        get_dbconnstr("mesosite"),
         index_col="cam",
     )
 

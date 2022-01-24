@@ -5,8 +5,7 @@ from io import StringIO
 
 import pytz
 import pandas as pd
-from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn, convert_value, logger
+from pyiem.util import get_dbconn, get_dbconnstr, convert_value, logger
 
 LOG = logger()
 
@@ -24,14 +23,14 @@ def do(ts):
     table = ts.strftime("raw%Y_%m")
     sts = datetime.datetime(ts.year, ts.month, ts.day).replace(tzinfo=pytz.utc)
     ets = sts + datetime.timedelta(hours=24)
-    df = read_sql(
+    df = pd.read_sql(
         f"""
         SELECT station, valid, substr(key, 1, 3) as vname, value
         from {table} WHERE valid >= %s and valid < %s and
         substr(key, 1, 3) in ('USI', 'UDI', 'TAI', 'TDI')
         and value > -999
     """,
-        pgconn,
+        get_dbconnstr("hads"),
         params=(sts, ets),
         index_col=None,
     )

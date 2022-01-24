@@ -3,11 +3,11 @@ import calendar
 import sys
 
 import numpy as np
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.plot import get_cmap
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconnstr, utc
 from tqdm import tqdm
 
 
@@ -18,13 +18,12 @@ def run(nexrad, name, network, cname):
 
     today = utc()
 
-    pgconn = get_dbconn("radar", user="nobody")
     df = read_sql(
         """
     SELECT drct, sknt, extract(doy from valid) as doy, valid
     from nexrad_attributes_log WHERE nexrad = %s and sknt > 0
     """,
-        pgconn,
+        get_dbconnstr("radar"),
         params=(nexrad,),
         index_col=None,
     )

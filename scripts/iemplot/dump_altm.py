@@ -1,15 +1,14 @@
 """Dumping altimeter data so that GEMPAK can analyze it."""
 import datetime
 
-from pyiem.util import get_dbconn
-from pandas.io.sql import read_sql
+from pyiem.util import get_dbconnstr
+from pandas import read_sql
 from metpy.units import units
 
 
 def main():
     """Go Main Go"""
     ts = datetime.datetime.utcnow().strftime("%y%m%d/%H00")
-    pgconn = get_dbconn("iem")
 
     df = read_sql(
         """
@@ -18,7 +17,7 @@ def main():
         and t.state in ('IA','MO','IL','WI','IN','OH','KY','MI','SD','ND','NE',
         'KS') and (network ~* 'ASOS' or network = 'AWOS')
      """,
-        pgconn,
+        get_dbconnstr("iem"),
         index_col="id",
     )
     df["altm"] = (df["alti"].values * units("inHg")).to(units("hPa")).m

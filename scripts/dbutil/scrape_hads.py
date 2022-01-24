@@ -3,20 +3,19 @@ from io import StringIO
 
 import requests
 import pandas as pd
-from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn
+from pandas import read_sql
+from pyiem.util import get_dbconn, get_dbconnstr
 from pyiem.reference import nwsli2state, nwsli2country
 
 
 def main():
     """Go Main Go"""
-    hads_pgconn = get_dbconn("hads")
     mesosite_pgconn = get_dbconn("mesosite")
     mcursor = mesosite_pgconn.cursor()
     udf = read_sql(
         "select distinct nwsli from unknown where length(nwsli) = 5 "
         "ORDER by nwsli",
-        hads_pgconn,
+        get_dbconnstr("hads"),
         index_col=None,
     )
     udf["stcode"] = udf["nwsli"].str.slice(3, 5)

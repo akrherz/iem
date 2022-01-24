@@ -14,9 +14,8 @@ import sys
 import pytz
 import requests
 import pandas as pd
-from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, logger, utc
+from pyiem.util import get_dbconn, get_dbconnstr, logger, utc
 
 LOG = logger()
 
@@ -163,14 +162,13 @@ def main(argv):
     """Go main go"""
     date = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
     LOG.debug("Processing date: %s", date)
-    pgconn = get_dbconn("isuag")
     nt = NetworkTable("ISUSM")
 
     # Get our obs
-    df = read_sql(
+    df = pd.read_sql(
         "SELECT station, rain_in_tot from sm_daily where "
         "valid = %s ORDER by station ASC",
-        pgconn,
+        get_dbconnstr("isuag"),
         params=(date,),
         index_col="station",
     )

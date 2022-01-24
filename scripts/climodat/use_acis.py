@@ -5,9 +5,8 @@ import time
 
 import requests
 import pandas as pd
-from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, logger, exponential_backoff
+from pyiem.util import get_dbconn, get_dbconnstr, logger, exponential_backoff
 from pyiem.reference import TRACE_VALUE, ncei_state_codes
 
 LOG = logger()
@@ -103,10 +102,10 @@ def do(meta, station, acis_station, interactive):
     acis["day"] = pd.to_datetime(acis["day"])
     acis = acis.set_index("day")
     pgconn = get_dbconn("coop")
-    obs = read_sql(
+    obs = pd.read_sql(
         f"SELECT day, high, low, precip, snow, snowd from {table} WHERE "
         "station = %s ORDER by day ASC",
-        pgconn,
+        get_dbconnstr("coop"),
         params=(station,),
         index_col="day",
     )

@@ -4,15 +4,14 @@ run from RUN_SUMMARY.sh
 """
 
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconn, utc, logger
-from pandas.io.sql import read_sql
+from pyiem.util import get_dbconnstr, utc, logger
+from pandas import read_sql
 
 LOG = logger()
 
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconn("iem")
     now = utc().replace(hour=0, minute=0, second=0, microsecond=0)
 
     df = read_sql(
@@ -32,7 +31,7 @@ def main():
     least(l.calc_low, l.reported_low) as low from
     lows l JOIN stations t on (t.iemid = l.iemid)
     """,
-        pgconn,
+        get_dbconnstr("iem"),
         params=(now, now.replace(hour=12)),
         index_col="id",
     )

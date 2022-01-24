@@ -42,11 +42,17 @@ import re
 
 import requests
 import pandas as pd
-from pandas.io.sql import read_sql
 import numpy as np
 from pyiem.reference import TRACE_VALUE, state_names
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, exponential_backoff, logger, c2f, mm2inch
+from pyiem.util import (
+    get_dbconn,
+    get_dbconnstr,
+    exponential_backoff,
+    logger,
+    c2f,
+    mm2inch,
+)
 
 LOG = logger()
 PGCONN = get_dbconn("coop")
@@ -200,10 +206,10 @@ def process(station, metadata, allow_inserts):
             obs[col] = None
 
     table = "alldata_%s" % (station[:2],)
-    current = read_sql(
+    current = pd.read_sql(
         f"SELECT day, high, low, precip, snow, snowd from {table} "
         "where station = %s ORDER by day ASC",
-        PGCONN,
+        get_dbconnstr("coop"),
         params=(station,),
         index_col=None,
     )

@@ -7,9 +7,8 @@ import sys
 # third party
 import pytz
 import pandas as pd
-from pandas.io.sql import read_sql
 import requests
-from pyiem.util import get_dbconn, logger, exponential_backoff
+from pyiem.util import get_dbconn, get_dbconnstr, logger, exponential_backoff
 
 
 LOG = logger()
@@ -77,8 +76,10 @@ def main():
         return
     df = process_features(data["features"])
     pgconn = get_dbconn("iem")
-    xref = read_sql(
-        "SELECT id, nwsli from rwis_locations", pgconn, index_col="nwsli"
+    xref = pd.read_sql(
+        "SELECT id, nwsli from rwis_locations",
+        get_dbconnstr("iem"),
+        index_col="nwsli",
     )
     df["location_id"] = xref["id"]
 

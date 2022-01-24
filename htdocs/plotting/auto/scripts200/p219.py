@@ -9,9 +9,9 @@ import matplotlib.patheffects as PathEffects
 from matplotlib.patches import Rectangle
 from metpy.units import units
 from metpy.calc import wind_components
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pyiem.util import get_autoplot_context, get_dbconn, get_dbconnstr, utc
 from pyiem.exceptions import NoDataFound
 
 VIS = "visibility"
@@ -119,7 +119,7 @@ def plotter(fdict):
             "SELECT f.*, t.product_id from taf t JOIN taf_forecast f on "
             "(t.id = f.taf_id) WHERE t.station = %s and t.valid = %s "
             "ORDER by f.valid ASC",
-            pgconn,
+            get_dbconnstr("asos"),
             params=(ctx["station"], ts),
             index_col="valid",
         )

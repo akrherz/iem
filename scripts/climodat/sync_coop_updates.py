@@ -7,22 +7,21 @@ run from RUN_NOON.sh
 """
 # pylint: disable=cell-var-from-loop
 
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconn, get_dbconnstr, logger
 import pandas as pd
-from pandas.io.sql import read_sql
 from psycopg2.extras import DictCursor
 
 LOG = logger()
 
 
-def load_changes(accessdb):
+def load_changes():
     """Find what has changed."""
-    df = read_sql(
+    df = pd.read_sql(
         "SELECT distinct id, c.iemid, network, tzname, "
         "date(valid at time zone t.tzname) from current_log c JOIN "
         "stations t on (c.iemid = t.iemid) WHERE t.network ~* 'COOP' and "
         "updated > now() - '25 hours'::interval",
-        accessdb,
+        get_dbconnstr("iem"),
         index_col=None,
     )
     LOG.debug("Found %s database changes", len(df.index))
@@ -87,7 +86,7 @@ def main():
     acursor = accessdb.cursor(cursor_factory=DictCursor)
     coopdb = get_dbconn("coop")
     ccursor = coopdb.cursor(cursor_factory=DictCursor)
-    df = load_changes(accessdb)
+    df = load_changes()
     xref = load_xref()
     updates = 0
     unused = 0

@@ -2,9 +2,9 @@
 import datetime
 import sys
 
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnstr
 
 
 def fmter(val):
@@ -25,8 +25,6 @@ def main(days, argv):
         routes = "a"
     sixago = today - datetime.timedelta(days=(days - 1))
 
-    pgconn = get_dbconn("iem", user="nobody")
-
     # Compute normal from the climate database
     df = read_sql(
         """
@@ -38,7 +36,7 @@ def main(days, argv):
         and pday >= 0 and pday < 30
         GROUP by s.id, lon, lat
     """,
-        pgconn,
+        get_dbconnstr("iem"),
         params=(sixago, today),
         index_col="id",
     )

@@ -2,14 +2,12 @@
 import sys
 import datetime
 
-from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn
+from pandas import read_sql
+from pyiem.util import get_dbconnstr
 
 
 def main(argv):
     """Go"""
-    pgconn = get_dbconn("asos", user="nobody")
-
     station = argv[1]
 
     df = read_sql(
@@ -21,7 +19,7 @@ def main(argv):
         WHERE station = %s and precip > 0 and precip < 0.5
         GROUP by hr, mi ORDER by hr, mi ASC
         """,
-        pgconn,
+        get_dbconnstr("asos"),
         params=(station,),
         index_col=None,
     )

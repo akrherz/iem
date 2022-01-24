@@ -103,7 +103,7 @@ if ($what == "download"){
    foreach ($stations as $key => $value){
      $station = $value;
 
-     include ("plot_1min.php");
+     include "plot_1min.php";
    }
  exit();
 } else {

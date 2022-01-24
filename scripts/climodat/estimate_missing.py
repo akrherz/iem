@@ -9,9 +9,8 @@ import sys
 
 import requests
 import pandas as pd
-from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconn, get_dbconnstr, logger
 
 LOG = logger()
 URI = (
@@ -117,11 +116,11 @@ def main(argv):
         return
     nt = NetworkTable(f"{state}CLIMATE", only_online=False)
     pgconn = get_dbconn("coop")
-    df = read_sql(
+    df = pd.read_sql(
         f"SELECT station, year, day, high, low, precip from alldata_{state} "
         "WHERE (high is null or low is null or precip is null) "
         "and year >= 1893 and day < 'TODAY' ORDER by station, day",
-        pgconn,
+        get_dbconnstr("coop"),
         index_col=None,
     )
     LOG.info("Processing %s rows for %s", len(df.index), state)

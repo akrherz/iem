@@ -11,13 +11,13 @@ import datetime
 import smtplib
 from email.mime.text import MIMEText
 
-from pandas.io.sql import read_sql
-from pyiem.util import get_properties, get_dbconn
+from pandas import read_sql
+from pyiem.util import get_properties, get_dbconnstr
 
 
 def generate_report(start_date, end_date):
     """Generate the text report"""
-    pgconn = get_dbconn("isuag", user="nobody")
+    pgconn = get_dbconnstr("isuag", user="nobody")
     days = (end_date - start_date).days + 1
     totalobs = days * 24 * 25
     df = read_sql(

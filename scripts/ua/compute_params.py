@@ -3,9 +3,9 @@ import sys
 
 # import warnings
 
-from pyiem.util import get_dbconn, utc, logger
+from pyiem.util import get_dbconn, get_dbconnstr, utc, logger
 from pyiem.network import Table as NetworkTable
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from tqdm import tqdm
 import pandas as pd
 import numpy as np
@@ -323,7 +323,7 @@ def main(argv):
         and pressure is not null
         ORDER by pressure DESC
     """,
-        dbconn,
+        get_dbconnstr("raob"),
     )
     if df.empty or pd.isnull(df["smps"].max()):
         return

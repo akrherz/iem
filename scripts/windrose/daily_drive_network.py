@@ -7,8 +7,8 @@ import subprocess
 import stat
 import datetime
 
-from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn, logger
+from pandas import read_sql
+from pyiem.util import get_dbconnstr, logger
 
 LOG = logger()
 CACHEDIR = "/mesonet/share/windrose/"
@@ -35,15 +35,14 @@ def do_network(network):
 def main():
     """Main"""
     now = datetime.datetime.now()
-    with get_dbconn("mesosite") as pgconn:
-        df = read_sql(
-            """SELECT max(id) as station, network from stations
-            WHERE (network ~* 'ASOS' or network = 'AWOS' or network ~* 'DCP'
-            or network ~* 'RWIS')
-            and online = 't' GROUP by network ORDER by random()""",
-            pgconn,
-            index_col="network",
-        )
+    df = read_sql(
+        """SELECT max(id) as station, network from stations
+        WHERE (network ~* 'ASOS' or network = 'AWOS' or network ~* 'DCP'
+        or network ~* 'RWIS')
+        and online = 't' GROUP by network ORDER by random()""",
+        get_dbconnstr("mesosite"),
+        index_col="network",
+    )
     for network, row in df.iterrows():
         station = row["station"]
         testfn = f"{CACHEDIR}/{network}/{station}/{station}_yearly.png"

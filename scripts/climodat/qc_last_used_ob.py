@@ -3,8 +3,8 @@
 import datetime
 
 # Third Party
-from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn, logger
+from pandas import read_sql
+from pyiem.util import get_dbconn, get_dbconnstr, logger
 
 LOG = logger()
 FLOOR = datetime.date.today() - datetime.timedelta(days=365)
@@ -31,7 +31,7 @@ def check_last(station, row):
         "(s.iemid = t.iemid) WHERE t.id = %s and t.network = %s and "
         "s.day > %s and (s.max_tmpf is not null or "
         "s.pday is not null)",
-        get_dbconn("iem"),
+        get_dbconnstr("iem"),
         index_col=None,
         params=(trackstation, tracknetwork, FLOOR),
     )
@@ -77,7 +77,7 @@ def main():
         substr(s.id, 3, 4) != '0000' and
         substr(s.id, 3, 1) != 'C' ORDER by s.id ASC
         """,
-        get_dbconn("mesosite"),
+        get_dbconnstr("mesosite"),
         index_col="id",
     )
     for station, row in sdf.iterrows():

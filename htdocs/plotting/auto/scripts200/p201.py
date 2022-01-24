@@ -1,10 +1,10 @@
 """Calendar of SPC Outlooks by WFO/state."""
 import datetime
 
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from pyiem.plot import calendar_plot
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -137,7 +137,7 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("postgis")
+    pgconn = get_dbconnstr("postgis")
     ctx = get_autoplot_context(fdict, get_description())
     sts = ctx["sdate"]
     ets = ctx["edate"]

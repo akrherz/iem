@@ -8,9 +8,9 @@ import verde as vd
 import pyproj
 from metpy.units import units as mpunits
 from metpy.units import masked_array
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from pyiem.iemre import get_grids, XAXIS, YAXIS, set_grids
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconnstr, logger
 
 LOG = logger()
 
@@ -60,7 +60,6 @@ def generic_gridder(day, df, idx):
 def main(argv):
     """Do work please"""
     day = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
-    pgconn = get_dbconn("coop")
     # Omit any current estimates as these likely have a feedback loop on the
     # IEMRE analysis
     df = read_sql(
@@ -75,7 +74,7 @@ def main(argv):
         and precip >= 0 and precip < 50
         and not precip_estimated
     """,
-        pgconn,
+        get_dbconnstr("coop"),
         params=(day,),
     )
     res = generic_gridder(day, df, "precip")

@@ -10,12 +10,11 @@ import sys
 import datetime
 
 import pandas as pd
-from pandas.io.sql import read_sql
 import numpy as np
 from metpy.units import units
 from pyiem import iemre
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconn, get_dbconnstr, logger
 from pyiem.reference import TRACE_VALUE, state_names
 
 LOG = logger()
@@ -63,12 +62,12 @@ def load_table(state, date):
     df = pd.DataFrame(rows)
     df = df.set_index("station")
     # Load up any available observations
-    obs = read_sql(
+    obs = pd.read_sql(
         "SELECT station, high, low, precip, snow, snowd, temp_hour, "
         "precip_hour, coalesce(temp_estimated, true) as temp_estimated, "
         "coalesce(precip_estimated, true) as precip_estimated "
         f"from alldata_{state} WHERE day = %s and station in %s",
-        get_dbconn("coop"),
+        get_dbconnstr("coop"),
         params=(date, tuple(df.index.values)),
         index_col="station",
     )
@@ -243,15 +242,14 @@ def commit(cursor, table, df, ts):
 
 def merge_network_obs(df, network, ts):
     """Merge data from observations."""
-    pgconn = get_dbconn("iem")
-    obs = read_sql(
+    obs = pd.read_sql(
         "SELECT t.id as station, max_tmpf as high, min_tmpf as low, "
         "pday as precip, snow, snowd, "
         "coalesce(extract(hour from (coop_valid + '1 minute'::interval) "
         "  at time zone tzname), 24) as temp_hour "
         "from summary s JOIN stations t "
         "on (t.iemid = s.iemid) WHERE t.network = %s and s.day = %s",
-        pgconn,
+        get_dbconnstr("iem"),
         params=(network, ts),
         index_col="station",
     )

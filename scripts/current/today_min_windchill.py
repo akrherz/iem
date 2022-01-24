@@ -4,9 +4,9 @@
 import datetime
 import sys
 
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnstr
 from pyiem.network import Table as NetworkTable
 
 
@@ -15,7 +15,6 @@ def doday(ts, realtime):
     Create a plot of precipitation stage4 estimates for some day
     """
     nt = NetworkTable(["AWOS", "IA_ASOS"])
-    pgconn = get_dbconn("iem", user="nobody")
     df = read_sql(
         """
     SELECT id as station, min(feel) as wcht from current_log c JOIN stations t
@@ -23,7 +22,7 @@ def doday(ts, realtime):
     and valid >= %s and valid < %s + '24 hours'::interval
     and feel is not null and sknt > 0 GROUP by id
     """,
-        pgconn,
+        get_dbconnstr("iem"),
         params=(ts, ts),
         index_col="station",
     )

@@ -18,10 +18,15 @@ import dropbox
 import requests
 import numpy as np
 import pandas as pd
-from pandas.io.sql import read_sql
 from metpy.units import units
 from pyiem.meteorology import gdd
-from pyiem.util import get_properties, get_dbconn, logger, convert_value
+from pyiem.util import (
+    get_properties,
+    get_dbconn,
+    get_dbconnstr,
+    logger,
+    convert_value,
+)
 
 LOG = logger()
 XREF = {
@@ -200,14 +205,13 @@ def qc(df):
 
 def load_baseline(location):
     """return a dataframe of this location's data"""
-    pgconn = get_dbconn("coop", user="nobody")
-    df = read_sql(
+    df = pd.read_sql(
         """
         SELECT *, extract(doy from valid) as doy,
         extract(year from valid) as year
         from yieldfx_baseline where station = %s ORDER by valid
         """,
-        pgconn,
+        get_dbconnstr("coop", user="nobody"),
         params=(location,),
         index_col="valid",
     )

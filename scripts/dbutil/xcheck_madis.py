@@ -3,16 +3,16 @@ import os
 import datetime
 import warnings
 
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from netCDF4 import chartostring
-from pyiem.util import get_dbconn, ncopen, utc
+from pyiem.util import get_dbconnstr, ncopen, utc
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 def main():
     """Go Main Go!"""
-    pgconn = get_dbconn("hads")
+    pgconn = get_dbconnstr("hads")
     udf = read_sql(
         """
         SELECT distinct nwsli, 1 as col from unknown

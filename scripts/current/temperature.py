@@ -1,14 +1,13 @@
 """Generate current plot of Temperature"""
 import datetime
 
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnstr
 
 
 def get_df():
     """Get my data"""
-    pgconn = get_dbconn("iem", user="nobody")
 
     return read_sql(
         """
@@ -22,7 +21,7 @@ def get_df():
       (valid + '30 minutes'::interval) > now() and
       tmpf >= -50 and tmpf < 140
     """,
-        pgconn,
+        get_dbconnstr("iem"),
         index_col="station",
     )
 

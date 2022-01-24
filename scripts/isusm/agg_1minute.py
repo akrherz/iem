@@ -5,8 +5,7 @@ import datetime
 
 import numpy as np
 import pandas as pd
-from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn, utc, logger
+from pyiem.util import get_dbconn, get_dbconnstr, utc, logger
 
 LOG = logger()
 TIME_FORMAT = "%Y-%m-%d %H:%M-06"
@@ -160,7 +159,7 @@ def workflow():
     date = datetime.date.today() - datetime.timedelta(days=7)
     # 6z is the start of such a date
     sts = utc(date.year, date.month, date.day, 6)
-    df = read_sql(
+    df = pd.read_sql(
         """
     WITH data as (
         SELECT *,
@@ -193,7 +192,7 @@ def workflow():
         as calc_vwc_50_avg
     from data GROUP by station, hour
     """,
-        pgconn,
+        get_dbconnstr("isuag"),
         params=(sts,),
         index_col=None,
     )

@@ -8,7 +8,7 @@ import pandas as pd
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.plot.geoplot import MapPlot
 from pyiem.plot import get_cmap
-from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pyiem.util import get_autoplot_context, get_dbconnstr, utc
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import LATLON
 
@@ -263,7 +263,7 @@ def plotter(fdict):
     lons = np.arange(GRIDWEST, GRIDEAST, griddelta)
     lats = np.arange(GRIDSOUTH, GRIDNORTH, griddelta)
 
-    pgconn = get_dbconn("postgis")
+    pgconn = get_dbconnstr("postgis")
     hour = int(p.split(".")[2])
     df = read_postgis(
         """

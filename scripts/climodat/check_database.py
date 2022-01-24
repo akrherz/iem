@@ -3,9 +3,8 @@ from io import StringIO
 import sys
 
 import pandas as pd
-from pandas.io.sql import read_sql
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconn, get_dbconnstr, logger
 
 LOG = logger()
 
@@ -15,10 +14,10 @@ def main(argv):
     state = argv[1]
     nt = NetworkTable(f"{state}CLIMATE", only_online=False)
     pgconn = get_dbconn("coop")
-    df = read_sql(
+    df = pd.read_sql(
         f"SELECT station, year, day from alldata_{state} "
         "ORDER by station, day",
-        pgconn,
+        get_dbconnstr("coop"),
         index_col=None,
     )
 

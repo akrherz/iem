@@ -5,14 +5,14 @@ import sys
 import os
 
 # thirdparty
-from pandas.io.sql import read_sql
+from pandas import read_sql
 import numpy as np
 from scipy.signal import convolve2d
 import pygrib
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.tracker import loadqc
 from pyiem.network import Table
-from pyiem.util import get_dbconn, logger, c2f, convert_value
+from pyiem.util import get_dbconnstr, logger, c2f, convert_value
 
 LOG = logger()
 
@@ -85,10 +85,6 @@ def main(argv):
     """Go Main Go"""
     nt = Table("ISUSM")
     qdict = loadqc()
-
-    idbconn = get_dbconn("isuag", user="nobody")
-    pdbconn = get_dbconn("postgis", user="nobody")
-
     day_ago = int(argv[1])
     ts = datetime.date.today() - datetime.timedelta(days=day_ago)
     hlons, hlats, hvals = do_nam(ts)
@@ -116,7 +112,7 @@ def main(argv):
          from sm_daily d JOIN ranges r on (d.station = r.station)
         where valid = %s and t4_c_avg_qc > -40 and r.count > 19
     """,
-        idbconn,
+        get_dbconnstr("isuag"),
         params=(ts, ts + datetime.timedelta(days=1), ts),
         index_col="station",
     )
@@ -161,7 +157,7 @@ def main(argv):
         ST_y(ST_centroid(the_geom)) as lat
         from uscounties WHERE state_name = 'Iowa'
     """,
-        pdbconn,
+        get_dbconnstr("postgis"),
         index_col=None,
     )
     for i, row in cdf.iterrows():

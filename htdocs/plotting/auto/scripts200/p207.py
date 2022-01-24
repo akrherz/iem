@@ -9,7 +9,7 @@ from shapely.geometry import Polygon, Point
 from scipy.interpolate import Rbf
 from pyiem import reference
 from pyiem.plot import MapPlot, nwssnow
-from pyiem.util import get_autoplot_context, get_dbconn, logger
+from pyiem.util import get_autoplot_context, get_dbconnstr, logger
 
 LOG = logger()
 T4326_2163 = Transformer.from_proj(4326, 2163, always_xy=True)
@@ -167,7 +167,7 @@ def get_description():
 def load_data(ctx, basets, endts):
     """Generate a dataframe with the data we want to analyze."""
     LOG.debug("call")
-    pgconn = get_dbconn("postgis")
+    pgconn = get_dbconnstr("postgis")
     df = read_postgis(
         """SELECT state, wfo,
         max(magnitude::real) as val, ST_x(geom) as lon, ST_y(geom) as lat,
@@ -190,7 +190,7 @@ def load_data(ctx, basets, endts):
     if ctx["coop"] == "no" or ctx["v"] == "ice":
         return df
     # More work to do
-    pgconn = get_dbconn("iem")
+    pgconn = get_dbconnstr("iem")
     days = []
     now = basets
     while now <= endts:

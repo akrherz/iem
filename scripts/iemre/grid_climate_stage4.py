@@ -4,12 +4,12 @@ import datetime
 
 import numpy as np
 from scipy.interpolate import NearestNDInterpolator
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from pyiem import iemre
-from pyiem.util import get_dbconn, ncopen, convert_value, logger
+from pyiem.util import get_dbconnstr, ncopen, convert_value, logger
 
 LOG = logger()
-COOP = get_dbconn("coop")
+COOP = get_dbconnstr("coop")
 
 
 def generic_gridder(nc, df, idx):

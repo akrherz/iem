@@ -9,15 +9,14 @@ import sys
 
 import pytz
 import numpy as np
-from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn, utc, logger
+from pandas import read_sql
+from pyiem.util import get_dbconn, get_dbconnstr, utc, logger
 
 LOG = logger()
 
 
 def workflow(date):
     """Do the necessary work for this date"""
-    pgconn = get_dbconn("hads", user="nobody")
     iem_pgconn = get_dbconn("iem")
     icursor = iem_pgconn.cursor()
     # load up the current obs
@@ -32,7 +31,7 @@ def workflow(date):
     SELECT d.id, d.iemid, d.tzname, coalesce(o.pday, 0) as pday from
     dcp d LEFT JOIN obs o on (d.iemid = o.iemid)
     """,
-        iem_pgconn,
+        get_dbconnstr("iem"),
         params=(date,),
         index_col="id",
     )
@@ -52,7 +51,7 @@ def workflow(date):
     from raw{date.year} WHERE valid between %s and %s and
     substr(key, 1, 3) = 'PPH' and value >= 0
     """,
-        pgconn,
+        get_dbconnstr("hads"),
         params=(sts, ets),
         index_col=None,
     )
