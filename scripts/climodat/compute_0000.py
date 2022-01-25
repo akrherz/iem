@@ -8,7 +8,14 @@ import numpy as np
 import geopandas as gpd
 from pyiem import iemre
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_dbconn, ncopen, logger, mm2inch, convert_value
+from pyiem.util import (
+    get_dbconn,
+    get_dbconnstr,
+    ncopen,
+    logger,
+    mm2inch,
+    convert_value,
+)
 
 LOG = logger()
 LOG.setLevel(logging.INFO)
@@ -76,11 +83,10 @@ def do_day(valid):
         snowd = mm2inch(nc.variables["snowd_12z"][idx, :, :])
 
     # build out the state mappers
-    pgconn = get_dbconn("postgis")
-    states = gpd.GeoDataFrame.from_postgis(
+    states = gpd.read_postgis(
         "SELECT the_geom, state_abbr from states "
         "where state_abbr not in %s",
-        pgconn,
+        get_dbconnstr("postgis"),
         params=(tuple(SKIPSTATES),),
         index_col="state_abbr",
         geom_col="the_geom",
@@ -104,9 +110,9 @@ def do_day(valid):
         update_database(state + "0000", valid, statedata[state])
 
     # build out climate division mappers
-    climdiv = gpd.GeoDataFrame.from_postgis(
-        "SELECT geom, iemid from climdiv " "where st_abbrv not in %s",
-        pgconn,
+    climdiv = gpd.read_postgis(
+        "SELECT geom, iemid from climdiv where st_abbrv not in %s",
+        get_dbconnstr("postgis"),
         params=(tuple(SKIPSTATES),),
         index_col="iemid",
         geom_col="geom",

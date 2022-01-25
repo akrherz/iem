@@ -7,7 +7,7 @@ import sys
 from datetime import date
 
 # third party
-from pyiem.util import get_dbconnstr, logger
+from pyiem.util import get_dbconnstr, get_dbconn, logger
 from metpy.units import units
 import pandas as pd
 
@@ -29,11 +29,11 @@ def comp(old, new):
 
 def main(argv):
     """Go Main Go."""
-    dbconn = get_dbconnstr("iem")
+    dbconn = get_dbconn("iem")
     valid = date(int(argv[1]), int(argv[2]), int(argv[3]))
     cf6 = pd.read_sql(
         "SELECT * from cf6_data where valid = %s ORDER by station ASC",
-        dbconn,
+        get_dbconnstr("iem"),
         params=(valid,),
         index_col="station",
     )
@@ -50,7 +50,7 @@ def main(argv):
         f"from {table} s JOIN "
         "stations t on (s.iemid = t.iemid) WHERE s.day = %s and "
         "t.network ~* 'ASOS' ORDER by station ASC",
-        dbconn,
+        get_dbconnstr("iem"),
         params=(valid,),
         index_col="station",
     )
@@ -69,7 +69,7 @@ def main(argv):
     updated_rows = 0
     for station, row in df.iterrows():
         if pd.isnull(row["iemid"]):
-            LOG.debug("Yikes, station %s is unknown?", station)
+            LOG.warning("Yikes, station %s is unknown?", station)
             continue
         work = []
         params = []
@@ -93,7 +93,7 @@ def main(argv):
 
     cursor.close()
     dbconn.commit()
-    LOG.debug("Updated %s values over %s rows", updated_vals, updated_rows)
+    LOG.info("Updated %s values over %s rows", updated_vals, updated_rows)
 
 
 if __name__ == "__main__":

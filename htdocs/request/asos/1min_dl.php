@@ -1,10 +1,6 @@
 <?php
 // Big downloads exceed 30 second limit.
 set_time_limit(300);
-/*
- * This thing does the work of getting the data from the database and either
- * plotting it (via plot_1min.php) or displaying it for download
- */
 require_once "../../../config/settings.inc.php";
 // This script can be too intensive and jam up php-fpm, so we throttle
 require_once "../../../include/throttle.php";
@@ -96,16 +92,6 @@ $sqlStr .= " and station IN ". $stationString ." ORDER by valid ASC";
 if ($what == "download"){
  header("Content-type: application/octet-stream");
  header("Content-Disposition: attachment; filename=changeme.txt");
-} else if ($what == "plot"){
-  require_once "../../../include/jpgraph/jpgraph.php";
-  require_once "../../../include/jpgraph/jpgraph_line.php";
-  require_once "../../../include/jpgraph/jpgraph_date.php";
-   foreach ($stations as $key => $value){
-     $station = $value;
-
-     include "plot_1min.php";
-   }
- exit();
 } else {
  header("Content-type: text/plain");
 }
