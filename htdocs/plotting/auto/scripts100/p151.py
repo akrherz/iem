@@ -4,9 +4,10 @@ import datetime
 from geopandas import read_postgis
 import numpy as np
 from pyiem.plot import MapPlot, centered_bins, get_cmap
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import SECTORS_NAME
+from sqlalchemy import text
 
 PDICT = {
     "state": "State Level Maps (select state)",
@@ -185,7 +186,6 @@ def get_description():
 
 def get_data(ctx):
     """Get the data, please."""
-    pgconn = get_dbconn("coop")
     state = ctx["state"]
     sector = ctx["sector"]
     threshold = ctx["threshold"]
@@ -226,31 +226,32 @@ def get_data(ctx):
         pcol = "precip * 25.4"
 
     df = read_postgis(
-        f"""
+        text(
+            f"""
     WITH period1 as (
         SELECT station, year, sum({pcol}) as total_precip,
         avg(({hcol}+{lcol}) / 2.) as avg_temp, avg({hcol}) as avg_high,
         avg({lcol}) as avg_low,
         sum(gddxx(50, 86, high, low)) as sum_gdd,
         sum(case when high > 86 then high - 86 else 0 end) as sum_sdd,
-        sum(case when {hcol} >= %s then 1 else 0 end) as days_high_above,
-        sum(case when {hcol} < %s then 1 else 0 end) as days_high_below,
-        sum(case when {lcol} >= %s then 1 else 0 end) as days_low_above,
-        sum(case when {lcol} < %s then 1 else 0 end) as days_low_below
-        from {table} WHERE year >= %s and year <= %s
-        and month in %s GROUP by station, year),
+        sum(case when {hcol} >= :t then 1 else 0 end) as days_high_above,
+        sum(case when {hcol} < :t then 1 else 0 end) as days_high_below,
+        sum(case when {lcol} >= :t then 1 else 0 end) as days_low_above,
+        sum(case when {lcol} < :t then 1 else 0 end) as days_low_below
+        from {table} WHERE year >= :syear1 and year <= :eyear1
+        and month in :months GROUP by station, year),
     period2 as (
         SELECT station, year, sum({pcol}) as total_precip,
         avg(({hcol}+{lcol}) / 2.) as avg_temp, avg({hcol}) as avg_high,
         avg({lcol}) as avg_low,
         sum(gddxx(50, 86, high, low)) as sum_gdd,
         sum(case when high > 86 then high - 86 else 0 end) as sum_sdd,
-        sum(case when {hcol} >= %s then 1 else 0 end) as days_high_above,
-        sum(case when {hcol} < %s then 1 else 0 end) as days_high_below,
-        sum(case when {lcol} >= %s then 1 else 0 end) as days_low_above,
-        sum(case when {lcol} < %s then 1 else 0 end) as days_low_below
-        from {table} WHERE year >= %s and year <= %s
-        and month in %s GROUP by station, year),
+        sum(case when {hcol} >= :t then 1 else 0 end) as days_high_above,
+        sum(case when {hcol} < :t then 1 else 0 end) as days_high_below,
+        sum(case when {lcol} >= :t then 1 else 0 end) as days_low_above,
+        sum(case when {lcol} < :t then 1 else 0 end) as days_low_below
+        from {table} WHERE year >= :syear2 and year <= :eyear2
+        and month in :months GROUP by station, year),
     p1agg as (
         SELECT station, avg(total_precip) as precip,
         avg(avg_temp) as avg_temp, avg(avg_high) as avg_high,
@@ -292,32 +293,25 @@ def get_data(ctx):
         p2.avg_days_low_below as p2_days_low_below
         from p1agg p1 JOIN p2agg p2 on
         (p1.station = p2.station)
-        WHERE p1.count >= %s and p2.count >= %s)
+        WHERE p1.count >= :p1years and p2.count >= :p2years)
 
     SELECT ST_X(geom) as lon, ST_Y(geom) as lat, t.geom,
     d.* from agg d JOIN stations t ON (d.station = t.id)
     WHERE t.network ~* 'CLIMATE'
     and substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000'
-    """,
-        pgconn,
-        params=[
-            threshold,
-            threshold,
-            threshold,
-            threshold,
-            p1syear,
-            p1eyear,
-            tuple(months),
-            threshold,
-            threshold,
-            threshold,
-            threshold,
-            p2syear,
-            p2eyear,
-            tuple(months),
-            p1years,
-            p2years,
-        ],
+    """
+        ),
+        get_dbconnstr("coop"),
+        params={
+            "t": threshold,
+            "syear1": p1syear,
+            "eyear1": p1eyear,
+            "months": tuple(months),
+            "syear2": p2syear,
+            "eyear2": p2eyear,
+            "p1years": p1years,
+            "p2years": p2years,
+        },
         index_col="station",
         geom_col="geom",
     )

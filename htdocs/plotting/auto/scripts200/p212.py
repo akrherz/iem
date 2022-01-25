@@ -4,8 +4,9 @@ import datetime
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 PDICT = {"00": "00 UTC", "12": "12 UTC"}
 PDICT3 = dict(
@@ -126,30 +127,39 @@ def get_data(ctx):
     varname = ctx["var"]
     hour = int(ctx["hour"])
     level = ctx["level"]
-    pgconn = get_dbconn("raob")
+    pgconn = get_dbconnstr("raob")
     if varname in ["tmpc", "dwpc", "height", "smps"]:
         ctx["leveltitle"] = f" @ {level} hPa"
         dfin = read_sql(
-            "select extract(year from f.valid at time zone 'UTC') as year, "
-            "f.valid at time zone 'UTC' as utc_valid, "
-            f"{varname} from raob_profile p JOIN raob_flights f on "
-            "(p.fid = f.fid) WHERE f.station in %s and p.pressure = %s and "
-            "extract(hour from f.valid at time zone 'UTC') = %s and "
-            f"{varname} is not null ORDER by valid ASC",
+            text(
+                "select extract(year from f.valid at time zone 'UTC') as year, "
+                "f.valid at time zone 'UTC' as utc_valid, "
+                f"{varname} from raob_profile p JOIN raob_flights f on "
+                "(p.fid = f.fid) WHERE f.station in :stations "
+                "and p.pressure = :level and "
+                "extract(hour from f.valid at time zone 'UTC') = :hour and "
+                f"{varname} is not null ORDER by valid ASC"
+            ),
             pgconn,
-            params=(tuple(stations), level, hour),
+            params={
+                "stations": tuple(stations),
+                "level": level,
+                "hour": hour,
+            },
             index_col="utc_valid",
         )
     else:
         ctx["leveltitle"] = ""
         dfin = read_sql(
-            "select extract(year from valid at time zone 'UTC') as year, "
-            "valid at time zone 'UTC' as utc_valid, "
-            f"{varname} from raob_flights WHERE station in %s and "
-            "extract(hour from valid at time zone 'UTC') = %s and "
-            f"{varname} is not null ORDER by valid ASC",
+            text(
+                "select extract(year from valid at time zone 'UTC') as year, "
+                "valid at time zone 'UTC' as utc_valid, "
+                f"{varname} from raob_flights WHERE station in :stations and "
+                "extract(hour from valid at time zone 'UTC') = :hour and "
+                f"{varname} is not null ORDER by valid ASC"
+            ),
             pgconn,
-            params=(tuple(stations), hour),
+            params={"stations": tuple(stations), "hour": hour},
             index_col="utc_valid",
         )
     if dfin.empty:

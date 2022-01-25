@@ -4,9 +4,10 @@ import datetime
 import pandas as pd
 from pandas.io.sql import read_sql
 from matplotlib.font_manager import FontProperties
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 PDICT = dict(
     [
@@ -107,7 +108,6 @@ def plotter(fdict):
     font1 = FontProperties()
     font1.set_size(16)
 
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     varname = ctx["var"]
     varname2 = varname.split("_")[1]
@@ -134,13 +134,14 @@ def plotter(fdict):
         months = [ts.month]
 
     df = read_sql(
-        f"""
+        text(
+            f"""
     WITH obs as (
-        SELECT (valid + '10 minutes'::interval) at time zone %s as ts,
+        SELECT (valid + '10 minutes'::interval) at time zone :tzname as ts,
         tmpf::int as itmpf, dwpf::int as idwpf,
         feel::int as ifeel, mslp, alti from alldata
-        where station = %s and
-        extract(month from valid at time zone %s) in %s),
+        where station = :station and
+        extract(month from valid at time zone :tzname) in :months),
     agg1 as (
         SELECT extract(hour from ts) as hr,
         max(idwpf) as max_dwpf,
@@ -159,14 +160,14 @@ def plotter(fdict):
         (a.hr = extract(hour from o.ts)
         and a.{varname} = o.{varname2})
         ORDER by a.hr ASC, o.ts DESC
-    """,
-        pgconn,
-        params=(
-            ctx["_nt"].sts[station]["tzname"],
-            station,
-            ctx["_nt"].sts[station]["tzname"],
-            tuple(months),
+    """
         ),
+        get_dbconnstr("asos"),
+        params={
+            "tzname": ctx["_nt"].sts[station]["tzname"],
+            "station": station,
+            "months": tuple(months),
+        },
         index_col=None,
     )
     if df.empty:

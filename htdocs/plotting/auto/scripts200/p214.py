@@ -2,9 +2,10 @@
 import datetime
 
 from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 VDICT = {
     "dwpf": "Air Dew Point Temp [F]",
@@ -158,7 +159,6 @@ $("#ap_container").highcharts({
 
 def get_data(fdict):
     """Build out the context."""
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     month = ctx["month"]
@@ -189,22 +189,28 @@ def get_data(fdict):
     basets = datetime.date(ctx["syear"], 1, 1)
     direction = "DESC" if agg == "max" else "ASC"
     ctx["df"] = read_sql(
-        f"""
+        text(
+            f"""
         WITH data as (
             SELECT {x}::{cast} as x, ({y}) as yv,
             first_value(valid at time zone 'UTC') OVER (
                 PARTITION by {x}::{cast}
                 ORDER by {y} {direction}, valid DESC) as timestamp
-            from alldata where station = %s
-            and extract(month from valid) in %s
-            and report_type = 2 and valid >= %s
+            from alldata where station = :station
+            and extract(month from valid) in :months
+            and report_type = 2 and valid >= :basets
             and {x} is not null and {y} is not null
             ORDER by x ASC)
         SELECT x, {agg}(yv) as y, max(timestamp) as utc_valid from data
         GROUP by x ORDER by x ASC
-    """,
-        pgconn,
-        params=(station, tuple(months), basets),
+    """
+        ),
+        get_dbconnstr("asos"),
+        params={
+            "station": station,
+            "months": tuple(months),
+            "basets": basets,
+        },
         index_col=None,
     )
     if ctx["df"].empty:

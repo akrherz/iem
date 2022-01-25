@@ -6,7 +6,8 @@ from pandas.io.sql import read_sql
 from windrose.windrose import histogram
 from windrose import WindroseAxes
 from matplotlib.patches import Rectangle
-from pyiem.util import get_autoplot_context, get_dbconn, drct2text
+from sqlalchemy import text
+from pyiem.util import get_autoplot_context, get_dbconnstr, drct2text
 from pyiem.plot import figure
 from pyiem.plot.use_agg import plt
 from pyiem.exceptions import NoDataFound
@@ -213,7 +214,6 @@ def highcharts(fdict):
 
 def get_context(fdict):
     """Do the agnostic stuff"""
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     ctx["station"] = ctx["zstation"]
 
@@ -255,14 +255,17 @@ def get_context(fdict):
         limiter = f"relh < {ctx['threshold']}"
         title = f"Relative Humidity below {ctx['threshold']}%"
     ctx["df"] = read_sql(
-        f"""
+        text(
+            f"""
         SELECT valid at time zone 'UTC' as valid,
         drct, sknt * 1.15 as smph from alldata
-        where station = %s and {limiter} and sknt > 0 and drct >= 0 and
-        drct <= 360 and extract(month from valid) in %s
-        """,
-        pgconn,
-        params=(ctx["station"], tuple(months)),
+        where station = :station and {limiter} and sknt > 0
+        and drct >= 0 and
+        drct <= 360 and extract(month from valid) in :months
+        """
+        ),
+        get_dbconnstr("asos"),
+        params={"station": ctx["station"], "months": tuple(months)},
         index_col="valid",
     )
     if ctx["df"].empty:

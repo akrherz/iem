@@ -10,6 +10,7 @@ from scipy.interpolate import Rbf
 from pyiem import reference
 from pyiem.plot import MapPlot, nwssnow
 from pyiem.util import get_autoplot_context, get_dbconnstr, logger
+from sqlalchemy import text
 
 LOG = logger()
 T4326_2163 = Transformer.from_proj(4326, 2163, always_xy=True)
@@ -169,16 +170,22 @@ def load_data(ctx, basets, endts):
     LOG.debug("call")
     pgconn = get_dbconnstr("postgis")
     df = read_postgis(
-        """SELECT state, wfo,
+        text(
+            """SELECT state, wfo,
         max(magnitude::real) as val, ST_x(geom) as lon, ST_y(geom) as lat,
         ST_Transform(geom, 2163) as geo
-        from lsrs WHERE type = %s and magnitude >= 0 and
-        valid >= %s and valid <= %s
+        from lsrs WHERE type = :typ and magnitude >= 0 and
+        valid >= :basets and valid <= :endts
         GROUP by state, wfo, lon, lat, geo
         ORDER by val DESC
-        """,
+        """
+        ),
         pgconn,
-        params=("S" if ctx["v"] == "snow" else "5", basets, endts),
+        params={
+            "typ": "S" if ctx["v"] == "snow" else "5",
+            "basets": basets,
+            "endts": endts,
+        },
         index_col=None,
         geom_col="geo",
     )
@@ -197,18 +204,25 @@ def load_data(ctx, basets, endts):
         days.append(now.date())
         now += datetime.timedelta(hours=24)
     df2 = read_postgis(
-        """SELECT state, wfo, id as nwsli,
+        text(
+            """SELECT state, wfo, id as nwsli,
         sum(snow) as val, ST_x(geom) as lon, ST_y(geom) as lat,
         ST_Transform(geom, 2163) as geo
         from summary s JOIN stations t on (s.iemid = t.iemid)
-        WHERE s.day in %s and (t.network ~* 'COOP' or t.network = 'IACOCORAHS')
+        WHERE s.day in :days
+        and (t.network ~* 'COOP' or t.network = 'IACOCORAHS')
         and snow >= 0 and
-        coop_valid >= %s and coop_valid <= %s
+        coop_valid >= :basets and coop_valid <= :endts
         GROUP by state, wfo, nwsli, lon, lat, geo
         ORDER by val DESC
-        """,
+        """
+        ),
         pgconn,
-        params=(tuple(days), basets, endts),
+        params={
+            "days": tuple(days),
+            "basets": basets,
+            "endts": endts,
+        },
         index_col=None,
         geom_col="geo",
     )

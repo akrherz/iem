@@ -5,9 +5,10 @@ import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
 from matplotlib.font_manager import FontProperties
+from sqlalchemy import text
 from pyiem import network
 from pyiem.plot import figure, get_cmap
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 
 MDICT = dict(
@@ -80,7 +81,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     binsize = ctx["binsize"]
@@ -103,10 +103,13 @@ def plotter(fdict):
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
     ddf = read_sql(
-        f"SELECT high, low, year, month from {table} WHERE station = %s "
-        "and year > 1892 and high >= low and month in %s",
-        pgconn,
-        params=(station, tuple(months)),
+        text(
+            f"SELECT high, low, year, month from {table} WHERE "
+            "station = :station "
+            "and year > 1892 and high >= low and month in :months "
+        ),
+        get_dbconnstr("coop"),
+        params={"station": station, "months": tuple(months)},
         index_col=None,
     )
     if ddf.empty:

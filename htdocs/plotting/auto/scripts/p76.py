@@ -8,8 +8,9 @@ import metpy.calc as mcalc
 from metpy.units import units
 from matplotlib.ticker import MaxNLocator
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pyiem.util import get_autoplot_context, get_dbconnstr, utc
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 MDICT = dict(
     [
@@ -167,7 +168,6 @@ def run_calcs(df, ctx):
 
 def get_data(ctx, startyear):
     """Get data"""
-    pgconn = get_dbconn("asos")
     today = datetime.datetime.now()
     lastyear = today.year
     deltadays = 0
@@ -216,30 +216,31 @@ def get_data(ctx, startyear):
         )
 
     df = read_sql(
-        """
+        text(
+            """
         WITH obs as (
-            SELECT valid at time zone %s as valid, tmpf, dwpf, relh,
+            SELECT valid at time zone :tzname as valid, tmpf, dwpf, relh,
             coalesce(mslp, alti * 33.8639, 1013.25) as slp,
             coalesce(feel, tmpf) as feel
-            from alldata WHERE station = %s and dwpf > -90
+            from alldata WHERE station = :station and dwpf > -90
             and dwpf < 100 and tmpf >= dwpf and
-            extract(month from valid) in %s and
-            extract(hour from valid at time zone %s) in %s
+            extract(month from valid) in :months and
+            extract(hour from valid at time zone :tzname) in :hours
             and report_type = 2
         )
       SELECT valid,
-      extract(year from valid + '%s days'::interval)::int as year,
+      extract(year from valid + ':days days'::interval)::int as year,
       tmpf, dwpf, slp, relh, feel from obs
-    """,
-        pgconn,
-        params=(
-            ctx["_nt"].sts[ctx["station"]]["tzname"],
-            ctx["station"],
-            tuple(months),
-            ctx["_nt"].sts[ctx["station"]]["tzname"],
-            tuple(hours),
-            deltadays,
+    """
         ),
+        get_dbconnstr("asos"),
+        params={
+            "tzname": ctx["_nt"].sts[ctx["station"]]["tzname"],
+            "station": ctx["station"],
+            "months": tuple(months),
+            "hours": tuple(hours),
+            "days": deltadays,
+        },
         index_col=None,
     )
     if df.empty:

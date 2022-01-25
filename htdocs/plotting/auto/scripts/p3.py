@@ -5,8 +5,9 @@ import datetime
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 PDICT = dict(
     [
@@ -232,7 +233,6 @@ yAxis: {title: {text: '"""
 
 def get_context(fdict):
     """Get the context"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     ctx["decadal"] = ctx.get("decadal") == "yes"
     # Lower the start year if decadal
@@ -265,10 +265,11 @@ def get_context(fdict):
 
     decagg = 10 if ctx["decadal"] else 1
     df = read_sql(
-        f"""
+        text(
+            f"""
     WITH climo as (
         SELECT to_char(valid, 'mmdd') as sday,
-        high, low from ncei_climate91 WHERE station = %s),
+        high, low from ncei_climate91 WHERE station = :ncei),
     day2day as (
         SELECT
         extract(year from day + '{lag}'::interval)::int / {decagg} as myyear,
@@ -277,10 +278,11 @@ def get_context(fdict):
         abs(low - lag(low) OVER (ORDER by day ASC)) as dlow,
         abs((high+low)/2. - lag((high+low)/2.)
             OVER (ORDER by day ASC)) as dtemp
-        from {table} WHERE station = %s),
+        from {table} WHERE station = :station),
     agg as (
         SELECT myyear, avg(dhigh) as dhigh, avg(dlow) as dlow,
-        avg(dtemp) as dtemp from day2day WHERE month in %s GROUP by myyear),
+        avg(dtemp) as dtemp from day2day
+        WHERE month in :months GROUP by myyear),
     agg2 as (
         SELECT
         extract(year from day + '{lag}'::interval)::int / {decagg} as myyear,
@@ -298,37 +300,32 @@ def get_context(fdict):
         max(o.precip) as "max-precip",
         sum(o.precip) as "sum-precip",
         avg(o.high) - avg(o.low) as "range-avghi-avglo",
-        sum(case when o.high >= %s then 1 else 0 end) as "days-high-above",
-        sum(case when o.high < %s then 1 else 0 end) as "days-high-below",
+        sum(case when o.high >= :t then 1 else 0 end) as "days-high-above",
+        sum(case when o.high < :t then 1 else 0 end) as "days-high-below",
     sum(case when o.high >= c.high then 1 else 0 end) as "days-high-above-avg",
-        sum(case when o.low >= %s then 1 else 0 end) as "days-lows-above",
+        sum(case when o.low >= :t then 1 else 0 end) as "days-lows-above",
     sum(case when o.low < c.low then 1 else 0 end) as "days-lows-below-avg",
-        sum(case when o.low < %s then 1 else 0 end) as "days-lows-below",
-        sum(case when o.precip >= %s then 1 else 0 end) as "days-precip-above"
+        sum(case when o.low < :t then 1 else 0 end) as "days-lows-below",
+        sum(case when o.precip >= :t then 1 else 0 end) as "days-precip-above"
         from {table} o JOIN climo c on (o.sday = c.sday)
-      where station = %s and month in %s GROUP by myyear)
+      where station = :station and month in :months GROUP by myyear)
 
     SELECT b.*, a.dhigh as "delta-high", a.dlow as "delta-low",
     a.dtemp as "delta-temp" from agg a JOIN agg2 b
-    on (a.myyear = b.myyear) WHERE b.myyear * {decagg} >= %s
-    and b.myyear * {decagg} <= %s
+    on (a.myyear = b.myyear) WHERE b.myyear * {decagg} >= :syear
+    and b.myyear * {decagg} <= :eyear
     ORDER by b.myyear ASC
-    """,
-        pgconn,
-        params=(
-            ctx["_nt"].sts[station]["ncei91"],
-            station,
-            tuple(months),
-            threshold,
-            threshold,
-            threshold,
-            threshold,
-            threshold,
-            station,
-            tuple(months),
-            ctx["syear"],
-            ctx["eyear"],
+    """
         ),
+        get_dbconnstr("coop"),
+        params={
+            "ncei": ctx["_nt"].sts[station]["ncei91"],
+            "station": station,
+            "months": tuple(months),
+            "t": threshold,
+            "syear": ctx["syear"],
+            "eyear": ctx["eyear"],
+        },
         index_col="myyear",
     )
     if df.empty:

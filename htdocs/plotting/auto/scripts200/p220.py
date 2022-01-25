@@ -11,9 +11,10 @@ import pandas as pd
 from geopandas import read_postgis
 from matplotlib.patches import Rectangle
 from pyiem.plot import MapPlot
-from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pyiem.util import get_autoplot_context, get_dbconnstr, utc, get_dbconn
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import Z_OVERLAY2_LABEL, Z_POLITICAL, LATLON
+from sqlalchemy import text
 
 CENTRALTZ = ZoneInfo("America/Chicago")
 PDICT = {
@@ -163,9 +164,9 @@ def get_description():
     return desc
 
 
-def outlook_search(pgconn, valid, days, outlook_type):
+def outlook_search(valid, days, outlook_type):
     """Go look for a nearest in time TAF."""
-    cursor = pgconn.cursor()
+    cursor = get_dbconn("postgis").cursor()
     cursor.execute(
         "SELECT product_issue at time zone 'UTC' from spc_outlook "
         "WHERE day in %s and outlook_type = %s and product_issue > %s and "
@@ -213,7 +214,6 @@ def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     valid = ctx["valid"].replace(tzinfo=datetime.timezone.utc)
-    pgconn = get_dbconn("postgis")
     day, outlook_type = int(ctx["which"][0]), ctx["which"][1]
     category = ctx["cat"].upper()
     if outlook_type == "F":
@@ -232,27 +232,34 @@ def plotter(fdict):
         """Getme data."""
         # NB careful here with the joins and not to use the view!
         return read_postgis(
-            "WITH data as ("
-            "SELECT o.*, g.* from spc_outlook o LEFT JOIN "
-            "spc_outlook_geometries g on (o.id = g.spc_outlook_id and "
-            "g.category = %s) WHERE product_issue = %s and day in %s and "
-            "outlook_type = %s) "
-            "SELECT d.product_issue at time zone 'UTC' as product_issue, "
-            "expire at time zone 'UTC' as expire, d.geom, "
-            "issue at time zone 'UTC' as issue, d.threshold, "
-            "updated at time zone 'UTC' as updated, d.product_id, d.day, "
-            "d.cycle, d.outlook_type, t.priority from data d LEFT JOIN "
-            "spc_outlook_thresholds t on (d.threshold = t.threshold) "
-            "ORDER by day ASC, priority ASC",
-            pgconn,
-            params=(category, ts, days, outlook_type),
+            text(
+                "WITH data as ("
+                "SELECT o.*, g.* from spc_outlook o LEFT JOIN "
+                "spc_outlook_geometries g on (o.id = g.spc_outlook_id and "
+                "g.category = :c) WHERE product_issue = :ts and day in :days and "
+                "outlook_type = :ot) "
+                "SELECT d.product_issue at time zone 'UTC' as product_issue, "
+                "expire at time zone 'UTC' as expire, d.geom, "
+                "issue at time zone 'UTC' as issue, d.threshold, "
+                "updated at time zone 'UTC' as updated, d.product_id, d.day, "
+                "d.cycle, d.outlook_type, t.priority from data d LEFT JOIN "
+                "spc_outlook_thresholds t on (d.threshold = t.threshold) "
+                "ORDER by day ASC, priority ASC"
+            ),
+            get_dbconnstr("postgis"),
+            params={
+                "c": category,
+                "ts": ts,
+                "days": days,
+                "ot": outlook_type,
+            },
             index_col=None,
             geom_col="geom",
         )
 
     df = fetch(valid)
     if df.empty:
-        valid = outlook_search(pgconn, valid, days, outlook_type)
+        valid = outlook_search(valid, days, outlook_type)
         if valid is None:
             raise NoDataFound("SPC Outlook data was not found!")
         df = fetch(valid)

@@ -8,9 +8,10 @@ except ImportError:
 
 from pandas.io.sql import read_sql
 from matplotlib.font_manager import FontProperties
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.plot import figure
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 MDICT = {
     "all": "No Month/Time Limit",
@@ -76,7 +77,7 @@ def get_description():
     return desc
 
 
-def plot_date(dbconn, ax, i, date, station, tz):
+def plot_date(ax, i, date, station, tz):
     """plot date."""
     # request 36 hours
     sts = datetime.datetime(date.year, date.month, date.day, tzinfo=tz)
@@ -86,7 +87,7 @@ def plot_date(dbconn, ax, i, date, station, tz):
         "SELECT valid at time zone 'UTC' as valid, tmpf from alldata "
         "where station = %s and "
         "valid >= %s and valid <= %s and tmpf is not null ORDER by valid ASC",
-        dbconn,
+        get_dbconnstr("asos"),
         params=(station, sts, ets),
         index_col=None,
     )
@@ -115,7 +116,6 @@ def plotter(fdict):
     font0 = FontProperties()
     font0.set_family("monospace")
     font0.set_size(16)
-    pgconn = get_dbconn("iem")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     month = ctx["month"]
@@ -137,17 +137,23 @@ def plotter(fdict):
 
     order = "DESC" if ctx["v"] == "largest" else "ASC"
     df = read_sql(
-        f"""
+        text(
+            f"""
         SELECT day as date, max_tmpf as max, min_tmpf as min,
         max_tmpf::int - min_tmpf::int as difference
         from summary s JOIN stations t on (s.iemid = t.iemid)
-        where t.id = %s and t.network = %s
-        and extract(month from day) in %s
+        where t.id = :station and t.network = :network
+        and extract(month from day) in :months
         and max_tmpf is not null and min_tmpf is not null
         ORDER by difference {order}, date DESC LIMIT 10
-    """,
-        pgconn,
-        params=(station, ctx["network"], tuple(months)),
+    """
+        ),
+        get_dbconnstr("iem"),
+        params={
+            "station": station,
+            "network": ctx["network"],
+            "months": tuple(months),
+        },
         parse_dates=("date",),
         index_col=None,
     )
@@ -178,7 +184,6 @@ def plotter(fdict):
     y = 0.74
     ax = fig.add_axes([0.5, 0.1, 0.3, 0.69])
     i = 10
-    dbconn = get_dbconn("asos")
     for _, row in df.iterrows():
         fig.text(
             0.1,
@@ -193,7 +198,7 @@ def plotter(fdict):
             ),
             fontproperties=font0,
         )
-        plot_date(dbconn, ax, i, row["date"], station, tz)
+        plot_date(ax, i, row["date"], station, tz)
         y -= 0.07
         i -= 1
     ax.set_title("Hourly Temps On Date & +/-12 Hrs")

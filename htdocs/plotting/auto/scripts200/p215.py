@@ -6,11 +6,12 @@ import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.plot.util import fitbox
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 from matplotlib.ticker import MaxNLocator
 from scipy.stats import gaussian_kde
 import numpy as np
+from sqlalchemy import text
 
 PDICT = {
     "high": "High Temperature [F]",
@@ -107,7 +108,6 @@ def get_description():
 
 def get_df(ctx, period):
     """Get our data."""
-    pgconn = get_dbconn("coop")
     table = "alldata_%s" % (ctx["station"][:2])
     month = ctx["month"]
     ctx["mlabel"] = f"{month.capitalize()} Season"
@@ -128,16 +128,19 @@ def get_df(ctx, period):
         ctx["mlabel"] = calendar.month_name[ts.month]
 
     return read_sql(
-        f"SELECT high, low, (high+low)/2. as avgt from {table} WHERE "
-        "day >= %s and day <= %s and station = %s and high is not null "
-        "and low is not null and month in %s",
-        pgconn,
-        params=(
-            date(ctx[f"sy{period}"], 1, 1),
-            date(ctx[f"ey{period}"], 12, 31),
-            ctx["station"],
-            tuple(months),
+        text(
+            f"SELECT high, low, (high+low)/2. as avgt from {table} WHERE "
+            "day >= :d1 and day <= :d2 and station = :station "
+            "and high is not null "
+            "and low is not null and month in :months"
         ),
+        get_dbconnstr("coop"),
+        params={
+            "d1": date(ctx[f"sy{period}"], 1, 1),
+            "d2": date(ctx[f"ey{period}"], 12, 31),
+            "station": ctx["station"],
+            "months": tuple(months),
+        },
     )
 
 

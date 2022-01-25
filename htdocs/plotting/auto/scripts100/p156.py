@@ -5,10 +5,11 @@ import calendar
 from pandas.io.sql import read_sql
 from matplotlib.font_manager import FontProperties
 import pandas as pd
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.plot import figure
 from pyiem.reference import state_names
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 NASS_CROP_PROGRESS = {
     "corn_poor_verypoor": "Percentage Corn Poor + Very Poor Condition",
@@ -116,7 +117,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     st1 = ctx["st1"][:2]
     st2 = ctx["st2"][:2]
@@ -137,14 +137,18 @@ def plotter(fdict):
     else:
         dlimit = f" short_desc = '{params}' "
     df = read_sql(
-        "select extract(year from week_ending) as year, week_ending, "
-        "sum(num_value) as value, state_alpha "
-        f"from nass_quickstats where {dlimit} and num_value is not null "
-        "and state_alpha in %s "
-        "GROUP by year, week_ending, state_alpha "
-        "ORDER by state_alpha, week_ending",
-        pgconn,
-        params=(tuple(states),),
+        text(
+            "select extract(year from week_ending) as year, week_ending, "
+            "sum(num_value) as value, state_alpha "
+            f"from nass_quickstats where {dlimit} and num_value is not null "
+            "and state_alpha in :states "
+            "GROUP by year, week_ending, state_alpha "
+            "ORDER by state_alpha, week_ending"
+        ),
+        get_dbconnstr("coop"),
+        params={
+            "states": tuple(states),
+        },
         index_col=None,
         parse_dates="week_ending",
     )

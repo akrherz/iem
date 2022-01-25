@@ -16,6 +16,7 @@ from pyiem import iemre
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, get_dbconnstr, logger
 from pyiem.reference import TRACE_VALUE, state_names
+from sqlalchemy import text
 
 LOG = logger()
 NON_CONUS = ["AK", "HI", "PR", "VI", "GU"]
@@ -63,12 +64,14 @@ def load_table(state, date):
     df = df.set_index("station")
     # Load up any available observations
     obs = pd.read_sql(
-        "SELECT station, high, low, precip, snow, snowd, temp_hour, "
-        "precip_hour, coalesce(temp_estimated, true) as temp_estimated, "
-        "coalesce(precip_estimated, true) as precip_estimated "
-        f"from alldata_{state} WHERE day = %s and station in %s",
+        text(
+            "SELECT station, high, low, precip, snow, snowd, temp_hour, "
+            "precip_hour, coalesce(temp_estimated, true) as temp_estimated, "
+            "coalesce(precip_estimated, true) as precip_estimated "
+            f"from alldata_{state} WHERE day = :date and station in :states"
+        ),
         get_dbconnstr("coop"),
-        params=(date, tuple(df.index.values)),
+        params={"date": date, "states": tuple(df.index.values)},
         index_col="station",
     )
     # combine this back into the main table

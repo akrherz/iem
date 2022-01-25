@@ -4,8 +4,9 @@ import calendar
 
 from pandas.io.sql import read_sql
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 MDICT = dict(
     [
@@ -93,7 +94,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     month = ctx["month"]
@@ -121,36 +121,33 @@ def plotter(fdict):
 
     sorder = "ASC" if varname in ["min_greatest_low"] else "DESC"
     df = read_sql(
-        f"""WITH data as (
-        SELECT month, day, day - '%s days'::interval as start_date,
-        count(*) OVER (ORDER by day ASC ROWS BETWEEN %s preceding and
+        text(
+            f"""WITH data as (
+        SELECT month, day, day - ':days days'::interval as start_date,
+        count(*) OVER (ORDER by day ASC ROWS BETWEEN :days preceding and
         current row) as count,
-        sum(precip) OVER (ORDER by day ASC ROWS BETWEEN %s preceding and
+        sum(precip) OVER (ORDER by day ASC ROWS BETWEEN :days preceding and
         current row) as total_precip,
-        min(high) OVER (ORDER by day ASC ROWS BETWEEN %s preceding and
+        min(high) OVER (ORDER by day ASC ROWS BETWEEN :days preceding and
         current row) as max_least_high,
-        max(low) OVER (ORDER by day ASC ROWS BETWEEN %s preceding and
+        max(low) OVER (ORDER by day ASC ROWS BETWEEN :days preceding and
         current row) as min_greatest_low
-        from {table} WHERE station = %s)
+        from {table} WHERE station = :station)
 
         SELECT day as end_date, start_date, {varname} from data WHERE
-        month in %s and
-        extract(month from start_date) in %s and count = %s and
+        month in :months and
+        extract(month from start_date) in :months and count = :d2 and
         {varname} is not null
         ORDER by {varname} {sorder} LIMIT 10
-        """,
-        pgconn,
-        params=(
-            days - 1,
-            days - 1,
-            days - 1,
-            days - 1,
-            days - 1,
-            station,
-            tuple(months),
-            tuple(months),
-            days,
+        """
         ),
+        get_dbconnstr("coop"),
+        params={
+            "days": days - 1,
+            "station": station,
+            "months": tuple(months),
+            "d2": days,
+        },
         index_col=None,
     )
     if df.empty:
@@ -232,4 +229,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

@@ -4,8 +4,9 @@ import calendar
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pyiem.util import get_autoplot_context, get_dbconnstr, utc
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 PDICT = {"00": "00 UTC", "12": "12 UTC"}
 PDICT2 = {
@@ -119,13 +120,13 @@ def plotter(fdict):
         stations = (
             ctx["_nt"].sts[station]["name"].split("--")[1].strip().split(" ")
         )
-    pgconn = get_dbconn("raob")
 
     hrlimit = f"and extract(hour from f.valid at time zone 'UTC') = {hour} "
     if ctx["h"] == "ALL":
         hrlimit = ""
     df = read_sql(
-        f"""
+        text(
+            f"""
     with data as (
         select f.valid,
         p.pressure, count(*) OVER (PARTITION by p.pressure),
@@ -149,14 +150,18 @@ def plotter(fdict):
         min(p.smps) OVER (PARTITION by p.pressure) as smps_min,
         max(p.smps) OVER (PARTITION by p.pressure) as smps_max
         from raob_flights f JOIN raob_profile p on (f.fid = p.fid)
-        WHERE f.station in %s {hrlimit} {vlimit}
+        WHERE f.station in :stations {hrlimit} {vlimit}
         and p.pressure in (925, 850, 700, 500, 400, 300, 250, 200,
         150, 100, 70, 50, 10)  and {varname} is not null)
 
-    select * from data where valid = %s ORDER by pressure DESC
-    """,
-        pgconn,
-        params=(tuple(stations), ts),
+    select * from data where valid = :ts ORDER by pressure DESC
+    """
+        ),
+        get_dbconnstr("raob"),
+        params={
+            "stations": tuple(stations),
+            "ts": ts,
+        },
         index_col="pressure",
     )
     if df.empty:

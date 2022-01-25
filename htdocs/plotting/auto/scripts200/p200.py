@@ -11,6 +11,7 @@ from pyiem.plot import get_cmap
 from pyiem.util import get_autoplot_context, get_dbconnstr, utc
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import LATLON
+from sqlalchemy import text
 
 
 PDICT5 = {
@@ -266,36 +267,39 @@ def plotter(fdict):
     pgconn = get_dbconnstr("postgis")
     hour = int(p.split(".")[2])
     df = read_postgis(
-        """
+        text(
+            """
         select product_issue, issue, expire, geom
-        from spc_outlooks where outlook_type = %s and day = %s and
-        cycle = %s and threshold = %s and category = %s and
-        ST_Intersects(geom, ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s %s,
-        %s %s, %s %s, %s %s))'))
-        and extract(month from product_issue) in %s
+        from spc_outlooks where outlook_type = :ot and day = :day and
+        cycle = :hour and threshold = :t and category = :cat and
+        ST_Intersects(geom,
+        ST_GeomFromEWKT('SRID=4326;POLYGON((:g1 :g2, :g3 :g4,
+        :g5 :g6, :g7 :g8, :g9 :g10))'))
+        and extract(month from product_issue) in :months
         and product_issue > '2002-01-01' and
-        product_issue < %s ORDER by product_issue ASC
-    """,
-        pgconn,
-        params=(
-            p.split(".")[1],
-            p.split(".")[0],
-            hour,
-            level.split(".", 1)[1],
-            level.split(".")[0],
-            GRIDWEST,
-            GRIDSOUTH,
-            GRIDWEST,
-            GRIDNORTH,
-            GRIDEAST,
-            GRIDNORTH,
-            GRIDEAST,
-            GRIDSOUTH,
-            GRIDWEST,
-            GRIDSOUTH,
-            tuple(months),
-            ctx.get("edate", utc() + datetime.timedelta(days=2)),
+        product_issue < :edate ORDER by product_issue ASC
+    """
         ),
+        pgconn,
+        params={
+            "ot": p.split(".")[1],
+            "day": p.split(".")[0],
+            "hour": hour,
+            "t": level.split(".", 1)[1],
+            "cat": level.split(".")[0],
+            "g1": GRIDWEST,
+            "g2": GRIDSOUTH,
+            "g3": GRIDWEST,
+            "g4": GRIDNORTH,
+            "g5": GRIDEAST,
+            "g6": GRIDNORTH,
+            "g7": GRIDEAST,
+            "g8": GRIDSOUTH,
+            "g9": GRIDWEST,
+            "g10": GRIDSOUTH,
+            "months": tuple(months),
+            "edate": ctx.get("edate", utc() + datetime.timedelta(days=2)),
+        },
         geom_col="geom",
     )
     if df.empty:

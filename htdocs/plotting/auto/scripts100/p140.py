@@ -5,8 +5,9 @@ import numpy as np
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 PDICT = dict(
     [
@@ -93,7 +94,6 @@ def nice(val):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("iem")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     days = ctx["days"]
@@ -108,7 +108,8 @@ def plotter(fdict):
 
     doff = (days + 1) if ets.year != sts.year else 0
     df = read_sql(
-        f"""
+        text(
+            f"""
     SELECT extract(year from day - '{doff} days'::interval) as yr,
     avg((max_tmpf+min_tmpf)/2.) as avg_temp, avg(max_tmpf) as avg_high_temp,
     avg(min_tmpf) as avg_low_temp,
@@ -119,11 +120,17 @@ def plotter(fdict):
     min(max_tmpf) as min_high,
     avg((max_dwpf + min_dwpf)/2.) as avg_dewp
     from summary s JOIN stations t on (s.iemid = t.iemid)
-    WHERE t.network = %s and t.id = %s and to_char(day, 'mmdd') in %s
+    WHERE t.network = :network and t.id = :station
+    and to_char(day, 'mmdd') in :sdays
     GROUP by yr ORDER by yr ASC
-    """,
-        pgconn,
-        params=(ctx["network"], station, tuple(sdays)),
+    """
+        ),
+        get_dbconnstr("iem"),
+        params={
+            "network": ctx["network"],
+            "station": station,
+            "sdays": tuple(sdays),
+        },
     )
     if df.empty:
         raise NoDataFound("No data was found.")

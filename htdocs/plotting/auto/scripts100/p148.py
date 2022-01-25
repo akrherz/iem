@@ -4,9 +4,10 @@ import calendar
 
 from dateutil.easter import easter as get_easter
 from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 PDICT = dict(
     [
@@ -147,14 +148,12 @@ def get_context(fdict):
         dtoff = datetime.timedelta(days=offset)
         thedate = thedate + dtoff
 
-    pgconn = get_dbconn("coop")
-
     table = f"alldata_{station[:2]}"
     if date == "exact":
         ctx["df"] = read_sql(
             f"SELECT year, high, day, precip from {table} WHERE station = %s "
             "and sday = %s ORDER by year ASC",
-            pgconn,
+            get_dbconnstr("coop"),
             params=(station, thedate.strftime("%m%d")),
             index_col="year",
         )
@@ -178,10 +177,15 @@ def get_context(fdict):
             )
             days = [day + dtoff for day in days]
         ctx["df"] = read_sql(
-            f"SELECT year, high, day, precip from {table} WHERE station = %s "
-            "and day in %s ORDER by year ASC",
-            pgconn,
-            params=(station, tuple(days)),
+            text(
+                f"SELECT year, high, day, precip from {table} "
+                "WHERE station = :station and day in :days ORDER by year ASC"
+            ),
+            get_dbconnstr("coop"),
+            params={
+                "station": station,
+                "days": tuple(days),
+            },
             index_col="year",
         )
     if ctx["df"].empty:

@@ -5,8 +5,9 @@ import matplotlib.patheffects as PathEffects
 from pandas.io.sql import read_sql
 from pyiem import network
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 PDICT = {
     "high": "High Temperature",
@@ -107,7 +108,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     varname = ctx["var"]
@@ -148,7 +148,8 @@ def plotter(fdict):
     comp = ">" if ctx["which"] == "above" else "<"
     which = "above" if ctx["which"] == "above" else "below"
     df = read_sql(
-        f"""
+        text(
+            f"""
       WITH avgs as (
         SELECT sday,
         avg(high) as avg_high,
@@ -158,7 +159,7 @@ def plotter(fdict):
         avg((high+low)/2.) as avg_temp,
         stddev((high+low)/2.) as stddev_temp
         from {table} WHERE
-        station = %s GROUP by sday)
+        station = :station GROUP by sday)
 
       SELECT {yr},
       sum(case when o.high {comp}
@@ -170,12 +171,16 @@ def plotter(fdict):
       sum(case when (o.high+o.low)/2. {comp}
        (a.avg_temp {op} a.stddev_temp * {smul} {op} {offset}) then 1 else 0 end
       ) as avg_{which},
-      count(*) as days from {table} o, avgs a WHERE o.station = %s
-      and o.sday = a.sday and month in %s
+      count(*) as days from {table} o, avgs a WHERE o.station = :station
+      and o.sday = a.sday and month in :months
       GROUP by yr ORDER by yr ASC
-    """,
-        pgconn,
-        params=(station, station, tuple(months)),
+    """
+        ),
+        get_dbconnstr("coop"),
+        params={
+            "station": station,
+            "months": tuple(months),
+        },
         index_col="yr",
     )
     if df.empty:

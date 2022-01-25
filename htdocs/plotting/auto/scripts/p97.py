@@ -6,9 +6,10 @@ import pandas as pd
 from pandas.io.sql import read_sql
 import geopandas as gpd
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr, get_dbconn
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import wfo_bounds
+from sqlalchemy import text
 
 PDICT = {
     "sector": "Plot by Sector / State",
@@ -280,16 +281,17 @@ def get_data(ctx):
         gddclimocol = f"gdd{ctx['gddbase']}"
     for table in tables:
         df = gpd.read_postgis(
-            f"""
+            text(
+                f"""
         WITH obs as (
-            SELECT station, gddxx(%s, %s, high, low) as gdd,
+            SELECT station, gddxx(:gddbase, :gddceil, high, low) as gdd,
             cdd(high, low, 65) as cdd65, hdd(high, low, 65) as hdd65,
             sday, high, low, precip, snow,
             (high + low)/2. as avg_temp
             from {table} WHERE
-            day >= %s and day <= %s and
+            day >= :date1 and day <= :date2 and
             substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000'
-            and station not in %s),
+            and station not in :cull),
         climo as (
             SELECT station, to_char(valid, 'mmdd') as sday, precip, high, low,
             {gddclimocol} as gdd, cdd65, hdd65, snow
@@ -354,15 +356,16 @@ def get_data(ctx):
         t.geom
         from agg d JOIN stations t on (d.station = t.id)
         WHERE t.network ~* 'CLIMATE' and t.online {wfo_limiter}
-        """,
-            pgconn,
-            params=(
-                ctx["gddbase"],
-                ctx["gddceil"],
-                date1,
-                date2,
-                tuple(cull),
+        """
             ),
+            get_dbconnstr("coop"),
+            params={
+                "gddbase": ctx["gddbase"],
+                "gddceil": ctx["gddceil"],
+                "date1": date1,
+                "date2": date2,
+                "cull": tuple(cull),
+            },
             index_col="station",
             geom_col="geom",
         )

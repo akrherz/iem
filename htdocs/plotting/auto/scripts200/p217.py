@@ -5,9 +5,10 @@ import pytz
 from geopandas import read_postgis
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import Z_OVERLAY2, LATLON
+from sqlalchemy import text
 
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
@@ -48,18 +49,19 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("postgis")
     ctx = get_autoplot_context(fdict, get_description())
     pid = ctx["pid"][:35]
     segnum = ctx["segnum"]
     nt = NetworkTable("WFO")
 
     df = read_postgis(
-        "SELECT geom, ugcs, wfo, issue, expire, landspout, waterspout, "
-        "max_hail_size, max_wind_gust, product, segmentnum "
-        f"from sps_{pid[:4]} where product_id = %s",
-        pgconn,
-        params=(pid,),
+        text(
+            "SELECT geom, ugcs, wfo, issue, expire, landspout, waterspout, "
+            "max_hail_size, max_wind_gust, product, segmentnum "
+            f"from sps_{pid[:4]} where product_id = :pid"
+        ),
+        get_dbconnstr("postgis"),
+        params={"pid": pid},
         index_col=None,
         geom_col="geom",
     )
@@ -81,10 +83,13 @@ def plotter(fdict):
     if row["geom"].is_empty:
         # Need to go looking for UGCs to compute the bounds
         ugcdf = read_postgis(
-            "SELECT simple_geom, ugc from ugcs where wfo = %s and ugc in %s "
-            "and end_ts is null",
-            pgconn,
-            params=(WFOCONV.get(wfo, wfo), tuple(row["ugcs"])),
+            text(
+                "SELECT simple_geom, ugc from ugcs where wfo = :wfo "
+                "and ugc in :ugcs "
+                "and end_ts is null"
+            ),
+            get_dbconnstr("postgis"),
+            params={"wfo": WFOCONV.get(wfo, wfo), "ugcs": tuple(row["ugcs"])},
             geom_col="simple_geom",
         )
         bounds = ugcdf["simple_geom"].total_bounds

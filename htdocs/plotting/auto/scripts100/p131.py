@@ -2,9 +2,10 @@
 import datetime
 
 from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 PDICT = {"CLR": "Clear (CLR)", "OVC": "Overcast (OVC)"}
 MDICT = dict(
@@ -77,7 +78,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     month = ctx["month"]
@@ -101,52 +101,48 @@ def plotter(fdict):
 
     if hour is None:
         df = read_sql(
-            """
+            text(
+                """
             SELECT tmpf::int as t,
-            SUM(case when (skyc1 = %s or skyc2 = %s or skyc3 = %s
-                or skyc4 = %s) then 1 else 0 end) as hits,
+            SUM(case when (skyc1 = :v or skyc2 = :v or skyc3 = :v
+                or skyc4 = :v) then 1 else 0 end) as hits,
             count(*)
-            from alldata where station = %s
-            and tmpf is not null and extract(month from valid) in %s
+            from alldata where station = :station
+            and tmpf is not null and extract(month from valid) in :months
             and report_type = 2
             GROUP by t ORDER by t ASC
-            """,
-            pgconn,
-            params=(
-                varname,
-                varname,
-                varname,
-                varname,
-                station,
-                tuple(months),
+            """
             ),
+            get_dbconnstr("asos"),
+            params={
+                "v": varname,
+                "station": station,
+                "months": tuple(months),
+            },
             index_col=None,
         )
     else:
         df = read_sql(
             """
             SELECT tmpf::int as t,
-            SUM(case when (skyc1 = %s or skyc2 = %s or skyc3 = %s
-                or skyc4 = %s) then 1 else 0 end) as hits,
+            SUM(case when (skyc1 = :v or skyc2 = :v or skyc3 = :v
+                or skyc4 = :v) then 1 else 0 end) as hits,
             count(*)
-            from alldata where station = %s
-            and tmpf is not null and extract(month from valid) in %s
+            from alldata where station = :station
+            and tmpf is not null and extract(month from valid) in :months
             and extract(hour from ((valid +
-                '10 minutes'::interval) at time zone %s)) = %s
+                '10 minutes'::interval) at time zone :tzname)) = :hour
             and report_type = 2
             GROUP by t ORDER by t ASC
             """,
-            pgconn,
-            params=(
-                varname,
-                varname,
-                varname,
-                varname,
-                station,
-                tuple(months),
-                ctx["_nt"].sts[station]["tzname"],
-                hour,
-            ),
+            get_dbconnstr("asos"),
+            params={
+                "v": varname,
+                "station": station,
+                "months": tuple(months),
+                "tzname": ctx["_nt"].sts[station]["tzname"],
+                "hour": hour,
+            },
             index_col=None,
         )
     if df.empty:

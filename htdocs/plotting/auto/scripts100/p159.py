@@ -3,9 +3,10 @@ import datetime
 
 from matplotlib.ticker import MaxNLocator
 from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.plot import figure
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 MDICT = dict(
     [
@@ -101,7 +102,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["zstation"]
@@ -132,25 +132,27 @@ def plotter(fdict):
 
     opp = ">=" if mydir == "aoa" else "<"
     df = read_sql(
-        f"""WITH hourly as (
+        text(
+            f"""WITH hourly as (
         SELECT date_trunc('hour', valid + '10 minutes'::interval)
-        at time zone %s as ts,
-        max(case when {varname}::int {opp} %s then 1 else 0 end) as hit
-        from alldata where station = %s and report_type = 2
+        at time zone :tzname as ts,
+        max(case when {varname}::int {opp} :t then 1 else 0 end) as hit
+        from alldata where station = :station and report_type = 2
         GROUP by ts)
 
         SELECT extract(year from {offset})::int as year,
         extract(hour from ts)::int as hour,
         sum(hit) as hits, count(*) as obs from hourly
-        WHERE extract(month from ts) in %s GROUP by year, hour
-        """,
-        pgconn,
-        params=(
-            ctx["_nt"].sts[station]["tzname"],
-            threshold,
-            station,
-            tuple(months),
+        WHERE extract(month from ts) in :months GROUP by year, hour
+        """
         ),
+        get_dbconnstr("asos"),
+        params={
+            "tzname": ctx["_nt"].sts[station]["tzname"],
+            "t": threshold,
+            "station": station,
+            "months": tuple(months),
+        },
         index_col=None,
     )
     if df.empty:

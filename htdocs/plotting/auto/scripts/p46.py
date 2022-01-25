@@ -4,8 +4,9 @@ import datetime
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 PDICT = {
     "wcht": "Minimum Wind Chill",
@@ -75,7 +76,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     offset = 0
@@ -100,15 +100,21 @@ def plotter(fdict):
 
     additive = "feel < tmpf" if ctx["var"] == "wcht" else "feel > tmpf"
     df = read_sql(
-        f"""
-        SELECT extract(year from valid + '%s months'::interval) as year,
+        text(
+            f"""
+        SELECT extract(year from valid + ':offset months'::interval) as year,
         min(feel) as min_feel, max(feel) as max_feel
-        from alldata WHERE station = %s and {additive}
-        and extract(month from valid) in %s
+        from alldata WHERE station = :station and {additive}
+        and extract(month from valid) in :months
         GROUP by year ORDER by year ASC
-      """,
-        pgconn,
-        params=(offset, station, tuple(months)),
+      """
+        ),
+        get_dbconnstr("asos"),
+        params={
+            "offset": offset,
+            "station": station,
+            "months": tuple(months),
+        },
         index_col="year",
     )
     if df.empty:

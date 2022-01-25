@@ -5,8 +5,9 @@ from pandas.io.sql import read_sql
 from metpy.units import units
 import metpy.calc as mcalc
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 MDICT = dict(
     [
@@ -64,7 +65,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["zstation"]
@@ -86,17 +86,22 @@ def plotter(fdict):
         months = [ts.month, 999]
 
     df = read_sql(
-        """
+        text(
+            """
         SELECT drct::int as t, dwpf, tmpf, relh,
         coalesce(mslp, alti * 33.8639, 1013.25) as slp
-        from alldata where station = %s
+        from alldata where station = :station
         and drct is not null and dwpf is not null and dwpf <= tmpf
-        and sknt > 3 and drct::int %% 10 = 0
-        and extract(month from valid) in %s
+        and sknt > 3 and drct::int % 10 = 0
+        and extract(month from valid) in :months
         and report_type = 2
-    """,
-        pgconn,
-        params=(station, tuple(months)),
+    """
+        ),
+        get_dbconnstr("asos"),
+        params={
+            "station": station,
+            "months": tuple(months),
+        },
     )
     if df.empty:
         raise NoDataFound("No Data Found.")

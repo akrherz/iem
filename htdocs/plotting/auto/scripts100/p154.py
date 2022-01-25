@@ -4,9 +4,10 @@ import datetime
 from pandas.io.sql import read_sql
 from scipy import stats
 from matplotlib.font_manager import FontProperties
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 PDICT = dict([("avg_tmpf", "Average Temperature")])
 UNITS = {"avg_tmpf": "F"}
@@ -83,7 +84,6 @@ def plotter(fdict):
     font0.set_family("monospace")
     font0.set_size(16)
 
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     varname = ctx["var"]
     month = ctx["month"]
@@ -108,30 +108,31 @@ def plotter(fdict):
         months = [ts.month]
 
     df = read_sql(
-        """
+        text(
+            """
     WITH obs as (
-        SELECT (valid + '10 minutes'::interval) at time zone %s as ts,
+        SELECT (valid + '10 minutes'::interval) at time zone :tzname as ts,
         tmpf::int as itmpf, dwpf::int as idwpf from alldata
-        where station = %s and tmpf is not null
+        where station = :station and tmpf is not null
         and dwpf is not null and
-        extract(month from valid at time zone %s) in %s),
+        extract(month from valid at time zone :tzname) in :months),
     agg1 as (
         SELECT date_trunc('hour', ts) as hts, avg(itmpf) as avg_itmpf,
         avg(idwpf) as avg_idwpf from obs
-        WHERE extract(hour from ts) = %s GROUP by hts)
+        WHERE extract(hour from ts) = :hour GROUP by hts)
 
     SELECT extract(year from hts)::int as year, avg(avg_itmpf) as avg_tmpf,
     count(*) as cnt
     from agg1 GROUP by year ORDER by year ASC
-    """,
-        pgconn,
-        params=(
-            ctx["_nt"].sts[station]["tzname"],
-            station,
-            ctx["_nt"].sts[station]["tzname"],
-            tuple(months),
-            hour,
+    """
         ),
+        get_dbconnstr("asos"),
+        params={
+            "tzname": ctx["_nt"].sts[station]["tzname"],
+            "station": station,
+            "months": tuple(months),
+            "hour": hour,
+        },
         index_col="year",
     )
     if df.empty:

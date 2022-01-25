@@ -3,10 +3,11 @@ import datetime
 import calendar
 
 from pandas.io.sql import read_sql
-from scipy import stats
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
+from scipy import stats
+from sqlalchemy import text
 
 PDICT = {
     "month": "Aggregate by Month",
@@ -169,7 +170,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     days = int(ctx["days"])
@@ -201,30 +201,32 @@ def plotter(fdict):
         months = [int(month)]
 
     obs = read_sql(
-        f"""WITH data as (
+        text(
+            f"""WITH data as (
      select day, extract(week from day) - 1 as week, year, month, sday,
      {ctx["fstat"]}({ctx["var"]}) OVER
-        (ORDER by day ASC rows between %s FOLLOWING and %s FOLLOWING)
+        (ORDER by day ASC rows between :f1 FOLLOWING and :f2 FOLLOWING)
         as forward_stat, {ctx["mstat"]}({ctx["var"]}) OVER
-        (ORDER by day ASC rows between CURRENT ROW and %s FOLLOWING)
+        (ORDER by day ASC rows between CURRENT ROW and :f3 FOLLOWING)
         as middle_stat, {ctx["stat"]}({ctx["var"]}) OVER
-         (ORDER by day ASC rows between %s PRECEDING and 1 PRECEDING)
+         (ORDER by day ASC rows between :days PRECEDING and 1 PRECEDING)
          as trailing_stat
-     from alldata_{station[:2]} where station = %s)
-    SELECT * from data WHERE month in %s and year >= %s
-        and year <= %s ORDER by day ASC
-    """,
-        pgconn,
-        params=(
-            fdays,
-            fdays + mdays - 1,
-            fdays - 1,
-            days,
-            station,
-            tuple(months),
-            syear,
-            eyear,
+     from alldata_{station[:2]} where station = :station)
+    SELECT * from data WHERE month in :months and year >= :syear
+        and year <= :eyear ORDER by day ASC
+    """
         ),
+        get_dbconnstr("coop"),
+        params={
+            "f1": fdays,
+            "f2": fdays + mdays - 1,
+            "f3": fdays - 1,
+            "days": days,
+            "station": station,
+            "months": tuple(months),
+            "syear": syear,
+            "eyear": eyear,
+        },
     )
     if obs.empty:
         raise NoDataFound("No Data Found.")

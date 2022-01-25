@@ -3,8 +3,9 @@ import datetime
 
 from pandas.io.sql import read_sql
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 MDICT = dict(
     [
@@ -102,7 +103,6 @@ def get_description():
 
 def get_context(fdict):
     """Do the processing work"""
-    pgconn = get_dbconn("iem")
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["zstation"]
@@ -130,16 +130,24 @@ def get_context(fdict):
 
     opp = ">=" if mydir == "aoa" else "<"
     ctx["df"] = read_sql(
-        f"""
+        text(
+            f"""
         SELECT extract(year from {offset})::int as year,
-        sum(case when {varname}::int {opp} %s then 1 else 0 end) as count
+        sum(case when {varname}::int {opp} :t then 1 else 0 end) as count
         from summary s JOIN stations t on (s.iemid = t.iemid)
-        WHERE t.id = %s and t.network = %s and extract(month from day) in %s
+        WHERE t.id = :station and t.network = :network
+        and extract(month from day) in :months
         and {varname} is not null
         GROUP by year ORDER by year ASC
-        """,
-        pgconn,
-        params=(threshold, station, ctx["network"], tuple(months)),
+        """
+        ),
+        get_dbconnstr("iem"),
+        params={
+            "t": threshold,
+            "station": station,
+            "network": ctx["network"],
+            "months": tuple(months),
+        },
         index_col="year",
     )
     ctx["title"] = "(%s) %s %s %.0f" % (

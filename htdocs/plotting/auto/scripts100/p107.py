@@ -5,8 +5,9 @@ import numpy as np
 from pandas.io.sql import read_sql
 from pyiem import network
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 PDICT = dict(
     [
@@ -119,7 +120,6 @@ def nice(val):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     days = ctx["days"]
@@ -139,10 +139,11 @@ def plotter(fdict):
 
     doff = (days + 1) if ets.year != sts.year else 0
     df = read_sql(
-        f"""
+        text(
+            f"""
     SELECT extract(year from day - '{doff} days'::interval) as yr,
     avg((high+low)/2.) as avg_temp, avg(high) as avg_high_temp,
-    sum(gddxx(%s, %s, high, low)) as gdd,
+    sum(gddxx(:gddbase, :gddceil, high, low)) as gdd,
     avg(low) as avg_low_temp,
     sum(precip) as precip,
     sum(snow) as snow,
@@ -150,25 +151,23 @@ def plotter(fdict):
     max(low) as max_low,
     max(high) as max_high,
     min(high) as min_high,
-    sum(case when high >= %s then 1 else 0 end) as "days-high-above",
-    sum(case when high < %s then 1 else 0 end) as "days-high-below",
-    sum(case when low >= %s then 1 else 0 end) as "days-lows-above",
-    sum(case when low < %s then 1 else 0 end) as "days-lows-below",
+    sum(case when high >= :t then 1 else 0 end) as "days-high-above",
+    sum(case when high < :t then 1 else 0 end) as "days-high-below",
+    sum(case when low >= :t then 1 else 0 end) as "days-lows-above",
+    sum(case when low < :t then 1 else 0 end) as "days-lows-below",
     count(*)
-    from {table} WHERE station = %s and sday in %s
+    from {table} WHERE station = :station and sday in :sdays
     GROUP by yr ORDER by yr ASC
-    """,
-        pgconn,
-        params=(
-            gddbase,
-            gddceil,
-            threshold,
-            threshold,
-            threshold,
-            threshold,
-            station,
-            tuple(sdays),
+    """
         ),
+        get_dbconnstr("coop"),
+        params={
+            "gddbase": gddbase,
+            "gddceil": gddceil,
+            "t": threshold,
+            "station": station,
+            "sdays": tuple(sdays),
+        },
     )
     if df.empty:
         raise NoDataFound("No Data Found.")

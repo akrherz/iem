@@ -16,6 +16,7 @@ from pyiem.util import (
     mm2inch,
     convert_value,
 )
+from sqlalchemy import text
 
 LOG = logger()
 LOG.setLevel(logging.INFO)
@@ -84,10 +85,14 @@ def do_day(valid):
 
     # build out the state mappers
     states = gpd.read_postgis(
-        "SELECT the_geom, state_abbr from states "
-        "where state_abbr not in %s",
+        text(
+            "SELECT the_geom, state_abbr from states "
+            "where state_abbr not in :states"
+        ),
         get_dbconnstr("postgis"),
-        params=(tuple(SKIPSTATES),),
+        params={
+            "states": tuple(SKIPSTATES),
+        },
         index_col="state_abbr",
         geom_col="the_geom",
     )
@@ -111,9 +116,9 @@ def do_day(valid):
 
     # build out climate division mappers
     climdiv = gpd.read_postgis(
-        "SELECT geom, iemid from climdiv where st_abbrv not in %s",
+        text("SELECT geom, iemid from climdiv where st_abbrv not in :states"),
         get_dbconnstr("postgis"),
-        params=(tuple(SKIPSTATES),),
+        params={"states": tuple(SKIPSTATES)},
         index_col="iemid",
         geom_col="geom",
     )

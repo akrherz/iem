@@ -4,8 +4,9 @@ import datetime
 from pandas.io.sql import read_sql
 from pyiem.nws import vtec
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 MDICT = dict(
     [
@@ -83,7 +84,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("postgis")
     ctx = get_autoplot_context(fdict, get_description())
 
     wfo = ctx["station"]
@@ -124,14 +124,15 @@ def plotter(fdict):
 
     tzname = ctx["_nt"].sts[wfo]["tzname"]
     df = read_sql(
-        """
+        text(
+            """
     WITH data as (
         SELECT extract(year from issue) as yr, eventid,
-        min(issue at time zone %s) as minissue,
-        max(expire at time zone %s) as maxexpire from warnings WHERE
-        phenomena = %s and significance = %s
-        and wfo = %s and
-        extract(month from issue) in %s GROUP by yr, eventid),
+        min(issue at time zone :tzname) as minissue,
+        max(expire at time zone :tzname) as maxexpire from warnings WHERE
+        phenomena = :phenomena and significance = :significance
+        and wfo = :wfo and
+        extract(month from issue) in :months GROUP by yr, eventid),
     events as (
         select count(*) from data),
     timedomain as (
@@ -145,9 +146,16 @@ def plotter(fdict):
         as minute, count(*) from timedomain
         GROUP by minute ORDER by minute ASC)
     select d.minute, d.count, e.count as total from data2 d, events e
-    """,
-        pgconn,
-        params=(tzname, tzname, phenomena, significance, wfo, tuple(months)),
+    """
+        ),
+        get_dbconnstr("postgis"),
+        params={
+            "tzname": tzname,
+            "phenomena": phenomena,
+            "significance": significance,
+            "wfo": wfo,
+            "months": tuple(months),
+        },
         index_col="minute",
     )
     if df.empty:

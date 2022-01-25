@@ -3,8 +3,9 @@ import datetime
 
 from pandas.io.sql import read_sql
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 PDICT = {"00": "00 UTC", "12": "12 UTC", "ALL": "Any Hour"}
 MDICT = dict(
@@ -213,7 +214,7 @@ def plotter(fdict):
         stations = (
             ctx["_nt"].sts[station]["name"].split("--")[1].strip().split(" ")
         )
-    pgconn = get_dbconn("raob")
+    pgconn = get_dbconnstr("raob")
 
     hrlimiter = f" extract(hour from f.valid at time zone 'UTC') = {hour} and "
     if hour == "ALL":
@@ -222,27 +223,39 @@ def plotter(fdict):
     if varname in ["tmpc", "dwpc", "height", "smps"]:
         leveltitle = " @ %s hPa" % (level,)
         dfin = read_sql(
-            f"""
+            text(
+                f"""
             select {yrcol} as year, {varname},
             valid at time zone 'UTC' as utc_valid
             from raob_profile p JOIN raob_flights f on (p.fid = f.fid)
-            WHERE f.station in %s and p.pressure = %s and {hrlimiter}
-            extract(month from f.valid) in %s and {varname} is not null
-        """,
+            WHERE f.station in :stations and p.pressure = :level
+            and {hrlimiter}
+            extract(month from f.valid) in :months and {varname} is not null
+        """
+            ),
             pgconn,
-            params=(tuple(stations), level, tuple(months)),
+            params={
+                "stations": tuple(stations),
+                "level": level,
+                "months": tuple(months),
+            },
         )
     else:
         leveltitle = ""
         dfin = read_sql(
-            f"""
+            text(
+                f"""
             select {yrcol} as year, {varname},
             valid at time zone 'UTC' as utc_valid
-            from raob_flights f WHERE f.station in %s and {hrlimiter}
-            extract(month from f.valid) in %s and {varname} is not null
-        """,
+            from raob_flights f WHERE f.station in :stations and {hrlimiter}
+            extract(month from f.valid) in :months and {varname} is not null
+        """
+            ),
             pgconn,
-            params=(tuple(stations), tuple(months)),
+            params={
+                "stations": tuple(stations),
+                "months": tuple(months),
+            },
         )
     df = compute(dfin, varname)
     if ctx["quorum"] == "yes":

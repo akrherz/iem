@@ -6,8 +6,9 @@ import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.plot.geoplot import MapPlot
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 PDICT3 = {"contour": "Contour + Plot Values", "values": "Plot Values Only"}
 PDICT2 = {
@@ -22,9 +23,9 @@ MONTH_DOMAIN = {
     "high_above": range(1, 13),
 }
 SQLOPT = {
-    "spring_below": " low < %s ",
-    "high_above": " high >= %s ",
-    "fall_below": " low < %s ",
+    "spring_below": " low < :t ",
+    "high_above": " high >= :t ",
+    "fall_below": " low < :t ",
 }
 YRGP = {
     "spring_below": "year",
@@ -135,7 +136,6 @@ def th(val):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     sector = ctx["sector"]
     if len(sector) != 2:
@@ -148,13 +148,14 @@ def plotter(fdict):
     syear = ctx.get("syear", 1893)
     eyear = ctx.get("eyear", datetime.date.today().year)
     df = read_sql(
-        f"""
+        text(
+            f"""
         -- create virtual table with winter_year included
         WITH events as (
             SELECT station, day, year, high, low,
             case when month < 7 then year - 1 else year end as winter_year,
             extract(doy from day) as doy
-            from alldata_{sector} WHERE month in %s and
+            from alldata_{sector} WHERE month in :months and
             substr(station, 3, 4) != '0000'
             and substr(station, 3, 1) not in ('C', 'T')
         )
@@ -165,11 +166,17 @@ def plotter(fdict):
         min(day) as min_day,
         max(day) as max_day
         from events
-        WHERE {YRGP[varname]} >= %s and {YRGP[varname]} <= %s
+        WHERE {YRGP[varname]} >= :syear and {YRGP[varname]} <= :eyear
         GROUP by station, {YRGP[varname]}
-        """,
-        pgconn,
-        params=(tuple(MONTH_DOMAIN[varname]), threshold, syear, eyear),
+        """
+        ),
+        get_dbconnstr("coop"),
+        params={
+            "months": tuple(MONTH_DOMAIN[varname]),
+            "t": threshold,
+            "syear": syear,
+            "eyear": eyear,
+        },
         index_col="station",
     )
     if df.empty:

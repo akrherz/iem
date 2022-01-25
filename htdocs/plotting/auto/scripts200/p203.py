@@ -7,10 +7,11 @@ from pandas.io.sql import read_sql
 import pandas as pd
 from geopandas import read_postgis
 import matplotlib.image as mpimage
-from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pyiem.util import get_autoplot_context, get_dbconnstr, utc
 from pyiem.plot import figure
 from pyiem.plot.util import fitbox
 from pyiem.nws.vtec import VTEC_PHENOMENA
+from sqlalchemy import text
 
 
 PDICT = dict(
@@ -80,7 +81,7 @@ def plotter(fdict):
     sort = ctx["sort"]
     date = ctx["date"]
 
-    pgconn = get_dbconn("postgis")
+    pgconn = get_dbconnstr("postgis")
     sts = utc(date.year, date.month, date.day)
     ets = sts + datetime.timedelta(hours=24)
 
@@ -102,7 +103,8 @@ def plotter(fdict):
 
     # Find largest polygon either in height or width
     gdf = read_postgis(
-        f"""
+        text(
+            f"""
         SELECT wfo, phenomena, eventid, issue,
         ST_area2d(ST_transform(geom,2163)) as size,
         (ST_xmax(ST_transform(geom,2163)) +
@@ -115,28 +117,31 @@ def plotter(fdict):
         (ST_ymax(ST_transform(geom,2163)) -
          ST_ymin(ST_transform(geom,2163))) as height
         from sbw_{sts.year}
-        WHERE status = 'NEW' and issue >= %s and issue < %s and
-        phenomena IN %s and eventid is not null
+        WHERE status = 'NEW' and issue >= :sts and issue < :ets and
+        phenomena IN :phenomena and eventid is not null
         ORDER by {opts[sort]["sortby"]}
-    """,
+    """
+        ),
         pgconn,
-        params=(sts, ets, tuple(phenoms[typ])),
+        params={"sts": sts, "ets": ets, "phenomena": tuple(phenoms[typ])},
         geom_col="utmgeom",
         index_col=None,
     )
 
     # For size reduction work
     df = read_sql(
-        f"""
+        text(
+            f"""
         SELECT w.wfo, phenomena, eventid,
         sum(ST_area2d(ST_transform(u.geom,2163))) as county_size
         from warnings_{sts.year} w JOIN ugcs u on (u.gid = w.gid)
-        WHERE issue >= %s and issue < %s and
-        significance = 'W' and phenomena IN %s
+        WHERE issue >= :sts and issue < :ets and
+        significance = 'W' and phenomena IN :phenomena
         GROUP by w.wfo, phenomena, eventid
-    """,
+    """
+        ),
         pgconn,
-        params=(sts, ets, tuple(phenoms[typ])),
+        params={"sts": sts, "ets": ets, "phenomena": tuple(phenoms[typ])},
         index_col=["wfo", "phenomena", "eventid"],
     )
     # Join the columns

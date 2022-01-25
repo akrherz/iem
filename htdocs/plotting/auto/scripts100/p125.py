@@ -5,9 +5,10 @@ import datetime
 import numpy as np
 from pandas.io.sql import read_sql
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import SECTORS_NAME, LATLON
+from sqlalchemy import text
 
 PDICT = {
     "state": "State Level Maps (select state)",
@@ -146,7 +147,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     state = ctx["state"][:2]
     varname = ctx["var"]
@@ -205,12 +205,13 @@ def plotter(fdict):
         sum(gdd52) as total_gdd52
         """
     df = read_sql(
-        f"""
+        text(
+            f"""
         WITH mystations as (
             select {joincol} as myid,
             max(ST_x(geom)) as lon, max(ST_y(geom)) as lat from stations
             where network ~* 'CLIMATE' and
-            ST_Contains(ST_MakeEnvelope(%s, %s, %s, %s, 4326), geom)
+            ST_Contains(ST_MakeEnvelope(:b1, :b2, :b3, :b4, 4326), geom)
             GROUP by myid
         )
         SELECT station, extract(month from valid) as month,
@@ -220,11 +221,18 @@ def plotter(fdict):
         avg(low) as avg_low,
         avg((high+low)/2.) as avg_temp {extra} from {ctx["src"]} c
         JOIN mystations t on (c.station = t.myid)
-        WHERE extract(month from valid) in %s
+        WHERE extract(month from valid) in :months
         GROUP by station, month
-        """,
-        pgconn,
-        params=(bnds[0], bnds[2], bnds[1], bnds[3], tuple(months)),
+        """
+        ),
+        get_dbconnstr("coop"),
+        params={
+            "b1": bnds[0],
+            "b2": bnds[2],
+            "b3": bnds[1],
+            "b4": bnds[3],
+            "months": tuple(months),
+        },
         index_col=["station", "month"],
     )
     if df.empty:

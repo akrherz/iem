@@ -4,8 +4,9 @@ import datetime
 import pandas as pd
 from pandas.io.sql import read_sql
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 MDICT = {"warm": "Temperature Rise", "cool": "Temperature Drop"}
 MDICT2 = dict(
@@ -72,7 +73,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     hours = ctx["hours"]
@@ -99,22 +99,29 @@ def plotter(fdict):
     # backwards intuitive
     sortdir = "ASC" if mydir == "warm" else "DESC"
     df = read_sql(
-        f"""
+        text(
+            f"""
     WITH data as (
-        SELECT valid at time zone %s as valid, tmpf from alldata
-        where station = %s and tmpf between -100 and 150
-        and extract(month from valid) in %s),
+        SELECT valid at time zone :tzname as valid, tmpf from alldata
+        where station = :station and tmpf between -100 and 150
+        and extract(month from valid) in :months),
     doffset as (
-        SELECT valid - '%s hours'::interval as valid, tmpf from data),
+        SELECT valid - ':hours hours'::interval as valid, tmpf from data),
     agg as (
         SELECT d.valid, d.tmpf as tmpf1, o.tmpf as tmpf2
         from data d JOIN doffset o on (d.valid = o.valid))
-    SELECT valid as valid1, valid + '%s hours'::interval as valid2,
+    SELECT valid as valid1, valid + ':hours hours'::interval as valid2,
     tmpf1, tmpf2 from agg
     ORDER by (tmpf1 - tmpf2) {sortdir} LIMIT 50
-    """,
-        pgconn,
-        params=(tzname, station, tuple(months), hours, hours),
+    """
+        ),
+        get_dbconnstr("asos"),
+        params={
+            "tzname": tzname,
+            "station": station,
+            "months": tuple(months),
+            "hours": hours,
+        },
         index_col=None,
     )
     df["diff"] = (df["tmpf1"] - df["tmpf2"]).abs()
