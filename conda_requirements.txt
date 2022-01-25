@@ -82,6 +82,8 @@ setuptools-markdown
 shapely
 # various dumpers
 simplejson
+# pandas 1.4
+sqlalchemy
 # scripts
 tqdm
 # AHPS scripts
