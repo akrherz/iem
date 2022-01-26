@@ -6,6 +6,7 @@ cd isuag
 bash run_plots.sh
 
 cd ../isusm
+python backfill_summary.py &
 if [ $DD -eq "07" ]
 	then
 		python nmp_monthly_email.py
