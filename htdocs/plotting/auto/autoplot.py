@@ -198,6 +198,7 @@ def workflow(environ, form, fmt):
         # Don't fetch memcache when we have _cb set for an inbound CGI
         res = mc.get(mckey) if fdict.get("_cb") is None else None
         if res:
+            mc.close()
             return HTTP200, res
     # memcache failed to save us work, so work we do!
     start_time = utc()
@@ -274,6 +275,8 @@ def workflow(environ, form, fmt):
         mc.set(mckey, content, dur)
     except Exception as exp:
         sys.stderr.write(f"Exception while writting key: {mckey}\n{exp}\n")
+    finally:
+        mc.close()
     if isinstance(mixedobj, plt.Figure):
         plt.close()
     syslog.syslog(

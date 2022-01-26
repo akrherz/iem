@@ -2,6 +2,7 @@
 
 Run from RUN_12Z.sh for yesterday and a few other previous dates.
 """
+# pylint: disable=no-member
 # stdlib
 import sys
 from datetime import date
@@ -41,7 +42,7 @@ def main(argv):
         cf6[col.replace("smph", "sknt")] = (
             (units("miles/hour") * cf6[col].values).to(units("knots")).m
         )
-    LOG.debug("Loaded %s CF6 entries for %s date", len(cf6.index), valid)
+    LOG.info("Loaded %s CF6 entries for %s date", len(cf6.index), valid)
 
     table = f"summary_{valid.year}"
     obs = pd.read_sql(
@@ -49,7 +50,7 @@ def main(argv):
         "case when length(t.id) = 3 then 'K'||t.id else t.id end as station "
         f"from {table} s JOIN "
         "stations t on (s.iemid = t.iemid) WHERE s.day = %s and "
-        "t.network ~* 'ASOS' ORDER by station ASC",
+        "(t.network ~* 'ASOS' or t.network = 'AWOS') ORDER by station ASC",
         get_dbconnstr("iem"),
         params=(valid,),
         index_col="station",
@@ -69,7 +70,8 @@ def main(argv):
     updated_rows = 0
     for station, row in df.iterrows():
         if pd.isnull(row["iemid"]):
-            LOG.warning("Yikes, station %s is unknown?", station)
+            # Lots of false positives here, like WFOs
+            LOG.info("Yikes, station %s is unknown?", station)
             continue
         work = []
         params = []

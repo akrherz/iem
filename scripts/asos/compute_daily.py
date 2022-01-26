@@ -86,7 +86,7 @@ def do(ts):
     and date(valid at time zone tzname) = %s
     ORDER by valid ASC
     """,
-        get_dbconn("asos"),
+        get_dbconnstr("asos"),
         params=(
             ts - datetime.timedelta(days=2),
             ts + datetime.timedelta(days=2),

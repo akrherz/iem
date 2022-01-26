@@ -3,12 +3,12 @@ from io import StringIO
 
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnstr
 
 
 def application(_environ, start_response):
     """Go Main Go"""
-    pgconn = get_dbconn("iem")
+    pgconn = get_dbconnstr("iem")
     amsi4 = read_sql(
         """
     SELECT to_char(day + '16 hours'::interval, 'YYYY-MM-DD HH24:MI') as valid,
@@ -21,7 +21,7 @@ def application(_environ, start_response):
         index_col="valid",
     )
 
-    pgconn = get_dbconn("isuag")
+    pgconn = get_dbconnstr("isuag")
     df = read_sql(
         """
     SELECT to_char(valid, 'YYYY-MM-DD HH24:MI') as valid,
@@ -40,13 +40,13 @@ def application(_environ, start_response):
     aggobs.columns = [
         s.replace("_hourly", "") + "_total" for s in aggobs.columns
     ]
-    df = df.drop("coop_date", axis=1)
+    df = df.drop(columns="coop_date")
 
     df2 = amsi4.join(df, how="outer")
     df2 = df2.merge(aggobs, how="outer", left_on="day", right_index=True)
     df2 = df2.drop("day", axis=1)
     df2 = df2.sort_index(ascending=True).reset_index()
-    df2["valid"] = pd.to_datetime(df2["index"]).dt.strftime("%Y-%m-%d %-I %p")
+    df2["valid"] = pd.to_datetime(df2["valid"]).dt.strftime("%Y-%m-%d %-I %p")
     sio = StringIO()
     df2.to_html(
         sio,

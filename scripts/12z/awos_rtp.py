@@ -28,7 +28,7 @@ def main():
     fmt = "%-6s:%-19s: %3s / %3s / %5s / %4s / %2s\n"
 
     shef_fn = "/tmp/awos_rtp.shef"
-    out = open(shef_fn, "w")
+    out = open(shef_fn, "w", encoding="utf8")
     out.write(
         (
             "\n"

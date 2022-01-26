@@ -4,7 +4,6 @@ import calendar
 
 import numpy as np
 from scipy import stats
-from pandas.io.sql import read_sql
 import pandas as pd
 from pyiem.plot import figure_axes
 from pyiem import network, util
@@ -187,7 +186,7 @@ def plotter(fdict):
     months2, offsets2 = compute_months_and_offsets(month2, num2)
     nt = network.Table(f"{station[:2]}CLIMATE")
     # Compute the monthly totals
-    df = read_sql(
+    df = pd.read_sql(
         f"""
     SELECT year, month, avg((high+low)/2.) as avg_temp,
     avg(high) as avg_high, min(high) as min_high,
