@@ -1,5 +1,6 @@
 """iemre stuff"""
 import datetime
+import os
 
 import numpy as np
 import matplotlib.dates as mdates
@@ -94,7 +95,10 @@ def get_data(ctx):
     if states.empty:
         raise NoDataFound("No data was found.")
 
-    with ncopen(iemre.get_daily_ncname(ctx["year"])) as nc:
+    ncfn = iemre.get_daily_ncname(ctx["year"])
+    if not os.path.isfile(ncfn):
+        raise NoDataFound(f"Missing {ncfn}")
+    with ncopen(ncfn) as nc:
         precip = nc.variables["p01d"]
         czs = CachingZonalStats(iemre.AFFINE)
         hasdata = np.zeros(

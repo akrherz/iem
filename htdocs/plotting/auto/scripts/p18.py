@@ -4,9 +4,9 @@ import datetime
 import pytz
 import psycopg2.extras
 import numpy as np
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 MDICT = dict(
@@ -147,7 +147,6 @@ def highcharts(fdict):
 def get_data(fdict):
     """Get data common to both methods"""
     ctx = get_autoplot_context(fdict, get_description())
-    asos_pgconn = get_dbconn("asos")
     coop_pgconn = get_dbconn("coop")
     ccursor = coop_pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx["station"] = ctx["zstation"]
@@ -177,7 +176,7 @@ def get_data(fdict):
         f"extract(epoch from valid) * 1000 as ticks, {col} as datum "
         "from alldata WHERE station = %s and valid > %s and valid < %s and "
         f" {ctx['var']} is not null and report_type = 2 ORDER by valid ASC",
-        asos_pgconn,
+        get_dbconnstr("asos"),
         params=(ctx["station"], sdate, sdate + datetime.timedelta(days=days)),
         index_col="valid",
     )

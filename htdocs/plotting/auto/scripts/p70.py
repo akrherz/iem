@@ -1,7 +1,7 @@
 """period between first and last watch"""
 import datetime
 
-from pandas.io.sql import read_sql
+from pandas import read_sql
 import numpy as np
 from matplotlib.ticker import FormatStrFormatter
 import matplotlib.colors as mpcolors
@@ -10,7 +10,7 @@ from pyiem import reference
 from pyiem.plot import get_cmap, figure
 from pyiem.plot.use_agg import plt
 from pyiem.nws import vtec
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"jan1": "January 1", "jul1": "July 1"}
@@ -100,7 +100,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("postgis")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"][:4]
     phenomena = ctx["phenomena"]
@@ -122,7 +121,7 @@ def plotter(fdict):
         SELECT year::int, date, count(*) from data GROUP by year, date
         ORDER by year ASC, date ASC
         """,
-        pgconn,
+        get_dbconnstr("postgis"),
         params=(phenomena, significance),
         index_col=None,
     )
@@ -223,6 +222,8 @@ def plotter(fdict):
             color=cmap(norm([gdf["cumsum"].values[::-1]]))[0],
         )
     gdf = df[["year", "doy"]].groupby("year").agg(["min", "max"])
+    if len(gdf.index) < 3:
+        raise NoDataFound("Not enough data to compute an average")
     # Exclude first and last year in the average
     avg_start = np.average(gdf["doy", "min"].values[1:-1])
     avg_end = np.average(gdf["doy", "max"].values[1:-1])

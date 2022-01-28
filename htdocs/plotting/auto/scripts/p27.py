@@ -1,11 +1,11 @@
 """First Fall Threshold Dates."""
 import datetime
 
-from pandas.io.sql import read_sql
+from pandas import read_sql
 import numpy as np
 from scipy.stats import linregress
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 
 
@@ -24,7 +24,7 @@ def get_description():
         dict(
             type="station",
             name="station",
-            default="IA0200",
+            default="IATAME",
             label="Select Station:",
             network="IACLIMATE",
         ),
@@ -40,7 +40,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["station"]
@@ -58,7 +57,7 @@ def plotter(fdict):
         from alldata_{station[:2]} where station = %s and month > 6
         GROUP by year ORDER by year ASC
     """,
-        pgconn,
+        get_dbconnstr("coop"),
         params=(t1, t2, station),
         index_col="year",
     )

@@ -158,7 +158,7 @@ def get_description():
 def compute(dfin, varname):
     """Compute our needed yearly aggregates."""
     if dfin.empty:
-        raise ValueError("No Data Found")
+        raise NoDataFound("No Data Found")
     # create final DataFrame holding our agg computations
     df = dfin.groupby("year").agg(["min", "mean", "max", "count"]).copy()
     df.columns = df.columns.map("_".join)

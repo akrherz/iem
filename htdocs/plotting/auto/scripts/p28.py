@@ -82,11 +82,9 @@ def get_ctx(fdict):
     date = ctx["date"]
     opt = ctx["opt"]
 
-    table = "alldata_%s" % (station[:2],)
-
     cursor.execute(
-        "SELECT year,  extract(doy from day) as doy, precip "
-        f"from {table} where station = %s and precip is not null",
+        "SELECT year,  extract(doy from day) as doy, precip from "
+        f"alldata_{station[:2]} where station = %s and precip is not null",
         (station,),
     )
     if cursor.rowcount == 0:
@@ -431,4 +429,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    highcharts(dict())
+    highcharts({})

@@ -2,11 +2,11 @@
 import datetime
 import calendar
 
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from metpy.units import units
 import metpy.calc as mcalc
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -61,7 +61,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     year = ctx["year"]
@@ -76,7 +75,7 @@ def plotter(fdict):
         tmpf > -50 and tmpf < 120 and valid > '1950-01-01'
         and report_type = 2
     """,
-        pgconn,
+        get_dbconnstr("asos"),
         params=(station,),
         index_col=None,
     )

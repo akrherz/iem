@@ -1,13 +1,12 @@
 """Distrubution of daily high and low temperatures"""
 import datetime
 
-import psycopg2.extras
 import numpy as np
 from scipy.stats import norm
 import pandas as pd
 from pyiem import reference
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 
 
@@ -32,28 +31,22 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop", user="nobody")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
 
     month = ctx["month"]
     day = ctx["day"]
     state = ctx["state"][:2]
-    cursor.execute(
+    df = pd.read_sql(
         f"SELECT high, low from alldata_{state} "
         "where sday = %s and high is not null and low is not null and "
         "substr(station, 3, 1) != 'T' and substr(station, 3, 4) != '0000'",
-        (f"{month:02.0f}{day:02.0f}",),
+        get_dbconnstr("coop"),
+        params=(f"{month:02.0f}{day:02.0f}",),
     )
-    if cursor.rowcount == 0:
+    if df.empty:
         raise NoDataFound("No Data Found.")
-    highs = []
-    lows = []
-    for row in cursor:
-        highs.append(row[0])
-        lows.append(row[1])
-    highs = np.array(highs)
-    lows = np.array(lows)
+    highs = df["high"].values
+    lows = df["low"].values
 
     ts = datetime.datetime(2000, month, day)
     title = (

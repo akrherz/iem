@@ -4,7 +4,7 @@ import datetime
 from pandas.io.sql import read_sql
 import numpy as np
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 
 PDICT = dict(
@@ -19,12 +19,10 @@ PDICT = dict(
         ("last_low_below", "Last Date Below (Low Temperature)"),
     ]
 )
-PDICT2 = dict(
-    [
-        ("calendar", "Compute over Calendar Year"),
-        ("winter", "Compute over Winter Season"),
-    ]
-)
+PDICT2 = {
+    "calendar": "Compute over Calendar Year",
+    "winter": "Compute over Winter Season",
+}
 
 
 def get_description():
@@ -107,7 +105,6 @@ def do_labels(ax, extrenum, varname, direction, threshold, season):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     threshold = ctx["threshold"]
@@ -135,7 +132,7 @@ def plotter(fdict):
     xday, extract(doy from xday) as xday_doy from agg1
     ORDER by season ASC
     """,
-        pgconn,
+        get_dbconnstr("coop"),
         params=(
             6 if season == "winter" else 0,
             station,

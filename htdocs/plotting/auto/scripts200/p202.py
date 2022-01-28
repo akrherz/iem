@@ -7,20 +7,18 @@ import pandas as pd
 from pandas.io.sql import read_sql
 from metpy.units import units
 import metpy.calc as mcalc
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.plot import get_cmap
 from pyiem.plot import figure_axes
 from pyiem.plot.util import fitbox
 from pyiem.exceptions import NoDataFound
 
-PDICT = dict(
-    [
-        ("tmpf", "Air Temperature [F]"),
-        ("dwpf", "Dew Point Temperature [F]"),
-        ("relh", "Relative Humidity [%]"),
-        ("q", "Specific Humidity [g/kg]"),
-    ]
-)
+PDICT = {
+    "tmpf": "Air Temperature [F]",
+    "dwpf": "Dew Point Temperature [F]",
+    "relh": "Relative Humidity [%]",
+    "q": "Specific Humidity [g/kg]",
+}
 PDICT2 = {
     "no": "Plot Daily Differences",
     "yes": "Accumulate the Daily Differences",
@@ -113,8 +111,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos")
-
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     h1 = int(ctx["h1"])
@@ -144,7 +140,7 @@ def plotter(fdict):
          then date(v - '1 day'::interval)
          else date(v) end) from agg WHERE rank = 1
     """,
-        pgconn,
+        get_dbconnstr("asos"),
         params=(
             tzname,
             tzname,

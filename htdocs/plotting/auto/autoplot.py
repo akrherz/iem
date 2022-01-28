@@ -112,7 +112,7 @@ def handle_error(exp, fmt, uri):
     del (exc_type, exc_value, exc_traceback, tb)
     if fmt in ["png", "svg", "pdf"]:
         return error_image(str(exp), fmt)
-    elif fmt == "js":
+    if fmt == "js":
         return f"alert('{exp}');"
     return str(exp)
 
@@ -182,7 +182,7 @@ def get_mckey(scriptnum, fdict, fmt):
     ).replace(" ", "")
 
 
-def workflow(environ, form, fmt):
+def workflow(mc, environ, form, fmt):
     """we need to return a status and content"""
     # q is the full query string that was rewritten to use by apache
     q = form.get("q", "")
@@ -193,12 +193,10 @@ def workflow(environ, form, fmt):
 
     # memcache keys can not have spaces
     mckey = get_mckey(scriptnum, fdict, fmt)
-    mc = Client(["iem-memcached", 11211])
     if len(mckey) < 250:
         # Don't fetch memcache when we have _cb set for an inbound CGI
         res = mc.get(mckey) if fdict.get("_cb") is None else None
         if res:
-            mc.close()
             return HTTP200, res
     # memcache failed to save us work, so work we do!
     start_time = utc()
@@ -275,8 +273,6 @@ def workflow(environ, form, fmt):
         mc.set(mckey, content, dur)
     except Exception as exp:
         sys.stderr.write(f"Exception while writting key: {mckey}\n{exp}\n")
-    finally:
-        mc.close()
     if isinstance(mixedobj, plt.Figure):
         plt.close()
     syslog.syslog(
@@ -301,12 +297,15 @@ def application(environ, start_response):
     fmt = fields.get("fmt", "png")[:7]
     # Figure out what our response headers should be
     response_headers = get_response_headers(fmt)
+    mc = Client(["iem-memcached", 11211])
     try:
         # do the work!
-        status, output = workflow(environ, fields, fmt)
+        status, output = workflow(mc, environ, fields, fmt)
     except Exception as exp:
         status = HTTP500
         output = handle_error(exp, fmt, environ.get("REQUEST_URI"))
+    finally:
+        mc.close()
     start_response(status, response_headers)
     # python3 mod-wsgi requires returning bytes, so we encode strings
     if sys.version_info[0] > 2 and isinstance(output, str):

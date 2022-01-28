@@ -2,8 +2,8 @@
 import datetime
 
 import numpy as np
-from pandas.io.sql import read_sql
-from pyiem import network, util
+from pandas import read_sql
+from pyiem import util
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
@@ -48,7 +48,7 @@ def get_description():
         dict(
             type="station",
             name="station",
-            default="IA0000",
+            default="IATAME",
             network="IACLIMATE",
             label="Select Station",
         ),
@@ -75,7 +75,7 @@ def get_description():
             type="year",
             name="eyear",
             default=eyear,
-            label="Start Year of Plot: (inclusive)",
+            label="End Year of Plot: (inclusive)",
         ),
     ]
     return desc
@@ -83,8 +83,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = util.get_dbconn("coop")
-
     ctx = util.get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     threshold = ctx["threshold"]
@@ -92,9 +90,7 @@ def plotter(fdict):
     syear = ctx["syear"]
     eyear = ctx["eyear"]
 
-    table = "alldata_%s" % (station[:2],)
-    nt = network.Table("%sCLIMATE" % (station[:2],))
-    if station not in nt.sts:
+    if station not in ctx["_nt"].sts:
         raise NoDataFound("Unknown station metadata.")
 
     df = read_sql(
@@ -114,11 +110,11 @@ def plotter(fdict):
     avg(precip) as "avg-precip",
     avg(case when precip > 0.009 then precip else null end) as "avg-precip2",
     sum(case when precip >= %s then 1 else 0 end) as "days-precip"
-    from {table}
+    from alldata_{station[:2]}
     where station = %s and year >= %s and year <= %s
     GROUP by year ORDER by year ASC
     """,
-        pgconn,
+        util.get_dbconnstr("coop"),
         params=(
             threshold,
             threshold,
@@ -135,15 +131,13 @@ def plotter(fdict):
     df["range-hilo"] = df["max-high"] - df["min-low"]
 
     years = df.index.values
-    title = ("[%s] %s %s-%s\n%s") % (
-        station,
-        nt.sts[station]["name"],
-        min(years),
-        max(years),
-        PDICT[ptype],
+    title = (
+        f"[{station}] {ctx['_nt'].sts[station]['name']} "
+        f"{min(years)}-{max(years)}\n"
+        f"{PDICT[ptype]}"
     )
     if ptype.find("days") == 0:
-        title += " (%s)" % (threshold,)
+        title += f" ({threshold})"
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     avgv = df[ptype].mean()
     data = df[ptype].values

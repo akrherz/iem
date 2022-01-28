@@ -11,9 +11,9 @@ require_once "lib.php";
 $mosdb = iemdb("mos");
 pg_exec($mosdb, "SET TIME ZONE 'UTC'");
 
-$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y", time() + 86400);
-$month = isset($_GET["month"]) ? intval($_GET["month"]): date("m", time() + 86400);
-$day = isset($_GET["day"]) ? intval($_GET["day"]): date("d", time() + 86400);
+$year = get_int404("year", date("Y", time() + 86400));
+$month = get_int404("month", date("m", time() + 86400));
+$day = get_int404("day", date("d", time() + 86400));
 $hour =  0;
 $model = isset($_GET["model"]) ? strtoupper(xssafe($_GET["model"])): "GFS";
 $station = isset($_GET["station"]) ? strtoupper(xssafe($_GET["station"])): "KAMW";
@@ -56,19 +56,23 @@ for ($i=0;$row=pg_fetch_array($rs);$i++)
 
 
 for($now=$sts+(3600*12);$now <= $ets+(2*86400); $now += (3600*3)){
- $thisrow = sprintf("<tr><td>%sZ</td>", date('d/H', $now) );
- $allnulls = TRUE;
- $lookup = date('Y-m-d H:i', $now);
- foreach($runtimes as $k => $s){
-   if (@$data[$s][$lookup] != null){
-     $allnulls = FALSE;
-   }
-   $thisrow .= sprintf("<td>%s</td>", @$data[$s][$lookup]);
- }
- $thisrow .= "</tr>\n";
- if (! $allnulls) {
-  $table .= $thisrow;
- }
+    $thisrow = sprintf("<tr><td>%sZ</td>", date('d/H', $now) );
+    $allnulls = TRUE;
+    $lookup = date('Y-m-d H:i', $now);
+    foreach($runtimes as $k => $s){
+        $val = null;
+        if (array_key_exists($lookup, $data[$s])){
+            $val = $data[$s][$lookup];
+        }
+        if (! is_null($val)){
+            $allnulls = FALSE;
+        }
+        $thisrow .= sprintf("<td>%s</td>", $val);
+    }
+    $thisrow .= "</tr>\n";
+    if (! $allnulls) {
+        $table .= $thisrow;
+    }
 }
 $table .= "</tbody></table>";
 

@@ -3,9 +3,9 @@ import calendar
 import datetime
 
 import numpy as np
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"monthly": "Plot Single Month", "yearly": "Plot Entire Year"}
@@ -88,7 +88,6 @@ def plot_trailing(ax, df, colname):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     month = ctx["month"]
@@ -105,7 +104,7 @@ def plotter(fdict):
         and year <= %s GROUP by year
         ORDER by year ASC
         """,
-            pgconn,
+            get_dbconnstr("coop"),
             params=(station, month, ctx["eyear"]),
             index_col="year",
         )
@@ -118,7 +117,7 @@ def plotter(fdict):
         and year <= %s GROUP by year
         ORDER by year ASC
         """,
-            pgconn,
+            get_dbconnstr("coop"),
             params=(station, ctx["eyear"]),
             index_col="year",
         )
@@ -174,4 +173,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

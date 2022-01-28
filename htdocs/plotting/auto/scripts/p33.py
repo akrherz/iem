@@ -2,9 +2,9 @@
 from calendar import month_abbr
 from datetime import date
 
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 
 
@@ -43,7 +43,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     year = ctx["year"]
@@ -66,7 +65,7 @@ def plotter(fdict):
     select myyear as year, day, low, drop as largest_change
     from agg where rank = 1
     """,
-        pgconn,
+        get_dbconnstr("coop"),
         params=(station,),
         index_col="year",
         parse_dates="day",

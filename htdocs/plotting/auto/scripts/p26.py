@@ -32,7 +32,7 @@ def get_description():
         dict(
             type="station",
             name="station",
-            default="IA0200",
+            default="IATAME",
             label="Select Station:",
             network="IACLIMATE",
         ),
@@ -306,7 +306,7 @@ def plotter(fdict):
             "95$^{th}$ %tile",
             "50$^{th}$ %tile",
             "Average",
-            "%s" % (ctx["year"],),
+            f"{ctx['year']}",
         ],
         loc=loc,
     )

@@ -1,12 +1,12 @@
 """Daily departures"""
 import datetime
 
-from pandas.io.sql import read_sql
+from pandas import read_sql
 import matplotlib.dates as mdates
 import matplotlib.colors as mpcolors
 from pyiem.plot import get_cmap
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 
 PDICT = dict(
     (
@@ -87,7 +87,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     year = ctx["year"]
@@ -145,7 +144,7 @@ def plotter(fdict):
     from data d JOIN climo c on
     (c.sday = d.sday) WHERE d.year = %s ORDER by day ASC
     """,
-        pgconn,
+        get_dbconnstr("coop"),
         params=(
             gddbase,
             gddceil,

@@ -6,7 +6,7 @@ import pandas as pd
 from pandas.io.sql import read_sql
 import matplotlib.patheffects as PathEffects
 from pyiem.util import drct2text
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 from metpy.units import units
@@ -89,7 +89,6 @@ def draw_line(ax, x, y, angle):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("iem")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     plot_units = ctx["units"]
@@ -104,19 +103,18 @@ def plotter(fdict):
         from summary s JOIN stations t
         ON (t.iemid = s.iemid) WHERE t.id = %s and t.network = %s and
         s.day >= %s and s.day < %s and avg_sknt is not null
-        ORDER by day ASC
+        and vector_avg_drct is not null ORDER by day ASC
     """,
-        pgconn,
+        get_dbconnstr("iem"),
         params=(station, ctx["network"], sts, ets),
     )
     if df.empty:
         raise NoDataFound("ERROR: No Data Found")
     df["day"] = pd.to_datetime(df["day"])
     sknt = (df["sknt"].values * units("knot")).to(XREF_UNITS[plot_units]).m
-    title = "%s [%s]\n%s Daily Average Wind Speed and Direction" % (
-        ctx["_nt"].sts[station]["name"],
-        station,
-        sts.strftime("%b %Y"),
+    title = (
+        f"{ctx['_nt'].sts[station]['name']} [{station}]\n"
+        f"{sts:%b %Y} Daily Average Wind Speed and Direction"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.bar(
@@ -142,10 +140,10 @@ def plotter(fdict):
     ax.set_xticks(range(1, 31, 5))
     ax.set_ylim(top=max(sknt) + 2)
 
-    ax.set_ylabel("Average Wind Speed [%s]" % (PDICT[plot_units],))
+    ax.set_ylabel(f"Average Wind Speed [{PDICT[plot_units]}]")
 
     return fig, df
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

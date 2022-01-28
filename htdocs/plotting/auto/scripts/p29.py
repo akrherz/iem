@@ -3,9 +3,9 @@ import calendar
 
 import pytz
 import numpy as np
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pyiem.util import get_autoplot_context, get_dbconnstr, utc
 from pyiem.exceptions import NoDataFound
 
 
@@ -48,7 +48,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     hour = ctx["hour"]
@@ -71,7 +70,7 @@ def plotter(fdict):
     sum(case when tmp < %s then 1 else 0 end) as below,
     count(*) from obs GROUP by month ORDER by month ASC
     """,
-        pgconn,
+        get_dbconnstr("asos"),
         params=(station, hour, t1, t2, t2, t1),
         index_col="month",
     )

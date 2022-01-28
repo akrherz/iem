@@ -3,9 +3,9 @@ import calendar
 import datetime
 
 import numpy as np
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 
 PDICT = dict(
@@ -60,7 +60,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     year = ctx["year"]
@@ -82,7 +81,7 @@ def plotter(fdict):
         o.hrrr_srad from agg a LEFT JOIN obs o on (a.sday = o.sday)
         ORDER by a.sday ASC
     """,
-        pgconn,
+        get_dbconnstr("coop"),
         params=(station, station, year),
         index_col="sday",
     )
@@ -157,7 +156,7 @@ def plotter(fdict):
         ax3.text(
             0.5,
             1.01,
-            "Pearson Corr: %.2f" % (c.iat[1, 0],),
+            f"Pearson Corr: {c.iat[1, 0]:.2f}",
             fontsize=10,
             ha="center",
             transform=ax3.transAxes,

@@ -2,8 +2,8 @@
 from datetime import timedelta
 
 import pandas as pd
-from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pandas import read_sql
+from pyiem.util import get_autoplot_context, get_dbconnstr, utc
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
@@ -41,10 +41,12 @@ def get_data(meta):
         "from alldata_1minute "
         "where station = %s and valid > %s and precip > 0 and precip < 0.2 "
         "ORDER by valid ASC",
-        get_dbconn("asos1min"),
+        get_dbconnstr("asos1min"),
         params=(meta["id"], utc(2002, 1, 1)),
         index_col="valid",
     )
+    if obsdf.empty:
+        raise NoDataFound("Failed to find any one-minute data, sorry.")
     obsdf["inwarn"] = False
     obsdf["nearwarn"] = False
 
@@ -54,7 +56,7 @@ def get_data(meta):
         "and ST_Contains(geom, "
         "GeomFromEWKT('SRID=4326;POINT(%s %s)')) "
         "ORDER by issue ASC",
-        get_dbconn("postgis"),
+        get_dbconnstr("postgis"),
         params=(meta["lon"], meta["lat"]),
         index_col=None,
     )

@@ -4,10 +4,9 @@ import calendar
 
 import numpy as np
 import pandas as pd
-from pandas.io.sql import read_sql
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import fitbox, figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from matplotlib.font_manager import FontProperties
 
 
@@ -92,7 +91,6 @@ def less_than(one, two):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     threshold = ctx["threshold"]
@@ -114,7 +112,7 @@ def plotter(fdict):
         cltable = "ncei_climate91"
         clstation = ctx["_nt"].sts[station]["ncei91"]
 
-    obs = read_sql(
+    obs = pd.read_sql(
         f"""
         WITH myclimo as (
             select to_char(valid, 'mmdd') as sday, high, low,
@@ -127,7 +125,7 @@ def plotter(fdict):
         from {table} o JOIN myclimo c on (o.sday = c.sday)
         where o.station = %s and o.high is not null ORDER by day ASC
         """,
-        pgconn,
+        get_dbconnstr("coop"),
         params=(clstation, station),
         index_col="day",
     )

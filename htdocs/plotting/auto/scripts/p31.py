@@ -2,7 +2,7 @@
 import datetime
 import calendar
 
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound

@@ -387,7 +387,7 @@ def geojson(fdict):
 
 def plotter(fdict):
     """Go"""
-    ctx = get_autoplot_context(fdict, get_description())
+    ctx = get_autoplot_context(fdict, get_description(), rectify_dates=True)
     df = get_data(ctx)
     sector = ctx["sector"]
     date1 = ctx["date1"]
@@ -407,9 +407,9 @@ def plotter(fdict):
             "compute departures"
         )
     elif varname.startswith("c"):
-        subtitle = ("Climatology is based on data from 19%s-%s") % (
-            ctx["ct"][-2:],
-            datetime.date.today().year - 1,
+        subtitle = (
+            "Climatology is based on data from "
+            f"19{ctx['ct'][-2:]}-{datetime.date.today().year - 1}"
         )
     if ctx["d"] == "sector":
         state = sector
@@ -421,22 +421,20 @@ def plotter(fdict):
         state = None
     # This causes grief
     ctx.pop("csector", None)
+    _gt = (
+        PDICT2.get(varname)
+        .replace("$base", str(ctx["gddbase"]))
+        .replace("$ceil", str(ctx["gddceil"]))
+    )
     mp = MapPlot(
         apctx=ctx,
         sector=sector,
         state=state,
         cwa=cwa,
         axisbg="white",
-        title="%s thru %s %s [%s]"
-        % (
-            date1.strftime(datefmt),
-            date2.strftime(datefmt),
-            (
-                PDICT2.get(varname)
-                .replace("$base", str(ctx["gddbase"]))
-                .replace("$ceil", str(ctx["gddceil"]))
-            ),
-            UNITS.get(varname),
+        title=(
+            f"{date1.strftime(datefmt)} thru {date2.strftime(datefmt)} {_gt} "
+            f"[{UNITS.get(varname)}]"
         ),
         subtitle=subtitle,
         twitter=True,

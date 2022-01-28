@@ -170,8 +170,6 @@ def combine(df, months, offsets):
 
 def plotter(fdict):
     """Go"""
-    pgconn = util.get_dbconn("coop")
-
     today = datetime.date.today()
     ctx = util.get_autoplot_context(fdict, get_description())
     station = ctx["station"]
@@ -205,7 +203,7 @@ def plotter(fdict):
     from alldata_{station[:2]}
     WHERE station = %s and day < %s GROUP by year, month
     """,
-        pgconn,
+        util.get_dbconnstr("coop"),
         params=(threshold, station, today.replace(day=1)),
         index_col="year",
     )

@@ -4,8 +4,8 @@ import datetime
 import psycopg2.extras
 import numpy as np
 import pandas as pd
-from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconn
+from pandas import read_sql
+from pyiem.util import get_autoplot_context, get_dbconnstr, get_dbconn
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
@@ -115,7 +115,7 @@ def plotter(fdict):
     obs JOIN climo on (climo.month = obs.month)
     ORDER by obs.year ASC, obs.month ASC
     """,
-        pgconn,
+        get_dbconnstr("coop"),
         params=(station, archiveend, station, archiveend, sts.year, ets.year),
         index_col=None,
     )

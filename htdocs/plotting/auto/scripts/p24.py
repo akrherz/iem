@@ -2,9 +2,9 @@
 import datetime
 
 import numpy as np
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -126,7 +126,6 @@ def get_daily_data(ctx, sdate, edate):
         raise NoDataFound(
             "Sorry, too long of period selected. < 1 year please"
         )
-    pgconn = get_dbconn("coop")
     yearcond = "false"
     if edate.year != sdate.year:
         yearcond = f"sday >= '{sdate.strftime('%m%d')}'"
@@ -176,7 +175,7 @@ def get_daily_data(ctx, sdate, edate):
     ((high - avg_high) / std_high) - ((precip - avg_precip) / std_precip)
     as aridity, max_date from ranks where year = %s
     """,
-        pgconn,
+        get_dbconnstr("coop"),
         params=(edate.year,),
         index_col="station",
     )

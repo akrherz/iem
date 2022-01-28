@@ -6,7 +6,7 @@ import numpy as np
 from pandas.io.sql import read_sql
 import matplotlib.patheffects as PathEffects
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"high": "High Temperature", "low": "Low Temperature"}
@@ -48,7 +48,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     varname = ctx["varname"]
@@ -72,7 +71,7 @@ def plotter(fdict):
     sum(case when low < llow then 1 else 0 end)::numeric as low_lower
     from obs GROUP by year, month ORDER by year, month
     """,
-        pgconn,
+        get_dbconnstr("coop"),
         params=(station,),
         index_col=None,
     )
@@ -206,4 +205,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

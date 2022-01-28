@@ -2,9 +2,9 @@
 import calendar
 
 import numpy as np
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"high": "High temperature", "low": "Low Temperature"}
@@ -60,7 +60,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     minv = ctx["min"]
     maxv = ctx["max"]
@@ -69,7 +68,6 @@ def plotter(fdict):
         minv = maxv
         maxv = temp
     station = ctx["station"]
-    table = "alldata_%s" % (station[:2],)
 
     df = read_sql(
         f"""
@@ -82,10 +80,10 @@ def plotter(fdict):
             then 1 else 0 end) as high_count,
     SUM(case when a.low >= (c.low + %s) and a.low < (c.low + %s)
             then 1 else 0 end) as low_count
-    FROM {table} a JOIN climate c on (a.sday = c.sday)
+    FROM alldata_{station[:2]} a JOIN climate c on (a.sday = c.sday)
     WHERE a.sday != '0229' and station = %s GROUP by doy ORDER by doy ASC
     """,
-        pgconn,
+        get_dbconnstr("coop"),
         params=(
             ctx["_nt"].sts[station]["ncei91"],
             minv,

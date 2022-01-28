@@ -3,7 +3,7 @@ import datetime
 
 import numpy as np
 from scipy import stats
-from pandas.io.sql import read_sql
+from pandas import read_sql
 import metpy.calc as mcalc
 from metpy.units import units
 from matplotlib.ticker import MaxNLocator

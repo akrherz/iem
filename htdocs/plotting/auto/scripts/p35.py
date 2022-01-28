@@ -118,11 +118,7 @@ def plotter(fdict):
         ctx["_nt"].sts[station]["name"],
         station,
     )
-    subtitle = "(bin=%s) of %s Hour %s Change" % (
-        interval,
-        hours,
-        PDICT[varname],
-    )
+    subtitle = f"(bin={interval}) of {hours} Hour {PDICT[varname]} Change"
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     res = ax.pcolormesh((xedges - 1) * 7, yedges, hist.transpose())
     fig.colorbar(res, label="Hours per Day")

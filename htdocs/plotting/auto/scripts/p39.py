@@ -175,8 +175,11 @@ def plotter(fdict):
         lw=2,
         color="k",
         zorder=3,
-        label=r"%s %s, %.2f$^\circ$F"
-        % (calendar.month_abbr[oldmonth.month], oldmonth.year, prevavg[-1]),
+        label=(
+            f"{calendar.month_abbr[oldmonth.month]} {oldmonth.year}, "
+            f"{prevavg[-1]:.2f}"
+            r"$^\circ$F"
+        ),
     )
 
     ax.set_xlim(1, days)
