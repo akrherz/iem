@@ -8,7 +8,9 @@ if (sizeof($tokens) == 5){
 } else if (sizeof($tokens) == 4) {
     $url = sprintf("pil=%s&e=%s", $tokens[3], $tokens[0]);
 } else {
-    http_response_code(404);
+    // For whatever reason, we get a lot of social media bots that come here
+    // without a pid.  We'll just redirect them to the home page.
+    header("Location: /");
     die();
 }
 header("Location: /wx/afos/p.php?{$url}");
