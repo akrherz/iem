@@ -10,7 +10,7 @@ from pandas.io.sql import read_sql
 from pyiem.reference import TRACE_VALUE
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import figure, get_cmap
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
@@ -207,7 +207,7 @@ def plotter(fdict):
 
     df = read_sql(
         "SELECT * from cli_data where station = %s and valid = %s",
-        get_dbconn("iem"),
+        get_dbconnstr("iem"),
         params=(ctx["station"], ctx["date"]),
         index_col=None,
     )

@@ -71,7 +71,7 @@ def get_data(station, year, fmt):
         resultant_wind_speed, resultant_wind_direction,
         highest_wind_speed, highest_wind_direction,
         highest_gust_speed, highest_gust_direction,
-        average_wind_speed
+        average_wind_speed, snowdepth
         from cli_data c JOIN stations s on (c.station = s.id)
         WHERE s.network = 'NWSCLI' and c.station = %s
         and c.valid >= %s and c.valid <= %s
@@ -114,6 +114,7 @@ def get_data(station, year, fmt):
                 "precip_record": f2_sanitize(row["precip_record"]),
                 "precip_record_years": row["precip_record_years"],
                 "snow": f1_sanitize(row["snow"]),
+                "snowdepth": f1_sanitize(row["snowdepth"]),
                 "snow_normal": f1_sanitize(row["snow_normal"]),
                 "snow_month": f1_sanitize(row["snow_month"]),
                 "snow_jun1": f1_sanitize(row["snow_jun1"]),
@@ -151,7 +152,7 @@ def get_data(station, year, fmt):
         "low_time,precip,precip_normal,precip_month,precip_jan1,"
         "precip_jan1_normal,precip_jul1,precip_dec1,precip_dec1_normal,"
         "precip_record,precip_record_years,"
-        "snow,snow_normal,snow_month,snow_jun1,snow_jul1,snow_dec1,"
+        "snow,snowdepth,snow_normal,snow_month,snow_jun1,snow_jul1,snow_dec1,"
         "snow_record,snow_record_years,snow_jul1_normal,snow_dec1_normal,"
         "snow_month_normal,snow_jul1_depart,average_sky_cover"
     )

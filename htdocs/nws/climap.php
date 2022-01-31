@@ -9,7 +9,7 @@ require_once "../../include/mlib.php";
 force_https();
 $t = new MyView();
 $t->title = "Map of Daily NWS CLImage reports";
-$OL = '6.4.3';
+$OL = '6.6.0';
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link rel="stylesheet" href="/vendor/jquery-ui/1.12.1/jquery-ui.min.css" />
@@ -75,6 +75,7 @@ $t->content = <<<EOF
 	<option value="precip_record">Precipitation Record</option>
     <option value="precip_month_normal">Precipitation this month normal</option>
 	<option value="snow">Snowfall</option>
+	<option value="snowdeoth">Snow Depth [inch]</option>
 	<option value="snow_month">Snowfall this month</option>
 	<option value="snow_jun1">Snowfall since June 1</option>
 	<option value="snow_jul1">Snowfall since July 1</option>

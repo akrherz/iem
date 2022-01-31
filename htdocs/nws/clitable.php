@@ -61,7 +61,7 @@ $table = <<<EOF
 	<th class="empty"></th>
 	<th colspan="6">Precip (inches)</th>
 	<th class="empty"></th>
-	<th colspan="4">Snow (inches)</th>
+	<th colspan="5">Snow (inches)</th>
 </tr>
 <tr class="small">
 	<th>Ob</th><th>Time</th><th>Rec</th><th>Years</th><th>Avg</th>
@@ -73,7 +73,7 @@ $table = <<<EOF
 	<th>Ob</th><th>Rec</th><th>Years</th>
 	<th>Avg</th><th>Mon to Date</th><th>Mon Avg</th><th class="empty"></th>
 			
-	<th>Ob</th><th>Rec</th><th>Years</th><th>Mon to Date</th>
+	<th>Ob</th><th>Rec</th><th>Years</th><th>Mon to Date</th><th>Depth</th>
 </tr>
 </thead>
 EOF;
@@ -132,7 +132,7 @@ foreach($arr as $entry){
 			<td>%s</td><td>%s</td><td>%s</td>
 			<th class=\"empty\"></th>
 			<td>%s%s</td><td>%s</td><td>%s</td>
-			<td>%s</td>
+			<td>%s</td><td>%s</td>
 			</tr>", $uri, $col1, 
 			$row["high"], new_record($row["high"], $row["high_record"]),
 			$row["high_time"], $row["high_record"],
@@ -157,8 +157,8 @@ foreach($arr as $entry){
 			new_record($row["snow"], $row["snow_record"]),
 			trace($row["snow_record"]),
 			implode(' ', $row["snow_record_years"]),
-			trace($row["snow_month"])
-				
+			trace($row["snow_month"]), trace($row["snowdepth"]),
+
 		);
 }
 $table .= "</table>";
