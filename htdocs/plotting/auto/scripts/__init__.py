@@ -663,6 +663,10 @@ nopts = [
         "id": 70,
         "label": "Period between First and Last VTEC Product Each Year",
     },
+    {
+        "id": 224,
+        "label": "Population under NWS Watch/Warning/Advisory at Time",
+    },
     {"id": 203, "label": "Storm Based Warning Polygon Visual Summary"},
     {"id": 195, "label": "Storm Motion distribution based on NWS Warnings"},
     {
