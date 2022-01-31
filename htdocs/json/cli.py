@@ -87,6 +87,7 @@ def get_data(station, year, fmt):
                 "state": row["state"],
                 "wfo": row["wfo"],
                 "link": f"/api/1/nwstext/{row['product']}",
+                "product": row["product"],
                 "name": row["name"],
                 "high": int_sanitize(row["high"]),
                 "high_record": int_sanitize(row["high_record"]),

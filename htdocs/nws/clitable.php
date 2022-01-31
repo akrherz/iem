@@ -120,7 +120,8 @@ foreach($arr as $entry){
 				date("m", $ts), date("d", $ts));
 		$col1 = sprintf("<a href=\"%s\">%s</a>", $link, date("Md,y", $ts));
 	}
-	$table .= sprintf("<tr><td nowrap><a href=\"%s\"><i class=\"fa fa-list-alt\" alt=\"View Text\"></i></a>
+	$table .= sprintf("<tr>
+        <td nowrap><a href=\"/p.php?pid=%s\" target=\"_blank\"><i class=\"fa fa-list-alt\" alt=\"View Text\"></i></a>
 			%s</td>
 			<td>%s%s</td><td nowrap>%s</td><td>%s</td>
 			<td>%s</td><td>%s</td><td style='background: %s;'>%s</td>
@@ -133,7 +134,7 @@ foreach($arr as $entry){
 			<th class=\"empty\"></th>
 			<td>%s%s</td><td>%s</td><td>%s</td>
 			<td>%s</td><td>%s</td>
-			</tr>", $uri, $col1, 
+			</tr>", $row["product"], $col1,
 			$row["high"], new_record($row["high"], $row["high_record"]),
 			$row["high_time"], $row["high_record"],
 			implode(" ", $row["high_record_years"]), $row["high_normal"],
