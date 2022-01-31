@@ -11,7 +11,7 @@ LOG = logger()
 def get_elevation(lon, lat):
     """Use arcgisonline"""
     req = requests.get(
-        f"https://api.open-elevation.com/api/v1/lookup?locations={lat},{lon}",
+        f"https://api.opentopodata.org/v1/test-dataset?locations={lat},{lon}",
         timeout=30,
     )
     if req.status_code != 200:
@@ -38,7 +38,7 @@ def workflow():
         network = row[0]
         newelev = get_elevation(lon, lat)
 
-        print("%7s %s OLD: %s NEW: %.3f" % (sid, network, elev, newelev))
+        print(f"{sid:7s} {network} OLD: {elev} NEW: {newelev:.3f}")
         mcursor2.execute(
             "UPDATE stations SET elevation = %s WHERE id = %s "
             "and network = %s",
