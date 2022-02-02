@@ -3,7 +3,8 @@ session_start();
 require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 102);
 require_once "../../../include/myview.php";
-require_once "../../../include/twitteroauth/twitteroauth.php";
+require_once "../../../include/vendor/autoload.php";
+use Abraham\TwitterOAuth\TwitterOAuth;
 require_once "../../../include/iemprop.php";
 require_once "../../../include/forms.php";
 
@@ -23,12 +24,26 @@ $rs = pg_prepare($pgconn, "SAVEAUTH", "INSERT into ".
 $rs = pg_prepare($pgconn, "UPDATEAUTH", "UPDATE iembot_twitter_oauth ".
   "SET access_token = $1, access_token_secret = $2, updated = now(), ".
   "screen_name = $3 WHERE user_id = $4 RETURNING screen_name");
-$rs = pg_prepare($pgconn, "SELECTSUBS", "SELECT * from ".
+
+$rs = pg_prepare(
+    $pgconn,
+    "DELETEAUTH",
+    "DELETE from iembot_twitter_oauth where user_id = $1",
+);
+
+  $rs = pg_prepare($pgconn, "SELECTSUBS", "SELECT * from ".
   "iembot_twitter_subs WHERE user_id = $1 ORDER by channel ASC");
 $rs = pg_prepare($pgconn, "ADDSUB", "INSERT into ".
   "iembot_twitter_subs(user_id, screen_name, channel) VALUES ($1, $2, $3)");
 $rs = pg_prepare($pgconn, "DELSUB", "DELETE from ".
   "iembot_twitter_subs WHERE user_id = $1 and channel = $2");
+
+$rs = pg_prepare(
+    $pgconn,
+    "DELETESUBS",
+    "DELETE from iembot_twitter_subs where user_id = $1",
+);
+
 
 function reloadbot(){
 	return file_get_contents("http://iembot:9003/reload");
@@ -36,6 +51,15 @@ function reloadbot(){
 
 $msg = Array();
 //------------------------------------------------------------
+if (isset($_REQUEST["removeme"]) && $_REQUEST["removeme"] == "1"){
+    // remove subs first due to foreign key constraints
+    pg_execute($pgconn, "DELETESUBS", Array($user_id));
+    pg_execute($pgconn, "DELETEAUTH", Array($user_id));
+    $msg[] = "You have been removed from the bot.";
+    reloadbot();
+    unset($_SESSION["user_id"]);
+    unset($_SESSION["screen_name"]);
+}
 if (isset($_REQUEST['add']) && $channel != '' && $screen_name != ''){
 	pg_execute($pgconn, 'ADDSUB', Array($_SESSION["user_id"],
 		strtolower($_SESSION["screen_name"]), $channel));
@@ -51,15 +75,22 @@ if (isset($_REQUEST['del']) && $channel != '' && $screen_name != ''){
 			$channel, $_SESSION["screen_name"]);
 }
 if (isset($_REQUEST['cb'])){
-	$to = new TwitterOAuth(TWITTER_KEY, TWITTER_SECRET,
-						   $_SESSION['token'], $_SESSION['token_secret']);
-	$tok = $to->getAccessToken($_REQUEST['oauth_verifier']);
+	$connection = new TwitterOAuth(
+        TWITTER_KEY,
+        TWITTER_SECRET,
+		$_SESSION['token'],
+        $_SESSION['token_secret'],
+    );
+    $atoken = $connection->oauth(
+        "oauth/access_token",
+        array("oauth_verifier" => $_REQUEST['oauth_verifier']),
+    );
 	unset($_SESSION['token']);
 	unset($_SESSION['token_secret']);
-	$user_id = $tok['user_id'];
-	$screen_name = $tok['screen_name'];
-	$access_token 	= $tok['oauth_token'];
-	$access_token_secret = $tok['oauth_token_secret'];
+	$user_id = $atoken['user_id'];
+	$screen_name = $atoken['screen_name'];
+	$access_token 	= $atoken['oauth_token'];
+	$access_token_secret = $atoken['oauth_token_secret'];
 	if ($screen_name != ''){
 		$_SESSION['user_id'] = $user_id;
 		$_SESSION['screen_name'] = $screen_name;
@@ -80,11 +111,13 @@ if (isset($_REQUEST['cb'])){
 }
 if ($screen_name == ''){
 	$connection = new TwitterOAuth(TWITTER_KEY, TWITTER_SECRET);
-	$request_token = $connection->getRequestToken("https://mesonet.agron.iastate.edu/projects/iembot/twitter.php?cb");
+    $request_token = $connection->oauth(
+        "oauth/request_token",
+        ["oauth_callback" => "https://mesonet.agron.iastate.edu/projects/iembot/twitter.php?cb"]);
 	$_SESSION['token'] = $token = $request_token['oauth_token'];
 	$_SESSION['token_secret'] = $request_token['oauth_token_secret'];
-	$authenticateUrl = $connection->getAuthorizeURL($token);
-	header("Location: $authenticateUrl");
+	$authUrl = $connection->url("oauth/authorize", array("oauth_token" => $token));
+	header("Location: $authUrl");
 	exit;
 }
 
@@ -117,15 +150,17 @@ $t->content = <<<EOL
 <h3>IEMBOT + Twitter Integration</h3>
 		
 <p>This page allows for the subscription of a Twitter Account to one or more
-"IEMBot channels".  The automated processing of National Weather Service text
+"<a href="/projects/iembot/#channels" target="_blank">IEMBot channels</a>".  The automated processing of National Weather Service text
 products converts each product into a tweet sized message and is associated
 with one or more channels.  These channels are then used to route the messages
-to subscribed twitter pages.</p>
+to subscribed twitter pages.  A deduplication process should prevent a single
+message from posting twice to your account.</p>
 
 <div class="alert alert-warning">This service is provided as-is and without
 warranty.  <strong>The service could fail</strong> with an EF-5 tornado approaching your
 city, so you have been warned!</div>
 
+<div class="well">
 <h4>Add Channel Subscription</h4>
  <form method="POST" action="twitter.php">
  <input type="hidden" name="add" value="yes"/>
@@ -136,13 +171,27 @@ city, so you have been warned!</div>
  </table>
  <input type="submit" name="Subscribe Channel" />
  </form>
+</div>
 
+<div class="well">
 <h4>Current Subscriptions</h4>
  <table class="table table-striped">
  <thead><tr><th>Page</th><th>Channel</th><th></th></tr></thead>
 {$sselect2}
  </table>
- 		
+</div> 		
+
+<div class="well">
+<h4>Delete IEMBot from my account</h4>
+
+<p><strong>WARNING:</strong> This will delete all of your IEMBot subscriptions
+and remove your OpenAuth tokens from the IEMBot database. This should prevent
+any future posts to your page on IEMbot's behalf.</p>
+
+<p><button class="btn btn-danger" onclick="if (confirm('Are you sure?')){
+    window.location.href='/projects/iembot/twitter.php?removeme=1';}">Delete IEMBot</button></p>
+</div>
+
 
 EOL;
 
