@@ -2,11 +2,11 @@
 import calendar
 
 import numpy as np
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from matplotlib import ticker
 from pyiem.plot import figure_axes
 from pyiem.plot import get_cmap
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.reference import state_names
 from pyiem.exceptions import NoDataFound
 
@@ -64,7 +64,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     state = ctx["state"][:2]
     short_desc = PDICT[ctx["short_desc"].upper()]
@@ -76,7 +75,7 @@ def plotter(fdict):
         where short_desc = %s and state_alpha = %s and num_value is not null
         ORDER by week_ending ASC
     """,
-        pgconn,
+        get_dbconnstr("coop"),
         params=(short_desc, state),
         index_col=None,
     )
@@ -87,14 +86,9 @@ def plotter(fdict):
     year0 = int(df["year"].min())
     lastyear = int(df["year"].max())
     title = (
-        "%s %s Progress\n"
-        "USDA NASS %i-%i -- Daily Linear Interpolated Values "
-        "Between Weekly Reports"
-    ) % (
-        state_names[state],
-        short_desc,
-        year0,
-        lastyear,
+        f"{state_names[state]} {short_desc} Progress\n"
+        f"USDA NASS {year0:.0f}-{lastyear:.0f} -- "
+        "Daily Linear Interpolated Values Between Weekly Reports"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 
@@ -146,9 +140,7 @@ def plotter(fdict):
     ax.yaxis.set_major_locator(ticker.MaxNLocator(integer=True))
     ax.grid(True)
     lastweek = df["week_ending"].max()
-    ax.set_xlabel(
-        "X denotes %s value of %.0f%%" % (lastweek.strftime("%d %b %Y"), dlast)
-    )
+    ax.set_xlabel(f"X denotes {lastweek:%d %b %Y} value of {dlast:.0f}%")
 
     return fig, df
 

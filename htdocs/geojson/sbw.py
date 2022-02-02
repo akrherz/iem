@@ -22,19 +22,17 @@ def run(ts):
             tzinfo=pytz.UTC
         )
         t0 = utcnow
-    sbwtable = "sbw_%s" % (utcnow.year,)
+    sbwtable = f"sbw_{utcnow.year}"
 
     # Look for polygons into the future as well as we now have Flood products
     # with a start time in the future
     cursor.execute(
-        """
+        f"""
         SELECT ST_asGeoJson(geom) as geojson, phenomena, eventid, wfo,
         significance, polygon_end at time zone 'UTC' as utc_polygon_end,
         polygon_begin at time zone 'UTC' as utc_polygon_begin, status,
         hvtec_nwsli
-        from """
-        + sbwtable
-        + """ WHERE
+        from {sbwtable} WHERE
         polygon_begin <= %s and
         polygon_end > %s
     """,
@@ -48,7 +46,10 @@ def run(ts):
         "count": cursor.rowcount,
     }
     for row in cursor:
-        sid = "%(wfo)s.%(phenomena)s.%(significance)s.%(eventid)04i" % row
+        sid = (
+            f"{row['wfo']}.{row['phenomena']}.{row['significance']}."
+            f"{row['eventid']:04.0f}"
+        )
         ets = row["utc_polygon_end"].strftime("%Y-%m-%dT%H:%M:%SZ")
         sts = row["utc_polygon_begin"].strftime("%Y-%m-%dT%H:%M:%SZ")
         sid += "." + sts
@@ -79,9 +80,9 @@ def application(environ, start_response):
 
     form = parse_formvars(environ)
     cb = form.get("callback", None)
-    ts = form.get("ts", "")
+    ts = form.get("ts", "")[:24]
 
-    mckey = "/geojson/sbw.geojson|%s" % (ts,)
+    mckey = f"/geojson/sbw.geojson|{ts}"
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
     if not res:
@@ -91,7 +92,7 @@ def application(environ, start_response):
     if cb is None:
         data = res
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        data = f"{html_escape(cb)}({res})"
 
     start_response("200 OK", headers)
     return [data.encode("ascii")]

@@ -6,6 +6,7 @@ header("Content-type: application/vnd.geo+json");
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/vtec.php";
+require_once "../../include/forms.php";
 $postgis = iemdb("postgis");
 
 function toTime($s){
@@ -26,7 +27,7 @@ $rs = pg_query($postgis, "SET TIME ZONE 'UTC'");
 if (isset($_REQUEST["phenomena"])){
   $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
   $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : "MPX";
-  $eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
+  $eventid = get_int404("eventid", 103);
   $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
   $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
   	

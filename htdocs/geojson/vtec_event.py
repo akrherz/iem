@@ -15,17 +15,13 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sbwtable = "sbw_%s" % (year,)
-    warningtable = "warnings_%s" % (year,)
+    sbwtable = f"sbw_{year}"
+    warningtable = f"warnings_{year}"
     if sbw == 1:
-        sql = (
-            """
+        sql = f"""
             SELECT distinct l.*, valid at time zone 'UTC' as utc_valid,
             ST_asGeoJson(l.geom) as geojson
-            from lsrs l,
-            """
-            + sbwtable
-            + """ w WHERE
+            from lsrs l, {sbwtable} w WHERE
             l.geom && w.geom and ST_contains(w.geom, l.geom)
             and l.wfo = %s and
             l.valid >= w.issue and l.valid <= w.expire and
@@ -33,16 +29,12 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
             w.significance = %s and w.phenomena = %s
             ORDER by l.valid ASC
         """
-        )
         args = (wfo, wfo, etn, significance, phenomena)
     else:
-        sql = (
-            """
+        sql = f"""
             WITH countybased as (
                 SELECT min(issue) as issued, max(expire) as expired
-                from """
-            + warningtable
-            + """ w JOIN ugcs u on (u.gid = w.gid)
+                from {warningtable} w JOIN ugcs u on (u.gid = w.gid)
                 WHERE w.wfo = %s and w.eventid = %s and
                 w.significance = %s
                 and w.phenomena = %s)
@@ -53,7 +45,6 @@ def run_lsrs(wfo, year, phenomena, significance, etn, sbw):
             l.valid >= c.issued and l.valid < c.expired and
             l.wfo = %s ORDER by l.valid ASC
         """
-        )
         args = (wfo, etn, significance, phenomena, wfo)
     cursor.execute(sql, args)
     res = {
@@ -89,16 +80,14 @@ def run_sbw(wfo, year, phenomena, significance, etn):
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    table = "sbw_%s" % (year,)
+    table = f"sbw_{year}"
     cursor.execute(
-        """
+        f"""
     SELECT
     ST_asGeoJson(geom) as geojson,
     issue at time zone 'UTC' as utc_issue,
     init_expire at time zone 'UTC' as utc_init_expire
-    from """
-        + table
-        + """
+    from {table}
     WHERE wfo = %s and eventid = %s and phenomena = %s and significance = %s
     and status = 'NEW'
     """,
@@ -131,17 +120,15 @@ def run(wfo, year, phenomena, significance, etn):
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    table = "warnings_%s" % (year,)
+    table = f"warnings_{year}"
     cursor.execute(
-        """
+        f"""
     SELECT
     w.ugc,
     ST_asGeoJson(u.geom) as geojson,
     issue at time zone 'UTC' as utc_issue,
     init_expire at time zone 'UTC' as utc_init_expire
-    from """
-        + table
-        + """ w JOIN ugcs u on (w.gid = u.gid)
+    from {table} w JOIN ugcs u on (w.gid = u.gid)
     WHERE w.wfo = %s and eventid = %s and
     phenomena = %s and significance = %s
     """,
@@ -186,14 +173,9 @@ def application(environ, start_response):
     lsrs = int(form.get("lsrs", 0))
     cb = form.get("callback", None)
 
-    mckey = ("/geojson/vtec_event/%s/%s/%s/%s/%s/%s/%s") % (
-        wfo,
-        year,
-        phenomena,
-        significance,
-        etn,
-        sbw,
-        lsrs,
+    mckey = (
+        f"/geojson/vtec_event/{wfo}/{year}/{phenomena}/{significance}/"
+        f"{etn}/{sbw}/{lsrs}"
     )
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
@@ -210,7 +192,7 @@ def application(environ, start_response):
     if cb is None:
         data = res
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        data = f"{html_escape(cb)}({res})"
 
     start_response("200 OK", headers)
     return [data.encode("ascii")]

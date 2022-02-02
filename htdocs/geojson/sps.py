@@ -66,7 +66,7 @@ def application(environ, start_response):
     if cb is None:
         data = res
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        data = f"{html_escape(cb)}({res})"
 
     start_response("200 OK", headers)
     return [data.encode("ascii")]

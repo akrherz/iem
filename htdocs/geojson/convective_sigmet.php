@@ -3,9 +3,9 @@
  * Generate GeoJSON Convective Sigmets
  */
 header("Content-type: application/vnd.geo+json");
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
-include("../../include/vtec.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/vtec.php";
 $postgis = iemdb("postgis");
 
 $rs = pg_query("SET TIME ZONE 'UTC'");

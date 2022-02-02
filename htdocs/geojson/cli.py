@@ -91,6 +91,7 @@ def get_data(ts, fmt):
                     "valid": row["valid"].strftime("%Y-%m-%d"),
                     "wfo": row["wfo"],
                     "link": f"/api/1/nwstext/{row['product']}",
+                    "product": row["product"],
                     "name": row["name"],
                     "high": int_sanitize(row["high"]),
                     "high_record": int_sanitize(row["high_record"]),
@@ -187,9 +188,9 @@ def get_data(ts, fmt):
         for col in cols.split(","):
             val = feat["properties"][col]
             if isinstance(val, (list, tuple)):
-                res += "%s," % (" ".join([str(s) for s in val]),)
+                res += f"{' '.join([str(s) for s in val])},"
             else:
-                res += "%s," % (val,)
+                res += f"{val},"
         res += "\n"
     return res
 
@@ -208,11 +209,7 @@ def application(environ, start_response):
     else:
         headers.append(("Content-type", "text/plain"))
 
-    mckey = "/geojson/cli/%s?callback=%s&fmt=%s" % (
-        ts.strftime("%Y%m%d"),
-        cb,
-        fmt,
-    )
+    mckey = f"/geojson/cli/{ts:%Y%m%d}?callback={cb}&fmt={fmt}"
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
     if not res:
@@ -221,7 +218,7 @@ def application(environ, start_response):
     if cb is None:
         data = res
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        data = f"{html_escape(cb)}({res})"
 
     start_response("200 OK", headers)
     return [data.encode("ascii")]

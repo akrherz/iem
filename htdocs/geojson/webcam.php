@@ -54,15 +54,15 @@ for( $i=0; $row = pg_fetch_assoc($result); $i++)
   		"%s/camera/%s/%s_%s.jpg", gmdate("Y/m/d", $valid), $row["cam"],
   		$row["cam"], gmdate("YmdHi", $valid) );
   $z = Array("type"=>"Feature", "id"=>$row["id"],
-             "properties"=>Array(
-             		"valid" => gmdate("Y-m-d\\TH:i:s\\Z", $valid),
-               "cid" => $row["id"],
-               "name" => $row["name"], 
-               "county" => $row["county"], 
-               "state" => $row["state"], 
+            "properties"=>Array(
+                "valid" => gmdate("Y-m-d\\TH:i:s\\Z", $valid),
+                "cid" => $row["id"],
+                "name" => $row["name"],
+                "county" => $row["county"],
+                "state" => $row["state"],
              	"angle" => $row["drct"],
-               "url" => $url
-              ),
+                "url" => $url
+            ),
              "geometry"=>Array("type"=>"Point",
                          "coordinates"=>Array(floatval($row["lon"]),
                          					  floatval($row["lat"]))));

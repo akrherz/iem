@@ -1,15 +1,16 @@
 <?php
 header("Content-type: application/vnd.geo+json");
-include_once "../../config/settings.inc.php";
-include_once "../../include/database.inc.php";
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/forms.php";
 $connect = iemdb("postgis");
 
-$year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
+$year = get_int404("year", 2006);
 $wfo = isset($_GET["wfo"]) ? $_GET["wfo"] : "MPX";
 if (strlen($wfo) > 3){
     $wfo = substr($wfo, 1, 3);
 }
-$eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
+$eventid = get_int404("eventid", 103);
 $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
 

@@ -66,7 +66,7 @@ def application(environ, start_response):
     cb = field.get("callback", None)
     headers = [("Content-type", "application/vnd.geo+json")]
 
-    mckey = "/geojson/snowfall/%s?callback=%s" % (ts.strftime("%Y%m%d"), cb)
+    mckey = f"/geojson/snowfall/{ts:%Y%m%d}?callback={cb}"
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
     if not res:
@@ -75,7 +75,7 @@ def application(environ, start_response):
     if cb is None:
         data = res
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        data = f"{html_escape(cb)}({res})"
 
     start_response("200 OK", headers)
     return [data.encode("ascii")]
