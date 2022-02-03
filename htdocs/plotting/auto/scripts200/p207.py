@@ -1,4 +1,5 @@
 """Snowfall analysis maps."""
+# pylint: disable=unpacking-non-sequence
 import datetime
 
 import numpy as np
@@ -7,8 +8,8 @@ from pyproj import Transformer
 from geopandas import read_postgis, GeoDataFrame
 from shapely.geometry import Polygon, Point
 from scipy.interpolate import Rbf
-from pyiem import reference
 from pyiem.plot import MapPlot, nwssnow
+from pyiem.reference import EPSG
 from pyiem.util import get_autoplot_context, get_dbconnstr, logger
 from sqlalchemy import text
 
@@ -45,6 +46,10 @@ PDICT5 = {
     "no": "Do not include any COOP reports.",
 }
 PDICT6 = {"snow": "Snowfall", "ice": "Freezing Rain / Ice Storm (LSRs Only)"}
+PDICT7 = {
+    "yes": "Clip Display by Plotted Geography",
+    "no": "Allow sometimes extrapolation outside of plotted area",
+}
 
 
 def get_description():
@@ -54,7 +59,7 @@ def get_description():
     desc["cache"] = 60
     desc[
         "description"
-    ] = """Generates an analysis map of snowfall or freezing rain data
+    ] = f"""Generates an analysis map of snowfall or freezing rain data
     based on NWS Local Storm Reports and NWS COOP Data.  This autoplot
     presents a number of tunables including:
     <ul>
@@ -65,7 +70,7 @@ def get_description():
        it is good to attempt to add zeros in to keep the reports from bleeding
        into areas that did not receive snow.</li>
        <li>You can pick which
-       <a href="%s">SciPy.interpolate.Rbf</a>
+       <a href="{SCIPY}">SciPy.interpolate.Rbf</a>
        function to use.  The radius in the function shown equals the grid cell
        size used for the analysis.</li>
        <li>You can optionally include any NWS COOP reports that were processed
@@ -73,16 +78,13 @@ def get_description():
     </ul>
 
     <br /><br />If you download the data for this analysis, there is a column
-    called <code>%s</code> which denotes if the report was used to create the
-    grid analysis.  There is a primative quality control routine that attempts
-    to omit too low of reports.
+    called <code>{USEME}</code> which denotes if the report was used to
+    create the grid analysis.  There is a primative quality control routine
+    that attempts to omit too low of reports.
 
     <br /><br />Having trouble with this app?  If so, please copy/paste the URL
     showing the bad image and <a href="/info/contacts.php">email it to us</a>!
-    """ % (
-        SCIPY,
-        USEME,
-    )
+    """
     now = datetime.datetime.now()
     desc["arguments"] = [
         dict(
@@ -161,6 +163,13 @@ def get_description():
             default="no",
             name="coop",
         ),
+        dict(
+            type="select",
+            options=PDICT7,
+            label="Clip display to plotted geography?",
+            default="yes",
+            name="c",
+        ),
     ]
     return desc
 
@@ -235,33 +244,31 @@ def load_data(ctx, basets, endts):
 
 def compute_grid_bounds(ctx):
     """Figure out where to look."""
-    if ctx["t"] == "state":
-        if ctx["csector"] in reference.SECTORS:
-            bnds = reference.SECTORS[ctx["csector"]]
-            # suck
-            bnds = [bnds[0], bnds[2], bnds[1], bnds[3]]
-        elif ctx["csector"] == "conus":
-            bnds = [
-                reference.CONUS_WEST,
-                reference.CONUS_SOUTH,
-                reference.CONUS_EAST,
-                reference.CONUS_NORTH,
-            ]
-        else:
-            bnds = reference.state_bounds[ctx["csector"]]
+
+    # Lame, we create a temp Map object to get the bounds
+    csector = ctx["csector"]
+    if ctx["t"] == "cwa":
+        sector = "cwa"
     else:
-        bnds = reference.wfo_bounds[ctx["wfo"]]
-    # xmin, ymin, xmax, ymax in EPSG:4326, we want meter space
-    ll = T4326_2163.transform(bnds[0], bnds[1])
-    ul = T4326_2163.transform(bnds[0], bnds[3])
-    lr = T4326_2163.transform(bnds[2], bnds[1])
-    ur = T4326_2163.transform(bnds[2], bnds[3])
+        sector = "state" if len(csector) == 2 else csector
+
+    mp = MapPlot(
+        apctx=ctx,
+        sector=sector,
+        twitter=True,
+        state=csector,
+        cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),
+        axisbg="white",
+    )
+    [xmin, xmax, ymin, ymax] = mp.panels[0].get_extent(EPSG[2163])
+    mp.close()
+
     buffer = 20000.0  # km
     return [
-        min(ll[0], ul[0]) - buffer,  # minx
-        min(ll[1], lr[1]) - buffer,  # miny
-        max(ur[0], lr[0]) + buffer,  # maxx
-        max(ul[1], ur[1]) + buffer,  # maxy
+        xmin - buffer,  # minx
+        ymin - buffer,  # miny
+        xmax + buffer,  # maxx
+        ymax + buffer,  # maxy
     ]
 
 
@@ -300,7 +307,7 @@ def add_zeros(df, ctx):
                         "val": 0,
                         "nwsli": f"Z{len(newrows) + 1}",
                         USEME: True,
-                        "plotme": True,
+                        "plotme": False,
                         "state": "Z",
                     }
                 )
@@ -359,7 +366,7 @@ def prettyprint(val):
         return "0"
     if 0 < val < 0.1:
         return "T"
-    return "%.1f" % (val,)
+    return f"{val:.1f}"
 
 
 def plotter(fdict):
@@ -373,6 +380,7 @@ def plotter(fdict):
     basets = endts - datetime.timedelta(hours=ctx["hours"])
     # Retrieve available obs
     df = load_data(ctx, basets, endts)
+
     # figure out our grid bounds
     ctx["bnds2163"] = compute_grid_bounds(ctx)
     # add zeros and QC
@@ -392,11 +400,11 @@ def plotter(fdict):
     else:
         sector = "state" if len(csector) == 2 else csector
 
-    title = "NWS Local Storm Report%s Snowfall Total Analysis" % (
-        " & COOP" if ctx["coop"] == "yes" else "",
-    )
+    _t = " & COOP" if ctx["coop"] == "yes" else ""
+    title = f"NWS Local Storm Report{_t} Snowfall Total Analysis"
     if ctx["v"] == "ice":
         title = "NWS Local Storm Reports of Freezing Rain + Ice"
+    obcnt = len(df2[df2["state"] != "Z"].index)
     mp = MapPlot(
         apctx=ctx,
         sector=sector,
@@ -406,21 +414,19 @@ def plotter(fdict):
         axisbg="white",
         title=title,
         subtitle=(
-            "%.0f reports over past %.0f hours till %s, "
-            "grid size: %.0fkm, Rbf: %s"
-            ""
-            % (
-                len(df2.index),
-                ctx["hours"],
-                endts.strftime("%d %b %Y %I:%M %p"),
-                ctx["sz"],
-                ctx["f"],
-            )
+            f"{obcnt:.0f} reports over past {ctx['hours']:.0f} hours "
+            f"till {endts:%d %b %Y %I:%M %p}, "
+            f"grid size: {ctx['sz']:.0f}km, Rbf: {ctx['f']}"
         ),
     )
     if df2["val"].max() > 0 and ctx["p"] in ["both", "contour"]:
         mp.contourf(
-            lons, lats, vals, rng, cmap=cmap, clip_on=(ctx["t"] != "cwa")
+            lons,
+            lats,
+            vals,
+            rng,
+            cmap=cmap,
+            clip_on=(ctx["c"] == "yes"),
         )
         # Allow analysis to bleed outside the CWA per request.
         if ctx["t"] == "cwa":
@@ -455,14 +461,17 @@ def plotter(fdict):
 if __name__ == "__main__":
     fig, _df = plotter(
         dict(
-            csector="midwest",
-            endts="2022-1-7 2000",
-            hours=12,
+            t="cwa",
+            csector="MN",
+            wfo="DLH",
+            endts="2019-12-10 0500",
+            hours=24,
             z="yes",
             p="contour",
             coop="yes",
-            sz=25,
+            sz=50,
             f="linear",
+            c="no",
         )
     )
     LOG.debug("writing image")
