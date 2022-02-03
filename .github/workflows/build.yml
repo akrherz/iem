@@ -21,6 +21,7 @@ jobs:
         git clone --depth 1 https://github.com/akrherz/iem-database.git database
         git clone --depth 1 https://github.com/akrherz/ci_tooling.git .ci_tooling
         git clone --depth 1 https://github.com/akrherz/iem-production-checks.git .ipc
+        . .ci_tooling/iemwebfarm.sh
         . .ci_tooling/postgres.sh
         sudo mkdir -p /mesonet/www/logs
         sudo ln -s `pwd` /opt/iem
