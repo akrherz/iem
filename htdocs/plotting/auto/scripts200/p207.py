@@ -242,16 +242,14 @@ def load_data(ctx, basets, endts):
     return pd.concat([df, df2], ignore_index=True, sort=False)
 
 
-def compute_grid_bounds(ctx):
+def compute_grid_bounds(ctx, csector):
     """Figure out where to look."""
 
     # Lame, we create a temp Map object to get the bounds
-    csector = ctx["csector"]
     if ctx["t"] == "cwa":
         sector = "cwa"
     else:
         sector = "state" if len(csector) == 2 else csector
-
     mp = MapPlot(
         apctx=ctx,
         sector=sector,
@@ -382,7 +380,8 @@ def plotter(fdict):
     df = load_data(ctx, basets, endts)
 
     # figure out our grid bounds
-    ctx["bnds2163"] = compute_grid_bounds(ctx)
+    csector = ctx.pop("csector")
+    ctx["bnds2163"] = compute_grid_bounds(ctx, csector)
     # add zeros and QC
     df = add_zeros(df, ctx)
     df["label"] = df["val"].apply(prettyprint)
@@ -394,7 +393,6 @@ def plotter(fdict):
     if ctx["v"] == "ice":
         rng = [0.01, 0.02, 0.05, 0.07, 0.1, 0.2, 0.3, 0.4, 0.5, 0.75, 1]
     cmap = nwssnow()
-    csector = ctx.pop("csector")
     if ctx["t"] == "cwa":
         sector = "cwa"
     else:
@@ -461,11 +459,12 @@ def plotter(fdict):
 if __name__ == "__main__":
     fig, _df = plotter(
         dict(
+            v="snow",
             t="cwa",
-            csector="MN",
-            wfo="DLH",
-            endts="2019-12-10 0500",
-            hours=24,
+            csector="IA",
+            wfo="LSX",
+            endts="2022-02-03 1955",
+            hours=48,
             z="yes",
             p="contour",
             coop="yes",
