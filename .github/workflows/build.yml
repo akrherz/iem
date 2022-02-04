@@ -35,8 +35,7 @@ jobs:
         sudo a2enmod headers rewrite proxy cgi expires authz_groupfile
         # we do things the old fashioned way, we earn it
         sudo a2dissite 000-default.conf
-        # reduce resource usage of mod-wsgi processes
-        sudo cp deployment/apache_configs/mod_wsgi.conf /etc/apache2/sites-enabled/
+        sudo cp .github/ci_support/mod_wsgi.conf /etc/apache2/sites-enabled/
         echo '<VirtualHost *:80>' | sudo tee /etc/apache2/sites-enabled/iem.conf > /dev/null
         cat config/mesonet.inc | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
         echo '</VirtualHost>' | sudo tee -a /etc/apache2/sites-enabled/iem.conf > /dev/null
