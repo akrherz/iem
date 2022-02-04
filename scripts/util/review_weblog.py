@@ -7,16 +7,18 @@ import subprocess
 
 import psycopg2
 
+THRESHOLD = 30
+
 
 def logic(counts, family):
     """Should we or should we not, that is the question."""
     exe = "iptables" if family == 4 else "ip6tables"
     for addr, hits in counts.items():
-        if len(hits) < 30:
+        if len(hits) < THRESHOLD:
             continue
         # NOTE the insert to the front of the chain
         cmd = f"/usr/sbin/{exe} -I INPUT -s {addr} -j DROP"
-        print(cmd)
+        print(f"{addr} with {len(hits)}/{THRESHOLD} 404s\n{cmd}\nSample 10\n")
         for hit in hits[:10]:
             print(f"{hit[0]} uri:|{hit[2]}| ref:|{hit[3]}|")
         print()
