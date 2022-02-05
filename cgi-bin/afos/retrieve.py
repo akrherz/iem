@@ -1,11 +1,12 @@
 """give me some AFOS data please."""
+from datetime import datetime, timezone
 import re
 from io import StringIO
 
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
 
-DATE_REGEX = re.compile(r"^[0-9]{4}\-\d+\-\d+$")
+DATE_REGEX = re.compile(r"^[0-9]{4}\-\d+\-\d+")
 WARPIL = "FLS FFS AWW TOR SVR FFW SVS LSR SPS WSW FFA WCN NPW".split()
 
 
@@ -42,7 +43,16 @@ def get_date(raw):
         return None
     if not DATE_REGEX.match(raw):
         return False
-    return raw
+    # Option 1, provided just YYYY-MM-DD
+    if len(raw) <= 10:
+        dt = datetime.strptime(raw, "%Y-%m-%d")
+    elif raw.find("T") > -1:
+        try:
+            dt = datetime.strptime(raw[:16], "%Y-%m-%dT%H:%M")
+        except ValueError:
+            return False
+
+    return dt.replace(tzinfo=timezone.utc)
 
 
 def application(environ, start_response):
@@ -59,7 +69,10 @@ def application(environ, start_response):
     edate = get_date(form.get("edate"))
     if sdate is False or edate is False:
         start_response("200 OK", [("Content-type", "text/plain")])
-        return [b"Either sdate or edate failed form YYYY-mm-dd"]
+        return [
+            b"Either sdate or edate failed form "
+            b"YYYY-mm-dd or YYYY-mm-ddTHH:MM, both are UTC dates"
+        ]
     ttaaii = form.get("ttaaii", "")[:6]
     fmt = form.get("fmt", "text")
     headers = [("X-Content-Type-Options", "nosniff")]

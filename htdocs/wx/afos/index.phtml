@@ -112,10 +112,10 @@ $theform = <<<EOM
 <p><label for="limit">Date Descending Entries</label>
 <br /><input type="text" name="limit" maxlength="4" size="6" value="1"></p>
 
-<p><label for="sdate">Start Date</label>
+<p><label for="sdate">Start Date @ 00 UTC</label>
 <br /><input id="sdate" type="text" name="sdate" value="No Limit"></p>
 
-<p><label for="edate">End Date</label>
+<p><label for="edate">End Date @ 00 UTC</label>
 <br /><input id="edate" type="text" name="edate" value="No Limit"></p>
 
 <p><button type="button" id="myform-submit" class="btn btn-default"><i class="fa fa-search"></i> Load Product</button></p>
@@ -157,4 +157,3 @@ $t->content = <<<EOF
 
 EOF;
 $t->render('full.phtml');
-?>
