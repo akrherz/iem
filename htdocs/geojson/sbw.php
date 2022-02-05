@@ -112,4 +112,4 @@ for ($i=0;$row=pg_fetch_assoc($rs);$i++)
   $ar["features"][] = $z;
 }
 echo str_replace($reps, $subs, json_encode($ar));
-?>
+

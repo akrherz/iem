@@ -58,5 +58,3 @@ if( ! isset($_REQUEST['callback']))
 
 $cb = xssafe($_REQUEST['callback']);
 echo "{$cb}($json)";
-
-?>

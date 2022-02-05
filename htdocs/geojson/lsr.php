@@ -128,4 +128,3 @@ for ($i=0;$row=pg_fetch_assoc($rs);$i++)
 }
 
 echo json_encode($ar);
-?>

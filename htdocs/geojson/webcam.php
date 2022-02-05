@@ -71,5 +71,3 @@ for( $i=0; $row = pg_fetch_assoc($result); $i++)
 }
 
 echo json_encode($ar);
-
-?>

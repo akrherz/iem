@@ -23,14 +23,20 @@ if ($ts > 0){
   		$ar = Array( date('Y-m-d H:i', $ts), 
   				$network);
 	} else {
-		$rs = pg_prepare($connect, "CAMSEL", "SELECT * from ".
-			"camera_log c, webcams w WHERE ".
+		// Timestamps are not exact with the RWIS webcams, so we support a
+        // +/- 10 minute offset
+        $rs = pg_prepare(
+            $connect,
+            "CAMSEL",
+            "SELECT * from camera_log c, webcams w WHERE ".
 			"valid BETWEEN $1 and $2 and c.cam = w.id ". 
-			"and w.network = $3 ORDER by name ASC, valid ASC");
+			"and w.network = $3 ORDER by name ASC, valid ASC"
+        );
 		$ar = Array(
-				date('Y-m-d H:i', $ts - (10*60)), 
-				date('Y-m-d H:i', $ts + (10*60)), 
-						$network);
+			date('Y-m-d H:i', $ts - (10*60)),
+			date('Y-m-d H:i', $ts + (10*60)),
+			$network,
+        );
 	}
 } else {
 	$rs = pg_prepare($connect, "CAMSEL", "SELECT * from "
@@ -83,4 +89,3 @@ if( ! isset($_REQUEST['callback']))
 
 $cb = xssafe($_REQUEST['callback']);
 exit( "{$cb}($json)" );
-?>

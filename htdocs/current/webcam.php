@@ -71,4 +71,3 @@ and the application will automatically update to show you the images. The IEM ha
 </div>
 EOF;
 $t->render('app.phtml');
-?>

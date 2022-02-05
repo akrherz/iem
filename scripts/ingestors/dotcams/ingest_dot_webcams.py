@@ -11,7 +11,7 @@ import subprocess
 
 # third party
 import requests
-import pyiem.util as util
+from pyiem import util
 
 LOG = util.logger()
 URI = (
@@ -41,7 +41,7 @@ def process_feature(cursor, feat):
             continue
         valid = datetime(1970, 1, 1) + timedelta(seconds=timestamp / 1000.0)
         valid = valid.replace(tzinfo=timezone.utc)
-        LOG.debug("%s %s", cam, valid)
+        LOG.info("%s %s", cam, valid)
         # Do we have this image?
         cursor.execute(
             "SELECT drct from camera_log where valid = %s and cam = %s",
@@ -122,6 +122,7 @@ def main():
             json.dumps(jobj, sort_keys=True, indent=4, separators=(",", ": ")),
         )
         return
+    LOG.info("len(features): %s", len(jobj["features"]))
     for feat in jobj["features"]:
         mcursor = pgconn.cursor()
         try:

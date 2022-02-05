@@ -895,4 +895,3 @@ not be implied as an endorsement. Of course, you can just search google for
  
 EOF;
 $t->render('single.phtml');
- ?>

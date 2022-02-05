@@ -42,4 +42,3 @@ for ($i=0;$row=pg_fetch_array($rs);$i++)
   $ar["features"][] = $z;
 }
 echo str_replace($reps, $subs, json_encode($ar));
-?>

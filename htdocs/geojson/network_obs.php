@@ -51,4 +51,3 @@ if ($callback != null){
 } else{
 	echo json_encode($ar);
 }
-?>
