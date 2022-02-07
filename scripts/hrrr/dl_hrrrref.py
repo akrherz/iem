@@ -42,7 +42,7 @@ def run(valid):
             del grbs
         except Exception as exp:
             logging.debug(exp)
-    tmpfn = "/tmp/%s.grib2" % (valid.strftime("%Y%m%d%H"),)
+    tmpfn = f"/tmp/{valid:%Y%m%d%H}.grib2"
     output = open(tmpfn, "wb")
     for hr in range(0, min([39, HOURS[valid.hour]]) + 1):
         if should_throttle and hr > 30:

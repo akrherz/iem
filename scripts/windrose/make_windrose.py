@@ -1,7 +1,7 @@
 """
 Drive a windrose for a given network and site
 """
-import datetime
+from calendar import month_abbr
 import sys
 import os
 
@@ -28,7 +28,7 @@ def main():
     elif net.find("_DCP") > 0:
         database = "hads"
 
-    mydir = "%s/%s/%s" % (CACHE_DIR, net, sid)
+    mydir = os.path.join(CACHE_DIR, net, sid)
     if not os.path.isdir(mydir):
         os.makedirs(mydir)
     fn = f"{mydir}/{sid}_yearly.png"
@@ -41,11 +41,7 @@ def main():
     res.savefig(fn)
     plt.close()
     for month in range(1, 13):
-        fn = "%s/%s_%s.png" % (
-            mydir,
-            sid,
-            datetime.datetime(2000, month, 1).strftime("%b").lower(),
-        )
+        fn = f"{mydir}/{sid}_{month_abbr[month].lower()}.png"
         res = windrose(
             sid,
             months=(month,),

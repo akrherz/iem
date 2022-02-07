@@ -2,15 +2,14 @@
 
 import numpy as np
 import pandas as pd
-from pandas.io.sql import read_sql
 from scipy import stats
 from matplotlib.font_manager import FontProperties
 from pyiem.plot import figure
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 
-ODICT = dict([("max", "Maximum"), ("min", "Minimum"), ("avg", "Average")])
+ODICT = {"max": "Maximum", "min": "Minimum", "avg": "Average"}
 PDICT = dict(
     [
         ("high", "Daily High Temperature"),
@@ -139,7 +138,7 @@ def get_data(pgconn, table, station, month, period, varname, days, opt):
     """Get Data please"""
     doffset = "0 days"
     if len(month) < 3:
-        mlimiter = " and month = %s " % (int(month),)
+        mlimiter = f" and month = {int(month)} "
     elif month == "all":
         mlimiter = ""
     elif month == "fall":
@@ -155,9 +154,9 @@ def get_data(pgconn, table, station, month, period, varname, days, opt):
     ylimiter = ""
     if period is not None:
         (y1, y2) = [int(x) for x in period.split("-")]
-        ylimiter = "WHERE myyear >= %s and myyear <= %s" % (y1, y2)
+        ylimiter = f"WHERE myyear >= {y1} and myyear <= {y2}"
     if days == 1:
-        df = read_sql(
+        df = pd.read_sql(
             f"""
         WITH data as (
             SELECT
@@ -174,10 +173,10 @@ def get_data(pgconn, table, station, month, period, varname, days, opt):
         )
     else:
         res = (
-            "%s(%s) OVER (ORDER by day ASC ROWS BETWEEN %s PRECEDING AND"
-            " CURRENT ROW) "
-        ) % (opt, varname, days - 1)
-        df = read_sql(
+            f"{opt}({varname}) OVER (ORDER by day ASC ROWS "
+            f"BETWEEN {days - 1} PRECEDING AND CURRENT ROW) "
+        )
+        df = pd.read_sql(
             f"""
         WITH data as (
             SELECT
@@ -205,7 +204,7 @@ def get_data(pgconn, table, station, month, period, varname, days, opt):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
+    pgconn = get_dbconnstr("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     month1 = ctx["month1"]
@@ -217,7 +216,7 @@ def plotter(fdict):
     days = ctx["days"]
     opt = ctx["opt"]
 
-    table = "alldata_%s" % (station[:2],)
+    table = f"alldata_{station[:2]}"
 
     m1data, y1, y2 = get_data(
         pgconn, table, station, month1, p1, varname, days, opt
@@ -246,7 +245,7 @@ def plotter(fdict):
         lw=3,
         color="r",
         zorder=2,
-        label=r"Fit R$^2$=%.2f" % (s_r ** 2,),
+        label=r"Fit R$^2$=%.2f" % (s_r**2,),
     )
     ax.axvline(highlight, zorder=1, color="k")
     y = highlight * s_slp + s_int

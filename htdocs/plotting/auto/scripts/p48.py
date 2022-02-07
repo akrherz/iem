@@ -111,15 +111,10 @@ def plotter(fdict):
     )
 
     vals = data / float(cnt) * 100.0
-    title = "[%s] %s :: %s (%s.%s)\n%s Events - %s to %s" % (
-        ugc,
-        name,
-        vtec.get_ps_string(phenomena, significance),
-        phenomena,
-        significance,
-        cnt,
-        sts.strftime("%Y-%m-%d %I:%M %p"),
-        ets.strftime("%Y-%m-%d %I:%M %p"),
+    title = (
+        f"[{ugc}] {name} :: {vtec.get_ps_string(phenomena, significance)} "
+        f"({phenomena}.{significance})\n"
+        f"{cnt} Events - {sts:%Y-%m-%d %I:%M %p} to {ets:%Y-%m-%d %I:%M %p}"
     )
 
     (fig, ax) = figure_axes(title=title, apctx=ctx)

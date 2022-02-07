@@ -5,7 +5,7 @@ from pandas.io.sql import read_sql
 import pandas as pd
 import numpy as np
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -102,7 +102,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("iem")
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["station"]
@@ -132,7 +131,7 @@ def plotter(fdict):
         "sdd86(high, low) as sdd86, precip "
         f"from alldata_{climosite[:2]} WHERE station = %s and "
         "year >= 1951 ORDER by day ASC",
-        get_dbconn("coop"),
+        get_dbconnstr("coop"),
         params=(gddbase, gddceil, ctx["_nt"].sts[station]["climate_site"]),
         index_col="day",
     )
@@ -191,7 +190,7 @@ def plotter(fdict):
         "ON (s.iemid = t.iemid) "
         "WHERE t.id = %s and t.network = %s and "
         "to_char(day, 'mmdd') != '0229' ORDER by day ASC",
-        pgconn,
+        get_dbconnstr("iem"),
         params=(gddbase, gddceil, station, ctx["network"]),
         index_col=None,
     )

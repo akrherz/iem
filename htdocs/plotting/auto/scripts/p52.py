@@ -2,16 +2,16 @@
 import datetime
 
 try:
-    from backports.zoneinfo import ZoneInfo
+    from backports.zoneinfo import ZoneInfo  # type: ignore
 except ImportError:
     from zoneinfo import ZoneInfo  # type: ignore
 
-from pandas.io.sql import read_sql
+from pandas import read_sql
 import matplotlib.dates as mdates
 from matplotlib import ticker
 from pyiem.nws import vtec
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 
 
@@ -51,7 +51,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("postgis")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     sts = ctx["sdate"]
@@ -73,7 +72,7 @@ def plotter(fdict):
         GROUP by phenomena, significance, eventid, year
         ORDER by minproductissue ASC
     """,
-        pgconn,
+        get_dbconnstr("postgis"),
         params=(station, sts, ets),
         index_col=None,
     )

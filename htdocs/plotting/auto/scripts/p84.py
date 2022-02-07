@@ -182,10 +182,6 @@ def plotter(fdict):
         raise NoDataFound("Sorry, do not support multi-year plots yet!")
     sector = ctx["sector"]
 
-    x0 = 0
-    x1 = -1
-    y0 = 0
-    y1 = -1
     state = None
     if len(sector) == 2:
         state = sector

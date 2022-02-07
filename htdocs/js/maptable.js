@@ -216,7 +216,7 @@ function init(idx, div) {
     inst.mapdiv.style = "height: 400px";
     leftcol.append(inst.mapdiv);
     var p = document.createElement('p');
-    var t = document.createTextNode("Select variable for labels:")
+    var t = document.createTextNode("Select variable for labels:");
     p.appendChild(t);
     inst.select = document.createElement('select');
     p.appendChild(inst.select);

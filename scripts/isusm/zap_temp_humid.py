@@ -3,7 +3,9 @@ import sys
 import subprocess
 import datetime
 
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
 def do_isuag(nwsli, sts, ets):
@@ -20,7 +22,7 @@ def do_isuag(nwsli, sts, ets):
     """,
         (nwsli, sts, ets),
     )
-    print("    sm_15minute updated %s rows" % (cursor.rowcount,))
+    LOG.info("    sm_15minute updated %s rows", cursor.rowcount)
     # Cull hourly
     cursor.execute(
         """
@@ -31,7 +33,7 @@ def do_isuag(nwsli, sts, ets):
     """,
         (nwsli, sts, ets),
     )
-    print("    sm_hourly updated %s rows" % (cursor.rowcount,))
+    LOG.info("    sm_hourly updated %s rows", cursor.rowcount)
     # cull daily
     cursor.execute(
         """
@@ -44,7 +46,7 @@ def do_isuag(nwsli, sts, ets):
     """,
         (nwsli, sts.date(), ets.date()),
     )
-    print("    sm_daily updated %s rows" % (cursor.rowcount,))
+    LOG.info("    sm_daily updated %s rows", cursor.rowcount)
     cursor.close()
     pgconn.commit()
     pgconn.close()
@@ -66,7 +68,7 @@ def do_iem(nwsli, sts, ets):
     """,
         (nwsli, sts.date(), ets.date()),
     )
-    print("    summary updated %s rows" % (cursor.rowcount,))
+    LOG.info("    summary updated %s rows", cursor.rowcount)
     cursor.close()
     pgconn.commit()
     pgconn.close()
@@ -81,7 +83,7 @@ def main(argv):
     ets = datetime.datetime(
         int(argv[6]), int(argv[7]), int(argv[8]), int(argv[9])
     )
-    res = input("%s %s->%s, OK? y/[n] " % (nwsli, sts, ets))
+    res = input(f"{nwsli} {sts}->{ets}, OK? y/[n] ")
     if str(res) != "y":
         print("ABORT")
         return

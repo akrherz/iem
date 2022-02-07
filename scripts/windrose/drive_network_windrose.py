@@ -1,5 +1,4 @@
-"""Generate a windrose for each site in the specified network...
-"""
+"""Generate a windrose for each site in the specified network..."""
 import sys
 import subprocess
 
@@ -15,9 +14,7 @@ def main(argv):
     nt = NetworkTable(net)
     for sid in nt.sts:
         LOG.info("calling make_windrose.py network: %s sid: %s", net, sid)
-        subprocess.call(
-            "python make_windrose.py %s %s" % (net, sid), shell=True
-        )
+        subprocess.call(["python", "make_windrose.py", net, sid])
 
 
 if __name__ == "__main__":

@@ -82,7 +82,7 @@ def get_description():
     plot also stops any computed streak when it encounters a data gap greater
     than three hours.
     """
-    year_range = "1928-%s" % (datetime.date.today().year,)
+    year_range = f"1928-{datetime.date.today().year}"
     desc["arguments"] = [
         dict(
             type="zstation",

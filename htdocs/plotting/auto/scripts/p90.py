@@ -693,7 +693,6 @@ def do_ugc(ctx):
                 f"and (to_char(issue, 'mmdd') >= '{sdate:%m%d}' "
                 f"or to_char(issue, 'mmdd') < '{edate:%m%d}') "
             )
-            (sdate, edate) = (edate, sdate)
         else:
             daylimiter = (
                 f"and to_char(issue, 'mmdd') >= '{sdate:%m%d}' "
@@ -754,12 +753,9 @@ def do_ugc(ctx):
         df["maxvalid"] = pd.to_datetime(df["maxvalid"])
         minv = df["minvalid"].min()
         maxv = df["maxvalid"].max()
-        ctx["title"] = ("Yearly %s between %s and %s [%s-%s]") % (
-            aggstat,
-            minv.strftime("%d %b"),
-            maxv.strftime("%d %b"),
-            minv.year,
-            maxv.year,
+        ctx["title"] = (
+            f"Yearly {aggstat} between {minv:%d %b} and {maxv:%d %b} "
+            f"[{minv.year}-{maxv.year}]"
         )
         datavar = "datum"
         if varname == "periodavg":
@@ -838,10 +834,9 @@ def plotter(fdict):
 
     subtitle = f"based on IEM Archives {ctx.get('subtitle', '')}"
     if t == "cwa":
-        subtitle = "Plotted for %s (%s), %s" % (
-            ctx["_nt"].sts[station]["name"],
-            station,
-            subtitle,
+        subtitle = (
+            f"Plotted for {ctx['_nt'].sts[station]['name']} ({station}), "
+            f"{subtitle}"
         )
     else:
         subtitle = f"Plotted for {state_names[state]}, {subtitle}"
@@ -851,12 +846,9 @@ def plotter(fdict):
         state=state,
         cwa=(station if len(station) == 3 else station[1:]),
         axisbg="white",
-        title=("%s %s (%s.%s)")
-        % (
-            ctx["title"],
-            vtec.get_ps_string(phenomena, significance),
-            phenomena,
-            significance,
+        title=(
+            f"{ctx['title']} {vtec.get_ps_string(phenomena, significance)} "
+            f"({phenomena}.{significance})"
         ),
         subtitle=subtitle,
         nocaption=True,

@@ -200,7 +200,7 @@ def write_and_upload(df, location):
 def qc(df):
     """Run some QC against the dataframe"""
     # Make sure our frame is sorted
-    df = df.sort_index()
+    return df.sort_index()
 
 
 def load_baseline(location):
@@ -525,7 +525,7 @@ def do(location):
     # 6. Compute GDD
     compute_gdd(df)
     # 7. QC
-    qc(df)
+    df = qc(df)
     # 8. Write and upload the file
     write_and_upload(df, location)
     # 9. Upload summary plots

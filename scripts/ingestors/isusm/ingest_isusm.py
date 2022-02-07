@@ -248,7 +248,6 @@ def process(fullfn):
     tabletype = tokens[1]
     if tokens[0].find("Inversion") > 0:
         station = INVERSION[tokens[0]]
-        tablename = "sm_inversion"
         if tabletype == "MinSI":
             do_inversion(fullfn, station)
         return

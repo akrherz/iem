@@ -47,7 +47,7 @@ def main():
         station = row["station"]
         testfn = f"{CACHEDIR}/{network}/{station}/{station}_yearly.png"
         if not os.path.isfile(testfn):
-            LOG.info(
+            LOG.warning(
                 "Driving network %s because no file for %s", network, station
             )
             do_network(network)
@@ -57,7 +57,7 @@ def main():
         # 250 days in seconds, enough to cover the number of networks
         if age < (250 * 24 * 60 * 60):
             continue
-        LOG.info("Driving network %s because of age!", network)
+        LOG.warning("Driving network %s because of age!", network)
         do_network(network)
         break
 

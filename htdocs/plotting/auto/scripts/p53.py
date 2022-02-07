@@ -2,9 +2,9 @@
 import datetime
 import calendar
 
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"tmpf": "Air Temperature", "dwpf": "Dew Point Temperature"}
@@ -65,7 +65,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["zstation"]
@@ -95,7 +94,7 @@ def plotter(fdict):
         and report_type = 2
         GROUP by week ORDER by week ASC
     """,
-        pgconn,
+        get_dbconnstr("asos"),
         params=(t1, t2, t1, t3, t2, t4, t3, t5, t4, t5, station),
         index_col="week",
     )
@@ -103,7 +102,7 @@ def plotter(fdict):
         raise NoDataFound("No observations found for query.")
 
     for i in range(1, 7):
-        df["p%s" % (i,)] = df["d%s" % (i,)] / df["count"] * 100.0
+        df[f"p{i}"] = df[f"d{i}"] / df["count"] * 100.0
     sts = datetime.datetime(2012, 1, 1)
     xticks = []
     for i in range(1, 13):
@@ -214,4 +213,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})
