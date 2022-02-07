@@ -270,7 +270,9 @@ def workflow(mc, environ, form, fmt):
 
     dur = int(meta.get("cache", 43200))
     try:
-        mc.set(mckey, content, dur)
+        # disabled due to unknown hangs
+        if fmt not in ["svg"]:
+            mc.set(mckey, content, dur)
     except Exception as exp:
         sys.stderr.write(f"Exception while writting key: {mckey}\n{exp}\n")
     if isinstance(mixedobj, plt.Figure):
