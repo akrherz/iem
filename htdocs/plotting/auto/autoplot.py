@@ -270,9 +270,14 @@ def workflow(mc, environ, form, fmt):
 
     dur = int(meta.get("cache", 43200))
     try:
-        # disabled due to unknown hangs
-        if fmt not in ["svg"]:
+        # we have a 10 MB limit within memcache, so don't write objects bigger
+        if len(content) < 9.5 * 1024 * 1024:
             mc.set(mckey, content, dur)
+        else:
+            sys.stderr.write(
+                f"Memcache object too large: {len(content)} "
+                f"uri: {environ.get('REQUEST_URI')}\n"
+            )
     except Exception as exp:
         sys.stderr.write(f"Exception while writting key: {mckey}\n{exp}\n")
     if isinstance(mixedobj, plt.Figure):
