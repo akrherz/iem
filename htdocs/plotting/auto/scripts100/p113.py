@@ -79,30 +79,31 @@ def plotter(fdict):
         df[col] = df[col].apply(lambda x: " ".join([str(i) for i in x]))
     if varname == "maxmin":
         res += (
-            "# DAILY RECORD HIGHS AND LOWS OCCURRING DURING %s-%s FOR "
-            "STATION NUMBER  %s\n"
+            f"# DAILY RECORD HIGHS AND LOWS OCCURRING DURING {bs.year}-"
+            f"{datetime.date.today().year} FOR "
+            f"STATION NUMBER  {station}\n"
             "     JAN     FEB     MAR     APR     MAY     JUN     JUL     "
             "AUG     SEP     OCT     NOV     DEC\n"
             " DY  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  "
             "MN  MX  MN  MX  MN  MX  MN  MX  MN\n"
-        ) % (bs.year, datetime.date.today().year, station)
+        )
     elif varname == "means":
         res += (
-            "# DAILY MEAN HIGHS AND LOWS FOR STATION NUMBER  %s\n"
+            f"# DAILY MEAN HIGHS AND LOWS FOR STATION NUMBER  {station}\n"
             "     JAN     FEB     MAR     APR     MAY     JUN     JUL     "
             "AUG     SEP     OCT     NOV     DEC\n"
             " DY  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  "
             "MX  MN  MX  MN  MX  MN  MX  MN  MX  MN\n"
-        ) % (station,)
+        )
     elif varname == "range":
         res += (
             "# RECORD LARGEST AND SMALLEST DAILY RANGES (MAX-MIN) "
-            "FOR STATION NUMBER  %s\n"
+            f"FOR STATION NUMBER  {station}\n"
             "     JAN     FEB     MAR     APR     MAY     JUN     JUL     "
             "AUG     SEP     OCT     NOV     DEC\n"
             " DY  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  MX  MN  "
             "MX  MN  MX  MN  MX  MN  MX  MN  MX  MN\n"
-        ) % (station,)
+        )
     else:
         res += (
             f"# DAILY MAXIMUM PRECIPITATION FOR STATION NUMBER {station}\n"
@@ -112,7 +113,7 @@ def plotter(fdict):
 
     bad = "  ****" if varname == "precip" else " *** ***"
     for day in range(1, 32):
-        res += "%3i" % (day,)
+        res += f"{day:3.0f}"
         for mo in range(1, 13):
             try:
                 ts = datetime.datetime(2000, mo, day)
@@ -127,19 +128,16 @@ def plotter(fdict):
                 res += bad
                 continue
             if varname == "maxmin":
-                res += "%4i%4i" % (row["max_high"], row["min_low"])
+                res += f"{row['max_high']:4.0f}{row['min_low']:4.0f}"
             elif varname == "range":
-                res += "%4i%4i" % (row["max_range"], row["min_range"])
+                res += f"{row['max_range']:4.0f}{row['min_range']:4.0f}"
             elif varname == "means":
-                res += "%4i%4i" % (row["avg_high"], row["avg_low"])
+                res += f"{row['avg_high']:4.0f}{row['avg_low']:4.0f}"
             else:
-                res += "%6.2f" % (row["max_precip"],)
+                res += f"{row['max_precip']:6.2f}"
         res += "\n"
 
-    title = "[%s] %s Daily Climatology" % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-    )
+    title = f"[{station}] {ctx['_nt'].sts[station]['name']} Daily Climatology"
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     x = df.index.values
     ax.plot(range(len(x)), df["avg_high"].values, color="r", label="High")

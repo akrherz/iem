@@ -143,5 +143,3 @@ Ag Decision Maker cost estimates</a>.</p>
 EOF;
 
 $t->render('app.phtml');
-
-?>

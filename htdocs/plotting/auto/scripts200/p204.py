@@ -5,9 +5,9 @@ import datetime
 import matplotlib.colors as mpcolors
 import numpy as np
 from seaborn import heatmap
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from pyiem.plot import get_cmap, figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -69,14 +69,12 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-
     ctx = get_autoplot_context(fdict, get_description())
-    pgconn = get_dbconn("coop")
-    table = "alldata_%s" % (ctx["station"][:2],)
+    table = f"alldata_{ctx['station'][:2]}"
     df = read_sql(
         "select day, sday, precip, high, extract(doy from day)::int as doy, "
         f"year from {table}  WHERE station = %s ORDER by day ASC",
-        pgconn,
+        get_dbconnstr("coop"),
         params=(ctx["station"],),
         index_col="day",
         parse_dates="day",

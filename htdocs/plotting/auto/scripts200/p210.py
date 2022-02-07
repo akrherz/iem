@@ -3,9 +3,9 @@ import datetime
 
 import pytz
 import numpy as np
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pyiem.util import get_autoplot_context, get_dbconnstr, utc
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import prodDefinitions
 
@@ -87,7 +87,6 @@ def get_description():
 def plotter(fdict):
     """Go"""
     fix()
-    pgconn = get_dbconn("afos")
     ctx = get_autoplot_context(fdict, get_description())
     pil = ctx["pil"][:3]
     if ctx["ets"].astimezone(pytz.UTC) > utc():
@@ -98,7 +97,7 @@ def plotter(fdict):
         "max(entered at time zone 'UTC') as last, count(*) from products "
         "WHERE substr(pil, 1, 3) = %s and entered >= %s and entered < %s "
         "GROUP by source, pil ORDER by source, pil ASC",
-        pgconn,
+        get_dbconnstr("afos"),
         params=(pil, ctx["sts"], ctx["ets"]),
         index_col=None,
     )

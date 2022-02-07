@@ -2,10 +2,10 @@
 import datetime
 
 import numpy as np
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from matplotlib.patches import Rectangle
 from pyiem.plot import get_cmap, figure
-from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pyiem.util import get_autoplot_context, get_dbconnstr, utc
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"sky": "Sky Coverage + Visibility", "vsby": "Just Visibility"}
@@ -90,11 +90,8 @@ def plot_sky(days, vsby, data, station, ctx, sts):
     fig.text(
         0.5,
         0.935,
-        (
-            "[%s] %s %s Clouds & Visibility\nbased on ASOS METAR Cloud Amount "
-            "/Level and Visibility Reports"
-        )
-        % (station, ctx["_nt"].sts[station]["name"], sts.strftime("%b %Y")),
+        f"[{station}] {ctx['_nt'].sts[station]['name']} {sts:%b %Y} "
+        "Clouds & Visibility\nbased on ASOS METAR Cloud Amount ",
         ha="center",
         fontsize=14,
     )
@@ -112,7 +109,7 @@ def plot_sky(days, vsby, data, station, ctx, sts):
     ax.set_yticks(range(0, 260, 50))
     ax.set_yticklabels(range(0, 26, 5))
     ax.set_ylabel("Cloud Levels [1000s feet]")
-    fig.text(0.45, 0.02, "Day of %s (UTC Timezone)" % (sts.strftime("%b %Y"),))
+    fig.text(0.45, 0.02, f"Day of {sts:%b %Y} (UTC Timezone)")
 
     r1 = Rectangle((0, 0), 1, 1, fc="skyblue")
     r2 = Rectangle((0, 0), 1, 1, fc="white")
@@ -158,10 +155,8 @@ def plot_vsby(days, vsby, station, ctx, sts):
     fig.text(
         0.5,
         0.935,
-        (
-            "[%s] %s %s Visibility\nbased on hourly ASOS METAR Visibility Reports"
-        )
-        % (station, ctx["_nt"].sts[station]["name"], sts.strftime("%b %Y")),
+        f"[{station}] {ctx['_nt'].sts[station]['name']} {sts:%b %Y} "
+        "Visibility\nbased on hourly ASOS METAR Visibility Reports",
         ha="center",
         fontsize=14,
     )
@@ -191,7 +186,6 @@ def plot_vsby(days, vsby, station, ctx, sts):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     year = ctx["year"]
@@ -216,7 +210,7 @@ def plotter(fdict):
         and report_type = 2
         ORDER by valid ASC
     """,
-        pgconn,
+        get_dbconnstr("asos"),
         params=(sts, station, sts, ets),
         index_col=None,
     )
@@ -232,9 +226,9 @@ def plotter(fdict):
         if not np.isnan(row["vsby"]):
             vsby[0, delta] = row["vsby"]
         for i in range(1, 5):
-            a = lookup.get(row["skyc%s" % (i,)], -1)
+            a = lookup.get(row[f"skyc{i}"], -1)
             if a >= 0:
-                skyl = row["skyl%s" % (i,)]
+                skyl = row[f"skyl{i}"]
                 if skyl is not None and skyl > 0:
                     skyl = int(skyl / 100)
                     if skyl >= 250:

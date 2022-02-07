@@ -72,7 +72,8 @@ def plotter(fdict):
         edate = utc(edate.year, edate.month, edate.day, 0, 0)
         cursor.execute(
             f"""
-         select wfo,  extract(days from (%s::date - max(issue))) as m
+         select wfo,  extract(days from (%s::date - max(issue))) as m,
+         max(date(issue))
          from warnings where significance = %s and phenomena = %s
          and issue < %s {emerg_extra}
          GROUP by wfo ORDER by m ASC
@@ -82,7 +83,8 @@ def plotter(fdict):
     else:
         cursor.execute(
             f"""
-         select wfo,  extract(days from ('TODAY'::date - max(issue))) as m
+         select wfo,  extract(days from ('TODAY'::date - max(issue))) as m,
+         max(date(issue))
          from warnings where significance = %s and phenomena = %s {emerg_extra}
          GROUP by wfo ORDER by m ASC
         """,
@@ -92,31 +94,28 @@ def plotter(fdict):
 
     if cursor.rowcount == 0:
         raise NoDataFound(
-            ("No Events Found for %s (%s.%s)")
-            % (
-                vtec.get_ps_string(phenomena, significance),
-                phenomena,
-                significance,
-            )
+            "No Events Found for "
+            f"{vtec.get_ps_string(phenomena, significance)} "
+            f"({phenomena}.{significance})"
         )
     data = {}
     rows = []
     for row in cursor:
         wfo = row[0] if row[0] != "JSJ" else "SJU"
-        rows.append(dict(wfo=wfo, days=row[1]))
+        rows.append(dict(wfo=wfo, days=row[1], date_central=row[2]))
         data[wfo] = max([row[1], 0])
     df = pd.DataFrame(rows)
     df = df.set_index("wfo")
 
+    ee = " (Emergency) " if ctx["e"] == "yes" else ""
     mp = MapPlot(
         sector="nws",
         axisbg="white",
         nocaption=True,
         apctx=ctx,
-        title="Days since Last %s%s by NWS Office"
-        % (
-            vtec.get_ps_string(phenomena, significance),
-            " (Emergency) " if ctx["e"] == "yes" else "",
+        title=(
+            f"Days since Last {vtec.get_ps_string(phenomena, significance)}"
+            f"{ee} by NWS Office"
         ),
         subtitle=f"Valid {edate:%d %b %Y %H%M} UTC",
     )

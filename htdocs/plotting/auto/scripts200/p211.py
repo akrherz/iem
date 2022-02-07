@@ -4,10 +4,9 @@ from datetime import timezone, timedelta
 import pytz
 import pandas as pd
 import numpy as np
-from pandas.io.sql import read_sql
 from matplotlib.dates import DateFormatter
 from metpy.units import units, masked_array
-from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pyiem.util import get_autoplot_context, get_dbconnstr, utc
 from pyiem.plot.use_agg import plt
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
@@ -68,14 +67,13 @@ def get_description():
 
 def get_data(ctx):
     """Fetch Data."""
-    pgconn = get_dbconn("asos1min")
-    df = read_sql(
+    df = pd.read_sql(
         "SELECT valid at time zone 'UTC' as valid, "
         "case when precip > 0.49 then null else precip end as precip, "
         "sknt, drct, gust_sknt from "
         "alldata_1minute WHERE station = %s and valid >= %s and valid < %s "
         "ORDER by valid ASC",
-        pgconn,
+        get_dbconnstr("asos1min"),
         params=(ctx["zstation"], ctx["sts"], ctx["ets"]),
         index_col="valid",
     )

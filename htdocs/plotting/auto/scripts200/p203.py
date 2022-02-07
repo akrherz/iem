@@ -3,7 +3,6 @@ import datetime
 import os
 from io import StringIO
 
-from pandas.io.sql import read_sql
 import pandas as pd
 from geopandas import read_postgis
 import matplotlib.image as mpimage
@@ -129,7 +128,7 @@ def plotter(fdict):
     )
 
     # For size reduction work
-    df = read_sql(
+    df = pd.read_sql(
         text(
             f"""
         SELECT w.wfo, phenomena, eventid,
@@ -328,4 +327,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})
