@@ -73,16 +73,18 @@ def run(ts, routes):
     lats, lons = u.latlons()
     lts = ts.astimezone(pytz.timezone("America/Chicago"))
     pqstr = (
-        "plot %s %s00 midwest/rtma_wind_power.png "
-        "midwest/rtma_wind_power_%s00.png png"
-    ) % (routes, ts.strftime("%Y%m%d%H"), ts.strftime("%H"))
+        f"plot {routes} {ts:%Y%m%d%H}00 midwest/rtma_wind_power.png "
+        f"midwest/rtma_wind_power_{ts:%H}00.png png"
+    )
     mp = MapPlot(
         sector="midwest",
         title=(
             "Wind Power Potential :: (speed_mps_10m * 1.35)$^3$ * 0.002641"
         ),
-        subtitle=("valid: %s based on NOAA Realtime " "Mesoscale Analysis")
-        % (lts.strftime("%d %b %Y %I %p")),
+        subtitle=(
+            f"valid: {lts:%d %b %Y %I %p} based on "
+            "NOAA Realtime Mesoscale Analysis"
+        ),
     )
     mp.pcolormesh(lons, lats, mag, np.array(LEVELS), units="MW")
 

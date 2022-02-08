@@ -82,4 +82,3 @@ to a wide range of factors.  Here is a listing of sites currently offline.
 <p></div>
 EOF;
 $t->render('single.phtml');
-?>

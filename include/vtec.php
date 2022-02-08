@@ -92,5 +92,3 @@ $vtec_status = Array(
  'EXP'=> 'expires',
  'ROU'=> 'routine',
  'COR'=> 'corrects');
-
-?>

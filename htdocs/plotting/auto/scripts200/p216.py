@@ -65,14 +65,12 @@ def plotter(fdict):
     varname = ctx["var"]
     mydir = ctx["dir"]
 
-    table = "alldata_%s" % (station[:2],)
-
     op = np.greater_equal if mydir == "above" else np.less
     cursor.execute(
         f"""
         select day, {varname},
         case when month > 6 then year + 1 else year end
-        from {table} where station = %s and {varname} is not null
+        from alldata_{station[:2]} where station = %s and {varname} is not null
         ORDER by day ASC
     """,
         (station,),
@@ -170,4 +168,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

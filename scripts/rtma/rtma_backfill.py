@@ -28,9 +28,7 @@ def main(argv):
     now = utc(int(argv[1]), int(argv[2]), int(argv[3]))
     for hr in range(24):
         now = now.replace(hour=hr)
-        basedir = now.strftime(
-            "/mesonet/ARCHIVE/data/%Y/%m/%d/" "model/rtma/%H/"
-        )
+        basedir = now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/model/rtma/%H/")
         if not os.path.isdir(basedir):
             LOG.info("Creating %s", basedir)
             os.makedirs(basedir)
@@ -74,7 +72,7 @@ def main(argv):
                 with open(fn, "ab") as fh:
                     fh.write(grb.tostring())
             except Exception:
-                print(f"{key} not found in {fn}")
+                LOG.warning("%s not found in %s", key, fn)
             grbs.close()
 
 

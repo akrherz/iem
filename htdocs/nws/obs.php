@@ -194,4 +194,3 @@ Timestamps displayed are the local time for the sensor.
 </form></div>
 EOF;
 $t->render("sortables.phtml");
-?>

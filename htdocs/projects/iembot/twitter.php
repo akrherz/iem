@@ -196,4 +196,3 @@ any future posts to your page on IEMbot's behalf.</p>
 EOL;
 
 $t->render('single.phtml');
-?>

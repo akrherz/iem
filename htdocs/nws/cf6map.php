@@ -99,4 +99,3 @@ $t->content = <<<EOF
 EOF;
 
 $t->render('full.phtml');
-?>

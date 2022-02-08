@@ -501,4 +501,19 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(wfo="DVN", d="wfo", ct="climate81", var="gdd", gddbase=49))
+    plotter(
+        {
+            "wfo": "DMX",
+            "d": "sector",
+            "sector": "IA",
+            "var": "precip_depart",
+            "gddbase": 50,
+            "gddceil": 86,
+            "date1": "2022/01/01",
+            "date2": "2022/02/06",
+            "p": "contour",
+            "cmap": "RdYlBu",
+            "c": "yes",
+            "ct": "climate51",
+        }
+    )

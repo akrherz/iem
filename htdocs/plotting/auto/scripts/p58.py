@@ -43,12 +43,11 @@ def plotter(fdict):
     station = ctx["station"]
     threshold = float(ctx["threshold"])
 
-    table = "alldata_%s" % (station[:2],)
-
     cursor.execute(
         f"""
          WITH monthly as (
-         SELECT year, month, max(precip), sum(precip) from {table}
+         SELECT year, month, max(precip), sum(precip)
+         from alldata_{station[:2]}
          WHERE station = %s and precip is not null GROUP by year, month)
 
          SELECT month, sum(case when max > (sum * %s) then 1 else 0 end),
@@ -68,18 +67,15 @@ def plotter(fdict):
         df.at[row[0], "events"] = row[1]
         df.at[row[0], "freq"] = row[1] / float(row[2]) * 100.0
 
-    (fig, ax) = figure_axes(apctx=ctx)
+    title = (
+        f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
+        f"Freq of One Day Having {threshold:.0f}% of That Month's Precip Total"
+    )
+    (fig, ax) = figure_axes(apctx=ctx, title=title)
 
     ax.bar(df.index, df.freq, align="center")
     for i, row in df.iterrows():
-        ax.text(i, row["freq"] + 2, "%.1f" % (row["freq"],), ha="center")
-    ax.set_title(
-        (
-            "[%s] %s\nFreq of One Day Having %.0f%% of That Month's "
-            "Precip Total"
-        )
-        % (station, ctx["_nt"].sts[station]["name"], threshold)
-    )
+        ax.text(i, row["freq"] + 2, f"{row['freq']:.1f}", ha="center")
     ax.grid(True)
     ax.set_xlim(0.5, 12.5)
     ax.set_ylim(0, 100)
@@ -92,4 +88,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

@@ -64,7 +64,12 @@ function cldtop($val1, $val2){
     }
     return sprintf("%s - %s", $val1, $val2);
 }
-function skyc($coverage, $level){
+function skyc($row, $i){
+    if (!array_key_exists("skyc$i", $row)){
+        return "";
+    }
+    $coverage = $row["skyc$i"];
+    $level = $row["skyl$i"];
     $res = "";
     if ($coverage !== null){
         $res .= $coverage;
@@ -103,11 +108,11 @@ foreach($data as $key => $row){
     }
     $table .= sprintf(
         "<td>%s %s %s %s<td>%s</td></tr>",
-        skyc($row["skyc1"], $row["skyl1"]),
-        skyc($row["skyc2"], $row["skyl2"]),
-        skyc($row["skyc3"], $row["skyl3"]),
-        skyc($row["skyc4"], $row["skyl4"]),
-        $row["metar"]);
+        skyc($row, 1),
+        skyc($row, 2),
+        skyc($row, 3),
+        skyc($row, 4),
+        array_key_exists("metar", $row) ? $row["metar"]: "");
 }
 $table .= "</tbody></table>";
 
@@ -157,4 +162,3 @@ Time Order:{$sortform}
 
 EOF;
 $t->render('sites.phtml');
-?>

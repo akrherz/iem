@@ -105,4 +105,3 @@ height="350"></embed></object>
 		where the "meso" / "wall cloud" can be seen.</p>
 EOM;
 $t->render('single.phtml');
-?>

@@ -267,4 +267,3 @@ $t->content = <<<EOF
 {$table}
 EOF;
 $t->render('single.phtml');
-?>

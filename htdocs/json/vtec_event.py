@@ -100,6 +100,12 @@ def application(environ, start_response):
     if len(wfo) == 4:
         wfo = wfo[1:]
     year = int(fields.get("year", 2015))
+    if year < 1986 or year > datetime.date.today().year + 1:
+        headers = [("Content-type", "text/plain")]
+        start_response("500 Internal Server Error", headers)
+        data = "Invalid Year"
+        return [data.encode("ascii")]
+
     phenomena = fields.get("phenomena", "SV")[:2]
     significance = fields.get("significance", "W")[:1]
     try:
@@ -111,13 +117,7 @@ def application(environ, start_response):
         return [data.encode("ascii")]
     cb = fields.get("callback", None)
 
-    mckey = "/json/vtec_event/%s/%s/%s/%s/%s" % (
-        wfo,
-        year,
-        phenomena,
-        significance,
-        etn,
-    )
+    mckey = f"/json/vtec_event/{wfo}/{year}/{phenomena}/{significance}/{etn}"
     mc = memcache.Client(["iem-memcached:11211"], debug=0)
     res = mc.get(mckey)
     if not res:
@@ -127,7 +127,7 @@ def application(environ, start_response):
     if cb is None:
         data = res
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        data = f"{html_escape(cb)}({res})"
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)

@@ -236,7 +236,7 @@ def plotter(fdict):
     df["month"] = df.index.month
     if ctx["s"] == "jul1":
         # Munge the year
-        df.at[df["month"] < 7, "year"] = df["year"] - 1
+        df.loc[df["month"] < 7, "year"] = df["year"] - 1
     # Compute cumsum
     df["cumsum"] = df[["year", "count"]].groupby("year").cumsum()
 

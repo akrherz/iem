@@ -227,4 +227,3 @@ $gentime = $json["gentime"];
  
 EOF;
  $t->render('single.phtml');
- ?>

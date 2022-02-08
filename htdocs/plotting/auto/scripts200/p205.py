@@ -2,8 +2,8 @@
 import calendar
 import itertools
 
-from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconn
+from pandas import read_sql
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
@@ -96,7 +96,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("iem")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     params = []
@@ -118,29 +117,23 @@ def plotter(fdict):
     if ctx.get("max_tmpf_range"):
         tokens = [int(i) for i in ctx["max_tmpf_range"].split("to")]
         params.append(
-            (
-                "case when max_tmpf::int >= %s and max_tmpf::int <= %s "
-                "then 1 else 0 end as tmpf_hit"
-            )
-            % (tokens[0], tokens[1])
+            f"case when max_tmpf::int >= {tokens[0]} and "
+            f"max_tmpf::int <= {tokens[1]} then 1 else 0 end as tmpf_hit"
         )
-        labels["tmpf_hit"] = "High Temp %.0fF - %.0fF" % (tokens[0], tokens[1])
+        labels["tmpf_hit"] = f"High Temp {tokens[0]:.0f}F - {tokens[1]:.0f}F"
     if ctx.get("avg_smph_below"):
         params.append(
-            (
-                "case when avg_sknt * 1.15 < %.0f "
-                "then 1 else 0 end as smph_hit"
-            )
-            % (ctx["avg_smph_below"],)
+            f"case when avg_sknt * 1.15 < {ctx['avg_smph_below']:.0f} "
+            "then 1 else 0 end as smph_hit"
         )
-        labels["smph_hit"] = "Avg Wind < %.0fMPH" % (ctx["avg_smph_below"],)
+        labels["smph_hit"] = f"Avg Wind < {ctx['avg_smph_below']:.0f}MPH"
     if not params:
         raise NoDataFound("Please select some options for plotting.")
     df = read_sql(
         f"SELECT {' , '.join(params)}, extract(doy from day) as doy "
         "from summary s JOIN stations t "
         "ON (s.iemid = t.iemid) WHERE t.id = %s and t.network = %s",
-        pgconn,
+        get_dbconnstr("iem"),
         params=(station, ctx["network"]),
     )
     if df.empty:
@@ -150,15 +143,14 @@ def plotter(fdict):
     for col in df.columns:
         if col == "doy":
             continue
-        df.at[df[col] < 1, "all_hit"] = 0
+        df.loc[df[col] < 1, "all_hit"] = 0
     gdf = df.groupby("doy").mean()
 
     ab = ctx["_nt"].sts[station]["archive_begin"]
     ab = "N/A" if ab is None else ab
-    title = "%s [%s] (%s-)\nDaily Observed Frequency" % (
-        ctx["_nt"].sts[station]["name"],
-        station,
-        ab.year,
+    title = (
+        f"{ctx['_nt'].sts[station]['name']} [{station}] ({ab.year}-)\n"
+        "Daily Observed Frequency"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     colors = itertools.cycle(["r", "g", "b", "c", "m", "y"])

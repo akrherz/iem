@@ -178,4 +178,3 @@ $('#makefancy').click(function(){
 </script>
 EOF;
 $t->render('full.phtml');
-?>

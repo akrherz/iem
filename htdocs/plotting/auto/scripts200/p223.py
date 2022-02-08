@@ -2,10 +2,10 @@
 import calendar
 import datetime
 
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 
 PDICT = {
     "month": "Grouped by Month",
@@ -105,7 +105,7 @@ def plotter(fdict):
         from alldata_{station[:2]} where station = %s and {varname} is not null
         and year >= %s and year <= %s GROUP by month ORDER by month ASC
     """,
-        get_dbconn("coop"),
+        get_dbconnstr("coop"),
         params=(
             low,
             high,
@@ -147,9 +147,9 @@ def plotter(fdict):
         ax.set_xticklabels(calendar.month_abbr[1:])
     else:
         df["season"] = "winter (DJF)"
-        df.at[df.index.isin([3, 4, 5]), "season"] = "spring (MAM)"
-        df.at[df.index.isin([6, 7, 8]), "season"] = "summer (JJA)"
-        df.at[df.index.isin([9, 10, 11]), "season"] = "fall (SON)"
+        df.loc[df.index.isin([3, 4, 5]), "season"] = "spring (MAM)"
+        df.loc[df.index.isin([6, 7, 8]), "season"] = "summer (JJA)"
+        df.loc[df.index.isin([9, 10, 11]), "season"] = "fall (SON)"
         gdf = df.groupby("season").sum().copy()
         gdf["freq"] = gdf["hits"] / gdf["hits"].sum() * 100
         gdf["days"] = gdf["freq"] / 100 * days_per_year
