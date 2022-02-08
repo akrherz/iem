@@ -66,7 +66,9 @@ def run(ts):
             total += val
 
     if lats is None:
-        LOG.info("nodata for %s", ts.date())
+        LOG.warning("nodata for %s, using zeros", ts.date())
+        ncprecip[offset, :, :] = 0
+        nc.close()
         return
     # CAREFUL HERE!  The MRMS grid is North to South
     # set top (smallest y)
