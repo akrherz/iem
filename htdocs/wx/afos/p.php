@@ -2,11 +2,12 @@
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
 require_once "../../../include/myview.php";
+require_once "../../../include/forms.php";
 $t = new MyView();
 
 define("IEM_APPID", 47);
 
-$e = isset($_GET['e']) ? intval($_GET['e']) : null;
+$e = get_int404("e", null);
 $pil = isset($_GET['pil']) ? strtoupper(substr($_GET['pil'],0,6)) : null;
 $bbb = isset($_GET["bbb"]) ? strtoupper(substr($_GET["bbb"], 0, 3)) : null;
 $dir = isset($_REQUEST['dir']) ? $_REQUEST['dir'] : null;
@@ -120,10 +121,23 @@ for ($i=0; $row = pg_fetch_assoc($rs); $i++)
         $t->twitter_description = sprintf("%s issued by NWS %s at %s UTC",
 				substr($pil,0,3), substr($pil,3,3), date("d M Y H:i", $basets));
         if (substr($pil, 0, 3) == "SPS"){
+            // Account for multi-segment SPS by counting $$ occurrences
+            $segments = substr_count($row["data"], "$$");
+            // Can only do one, so this is the best we can do
             $t->twitter_image = "/plotting/auto/plot/217/pid:${product_id}.png";
-            $img = <<<EOM
-<p><img src="/plotting/auto/plot/217/pid:${product_id}.png" class="img img-responsive"></p>
-EOM;
+            $img = sprintf(
+                '<p><img src="/plotting/auto/plot/217/pid:%s::segnum:0.png" '.
+                'class="img img-responsive"></p>',
+                $product_id,
+            );
+            for ($segnum=1; $segnum < $segments; $segnum++){
+                $img .= sprintf(
+                    '<p><img src="/plotting/auto/plot/217/pid:%s::segnum:%s.png" '.
+                    'class="img img-responsive"></p>',
+                    $product_id,
+                    $segnum,
+                );
+            }
         } else {
             $t->twitter_image = "/wx/afos/${newe}_${pil}.png";
         }

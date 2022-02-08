@@ -54,14 +54,26 @@ def plotter(fdict):
     segnum = ctx["segnum"]
     nt = NetworkTable("WFO")
 
+    # Compute a population estimate
+    popyear = max([int(pid[:4]) - int(pid[:4]) % 5, 2000])
+
     df = read_postgis(
         text(
-            "SELECT geom, ugcs, wfo, issue, expire, landspout, waterspout, "
-            "max_hail_size, max_wind_gust, product, segmentnum "
-            f"from sps_{pid[:4]} where product_id = :pid"
+            f"""
+            with geopop as (
+                select sum(population) as pop from sps_{pid[:4]} s,
+                gpw{popyear} g WHERE s.product_id = :pid and
+                ST_Contains(s.geom, g.geom) and segmentnum = :segnum
+            )
+            SELECT geom, ugcs, wfo, issue, expire, landspout, waterspout,
+            max_hail_size, max_wind_gust, product, segmentnum,
+            coalesce(pop, 0) as pop
+            from sps_{pid[:4]}, geopop where product_id = :pid
+            and segmentnum = :segnum
+            """
         ),
         get_dbconnstr("postgis"),
-        params={"pid": pid},
+        params={"pid": pid, "segnum": segnum},
         index_col=None,
         geom_col="geom",
     )
@@ -82,25 +94,35 @@ def plotter(fdict):
 
     if row["geom"].is_empty:
         # Need to go looking for UGCs to compute the bounds
+        # Can a SPS be issued for Fire Weather zones? source = 'fz'
         ugcdf = read_postgis(
             text(
-                "SELECT simple_geom, ugc from ugcs where wfo = :wfo "
-                "and ugc in :ugcs "
-                "and end_ts is null"
+                f"SELECT simple_geom, ugc, gpw_population_{popyear} as pop "
+                "from ugcs where wfo = :wfo "
+                "and ugc in :ugcs and "
+                "(end_ts is null or end_ts > :expire) and source = 'z'"
             ),
             get_dbconnstr("postgis"),
-            params={"wfo": WFOCONV.get(wfo, wfo), "ugcs": tuple(row["ugcs"])},
+            params={
+                "wfo": WFOCONV.get(wfo, wfo),
+                "ugcs": tuple(row["ugcs"]),
+                "expire": expire,
+            },
             geom_col="simple_geom",
         )
         bounds = ugcdf["simple_geom"].total_bounds
+        population = ugcdf["pop"].sum()
     else:
         bounds = row["geom"].bounds
+        population = row["pop"]
+    stextra = " for Polygon" if not row["geom"].is_empty else ""
     mp = MapPlot(
         apctx=ctx,
         title=(
             f"{wfo} Special Weather Statement (SPS) "
             f"till {expire.strftime(TFORMAT)}"
         ),
+        subtitle=(f"Estimated {popyear} Population{stextra}: {population:,}"),
         sector="custom",
         west=bounds[0] - 0.02,
         south=bounds[1] - 0.3,
