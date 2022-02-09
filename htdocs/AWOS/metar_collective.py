@@ -13,7 +13,7 @@ def add_output(sio):
     df = pd.read_sql(
         "select raw from current c JOIn stations t on (t.iemid = c.iemid) "
         "WHERE t.network = 'AWOS' and valid > now() - '2 hours'::interval "
-        "ORDER by id ASC",
+        "and id not in ('CWI', 'FOD') ORDER by id ASC",
         get_dbconnstr("iem"),
     )
     sio.write("000 \r\r\n")
