@@ -3,9 +3,9 @@ import datetime
 import calendar
 
 import numpy as np
-from pandas.io.sql import read_sql
+from pandas import read_sql
 from pyiem.plot import get_cmap, figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -57,7 +57,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     station1 = ctx["zstation1"]
     station2 = ctx["zstation2"]
@@ -90,7 +89,7 @@ def plotter(fdict):
     from one JOIN two on (one.date = two.date) WHERE one.avg >= 0
     and one.d - two.d between -25 and 25
     """,
-        pgconn,
+        get_dbconnstr("asos"),
         params=(
             station1,
             ctx["_nt1"].sts[station1]["tzname"],
@@ -110,17 +109,11 @@ def plotter(fdict):
     fig = figure(apctx=ctx)
     ax = fig.subplots(2, 1)
 
+    tt = "Mid - 8 AM Low" if varname == "low" else "Noon - 8 PM High"
     ax[0].set_title(
-        ("[%s] %s minus [%s] %s\n" "%s Temp Difference Period: %s - %s")
-        % (
-            station1,
-            ctx["_nt1"].sts[station1]["name"],
-            station2,
-            ctx["_nt2"].sts[station2]["name"],
-            "Mid - 8 AM Low" if varname == "low" else "Noon - 8 PM High",
-            df["day"].min(),
-            df["day"].max(),
-        )
+        f"[{station1}] {ctx['_nt1'].sts[station1]['name']} minus "
+        f"[{station2}] {ctx['_nt2'].sts[station2]['name']}\n"
+        f"{tt} Temp Difference Period: {df['day'].min()} - {df['day'].max()}"
     )
 
     bins = np.arange(-20.5, 20.5, 1)
@@ -147,13 +140,12 @@ def plotter(fdict):
     ax[0].set_ylim(0 - rng - 2, rng + 2)
     ax[0].grid(True)
     ax[0].set_ylabel(
-        ("%s Temp Diff " r"$^\circ$F")
-        % ("Low" if varname == "low" else "High",)
+        f"{'Low' if varname == 'low' else 'High'} Temp Diff " r"$^\circ$F"
     )
     ax[0].text(
         -0.01,
         1.02,
-        "%s\nWarmer" % (station1,),
+        f"{station1}\nWarmer",
         transform=ax[0].transAxes,
         va="top",
         ha="right",
@@ -162,7 +154,7 @@ def plotter(fdict):
     ax[0].text(
         -0.01,
         -0.02,
-        "%s\nColder" % (station1,),
+        f"{station1}\nColder",
         transform=ax[0].transAxes,
         va="bottom",
         ha="right",
@@ -192,15 +184,14 @@ def plotter(fdict):
     ax[1].set_ylim(0 - rng - 2, rng + 2)
     ax[1].grid(True)
     ax[1].set_xlim(left=-0.25)
-    ax[1].set_xlabel("Average Wind Speed [kts] for %s" % (station1,))
+    ax[1].set_xlabel(f"Average Wind Speed [kts] for {station1}")
     ax[1].set_ylabel(
-        ("%s Temp Diff " r"$^\circ$F")
-        % ("Low" if varname == "low" else "High",)
+        f"{'Low' if varname == 'low' else 'High'} Temp Diff " r"$^\circ$F"
     )
     ax[1].text(
         -0.01,
         1.02,
-        "%s\nWarmer" % (station1,),
+        f"{station1}\nWarmer",
         transform=ax[1].transAxes,
         va="top",
         ha="right",
@@ -209,7 +200,7 @@ def plotter(fdict):
     ax[1].text(
         -0.01,
         -0.02,
-        "%s\nColder" % (station1,),
+        f"{station1}\nColder",
         transform=ax[1].transAxes,
         va="bottom",
         ha="right",
@@ -220,4 +211,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})
