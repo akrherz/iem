@@ -7,6 +7,7 @@ require_once "../../include/mlib.php";
 $t = new MyView();
 
 $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "station";
+$metar = isset($_GET['metar']) ? xssafe($_GET["metar"]): "no";
 
 $t->refresh = 60;
 $t->title = "AWOS Network Current Conditions";
@@ -22,30 +23,48 @@ $t->current_network = "AWOS";
 
 if (!array_key_exists($sortcol, $vals)) $sortcol = "name";
 
+$ar = Array(
+	"no" => "No",
+	"yes" => "Yes"
+);
+$mselect = make_select("metar", $metar, $ar);
+
 $t->breadcrumbs = <<<EOF
 <ol class="breadcrumb">
  <li><a href="/AWOS/">AWOS Homepage</a></li>
  <li class="active">Current Conditions</li>
 </ol>
 EOF;
+$uri = sprintf("current.phtml?metar=%s&amp;sortcol=", $metar);
 $table = <<<EOF
 
-<h3>Current AWOS Conditions</h3>
+<h3>Current Iowa AWOS Conditions</h3>
 
-<p>** This page will automatically refresh every five minutes.
+<p>This page is unique to the non-federal AWOS sites in Iowa.  While the IEM
+lumps all AWOS+ASOS sites in other states together, the Iowa AWOS sites are
+uniquely classified here. This page also presents METAR data from a special
+feed not available on FAA NADIN.</p>
 
-<br>Sorted by: <b>({$vals[$sortcol]})</b>  &nbsp; &nbsp; 
-Click on a column to sort it.<br>
+<p>A faked METAR-collective file <a href="/AWOS/iowa_metar_collective.txt">is available</a>
+for those that want to process a feed for their own use.  This file presently
+should not be polled more than once every 5 minutes.</p>
+
+<p>Sorted by: <b>({$vals[$sortcol]})</b>  &nbsp; &nbsp; 
+Click on a column to sort it.</p>
+
+<form method="GET" action="current.phtml">
+<input type="hidden" name="sortcol" value="{$sortcol}">
+<p>Include METARS:<br />{$mselect} <input type="submit" value="Update"></p>
+</form>
 
 <form name="asdf" method="GET" action="/my/current.phtml">
-
 <table class="table table-condensed table-striped table-bordered">
 <thead>
 <tr>
   <th rowspan=2>Add</th>
-  <th rowspan=2><a href="current.phtml?sortcol=station">ID:</a></th>
-  <th rowspan=2><a href="current.phtml?sortcol=name">Name:</a></th>
-  <th rowspan=2><a href="current.phtml?sortcol=ts">Ob Time</a></th>
+  <th rowspan=2><a href="{$uri}station">ID:</a></th>
+  <th rowspan=2><a href="{$uri}name">Name:</a></th>
+  <th rowspan=2><a href="{$uri}ts">Ob Time</a></th>
   <th colspan=4>&nbsp;</th>
   <th colspan=3>Wind [knots]</th>
   <th colspan=2>&nbsp;</th>
@@ -53,21 +72,21 @@ Click on a column to sort it.<br>
 
 <tr>
   <th>
-   <a href="current.phtml?sortcol=tmpf">Temp</a>
-   (<a href="current.phtml?sortcol=max_tmpf">Hi</a> /
-   <a href="current.phtml?sortcol=min_tmpf">Lo</a>)
+   <a href="{$uri}tmpf">Temp</a>
+   (<a href="{$uri}max_tmpf">Hi</a> /
+   <a href="{$uri}min_tmpf">Lo</a>)
  </th>
-  <th><a href="current.phtml?sortcol=dwpf">DewP</a></th>
-  <th><a href="current.phtml?sortcol=feel">Feels</a></th>
-  <th><a href="current.phtml?sortcol=relh">RH%</a></th>
+  <th><a href="{$uri}dwpf">DewP</a></th>
+  <th><a href="{$uri}feel">Feels</a></th>
+  <th><a href="{$uri}relh">RH%</a></th>
   <th>Dir</th>
-  <th><a href="current.phtml?sortcol=sknt">Speed</a></th>
-  <th><a href="current.phtml?sortcol=peak">Peak Gust</a>
-   <br>@ <a href="current.phtml?sortcol=peak_ts">Time</a></th>
-  <th><a href="current.phtml?sortcol=alti">Alti</a></th>
-  <th><a href="current.phtml?sortcol=vsby">Vsby</a></th>
-  <th><a href="current.phtml?sortcol=phour">Hour</a></th>
-  <th><a href="current.phtml?sortcol=pday">Today</a></th>
+  <th><a href="{$uri}sknt">Speed</a></th>
+  <th><a href="{$uri}peak">Peak Gust</a>
+   <br>@ <a href="{$uri}peak_ts">Time</a></th>
+  <th><a href="{$uri}alti">Alti</a></th>
+  <th><a href="{$uri}vsby">Vsby</a></th>
+  <th><a href="{$uri}phour">Hour</a></th>
+  <th><a href="{$uri}pday">Today</a></th>
 </tr>
 </thead><tbody>
 EOF;
@@ -144,6 +163,12 @@ foreach($jobj["data"] as $bogus => $iemob){
           <td>". $parts["vsby"] ."</td>
           <td>". $parts["phour"] ."</td>
           <td>". $parts["pday"] ."</td></tr>\n";
+    if ($metar == "yes"){
+        $table .= sprintf(
+            '<tr><td colspan="3"></td><td colspan="12">%s</td></tr>',
+            $parts["raw"],
+        );
+    }
 }
 $table .= <<<EOF
 </tbody>
@@ -157,4 +182,3 @@ $table .= <<<EOF
 EOF;
 $t->content = $table;
 $t->render("sortables.phtml");
-?>

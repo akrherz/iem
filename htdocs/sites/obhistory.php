@@ -63,7 +63,7 @@ function asos_formatter($i, $row){
 	<td>%s%%</td>
 	<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>
 	<tr style=\"background: %s;\" class=\"%smetar\">" .
-	"<td colspan=\"16\">%s</td></tr>", 
+	"<td colspan=\"17\">%s</td></tr>", 
 	($i % 2 == 0)? "#FFF": "#EEE",
 	$ismadis ? "hf": "",
 	$ismadis ? "1": "0",
@@ -116,9 +116,9 @@ function hads_formatter($i, $row, $shefcols){
     precip_formatter($row["phour"]), $html
 	);
 }
-$year = isset($_GET["year"])? intval($_GET["year"]): date("Y");
-$month = isset($_GET["month"])? intval($_GET["month"]): date("m");
-$day = isset($_GET["day"])? intval($_GET["day"]): date("d");
+$year = get_int404("year", date("Y"));
+$month = get_int404("month", date("m"));
+$day = get_int404("day", date("d"));
 $metar = (isset($_GET["metar"]) && $_GET["metar"] == "1") ? "1": "0";
 $madis = (isset($_GET["madis"]) && $_GET["madis"] == "1") ? "1": "0";
 $sortdir = isset($_GET["sortdir"]) ? xssafe($_GET["sortdir"]) : "asc";
@@ -461,4 +461,3 @@ page.  For more details, see <a href="/api/1/docs#/default/service_obhistory__fm
 EOF;
 $t->content = $content;
 $t->render('sites.phtml');
-?>

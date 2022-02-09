@@ -156,3 +156,5 @@
 192.168.0.234    iem-loggernet.local
 # VI_1_232(70) metvm0
 192.168.1.232    iem-archive.local
+# VI_0_253(253) pyWWA awos_ingest
+192.168.0.253    iem-awos-ingest.local

@@ -222,6 +222,9 @@
     RewriteRule ([0-9]{12})_([A-Z0-9\s]+).png$ text2png.py?e=$1&pil=$2
   </Directory>
 
+  <Directory "/opt/iem/htdocs/AWOS">
+    RewriteRule (.*)_metar_collective.txt metar_collective.py?state=$1
+  </Directory>
 
   <Directory "/opt/iem/htdocs/frost">
     RewriteRule frost_ts_([a-z]+)_([\-\.0-9]+)_([\.0-9]+).png$ frost_ts.py?lon=$2&lat=$3&model=$1
