@@ -322,5 +322,3 @@ else if ($what != "plot"){
   echo "\r\n";
  }
 }
-
-?>

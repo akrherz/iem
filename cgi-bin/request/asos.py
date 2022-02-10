@@ -69,7 +69,7 @@ def fmt_trace(val, missing, trace, _tzinfo):
     # careful with this comparison
     if 0 < val < 0.009999:
         return trace
-    return "%.2f" % (val,)
+    return f"{val:.2f}"
 
 
 def fmt_simple(val, missing, _trace, _tzinfo):
@@ -90,7 +90,7 @@ def fmt_f2(val, missing, _trace, _tzinfo):
     """Simple 2 place formatter."""
     if val is None:
         return missing
-    return "%.2f" % (val,)
+    return "{val:.2f}"
 
 
 def fmt_f0(val, missing, _trace, _tzinfo):
@@ -112,9 +112,8 @@ def check_load():
         pgconn = get_dbconn("mesosite")
         mcursor = pgconn.cursor()
         mcursor.execute(
-            """
-        select pid from pg_stat_activity where query ~* 'FETCH'
-        and datname = 'asos'"""
+            "select pid from pg_stat_activity where query ~* 'FETCH' and "
+            "datname = 'asos'"
         )
         if mcursor.rowcount < 30:
             return True

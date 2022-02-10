@@ -8,12 +8,12 @@ import zipfile
 from io import BytesIO, StringIO
 
 import pandas as pd
-from pandas.io.sql import read_sql
 import psycopg2.extras
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc, get_dbconnstr
 from metpy.units import units
+from sqlalchemy import text
 
 DEGC = units.degC
 DEGF = units.degF
@@ -133,10 +133,7 @@ def do_apsim(ctx):
 
     sio = StringIO()
     sio.write("! Iowa Environmental Mesonet -- NWS Cooperative Data\n")
-    sio.write(
-        "! Created: %s UTC\n"
-        % (datetime.datetime.utcnow().strftime("%d %b %Y %H:%M:%S"),)
-    )
+    sio.write(f"! Created: {utc():%d %b %Y %H:%M:%S} UTC\n")
     sio.write("! Contact: daryl herzmann akrherz@iastate.edu 515-294-5978\n")
     sio.write("! Station: %s %s\n" % (station, nt.sts[station]["name"]))
     sio.write("! Data Period: %s - %s\n" % (ctx["sts"], ctx["ets"]))
@@ -318,10 +315,7 @@ def do_century(ctx):
         }
     sio = StringIO()
     sio.write("# Iowa Environmental Mesonet -- NWS Cooperative Data\n")
-    sio.write(
-        "# Created: %s UTC\n"
-        % (datetime.datetime.utcnow().strftime("%d %b %Y %H:%M:%S"),)
-    )
+    sio.write(f"# Created: {utc():%d %b %Y %H:%M:%S} UTC\n")
     sio.write("# Contact: daryl herzmann akrherz@iastate.edu 515-294-5978\n")
     sio.write("# Station: %s %s\n" % (station, nt.sts[station]["name"]))
     sio.write("# Data Period: %s - %s\n" % (sts, ets))
@@ -510,6 +504,7 @@ def do_simple(ctx):
     if len(ctx["stations"]) == 1:
         ctx["stations"].append("X")
 
+    limitrowcount = "LIMIT 1048000" if ctx["what"] == "excel" else ""
     sql = f"""
     WITH scenario as (
         SELECT station, high, low, precip, snow, snowd, narr_srad,
@@ -543,7 +538,7 @@ def do_simple(ctx):
         SELECT * from obs UNION SELECT * from scenario
     )
 
-    SELECT * from total ORDER by day ASC"""
+    SELECT * from total ORDER by day ASC {limitrowcount}"""
     args = (ctx["scenario_sts"], ctx["scenario_ets"], ctx["sts"], ctx["ets"])
 
     cols = ["station", "station_name", "day", "doy"]
@@ -555,7 +550,7 @@ def do_simple(ctx):
 
     if ctx["what"] == "excel":
         # Do the excel logic
-        df = pd.read_sql(sql, dbconn, params=args)
+        df = pd.read_sql(sql, get_dbconnstr("coop"), params=args)
         # Convert day into a python date type
         df["day"] = pd.to_datetime(df["day"]).dt.date
 
@@ -573,10 +568,7 @@ def do_simple(ctx):
     cursor.execute(sql, args)
     sio = StringIO()
     sio.write("# Iowa Environmental Mesonet -- NWS Cooperative Data\n")
-    sio.write(
-        "# Created: %s UTC\n"
-        % (datetime.datetime.utcnow().strftime("%d %b %Y %H:%M:%S"),)
-    )
+    sio.write(f"# Created: {utc():%d %b %Y %H:%M:%S} UTC\n")
     sio.write("# Contact: daryl herzmann akrherz@iastate.edu 515-294-5978\n")
     sio.write("# Data Period: %s - %s\n" % (ctx["sts"], ctx["ets"]))
     if ctx["scenario"] == "yes":
@@ -630,26 +622,20 @@ def do_salus(ctx):
     station = ctx["stations"][0]
     thisyear = datetime.datetime.now().year
     cursor.execute(
-        """
+        f"""
     WITH scenario as (
         SELECT
- ('"""
-        + str(thisyear)
-        + """-'||month||'-'||extract(day from day))::date
+ ('{thisyear}-'||month||'-'||extract(day from day))::date
     as day,
         high, low, precip, station,
         coalesce(narr_srad, merra_srad, hrrr_srad) as srad
-        from """
-        + table
-        + """ WHERE station = %s and
+        from {table} WHERE station = %s and
         day >= %s and year = %s
     ), obs as (
         SELECT day,
         high, low, precip,  station,
         coalesce(narr_srad, merra_srad, hrrr_srad) as srad
-        from """
-        + table
-        + """ WHERE station = %s and
+        from {table} WHERE station = %s and
         day >= %s and day <= %s ORDER by day ASC
     ), total as (
         SELECT *, extract(doy from day) as doy from obs
@@ -710,41 +696,35 @@ def do_dndc(ctx):
 
     thisyear = datetime.datetime.now().year
     cursor.execute(
-        """
+        f"""
         WITH scenario as (
             SELECT
-    ('"""
-        + str(thisyear)
-        + """-'||month||'-'||extract(day from day))::date as day,
-            high, low, precip, station from """
-        + table
-        + """
-            WHERE station IN """
-        + str(tuple(ctx["stations"]))
-        + """ and
-            day >= %s and year = %s),
+    ('{thisyear}-'||month||'-'||extract(day from day))::date as day,
+            high, low, precip, station from {table}
+            WHERE station IN %s and day >= %s and year = %s),
         obs as (
-            SELECT day, high, low, precip, station from """
-        + table
-        + """
-            WHERE station IN """
-        + str(tuple(ctx["stations"]))
-        + """ and
-            day >= %s and day <= %s),
+            SELECT day, high, low, precip, station from {table}
+            WHERE station IN %s and day >= %s and day <= %s),
         total as (
             SELECT *, extract(doy from day) as doy from obs UNION
             SELECT *, extract(doy from day) as doy from scenario
         )
-
         SELECT * from total ORDER by day ASC
     """,
-        (asts, scenario_year, ctx["sts"], ctx["ets"]),
+        (
+            tuple(ctx["stations"]),
+            asts,
+            scenario_year,
+            tuple(ctx["stations"]),
+            ctx["sts"],
+            ctx["ets"],
+        ),
     )
     zipfiles = {}
     for row in cursor:
         station = row["station"]
         sname = nt.sts[station]["name"].replace(" ", "_")
-        fn = "%s/%s_%s.txt" % (sname, sname, row["day"].year)
+        fn = f"{sname}/{sname}_{row['day'].year}.txt"
         if fn not in zipfiles:
             zipfiles[fn] = ""
         zipfiles[fn] += ("%s %.2f %.2f %.2f\n") % (
@@ -756,8 +736,8 @@ def do_dndc(ctx):
 
     sio = BytesIO()
     with zipfile.ZipFile(sio, "a") as zf:
-        for fn in zipfiles:
-            zf.writestr(fn, zipfiles[fn])
+        for fn, fp in zipfiles.items():
+            zf.writestr(fn, fp)
     return sio.getvalue()
 
 
@@ -766,8 +746,6 @@ def do_swat(ctx):
 
     Two files, one for precip [mm] and one for hi and low temperature [C]
     """
-    dbconn = get_database()
-
     table = get_tablename(ctx["stations"])
 
     if len(ctx["stations"]) == 1:
@@ -782,37 +760,32 @@ def do_swat(ctx):
         asts = datetime.date(scenario_year, today.month, today.day)
 
     thisyear = datetime.datetime.now().year
-    df = read_sql(
-        """
+    df = pd.read_sql(
+        text(
+            f"""
         WITH scenario as (
             SELECT
-    ('"""
-        + str(thisyear)
-        + """-'||month||'-'||extract(day from day))::date as day,
-            high, low, precip, station from """
-        + table
-        + """
-            WHERE station IN """
-        + str(tuple(ctx["stations"]))
-        + """ and
-            day >= %s and year = %s),
+            ('{thisyear}-'||month||'-'||extract(day from day))::date as day,
+            high, low, precip, station from {table}
+            WHERE station IN :sids and day >= :asts and year = :scenario_year),
         obs as (
-            SELECT day, high, low, precip, station from """
-        + table
-        + """
-            WHERE station IN """
-        + str(tuple(ctx["stations"]))
-        + """ and
-            day >= %s and day <= %s),
+            SELECT day, high, low, precip, station from {table}
+            WHERE station IN :sids and day >= :sts and day <= :ets),
         total as (
             SELECT *, extract(doy from day) as doy from obs UNION
             SELECT *, extract(doy from day) as doy from scenario
         )
-
         SELECT * from total ORDER by day ASC
-    """,
-        dbconn,
-        params=(asts, scenario_year, ctx["sts"], ctx["ets"]),
+    """
+        ),
+        get_dbconnstr("coop"),
+        params={
+            "sids": tuple(ctx["stations"]),
+            "asts": asts,
+            "scenario_year": scenario_year,
+            "sts": ctx["sts"],
+            "ets": ctx["ets"],
+        },
         index_col=None,
     )
     df["tmax"] = f2c(df["high"].values)
@@ -838,8 +811,8 @@ def do_swat(ctx):
             )
     sio = BytesIO()
     with zipfile.ZipFile(sio, "a") as zf:
-        for fn in zipfiles:
-            zf.writestr(fn, zipfiles[fn])
+        for fn, fp in zipfiles.items():
+            zf.writestr(fn, fp)
     return sio.getvalue()
 
 

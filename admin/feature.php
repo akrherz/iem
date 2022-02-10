@@ -146,7 +146,8 @@ $t->content = <<<EOF
 <br /><input type="text" name="javascripturl" size="80" /></p>
 
 <p>Publish Facebook?
-<br /><input type="checkbox" name="facebook" value="yes" />Yes</p>
+<br /><input id="fb" type="checkbox" name="facebook" value="yes" />
+<label for="fb">Yes</label></p>
 
 <p>Allow Voting:
 <br /><input type="checkbox" name="voting" value="yes" checked="checked" />Yes</p>
@@ -158,4 +159,3 @@ $t->content = <<<EOF
 </form>
 EOF;
 $t->render('single.phtml');
-?>

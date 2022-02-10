@@ -30,10 +30,8 @@ def get_climate(network, stations):
     mesosite = get_dbconn("coop")
     cursor = mesosite.cursor()
     cursor.execute(
-        """
-        SELECT station, valid, high, low, precip
-        from ncdc_climate81 where station in %s
-    """,
+        "SELECT station, valid, high, low, precip from ncdc_climate81 "
+        "where station in %s",
         (tuple(clisites),),
     )
     for row in cursor:

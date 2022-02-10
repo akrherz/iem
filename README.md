@@ -19,7 +19,7 @@ limited time.
 
 Process | Primary | Backup | Monitor
 ------- | ------- | ------ | -------
-AWOS Ingest | iem16 | iem14 | None
+AWOS Ingest | iem16 | iem14 | nagios `check_awos_ingest.py`
 GOES R/S | iem8-dc | iem19 | None
 iembot  | iem13    | None  | nagios checks for twistd processes running
 iem-web-services | iem12 | iem16 | nagios check

@@ -96,4 +96,3 @@ function cleaner($v){
  }
 
  echo $data;
-?>

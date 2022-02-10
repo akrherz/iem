@@ -126,10 +126,14 @@ to have your format added to the list!</i>
 
 
 <p><h4>5. How to view?</h4>
+
+<p>Note that the Excel format is limited to 1,048,576 rows of data, so selecting
+it will limit the returned data.</p>
+
 <select name="what">
   <option value="excel">Excel File</option>
-  <option value="download">Download to Disk
-  <option value="view">View on-line
+  <option value="download">Download to Disk</option>
+  <option value="view">View on-line</option>
 </select>
 
 <p><h4>6. Data Delimitation:</h4>
@@ -167,4 +171,3 @@ seconds to get a response.</i><br />
 </form>
 EOF;
 $t->render('full.phtml');
-?>
