@@ -90,7 +90,7 @@ def fmt_f2(val, missing, _trace, _tzinfo):
     """Simple 2 place formatter."""
     if val is None:
         return missing
-    return "{val:.2f}"
+    return f"{val:.2f}"
 
 
 def fmt_f0(val, missing, _trace, _tzinfo):
