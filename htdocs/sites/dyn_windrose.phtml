@@ -11,21 +11,21 @@ require_once "../../include/myview.php";
 require_once "setup.php";
 
 // HTTP GET vars
-$day1 = isset($_GET["day1"]) ? intval($_GET["day1"]): 1;
-$day2 = isset($_GET["day2"]) ? intval($_GET["day2"]): 1;
-$month1 = isset($_GET["month1"]) ? intval($_GET["month1"]): date("m");
-$month2 = isset($_GET["month2"]) ? intval($_GET["month2"]): date("m");
-$year1 = isset($_GET["year1"]) ? intval($_GET["year1"]): date("Y");
-$year2 = isset($_GET["year2"]) ? intval($_GET["year2"]): date("Y");
-$hour1 = isset($_GET["hour1"]) ? intval($_GET["hour1"]): 12;
-$hour2 = isset($_GET["hour2"]) ? intval($_GET["hour2"]): 12;
-$minute1 = isset($_GET["minute1"]) ? intval($_GET["minute1"]): 0;
-$minute2 = isset($_GET["minute2"]) ? intval($_GET["minute2"]): 0;
+$day1 = get_int404("day1", 1);
+$day2 = get_int404("day2", date("d"));
+$month1 = get_int404("month1", 1);
+$month2 = get_int404("month2", date("m"));
+$year1 = get_int404("year1", date("Y"));
+$year2 = get_int404("year2", date("Y"));
+$hour1 = get_int404("hour1", 0);
+$hour2 = get_int404("hour2", 0);
+$minute1 = get_int404("minute1", 0);
+$minute2 = get_int404("minute2", 0);
 $units = isset($_GET["units"]) ? xssafe($_GET["units"]): "mph";
-$nsector = isset($_GET['nsector']) ? intval($_GET['nsector']): 36;
+$nsector = get_int404('nsector', 36);
 $level = isset($_GET["level"]) ? floatval($_GET['level']): 1000;
 $fmt = isset($_GET["fmt"]) ? xssafe($_GET["fmt"]): 'png';
-$dpi = isset($_GET["dpi"]) ? intval($_GET["dpi"]): 100;
+$dpi = get_int404("dpi", 100);
 $bins = Array(2, 5, 7, 10, 15, 20);
 for ($i=0; $i < sizeof($bins); $i++){
 	$bins[$i] = isset($_GET["bin{$i}"]) ? floatval($_GET["bin{$i}"]): $bins[$i];
@@ -153,20 +153,28 @@ if (isset($_GET["staticrange"])) $content .= "checked=\"checked\" ";
 $content .= '>Optional: Hard code the frequency axis limit to 100%';
 
 // Allow setting of wind speed bins
-$content .= sprintf("<br /><input type=\"checkbox\" name=\"setbins\" ".
-		"value=\"1\"%s>Optional. User provided wind speed bins<br />".
-		"<div style=\"display: %s;\" id=\"showbins\"> 0 - ".
-		"<input type=\"text\" name=\"bin0\" value=\"%s\" size=\"4\"> - ".
-		"<input type=\"text\" name=\"bin1\" value=\"%s\" size=\"4\"> - ".
-		"<input type=\"text\" name=\"bin2\" value=\"%s\" size=\"4\"> - ".
-		"<input type=\"text\" name=\"bin3\" value=\"%s\" size=\"4\"> - ".
-		"<input type=\"text\" name=\"bin4\" value=\"%s\" size=\"4\"> - ".
-        "<input type=\"text\" name=\"bin5\" value=\"%s\" size=\"4\"> +".
-        "<br />Values between 0 and the first bin are counted as calm. ".
-		"</div>",
+$missive = <<<EOM
+<p>Since calm winds have no direction, the first bin lumps all the calm
+reports together. A value of 2 knots is likely the most appropriate here. The
+bin ranges are inclusive on the lower end and exclusive on the upper end.</p>
+EOM;
+$content .= sprintf(
+    '<br /><input type="checkbox" name="setbins" '.
+	'value="1"%s>Optional. User provided wind speed bins<br />'.
+	'<div style="display: %s;" id="showbins"> 0 - '.
+	'<input type="text" name="bin0" value="%s" size="4"> - '.
+	'<input type="text" name="bin1" value="%s" size="4"> - '.
+	'<input type="text" name="bin2" value="%s" size="4"> - '.
+	'<input type="text" name="bin3" value="%s" size="4"> - '.
+	'<input type="text" name="bin4" value="%s" size="4"> - '.
+    '<input type="text" name="bin5" value="%s" size="4"> +'.
+    '%s'.
+	'</div>',
 		isset($_GET["setbins"]) ? " checked=\"checked\"": "",
 		isset($_GET["setbins"]) ? "block": "none",
-		$bins[0], $bins[1], $bins[2], $bins[3], $bins[4], $bins[5]);
+		$bins[0], $bins[1], $bins[2], $bins[3], $bins[4], $bins[5],
+    $missive,
+);
 $jsextra = <<<EOF
 $(document).ready(function(){
 	$("input[name=setbins]").click(function(){
@@ -266,5 +274,3 @@ EOF;
 
 $t->content = $content;
 $t->render('sites.phtml');
- 
-?>

@@ -3,11 +3,10 @@ import datetime
 import calendar
 
 import numpy as np
-from pandas.io.sql import read_sql
 import pandas as pd
 from pyiem.plot import get_cmap
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 
 
@@ -38,21 +37,20 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
 
-    df = read_sql(
+    df = pd.read_sql(
         """
     WITH obs as (
         SELECT date_trunc('hour', valid) as t, avg(tmpf) as avgt from alldata
         WHERE station = %s and p01i > 0.009 and tmpf is not null
-        GROUP by t
+        and report_type = 2 GROUP by t
     )
 
     SELECT extract(week from t) as week, avgt from obs
     """,
-        pgconn,
+        get_dbconnstr("asos"),
         params=(station,),
         index_col=None,
     )
@@ -69,13 +67,9 @@ def plotter(fdict):
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
     title = (
-        "[%s] %s (%s-%s)\n"
+        f"[{station}] {ctx['_nt'].sts[station]['name']} "
+        f"({ab.year}-{datetime.date.today().year})\n"
         "Temperature Frequency During Precipitation by Week"
-    ) % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-        ab.year,
-        datetime.date.today().year,
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 
@@ -93,7 +87,10 @@ def plotter(fdict):
     H = np.ma.array(H) / float(years)
     H.mask = np.ma.where(H < 0.1, True, False)
     res = ax.pcolormesh(
-        (xedges - 1) * 7, yedges, H.transpose(), cmap=get_cmap(ctx["cmap"])
+        (xedges - 1) * 7,
+        yedges,
+        H.transpose(),
+        cmap=get_cmap(ctx["cmap"]),
     )
     fig.colorbar(res, label="Hours per week per year")
     ax.set_xticks(xticks)
@@ -104,6 +101,9 @@ def plotter(fdict):
     for i in range(np.shape(H)[0]):
         y.append(np.ma.sum(H[i, :] * (bins[:-1] + 0.5)) / np.ma.sum(H[i, :]))
 
+    if np.nanmin(y) < 40:
+        ax.axhline(32, ls="-.", color="r", lw=2)
+        ax.text(180, 32, "32", ha="center", va="bottom", fontsize=14)
     ax.plot(xedges[:-1] * 7, y, zorder=3, lw=3, color="w")
     ax.plot(xedges[:-1] * 7, y, zorder=3, lw=1, color="k", label="Average")
     ax.legend(loc=2)
@@ -115,4 +115,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})
