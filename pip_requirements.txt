@@ -1,4 +1,6 @@
 --extra-index-url https://pypi.anaconda.org/pypi/simple
+# searching
+commonregex
 inotify
 PyRSS2Gen
 mod_wsgi

@@ -24,6 +24,9 @@
   RewriteRule ^/p.phppid=([^\.]+) /p.php?pid=$1 [L]
   RewriteRule ^/iembot(.*)$ https://weather.im/iembot$1 [R=permanent]
 
+# Search functionality
+RewriteRule ^/search /search.py [QSA]
+
   Redirect /data/mwcomp.phtml https://mesonet.agron.iastate.edu/current/mwcomp.phtml
   Redirect /RWIS/current.php https://mesonet.agron.iastate.edu/RWIS/current.phtml
   Redirect /schoolnet/current.php https://mesonet.agron.iastate.edu/schoolnet/current.phtml
