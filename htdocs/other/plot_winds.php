@@ -1,11 +1,14 @@
 <?php
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/jpgraph/jpgraph.php";
+require_once "../../include/jpgraph/jpgraph_line.php";
+require_once "../../include/jpgraph/jpgraph_date.php";
 
 $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
 $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
-$station = isset($_GET["station"]) ? $_GET["station"]: "OT0002";
+$station = isset($_GET["station"]) ? substr($_GET["station"],0, 10): "OT0002";
 
 $myTime = mktime(0,0,0,$month, $day, $year);
 
@@ -28,9 +31,6 @@ for($i=0; $row = pg_fetch_array($rs); $i++){
 
 } // End of while
 
-include ("../../include/jpgraph/jpgraph.php");
-include ("../../include/jpgraph/jpgraph_line.php");
-include ("../../include/jpgraph/jpgraph_date.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(600,300);
@@ -82,5 +82,3 @@ if (max($sknt) > 0){
 }
 
 $graph->Stroke();
-
-?>

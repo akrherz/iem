@@ -111,4 +111,3 @@ have been posted on most days since February 2002. List all
 {$linkbar}
 EOF;
 $t->render('single.phtml');
-?>

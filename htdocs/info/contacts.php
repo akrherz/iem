@@ -37,4 +37,3 @@ reflect the views of the National Science Foundation.</p>
 
 EOM;
 $t->render('single.phtml');
-?>

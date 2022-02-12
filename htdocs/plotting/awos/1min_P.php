@@ -1,7 +1,7 @@
 <?php
 // Cool.....
 
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 include("../../../include/database.inc.php");
 include("../../../include/network.php");
 $nt = new NetworkTable("AWOS");
@@ -14,9 +14,7 @@ $year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"]: date("m");
 $day = isset($_GET["day"]) ? $_GET["day"]: date("d");
 
-  $myTime = strtotime($year."-".$month."-".$day);
-
-
+$myTime = strtotime($year."-".$month."-".$day);
 
 $titleDate = strftime("%b %d, %Y", $myTime);
 $tableName = strftime("t%Y_%m", $myTime);
@@ -177,7 +175,4 @@ $t1->SetFont(FF_FONT1,FS_BOLD);
 $t1->SetColor("black");
 $graph->AddText($t1);
 
-
-
 $graph->Stroke();
-?>

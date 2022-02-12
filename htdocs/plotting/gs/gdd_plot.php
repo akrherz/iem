@@ -1,8 +1,14 @@
 <?php
- require_once "../../../config/settings.inc.php";
- require_once "../../../include/database.inc.php";
- require_once "../../../include/station.php";
- 
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/database.inc.php";
+require_once "../../../include/station.php";
+
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_plotline.php";
+require_once "../../../include/jpgraph/jpgraph_date.php";
+require_once "../../../include/jpgraph/jpgraph_bar.php";
+
 $station = isset($_GET['station']) ? $_GET['station'] : "DSM";
 $network = isset($_GET['network']) ? $_GET['network'] : 'IA_ASOS';
 $year = isset($_GET['year']) ? $_GET['year']: date("Y");
@@ -93,14 +99,7 @@ for( $i=0; $row = pg_fetch_array($rs); $i++)
     $times[$i] = strtotime( $row["valid"] );
 }
 
-
 pg_close($coopdb);
-
-require_once "../../../include/jpgraph/jpgraph.php";
-require_once "../../../include/jpgraph/jpgraph_line.php";
-require_once "../../../include/jpgraph/jpgraph_plotline.php";
-require_once "../../../include/jpgraph/jpgraph_date.php";
-require_once "../../../include/jpgraph/jpgraph_bar.php";
 
 // Create the graph. These two calls are always required
 $graph = new Graph(640,480,"example1");
@@ -154,4 +153,3 @@ $graph->Add($z);
 
 // Display the graph
 $graph->Stroke();
-?>

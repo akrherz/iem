@@ -11,14 +11,17 @@ $pgconn = iemdb('mesosite');
 
 /* If nothing specified for a tag! */
 if (! isset($_GET["tag"])){
-  $rs = pg_exec($pgconn, "SELECT tags from feature WHERE tags is not Null");
+  $rs = pg_exec($pgconn, "SELECT tags from feature WHERE tags is not null");
   $tags = Array();
   for ($i=0;$row=pg_fetch_array($rs);$i++) { 
     $tokens = preg_split("/,/", $row["tags"]);
     foreach($tokens as $k => $v)
     { 
 		if ($v == ""){ continue; }
-    	@$tags[$v] += 1; 
+    	if (!array_key_exists($v, $tags)){
+            $tags[$v] = 0;
+        }
+        $tags[$v] += 1; 
     }
   }
 
@@ -147,7 +150,8 @@ if (pg_num_rows($rs) == 0)
 
 $t->content = <<<EOF
 <h3>Past IEM Features tagged: {$tag}</h3>
-<p><a href="index.php" class="btn btn-default"><i class="fa fa-th-list"></i> List all tags</a></p>
+<p><a href="index.php" class="btn btn-default"><i class="fa fa-th-list"></i>
+List all tags</a></p>
 
 {$winterextra}
 
@@ -155,4 +159,3 @@ $t->content = <<<EOF
 
 EOF;
 $t->render('single.phtml');
-?>

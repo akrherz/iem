@@ -11,7 +11,7 @@ $status = "PROCESSING";
 if (isset($_REQUEST["jobid"])){
 	$mesosite = iemdb("mesosite");
 	pg_prepare($mesosite, "SELECT", "SELECT * from racoon_jobs where jobid = $1");
-	$rs = pg_execute($mesosite, "SELECT", Array($_REQUEST["jobid"]));
+	$rs = pg_execute($mesosite, "SELECT", Array($jobid));
 	if (pg_num_rows($rs) < 1) die();
 	$row = pg_fetch_assoc($rs,0);
 	$sts = strtotime($row["sts"]);
@@ -34,8 +34,9 @@ if ($status != "DONE!"){
 
 $c = "";
 if ($status == "DONE!"){
-	$c = sprintf("<p>Download your powerpoint <a href=\"%s/pickup/raccoon/%s\">here</a>",
-			BASEURL, $basefn);
+	$c = sprintf(
+        '<p>Download your powerpoint <a href="/pickup/raccoon/%s">here</a>',
+		$basefn);
 }
 $t->content = <<<EOF
 <h3>IEM Raccoon</h3>
@@ -48,4 +49,3 @@ typically takes 1-3 minutes for the powerpoint to be generated!
 
 EOF;
 $t->render('single.phtml');
-?>

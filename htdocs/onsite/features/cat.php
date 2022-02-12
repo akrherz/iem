@@ -134,4 +134,3 @@ $content .= <<<EOF
 EOF;
 $t->content = $content;
 $t->render('single.phtml');
-?>

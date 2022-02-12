@@ -69,11 +69,8 @@ $t->content = <<<EOF
 
 {$tags}
 
-		{$content}
+{$content}
 		
 EOF;
 
-
-
 $t->render('single.phtml');
-?>

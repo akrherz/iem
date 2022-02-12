@@ -104,4 +104,3 @@ $lineplot2->SetColor("blue");
 //$lineplot2->SetFilled();
 //$lineplot2->SetFillColor("blue");
 $graph->Stroke();
-?>

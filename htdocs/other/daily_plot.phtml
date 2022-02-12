@@ -1,14 +1,14 @@
 <?php 
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Other Network";
 require_once "../../include/forms.php"; 
-include("../../include/imagemaps.php"); 
+require_once "../../include/imagemaps.php";
 
-$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
-$month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
-$day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
+$year = get_int404("year", date("Y"));
+$month = get_int404("month", date("m"));
+$day = get_int404("day", date("d"));
 $myTime = mktime(0,0,0,$month,$day,$year);
 $station = isset($_GET["station"]) ? xssafe($_GET["station"]): "OT0002";
 
@@ -38,4 +38,3 @@ $t->content = <<<EOF
 </div>
 EOF;
 $t->render('single.phtml');
-?>

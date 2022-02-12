@@ -2,7 +2,7 @@
 // 1 minute schoolnet data plotter
 // Cool.....
 
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 include("../../../include/database.inc.php");
 include("../../../include/network.php");
 $nt = new NetworkTable("AWOS");
@@ -179,4 +179,3 @@ $t1->SetColor("black");
 $graph->AddText($t1);
 
 $graph->Stroke();
-?>

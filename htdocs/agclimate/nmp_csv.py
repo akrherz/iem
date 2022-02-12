@@ -7,10 +7,9 @@ from io import StringIO
 
 import numpy as np
 import pandas as pd
-from pandas.io.sql import read_sql
 from metpy.units import units
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, convert_value
+from pyiem.util import get_dbconnstr, convert_value
 
 INVERSION = [
     "BOOI4",
@@ -57,10 +56,10 @@ def do_temp_rh(sid, row):
         p(row["rh_avg"], 1, 0, 100),
     ]
     if sid in INVERSION:
-        df = read_sql(
+        df = pd.read_sql(
             "SELECT * from sm_inversion WHERE station = %s and "
             "valid > %s - '4 hours'::interval ORDER by valid DESC LIMIT 1",
-            get_dbconn("isuag"),
+            get_dbconnstr("isuag"),
             params=(sid, row["valid"]),
         )
         if not df.empty:
@@ -113,7 +112,7 @@ def use_table(sio):
     """Process for the given table."""
     nt = NetworkTable("ISUSM")
     table = f"sm_minute_{datetime.now().year}"
-    obsdf = read_sql(
+    obsdf = pd.read_sql(
         f"""
         WITH latest as (
             SELECT station, valid,
@@ -128,7 +127,7 @@ def use_table(sio):
         from {table} s, agg a WHERE s.station = a.station
         and s.valid > (a.valid - '1 hour'::interval) and s.valid <= a.valid
         """,
-        get_dbconn("isuag"),
+        get_dbconnstr("isuag"),
         index_col=None,
     )
     lastob = obsdf[obsdf["is_last"]].set_index("station")
@@ -204,6 +203,6 @@ def test_basic():
     """Test that we can do things we need to do!"""
     sio = StringIO()
     do_output(sio)
-    with open("/tmp/pytest_isusm.csv", "w") as fh:
+    with open("/tmp/pytest_isusm.csv", "w", encoding="utf-8") as fh:
         fh.write(sio.getvalue())
     assert False

@@ -43,13 +43,13 @@ if (strlen($station) > 0 ) {
 $content .= <<<EOF
 
 <br />
-<img class="image-responsive" src="1min.php?year={$year}&amp;month={$month}&amp;day={$day}&amp;station={$station}" alt="Time Series">
+<img class="img img-responsive" src="1min.php?year={$year}&amp;month={$month}&amp;day={$day}&amp;station={$station}" alt="Time Series">
 
 <br />
-<img class="image-responsive" src="1min_V.php?year={$year}&amp;month={$month}&amp;day={$day}&amp;station={$station}" alt="Time Series">
+<img class="img img-responsive" src="1min_V.php?year={$year}&amp;month={$month}&amp;day={$day}&amp;station={$station}" alt="Time Series">
 
 <br>
-<img class="image-responsive" src="1min_P.php?year={$year}&amp;month={$month}&amp;day={$day}&amp;station={$station}" alt="Time Series">
+<img class="img img-responsive" src="1min_P.php?year={$year}&amp;month={$month}&amp;day={$day}&amp;station={$station}" alt="Time Series">
 
 
 <p><b>Note:</b> The wind speeds are indicated every minute by the red line. 
@@ -63,5 +63,3 @@ $content .= <<<EOF
 EOF;
 $t->content = $content;
 $t->render('single.phtml');
-
-?>

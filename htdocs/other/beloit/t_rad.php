@@ -110,11 +110,8 @@ $graph->tabtitle->Set(' '. $cityname ." on ". $titleDate .' ');
 $graph->yaxis->scale->ticks->SetLabelFormat("%5.1f");
 $graph->yaxis->scale->ticks->SetLabelFormat("%5.0f");
 
-
-
 $graph->y2axis->scale->ticks->Set(100,25);
 $graph->y2axis->scale->ticks->SetLabelFormat("%-4.0f");
-
 
 // Create the linear plot
 $lineplot=new LinePlot($temps, $times);
@@ -139,5 +136,3 @@ $graph->Add($lineplot);
 $graph->AddY2($lineplot3);
 
 $graph->Stroke();
-
-?>

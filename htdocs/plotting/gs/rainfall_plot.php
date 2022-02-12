@@ -152,4 +152,3 @@ $graph->Add($z);
 
 // Display the graph
 $graph->Stroke();
-?>

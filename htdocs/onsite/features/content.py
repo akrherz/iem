@@ -65,7 +65,7 @@ def application(environ, start_response):
     if match is None:
         headers.append(get_content_type("text"))
         start_response("500 Internal Server Error", headers)
-        sys.stderr.write("feature content failure: %s\n" % (repr(uri),))
+        sys.stderr.write(f"feature content failure: {repr(uri)}\n")
         return [b"ERROR!"]
 
     data = match.groupdict()
@@ -100,7 +100,8 @@ def application(environ, start_response):
     headers.append(get_content_type(data["suffix"]))
     rng = environ.get("HTTP_RANGE", "bytes=0-")
     tokens = rng.replace("bytes=", "").split("-", 1)
-    resdata = open(fn, "rb").read()
+    with open(fn, "rb") as fh:
+        resdata = fh.read()
     totalsize = len(resdata)
     stripe = slice(
         int(tokens[0]),

@@ -71,7 +71,7 @@ def plot(data, v):
         mp = MapPlot(
             sector="iowa",
             axisbg="white",
-            title=("ISU Soil Moisture Network :: %s" "") % (CTX[v]["title"],),
+            title=f"ISU Soil Moisture Network :: {CTX[v]['title']}",
             figsize=(8.0, 6.4),
         )
         mp.plot_values([-95], [41.99], ["No Data Found"], "%s", textsize=30)
@@ -81,8 +81,8 @@ def plot(data, v):
     mp = MapPlot(
         sector="iowa",
         axisbg="white",
-        title="ISU Soil Moisture Network :: %s" % (CTX[v]["title"],),
-        subtitle="valid %s" % (valid.strftime("%-d %B %Y %I:%M %p"),),
+        title=f"ISU Soil Moisture Network :: {CTX[v]['title']}",
+        subtitle=f"valid {valid:%-d %B %Y %I:%M %p}",
         figsize=(8.0, 6.4),
     )
     mp.plot_values(lons, lats, vals, "%.1f")

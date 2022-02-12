@@ -95,4 +95,3 @@ $sp1->mark->SetFillColor("blue");
 $sp1->mark->SetWidth(3);
 
 $graph->Stroke();
-?>

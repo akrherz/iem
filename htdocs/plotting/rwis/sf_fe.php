@@ -5,6 +5,7 @@ $OL = "6.2.1";
  $t = new MyView();
  require_once "../../../include/database.inc.php";
  require_once "../../../include/forms.php";
+ require_once "../../../include/imagemaps.php";
 
 $network = 'IA_RWIS';
 $ostation = isset($_GET["ostation"]) ? xssafe($_GET["ostation"]) : "";
@@ -28,8 +29,7 @@ if (! $subc && ! $dwpf && ! $tmpf && ! $s0 && ! $s1 && ! $s2 && ! $s3 ){
   $_GET["tmpf"] = "on";
 }
 
-require_once "../../../include/imagemaps.php";
-require_once "../../../include/forms.php";
+
 $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
@@ -214,4 +214,3 @@ EOF;
   }
 $t->content = $content;
 $t->render('single.phtml');
-?>

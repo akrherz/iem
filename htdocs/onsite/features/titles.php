@@ -1,9 +1,9 @@
 <?php 
-include("../../../config/settings.inc.php");
-include("../../../include/myview.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "List of Daily Feature Titles";
-include("../../../include/database.inc.php");
+require_once "../../../include/database.inc.php";
 
 $connection = iemdb("mesosite");
 $query1 = "SELECT title, good, bad, abstain,
@@ -47,5 +47,3 @@ are good votes, bad votes, and abstains.
 
 EOF;
 $t->render('single.phtml');
-?>
-

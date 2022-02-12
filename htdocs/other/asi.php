@@ -164,4 +164,3 @@ is labelled as a channel within the datafile.
 </table>
 EOF;
 $t->render('single.phtml');
-?>

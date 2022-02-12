@@ -19,7 +19,6 @@ if (! isset($_GET["valid"]))
 }
 
 
-
 $map = ms_newMapObj("roads.map");
 if ($eightbit)
 {
@@ -187,4 +186,3 @@ $map->drawLabelCache($img);
 
 header("Content-type: image/png");
 $img->saveImage('');
-?>

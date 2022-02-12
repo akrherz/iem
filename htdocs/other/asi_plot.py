@@ -52,26 +52,22 @@ def application(environ, start_response):
     pgconn = get_dbconn("other")
     icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = """
-        SELECT * from asi_data WHERE
-        station = '%s' and valid BETWEEN '%s' and '%s' ORDER by valid ASC
-    """ % (
-        station,
-        sts.strftime("%Y-%m-%d %H:%M"),
-        ets.strftime("%Y-%m-%d %H:%M"),
+    icursor.execute(
+        "SELECT * from asi_data WHERE station = %s and "
+        "valid BETWEEN %s and %s ORDER by valid ASC",
+        (station, sts, ets),
     )
-    icursor.execute(sql)
     data = {}
     for i in range(1, 13):
-        data["ch%savg" % (i,)] = []
+        data[f"ch{i}avg"] = []
     valid = []
     for row in icursor:
         for i in range(1, 13):
-            data["ch%savg" % (i,)].append(row["ch%savg" % (i,)])
+            data[f"ch{i}avg"].append(row[f"ch{i}avg"])
         valid.append(row["valid"])
 
     for i in range(1, 13):
-        data["ch%savg" % (i,)] = np.array(data["ch%savg" % (i,)])
+        data[f"ch{i}avg"] = np.array(data[f"ch{i}avg"])
 
     if len(valid) < 3:
         (_fig, ax) = plt.subplots(1, 1)
@@ -125,9 +121,7 @@ def application(environ, start_response):
             mdates.DateFormatter("%-I %p\n%d %b", tz=central)
         )
 
-    ax[0].set_title(
-        "ISUASI Station: %s Timeseries" % (nt.sts[station]["name"],)
-    )
+    ax[0].set_title(f"ISUASI Station: {nt.sts[station]['name']} Timeseries")
 
     ax[1].plot(valid, data["ch10avg"], color="b", label="3m")
     ax[1].plot(valid, data["ch11avg"], color="r", label="48.5m")

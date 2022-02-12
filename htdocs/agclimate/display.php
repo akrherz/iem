@@ -5,9 +5,9 @@
 
  $t = new MyView();
  $t->title = "Ag Climate";
- $prod = isset($_GET["prod"]) ? intval($_GET["prod"]) : 1;
- $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y");
- $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m");
+ $prod = get_int404("prod", 1);
+ $year = get_int404("year", date("Y"));
+ $month = get_int404("month", date("m"));
  
 $old2new = Array(
  "/data/agclimate/air-temp-out.png" => 1,
@@ -209,4 +209,3 @@ $t->content = <<<EOF
 <br clear="all" /><p>&nbsp;</p>
 EOF;
 $t->render('single.phtml');
-?>

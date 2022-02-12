@@ -1,6 +1,6 @@
 <?php
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Information";
 $t->content = <<<EOF
@@ -91,8 +91,8 @@ most beneficially placed.</li>
  <li>Meeting the data needs of end-users.</li>
  <li>Quality control issues.</li>
 </ul>
-<br><br>If you have any questions or comments, please <a href="contacts.php">let us know</a>.
+<br><br>If you have any questions or comments, please
+<a href="contacts.php">let us know</a>.
 
 EOF;
 $t->render('single.phtml');
-?>

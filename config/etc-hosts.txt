@@ -21,6 +21,8 @@
 192.168.0.14     iem14 iem14.local lesync.local
 192.168.0.15     iem15 iem15.local
 192.168.0.16     iem16 iem16.local
+192.168.0.17     iem17 iem17.local
+192.168.0.18     iem18 iem18.local
 192.168.0.19     iem19 iem19.local
 
 # VM servers for webfarm nodes

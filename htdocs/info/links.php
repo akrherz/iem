@@ -83,4 +83,3 @@ access this data in the following locations:</p>
 
 EOF;
 $t->render('single.phtml');
-?>

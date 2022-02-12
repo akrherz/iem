@@ -104,5 +104,3 @@ $lineplot2->SetLegend("Dew Point");
 $lineplot2->SetColor("blue");
 
 $graph->Stroke();
-
-?>
