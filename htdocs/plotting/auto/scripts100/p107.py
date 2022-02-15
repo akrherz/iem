@@ -9,32 +9,25 @@ from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
-PDICT = dict(
-    [
-        ("avg_high_temp", "Average High Temperature"),
-        ("avg_low_temp", "Average Low Temperature"),
-        ("avg_temp", "Average Temperature"),
-        ("gdd", "Growing Degree Days"),
-        (
-            "days-high-above",
-            "Days with High Temp Greater Than or Equal To (threshold)",
-        ),
-        ("days-high-below", "Days with High Temp Below (threshold)"),
-        (
-            "days-lows-above",
-            "Days with Low Temp Greater Than or Equal To (threshold)",
-        ),
-        ("days-lows-below", "Days with Low Temp Below (threshold)"),
-        ("max_high", "Maximum High Temperature"),
-        ("min_high", "Minimum High Temperature"),
-        ("range_high", "Range of High Temperature"),
-        ("min_low", "Minimum Low Temperature"),
-        ("max_low", "Maximum Low Temperature"),
-        ("range_low", "Range of Low Temperature"),
-        ("precip", "Total Precipitation"),
-        ("snow", "Total Snowfall"),
-    ]
-)
+PDICT = {
+    "avg_high_temp": "Average High Temperature",
+    "avg_low_temp": "Average Low Temperature",
+    "avg_temp": "Average Temperature",
+    "gdd": "Growing Degree Days",
+    "days-high-above": "Days with High Temp Greater Than or Equal To (threshold)",
+    "days-high-below": "Days with High Temp Below (threshold)",
+    "days-lows-above": "Days with Low Temp Greater Than or Equal To (threshold)",
+    "days-lows-below": "Days with Low Temp Below (threshold)",
+    "max_high": "Maximum High Temperature",
+    "min_high": "Minimum High Temperature",
+    "range_high": "Range of High Temperature",
+    "min_low": "Minimum Low Temperature",
+    "max_low": "Maximum Low Temperature",
+    "range_low": "Range of Low Temperature",
+    "precip": "Total Precipitation",
+    "snow": "Total Snowfall",
+    "days-snow-above": "Days with Snowfall Greater Than or Equal To (threshold)",
+}
 
 
 def get_description():
@@ -109,13 +102,25 @@ def get_description():
     return desc
 
 
+def crossesjan1(val):
+    """Pretty print for a year."""
+    return f"{val:.0f}-{(val + 1):.0f}"
+
+
+def intfmt(val):
+    """format int values"""
+    if val == "M":
+        return "M"
+    return f"{val:.0f}"
+
+
 def nice(val):
     """nice printer"""
     if val == "M":
         return "M"
     if 0 < val < 0.01:
         return "Trace"
-    return "%.2f" % (val,)
+    return f"{val:.2f}"
 
 
 def plotter(fdict):
@@ -130,18 +135,18 @@ def plotter(fdict):
     varname = ctx["varname"]
     year = ctx["year"]
     threshold = ctx["thres"]
-    table = "alldata_%s" % (station[:2],)
-    nt = network.Table("%sCLIMATE" % (station[:2],))
+    nt = network.Table(f"{station[:2]}CLIMATE")
     sdays = []
     for i in range(days):
         ts = sts + datetime.timedelta(days=i)
         sdays.append(ts.strftime("%m%d"))
 
     doff = (days + 1) if ets.year != sts.year else 0
+    culler = " and snow is not null" if varname.find("snow") > -1 else ""
     df = read_sql(
         text(
             f"""
-    SELECT extract(year from day - '{doff} days'::interval) as yr,
+    SELECT extract(year from day - '{doff} days'::interval)::int as yr,
     avg((high+low)/2.) as avg_temp, avg(high) as avg_high_temp,
     sum(gddxx(:gddbase, :gddceil, high, low)) as gdd,
     avg(low) as avg_low_temp,
@@ -155,9 +160,10 @@ def plotter(fdict):
     sum(case when high < :t then 1 else 0 end) as "days-high-below",
     sum(case when low >= :t then 1 else 0 end) as "days-lows-above",
     sum(case when low < :t then 1 else 0 end) as "days-lows-below",
+    sum(case when snow >= :t then 1 else 0 end) as "days-snow-above",
     count(*)
-    from {table} WHERE station = :station and sday in :sdays
-    GROUP by yr ORDER by yr ASC
+    from alldata_{station[:2]} WHERE station = :station and sday in :sdays
+    {culler} GROUP by yr ORDER by yr ASC
     """
         ),
         get_dbconnstr("coop"),
@@ -171,15 +177,42 @@ def plotter(fdict):
     )
     if df.empty:
         raise NoDataFound("No Data Found.")
+    fmter = intfmt if varname.find("days") > -1 else nice
+    yrfmter = intfmt if sts.year == ets.year else crossesjan1
     df["range_high"] = df["max_high"] - df["min_high"]
     df["range_low"] = df["max_low"] - df["min_low"]
     # require at least 90% coverage
     df = df[df["count"] >= (days * 0.9)]
     # require values , not nan
-    df = df[df[varname].notnull()]
+    df = df[df[varname].notnull()].sort_values(varname, ascending=False)
 
-    fig = figure(apctx=ctx)
+    title = PDICT.get(varname).replace("(threshold)", str(threshold))
+    title = (
+        f"[{station}] {nt.sts[station]['name']}\n"
+        f"{title} from {sts:%-d %B} through {ets:%-d %B}"
+    )
+    fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(2, 1)
+    # Move axes over to make some room for the top 10
+    ax[0].set_position([0.07, 0.53, 0.78, 0.36])
+    ax[1].set_position([0.07, 0.1, 0.78, 0.36])
+
+    # Print top 10
+    dy = 0.03
+    ypos = 0.9
+    fig.text(0.86, ypos, "Top 10")
+    for _, row in df.head(10).iterrows():
+        ypos -= dy
+        fig.text(0.86, ypos, yrfmter(row["yr"]))
+        fig.text(0.95, ypos, fmter(row[varname]))
+
+    ypos -= 2 * dy
+    fig.text(0.86, ypos, "Bottom 10")
+    ypos = ypos - 10 * dy
+    for _, row in df.tail(10).iterrows():
+        fig.text(0.86, ypos, yrfmter(row["yr"]))
+        fig.text(0.95, ypos, fmter(row[varname]))
+        ypos += dy
 
     bars = ax[0].bar(df["yr"], df[varname], facecolor="r", edgecolor="r")
     thisvalue = "M"
@@ -188,9 +221,9 @@ def plotter(fdict):
             mybar.set_facecolor("g")
             mybar.set_edgecolor("g")
             thisvalue = y
-    ax[0].set_xlabel("Year, %s = %s" % (year, nice(thisvalue)))
+    ax[0].set_xlabel(f"Year, {yrfmter(year)} = {fmter(thisvalue)}")
     ax[0].axhline(
-        df[varname].mean(), lw=2, label="Avg: %.2f" % (df[varname].mean(),)
+        df[varname].mean(), lw=2, label=f"Avg: {df[varname].mean():.2f}"
     )
     ylabel = r"Temperature $^\circ$F"
     if varname in ["precip"]:
@@ -200,20 +233,8 @@ def plotter(fdict):
     elif varname.find("days") > -1:
         ylabel = "Days"
     elif varname == "gdd":
-        ylabel = r"Growing Degree Days (%s,%s) $^\circ$F" % (gddbase, gddceil)
+        ylabel = f"Growing Degree Days ({gddbase},{gddceil}) " r"$^\circ$F"
     ax[0].set_ylabel(ylabel)
-    title = PDICT.get(varname).replace("(threshold)", str(threshold))
-    ax[0].set_title(
-        ("[%s] %s\n%s from %s through %s")
-        % (
-            station,
-            nt.sts[station]["name"],
-            title,
-            sts.strftime("%d %b"),
-            ets.strftime("%d %b"),
-        ),
-        fontsize=12,
-    )
     ax[0].grid(True)
     ax[0].legend(ncol=2, fontsize=10)
     ax[0].set_xlim(df["yr"].min() - 1, df["yr"].max() + 1)
@@ -242,20 +263,15 @@ def plotter(fdict):
         ax[1].axvline(thisvalue, color="g")
     mysort = df.sort_values(by=varname, ascending=True)
     info = (
-        "Min: %.2f %.0f\n95th: %.2f\nMean: %.2f\nSTD: %.2f\n5th: %.2f\n"
-        "Max: %.2f %.0f"
-    ) % (
-        df2[varname].min(),
-        df["yr"][mysort.index[0]],
-        ptile[1],
-        np.average(df2[varname]),
-        np.std(df2[varname]),
-        ptile[3],
-        df2[varname].max(),
-        df["yr"][mysort.index[-1]],
+        f"Min: {df2[varname].min():.2f} {yrfmter(df['yr'][mysort.index[0]])}\n"
+        f"95th: {ptile[1]:.2f}\n"
+        f"Mean: {np.average(df2[varname]):.2f}\n"
+        f"STD: {np.std(df2[varname]):.2f}\n"
+        f"5th: {ptile[3]:.2f}\n"
+        f"Max: {df2[varname].max():.2f} {yrfmter(df['yr'][mysort.index[-1]])}"
     )
     ax[1].text(
-        0.8,
+        0.75,
         0.95,
         info,
         transform=ax[1].transAxes,
@@ -266,4 +282,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({})
+    plotter({"varname": "days-snow-above", "thres": 0.01})
