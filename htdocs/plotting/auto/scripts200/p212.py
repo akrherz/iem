@@ -2,7 +2,7 @@
 import datetime
 
 import pandas as pd
-from pandas.io.sql import read_sql
+import numpy as np
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
@@ -11,18 +11,18 @@ from sqlalchemy import text
 PDICT = {"00": "00 UTC", "12": "12 UTC"}
 PDICT3 = dict(
     [
-        ("tmpc", "Air Temperature (C)"),
-        ("dwpc", "Dew Point (C)"),
+        ("tmpc", "Air Temperature (°C)"),
+        ("dwpc", "Dew Point (°C)"),
         ("el_agl_m", "Equalibrium Level (m AGL)"),
         ("el_pressure_hpa", "Equalibrium Pressure (hPa)"),
-        ("el_tmpc", "Equalibrium Level Temperature (C)"),
+        ("el_tmpc", "Equalibrium Level Temperature (°C)"),
         ("height", "Height (m)"),
         ("lcl_agl_m", "Lifted Condensation Level (m AGL)"),
         ("lcl_pressure_hpa", "Lifted Condensation Level (hPa)"),
-        ("lcl_tmpc", "Lifted Condensation Level Temperature (C)"),
+        ("lcl_tmpc", "Lifted Condensation Level Temperature (°C)"),
         ("lfc_agl_m", "Lifted of Free Convection (m AGL)"),
         ("lfc_pressure_hpa", "Lifted of Free Convection (hPa)"),
-        ("lfc_tmpc", "Lifted of Free Convection Temperature (C)"),
+        ("lfc_tmpc", "Lifted of Free Convection Temperature (°C)"),
         ("mlcape_jkg", "Mixed Layer (100hPa) CAPE (J/kg)"),
         ("mlcin_jkg", "Mixed Layer (100hPa) CIN (J/kg)"),
         ("mucape_jkg", "Most Unstable CAPE (J/kg)"),
@@ -52,7 +52,7 @@ PDICT3 = dict(
         ("sbcape_jkg", "Surface Based CAPE (J/kg)"),
         ("sbcin_jkg", "Surface Based CIN (J/kg)"),
         ("sweat_index", "Sweat Index"),
-        ("total_totals", "Total Totals (C)"),
+        ("total_totals", "Total Totals (°C)"),
         ("smps", "Wind Speed (mps)"),
     ]
 )
@@ -130,9 +130,10 @@ def get_data(ctx):
     pgconn = get_dbconnstr("raob")
     if varname in ["tmpc", "dwpc", "height", "smps"]:
         ctx["leveltitle"] = f" @ {level} hPa"
-        dfin = read_sql(
+        dfin = pd.read_sql(
             text(
-                "select extract(year from f.valid at time zone 'UTC') as year, "
+                "select "
+                "extract(year from f.valid at time zone 'UTC')::int as year, "
                 "f.valid at time zone 'UTC' as utc_valid, "
                 f"{varname} from raob_profile p JOIN raob_flights f on "
                 "(p.fid = f.fid) WHERE f.station in :stations "
@@ -150,9 +151,10 @@ def get_data(ctx):
         )
     else:
         ctx["leveltitle"] = ""
-        dfin = read_sql(
+        dfin = pd.read_sql(
             text(
-                "select extract(year from valid at time zone 'UTC') as year, "
+                "select "
+                "extract(year from valid at time zone 'UTC')::int as year, "
                 "valid at time zone 'UTC' as utc_valid, "
                 f"{varname} from raob_flights WHERE station in :stations and "
                 "extract(hour from valid at time zone 'UTC') = :hour and "
@@ -176,6 +178,21 @@ def get_data(ctx):
     df[f"{ctx['var']}_{ctx['year']}"] = dfin[
         dfin["year"] == ctx["year"]
     ].set_index("sday")[ctx["var"]]
+    # Merge in the year of max value
+    mx = (
+        dfin.sort_values(ctx["var"], ascending=False)
+        .drop_duplicates("sday")
+        .set_index("sday")
+    )
+    df[f"{ctx['var']}_max_year"] = mx["year"]
+    # Merge in the year of max value
+    mx = (
+        dfin.sort_values(ctx["var"], ascending=True)
+        .drop_duplicates("sday")
+        .set_index("sday")
+    )
+    df[f"{ctx['var']}_min_year"] = mx["year"]
+
     # Create a utc_valid column for later usage
     df["utc_valid"] = pd.to_datetime(
         str(ctx["year"]) + df.index + f"{hour:02.0f}",
@@ -193,79 +210,121 @@ def highcharts(fdict):
     """Make highcharts output."""
     ctx = get_autoplot_context(fdict, get_description())
     get_data(ctx)
-    ticks = (ctx["df"]["utc_valid"].view("int64") // 1e6).tolist()
-    j = {}
-    j["title"] = dict(text=ctx["title"])
-    j["exporting"] = {"enabled": True}
-    j["chart"] = {"zoomType": "x"}
-    j["plotOptions"] = {"line": {"turboThreshold": 0}}
-    j["xAxis"] = dict(type="datetime")
-    j["yAxis"] = dict(title=dict(text=PDICT3[ctx["var"]]))
-    units = PDICT3[ctx["var"]].split()[-1]
-    j["tooltip"] = {
-        "crosshairs": True,
-        "shared": True,
-        "valueSuffix": f" {units}",
-        "valueDecimals": 2,
-    }
-
+    df = ctx["df"]
+    df["ticks"] = df["utc_valid"].view("int64") // 1e6
+    units = PDICT3[ctx["var"]].split()[-1].replace("(", "").replace(")", "")
     myyearcol = f"{ctx['var']}_{ctx['year']}"
-    j["series"] = [
-        {
-            "name": PDICT3[ctx["var"]],
-            "data": list(zip(ticks, ctx["df"][myyearcol].values.tolist())),
-            "zIndex": 3,
-            "color": "#FF0000",
-            "lineWidth": 2,
-            "marker": {"enabled": False},
-            "type": "line",
-        },
-        {
-            "name": "Average",
-            "data": list(
-                zip(ticks, ctx["df"][ctx["var"], "mean"].values.tolist())
-            ),
-            "zIndex": 2,
-            "color": "#000000",
-            "lineWidth": 2,
-            "marker": {"enabled": False},
-            "type": "line",
-        },
-        {
-            "name": "Range",
-            "data": list(
-                zip(
-                    ticks,
-                    ctx["df"][ctx["var"], "min"].values.tolist(),
-                    ctx["df"][ctx["var"], "max"].values.tolist(),
-                )
-            ),
-            "type": "arearange",
-            "lineWidth": 0,
-            "linkedTo": ":previous",
-            "color": "#ADD8E6",
-            "fillOpacity": 0.3,
-            "zIndex": 0,
-        },
-        {
-            "name": "25-75 %tile",
-            "data": list(
-                zip(
-                    ticks,
-                    ctx["df"][ctx["var"], "25%"].values.tolist(),
-                    ctx["df"][ctx["var"], "75%"].values.tolist(),
-                )
-            ),
-            "type": "arearange",
-            "lineWidth": 0,
-            "linkedTo": ":previous",
-            "color": "#D2B48C",
-            "fillOpacity": 0.3,
-            "zIndex": 0,
-        },
-    ]
+    title = ctx["title"].replace("\n", "\\n")
+    tc = ("ticks", "")
+    mx = df[f"{ctx['var']}_max_year"]
+    mn = df[f"{ctx['var']}_min_year"]
+    res = f"""
+    var max_years = {mx.values.tolist()};
+    var min_years = {mn.values.tolist()};
 
-    return j
+    $("#ap_container").highcharts({{
+        title: {{
+            text: "{title}"
+        }},
+        exporting: {{
+            enabled: true
+        }},
+        chart: {{
+            zoomType: 'x',
+        }},
+        plotOptions: {{
+            line: {{
+                turboThreshold: 0,
+            }}
+        }},
+        xAxis: {{
+            type: 'datetime'
+        }},
+        yAxis: {{
+            title: {{
+                text: "{PDICT3[ctx['var']]}"
+            }}
+        }},
+        tooltip: {{
+            crosshairs: true,
+            shared: true,
+            valueSuffix: ' {units}',
+            valueDecimals: 2
+        }},
+        series: [
+            {{
+                name: "{' '.join(PDICT3[ctx["var"]].split()[:-1])}",
+                data: {
+                    df[["ticks", myyearcol]]
+                    .replace({np.nan: None})
+                    .values
+                    .tolist()
+                },
+                zIndex: 3,
+                color: "#FF0000",
+                lineWidth: 2,
+                marker: {{
+                    enabled: false
+                }},
+                type: 'line'
+            }}, {{
+                name: "Average",
+                data: {
+                    df[[tc, (ctx["var"], "mean")]]
+                    .replace({np.nan: None})
+                    .values
+                    .tolist()
+                },
+                zIndex: 2,
+                color: "#000000",
+                lineWidth: 2,
+                marker: {{
+                    enabled: false
+                }},
+                type: 'line'
+            }}, {{
+                name: "Range",
+                data: {
+                    df[[tc, (ctx["var"], "min"), (ctx["var"], "max")]]
+                    .replace({np.nan: None})
+                    .values
+                    .tolist()
+                },
+                type: "arearange",
+                lineWidth: 0,
+                linkedTo: ":previous",
+                color: "#ADD8E6",
+                fillOpacity: 0.3,
+                zIndex: 0,
+                tooltip: {{
+                    pointFormatter: function() {{
+                        var s = '<span style="color:' + this.color +
+                            '">\u25CF</span> '+
+                            this.series.name + ': <b>' + this.low + ' (' +
+                            min_years[this.index] +') to ' + this.high + ' ('+
+                            max_years[this.index] +')</b><br/>';
+                        return s;
+                    }}
+                }}
+            }}, {{
+                name: "25-75 %tile",
+                data: {
+                    df[[tc, (ctx["var"], "25%"), (ctx["var"], "75%")]]
+                    .replace({np.nan: None})
+                    .values
+                    .tolist()
+                },
+                type: "arearange",
+                lineWidth: 0,
+                linkedTo: ":previous",
+                color: "#D2B48C",
+                fillOpacity: 0.3,
+                zIndex: 0
+            }}
+        ]
+    }});
+    """
+    return res.replace("None", "null")
 
 
 def plotter(fdict):
@@ -273,7 +332,7 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     get_data(ctx)
     df = ctx["df"]
-    fig, ax = figure_axes(apctx=ctx)
+    fig, ax = figure_axes(apctx=ctx, title=ctx["title"])
     colname = f"{ctx['var']}_{ctx['year']}"
     x = df["utc_valid"].values
     ax.plot(x, df[colname].values, label=str(ctx["year"]), zorder=4, color="r")
@@ -295,11 +354,10 @@ def plotter(fdict):
     ax.plot(x, df[ctx["var"], "mean"].values, color="k", zorder=3, label="Avg")
     ax.legend()
     ax.set_ylabel(PDICT3[ctx["var"]])
-    fig.text(0.5, 0.9, ctx["title"], ha="center", va="bottom")
     ax.grid(True)
 
     return fig, df
 
 
 if __name__ == "__main__":
-    highcharts(dict(station="KABR", var="tmpc", level=500, hour="12"))
+    print(highcharts(dict(station="KABR", var="tmpc", level=500, hour="12")))
