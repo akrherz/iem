@@ -68,5 +68,3 @@ EOF;
  
  $memcache->set("/feature_rss.php", ob_get_contents(), 3600); // one hour
  ob_end_flush();
- 
-?>

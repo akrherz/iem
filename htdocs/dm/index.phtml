@@ -1,7 +1,7 @@
 <?php
-require '../../config/settings.inc.php';
+require_once '../../config/settings.inc.php';
 define("IEM_APPID", 58);
-include_once '../../include/myview.php';
+require_once '../../include/myview.php';
 
 $t = new MyView();
 $t->title = "Drought Monitoring Products";
@@ -98,4 +98,3 @@ and US Drought Monitor status.</li>
 <p>Please <a href="/info/contacts.php">contact us</a> if you have links you would like added on this page.
 EOF;
 $t->render('single.phtml');
-?>

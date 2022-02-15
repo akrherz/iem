@@ -53,10 +53,9 @@ def application(environ, start_response):
     for row in acursor:
         root["products"].append({"data": row[0], "entered": row[1]})
 
-    if cb is None:
-        data = json.dumps(root)
-    else:
-        data = "%s(%s)" % (html_escape(cb), json.dumps(root))
+    data = json.dumps(root)
+    if cb is not None:
+        data = f"{html_escape(cb)}({data})"
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)

@@ -56,18 +56,13 @@ def available_radars(fields):
         from stations where network in ('NEXRAD','ASR4','ASR11','TWDR')
         ORDER by id asc"""
     else:
-        sql = """
+        sql = f"""
         select id, name, ST_x(geom) as lon, ST_y(geom) as lat, network,
-        ST_Distance(geom, GeomFromEWKT('SRID=4326;POINT(%s %s)')) as dist
+        ST_Distance(geom, GeomFromEWKT('SRID=4326;POINT({lon} {lat})')) as dist
         from stations where network in ('NEXRAD','ASR4','ASR11','TWDR')
-        and ST_Distance(geom, GeomFromEWKT('SRID=4326;POINT(%s %s)')) < 3
+        and ST_Distance(geom, GeomFromEWKT('SRID=4326;POINT({lon} {lat})')) < 3
         ORDER by dist asc
-        """ % (
-            lon,
-            lat,
-            lon,
-            lat,
-        )
+        """
     mcursor.execute(sql)
     root["radars"].append(
         {
@@ -232,7 +227,7 @@ def application(environ, start_response):
     callback = fields.get("callback")
     data = ""
     if callback is not None:
-        data += "%s(" % (html_escape(callback),)
+        data += f"{html_escape(callback)}("
     if operation == "list":
         data += json.dumps(list_files(fields))
     elif operation == "available":

@@ -14,5 +14,3 @@ if (sizeof($tokens) == 5){
     die();
 }
 header("Location: /wx/afos/p.php?{$url}");
-
-?>

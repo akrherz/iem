@@ -2,10 +2,10 @@
 import calendar
 
 import numpy as np
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem import network
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"spring": "1 January - 31 December", "fall": "1 July - 30 June"}
@@ -43,20 +43,18 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
-
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     season = ctx["season"]
-    table = "alldata_%s" % (station[:2],)
-    nt = network.Table("%sCLIMATE" % (station[:2],))
+    table = f"alldata_{station[:2]}"
+    nt = network.Table(f"{station[:2]}CLIMATE")
 
     year = (
         "case when month > 6 then year + 1 else year end"
         if season == "fall"
         else "year"
     )
-    df = read_sql(
+    df = pd.read_sql(
         f"""
     WITH obs as (
         SELECT day, month, high, low, {year} as season
@@ -80,7 +78,7 @@ def plotter(fdict):
     (SELECT season as year, day, extract(doy from day) as doy,
      level, 'spring' as typ from highs WHERE rank = 1)
     """,
-        pgconn,
+        get_dbconnstr("coop"),
         params=[station],
     )
     if df.empty:
@@ -91,15 +89,11 @@ def plotter(fdict):
     dyear = df2.groupby(["year"]).count()
     ax[0].bar(dyear.index, dyear["level"], facecolor="tan", edgecolor="tan")
     ax[0].axhline(dyear["level"].mean(), lw=2)
-    ax[0].set_ylabel("Yearly Events Avg: %.1f" % (dyear["level"].mean(),))
+    ax[0].set_ylabel(f"Yearly Events Avg: {dyear['level'].mean():.1f}")
     ax[0].set_xlim(dyear.index.min() - 1, dyear.index.max() + 1)
-    title = "%s Steps %s" % (
-        PDICT[season],
-        "Down" if season == "fall" else "Up",
-    )
+    title = f"{PDICT[season]} Steps {'Down' if season == 'fall' else 'Up'}"
     ax[0].set_title(
-        "%s [%s]\n%s in Temperature"
-        % (nt.sts[station]["name"], station, title)
+        f"{nt.sts[station]['name']} [{station}]\n{title} in Temperature"
     )
     ax[0].grid(True)
 
@@ -132,4 +126,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

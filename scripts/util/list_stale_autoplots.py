@@ -52,7 +52,7 @@ def main():
             continue
         tokens = QRE.findall(appurl)
         if not tokens:
-            print("appurl: %s valid: %s failed RE" % (appurl, valid))
+            print(f"appurl: {appurl} valid: {valid} failed RE")
             continue
         appid = int(tokens[0])
         if appid in NO_FEATURES:
@@ -69,7 +69,7 @@ def main():
     maxval = df.index.max()
     for i in range(1, maxval):
         if i not in rows and i not in NO_FEATURES:
-            print("No entries for: %4i" % (i,))
+            print(f"No entries for: {i:4.0f}")
     df = df.sort_values(by="valid")
     print(df.head(10))
 

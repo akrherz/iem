@@ -3,11 +3,10 @@ import datetime
 
 import numpy as np
 import pandas as pd
-from pandas.io.sql import read_sql
 import pytz
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 
 MDICT = dict(
     [
@@ -61,7 +60,7 @@ MDICT = dict(
         ("WILDFIRE", "WILDFIRE"),
     ]
 )
-PDICT = dict([("wfo", "By NWS Forecast Office"), ("state", "By State")])
+PDICT = {"wfo": "By NWS Forecast Office", "state": "By State"}
 PDICT2 = {
     "count": "Event Count",
     "days": "Days with 1+ Events",
@@ -201,7 +200,7 @@ def get_count_bins(df, varname):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("postgis")
+    pgconn = get_dbconnstr("postgis")
     ctx = get_autoplot_context(fdict, get_description())
     sts = ctx["sdate"].replace(tzinfo=pytz.utc)
     ets = ctx["edate"].replace(tzinfo=pytz.utc)
@@ -225,7 +224,7 @@ def plotter(fdict):
     extend = "neither"
 
     if varname == "days":
-        df = read_sql(
+        df = pd.read_sql(
             f"""
         WITH data as (
             SELECT distinct wfo, state, date(valid)
@@ -247,7 +246,7 @@ def plotter(fdict):
         cmap.set_under("white")
         cmap.set_over("#EEEEEE")
     elif varname == "count":
-        df = read_sql(
+        df = pd.read_sql(
             f"""
         WITH data as (
             SELECT distinct wfo, state, valid, type,
@@ -285,7 +284,7 @@ def plotter(fdict):
                 "extract(year from valid) end"
             )
         # Expensive
-        df = read_sql(
+        df = pd.read_sql(
             f"""
         WITH data as (
             SELECT distinct wfo, {yearcol} as year, state, valid, type,

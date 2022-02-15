@@ -66,5 +66,3 @@ echo "</Placemark>";
 echo "
  </Document>
 </kml>";
-
-?>

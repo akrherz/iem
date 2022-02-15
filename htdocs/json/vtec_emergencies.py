@@ -1,7 +1,7 @@
 """Listing of VTEC emergencies"""
 import json
 
-import memcache
+from pymemcache.client import Client
 import psycopg2.extras
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
@@ -16,7 +16,7 @@ def run():
 
     cursor.execute(
         """
-        SELECT extract(year from issue) as year, wfo, eventid,
+        SELECT extract(year from issue)::int as year, wfo, eventid,
         phenomena, significance,
         min(product_issue at time zone 'UTC') as utc_product_issue,
         min(init_expire at time zone 'UTC') as utc_init_expire,
@@ -32,12 +32,9 @@ def run():
     )
     res = {"events": []}
     for row in cursor:
-        uri = "/vtec/#%s-O-NEW-K%s-%s-%s-%04i" % (
-            row["year"],
-            row["wfo"],
-            row["phenomena"],
-            row["significance"],
-            row["eventid"],
+        uri = (
+            f"/vtec/#{row['year']}-O-NEW-K{row['wfo']}-"
+            f"{row['phenomena']}-{row['significance']}-{row['eventid']:04.0f}"
         )
         res["events"].append(
             dict(
@@ -64,16 +61,16 @@ def application(environ, start_response):
     cb = fields.get("callback", None)
 
     mckey = "/json/vtec_emergencies"
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
-    res = mc.get(mckey)
-    if not res:
-        res = run()
-        mc.set(mckey, res, 3600)
-
-    if cb is None:
-        data = res
+    mc = Client(("iem-memcached", 11211))
+    data = mc.get(mckey)
+    if data is not None:
+        data = data.decode("utf-8")
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        data = run()
+        mc.set(mckey, data, 3600)
+    mc.close()
+    if cb is not None:
+        data = f"{html_escape(cb)}({data})"
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)

@@ -25,4 +25,3 @@ with little or no notice.</p>
 
 EOF;
 $t->render('single.phtml');
-?>

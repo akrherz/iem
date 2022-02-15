@@ -50,16 +50,14 @@ def application(environ, start_response):
         return [
             send_error(
                 start_response,
-                "lon value outside of bounds: %s to %s"
-                % (iemre.WEST, iemre.EAST),
+                f"lon value outside of bounds: {iemre.WEST} to {iemre.EAST}",
             )
         ]
     if lat < iemre.SOUTH or lat > iemre.NORTH:
         return [
             send_error(
                 start_response,
-                "lat value outside of bounds: %s to %s"
-                % (iemre.SOUTH, iemre.NORTH),
+                f"lat value outside of bounds: {iemre.SOUTH} to {iemre.NORTH}",
             )
         ]
     # fmt = form["format"][0]
@@ -103,7 +101,7 @@ def application(environ, start_response):
 
     if ts1.year > 1980:
         i2, j2 = prismutil.find_ij(lon, lat)
-        with ncopen("/mesonet/data/prism/%s_daily.nc" % (ts1.year,)) as nc:
+        with ncopen(f"/mesonet/data/prism/{ts1.year}_daily.nc") as nc:
             prism_precip = nc.variables["ppt"][offset1:offset2, j2, i2] / 25.4
     else:
         prism_precip = [None] * (offset2 - offset1)

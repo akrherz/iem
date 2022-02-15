@@ -12,4 +12,3 @@ $page_href = $_REQUEST['url_of_page_comment_leaved_on'];
 $message = "comment #{$commentID} was left on page {$page_href}";
 
 mail($admin_email, "You have a new comment", $message);
-?>

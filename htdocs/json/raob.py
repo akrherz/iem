@@ -17,11 +17,12 @@ import datetime
 import json
 
 import pytz
-import memcache
+from pymemcache.client import Client
 from pandas.io.sql import read_sql
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, html_escape
+from pyiem.util import get_dbconnstr, html_escape
+from sqlalchemy import text
 
 json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 
@@ -35,50 +36,46 @@ def safe(val):
 
 def run(ts, sid, pressure):
     """Actually do some work!"""
-    dbconn = get_dbconn("raob")
-
     res = {"profiles": []}
-    table = "raob_profile_%s" % (ts.year,)
     if ts.year > datetime.datetime.utcnow().year or ts.year < 1946:
         return json.dumps(res)
 
     stationlimiter = ""
+    params = {"valid": ts}
     if sid != "":
-        stationlimiter = " f.station = '%s' and " % (sid,)
+        stationlimiter = " f.station = :sid and "
+        params["sid"] = sid
         if sid.startswith("_"):
             # Magic here
             nt = NetworkTable("RAOB", only_online=False)
             ids = (
                 nt.sts.get(sid, {})
-                .get("name", " -- %s" % (sid,))
+                .get("name", f" -- {sid}")
                 .split("--")[1]
                 .strip()
                 .split()
             )
             if len(ids) > 1:
-                stationlimiter = " f.station in %s and " % (str(tuple(ids)),)
+                stationlimiter = " f.station in :sid and "
+                params["sid"] = tuple(ids)
     pressurelimiter = ""
     if pressure > 0:
-        pressurelimiter = " and p.pressure = %s " % (pressure,)
+        pressurelimiter = " and p.pressure = :pid "
+        params["pid"] = pressure
     df = read_sql(
-        """
+        text(
+            f"""
         SELECT f.station, p.pressure, p.height,
         round(p.tmpc::numeric,1) as tmpc,
         round(p.dwpc::numeric,1) as dwpc, p.drct,
-        round((p.smps * 1.94384)::numeric,0) as sknt from """
-        + table
-        + """
-        p JOIN raob_flights f
-        on (p.fid = f.fid) WHERE
-        """
-        + stationlimiter
-        + """ f.valid = %s """
-        + pressurelimiter
-        + """
+        round((p.smps * 1.94384)::numeric,0) as sknt
+        from raob_profile_{ts.year} p JOIN raob_flights f on (p.fid = f.fid)
+        WHERE {stationlimiter} f.valid = :valid {pressurelimiter}
         ORDER by f.station, p.pressure DESC
-        """,
-        dbconn,
-        params=(ts,),
+        """
+        ),
+        get_dbconnstr("raob"),
+        params=params,
         index_col=None,
     )
     for station, gdf in df.groupby("station"):
@@ -101,7 +98,6 @@ def run(ts, sid, pressure):
                 profile=profile,
             )
         )
-    dbconn.close()
     return json.dumps(res)
 
 
@@ -128,23 +124,18 @@ def application(environ, start_response):
     pressure = int(fields.get("pressure", -1))
     cb = fields.get("callback")
 
-    mckey = "/json/raob/%s/%s/%s?callback=%s" % (
-        ts.strftime("%Y%m%d%H%M"),
-        sid,
-        pressure,
-        cb,
-    )
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
-    res = mc.get(mckey)
-    if not res:
-        res = run(ts, sid, pressure)
-        mc.set(mckey, res, 600)
-
-    if cb is None:
-        data = res
+    mckey = f"/json/raob/{ts:%Y%m%d%H%M}/{sid}/{pressure}?callback={cb}"
+    mc = Client(("iem-memcached", 11211))
+    data = mc.get(mckey)
+    if data is not None:
+        data = data.decode("utf-8")
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        data = run(ts, sid, pressure)
+        mc.set(mckey, data, 600)
+    mc.close()
 
+    if cb is not None:
+        data = f"{html_escape(cb)}({data})"
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
     return [data.encode("ascii")]

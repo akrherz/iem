@@ -16,4 +16,3 @@ echo <<<EOF
 </Folder>
 </kml>
 EOF;
-?>

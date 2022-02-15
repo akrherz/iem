@@ -5,6 +5,7 @@ from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
 
 ISO9660 = "%Y-%m-%dT%H:%MZ"
+BASEURL = "https://www.spc.noaa.gov/products/md"
 
 
 def dowork(count, sort):
@@ -15,7 +16,7 @@ def dowork(count, sort):
     res = dict(mcds=[])
 
     cursor.execute(
-        """
+        f"""
         SELECT issue at time zone 'UTC' as i,
         expire at time zone 'UTC' as e,
         num,
@@ -23,17 +24,12 @@ def dowork(count, sort):
         ST_Area(geom::geography) / 1000000. as area_sqkm,
         concerning
         from mcd WHERE not ST_isEmpty(geom)
-        ORDER by area_sqkm """
-        + sort
-        + """ LIMIT %s
+        ORDER by area_sqkm {sort} LIMIT %s
     """,
         (count,),
     )
     for row in cursor:
-        url = ("https://www.spc.noaa.gov/products/md/%s/md%04i.html") % (
-            row[4],
-            row[2],
-        )
+        url = f"{BASEURL}/{row[4]}/md{row[2]:04.0f}.html"
         res["mcds"].append(
             dict(
                 spcurl=url,
@@ -64,7 +60,7 @@ def application(environ, start_response):
     if cb is None:
         data = res
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        data = f"{html_escape(cb)}({res})"
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)

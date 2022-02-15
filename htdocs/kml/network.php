@@ -45,4 +45,3 @@ foreach($nt->table as $sid => $data)
 </Placemark>";
 }
 echo "</Document></kml>";
-?>
