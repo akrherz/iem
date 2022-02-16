@@ -22,7 +22,7 @@ from pandas.io.sql import read_sql
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconnstr, html_escape
-from sqlalchemy import text
+from sqlalchemy import text, create_engine
 
 json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 
@@ -62,22 +62,24 @@ def run(ts, sid, pressure):
     if pressure > 0:
         pressurelimiter = " and p.pressure = :pid "
         params["pid"] = pressure
-    df = read_sql(
-        text(
-            f"""
-        SELECT f.station, p.pressure, p.height,
-        round(p.tmpc::numeric,1) as tmpc,
-        round(p.dwpc::numeric,1) as dwpc, p.drct,
-        round((p.smps * 1.94384)::numeric,0) as sknt
-        from raob_profile_{ts.year} p JOIN raob_flights f on (p.fid = f.fid)
-        WHERE {stationlimiter} f.valid = :valid {pressurelimiter}
-        ORDER by f.station, p.pressure DESC
-        """
-        ),
-        get_dbconnstr("raob"),
-        params=params,
-        index_col=None,
-    )
+    with create_engine(get_dbconnstr("raob")).begin() as engine:
+        df = read_sql(
+            text(
+                f"""
+            SELECT f.station, p.pressure, p.height,
+            round(p.tmpc::numeric,1) as tmpc,
+            round(p.dwpc::numeric,1) as dwpc, p.drct,
+            round((p.smps * 1.94384)::numeric,0) as sknt
+            from raob_profile_{ts.year} p JOIN raob_flights f
+                on (p.fid = f.fid)
+            WHERE {stationlimiter} f.valid = :valid {pressurelimiter}
+            ORDER by f.station, p.pressure DESC
+            """
+            ),
+            engine,
+            params=params,
+            index_col=None,
+        )
     for station, gdf in df.groupby("station"):
         profile = []
         for _, row in gdf.iterrows():

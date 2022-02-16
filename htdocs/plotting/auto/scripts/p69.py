@@ -2,8 +2,7 @@
 import datetime
 
 import matplotlib.patheffects as PathEffects
-from pandas.io.sql import read_sql
-from pyiem import network
+import pandas as pd
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
@@ -114,8 +113,7 @@ def plotter(fdict):
     month = ctx["month"]
     ctx["mag"] = abs(ctx["mag"])
 
-    table = "alldata_%s" % (station[:2],)
-    nt = network.Table("%sCLIMATE" % (station[:2],))
+    table = f"alldata_{station[:2]}"
 
     yr = "year as yr"
     if month == "all":
@@ -130,7 +128,7 @@ def plotter(fdict):
     elif month == "summer":
         months = [6, 7, 8]
     else:
-        ts = datetime.datetime.strptime("2000-" + month + "-01", "%Y-%b-%d")
+        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
@@ -139,15 +137,15 @@ def plotter(fdict):
     offset = 0
     if ctx["mag"] > 0:
         if ctx["unit"] == "sigma":
-            metric = fr"{ctx['mag']}$\sigma$"
+            metric = rf"{ctx['mag']}$\sigma$"
             smul = ctx["mag"]
         elif ctx["unit"] == "degrees":
-            metric = fr"{ctx['mag']}$^\circ$F"
+            metric = rf"{ctx['mag']}$^\circ$F"
             offset = ctx["mag"]
     op = "+" if ctx["which"] == "above" else "-"
     comp = ">" if ctx["which"] == "above" else "<"
     which = "above" if ctx["which"] == "above" else "below"
-    df = read_sql(
+    df = pd.read_sql(
         text(
             f"""
       WITH avgs as (
@@ -192,7 +190,7 @@ def plotter(fdict):
 
     title = "\n".join(
         [
-            f"[{station}] {nt.sts[station]['name']} "
+            f"[{station}] {ctx['_nt'].sts[station]['name']} "
             f"{df.index.values.min()}-{df.index.values.max()} "
             f"{PDICT4[ctx['opt']]} of Days",
             f"with {PDICT[varname]} {metric} {PDICT3[ctx['which']]} "
@@ -220,7 +218,7 @@ def plotter(fdict):
     txt = ax.text(
         bars[10].get_x(),
         avgv,
-        "Avg: %.1f%s" % (avgv, "" if ctx["opt"] == "number" else "%"),
+        f"Avg: {avgv:.1f}{'' if ctx['opt'] == 'number' else '%'}",
         color="yellow",
         fontsize=14,
         va="center",
@@ -237,4 +235,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

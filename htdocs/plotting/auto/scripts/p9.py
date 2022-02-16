@@ -4,10 +4,8 @@ import datetime
 
 import numpy as np
 import pandas as pd
-from pandas.io.sql import read_sql
-from pyiem import network
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -68,7 +66,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop", user="nobody")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     thisyear = datetime.datetime.now().year
@@ -77,30 +74,26 @@ def plotter(fdict):
     ceiling = ctx["ceiling"]
     varname = ctx["var"]
 
-    table = f"alldata_{station[:2]}"
-    nt = network.Table(f"{station[:2]}CLIMATE")
-    ab = nt.sts[station]["archive_begin"]
+    ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown Station Metadata.")
     syear = max(ab.year, 1893)
 
-    glabel = "%s%s%s" % (varname, base, ceiling)
-    gfunc = "gddxx(%s, %s, high, low)" % (base, ceiling)
-    title = "base=%s/ceil=%s" % (base, ceiling)
+    glabel = f"{varname}{base}{ceiling}"
+    gfunc = f"gddxx({base}, {ceiling}, high, low)"
+    title = f"base={base}/ceil={ceiling}"
     if varname in ["hdd", "cdd"]:
-        gfunc = "%s(high, low, %s)" % (varname, base)
-        title = "base=%s" % (base,)
+        gfunc = f"{varname}(high, low, {base})"
+        title = f"base={base}"
     elif varname == "sdd":
-        gfunc = "case when high > %s then high - %s else 0 end" % (
-            ceiling,
-            ceiling,
-        )
-        title = "base=%s" % (ceiling,)
+        gfunc = f"case when high > {ceiling} then high - {ceiling} else 0 end"
+        title = f"base={ceiling}"
 
-    df = read_sql(
-        f"SELECT year, sday, {gfunc} as {glabel} from {table} WHERE "
+    df = pd.read_sql(
+        f"SELECT year, sday, {gfunc} as {glabel} from "
+        f"alldata_{station[:2]} WHERE "
         "station = %s and year > 1892 and sday != '0229'",
-        pgconn,
+        get_dbconnstr("coop"),
         params=(station,),
     )
     if df.empty:
@@ -113,14 +106,9 @@ def plotter(fdict):
         .describe(percentiles=[0.05, 0.25, 0.75, 0.95])
     )
     df2 = df2.unstack(level=-1)
-    title = "%s-%s %s [%s]\n%s %s (%s)" % (
-        syear,
-        thisyear,
-        nt.sts[station]["name"],
-        station,
-        year,
-        PDICT[varname],
-        title,
+    title = (
+        f"{syear}-{thisyear} {ctx['_nt'].sts[station]['name']} [{station}]\n"
+        f"{year} {PDICT[varname]} ({title})"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.plot(
@@ -137,7 +125,7 @@ def plotter(fdict):
         _data[glabel],
         color="b",
         zorder=2,
-        label="%s" % (year,),
+        label=f"{year}",
     )
     ax.bar(
         np.arange(1, 366),

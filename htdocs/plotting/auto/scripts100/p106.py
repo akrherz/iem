@@ -103,9 +103,9 @@ def plotter(fdict):
         months = [ts.month, 999]
 
     if opt == "tmpf_above":
-        limiter = "round(tmpf::numeric,0) >= %s" % (threshold,)
+        limiter = f"round(tmpf::numeric,0) >= {threshold}"
     else:
-        limiter = "round(tmpf::numeric,0) < %s" % (threshold,)
+        limiter = f"round(tmpf::numeric,0) < {threshold}"
 
     cursor.execute(
         f"""
@@ -134,14 +134,13 @@ def plotter(fdict):
     for row in cursor:
         data[row[0].hour].append(row[1])
 
-    title = "%s [%s] Hourly Temp Distributions over (%s)" % (
-        ctx["_nt"].sts[station]["name"],
-        station,
-        month.capitalize(),
+    title = (
+        f"{ctx['_nt'].sts[station]['name']} [{station}] Hourly Temp "
+        f"Distributions over ({month.capitalize()})"
     )
-    subtitle = "On Dates with at least one temperature ob %s %.0f" % (
-        PDICT[opt],
-        threshold,
+    subtitle = (
+        f"On Dates with at least one temperature ob {PDICT[opt]} "
+        f"{threshold:.0f}"
     )
     fig, ax = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     v1 = ax.violinplot(data, showextrema=True, showmeans=True, widths=0.7)
@@ -151,7 +150,7 @@ def plotter(fdict):
     ax.grid(True)
     ax.set_ylabel(r"Temperature $^\circ$F")
     ax.set_xlabel(
-        "Local Hour for Timezone: %s" % (ctx["_nt"].sts[station]["tzname"],)
+        f"Local Hour for Timezone: {ctx['_nt'].sts[station]['tzname']}"
     )
     ax.set_xticks(range(1, 25, 3))
     ax.set_xticklabels("Mid,3 AM,6 AM,9 AM,Noon,3 PM,6 PM,9 PM".split(","))

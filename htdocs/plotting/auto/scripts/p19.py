@@ -3,10 +3,8 @@ import datetime
 
 import numpy as np
 import pandas as pd
-from pandas.io.sql import read_sql
 from matplotlib.font_manager import FontProperties
 from sqlalchemy import text
-from pyiem import network
 from pyiem.plot import figure, get_cmap
 from pyiem.util import get_autoplot_context, get_dbconnstr
 from pyiem.exceptions import NoDataFound
@@ -86,8 +84,6 @@ def plotter(fdict):
     binsize = ctx["binsize"]
     month = ctx["month"]
     year = ctx.get("year")
-    table = "alldata_%s" % (station[:2],)
-    nt = network.Table("%sCLIMATE" % (station[:2],))
     if month == "all":
         months = range(1, 13)
     elif month == "fall":
@@ -102,9 +98,9 @@ def plotter(fdict):
         ts = datetime.datetime.strptime("2000-" + month + "-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
-    ddf = read_sql(
+    ddf = pd.read_sql(
         text(
-            f"SELECT high, low, year, month from {table} WHERE "
+            f"SELECT high, low, year, month from alldata_{station[:2]} WHERE "
             "station = :station "
             "and year > 1892 and high >= low and month in :months "
         ),
@@ -126,7 +122,7 @@ def plotter(fdict):
         for j, yedge in enumerate(yedges[:-1]):
             rows.append(dict(high=yedge, low=xedge, count=hist[i, j]))
     df = pd.DataFrame(rows)
-    ab = nt.sts[station]["archive_begin"]
+    ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
     years = float(datetime.datetime.now().year - ab.year)
@@ -134,7 +130,7 @@ def plotter(fdict):
     hist.mask = np.where(hist < (1.0 / years), True, False)
     ar = np.argwhere(hist.max() == hist)
 
-    title = f"[{station}] {nt.sts[station]['name']}"
+    title = f"[{station}] {ctx['_nt'].sts[station]['name']}"
     subtitle = (
         "Daily High vs Low Temperature Histogram + Range between Low + High "
         f"(month={month.upper()})"
@@ -201,13 +197,10 @@ def plotter(fdict):
     ax.text(
         0.65,
         0.15,
-        ("Largest Frequency: %.1d days\n" "High: %.0d-%.0d Low: %.0d-%.0d")
-        % (
-            hist[xmax, ymax],
-            yedges[ymax],
-            yedges[ymax + 1],
-            xedges[xmax],
-            xedges[xmax + 1],
+        (
+            f"Largest Frequency: {hist[xmax, ymax]:.1f} days\n"
+            f"High: {yedges[ymax]:.0f}-{yedges[ymax + 1]:.0f} "
+            f"Low: {xedges[xmax]:.0f}-{xedges[xmax + 1]:.0f}"
         ),
         ha="center",
         va="center",
@@ -244,7 +237,7 @@ def plotter(fdict):
             ddf["year"] = (
                 ddf[((ddf["month"] == 1) | (ddf["month"] == 2))]["year"] - 1
             )
-            label = "Dec %s - Feb %s" % (year, year + 1)
+            label = f"Dec {year} - Feb {year + 1}"
         ddf2 = ddf[ddf["year"] == year]
         ax.scatter(
             ddf2["low"],

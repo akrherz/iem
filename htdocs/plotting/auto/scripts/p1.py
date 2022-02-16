@@ -6,7 +6,7 @@ import numpy as np
 from scipy import stats
 import pandas as pd
 from pyiem.plot import figure_axes
-from pyiem import network, util
+from pyiem import util
 from pyiem.exceptions import NoDataFound
 
 PDICT = dict(
@@ -182,7 +182,6 @@ def plotter(fdict):
     num2 = min([12, ctx["num2"]])
     months1, offsets1 = compute_months_and_offsets(month1, num1)
     months2, offsets2 = compute_months_and_offsets(month2, num2)
-    nt = network.Table(f"{station[:2]}CLIMATE")
     # Compute the monthly totals
     df = pd.read_sql(
         f"""
@@ -215,19 +214,15 @@ def plotter(fdict):
 
     resdf = pd.DataFrame(
         {
-            "%s_1" % (varname1,): xdf[varname1],
-            "%s_2" % (varname2,): ydf[varname2],
+            f"{varname1}_1": xdf[varname1],
+            f"{varname2}_2": ydf[varname2],
         }
     )
     resdf = resdf.dropna()
     title = (
-        "%s-%s %s [%s]\n"
+        f"{resdf.index.min()}-{resdf.index.max()} "
+        f"{ctx['_nt'].sts[station]['name']} [{station}]\n"
         "Comparison of Monthly Periods, Quadrant Frequency Labelled"
-    ) % (
-        resdf.index.min(),
-        resdf.index.max(),
-        nt.sts[station]["name"],
-        station,
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.scatter(
@@ -254,7 +249,7 @@ def plotter(fdict):
         y,
         lw=2,
         color="r",
-        label="Slope=%.2f R$^2$=%.2f" % (h_slope, r_value ** 2),
+        label="Slope=%.2f R$^2$=%.2f" % (h_slope, r_value**2),
     )
     ax.legend(fontsize=10)
     xmonths = ", ".join([calendar.month_abbr[x] for x in months1])

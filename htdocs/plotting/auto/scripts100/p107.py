@@ -14,9 +14,13 @@ PDICT = {
     "avg_low_temp": "Average Low Temperature",
     "avg_temp": "Average Temperature",
     "gdd": "Growing Degree Days",
-    "days-high-above": "Days with High Temp Greater Than or Equal To (threshold)",
+    "days-high-above": (
+        "Days with High Temp Greater Than or Equal To (threshold)"
+    ),
     "days-high-below": "Days with High Temp Below (threshold)",
-    "days-lows-above": "Days with Low Temp Greater Than or Equal To (threshold)",
+    "days-lows-above": (
+        "Days with Low Temp Greater Than or Equal To (threshold)"
+    ),
     "days-lows-below": "Days with Low Temp Below (threshold)",
     "max_high": "Maximum High Temperature",
     "min_high": "Minimum High Temperature",
@@ -26,7 +30,9 @@ PDICT = {
     "range_low": "Range of Low Temperature",
     "precip": "Total Precipitation",
     "snow": "Total Snowfall",
-    "days-snow-above": "Days with Snowfall Greater Than or Equal To (threshold)",
+    "days-snow-above": (
+        "Days with Snowfall Greater Than or Equal To (threshold)"
+    ),
 }
 
 
@@ -203,15 +209,17 @@ def plotter(fdict):
     fig.text(0.86, ypos, "Top 10")
     for _, row in df.head(10).iterrows():
         ypos -= dy
-        fig.text(0.86, ypos, yrfmter(row["yr"]))
-        fig.text(0.95, ypos, fmter(row[varname]))
+        _fp = {"weight": "bold"} if row["yr"] == year else {}
+        fig.text(0.86, ypos, yrfmter(row["yr"]), font_properties=_fp)
+        fig.text(0.95, ypos, fmter(row[varname]), font_properties=_fp)
 
     ypos -= 2 * dy
     fig.text(0.86, ypos, "Bottom 10")
     ypos = ypos - 10 * dy
     for _, row in df.tail(10).iterrows():
-        fig.text(0.86, ypos, yrfmter(row["yr"]))
-        fig.text(0.95, ypos, fmter(row[varname]))
+        _fp = {"weight": "bold"} if row["yr"] == year else {}
+        fig.text(0.86, ypos, yrfmter(row["yr"]), font_properties=_fp)
+        fig.text(0.95, ypos, fmter(row[varname]), font_properties=_fp)
         ypos += dy
 
     bars = ax[0].bar(df["yr"], df[varname], facecolor="r", edgecolor="r")

@@ -3,7 +3,6 @@ import datetime
 
 import numpy as np
 import pandas as pd
-from pyiem import network
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -86,18 +85,10 @@ def plotter(fdict):
     date1 = ctx["date1"]
     date2 = ctx["date2"]
 
-    table = "alldata_%s" % (station[:2],)
-    nt = network.Table("%sCLIMATE" % (station[:2],))
-
     title = (
-        "%s - %s [%s] %s\n" "%s Day Trailing Departures plotted every %s days"
-    ) % (
-        date1.strftime("%d %b %Y"),
-        date2.strftime("%d %b %Y"),
-        station,
-        nt.sts[station]["name"],
-        days,
-        days2,
+        f"{date1:%d %b %Y} - {date2:%d %b %Y} "
+        f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
+        f"{days} Day Trailing Departures plotted every {days2} days"
     )
 
     (fig, ax) = figure_axes(title=title, apctx=ctx)
@@ -122,7 +113,7 @@ def plotter(fdict):
         max(case when year = %s then p else -999 end),
         max(case when year = %s then t else -999 end) from
         (SELECT year, sum(precip) as p, avg((high+low)/2.) as t
-        from {table}
+        from alldata_{station[:2]}
         WHERE station = %s and sday in %s GROUP by year) as foo
         """,
             (now.year, now.year, station, tuple(sdays)),
@@ -192,7 +183,7 @@ def plotter(fdict):
         ha="right",
     )
     for lbl, t, p, a in zip(lbls, tsigma, psigma, aligns):
-        ax.text(pos[0], y, "%s" % (lbl,), transform=ax.transAxes, fontsize=10)
+        ax.text(pos[0], y, f"{lbl}", transform=ax.transAxes, fontsize=10)
         ax.text(
             pos[1],
             y,

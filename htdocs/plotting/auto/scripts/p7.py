@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 import matplotlib.dates as mdates
 import matplotlib.colors as mpcolors
-from pyiem import network
 from pyiem.plot import get_cmap, figure
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -21,6 +20,8 @@ def get_description():
     ] = """This plot presents the period over which growing
     degree days were accumulated between the two thresholds provided by
     the user.  The colors represent the number of days for the period shown."""
+    today = datetime.date.today()
+    year = today.year if today.month > 5 else today.year - 1
     desc["arguments"] = [
         dict(
             type="station",
@@ -32,7 +33,7 @@ def get_description():
         dict(
             type="year",
             name="year",
-            default=datetime.date.today().year,
+            default=year,
             label="Select Year",
             min=1893,
         ),
@@ -75,8 +76,7 @@ def plotter(fdict):
     year = ctx["year"]
     gdd1 = ctx["gdd1"]
     gdd2 = ctx["gdd2"]
-    table = "alldata_%s" % (station[:2],)
-    nt = network.Table("%sCLIMATE" % (station[:2],))
+    table = f"alldata_{station[:2]}"
 
     ccursor.execute(
         "SELECT day, gddxx(%s, %s, high, low) as gdd "
@@ -134,7 +134,7 @@ def plotter(fdict):
         )
         now += datetime.timedelta(days=1)
 
-    if True not in success:
+    if not any(success):
         raise NoDataFound("No data, pick lower GDD values")
     df = pd.DataFrame(rows)
     heights = np.array(heights)
@@ -147,7 +147,12 @@ def plotter(fdict):
     bins = np.arange(bmin, bmax + 1.1)
     norm = mpcolors.BoundaryNorm(bins, cmap.N)
 
-    fig = figure(apctx=ctx)
+    title = (
+        f"{ctx['_nt'].sts[station]['name']} [{station}] {year} GDD "
+        f"[base={ctx['gddbase']},ceil={ctx['gddceil']}]\n"
+        f"Period between GDD {gdd1} and {gdd2}, gray bars incomplete"
+    )
+    fig = figure(apctx=ctx, title=title)
     ax = fig.add_axes([0.125, 0.125, 0.75, 0.75])
     bars = ax.bar(days2, heights, bottom=starts, fc="#EEEEEE")
     for i, mybar in enumerate(bars):
@@ -161,30 +166,13 @@ def plotter(fdict):
 
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d\n%b"))
     ax.set_xlabel("Planting Date")
-    ax.set_title(
-        (
-            "%s [%s] %s GDD [base=%s,ceil=%s]\n"
-            "Period between GDD %s and %s, gray bars incomplete"
-        )
-        % (
-            nt.sts[station]["name"],
-            station,
-            year,
-            ctx["gddbase"],
-            ctx["gddceil"],
-            gdd1,
-            gdd2,
-        )
-    )
 
     ax2 = fig.add_axes(
         [0.92, 0.1, 0.07, 0.8], frameon=False, yticks=[], xticks=[]
     )
     ax2.set_xlabel("Days")
-    for i, mybin in enumerate(bins):
-        ax2.text(0.52, i, "%g" % (mybin,), ha="left", va="center", color="k")
-        # txt.set_path_effects([PathEffects.withStroke(linewidth=2,
-        #                                             foreground="k")])
+    for i, mybin in enumerate(bins[:-1]):
+        ax2.text(0.52, i, f"{mybin:.0f}", ha="left", va="center", color="k")
     ax2.barh(
         np.arange(len(bins[:-1])),
         [0.5] * len(bins[:-1]),
