@@ -55,8 +55,8 @@ def get_data(ts, fmt):
     cursor.execute(
         """
     select station, name, product, state, wfo, valid,
-    round(st_x(geom)::numeric, 4)::float as st_x,
-    round(st_y(geom)::numeric, 4)::float as st_y,
+    round(st_x(geom)::numeric, 4)::float as lon,
+    round(st_y(geom)::numeric, 4)::float as lat,
     high, high_normal, high_record, high_record_years, high_time,
     low, low_normal, low_record, low_record_years, low_time,
     precip, precip_normal, precip_month, precip_jan1, precip_jan1_normal,
@@ -88,6 +88,8 @@ def get_data(ts, fmt):
                 "properties": {
                     "station": row["station"],
                     "state": row["state"],
+                    "lon": row["lon"],
+                    "lat": row["lat"],
                     "valid": row["valid"].strftime("%Y-%m-%d"),
                     "wfo": row["wfo"],
                     "link": f"/api/1/nwstext/{row['product']}",
@@ -167,14 +169,15 @@ def get_data(ts, fmt):
                 },
                 "geometry": {
                     "type": "Point",
-                    "coordinates": [row["st_x"], row["st_y"]],
+                    "coordinates": [row["lon"], row["lat"]],
                 },
             }
         )
     if fmt == "geojson":
         return json.dumps(data)
     cols = (
-        "station,valid,name,state,wfo,high,high_record,high_record_years,"
+        "station,lon,lat,valid,name,state,wfo,high,high_record,"
+        "high_record_years,"
         "high_normal,high_time,low,low_record,low_record_years,low_normal,"
         "low_time,precip,precip_normal,precip_month,precip_jan1,"
         "precip_jan1_normal,precip_jul1,precip_dec1,precip_dec1_normal,"
