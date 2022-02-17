@@ -4,10 +4,10 @@ import datetime
 import calendar
 
 from scipy import stats
-from pandas.io.sql import read_sql
+import pandas as pd
 from matplotlib.patches import Circle
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 
@@ -61,21 +61,21 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     month = ctx["month"]
     year = ctx["year"]
 
-    df = read_sql(
-        "SELECT year, sum(precip) as total_precip, "
-        "sum(gddxx(%s, %s, high::numeric,low::numeric)) as gdd "
-        f"from alldata_{station[:2]} "
-        "WHERE station = %s and month = %s GROUP by year",
-        pgconn,
-        params=(ctx["gddbase"], ctx["gddceil"], station, month),
-        index_col="year",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            "SELECT year, sum(precip) as total_precip, "
+            "sum(gddxx(%s, %s, high::numeric,low::numeric)) as gdd "
+            f"from alldata_{station[:2]} "
+            "WHERE station = %s and month = %s GROUP by year",
+            conn,
+            params=(ctx["gddbase"], ctx["gddceil"], station, month),
+            index_col="year",
+        )
     if len(df.index) < 3:
         raise NoDataFound("ERROR: No Data Found")
 
@@ -84,7 +84,7 @@ def plotter(fdict):
 
     df["precip_sigma"] = (df.total_precip - pstats["mean"]) / pstats["std"]
     df["gdd_sigma"] = (df.gdd - gstats["mean"]) / gstats["std"]
-    df["distance"] = (df.precip_sigma ** 2 + df.gdd_sigma ** 2) ** 0.5
+    df["distance"] = (df.precip_sigma**2 + df.gdd_sigma**2) ** 0.5
 
     h_slope, intercept, r_value, _, _ = stats.linregress(
         df["gdd_sigma"], df["precip_sigma"]

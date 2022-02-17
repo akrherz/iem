@@ -2,10 +2,9 @@
 import calendar
 
 import numpy as np
-from pandas.io.sql import read_sql
-from pyiem import network
+import pandas as pd
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -64,7 +63,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     varname = ctx["var"]
@@ -76,29 +74,27 @@ def plotter(fdict):
     if PDICT2.get(drct) is None:
         return
     operator = ">=" if drct == "above" else "<"
-    table = "alldata_%s" % (station[:2],)
-    nt = network.Table("%sCLIMATE" % (station[:2],))
-
-    df = read_sql(
-        f"""
-        SELECT sday,
-        sum(case when {varname} {operator} %s then 1 else 0 end)
-        as hit,
-        count(*) as total
-        from {table} WHERE station = %s and month = %s
-        GROUP by sday ORDER by sday ASC
-        """,
-        pgconn,
-        params=(threshold, station, month),
-        index_col="sday",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+            SELECT sday,
+            sum(case when {varname} {operator} %s then 1 else 0 end)
+            as hit,
+            count(*) as total
+            from alldata_{station[:2]} WHERE station = %s and month = %s
+            GROUP by sday ORDER by sday ASC
+            """,
+            conn,
+            params=(threshold, station, month),
+            index_col="sday",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     df["freq"] = df["hit"] / df["total"] * 100.0
 
     title = ("[%s] %s %s %s %s\nduring %s (Avg: %.2f days/year)") % (
         station,
-        nt.sts[station]["name"],
+        ctx["_nt"].sts[station]["name"],
         PDICT.get(varname),
         PDICT2.get(drct),
         threshold,

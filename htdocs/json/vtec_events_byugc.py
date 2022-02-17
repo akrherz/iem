@@ -4,7 +4,7 @@ from io import BytesIO, StringIO
 import datetime
 
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, html_escape
+from pyiem.util import get_sqlalchemy_conn, html_escape
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
 from pandas.io.sql import read_sql
 
@@ -24,26 +24,25 @@ def make_url(row):
 
 def get_df(ugc, sdate, edate):
     """Answer the request!"""
-    pgconn = get_dbconn("postgis")
-
-    df = read_sql(
-        """
-        SELECT
-        to_char(issue at time zone 'UTC',
-            'YYYY-MM-DDThh24:MI:SSZ') as iso_issued,
-        to_char(issue at time zone 'UTC',
-            'YYYY-MM-DD hh24:MI') as issued,
-        to_char(expire at time zone 'UTC',
-            'YYYY-MM-DDThh24:MI:SSZ') as iso_expired,
-        to_char(expire at time zone 'UTC',
-            'YYYY-MM-DD hh24:MI') as expired,
-        eventid, phenomena, significance, hvtec_nwsli, wfo
-        from warnings WHERE ugc = %s and issue > %s
-        and issue < %s ORDER by issue ASC
-        """,
-        pgconn,
-        params=(ugc, sdate, edate),
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = read_sql(
+            """
+            SELECT
+            to_char(issue at time zone 'UTC',
+                'YYYY-MM-DDThh24:MI:SSZ') as iso_issued,
+            to_char(issue at time zone 'UTC',
+                'YYYY-MM-DD hh24:MI') as issued,
+            to_char(expire at time zone 'UTC',
+                'YYYY-MM-DDThh24:MI:SSZ') as iso_expired,
+            to_char(expire at time zone 'UTC',
+                'YYYY-MM-DD hh24:MI') as expired,
+            eventid, phenomena, significance, hvtec_nwsli, wfo
+            from warnings WHERE ugc = %s and issue > %s
+            and issue < %s ORDER by issue ASC
+            """,
+            conn,
+            params=(ugc, sdate, edate),
+        )
     if df.empty:
         return df
     df["name"] = df[["phenomena", "significance"]].apply(

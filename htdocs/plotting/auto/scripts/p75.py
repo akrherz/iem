@@ -5,7 +5,6 @@ import psycopg2.extras
 import numpy as np
 from scipy import stats
 import pandas as pd
-from pyiem import network
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -64,7 +63,6 @@ def plotter(fdict):
     startyear = ctx["year"]
 
     table = "alldata_%s" % (station[:2],)
-    nt = network.Table("%sCLIMATE" % (station[:2],))
 
     ccursor.execute(
         f"""
@@ -102,7 +100,7 @@ def plotter(fdict):
     years = np.array(df["year"])
     title = ("[%s] %s %.0f-%.0f Precipitation [%s] ") % (
         station,
-        nt.sts[station]["name"],
+        ctx["_nt"].sts[station]["name"],
         min(years),
         max(years),
         PDICT2[season],
@@ -131,7 +129,7 @@ def plotter(fdict):
         0.01,
         0.99,
         "Avg: %.2f, slope: %.2f inch/century, R$^2$=%.2f"
-        % (avgv, h_slope * 100.0, r_value ** 2),
+        % (avgv, h_slope * 100.0, r_value**2),
         transform=ax.transAxes,
         va="top",
         bbox=dict(color="white"),

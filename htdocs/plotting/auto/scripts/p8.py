@@ -5,7 +5,6 @@ import datetime
 import psycopg2.extras
 import numpy as np
 import pandas as pd
-from pyiem import network
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -59,8 +58,6 @@ def plotter(fdict):
     eyear = ctx["eyear"]
     threshold = ctx["threshold"]
 
-    nt = network.Table(f"{station[:2]}CLIMATE")
-
     cursor.execute(
         f"""
     with months as (
@@ -87,7 +84,7 @@ def plotter(fdict):
     )
 
     title = (
-        f"{nt.sts[station]['name']} [{station}] "
+        f"{ctx['_nt'].sts[station]['name']} [{station}] "
         "Monthly Precipitation Reliability\n"
         f"Period: {syear}-{eyear}, % of Months above {threshold}% "
         "of Long Term Avg"

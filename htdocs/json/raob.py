@@ -21,8 +21,8 @@ from pymemcache.client import Client
 from pandas.io.sql import read_sql
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconnstr, html_escape
-from sqlalchemy import text, create_engine
+from pyiem.util import get_sqlalchemy_conn, html_escape
+from sqlalchemy import text
 
 json.encoder.FLOAT_REPR = lambda o: format(o, ".2f")
 
@@ -62,7 +62,7 @@ def run(ts, sid, pressure):
     if pressure > 0:
         pressurelimiter = " and p.pressure = :pid "
         params["pid"] = pressure
-    with create_engine(get_dbconnstr("raob")).begin() as engine:
+    with get_sqlalchemy_conn("raob") as conn:
         df = read_sql(
             text(
                 f"""
@@ -76,7 +76,7 @@ def run(ts, sid, pressure):
             ORDER by f.station, p.pressure DESC
             """
             ),
-            engine,
+            conn,
             params=params,
             index_col=None,
         )

@@ -2,9 +2,9 @@
 import datetime
 import calendar
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 
@@ -55,76 +55,73 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     month = ctx["month"]
 
-    table = "alldata_%s" % (station[:2],)
-
     # beat month
-    df = read_sql(
-        f"""
-    with obs as (
-     SELECT sday, avg(high) as avgh, avg(low) as avgl,
-     avg((high+low)/2.) as avgt, min(year) as min_year,
-     max(year) as max_year from {table}
-     WHERE station = %s and month = %s and year >= %s and year <= %s
-     GROUP by sday
-    ), c91 as (
-     SELECT to_char(valid, 'mmdd') as sday, high, low, (high+low)/2. as avgt
-     from ncei_climate91 where station = %s
-    ), c81 as (
-     SELECT to_char(valid, 'mmdd') as sday, high, low, (high+low)/2. as avgt
-     from ncdc_climate81 where station = %s
-    ), c71 as (
-     SELECT to_char(valid, 'mmdd') as sday, high, low, (high+low)/2. as avgt
-     from ncdc_climate71 where station = %s
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        with obs as (
+        SELECT sday, avg(high) as avgh, avg(low) as avgl,
+        avg((high+low)/2.) as avgt, min(year) as min_year,
+        max(year) as max_year from alldata_{station[:2]}
+        WHERE station = %s and month = %s and year >= %s and year <= %s
+        GROUP by sday
+        ), c91 as (
+        SELECT to_char(valid, 'mmdd') as sday, high, low, (high+low)/2. as avgt
+        from ncei_climate91 where station = %s
+        ), c81 as (
+        SELECT to_char(valid, 'mmdd') as sday, high, low, (high+low)/2. as avgt
+        from ncdc_climate81 where station = %s
+        ), c71 as (
+        SELECT to_char(valid, 'mmdd') as sday, high, low, (high+low)/2. as avgt
+        from ncdc_climate71 where station = %s
+        )
 
-    SELECT o.sday, o.min_year, o.max_year,
-    o.avgh as iem_avgh,
-    c91.high as ncei91_avgh,
-    c81.high as ncei81_avgh,
-    c71.high as ncei71_avgh,
-    o.avgl as iem_avgl,
-    c91.low as ncei91_avgl,
-    c81.low as ncei81_avgl,
-    c71.low as ncei71_avgl,
-    o.avgt as iem_avgt,
-    c91.avgt as ncei91_avgt,
-    c81.avgt as ncei81_avgt,
-    c71.avgt as ncei71_avgt
-    from obs o, c91, c81, c71 where o.sday = c81.sday and o.sday = c71.sday and
-    o.sday = c91.sday ORDER by o.sday ASC
-    """,
-        pgconn,
-        params=(
-            station,
-            month,
-            ctx["syear"],
-            ctx["eyear"],
-            ctx["_nt"].sts[station]["ncei91"],
-            ctx["_nt"].sts[station]["ncdc81"],
-            station,
-        ),
-        index_col="sday",
-    )
+        SELECT o.sday, o.min_year, o.max_year,
+        o.avgh as iem_avgh,
+        c91.high as ncei91_avgh,
+        c81.high as ncei81_avgh,
+        c71.high as ncei71_avgh,
+        o.avgl as iem_avgl,
+        c91.low as ncei91_avgl,
+        c81.low as ncei81_avgl,
+        c71.low as ncei71_avgl,
+        o.avgt as iem_avgt,
+        c91.avgt as ncei91_avgt,
+        c81.avgt as ncei81_avgt,
+        c71.avgt as ncei71_avgt
+        from obs o, c91, c81, c71 where o.sday = c81.sday
+        and o.sday = c71.sday and o.sday = c91.sday ORDER by o.sday ASC
+        """,
+            conn,
+            params=(
+                station,
+                month,
+                ctx["syear"],
+                ctx["eyear"],
+                ctx["_nt"].sts[station]["ncei91"],
+                ctx["_nt"].sts[station]["ncdc81"],
+                station,
+            ),
+            index_col="sday",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
 
-    fig = figure(apctx=ctx)
-    ax = fig.subplots(3, 1, sharex=True)
-
-    ax[0].set_title(
-        ("%s %s Daily Climate Comparison for %s")
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            calendar.month_name[month],
-        ),
-        fontsize=12,
+    title = (
+        f"{station} {ctx['_nt'].sts[station]['name']} Daily "
+        f"Climate Comparison for {calendar.month_name[month]}"
     )
+    fig = figure(apctx=ctx, title=title)
+    height = 0.21
+    ax = [
+        fig.add_axes([0.1, 0.08 + height * 2 + 0.18, 0.85, height]),
+        fig.add_axes([0.1, 0.08 + height + 0.09, 0.85, height]),
+        fig.add_axes([0.1, 0.08, 0.85, height]),
+    ]
     x = list(range(1, len(df.index) + 1))
     for i, c in enumerate(["avgh", "avgl", "avgt"]):
         ax[i].bar(
@@ -133,10 +130,9 @@ def plotter(fdict):
             width=0.8,
             fc="tan",
             align="center",
-            label="IEM %.0f-%.0f Obs Avg"
-            % (
-                df["min_year"].min(),
-                df["max_year"].max(),
+            label=(
+                f"IEM {df['min_year'].min():.0f}-{df['max_year'].max():.0f} "
+                "Obs Avg"
             ),
         )
         ax[i].plot(
@@ -185,12 +181,8 @@ def plotter(fdict):
         fontsize=10,
     )
 
-    ax[2].set_xlabel("Day of %s" % (calendar.month_name[month],))
+    ax[2].set_xlabel(f"Day of {calendar.month_name[month]}")
     ax[2].set_xlim(0.5, len(x) + 0.5)
-
-    ax[0].set_position([0.1, 0.7, 0.85, 0.24])
-    ax[1].set_position([0.1, 0.42, 0.85, 0.24])
-    ax[2].set_position([0.1, 0.1, 0.85, 0.24])
 
     return fig, df
 

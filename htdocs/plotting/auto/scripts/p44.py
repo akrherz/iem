@@ -5,12 +5,12 @@ import calendar
 
 import numpy as np
 import pandas as pd
-from pandas.io.sql import read_sql
 from pyiem.nws import vtec
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem import reference
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 PDICT = {"yes": "Limit Plot to Year-to-Date", "no": "Plot Entire Year"}
 PDICT2 = {
@@ -158,11 +158,36 @@ def make_barplot(ctx, df):
     return fig, df2
 
 
+def munge_df(ctx, df):
+    """Rectify an x-axis."""
+    # create a simple doy example
+    df["doy"] = pd.to_numeric(df.index.strftime("%j"))
+    df["year"] = df.index.year
+    df["month"] = df.index.month
+
+    month = 1
+    xlimit = 367
+    today = datetime.date.today()
+    if ctx["limit"] == "yes":
+        xlimit = int(today.strftime("%j"))
+    if ctx["s"] == "jul1":
+        df.loc[df["month"] < 7, "year"] = df["year"] - 1
+        month = 7
+        if ctx["limit"] == "yes":
+            base = datetime.date(today.year, 7, 1)
+            if today.month < 7:
+                base = datetime.date(today.year - 1, 7, 1)
+            xlimit = (today - base).days
+    baseline = pd.to_datetime({"year": df["year"], "month": month, "day": 1})
+    df["xaxis"] = (df.index - baseline).astype(int) // 86400 // 1e9
+
+    return df[df["xaxis"] < xlimit]
+
+
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
-    limit = ctx["limit"]
     combo = ctx["c"]
     phenomena = ctx["phenomena"][:2]
     significance = ctx["significance"][:1]
@@ -178,14 +203,12 @@ def plotter(fdict):
     if station not in ctx["_nt"].sts:
         raise NoDataFound("No Data Found.")
 
-    lastdoy = 367
-    if limit.lower() == "yes":
-        if ctx["s"] == "jul1":
-            raise ValueError("Sorry, combination of Jul 1 + limit supported")
-        lastdoy = int(datetime.datetime.today().strftime("%j")) + 1
-    wfolimiter = f" and wfo = '{station}' "
+    params = {"syear": ctx["syear"], "eyear": eyear}
+    wfolimiter = " and wfo = :wfo "
+    params["wfo"] = station
     if opt == "state":
-        wfolimiter = f" and substr(ugc, 1, 2) = '{state}' "
+        wfolimiter = " and substr(ugc, 1, 2) = :state "
+        params["state"] = state
     if opt == "wfo" and station == "_ALL":
         wfolimiter = ""
     eventlimiter = ""
@@ -193,50 +216,47 @@ def plotter(fdict):
         eventlimiter = " or (phenomena = 'SV' and significance = 'W') "
         phenomena = "TO"
         significance = "W"
-    args = [ctx["syear"], eyear, lastdoy]
     if combo == "all":
         pslimiter = ""
     else:
-        pslimiter = "(phenomena = %s and significance = %s)"
-        args.insert(0, significance)
-        args.insert(0, phenomena)
+        pslimiter = "(phenomena = :ph and significance = :sig)"
+        params["ph"] = phenomena
+        params["sig"] = significance
 
     limiter = ""
     if pslimiter != "" or eventlimiter != "":
         limiter = f" ({pslimiter} {eventlimiter}) and "
+    # Load up all data by default and then filter it later.
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = pd.read_sql(
+            text(
+                f"""
+        WITH data as (
+            SELECT extract(year from issue)::int as year,
+            issue, phenomena, significance, eventid, wfo from warnings WHERE
+            {limiter} extract(year from issue) >= :syear and
+            extract(year from issue) <= :eyear {wfolimiter}),
+        agg1 as (
+            SELECT year, min(issue) as min_issue, eventid, wfo, phenomena,
+            significance from data
+            GROUP by year, eventid, wfo, phenomena, significance)
 
-    df = read_sql(
-        f"""
-    WITH data as (
-        SELECT extract(year from issue)::int as year,
-        issue, phenomena, significance, eventid, wfo from warnings WHERE
-        {limiter} extract(year from issue) >= %s and
-        extract(year from issue) <= %s
-        and extract(doy from issue) <= %s {wfolimiter}),
-    agg1 as (
-        SELECT year, min(issue) as min_issue, eventid, wfo, phenomena,
-        significance from data
-        GROUP by year, eventid, wfo, phenomena, significance)
-
-    SELECT date(min_issue) as date, count(*)
-    from agg1 GROUP by date ORDER by date ASC
-    """,
-        get_dbconn("postgis"),
-        params=args,
-        index_col="date",
-        parse_dates="date",
-    )
+        SELECT date(min_issue) as date, count(*)
+        from agg1 GROUP by date ORDER by date ASC
+        """
+            ),
+            conn,
+            params=params,
+            index_col="date",
+            parse_dates="date",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     # pylint: disable=no-member
     df = df.reindex(
         pd.date_range(df.index.values[0], datetime.date.today())
     ).fillna(0)
-    df["year"] = df.index.year
-    df["month"] = df.index.month
-    if ctx["s"] == "jul1":
-        # Munge the year
-        df.loc[df["month"] < 7, "year"] = df["year"] - 1
+    df = munge_df(ctx, df)
     # Compute cumsum
     df["cumsum"] = df[["year", "count"]].groupby("year").cumsum()
 
@@ -249,12 +269,10 @@ def plotter(fdict):
     if opt == "state":
         _p = "Parishes" if state == "LA" else "Counties"
         ptitle = f"NWS Issued for {_p} in {reference.state_names[state]}"
-    ctx["title"] = f"{ptitle}\n {title} Count"
+    ctx["title"] = f"{ptitle}\n{title} Count"
     ctx["xlabel"] = "all days plotted"
-    if lastdoy < 367:
-        ctx["xlabel"] = f"thru approximately {datetime.date.today():%-d %B}"
-    if ctx["s"] == "jul1":
-        ctx["xlabel"] += ", year denotes start date of 1 July"
+    if ctx["limit"] == "yes":
+        ctx["xlabel"] = f"Up until {datetime.date.today():%B %d}"
 
     if ctx["plot"] == "bar":
         return make_barplot(ctx, df)
@@ -265,8 +283,7 @@ def plotter(fdict):
         df2 = df[df["year"] == yr]
         if len(df2.index) < 2:
             continue
-        basedate = datetime.date(yr, 7 if ctx["s"] == "jul1" else 1, 1)
-        xr = [x.days for x in (df2.index.date - basedate)]
+        xr = df2["xaxis"]
         maxval = df2["cumsum"].max()
         lp = ax.plot(
             xr,
@@ -275,10 +292,11 @@ def plotter(fdict):
             label=f"{yr} ({maxval:.0f})",
             drawstyle="steps-post",
         )
-        lrow = df2[df2["cumsum"] == maxval].index.date[0]
+        # First row where we hit the max
+        lrow = df2[df2["cumsum"] == maxval].iloc[0]
         ann.append(
             ax.text(
-                (lrow - basedate).days + 1,
+                lrow["xaxis"] + 1,
                 maxval,
                 f"{yr}",
                 color="w",
@@ -294,6 +312,7 @@ def plotter(fdict):
     fig.canvas.draw()
 
     attempts = 10
+    lastdoy = df["xaxis"].max()
     while ann and attempts > 0:
         attempts -= 1
         removals = []
@@ -326,7 +345,7 @@ def plotter(fdict):
     ax.set_ylim(bottom=0)
     ax.set_xlim(0, lastdoy)
 
-    return fig, df
+    return fig, df.drop(columns=["xaxis"])
 
 
 if __name__ == "__main__":
@@ -339,6 +358,6 @@ if __name__ == "__main__":
             "c": "single",
             "phenomena": "SV",
             "significance": "W",
-            "s": "jan1",
+            "s": "jul1",
         }
     )

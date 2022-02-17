@@ -3,12 +3,11 @@ import datetime
 
 import pytz
 import numpy as np
-from pandas.io.sql import read_sql
+import pandas as pd
 import matplotlib.dates as mdates
 from matplotlib.font_manager import FontProperties
 from matplotlib.colorbar import ColorbarBase
-
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import get_cmap
 from pyiem.plot import figure
 from pyiem.plot.util import fitbox
@@ -88,16 +87,24 @@ def print_table(fig, df, varname):
     monofont = FontProperties(family="monospace")
     ranks = df[varname].quantile(np.arange(0, 1.0001, 0.0025))
     xpos = 0.72
-    ypos = 0.9
-    title = "Raw Percentiles (All Hours)"
-    fitbox(fig, title, 0.7, 0.95, 0.91, 0.97, ha="center", va="center")
+    ypos = 0.8
+    fitbox(
+        fig,
+        "Raw Percentiles (All Hours)",
+        0.7,
+        0.91,
+        ypos + 0.01,
+        ypos + 0.1,
+        ha="center",
+        va="center",
+    )
     fig.text(xpos - 0.01, ypos - 0.01, "Percentile   Value")
     for (q, val) in ranks.iteritems():
         if 0.02 < q < 0.98 and (q * 100.0 % 5) != 0:
             continue
         if abs(q - 0.5) < 0.001:
             xpos = 0.85
-            ypos = 0.9
+            ypos = 0.8
             fig.text(xpos - 0.01, ypos - 0.01, "Percentile   Value")
         ypos -= 0.035
         label = f"{q * 100:-6g} {val:-6.2f}"
@@ -106,7 +113,6 @@ def print_table(fig, df, varname):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos")
 
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
@@ -147,19 +153,20 @@ def plotter(fdict):
         datefmt = "%-d %b"
 
     # Load up all the values, since we need pandas to do some heavy lifting
-    obsdf = read_sql(
-        f"""
-        select valid at time zone 'UTC' as utc_valid,
-        extract(year from valid at time zone %s)  as year,
-        extract(hour from valid at time zone %s +
-            '10 minutes'::interval)::int as hr, {varname}
-        from alldata WHERE station = %s and {varname} is not null {limiter}
-        and report_type = 2 ORDER by valid ASC
-    """,
-        pgconn,
-        params=(tzname, tzname, station),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("asos") as conn:
+        obsdf = pd.read_sql(
+            f"""
+            select valid at time zone 'UTC' as utc_valid,
+            extract(year from valid at time zone %s)::int as year,
+            extract(hour from valid at time zone %s +
+                '10 minutes'::interval)::int as hr, {varname}
+            from alldata WHERE station = %s and {varname} is not null {limiter}
+            and report_type = 2 ORDER by valid ASC
+        """,
+            conn,
+            params=(tzname, tzname, station),
+            index_col=None,
+        )
     if obsdf.empty:
         raise NoDataFound("No data was found.")
 
@@ -173,9 +180,15 @@ def plotter(fdict):
         .reset_index()
     )
     qtile = qtile.rename(columns={"level_1": "quantile"})
-    fig = figure(apctx=ctx)
+    title = (
+        f"{station} {ctx['_nt'].sts[station]['name']} {PDICT[varname]} "
+        f"Percentiles ({obsdf['year'].min():.0f}-{obsdf['year'].max():.0f})\n"
+        f"{subtitle}"
+    )
+    fig = figure(apctx=ctx, title=title)
     tp = fig.add_axes([0.1, 0.57, 0.5, 0.33])
-    bp = fig.add_axes([0.1, 0.13, 0.6, 0.35])
+    bp = fig.add_axes([0.1, 0.13, 0.5, 0.35])
+    sidep = fig.add_axes([0.61, 0.13, 0.1, 0.35])
     # Plot total percentiles on the figure
     print_table(fig, obsdf, varname)
     cmap = get_cmap(ctx["cmap"])
@@ -206,21 +219,32 @@ def plotter(fdict):
         )
         bp.grid(True)
         bp.set_ylabel("Percentile")
+        bp.set_yticks([0, 10, 25, 50, 75, 90, 100])
         bp.set_ylim(-1, 101)
         bp.xaxis.set_major_formatter(
             mdates.DateFormatter(datefmt, tz=pytz.timezone(tzname))
         )
         if opt == "day":
             bp.set_xlabel(f"Timezone: {tzname}")
-    title = ("%s %s %s Percentiles\n%s") % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-        PDICT[varname],
-        subtitle,
-    )
-    fitbox(fig, title, 0.01, 0.59, 0.91, 0.99, ha="center", va="center")
+        # Add horizontal bar graph with a histogram of the percentiles
+        hist = np.histogram(
+            thisyear["quantile"].values * 100.0,
+            bins=np.arange(0, 101, 10),
+        )
+        sidep.barh(
+            hist[1][:-1],
+            hist[0],
+            height=10,
+            align="edge",
+        )
+        sidep.set_xlabel("Hours")
+        sidep.set_yticks([])
+        sidep.set_ylim(-1, 101)
+        sidep.grid(True)
+        sidep.text(0.1, 1.01, "Histogram", transform=sidep.transAxes)
+
     return fig, qtile
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

@@ -1,10 +1,9 @@
 """Days below threshold"""
 
 from scipy import stats
-from pandas.io.sql import read_sql
-from pyiem import network
+import pandas as pd
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"above": "At or Above Threshold", "below": "Below Threshold"}
@@ -74,7 +73,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     season = ctx["season"]
@@ -83,40 +81,38 @@ def plotter(fdict):
     threshold = ctx["threshold"]
     startyear = ctx["year"]
 
-    table = "alldata_%s" % (station[:2],)
-    nt = network.Table("%sCLIMATE" % (station[:2],))
-
     b = "%s %s %s" % (
         varname,
         ">=" if direction == "above" else "<",
         threshold,
     )
 
-    df = read_sql(
-        f"""
-      SELECT extract(year from day + '%s month'::interval) as yr,
-      sum(case when month in (12, 1, 2) and {b}
-      then 1 else 0 end) as winter,
-      sum(case when month in (3, 4, 5) and {b}
-      then 1 else 0 end) as spring,
-      sum(case when month in (6, 7, 8) and {b}
-      then 1 else 0 end) as summer,
-      sum(case when month in (9, 10, 11) and {b}
-      then 1 else 0 end) as fall,
-      sum(case when {b} then 1 else 0 end) as all
-      from {table} WHERE station = %s and year >= %s
-      GROUP by yr ORDER by yr ASC
-    """,
-        pgconn,
-        params=(1 if season != "all" else 0, station, startyear),
-        index_col="yr",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        SELECT extract(year from day + '%s month'::interval) as yr,
+        sum(case when month in (12, 1, 2) and {b}
+        then 1 else 0 end) as winter,
+        sum(case when month in (3, 4, 5) and {b}
+        then 1 else 0 end) as spring,
+        sum(case when month in (6, 7, 8) and {b}
+        then 1 else 0 end) as summer,
+        sum(case when month in (9, 10, 11) and {b}
+        then 1 else 0 end) as fall,
+        sum(case when {b} then 1 else 0 end) as all
+        from alldata_{station[:2]} WHERE station = %s and year >= %s
+        GROUP by yr ORDER by yr ASC
+        """,
+            conn,
+            params=(1 if season != "all" else 0, station, startyear),
+            index_col="yr",
+        )
     if df.empty:
         raise NoDataFound("No data found for query")
 
     title = ("[%s] %s %.0f-%.0f Number of Days\n[%s] with %s %s %g%s") % (
         station,
-        nt.sts[station]["name"],
+        ctx["_nt"].sts[station]["name"],
         df.index.min(),
         df.index.max(),
         PDICT2[season],
@@ -160,7 +156,7 @@ def plotter(fdict):
         0.01,
         0.99,
         "Avg: %.1f, slope: %.2f days/century, R$^2$=%.2f"
-        % (avgv, h_slope * 100.0, r_value ** 2),
+        % (avgv, h_slope * 100.0, r_value**2),
         transform=ax.transAxes,
         va="top",
         bbox=dict(color="white"),
@@ -176,4 +172,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

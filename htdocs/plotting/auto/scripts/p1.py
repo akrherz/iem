@@ -183,29 +183,31 @@ def plotter(fdict):
     months1, offsets1 = compute_months_and_offsets(month1, num1)
     months2, offsets2 = compute_months_and_offsets(month2, num2)
     # Compute the monthly totals
-    df = pd.read_sql(
-        f"""
-    SELECT year, month, avg((high+low)/2.) as avg_temp,
-    avg(high) as avg_high, min(high) as min_high,
-    avg(low) as avg_low, max(low) as max_low,
-    sum(precip) as total_precip, max(high) as max_high, min(low) as min_low,
-    sum(case when high >= %s then 1 else 0 end) as days_high_aoa,
-    sum(cdd(high, low, 65)) as cdd65,
-    sum(hdd(high, low, 65)) as hdd65,
-    sum(gddxx(32, 86, high, low)) as gdd32,
-    sum(gddxx(41, 86, high, low)) as gdd41,
-    sum(gddxx(46, 86, high, low)) as gdd46,
-    sum(gddxx(48, 86, high, low)) as gdd48,
-    sum(gddxx(50, 86, high, low)) as gdd50,
-    sum(gddxx(51, 86, high, low)) as gdd51,
-    sum(gddxx(52, 86, high, low)) as gdd52
-    from alldata_{station[:2]}
-    WHERE station = %s and day < %s GROUP by year, month
-    """,
-        util.get_dbconnstr("coop"),
-        params=(threshold, station, today.replace(day=1)),
-        index_col="year",
-    )
+    with util.get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        SELECT year, month, avg((high+low)/2.) as avg_temp,
+        avg(high) as avg_high, min(high) as min_high,
+        avg(low) as avg_low, max(low) as max_low,
+        sum(precip) as total_precip, max(high) as max_high,
+        min(low) as min_low,
+        sum(case when high >= %s then 1 else 0 end) as days_high_aoa,
+        sum(cdd(high, low, 65)) as cdd65,
+        sum(hdd(high, low, 65)) as hdd65,
+        sum(gddxx(32, 86, high, low)) as gdd32,
+        sum(gddxx(41, 86, high, low)) as gdd41,
+        sum(gddxx(46, 86, high, low)) as gdd46,
+        sum(gddxx(48, 86, high, low)) as gdd48,
+        sum(gddxx(50, 86, high, low)) as gdd50,
+        sum(gddxx(51, 86, high, low)) as gdd51,
+        sum(gddxx(52, 86, high, low)) as gdd52
+        from alldata_{station[:2]}
+        WHERE station = %s and day < %s GROUP by year, month
+        """,
+            conn,
+            params=(threshold, station, today.replace(day=1)),
+            index_col="year",
+        )
 
     xdf = combine(df, months1, offsets1)
     ydf = combine(df, months2, offsets2)

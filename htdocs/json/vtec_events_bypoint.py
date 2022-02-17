@@ -4,7 +4,7 @@ from io import BytesIO, StringIO
 import datetime
 
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, html_escape
+from pyiem.util import get_sqlalchemy_conn, html_escape
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
 from pandas.io.sql import read_sql
 
@@ -29,26 +29,27 @@ def get_df(lon, lat, sdate, edate):
       wfo (str): 3 character WFO identifier
       year (int): year to run for
     """
-    pgconn = get_dbconn("postgis")
-
-    df = read_sql(
-        """
-    WITH myugcs as (
-        select gid from ugcs where
-        ST_Contains(geom, ST_SetSRID(ST_GeomFromEWKT('POINT(%s %s)'),4326))
-    )
-    SELECT
-    to_char(issue at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ') as iso_issued,
-  to_char(expire at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ') as iso_expired,
-    to_char(issue at time zone 'UTC', 'YYYY-MM-DD hh24:MI') as issued,
-  to_char(expire at time zone 'UTC', 'YYYY-MM-DD hh24:MI') as expired,
-    eventid, phenomena, significance, wfo, hvtec_nwsli
-    from warnings w JOIN myugcs u on (w.gid = u.gid) WHERE
-    issue > %s and issue < %s ORDER by issue ASC
-    """,
-        pgconn,
-        params=(lon, lat, sdate, edate),
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = read_sql(
+            """
+        WITH myugcs as (
+            select gid from ugcs where
+            ST_Contains(geom, ST_SetSRID(ST_GeomFromEWKT('POINT(%s %s)'),4326))
+        )
+        SELECT
+        to_char(issue at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ')
+            as iso_issued,
+        to_char(expire at time zone 'UTC', 'YYYY-MM-DDThh24:MI:SSZ')
+            as iso_expired,
+        to_char(issue at time zone 'UTC', 'YYYY-MM-DD hh24:MI') as issued,
+        to_char(expire at time zone 'UTC', 'YYYY-MM-DD hh24:MI') as expired,
+        eventid, phenomena, significance, wfo, hvtec_nwsli
+        from warnings w JOIN myugcs u on (w.gid = u.gid) WHERE
+        issue > %s and issue < %s ORDER by issue ASC
+        """,
+            conn,
+            params=(lon, lat, sdate, edate),
+        )
     if df.empty:
         return df
     df["name"] = df[["phenomena", "significance"]].apply(

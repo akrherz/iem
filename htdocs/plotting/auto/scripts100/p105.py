@@ -2,10 +2,9 @@
 import calendar
 
 import numpy as np
-from pandas.io.sql import read_sql
-from pyiem import network
+import pandas as pd
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"yes": "Yes, consider trace reports", "no": "No, omit trace reports"}
@@ -61,52 +60,50 @@ def get_color(val, cat):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     threshold = ctx["thres"]
     use_trace = ctx["trace"] == "yes"
-    table = "alldata_%s" % (station[:2],)
-    nt = network.Table("%sCLIMATE" % (station[:2],))
+    table = f"alldata_{station[:2]}"
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        with data as (
+        select sday, day, precip from {table}
+        where station = %s),
 
-    df = read_sql(
-        f"""
-    with data as (
-      select sday, day, precip from {table}
-      where station = %s),
+        rains as (
+        SELECT day from {table} WHERE station = %s and precip >= %s),
 
-    rains as (
-      SELECT day from {table} WHERE station = %s and precip >= %s),
+        rains2 as (
+        SELECT day from {table} WHERE station = %s and precip >= %s),
 
-    rains2 as (
-      SELECT day from {table} WHERE station = %s and precip >= %s),
+        agg as (
+        SELECT d.sday, d.day, d.precip, r.day as rday
+        from data d LEFT JOIN rains r ON (d.day = r.day)),
 
-    agg as (
-      SELECT d.sday, d.day, d.precip, r.day as rday
-      from data d LEFT JOIN rains r ON (d.day = r.day)),
+        agg2 as (
+        SELECT d.sday, d.day, d.precip, d.rday, r.day as rday2 from
+        agg d LEFT JOIN rains2 r ON (d.day = r.day)),
 
-    agg2 as (
-      SELECT d.sday, d.day, d.precip, d.rday, r.day as rday2 from
-      agg d LEFT JOIN rains2 r ON (d.day = r.day)),
+        agg3 as (
+        SELECT sday, precip, day - max(rday) OVER (ORDER by day ASC) as diff,
+        day - max(rday2) OVER (ORDER by day ASC) as diff2 from agg2)
 
-    agg3 as (
-      SELECT sday, precip, day - max(rday) OVER (ORDER by day ASC) as diff,
-      day - max(rday2) OVER (ORDER by day ASC) as diff2 from agg2)
-
-    SELECT sday, max(precip) as maxp, max(diff) as d1, max(diff2) as d2
-    from agg3 WHERE sday != '0229'
-    GROUP by sday ORDER by sday ASC
-    """,
-        pgconn,
-        params=(
-            station,
-            station,
-            0.0001 if use_trace else 0.01,
-            station,
-            threshold,
-        ),
-        index_col="sday",
-    )
+        SELECT sday, max(precip) as maxp, max(diff) as d1, max(diff2) as d2
+        from agg3 WHERE sday != '0229'
+        GROUP by sday ORDER by sday ASC
+        """,
+            conn,
+            params=(
+                station,
+                station,
+                0.0001 if use_trace else 0.01,
+                station,
+                threshold,
+            ),
+            index_col="sday",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
 
@@ -121,7 +118,8 @@ def plotter(fdict):
     ax[0].grid(True)
     ax[0].legend(ncol=2, loc=(0.5, -0.13), fontsize=10)
     ax[0].set_title(
-        "%s [%s] Precipitation Metrics" % (nt.sts[station]["name"], station)
+        "%s [%s] Precipitation Metrics"
+        % (ctx["_nt"].sts[station]["name"], station)
     )
     ax[0].text(
         0.05,
@@ -142,4 +140,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

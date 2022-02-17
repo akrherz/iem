@@ -9,7 +9,7 @@ import pandas as pd
 from pandas.io.sql import read_sql
 from paste.request import parse_formvars
 from pyiem.nws.products.spcpts import THRESHOLD_ORDER
-from pyiem.util import get_dbconn, html_escape
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, html_escape
 
 ISO9660 = "%Y-%m-%dT%H:%MZ"
 
@@ -37,24 +37,24 @@ def dotime(time, lon, lat, day, cat):
         # ISO formatting
         ts = datetime.datetime.strptime(time, "%Y-%m-%dT%H:%MZ")
         ts = ts.replace(tzinfo=pytz.utc)
-    pgconn = get_dbconn("postgis")
-    df = read_sql(
-        """
-    SELECT issue at time zone 'UTC' as i,
-    expire at time zone 'UTC' as e,
-    product_issue at time zone 'UTC' as v,
-    threshold, category from spc_outlooks where
-    product_issue = (
-        select product_issue from spc_outlook where
-        issue <= %s and expire > %s and day = %s
-        and outlook_type = 'C' ORDER by product_issue DESC LIMIT 1)
-    and ST_Contains(geom, ST_GeomFromEWKT('SRID=4326;POINT(%s %s)'))
-    and day = %s and outlook_type = 'C' and category = %s
-    """,
-        pgconn,
-        params=(ts, ts, day, lon, lat, day, cat),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = read_sql(
+            """
+        SELECT issue at time zone 'UTC' as i,
+        expire at time zone 'UTC' as e,
+        product_issue at time zone 'UTC' as v,
+        threshold, category from spc_outlooks where
+        product_issue = (
+            select product_issue from spc_outlook where
+            issue <= %s and expire > %s and day = %s
+            and outlook_type = 'C' ORDER by product_issue DESC LIMIT 1)
+        and ST_Contains(geom, ST_GeomFromEWKT('SRID=4326;POINT(%s %s)'))
+        and day = %s and outlook_type = 'C' and category = %s
+        """,
+            conn,
+            params=(ts, ts, day, lon, lat, day, cat),
+            index_col=None,
+        )
     res = {
         "generation_time": datetime.datetime.utcnow().strftime(ISO9660),
         "query_params": {

@@ -2,11 +2,10 @@
 import datetime
 
 import pandas as pd
-from pandas.io.sql import read_sql
 from pyiem.plot import get_cmap
 from pyiem.plot import figure_axes
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from matplotlib.colorbar import ColorbarBase
 import matplotlib.colors as mpcolors
@@ -75,7 +74,6 @@ def get_description():
 
 def get_data(ctx):
     """The data we want and the data we need"""
-    pgconn = get_dbconn("coop")
     unit_desc = ctx["unit_desc"].upper()
     commodity_desc = ctx["commodity_desc"].upper()
 
@@ -92,19 +90,21 @@ def get_data(ctx):
         ctx["syear"],
         ctx["eyear"],
     )
-    df = read_sql(
-        """
-        select year, week_ending, num_value, state_alpha from nass_quickstats
-        where commodity_desc = %s and statisticcat_desc = 'PROGRESS'
-        and unit_desc = %s and state_alpha = %s and
-        util_practice_desc = %s and year >= %s and year <= %s
-        and num_value is not null
-        ORDER by state_alpha, week_ending
-    """,
-        pgconn,
-        params=params,
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            """
+            select year, week_ending, num_value, state_alpha
+            from nass_quickstats
+            where commodity_desc = %s and statisticcat_desc = 'PROGRESS'
+            and unit_desc = %s and state_alpha = %s and
+            util_practice_desc = %s and year >= %s and year <= %s
+            and num_value is not null
+            ORDER by state_alpha, week_ending
+        """,
+            conn,
+            params=params,
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No results found for query!")
     df["week_ending"] = pd.to_datetime(df["week_ending"])

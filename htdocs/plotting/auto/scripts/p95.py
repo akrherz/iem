@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 import matplotlib.colors as mpcolors
-from pyiem import network
 from pyiem.plot import get_cmap, figure
 from pyiem.plot.use_agg import plt
 from pyiem.util import get_autoplot_context, get_dbconn
@@ -106,8 +105,6 @@ def plotter(fdict):
             wanted.append(m - 12)
             deltas.append(-1)
 
-    nt = network.Table("%sCLIMATE" % (station[:2],))
-
     elnino = {}
     ccursor.execute("SELECT monthdate, soi_3m, anom_34 from elnino")
     for row in ccursor:
@@ -139,7 +136,7 @@ def plotter(fdict):
 
     title2 = "[%s] %s %s" % (
         station,
-        nt.sts[station]["name"],
+        ctx["_nt"].sts[station]["name"],
         title(wanted),
     )
     subtitle = "%s SOI (3 month average)" % (
@@ -209,7 +206,7 @@ def plotter(fdict):
     ax2.text(
         0.97,
         0.9,
-        "R$^2$=%.2f" % (r_value ** 2,),
+        "R$^2$=%.2f" % (r_value**2,),
         ha="right",
         transform=ax2.transAxes,
         bbox=dict(color="white"),
@@ -229,7 +226,7 @@ def plotter(fdict):
     ax3.text(
         0.97,
         0.9,
-        "R$^2$=%.2f" % (r_value ** 2,),
+        "R$^2$=%.2f" % (r_value**2,),
         ha="right",
         transform=ax3.transAxes,
         bbox=dict(color="white"),

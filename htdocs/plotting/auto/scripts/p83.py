@@ -2,11 +2,10 @@
 import datetime
 
 import numpy as np
-from pandas.io.sql import read_sql
+import pandas as pd
 from scipy import stats
-from pyiem import network
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -59,7 +58,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["station"]
@@ -79,52 +77,60 @@ def plotter(fdict):
     )
 
     table = "alldata_%s" % (station[:2],)
-    nt = network.Table("%sCLIMATE" % (station[:2],))
 
-    df = read_sql(
-        f"""
-    with data as (
-        SELECT day, year,
-        count(*) OVER
-            (ORDER by day ASC ROWS BETWEEN %s PRECEDING AND 1 PRECEDING) as cb,
-        avg(high) OVER
-            (ORDER by day ASC ROWS BETWEEN %s PRECEDING AND 1 PRECEDING) as hb,
-        avg(low) OVER
-            (ORDER by day ASC ROWS BETWEEN %s PRECEDING AND 1 PRECEDING) as lb,
-        sum(precip) OVER
-            (ORDER by day ASC ROWS BETWEEN %s PRECEDING AND 1 PRECEDING) as pb,
-        count(*) OVER
-            (ORDER by day ASC ROWS BETWEEN 1 FOLLOWING AND %s FOLLOWING) as ca,
-        avg(high) OVER
-            (ORDER by day ASC ROWS BETWEEN 1 FOLLOWING AND %s FOLLOWING) as ha,
-        avg(low)OVER
-            (ORDER by day ASC ROWS BETWEEN 1 FOLLOWING AND %s FOLLOWING) as la,
-        sum(precip) OVER
-            (ORDER by day ASC ROWS BETWEEN 1 FOLLOWING AND %s FOLLOWING) as pa
-        from {table} WHERE station = %s)
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        with data as (
+            SELECT day, year,
+            count(*) OVER
+                (ORDER by day ASC ROWS BETWEEN %s PRECEDING AND 1 PRECEDING)
+                as cb,
+            avg(high) OVER
+                (ORDER by day ASC ROWS BETWEEN %s PRECEDING AND 1 PRECEDING)
+                as hb,
+            avg(low) OVER
+                (ORDER by day ASC ROWS BETWEEN %s PRECEDING AND 1 PRECEDING)
+                as lb,
+            sum(precip) OVER
+                (ORDER by day ASC ROWS BETWEEN %s PRECEDING AND 1 PRECEDING)
+                as pb,
+            count(*) OVER
+                (ORDER by day ASC ROWS BETWEEN 1 FOLLOWING AND %s FOLLOWING)
+                as ca,
+            avg(high) OVER
+                (ORDER by day ASC ROWS BETWEEN 1 FOLLOWING AND %s FOLLOWING)
+                as ha,
+            avg(low)OVER
+                (ORDER by day ASC ROWS BETWEEN 1 FOLLOWING AND %s FOLLOWING)
+                as la,
+            sum(precip) OVER
+                (ORDER by day ASC ROWS BETWEEN 1 FOLLOWING AND %s FOLLOWING)
+                as pa
+            from {table} WHERE station = %s)
 
-    SELECT year, hb as high_before, lb as low_before, pb as precip_before,
-    ha as high_after, la as low_after, pa as precip_after from
-    data where cb = ca and
-    cb = %s and extract(month from day) = %s and extract(day from day) = %s
-    """,
-        pgconn,
-        params=(
-            days,
-            days,
-            days,
-            days,
-            days,
-            days,
-            days,
-            days,
-            station,
-            days,
-            month,
-            day,
-        ),
-        index_col="year",
-    )
+        SELECT year, hb as high_before, lb as low_before, pb as precip_before,
+        ha as high_after, la as low_after, pa as precip_after from
+        data where cb = ca and
+        cb = %s and extract(month from day) = %s and extract(day from day) = %s
+        """,
+            conn,
+            params=(
+                days,
+                days,
+                days,
+                days,
+                days,
+                days,
+                days,
+                days,
+                station,
+                days,
+                month,
+                day,
+            ),
+            index_col="year",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
 
@@ -150,7 +156,7 @@ def plotter(fdict):
         )
     msg = ("[%s] %s %s over %s days prior to and after %s") % (
         station,
-        nt.sts[station]["name"],
+        ctx["_nt"].sts[station]["name"],
         PDICT.get(varname),
         days,
         dt.strftime("%-d %B"),
@@ -227,7 +233,7 @@ def plotter(fdict):
     ax.text(
         0.65,
         0.02,
-        "R$^2$=%.2f bias=%.2f" % (r_value ** 2, yavg - xavg),
+        "R$^2$=%.2f bias=%.2f" % (r_value**2, yavg - xavg),
         ha="right",
         transform=ax.transAxes,
         bbox=dict(color="white"),
@@ -253,4 +259,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

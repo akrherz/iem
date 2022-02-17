@@ -2,10 +2,9 @@
 import datetime
 
 import numpy as np
-from pandas.io.sql import read_sql
-from pyiem import network
+import pandas as pd
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
@@ -141,7 +140,6 @@ def plotter(fdict):
     varname = ctx["varname"]
     year = ctx["year"]
     threshold = ctx["thres"]
-    nt = network.Table(f"{station[:2]}CLIMATE")
     sdays = []
     for i in range(days):
         ts = sts + datetime.timedelta(days=i)
@@ -149,38 +147,39 @@ def plotter(fdict):
 
     doff = (days + 1) if ets.year != sts.year else 0
     culler = " and snow is not null" if varname.find("snow") > -1 else ""
-    df = read_sql(
-        text(
-            f"""
-    SELECT extract(year from day - '{doff} days'::interval)::int as yr,
-    avg((high+low)/2.) as avg_temp, avg(high) as avg_high_temp,
-    sum(gddxx(:gddbase, :gddceil, high, low)) as gdd,
-    avg(low) as avg_low_temp,
-    sum(precip) as precip,
-    sum(snow) as snow,
-    min(low) as min_low,
-    max(low) as max_low,
-    max(high) as max_high,
-    min(high) as min_high,
-    sum(case when high >= :t then 1 else 0 end) as "days-high-above",
-    sum(case when high < :t then 1 else 0 end) as "days-high-below",
-    sum(case when low >= :t then 1 else 0 end) as "days-lows-above",
-    sum(case when low < :t then 1 else 0 end) as "days-lows-below",
-    sum(case when snow >= :t then 1 else 0 end) as "days-snow-above",
-    count(*)
-    from alldata_{station[:2]} WHERE station = :station and sday in :sdays
-    {culler} GROUP by yr ORDER by yr ASC
-    """
-        ),
-        get_dbconnstr("coop"),
-        params={
-            "gddbase": gddbase,
-            "gddceil": gddceil,
-            "t": threshold,
-            "station": station,
-            "sdays": tuple(sdays),
-        },
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            text(
+                f"""
+        SELECT extract(year from day - '{doff} days'::interval)::int as yr,
+        avg((high+low)/2.) as avg_temp, avg(high) as avg_high_temp,
+        sum(gddxx(:gddbase, :gddceil, high, low)) as gdd,
+        avg(low) as avg_low_temp,
+        sum(precip) as precip,
+        sum(snow) as snow,
+        min(low) as min_low,
+        max(low) as max_low,
+        max(high) as max_high,
+        min(high) as min_high,
+        sum(case when high >= :t then 1 else 0 end) as "days-high-above",
+        sum(case when high < :t then 1 else 0 end) as "days-high-below",
+        sum(case when low >= :t then 1 else 0 end) as "days-lows-above",
+        sum(case when low < :t then 1 else 0 end) as "days-lows-below",
+        sum(case when snow >= :t then 1 else 0 end) as "days-snow-above",
+        count(*)
+        from alldata_{station[:2]} WHERE station = :station and sday in :sdays
+        {culler} GROUP by yr ORDER by yr ASC
+        """
+            ),
+            conn,
+            params={
+                "gddbase": gddbase,
+                "gddceil": gddceil,
+                "t": threshold,
+                "station": station,
+                "sdays": tuple(sdays),
+            },
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     fmter = intfmt if varname.find("days") > -1 else nice
@@ -194,7 +193,7 @@ def plotter(fdict):
 
     title = PDICT.get(varname).replace("(threshold)", str(threshold))
     title = (
-        f"[{station}] {nt.sts[station]['name']}\n"
+        f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
         f"{title} from {sts:%-d %B} through {ets:%-d %B}"
     )
     fig = figure(apctx=ctx, title=title)

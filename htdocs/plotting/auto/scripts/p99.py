@@ -1,11 +1,10 @@
 """Daily high/low against climo"""
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 import matplotlib.dates as mdates
-from pyiem import network
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"abs": "Departure in degrees", "sigma": "Depature in sigma"}
@@ -49,43 +48,43 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     delta = ctx["delta"]
     year = ctx["year"]
-    nt = network.Table("%sCLIMATE" % (station[:2],))
 
-    table = "alldata_%s" % (station[:2],)
-    df = read_sql(
-        f"""
-        WITH days as (
-            select generate_series('%s-01-01'::date, '%s-12-31'::date,
-                '1 day'::interval)::date as day,
-                to_char(generate_series('%s-01-01'::date, '%s-12-31'::date,
-                '1 day'::interval)::date, 'mmdd') as sday
-        ),
-        climo as (
-            SELECT sday, avg(high) as avg_high, stddev(high) as stddev_high,
-            avg(low) as avg_low, stddev(low) as stddev_low from {table}
-            WHERE station = %s GROUP by sday
-        ),
-        thisyear as (
-            SELECT day, sday, high, low from {table}
-            WHERE station = %s and year = %s
-        ),
-        thisyear2 as (
-            SELECT d.day, d.sday, t.high, t.low from days d LEFT JOIN
-            thisyear t on (d.sday = t.sday)
+    table = f"alldata_{station[:2]}"
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+            WITH days as (
+                select generate_series('%s-01-01'::date, '%s-12-31'::date,
+                    '1 day'::interval)::date as day,
+                    to_char(generate_series('%s-01-01'::date, '%s-12-31'::date,
+                    '1 day'::interval)::date, 'mmdd') as sday
+            ),
+            climo as (
+                SELECT sday, avg(high) as avg_high, stddev(high)
+                as stddev_high,
+                avg(low) as avg_low, stddev(low) as stddev_low from {table}
+                WHERE station = %s GROUP by sday
+            ),
+            thisyear as (
+                SELECT day, sday, high, low from {table}
+                WHERE station = %s and year = %s
+            ),
+            thisyear2 as (
+                SELECT d.day, d.sday, t.high, t.low from days d LEFT JOIN
+                thisyear t on (d.sday = t.sday)
+            )
+            SELECT t.day, t.sday, t.high, t.low, c.avg_high, c.avg_low,
+            c.stddev_high, c.stddev_low from thisyear2 t JOIN climo c on
+            (t.sday = c.sday) ORDER by t.day ASC
+        """,
+            conn,
+            params=(year, year, year, year, station, station, year),
+            index_col="day",
         )
-        SELECT t.day, t.sday, t.high, t.low, c.avg_high, c.avg_low,
-        c.stddev_high, c.stddev_low from thisyear2 t JOIN climo c on
-        (t.sday = c.sday) ORDER by t.day ASC
-    """,
-        pgconn,
-        params=(year, year, year, year, station, station, year),
-        index_col="day",
-    )
     if df.empty:
         raise NoDataFound("No Data Found.")
     df.index.name = "Date"
@@ -108,7 +107,7 @@ def plotter(fdict):
     ax[0].set_ylabel(r"Temperature $^\circ\mathrm{F}$")
     ax[0].set_title(
         "[%s] %s Climatology & %s Observations"
-        % (station, nt.sts[station]["name"], year)
+        % (station, ctx["_nt"].sts[station]["name"], year)
     )
 
     ax[0].plot(
@@ -121,7 +120,7 @@ def plotter(fdict):
         df.index.values,
         df["low"].values,
         color="green",
-        label="%s Low" % (year,),
+        label=f"{year} Low",
     )
 
     if delta == "abs":
@@ -167,4 +166,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

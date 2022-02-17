@@ -3,11 +3,10 @@ import datetime
 import calendar
 
 import numpy as np
-from pyiem import network
+import pandas as pd
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
-from pandas.io.sql import read_sql
 
 
 def get_description():
@@ -35,37 +34,35 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
 
-    table = "alldata_%s" % (station[:2],)
-    nt = network.Table("%sCLIMATE" % (station[:2],))
     today = datetime.datetime.now()
     thisyear = today.year
 
-    df = read_sql(
-        f"""
-    with data as (
-        select year, month, extract(doy from day) as doy,
-        generate_series(32, high) as t from {table}
-        where station = %s and year < %s),
-    agger as (
-        SELECT year, t, min(doy), max(doy) from data GROUP by year, t)
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        with data as (
+            select year, month, extract(doy from day) as doy,
+            generate_series(32, high) as t from alldata_{station[:2]}
+            where station = %s and year < %s),
+        agger as (
+            SELECT year, t, min(doy), max(doy) from data GROUP by year, t)
 
-    SELECT t as tmpf, avg(min) as min_jday,
-    avg(max) as max_jday from agger GROUP by t ORDER by t ASC
-    """,
-        pgconn,
-        params=(station, thisyear),
-        index_col="tmpf",
-    )
+        SELECT t as tmpf, avg(min) as min_jday,
+        avg(max) as max_jday from agger GROUP by t ORDER by t ASC
+        """,
+            conn,
+            params=(station, thisyear),
+            index_col="tmpf",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     title = (
-        "[%s] %s Period Between\nAverage Last and "
-        "First High Temperature of Year"
-    ) % (station, nt.sts[station]["name"])
+        f"[{station}] {ctx['_nt'].sts[station]['name']} Period Between\n"
+        "Average Last and First High Temperature of Year"
+    )
     fig = figure(title=title, apctx=ctx)
     ax = fig.add_axes([0.1, 0.1, 0.7, 0.8])
     ax2 = fig.add_axes([0.81, 0.1, 0.15, 0.8])
@@ -116,4 +113,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

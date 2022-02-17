@@ -3,7 +3,6 @@
 import psycopg2.extras
 import numpy as np
 import pandas as pd
-from pyiem import network
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -66,8 +65,6 @@ def plotter(fdict):
     station = ctx["station"]
     varname = ctx["var"]
 
-    nt = network.Table(f"{station[:2]}CLIMATE")
-
     rows = []
     for dy in range(1, 32):
         ccursor.execute(
@@ -102,7 +99,7 @@ def plotter(fdict):
 
     title = ("[%s] %s Statistics of %s over 1-31 Consecutive Days") % (
         station,
-        nt.sts[station]["name"],
+        ctx["_nt"].sts[station]["name"],
         PDICT.get(varname),
     )
     fig, ax = figure_axes(title=title, apctx=ctx)

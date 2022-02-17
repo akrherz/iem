@@ -8,7 +8,7 @@ import datetime
 
 import numpy as np
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_sqlalchemy_conn, utc
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
 from pandas.io.sql import read_sql
 
@@ -39,28 +39,28 @@ def get_events(ctx):
         )
         data["valid"] = ctx["valid"].strftime(ISO)
 
-    pgconn = get_dbconn("postgis")
-    df = read_sql(
-        f"""
-  select wfo, significance, phenomena,
-  to_char(issue at time zone 'UTC',
-            'YYYY-MM-DDThh24:MIZ') as iso_issued,
-    to_char(expire at time zone 'UTC',
-            'YYYY-MM-DDThh24:MIZ') as iso_expired,
-  to_char(issue at time zone 'UTC',
-            'YYYY-MM-DD hh24:MI') as issued,
-    to_char(expire at time zone 'UTC',
-            'YYYY-MM-DD hh24:MI') as expired,
-    eventid,
-  tml_direction, tml_sknt, hvtec_nwsli, windtag, hailtag, tornadotag,
-  damagetag from sbw
-  where status = 'NEW' and
-  ST_Contains(geom, ST_SetSRID(ST_GeomFromEWKT('POINT(%s %s)'),4326)) and
-  issue > '2005-10-01' {valid_limiter} ORDER by issue ASC
-    """,
-        pgconn,
-        params=(ctx["lon"], ctx["lat"]),
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = read_sql(
+            f"""
+    select wfo, significance, phenomena,
+    to_char(issue at time zone 'UTC',
+                'YYYY-MM-DDThh24:MIZ') as iso_issued,
+        to_char(expire at time zone 'UTC',
+                'YYYY-MM-DDThh24:MIZ') as iso_expired,
+    to_char(issue at time zone 'UTC',
+                'YYYY-MM-DD hh24:MI') as issued,
+        to_char(expire at time zone 'UTC',
+                'YYYY-MM-DD hh24:MI') as expired,
+        eventid,
+    tml_direction, tml_sknt, hvtec_nwsli, windtag, hailtag, tornadotag,
+    damagetag from sbw
+    where status = 'NEW' and
+    ST_Contains(geom, ST_SetSRID(ST_GeomFromEWKT('POINT(%s %s)'),4326)) and
+    issue > '2005-10-01' {valid_limiter} ORDER by issue ASC
+        """,
+            conn,
+            params=(ctx["lon"], ctx["lat"]),
+        )
     if df.empty:
         return data, df
     df = df.replace({np.nan: None})
@@ -136,7 +136,7 @@ def application(environ, start_response):
         fn = "sbw_%.4fN_%.4fW.xlsx" % (ctx["lat"], 0 - ctx["lon"])
         headers = [
             ("Content-type", EXL),
-            ("Content-disposition", "attachment; Filename=" + fn),
+            ("Content-disposition", f"attachment; Filename={fn}"),
         ]
         start_response("200 OK", headers)
         bio = BytesIO()

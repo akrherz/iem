@@ -1,10 +1,9 @@
 """Stddev of temperatures"""
 import calendar
 
-from pandas.io.sql import read_sql
-from pyiem import network
+import pandas as pd
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {"high": "High Temperature", "low": "Low Temperature"}
 
@@ -41,37 +40,33 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     varname = ctx["var"]
     if PDICT.get(varname) is None:
         return
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        with data as (
+            select extract(doy from day) as doy,
+            day, {varname} as v from alldata_{station[:2]} WHERE
+            station = %s),
+        doyagg as (
+            SELECT doy, stddev(v) from data GROUP by doy),
+        deltas as (
+            SELECT doy, (v - lag(v) OVER (ORDER by day ASC)) as d from data),
+        deltaagg as (
+            SELECT doy, stddev(d) from deltas GROUP by doy)
 
-    table = "alldata_%s" % (station[:2],)
-    nt = network.Table("%sCLIMATE" % (station[:2],))
-
-    df = read_sql(
-        f"""
-    with data as (
-        select extract(doy from day) as doy,
-        day, {varname} as v from {table} WHERE
-        station = %s),
-    doyagg as (
-        SELECT doy, stddev(v) from data GROUP by doy),
-    deltas as (
-        SELECT doy, (v - lag(v) OVER (ORDER by day ASC)) as d from data),
-    deltaagg as (
-        SELECT doy, stddev(d) from deltas GROUP by doy)
-
-    SELECT d.doy, d.stddev as d2d_stddev,
-    y.stddev as doy_stddev from deltaagg d JOIN doyagg y ON
-    (y.doy = d.doy) WHERE d.doy < 366 ORDER by d.doy ASC
-    """,
-        pgconn,
-        params=(station,),
-        index_col="doy",
-    )
+        SELECT d.doy, d.stddev as d2d_stddev,
+        y.stddev as doy_stddev from deltaagg d JOIN doyagg y ON
+        (y.doy = d.doy) WHERE d.doy < 366 ORDER by d.doy ASC
+        """,
+            conn,
+            params=(station,),
+            index_col="doy",
+        )
 
     fig = figure(apctx=ctx)
     ax = fig.subplots(2, 1, sharex=True)
@@ -88,7 +83,7 @@ def plotter(fdict):
 
     msg = ("[%s] %s Daily %s Standard Deviations") % (
         station,
-        nt.sts[station]["name"],
+        ctx["_nt"].sts[station]["name"],
         PDICT.get(varname),
     )
     tokens = msg.split()
@@ -107,4 +102,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

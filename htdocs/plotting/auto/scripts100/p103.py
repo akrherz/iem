@@ -3,9 +3,8 @@ import calendar
 
 import numpy as np
 import pandas as pd
-from pyiem import network
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"spring": "1 January - 31 December", "fall": "1 July - 30 June"}
@@ -47,40 +46,40 @@ def plotter(fdict):
     station = ctx["station"]
     season = ctx["season"]
     table = f"alldata_{station[:2]}"
-    nt = network.Table(f"{station[:2]}CLIMATE")
 
     year = (
         "case when month > 6 then year + 1 else year end"
         if season == "fall"
         else "year"
     )
-    df = pd.read_sql(
-        f"""
-    WITH obs as (
-        SELECT day, month, high, low, {year} as season
-        from {table} WHERE station = %s),
-    data as (
-        SELECT season, day,
-        max(high) OVER (PARTITION by season ORDER by day ASC
-                        ROWS BETWEEN 366 PRECEDING and CURRENT ROW) as mh,
-        min(low) OVER (PARTITION by season ORDER by day ASC
-                       ROWS BETWEEN 366 PRECEDING and CURRENT ROW) as ml
-        from obs),
-    lows as (
-        SELECT season, day, ml as level,
-        rank() OVER (PARTITION by season, ml ORDER by day ASC) from data),
-    highs as (
-        SELECT season, day, mh as level,
-        rank() OVER (PARTITION by season, mh ORDER by day ASC) from data)
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        WITH obs as (
+            SELECT day, month, high, low, {year} as season
+            from {table} WHERE station = %s),
+        data as (
+            SELECT season, day,
+            max(high) OVER (PARTITION by season ORDER by day ASC
+                            ROWS BETWEEN 366 PRECEDING and CURRENT ROW) as mh,
+            min(low) OVER (PARTITION by season ORDER by day ASC
+                        ROWS BETWEEN 366 PRECEDING and CURRENT ROW) as ml
+            from obs),
+        lows as (
+            SELECT season, day, ml as level,
+            rank() OVER (PARTITION by season, ml ORDER by day ASC) from data),
+        highs as (
+            SELECT season, day, mh as level,
+            rank() OVER (PARTITION by season, mh ORDER by day ASC) from data)
 
-    (SELECT season as year, day, extract(doy from day) as doy,
-     level, 'fall' as typ from lows WHERE rank = 1) UNION
-    (SELECT season as year, day, extract(doy from day) as doy,
-     level, 'spring' as typ from highs WHERE rank = 1)
-    """,
-        get_dbconnstr("coop"),
-        params=[station],
-    )
+        (SELECT season as year, day, extract(doy from day) as doy,
+        level, 'fall' as typ from lows WHERE rank = 1) UNION
+        (SELECT season as year, day, extract(doy from day) as doy,
+        level, 'spring' as typ from highs WHERE rank = 1)
+        """,
+            conn,
+            params=[station],
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     df2 = df[df["typ"] == season]
@@ -93,7 +92,8 @@ def plotter(fdict):
     ax[0].set_xlim(dyear.index.min() - 1, dyear.index.max() + 1)
     title = f"{PDICT[season]} Steps {'Down' if season == 'fall' else 'Up'}"
     ax[0].set_title(
-        f"{nt.sts[station]['name']} [{station}]\n{title} in Temperature"
+        f"{ctx['_nt'].sts[station]['name']} [{station}]\n"
+        f"{title} in Temperature"
     )
     ax[0].grid(True)
 
