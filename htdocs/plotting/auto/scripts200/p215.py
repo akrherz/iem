@@ -3,10 +3,9 @@ import calendar
 from datetime import date, datetime
 
 import pandas as pd
-from pandas.io.sql import read_sql
 from pyiem.plot.util import fitbox
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from matplotlib.ticker import MaxNLocator
 from scipy.stats import gaussian_kde
@@ -126,22 +125,23 @@ def get_df(ctx, period):
         ts = datetime.strptime("2000-" + month + "-01", "%Y-%b-%d")
         months = [ts.month]
         ctx["mlabel"] = calendar.month_name[ts.month]
-
-    return read_sql(
-        text(
-            f"SELECT high, low, (high+low)/2. as avgt from {table} WHERE "
-            "day >= :d1 and day <= :d2 and station = :station "
-            "and high is not null "
-            "and low is not null and month in :months"
-        ),
-        get_dbconnstr("coop"),
-        params={
-            "d1": date(ctx[f"sy{period}"], 1, 1),
-            "d2": date(ctx[f"ey{period}"], 12, 31),
-            "station": ctx["station"],
-            "months": tuple(months),
-        },
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            text(
+                f"SELECT high, low, (high+low)/2. as avgt from {table} WHERE "
+                "day >= :d1 and day <= :d2 and station = :station "
+                "and high is not null "
+                "and low is not null and month in :months"
+            ),
+            conn,
+            params={
+                "d1": date(ctx[f"sy{period}"], 1, 1),
+                "d2": date(ctx[f"ey{period}"], 12, 31),
+                "station": ctx["station"],
+                "months": tuple(months),
+            },
+        )
+    return df
 
 
 def f2s(value):

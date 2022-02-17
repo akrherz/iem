@@ -2,7 +2,7 @@
 /* Create a table of soil temperature probabilities based on obs? */
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 88);
-include_once "../../include/myview.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 require_once "../../include/database.inc.php";
 require_once "../../include/imagemaps.php";
@@ -130,4 +130,3 @@ is not considered.</div>
  </div></div>
 EOF;
 $t->render('single.phtml');
- ?>

@@ -6,6 +6,7 @@ import json
 
 import memcache
 import pytz
+import pandas as pd
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
 
@@ -107,6 +108,8 @@ def application(environ, start_response):
     ts = fields.get("ts", None)
     lat = float(fields.get("lat", 0))
     lon = float(fields.get("lon", 0))
+    if pd.isna([lat, lon]).any():
+        lat, lon = 0, 0
     if ts is None:
         ts = datetime.datetime.utcnow()
     else:
@@ -131,7 +134,7 @@ def application(environ, start_response):
     if cb is None:
         data = res
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        data = f"{html_escape(cb)}({res})"
 
     headers = [("Content-type", "application/vnd.geo+json")]
     start_response("200 OK", headers)

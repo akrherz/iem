@@ -3,7 +3,7 @@ import datetime
 
 import simplejson as json
 from simplejson import encoder
-import memcache
+from pymemcache.client import Client
 import psycopg2.extras
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
@@ -206,19 +206,30 @@ def application(environ, start_response):
     headers = []
     if fmt == "geojson":
         headers.append(("Content-type", "application/vnd.geo+json"))
+    elif fmt == "csv" and fields.get("dl", None) is not None:
+        headers.extend(
+            [
+                ("Content-type", "application/octet-stream"),
+                (
+                    "Content-disposition",
+                    f"attachment; filename=cli{ts:%Y%m%d}.csv",
+                ),
+            ]
+        )
     else:
         headers.append(("Content-type", "text/plain"))
 
     mckey = f"/geojson/cli/{ts:%Y%m%d}?callback={cb}&fmt={fmt}"
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
-    res = mc.get(mckey)
-    if not res:
-        res = get_data(ts, fmt)
-        mc.set(mckey, res, 300)
-    if cb is None:
-        data = res
+    mc = Client(["iem-memcached", 11211])
+    data = mc.get(mckey)
+    if data is None:
+        data = get_data(ts, fmt)
+        mc.set(mckey, data.encode("utf-8"), 300)
     else:
-        data = f"{html_escape(cb)}({res})"
+        data = data.decode("utf-8")
+    mc.close()
+    if cb is not None:
+        data = f"{html_escape(cb)}({data})"
 
     start_response("200 OK", headers)
     return [data.encode("ascii")]

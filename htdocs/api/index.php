@@ -61,5 +61,3 @@ are extremely responsive to email :)
 EOF;
 
 $t->render('single.phtml');
-
-?>

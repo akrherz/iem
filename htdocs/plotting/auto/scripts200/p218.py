@@ -6,11 +6,10 @@ from math import pi
 # third party
 import numpy as np
 import pandas as pd
-from pandas.io.sql import read_sql
 from pyiem.reference import TRACE_VALUE
 from pyiem.network import Table as NetworkTable
 from pyiem.plot import figure, get_cmap
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 TFORMAT = "%b %-d %Y %-I:%M %p %Z"
@@ -204,13 +203,13 @@ def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     nt = NetworkTable("NWSCLI")
-
-    df = read_sql(
-        "SELECT * from cli_data where station = %s and valid = %s",
-        get_dbconnstr("iem"),
-        params=(ctx["station"], ctx["date"]),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        df = pd.read_sql(
+            "SELECT * from cli_data where station = %s and valid = %s",
+            conn,
+            params=(ctx["station"], ctx["date"]),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No CLI data found for date/station.")
     row = df.iloc[0]

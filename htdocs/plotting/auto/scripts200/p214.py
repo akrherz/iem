@@ -1,8 +1,8 @@
 """Metric Something by Something."""
 import datetime
 
-from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconnstr
+import pandas as pd
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
@@ -188,31 +188,32 @@ def get_data(fdict):
     cast = "int" if x in ["tmpf", "dwpf", "feel"] else "real"
     basets = datetime.date(ctx["syear"], 1, 1)
     direction = "DESC" if agg == "max" else "ASC"
-    ctx["df"] = read_sql(
-        text(
-            f"""
-        WITH data as (
-            SELECT {x}::{cast} as x, ({y}) as yv,
-            first_value(valid at time zone 'UTC') OVER (
-                PARTITION by {x}::{cast}
-                ORDER by {y} {direction}, valid DESC) as timestamp
-            from alldata where station = :station
-            and extract(month from valid) in :months
-            and report_type = 2 and valid >= :basets
-            and {x} is not null and {y} is not null
-            ORDER by x ASC)
-        SELECT x, {agg}(yv) as y, max(timestamp) as utc_valid from data
-        GROUP by x ORDER by x ASC
-    """
-        ),
-        get_dbconnstr("asos"),
-        params={
-            "station": station,
-            "months": tuple(months),
-            "basets": basets,
-        },
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("asos") as conn:
+        ctx["df"] = pd.read_sql(
+            text(
+                f"""
+            WITH data as (
+                SELECT {x}::{cast} as x, ({y}) as yv,
+                first_value(valid at time zone 'UTC') OVER (
+                    PARTITION by {x}::{cast}
+                    ORDER by {y} {direction}, valid DESC) as timestamp
+                from alldata where station = :station
+                and extract(month from valid) in :months
+                and report_type = 2 and valid >= :basets
+                and {x} is not null and {y} is not null
+                ORDER by x ASC)
+            SELECT x, {agg}(yv) as y, max(timestamp) as utc_valid from data
+            GROUP by x ORDER by x ASC
+        """
+            ),
+            conn,
+            params={
+                "station": station,
+                "months": tuple(months),
+                "basets": basets,
+            },
+            index_col=None,
+        )
     if ctx["df"].empty:
         raise NoDataFound("No Data Found.")
     ab = ctx["_nt"].sts[station]["archive_begin"]

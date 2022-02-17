@@ -208,5 +208,9 @@ $(document).ready(function(){
 		fontSize -= 2;
 		vectorLayer.setStyle(vectorStyleFunction);
 	});
-	
+
+    $("#dlcsv").click(function(){
+        window.location.href = "/geojson/cli.py?dl=1&fmt=csv&dt="+
+        $.datepicker.formatDate("yy-mm-dd", $("#datepicker").datepicker('getDate'));
+    });
 });

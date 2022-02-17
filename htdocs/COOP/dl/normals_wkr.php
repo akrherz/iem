@@ -14,8 +14,8 @@ $dloption = isset($_GET["dloption"]) ? $_GET["dloption"]
                                    : die("No download option specified");
 $mode = isset($_GET["mode"]) ? $_GET["mode"] : 'station';
 $source = isset($_GET["source"]) ? substr($_GET["source"], 0, 20): 'climate71';
-$month = isset($_GET["month"]) ? substr($_GET["month"],0,2) : 1;
-$day = isset($_GET["day"]) ? substr($_GET["day"],0,2) : 1;
+$month = get_int404("month", 1);
+$day = get_int404("day", 1);
 $datestr = "2000-$month-$day";
 
 $con = iemdb('coop');
@@ -23,12 +23,18 @@ $con = iemdb('coop');
 // If NCDC climatology, then we have to look at a different station
 if ($source == 'ncdc_climate71'){
     $station = $cities[$station]['climate_site'];
+    $nt = new NetworkTable("NCDC71");
+    $cities = $nt->table;
 }
 else if ($source == 'ncdc_climate81'){
     $station = $cities[$station]['ncdc81'];
+    $nt = new NetworkTable("NCDC81");
+    $cities = $nt->table;
 }
 else if ($source == 'ncei_climate91'){
     $station = $cities[$station]['ncei91'];
+    $nt = new NetworkTable("NCEI91");
+    $cities = $nt->table;
 }
 
 
@@ -71,7 +77,4 @@ switch($dloption){
  break;
 
 }
-
 echo $s;
-
-?>

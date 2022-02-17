@@ -82,4 +82,3 @@ ROOT={$u2}
 
 EOF;
 $t->render('single.phtml');
-?>

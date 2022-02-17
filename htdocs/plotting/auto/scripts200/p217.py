@@ -5,7 +5,7 @@ import pytz
 from geopandas import read_postgis
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import Z_OVERLAY2, LATLON
 from sqlalchemy import text
@@ -56,27 +56,27 @@ def plotter(fdict):
 
     # Compute a population estimate
     popyear = max([int(pid[:4]) - int(pid[:4]) % 5, 2000])
-
-    df = read_postgis(
-        text(
-            f"""
-            with geopop as (
-                select sum(population) as pop from sps_{pid[:4]} s,
-                gpw{popyear} g WHERE s.product_id = :pid and
-                ST_Contains(s.geom, g.geom) and segmentnum = :segnum
-            )
-            SELECT geom, ugcs, wfo, issue, expire, landspout, waterspout,
-            max_hail_size, max_wind_gust, product, segmentnum,
-            coalesce(pop, 0) as pop
-            from sps_{pid[:4]}, geopop where product_id = :pid
-            and segmentnum = :segnum
-            """
-        ),
-        get_dbconnstr("postgis"),
-        params={"pid": pid, "segnum": segnum},
-        index_col=None,
-        geom_col="geom",
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = read_postgis(
+            text(
+                f"""
+                with geopop as (
+                    select sum(population) as pop from sps_{pid[:4]} s,
+                    gpw{popyear} g WHERE s.product_id = :pid and
+                    ST_Contains(s.geom, g.geom) and segmentnum = :segnum
+                )
+                SELECT geom, ugcs, wfo, issue, expire, landspout, waterspout,
+                max_hail_size, max_wind_gust, product, segmentnum,
+                coalesce(pop, 0) as pop
+                from sps_{pid[:4]}, geopop where product_id = :pid
+                and segmentnum = :segnum
+                """
+            ),
+            conn,
+            params={"pid": pid, "segnum": segnum},
+            index_col=None,
+            geom_col="geom",
+        )
     if df.empty:
         raise NoDataFound("SPS Event was not found, sorry.")
     df2 = df[df["segmentnum"] == segnum]
@@ -95,21 +95,21 @@ def plotter(fdict):
     if row["geom"].is_empty:
         # Need to go looking for UGCs to compute the bounds
         # Can a SPS be issued for Fire Weather zones? source = 'fz'
-        ugcdf = read_postgis(
-            text(
-                f"SELECT simple_geom, ugc, gpw_population_{popyear} as pop "
-                "from ugcs where wfo = :wfo "
-                "and ugc in :ugcs and "
-                "(end_ts is null or end_ts > :expire) and source = 'z'"
-            ),
-            get_dbconnstr("postgis"),
-            params={
-                "wfo": WFOCONV.get(wfo, wfo),
-                "ugcs": tuple(row["ugcs"]),
-                "expire": expire,
-            },
-            geom_col="simple_geom",
-        )
+        with get_sqlalchemy_conn("postgis") as conn:
+            ugcdf = read_postgis(
+                text(
+                    f"SELECT simple_geom, ugc, gpw_population_{popyear} "
+                    "as pop from ugcs where wfo = :wfo and ugc in :ugcs and "
+                    "(end_ts is null or end_ts > :expire) and source = 'z'"
+                ),
+                conn,
+                params={
+                    "wfo": WFOCONV.get(wfo, wfo),
+                    "ugcs": tuple(row["ugcs"]),
+                    "expire": expire,
+                },
+                geom_col="simple_geom",
+            )
         bounds = ugcdf["simple_geom"].total_bounds
         population = ugcdf["pop"].sum()
     else:

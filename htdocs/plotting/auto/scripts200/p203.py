@@ -6,7 +6,7 @@ from io import StringIO
 import pandas as pd
 from geopandas import read_postgis
 import matplotlib.image as mpimage
-from pyiem.util import get_autoplot_context, get_dbconnstr, utc
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 from pyiem.plot import figure
 from pyiem.plot.util import fitbox
 from pyiem.nws.vtec import VTEC_PHENOMENA
@@ -80,7 +80,6 @@ def plotter(fdict):
     sort = ctx["sort"]
     date = ctx["date"]
 
-    pgconn = get_dbconnstr("postgis")
     sts = utc(date.year, date.month, date.day)
     ets = sts + datetime.timedelta(hours=24)
 
@@ -101,48 +100,49 @@ def plotter(fdict):
     header = 35
 
     # Find largest polygon either in height or width
-    gdf = read_postgis(
-        text(
-            f"""
-        SELECT wfo, phenomena, eventid, issue,
-        ST_area2d(ST_transform(geom,2163)) as size,
-        (ST_xmax(ST_transform(geom,2163)) +
-         ST_xmin(ST_transform(geom,2163))) /2.0 as xc,
-        (ST_ymax(ST_transform(geom,2163)) +
-         ST_ymin(ST_transform(geom,2163))) /2.0 as yc,
-        ST_transform(geom, 2163) as utmgeom,
-        (ST_xmax(ST_transform(geom,2163)) -
-         ST_xmin(ST_transform(geom,2163))) as width,
-        (ST_ymax(ST_transform(geom,2163)) -
-         ST_ymin(ST_transform(geom,2163))) as height
-        from sbw_{sts.year}
-        WHERE status = 'NEW' and issue >= :sts and issue < :ets and
-        phenomena IN :phenomena and eventid is not null
-        ORDER by {opts[sort]["sortby"]}
-    """
-        ),
-        pgconn,
-        params={"sts": sts, "ets": ets, "phenomena": tuple(phenoms[typ])},
-        geom_col="utmgeom",
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        gdf = read_postgis(
+            text(
+                f"""
+            SELECT wfo, phenomena, eventid, issue,
+            ST_area2d(ST_transform(geom,2163)) as size,
+            (ST_xmax(ST_transform(geom,2163)) +
+            ST_xmin(ST_transform(geom,2163))) /2.0 as xc,
+            (ST_ymax(ST_transform(geom,2163)) +
+            ST_ymin(ST_transform(geom,2163))) /2.0 as yc,
+            ST_transform(geom, 2163) as utmgeom,
+            (ST_xmax(ST_transform(geom,2163)) -
+            ST_xmin(ST_transform(geom,2163))) as width,
+            (ST_ymax(ST_transform(geom,2163)) -
+            ST_ymin(ST_transform(geom,2163))) as height
+            from sbw_{sts.year}
+            WHERE status = 'NEW' and issue >= :sts and issue < :ets and
+            phenomena IN :phenomena and eventid is not null
+            ORDER by {opts[sort]["sortby"]}
+        """
+            ),
+            conn,
+            params={"sts": sts, "ets": ets, "phenomena": tuple(phenoms[typ])},
+            geom_col="utmgeom",
+            index_col=None,
+        )
 
-    # For size reduction work
-    df = pd.read_sql(
-        text(
-            f"""
-        SELECT w.wfo, phenomena, eventid,
-        sum(ST_area2d(ST_transform(u.geom,2163))) as county_size
-        from warnings_{sts.year} w JOIN ugcs u on (u.gid = w.gid)
-        WHERE issue >= :sts and issue < :ets and
-        significance = 'W' and phenomena IN :phenomena
-        GROUP by w.wfo, phenomena, eventid
-    """
-        ),
-        pgconn,
-        params={"sts": sts, "ets": ets, "phenomena": tuple(phenoms[typ])},
-        index_col=["wfo", "phenomena", "eventid"],
-    )
+        # For size reduction work
+        df = pd.read_sql(
+            text(
+                f"""
+            SELECT w.wfo, phenomena, eventid,
+            sum(ST_area2d(ST_transform(u.geom,2163))) as county_size
+            from warnings_{sts.year} w JOIN ugcs u on (u.gid = w.gid)
+            WHERE issue >= :sts and issue < :ets and
+            significance = 'W' and phenomena IN :phenomena
+            GROUP by w.wfo, phenomena, eventid
+        """
+            ),
+            conn,
+            params={"sts": sts, "ets": ets, "phenomena": tuple(phenoms[typ])},
+            index_col=["wfo", "phenomena", "eventid"],
+        )
     # Join the columns
     gdf = gdf.merge(df, on=["wfo", "phenomena", "eventid"])
     gdf["ratio"] = (1.0 - (gdf["size"] / gdf["county_size"])) * 100.0
@@ -246,7 +246,7 @@ def plotter(fdict):
             ax.spines[x].set_visible(False)
         ax.set_xlim(x0, x1)
         ax.set_ylim(y0, y1)
-        for poly in row["utmgeom"]:
+        for poly in row["utmgeom"].geoms:
             xs, ys = poly.exterior.xy
             color = COLORS[row["phenomena"]]
             ax.plot(xs, ys, color=color, lw=2)
@@ -322,8 +322,7 @@ def plotter(fdict):
     if gdf.empty:
         fitbox(fig, "No warnings Found!", 0.2, 0.8, 0.2, 0.5, color="white")
 
-    df = gdf.drop(["utmgeom", "issue"], axis=1)
-    return fig, df, imagemap.read()
+    return fig, gdf.drop(columns=["utmgeom", "issue"]), imagemap.read()
 
 
 if __name__ == "__main__":

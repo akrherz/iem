@@ -3,7 +3,7 @@ define("IEM_APPID", 114);
 require_once "../../config/settings.inc.php";
 require_once "../../include/forms.php"; 
 require_once "../../include/imagemaps.php"; 
-include_once "../../include/myview.php";
+require_once "../../include/myview.php";
 
 $t = new MyView();
 $t->title = "ISU Soil Moisture Plots";
@@ -11,15 +11,17 @@ $t->title = "ISU Soil Moisture Plots";
 $now = time();
 $d2 = time() - 5 * 86400;
 $station = isset($_GET["station"]) ? xssafe($_GET["station"]): "AEEI4";
-$year1 = isset($_REQUEST['year1']) ? intval($_REQUEST['year1']): date("Y", $d2);
-$month1 = isset($_REQUEST['month1']) ? intval($_REQUEST['month1']): date("m", $d2);
-$day1 = isset($_REQUEST['day1']) ? intval($_REQUEST['day1']): date("d", $d2);
-$hour1 = isset($_REQUEST['hour1']) ? intval($_REQUEST['hour1']): 0;
-$year2 = isset($_REQUEST['year2']) ? intval($_REQUEST['year2']): date("Y", $now);
-$month2 = isset($_REQUEST['month2']) ? intval($_REQUEST['month2']): date("m", $now);
-$day2 = isset($_REQUEST['day2']) ? intval($_REQUEST['day2']): date("d", $now);
-$hour2 = isset($_REQUEST['hour2']) ? intval($_REQUEST['hour2']): date("H", $now);
-$opt = isset($_REQUEST['opt']) ? xssafe($_REQUEST['opt']): '1';
+$year1 = get_int404('year1', date("Y", $d2));
+$month1 = get_int404('month1', date("m", $d2));
+$day1 = get_int404('day1', date("d", $d2));
+$hour1 = get_int404('hour1', 0);
+
+$year2 = get_int404('year2', date("Y", $now));
+$month2 = get_int404('month2', date("m", $now));
+$day2 = get_int404('day2', date("d", $now));
+$hour2 = get_int404('hour2', date("H", $now));
+
+$opt = get_int404('opt', 1);
 
 $sts = mktime($hour1, 0, 0, $month1, $day1, $year1);
 $ets = mktime($hour2, 0, 0, $month2, $day2, $year2);
@@ -41,40 +43,40 @@ $d2 = daySelect2($day2, "day2");
 $h2 = hourSelect($hour2, "hour2");
 
 $ar = Array(
-    "1" => "3 Panel Plot",
-    "2" => "Just Soil Temps",
-    "3" => "Daily Max/Min 4 Inch Soil Temps",
-    "4" => "Daily Solar Radiation",
-    "5" => "Daily Potential Evapotranspiration",
-    "6" => "Histogram of Volumetric Soil Moisture",
-    "7" => "Daily Soil Water + Change",
-    "8" => "Battery Voltage",
-    "9" => "Daily Rainfall, 4 inch Soil Temp, and RH",
-    "10" => "Inversion Diagnostic Plot (BOOI4 Ames - AEA) Only",
+    1 => "3 Panel Plot",
+    2 => "Just Soil Temps",
+    3 => "Daily Max/Min 4 Inch Soil Temps",
+    4 => "Daily Solar Radiation",
+    5 => "Daily Potential Evapotranspiration",
+    6 => "Histogram of Volumetric Soil Moisture",
+    7 => "Daily Soil Water + Change",
+    8 => "Battery Voltage",
+    9 => "Daily Rainfall, 4 inch Soil Temp, and RH",
+    10 => "Inversion Diagnostic Plot (BOOI4 Ames - AEA) Only",
 );
 $dd = "This plot is a time series graph of
 observations from a time period and ISU Soil Moisture station of your choice.";
-$desc = Array("1" => $dd,
-		"2" => $dd,
-		"3" => $dd,
-		"4" => $dd,
-		"5" => $dd,
-		"6" => $dd,
-		"7" => $dd,
-		"8" => $dd);
-$desc["6"] = <<<EOF
+$desc = Array(1 => $dd,
+		2 => $dd,
+		3 => $dd,
+		4 => $dd,
+		5 => $dd,
+		6 => $dd,
+		7 => $dd,
+		8 => $dd);
+$desc[6] = <<<EOF
 This plot presents a histogram of hourly volumetric soil moisture observations.
 The y-axis is expressed in logarithmic to better show the low frequency obs
 within the distribution.
 EOF;
-$desc["7"] = <<<EOF
+$desc[7] = <<<EOF
 This plot computes the daily change in soil water approximately between
 the depths of 6 to 30 inches.  This is using only two measurements at
 12, and 24 inch depths.  The 12 inch depth is assumed to cover the
 6-18 inch layer and the 24 inch depth to cover 18-30 layer.  If you select a
 period of less than 60 days, the daily rainfall will be plotted as well.
 EOF;
-$desc["10"] = <<<EOF
+$desc[10] = <<<EOF
 This plot provides a diagnostic of the data being provided by the inversion
 sensors.  These temperature sensors are installed at 1.5 and 10 feet above the
 ground, which then can sense if temperature increases with height.  This
@@ -148,4 +150,3 @@ and click the 'Make Plot' button below.
 </p>
 EOF;
 $t->render('single.phtml');
-?>

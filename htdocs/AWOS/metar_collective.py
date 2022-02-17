@@ -5,17 +5,18 @@
 from io import StringIO
 
 import pandas as pd
-from pyiem.util import get_dbconnstr, utc
+from pyiem.util import get_sqlalchemy_conn, utc
 
 
 def add_output(sio):
     """Do as I say"""
-    df = pd.read_sql(
-        "select raw from current c JOIn stations t on (t.iemid = c.iemid) "
-        "WHERE t.network = 'AWOS' and valid > now() - '2 hours'::interval "
-        "and id not in ('CWI', 'FOD') ORDER by id ASC",
-        get_dbconnstr("iem"),
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        df = pd.read_sql(
+            "select raw from current c JOIn stations t on (t.iemid = c.iemid) "
+            "WHERE t.network = 'AWOS' and valid > now() - '2 hours'::interval "
+            "and id not in ('CWI', 'FOD') ORDER by id ASC",
+            conn,
+        )
     sio.write("000 \r\r\n")
     sio.write(f"SAUS80 KIEM {utc():%d%H%M}\r\r\n")
     sio.write("METAR \r\r\n")

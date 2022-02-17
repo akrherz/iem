@@ -26,4 +26,3 @@ are used to bias correct the model output after some quality control checks are 
 <p><img src="/data/soilt_day3.png?{$nounce}" class="img img-responsive"></p>
 EOF;
 $t->render('single.phtml');
-?>

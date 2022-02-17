@@ -258,7 +258,8 @@ def workflow(mc, environ, form, fmt):
             # Need to set engine as xlsx/xls can't be inferred
             with pd.ExcelWriter(tmpfn, engine="openpyxl") as writer:
                 df.to_excel(writer, encoding="latin-1", sheet_name="Sheet1")
-            content = open(tmpfn, "rb").read()
+            with open(tmpfn, "rb") as fh:
+                content = fh.read()
             os.unlink(tmpfn)
         del df
     else:
@@ -272,7 +273,16 @@ def workflow(mc, environ, form, fmt):
     try:
         # we have a 10 MB limit within memcache, so don't write objects bigger
         if len(content) < 9.5 * 1024 * 1024:
-            mc.set(mckey, content, dur)
+            # Default encoding is ascii for text
+            mc.set(
+                mckey,
+                (
+                    content
+                    if isinstance(content, bytes)
+                    else content.encode("utf-8")
+                ),
+                dur,
+            )
         else:
             sys.stderr.write(
                 f"Memcache object too large: {len(content)} "

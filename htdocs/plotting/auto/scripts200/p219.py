@@ -9,9 +9,13 @@ import matplotlib.patheffects as PathEffects
 from matplotlib.patches import Rectangle
 from metpy.units import units
 from metpy.calc import wind_components
-from pandas import read_sql
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn, get_dbconnstr, utc
+from pyiem.util import (
+    get_autoplot_context,
+    get_dbconn,
+    get_sqlalchemy_conn,
+    utc,
+)
 from pyiem.exceptions import NoDataFound
 
 VIS = "visibility"
@@ -115,14 +119,16 @@ def plotter(fdict):
 
     def fetch(ts):
         """Getme data."""
-        return read_sql(
-            "SELECT f.*, t.product_id from taf t JOIN taf_forecast f on "
-            "(t.id = f.taf_id) WHERE t.station = %s and t.valid = %s "
-            "ORDER by f.valid ASC",
-            get_dbconnstr("asos"),
-            params=(ctx["station"], ts),
-            index_col="valid",
-        )
+        with get_sqlalchemy_conn("asos") as conn:
+            df = pd.read_sql(
+                "SELECT f.*, t.product_id from taf t JOIN taf_forecast f on "
+                "(t.id = f.taf_id) WHERE t.station = %s and t.valid = %s "
+                "ORDER by f.valid ASC",
+                conn,
+                params=(ctx["station"], ts),
+                index_col="valid",
+            )
+        return df
 
     df = fetch(valid)
     if df.empty:

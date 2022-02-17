@@ -4,14 +4,19 @@ import datetime
 try:
     from zoneinfo import ZoneInfo  # type: ignore
 except ImportError:
-    from backports.zoneinfo import ZoneInfo
+    from backports.zoneinfo import ZoneInfo  # type: ignore
 
 # third party
 import pandas as pd
 from geopandas import read_postgis
 from matplotlib.patches import Rectangle
 from pyiem.plot import MapPlot
-from pyiem.util import get_autoplot_context, get_dbconnstr, utc, get_dbconn
+from pyiem.util import (
+    get_autoplot_context,
+    get_sqlalchemy_conn,
+    utc,
+    get_dbconn,
+)
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import Z_OVERLAY2_LABEL, Z_POLITICAL, LATLON
 from sqlalchemy import text
@@ -94,6 +99,20 @@ OUTLINE_COLORS = {
     "HIGH": "#d21fc3",
 }
 ISO = "%Y-%m-%d %H:%M"
+SQL = """
+WITH data as (
+    SELECT o.*, g.* from spc_outlook o LEFT JOIN spc_outlook_geometries g
+    on (o.id = g.spc_outlook_id and g.category = :c) WHERE product_issue = :ts
+    and day in :days and outlook_type = :ot)
+
+SELECT d.product_issue at time zone 'UTC' as product_issue,
+expire at time zone 'UTC' as expire, d.geom,
+issue at time zone 'UTC' as issue, d.threshold,
+updated at time zone 'UTC' as updated, d.product_id, d.day,
+d.cycle, d.outlook_type, t.priority from data d LEFT JOIN
+spc_outlook_thresholds t on (d.threshold = t.threshold)
+ORDER by day ASC, priority ASC
+"""
 
 
 def get_description():
@@ -231,31 +250,20 @@ def plotter(fdict):
     def fetch(ts):
         """Getme data."""
         # NB careful here with the joins and not to use the view!
-        return read_postgis(
-            text(
-                "WITH data as ("
-                "SELECT o.*, g.* from spc_outlook o LEFT JOIN "
-                "spc_outlook_geometries g on (o.id = g.spc_outlook_id and "
-                "g.category = :c) WHERE product_issue = :ts and day in :days and "
-                "outlook_type = :ot) "
-                "SELECT d.product_issue at time zone 'UTC' as product_issue, "
-                "expire at time zone 'UTC' as expire, d.geom, "
-                "issue at time zone 'UTC' as issue, d.threshold, "
-                "updated at time zone 'UTC' as updated, d.product_id, d.day, "
-                "d.cycle, d.outlook_type, t.priority from data d LEFT JOIN "
-                "spc_outlook_thresholds t on (d.threshold = t.threshold) "
-                "ORDER by day ASC, priority ASC"
-            ),
-            get_dbconnstr("postgis"),
-            params={
-                "c": category,
-                "ts": ts,
-                "days": days,
-                "ot": outlook_type,
-            },
-            index_col=None,
-            geom_col="geom",
-        )
+        with get_sqlalchemy_conn("postgis") as conn:
+            df = read_postgis(
+                text(SQL),
+                conn,
+                params={
+                    "c": category,
+                    "ts": ts,
+                    "days": days,
+                    "ot": outlook_type,
+                },
+                index_col=None,
+                geom_col="geom",
+            )
+        return df
 
     df = fetch(valid)
     if df.empty:

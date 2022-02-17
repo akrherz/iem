@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from metpy.units import units
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconnstr, convert_value
+from pyiem.util import get_sqlalchemy_conn, convert_value
 
 INVERSION = [
     "BOOI4",
@@ -56,12 +56,13 @@ def do_temp_rh(sid, row):
         p(row["rh_avg"], 1, 0, 100),
     ]
     if sid in INVERSION:
-        df = pd.read_sql(
-            "SELECT * from sm_inversion WHERE station = %s and "
-            "valid > %s - '4 hours'::interval ORDER by valid DESC LIMIT 1",
-            get_dbconnstr("isuag"),
-            params=(sid, row["valid"]),
-        )
+        with get_sqlalchemy_conn("isuag") as conn:
+            df = pd.read_sql(
+                "SELECT * from sm_inversion WHERE station = %s and "
+                "valid > %s - '4 hours'::interval ORDER by valid DESC LIMIT 1",
+                conn,
+                params=(sid, row["valid"]),
+            )
         if not df.empty:
             row2 = df.iloc[0]
             for foot, col in [[1.5, "15"], [5, "5"], [10, "10"]]:
@@ -112,24 +113,25 @@ def use_table(sio):
     """Process for the given table."""
     nt = NetworkTable("ISUSM")
     table = f"sm_minute_{datetime.now().year}"
-    obsdf = pd.read_sql(
-        f"""
-        WITH latest as (
-            SELECT station, valid,
-            row_number() OVER (PARTITION by station ORDER by valid DESC)
-            from {table} WHERE valid > now() - '48 hours'::interval
-            and valid < now()
-        ), agg as (
-            select station, valid from latest where row_number = 1
+    with get_sqlalchemy_conn("isuag") as conn:
+        obsdf = pd.read_sql(
+            f"""
+            WITH latest as (
+                SELECT station, valid,
+                row_number() OVER (PARTITION by station ORDER by valid DESC)
+                from {table} WHERE valid > now() - '48 hours'::interval
+                and valid < now()
+            ), agg as (
+                select station, valid from latest where row_number = 1
+            )
+            select s.*, s.valid at time zone 'UTC' as utc_valid,
+            case when s.valid = a.valid then true else false end as is_last
+            from {table} s, agg a WHERE s.station = a.station
+            and s.valid > (a.valid - '1 hour'::interval) and s.valid <= a.valid
+            """,
+            conn,
+            index_col=None,
         )
-        select s.*, s.valid at time zone 'UTC' as utc_valid,
-        case when s.valid = a.valid then true else false end as is_last
-        from {table} s, agg a WHERE s.station = a.station
-        and s.valid > (a.valid - '1 hour'::interval) and s.valid <= a.valid
-        """,
-        get_dbconnstr("isuag"),
-        index_col=None,
-    )
     lastob = obsdf[obsdf["is_last"]].set_index("station")
     hrtotal = (
         obsdf[["station", "rain_in_tot", "slrkj_tot"]].groupby("station").sum()

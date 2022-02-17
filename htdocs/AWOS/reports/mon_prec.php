@@ -129,4 +129,3 @@ on available AWOS data.
 </table>
 EOF;
 $t->render('single.phtml');
-?>

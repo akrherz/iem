@@ -5,7 +5,7 @@ import datetime
 from pandas import read_sql
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {
     "month": "Grouped by Month",
@@ -96,25 +96,26 @@ def plotter(fdict):
     station = ctx["station"]
     low, high = [float(x) for x in ctx["rng"].split("-")]
     varname = ctx["var"]
-
-    df = read_sql(
-        f"""
-        select month,
-        sum(case when {varname} >= %s and {varname} <= %s then 1 else 0 end)
-        as hits, count(*)
-        from alldata_{station[:2]} where station = %s and {varname} is not null
-        and year >= %s and year <= %s GROUP by month ORDER by month ASC
-    """,
-        get_dbconnstr("coop"),
-        params=(
-            low,
-            high,
-            station,
-            ctx["syear"],
-            ctx["eyear"],
-        ),
-        index_col="month",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = read_sql(
+            f"""
+            select month,
+            sum(case when {varname} >= %s and {varname} <= %s
+                then 1 else 0 end) as hits, count(*)
+            from alldata_{station[:2]} where station = %s
+            and {varname} is not null
+            and year >= %s and year <= %s GROUP by month ORDER by month ASC
+        """,
+            conn,
+            params=(
+                low,
+                high,
+                station,
+                ctx["syear"],
+                ctx["eyear"],
+            ),
+            index_col="month",
+        )
     if df.empty:
         raise NoDataFound("Did not find any observations for station.")
 

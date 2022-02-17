@@ -3,7 +3,7 @@ from datetime import timedelta
 
 import pandas as pd
 from pandas import read_sql
-from pyiem.util import get_autoplot_context, get_dbconnstr, utc
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
@@ -35,31 +35,31 @@ def get_description():
 
 def get_data(meta):
     """Fetch Data."""
-    obsdf = read_sql(
-        "SELECT valid, precip, extract(year from valid)::int as year, "
-        "extract(doy from valid)::int as doy "
-        "from alldata_1minute "
-        "where station = %s and valid > %s and precip > 0 and precip < 0.2 "
-        "ORDER by valid ASC",
-        get_dbconnstr("asos1min"),
-        params=(meta["id"], utc(2002, 1, 1)),
-        index_col="valid",
-    )
+    with get_sqlalchemy_conn("asos1min") as conn:
+        obsdf = read_sql(
+            "SELECT valid, precip, extract(year from valid)::int as year, "
+            "extract(doy from valid)::int as doy "
+            "from alldata_1minute where station = %s and valid > %s and "
+            "precip > 0 and precip < 0.2 ORDER by valid ASC",
+            conn,
+            params=(meta["id"], utc(2002, 1, 1)),
+            index_col="valid",
+        )
     if obsdf.empty:
         raise NoDataFound("Failed to find any one-minute data, sorry.")
     obsdf["inwarn"] = False
     obsdf["nearwarn"] = False
-
-    warndf = read_sql(
-        "SELECT issue, expire from sbw WHERE issue > '2002-01-01' and "
-        "phenomena in ('TO', 'SV') and significance = 'W' and status = 'NEW' "
-        "and ST_Contains(geom, "
-        "GeomFromEWKT('SRID=4326;POINT(%s %s)')) "
-        "ORDER by issue ASC",
-        get_dbconnstr("postgis"),
-        params=(meta["lon"], meta["lat"]),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        warndf = read_sql(
+            "SELECT issue, expire from sbw WHERE issue > '2002-01-01' and "
+            "phenomena in ('TO', 'SV') and significance = 'W' and "
+            "status = 'NEW' and ST_Contains(geom, "
+            "GeomFromEWKT('SRID=4326;POINT(%s %s)')) "
+            "ORDER by issue ASC",
+            conn,
+            params=(meta["lon"], meta["lat"]),
+            index_col=None,
+        )
     td = timedelta(hours=1)
     for _, row in warndf.iterrows():
         obsdf.loc[row["issue"] : row["expire"], "inwarn"] = True

@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 
 from matplotlib.patches import Rectangle
 import pandas as pd
-from pyiem.util import get_autoplot_context, get_dbconnstr, utc
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 from pyiem.nws.vtec import NWS_COLORS, get_ps_string
 from pyiem.plot import figure
 from pyiem.exceptions import NoDataFound
@@ -80,43 +80,45 @@ def plotter(fdict):
 
     isscol = "issue" if ctx["opt"] == "within" else "product_issue"
     popyear = int(valid.year - (valid.year % 5))
-    df = pd.read_sql(
-        text(
-            f"""
-        with sbwpop as (
-            select phenomena ||'.'|| significance as key,
-            sum(population) as pop
-            from sbw w, gpw{popyear} p
-            WHERE ST_Contains(w.geom, p.geom) and
-            polygon_begin <= :valid and polygon_end >= :valid
-            GROUP by key ORDER by pop DESC
-        ), sbwevents as (
-            select phenomena ||'.'|| significance as key,
-            count(*) from sbw w
-            WHERE polygon_begin <= :valid and polygon_end >= :valid
-            GROUP by key
-        ), sbwagg as (
-            select p.key, p.pop, e.count as events
-            from sbwpop p JOIN sbwevents e on (p.key = e.key)
-        ), cbwpop as (
-            select phenomena ||'.'|| significance as key,
-            array_agg(distinct substr(w.ugc, 1, 2)) as states,
-            sum(gpw_population_{popyear}) as pop, count(*) as events
-            from warnings w JOIN ugcs u on (w.gid = u.gid)
-            WHERE {isscol} <= :valid and expire >= :valid
-            GROUP by key ORDER by pop DESC
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = pd.read_sql(
+            text(
+                f"""
+            with sbwpop as (
+                select phenomena ||'.'|| significance as key,
+                sum(population) as pop
+                from sbw w, gpw{popyear} p
+                WHERE ST_Contains(w.geom, p.geom) and
+                polygon_begin <= :valid and polygon_end >= :valid
+                GROUP by key ORDER by pop DESC
+            ), sbwevents as (
+                select phenomena ||'.'|| significance as key,
+                count(*) from sbw w
+                WHERE polygon_begin <= :valid and polygon_end >= :valid
+                GROUP by key
+            ), sbwagg as (
+                select p.key, p.pop, e.count as events
+                from sbwpop p JOIN sbwevents e on (p.key = e.key)
+            ), cbwpop as (
+                select phenomena ||'.'|| significance as key,
+                array_agg(distinct substr(w.ugc, 1, 2)) as states,
+                sum(gpw_population_{popyear}) as pop, count(*) as events
+                from warnings w JOIN ugcs u on (w.gid = u.gid)
+                WHERE {isscol} <= :valid and expire >= :valid
+                GROUP by key ORDER by pop DESC
+            )
+            select c.key, c.pop as zone_pop, s.pop as poly_pop, c.states,
+            c.events as zone_events, coalesce(s.events, 0) as poly_events,
+            (case when s.pop is not null then s.pop else c.pop end)
+                as final_pop
+            from cbwpop c LEFT JOIN sbwagg s
+            on (c.key = s.key) ORDER by final_pop DESC
+                """
+            ),
+            conn,
+            params={"valid": valid},
+            index_col="key",
         )
-        select c.key, c.pop as zone_pop, s.pop as poly_pop, c.states,
-        c.events as zone_events, coalesce(s.events, 0) as poly_events,
-        (case when s.pop is not null then s.pop else c.pop end) as final_pop
-        from cbwpop c LEFT JOIN sbwagg s
-        on (c.key = s.key) ORDER by final_pop DESC
-            """
-        ),
-        get_dbconnstr("postgis"),
-        params={"valid": valid},
-        index_col="key",
-    )
     if df.empty:
         raise NoDataFound("No WaWA data found at the given timestamp!")
     df["states"] = df["states"].apply(" ".join)

@@ -29,7 +29,7 @@ $t->jsextra = <<<EOF
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
 <script src="/vendor/jquery-ui/1.12.1/jquery-ui.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
-<script src='climap.js'></script>
+<script src='climap.js?v=2'></script>
 EOF;
 
 $t->content = <<<EOF
@@ -92,7 +92,10 @@ $t->content = <<<EOF
     </select>	
 		
 <strong>For Date:</strong><input type="text" id="datepicker" size="30">
-		
+
+<button id="dlcsv" class="btn btn-default" type="button"><i class="fa fa-download"></i> Download as CSV</button>
+
+
 </form>
 </div></div><!-- ./row -->
 

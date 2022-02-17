@@ -264,4 +264,3 @@ from Spring thresholds (mainly because of plant size/height).</blockquote>
 </ul>
 EOF;
 $t->render('single.phtml');
-?>
