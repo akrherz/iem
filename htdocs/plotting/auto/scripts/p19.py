@@ -6,7 +6,7 @@ import pandas as pd
 from matplotlib.font_manager import FontProperties
 from sqlalchemy import text
 from pyiem.plot import figure, get_cmap
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 MDICT = dict(
@@ -98,16 +98,17 @@ def plotter(fdict):
         ts = datetime.datetime.strptime("2000-" + month + "-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
-    ddf = pd.read_sql(
-        text(
-            f"SELECT high, low, year, month from alldata_{station[:2]} WHERE "
-            "station = :station "
-            "and year > 1892 and high >= low and month in :months "
-        ),
-        get_dbconnstr("coop"),
-        params={"station": station, "months": tuple(months)},
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        ddf = pd.read_sql(
+            text(
+                f"SELECT high, low, year, month from alldata_{station[:2]} "
+                "WHERE station = :station "
+                "and year > 1892 and high >= low and month in :months "
+            ),
+            conn,
+            params={"station": station, "months": tuple(months)},
+            index_col=None,
+        )
     if ddf.empty:
         raise NoDataFound("No Data Found.")
     ddf["range"] = ddf["high"] - ddf["low"]

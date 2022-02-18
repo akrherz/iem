@@ -3,9 +3,9 @@ import datetime
 import calendar
 
 import numpy as np
-from pandas import read_sql
+import pandas as pd
 from pyiem.plot import get_cmap, figure
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -67,37 +67,38 @@ def plotter(fdict):
     if varname == "high":
         aggfunc = "max"
         tlimit = "12 and 20"
-    df = read_sql(
-        f"""
-    WITH one as (
-      SELECT date(valid), {aggfunc}(tmpf::int) as d, avg(sknt)
-      from alldata where station = %s
-      and extract(hour from valid at time zone %s) between {tlimit}
-      and tmpf between -70 and 140  GROUP by date),
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            f"""
+        WITH one as (
+        SELECT date(valid), {aggfunc}(tmpf::int) as d, avg(sknt)
+        from alldata where station = %s
+        and extract(hour from valid at time zone %s) between {tlimit}
+        and tmpf between -70 and 140  GROUP by date),
 
-    two as (
-      SELECT date(valid), {aggfunc}(tmpf::int) as d, avg(sknt)
-      from alldata where station = %s
-      and extract(hour from valid at time zone %s) between {tlimit}
-      and tmpf between -70 and 140 GROUP by date)
+        two as (
+        SELECT date(valid), {aggfunc}(tmpf::int) as d, avg(sknt)
+        from alldata where station = %s
+        and extract(hour from valid at time zone %s) between {tlimit}
+        and tmpf between -70 and 140 GROUP by date)
 
-    SELECT one.date as day,
-    extract(week from one.date) as week,
-    one.d - two.d as delta,
-    one.avg as sknt,
-    two.avg as sknt2
-    from one JOIN two on (one.date = two.date) WHERE one.avg >= 0
-    and one.d - two.d between -25 and 25
-    """,
-        get_dbconnstr("asos"),
-        params=(
-            station1,
-            ctx["_nt1"].sts[station1]["tzname"],
-            station2,
-            ctx["_nt2"].sts[station2]["tzname"],
-        ),
-        index_col=None,
-    )
+        SELECT one.date as day,
+        extract(week from one.date) as week,
+        one.d - two.d as delta,
+        one.avg as sknt,
+        two.avg as sknt2
+        from one JOIN two on (one.date = two.date) WHERE one.avg >= 0
+        and one.d - two.d between -25 and 25
+        """,
+            conn,
+            params=(
+                station1,
+                ctx["_nt1"].sts[station1]["tzname"],
+                station2,
+                ctx["_nt2"].sts[station2]["tzname"],
+            ),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     sts = datetime.datetime(2012, 1, 1)

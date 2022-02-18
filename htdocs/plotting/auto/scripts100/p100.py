@@ -2,7 +2,7 @@
 import datetime
 
 import numpy as np
-from pandas import read_sql
+import pandas as pd
 from pyiem import util
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
@@ -93,39 +93,41 @@ def plotter(fdict):
     if station not in ctx["_nt"].sts:
         raise NoDataFound("Unknown station metadata.")
 
-    df = read_sql(
-        f"""
-    SELECT year,
-    max(high) as "max-high",
-    min(high) as "min-high",
-    avg(high) as "avg-high",
-    max(low) as "max-low",
-    min(low) as "min-low",
-    avg(low) as "avg-low",
-    max(precip) as "max-precip",
-    sum(precip) as "sum-precip",
-    sum(case when high >= %s then 1 else 0 end) as "days-high-above",
-    sum(case when low >= %s then 1 else 0 end) as "days-lows-above",
-    sum(case when low < %s then 1 else 0 end) as "days-lows-below",
-    avg(precip) as "avg-precip",
-    avg(case when precip > 0.009 then precip else null end) as "avg-precip2",
-    sum(case when precip >= %s then 1 else 0 end) as "days-precip"
-    from alldata_{station[:2]}
-    where station = %s and year >= %s and year <= %s
-    GROUP by year ORDER by year ASC
-    """,
-        util.get_dbconnstr("coop"),
-        params=(
-            threshold,
-            threshold,
-            threshold,
-            threshold,
-            station,
-            syear,
-            eyear,
-        ),
-        index_col="year",
-    )
+    with util.get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        SELECT year,
+        max(high) as "max-high",
+        min(high) as "min-high",
+        avg(high) as "avg-high",
+        max(low) as "max-low",
+        min(low) as "min-low",
+        avg(low) as "avg-low",
+        max(precip) as "max-precip",
+        sum(precip) as "sum-precip",
+        sum(case when high >= %s then 1 else 0 end) as "days-high-above",
+        sum(case when low >= %s then 1 else 0 end) as "days-lows-above",
+        sum(case when low < %s then 1 else 0 end) as "days-lows-below",
+        avg(precip) as "avg-precip",
+        avg(case when precip > 0.009 then precip else null end)
+            as "avg-precip2",
+        sum(case when precip >= %s then 1 else 0 end) as "days-precip"
+        from alldata_{station[:2]}
+        where station = %s and year >= %s and year <= %s
+        GROUP by year ORDER by year ASC
+        """,
+            conn,
+            params=(
+                threshold,
+                threshold,
+                threshold,
+                threshold,
+                station,
+                syear,
+                eyear,
+            ),
+            index_col="year",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     df["range-hilo"] = df["max-high"] - df["min-low"]

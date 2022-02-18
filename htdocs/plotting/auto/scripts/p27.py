@@ -1,11 +1,11 @@
 """First Fall Threshold Dates."""
 import datetime
 
-from pandas import read_sql
+import pandas as pd
 import numpy as np
 from scipy.stats import linregress
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 
@@ -45,22 +45,22 @@ def plotter(fdict):
     station = ctx["station"]
     t1 = ctx["t1"]
     t2 = ctx["t2"]
-
-    df = read_sql(
-        f"""
-        SELECT year,
-        min(low) as min_low,
-        min(case when low < %s then extract(doy from day)
-            else 999 end) as t1_doy,
-        min(case when low < %s then extract(doy from day)
-            else 999 end) as t2_doy
-        from alldata_{station[:2]} where station = %s and month > 6
-        GROUP by year ORDER by year ASC
-    """,
-        get_dbconnstr("coop"),
-        params=(t1, t2, station),
-        index_col="year",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+            SELECT year,
+            min(low) as min_low,
+            min(case when low < %s then extract(doy from day)
+                else 999 end) as t1_doy,
+            min(case when low < %s then extract(doy from day)
+                else 999 end) as t2_doy
+            from alldata_{station[:2]} where station = %s and month > 6
+            GROUP by year ORDER by year ASC
+        """,
+            conn,
+            params=(t1, t2, station),
+            index_col="year",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     df = df[df["t2_doy"] < 400]
@@ -98,7 +98,7 @@ def plotter(fdict):
     ax.text(
         0.95,
         0.91,
-        "slope: %.2f days/day, R$^2$=%.2f" % (h_slope, r_value ** 2),
+        "slope: %.2f days/day, R$^2$=%.2f" % (h_slope, r_value**2),
         bbox=dict(color="white"),
         transform=ax.transAxes,
         va="bottom",

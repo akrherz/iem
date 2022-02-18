@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from pyiem.plot import get_cmap
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 
@@ -39,21 +39,21 @@ def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            """
+        WITH obs as (
+            SELECT date_trunc('hour', valid) as t, avg(tmpf) as avgt from
+            alldata WHERE station = %s and p01i > 0.009 and tmpf is not null
+            and report_type = 2 GROUP by t
+        )
 
-    df = pd.read_sql(
-        """
-    WITH obs as (
-        SELECT date_trunc('hour', valid) as t, avg(tmpf) as avgt from alldata
-        WHERE station = %s and p01i > 0.009 and tmpf is not null
-        and report_type = 2 GROUP by t
-    )
-
-    SELECT extract(week from t) as week, avgt from obs
-    """,
-        get_dbconnstr("asos"),
-        params=(station,),
-        index_col=None,
-    )
+        SELECT extract(week from t) as week, avgt from obs
+        """,
+            conn,
+            params=(station,),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No data found.")
 

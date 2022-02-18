@@ -4,7 +4,7 @@ import datetime
 import json
 
 import numpy as np
-import memcache
+from pymemcache.client import Client
 from paste.request import parse_formvars
 from pyiem import prism
 from pyiem.util import ncopen, html_escape, c2f, mm2inch
@@ -104,18 +104,18 @@ def application(environ, start_response):
     valid = fields.get("valid", "20191028")
     cb = fields.get("callback", None)
 
-    mckey = "/json/prism/%.2f/%.2f/%s?callback=%s" % (lon, lat, valid, cb)
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    mckey = f"/json/prism/{lon:.2f}/{lat:.2f}/{valid}?callback={cb}"
+    mc = Client(["iem-memcached", 11211])
     res = mc.get(mckey)
-    if not res:
+    if res is None:
         res = dowork(valid, lon, lat)
         mc.set(mckey, res, 3600 * 12)
-
-    if cb is None:
-        data = res
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        res = res.decode("utf-8")
+    mc.close()
+    if cb is not None:
+        res = f"{html_escape(cb)}({res})"
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return [res.encode("ascii")]

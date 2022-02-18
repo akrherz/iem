@@ -2,9 +2,9 @@
 import datetime
 import calendar
 
-from pandas import read_sql
+import pandas as pd
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"tmpf": "Air Temperature", "dwpf": "Dew Point Temperature"}
@@ -74,30 +74,30 @@ def plotter(fdict):
     t4 = ctx["t4"]
     t5 = ctx["t5"]
     v = ctx["var"]
-
-    df = read_sql(
-        f"""
-        SELECT extract(week from valid) as week,
-        sum(case when {v}::int < %s then 1 else 0 end) as d1,
-        sum(case when {v}::int < %s and {v}::int >= %s then 1 else 0 end)
-          as d2,
-        sum(case when {v}::int < %s and {v}::int >= %s then 1 else 0 end)
-          as d3,
-        sum(case when {v}::int < %s and {v}::int >= %s then 1 else 0 end)
-          as d4,
-        sum(case when {v}::int < %s and {v}::int >= %s then 1 else 0 end)
-          as d5,
-        sum(case when {v}::int >= %s then 1 else 0 end) as d6,
-        count(*)
-        from alldata where station = %s and {v} is not null
-        and extract(minute  from valid  - '1 minute'::interval) > 49
-        and report_type = 2
-        GROUP by week ORDER by week ASC
-    """,
-        get_dbconnstr("asos"),
-        params=(t1, t2, t1, t3, t2, t4, t3, t5, t4, t5, station),
-        index_col="week",
-    )
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            f"""
+            SELECT extract(week from valid) as week,
+            sum(case when {v}::int < %s then 1 else 0 end) as d1,
+            sum(case when {v}::int < %s and {v}::int >= %s then 1 else 0 end)
+            as d2,
+            sum(case when {v}::int < %s and {v}::int >= %s then 1 else 0 end)
+            as d3,
+            sum(case when {v}::int < %s and {v}::int >= %s then 1 else 0 end)
+            as d4,
+            sum(case when {v}::int < %s and {v}::int >= %s then 1 else 0 end)
+            as d5,
+            sum(case when {v}::int >= %s then 1 else 0 end) as d6,
+            count(*)
+            from alldata where station = %s and {v} is not null
+            and extract(minute  from valid  - '1 minute'::interval) > 49
+            and report_type = 2
+            GROUP by week ORDER by week ASC
+        """,
+            conn,
+            params=(t1, t2, t1, t3, t2, t4, t3, t5, t4, t5, station),
+            index_col="week",
+        )
     if df.empty:
         raise NoDataFound("No observations found for query.")
 

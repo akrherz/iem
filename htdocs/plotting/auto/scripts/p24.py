@@ -2,9 +2,9 @@
 import datetime
 
 import numpy as np
-from pandas import read_sql
+import pandas as pd
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -139,46 +139,48 @@ def get_daily_data(ctx, sdate, edate):
         statelimiter = f" and substr(station, 1, 2) = '{ctx['csector']}' "
         table = f"alldata_{ctx['csector']}"
 
-    ctx["df"] = read_sql(
-        f"""
-    with monthly as (
-        SELECT
-        case when {yearcond} then year + 1 else year end as myyear,
-        station,
-        sum(precip) as p,
-        avg((high+low)/2.) as avgt,
-        avg(low) as avglo,
-        avg(high) as avghi,
-        max(day) as max_date
-        from {table}
-        WHERE substr(station, 3, 1) = 'C' and ( {sday} ) {statelimiter}
-        GROUP by myyear, station),
-    ranks as (
-        SELECT station, myyear as year,
-        max(max_date) OVER (PARTITION by station, myyear) as max_date,
-        avg(p) OVER (PARTITION by station) as avg_precip,
-        stddev(p) OVER (PARTITION by station) as std_precip,
-        p as precip,
-        avg(avghi) OVER (PARTITION by station) as avg_high,
-        stddev(avghi) OVER (PARTITION by station) as std_high,
-        avghi as high,
-        avg(avglo) OVER (PARTITION by station) as avg_low,
-        stddev(avglo) OVER (PARTITION by station) as std_low,
-        avglo as low,
-        rank() OVER (PARTITION by station ORDER by p DESC) as precip_rank,
-        rank() OVER (PARTITION by station ORDER by avghi DESC) as high_rank,
-        rank() OVER (PARTITION by station ORDER by avglo DESC) as low_rank,
-        rank() OVER (PARTITION by station ORDER by avgt DESC) as avgt_rank
-        from monthly)
+    with get_sqlalchemy_conn("coop") as conn:
+        ctx["df"] = pd.read_sql(
+            f"""
+        with monthly as (
+            SELECT
+            case when {yearcond} then year + 1 else year end as myyear,
+            station,
+            sum(precip) as p,
+            avg((high+low)/2.) as avgt,
+            avg(low) as avglo,
+            avg(high) as avghi,
+            max(day) as max_date
+            from {table}
+            WHERE substr(station, 3, 1) = 'C' and ( {sday} ) {statelimiter}
+            GROUP by myyear, station),
+        ranks as (
+            SELECT station, myyear as year,
+            max(max_date) OVER (PARTITION by station, myyear) as max_date,
+            avg(p) OVER (PARTITION by station) as avg_precip,
+            stddev(p) OVER (PARTITION by station) as std_precip,
+            p as precip,
+            avg(avghi) OVER (PARTITION by station) as avg_high,
+            stddev(avghi) OVER (PARTITION by station) as std_high,
+            avghi as high,
+            avg(avglo) OVER (PARTITION by station) as avg_low,
+            stddev(avglo) OVER (PARTITION by station) as std_low,
+            avglo as low,
+            rank() OVER (PARTITION by station ORDER by p DESC) as precip_rank,
+            rank() OVER (PARTITION by station ORDER by avghi DESC)
+                as high_rank,
+            rank() OVER (PARTITION by station ORDER by avglo DESC) as low_rank,
+            rank() OVER (PARTITION by station ORDER by avgt DESC) as avgt_rank
+            from monthly)
 
-    SELECT station, precip_rank, avgt_rank, high_rank, low_rank,
-    ((high - avg_high) / std_high) - ((precip - avg_precip) / std_precip)
-    as aridity, max_date from ranks where year = %s
-    """,
-        get_dbconnstr("coop"),
-        params=(edate.year,),
-        index_col="station",
-    )
+        SELECT station, precip_rank, avgt_rank, high_rank, low_rank,
+        ((high - avg_high) / std_high) - ((precip - avg_precip) / std_precip)
+        as aridity, max_date from ranks where year = %s
+        """,
+            conn,
+            params=(edate.year,),
+            index_col="station",
+        )
     if ctx["df"].empty:
         raise NoDataFound("No data found")
     edate = ctx["df"]["max_date"].max()

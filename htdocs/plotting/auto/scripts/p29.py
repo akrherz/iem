@@ -3,9 +3,9 @@ import calendar
 
 import pytz
 import numpy as np
-from pandas import read_sql
+import pandas as pd
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnstr, utc
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 from pyiem.exceptions import NoDataFound
 
 
@@ -53,27 +53,27 @@ def plotter(fdict):
     hour = ctx["hour"]
     t1 = ctx["t1"]
     t2 = ctx["t2"]
-
-    df = read_sql(
-        """
-    WITH obs as (
-        SELECT date_trunc('hour', valid) as t,
-        round(avg(tmpf)::numeric, 0) as tmp from alldata
-        WHERE station = %s and (extract(minute from valid) > 50 or
-        extract(minute from valid) = 10) and
-        extract(hour from valid at time zone 'UTC') = %s and tmpf is not null
-        GROUP by t
-    )
-    SELECT extract(month from t) as month,
-    sum(case when tmp >= %s and tmp <= %s then 1 else 0 end)::int as hits,
-    sum(case when tmp > %s then 1 else 0 end) as above,
-    sum(case when tmp < %s then 1 else 0 end) as below,
-    count(*) from obs GROUP by month ORDER by month ASC
-    """,
-        get_dbconnstr("asos"),
-        params=(station, hour, t1, t2, t2, t1),
-        index_col="month",
-    )
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            """
+        WITH obs as (
+            SELECT date_trunc('hour', valid) as t,
+            round(avg(tmpf)::numeric, 0) as tmp from alldata
+            WHERE station = %s and (extract(minute from valid) > 50 or
+            extract(minute from valid) = 10) and
+            extract(hour from valid at time zone 'UTC') = %s
+            and tmpf is not null GROUP by t
+        )
+        SELECT extract(month from t) as month,
+        sum(case when tmp >= %s and tmp <= %s then 1 else 0 end)::int as hits,
+        sum(case when tmp > %s then 1 else 0 end) as above,
+        sum(case when tmp < %s then 1 else 0 end) as below,
+        count(*) from obs GROUP by month ORDER by month ASC
+        """,
+            conn,
+            params=(station, hour, t1, t2, t2, t1),
+            index_col="month",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     df["freq"] = df["hits"] / df["count"] * 100.0

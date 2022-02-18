@@ -4,7 +4,7 @@ import datetime
 import pandas as pd
 import numpy as np
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
@@ -127,43 +127,44 @@ def get_data(ctx):
     varname = ctx["var"]
     hour = int(ctx["hour"])
     level = ctx["level"]
-    pgconn = get_dbconnstr("raob")
     if varname in ["tmpc", "dwpc", "height", "smps"]:
         ctx["leveltitle"] = f" @ {level} hPa"
-        dfin = pd.read_sql(
-            text(
-                "select "
-                "extract(year from f.valid at time zone 'UTC')::int as year, "
-                "f.valid at time zone 'UTC' as utc_valid, "
-                f"{varname} from raob_profile p JOIN raob_flights f on "
-                "(p.fid = f.fid) WHERE f.station in :stations "
-                "and p.pressure = :level and "
-                "extract(hour from f.valid at time zone 'UTC') = :hour and "
-                f"{varname} is not null ORDER by valid ASC"
-            ),
-            pgconn,
-            params={
-                "stations": tuple(stations),
-                "level": level,
-                "hour": hour,
-            },
-            index_col="utc_valid",
-        )
+        with get_sqlalchemy_conn("raob") as conn:
+            dfin = pd.read_sql(
+                text(
+                    "select "
+                    "extract(year from f.valid at time zone 'UTC')::int "
+                    "as year, f.valid at time zone 'UTC' as utc_valid, "
+                    f"{varname} from raob_profile p JOIN raob_flights f on "
+                    "(p.fid = f.fid) WHERE f.station in :stations "
+                    "and p.pressure = :level and "
+                    "extract(hour from f.valid at time zone 'UTC') = :hour "
+                    f"and {varname} is not null ORDER by valid ASC"
+                ),
+                conn,
+                params={
+                    "stations": tuple(stations),
+                    "level": level,
+                    "hour": hour,
+                },
+                index_col="utc_valid",
+            )
     else:
         ctx["leveltitle"] = ""
-        dfin = pd.read_sql(
-            text(
-                "select "
-                "extract(year from valid at time zone 'UTC')::int as year, "
-                "valid at time zone 'UTC' as utc_valid, "
-                f"{varname} from raob_flights WHERE station in :stations and "
-                "extract(hour from valid at time zone 'UTC') = :hour and "
-                f"{varname} is not null ORDER by valid ASC"
-            ),
-            pgconn,
-            params={"stations": tuple(stations), "hour": hour},
-            index_col="utc_valid",
-        )
+        with get_sqlalchemy_conn("raob") as conn:
+            dfin = pd.read_sql(
+                text(
+                    "select "
+                    "extract(year from valid at time zone 'UTC')::int "
+                    "as year, valid at time zone 'UTC' as utc_valid, "
+                    f"{varname} from raob_flights WHERE station in :stations "
+                    "and extract(hour from valid at time zone 'UTC') = :hour "
+                    f"and {varname} is not null ORDER by valid ASC"
+                ),
+                conn,
+                params={"stations": tuple(stations), "hour": hour},
+                index_col="utc_valid",
+            )
     if dfin.empty:
         raise NoDataFound("No Data Found.")
     dfin["sday"] = dfin.index.strftime("%m%d")

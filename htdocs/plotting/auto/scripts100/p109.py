@@ -2,12 +2,11 @@
 import datetime
 
 import pandas as pd
-from pandas.io.sql import read_sql
 import numpy as np
 import pytz
 from pyiem.nws import vtec
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {
     "count": "Event Count",
@@ -140,7 +139,7 @@ def get_description():
     return desc
 
 
-def get_count_df(ctx, pgconn, varname, pstr, sts, ets):
+def get_count_df(ctx, varname, pstr, sts, ets):
     """Oh boy, do complex things."""
 
     emerg_extra = ""
@@ -168,18 +167,19 @@ def get_count_df(ctx, pgconn, varname, pstr, sts, ets):
         sdate = "2002-01-01"
         if pstr.find("1=1") > -1:
             sdate = "2005-10-01"
-        df = read_sql(
-            f"""
-            with events as (
-                select distinct wfo, {yearcol} as year,
-                phenomena, eventid from warnings where {pstr} and
-                {slimiter} and issue > '{sdate}' {emerg_extra})
-            select wfo, year::int as year, count(*) from events
-            group by wfo, year
-            """,
-            pgconn,
-            index_col=None,
-        )
+        with get_sqlalchemy_conn("postgis") as conn:
+            df = pd.read_sql(
+                f"""
+                with events as (
+                    select distinct wfo, {yearcol} as year,
+                    phenomena, eventid from warnings where {pstr} and
+                    {slimiter} and issue > '{sdate}' {emerg_extra})
+                select wfo, year::int as year, count(*) from events
+                group by wfo, year
+                """,
+                conn,
+                index_col=None,
+            )
         # enlarge by wfo and year cartesian product
         ctx["_subtitle"] = ", Period of Record: %.0f-%.0f" % (
             df["year"].min(),
@@ -203,22 +203,23 @@ def get_count_df(ctx, pgconn, varname, pstr, sts, ets):
         df["count_departure"] = df["count"] - df["count_mean"]
         df["count_standard"] = df["count_departure"] / df["count_std"]
     else:
-        df = read_sql(
-            f"""
-            with total as (
-            select distinct wfo,
-            extract(year from issue at time zone 'UTC') as year,
-            phenomena, significance, eventid from warnings
-            where {pstr} and issue >= %s and issue < %s {emerg_extra}
-            )
+        with get_sqlalchemy_conn("postgis") as conn:
+            df = pd.read_sql(
+                f"""
+                with total as (
+                select distinct wfo,
+                extract(year from issue at time zone 'UTC') as year,
+                phenomena, significance, eventid from warnings
+                where {pstr} and issue >= %s and issue < %s {emerg_extra}
+                )
 
-            SELECT wfo, count(*) from total
-            GROUP by wfo
-            """,
-            pgconn,
-            params=(sts, ets),
-            index_col="wfo",
-        )
+                SELECT wfo, count(*) from total
+                GROUP by wfo
+                """,
+                conn,
+                params=(sts, ets),
+                index_col="wfo",
+            )
     return df
 
 
@@ -296,7 +297,6 @@ def get_count_bins(df, varname):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("postgis")
     ctx = get_autoplot_context(fdict, get_description())
     sts = ctx["sdate"]
     sts = sts.replace(tzinfo=pytz.UTC)
@@ -343,7 +343,7 @@ def plotter(fdict):
         emerg_extra = " and is_emergency "
         title += " (Emergencies) "
     if varname.startswith("count"):
-        df = get_count_df(ctx, pgconn, varname, pstr, sts, ets)
+        df = get_count_df(ctx, varname, pstr, sts, ets)
 
         bins = get_count_bins(df, varname)
         lformat = "%.0f"
@@ -360,27 +360,28 @@ def plotter(fdict):
             extend = "both"
         df2 = df[varname]
     elif varname == "days":
-        df = read_sql(
-            f"""
-        WITH data as (
-            SELECT distinct wfo, generate_series(greatest(issue, %s),
-            least(expire, %s), '1 minute'::interval) as ts from warnings
-            WHERE issue > %s and expire < %s and {pstr} {emerg_extra}
-        ), agg as (
-            SELECT distinct wfo, date(ts) from data
-        )
-        select wfo, count(*) as days from agg
-        GROUP by wfo ORDER by days DESC
-        """,
-            pgconn,
-            params=(
-                sts,
-                ets,
-                sts - datetime.timedelta(days=90),
-                ets + datetime.timedelta(days=90),
-            ),
-            index_col="wfo",
-        )
+        with get_sqlalchemy_conn("postgis") as conn:
+            df = pd.read_sql(
+                f"""
+            WITH data as (
+                SELECT distinct wfo, generate_series(greatest(issue, %s),
+                least(expire, %s), '1 minute'::interval) as ts from warnings
+                WHERE issue > %s and expire < %s and {pstr} {emerg_extra}
+            ), agg as (
+                SELECT distinct wfo, date(ts) from data
+            )
+            select wfo, count(*) as days from agg
+            GROUP by wfo ORDER by days DESC
+            """,
+                conn,
+                params=(
+                    sts,
+                    ets,
+                    sts - datetime.timedelta(days=90),
+                    ets + datetime.timedelta(days=90),
+                ),
+                index_col="wfo",
+            )
 
         df2 = df["days"]
         if df2.max() < 10:
@@ -393,26 +394,27 @@ def plotter(fdict):
         cmap.set_over("#EEEEEE")
     else:
         total_minutes = (ets - sts).total_seconds() / 60.0
-        df = read_sql(
-            f"""
-        WITH data as (
-            SELECT distinct wfo, generate_series(greatest(issue, %s),
-            least(expire, %s), '1 minute'::interval) as ts from warnings
-            WHERE issue > %s and expire < %s and {pstr} {emerg_extra}
-        )
-        select wfo, count(*) / %s * 100. as tpercent from data
-        GROUP by wfo ORDER by tpercent DESC
-        """,
-            pgconn,
-            params=(
-                sts,
-                ets,
-                sts - datetime.timedelta(days=90),
-                ets + datetime.timedelta(days=90),
-                total_minutes,
-            ),
-            index_col="wfo",
-        )
+        with get_sqlalchemy_conn("postgis") as conn:
+            df = pd.read_sql(
+                f"""
+            WITH data as (
+                SELECT distinct wfo, generate_series(greatest(issue, %s),
+                least(expire, %s), '1 minute'::interval) as ts from warnings
+                WHERE issue > %s and expire < %s and {pstr} {emerg_extra}
+            )
+            select wfo, count(*) / %s * 100. as tpercent from data
+            GROUP by wfo ORDER by tpercent DESC
+            """,
+                conn,
+                params=(
+                    sts,
+                    ets,
+                    sts - datetime.timedelta(days=90),
+                    ets + datetime.timedelta(days=90),
+                    total_minutes,
+                ),
+                index_col="wfo",
+            )
 
         df2 = df["tpercent"]
         bins = list(range(0, 101, 10))

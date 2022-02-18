@@ -1,10 +1,10 @@
 """histogram of issuance time."""
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.nws import vtec
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
@@ -123,41 +123,43 @@ def plotter(fdict):
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
 
     tzname = ctx["_nt"].sts[wfo]["tzname"]
-    df = read_sql(
-        text(
-            """
-    WITH data as (
-        SELECT extract(year from issue) as yr, eventid,
-        min(issue at time zone :tzname) as minissue,
-        max(expire at time zone :tzname) as maxexpire from warnings WHERE
-        phenomena = :phenomena and significance = :significance
-        and wfo = :wfo and
-        extract(month from issue) in :months GROUP by yr, eventid),
-    events as (
-        select count(*) from data),
-    timedomain as (
-        SELECT generate_series(minissue,
-            least(maxexpire, minissue + '24 hours'::interval)
-            , '1 minute'::interval)
-        as ts from data
-    ),
-    data2 as (
-        SELECT extract(hour from ts)::int * 60 + extract(minute from ts)::int
-        as minute, count(*) from timedomain
-        GROUP by minute ORDER by minute ASC)
-    select d.minute, d.count, e.count as total from data2 d, events e
-    """
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = pd.read_sql(
+            text(
+                """
+        WITH data as (
+            SELECT extract(year from issue) as yr, eventid,
+            min(issue at time zone :tzname) as minissue,
+            max(expire at time zone :tzname) as maxexpire from warnings WHERE
+            phenomena = :phenomena and significance = :significance
+            and wfo = :wfo and
+            extract(month from issue) in :months GROUP by yr, eventid),
+        events as (
+            select count(*) from data),
+        timedomain as (
+            SELECT generate_series(minissue,
+                least(maxexpire, minissue + '24 hours'::interval)
+                , '1 minute'::interval)
+            as ts from data
         ),
-        get_dbconnstr("postgis"),
-        params={
-            "tzname": tzname,
-            "phenomena": phenomena,
-            "significance": significance,
-            "wfo": wfo,
-            "months": tuple(months),
-        },
-        index_col="minute",
-    )
+        data2 as (
+            SELECT
+            extract(hour from ts)::int * 60 + extract(minute from ts)::int
+            as minute, count(*) from timedomain
+            GROUP by minute ORDER by minute ASC)
+        select d.minute, d.count, e.count as total from data2 d, events e
+        """
+            ),
+            conn,
+            params={
+                "tzname": tzname,
+                "phenomena": phenomena,
+                "significance": significance,
+                "wfo": wfo,
+                "months": tuple(months),
+            },
+            index_col="minute",
+        )
     if df.empty:
         raise NoDataFound("No Results Found")
     df["frequency"] = df["count"] / df["total"] * 100.0
@@ -205,4 +207,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

@@ -5,7 +5,7 @@ import datetime
 import numpy as np
 import pandas as pd
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -88,14 +88,14 @@ def plotter(fdict):
     elif varname == "sdd":
         gfunc = f"case when high > {ceiling} then high - {ceiling} else 0 end"
         title = f"base={ceiling}"
-
-    df = pd.read_sql(
-        f"SELECT year, sday, {gfunc} as {glabel} from "
-        f"alldata_{station[:2]} WHERE "
-        "station = %s and year > 1892 and sday != '0229'",
-        get_dbconnstr("coop"),
-        params=(station,),
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"SELECT year, sday, {gfunc} as {glabel} from "
+            f"alldata_{station[:2]} WHERE "
+            "station = %s and year > 1892 and sday != '0229'",
+            conn,
+            params=(station,),
+        )
     if df.empty:
         raise NoDataFound("No data Found.")
 

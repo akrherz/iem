@@ -3,9 +3,9 @@ import calendar
 import datetime
 
 import numpy as np
-from pandas import read_sql
+import pandas as pd
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = dict(
@@ -65,26 +65,25 @@ def plotter(fdict):
     year = ctx["year"]
     varname = ctx["var"]
 
-    table = f"alldata_{station[:2]}"
-
-    df = read_sql(
-        f"""
-        WITH agg as (
-            SELECT sday, max(coalesce(narr_srad, 0))
-            from {table} where
-            station = %s  and year > 1978 GROUP by sday),
-        obs as (
-            SELECT sday, day, narr_srad, merra_srad, hrrr_srad
-            from {table} WHERE
-            station = %s and year = %s)
-        SELECT a.sday, a.max as max_narr, o.day, o.narr_srad, o.merra_srad,
-        o.hrrr_srad from agg a LEFT JOIN obs o on (a.sday = o.sday)
-        ORDER by a.sday ASC
-    """,
-        get_dbconnstr("coop"),
-        params=(station, station, year),
-        index_col="sday",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+            WITH agg as (
+                SELECT sday, max(coalesce(narr_srad, 0))
+                from alldata_{station[:2]} where
+                station = %s  and year > 1978 GROUP by sday),
+            obs as (
+                SELECT sday, day, narr_srad, merra_srad, hrrr_srad
+                from alldata_{station[:2]} WHERE
+                station = %s and year = %s)
+            SELECT a.sday, a.max as max_narr, o.day, o.narr_srad, o.merra_srad,
+            o.hrrr_srad from agg a LEFT JOIN obs o on (a.sday = o.sday)
+            ORDER by a.sday ASC
+        """,
+            conn,
+            params=(station, station, year),
+            index_col="sday",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     df["max_narr_smooth"] = (

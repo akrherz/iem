@@ -4,10 +4,9 @@ import calendar
 
 import numpy as np
 import pandas as pd
-from pandas.io.sql import read_sql
 from metpy.units import units
 import metpy.calc as mcalc
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import get_cmap
 from pyiem.plot import figure_axes
 from pyiem.plot.util import fitbox
@@ -119,39 +118,43 @@ def plotter(fdict):
 
     tzname = ctx["_nt"].sts[station]["tzname"]
 
-    df = read_sql(
-        """
-    WITH data as (
-        SELECT valid at time zone %s + '10 minutes'::interval as localvalid,
-        date_trunc(
-             'hour', valid at time zone %s  + '10 minutes'::interval) as v,
-        tmpf, dwpf, sknt, drct, alti, relh, random() as r,
-        coalesce(mslp, alti * 33.8639, 1013.25) as slp
-        from alldata where station = %s and report_type = 2
-        and extract(hour from valid at time zone %s + '10 minutes'::interval)
-        in (%s, %s)),
-     agg as (
-          select *, extract(hour from v) as hour,
-          rank() OVER (PARTITION by v ORDER by localvalid ASC, r ASC) from data
-     )
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            """
+        WITH data as (
+            SELECT valid at time zone %s + '10 minutes'::interval
+                as localvalid,
+            date_trunc(
+                'hour', valid at time zone %s  + '10 minutes'::interval) as v,
+            tmpf, dwpf, sknt, drct, alti, relh, random() as r,
+            coalesce(mslp, alti * 33.8639, 1013.25) as slp
+            from alldata where station = %s and report_type = 2
+            and extract(hour from
+            valid at time zone %s + '10 minutes'::interval)
+            in (%s, %s)),
+        agg as (
+            select *, extract(hour from v) as hour,
+            rank() OVER (PARTITION by v ORDER by localvalid ASC, r ASC)
+            from data
+        )
 
-     SELECT *, date(
-         case when hour = %s
-         then date(v - '1 day'::interval)
-         else date(v) end) from agg WHERE rank = 1
-    """,
-        get_dbconnstr("asos"),
-        params=(
-            tzname,
-            tzname,
-            station,
-            tzname,
-            h1,
-            h2,
-            h2 if h2 < h1 else -1,
-        ),
-        index_col=None,
-    )
+        SELECT *, date(
+            case when hour = %s
+            then date(v - '1 day'::interval)
+            else date(v) end) from agg WHERE rank = 1
+        """,
+            conn,
+            params=(
+                tzname,
+                tzname,
+                station,
+                tzname,
+                h1,
+                h2,
+                h2 if h2 < h1 else -1,
+            ),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No data was found.")
     if varname == "q":

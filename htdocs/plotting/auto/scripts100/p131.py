@@ -1,8 +1,8 @@
 """Plot overcast conditions by temperature"""
 import datetime
 
-from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconnstr
+import pandas as pd
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
@@ -100,51 +100,55 @@ def plotter(fdict):
         months = [ts.month, 999]
 
     if hour is None:
-        df = read_sql(
-            text(
+        with get_sqlalchemy_conn("asos") as conn:
+            df = pd.read_sql(
+                text(
+                    """
+                SELECT tmpf::int as t,
+                SUM(case when (skyc1 = :v or skyc2 = :v or skyc3 = :v
+                    or skyc4 = :v) then 1 else 0 end) as hits,
+                count(*)
+                from alldata where station = :station
+                and tmpf is not null and extract(month from valid) in :months
+                and report_type = 2
+                GROUP by t ORDER by t ASC
                 """
-            SELECT tmpf::int as t,
-            SUM(case when (skyc1 = :v or skyc2 = :v or skyc3 = :v
-                or skyc4 = :v) then 1 else 0 end) as hits,
-            count(*)
-            from alldata where station = :station
-            and tmpf is not null and extract(month from valid) in :months
-            and report_type = 2
-            GROUP by t ORDER by t ASC
-            """
-            ),
-            get_dbconnstr("asos"),
-            params={
-                "v": varname,
-                "station": station,
-                "months": tuple(months),
-            },
-            index_col=None,
-        )
+                ),
+                conn,
+                params={
+                    "v": varname,
+                    "station": station,
+                    "months": tuple(months),
+                },
+                index_col=None,
+            )
     else:
-        df = read_sql(
-            """
-            SELECT tmpf::int as t,
-            SUM(case when (skyc1 = :v or skyc2 = :v or skyc3 = :v
-                or skyc4 = :v) then 1 else 0 end) as hits,
-            count(*)
-            from alldata where station = :station
-            and tmpf is not null and extract(month from valid) in :months
-            and extract(hour from ((valid +
-                '10 minutes'::interval) at time zone :tzname)) = :hour
-            and report_type = 2
-            GROUP by t ORDER by t ASC
-            """,
-            get_dbconnstr("asos"),
-            params={
-                "v": varname,
-                "station": station,
-                "months": tuple(months),
-                "tzname": ctx["_nt"].sts[station]["tzname"],
-                "hour": hour,
-            },
-            index_col=None,
-        )
+        with get_sqlalchemy_conn("asos") as conn:
+            df = pd.read_sql(
+                text(
+                    """
+                SELECT tmpf::int as t,
+                SUM(case when (skyc1 = :v or skyc2 = :v or skyc3 = :v
+                    or skyc4 = :v) then 1 else 0 end) as hits,
+                count(*)
+                from alldata where station = :station
+                and tmpf is not null and extract(month from valid) in :months
+                and extract(hour from ((valid +
+                    '10 minutes'::interval) at time zone :tzname)) = :hour
+                and report_type = 2
+                GROUP by t ORDER by t ASC
+                """
+                ),
+                conn,
+                params={
+                    "v": varname,
+                    "station": station,
+                    "months": tuple(months),
+                    "tzname": ctx["_nt"].sts[station]["tzname"],
+                    "hour": hour,
+                },
+                index_col=None,
+            )
     if df.empty:
         raise NoDataFound("No data was found.")
     df["freq"] = df["hits"] / df["count"] * 100.0
@@ -187,4 +191,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

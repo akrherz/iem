@@ -1,10 +1,10 @@
 """Calendar of SPC Outlooks by WFO/state."""
 import datetime
 
-from pandas import read_sql
+import pandas as pd
 from pyiem.plot import calendar_plot
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -137,7 +137,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconnstr("postgis")
     ctx = get_autoplot_context(fdict, get_description())
     sts = ctx["sdate"]
     ets = ctx["edate"]
@@ -155,32 +154,33 @@ def plotter(fdict):
     elif outlook_type == "F":
         category = "FIRE WEATHER CATEGORICAL"
     if ctx["w"] == "all":
-        df = read_sql(
-            """
-        with data as (
-            select expire, threshold from spc_outlooks
-            WHERE category = %s and day = %s and outlook_type = %s and
-            expire > %s and expire < %s),
-        agg as (
-            select date(expire - '1 day'::interval), d.threshold, priority,
-            rank() OVER (PARTITION by date(expire - '1 day'::interval)
-            ORDER by priority DESC)
-            from data d JOIN spc_outlook_thresholds t
-            on (d.threshold = t.threshold))
+        with get_sqlalchemy_conn("postgis") as conn:
+            df = pd.read_sql(
+                """
+            with data as (
+                select expire, threshold from spc_outlooks
+                WHERE category = %s and day = %s and outlook_type = %s and
+                expire > %s and expire < %s),
+            agg as (
+                select date(expire - '1 day'::interval), d.threshold, priority,
+                rank() OVER (PARTITION by date(expire - '1 day'::interval)
+                ORDER by priority DESC)
+                from data d JOIN spc_outlook_thresholds t
+                on (d.threshold = t.threshold))
 
-        SELECT distinct date, threshold from agg where rank = 1
-        ORDER by date ASC
-        """,
-            pgconn,
-            params=(
-                category,
-                day,
-                outlook_type,
-                sts,
-                ets + datetime.timedelta(days=2),
-            ),
-            index_col="date",
-        )
+            SELECT distinct date, threshold from agg where rank = 1
+            ORDER by date ASC
+            """,
+                conn,
+                params=(
+                    category,
+                    day,
+                    outlook_type,
+                    sts,
+                    ets + datetime.timedelta(days=2),
+                ),
+                index_col="date",
+            )
         title2 = "Continental US"
     else:
         if ctx["w"] == "wfo":
@@ -197,7 +197,7 @@ def plotter(fdict):
             geomcol = "simple_geom"
             geoval = ugc
             sqllimiter = " and t.end_ts is null "
-            cursor = pgconn.cursor()
+            cursor = get_dbconn("postgis").cursor()
             cursor.execute(
                 "SELECT name from ugcs where ugc = %s and end_ts is null "
                 "LIMIT 1",
@@ -218,36 +218,37 @@ def plotter(fdict):
             geoval = ctx["mystate"]
             title2 = state_names[ctx["mystate"]]
 
-        df = read_sql(
-            f"""
-        with data as (
-            select expire, threshold from
-            spc_outlooks o, {table} t
-            WHERE t.{abbrcol} = %s and category = %s
-            and ST_Intersects(st_buffer(o.geom, 0), t.{geomcol})
-            and o.day = %s and o.outlook_type = %s and expire > %s
-            and expire < %s {sqllimiter}),
-        agg as (
-            select date(expire - '1 day'::interval), d.threshold, priority,
-            rank() OVER (PARTITION by date(expire - '1 day'::interval)
-            ORDER by priority DESC)
-            from data d JOIN spc_outlook_thresholds t
-            on (d.threshold = t.threshold))
+        with get_sqlalchemy_conn("postgis") as conn:
+            df = pd.read_sql(
+                f"""
+            with data as (
+                select expire, threshold from
+                spc_outlooks o, {table} t
+                WHERE t.{abbrcol} = %s and category = %s
+                and ST_Intersects(st_buffer(o.geom, 0), t.{geomcol})
+                and o.day = %s and o.outlook_type = %s and expire > %s
+                and expire < %s {sqllimiter}),
+            agg as (
+                select date(expire - '1 day'::interval), d.threshold, priority,
+                rank() OVER (PARTITION by date(expire - '1 day'::interval)
+                ORDER by priority DESC)
+                from data d JOIN spc_outlook_thresholds t
+                on (d.threshold = t.threshold))
 
-        SELECT distinct date, threshold from agg where rank = 1
-        ORDER by date ASC
-        """,
-            pgconn,
-            params=(
-                geoval,
-                category,
-                day,
-                outlook_type,
-                sts,
-                ets + datetime.timedelta(days=2),
-            ),
-            index_col="date",
-        )
+            SELECT distinct date, threshold from agg where rank = 1
+            ORDER by date ASC
+            """,
+                conn,
+                params=(
+                    geoval,
+                    category,
+                    day,
+                    outlook_type,
+                    sts,
+                    ets + datetime.timedelta(days=2),
+                ),
+                index_col="date",
+            )
 
     data = {}
     now = sts

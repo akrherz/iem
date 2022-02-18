@@ -3,8 +3,8 @@ import datetime
 import calendar
 
 from dateutil.easter import easter as get_easter
-from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconnstr
+import pandas as pd
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
@@ -150,13 +150,14 @@ def get_context(fdict):
 
     table = f"alldata_{station[:2]}"
     if date == "exact":
-        ctx["df"] = read_sql(
-            f"SELECT year, high, day, precip from {table} WHERE station = %s "
-            "and sday = %s ORDER by year ASC",
-            get_dbconnstr("coop"),
-            params=(station, thedate.strftime("%m%d")),
-            index_col="year",
-        )
+        with get_sqlalchemy_conn("coop") as conn:
+            ctx["df"] = pd.read_sql(
+                f"SELECT year, high, day, precip from {table} "
+                "WHERE station = %s and sday = %s ORDER by year ASC",
+                conn,
+                params=(station, thedate.strftime("%m%d")),
+                index_col="year",
+            )
         ctx["subtitle"] = thedate.strftime("%B %-d")
     else:
         if date == "memorial":
@@ -176,18 +177,20 @@ def get_context(fdict):
                 f"{PDICT[date]}"
             )
             days = [day + dtoff for day in days]
-        ctx["df"] = read_sql(
-            text(
-                f"SELECT year, high, day, precip from {table} "
-                "WHERE station = :station and day in :days ORDER by year ASC"
-            ),
-            get_dbconnstr("coop"),
-            params={
-                "station": station,
-                "days": tuple(days),
-            },
-            index_col="year",
-        )
+        with get_sqlalchemy_conn("coop") as conn:
+            ctx["df"] = pd.read_sql(
+                text(
+                    f"SELECT year, high, day, precip from {table} "
+                    "WHERE station = :station and day in :days "
+                    "ORDER by year ASC"
+                ),
+                conn,
+                params={
+                    "station": station,
+                    "days": tuple(days),
+                },
+                index_col="year",
+            )
     if ctx["df"].empty:
         raise NoDataFound("No Data Found.")
     ctx["title"] = ("%s [%s] Daily %s") % (

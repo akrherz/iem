@@ -37,6 +37,9 @@ def workflow():
         sid = row[4]
         network = row[0]
         newelev = get_elevation(lon, lat)
+        if newelev is None:
+            print(f"Got None for {sid} {network}")
+            continue
 
         print(f"{sid:7s} {network} OLD: {elev} NEW: {newelev:.3f}")
         mcursor2.execute(

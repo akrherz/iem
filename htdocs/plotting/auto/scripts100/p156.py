@@ -2,10 +2,9 @@
 import datetime
 import calendar
 
-from pandas.io.sql import read_sql
 from matplotlib.font_manager import FontProperties
 import pandas as pd
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import figure
 from pyiem.reference import state_names
 from pyiem.exceptions import NoDataFound
@@ -136,22 +135,23 @@ def plotter(fdict):
         dlimit = " short_desc in %s" % (str(tuple(params)),)
     else:
         dlimit = f" short_desc = '{params}' "
-    df = read_sql(
-        text(
-            "select extract(year from week_ending) as year, week_ending, "
-            "sum(num_value) as value, state_alpha "
-            f"from nass_quickstats where {dlimit} and num_value is not null "
-            "and state_alpha in :states "
-            "GROUP by year, week_ending, state_alpha "
-            "ORDER by state_alpha, week_ending"
-        ),
-        get_dbconnstr("coop"),
-        params={
-            "states": tuple(states),
-        },
-        index_col=None,
-        parse_dates="week_ending",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            text(
+                "select extract(year from week_ending) as year, week_ending, "
+                "sum(num_value) as value, state_alpha "
+                f"from nass_quickstats where {dlimit} and "
+                "num_value is not null and state_alpha in :states "
+                "GROUP by year, week_ending, state_alpha "
+                "ORDER by state_alpha, week_ending"
+            ),
+            conn,
+            params={
+                "states": tuple(states),
+            },
+            index_col=None,
+            parse_dates="week_ending",
+        )
     if df.empty:
         raise NoDataFound("ERROR: No data found!")
     df["doy"] = pd.to_numeric(df["week_ending"].dt.strftime("%j"))

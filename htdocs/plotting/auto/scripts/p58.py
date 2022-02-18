@@ -4,7 +4,7 @@ import calendar
 import pandas as pd
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 
 def get_description():
@@ -40,23 +40,24 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     threshold = float(ctx["threshold"])
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+            WITH monthly as (
+            SELECT year, month, max(precip), sum(precip)
+            from alldata_{station[:2]}
+            WHERE station = %s and precip is not null GROUP by year, month)
 
-    df = pd.read_sql(
-        f"""
-         WITH monthly as (
-         SELECT year, month, max(precip), sum(precip)
-         from alldata_{station[:2]}
-         WHERE station = %s and precip is not null GROUP by year, month)
-
-         SELECT month,
-         sum(case when max > (sum * %s) then 1 else 0 end) as hits,
-         max(case when max > (sum * %s) then year else null end) as last_year,
-         count(*) as years from monthly GROUP by month ORDER by month ASC
-        """,
-        get_dbconnstr("coop"),
-        params=(station, threshold / 100.0, threshold / 100.0),
-        index_col="month",
-    )
+            SELECT month,
+            sum(case when max > (sum * %s) then 1 else 0 end) as hits,
+            max(case when max > (sum * %s) then year else null end)
+                as last_year,
+            count(*) as years from monthly GROUP by month ORDER by month ASC
+            """,
+            conn,
+            params=(station, threshold / 100.0, threshold / 100.0),
+            index_col="month",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     df["freq"] = df["hits"] / df["years"] * 100.0

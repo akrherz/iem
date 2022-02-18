@@ -1,9 +1,9 @@
 """climodat"""
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 import numpy as np
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 
@@ -27,7 +27,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
 
@@ -55,17 +54,17 @@ def plotter(fdict):
 
     s = ctx["_nt"].sts[station]["archive_begin"]
     e = datetime.date.today().year + 1
-
-    df = read_sql(
-        f"""
-        SELECT year, month, sum(case when high > 86 then 1 else 0 end) as days,
-        sum(case when high > 86 then high - 86 else 0 end) as sdd
-        from {table} WHERE station = %s GROUP by year, month
-    """,
-        pgconn,
-        params=(station,),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+            SELECT year, month, sum(case when high > 86 then 1 else 0 end)
+            as days, sum(case when high > 86 then high - 86 else 0 end) as sdd
+            from {table} WHERE station = %s GROUP by year, month
+        """,
+            conn,
+            params=(station,),
+            index_col=None,
+        )
     sdd = df.pivot("year", "month", "sdd")
     days = df.pivot("year", "month", "days")
     df = sdd.join(days, lsuffix="sdd", rsuffix="days")
@@ -123,4 +122,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

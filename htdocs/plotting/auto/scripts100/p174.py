@@ -1,10 +1,10 @@
 """comparison"""
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 import matplotlib.dates as mdates
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -65,7 +65,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("iem")
     ctx = get_autoplot_context(fdict, get_description())
     station1 = ctx["zstation1"]
     station2 = ctx["zstation2"]
@@ -74,36 +73,37 @@ def plotter(fdict):
     varname = ctx["var"]
 
     d = "tmpf" if varname == "temp" else "dwpf"
-    df = read_sql(
-        f"""
-    WITH one as (
-        SELECT day, max_{d}, min_{d} from summary s JOIN stations t on
-        (s.iemid = t.iemid) WHERE t.id = %s and t.network = %s and
-        s.day >= %s and s.day <= %s),
+    with get_sqlalchemy_conn("iem") as conn:
+        df = pd.read_sql(
+            f"""
+        WITH one as (
+            SELECT day, max_{d}, min_{d} from summary s JOIN stations t on
+            (s.iemid = t.iemid) WHERE t.id = %s and t.network = %s and
+            s.day >= %s and s.day <= %s),
 
-    two as (
-        SELECT day, max_{d}, min_{d} from summary s JOIN stations t on
-        (s.iemid = t.iemid) WHERE t.id = %s and t.network = %s and
-        s.day >= %s and s.day <= %s)
+        two as (
+            SELECT day, max_{d}, min_{d} from summary s JOIN stations t on
+            (s.iemid = t.iemid) WHERE t.id = %s and t.network = %s and
+            s.day >= %s and s.day <= %s)
 
-    SELECT one.day as day,
-    one.max_{d} as one_high, one.min_{d} as one_low,
-    two.max_{d} as two_high, two.min_{d} as two_low
-    from one JOIN two on (one.day = two.day) ORDER by day ASC
-    """,
-        pgconn,
-        params=(
-            station1,
-            ctx["network1"],
-            sdate,
-            edate,
-            station2,
-            ctx["network2"],
-            sdate,
-            edate,
-        ),
-        index_col="day",
-    )
+        SELECT one.day as day,
+        one.max_{d} as one_high, one.min_{d} as one_low,
+        two.max_{d} as two_high, two.min_{d} as two_low
+        from one JOIN two on (one.day = two.day) ORDER by day ASC
+        """,
+            conn,
+            params=(
+                station1,
+                ctx["network1"],
+                sdate,
+                edate,
+                station2,
+                ctx["network2"],
+                sdate,
+                edate,
+            ),
+            index_col="day",
+        )
     if df.empty:
         raise NoDataFound("No data found for this comparison")
     df["high_diff"] = df["one_high"] - df["two_high"]

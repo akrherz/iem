@@ -4,9 +4,8 @@ import calendar
 
 import numpy as np
 import pandas as pd
-from pandas.io.sql import read_sql
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from metpy.units import units
 from metpy.calc import wind_components
@@ -63,19 +62,18 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    asos = get_dbconn("asos")
-
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     plot_units = ctx["units"]
-
-    df = read_sql(
-        "SELECT extract(doy from valid) as doy, sknt, drct from alldata "
-        "where station = %s and sknt >= 0 and drct >= 0 and report_type = 2",
-        asos,
-        params=(station,),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            "SELECT extract(doy from valid) as doy, sknt, drct from alldata "
+            "where station = %s and sknt >= 0 and drct >= 0 "
+            "and report_type = 2",
+            conn,
+            params=(station,),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No data Found.")
 

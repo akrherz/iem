@@ -6,12 +6,12 @@ try:
 except ImportError:
     from zoneinfo import ZoneInfo  # type: ignore
 
-from pandas import read_sql
+import pandas as pd
 import matplotlib.dates as mdates
 from matplotlib import ticker
 from pyiem.nws import vtec
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 
@@ -59,23 +59,25 @@ def plotter(fdict):
     days = ctx["days"]
 
     ets = sts + datetime.timedelta(days=days)
-    df = read_sql(
-        """
-        SELECT phenomena, significance, eventid,
-        min(product_issue at time zone 'UTC') as minproductissue,
-        min(issue at time zone 'UTC') as minissue,
-        max(expire at time zone 'UTC') as maxexpire,
-        max(coalesce(init_expire, expire) at time zone 'UTC') as maxinitexpire,
-        extract(year from product_issue) as year
-        from warnings
-        WHERE wfo = %s and issue > %s and issue < %s
-        GROUP by phenomena, significance, eventid, year
-        ORDER by minproductissue ASC
-    """,
-        get_dbconnstr("postgis"),
-        params=(station, sts, ets),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = pd.read_sql(
+            """
+            SELECT phenomena, significance, eventid,
+            min(product_issue at time zone 'UTC') as minproductissue,
+            min(issue at time zone 'UTC') as minissue,
+            max(expire at time zone 'UTC') as maxexpire,
+            max(coalesce(init_expire, expire) at time zone 'UTC')
+                as maxinitexpire,
+            extract(year from product_issue)::int as year
+            from warnings
+            WHERE wfo = %s and issue > %s and issue < %s
+            GROUP by phenomena, significance, eventid, year
+            ORDER by minproductissue ASC
+        """,
+            conn,
+            params=(station, sts, ets),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No events were found for WFO and time period.")
 

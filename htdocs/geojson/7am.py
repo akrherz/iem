@@ -2,7 +2,7 @@
 import datetime
 import json
 
-import memcache
+from pymemcache.client import Client
 import psycopg2.extras
 import pytz
 from paste.request import parse_formvars
@@ -137,19 +137,19 @@ def application(environ, start_response):
     ts = ts.replace(hour=12, tzinfo=pytz.utc)
 
     mckey = f"/geojson/7am/{dt}/{group}"
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    mc = Client(["iem-memcached", 11211])
     res = mc.get(mckey)
-    if not res:
+    if res is None:
         res = router(group, ts)
         mc.set(mckey, res, 15)
-
-    if cb is None:
-        data = res
     else:
-        data = f"{html_escape(cb)}({res})"
+        res = res.decode("utf-8")
+    mc.close()
+    if cb is not None:
+        res = f"{html_escape(cb)}({res})"
 
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return [res.encode("ascii")]
 
 
 if __name__ == "__main__":

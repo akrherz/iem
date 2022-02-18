@@ -4,11 +4,11 @@ import datetime
 try:
     from zoneinfo import ZoneInfo
 except ImportError:
-    from backports.zoneinfo import ZoneInfo
+    from backports.zoneinfo import ZoneInfo  # type: ignore
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from matplotlib.font_manager import FontProperties
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import figure
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
@@ -83,14 +83,15 @@ def plot_date(ax, i, date, station, tz):
     sts = datetime.datetime(date.year, date.month, date.day, tzinfo=tz)
     sts = sts - datetime.timedelta(hours=12)
     ets = sts + datetime.timedelta(hours=48)
-    df = read_sql(
-        "SELECT valid at time zone 'UTC' as valid, tmpf from alldata "
-        "where station = %s and "
-        "valid >= %s and valid <= %s and tmpf is not null ORDER by valid ASC",
-        get_dbconnstr("asos"),
-        params=(station, sts, ets),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            "SELECT valid at time zone 'UTC' as valid, tmpf from alldata "
+            "where station = %s and valid >= %s and valid <= %s and "
+            "tmpf is not null ORDER by valid ASC",
+            conn,
+            params=(station, sts, ets),
+            index_col=None,
+        )
     if df.empty:
         return
     df["valid"] = df["valid"].dt.tz_localize(ZoneInfo("UTC"))
@@ -136,27 +137,28 @@ def plotter(fdict):
         months = [ts.month, 999]
 
     order = "DESC" if ctx["v"] == "largest" else "ASC"
-    df = read_sql(
-        text(
-            f"""
-        SELECT day as date, max_tmpf as max, min_tmpf as min,
-        max_tmpf::int - min_tmpf::int as difference
-        from summary s JOIN stations t on (s.iemid = t.iemid)
-        where t.id = :station and t.network = :network
-        and extract(month from day) in :months
-        and max_tmpf is not null and min_tmpf is not null
-        ORDER by difference {order}, date DESC LIMIT 10
-    """
-        ),
-        get_dbconnstr("iem"),
-        params={
-            "station": station,
-            "network": ctx["network"],
-            "months": tuple(months),
-        },
-        parse_dates=("date",),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        df = pd.read_sql(
+            text(
+                f"""
+            SELECT day as date, max_tmpf as max, min_tmpf as min,
+            max_tmpf::int - min_tmpf::int as difference
+            from summary s JOIN stations t on (s.iemid = t.iemid)
+            where t.id = :station and t.network = :network
+            and extract(month from day) in :months
+            and max_tmpf is not null and min_tmpf is not null
+            ORDER by difference {order}, date DESC LIMIT 10
+        """
+            ),
+            conn,
+            params={
+                "station": station,
+                "network": ctx["network"],
+                "months": tuple(months),
+            },
+            parse_dates=("date",),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No Data Found,")
     df["rank"] = df["difference"].rank(

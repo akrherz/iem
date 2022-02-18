@@ -5,7 +5,7 @@ import json
 import os
 import datetime
 
-import memcache
+from pymemcache.client import Client
 from paste.request import parse_formvars
 from pyiem.util import html_escape
 
@@ -20,22 +20,24 @@ def run():
     fn = "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_0.json"
     if not os.path.isfile(fn):
         return "ERROR"
-    j = json.load(open(fn))
+    with open(fn, encoding="utf-8") as fh:
+        j = json.load(fh)
     vt = datetime.datetime.strptime(j["meta"]["valid"], iso)
     res["services"].append(
         {
             "id": "ridge_uscomp_n0q",
-            "layername": "ridge::USCOMP-N0Q-%s" % vt.strftime("%Y%m%d%H%M"),
+            "layername": f"ridge::USCOMP-N0Q-{vt:%Y%m%d%H%M}",
             "utc_valid": j["meta"]["valid"],
         }
     )
-
-    j = json.load(open("/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.json"))
+    fn = "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.json"
+    with open(fn, encoding="utf-8") as fh:
+        j = json.load(fh)
     vt = datetime.datetime.strptime(j["meta"]["valid"], iso)
     res["services"].append(
         {
             "id": "ridge_uscomp_n0r",
-            "layername": "ridge::USCOMP-N0R-%s" % vt.strftime("%Y%m%d%H%M"),
+            "layername": f"ridge::USCOMP-N0R-{vt:%Y%m%d%H%M}",
             "utc_valid": j["meta"]["valid"],
         }
     )
@@ -55,16 +57,17 @@ def application(environ, start_response):
     cb = fields.get("callback")
 
     mckey = "/json/tms.json"
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    mc = Client(["iem-memcached", 11211])
     res = mc.get(mckey)
-    if not res:
+    if res is None:
         res = run()
         mc.set(mckey, res, 15)
-    if cb is None:
-        data = res
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        res = res.decode("utf-8")
+    mc.close()
+    if cb is not None:
+        res = f"{html_escape(cb)}({res})"
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return [res.encode("ascii")]

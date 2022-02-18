@@ -3,10 +3,9 @@ import datetime
 import calendar
 
 import pandas as pd
-from pandas.io.sql import read_sql
 import numpy as np
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -56,7 +55,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["station"]
@@ -68,18 +66,18 @@ def plotter(fdict):
         lastday += datetime.timedelta(days=1)
     else:
         lastday = lastday.replace(day=1)
-
-    df = read_sql(
-        f"""SELECT year, month, avg((high+low)/2.) as avg_temp,
-      avg(high) as avg_high_temp, avg(low) as avg_low_temp,
-      sum(precip) as total_precip,
-      sum(case when precip > 0.005 then 1 else 0 end) as rain_days
-      from alldata_{station[:2]} where station = %s and day < %s
-      GROUP by year, month
-      """,
-        pgconn,
-        params=(station, lastday),
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""SELECT year, month, avg((high+low)/2.) as avg_temp,
+        avg(high) as avg_high_temp, avg(low) as avg_low_temp,
+        sum(precip) as total_precip,
+        sum(case when precip > 0.005 then 1 else 0 end) as rain_days
+        from alldata_{station[:2]} where station = %s and day < %s
+        GROUP by year, month
+        """,
+            conn,
+            params=(station, lastday),
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
 

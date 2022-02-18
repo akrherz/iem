@@ -6,7 +6,7 @@ import pandas as pd
 import pytz
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 MDICT = dict(
     [
@@ -200,7 +200,6 @@ def get_count_bins(df, varname):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconnstr("postgis")
     ctx = get_autoplot_context(fdict, get_description())
     sts = ctx["sdate"].replace(tzinfo=pytz.utc)
     ets = ctx["edate"].replace(tzinfo=pytz.utc)
@@ -224,18 +223,19 @@ def plotter(fdict):
     extend = "neither"
 
     if varname == "days":
-        df = pd.read_sql(
-            f"""
-        WITH data as (
-            SELECT distinct wfo, state, date(valid)
-            from lsrs where valid >= %s and valid < %s {tlimiter}
-        )
-        SELECT {by}, count(*) from data GROUP by {by}
-        """,
-            pgconn,
-            params=(sts, ets),
-            index_col=by,
-        )
+        with get_sqlalchemy_conn("postgis") as conn:
+            df = pd.read_sql(
+                f"""
+            WITH data as (
+                SELECT distinct wfo, state, date(valid)
+                from lsrs where valid >= %s and valid < %s {tlimiter}
+            )
+            SELECT {by}, count(*) from data GROUP by {by}
+            """,
+                conn,
+                params=(sts, ets),
+                index_col=by,
+            )
         df2 = df["count"]
         if df2.max() < 10:
             bins = list(range(1, 11, 1))
@@ -246,18 +246,19 @@ def plotter(fdict):
         cmap.set_under("white")
         cmap.set_over("#EEEEEE")
     elif varname == "count":
-        df = pd.read_sql(
-            f"""
-        WITH data as (
-            SELECT distinct wfo, state, valid, type,
-            magnitude, geom from lsrs
-            where valid >= %s and valid < %s {tlimiter})
-        SELECT {by}, count(*) from data GROUP by {by}
-        """,
-            pgconn,
-            index_col=by,
-            params=(sts, ets),
-        )
+        with get_sqlalchemy_conn("postgis") as conn:
+            df = pd.read_sql(
+                f"""
+            WITH data as (
+                SELECT distinct wfo, state, valid, type,
+                magnitude, geom from lsrs
+                where valid >= %s and valid < %s {tlimiter})
+            SELECT {by}, count(*) from data GROUP by {by}
+            """,
+                conn,
+                index_col=by,
+                params=(sts, ets),
+            )
         df2 = df["count"]
         if df2.max() < 10:
             bins = list(range(1, 11, 1))
@@ -284,18 +285,19 @@ def plotter(fdict):
                 "extract(year from valid) end"
             )
         # Expensive
-        df = pd.read_sql(
-            f"""
-        WITH data as (
-            SELECT distinct wfo, {yearcol} as year, state, valid, type,
-            magnitude, geom from lsrs
-            where {slimiter} {tlimiter}
-        )
-        SELECT {by}, year, count(*) from data GROUP by {by}, year
-        """,
-            pgconn,
-            index_col=None,
-        )
+        with get_sqlalchemy_conn("postgis") as conn:
+            df = pd.read_sql(
+                f"""
+            WITH data as (
+                SELECT distinct wfo, {yearcol} as year, state, valid, type,
+                magnitude, geom from lsrs
+                where {slimiter} {tlimiter}
+            )
+            SELECT {by}, year, count(*) from data GROUP by {by}, year
+            """,
+                conn,
+                index_col=None,
+            )
         # Fill out zeros
         idx = pd.MultiIndex.from_product(
             [df[by].unique(), df["year"].unique()],

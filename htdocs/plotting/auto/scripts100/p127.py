@@ -2,11 +2,11 @@
 import calendar
 
 import numpy as np
-from pandas import read_sql
+import pandas as pd
 from matplotlib import ticker
 from pyiem.plot import figure_axes
 from pyiem.plot import get_cmap
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.reference import state_names
 from pyiem.exceptions import NoDataFound
 
@@ -67,18 +67,19 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     state = ctx["state"][:2]
     short_desc = PDICT[ctx["short_desc"].upper()]
-
-    df = read_sql(
-        """
-        select year, week_ending, num_value,
-        extract(doy from week_ending)::int as day_of_year from nass_quickstats
-        where short_desc = %s and state_alpha = %s and num_value is not null
-        ORDER by week_ending ASC
-    """,
-        get_dbconnstr("coop"),
-        params=(short_desc, state),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            """
+            select year, week_ending, num_value,
+            extract(doy from week_ending)::int as day_of_year
+            from nass_quickstats
+            where short_desc = %s and state_alpha = %s and
+            num_value is not null ORDER by week_ending ASC
+        """,
+            conn,
+            params=(short_desc, state),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("ERROR: No data found!")
     df["yeari"] = df["year"] - df["year"].min()

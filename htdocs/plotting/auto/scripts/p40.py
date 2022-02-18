@@ -2,10 +2,10 @@
 import datetime
 
 import numpy as np
-from pandas import read_sql
+import pandas as pd
 from matplotlib.patches import Rectangle
 from pyiem.plot import get_cmap, figure
-from pyiem.util import get_autoplot_context, get_dbconnstr, utc
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"sky": "Sky Coverage + Visibility", "vsby": "Just Visibility"}
@@ -199,21 +199,21 @@ def plotter(fdict):
     days = (ets - sts).days
     data = np.ones((250, days * 24)) * -1
     vsby = np.ones((1, days * 24)) * -1
-
-    df = read_sql(
-        """
-        SELECT valid at time zone 'UTC' as valid,
-        skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4,
-        vsby,
-        extract(epoch from (valid - %s))/3600. as hours
-        from alldata where station = %s and valid BETWEEN %s and %s
-        and report_type = 2
-        ORDER by valid ASC
-    """,
-        get_dbconnstr("asos"),
-        params=(sts, station, sts, ets),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            """
+            SELECT valid at time zone 'UTC' as valid,
+            skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4,
+            vsby,
+            extract(epoch from (valid - %s))/3600. as hours
+            from alldata where station = %s and valid BETWEEN %s and %s
+            and report_type = 2
+            ORDER by valid ASC
+        """,
+            conn,
+            params=(sts, station, sts, ets),
+            index_col=None,
+        )
 
     lookup = {"CLR": 0, "FEW": 25, "SCT": 50, "BKN": 75, "OVC": 100}
 

@@ -2,9 +2,9 @@
 from calendar import month_abbr
 from datetime import date
 
-from pandas import read_sql
+import pandas as pd
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 
@@ -46,30 +46,31 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     year = ctx["year"]
-
-    df = read_sql(
-        f"""
-    with obs as (
-    select day, (case when month < 7 then year - 1 else year end) as myyear,
-    low, month from alldata_{station[:2]} where station = %s
-    ), obs2 as (
-        select day, myyear, low, month,
-        low - min(low) OVER
-        (PARTITION by myyear ORDER by day ASC ROWS between 400 PRECEDING
-         and 1 PRECEDING) as drop from obs
-    ), agg as (
-        select day, myyear, low, drop,
-        rank() OVER (PARTITION by myyear ORDER by drop ASC) as rank from obs2
-        WHERE month != 7
-    )
-    select myyear as year, day, low, drop as largest_change
-    from agg where rank = 1
-    """,
-        get_dbconnstr("coop"),
-        params=(station,),
-        index_col="year",
-        parse_dates="day",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        with obs as (
+        select day, (case when month < 7 then year - 1 else year end)
+            as myyear,
+        low, month from alldata_{station[:2]} where station = %s
+        ), obs2 as (
+            select day, myyear, low, month,
+            low - min(low) OVER
+            (PARTITION by myyear ORDER by day ASC ROWS between 400 PRECEDING
+            and 1 PRECEDING) as drop from obs
+        ), agg as (
+            select day, myyear, low, drop,
+            rank() OVER (PARTITION by myyear ORDER by drop ASC) as rank
+            from obs2 WHERE month != 7
+        )
+        select myyear as year, day, low, drop as largest_change
+        from agg where rank = 1
+        """,
+            conn,
+            params=(station,),
+            index_col="year",
+            parse_dates="day",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     df["largest_change"] = df["largest_change"] * -1

@@ -3,10 +3,9 @@ import datetime
 
 import numpy as np
 import pandas as pd
-from pandas.io.sql import read_sql
 import geopandas as gpd
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_autoplot_context, get_dbconnstr, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconn, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import wfo_bounds
 from sqlalchemy import text
@@ -220,7 +219,7 @@ def compute_tables_wfo(wfo):
     return tables, [xmin, ymin, xmax, ymax]
 
 
-def replace_gdd_climo(ctx, pgconn, df, table, date1, date2):
+def replace_gdd_climo(ctx, df, table, date1, date2):
     """Here we are, incredible pain."""
     d1 = date1.strftime("%m%d")
     d2 = date2.strftime("%m%d")
@@ -229,18 +228,18 @@ def replace_gdd_climo(ctx, pgconn, df, table, date1, date2):
         daylimit = f"sday >= '{d2}' or sday <= '{d1}'"
     if (date2 - date1) > datetime.timedelta(days=365):
         daylimit = ""
-
-    climo = read_sql(
-        f"""WITH obs as (
-            SELECT station, sday, avg(gddxx(%s, %s, high, low)) as datum from
-            {table} GROUP by station, sday)
-        select station, sum(datum) as gdd from obs
-        WHERE {daylimit} GROUP by station ORDER by station
-        """,
-        pgconn,
-        params=(ctx["gddbase"], ctx["gddceil"]),
-        index_col="station",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        climo = pd.read_sql(
+            f"""WITH obs as (
+                SELECT station, sday, avg(gddxx(%s, %s, high, low)) as datum
+                from {table} GROUP by station, sday)
+            select station, sum(datum) as gdd from obs
+            WHERE {daylimit} GROUP by station ORDER by station
+            """,
+            conn,
+            params=(ctx["gddbase"], ctx["gddceil"]),
+            index_col="station",
+        )
     climo.loc[climo["gdd"] == 0, "gdd"] = 1
     df["cgdd_sum"] = climo["gdd"]
     df["gdd_percent"] = df["gdd_sum"] / df["cgdd_sum"] * 100.0
@@ -253,7 +252,6 @@ def get_data(ctx):
     cull = cull_to_list(ctx["cull"])
     date1 = ctx["date1"]
     date2 = min([ctx["date2"], datetime.date.today()])
-    pgconn = get_dbconn("coop")
     sector = ctx["sector"]
     table = f"alldata_{sector}" if len(sector) == 2 else "alldata"
     tables = [table]
@@ -280,98 +278,100 @@ def get_data(ctx):
     if ctx["gddbase"] in GDD_KNOWN_BASES:
         gddclimocol = f"gdd{ctx['gddbase']}"
     for table in tables:
-        df = gpd.read_postgis(
-            text(
-                f"""
-        WITH obs as (
-            SELECT station, gddxx(:gddbase, :gddceil, high, low) as gdd,
-            cdd(high, low, 65) as cdd65, hdd(high, low, 65) as hdd65,
-            sday, high, low, precip, snow,
-            (high + low)/2. as avg_temp
-            from {table} WHERE
-            day >= :date1 and day <= :date2 and
-            substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000'
-            and station not in :cull),
-        climo as (
-            SELECT station, to_char(valid, 'mmdd') as sday, precip, high, low,
-            {gddclimocol} as gdd, cdd65, hdd65, snow
-            from {ctx['ct']}),
-        combo as (
-            SELECT o.station, o.precip - c.precip as precip_diff,
-            o.precip as precip, c.precip as cprecip,
-            o.avg_temp, o.cdd65, o.hdd65,
-            o.high, o.low, o.gdd, c.gdd as cgdd,
-            o.gdd - c.gdd as gdd_diff,
-            o.cdd65 - c.cdd65 as cdd65_diff,
-            o.hdd65 - c.hdd65 as hdd65_diff,
-            o.avg_temp - (c.high + c.low)/2. as temp_diff,
-            o.snow as snow, c.snow as csnow,
-            o.snow - c.snow as snow_diff
-            from obs o JOIN climo c ON
-            (o.station = c.station and o.sday = c.sday)),
-        agg as (
-            SELECT station,
-            avg(avg_temp) as avg_temp,
-            sum(precip_diff) as precip_depart,
-            sum(precip) / greatest(sum(cprecip), 0.0001) * 100.
-                as precip_percent,
-            sum(snow_diff) as snow_depart,
-            sum(snow) / greatest(sum(csnow), 0.0001) * 100. as snow_percent,
-            sum(precip) as precip, sum(cprecip) as cprecip,
-            sum(snow) as snow, sum(csnow) as csnow,
-            avg(high) as avg_high_temp,
-            avg(low) as avg_low_temp,
-            max(high) as max_high_temp,
-            min(low) as min_low_temp, sum(gdd_diff) as gdd_depart,
-            sum(gdd) / greatest(1, sum(cgdd)) * 100. as gdd_percent,
-            avg(temp_diff) as avg_temp_depart, sum(gdd) as gdd_sum,
-            sum(cgdd) as cgdd_sum,
-            sum(cdd65) as cdd65_sum,
-            sum(hdd65) as hdd65_sum,
-            sum(cdd65_diff) as cdd65_depart,
-            sum(hdd65_diff) as hdd65_depart
-            from combo GROUP by station)
+        with get_sqlalchemy_conn("coop") as conn:
+            df = gpd.read_postgis(
+                text(
+                    f"""
+            WITH obs as (
+                SELECT station, gddxx(:gddbase, :gddceil, high, low) as gdd,
+                cdd(high, low, 65) as cdd65, hdd(high, low, 65) as hdd65,
+                sday, high, low, precip, snow,
+                (high + low)/2. as avg_temp
+                from {table} WHERE
+                day >= :date1 and day <= :date2 and
+                substr(station, 3, 1) != 'C' and
+                substr(station, 3, 4) != '0000' and station not in :cull),
+            climo as (
+                SELECT station, to_char(valid, 'mmdd') as sday, precip, high,
+                low, {gddclimocol} as gdd, cdd65, hdd65, snow
+                from {ctx['ct']}),
+            combo as (
+                SELECT o.station, o.precip - c.precip as precip_diff,
+                o.precip as precip, c.precip as cprecip,
+                o.avg_temp, o.cdd65, o.hdd65,
+                o.high, o.low, o.gdd, c.gdd as cgdd,
+                o.gdd - c.gdd as gdd_diff,
+                o.cdd65 - c.cdd65 as cdd65_diff,
+                o.hdd65 - c.hdd65 as hdd65_diff,
+                o.avg_temp - (c.high + c.low)/2. as temp_diff,
+                o.snow as snow, c.snow as csnow,
+                o.snow - c.snow as snow_diff
+                from obs o JOIN climo c ON
+                (o.station = c.station and o.sday = c.sday)),
+            agg as (
+                SELECT station,
+                avg(avg_temp) as avg_temp,
+                sum(precip_diff) as precip_depart,
+                sum(precip) / greatest(sum(cprecip), 0.0001) * 100.
+                    as precip_percent,
+                sum(snow_diff) as snow_depart,
+                sum(snow) / greatest(sum(csnow), 0.0001) * 100.
+                    as snow_percent,
+                sum(precip) as precip, sum(cprecip) as cprecip,
+                sum(snow) as snow, sum(csnow) as csnow,
+                avg(high) as avg_high_temp,
+                avg(low) as avg_low_temp,
+                max(high) as max_high_temp,
+                min(low) as min_low_temp, sum(gdd_diff) as gdd_depart,
+                sum(gdd) / greatest(1, sum(cgdd)) * 100. as gdd_percent,
+                avg(temp_diff) as avg_temp_depart, sum(gdd) as gdd_sum,
+                sum(cgdd) as cgdd_sum,
+                sum(cdd65) as cdd65_sum,
+                sum(hdd65) as hdd65_sum,
+                sum(cdd65_diff) as cdd65_depart,
+                sum(hdd65_diff) as hdd65_depart
+                from combo GROUP by station)
 
-        SELECT d.station, t.name, t.wfo,
-        avg_temp,
-        precip as precip_sum,
-        cprecip as cprecip_sum,
-        precip_depart,
-        precip_percent,
-        snow as snow_sum,
-        csnow as csnow_sum,
-        snow_depart,
-        snow_percent,
-        min_low_temp,
-        avg_temp_depart,
-        gdd_depart,
-        gdd_sum,
-        gdd_percent,
-        cgdd_sum,
-        max_high_temp,
-        avg_high_temp,
-        avg_low_temp,
-        cdd65_sum, hdd65_sum, cdd65_depart, hdd65_depart,
-        ST_x(t.geom) as lon, ST_y(t.geom) as lat,
-        t.geom
-        from agg d JOIN stations t on (d.station = t.id)
-        WHERE t.network ~* 'CLIMATE' and t.online {wfo_limiter}
-        """
-            ),
-            get_dbconnstr("coop"),
-            params={
-                "gddbase": ctx["gddbase"],
-                "gddceil": ctx["gddceil"],
-                "date1": date1,
-                "date2": date2,
-                "cull": tuple(cull),
-            },
-            index_col="station",
-            geom_col="geom",
-        )
+            SELECT d.station, t.name, t.wfo,
+            avg_temp,
+            precip as precip_sum,
+            cprecip as cprecip_sum,
+            precip_depart,
+            precip_percent,
+            snow as snow_sum,
+            csnow as csnow_sum,
+            snow_depart,
+            snow_percent,
+            min_low_temp,
+            avg_temp_depart,
+            gdd_depart,
+            gdd_sum,
+            gdd_percent,
+            cgdd_sum,
+            max_high_temp,
+            avg_high_temp,
+            avg_low_temp,
+            cdd65_sum, hdd65_sum, cdd65_depart, hdd65_depart,
+            ST_x(t.geom) as lon, ST_y(t.geom) as lat,
+            t.geom
+            from agg d JOIN stations t on (d.station = t.id)
+            WHERE t.network ~* 'CLIMATE' and t.online {wfo_limiter}
+            """
+                ),
+                conn,
+                params={
+                    "gddbase": ctx["gddbase"],
+                    "gddceil": ctx["gddceil"],
+                    "date1": date1,
+                    "date2": date2,
+                    "cull": tuple(cull),
+                },
+                index_col="station",
+                geom_col="geom",
+            )
         if ctx["gddbase"] not in GDD_KNOWN_BASES or ctx["gddceil"] != 86:
             # We need to compute our own GDD Climatology, Le Sigh
-            df = replace_gdd_climo(ctx, pgconn, df, table, date1, date2)
+            df = replace_gdd_climo(ctx, df, table, date1, date2)
         dfs.append(df)
     df = pd.concat(dfs)
     if df.empty:

@@ -3,9 +3,9 @@ import calendar
 import datetime
 
 import numpy as np
-from pandas import read_sql
+import pandas as pd
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"monthly": "Plot Single Month", "yearly": "Plot Entire Year"}
@@ -96,31 +96,33 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
 
     if ctx["opt"] == "monthly":
-        df = read_sql(
-            f"""
-        SELECT year,  max(high) as max_high,  min(low) as min_low
-        from {table} where station = %s and month = %s and
-        high is not null and low is not null
-        and year <= %s GROUP by year
-        ORDER by year ASC
-        """,
-            get_dbconnstr("coop"),
-            params=(station, month, ctx["eyear"]),
-            index_col="year",
-        )
+        with get_sqlalchemy_conn("coop") as conn:
+            df = pd.read_sql(
+                f"""
+            SELECT year,  max(high) as max_high,  min(low) as min_low
+            from {table} where station = %s and month = %s and
+            high is not null and low is not null
+            and year <= %s GROUP by year
+            ORDER by year ASC
+            """,
+                conn,
+                params=(station, month, ctx["eyear"]),
+                index_col="year",
+            )
     else:
-        df = read_sql(
-            f"""
-        SELECT year,  max(high) as max_high,  min(low) as min_low
-        from {table} where station = %s and
-        high is not null and low is not null
-        and year <= %s GROUP by year
-        ORDER by year ASC
-        """,
-            get_dbconnstr("coop"),
-            params=(station, ctx["eyear"]),
-            index_col="year",
-        )
+        with get_sqlalchemy_conn("coop") as conn:
+            df = pd.read_sql(
+                f"""
+            SELECT year,  max(high) as max_high,  min(low) as min_low
+            from {table} where station = %s and
+            high is not null and low is not null
+            and year <= %s GROUP by year
+            ORDER by year ASC
+            """,
+                conn,
+                params=(station, ctx["eyear"]),
+                index_col="year",
+            )
     if df.empty:
         raise NoDataFound("No Data Found.")
     df["rng"] = df["max_high"] - df["min_low"]

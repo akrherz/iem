@@ -3,39 +3,40 @@ from io import StringIO
 
 import pandas as pd
 from pandas.io.sql import read_sql
-from pyiem.util import get_dbconnstr
+from pyiem.util import get_sqlalchemy_conn
 
 
 def application(_environ, start_response):
     """Go Main Go"""
-    pgconn = get_dbconnstr("iem")
-    amsi4 = read_sql(
-        """
-    SELECT to_char(day + '16 hours'::interval, 'YYYY-MM-DD HH24:MI') as valid,
-    pday as coop, day
-    from summary s JOIN stations t on (s.iemid = t.iemid)
-    where t.id = 'AMSI4' and day > '2017-07-25' and pday >= 0
-    ORDER by day ASC
-    """,
-        pgconn,
-        index_col="valid",
-    )
-
-    pgconn = get_dbconnstr("isuag")
-    df = read_sql(
-        """
-    SELECT to_char(valid, 'YYYY-MM-DD HH24:MI') as valid,
-    case when extract(hour from valid) > 16 then
-        date(valid + '8 hours'::interval) else date(valid) end as coop_date,
-    rain_in_tot as bucket1_hourly,
-    coalesce(rain_in_2_tot, rain_in_2_tot) as bucket2_hourly
-    from sm_hourly where station = 'BOOI4'
-    and valid > '2017-07-25' and (rain_in_tot > 0 or rain_in_2_tot > 0)
-    ORDER by valid ASC
-    """,
-        pgconn,
-        index_col="valid",
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        amsi4 = read_sql(
+            """
+        SELECT to_char(day + '16 hours'::interval,
+            'YYYY-MM-DD HH24:MI') as valid,
+        pday as coop, day
+        from summary s JOIN stations t on (s.iemid = t.iemid)
+        where t.id = 'AMSI4' and day > '2017-07-25' and pday >= 0
+        ORDER by day ASC
+        """,
+            conn,
+            index_col="valid",
+        )
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = read_sql(
+            """
+        SELECT to_char(valid, 'YYYY-MM-DD HH24:MI') as valid,
+        case when extract(hour from valid) > 16 then
+            date(valid + '8 hours'::interval) else date(valid) end
+            as coop_date,
+        rain_in_tot as bucket1_hourly,
+        coalesce(rain_in_2_tot, rain_in_2_tot) as bucket2_hourly
+        from sm_hourly where station = 'BOOI4'
+        and valid > '2017-07-25' and (rain_in_tot > 0 or rain_in_2_tot > 0)
+        ORDER by valid ASC
+        """,
+            conn,
+            index_col="valid",
+        )
     aggobs = df.groupby("coop_date").sum(numeric_only=True)
     aggobs.columns = [
         s.replace("_hourly", "") + "_total" for s in aggobs.columns

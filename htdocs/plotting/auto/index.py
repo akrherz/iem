@@ -660,6 +660,8 @@ function onNetworkChange(newnetwork){{
 
 def features_for_id(apid):
     """List out features for this given plotid."""
+    if apid < 1:
+        return ""
     pgconn = get_dbconn("mesosite")
     cursor = pgconn.cursor()
     s = """

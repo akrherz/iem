@@ -4,8 +4,7 @@ import datetime
 import psycopg2.extras
 import numpy as np
 import pandas as pd
-from pandas import read_sql
-from pyiem.util import get_autoplot_context, get_dbconnstr, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, get_dbconn
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
@@ -90,35 +89,42 @@ def plotter(fdict):
         elninovalid.append(row[1])
 
     elnino = np.array(elnino)
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        WITH climo2 as (
+            SELECT year, month, avg((high+low)/2.), sum(precip),
+            avg(high) as avg_high, avg(low) as avg_low
+            from {table} where station = %s
+            and day < %s GROUP by year, month),
+        climo as (
+            select month, avg(avg) as t, avg(sum) as p,
+            avg(avg_high) as high, avg(avg_low) as low from climo2
+            GROUP by month),
+        obs as (
+            SELECT year, month, avg((high+low)/2.), avg(high) as avg_high,
+            avg(low) as avg_low,
+            sum(precip) from {table} where station = %s
+            and day < %s and year >= %s and year < %s GROUP by year, month)
 
-    df = read_sql(
-        f"""
-     WITH climo2 as (
-         SELECT year, month, avg((high+low)/2.), sum(precip),
-         avg(high) as avg_high, avg(low) as avg_low
-         from {table} where station = %s
-         and day < %s GROUP by year, month),
-     climo as (
-         select month, avg(avg) as t, avg(sum) as p,
-         avg(avg_high) as high, avg(avg_low) as low from climo2
-         GROUP by month),
-    obs as (
-         SELECT year, month, avg((high+low)/2.), avg(high) as avg_high,
-         avg(low) as avg_low,
-         sum(precip) from {table} where station = %s
-         and day < %s and year >= %s and year < %s GROUP by year, month)
-
-    SELECT obs.year, obs.month, obs.avg - climo.t as avg_temp,
-    obs.avg_high - climo.high as avg_high,
-    obs.avg_low - climo.low as avg_low,
-    obs.sum - climo.p as precip from
-    obs JOIN climo on (climo.month = obs.month)
-    ORDER by obs.year ASC, obs.month ASC
-    """,
-        get_dbconnstr("coop"),
-        params=(station, archiveend, station, archiveend, sts.year, ets.year),
-        index_col=None,
-    )
+        SELECT obs.year, obs.month, obs.avg - climo.t as avg_temp,
+        obs.avg_high - climo.high as avg_high,
+        obs.avg_low - climo.low as avg_low,
+        obs.sum - climo.p as precip from
+        obs JOIN climo on (climo.month = obs.month)
+        ORDER by obs.year ASC, obs.month ASC
+        """,
+            conn,
+            params=(
+                station,
+                archiveend,
+                station,
+                archiveend,
+                sts.year,
+                ets.year,
+            ),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     df["date"] = pd.to_datetime(

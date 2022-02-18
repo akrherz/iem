@@ -3,10 +3,9 @@ import datetime
 
 import numpy as np
 import pandas as pd
-from pandas.io.sql import read_sql
 import matplotlib.patheffects as PathEffects
 from pyiem.util import drct2text
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 from metpy.units import units
@@ -96,18 +95,18 @@ def plotter(fdict):
     month = ctx["month"]
     sts = datetime.date(year, month, 1)
     ets = (sts + datetime.timedelta(days=35)).replace(day=1)
-
-    df = read_sql(
-        """
-        SELECT day, avg_sknt as sknt, vector_avg_drct as drct
-        from summary s JOIN stations t
-        ON (t.iemid = s.iemid) WHERE t.id = %s and t.network = %s and
-        s.day >= %s and s.day < %s and avg_sknt is not null
-        and vector_avg_drct is not null ORDER by day ASC
-    """,
-        get_dbconnstr("iem"),
-        params=(station, ctx["network"], sts, ets),
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        df = pd.read_sql(
+            """
+            SELECT day, avg_sknt as sknt, vector_avg_drct as drct
+            from summary s JOIN stations t
+            ON (t.iemid = s.iemid) WHERE t.id = %s and t.network = %s and
+            s.day >= %s and s.day < %s and avg_sknt is not null
+            and vector_avg_drct is not null ORDER by day ASC
+        """,
+            conn,
+            params=(station, ctx["network"], sts, ets),
+        )
     if df.empty:
         raise NoDataFound("ERROR: No Data Found")
     df["day"] = pd.to_datetime(df["day"])

@@ -3,41 +3,31 @@ require_once "../../config/settings.inc.php";
 define("IEM_APPID", 64);
 require_once "../../include/myview.php";
 $t = new MyView();
-$t->title = "AWOS Network";
+$t->title = "Iowa AWOS Network";
 $t->content = <<<EOM
 
 <div class="row">
  <div class="col-md-3">
- <span style="font-size: 1.3em;">AWOS<br />Quick Links</span>
+ <span style="font-size: 1.3em;">Iowa AWOS</span>
  </div>
  <div class="col-md-3">
- <a href="current.phtml"><img src="../images/view_text.png" /><br />Currents</a>
+ <a href="current.phtml"><img src="/images/view_text.png" /><br />Currents</a>
  </div>
  <div class="col-md-3">
- <a href="/request/download.phtml?network=AWOS"><img src="../images/down.png" /><br />Download</a>
+ <a href="/request/download.phtml?network=AWOS"><img src="/images/down.png" /><br />Download</a>
  </div>
 	<div class="col-md-3">
-	<a href="/sites/locate.php?network=AWOS"><img src="../images/find.png" /><br />Locate Site</a>
+	<a href="/sites/locate.php?network=AWOS"><img src="/images/find.png" /><br />Locate Site</a>
 	</div>
 </div>
 
-<h3">AWOS Network</h3><p>
-
-<div class="well pull-right">
-<b><u>AWOS</u></b>
-<br>Reports: 12x per Hour
-<br>Stations: 45
-<br><a href="/sites/locate.php?network=AWOS">Locations</a>
-</div>
-
-Automated Weather Observing System (AWOS) stations are often
-grouped together with the ASOS stations, but they are not the same.  Like the
-ASOS, the AWOS sensors primarily provide the aviation community with current
-weather observations.  The data is also transmitted by phone lines or satellite
-uplinks for use by other agencies. The AWOS sites are either 
-federally operated by the FAA or 
-some of them are locally maintained by state agencies.[1]</td>
-<td>
+<p>The term "AWOS" is typically applied to a subset of ASOS stations (airport
+weather stations) that are not federally owned.  For the purposes of the IEM
+website, the network identifier "AWOS" is solely used for the non-ASOS sites
+<strong>only within Iowa</strong>.  You should look at the <a href="/ASOS/">IEM ASOS</a>
+network page for all other state AWOS sites.  So the Iowa AWOS sites found here
+are operated by the Iowa Department of Transportation, except Fort Dodge (KFOD) and
+Clinton (KCWI) who are FAA operated AWOS sites.</p>
 
 <div class="row">
 <div class="col-md-6">
@@ -133,11 +123,6 @@ for 5-10 minute interval data after 1 April 2011.
 
 </div>
 </div>
-
-
-<b>References:</b><br>
-<b>1</b> <a href="http://www.faa.gov/asos/whatawos.htm">http://www.faa.gov/asos/whatawos.htm</a>
- , viewed: 21 Feb 2002
 
 EOM;
 $t->render('single.phtml');

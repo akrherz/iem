@@ -1,8 +1,8 @@
 """period between first and last watch"""
 import datetime
 
-from pandas import read_sql
 import numpy as np
+import pandas as pd
 from matplotlib.ticker import FormatStrFormatter
 import matplotlib.colors as mpcolors
 from matplotlib.colorbar import ColorbarBase
@@ -10,7 +10,7 @@ from pyiem import reference
 from pyiem.plot import get_cmap, figure
 from pyiem.plot.use_agg import plt
 from pyiem.nws import vtec
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"jan1": "January 1", "jul1": "July 1"}
@@ -111,20 +111,20 @@ def plotter(fdict):
     wfolimiter = f" wfo = '{station}' "
     if opt == "state":
         wfolimiter = f" substr(ugc, 1, 2) = '{state}' "
-
-    df = read_sql(
-        f"""WITH data as (
-            SELECT eventid, wfo, extract(year from issue) as year,
-            min(date(issue)) as date from warnings where {wfolimiter}
-            and phenomena = %s and significance = %s
-            GROUP by eventid, wfo, year)
-        SELECT year::int, date, count(*) from data GROUP by year, date
-        ORDER by year ASC, date ASC
-        """,
-        get_dbconnstr("postgis"),
-        params=(phenomena, significance),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = pd.read_sql(
+            f"""WITH data as (
+                SELECT eventid, wfo, extract(year from issue) as year,
+                min(date(issue)) as date from warnings where {wfolimiter}
+                and phenomena = %s and significance = %s
+                GROUP by eventid, wfo, year)
+            SELECT year::int, date, count(*) from data GROUP by year, date
+            ORDER by year ASC, date ASC
+            """,
+            conn,
+            params=(phenomena, significance),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No data found for query")
 

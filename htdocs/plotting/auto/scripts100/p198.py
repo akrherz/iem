@@ -1,9 +1,9 @@
 """Monthly Sounding Averages"""
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
@@ -214,7 +214,6 @@ def plotter(fdict):
         stations = (
             ctx["_nt"].sts[station]["name"].split("--")[1].strip().split(" ")
         )
-    pgconn = get_dbconnstr("raob")
 
     hrlimiter = f" extract(hour from f.valid at time zone 'UTC') = {hour} and "
     if hour == "ALL":
@@ -222,41 +221,43 @@ def plotter(fdict):
     yrcol = f"extract(year from f.valid + '{offset:0d} days'::interval)::int"
     if varname in ["tmpc", "dwpc", "height", "smps"]:
         leveltitle = " @ %s hPa" % (level,)
-        dfin = read_sql(
-            text(
-                f"""
-            select {yrcol} as year, {varname},
-            valid at time zone 'UTC' as utc_valid
-            from raob_profile p JOIN raob_flights f on (p.fid = f.fid)
-            WHERE f.station in :stations and p.pressure = :level
-            and {hrlimiter}
-            extract(month from f.valid) in :months and {varname} is not null
-        """
-            ),
-            pgconn,
-            params={
-                "stations": tuple(stations),
-                "level": level,
-                "months": tuple(months),
-            },
-        )
+        with get_sqlalchemy_conn("raob") as conn:
+            dfin = pd.read_sql(
+                text(
+                    f"""
+                select {yrcol} as year, {varname},
+                valid at time zone 'UTC' as utc_valid
+                from raob_profile p JOIN raob_flights f on (p.fid = f.fid)
+                WHERE f.station in :stations and p.pressure = :level
+                and {hrlimiter} extract(month from f.valid) in :months
+                and {varname} is not null
+            """
+                ),
+                conn,
+                params={
+                    "stations": tuple(stations),
+                    "level": level,
+                    "months": tuple(months),
+                },
+            )
     else:
         leveltitle = ""
-        dfin = read_sql(
-            text(
-                f"""
-            select {yrcol} as year, {varname},
-            valid at time zone 'UTC' as utc_valid
-            from raob_flights f WHERE f.station in :stations and {hrlimiter}
-            extract(month from f.valid) in :months and {varname} is not null
-        """
-            ),
-            pgconn,
-            params={
-                "stations": tuple(stations),
-                "months": tuple(months),
-            },
-        )
+        with get_sqlalchemy_conn("raob") as conn:
+            dfin = pd.read_sql(
+                text(
+                    f"""
+                select {yrcol} as year, {varname}, valid at time zone 'UTC'
+                as utc_valid from raob_flights f WHERE f.station in :stations
+                and {hrlimiter} extract(month from f.valid) in :months and
+                {varname} is not null
+            """
+                ),
+                conn,
+                params={
+                    "stations": tuple(stations),
+                    "months": tuple(months),
+                },
+            )
     df = compute(dfin, varname)
     if ctx["quorum"] == "yes":
         # need quorums

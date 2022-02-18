@@ -6,7 +6,7 @@ from scipy import stats
 from matplotlib.font_manager import FontProperties
 from pyiem.plot import figure
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 ODICT = {"max": "Maximum", "min": "Minimum", "avg": "Average"}
@@ -134,7 +134,7 @@ def get_description():
     return desc
 
 
-def get_data(pgconn, table, station, month, period, varname, days, opt):
+def get_data(table, station, month, period, varname, days, opt):
     """Get Data please"""
     doffset = "0 days"
     if len(month) < 3:
@@ -156,43 +156,45 @@ def get_data(pgconn, table, station, month, period, varname, days, opt):
         (y1, y2) = [int(x) for x in period.split("-")]
         ylimiter = f"WHERE myyear >= {y1} and myyear <= {y2}"
     if days == 1:
-        df = pd.read_sql(
-            f"""
-        WITH data as (
-            SELECT
-            extract(year from day + '{doffset}'::interval)::int
-              as myyear,
-            high, low, (high+low)/2. as avg from {table}
-            WHERE station = %s and high is not null
-            and low is not null {mlimiter})
-        SELECT * from data {ylimiter}
-        """,
-            pgconn,
-            params=(station,),
-            index_col=None,
-        )
+        with get_sqlalchemy_conn("coop") as conn:
+            df = pd.read_sql(
+                f"""
+            WITH data as (
+                SELECT
+                extract(year from day + '{doffset}'::interval)::int
+                as myyear,
+                high, low, (high+low)/2. as avg from {table}
+                WHERE station = %s and high is not null
+                and low is not null {mlimiter})
+            SELECT * from data {ylimiter}
+            """,
+                conn,
+                params=(station,),
+                index_col=None,
+            )
     else:
         res = (
             f"{opt}({varname}) OVER (ORDER by day ASC ROWS "
             f"BETWEEN {days - 1} PRECEDING AND CURRENT ROW) "
         )
-        df = pd.read_sql(
-            f"""
-        WITH data as (
-            SELECT
-            extract(year from day + '{doffset}'::interval)::int
-              as myyear,
-            high, low, (high+low)/2. as avg, day, month from {table}
-            WHERE station = %s and high is not null and low is not null),
-        agg1 as (
-            SELECT myyear, month, {res} as {varname}
-            from data WHERE 1 = 1 {mlimiter})
-        SELECT * from agg1 {ylimiter}
-        """,
-            pgconn,
-            params=(station,),
-            index_col=None,
-        )
+        with get_sqlalchemy_conn("coop") as conn:
+            df = pd.read_sql(
+                f"""
+            WITH data as (
+                SELECT
+                extract(year from day + '{doffset}'::interval)::int
+                as myyear,
+                high, low, (high+low)/2. as avg, day, month from {table}
+                WHERE station = %s and high is not null and low is not null),
+            agg1 as (
+                SELECT myyear, month, {res} as {varname}
+                from data WHERE 1 = 1 {mlimiter})
+            SELECT * from agg1 {ylimiter}
+            """,
+                conn,
+                params=(station,),
+                index_col=None,
+            )
     if df.empty:
         raise NoDataFound("No Data Found.")
     mdata = df[varname].values
@@ -204,7 +206,6 @@ def get_data(pgconn, table, station, month, period, varname, days, opt):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconnstr("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     month1 = ctx["month1"]
@@ -218,12 +219,8 @@ def plotter(fdict):
 
     table = f"alldata_{station[:2]}"
 
-    m1data, y1, y2 = get_data(
-        pgconn, table, station, month1, p1, varname, days, opt
-    )
-    m2data, y3, y4 = get_data(
-        pgconn, table, station, month2, p2, varname, days, opt
-    )
+    m1data, y1, y2 = get_data(table, station, month1, p1, varname, days, opt)
+    m2data, y3, y4 = get_data(table, station, month2, p2, varname, days, opt)
 
     pc1 = np.percentile(m1data, range(0, 101, 1))
     pc2 = np.percentile(m2data, range(0, 101, 1))

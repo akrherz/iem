@@ -2,9 +2,8 @@
 import datetime
 
 import pandas as pd
-from pandas.io.sql import read_sql
 from matplotlib.font_manager import FontProperties
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
@@ -132,44 +131,44 @@ def plotter(fdict):
         ts = datetime.datetime.strptime("2000-" + month + "-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month]
-
-    df = read_sql(
-        text(
-            f"""
-    WITH obs as (
-        SELECT (valid + '10 minutes'::interval) at time zone :tzname as ts,
-        tmpf::int as itmpf, dwpf::int as idwpf,
-        feel::int as ifeel, mslp, alti from alldata
-        where station = :station and
-        extract(month from valid at time zone :tzname) in :months),
-    agg1 as (
-        SELECT extract(hour from ts) as hr,
-        max(idwpf) as max_dwpf,
-        max(itmpf) as max_tmpf,
-        min(idwpf) as min_dwpf,
-        min(itmpf) as min_tmpf,
-        min(ifeel) as min_feel,
-        max(ifeel) as max_feel,
-        max(alti) as max_alti,
-        min(alti) as min_alti,
-        max(mslp) as max_mslp,
-        min(mslp) as min_mslp
-        from obs GROUP by hr)
-    SELECT o.ts, a.hr::int as hr,
-        a.{varname} from agg1 a JOIN obs o on
-        (a.hr = extract(hour from o.ts)
-        and a.{varname} = o.{varname2})
-        ORDER by a.hr ASC, o.ts DESC
-    """
-        ),
-        get_dbconnstr("asos"),
-        params={
-            "tzname": ctx["_nt"].sts[station]["tzname"],
-            "station": station,
-            "months": tuple(months),
-        },
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            text(
+                f"""
+        WITH obs as (
+            SELECT (valid + '10 minutes'::interval) at time zone :tzname as ts,
+            tmpf::int as itmpf, dwpf::int as idwpf,
+            feel::int as ifeel, mslp, alti from alldata
+            where station = :station and
+            extract(month from valid at time zone :tzname) in :months),
+        agg1 as (
+            SELECT extract(hour from ts) as hr,
+            max(idwpf) as max_dwpf,
+            max(itmpf) as max_tmpf,
+            min(idwpf) as min_dwpf,
+            min(itmpf) as min_tmpf,
+            min(ifeel) as min_feel,
+            max(ifeel) as max_feel,
+            max(alti) as max_alti,
+            min(alti) as min_alti,
+            max(mslp) as max_mslp,
+            min(mslp) as min_mslp
+            from obs GROUP by hr)
+        SELECT o.ts, a.hr::int as hr,
+            a.{varname} from agg1 a JOIN obs o on
+            (a.hr = extract(hour from o.ts)
+            and a.{varname} = o.{varname2})
+            ORDER by a.hr ASC, o.ts DESC
+        """
+            ),
+            conn,
+            params={
+                "tzname": ctx["_nt"].sts[station]["tzname"],
+                "station": station,
+                "months": tuple(months),
+            },
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No Data was found.")
     y0 = 0.1

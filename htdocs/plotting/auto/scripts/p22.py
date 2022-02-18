@@ -2,9 +2,9 @@
 import calendar
 
 import numpy as np
-from pandas import read_sql
+import pandas as pd
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"high": "High temperature", "low": "Low Temperature"}
@@ -64,36 +64,34 @@ def plotter(fdict):
     minv = ctx["min"]
     maxv = ctx["max"]
     if minv > maxv:
-        temp = minv
-        minv = maxv
-        maxv = temp
+        minv, maxv = maxv, minv
     station = ctx["station"]
-
-    df = read_sql(
-        f"""
-    WITH climate as (
-        SELECT to_char(valid, 'mmdd') as sday, high, low from
-        ncei_climate91 where station = %s
-    )
-    SELECT extract(doy from day) as doy, count(*),
-    SUM(case when a.high >= (c.high + %s) and a.high < (c.high + %s)
-            then 1 else 0 end) as high_count,
-    SUM(case when a.low >= (c.low + %s) and a.low < (c.low + %s)
-            then 1 else 0 end) as low_count
-    FROM alldata_{station[:2]} a JOIN climate c on (a.sday = c.sday)
-    WHERE a.sday != '0229' and station = %s GROUP by doy ORDER by doy ASC
-    """,
-        get_dbconnstr("coop"),
-        params=(
-            ctx["_nt"].sts[station]["ncei91"],
-            minv,
-            maxv,
-            minv,
-            maxv,
-            station,
-        ),
-        index_col="doy",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        WITH climate as (
+            SELECT to_char(valid, 'mmdd') as sday, high, low from
+            ncei_climate91 where station = %s
+        )
+        SELECT extract(doy from day) as doy, count(*),
+        SUM(case when a.high >= (c.high + %s) and a.high < (c.high + %s)
+                then 1 else 0 end) as high_count,
+        SUM(case when a.low >= (c.low + %s) and a.low < (c.low + %s)
+                then 1 else 0 end) as low_count
+        FROM alldata_{station[:2]} a JOIN climate c on (a.sday = c.sday)
+        WHERE a.sday != '0229' and station = %s GROUP by doy ORDER by doy ASC
+        """,
+            conn,
+            params=(
+                ctx["_nt"].sts[station]["ncei91"],
+                minv,
+                maxv,
+                minv,
+                maxv,
+                station,
+            ),
+            index_col="doy",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
 
@@ -122,4 +120,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

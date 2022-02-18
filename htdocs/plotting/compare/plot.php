@@ -1,16 +1,11 @@
 <?php
-if (isset($argv))
-   for ($i=1;$i<count($argv);$i++)
-   {
-       $it = explode("=",$argv[$i]);
-       $_GET[$it[0]] = $it[1];
-   }
-
-
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/station.php";
-
 require_once "../../../include/database.inc.php";
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_date.php";
+
 $pgconn = iemdb("iem");
 
 /* Get vars */
@@ -47,9 +42,6 @@ for ($i=0;  $row=pg_fetch_array($rs); $i++)
   //$cnt[$s] += 1;
 }
 
-include ("../../../include/jpgraph/jpgraph.php");
-include ("../../../include/jpgraph/jpgraph_line.php");
-include ("../../../include/jpgraph/jpgraph_date.php");
 
 
 // Create the graph. These two calls are always required
@@ -89,7 +81,6 @@ $graph->tabtitle->Set('Recent Comparison');
   $graph->ygrid->Show();
   $graph->xgrid->Show();
 
-
 // Create the linear plot
 $lineplot=new LinePlot($datay[$station1], $datax[$station1]);
 $graph->Add($lineplot);
@@ -102,10 +93,5 @@ $graph->Add($lineplot2);
 $lineplot2->SetLegend($cities[$station2]["name"] ." ($station2)");
 $lineplot2->SetColor("blue");
 
-// Add the plot to the graph
-
-
-
 // Display the graph
 $graph->Stroke();
-?>

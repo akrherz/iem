@@ -1,11 +1,11 @@
 """Average dew point by wind direction."""
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from metpy.units import units
 import metpy.calc as mcalc
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
@@ -84,25 +84,25 @@ def plotter(fdict):
         ts = datetime.datetime.strptime("2000-" + month + "-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
-
-    df = read_sql(
-        text(
-            """
-        SELECT drct::int as t, dwpf, tmpf, relh,
-        coalesce(mslp, alti * 33.8639, 1013.25) as slp
-        from alldata where station = :station
-        and drct is not null and dwpf is not null and dwpf <= tmpf
-        and sknt > 3 and drct::int % 10 = 0
-        and extract(month from valid) in :months
-        and report_type = 2
-    """
-        ),
-        get_dbconnstr("asos"),
-        params={
-            "station": station,
-            "months": tuple(months),
-        },
-    )
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            text(
+                """
+            SELECT drct::int as t, dwpf, tmpf, relh,
+            coalesce(mslp, alti * 33.8639, 1013.25) as slp
+            from alldata where station = :station
+            and drct is not null and dwpf is not null and dwpf <= tmpf
+            and sknt > 3 and drct::int % 10 = 0
+            and extract(month from valid) in :months
+            and report_type = 2
+        """
+            ),
+            conn,
+            params={
+                "station": station,
+                "months": tuple(months),
+            },
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     # Convert sea level pressure to station pressure

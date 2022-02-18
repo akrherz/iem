@@ -6,7 +6,7 @@ import re
 from commonregex import CommonRegex
 import pandas as pd
 from pyiem.templates.iem import TEMPLATE
-from pyiem.util import get_dbconnstr, get_properties
+from pyiem.util import get_sqlalchemy_conn, get_properties
 from paste.request import parse_formvars
 import requests
 
@@ -39,14 +39,16 @@ def geocoder(q):
         return "/sites/locate.php"
     lat = data["results"][0]["geometry"]["location"]["lat"]
     lon = data["results"][0]["geometry"]["location"]["lng"]
-    df = pd.read_sql(
-        "SELECT id, network, "
-        "ST_Distance(geom, ST_GeomFromEWKT('SRID=4326;POINT(%s %s)')) as dist "
-        "from stations where ST_PointInsideCircle(geom, %s, %s, 1) "
-        "ORDER by dist ASC LIMIT 50",
-        get_dbconnstr("mesosite"),
-        params=(lon, lat, lon, lat),
-    )
+    with get_sqlalchemy_conn("mesosiste") as conn:
+        df = pd.read_sql(
+            "SELECT id, network, "
+            "ST_Distance(geom, "
+            "ST_GeomFromEWKT('SRID=4326;POINT(%s %s)')) as dist "
+            "from stations where ST_PointInsideCircle(geom, %s, %s, 1) "
+            "ORDER by dist ASC LIMIT 50",
+            conn,
+            params=(lon, lat, lon, lat),
+        )
     return station_df_handler(df)
 
 
@@ -60,11 +62,12 @@ def station_handler(sid):
     # convert KXXX to XXX
     if sid.startswith("K") and len(sid) == 4:
         sid = sid[1:]
-    df = pd.read_sql(
-        "SELECT id, network from stations where id = %s",
-        get_dbconnstr("mesosite"),
-        params=(sid,),
-    )
+    with get_sqlalchemy_conn("mesosite") as conn:
+        df = pd.read_sql(
+            "SELECT id, network from stations where id = %s",
+            conn,
+            params=(sid,),
+        )
     return station_df_handler(df)
 
 

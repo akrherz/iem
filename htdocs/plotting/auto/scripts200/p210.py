@@ -3,9 +3,9 @@ import datetime
 
 import pytz
 import numpy as np
-from pandas import read_sql
+import pandas as pd
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_autoplot_context, get_dbconnstr, utc
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import prodDefinitions
 
@@ -92,15 +92,16 @@ def plotter(fdict):
     if ctx["ets"].astimezone(pytz.UTC) > utc():
         ctx["ets"] = utc()
 
-    df = read_sql(
-        "SELECT source, pil, min(entered at time zone 'UTC') as first, "
-        "max(entered at time zone 'UTC') as last, count(*) from products "
-        "WHERE substr(pil, 1, 3) = %s and entered >= %s and entered < %s "
-        "GROUP by source, pil ORDER by source, pil ASC",
-        get_dbconnstr("afos"),
-        params=(pil, ctx["sts"], ctx["ets"]),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("afos") as conn:
+        df = pd.read_sql(
+            "SELECT source, pil, min(entered at time zone 'UTC') as first, "
+            "max(entered at time zone 'UTC') as last, count(*) from products "
+            "WHERE substr(pil, 1, 3) = %s and entered >= %s and entered < %s "
+            "GROUP by source, pil ORDER by source, pil ASC",
+            conn,
+            params=(pil, ctx["sts"], ctx["ets"]),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No text products found for query, sorry.")
 

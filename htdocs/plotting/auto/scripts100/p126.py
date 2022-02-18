@@ -2,11 +2,11 @@
 import datetime
 import calendar
 
-from pandas import read_sql
+import pandas as pd
 from metpy.units import units
 import metpy.calc as mcalc
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -65,20 +65,20 @@ def plotter(fdict):
     station = ctx["zstation"]
     year = ctx["year"]
     varname = ctx["var"]
-
-    df = read_sql(
-        """
-        SELECT extract(year from valid) as year,
-        coalesce(mslp, alti * 33.8639, 1013.25) as slp,
-        extract(doy from valid) as doy, tmpf, dwpf, relh from alldata
-        where station = %s and dwpf > -50 and dwpf < 90 and
-        tmpf > -50 and tmpf < 120 and valid > '1950-01-01'
-        and report_type = 2
-    """,
-        get_dbconnstr("asos"),
-        params=(station,),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            """
+            SELECT extract(year from valid) as year,
+            coalesce(mslp, alti * 33.8639, 1013.25) as slp,
+            extract(doy from valid) as doy, tmpf, dwpf, relh from alldata
+            where station = %s and dwpf > -50 and dwpf < 90 and
+            tmpf > -50 and tmpf < 120 and valid > '1950-01-01'
+            and report_type = 2
+        """,
+            conn,
+            params=(station,),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No Data was found.")
     # saturation vapor pressure

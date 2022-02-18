@@ -3,10 +3,9 @@ import datetime
 
 import numpy as np
 import pandas as pd
-from pandas.io.sql import read_sql
 from pyiem.plot.geoplot import MapPlot
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
@@ -147,38 +146,39 @@ def plotter(fdict):
     nt = NetworkTable(f"{sector}CLIMATE")
     syear = ctx.get("syear", 1893)
     eyear = ctx.get("eyear", datetime.date.today().year)
-    df = read_sql(
-        text(
-            f"""
-        -- create virtual table with winter_year included
-        WITH events as (
-            SELECT station, day, year, high, low,
-            case when month < 7 then year - 1 else year end as winter_year,
-            extract(doy from day) as doy
-            from alldata_{sector} WHERE month in :months and
-            substr(station, 3, 4) != '0000'
-            and substr(station, 3, 1) not in ('C', 'T')
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            text(
+                f"""
+            -- create virtual table with winter_year included
+            WITH events as (
+                SELECT station, day, year, high, low,
+                case when month < 7 then year - 1 else year end as winter_year,
+                extract(doy from day) as doy
+                from alldata_{sector} WHERE month in :months and
+                substr(station, 3, 4) != '0000'
+                and substr(station, 3, 1) not in ('C', 'T')
+            )
+            SELECT station, {YRGP[varname]},
+            {ORDER[varname]}(
+                case when {SQLOPT[varname]} then day else null end) as event,
+            count(*),
+            min(day) as min_day,
+            max(day) as max_day
+            from events
+            WHERE {YRGP[varname]} >= :syear and {YRGP[varname]} <= :eyear
+            GROUP by station, {YRGP[varname]}
+            """
+            ),
+            conn,
+            params={
+                "months": tuple(MONTH_DOMAIN[varname]),
+                "t": threshold,
+                "syear": syear,
+                "eyear": eyear,
+            },
+            index_col="station",
         )
-        SELECT station, {YRGP[varname]},
-        {ORDER[varname]}(case when {SQLOPT[varname]} then day else null end)
-            as event,
-        count(*),
-        min(day) as min_day,
-        max(day) as max_day
-        from events
-        WHERE {YRGP[varname]} >= :syear and {YRGP[varname]} <= :eyear
-        GROUP by station, {YRGP[varname]}
-        """
-        ),
-        get_dbconnstr("coop"),
-        params={
-            "months": tuple(MONTH_DOMAIN[varname]),
-            "t": threshold,
-            "syear": syear,
-            "eyear": eyear,
-        },
-        index_col="station",
-    )
     if df.empty:
         raise NoDataFound("No data found")
     df = df[~pd.isnull(df["event"])]

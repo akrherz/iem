@@ -3,8 +3,8 @@
 import datetime
 import json
 
-from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconnstr, convert_value
+import pandas as pd
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, convert_value
 from pyiem.exceptions import NoDataFound
 import seaborn as sns
 from sqlalchemy import text
@@ -89,19 +89,20 @@ def get_data(ctx):
     ps = [phenomena]
     if phenomena == "_A":
         ps = ["TO", "SV"]
-    df = read_sql(
-        text(
-            "SELECT polygon_begin at time zone 'America/Chicago' as issue, "
-            "to_char(polygon_begin at time zone 'UTC', "
-            "'YYYY-MM-DD HH24:MI') as utc_issue, eventid, phenomena as ph, "
-            "significance as s, "
-            "tml_direction, tml_sknt from sbw WHERE phenomena in :phenomena and "
-            f"wfo = :wfo and {statuslimit} and tml_direction is not null and "
-            "tml_sknt is not null ORDER by issue"
-        ),
-        get_dbconnstr("postgis"),
-        params={"phenomena": tuple(ps), "wfo": wfo},
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = pd.read_sql(
+            text(
+                "SELECT polygon_begin at time zone 'America/Chicago' "
+                "as issue, to_char(polygon_begin at time zone 'UTC', "
+                "'YYYY-MM-DD HH24:MI') as utc_issue, eventid, "
+                "phenomena as ph, significance as s, tml_direction, tml_sknt "
+                "from sbw WHERE phenomena in :phenomena and wfo = :wfo and "
+                f"{statuslimit} and tml_direction is not null and "
+                "tml_sknt is not null ORDER by issue"
+            ),
+            conn,
+            params={"phenomena": tuple(ps), "wfo": wfo},
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     df["tml_mph"] = convert_value(df["tml_sknt"], "knot", "mile / hour")

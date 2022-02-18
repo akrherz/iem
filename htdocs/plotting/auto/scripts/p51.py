@@ -1,11 +1,10 @@
 """Replicated 108 plot, but for non-climodat."""
 import datetime
 
-from pandas.io.sql import read_sql
 import pandas as pd
 import numpy as np
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -126,15 +125,16 @@ def plotter(fdict):
 
     # build the climatology
     climosite = ctx["_nt"].sts[station]["climate_site"]
-    climo = read_sql(
-        f"SELECT day, sday, gddxx(%s, %s, high, low) as {glabel}, "
-        "sdd86(high, low) as sdd86, precip "
-        f"from alldata_{climosite[:2]} WHERE station = %s and "
-        "year >= 1951 ORDER by day ASC",
-        get_dbconnstr("coop"),
-        params=(gddbase, gddceil, ctx["_nt"].sts[station]["climate_site"]),
-        index_col="day",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        climo = pd.read_sql(
+            f"SELECT day, sday, gddxx(%s, %s, high, low) as {glabel}, "
+            "sdd86(high, low) as sdd86, precip "
+            f"from alldata_{climosite[:2]} WHERE station = %s and "
+            "year >= 1951 ORDER by day ASC",
+            conn,
+            params=(gddbase, gddceil, ctx["_nt"].sts[station]["climate_site"]),
+            index_col="day",
+        )
     if climo.empty:
         raise NoDataFound("Failed to find climatology")
     baseyear = int(climo.index.values[0].year)
@@ -183,17 +183,18 @@ def plotter(fdict):
     climo = pd.DataFrame(rows)
 
     # build the obs
-    df = read_sql(
-        "SELECT day, to_char(day, 'mmdd') as sday, "
-        f"gddxx(%s, %s, max_tmpf, min_tmpf) as o{glabel}, pday as oprecip, "
-        "sdd86(max_tmpf, min_tmpf) as osdd86 from summary s JOIN stations t "
-        "ON (s.iemid = t.iemid) "
-        "WHERE t.id = %s and t.network = %s and "
-        "to_char(day, 'mmdd') != '0229' ORDER by day ASC",
-        get_dbconnstr("iem"),
-        params=(gddbase, gddceil, station, ctx["network"]),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        df = pd.read_sql(
+            "SELECT day, to_char(day, 'mmdd') as sday, "
+            f"gddxx(%s, %s, max_tmpf, min_tmpf) as o{glabel}, pday as oprecip, "
+            "sdd86(max_tmpf, min_tmpf) as osdd86 from summary s JOIN stations t "
+            "ON (s.iemid = t.iemid) "
+            "WHERE t.id = %s and t.network = %s and "
+            "to_char(day, 'mmdd') != '0229' ORDER by day ASC",
+            conn,
+            params=(gddbase, gddceil, station, ctx["network"]),
+            index_col=None,
+        )
     # Now we need to join the frames
     df = pd.merge(df, climo, on="sday")
     df = df.sort_values("day", ascending=True)

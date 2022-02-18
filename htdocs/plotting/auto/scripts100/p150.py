@@ -2,9 +2,8 @@
 import calendar
 
 import pandas as pd
-from pandas.io.sql import read_sql
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconnstr, utc
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
@@ -124,46 +123,50 @@ def plotter(fdict):
     hrlimit = f"and extract(hour from f.valid at time zone 'UTC') = {hour} "
     if ctx["h"] == "ALL":
         hrlimit = ""
-    df = read_sql(
-        text(
-            f"""
-    with data as (
-        select f.valid,
-        p.pressure, count(*) OVER (PARTITION by p.pressure),
-        min(valid at time zone 'UTC') OVER () as min_valid,
-        max(valid at time zone 'UTC') OVER () as max_valid,
-        p.tmpc,
-        rank() OVER (PARTITION by p.pressure ORDER by p.tmpc ASC) as tmpc_rank,
-        min(p.tmpc) OVER (PARTITION by p.pressure) as tmpc_min,
-        max(p.tmpc) OVER (PARTITION by p.pressure) as tmpc_max,
-        p.dwpc,
-        rank() OVER (PARTITION by p.pressure ORDER by p.dwpc ASC) as dwpc_rank,
-        min(p.dwpc) OVER (PARTITION by p.pressure) as dwpc_min,
-        max(p.dwpc) OVER (PARTITION by p.pressure) as dwpc_max,
-        p.height as hght,
-        rank() OVER (
-            PARTITION by p.pressure ORDER by p.height ASC) as hght_rank,
-        min(p.height) OVER (PARTITION by p.pressure) as hght_min,
-        max(p.height) OVER (PARTITION by p.pressure) as hght_max,
-        p.smps,
-        rank() OVER (PARTITION by p.pressure ORDER by p.smps ASC) as smps_rank,
-        min(p.smps) OVER (PARTITION by p.pressure) as smps_min,
-        max(p.smps) OVER (PARTITION by p.pressure) as smps_max
-        from raob_flights f JOIN raob_profile p on (f.fid = p.fid)
-        WHERE f.station in :stations {hrlimit} {vlimit}
-        and p.pressure in (925, 850, 700, 500, 400, 300, 250, 200,
-        150, 100, 70, 50, 10)  and {varname} is not null)
+    with get_sqlalchemy_conn("raob") as conn:
+        df = pd.read_sql(
+            text(
+                f"""
+        with data as (
+            select f.valid,
+            p.pressure, count(*) OVER (PARTITION by p.pressure),
+            min(valid at time zone 'UTC') OVER () as min_valid,
+            max(valid at time zone 'UTC') OVER () as max_valid,
+            p.tmpc,
+            rank() OVER (PARTITION by p.pressure ORDER by p.tmpc ASC)
+                as tmpc_rank,
+            min(p.tmpc) OVER (PARTITION by p.pressure) as tmpc_min,
+            max(p.tmpc) OVER (PARTITION by p.pressure) as tmpc_max,
+            p.dwpc,
+            rank() OVER (PARTITION by p.pressure ORDER by p.dwpc ASC)
+                as dwpc_rank,
+            min(p.dwpc) OVER (PARTITION by p.pressure) as dwpc_min,
+            max(p.dwpc) OVER (PARTITION by p.pressure) as dwpc_max,
+            p.height as hght,
+            rank() OVER (
+                PARTITION by p.pressure ORDER by p.height ASC) as hght_rank,
+            min(p.height) OVER (PARTITION by p.pressure) as hght_min,
+            max(p.height) OVER (PARTITION by p.pressure) as hght_max,
+            p.smps,
+            rank() OVER (PARTITION by p.pressure ORDER by p.smps ASC)
+                as smps_rank,
+            min(p.smps) OVER (PARTITION by p.pressure) as smps_min,
+            max(p.smps) OVER (PARTITION by p.pressure) as smps_max
+            from raob_flights f JOIN raob_profile p on (f.fid = p.fid)
+            WHERE f.station in :stations {hrlimit} {vlimit}
+            and p.pressure in (925, 850, 700, 500, 400, 300, 250, 200,
+            150, 100, 70, 50, 10)  and {varname} is not null)
 
-    select * from data where valid = :ts ORDER by pressure DESC
-    """
-        ),
-        get_dbconnstr("raob"),
-        params={
-            "stations": tuple(stations),
-            "ts": ts,
-        },
-        index_col="pressure",
-    )
+        select * from data where valid = :ts ORDER by pressure DESC
+        """
+            ),
+            conn,
+            params={
+                "stations": tuple(stations),
+                "ts": ts,
+            },
+            index_col="pressure",
+        )
     if df.empty:
         raise NoDataFound(f"Sounding for {ts:%Y-%m-%d %H:%M} was not found!")
     df = df.drop("valid", axis=1)

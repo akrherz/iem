@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import fitbox, figure
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from matplotlib.font_manager import FontProperties
 
 
@@ -111,24 +111,24 @@ def plotter(fdict):
     elif ctx["climo"] == "ncei91":
         cltable = "ncei_climate91"
         clstation = ctx["_nt"].sts[station]["ncei91"]
-
-    obs = pd.read_sql(
-        f"""
-        WITH myclimo as (
-            select to_char(valid, 'mmdd') as sday, high, low,
-            (high + low) / 2. as avgt from
-            {cltable} WHERE station = %s
+    with get_sqlalchemy_conn("coop") as conn:
+        obs = pd.read_sql(
+            f"""
+            WITH myclimo as (
+                select to_char(valid, 'mmdd') as sday, high, low,
+                (high + low) / 2. as avgt from
+                {cltable} WHERE station = %s
+            )
+            SELECT extract(doy from day)::int as d, o.high, o.low, o.day,
+            (o.high + o.low) / 2. as avgt,
+            c.high as climo_high, c.low as climo_low, c.avgt as climo_avgt
+            from {table} o JOIN myclimo c on (o.sday = c.sday)
+            where o.station = %s and o.high is not null ORDER by day ASC
+            """,
+            conn,
+            params=(clstation, station),
+            index_col="day",
         )
-        SELECT extract(doy from day)::int as d, o.high, o.low, o.day,
-        (o.high + o.low) / 2. as avgt,
-        c.high as climo_high, c.low as climo_low, c.avgt as climo_avgt
-        from {table} o JOIN myclimo c on (o.sday = c.sday)
-        where o.station = %s and o.high is not null ORDER by day ASC
-        """,
-        get_dbconnstr("coop"),
-        params=(clstation, station),
-        index_col="day",
-    )
     if obs.empty:
         raise NoDataFound("No observations found for given station.")
     obs["threshold"] = threshold

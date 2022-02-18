@@ -2,8 +2,8 @@
 import calendar
 import itertools
 
-from pandas import read_sql
-from pyiem.util import get_autoplot_context, get_dbconnstr
+import pandas as pd
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
@@ -129,13 +129,14 @@ def plotter(fdict):
         labels["smph_hit"] = f"Avg Wind < {ctx['avg_smph_below']:.0f}MPH"
     if not params:
         raise NoDataFound("Please select some options for plotting.")
-    df = read_sql(
-        f"SELECT {' , '.join(params)}, extract(doy from day) as doy "
-        "from summary s JOIN stations t "
-        "ON (s.iemid = t.iemid) WHERE t.id = %s and t.network = %s",
-        get_dbconnstr("iem"),
-        params=(station, ctx["network"]),
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        df = pd.read_sql(
+            f"SELECT {' , '.join(params)}, extract(doy from day) as doy "
+            "from summary s JOIN stations t "
+            "ON (s.iemid = t.iemid) WHERE t.id = %s and t.network = %s",
+            conn,
+            params=(station, ctx["network"]),
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
 

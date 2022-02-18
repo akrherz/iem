@@ -2,9 +2,9 @@
 import datetime
 import calendar
 
-from pandas import read_sql
+import pandas as pd
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from scipy import stats
 from sqlalchemy import text
@@ -199,35 +199,35 @@ def plotter(fdict):
         months = [5, 6, 7, 8, 9]
     elif month != "year":
         months = [int(month)]
-
-    obs = read_sql(
-        text(
-            f"""WITH data as (
-     select day, extract(week from day) - 1 as week, year, month, sday,
-     {ctx["fstat"]}({ctx["var"]}) OVER
-        (ORDER by day ASC rows between :f1 FOLLOWING and :f2 FOLLOWING)
-        as forward_stat, {ctx["mstat"]}({ctx["var"]}) OVER
-        (ORDER by day ASC rows between CURRENT ROW and :f3 FOLLOWING)
-        as middle_stat, {ctx["stat"]}({ctx["var"]}) OVER
-         (ORDER by day ASC rows between :days PRECEDING and 1 PRECEDING)
-         as trailing_stat
-     from alldata_{station[:2]} where station = :station)
-    SELECT * from data WHERE month in :months and year >= :syear
-        and year <= :eyear ORDER by day ASC
-    """
-        ),
-        get_dbconnstr("coop"),
-        params={
-            "f1": fdays,
-            "f2": fdays + mdays - 1,
-            "f3": fdays - 1,
-            "days": days,
-            "station": station,
-            "months": tuple(months),
-            "syear": syear,
-            "eyear": eyear,
-        },
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        obs = pd.read_sql(
+            text(
+                f"""WITH data as (
+        select day, extract(week from day) - 1 as week, year, month, sday,
+        {ctx["fstat"]}({ctx["var"]}) OVER
+            (ORDER by day ASC rows between :f1 FOLLOWING and :f2 FOLLOWING)
+            as forward_stat, {ctx["mstat"]}({ctx["var"]}) OVER
+            (ORDER by day ASC rows between CURRENT ROW and :f3 FOLLOWING)
+            as middle_stat, {ctx["stat"]}({ctx["var"]}) OVER
+            (ORDER by day ASC rows between :days PRECEDING and 1 PRECEDING)
+            as trailing_stat
+        from alldata_{station[:2]} where station = :station)
+        SELECT * from data WHERE month in :months and year >= :syear
+            and year <= :eyear ORDER by day ASC
+        """
+            ),
+            conn,
+            params={
+                "f1": fdays,
+                "f2": fdays + mdays - 1,
+                "f3": fdays - 1,
+                "days": days,
+                "station": station,
+                "months": tuple(months),
+                "syear": syear,
+                "eyear": eyear,
+            },
+        )
     if obs.empty:
         raise NoDataFound("No Data Found.")
     if ctx.get("thres") is not None:
@@ -311,7 +311,7 @@ def plotter(fdict):
             ax.text(
                 0.9,
                 yloc,
-                r"R^2=%.02f" % (r_value ** 2,),
+                r"R^2=%.02f" % (r_value**2,),
                 color=color,
                 transform=ax.transAxes,
                 va="center",

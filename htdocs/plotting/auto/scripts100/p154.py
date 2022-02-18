@@ -1,10 +1,10 @@
 """Hourly temperature averages"""
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from scipy import stats
 from matplotlib.font_manager import FontProperties
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
@@ -107,34 +107,35 @@ def plotter(fdict):
         # make sure it is length two for the trick below in SQL
         months = [ts.month]
 
-    df = read_sql(
-        text(
-            """
-    WITH obs as (
-        SELECT (valid + '10 minutes'::interval) at time zone :tzname as ts,
-        tmpf::int as itmpf, dwpf::int as idwpf from alldata
-        where station = :station and tmpf is not null
-        and dwpf is not null and
-        extract(month from valid at time zone :tzname) in :months),
-    agg1 as (
-        SELECT date_trunc('hour', ts) as hts, avg(itmpf) as avg_itmpf,
-        avg(idwpf) as avg_idwpf from obs
-        WHERE extract(hour from ts) = :hour GROUP by hts)
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            text(
+                """
+        WITH obs as (
+            SELECT (valid + '10 minutes'::interval) at time zone :tzname as ts,
+            tmpf::int as itmpf, dwpf::int as idwpf from alldata
+            where station = :station and tmpf is not null
+            and dwpf is not null and
+            extract(month from valid at time zone :tzname) in :months),
+        agg1 as (
+            SELECT date_trunc('hour', ts) as hts, avg(itmpf) as avg_itmpf,
+            avg(idwpf) as avg_idwpf from obs
+            WHERE extract(hour from ts) = :hour GROUP by hts)
 
-    SELECT extract(year from hts)::int as year, avg(avg_itmpf) as avg_tmpf,
-    count(*) as cnt
-    from agg1 GROUP by year ORDER by year ASC
-    """
-        ),
-        get_dbconnstr("asos"),
-        params={
-            "tzname": ctx["_nt"].sts[station]["tzname"],
-            "station": station,
-            "months": tuple(months),
-            "hour": hour,
-        },
-        index_col="year",
-    )
+        SELECT extract(year from hts)::int as year, avg(avg_itmpf) as avg_tmpf,
+        count(*) as cnt
+        from agg1 GROUP by year ORDER by year ASC
+        """
+            ),
+            conn,
+            params={
+                "tzname": ctx["_nt"].sts[station]["tzname"],
+                "station": station,
+                "months": tuple(months),
+                "hour": hour,
+            },
+            index_col="year",
+        )
     if df.empty:
         raise NoDataFound("No data was found.")
     minfreq = len(months) * 30 * 0.8
@@ -166,7 +167,7 @@ def plotter(fdict):
         0.02,
         0.92,
         r"$\frac{^\circ}{decade} = %.2f,R^2=%.2f, avg = %.1f$"
-        % (slp * 10.0, r ** 2, m),
+        % (slp * 10.0, r**2, m),
         va="bottom",
         transform=ax.transAxes,
         bbox=dict(color="white"),

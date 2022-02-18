@@ -4,7 +4,7 @@ import datetime
 import matplotlib.patheffects as PathEffects
 import pandas as pd
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
@@ -145,42 +145,43 @@ def plotter(fdict):
     op = "+" if ctx["which"] == "above" else "-"
     comp = ">" if ctx["which"] == "above" else "<"
     which = "above" if ctx["which"] == "above" else "below"
-    df = pd.read_sql(
-        text(
-            f"""
-      WITH avgs as (
-        SELECT sday,
-        avg(high) as avg_high,
-        stddev(high) as stddev_high,
-        avg(low) as avg_low,
-        stddev(low) as stddev_low,
-        avg((high+low)/2.) as avg_temp,
-        stddev((high+low)/2.) as stddev_temp
-        from {table} WHERE
-        station = :station GROUP by sday)
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            text(
+                f"""
+        WITH avgs as (
+            SELECT sday,
+            avg(high) as avg_high,
+            stddev(high) as stddev_high,
+            avg(low) as avg_low,
+            stddev(low) as stddev_low,
+            avg((high+low)/2.) as avg_temp,
+            stddev((high+low)/2.) as stddev_temp
+            from {table} WHERE
+            station = :station GROUP by sday)
 
-      SELECT {yr},
-      sum(case when o.high {comp}
-       (a.avg_high {op} a.stddev_high * {smul} {op} {offset}) then 1 else 0 end
-      ) as high_{which},
-      sum(case when o.low {comp}
-       (a.avg_low {op} a.stddev_low * {smul} {op} {offset}) then 1 else 0 end
-      ) as low_{which},
-      sum(case when (o.high+o.low)/2. {comp}
-       (a.avg_temp {op} a.stddev_temp * {smul} {op} {offset}) then 1 else 0 end
-      ) as avg_{which},
-      count(*) as days from {table} o, avgs a WHERE o.station = :station
-      and o.sday = a.sday and month in :months
-      GROUP by yr ORDER by yr ASC
-    """
-        ),
-        get_dbconnstr("coop"),
-        params={
-            "station": station,
-            "months": tuple(months),
-        },
-        index_col="yr",
-    )
+        SELECT {yr},
+        sum(case when o.high {comp}
+        (a.avg_high {op} a.stddev_high * {smul} {op} {offset})
+            then 1 else 0 end) as high_{which},
+        sum(case when o.low {comp}
+        (a.avg_low {op} a.stddev_low * {smul} {op} {offset}) then 1 else 0 end
+        ) as low_{which},
+        sum(case when (o.high+o.low)/2. {comp}
+        (a.avg_temp {op} a.stddev_temp * {smul} {op} {offset})
+            then 1 else 0 end) as avg_{which},
+        count(*) as days from {table} o, avgs a WHERE o.station = :station
+        and o.sday = a.sday and month in :months
+        GROUP by yr ORDER by yr ASC
+        """
+            ),
+            conn,
+            params={
+                "station": station,
+                "months": tuple(months),
+            },
+            index_col="yr",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
 

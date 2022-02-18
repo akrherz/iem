@@ -2,9 +2,9 @@
 import datetime
 import calendar
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
@@ -120,36 +120,37 @@ def plotter(fdict):
         months = [ts.month, 999]
 
     sorder = "ASC" if varname in ["min_greatest_low"] else "DESC"
-    df = read_sql(
-        text(
-            f"""WITH data as (
-        SELECT month, day, day - ':days days'::interval as start_date,
-        count(*) OVER (ORDER by day ASC ROWS BETWEEN :days preceding and
-        current row) as count,
-        sum(precip) OVER (ORDER by day ASC ROWS BETWEEN :days preceding and
-        current row) as total_precip,
-        min(high) OVER (ORDER by day ASC ROWS BETWEEN :days preceding and
-        current row) as max_least_high,
-        max(low) OVER (ORDER by day ASC ROWS BETWEEN :days preceding and
-        current row) as min_greatest_low
-        from {table} WHERE station = :station)
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            text(
+                f"""WITH data as (
+            SELECT month, day, day - ':days days'::interval as start_date,
+            count(*) OVER (ORDER by day ASC ROWS BETWEEN :days preceding and
+            current row) as count,
+            sum(precip) OVER (ORDER by day ASC ROWS BETWEEN :days preceding and
+            current row) as total_precip,
+            min(high) OVER (ORDER by day ASC ROWS BETWEEN :days preceding and
+            current row) as max_least_high,
+            max(low) OVER (ORDER by day ASC ROWS BETWEEN :days preceding and
+            current row) as min_greatest_low
+            from {table} WHERE station = :station)
 
-        SELECT day as end_date, start_date, {varname} from data WHERE
-        month in :months and
-        extract(month from start_date) in :months and count = :d2 and
-        {varname} is not null
-        ORDER by {varname} {sorder} LIMIT 10
-        """
-        ),
-        get_dbconnstr("coop"),
-        params={
-            "days": days - 1,
-            "station": station,
-            "months": tuple(months),
-            "d2": days,
-        },
-        index_col=None,
-    )
+            SELECT day as end_date, start_date, {varname} from data WHERE
+            month in :months and
+            extract(month from start_date) in :months and count = :d2 and
+            {varname} is not null
+            ORDER by {varname} {sorder} LIMIT 10
+            """
+            ),
+            conn,
+            params={
+                "days": days - 1,
+                "station": station,
+                "months": tuple(months),
+                "d2": days,
+            },
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("Error, no results returned!")
     ylabels = []

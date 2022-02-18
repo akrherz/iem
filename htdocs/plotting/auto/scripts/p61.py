@@ -1,12 +1,11 @@
 """Streaks from CLI sites"""
 import datetime
 
-from pandas.io.sql import read_sql
 import pandas as pd
 import geopandas as gpd
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import SECTORS_NAME
 
@@ -79,45 +78,44 @@ def get_description():
 
 def get_data(ctx):
     """Build out our data."""
-    pgconn = get_dbconn("iem")
     ctx["nt"] = NetworkTable("NWSCLI")
     varname = ctx["var"]
 
     today = ctx["sdate"]
     yesterday = today - datetime.timedelta(days=1)
     d180 = today - datetime.timedelta(days=180)
+    with get_sqlalchemy_conn("iem") as conn:
+        df = pd.read_sql(
+            """
+        with obs as (
+        select station, valid,
+        (case when low > low_normal then 1 else 0 end) as low_hit,
+        (case when high > high_normal then 1 else 0 end) as high_hit,
+        (case when precip > 0.009 then 1 else 0 end) as precip_hit
+        from cli_data
+        where high is not null
+        and high_normal is not null and low is not null and
+        low_normal is not null and precip is not null
+        and valid > %s and valid <= %s),
 
-    df = read_sql(
-        """
-     with obs as (
-      select station, valid,
-      (case when low > low_normal then 1 else 0 end) as low_hit,
-      (case when high > high_normal then 1 else 0 end) as high_hit,
-      (case when precip > 0.009 then 1 else 0 end) as precip_hit
-      from cli_data
-      where high is not null
-      and high_normal is not null and low is not null and
-      low_normal is not null and precip is not null
-      and valid > %s and valid <= %s),
+        totals as (
+        SELECT station,
+        max(case when low_hit = 0 then valid else %s end) as last_low_below,
+        max(case when low_hit = 1 then valid else %s end) as last_low_above,
+        max(case when high_hit = 0 then valid else %s end) as last_high_below,
+        max(case when high_hit = 1 then valid else %s end) as last_high_above,
+        max(case when precip_hit = 0 then valid else %s end) as last_dry,
+        max(case when precip_hit = 1 then valid else %s end) as last_wet,
+        count(*) as count from obs GROUP by station)
 
-      totals as (
-      SELECT station,
-      max(case when low_hit = 0 then valid else %s end) as last_low_below,
-      max(case when low_hit = 1 then valid else %s end) as last_low_above,
-      max(case when high_hit = 0 then valid else %s end) as last_high_below,
-      max(case when high_hit = 1 then valid else %s end) as last_high_above,
-      max(case when precip_hit = 0 then valid else %s end) as last_dry,
-      max(case when precip_hit = 1 then valid else %s end) as last_wet,
-      count(*) as count from obs GROUP by station)
-
-      SELECT station, last_low_below, last_low_above, last_high_below,
-      last_high_above, last_dry, last_wet
-      from totals where count > 170
-    """,
-        pgconn,
-        params=(d180, today, d180, d180, d180, d180, d180, d180),
-        index_col="station",
-    )
+        SELECT station, last_low_below, last_low_above, last_high_below,
+        last_high_above, last_dry, last_wet
+        from totals where count > 170
+        """,
+            conn,
+            params=(d180, today, d180, d180, d180, d180, d180, d180),
+            index_col="station",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
 
@@ -152,8 +150,9 @@ def get_data(ctx):
         df, geometry=gpd.points_from_xy(df["lon"], df["lat"])
     )
     ctx["subtitle"] = (
-        "based on NWS CLI Sites, map approximately " "valid for %s"
-    ) % (today.strftime("%-d %b %Y"),)
+        "based on NWS CLI Sites, map approximately "
+        f"valid for {today:%-d %b %Y}"
+    )
 
 
 def plotter(fdict):

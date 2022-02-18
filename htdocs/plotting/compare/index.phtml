@@ -1,20 +1,19 @@
 <?php
-$OL = "6.2.1";
+$OL = "6.6.0";
  require_once "../../../config/settings.inc.php";
  require_once "../../../include/mlib.php";
  force_https();
   require_once "../../../include/myview.php";
  require_once "../../../include/forms.php";
  require_once "../../../include/imagemaps.php";
+ require_once "../../../include/station.php";
  $t = new MyView();
- 
 
  $network = isset($_REQUEST['network']) ? xssafe($_REQUEST['network']) : "IA_ASOS";
  $station1 = isset($_GET['station']) ? strtoupper(xssafe($_GET['station'])) : "";
  $station2 = isset($_GET['station1']) ? strtoupper(xssafe($_GET['station1'])) : "";
 
  $var = isset($_GET['var']) ? xssafe($_GET['var']): "tmpf";
- include("../../../include/station.php");
  $st = new StationData(Array($station1, $station2));
  $cities = $st->table;
 
@@ -74,6 +73,13 @@ $content = <<<EOF
 </style>
 
 <h3>IEM Site Comparisons</h3>
+
+<p><strong>17 Feb 2022 Deprecation Notice</strong> This page is more clunky then a typical
+IEM page and uses obsolete technology.  I'd like to remove it at some point, but
+let me know akrherz@iastate.edu if you want it kept around.
+<a href="/plotting/auto/?q=174">Autoplot 174</a> and
+<a href="/plotting/auto/?q=54">Autoplot 54</a> are likely more useful
+for a comparison purpose than this page!</p>
 
 <p>This application plots a timeseries comparison between two sites of your
 choice for a variable of your choice.  If you know the official IDs, you 
@@ -142,4 +148,3 @@ EOF;
 
 $t->content = $content;
 $t->render('single.phtml');
-?>

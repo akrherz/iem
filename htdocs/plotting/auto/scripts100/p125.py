@@ -3,9 +3,9 @@ import calendar
 import datetime
 
 import numpy as np
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import SECTORS_NAME, LATLON
 from sqlalchemy import text
@@ -204,37 +204,38 @@ def plotter(fdict):
         sum(gdd51) as total_gdd51,
         sum(gdd52) as total_gdd52
         """
-    df = read_sql(
-        text(
-            f"""
-        WITH mystations as (
-            select {joincol} as myid,
-            max(ST_x(geom)) as lon, max(ST_y(geom)) as lat from stations
-            where network ~* 'CLIMATE' and
-            ST_Contains(ST_MakeEnvelope(:b1, :b2, :b3, :b4, 4326), geom)
-            GROUP by myid
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            text(
+                f"""
+            WITH mystations as (
+                select {joincol} as myid,
+                max(ST_x(geom)) as lon, max(ST_y(geom)) as lat from stations
+                where network ~* 'CLIMATE' and
+                ST_Contains(ST_MakeEnvelope(:b1, :b2, :b3, :b4, 4326), geom)
+                GROUP by myid
+            )
+            SELECT station, extract(month from valid) as month,
+            max(lon) as lon, min(lat) as lat,
+            sum(precip) as total_precip,
+            avg(high) as avg_high,
+            avg(low) as avg_low,
+            avg((high+low)/2.) as avg_temp {extra} from {ctx["src"]} c
+            JOIN mystations t on (c.station = t.myid)
+            WHERE extract(month from valid) in :months
+            GROUP by station, month
+            """
+            ),
+            conn,
+            params={
+                "b1": bnds[0],
+                "b2": bnds[2],
+                "b3": bnds[1],
+                "b4": bnds[3],
+                "months": tuple(months),
+            },
+            index_col=["station", "month"],
         )
-        SELECT station, extract(month from valid) as month,
-        max(lon) as lon, min(lat) as lat,
-        sum(precip) as total_precip,
-        avg(high) as avg_high,
-        avg(low) as avg_low,
-        avg((high+low)/2.) as avg_temp {extra} from {ctx["src"]} c
-        JOIN mystations t on (c.station = t.myid)
-        WHERE extract(month from valid) in :months
-        GROUP by station, month
-        """
-        ),
-        get_dbconnstr("coop"),
-        params={
-            "b1": bnds[0],
-            "b2": bnds[2],
-            "b3": bnds[1],
-            "b4": bnds[3],
-            "months": tuple(months),
-        },
-        index_col=["station", "month"],
-    )
     if df.empty:
         raise NoDataFound("No data was found for query, sorry.")
 

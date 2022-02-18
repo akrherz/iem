@@ -5,9 +5,9 @@ import datetime
 import matplotlib.colors as mpcolors
 import numpy as np
 from seaborn import heatmap
-from pandas import read_sql
+import pandas as pd
 from pyiem.plot import get_cmap, figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -71,14 +71,16 @@ def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     table = f"alldata_{ctx['station'][:2]}"
-    df = read_sql(
-        "select day, sday, precip, high, extract(doy from day)::int as doy, "
-        f"year from {table}  WHERE station = %s ORDER by day ASC",
-        get_dbconnstr("coop"),
-        params=(ctx["station"],),
-        index_col="day",
-        parse_dates="day",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            "select day, sday, precip, high, "
+            "extract(doy from day)::int as doy, "
+            f"year from {table}  WHERE station = %s ORDER by day ASC",
+            conn,
+            params=(ctx["station"],),
+            index_col="day",
+            parse_dates="day",
+        )
     if df.empty:
         raise NoDataFound("Did not find any data for station!")
     if ctx["var"] == "trail_precip_percent":

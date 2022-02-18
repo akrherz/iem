@@ -1,12 +1,12 @@
 """Daily departures"""
 import datetime
 
-from pandas import read_sql
+import pandas as pd
 import matplotlib.dates as mdates
 import matplotlib.colors as mpcolors
 from pyiem.plot import get_cmap
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = dict(
     (
@@ -95,71 +95,71 @@ def plotter(fdict):
     gddbase = ctx["gddbase"]
     gddceil = ctx["gddceil"]
 
-    table = f"alldata_{station[:2]}"
-
-    df = read_sql(
-        f"""
-    WITH data as (
-     select day, year, sday,
-     high,
-     low,
-     (high+low)/2. as temp,
-     gddxx(%s, %s, high, low) as gdd,
-     rank() OVER (PARTITION by sday ORDER by high ASC) as high_ptile,
-     rank() OVER (PARTITION by sday ORDER by (high+low)/2. ASC) as temp_ptile,
-     rank() OVER (PARTITION by sday ORDER by low ASC) as low_ptile,
-     rank() OVER (PARTITION by sday
-        ORDER by gddxx(%s, %s, high, low) ASC) as gdd_ptile
-     from {table} where station = %s
-    ), climo as (
-     SELECT sday, avg(high) as avg_high, avg(low) as avg_low,
-     avg((high+low)/2.) as avg_temp, stddev(high) as stddev_high,
-     stddev(low) as stddev_low, stddev((high+low)/2.) as stddev_temp,
-     avg(gddxx(%s, %s, high, low)) as avg_gdd,
-     stddev(gddxx(%s, %s, high, low)) as stddev_gdd,
-     count(*)::float as years
-     from {table} WHERE station = %s GROUP by sday
-    )
-    SELECT day,
-    d.high - c.avg_high as high_diff,
-    (d.high - c.avg_high) / c.stddev_high as high_sigma,
-    d.low - c.avg_low as low_diff,
-    (d.low - c.avg_low) / c.stddev_low as low_sigma,
-    d.temp - c.avg_temp as avg_diff,
-    (d.temp - c.avg_temp) / c.stddev_temp as avg_sigma,
-    d.gdd - c.avg_gdd as gdd_diff,
-    (d.gdd - c.avg_gdd) / greatest(c.stddev_gdd, 0.1) as gdd_sigma,
-    d.high,
-    c.avg_high,
-    d.low,
-    c.avg_low,
-    d.temp,
-    c.avg_temp,
-    d.gdd,
-    c.avg_gdd,
-    high_ptile / years * 100. as high_ptile,
-    low_ptile / years * 100. as low_ptile,
-    temp_ptile / years * 100. as temp_ptile,
-    gdd_ptile / years * 100. as gdd_ptile
-    from data d JOIN climo c on
-    (c.sday = d.sday) WHERE d.year = %s ORDER by day ASC
-    """,
-        get_dbconnstr("coop"),
-        params=(
-            gddbase,
-            gddceil,
-            gddbase,
-            gddceil,
-            station,
-            gddbase,
-            gddceil,
-            gddbase,
-            gddceil,
-            station,
-            year,
-        ),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        WITH data as (
+        select day, year, sday,
+        high,
+        low,
+        (high+low)/2. as temp,
+        gddxx(%s, %s, high, low) as gdd,
+        rank() OVER (PARTITION by sday ORDER by high ASC) as high_ptile,
+        rank() OVER (PARTITION by sday ORDER by (high+low)/2. ASC)
+            as temp_ptile,
+        rank() OVER (PARTITION by sday ORDER by low ASC) as low_ptile,
+        rank() OVER (PARTITION by sday
+            ORDER by gddxx(%s, %s, high, low) ASC) as gdd_ptile
+        from alldata_{station[:2]} where station = %s
+        ), climo as (
+        SELECT sday, avg(high) as avg_high, avg(low) as avg_low,
+        avg((high+low)/2.) as avg_temp, stddev(high) as stddev_high,
+        stddev(low) as stddev_low, stddev((high+low)/2.) as stddev_temp,
+        avg(gddxx(%s, %s, high, low)) as avg_gdd,
+        stddev(gddxx(%s, %s, high, low)) as stddev_gdd,
+        count(*)::float as years
+        from alldata_{station[:2]} WHERE station = %s GROUP by sday
+        )
+        SELECT day,
+        d.high - c.avg_high as high_diff,
+        (d.high - c.avg_high) / c.stddev_high as high_sigma,
+        d.low - c.avg_low as low_diff,
+        (d.low - c.avg_low) / c.stddev_low as low_sigma,
+        d.temp - c.avg_temp as avg_diff,
+        (d.temp - c.avg_temp) / c.stddev_temp as avg_sigma,
+        d.gdd - c.avg_gdd as gdd_diff,
+        (d.gdd - c.avg_gdd) / greatest(c.stddev_gdd, 0.1) as gdd_sigma,
+        d.high,
+        c.avg_high,
+        d.low,
+        c.avg_low,
+        d.temp,
+        c.avg_temp,
+        d.gdd,
+        c.avg_gdd,
+        high_ptile / years * 100. as high_ptile,
+        low_ptile / years * 100. as low_ptile,
+        temp_ptile / years * 100. as temp_ptile,
+        gdd_ptile / years * 100. as gdd_ptile
+        from data d JOIN climo c on
+        (c.sday = d.sday) WHERE d.year = %s ORDER by day ASC
+        """,
+            conn,
+            params=(
+                gddbase,
+                gddceil,
+                gddbase,
+                gddceil,
+                station,
+                gddbase,
+                gddceil,
+                gddbase,
+                gddceil,
+                station,
+                year,
+            ),
+            index_col=None,
+        )
 
     (fig, ax) = figure_axes(apctx=ctx)
     diff = df[varname + "_" + how].values

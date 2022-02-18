@@ -2,12 +2,12 @@
 import datetime
 
 import numpy as np
-from pandas.io.sql import read_sql
+import pandas as pd
 from windrose.windrose import histogram
 from windrose import WindroseAxes
 from matplotlib.patches import Rectangle
 from sqlalchemy import text
-from pyiem.util import get_autoplot_context, get_dbconnstr, drct2text
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, drct2text
 from pyiem.plot import figure
 from pyiem.plot.use_agg import plt
 from pyiem.exceptions import NoDataFound
@@ -254,20 +254,21 @@ def get_context(fdict):
     elif ctx["opt"] == "relh_below":
         limiter = f"relh < {ctx['threshold']}"
         title = f"Relative Humidity below {ctx['threshold']}%"
-    ctx["df"] = read_sql(
-        text(
-            f"""
-        SELECT valid at time zone 'UTC' as valid,
-        drct, sknt * 1.15 as smph from alldata
-        where station = :station and {limiter} and sknt > 0
-        and drct >= 0 and
-        drct <= 360 and extract(month from valid) in :months
-        """
-        ),
-        get_dbconnstr("asos"),
-        params={"station": ctx["station"], "months": tuple(months)},
-        index_col="valid",
-    )
+    with get_sqlalchemy_conn("asos") as conn:
+        ctx["df"] = pd.read_sql(
+            text(
+                f"""
+            SELECT valid at time zone 'UTC' as valid,
+            drct, sknt * 1.15 as smph from alldata
+            where station = :station and {limiter} and sknt > 0
+            and drct >= 0 and
+            drct <= 360 and extract(month from valid) in :months
+            """
+            ),
+            conn,
+            params={"station": ctx["station"], "months": tuple(months)},
+            index_col="valid",
+        )
     if ctx["df"].empty:
         raise NoDataFound("No Data Found.")
     minvalid = ctx["df"].index.min()

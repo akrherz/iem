@@ -3,12 +3,12 @@ import datetime
 
 import numpy as np
 from scipy import stats
-from pandas import read_sql
+import pandas as pd
 import metpy.calc as mcalc
 from metpy.units import units
 from matplotlib.ticker import MaxNLocator
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnstr, utc
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
@@ -214,35 +214,35 @@ def get_data(ctx, startyear):
             f"[{utc(2017, 1, 1, tokens[0]):%-I %p}-"
             f"{utc(2017, 1, 1, tokens[1]):%-I %p}]"
         )
-
-    df = read_sql(
-        text(
-            """
-        WITH obs as (
-            SELECT valid at time zone :tzname as valid, tmpf, dwpf, relh,
-            coalesce(mslp, alti * 33.8639, 1013.25) as slp,
-            coalesce(feel, tmpf) as feel
-            from alldata WHERE station = :station and dwpf > -90
-            and dwpf < 100 and tmpf >= dwpf and
-            extract(month from valid) in :months and
-            extract(hour from valid at time zone :tzname) in :hours
-            and report_type = 2
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            text(
+                """
+            WITH obs as (
+                SELECT valid at time zone :tzname as valid, tmpf, dwpf, relh,
+                coalesce(mslp, alti * 33.8639, 1013.25) as slp,
+                coalesce(feel, tmpf) as feel
+                from alldata WHERE station = :station and dwpf > -90
+                and dwpf < 100 and tmpf >= dwpf and
+                extract(month from valid) in :months and
+                extract(hour from valid at time zone :tzname) in :hours
+                and report_type = 2
+            )
+        SELECT valid,
+        extract(year from valid + ':days days'::interval)::int as year,
+        tmpf, dwpf, slp, relh, feel from obs
+        """
+            ),
+            conn,
+            params={
+                "tzname": ctx["_nt"].sts[ctx["station"]]["tzname"],
+                "station": ctx["station"],
+                "months": tuple(months),
+                "hours": tuple(hours),
+                "days": deltadays,
+            },
+            index_col=None,
         )
-      SELECT valid,
-      extract(year from valid + ':days days'::interval)::int as year,
-      tmpf, dwpf, slp, relh, feel from obs
-    """
-        ),
-        get_dbconnstr("asos"),
-        params={
-            "tzname": ctx["_nt"].sts[ctx["station"]]["tzname"],
-            "station": ctx["station"],
-            "months": tuple(months),
-            "hours": tuple(hours),
-            "days": deltadays,
-        },
-        index_col=None,
-    )
     if df.empty:
         raise NoDataFound("No data found.")
     df = df[(df["year"] >= startyear) & (df["year"] < lastyear)]
@@ -281,7 +281,7 @@ def make_plot(df, ctx):
         avgv,
         h_slope * 100.0,
         UNITS[varname],
-        r_value ** 2,
+        r_value**2,
     )
 
     (fig, ax) = figure_axes(title=title, apctx=ctx)

@@ -10,7 +10,7 @@ from shapely.geometry import Polygon, Point
 from scipy.interpolate import Rbf
 from pyiem.plot import MapPlot, nwssnow
 from pyiem.reference import EPSG
-from pyiem.util import get_autoplot_context, get_dbconnstr, logger
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, logger
 from sqlalchemy import text
 
 LOG = logger()
@@ -177,27 +177,27 @@ def get_description():
 def load_data(ctx, basets, endts):
     """Generate a dataframe with the data we want to analyze."""
     LOG.debug("call")
-    pgconn = get_dbconnstr("postgis")
-    df = read_postgis(
-        text(
-            """SELECT state, wfo,
-        max(magnitude::real) as val, ST_x(geom) as lon, ST_y(geom) as lat,
-        ST_Transform(geom, 2163) as geo
-        from lsrs WHERE type = :typ and magnitude >= 0 and
-        valid >= :basets and valid <= :endts
-        GROUP by state, wfo, lon, lat, geo
-        ORDER by val DESC
-        """
-        ),
-        pgconn,
-        params={
-            "typ": "S" if ctx["v"] == "snow" else "5",
-            "basets": basets,
-            "endts": endts,
-        },
-        index_col=None,
-        geom_col="geo",
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = read_postgis(
+            text(
+                """SELECT state, wfo,
+            max(magnitude::real) as val, ST_x(geom) as lon, ST_y(geom) as lat,
+            ST_Transform(geom, 2163) as geo
+            from lsrs WHERE type = :typ and magnitude >= 0 and
+            valid >= :basets and valid <= :endts
+            GROUP by state, wfo, lon, lat, geo
+            ORDER by val DESC
+            """
+            ),
+            conn,
+            params={
+                "typ": "S" if ctx["v"] == "snow" else "5",
+                "basets": basets,
+                "endts": endts,
+            },
+            index_col=None,
+            geom_col="geo",
+        )
     LOG.debug("Loaded %s rows", len(df.index))
     df[USEME] = True
     df["nwsli"] = df.index.values
@@ -206,35 +206,35 @@ def load_data(ctx, basets, endts):
     if ctx["coop"] == "no" or ctx["v"] == "ice":
         return df
     # More work to do
-    pgconn = get_dbconnstr("iem")
     days = []
     now = basets
     while now <= endts:
         days.append(now.date())
         now += datetime.timedelta(hours=24)
-    df2 = read_postgis(
-        text(
-            """SELECT state, wfo, id as nwsli,
-        sum(snow) as val, ST_x(geom) as lon, ST_y(geom) as lat,
-        ST_Transform(geom, 2163) as geo
-        from summary s JOIN stations t on (s.iemid = t.iemid)
-        WHERE s.day in :days
-        and (t.network ~* 'COOP' or t.network = 'IACOCORAHS')
-        and snow >= 0 and
-        coop_valid >= :basets and coop_valid <= :endts
-        GROUP by state, wfo, nwsli, lon, lat, geo
-        ORDER by val DESC
-        """
-        ),
-        pgconn,
-        params={
-            "days": tuple(days),
-            "basets": basets,
-            "endts": endts,
-        },
-        index_col=None,
-        geom_col="geo",
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        df2 = read_postgis(
+            text(
+                """SELECT state, wfo, id as nwsli,
+            sum(snow) as val, ST_x(geom) as lon, ST_y(geom) as lat,
+            ST_Transform(geom, 2163) as geo
+            from summary s JOIN stations t on (s.iemid = t.iemid)
+            WHERE s.day in :days
+            and (t.network ~* 'COOP' or t.network = 'IACOCORAHS')
+            and snow >= 0 and
+            coop_valid >= :basets and coop_valid <= :endts
+            GROUP by state, wfo, nwsli, lon, lat, geo
+            ORDER by val DESC
+            """
+            ),
+            conn,
+            params={
+                "days": tuple(days),
+                "basets": basets,
+                "endts": endts,
+            },
+            index_col=None,
+            geom_col="geo",
+        )
     LOG.debug("Loaded %s rows", len(df2.index))
     df2[USEME] = True
     df2["plotme"] = True

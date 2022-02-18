@@ -1,10 +1,10 @@
 """First or Last Date with temp"""
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 import numpy as np
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = dict(
@@ -112,37 +112,38 @@ def plotter(fdict):
     (extrenum, varname, direction) = ctx["which"].split("_")
     year = ctx["year"]
 
-    table = "alldata_%s" % (station[:2],)
-
     op = "%s %s" % (varname, ">=" if direction == "above" else "<")
-    df = read_sql(
-        f"""
-        with data as (
-            SELECT extract(year from day + '%s months'::interval) as season,
-            high, low, day from {table} WHERE station = %s
-            and day >= '1893-01-01'),
-        agg1 as (
-            SELECT season - %s as season,
-            count(*) as obs,
-            min(case when {op} %s then day else null end) as nday,
-            max(case when {op} %s then day else null end) as xday,
-            sum(case when {op} %s then 1 else 0 end) as count
-            from data GROUP by season)
-    SELECT season::int, count, obs, nday, extract(doy from nday) as nday_doy,
-    xday, extract(doy from xday) as xday_doy from agg1
-    ORDER by season ASC
-    """,
-        get_dbconnstr("coop"),
-        params=(
-            6 if season == "winter" else 0,
-            station,
-            1 if season == "winter" else 0,
-            threshold,
-            threshold,
-            threshold,
-        ),
-        index_col="season",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+            with data as (
+                SELECT extract(year from day + '%s months'::interval)
+                    as season,
+                high, low, day from alldata_{station[:2]} WHERE station = %s
+                and day >= '1893-01-01'),
+            agg1 as (
+                SELECT season - %s as season,
+                count(*) as obs,
+                min(case when {op} %s then day else null end) as nday,
+                max(case when {op} %s then day else null end) as xday,
+                sum(case when {op} %s then 1 else 0 end) as count
+                from data GROUP by season)
+        SELECT season::int, count, obs, nday,
+        extract(doy from nday) as nday_doy,
+        xday, extract(doy from xday) as xday_doy from agg1
+        ORDER by season ASC
+        """,
+            conn,
+            params=(
+                6 if season == "winter" else 0,
+                station,
+                1 if season == "winter" else 0,
+                threshold,
+                threshold,
+                threshold,
+            ),
+            index_col="season",
+        )
     # We need to do some magic to julian dates straight
     if season == "winter":
         # drop the first row

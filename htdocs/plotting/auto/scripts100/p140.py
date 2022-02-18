@@ -3,9 +3,8 @@ import datetime
 
 import numpy as np
 import pandas as pd
-from pandas.io.sql import read_sql
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
@@ -107,31 +106,33 @@ def plotter(fdict):
         sdays.append(ts.strftime("%m%d"))
 
     doff = (days + 1) if ets.year != sts.year else 0
-    df = read_sql(
-        text(
-            f"""
-    SELECT extract(year from day - '{doff} days'::interval) as yr,
-    avg((max_tmpf+min_tmpf)/2.) as avg_temp, avg(max_tmpf) as avg_high_temp,
-    avg(min_tmpf) as avg_low_temp,
-    sum(pday) as precip, avg(avg_sknt) * 1.15 as avg_wind_speed,
-    min(min_tmpf) as min_low,
-    max(min_tmpf) as max_low,
-    max(max_tmpf) as max_high,
-    min(max_tmpf) as min_high,
-    avg((max_dwpf + min_dwpf)/2.) as avg_dewp
-    from summary s JOIN stations t on (s.iemid = t.iemid)
-    WHERE t.network = :network and t.id = :station
-    and to_char(day, 'mmdd') in :sdays
-    GROUP by yr ORDER by yr ASC
-    """
-        ),
-        get_dbconnstr("iem"),
-        params={
-            "network": ctx["network"],
-            "station": station,
-            "sdays": tuple(sdays),
-        },
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        df = pd.read_sql(
+            text(
+                f"""
+        SELECT extract(year from day - '{doff} days'::interval) as yr,
+        avg((max_tmpf+min_tmpf)/2.) as avg_temp,
+        avg(max_tmpf) as avg_high_temp,
+        avg(min_tmpf) as avg_low_temp,
+        sum(pday) as precip, avg(avg_sknt) * 1.15 as avg_wind_speed,
+        min(min_tmpf) as min_low,
+        max(min_tmpf) as max_low,
+        max(max_tmpf) as max_high,
+        min(max_tmpf) as min_high,
+        avg((max_dwpf + min_dwpf)/2.) as avg_dewp
+        from summary s JOIN stations t on (s.iemid = t.iemid)
+        WHERE t.network = :network and t.id = :station
+        and to_char(day, 'mmdd') in :sdays
+        GROUP by yr ORDER by yr ASC
+        """
+            ),
+            conn,
+            params={
+                "network": ctx["network"],
+                "station": station,
+                "sdays": tuple(sdays),
+            },
+        )
     if df.empty:
         raise NoDataFound("No data was found.")
     df["range_high_temp"] = df["max_high"] - df["min_high"]

@@ -1,9 +1,9 @@
 """Max Dewpoint"""
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
@@ -129,27 +129,28 @@ def get_context(fdict):
         months = [ts.month, 999]
 
     opp = ">=" if mydir == "aoa" else "<"
-    ctx["df"] = read_sql(
-        text(
-            f"""
-        SELECT extract(year from {offset})::int as year,
-        sum(case when {varname}::int {opp} :t then 1 else 0 end) as count
-        from summary s JOIN stations t on (s.iemid = t.iemid)
-        WHERE t.id = :station and t.network = :network
-        and extract(month from day) in :months
-        and {varname} is not null
-        GROUP by year ORDER by year ASC
-        """
-        ),
-        get_dbconnstr("iem"),
-        params={
-            "t": threshold,
-            "station": station,
-            "network": ctx["network"],
-            "months": tuple(months),
-        },
-        index_col="year",
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        ctx["df"] = pd.read_sql(
+            text(
+                f"""
+            SELECT extract(year from {offset})::int as year,
+            sum(case when {varname}::int {opp} :t then 1 else 0 end) as count
+            from summary s JOIN stations t on (s.iemid = t.iemid)
+            WHERE t.id = :station and t.network = :network
+            and extract(month from day) in :months
+            and {varname} is not null
+            GROUP by year ORDER by year ASC
+            """
+            ),
+            conn,
+            params={
+                "t": threshold,
+                "station": station,
+                "network": ctx["network"],
+                "months": tuple(months),
+            },
+            index_col="year",
+        )
     ctx["title"] = "(%s) %s %s %.0f" % (
         MDICT[ctx["month"]],
         METRICS[ctx["var"]],
@@ -200,8 +201,8 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("Error, no results returned!")
 
-    (fig, ax) = figure_axes(apctx=ctx)
-    ax.set_title("%s\n%s" % (ctx["title"], ctx["subtitle"]))
+    title = f"{ctx['title']}\n{ctx['subtitle']}"
+    (fig, ax) = figure_axes(apctx=ctx, title=title)
     ax.bar(
         df.index.values, df["count"], align="center", fc="green", ec="green"
     )

@@ -6,7 +6,7 @@ from scipy.stats import norm
 import pandas as pd
 from pyiem import reference
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 
@@ -36,13 +36,14 @@ def plotter(fdict):
     month = ctx["month"]
     day = ctx["day"]
     state = ctx["state"][:2]
-    df = pd.read_sql(
-        f"SELECT high, low from alldata_{state} "
-        "where sday = %s and high is not null and low is not null and "
-        "substr(station, 3, 1) != 'T' and substr(station, 3, 4) != '0000'",
-        get_dbconnstr("coop"),
-        params=(f"{month:02.0f}{day:02.0f}",),
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"SELECT high, low from alldata_{state} "
+            "where sday = %s and high is not null and low is not null and "
+            "substr(station, 3, 1) != 'T' and substr(station, 3, 4) != '0000'",
+            conn,
+            params=(f"{month:02.0f}{day:02.0f}",),
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     highs = df["high"].values

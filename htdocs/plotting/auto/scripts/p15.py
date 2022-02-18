@@ -3,10 +3,10 @@ import calendar
 import datetime
 
 import numpy as np
-from pandas.io.sql import read_sql
+import pandas as pd
 import matplotlib.patheffects as PathEffects
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"high": "High Temperature", "low": "Low Temperature"}
@@ -53,28 +53,27 @@ def plotter(fdict):
     varname = ctx["varname"]
     year = ctx["year"]
 
-    table = "alldata_%s" % (station[:2],)
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        with obs as
+        (select month, year, high, lag(high) OVER (ORDER by day ASC) as lhigh,
+        low, lag(low) OVER (ORDER by day ASC) as llow
+        from alldata_{station[:2]} where station = %s)
 
-    df = read_sql(
-        f"""
-    with obs as
-    (select month, year, high, lag(high) OVER (ORDER by day ASC) as lhigh,
-    low, lag(low) OVER (ORDER by day ASC) as llow from {table}
-    where station = %s)
-
-    SELECT year, month,
-    sum(case when high > lhigh then 1 else 0 end)::numeric as high_greater,
-    sum(case when high = lhigh then 1 else 0 end)::numeric as high_unch,
-    sum(case when high < lhigh then 1 else 0 end)::numeric as high_lower,
-    sum(case when low > llow then 1 else 0 end)::numeric as low_greater,
-    sum(case when low = llow then 1 else 0 end)::numeric as low_unch,
-    sum(case when low < llow then 1 else 0 end)::numeric as low_lower
-    from obs GROUP by year, month ORDER by year, month
-    """,
-        get_dbconnstr("coop"),
-        params=(station,),
-        index_col=None,
-    )
+        SELECT year, month,
+        sum(case when high > lhigh then 1 else 0 end)::numeric as high_greater,
+        sum(case when high = lhigh then 1 else 0 end)::numeric as high_unch,
+        sum(case when high < lhigh then 1 else 0 end)::numeric as high_lower,
+        sum(case when low > llow then 1 else 0 end)::numeric as low_greater,
+        sum(case when low = llow then 1 else 0 end)::numeric as low_unch,
+        sum(case when low < llow then 1 else 0 end)::numeric as low_lower
+        from obs GROUP by year, month ORDER by year, month
+        """,
+            conn,
+            params=(station,),
+            index_col=None,
+        )
     gdf = df.groupby("month").sum()
     gyear = df[df["year"] == year].groupby("month").sum()
     if gyear.empty or gdf.empty:

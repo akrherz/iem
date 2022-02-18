@@ -2,10 +2,10 @@
 import calendar
 import datetime
 
+import pandas as pd
 import numpy as np
-from pandas.io.sql import read_sql
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnstr
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
@@ -264,70 +264,76 @@ def get_context(fdict):
         label = calendar.month_name[int(month)]
 
     decagg = 10 if ctx["decadal"] else 1
-    df = read_sql(
-        text(
-            f"""
-    WITH climo as (
-        SELECT to_char(valid, 'mmdd') as sday,
-        high, low from ncei_climate91 WHERE station = :ncei),
-    day2day as (
-        SELECT
-        extract(year from day + '{lag}'::interval)::int / {decagg} as myyear,
-        month,
-        abs(high - lag(high) OVER (ORDER by day ASC)) as dhigh,
-        abs(low - lag(low) OVER (ORDER by day ASC)) as dlow,
-        abs((high+low)/2. - lag((high+low)/2.)
-            OVER (ORDER by day ASC)) as dtemp
-        from {table} WHERE station = :station),
-    agg as (
-        SELECT myyear, avg(dhigh) as dhigh, avg(dlow) as dlow,
-        avg(dtemp) as dtemp from day2day
-        WHERE month in :months GROUP by myyear),
-    agg2 as (
-        SELECT
-        extract(year from day + '{lag}'::interval)::int / {decagg} as myyear,
-        max(o.year) - min(o.year) + 1 as years,
-        max(o.high) as "max-high",
-        min(o.high) as "min-high",
-        avg(o.high) as "avg-high",
-        stddev(o.high) as "std-high",
-        max(o.low) as "max-low",
-        min(o.low) as "min-low",
-        avg(o.low) as "avg-low",
-        stddev(o.low) as "std-low",
-        avg((o.high + o.low)/2.) as "avg-temp",
-        stddev((o.high + o.low)/2.) as "std-temp",
-        max(o.precip) as "max-precip",
-        sum(o.precip) as "sum-precip",
-        avg(o.high) - avg(o.low) as "range-avghi-avglo",
-        sum(case when o.high >= :t then 1 else 0 end) as "days-high-above",
-        sum(case when o.high < :t then 1 else 0 end) as "days-high-below",
-    sum(case when o.high >= c.high then 1 else 0 end) as "days-high-above-avg",
-        sum(case when o.low >= :t then 1 else 0 end) as "days-lows-above",
-    sum(case when o.low < c.low then 1 else 0 end) as "days-lows-below-avg",
-        sum(case when o.low < :t then 1 else 0 end) as "days-lows-below",
-        sum(case when o.precip >= :t then 1 else 0 end) as "days-precip-above"
-        from {table} o JOIN climo c on (o.sday = c.sday)
-      where station = :station and month in :months GROUP by myyear)
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            text(
+                f"""
+        WITH climo as (
+            SELECT to_char(valid, 'mmdd') as sday,
+            high, low from ncei_climate91 WHERE station = :ncei),
+        day2day as (
+            SELECT
+            extract(year from day + '{lag}'::interval)::int / {decagg}
+                as myyear,
+            month,
+            abs(high - lag(high) OVER (ORDER by day ASC)) as dhigh,
+            abs(low - lag(low) OVER (ORDER by day ASC)) as dlow,
+            abs((high+low)/2. - lag((high+low)/2.)
+                OVER (ORDER by day ASC)) as dtemp
+            from {table} WHERE station = :station),
+        agg as (
+            SELECT myyear, avg(dhigh) as dhigh, avg(dlow) as dlow,
+            avg(dtemp) as dtemp from day2day
+            WHERE month in :months GROUP by myyear),
+        agg2 as (
+            SELECT
+            extract(year from day + '{lag}'::interval)::int / {decagg}
+                as myyear,
+            max(o.year) - min(o.year) + 1 as years,
+            max(o.high) as "max-high",
+            min(o.high) as "min-high",
+            avg(o.high) as "avg-high",
+            stddev(o.high) as "std-high",
+            max(o.low) as "max-low",
+            min(o.low) as "min-low",
+            avg(o.low) as "avg-low",
+            stddev(o.low) as "std-low",
+            avg((o.high + o.low)/2.) as "avg-temp",
+            stddev((o.high + o.low)/2.) as "std-temp",
+            max(o.precip) as "max-precip",
+            sum(o.precip) as "sum-precip",
+            avg(o.high) - avg(o.low) as "range-avghi-avglo",
+            sum(case when o.high >= :t then 1 else 0 end) as "days-high-above",
+            sum(case when o.high < :t then 1 else 0 end) as "days-high-below",
+            sum(case when o.high >= c.high then 1 else 0 end)
+                as "days-high-above-avg",
+            sum(case when o.low >= :t then 1 else 0 end) as "days-lows-above",
+            sum(case when o.low < c.low then 1 else 0 end)
+                as "days-lows-below-avg",
+            sum(case when o.low < :t then 1 else 0 end) as "days-lows-below",
+            sum(case when o.precip >= :t then 1 else 0 end)
+                as "days-precip-above"
+            from {table} o JOIN climo c on (o.sday = c.sday)
+        where station = :station and month in :months GROUP by myyear)
 
-    SELECT b.*, a.dhigh as "delta-high", a.dlow as "delta-low",
-    a.dtemp as "delta-temp" from agg a JOIN agg2 b
-    on (a.myyear = b.myyear) WHERE b.myyear * {decagg} >= :syear
-    and b.myyear * {decagg} <= :eyear
-    ORDER by b.myyear ASC
-    """
-        ),
-        get_dbconnstr("coop"),
-        params={
-            "ncei": ctx["_nt"].sts[station]["ncei91"],
-            "station": station,
-            "months": tuple(months),
-            "t": threshold,
-            "syear": ctx["syear"],
-            "eyear": ctx["eyear"],
-        },
-        index_col="myyear",
-    )
+        SELECT b.*, a.dhigh as "delta-high", a.dlow as "delta-low",
+        a.dtemp as "delta-temp" from agg a JOIN agg2 b
+        on (a.myyear = b.myyear) WHERE b.myyear * {decagg} >= :syear
+        and b.myyear * {decagg} <= :eyear
+        ORDER by b.myyear ASC
+        """
+            ),
+            conn,
+            params={
+                "ncei": ctx["_nt"].sts[station]["ncei91"],
+                "station": station,
+                "months": tuple(months),
+                "t": threshold,
+                "syear": ctx["syear"],
+                "eyear": ctx["eyear"],
+            },
+            index_col="myyear",
+        )
     if df.empty:
         raise NoDataFound("No data was found for query")
     if ctx["decadal"]:

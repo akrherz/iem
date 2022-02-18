@@ -4,9 +4,9 @@ import datetime
 import pytz
 import psycopg2.extras
 import numpy as np
-from pandas import read_sql
+import pandas as pd
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconnstr, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, get_dbconn
 from pyiem.exceptions import NoDataFound
 
 MDICT = dict(
@@ -171,15 +171,21 @@ def get_data(fdict):
             )
     col = "tmpf::int" if ctx["var"] == "tmpf" else ctx["var"]
     col = "dwpf::int" if ctx["var"] == "dwpf" else col
-    ctx["df"] = read_sql(
-        "SELECT valid at time zone 'UTC' as valid, "
-        f"extract(epoch from valid) * 1000 as ticks, {col} as datum "
-        "from alldata WHERE station = %s and valid > %s and valid < %s and "
-        f" {ctx['var']} is not null and report_type = 2 ORDER by valid ASC",
-        get_dbconnstr("asos"),
-        params=(ctx["station"], sdate, sdate + datetime.timedelta(days=days)),
-        index_col="valid",
-    )
+    with get_sqlalchemy_conn("asos") as conn:
+        ctx["df"] = pd.read_sql(
+            "SELECT valid at time zone 'UTC' as valid, "
+            f"extract(epoch from valid) * 1000 as ticks, {col} as datum "
+            "from alldata WHERE station = %s and valid > %s and valid < %s "
+            f"and {ctx['var']} is not null and report_type = 2 "
+            "ORDER by valid ASC",
+            conn,
+            params=(
+                ctx["station"],
+                sdate,
+                sdate + datetime.timedelta(days=days),
+            ),
+            index_col="valid",
+        )
     if ctx["df"].empty:
         raise NoDataFound("No data found.")
 
