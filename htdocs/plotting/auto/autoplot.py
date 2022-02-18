@@ -247,7 +247,12 @@ def workflow(mc, environ, form, fmt):
         # Dragons: do timestamp conversion as pandas has many bugs
         for column in df.columns:
             if isdt(df[column]):
-                df[column] = df[column].dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+                # Careful, only use ISO format when the timezone is UTC
+                dtz = df[column].dt.tz
+                if dtz is not None and dtz.zone == "UTC":
+                    df[column] = df[column].dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+                else:
+                    df[column] = df[column].dt.strftime("%Y-%m-%dT%H:%M:%S")
 
         if fmt == "csv":
             content = df.to_csv(index=(df.index.name is not None), header=True)

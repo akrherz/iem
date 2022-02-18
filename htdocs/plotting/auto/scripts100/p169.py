@@ -102,7 +102,7 @@ def plotter(fdict):
             text(
                 f"""
         WITH data as (
-            SELECT valid at time zone :tzname as valid, tmpf from alldata
+            SELECT valid, tmpf from alldata
             where station = :station and tmpf between -100 and 150
             and extract(month from valid) in :months),
         doffset as (
@@ -110,24 +110,28 @@ def plotter(fdict):
         agg as (
             SELECT d.valid, d.tmpf as tmpf1, o.tmpf as tmpf2
             from data d JOIN doffset o on (d.valid = o.valid))
-        SELECT valid as valid1, valid + ':hours hours'::interval as valid2,
-        tmpf1, tmpf2 from agg
-        ORDER by (tmpf1 - tmpf2) {sortdir} LIMIT 50
+        SELECT valid at time zone 'UTC' as valid1,
+        (valid + ':hours hours'::interval) at time zone 'UTC' as valid2,
+        tmpf1, tmpf2 from agg ORDER by (tmpf1 - tmpf2) {sortdir} LIMIT 50
         """
             ),
             conn,
             params={
-                "tzname": tzname,
                 "station": station,
                 "months": tuple(months),
                 "hours": hours,
             },
             index_col=None,
         )
-    df["diff"] = (df["tmpf1"] - df["tmpf2"]).abs()
-
     if df.empty:
         raise NoDataFound("No database entries found for station, sorry!")
+
+    df["diff"] = (df["tmpf1"] - df["tmpf2"]).abs()
+    # Localize the valid times
+    for col in ["valid1", "valid2"]:
+        # set time zone to UTC
+        df[col] = df[col].dt.tz_localize("UTC")
+        df[f"local_{col}"] = df[col].dt.tz_convert(tzname)
 
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
@@ -147,8 +151,8 @@ def plotter(fdict):
     while i < 50 and len(labels) < 10:
         row = df.iloc[i]
         i += 1
-        sts = pd.Timestamp(row["valid1"])
-        ets = pd.Timestamp(row["valid2"])
+        sts = pd.Timestamp(row["local_valid1"])
+        ets = pd.Timestamp(row["local_valid2"])
         lbl = (
             f"{row['tmpf1']:.0f} to {row['tmpf2']:.0f} -> {row['diff']:.0f}\n"
             f"{sts:%-d %b %Y %-I:%M %p} - {ets:%-d %b %Y %-I:%M %p}"
@@ -167,5 +171,5 @@ def plotter(fdict):
 
 if __name__ == "__main__":
     plotter(
-        {"zstation": "TLH", "network": "FL_ASOS", "hours": 5, "month": "nov"}
+        {"zstation": "IDI", "network": "PA_ASOS", "hours": 1, "dir": "cool"}
     )
