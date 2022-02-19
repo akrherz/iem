@@ -11,7 +11,7 @@ from metpy.calc import wind_components
 from metpy.interpolate import inverse_distance_to_grid
 from scipy.interpolate import NearestNDInterpolator
 from pyiem import iemre
-from pyiem.util import get_dbconnstr, ncopen, utc, logger
+from pyiem.util import get_sqlalchemy_conn, ncopen, utc, logger
 
 # stop RuntimeWarning: invalid value encountered in greater
 np.warnings.filterwarnings("ignore")
@@ -145,27 +145,30 @@ def grid_hour(ts):
         ts0,
         ts1,
     )
-
-    df = pd.read_sql(
-        """SELECT station, ST_x(geom) as lon, st_y(geom) as lat,
- max(case when tmpf > -60 and tmpf < 130 THEN tmpf else null end) as max_tmpf,
- max(case when sknt > 0 and sknt < 100 then sknt else 0 end) as max_sknt,
- max(getskyc(skyc1)) as max_skyc1,
- max(getskyc(skyc2)) as max_skyc2,
- max(getskyc(skyc3)) as max_skyc3,
- max(case when p01i > 0 and p01i < 1000 then p01i else 0 end) as phour,
- max(case when dwpf > -60 and dwpf < 100 THEN dwpf else null end) as max_dwpf,
- max(case when sknt >= 0 then sknt else 0 end) as sknt,
- max(case when sknt >= 0 then drct else 0 end) as drct
- from alldata a JOIN stations t on (a.station = t.id) WHERE
- ST_Contains(
-  ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
-  geom) and (t.network ~* 'ASOS' or t.network = 'AWOS') and
- valid >= %s and valid < %s and report_type = 2 GROUP by station, lon, lat""",
-        get_dbconnstr("asos"),
-        params=params,
-        index_col="station",
-    )
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            """SELECT station, ST_x(geom) as lon, st_y(geom) as lat,
+    max(case when tmpf > -60 and tmpf < 130 THEN tmpf else null end)
+        as max_tmpf,
+    max(case when sknt > 0 and sknt < 100 then sknt else 0 end) as max_sknt,
+    max(getskyc(skyc1)) as max_skyc1,
+    max(getskyc(skyc2)) as max_skyc2,
+    max(getskyc(skyc3)) as max_skyc3,
+    max(case when p01i > 0 and p01i < 1000 then p01i else 0 end) as phour,
+    max(case when dwpf > -60 and dwpf < 100 THEN dwpf else null end)
+        as max_dwpf,
+    max(case when sknt >= 0 then sknt else 0 end) as sknt,
+    max(case when sknt >= 0 then drct else 0 end) as drct
+    from alldata a JOIN stations t on (a.station = t.id) WHERE
+    ST_Contains(
+    ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
+    geom) and (t.network ~* 'ASOS' or t.network = 'AWOS') and
+    valid >= %s and valid < %s and report_type = 2
+    GROUP by station, lon, lat""",
+            conn,
+            params=params,
+            index_col="station",
+        )
 
     # try first to use RTMA
     res = use_rtma(ts, "wind")
@@ -173,16 +176,16 @@ def grid_hour(ts):
         ures, vres = res
     else:
         if df.empty:
-            LOG.info("%s has no entries, FAIL", ts)
+            LOG.warning("%s has no entries, FAIL", ts)
             return
         ures, vres = grid_wind(df, domain)
-    LOG.debug(
+    LOG.info(
         "wind is done. max(ures): %s max(vres): %s",
         np.max(ures),
         np.max(vres),
     )
     if ures is None:
-        LOG.debug("Failure for uwnd at %s", ts)
+        LOG.warning("Failure for uwnd at %s", ts)
     else:
         write_grid(ts, "uwnd", ures)
         write_grid(ts, "vwnd", vres)
@@ -194,7 +197,7 @@ def grid_hour(ts):
         tmpf = masked_array(res[0], data_units="degK").to("degF").m
     else:
         if df.empty:
-            LOG.info("%s has no entries, FAIL", ts)
+            LOG.warning("%s has no entries, FAIL", ts)
             return
         did_gridding = True
         tmpf = generic_gridder(df, "max_tmpf", domain)
@@ -206,7 +209,7 @@ def grid_hour(ts):
         dwpf = masked_array(res[0], data_units="degK").to("degF").m
     else:
         if df.empty:
-            LOG.info("%s has no entries, FAIL", ts)
+            LOG.warning("%s has no entries, FAIL", ts)
             return
         dwpf = generic_gridder(df, "max_dwpf", domain)
 
@@ -218,9 +221,9 @@ def grid_hour(ts):
     write_grid(ts, "dwpk", masked_array(dwpf, data_units="degF").to("degK"))
 
     res = grid_skyc(df, domain)
-    LOG.debug("grid skyc is done")
+    LOG.info("grid skyc is done")
     if res is None:
-        LOG.info("Failure for skyc at %s", ts)
+        LOG.warning("Failure for skyc at %s", ts)
     else:
         write_grid(ts, "skyc", res)
 
@@ -233,7 +236,7 @@ def write_grid(valid, vname, grid):
     """
     offset = iemre.hourly_offset(valid)
     with ncopen(iemre.get_hourly_ncname(valid.year), "a", timeout=300) as nc:
-        LOG.debug(
+        LOG.info(
             "offset: %s writing %s with min: %s max: %s Ames: %s",
             offset,
             vname,

@@ -4,7 +4,7 @@ import datetime
 import json
 
 import numpy as np
-import memcache
+from pymemcache.client import Client
 from paste.request import parse_formvars
 import pytz
 from pyiem import iemre
@@ -24,6 +24,8 @@ def get_timerange(form):
     """Figure out what period to get data for."""
     ts = datetime.datetime.strptime(form.get("date", "2019-03-01"), "%Y-%m-%d")
     # Construct a CDT/CST Midnight to 11 PM period
+    # This logic does not properly handle spring/fall time changes as it always
+    # returns a 24 hour period.
     ts = utc(ts.year, ts.month, ts.day, 12).astimezone(
         pytz.timezone("America/Chicago")
     )
@@ -95,13 +97,13 @@ def application(environ, start_response):
     i, j = iemre.find_ij(lon, lat)
     mckey = f"iemre/hourly/{sts:%Y%m%d}/{i}/{j}"
 
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    mc = Client(["iem-memcached", 11211])
     res = mc.get(mckey)
     if res is None:
         res = workflow(sts, ets, i, j)
         res = json.dumps(res).encode("ascii")
         mc.set(mckey, res, 3600)
-
+    mc.close()
     return [res]
 
 

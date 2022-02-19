@@ -2,7 +2,8 @@
 import datetime
 
 import requests
-from pyiem.util import get_dbconn
+import pandas as pd
+from pyiem.util import get_dbconn, get_sqlalchemy_conn
 
 
 def main():
@@ -11,12 +12,14 @@ def main():
     mcursor = mesosite.cursor()
 
     # Get max date
-    current = {}
-    mcursor.execute("SELECT monthdate, anom_34, soi_3m from elnino")
-    for row in mcursor:
-        current[row[0]] = dict(anom_34=row[1], soi_3m=row[2])
+    with get_sqlalchemy_conn("coop") as engine:
+        current = pd.read_sql(
+            "SELECT monthdate, anom_34, soi_3m from elnino",
+            engine,
+            index_col="monthdate",
+        )
 
-    url = "http://www.cpc.ncep.noaa.gov/data/indices/sstoi.indices"
+    url = "https://www.cpc.ncep.noaa.gov/data/indices/sstoi.indices"
     data = requests.get(url, timeout=30).content.decode("ascii").split("\n")
 
     for line in data[1:]:
@@ -25,20 +28,26 @@ def main():
             continue
         anom34 = float(tokens[-1])
         date = datetime.date(int(tokens[0]), int(tokens[1]), 1)
-        val = current.get(date, {}).get("anom_34", None)
-        if val is None or anom34 != val:
-            print("Found ElNino3.4! %s %s" % (date, anom34))
-            if current.get(date) is None:
-                mcursor.execute(
-                    "INSERT into elnino(monthdate) values (%s)", (date,)
+        if date in current.index:
+            if current.loc[date]["anom_34"] != anom34:
+                print(
+                    f"anom_34 update {date.year}-{date.month}-01: "
+                    f"{current.loc[date]['anom_34']} -> {anom34}"
                 )
-                current[date] = dict(anom_34=anom34)
-            mcursor.execute(
-                "UPDATE elnino SET anom_34 = %s WHERE monthdate = %s",
-                (anom34, date),
-            )
+                mcursor.execute(
+                    "UPDATE elnino SET anom_34 = %s WHERE monthdate = %s",
+                    (anom34, date),
+                )
+            continue
+        print(f"Found ElNino3.4! {date} {anom34}")
+        # Add entry to current dataframe
+        current.loc[date] = [anom34, None]
+        mcursor.execute(
+            "INSERT into elnino(monthdate, anom_34) values (%s, %s)",
+            (date, anom34),
+        )
 
-    url = "http://www.cpc.ncep.noaa.gov/data/indices/soi.3m.txt"
+    url = "https://www.cpc.ncep.noaa.gov/data/indices/soi.3m.txt"
     data = requests.get(url, timeout=30).content.decode("ascii").split("\n")
 
     for line in data[1:]:
@@ -52,17 +61,21 @@ def main():
             date = datetime.date(year, month, 1)
             if soi < -999:
                 continue
-            val = current.get(date, {}).get("soi_3m", None)
-            if val is None or soi != val:
-                print("Found SOI 3M! %s %s" % (date, soi))
-                if current.get(date) is None:
-                    mcursor.execute(
-                        "INSERT into elnino(monthdate) values (%s)", (date,)
+            if date in current.index:
+                if current.loc[date]["soi_3m"] != soi:
+                    print(
+                        f"soi_3m update {date.year}-{date.month}-01: "
+                        f"{current.loc[date]['soi_3m']} -> {soi}"
                     )
-                mcursor.execute(
-                    "UPDATE elnino SET soi_3m = %s WHERE monthdate = %s",
-                    (soi, date),
-                )
+                    mcursor.execute(
+                        "UPDATE elnino SET soi_3m = %s WHERE monthdate = %s",
+                        (soi, date),
+                    )
+                continue
+            mcursor.execute(
+                "INSERT into elnino(monthdate, soi_3m) values (%s, %s)",
+                (date, soi),
+            )
 
     mesosite.commit()
     mesosite.close()
