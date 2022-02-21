@@ -15,7 +15,7 @@ $sday = isset($_REQUEST['sday']) ? strtotime($_REQUEST['sday']) : die("No sday")
 $eday = isset($_REQUEST['eday']) ? strtotime($_REQUEST['eday']) : die("No eday");
 
 $rs = pg_prepare($pgconn, "SELECT", "SELECT * from raw". date("Y", $sday) .
-	"WHERE station = $1 and valid BETWEEN $2 and $3 and key = $4 ".
+	" WHERE station = $1 and valid BETWEEN $2 and $3 and key = $4 ".
 	"ORDER by valid ASC");
 
 $rs = pg_execute($pgconn, "SELECT", Array($station, 
@@ -23,7 +23,7 @@ $rs = pg_execute($pgconn, "SELECT", Array($station,
 
 $data = Array();
 $times = Array();
-for ($i=0;$row=pg_fetch_array($rs);$i++){
+for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 	$times[] = strtotime($row["valid"]);
 	$data[] = $row["value"];
 }
@@ -37,22 +37,22 @@ $graph->SetScale("datelin");
 
 $graph->SetMarginColor('white');
 
-$graph->img->SetMargin(40,40,45,100);
+$graph->img->SetMargin(40,40,45,120);
 
 $title = sprintf("%s [%s] \nPlot of SHEF Variable [%s]", $nt->table[$station]['name'],
 	$station, $varname);
 $graph->title->Set($title);
 
-$graph->title->SetFont(FF_VERDANA,FS_BOLD,11);
-$graph->subtitle->SetFont(FF_VERDANA,FS_BOLD,20);
-$graph->xaxis->title->SetFont(FF_VERDANA,FS_BOLD,11);
+//$graph->title->SetFont(FF_VERDANA,FS_BOLD,11);
+//$graph->subtitle->SetFont(FF_VERDANA,FS_BOLD,20);
+//$graph->xaxis->title->SetFont(FF_VERDANA,FS_BOLD,11);
 
 $graph->xaxis->scale->SetDateFormat("M d h A");
 
 $graph->xaxis->SetTitle( sprintf("Time Interval: %s - %s", date('d M Y', $sday),
 		date('d M Y', $eday)) );
 
-$graph->xaxis->SetTitleMargin(70);
+$graph->xaxis->SetTitleMargin(90);
 $graph->xaxis->SetLabelAngle(90);
 
 // Create the linear plot
@@ -63,5 +63,3 @@ $graph->Add($lineplot);
 
 // Display the graph
 $graph->Stroke();
-
-?>
