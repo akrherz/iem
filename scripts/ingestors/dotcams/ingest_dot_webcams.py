@@ -29,9 +29,11 @@ def process_feature(cursor, feat):
         LOG.info("feature has no RPUID, skipping")
         return
     rpuid = int(props["RPUID"])
-    scene = int(props["SCANWEB_POSITIONID"])
+    # Changed from SCANWEB_ as that appears to be wrong now
+    scene = int(props["CAMERA_POSITION"])
     # Imagery is stored as IDOT-<RPUID:03i>-<SCENE-02i>.jpg
     cam = f"IDOT-{rpuid:03.0f}-{scene:02.0f}"
+    LOG.info("Processing %s", cam)
     # Loop over 10 possible images found with this feature
     for i in range(1, 11):
         suffix = f"_{i}" if i > 1 else ""
