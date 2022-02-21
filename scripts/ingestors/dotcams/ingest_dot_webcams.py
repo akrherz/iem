@@ -25,7 +25,7 @@ CLOUD404 = "/mesonet/tmp/dotcloud404.txt"
 def process_feature(cursor, feat):
     """Do what we need to do with this feature."""
     props = feat["attributes"]
-    if props["RPUID"] is None:
+    if props["RPUID"] is None or props["CAMERA_POSITION"] is None:
         LOG.info("feature has no RPUID, skipping")
         return
     rpuid = int(props["RPUID"])
