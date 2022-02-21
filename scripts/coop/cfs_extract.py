@@ -117,7 +117,7 @@ def dbsave(ts, data):
             "DELETE from alldata_forecast where modelid = %s", (modelid,)
         )
         if cursor.rowcount > 0:
-            LOG.info("Removed %s previous entries", cursor.rowcount)
+            LOG.warning("Removed %s previous entries", cursor.rowcount)
     else:
         cursor.execute(
             "INSERT into forecast_inventory(model, modelts) "
@@ -134,16 +134,16 @@ def dbsave(ts, data):
             or d["precip"] is None
             or d["srad"] is None
         ):
-            LOG.info("Missing data for date: %s", date)
+            LOG.warning("Missing data for date: %s", date)
             del data["fx"][date]
 
-    for sid in nt.sts.keys():
+    for sid, entry in nt.sts.items():
         # Skip virtual stations
         if sid[2:] == "0000" or sid[2] == "C":
             continue
         # Careful here, lon is 0-360 for this file
-        i = np.digitize([nt.sts[sid]["lon"] + 360], data["x"])[0]
-        j = np.digitize([nt.sts[sid]["lat"]], data["y"])[0]
+        i = np.digitize([entry["lon"] + 360], data["x"])[0]
+        j = np.digitize([entry["lat"]], data["y"])[0]
         for date in data["fx"]:
             d = data["fx"][date]
             high = bnds(

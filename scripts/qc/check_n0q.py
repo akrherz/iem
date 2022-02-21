@@ -18,10 +18,10 @@ def run(sts, ets):
             "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0q_%Y%m%d%H%M.png"
         )
         if not os.path.isfile(fn):
-            LOG.info("%s is missing", os.path.basename(fn))
+            LOG.warning("%s is missing", os.path.basename(fn))
         else:
             if os.stat(fn)[6] < 200000:
-                LOG.info(
+                LOG.warning(
                     "check_n0q.py %s too small, size: %s",
                     fn.split("/")[-1],
                     os.stat(fn)[6],

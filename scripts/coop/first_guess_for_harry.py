@@ -278,7 +278,7 @@ def get_site(year, month, iemre, nwsli):
             data[idx]["coop"]["v"] += "%s/%s " % (key, row[2])
         elif key[:2] in ["PP", "SD", "SF", "TA"]:
             if key not in UNCONV_VARS:
-                LOG.info("Unaccounted for %s %s %s", nwsli, valid, key)
+                LOG.warning("Unaccounted for %s %s %s", nwsli, valid, key)
                 UNCONV_VARS.append(key)
 
     ccursor.execute(

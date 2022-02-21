@@ -15,6 +15,7 @@ cursor = pgconn.cursor()
 cursor2 = pgconn.cursor()
 
 nt = NetworkTable(["WFO", "RFC", "NWS", "NCEP", "CWSU", "WSO"])
+BASE = "https://mesonet.agron.iastate.edu/p.php?pid"
 
 
 def sample(source, ts):
@@ -30,10 +31,7 @@ def sample(source, ts):
             continue
         pils.append(row[0])
         valid = row[1].astimezone(pytz.UTC)
-        uri = (
-            "https://mesonet.agron.iastate.edu/p.php?pid=%s-%s-%s-%s" ""
-        ) % (valid.strftime("%Y%m%d%H%M"), source, row[2], row[0])
-        print(" %s" % (uri,))
+        print(f" {BASE}={valid:%Y%m%d%H%M}-{source}-{row[2]}-{row[0]}")
 
 
 def look4(ts):
@@ -48,7 +46,7 @@ def look4(ts):
         source = row[0]
         lookup = source[1:] if source[0] == "K" else source
         if lookup not in nt.sts and source[0] in ["K", "P"]:
-            print("%s %s" % (row[0], row[1]))
+            print(f"{row[0]} {row[1]}")
             sample(source, ts)
 
 
@@ -60,7 +58,7 @@ def main(argv):
         ts = utc() - datetime.timedelta(days=1)
         ts = ts.replace(hour=0, minute=0, second=0, microsecond=0)
 
-    LOG.debug("running for %s", ts)
+    LOG.info("running for %s", ts)
     look4(ts)
 
 

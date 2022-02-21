@@ -23,11 +23,8 @@ def workflow(netname, pname):
     threshold = utc() - datetime.timedelta(hours=2)
     mcursor = pgconn_mesosite.cursor()
     mcursor.execute(
-        """
-        SELECT id, network, name from webcams where
-        network = %s
-        and online ORDER by id ASC
-    """,
+        "SELECT id, network, name from webcams where network = %s and online "
+        "ORDER by id ASC",
         (netname,),
     )
     nt = NetworkTable(None)
@@ -37,11 +34,11 @@ def workflow(netname, pname):
         nt.sts[row[0]] = dict(
             id=row[0], network=row[1], name=row[2], tzname="America/Chicago"
         )
-        fn = "%s/%s.jpg" % (mydir, row[0])
+        fn = f"{mydir}/{row[0]}.jpg"
         if not os.path.isfile(fn):
             missing += 1
             if missing > 1:
-                print("Missing webcam file: %s" % (fn,))
+                print(f"Missing webcam file: {fn}")
             continue
         ticks = os.stat(fn)[stat.ST_MTIME]
         valid = datetime.datetime(1970, 1, 1) + datetime.timedelta(
@@ -63,7 +60,7 @@ def workflow(netname, pname):
 def main():
     """Do something"""
     for network in ["KCCI", "KCRG", "KELO", "KCWI"]:
-        workflow(network, "%ssnet" % (network.lower(),))
+        workflow(network, f"{network.lower()}snet")
 
 
 if __name__ == "__main__":

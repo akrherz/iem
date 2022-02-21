@@ -18,7 +18,7 @@ def main():
         "or ST_y(geom) < -90"
     )
     for row in mcursor:
-        LOG.info("QC FAIL %s %s %s %s %s", *row)
+        LOG.warning("QC FAIL %s %s %s %s %s", *row)
 
 
 if __name__ == "__main__":

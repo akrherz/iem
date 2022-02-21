@@ -25,7 +25,7 @@ def main():
     )
     missing = []
     for row in pcursor:
-        missing.append("%s.%s.%s.%s" % (row[0], row[1], row[2], row[3]))
+        missing.append(f"{row[0]}.{row[1]}.{row[2]}.{row[3]}")
 
     # Gap analysis!
     sql = f"""
@@ -58,7 +58,7 @@ def main():
             continue
 
         for eid in range(eventid - gap + 1, eventid):
-            lookup = "%s.%s.%s.%s" % (wfo, phenomena, sig, eid)
+            lookup = f"{wfo}.{phenomena}.{sig}.{eid}"
             if lookup in missing:
                 continue
             pcursor2.execute(
@@ -66,7 +66,7 @@ def main():
                 "significance, eventid) VALUES (%s,%s,%s,%s,%s)",
                 (year, wfo, phenomena, sig, eid),
             )
-            LOG.info(
+            LOG.warning(
                 "WWA missing WFO: %s phenomena: %s sig: %s eventid: %s",
                 wfo,
                 phenomena,

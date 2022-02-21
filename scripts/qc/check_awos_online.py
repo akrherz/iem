@@ -33,7 +33,7 @@ def main():
     tracker.send_emails()
     tac = tracker.action_count
     if tac > 6:
-        LOG.info("Had %s actions, did not email", tac)
+        LOG.warning("Had %s actions, did not email", tac)
     IEM.commit()
     PORTFOLIO.commit()
 

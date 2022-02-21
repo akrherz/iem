@@ -6,7 +6,7 @@ import subprocess
 import datetime
 
 from geopandas import read_postgis
-from pyiem.util import get_dbconnstr
+from pyiem.util import get_sqlalchemy_conn
 
 SCHEMA = {
     "geometry": "Point",
@@ -31,35 +31,33 @@ SCHEMA = {
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconnstr("postgis", user="nobody")
-
     os.chdir("/tmp/")
 
     # We set one minute into the future, so to get expiring warnings
     # out of the shapefile
     ets = datetime.datetime.utcnow() + datetime.timedelta(minutes=+1)
-
-    df = read_postgis(
-        """
-        SELECT distinct geom,
-        to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as VALID,
-        coalesce(magnitude, 0)::float as MAG,
-        wfo as WFO,
-        type as TYPECODE,
-        typetext as TYPETEXT,
-        city as CITY,
-        county as COUNTY,
-        state as STATE,
-        source as SOURCE,
-        substr(coalesce(remark, ''), 1, 200) as REMARK,
-        ST_x(geom) as LON,
-        ST_y(geom) as LAT
-        from lsrs WHERE valid > (now() -'1 day'::interval)
-    """,
-        pgconn,
-        index_col=None,
-        geom_col="geom",
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = read_postgis(
+            """
+            SELECT distinct geom,
+            to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as VALID,
+            coalesce(magnitude, 0)::float as MAG,
+            wfo as WFO,
+            type as TYPECODE,
+            typetext as TYPETEXT,
+            city as CITY,
+            county as COUNTY,
+            state as STATE,
+            source as SOURCE,
+            substr(coalesce(remark, ''), 1, 200) as REMARK,
+            ST_x(geom) as LON,
+            ST_y(geom) as LAT
+            from lsrs WHERE valid > (now() -'1 day'::interval)
+        """,
+            conn,
+            index_col=None,
+            geom_col="geom",
+        )
     if df.empty:
         return
     df.columns = [s.upper() if s != "geom" else "geom" for s in df.columns]
@@ -76,16 +74,17 @@ def main():
 
     cmd = (
         "pqinsert -i "
-        '-p "zip c %s gis/shape/4326/us/lsr_24hour.zip '
+        f'-p "zip c {ets:%Y%m%d%H%M} gis/shape/4326/us/lsr_24hour.zip '
         'bogus zip" lsr_24hour.zip'
-    ) % (ets.strftime("%Y%m%d%H%M"),)
+    )
     subprocess.call(cmd, shell=True)
     for suffix in ["geojson", "csv"]:
         cmd = (
             "pqinsert -i "
-            '-p "data c %s gis/shape/4326/us/lsr_24hour.%s '
-            'bogus %s" lsr_24hour.%s'
-        ) % (ets.strftime("%Y%m%d%H%M"), suffix, suffix, suffix)
+            f'-p "data c {ets:%Y%m%d%H%M} '
+            f"gis/shape/4326/us/lsr_24hour.{suffix} "
+            f'bogus {suffix}" lsr_24hour.{suffix}'
+        )
         subprocess.call(cmd, shell=True)
 
     for suffix in ["shp", "shx", "dbf", "prj", "zip", "geojson", "csv"]:

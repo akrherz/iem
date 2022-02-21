@@ -21,10 +21,8 @@ def main():
 
     icursor = IEM.cursor()
     icursor.execute(
-        """
-        SELECT id, valid from current c JOIN stations t
-        ON (t.iemid = c.iemid) WHERE t.network = 'ISUSM'
-    """
+        "SELECT id, valid from current c JOIN stations t ON "
+        "(t.iemid = c.iemid) WHERE t.network = 'ISUSM'"
     )
     obs = {}
     for row in icursor:
@@ -35,7 +33,7 @@ def main():
     tracker.send_emails()
     tac = tracker.action_count
     if tac > 6:
-        print("check_isusm_online.py had %s actions, did not email" % (tac,))
+        print(f"check_isusm_online.py had {tac} actions, did not email")
     IEM.commit()
     PORTFOLIO.commit()
 

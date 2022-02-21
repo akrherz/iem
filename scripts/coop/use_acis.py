@@ -5,14 +5,14 @@ import datetime
 try:
     from zoneinfo import ZoneInfo
 except ImportError:
-    from backports.zoneinfo import ZoneInfo
+    from backports.zoneinfo import ZoneInfo  # type: ignore
 
 import requests
 from tqdm import tqdm
 import pandas as pd
 from pyiem.network import Table as NetworkTable
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn, get_dbconnstr, logger
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger
 from pyiem.reference import TRACE_VALUE
 
 LOG = logger()
@@ -33,7 +33,7 @@ def safe(val):
     try:
         return float(val)
     except Exception as exp:
-        LOG.info(
+        LOG.warning(
             "%s failed to convert %s to float, using None", exp, repr(val)
         )
 
@@ -63,15 +63,16 @@ def main(argv):
     for nwsli in progress:
         progress.set_description(nwsli)
         tz = ZoneInfo(nt.sts[nwsli]["tzname"])
-        obsdf = pd.read_sql(
-            "SELECT day, max_tmpf as maxt, min_tmpf as mint, "
-            "pday as pcpn, snow, snowd as snwd, coop_tmpf as obst "
-            "from summary WHERE iemid = %s and day >= %s and day <= %s "
-            "ORDER by day ASC",
-            get_dbconnstr("iem"),
-            params=(nt.sts[nwsli]["iemid"], sts, ets),
-            index_col="day",
-        )
+        with get_sqlalchemy_conn("iem") as conn:
+            obsdf = pd.read_sql(
+                "SELECT day, max_tmpf as maxt, min_tmpf as mint, "
+                "pday as pcpn, snow, snowd as snwd, coop_tmpf as obst "
+                "from summary WHERE iemid = %s and day >= %s and day <= %s "
+                "ORDER by day ASC",
+                conn,
+                params=(nt.sts[nwsli]["iemid"], sts, ets),
+                index_col="day",
+            )
         obsdf = obsdf.reindex(pd.date_range(sts, ets))
         payload = {
             "sid": nwsli,
@@ -90,12 +91,12 @@ def main(argv):
             req = requests.post(SERVICE, json=payload, timeout=30)
             j = req.json()
         except Exception as exp:
-            LOG.info("download and processing failed for %s", nwsli)
+            LOG.warning("download and processing failed for %s", nwsli)
             LOG.exception(exp)
             continue
         cursor = pgconn.cursor()
         if "data" not in j:
-            LOG.info("Did not get data for %s ACIS request", nwsli)
+            LOG.warning("Did not get data for %s ACIS request", nwsli)
             continue
         updates = 0
         for row in j["data"]:
@@ -137,7 +138,7 @@ def main(argv):
             ob.save(cursor, skip_current=True)
             updates += 1
         if updates > 0:
-            LOG.info("Updated %s rows for %s", updates, nwsli)
+            LOG.warning("Updated %s rows for %s", updates, nwsli)
         cursor.close()
         pgconn.commit()
 

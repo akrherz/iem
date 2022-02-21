@@ -19,7 +19,6 @@ from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, logger, utc, convert_value
 
 LOG = logger()
-
 nt = NetworkTable("IACLIMATE")
 
 
@@ -80,7 +79,7 @@ def process(ts):
             "ndfd.t%02iz.awp2p5f%03i.grib2"
         ) % (ts.year, ts.month, ts.day, ts.hour, ts.hour, fhour)
         if not os.path.isfile(fn):
-            LOG.info("missing: %s", fn)
+            LOG.warning("missing: %s", fn)
             continue
         LOG.debug("-> %s", fn)
         gribs = pygrib.open(fn)
@@ -106,23 +105,22 @@ def dbsave(ts, data):
     cursor = pgconn.cursor()
     # Check to see if we already have data for this date
     cursor.execute(
-        """SELECT id from forecast_inventory
-      WHERE model = 'NDFD' and modelts = %s""",
+        "SELECT id from forecast_inventory WHERE model = 'NDFD' and "
+        "modelts = %s",
         (ts,),
     )
     if cursor.rowcount > 0:
         modelid = cursor.fetchone()[0]
         cursor.execute(
-            """DELETE from alldata_forecast where
-        modelid = %s""",
+            "DELETE from alldata_forecast where modelid = %s",
             (modelid,),
         )
         if cursor.rowcount > 0:
             LOG.warning("Removed %s previous entries", cursor.rowcount)
     else:
         cursor.execute(
-            """INSERT into forecast_inventory(model, modelts)
-        VALUES ('NDFD', %s) RETURNING id""",
+            "INSERT into forecast_inventory(model, modelts) VALUES "
+            "('NDFD', %s) RETURNING id",
             (ts,),
         )
         modelid = cursor.fetchone()[0]
@@ -134,11 +132,11 @@ def dbsave(ts, data):
             del data["fx"][date]
 
     found_data = False
-    for sid in nt.sts.keys():
+    for sid, entry in nt.sts.items():
         # Skip virtual stations
         if sid[2:] == "0000" or sid[2] == "C":
             continue
-        x, y = data["proj"](nt.sts[sid]["lon"], nt.sts[sid]["lat"])
+        x, y = data["proj"](entry["lon"], entry["lat"])
         i = np.digitize([x], data["x"])[0]
         j = np.digitize([y], data["y"])[0]
         for date in data["fx"]:
@@ -169,7 +167,7 @@ def main(argv):
         ts = utc().replace(hour=0, minute=0, second=0, microsecond=0)
     data = process(ts)
     if data["proj"] is None:
-        LOG.info("ERROR: found no data!")
+        LOG.warning("ERROR: found no data!")
     else:
         dbsave(ts, data)
 

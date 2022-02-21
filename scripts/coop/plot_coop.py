@@ -26,7 +26,7 @@ def plot_hilo(valid):
     Args:
       valid (datetime): The timestamp we are interested in!
     """
-    pgconn = get_dbconn("iem", user="nobody")
+    pgconn = get_dbconn("iem")
     cursor = pgconn.cursor()
 
     cursor.execute(
@@ -72,7 +72,7 @@ def plot_snowdepth(valid):
     Args:
       valid (datetime): The timestamp we are interested in!
     """
-    pgconn = get_dbconn("iem", user="nobody")
+    pgconn = get_dbconn("iem")
     cursor = pgconn.cursor()
 
     cursor.execute(
@@ -121,7 +121,7 @@ def plot_snow(valid):
     Args:
       valid (datetime): The timestamp we are interested in!
     """
-    pgconn = get_dbconn("iem", user="nobody")
+    pgconn = get_dbconn("iem")
     cursor = pgconn.cursor()
 
     cursor.execute(
@@ -170,7 +170,7 @@ def plot_snow_month(valid):
     Args:
       valid (datetime): The timestamp we are interested in!
     """
-    pgconn = get_dbconn("iem", user="nobody")
+    pgconn = get_dbconn("iem")
     cursor = pgconn.cursor()
 
     d1 = valid.replace(day=1)
@@ -224,7 +224,7 @@ def plot_precip_month(valid):
     Args:
       valid (datetime): The timestamp we are interested in!
     """
-    pgconn = get_dbconn("iem", user="nobody")
+    pgconn = get_dbconn("iem")
     cursor = pgconn.cursor()
 
     d1 = valid.replace(day=1)
@@ -278,7 +278,7 @@ def plot_precip(valid):
     Args:
       valid (datetime): The timestamp we are interested in!
     """
-    pgconn = get_dbconn("iem", user="nobody")
+    pgconn = get_dbconn("iem")
     cursor = pgconn.cursor()
 
     cursor.execute(
