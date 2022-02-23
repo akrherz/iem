@@ -4,7 +4,7 @@ import datetime
 
 from pandas.io.sql import read_sql
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -14,9 +14,11 @@ PDICT = {
     "-SN": "Light Snow (-SN)",
     "PSN": "Heavy Snow (+SN)",  # +SN causes CGI issues
     "SN": "Any Snow (*SN*)",
+    "TSPL": "Thunder and Ice Pellets (TSPL)",
     "TSSN": "Thunder and Snow (TSSN)",
     "FZFG": "Freezing Fog (FZFG)",
     "FZRA": "Freezing Rain (FZRA)",
+    "TSFZRA": "Thunder and Freezing Rain (TSFZRA)",
     "FG": "Fog (FG)",
     "BLSN": "Blowing Snow (BLSN)",
     "FU": "Smoke (FU)",
@@ -88,7 +90,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     year = ctx["year"]
@@ -111,22 +112,23 @@ def plotter(fdict):
             "'-TSSN'::varchar, '-TSDZ'::varchar] && wxcodes"
         )
     trunc = "day" if ctx["w"] == "day" else "hour"
-    df = read_sql(
-        f"""
-    WITH data as (
-        SELECT distinct date_trunc(%s,
-            valid at time zone %s + '10 minutes'::interval) as datum
-        from alldata where station = %s and {limiter}
-        and valid > '1973-01-01' and report_type = 2)
+    with get_sqlalchemy_conn("asos") as conn:
+        df = read_sql(
+            f"""
+        WITH data as (
+            SELECT distinct date_trunc(%s,
+                valid at time zone %s + '10 minutes'::interval) as datum
+            from alldata where station = %s and {limiter}
+            and valid > '1973-01-01' and report_type = 2)
 
-    SELECT extract(year from datum)::int as year,
-    extract(month from datum)::int as month,
-    count(*) from data GROUP by year, month ORDER by year, month
-    """,
-        pgconn,
-        params=(trunc, tzname, station),
-        index_col=None,
-    )
+        SELECT extract(year from datum)::int as year,
+        extract(month from datum)::int as month,
+        count(*) from data GROUP by year, month ORDER by year, month
+        """,
+            conn,
+            params=(trunc, tzname, station),
+            index_col=None,
+        )
 
     if df.empty:
         raise NoDataFound("No database entries found for station, sorry!")
@@ -173,4 +175,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(zstation="ALO", year=2017, var="FG", network="IA_ASOS"))
+    plotter(dict(zstation="ALO", year=2017, var="TSFZRA", network="IA_ASOS"))

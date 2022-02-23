@@ -3,7 +3,7 @@ import datetime
 
 from pandas.io.sql import read_sql
 from pyiem.plot import figure_axes
-from pyiem.util import get_dbconn, get_autoplot_context
+from pyiem.util import get_sqlalchemy_conn, get_autoplot_context
 from pyiem.exceptions import NoDataFound
 
 CWEEK = {
@@ -86,38 +86,42 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
 
-    table = "alldata_%s" % (station[:2],)
-    df = read_sql(
-        f"""
-    with events as (
-        SELECT c.climoweek, a.precip, a.year from {table} a
-        JOIN climoweek c on (c.sday = a.sday) WHERE a.station = %s
-        and precip > 0.009),
-    ranks as (
-        SELECT climoweek, year,
-        rank() OVER (PARTITION by climoweek ORDER by precip DESC, year DESC)
-        from events),
-    stats as (
-    SELECT climoweek, max(precip), avg(precip),
-    sum(case when precip > 0.009 and precip < 0.26 then 1 else 0 end) as cat1,
-    sum(case when precip >= 0.26 and precip < 0.51 then 1 else 0 end) as cat2,
-    sum(case when precip >= 0.51 and precip < 1.01 then 1 else 0 end) as cat3,
-    sum(case when precip >= 1.01 and precip < 2.01 then 1 else 0 end) as cat4,
-    sum(case when precip >= 2.01 then 1 else 0 end) as cat5,
-    count(*) from events GROUP by climoweek)
-    SELECT e.climoweek, e.max, r.year, e.avg, e.cat1, e.cat2, e.cat3, e.cat4,
-    e.cat5 from
-    stats e JOIN ranks r on (r.climoweek = e.climoweek) WHERE r.rank = 1
-    ORDER by e.climoweek ASC
-    """,
-        pgconn,
-        params=(station,),
-        index_col="climoweek",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = read_sql(
+            f"""
+        with events as (
+            SELECT c.climoweek, a.precip, a.year from alldata_{station[:2]} a
+            JOIN climoweek c on (c.sday = a.sday) WHERE a.station = %s
+            and precip > 0.009),
+        ranks as (
+            SELECT climoweek, year,
+            rank() OVER (
+                PARTITION by climoweek ORDER by precip DESC, year DESC)
+            from events),
+        stats as (
+        SELECT climoweek, max(precip), avg(precip),
+        sum(case when precip > 0.009 and precip < 0.26 then 1 else 0 end)
+            as cat1,
+        sum(case when precip >= 0.26 and precip < 0.51 then 1 else 0 end)
+            as cat2,
+        sum(case when precip >= 0.51 and precip < 1.01 then 1 else 0 end)
+            as cat3,
+        sum(case when precip >= 1.01 and precip < 2.01 then 1 else 0 end)
+            as cat4,
+        sum(case when precip >= 2.01 then 1 else 0 end) as cat5,
+        count(*) from events GROUP by climoweek)
+        SELECT e.climoweek, e.max, r.year, e.avg, e.cat1, e.cat2, e.cat3,
+        e.cat4, e.cat5 from
+        stats e JOIN ranks r on (r.climoweek = e.climoweek) WHERE r.rank = 1
+        ORDER by e.climoweek ASC
+        """,
+            conn,
+            params=(station,),
+            index_col="climoweek",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
 
@@ -128,26 +132,27 @@ def plotter(fdict):
         4: "1.01 - 2.00",
         5: "2.01 +",
     }
-    res = """\
-# IEM Climodat https://mesonet.agron.iastate.edu/climodat/
-# Report Generated: %s
-# Climate Record: %s -> %s
-# Site Information: [%s] %s
-# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
-# Based on climoweek periods, this report summarizes liquid precipitation.
-#                                     Number of precip events - (%% of total)
- CL                MAX         MEAN   0.01-    0.26-    0.51-    1.01-            TOTAL
- WK TIME PERIOD    VAL  YR     RAIN     0.25     0.50     1.00     2.00    >2.01  DAYS
-""" % (
-        datetime.date.today().strftime("%d %b %Y"),
-        ctx["_nt"].sts[station]["archive_begin"].date(),
-        datetime.date.today(),
-        station,
-        ctx["_nt"].sts[station]["name"],
+    today = datetime.date.today()
+    res = (
+        "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
+        f"# Report Generated: {today:%d %b %Y}\n"
+        "# Climate Record: "
+        f"{ctx['_nt'].sts[station]['archive_begin'].date()} -> {today}\n"
+        f"# Site Information: [{station}] {ctx['_nt'].sts[station]['name']}\n"
+        "# Contact Information: "
+        "Daryl Herzmann akrherz@iastate.edu 515.294.5978\n"
+        "# Based on climoweek periods, this report summarizes liquid "
+        "precipitation.\n"
+        "#                                     Number of precip events - "
+        "(% of total)\n"
+        " CL                MAX         MEAN   0.01-    0.26-    0.51-    "
+        "1.01-            TOTAL\n"
+        " WK TIME PERIOD    VAL  YR     RAIN     0.25     0.50     1.00     "
+        "2.00    >2.01  DAYS\n"
     )
-    title = "[%s] %s Precipitation Bin Histogram" % (
-        station,
-        ctx["_nt"].sts[station]["name"],
+    title = (
+        f"[{station}] {ctx['_nt'].sts[station]['name']} Precipitation "
+        "Bin Histogram"
     )
     fig, ax = figure_axes(title=title, apctx=ctx)
     df["total"] = (
@@ -244,4 +249,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

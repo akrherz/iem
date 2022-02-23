@@ -181,9 +181,9 @@ def get_count_df(ctx, varname, pstr, sts, ets):
                 index_col=None,
             )
         # enlarge by wfo and year cartesian product
-        ctx["_subtitle"] = ", Period of Record: %.0f-%.0f" % (
-            df["year"].min(),
-            df["year"].max(),
+        ctx["_subtitle"] = (
+            ", Period of Record: "
+            f"{df['year'].min():.0f}-{df['year'].max():.0f}"
         )
         idx = pd.MultiIndex.from_product(
             [df["wfo"].unique(), df["year"].unique()],
@@ -286,6 +286,8 @@ def get_count_bins(df, varname):
                 750,
                 1000,
             ]
+        elif maxv < 75:
+            bins = [0, 1, 2, 3, 5, 10, 15, 20, 25, 30, 40, 50, 75]
     elif max([abs(minv), abs(maxv)]) > 100:
         bins = [-200, -150, -100, -50, -25, -10, 0, 10, 25, 50, 100, 150, 200]
     elif max([abs(minv), abs(maxv)]) > 10:
@@ -324,8 +326,8 @@ def plotter(fdict):
     subtitle = ""
     title = ""
     for p, s in zip(phenomena, significance):
-        pstr.append("(phenomena = '%s' and significance = '%s')" % (p, s))
-        subtitle += "%s.%s " % (p, s)
+        pstr.append(f"(phenomena = '{p}' and significance = '{s}')")
+        subtitle += f"{p}.{s} "
         title += vtec.get_ps_string(p, s)
     if len(phenomena) > 1:
         title = "VTEC Unique Event"
@@ -430,13 +432,10 @@ def plotter(fdict):
         sector="nws",
         axisbg="white",
         twitter=True,
-        title="%s %s by NWS Office" % (title, PDICT[varname]),
-        subtitle=("Valid %s - %s UTC, based on VTEC: %s %s")
-        % (
-            sts.strftime("%d %b %Y %H:%M"),
-            ets.strftime("%d %b %Y %H:%M"),
-            subtitle,
-            ctx.get("_subtitle", ""),
+        title=f"{title} {PDICT[varname]} by NWS Office",
+        subtitle=(
+            f"Valid {sts:%d %b %Y %H:%M} - {ets:%d %b %Y %H:%M} UTC, "
+            f"based on VTEC: {subtitle} {ctx.get('_subtitle', '')}"
         ),
     )
     mp.fill_cwas(
