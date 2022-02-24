@@ -12,14 +12,12 @@ PDICT2 = {
     "none": "No Comparison Limit (All Soundings)",
     "month": "Month of the Selected Profile",
 }
-PDICT3 = dict(
-    [
-        ("tmpc", "Air Temperature (C)"),
-        ("dwpc", "Dew Point (C)"),
-        ("hght", "Height (m)"),
-        ("smps", "Wind Speed (mps)"),
-    ]
-)
+PDICT3 = {
+    "tmpc": "Air Temperature (C)",
+    "dwpc": "Dew Point (C)",
+    "hght": "Height (m)",
+    "smps": "Wind Speed (mps)",
+}
 PDICT4 = {
     "same": "Compare against soundings for same hour",
     "all": "Compare against soundings at any hour",
@@ -109,18 +107,24 @@ def plotter(fdict):
     hour = int(ctx["hour"])
     ts = utc(ts.year, ts.month, ts.day, hour)
     which = ctx["which"]
-    vlimit = ""
-    if which == "month":
-        vlimit = (" and extract(month from f.valid) = %s ") % (ts.month,)
-    name = ctx["_nt"].sts[station]["name"]
     stations = [station]
     if station.startswith("_"):
         name = ctx["_nt"].sts[station]["name"].split("--")[0]
         stations = (
             ctx["_nt"].sts[station]["name"].split("--")[1].strip().split(" ")
         )
+    params = {
+        "stations": tuple(stations),
+        "ts": ts,
+    }
+    vlimit = ""
+    if which == "month":
+        vlimit = " and extract(month from f.valid) = :month "
+        params["month"] = ts.month
+    name = ctx["_nt"].sts[station]["name"]
 
-    hrlimit = f"and extract(hour from f.valid at time zone 'UTC') = {hour} "
+    hrlimit = "and extract(hour from f.valid at time zone 'UTC') = :hour "
+    params["hour"] = hour
     if ctx["h"] == "ALL":
         hrlimit = ""
     with get_sqlalchemy_conn("raob") as conn:
@@ -155,32 +159,26 @@ def plotter(fdict):
             from raob_flights f JOIN raob_profile p on (f.fid = p.fid)
             WHERE f.station in :stations {hrlimit} {vlimit}
             and p.pressure in (925, 850, 700, 500, 400, 300, 250, 200,
-            150, 100, 70, 50, 10)  and {varname} is not null)
+            150, 100, 70, 50, 10)  and
+            {varname if varname != 'hght' else 'height'} is not null)
 
         select * from data where valid = :ts ORDER by pressure DESC
         """
             ),
             conn,
-            params={
-                "stations": tuple(stations),
-                "ts": ts,
-            },
+            params=params,
             index_col="pressure",
         )
     if df.empty:
         raise NoDataFound(f"Sounding for {ts:%Y-%m-%d %H:%M} was not found!")
     df = df.drop("valid", axis=1)
-    for key in PDICT3.keys():
+    for key in PDICT3:
         df[key + "_percentile"] = df[key + "_rank"] / df["count"] * 100.0
         # manual hackery to get 0 and 100th percentile
-        df.loc[df[key] == df[key + "_max"], key + "_percentile"] = 100.0
-        df.loc[df[key] == df[key + "_min"], key + "_percentile"] = 0.0
+        df.loc[df[key] == df[f"{key}_max"], f"{key}_percentile"] = 100.0
+        df.loc[df[key] == df[f"{key}_min"], f"{key}_percentile"] = 0.0
 
-    title = "%s %s %s Sounding" % (
-        station,
-        name,
-        ts.strftime("%Y/%m/%d %H UTC"),
-    )
+    title = f"{station} {name} {ts:%Y/%m/%d %H} UTC Sounding"
     subtitle = "(%s-%s) Percentile Ranks (%s) for %s at %s" % (
         pd.Timestamp(df.iloc[0]["min_valid"]).year,
         pd.Timestamp(df.iloc[0]["max_valid"]).year,
