@@ -5,12 +5,11 @@
 require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 48);
 require_once "../../../include/forms.php";
-require_once "../../../include/database.inc.php";
 require_once "../../../include/imagemaps.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/network.php";
+require_once "../../../include/mlib.php";
 
-$afos = iemdb("afos");
 $t = new MyView();
 $t->title = "NWS Text Product by Issuing Center by Date";
 $t->headextra = <<<EOF
@@ -48,14 +47,17 @@ function j(name){
 }
 </script>
 EOF;
- 
-$wfo = isset($_REQUEST["wfo"])? xssafe($_REQUEST["wfo"]): null;
+
+// A dance here to get a 4-char and 3-char identifier
 $source = isset($_REQUEST["source"])? substr($_GET["source"],0,4) : 'DMX';
-$dbsource = $source;
+$cccc = $source;
 $sesource = $source;
-if (strlen($source) == 3){ $dbsource = "K$source";}
-if ((strlen($source) == 4) && (substr($source, 0, 1) == 'K')) { $sesource = substr($source, 1, 3); }
-if ($wfo != null){ $source = $wfo; }
+if (strlen($source) == 3){
+    $cccc = "K$source";
+}
+if ((strlen($source) == 4) && (substr($source, 0, 1) == 'K')) {
+    $sesource = substr($source, 1, 3);
+}
 
 $view = isset($_GET["view"])? xssafe($_GET["view"]): 'grid';
 $order = isset($_GET["order"]) ? xssafe($_GET["order"]): "asc";
@@ -67,13 +69,22 @@ $year2 = get_int404("year2", date("Y"));
 $month2 = get_int404("month2", date("m"));
 $day2 = get_int404("day2", date("d"));
 
-$ts = mktime(0,0,0, $month, $day, $year);
-$ts2 = $ts + 86400;
+// Belt-suspenders check here
+$dt = new DateTime("$year-$month-$day");
+$datequeue = Array($dt->format("Y-m-d"));
+
 $d2display = "none";
 
+$timeformat = "H:i";
 if (isset($_REQUEST['drange'])){
-	$ts2 = mktime(0,0,0, $month2, $day2, $year2) + 86400;
+    $dt2 = new Datetime("$year2-$month2-$day2");
+    // Loop through all the days in the range from $dt to $dt2
+    while (($dt <= $dt2) && sizeof($datequeue) < 10){
+        $datequeue[] = $dt->format("Y-m-d");
+        $dt->modify("+1 day");
+    }
 	$d2display = "block";
+    $timeformat = "d/H:i";
 }
 
 $ar = Array("asc" => "Time Ascending",
@@ -83,103 +94,106 @@ $oselect = make_select("order", $order, $ar);
 
 $table = "";
 $atags = "";
-pg_query($afos, "SET TIME ZONE 'UTC'");
-$pil_limiter = "";
-if (date("Y", $ts) > "2020"){
-    $pil_limiter = " and substr(pil, 1, 3) not in ('LLL', 'WRK') ";
-}
-if ($dbsource == "KWNO"){
-    $pil_limiter = <<<EOM
- and substr(pil, 1, 3) not in ('NBS', 'NBX', 'NBE', 'NBH', 'NBP', 'MAV', 'MET',
- 'MEX', 'LAV', 'LEV')
-EOM;
-}
-$rs = pg_prepare($afos, "_SELECT",
-	"SELECT pil, entered from products ".
-	"WHERE source = $1 and entered BETWEEN $2 and $3 and ".
-	"pil is not null $pil_limiter ORDER by entered $order");
 
-$rs = pg_execute($afos, "_SELECT", Array($dbsource, date("Y-m-d H:i", $ts)."+00",
-		date("Y-m-d H:i", $ts2)."+00"));
-if ($view == "prod"){
-	$prods = Array();
-	for($i=0;$row=pg_fetch_array($rs);$i++){
-		$ts = strtotime($row["entered"]);
-		$url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
-        if (!array_key_exists($row["pil"], $prods)){
-            $prods[$row["pil"]] = "";
-        }
-        $prods[$row["pil"]] .= sprintf("<tr><td><a href=\"%s\">%s</a></td>
-    	<td>%s</td><td>%s</td></tr>",
-				$url, $row["pil"], gmdate("Y-m-d", $ts), gmdate("H:i", $ts));
-	}
-	$keys = array_keys($prods);
-	asort($keys);
-	$table .= "<table class=\"table table-condensed table-striped\"><tr><th>Product Link</th><th>Date</th><th>UTC Time</th></tr>";
-	foreach($keys as $i => $k){
-		$table .= sprintf("%s", $prods[$k]);
-	}
-	$table .= "</table>";
-} else if ($view == "grid"){
-	$columns = Array();
-	for($i=0;$row=pg_fetch_array($rs);$i++){
-		$ts = strtotime($row["entered"]);
-		$url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
-        if (!array_key_exists($row["pil"], $columns)){
-            $columns[$row["pil"]] = "";
-        }
-        $columns[$row["pil"]] .= sprintf("<a href=\"%s\">%s</a> (%s)<br />",
-				$url, $row["pil"], gmdate("H:i", $ts));
+// Loop over dates in the datequeue
+$prods = Array();
+$columns = Array();
+foreach($datequeue as $dt){
+    $res = iemws_json(
+        "nws/afos/list.json",
+        Array("cccc" => $cccc, "date" => $dt),
+    );
+    $rows = $res["data"];
+    if ($order == "desc"){
+        $rows = array_reverse($rows);
     }
+    if (sizeof($rows) == 0){
+        $table .= "<h3>No products found for $dt</h3>\n";
+        continue;
+    }
+
+    if ($view == "prod"){
+        foreach($rows as $row){
+            $ts = strtotime($row["entered"]);
+            $url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
+            if (!array_key_exists($row["pil"], $prods)){
+                $prods[$row["pil"]] = "";
+            }
+            $prods[$row["pil"]] .= sprintf(
+                "<tr><td><a href=\"%s\">%s</a></td><td>%s</td><td>%s</td></tr>",
+                $url, $row["pil"], gmdate("Y-m-d", $ts), gmdate("H:i", $ts)
+            );        
+        }
+    } else if ($view == "grid") {
+        foreach($rows as $row){
+            $ts = strtotime($row["entered"]);
+            $url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
+            if (!array_key_exists($row["pil"], $columns)){
+                $columns[$row["pil"]] = "";
+            }
+            $columns[$row["pil"]] .= sprintf("<a href=\"%s\">%s</a> (%s)<br />",
+                    $url, $row["pil"], gmdate($timeformat, $ts));    
+        }    
+
+    } else {
+        $lasthour = "";
+        $colnum = 0;
+        $atags .= '<div class="clearfix"></div><strong>Skip to Hour:</strong> ';
+        foreach($rows as $row){
+            $ts = strtotime($row["entered"]);
+            $url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
+            if (gmdate("H", $ts) != $lasthour){
+                if ($lasthour != ""){
+                    // End previous col-
+                    $table .= "</div>\n";
+                }
+                $lasthour = gmdate("H", $ts);
+                $atags .= sprintf("<a class=\"btn btn-default btn-sm\" href=\"javascript:void(0)\" onclick=\"j('%s');\">%s</a> ",
+                                      $lasthour, $lasthour);
+                if ($colnum % 6 == 0){
+                    if ($colnum > 0){
+                        // End previous row + container
+                        $table .= "</div></div>";
+                    }
+                    $table .= "<div class=\"container\"><div class=\"row\">\n";
+                }
+                $table .= "<div id=\"sect$lasthour\" class=\"col-lg-2 col-md-2 col-sm-2 col-xs-4 well\">";
+                $table .= sprintf("<strong>%s UTC</strong><br />", gmdate('d M Y : H', $ts));
+                $colnum += 1;
+            }
+            $table .= sprintf("<a href=\"%s\">%s</a> (%s)<br />", $url, $row["pil"],
+                    gmdate("H:i", $ts));    
+        }
+        $table .= "</div></div>\n";
+        $atags .= '<div class="clearfix"></div>';
+    }
+}
+if ($view == "prod"){
+    $keys = array_keys($prods);
+    asort($keys);
+    $table .= "<table class=\"table table-condensed table-striped\"><tr><th>Product Link</th><th>Date</th><th>UTC Time</th></tr>";
+    foreach($keys as $i => $k){
+        $table .= sprintf("%s", $prods[$k]);
+    }
+    $table .= "</table>";
+} else if ($view == "grid") {
     ksort($columns);
-	$keys = array_keys($columns);
-	$table = "";
-	$atags .= '<div class="clearfix"></div><strong>Skip to PIL:</strong> ';
-	foreach($keys as $i => $k){
-		$atags .= sprintf("<a class=\"btn btn-default btn-sm\" href=\"javascript:void(0)\" onclick=\"j('%s');\">%s</a> ",
-		                  $k, $k);
+    $keys = array_keys($columns);
+    $table = "";
+    $atags .= '<div class="clearfix"></div><strong>Skip to PIL:</strong> ';
+    foreach($keys as $i => $k){
+        $atags .= sprintf("<a class=\"btn btn-default btn-sm\" href=\"javascript:void(0)\" onclick=\"j('%s');\">%s</a> ",
+                          $k, $k);
         if ($i % 6 == 0){
-			if ($i > 0){
-				$table .= "</div>";
-			}
-			$table .= "<div class=\"row\">\n";
-		}
-		$table .= sprintf("<div id=\"sect$k\" class=\"col-lg-2 col-md-2 col-sm-2 col-xs-4 well\">%s</div>\n",
-		                  $columns[$k]);
-	}
-	$table .= "</div>\n";
-	$atags .= '<div class="clearfix"></div>';
-} else {
-	//view=time
-	$lasthour = "";
-	$colnum = 0;
-	$atags .= '<div class="clearfix"></div><strong>Skip to Hour:</strong> ';
-	for($i=0;$row=pg_fetch_array($rs);$i++){
-		$ts = strtotime($row["entered"]);
-		$url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
-		if (gmdate("H", $ts) != $lasthour){
-			if ($lasthour != ""){
-				// End previous col-
-				$table .= "</div>\n";
-			}
-			$lasthour = gmdate("H", $ts);
-			$atags .= sprintf("<a class=\"btn btn-default btn-sm\" href=\"javascript:void(0)\" onclick=\"j('%s');\">%s</a> ",
-                                  $lasthour, $lasthour);
-			if ($colnum % 6 == 0){
-				if ($colnum > 0){
-					// End previous row + container
-					$table .= "</div></div>";
-				}
-				$table .= "<div class=\"container\"><div class=\"row\">\n";
-			}
-			$table .= "<div id=\"sect$lasthour\" class=\"col-lg-2 col-md-2 col-sm-2 col-xs-4 well\">";
-			$table .= sprintf("<strong>%s UTC</strong><br />", gmdate('d M Y : H', $ts));
-		    $colnum += 1;
-		}
-		$table .= sprintf("<a href=\"%s\">%s</a> (%s)<br />", $url, $row["pil"],
-				gmdate("H:i", $ts));
-	}
-	$table .= "</div></div>\n";
+            if ($i > 0){
+                $table .= "</div>";
+            }
+            $table .= "<div class=\"row\">\n";
+        }
+        $table .= sprintf("<div id=\"sect$k\" class=\"col-lg-2 col-md-2 col-sm-2 col-xs-4 well\">%s</div>\n",
+                          $columns[$k]);
+    }
+    $table .= "</div>\n";
     $atags .= '<div class="clearfix"></div>';
 }
 
@@ -216,7 +230,7 @@ $ar = Array("time" => "Chronological",
 $vselect = make_select("view", $view, $ar);
 
 
-$t->content = <<<EOF
+$t->content = <<<EOM
 <h3>NWS Text Products by Issuing Center by Date</h3>
 <p>This application prints out a listing of IEM archived text products
 by issuing NWS Issuing Center and by date.  After about
@@ -245,22 +259,25 @@ and a brief associated product name on the NWS website.</p>
  </ul>
 </p>
 
+<p>This data presentation is powered by a <a href="/api/1/docs#/nws/service_nws_afos_list__fmt__get">IEM API Web Service</a>.</p>
+
 <form name="selector" method="GET">
 <div class="row well">
 <div class="col-md-5">
   <strong>Select Issuing Center:</strong>
   <br />{$netselect}
 </div>
-<div class="col-md-3">
+<div class="col-md-5">
   <strong>For UTC Date:</strong>
   <br />{$yselect} {$mselect} {$dselect}
-  <br /><input id="drange" type="checkbox" name="drange" value="yes" 
-  onClick="showHide(this.value)" {$drangecheck}/>Enable Search over date range
+  <br /><input id="drange" type="checkbox" name="drange" value="yes" id="drange" 
+  onClick="showHide(this.value)" {$drangecheck}/>
+  <label for="drange">List over UTC date range through (max 10 days)</label>
   <br /><div id="d2" style="display: {$d2display}">
   {$y2select} {$m2select} {$d2select}</div>
 </div>
 
-<div class="col-md-4">
+<div class="col-md-2">
   <strong>Options:</strong>
   <br />How to view: {$vselect}
   <br />Sort order: {$oselect}
@@ -273,8 +290,6 @@ and a brief associated product name on the NWS website.</p>
 
 {$table}
 
-EOF;
+EOM;
 
 $t->render('full.phtml');
-
-?>
