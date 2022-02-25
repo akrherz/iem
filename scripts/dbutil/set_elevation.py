@@ -11,7 +11,7 @@ LOG = logger()
 def get_elevation(lon, lat):
     """Use arcgisonline"""
     req = requests.get(
-        f"https://api.opentopodata.org/v1/test-dataset?locations={lat},{lon}",
+        f"https://api.opentopodata.org/v1/mapzen?locations={lat},{lon}",
         timeout=30,
     )
     if req.status_code != 200:
