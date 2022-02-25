@@ -17,7 +17,7 @@ Date.prototype.toIEMString = function () {
         + pad(this.getUTCMonth() + 1)
         + pad(this.getUTCDate())
         + pad(this.getUTCHours())
-        + '00';
+        + pad(this.getUTCMinutes());
 };
 
 if (!Date.prototype.toISOString) {
@@ -30,8 +30,6 @@ if (!Date.prototype.toISOString) {
                 + '-' + pad(this.getUTCDate())
                 + 'T' + pad(this.getUTCHours())
                 + ':' + pad(this.getUTCMinutes())
-                + ':' + pad(this.getUTCSeconds())
-                + '.' + String((this.getUTCMilliseconds() / 1000).toFixed(3)).slice(2, 5)
                 + 'Z';
         };
 
@@ -124,6 +122,14 @@ $().ready(function () {
             format: new ol.format.GeoJSON()
         }),
         style: function (feature, resolution) {
+            // Update the img src to the appropriate arrow
+            $("#" + feature.getId() + "_arrow").attr(
+                "src",
+                feature.get("is_inversion") ? "/images/red_arrow_down.svg" : "/images/green_arrow_up.svg"
+            );
+            $("#" + feature.getId() + "_15").text(feature.get('tmpf_15'));
+            $("#" + feature.getId() + "_5").text(feature.get('tmpf_5'));
+            $("#" + feature.getId() + "_10").text(feature.get('tmpf_10'));
             return [feature.get("is_inversion") ? redArrow: greenArrow];
         }
     });
@@ -178,7 +184,7 @@ $().ready(function () {
                     'Air Temp @5ft: ' + feature.get('tmpf_5'),
                     'Air Temp @10ft: ' + feature.get('tmpf_10'),
                     '</p>'
-                ].join('<br/>');    
+                ].join('<br/>');
             }
             $(element).popover({
                 'placement': 'top',
@@ -193,11 +199,9 @@ $().ready(function () {
     var layerSwitcher = new ol.control.LayerSwitcher();
     map.addControl(layerSwitcher);
 
-
-
     dtpicker = $('#datetimepicker');
     dtpicker.datetimepicker({
-        showMinute: false,
+        showMinute: true,
         showSecond: false,
         onSelect: logic,
         minDateTime: (new Date(2013, 1, 1, 0, 0)),
@@ -232,37 +236,14 @@ function setDate() {
         .datepicker("enable");
 }
 
-$('#plusonehour').click(function (e) {
+$(".dt").click(function (e) {
     timeChanged = true;
     $(this).removeClass('focus');
-    currentdt = new Date(currentdt.valueOf() + 3600000);
+    currentdt = new Date(currentdt.valueOf() + parseInt($(this).data('delta')));
     setDate();
     updateMap();
 });
 
-$('#minusonehour').click(function (e) {
-    timeChanged = true;
-    $(this).removeClass('focus');
-    currentdt = new Date(currentdt.valueOf() - 3600000);
-    setDate();
-    updateMap();
-});
-
-$('#minusoneday').click(function (e) {
-    timeChanged = true;
-    $(this).removeClass('focus');
-    currentdt = new Date(currentdt.valueOf() - (24 * 3600000));
-    setDate();
-    updateMap();
-});
-
-$('#plusoneday').click(function (e) {
-    timeChanged = true;
-    $(this).removeClass('focus');
-    currentdt = new Date(currentdt.valueOf() + (24 * 3600000));
-    setDate();
-    updateMap();
-});
 
 $('#varpicker').change(function () {
     varname = $('#varpicker').val();

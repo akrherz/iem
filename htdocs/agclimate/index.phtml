@@ -5,7 +5,7 @@
  force_https();
 
  define("IEM_APPID", 10); 
- $OL = "6.4.3";
+ $OL = "6.12.0";
  $t = new MyView();
  $t->title = "ISU Soil Moisture Network"; 
  
@@ -13,19 +13,26 @@ $t->jsextra = <<<EOF
 <script src="/vendor/openlayers/${OL}/ol.js"></script>
 <script src="/vendor/openlayers/${OL}/ol-layerswitcher.js"></script>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
-<script src="dataexplorer.js?v=7"></script>
+<script src="dataexplorer.js"></script>
 <script src="/vendor/jquery-ui-timepicker/1.5.3/jquery-ui-timepicker-addon.js"></script>
 <script src="/vendor/jquery-ui-timepicker/1.5.3/jquery-ui-sliderAccess.js"></script>
 EOF;
 
-$dt = date("Y/m/d H:00", time() - (20*60));
+// Pick a sensible default datetime
+$dt = new DateTime();
+// Move back 3 minutes to allow data to arrive
+$dt->sub(new DateInterval("PT3M"));
+// Set back to nearest minute modulo 5
+$dt->modify( '-' . ($dt->format('i') % 5) . ' minutes' );
+
+$dt = $dt->format("Y/m/d H:i");
 $t->headextra = <<<EOF
 <link rel="stylesheet" type="text/css" href="/vendor/openlayers/${OL}/ol.css"/ >
 <link rel="stylesheet" type="text/css" href="/vendor/openlayers/${OL}/ol-layerswitcher.css"/ >
 <link rel="stylesheet" type="text/css" href="/vendor/jquery-ui-timepicker/1.5.3/jquery-ui-timepicker-addon.css"/ >
 <link rel="stylesheet" type="text/css" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css"/ >
 <script>
-	var defaultdt = "{$dt}";
+var defaultdt = "{$dt}";
 </script>
 <style>
   #map {
@@ -95,10 +102,12 @@ during 2012.
 	<h4>Select Time:</h4> 
 <input type="text" id="datetimepicker" name="dosomething" />
 <br />
- <button type="button" class="btn btn-default btn-xs" id="minusoneday">-1 Day</button>
- <button type="button" class="btn btn-default btn-xs" id="minusonehour">-1 HR</button>
- <button type="button" class="btn btn-default btn-xs" id="plusonehour">+1 HR</button>
- <button type="button" class="btn btn-default btn-xs" id="plusoneday">+1 Day</button>
+ <button type="button" class="btn btn-default btn-xs dt" data-delta="-86400000">-1 Day</button>
+ <button type="button" class="btn btn-default btn-xs dt" data-delta="-3600000">-1 HR</button>
+ <button type="button" class="btn btn-default btn-xs dt" data-delta="-300000">-5 Mins</button>
+ <button type="button" class="btn btn-default btn-xs dt" data-delta="300000">+5 Mins</button>
+ <button type="button" class="btn btn-default btn-xs dt" data-delta="3600000">+1 HR</button>
+ <button type="button" class="btn btn-default btn-xs dt" data-delta="86400000">+1 Day</button>
 </div>
 <div class="col-md-6">
 <h4>Select Variable:</h4>
@@ -125,13 +134,44 @@ during 2012.
 	<option value="wind">Wind Direction + Speed [mph]</option>
 	<option value="gust">Wind Gust [mph]</option>
 </select>
-</div></div>
+</div></div><!-- end row -->
 	
- 		<span id="maptitle">The map is displaying Air Temperature [F] valid at {$dt}</span>
-		<div id="map"></div>
- 		<div id="popup" title="Station Information"></div>
-	</div>
+<span id="maptitle">The map is displaying Air Temperature [F] valid at {$dt}</span>
+<div id="map"></div>
+<div id="popup" title="Station Information"></div>
+
+<div class="row">
+
+<div class="col-md-4">
+<p><img id="CAMI4_arrow" src="/images/green_arrow_up.svg" width="20">
+<strong>Northwest (Sutherland):</strong>
+<br /><i>1.5ft</i>: <span id="CAMI4_15">M</span>&deg;F
+<br /><i>5ft</i>: <span id="CAMI4_5">M</span>&deg;F
+<br /><i>10ft</i>: <span id="CAMI4_10">M</span>&deg;F
+</p>
 </div>
+
+<div class="col-md-3">
+<p><img id="BOOI4_arrow" src="/images/green_arrow_up.svg" width="20">
+<strong>Central (Ames):</strong>
+<br /><i>1.5ft</i>: <span id="BOOI4_15">M</span>&deg;F
+<br /><i>5ft</i>: <span id="BOOI4_5">M</span>&deg;F
+<br /><i>10ft</i>: <span id="BOOI4_10">M</span>&deg;F
+</p>
+</div>
+
+<div class="col-md-5">
+<p><img id="CRFI4_arrow" src="/images/green_arrow_up.svg" width="20">
+<strong>Southeast (Crawfordsville):</strong>
+<br /><i>1.5ft</i>: <span id="CRFI4_15">M</span>&deg;F
+<br /><i>5ft</i>: <span id="CRFI4_5">M</span>&deg;F
+<br /><i>10ft</i>: <span id="CRFI4_10">M</span>&deg;F
+</p>
+</div>
+
+</div><!-- end row -->
+
+</div></div><!-- end row -->
 </form>
 
 <div class="row">

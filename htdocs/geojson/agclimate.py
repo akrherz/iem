@@ -13,14 +13,14 @@ def safe_t(val, units="degC"):
     """Safe value."""
     if val is None:
         return "M"
-    return "%.1f" % (convert_value(val, units, "degF"),)
+    return f"{convert_value(val, units, 'degF'):.1f}"
 
 
 def safe_p(val):
     """precipitation"""
     if val is None or val < 0:
         return "M"
-    return "%.2f" % (val,)
+    return f"{val:.2f}"
 
 
 def safe(val, precision):
@@ -77,7 +77,8 @@ def get_data(pgconn, ts):
     qcdict = loadqc()
     nt = NetworkTable("ISUSM", only_online=False)
     data = {"type": "FeatureCollection", "features": []}
-    midnight = ts.replace(hour=0)
+    midnight = ts.replace(hour=0, minute=0)
+    tophour = ts.replace(minute=0)
     h24 = ts - datetime.timedelta(hours=24)
     cursor.execute(
         """
@@ -126,14 +127,15 @@ def get_data(pgconn, ts):
             coalesce(m.ws_mph_s_wvt * 0.447,
                     coalesce(h.ws_mps_s_wvt, 0))as ws_mps_s_wvt
             from sm_hourly h LEFT JOIN sm_minute m on (
-                h.station = m.station and h.valid = m.valid)
-            where h.valid = %s
+                h.station = m.station and
+                h.valid = date_trunc('hour', m.valid))
+            where h.valid = %s and m.valid = %s
         )
         SELECT a.*, c.max_tmpc, c.min_tmpc, c.pday, h.p24m from
         agg a LEFT JOIN calendar_day c on (a.station = c.station)
         LEFT JOIN twentyfour_hour h on (a.station = h.station)
     """,
-        (midnight, ts, h24, ts, ts),
+        (midnight, ts, h24, ts, tophour, ts),
     )
     for row in cursor:
         sid = row["station"]
@@ -149,12 +151,12 @@ def get_data(pgconn, ts):
                 "properties": {
                     "valid_utc": ts.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "encrh_avg": (
-                        "%s%%" % safe(row["encrh_avg"], 1)
+                        f"{safe(row['encrh_avg'], 1)}%"
                         if row["encrh_avg"] is not None
                         and row["encrh_avg"] > 0
                         else "M"
                     ),
-                    "rh": "%s%%" % (safe(row["rh"], 0),),
+                    "rh": f"{safe(row['rh'], 0)}%",
                     "hrprecip": (
                         safe_p(row["rain_in_tot"])
                         if not q.get("precip", False)
@@ -209,10 +211,9 @@ def get_data(pgconn, ts):
                         else "M"
                     ),
                     "gust": safe(row["ws_mph_max"], 1),
-                    "wind": ("%s@%.0f")
-                    % (
-                        drct2text(row["winddir_d1_wvt"]),
-                        row["ws_mps_s_wvt"] * 2.23,
+                    "wind": (
+                        f"{drct2text(row['winddir_d1_wvt'])}@"
+                        f"{(row['ws_mps_s_wvt'] * 2.23):.0f}"
                     ),
                     "name": nt.sts[sid]["name"],
                 },
@@ -230,7 +231,8 @@ def application(environ, start_response):
     if dt is None:
         ts = utc().replace(minute=0, second=0, microsecond=0)
     else:
-        ts = datetime.datetime.strptime(dt, "%Y-%m-%dT%H:%M:%S.000Z")
+        fmt = "%Y-%m-%dT%H:%M:%S.000Z" if len(dt) == 24 else "%Y-%m-%dT%H:%MZ"
+        ts = datetime.datetime.strptime(dt, fmt)
         ts = ts.replace(tzinfo=datetime.timezone.utc)
     with get_dbconn("isuag") as pgconn:
         func = (
