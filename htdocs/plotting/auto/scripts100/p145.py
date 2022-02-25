@@ -3,7 +3,6 @@ import datetime
 import calendar
 
 import pandas as pd
-from pandas.io.sql import read_sql
 from pyiem import util
 from pyiem.plot import figure_axes
 from pyiem.network import Table as NetworkTable  # This is needed.
@@ -76,7 +75,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = util.get_dbconn("isuag")
     nt = NetworkTable("ISUSM", only_online=False)
     oldnt = NetworkTable("ISUAG", only_online=False)
     ctx = util.get_autoplot_context(fdict, get_description())
@@ -84,28 +82,29 @@ def plotter(fdict):
     highlightyear = ctx["year"]
     varname = ctx["var"]
     oldstation = XREF.get(station, "A130209")
-    df = read_sql(
-        """
-    WITH legacy as (
-        SELECT valid, c30 as tsoil, 'L' as dtype
-        from daily where station = %s
-        and c30 > 0 ORDER by valid ASC
-    ), present as (
-        SELECT valid, t4_c_avg_qc * 9./5. + 32. as tsoil,
-        'C' as dtype,
-        vwc_12_avg_qc as vwc12,
-        vwc_24_avg_qc as vwc24,
-        vwc_50_avg_qc as vwc50
-        from sm_daily
-        where station = %s and t4_c_avg_qc is not null ORDER by valid ASC
-    )
-    SELECT valid, tsoil, dtype, null as vwc12, null as vwc24, null as vwc50
-    from legacy UNION ALL select * from present
-    """,
-        pgconn,
-        params=(oldstation, station),
-        index_col=None,
-    )
+    with util.get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            """
+        WITH legacy as (
+            SELECT valid, c30 as tsoil, 'L' as dtype
+            from daily where station = %s
+            and c30 > 0 ORDER by valid ASC
+        ), present as (
+            SELECT valid, t4_c_avg_qc * 9./5. + 32. as tsoil,
+            'C' as dtype,
+            vwc_12_avg_qc as vwc12,
+            vwc_24_avg_qc as vwc24,
+            vwc_50_avg_qc as vwc50
+            from sm_daily
+            where station = %s and t4_c_avg_qc is not null ORDER by valid ASC
+        )
+        SELECT valid, tsoil, dtype, null as vwc12, null as vwc24, null as vwc50
+        from legacy UNION ALL select * from present
+        """,
+            conn,
+            params=(oldstation, station),
+            index_col=None,
+        )
     df["valid"] = pd.to_datetime(df["valid"])
     df["doy"] = pd.to_numeric(df["valid"].dt.strftime("%j"))
     df["year"] = df["valid"].dt.year
@@ -163,4 +162,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

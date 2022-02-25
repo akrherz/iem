@@ -1,10 +1,15 @@
 """ISUAG"""
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.network import Table as NetworkTable  # This is needed.
 from pyiem.plot import figure_axes
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_autoplot_context, get_dbconn, utc, convert_value
+from pyiem.util import (
+    get_autoplot_context,
+    get_sqlalchemy_conn,
+    utc,
+    convert_value,
+)
 from pyiem.exceptions import NoDataFound
 
 XREF = {
@@ -64,7 +69,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("isuag")
     ctx = get_autoplot_context(fdict, get_description())
     threshold = 50
     threshold_c = convert_value(threshold, "degF", "degC")
@@ -72,91 +76,93 @@ def plotter(fdict):
     hours2 = ctx["hours2"]
     station = ctx["station"]
     oldstation = XREF[station]
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            """
+        with obs as (
+            select valid, c300, lag(c300) OVER (ORDER by valid ASC) from hourly
+            where station = %s),
+        agg1 as (
+            select valid,
+            case when c300 > %s and lag < %s then 1
+                when c300 < %s and lag > %s then -1
+                else 0 end as t from obs),
+        agg2 as (
+            SELECT valid, t from agg1 where t != 0),
+        agg3 as (
+            select valid, lead(valid) OVER (ORDER by valid ASC),
+            t from agg2),
+        agg4 as (
+            select extract(year from valid) as yr, valid, lead,
+            rank() OVER (PARTITION by extract(year from valid)
+            ORDER by valid ASC)
+            from agg3 where t = 1
+            and (lead - valid) >= '%s hours'::interval),
+        agg5 as (
+            select extract(year from valid) as yr, valid, lead
+            from agg3 where t = -1)
 
-    df = read_sql(
-        """
-    with obs as (
-        select valid, c300, lag(c300) OVER (ORDER by valid ASC) from hourly
-        where station = %s),
-    agg1 as (
-        select valid,
-        case when c300 > %s and lag < %s then 1
-             when c300 < %s and lag > %s then -1
-             else 0 end as t from obs),
-    agg2 as (
-        SELECT valid, t from agg1 where t != 0),
-    agg3 as (
-        select valid, lead(valid) OVER (ORDER by valid ASC),
-        t from agg2),
-    agg4 as (
-        select extract(year from valid) as yr, valid, lead,
-        rank() OVER (PARTITION by extract(year from valid) ORDER by valid ASC)
-        from agg3 where t = 1
-        and (lead - valid) >= '%s hours'::interval),
-    agg5 as (
-        select extract(year from valid) as yr, valid, lead
-        from agg3 where t = -1)
-
-    select f.yr, f.valid as fup, f.lead as flead, d.valid as dup,
-    d.lead as dlead from agg4 f JOIN agg5 d ON (f.yr = d.yr)
-    where f.rank = 1 and d.valid > f.valid
-    ORDER by fup ASC
-    """,
-        pgconn,
-        params=(
-            oldstation,
-            threshold,
-            threshold,
-            threshold,
-            threshold,
-            hours1,
-        ),
-        index_col=None,
-    )
+        select f.yr, f.valid as fup, f.lead as flead, d.valid as dup,
+        d.lead as dlead from agg4 f JOIN agg5 d ON (f.yr = d.yr)
+        where f.rank = 1 and d.valid > f.valid
+        ORDER by fup ASC
+        """,
+            conn,
+            params=(
+                oldstation,
+                threshold,
+                threshold,
+                threshold,
+                threshold,
+                hours1,
+            ),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No Data Found")
+    with get_sqlalchemy_conn("isuag") as conn:
+        df2 = pd.read_sql(
+            """
+        with obs as (
+            select valid, t4_c_avg,
+            lag(t4_c_avg) OVER (ORDER by valid ASC) from sm_hourly
+            where station = %s),
+        agg1 as (
+            select valid,
+            case when t4_c_avg > %s and lag < %s then 1
+                when t4_c_avg < %s and lag > %s then -1
+                else 0 end as t from obs),
+        agg2 as (
+            SELECT valid, t from agg1 where t != 0),
+        agg3 as (
+            select valid, lead(valid) OVER (ORDER by valid ASC),
+            t from agg2),
+        agg4 as (
+            select extract(year from valid) as yr, valid, lead,
+            rank() OVER (PARTITION by extract(year from valid)
+            ORDER by valid ASC)
+            from agg3 where t = 1
+            and (lead - valid) >= '%s hours'::interval),
+        agg5 as (
+            select extract(year from valid) as yr, valid, lead
+            from agg3 where t = -1)
 
-    df2 = read_sql(
-        """
-    with obs as (
-        select valid, t4_c_avg,
-        lag(t4_c_avg) OVER (ORDER by valid ASC) from sm_hourly
-        where station = %s),
-    agg1 as (
-        select valid,
-        case when t4_c_avg > %s and lag < %s then 1
-             when t4_c_avg < %s and lag > %s then -1
-             else 0 end as t from obs),
-    agg2 as (
-        SELECT valid, t from agg1 where t != 0),
-    agg3 as (
-        select valid, lead(valid) OVER (ORDER by valid ASC),
-        t from agg2),
-    agg4 as (
-        select extract(year from valid) as yr, valid, lead,
-        rank() OVER (PARTITION by extract(year from valid) ORDER by valid ASC)
-        from agg3 where t = 1
-        and (lead - valid) >= '%s hours'::interval),
-    agg5 as (
-        select extract(year from valid) as yr, valid, lead
-        from agg3 where t = -1)
-
-    select f.yr, f.valid as fup, f.lead as flead, d.valid as dup,
-    d.lead as dlead from agg4 f JOIN agg5 d ON (f.yr = d.yr)
-    where f.rank = 1 and d.valid > f.valid
-    ORDER by fup ASC
-    """,
-        pgconn,
-        params=(
-            station,
-            threshold_c,
-            threshold_c,
-            threshold_c,
-            threshold_c,
-            hours1,
-        ),
-        index_col=None,
-    )
+        select f.yr, f.valid as fup, f.lead as flead, d.valid as dup,
+        d.lead as dlead from agg4 f JOIN agg5 d ON (f.yr = d.yr)
+        where f.rank = 1 and d.valid > f.valid
+        ORDER by fup ASC
+        """,
+            conn,
+            params=(
+                station,
+                threshold_c,
+                threshold_c,
+                threshold_c,
+                threshold_c,
+                hours1,
+            ),
+            index_col=None,
+        )
     if df2.empty:
         raise NoDataFound("No Data Found")
 

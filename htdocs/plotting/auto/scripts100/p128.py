@@ -1,8 +1,9 @@
 """compares yearly summaries"""
+# pylint: disable=no-member
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = dict(
@@ -55,46 +56,44 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station1 = ctx["station1"].upper()
     station2 = ctx["station2"].upper()
-    table1 = "alldata_%s" % (station1[:2],)
-    table2 = "alldata_%s" % (station2[:2],)
     varname = ctx["var"]
 
-    df = read_sql(
-        f"""WITH one as (
-      SELECT year, sum(precip) as one_total_precip,
-      avg(high) as one_avg_high, avg(low) as one_avg_low,
-      avg((high+low)/2.) as one_avg_temp,
-      max(high) as one_max_high,
-      min(high) as one_min_high,
-      min(low) as one_min_low,
-      max(low) as one_max_low from {table1} WHERE
-      station = %s GROUP by year),
-    two as (
-      SELECT year, sum(precip) as two_total_precip,
-      avg(high) as two_avg_high, avg(low) as two_avg_low,
-      avg((high+low)/2.) as two_avg_temp,
-      max(high) as two_max_high,
-      min(high) as two_min_high,
-      min(low) as two_min_low,
-      max(low) as two_max_low from {table2} WHERE
-      station = %s GROUP by year
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""WITH one as (
+        SELECT year, sum(precip) as one_total_precip,
+        avg(high) as one_avg_high, avg(low) as one_avg_low,
+        avg((high+low)/2.) as one_avg_temp,
+        max(high) as one_max_high,
+        min(high) as one_min_high,
+        min(low) as one_min_low,
+        max(low) as one_max_low from alldata_{station1[:2]} WHERE
+        station = %s GROUP by year),
+        two as (
+        SELECT year, sum(precip) as two_total_precip,
+        avg(high) as two_avg_high, avg(low) as two_avg_low,
+        avg((high+low)/2.) as two_avg_temp,
+        max(high) as two_max_high,
+        min(high) as two_min_high,
+        min(low) as two_min_low,
+        max(low) as two_max_low from alldata_{station2[:2]} WHERE
+        station = %s GROUP by year
+        )
 
-    SELECT o.year, one_total_precip, one_avg_high, one_avg_low,
-    one_avg_temp, one_max_high, one_min_low, one_min_high, one_max_low,
-    two_total_precip, two_avg_high,
-    two_avg_low, two_avg_temp, two_max_high, two_min_low, two_min_high,
-    two_max_low from one o JOIN two t
-    on (o.year = t.year) ORDER by o.year ASC
-    """,
-        pgconn,
-        params=(station1, station2),
-        index_col="year",
-    )
+        SELECT o.year, one_total_precip, one_avg_high, one_avg_low,
+        one_avg_temp, one_max_high, one_min_low, one_min_high, one_max_low,
+        two_total_precip, two_avg_high,
+        two_avg_low, two_avg_temp, two_max_high, two_min_low, two_min_high,
+        two_max_low from one o JOIN two t
+        on (o.year = t.year) ORDER by o.year ASC
+        """,
+            conn,
+            params=(station1, station2),
+            index_col="year",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     df["one_station"] = station1

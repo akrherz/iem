@@ -4,10 +4,9 @@ import datetime
 import numpy as np
 import pandas as pd
 import geopandas as gpd
-from pandas.io.sql import read_sql
 from pyiem import reference
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
@@ -116,40 +115,40 @@ def get_df(ctx, buf=2.25):
             ctx["_nt"].sts[ctx["wfo"]]["name"],
             ctx["wfo"],
         )
-    dbconn = get_dbconn("iem")
-    df = read_sql(
-        """
-        WITH mystation as (
-            select id, st_x(geom) as lon, st_y(geom) as lat,
-            state, wfo, iemid from stations
-            where (network ~* 'ASOS' or network = 'AWOS') and
-            ST_contains(ST_geomfromtext(
-                'SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))'),
-                geom)
+    with get_sqlalchemy_conn("iem") as conn:
+        df = pd.read_sql(
+            """
+            WITH mystation as (
+                select id, st_x(geom) as lon, st_y(geom) as lat,
+                state, wfo, iemid from stations
+                where (network ~* 'ASOS' or network = 'AWOS') and
+                ST_contains(ST_geomfromtext(
+                    'SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))'),
+                    geom)
+            )
+            SELECT s.day, s.max_tmpf, s.min_tmpf,
+            s.min_rh, s.max_rh, s.min_feel, s.max_feel,
+            max_sknt * 1.15 as max_sknt,
+            max_gust * 1.15 as max_gust, t.id as station, t.lat, t.lon,
+            t.wfo, t.state from
+            summary s JOIN mystation t on (s.iemid = t.iemid)
+            WHERE s.day = %s
+        """,
+            conn,
+            params=(
+                bnds[0] - buf,
+                bnds[1] - buf,
+                bnds[0] - buf,
+                bnds[3] + buf,
+                bnds[2] + buf,
+                bnds[3] + buf,
+                bnds[2] + buf,
+                bnds[1] - buf,
+                bnds[0] - buf,
+                bnds[1] - buf,
+                ctx["day"],
+            ),
         )
-        SELECT s.day, s.max_tmpf, s.min_tmpf,
-        s.min_rh, s.max_rh, s.min_feel, s.max_feel,
-        max_sknt * 1.15 as max_sknt,
-        max_gust * 1.15 as max_gust, t.id as station, t.lat, t.lon,
-        t.wfo, t.state from
-        summary s JOIN mystation t on (s.iemid = t.iemid)
-        WHERE s.day = %s
-    """,
-        dbconn,
-        params=(
-            bnds[0] - buf,
-            bnds[1] - buf,
-            bnds[0] - buf,
-            bnds[3] + buf,
-            bnds[2] + buf,
-            bnds[3] + buf,
-            bnds[2] + buf,
-            bnds[1] - buf,
-            bnds[0] - buf,
-            bnds[1] - buf,
-            ctx["day"],
-        ),
-    )
     if df.empty:
         raise NoDataFound("No Data Found.")
     df = gpd.GeoDataFrame(

@@ -1,9 +1,9 @@
 """snowfall totals around day"""
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 
@@ -40,32 +40,32 @@ def get_description():
 
 def get_data(fdict):
     """Get the data"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     date = ctx["date"]
     jul1 = datetime.date(date.year if date.month > 6 else date.year - 1, 7, 1)
     offset = int((date - jul1).days)
-    table = "alldata_%s" % (station[:2],)
-    df = read_sql(
-        f"""
-    with obs as (
-        select day,
-        day -
-        ((case when month > 6 then year else year - 1 end)||'-07-01')::date
-        as doy,
-        (case when month > 6 then year else year - 1 end) as eyear, snow
-        from {table} where station = %s)
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        with obs as (
+            select day,
+            day -
+            ((case when month > 6 then year else year - 1 end)||'-07-01')::date
+            as doy,
+            (case when month > 6 then year else year - 1 end) as eyear, snow
+            from alldata_{station[:2]} where station = %s)
 
-        SELECT eyear, sum(case when doy < %s then snow else 0 end) as before,
-        sum(case when doy >= %s then snow else 0 end) as after,
-        sum(snow) as total from obs
-        GROUP by eyear ORDER by eyear ASC
-    """,
-        pgconn,
-        params=(station, offset, offset),
-        index_col="eyear",
-    )
+            SELECT eyear,
+            sum(case when doy < %s then snow else 0 end) as before,
+            sum(case when doy >= %s then snow else 0 end) as after,
+            sum(snow) as total from obs
+            GROUP by eyear ORDER by eyear ASC
+        """,
+            conn,
+            params=(station, offset, offset),
+            index_col="eyear",
+        )
     df = df[df["total"] > 0]
     return df
 
@@ -183,4 +183,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

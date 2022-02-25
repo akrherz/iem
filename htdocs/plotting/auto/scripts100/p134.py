@@ -2,12 +2,12 @@
 import datetime
 
 import numpy as np
-from pandas.io.sql import read_sql
+import pandas as pd
 import matplotlib.colors as mpcolors
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.ticker import MaxNLocator
 from pyiem.plot import get_cmap, figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = dict(
@@ -74,75 +74,76 @@ def get_data(ctx):
     station = ctx["station"]
     if ctx["network"].endswith("CLIMATE"):
         table = "alldata_%s" % (station[:2],)
-        pgconn = get_dbconn("coop")
+        dbname = "coop"
         highcol = "high"
         lowcol = "low"
         precipcol = "precip"
         stationcol = "station"
     else:
         station = ctx["_nt"].sts[station]["iemid"]
-        pgconn = get_dbconn("iem")
+        dbname = "iem"
         highcol = "max_tmpf"
         lowcol = "min_tmpf"
         precipcol = "pday"
         table = "summary"
         stationcol = "iemid"
-    df = read_sql(
-        f"""
-    WITH data as (
-    SELECT day, extract(year from day + '%s months'::interval) as season,
-    avg(({highcol} + {lowcol})/2.)
-        OVER (ORDER by day ASC ROWS %s preceding) as avg_temp,
-    avg({highcol})
-        OVER (ORDER by day ASC ROWS %s preceding) as avg_hitemp,
-    avg({lowcol})
-        OVER (ORDER by day ASC ROWS %s preceding) as avg_lotemp,
-    sum({precipcol})
-        OVER (ORDER by day ASC ROWS %s preceding) as sum_precip
-    from {table} WHERE {stationcol} = %s and {highcol} is not null),
-    agg1 as (
-        SELECT season, day, avg_temp, avg_hitemp, avg_lotemp,
-        sum_precip,
-        row_number()
-            OVER (PARTITION by season ORDER by avg_temp ASC, day ASC)
-            as coldest_temp_rank,
-        row_number()
-            OVER (PARTITION by season ORDER by avg_hitemp ASC, day ASC)
-            as coldest_hitemp_rank,
-        row_number()
-            OVER (PARTITION by season ORDER by avg_lotemp ASC, day ASC)
-            as coldest_lotemp_rank,
-        row_number()
-            OVER (PARTITION by season ORDER by avg_temp DESC, day ASC)
-            as warmest_temp_rank,
-        row_number()
-            OVER (PARTITION by season ORDER by avg_hitemp DESC, day ASC)
-            as warmest_hitemp_rank,
-        row_number()
-            OVER (PARTITION by season ORDER by avg_lotemp DESC, day ASC)
-            as warmest_lotemp_rank,
-        row_number()
-            OVER (PARTITION by season ORDER by sum_precip DESC, day ASC)
-            as wettest_rank,
-        count(*) OVER (PARTITION by season)
-        from data)
-    SELECT season, day,
-    extract(doy from day - '%s days'::interval)::int as doy,
-    avg_temp, avg_hitemp, avg_lotemp,
-    sum_precip from agg1 where {varname}_rank = 1 and count > 200
-    """,
-        pgconn,
-        params=(
-            offset,
-            days - 1,
-            days - 1,
-            days - 1,
-            days - 1,
-            station,
-            days - 1,
-        ),
-        index_col="season",
-    )
+    with get_sqlalchemy_conn(dbname) as conn:
+        df = pd.read_sql(
+            f"""
+        WITH data as (
+        SELECT day, extract(year from day + '%s months'::interval) as season,
+        avg(({highcol} + {lowcol})/2.)
+            OVER (ORDER by day ASC ROWS %s preceding) as avg_temp,
+        avg({highcol})
+            OVER (ORDER by day ASC ROWS %s preceding) as avg_hitemp,
+        avg({lowcol})
+            OVER (ORDER by day ASC ROWS %s preceding) as avg_lotemp,
+        sum({precipcol})
+            OVER (ORDER by day ASC ROWS %s preceding) as sum_precip
+        from {table} WHERE {stationcol} = %s and {highcol} is not null),
+        agg1 as (
+            SELECT season, day, avg_temp, avg_hitemp, avg_lotemp,
+            sum_precip,
+            row_number()
+                OVER (PARTITION by season ORDER by avg_temp ASC, day ASC)
+                as coldest_temp_rank,
+            row_number()
+                OVER (PARTITION by season ORDER by avg_hitemp ASC, day ASC)
+                as coldest_hitemp_rank,
+            row_number()
+                OVER (PARTITION by season ORDER by avg_lotemp ASC, day ASC)
+                as coldest_lotemp_rank,
+            row_number()
+                OVER (PARTITION by season ORDER by avg_temp DESC, day ASC)
+                as warmest_temp_rank,
+            row_number()
+                OVER (PARTITION by season ORDER by avg_hitemp DESC, day ASC)
+                as warmest_hitemp_rank,
+            row_number()
+                OVER (PARTITION by season ORDER by avg_lotemp DESC, day ASC)
+                as warmest_lotemp_rank,
+            row_number()
+                OVER (PARTITION by season ORDER by sum_precip DESC, day ASC)
+                as wettest_rank,
+            count(*) OVER (PARTITION by season)
+            from data)
+        SELECT season, day,
+        extract(doy from day - '%s days'::interval)::int as doy,
+        avg_temp, avg_hitemp, avg_lotemp,
+        sum_precip from agg1 where {varname}_rank = 1 and count > 200
+        """,
+            conn,
+            params=(
+                offset,
+                days - 1,
+                days - 1,
+                days - 1,
+                days - 1,
+                station,
+                days - 1,
+            ),
+            index_col="season",
+        )
     if varname.startswith("coldest"):
         df.loc[df["doy"] < 183, "doy"] += 365.0
     return df

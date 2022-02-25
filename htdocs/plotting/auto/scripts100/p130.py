@@ -3,10 +3,9 @@ import calendar
 
 import numpy as np
 import pandas as pd
-from pandas.io.sql import read_sql
 from pyiem.plot.use_agg import plt
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 
@@ -36,18 +35,17 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"].upper()
-    table = "alldata_%s" % (station[:2],)
     # Load all available data
-    df = read_sql(
-        f"SELECT year, month, high, low, snowd from {table} WHERE "
-        "station = %s and snowd is not null",
-        pgconn,
-        params=(station,),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"SELECT year, month, high, low, snowd from alldata_{station[:2]} "
+            "WHERE station = %s and snowd is not null",
+            conn,
+            params=(station,),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No data found.")
 
@@ -62,8 +60,13 @@ def plotter(fdict):
     months = [x for x in monthsall if x > 6]
     months2 = [x for x in monthsall if x < 7]
     months.extend(months2)
+    title = (
+        f"{ctx['_nt'].sts[station]['name']} [{station}]\n"
+        "Daily Temp Distributions by Month by Snow Cover"
+        f"[{df['year'].min()}-{df['year'].min()}]"
+    )
 
-    fig = figure(apctx=ctx)
+    fig = figure(apctx=ctx, title=title)
     ax = [
         fig.add_axes([0.12, 0.56, 0.83, 0.32]),
         fig.add_axes([0.12, 0.1, 0.83, 0.32]),
@@ -132,16 +135,6 @@ def plotter(fdict):
         ("Without Snow Cover", "With Snow Cover"),
         ncol=2,
         loc=(0.1, -0.35),
-    )
-
-    ax[0].set_title(
-        ("%s [%s]\nDaily Temp Distributions by Month by Snow Cover[%s-%s]")
-        % (
-            ctx["_nt"].sts[station]["name"],
-            station,
-            df["year"].min(),
-            df["year"].max(),
-        )
     )
     ax[0].set_ylabel(r"Daily High Temp $^\circ$F")
     ax[1].set_ylabel(r"Daily Low Temp $^\circ$F")

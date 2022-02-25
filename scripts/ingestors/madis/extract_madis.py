@@ -1,15 +1,13 @@
 """extract_madis.py Get the latest MADIS numbers from the data file!"""
 import datetime
 import os
-import warnings
 
 import pytz
 import numpy as np
 from netCDF4 import chartostring
-from pyiem.util import get_dbconn, ncopen, convert_value
+from pyiem.util import get_dbconn, ncopen, convert_value, logger
 
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-warnings.simplefilter("ignore", UserWarning)
+LOG = logger()
 
 
 def figure(val, qcval):
@@ -45,14 +43,12 @@ def main():
     utcnow = datetime.datetime.utcnow()
     for i in range(10):
         now = utcnow - datetime.timedelta(hours=i)
-        fn = "/mesonet/data/madis/mesonet1/%s.nc" % (
-            now.strftime("%Y%m%d_%H00"),
-        )
+        fn = f"/mesonet/data/madis/mesonet1/{now:%Y%m%d_%H}00.nc"
         if os.path.isfile(fn):
             break
 
     if not os.path.isfile(fn):
-        print("extract_madis.py found no files? last: %s" % (fn,))
+        LOG.warning("Found no files? last: %s", fn)
         return
 
     with ncopen(fn) as nc:

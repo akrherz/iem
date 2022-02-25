@@ -24,12 +24,12 @@ def find_file():
         ts = datetime.datetime.utcnow() - datetime.timedelta(hours=i)
         testfn = ts.strftime("/mesonet/data/madis/mesonet1/%Y%m%d_%H00.nc")
         if os.path.isfile(testfn):
-            LOG.debug("processing %s", testfn)
+            LOG.info("processing %s", testfn)
             fn = testfn
             break
 
     if fn is None:
-        LOG.info("Found no available files to process")
+        LOG.warning("Found no available files to process")
         sys.exit()
     return fn
 
@@ -63,7 +63,7 @@ def provider2network(provider, name):
         if provider[:2] == "IA":
             return None
         return f"{provider[:2]}_RWIS"
-    LOG.info("Unsure how to convert %s into a network", provider)
+    LOG.warning("Unsure how to convert %s into a network", provider)
     return None
 
 
@@ -165,52 +165,50 @@ def main():
         if rstate4[recnum] is not np.ma.masked:
             db[this_station]["scond3"] = road_state_xref.get(rstate4[recnum])
 
-    for sid in db:
-        iem = Observation(sid, db[sid]["network"], db[sid]["ts"])
+    for sid, val in db.items():
+        iem = Observation(sid, val["network"], val["ts"])
         for colname in ["scond0", "scond1", "scond2", "scond3"]:
-            iem.data[colname] = db[sid].get(colname)
-        if db[sid]["tmpk"] is not None:
-            iem.data["tmpf"] = convert_value(db[sid]["tmpk"], "degK", "degF")
-        if db[sid]["dwpk"] is not None:
-            iem.data["dwpf"] = convert_value(db[sid]["dwpk"], "degK", "degF")
-        if db[sid]["relh"] is not None and db[sid]["relh"] is not np.ma.masked:
-            iem.data["relh"] = float(db[sid]["relh"])
-        if db[sid]["drct"] is not None:
-            iem.data["drct"] = db[sid]["drct"]
-        if db[sid]["smps"] is not None:
+            iem.data[colname] = val.get(colname)
+        if val["tmpk"] is not None:
+            iem.data["tmpf"] = convert_value(val["tmpk"], "degK", "degF")
+        if val["dwpk"] is not None:
+            iem.data["dwpf"] = convert_value(val["dwpk"], "degK", "degF")
+        if val["relh"] is not None and val["relh"] is not np.ma.masked:
+            iem.data["relh"] = float(val["relh"])
+        if val["drct"] is not None:
+            iem.data["drct"] = val["drct"]
+        if val["smps"] is not None:
             iem.data["sknt"] = convert_value(
-                db[sid]["smps"], "meter / second", "knot"
+                val["smps"], "meter / second", "knot"
             )
-        if db[sid]["gmps"] is not None:
+        if val["gmps"] is not None:
             iem.data["gust"] = convert_value(
-                db[sid]["gmps"], "meter / second", "knot"
+                val["gmps"], "meter / second", "knot"
             )
-        if db[sid]["pres"] is not None:
-            iem.data["pres"] = (float(db[sid]["pres"]) / 100.00) * 0.02952
-        if db[sid]["rtk1"] is not None:
-            iem.data["tsf0"] = convert_value(db[sid]["rtk1"], "degK", "degF")
-        if db[sid]["rtk2"] is not None:
-            iem.data["tsf1"] = convert_value(db[sid]["rtk2"], "degK", "degF")
-        if db[sid]["rtk3"] is not None:
-            iem.data["tsf2"] = convert_value(db[sid]["rtk3"], "degK", "degF")
-        if db[sid]["rtk4"] is not None:
-            iem.data["tsf3"] = convert_value(db[sid]["rtk4"], "degK", "degF")
-        if db[sid]["vsby"] is not None:
-            iem.data["vsby"] = db[sid]["vsby"]
-        if db[sid]["subk"] is not None:
-            iem.data["rwis_subf"] = convert_value(
-                db[sid]["subk"], "degK", "degF"
-            )
-        if db[sid]["pday"] is not None:
-            iem.data["pday"] = round(mm2inch(db[sid]["pday"]), 2)
+        if val["pres"] is not None:
+            iem.data["pres"] = (float(val["pres"]) / 100.00) * 0.02952
+        if val["rtk1"] is not None:
+            iem.data["tsf0"] = convert_value(val["rtk1"], "degK", "degF")
+        if val["rtk2"] is not None:
+            iem.data["tsf1"] = convert_value(val["rtk2"], "degK", "degF")
+        if val["rtk3"] is not None:
+            iem.data["tsf2"] = convert_value(val["rtk3"], "degK", "degF")
+        if val["rtk4"] is not None:
+            iem.data["tsf3"] = convert_value(val["rtk4"], "degK", "degF")
+        if val["vsby"] is not None:
+            iem.data["vsby"] = val["vsby"]
+        if val["subk"] is not None:
+            iem.data["rwis_subf"] = convert_value(val["subk"], "degK", "degF")
+        if val["pday"] is not None:
+            iem.data["pday"] = round(mm2inch(val["pday"]), 2)
         if not iem.save(icursor):
-            LOG.info(
+            LOG.warning(
                 "MADIS Extract: %s found new station: %s network: %s" "",
                 fn.split("/")[-1],
                 sid,
-                db[sid]["network"],
+                val["network"],
             )
-            subprocess.call("python sync_stations.py %s" % (fn,), shell=True)
+            subprocess.call(f"python sync_stations.py {fn}", shell=True)
             os.chdir("../../dbutil")
             subprocess.call("sh SYNC_STATIONS.sh", shell=True)
             os.chdir("../ingestors/madis")

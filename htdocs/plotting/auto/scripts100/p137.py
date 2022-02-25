@@ -3,10 +3,9 @@ import datetime
 
 import matplotlib.dates as mdates
 import pandas as pd
-from pandas.io.sql import read_sql
 from scipy import stats
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"spring": "Spring Season", "fall": "Fall Season"}
@@ -58,54 +57,53 @@ def plotter(fdict):
     station = ctx["station"]
     year = ctx["year"]
     season = ctx["season"]
-    table = "alldata_%s" % (station[:2],)
 
-    pgconn = get_dbconn("coop")
+    with get_sqlalchemy_conn("coop") as conn:
+        # Have to do a redundant query to get the running values
+        obs = pd.read_sql(
+            f"""
+        WITH trail as (
+            SELECT day, year,
+            avg((high+low)/2.) OVER (ORDER by day ASC ROWS 91 PRECEDING)
+            as avgt from alldata_{station[:2]} WHERE station = %s)
 
-    # Have to do a redundant query to get the running values
-    obs = read_sql(
-        f"""
-    WITH trail as (
-        SELECT day, year,
-        avg((high+low)/2.) OVER (ORDER by day ASC ROWS 91 PRECEDING) as avgt
-        from {table} WHERE station = %s)
-
-    SELECT day, avgt from trail WHERE year between %s and %s ORDER by day ASC
-    """,
-        pgconn,
-        params=(station, year, year + 2),
-        index_col="day",
-    )
+        SELECT day, avgt from trail WHERE year between %s and %s
+        ORDER by day ASC
+        """,
+            conn,
+            params=(station, year, year + 2),
+            index_col="day",
+        )
     if obs.empty:
         raise NoDataFound("No Data Found.")
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        WITH trail as (
+            SELECT day, year,
+            avg((high+low)/2.) OVER (ORDER by day ASC ROWS 91 PRECEDING)
+            as avgt from alldata_{station[:2]} WHERE station = %s),
+        extremes as (
+            SELECT day, year, avgt,
+            rank() OVER (PARTITION by year ORDER by avgt ASC) as minrank,
+            rank() OVER (PARTITION by year ORDER by avgt DESC) as maxrank
+            from trail),
+        yearmax as (
+            SELECT year, min(day) as summer_end, min(avgt) as summer
+            from extremes where maxrank = 1 GROUP by year),
+        yearmin as (
+            SELECT year, min(day) as winter_end, min(avgt) as winter
+            from extremes where minrank = 1 GROUP by year)
 
-    df = read_sql(
-        f"""
-    WITH trail as (
-        SELECT day, year,
-        avg((high+low)/2.) OVER (ORDER by day ASC ROWS 91 PRECEDING) as avgt
-        from {table} WHERE station = %s),
-    extremes as (
-        SELECT day, year, avgt,
-        rank() OVER (PARTITION by year ORDER by avgt ASC) as minrank,
-        rank() OVER (PARTITION by year ORDER by avgt DESC) as maxrank
-        from trail),
-    yearmax as (
-        SELECT year, min(day) as summer_end, min(avgt) as summer
-        from extremes where maxrank = 1 GROUP by year),
-    yearmin as (
-        SELECT year, min(day) as winter_end, min(avgt) as winter
-        from extremes where minrank = 1 GROUP by year)
-
-    SELECT x.year, winter_end, winter, summer_end, summer,
-    extract(doy from winter_end)::int as winter_end_doy,
-    extract(doy from summer_end)::int as summer_end_doy
-    from yearmax x JOIN yearmin n on (x.year = n.year) ORDER by x.year ASC
-    """,
-        pgconn,
-        params=(station,),
-        index_col="year",
-    )
+        SELECT x.year, winter_end, winter, summer_end, summer,
+        extract(doy from winter_end)::int as winter_end_doy,
+        extract(doy from summer_end)::int as summer_end_doy
+        from yearmax x JOIN yearmin n on (x.year = n.year) ORDER by x.year ASC
+        """,
+            conn,
+            params=(station,),
+            index_col="year",
+        )
     # Throw out spring of the first year
     for col in ["winter", "winter_end_doy", "winter_end"]:
         df.at[df.index.min(), col] = None
@@ -204,7 +202,7 @@ def plotter(fdict):
         0.02,
         0.02,
         r"$\frac{\Delta days}{decade} = %.2f,R^2=%.2f, avg = %s$"
-        % (slp * 10.0, r ** 2, d),
+        % (slp * 10.0, r**2, d),
         va="bottom",
         transform=ax[1].transAxes,
     )
@@ -223,7 +221,7 @@ def plotter(fdict):
         0.02,
         0.02,
         r"$\frac{\Delta days}{decade} = %.2f,R^2=%.2f, avg = %.1fd$"
-        % (slp * 10.0, r ** 2, avgv),
+        % (slp * 10.0, r**2, avgv),
         va="bottom",
         transform=ax[2].transAxes,
     )

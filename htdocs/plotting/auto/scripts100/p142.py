@@ -3,12 +3,12 @@ import datetime
 import sys
 
 import requests
-from pandas.io.sql import read_sql
+import pandas as pd
 import matplotlib.dates as mdates
 from matplotlib.patches import Rectangle
 from pyiem.plot import figure_axes
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 UNITS = {"precip": "inch", "avgt": "F", "high": "F", "low": "F"}
@@ -103,7 +103,7 @@ def underlay_usdm(axis, sts, ets, lon, lat):
     )
     legend = plt.legend(
         rects,
-        ["D%s" % (cat,) for cat in range(5)],
+        [f"D{cat}" for cat in range(5)],
         ncol=5,
         fontsize=11,
         loc=(0.3, 1.01),
@@ -142,100 +142,101 @@ def plotter(fdict):
     how = ctx["how"]
     maxdays = max([p1, p2, p3])
 
-    pgconn = get_dbconn("coop")
-
-    table = "alldata_%s" % (station[:2],)
-    df = read_sql(
-        f"""
-    -- Get all period averages
-    with avgs as (
-        SELECT day, sday,
-        count(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as counts,
-        avg(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as p1_high,
-        avg(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as p2_high,
-        avg(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as p3_high,
-        avg(low) OVER (ORDER by day ASC ROWS %s PRECEDING) as p1_low,
-        avg(low) OVER (ORDER by day ASC ROWS %s PRECEDING) as p2_low,
-        avg(low) OVER (ORDER by day ASC ROWS %s PRECEDING) as p3_low,
-        avg((high+low)/2.)
-            OVER (ORDER by day ASC ROWS %s PRECEDING) as p1_avgt,
-        avg((high+low)/2.)
-            OVER (ORDER by day ASC ROWS %s PRECEDING) as p2_avgt,
-        avg((high+low)/2.)
-            OVER (ORDER by day ASC ROWS %s PRECEDING) as p3_avgt,
-        sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as p1_precip,
-        sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as p2_precip,
-        sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as p3_precip
-        from {table} WHERE station = %s
-    ),
-    -- Get sday composites
-    sdays as (
-        SELECT sday,
-        avg(p1_high) as p1_high_avg, stddev(p1_high) as p1_high_stddev,
-        avg(p2_high) as p2_high_avg, stddev(p2_high) as p2_high_stddev,
-        avg(p3_high) as p3_high_avg, stddev(p3_high) as p3_high_stddev,
-        avg(p1_low) as p1_low_avg, stddev(p1_low) as p1_low_stddev,
-        avg(p2_low) as p2_low_avg, stddev(p2_low) as p2_low_stddev,
-        avg(p3_low) as p3_low_avg, stddev(p3_low) as p3_low_stddev,
-        avg(p1_avgt) as p1_avgt_avg, stddev(p1_avgt) as p1_avgt_stddev,
-        avg(p2_avgt) as p2_avgt_avg, stddev(p2_avgt) as p2_avgt_stddev,
-        avg(p3_avgt) as p3_avgt_avg, stddev(p3_avgt) as p3_avgt_stddev,
-        avg(p1_precip) as p1_precip_avg, stddev(p1_precip) as p1_precip_stddev,
-        avg(p2_precip) as p2_precip_avg, stddev(p2_precip) as p2_precip_stddev,
-        avg(p3_precip) as p3_precip_avg, stddev(p3_precip) as p3_precip_stddev
-        from avgs WHERE counts = %s GROUP by sday
-    )
-    -- Now merge to get obs
-        SELECT day, s.sday,
-        p1_high - p1_high_avg as p1_high_diff,
-        p2_high - p2_high_avg as p2_high_diff,
-        p3_high - p3_high_avg as p3_high_diff,
-        p1_low - p1_low_avg as p1_low_diff,
-        p2_low - p2_low_avg as p2_low_diff,
-        p3_low - p3_low_avg as p3_low_diff,
-        p1_avgt - p1_avgt_avg as p1_avgt_diff,
-        p2_avgt - p2_avgt_avg as p2_avgt_diff,
-        p3_avgt - p3_avgt_avg as p3_avgt_diff,
-        p1_precip - p1_precip_avg as p1_precip_diff,
-        p2_precip - p2_precip_avg as p2_precip_diff,
-        p3_precip - p3_precip_avg as p3_precip_diff,
-        (p1_high - p1_high_avg) / p1_high_stddev as p1_high_sigma,
-        (p2_high - p2_high_avg) / p2_high_stddev as p2_high_sigma,
-        (p3_high - p3_high_avg) / p3_high_stddev as p3_high_sigma,
-        (p1_low - p1_low_avg) / p1_low_stddev as p1_low_sigma,
-        (p2_low - p2_low_avg) / p2_low_stddev as p2_low_sigma,
-        (p3_low - p3_low_avg) / p3_low_stddev as p3_low_sigma,
-        (p1_avgt - p1_avgt_avg) / p1_avgt_stddev as p1_avgt_sigma,
-        (p2_avgt - p2_avgt_avg) / p2_avgt_stddev as p2_avgt_sigma,
-        (p3_avgt - p3_avgt_avg) / p3_avgt_stddev as p3_avgt_sigma,
-        (p1_precip - p1_precip_avg) / p1_precip_stddev as p1_precip_sigma,
-        (p2_precip - p2_precip_avg) / p2_precip_stddev as p2_precip_sigma,
-        (p3_precip - p3_precip_avg) / p3_precip_stddev as p3_precip_sigma
-        from avgs a JOIN sdays s on (a.sday = s.sday) WHERE
-        day >= %s and day <= %s ORDER by day ASC
-    """,
-        pgconn,
-        params=(
-            maxdays - 1,
-            p1 - 1,
-            p2 - 1,
-            p3 - 1,
-            p1 - 1,
-            p2 - 1,
-            p3 - 1,
-            p1 - 1,
-            p2 - 1,
-            p3 - 1,
-            p1 - 1,
-            p2 - 1,
-            p3 - 1,
-            station,
-            maxdays,
-            sts,
-            ets,
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        -- Get all period averages
+        with avgs as (
+            SELECT day, sday,
+            count(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as counts,
+            avg(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as p1_high,
+            avg(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as p2_high,
+            avg(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as p3_high,
+            avg(low) OVER (ORDER by day ASC ROWS %s PRECEDING) as p1_low,
+            avg(low) OVER (ORDER by day ASC ROWS %s PRECEDING) as p2_low,
+            avg(low) OVER (ORDER by day ASC ROWS %s PRECEDING) as p3_low,
+            avg((high+low)/2.)
+                OVER (ORDER by day ASC ROWS %s PRECEDING) as p1_avgt,
+            avg((high+low)/2.)
+                OVER (ORDER by day ASC ROWS %s PRECEDING) as p2_avgt,
+            avg((high+low)/2.)
+                OVER (ORDER by day ASC ROWS %s PRECEDING) as p3_avgt,
+            sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as p1_precip,
+            sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as p2_precip,
+            sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as p3_precip
+            from alldata_{station[:2]} WHERE station = %s
         ),
-        index_col="day",
-    )
+        -- Get sday composites
+        sdays as (
+            SELECT sday,
+            avg(p1_high) as p1_high_avg, stddev(p1_high) as p1_high_stddev,
+            avg(p2_high) as p2_high_avg, stddev(p2_high) as p2_high_stddev,
+            avg(p3_high) as p3_high_avg, stddev(p3_high) as p3_high_stddev,
+            avg(p1_low) as p1_low_avg, stddev(p1_low) as p1_low_stddev,
+            avg(p2_low) as p2_low_avg, stddev(p2_low) as p2_low_stddev,
+            avg(p3_low) as p3_low_avg, stddev(p3_low) as p3_low_stddev,
+            avg(p1_avgt) as p1_avgt_avg, stddev(p1_avgt) as p1_avgt_stddev,
+            avg(p2_avgt) as p2_avgt_avg, stddev(p2_avgt) as p2_avgt_stddev,
+            avg(p3_avgt) as p3_avgt_avg, stddev(p3_avgt) as p3_avgt_stddev,
+            avg(p1_precip) as p1_precip_avg,
+            stddev(p1_precip) as p1_precip_stddev,
+            avg(p2_precip) as p2_precip_avg,
+            stddev(p2_precip) as p2_precip_stddev,
+            avg(p3_precip) as p3_precip_avg,
+            stddev(p3_precip) as p3_precip_stddev
+            from avgs WHERE counts = %s GROUP by sday
+        )
+        -- Now merge to get obs
+            SELECT day, s.sday,
+            p1_high - p1_high_avg as p1_high_diff,
+            p2_high - p2_high_avg as p2_high_diff,
+            p3_high - p3_high_avg as p3_high_diff,
+            p1_low - p1_low_avg as p1_low_diff,
+            p2_low - p2_low_avg as p2_low_diff,
+            p3_low - p3_low_avg as p3_low_diff,
+            p1_avgt - p1_avgt_avg as p1_avgt_diff,
+            p2_avgt - p2_avgt_avg as p2_avgt_diff,
+            p3_avgt - p3_avgt_avg as p3_avgt_diff,
+            p1_precip - p1_precip_avg as p1_precip_diff,
+            p2_precip - p2_precip_avg as p2_precip_diff,
+            p3_precip - p3_precip_avg as p3_precip_diff,
+            (p1_high - p1_high_avg) / p1_high_stddev as p1_high_sigma,
+            (p2_high - p2_high_avg) / p2_high_stddev as p2_high_sigma,
+            (p3_high - p3_high_avg) / p3_high_stddev as p3_high_sigma,
+            (p1_low - p1_low_avg) / p1_low_stddev as p1_low_sigma,
+            (p2_low - p2_low_avg) / p2_low_stddev as p2_low_sigma,
+            (p3_low - p3_low_avg) / p3_low_stddev as p3_low_sigma,
+            (p1_avgt - p1_avgt_avg) / p1_avgt_stddev as p1_avgt_sigma,
+            (p2_avgt - p2_avgt_avg) / p2_avgt_stddev as p2_avgt_sigma,
+            (p3_avgt - p3_avgt_avg) / p3_avgt_stddev as p3_avgt_sigma,
+            (p1_precip - p1_precip_avg) / p1_precip_stddev as p1_precip_sigma,
+            (p2_precip - p2_precip_avg) / p2_precip_stddev as p2_precip_sigma,
+            (p3_precip - p3_precip_avg) / p3_precip_stddev as p3_precip_sigma
+            from avgs a JOIN sdays s on (a.sday = s.sday) WHERE
+            day >= %s and day <= %s ORDER by day ASC
+        """,
+            conn,
+            params=(
+                maxdays - 1,
+                p1 - 1,
+                p2 - 1,
+                p3 - 1,
+                p1 - 1,
+                p2 - 1,
+                p3 - 1,
+                p1 - 1,
+                p2 - 1,
+                p3 - 1,
+                p1 - 1,
+                p2 - 1,
+                p3 - 1,
+                station,
+                maxdays,
+                sts,
+                ets,
+            ),
+            index_col="day",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
 

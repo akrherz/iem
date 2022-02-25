@@ -4,10 +4,10 @@ from datetime import timezone
 
 # third party
 import pandas as pd
-from geopandas import read_postgis
+import geopandas as gpd
 from pyiem.nws import vtec
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import Z_OVERLAY2, Z_OVERLAY2_LABEL, LATLON
 import pytz
@@ -104,7 +104,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("postgis")
     ctx = get_autoplot_context(fdict, get_description())
     utcvalid = ctx.get("valid")
     wfo = ctx["wfo"]
@@ -113,28 +112,51 @@ def plotter(fdict):
     s1 = ctx["significancev"][:1]
     etn = int(ctx["etn"])
     year = int(ctx["year"])
-
-    df = read_postgis(
-        f"""
-        SELECT w.ugc, simple_geom, u.name,
-        issue at time zone 'UTC' as issue,
-        expire at time zone 'UTC' as expire,
-        init_expire at time zone 'UTC' as init_expire,
-        1 as val,
-        status, is_emergency, is_pds, w.wfo
-        from warnings_{year} w JOIN ugcs u on (w.gid = u.gid)
-        WHERE w.wfo = %s and eventid = %s and significance = %s and
-        phenomena = %s ORDER by issue ASC
-    """,
-        pgconn,
-        params=(wfo[-3:], etn, s1, p1),
-        index_col="ugc",
-        geom_col="simple_geom",
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = gpd.read_postgis(
+            f"""
+            SELECT w.ugc, simple_geom, u.name,
+            issue at time zone 'UTC' as issue,
+            expire at time zone 'UTC' as expire,
+            init_expire at time zone 'UTC' as init_expire,
+            1 as val,
+            status, is_emergency, is_pds, w.wfo
+            from warnings_{year} w JOIN ugcs u on (w.gid = u.gid)
+            WHERE w.wfo = %s and eventid = %s and significance = %s and
+            phenomena = %s ORDER by issue ASC
+        """,
+            conn,
+            params=(wfo[-3:], etn, s1, p1),
+            index_col="ugc",
+            geom_col="simple_geom",
+        )
     if df.empty:
         if year == 2022:
             year = 2021
-            df = read_postgis(
+            with get_sqlalchemy_conn("postgis") as conn:
+                df = gpd.read_postgis(
+                    f"""
+                    SELECT w.ugc, simple_geom, u.name,
+                    issue at time zone 'UTC' as issue,
+                    expire at time zone 'UTC' as expire,
+                    init_expire at time zone 'UTC' as init_expire,
+                    1 as val,
+                    status, is_emergency, is_pds, w.wfo
+                    from warnings_{year} w JOIN ugcs u on (w.gid = u.gid)
+                    WHERE w.wfo = %s and eventid = %s and significance = %s and
+                    phenomena = %s ORDER by issue ASC
+                """,
+                    conn,
+                    params=(wfo[-3:], etn, s1, p1),
+                    index_col="ugc",
+                    geom_col="simple_geom",
+                )
+        if df.empty:
+            raise NoDataFound("VTEC Event was not found, sorry.")
+    if ctx["opt"] == "expand":
+        # Get all phenomena coincident with the above alert
+        with get_sqlalchemy_conn("postgis") as conn:
+            df = gpd.read_postgis(
                 f"""
                 SELECT w.ugc, simple_geom, u.name,
                 issue at time zone 'UTC' as issue,
@@ -143,99 +165,82 @@ def plotter(fdict):
                 1 as val,
                 status, is_emergency, is_pds, w.wfo
                 from warnings_{year} w JOIN ugcs u on (w.gid = u.gid)
-                WHERE w.wfo = %s and eventid = %s and significance = %s and
-                phenomena = %s ORDER by issue ASC
+                WHERE significance = %s and
+                phenomena = %s and issue < %s and expire > %s
+                ORDER by issue ASC
             """,
-                pgconn,
-                params=(wfo[-3:], etn, s1, p1),
+                conn,
+                params=(s1, p1, df["expire"].min(), df["issue"].min()),
                 index_col="ugc",
                 geom_col="simple_geom",
             )
-        if df.empty:
-            raise NoDataFound("VTEC Event was not found, sorry.")
-    if ctx["opt"] == "expand":
-        # Get all phenomena coincident with the above alert
-        df = read_postgis(
-            f"""
-            SELECT w.ugc, simple_geom, u.name,
-            issue at time zone 'UTC' as issue,
-            expire at time zone 'UTC' as expire,
-            init_expire at time zone 'UTC' as init_expire,
-            1 as val,
-            status, is_emergency, is_pds, w.wfo
-            from warnings_{year} w JOIN ugcs u on (w.gid = u.gid)
-            WHERE significance = %s and
-            phenomena = %s and issue < %s and expire > %s
-            ORDER by issue ASC
-        """,
-            pgconn,
-            params=(s1, p1, df["expire"].min(), df["issue"].min()),
-            index_col="ugc",
-            geom_col="simple_geom",
-        )
     elif ctx["opt"] == "etn":
         # Get all phenomena coincident with the above alert
-        df = read_postgis(
-            f"""
-            SELECT w.ugc, simple_geom, u.name,
-            issue at time zone 'UTC' as issue,
-            expire at time zone 'UTC' as expire,
-            init_expire at time zone 'UTC' as init_expire,
-            1 as val,
-            status, is_emergency, is_pds, w.wfo
-            from warnings_{year} w JOIN ugcs u on (w.gid = u.gid)
-            WHERE significance = %s and
-            phenomena = %s and eventid = %s
-            ORDER by issue ASC
-        """,
-            pgconn,
-            params=(s1, p1, etn),
-            index_col="ugc",
-            geom_col="simple_geom",
-        )
+        with get_sqlalchemy_conn("postgis") as conn:
+            df = gpd.read_postgis(
+                f"""
+                SELECT w.ugc, simple_geom, u.name,
+                issue at time zone 'UTC' as issue,
+                expire at time zone 'UTC' as expire,
+                init_expire at time zone 'UTC' as init_expire,
+                1 as val,
+                status, is_emergency, is_pds, w.wfo
+                from warnings_{year} w JOIN ugcs u on (w.gid = u.gid)
+                WHERE significance = %s and
+                phenomena = %s and eventid = %s
+                ORDER by issue ASC
+            """,
+                conn,
+                params=(s1, p1, etn),
+                index_col="ugc",
+                geom_col="simple_geom",
+            )
 
-    sbwdf = read_postgis(
-        f"""
-        SELECT status, geom, wfo,
-        polygon_begin at time zone 'UTC' as polygon_begin,
-        polygon_end at time zone 'UTC' as polygon_end from sbw_{year}
-        WHERE wfo = %s and eventid = %s and significance = %s and
-        phenomena = %s ORDER by polygon_begin ASC
-    """,
-        pgconn,
-        params=(wfo[-3:], etn, s1, p1),
-        geom_col="geom",
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        sbwdf = gpd.read_postgis(
+            f"""
+            SELECT status, geom, wfo,
+            polygon_begin at time zone 'UTC' as polygon_begin,
+            polygon_end at time zone 'UTC' as polygon_end from sbw_{year}
+            WHERE wfo = %s and eventid = %s and significance = %s and
+            phenomena = %s ORDER by polygon_begin ASC
+        """,
+            conn,
+            params=(wfo[-3:], etn, s1, p1),
+            geom_col="geom",
+        )
     if not sbwdf.empty and ctx["opt"] == "expand":
         # Get all phenomena coincident with the above alert
-        sbwdf = read_postgis(
-            f"""
-            SELECT status, geom, wfo,
-            polygon_begin at time zone 'UTC' as polygon_begin,
-            polygon_end at time zone 'UTC' as polygon_end from sbw_{year}
-            WHERE status = 'NEW' and significance = %s and
-            phenomena = %s and issue < %s and expire > %s
-            ORDER by polygon_begin ASC
-        """,
-            pgconn,
-            params=(s1, p1, df["expire"].min(), df["issue"].min()),
-            geom_col="geom",
-        )
+        with get_sqlalchemy_conn("postgis") as conn:
+            sbwdf = gpd.read_postgis(
+                f"""
+                SELECT status, geom, wfo,
+                polygon_begin at time zone 'UTC' as polygon_begin,
+                polygon_end at time zone 'UTC' as polygon_end from sbw_{year}
+                WHERE status = 'NEW' and significance = %s and
+                phenomena = %s and issue < %s and expire > %s
+                ORDER by polygon_begin ASC
+            """,
+                conn,
+                params=(s1, p1, df["expire"].min(), df["issue"].min()),
+                geom_col="geom",
+            )
     elif not sbwdf.empty and ctx["opt"] == "etn":
         # Get all phenomena coincident with the above alert
-        sbwdf = read_postgis(
-            f"""
-            SELECT status, geom, wfo,
-            polygon_begin at time zone 'UTC' as polygon_begin,
-            polygon_end at time zone 'UTC' as polygon_end from sbw_{year}
-            WHERE status = 'NEW' and significance = %s and
-            phenomena = %s and eventid = %s
-            ORDER by polygon_begin ASC
-        """,
-            pgconn,
-            params=(s1, p1, etn),
-            geom_col="geom",
-        )
+        with get_sqlalchemy_conn("postgis") as conn:
+            sbwdf = gpd.read_postgis(
+                f"""
+                SELECT status, geom, wfo,
+                polygon_begin at time zone 'UTC' as polygon_begin,
+                polygon_end at time zone 'UTC' as polygon_end from sbw_{year}
+                WHERE status = 'NEW' and significance = %s and
+                phenomena = %s and eventid = %s
+                ORDER by polygon_begin ASC
+            """,
+                conn,
+                params=(s1, p1, etn),
+                geom_col="geom",
+            )
 
     if utcvalid is None:
         utcvalid = df["issue"].max()

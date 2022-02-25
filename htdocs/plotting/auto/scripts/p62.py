@@ -3,11 +3,11 @@ import datetime
 import copy
 
 import numpy as np
+import pandas as pd
 import matplotlib.colors as mpcolors
-from pandas.io.sql import read_sql
 from pyiem.plot import figure
 from pyiem.plot.colormaps import nwssnow
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 LEVELS = [0.1, 1, 2, 3, 4, 6, 8, 12, 18, 24, 30, 36]
@@ -53,7 +53,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     ab = ctx["_nt"].sts[station]["archive_begin"]
@@ -67,18 +66,19 @@ def plotter(fdict):
     table = "alldata_%s" % (station[:2],)
     eyear = datetime.datetime.now().year
     obs = np.ma.ones((eyear - syear + 1, 183), "f") * -1
-
-    df = read_sql(
-        f"""
-        SELECT year, extract(doy from day) as doy, snowd, day,
-        case when month < 6 then year - 1 else year end as winter_year
-        from {table} WHERE station = %s and
-        month in (11, 12, 1, 2, 3, 4) and snowd >= 0 and day between %s and %s
-    """,
-        pgconn,
-        params=(station, sts, ets),
-        index_col="day",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+            SELECT year, extract(doy from day) as doy, snowd, day,
+            case when month < 6 then year - 1 else year end as winter_year
+            from {table} WHERE station = %s and
+            month in (11, 12, 1, 2, 3, 4) and snowd >= 0 and
+            day between %s and %s
+        """,
+            conn,
+            params=(station, sts, ets),
+            index_col="day",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     minyear = df["year"].min()
@@ -124,4 +124,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

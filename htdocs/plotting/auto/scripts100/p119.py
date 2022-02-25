@@ -1,11 +1,10 @@
 """Frequency of first fall low"""
 import datetime
 
-from pandas.io.sql import read_sql
 import pandas as pd
 import matplotlib.dates as mdates
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"low": "Low Temperature", "high": "High Temperature"}
@@ -45,12 +44,11 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     thresholds = [ctx["t1"], ctx["t2"], ctx["t3"], ctx["t4"]]
 
-    table = "alldata_%s" % (station[:2],)
+    table = f"alldata_{station[:2]}"
     # Load up dict of dates..
 
     sz = 214 + 304
@@ -66,28 +64,29 @@ def plotter(fdict):
     )
     df.index.name = "doy"
 
-    for base in thresholds:
-        # Find first dates by winter season
-        df2 = read_sql(
-            f"""
-            select
-            case when month > 7 then year + 1 else year end as winter,
-            min(case when {ctx["var"]} <= %s
-            then day else '2099-01-01'::date end) as mindate from {table}
-            WHERE month not in (6, 7) and station = %s and year < %s
-            GROUP by winter
-        """,
-            pgconn,
-            params=(base, station, datetime.date.today().year),
-            index_col=None,
-        )
-        for _, row in df2.iterrows():
-            if row["mindate"].year == 2099:
-                continue
-            jan1 = datetime.date(row["winter"] - 1, 1, 1)
-            doy = (row["mindate"] - jan1).days
-            df.loc[doy:sz, "%scnts" % (base,)] += 1
-        df[f"{base}freq"] = df[f"{base}cnts"] / len(df2.index) * 100.0
+    with get_sqlalchemy_conn("coop") as conn:
+        for base in thresholds:
+            # Find first dates by winter season
+            df2 = pd.read_sql(
+                f"""
+                select
+                case when month > 7 then year + 1 else year end as winter,
+                min(case when {ctx["var"]} <= %s
+                then day else '2099-01-01'::date end) as mindate from {table}
+                WHERE month not in (6, 7) and station = %s and year < %s
+                GROUP by winter
+            """,
+                conn,
+                params=(base, station, datetime.date.today().year),
+                index_col=None,
+            )
+            for _, row in df2.iterrows():
+                if row["mindate"].year == 2099:
+                    continue
+                jan1 = datetime.date(row["winter"] - 1, 1, 1)
+                doy = (row["mindate"] - jan1).days
+                df.loc[doy:sz, f"{base}cnts"] += 1
+            df[f"{base}freq"] = df[f"{base}cnts"] / len(df2.index) * 100.0
 
     bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:

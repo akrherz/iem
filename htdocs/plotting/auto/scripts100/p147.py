@@ -1,18 +1,16 @@
 """Two station temperature frequency"""
 import calendar
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
-PDICT = dict(
-    [
-        ("precip", "Precipitation"),
-        ("avgt", "Average Temperature"),
-        ("high", "High Temperature"),
-        ("low", "Low Temperature"),
-    ]
-)
+PDICT = {
+    "precip": "Precipitation",
+    "avgt": "Average Temperature",
+    "high": "High Temperature",
+    "low": "Low Temperature",
+}
 
 
 def get_description():
@@ -64,30 +62,30 @@ def plotter(fdict):
     station2 = ctx["station2"]
     mag = ctx["mag"]
     pvar = ctx["pvar"]
-    pgconn = get_dbconn("coop")
 
-    table1 = "alldata_%s" % (station1[:2],)
-    table2 = "alldata_%s" % (station2[:2],)
-    df = read_sql(
-        f"""
-    WITH obs1 as (
-        SELECT day, high, low, precip, (high+low)/2. as avgt from {table1}
-        WHERE station = %s),
-    obs2 as (
-        SELECT day, high, low, precip, (high+low)/2. as avgt from {table2}
-        WHERE station = %s)
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        WITH obs1 as (
+            SELECT day, high, low, precip, (high+low)/2. as avgt from
+            alldata_{station1[:2]} WHERE station = %s),
+        obs2 as (
+            SELECT day, high, low, precip, (high+low)/2. as avgt from
+            alldata_{station2[:2]} WHERE station = %s)
 
-    SELECT extract(doy from o.day) as doy, count(*),
-    sum(case when o.high >= (t.high + %s) then 1 else 0 end) as high_hits,
-    sum(case when o.low >= (t.low + %s) then 1 else 0 end) as low_hits,
- sum(case when o.precip >= (t.precip + %s) then 1 else 0 end) as precip_hits,
-    sum(case when o.avgt >= (t.avgt + %s) then 1 else 0 end) as avgt_hits
-    from obs1 o JOIN obs2 t on (o.day = t.day) GROUP by doy ORDER by doy ASC
-    """,
-        pgconn,
-        params=(station1, station2, mag, mag, mag, mag),
-        index_col="doy",
-    )
+        SELECT extract(doy from o.day) as doy, count(*),
+        sum(case when o.high >= (t.high + %s) then 1 else 0 end) as high_hits,
+        sum(case when o.low >= (t.low + %s) then 1 else 0 end) as low_hits,
+        sum(case when o.precip >= (t.precip + %s) then 1 else 0 end)
+        as precip_hits,
+        sum(case when o.avgt >= (t.avgt + %s) then 1 else 0 end) as avgt_hits
+        from obs1 o JOIN obs2 t on (o.day = t.day) GROUP by doy
+        ORDER by doy ASC
+        """,
+            conn,
+            params=(station1, station2, mag, mag, mag, mag),
+            index_col="doy",
+        )
     for _v in ["high", "low", "avgt", "precip"]:
         df["%s_freq[%%]" % (_v,)] = df["%s_hits" % (_v,)] / df["count"] * 100.0
 

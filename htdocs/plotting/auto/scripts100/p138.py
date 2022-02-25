@@ -1,14 +1,14 @@
 """monthly wind speeds"""
 import calendar
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from metpy.units import units as munits
 from metpy.calc import wind_components, wind_direction
 from pyiem.plot import figure_axes
 from pyiem.util import (
     drct2text,
     get_autoplot_context,
-    get_dbconn,
+    get_sqlalchemy_conn,
     convert_value,
 )
 from pyiem.exceptions import NoDataFound
@@ -47,22 +47,22 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["zstation"]
     units = ctx["units"]
-    df = read_sql(
-        """
-        select date_trunc('hour', valid at time zone 'UTC') as ts,
-        avg(sknt) as sknt, max(drct) as drct from alldata
-        WHERE station = %s and sknt is not null and drct is not null
-        GROUP by ts
-    """,
-        pgconn,
-        params=(station,),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            """
+            select date_trunc('hour', valid at time zone 'UTC') as ts,
+            avg(sknt) as sknt, max(drct) as drct from alldata
+            WHERE station = %s and sknt is not null and drct is not null
+            GROUP by ts
+        """,
+            conn,
+            params=(station,),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     sknt = munits("knot") * df["sknt"].values
@@ -103,7 +103,7 @@ def plotter(fdict):
             bbox=dict(color="white"),
         )
         ax.text(
-            row["sped_%s" % (units,)] * 0.98,
+            row[f"sped_{units}"] * 0.98,
             mon,
             "%.1f" % (row[f"sped_{units}"],),
             ha="right",
