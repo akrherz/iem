@@ -41,7 +41,6 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
 
-    table = "alldata_%s" % (station[:2],)
     sts = ctx["_nt"].sts[station]["archive_begin"]
     if sts is None:
         raise NoDataFound("Station metadata unknown.")
@@ -51,7 +50,7 @@ def plotter(fdict):
 
     cursor.execute(
         f"""
-        SELECT sday, year, high, low, precip, day from {table}
+        SELECT sday, year, high, low, precip, day from alldata_{station[:2]}
         where station = %s and sday != '0229'
         and year >= %s ORDER by day ASC
     """,
@@ -101,7 +100,14 @@ def plotter(fdict):
             year=years,
         )
     )
-    fig = figure(apctx=ctx)
+    title = (
+        f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
+        "Daily Records Set Per Year "
+        f"{syear} sets record then accumulate ({syear + 1}-{eyear})\n"
+        "events/year value is long term average, total events / "
+        f"{(eyear - syear - 1):.0f} years"
+    )
+    fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(3, 1, sharex=True, sharey=True)
     rects = ax[0].bar(years, hyears, facecolor="b", edgecolor="b")
     for i, rect in enumerate(rects):
@@ -114,27 +120,12 @@ def plotter(fdict):
     ax[0].grid(True)
     ax[0].legend()
     ax[0].set_ylabel("Records set per year")
-    ax[0].set_title(
-        (
-            "[%s] %s\nDaily Records Set Per Year "
-            "%s sets record then accumulate (%s-%s)\n"
-            "events/year value is long term average, total events / "
-            "%.0f years"
-        )
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            syear,
-            syear + 1,
-            eyear,
-            eyear - syear - 1,
-        )
-    )
+
     rate = sum(hyears) / float(len(hyears))
     ax[0].text(
         eyear - 70,
         32,
-        "Max High Temperature, %.1f events/year" % (rate,),
+        f"Max High Temperature, {rate:.1f} events/year",
         bbox=dict(color="white"),
     )
 
@@ -176,4 +167,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

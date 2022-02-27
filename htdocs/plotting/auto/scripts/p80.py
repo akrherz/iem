@@ -89,15 +89,10 @@ def plotter(fdict):
 
     df = pd.DataFrame(rows)
     title = (
-        "[%s] %s :: %s (%s.%s)\nDistribution of Event Time Duration %s-%s"
-    ) % (
-        ugc,
-        name,
-        vtec.get_ps_string(phenomena, significance),
-        phenomena,
-        significance,
-        min(df["issue"]).strftime("%-d %b %Y"),
-        max(df["issue"]).strftime("%-d %b %Y"),
+        f"[{ugc}] {name} :: {vtec.get_ps_string(phenomena, significance)} "
+        f"({phenomena}.{significance})\n"
+        f"Distribution of Event Time Duration {df['issue'].min():%-d %b %Y}"
+        f"-{df['issue'].max():%-d %b %Y}"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 
@@ -144,4 +139,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

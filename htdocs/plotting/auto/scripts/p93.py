@@ -3,12 +3,9 @@ import datetime
 
 import numpy as np
 import pandas as pd
-from pandas.io.sql import read_sql
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
-from metpy.units import units
-from metpy.calc import heat_index, windchill, relative_humidity_from_dewpoint
 
 
 PDICT = {
@@ -138,8 +135,6 @@ def get_doylimit(ytd, varname):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos")
-
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     highlightyear = ctx["year"]
@@ -152,98 +147,76 @@ def plotter(fdict):
     tmpflimit = "and tmpf >= 50" if varname != "windchill" else "and tmpf < 50"
     if varname not in ["windchill", "heatindex"]:
         tmpflimit = ""
-
-    df = read_sql(
-        "SELECT to_char(valid, 'YYYYmmddHH24') as d, avg(tmpf)::int as tmpf, "
-        "avg(dwpf)::int as dwpf, avg(coalesce(sknt, 0)) as sknt "
-        f"from alldata WHERE station = %s {tmpflimit} "
-        "and dwpf <= tmpf and valid > %s and valid < %s and report_type = 2 "
-        f"{doylimiter} GROUP by d",
-        pgconn,
-        params=(station, sdate, edate),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            "SELECT date_trunc('hour', valid at time zone 'UTC') as d, "
+            "avg(tmpf)::int as tmpf, "
+            "avg(dwpf)::int as dwpf, avg(feel) as feel "
+            f"from alldata WHERE station = %s {tmpflimit} "
+            "and dwpf <= tmpf and valid > %s and valid < %s "
+            f"and report_type = 2 {doylimiter} GROUP by d",
+            conn,
+            params=(station, sdate, edate),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
-    df["year"] = df["d"].apply(lambda x: int(x[:4]))
+    bs = ctx["_nt"].sts[station]["archive_begin"]
+    if bs is None:
+        raise NoDataFound("Unknown station metadata.")
+    df["year"] = df["d"].dt.year
 
     df2 = df
     title2 = VDICT[varname]
     compop = np.greater_equal
     inctitle = ""
     if varname == "heatindex":
-        df["heatindex"] = (
-            heat_index(
-                df["tmpf"].values * units("degF"),
-                relative_humidity_from_dewpoint(
-                    df["tmpf"].values * units("degF"),
-                    df["dwpf"].values * units("degF"),
-                ),
-            )
-            .to(units("degF"))
-            .m
-        )
         inctitle = " [All Obs Included]"
         if inc == "no":
-            df2 = df[df["heatindex"] > df["tmpf"]]
+            df2 = df[df["feel"] > df["tmpf"]]
             inctitle = " [Only Additive]"
         else:
             df2 = df
-        maxval = int(df2["heatindex"].max() + 1)
+        maxval = int(df2["feel"].max() + 1)
         LEVELS[varname] = np.arange(80, maxval)
     elif varname == "windchill":
         compop = np.less_equal
         df["year"] = df["d"].apply(
-            lambda x: (int(x[:4]) - 1) if int(x[4:6]) < 7 else int(x[:4])
-        )
-        df["windchill"] = (
-            windchill(
-                df["tmpf"].values * units("degF"),
-                df["sknt"].values * units("knot"),
-            )
-            .to(units("degF"))
-            .m
+            lambda x: (x.year - 1) if x.month < 7 else x.year
         )
         inctitle = " [All Obs Included]"
         if inc == "no":
-            df2 = df[df["windchill"] < df["tmpf"]]
+            df2 = df[df["feel"] < df["tmpf"]]
             inctitle = " [Only Additive]"
         else:
             df2 = df
-        minval = int(df2["windchill"].min() - 1)
+        minval = int(df2["feel"].min() - 1)
         LEVELS[varname] = np.arange(minval, minval + 51)
     else:
         maxval = int(df2[varname].max() + 1)
         LEVELS[varname] = np.arange(maxval - 31, maxval)
 
-    bs = ctx["_nt"].sts[station]["archive_begin"]
-    if bs is None:
-        raise NoDataFound("Unknown station metadata.")
     minyear = df["year"].min()
     maxyear = df["year"].max()
     years = float((maxyear - minyear) + 1)
     x = []
     y = []
     y2 = []
-    title = "till %s" % (datetime.date.today().strftime("%-d %b"),)
+    title = f"till {datetime.date.today():%-d %b}"
     title = "Entire Year" if ytd == "no" else title
-    title = ("[%s] %s %s-%s\n" "%s Histogram (%s)%s") % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-        minyear,
-        maxyear,
-        title2,
-        title,
-        inctitle,
+    title = (
+        f"[{station}] {ctx['_nt'].sts[station]['name']} "
+        f"{minyear}-{maxyear}\n"
+        f"{title2} Histogram ({title}){inctitle}"
     )
     fig, ax = figure_axes(title=title, apctx=ctx)
     ax.set_position([0.06, 0.1, 0.64, 0.8])
     yloc = 1.0
     xloc = 1.13
     yrlabel = (
-        "%s" % (highlightyear,)
+        f"{highlightyear}"
         if varname != "windchill"
-        else "%s-%s" % (highlightyear, highlightyear + 1)
+        else f"{highlightyear}-{highlightyear + 1}"
     )
     ax.text(
         xloc + 0.08, yloc + 0.04, "Avg:", transform=ax.transAxes, color="b"
@@ -254,29 +227,29 @@ def plotter(fdict):
     df3 = df2[df2["year"] == highlightyear]
     for level in LEVELS[varname]:
         x.append(level)
-        y.append(len(df2[compop(df2[varname], level)]) / years)
-        y2.append(len(df3[compop(df3[varname], level)]))
+        y.append(len(df2[compop(df2["feel"], level)]) / years)
+        y2.append(len(df3[compop(df3["feel"], level)]))
         if level % 2 == 0:
-            ax.text(xloc, yloc, "%s" % (level,), transform=ax.transAxes)
+            ax.text(xloc, yloc, f"{level}", transform=ax.transAxes)
             ax.text(
                 xloc + 0.08,
                 yloc,
-                "%.1f" % (y[-1],),
+                f"{y[-1]:.1f}",
                 transform=ax.transAxes,
                 color="b",
             )
             ax.text(
                 xloc + 0.21,
                 yloc,
-                "%.0f" % (y2[-1],),
+                f"{y2[-1]:.0f}",
                 transform=ax.transAxes,
                 color="r",
             )
             yloc -= 0.04
-    ax.text(xloc, yloc, "n=%s" % (len(df2.index),), transform=ax.transAxes)
+    ax.text(xloc, yloc, f"n={len(df2.index)}", transform=ax.transAxes)
     for x0, y0, y02 in zip(x, y, y2):
         ax.plot([x0, x0], [y0, y02], color="k")
-    rdf = pd.DataFrame({"level": x, "avg": y, "d%s" % (highlightyear,): y2})
+    rdf = pd.DataFrame({"level": x, "avg": y, f"d{highlightyear}": y2})
     x = np.array(x, dtype=np.float64)
     ax.scatter(x, y, color="b", label="Avg")
     ax.scatter(x, y2, color="r", label=yrlabel)
@@ -289,11 +262,11 @@ def plotter(fdict):
     ax2 = ax.twinx()
     ax2.set_ylim(-0.5, ymax + 5)
     ax2.set_yticks(range(0, ymax, dy))
-    ax2.set_yticklabels(["%.0f" % (s,) for s in np.arange(0, ymax, dy) / 24])
+    ax2.set_yticklabels([f"{s:.0f}" for s in np.arange(0, ymax, dy) / 24])
     ax2.set_ylabel("Expressed in 24 Hour Days")
     ax.set_ylabel("Hours Per Year")
     ax.set_xlabel(f"{VDICT[varname]} " r"$^\circ$F")
-    ax.legend(loc="best", scatterpoints=1)
+    ax.legend(loc=(2 if varname == "windchill" else 1), scatterpoints=1)
     return fig, rdf
 
 

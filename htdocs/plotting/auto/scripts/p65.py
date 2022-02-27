@@ -2,9 +2,9 @@
 import calendar
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {"cold": "Coldest Temperature", "hot": "Hottest Temperature"}
 
@@ -46,7 +46,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     month = ctx["month"]
@@ -56,45 +55,38 @@ def plotter(fdict):
     ets = ets.replace(day=1)
     days = int((ets - ts).days)
 
-    table = "alldata_%s" % (station[:2],)
-
     s = "ASC" if mydir == "cold" else "DESC"
-    df = read_sql(
-        f"""
-        with ranks as (
-            select day, high, low,
-    rank() OVER (PARTITION by year ORDER by high {s}) as high_rank,
-    rank() OVER (PARTITION by year ORDER by low {s}) as low_rank
-            from {table} where station = %s and month = %s),
-        highs as (
-            SELECT extract(day from day) as dom, count(*) from ranks
-            where high_rank = 1 GROUP by dom),
-        lows as (
-            SELECT extract(day from day) as dom, count(*) from ranks
-            where low_rank = 1 GROUP by dom)
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+            with ranks as (
+                select day, high, low,
+        rank() OVER (PARTITION by year ORDER by high {s}) as high_rank,
+        rank() OVER (PARTITION by year ORDER by low {s}) as low_rank
+                from alldata_{station[:2]} where station = %s and month = %s),
+            highs as (
+                SELECT extract(day from day) as dom, count(*) from ranks
+                where high_rank = 1 GROUP by dom),
+            lows as (
+                SELECT extract(day from day) as dom, count(*) from ranks
+                where low_rank = 1 GROUP by dom)
 
-        select coalesce(h.dom, l.dom) as dom, h.count as high_count,
-        l.count as low_count from
-        highs h FULL OUTER JOIN lows l on (h.dom = l.dom) ORDER by h.dom
-    """,
-        pgconn,
-        params=(station, month),
-    )
+            select coalesce(h.dom, l.dom) as dom, h.count as high_count,
+            l.count as low_count from
+            highs h FULL OUTER JOIN lows l on (h.dom = l.dom) ORDER by h.dom
+        """,
+            conn,
+            params=(station, month),
+        )
 
     fig = figure(apctx=ctx)
     ax = fig.subplots(2, 1, sharex=True)
     lbl = "Coldest" if mydir == "cold" else "Hottest"
     ax[0].set_title(
         (
-            "[%s] %s\nFrequency of Day in %s\n"
-            "Having %s High Temperature of %s"
-        )
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            calendar.month_name[month],
-            lbl,
-            calendar.month_name[month],
+            f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
+            f"Frequency of Day in {calendar.month_name[month]}\n"
+            f"Having {lbl} High Temperature of {calendar.month_name[month]}"
         ),
         fontsize=10,
     )
@@ -104,8 +96,7 @@ def plotter(fdict):
     ax[0].bar(df["dom"], df["high_count"], align="center")
 
     ax[1].set_title(
-        ("Having %s Low Temperature of %s")
-        % (lbl, calendar.month_name[month]),
+        f"Having {lbl} Low Temperature of {calendar.month_name[month]}",
         fontsize=10,
     )
     ax[1].set_ylabel("Years (ties split)")
@@ -118,4 +109,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

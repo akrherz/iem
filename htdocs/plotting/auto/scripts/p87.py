@@ -3,10 +3,10 @@ import datetime
 import calendar
 
 import numpy as np
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.plot.use_agg import plt
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = dict(
@@ -75,7 +75,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["zstation"]
@@ -91,51 +90,53 @@ def plotter(fdict):
 
     if groupby == "week":
         data = np.ma.zeros((24, 52), "f")
-        df = read_sql(
-            f"""
-        WITH data as (
-            SELECT valid at time zone %s + '10 minutes'::interval as v
-            from alldata where
-            station = %s and
-            array_to_string(wxcodes, '') LIKE '%%{code}%%'
-            and valid > %s and valid < %s),
-        agg as (
-            SELECT distinct extract(week from v)::int as week,
-            extract(doy from v)::int as doy,
-            extract(year from v)::int as year,
-            extract(hour from v)::int as hour
-            from data)
-        SELECT week, year, hour, count(*) from agg
-        WHERE week < 53
-        GROUP by week, year, hour
-        """,
-            pgconn,
-            params=(ctx["_nt"].sts[station]["tzname"], station, sts, ets),
-            index_col=None,
-        )
+        with get_sqlalchemy_conn("asos") as conn:
+            df = pd.read_sql(
+                f"""
+            WITH data as (
+                SELECT valid at time zone %s + '10 minutes'::interval as v
+                from alldata where
+                station = %s and
+                array_to_string(wxcodes, '') LIKE '%%{code}%%'
+                and valid > %s and valid < %s),
+            agg as (
+                SELECT distinct extract(week from v)::int as week,
+                extract(doy from v)::int as doy,
+                extract(year from v)::int as year,
+                extract(hour from v)::int as hour
+                from data)
+            SELECT week, year, hour, count(*) from agg
+            WHERE week < 53
+            GROUP by week, year, hour
+            """,
+                conn,
+                params=(ctx["_nt"].sts[station]["tzname"], station, sts, ets),
+                index_col=None,
+            )
     else:
         data = np.ma.zeros((24, 366), "f")
-        df = read_sql(
-            f"""
-        WITH data as (
-            SELECT valid at time zone %s + '10 minutes'::interval as v
-            from alldata where
-            station = %s and
-            array_to_string(wxcodes, '') LIKE '%%{code}%%'
-            and valid > %s and valid < %s),
-        agg as (
-            SELECT distinct
-            extract(doy from v)::int as doy,
-            extract(year from v)::int as year,
-            extract(hour from v)::int as hour
-            from data)
-        SELECT doy, year, hour, count(*) from agg
-        GROUP by doy, year, hour
-        """,
-            pgconn,
-            params=(ctx["_nt"].sts[station]["tzname"], station, sts, ets),
-            index_col=None,
-        )
+        with get_sqlalchemy_conn("asos") as conn:
+            df = pd.read_sql(
+                f"""
+            WITH data as (
+                SELECT valid at time zone %s + '10 minutes'::interval as v
+                from alldata where
+                station = %s and
+                array_to_string(wxcodes, '') LIKE '%%{code}%%'
+                and valid > %s and valid < %s),
+            agg as (
+                SELECT distinct
+                extract(doy from v)::int as doy,
+                extract(year from v)::int as year,
+                extract(hour from v)::int as hour
+                from data)
+            SELECT doy, year, hour, count(*) from agg
+            GROUP by doy, year, hour
+            """,
+                conn,
+                params=(ctx["_nt"].sts[station]["tzname"], station, sts, ets),
+                index_col=None,
+            )
     if df.empty:
         raise NoDataFound("No data was found, sorry!")
 

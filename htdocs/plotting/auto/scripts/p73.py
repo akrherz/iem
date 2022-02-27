@@ -1,13 +1,14 @@
 """Simple plot of number of WAWA"""
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from matplotlib.ticker import MaxNLocator
-import pyiem.nws.vtec as vtec
+from pyiem.nws import vtec
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, get_dbconn
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import state_names
+from sqlalchemy import text
 
 PDICT = {"yes": "Limit Plot to Year-to-Date", "no": "Plot Entire Year"}
 PDICT2 = {
@@ -92,7 +93,6 @@ def get_ugc_name(ugc):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("postgis")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     limit = ctx["limit"]
@@ -102,29 +102,29 @@ def plotter(fdict):
     state = ctx["state"]
 
     ctx["_nt"].sts["_ALL"] = {"name": "All Offices"}
-
+    params = {}
     if opt == "wfo":
-        wfo_limiter = (" and wfo = '%s' ") % (
-            station if len(station) == 3 else station[1:],
-        )
+        wfo_limiter = " and wfo = :wfo "
+        params["wfo"] = station if len(station) == 3 else station[1:]
         if station == "_ALL":
             wfo_limiter = ""
-        title1 = "NWS %s" % (ctx["_nt"].sts[station]["name"],)
+        title1 = f"NWS {ctx['_nt'].sts[station]['name']}"
     elif opt == "ugc":
-        wfo_limiter = f" and ugc = '{ctx['ugc']}' "
+        wfo_limiter = " and ugc = :ugc "
+        params["ugc"] = ctx["ugc"]
         name, wfo = get_ugc_name(ctx["ugc"])
-        title1 = "NWS %s Issued for [%s] %s" % (
-            ctx["_nt"].sts[wfo]["name"],
-            ctx["ugc"],
-            name,
+        title1 = (
+            f"NWS {ctx['_nt'].sts[wfo]['name']} Issued for [{ctx['ugc']}] "
+            f"{name}"
         )
     else:
-        wfo_limiter = f" and substr(ugc, 1, 2) = '{state}' "
+        wfo_limiter = " and substr(ugc, 1, 2) = :state "
+        params["state"] = state
         title1 = state_names[state]
     doy_limiter = ""
     title = "Entire Year"
     if limit.lower() == "yes":
-        title = "thru ~%s" % (datetime.date.today().strftime("%-d %b"),)
+        title = f"thru ~{datetime.date.today():%-d %b}"
         doy_limiter = (
             " and extract(doy from issue) <= "
             "extract(doy from 'TODAY'::date) "
@@ -135,18 +135,24 @@ def plotter(fdict):
         desc = ""
     if phenomena in ["SV", "TO"] and significance == "A":
         desc = ""
-    df = read_sql(
-        f"""
-        with data as (
-            SELECT distinct extract(year from issue)::int as yr, {desc} eventid
-            from warnings where phenomena = %s and significance = %s
-            {wfo_limiter} {doy_limiter})
+    params["sig"] = significance
+    params["ph"] = phenomena
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = pd.read_sql(
+            text(
+                f"""
+            with data as (
+                SELECT distinct extract(year from issue)::int as yr,
+                {desc} eventid
+                from warnings where phenomena = :ph and significance = :sig
+                {wfo_limiter} {doy_limiter})
 
-        SELECT yr, count(*) from data GROUP by yr ORDER by yr ASC
-      """,
-        pgconn,
-        params=(phenomena, significance),
-    )
+            SELECT yr, count(*) from data GROUP by yr ORDER by yr ASC
+        """
+            ),
+            conn,
+            params=params,
+        )
     if df.empty:
         if opt == "ugc":
             raise NoDataFound(
@@ -160,12 +166,10 @@ def plotter(fdict):
         df = df[df["yr"] > 2005]
     elif df["yr"].min() == 2008:
         df = df[df["yr"] > 2008]
-    title = ("%s [%s]\n%s (%s.%s) Count") % (
-        title1,
-        title,
-        vtec.get_ps_string(phenomena, significance),
-        phenomena,
-        significance,
+    title = (
+        f"{title1} [{title}]\n"
+        f"{vtec.get_ps_string(phenomena, significance)} "
+        f"({phenomena}.{significance}) Count"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.bar(df["yr"], df["count"], align="center")
@@ -182,16 +186,11 @@ def plotter(fdict):
         )
     ax.grid(True)
     ax.set_ylabel("Yearly Count")
-    ax.set_xlabel(
-        ("%s thru approximately %s")
-        % (
-            "" if limit == "yes" else datetime.date.today().year,
-            datetime.date.today().strftime("%-d %b"),
-        )
-    )
+    xx = "" if limit == "yes" else datetime.date.today().year
+    ax.set_xlabel(f"{xx} thru approximately {datetime.date.today():%-d %b}")
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
     return fig, df
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

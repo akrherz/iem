@@ -226,7 +226,7 @@ def plotter(fdict):
     ax3.text(
         0.97,
         0.9,
-        "R$^2$=%.2f" % (r_value**2,),
+        f"R$^2$={(r_value**2):.2f}",
         ha="right",
         transform=ax3.transAxes,
         bbox=dict(color="white"),

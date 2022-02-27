@@ -89,16 +89,11 @@ def plotter(fdict):
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
     title = (
-        "%s [%s]\nFrequency of %s+ knot Wind Speeds by Temperature "
-        "for %s (%s-%s)\n"
+        f"{ctx['_nt'].sts[station]['name']} [{station}]\n"
+        f"Frequency of {threshold}+ knot Wind Speeds by Temperature "
+        f"for {calendar.month_name[month]} "
+        f"({ab.year}-{datetime.datetime.now().year})\n"
         "(must have 3+ hourly observations at the given temperature)"
-    ) % (
-        ctx["_nt"].sts[station]["name"],
-        station,
-        threshold,
-        calendar.month_name[month],
-        ab.year,
-        datetime.datetime.now().year,
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.bar(
@@ -131,4 +126,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

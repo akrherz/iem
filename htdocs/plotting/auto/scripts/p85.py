@@ -1,14 +1,15 @@
 """Hourly Temp Frequencies"""
 import calendar
 
-from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconn
+import pandas as pd
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
-PDICT = dict(
-    [("above", "At or Above Temperature"), ("below", "Below Temperature")]
-)
+PDICT = {
+    "above": "At or Above Temperature",
+    "below": "Below Temperature",
+}
 
 
 def get_description():
@@ -48,8 +49,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos", user="nobody")
-
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     month = int(ctx["month"])
@@ -57,25 +56,25 @@ def plotter(fdict):
     mydir = ctx["dir"]
 
     tzname = ctx["_nt"].sts[station]["tzname"]
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            """
+        WITH data as (
+            SELECT valid at time zone %s  + '10 minutes'::interval as v, tmpf
+            from alldata where station = %s and tmpf > -90 and tmpf < 150
+            and extract(month from valid) = %s and report_type = 2)
 
-    df = read_sql(
-        """
-    WITH data as (
-        SELECT valid at time zone %s  + '10 minutes'::interval as v, tmpf
-        from alldata where station = %s and tmpf > -90 and tmpf < 150
-        and extract(month from valid) = %s and report_type = 2)
-
-    SELECT extract(hour from v) as hour,
-    min(v) as min_valid, max(v) as max_valid,
-    sum(case when tmpf::int < %s THEN 1 ELSE 0 END) as below,
-    sum(case when tmpf::int >= %s THEN 1 ELSE 0 END) as above,
-    count(*) from data
-    GROUP by hour ORDER by hour ASC
-    """,
-        pgconn,
-        params=(tzname, station, month, thres, thres),
-        index_col="hour",
-    )
+        SELECT extract(hour from v) as hour,
+        min(v) as min_valid, max(v) as max_valid,
+        sum(case when tmpf::int < %s THEN 1 ELSE 0 END) as below,
+        sum(case when tmpf::int >= %s THEN 1 ELSE 0 END) as above,
+        count(*) from data
+        GROUP by hour ORDER by hour ASC
+        """,
+            conn,
+            params=(tzname, station, month, thres, thres),
+            index_col="hour",
+        )
     if df.empty:
         raise NoDataFound("No data found.")
 
@@ -84,14 +83,20 @@ def plotter(fdict):
 
     freq = df[mydir + "_freq"].values
     hours = df.index.values
-
-    (fig, ax) = figure_axes(apctx=ctx)
+    title = (
+        f"({df['min_valid'].min().year} - {df['max_valid'].max().year}) "
+        f"{ctx['_nt'].sts[station]['name']} [{station}]\n"
+        f"Frequency of {calendar.month_name[month]} Hour, {PDICT[mydir]}: "
+        f"{thres}"
+        r"$^\circ$F"
+    )
+    (fig, ax) = figure_axes(apctx=ctx, title=title)
     bars = ax.bar(hours, freq, fc="blue", align="center")
     for i, mybar in enumerate(bars):
         ax.text(
             i,
             mybar.get_height() + 3,
-            "%.0f" % (mybar.get_height(),),
+            f"{mybar.get_height():.0f}",
             ha="center",
             fontsize=10,
         )
@@ -105,18 +110,6 @@ def plotter(fdict):
     ax.set_ylabel("Frequency [%]")
     ax.set_xlabel(f"Hour Timezone: {tzname}")
     ax.set_xlim(-0.5, 23.5)
-    ax.set_title(
-        ("(%s - %s) %s [%s]\n" r"Frequency of %s Hour, %s: %s$^\circ$F")
-        % (
-            df["min_valid"].min().year,
-            df["max_valid"].max().year,
-            ctx["_nt"].sts[station]["name"],
-            station,
-            calendar.month_name[month],
-            PDICT[mydir],
-            thres,
-        )
-    )
 
     return fig, df
 

@@ -1,9 +1,9 @@
 """Consec days"""
 import calendar
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {
     "above": "Temperature At or Above (AOA) Threshold",
@@ -57,7 +57,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     days = ctx["days"]
@@ -65,42 +64,35 @@ def plotter(fdict):
     varname = ctx["var"]
     mydir = ctx["dir"]
 
-    table = "alldata_%s" % (station[:2],)
-
     agg = "min" if mydir == "above" else "max"
     op = ">=" if mydir == "above" else "<"
-    df = read_sql(
-        f"""
-        with data as (
-            select day, {agg}({varname})
-            OVER (ORDER by day ASC ROWS BETWEEN %s PRECEDING
-            and CURRENT ROW) as agg from {table}
-            where station = %s)
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+            with data as (
+                select day, {agg}({varname})
+                OVER (ORDER by day ASC ROWS BETWEEN %s PRECEDING
+                and CURRENT ROW) as agg from alldata_{station[:2]}
+                where station = %s)
 
-        select extract(doy from day) as doy,
-        sum(case when agg {op} %s then 1 else 0 end)
-            / count(*)::float * 100. as freq
-        from data GROUP by doy ORDER by doy asc
-    """,
-        pgconn,
-        params=(days - 1, station, threshold),
-        index_col="doy",
-    )
-
-    fig, ax = figure_axes(apctx=ctx)
+            select extract(doy from day) as doy,
+            sum(case when agg {op} %s then 1 else 0 end)
+                / count(*)::float * 100. as freq
+            from data GROUP by doy ORDER by doy asc
+        """,
+            conn,
+            params=(days - 1, station, threshold),
+            index_col="doy",
+        )
 
     label = "AOA" if mydir == "above" else "below"
-    ax.set_title(
-        ("[%s] %s\n" r"Frequency of %s Consec Days with %s %s %s$^\circ$F ")
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            days,
-            varname.capitalize(),
-            label,
-            threshold,
-        )
+    title = (
+        f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
+        f"Frequency of {days} Consec Days with {varname.capitalize()} "
+        f"{label} {threshold}"
+        r"$^\circ$F "
     )
+    fig, ax = figure_axes(apctx=ctx, title=title)
     ax.set_ylabel("Frequency of Days [%]")
     ax.set_ylim(0, 100)
     ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
@@ -114,4 +106,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

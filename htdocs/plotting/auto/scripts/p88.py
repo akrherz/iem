@@ -2,9 +2,9 @@
 import datetime
 
 import numpy as np
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.plot import get_cmap
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
@@ -50,7 +50,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     which = ctx["which"]
@@ -58,33 +57,34 @@ def plotter(fdict):
     data = np.zeros((24, 52), "f")
 
     sql = "in ('BKN','OVC')" if which == "cloudy" else "= 'CLR'"
-    df = read_sql(
-        f"""
-    WITH data as (
-     SELECT valid at time zone %s + '10 minutes'::interval as v,
-     tmpf, skyc1, skyc2, skyc3, skyc4 from alldata WHERE station = %s
-     and valid > '1973-01-01'
-     and tmpf is not null and tmpf > -99 and tmpf < 150),
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            f"""
+        WITH data as (
+        SELECT valid at time zone %s + '10 minutes'::interval as v,
+        tmpf, skyc1, skyc2, skyc3, skyc4 from alldata WHERE station = %s
+        and valid > '1973-01-01'
+        and tmpf is not null and tmpf > -99 and tmpf < 150),
 
 
-    climo as (
-     select extract(week from v) as w,
-     extract(hour from v) as hr,
-     avg(tmpf) from data GROUP by w, hr),
+        climo as (
+        select extract(week from v) as w,
+        extract(hour from v) as hr,
+        avg(tmpf) from data GROUP by w, hr),
 
-    cloudy as (
-     select extract(week from v) as w,
-     extract(hour from v) as hr,
-     avg(tmpf) from data WHERE skyc1 {sql} or skyc2 {sql} or
-     skyc3 {sql} or skyc4 {sql} GROUP by w, hr)
+        cloudy as (
+        select extract(week from v) as w,
+        extract(hour from v) as hr,
+        avg(tmpf) from data WHERE skyc1 {sql} or skyc2 {sql} or
+        skyc3 {sql} or skyc4 {sql} GROUP by w, hr)
 
-    SELECT l.w as week, l.hr as hour, l.avg - c.avg as difference
-    from cloudy l JOIN climo c on
-    (l.w = c.w and l.hr = c.hr)
-    """,
-        pgconn,
-        params=(ctx["_nt"].sts[station]["tzname"], station),
-    )
+        SELECT l.w as week, l.hr as hour, l.avg - c.avg as difference
+        from cloudy l JOIN climo c on
+        (l.w = c.w and l.hr = c.hr)
+        """,
+            conn,
+            params=(ctx["_nt"].sts[station]["tzname"], station),
+        )
 
     for _, row in df.iterrows():
         if row[0] > 52:
@@ -93,12 +93,10 @@ def plotter(fdict):
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
-    title = ("[%s] %s %s-%s\nHourly Temp Departure (skies were %s vs all)") % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-        max([ab.year, 1973]),
-        datetime.date.today().year,
-        PDICT[ctx["which"]],
+    title = (
+        f"[{station}] {ctx['_nt'].sts[station]['name']} "
+        f"{max([ab.year, 1973])}-{datetime.date.today().year}\n"
+        f"Hourly Temp Departure (skies were {PDICT[ctx['which']]} vs all)"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 
@@ -115,9 +113,7 @@ def plotter(fdict):
     a.ax.set_ylabel(r"Temperature Departure $^{\circ}\mathrm{F}$")
     ax.grid(True)
     ax.set_ylim(-0.5, 23.5)
-    ax.set_ylabel(
-        "Local Hour of Day, %s" % (ctx["_nt"].sts[station]["tzname"],)
-    )
+    ax.set_ylabel(f"Local Hour of Day, {ctx['_nt'].sts[station]['tzname']}")
     ax.set_yticks((0, 4, 8, 12, 16, 20))
     ax.set_xticks(range(0, 55, 7))
     ax.set_xticklabels(
@@ -132,7 +128,6 @@ def plotter(fdict):
             "Dec 9",
         )
     )
-
     ax.set_yticklabels(("Mid", "4 AM", "8 AM", "Noon", "4 PM", "8 PM"))
 
     return fig, df
