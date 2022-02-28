@@ -5,8 +5,12 @@ import numpy as np
 import psycopg2.extras
 import pandas as pd
 from matplotlib.patches import Rectangle
-from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconn, convert_value
+from pyiem.util import (
+    get_autoplot_context,
+    get_sqlalchemy_conn,
+    convert_value,
+    get_dbconn,
+)
 from pyiem.reference import TRACE_VALUE
 from pyiem.plot import calendar_plot
 from pyiem.exceptions import NoDataFound
@@ -118,9 +122,6 @@ def add_stages_legend(fig, stagevals):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("iem")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     varname = ctx["var"]
@@ -128,16 +129,17 @@ def plotter(fdict):
     edate = ctx["edate"]
 
     # Get Climatology
-    cdf = read_sql(
-        "SELECT to_char(valid, 'mmdd') as sday, "
-        "round(high::numeric, 0) as high, "
-        "round(low::numeric, 0) as low, "
-        "round(((high + low) / 2.)::numeric, 0) as avg, "
-        "precip from ncei_climate91 WHERE station = %s ORDER by sday ASC",
-        get_dbconn("coop"),
-        params=(ctx["_nt"].sts[station]["ncei91"],),
-        index_col="sday",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        cdf = pd.read_sql(
+            "SELECT to_char(valid, 'mmdd') as sday, "
+            "round(high::numeric, 0) as high, "
+            "round(low::numeric, 0) as low, "
+            "round(((high + low) / 2.)::numeric, 0) as avg, "
+            "precip from ncei_climate91 WHERE station = %s ORDER by sday ASC",
+            conn,
+            params=(ctx["_nt"].sts[station]["ncei91"],),
+            index_col="sday",
+        )
     if cdf.empty:
         raise NoDataFound("No Data Found.")
 
@@ -164,6 +166,8 @@ def plotter(fdict):
             (sdate, edate, station),
         )
     else:
+        pgconn = get_dbconn("iem")
+        cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute(
             """
             SELECT day, max_tmpf, min_tmpf, max_dwpf, min_dwpf,

@@ -1,10 +1,10 @@
 """daily ranges"""
 import calendar
 
-from pandas.io.sql import read_sql
+import pandas as pd
 import numpy as np
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = dict(
@@ -51,7 +51,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["station"]
@@ -66,22 +65,23 @@ def plotter(fdict):
         orderer += " ASC"
     else:
         orderer += " DESC"
-    df = read_sql(
-        f"""
-    WITH ranks as (
-        SELECT month, day, high, low, precip, snow,
-        rank() OVER (
-            PARTITION by month ORDER by {orderer} NULLS LAST)
-        from alldata_{station[:2]} WHERE station = %s)
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        WITH ranks as (
+            SELECT month, day, high, low, precip, snow,
+            rank() OVER (
+                PARTITION by month ORDER by {orderer} NULLS LAST)
+            from alldata_{station[:2]} WHERE station = %s)
 
-    select month, to_char(day, 'Mon dd, YYYY') as dd, high, low, precip, snow,
-    (high - low) as range from ranks
-    WHERE rank = 1 ORDER by month ASC, day DESC
-    """,
-        pgconn,
-        params=(station,),
-        index_col="month",
-    )
+        select month, to_char(day, 'Mon dd, YYYY') as dd, high, low, precip,
+        snow, (high - low) as range from ranks
+        WHERE rank = 1 ORDER by month ASC, day DESC
+        """,
+            conn,
+            params=(station,),
+            index_col="month",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     labels = []

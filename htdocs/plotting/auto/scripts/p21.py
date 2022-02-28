@@ -2,10 +2,10 @@
 import datetime
 
 import numpy as np
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"high": "High temperature", "low": "Low Temperature"}
@@ -34,6 +34,7 @@ def get_description():
             default=threeweeks.strftime("%Y/%m/%d"),
             label="From Date (ignore year):",
             min="2014/01/01",
+            max=f"{today.year + 1}/12/31",
         ),  # Comes back to python as yyyy-mm-dd
         dict(
             type="date",
@@ -41,6 +42,7 @@ def get_description():
             default=today.strftime("%Y/%m/%d"),
             label="To Date (ignore year):",
             min="2014/01/01",
+            max=f"{today.year + 1}/12/31",
         ),  # Comes back to python as yyyy-mm-dd
         dict(
             type="select",
@@ -56,7 +58,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     date1 = ctx["date1"]
     date2 = ctx["date2"]
@@ -64,29 +65,29 @@ def plotter(fdict):
     date2 = date2.replace(year=2000)
 
     varname = ctx["varname"]
-
-    df = read_sql(
-        """
-    WITH t2 as (
-         SELECT station, high, low from ncdc_climate81 WHERE
-         valid = %s
-    ), t1 as (
-        SELECT station, high, low from ncdc_climate81 where
-        valid = %s
-    ), data as (
-        SELECT t2.station, t1.high as t1_high, t2.high as t2_high,
-        t1.low as t1_low, t2.low as t2_low from t1 JOIN t2 on
-        (t1.station = t2.station)
-    )
-    SELECT d.station, ST_x(geom) as lon, ST_y(geom) as lat,
-    t2_high -  t1_high as high, t2_low - t1_low as low from data d JOIN
-    stations s on (s.id = d.station) where s.network = 'NCDC81'
-    and s.state not in ('HI', 'AK')
-    """,
-        pgconn,
-        params=(date2, date1),
-        index_col="station",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            """
+        WITH t2 as (
+            SELECT station, high, low from ncei_climate91 WHERE
+            valid = %s
+        ), t1 as (
+            SELECT station, high, low from ncei_climate91 where
+            valid = %s
+        ), data as (
+            SELECT t2.station, t1.high as t1_high, t2.high as t2_high,
+            t1.low as t1_low, t2.low as t2_low from t1 JOIN t2 on
+            (t1.station = t2.station)
+        )
+        SELECT d.station, ST_x(geom) as lon, ST_y(geom) as lat,
+        t2_high -  t1_high as high, t2_low - t1_low as low from data d JOIN
+        stations s on (s.id = d.station) where s.network = 'NCEI91'
+        and s.state not in ('HI', 'AK')
+        """,
+            conn,
+            params=(date2, date1),
+            index_col="station",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
 
@@ -94,7 +95,9 @@ def plotter(fdict):
     extent = int(df[varname].abs().max())
     mp = MapPlot(
         apctx=ctx,
-        title=f"{days} Day Change in {PDICT[varname]} NCDC 81 Climatology",
+        title=(
+            f"{days} Day Change in {PDICT[varname]} NCEI 1991-2020 Climatology"
+        ),
         subtitle=f"from {date1:%-d %B} to {date2:%-d %B}",
     )
     mp.contourf(
@@ -110,4 +113,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

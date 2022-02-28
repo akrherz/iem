@@ -3,11 +3,11 @@ import datetime
 import calendar
 
 import numpy as np
-from pandas.io.sql import read_sql
+import pandas as pd
 import matplotlib.colors as mpcolors
 from pyiem.plot import get_cmap
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"above": "At or Above Threshold", "below": "Below Threshold"}
@@ -83,8 +83,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos")
-
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     threshold = ctx["threshold"]
@@ -102,27 +100,27 @@ def plotter(fdict):
         )
     if ctx.get("edate"):
         timelimiter += f" and valid at time zone '{tzname}' < '{ctx['edate']}'"
-
-    df = read_sql(
-        f"""
-        WITH data as (
-            SELECT extract(week from valid) as week,
-            extract(hour from (valid + '10 minutes'::interval)
-              at time zone %s) as hour, {varname} as d,
-            valid at time zone %s as local_valid from alldata where
-            station = %s and {varname} between -70 and 140 {timelimiter}
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            f"""
+            WITH data as (
+                SELECT extract(week from valid) as week,
+                extract(hour from (valid + '10 minutes'::interval)
+                at time zone %s) as hour, {varname} as d,
+                valid at time zone %s as local_valid from alldata where
+                station = %s and {varname} between -70 and 140 {timelimiter}
+            )
+            SELECT week::int, hour::int,
+            sum(case when d {mydir} %s then 1 else 0 end),
+            count(*),
+            min(local_valid)::date as min_valid,
+            max(local_valid)::date as max_valid
+            from data GROUP by week, hour
+            """,
+            conn,
+            params=(tzname, tzname, station, threshold),
+            index_col=None,
         )
-        SELECT week::int, hour::int,
-        sum(case when d {mydir} %s then 1 else 0 end),
-        count(*),
-        min(local_valid)::date as min_valid,
-        max(local_valid)::date as max_valid
-        from data GROUP by week, hour
-        """,
-        pgconn,
-        params=(tzname, tzname, station, threshold),
-        index_col=None,
-    )
     data = np.ones((24, 53), "f") * -1
     df["freq[%]"] = df["sum"] / df["count"] * 100.0
     for _, row in df.iterrows():

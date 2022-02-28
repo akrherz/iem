@@ -1,10 +1,10 @@
 """IEMAccess daily summary ranges"""
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 import matplotlib.dates as mdates
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -77,27 +77,26 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("iem")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     year = ctx["year"]
     emphasis = ctx["emphasis"]
     opt = ctx["opt"]
     varname = ctx["var"]
-
-    df = read_sql(
-        f"""
-        select day, max_{varname}, min_{varname}
-        from summary_{year} s JOIN stations t on (s.iemid = t.iemid)
-        where t.id = %s and t.network = %s and
-        max_{varname} is not null and
-        min_{varname} is not null
-        ORDER by day ASC
-    """,
-        pgconn,
-        params=(station, ctx["network"]),
-        index_col="day",
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        df = pd.read_sql(
+            f"""
+            select day, max_{varname}, min_{varname}
+            from summary_{year} s JOIN stations t on (s.iemid = t.iemid)
+            where t.id = %s and t.network = %s and
+            max_{varname} is not null and
+            min_{varname} is not null
+            ORDER by day ASC
+        """,
+            conn,
+            params=(station, ctx["network"]),
+            index_col="day",
+        )
     if df.empty:
         raise NoDataFound("No Data Found!")
     df["range"] = df["max_" + varname] - df["min_" + varname]

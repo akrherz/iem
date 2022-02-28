@@ -5,10 +5,9 @@ import pytz
 import matplotlib.dates as mdates
 from matplotlib import ticker
 import pandas as pd
-from pandas.io.sql import read_sql
 from pyiem.plot import figure
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 from pyiem.exceptions import NoDataFound
 from metpy.units import units
 
@@ -85,20 +84,21 @@ def get_description():
 def get_data(network, station, tzname, sdate):
     """retrieve the data frame we want"""
     if sdate is None:
-        pgconn = get_dbconn("iem")
-        return read_sql(
-            """
-            SELECT tmpf, dwpf, sknt, gust, drct, skyc1, skyc2, skyc3, skyc4,
-            skyl1, skyl2, skyl3, skyl4, vsby, alti,
-            valid at time zone 'UTC' as utc_valid
-            from current_log c JOIN stations t ON (t.iemid = c.iemid)
-            WHERE t.network = %s and t.id = %s and
-            valid > now() - '4 days'::interval ORDER by valid ASC
-        """,
-            pgconn,
-            params=(network, station),
-            index_col="utc_valid",
-        )
+        with get_sqlalchemy_conn("iem") as conn:
+            df = pd.read_sql(
+                """
+                SELECT tmpf, dwpf, sknt, gust, drct, skyc1, skyc2, skyc3,
+                skyc4, skyl1, skyl2, skyl3, skyl4, vsby, alti,
+                valid at time zone 'UTC' as utc_valid
+                from current_log c JOIN stations t ON (t.iemid = c.iemid)
+                WHERE t.network = %s and t.id = %s and
+                valid > now() - '4 days'::interval ORDER by valid ASC
+            """,
+                conn,
+                params=(network, station),
+                index_col="utc_valid",
+            )
+        return df
 
     sts = utc(2018)
     sts = sts.astimezone(pytz.timezone(tzname))
@@ -107,20 +107,21 @@ def get_data(network, station, tzname, sdate):
     )
     ets = sts + datetime.timedelta(hours=72)
     if network == "AWOS" or network.endswith("ASOS"):
-        pgconn = get_dbconn("asos")
-        df = read_sql(
-            """
-            SELECT tmpf, dwpf, sknt, gust, drct, skyc1, skyc2, skyc3, skyc4,
-            skyl1, skyl2, skyl3, skyl4, vsby, alti,
-            valid at time zone 'UTC' as utc_valid
-            from alldata WHERE station = %s and valid >= %s and valid < %s
-            ORDER by valid ASC
-        """,
-            pgconn,
-            params=(station, sts, ets),
-            index_col="utc_valid",
-        )
-    return df
+        with get_sqlalchemy_conn("asos") as conn:
+            df = pd.read_sql(
+                """
+                SELECT tmpf, dwpf, sknt, gust, drct, skyc1, skyc2, skyc3,
+                skyc4, skyl1, skyl2, skyl3, skyl4, vsby, alti,
+                valid at time zone 'UTC' as utc_valid
+                from alldata WHERE station = %s and valid >= %s and valid < %s
+                ORDER by valid ASC
+            """,
+                conn,
+                params=(station, sts, ets),
+                index_col="utc_valid",
+            )
+        return df
+    return None
 
 
 def plotter(fdict):

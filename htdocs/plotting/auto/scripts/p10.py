@@ -10,13 +10,11 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = dict(
-    (
-        ("above", "First Spring/Last Fall Temperature Above (>=) Threshold"),
-        ("above2", "Last Spring/First Fall Temperature Above (>=) Threshold"),
-        ("below", "Last Spring/First Fall Temperature Below Threshold"),
-    )
-)
+PDICT = {
+    "above": "First Spring/Last Fall Temperature Above (>=) Threshold",
+    "above2": "Last Spring/First Fall Temperature Above (>=) Threshold",
+    "below": "Last Spring/First Fall Temperature Below Threshold",
+}
 PDICT2 = dict(
     (
         ("high", "High Temperature"),
@@ -85,7 +83,7 @@ def plotter(fdict):
     varname = ctx["varname"]
     startyear = ctx["year"]
 
-    table = "alldata_%s" % (station[:2],)
+    table = f"alldata_{station[:2]}"
 
     if direction == "below":
         sql = f"""select year,
@@ -230,7 +228,7 @@ def plotter(fdict):
         lw=3,
         zorder=2,
         label=r"%.2f $\frac{days}{100y}$ R$^2$=%.2f"
-        % (s_slp * 100.0, s_r ** 2),
+        % (s_slp * 100.0, s_r**2),
     )
     ax.plot(
         years,
@@ -238,7 +236,7 @@ def plotter(fdict):
         lw=3,
         zorder=2,
         label=r"%.2f $\frac{days}{100y}$ R$^2$=%.2f"
-        % (f_slp * 100.0, f_r ** 2),
+        % (f_slp * 100.0, f_r**2),
     )
     ax.grid(True)
     title = PDICT.get(direction, "").replace(

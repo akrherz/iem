@@ -1,8 +1,8 @@
 """Fall Minimum by Date"""
 import calendar
 
-from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconn
+import pandas as pd
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.reference import FIGSIZES
 from pyiem.exceptions import NoDataFound
 import seaborn as sns
@@ -42,24 +42,24 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     month = ctx["month"]
     year = ctx["year"]
 
-    # beat month
-    df = read_sql(
-        f"""
-    SELECT year, sum(precip) as precip, sum(snow) as snow from
-    alldata_{station[:2]}
-    WHERE station = %s and month = %s and precip >= 0
-    and snow >= 0 GROUP by year ORDER by year ASC
-    """,
-        pgconn,
-        params=(station, month),
-        index_col="year",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        # beat month
+        df = pd.read_sql(
+            f"""
+        SELECT year, sum(precip) as precip, sum(snow) as snow from
+        alldata_{station[:2]}
+        WHERE station = %s and month = %s and precip >= 0
+        and snow >= 0 GROUP by year ORDER by year ASC
+        """,
+            conn,
+            params=(station, month),
+            index_col="year",
+        )
     if df.empty:
         raise NoDataFound("Failed to find any data for this month.")
 
