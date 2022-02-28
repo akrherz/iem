@@ -34,6 +34,7 @@ CMAPS = {
         "plasma",
         "inferno",
         "magma",
+        "cividis",
     ],
     "Sequential": [
         "Greys",
@@ -87,6 +88,11 @@ CMAPS = {
         "bwr",
         "seismic",
     ],
+    "Cyclic": [
+        "twilight",
+        "twilight_shifted",
+        "hsv",
+    ],
     "Qualitative": [
         "Pastel1",
         "Pastel2",
@@ -113,10 +119,10 @@ CMAPS = {
         "CMRmap",
         "cubehelix",
         "brg",
-        "hsv",
         "gist_rainbow",
         "rainbow",
         "jet",
+        "turbo",
         "nipy_spectral",
         "gist_ncar",
     ],
