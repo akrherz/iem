@@ -51,9 +51,14 @@ function aSortBySecondIndex($multiArray, $secondIndex, $sorder="asc") {
     }
     $indexMap = Array();
     foreach($multiArray as $firstIndex => $value) {
-        $indexMap[$firstIndex] = $value[$secondIndex];
+        if (array_key_exists($secondIndex, $value)){
+            $val = $value[$secondIndex];
+        } else {
+            $val = null;
+        }
+        $indexMap[$firstIndex] = $val;
     }
-    if ($sorder == "asc") {
+    if ($sorder == "asc"){
         asort($indexMap);
     } else {
         arsort($indexMap);

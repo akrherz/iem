@@ -51,7 +51,6 @@ $cols = Array(
  	$obs[ $row['station'] ]['valid'] = strtotime($row["localvalid"]);
  	$obs[ $row['station'] ]['name'] = $row["name"];
  }
-
  $final = aSortBySecondIndex($obs, $sortcol, "desc");
  
  $nselect = "<select name=\"network\">";
@@ -166,4 +165,3 @@ $content .= <<<EOF
 EOF;
 $t->content = $content;
 $t->render('sortables.phtml');
-?>

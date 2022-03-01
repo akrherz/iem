@@ -209,6 +209,7 @@ def plotter(fdict):
                 low_departure=ld,
                 avg_departure=ad,
                 min_tmpf=row["min_tmpf"],
+                avg_tmpf=row["avg_tmpf"],
                 pday=row["pday"],
                 max_rstage=row["max_rstage"],
             )
@@ -252,4 +253,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"var": "pday", "station": "IA0000", "network": "IACLIMATE"})
+    plotter({"var": "avg_tmpf", "station": "CHS", "network": "SC_ASOS"})

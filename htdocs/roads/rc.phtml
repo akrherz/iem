@@ -24,7 +24,7 @@ for ($i=0; $row = pg_fetch_array($rs); $i++)
   $seg = intval($row["segid"]);
   $obs[$seg] = $row;
   $t2 = preg_split('/ to /', $row["longname"]);
-  if (sizeof($t) == 2){
+  if (sizeof($t2) == 2){
   	$obs[$seg]["minor0"] = $t2[0];
   	$obs[$seg]["minor1"] = $t2[1];
   } else {
@@ -94,4 +94,3 @@ $t->content = <<<EOF
 </table>
 EOF;
 $t->render('single.phtml');
-?>

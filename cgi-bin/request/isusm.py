@@ -238,7 +238,11 @@ def fetch_daily(form, cols):
                 valid=valid.strftime("%Y-%m-%d"),
                 high=high,
                 low=low,
-                solar=row["slrkj_tot_qc"] / 1000.0,
+                solar=(
+                    (row["slrkj_tot_qc"] / 1000.0)
+                    if row["slrkj_tot_qc"] is not None
+                    else miss
+                ),
                 rh=row["rh"],
                 rh_min=row["rh_min"],
                 rh_max=row["rh_max"],

@@ -195,7 +195,8 @@ def plotter(fdict):
                 index_col="ugc",
                 geom_col="simple_geom",
             )
-
+    if df.empty:
+        raise NoDataFound("VTEC Event was not found, sorry.")
     with get_sqlalchemy_conn("postgis") as conn:
         sbwdf = gpd.read_postgis(
             f"""
@@ -256,7 +257,7 @@ def plotter(fdict):
             .strftime(TFORMAT)
         )
 
-    df["color"] = vtec.NWS_COLORS.get("%s.%s" % (p1, s1), "#FF0000")
+    df["color"] = vtec.NWS_COLORS.get(f"{p1}.{s1}", "#FF0000")
     if not sbwdf.empty:
         df["color"] = "tan"
     if len(df["wfo"].unique()) == 1:
@@ -267,19 +268,15 @@ def plotter(fdict):
         df2 = df[~df["wfo"].isin(["AJK", "AFC", "AFG", "HFO", "JSJ"])]
         bounds = df2["simple_geom"].total_bounds
     buffer = 0.4
-    title = "%s %s %s%s %s (%s.%s) #%s" % (
-        year,
-        wfo,
-        vtec.VTEC_PHENOMENA.get(p1, p1),
-        " (PDS) " if True in df["is_pds"].values else "",
-        (
-            "Emergency"
-            if True in df["is_emergency"].values
-            else vtec.VTEC_SIGNIFICANCE.get(s1, s1)
-        ),
-        p1,
-        s1,
-        etn,
+    _pds = " (PDS) " if True in df["is_pds"].values else ""
+    _tt = (
+        "Emergency"
+        if True in df["is_emergency"].values
+        else vtec.VTEC_SIGNIFICANCE.get(s1, s1)
+    )
+    title = (
+        f"{year} {wfo} {vtec.VTEC_PHENOMENA.get(p1, p1)}{_pds} {_tt} "
+        f"({p1}.{s1}) #{etn}"
     )
     if ctx["opt"] in ["expand", "etn"]:
         title = (
@@ -290,8 +287,10 @@ def plotter(fdict):
             title += f" #{etn}"
     mp = MapPlot(
         apctx=ctx,
-        subtitle="Map Valid: %s, Event: %s to %s"
-        % (m(utcvalid), m(df["issue"].min()), m(df["expire"].max())),
+        subtitle=(
+            f"Map Valid: {m(utcvalid)}, Event: {m(df['issue'].min())} "
+            f"to {m(df['expire'].max())}"
+        ),
         title=title,
         sector="custom",
         west=bounds[0] - buffer,
@@ -383,11 +382,14 @@ def plotter(fdict):
 if __name__ == "__main__":
     plotter(
         dict(
-            phenomenav="HT",
-            significancev="Y",
-            wfo="HNX",
-            year=2021,
-            etn=10,
-            valid="2021-09-08 1450",
+            phenomenav="TO",
+            significancev="W",
+            wfo="PAH",
+            year=2019,
+            etn=1,
+            valid="2021-12-11 0339",
+            network="WFO",
+            opt="expand",
+            n="auto",
         )
     )
