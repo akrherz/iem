@@ -226,10 +226,9 @@ def minute_iemaccess(df):
                 row["ws_mph_max_qc"], "mile / hour", "knot"
             )
         ob.data["drct"] = row["winddir_d1_wvt_qc"]
-        if "t4_c_avg" in df.columns:
-            ob.data["c1tmpf"] = c2f(row["t4_c_avg_qc"])
-        ob.data["c2tmpf"] = c2f(row["t12_c_avg_qc"])
-        ob.data["c3tmpf"] = c2f(row["t24_c_avg_qc"])
+        for j, col in enumerate(["4", "12", "24"]):
+            if f"t{col}_c_avg" in df.columns:
+                ob.data[f"c{j + 1}tmpf"] = c2f(row[f"t{col}_c_avg_qc"])
         if "t50_c_avg" in df.columns:
             ob.data["c4tmpf"] = c2f(row["t50_c_avg_qc"])
         if "calcvwc12_avg" in df.columns:
