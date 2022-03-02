@@ -120,11 +120,8 @@ def check_load():
         pgconn.close()
         if i == 4:
             sys.stderr.write(
-                (
-                    "[client: %s] "
-                    "/cgi-bin/request/asos.py over capacity: %s\n"
-                )
-                % (os.environ.get("REMOTE_ADDR"), mcursor.rowcount)
+                f"[client: {os.environ.get('REMOTE_ADDR')}] "
+                f"/cgi-bin/request/asos.py over capacity: {mcursor.rowcount}\n"
             )
         else:
             time.sleep(3)
@@ -215,11 +212,13 @@ def application(environ, start_response):
         start_response(
             "500 Internal Server Error", [("Content-type", "text/plain")]
         )
-        sys.stderr.write("asos.py invalid tz: %s\n" % (exp,))
+        sys.stderr.write(f"asos.py invalid tz: {exp}\n")
         yield b"Invalid Timezone (tz) provided"
         return
     pgconn = get_dbconn("asos")
     acursor = pgconn.cursor("mystream")
+    acursor.itersize = 2000
+    acursor.scrollable = False
 
     # Save direct to disk or view in browser
     direct = form.get("direct", "no") == "yes"
@@ -250,9 +249,7 @@ def application(environ, start_response):
             fn = f"asos.{suffix}"
         else:
             fn = f"{stations[0]}.{suffix}"
-        headers.append(
-            ("Content-Disposition", "attachment; filename=%s" % (fn,))
-        )
+        headers.append(("Content-Disposition", f"attachment; filename={fn}"))
     else:
         headers.append(("Content-type", "text/plain"))
     start_response("200 OK", headers)
@@ -281,10 +278,10 @@ def application(environ, start_response):
 
     rlimiter = ""
     if len(report_type) == 1:
-        rlimiter = " and report_type = %s" % (int(report_type[0]),)
+        rlimiter = f" and report_type = {int(report_type[0])}"
     elif len(report_type) > 1:
-        rlimiter = (" and report_type in %s") % (
-            tuple([int(a) for a in report_type]),
+        rlimiter = (
+            f" and report_type in {tuple([int(a) for a in report_type])}"
         )
     sqlcols = ",".join(querycols)
     sorder = "DESC" if "hours" in form else "ASC"
@@ -302,19 +299,18 @@ def application(environ, start_response):
             f"ORDER by valid {sorder}",
             (sts, ets),
         )
-
     sio = StringIO()
     if delim not in ["onlytdf", "onlycomma"]:
-        sio.write("#DEBUG: Format Typ    -> %s\n" % (delim,))
-        sio.write("#DEBUG: Time Period   -> %s %s\n" % (sts, ets))
-        sio.write("#DEBUG: Time Zone     -> %s\n" % (tzinfo,))
+        sio.write(f"#DEBUG: Format Typ    -> {delim}\n")
+        sio.write(f"#DEBUG: Time Period   -> {sts} {ets}\n")
+        sio.write(f"#DEBUG: Time Zone     -> {tzinfo}\n")
         sio.write(
             (
                 "#DEBUG: Data Contact   -> daryl herzmann "
                 "akrherz@iastate.edu 515-294-5978\n"
             )
         )
-        sio.write("#DEBUG: Entries Found -> %s\n" % (acursor.rowcount,))
+        sio.write(f"#DEBUG: Entries Found -> {acursor.rowcount}\n")
     nometa = "nometa" in form
     if not nometa:
         sio.write(f"station{rD}valid{rD}")
@@ -324,8 +320,9 @@ def application(environ, start_response):
             sio.write(f"elevation{rD}")
         # hack to convert tmpf as tmpc to tmpc
         sio.write(
-            "%s\n" % (rD.join([c.split(" as ")[-1] for c in querycols]),)
+            f"{rD.join([c.rsplit(' as ', maxsplit=1)[-1] for c in querycols])}"
         )
+        sio.write("\n")
 
     ff = {
         "wxcodes": fmt_wxcodes,

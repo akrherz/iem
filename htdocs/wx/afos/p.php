@@ -102,6 +102,10 @@ $content = "<h3>National Weather Service Raw Text Product</h3>";
 if (is_null($rs) || pg_numrows($rs) < 1){
 	$content .= "<div class=\"alert alert-warning\">Sorry, could not find product.</div>";
 }
+if (pg_numrows($rs) > 1){
+    $content .= '<div class="alert alert-warning"><i class="fa fa-file"></i> '.
+    'Found multiple products. Scroll down to see them all.</div>';
+}
 $img = "";
 for ($i=0; $row = pg_fetch_assoc($rs); $i++)
 {
@@ -192,4 +196,3 @@ $content .= $img;
 
 $t->content = $content;
 $t->render('single.phtml');
-?>
