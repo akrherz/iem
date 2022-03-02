@@ -112,7 +112,11 @@ daily_opts = [
     },
     {
         "id": 204,
-        "label": ("Heatmap of Daily / Trailing Daily Temperature / Precip"),
+        "label": "Heatmap of Daily / Trailing Daily Temperature / Precip",
+    },
+    {
+        "id": 225,
+        "label": "Heatmap of Distribution of Trailing Depatures",
     },
     {
         "id": 61,
