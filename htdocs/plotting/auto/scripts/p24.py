@@ -202,7 +202,7 @@ def plotter(fdict):
             ets = datetime.date(year, 11, 30)
         elif month == "winter":
             sts = datetime.date(year, 12, 1)
-            ets = datetime.date(year, 3, 1) - oneday
+            ets = datetime.date(year + 1, 3, 1) - oneday
         elif month == "spring":
             sts = datetime.date(year, 3, 1)
             ets = datetime.date(year, 5, 31)
