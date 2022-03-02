@@ -292,7 +292,7 @@ def process(fullfn):
         df["slrkj_tot"] = df["slrw_avg"] * 86400.0 / 1000.0
         # Remove un-needed data
         df = df.drop(
-            ["slrw_avg", "solarradcalc", "nancounttot"],
+            ["slrw_avg", "solarradcalc", "nancounttot", "slrmj_tot"],
             axis=1,
             errors="ignore",
         )
