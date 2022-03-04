@@ -4,6 +4,7 @@ import datetime
 import json
 
 import pandas as pd
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, convert_value
 from pyiem.exceptions import NoDataFound
 import seaborn as sns
@@ -210,6 +211,7 @@ def plotter(fdict):
         color="tan",
         xlim=(0, 360),
     ).plot_joint(sns.kdeplot, n_levels=6)
+    figure(fig=g.figure, apctx=ctx, title=ctx["title"])
     g.ax_joint.set_xlabel("Storm Motion From Direction")
     g.ax_joint.set_ylabel("Storm Speed [MPH]")
     g.ax_joint.set_xticks(range(0, 361, 45))
@@ -227,7 +229,6 @@ def plotter(fdict):
         )
         g.ax_joint.legend(loc="best")
     g.ax_joint.grid()
-    g.ax_marg_x.set_title(ctx["title"])
     g.fig.subplots_adjust(top=0.9, bottom=0.1, left=0.1)
     return g.fig, df
 

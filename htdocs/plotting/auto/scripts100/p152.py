@@ -1,8 +1,8 @@
 """Period differences"""
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.plot import MapPlot, centered_bins, get_cmap
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import SECTORS_NAME
 
@@ -87,7 +87,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     state = ctx["state"][:2]
     sector = ctx["sector"]
@@ -100,43 +99,43 @@ def plotter(fdict):
 
     table = "alldata"
     if sector == "state":
-        table = "alldata_%s" % (state,)
+        table = f"alldata_{state}"
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        WITH season1 as (
+            SELECT station, year,
+            min(case when month > 7 and low < 32 then
+                extract(doy from day) else 366 end) as first_freeze,
+            max(case when month < 7 and low < 32 then
+                extract(doy from day) else 0 end) as last_freeze
+            from {table} WHERE
+            year >= %s and year <= %s GROUP by station, year),
+        season2 as (
+            SELECT station, year,
+            min(case when month > 7 and low < 32 then
+                extract(doy from day) else 366 end) as first_freeze,
+            max(case when month < 7 and low < 32 then
+                extract(doy from day) else 0 end) as last_freeze
+            from {table} WHERE
+            year >= %s and year <= %s GROUP by station, year),
+        agg as (
+            SELECT p1.station, avg(p1.first_freeze) as p1_first_fall,
+            avg(p1.last_freeze) as p1_last_spring,
+            avg(p2.first_freeze) as p2_first_fall,
+            avg(p2.last_freeze) as p2_last_spring
+            from season1 as p1 JOIN season2 as p2 on (p1.station = p2.station)
+            GROUP by p1.station)
 
-    df = read_sql(
-        f"""
-    WITH season1 as (
-        SELECT station, year,
-        min(case when month > 7 and low < 32 then
-            extract(doy from day) else 366 end) as first_freeze,
-        max(case when month < 7 and low < 32 then
-            extract(doy from day) else 0 end) as last_freeze
-        from {table} WHERE
-        year >= %s and year <= %s GROUP by station, year),
-    season2 as (
-        SELECT station, year,
-        min(case when month > 7 and low < 32 then
-            extract(doy from day) else 366 end) as first_freeze,
-        max(case when month < 7 and low < 32 then
-            extract(doy from day) else 0 end) as last_freeze
-        from {table} WHERE
-        year >= %s and year <= %s GROUP by station, year),
-    agg as (
-        SELECT p1.station, avg(p1.first_freeze) as p1_first_fall,
-        avg(p1.last_freeze) as p1_last_spring,
-        avg(p2.first_freeze) as p2_first_fall,
-        avg(p2.last_freeze) as p2_last_spring
-        from season1 as p1 JOIN season2 as p2 on (p1.station = p2.station)
-        GROUP by p1.station)
-
-    SELECT station, ST_X(geom) as lon, ST_Y(geom) as lat,
-    d.* from agg d JOIN stations t ON (d.station = t.id)
-    WHERE t.network ~* 'CLIMATE'
-    and substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000'
-    """,
-        pgconn,
-        params=[p1syear, p1eyear, p2syear, p2eyear],
-        index_col="station",
-    )
+        SELECT station, ST_X(geom) as lon, ST_Y(geom) as lat,
+        d.* from agg d JOIN stations t ON (d.station = t.id)
+        WHERE t.network ~* 'CLIMATE'
+        and substr(station, 3, 1) != 'C' and substr(station, 3, 4) != '0000'
+        """,
+            conn,
+            params=[p1syear, p1eyear, p2syear, p2eyear],
+            index_col="station",
+        )
     if df.empty:
         raise NoDataFound("No Data Found")
     df["p1_season"] = df["p1_first_fall"] - df["p1_last_spring"]
@@ -155,9 +154,11 @@ def plotter(fdict):
         sector=sector,
         state=state,
         axisbg="white",
-        title=("%.0f-%.0f minus %.0f-%.0f %s Difference")
-        % (p2syear, p2eyear, p1syear, p1eyear, title),
-        subtitle=("based on IEM Archives"),
+        title=(
+            f"{p2syear:.0f}-{p2eyear:.0f} minus {p1syear:.0f}-"
+            f"{p1eyear:.0f} {title} Difference"
+        ),
+        subtitle="based on IEM Archives",
         titlefontsize=14,
     )
     # Create 9 levels centered on zero
@@ -178,7 +179,7 @@ def plotter(fdict):
         mp.plot_values(
             df["lon"].values,
             df["lat"].values,
-            df[varname + "_delta"].values,
+            df[f"{varname}_delta"].values,
             fmt="%.1f",
             labelbuffer=5,
         )

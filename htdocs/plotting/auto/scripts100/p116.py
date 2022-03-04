@@ -4,7 +4,7 @@ import datetime
 import seaborn as sns
 from pandas.io.sql import read_sql
 from pyiem.plot import figure_axes
-from pyiem.util import get_dbconn, get_autoplot_context
+from pyiem.util import get_sqlalchemy_conn, get_autoplot_context
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"cdd": "Cooling Degree Days", "hdd": "Heating Degree Days"}
@@ -50,28 +50,27 @@ def get_description():
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
-    pgconn = get_dbconn("coop")
 
     station = ctx["station"]
     varname = ctx["var"]
-
-    df = read_sql(
-        f"""
-        SELECT year, month, sum(precip) as sum_precip,
-        avg(high) as avg_high,
-        avg(low) as avg_low,
-        sum(cdd(high,low,60)) as cdd60,
-        sum(cdd(high,low,65)) as cdd65,
-        sum(hdd(high,low,60)) as hdd60,
-        sum(hdd(high,low,65)) as hdd65,
-        sum(case when precip > 0.009 then 1 else 0 end) as rain_days,
-        sum(case when snow >= 0.1 then 1 else 0 end) as snow_days
-        from alldata_{station[:2]} WHERE station = %s GROUP by year, month
-    """,
-        pgconn,
-        params=(station,),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = read_sql(
+            f"""
+            SELECT year, month, sum(precip) as sum_precip,
+            avg(high) as avg_high,
+            avg(low) as avg_low,
+            sum(cdd(high,low,60)) as cdd60,
+            sum(cdd(high,low,65)) as cdd65,
+            sum(hdd(high,low,60)) as hdd60,
+            sum(hdd(high,low,65)) as hdd65,
+            sum(case when precip > 0.009 then 1 else 0 end) as rain_days,
+            sum(case when snow >= 0.1 then 1 else 0 end) as snow_days
+            from alldata_{station[:2]} WHERE station = %s GROUP by year, month
+        """,
+            conn,
+            params=(station,),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     df["monthdate"] = df[["year", "month"]].apply(
@@ -79,48 +78,42 @@ def plotter(fdict):
     )
     df = df.set_index("monthdate")
 
-    res = """\
-# IEM Climodat https://mesonet.agron.iastate.edu/climodat/
-# Report Generated: %s
-# Climate Record: %s -> %s
-# Site Information: [%s] %s
-# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
-""" % (
-        datetime.date.today().strftime("%d %b %Y"),
-        ctx["_nt"].sts[station]["archive_begin"].date(),
-        datetime.date.today(),
-        station,
-        ctx["_nt"].sts[station]["name"],
-    )
-    res += """# THESE ARE THE MONTHLY %s (base=65) FOR STATION  %s
-YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    SEP    \
-OCT    NOV    DEC
-""" % (
-        PDICT[varname].upper(),
-        station,
+    res = (
+        "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
+        f"# Report Generated: {datetime.date.today():%d %b %Y}\n"
+        f"# Climate Record: {ctx['_nt'].sts[station]['archive_begin'].date()} "
+        f"-> {datetime.date.today()}\n"
+        f"# Site Information: {ctx['_sname']}\n"
+        "# Contact Information: Daryl Herzmann "
+        "akrherz@iastate.edu 515.294.5978\n"
+        f"# THESE ARE THE MONTHLY {PDICT[varname].upper()} (base=65) "
+        f"FOR STATION {station}\n"
+        "YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    "
+        "SEP    OCT    NOV    DEC\n"
     )
 
-    second = """# THESE ARE THE MONTHLY %s (base=60) FOR STATION  %s
-YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    SEP    \
-OCT    NOV    DEC
-""" % (
-        PDICT[varname].upper(),
-        station,
+    second = (
+        f"# THESE ARE THE MONTHLY {PDICT[varname].upper()} (base=60) "
+        f"FOR STATION {station}\n"
+        "YEAR    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    "
+        "SEP    OCT    NOV    DEC\n"
     )
     minyear = df["year"].min()
     maxyear = df["year"].max()
     for yr in range(minyear, maxyear + 1):
-        res += "%4i" % (yr,)
-        second += "%4i" % (yr,)
+        res += f"{yr:4.0f}"
+        second += f"{yr:4.0f}"
         for mo in range(1, 13):
             ts = datetime.date(yr, mo, 1)
             if ts not in df.index:
-                res += "%7s" % ("M",)
-                second += "%7s" % ("M",)
+                res += f"{'M':>7s}"
+                second += f"{'M':>7s}"
                 continue
             row = df.loc[ts]
-            res += "%7.0f" % (row[varname + "65"],)
-            second += "%7.0f" % (row[varname + "60"],)
+            val = row[f"{varname}65"]
+            res += f"{val:7.0f}"
+            val = row[f"{varname}60"]
+            second += f"{val:7.0f}"
         res += "\n"
         second += "\n"
 
@@ -128,24 +121,21 @@ OCT    NOV    DEC
     second += "MEAN"
     for mo in range(1, 13):
         df2 = df[df["month"] == mo]
-        res += "%7.0f" % (df2[varname + "65"].mean(),)
-        second += "%7.0f" % (df2[varname + "60"].mean(),)
+        val = df2[f"{varname}65"].mean()
+        res += f"{val:7.0f}"
+        val = df2[varname + "60"].mean()
+        second += f"{val:7.0f}"
     res += "\n"
     second += "\n"
     res += second
 
     y1 = int(fdict.get("syear", 1990))
 
-    fig, ax = figure_axes(apctx=ctx)
-    fig.text(
-        0.5,
-        0.95,
-        "[%s] %s (%s-%s)"
-        % (station, ctx["_nt"].sts[station]["name"], y1, y1 + 20),
-        ha="center",
-        fontsize=16,
+    title = (
+        f"[{station}] {ctx['_nt'].sts[station]['name']} " f"({y1}-{y1 + 20})"
     )
-    ax.set_title(r"%s base=60$^\circ$F" % (PDICT[varname],))
+    fig, ax = figure_axes(title=title, apctx=ctx)
+    ax.set_title(f"{PDICT[varname]} base=60" r"$^\circ$F")
     filtered = df[(df["year"] >= y1) & (df["year"] <= (y1 + 20))]
     df2 = filtered[["month", "year", varname + "60"]].pivot(
         "year", "month", varname + "60"

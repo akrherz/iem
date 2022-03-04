@@ -729,7 +729,10 @@ box above.</p>
 
 def generate(fdict, headers, cookies):
     """Return a dict of things for the template engine."""
-    apid = int(fdict.get("q", 0))
+    try:
+        apid = int(fdict.get("q", 0))
+    except ValueError:
+        apid = 0
     res = generate_form(apid, fdict, headers, cookies)
     content = f"""
 <h3>Automated Data Plotter</h3>

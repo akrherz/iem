@@ -74,7 +74,7 @@ def station_handler(sid):
 def find_handler(q):
     """Do we have a handler for this request?"""
     if q == "":
-        return None
+        return None, None
     if STATION_RE.match(q):
         return station_handler, q.upper()
     m = AUTOPLOT_RE.match(q)

@@ -3,7 +3,7 @@ import calendar
 
 from pandas import read_sql
 from pyiem.exceptions import NoDataFound
-from pyiem.plot.util import fitbox, draw_logo
+from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 import seaborn as sns
 from sqlalchemy import text
@@ -134,9 +134,8 @@ def plotter(fdict):
     )
 
     # Create the seaborn jointplot
-    g = sns.JointGrid(data=df, x="doy", y=varname)
-    draw_logo(g.figure, "iem")
-    fitbox(g.figure, title, 0.1, 0.9, 0.91, 0.98)
+    g = sns.JointGrid(data=df, x="doy", y=varname, height=6)
+    figure(fig=g.figure, apctx=ctx, title=title)
     # Create an inset legend for the histogram colorbar
     cax = g.figure.add_axes([0.8, 0.65, 0.02, 0.2])
 
@@ -151,7 +150,7 @@ def plotter(fdict):
     )
     g.ax_joint.set_xticks(XTICKS)
     g.ax_joint.set_xticklabels(calendar.month_abbr[1:])
-    g.ax_joint.set_xlim(0, 380)
+    g.ax_joint.set_xlim(0, 390)
     g.ax_joint.axhline(0, color="k")
     g.ax_joint.set_ylabel(PDICT[varname])
     g.ax_joint.set_xlabel("Day of Year")
@@ -161,7 +160,7 @@ def plotter(fdict):
             g.ax_joint.axhline(spi, color=colors[i], lw=2, zorder=4)
             g.ax_joint.annotate(
                 f"D{i}",
-                (1, spi),
+                (0.97, spi),
                 xycoords=("axes fraction", "data"),
                 va="center",
                 zorder=5,

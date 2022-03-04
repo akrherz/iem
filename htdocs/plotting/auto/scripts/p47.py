@@ -3,7 +3,7 @@ import calendar
 
 import pandas as pd
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.reference import FIGSIZES
+from pyiem.plot import figure
 from pyiem.exceptions import NoDataFound
 import seaborn as sns
 
@@ -52,9 +52,8 @@ def plotter(fdict):
         df = pd.read_sql(
             f"""
         SELECT year, sum(precip) as precip, sum(snow) as snow from
-        alldata_{station[:2]}
-        WHERE station = %s and month = %s and precip >= 0
-        and snow >= 0 GROUP by year ORDER by year ASC
+        alldata_{station[:2]} WHERE station = %s and month = %s and
+        precip >= 0 and snow >= 0 GROUP by year ORDER by year ASC
         """,
             conn,
             params=(station, month),
@@ -66,14 +65,14 @@ def plotter(fdict):
     g = sns.jointplot(
         x="precip", y="snow", data=df, s=50, color="tan"
     ).plot_joint(sns.kdeplot, n_levels=6)
-    g.fig.set_size_inches(*FIGSIZES[ctx["_r"]])
-    g.fig.tight_layout()
-    g.fig.subplots_adjust(top=0.91)
-    g.fig.suptitle(
+    title = (
         f"[{station}] {ctx['_nt'].sts[station]['name']}"
         f"({df.index.min()}-{df.index.max()})\n"
         f"{calendar.month_name[month]} Snowfall vs Precipitation Totals"
     )
+    figure(title=title, apctx=ctx, fig=g.figure)
+    g.fig.tight_layout()
+    g.fig.subplots_adjust(top=0.91)
     if year in df.index:
         row = df.loc[year]
         g.ax_joint.scatter(

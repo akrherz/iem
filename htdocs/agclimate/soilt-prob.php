@@ -42,7 +42,8 @@ foreach($thresholds as $k => $thres)
   /* Day Sampler */
   for ($i=0;$i<182;$i=$i+5) {
     $ts = mktime(0,0,0,1,1,2000) + ($i * 86400);
-    @$tblrows[$i] .= sprintf("<td>%.0f</td>", $probs[$i]/$yrs*100);
+    $val = array_key_exists($i, $probs) ? $probs[$i]: 0;
+    $tblrows[$i] .= sprintf("<td>%.0f</td>", $val/$yrs*100);
   }
 }
 $spring = "<table class=\"table table-condensed table-striped table-bordered\">$row1</tr>";
@@ -73,7 +74,8 @@ foreach($thresholds as $k => $thres)
   /* Day Sampler */
   for ($i=182;$i<366;$i=$i+5) {
     $ts = mktime(0,0,0,1,1,2000) + ($i * 86400);
-    @$tblrows[$i] .= sprintf("<td>%.0f</td>", $probs[$i]/$yrs*100);
+    $val = array_key_exists($i, $probs) ? $probs[$i]: 0;
+    $tblrows[$i] .= sprintf("<td>%.0f</td>", $val/$yrs*100);
   }
 }
 $fall = "<table class=\"table table-condensed table-striped table-bordered\">$row1</tr>";

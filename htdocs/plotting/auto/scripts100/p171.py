@@ -2,13 +2,14 @@
 import calendar
 
 import numpy as np
-from pandas.io.sql import read_sql
+import pandas as pd
 import seaborn as sns
 import pyiem.nws.vtec as vtec
 from pyiem import reference
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, get_dbconn
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 PDICT = {
     "wfo": "Select by NWS Forecast Office",
@@ -85,7 +86,6 @@ def get_ugc_name(ugc):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("postgis")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     phenomena = ctx["phenomena"]
@@ -94,34 +94,43 @@ def plotter(fdict):
     state = ctx["state"]
     ctx["_nt"].sts["_ALL"] = {"name": "All Offices"}
 
-    wfo_limiter = (" and wfo = '%s' ") % (
-        station if len(station) == 3 else station[1:],
-    )
+    params = {
+        "ph": phenomena,
+        "sig": significance,
+    }
+    wfo_limiter = " and wfo = :wfo "
+    params["wfo"] = station if len(station) == 3 else station[1:]
     if station == "_ALL":
         wfo_limiter = ""
     if opt == "state":
-        wfo_limiter = " and substr(ugc, 1, 2) = '%s'" % (state,)
+        wfo_limiter = " and substr(ugc, 1, 2) = :state "
+        params["state"] = state
     elif opt == "ugc":
-        wfo_limiter = f" and ugc = '{ctx['ugc']}' "
+        wfo_limiter = " and ugc = :ugc "
+        params["ugc"] = ctx["ugc"]
 
     # NB we added a hack here that may lead to some false positives when events
     # cross over months, sigh, recall the 2017 eventid pain
-    df = read_sql(
-        f"""
-        with data as (
-            SELECT distinct
-            extract(year from issue)::int as yr,
-            extract(month from issue)::int as mo, wfo, eventid
-            from warnings where phenomena = %s and significance = %s
-            {wfo_limiter}
-            GROUP by yr, mo, wfo, eventid)
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = pd.read_sql(
+            text(
+                f"""
+            with data as (
+                SELECT distinct
+                extract(year from issue)::int as yr,
+                extract(month from issue)::int as mo, wfo, eventid
+                from warnings where phenomena = :ph and significance = :sig
+                {wfo_limiter}
+                GROUP by yr, mo, wfo, eventid)
 
-        SELECT yr, mo, count(*) from data GROUP by yr, mo ORDER by yr, mo ASC
-      """,
-        pgconn,
-        params=(phenomena, significance),
-        index_col=None,
-    )
+            SELECT yr, mo, count(*) from data GROUP by yr, mo
+            ORDER by yr, mo ASC
+        """
+            ),
+            conn,
+            params=params,
+            index_col=None,
+        )
 
     if df.empty:
         if opt == "ugc":
@@ -136,22 +145,21 @@ def plotter(fdict):
         index=range(df["yr"].min(), df["yr"].max() + 1), columns=range(1, 13)
     )
 
-    title = "NWS %s" % (ctx["_nt"].sts[station]["name"],)
+    title = f"NWS {ctx['_sname']}"
     if opt == "state":
-        title = ("NWS Issued for Counties/Zones for State of %s") % (
-            reference.state_names[state],
+        title = (
+            "NWS Issued for Counties/Zones for State of "
+            f"{reference.state_names[state]}"
         )
     elif opt == "ugc":
         name, wfo = get_ugc_name(ctx["ugc"])
-        title = "NWS %s Issued for [%s] %s" % (
-            ctx["_nt"].sts[wfo]["name"],
-            ctx["ugc"],
-            name,
+        title = (
+            f"NWS [{wfo}] {ctx['_nt'].sts[wfo]['name']} Issued for "
+            f"[{ctx['ugc']}] {name}"
         )
-    subtitle = ("%s (%s.%s) Issued by Year, Month") % (
-        vtec.get_ps_string(phenomena, significance),
-        phenomena,
-        significance,
+    subtitle = (
+        f"{vtec.get_ps_string(phenomena, significance)} "
+        f"({phenomena}.{significance}) Issued by Year, Month"
     )
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     sns.heatmap(

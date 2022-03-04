@@ -128,4 +128,3 @@ function drct2txt($dir)
   else if ($dir >= 324 && $dir < 350) return "NNW";
   return "";
 }
-?>

@@ -1,11 +1,11 @@
 """Aridity"""
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 import numpy as np
 import matplotlib.dates as mdates
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 
@@ -101,65 +101,68 @@ def plotter(fdict):
     yrrange = ets.year - sts.year
     year2 = ctx.get("year2")  # could be null!
     year3 = ctx.get("year3")  # could be null!
-    pgconn = get_dbconn("coop")
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        WITH agg as (
+            SELECT o.day, o.sday,
+            avg(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as avgt,
+            sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as sump,
+            count(*) OVER (ORDER by day ASC ROWS %s PRECEDING) as cnt,
+            avg(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as avgt2,
+            sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as sump2,
+            count(*) OVER (ORDER by day ASC ROWS %s PRECEDING) as cnt2,
+            avg(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as avgt3,
+            sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as sump3,
+            count(*) OVER (ORDER by day ASC ROWS %s PRECEDING) as cnt3
+            from alldata_{station[:2]} o WHERE station = %s),
+        agg2 as (
+            SELECT sday,
+            avg(avgt) as avg_avgt, stddev(avgt) as std_avgt,
+            avg(sump) as avg_sump, stddev(sump) as std_sump,
+            avg(avgt2) as avg_avgt2, stddev(avgt2) as std_avgt2,
+            avg(sump2) as avg_sump2, stddev(sump2) as std_sump2,
+            avg(avgt3) as avg_avgt3, stddev(avgt3) as std_avgt3,
+            avg(sump3) as avg_sump3, stddev(sump3) as std_sump3
+            from agg WHERE cnt = %s GROUP by sday)
 
-    table = "alldata_%s" % (station[:2],)
-    df = read_sql(
-        f"""
-    WITH agg as (
-        SELECT o.day, o.sday,
-        avg(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as avgt,
-        sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as sump,
-        count(*) OVER (ORDER by day ASC ROWS %s PRECEDING) as cnt,
-        avg(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as avgt2,
-        sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as sump2,
-        count(*) OVER (ORDER by day ASC ROWS %s PRECEDING) as cnt2,
-        avg(high) OVER (ORDER by day ASC ROWS %s PRECEDING) as avgt3,
-        sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as sump3,
-        count(*) OVER (ORDER by day ASC ROWS %s PRECEDING) as cnt3
-        from {table} o WHERE station = %s),
-    agg2 as (
-        SELECT sday,
-        avg(avgt) as avg_avgt, stddev(avgt) as std_avgt,
-        avg(sump) as avg_sump, stddev(sump) as std_sump,
-        avg(avgt2) as avg_avgt2, stddev(avgt2) as std_avgt2,
-        avg(sump2) as avg_sump2, stddev(sump2) as std_sump2,
-        avg(avgt3) as avg_avgt3, stddev(avgt3) as std_avgt3,
-        avg(sump3) as avg_sump3, stddev(sump3) as std_sump3
-        from agg WHERE cnt = %s GROUP by sday)
-
-    SELECT day,
-    (a.avgt - b.avg_avgt) / b.std_avgt as t,
-    (a.sump - b.avg_sump) / b.std_sump as p,
-    (a.avgt2 - b.avg_avgt2) / b.std_avgt2 as t2,
-    (a.sump2 - b.avg_sump2) / b.std_sump2 as p2,
-    (a.avgt3 - b.avg_avgt3) / b.std_avgt3 as t3,
-    (a.sump3 - b.avg_sump3) / b.std_sump3 as p3
-    from agg a JOIN agg2 b on (a.sday = b.sday)
-    ORDER by day ASC
-    """,
-        pgconn,
-        params=(
-            days - 1,
-            days - 1,
-            days - 1,
-            _days2 - 1,
-            _days2 - 1,
-            _days2 - 1,
-            _days3 - 1,
-            _days3 - 1,
-            _days3 - 1,
-            station,
-            days,
-        ),
-        index_col="day",
-    )
+        SELECT day,
+        (a.avgt - b.avg_avgt) / b.std_avgt as t,
+        (a.sump - b.avg_sump) / b.std_sump as p,
+        (a.avgt2 - b.avg_avgt2) / b.std_avgt2 as t2,
+        (a.sump2 - b.avg_sump2) / b.std_sump2 as p2,
+        (a.avgt3 - b.avg_avgt3) / b.std_avgt3 as t3,
+        (a.sump3 - b.avg_sump3) / b.std_sump3 as p3
+        from agg a JOIN agg2 b on (a.sday = b.sday)
+        ORDER by day ASC
+        """,
+            conn,
+            params=(
+                days - 1,
+                days - 1,
+                days - 1,
+                _days2 - 1,
+                _days2 - 1,
+                _days2 - 1,
+                _days3 - 1,
+                _days3 - 1,
+                _days3 - 1,
+                station,
+                days,
+            ),
+            index_col="day",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     df["aridity"] = df["t"] - df["p"]
     df["aridity2"] = df["t2"] - df["p2"]
     df["aridity3"] = df["t3"] - df["p3"]
-    (fig, ax) = figure_axes(apctx=ctx)
+    title = "" if year2 is None else f"{days} Day"
+    title = (
+        f"{ctx['_sname']} {title} Aridity Index\n"
+        "Std. High Temp Departure minus Std. Precip Departure"
+    )
+    (fig, ax) = figure_axes(apctx=ctx, title=title)
 
     if year2 is None:
         df2 = df.loc[sts:ets]
@@ -168,7 +171,7 @@ def plotter(fdict):
             df2["aridity"],
             color="r",
             lw=2,
-            label="%s days" % (days,),
+            label=f"{days} days",
         )
         maxval = df2["aridity"].abs().max() + 0.25
         if days2 > 0:
@@ -177,7 +180,7 @@ def plotter(fdict):
                 df2["aridity2"],
                 color="b",
                 lw=2,
-                label="%s days" % (days2,),
+                label=f"{days2} days",
             )
             maxval = max([maxval, df2["aridity2"].abs().max() + 0.25])
         if days3 > 0:
@@ -186,11 +189,10 @@ def plotter(fdict):
                 df2["aridity3"],
                 color="g",
                 lw=2,
-                label="%s days" % (days3,),
+                label=f"{days3} days",
             )
             maxval = max([maxval, df2["aridity3"].abs().max() + 0.25])
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d %b\n%Y"))
-        title = ""
     else:
         df2 = df.loc[sts:ets]
         ax.plot(
@@ -198,7 +200,7 @@ def plotter(fdict):
             df2["aridity"],
             color="r",
             lw=2,
-            label="%s" % (ets.year,),
+            label=f"{ets.year}",
         )
         maxval = df2["aridity"].abs().max() + 0.25
         if year2 is not None:
@@ -222,7 +224,7 @@ def plotter(fdict):
                 df2["aridity"],
                 color="b",
                 lw=2,
-                label="%s" % (year2,),
+                label=f"{year2}",
             )
             maxval = max([maxval, df2["aridity"].abs().max() + 0.25])
         if year3 is not None:
@@ -234,7 +236,7 @@ def plotter(fdict):
                 df2["aridity"],
                 color="g",
                 lw=2,
-                label="%s" % (year3,),
+                label=f"{year3}",
             )
             maxval = max([maxval, df2["aridity"].abs().max() + 0.25])
 
@@ -262,21 +264,12 @@ def plotter(fdict):
                 df2["aridity"],
                 color="k",
                 lw=2,
-                label="%s (%s best match)" % (useyear, ets.year),
+                label=f"{useyear} ({ets.year} best match)",
             )
             maxval = max([maxval, df2["aridity"].abs().max() + 0.25])
-        title = "%s Day" % (days,)
-        ax.set_xlabel(
-            "%s to %s" % (sts.strftime("%-d %b"), ets.strftime("%-d %b"))
-        )
+        ax.set_xlabel(f"{sts:%-d %b} to {ets:%-d %b}")
     ax.grid(True)
-    ax.set_title(
-        (
-            "%s [%s] %s Aridity Index\n"
-            "Std. High Temp Departure minus Std. Precip Departure"
-        )
-        % (ctx["_nt"].sts[station]["name"], station, title)
-    )
+
     ax.set_ylim(0 - maxval, maxval)
     ax.set_ylabel("Aridity Index")
     ax.text(
@@ -302,4 +295,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})
