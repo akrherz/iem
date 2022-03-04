@@ -269,13 +269,14 @@ def plotter(fdict):
         df = read_postgis(
             text(
                 """
-            select product_issue, issue, expire, geom
+            select product_issue, issue, expire, geom,
+            extract(year from issue at time zone 'UTC') as year
             from spc_outlooks where outlook_type = :ot and day = :day and
             cycle = :hour and threshold = :t and category = :cat and
             ST_Intersects(geom,
             ST_GeomFromEWKT('SRID=4326;POLYGON((:g1 :g2, :g3 :g4,
             :g5 :g6, :g7 :g8, :g9 :g10))'))
-            and extract(month from product_issue) in :months
+            and extract(month from issue) in :months
             and product_issue > '2002-01-01' and
             product_issue < :edate ORDER by product_issue ASC
         """
@@ -301,20 +302,27 @@ def plotter(fdict):
                 "edate": ctx.get("edate", utc() + datetime.timedelta(days=2)),
             },
             geom_col="geom",
+            index_col=None,
         )
     if df.empty:
         raise NoDataFound("No results found for query")
     affine = Affine(griddelta, 0.0, GRIDWEST, 0.0, 0 - griddelta, GRIDNORTH)
     czs = CachingZonalStats(affine)
     czs.compute_gridnav(df["geom"], raster)
-    for nav in czs.gridnav:
+    for i, nav in enumerate(czs.gridnav):
         if nav is None:
             continue
         grid = np.ones((nav.ysz, nav.xsz))
         grid[nav.mask] = 0.0
         jslice = slice(nav.y0, nav.y0 + nav.ysz)
         islice = slice(nav.x0, nav.x0 + nav.xsz)
-        raster[jslice, islice] += grid
+        if ctx["w"] == "lastyear":
+            raster[jslice, islice] = np.max(
+                [raster[jslice, islice], grid * df.loc[i]["year"]],
+                axis=0,
+            )
+        else:
+            raster[jslice, islice] += grid
 
     raster = np.flipud(raster)
     years = (utc() - df["issue"].min()).total_seconds() / 365.25 / 86400.0
@@ -343,7 +351,7 @@ def plotter(fdict):
         axisbg="white",
         title=(
             f"{'WPC' if p.split('.')[1] == 'E' else 'SPC'} {ISSUANCE[p]} "
-            f"Outlook [{month.capitalize()}] of at least "
+            f"Outlook [{MDICT[month]}] of at least "
             f"{OUTLOOKS[level].split('(')[0].strip()}"
         ),
         subtitle=f"{PDICT2[ctx['w']]}, {subtitle}",
@@ -394,7 +402,7 @@ def plotter(fdict):
         cmap=cmap,
         clip_on=False,
         units=UNITS[ctx["w"]],
-        extend="both",  # dragons
+        extend="both" if ctx["w"] != "lastyear" else "neither",  # dragons
     )
     # Cut down on SVG et al size
     res.set_rasterized(True)
