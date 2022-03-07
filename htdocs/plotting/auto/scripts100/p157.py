@@ -2,8 +2,8 @@
 import calendar
 import datetime
 
-from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconn
+import pandas as pd
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
@@ -74,7 +74,6 @@ def nice(val):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("iem")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     year = ctx["year"]
@@ -83,23 +82,24 @@ def plotter(fdict):
     varname = ctx["var"]
 
     op = ">=" if mydir == "above" else "<"
-    df = read_sql(
-        f"""
-        SELECT day, extract(doy from day) as doy,
-        extract(year from day) as year,
-        extract(week from day) as week,
-        max_rh, min_rh, avg_rh,
-        case when {varname} {op} %s then 1 else 0 end
-        as rh_exceed
-        from summary s JOIN stations t
-        ON (s.iemid = t.iemid) WHERE t.id = %s and t.network = %s
-        and min_rh is not null and max_rh is not null
-        ORDER by day ASC
-    """,
-        pgconn,
-        params=(threshold, station, ctx["network"]),
-        index_col="day",
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        df = pd.read_sql(
+            f"""
+            SELECT day, extract(doy from day) as doy,
+            extract(year from day) as year,
+            extract(week from day) as week,
+            max_rh, min_rh, avg_rh,
+            case when {varname} {op} %s then 1 else 0 end
+            as rh_exceed
+            from summary s JOIN stations t
+            ON (s.iemid = t.iemid) WHERE t.id = %s and t.network = %s
+            and min_rh is not null and max_rh is not null
+            ORDER by day ASC
+        """,
+            conn,
+            params=(threshold, station, ctx["network"]),
+            index_col="day",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
 
@@ -109,7 +109,11 @@ def plotter(fdict):
         raise NoDataFound("No Data Found.")
     wdf = df.groupby("week").mean()
 
-    (fig, ax) = figure_axes(apctx=ctx)
+    title = (
+        f"{ctx['_sname']} ({df['year'].min():.0f}-{df['year'].max():.0f})\n"
+        f"{year:.0f} Daily Relative Humidity"
+    )
+    (fig, ax) = figure_axes(apctx=ctx, title=title)
     ax.plot(
         gdf.index.values, gdf["max_rh"].values, color="b", lw=2, label="Max"
     )
@@ -139,16 +143,6 @@ def plotter(fdict):
     ax.set_ylim(0, 100)
     ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     ax.grid(True)
-    ax.set_title(
-        ("%s [%s] (%.0f-%.0f)\n" "%.0f Daily Relative Humidity")
-        % (
-            ctx["_nt"].sts[station]["name"],
-            station,
-            df["year"].min(),
-            df["year"].max(),
-            year,
-        )
-    )
     ax2 = ax.twinx()
     ax2.set_ylabel(
         f"Daily Frequency w/ {varname} {op} {threshold:.0f}%", color="r"

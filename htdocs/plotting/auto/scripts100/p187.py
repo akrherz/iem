@@ -1,7 +1,7 @@
 """Percentile Rank for station's data."""
 
-from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconn
+import pandas as pd
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import figure
 from pyiem.exceptions import NoDataFound
 
@@ -48,36 +48,36 @@ def plotter(fdict):
     station = ctx["station"]
     varname = ctx["var"]
     assert varname in PDICT
-
-    df = read_sql(
-        f"""
-    with data as (
-        select station, year, sum(precip) as precip,
-        avg(high) as high, avg(low) as low,
-        avg((high+low)/2.) as temp, count(*) from alldata_{station[:2]}
-        WHERE year >= 1893 and substr(station, 3, 1) != 'C' and
-        substr(station, 3, 4) != '0000' GROUP by station, year
-    ), counts as (
-        select year, max(count) as maxcnt from data GROUP by year
-    ), quorum as (
-        select d.* from data d JOIN counts a on (d.year = a.year) WHERE
-        d.count = a.maxcnt
-    ), stdata as (
-        select year, precip, high, low, temp from data where station = %s
-    ), agg as (
-        select station, year,
-        avg({varname}) OVER (PARTITION by year) as avgval,
-        rank() OVER (PARTITION by year ORDER by {varname} ASC) /
-        count(*) OVER (PARTITION by year)::float * 100. as percentile
-        from data)
-    select a.station, a.year, a.percentile, s.{varname}, a.avgval
-    from agg a JOIN stdata s on (a.year = s.year)
-    where a.station = %s ORDER by a.year ASC
-    """,
-        get_dbconn("coop"),
-        params=(station, station),
-        index_col="year",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        with data as (
+            select station, year, sum(precip) as precip,
+            avg(high) as high, avg(low) as low,
+            avg((high+low)/2.) as temp, count(*) from alldata_{station[:2]}
+            WHERE year >= 1893 and substr(station, 3, 1) != 'C' and
+            substr(station, 3, 4) != '0000' GROUP by station, year
+        ), counts as (
+            select year, max(count) as maxcnt from data GROUP by year
+        ), quorum as (
+            select d.* from data d JOIN counts a on (d.year = a.year) WHERE
+            d.count = a.maxcnt
+        ), stdata as (
+            select year, precip, high, low, temp from data where station = %s
+        ), agg as (
+            select station, year,
+            avg({varname}) OVER (PARTITION by year) as avgval,
+            rank() OVER (PARTITION by year ORDER by {varname} ASC) /
+            count(*) OVER (PARTITION by year)::float * 100. as percentile
+            from data)
+        select a.station, a.year, a.percentile, s.{varname}, a.avgval
+        from agg a JOIN stdata s on (a.year = s.year)
+        where a.station = %s ORDER by a.year ASC
+        """,
+            conn,
+            params=(station, station),
+            index_col="year",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
 

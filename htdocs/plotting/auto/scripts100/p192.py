@@ -4,12 +4,11 @@ import datetime
 import pytz
 import numpy as np
 import pandas as pd
-from pandas.io.sql import read_sql
 from metpy.calc import apparent_temperature
 from metpy.units import units
 from pyiem import reference
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
@@ -85,71 +84,70 @@ def get_df(ctx, bnds, buf=2.25):
     """Figure out what data we need to fetch here"""
     if ctx.get("valid"):
         valid = ctx["valid"].replace(tzinfo=pytz.utc)
-        dbconn = get_dbconn("asos")
-        df = read_sql(
-            """
-        WITH mystation as (
-            select id, st_x(geom) as lon, st_y(geom) as lat,
-            state, wfo from stations
-            where (network ~* 'ASOS' or network = 'AWOS') and
-            ST_contains(ST_geomfromtext(
-                'SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))
-                        '), geom)
-        )
-        SELECT station, vsby, tmpf, dwpf, sknt, state, wfo, lat, lon, relh,
-        abs(extract(epoch from (%s - valid))) as tdiff from
-        alldata a JOIN mystation m on (a.station = m.id)
-        WHERE a.valid between %s and %s ORDER by tdiff ASC
-        """,
-            dbconn,
-            params=(
-                bnds[0] - buf,
-                bnds[1] - buf,
-                bnds[0] - buf,
-                bnds[3] + buf,
-                bnds[2] + buf,
-                bnds[3] + buf,
-                bnds[2] + buf,
-                bnds[1] - buf,
-                bnds[0] - buf,
-                bnds[1] - buf,
-                valid,
-                valid - datetime.timedelta(minutes=30),
-                valid + datetime.timedelta(minutes=30),
-            ),
-        )
+        with get_sqlalchemy_conn("asos") as conn:
+            df = pd.read_sql(
+                """
+            WITH mystation as (
+                select id, st_x(geom) as lon, st_y(geom) as lat,
+                state, wfo from stations
+                where (network ~* 'ASOS' or network = 'AWOS') and
+                ST_contains(ST_geomfromtext(
+                    'SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))
+                            '), geom)
+            )
+            SELECT station, vsby, tmpf, dwpf, sknt, state, wfo, lat, lon, relh,
+            abs(extract(epoch from (%s - valid))) as tdiff from
+            alldata a JOIN mystation m on (a.station = m.id)
+            WHERE a.valid between %s and %s ORDER by tdiff ASC
+            """,
+                conn,
+                params=(
+                    bnds[0] - buf,
+                    bnds[1] - buf,
+                    bnds[0] - buf,
+                    bnds[3] + buf,
+                    bnds[2] + buf,
+                    bnds[3] + buf,
+                    bnds[2] + buf,
+                    bnds[1] - buf,
+                    bnds[0] - buf,
+                    bnds[1] - buf,
+                    valid,
+                    valid - datetime.timedelta(minutes=30),
+                    valid + datetime.timedelta(minutes=30),
+                ),
+            )
         df = df.groupby("station").first()
     else:
-        dbconn = get_dbconn("iem")
         valid = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
-        df = read_sql(
-            """
-            SELECT state, wfo, tmpf, dwpf, sknt, relh,
-      id, network, vsby, ST_x(geom) as lon, ST_y(geom) as lat
-    FROM
-      current c JOIN stations s ON (s.iemid = c.iemid)
-    WHERE
-      (s.network ~* 'ASOS' or s.network = 'AWOS') and s.country = 'US' and
-      valid + '80 minutes'::interval > now() and
-      vsby >= 0 and vsby <= 10 and
-      ST_contains(ST_geomfromtext(
-                        'SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))
-                        '), geom)
-        """,
-            dbconn,
-            params=(
-                bnds[0] - buf,
-                bnds[1] - buf,
-                bnds[0] - buf,
-                bnds[3] + buf,
-                bnds[2] + buf,
-                bnds[3] + buf,
-                bnds[2] + buf,
-                bnds[1] - buf,
-                bnds[0] - buf,
-                bnds[1] - buf,
-            ),
-        )
+        with get_sqlalchemy_conn("iem") as conn:
+            df = pd.read_sql(
+                """
+                SELECT state, wfo, tmpf, dwpf, sknt, relh,
+        id, network, vsby, ST_x(geom) as lon, ST_y(geom) as lat
+        FROM
+        current c JOIN stations s ON (s.iemid = c.iemid)
+        WHERE
+        (s.network ~* 'ASOS' or s.network = 'AWOS') and s.country = 'US' and
+        valid + '80 minutes'::interval > now() and
+        vsby >= 0 and vsby <= 10 and
+        ST_contains(ST_geomfromtext(
+            'SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))'), geom)
+            """,
+                conn,
+                params=(
+                    bnds[0] - buf,
+                    bnds[1] - buf,
+                    bnds[0] - buf,
+                    bnds[3] + buf,
+                    bnds[2] + buf,
+                    bnds[3] + buf,
+                    bnds[2] + buf,
+                    bnds[1] - buf,
+                    bnds[0] - buf,
+                    bnds[1] - buf,
+                ),
+            )
     return df, valid
 
 
@@ -163,10 +161,7 @@ def plotter(fdict):
         title = reference.state_names[ctx["state"]]
     else:
         bnds = reference.wfo_bounds[ctx["wfo"]]
-        title = "NWS CWA %s [%s]" % (
-            ctx["_nt"].sts[ctx["wfo"]]["name"],
-            ctx["wfo"],
-        )
+        title = f"NWS CWA {ctx['_sname']}"
     df, valid = get_df(ctx, bnds)
     if df.empty:
         raise NoDataFound("No data was found for your query")
@@ -176,8 +171,8 @@ def plotter(fdict):
         state=ctx["state"],
         cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),
         axisbg="white",
-        title="%s for %s" % (PDICT2[ctx["v"]], title),
-        subtitle=("Map valid: %s UTC") % (valid.strftime("%d %b %Y %H:%M"),),
+        title=f"{PDICT2[ctx['v']]} for {title}",
+        subtitle=f"Map valid: {valid:%d %b %Y %H:%M} UTC",
         nocaption=True,
         titlefontsize=16,
     )

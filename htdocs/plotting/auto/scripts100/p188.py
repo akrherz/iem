@@ -2,8 +2,8 @@
 import datetime
 import calendar
 
-from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconn
+import pandas as pd
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import figure
 from pyiem.exceptions import NoDataFound
 
@@ -73,9 +73,6 @@ def plotter(fdict):
     varname = ctx["var"]
     thres = ctx["thres"]
     thres2 = ctx["thres2"]
-
-    dbconn = get_dbconn("coop")
-
     table = f"alldata_{station[:2]}"
     if varname == "fall":
         sql = f"""
@@ -115,39 +112,37 @@ def plotter(fdict):
         a.peak_value, a.count_days
         from doy d JOIN agg a on (d.year = a.year) ORDER by d.year"""
         title = (
-            "Min low after first %.0f+ high, " "days below %.0f till 1 Jun"
-        ) % (thres, thres2)
+            f"Min low after first {thres:.0f}+ high, "
+            f"days below {thres2:.0f} till 1 Jun"
+        )
         ctx["ax1_ylabel"] = r"Min Low Temperature $^\circ$F"
-        ctx["ax2_xlabel"] = "Date of First %.0f High" % (thres,)
-    df = read_sql(
-        sql, dbconn, params=(station, thres, thres2, station), index_col="year"
-    )
+        ctx["ax2_xlabel"] = f"Date of First {thres:.0f} High"
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            sql,
+            conn,
+            params=(station, thres, thres2, station),
+            index_col="year",
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     df2 = None
     if ctx["year"] in df.index:
         df2 = df.loc[ctx["year"]]
-    fig = figure(apctx=ctx)
+    title = (
+        f"{ctx['_sname']} {PDICT[varname]}\n"
+        f"{title} ({df.index.min():.0f}-{df.index.max():.0f})"
+    )
+    fig = figure(apctx=ctx, title=title)
     (ax, ax2, ax3) = fig.subplots(3, 1)
-    ax.set_position([0.1, 0.7, 0.85, 0.25])
-    ax2.set_position([0.1, 0.4, 0.85, 0.25])
-    ax3.set_position([0.1, 0.1, 0.85, 0.25])
+    ax.set_position([0.1, 0.61, 0.85, 0.22])
+    ax2.set_position([0.1, 0.33, 0.85, 0.22])
+    ax3.set_position([0.1, 0.08, 0.85, 0.22])
 
     ax.bar(df.index.values, df["peak_value"], zorder=1)
     if df2 is not None:
         ax.bar(ctx["year"], df2["peak_value"], color="red", zorder=2)
     ax.grid(True)
-    ax.set_title(
-        ("[%s] %s %s\n%s (%.0f-%.0f)")
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            PDICT[varname],
-            title,
-            df.index.min(),
-            df.index.max(),
-        )
-    )
     ax.set_xlim(df.index.min() - 1, df.index.max() + 1)
     ax.set_ylim(df["peak_value"].min() - 5, df["peak_value"].max() + 5)
     ax.set_ylabel(ctx["ax1_ylabel"])
@@ -191,4 +186,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

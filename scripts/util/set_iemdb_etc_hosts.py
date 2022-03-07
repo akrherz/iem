@@ -8,7 +8,7 @@ IPS = "172.16.170.1 172.16.172.1 172.16.174.1".split()
 LOOKUP = {
     "": IPS[METVM4],
     "-afos": IPS[METVM4],
-    "-asos": IPS[METVM4],
+    "-asos": IPS[METVM6],
     "-asos1min": IPS[METVM4],
     "-awos": IPS[METVM6],
     "-coop": IPS[METVM2],

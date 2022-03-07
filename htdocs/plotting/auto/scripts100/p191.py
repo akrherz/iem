@@ -1,12 +1,13 @@
 """VTEC Products issued by date"""
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.nws import vtec
 from pyiem.plot import calendar_plot
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, get_dbconn
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 PDICT = {"yes": "Colorize Cells in Chart", "no": "Just plot values please"}
 PDICT2 = {
@@ -127,7 +128,6 @@ def get_ugc_name(ugc):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("postgis")
     ctx = get_autoplot_context(fdict, get_description())
     sts = ctx["sdate"]
     ets = ctx["edate"]
@@ -153,13 +153,19 @@ def plotter(fdict):
 
     pstr = []
     title = ""
+    params = {}
+    params["tzname"] = ctx["_nt"].sts[wfo]["tzname"]
+    params["sts"] = sts - datetime.timedelta(days=2)
+    params["ets"] = ets + datetime.timedelta(days=2)
     for i, (p, s) in enumerate(zip(phenomena, significance)):
-        pstr.append("(phenomena = '%s' and significance = '%s')" % (p, s))
+        pstr.append(f"(phenomena = :ph{i} and significance = :sig{i})")
+        params[f"ph{i}"] = p
+        params[f"sig{i}"] = s
         if i == 2:
             title += "\n"
-        title += "%s %s.%s, " % (vtec.get_ps_string(p, s), p, s)
+        title += f"{vtec.get_ps_string(p, s)} {p}.{s}, "
     pstr = " or ".join(pstr)
-    pstr = "(%s)" % (pstr,)
+    pstr = f"({pstr})"
 
     if ctx["w"] == "wfo":
         ctx["_nt"].sts["_ALL"] = {
@@ -168,46 +174,42 @@ def plotter(fdict):
         }
         if wfo not in ctx["_nt"].sts:
             raise NoDataFound("No Data Found.")
-        wfo_limiter = (" and wfo = '%s' ") % (
-            wfo if len(wfo) == 3 else wfo[1:],
-        )
+        wfo_limiter = " and wfo = :wfo "
+        params["wfo"] = wfo if len(wfo) == 3 else wfo[1:]
         if wfo == "_ALL":
             wfo_limiter = ""
-        tzname = ctx["_nt"].sts[wfo]["tzname"]
-        title2 = "NWS %s [%s]" % (ctx["_nt"].sts[wfo]["name"], wfo)
+        title2 = f"NWS {ctx['_sname']}"
         if wfo == "_ALL":
             title2 = "All NWS Offices"
     elif ctx["w"] == "ugc":
-        wfo_limiter = f" and ugc = '{ctx['ugc']}' "
+        wfo_limiter = " and ugc = :ugc "
+        params["ugc"] = ctx["ugc"]
         name, wfo = get_ugc_name(ctx["ugc"])
-        tzname = ctx["_nt"].sts[wfo]["tzname"]
         title2 = f"[{ctx['ugc']}] {name}"
     else:
-        wfo_limiter = " and substr(ugc, 1, 2) = '%s' " % (ctx["state"],)
-        tzname = "America/Chicago"
+        wfo_limiter = " and substr(ugc, 1, 2) = :state "
+        params["state"] = ctx["state"]
         title2 = state_names[ctx["state"]]
-
-    df = read_sql(
-        f"""
-with events as (
-  select wfo, min(issue at time zone %s) as localissue,
-  extract(year from issue) as year,
-  phenomena, significance, eventid from warnings
-  where {pstr} {wfo_limiter} and
-  issue >= %s and issue < %s GROUP by wfo, year, phenomena, significance,
-  eventid
-)
-
-SELECT date(localissue), count(*) from events GROUP by date(localissue)
-    """,
-        pgconn,
-        params=(
-            tzname,
-            sts - datetime.timedelta(days=2),
-            ets + datetime.timedelta(days=2),
-        ),
-        index_col="date",
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = pd.read_sql(
+            text(
+                f"""
+    with events as (
+    select wfo, min(issue at time zone :tzname) as localissue,
+    extract(year from issue) as year,
+    phenomena, significance, eventid from warnings
+    where {pstr} {wfo_limiter} and
+    issue >= :sts and issue < :ets GROUP by wfo, year, phenomena, significance,
+    eventid
     )
+
+    SELECT date(localissue), count(*) from events GROUP by date(localissue)
+        """
+            ),
+            conn,
+            params=params,
+            index_col="date",
+        )
 
     data = {}
     now = sts
@@ -222,10 +224,8 @@ SELECT date(localissue), count(*) from events GROUP by date(localissue)
         data,
         apctx=ctx,
         heatmap=(ctx["heatmap"] == "yes"),
-        title=("Number of VTEC Events for %s by Local Calendar Date")
-        % (title2,),
-        subtitle="Valid %s - %s for %s"
-        % (sts.strftime("%d %b %Y"), ets.strftime("%d %b %Y"), title),
+        title=f"Number of VTEC Events for {title2} by Local Calendar Date",
+        subtitle=f"Valid {sts:%d %b %Y} - {ets:%d %b %Y} for {title}",
     )
     return fig, df
 

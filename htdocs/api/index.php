@@ -25,6 +25,7 @@ not be implied as an endorsement. Of course, you can just search google for
 
 <ul>
  <li><a href="https://www.aerisweather.com/develop/">Aeris Weather</a></li>
+ <li><a href="https://developer.baronweather.com/">Baron Weather</a></li>
  <li><a href="https://realearth.ssec.wisc.edu/doc/api.php">SSEC RealEarth API</a></li>
  <li><a href="https://www.visualcrossing.com/weather-api">Visual Crossing Weather</a></li>
  <li><a href="https://www.weatherbit.io/api/">Weatherbit API</a></li>

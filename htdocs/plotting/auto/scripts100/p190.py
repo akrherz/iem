@@ -2,11 +2,11 @@
 import calendar
 
 import numpy as np
-from pandas.io.sql import read_sql
+import pandas as pd
 import matplotlib.colors as mpcolors
 from pyiem.plot import figure
 from pyiem.plot import get_cmap
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 
@@ -68,65 +68,56 @@ def magic(fig, ax, df, colname, title, ctx):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
 
-    table = "alldata_%s" % (station[:2],)
-
-    df = read_sql(
-        f"""
-    WITH data as (
-        SELECT sday, day, year,
-        rank() OVER (PARTITION by sday ORDER by high DESC NULLS LAST)
-            as max_high_rank,
-        rank() OVER (PARTITION by sday ORDER by high ASC NULLS LAST)
-            as min_high_rank,
-        rank() OVER (PARTITION by sday ORDER by low DESC NULLS LAST)
-            as max_low_rank,
-        rank() OVER (PARTITION by sday ORDER by low ASC NULLS LAST)
-            as min_low_rank,
-        rank() OVER (PARTITION by sday ORDER by precip DESC NULLS LAST)
-            as max_precip_rank
-        from {table} WHERE station = %s)
-    SELECT *,
-    extract(doy from
-    ('2000-'||substr(sday, 1, 2)||'-'||substr(sday, 3, 2))::date) as doy
-    from data WHERE max_high_rank = 1 or min_high_rank = 1 or
-    max_low_rank = 1 or min_low_rank = 1 or max_precip_rank = 1
-    ORDER by day ASC
-    """,
-        pgconn,
-        params=(station,),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        WITH data as (
+            SELECT sday, day, year,
+            rank() OVER (PARTITION by sday ORDER by high DESC NULLS LAST)
+                as max_high_rank,
+            rank() OVER (PARTITION by sday ORDER by high ASC NULLS LAST)
+                as min_high_rank,
+            rank() OVER (PARTITION by sday ORDER by low DESC NULLS LAST)
+                as max_low_rank,
+            rank() OVER (PARTITION by sday ORDER by low ASC NULLS LAST)
+                as min_low_rank,
+            rank() OVER (PARTITION by sday ORDER by precip DESC NULLS LAST)
+                as max_precip_rank
+            from alldata_{station[:2]} WHERE station = %s)
+        SELECT *,
+        extract(doy from
+        ('2000-'||substr(sday, 1, 2)||'-'||substr(sday, 3, 2))::date) as doy
+        from data WHERE max_high_rank = 1 or min_high_rank = 1 or
+        max_low_rank = 1 or min_low_rank = 1 or max_precip_rank = 1
+        ORDER by day ASC
+        """,
+            conn,
+            params=(station,),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
 
-    fig = figure(apctx=ctx)
-    fig.text(
-        0.5,
-        0.95,
-        ("[%s] %s Year of Daily Records, ties included")
-        % (station, ctx["_nt"].sts[station]["name"]),
-        ha="center",
-        fontsize=16,
-    )
+    title = f"{ctx['_sname']} Year of Daily Records, ties included"
+    fig = figure(apctx=ctx, title=title)
     axwidth = 0.265
     x0 = 0.04
-    ax = fig.add_axes([x0, 0.56, axwidth, 0.35])
+    ax = fig.add_axes([x0, 0.54, axwidth, 0.35])
     magic(fig, ax, df, "max_high_rank", "Maximum High (warm)", ctx)
-    ax = fig.add_axes([x0, 0.11, axwidth, 0.35])
+    ax = fig.add_axes([x0, 0.09, axwidth, 0.35])
     magic(fig, ax, df, "min_high_rank", "Minimum High (cold)", ctx)
-    ax = fig.add_axes([x0 + 0.32, 0.56, axwidth, 0.35])
+    ax = fig.add_axes([x0 + 0.32, 0.54, axwidth, 0.35])
     magic(fig, ax, df, "max_low_rank", "Maximum Low (warm)", ctx)
-    ax = fig.add_axes([x0 + 0.32, 0.11, axwidth, 0.35])
+    ax = fig.add_axes([x0 + 0.32, 0.09, axwidth, 0.35])
     magic(fig, ax, df, "min_low_rank", "Minimum Low (cold)", ctx)
-    ax = fig.add_axes([x0 + 0.64, 0.11, axwidth, 0.35])
+    ax = fig.add_axes([x0 + 0.64, 0.09, axwidth, 0.35])
     magic(fig, ax, df, "max_precip_rank", "Maximum Precipitation", ctx)
 
     return fig, df
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

@@ -1,20 +1,18 @@
 """NWSLI stations over/under"""
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.plot import figure_axes
 from pyiem.plot.use_agg import plt
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
-MDICT = dict(
-    [
-        ("high", "High Temperature"),
-        ("low", "Low Temperature"),
-        ("precip", "Reported Precip"),
-        ("snow", "Reported Snowfall"),
-    ]
-)
+MDICT = {
+    "high": "High Temperature",
+    "low": "Low Temperature",
+    "precip": "Reported Precip",
+    "snow": "Reported Snowfall",
+}
 
 
 def get_description():
@@ -61,73 +59,69 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("iem")
     ctx = get_autoplot_context(fdict, get_description())
 
     sts = ctx["sts"]
     ets = ctx["ets"]
     varname = ctx["var"]
-
-    df = read_sql(
-        """
-    WITH data as (
-        SELECT valid, high - high_normal as high_delta,
-        low - low_normal as low_delta, precip, snow
-        from cli_data where valid >= %s and valid <= %s
-        and substr(station, 1, 1) = 'K'
-    )
-    SELECT valid,
-    sum(case when high_delta > 0 then 1 else 0 end) as high_above,
-    sum(case when high_delta = 0 then 1 else 0 end) as high_equal,
-    sum(case when high_delta < 0 then 1 else 0 end) as high_below,
-    sum(case when low_delta > 0 then 1 else 0 end) as low_above,
-    sum(case when low_delta = 0 then 1 else 0 end) as low_equal,
-    sum(case when low_delta < 0 then 1 else 0 end) as low_below,
-    sum(case when precip > 0.005 then 1 else 0 end) as precip_above,
-    sum(case when precip < 0.005 then 1 else 0 end) as precip_below,
-    sum(case when snow > 0.005 then 1 else 0 end) as snow_above,
-    sum(case when snow < 0.005 then 1 else 0 end) as snow_below
-    from data GROUP by valid ORDER by valid ASC
-    """,
-        pgconn,
-        params=(sts, ets),
-        index_col="valid",
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        df = pd.read_sql(
+            """
+        WITH data as (
+            SELECT valid, high - high_normal as high_delta,
+            low - low_normal as low_delta, precip, snow
+            from cli_data where valid >= %s and valid <= %s
+            and substr(station, 1, 1) = 'K'
+        )
+        SELECT valid,
+        sum(case when high_delta > 0 then 1 else 0 end) as high_above,
+        sum(case when high_delta = 0 then 1 else 0 end) as high_equal,
+        sum(case when high_delta < 0 then 1 else 0 end) as high_below,
+        sum(case when low_delta > 0 then 1 else 0 end) as low_above,
+        sum(case when low_delta = 0 then 1 else 0 end) as low_equal,
+        sum(case when low_delta < 0 then 1 else 0 end) as low_below,
+        sum(case when precip > 0.005 then 1 else 0 end) as precip_above,
+        sum(case when precip < 0.005 then 1 else 0 end) as precip_below,
+        sum(case when snow > 0.005 then 1 else 0 end) as snow_above,
+        sum(case when snow < 0.005 then 1 else 0 end) as snow_below
+        from data GROUP by valid ORDER by valid ASC
+        """,
+            conn,
+            params=(sts, ets),
+            index_col="valid",
+        )
     if df.empty:
         raise NoDataFound("Error, no results returned!")
     for v in ["precip", "snow"]:
         if varname == v:
-            xlabel = "<-- No/Trace %s %%   |     Measurable %s   %% -->" % (
-                v.capitalize(),
-                v.capitalize(),
+            xlabel = (
+                f"<-- No/Trace {v.capitalize()} %   |"
+                f"     Measurable {v.capitalize()}   % -->"
             )
             colors = ["r", "b"]
-        df[v + "_count"] = df[v + "_above"] + df[v + "_below"]
+        df[v + "_count"] = df[f"{v}_above"] + df[f"{v}_below"]
     for v in ["high", "low"]:
         df[v + "_count"] = (
-            df[v + "_above"] + df[v + "_below"] + df[v + "_equal"]
+            df[v + "_above"] + df[f"{v}_below"] + df[f"{v}_equal"]
         )
         if varname == v:
             xlabel = "<-- Below Average %    |    Above Average % -->"
             colors = ["b", "r"]
     title = (
-        "Percentage of CONUS NWS First Order CLImate Sites\n(%s - %s) %s"
-    ) % (
-        sts.strftime("%-d %b %Y"),
-        ets.strftime("%-d %b %Y"),
-        MDICT.get(varname),
+        "Percentage of CONUS NWS First Order CLImate Sites\n"
+        f"({sts:%-d %b %Y} - {ets:%-d %b %Y}) {MDICT[varname]}"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.barh(
         df.index.values,
-        0 - (df[varname + "_below"] / df[varname + "_count"] * 100.0),
+        0 - (df[f"{varname}_below"] / df[f"{varname}_count"] * 100.0),
         fc=colors[0],
         ec=colors[0],
         align="center",
     )
     ax.barh(
         df.index.values,
-        df[varname + "_above"] / df[varname + "_count"] * 100.0,
+        df[f"{varname}_above"] / df[f"{varname}_count"] * 100.0,
         fc=colors[1],
         ec=colors[1],
         align="center",

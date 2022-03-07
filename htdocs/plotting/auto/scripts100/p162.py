@@ -4,11 +4,10 @@ import datetime
 import numpy as np
 import numpy.ma as ma
 import pandas as pd
-from pandas.io.sql import read_sql
 import matplotlib.colors as mpcolors
 from pyiem.plot import figure_axes
 from pyiem.plot import get_cmap
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 
@@ -38,23 +37,23 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["zstation"]
-    df = read_sql(
-        """
-        select extract(doy from valid) as doy,
-        greatest(skyl1, skyl2, skyl3, skyl4) as sky from alldata
-        WHERE station = %s and
-        (skyc1 = 'OVC' or skyc2 = 'OVC' or skyc3 = 'OVC' or skyc4 = 'OVC')
-        and valid > '1973-01-01' and (extract(minute from valid) = 0 or
-        extract(minute from valid) > 50) and report_type = 2
-    """,
-        pgconn,
-        params=(station,),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            """
+            select extract(doy from valid) as doy,
+            greatest(skyl1, skyl2, skyl3, skyl4) as sky from alldata
+            WHERE station = %s and
+            (skyc1 = 'OVC' or skyc2 = 'OVC' or skyc3 = 'OVC' or skyc4 = 'OVC')
+            and valid > '1973-01-01' and (extract(minute from valid) = 0 or
+            extract(minute from valid) > 50) and report_type = 2
+        """,
+            conn,
+            params=(station,),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("Error, no results returned!")
 
@@ -85,13 +84,9 @@ def plotter(fdict):
     syear = max([1973, ab.year])
 
     title = (
-        "%s-%s [%s %s Ceilings Frequency\n"
+        f"{syear}-{datetime.date.today().year} {ctx['_sname']} "
+        "Ceilings Frequency\n"
         "Level at which Overcast Conditions Reported"
-    ) % (
-        syear,
-        datetime.date.today().year,
-        station,
-        ctx["_nt"].sts[station]["name"],
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 

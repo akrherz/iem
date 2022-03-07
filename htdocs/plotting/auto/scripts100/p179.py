@@ -135,8 +135,12 @@ def plotter(fdict):
 
     probs = np.where(probs < 0.1, -1, probs)
     scenario_probs = np.where(scenario_probs < 0.1, -1, scenario_probs)
-
-    fig = figure(apctx=ctx)
+    title = (
+        f"{byear}-{eyear - 1} {ctx['_sname']} GDDs\n"
+        f"Frequency [%] of reaching {gddbase:.0f} GDDs "
+        f"({base:.0f}/{ceil:.0f}) prior to first freeze"
+    )
+    fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(1, 2, sharey=True)
 
     cmap = get_cmap(ctx["cmap"])
@@ -180,28 +184,8 @@ def plotter(fdict):
     cbar_ax = fig.add_axes([0.05, 0.06, 0.85, 0.05])
     fig.colorbar(res, cax=cbar_ax, orientation="horizontal")
 
-    fig.text(
-        0.5,
-        0.90,
-        (
-            "%s-%s %s GDDs\n"
-            "Frequency [%%] of reaching %.0f GDDs (%.0f/%.0f) "
-            "prior to first freeze"
-        )
-        % (
-            byear,
-            eyear - 1,
-            ctx["_nt"].sts[station]["name"],
-            gddbase,
-            base,
-            ceil,
-        ),
-        fontsize=14,
-        ha="center",
-    )
-
     return fig, df
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

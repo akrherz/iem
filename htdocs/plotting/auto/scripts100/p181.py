@@ -2,8 +2,8 @@
 import datetime
 
 import numpy as np
-from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconn
+import pandas as pd
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
@@ -114,25 +114,25 @@ def plotter(fdict):
     year = ctx["year"]
     varname = ctx["var"]
 
-    dbconn = get_dbconn("coop")
-
-    df = read_sql(
-        f"""
-        SELECT year, day, high, low, precip, snow,
-        (high + low) / 2. as avgt from alldata_{station[:2]} WHERE
-        station = %s and extract(doy from day) <= extract(doy from %s::date)
-    """,
-        dbconn,
-        params=(station, date),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+            SELECT year, day, high, low, precip, snow,
+            (high + low) / 2. as avgt from alldata_{station[:2]} WHERE
+            station = %s and
+            extract(doy from day) <= extract(doy from %s::date)
+        """,
+            conn,
+            params=(station, date),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     for i, rng in enumerate([r1, r2, r3, r4, r5]):
-        df["cnt%s" % (i + 1,)] = 0
+        df[f"cnt{i + 1}"] = 0
         df.loc[
             ((df[varname] >= rng[0]) & (df[varname] <= rng[1])),
-            "cnt%s" % (i + 1,),
+            f"cnt{i + 1}",
         ] = 1
 
     gdf = (
@@ -141,12 +141,7 @@ def plotter(fdict):
         .sum()
     )
 
-    title = "[%s] %s :: Jan 1 - %s %s Days" % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-        date.strftime("%b %-d"),
-        PDICT[varname],
-    )
+    title = f"{ctx['_sname']} :: Jan 1 - {date:%b %-d} {PDICT[varname]} Days"
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     bars = ax.bar(
         np.arange(1, 6) - 0.25, gdf.mean().values, width=-0.25, label="Average"
@@ -155,7 +150,7 @@ def plotter(fdict):
         ax.text(
             mybar.get_x() - 0.125,
             mybar.get_height() + 0.5,
-            "%.1f" % (mybar.get_height(),),
+            f"{mybar.get_height():.1f}",
             fontsize=14,
             ha="center",
         )
@@ -167,7 +162,7 @@ def plotter(fdict):
         ax.text(
             mybar.get_x() + 0.125,
             mybar.get_height() + 0.5,
-            "%.0f" % (mybar.get_height(),),
+            f"{mybar.get_height():.0f}",
             fontsize=14,
             ha="center",
         )
@@ -182,7 +177,7 @@ def plotter(fdict):
         ax.text(
             mybar.get_x() + 0.125,
             mybar.get_height() + 0.5,
-            "%.0f" % (mybar.get_height(),),
+            f"{mybar.get_height():.0f}",
             fontsize=14,
             ha="center",
         )
@@ -200,4 +195,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

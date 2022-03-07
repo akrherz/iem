@@ -2,7 +2,7 @@
 import calendar
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 import numpy as np
 from pyiem import util
 from pyiem.plot import figure_axes
@@ -38,30 +38,33 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = util.get_dbconn("coop")
     ctx = util.get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
-    table = "alldata_%s" % (station[:2],)
-    df = read_sql(
-        f"""
-    with data as (
-        select day, high, year,
-        rank() OVER (PARTITION by high ORDER by sday DESC)
-        from {table} where station = %s)
-    SELECT day, year, high, rank from data WHERE rank = 1
-    ORDER by high DESC, day DESC
-    """,
-        pgconn,
-        params=(station,),
-        index_col=None,
-    )
+    with util.get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        with data as (
+            select day, high, year,
+            rank() OVER (PARTITION by high ORDER by sday DESC)
+            from alldata_{station[:2]} where station = %s)
+        SELECT day, year, high, rank from data WHERE rank = 1
+        ORDER by high DESC, day DESC
+        """,
+            conn,
+            params=(station,),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No data found!")
 
-    (fig, ax) = figure_axes(apctx=ctx)
+    title = (
+        "Most Recent & Latest Date of High Temperature\n"
+        f"{ctx['_sname']} ({ab.year}-{datetime.date.today().year})"
+    )
+    (fig, ax) = figure_axes(apctx=ctx, title=title)
     current = {
         "d2000": datetime.date(2000, 1, 1),
         "date": datetime.date(2000, 1, 1),
@@ -82,15 +85,13 @@ def plotter(fdict):
             break
         y.append(level)
         x.append(int(current["d2000"].strftime("%j")))
+        tt = " **" if current["ties"] else ""
         ax.text(
             x[-1] + 3,
             level,
-            "%s -- %s %s%s"
-            % (
-                level,
-                current["d2000"].strftime("%-d %b"),
-                current["date"].year,
-                " **" if current["ties"] else "",
+            (
+                f"{level} -- {current['d2000']:%-d %b} "
+                f"{current['date'].year}{tt}"
             ),
             va="center",
         )
@@ -100,15 +101,6 @@ def plotter(fdict):
     ax.set_xlim(min(x) - 5, 400)
     ax.set_ylim(y[-1] - 1, y[0] + 1)
     ax.grid(True)
-    ax.set_title(
-        ("Most Recent & Latest Date of High Temperature\n[%s] %s (%s-%s)")
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            ab.year,
-            datetime.date.today().year,
-        )
-    )
     ax.set_ylabel(r"High Temperature $^\circ$F")
     ax.set_xlabel("** denotes ties")
 

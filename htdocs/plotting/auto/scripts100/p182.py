@@ -76,15 +76,14 @@ def plotter(fdict):
     if not os.path.isfile(ncfn):
         raise NoDataFound("No data for that year, sorry.")
     # Get the state weight
-    df = gpd.GeoDataFrame.from_postgis(
-        """
-    SELECT the_geom from states where state_abbr = %s
-    """,
-        util.get_dbconn("postgis"),
-        params=(sector,),
-        index_col=None,
-        geom_col="the_geom",
-    )
+    with util.get_sqlalchemy_conn("postgis") as conn:
+        df = gpd.GeoDataFrame.from_postgis(
+            "SELECT the_geom from states where state_abbr = %s",
+            conn,
+            params=(sector,),
+            index_col=None,
+            geom_col="the_geom",
+        )
     czs = CachingZonalStats(iemre.MRMS_AFFINE)
     with util.ncopen(ncfn) as nc:
         czs.gen_stats(
@@ -162,42 +161,41 @@ def plotter(fdict):
     x2 = []
     labels = []
     for (minv, maxv) in ranges:
-        labels.append("%.0f to %.0f" % (minv, maxv))
+        labels.append(f"{minv:.0f} to {maxv:.0f}")
         # How many departure cells in this range
         hits = np.logical_and(departure < maxv, departure > minv)
         hits2 = np.logical_and(hits, today > threshold)
         x.append(np.sum(np.where(hits, 1, 0)) / float(cells) * 100.0)
         x2.append(np.sum(np.where(hits2, 1, 0)) / float(cells) * 100.0)
 
-    (fig, ax) = figure_axes(apctx=ctx)
-    ax.set_title(
-        ("%s NOAA MRMS %s %.2f inch Precip Coverage")
-        % (state_names[sector], date.strftime("%-d %b %Y"), threshold)
+    title = (
+        f"{state_names[sector]} NOAA MRMS {date:%-d %b %Y} "
+        f"{threshold:.2f} inch Precip Coverage"
     )
+    (fig, ax) = figure_axes(apctx=ctx, title=title)
     ax.bar(
         np.arange(8) - 0.2,
         x,
         align="center",
         width=0.4,
-        label="Trailing %s Day Departure" % (days,),
+        label=f"Trailing {days} Day Departure",
     )
     ax.bar(
         np.arange(8) + 0.2,
         x2,
         align="center",
         width=0.4,
-        label="%s Coverage (%.1f%% Tot)"
-        % (date.strftime("%-d %b %Y"), sum(x2)),
+        label=f"{date:%-d %b %Y} Coverage ({sum(x2):.1f}% Tot)",
     )
     for i, (_x1, _x2) in enumerate(zip(x, x2)):
-        ax.text(i - 0.2, _x1 + 1, "%.1f" % (_x1,), ha="center")
-        ax.text(i + 0.2, _x2 + 1, "%.1f" % (_x2,), ha="center")
+        ax.text(i - 0.2, _x1 + 1, f"{_x1:.1f}", ha="center")
+        ax.text(i + 0.2, _x2 + 1, f"{_x2:.1f}", ha="center")
     ax.set_xticks(np.arange(8))
     ax.set_xticklabels(labels)
-    ax.set_xlabel("Trailing %s Day Precip Departure [in]" % (days,))
+    ax.set_xlabel(f"Trailing {days} Day Precip Departure [in]")
     ax.set_position([0.1, 0.2, 0.8, 0.7])
     ax.legend(loc=(0.0, -0.2), ncol=2)
-    ax.set_ylabel("Areal Coverage of %s [%%]" % (state_names[sector],))
+    ax.set_ylabel(f"Areal Coverage of {state_names[sector]} [%]")
     ax.grid(True)
     ax.set_xlim(-0.5, 7.5)
     ax.set_ylim(0, max([max(x2), max(x)]) + 5)
@@ -205,4 +203,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

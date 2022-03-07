@@ -1,11 +1,11 @@
 """Top 10"""
 import datetime
 
-from pandas.io.sql import read_sql
 import pandas as pd
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 MDICT = dict(
     [
@@ -155,34 +155,29 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["zstation"]
     month = ctx["month"]
     varname = ctx["var"]
     tzname = ctx["_nt"].sts[station]["tzname"]
-
+    params = {}
+    params["station"] = station
+    params["tzname"] = tzname
     if ctx.get("sdate") and ctx.get("edate"):
+        op = "or" if ctx["sdate"] > ctx["edate"] else "and"
         date_limiter = (
-            " and (to_char(valid at time zone '%s', 'mmdd') >= '%s'"
-            " %s to_char(valid at time zone '%s', 'mmdd') <= '%s')"
-        ) % (
-            tzname,
-            ctx["sdate"].strftime("%m%d"),
-            "or" if ctx["sdate"] > ctx["edate"] else "and",
-            tzname,
-            ctx["edate"].strftime("%m%d"),
+            " and (to_char(valid at time zone :tzname, 'mmdd') >= :ssday "
+            f" {op} to_char(valid at time zone :tzname, 'mmdd') <= :esday)"
         )
-        title2 = "between %s and %s" % (
-            ctx["sdate"].strftime("%-d %b"),
-            ctx["edate"].strftime("%-d %b"),
-        )
+        params["ssday"] = ctx["sdate"].strftime("%m%d")
+        params["esday"] = ctx["edate"].strftime("%m%d")
+        title2 = f"between {ctx['sdate']:%-d %b} and {ctx['edate']:%-d %b}"
         if ctx["sdate"] == ctx["edate"]:
             date_limiter = (
-                "and to_char(valid at time zone '%s', 'mmdd') = '%s'"
-            ) % (tzname, ctx["sdate"].strftime("%m%d"))
-            title2 = "on %s" % (ctx["sdate"].strftime("%-d %b"),)
+                "and to_char(valid at time zone :tzname, 'mmdd') = :ssday "
+            )
+            title2 = f"on {ctx['sdate']:%-d %b}"
     else:
         if month == "all":
             months = range(1, 13)
@@ -197,74 +192,85 @@ def plotter(fdict):
         elif month == "octmar":
             months = [10, 11, 12, 1, 2, 3]
         else:
-            ts = datetime.datetime.strptime(
-                "2000-" + month + "-01", "%Y-%b-%d"
-            )
+            ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
             # make sure it is length two for the trick below in SQL
             months = [ts.month, 999]
         date_limiter = (
-            " and extract(month from valid at time zone '%s') in %s"
-        ) % (tzname, tuple(months))
+            " and extract(month from valid at time zone :tzname) in :months "
+        )
+        params["months"] = tuple(months)
         title2 = MDICT[month]
     if ctx.get("hour") is not None:
         date_limiter += (
-            f" and extract(hour from valid at time zone '{tzname}' "
-            f"+ '10 minutes'::interval) = {ctx['hour']}"
+            " and extract(hour from valid at time zone :tzname "
+            "+ '10 minutes'::interval) = :hour "
         )
+        params["hour"] = ctx["hour"]
         dt = datetime.datetime(2000, 1, 1, ctx["hour"])
-        title2 += " @" + dt.strftime("%-I %p")
+        title2 += f" @{dt:%-I %p}"
     (agg, dbvar) = varname.split("_")
     # Special accounting for the peak_wind_gust column
     tzname = ctx["_nt"].sts[station]["tzname"]
     if dbvar == "gust":
         titlelabel = "Top"
-        df = read_sql(
-            f"""
-            WITH data as (
-                SELECT
-                case when peak_wind_gust > gust then peak_wind_time
-                else valid end as v,
-                case when peak_wind_gust > gust then peak_wind_gust
-                else gust end as speed from alldata
-                WHERE station = %s {date_limiter})
+        with get_sqlalchemy_conn("asos") as conn:
+            df = pd.read_sql(
+                text(
+                    f"""
+                WITH data as (
+                    SELECT
+                    case when peak_wind_gust > gust then peak_wind_time
+                    else valid end as v,
+                    case when peak_wind_gust > gust then peak_wind_gust
+                    else gust end as speed from alldata
+                    WHERE station = :station {date_limiter})
 
-            SELECT v at time zone %s as valid, speed as gust from data
-            WHERE speed is not null
-            ORDER by gust DESC LIMIT 100
-        """,
-            pgconn,
-            params=(station, tzname),
-            index_col=None,
-        )
+                SELECT v at time zone :tzname as valid, speed as gust from data
+                WHERE speed is not null
+                ORDER by gust DESC LIMIT 100
+            """
+                ),
+                conn,
+                params=params,
+                index_col=None,
+            )
 
     elif agg in ["max", "min"]:
         titlelabel = "Top"
         sorder = "DESC" if agg == "max" else "ASC"
-        df = read_sql(
-            f"""
-            WITH data as (
-                SELECT valid at time zone %s as v, {dbvar} from alldata
-                WHERE station = %s {date_limiter})
+        with get_sqlalchemy_conn("asos") as conn:
+            df = pd.read_sql(
+                text(
+                    f"""
+                WITH data as (
+                    SELECT valid at time zone :tzname as v, {dbvar}
+                    from alldata WHERE station = :station {date_limiter})
 
-            SELECT v as valid, {dbvar} from data
-            ORDER by {dbvar} {sorder} NULLS LAST LIMIT 100
-        """,
-            pgconn,
-            params=(tzname, station),
-            index_col=None,
-        )
+                SELECT v as valid, {dbvar} from data
+                ORDER by {dbvar} {sorder} NULLS LAST LIMIT 100
+            """
+                ),
+                conn,
+                params=params,
+                index_col=None,
+            )
     else:
         titlelabel = "Most Recent"
         op = ">=" if agg == "above" else "<"
         threshold = float(ctx.get("threshold", 100))
-        df = read_sql(
-            f"SELECT valid at time zone %s as valid, {dbvar} from alldata "
-            f"WHERE station = %s {date_limiter} and {dbvar} {op} {threshold} "
-            "ORDER by valid DESC LIMIT 100",
-            pgconn,
-            params=(tzname, station),
-            index_col=None,
-        )
+        with get_sqlalchemy_conn("asos") as conn:
+            df = pd.read_sql(
+                text(
+                    f"SELECT valid at time zone :tzname as valid, "
+                    f"{dbvar} from "
+                    f"alldata WHERE station = :station {date_limiter} and "
+                    f"{dbvar} {op} {threshold} "
+                    "ORDER by valid DESC LIMIT 100"
+                ),
+                conn,
+                params=params,
+                index_col=None,
+            )
     if df.empty:
         raise NoDataFound("Error, no results returned!")
     ylabels = []
@@ -283,7 +289,7 @@ def plotter(fdict):
         hours.append(key)
         y.append(row[dbvar])
         lbl = fmt % (row[dbvar],)
-        lbl += " -- %s" % (row["valid"].strftime("%b %d, %Y %-I:%M %p"),)
+        lbl += f" -- {row['valid']:%b %d, %Y %-I:%M %p}"
         ylabels.append(lbl)
         if row[dbvar] != lastval or agg in ["above", "below"]:
             currentrank += 1
@@ -297,17 +303,11 @@ def plotter(fdict):
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
-    title = "%s [%s] %s 10 Events" % (
-        ctx["_nt"].sts[station]["name"],
-        station,
-        titlelabel,
-    )
-    subtitle = "%s %s (%s) (%s-%s)" % (
-        METRICS[varname],
-        ctx.get("threshold") if agg in ["above", "below"] else "",
-        title2,
-        ab.year,
-        datetime.datetime.now().year,
+    title = f"{ctx['_sname']} {titlelabel} 10 Events"
+    st = ctx.get("threshold") if agg in ["above", "below"] else ""
+    subtitle = (
+        f"{METRICS[varname]} {st} ({title2}) "
+        f"({ab.year}-{datetime.datetime.now().year})"
     )
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
     ax = fig.add_axes([0.15, 0.1, 0.65, 0.8])
@@ -324,14 +324,14 @@ def plotter(fdict):
     ax.set_ylim(0.5, 10.5)
     ax2.set_yticks(range(1, len(y) + 1))
     ax.set_yticks(range(1, len(y) + 1))
-    ax.set_yticklabels(["#%s" % (x,) for x in ranks][::-1])
+    ax.set_yticklabels([f"#{x}" for x in ranks][::-1])
     ax2.set_yticklabels(ylabels[::-1])
     ax.grid(True, zorder=11)
-    ax.set_xlabel("%s %s" % (METRICS[varname], UNITS[dbvar]))
+    ax.set_xlabel(f"{METRICS[varname]} {UNITS[dbvar]}")
     fig.text(
         0.98,
         0.03,
-        "Timezone: %s" % (ctx["_nt"].sts[station]["tzname"],),
+        f"Timezone: {ctx['_nt'].sts[station]['tzname']}",
         ha="right",
         fontsize=14,
     )

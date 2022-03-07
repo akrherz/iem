@@ -63,13 +63,14 @@ def plotter(fdict):
     ncvar = "p01d"
 
     # Get the state weight
-    df = gpd.GeoDataFrame.from_postgis(
-        "SELECT the_geom from states where state_abbr = %s",
-        util.get_dbconn("postgis"),
-        params=(sector,),
-        index_col=None,
-        geom_col="the_geom",
-    )
+    with util.get_sqlalchemy_conn("postgis") as conn:
+        df = gpd.GeoDataFrame.from_postgis(
+            "SELECT the_geom from states where state_abbr = %s",
+            conn,
+            params=(sector,),
+            index_col=None,
+            geom_col="the_geom",
+        )
     czs = CachingZonalStats(iemre.MRMS_AFFINE)
     with util.ncopen(ncfn) as nc:
         czs.gen_stats(
@@ -108,15 +109,13 @@ def plotter(fdict):
         subtitlefontsize=12,
         title=(
             "NOAA MRMS Q3: Number of Recent Days "
-            'till Accumulating %s" of Precip'
-        )
-        % (threshold,),
+            f'till Accumulating {threshold}" of Precip'
+        ),
         subtitle=(
-            "valid %s: based on per calendar day "
+            f"valid {date:%-d %b %Y}: based on per calendar day "
             "estimated preciptation, MultiSensorPass2 and "
             "RadarOnly products"
-        )
-        % (date.strftime("%-d %b %Y"),),
+        ),
     )
     x, y = np.meshgrid(lon, lat)
     cmap = get_cmap(ctx["cmap"])
@@ -130,4 +129,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

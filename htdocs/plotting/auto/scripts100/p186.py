@@ -30,7 +30,7 @@ def get_description():
     up would indicate a one category improvement in drought over the area
     of the state. This
     plot uses a JSON data service provided by the
-    <a href="http://droughtmonitor.unl.edu">Drought Monitor</a> website.
+    <a href="https://droughtmonitor.unl.edu">Drought Monitor</a> website.
     """
     thisyear = datetime.date.today().year
     desc["arguments"] = [
@@ -72,7 +72,6 @@ def plotter(fdict):
         requests.get, SERVICE, payload, headers=headers
     )
     if req is None or req.status_code != 200:
-        print(req.content)
         raise NoDataFound("Drought Web Service failed to deliver data.")
     jdata = req.json()
     if "d" not in jdata:

@@ -3,11 +3,11 @@ import datetime
 
 import numpy as np
 import pytz
-from pandas.io.sql import read_sql
+import pandas as pd
 import matplotlib.colors as mpcolors
 from matplotlib.patches import Rectangle
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn, utc
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 from pyiem.exceptions import NoDataFound
 
 
@@ -68,7 +68,6 @@ Ceiling &gt; 3000' AGL and visibility &gt; 5 statutes miles (green)</td></tr>
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     year = ctx["year"]
@@ -83,18 +82,18 @@ def plotter(fdict):
     ets = (sts + datetime.timedelta(days=35)).replace(day=1)
     days = (ets - sts).days
     data = np.zeros((24, days))
-
-    df = read_sql(
-        """
-    SELECT valid at time zone %s as ts,
-    skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, vsby
-    from alldata where station = %s and valid BETWEEN %s and %s
-    and vsby is not null and report_type = 2 ORDER by valid ASC
-    """,
-        pgconn,
-        params=(tzname, station, sts, ets),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            """
+        SELECT valid at time zone %s as ts,
+        skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, vsby
+        from alldata where station = %s and valid BETWEEN %s and %s
+        and vsby is not null and report_type = 2 ORDER by valid ASC
+        """,
+            conn,
+            params=(tzname, station, sts, ets),
+            index_col=None,
+        )
 
     if df.empty:
         raise NoDataFound("No database entries found for station, sorry!")
@@ -136,19 +135,13 @@ def plotter(fdict):
         # print row['ts'], y, x, val, data[y, x], level, row['vsby']
 
     df["flstatus"] = conds
-
-    (fig, ax) = figure_axes(apctx=ctx)
+    title = (
+        f"{ctx['_sname']} {sts:%b %Y} Flight Category\n"
+        "based on Hourly METAR Cloud Amount/Level and Visibility Reports"
+    )
+    (fig, ax) = figure_axes(apctx=ctx, title=title)
 
     ax.set_facecolor("skyblue")
-
-    ax.set_title(
-        (
-            "[%s] %s %s Flight Category\n"
-            "based on Hourly METAR Cloud Amount/Level"
-            " and Visibility Reports"
-        )
-        % (station, ctx["_nt"].sts[station]["name"], sts.strftime("%b %Y"))
-    )
 
     colors = ["#EEEEEE", "green", "blue", "red", "magenta"]
     cmap = mpcolors.ListedColormap(colors)
@@ -166,8 +159,8 @@ def plotter(fdict):
         ["Mid", "3 AM", "6 AM", "9 AM", "Noon", "3 PM", "6 PM", "9 PM"]
     )
     ax.set_xticks(range(1, days + 1))
-    ax.set_ylabel("Hour of Local Day (%s)" % (tzname,))
-    ax.set_xlabel("Day of %s" % (sts.strftime("%b %Y"),))
+    ax.set_ylabel(f"Hour of Local Day ({tzname})")
+    ax.set_xlabel(f"Day of {sts:%b %Y}")
 
     rects = []
     for color in colors:
