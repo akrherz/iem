@@ -21,7 +21,7 @@ def fix():
     for key, val in prodDefinitions.items():
         if val.startswith("["):
             continue
-        prodDefinitions[key] = "[%s] %s" % (key, prodDefinitions[key])
+        prodDefinitions[key] = f"[{key}] {prodDefinitions[key]}"
 
 
 def get_description():
@@ -78,6 +78,7 @@ def get_description():
             default=now.strftime("%Y/%m/%d 0000"),
             label="Search archive ending at (UTC Timestamp):",
             min="2001/01/01 0000",
+            max=now.strftime("%Y/%m/%d 2359"),
         ),
         dict(type="cmap", name="cmap", default="jet", label="Color Ramp:"),
     ]
@@ -134,14 +135,11 @@ def plotter(fdict):
 
     mp = MapPlot(
         apctx=ctx,
-        title="NWS %s of %s" % (PDICT[ctx["var"]], prodDefinitions[pil]),
+        title=f"NWS {PDICT[ctx['var']]} of {prodDefinitions[pil]}",
         subtitle=(
-            "Plot valid between %s UTC and %s UTC, "
+            f"Plot valid between {ctx['sts']:%d %b %Y %H:%M} UTC "
+            f"and {ctx['ets']:%d %b %Y %H:%M} UTC, "
             "based on unofficial IEM Archives"
-        )
-        % (
-            ctx["sts"].strftime("%d %b %Y %H:%M"),
-            ctx["ets"].strftime("%d %b %Y %H:%M"),
         ),
         sector="nws",
         nocaption=True,
