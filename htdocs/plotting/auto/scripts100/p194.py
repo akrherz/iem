@@ -52,7 +52,7 @@ def get_description():
         dict(
             type="date",
             name="sdate",
-            defaultf="{today.year}/01/01",
+            default=f"{today.year}/01/01",
             label="Start Date:",
             min="2000/01/04",
             max=today.strftime("%Y/%m/%d"),
@@ -101,12 +101,9 @@ def plotter(fdict):
     griddelta = 0.1
     mp = MapPlot(
         apctx=ctx,
-        title=('%s at or above "%s" %s - %s')
-        % (
-            PDICT2[ctx["w"]],
-            PDICT[dlevel],
-            sdate.strftime("%b %-d, %Y"),
-            edate.strftime("%b %-d, %Y"),
+        title=(
+            f'{PDICT2[ctx["w"]]} at or above "{PDICT[dlevel]}" '
+            f"{sdate:%b %-d, %Y} - {edate:%b %-d, %Y}"
         ),
         subtitle=(
             f"based on weekly US Drought Monitor Analysis, {griddelta:.2f}"
