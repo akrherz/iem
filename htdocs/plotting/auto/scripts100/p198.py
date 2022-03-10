@@ -77,7 +77,7 @@ PDICT3 = dict(
         ("smps", "Wind Speed (mps)"),
     ]
 )
-PDICT4 = dict((("min", "Minimum"), ("avg", "Average"), ("max", "Maximum")))
+PDICT4 = {"min": "Minimum", "avg": "Average", "max": "Maximum"}
 PDICT5 = {
     "no": "Plot All Available Data",
     "yes": "Only Plot Years with ~75% Data Availability",

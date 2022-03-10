@@ -2,7 +2,7 @@
 import datetime
 
 import numpy as np
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.plot import figure_axes
 from pyiem import util
 from pyiem.reference import lsr_events
@@ -67,7 +67,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = util.get_dbconn("postgis")
     ctx = util.get_autoplot_context(fdict, get_description())
     ctx["_nt"].sts["_ALL"] = dict(name="All WFOs")
     station = ctx["station"][:4]
@@ -88,17 +87,17 @@ def plotter(fdict):
             typetext_limiter = " and typetext = '%s'" % (ltype[0],)
         else:
             typetext_limiter = " and typetext in %s" % (tuple(ltype),)
-
-    df = read_sql(
-        f"""
-        select extract(year from valid)::int as yr, upper(source) as src,
-        count(*) from lsrs
-        where valid > '{syear}-01-01' and
-        valid < '{eyear + 1}-01-01' {wfo_limiter} {typetext_limiter}
-        GROUP by yr, src
-    """,
-        pgconn,
-    )
+    with util.get_sqlalchemy_conn("postgis") as conn:
+        df = pd.read_sql(
+            f"""
+            select extract(year from valid)::int as yr, upper(source) as src,
+            count(*) from lsrs
+            where valid > '{syear}-01-01' and
+            valid < '{eyear + 1}-01-01' {wfo_limiter} {typetext_limiter}
+            GROUP by yr, src
+        """,
+            conn,
+        )
     if df.empty:
         raise NoDataFound("No data found")
     # pivot the table so that we can fill out zeros
@@ -181,8 +180,8 @@ def plotter(fdict):
         tick.set_rotation(90)
     ax.grid()
 
-    fig.text(0.15, 0.88, "%s" % (syear,), fontsize=14, ha="center")
-    fig.text(0.85, 0.88, "%s" % (eyear,), fontsize=14, ha="center")
+    fig.text(0.15, 0.88, f"{syear}", fontsize=14, ha="center")
+    fig.text(0.85, 0.88, f"{eyear}", fontsize=14, ha="center")
 
     return fig, df
 

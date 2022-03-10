@@ -1,10 +1,10 @@
 """ISU Soil Moisture Network Daily Plots."""
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from metpy.units import units
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_autoplot_context, get_dbconn, mm2inch
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, mm2inch
 from pyiem.network import Table as NetworkTable  # This is needed.
 from pyiem.tracker import loadqc
 from pyiem.exceptions import NoDataFound
@@ -56,17 +56,18 @@ def plot1(ctx):
     dt = datetime.datetime(
         ctx["date"].year, ctx["date"].month, ctx["date"].day
     )
-    df = read_sql(
-        """
-        SELECT station, max(t4_c_avg_qc) as max_tsoil_c,
-        min(t4_c_avg_qc) as min_tsoil_c from sm_hourly WHERE
-        valid BETWEEN %s and %s and t4_c_avg_qc is not null
-        GROUP by station
-    """,
-        ctx["pgconn"],
-        params=(dt, dt + datetime.timedelta(hours=24)),
-        index_col="station",
-    )
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            """
+            SELECT station, max(t4_c_avg_qc) as max_tsoil_c,
+            min(t4_c_avg_qc) as min_tsoil_c from sm_hourly WHERE
+            valid BETWEEN %s and %s and t4_c_avg_qc is not null
+            GROUP by station
+        """,
+            conn,
+            params=(dt, dt + datetime.timedelta(hours=24)),
+            index_col="station",
+        )
     if df.empty:
         raise NoDataFound("No Data Found for This Plot.")
     df["max_tsoil_f"] = (
@@ -98,17 +99,18 @@ def plot1(ctx):
 
 def plot2(ctx):
     """Daily air high/low temp."""
-    df = read_sql(
-        """
-        SELECT station, tair_c_max_qc,
-        tair_c_min_qc from sm_daily WHERE
-        valid = %s and tair_c_max_qc is not null and
-        tair_c_min_qc is not null
-    """,
-        ctx["pgconn"],
-        params=(ctx["date"],),
-        index_col="station",
-    )
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            """
+            SELECT station, tair_c_max_qc,
+            tair_c_min_qc from sm_daily WHERE
+            valid = %s and tair_c_max_qc is not null and
+            tair_c_min_qc is not null
+        """,
+            conn,
+            params=(ctx["date"],),
+            index_col="station",
+        )
     if df.empty:
         raise NoDataFound("No Data Found for This Plot.")
     df["high_f"] = (
@@ -138,15 +140,16 @@ def plot2(ctx):
 
 def plot3(ctx):
     """Daily air high/low temp."""
-    df = read_sql(
-        """
-        SELECT station, t4_c_avg_qc from sm_daily WHERE
-        valid = %s and t4_c_avg_qc is not null
-    """,
-        ctx["pgconn"],
-        params=(ctx["date"],),
-        index_col="station",
-    )
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            """
+            SELECT station, t4_c_avg_qc from sm_daily WHERE
+            valid = %s and t4_c_avg_qc is not null
+        """,
+            conn,
+            params=(ctx["date"],),
+            index_col="station",
+        )
     if df.empty:
         raise NoDataFound("No Data Found for This Plot.")
     df["soil4_avg_f"] = (
@@ -172,15 +175,16 @@ def plot3(ctx):
 
 def plot4(ctx):
     """Daily rad."""
-    df = read_sql(
-        """
-        SELECT station, slrkj_tot_qc from sm_daily WHERE
-        valid = %s and slrkj_tot_qc is not null
-    """,
-        ctx["pgconn"],
-        params=(ctx["date"],),
-        index_col="station",
-    )
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            """
+            SELECT station, slrkj_tot_qc from sm_daily WHERE
+            valid = %s and slrkj_tot_qc is not null
+        """,
+            conn,
+            params=(ctx["date"],),
+            index_col="station",
+        )
     if df.empty:
         raise NoDataFound("No Data Found for This Plot.")
 
@@ -203,13 +207,14 @@ def plot4(ctx):
 
 def plot5(ctx, col):
     """Daily ET."""
-    df = read_sql(
-        f"SELECT station, {col}_qc from sm_daily WHERE valid = %s and "
-        f"{col}_qc >= 0",
-        ctx["pgconn"],
-        params=(ctx["date"],),
-        index_col="station",
-    )
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            f"SELECT station, {col}_qc from sm_daily WHERE valid = %s and "
+            f"{col}_qc >= 0",
+            conn,
+            params=(ctx["date"],),
+            index_col="station",
+        )
     if df.empty:
         raise NoDataFound("No Data Found for This Plot.")
     if col == "dailyet":
@@ -236,16 +241,17 @@ def plot5(ctx, col):
 
 def plot7(ctx):
     """Daily peak wind."""
-    df = read_sql(
-        """
-        SELECT station, ws_mps_max_qc, to_char(ws_mps_tmx, 'HH24MI') as time
-        from sm_daily WHERE
-        valid = %s and ws_mps_max_qc is not null
-    """,
-        ctx["pgconn"],
-        params=(ctx["date"],),
-        index_col="station",
-    )
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            """
+            SELECT station, ws_mps_max_qc, to_char(ws_mps_tmx, 'HH24MI')
+            as time from sm_daily WHERE
+            valid = %s and ws_mps_max_qc is not null
+        """,
+            conn,
+            params=(ctx["date"],),
+            index_col="station",
+        )
     if df.empty:
         raise NoDataFound("No Data Found for This Plot.")
     df["gust_mph"] = (
@@ -274,16 +280,17 @@ def plot7(ctx):
 
 def plot8(ctx):
     """Daily peak wind."""
-    df = read_sql(
-        """
-        SELECT station, ws_mps_s_wvt_qc
-        from sm_daily WHERE
-        valid = %s and ws_mps_s_wvt_qc is not null
-    """,
-        ctx["pgconn"],
-        params=(ctx["date"],),
-        index_col="station",
-    )
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            """
+            SELECT station, ws_mps_s_wvt_qc
+            from sm_daily WHERE
+            valid = %s and ws_mps_s_wvt_qc is not null
+        """,
+            conn,
+            params=(ctx["date"],),
+            index_col="station",
+        )
     if df.empty:
         raise NoDataFound("No Data Found for This Plot.")
     df["wind_mph"] = (
@@ -314,7 +321,6 @@ def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     ctx["qc"] = loadqc(date=ctx["date"])
-    ctx["pgconn"] = get_dbconn("isuag")
     ctx["nt"] = NetworkTable("ISUSM")
     if not ctx["nt"].sts:
         raise NoDataFound("No station metadata found.")

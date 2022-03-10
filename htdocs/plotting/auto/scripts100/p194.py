@@ -8,7 +8,7 @@ from geopandas import read_postgis
 from pyiem.plot import MapPlot
 from pyiem.plot.colormaps import stretch_cmap
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import LATLON
 
@@ -52,7 +52,7 @@ def get_description():
         dict(
             type="date",
             name="sdate",
-            default="%s/01/01" % (today.year,),
+            defaultf="{today.year}/01/01",
             label="Start Date:",
             min="2000/01/04",
             max=today.strftime("%Y/%m/%d"),
@@ -128,35 +128,35 @@ def plotter(fdict):
     lats = lats[::-1]
     affine = Affine(griddelta, 0.0, west, 0.0, 0 - griddelta, north)
     # get the geopandas data
-    pgconn = get_dbconn("postgis")
-    df = read_postgis(
-        """
-    with d as (
-        select valid, (ST_Dump(st_simplify(geom, 0.01))).geom from usdm where
-        valid >= %s and valid <= %s and dm >= %s and
-        ST_Intersects(geom, ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s %s,
-         %s %s, %s %s, %s %s))'))
-    )
-    select valid, st_collect(geom) as the_geom from d GROUP by valid
-    """,
-        pgconn,
-        params=(
-            sdate,
-            edate,
-            dlevel,
-            west,
-            south,
-            west,
-            north,
-            east,
-            north,
-            east,
-            south,
-            west,
-            south,
-        ),
-        geom_col="the_geom",
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = read_postgis(
+            """
+        with d as (
+            select valid, (ST_Dump(st_simplify(geom, 0.01))).geom from usdm
+            where valid >= %s and valid <= %s and dm >= %s and
+            ST_Intersects(geom, ST_GeomFromEWKT('SRID=4326;
+            POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))'))
+        )
+        select valid, st_collect(geom) as the_geom from d GROUP by valid
+        """,
+            conn,
+            params=(
+                sdate,
+                edate,
+                dlevel,
+                west,
+                south,
+                west,
+                north,
+                east,
+                north,
+                east,
+                south,
+                west,
+                south,
+            ),
+            geom_col="the_geom",
+        )
     if df.empty:
         raise NoDataFound("No Data Found, sorry!")
     # loop over the cached stats
@@ -206,5 +206,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    fig, _df = plotter({"w": "percent"})
-    fig.savefig("/tmp/test.png")
+    plotter({})

@@ -11,18 +11,16 @@ import seaborn as sns
 from sqlalchemy import text
 
 
-PDICT = dict(
-    (
-        ("TO", "Tornado Warning"),
-        ("SV", "Severe Thunderstorm Warning"),
-        ("_A", "Severe Tstorm + Tornado Warning"),
-        ("EW", "Extreme Wind"),
-        ("FA", "Flood Advisory/Warning"),
-        ("FF", "Flash Flood Warning"),
-        ("MA", "Marine Warning"),
-        ("SQ", "Snow Squall"),
-    )
-)
+PDICT = {
+    "TO": "Tornado Warning",
+    "SV": "Severe Thunderstorm Warning",
+    "_A": "Severe Tstorm + Tornado Warning",
+    "EW": "Extreme Wind",
+    "FA": "Flood Advisory/Warning",
+    "FF": "Flash Flood Warning",
+    "MA": "Marine Warning",
+    "SQ": "Snow Squall",
+}
 PDICT2 = {
     "NEW": "at Issuance",
     "ANY": "at Issuance or Update",

@@ -24,7 +24,8 @@ def main(argv):
             "SELECT id, ST_Distance(geom, "
             "ST_SetSRID(ST_GeomFromText('POINT(%s %s)'), 4326)) "
             "from stations where network = 'IACLIMATE' and id != 'IA0000' "
-            "and substr(id,3,1) != 'C' ORDER by st_distance ASC LIMIT 1",
+            "and substr(id,3,1) != 'C' and online "
+            "ORDER by st_distance ASC LIMIT 1",
             (row[1], row[2]),
         )
         sid = cursor2.fetchone()[0]

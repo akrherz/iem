@@ -2,8 +2,8 @@
 import datetime
 
 from scipy.stats import linregress
-from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconn
+import pandas as pd
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
@@ -139,53 +139,54 @@ def yearly_plot(ctx):
     """
     Make a yearly plot of something
     """
-    pgconn = get_dbconn("coop", user="nobody")
     st = ctx["station"][:2]
 
     if ctx["plot_type"] == "frost_free":
-        df = read_sql(
-            f"""
-        select fall.year as yr, fall.s - spring.s as data from
-          (select year, max(extract(doy from day)) as s
-           from alldata_{st} where station = %s and
-           month < 7 and low <= 32 and year >= %s and
-           year <= %s GROUP by year) as spring,
-          (select year, min(extract(doy from day)) as s
-           from alldata_{st} where station = %s and
-           month > 7 and low <= 32 and year >= %s and
-           year <= %s GROUP by year) as fall
-         WHERE spring.year = fall.year ORDER by fall.year ASC
-        """,
-            pgconn,
-            params=(
-                ctx["station"],
-                ctx["first_year"],
-                ctx["last_year"],
-                ctx["station"],
-                ctx["first_year"],
-                ctx["last_year"],
-            ),
-        )
+        with get_sqlalchemy_conn("coop") as conn:
+            df = pd.read_sql(
+                f"""
+            select fall.year as yr, fall.s - spring.s as data from
+            (select year, max(extract(doy from day)) as s
+            from alldata_{st} where station = %s and
+            month < 7 and low <= 32 and year >= %s and
+            year <= %s GROUP by year) as spring,
+            (select year, min(extract(doy from day)) as s
+            from alldata_{st} where station = %s and
+            month > 7 and low <= 32 and year >= %s and
+            year <= %s GROUP by year) as fall
+            WHERE spring.year = fall.year ORDER by fall.year ASC
+            """,
+                conn,
+                params=(
+                    ctx["station"],
+                    ctx["first_year"],
+                    ctx["last_year"],
+                    ctx["station"],
+                    ctx["first_year"],
+                    ctx["last_year"],
+                ),
+            )
     else:
         off = META[ctx["plot_type"]]["valid_offset"]
         func = META[ctx["plot_type"]]["func"]
         bnds = META[ctx["plot_type"]]["month_bounds"]
-        df = read_sql(
-            f"SELECT extract(year from (day {off})) as yr, {func} as data "
-            f"from alldata_{st} WHERE station = %s {bnds} "
-            "GROUP by yr ORDER by yr ASC",
-            pgconn,
-            params=(ctx["station"],),
-        )
+        with get_sqlalchemy_conn("coop") as conn:
+            df = pd.read_sql(
+                f"SELECT extract(year from (day {off})) as yr, "
+                f"{func} as data "
+                f"from alldata_{st} WHERE station = %s {bnds} "
+                "GROUP by yr ORDER by yr ASC",
+                conn,
+                params=(ctx["station"],),
+            )
     df = df[(df["yr"] >= ctx["first_year"]) & (df["yr"] <= ctx["last_year"])]
     if df.empty:
         raise NoDataFound("no data found, sorry")
 
     title = (
+        f"{ctx['_sname']}\n"
         f"{META[ctx['plot_type']].get('title', 'TITLE')} "
-        f"({ctx['first_year']} - {ctx['last_year']})\n"
-        f"Location ID: {ctx['station']} "
-        f"Name: {ctx['_nt'].sts[ctx['station']]['name']}"
+        f"({df['yr'].min():.0f} - {df['yr'].max():.0f})\n"
     )
     fig, ax = figure_axes(title=title, apctx=ctx)
     ax.plot(df["yr"].values, df["data"].values, "bo-")
@@ -211,6 +212,7 @@ def yearly_plot(ctx):
             maxy,
             f"$R^2$={(r_value ** 2):.2f}",
             color="#CC6633",
+            bbox=dict(facecolor="white"),
         )
 
     return fig, df
@@ -230,6 +232,9 @@ def get_description():
      the last spring sub 32F temperature and first fall sub 32F temperature.
      </li>
     </ul>
+
+    <p>If you plot the DJF period, the year shown is the year of the
+    December within the three year period.
     """
     pdict = {}
     for varname, item in META.items():
@@ -239,7 +244,7 @@ def get_description():
         dict(
             type="station",
             name="station",
-            default="IA0200",
+            default="IATAME",
             label="Select Station:",
             network="IACLIMATE",
         ),

@@ -98,7 +98,7 @@ def plotter(fdict):
         )
     )
     if not os.path.isfile(gribfn):
-        raise NoDataFound("gribfn %s missing" % (gribfn,))
+        raise NoDataFound(f"gribfn {gribfn} missing")
 
     grbs = pygrib.open(gribfn)
     grb = grbs[1]
@@ -106,14 +106,13 @@ def plotter(fdict):
     lats, lons = grb.latlons()
 
     title = (
-        "Weather Prediction Center %s Quantitative Precipitation Forecast"
-    ) % (PDICT[period])
-    subtitle = ("%sWPC Forecast %s UTC to %s UTC") % (
-        ("US Drought Monitor Overlaid, " if ctx["opt"] == "both" else ""),
-        valid.strftime("%d %b %Y %H"),
-        (valid + datetime.timedelta(hours=int(period))).strftime(
-            "%d %b %Y %H"
-        ),
+        f"Weather Prediction Center {PDICT[period]} "
+        "Quantitative Precipitation Forecast"
+    )
+    _t = "US Drought Monitor Overlaid, " if ctx["opt"] == "both" else ""
+    subtitle = (
+        f"{_t}WPC Forecast {valid:%d %b %Y %H} UTC to "
+        f"{(valid + datetime.timedelta(hours=int(period))):%d %b %Y %H} UTC"
     )
     mp = MapPlot(
         apctx=ctx,
@@ -156,4 +155,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

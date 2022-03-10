@@ -3,9 +3,8 @@ Heat Advisory and Wind Chill alerts by temperature.
 """
 
 import pandas as pd
-from pandas.io.sql import read_sql
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.nws.vtec import NWS_COLORS, get_ps_string
 from pyiem.exceptions import NoDataFound
 
@@ -66,7 +65,6 @@ def get_description():
 def get_df(ctx):
     """Figure out what data we need to fetch here"""
     ctx["ugc"] = ctx["_nt"].sts[ctx["station"]]["ugc_zone"]
-    pgconn = get_dbconn("postgis")
     ctx["s1"] = "Y"
     ctx["s2"] = "W"
     if ctx["var"] == "heat":
@@ -76,40 +74,37 @@ def get_df(ctx):
         ctx["p1"] = "WC"
         ctx["p2"] = "WC"
     # Thankfully, all the above are zone based
-    events = read_sql(
-        """
-        SELECT generate_series(issue, expire, '1 minute'::interval) as valid,
-        (phenomena ||'.'|| significance) as vtec
-        from warnings WHERE ugc = %s and (
-            (phenomena = %s and significance = %s) or
-            (phenomena = %s and significance = %s)
-        ) ORDER by issue ASC
-    """,
-        pgconn,
-        params=(ctx["ugc"], ctx["p1"], ctx["s1"], ctx["p2"], ctx["s2"]),
-        index_col="valid",
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        events = pd.read_sql(
+            """
+            SELECT generate_series(issue, expire, '1 minute'::interval)
+            as valid,
+            (phenomena ||'.'|| significance) as vtec
+            from warnings WHERE ugc = %s and (
+                (phenomena = %s and significance = %s) or
+                (phenomena = %s and significance = %s)
+            ) ORDER by issue ASC
+        """,
+            conn,
+            params=(ctx["ugc"], ctx["p1"], ctx["s1"], ctx["p2"], ctx["s2"]),
+            index_col="valid",
+        )
     if events.empty:
-        raise NoDataFound("No Alerts were found for UGC: %s" % (ctx["ugc"],))
-    pgconn = get_dbconn("asos")
+        raise NoDataFound(f"No Alerts were found for UGC: {ctx['ugc']}")
     thres = "tmpf > 70" if ctx["var"] == "heat" else "tmpf < 40"
-    obs = read_sql(
-        "SELECT valid, tmpf::int as tmpf, feel from alldata where "
-        f"station = %s and valid > %s and {thres} and feel is not null "
-        "ORDER by valid ASC",
-        pgconn,
-        params=(ctx["station"], str(events.index.values[0])),
-        index_col="valid",
-    )
+    with get_sqlalchemy_conn("asos") as conn:
+        obs = pd.read_sql(
+            "SELECT valid, tmpf::int as tmpf, feel from alldata where "
+            f"station = %s and valid > %s and {thres} and feel is not null "
+            "ORDER by valid ASC",
+            conn,
+            params=(ctx["station"], str(events.index.values[0])),
+            index_col="valid",
+        )
     ctx["title"] = (
-        "%s [%s] (%s to %s)\n" "Frequency of NWS Headline for %s by %s"
-    ) % (
-        ctx["_nt"].sts[ctx["station"]]["name"],
-        ctx["station"],
-        str(events.index.values[0])[:10],
-        str(obs.index.values[-1])[:10],
-        ctx["ugc"],
-        PDICT2[ctx["var"]],
+        f"{ctx['_sname']} ({str(events.index.values[0])[:10]} "
+        f"to {str(obs.index.values[-1])[:10]})\n"
+        f"Frequency of NWS Headline for {ctx['ugc']} by {PDICT2[ctx['var']]}"
     )
     if ctx["opt"] == "yes":
         if ctx["var"] == "heat":
@@ -128,13 +123,13 @@ def get_df(ctx):
     )
     ctx["df"]["Total"] = ctx["df"].sum(axis=1)
     for vtec in [
-        "%s.%s" % (ctx["p1"], ctx["s1"]),
-        "%s.%s" % (ctx["p2"], ctx["s2"]),
+        f"{ctx['p1']}.{ctx['s1']}",
+        f"{ctx['p2']}.{ctx['s2']}",
         "None",
     ]:
         if vtec not in ctx["df"].columns:
             ctx["df"][vtec] = 0.0
-        ctx["df"][vtec + "%"] = ctx["df"][vtec] / ctx["df"]["Total"] * 100.0
+        ctx["df"][f"{vtec}%"] = ctx["df"][vtec] / ctx["df"]["Total"] * 100.0
 
 
 def plotter(fdict):
@@ -144,7 +139,7 @@ def plotter(fdict):
     get_df(ctx)
     (fig, ax) = figure_axes(apctx=ctx)
 
-    v1 = "%s.%s" % (ctx["p1"], ctx["s1"])
+    v1 = f"{ctx['p1']}.{ctx['s1']}"
     hty = ctx["df"][v1 + "%"]
     ax.bar(
         ctx["df"].index.values,
@@ -153,8 +148,8 @@ def plotter(fdict):
         color=NWS_COLORS[v1],
     )
 
-    v2 = "%s.%s" % (ctx["p2"], ctx["s2"])
-    ehw = ctx["df"][v2 + "%"]
+    v2 = f"{ctx['21']}.{ctx['s2']}"
+    ehw = ctx["df"][f"{v2}%"]
     ax.bar(
         ctx["df"].index.values,
         ehw.values,
@@ -173,10 +168,8 @@ def plotter(fdict):
     ax.legend(loc=(-0.03, -0.22), ncol=3)
     ax.set_position([0.1, 0.2, 0.8, 0.7])
     ax.grid(True)
-    ax.set_xlabel(
-        (r"Feels Like $^\circ$F, %s")
-        % ("All Obs Considered" if ctx["opt"] == "no" else "Only Additive Obs")
-    )
+    _tt = "All Obs Considered" if ctx["opt"] == "no" else "Only Additive Obs"
+    ax.set_xlabel(r"Feels Like $^\circ$F, " f"{_tt}")
     ax.set_ylabel("Frequency [%]")
     ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     ax.set_title(ctx["title"])

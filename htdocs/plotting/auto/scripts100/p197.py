@@ -2,11 +2,11 @@
 import datetime
 
 import pandas as pd
-from pandas.io.sql import read_sql
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 NASS_CROP_PROGRESS = {
     "corn_poor_verypoor": "Percentage Corn Poor + Very Poor Condition",
@@ -116,22 +116,29 @@ def get_df(ctx):
     if date.isoweekday() < 7:
         date = date - datetime.timedelta(days=date.isoweekday())
     varname = ctx["var"]
-    pgconn = get_dbconn("coop")
-    params = NASS_CROP_PROGRESS_LOOKUP[varname]
-    if isinstance(params, list):
-        dlimit = " short_desc in %s" % (str(tuple(params)),)
+    params2 = NASS_CROP_PROGRESS_LOOKUP[varname]
+    params = {}
+    if isinstance(params2, list):
+        dlimit = " short_desc in :dlimit "
+        params["dlimit"] = tuple(params2)
     else:
-        dlimit = " short_desc = '%s' " % (params,)
+        dlimit = " short_desc = :dlimit "
+        params["dlimit"] = params2
     # NB aggregate here needed for the multiple parameter short_desc above
-    df = read_sql(
-        "select year, week_ending, sum(num_value) as value, state_alpha "
-        f"from nass_quickstats where {dlimit} and num_value is not null "
-        "GROUP by year, week_ending, state_alpha "
-        "ORDER by state_alpha, week_ending",
-        pgconn,
-        index_col=None,
-        parse_dates="week_ending",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            text(
+                "select year, week_ending, sum(num_value) as value, "
+                f"state_alpha from nass_quickstats where {dlimit} and "
+                "num_value is not null "
+                "GROUP by year, week_ending, state_alpha "
+                "ORDER by state_alpha, week_ending"
+            ),
+            conn,
+            index_col=None,
+            params=params,
+            parse_dates="week_ending",
+        )
     if df.empty:
         raise NoDataFound("No NASS Data was found for query, sorry.")
     data = {}

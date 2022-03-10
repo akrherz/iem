@@ -60,8 +60,8 @@ def plotter(fdict):
     station = ctx["station"][:4]
     sts = datetime.date(syear, 1, 1)
     ets = datetime.date(eyear, 1, 1)
-    wfo_limiter = " and wfo = '%s' " % (
-        station if len(station) == 3 else station[1:],
+    wfo_limiter = (
+        f" and wfo = '{station if len(station) == 3 else station[1:5]}' "
     )
     if station == "_ALL":
         wfo_limiter = ""
@@ -82,11 +82,8 @@ def plotter(fdict):
     cnt = 1
     rows = []
     for row in pcursor:
-        label = ("%s. %s (%s.%s)") % (
-            cnt,
-            vtec.get_ps_string(row[0], row[1]),
-            row[0],
-            row[1],
+        label = (
+            f"{cnt}. {vtec.get_ps_string(row[0], row[1])} ({row[0]}.{row[1]})"
         )
         if cnt < 26:
             labels.append(label)
@@ -109,22 +106,18 @@ def plotter(fdict):
     )
     for i in range(1, len(vals)):
         y = vals[i] / float(vals[0]) * 100.0
-        ax.text(y + 1, i, "%.1f%%" % (y,), va="center")
+        ax.text(y + 1, i, f"{y:.1f}%", va="center")
+    _tt = eyear - 1 if (eyear - 1 != syear) else ""
     fig.text(
         0.5,
         0.95,
-        "%s-%s NWS %s Watch/Warning/Advisory Totals"
-        % (
-            syear,
-            eyear - 1 if (eyear - 1 != syear) else "",
-            ctx["_nt"].sts[station]["name"],
-        ),
+        f"{syear}-{_tt} NWS {ctx['_sname']} Watch/Warning/Advisory Totals",
         ha="center",
     )
     fig.text(
         0.5,
         0.05,
-        "Event+County/Zone Count, Relative to #%s" % (labels[0],),
+        f"Event+County/Zone Count, Relative to #{labels[0]}",
         ha="center",
         fontsize=10,
     )
@@ -139,4 +132,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})
