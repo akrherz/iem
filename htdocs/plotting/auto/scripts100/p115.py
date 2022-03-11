@@ -3,8 +3,7 @@ import datetime
 import calendar
 
 import pandas as pd
-from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn, get_autoplot_context
+from pyiem.util import get_sqlalchemy_conn, get_autoplot_context
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -77,30 +76,28 @@ def p(df, year, month, varname, precision):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["station"]
     varname = ctx["var"]
 
-    table = "alldata_%s" % (station[:2],)
-
-    df = read_sql(
-        f"""
-        SELECT year, month,
-        case when month in (10, 11, 12) then year + 1 else year end
-          as water_year,
-        sum(precip) as precip,
-        sum(snow) as snow,
-        avg(high) as avg_high, avg(low) as avg_low,
-        avg((high+low)/2.) as avg_temp, max(day) as max_day from {table} WHERE
-        station = %s
-        GROUP by year, water_year, month ORDER by year ASC, month ASC
-    """,
-        pgconn,
-        params=(station,),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+            SELECT year, month,
+            case when month in (10, 11, 12) then year + 1 else year end
+            as water_year,
+            sum(precip) as precip,
+            sum(snow) as snow,
+            avg(high) as avg_high, avg(low) as avg_low,
+            avg((high+low)/2.) as avg_temp, max(day) as max_day from
+            alldata_{station[:2]} WHERE station = %s
+            GROUP by year, water_year, month ORDER by year ASC, month ASC
+        """,
+            conn,
+            params=(station,),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
 
@@ -203,4 +200,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

@@ -129,6 +129,10 @@ def get_ugc_name(ugc):
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
+    ctx["_nt"].sts["_ALL"] = {
+        "name": "All Offices",
+        "tzname": "America/Chicago",
+    }
     sts = ctx["sdate"]
     ets = ctx["edate"]
     if (ets - sts).days > 366:

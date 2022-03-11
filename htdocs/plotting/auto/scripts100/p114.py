@@ -1,8 +1,8 @@
 """Days per year"""
 import datetime
 
-from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconn
+import pandas as pd
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 
@@ -26,18 +26,18 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"].upper()
 
-    table = "alldata_%s" % (station[:2],)
-    df = read_sql(
-        f"SELECT year, count(low) from {table} WHERE station = %s and "
-        "low >= 32 and year < %s GROUP by year ORDER by year ASC",
-        pgconn,
-        params=(station, datetime.date.today().year),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"SELECT year, count(low) from alldata_{station[:2]} "
+            "WHERE station = %s and low >= 32 and year < %s "
+            "GROUP by year ORDER by year ASC",
+            conn,
+            params=(station, datetime.date.today().year),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
 
@@ -65,4 +65,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

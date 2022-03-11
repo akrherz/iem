@@ -34,4 +34,3 @@ for($i=0;$row=pg_fetch_assoc($rs);$i++){
 	);
 }
 $memcache->set("php/cameras.inc.php", $cameras, 43200);
-?>

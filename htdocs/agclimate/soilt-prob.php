@@ -31,7 +31,10 @@ foreach($thresholds as $k => $thres)
   $yrs = pg_num_rows($rs);
   for ($i=0;$row=pg_fetch_array($rs);$i++)
   {
-    @$cnts[ $row["v"] ] += 1;
+    if (!array_key_exists($row["v"], $cnts)){
+        $cnts[$row["v"]] = 0;
+    }
+    $cnts[ $row["v"] ] += 1;
   }
   $probs = Array();
   $running = $yrs;
@@ -43,6 +46,9 @@ foreach($thresholds as $k => $thres)
   for ($i=0;$i<182;$i=$i+5) {
     $ts = mktime(0,0,0,1,1,2000) + ($i * 86400);
     $val = array_key_exists($i, $probs) ? $probs[$i]: 0;
+    if (!array_key_exists($i, $tblrows)){
+        $tblrows[$i] = "";
+    }
     $tblrows[$i] .= sprintf("<td>%.0f</td>", $val/$yrs*100);
   }
 }
@@ -63,7 +69,10 @@ foreach($thresholds as $k => $thres)
   $yrs = pg_num_rows($rs);
   for ($i=0;$row=pg_fetch_array($rs);$i++)
   {
-    @$cnts[ $row["v"] ] += 1;
+    if (!array_key_exists($row["v"], $cnts)){
+        $cnts[$row["v"]] = 0;
+    }
+    $cnts[ $row["v"] ] += 1;
   }
   $probs = Array();
   $running = 0;
@@ -75,6 +84,9 @@ foreach($thresholds as $k => $thres)
   for ($i=182;$i<366;$i=$i+5) {
     $ts = mktime(0,0,0,1,1,2000) + ($i * 86400);
     $val = array_key_exists($i, $probs) ? $probs[$i]: 0;
+    if (!array_key_exists($i, $tblrows)){
+        $tblrows[$i] = "";
+    }
     $tblrows[$i] .= sprintf("<td>%.0f</td>", $val/$yrs*100);
   }
 }

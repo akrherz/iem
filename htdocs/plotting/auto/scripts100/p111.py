@@ -1,8 +1,8 @@
 """Climodat"""
 import datetime
 
-from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconn
+import pandas as pd
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 
@@ -26,47 +26,41 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
 
-    table = "alldata_%s" % (station[:2],)
-    df = read_sql(
-        f"SELECT day, precip from {table} WHERE station = %s and "
-        "precip is not null ORDER by precip DESC LIMIT 30",
-        pgconn,
-        params=(station,),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"SELECT day, precip from alldata_{station[:2]} WHERE "
+            "station = %s and precip is not null "
+            "ORDER by precip DESC LIMIT 30",
+            conn,
+            params=(station,),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
 
-    res = """\
-# IEM Climodat https://mesonet.agron.iastate.edu/climodat/
-# Report Generated: %s
-# Climate Record: %s -> %s
-# Site Information: [%s] %s
-# Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
-# Top 30 single day rainfalls
- MONTH  DAY  YEAR   AMOUNT
-""" % (
-        datetime.date.today().strftime("%d %b %Y"),
-        ctx["_nt"].sts[station]["archive_begin"].date(),
-        datetime.date.today(),
-        station,
-        ctx["_nt"].sts[station]["name"],
+    res = (
+        "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
+        f"# Report Generated: {datetime.date.today():%d %b %Y}\n"
+        f"# Climate Record: {ctx['_nt'].sts[station]['archive_begin'].date()} "
+        f"-> {datetime.date.today()}\n"
+        f"# Site Information: {ctx['_sname']}\n"
+        "# Contact Information: Daryl Herzmann "
+        "akrherz@iastate.edu 515.294.5978\n"
+        "# Top 30 single day rainfalls\n"
+        " MONTH  DAY  YEAR   AMOUNT\n"
     )
 
     for _, row in df.iterrows():
-        res += "%4i%7i%6i%9.2f\n" % (
-            row["day"].month,
-            row["day"].day,
-            row["day"].year,
-            row["precip"],
+        res += (
+            f"{row['day'].month:4.0f}{row['day'].day:7.0f}"
+            f"{row['day'].year:6.0f}{row['precip']:9.2f}\n"
         )
 
     return None, df, res
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

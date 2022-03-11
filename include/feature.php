@@ -1,5 +1,5 @@
 <?php
-  // Here is where we start pulling station Information
+
 function printTags($tokens)
 {
   if (sizeof($tokens) == 0 || $tokens[0] == ""){ return "";}
@@ -12,5 +12,3 @@ function printTags($tokens)
   $s .= "</span>";
   return $s;
 }
-
-?>

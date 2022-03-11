@@ -1,9 +1,9 @@
 """GDD by month and year"""
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 import numpy as np
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 
@@ -104,35 +104,34 @@ def modMonth(
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     gddbase = ctx["base"]
     gddceil = ctx["ceil"]
-    varname = "gdd%s%s" % (gddbase, gddceil)
+    varname = f"gdd{gddbase}{gddceil}"
 
-    table = "alldata_%s" % (station[:2],)
-    df = read_sql(
-        f"""
-    SELECT year, month, sum(precip) as sum_precip,
-    avg(high) as avg_high,
-    avg(low) as avg_low,
-    sum(cdd(high,low,60)) as cdd60,
-    sum(cdd(high,low,65)) as cdd65,
-    sum(hdd(high,low,60)) as hdd60,
-    sum(hdd(high,low,65)) as hdd65,
-    sum(case when precip > 0.009 then 1 else 0 end) as rain_days,
-    sum(case when snow >= 0.1 then 1 else 0 end) as snow_days,
-    sum(gddxx(40,86,high,low)) as gdd40,
-    sum(gddxx(48,86,high,low)) as gdd48,
-    sum(gddxx(50,86,high,low)) as gdd50,
-    sum(gddxx(%s, %s, high, low)) as {varname}
-    from {table} WHERE station = %s GROUP by year, month
-    """,
-        pgconn,
-        params=(gddbase, gddceil, station),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        SELECT year, month, sum(precip) as sum_precip,
+        avg(high) as avg_high,
+        avg(low) as avg_low,
+        sum(cdd(high,low,60)) as cdd60,
+        sum(cdd(high,low,65)) as cdd65,
+        sum(hdd(high,low,60)) as hdd60,
+        sum(hdd(high,low,65)) as hdd65,
+        sum(case when precip > 0.009 then 1 else 0 end) as rain_days,
+        sum(case when snow >= 0.1 then 1 else 0 end) as snow_days,
+        sum(gddxx(40,86,high,low)) as gdd40,
+        sum(gddxx(48,86,high,low)) as gdd48,
+        sum(gddxx(50,86,high,low)) as gdd50,
+        sum(gddxx(%s, %s, high, low)) as {varname}
+        from alldata_{station[:2]} WHERE station = %s GROUP by year, month
+        """,
+            conn,
+            params=(gddbase, gddceil, station),
+            index_col=None,
+        )
 
     bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:
@@ -222,4 +221,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

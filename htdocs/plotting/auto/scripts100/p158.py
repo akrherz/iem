@@ -3,10 +3,10 @@ import datetime
 
 import pytz
 import numpy as np
-from pandas.io.sql import read_sql
+import pandas as pd
 import matplotlib.dates as mdates
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 
 def get_description():
@@ -47,7 +47,6 @@ def get_description():
 
 def get_context(fdict):
     """Get plot context"""
-    pgconn = get_dbconn("talltowers")
     ctx = get_autoplot_context(fdict, get_description())
     ctx["dt"] = ctx["dt"].replace(tzinfo=pytz.UTC)
     dt = ctx["dt"]
@@ -60,19 +59,24 @@ def get_context(fdict):
 
     towerid = ctx["_nt"].sts[station]["remote_id"]
     ctx["title"] = "Tall Tower %s" % (ctx["_nt"].sts[station]["name"],)
-
-    ctx["df"] = read_sql(
-        """
-        WITH data as (
-            SELECT *, row_number() OVER (ORDER by valid ASC)
-            from data_analog where tower = %s and
-            valid between %s and %s ORDER by valid ASC)
-        select * from data where row_number %% %s = 0
-    """,
-        pgconn,
-        params=(towerid, dt, dt + datetime.timedelta(minutes=minutes), stride),
-        index_col="valid",
-    )
+    with get_sqlalchemy_conn("talltowers") as conn:
+        ctx["df"] = pd.read_sql(
+            """
+            WITH data as (
+                SELECT *, row_number() OVER (ORDER by valid ASC)
+                from data_analog where tower = %s and
+                valid between %s and %s ORDER by valid ASC)
+            select * from data where row_number %% %s = 0
+        """,
+            conn,
+            params=(
+                towerid,
+                dt,
+                dt + datetime.timedelta(minutes=minutes),
+                stride,
+            ),
+            index_col="valid",
+        )
     return ctx
 
 
@@ -80,7 +84,7 @@ def highcharts(fdict):
     """Do highcharts variant"""
     ctx = get_context(fdict)
     df = ctx["df"]
-    df["ticks"] = df.index.values.view(np.int64) // 10 ** 6
+    df["ticks"] = df.index.values.view(np.int64) // 10**6
     lines = []
     lines2 = []
     lines3 = []
@@ -472,4 +476,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})
