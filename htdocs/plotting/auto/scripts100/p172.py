@@ -156,10 +156,9 @@ def plotter(fdict):
     df, cullyears = cull_missing(df, ctx["var"], ctx["m"])
 
     extra = "" if doy_trunc == 365 else f" through {today.strftime('%-d %B')}"
-    title = f"Accumulated {sdate:%-d %B} after {PDICT[ctx['var']]}{extra}"
+    title = f"Accumulated {PDICT[ctx['var']]}{extra} after {sdate:%-d %B}"
     subtitle = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']} "
-        f"({df['binyear'].min()}-{datetime.date.today().year})"
+        f"{ctx['_sname']} {df['binyear'].min()}-{datetime.date.today().year})"
     )
     if cullyears:
         subtitle += (
