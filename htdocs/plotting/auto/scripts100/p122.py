@@ -1,8 +1,8 @@
 """climodat days over threshold"""
 import datetime
 
-from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconn
+import pandas as pd
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 
@@ -26,7 +26,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["station"]
@@ -63,25 +62,25 @@ def plotter(fdict):
         93,
         100,
     )
-
-    df = read_sql(
-        f"""SELECT year,
-       sum(case when low <= -20 THEN 1 ELSE 0 END) as m20,
-       sum(case when low <= -10 THEN 1 ELSE 0 END) as m10,
-       sum(case when low <=  0 THEN 1 ELSE 0 END) as m0,
-       sum(case when low <=  32 THEN 1 ELSE 0 END) as m32,
-       sum(case when high >= 50 THEN 1 ELSE 0 END) as e50,
-       sum(case when high >= 70 THEN 1 ELSE 0 END) as e70,
-       sum(case when high >= 80 THEN 1 ELSE 0 END) as e80,
-       sum(case when high >= 93 THEN 1 ELSE 0 END) as e93,
-       sum(case when high >= 100 THEN 1 ELSE 0 END) as e100
-       from alldata_{station[:2]}
-       WHERE station = %s GROUP by year ORDER by year ASC
-    """,
-        pgconn,
-        params=(station,),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""SELECT year,
+        sum(case when low <= -20 THEN 1 ELSE 0 END) as m20,
+        sum(case when low <= -10 THEN 1 ELSE 0 END) as m10,
+        sum(case when low <=  0 THEN 1 ELSE 0 END) as m0,
+        sum(case when low <=  32 THEN 1 ELSE 0 END) as m32,
+        sum(case when high >= 50 THEN 1 ELSE 0 END) as e50,
+        sum(case when high >= 70 THEN 1 ELSE 0 END) as e70,
+        sum(case when high >= 80 THEN 1 ELSE 0 END) as e80,
+        sum(case when high >= 93 THEN 1 ELSE 0 END) as e93,
+        sum(case when high >= 100 THEN 1 ELSE 0 END) as e100
+        from alldata_{station[:2]}
+        WHERE station = %s GROUP by year ORDER by year ASC
+        """,
+            conn,
+            params=(station,),
+            index_col=None,
+        )
 
     for _, row in df.iterrows():
         res += (

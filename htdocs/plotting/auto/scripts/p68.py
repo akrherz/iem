@@ -1,7 +1,8 @@
 """VTEC combos"""
-from pandas.io.sql import read_sql
+
+import pandas as pd
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 
@@ -39,39 +40,39 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("postgis")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"][:4]
     ctx["_nt"].sts["_ALL"] = {"name": "All Offices"}
 
-    fig = figure(figsize=(8, 14 if station != "_ALL" else 21), apctx=ctx)
+    fig = figure(figsize=(10, 14 if station != "_ALL" else 21), apctx=ctx)
     ax = [None, None]
     ax[0] = fig.add_axes([0.1, 0.75, 0.85, 0.2])
     ax[1] = fig.add_axes([0.1, 0.05, 0.85, 0.65])
 
-    if station == "_ALL":
-        df = read_sql(
-            """
-            SELECT distinct extract(year from issue) as year,
-            phenomena, significance from warnings WHERE
-            phenomena is not null and significance is not null and
-            issue > '2005-01-01'
-            """,
-            pgconn,
-            index_col=None,
-        )
-    else:
-        df = read_sql(
-            """
-            SELECT distinct extract(year from issue) as year,
-            phenomena, significance from warnings WHERE
-            wfo = %s and phenomena is not null and significance is not null
-            and issue > '2005-01-01'
-            """,
-            pgconn,
-            params=(station,),
-            index_col=None,
-        )
+    with get_sqlalchemy_conn("postgis") as conn:
+        if station == "_ALL":
+            df = pd.read_sql(
+                """
+                SELECT distinct extract(year from issue) as year,
+                phenomena, significance from warnings WHERE
+                phenomena is not null and significance is not null and
+                issue > '2005-01-01'
+                """,
+                conn,
+                index_col=None,
+            )
+        else:
+            df = pd.read_sql(
+                """
+                SELECT distinct extract(year from issue) as year,
+                phenomena, significance from warnings WHERE
+                wfo = %s and phenomena is not null and significance is not null
+                and issue > '2005-01-01'
+                """,
+                conn,
+                params=(station,),
+                index_col=None,
+            )
     if df.empty:
         raise NoDataFound("No data was found for this WFO.")
     df["wfo"] = station
@@ -119,6 +120,7 @@ def plotter(fdict):
 
     ax[1].set_title("VTEC <Phenomena.Significance> Issued by Year")
     ax[1].set_ylim(0, i)
+    ax[1].set_yticks([])
     ax[1].grid(True)
     ax[1].set_xlim(gdf.index.values.min() - 0.5, gdf.index.values.max() + 0.5)
     return fig, df

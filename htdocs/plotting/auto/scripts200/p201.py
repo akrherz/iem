@@ -181,7 +181,7 @@ def plotter(fdict):
                 ),
                 index_col="date",
             )
-        title2 = "Continental US"
+        title2 = "Contiguous US"
     else:
         if ctx["w"] == "wfo":
             table = "cwa"

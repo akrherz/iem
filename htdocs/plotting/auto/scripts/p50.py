@@ -1,11 +1,11 @@
 """IBW Tag Freq."""
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.plot.use_agg import plt
 from pyiem.plot import figure_axes
 from pyiem.reference import state_names
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"state": "Aggregate by State", "wfo": "Aggregate by WFO"}
@@ -95,7 +95,6 @@ def plotter(fdict):
     date2 = ctx.get(
         "date2", datetime.date.today() + datetime.timedelta(days=1)
     )
-    pgconn = get_dbconn("postgis")
     wfo_limiter = ("and wfo = '%s' ") % (
         station if len(station) == 3 else station[1:],
     )
@@ -148,8 +147,8 @@ def plotter(fdict):
         from data GROUP by windtag, hailtag
         """
         args = (date1, date2, state)
-
-    df = read_sql(sql, pgconn, params=args, index_col=None)
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = pd.read_sql(sql, conn, params=args, index_col=None)
     if df.empty:
         raise NoDataFound("No data was found.")
     minvalid = df["min_issue"].min()

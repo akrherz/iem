@@ -434,7 +434,8 @@ def test_timestamp():
 def test_parser():
     """test things"""
     metadata = {"utc_direction": 1}
-    p1_examples = open("p1_examples.txt").readlines()
+    with open("p1_examples.txt", encoding="utf-8") as fh:
+        p1_examples = fh.readlines()
     for i, ex in enumerate(p1_examples):
         res = p1_parser(ex, metadata)
         if i == 0:
@@ -446,8 +447,8 @@ def test_parser():
         if i in [26, 27]:
             assert res.get("drct") is None
         assert res is not None
-
-    p2_examples = open("p2_examples.txt").readlines()
+    with open("p2_examples.txt", encoding="utf-8") as fh:
+        p2_examples = fh.readlines()
     for i, ex in enumerate(p2_examples):
         res = p2_parser(ex, metadata)
         if i == 0:

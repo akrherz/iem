@@ -3,20 +3,17 @@ import datetime
 
 import matplotlib.dates as mdates
 import pandas as pd
-from pandas.io.sql import read_sql
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
-PDICT = dict(
-    [
-        ("high", "High Temp (F)"),
-        ("low", "Low Temp (F)"),
-        ("precip", "Precip (inch)"),
-        ("snow", "Snowfall (inch)"),
-        ("snowd", "Snow Depth (inch)"),
-    ]
-)
+PDICT = {
+    "high": "High Temp (F)",
+    "low": "Low Temp (F)",
+    "precip": "Precip (inch)",
+    "snow": "Snowfall (inch)",
+    "snowd": "Snow Depth (inch)",
+}
 PDICT2 = {"gte": "Greater than or equal to", "lt": "Less than"}
 XREF = {"gte": ">=", "lt": "<"}
 PDICT3 = {
@@ -100,7 +97,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["station"]
@@ -110,24 +106,26 @@ def plotter(fdict):
     days = int(ctx["days"])
     table = f"alldata_{station[:2]}"
     func = "avg" if days == 1 else ctx["f"]
-
-    df = read_sql(
-        (
-            "WITH data as ( "
-            f"SELECT sday, {func}({varname}) "
-            "OVER (ORDER by day ASC ROWS between "
-            f"CURRENT ROW and {days - 1} FOLLOWING) as val, day from {table} "
-            f"WHERE station = %s and {varname} is not null and year >= %s "
-            "and year <= %s) "
-            f"SELECT sday, sum(case when val {opt} {threshold} then 1 else 0 "
-            "end) as hits, count(*) as total, "
-            "min(day) as min_date, max(day) as max_date from data "
-            "WHERE sday != '0229' GROUP by sday ORDER by sday ASC"
-        ),
-        pgconn,
-        params=(station, ctx["syear"], ctx["eyear"]),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            (
+                f"""
+                WITH data as (
+                SELECT sday, {func}({varname})
+                OVER (ORDER by day ASC ROWS between
+                CURRENT ROW and {days - 1} FOLLOWING) as val, day from {table}
+                WHERE station = %s and {varname} is not null and year >= %s
+                and year <= %s)
+                SELECT sday, sum(case when val {opt} {threshold} then 1 else 0
+                end) as hits, count(*) as total,
+                min(day) as min_date, max(day) as max_date from data
+                WHERE sday != '0229' GROUP by sday ORDER by sday ASC
+            """
+            ),
+            conn,
+            params=(station, ctx["syear"], ctx["eyear"]),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     # Covert sday into year 2001 date

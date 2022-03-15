@@ -2,12 +2,13 @@
 import calendar
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.nws import vtec
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import figure
 from pyiem import reference
 from pyiem.exceptions import NoDataFound
+from sqlalchemy import text
 
 OPT = {
     "state": "Summarize by State",
@@ -87,7 +88,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("postgis")
     ctx = get_autoplot_context(fdict, get_description())
 
     opt = ctx["opt"]
@@ -95,29 +95,38 @@ def plotter(fdict):
     phenomena = ctx["phenomena"]
     significance = ctx["significance"]
     station = ctx["station"][:4]
-
-    limiter = f" wfo = '{station}' "
+    params = {
+        "ph": phenomena,
+        "sig": significance,
+        "wfo": station,
+    }
+    limiter = " wfo = :wfo "
     title = f"[{station}] NWS {ctx['_nt'].sts[station]['name']}"
     if opt == "state":
         title = f"State of {reference.state_names[state]}"
-        limiter = f" substr(ugc, 1, 2) = '{state}' "
+        limiter = " substr(ugc, 1, 2) = :state "
+        params["state"] = state
     agg = f"extract({ctx['how']} from issue)"
     if ctx["how"] == "week":
         agg = "(extract(doy from issue) / 7)::int"
-    df = read_sql(
-        f"""
-    with obs as (
-        SELECT distinct extract(year from issue) as yr,
-        {agg} as datum, wfo, eventid
-        from warnings WHERE
-        {limiter} and phenomena = %s and significance = %s
-    )
-    SELECT yr::int, datum, count(*) from obs GROUP by yr, datum ORDER by yr ASC
-    """,
-        pgconn,
-        params=(phenomena, significance),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = pd.read_sql(
+            text(
+                f"""
+        with obs as (
+            SELECT distinct extract(year from issue) as yr,
+            {agg} as datum, wfo, eventid
+            from warnings WHERE
+            {limiter} and phenomena = :ph and significance = :sig
+        )
+        SELECT yr::int, datum, count(*) from obs GROUP by yr, datum
+        ORDER by yr ASC
+        """
+            ),
+            conn,
+            params=params,
+            index_col=None,
+        )
 
     if df.empty:
         raise NoDataFound("ERROR: No Results Found!")

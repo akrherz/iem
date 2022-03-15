@@ -1,10 +1,10 @@
 """departures"""
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 import numpy as np
 from pyiem.plot import figure
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -101,7 +101,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["station"]
@@ -120,24 +119,24 @@ def plotter(fdict):
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
 
-    table = f"alldata_{station[:2]}"
-    df = read_sql(
-        f"""
-    WITH avgs as (
-        SELECT sday, avg(gddxx(%s, %s, high, low)) as c{glabel},
-        avg(sdd86(high, low)) as csdd86, avg(precip) as cprecip
-        from {table} WHERE station = %s GROUP by sday
-    )
-    SELECT day, gddxx(%s, %s, high, low) as o{glabel}, c{glabel},
-    o.precip as oprecip, cprecip,
-    sdd86(o.high, o.low) as osdd86, csdd86 from {table} o
-    JOIN avgs a on (o.sday = a.sday)
-    WHERE station = %s and o.sday != '0229' ORDER by day ASC
-    """,
-        pgconn,
-        params=(gddbase, gddceil, station, gddbase, gddceil, station),
-        index_col="day",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        WITH avgs as (
+            SELECT sday, avg(gddxx(%s, %s, high, low)) as c{glabel},
+            avg(sdd86(high, low)) as csdd86, avg(precip) as cprecip
+            from alldata_{station[:2]} WHERE station = %s GROUP by sday
+        )
+        SELECT day, gddxx(%s, %s, high, low) as o{glabel}, c{glabel},
+        o.precip as oprecip, cprecip,
+        sdd86(o.high, o.low) as osdd86, csdd86 from alldata_{station[:2]} o
+        JOIN avgs a on (o.sday = a.sday)
+        WHERE station = %s and o.sday != '0229' ORDER by day ASC
+        """,
+            conn,
+            params=(gddbase, gddceil, station, gddbase, gddceil, station),
+            index_col="day",
+        )
     df["precip_diff"] = df["oprecip"] - df["cprecip"]
     df[glabel + "_diff"] = df["o" + glabel] - df["c" + glabel]
 

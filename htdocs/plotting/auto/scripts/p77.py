@@ -60,7 +60,7 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No Data Found.")
     title = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']} Period Between\n"
+        f"{ctx['_sname']} :: Period Between\n"
         "Average Last and First High Temperature of Year"
     )
     fig = figure(title=title, apctx=ctx)

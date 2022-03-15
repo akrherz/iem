@@ -3,13 +3,12 @@ import datetime
 import warnings
 
 import numpy as np
-from pandas.io.sql import read_sql
 import pandas as pd
 import requests
 import matplotlib.patheffects as PathEffects
 from matplotlib.patches import Rectangle
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 warnings.simplefilter("ignore", UserWarning)
 PDICT = {"temps": "Plot High/Low Temperatures", "precip": "Plot Precipitation"}
@@ -58,7 +57,6 @@ def get_description():
 
 def common(ctx):
     """Do things common to both plots."""
-    pgconn_coop = get_dbconn("coop")
     station = ctx["station"]
     year = ctx["year"]
     month = ctx["month"]
@@ -104,22 +102,23 @@ def common(ctx):
                 f"{ctx['_nt'].sts[station]['ncei91']}"
             )
     # Get the normals
-    cdf = read_sql(
-        "SELECT high as climo_high, low as climo_low, "
-        "extract(day from valid)::int as day_of_month, "
-        f"precip as climo_precip from {table} where station = %s and "
-        "extract(month from valid) = %s ORDER by valid ASC",
-        pgconn_coop,
-        params=(ctx["_nt"].sts[station][clcol], month),
-        index_col="day_of_month",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        cdf = pd.read_sql(
+            "SELECT high as climo_high, low as climo_low, "
+            "extract(day from valid)::int as day_of_month, "
+            f"precip as climo_precip from {table} where station = %s and "
+            "extract(month from valid) = %s ORDER by valid ASC",
+            conn,
+            params=(ctx["_nt"].sts[station][clcol], month),
+            index_col="day_of_month",
+        )
     df = cdf.join(df)
     df["accum_climo_precip"] = df["climo_precip"].cumsum()
     if "accum_pday" not in df.columns:
         df["accum_pday"] = 0
     df["depart_precip"] = df["accum_pday"] - df["accum_climo_precip"]
     title = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']} :: "
+        f"{ctx['_sname']} :: "
         f"{'Hi/Lo Temps' if ctx['p'] == 'temps' else 'Precipitation'} "
         f"for {sts:%b %Y}\n"
         f"{subtitle}"
