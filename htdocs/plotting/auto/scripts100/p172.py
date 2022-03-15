@@ -1,8 +1,8 @@
 """accumulated precip."""
 import datetime
 
-from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconn
+import pandas as pd
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
@@ -112,7 +112,6 @@ def cull_missing(df, colname, missingdays):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     ab = ctx["_nt"].sts[station]["archive_begin"]
@@ -125,22 +124,34 @@ def plotter(fdict):
     table = f"alldata_{station[:2]}"
     # belt and suspenders
     assert ctx["var"] in PDICT
-    df = read_sql(
-        f"""
-        with obs as (
-            SELECT day, {ctx["var"]},
-            case when sday >= %s then year else year - 1 end as binyear
-            from {table} WHERE station = %s
+    with get_sqlalchemy_conn("coop") as conn:
+        climo = pd.read_sql(
+            """
+            SELECT to_char(valid, 'mmdd') as sday, precip as cprecip,
+            snow as csnow
+            from ncei_climate91 where station = %s ORDER by sday
+            """,
+            conn,
+            params=(ctx["_nt"].sts[station]["ncei91"],),
+            index_col="sday",
         )
-        SELECT day, binyear::int, {ctx["var"]},
-        row_number() OVER (PARTITION by binyear ORDER by day ASC) as row,
-        sum({ctx["var"]}) OVER (PARTITION by binyear ORDER by day ASC) as accum
-        from obs ORDER by day ASC
-    """,
-        pgconn,
-        params=(sdate.strftime("%m%d"), station),
-        index_col="day",
-    )
+        df = pd.read_sql(
+            f"""
+            with obs as (
+                SELECT day, {ctx["var"]}, sday,
+                case when sday >= %s then year else year - 1 end as binyear
+                from {table} WHERE station = %s
+            )
+            SELECT day, binyear::int, {ctx["var"]}, sday,
+            row_number() OVER (PARTITION by binyear ORDER by day ASC) as row,
+            sum({ctx["var"]}) OVER (PARTITION by binyear ORDER by day ASC)
+                as accum
+            from obs ORDER by day ASC
+        """,
+            conn,
+            params=(sdate.strftime("%m%d"), station),
+            index_col="day",
+        )
     if df.empty:
         raise NoDataFound("No data found!")
     # Truncate plot
@@ -154,6 +165,8 @@ def plotter(fdict):
         df = df[df["row"] <= doy_trunc]
 
     df, cullyears = cull_missing(df, ctx["var"], ctx["m"])
+    if not climo.empty:
+        df = df.join(climo, how="left", on="sday")
 
     extra = "" if doy_trunc == 365 else f" through {today.strftime('%-d %B')}"
     title = f"Accumulated {PDICT[ctx['var']]}{extra} after {sdate:%-d %B}"
@@ -170,14 +183,15 @@ def plotter(fdict):
     # Average
     jday = df[["row", "accum"]].groupby("row").mean()
     jday["accum"].values[-1] = jday["accum"].values[-2]
-    ax.plot(
-        range(1, len(jday.index) + 1),
-        jday["accum"],
-        lw=2,
-        zorder=5,
-        color="k",
-        label=f"Average - {jday['accum'].iloc[-1]:.2f}",
-    )
+    if climo.empty:
+        ax.plot(
+            range(1, len(jday.index) + 1),
+            jday["accum"],
+            lw=2,
+            zorder=5,
+            color="k",
+            label=f"Simple Average - {jday['accum'].iloc[-1]:.2f}",
+        )
 
     # Min and Max
     jmin = df[["row", "accum"]].groupby("row").min()
@@ -222,6 +236,19 @@ def plotter(fdict):
             df2["accum"],
             label=f"{labelyear} - {lastrow['accum']:.2f}{extra}",
             color=color,
+            lw=2,
+        )
+    # NCEI91 Climatology
+    if not climo.empty:
+        df2 = df[df["binyear"] == 2000]
+        acc = df2[f"c{ctx['var']}"].cumsum()
+        maxval = acc.max()
+        ax.plot(
+            range(1, len(acc.index) + 1),
+            acc,
+            label=f"NCEI91-20 - {maxval:.2f}",
+            color="k",
+            linestyle="--",
             lw=2,
         )
 
