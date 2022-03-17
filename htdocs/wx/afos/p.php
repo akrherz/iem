@@ -112,6 +112,14 @@ for ($i=0; $row = pg_fetch_assoc($rs); $i++)
 	if ($i == 0){
 		$basets = strtotime($row["mytime"]); 
 		$newe = date("YmdHi", $basets);
+        $rawtext = sprintf(
+            "/api/1/nwstext/%s-%s-%s-%s",
+            $newe, $row["source"], $row["wmo"], $pil,
+        );
+        if ($row["bbb"] != ""){
+            $rawtext .= "-" . $row["bbb"];
+        }
+        $isodt = date("Y-m-d\\TH:i", $basets);
         $t->title = sprintf(
             "%s from NWS %s",
             substr($pil,0,3),
@@ -165,7 +173,7 @@ Received: <strong>{$dstamp} UTC</strong>
 	href="p.php?dir=prev&pil=$pil&e=$newe"><i class="fa fa-arrow-left"></i> 
 	Previous in Time</a>
 </div>
-<div class="col-sm-4">
+<div class="col-sm-3">
 	<a rel="nofollow" class="btn btn-primary" 
 	href="{$listlink}">View All {$row["source"]} Products for {$date2}</a>
 </div>
@@ -173,11 +181,13 @@ Received: <strong>{$dstamp} UTC</strong>
 	<a rel="nofollow" class="btn btn-primary" 
 	href="p.php?dir=next&pil=$pil&e=$newe">Next in Time <i class="fa fa-arrow-right"></i></a>
 </div>
-<div class="col-sm-4">
+<div class="col-sm-5">
 	<a rel="nofollow" class="btn btn-primary" 
 	href="p.php?pil=$pil">Latest Product</a>
-	<a rel="nofollow" class="btn btn-primary" 
+	<a rel="nofollow" class="btn btn-primary"
 	href="{$t->twitter_image}">View As Image</a>
+	<a class="btn btn-primary"
+	href="{$rawtext}">Download As Text</a>
 </div>
 </div><!-- ./row -->
 EOF;
@@ -185,11 +195,7 @@ EOF;
 	}
 	if (strtotime($row["mytime"]) != $basets){ continue; }
 	$d = preg_replace("/\r\r\n/", "\n", $row["data"]);
-	if (preg_match('/xml/', $row["data"]) > 0){
-        $content .= "<pre>". $d ."</pre>\n";
-	} else {
-		$content .= "<pre>". htmlentities($d) ."</pre>\n";
-	}
+	$content .= "<pre>". htmlentities($d) ."</pre>\n";
 }
 
 $content .= $img;
