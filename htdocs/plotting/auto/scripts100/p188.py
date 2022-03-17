@@ -130,7 +130,7 @@ def plotter(fdict):
     if ctx["year"] in df.index:
         df2 = df.loc[ctx["year"]]
     title = (
-        f"{ctx['_sname']} {PDICT[varname]}\n"
+        f"{ctx['_sname']} :: {PDICT[varname]}\n"
         f"{title} ({df.index.min():.0f}-{df.index.max():.0f})"
     )
     fig = figure(apctx=ctx, title=title)
@@ -163,9 +163,9 @@ def plotter(fdict):
     if df2 is not None:
         ax3.bar(ctx["year"], df2["count_days"], zorder=2, color="red")
     ax3.grid(True)
-    ax3.set_ylabel(
-        "Days %s %.0f" % ("above" if varname == "fall" else "below", thres2)
-    )
+    tt = "above" if varname == "fall" else "below"
+    tt2 = "High" if varname == "fall" else "low"
+    ax3.set_ylabel(f"Days {tt} {thres2:.0f}F for {tt2}")
     ax3.set_xlim(df.index.min() - 1, df.index.max() + 1)
     ax3.axhline(df["count_days"].mean())
     ax3.text(
@@ -173,13 +173,10 @@ def plotter(fdict):
         df["count_days"].mean(),
         "Avg:\n%.1f" % (df["count_days"].mean(),),
     )
+    val = f"{df2['count_days']:.0f}" if df2 is not None else "M"
     ax3.set_xlabel(
-        ("%0.f years with 0 days, %s = %.0f")
-        % (
-            len(df[df["count_days"] == 0].index),
-            ctx["year"],
-            df2["count_days"] if df2 is not None else -99,
-        )
+        f"{len(df[df['count_days'] == 0].index):.0f} years with 0 days, "
+        f"{ctx['year']} = {val}"
     )
 
     return fig, df
