@@ -104,7 +104,7 @@ def copy_iemre(ts, ds):
                 if uwnd.mask.all():
                     LOG.warning("No wind for offset: %s", offset)
                     continue
-                mag = (uwnd ** 2 + vwnd ** 2) ** 0.5
+                mag = (uwnd**2 + vwnd**2) ** 0.5
                 windhours += 1
                 if sped is None:
                     sped = mag
@@ -121,7 +121,7 @@ def copy_iemre(ts, ds):
                         LOG.warning("No wind for offset: %s", offset)
                         continue
                     windhours += 1
-                    sped += (uwnd ** 2 + vwnd ** 2) ** 0.5
+                    sped += (uwnd**2 + vwnd**2) ** 0.5
     else:
         ncfn = iemre.get_hourly_ncname(sts.year)
         if not os.path.isfile(ncfn):
@@ -134,12 +134,18 @@ def copy_iemre(ts, ds):
                 uwnd = hnc.variables["uwnd"][offset, :, :]
                 vwnd = hnc.variables["vwnd"][offset, :, :]
                 if uwnd.mask.all():
-                    # Don't complain about the last timestamp being missing
-                    if offset != offset2 - 1:
-                        LOG.warning("No wind for offset: %s", offset)
+                    # Don't complain about the last two timestamp being missing
+                    if offset < (offset2 - 2):
+                        LOG.warning(
+                            "No wind for offset: %s[%s-%s] %s",
+                            offset,
+                            offset1,
+                            offset2,
+                            sts,
+                        )
                     continue
                 windhours += 1
-                mag = (uwnd ** 2 + vwnd ** 2) ** 0.5
+                mag = (uwnd**2 + vwnd**2) ** 0.5
                 if sped is None:
                     sped = mag
                 else:

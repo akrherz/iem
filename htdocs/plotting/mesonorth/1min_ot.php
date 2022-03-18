@@ -66,9 +66,6 @@ foreach($new_contents as $line_num => $line)
 
 } // End of while
 
-
-
-
 // Create the graph. These two calls are always required
 $graph = new Graph(1200, 628);
 $graph->SetScale("datlin");
@@ -145,5 +142,3 @@ $graph->Add($lineplot4);
 }
 
 $graph->Stroke();
-
-?>
