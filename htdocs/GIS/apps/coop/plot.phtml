@@ -48,13 +48,12 @@ function plotNoData($map, $img){
 	$point->setXY( 100, 200);
 	$point->draw($map, $layer, $img, 1,
 			"  No data found for this date! ");
-
-
 }
 
 $vardef = Array(
     "high" => "High Temperature",
 	"low" => "Low Temperature",
+    "tob" => "Temperature At Observation",
 	"precip" => "Precipitation",
 	"snow" => "Snow [1]",
     "snowd" => "Snow Depth [2]",
@@ -115,7 +114,8 @@ if ($source == "qc")
 	$cutstring1 = 0;
 	$cutstring2 = 5;
 	$sql = sprintf("SELECT id as station, day, snowd, max_tmpf as high, ".
-	    "min_tmpf as low, pday as precip, snow, snowd from summary_%s s ".
+	    "min_tmpf as low, pday as precip, snow, snowd, coop_tmpf as tob ".
+        "from summary_%s s ".
 	    "JOIN stations t on (t.iemid = s.iemid) WHERE day = '%s' and ".
 	    "network = 'IA_COOP' ORDER by $dbvar DESC",
 	    adodb_date("Y", $ts), adodb_date("Y-m-d", $ts) );
@@ -226,7 +226,10 @@ choice.
   </tr>
  <tr>
   <td>{$sourceselect}</td>
-  <td>{$varselect}</td>
+  <td>{$varselect}
+  <br /><i>Note:</i> Temperature at Observation is only available for the
+  "Preliminary" data source.
+  </td>
   <td>{$yselect}</td>
   <td>{$mselect}</td>
   <td>{$dselect}</td>
@@ -266,4 +269,3 @@ then import this dataset as a layer.  You may have to omit the commented lines
 (#) if your GIS has trouble importing the data.
 EOF;
 $t->render('single.phtml');
-?>
