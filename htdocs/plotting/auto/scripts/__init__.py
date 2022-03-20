@@ -733,9 +733,10 @@ uopts = [
     {"id": 212, "label": "Sounding Parameter / Variable Yearly Timeseries"},
 ]
 misc = [
-    {"id": 219, "label": "Terminal Aerodome Forecast (TAF) Infographic"},
-    {"id": 220, "label": "SPC Convective / Fire Weather Outlook Graphics"},
+    {"id": 226, "label": "Center Weather Advisory (CWA) Map"},
     {"id": 221, "label": "HRRR Time-Lagged Ensemble Reflectivity Plot"},
+    {"id": 220, "label": "SPC Convective / Fire Weather Outlook Graphics"},
+    {"id": 219, "label": "Terminal Aerodome Forecast (TAF) Infographic"},
 ]
 data = {
     "plots": [
