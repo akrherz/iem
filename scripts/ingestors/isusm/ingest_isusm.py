@@ -157,7 +157,7 @@ def do_inversion(filename, nwsli):
     df = pd.read_csv(
         filename,
         skiprows=[0, 2, 3],
-        na_values=["NAN"],
+        na_values=["NAN", "INF"],
         encoding="ISO-8859-1",
     )
     # convert all columns to lowercase
@@ -256,7 +256,7 @@ def process(fullfn):
     df = pd.read_csv(
         fullfn,
         skiprows=[0, 2, 3],
-        na_values=["NAN", "-100"],
+        na_values=["NAN", "-100", "INF"],
         encoding="ISO-8859-1",
     )
     if df.empty:
