@@ -112,7 +112,7 @@ def dowork(lon, lat, last, day, cat):
         and threshold = 'SIGN' ORDER by expire DESC, issue ASC LIMIT 1)
 
     (SELECT i, e, v, threshold, category from agg
-    ORDER by e DESC, threshold desc) UNION
+    ORDER by e DESC, threshold desc) UNION ALL
     (SELECT i, e, v, threshold, category from sign
     ORDER by e DESC, threshold desc)
     """,
