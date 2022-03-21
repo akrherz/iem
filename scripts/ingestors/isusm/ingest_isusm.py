@@ -93,6 +93,7 @@ VARCONV = {
 }
 STATIONS = {
     "Sutherland": "CAMI4",
+    "Calumet": "CAMI4",  # legacy, renamed on 21 March 2022
     "AEAFarm": "BOOI4",
     "Wellman": "WMNI4",
     "Sibley": "SBEI4",
@@ -125,6 +126,7 @@ STATIONS = {
 INVERSION = {
     "AEAInversion": "BOOI4",
     "SutherlandInversion": "CAMI4",
+    "CalumetInversion": "CAMI4",  # legacy, renamed on 21 March 2022
     "CrawfordsvilleInversion": "CRFI4",
 }
 
