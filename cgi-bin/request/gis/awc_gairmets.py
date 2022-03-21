@@ -48,6 +48,7 @@ def run(ctx, start_response):
         "geometry": "Polygon",
         "properties": dict(
             [
+                ("NAME", "str:64"),
                 ("LABEL", "str:4"),
                 ("GML_ID", "str:32"),
                 ("VALID_AT", "str:20"),
@@ -64,6 +65,7 @@ def run(ctx, start_response):
     with get_sqlalchemy_conn("postgis") as conn:
         df = gpd.read_postgis(
             "select label, gml_id, "
+            f"gml_id  || ' ' || to_char(valid_at {common}) as name, "
             f"to_char(valid_at {common}) as valid_at, "
             f"to_char(valid_from {common}) as valid_fm, "
             f"to_char(valid_to {common}) as valid_to, "
@@ -87,7 +89,7 @@ def run(ctx, start_response):
     if ctx["format"] == "kml":
         fp = BytesIO()
         with fiona.drivers():
-            df.to_file(fp, driver="KML")
+            df.to_file(fp, driver="KML", NameField="NAME")
         headers = [
             ("Content-type", "application/octet-stream"),
             ("Content-Disposition", f"attachment; filename={fn}.kml"),
