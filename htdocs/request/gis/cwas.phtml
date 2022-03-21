@@ -1,36 +1,35 @@
 <?php 
 require_once "../../../config/settings.inc.php";
-define("IEM_APPID", 132);
+define("IEM_APPID", 133);
 require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
 require_once "../../../include/imagemaps.php";
 
 $t = new MyView();
-$t->title = "Download Aviation Weather Center G-AIRMETs Shapefile/KML";
+$t->title = "Download CWSU Center Weather Advisory (CWA) Shapefile/KML";
 $content = <<<EOF
 <p>
 <ul class="breadcrumb">
 <li><a href="/nws/">NWS Mainpage</a></li>
-<li class="active">AWC G-AIRMETs Download</li>
+<li class="active">CWSU CWA Download</li>
 </ul>
 </p>
 
 <p>The IEM has a database archive of
-<a href="https://www.aviationweather.gov/gairmet/">AWC G-AIRMETs</a>
-since their inception on about 3 March 2021.  The IEM also maintains an
-archive of the raw XML text, which you can find listed on the main
-<a href="/wx/afos/list.phtml?source=KKCI">AFOS List Page for KKCI</a>. These
-products are assigned a product identifier of <code>GMT</code> on that page.
+<a href="https://www.aviationweather.gov/cwamis">CWSU Center Weather Advisories</a>.
+The archive presently dates back to 1 January 2014 and is updated in real-time as
+new products are received and processed.  Robust processing of the CWA has been
+problematic as the raw products are more free-form text than adhering to a format
+specification.  Presently, attempts are not made at processing cancellation statements. 
 </p>
 
 <p><strong>Related:</strong>
-<a class="btn btn-primary" href="cwas.phtml">CWSU Center Weather Advisories</a>
+<a class="btn btn-primary" href="awc_gairmets.phtml">AWC Graphical-AIRMETs</a>
 </p>
 
-<form method="GET" action="/cgi-bin/request/gis/awc_gairmets.py">
+<form method="GET" action="/cgi-bin/request/gis/cwas.py">
 <table class="table">
-<thead><tr><th colspan="6">Time Interval for G-AIRMET
-*Issue Time (G-AIRMETISSUETIME)* (UTC)</th></tr></thead>
+<thead><tr><th colspan="6">Time Interval for CWA Issuance (UTC)</th></tr></thead>
 <tr>
     <td></td><th>Year</th><th>Month</th><th>Day</th>
     <th>Hour</th><th>Minute</th>
@@ -40,7 +39,7 @@ products are assigned a product identifier of <code>GMT</code> on that page.
 EOF;
 $content .= "<th>Start:</th>
     <td>
-     ". yearSelect2(2021, date("Y"), "year1") ."
+     ". yearSelect2(2014, date("Y"), "year1") ."
     </td>
     <td>
      ". monthSelect2(0,"month1") ."
@@ -59,7 +58,7 @@ $content .= "<th>Start:</th>
   <tr>
     <th>End:</th>
     <td>
-     ". yearSelect2(2021, date("Y"), "year2") ."
+     ". yearSelect2(2014, date("Y"), "year2") ."
     </td>
     <td>
      ". monthSelect2(date("m"), "month2") ."
@@ -89,16 +88,12 @@ $content .= <<<EOM
 
 <h4>Shapefile DBF schema:</h4>
 <pre>
-Field 0: Type=C/String, Title=`LABEL', Event label from GML_ID
-Field 1: Type=C/String, Title=`GML_ID', Verbatim GML_ID from product
-Field 2: Type=C/String, Title=`VALID_AT', UTC Valid At time (gml:timePosition)
-Field 3: Type=C/String, Title=`VALID_FM', UTC From Time (G-AIRMETVALIDFROM)
-Field 4: Type=C/String, Title=`VALID_TO', UTC To Time (G-AIRMETVALIDTO)
-Field 5: Type=C/String, Title=`ISSUTIME', UTC Issue Time (G-AIRMETISSUETIME)
-Field 6: Type=C/String, Title=`PROD_ID', IEM Text Product ID
-Field 7: Type=C/String, Title=`STATUS', Status of AIRMET
-Field 8: Type=C/String, Title=`HZTYPE', Hazard Type
-Field 9: Type=C/String, Title=`WXCOND', Comma list of weather conditions
+Field 0: Type=C/String, Title='CENTER', CWSU Center ID
+Field 1: Type=C/String, Title='ISSUE', UTC CWA Issuance Time
+Field 2: Type=C/String, Title='EXPIRE', UTC CWA Expiration Time
+Field 3: Type=C/String, Title='PROD_ID', IEM Text Product Identifier
+Field 4: Type=C/String, Title='NARRATIV', Text Narrative found in raw text
+Field 5: Type=N/Double, Title='NUMBER', CWA Number
 </pre>
 
 <h4>Archive / Usage Notes:</h4>

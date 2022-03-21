@@ -44,13 +44,17 @@ hole with hundreds of plotting options for many datasets of NWS interest.</p>
 <h3>Interest Areas</h3>
 
 <div class="panel panel-default">
-  <div class="panel-heading">Aviation Weather Center Products</div>
+  <div class="panel-heading">Aviation Weather Products</div>
   <div class="panel-body">
 
   <ul>
   <li><a href="/request/gis/awc_gairmets.phtml">Archive Graphical AIRMETs in Shapefile/KML format</a>
 </li>
-  </div>
+<li><a href="/request/gis/cwas.phtml">Center Weather Advisories (CWA) in Shapefile/KML format</a>
+</li>
+</ul>
+
+</div>
 </div>
 
 
