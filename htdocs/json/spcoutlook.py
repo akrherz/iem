@@ -85,6 +85,7 @@ def dowork(lon, lat, last, day, cat):
 
     res = dict(outlooks=[])
 
+    # Need to compute SIGN seperately
     cursor.execute(
         """
     WITH data as (
@@ -93,20 +94,29 @@ def dowork(lon, lat, last, day, cat):
         product_issue at time zone 'UTC' as v,
         o.threshold, category, t.priority,
         row_number() OVER (PARTITION by expire
-            ORDER by priority DESC NULLS last, issue ASC) as rank,
-        case when o.threshold = 'SIGN' then rank()
-            OVER (PARTITION by o.threshold, expire
-            ORDER by product_issue ASC) else 2 end as sign_rank
+            ORDER by priority DESC NULLS last, issue ASC) as rank
         from spc_outlooks o, spc_outlook_thresholds t
         where o.threshold = t.threshold and
         ST_Contains(geom, ST_GeomFromEWKT('SRID=4326;POINT(%s %s)'))
         and day = %s and outlook_type = 'C' and category = %s
-        and o.threshold not in ('TSTM') ORDER by issue DESC)
-    SELECT i, e, v, threshold, category from data
-    where (rank = 1 or sign_rank = 1)
-    ORDER by e DESC
+        and o.threshold not in ('TSTM', 'SIGN') ORDER by issue DESC),
+    agg as (
+        select i, e, v, threshold, category from data where rank = 1),
+    sign as (
+        SELECT issue at time zone 'UTC' as i,
+        expire at time zone 'UTC' as e,
+        product_issue at time zone 'UTC' as v,
+        threshold, category from spc_outlooks
+        where ST_Contains(geom, ST_GeomFromEWKT('SRID=4326;POINT(%s %s)'))
+        and day = %s and outlook_type = 'C' and category = %s
+        and threshold = 'SIGN' ORDER by expire DESC, issue ASC LIMIT 1)
+
+    (SELECT i, e, v, threshold, category from agg
+    ORDER by e DESC, threshold desc) UNION
+    (SELECT i, e, v, threshold, category from sign
+    ORDER by e DESC, threshold desc)
     """,
-        (lon, lat, day, cat),
+        (lon, lat, day, cat, lon, lat, day, cat),
     )
     running = {}
     for row in cursor:
