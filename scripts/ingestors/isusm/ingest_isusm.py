@@ -92,7 +92,7 @@ VARCONV = {
     "encrh": "encrh_avg",
 }
 STATIONS = {
-    "Calumet": "CAMI4",
+    "Sutherland": "CAMI4",
     "AEAFarm": "BOOI4",
     "Wellman": "WMNI4",
     "Sibley": "SBEI4",
@@ -124,7 +124,7 @@ STATIONS = {
 }
 INVERSION = {
     "AEAInversion": "BOOI4",
-    "CalumetInversion": "CAMI4",
+    "SutherlandInversion": "CAMI4",
     "CrawfordsvilleInversion": "CRFI4",
 }
 
