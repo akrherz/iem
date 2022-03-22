@@ -36,7 +36,7 @@ def get_df(ugc, sdate, edate):
                 'YYYY-MM-DDThh24:MI:SSZ') as iso_expired,
             to_char(expire at time zone 'UTC',
                 'YYYY-MM-DD hh24:MI') as expired,
-            eventid, phenomena, significance, hvtec_nwsli, wfo
+            eventid, phenomena, significance, hvtec_nwsli, wfo, ugc
             from warnings WHERE ugc = %s and issue > %s
             and issue < %s ORDER by issue ASC
             """,
@@ -72,6 +72,7 @@ def as_json(df):
                 "name": row["name"],
                 "ph_name": row["ph_name"],
                 "sig_name": row["sig_name"],
+                "ugc": row["ugc"],
             }
         )
 

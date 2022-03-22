@@ -43,7 +43,7 @@ def get_df(lon, lat, sdate, edate):
             as iso_expired,
         to_char(issue at time zone 'UTC', 'YYYY-MM-DD hh24:MI') as issued,
         to_char(expire at time zone 'UTC', 'YYYY-MM-DD hh24:MI') as expired,
-        eventid, phenomena, significance, wfo, hvtec_nwsli
+        eventid, phenomena, significance, wfo, hvtec_nwsli, w.ugc
         from warnings w JOIN myugcs u on (w.gid = u.gid) WHERE
         issue > %s and issue < %s ORDER by issue ASC
         """,
@@ -79,6 +79,7 @@ def to_json(df):
                 "name": row["name"],
                 "ph_name": row["ph_name"],
                 "sig_name": row["sig_name"],
+                "ugc": row["ugc"],
             }
         )
 

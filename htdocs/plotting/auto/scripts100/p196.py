@@ -148,7 +148,7 @@ def plotter(fdict):
         color=NWS_COLORS[v1],
     )
 
-    v2 = f"{ctx['21']}.{ctx['s2']}"
+    v2 = f"{ctx['p2']}.{ctx['s2']}"
     ehw = ctx["df"][f"{v2}%"]
     ax.bar(
         ctx["df"].index.values,

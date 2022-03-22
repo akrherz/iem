@@ -136,4 +136,3 @@ an office that did not exist at the time.
 		
 EOF;
 $t->render('full.phtml');
-?>
