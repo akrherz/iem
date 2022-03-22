@@ -89,16 +89,17 @@ $content .= <<<EOM
 
 <h4>Shapefile DBF schema:</h4>
 <pre>
-Field 0: Type=C/String, Title=`LABEL', Event label from GML_ID
-Field 1: Type=C/String, Title=`GML_ID', Verbatim GML_ID from product
-Field 2: Type=C/String, Title=`VALID_AT', UTC Valid At time (gml:timePosition)
-Field 3: Type=C/String, Title=`VALID_FM', UTC From Time (G-AIRMETVALIDFROM)
-Field 4: Type=C/String, Title=`VALID_TO', UTC To Time (G-AIRMETVALIDTO)
-Field 5: Type=C/String, Title=`ISSUTIME', UTC Issue Time (G-AIRMETISSUETIME)
-Field 6: Type=C/String, Title=`PROD_ID', IEM Text Product ID
-Field 7: Type=C/String, Title=`STATUS', Status of AIRMET
-Field 8: Type=C/String, Title=`HZTYPE', Hazard Type
-Field 9: Type=C/String, Title=`WXCOND', Comma list of weather conditions
+Field 0: Type=C/String, Title=`NAME', GML_ID + VALID_AT timestamp
+Field 1: Type=C/String, Title=`LABEL', Event label from GML_ID
+Field 2: Type=C/String, Title=`GML_ID', Verbatim GML_ID from product
+Field 3: Type=C/String, Title=`VALID_AT', UTC Valid At time (gml:timePosition)
+Field 4: Type=C/String, Title=`VALID_FM', UTC From Time (G-AIRMETVALIDFROM)
+Field 5: Type=C/String, Title=`VALID_TO', UTC To Time (G-AIRMETVALIDTO)
+Field 6: Type=C/String, Title=`ISSUTIME', UTC Issue Time (G-AIRMETISSUETIME)
+Field 7: Type=C/String, Title=`PROD_ID', IEM Text Product ID
+Field 8: Type=C/String, Title=`STATUS', Status of AIRMET
+Field 9: Type=C/String, Title=`HZTYPE', Hazard Type
+Field 10: Type=C/String, Title=`WXCOND', Comma list of weather conditions
 </pre>
 
 <h4>Archive / Usage Notes:</h4>
