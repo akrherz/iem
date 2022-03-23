@@ -60,7 +60,6 @@ def get_data(ctx):
     threshold = ctx["threshold"]
     threshold = TRACE_VALUE if threshold == "T" else float(threshold)
 
-    table = "alldata_%s" % (station[:2],)
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
         raise NoDataFound("No Data Found.")
@@ -70,8 +69,8 @@ def get_data(ctx):
     snow = np.zeros((eyear - syear + 1, 366))
     snowd = np.zeros((eyear - syear + 1, 366))
     cursor.execute(
-        f"SELECT extract(doy from day), year, snow, snowd from {table} "
-        "where station = %s and year >= %s",
+        "SELECT extract(doy from day), year, snow, snowd from "
+        f"alldata_{station[:2]} where station = %s and year >= %s",
         (station, syear),
     )
     for row in cursor:
@@ -130,15 +129,15 @@ def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
     df = get_data(ctx)
-    title = "[%s] %s %s %s Snowfall\n(color is how long snow remained)" % (
-        ctx["station"],
-        ctx["_nt"].sts[ctx["station"]]["name"],
-        "Last" if ctx["dir"] == "last" else "First",
-        (
-            "Trace+"
-            if ctx["threshold"] == "T"
-            else "%.2f+ Inch" % (float(ctx["threshold"]),)
-        ),
+    t1 = "Last" if ctx["dir"] == "last" else "First"
+    t2 = (
+        "Trace+"
+        if ctx["threshold"] == "T"
+        else f"{float(ctx['threshold']):.2f}+ Inch"
+    )
+    title = (
+        f"{ctx['_sname']} :: {t1} {t2} Snowfall\n"
+        "(color is how long snow remained)"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 

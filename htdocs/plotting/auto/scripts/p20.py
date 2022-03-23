@@ -3,9 +3,9 @@ import datetime
 import calendar
 
 import numpy as np
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 
@@ -36,49 +36,50 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["zstation"]
     year = ctx["year"]
 
     # Oh, the pain of floating point comparison here.
-    df = read_sql(
-        """
-    WITH obs as (
-        SELECT distinct date_trunc('hour', valid) as t from alldata
-        WHERE station = %s and p01i > 0.009
-    ), agg1 as (
-        SELECT extract(year from t) as year, extract(month from t) as month,
-        count(*) from obs GROUP by year, month
-    ), averages as (
-        SELECT month, avg(count), max(count) from agg1 GROUP by month
-    ), myyear as (
-        SELECT month, count from agg1 where year = %s
-    ), ranks as (
-        SELECT month, year,
-        rank() OVER (PARTITION by month ORDER by count DESC)
-        from agg1
-    ), top as (
-        SELECT month, max(year) as max_year from ranks
-        WHERE rank = 1 GROUP by month
-    ), agg2 as (
-        SELECT t.month, t.max_year, a.avg, a.max from top t JOIN averages a
-        on (t.month = a.month)
-    )
-    SELECT a.month, m.count as count, a.avg, a.max, a.max_year from
-    agg2 a LEFT JOIN myyear m
-    on (m.month = a.month) ORDER by a.month ASC
-    """,
-        pgconn,
-        params=(station, year),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            """
+        WITH obs as (
+            SELECT distinct date_trunc('hour', valid) as t from alldata
+            WHERE station = %s and p01i > 0.009
+        ), agg1 as (
+            SELECT extract(year from t) as year, extract(month from t)
+            as month, count(*) from obs GROUP by year, month
+        ), averages as (
+            SELECT month, avg(count), max(count) from agg1 GROUP by month
+        ), myyear as (
+            SELECT month, count from agg1 where year = %s
+        ), ranks as (
+            SELECT month, year,
+            rank() OVER (PARTITION by month ORDER by count DESC)
+            from agg1
+        ), top as (
+            SELECT month, max(year) as max_year from ranks
+            WHERE rank = 1 GROUP by month
+        ), agg2 as (
+            SELECT t.month, t.max_year, a.avg, a.max from top t JOIN averages a
+            on (t.month = a.month)
+        )
+        SELECT a.month, m.count as count, a.avg, a.max, a.max_year from
+        agg2 a LEFT JOIN myyear m
+        on (m.month = a.month) ORDER by a.month ASC
+        """,
+            conn,
+            params=(station, year),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No Precipitation Data Found for Site")
     title = (
-        "%s [%s]\n" "Number of Hours with *Measurable* Precipitation Reported"
-    ) % (ctx["_nt"].sts[station]["name"], station)
+        f"{ctx['_sname']} :: Number of Hours with "
+        "*Measurable* Precipitation Reported"
+    )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     monthly = df["avg"].values.tolist()
     bars = ax.bar(
@@ -152,4 +153,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

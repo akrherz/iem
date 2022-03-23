@@ -49,15 +49,13 @@ def plotter(fdict):
     which = ctx["which"]
     station = ctx["station"]
 
-    table = "alldata_%s" % (station[:2],)
-
     cursor.execute(
         f"""
     select year, extract(doy from day) as d from
         (select day, year, rank() OVER (PARTITION by year ORDER by avg DESC)
         from
             (select day, year, avg((high+low)/2.) OVER
-            (ORDER by day ASC rows 91 preceding) from {table}
+            (ORDER by day ASC rows 91 preceding) from alldata_{station[:2]}
             where station = %s and day > '1893-01-01') as foo)
             as foo2 where rank = 1
             ORDER by year ASC
@@ -78,17 +76,15 @@ def plotter(fdict):
 
     df = pd.DataFrame(dict(year=pd.Series(years), doy=pd.Series(maxsday)))
     maxsday = np.array(maxsday)
-
-    title = "%s [%s] %s\n%s Date of Warmest (Avg Temp) 91 Day Period" % (
-        ctx["_nt"].sts[station]["name"],
-        station,
-        PDICT.get(which),
-        "End" if delta == 0 else "Start",
+    t1 = "End" if delta == 0 else "Start"
+    title = (
+        f"{ctx['_sname']} :: {PDICT.get(which)}\n"
+        f"{t1} Date of Warmest (Avg Temp) 91 Day Period"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.scatter(years, maxsday)
     ax.grid(True)
-    ax.set_ylabel("%s Date" % ("End" if delta == 0 else "Start",))
+    ax.set_ylabel(f"{t1} Date")
 
     yticks = []
     yticklabels = []
@@ -110,7 +106,7 @@ def plotter(fdict):
         0.1,
         0.03,
         "Avg Date: %s, slope: %.2f days/century, R$^2$=%.2f"
-        % (avgd.strftime("%-d %b"), h_slope * 100.0, r_value ** 2),
+        % (avgd.strftime("%-d %b"), h_slope * 100.0, r_value**2),
         transform=ax.transAxes,
         va="bottom",
     )

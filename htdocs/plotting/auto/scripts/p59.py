@@ -105,8 +105,15 @@ def plotter(fdict):
             day_of_year=pd.Series(np.arange(1, 367)),
         )
     )
-
-    fig = figure(apctx=ctx)
+    ab = ctx["_nt"].sts[station]["archive_begin"]
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
+    title = (
+        f"{ctx['_sname']} :: Daily Average Component Wind Speed\n"
+        f"[{ab.year}-{datetime.datetime.now().year}] 7 day smooth filter "
+        f"applied, {len(df.index):.0f} obs found"
+    )
+    fig = figure(apctx=ctx, title=title)
     axes = fig.subplots(2, 1)
     ax = axes[0]
     ax.plot(
@@ -125,26 +132,10 @@ def plotter(fdict):
     )
     ax.set_xticks([1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335])
     ax.set_xticklabels(calendar.month_abbr[1:])
-    ax.legend(ncol=2, fontsize=11, loc=(0.0, -0.21))
+    ax.legend(ncol=2, fontsize=11, loc=(0.0, -0.25))
     ax.grid(True)
     ax.set_xlim(0, 366)
-    ab = ctx["_nt"].sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata.")
-    ax.set_title(
-        (
-            "[%s] %s Daily Average Component Wind Speed\n"
-            "[%s-%s] 7 day smooth filter applied, %.0f obs found"
-        )
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            ab.year,
-            datetime.datetime.now().year,
-            len(df.index),
-        )
-    )
-    ax.set_ylabel("Average Wind Speed %s" % (PDICT.get(plot_units),))
+    ax.set_ylabel(f"Average Wind Speed\n{PDICT.get(plot_units)}")
 
     box = ax.get_position()
     ax.set_position(
@@ -162,7 +153,7 @@ def plotter(fdict):
     ax.legend(loc="best")
     ax.set_xticks([1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335])
     ax.set_xticklabels(calendar.month_abbr[1:])
-    ax.set_ylabel("Average Speed %s" % (PDICT[plot_units],))
+    ax.set_ylabel(f"Average Wind Speed\n{PDICT[plot_units]}")
     ax.grid(True)
     ax.set_xlim(0, 366)
 
