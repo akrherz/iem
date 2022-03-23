@@ -20,20 +20,36 @@ URI = (
     "f=json"
 )
 CLOUD404 = "/mesonet/tmp/dotcloud404.txt"
+# prevent things from the future.
+CEILING = util.utc() + timedelta(minutes=30)
 
 
-def process_feature(cursor, feat):
+def add_entry(cursor, cam, props):
+    """Add a database entry for this camera."""
+    cursor.execute(
+        "INSERT into webcams (id, name, pan0, online, network, sts, removed, "
+        "state, geom, fullres) VALUES (%s, %s, 0, 't', 'IDOT', now(), 'f', "
+        "'IA', (select geom from stations where network = 'IA_RWIS' and "
+        "remote_id = %s LIMIT 1), '640x480')",
+        (cam, props["IMAGE_NAME"], int(props["RPUID"])),
+    )
+
+
+def process_feature(cursor, domain, feat):
     """Do what we need to do with this feature."""
     props = feat["attributes"]
     if props["RPUID"] is None or props["CAMERA_POSITION"] is None:
         LOG.info("feature has no RPUID, skipping")
         return
     rpuid = int(props["RPUID"])
-    # Changed from SCANWEB_ as that appears to be wrong now
+    # Previous ingest used SCANWEB_POSITIONID, which was one less than CP
     scene = int(props["CAMERA_POSITION"])
     # Imagery is stored as IDOT-<RPUID:03i>-<SCENE-02i>.jpg
     cam = f"IDOT-{rpuid:03.0f}-{scene:02.0f}"
-    LOG.info("Processing %s", cam)
+    if cam not in domain:
+        LOG.warning("cam %s not in domain, adding entry", cam)
+        add_entry(cursor, cam, props)
+        domain.append(cam)
     # Loop over 10 possible images found with this feature
     for i in range(1, 11):
         suffix = f"_{i}" if i > 1 else ""
@@ -43,7 +59,10 @@ def process_feature(cursor, feat):
             continue
         valid = datetime(1970, 1, 1) + timedelta(seconds=timestamp / 1000.0)
         valid = valid.replace(tzinfo=timezone.utc)
-        LOG.info("%s %s", cam, valid)
+        if valid > CEILING:
+            LOG.info("%s is in the future %s, skipping", cam, valid)
+            continue
+        LOG.debug("%s %s", cam, valid)
         # Do we have this image?
         cursor.execute(
             "SELECT drct from camera_log where valid = %s and cam = %s",
@@ -111,6 +130,11 @@ def process_feature(cursor, feat):
 def main():
     """Go Main Go"""
     pgconn = util.get_dbconn("mesosite")
+    # Create a dictionary of current webcams
+    cursor = pgconn.cursor()
+    cursor.execute("select id from webcams where network = 'IDOT'")
+    domain = [row[0] for row in cursor]
+    cursor.close()
 
     # Fetch the REST service
     req = util.exponential_backoff(requests.get, URI, timeout=30)
@@ -129,9 +153,9 @@ def main():
     for feat in jobj["features"]:
         mcursor = pgconn.cursor()
         try:
-            process_feature(mcursor, feat)
+            process_feature(mcursor, domain, feat)
         except Exception as exp:
-            LOG.error(exp)
+            LOG.exception(exp)
         mcursor.close()
         pgconn.commit()
 
