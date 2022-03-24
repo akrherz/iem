@@ -8,7 +8,12 @@ define("IEM_APPID", 111);
 $t = new MyView();
 $t->title = "Download PIREPs";
 $content = <<<EOF
-<h3>Archived Pilot Reports (PIREPs)</h3>
+<p>
+<ul class="breadcrumb">
+<li><a href="/nws/">NWS Mainpage</a></li>
+<li class="active">Archived Pilot Reports (PIREPs)</li>
+</ul>
+</p>
 
 <p>The IEM attempts to process a feed of Pilot Reports (PIREPs). This
 processing is done via the <a href="https://github.com/akrherz/pyIEM/blob/main/src/pyiem/nws/products/pirep.py">PyIEM Library</a>.
@@ -27,6 +32,12 @@ considered 'complete'.</p>
 <p>Due to filesize and speed, you can only request up to 120 days of data
 at a time!  If you request data with the spatial filter, you can download
 longer periods of data.</p>
+
+<p><strong>Related:</strong>
+<a class="btn btn-primary" href="cwas.phtml">CWSU Center Weather Advisories</a>
+<a class="btn btn-primary" href="awc_gairmets.phtml">Graphical AIRMETs</a>
+<a class="btn btn-primary" href="awc_sigmets.phtml">SIGMETs</a>
+</p>
 
 <form method="GET" action="/cgi-bin/request/gis/pireps.py">
 <h4>Select time interval</h4>
@@ -138,5 +149,5 @@ $("input[name='filter']").click(function(){
 });
 </script>
 EOM;
+
 $t->render('single.phtml');
-?>
