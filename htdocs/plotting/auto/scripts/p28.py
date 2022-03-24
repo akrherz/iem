@@ -166,12 +166,9 @@ def get_ctx(fdict):
         spi.append((thisyear - avgs[-1]) / np.nanstd(sums))
 
     ctx["sdate"] = date - datetime.timedelta(days=360)
-    ctx["title"] = "[%s-%s] %s %s" % (
-        baseyear + 2,
-        datetime.datetime.now().year,
-        station,
-        ctx["_nt"].sts[station]["name"],
-    )
+    ctx[
+        "title"
+    ] = f"[{baseyear + 2}-{datetime.datetime.now().year}] {ctx['_sname']}"
     ctx["subtitle"] = (
         "%s from given x-axis date until %s, US Drought Monitor: %s"
     ) % (

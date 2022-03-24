@@ -142,20 +142,17 @@ def plotter(fdict):
     avgs = np.average(yearlybins, 0)
     df["avg_days"] = avgs
     dlast = yearlybins[year - minyear, :]
-    df["days_%s" % (year,)] = dlast
-    df["precip_%s" % (year,)] = yearlytotals[year - minyear, :]
-    df["normal_%s" % (year,)] = normal / 5.0
+    df[f"days_{year}"] = dlast
+    df[f"precip_{year}"] = yearlytotals[year - minyear, :]
+    df[f"normal_{year}"] = normal / 5.0
 
     ybuffer = (max([max(avgs), max(dlast)]) + 2) * 0.05
     addl = ""
     if jdaylimit < 367:
-        addl = " thru %s" % (today.strftime("%-d %b"),)
-    title = ("%s [%s] [%s-%s]\nDaily Precipitation Contributions%s") % (
-        ctx["_nt"].sts[station]["name"],
-        station,
-        minyear,
-        endyear - 2,
-        addl,
+        addl = f" thru {today:%-d %b}"
+    title = (
+        f"{ctx['_sname']} [{minyear}-{endyear - 2}]\n"
+        f"Daily Precipitation Contributions{addl}"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 
@@ -165,7 +162,7 @@ def plotter(fdict):
         width=0.4,
         fc="b",
         align="center",
-        label='Average = %.2f"' % (normal,),
+        label=f'Average = {normal:.2f}"',
     )
     for i, _bar in enumerate(bars):
         ax.text(

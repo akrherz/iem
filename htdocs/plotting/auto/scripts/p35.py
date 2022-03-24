@@ -8,16 +8,14 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT = dict(
-    (
-        ("tmpf", "Air Temp (F)"),
-        ("alti", "Altimeter (in)"),
-        ("dwpf", "Dew Point Temp (F)"),
-        ("feel", "Feels Like Temp (F)"),
-        ("mslp", "Mean Sea Level Pressure (mb)"),
-        ("relh", "Relative Humidity (%)"),
-    )
-)
+PDICT = {
+    "tmpf": "Air Temp (F)",
+    "alti": "Altimeter (in)",
+    "dwpf": "Dew Point Temp (F)",
+    "feel": "Feels Like Temp (F)",
+    "mslp": "Mean Sea Level Pressure (mb)",
+    "relh": "Relative Humidity (%)",
+}
 
 
 def compute_bins(interval):
@@ -114,16 +112,13 @@ def plotter(fdict):
     hist = np.ma.array(hist / years / 7.0)
     hist.mask = np.where(hist < (1.0 / years), True, False)
 
-    title = "%s [%s] Histogram" % (
-        ctx["_nt"].sts[station]["name"],
-        station,
-    )
+    title = f"{ctx['_sname']} :: Histogram"
     subtitle = f"(bin={interval}) of {hours} Hour {PDICT[varname]} Change"
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     res = ax.pcolormesh((xedges - 1) * 7, yedges, hist.transpose())
     fig.colorbar(res, label="Hours per Day")
     ax.grid(True)
-    ax.set_ylabel("%s Change" % (PDICT[varname],))
+    ax.set_ylabel(f"{PDICT[varname]} Change")
 
     ax.set_xticks(xticks)
     ax.set_xticklabels(calendar.month_abbr[1:])

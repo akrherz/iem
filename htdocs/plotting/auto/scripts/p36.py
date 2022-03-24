@@ -84,10 +84,7 @@ def plotter(fdict):
             )
     df = pd.DataFrame(rows)
 
-    title = ("[%s] %s\nYears that Month was Warmer than other Month") % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-    )
+    title = f"{ctx['_sname']}\n" "Years that Month was Warmer than other Month"
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     x, y = np.meshgrid(np.arange(-0.5, 12.5, 1), np.arange(-0.5, 12.5, 1))
     res = ax.pcolormesh(x, y, np.transpose(matrix))

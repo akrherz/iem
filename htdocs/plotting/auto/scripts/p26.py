@@ -160,13 +160,7 @@ def get_context(fdict):
         title = "Maximum Daily %s Temperature"
     title = title % (varname.capitalize(),)
     ctx["ylabel"] = title
-    ctx["title"] = "%s-%s %s %s\n%s" % (
-        startyear,
-        thisyear - 1,
-        station,
-        ctx["_nt"].sts[station]["name"],
-        title,
-    )
+    ctx["title"] = f"{startyear}-{thisyear - 1} {ctx['_sname']}\n" f"{title}"
     return ctx
 
 
