@@ -64,7 +64,6 @@ def plotter(fdict):
     year = ctx["year"]
     month = ctx["month"]
     effective_date = ctx["date"]
-    table = "alldata_%s" % (station[:2],)
 
     oldmonth = datetime.date(year, month, 1)
     sts = datetime.date(effective_date.year, effective_date.month, 1)
@@ -73,7 +72,8 @@ def plotter(fdict):
 
     # beat month
     cursor.execute(
-        f"SELECT extract(day from day), (high+low)/2. from {table} "
+        "SELECT extract(day from day), (high+low)/2. from "
+        f"alldata_{station[:2]} "
         "WHERE station = %s and year = %s and month = %s "
         "ORDER by day ASC",
         (station, year, month),
@@ -87,9 +87,9 @@ def plotter(fdict):
 
     # build history
     cursor.execute(
-        f"SELECT year, day, (high+low)/2. from {table} WHERE station = %s "
-        "and month = %s and extract(day from day) <= %s and day < %s "
-        "ORDER by day ASC",
+        f"SELECT year, day, (high+low)/2. from alldata_{station[:2]} "
+        "WHERE station = %s and month = %s and extract(day from day) <= %s "
+        "and day < %s ORDER by day ASC",
         (station, effective_date.month, days, ets),
     )
 

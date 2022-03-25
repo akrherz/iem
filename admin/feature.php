@@ -179,7 +179,7 @@ $t->content = <<<EOF
 {$logmsgs}
 
 <h3>IEM Feature Publisher</h3>
-<form method="POST">
+<form method="POST" action="feature.php">
 
 <p>Feature Title:
 <br /><input type="text" name="title" size="80" /></p>

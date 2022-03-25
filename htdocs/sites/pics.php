@@ -81,4 +81,3 @@ Iowa...</p>
 {$more}
 EOF;
 $t->render('sites.phtml');
-?>

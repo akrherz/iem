@@ -77,4 +77,3 @@ you may find useful.</p>
 </div>
 EOF;
 $t->render('single.phtml');
-?>

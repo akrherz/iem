@@ -304,7 +304,7 @@ def plotter(fdict):
             obs[row[0]] = row[1]
 
     title = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']} {PDICT2[ctx['var']]}\n"
+        f"{ctx['_sname']} :: {PDICT2[ctx['var']]}\n"
         f"{model} Forecast MOS Range for {month1:%B %Y}"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)

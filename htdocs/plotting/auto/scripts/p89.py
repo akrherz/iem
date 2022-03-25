@@ -9,7 +9,7 @@ import geopandas as gpd
 from metpy.units import units
 from pyiem import iemre, reference
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_autoplot_context, get_dbconn, ncopen
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, ncopen
 from pyiem.plot import figure
 from pyiem.exceptions import NoDataFound
 
@@ -84,14 +84,14 @@ def do_date(ctx, now, precip, daythres, trailthres):
 
 def get_data(ctx):
     """Do the processing work, please"""
-    pgconn = get_dbconn("postgis")
-    states = gpd.GeoDataFrame.from_postgis(
-        "SELECT the_geom, state_abbr from states where state_abbr = %s",
-        pgconn,
-        params=(ctx["state"],),
-        index_col="state_abbr",
-        geom_col="the_geom",
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        states = gpd.GeoDataFrame.from_postgis(
+            "SELECT the_geom, state_abbr from states where state_abbr = %s",
+            conn,
+            params=(ctx["state"],),
+            index_col="state_abbr",
+            geom_col="the_geom",
+        )
     if states.empty:
         raise NoDataFound("No data was found.")
 

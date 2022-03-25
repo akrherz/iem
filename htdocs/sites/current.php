@@ -208,4 +208,3 @@ $t->content = <<<EOF
 
 EOF;
 $t->render('sites.phtml');
-?>

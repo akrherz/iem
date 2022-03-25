@@ -255,4 +255,3 @@ EOF;
 	header("Content-type: text/plain");
 	echo $table;
 }
-?>
