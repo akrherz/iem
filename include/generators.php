@@ -100,7 +100,7 @@ function gen_feature($t){
 	$query1 = "SELECT *, to_char(valid, 'YYYY/MM/YYMMDD') as imageref,
                 to_char(valid, 'DD Mon YYYY HH:MI AM') as webdate,
                 to_char(valid, 'YYYY-MM-DD') as permalink from feature
-                ORDER by valid DESC LIMIT 1";
+                WHERE valid < now() ORDER by valid DESC LIMIT 1";
 	$result = pg_exec($connection, $query1);
 	$row = pg_fetch_assoc($result,0);
 	$good = intval($row["good"]);
@@ -301,5 +301,3 @@ EOF;
 	
 	return $s;
 }
-
-?>

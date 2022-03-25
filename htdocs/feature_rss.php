@@ -25,7 +25,11 @@
 <lastBuildDate>{$d}</lastBuildDate>
 EOF;
  $conn = iemdb("mesosite");
- $rs = pg_exec($conn, "SELECT *, to_char(valid, 'YYYY/MM/YYMMDD') as imageref from feature ORDER by valid DESC LIMIT 20");
+ $rs = pg_exec(
+     $conn,
+     "SELECT *, to_char(valid, 'YYYY/MM/YYMMDD') as imageref from feature ".
+     "WHERE valid < now() ORDER by valid DESC LIMIT 20"
+);
  pg_close($conn);
  for ($i=0; $row = pg_fetch_assoc($rs); $i++) {
 	$appurl = "";

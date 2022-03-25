@@ -28,7 +28,7 @@ $sql = <<<EOF
 	to_char(valid, 'Dy Mon DD, YYYY') as calhead,
 	to_char(valid, 'D') as dow from feature
 	WHERE valid BETWEEN '{$year}-{$month}-01' and '{$nyear}-{$nmonth}-01'
-	ORDER by valid ASC
+    and valid < now() ORDER by valid ASC
 EOF;
 $rs = pg_exec($c, $sql);
 
