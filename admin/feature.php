@@ -101,7 +101,7 @@ if ($accessToken){
 
 if (! is_null($story) && ! is_null($title)){
     $at_str = isset($_REQUEST["at_on"])? $_REQUEST["at"]: ""; 
-    $publish_at = new DateTime($_REQUEST["at"], new DateTimeZone("America/Chicago"));
+    $publish_at = new DateTime($at_str, new DateTimeZone("America/Chicago"));
 
     $permalink = sprintf(
         "https://mesonet.agron.iastate.edu/onsite/features/cat.php?day=%s",
@@ -129,9 +129,11 @@ if (! is_null($story) && ! is_null($title)){
         $data = [
             'link' => $permalink,
             'message' => $story,
-            "scheduled_publish_time" => $publish_at->getTimestamp(),
-            "published" => false,
         ];
+        if ($at_str != ""){
+            $data["scheduled_publish_time"] = $publish_at->getTimestamp();
+            $data["published"] = false;
+        }
         try{
             // Get a page access token to use
             $response = $fb->get('/157789644737?fields=access_token');
