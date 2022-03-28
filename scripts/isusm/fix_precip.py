@@ -6,8 +6,8 @@ Implementation Thoughts:
 2. We'll take the stage IV product as gospel
 3. We won't update the 'raw' precip tables
 4. This uses the flag 'E' for estimated
-
 """
+# pylint: disable=unsubscriptable-object
 import datetime
 import sys
 
@@ -30,9 +30,9 @@ def print_debugging(station):
         "(rain_in_tot > 0 or rain_in_tot_qc > 0) ORDER by valid DESC LIMIT 10",
         (station,),
     )
-    LOG.info("     Date           Obs     QC  Flag")
+    print("     Date           Obs     QC  Flag")
     for row in cursor:
-        LOG.info("     %s   %5.2f  %5.2f %5s", *row)
+        print(f"     {row[0]}   {row[1]:5.2f}  {row[2]:5.2f} {row[3]}")
 
 
 def get_hdf(nt, date):
@@ -42,15 +42,15 @@ def get_hdf(nt, date):
     for station in nt.sts:
         # service provides UTC dates, so we need to request two days
         for ldate in [date, date + datetime.timedelta(days=1)]:
-            uri = ("http://iem.local/json/stage4/%.2f/%.2f/%s") % (
-                nt.sts[station]["lon"],
-                nt.sts[station]["lat"],
-                ldate.strftime("%Y-%m-%d"),
+            uri = (
+                "http://iem.local/json/stage4/"
+                f"{nt.sts[station]['lon']:.2f}/"
+                f"{nt.sts[station]['lat']:.2f}/{ldate:%Y-%m-%d}"
             )
             try:
                 j = requests.get(uri).json()
             except Exception as exp:
-                LOG.info("JSON stage4 service failed\n%s\n%s", uri, exp)
+                LOG.warning("JSON stage4 service failed\n%s\n%s", uri, exp)
                 continue
             for entry in j["data"]:
                 rows.append(
@@ -72,7 +72,7 @@ def set_iemacces(station, date, precip_inch):
     # update iemaccess
     pgconn = get_dbconn("iem")
     cursor = pgconn.cursor()
-    LOG.debug("Update iemaccess %s %s %.4f", station, date, precip_inch)
+    LOG.info("Update iemaccess %s %s %.4f", station, date, precip_inch)
     cursor.execute(
         "UPDATE summary s SET pday = %s FROM stations t WHERE "
         "t.iemid = s.iemid and s.day = %s and t.id = %s and "
@@ -178,7 +178,7 @@ def main(argv):
     df["obs"] = df["rain_in_tot"]
     hdf = get_hdf(nt, date)
     if hdf.empty:
-        LOG.info("hdf is empty, abort fix_precip for %s", date)
+        LOG.warning("hdf is empty, abort for %s", date)
         return
 
     # lets try some QC
@@ -212,6 +212,7 @@ def main(argv):
             print_debugging(station)
             if station == "MCSI4":
                 LOG.info("Not updating Marcus")
+                set_iemacces(station, date, row["obs"])
                 continue
             update_precip(date, station, hdf)
         else:
