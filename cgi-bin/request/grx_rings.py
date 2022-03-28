@@ -61,36 +61,33 @@ def application(environ, start_response):
     pointLon = float(form.get("lon", -93.635773))
     sio = StringIO()
     sio.write(
-        (
-            "; This is a placefile to draw a range ring x miles from: %s\n"
-            "; Created by Zach Hiris - 8/9/2019\n"
-            "; Code adapted from Jonathan Scholtes (2016)\n\n\n"
-            "Threshold: 999 \n"
-            "Title: Rings @ %s\n"
-        )
-        % (loc, loc)
+        f"; This is a placefile to draw a range ring x miles from: {loc}\n"
+        "; Created by Zach Hiris - 8/9/2019\n"
+        "; Code adapted from Jonathan Scholtes (2016)\n\n\n"
+        "Threshold: 999 \n"
+        f"Title: Rings @ {loc}\n"
     )
 
     for i in range(3):
-        distanceInMiles = float(form.get("m%s" % (i,), 100))
+        distanceInMiles = float(form.get(f"m{i}", 100))
         if distanceInMiles <= 0.00001:
             continue
-        r = int(form.get("r%s" % (i,), 255))
-        g = int(form.get("g%s" % (i,), 255))
-        b = int(form.get("b%s" % (i,), 0))
-        a = int(form.get("a%s" % (i,), 255))
-        t = form.get("t%s" % (i,), "").replace("\n", "\\n")
+        r = int(form.get(f"r{i}", 255))
+        g = int(form.get(f"g{i}", 255))
+        b = int(form.get(f"b{i}", 0))
+        a = int(form.get(f"a{i}", 255))
+        t = form.get(f"t{i}", "").replace("\n", "\\n")
 
         # Create the lon/lat pairs
         X, Y = createCircleAroundWithRadius(
             pointLat, pointLon, distanceInMiles
         )
-
+        ll = "\\n" if t != "" else ""
         sio.write(
-            ("Color: %s %s %s %s\n" 'Line: 2, 0, "%s%s%.1f miles from %s" \n')
-            % (r, g, b, a, t, "\\n" if t != "" else "", distanceInMiles, loc)
+            f"Color: {r} {g} {b} {a}\n"
+            f'Line: 2, 0, "{t}{ll}{distanceInMiles:.1f} miles from {loc}" \n'
         )
         for x, y in zip(X, Y):
-            sio.write(" %s, %s\n" % (y, x))
+            sio.write(f" {y}, {x}\n")
         sio.write("End:\n\n")
     return [sio.getvalue().encode("ascii")]

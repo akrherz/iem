@@ -17,10 +17,7 @@ def get_climate(network, stations):
     cldata = {}
     for station in stations:
         if station not in nt.sts:
-            return ("ERROR: station: %s not found in network: %s") % (
-                station,
-                network,
-            )
+            return f"ERROR: station: {station} not found in network: {network}"
         cldata[nt.sts[station]["ncdc81"]] = {}
         clisites.append(nt.sts[station]["ncdc81"])
     if not clisites:
@@ -83,35 +80,13 @@ def get_data(network, sts, ets, stations):
         (sts, ets, network, tuple(stations)),
     )
     for row in cursor:
+        key = row[1].strftime("%m%d")
         sio.write(
-            (
-                "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
-                "%s,%s\n"
-            )
-            % (
-                row[0],
-                row[1],
-                row[2],
-                row[3],
-                row[4],
-                row[5],
-                row[6],
-                row[7],
-                row[8],
-                row[9],
-                row[10],
-                row[11],
-                climate[row[0]][row[1].strftime("%m%d")]["high"],
-                climate[row[0]][row[1].strftime("%m%d")]["low"],
-                climate[row[0]][row[1].strftime("%m%d")]["precip"],
-                row[12],
-                row[13],
-                row[14],
-                row[15],
-                row[16],
-                row[17],
-                row[18],
-            )
+            f"{row[0]},{row[1]},{row[2]},{row[3]},{row[4]},{row[5]},{row[6]},"
+            f"{row[7]},{row[8]},{row[9]},{row[10]},{row[11]},"
+            f"{climate[row[0]][key]['high']},{climate[row[0]][key]['low']},"
+            f"{climate[row[0]][key]['precip']},{row[12]},{row[13]},{row[14]},"
+            f"{row[15]},{row[16]},{row[17]},{row[18]}\n"
         )
 
     return sio.getvalue()

@@ -9,19 +9,15 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import SECTORS_NAME
 
-PDICT = dict(
-    [
-        ("precip", "Last Measurable Precipitation"),
-        ("low", "Low Temperature"),
-        ("high", "High Temperature"),
-    ]
-)
-SECTORS = dict(
-    [
-        ("state", "Select a State"),
-        ("cwa", "Select a NWS Weather Forecast Office"),
-    ]
-)
+PDICT = {
+    "precip": "Last Measurable Precipitation",
+    "low": "Low Temperature",
+    "high": "High Temperature",
+}
+SECTORS = {
+    "state": "Select a State",
+    "cwa": "Select a NWS Weather Forecast Office",
+}
 SECTORS.update(SECTORS_NAME)
 
 

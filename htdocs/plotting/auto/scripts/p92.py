@@ -90,7 +90,7 @@ def plotter(fdict):
         """,
             (significance, phenomena),
         )
-        edate = datetime.datetime.utcnow()
+        edate = utc()
 
     if cursor.rowcount == 0:
         raise NoDataFound(

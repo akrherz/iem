@@ -22,10 +22,10 @@ $mode = isset($_GET['mode']) ? xssafe($_GET['mode']): 'monthly';
 $sortvar = isset($_GET['sortvar']) ? xssafe($_GET['sortvar']): 'id';
 if ($sortvar == 'station'){ $sortvar = 'id'; }
 
-$ts = mktime(0,0,0, $month, $day, $year);
-$dateStr = strftime("%Y-%m-%d", $ts);
-$nicedate = strftime("%d %B %Y", $ts);
-$nicemonthdate = strftime("%B %Y", $ts);
+$ts = new Datetime("$year-$month-$day");
+$dateStr = $ts->format("%Y-%m-%d");
+$nicedate = $ts->format("%d %B %Y");
+$nicemonthdate = $ts->format("%B %Y");
 $htmlout = "";
 
 function snowprint($val){
@@ -122,6 +122,7 @@ if ($mode == "monthly"){
     );
 }
 $wsuri = sprintf("/api/1/daily.json?%s", http_build_query($arr));
+$wsuri_csv = sprintf("/api/1/daily.txt?%s", http_build_query($arr));
 $jobj = iemws_json("daily.json", $arr);
 
 if ($mode == "monthly") {
@@ -191,7 +192,8 @@ if ($mode == "monthly") {
  $htmlout .= <<<EOM
 
  <p>The data presented here provided by <a href="/api/">IEM API</a>
- webservice: <a href="{$wsuri}">daily.json</a>.</p>
+ webservice: <a href="{$wsuri}">daily.json</a>. A simple <a href="{$wsuri_csv}">CSV option</a>
+ exists as well.</p>
 
  <h3>Daily High/Low Plot</h3>
 <img src="/plotting/auto/plot/17/month:{$month}::year:{$year}::station:{$station}::network:{$network}.png" class="img img-responsive">
@@ -289,7 +291,8 @@ EOF;
   $t->sites_current="calendar"; 
   $htmlout .= <<< EOM
   <p>The data presented here provided by <a href="/api/">IEM API</a>
-  webservice: <a href="{$wsuri}">daily.json</a>.</p> 
+  webservice: <a href="{$wsuri}">daily.json</a>. A simple <a href="{$wsuri_csv}">CSV option</a>
+  exists as well.</p> 
 EOM;
 
   $content = <<<EOF

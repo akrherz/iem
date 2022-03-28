@@ -15,14 +15,12 @@ def check_load(cursor):
     """A crude check that aborts this script if there is too much
     demand at the moment"""
     cursor.execute(
-        """
-    select pid from pg_stat_activity where query ~* 'FETCH'
-    and datname = 'asos'"""
+        "select pid from pg_stat_activity where query ~* 'FETCH' "
+        "and datname = 'asos'"
     )
     if cursor.rowcount > 9:
         sys.stderr.write(
-            ("/cgi-bin/request/metars.py over capacity: %s")
-            % (cursor.rowcount,)
+            f"/cgi-bin/request/metars.py over capacity: {cursor.rowcount}\n"
         )
         return False
     return True
@@ -30,7 +28,7 @@ def check_load(cursor):
 
 def application(environ, start_response):
     """Do Something"""
-    pgconn = get_dbconn("asos", user="nobody")
+    pgconn = get_dbconn("asos")
     if not check_load(pgconn.cursor()):
         start_response(
             "503 Service Unavailable", [("Content-type", "text/plain")]

@@ -8,11 +8,9 @@ from pyiem.util import get_dbconn
 
 def get_data(network, sts, ets, tzinfo, stations):
     """Go fetch data please"""
-    pgconn = get_dbconn("iem", user="nobody")
+    pgconn = get_dbconn("iem")
     cursor = pgconn.cursor()
     res = "station,network,valid,precip_in\n"
-    if len(stations) == 1:
-        stations.append("ZZZZZ")
     cursor.execute(
         "SELECT id, t.network, valid, phour from hourly h JOIN stations t on "
         "(h.iemid = t.iemid) WHERE "
@@ -21,11 +19,9 @@ def get_data(network, sts, ets, tzinfo, stations):
         (sts, ets, network, tuple(stations)),
     )
     for row in cursor:
-        res += ("%s,%s,%s,%s\n") % (
-            row[0],
-            row[1],
-            (row[2].astimezone(tzinfo)).strftime("%Y-%m-%d %H:%M"),
-            row[3],
+        res += (
+            f"{row[0]},{row[1]},{row[2].astimezone(tzinfo):%Y-%m-%d %H:%M},"
+            f"{row[3]}\n"
         )
 
     return res.encode("ascii", "ignore")

@@ -148,7 +148,7 @@ def plotter(fdict):
     norm = mpcolors.BoundaryNorm(bins, cmap.N)
 
     title = (
-        f"{ctx['_nt'].sts[station]['name']} [{station}] {year} GDD "
+        f"{ctx['_sname']} :: {year} GDD "
         f"[base={ctx['gddbase']},ceil={ctx['gddceil']}]\n"
         f"Period between GDD {gdd1} and {gdd2}, gray bars incomplete"
     )

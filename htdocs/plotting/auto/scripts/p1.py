@@ -222,8 +222,7 @@ def plotter(fdict):
     )
     resdf = resdf.dropna()
     title = (
-        f"{resdf.index.min()}-{resdf.index.max()} "
-        f"{ctx['_nt'].sts[station]['name']} [{station}]\n"
+        f"{resdf.index.min()}-{resdf.index.max()} {ctx['_sname']}\n"
         "Comparison of Monthly Periods, Quadrant Frequency Labelled"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
@@ -326,8 +325,7 @@ def plotter(fdict):
     )
     ul = len(
         resdf[
-            (resdf["%s_1" % (varname1,)] < x)
-            & (resdf["%s_2" % (varname2,)] >= y)
+            (resdf[f"{varname1}_1"] < x) & (resdf[f"{varname2}_2"] >= y)
         ].index
     )
     ax.text(

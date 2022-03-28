@@ -6,14 +6,13 @@ import numpy as np
 import pytz
 from rasterstats import zonal_stats
 import pandas as pd
-from pandas.io.sql import read_sql
 from geopandas import read_postgis
 from affine import Affine
 from pyiem.nws import vtec
 from pyiem.reference import state_names, state_bounds, wfo_bounds
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_dbconn, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
@@ -700,53 +699,55 @@ def do_ugc(ctx):
             )
         aggstat = varname.replace("period", "")
         if t == "cwa":
-            df = read_sql(
-                f"""WITH data as (
-            select ugc, extract(year from issue) as year,
-            count(*), min(issue at time zone 'UTC') as nv,
-            max(issue at time zone 'UTC') as mv from warnings
-            WHERE wfo = %s and phenomena = %s and significance = %s
-            and issue >= %s and issue <= %s {daylimiter}
-            GROUP by ugc, year
-            )
-            SELECT ugc, sum(count) as total, {aggstat}(count) as datum,
-            min(nv) as minvalid, max(mv) as maxvalid, count(*)::int as years
-            from data GROUP by ugc
-            """,
-                pgconn,
-                params=(
-                    station if len(station) == 3 else station[1:],
-                    phenomena,
-                    significance,
-                    datetime.date(year, 1, 1),
-                    datetime.date(year2 + 1, 1, 1),
-                ),
-                index_col="ugc",
-            )
+            with get_sqlalchemy_conn("postgis") as conn:
+                df = pd.read_sql(
+                    f"""WITH data as (
+                select ugc, extract(year from issue) as year,
+                count(*), min(issue at time zone 'UTC') as nv,
+                max(issue at time zone 'UTC') as mv from warnings
+                WHERE wfo = %s and phenomena = %s and significance = %s
+                and issue >= %s and issue <= %s {daylimiter}
+                GROUP by ugc, year
+                )
+                SELECT ugc, sum(count) as total, {aggstat}(count) as datum,
+                min(nv) as minvalid, max(mv) as maxvalid,
+                count(*)::int as years from data GROUP by ugc
+                """,
+                    conn,
+                    params=(
+                        station if len(station) == 3 else station[1:],
+                        phenomena,
+                        significance,
+                        datetime.date(year, 1, 1),
+                        datetime.date(year2 + 1, 1, 1),
+                    ),
+                    index_col="ugc",
+                )
         else:
-            df = read_sql(
-                f"""WITH data as (
-            select ugc, extract(year from issue) as year,
-            count(*), min(issue at time zone 'UTC') as nv,
-            max(issue at time zone 'UTC') as mv from warnings
-            WHERE substr(ugc, 1, 2) = %s and phenomena = %s
-            and significance = %s and issue >= %s and issue < %s {daylimiter}
-            GROUP by ugc, year
-            )
-            SELECT ugc, sum(count) as total, {aggstat}(count) as datum,
-            min(nv) as minvalid, max(mv) as maxvalid, count(*)::int as years
-            from data GROUP by ugc
-            """,
-                pgconn,
-                params=(
-                    state,
-                    phenomena,
-                    significance,
-                    datetime.date(year, 1, 1),
-                    datetime.date(year2 + 1, 1, 1),
-                ),
-                index_col="ugc",
-            )
+            with get_sqlalchemy_conn("postgis") as conn:
+                df = pd.read_sql(
+                    f"""WITH data as (
+                select ugc, extract(year from issue) as year,
+                count(*), min(issue at time zone 'UTC') as nv,
+                max(issue at time zone 'UTC') as mv from warnings
+                WHERE substr(ugc, 1, 2) = %s and phenomena = %s
+                and significance = %s and issue >= %s and issue < %s
+                {daylimiter} GROUP by ugc, year
+                )
+                SELECT ugc, sum(count) as total, {aggstat}(count) as datum,
+                min(nv) as minvalid, max(mv) as maxvalid,
+                count(*)::int as years from data GROUP by ugc
+                """,
+                    conn,
+                    params=(
+                        state,
+                        phenomena,
+                        significance,
+                        datetime.date(year, 1, 1),
+                        datetime.date(year2 + 1, 1, 1),
+                    ),
+                    index_col="ugc",
+                )
         if df.empty:
             raise NoDataFound("No events found for query.")
         df["minvalid"] = pd.to_datetime(df["minvalid"])
@@ -928,7 +929,7 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    fig, _df = plotter(
+    plotter(
         dict(
             network="WFO",
             station="GJT",
@@ -945,5 +946,4 @@ if __name__ == "__main__":
             sdate="2021-12-14 0000",
             edate="2021-12-16 1200",
         )
-    )
-    fig.savefig("/tmp/test.png")
+    )[0].savefig("/tmp/test.png")
