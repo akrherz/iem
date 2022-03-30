@@ -52,12 +52,12 @@ def vsbyfmt(val):
 def process_sky(data, skycs, skyls):
     """Process the sky cover"""
     mtr = ""
-    for i, (skyc, skyl) in enumerate(zip(skycs, skyls)):
+    for i, (skyc, skyl) in enumerate(zip(skycs, skyls), start=1):
         if skyc == "":
             continue
-        data[f"skyc{i + 1}"] = skyc
+        data[f"skyc{i}"] = skyc
         if skyc != "CLR":
-            data[f"skyl{i + 1}"] = float(np.round(skyl, 0))  # GH287
+            data[f"skyl{i}"] = float(np.round(skyl, 0))  # GH287
             mtr += f"{skyc}{(skyl / 100.):03.0f} "
         else:
             mtr += "CLR "
@@ -71,7 +71,7 @@ def process(ncfn):
     xref = {}
     icursor.execute(
         "SELECT id, network from stations where "
-        "network ~* 'ASOS' and country = 'US'"
+        "(network ~* 'ASOS' and country = 'US') or id in ('PGSN')"
     )
     for row in icursor:
         xref[row[0]] = row[1]
