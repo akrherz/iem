@@ -14,11 +14,11 @@ def doday(ts, realtime):
     """
     Create a plot of precipitation stage4 estimates for some day
     """
-    nt = NetworkTable(["AWOS", "IA_ASOS"])
+    nt = NetworkTable("IA_ASOS")
     df = read_sql(
         """
     SELECT id as station, min(feel) as wcht from current_log c JOIN stations t
-    on (c.iemid = t.iemid) WHERE t.network in ('IA_ASOS', 'AWOS')
+    on (c.iemid = t.iemid) WHERE t.network = 'IA_ASOS'
     and valid >= %s and valid < %s + '24 hours'::interval
     and feel is not null and sknt > 0 GROUP by id
     """,

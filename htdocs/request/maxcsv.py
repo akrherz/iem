@@ -10,7 +10,7 @@ import sys
 try:
     from zoneinfo import ZoneInfo  # type: ignore
 except ImportError:
-    from backports.zoneinfo import ZoneInfo
+    from backports.zoneinfo import ZoneInfo  # type: ignore
 
 # third party
 import requests
@@ -140,7 +140,7 @@ def do_webcams(network):
 
 
 def do_iowa_azos(date, itoday=False):
-    """Dump high and lows for Iowa ASOS + AWOS"""
+    """Dump high and lows for Iowa ASOS"""
     pgconn = get_dbconn("iem")
     df = read_sql(
         f"""
@@ -148,7 +148,7 @@ def do_iowa_azos(date, itoday=False):
     st_x(geom) as longitude, s.day, s.max_tmpf::int as high,
     s.min_tmpf::int as low, coalesce(pday, 0) as precip
     from stations n JOIN summary_{date.year} s on (n.iemid = s.iemid)
-    WHERE n.network in ('IA_ASOS', 'AWOS') and s.day = %s
+    WHERE n.network = 'IA_ASOS' and s.day = %s
     """,
         pgconn,
         params=(date,),
@@ -169,8 +169,7 @@ def do_iowa_azos(date, itoday=False):
         sum(case when valid >= (now() - '24 hours'::interval)
             then phour else 0 end) as precip24
         from hourly h JOIN stations t on (h.iemid = t.iemid)
-        where t.network in ('IA_ASOS', 'AWOS')
-        and valid >= now() - '720 hours'::interval
+        where t.network = 'IA_ASOS' and valid >= now() - '720 hours'::interval
         and phour > 0.005 GROUP by id
         """,
             pgconn,

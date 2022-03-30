@@ -23,8 +23,7 @@ def do(ts):
         """
     select station, network, iemid, valid at time zone tzname,
     tmpf, dwpf, p01i from alldata d JOIN stations t on (t.id = d.station)
-    where (network ~* 'ASOS' or network = 'AWOS')
-    and valid between %s and %s ORDER by valid ASC
+    where network ~* 'ASOS' and valid between %s and %s ORDER by valid ASC
     """,
         (ts - datetime.timedelta(days=2), ts + datetime.timedelta(days=2)),
     )

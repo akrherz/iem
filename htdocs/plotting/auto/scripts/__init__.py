@@ -44,8 +44,7 @@ daily_opts = [
     {
         "id": 11,
         "label": (
-            "ASOS/AWOS Daily Min/Max Dew Point/Temp/Feels Like/RH "
-            "for a Year"
+            "ASOS Daily Min/Max Dew Point/Temp/Feels Like/RH " "for a Year"
         ),
     },
     {"id": 94, "label": "Bias of 24 Hour High+Low Computation by Hour"},
@@ -577,7 +576,7 @@ mopts = [
             "Wind Chill Hourly Histogram"
         ),
     },
-    {"id": 192, "label": "Hourly Analysis Maps of ASOS/AWOS/METAR Stations"},
+    {"id": 192, "label": "Hourly Analysis Maps of ASOS/METAR Stations"},
     {"id": 153, "label": "Hourly Temperature Extremes by Month/Season/Year"},
     {
         "id": 159,

@@ -23,7 +23,7 @@ def main():
      from current_log c JOIN stations s
      ON (s.iemid = c.iemid)
      WHERE valid > %s and valid < %s
-     and (s.network ~* 'ASOS' or s.network = 'AWOS')
+     and s.network ~* 'ASOS'
      and s.country = 'US' and s.state not in ('HI', 'AK') GROUP by c.iemid
     )
 
@@ -54,7 +54,7 @@ def main():
         mp = MapPlot(
             sector=sector if len(sector) > 2 else "state",
             state=sector if len(sector) == 2 else "IA",
-            title=f"{now:%-d %b %Y} ASOS/AWOS 01-12 UTC Low Temperature",
+            title=f"{now:%-d %b %Y} ASOS 01-12 UTC Low Temperature",
             subtitle=(
                 "includes available 6z and 12z 6-hr mins, "
                 "does not include 0z observation"

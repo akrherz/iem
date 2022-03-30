@@ -31,7 +31,7 @@ def main():
         cursor.execute(
             """
             SELECT iemid, synop from stations where
-            id = %s and (network ~* 'ASOS' or network ~* 'AWOS')
+            id = %s and network ~* 'ASOS'
         """,
             (faa,),
         )

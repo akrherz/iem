@@ -3,7 +3,7 @@ header("Content-type: text/plain");
  // Generate placefiles, whatever
  // Inspiration: http://grlevel3.tornadocentral.com/metars.php?state=IA
 
-echo 'Title: Iowa AWOS Only
+echo 'Title: Iowa ASOS Only
 Refresh: 5
 Color: 200 200 255
 IconFile: 1, 18, 32, 2, 31, "https://mesonet.agron.iastate.edu/request/grx/windbarbs.png" 
@@ -44,7 +44,7 @@ function s2icon($s)
 
 $now = time();
 $arr = Array(
-    "network" => "AWOS",
+    "network" => "IA_ASOS",
 );
 $jobj = iemws_json("currents.json", $arr);
 

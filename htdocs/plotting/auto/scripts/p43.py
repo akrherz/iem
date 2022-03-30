@@ -106,7 +106,7 @@ def get_data(network, station, tzname, sdate):
         year=sdate.year, month=sdate.month, day=sdate.day, hour=0, minute=0
     )
     ets = sts + datetime.timedelta(hours=72)
-    if network == "AWOS" or network.endswith("ASOS"):
+    if network.endswith("ASOS"):
         with get_sqlalchemy_conn("asos") as conn:
             df = pd.read_sql(
                 """

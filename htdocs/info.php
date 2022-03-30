@@ -22,7 +22,6 @@ $t->content = <<<EOF
 <h3>Station Locations: (graphical)</h3>
 <ul>
 	<li><a href="/sites/locate.php?network=IA_ASOS">ASOS Locations</a></li>
-	<li><a href="/sites/locate.php?network=AWOS">AWOS Locations</a></li>
 	<li><a href="/sites/locate.php?network=IA_RWIS">RWIS Locations</a></li>
 	<li><a href="/sites/locate.php?network=IA_COOP">COOP Locations</a></li>
 	<li><a href="/sites/locate.php?network=ISUSM">ISU Soil Moisture Locations</a></li>

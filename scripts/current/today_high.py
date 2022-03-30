@@ -33,7 +33,7 @@ def main(argv):
       max_tmpf as high, s.network
       from summary c, stations s
       WHERE c.iemid = s.iemid and day = %s and max_tmpf is not null
-      and s.network in ('IA_ASOS', 'AWOS', 'IL_ASOS','MO_ASOS','KS_ASOS',
+      and s.network in ('IA_ASOS', 'IL_ASOS','MO_ASOS','KS_ASOS',
       'NE_ASOS','SD_ASOS','MN_ASOS','WI_ASOS') ORDER by high ASC
     """,
         (now,),
@@ -48,7 +48,7 @@ def main(argv):
         lons.append(row[1])
         vals.append(row[3])
         labels.append(row[0])
-        valmask.append(row[4] in ["AWOS", "IA_ASOS"])
+        valmask.append(row[4] == "IA_ASOS")
 
     if len(lats) < 4:
         LOG.debug("Aborting as only found %s reports", len(lats))
@@ -56,8 +56,7 @@ def main(argv):
 
     mp = MapPlot(
         sector="iowa",
-        title=("%s Iowa ASOS/AWOS High Temperature")
-        % (now.strftime("%-d %b %Y"),),
+        title=("%s Iowa ASOS High Temperature") % (now.strftime("%-d %b %Y"),),
         subtitle="map valid: %s" % (now.strftime("%d %b %Y %-I:%M %p"),),
     )
     # m.debug = True

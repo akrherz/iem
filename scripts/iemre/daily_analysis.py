@@ -312,7 +312,7 @@ def grid_day(ts, ds):
            from summary_{ts.year} c, stations s WHERE day = %s and
            ST_Contains(
   ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
-  geom) and (s.network = 'AWOS' or s.network ~* 'ASOS') and c.iemid = s.iemid
+  geom) and s.network ~* 'ASOS' and c.iemid = s.iemid
             """,
             PGCONN,
             params=(

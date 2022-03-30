@@ -10,9 +10,9 @@ from pyiem.util import get_dbconn, utc
 
 def main():
     """Go Main Go."""
-    nt = network.Table("AWOS")
+    nt = network.Table("IA_ASOS")
     qdict = loadqc()
-    pgconn = get_dbconn("iem", user="nobody")
+    pgconn = get_dbconn("iem")
     icursor = pgconn.cursor()
 
     ets = utc().replace(
@@ -48,7 +48,7 @@ def main():
     sql = """SELECT t.id as station,
         round(max(tmpf)::numeric,0) as max_tmpf,
         count(tmpf) as obs FROM current_log c, stations t
-        WHERE t.iemid = c.iemid and t.network = 'AWOS' and valid > %s
+        WHERE t.iemid = c.iemid and t.network = 'IA_ASOS' and valid > %s
             and valid < %s
         and tmpf > -99 GROUP by t.id """
     args = (sts6z, ets)
@@ -65,7 +65,7 @@ def main():
         select id as station, sum(precip) from
         (select t.id, extract(hour from valid) as hour,
         max(phour) as precip from current_log c, stations t
-        WHERE t.network = 'AWOS' and t.iemid = c.iemid
+        WHERE t.network = 'IA_ASOS' and t.iemid = c.iemid
         and valid  >= %s and valid < %s
         GROUP by t.id, hour) as foo
         GROUP by id""",
@@ -81,7 +81,7 @@ def main():
         """SELECT t.id as station,
         round(min(tmpf)::numeric,0) as min_tmpf,
         count(tmpf) as obs FROM current_log c, stations t
-        WHERE t.iemid = c.iemid and t.network = 'AWOS' and valid > %s and
+        WHERE t.iemid = c.iemid and t.network = 'IA_ASOS' and valid > %s and
         valid < %s and tmpf > -99 GROUP by t,id""",
         (sts6z, ets),
     )
@@ -94,6 +94,8 @@ def main():
     ids = list(nt.sts.keys())
     ids.sort()
     for sid in ids:
+        if nt.sts[sid]["attributes"].get("IS_ASOS") != "1":
+            continue
         myP = pcpn.get(sid, "M")
         myH = highs.get(sid, "M")
         myL = lows.get(sid, "M")

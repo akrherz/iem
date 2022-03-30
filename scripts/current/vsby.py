@@ -22,7 +22,7 @@ def main():
     FROM
       current c JOIN stations s ON (s.iemid = c.iemid)
     WHERE
-      s.network IN ('AWOS', 'IA_ASOS','IL_ASOS','MN_ASOS','WI_ASOS','SD_ASOS',
+      s.network IN ('IA_ASOS','IL_ASOS','MN_ASOS','WI_ASOS','SD_ASOS',
                   'NE_ASOS','MO_ASOS') and
       valid + '60 minutes'::interval > now() and
       vsby >= 0 and vsby <= 10
@@ -37,7 +37,7 @@ def main():
         lats.append(row[4])
         lons.append(row[3])
         vals.append(row[2])
-        valmask.append(row[1] in ["AWOS", "IA_ASOS"])
+        valmask.append(row[1] == "IA_ASOS")
 
     if len(lats) < 5:
         return

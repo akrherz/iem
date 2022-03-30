@@ -13,9 +13,9 @@ from pyiem.util import get_dbconn, utc
 
 def main():
     """Go Main Go"""
-    nt = network.Table("AWOS")
+    nt = network.Table("IA_ASOS")
     qdict = loadqc()
-    pgconn = get_dbconn("iem", user="nobody")
+    pgconn = get_dbconn("iem")
     icursor = pgconn.cursor()
 
     # We run at 12z
@@ -49,7 +49,7 @@ def main():
     sql = """SELECT id,
         round(max(tmpf)::numeric,0) as max_tmpf,
         count(tmpf) as obs FROM current_log c, stations t
-        WHERE t.iemid = c.iemid and t.network = 'AWOS' and valid >= %s
+        WHERE t.iemid = c.iemid and t.network = 'IA_ASOS' and valid >= %s
         and valid < %s
         and tmpf > -99 GROUP by id """
     args = (yesterday6z, today6z)
@@ -65,7 +65,7 @@ def main():
         select id, sum(precip) from
         (select id, extract(hour from valid) as hour,
         max(phour) as precip from current_log c, stations t
-        WHERE t.network = 'AWOS' and t.iemid = c.iemid
+        WHERE t.network = 'IA_ASOS' and t.iemid = c.iemid
         and valid  >= %s and valid < %s
         GROUP by id, hour) as foo
         GROUP by id
@@ -83,7 +83,7 @@ def main():
         SELECT id, round(min(tmpf)::numeric,0) as min_tmpf,
         count(tmpf) as obs FROM
         current_log c JOIN stations t on (t.iemid = c.iemid)
-        WHERE t.network = 'AWOS' and valid >= %s
+        WHERE t.network = 'IA_ASOS' and valid >= %s
         and valid < %s  and tmpf > -99 GROUP by id
     """
     args = (today0z, now12z)
@@ -96,6 +96,8 @@ def main():
     ids = list(nt.sts.keys())
     ids.sort()
     for myid in ids:
+        if nt.sts[myid]["attributes"].get("IS_ASOS") != "1":
+            continue
         out.write(
             fmt
             % (

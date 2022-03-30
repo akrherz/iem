@@ -198,7 +198,7 @@ def main():
                 length(raw) DESC) from
                 current_log c JOIN stations t on (t.iemid = c.iemid) WHERE
                 updated >= %s and updated <= %s and raw {limiter} 'MADISHF'
-                and (network ~* 'ASOS' or network = 'AWOS'))
+                and network ~* 'ASOS')
             SELECT * from data where row_number = 1
             """,
             (first_updated, last_updated),

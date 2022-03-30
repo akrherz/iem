@@ -17,7 +17,7 @@ def t(value):
 def main():
     """Go Main Go"""
     now = datetime.datetime.now()
-    pgconn = get_dbconn("iem", user="nobody")
+    pgconn = get_dbconn("iem")
     icursor = pgconn.cursor()
 
     # Compute normal from the climate database
@@ -30,7 +30,7 @@ def main():
      WHERE s.iemid = c2.iemid and c2.iemid = c.iemid and
      c2.valid > (now() - '2 hours'::interval)
      and c.day = 'TODAY'
-     and s.country = 'US' and (s.network ~* 'ASOS' or s.network = 'AWOS')
+     and s.country = 'US' and s.network ~* 'ASOS'
      and s.state in ('IA','MN','WI','IL','MO','NE','KS','SD','ND')
     """ % (
         now.year,
@@ -46,7 +46,7 @@ def main():
         lats.append(row[3])
         lons.append(row[2])
         vals.append(t(row[4]))
-        iowa = row[1] in ["AWOS", "IA_ASOS"]
+        iowa = row[1] == "IA_ASOS"
         valmask.append(iowa)
         if iowa:
             iavals.append(row[4])
@@ -55,7 +55,7 @@ def main():
         return
 
     mp = MapPlot(
-        title="Iowa ASOS/AWOS Rainfall Reports",
+        title="Iowa ASOS Rainfall Reports",
         axisbg="white",
         subtitle="%s" % (now.strftime("%d %b %Y"),),
     )

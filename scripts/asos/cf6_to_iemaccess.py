@@ -50,7 +50,7 @@ def main(argv):
         "case when length(t.id) = 3 then 'K'||t.id else t.id end as station "
         f"from {table} s JOIN "
         "stations t on (s.iemid = t.iemid) WHERE s.day = %s and "
-        "(t.network ~* 'ASOS' or t.network = 'AWOS') ORDER by station ASC",
+        "t.network ~* 'ASOS' ORDER by station ASC",
         get_dbconnstr("iem"),
         params=(valid,),
         index_col="station",

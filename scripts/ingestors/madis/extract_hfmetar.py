@@ -71,7 +71,7 @@ def process(ncfn):
     xref = {}
     icursor.execute(
         "SELECT id, network from stations where "
-        "network ~* 'ASOS' or network = 'AWOS' and country = 'US'"
+        "network ~* 'ASOS' and country = 'US'"
     )
     for row in icursor:
         xref[row[0]] = row[1]

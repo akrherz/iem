@@ -14,8 +14,7 @@ def get_df():
       SELECT s.id as station, s.network, tmpf, drct, sknt,
       ST_x(s.geom) as lon, ST_y(s.geom) as lat
       FROM current c, stations s
-      WHERE (s.network ~* 'ASOS' or s.network = 'AWOS')
-      and s.country = 'US' and
+      WHERE s.network ~* 'ASOS' and s.country = 'US' and
       s.state not in ('HI', 'AK') and
       s.iemid = c.iemid and
       (valid + '30 minutes'::interval) > now() and

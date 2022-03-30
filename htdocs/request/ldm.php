@@ -96,7 +96,7 @@ from the raw ASCII data.  If you ever notice formatting issues, please let us
 know.  Many of the scripts have been in use for a year now, so they are somewhat
 robust.  Having sub-zero temperatures makes the METAR format fun!</li>
  <li><b>Important!</b>  It is not recommended that you integrate this dataset 
-with the normal ASOS/AWOS sites you get via the IDD or from the dish.  Some
+with the normal ASOS sites you get via the IDD or from the dish.  Some
 of these instruments are in ditches or on top of school roofs.  They are not
 thoroughly QC'd either, the IEM is working on QC routines and will implement 
 them in the future.</li>
@@ -121,4 +121,3 @@ Daryl Herzmann
 
 EOF;
 $t->render('single.phtml');
-?>

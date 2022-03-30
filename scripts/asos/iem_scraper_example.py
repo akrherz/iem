@@ -63,8 +63,7 @@ def get_stations_from_networks():
     states = """AK AL AR AZ CA CO CT DE FL GA HI IA ID IL IN KS KY LA MA MD ME
      MI MN MO MS MT NC ND NE NH NJ NM NV NY OH OK OR PA RI SC SD TN TX UT VA VT
      WA WI WV WY"""
-    # IEM quirk to have Iowa AWOS sites in its own labeled network
-    networks = ["AWOS"]
+    networks = []
     for state in states.split():
         networks.append("%s_ASOS" % (state,))
 

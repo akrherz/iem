@@ -22,7 +22,7 @@ def get_description():
     desc["cache"] = 600
     desc[
         "description"
-    ] = """Generates analysis maps of ASOS/AWOS
+    ] = """Generates analysis maps of ASOS
     station data."""
     utcnow = datetime.datetime.utcnow()
     desc["arguments"] = [
@@ -90,7 +90,7 @@ def get_df(ctx, bnds, buf=2.25):
             WITH mystation as (
                 select id, st_x(geom) as lon, st_y(geom) as lat,
                 state, wfo from stations
-                where (network ~* 'ASOS' or network = 'AWOS') and
+                where network ~* 'ASOS' and
                 ST_contains(ST_geomfromtext(
                     'SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))
                             '), geom)
@@ -127,8 +127,7 @@ def get_df(ctx, bnds, buf=2.25):
         id, network, vsby, ST_x(geom) as lon, ST_y(geom) as lat
         FROM
         current c JOIN stations s ON (s.iemid = c.iemid)
-        WHERE
-        (s.network ~* 'ASOS' or s.network = 'AWOS') and s.country = 'US' and
+        WHERE s.network ~* 'ASOS' and s.country = 'US' and
         valid + '80 minutes'::interval > now() and
         vsby >= 0 and vsby <= 10 and
         ST_contains(ST_geomfromtext(

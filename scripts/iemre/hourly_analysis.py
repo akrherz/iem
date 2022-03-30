@@ -162,7 +162,7 @@ def grid_hour(ts):
     from alldata a JOIN stations t on (a.station = t.id) WHERE
     ST_Contains(
     ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
-    geom) and (t.network ~* 'ASOS' or t.network = 'AWOS') and
+    geom) and t.network ~* 'ASOS' and
     valid >= %s and valid < %s and report_type = 2
     GROUP by station, lon, lat""",
             conn,

@@ -45,7 +45,7 @@ $o = Array(
   		"icon" => "camera"),
   "cal" => Array("name" => "Calibration", "uri" => "cal.phtml?",
 		"icon" => "wrench",
-		"networks" => Array("AWOS", "IA_RWIS", "ISUAG", "ISUSM")),
+		"networks" => Array("IA_ASOS", "IA_RWIS", "ISUAG", "ISUSM")),
   "meteo" => Array("name" => "Meteogram", "uri" => "meteo.php?",
   		"icon" => "chart-area"),
   "tables" => Array("name" => "Network Table", "uri" => "networks.php?",
@@ -69,7 +69,7 @@ foreach($o as $key => $val)
     if (($key == "obhistory") && preg_match('/COCORAHS/', $network) > 0){
         continue;
     }
- 	if ((array_key_exists("azos", $val) &&  preg_match('/ASOS|AWOS|ISUSM/', $network) <= 0) &&
+ 	if ((array_key_exists("azos", $val) &&  preg_match('/ASOS|ISUSM/', $network) <= 0) &&
 		(array_key_exists("rwis", $val) &&  preg_match('/RWIS/', $network) <= 0)){
 		continue;
 	}
@@ -95,7 +95,7 @@ foreach($o as $key => $val)
   			$uri, $active, $val["icon"], $val["name"]);
 }
 
-if (preg_match('/ASOS|AWOS/', $network) > 0){
+if (preg_match('/ASOS/', $network) > 0){
     if ($metadata["country"] == "US") {
         $uri = sprintf("/sites/scp.php?station=%s&amp;network=%s", $station, $network);
         echo sprintf("<a href=\"%s\" class=\"btn btn-default\"><span class=\"fa fa-cloud\"></span> Satellite Cloud Product</a>", 

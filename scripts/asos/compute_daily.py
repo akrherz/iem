@@ -81,7 +81,7 @@ def do(ts):
     peak_wind_gust, peak_wind_drct, peak_wind_time,
     peak_wind_time at time zone tzname as local_peak_wind_time from
     alldata d JOIN stations t on (t.id = d.station)
-    where (network ~* 'ASOS' or network = 'AWOS')
+    where network ~* 'ASOS'
     and valid between %s and %s and t.tzname is not null
     and date(valid at time zone tzname) = %s
     ORDER by valid ASC

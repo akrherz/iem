@@ -146,7 +146,7 @@ def station_handler(value, arg, fdict, res, typ):
     cursor = get_dbconn("mesosite").cursor()
     netlim = ""
     if typ == "zstation":
-        netlim = "WHERE id ~* 'ASOS' or id = 'AWOS'"
+        netlim = "WHERE id ~* 'ASOS'"
     elif typ == "station":
         netlim = "WHERE id ~* 'CLIMATE'"
     cursor.execute(f"SELECT id, name from networks {netlim} ORDER by name ASC")

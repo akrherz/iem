@@ -40,7 +40,7 @@ def get_description():
             type="zstation",
             name="zstation2",
             default="OLZ",
-            network="AWOS",
+            network="IA_ASOS",
             label="Select Station 2:",
         ),
         dict(

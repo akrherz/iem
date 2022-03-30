@@ -251,7 +251,7 @@ $ys = yearSelect($startyear,date("Y", $date));
 $ms = monthSelect(date("m", $date));
 $ds = daySelect(date("d", $date));
 
-$mbutton = (preg_match("/ASOS|AWOS/", $network)) ? 
+$mbutton = (preg_match("/ASOS/", $network)) ? 
 "<a onclick=\"javascript:toggleMETAR();\" class=\"btn btn-success\" id=\"metar_toggle\"><i class=\"fa fa-plus\"></i> Show METARs</a>" .
 " &nbsp; <a onclick=\"javascript:toggleMADIS();\" class=\"btn btn-success\" id=\"madis_toggle\"><i class=\"fa fa-plus\"></i> Show High Frequency MADIS</a>"
 : "";
@@ -327,7 +327,7 @@ if ($jobj === FALSE){
     $errmsg = "Failed to fetch history from web service. No data was found.";
 }
 
-if (preg_match("/ASOS|AWOS/", $network)){
+if (preg_match("/ASOS/", $network)){
 	$notes .= <<<EOM
 <li>For recent years, this page also optionally shows observations from the
 <a href="https://madis.ncep.noaa.gov/madis_OMO.shtml">MADIS High Frequency METAR</a>
@@ -422,7 +422,7 @@ if ($sortdir == "desc"){
 }
 foreach($data as $bogus => $row)
 {
-    if (preg_match("/ASOS|AWOS/", $network)){
+    if (preg_match("/ASOS/", $network)){
         $table .= asos_formatter($i, $row);
     } else if (preg_match("/DCP|COOP/", $network)){
         $table .= hads_formatter($i, $row, $shefcols);

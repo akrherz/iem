@@ -45,8 +45,8 @@ if ($network == '_ALL_'){
         $pgconn,
         "SELECT id, name, elevation, archive_begin, archive_end, network, ".
         "ST_x(geom) as lon, ST_y(geom) as lat, null as attributes, state, ".
-        "synop, country from stations WHERE online and
-        (network ~* 'ASOS' or network = 'AWOS') ORDER by name");
+        "synop, country from stations WHERE online and ".
+        "network ~* 'ASOS' ORDER by name");
     $cities = Array();
     for ($i=0; $row = pg_fetch_array($rs); $i++) {
         $cities[$row["id"]] = $row;

@@ -15,7 +15,7 @@ def main():
         SELECT t.id, alti from current c JOIN stations t on (t.iemid = c.iemid)
         WHERE alti > 0 and valid > (now() - '60 minutes'::interval)
         and t.state in ('IA','MO','IL','WI','IN','OH','KY','MI','SD','ND','NE',
-        'KS') and (network ~* 'ASOS' or network = 'AWOS')
+        'KS') and network ~* 'ASOS'
      """,
         get_dbconnstr("iem"),
         index_col="id",

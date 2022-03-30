@@ -26,8 +26,7 @@ def main(argv):
     FROM
       summary_{now.year} c JOIN stations s on (c.iemid = s.iemid)
     WHERE
-      s.network IN ('AWOS', 'IA_ASOS') and
-      day = %s
+      s.network = 'IA_ASOS' and day = %s
       and max_tmpf is not null and min_tmpf is not null
     """,
         (now,),
