@@ -2,6 +2,5 @@
 #	RUN_PLOTS
 # These plots are run every 20 minutes
 
-csh AWOS_plot.csh
 csh 20m_radar.csh
 python plot_rwis_sf.py

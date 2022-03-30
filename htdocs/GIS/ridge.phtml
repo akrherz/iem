@@ -39,14 +39,19 @@ products like velocity.
 
 <p>The services mentioned on this page provide access to products that contain
 data from one RADAR site for one level3 product at one volume scan time!  The 
-archive for these products starts in 2012, but is being backfilled to cover high
-end events of the past.  This processing is very compute intensive, so backfilling
-is non trivial.
+archive for these products starts in 2012.
 
 <p>These images are provided in the 
-<a href="http://spatialreference.org/ref/epsg/4326">EPSG:4326</a> projection. This
+<a href="https://spatialreference.org/ref/epsg/4326/">EPSG:4326</a> projection. This
 is a commonly used projection for what people like to call "un-projected" lat/lon. Of
 course, this is not correct terminology, but anyway...
+
+<h3>Change Log:</h3>
+<ul>
+  <li><strong>29 March 2022</strong>: The NWS will soon stop the NOAAPort dissemination of
+  a number of Level III RADAR products, including <code>N0Q</code>.  In preparation
+  for that upcoming date, <code>N0B</code> imagery is now being saved.</li>
+</ul>
 
 <h3>Realtime Raw Data:</h3>
 
@@ -59,6 +64,7 @@ processed products, click on the name for a color ramp for that product.
 <ul>
  <li>TZL - <a href="legends/TZL.gif">TDWR Base Reflectivity</a></li>
  <li>TV0 - <a href="legends/TV0.gif">TDWR Base Velocity</a></li>
+ <li>N0B - <a href="legends/N0B.gif">8bit High Resolution Base Reflectivity</a></li>
  <li>N0Q - <a href="legends/N0Q.gif">8bit High Resolution Base Reflectivity</a></li>
  <li>N0S - <a href="legends/N0S.gif">Storm Relative Base Velocity</a></li>
  <li>N0Z - <a href="legends/N0Z.gif">248nm Base Reflectivity</a></li>
@@ -136,7 +142,7 @@ HTTPD GET Variables:
 
 <h3>Tile Map Service</h3>
 
-<p>The IEM provides a caching <a href="../ogc/">tile map service</a> to provide 
+<p>The IEM provides a caching <a href="/ogc/">tile map service</a> to provide 
 tiles to Google Maps type applications in spherical mercator projection. This
 archive and current realtime imagery is exposed via this service!  Here is how
 you can access it:<br />
@@ -174,4 +180,3 @@ developed will find a stable and permanent home with the NWS someday!
 
 EOF;
 $t->render('single.phtml');
-?>

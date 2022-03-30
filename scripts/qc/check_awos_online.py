@@ -13,7 +13,7 @@ LOG = logger()
 
 def main():
     """Go Main Go"""
-    NT = NetworkTable("AWOS")
+    NT = NetworkTable("IA_ASOS")
     IEM = get_dbconn("iem")
     PORTFOLIO = get_dbconn("portfolio")
 
@@ -22,11 +22,12 @@ def main():
     icursor = IEM.cursor()
     icursor.execute(
         "SELECT id, valid from current c JOIN stations t ON "
-        "(t.iemid = c.iemid) WHERE t.network = 'AWOS'"
+        "(t.iemid = c.iemid) WHERE t.network = 'IA_ASOS'"
     )
     obs = {}
     for row in icursor:
-        obs[row[0]] = dict(id=row[0], valid=row[1])
+        if NT.sts[row[0]]["attributes"].get("IS_AWOS") == "1":
+            obs[row[0]] = dict(id=row[0], valid=row[1])
 
     tracker = TrackerEngine(IEM.cursor(), PORTFOLIO.cursor(), 10)
     tracker.process_network(obs, "iaawos", NT, threshold)

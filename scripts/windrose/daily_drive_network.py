@@ -37,8 +37,7 @@ def main():
     now = datetime.datetime.now()
     df = read_sql(
         """SELECT max(id) as station, network from stations
-        WHERE (network ~* 'ASOS' or network = 'AWOS' or network ~* 'DCP'
-        or network ~* 'RWIS')
+        WHERE (network ~* 'ASOS' or network ~* 'DCP' or network ~* 'RWIS')
         and online = 't' GROUP by network ORDER by random()""",
         get_dbconnstr("mesosite"),
         index_col="network",

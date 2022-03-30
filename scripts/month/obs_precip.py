@@ -20,7 +20,7 @@ def main():
     sql = """SELECT id,
           sum(pday) as precip,
           ST_x(geom) as lon, ST_y(geom) as lat from summary_%s s, stations t
-         WHERE t.network in ('IA_ASOS', 'AWOS') and
+         WHERE t.network = 'IA_ASOS' and
           extract(month from day) = %s
           and extract(year from day) = extract(year from now())
          and t.iemid = s.iemid GROUP by id, lat, lon

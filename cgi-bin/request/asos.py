@@ -1,5 +1,5 @@
 """
-Download interface for ASOS/AWOS data from the asos database
+Download interface for ASOS data from the asos database
 """
 import time
 import os
@@ -274,7 +274,7 @@ def application(environ, start_response):
     if gisextra or elev_extra:
         colextra = "ST_X(geom) as lon, ST_Y(geom) as lat, elevation, "
         table = "alldata a JOIN stations t on (a.station = t.id)"
-        metalimiter = "(t.network ~* 'ASOS' or t.network = 'AWOS') and "
+        metalimiter = "t.network ~* 'ASOS' and "
 
     rlimiter = ""
     if len(report_type) == 1:

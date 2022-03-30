@@ -29,7 +29,7 @@ $GEMEXE/sfmap << EOF > /tmp/WINDS_plot_sfmap.out
  	SFFILE   =  /mesonet/data/gempak/sao/${date}_sao.gem
 	MAP      =  25//2 + 25
  	LATLON   =  0
-        TITLE    =  32/-1/~ Wind Compare [ASOS/AWOS red] [RWIS blue]
+        TITLE    =  32/-1/~ Wind Compare [ASOS red] [RWIS blue]
         CLEAR    =  no
         PANEL    =  0
         DEVICE   = ${DEVICE}

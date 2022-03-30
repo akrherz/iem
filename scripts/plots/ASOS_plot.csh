@@ -29,7 +29,7 @@ $GEMEXE/sfmap_gf << EOF > /tmp/sfmap.out
  	DATTIM   =  ${date}/${hh}${mm}
  	SFFILE   =  /mesonet/data/gempak/sao/${date}_sao.gem
  	LATLON   =  0
-        TITLE    =  32/-1/~ ASOS/AWOS Data 
+        TITLE    =  32/-1/~ ASOS Data 
         CLEAR    =  no
         PANEL    =  0
         DEVICE   = ${DEVICE}

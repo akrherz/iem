@@ -1,4 +1,4 @@
-""" Generate a plot of GDD for the ASOS/AWOS network"""
+""" Generate a plot of GDD for the ASOS network"""
 import sys
 import datetime
 

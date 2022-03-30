@@ -12,7 +12,7 @@ import subprocess
 try:
     from zoneinfo import ZoneInfo
 except ImportError:
-    from backports.zoneinfo import ZoneInfo
+    from backports.zoneinfo import ZoneInfo  # type: ignore
 
 # third party
 import ephem
@@ -20,7 +20,7 @@ from pyiem.util import utc, logger
 from pyiem.network import Table as NetworkTable
 
 LOG = logger()
-nt = NetworkTable(("AWOS", "IA_ASOS"))
+nt = NetworkTable("IA_ASOS")
 UTC = datetime.timezone.utc
 
 

@@ -1,5 +1,5 @@
 """
- Generate a Weather Central Formatted file of ASOS/AWOS Precip
+ Generate a Weather Central Formatted file of ASOS Precip
 """
 
 import os
@@ -14,7 +14,7 @@ IEM = get_dbconn("iem", user="nobody")
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 COOP = get_dbconn("coop", user="nobody")
 ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
-nt = NetworkTable(("IA_ASOS", "AWOS"))
+nt = NetworkTable("IA_ASOS")
 
 
 def compute_climate(sts, ets):
@@ -50,7 +50,7 @@ SELECT
 FROM
   summary_%s c, stations s
 WHERE
-  s.network in ('IA_ASOS', 'AWOS') and
+  s.network = 'IA_ASOS' and
   s.iemid = c.iemid and
   day IN ('TODAY'::date,'YESTERDAY'::date, 'TODAY'::date - '2 days'::interval)
 GROUP by s.id, lon, lat

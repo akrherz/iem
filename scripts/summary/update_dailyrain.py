@@ -27,8 +27,7 @@ def main():
             max(phour) as rain,
             extract(hour from (valid - '1 minute'::interval)) as hour
             from current_log c, stations s
-            WHERE (s.network IN ('AWOS') or s.network ~* 'ASOS') and
-            c.iemid = s.iemid and
+            WHERE s.network ~* 'ASOS' and c.iemid = s.iemid and
             date(valid at time zone s.tzname) =
                 date((now() - '1 hour'::interval) at time zone s.tzname)
             and phour > 0

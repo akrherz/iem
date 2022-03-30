@@ -26,7 +26,6 @@ python update_dailyrain.py
 
 cd ../outgoing
 iemphp wxc_rwis.php
-iemphp wxc_awos.php
 python madis2csv.py
 python wxc_azos_prec.py
 python wxc_iarwis_traffic.py

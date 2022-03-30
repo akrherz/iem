@@ -26,7 +26,7 @@ $GEMEXE/sfmap << EOF > /tmp/DEWPS_plot_sfmap.out
  	DATTIM   =  ${date}/${hh}
  	SFFILE   =  /mesonet/data/gempak/sao/${date}_sao.gem
  	LATLON   =  0
-        TITLE    =  32/-1/~ Dew Point Comp [ASOS/AWOS red]  [RWIS blue]
+        TITLE    =  32/-1/~ Dew Point Comp [ASOS red]  [RWIS blue]
         CLEAR    =  no
         PANEL    =  0
         DEVICE   = ${DEVICE}

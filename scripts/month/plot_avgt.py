@@ -28,7 +28,7 @@ def main():
         from """
         + table
         + """ c JOIN stations s ON (s.iemid = c.iemid)
-        WHERE s.network in ('IA_ASOS', 'AWOS') and
+        WHERE s.network = 'IA_ASOS' and
         day >= %s and day < %s
         and max_tmpf > -30 and min_tmpf < 90 GROUP by id, s.network, lon, lat
     """,
@@ -40,7 +40,7 @@ def main():
         lats.append(row["lat"])
         lons.append(row["lon"])
         vals.append(row["avgt"])
-        valmask.append(row["network"] in ["AWOS", "IA_ASOS"])
+        valmask.append(row["network"] == "IA_ASOS")
 
     if len(vals) < 3:
         return

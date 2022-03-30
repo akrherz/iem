@@ -32,8 +32,7 @@ def main(days, argv):
         sum(pday) as rainfall
         from summary c JOIN stations s on (c.iemid = s.iemid)
         WHERE day >= %s and day <= %s
-        and s.network in ('AWOS', 'IA_ASOS')
-        and pday >= 0 and pday < 30
+        and s.network = 'IA_ASOS' and pday >= 0 and pday < 30
         GROUP by s.id, lon, lat
     """,
         get_dbconnstr("iem"),
@@ -43,7 +42,7 @@ def main(days, argv):
     df["label"] = df["rainfall"].apply(fmter)
 
     mp = MapPlot(
-        title=f"Iowa {days} Day Precipitation Total [inch] (ASOS/AWOS)",
+        title=f"Iowa {days} Day Precipitation Total [inch] (ASOS)",
         subtitle=("%s - %s inclusive")
         % (sixago.strftime("%d %b %Y"), today.strftime("%d %b %Y")),
         continentalcolor="white",

@@ -14,7 +14,7 @@ from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, logger
 
 LOG = logger()
-NT = NetworkTable(["AWOS", "IA_ASOS"])
+NT = NetworkTable("IA_ASOS")
 
 BASE_URL = "https://tds.scigw.unidata.ucar.edu/thredds/ncss/grib/NCEP/"
 BASE_URL2 = "http://thredds.ucar.edu/thredds/ncss/grib/NCEP/"

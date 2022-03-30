@@ -9,7 +9,7 @@ from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
 
-nt = NetworkTable(("AWOS", "IA_ASOS"))
+nt = NetworkTable("IA_ASOS")
 IEM = get_dbconn("iem")
 icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -30,7 +30,7 @@ def doHeader(environ, start_response, sio):
 <body bgcolor="white">
 <a href="/index.php">Iowa Mesonet</a> &gt;
 <a href="/climate/">Climatology</a> &gt;
-Hourly Precipitation [ASOS/AWOS]
+Hourly Precipitation [IA_ASOS]
 
 """
     )
@@ -143,7 +143,7 @@ def application(environ, start_response):
         "SELECT extract('hour' from valid) as vhour, t.id as station, "
         f"valid, phour from hourly_{ts.year} h JOIN stations t on "
         "(h.iemid = t.iemid) WHERE "
-        "valid >= %s and valid < %s and t.network in ('AWOS','IA_ASOS')",
+        "valid >= %s and valid < %s and t.network = 'IA_ASOS'",
         (ts, ts + datetime.timedelta(hours=24)),
     )
     for row in icursor:

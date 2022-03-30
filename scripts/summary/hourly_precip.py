@@ -39,7 +39,7 @@ def archive(ts):
         GROUP by station)
 
     SELECT max, iemid from data d JOIN stations s on
-    (d.station = s.id) WHERE (s.network ~* 'ASOS' or s.network = 'AWOS')
+    (d.station = s.id) WHERE s.network ~* 'ASOS'
     """,
         (ts, ts + datetime.timedelta(minutes=60)),
     )

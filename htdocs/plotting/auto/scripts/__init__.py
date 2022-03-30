@@ -4,6 +4,18 @@ Examples of widget types
 dict(type='date', name='date2', default='2012/03/15', label='Bogus2:',
      min="1893/01/01"), # Comes back to python as yyyy-mm-dd
 
+>>> res = list(range(230))
+>>> for key in scripts.data:
+...   for entry in scripts.data[key]:
+...     for opt in entry['options']:
+...       if opt["id"] in res:
+...         res.remove(opt["id"])
+...
+>>> res
+
+Not listed due to having no PNG output
+111, 112, 114, 115, 117, 118, 121, 122, 123, 124, 141, 143
+
 """
 # Association of plots
 daily_opts = [
@@ -736,6 +748,7 @@ misc = [
     {"id": 226, "label": "Center Weather Advisory (CWA) Map"},
     {"id": 221, "label": "HRRR Time-Lagged Ensemble Reflectivity Plot"},
     {"id": 220, "label": "SPC Convective / Fire Weather Outlook Graphics"},
+    {"id": 217, "label": "SPS Special Weather Statement Maps"},
     {"id": 219, "label": "Terminal Aerodome Forecast (TAF) Infographic"},
 ]
 data = {

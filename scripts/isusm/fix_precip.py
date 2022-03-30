@@ -106,7 +106,7 @@ def update_precip(date, station, hdf):
     )
     for _, row in ldf.iterrows():
         # hourly
-        LOG.debug(
+        LOG.info(
             "set hourly %s %s %s", station, row["valid"], row["precip_in"]
         )
         cursor.execute(
@@ -125,7 +125,7 @@ def update_precip(date, station, hdf):
             ),
         )
         if cursor.rowcount == 0:
-            LOG.info("Can't adjust %s %s, no data", station, row["valid"])
+            LOG.warning("Can't adjust %s %s, no data", station, row["valid"])
             continue
         current_in = cursor.fetchone()[0]
         multi = 0
@@ -147,7 +147,7 @@ def update_precip(date, station, hdf):
                 station,
             ),
         )
-        LOG.debug(
+        LOG.info(
             "minute %s multi %.4f value %.4f rows updated %s",
             row["valid"],
             multi,
@@ -161,7 +161,7 @@ def update_precip(date, station, hdf):
 def main(argv):
     """Go main go"""
     date = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
-    LOG.debug("Processing date: %s", date)
+    LOG.info("Processing date: %s", date)
     nt = NetworkTable("ISUSM")
 
     # Get our obs
@@ -173,7 +173,7 @@ def main(argv):
         index_col="station",
     )
     if df.empty:
-        LOG.info("no observations found for %s, aborting", date)
+        LOG.warning("no observations found for %s, aborting", date)
         return
     df["obs"] = df["rain_in_tot"]
     hdf = get_hdf(nt, date)
@@ -197,12 +197,12 @@ def main(argv):
 
     df["diff"] = df["obs"] - df["stage4"]
     for station, row in df.iterrows():
-        LOG.debug("%s stage4: %s ob: %s", station, row["stage4"], row["obs"])
+        LOG.info("%s stage4: %s ob: %s", station, row["stage4"], row["obs"])
         # We want to QC the case of having too low of precip.
         # How low is too low?
         # if stageIV > 0.1 and obs < 0.05
         if row["stage4"] > 0.1 and row["obs"] < 0.05:
-            LOG.info(
+            LOG.warning(
                 "ISUSM fix_precip %s %s stageIV: %.2f obs: %.2f",
                 date,
                 station,
@@ -211,7 +211,7 @@ def main(argv):
             )
             print_debugging(station)
             if station == "MCSI4":
-                LOG.info("Not updating Marcus")
+                LOG.warning("Not updating Marcus")
                 set_iemacces(station, date, row["obs"])
                 continue
             update_precip(date, station, hdf)

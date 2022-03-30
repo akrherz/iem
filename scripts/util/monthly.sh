@@ -15,11 +15,6 @@ cd /mesonet/data/gempak/asos
 mkdir -p /mesonet/ARCHIVE/gempak/surface/ASOS/${YYYY}_${MM}
 mv ${YY}${MM}??_asos.gem /mesonet/ARCHIVE/gempak/surface/ASOS/${YYYY}_${MM}/
 
-# echo "Lets go AWOS.gem"
-cd /mesonet/data/gempak/awos
-mkdir -p /mesonet/ARCHIVE/gempak/surface/AWOS/${YYYY}_${MM}
-mv ${YY}${MM}??_awos.gem /mesonet/ARCHIVE/gempak/surface/AWOS/${YYYY}_${MM}/
-
 # echo "Lets go meso.gem"
 cd /mesonet/data/gempak/meso
 mkdir -p /mesonet/ARCHIVE/gempak/surface/mesonet/${YYYY}_${MM}

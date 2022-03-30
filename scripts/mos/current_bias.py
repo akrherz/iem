@@ -43,7 +43,7 @@ def doit(now, model):
         current c, stations s
         WHERE
         c.iemid = s.iemid and
-        (s.network ~* 'ASOS' or s.network = 'AWOS') and s.country = 'US' and
+        s.network ~* 'ASOS' and s.country = 'US' and
         valid + '60 minutes'::interval > now() and
         tmpf > -50
     """

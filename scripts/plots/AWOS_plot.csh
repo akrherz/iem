@@ -21,9 +21,8 @@ endif
 
 setenv DISPLAY localhost:1
 
-rm awos.gif* ceil.gif* >& /dev/null
+rm ceil.gif* >& /dev/null
 
-set DEVICE="GIF|awos.gif|650;500"
 set DEVICE2="GIF|ceil.gif|650;500"
 
 
@@ -36,12 +35,9 @@ $GEMEXE/sfmap_gf << EOF > /tmp/awos_plot_sfmap.out
 	SFPARM   =  skyc;tmpf;wsym:1.2:2;;;dwpf;;;;brbk:1:2:111
 	COLORS   =  32;2;32;4;32
  	DATTIM   =  ${date}/${hh}${mm}
-	SFFILE   =  /mesonet/data/gempak/awos/${date}_awos.gem
  	LATLON   =  0
-        TITLE    =  32/-1/~ AWOS Data (${localtime})
         CLEAR    =  no
         PANEL    =  0
-        DEVICE   = ${DEVICE}
         PROJ     =  LCC
         FILTER   =  .3
         TEXT     =  1/1//hw
@@ -49,8 +45,6 @@ $GEMEXE/sfmap_gf << EOF > /tmp/awos_plot_sfmap.out
         STNPLT   =
 	MAP	= 25 + 25//2
 	\$mapfil = HICNUS.NWS + hipowo.cia
-	list
-	run
 
 	SFFILE	= /mesonet/data/gempak/meso/${date}_meso.gem
 	DEVICE	= ${DEVICE2}
@@ -63,9 +57,7 @@ $GEMEXE/sfmap_gf << EOF > /tmp/awos_plot_sfmap.out
 	exit
 EOF
 
-if (-e awos.gif ) then
-    pqinsert -p "plot c 000000000000 awos.gif bogus gif" awos.gif
+if (-e ceil.gif ) then
     pqinsert -p "plot c 000000000000 ceil.gif bogus gif" ceil.gif
-    rm awos.gif
     rm ceil.gif
 endif
