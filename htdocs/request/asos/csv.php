@@ -15,7 +15,7 @@ if (isset($_GET["lat"]) && isset($_GET["lon"]))
   /* Figure out what station(s) fits the bill */
   $sql = sprintf("SELECT id, 
       ST_DistanceSphere(geom, ST_geometryfromtext('POINT(%.4f %.4f)',4326)) as dist from stations
-      WHERE (network ~* 'ASOS' or network ~* 'AWOS') ORDER by dist ASC
+      WHERE network ~* 'ASOS' ORDER by dist ASC
       LIMIT 5", $_GET["lon"], $_GET["lat"]);
   $rs = pg_exec($mesosite, $sql);
   for ($i=0;$row=pg_fetch_array($rs);$i++)
@@ -35,7 +35,7 @@ foreach($stations as $k => $id)
 		    max(tmpf) as tmpf, max(dwpf) as dwpf, max(sknt) as sknt, max(drct) as drct,
 		    max(p01i) as phour, max(alti) as alti, max(gust) as gust, 
 		    max(ST_x(s.geom)) as lon, max(ST_y(s.geom)) as lat from alldata t, stations s
-		    where s.id = $1 and (s.network ~* 'ASOS' or s.network ~* 'AWOS')
+		    where s.id = $1 and s.network ~* 'ASOS'
 		    and t.station = s.id and t.valid BETWEEN '%s'::date 
 		    and '%s'::date + '9 days'::interval GROUP by station, valid 
 		    ORDER by valid ASC", date("Y-m-d", $ts), date("Y-m-d", $ts) ));
@@ -61,5 +61,3 @@ foreach($stations as $k => $id)
 
 header("Content-type: text/plain");
 echo $result;
-
-?>

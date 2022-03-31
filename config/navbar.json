@@ -168,12 +168,8 @@
                     "url": "/sites/networks.php"
                 },
                 {
-                    "title": "ASOS",
+                    "title": "ASOS/AWOS Airports",
                     "url": "/ASOS/"
-                },
-                {
-                    "title": "AWOS",
-                    "url": "/AWOS/"
                 },
                 {
                     "title": "CoCoRaHS",

@@ -96,7 +96,7 @@ def main():
     ids = list(nt.sts.keys())
     ids.sort()
     for myid in ids:
-        if nt.sts[myid]["attributes"].get("IS_ASOS") != "1":
+        if nt.sts[myid]["attributes"].get("IS_AWOS") != "1":
             continue
         out.write(
             fmt

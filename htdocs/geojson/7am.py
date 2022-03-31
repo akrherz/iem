@@ -46,7 +46,7 @@ def run_azos(ts):
     cursor.execute(
         "select t.id, t.name, sum(phour), st_x(geom), st_y(geom) "
         "from hourly h JOIN stations t ON "
-        "(h.iemid = t.iemid) where t.network in ('AWOS', 'IA_ASOS', 'SD_ASOS',"
+        "(h.iemid = t.iemid) where t.network in ('IA_ASOS', 'SD_ASOS',"
         "'NE_ASOS', 'KS_ASOS', 'MO_ASOS', 'IL_ASOS', 'WI_ASOS', 'MN_ASOS') "
         "and valid >= %s and valid < %s GROUP by t.id, t.name, t.geom",
         (ts0, ts1),

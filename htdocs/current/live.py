@@ -79,6 +79,7 @@ def workflow(cid):
     if res is not None:
         # Set for 15 seconds
         mc.set(mckey, res, 15)
+    mc.close()
     return res
 
 

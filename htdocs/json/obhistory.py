@@ -63,7 +63,7 @@ def workflow(station, network, date):
     table = {"fields": [], "rows": []}
     if date == datetime.date.today():
         do_today(table, station, network, date)
-    elif network == "AWOS" or network.find("ASOS") > -1:
+    elif network.find("ASOS") > -1:
         do_asos(table, station, network, date)
 
     return json.dumps(table)

@@ -167,4 +167,3 @@ $map->drawLabelCache($img);
 
 header("Content-type: image/png");
 $img->saveImage('');
-?>

@@ -94,7 +94,7 @@ def main():
     ids = list(nt.sts.keys())
     ids.sort()
     for sid in ids:
-        if nt.sts[sid]["attributes"].get("IS_ASOS") != "1":
+        if nt.sts[sid]["attributes"].get("IS_AWOS") != "1":
             continue
         myP = pcpn.get(sid, "M")
         myH = highs.get(sid, "M")

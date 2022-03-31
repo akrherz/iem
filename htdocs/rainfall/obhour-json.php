@@ -13,7 +13,7 @@ $ts = mktime( substr($tstr, 8, 2), 0, 0 ,
 $networks = "'$network'";
 if ($network == "IOWA")
 {
-  $networks = "'KCCI','IA_ASOS','AWOS','KIMT'";
+  $networks = "'KCCI','IA_ASOS','KIMT'";
 }
 
 $intervals = Array(1,3,6,12,24,48,72,168,720,"midnight");

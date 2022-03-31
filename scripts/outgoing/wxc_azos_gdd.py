@@ -1,6 +1,6 @@
 """
  Generate a Weather Central Formatted file of Growing Degree Days
- for our beloved ASOS/AWOS network
+ for our beloved ASOS network
 """
 import datetime
 import os
@@ -79,8 +79,7 @@ def load_soilt(data):
 
 def build_xref():
     mcursor.execute(
-        """SELECT id, climate_site from stations
-    WHERE network in ('IA_ASOS','AWOS')"""
+        "SELECT id, climate_site from stations WHERE network = 'IA_ASOS'"
     )
     data = {}
     for row in mcursor:
@@ -113,8 +112,7 @@ SELECT
 FROM
   summary_%s c, stations s
 WHERE
-  s.network in ('IA_ASOS','AWOS') and
-  day >= '%s' and day < '%s' and
+  s.network = 'IA_ASOS' and day >= '%s' and day < '%s' and
   c.iemid = s.iemid
 GROUP by s.id, lon, lat
     """ % (

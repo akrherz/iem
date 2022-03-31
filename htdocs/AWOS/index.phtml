@@ -6,28 +6,13 @@ $t = new MyView();
 $t->title = "Iowa AWOS Network";
 $t->content = <<<EOM
 
-<div class="row">
- <div class="col-md-3">
- <span style="font-size: 1.3em;">Iowa AWOS</span>
- </div>
- <div class="col-md-3">
- <a href="current.phtml"><img src="/images/view_text.png" /><br />Currents</a>
- </div>
- <div class="col-md-3">
- <a href="/request/download.phtml?network=IA_ASOS"><img src="/images/down.png" /><br />Download</a>
- </div>
-	<div class="col-md-3">
-	<a href="/sites/locate.php?network=IA_ASOS"><img src="/images/find.png" /><br />Locate Site</a>
-	</div>
-</div>
+<h3>Iowa AWOS Network</h3>
 
 <p>The term "AWOS" is typically applied to a subset of ASOS stations (airport
-weather stations) that are not federally owned.  For the purposes of the IEM
-website, the network identifier "AWOS" is solely used for the non-ASOS sites
-<strong>only within Iowa</strong>.  You should look at the <a href="/ASOS/">IEM ASOS</a>
-network page for all other state AWOS sites.  So the Iowa AWOS sites found here
-are operated by the Iowa Department of Transportation, except Fort Dodge (KFOD) and
-Clinton (KCWI) who are FAA operated AWOS sites.</p>
+weather stations) that are not federally owned.  Over the years, the IEM has
+collected some datasets and products that are limited to AWOS sites in Iowa.
+This page details these Iowa-specific AWOS products.  The main page for data
+from these sites resides with the <a href="/ASOS/">ASOS Mainpage</a>.</p>
 
 <div class="row">
 <div class="col-md-6">
@@ -39,18 +24,10 @@ Clinton (KCWI) who are FAA operated AWOS sites.</p>
 <li><a href="skyc.phtml">Note about archived cloud coverages</a></li>
 </ul>
 
-<h3>Current AWOS Data:</h3>
+<h3>Iowa AWOS Specific Data:</h3>
 <ul>
- <li><a href="current.phtml">Sortable Current Conditions</a></li>
- <li><a href="/data/mesonet.gif">Combined Mesonet</a></li>
- <li><a href="/data/awos.gif">AWOS Mesonet</a></li>
- <li><a href="/data/heat.gif">Heat Index</a></li>
- <li><a href="/data/wcht.gif">Wind Chill Index</a></li>
- <li><a href="/data/relh.gif">Relative Humidity</a></li>
  <li><a href="/data/awos_rtp.shef">12Z RTP First Guess</a></li>
- <li><a href="/data/awos_rtp_00z.shef">00Z RTP First Guess</a></li>
- <li><a href="/data/LOCDSMMETAR.dat">METAR formatted latest obs</a></li>
-		
+ <li><a href="/data/awos_rtp_00z.shef">00Z RTP First Guess</a></li>		
 </ul>
 
 <p><h3>Archived One Minute Data:</h3>
@@ -58,68 +35,21 @@ Clinton (KCWI) who are FAA operated AWOS sites.</p>
 <p>The Iowa DOT kept an one minute interval archive of their data between
 1995 and <strong>1 April 2011</strong>.  Due to communication changes, 
 this archival was discontinued.  You can download data from this archive at the 
-links below.  You can use <a href="/request/download.phtml?network=IA_ASOS">this link</a>
-for 5-10 minute interval data after 1 April 2011.
+links below. 
 
 <ul>
   <li><a href="/plotting/awos/1station_1min.php">Daily Data Plotting</a></li>
   <li><a href="/request/awos/1min.php">Download/View/Plot Archived Data</a></li>
 </ul>
 
-<p><h3 class="subtitle">Historical Data:</h3>
-
-<p>The IEM archives the routine METAR reports from this network at up to 
-5 minute intervals.
-
-<ul>
-<li><a href="/request/download.phtml?network=IA_ASOS">Download</a></li>
-<li><a href="/AWOS/reports/mon_prec.php">Monthly Precipitation Totals</a></li>
-<li><a href="/cgi-bin/precip/catAZOS.py">Hourly Precipitation</a> tables</li>
-</ul>
-
 </div>
 <div class="col-md-6">
-
-<h3>MADIS QC Mesages:</h3>
-<ul>
- <li><a href="/QC/madis/network.phtml?network=AWOS">Raw QC Values</a></li>
- <li><a href="http://www.madis-fsl.org/qcms_data/qc4/qchour.txt">Hourly</a></li>
- <li><a href="http://www.madis-fsl.org/qcms_data/qc4/qcday.txt">Daily</a></li>
- <li><a href="http://www.madis-fsl.org/qcms_data/qc4/qcweek.txt">Weekly</a></li>
- <li><a href="http://www.madis-fsl.org/qcms_data/qc4/qcmonth.txt">Monthly</a></li>
-</ul>
-
-<h3>Comparisons:</h3>
-<ul>
- <li><a href="/plotting/compare/">Generate Interactive Comparisons</a> between two sites of your choice.</li>
-  <li><a href="/wx/data/models/ruc2_iem_T.gif">Temperatures vs RUC2 Model</a></li>
-  <li><a href="/data/temps.gif">Temperatures vs RWIS Network</a></li>
-  <li><a href="/data/snet/Tcompare.gif">Temperatures vs SchoolNet Network</a></li>
-  <li><a href="/wx/data/models/ruc2_iem_Td.gif">Dew Points vs RUC2 Model</a></li>
-  <li><a href="/data/dewps.gif">Dew Points vs RWIS Network</a></li>
-  <li><a href="/data/snet/Dcompare.gif">Dew Points vs SchoolNet Network</a></li>
-  <li><a href="/wx/data/models/ruc2_iem_V.gif">Winds vs RUC2 Model</a></li>
-  <li><a href="/data/winds.gif">Winds vs RWIS Network</a></li>
-  <li><a href="/wx/data/models/ruc2_iem_Rh.gif">Relative Humidity vs RUC2 Model</a></li>
-  <li><a href="/data/snet/Pcompare.gif">Pressure vs SchoolNet Network (mb)</a></li>
-  <li><a href="/data/snet/P2compare.gif">Pressure vs SchoolNet Network (in)</a></li>
-</ul>
-
 
 <h3>QC Info:</h3>
 <ul>
 <li>Sites <a href="/QC/offline.php">offline</a></li>
 <li><a href="/QC/tickets.phtml">Open Trouble Tickets</a></li>
 </ul>
-
-<h3>Hourly Mesonet + NEXRAD:</h3>
-<UL>
-	<li><a href="/data/DMX_radar.gif">Des Moines</a></li>
-        <li><a href="/data/OAX_radar.gif">Omaha</a></li>
-        <li><a href="/data/DVN_radar.gif">Davenport</a></li>
-	<li><a href="/data/FSD_radar.gif">Sioux Falls</a></li>
-        <li><a href="/data/ARX_radar.gif">LaCrosse</a></li>
-</UL>
 
 </div>
 </div>

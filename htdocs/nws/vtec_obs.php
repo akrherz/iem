@@ -63,8 +63,8 @@ $rs = pg_prepare(
 
 $station2ugc = Array();
 $ugc2station = Array();
-$rs = pg_prepare($postgis, "STATIONS", "SELECT id, ugc_zone from stations
-  		where wfo = $1 and (network ~* 'ASOS' or network = 'AWOS')");
+$rs = pg_prepare($postgis, "STATIONS", "SELECT id, ugc_zone from stations ".
+  	"where wfo = $1 and network ~* 'ASOS'");
 $rs = pg_execute($postgis, "STATIONS", Array($wfo));
 for($i=0;$row=pg_fetch_assoc($rs);$i++){
   	if (! array_key_exists($row["ugc_zone"], $ugc2station)){

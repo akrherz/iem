@@ -47,8 +47,7 @@ def do(ts):
         f"""
         SELECT id, network, d.iemid, max_tmpf, min_tmpf,
         max_dwpf, min_dwpf, pday from {table} d JOIN stations t
-        on (t.iemid = d.iemid) WHERE day = %s and
-        (network ~* 'ASOS' or network = 'AWOS')
+        on (t.iemid = d.iemid) WHERE day = %s and network ~* 'ASOS'
     """,
         (ts,),
     )
