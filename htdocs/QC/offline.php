@@ -9,10 +9,12 @@ require_once "../../include/database.inc.php";
 require_once "../../include/network.php";
 require_once "../../include/mlib.php";
 $pgconn = iemdb("iem");
-$rs = pg_prepare($pgconn, "SELECT", "SELECT *,
-                 to_char(valid, 'Mon DD YYYY HH:MI AM') as v from offline
-                 WHERE network = $1 ORDER by valid ASC");
-
+$rs = pg_prepare(
+    $pgconn,
+    "SELECT",
+    "SELECT *, to_char(valid, 'Mon DD YYYY HH:MI AM') as v from offline ".
+    "WHERE network = $1 ORDER by valid ASC",
+);
 
 $nt = new NetworkTable("IA_ASOS");
 function networkOffline($network)
@@ -27,7 +29,6 @@ function networkOffline($network)
 	for( $i=0; $row = pg_fetch_array($rs); $i++)
 	{
 		$valid = $row["v"];
-		$tracker_id = $row["trackerid"];
 		$station = $row["station"];
 		if (! isset($cities[$station]))  continue;
 		$name = $cities[$station]['name'];
@@ -39,7 +40,7 @@ function networkOffline($network)
 	return $s;
 }
 $rwis = networkOffline("IA_RWIS");
-$awos = networkOffline("AWOS");
+$awos = networkOffline("IA_ASOS");
 $isusm = networkOffline("ISUSM");
 $t->content = <<< EOF
 <ol class="breadcrumb">
@@ -64,13 +65,13 @@ to a wide range of factors.  Here is a listing of sites currently offline.
 {$isusm}
 
 <tr>
- <td colspan=3 style="background: #CCCCCC;"><b>RWIS Network</b>
+ <td colspan=3 style="background: #CCCCCC;"><b>Iowa RWIS Network</b>
   (1 hour tolerance)</td>
 </tr>
 {$rwis}
 
 <tr>
- <td colspan=3 style="background: #CCCCCC;"><b>AWOS Network</b>
+ <td colspan=3 style="background: #CCCCCC;"><b>Iowa AWOS Network</b>
   (90 minute tolerance)</td>
 </tr>
 {$awos}

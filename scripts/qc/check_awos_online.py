@@ -22,7 +22,7 @@ def main():
     icursor = IEM.cursor()
     icursor.execute(
         "SELECT id, valid from current c JOIN stations t ON "
-        "(t.iemid = c.iemid) WHERE t.network = 'IA_ASOS'"
+        "(t.iemid = c.iemid) WHERE t.network = 'IA_ASOS' and t.online"
     )
     obs = {}
     for row in icursor:
