@@ -34,7 +34,7 @@ $(document).ready(function(){
 EOF;
  $t->current_network = "ASOS";
   
-  $nt = new NetworkTable($network);
+  $nt = new NetworkTable($network, FALSE, TRUE);
   $cities = $nt->table;
   $mesosite = iemdb('mesosite');
   pg_prepare($mesosite, "FINDTZ", "SELECT tzname from networks where id = $1");
@@ -90,8 +90,9 @@ foreach($jobj["data"] as $bogus => $iemob){
 if($format == 'csv'){
 	$csv = "station,valid_gmt,tmpf,max_tmpf,min_tmpf,dwpf,sknt,drct,relh,vsby,phour_in,pday_in,metar\n";
 	foreach($mydata as $key => $data){
+        $dt = new DateTime($data['utc_valid']);
 		$csv .= sprintf("%s,%s,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.1f,%s,%.2f,%.2f,%s\n", $key, 
-		    gmstrftime("%Y-%m-%d %H:%M", strtotime($data['utc_valid'])),
+		    $dt->format("Y-m-d H:i"),
 			$data['tmpf'], $data["max_tmpf"], $data["min_tmpf"], 
 			$data['dwpf'], $data['sknt'], $data['drct'], $data['relh'], 
 			$data['vsby'], $data['phour'],
@@ -138,8 +139,6 @@ $uri = "current.phtml?sorder=$sorder&metar=$metar&network=$network&sortcol=";
 $year = date("Y");
 $month = date("m");
 $day = date("d");
-$tkeys = array_keys($nt->table);
-$station = $tkeys[0];
 $table = <<<EOF
 <table class="table table-bordered table-condensed">
 <tr>
@@ -152,7 +151,7 @@ Select Network: {$nselect}</td>
 <td>Format: {$fselect}</td></td>
 <td><input type="submit" value="Go!"></form></td>
 </tr></table>
-<br /><strong>Times shown are for timezone: ${tzname}.</strong> The local day summary
+<br />Times shown are for timezone: <strong>${tzname}.</strong> The local day summary
 is based on that timezone. <br />Table sorted by: <b>({$vals[$sortcol]})</b>  
 &nbsp; &nbsp; Click on
 a column to sort it. Click on site ID for more information. You can download data from 
@@ -161,7 +160,6 @@ and you can view <a href="/sites/hist.phtml?station=${station}&network=${network
 on this network.
 
 <form method="GET" action="/my/current.phtml">
-
 
 <table class="table table-striped table-condensed table-bordered">
 <thead>
@@ -203,7 +201,13 @@ $finalA = aSortBySecondIndex($mydata, $sortcol, $sorder);
 $now = time();
 $i = 0;
 $old = "";
+
+$domain = array_keys($nt->table);
+$online = array();
+
 foreach ($finalA as $key => $parts){
+    // Keep track of online stations
+    $online[] = $key;
   $i++;
 
   $row = "<tr";
@@ -235,7 +239,7 @@ foreach ($finalA as $key => $parts){
   $ptmpf = ($parts["tmpf"] !== null) ? round($parts["tmpf"],0): 'M';
   $pdwpf = ($parts["dwpf"] !== null) ? round($parts["dwpf"],0): 'M';
   $pfeel = ($ptmpf === "M" || $pdwpf === "M" || $parts["feel"] === null) ? "M": round($parts["feel"], 0);
-  $prelh = ($ptmpf === "M" || $pdwpf === "M" || $parts["relh"] === null) ? "M": $parts["relh"];
+  $prelh = ($ptmpf === "M" || $pdwpf === "M" || $parts["relh"] === null) ? "M": round($parts["relh"], 0);
   $row .= ">". strftime($fmt, $parts["ts"]) ."</td>".
       "<td align='center'>". str_replace("}", " ", str_replace("{", " ", $parts["wxcodes"])) ."</td>".
   "<td align='center'>". $ptmpf ."</td><td><font color=\"#ff0000\">". round($parts["max_tmpf"],0) ."</font></td><td><font color=\"#0000ff\">". round($parts["min_tmpf"],0) ."</font></td>
@@ -269,7 +273,22 @@ foreach ($finalA as $key => $parts){
    }
   $table .= $row;
  }
-$table .= $old;
+
+$offline = array_diff($domain, $online);
+$offline_entries = "";
+// loop over offline entries
+foreach($offline as $sid){
+    $sname = $nt->table[$sid]["name"];
+    $url = sprintf("/sites/site.php?station=%s&network=%s", $sid, $network);
+    $offline_entries .= sprintf(
+        "<tr><td><input type=\"checkbox\" name=\"st[]\" value=\"%s\"></td>".
+        "<td><a href='%s'>%s</a></td>".
+        "<td>%s</td><td colspan=\"19\">Site Offline</td></tr>\n",
+        $sid, $url, $sid, $sname);
+}
+
+ $table .= $old;
+ $table .= $offline_entries;
 $table .= <<<EOF
 </tbody>
 
