@@ -8,7 +8,7 @@ from datetime import timedelta
 import sys
 
 import pandas as pd
-from pyiem.util import get_dbconn, get_dbconnstr, logger, utc
+from pyiem.util import get_dbconn, logger, utc, get_sqlalchemy_conn
 
 LOG = logger()
 
@@ -52,14 +52,15 @@ def main(argv):
 
     basets = utc(2000, 1, 1) if fullreprocess else (utc() - timedelta(days=8))
     LOG.info("Running full reprocess: %s basets: %s", fullreprocess, basets)
-    obs = pd.read_sql(
-        "select iemid, station, valid, rh_avg_qc from "
-        "sm_daily d JOIN stations t on (d.station = t.id) where rh_avg_qc > 0 "
-        "and valid > %s and t.network = 'ISUSM'",
-        get_dbconnstr("isuag"),
-        params=(basets,),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("isuag") as conn:
+        obs = pd.read_sql(
+            "select iemid, station, valid, rh_avg_qc from "
+            "sm_daily d JOIN stations t on (d.station = t.id) "
+            "where rh_avg_qc > 0 and valid > %s and t.network = 'ISUSM'",
+            conn,
+            params=(basets,),
+            index_col=None,
+        )
     LOG.info("Found %s obs", len(obs.index))
     with get_dbconn("iem") as pgconn:
         process(pgconn, obs)

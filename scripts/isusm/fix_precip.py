@@ -202,12 +202,10 @@ def main(argv):
         # How low is too low?
         # if stageIV > 0.1 and obs < 0.05
         if row["stage4"] > 0.1 and row["obs"] < 0.05:
-            LOG.warning(
-                "ISUSM fix_precip %s %s stageIV: %.2f obs: %.2f",
-                date,
-                station,
-                row["stage4"],
-                row["obs"],
+            # print to keep email log more pretty
+            print(
+                f"ISUSM fix_precip {date} {station} "
+                f"stageIV: {row['stage4']:.2f} obs: {row['obs']:.2f}"
             )
             print_debugging(station)
             if station == "MCSI4":

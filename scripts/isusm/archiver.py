@@ -117,10 +117,10 @@ def main():
         station = fn.rsplit("_", 5)[0]
         d = files.setdefault(station, [])
         d.append(fn)
-    for station in files:
-        content = process(files[station])
+    for station, fns in files.items():
+        content = process(fns)
         save_content(station, content)
-        zip_and_delete(station, files[station])
+        zip_and_delete(station, fns)
     upload_to_staging()
 
 
