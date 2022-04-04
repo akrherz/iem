@@ -11,14 +11,15 @@ from pyiem.exceptions import NoDataFound
 
 
 PLOTTYPES = {
-    "1": "Daily Max/Min 4 Inch Soil Temps",
-    "2": "Daily Max/Min Air Temperature",
-    "3": "Daily Average 4 Inch Soil Temp",
-    "4": "Daily Solar Radiation",
-    "5": "Daily Potential Evapotranspiration",
-    "6": "Daily Precipitation",
+    "1": "Max/Min 4 Inch Soil Temps",
+    "2": "Max/Min Air Temperature",
+    "3": "Average 4 Inch Soil Temp",
+    "4": "Solar Radiation",
+    "5": "Potential Evapotranspiration",
+    "6": "DPrecipitation",
     "7": "Peak Wind Gust",
-    "8": "Daily Average Wind Speed",
+    "8": "Average Wind Speed",
+    "9": "Plant Available Soil Water (6-30 inches)",
 }
 
 
@@ -317,6 +318,42 @@ def plot8(ctx):
     return data, df
 
 
+def plot9(ctx):
+    """Daily peak wind."""
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            "SELECT station, calc_vwc_12_avg_qc, calc_vwc_24_avg_qc from "
+            "sm_daily WHERE valid = %s and calc_vwc_24_avg_qc is not null "
+            "and station != 'FRUI4'",
+            conn,
+            params=(ctx["date"],),
+            index_col="station",
+        )
+    if df.empty:
+        raise NoDataFound("No Data Found for This Plot.")
+    df["vwc_12"] = df["calc_vwc_12_avg_qc"].clip(0.1, 0.45)
+    df["vwc_24"] = df["calc_vwc_24_avg_qc"].clip(0.1, 0.45)
+    df["val"] = (df["vwc_12"] * 12 + df["vwc_24"] * 12) - (24 * 0.1)
+    df = df[~df["val"].isna()]
+
+    data = []
+    for station, row in df.iterrows():
+        if station not in ctx["nt"].sts:
+            continue
+        data.append(
+            {
+                "lon": ctx["nt"].sts[station]["lon"],
+                "lat": ctx["nt"].sts[station]["lat"],
+                "tmpf": row["val"],
+                "tmpf_format": "%.02f",
+                "id": ctx["nt"].sts[station]["plot_name"],
+                "id_color": "k",
+            }
+        )
+
+    return data, df
+
+
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
@@ -329,6 +366,9 @@ def plotter(fdict):
     ctx["nt"].sts["BOOI4"]["lat"] -= 0.15
     ctx["nt"].sts["AHTI4"]["lon"] += 0.25
     ctx["nt"].sts["AHTI4"]["lat"] += 0.25
+
+    ctx["nt"].sts["DONI4"]["lon"] += 0.05
+    ctx["nt"].sts["DONI4"]["lat"] -= 0.2
 
     title = "TBD"
     subtitle = "TBD"
@@ -367,6 +407,15 @@ def plotter(fdict):
         title = "ISU Soil Moisture Average Wind Speed [MPH]"
         subtitle = "based on available daily summary data"
         data, df = plot8(ctx)
+    elif ctx["opt"] == "9":
+        title = (
+            "ISU Soil Moisture Plant Available Soil Water (6-30 inch) [inch]"
+        )
+        subtitle = (
+            'based on available daily summary data, 10.8" theoretical max '
+            "assuming 45% capacity"
+        )
+        data, df = plot9(ctx)
 
     tle = ctx["date"].strftime("%b %-d, %Y")
     mp = MapPlot(

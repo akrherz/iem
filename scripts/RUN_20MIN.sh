@@ -1,9 +1,6 @@
 # Run every 20 minutes please
 
-cd gempak
-csh grid_radar.csh
-
-cd ../ingestors/madis
+cd ingestors/madis
 python to_iemaccess.py
 
 cd ../../outgoing

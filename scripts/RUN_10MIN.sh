@@ -12,9 +12,6 @@ python rwis_station.py
 cd ../dbutil
 timeout -v 540 python asos2archive.py &
 
-cd ../plots
-csh MW_overlay.csh
-
 cd ../ingestors
 python dot_truckcams.py &
 

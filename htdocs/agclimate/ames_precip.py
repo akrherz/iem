@@ -45,6 +45,7 @@ def application(_environ, start_response):
 
     df2 = amsi4.join(df, how="outer")
     df2 = df2.merge(aggobs, how="outer", left_on="day", right_index=True)
+    df2.index.name = "valid"
     df2 = df2.drop("day", axis=1)
     df2 = df2.sort_index(ascending=True).reset_index()
     df2["valid"] = pd.to_datetime(df2["valid"]).dt.strftime("%Y-%m-%d %-I %p")

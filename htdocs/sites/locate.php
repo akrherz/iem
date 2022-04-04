@@ -69,9 +69,12 @@ you may find useful.</p>
 <td>{$n2select}</td>
 <td><input type="submit" value="Select Station"></td>
 </tr></table>
-<br />Or select site from this map by clicking on the yellow dot and then clicking
-		the 'Select Station' button above.
+<p>Green dots represent stations online with current data.  Yellow dots are
+stations that are no longer active.  Click on a dot to select a station, then click
+the 'Select Station' button above.</p>
+
 <div id="map" style="width:100%; height: 400px;"></div>
+
 </form>
 
 </div>

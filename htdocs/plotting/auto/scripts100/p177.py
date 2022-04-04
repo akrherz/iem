@@ -6,13 +6,18 @@ import numpy as np
 import psycopg2
 import pytz
 import pandas as pd
-from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
 from matplotlib.patches import Patch
 from matplotlib.lines import Line2D
 from pyiem import meteorology
 from pyiem.plot import figure, figure_axes
-from pyiem.util import convert_value, get_autoplot_context, get_dbconn, c2f
+from pyiem.util import (
+    convert_value,
+    get_autoplot_context,
+    get_dbconn,
+    c2f,
+    get_sqlalchemy_conn,
+)
 from pyiem.exceptions import NoDataFound
 
 CENTRAL = pytz.timezone("America/Chicago")
@@ -76,12 +81,13 @@ def get_description():
 
 def make_inversion_plot(ctx):
     """Generate an inversion plot"""
-    df = read_sql(
-        "SELECT * from sm_inversion where station = %s and "
-        "valid >= %s and valid < %s ORDER by valid ASC",
-        ctx["pgconn"],
-        params=(ctx["station"], ctx["sts"], ctx["ets"]),
-    )
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            "SELECT * from sm_inversion where station = %s and "
+            "valid >= %s and valid < %s ORDER by valid ASC",
+            conn,
+            params=(ctx["station"], ctx["sts"], ctx["ets"]),
+        )
     if df.empty:
         raise NoDataFound("No inversion data found for station!")
 
@@ -96,10 +102,7 @@ def make_inversion_plot(ctx):
     ax.plot(df["valid"], c2f(df["tair_10_c_avg_qc"].values), label="10 feet")
     ax.grid(True)
     ax.set_ylabel(r"Air Temperature $^\circ$F")
-    ax.set_title(
-        ("ISUSM Station: %s Inversion Timeseries")
-        % (ctx["_nt"].sts[ctx["station"]]["name"],)
-    )
+    ax.set_title(f"ISUSM Station: {ctx['_sname']} :: Inversion Timeseries")
     ax.xaxis.set_major_formatter(
         mdates.DateFormatter("%-I:%M %p\n%-d %b", tz=CENTRAL)
     )
@@ -160,17 +163,17 @@ def make_daily_pet_plot(ctx):
         from daily where station = 'A130209' GROUP by mmdd
     ), obs as (
         SELECT valid, dailyet_qc / 25.4 as et, to_char(valid, 'mmdd') as mmdd
-        from sm_daily WHERE station = '%s' and valid >= '%s' and valid <= '%s'
+        from sm_daily WHERE station = %s and valid >= %s and valid <= %s
     )
 
     select o.valid, o.et, c.et from obs o
     JOIN climo c on (c.mmdd = o.mmdd) ORDER by o.valid ASC
-    """
-        % (
+    """,
+        (
             ctx["station"],
             ctx["sts"].strftime("%Y-%m-%d"),
             ctx["ets"].strftime("%Y-%m-%d"),
-        )
+        ),
     )
     dates = []
     o_dailyet = []
@@ -184,7 +187,11 @@ def make_daily_pet_plot(ctx):
     if df.empty:
         raise NoDataFound("No Data Found!")
 
-    (fig, ax) = figure_axes(apctx=ctx)
+    title = (
+        f"ISUSM Station: {ctx['_sname']} Timeseries\n"
+        "Potential Evapotranspiration, Climatology from Ames 1986-2014"
+    )
+    (fig, ax) = figure_axes(apctx=ctx, title=title)
     ax.bar(
         dates,
         o_dailyet,
@@ -197,14 +204,6 @@ def make_daily_pet_plot(ctx):
     ax.plot(dates, c_et, label="Climatology", color="k", lw=1.5, zorder=2)
     ax.grid(True)
     ax.set_ylabel("Potential Evapotranspiration [inch]")
-    ax.set_title(
-        (
-            "ISUSM Station: %s Timeseries\n"
-            "Potential Evapotranspiration, "
-            "Climatology from Ames 1986-2014"
-        )
-        % (ctx["_nt"].sts[ctx["station"]]["name"],)
-    )
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d %b\n%Y"))
     interval = int(len(dates) / 7.0 + 1)
     ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
@@ -222,17 +221,14 @@ def make_daily_rad_plot(ctx):
 
     icursor = ctx["pgconn"].cursor(cursor_factory=psycopg2.extras.DictCursor)
     icursor.execute(
-        """
-        SELECT valid, slrkj_tot_qc / 1000. from sm_daily
-        where station = '%s'
-        and valid >= '%s' and valid <= '%s' and slrkj_tot_qc > 0 and
-        slrkj_tot_qc < 40000 ORDER by valid ASC
-    """
-        % (
+        "SELECT valid, slrkj_tot_qc / 1000. from sm_daily where station = %s "
+        "and valid >= %s and valid <= %s and slrkj_tot_qc > 0 and "
+        "slrkj_tot_qc < 40000 ORDER by valid ASC",
+        (
             ctx["station"],
             ctx["sts"].strftime("%Y-%m-%d"),
             ctx["ets"].strftime("%Y-%m-%d"),
-        )
+        ),
     )
     dates = []
     vals = []
@@ -249,7 +245,10 @@ def make_daily_rad_plot(ctx):
 
     df = pd.DataFrame(dict(dates=dates, vals=vals, jday=jday, tmax=tmax))
 
-    (fig, ax) = figure_axes(apctx=ctx)
+    title = (
+        f"ISUSM Station: {ctx['_sname']} Timeseries\n" "Daily Solar Radiation"
+    )
+    (fig, ax) = figure_axes(apctx=ctx, title=title)
     ax.bar(
         dates,
         vals,
@@ -265,10 +264,6 @@ def make_daily_rad_plot(ctx):
     interval = int(len(dates) / 7.0 + 1)
     ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
     ax.set_ylabel("Solar Radiation $MJ m^{-2}$")
-    ax.set_title(
-        ("ISUSM Station: %s Timeseries\n" "Daily Solar Radiation")
-        % (ctx["_nt"].sts[ctx["station"]]["name"],)
-    )
     ax.set_ylim(0, 38)
     ax.legend(loc=1, ncol=2, fontsize=10)
     return fig, df
@@ -276,24 +271,23 @@ def make_daily_rad_plot(ctx):
 
 def make_daily_rainfall_soil_rh(ctx):
     """Give them what they want."""
-    df = read_sql(
-        "SELECT valid, rain_in_tot_qc, t4_c_avg_qc, rh_avg_qc "
-        "from sm_daily where station = %s and valid >= %s and valid <= %s "
-        "ORDER by valid ASC",
-        ctx["pgconn"],
-        params=(
-            ctx["station"],
-            ctx["sts"].strftime("%Y-%m-%d"),
-            ctx["ets"].strftime("%Y-%m-%d"),
-        ),
-        index_col="valid",
-    )
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            "SELECT valid, rain_in_tot_qc, t4_c_avg_qc, rh_avg_qc "
+            "from sm_daily where station = %s and valid >= %s and valid <= %s "
+            "ORDER by valid ASC",
+            conn,
+            params=(
+                ctx["station"],
+                ctx["sts"].strftime("%Y-%m-%d"),
+                ctx["ets"].strftime("%Y-%m-%d"),
+            ),
+            index_col="valid",
+        )
     if df.empty:
         raise NoDataFound("No Data Found for Query")
 
-    title = "ISUSM Station: %s Timeseries" % (
-        ctx["_nt"].sts[ctx["station"]]["name"],
-    )
+    title = f"ISUSM Station: {ctx['_sname']} Timeseries"
     subtitle = "Daily Precipitation, 4 Inch Soil Temperature, and Avg RH"
 
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
@@ -347,28 +341,33 @@ def make_daily_rainfall_soil_rh(ctx):
 
 def make_daily_plot(ctx):
     """Generate a daily plot of max/min 4 inch soil temps"""
-    df = read_sql(
-        """
-        SELECT date(valid), min(t4_c_avg_qc),
-        max(t4_c_avg_qc), avg(t4_c_avg_qc) from sm_hourly
-        where station = %s and valid >= %s and valid < %s
-        and t4_c_avg is not null GROUP by date ORDER by date ASC
-    """,
-        ctx["pgconn"],
-        params=(
-            ctx["station"],
-            ctx["sts"].strftime("%Y-%m-%d 00:00"),
-            ctx["ets"].strftime("%Y-%m-%d 23:59"),
-        ),
-        index_col="date",
-    )
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            """
+            SELECT date(valid), min(t4_c_avg_qc),
+            max(t4_c_avg_qc), avg(t4_c_avg_qc) from sm_hourly
+            where station = %s and valid >= %s and valid < %s
+            and t4_c_avg is not null GROUP by date ORDER by date ASC
+        """,
+            conn,
+            params=(
+                ctx["station"],
+                ctx["sts"].strftime("%Y-%m-%d 00:00"),
+                ctx["ets"].strftime("%Y-%m-%d 23:59"),
+            ),
+            index_col="date",
+        )
     if df.empty:
         raise NoDataFound("No Data Found for Query")
 
     mins = c2f(df["min"].values)
     maxs = c2f(df["max"].values)
     avgs = c2f(df["avg"].values)
-    (fig, ax) = figure_axes(apctx=ctx)
+    title = (
+        f"ISUSM Station: {ctx['_sname']} Timeseries\n"
+        "Daily Max/Min/Avg 4 inch Soil Temperatures"
+    )
+    (fig, ax) = figure_axes(apctx=ctx, title=title)
     ax.bar(
         df.index.values,
         maxs - mins,
@@ -391,13 +390,6 @@ def make_daily_plot(ctx):
     ax.axhline(50, lw=1.5, c="k")
     ax.grid(True)
     ax.set_ylabel(r"4 inch Soil Temperature $^\circ$F")
-    ax.set_title(
-        (
-            "ISUSM Station: %s Timeseries\n"
-            "Daily Max/Min/Avg 4 inch Soil Temperatures"
-        )
-        % (ctx["_nt"].sts[ctx["station"]]["name"],)
-    )
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d %b\n%Y"))
     interval = int(len(df.index) / 7.0 + 1)
     ax.xaxis.set_major_locator(mdates.DayLocator(interval=interval))
@@ -410,14 +402,14 @@ def make_battery_plot(ctx):
     icursor = ctx["pgconn"].cursor(cursor_factory=psycopg2.extras.DictCursor)
     icursor.execute(
         """SELECT valid, battv_min_qc from sm_hourly
-    where station = '%s' and valid >= '%s 00:00' and valid < '%s 23:56'
+    where station = %s and valid >= %s and valid < %s
     and battv_min_qc is not null ORDER by valid ASC
-    """
-        % (
+    """,
+        (
             ctx["station"],
-            ctx["sts"].strftime("%Y-%m-%d"),
-            ctx["ets"].strftime("%Y-%m-%d"),
-        )
+            ctx["sts"].strftime("%Y-%m-%d 00:00"),
+            ctx["ets"].strftime("%Y-%m-%d 23:59"),
+        ),
     )
     dates = []
     battv = []
@@ -426,14 +418,11 @@ def make_battery_plot(ctx):
         battv.append(row[1])
 
     df = pd.DataFrame(dict(dates=dates, battv=battv))
-    (fig, ax) = figure_axes(apctx=ctx)
+    title = f"ISUSM Station: {ctx['_sname']} Timeseries\n" "Battery Voltage"
+    (fig, ax) = figure_axes(apctx=ctx, title=title)
     ax.plot(dates, battv)
     ax.grid(True)
     ax.set_ylabel("Battery Voltage [V]")
-    ax.set_title(
-        ("ISUSM Station: %s Timeseries\n" "Battery Voltage")
-        % (ctx["_nt"].sts[ctx["station"]]["name"],)
-    )
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d %b\n%Y"))
     ax.legend(loc="best", ncol=2, fontsize=10)
     return fig, df
@@ -441,32 +430,30 @@ def make_battery_plot(ctx):
 
 def make_vsm_histogram_plot(ctx):
     """Option 6"""
-    df = read_sql(
-        """
-        SELECT
-    CASE WHEN t12_c_avg_qc > 1 then calc_vwc_12_avg_qc else null end as v12,
-    CASE WHEN t24_c_avg_qc > 1 then calc_vwc_24_avg_qc else null end as v24,
-    CASE WHEN t50_c_avg_qc > 1 then calc_vwc_50_avg_qc else null end as v50
-        from sm_hourly
-        where station = %s and valid >= %s and valid < %s
-    """,
-        ctx["pgconn"],
-        params=(ctx["station"], ctx["sts"], ctx["ets"]),
-        index_col=None,
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            """
+            SELECT
+            CASE WHEN t12_c_avg_qc > 1 then calc_vwc_12_avg_qc else null end
+                as v12,
+            CASE WHEN t24_c_avg_qc > 1 then calc_vwc_24_avg_qc else null end
+                as v24,
+            CASE WHEN t50_c_avg_qc > 1 then calc_vwc_50_avg_qc else null end
+                as v50
+            from sm_hourly
+            where station = %s and valid >= %s and valid < %s
+        """,
+            conn,
+            params=(ctx["station"], ctx["sts"], ctx["ets"]),
+            index_col=None,
+        )
+    title = (
+        f"ISUSM Station: {ctx['_sname']} VWC Histogram\n"
+        f"For un-frozen condition between {ctx['sts']:%-d %b %Y} "
+        f"and {ctx['ets']:%-d %b %Y}"
     )
-    fig = figure(apctx=ctx)
+    fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(3, 1, sharex=True)
-    ax[0].set_title(
-        (
-            "ISUSM Station: %s VWC Histogram\n"
-            "For un-frozen condition between %s and %s"
-        )
-        % (
-            ctx["_nt"].sts[ctx["station"]]["name"],
-            ctx["sts"].strftime("%-d %b %Y"),
-            ctx["ets"].strftime("%-d %b %Y"),
-        )
-    )
     for i, col in enumerate(["v12", "v24", "v50"]):
         ax[i].hist(df[col] * 100.0, bins=50, range=(0, 50), density=True)
         ax[i].set_ylabel("Frequency")
@@ -474,7 +461,7 @@ def make_vsm_histogram_plot(ctx):
         ax[i].text(
             0.99,
             0.99,
-            "%s inches" % (col[1:],),
+            f"{col[1:]} inches",
             transform=ax[i].transAxes,
             ha="right",
             va="top",
@@ -488,70 +475,63 @@ def make_vsm_histogram_plot(ctx):
 def make_daily_water_change_plot(ctx):
     """Option 7"""
     # Get daily precip
-    pdf = read_sql(
-        """
-    SELECT valid, rain_in_tot_qc from sm_daily where station = %s
-    and valid >= %s and valid <= %s ORDER by valid ASC
-    """,
-        ctx["pgconn"],
-        params=(ctx["station"], ctx["sts"].date(), ctx["ets"].date()),
-        index_col="valid",
-    )
+    with get_sqlalchemy_conn("isuag") as conn:
+        pdf = pd.read_sql(
+            "SELECT valid, rain_in_tot_qc from sm_daily where station = %s "
+            "and valid >= %s and valid <= %s ORDER by valid ASC",
+            conn,
+            params=(ctx["station"], ctx["sts"].date(), ctx["ets"].date()),
+            index_col="valid",
+        )
 
-    df = read_sql(
-        """
-    WITH obs as (
+        df = pd.read_sql(
+            """
+        WITH obs as (
+            SELECT valid,
+            CASE WHEN t12_c_avg_qc > 1 then calc_vwc_12_avg_qc else null end
+            as v12,
+            CASE WHEN t24_c_avg_qc > 1 then calc_vwc_24_avg_qc else null end
+            as v24,
+            CASE WHEN t50_c_avg_qc > 1 then calc_vwc_50_avg_qc else null end
+            as v50
+            from sm_daily
+            where station = %s and valid >= %s and valid < %s)
+
         SELECT valid,
-    CASE WHEN t12_c_avg_qc > 1 then calc_vwc_12_avg_qc else null end as v12,
-    CASE WHEN t24_c_avg_qc > 1 then calc_vwc_24_avg_qc else null end as v24,
-    CASE WHEN t50_c_avg_qc > 1 then calc_vwc_50_avg_qc else null end as v50
-        from sm_daily
-        where station = %s and valid >= %s and valid < %s)
-
-    SELECT valid,
-    v12, v12 - lag(v12) OVER (ORDER by valid ASC) as v12_delta,
-    v24, v24 - lag(v24) OVER (ORDER by valid ASC) as v24_delta,
-    v50, v50 - lag(v50) OVER (ORDER by valid ASC) as v50_delta
-    from obs ORDER by valid ASC
-    """,
-        ctx["pgconn"],
-        params=(ctx["station"], ctx["sts"], ctx["ets"]),
-        index_col=None,
-    )
+        v12, v12 - lag(v12) OVER (ORDER by valid ASC) as v12_delta,
+        v24, v24 - lag(v24) OVER (ORDER by valid ASC) as v24_delta,
+        v50, v50 - lag(v50) OVER (ORDER by valid ASC) as v50_delta
+        from obs ORDER by valid ASC
+        """,
+            conn,
+            params=(ctx["station"], ctx["sts"], ctx["ets"]),
+            index_col=None,
+        )
+    # 12inch covers 6-18 inches, 24inch covers 18-30 inches, 50inch excluded
     l1 = 12.0
     l2 = 12.0
-    l3 = 0.0
-    df["change"] = (
-        df["v12_delta"] * l1 + df["v24_delta"] * l2 + df["v50_delta"] * l3
-    )
-    df["depth"] = df["v12"] * l1 + df["v24"] * l2 + df["v50"] * l3
+    df["change"] = df["v12_delta"] * l1 + df["v24_delta"] * l2
+    # Compute an estimate of available water capacity
+    # thresholds arbitrarily chosen at 10% and 45%
+    for lvl in ["v12", "v12"]:
+        df[lvl] = df[lvl].clip(lower=0.1, upper=0.45)
+    df["depth"] = df["v12"] * l1 + df["v24"] * l2 - (l1 + l2) * 0.1
 
-    fig = figure(apctx=ctx)
+    title = (
+        f'ISUSM Station: {ctx["_sname"]} :: Daily Soil (6-30") Water\n'
+        f"For un-frozen condition between {ctx['sts']:%-d %b %Y} and "
+        f"{ctx['ets']:%-d %b %Y}"
+    )
+    fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(2, 1, sharex=True)
     if not df["depth"].isnull().all():
-        ax[0].plot(df["valid"].values, df["depth"], color="b", lw=2)
+        ax[0].bar(df["valid"].values, df["depth"], color="b", width=1)
     oneday = datetime.timedelta(days=1)
-    for level in [0.15, 0.25, 0.35, 0.45]:
-        ax[0].axhline((l1 + l2 + l3) * level, c="k")
-        ax[0].text(
-            df["valid"].values[-1] + oneday,
-            (l1 + l2 + l3) * level,
-            "  %.0f%%" % (level * 100.0,),
-            va="center",
-        )
     ax[0].grid(True)
-    ax[0].set_ylabel("Water Depth [inch]")
-    ax[0].set_title(
-        (
-            'ISUSM Station: %s Daily Soil (6-30") Water\n'
-            "For un-frozen condition between %s and %s"
-        )
-        % (
-            ctx["_nt"].sts[ctx["station"]]["name"],
-            ctx["sts"].strftime("%-d %b %Y"),
-            ctx["ets"].strftime("%-d %b %Y"),
-        )
-    )
+    ax[0].set_ylabel("Plant Available Soil Water [inch]")
+    ax[0].set_ylim(bottom=0)
+
+    # Second plot
     bars = ax[1].bar(df["valid"].values, df["change"].values, fc="b", ec="b")
     for mybar in bars:
         if mybar.get_y() < 0:
@@ -572,7 +552,7 @@ def make_daily_water_change_plot(ctx):
                 ax[1].text(
                     valid,
                     ylim,
-                    "%.2f" % (row["pday"],),
+                    f"{row['pday']:.2f}",
                     rotation=90,
                     va="bottom",
                     color="b",
@@ -591,13 +571,14 @@ def make_daily_water_change_plot(ctx):
 
 def plot2(ctx):
     """Just soil temps"""
-    df = read_sql(
-        "SELECT * from sm_hourly WHERE station = %s and "
-        "valid BETWEEN %s and %s ORDER by valid ASC",
-        ctx["pgconn"],
-        params=(ctx["station"], ctx["sts"], ctx["ets"]),
-        index_col="valid",
-    )
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            "SELECT * from sm_hourly WHERE station = %s and "
+            "valid BETWEEN %s and %s ORDER by valid ASC",
+            conn,
+            params=(ctx["station"], ctx["sts"], ctx["ets"]),
+            index_col="valid",
+        )
     d06t = df["t6_c_avg_qc"]
     d12t = df["t12_c_avg_qc"]
     d24t = df["t24_c_avg_qc"]
@@ -658,13 +639,14 @@ def plot2(ctx):
 
 def plot1(ctx):
     """Do main plotting logic"""
-    df = read_sql(
-        "SELECT * from sm_hourly WHERE "
-        "station = %s and valid BETWEEN %s and %s ORDER by valid ASC",
-        ctx["pgconn"],
-        params=(ctx["station"], ctx["sts"], ctx["ets"]),
-        index_col="valid",
-    )
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            "SELECT * from sm_hourly WHERE "
+            "station = %s and valid BETWEEN %s and %s ORDER by valid ASC",
+            conn,
+            params=(ctx["station"], ctx["sts"], ctx["ets"]),
+            index_col="valid",
+        )
     if df.empty:
         raise NoDataFound("No Data Found for This Plot.")
     solar_wm2 = df["slrkj_tot_qc"] / 3600.0 * 1000.0
@@ -700,10 +682,7 @@ def plot1(ctx):
         ax[0].plot(valid, d50sm * 100.0, linewidth=2, color="black", zorder=5)
     ax[0].set_ylabel("Volumetric Soil Water Content [%]", fontsize=10)
 
-    ax[0].set_title(
-        ("ISUSM Station: %s Timeseries")
-        % (ctx["_nt"].sts[ctx["station"]]["name"],)
-    )
+    ax[0].set_title(f"ISUSM Station: {ctx['_sname']} Timeseries")
     box = ax[0].get_position()
     ax[0].set_position(
         [box.x0, box.y0 + box.height * 0.05, box.width, box.height * 0.95]
@@ -850,6 +829,3 @@ if __name__ == "__main__":
             "opt": "9",
         }
     )
-    # fig, df = plotter(dict())
-    # with pd.ExcelWriter("/tmp/ba.xlsx") as xl:
-    #    df.to_excel(xl)

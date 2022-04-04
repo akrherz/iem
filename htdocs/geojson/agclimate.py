@@ -37,6 +37,18 @@ def safe_m(val):
     return round(val * 100.0, 0)
 
 
+def compute_plant_water(row):
+    """Crude algo."""
+    if row["calc_vwc_12_avg_qc"] is None or row["calc_vwc_24_avg_qc"] is None:
+        return "M"
+    if row["station"] == "FRUI4":  # Problematic
+        return "M"
+    p12 = min([max([0.1, row["calc_vwc_12_avg_qc"]]), 0.45])
+    p24 = min([max([0.1, row["calc_vwc_24_avg_qc"]]), 0.45])
+    val = (p12 * 12 + p24 * 12) - (24 * 0.1)
+    return safe(val, 2)
+
+
 def get_inversion_data(pgconn, ts):
     """Retrieve inversion data."""
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -150,6 +162,7 @@ def get_data(pgconn, ts):
                 "id": sid,
                 "properties": {
                     "valid_utc": ts.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "plant_water_6_30": compute_plant_water(row),
                     "encrh_avg": (
                         f"{safe(row['encrh_avg'], 1)}%"
                         if row["encrh_avg"] is not None

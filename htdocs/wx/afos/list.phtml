@@ -27,9 +27,7 @@ $t->jsextra = <<<EOF
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script>
 $(document).ready(function(){
-    //disabled for now due to accessible issues
-    //https://github.com/select2/select2/issues/3744
-    //$(".iemselect2").select2();
+    $(".iemselect2").select2();
 });
 
 function showHide(v){
@@ -78,6 +76,14 @@ $d2display = "none";
 $timeformat = "H:i";
 if (isset($_REQUEST['drange'])){
     $dt2 = new Datetime("$year2-$month2-$day2");
+    // Enforce the 10 day limit on range
+    if ($dt2->diff($dt)->days > 10){
+        $dt2 = $dt->add(new DateInterval("P10D"));
+        $year2 = $dt2->format("Y");
+        $month2 = $dt2->format("m");
+        $day2 = $dt2->format("d");
+    }
+
     // Loop through all the days in the range from $dt to $dt2
     while (($dt <= $dt2) && sizeof($datequeue) < 10){
         $datequeue[] = $dt->format("Y-m-d");
@@ -215,7 +221,12 @@ foreach($groups as $key => $s){
 				$tbl['name']);
 	}
 }
-$netselect = make_select("source", $sesource, $sources, $jscallback="", $cssclass="form-control");
+$netselect = make_select(
+    "source",
+    $sesource,
+    $sources,
+    $jscallback="",
+    $cssclass="form-control iemselect2");
 
 $yselect = yearSelect(1983, $year);
 $mselect = monthSelect($month);
