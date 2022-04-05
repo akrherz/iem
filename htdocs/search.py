@@ -11,7 +11,7 @@ from paste.request import parse_formvars
 import requests
 
 STATION_RE = re.compile(r"^[A-Z0-9]{3,10}$", re.I)
-AUTOPLOT_RE = re.compile(r"^(autoplot|ap)\s?(?P<n>\d{1,3})$", re.I)
+AUTOPLOT_RE = re.compile(r"^(autoplot|ap)?\s?(?P<n>\d{1,3})$", re.I)
 
 
 def station_df_handler(df):
@@ -39,7 +39,7 @@ def geocoder(q):
         return "/sites/locate.php"
     lat = data["results"][0]["geometry"]["location"]["lat"]
     lon = data["results"][0]["geometry"]["location"]["lng"]
-    with get_sqlalchemy_conn("mesosiste") as conn:
+    with get_sqlalchemy_conn("mesosite") as conn:
         df = pd.read_sql(
             "SELECT id, network, "
             "ST_Distance(geom, "
@@ -75,12 +75,13 @@ def find_handler(q):
     """Do we have a handler for this request?"""
     if q == "":
         return None, None
-    if STATION_RE.match(q):
-        return station_handler, q.upper()
+    # Match autoplot first as ### will match STATION_RE
     m = AUTOPLOT_RE.match(q)
     if m:
         d = m.groupdict()
         return ap_handler, d["n"]
+    if STATION_RE.match(q):
+        return station_handler, q.upper()
     # Likely want to always do this one last, as it will catch things
     c = CommonRegex(q)
     # pylint: disable=no-member
