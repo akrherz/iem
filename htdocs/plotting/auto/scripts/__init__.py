@@ -715,7 +715,7 @@ nopts = [
     {
         "id": 109,
         "label": (
-            "WFO VTEC Event Counts/Time Coverage Percent/Num Days "
+            "WFO / State VTEC Event Counts/Time Coverage Percent/Num Days "
             "for a Given Period (map)"
         ),
     },

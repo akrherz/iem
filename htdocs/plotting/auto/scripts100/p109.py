@@ -24,6 +24,10 @@ PDICT3 = {
     "yes": "Only Emergencies",
     "all": "All Events",
 }
+PDICT4 = {
+    "wfo": "by WFO",
+    "state": "by State",
+}
 
 
 def get_description():
@@ -32,7 +36,7 @@ def get_description():
     desc["data"] = True
     desc[
         "description"
-    ] = """This application generates per WFO maps of VTEC
+    ] = """This application generates per WFO or state maps of VTEC
     event counts.  The current three available metrics are:<br />
     <ul>
         <li><strong>Event Count</strong>: The number of distinct VTEC events.
@@ -72,6 +76,13 @@ def get_description():
     today = datetime.date.today()
     jan1 = today.replace(month=1, day=1)
     desc["arguments"] = [
+        dict(
+            type="select",
+            name="by",
+            options=PDICT4,
+            default="wfo",
+            label="Aggregate Statistics:",
+        ),
         dict(
             type="datetime",
             name="sdate",
@@ -168,44 +179,71 @@ def get_count_df(ctx, varname, pstr, sts, ets):
         if pstr.find("1=1") > -1:
             sdate = "2005-10-01"
         with get_sqlalchemy_conn("postgis") as conn:
-            df = pd.read_sql(
-                f"""
+            if ctx["by"] == "state":
+                sql = f"""
+                with events as (
+                    select distinct wfo, substr(ugc, 1, 2) as state,
+                    {yearcol} as year,
+                    phenomena, eventid from warnings where {pstr} and
+                    {slimiter} and issue > '{sdate}' {emerg_extra})
+                select state as datum, year::int as year, count(*) from events
+                group by datum, year
+                """
+            else:
+                sql = f"""
                 with events as (
                     select distinct wfo, {yearcol} as year,
                     phenomena, eventid from warnings where {pstr} and
                     {slimiter} and issue > '{sdate}' {emerg_extra})
-                select wfo, year::int as year, count(*) from events
-                group by wfo, year
-                """,
-                conn,
-                index_col=None,
-            )
+                select wfo as datum, year::int as year, count(*) from events
+                group by datum, year
+                """
+            df = pd.read_sql(sql, conn, index_col=None)
         # enlarge by wfo and year cartesian product
         ctx["_subtitle"] = (
             ", Period of Record: "
             f"{df['year'].min():.0f}-{df['year'].max():.0f}"
         )
         idx = pd.MultiIndex.from_product(
-            [df["wfo"].unique(), df["year"].unique()],
-            names=["wfo", "year"],
+            [df["datum"].unique(), df["year"].unique()],
+            names=["datum", "year"],
         )
-        df = df.set_index(["wfo", "year"]).reindex(idx).fillna(0).reset_index()
-        df["rank"] = df.groupby("wfo")["count"].rank(
+        df = (
+            df.set_index(["datum", "year"])
+            .reindex(idx)
+            .fillna(0)
+            .reset_index()
+        )
+        df["rank"] = df.groupby("datum")["count"].rank(
             method="min", ascending=True
         )
         thisyear = (
-            df[df["year"] == sts.year].set_index("wfo").drop("year", axis=1)
+            df[df["year"] == sts.year].set_index("datum").drop("year", axis=1)
         )
         # Ready to construct final df.
-        df = df[["wfo", "count"]].groupby("wfo").agg(["mean", "std"]).copy()
+        df = (
+            df[["datum", "count"]].groupby("datum").agg(["mean", "std"]).copy()
+        )
         df.columns = ["_".join(a) for a in df.columns.to_flat_index()]
         df[["count", "count_rank"]] = thisyear[["count", "rank"]]
         df["count_departure"] = df["count"] - df["count_mean"]
         df["count_standard"] = df["count_departure"] / df["count_std"]
     else:
         with get_sqlalchemy_conn("postgis") as conn:
-            df = pd.read_sql(
-                f"""
+            if ctx["by"] == "state":
+                sql = f"""
+                with total as (
+                select distinct wfo, substr(ugc, 1, 2) as state,
+                extract(year from issue at time zone 'UTC') as year,
+                phenomena, significance, eventid from warnings
+                where {pstr} and issue >= %s and issue < %s {emerg_extra}
+                )
+
+                SELECT state as datum, count(*) from total
+                GROUP by datum
+                """
+            else:
+                sql = f"""
                 with total as (
                 select distinct wfo,
                 extract(year from issue at time zone 'UTC') as year,
@@ -213,13 +251,10 @@ def get_count_df(ctx, varname, pstr, sts, ets):
                 where {pstr} and issue >= %s and issue < %s {emerg_extra}
                 )
 
-                SELECT wfo, count(*) from total
-                GROUP by wfo
-                """,
-                conn,
-                params=(sts, ets),
-                index_col="wfo",
-            )
+                SELECT wfo as datum, count(*) from total
+                GROUP by datum
+                """
+            df = pd.read_sql(sql, conn, params=(sts, ets), index_col="datum")
     return df
 
 
@@ -230,10 +265,10 @@ def get_count_bins(df, varname):
     if varname == "count_rank":
         bins = np.arange(1, maxv + 2)
     elif varname == "count":
-        bins = [0, 1, 2, 3, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 200]
+        bins = [1, 2, 3, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 200]
         if maxv > 5000:
             bins = [
-                0,
+                1,
                 5,
                 10,
                 50,
@@ -251,7 +286,6 @@ def get_count_bins(df, varname):
             ]
         elif maxv > 1000:
             bins = [
-                0,
                 1,
                 5,
                 10,
@@ -269,7 +303,6 @@ def get_count_bins(df, varname):
             ]
         elif maxv > 200:
             bins = [
-                0,
                 1,
                 3,
                 5,
@@ -287,7 +320,7 @@ def get_count_bins(df, varname):
                 1000,
             ]
         elif maxv < 75:
-            bins = [0, 1, 2, 3, 5, 10, 15, 20, 25, 30, 40, 50, 75]
+            bins = [1, 2, 3, 5, 10, 15, 20, 25, 30, 40, 50, 75]
     elif max([abs(minv), abs(maxv)]) > 100:
         bins = [-200, -150, -100, -50, -25, -10, 0, 10, 25, 50, 100, 150, 200]
     elif max([abs(minv), abs(maxv)]) > 10:
@@ -363,8 +396,21 @@ def plotter(fdict):
         df2 = df[varname]
     elif varname == "days":
         with get_sqlalchemy_conn("postgis") as conn:
-            df = pd.read_sql(
-                f"""
+            if ctx["by"] == "state":
+                sql = f"""
+            WITH data as (
+                SELECT distinct substr(ugc, 1, 2) as state,
+                generate_series(greatest(issue, %s),
+                least(expire, %s), '1 minute'::interval) as ts from warnings
+                WHERE issue > %s and expire < %s and {pstr} {emerg_extra}
+            ), agg as (
+                SELECT distinct state, date(ts) from data
+            )
+            select state as datum, count(*) as days from agg
+            GROUP by datum ORDER by days DESC
+            """
+            else:
+                sql = f"""
             WITH data as (
                 SELECT distinct wfo, generate_series(greatest(issue, %s),
                 least(expire, %s), '1 minute'::interval) as ts from warnings
@@ -372,9 +418,11 @@ def plotter(fdict):
             ), agg as (
                 SELECT distinct wfo, date(ts) from data
             )
-            select wfo, count(*) as days from agg
-            GROUP by wfo ORDER by days DESC
-            """,
+            select wfo as datum, count(*) as days from agg
+            GROUP by datum ORDER by days DESC
+            """
+            df = pd.read_sql(
+                sql,
                 conn,
                 params=(
                     sts,
@@ -382,7 +430,7 @@ def plotter(fdict):
                     sts - datetime.timedelta(days=90),
                     ets + datetime.timedelta(days=90),
                 ),
-                index_col="wfo",
+                index_col="datum",
             )
 
         df2 = df["days"]
@@ -397,16 +445,29 @@ def plotter(fdict):
     else:
         total_minutes = (ets - sts).total_seconds() / 60.0
         with get_sqlalchemy_conn("postgis") as conn:
-            df = pd.read_sql(
-                f"""
+            if ctx["by"] == "state":
+                sql = f"""
+            WITH data as (
+                SELECT distinct substr(ugc, 1, 2) as state,
+                generate_series(greatest(issue, %s),
+                least(expire, %s), '1 minute'::interval) as ts from warnings
+                WHERE issue > %s and expire < %s and {pstr} {emerg_extra}
+            )
+            select state as datum, count(*) / %s * 100. as tpercent from data
+            GROUP by datum ORDER by tpercent DESC
+            """
+            else:
+                sql = f"""
             WITH data as (
                 SELECT distinct wfo, generate_series(greatest(issue, %s),
                 least(expire, %s), '1 minute'::interval) as ts from warnings
                 WHERE issue > %s and expire < %s and {pstr} {emerg_extra}
             )
-            select wfo, count(*) / %s * 100. as tpercent from data
-            GROUP by wfo ORDER by tpercent DESC
-            """,
+            select wfo as datum, count(*) / %s * 100. as tpercent from data
+            GROUP by datum ORDER by tpercent DESC
+            """
+            df = pd.read_sql(
+                sql,
                 conn,
                 params=(
                     sts,
@@ -415,7 +476,7 @@ def plotter(fdict):
                     ets + datetime.timedelta(days=90),
                     total_minutes,
                 ),
-                index_col="wfo",
+                index_col="datum",
             )
 
         df2 = df["tpercent"]
@@ -432,13 +493,14 @@ def plotter(fdict):
         sector="nws",
         axisbg="white",
         twitter=True,
-        title=f"{title} {PDICT[varname]} by NWS Office",
+        title=f"{title} {PDICT[varname]} {PDICT4[ctx['by']]}",
         subtitle=(
             f"Valid {sts:%d %b %Y %H:%M} - {ets:%d %b %Y %H:%M} UTC, "
             f"based on VTEC: {subtitle} {ctx.get('_subtitle', '')}"
         ),
     )
-    mp.fill_cwas(
+    func = mp.fill_cwas if ctx["by"] == "wfo" else mp.fill_states
+    func(
         df2,
         bins=bins,
         ilabel=True,
