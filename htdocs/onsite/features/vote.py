@@ -17,7 +17,7 @@ def do(environ, headers, vote):
     cursor = pgconn.cursor()
     cursor.execute(
         "SELECT to_char(valid, 'YYmmdd')::int as oid, good, bad, abstain "
-        "from feature ORDER by valid DESC LIMIT 1"
+        "from feature WHERE valid < now() ORDER by valid DESC LIMIT 1"
     )
     row = cursor.fetchone()
     foid = row[0]
