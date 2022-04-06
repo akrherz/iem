@@ -109,7 +109,7 @@ def check_load():
     """Prevent automation from overwhelming the server"""
 
     for i in range(5):
-        pgconn = get_dbconn("mesosite")
+        pgconn = get_dbconn("asos")
         mcursor = pgconn.cursor()
         mcursor.execute(
             "select pid from pg_stat_activity where query ~* 'FETCH' and "
