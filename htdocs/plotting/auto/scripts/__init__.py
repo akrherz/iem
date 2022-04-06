@@ -746,6 +746,7 @@ uopts = [
 misc = [
     {"id": 226, "label": "Center Weather Advisory (CWA) Map"},
     {"id": 221, "label": "HRRR Time-Lagged Ensemble Reflectivity Plot"},
+    {"id": 227, "label": "NWEM / NWS Non-VTEC Products containing a polygon"},
     {"id": 220, "label": "SPC Convective / Fire Weather Outlook Graphics"},
     {"id": 217, "label": "SPS Special Weather Statement Maps"},
     {"id": 219, "label": "Terminal Aerodome Forecast (TAF) Infographic"},
