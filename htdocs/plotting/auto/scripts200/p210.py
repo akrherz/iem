@@ -143,7 +143,6 @@ def plotter(fdict):
         ),
         sector="nws",
         nocaption=True,
-        twitter=True,
     )
     mp.fill_cwas(
         data,

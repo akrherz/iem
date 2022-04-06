@@ -437,7 +437,7 @@ def plotter(fdict):
             f"[{UNITS.get(varname)}]"
         ),
         subtitle=subtitle,
-        twitter=True,
+        nocaption=True,
     )
     fmt = "%.2f"
     cmap = get_cmap(ctx["cmap"])

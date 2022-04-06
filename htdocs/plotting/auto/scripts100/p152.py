@@ -160,6 +160,7 @@ def plotter(fdict):
         ),
         subtitle="based on IEM Archives",
         titlefontsize=14,
+        nocaption=True,
     )
     # Create 9 levels centered on zero
     abval = df[varname + "_delta"].abs().max()

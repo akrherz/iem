@@ -116,6 +116,7 @@ def plotter(fdict):
             "estimated preciptation, MultiSensorPass2 and "
             "RadarOnly products"
         ),
+        nocaption=True,
     )
     x, y = np.meshgrid(lon, lat)
     cmap = get_cmap(ctx["cmap"])

@@ -112,7 +112,6 @@ def plotter(fdict):
         continentalcolor="white",
         titlefontsize=14,
         nocaption=True,
-        twitter=True,
     )
 
     # compute the affine

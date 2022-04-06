@@ -88,6 +88,7 @@ def plotter(fdict):
         south=bounds[1] - 1.2,
         east=bounds[2] + 1.2,
         north=bounds[3] + 1.2,
+        nocaption=True,
     )
     df.to_crs(mp.panels[0].crs).plot(
         ax=mp.panels[0].ax,

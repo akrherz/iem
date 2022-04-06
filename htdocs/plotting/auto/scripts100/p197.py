@@ -227,7 +227,7 @@ def plotter(fdict):
         sector=ctx["sector"],
         title=ctx["title"],
         subtitle=ctx["subtitle"],
-        twitter=True,
+        nocaption=True,
     )
     levels = range(-40, 41, 10)
     cmap = get_cmap(ctx["cmap"])

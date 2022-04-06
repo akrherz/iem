@@ -356,7 +356,6 @@ def plotter(fdict):
         ),
         subtitle=f"{PDICT2[ctx['w']]}, {subtitle}",
         nocaption=True,
-        twitter=True,
     )
     # Get the main axes bounds
     if t == "state" and csector == "conus":

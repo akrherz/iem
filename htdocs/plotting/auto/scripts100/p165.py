@@ -229,6 +229,7 @@ def plotter(fdict):
         nocaption=True,
         title=title,
         subtitle=f"based on NWS COOP and IEM Daily Estimates{extra}",
+        nocaption=True,
     )
     levs = np.linspace(
         df2["doy"].min() - 1, df2["doy"].max() + 1, 7, dtype="i"

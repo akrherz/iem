@@ -127,6 +127,7 @@ def plotter(fdict):
             "needed for non-urban Flash Flooding to commence"
         )
         % (HOURS[ctx["hour"]],),
+        nocaption=True,
     )
     cmap = get_cmap(ctx["cmap"])
     bins = [

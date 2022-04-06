@@ -492,7 +492,7 @@ def plotter(fdict):
         apctx=ctx,
         sector="nws",
         axisbg="white",
-        twitter=True,
+        nocaption=True,
         title=f"{title} {PDICT[varname]} {PDICT4[ctx['by']]}",
         subtitle=(
             f"Valid {sts:%d %b %Y %H:%M} - {ets:%d %b %Y %H:%M} UTC, "

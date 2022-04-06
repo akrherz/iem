@@ -120,6 +120,7 @@ def plotter(fdict):
         subtitle=subtitle,
         continentalcolor="white",
         titlefontsize=16,
+        nocaption=True,
     )
     cmap = get_cmap(ctx["cmap"])
     cmap.set_under("#EEEEEE")

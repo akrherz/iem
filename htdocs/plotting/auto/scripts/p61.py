@@ -171,6 +171,7 @@ def plotter(fdict):
         statecolor="#EEEEEE",
         title=title,
         subtitle=ctx["subtitle"],
+        nocaption=True,
     )
     df2 = ctx["df"][pd.notnull(ctx["df"]["lon"])]
     mp.plot_values(

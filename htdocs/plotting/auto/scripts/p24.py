@@ -234,6 +234,7 @@ def plotter(fdict):
         ),
         subtitle=subtitle,
         titlefontsize=14,
+        nocaption=True,
     )
     cmap = get_cmap(ctx["cmap"])
     bins = [

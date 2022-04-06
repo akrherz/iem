@@ -297,7 +297,6 @@ def plotter(fdict):
             f"| Expire: {df['expire'].max().strftime(ISO)} UTC"
         ),
         sector=sector,
-        twitter=True,
         state=csector,
         cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),
         nocaption=True,

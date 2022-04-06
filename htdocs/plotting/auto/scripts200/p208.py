@@ -298,7 +298,6 @@ def plotter(fdict):
         east=bounds[2] + buffer,
         north=bounds[3] + buffer,
         nocaption=True,
-        twitter=True,
     )
     if len(df["wfo"].unique()) == 1 and wfo not in ["PHEB", "PAAQ"]:
         mp.sector = "cwa"

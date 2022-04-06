@@ -382,6 +382,7 @@ def plotter(fdict):
         title=title,
         subtitle=("based on IEM Archives"),
         titlefontsize=12,
+        nocaption=True,
     )
     if opt1 == "diff":
         # Create 9 levels centered on zero

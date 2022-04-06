@@ -99,6 +99,7 @@ def plotter(fdict):
             f"{days} Day Change in {PDICT[varname]} NCEI 1991-2020 Climatology"
         ),
         subtitle=f"from {date1:%-d %B} to {date2:%-d %B}",
+        nocaption=True,
     )
     mp.contourf(
         df["lon"].values,

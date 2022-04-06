@@ -253,7 +253,7 @@ def compute_grid_bounds(ctx, csector):
     mp = MapPlot(
         apctx=ctx,
         sector=sector,
-        twitter=True,
+        nocaption=True,
         state=csector,
         cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),
         axisbg="white",
@@ -406,7 +406,7 @@ def plotter(fdict):
     mp = MapPlot(
         apctx=ctx,
         sector=sector,
-        twitter=True,
+        nocaption=True,
         state=csector,
         cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),
         axisbg="white",

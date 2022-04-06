@@ -340,6 +340,7 @@ def plotter(fdict):
             f"Valid {sts:%d %b %Y %H:%M} - {ets:%d %b %Y %H:%M} UTC, "
             f"type limiter: {MDICT.get(myfilter)}"
         ),
+        nocaption=True,
     )
     if by == "wfo":
         mp.fill_cwas(

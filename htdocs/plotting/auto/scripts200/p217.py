@@ -128,7 +128,7 @@ def plotter(fdict):
         south=bounds[1] - 0.3,
         east=bounds[2] + (bounds[2] - bounds[0]) + 0.02,
         north=bounds[3] + 0.3,
-        twitter=True,
+        nocaption=True,
     )
     # Hackish
     mp.sector = "cwa"
