@@ -33,7 +33,7 @@ $t->content = <<<EOF
 
 <ol class="breadcrumb">
  <li><a href="/projects/iao/">IEM Iowa Atmospheric Observatory Homepage</a></li>
- <li class="active">One minute aggregate date</li>
+ <li class="active">One minute aggregate data</li>
 </ol>
 
 <p>This interface provides a download of one minute aggregates of available
@@ -42,8 +42,9 @@ one second data from the "analog" sensors found on the Tall Towers.</p>
 <h4>Citation</h4>
 
 <p>Acknowledgement is made to Iowa State University use of data from the ISU 
-Tall-Tower Network, which is funded by a grant from the National Science 
-Foundation.</p>
+Tall-Tower Network, which is funded by grants from the Iowa Power Fund and
+National Science Foundation Iowa EPSCoR grant #1101284 and National
+Science Foundation grant #1701278.</p>
 
 <form method="GET" action="/cgi-bin/request/talltowers.py" target="_blank">
 
@@ -142,4 +143,3 @@ request.</p>
 
 EOF;
 $t->render('single.phtml');
-?>
