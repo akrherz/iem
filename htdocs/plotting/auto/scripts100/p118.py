@@ -1,8 +1,8 @@
 """precip days per month"""
 import datetime
 
-from pandas.io.sql import read_sql
-from pyiem.util import get_autoplot_context, get_dbconn
+import pandas as pd
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"precip_days": "Precipitation Days", "snow_days": "Snowfall Days"}
@@ -35,24 +35,23 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     varname = ctx["var"]
 
-    table = "alldata_%s" % (station[:2],)
-    df = read_sql(
-        f"""
-        SELECT year, month,
-        sum(case when precip > 0.009 then 1 else 0 end) as precip_days,
-        sum(case when snow > 0.009 then 1 else 0 end) as snow_days
-        from {table} WHERE station = %s
-        GROUP by year, month
-    """,
-        pgconn,
-        params=(station,),
-        index_col=["year", "month"],
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+            SELECT year, month,
+            sum(case when precip > 0.009 then 1 else 0 end) as precip_days,
+            sum(case when snow > 0.009 then 1 else 0 end) as snow_days
+            from alldata_{station[:2]} WHERE station = %s
+            GROUP by year, month
+        """,
+            conn,
+            params=(station,),
+            index_col=["year", "month"],
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
 

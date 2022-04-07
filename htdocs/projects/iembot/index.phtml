@@ -3,7 +3,28 @@
  require_once "../../../include/network.php";
  $nt = new NetworkTable("WFO"); 
  require_once "../../../include/myview.php";
- $t = new MyView();
+ require_once "../../../include/database.inc.php";
+
+$btable = <<<EOM
+<table class="table table-striped table-bordered table-condensed">
+<thead><tr><th>Twitter User</th><th>Channels</th></tr></thead>
+<tbody>
+EOM;
+$pgconn = iemdb("mesosite");
+$rs = pg_exec(
+    $pgconn,
+    "select o.screen_name, string_agg(channel, ', ' order by channel) ".
+    "as channels from iembot_twitter_oauth o JOIN iembot_twitter_subs s on ".
+    "(o.user_id = s.user_id) WHERE o.iem_owned GROUP by o.screen_name ".
+    "ORDER by screen_name ASC"
+);
+for($i=0; $row=@pg_fetch_assoc($rs,$i); $i++){
+  $btable .= sprintf("<tr><td><a href=\"https://twitter.com/%s\">@%s</a></td><td>%s</td></tr>",
+      $row["screen_name"], $row["screen_name"], $row["channels"]);
+}
+$btable .= "</tbody></table>";
+
+$t = new MyView();
  $t->title = "IEMBot Project";
  $t->jsextra = <<<EOF
 <script>
@@ -42,6 +63,7 @@ warnings by their chat partners.</p>
 
 <ul>
   <li><a href="#channels"><i class="fa fa-list"></i> IEMBot Channels</a></li>
+  <li><a href="#bots"><i class="fa fa-list"></i> List of IEMBots on Twitter + Channel Subscriptions</a></li>
 </ul>
 
 
@@ -125,6 +147,13 @@ mean.</p>
  </dl>
  
 		{$channels}
+
+<a name="bots"><h3>Twitter IEMBots and Channel Subscriptions</h3></a>
+
+<p>These are the IEMBots on Twitter maintained by the IEM.</p>
+
+${btable}
+
 
 EOF;
 $t->render('single.phtml');

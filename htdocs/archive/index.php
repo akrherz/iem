@@ -14,13 +14,12 @@ $t->content = <<<EOF
 
 <p>This page contains a listing of archive resources.  A brief
 description of each link is included to aid your search.  If you are still
-having difficulty finding something, please let us know. </p>
+having difficulty finding something, please
+<a href="/info/contacts.php">let us know</a>. </p>
 
 <div class="row"><div class="col-md-6 col-sm-6">
 
 <h3>Multi-RADAR Multi-Sensor (MRMS) Archiving</h3>
-
-
 
 <p>The IEM maintains some unique archiving of the 
 <a href="https://www.nssl.noaa.gov/projects/mrms/">MRMS Project</a>.
@@ -31,27 +30,16 @@ you should use the <a href="https://mrms.ncep.noaa.gov/data/">MRMS Data Website<
 for realtime data.</p>
 
 <ul>
-  <li><a href="https://iastate.box.com/s/gznw95dt3g7bggsc3o7ycfrusd82gksi">~Complete Hourly Zipfiles on CyBox (box.com)</a> since 28 Sep 2019.
-    <br />Due to a 2022 change with Iowa State University's cloud storage, the data available
-    on the Google Drive link below is being moved to the Box.com link above.  Things are
-    a bit of a mess between these two resources, sorry.
+<li><a href="https://mrms.agron.iastate.edu">~Complete Hourly Zip Files</a>
+<br /><code>Oct 2019 - present</code> This is the main landing site to look for the IEM's hourly MRMS zip
+files.  For fast access, it contains the most recent 40 TB worth of MRMS data
+with pointers to content that has been placed on the CyBox storage.
     <br />These are based on whatever was provided by the LDM NCEP feed and
   there is no mechanism attempted to repair any holes (quasi rare) from the
-  LDM feed.  Automated downloads from the Google Drive are difficult, but is
-  your only option if the next link below does not have your files of interest.
-  </li>
+  LDM feed.</li>
 
-    <li><a href="https://drive.google.com/drive/folders/1WjGDYQxA63veeZXX33L5fImydx7M01oI?usp=sharing">~Complete Hourly Zipfiles on Google Drive</a> since 28 Sep 2019.
-    <br />See note above on the CyBox link.  Much of the archive is still on Google Drive, but
-    is slowly moving to CyBox during 2022.
-    </li>
-
-  <li><a href="https://mrms.agron.iastate.edu">Local Cache of ~Complete Hourly Zip Files</a>
-  <br />Same files as found on the Google Drive, but served from a local
-  spinning disk and so is <strong>easy to script against</strong> to download
-  a large chunk of data.  There's typically about 6-8 months worth of data there.</li>
-
-  <li><a href="https://mtarchive.geol.iastate.edu/${d}/mrms/ncep/">Mtarchive Daily Selected Files</a> contains
+  <li><a href="https://mtarchive.geol.iastate.edu/${d}/mrms/ncep/">Mtarchive Daily Selected Files</a>
+  <br />contains
   selected grib2 files of interest and has a more aggressive process that attempts to fill
   in holes based on NCEP LDM or HTTP outages.  This archive goes back to the beginning
   of MRMS, but the number of data types archived varies.</li>
@@ -87,15 +75,9 @@ then, only base reflectivity was saved.</li>
 <li><a href="https://mesonet-nexrad.agron.iastate.edu/level2/raw/">IEM 2 day Level II Archive</a>
  <br />The IEM maintains an archive of Level II data for roughly the past two days.</li>
 
-<li><a href="http://hurricane.ncdc.noaa.gov/pls/plhas/has.dsselect">NCDC ~Complete NEXRAD archive</a>
- <br />This is the one-stop place for historical Level II and Level III NEXRAD information.  A wonderful site!</li>
-
  <li><a href="/archive/data/">GIS NEXRAD Composites</a>
   <br />Composites of NEXRAD base reflectivity.  The raw files are found
    in the general IEM archive in the sub-directory called 'GIS/uscomp/'.</li>
-
-<li><a href="http://vortex.plymouth.edu/nids.html">Single Site NIDS Imagery</a>
- <br />You can generate images from their online archive!</li>
 </ul>
 
 <h3>Satellite</h3>
@@ -120,17 +102,6 @@ on this archive and how it is made available.</p>
   <li><a href="/archive/rer/">NWS Record Event Reports</a>
   <br />Daily reports of record temperatures and precipitation for
    Iowa since November 2001</li>
-</ul>
-
-<h3>Storm Event Pictures</h3>
-<ul>
- <li><a href="/cases/060413/">13 April 2006</a>
-  <br />Iowa City tornado.</li>
- <li><a href="/cases/051112/">12 November 2005</a>
-  <br />Tornadoes of Woodward, Stratford, and Ames.</li>
- <li><a href="/cases/080525/">25 May 2008</a>
-  <br />Parkersburg EF5 Tornado.</li>
- <li><a href="/cases/">... View all ...</a></li>
 </ul>
 
 </div><div class="col-md-6 col-sm-6">

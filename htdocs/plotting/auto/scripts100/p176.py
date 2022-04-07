@@ -104,10 +104,7 @@ def get_context(fdict):
                     rows.append(dict(margin=margin, date=row[0], val=row[3]))
 
     ctx["df"] = pd.DataFrame(rows)
-    ctx["title"] = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']} {PDICT2[ctx['w']]} "
-        "Margin"
-    )
+    ctx["title"] = f"{ctx['_sname']} :: {PDICT2[ctx['w']]} Margin"
     ctx[
         "subtitle"
     ] = f"By how much did a new record beat the previous {PDICT[opt]}"

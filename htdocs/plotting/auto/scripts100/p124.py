@@ -1,9 +1,9 @@
 """text report of number of days with precip above threshold"""
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 import numpy as np
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 CATS = np.array([0.01, 0.5, 1.0, 2.0, 3.0, 4.0])
@@ -29,7 +29,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["station"]
@@ -41,22 +40,31 @@ def plotter(fdict):
         raise NoDataFound("No metadata found.")
     startyear = bs.year
     # 0.01, 0.5, 1, 2, 3, 4
-    df = read_sql(
-        f"""
-        SELECT year, month,
-        sum(case when precip >= %s then 1 else 0 end) as cat1,
-        sum(case when precip >= %s then 1 else 0 end) as cat2,
-        sum(case when precip >= %s then 1 else 0 end) as cat3,
-        sum(case when precip >= %s then 1 else 0 end) as cat4,
-        sum(case when precip >= %s then 1 else 0 end) as cat5,
-        sum(case when precip >= %s then 1 else 0 end) as cat6
-        from {table} WHERE station = %s GROUP by year, month
-        ORDER by year, month
-    """,
-        pgconn,
-        params=(CATS[0], CATS[1], CATS[2], CATS[3], CATS[4], CATS[5], station),
-        index_col=["year", "month"],
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+            SELECT year, month,
+            sum(case when precip >= %s then 1 else 0 end) as cat1,
+            sum(case when precip >= %s then 1 else 0 end) as cat2,
+            sum(case when precip >= %s then 1 else 0 end) as cat3,
+            sum(case when precip >= %s then 1 else 0 end) as cat4,
+            sum(case when precip >= %s then 1 else 0 end) as cat5,
+            sum(case when precip >= %s then 1 else 0 end) as cat6
+            from {table} WHERE station = %s GROUP by year, month
+            ORDER by year, month
+        """,
+            conn,
+            params=(
+                CATS[0],
+                CATS[1],
+                CATS[2],
+                CATS[3],
+                CATS[4],
+                CATS[5],
+                station,
+            ),
+            index_col=["year", "month"],
+        )
 
     res = (
         "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
