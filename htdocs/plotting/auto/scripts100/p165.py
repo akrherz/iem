@@ -226,7 +226,6 @@ def plotter(fdict):
         sector="state",
         state=ctx["sector"],
         continental_color="white",
-        nocaption=True,
         title=title,
         subtitle=f"based on NWS COOP and IEM Daily Estimates{extra}",
         nocaption=True,

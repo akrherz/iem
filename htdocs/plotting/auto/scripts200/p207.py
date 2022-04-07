@@ -50,6 +50,10 @@ PDICT7 = {
     "yes": "Clip Display by Plotted Geography",
     "no": "Allow sometimes extrapolation outside of plotted area",
 }
+PDICT8 = {
+    "yes": "Overlay cities",
+    "no": "Do not overlay cities",
+}
 
 
 def get_description():
@@ -169,6 +173,21 @@ def get_description():
             label="Clip display to plotted geography?",
             default="yes",
             name="c",
+        ),
+        dict(
+            type="select",
+            options=PDICT8,
+            label="Plot cities on the map?",
+            default="yes",
+            name="ct",
+        ),
+        dict(
+            type="float",
+            default=1,
+            label="Contour line width (pixels) &lt; 10, 0 disables:",
+            name="lw",
+            min=0,
+            max=10,
         ),
     ]
     return desc
@@ -452,7 +471,8 @@ def plotter(fdict):
                 color="#FF0000",
                 labelbuffer=0,
             )
-    mp.drawcities()
+    if ctx["ct"] == "yes":
+        mp.drawcities()
     return mp.fig, df.drop(["geo", "plotme"], axis=1)
 
 
