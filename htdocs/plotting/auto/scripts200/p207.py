@@ -444,6 +444,7 @@ def plotter(fdict):
             rng,
             cmap=cmap,
             clip_on=(ctx["c"] == "yes"),
+            linewidths=ctx["lw"],
         )
         # Allow analysis to bleed outside the CWA per request.
         if ctx["t"] == "cwa":
