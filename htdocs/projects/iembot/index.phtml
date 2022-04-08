@@ -18,7 +18,7 @@ $rs = pg_exec(
     "(o.user_id = s.user_id) WHERE o.iem_owned GROUP by o.screen_name ".
     "ORDER by screen_name ASC"
 );
-for($i=0; $row=@pg_fetch_assoc($rs,$i); $i++){
+while ($row= pg_fetch_assoc($rs)){
   $btable .= sprintf("<tr><td><a href=\"https://twitter.com/%s\">@%s</a></td><td>%s</td></tr>",
       $row["screen_name"], $row["screen_name"], $row["channels"]);
 }
