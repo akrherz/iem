@@ -107,7 +107,7 @@
 
 ### iemdb2 PostgreSQL
 # iemdb2(222) metvm2 -> metvm0
-192.168.0.222 metvm2-iemdb.local
+192.168.0.222 iemdb2.local
 192.168.0.222 iemdb-coop.local
 192.168.0.222 iemdb-hads iemdb-hads.local
 192.168.0.222 iemdb-talltowers.local
@@ -120,7 +120,7 @@
 
 ### iemdb3 PostgreSQL
 # iemdb3(230) metvm6 -> metvm1
-192.168.0.230 metvm6-iemdb.local
+192.168.0.230 iemdb3.local
 192.168.0.230 iemdb-asos.local
 192.168.0.230 iemdb-awos.local
 192.168.0.230 iemdb-hml.local
