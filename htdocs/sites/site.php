@@ -195,4 +195,3 @@ google.maps.event.addDomListener(window, 'load', load);
 </script>
 EOF;
 $t->render('sites.phtml');
-?>

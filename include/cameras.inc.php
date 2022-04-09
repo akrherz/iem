@@ -13,7 +13,7 @@ $mesosite = iemdb("mesosite");
 $rs = pg_query($mesosite, "SELECT *, ST_x(geom) as lon,
 		ST_y(geom) as lat from webcams ORDER by name ASC");
 $cameras = Array();
-for($i=0;$row=pg_fetch_assoc($rs);$i++){
+while ($row=pg_fetch_assoc($rs)){
 	$cameras[ $row["id"] ] = Array(
 			"sts" => strtotime($row["sts"]),
 			"ets" => ($row["ets"] === NULL) ? time() + 86400: 

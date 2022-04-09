@@ -61,8 +61,8 @@ if (isset($_GET["hour1"])){
 }
 
 $firstyear = 1995;
-if ($metadata["archive_begin"]){
-	$firstyear = date("Y", $metadata["archive_begin"]);
+if (! is_null($metadata["archive_begin"])){
+	$firstyear = $metadata["archive_begin"]->format("Y");
 }
 
 $t = new MyView();

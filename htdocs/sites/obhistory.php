@@ -135,11 +135,8 @@ $sortopts = Array(
 );
 $sortform = make_select("sortdir", $sortdir, $sortopts);
 
-if ($metadata["archive_begin"]){
-	$startyear = intval(date("Y", $metadata["archive_begin"]));
-	if ($date < $metadata['archive_begin']){
-		$date = $metadata['archive_begin'];
-	}
+if (! is_null($metadata["archive_begin"])){
+	$startyear = intval($metadata["archive_begin"]->format("Y"));
 } else {
 	$startyear = 2010;
 }

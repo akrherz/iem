@@ -6,7 +6,6 @@ require_once "../../../../include/network.php";
 $nt = new NetworkTable("ISUSM");
 $ISUAGcities = $nt->table;
 
-
 $year = isset($_GET["year"]) ? $_GET["year"]: date("Y", time() - 86400 - (7 * 3600) );
 $month = isset($_GET["month"]) ? $_GET["month"]: date("m", time() - 86400 - (7 * 3600) );
 $day = isset($_GET["day"]) ? $_GET["day"]: date("d", time() - 86400 - (7 * 3600) );
@@ -88,7 +87,7 @@ for ($i=0; $row = pg_fetch_array($rs); $i++) {
   $data[$key]['var'] = $val;
 
   // Calculate average?
-  $syear = intval(date("Y", $ISUAGcities[$key]["archive_begin"]));
+  $syear = intval($ISUAGcities[$key]["archive_begin"]->format("Y"));
   $sql = "select count(distinct valid) as c 
        from sm_hourly WHERE station = '$key' and tair_c_avg >= f2c(32) and tair_c_avg <= f2c(45) 
        and extract(year from valid) >= $syear and 
@@ -138,4 +137,3 @@ if (strlen($direct) > 0) {
     $url = $img->saveWebImage();
 	echo sprintf("<img src=\"%s\" border=\"1\">", $url);
 }
-?>

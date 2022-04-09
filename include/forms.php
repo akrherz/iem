@@ -48,6 +48,25 @@ function endsWith($haystack, $needle)
     return (substr($haystack, -$length) === $needle);
 }
 
+function make_checkboxes($name, $selected, $ar){
+    $myselected = $selected;
+    if (!is_array($selected)){
+        $myselected = Array($selected);
+    }
+    $s = "";
+    foreach($ar as $key => $val)
+    {
+        $s .= sprintf(
+            '<br /><input name="%s" type="checkbox" value="%s" id="%s_%s"%s> '.
+            '<label for="%s_%s">%s</label>'. "\n",
+            $name, $key, $name, $key,
+            in_array($key, $myselected)? ' checked="checked"': "",
+            $name, $key, $val
+        );
+    }
+    return $s;
+}
+
 function make_select($name, $selected, $ar, $jscallback="", $cssclass='',
                      $multiple=FALSE, $showvalue=FALSE){
         // Create a simple HTML select box

@@ -302,8 +302,8 @@ EOM;
 <input type="hidden" name="network" value="{$network}">
 EOF;
 $startyear = 2002;
-if ($metadata["archive_begin"]){
-	$startyear = date("Y", $metadata["archive_begin"]);
+if (! is_null($metadata["archive_begin"])){
+	$startyear = $metadata["archive_begin"]->format("Y");
 }
 $ys = yearSelect($startyear, $year, "year");
 $ms = monthSelect($month, "month");

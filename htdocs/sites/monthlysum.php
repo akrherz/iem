@@ -117,7 +117,7 @@ $ltext = date("M Y", $lmonth);
 $ntext = date("M Y", $nmonth);
 
 $ms = monthSelect($month);
-$minyear = isset($metadata["archive_begin"]) ? intval(date("Y", $metadata["archive_begin"])): 1929;
+$minyear = is_null($metadata["archive_begin"]) ? 1929 : intval($metadata["archive_begin"]->format("Y"));
 $ys = yearSelect($minyear, $year);
 
 $plot1 = sprintf("/plotting/auto/plot/17/month:%s"

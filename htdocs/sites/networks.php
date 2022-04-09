@@ -20,14 +20,14 @@ function attrs2str($arr){
     }
     return $s;
 }
-function pretty_date($val){
-    if ($val === null){
+function pretty_date($val, $fmt="M d, Y"){
+    if (is_null($val)){
         return "";
     }
     if (is_string($val)){
-        $val = strtotime($val);
+        $val = new DateTime($val);
     }
-    return date("M d, Y", $val);
+    return $val->format($fmt);
 }
 
 if ($network == '_ALL_'){
@@ -99,7 +99,7 @@ EOM;
 					. round($row["lat"],5). ","
 					. round($row["lon"],5). ","
 					. $row["elevation"]. ","
-					. $row["archive_begin"]. ","
+					. pretty_date($row["archive_begin"], 'Y-m-d H:i'). ","
 					. $row["network"]. "\n";
 		}
 		if (! $nohtml)  $table .= "</pre>\n";

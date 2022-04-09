@@ -3,7 +3,7 @@ import sys
 import tempfile
 import os
 
-METVM4, METVM6, METVM2 = range(3)
+METVM4, METVM2, METVM6 = range(3)
 IPS = "172.16.170.1 172.16.172.1 172.16.174.1".split()
 LOOKUP = {
     "": IPS[METVM4],

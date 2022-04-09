@@ -1,11 +1,8 @@
 <?php 
- /* 
-  * Download front end for daily data from the ISUSM network
-  */
  require_once "../../../config/settings.inc.php";
  require_once "../../../include/myview.php";
  $t = new MyView();
- $t->title = "ISU Soil Moisture Hourly Data Request";
+ $t->title = "ISU Soil Moisture Minute/Hourly Data Request";
  
  require_once "../../../include/network.php";
  $nt = new NetworkTable("ISUSM");
@@ -22,31 +19,64 @@
 $sselect = "";
 foreach($nt->table as $key => $val)
 {
-	$sselect .= sprintf("<br /><input type=\"checkbox\" name=\"sts\" value=\"%s\">%s (%s County, %s)",
-			$key, $val["name"], $val["county"], $key);
+	$sselect .= sprintf(
+        '<br /><input type="checkbox" name="sts" value="%s" id="%s"> '.
+        '<label for="%s">[%s] %s (%s County) (%s-%s)</label>',
+		$key, $key, $key, $key, $val["name"], $val["county"],
+        is_null($val["archive_begin"]) ? "": $val["archive_begin"]->format("Y-m-d"),
+        is_null($val["archive_end"]) ? "today": $val["archive_end"]->format("Y-m-d"),
+    );
 }
- 
+
+$ar = Array(
+    "tmpf" => "Air Temperature [F]",
+    "relh" => "Relative Humidity [%]",
+    "solar" => "Solar Radiation [J/m2]",
+    "precip" => "Precipitation [inch]",
+    "speed" => "Average Wind Speed [mph]",
+    "drct" => "Wind Direction [deg]",
+    "et" => "Potential Evapotranspiration [inch]",
+    "soil04t" => "4 inch Soil Temperature [F]",
+    "soil12t" => "12 inch Soil Temperature [F]",
+    "soil24t" => "24 inch Soil Temperature [F]",
+    "soil50t" => "50 inch Soil Temperature [F]",
+    "soil12vwc" => "12 inch Soil Moisture [%]",
+    "soil24vwc" => "24 inch Soil Moisture [%]",
+    "soil50vwc" => "50 inch Soil Moisture [%]",
+    "bp_mb" => "Atmospheric Pressure [mb] (only Ames ISU Hort Farm at 15 minute interval)",
+);
+$vselect = make_checkboxes("vars", "", $ar);
+
+$ar = Array(
+"lwmv_1" => "lwmv_1",
+"lwmv_2" => "lwmv_2",
+"lwmdry_1_tot" => "lwmdry_1_tot",
+"lwmcon_1_tot" => "lwmcon_1_tot",
+"lwmwet_1_tot" => "lwmwet_1_tot",
+"lwmdry_2_tot" => "lwmdry_2_tot",
+"lwmcon_2_tot" => "lwmcon_2_tot",
+"lwmwet_2_tot" => "lwmwet_2_tot",
+"bpres_avg" => "bpres_avg",
+);
+$vselect2 = make_checkboxes("vars", "", $ar);
+
 $t->content = <<<EOF
  <ol class="breadcrumb">
   <li><a href="/agclimate">ISU Soil Moisture Network</a></li>
-  <li class="active">Hourly Download</li>
+  <li class="active">Minute/Hourly Download</li>
  </ol>
 
 {$box}
 
-<h3>Hourly Data Request Form:</h3>
+<h3>Minute/Hourly Data:</h3>
 
-<P><b>Information:</b>  This interface accesses the archive of daily and hourly weather
-data collected from the Iowa Agclimate Automated Weather stations.  Please
-select the appropiate stations and weather variables desired below. 
-
-
-<P><B>Data Interval:</B>  Currently you are selected to download hourly data. You may
-wish to change this to <a href="daily.php">daily data</a>. 
-
+<p>The present data collection interval from this network is every 15 minutes
+for the vineyard sites and every minute for the others.  The minute interval
+data only started in 2021 though.  The default download is to provide the
+hourly data.</p>
 
 <div class="row">
-<div class="col-md-6">
+<div class="col-md-7">
 
 <form name='dl' method="GET" action="/cgi-bin/request/isusm.py">
 <input type="hidden" name="mode" value="hourly" />
@@ -54,14 +84,16 @@ wish to change this to <a href="daily.php">daily data</a>.
 <h4>Select Time Resolution:</h4>
 
 <select name="timeres">
-  <option value="hourly">Hourly</option>
-  <option value="minute">Minute (coming soon!)</option>
+  <option value="hourly" selected="selected">Hourly</option>
+  <option value="minute">Minute</option>
 </select>
 
 <h4>Select station(s):</h4>
-<a href="/sites/networks.php?network=ISUSM&format=html">View station metadata</a><br />
+<a href="/sites/networks.php?network=ISUSM">View station metadata</a><br />
+
 {$sselect}
 
+</div><div class="col-md-5">
 
 <h4>Select the time interval:</h4>
 <TABLE>
@@ -79,37 +111,18 @@ wish to change this to <a href="daily.php">daily data</a>.
 </TR>
 </TABLE>
 
+
 <h4>Options:</h4>
  		
 <strong>Select from available variables</strong><br />
-<input type="checkbox" name="vars" value="tmpf">Air Temperature [F]
-<br /><input type="checkbox" name="vars" value="relh">Relative Humidity [%]
-<br /><input type="checkbox" name="vars" value="solar">Solar Radiation [J/m2]
-<br /><input type="checkbox" name="vars" value="precip">Precipitation [inch]
-<br /><input type="checkbox" name="vars" value="speed">Average Wind Speed [mph]
-<br /><input type="checkbox" name="vars" value="drct">Wind Direction [deg]
-<br /><input type="checkbox" name="vars" value="et"> <a href="/agclimate/et.phtml" target="_new">Reference Evapotranspiration (alfalfa)</a> [inch]
-<br /><input type="checkbox" name="vars" value="soil04t">4 inch Soil Temperature [F]
-<br /><input type="checkbox" name="vars" value="soil12t">12 inch Soil Temperature [F]
-<br /><input type="checkbox" name="vars" value="soil24t">24 inch Soil Temperature [F]
-<br /><input type="checkbox" name="vars" value="soil50t">50 inch Soil Temperature [F]
-<br /><input type="checkbox" name="vars" value="soil12vwc">12 inch Soil Moisture [%]
-<br /><input type="checkbox" name="vars" value="soil24vwc">24 inch Soil Moisture [%]
-<br /><input type="checkbox" name="vars" value="soil50vwc">50 inch Soil Moisture [%]
-<br /><input type="checkbox" name="vars" value="bp_mb">Atmospheric Pressure [mb] (only Ames ISU Hort Farm at 15 minute interval)
+<a href="/agclimate/et.phtml" target="_new">Reference Evapotranspiration (alfalfa)</a>
+
+{$vselect}
 
 <hr>
 <p><strong>Vineyard Station-only Variables</strong>
-<br />Sorry for the cryptic labels, this is a current work in progress.
-<br /><input type="checkbox" name="vars" value="lwmv_1">lwmv_1
-<br /><input type="checkbox" name="vars" value="lwmv_2">lwmv_2
-<br /><input type="checkbox" name="vars" value="lwmdry_1_tot">lwmdry_1_tot
-<br /><input type="checkbox" name="vars" value="lwmcon_1_tot">lwmcon_1_tot
-<br /><input type="checkbox" name="vars" value="lwmwet_1_tot">lwmwet_1_tot
-<br /><input type="checkbox" name="vars" value="lwmdry_2_tot">lwmdry_2_tot
-<br /><input type="checkbox" name="vars" value="lwmcon_2_tot">lwmcon_2_tot
-<br /><input type="checkbox" name="vars" value="lwmwet_2_tot">lwmwet_2_tot
-<br /><input type="checkbox" name="vars" value="bpres_avg">bpres_avg
+
+{$vselect2}
  		
 {$qcbox}
 
@@ -136,9 +149,10 @@ wish to change this to <a href="daily.php">daily data</a>.
 
 </form>
 
-</div><div class="col-md-6">
 
-<h4 class="subtitle">Description of variables in download</h4>
+</div></div>
+
+<h4>Description of variables in download</h4>
 
 <dl>
  <dt>station</dt><dd>National Weather Service Location Identifier for the
@@ -161,8 +175,6 @@ wish to change this to <a href="daily.php">daily data</a>.
  
  </dl>
 
- 		</div></div>
 
 EOF;
-$t->render("single.phtml");
-?>
+$t->render("full.phtml");

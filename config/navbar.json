@@ -172,16 +172,16 @@
                     "url": "/ASOS/"
                 },
                 {
-                    "title": "CoCoRaHS",
+                    "title": "CoCoRaHS - Citizen Science",
                     "url": "/cocorahs/"
                 },
                 {
-                    "title": "NWS COOP",
-                    "url": "/COOP/"
+                    "title": "DCP/HADS/SHEF - Hydrological",
+                    "url": "/DCP/"
                 },
                 {
-                    "title": "DCP",
-                    "url": "/DCP/"
+                    "title": "NWS COOP - Daily Climate",
+                    "url": "/COOP/"
                 },
                 {
                     "title": "ISU Soil Moisture",
@@ -192,16 +192,12 @@
                     "url": "/nstl_flux/"
                 },
                 {
-                    "title": "RWIS",
+                    "title": "RWIS - Roadway Weather",
                     "url": "/RWIS/"
                 },
                 {
-                    "title": "SCAN",
+                    "title": "SCAN - NRCS Soil Climate",
                     "url": "/scan/"
-                },
-                {
-                    "title": "SchoolNet",
-                    "url": "/schoolnet/"
                 },
                 {
                     "title": "Other",

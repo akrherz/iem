@@ -60,8 +60,8 @@ EOM;
   }
 
   function do_conversions($id){
-      if ($this->table[$id]["archive_begin"] != null){
-          $this->table[$id]["archive_begin"] = strtotime($this->table[$id]["archive_begin"]);
+      if (! is_null($this->table[$id]["archive_begin"])){
+          $this->table[$id]["archive_begin"] = new DateTime($this->table[$id]["archive_begin"]);
       }
       // Make attributes more accessible
       $this->table[$id]["attrs"] = array_filter(

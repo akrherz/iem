@@ -108,10 +108,10 @@ function networkMultiSelect($network, $selected, $extra=Array(),
 function make_sname($tbl){
     // Construct a nice label for the given station
     $dextra = '';
-    if ($tbl['archive_begin'] != null){
-        $dextra .= sprintf(" [%s-", date("Y", $tbl["archive_begin"]));
-        if ($tbl['archive_end'] != null){
-            $dextra .= sprintf("%s", date("Y", $tbl["archive_end"]));
+    if (! is_null($tbl['archive_begin'])){
+        $dextra .= sprintf(" [%s-", $tbl["archive_begin"]->format("Y"));
+        if (! is_null($tbl['archive_end'])){
+            $dextra .= $tbl["archive_end"]->format("Y");
         }
         $dextra .= "]";
     }
@@ -217,5 +217,3 @@ function rwisMultiSelect($selected, $size){
   $s .= "</select>\n";
   return $s;
 }
-
-?>
