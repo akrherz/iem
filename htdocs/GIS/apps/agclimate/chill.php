@@ -87,7 +87,10 @@ for ($i=0; $row = pg_fetch_array($rs); $i++) {
   $data[$key]['var'] = $val;
 
   // Calculate average?
-  $syear = intval($ISUAGcities[$key]["archive_begin"]->format("Y"));
+  $syear = 2000;
+  if (! is_null($ISUAGcities[$key]["archive_begin"])){
+    $syear = intval($ISUAGcities[$key]["archive_begin"]->format("Y"));
+  }
   $sql = "select count(distinct valid) as c 
        from sm_hourly WHERE station = '$key' and tair_c_avg >= f2c(32) and tair_c_avg <= f2c(45) 
        and extract(year from valid) >= $syear and 

@@ -107,6 +107,8 @@ def dance(val):
 
 def check_load():
     """Prevent automation from overwhelming the server"""
+    # Temp throttling due to unknown load source
+    climit = 5 if utc().hour == 8 else 30
 
     for i in range(5):
         pgconn = get_dbconn("asos")
@@ -115,7 +117,7 @@ def check_load():
             "select pid from pg_stat_activity where query ~* 'FETCH' and "
             "datname = 'asos'"
         )
-        if mcursor.rowcount < 30:
+        if mcursor.rowcount < climit:
             return True
         pgconn.close()
         if i == 4:
