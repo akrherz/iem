@@ -69,7 +69,9 @@ EOM;
 
   function do_conversions($id){
       if (! is_null($this->table[$id]["archive_begin"])){
-          $this->table[$id]["archive_begin"] = new DateTime($this->table[$id]["archive_begin"]);
+            // can't deal with ancient dates
+            $this->table[$id]["archive_begin"] = new DateTime(
+              substr($this->table[$id]["archive_begin"], 0, 10));
       }
       if (! is_null($this->table[$id]["archive_end"])){
         $this->table[$id]["archive_end"] = new DateTime($this->table[$id]["archive_end"]);
