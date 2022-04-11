@@ -35,15 +35,13 @@ def process(sid, csv):
     table = "alldata_%s" % (sid[:2],)
     # Fetch Yearly Totals
     cursor.execute(
-        """
+        f"""
         SELECT year, round(avg(high)::numeric,1) as avg_high,
         round(avg(low)::numeric,1) as avg_low,
         round(sum(precip)::numeric,2) as rain,
         round(sum(gdd50(high, low))::numeric, 0) as gdd50,
         round(sum(sdd86(high, low))::numeric, 0) as sdd86
-        from """
-        + table
-        + """
+        from {table}
         WHERE station = %s GROUP by year ORDER by year ASC
     """,
         (sid,),
@@ -84,16 +82,13 @@ def process(sid, csv):
     # Need to do climate stuff
     # Then climate
     cursor.execute(
-        """
+        f"""
         SELECT round(avg(high)::numeric,1) as avg_high,
         round(avg(low)::numeric,1) as avg_low,
         sum(precip) as rain,
         sum(gdd50(high, low)) as gdd50,
         sum(sdd86(high, low)) as sdd86
-        from """
-        + table
-        + """
-        WHERE station = %s
+        from {table} WHERE station = %s
     """,
         (sid,),
     )

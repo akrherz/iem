@@ -27,7 +27,7 @@ nt = NetworkTable(
         "MOCLIMATE",
     )
 )
-pgconn = get_dbconn("coop", user="nobody")
+pgconn = get_dbconn("coop")
 cursor = pgconn.cursor()
 
 
@@ -36,7 +36,7 @@ def setup_csv(yr):
     mydir = "/mesonet/share/climodat/ks"
     if not os.path.isdir(mydir):
         os.makedirs(mydir)
-    out = open("%s/%s_monthly.csv" % (mydir, yr), "w")
+    out = open(f"{mydir}/{yr}_monthly.csv", "w", encoding="utf-8")
     out.write("stationID,stationName,Latitude,Longitude,")
     for i in range(1, 13):
         for v in ["MINT", "MAXT", "PREC", "GDD50", "SDD86"]:

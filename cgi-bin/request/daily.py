@@ -1,10 +1,36 @@
 """Download IEM summary data!"""
 from io import StringIO
 import datetime
+import os
+import sys
+import time
 
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn
 from pyiem.network import Table as NetworkTable
+
+
+def check_load():
+    """Prevent automation from overwhelming the server"""
+
+    for i in range(5):
+        pgconn = get_dbconn("iem")
+        mcursor = pgconn.cursor()
+        mcursor.execute(
+            "select pid from pg_stat_activity where query ~* 'FETCH' and "
+            "datname = 'iem'"
+        )
+        if mcursor.rowcount < 10:
+            return True
+        pgconn.close()
+        if i == 4:
+            sys.stderr.write(
+                f"[client: {os.environ.get('REMOTE_ADDR')}] "
+                f"daily.py over capacity: {mcursor.rowcount}\n"
+            )
+        else:
+            time.sleep(3)
+    return False
 
 
 def get_climate(network, stations):
@@ -55,7 +81,7 @@ def get_climate(network, stations):
 def get_data(network, sts, ets, stations):
     """Go fetch data please"""
     pgconn = get_dbconn("iem")
-    cursor = pgconn.cursor()
+    cursor = pgconn.cursor("mystream")
     climate = get_climate(network, stations)
     if not isinstance(climate, dict):
         return climate
@@ -101,6 +127,11 @@ def application(environ, start_response):
     ets = datetime.date(
         int(form.get("year2")), int(form.get("month2")), int(form.get("day2"))
     )
+    if sts.year != ets.year and not check_load():
+        start_response(
+            "503 Service Unavailable", [("Content-type", "text/plain")]
+        )
+        return [b"ERROR: server over capacity, please try later"]
 
     start_response("200 OK", [("Content-type", "text/plain")])
     stations = form.getall("stations")

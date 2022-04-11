@@ -3,6 +3,7 @@
 Run once at 10 PM to snag calendar day stations. (RUN_50_AFTER.sh)
 Run again with RUN_NOON.sh when the regular estimator runs
 """
+# pylint: disable=unpacking-non-sequence
 import datetime
 import os
 import sys
@@ -16,10 +17,8 @@ from pyiem.util import get_dbconn, utc, logger
 LOG = logger()
 P4326 = pyproj.Proj("epsg:4326")
 LCC = pyproj.Proj(
-    (
-        "+lon_0=-97.5 +y_0=0.0 +R=6367470. +proj=lcc +x_0=0.0"
-        " +units=m +lat_2=38.5 +lat_1=38.5 +lat_0=38.5"
-    )
+    "+lon_0=-97.5 +y_0=0.0 +R=6367470. +proj=lcc +x_0=0.0"
+    " +units=m +lat_2=38.5 +lat_1=38.5 +lat_0=38.5"
 )
 
 SWITCH_DATE = utc(2014, 10, 10, 20)
@@ -36,10 +35,8 @@ def run(ts):
     for hr in range(5, 23):  # Only need 5 AM to 10 PM for solar
         utcts = ts.replace(hour=hr).astimezone(pytz.UTC)
         fn = utcts.strftime(
-            (
-                "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
-                "hrrr.t%Hz.3kmf00.grib2"
-            )
+            "/mesonet/ARCHIVE/data/%Y/%m/%d/model/hrrr/%H/"
+            "hrrr.t%Hz.3kmf00.grib2"
         )
         if not os.path.isfile(fn):
             continue
@@ -106,12 +103,8 @@ def run(ts):
         if row[3] in range(4, 13):
             date2 = (ts + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
         cursor2.execute(
-            """
-            UPDATE alldata_"""
-            + row[0][:2]
-            + """ SET hrrr_srad = %s WHERE
-            day = %s and station = %s
-        """,
+            f"UPDATE alldata_{row[0][:2]} SET hrrr_srad = %s WHERE "
+            "day = %s and station = %s",
             (rad_mj, date2, row[0]),
         )
     cursor.close()

@@ -60,10 +60,8 @@ def main(argv):
                         (nt[network].sts[sid]["iemid"],),
                     )
                 cursor.execute(
-                    """
-                    INSERT into station_attributes(iemid, attr, value)
-                    VALUES (%s, %s, %s)
-                """,
+                    "INSERT into station_attributes(iemid, attr, value) "
+                    "VALUES (%s, %s, %s)",
                     (nt[network].sts[sid]["iemid"], MYATTR, value),
                 )
                 break

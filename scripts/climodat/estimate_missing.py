@@ -27,8 +27,8 @@ def process(cursor, station, df, meta):
     sdate = df["day"].min()
     edate = df["day"].max()
     wsuri = URI % {
-        "sdate": "%s-%02i-%02i" % (sdate.year, sdate.month, sdate.day),
-        "edate": "%s-%02i-%02i" % (edate.year, edate.month, edate.day),
+        "sdate": f"{sdate:%Y-%m-%d}",
+        "edate": f"{edate:%Y-%m-%d}",
         "lon": meta["lon"],
         "lat": meta["lat"],
     }
@@ -45,6 +45,7 @@ def process(cursor, station, df, meta):
         return
     estimated["date"] = pd.to_datetime(estimated["date"]).dt.date
     estimated = estimated.set_index("date")
+
     for _, row in df.iterrows():
         newvals = row.to_dict()
         precip_estimated = False
@@ -68,7 +69,7 @@ def process(cursor, station, df, meta):
                 ]
             else:
                 newvals[col] = estimated.loc[row["day"]][
-                    "%s_%s_%s" % (prefix, col, units)
+                    f"{prefix}_{col}_{units}"
                 ]
         if None in newvals.values():
             LOG.info(
@@ -112,7 +113,7 @@ def main(argv):
     """Go Main Go"""
     state = argv[1]
     if state in NON_CONUS:
-        LOG.error("Script does not work for non-CONUS sites, exiting.")
+        LOG.error("Exiting for non-CONUS sites (%s).", state)
         return
     nt = NetworkTable(f"{state}CLIMATE", only_online=False)
     pgconn = get_dbconn("coop")

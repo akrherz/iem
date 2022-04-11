@@ -36,10 +36,8 @@ from pyiem.util import get_dbconn, ncopen, logger
 LOG = logger()
 P4326 = pyproj.Proj(init="epsg:4326")
 LCC = pyproj.Proj(
-    (
-        "+lon_0=-107.0 +y_0=0.0 +R=6367470.21484 +proj=lcc "
-        "+x_0=0.0 +units=m +lat_2=50.0 +lat_1=50.0 +lat_0=50.0"
-    )
+    "+lon_0=-107.0 +y_0=0.0 +R=6367470.21484 +proj=lcc "
+    "+x_0=0.0 +units=m +lat_2=50.0 +lat_1=50.0 +lat_0=50.0"
 )
 NC_MODE, GRIB_MODE = range(2)
 
