@@ -180,7 +180,7 @@ def application(environ, start_response):
     if "justdata" in form:
         # We want text
         start_response("200 OK", [("Content-type", "text/plain")])
-        return [res.encode("ascii")]
+        return [res.encode("utf-8")]
     fmt = form.get("fmt", "png")
     if fmt == "png":
         ct = "image/png"

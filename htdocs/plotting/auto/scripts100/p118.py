@@ -66,7 +66,7 @@ def plotter(fdict):
 YEAR   JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC ANN
 """ % (
         datetime.date.today().strftime("%d %b %Y"),
-        ctx["_nt"].sts[station]["archive_begin"].date(),
+        ctx["_nt"].sts[station]["archive_begin"],
         datetime.date.today(),
         station,
         ctx["_nt"].sts[station]["name"],

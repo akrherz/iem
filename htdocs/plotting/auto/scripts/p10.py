@@ -15,14 +15,12 @@ PDICT = {
     "above2": "Last Spring/First Fall Temperature Above (>=) Threshold",
     "below": "Last Spring/First Fall Temperature Below Threshold",
 }
-PDICT2 = dict(
-    (
-        ("high", "High Temperature"),
-        ("low", "Low Temperature"),
-        ("snow", "Snowfall"),
-        ("snowd", "Snow Cover Depth"),
-    )
-)
+PDICT2 = {
+    "high": "High Temperature",
+    "low": "Low Temperature",
+    "snow": "Snowfall",
+    "snowd": "Snow Cover Depth",
+}
 
 
 def get_description():
@@ -158,7 +156,7 @@ def plotter(fdict):
    YEAR MONTH DAY DOY         MONTH DAY DOY   LENGTH OF SEASON
 """ % (
         datetime.date.today().strftime("%d %b %Y"),
-        ctx["_nt"].sts[station]["archive_begin"].date(),
+        ctx["_nt"].sts[station]["archive_begin"],
         datetime.date.today(),
         station,
         ctx["_nt"].sts[station]["name"],

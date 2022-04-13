@@ -22,7 +22,7 @@ def main(argv):
     table = NetworkTable(network)
 
     rcursor.execute(
-        "SELECT station, min(valid), max(valid) from "
+        "SELECT station, min(date(valid)), max(date(valid)) from "
         f"{ALLDATA.get(network, 'alldata')} "
         "GROUP by station ORDER by min ASC"
     )
@@ -31,7 +31,7 @@ def main(argv):
         if station not in table.sts:
             continue
         if table.sts[station]["archive_begin"] != row[1]:
-            LOG.info(
+            LOG.warning(
                 "Updated %s STS WAS: %s NOW: %s",
                 station,
                 table.sts[station]["archive_begin"],
@@ -44,7 +44,7 @@ def main(argv):
             (row[1], station, network),
         )
         if mcursor.rowcount == 0:
-            LOG.info("ERROR: No rows updated")
+            LOG.warning("ERROR: No rows updated for %s", station)
 
     mcursor.close()
     mesosite.commit()

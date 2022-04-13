@@ -1,7 +1,9 @@
 """Figure out when the ISUSM data started..."""
 
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
+
+LOG = logger()
 
 
 def main():
@@ -11,24 +13,26 @@ def main():
     mesosite = get_dbconn("mesosite")
     mcursor = mesosite.cursor()
 
-    table = NetworkTable("ISUSM")
+    table = NetworkTable("ISUSM", only_online=False)
 
     icursor.execute(
-        "SELECT station, min(valid), max(valid) from sm_hourly "
+        "SELECT station, min(date(valid)), max(date(valid)) from sm_hourly "
         "GROUP by station ORDER by min ASC"
     )
     for row in icursor:
         station = row[0]
         if station not in table.sts:
-            print(
-                ("Whoa station: %s does not exist in metadatabase?")
-                % (station,)
+            LOG.warning(
+                "Whoa station: %s does not exist in metadatabase?",
+                station,
             )
             continue
         if table.sts[station]["archive_begin"] != row[1]:
-            print(
-                ("Updated %s STS WAS: %s NOW: %s" "")
-                % (station, table.sts[station]["archive_begin"], row[1])
+            LOG.warning(
+                "Updated %s STS WAS: %s NOW: %s" "",
+                station,
+                table.sts[station]["archive_begin"],
+                row[1],
             )
 
         mcursor.execute(
@@ -37,7 +41,7 @@ def main():
             (row[1], station, "ISUSM"),
         )
         if mcursor.rowcount == 0:
-            print("ERROR: No rows updated")
+            LOG.warning("ERROR: No rows updated for %s", station)
 
     mcursor.close()
     mesosite.commit()

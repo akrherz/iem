@@ -3,7 +3,7 @@ import sys
 import datetime
 
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, utc, logger
+from pyiem.util import get_dbconn, logger
 
 LOG = logger()
 
@@ -29,10 +29,8 @@ def main(argv):
     )
     for row in acursor:
         station = row[0]
-        # Use 12 UTC as the timestamp so to avoid timezone issues with very old
-        # dates, for example 00 UTC on 1 Jan 1893 would go to 31 Dec 1892
-        sts = utc(row[1].year, row[1].month, row[1].day, 12, 0)
-        ets = utc(row[2].year, row[2].month, row[2].day, 12, 0)
+        sts = row[1]
+        ets = row[2]
         if station not in nt.sts:
             LOG.info("%s is unknown in mesosite table", station)
             continue
@@ -59,7 +57,7 @@ def main(argv):
         if (
             archive_end is None and meta["archive_end"] is not None
         ) or archive_end != meta["archive_end"]:
-            LOG.info(
+            LOG.warning(
                 "Updated %s ETS WAS: %s NOW: %s" "",
                 station,
                 nt.sts[station]["archive_end"],

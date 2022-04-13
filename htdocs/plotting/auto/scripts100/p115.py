@@ -111,7 +111,7 @@ def plotter(fdict):
         "Daryl Herzmann akrherz@iastate.edu 515.294.5978\n"
     ) % (
         datetime.date.today().strftime("%d %b %Y"),
-        ctx["_nt"].sts[station]["archive_begin"].date(),
+        ctx["_nt"].sts[station]["archive_begin"],
         df["max_day"].max(),
         station,
         ctx["_nt"].sts[station]["name"],

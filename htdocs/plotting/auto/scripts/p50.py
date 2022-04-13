@@ -76,7 +76,7 @@ def get_description():
             name="date2",
             optional=True,
             default=today.strftime("%Y/%m/%d"),
-            label="Start Date Bounds (optional):",
+            label="End Date Bounds (optional):",
             min="2010/04/01",
         ),
     ]

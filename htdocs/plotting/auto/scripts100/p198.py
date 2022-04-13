@@ -220,7 +220,7 @@ def plotter(fdict):
         hrlimiter = ""
     yrcol = f"extract(year from f.valid + '{offset:0d} days'::interval)::int"
     if varname in ["tmpc", "dwpc", "height", "smps"]:
-        leveltitle = " @ %s hPa" % (level,)
+        leveltitle = f" @ {level} hPa"
         with get_sqlalchemy_conn("raob") as conn:
             dfin = pd.read_sql(
                 text(

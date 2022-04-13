@@ -50,7 +50,7 @@ def plotter(fdict):
 # OF DAYS EACH YEAR WHERE MIN >=32 F
 """ % (
         datetime.date.today().strftime("%d %b %Y"),
-        ctx["_nt"].sts[station]["archive_begin"].date(),
+        ctx["_nt"].sts[station]["archive_begin"],
         datetime.date.today(),
         station,
         ctx["_nt"].sts[station]["name"],
