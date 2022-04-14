@@ -1,36 +1,23 @@
 """Download IEM summary data!"""
 from io import StringIO
 import datetime
-import os
 import sys
-import time
 
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn
 from pyiem.network import Table as NetworkTable
 
 
-def check_load():
+def overloaded():
     """Prevent automation from overwhelming the server"""
 
-    for i in range(5):
-        pgconn = get_dbconn("iem")
-        mcursor = pgconn.cursor()
-        mcursor.execute(
-            "select pid from pg_stat_activity where query ~* 'FETCH' and "
-            "datname = 'iem'"
-        )
-        if mcursor.rowcount < 10:
-            return True
-        pgconn.close()
-        if i == 4:
-            sys.stderr.write(
-                f"[client: {os.environ.get('REMOTE_ADDR')}] "
-                f"daily.py over capacity: {mcursor.rowcount}\n"
-            )
-        else:
-            time.sleep(3)
-    return False
+    with get_dbconn("iem") as pgconn:
+        cursor = pgconn.cursor()
+        cursor.execute("select one::float from system_loadavg")
+        val = cursor.fetchone()[0]
+    if val > 10:
+        sys.stderr.write(f"/cgi-bin/request/asos.py over cpu thres: {val}\n")
+    return val > 10
 
 
 def get_climate(network, stations):
@@ -127,7 +114,7 @@ def application(environ, start_response):
     ets = datetime.date(
         int(form.get("year2")), int(form.get("month2")), int(form.get("day2"))
     )
-    if sts.year != ets.year and not check_load():
+    if sts.year != ets.year and overloaded():
         start_response(
             "503 Service Unavailable", [("Content-type", "text/plain")]
         )

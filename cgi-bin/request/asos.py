@@ -1,8 +1,6 @@
 """
 Download interface for ASOS data from the asos database
 """
-import time
-import os
 import sys
 from io import StringIO
 import datetime
@@ -105,29 +103,16 @@ def dance(val):
     return val.encode("ascii", "ignore").decode("ascii")
 
 
-def check_load():
+def overloaded():
     """Prevent automation from overwhelming the server"""
-    # Temp throttling due to unknown load source
-    climit = 5 if utc().hour in [8, 9] else 30
 
-    for i in range(5):
-        pgconn = get_dbconn("asos")
-        mcursor = pgconn.cursor()
-        mcursor.execute(
-            "select pid from pg_stat_activity where query ~* 'FETCH' and "
-            "datname = 'asos'"
-        )
-        if mcursor.rowcount < climit:
-            return True
-        pgconn.close()
-        if i == 4:
-            sys.stderr.write(
-                f"[client: {os.environ.get('REMOTE_ADDR')}] "
-                f"/cgi-bin/request/asos.py over capacity: {mcursor.rowcount}\n"
-            )
-        else:
-            time.sleep(3)
-    return False
+    with get_dbconn("asos") as pgconn:
+        cursor = pgconn.cursor()
+        cursor.execute("select one::float from system_loadavg")
+        val = cursor.fetchone()[0]
+    if val > 10:
+        sys.stderr.write(f"/cgi-bin/request/asos.py over cpu thres: {val}\n")
+    return val > 10
 
 
 def get_stations(form):
@@ -202,7 +187,7 @@ def application(environ, start_response):
         yield b"Allow: GET,POST,OPTIONS"
         return
     form = parse_formvars(environ)
-    if not check_load():
+    if overloaded():
         start_response(
             "503 Service Unavailable", [("Content-type", "text/plain")]
         )
