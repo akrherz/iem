@@ -35,11 +35,8 @@ def main(argv):
             LOG.info("%s is unknown in mesosite table", station)
             continue
         meta = nt.sts[station]
-        if (
-            meta["archive_begin"] is None
-            or meta["archive_begin"] != sts.date()
-        ):
-            LOG.info(
+        if meta["archive_begin"] is None or meta["archive_begin"] != sts:
+            LOG.warning(
                 "Updated %s STS WAS: %s NOW: %s" "",
                 station,
                 nt.sts[station]["archive_begin"],

@@ -70,9 +70,9 @@ $t->content = <<<EOF
 
 <h3>Minute/Hourly Data:</h3>
 
-<p>The present data collection interval from this network is every 15 minutes
-for the vineyard sites and every minute for the others.  The minute interval
-data only started in 2021 though.  The default download is to provide the
+<p>the present data collection interval from this network is every 15 minutes
+for the vineyard sites and every minute for the others.  the minute interval
+data only started in 2021 though.  the default download is to provide the
 hourly data.</p>
 
 <div class="row">
@@ -96,20 +96,20 @@ hourly data.</p>
 </div><div class="col-md-5">
 
 <h4>Select the time interval:</h4>
-<TABLE>
-  <TR><TH></TH><TH>Year:</TH><TH>Month:</TH><TH>Day:</TH></TR>
-  <TR><TH>Starting On:</TH>
- <TD>{$yselect}</TD>
+<table>
+  <tr><th></th><th>Year:</th><th>Month:</th><th>Day:</th></tr>
+  <tr><th>Starting On:</th>
+ <td>{$yselect}</td>
  <td>{$mselect}</td>
  <td>{$dselect}</td>
  </tr>
-</TR>
-<TR><TH>Ending On:</TH>
- <TD>{$yselect2}</TD>
+</tr>
+<tr><th>Ending On:</th>
+ <td>{$yselect2}</td>
  <td>{$mselect2}</td>
  <td>{$dselect2}</td>
-</TR>
-</TABLE>
+</tr>
+</table>
 
 
 <h4>Options:</h4>
@@ -120,13 +120,24 @@ hourly data.</p>
 {$vselect}
 
 <hr>
+<p>The Ames-AEA, Ames-Kitchen, and Jefferson locations have the
+<a href="https://www.campbellsci.com/soilvue10">CS SoilVue 10</a> installed.<br />
+
+<input type="checkbox" name="vars" value="sv" id="sv">
+<label for="sv">SoilVue Temperature+Moisture Data</label>
+</p>
+
+<hr>
 <p><strong>Vineyard Station-only Variables</strong>
 
 {$vselect2}
  		
 {$qcbox}
 
-<p><input type="checkbox" name="todisk" value="yes">Download directly to disk
+<p>
+<input type="checkbox" name="todisk" value="yes" id="dd">
+<label for="dd">Download directly to disk</label>
+</p>
 
  <p><strong>How should the data be formatted?:</strong> &nbsp; 
 <select name="format">
@@ -143,8 +154,16 @@ hourly data.</p>
   	<option value="">(blank, empty space)</option>
 </select>
 
-<p><b><h4 class="subtitle">Submit your request:</h4></b>
-	<input type="submit" value="Submit Query">
+<p><strong>Timezone for Data:</strong>
+<br />
+<select name="tz">
+    <option value="central">Central Standard/Daylight Time</option>
+    <option value="utc">UTC</option>
+</select></p>
+
+<p><strong>Submit your request:</strong>
+<br />
+	<input type="submit" value="Submit">
 	<input type="reset">
 
 </form>
@@ -156,7 +175,7 @@ hourly data.</p>
 
 <dl>
  <dt>station</dt><dd>National Weather Service Location Identifier for the
- site.  This is a five character identifier.</dd>
+ site.  this is a five character identifier.</dd>
  <dt>valid</dt><dd>Timestamp of the observation either in CST or CDT</dd>
  <dt>tmpf</dt><dd>Air Temperature [F]</dd>
  <dt>relh</dt><dd>Relative Humidity [%]</dd>

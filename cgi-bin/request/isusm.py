@@ -2,10 +2,11 @@
 import datetime
 from io import StringIO, BytesIO
 
+import numpy as np
 import pandas as pd
-import psycopg2.extras
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, c2f, mm2inch
+from pyiem.util import get_sqlalchemy_conn, convert_value
+from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 MISSING = {"", "M", "-99"}
@@ -53,11 +54,9 @@ def get_delimiter(form):
 
 def fetch_daily(form, cols):
     """Return a fetching of daily data"""
-    pgconn = get_dbconn("isuag", user="nobody")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     sts, ets = get_dates(form)
     if sts is None:
-        return None, None
+        return None, []
     stations = get_stations(form)
 
     if not cols:
@@ -87,7 +86,10 @@ def fetch_daily(form, cols):
         cols.insert(0, "valid")
         cols.insert(0, "station")
 
-    sql = """
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            text(
+                """
     --- Get the Daily Max/Min soil values
     WITH soils as (
       SELECT station, date(valid) as date,
@@ -99,7 +101,7 @@ def fetch_daily(form, cols):
       min(t24_c_avg_qc) as soil24tn, max(t24_c_avg_qc) as soil24tx,
       min(t50_c_avg_qc) as soil50tn, max(t50_c_avg_qc) as soil50tx
       from sm_hourly where
-      valid >= '%s 00:00' and valid < '%s 00:00' and station in %s
+      valid >= :sts and valid < :ets and station in :stations
       GROUP by station, date
     ), daily as (
       SELECT station, valid, tair_c_max_qc, tair_c_min_qc, slrkj_tot_qc,
@@ -108,7 +110,7 @@ def fetch_daily(form, cols):
       ws_mps_s_wvt_qc, ws_mps_max_qc, lwmv_1_qc, lwmv_2_qc,
       lwmdry_1_tot_qc, lwmcon_1_tot_qc, lwmwet_1_tot_qc, lwmdry_2_tot_qc,
       lwmcon_2_tot_qc, lwmwet_2_tot_qc, bpres_avg_qc from sm_daily WHERE
-      valid >= '%s 00:00' and valid < '%s 00:00' and station in %s
+      valid >= :sts and valid < :ets and station in :stations
     )
     SELECT d.station, d.valid, s.date, s.soil04tn, s.soil04tx, s.rh,
     s.rh_min, s.rh_max,
@@ -122,172 +124,84 @@ def fetch_daily(form, cols):
     lwmcon_2_tot_qc, lwmwet_2_tot_qc, bpres_avg_qc
     FROM soils s JOIN daily d on (d.station = s.station and s.date = d.valid)
     ORDER by d.valid ASC
-    """ % (
-        sts.strftime("%Y-%m-%d"),
-        ets.strftime("%Y-%m-%d"),
-        str(tuple(stations)),
-        sts.strftime("%Y-%m-%d"),
-        ets.strftime("%Y-%m-%d"),
-        str(tuple(stations)),
-    )
-    cursor.execute(sql)
-
-    values = []
-    miss = form.get("missing", "-99")
-    assert miss in MISSING
-
-    for row in cursor:
-        valid = row["valid"]
-        station = row["station"]
-        high = (
-            c2f(row["tair_c_max_qc"])
-            if row["tair_c_max_qc"] is not None
-            else miss
-        )
-        low = (
-            c2f(row["tair_c_min_qc"])
-            if row["tair_c_min_qc"] is not None
-            else miss
-        )
-        precip = (
-            row["rain_in_tot_qc"]
-            if row["rain_in_tot_qc"] is not None and row["rain_in_tot_qc"] > 0
-            else 0
-        )
-        et = (
-            mm2inch(row["dailyet_qc"])
-            if row["dailyet_qc"] is not None and row["dailyet_qc"] > 0
-            else 0
+    """
+            ),
+            conn,
+            params={
+                "sts": sts,
+                "ets": ets,
+                "stations": tuple(stations),
+            },
+            index_col=None,
         )
 
-        soil04t = (
-            c2f(row["t4_c_avg_qc"]) if row["t4_c_avg_qc"] is not None else miss
-        )
-        soil04tn = (
-            c2f(row["soil04tn"]) if row["soil04tn"] is not None else miss
-        )
-        soil04tx = (
-            c2f(row["soil04tx"]) if row["soil04tx"] is not None else miss
-        )
+    if df.empty:
+        return df, []
 
-        soil12t = (
-            c2f(row["t12_c_avg_qc"])
-            if row["t12_c_avg_qc"] is not None
-            else miss
-        )
-        soil12tn = (
-            c2f(row["soil12tn"]) if row["soil12tn"] is not None else miss
-        )
-        soil12tx = (
-            c2f(row["soil12tx"]) if row["soil12tx"] is not None else miss
-        )
+    # Direct copy / rename
+    xref = {
+        "rh_avg_qc": "relh",
+        "rain_in_tot_qc": "precip",
+        "winddir_d1_wvt_qc": "drct",
+        "calc_vwc_12_avg_qc": "soil12vwc",
+        "calc_vwc_24_avg_qc": "soil24vwc",
+        "calc_vwc_50_avg_qc": "soil50vwc",
+    }
+    df = df.rename(xref, axis=1, errors="ignore")
+    # Now we need to do some mass data conversion, sigh
+    tc = {
+        "high": "tair_c_max_qc",
+        "low": "tair_c_min_qc",
+        "soil04t": "t4_c_avg_qc",
+        "soil04tn": "soil04tn",
+        "soil04tx": "soil04tx",
+        "soil12t": "t12_c_avg_qc",
+        "soil12tn": "soil12tn",
+        "soil12tx": "soil12tx",
+        "soil24t": "t24_c_avg_qc",
+        "soil24tn": "soil24tn",
+        "soil24tx": "soil24tx",
+        "soil50t": "t50_c_avg_qc",
+        "soil50tn": "soil50tn",
+        "soil50tx": "soil50tx",
+    }
+    for key, col in tc.items():
+        if key not in cols:
+            continue
+        # Do the work
+        df[key] = convert_value(df[col].values, "degC", "degF")
 
-        soil24t = (
-            c2f(row["t24_c_avg_qc"])
-            if row["t24_c_avg_qc"] is not None
-            else miss
+    if "et" in cols:
+        df["et"] = convert_value(df["etalfalfa_qc"].values, "mm", "inch")
+    if "speed" in cols:
+        df["speed"] = convert_value(
+            df["ws_mps_s_wvt_qc"].values, "meter / second", "mile / hour"
         )
-        soil24tn = (
-            c2f(row["soil24tn"]) if row["soil24tn"] is not None else miss
+    if "gust" in cols:
+        df["gust"] = convert_value(
+            df["ws_mps_max_qc"].values, "meter / second", "mile / hour"
         )
-        soil24tx = (
-            c2f(row["soil24tx"]) if row["soil24tx"] is not None else miss
-        )
+    # Convert solar radiation to J/m2
+    if "solar" in cols:
+        df["solar"] = df["slrkj_tot_qc"] * 1000.0
 
-        soil50t = (
-            c2f(row["t50_c_avg_qc"])
-            if row["t50_c_avg_qc"] is not None
-            else miss
-        )
-        soil50tn = (
-            c2f(row["soil50tn"]) if row["soil50tn"] is not None else miss
-        )
-        soil50tx = (
-            c2f(row["soil50tx"]) if row["soil50tx"] is not None else miss
-        )
+    overwrite = (
+        "bp_mb lwmv_1 lwmv_2 lwmdry_1_tot lwmcon_1_tot lwmwet_1_tot "
+        "lwmdry_2_tot lwmcon_2_tot lwmwet_2_tot bpres_avg"
+    ).split()
+    for col in overwrite:
+        if col in cols:
+            # Overwrite
+            df[col] = df[f"{col}_qc"]
 
-        soil12vwc = (
-            row["calc_vwc_12_avg_qc"]
-            if row["calc_vwc_12_avg_qc"] is not None
-            else miss
-        )
-        soil24vwc = (
-            row["calc_vwc_24_avg_qc"]
-            if row["calc_vwc_24_avg_qc"] is not None
-            else miss
-        )
-        soil50vwc = (
-            row["calc_vwc_50_avg_qc"]
-            if row["calc_vwc_50_avg_qc"] is not None
-            else miss
-        )
-        speed = (
-            row["ws_mps_s_wvt_qc"] * 2.23
-            if row["ws_mps_s_wvt_qc"] is not None
-            else miss
-        )
-        gust = (
-            row["ws_mps_max_qc"] * 2.23
-            if row["ws_mps_max_qc"] is not None
-            else miss
-        )
-
-        values.append(
-            dict(
-                station=station,
-                valid=valid.strftime("%Y-%m-%d"),
-                high=high,
-                low=low,
-                solar=(
-                    (row["slrkj_tot_qc"] / 1000.0)
-                    if row["slrkj_tot_qc"] is not None
-                    else miss
-                ),
-                rh=row["rh"],
-                rh_min=row["rh_min"],
-                rh_max=row["rh_max"],
-                gdd50=row["gdd50"],
-                precip=precip,
-                sped=speed,
-                gust=gust,
-                et=et,
-                soil04t=soil04t,
-                soil12t=soil12t,
-                soil24t=soil24t,
-                soil50t=soil50t,
-                soil04tn=soil04tn,
-                soil04tx=soil04tx,
-                soil12tn=soil12tn,
-                soil12tx=soil12tx,
-                soil24tn=soil24tn,
-                soil24tx=soil24tx,
-                soil50tn=soil50tn,
-                soil50tx=soil50tx,
-                soil12vwc=soil12vwc,
-                soil24vwc=soil24vwc,
-                soil50vwc=soil50vwc,
-                lwmv_1=row["lwmv_1_qc"],
-                lwmv_2=row["lwmv_2_qc"],
-                lwmdry_1_tot=row["lwmdry_1_tot_qc"],
-                lwmcon_1_tot=row["lwmcon_1_tot_qc"],
-                lwmwet_1_tot=row["lwmwet_1_tot_qc"],
-                lwmdry_2_tot=row["lwmdry_2_tot_qc"],
-                lwmcon_2_tot=row["lwmcon_2_tot_qc"],
-                lwmwet_2_tot=row["lwmwet_2_tot_qc"],
-                bpres_avg=row["bpres_avg_qc"],
-            )
-        )
-
-    return values, cols
+    return df, cols
 
 
 def fetch_hourly(form, cols):
-    """Return a fetching of hourly data"""
-    pgconn = get_dbconn("isuag", user="nobody")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    """Process the request for hourly/minute data."""
     sts, ets = get_dates(form)
     if sts is None:
-        return None, None
+        return None, []
     stations = get_stations(form)
 
     if not cols:
@@ -314,137 +228,102 @@ def fetch_hourly(form, cols):
         cols.insert(0, "station")
 
     table = "sm_hourly"
-    sqlextra = ", null as bp_mb_qc, etalfalfa_qc "
+    sqlextra = ", null as bp_mb_qc "
     if form.get("timeres") == "minute":
         table = "sm_minute"
-        sqlextra = ", bp_mb_qc, null as etalfalfa_qc"
+        sqlextra = ", null as etalfalfa_qc"
+    if "sv" in cols:
+        # SoilVue 10 data
+        for depth in [2, 4, 8, 12, 16, 20, 24, 30, 40]:
+            for c2 in ["t", "vwc"]:
+                cols.append(f"sv_{c2}{depth}")
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            text(
+                "SELECT *, valid at time zone 'UTC' as utc_valid "
+                f"{sqlextra} from {table} WHERE valid >= :sts "
+                "and valid < :ets and station in :stations ORDER by valid ASC"
+            ),
+            conn,
+            params={
+                "sts": sts,
+                "ets": ets,
+                "stations": tuple(stations),
+            },
+            index_col=None,
+        )
+    if df.empty:
+        return df, cols
+
+    # Muck with the timestamp column
+    if form.get("tz") == "utc":
+        df["valid"] = df["utc_valid"].dt.strftime("%Y-%m-%d %H:%M+00")
     else:
-        if "bp_mb" in cols:
-            cols.remove("bp_mb")
-    cursor.execute(
-        f"""SELECT station, valid, tair_c_avg_qc, rh_avg_qc,
-    slrkj_tot_qc,
-    rain_in_tot_qc, ws_mps_s_wvt_qc, winddir_d1_wvt_qc,
-    t4_c_avg_qc,
-    t12_c_avg_qc, t24_c_avg_qc, t50_c_avg_qc, calc_vwc_12_avg_qc,
-    calc_vwc_24_avg_qc, calc_vwc_50_avg_qc, lwmv_1_qc, lwmv_2_qc,
-    lwmdry_1_tot_qc, lwmcon_1_tot_qc, lwmwet_1_tot_qc, lwmdry_2_tot_qc,
-    lwmcon_2_tot_qc, lwmwet_2_tot_qc, bpres_avg_qc {sqlextra}
-    from {table}
-    WHERE valid >= '%s 00:00' and valid < '%s 00:00' and station in %s
-    ORDER by valid ASC
-    """
-        % (
-            sts.strftime("%Y-%m-%d"),
-            ets.strftime("%Y-%m-%d"),
-            str(tuple(stations)),
+        df["valid"] = (
+            df["utc_valid"]
+            .dt.tz_localize("UTC")
+            .dt.tz_convert("US/Central")
+            .dt.strftime("%Y-%m-%d %H:%M")
         )
-    )
 
-    values = []
-    miss = form.get("missing", "-99")
-    assert miss in MISSING
+    df = df.fillna(np.nan)
+    # Direct copy / rename
+    xref = {
+        "rh_avg_qc": "relh",
+        "rain_in_tot_qc": "precip",
+        "winddir_d1_wvt_qc": "drct",
+    }
+    df = df.rename(xref, axis=1, errors="ignore")
+    # Now we need to do some mass data conversion, sigh
+    tc = {
+        "tmpf": "tair_c_avg_qc",
+        "soil04t": "t4_c_avg_qc",
+        "soil12t": "t12_c_avg_qc",
+        "soil24t": "t24_c_avg_qc",
+        "soil50t": "t50_c_avg_qc",
+        "soil12vwc": "calc_vwc_12_avg_qc",
+        "soil24vwc": "calc_vwc_24_avg_qc",
+        "soil50vwc": "calc_vwc_50_avg_qc",
+    }
+    for key, col in tc.items():
+        if key not in cols:
+            continue
+        # Do the work
+        df[key] = convert_value(df[col].values, "degC", "degF")
 
-    for row in cursor:
-        valid = row["valid"]
-        station = row["station"]
-        tmpf = (
-            c2f(row["tair_c_avg_qc"])
-            if row["tair_c_avg_qc"] is not None
-            else miss
-        )
-        relh = row["rh_avg_qc"] if row["rh_avg_qc"] is not None else -99
-        solar = (
-            (row["slrkj_tot_qc"] * 1000.0)
-            if row["slrkj_tot_qc"] is not None
-            else miss
-        )
-        precip = (
-            row["rain_in_tot_qc"]
-            if row["rain_in_tot_qc"] is not None
-            else miss
-        )
-        speed = (
-            row["ws_mps_s_wvt_qc"] * 2.23
-            if row["ws_mps_s_wvt_qc"] is not None
-            else miss
-        )
-        drct = (
-            row["winddir_d1_wvt_qc"]
-            if row["winddir_d1_wvt_qc"] is not None
-            else miss
-        )
-        et = (
-            mm2inch(row["etalfalfa_qc"])
-            if row["etalfalfa_qc"] is not None
-            else miss
-        )
-        soil04t = (
-            c2f(row["t4_c_avg_qc"]) if row["t4_c_avg_qc"] is not None else miss
-        )
-        soil12t = (
-            c2f(row["t12_c_avg_qc"])
-            if row["t12_c_avg_qc"] is not None
-            else miss
-        )
-        soil24t = (
-            c2f(row["t24_c_avg_qc"])
-            if row["t24_c_avg_qc"] is not None
-            else miss
-        )
-        soil50t = (
-            c2f(row["t50_c_avg_qc"])
-            if row["t50_c_avg_qc"] is not None
-            else miss
-        )
-        soil12vwc = (
-            row["calc_vwc_12_avg_qc"]
-            if row["calc_vwc_12_avg_qc"] is not None
-            else miss
-        )
-        soil24vwc = (
-            row["calc_vwc_24_avg_qc"]
-            if row["calc_vwc_24_avg_qc"] is not None
-            else miss
-        )
-        soil50vwc = (
-            row["calc_vwc_50_avg_qc"]
-            if row["calc_vwc_50_avg_qc"] is not None
-            else miss
-        )
-        bp_mb = row["bp_mb_qc"] if row["bp_mb_qc"] is not None else -99
-
-        values.append(
-            dict(
-                station=station,
-                valid=valid.strftime("%Y-%m-%d %H:%M"),
-                tmpf=tmpf,
-                relh=relh,
-                solar=solar,
-                precip=precip,
-                speed=speed,
-                drct=drct,
-                et=et,
-                soil04t=soil04t,
-                soil12t=soil12t,
-                soil24t=soil24t,
-                soil50t=soil50t,
-                soil12vwc=soil12vwc,
-                soil24vwc=soil24vwc,
-                soil50vwc=soil50vwc,
-                lwmv_1=row["lwmv_1_qc"],
-                lwmv_2=row["lwmv_2_qc"],
-                lwmdry_1_tot=row["lwmdry_1_tot_qc"],
-                lwmcon_1_tot=row["lwmcon_1_tot_qc"],
-                lwmwet_1_tot=row["lwmwet_1_tot_qc"],
-                lwmdry_2_tot=row["lwmdry_2_tot_qc"],
-                lwmcon_2_tot=row["lwmcon_2_tot_qc"],
-                lwmwet_2_tot=row["lwmwet_2_tot_qc"],
-                bpres_avg=row["bpres_avg_qc"],
-                bp_mb=bp_mb,
+    if "sv" in cols:
+        # SoilVue 10 data
+        for depth in [2, 4, 8, 12, 16, 20, 24, 30, 40]:
+            df[f"sv_t{depth}"] = convert_value(
+                df[f"sv_t{depth}_qc"].values, "degC", "degF"
             )
+            # Copy
+            df[f"sv_vwc{depth}"] = df[f"sv_vwc{depth}_qc"]
+        # Remove the original
+        cols.remove("sv")
+
+    # Convert solar radiation to J/m2
+    if "solar" in cols:
+        df["solar"] = df["slrkj_tot_qc"] * 1000.0
+
+    if "speed" in cols:
+        df["speed"] = convert_value(
+            df["ws_mps_s_wvt_qc"].values, "meter / second", "mile / hour"
         )
-    return values, cols
+
+    if "et" in cols:
+        df["et"] = convert_value(df["etalfalfa_qc"].values, "mm", "inch")
+
+    overwrite = (
+        "bp_mb lwmv_1 lwmv_2 lwmdry_1_tot lwmcon_1_tot lwmwet_1_tot "
+        "lwmdry_2_tot lwmcon_2_tot lwmwet_2_tot bpres_avg"
+    ).split()
+    for col in overwrite:
+        if col in cols:
+            # Overwrite
+            df[col] = df[f"{col}_qc"]
+
+    return df, cols
 
 
 def application(environ, start_response):
@@ -455,15 +334,18 @@ def application(environ, start_response):
     fmt = form.get("format", "csv").lower()
     todisk = form.get("todisk", "no")
     if mode == "hourly":
-        values, cols = fetch_hourly(form, cols)
+        df, cols = fetch_hourly(form, cols)
     else:
-        values, cols = fetch_daily(form, cols)
+        df, cols = fetch_daily(form, cols)
 
-    if not values:
+    if df is None or df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
         return [b"Sorry, no data found for this query."]
 
-    df = pd.DataFrame(values)
+    miss = form.get("missing", "-99")
+    assert miss in MISSING
+    df = df.replace({np.nan: miss})
+
     if fmt == "excel":
         bio = BytesIO()
         # pylint: disable=abstract-class-instantiated
