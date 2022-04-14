@@ -56,7 +56,7 @@ def plotter(fdict):
     res = (
         "# IEM Climodat https://mesonet.agron.iastate.edu/climodat/\n"
         f"# Report Generated: {datetime.date.today():%d %b %Y}\n"
-        f"# Climate Record: {bs.date()} -> {datetime.date.today()}\n"
+        f"# Climate Record: {bs} -> {datetime.date.today()}\n"
         f"# Site Information: [{station}] {ctx['_nt'].sts[station]['name']}\n"
         "# Contact Information: "
         "Daryl Herzmann akrherz@iastate.edu 515.294.5978\n"

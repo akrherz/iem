@@ -144,7 +144,7 @@ def plotter(fdict):
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 """ % (
         datetime.date.today().strftime("%d %b %Y"),
-        bs.date(),
+        bs,
         datetime.date.today(),
         station,
         ctx["_nt"].sts[station]["name"],

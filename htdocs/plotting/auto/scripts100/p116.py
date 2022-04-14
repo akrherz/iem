@@ -2,7 +2,7 @@
 import datetime
 
 import seaborn as sns
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.plot import figure_axes
 from pyiem.util import get_sqlalchemy_conn, get_autoplot_context
 from pyiem.exceptions import NoDataFound
@@ -54,7 +54,7 @@ def plotter(fdict):
     station = ctx["station"]
     varname = ctx["var"]
     with get_sqlalchemy_conn("coop") as conn:
-        df = read_sql(
+        df = pd.read_sql(
             f"""
             SELECT year, month, sum(precip) as sum_precip,
             avg(high) as avg_high,

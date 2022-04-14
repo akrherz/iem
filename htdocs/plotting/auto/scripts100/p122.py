@@ -46,7 +46,7 @@ def plotter(fdict):
         "above value\n"
     ) % (
         datetime.date.today().strftime("%d %b %Y"),
-        bs.date(),
+        bs,
         datetime.date.today(),
         station,
         ctx["_nt"].sts[station]["name"],

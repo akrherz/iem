@@ -110,16 +110,12 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No data found for query")
 
-    title = ("[%s] %s %.0f-%.0f Number of Days\n[%s] with %s %s %g%s") % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-        df.index.min(),
-        df.index.max(),
-        PDICT2[season],
-        PDICT3[varname],
-        PDICT[direction],
-        threshold,
-        r"$^\circ$F" if varname != "precip" else "inch",
+    tt = r"$^\circ$F" if varname != "precip" else "inch"
+    title = (
+        f"{ctx['_sname']} {df.index.min():.0f}-{df.index.max():.0f} "
+        "Number of Days\n"
+        f"[{PDICT2[season]}] with {PDICT3[varname]} {PDICT[direction]} "
+        f"{threshold}{tt}"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     avgv = df[season].mean()

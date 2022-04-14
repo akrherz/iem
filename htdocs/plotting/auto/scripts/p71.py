@@ -7,7 +7,6 @@ import matplotlib.patheffects as PathEffects
 from pyiem.util import drct2text
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import figure_axes
-from pyiem.exceptions import NoDataFound
 from metpy.units import units
 
 PDICT = {
@@ -107,37 +106,50 @@ def plotter(fdict):
             conn,
             params=(station, ctx["network"], sts, ets),
         )
-    if df.empty:
-        raise NoDataFound("ERROR: No Data Found")
-    df["day"] = pd.to_datetime(df["day"])
-    sknt = (df["sknt"].values * units("knot")).to(XREF_UNITS[plot_units]).m
     title = (
         f"{ctx['_nt'].sts[station]['name']} [{station}]\n"
         f"{sts:%b %Y} Daily Average Wind Speed and Direction"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
-    ax.bar(
-        df["day"].dt.day.values, sknt, ec="green", fc="green", align="center"
-    )
-    pos = max([min(sknt) / 2.0, 0.5])
-    for d, _, r in zip(df["day"].dt.day.values, sknt, df["drct"].values):
-        draw_line(ax, d, max(sknt) + 0.5, (270.0 - r) / 180.0 * np.pi)
-        txt = ax.text(
-            d,
-            pos,
-            drct2text(r),
+
+    if not df.empty:
+        df["day"] = pd.to_datetime(df["day"])
+        sknt = (df["sknt"].values * units("knot")).to(XREF_UNITS[plot_units]).m
+        ax.bar(
+            df["day"].dt.day.values,
+            sknt,
+            ec="green",
+            fc="green",
+            align="center",
+        )
+        pos = max([min(sknt) / 2.0, 0.5])
+        for d, _, r in zip(df["day"].dt.day.values, sknt, df["drct"].values):
+            draw_line(ax, d, max(sknt) + 0.5, (270.0 - r) / 180.0 * np.pi)
+            txt = ax.text(
+                d,
+                pos,
+                drct2text(r),
+                ha="center",
+                rotation=90,
+                color="white",
+                va="center",
+            )
+            txt.set_path_effects(
+                [PathEffects.withStroke(linewidth=2, foreground="k")]
+            )
+        ax.grid(True, zorder=11)
+        ax.set_ylim(top=max(sknt) + 2)
+    else:
+        ax.text(
+            0.5,
+            0.5,
+            "No Wind Speed Information For Site For Period.",
+            transform=ax.transAxes,
             ha="center",
-            rotation=90,
-            color="white",
-            va="center",
+            bbox=dict(color="white"),
         )
-        txt.set_path_effects(
-            [PathEffects.withStroke(linewidth=2, foreground="k")]
-        )
-    ax.grid(True, zorder=11)
     ax.set_xlim(0.5, 31.5)
     ax.set_xticks(range(1, 31, 5))
-    ax.set_ylim(top=max(sknt) + 2)
 
     ax.set_ylabel(f"Average Wind Speed [{PDICT[plot_units]}]")
 

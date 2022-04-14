@@ -108,7 +108,7 @@ def dance(val):
 def check_load():
     """Prevent automation from overwhelming the server"""
     # Temp throttling due to unknown load source
-    climit = 5 if utc().hour == 8 else 30
+    climit = 5 if utc().hour in [8, 9] else 30
 
     for i in range(5):
         pgconn = get_dbconn("asos")

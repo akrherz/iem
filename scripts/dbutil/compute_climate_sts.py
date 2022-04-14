@@ -37,7 +37,7 @@ def main(argv):
         meta = nt.sts[station]
         if (
             meta["archive_begin"] is None
-            or meta["archive_begin"].date() != sts.date()
+            or meta["archive_begin"] != sts.date()
         ):
             LOG.info(
                 "Updated %s STS WAS: %s NOW: %s" "",

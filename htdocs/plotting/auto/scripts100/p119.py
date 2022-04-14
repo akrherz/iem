@@ -103,7 +103,7 @@ def plotter(fdict):
  DOY Date    <%s  <%s  <%s  <%s
 """ % (
         datetime.date.today().strftime("%d %b %Y"),
-        bs.date(),
+        bs,
         datetime.date.today(),
         station,
         ctx["_nt"].sts[station]["name"],

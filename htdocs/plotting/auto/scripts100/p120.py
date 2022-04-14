@@ -107,7 +107,7 @@ def plotter(fdict):
  DOY Date    <%s  <%s  <%s  <%s
 """ % (
         datetime.date.today().strftime("%d %b %Y"),
-        max([bs.date(), datetime.date(ctx["syear"], 1, 1)]),
+        max([bs, datetime.date(ctx["syear"], 1, 1)]),
         min([datetime.date.today(), datetime.date(ctx["eyear"] - 1, 12, 31)]),
         station,
         ctx["_nt"].sts[station]["name"],
@@ -136,7 +136,7 @@ def plotter(fdict):
     subtitle = "%s %s (%s-%s)" % (
         station,
         ctx["_nt"].sts[station]["name"],
-        max([bs.date(), datetime.date(ctx["syear"], 1, 1)]),
+        max([bs, datetime.date(ctx["syear"], 1, 1)]),
         min([datetime.date.today(), datetime.date(ctx["eyear"] - 1, 12, 31)]),
     )
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)

@@ -46,7 +46,7 @@ def get_description():
         dict(
             type="station",
             name="station2",
-            default="IA0200",
+            default="IATAME",
             label="Select Secont Station:",
             network="IACLIMATE",
         ),

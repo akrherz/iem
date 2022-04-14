@@ -43,7 +43,7 @@ def plotter(fdict):
         "akrherz@iastate.edu 515.294.5978\n"
     ) % (
         datetime.date.today().strftime("%d %b %Y"),
-        bs.date(),
+        bs,
         datetime.date.today(),
         station,
         ctx["_nt"].sts[station]["name"],

@@ -82,7 +82,7 @@ def plotter(fdict):
         "# above or below a temperature threshold\n"
     ) % (
         datetime.date.today().strftime("%d %b %Y"),
-        bs.date(),
+        bs,
         datetime.date.today(),
         station,
         ctx["_nt"].sts[station]["name"],

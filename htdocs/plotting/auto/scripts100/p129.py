@@ -3,9 +3,9 @@ import calendar
 import datetime
 
 import numpy as np
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -62,13 +62,11 @@ def get_description():
 
 def get_context(fdict):
     """Get the context"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"].upper()
     varname = ctx["var"]
     level = ctx["level"]
     mydir = ctx["dir"]
-    table = "alldata_%s" % (station[:2],)
     bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:
         raise NoDataFound("Unknown station metadata.")
@@ -76,17 +74,18 @@ def get_context(fdict):
 
     plimit = "" if varname != "precip" else " and precip > 0.009 "
     comp = ">=" if mydir == "above" else "<"
-    df = read_sql(
-        f"""
-    SELECT month,
-    sum(case when {varname} {comp} %s then 1 else 0 end) as hits,
-    count(*) from {table} WHERE station = %s {plimit}
-    GROUP by month ORDER by month ASC
-    """,
-        pgconn,
-        params=(level, station),
-        index_col="month",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        SELECT month,
+        sum(case when {varname} {comp} %s then 1 else 0 end) as hits,
+        count(*) from alldata_{station[:2]} WHERE station = %s {plimit}
+        GROUP by month ORDER by month ASC
+        """,
+            conn,
+            params=(level, station),
+            index_col="month",
+        )
     if df.empty:
         raise NoDataFound("Did not find any data.")
     df["rank"] = (df["count"] - df["hits"]) / df["count"] * 100.0
