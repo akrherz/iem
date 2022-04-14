@@ -15,9 +15,9 @@ def overloaded():
         cursor = pgconn.cursor()
         cursor.execute("select one::float from system_loadavg")
         val = cursor.fetchone()[0]
-    if val > 10:
-        sys.stderr.write(f"/cgi-bin/request/asos.py over cpu thres: {val}\n")
-    return val > 10
+    if val > 20:  # Cut back on logging
+        sys.stderr.write(f"/cgi-bin/request/daily.py over cpu thres: {val}\n")
+    return val > 15
 
 
 def get_climate(network, stations):
