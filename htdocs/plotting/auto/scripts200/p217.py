@@ -91,25 +91,32 @@ def plotter(fdict):
             tzname = "UTC"
     tz = pytz.timezone(tzname)
     expire = df["expire"].dt.tz_convert(tz)[0]
-
+    is_fwx = False
     if row["geom"].is_empty:
         # Need to go looking for UGCs to compute the bounds
         # Can a SPS be issued for Fire Weather zones? source = 'fz'
         with get_sqlalchemy_conn("postgis") as conn:
-            ugcdf = read_postgis(
-                text(
-                    f"SELECT simple_geom, ugc, gpw_population_{popyear} "
-                    "as pop from ugcs where wfo = :wfo and ugc in :ugcs and "
-                    "(end_ts is null or end_ts > :expire) and source = 'z'"
-                ),
-                conn,
-                params={
-                    "wfo": WFOCONV.get(wfo, wfo),
-                    "ugcs": tuple(row["ugcs"]),
-                    "expire": expire,
-                },
-                geom_col="simple_geom",
-            )
+            for source in ["z", "fz", "mz"]:
+                ugcdf = read_postgis(
+                    text(
+                        f"SELECT simple_geom, ugc, gpw_population_{popyear} "
+                        "as pop from ugcs where wfo = :wfo and ugc in :ugcs "
+                        "and (end_ts is null or end_ts > :expire) and "
+                        "source = :source"
+                    ),
+                    conn,
+                    params={
+                        "wfo": WFOCONV.get(wfo, wfo),
+                        "ugcs": tuple(row["ugcs"]),
+                        "expire": expire,
+                        "source": source,
+                    },
+                    geom_col="simple_geom",
+                )
+                if not ugcdf.empty:
+                    if source == "fz":
+                        is_fwx = True
+                    break
         bounds = ugcdf["simple_geom"].total_bounds
         population = ugcdf["pop"].sum()
     else:
@@ -192,6 +199,7 @@ def plotter(fdict):
             draw_colorbar=False,
             plotmissing=False,
             zorder=Z_OVERLAY2 - 1,
+            is_firewx=is_fwx,
         )
     prod = "N0Q" if df["issue"][0].year > 2010 else "N0R"
     radtime = mp.overlay_nexrad(df["issue"][0].to_pydatetime(), product=prod)
