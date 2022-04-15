@@ -5,7 +5,7 @@ import json
 import datetime
 import glob
 
-import memcache
+from pymemcache.client import Client
 from paste.request import parse_formvars
 from pyiem.util import html_escape
 
@@ -22,10 +22,11 @@ def run(product):
     }
 
     for fn in glob.glob(
-        ("/mesonet/ldmdata/gis/images/4326/ridge/???/%s_0.json") % (product,)
+        f"/mesonet/ldmdata/gis/images/4326/ridge/???/{product}_0.json"
     ):
         try:
-            j = json.load(open(fn))
+            with open(fn, encoding="utf-8") as fh:
+                j = json.load(fh)
             res["meta"].append(j["meta"])
         except Exception:
             pass
@@ -36,21 +37,21 @@ def run(product):
 def application(environ, start_response):
     """Answer request."""
     fields = parse_formvars(environ)
-    product = fields.get("product", "N0Q")[:3].upper()
+    product = fields.get("product", "N0B")[:3].upper()
     cb = fields.get("callback", None)
 
-    mckey = "/json/ridge_current_%s.json" % (product,)
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    mckey = f"/json/ridge_current_{product}.json"
+    mc = Client(["iem-memcached", 11211])
     res = mc.get(mckey)
     if not res:
         res = run(product)
         mc.set(mckey, res, 30)
-
-    if cb is None:
-        data = res
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        res = res.decode("ascii")
+    mc.close()
+    if cb is not None:
+        res = f"{html_escape(cb)}({res})"
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return [res.encode("ascii")]

@@ -1,13 +1,14 @@
 """Download Interface for RWIS data"""
+# pylint: disable=abstract-class-instantiated
 import datetime
 from io import StringIO, BytesIO
 
 import pytz
 import pandas as pd
-from pandas.io.sql import read_sql
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn
+from pyiem.util import get_sqlalchemy_conn
+from sqlalchemy import text
 
 DELIMITERS = {"comma": ",", "space": " ", "tab": "\t"}
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -52,23 +53,28 @@ def application(environ, start_response):
     if len(stations) == 1:
         stations.append("XXXXXXX")
 
-    tbl = ""
+    tbl = "alldata"
     if src in ["soil", "traffic"]:
-        tbl = "_%s" % (src,)
-    pgconn = get_dbconn("rwis")
+        tbl = f"alldata_{src}"
+    params = {
+        "tzname": tzname,
+        "ids": tuple(stations),
+        "ets": ets,
+        "sts": sts,
+    }
     if "_ALL" in stations:
-        sql = (
-            f"SELECT *, valid at time zone %s as obtime from alldata{tbl} "
-            "WHERE valid BETWEEN %s and %s ORDER by valid ASC"
+        sql = text(
+            f"SELECT *, valid at time zone :tzname as obtime from {tbl} "
+            "WHERE valid BETWEEN :sts and :ets ORDER by valid ASC"
         )
-        df = read_sql(sql, pgconn, params=(tzname, sts, ets))
     else:
-        sql = (
-            f"SELECT *, valid at time zone %s as obtime from alldata{tbl} "
-            "WHERE station in %s and valid BETWEEN %s and %s "
+        sql = text(
+            f"SELECT *, valid at time zone :tzname as obtime from {tbl} "
+            "WHERE station in :ids and valid BETWEEN :sts and :ets "
             "ORDER by valid ASC"
         )
-        df = read_sql(sql, pgconn, params=(tzname, tuple(stations), sts, ets))
+    with get_sqlalchemy_conn("rwis") as conn:
+        df = pd.read_sql(sql, conn, params=params)
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
         return [b"Sorry, no results found for query!"]

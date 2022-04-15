@@ -91,7 +91,8 @@ def plotter(fdict):
     df["high_sigma"] = (df["high"] - df["avg_high"]) / df["stddev_high"]
     df["low_sigma"] = (df["low"] - df["avg_low"]) / df["stddev_low"]
 
-    fig = figure(apctx=ctx)
+    title = f"{ctx['_sname']} :: Climatology & {year} Observations"
+    fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(2, 1, sharex=True)
 
     ax[0].plot(
@@ -105,10 +106,6 @@ def plotter(fdict):
         df.index.values, df["avg_low"].values, color="b", label="Climate Low"
     )
     ax[0].set_ylabel(r"Temperature $^\circ\mathrm{F}$")
-    ax[0].set_title(
-        "[%s] %s Climatology & %s Observations"
-        % (station, ctx["_nt"].sts[station]["name"], year)
-    )
 
     ax[0].plot(
         df.index.values,

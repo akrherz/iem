@@ -696,10 +696,10 @@ imagery available for the timestamp and latitude / longitude location you specif
   		"desc" => "This service returns a listing of the most recent image for
   		a given product from all collected RADAR sites.",
   		"vars" => Array(
-  				"product" => "Level III Product {N0Q, N0S, N0U, N0Z, NET}"
+  				"product" => "Level III Product {N0B, N0S, N0U, N0Z, NET}"
   		),
   		"example" => Array(
-  				"{product}" => 'N0Q'
+  				"{product}" => 'N0B'
   		 )
   );
   

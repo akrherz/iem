@@ -182,7 +182,7 @@ END
 
 LAYER
   NAME DMX
-  DATA /mesonet/ldmdata/gis/images/4326/ridge/DMX/N0Q_0.png
+  DATA /mesonet/ldmdata/gis/images/4326/ridge/DMX/N0B_0.png
   TYPE RASTER
   STATUS ON
   METADATA

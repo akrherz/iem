@@ -15,7 +15,7 @@ from pyiem.network import Table as NetworkTable
 from pyiem.util import utc
 
 PRODS = {
-    "NEXRAD": ["N0Q", "N0S", "N0U", "N0Z", "NET"],
+    "NEXRAD": ["N0B", "N0S", "N0U", "N0Z", "NET"],
     "TWDR": ["NET", "TZL", "TV0"],
 }
 PILS = (
@@ -53,7 +53,7 @@ def main(argv):
     basedir = ts.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ridge")
     for sid in nt.sts:
         for prod in PRODS[nt.sts[sid]["network"]]:
-            mydir = "%s/%s/%s" % (basedir, sid, prod)
+            mydir = os.path.join(basedir, sid, prod)
             if os.path.isdir(mydir):
                 continue
             supermakedirs(mydir, 0o775, grp.getgrnam("iem-friends")[2])
@@ -62,7 +62,7 @@ def main(argv):
     supermakedirs(basedir, 0o775, grp.getgrnam("iem-friends")[2])
     os.chdir(basedir)
     for pil in PILS:
-        fn = "%s_%s.txt" % (pil, ts.strftime("%Y%m%d"))
+        fn = f"{pil}_{ts:%Y%m%d}.txt"
         if not os.path.isfile(fn):
             subprocess.call(f"touch {fn}", shell=True)
             os.chmod(fn, 0o664)

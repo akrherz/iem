@@ -138,6 +138,8 @@ def fetch_daily(form, cols):
     if df.empty:
         return df, []
 
+    df = df.fillna(np.nan)
+
     # Direct copy / rename
     xref = {
         "rh_avg_qc": "relh",
@@ -146,6 +148,7 @@ def fetch_daily(form, cols):
         "calc_vwc_12_avg_qc": "soil12vwc",
         "calc_vwc_24_avg_qc": "soil24vwc",
         "calc_vwc_50_avg_qc": "soil50vwc",
+        "dailyet_qc": "et",
     }
     df = df.rename(xref, axis=1, errors="ignore")
     # Now we need to do some mass data conversion, sigh
@@ -171,8 +174,6 @@ def fetch_daily(form, cols):
         # Do the work
         df[key] = convert_value(df[col].values, "degC", "degF")
 
-    if "et" in cols:
-        df["et"] = convert_value(df["etalfalfa_qc"].values, "mm", "inch")
     if "speed" in cols:
         df["speed"] = convert_value(
             df["ws_mps_s_wvt_qc"].values, "meter / second", "mile / hour"

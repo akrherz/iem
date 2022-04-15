@@ -127,7 +127,7 @@ daily_opts = [
     },
     {
         "id": 225,
-        "label": "Heatmap of Distribution of Trailing Depatures",
+        "label": "Heatmap of Distribution of Trailing Departures",
     },
     {
         "id": 61,

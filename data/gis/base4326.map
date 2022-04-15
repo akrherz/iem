@@ -88,7 +88,7 @@ LAYER
   NAME DMX
   STATUS ON
   TYPE RASTER
-  DATA /mesonet/ldmdata/gis/images/4326/ridge/DMX/N0Q_0.png
+  DATA /mesonet/ldmdata/gis/images/4326/ridge/DMX/N0B_0.png
   OFFSITE 255 255 255
   PROJECTION
    "init=epsg:4326"
@@ -100,7 +100,7 @@ LAYER
   NAME EAX
   STATUS ON
   TYPE RASTER
-  DATA /mesonet/ldmdata/gis/images/4326/ridge/EAX/N0Q_0.png
+  DATA /mesonet/ldmdata/gis/images/4326/ridge/EAX/N0B_0.png
   OFFSITE 255 255 255
   PROJECTION
    "init=epsg:4326"
@@ -125,7 +125,7 @@ LAYER
   NAME FSD
   STATUS ON
   TYPE RASTER
-  DATA /mesonet/ldmdata/gis/images/4326/ridge/FSD/N0Q_0.png
+  DATA /mesonet/ldmdata/gis/images/4326/ridge/FSD/N0B_0.png
   OFFSITE 255 255 255
 END
 
@@ -133,7 +133,7 @@ LAYER
   NAME ABR
   STATUS ON
   TYPE RASTER
-  DATA /mesonet/ldmdata/gis/images/4326/ridge/ABR/N0Q_0.png
+  DATA /mesonet/ldmdata/gis/images/4326/ridge/ABR/N0B_0.png
   OFFSITE 255 255 255
 END
 
@@ -141,7 +141,7 @@ LAYER
   NAME UDX
   STATUS ON
   TYPE RASTER
-  DATA /mesonet/ldmdata/gis/images/4326/ridge/UDX/N0Q_0.png
+  DATA /mesonet/ldmdata/gis/images/4326/ridge/UDX/N0B_0.png
   OFFSITE 255 255 255
 END
 
@@ -149,7 +149,7 @@ LAYER
   NAME MPX
   STATUS ON
   TYPE RASTER
-  DATA /mesonet/ldmdata/gis/images/4326/ridge/MPX/N0Q_0.png
+  DATA /mesonet/ldmdata/gis/images/4326/ridge/MPX/N0B_0.png
   OFFSITE 255 255 255
 END
 
@@ -158,7 +158,7 @@ LAYER
   NAME ARX
   STATUS ON
   TYPE RASTER
-  DATA /mesonet/ldmdata/gis/images/4326/ridge/ARX/N0Q_0.png
+  DATA /mesonet/ldmdata/gis/images/4326/ridge/ARX/N0B_0.png
   OFFSITE 255 255 255
 END
 
@@ -166,7 +166,7 @@ LAYER
   NAME DVN
   STATUS ON
   TYPE RASTER
-  DATA /mesonet/ldmdata/gis/images/4326/ridge/DVN/N0Q_0.png
+  DATA /mesonet/ldmdata/gis/images/4326/ridge/DVN/N0B_0.png
   OFFSITE 255 255 255
 END
 
@@ -174,7 +174,7 @@ LAYER
   NAME OAX
   STATUS ON
   TYPE RASTER
-  DATA /mesonet/ldmdata/gis/images/4326/ridge/OAX/N0Q_0.png
+  DATA /mesonet/ldmdata/gis/images/4326/ridge/OAX/N0B_0.png
   OFFSITE 255 255 255
 END
 

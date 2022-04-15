@@ -8,7 +8,7 @@
                     "url": "/apps.php"
                 },
                 {
-                    "title": "Auto Data Plotter",
+                    "title": "Automated Data Plotting",
                     "url": "/plotting/auto/"
                 },
                 {
@@ -24,7 +24,7 @@
                     "url": "/rainfall/obhour.phtml"
                 },
                 {
-                    "title": "Interact Radar",
+                    "title": "Interactive Radar",
                     "url": "/GIS/apps/rview/warnings.phtml"
                 },
                 {
@@ -98,7 +98,7 @@
                     "url": "/docs/nexrad_mosaic/"
                 },
                 {
-                    "title": "PIREPs",
+                    "title": "PIREP - Pilot Reports",
                     "url": "/request/gis/pireps.php"
                 },
                 {

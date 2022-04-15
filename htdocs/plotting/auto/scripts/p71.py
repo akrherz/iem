@@ -5,9 +5,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.patheffects as PathEffects
 from pyiem.util import drct2text
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, convert_value
 from pyiem.plot import figure_axes
-from metpy.units import units
 
 PDICT = {
     "KT": "knots",
@@ -16,10 +15,10 @@ PDICT = {
     "KMH": "kilometers per hour",
 }
 XREF_UNITS = {
-    "MPS": units("meter / second"),
-    "KT": units("knot"),
-    "KMH": units("kilometer / hour"),
-    "MPH": units("mile / hour"),
+    "MPS": "meter / second",
+    "KT": "knot",
+    "KMH": "kilometer / hour",
+    "MPH": "mile / hour",
 }
 
 
@@ -93,52 +92,81 @@ def plotter(fdict):
     year = ctx["year"]
     month = ctx["month"]
     sts = datetime.date(year, month, 1)
-    ets = (sts + datetime.timedelta(days=35)).replace(day=1)
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
             """
-            SELECT day, avg_sknt as sknt, vector_avg_drct as drct
-            from summary s JOIN stations t
-            ON (t.iemid = s.iemid) WHERE t.id = %s and t.network = %s and
-            s.day >= %s and s.day < %s and avg_sknt is not null
-            and vector_avg_drct is not null ORDER by day ASC
+                SELECT extract(year from day) as year,
+                to_char(day, 'mmdd') as sday,
+                day, avg_sknt as sknt, vector_avg_drct as drct
+                from summary s JOIN stations t
+                ON (t.iemid = s.iemid) WHERE t.id = %s and t.network = %s and
+                extract(month from day) = %s and avg_sknt is not null
+                and vector_avg_drct is not null ORDER by day ASC
         """,
             conn,
-            params=(station, ctx["network"], sts, ets),
+            params=(station, ctx["network"], month),
+            parse_dates=["day"],
         )
     title = (
-        f"{ctx['_nt'].sts[station]['name']} [{station}]\n"
+        f"{ctx['_sname']}\n"
         f"{sts:%b %Y} Daily Average Wind Speed and Direction"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     if not df.empty:
-        df["day"] = pd.to_datetime(df["day"])
-        sknt = (df["sknt"].values * units("knot")).to(XREF_UNITS[plot_units]).m
-        ax.bar(
-            df["day"].dt.day.values,
-            sknt,
-            ec="green",
-            fc="green",
-            align="center",
+        # Convert speed to desired units
+        df["speed"] = convert_value(df["sknt"], "knot", XREF_UNITS[plot_units])
+        # compute climatology
+        climo = (
+            df[["speed", "sday"]]
+            .groupby("sday")
+            .mean()
+            .rolling(window=7, center=True, min_periods=1)
+            .mean()
+            .reset_index()
         )
-        pos = max([min(sknt) / 2.0, 0.5])
-        for d, _, r in zip(df["day"].dt.day.values, sknt, df["drct"].values):
-            draw_line(ax, d, max(sknt) + 0.5, (270.0 - r) / 180.0 * np.pi)
-            txt = ax.text(
-                d,
-                pos,
-                drct2text(r),
-                ha="center",
-                rotation=90,
-                color="white",
-                va="center",
+        climo["day_of_month"] = climo["sday"].apply(lambda x: int(x[-2:]))
+        label = (
+            f"Smoothed Climatology ({df['year'].min():.0f}-"
+            f"{df['year'].max():.0f})"
+        )
+        # Get this year's data
+        df = df[df["year"] == year]
+        if not df.empty:
+            ax.bar(
+                df["day"].dt.day.values,
+                df["speed"].values,
+                ec="green",
+                fc="green",
+                align="center",
             )
-            txt.set_path_effects(
-                [PathEffects.withStroke(linewidth=2, foreground="k")]
+            pos = max([df["speed"].min() / 2.0, 0.5])
+            # Leave 15% room at the top
+            apos = df["speed"].max() * 1.075
+            for _, row in df.iterrows():
+                x = row["day"].day
+                draw_line(ax, x, apos, (270.0 - row["drct"]) / 180.0 * np.pi)
+                ax.text(
+                    x,
+                    pos,
+                    drct2text(row["drct"]),
+                    ha="center",
+                    rotation=90,
+                    color="white",
+                    va="center",
+                ).set_path_effects(
+                    [PathEffects.withStroke(linewidth=2, foreground="k")]
+                )
+            ax.set_ylim(0, df["speed"].max() * 1.15)
+            ax.plot(
+                climo["day_of_month"],
+                climo["speed"],
+                "k-",
+                lw=2,
+                label=label,
             )
+            ax.legend(loc=(0.75, 1.02))
         ax.grid(True, zorder=11)
-        ax.set_ylim(top=max(sknt) + 2)
     else:
         ax.text(
             0.5,
