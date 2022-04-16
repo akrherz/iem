@@ -49,7 +49,7 @@ def main(argv):
                 (sts, station, net),
             )
         archive_end = ets
-        if ets.date() > floor:
+        if ets > floor:
             archive_end = None
         if (
             archive_end is None and meta["archive_end"] is not None

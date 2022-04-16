@@ -1,4 +1,3 @@
-#!/bin/sh
 # Manually run workflow that syncs station metadata
 
 python set_elevation.py

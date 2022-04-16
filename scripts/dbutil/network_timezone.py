@@ -22,9 +22,9 @@ def main():
         )
         row2 = mcursor2.fetchone()
         if row2 is None or row2[0] == "uninhabited":
-            print("--> MISSING ID: %s" % (netid,))
+            print(f"--> MISSING ID: {netid}")
         else:
-            print("ID: %s TIMEZONE: %s" % (netid, row2[0]))
+            print(f"ID: {netid} TIMEZONE: {row2[0]}")
             mcursor2.execute(
                 "UPDATE networks SET tzname = %s WHERE id = %s",
                 (row2[0], netid),

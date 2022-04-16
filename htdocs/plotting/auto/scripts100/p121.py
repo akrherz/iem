@@ -71,7 +71,6 @@ def plotter(fdict):
 
     prs = [make(thres1), make(thres2), make(thres3), make(thres4)]
 
-    table = "alldata_%s" % (station[:2],)
     s = ctx["_nt"].sts[station]["archive_begin"]
     e = datetime.date.today()
 
@@ -85,13 +84,14 @@ def plotter(fdict):
 # Contact Information: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 # seasonal temperature cycles per year, spring is Jan-Jun, fall is Jul-Dec
 # 1 CYCLE IS A TEMPERATURE VARIATION FROM A VALUE BELOW A THRESHOLD
-#   TO A VALUE EXCEEDING A THRESHOLD.  THINK OF IT AS FREEZE/THAW CYCLES
-#  FIRST DATA COLUMN WOULD BE FOR CYCLES EXCEEDING 26 AND 38 DEGREES F
-THRES  %2.0f-%2.0f   %2.0f-%2.0f   %2.0f-%2.0f   %2.0f-%2.0f   %2.0f-%2.0f   %2.0f-%2.0f   %2.0f-%2.0f   %2.0f-%2.0f
+# TO A VALUE EXCEEDING A THRESHOLD.  THINK OF IT AS FREEZE/THAW CYCLES
+# FIRST DATA COLUMN WOULD BE FOR CYCLES EXCEEDING 26 AND 38 DEGREES F
+THRES  %2.0f-%2.0f   %2.0f-%2.0f   %2.0f-%2.0f   %2.0f-%2.0f   \
+%2.0f-%2.0f   %2.0f-%2.0f   %2.0f-%2.0f   %2.0f-%2.0f
 YEAR   SPRING  FALL    SPRING  FALL    SPRING  FALL    SPRING  FALL
 """ % (
         datetime.date.today().strftime("%d %b %Y"),
-        s.date(),
+        s,
         datetime.date.today(),
         station,
         ctx["_nt"].sts[station]["name"],
@@ -130,14 +130,14 @@ YEAR   SPRING  FALL    SPRING  FALL    SPRING  FALL    SPRING  FALL
     cycle_pos = [-1, -1, -1, -1]
 
     cursor.execute(
-        f"SELECT day, high, low from {table} WHERE station = %s and "
+        "SELECT day, high, low from alldata WHERE station = %s and "
         "high is not null and low is not null ORDER by day ASC",
         (station,),
     )
     for row in cursor:
         ts = row[0]
-        high = int(row[1])
-        low = int(row[2])
+        high = row[1]
+        low = row[2]
 
         for i, (lower, upper) in enumerate(prs):
             ckey = thres[i] + ("s" if ts.month < 7 else "f")

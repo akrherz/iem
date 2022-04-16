@@ -4,10 +4,9 @@ import calendar
 
 # third party
 import pandas as pd
-from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
 from pyiem.exceptions import NoDataFound
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import figure
 from pyiem.plot import fitbox
 
@@ -150,63 +149,67 @@ def plotter(fdict):
     c1 = ctx["c1"]
     c2 = ctx.get("c2")
 
-    dbconn = get_dbconn("coop")
     cltable1, clstation1 = pick_climate(ctx, "1")
 
     if c1 == "custom":
-        df = read_sql(
-            "SELECT sday, station, avg(high) as high, avg(low) as low, "
-            "avg(precip) as precip, avg(snow) as snow "
-            f"from alldata_{station1[:2]} WHERE "
-            "station = %s and sday != '0229' and year >= %s and year <= %s "
-            "and high is not null and "
-            "low is not null GROUP by sday, station ORDER by sday ASC",
-            dbconn,
-            params=(station1, ctx["sy1"], ctx["ey1"]),
-            index_col=None,
-        )
+        with get_sqlalchemy_conn("coop") as conn:
+            df = pd.read_sql(
+                "SELECT sday, station, avg(high) as high, avg(low) as low, "
+                "avg(precip) as precip, avg(snow) as snow "
+                "from alldata WHERE "
+                "station = %s and sday != '0229' and year >= %s and "
+                "year <= %s and high is not null and "
+                "low is not null GROUP by sday, station ORDER by sday ASC",
+                conn,
+                params=(station1, ctx["sy1"], ctx["ey1"]),
+                index_col=None,
+            )
         df["valid"] = pd.to_datetime(df["sday"] + "2000", format="%m%d%Y")
         df = df.set_index("valid")
     else:
-        df = read_sql(
-            f"SELECT valid, station, high, low, precip, snow from {cltable1} "
-            "WHERE station = %s and valid != '2000-02-29' ORDER by valid ASC",
-            dbconn,
-            params=(clstation1,),
-            parse_dates="valid",
-            index_col="valid",
-        )
+        with get_sqlalchemy_conn("coop") as conn:
+            df = pd.read_sql(
+                "SELECT valid, station, high, low, precip, snow from "
+                f"{cltable1} WHERE station = %s and valid != '2000-02-29' "
+                "ORDER by valid ASC",
+                conn,
+                params=(clstation1,),
+                parse_dates="valid",
+                index_col="valid",
+            )
     if df.empty:
         raise NoDataFound("Failed to find data for station1")
     if station2:
         cltable2, clstation2 = pick_climate(ctx, "2")
         if c2 == "custom":
-            df2 = read_sql(
-                "SELECT sday, station, avg(high) as high, avg(low) as low, "
-                "avg(precip) as precip, avg(snow) as snow "
-                f"from alldata_{station2[:2]} WHERE "
-                "station = %s and sday != '0229' and year >= %s and "
-                "year <= %s and high is not null and "
-                "low is not null GROUP by sday, station ORDER by sday ASC",
-                dbconn,
-                params=(station2, ctx["sy2"], ctx["ey2"]),
-                index_col=None,
-            )
+            with get_sqlalchemy_conn("coop") as conn:
+                df2 = pd.read_sql(
+                    "SELECT sday, station, avg(high) as high, "
+                    "avg(low) as low, avg(precip) as precip, "
+                    "avg(snow) as snow from alldata WHERE "
+                    "station = %s and sday != '0229' and year >= %s and "
+                    "year <= %s and high is not null and "
+                    "low is not null GROUP by sday, station ORDER by sday ASC",
+                    conn,
+                    params=(station2, ctx["sy2"], ctx["ey2"]),
+                    index_col=None,
+                )
             df2["valid"] = pd.to_datetime(
                 df2["sday"] + "2000", format="%m%d%Y"
             )
             df2 = df2.set_index("valid")
 
         else:
-            df2 = read_sql(
-                "SELECT valid, station, high, low, precip, snow from "
-                f"{cltable2} WHERE station = %s and valid != '2000-02-29' "
-                "ORDER by valid ASC",
-                dbconn,
-                params=(clstation2,),
-                parse_dates="valid",
-                index_col="valid",
-            )
+            with get_sqlalchemy_conn("coop") as conn:
+                df2 = pd.read_sql(
+                    "SELECT valid, station, high, low, precip, snow from "
+                    f"{cltable2} WHERE station = %s and valid != '2000-02-29' "
+                    "ORDER by valid ASC",
+                    conn,
+                    params=(clstation2,),
+                    parse_dates="valid",
+                    index_col="valid",
+                )
         if df2.empty:
             raise NoDataFound("Failed to find data for station2")
         df["station2"] = station2
@@ -338,9 +341,9 @@ def plotter(fdict):
         ax2.set_xticklabels(calendar.month_abbr[1:])
         ax2.grid()
 
-    fitbox(fig, title, 0.05, 0.94, 0.95, 0.99)
+    fitbox(fig, title, 0.08, 0.94, 0.95, 0.99)
     if subtitle is not None:
-        fitbox(fig, subtitle, 0.05, 0.95, 0.905, 0.935)
+        fitbox(fig, subtitle, 0.08, 0.95, 0.905, 0.935)
     ax0.legend(fontsize=10, ncol=2, loc="center", bbox_to_anchor=(0.5, -0.1))
     ax0.grid()
     ax0.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
