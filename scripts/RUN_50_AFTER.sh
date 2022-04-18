@@ -2,6 +2,8 @@
 
 python cache/cache_autoplots.py &
 
+python gfs/gfs2iemre.py $(date -u --date '6 hours ago' +'%Y %m %d %H') &
+
 cd ingestors/madis
 python extract_hfmetar.py 2 &
 
