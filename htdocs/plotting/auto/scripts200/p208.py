@@ -319,18 +319,36 @@ def plotter(fdict):
             ha="center",
         )
     else:
-        mp.fill_ugcs(
-            df2["val"].to_dict(),
-            color=df2["color"].to_dict(),
-            draw_colorbar=False,
-            labels=df2["name"].to_dict(),
-            missingval="",
-            ilabel=(len(df2.index) <= 10),
-            labelbuffer=5,
-            is_firewx=(p1 == "FW"),
-        )
+        # Do we have a fixed zone/county product?
+        if len(df2.index.str.slice(2, 3).unique().values) == 1:
+            # Let pyIEM handle it verbatim
+            mp.fill_ugcs(
+                df2["val"].to_dict(),
+                color=df2["color"].to_dict(),
+                draw_colorbar=False,
+                labels=df2["name"].to_dict(),
+                missingval="",
+                ilabel=(len(df2.index) <= 10),
+                labelbuffer=5,
+                is_firewx=(p1 == "FW"),
+            )
+        else:
+            # Need to chunk it.
+            for geotype in ["Z", "C"]:
+                df3 = df2[df2.index.str.slice(2, 3) == geotype]
+                mp.fill_ugcs(
+                    df3["val"].to_dict(),
+                    color=df3["color"].to_dict(),
+                    draw_colorbar=False,
+                    labels=df3["name"].to_dict(),
+                    missingval="",
+                    ilabel=(len(df2.index) <= 10),
+                    labelbuffer=5,
+                    is_firewx=(p1 == "FW"),
+                )
+
     if not sbwdf.empty:
-        color = vtec.NWS_COLORS.get("%s.%s" % (p1, s1), "#FF0000")
+        color = vtec.NWS_COLORS.get(f"{p1}.{s1}", "#FF0000")
         poly = sbwdf.iloc[0]["geom"]
         df2 = sbwdf[
             (sbwdf["polygon_begin"] <= utcvalid)
