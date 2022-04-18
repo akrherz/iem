@@ -18,6 +18,9 @@ python extract_hfmetar.py 0 &
 cd ../../plots
 ./RUN_PLOTS
 
+cd ../ndfd
+python ndfd2iemre.py &
+
 cd ../isusm
 python agg_1minute.py
 
