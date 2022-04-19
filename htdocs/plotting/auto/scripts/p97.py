@@ -5,7 +5,11 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_autoplot_context, get_dbconn, get_sqlalchemy_conn
+from pyiem.util import (
+    get_autoplot_context,
+    get_dbconn,
+    get_sqlalchemy_conn,
+)
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import wfo_bounds
 from sqlalchemy import text
@@ -221,6 +225,9 @@ def compute_tables_wfo(wfo):
 
 def replace_gdd_climo(ctx, df, table, date1, date2):
     """Here we are, incredible pain."""
+    # Short circuit if we are not doing departures
+    if ctx["var"] in ["gdd_sum"]:
+        return df
     d1 = date1.strftime("%m%d")
     d2 = date2.strftime("%m%d")
     daylimit = f"sday >= '{d1}' and sday <= '{d2}'"
@@ -396,8 +403,10 @@ def plotter(fdict):
 
     datefmt = "%-d %b %Y" if varname != "cgdd_sum" else "%-d %b"
     subtitle = ""
-    if varname.find("gdd") > -1 and (
-        ctx["gddbase"] not in GDD_KNOWN_BASES or ctx["gddceil"] != 86
+    if (
+        varname.find("gdd") > -1
+        and (ctx["gddbase"] not in GDD_KNOWN_BASES or ctx["gddceil"] != 86)
+        and varname != "gdd_sum"
     ):
         subtitle = "Period of Record Climatology is used for custom GDD"
     elif varname.find("depart") > -1:
