@@ -148,8 +148,6 @@
 192.168.0.241    iem-web-services.local
 # openfire(240) iem16
 192.168.0.240    iem-openfire openfire-bosh
-# rabbitmq(238) metvm2
-192.168.0.238    iem-rabbitmq.local
 # ldm(235) iem11
 192.168.0.235    iem-ldm.local
 # VI_0_234(68) iem15

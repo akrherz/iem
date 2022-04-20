@@ -29,6 +29,7 @@ NEXRAD Mosaics | iem8-dc | iem16 | nagios checks archive
 openfire | iem16 | iem14 | None
 postgres | metvm2 | metvm9  | None
 postgres4 | metvm7 | None | None
+rabbitmq | iem9-dc | iem8-dc | nagios check
 samba | iem16 | None | cron scripts check data availability
 SSH | iem14 | None | None
 RIDGE   | iem13    | None    | inbound file queue, check latency 7 radars
