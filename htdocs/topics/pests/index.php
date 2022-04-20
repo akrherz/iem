@@ -3,6 +3,7 @@
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
+require_once "../../../include/imagemaps.php";
 
 // defaults
 $year = date("Y");
@@ -10,10 +11,14 @@ $year = date("Y");
 $day = date("Y-m-d", time() - 86400);
 
 // Get things set via CGI
+$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IACLIMATE";
+$station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "IATAME";
 $pest = isset($_GET["pest"]) ? xssafe($_GET["pest"]) : null;
 $sdate = isset($_GET["sdate"]) ? xssafe($_GET["sdate"]) : "$year-01-01";
 $edate = isset($_GET["edate"]) ? xssafe($_GET["edate"]) : $day;
 $edatechecked = isset($_GET["edate"]) ? "" : "checked";
+
+$sselect = selectClimodatNetwork($network, "network");
 
 $t = new MyView();
 $t->title = "Pest Forecasting Maps";
@@ -47,6 +52,7 @@ $ar = Array(
     "japanese_beetle" => "Japanese Beetle (Popillia japonica)",
 );
 $pselect = make_select("pest", $pest, $ar, "updateImage", "form-control");
+$nselect = networkSelect($network, $station);
 
 $t->content = <<<EOM
 <ol class="breadcrumb">
@@ -59,6 +65,10 @@ the base and ceiling values used in the degree day calculation. The IEM's
 <a href="/climodat/">Climodat Stations</a> are used for the daily high and
 low temperatures. <a href="/plotting/auto/?q=97">IEM Autoplot 97</a> is
 the backend that generates the maps/data here.</p>
+
+<form method="GET" name="sswitch">
+<p>$sselect <input type="submit" value="Switch State"></p>
+</form>
 
 <form method="GET" name="main">
 
@@ -146,14 +156,42 @@ Hold on for the map is generating now!</p>
 </div>
 <br clear="all" />
 
-<div class="row"><div class="col-md-12">
+<div class="row">
+<div class="col-md-9">
 <img id="theimage" src="/images/pixel.gif" class="img img-responsive">
-</div></div>
-
 <div id="thedata"></div>
+</div>
+
+<div class="col-md-3">
+<strong>Point Data &amp; Forecast</strong>
+
+<p>Select from the available stations for the observed data and a point
+forecast based on the <a href="https://digital.weather.gov/">NWS NDFD</a>
+and <a href="https://mag.ncep.noaa.gov/">NWS GFS Model</a>.</p>
+
+<label>Select Station</label>
+<br />${nselect}
+
+<table class="table table-striped">
+<tbody>
+<tr><th colspan="2">Observed <span id="station_date"></span></th></tr>
+<tr><th>DD Accum:</th><td><span id="station_accum"></span></td></tr>
+
+<tr><th colspan="2">NWS NDFD <span id="station_ndfd_date"></span></th></tr>
+<tr><th>DD Accum:</th><td><span id="station_ndfd_accum"></span></td></tr>
+<tr><th>DD Total:</th><td><span id="station_ndfd_total"></span></td></tr>
+
+<tr><th colspan="2">NWS GFS <span id="station_gfs_date"></span></th></tr>
+<tr><th>DD Accum:</th><td><span id="station_gfs_accum"></span></td></tr>
+<tr><th>DD Total:</th><td><span id="station_gfs_total"></span></td></tr>
+
+</tbody>
+</table>
+</div>
+</div>
 
 </form>
 
 
 EOM;
-$t->render("single.phtml");
+$t->render("full.phtml");

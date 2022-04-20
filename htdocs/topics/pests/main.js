@@ -16,9 +16,32 @@ function hideImageLoad(){{
         '<i class="fa fa-table"></i> As Excel</a></p>');
 }}
 
+function updateStationForecast(){
+    var station = $("select[name='station']").val();
+    var pest = $("select[name='pest']").val()
+    var opts = pestData[pest];
+    var sdate = $("#sdate").val();
+    var edate = $("#edate").val();
+    var url = "/json/climodat_dd.py?station=" + station +"&gddbase=" + opts.gddbase +
+    "&gddceil=" + opts.gddceil + "&sdate=" + sdate + "&edate=" + edate;
+    $.get(url, function(data){
+        $("#station_date").html( data.sdate + " to " + data.edate);
+        $("#station_accum").html(data.accum.toFixed(1));
+
+        $("#station_gfs_date").html( data.gfs_sdate + " to " + data.gfs_edate);
+        $("#station_gfs_accum").html("+" + data.gfs_accum.toFixed(1));
+        $("#station_gfs_total").html((data.accum + data.gfs_accum).toFixed(1));
+
+        $("#station_ndfd_date").html( data.ndfd_sdate + " to " + data.ndfd_edate);
+        $("#station_ndfd_accum").html("+" + data.ndfd_accum.toFixed(1));
+        $("#station_ndfd_total").html((data.accum + data.ndfd_accum).toFixed(1));
+    });
+}
+
 function updateImage(){
     showProgressBar();
     $("#theimage").attr("src", "/images/pixel.gif");
+    var station = $("select[name='station']").val();
     var pest = $("select[name='pest']").val()
 
     // Hide all the pinfo containers
@@ -29,13 +52,16 @@ function updateImage(){
     var opts = pestData[pest];
     var sdate = $("#sdate").val();
     var edate = $("#edate").val();
-    var imgurl = "/plotting/auto/plot/97/d:sector::sector:IA::var:gdd_sum::" +
+    var state = $("select[name='state']").val();
+    state = (state !== undefined) ? state.substring(0, 2): "IA";
+    var imgurl = "/plotting/auto/plot/97/d:sector::sector:" + state + "::var:gdd_sum::" +
     "gddbase:" + opts.gddbase + "::gddceil:" + opts.gddceil + "::date1:" + sdate + "::usdm:no::" +
-    "date2:" + edate + "::p:contour::cmap:RdYlBu::cmap_r=on::c:yes::_r:43.png";
+    "date2:" + edate + "::p:contour::cmap:RdYlBu_r::c:yes::_r:43.png";
     $("#theimage").attr("src", imgurl);
 
     // Update the web browser URL
-    var url = "/topics/pests/?pest=" + pest + "&sdate=" + sdate;
+    var url = "/topics/pests/?state=" + state + "&pest=" + pest + "&sdate="
+        + sdate + "&station=" + station;
     // is edate_off checked?
     if (! $("#edate_off").is(':checked')){
         url += "&edate=" + edate;
@@ -87,10 +113,15 @@ function setupUI(){
             updateImage();
         }
     });
+
+    $("select[name='station']").change(function(){
+        updateStationForecast();
+    });
 }
 
 $(document).ready(function() {
     updateImage();
+    updateStationForecast();
     showProgressBar();
     setupUI();
 });
