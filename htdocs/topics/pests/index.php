@@ -16,13 +16,24 @@ $edate = isset($_GET["edate"]) ? xssafe($_GET["edate"]) : $day;
 $edatechecked = isset($_GET["edate"]) ? "" : "checked";
 
 $t = new MyView();
-$t->title = "Pest Degree Day Maps";
+$t->title = "Pest Forecasting Maps";
 $t->jsextra = <<<EOM
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script type="text/javascript" src="main.js"></script>
 EOM;
 $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
+<style>
+#theimage {
+  display: block;
+  background-image: url("/images/wait24trans.gif");
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: 80px 80px;
+  min-height: 100px;
+  min-width: 400px;
+}
+</style>
 EOM;
 
 // Compute a good fall Year
@@ -32,22 +43,29 @@ $ar = Array(
     "seedcorn_maggot" => "Seedcorn Maggot (Delia platura)",
     "alfalfa_weevil" => "Alfalfa Weevil (Hypera postica)",
     "soybean_aphid" => "Soybean Aphid (Aphis glycines)",
-    "common_stalk_borer" => "Common Stalk Borer (Papaiperma nebris)",
+    "common_stalk_borer" => "Common Stalk Borer (Papaipema nebris)",
     "japanese_beetle" => "Japanese Beetle (Popillia japonica)",
 );
-$pselect = make_select("pest", $pest, $ar, "updateImage");
+$pselect = make_select("pest", $pest, $ar, "updateImage", "form-control");
 
 $t->content = <<<EOM
 <ol class="breadcrumb">
  <li><a href="/agweather/">Ag Weather</a></li>
- <li class="active">Pest Degree Day Maps</li>
+ <li class="active">Pest Forecasting Maps</li>
  </ol>
+
+<p>This page generates degree day maps for a selected pest. The pest provides
+the base and ceiling values used in the degree day calculation. The IEM's
+<a href="/climodat/">Climodat Stations</a> are used for the daily high and
+low temperatures. <a href="/plotting/auto/?q=97">IEM Autoplot 97</a> is
+the backend that generates the maps/data here.</p>
 
 <form method="GET" name="main">
 
 <div class="row">
 <div class="col-md-6">
-${pselect}
+<label>Select Pest</label>
+<br />${pselect}
 </div>
 <div class="col-md-3">
 <label for="sdate">Start Date</label>
@@ -55,8 +73,7 @@ ${pselect}
 </div>
 <div class="col-md-3">
 <input type="checkbox" name="edate_off" id="edate_off" value="1" $edatechecked>
-<label for="edate_off">Default to Latest Date</label>
-<br /><label for="edate">Or Select End Date</label>
+<label for="edate_off">Default to Latest End Date</label>
 <input type="text" name="edate" id="edate" value="$edate" class="form-control" placeholder="Start Date">
 </div>
 
@@ -95,7 +112,7 @@ ${pselect}
 </div>
 
 <div id="common_stalk_borer" class="pinfo" style="display: none;">
-<h3>Common Stalk Borer (Papaiperma nebris)</h3>
+<h3>Common Stalk Borer (Papaipema nebris)</h3>
 <p>Key Degree Day Levels:</p>
 <ul>
  <li><strong>1,400</strong>: Larvae begin moving to cornfields</li>
@@ -129,7 +146,11 @@ Hold on for the map is generating now!</p>
 </div>
 <br clear="all" />
 
-<p><img id="theimage" src="/images/wait24trans.gif" class="img img-responsive"></p>
+<div class="row"><div class="col-md-12">
+<img id="theimage" src="/images/pixel.gif" class="img img-responsive">
+</div></div>
+
+<div id="thedata"></div>
 
 </form>
 

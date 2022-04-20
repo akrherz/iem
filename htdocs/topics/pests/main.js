@@ -8,10 +8,17 @@ pestData.japanese_beetle = {'gddbase': 50, 'gddceil': 90};
 
 function hideImageLoad(){{
     $('#willload').css('display', 'none');
+    var url =$("#theimage").attr("src").replace(".png", "");
+    $("#thedata").html(
+        '<p>Download point data: <a href="' + url +'.txt" class="btn btn-primary">' +
+        '<i class="fa fa-table"></i> As CSV</a> &nbsp;' +
+        '<a href="' + url +'.xlsx" class="btn btn-primary">' +
+        '<i class="fa fa-table"></i> As Excel</a></p>');
 }}
 
 function updateImage(){
     showProgressBar();
+    $("#theimage").attr("src", "/images/pixel.gif");
     var pest = $("select[name='pest']").val()
 
     // Hide all the pinfo containers
