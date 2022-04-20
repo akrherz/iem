@@ -136,11 +136,11 @@ def merge_grib(nc, now):
             days = (fxtime.date() - now.date()).days - 1
             if hits == 4:
                 LOG.info("Writing %s, days=%s", fxtime, days)
-                nn = NearestNDInterpolator((lats, lons), np.ravel(tmaxgrid))
+                nn = NearestNDInterpolator((lons, lats), np.ravel(tmaxgrid))
                 nc.variables["high_tmpk"][days, :, :] = nn(xi, yi)
-                nn = NearestNDInterpolator((lats, lons), np.ravel(tmingrid))
+                nn = NearestNDInterpolator((lons, lats), np.ravel(tmingrid))
                 nc.variables["low_tmpk"][days, :, :] = nn(xi, yi)
-                nn = NearestNDInterpolator((lats, lons), np.ravel(pgrid))
+                nn = NearestNDInterpolator((lons, lats), np.ravel(pgrid))
                 nc.variables["p01d"][days, :, :] = nn(xi, yi)
             tmingrid = None
             tmaxgrid = None
