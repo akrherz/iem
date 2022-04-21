@@ -30,12 +30,12 @@ EVENTS = {"reprocess_solar": False, "days": [], "reprocess_temps": False}
 VARCONV = {
     "tsoil_c_avg": "t4_c_avg",
     "timestamp": "valid",
-    "vwc06_avg": "vwc_06_avg",
-    "vwc_avg6in": "vwc_06_avg",
+    "vwc_avg6in": "calcvwc4_avg",  # Unique to Masonville, call it 4 inch
+    "temp_avg6in": "t4_c_avg",  # Unique to Masonville
+    "ec6in": "ec4",  # Unique to Masonville
     "vwc12_avg": "vwc_12_avg",
     "vwc24_avg": "vwc_24_avg",
     "vwc50_avg": "vwc_50_avg",
-    "calcvwc06_avg": "calc_vwc_06_avg",
     "calcvwc12_avg": "calc_vwc_12_avg",
     "calcvwc24_avg": "calc_vwc_24_avg",
     "calcvwc50_avg": "calc_vwc_50_avg",
@@ -44,11 +44,9 @@ VARCONV = {
     "outofrange24": "p24outofrange",
     "outofrange50": "p50outofrange",
     "ws_ms_s_wvt": "ws_mps_s_wvt",
-    "temp_avg6in": "t6_c_avg",
     "bp_mmhg_avg": "bpres_avg",
     "bp_mb_avg": "bpres_avg",
     "rh": "rh_avg",
-    "ec6in": "ec6",
     "ec12in": "ec12",
     "ec24in": "ec24",
     "ec50in": "ec50",
@@ -231,7 +229,7 @@ def common_df_logic(filename, maxts, nwsli, tablename):
             "rhnans_tot",
             "tairnans_tot",
             "winddir_sd1_wvt",
-            "ec6",
+            "ec4",
         ],
         axis=1,
         errors="ignore",
