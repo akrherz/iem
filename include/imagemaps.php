@@ -118,12 +118,16 @@ function make_sname($tbl){
     return sprintf("[%s] %s%s", $tbl['id'], $tbl['name'], $dextra);
 }
 
-function networkSelect($network, $selected, $extra=Array(),
-		$selectName="station")
+function networkSelect(
+    $network,
+    $selected,
+    $extra=Array(),
+	$selectName="station",
+    $only_online=FALSE)
 {
     $s = "";
     include_once dirname(__FILE__) ."/network.php";
-    $nt = new NetworkTable($network);
+    $nt = new NetworkTable($network, FALSE, $only_online);
     $cities = $nt->table;
     $s .= "<select class=\"iemselect2\" name=\"$selectName\">\n";
     foreach($cities as $sid => $tbl)
