@@ -1,4 +1,7 @@
 <?php
+// TODO print out dates that key thresholds are met
+// TODO add climatology to the table
+
 // Pest DD Maps
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
@@ -24,7 +27,7 @@ $t = new MyView();
 $t->title = "Pest Forecasting Maps";
 $t->jsextra = <<<EOM
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
-<script type="text/javascript" src="main.js"></script>
+<script type="text/javascript" src="main.js?v=2"></script>
 EOM;
 $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
@@ -52,7 +55,7 @@ $ar = Array(
     "japanese_beetle" => "Japanese Beetle (Popillia japonica)",
 );
 $pselect = make_select("pest", $pest, $ar, "updateImage", "form-control");
-$nselect = networkSelect($network, $station);
+$nselect = networkSelect($network, $station, Array(), "station", TRUE);
 
 $t->content = <<<EOM
 <ol class="breadcrumb">
@@ -91,7 +94,7 @@ the backend that generates the maps/data here.</p>
 
 <div id="seedcorn_maggot" class="pinfo" style="display: none;">
 <h3>Seedcorn Maggot (Delia platura)</h3>
-<p>Key Degree Day Levels:</p>
+<p>Key Degree Day Levels for January 1 Start Date:</p>
 <ul>
  <li><strong>360:</strong> Peak adult emergence (1st generation) and egg-laying</li>
  <li><strong>781:</strong> Pupation, "fly-free" period begins</li>
@@ -102,7 +105,7 @@ the backend that generates the maps/data here.</p>
 
 <div id="alfalfa_weevil" class="pinfo" style="display: none;">
 <h3>Alfalfa Weevil (Hypera postica)</h3>
-<p>Key Degree Day Levels:</p>
+<p>Key Degree Day Levels for January 1 Start Date:</p>
 <ul>
  <li><strong>300:</strong> Egg hatch</li>
  <li><strong>575:</strong> Peak larval feeding</li>
@@ -113,7 +116,7 @@ the backend that generates the maps/data here.</p>
 
 <div id="soybean_aphid" class="pinfo" style="display: none;">
 <h3>Soybean Aphid (Aphis glycines)</h3>
-<p>Key Degree Day Levels:</p>
+<p>Key Degree Day Levels for January 1 Start Date:</p>
 <ul>
  <li><strong>150:</strong> Egg hatch</li>
 </ul>
@@ -123,7 +126,7 @@ the backend that generates the maps/data here.</p>
 
 <div id="common_stalk_borer" class="pinfo" style="display: none;">
 <h3>Common Stalk Borer (Papaipema nebris)</h3>
-<p>Key Degree Day Levels:</p>
+<p>Key Degree Day Levels for January 1 Start Date:</p>
 <ul>
  <li><strong>1,400</strong>: Larvae begin moving to cornfields</li>
  <li><strong>1,700</strong>: Peak larval movement</li>
@@ -134,7 +137,7 @@ the backend that generates the maps/data here.</p>
 
 <div id="japanese_beetle" class="pinfo" style="display: none;">
 <h3>Japanese Beetle (Popillia japonica)</h3>
-<p>Key Degree Day Levels:</p>
+<p>Key Degree Day Levels for January 1 Start Date:</p>
 <ul>
  <li><strong>1,030</strong>: Adults begin emerging</li>
  <li><strong>2,150</strong>: Adults done emerging</li>
@@ -177,11 +180,13 @@ and <a href="https://mag.ncep.noaa.gov/">NWS GFS Model</a>.</p>
 <tr><th colspan="2">Observed <span id="station_date"></span></th></tr>
 <tr><th>DD Accum:</th><td><span id="station_accum"></span></td></tr>
 
-<tr><th colspan="2">NWS NDFD <span id="station_ndfd_date"></span></th></tr>
+<tr><th colspan="2">NWS NDFD 7 Day Forecast
+<br /><span id="station_ndfd_date"></span></th></tr>
 <tr><th>DD Accum:</th><td><span id="station_ndfd_accum"></span></td></tr>
 <tr><th>DD Total:</th><td><span id="station_ndfd_total"></span></td></tr>
 
-<tr><th colspan="2">NWS GFS <span id="station_gfs_date"></span></th></tr>
+<tr><th colspan="2">NWS GFS 14 Day Forecast
+<br /><span id="station_gfs_date"></span></th></tr>
 <tr><th>DD Accum:</th><td><span id="station_gfs_accum"></span></td></tr>
 <tr><th>DD Total:</th><td><span id="station_gfs_total"></span></td></tr>
 

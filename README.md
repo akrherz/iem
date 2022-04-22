@@ -31,8 +31,7 @@ postgres | metvm2 | metvm9  | None
 postgres4 | metvm7 | None | None
 rabbitmq | iem9-dc | iem8-dc | nagios check
 samba | iem16 | None | cron scripts check data availability
-SSH | iem14 | None | None
-RIDGE   | iem13    | None    | inbound file queue, check latency 7 radars
+RIDGE | iem9-dc | None    | inbound file queue, check latency 7 radars
 webalizer | iem19 | None | None
 Webcam Current | iem13 | None | cron script monitors for offline webcams
 Webcam Lapses | iem13 | None | None
