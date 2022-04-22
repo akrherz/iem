@@ -12,15 +12,13 @@ PDICT = {
     "E": "Excessive Rainfall",
     "F": "Fire Weather",
 }
-PDICT2 = dict(
-    (
-        ("all", "Summarize for CONUS"),
-        ("ugc", "Summarize by Selected County/Zone/Parish"),
-        ("state", "Summarize by Selected State"),
-        ("wfo", "Summarize by Selected WFO"),
-    )
-)
-PDICT3 = dict((("yes", "Yes"), ("no", "No")))
+PDICT2 = {
+    "all": "Summarize for CONUS",
+    "ugc": "Summarize by Selected County/Zone/Parish",
+    "state": "Summarize by Selected State",
+    "wfo": "Summarize by Selected WFO",
+}
+PDICT3 = {"yes": "Yes", "no": "No"}
 COLORS = {
     "TSTM": "#c0e8c0",
     "MRGL": "#66c57d",
@@ -160,7 +158,8 @@ def plotter(fdict):
             with data as (
                 select expire, threshold from spc_outlooks
                 WHERE category = %s and day = %s and outlook_type = %s and
-                expire > %s and expire < %s),
+                expire > %s and expire < %s and
+                threshold not in ('IDRT', 'SDRT')),
             agg as (
                 select date(expire - '1 day'::interval), d.threshold, priority,
                 rank() OVER (PARTITION by date(expire - '1 day'::interval)
@@ -190,7 +189,7 @@ def plotter(fdict):
             geomcol = "the_geom"
             if wfo not in ctx["_nt"].sts:
                 raise NoDataFound("Unknown station metadata.")
-            title2 = "NWS %s [%s]" % (ctx["_nt"].sts[wfo]["name"], wfo)
+            title2 = f"NWS {ctx['_nt'].sts[wfo]['name']} [{wfo}]"
         elif ctx["w"] == "ugc":
             table = "ugcs"
             abbrcol = "ugc"
@@ -206,11 +205,7 @@ def plotter(fdict):
             name = "Unknown"
             if cursor.rowcount == 1:
                 name = cursor.fetchone()[0]
-            title2 = "%s [%s] %s" % (
-                "County" if ugc[2] == "C" else "Zone",
-                ugc,
-                name,
-            )
+            title2 = f"{'County' if ugc[2] == 'C' else 'Zone'} [{ugc}] {name}"
         else:
             table = "states"
             geomcol = "the_geom"
@@ -267,15 +262,11 @@ def plotter(fdict):
         ets,
         data,
         apctx=ctx,
-        title="Highest %s Day %s %s Outlook for %s"
-        % (
-            "WPC" if outlook_type == "E" else "SPC",
-            day,
-            PDICT[outlook_type],
-            title2,
+        title=(
+            f"Highest {'WPC' if outlook_type == 'E' else 'SPC'} Day "
+            f"{day} {PDICT[outlook_type]} Outlook for {title2}"
         ),
-        subtitle="Valid %s - %s"
-        % (sts.strftime("%d %b %Y"), ets.strftime("%d %b %Y")),
+        subtitle=f"Valid {sts:%d %b %Y} - {ets:%d %b %Y}",
     )
     return fig, df
 
