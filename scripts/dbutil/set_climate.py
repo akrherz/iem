@@ -12,7 +12,7 @@ def workflow(col):
     pgconn = get_dbconn("mesosite")
     mcursor = pgconn.cursor()
     mcursor2 = pgconn.cursor()
-    if col == "climate":
+    if col == "climate_site":
         # Update when sites come offline and online
         mcursor.execute(
             "update stations SET climate_site = null where "
