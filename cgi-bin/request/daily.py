@@ -31,16 +31,16 @@ def get_climate(network, stations):
     for station in stations:
         if station not in nt.sts:
             return f"ERROR: station: {station} not found in network: {network}"
-        cldata[nt.sts[station]["ncdc81"]] = {}
-        clisites.append(nt.sts[station]["ncdc81"])
+        clid = nt.sts[station]["ncei91"]
+        cldata[clid] = {}
+        if clid not in clisites:
+            clisites.append(clid)
     if not clisites:
         return data
-    if len(clisites) == 1:
-        clisites.append("XX")
     mesosite = get_dbconn("coop")
     cursor = mesosite.cursor()
     cursor.execute(
-        "SELECT station, valid, high, low, precip from ncdc_climate81 "
+        "SELECT station, valid, high, low, precip from ncei_climate91 "
         "where station in %s",
         (tuple(clisites),),
     )
@@ -55,7 +55,7 @@ def get_climate(network, stations):
     for stid in stations:
         data[stid] = {}
         now = sts
-        clsite = nt.sts[stid]["ncdc81"]
+        clsite = nt.sts[stid]["ncei91"]
         while now < ets:
             key = now.strftime("%m%d")
             data[stid][key] = cldata[clsite].get(
@@ -88,7 +88,7 @@ def get_data(network, sts, ets, stations):
         snowd, min_feel, avg_feel, max_feel, max_sknt, max_gust
         from summary s JOIN stations t
         on (t.iemid = s.iemid) WHERE
-        s.day >= %s and s.day < %s and t.network = %s and t.id in %s
+        s.day >= %s and s.day <= %s and t.network = %s and t.id in %s
         ORDER by day ASC""",
         (sts, ets, network, tuple(stations)),
     )

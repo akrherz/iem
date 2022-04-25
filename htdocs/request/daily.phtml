@@ -30,8 +30,8 @@ $y1 = yearSelect2(1928, date("Y"), "year1");
 $m1 = monthSelect("", "month1");
 $d1 = daySelect2("", "day1");
 $y2 = yearSelect2(1928, date("Y"), "year2");
-$m2 = monthSelect("", "month2");
-$d2 = daySelect2("", "day2");
+$m2 = monthSelect(date("m"), "month2");
+$d2 = daySelect2(date("d"), "day2");
 
 $t->content = <<<EOF
 <h3>IEM Computed Daily Summary of Observations</h3>
@@ -57,7 +57,7 @@ $t->content = <<<EOF
 
 <div id="iemss" data-network="{$network}"></div>
 
-<h4>Select period:</h4>
+<h4>Select inclusive date period:</h4>
 <table class="table table-striped">
   <tr>
     <td></td>
@@ -94,9 +94,9 @@ $t->content = <<<EOF
  <dt>avg_rh</dt><dd>Average Relative Humidity [%]: computed by time averaging
     		the available reports, it is not average of the daily max/min.</dd>
  <dt>max_rh</dt><dd>Maximum Relative Humidity [%]</dd>
- <dt>climo_high_f</dt><dd>NCDC 1981-2010 Daily High Temperature Climatology [F]</dd>
- <dt>climo_low_f</dt><dd>NCDC 1981-2010 Daily Low Temperature Climatology [F]</dd>
- <dt>climo_precip_in</dt><dd>NCDC 1981-2010 Daily Precipitation Climatology [inch]</dd>
+ <dt>climo_high_f</dt><dd>NCEI 1991-2020 Daily High Temperature Climatology [F]</dd>
+ <dt>climo_low_f</dt><dd>NCEI 1991-2020 Daily Low Temperature Climatology [F]</dd>
+ <dt>climo_precip_in</dt><dd>NCEI 1991-2020 Daily Precipitation Climatology [inch]</dd>
  <dt>snow_in</dt><dd>Reported Snowfall [inch]</dd>
  <dt>snowd_in</dt><dd>Reported Snow Depth [inch]</dd>
  <dt>min_feel</dt><dd>Minimum "Feels Like" (either wind chill or heat index)
@@ -117,5 +117,3 @@ $t->content = <<<EOF
 
 EOF;
 $t->render('single.phtml');
-
-?>
