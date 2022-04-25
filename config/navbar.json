@@ -28,6 +28,10 @@
                     "url": "/GIS/apps/rview/warnings.phtml"
                 },
                 {
+                    "title": "Pest Maps + Forecasting",
+                    "url": "/topics/pests/"
+                },
+                {
                     "title": "Sortable Currents",
                     "url": "/my/current.phtml"
                 },

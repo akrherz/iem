@@ -71,6 +71,9 @@ product generated for the National Weather Service for comparison.</li>
 data from the NWS COOP network.
 
 <br /><a href="/plotting/auto/?q=99">Plot of Daily Departures by Year</a>
+
+<p><a href="/topics/pests/">Pest Maps and Forecasts</a> track degree days
+for various pests of interest.</p>
 </td>
 </tr>
 
@@ -96,6 +99,10 @@ The <a href="/climodat/">Climodat</a> reports present summarized GDD data.
  <li><a href="/data/summary/gdd_may1_6086.png">May 1 - Nov 1 GDD 60/86</a></li>
  <li><a href="/data/summary/gdd_may1_6586.png">May 1 - Nov 1 GDD 65/86</a></li>
 </ul>
+
+<p><a href="/topics/pests/">Pest Maps and Forecasts</a> track degree days
+for various pests of interest.</p>
+
 </td>
 </tr>
 
