@@ -580,7 +580,7 @@ mopts = [
     {"id": 153, "label": "Hourly Temperature Extremes by Month/Season/Year"},
     {
         "id": 159,
-        "label": "Hourly Temp/Dew Point Frequency by-year by-hour-of-day",
+        "label": "Hourly Frequency / Histogram by year and by hour of day",
     },
     {
         "id": 106,

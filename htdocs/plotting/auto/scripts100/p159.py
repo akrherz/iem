@@ -31,14 +31,20 @@ MDICT = dict(
     ]
 )
 
-METRICS = dict(
-    [
-        ("tmpf", "Air Temp (F)"),
-        ("dwpf", "Dew Point Temp (F)"),
-        ("feel", "Feels Like Temp (F)"),
-        ("relh", "Relative Humidity (%)"),
-    ]
-)
+METRICS = {
+    "tmpf": "Air Temp (F)",
+    "dwpf": "Dew Point Temp (F)",
+    "feel": "Feels Like Temp (F)",
+    "relh": "Relative Humidity (%)",
+    "sped": "Wind Speed (mph)",
+}
+UNITS = {
+    "tmpf": "F",
+    "dwpf": "F",
+    "feel": "F",
+    "relh": "%",
+    "sped": "mph",
+}
 
 DIRS = {"aoa": "At or Above", "below": "Below"}
 
@@ -81,7 +87,12 @@ def get_description():
             label="Threshold Direction:",
             options=DIRS,
         ),
-        dict(type="int", name="thres", default=65, label="Threshold (F or %)"),
+        dict(
+            type="int",
+            name="thres",
+            default=65,
+            label="Threshold (F or % or MPH):",
+        ),
         dict(
             type="select",
             name="month",
@@ -126,18 +137,20 @@ def plotter(fdict):
     elif month == "summer":
         months = [6, 7, 8]
     else:
-        ts = datetime.datetime.strptime("2000-" + month + "-01", "%Y-%b-%d")
+        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month]
 
     opp = ">=" if mydir == "aoa" else "<"
+
+    dbvarname = "(sknt * 1.15)" if varname == "sped" else varname
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
             text(
                 f"""WITH hourly as (
             SELECT date_trunc('hour', valid + '10 minutes'::interval)
             at time zone :tzname as ts,
-            max(case when {varname}::int {opp} :t then 1 else 0 end) as hit
+            max(case when {dbvarname}::int {opp} :t then 1 else 0 end) as hit
             from alldata where station = :station and report_type = 2
             GROUP by ts)
 
@@ -163,9 +176,8 @@ def plotter(fdict):
     mlabel = MDICT[month] if month != "jul1" else "Jul-Jun [year of Jul shown]"
     title = (
         f"({mlabel}) {METRICS[varname]} Hours {DIRS[mydir]} "
-        f"{threshold}{'%' if varname == 'relh' else 'F'}\n"
-        f"{ctx['_nt'].sts[station]['name']} [{station}] "
-        f"({ydf.index.min():.0f}-{ydf.index.max():.0f})"
+        f"{threshold}{UNITS[varname]}\n"
+        f"{ctx['_sname']} :: ({ydf.index.min():.0f}-{ydf.index.max():.0f})"
     )
     fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(2, 1)
