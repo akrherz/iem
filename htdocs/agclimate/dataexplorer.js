@@ -56,13 +56,14 @@ function updateTitle() {
 function updateMap() {
     if (currentdt && typeof currentdt != "string") {
         var dt = currentdt.toISOString();
+        var uristamp = timeChanged ? "dt=" + dt : "";
         gj.setSource(new ol.source.Vector({
-            url: "/geojson/agclimate.py?dt=" + dt,
+            url: "/geojson/agclimate.py?" + uristamp,
             format: new ol.format.GeoJSON()
         })
         );
         invgj.setSource(new ol.source.Vector({
-            url: "/geojson/agclimate.py?inversion&dt=" + dt,
+            url: "/geojson/agclimate.py?inversion&" + uristamp,
             format: new ol.format.GeoJSON()
         })
         );
@@ -236,17 +237,23 @@ function setDate() {
         .datepicker("enable");
 }
 
-$(".dt").click(function (e) {
-    timeChanged = true;
-    $(this).removeClass('focus');
-    currentdt = new Date(currentdt.valueOf() + parseInt($(this).data('delta')));
-    setDate();
-    updateMap();
-});
+function setupUI(){
+    $(".dt").click(function (e) {
+        timeChanged = true;
+        $(this).removeClass('focus');
+        currentdt = new Date(currentdt.valueOf() + parseInt($(this).data('delta')));
+        setDate();
+        updateMap();
+    });
+    
+    
+    $('#varpicker').change(function () {
+        varname = $('#varpicker').val();
+        gj.setStyle(gj.getStyle());
+        updateTitle();
+    });    
+};
 
-
-$('#varpicker').change(function () {
-    varname = $('#varpicker').val();
-    gj.setStyle(gj.getStyle());
-    updateTitle();
+$(document).ready(function(){
+    setupUI();
 });

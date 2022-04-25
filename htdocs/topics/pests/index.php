@@ -1,6 +1,7 @@
 <?php
 // TODO print out dates that key thresholds are met
 // TODO add climatology to the table
+define("IEM_APPID", 135);
 
 // Pest DD Maps
 require_once "../../../config/settings.inc.php";

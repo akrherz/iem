@@ -112,7 +112,7 @@ def plotter(fdict):
         raise NoDataFound("No Data Found.")
 
     title = (
-        f"{station} {ctx['_nt'].sts[station]['name']} Daily "
+        f"{ctx['_sname']} :: Daily "
         f"Climate Comparison for {calendar.month_name[month]}"
     )
     fig = figure(apctx=ctx, title=title)

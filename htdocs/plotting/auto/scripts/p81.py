@@ -68,7 +68,10 @@ def plotter(fdict):
             index_col="doy",
         )
 
-    fig = figure(apctx=ctx)
+    title = (
+        f"{ctx['_sname']} :: Daily {PDICT.get(varname)} Standard Deviations"
+    )
+    fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(2, 1, sharex=True)
     ax[0].plot(
         df.index.values, df["doy_stddev"], lw=2, color="r", label="Single Day"
@@ -80,15 +83,6 @@ def plotter(fdict):
 
     ax[0].set_ylabel(r"Temperature Std. Deviation $^\circ$F")
     ax[0].grid(True)
-
-    msg = ("[%s] %s Daily %s Standard Deviations") % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-        PDICT.get(varname),
-    )
-    tokens = msg.split()
-    sz = int(len(tokens) / 2)
-    ax[0].set_title(" ".join(tokens[:sz]) + "\n" + " ".join(tokens[sz:]))
 
     ax[1].plot(
         df.index.values, df["doy_stddev"] / df["d2d_stddev"], lw=2, color="g"

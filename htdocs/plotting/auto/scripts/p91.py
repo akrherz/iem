@@ -97,10 +97,9 @@ def plotter(fdict):
         )
     df = pd.DataFrame(rows)
 
-    title = ("[%s] %s Statistics of %s over 1-31 Consecutive Days") % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-        PDICT.get(varname),
+    title = (
+        f"{ctx['_sname']} Statistics of {PDICT.get(varname)} "
+        "over 1-31 Consecutive Days"
     )
     fig, ax = figure_axes(title=title, apctx=ctx)
     if varname == "precip":
@@ -136,7 +135,7 @@ def plotter(fdict):
             np.arange(1, 32), df["highest_min"], label="Highest Above", lw=2
         )
         ax.plot(np.arange(1, 32), df["lowest_max"], label="Lowest Below", lw=2)
-    ax.set_ylabel("%s (%s)" % (PDICT.get(varname), UNITS.get(varname)))
+    ax.set_ylabel(f"{PDICT.get(varname)} ({UNITS.get(varname)})")
     ax.set_xlabel("Consecutive Days")
     ax.grid(True)
     ax.set_xlim(0.5, 31.5)

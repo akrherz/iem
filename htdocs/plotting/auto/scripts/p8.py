@@ -84,8 +84,7 @@ def plotter(fdict):
     )
 
     title = (
-        f"{ctx['_nt'].sts[station]['name']} [{station}] "
-        "Monthly Precipitation Reliability\n"
+        f"{ctx['_sname']} :: Monthly Precipitation Reliability\n"
         f"Period: {syear}-{eyear}, % of Months above {threshold}% "
         "of Long Term Avg"
     )
