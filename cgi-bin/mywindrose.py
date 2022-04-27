@@ -175,6 +175,7 @@ def application(environ, start_response):
         sname=nt.sts[station]["name"],
         tzname=tzname,
         level=form.get("level", None),
+        limit_by_doy=(form.get("limit_by_doy") == "1"),
         bins=bins,
     )
     if "justdata" in form:

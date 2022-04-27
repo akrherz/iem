@@ -48,7 +48,10 @@ if (isset($_GET["hour1"])){
 	if (isset($_GET["monthlimit"])){
 	  $rose_uri .= "&amp;monthlimit=1";
 	}
-	if (isset($_GET["hourrangelimit"])){
+	if (isset($_GET["limit_by_doy"])){
+        $rose_uri .= "&amp;limit_by_doy=1";
+    }
+    if (isset($_GET["hourrangelimit"])){
 		$rose_uri .= "&amp;hourrangelimit=1";
 	}
 	if (isset($_GET["staticrange"])){
@@ -88,7 +91,8 @@ that this application processes. You can limit the dataset from which the
 windrose is derived in three ways:
 <ol>
  <li>By only including observations from a specific hour</li>
- <li>By only including observations from a specific month</li>
+ <li>By only including observations from a specific month or by a specific
+ period of dates each year.</li>
  <li>By only including observations between a start and end hour</li>
 </ol>
 
@@ -141,16 +145,23 @@ $uselect = make_select("units", $units, $ar);
 
 $content .= '<input type="checkbox" name="hourlimit" value="1" ';
 if (isset($_GET["hourlimit"])) $content .= "checked=\"checked\" "; 
-$content .= '>1. Limit to Hour of Start Time
-<br /><input type="checkbox" name="monthlimit" value="1" ';
+$content .= 'id="r1"> <label for="r1">1. Limit to Hour of Start Time</label>';
+
+$content .= '<br /><input type="checkbox" name="monthlimit" value="1" ';
 if (isset($_GET["monthlimit"])) $content .= "checked=\"checked\" "; 
-$content .= '>2. Limit to Month of Start Time
-<br /><input type="checkbox" name="hourrangelimit" value="1" ';
+$content .= 'id="r2"> <label for="r2">2a. Limit to Month of Start Time</label>';
+
+$content .= '<br /><input type="checkbox" name="limit_by_doy" value="1" ';
+if (isset($_GET["limit_by_doy"])) $content .= "checked=\"checked\" "; 
+$content .= 'id="r2b"> <label for="r2b">2b. Limit to Month+Day Period each Year</label>';
+
+$content .= '<br /><input type="checkbox" name="hourrangelimit" value="1" ';
 if (isset($_GET["hourrangelimit"])) $content .= "checked=\"checked\" "; 
-$content .= '>3. Limit to Range of hours given by start and end time
-<br /><input type="checkbox" name="staticrange" value="1" ';
+$content .= 'id="r3"> <label for="r3">3. Limit to Range of hours given by start and end time</label>';
+
+$content .= '<br /><input type="checkbox" name="staticrange" value="1" ';
 if (isset($_GET["staticrange"])) $content .= "checked=\"checked\" "; 
-$content .= '>Optional: Hard code the frequency axis limit to 100%';
+$content .= 'id="o1"> <label for="o1">Optional: Hard code the frequency axis limit to 100%</label>';
 
 // Allow setting of wind speed bins
 $missive = <<<EOM
@@ -160,7 +171,7 @@ bin ranges are inclusive on the lower end and exclusive on the upper end.</p>
 EOM;
 $content .= sprintf(
     '<br /><input type="checkbox" name="setbins" '.
-	'value="1"%s>Optional. User provided wind speed bins<br />'.
+	'value="1"%s id="o2"> <label for="o2">Optional. User provided wind speed bins</label><br />'.
 	'<div style="display: %s;" id="showbins"> 0 - '.
 	'<input type="text" name="bin0" value="%s" size="4"> - '.
 	'<input type="text" name="bin1" value="%s" size="4"> - '.
