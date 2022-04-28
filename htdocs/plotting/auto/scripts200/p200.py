@@ -18,35 +18,39 @@ PDICT5 = {
     "yes": "YES: Draw Counties/Parishes",
     "no": "NO: Do Not Draw Counties/Parishes",
 }
-ISSUANCE = dict(
-    (
-        ("1.C.1", "Day 1 Convective @1z"),
-        ("1.C.6", "Day 1 Convective @6z"),
-        ("1.F.7", "Day 1 Fire Weather @7z"),
-        ("1.C.13", "Day 1 Convective @13z"),
-        ("1.C.16", "Day 1 Convective @16z"),
-        ("1.F.17", "Day 1 Fire Weather @17z"),
-        ("1.C.20", "Day 1 Convective @20z"),
-        ("1.E.8", "Day 1 Excessive Rainfall @8z"),
-        ("1.E.16", "Day 1 Excessive Rainfall @16z"),
-        ("1.E.20", "Day 1 Excessive Rainfall @20z"),
-        ("1.E.1", "Day 1 Excessive Rainfall @1z"),
-        ("2.C.7", "Day 2 Convective @7z"),
-        ("2.F.8", "Day 2 Fire Weather @8z"),
-        ("2.C.17", "Day 2 Convective @17z"),
-        ("2.F.18", "Day 2 Fire Weather @18z"),
-        ("2.E.9", "Day 2 Excessive Rainfall @9z"),
-        ("2.E.21", "Day 2 Excessive Rainfall @21z"),
-        ("3.C.8", "Day 3 Convective @8z"),
-        ("3.F.21", "Day 3 Fire Weather @21z"),
-        ("3.E.9", "Day 3 Excessive Rainfall @9z"),
-        ("4.C.10", "Day 4 Convective @10z"),
-        ("5.C.10", "Day 5 Convective @10z"),
-        ("6.C.10", "Day 6 Convective @10z"),
-        ("7.C.10", "Day 7 Convective @10z"),
-        ("8.C.10", "Day 8 Convective @10z"),
-    )
-)
+ISSUANCE = {
+    "1.C.A": "Day 1 Convective",
+    "1.C.1": "Day 1 Convective @1z",
+    "1.C.6": "Day 1 Convective @6z",
+    "1.C.13": "Day 1 Convective @13z",
+    "1.C.16": "Day 1 Convective @16z",
+    "1.C.20": "Day 1 Convective @20z",
+    "1.F.A": "Day 1 Fire Weather",
+    "1.F.7": "Day 1 Fire Weather @7z",
+    "1.F.17": "Day 1 Fire Weather @17z",
+    "1.E.A": "Day 1 Excessive Rainfall",
+    "1.E.8": "Day 1 Excessive Rainfall @8z",
+    "1.E.16": "Day 1 Excessive Rainfall @16z",
+    "1.E.20": "Day 1 Excessive Rainfall @20z",
+    "1.E.1": "Day 1 Excessive Rainfall @1z",
+    "2.C.A": "Day 2 Convective",
+    "2.C.7": "Day 2 Convective @7z",
+    "2.C.17": "Day 2 Convective @17z",
+    "2.F.A": "Day 2 Fire Weather",
+    "2.F.8": "Day 2 Fire Weather @8z",
+    "2.F.18": "Day 2 Fire Weather @18z",
+    "2.E.A": "Day 2 Excessive Rainfall",
+    "2.E.9": "Day 2 Excessive Rainfall @9z",
+    "2.E.21": "Day 2 Excessive Rainfall @21z",
+    "3.C.8": "Day 3 Convective @8z",
+    "3.F.21": "Day 3 Fire Weather @21z",
+    "3.E.9": "Day 3 Excessive Rainfall @9z",
+    "4.C.10": "Day 4 Convective @10z",
+    "5.C.10": "Day 5 Convective @10z",
+    "6.C.10": "Day 6 Convective @10z",
+    "7.C.10": "Day 7 Convective @10z",
+    "8.C.10": "Day 8 Convective @10z",
+}
 OUTLOOKS = dict(
     (
         ("ANY SEVERE.0.02", "Any Severe 2% (Day 3+)"),
@@ -162,6 +166,11 @@ def get_description():
     <p><i class="fa fa-info"></i> This autoplot currently only considers
     outlooks since 2002.  This app is also horribly slow for reasons I have
     yet to fully debug :(</p>
+
+    <p><strong>Updated 28 Apr 2022</strong>: A generalized outlook category
+    was added to lump all of the issuance times together.  So you can do
+    generic requests now like for any Day 1 Outlook, instead of limiting to
+    just the 13z issuance, for example.</p>
     """
     desc["arguments"] = [
         dict(
@@ -264,43 +273,49 @@ def plotter(fdict):
     lons = np.arange(GRIDWEST, GRIDEAST, griddelta)
     lats = np.arange(GRIDSOUTH, GRIDNORTH, griddelta)
 
-    hour = int(p.split(".")[2])
+    params = {
+        "ot": p.split(".")[1],
+        "day": p.split(".")[0],
+        "t": level.split(".", 1)[1],
+        "cat": level.split(".")[0],
+        "g1": GRIDWEST,
+        "g2": GRIDSOUTH,
+        "g3": GRIDWEST,
+        "g4": GRIDNORTH,
+        "g5": GRIDEAST,
+        "g6": GRIDNORTH,
+        "g7": GRIDEAST,
+        "g8": GRIDSOUTH,
+        "g9": GRIDWEST,
+        "g10": GRIDSOUTH,
+        "months": tuple(months),
+        "edate": ctx.get("edate", utc() + datetime.timedelta(days=2)),
+    }
+
+    hour = p.split(".")[2]
+    hour_limiter = ""
+    if hour != "A":
+        params["hour"] = int(hour)
+        hour_limiter = " and cycle = :hour "
     with get_sqlalchemy_conn("postgis") as conn:
         df = read_postgis(
             text(
-                """
-            select product_issue, issue, expire, geom,
-            extract(year from issue at time zone 'UTC') as year
-            from spc_outlooks where outlook_type = :ot and day = :day and
-            cycle = :hour and threshold = :t and category = :cat and
+                f"""
+            select expire, min(issue) as min_issue, st_union(geom) as geom,
+            min(extract(year from issue at time zone 'UTC')) as year
+            from spc_outlooks where outlook_type = :ot and day = :day
+            {hour_limiter} and threshold = :t and category = :cat and
             ST_Intersects(geom,
             ST_GeomFromEWKT('SRID=4326;POLYGON((:g1 :g2, :g3 :g4,
             :g5 :g6, :g7 :g8, :g9 :g10))'))
             and extract(month from issue) in :months
             and product_issue > '2002-01-01' and
-            product_issue < :edate ORDER by product_issue ASC
+            product_issue < :edate
+            GROUP by expire ORDER by min_issue ASC
         """
             ),
             conn,
-            params={
-                "ot": p.split(".")[1],
-                "day": p.split(".")[0],
-                "hour": hour,
-                "t": level.split(".", 1)[1],
-                "cat": level.split(".")[0],
-                "g1": GRIDWEST,
-                "g2": GRIDSOUTH,
-                "g3": GRIDWEST,
-                "g4": GRIDNORTH,
-                "g5": GRIDEAST,
-                "g6": GRIDNORTH,
-                "g7": GRIDEAST,
-                "g8": GRIDSOUTH,
-                "g9": GRIDWEST,
-                "g10": GRIDSOUTH,
-                "months": tuple(months),
-                "edate": ctx.get("edate", utc() + datetime.timedelta(days=2)),
-            },
+            params=params,
             geom_col="geom",
             index_col=None,
         )
@@ -325,13 +340,13 @@ def plotter(fdict):
             raster[jslice, islice] += grid
 
     raster = np.flipud(raster)
-    years = (utc() - df["issue"].min()).total_seconds() / 365.25 / 86400.0
+    years = (utc() - df["min_issue"].min()).total_seconds() / 365.25 / 86400.0
     if ctx["w"] == "avg":
         raster = raster / years
     subtitle = (
         f"Found {len(df.index)} events for CONUS "
-        f"between {df['issue'].min():%d %b %Y} and "
-        f"{df['issue'].max():%d %b %Y}"
+        f"between {df['min_issue'].min():%d %b %Y} and "
+        f"{df['min_issue'].max():%d %b %Y}"
     )
     csector = ctx.pop("csector")
     if t == "cwa":
@@ -412,4 +427,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(level="CATEGORICAL.SLGT"))
+    plotter(dict(level="CATEGORICAL.SLGT", p="1.C.A", csector="conus"))
