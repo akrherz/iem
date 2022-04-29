@@ -36,10 +36,15 @@ function selectElementContents(elid) {
 }
 
 function workflow(){
-	doOutlook();
-	doMCD();
-	doWatch();
-	updateTableTitle();
+	var lon = parseFloat($("#lon").val());
+	var lat = parseFloat($("#lat").val());
+    if (isNaN(lon) || isNaN(lat)){
+        return;
+    }
+	doOutlook(lon, lat);
+	doMCD(lon, lat);
+	doWatch(lon, lat);
+	updateTableTitle(lon, lat);
 }
 
 function buildUI(){
@@ -67,9 +72,7 @@ function buildUI(){
 	});
 }
 
-function updateTableTitle(){
-	var lon = $("#lon").val();
-	var lat = $("#lat").val();
+function updateTableTitle(lon, lat){
 	var text = "Lon: "+ lon +" Lat: "+ lat;
 	$('#watches').find("caption").text("Convective Watches for "+ text);
 	$('#outlooks').find("caption").text("Convective Outlooks for "+ text);
@@ -85,9 +88,7 @@ function updateMarkerPosition(latLng) {
 	workflow();
 }
 
-function doOutlook(){
-	var lon = $("#lon").val();
-	var lat = $("#lat").val();
+function doOutlook(lon, lat){
 	var last = $('#last').is(":checked") ? $("#events").val(): '0';
 	var day = $("input[name='day']:checked").val();
 	var cat = $("input[name='cat']:checked").val();
@@ -115,9 +116,7 @@ function doOutlook(){
 			}
 	});
 }
-function doMCD(){
-	var lon = $("#lon").val();
-	var lat = $("#lat").val();
+function doMCD(lon, lat){
 	var tbody = $("#mcds tbody").empty();
 	$("#mcd_spinner").show();
 	var jsonurl = "/json/spcmcd.py?lon="+lon+"&lat="+lat;
@@ -141,9 +140,7 @@ function doMCD(){
 	});
 }
 
-function doWatch(){
-	var lon = $("#lon").val();
-	var lat = $("#lat").val();
+function doWatch(lon, lat){
 	var tbody = $("#watches tbody").empty();
 	$("#watch_spinner").show();
 	var jsonurl = "/json/spcwatch.py?lon="+lon+"&lat="+lat;

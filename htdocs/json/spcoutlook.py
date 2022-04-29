@@ -1,9 +1,8 @@
 """SPC Outlook JSON service."""
 import datetime
-import os
 import json
 
-import memcache
+from pymemcache.client import Client
 import pytz
 import pandas as pd
 from pandas.io.sql import read_sql
@@ -151,22 +150,22 @@ def application(environ, start_response):
 
     cb = fields.get("callback")
 
-    hostname = os.environ.get("SERVER_NAME", "")
     mckey = f"/json/spcoutlook/{lon:.4f}/{lat:.4f}/{last}/{day}/{cat}/{time}"
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
-    res = mc.get(mckey) if hostname != "iem.local" else None
+    mc = Client(["iem-memcached", 11211])
+    res = mc.get(mckey)
     if not res:
         if time is not None:
             res = dotime(time, lon, lat, day, cat)
         else:
             res = dowork(lon, lat, last, day, cat)
         mc.set(mckey, res, 3600)
-
-    if cb is None:
-        data = res
     else:
-        data = f"{html_escape(cb)}({res})"
+        res = res.decode("utf-8")
+    mc.close()
+
+    if cb is not None:
+        res = f"{html_escape(cb)}({res})"
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return [res.encode("utf-8")]

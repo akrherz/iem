@@ -34,6 +34,7 @@ var htmlInterface = ['<div class="panel panel-default">',
 		'</div>',
 	'<div class="col-sm-6">',
 '<label for="stations_out">Selected Stations:</label>',
+'<input type="checkbox" name="stations" value="_ALL" style="display: none;">',
 '<select multiple id="stations_out" class="form-control" name="stations">',
 '</select>',
 '<div class="form-group">',
@@ -98,14 +99,15 @@ $().ready(function() {
 	// stations, this avoids user confusion
 	$("form[name='iemss'] :submit").click(function (){
         // Empty input implies that all are selected!
-        if ($("#iemss").data("supports-all") != "0" && $('#stations_in option').length == 0){
-            // Deselect anything selected so that it does not submit
-            $('#stations_out option').prop('selected', false);
-            // Add a faked _ALL station
-            $("#stations_out").append(
-                '<option value="_ALL" selected="selected">ALL</option>'
-            );
-            return true;
+        if ($("#iemss").data("supports-all") != "0") {
+            if ($('#stations_in option').length == 0){
+                // Deselect anything selected so that it does not submit
+                $('#stations_out option').prop('selected', false);
+                $("input[type='checkbox'][name='stations']").prop("checked", true);
+                return true;
+            } else {
+                $("input[type='checkbox'][name='stations']").prop("checked", false);
+            }
         }
         $('#stations_out option').prop('selected', true);
 		// Stop us if we have no stations selected!
