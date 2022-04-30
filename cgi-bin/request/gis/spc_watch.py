@@ -7,7 +7,7 @@ import zipfile
 # Third Party
 from geopandas import read_postgis
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_sqlalchemy_conn, utc
 
 # cgitb.enable()
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
@@ -41,7 +41,6 @@ def get_context(environ):
 
 def run(ctx, start_response):
     """Do something!"""
-    pgconn = get_dbconn("postgis")
     common = "at time zone 'UTC', 'YYYYMMDDHH24MI'"
     schema = {
         "geometry": "MultiPolygon",
@@ -52,23 +51,44 @@ def run(ctx, start_response):
                 ("SEL", "str:5"),
                 ("TYPE", "str:3"),
                 ("NUM", "int"),
+                ("P_TORTWO", "int"),
+                ("P_TOREF2", "int"),
+                ("P_WIND10", "int"),
+                ("P_WIND65", "int"),
+                ("P_HAIL10", "int"),
+                ("P_HAIL2I", "int"),
+                ("P_HAILWND", "int"),
+                ("MAX_HAIL", "float"),
+                ("MAX_GUST", "int"),
+                ("MAX_TOPS", "int"),
+                ("MV_DRCT", "int"),
+                ("MV_SKNT", "int"),
+                ("IS_PDS", "bool"),
             ]
         ),
     }
-    df = read_postgis(
-        "select "
-        f"to_char(issued {common}) as issue, "
-        f"to_char(expired {common}) as expire, "
-        "sel, type, num, geom "
-        "from watches WHERE issued >= %s and "
-        "issued < %s ORDER by issued ASC",
-        pgconn,
-        params=(
-            ctx["sts"],
-            ctx["ets"],
-        ),
-        geom_col="geom",
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = read_postgis(
+            "select "
+            f"to_char(issued {common}) as issue, "
+            f"to_char(expired {common}) as expire, "
+            "sel, type, num, geom, "
+            "tornadoes_2m as p_tortwo, tornadoes_1m_strong as p_toref2, "
+            "wind_10m as p_wind10, wind_1m_65kt as p_wind65, "
+            "hail_10m as p_hail10, hail_1m_2inch as p_hail2i, "
+            "hail_wind_6m as p_hailwnd, max_hail_size as max_hail, "
+            "max_wind_gust_knots as max_gust, max_tops_feet as max_tops, "
+            "storm_motion_drct as mv_drct, storm_motion_sknt as mv_sknt, "
+            "is_pds "
+            "from watches WHERE issued >= %s and "
+            "issued < %s ORDER by issued ASC",
+            conn,
+            params=(
+                ctx["sts"],
+                ctx["ets"],
+            ),
+            geom_col="geom",
+        )
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
         return b"ERROR: no results found for your query"

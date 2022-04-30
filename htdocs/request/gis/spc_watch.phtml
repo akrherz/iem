@@ -89,10 +89,25 @@ Field 1: Type=C/String, Title=`EXPIRE', UTC MCD Expiration Timestamp
 Field 2: Type=C/String, Title=`SEL', The 0-9 watch sequence number
 Field 3: Type=C/String, Title=`TYPE', TOR or SVR watch
 Field 4: Type=N/Double, Title=`NUM', SPC Watch Number
+Field 5: Type=N/Double, Title=`P_TORTWO', PROB OF 2 OR MORE TORNADOES
+Field 6: Type=N/Double, Title=`P_TOREF2', PROB OF 1 OR MORE STRONG /EF2-EF5/ TORNADOES
+Field 7: Type=N/Double, Title=`P_WIND10', PROB OF 10 OR MORE SEVERE WIND EVENTS
+Field 8: Type=N/Double, Title=`P_WIND65', PROB OF 1 OR MORE WIND EVENTS >= 65 KNOTS 
+Field 9: Type=N/Double, Title=`P_HAIL10', PROB OF 10 OR MORE SEVERE HAIL EVENTS
+Field 10: Type=N/Double, Title=`P_HAIL2I', PROB OF 1 OR MORE HAIL EVENTS >= 2 INCHES
+Field 11: Type=N/Double, Title=`P_HAILWND' PROB OF 6 OR MORE COMBINED SEVERE HAIL/WIND EVENTS
+Field 12: Type=N/Double, Title=`MAX_HAIL', MAX HAIL /INCHES/ 
+Field 13: Type=N/Double, Title=`MAX_GUST', MAX WIND GUSTS SURFACE /KNOTS/
+Field 14: Type=N/Double, Title=`MAX_TOPS', MAX TOPS /X 100 FEET/
+Field 15: Type=N/Double, Title=`MV_DRCT', MEAN STORM MOTION VECTOR /DEGREES/
+Field 16: Type=N/Double, Title=`MV_SKNT', MEAN STORM MOTION VECTOR /KNOTS/
+Field 17: Type=N/Integer, Title=`IS_PDS', PARTICULARLY DANGEROUS SITUATION
 </pre>
 
 <h4>Archive / Usage Notes:</h4>
 <ol>
+<li><strong>30 April 2022:</strong> Associated probabilities found in the <code>WWP</code>
+ product are now included as attributes.  This archive goes back to about May 2006.</li>
 <li>To re-emphasize, these polygons are <strong>not the official</strong>
 watch anymore.  The official watch is issued on a county/zone basis.</li>
 </ol>
@@ -101,5 +116,3 @@ EOM;
 
 $t->content = $content;
 $t->render('single.phtml');
-
-?>
