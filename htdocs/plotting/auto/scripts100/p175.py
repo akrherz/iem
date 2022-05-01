@@ -9,7 +9,12 @@ import matplotlib.dates as mdates
 from pyiem import iemre
 from pyiem.plot import figure_axes
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_autoplot_context, get_dbconn, ncopen, convert_value
+from pyiem.util import (
+    get_autoplot_context,
+    get_sqlalchemy_conn,
+    ncopen,
+    convert_value,
+)
 from pyiem import reference
 from pyiem.exceptions import NoDataFound
 
@@ -69,14 +74,14 @@ def plotter(fdict):
     ets = datetime.datetime(year + 1, 5, 1, 12)
     rows = []
 
-    pgconn = get_dbconn("postgis")
-    states = gpd.GeoDataFrame.from_postgis(
-        "SELECT the_geom, state_abbr from states where state_abbr = %s",
-        pgconn,
-        params=(state,),
-        index_col="state_abbr",
-        geom_col="the_geom",
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        states = gpd.read_postgis(
+            "SELECT the_geom, state_abbr from states where state_abbr = %s",
+            conn,
+            params=(state,),
+            index_col="state_abbr",
+            geom_col="the_geom",
+        )
 
     sidx = iemre.daily_offset(sts)
     ncfn = iemre.get_daily_ncname(sts.year)

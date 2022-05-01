@@ -1,9 +1,9 @@
 """Accumuldated days"""
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -145,7 +145,6 @@ def highcharts(fdict):
 
 def get_data(ctx):
     """Get the data"""
-    pgconn = get_dbconn("coop")
     station = ctx["station"]
     threshold = ctx["threshold"]
     varname = ctx["var"]
@@ -165,25 +164,26 @@ def get_data(ctx):
         sts = sts.replace(month=1, day=1)
     if split == "jul1":
         sts = sts.replace(month=7, day=1)
-    df = read_sql(
-        f"""
-    with data as (
-        select extract(year from day + '%s days'::interval) as season,
-        extract(doy from day + '%s days'::interval) as doy,
-        (case when {col} {opp} %s then 1 else 0 end) as hit
-        from {table}
-        where station = %s and day >= %s),
-    agg1 as (
-        SELECT season, doy,
-        sum(hit) OVER (PARTITION by season ORDER by doy ASC) from data)
-    SELECT doy - %s as doy, min(sum), avg(sum), max(sum),
-    max(case when season = %s then sum else null end) as thisyear from agg1
-    WHERE doy < 365 GROUP by doy ORDER by doy ASC
-    """,
-        pgconn,
-        params=(days, days, threshold, station, sts, days, year),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            f"""
+        with data as (
+            select extract(year from day + '%s days'::interval) as season,
+            extract(doy from day + '%s days'::interval) as doy,
+            (case when {col} {opp} %s then 1 else 0 end) as hit
+            from {table}
+            where station = %s and day >= %s),
+        agg1 as (
+            SELECT season, doy,
+            sum(hit) OVER (PARTITION by season ORDER by doy ASC) from data)
+        SELECT doy - %s as doy, min(sum), avg(sum), max(sum),
+        max(case when season = %s then sum else null end) as thisyear from agg1
+        WHERE doy < 365 GROUP by doy ORDER by doy ASC
+        """,
+            conn,
+            params=(days, days, threshold, station, sts, days, year),
+            index_col=None,
+        )
     df["datestr"] = df["doy"].apply(
         lambda x: (
             datetime.date(2001, 1, 1) + datetime.timedelta(days=x)
@@ -233,4 +233,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

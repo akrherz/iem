@@ -8,16 +8,15 @@ from matplotlib.dates import DateFormatter
 from metpy.units import units, masked_array
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 from pyiem.plot.use_agg import plt
-from pyiem.plot import figure_axes
+from pyiem.plot import figure_axes, figure
 from pyiem.exceptions import NoDataFound
 
-PDICT = dict(
-    [
-        ("precip", "Precipitation Plot"),
-        ("wind", "Wind Speed + Direction Plot [MPH]"),
-        ("windkt", "Wind Speed + Direction Plot [KNOTS]"),
-    ]
-)
+PDICT = {
+    "meteo": "Meteogram Style (Temp/Wind/Pressure)",
+    "precip": "Precipitation Plot",
+    "wind": "Wind Speed + Direction Plot [MPH]",
+    "windkt": "Wind Speed + Direction Plot [KNOTS]",
+}
 
 
 def get_description():
@@ -71,7 +70,8 @@ def get_data(ctx):
         df = pd.read_sql(
             "SELECT valid at time zone 'UTC' as valid, "
             "case when precip > 0.49 then null else precip end as precip, "
-            "sknt, drct, gust_sknt from alldata_1minute WHERE station = %s "
+            "sknt, drct, gust_sknt, tmpf, dwpf, pres1 "
+            "from alldata_1minute WHERE station = %s "
             "and valid >= %s and valid < %s ORDER by valid ASC",
             conn,
             params=(ctx["zstation"], ctx["sts"], ctx["ets"]),
@@ -95,7 +95,7 @@ def get_data(ctx):
     return df
 
 
-def do_xaxis(ctx, ax):
+def do_xaxis(ctx, ax, show_label=True):
     """Make a sensible xaxis."""
     timerange = ctx["ets"] - ctx["sts"]
     if timerange > timedelta(days=1):
@@ -103,7 +103,8 @@ def do_xaxis(ctx, ax):
     else:
         fmt = "%-I:%M %p"
     ax.xaxis.set_major_formatter(DateFormatter(fmt, tz=ctx["tz"]))
-    ax.set_xlabel(f"Plot Timezone: {ctx['tz']}")
+    if show_label:
+        ax.set_xlabel(f"Plot Timezone: {ctx['tz']}")
 
 
 def make_wind_plot(ctx, ptype):
@@ -141,18 +142,11 @@ def make_wind_plot(ctx, ptype):
     ax2.set_yticklabels(["N", "NE", "E", "SE", "S", "SW", "W", "NW", "N"])
     ax2.set_ylim(-1, 361)
     ax.set_title(
-        (
-            f"{get_ttitle(df)} %s (%s)\n"
-            "One Minute Interval Wind Speed + Direction, %s missing minutes\n"
-            f"Peak Speed: %.1f {unit} Peak Gust: %.1f {unit}"
-        )
-        % (
-            ctx["_nt"].sts[ctx["zstation"]]["name"],
-            ctx["zstation"],
-            df["sknt"].isna().sum(),
-            np.nanmax(sknt),
-            np.nanmax(gust),
-        )
+        f"{get_ttitle(df)} {ctx['_sname']}\n"
+        "One Minute Interval Wind Speed + Direction, "
+        f"{df['sknt'].isna().sum()} missing minutes\n"
+        f"Peak Speed: {np.nanmax(sknt):.1f} {unit} "
+        f"Peak Gust: {np.nanmax(gust):.1f} {unit}"
     )
     do_xaxis(ctx, ax)
     ax.set_xlim(df["local_valid"].min(), df["local_valid"].max())
@@ -164,10 +158,7 @@ def get_ttitle(df):
     lvmin, lvmax = df["local_valid"].min(), df["local_valid"].max()
     title = lvmin.strftime("%-d %b %Y")
     if lvmin.date() != lvmax.date():
-        title = "%s - %s" % (
-            lvmin.strftime("%-d %b %Y"),
-            lvmax.strftime("%-d %b %Y"),
-        )
+        title = f"{lvmin:%-d %b %Y} - {lvmax:%-d %b %Y}"
     return title
 
 
@@ -179,14 +170,11 @@ def make_precip_plot(ctx):
     df["precip_rate1"] = df["precip"] * 60.0
     df["precip_rate15"] = df["precip"].rolling(window=15).sum() * 4.0
     df["precip_rate60"] = df["precip"].rolling(window=60).sum()
-    subtitle = ("%.2f inches total plotted, %s missing minutes") % (
-        df["precip_accum"].max(),
-        df["oprecip"].isna().sum(),
+    subtitle = (
+        f"{df['precip_accum'].max():.2f} inches total plotted, "
+        f"{df['oprecip'].isna().sum()} missing minutes"
     )
-    title = (f"{get_ttitle(df)} %s (%s) One Minute Rainfall") % (
-        ctx["_nt"].sts[ctx["zstation"]]["name"],
-        ctx["zstation"],
-    )
+    title = f"{get_ttitle(df)} {ctx['_sname']} :: One Minute Rainfall"
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     ax.set_position([0.06, 0.1, 0.81, 0.78])
 
@@ -242,8 +230,7 @@ def make_precip_plot(ctx):
             ax.text(
                 x,
                 y,
-                "%s %.2f"
-                % (row["local_valid"].strftime("%-I:%M %p"), row["precip"]),
+                f"{row['local_valid']:%-I:%M %p} {row['precip']:.2f}",
                 transform=ax.transAxes,
                 fontsize=10,
                 bbox=dict(fc="white", ec="None"),
@@ -261,6 +248,93 @@ def make_precip_plot(ctx):
     return fig
 
 
+def make_meteo_plot(ctx):
+    """Generate a meteogram plot, please."""
+    df = ctx["df"]
+    title = f"{get_ttitle(df)} {ctx['_sname']} :: One Minute Meteogram"
+    fig = figure(apctx=ctx, title=title)
+
+    # -----------------------------
+    ax = fig.add_axes([0.1, 0.65, 0.85, 0.25])
+    ax.plot(
+        df["local_valid"].values,
+        df["tmpf"].values,
+        zorder=1,
+        label="Air Temp",
+    )
+    ax.plot(
+        df["local_valid"].values,
+        df["dwpf"].values,
+        zorder=1,
+        label="Dew Point",
+    )
+    ax.grid(True)
+    ax.set_ylabel(r"Temperature [$^\circ$F]")
+    do_xaxis(ctx, ax, False)
+
+    # -----------------------------
+    gust = (
+        masked_array(df["gust_sknt"].values, units("knots"))
+        .to(units("miles per hour"))
+        .m
+    )
+    sknt = (
+        masked_array(df["sknt"].values, units("knots"))
+        .to(units("miles per hour"))
+        .m
+    )
+
+    ax = fig.add_axes([0.1, 0.36, 0.85, 0.25])
+    ax.bar(
+        df["local_valid"].values,
+        gust,
+        zorder=1,
+        width=1.0 / 1440.0,
+        label="Wind Gust",
+    )
+    ax.bar(
+        df["local_valid"].values,
+        sknt,
+        zorder=2,
+        width=1.0 / 1440.0,
+        label="Wind Speed",
+    )
+    ax.legend(loc="best", ncol=3)
+    ax2 = ax.twinx()
+    ax2.scatter(
+        df["local_valid"].values,
+        df["drct"].values,
+        zorder=1,
+        color="green",
+        label="Wind Direction",
+    )
+    ax2.set_ylim(0, 360)
+    ax2.set_yticks(range(0, 361, 45))
+    ax2.set_yticklabels(["N", "NE", "E", "SE", "S", "SW", "W", "NW", "N"])
+    ax.grid(True)
+    ymax = max([7, gust.max(), sknt.max()])
+    for i in range(10):
+        if i * 8 > ymax:
+            ax.set_ylim(0, i * 8)
+            ax.set_yticks(range(0, i * 8 + 1, i))
+            break
+    ax.set_ylabel("Wind Speed [mph]")
+    do_xaxis(ctx, ax, False)
+
+    # -----------------------------
+    ax = fig.add_axes([0.1, 0.07, 0.85, 0.25])
+    ax.plot(
+        df["local_valid"].values,
+        df["pres1"].values,
+        zorder=1,
+    )
+    ax.grid(True)
+    ax.set_ylabel("Pressure [in Hg]")
+    do_xaxis(ctx, ax)
+
+    return fig
+
+
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
@@ -275,6 +349,8 @@ def plotter(fdict):
 
     if ctx["ptype"] == "precip":
         fig = make_precip_plot(ctx)
+    elif ctx["ptype"] == "meteo":
+        fig = make_meteo_plot(ctx)
     elif ctx["ptype"] in ["wind", "windkt"]:
         fig = make_wind_plot(ctx, ctx["ptype"])
     # Need to drop timezone for excel output

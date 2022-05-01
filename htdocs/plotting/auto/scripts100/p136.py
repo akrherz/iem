@@ -2,10 +2,9 @@
 import datetime
 
 import pandas as pd
-from pandas.io.sql import read_sql
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
 PDICT = {
     "0": "Include calm observations",
@@ -195,27 +194,27 @@ $("#ap_container").highcharts({
 
 def get_context(fdict):
     """Get the data"""
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["zstation"]
     sknt = ctx["wind"]
     today = datetime.date.today()
-    df = read_sql(
-        """
-    WITH data as (
-        SELECT valid, lag(valid) OVER (ORDER by valid ASC),
-        extract(year from valid + '5 months'::interval) as season,
-        wcht(tmpf::numeric, (sknt * 1.15)::numeric) from alldata
-        WHERE station = %s and tmpf is not null and sknt is not null
-        and tmpf < 50 and sknt >= %s and report_type = 2 ORDER by valid)
-    SELECT case when (valid - lag) < '3 hours'::interval then (valid - lag)
-    else '3 hours'::interval end as timedelta, wcht,
-    season, to_char(valid, 'mmdd') as sday from data
-    """,
-        pgconn,
-        params=(station, sknt),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            """
+        WITH data as (
+            SELECT valid, lag(valid) OVER (ORDER by valid ASC),
+            extract(year from valid + '5 months'::interval) as season,
+            wcht(tmpf::numeric, (sknt * 1.15)::numeric) from alldata
+            WHERE station = %s and tmpf is not null and sknt is not null
+            and tmpf < 50 and sknt >= %s and report_type = 2 ORDER by valid)
+        SELECT case when (valid - lag) < '3 hours'::interval then (valid - lag)
+        else '3 hours'::interval end as timedelta, wcht,
+        season, to_char(valid, 'mmdd') as sday from data
+        """,
+            conn,
+            params=(station, sknt),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No data found for query.")
     textra = ""
@@ -233,8 +232,7 @@ def get_context(fdict):
         df2[i] = df[df["wcht"] < i].groupby("season")["timedelta"].sum()
     ctx["df"] = df2
     ctx["title"] = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']} "
-        f"Wind Chill Hours {textra} "
+        f"{ctx['_sname']} :: Wind Chill Hours {textra} "
         f"({df['season'].min():.0f}-{df['season'].max():.0f})"
     )
     ctx["subtitle"] = f"Hours below threshold by season (wind >= {sknt} kts)"
