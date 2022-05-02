@@ -71,7 +71,7 @@ def fetch_daily(form, cols):
             "gdd50",
             "solar",
             "precip",
-            "sped",
+            "speed",
             "gust",
             "et",
             "soil04t",
