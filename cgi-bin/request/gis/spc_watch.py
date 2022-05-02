@@ -2,14 +2,16 @@
 # Local
 from io import BytesIO
 import os
+import tempfile
 import zipfile
 
 # Third Party
-from geopandas import read_postgis
+import fiona
+import geopandas as gpd
 from paste.request import parse_formvars
 from pyiem.util import get_sqlalchemy_conn, utc
 
-# cgitb.enable()
+gpd.io.file.fiona.drvsupport.supported_drivers["KML"] = "rw"
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
 
 
@@ -36,7 +38,17 @@ def get_context(environ):
     if ets < sts:
         sts, ets = ets, sts
 
-    return dict(sts=sts, ets=ets)
+    return dict(sts=sts, ets=ets, format=form.get("format", "shp"))
+
+
+def start_headers(start_response, ctx, fn):
+    """Figure out the proper headers for the output"""
+    suffix = "zip" if ctx["format"] == "shp" else ctx["format"]
+    headers = [
+        ("Content-type", "application/octet-stream"),
+        ("Content-Disposition", f"attachment; filename={fn}.{suffix}"),
+    ]
+    start_response("200 OK", headers)
 
 
 def run(ctx, start_response):
@@ -68,7 +80,7 @@ def run(ctx, start_response):
         ),
     }
     with get_sqlalchemy_conn("postgis") as conn:
-        df = read_postgis(
+        df = gpd.read_postgis(
             "select "
             f"to_char(issued {common}) as issue, "
             f"to_char(expired {common}) as expire, "
@@ -94,6 +106,27 @@ def run(ctx, start_response):
         return b"ERROR: no results found for your query"
     df.columns = [s.upper() if s != "geom" else "geom" for s in df.columns]
     fn = f"watches_{ctx['sts']:%Y%m%d%H%M}_{ctx['ets']:%Y%m%d%H%M}"
+    start_headers(start_response, ctx, fn)
+    if ctx["format"] == "csv":
+        return df.to_csv(index=False).encode("utf-8")
+    if ctx["format"] == "geojson":
+        with tempfile.NamedTemporaryFile("w", delete=True) as tmp:
+            df.to_file(tmp.name, driver="GeoJSON")
+            with open(tmp.name, encoding="utf8") as fh:
+                res = fh.read()
+        return res.encode("utf-8")
+    if ctx["format"] == "kml":
+        df["NAME"] = (
+            df["ISSUE"].str.slice(0, 4)
+            + ": "
+            + df["TYPE"]
+            + " #"
+            + df["NUM"].apply(str)
+        )
+        fp = BytesIO()
+        with fiona.drivers():
+            df.to_file(fp, driver="KML", NameField="NAME")
+        return fp.getvalue()
 
     os.chdir("/tmp")
     df.to_file(f"{fn}.shp", schema=schema)
@@ -108,11 +141,6 @@ def run(ctx, start_response):
             zf.write(f"{fn}.{suffix}")
     for suffix in ["shp", "shx", "dbf"]:
         os.unlink(f"{fn}.{suffix}")
-    headers = [
-        ("Content-type", "application/octet-stream"),
-        ("Content-Disposition", f"attachment; filename={fn}.zip"),
-    ]
-    start_response("200 OK", headers)
 
     return zio.getvalue()
 
