@@ -95,56 +95,61 @@ the backend that generates the maps/data here.</p>
 
 <div id="seedcorn_maggot" class="pinfo" style="display: none;">
 <h3>Seedcorn Maggot (Delia platura)</h3>
-<p>Key Degree Day Levels for January 1 Start Date:</p>
+<p>Key Degree Day Levels</p>
 <ul>
+ <li><strong>January 1:</strong> Start Date</li>
  <li><strong>360:</strong> Peak adult emergence (1st generation) and egg-laying</li>
  <li><strong>781:</strong> Pupation, "fly-free" period begins</li>
  </ul>
 
-<p><a href="https://crops.extension.iastate.edu/encyclopedia/seedcorn-maggot">Extension Encyclopedia</a></p>
+<p><a href="https://crops.extension.iastate.edu/encyclopedia/seedcorn-maggot">Learn more here!</a></p>
 </div>
 
 <div id="alfalfa_weevil" class="pinfo" style="display: none;">
 <h3>Alfalfa Weevil (Hypera postica)</h3>
-<p>Key Degree Day Levels for January 1 Start Date:</p>
+<p>Key Degree Day Levels:</p>
 <ul>
+ <li><strong>January 1:</strong> Start Date</li>
  <li><strong>300:</strong> Egg hatch</li>
  <li><strong>575:</strong> Peak larval feeding</li>
 </ul>
 
-<p><a href="https://crops.extension.iastate.edu/encyclopedia/alfalfa-weevil">Extension Encyclopedia</a></p>
+<p><a href="https://crops.extension.iastate.edu/encyclopedia/alfalfa-weevil">Learn more here!</a></p>
 </div>
 
 <div id="soybean_aphid" class="pinfo" style="display: none;">
 <h3>Soybean Aphid (Aphis glycines)</h3>
-<p>Key Degree Day Levels for January 1 Start Date:</p>
+<p>Key Degree Day Levels:</p>
 <ul>
+ <li><strong>January 1:</strong> Start Date</li>
  <li><strong>150:</strong> Egg hatch</li>
 </ul>
 
-<p><a href="https://crops.extension.iastate.edu/encyclopedia/soybean-aphid">Extension Encyclopedia</a></p>
+<p><a href="https://crops.extension.iastate.edu/encyclopedia/soybean-aphid">Learn more here!</a></p>
 </div>
 
 <div id="common_stalk_borer" class="pinfo" style="display: none;">
 <h3>Common Stalk Borer (Papaipema nebris)</h3>
-<p>Key Degree Day Levels for January 1 Start Date:</p>
+<p>Key Degree Day Levels:</p>
 <ul>
+ <li><strong>January 1:</strong> Start Date</li>
  <li><strong>1,400</strong>: Larvae begin moving to cornfields</li>
  <li><strong>1,700</strong>: Peak larval movement</li>
 </ul>
 
-<p>Extension Encyclopedia TBD</p>
+<p>Learn more link TBD</p>
 </div>
 
 <div id="japanese_beetle" class="pinfo" style="display: none;">
 <h3>Japanese Beetle (Popillia japonica)</h3>
-<p>Key Degree Day Levels for January 1 Start Date:</p>
+<p>Key Degree Day Levels:</p>
 <ul>
+ <li><strong>January 1:</strong> Start Date</li>
  <li><strong>1,030</strong>: Adults begin emerging</li>
  <li><strong>2,150</strong>: Adults done emerging</li>
 </ul>
 
-<p><a href="https://crops.extension.iastate.edu/encyclopedia/japanese-beetle-corn-and-soybean">Extension Encyclopedia</a></p>
+<p><a href="https://crops.extension.iastate.edu/encyclopedia/japanese-beetle-corn-and-soybean">Learn more here!</a></p>
 </div>
 
 
