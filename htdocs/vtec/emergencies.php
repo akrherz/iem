@@ -61,6 +61,13 @@ directly access it here:
 <br /><code>https://mesonet.agron.iastate.edu/json/vtec_emergencies.py
 </code></p>
 
+<p><strong>Related:</strong>
+<a class="btn btn-primary" href="/vtec/pds.php">PDS Warnings</a>
+&nbsp;
+<a class="btn btn-primary" href="/nws/pds_watches.php">SPC PDS Watches</a>
+&nbsp;
+</p>
+
 <p><button id="makefancy">Make Table Interactive</button></p>
 
 <div id="thetable">
@@ -73,5 +80,4 @@ directly access it here:
 </div>
 
 EOF;
-$t->render("single.phtml");
-?>
+$t->render("full.phtml");
