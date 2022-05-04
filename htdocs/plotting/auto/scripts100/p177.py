@@ -579,7 +579,6 @@ def plot2(ctx):
             params=(ctx["station"], ctx["sts"], ctx["ets"]),
             index_col="valid",
         )
-    d06t = df["t6_c_avg_qc"]
     d12t = df["t12_c_avg_qc"]
     d24t = df["t24_c_avg_qc"]
     d50t = df["t50_c_avg_qc"]
@@ -594,8 +593,6 @@ def plot2(ctx):
     ax.grid(True)
     if not d04t.isnull().all():
         ax.plot(valid, c2f(d04t), linewidth=2, color="brown", label="4 inch")
-    if not d06t.isnull().all():
-        ax.plot(valid, c2f(d06t), linewidth=2, color="k", label="6 inch")
     if not d12t.isnull().all():
         ax.plot(valid, c2f(d12t), linewidth=2, color="r", label="12 inch")
     if not d24t.isnull().all():

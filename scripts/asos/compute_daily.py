@@ -190,7 +190,7 @@ def do(ts):
         cols = []
         args = []
         for key, val in newdata.items():
-            cols.append("%s = %%s" % (key,))
+            cols.append(f"{key} = %s")
             args.append(val)
         args.extend([iemid, ts])
 

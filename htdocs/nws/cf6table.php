@@ -15,7 +15,7 @@ $month = isset($_GET["month"]) ? intval($_GET["month"]): null;
 $day = isset($_GET["day"]) ? intval($_GET["day"]): null;
 $opt = isset($_GET["opt"]) ? xssafe($_GET["opt"]): "bystation";
 
-$ys = yearSelect(2009, $year, "year");
+$ys = yearSelect(2001, $year, "year");
 $ms = monthSelect($month, "month");
 $ds = daySelect($day, "day");
 
