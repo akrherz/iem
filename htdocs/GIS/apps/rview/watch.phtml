@@ -2,16 +2,16 @@
 require_once "../../../../config/settings.inc.php";
 putenv("TZ=UTC");
 require_once "../../../../include/myview.php";
+require_once "../../../../include/forms.php";
+require_once "../../../../include/database.inc.php";
 
 /* Needed GET variables */
-$year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y");
-$num = isset($_GET["num"]) ? intval($_GET["num"]) : 1;
+$year = get_int404("year", date("Y"));
+$num = get_int404("num", 1);
 
 $t = new MyView();
 $t->title = "SPC $year Convective Watch $num";
 
-require_once "../../../../include/forms.php";
-require_once "../../../../include/database.inc.php";
 require_once "lib.php";
 $db = iemdb("postgis");
 pg_exec($db, "SET TIME ZONE 'UTC'");
@@ -33,6 +33,29 @@ if (pg_numrows($rs) == 0) {
 }
 
 $row = pg_fetch_array($rs,0);
+
+$textlinks = "";
+if (! is_null($row["product_id_saw"])) {
+    $textlinks .= sprintf(
+        '<tr><th>SAW Issuance</th><td><a href="/p.php?pid=%s">%s</a></td></tr>',
+        $row["product_id_saw"],
+        $row["product_id_saw"],
+    );
+}
+if (! is_null($row["product_id_sel"])) {
+    $textlinks .= sprintf(
+        '<tr><th>SEL Issuance</th><td><a href="/p.php?pid=%s">%s</a></td></tr>',
+        $row["product_id_sel"],
+        $row["product_id_sel"],
+    );
+}
+if (! is_null($row["product_id_sel"])) {
+    $textlinks .= sprintf(
+        '<tr><th>Watch Probs</th><td><a href="/p.php?pid=%s">%s</a></td></tr>',
+        $row["product_id_wwp"],
+        $row["product_id_wwp"],
+    );
+}
 
 $ts = strtotime($row["issued"]);
 $expires = strtotime($row["expired"]);
@@ -61,7 +84,7 @@ $yselect = yearSelect(1997,$year);
 $issue = substr($row["issued"],0,16);
 $expire = substr($row["expired"],0,16);
 
-$spclink = sprintf("http://www.spc.noaa.gov/products/watch/%s/ww%04d.html",
+$spclink = sprintf("https://www.spc.noaa.gov/products/watch/%s/ww%04d.html",
 	$year, $num);
 
 $woulink = "";
@@ -91,12 +114,21 @@ $t->content = <<<EOF
 </ol>
 
 <p>This application presents a browsable archive 
-of <a href="http://www.spc.noaa.gov">SPC</a> issued tornado and 
+of <a href="https://www.spc.noaa.gov">SPC</a> issued tornado and 
 severe thunderstorm watches. Each sequential
 watch is assigned a numeric ID, which uniquely identifies a watch for each year.
 Up until 2006, the polygon was the valid area of the watch.  Since then, the 
 valid area is issued by county and marine zone.
 </p>
+
+<p><strong>Related Links:</strong>
+<a class="btn btn-primary" href="{$spclink}">View This Watch on SPC Website</a>
+&nbsp;
+<a class="btn btn-primary" href="/request/gis/spc_watch.phtml">Download Watches</a>
+&nbsp;
+<a class="btn btn-primary" href="/nws/pds_watches.php">List PDS Watches</a>
+</p>
+
 
 <form method="GET" action="watch.phtml">
 
@@ -110,20 +142,18 @@ valid area is issued by county and marine zone.
 <p>
 {$prevlink} &nbsp; -- &nbsp; {$nextlink}
 
-<table cellpadding="2" cellspacing="0" border="1">
+<table class="table table-striped">
 <tr><th>Type:</th><td>{$row["type"]}</td></tr>
 <tr><th>Watch #:</th><td>{$yselect}
 <input name="num" type="text" size="5" value="{$row["num"]}"> 
 <input type="submit" value="GO!"></td></tr>
 
+{$textlinks}
 <tr><th>Issue:</th><td>{$issue} UTC</td></tr>
 <tr><th>Expired/Cancelled:</th><td>{$expire} UTC</td></tr>
 {$woulink}
 </table>
 
-<br />
-<a href="{$spclink}" class="btn btn-info">View This Watch on SPC Website</a>
-<br />
 
 <p><strong>Archive Status:</strong>
 <ul>
@@ -151,5 +181,3 @@ valid area is issued by county and marine zone.
 
 EOF;
 $t->render('single.phtml');
-
-?>

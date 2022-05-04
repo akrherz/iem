@@ -282,11 +282,20 @@ first guess at fields the NWS needs for their RTP product.</p>
 <i class="fa fa-download"></i> SPC Mesoscale Discussion Shapefile Download</a></li>
 <li><a href="/request/gis/spc_outlooks.phtml">
  <i class="fa fa-download"></i> SPC Outlook Shapefile Download</a></li>
+
  <li><a href="/request/gis/spc_watch.phtml">
  <i class="fa fa-download"></i> SPC Watch Polygon Shapefile Download</a></li>
+
  <li><a href="/GIS/apps/rview/watch.phtml">Convective Watches Information</a>
   <br />Lists out some simple details on each convective watch.</li>
- <li><a href="/nws/spc_outlook_search/"><i class="fa fa-search"></i> SPC Outlook / MCD search by point</a>
+
+  <li><a href="/nws/watches.php">List SPC Watches by Year</a>
+  <br />Lists out some simple details on all watches for a year.</li>
+
+  <li><a href="/nws/pds_watches.php">Lists All SPC PDS Watches</a>
+  <br />Lists out watches tagged as Particularly Dangerous Situations (PDS).</li>
+
+  <li><a href="/nws/spc_outlook_search/"><i class="fa fa-search"></i> SPC Outlook / MCD search by point</a>
   <br />Allows answering of the question of when was a given point last under
 some convective outlook or the number of outlooks for a given point.</li>
 </ul>

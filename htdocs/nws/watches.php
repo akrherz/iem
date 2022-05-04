@@ -1,13 +1,14 @@
 <?php 
 require_once "../../config/settings.inc.php";
-define("IEM_APPID", 136);
+define("IEM_APPID", 137);
 
 require_once "../../include/myview.php";
 require_once "../../include/vtec.php";
 require_once "../../include/forms.php";
 require_once "../../include/imagemaps.php";
 
-$uri = "http://iem.local/json/watches.py?is_pds=1";
+$year = get_int404("year", date("Y"));
+$uri = sprintf("http://iem.local/json/watches.py?year=%s", $year);
 $data = file_get_contents($uri);
 $json = json_decode($data, $assoc=TRUE);
 $table = "";
@@ -16,10 +17,11 @@ foreach($json['events'] as $key => $val){
         '<a target="_blank" href="https://www.spc.noaa.gov/products/watch/'.
         '%s/ww%04.0f.html">%s %s</a>',
      $val['year'], $val['num'], $val["type"], $val['num']);
-	$table .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td>".
+	$table .= sprintf("<tr><td>%s</td><td>%s%s</td><td>%s</td>".
     "<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
 			$val["year"],
 			$spclink,
+            ($val["is_pds"]) ? ' <span class="badge badge-danger">PDS</span>' : "",
             $val["states"],
             $val["issue"],
             $val["expire"],
@@ -29,9 +31,9 @@ foreach($json['events'] as $key => $val){
             $val["max_wind_gust_knots"],
         );
 }
-
+$yearselect = yearSelect(1997, $year, "year");
 $t = new MyView();
-$t->title = "Particularly Dangerous Situation SPC Watches Listing";
+$t->title = "SPC Watches Listing";
 $t->headextra = <<<EOM
 <link type="text/css" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" rel="stylesheet" />
 EOM;
@@ -48,28 +50,27 @@ EOM;
 $t->content = <<<EOF
 <ol class="breadcrumb">
  <li><a href="/nws/">NWS Resources</a></li>
- <li class="active">Particularly Dangerous Situation Watches</li>
+ <li class="active">SPC Watch Listing</li>
 </ol>
-<h3>Particularly Dangerous Situation SPC Watches</h3>
-
-<div class="alert alert-info">This page presents the current
-<strong>unofficial</strong> IEM
-accounting of SPC watches that contain the special Particularly Dangerous Situation
-phrasing.
-</div>
+<h3>Yearly Listing of SPC Watches</h3>
 
 <p>There is a <a href="/json/">JSON(P) webservice</a> that backends this table presentation, you can
 directly access it here:
-<br /><code>https://mesonet.agron.iastate.edu/json/watches.py?is_pds=1</code></p>
+<br /><code>https://mesonet.agron.iastate.edu/json/watches.py?year=$year</code></p>
 
 <p><strong>Related:</strong>
-<a class="btn btn-primary" href="/vtec/emergencies.php">TOR/FFW Emergencies</a>
-&nbsp;
-<a class="btn btn-primary" href="/nws/watches.php">List Watches by Year</a>
-&nbsp;
-<a class="btn btn-primary" href="/vtec/pds.php">PDS Warnings</a>
+<a class="btn btn-primary" href="/nws/pds_watches.php">PDS Watches</a>
 &nbsp;
 </p>
+
+<form method="GET" action="/nws/watches.php" name="ys">
+<div class="form-group">
+
+    <label for="year">Select Year</label>
+    $yearselect
+    <button type="submit">Update Table</button>
+</div>
+</form>
 
 <p><button id="makefancy">Make Table Interactive</button></p>
 
