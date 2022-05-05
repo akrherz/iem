@@ -8,7 +8,7 @@ import sys
 from datetime import date
 
 # third party
-from pyiem.util import get_dbconnstr, get_dbconn, logger
+from pyiem.util import get_sqlalchemy_conn, get_dbconn, logger
 from metpy.units import units
 import pandas as pd
 
@@ -32,12 +32,13 @@ def main(argv):
     """Go Main Go."""
     dbconn = get_dbconn("iem")
     valid = date(int(argv[1]), int(argv[2]), int(argv[3]))
-    cf6 = pd.read_sql(
-        "SELECT * from cf6_data where valid = %s ORDER by station ASC",
-        get_dbconnstr("iem"),
-        params=(valid,),
-        index_col="station",
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        cf6 = pd.read_sql(
+            "SELECT * from cf6_data where valid = %s ORDER by station ASC",
+            conn,
+            params=(valid,),
+            index_col="station",
+        )
     for col in ["avg_smph", "max_smph", "gust_smph"]:
         cf6[col.replace("smph", "sknt")] = (
             (units("miles/hour") * cf6[col].values).to(units("knots")).m
@@ -45,16 +46,17 @@ def main(argv):
     LOG.info("Loaded %s CF6 entries for %s date", len(cf6.index), valid)
 
     table = f"summary_{valid.year}"
-    obs = pd.read_sql(
-        "SELECT s.*, t.network, "
-        "case when length(t.id) = 3 then 'K'||t.id else t.id end as station "
-        f"from {table} s JOIN "
-        "stations t on (s.iemid = t.iemid) WHERE s.day = %s and "
-        "t.network ~* 'ASOS' ORDER by station ASC",
-        get_dbconnstr("iem"),
-        params=(valid,),
-        index_col="station",
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        obs = pd.read_sql(
+            "SELECT s.*, t.network, "
+            "case when length(t.id) = 3 then 'K'||t.id else t.id end "
+            f"as station from {table} s JOIN "
+            "stations t on (s.iemid = t.iemid) WHERE s.day = %s and "
+            "t.network ~* 'ASOS' ORDER by station ASC",
+            conn,
+            params=(valid,),
+            index_col="station",
+        )
 
     df = cf6.join(obs, lsuffix="_cf6")
     obscols = (

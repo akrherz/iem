@@ -2,10 +2,9 @@
 import calendar
 import datetime
 
-from pandas.io.sql import read_sql
 import pandas as pd
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn, convert_value
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, convert_value
 from pyiem.exceptions import NoDataFound
 
 UNITS = {"mph": "miles per hour", "kt": "knots", "mps": "meters per second"}
@@ -105,7 +104,6 @@ def get_description():
 
 def get_context(fdict):
     """get context for both output types"""
-    pgconn = get_dbconn("asos")
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["zstation"]
@@ -123,9 +121,9 @@ def get_context(fdict):
     ylimiter = ""
     if y1 is not None and y2 is not None:
         ylimiter = (
-            " and extract(year from valid) >= %s and "
-            "extract(year from valid) <= %s "
-        ) % (y1, y2)
+            f" and extract(year from valid) >= {y1} and "
+            f"extract(year from valid) <= {y2} "
+        )
     else:
         ab = ctx["_nt"].sts[station]["archive_begin"]
         if ab is None:
@@ -133,22 +131,23 @@ def get_context(fdict):
         y1 = ab.year
         y2 = datetime.date.today().year
 
-    df = read_sql(
-        f"""
-    WITH obs as (
-        SELECT (valid + '10 minutes'::interval) at time zone %s as ts,
-        sknt from alldata where station = %s and sknt >= 0 and sknt < 150
-        and report_type = 2 {ylimiter})
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            f"""
+        WITH obs as (
+            SELECT (valid + '10 minutes'::interval) at time zone %s as ts,
+            sknt from alldata where station = %s and sknt >= 0 and sknt < 150
+            and report_type = 2 {ylimiter})
 
-    select extract(month from ts)::int as month,
-    extract(hour from ts)::int as hour, extract(day from ts)::int as day,
-    avg(sknt) as avg_sknt from obs GROUP by month, day, hour
-    ORDER by month, day, hour
-        """,
-        pgconn,
-        params=(ctx["_nt"].sts[station]["tzname"], station),
-        index_col=None,
-    )
+        select extract(month from ts)::int as month,
+        extract(hour from ts)::int as hour, extract(day from ts)::int as day,
+        avg(sknt) as avg_sknt from obs GROUP by month, day, hour
+        ORDER by month, day, hour
+            """,
+            conn,
+            params=(ctx["_nt"].sts[station]["tzname"], station),
+            index_col=None,
+        )
     # Figure out which mode we are going to do
     if all([a is None for a in [p1, p2, p3, p4, p5, p6]]):
         df = (
@@ -187,9 +186,7 @@ def get_context(fdict):
             ldf = ldf.reset_index()
             ldf["month"] = len(dfs) + 1
             dfs.append(ldf)
-            ctx["labels"].append(
-                "%s-%s" % (sts.strftime("%b%d"), ets.strftime("%b%d"))
-            )
+            ctx["labels"].append(f"{sts:%b%d}-{ets:%b%d}")
             ctx["subtitle"] = "Period Average Wind Speed by Hour"
         df = pd.concat(dfs)
 
@@ -201,12 +198,7 @@ def get_context(fdict):
     ctx["xlabel"] = ("Hour of Day (timezone: %s)") % (
         ctx["_nt"].sts[station]["tzname"],
     )
-    ctx["title"] = ("[%s] %s [%s-%s]") % (
-        ctx["station"],
-        ctx["_nt"].sts[station]["name"],
-        y1,
-        y2,
-    )
+    ctx["title"] = f"{ctx['_sname']} [{y1}-{y2}]"
     return ctx
 
 

@@ -1,7 +1,7 @@
 """Watches"""
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 import matplotlib.ticker as ticker
 from pyiem import util
 from pyiem.plot import figure
@@ -39,7 +39,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = util.get_dbconn("postgis")
     ctx = util.get_autoplot_context(fdict, get_description())
     state = ctx["state"][:2].upper()
     limit = ctx["limit"]
@@ -51,30 +50,33 @@ def plotter(fdict):
         sqllimit = "extract(doy from issued) <= extract(doy from now()) and "
 
     # Get total issued
-    df = read_sql(
-        f"""
-        Select extract(year from issued)::int as year,
-        count(*) as national_count from watches
-        where {sqllimit} num < 3000 GROUP by year ORDER by year ASC
-    """,
-        pgconn,
-        index_col="year",
-    )
+    with util.get_sqlalchemy_conn("postgis") as conn:
+        df = pd.read_sql(
+            f"""
+            Select extract(year from issued)::int as year,
+            count(*) as national_count from watches
+            where {sqllimit} num < 3000 GROUP by year ORDER by year ASC
+        """,
+            conn,
+            index_col="year",
+        )
     if df.empty:
         raise NoDataFound("No data was found.")
 
     # Get total issued
-    odf = read_sql(
-        f"""
-        select extract(year from issued)::int as year, count(*) as state_count
-        from watches w, states s where w.geom && s.the_geom and
-        ST_Intersects(w.geom, s.the_geom) and {sqllimit} s.state_abbr = %s
-        GROUP by year ORDER by year ASC
-    """,
-        pgconn,
-        params=(state,),
-        index_col="year",
-    )
+    with util.get_sqlalchemy_conn("postgis") as conn:
+        odf = pd.read_sql(
+            f"""
+            select extract(year from issued)::int as year,
+            count(*) as state_count
+            from watches w, states s where w.geom && s.the_geom and
+            ST_Intersects(w.geom, s.the_geom) and {sqllimit} s.state_abbr = %s
+            GROUP by year ORDER by year ASC
+        """,
+            conn,
+            params=(state,),
+            index_col="year",
+        )
     df["state_count"] = odf["state_count"]
     df["state_percent"] = df["state_count"] / df["national_count"] * 100.0
     df = df.fillna(0)
@@ -87,7 +89,7 @@ def plotter(fdict):
         ax[0].text(
             year,
             row["national_count"],
-            " %.0f" % (row["national_count"],),
+            f" {row['national_count']:.0f}",
             ha="center",
             rotation=90,
             va="bottom",
@@ -95,12 +97,8 @@ def plotter(fdict):
         )
     ax[0].grid(True)
     ax[0].set_title(
-        (
-            "Storm Prediction Center Issued Tornado / "
-            "Svr T'Storm Watches\n"
-            "1 January to %s, Watch Outlines touching %s"
-        )
-        % (ets, state_names[state])
+        "Storm Prediction Center Issued Tornado / Svr T'Storm Watches\n"
+        f"1 January to {ets}, Watch Outlines touching {state_names[state]}"
     )
     ax[0].set_ylabel("National Count")
     ax[0].set_ylim(0, df["national_count"].max() * 1.3)
@@ -110,7 +108,7 @@ def plotter(fdict):
         ax[1].text(
             year,
             row["state_count"],
-            " %.0f" % (row["state_count"],),
+            f" {row['state_count']:.0f}",
             ha="center",
             rotation=90,
             va="bottom",
@@ -125,7 +123,7 @@ def plotter(fdict):
         ax[2].text(
             year,
             row["state_percent"],
-            " %.1f%%" % (row["state_percent"],),
+            f" {row['state_percent']:.1f}%",
             ha="center",
             rotation=90,
             va="bottom",

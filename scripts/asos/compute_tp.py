@@ -15,7 +15,7 @@ warnings.simplefilter("ignore", RuntimeWarning)
 
 def do(ts):
     """Process this date timestamp"""
-    asos = get_dbconn("asos", user="nobody")
+    asos = get_dbconn("asos")
     cursor = asos.cursor()
     iemaccess = get_dbconn("iem")
     icursor = iemaccess.cursor()
@@ -40,7 +40,7 @@ def do(ts):
         _d["dwpf"].append(row[5] if row[5] is not None else np.nan)
         _d["p01i"].append(row[6] if row[6] is not None else np.nan)
 
-    table = "summary_%s" % (ts.year,)
+    table = f"summary_{ts.year}"
     # Load up current data
     current = {}
     icursor.execute(
@@ -60,25 +60,25 @@ def do(ts):
             min_dwpf=row[6],
             pday=row[7],
         )
-    for stid in data:
+    for stid, entry in data.items():
         # Not enough data
-        if len(data[stid]["valid"]) < 4:
+        if len(entry["valid"]) < 4:
             continue
         # Compute the time coverage, assume we are okay if we have 18 hrs
-        delta = (max(data[stid]["valid"]) - min(data[stid]["valid"])).seconds
+        delta = (max(entry["valid"]) - min(entry["valid"])).seconds
         if delta < (18 * 60):
             continue
 
         station, network, iemid = stid.split("|")
         computed = {}
-        computed["max_tmpf"] = np.nanmax(data[stid]["tmpf"])
-        computed["min_tmpf"] = np.nanmin(data[stid]["tmpf"])
-        computed["max_dwpf"] = np.nanmax(data[stid]["dwpf"])
-        computed["min_dwpf"] = np.nanmin(data[stid]["dwpf"])
+        computed["max_tmpf"] = np.nanmax(entry["tmpf"])
+        computed["min_tmpf"] = np.nanmin(entry["tmpf"])
+        computed["max_dwpf"] = np.nanmax(entry["dwpf"])
+        computed["min_dwpf"] = np.nanmin(entry["dwpf"])
         # BUG: obs that may spill over the top of the hour
         pday = [0] * 24
-        for i, valid in enumerate(data[stid]["valid"]):
-            p01i = data[stid]["p01i"][i]
+        for i, valid in enumerate(entry["valid"]):
+            p01i = entry["p01i"][i]
             if p01i is not None and p01i > 0:
                 hr = int(valid.strftime("%H"))
                 pday[hr] = max([pday[hr], p01i])

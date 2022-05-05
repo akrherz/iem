@@ -4,12 +4,11 @@ import os
 
 import pandas as pd
 from scipy import stats
-from pandas.io.sql import read_sql
 import matplotlib.patheffects as PathEffects
 from metpy.units import units
 from pyiem.meteorology import gdd
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn, mm2inch, c2f
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, mm2inch, c2f
 from pyiem.exceptions import NoDataFound
 
 STATIONS = dict(
@@ -55,19 +54,19 @@ PDICT = {"yes": "Colorize Labels by Corn Yield Trend", "no": "No Colorize"}
 
 def load_yields(location):
     """Loads up the county corn yields"""
-    pgconn = get_dbconn("coop")
-    df = read_sql(
-        """
-        select year, num_value as yield
-        from nass_quickstats where
-        county_ansi = %s and state_alpha = 'IA' and year >= 1980
-        and commodity_desc = 'CORN' and statisticcat_desc = 'YIELD'
-        and unit_desc = 'BU / ACRE' ORDER by year ASC
-    """,
-        pgconn,
-        params=(COUNTY[location],),
-        index_col="year",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            """
+            select year, num_value as yield
+            from nass_quickstats where
+            county_ansi = %s and state_alpha = 'IA' and year >= 1980
+            and commodity_desc = 'CORN' and statisticcat_desc = 'YIELD'
+            and unit_desc = 'BU / ACRE' ORDER by year ASC
+        """,
+            conn,
+            params=(COUNTY[location],),
+            index_col="year",
+        )
     if df.empty:
         raise NoDataFound("Data was not found.")
     slp, intercept, _, _, _ = stats.linregress(

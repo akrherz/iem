@@ -6,10 +6,9 @@ import datetime
 import pytz
 import numpy as np
 import pandas as pd
-from pandas.io.sql import read_sql
 import matplotlib.dates as mdates
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 STAGES = "low action bankfull flood moderate major record".split()
@@ -82,7 +81,6 @@ def get_description():
 
 def get_context(fdict):
     """Do the common work"""
-    pgconn = get_dbconn("hml")
     ctx = get_autoplot_context(fdict, get_description())
 
     ctx["station"] = ctx["station"].upper()[:8]
@@ -90,12 +88,13 @@ def get_context(fdict):
     dt = ctx["dt"]
 
     # Attempt to get station information
-    df = read_sql(
-        "SELECT * from stations where id = %s and network ~* 'DCP'",
-        pgconn,
-        params=(station,),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("hml") as conn:
+        df = pd.read_sql(
+            "SELECT * from stations where id = %s and network ~* 'DCP'",
+            conn,
+            params=(station,),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("Could not find metadata for station.")
     row = df.iloc[0]
@@ -104,28 +103,29 @@ def get_context(fdict):
     for col in cols:
         ctx[col] = row[col]
 
-    ctx["fdf"] = read_sql(
-        f"""with fx as (
-        select id, issued, primaryname, primaryunits, secondaryname,
-        secondaryunits from hml_forecast where station = %s
-        and generationtime between %s and %s)
-    SELECT f.id,
-    f.issued at time zone 'UTC' as issued,
-    d.valid at time zone 'UTC' as valid,
-    d.primary_value, f.primaryname,
-    f.primaryunits, d.secondary_value, f.secondaryname,
-    f.secondaryunits from
-    hml_forecast_data_{dt.year} d JOIN fx f
-    on (d.hml_forecast_id = f.id) ORDER by f.id ASC, d.valid ASC
-    """,
-        pgconn,
-        params=(
-            station,
-            dt - datetime.timedelta(days=3),
-            dt + datetime.timedelta(days=1),
-        ),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("hml") as conn:
+        ctx["fdf"] = pd.read_sql(
+            f"""with fx as (
+            select id, issued, primaryname, primaryunits, secondaryname,
+            secondaryunits from hml_forecast where station = %s
+            and generationtime between %s and %s)
+        SELECT f.id,
+        f.issued at time zone 'UTC' as issued,
+        d.valid at time zone 'UTC' as valid,
+        d.primary_value, f.primaryname,
+        f.primaryunits, d.secondary_value, f.secondaryname,
+        f.secondaryunits from
+        hml_forecast_data_{dt.year} d JOIN fx f
+        on (d.hml_forecast_id = f.id) ORDER by f.id ASC, d.valid ASC
+        """,
+            conn,
+            params=(
+                station,
+                dt - datetime.timedelta(days=3),
+                dt + datetime.timedelta(days=1),
+            ),
+            index_col=None,
+        )
     if not ctx["fdf"].empty:
         ctx["fdf"]["valid"] = ctx["fdf"]["valid"].dt.tz_localize(pytz.UTC)
         ctx["fdf"]["issued"] = ctx["fdf"]["issued"].dt.tz_localize(pytz.UTC)
@@ -141,15 +141,17 @@ def get_context(fdict):
     else:
         mints = dt - datetime.timedelta(days=3)
         maxts = dt + datetime.timedelta(days=3)
-    df = read_sql(
-        "SELECT distinct valid at time zone 'UTC' as valid, "
-        "h.label, value from hml_observed_data d "
-        "JOIN hml_observed_keys h on (d.key = h.id) WHERE station = %s and "
-        "valid between %s and %s ORDER by valid ASC",
-        pgconn,
-        params=(station, mints, maxts),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("hml") as conn:
+        df = pd.read_sql(
+            "SELECT distinct valid at time zone 'UTC' as valid, "
+            "h.label, value from hml_observed_data d "
+            "JOIN hml_observed_keys h on (d.key = h.id) "
+            "WHERE station = %s and "
+            "valid between %s and %s ORDER by valid ASC",
+            conn,
+            params=(station, mints, maxts),
+            index_col=None,
+        )
     if df.empty:
         raise NoDataFound("No Data Found.")
     df["valid"] = df["valid"].dt.tz_localize(pytz.UTC)
@@ -190,7 +192,7 @@ def highcharts(fdict):
     if "df" not in ctx:
         raise NoDataFound("No Data Found.")
     df = ctx["df"]
-    df["ticks"] = df["valid"].view(np.int64) // 10 ** 6
+    df["ticks"] = df["valid"].view(np.int64) // 10**6
     lines = []
     if "id" in df.columns:
         fxs = df["id"].unique()
@@ -215,7 +217,7 @@ def highcharts(fdict):
                 }
             """
             )
-    ctx["odf"]["ticks"] = ctx["odf"].index.values.view(np.int64) // 10 ** 6
+    ctx["odf"]["ticks"] = ctx["odf"].index.values.view(np.int64) // 10**6
     if ctx["var"] in ctx:
         v = ctx["odf"][["ticks", ctx[ctx["var"]]]].to_json(orient="values")
         lines.append(

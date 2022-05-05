@@ -59,7 +59,7 @@ def main(argv):
         mslp[int(row[0] - BASEYEAR), int(row[1] - 1)] = row[3]
         metar[int(row[0] - BASEYEAR), int(row[1] - 1)] = row[4]
 
-    print("Observation Count For %s" % (stid,))
+    print(f"Observation Count For {stid}")
     print("YEAR  JAN  FEB  MAR  APR  MAY  JUN  JUL  AUG  SEP  OCT  NOV  DEC")
     output = False
     for i in range(years):
