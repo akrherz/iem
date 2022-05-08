@@ -74,6 +74,7 @@ PDICT6 = {
     "climate51": "IEM Climatology 1951-present",
     "climate71": "IEM Climatology 1971-present",
     "climate81": "IEM Climatology 1981-present",
+    "ncei_climate91": "NCEI Climatology 1991-2020",
 }
 GDD_KNOWN_BASES = [32, 41, 46, 48, 50, 51, 52]
 
@@ -86,9 +87,8 @@ def get_description():
         "description"
     ] = """This application plots an analysis of station
     data for a period of your choice.  Spatially aggregated values like those
-    for climate districts and statewide averages are not included.  For this
-    application, climatology is based on averaged observations for the
-    climatology period you pick.
+    for climate districts and statewide averages are not included.  The IEM
+    computed climatologies are based on simple daily averages of observations.
     """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc["arguments"] = [
@@ -175,7 +175,10 @@ def get_description():
         dict(
             type="select",
             options=PDICT6,
-            label="Which IEM Computed Climatology to Use",
+            label=(
+                "Which Climatology to Use?<br />Note that NCEI 1991-2020 "
+                "climatology only works with some base plot variables."
+            ),
             default="climate51",
             name="ct",
         ),
@@ -254,6 +257,27 @@ def replace_gdd_climo(ctx, df, table, date1, date2):
     return df
 
 
+def build_climate_sql(ctx, table):
+    """figure out how to get climatology..."""
+    gddclimocol = "0"
+    if ctx["gddbase"] in GDD_KNOWN_BASES:
+        gddclimocol = f"gdd{ctx['gddbase']}"
+    stjoin = "id"
+    if ctx["ct"] == "ncei_climate91":
+        stjoin = "ncei91"
+    netlimiter = "t.network ~* 'CLIMATE'"
+    if table != "alldata":
+        netlimiter = f"t.network = '{table[-2:].upper()}CLIMATE'"
+
+    sql = f"""
+    SELECT t.id as station, to_char(valid, 'mmdd') as sday, precip, high,
+    low, {gddclimocol} as gdd, cdd65, hdd65, snow
+    from {ctx['ct']} c, stations t WHERE c.station = t.{stjoin} and
+    {netlimiter} """
+
+    return sql
+
+
 def get_data(ctx):
     """Compute the data needed for this app."""
     cull = cull_to_list(ctx["cull"])
@@ -281,14 +305,16 @@ def get_data(ctx):
         if ctx["gddbase"] not in GDD_KNOWN_BASES:
             raise NoDataFound(f"GDD Base must be {','.join(GDD_KNOWN_BASES)}")
         ctx["gddceil"] = 86
-    gddclimocol = "0"
-    if ctx["gddbase"] in GDD_KNOWN_BASES:
-        gddclimocol = f"gdd{ctx['gddbase']}"
+    params = {
+        "gddbase": ctx["gddbase"],
+        "gddceil": ctx["gddceil"],
+        "date1": date1,
+        "date2": date2,
+        "cull": tuple(cull),
+    }
     for table in tables:
-        with get_sqlalchemy_conn("coop") as conn:
-            df = gpd.read_postgis(
-                text(
-                    f"""
+        sql = text(
+            f"""
             WITH obs as (
                 SELECT station, gddxx(:gddbase, :gddceil, high, low) as gdd,
                 cdd(high, low, 65) as cdd65, hdd(high, low, 65) as hdd65,
@@ -298,10 +324,7 @@ def get_data(ctx):
                 day >= :date1 and day <= :date2 and
                 substr(station, 3, 1) != 'C' and
                 substr(station, 3, 4) != '0000' and station not in :cull),
-            climo as (
-                SELECT station, to_char(valid, 'mmdd') as sday, precip, high,
-                low, {gddclimocol} as gdd, cdd65, hdd65, snow
-                from {ctx['ct']}),
+            climo as ({build_climate_sql(ctx, table)}),
             combo as (
                 SELECT o.station, o.precip - c.precip as precip_diff,
                 o.precip as precip, c.precip as cprecip,
@@ -364,15 +387,12 @@ def get_data(ctx):
             from agg d JOIN stations t on (d.station = t.id)
             WHERE t.network ~* 'CLIMATE' and t.online {wfo_limiter}
             """
-                ),
+        )
+        with get_sqlalchemy_conn("coop") as conn:
+            df = gpd.read_postgis(
+                sql,
                 conn,
-                params={
-                    "gddbase": ctx["gddbase"],
-                    "gddceil": ctx["gddceil"],
-                    "date1": date1,
-                    "date2": date2,
-                    "cull": tuple(cull),
-                },
+                params=params,
                 index_col="station",
                 geom_col="geom",
             )
@@ -415,11 +435,20 @@ def plotter(fdict):
             f"{datetime.date.today().year - 1} Climatology to "
             "compute departures"
         )
+        if ctx["ct"] == "ncei_climate91":
+            subtitle = (
+                f"{date1.year} is compared with NCEI 1991-2020 Climatology to "
+                "compute departures"
+            )
     elif varname.startswith("c"):
         subtitle = (
             "Climatology is based on data from "
             f"19{ctx['ct'][-2:]}-{datetime.date.today().year - 1}"
         )
+        if ctx["ct"] == "ncei_climate91":
+            subtitle = (
+                "Climatology of NCEI 1991-2020 is used to compute departures"
+            )
     if ctx["d"] == "sector":
         state = sector
         sector = "state" if len(sector) == 2 else sector
