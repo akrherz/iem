@@ -123,5 +123,5 @@ def application(environ, start_response):
         start_response("200 OK", headers)
         return [bio.getvalue()]
     start_response("200 OK", [("Content-type", "text/plain")])
-    df.to_csv(sio, sep=delimiter, columns=myvars)
+    df.to_csv(sio, sep=delimiter, columns=df.columns.intersection(myvars))
     return [sio.getvalue().encode("ascii")]
