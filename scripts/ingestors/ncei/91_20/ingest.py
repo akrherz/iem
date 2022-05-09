@@ -27,6 +27,7 @@ def remove_station(sid):
 
 
 def nona(val, minval=None):
+    """Return a non-NA value"""
     if pd.isna(val):
         return None
     if minval is not None and val < minval:
@@ -68,7 +69,7 @@ def ingest(pgconn, sid):
         df.at[0, "snow"] = df.at[0, "scum"]
         df.at[59, "snow"] = df.at[58, "snow"]
     else:
-        df["snow"] = 0
+        df["snow"] = pd.NA
     df.at[59, "pcum"] = df.at[58, "pcum"]
     df["precip"] = df["pcum"].diff()
     df.at[0, "precip"] = df.at[0, "pcum"]

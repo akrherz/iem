@@ -403,6 +403,10 @@ def get_data(ctx):
     df = pd.concat(dfs)
     if df.empty:
         raise NoDataFound("No Data Found.")
+    # Drop any entries with NaN
+    df = df[~pd.isna(df[ctx["var"]])]
+    if df.empty:
+        raise NoDataFound("All data found to be missing.")
     return df.reindex(df[ctx["var"]].abs().sort_values(ascending=False).index)
 
 
