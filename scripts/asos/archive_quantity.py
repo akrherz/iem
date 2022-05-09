@@ -48,8 +48,8 @@ def main(argv):
         extract(month from valid) as mo, count(*),
         sum(case when mslp is null or mslp < 1 then 1 else 0 end),
         sum(case when metar is null or metar = '' then 1 else 0 end)
-        from alldata WHERE
-        station = %s GROUP by yr, mo ORDER by yr ASC, mo ASC
+        from alldata WHERE station = %s and report_type = 2
+        GROUP by yr, mo ORDER by yr ASC, mo ASC
     """,
         (stid,),
     )

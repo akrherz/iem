@@ -80,8 +80,8 @@
 ##############################################################################
 
 ### iemdb PostgreSQL
-# iemdb(231) metvm4 -> metvm8
-192.168.0.231 iemdb.local
+# iemdb1(231) metvm4 -> metvm8
+192.168.0.231 iemdb1.local
 192.168.0.231 iemdb-afos.local
 192.168.0.231 iemdb-asos1min.local
 192.168.0.231 iemdb-frost.local
@@ -133,8 +133,7 @@
 ##############################################################################
 
 # runs with special 10 MB size and 8 GB memory size
-# memcache(249) metvm3 <-> metvm9
-192.168.0.249    iem-memcached
+10.90.12.14    iem-memcached
 # memcache1(248) metvm2 <-> metvm8
 192.168.0.248    iem-memcached1
 # memcache2(247) metvm8 <-> metvm3

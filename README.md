@@ -22,13 +22,15 @@ Process | Primary | Backup | Monitor
 AWOS Ingest | iem16 | iem14 | nagios `check_awos_ingest.py`
 GOES R/S | iem8-dc | iem19 | None
 iembot  | iem13    | None  | nagios checks for twistd processes running
+iemdb1 | metvm4 | metvm8 | nagios check
+iemdb2 | metvm2 | metvm0 | nagios check
+iemdb3 | metvm6 | metvm1 | nagios check
 iem-web-services | iem12 | iem16 | nagios check
 LDM | iem14 | None | None
 LoggerNet | iem15 | None | None
+memcached | iem8-dc | iem11-dc | nagios check
 NEXRAD Mosaics | iem8-dc | iem16 | nagios checks archive
 openfire | iem16 | iem14 | None
-postgres | metvm2 | metvm9  | None
-postgres4 | metvm7 | None | None
 rabbitmq | iem9-dc | iem8-dc | nagios check
 samba | iem16 | None | cron scripts check data availability
 RIDGE | iem9-dc | None    | inbound file queue, check latency 7 radars
