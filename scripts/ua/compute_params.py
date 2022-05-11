@@ -3,9 +3,8 @@ import sys
 
 # import warnings
 
-from pyiem.util import get_dbconn, get_dbconnstr, utc, logger
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, utc, logger
 from pyiem.network import Table as NetworkTable
-from pandas import read_sql
 from tqdm import tqdm
 import pandas as pd
 import numpy as np
@@ -134,10 +133,7 @@ def do_profile(cursor, fid, gdf, nt):
     wind_profile = gdf[pd.notnull(gdf["u"])]
     # Presently we are all or nothing here.  The length is arb
     if len(td_profile.index) < 5 or len(wind_profile.index) < 5:
-        msg = ("quorum fail td: %s wind: %s, skipping") % (
-            len(td_profile.index),
-            len(wind_profile.index),
-        )
+        msg = f"quorum fail td: {td_profile.size} wind: {wind_profile.size}"
         raise ValueError(msg)
     if gdf["pressure"].min() > 500:
         raise ValueError("Profile only up to %s mb" % (gdf["pressure"].min(),))
@@ -314,17 +310,19 @@ def main(argv):
     dbconn = get_dbconn("raob")
     cursor = dbconn.cursor()
     nt = NetworkTable("RAOB")
-    df = read_sql(
-        f"""
-        select f.fid, f.station, pressure, dwpc, tmpc, drct, smps, height,
-        levelcode from
-        raob_profile_{year} p JOIN raob_flights f
-        on (p.fid = f.fid) WHERE not computed and height is not null
-        and pressure is not null
-        ORDER by pressure DESC
-    """,
-        get_dbconnstr("raob"),
-    )
+    with get_sqlalchemy_conn("raob") as conn:
+        df = pd.read_sql(
+            f"""
+            select f.fid, f.station, pressure, dwpc, tmpc, drct, smps, height,
+            levelcode from
+            raob_profile_{year} p JOIN raob_flights f
+            on (p.fid = f.fid) WHERE (not computed or computed is null)
+            and height is not null
+            and pressure is not null
+            ORDER by pressure DESC
+        """,
+            conn,
+        )
     if df.empty or pd.isnull(df["smps"].max()):
         return
     u, v = wind_components(
@@ -336,7 +334,7 @@ def main(argv):
     count = 0
     progress = tqdm(df.groupby("fid"), disable=not sys.stdout.isatty())
     for fid, gdf in progress:
-        progress.set_description("%s %s" % (year, fid))
+        progress.set_description(f"{year} {fid}")
         try:
             do_profile(cursor, fid, gdf, nt)
         except (RuntimeError, ValueError, IndexError) as exp:

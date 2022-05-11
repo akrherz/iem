@@ -129,8 +129,8 @@ class RAOB:
         if txn.rowcount == 0:
             txn.execute(
                 "INSERT into raob_flights (valid, station, release_time, "
-                "hydro_level, maxwd_level, tropo_level) "
-                "values (%s,%s,%s,%s,%s,%s) RETURNING fid",
+                "hydro_level, maxwd_level, tropo_level, computed) "
+                "values (%s,%s,%s,%s,%s,%s, 'f') RETURNING fid",
                 (
                     self.valid,
                     self.station,
@@ -144,7 +144,7 @@ class RAOB:
         fid = row[0]
         txn.execute("DELETE from raob_profile where fid = %s", (fid,))
         if txn.rowcount > 0 and self.valid.hour in [0, 12]:
-            LOG.info(
+            LOG.warning(
                 "RAOB del %s rows for sid: %s valid: %s",
                 txn.rowcount,
                 self.station,
@@ -296,7 +296,7 @@ def main(valid):
         except Exception as exp:
             fn = "/tmp/%s_%s_fail" % (sid, valid.strftime("%Y%m%d%H%M"))
             LOG.info("FAIL %s %s %s, check %s for data", sid, valid, exp, fn)
-            with open(fn, "w") as fh:
+            with open(fn, "w", encoding="utf-8") as fh:
                 fh.write(req.content)
         finally:
             cursor.close()
