@@ -93,7 +93,7 @@ def plotter(fdict):
     y1 = -4.0 * h_slope + intercept
     y2 = 4.0 * h_slope + intercept
     title = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']} -- For Month of "
+        f"{ctx['_sname']} :: For Month of "
         f"{calendar.month_name[month]}\n"
         f"Growing Degree Day (base={ctx['gddbase']}, ceil={ctx['gddceil']}) "
         "+ Precipitation Departure"

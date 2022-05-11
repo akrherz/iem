@@ -177,7 +177,7 @@ def ugc_select(state, ugc):
     ar = {}
     for row in cursor:
         ar[row[0]] = f"{row[1]} {'(Zone)' if row[0][2] == 'Z' else ''}"
-    return make_select("ugc", ugc, ar)
+    return make_select("ugc", ugc, ar, cssclass="iemselect2")
 
 
 def ugc_handler(name, value, fdict):
@@ -471,15 +471,11 @@ def generate_form(apid, fdict, headers, cookies):
             opton = fdict.get(f"_opt_{arg['name']}") == "on"
             # prepend
             form = (
-                '<input class="optcontrol" %s type="checkbox" '
-                'value="on" name="%s"><div id="%s" '
-                'style="display: %s;">%s</div>'
-            ) % (
-                'checked="checked"' if opton else "",
-                "_opt_" + arg["name"],
-                "_opt_" + arg["name"],
-                "block" if opton else "none",
-                form,
+                '<input class="optcontrol" '
+                f'{"checked" if opton else ""} type="checkbox" '
+                f'value="on" name="_opt_{arg["name"]}">'
+                f'<div id="_opt_{arg["name"]}" style="display: '
+                f'{"block" if opton else "none"};">{form}</div>'
             )
             if opton:
                 add_to_plotvars(value, fdict, arg, res)

@@ -12,9 +12,9 @@ import pandas as pd
 from pyiem.util import get_dbconn, logger, get_properties
 
 # Suppress only the single warning from urllib3 needed.
+# pylint: disable=no-member
 requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 LOG = logger()
-TMP = "/mesonet/tmp"
 PROPS = get_properties()
 TOPICS = [
     {"commodity_desc": "CORN", "statisticcat_desc": "PROGRESS"},
@@ -46,7 +46,7 @@ def get_df(year, sts, topic):
         if req.status_code == 400:
             LOG.debug("Got status_code=400 (no data) %s", req.url)
         else:
-            LOG.info("Got status_code %s %s", req.status_code, req.url)
+            LOG.warning("Got status_code %s %s", req.status_code, req.url)
         return
     data = req.json()
     return pd.DataFrame(data["data"])
@@ -154,7 +154,7 @@ def process(df):
         )
     cursor.close()
     pgconn.commit()
-    LOG.info("Deleted %s, Inserted %s, Dups %s rows", deleted, inserted, dups)
+    LOG.warning("Del %s, Inserted %s, Dups %s rows", deleted, inserted, dups)
 
 
 def main(argv):

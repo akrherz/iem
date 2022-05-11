@@ -60,6 +60,13 @@ def get_description():
             label="Month Limiter",
             options=MDICT,
         ),
+        dict(
+            type="date",
+            name="date",
+            optional=True,
+            label="Plot Obs for A Single Calendar Date (optional)",
+            default=datetime.date.today().strftime("%Y/%m/%d"),
+        ),
     ]
     return desc
 
@@ -89,7 +96,8 @@ def plotter(fdict):
             text(
                 """
             SELECT tmpf::int as tmpf, dwpf, relh,
-            coalesce(mslp, alti * 33.8639, 1013.25) as slp
+            coalesce(mslp, alti * 33.8639, 1013.25) as slp,
+            date(valid at time zone :tzname) as local_date
             from alldata where station = :station
             and drct is not null and dwpf is not null and dwpf <= tmpf
             and relh is not null
@@ -101,6 +109,7 @@ def plotter(fdict):
             params={
                 "station": station,
                 "months": tuple(months),
+                "tzname": ctx["_nt"].sts[station]["tzname"],
             },
         )
     if df.empty:
@@ -128,8 +137,13 @@ def plotter(fdict):
         df["mixingratio"].values * units("kg/kg"),
     ).to(units("kPa"))
 
-    qtiles = df.groupby("tmpf").quantile([0.05, 0.25, 0.5, 0.75, 0.95]).copy()
-    qtiles = qtiles.reset_index()
+    qtiles = (
+        df.drop(columns="local_date")
+        .groupby("tmpf")
+        .quantile([0.05, 0.25, 0.5, 0.75, 0.95])
+        .copy()
+        .reset_index()
+    )
     # Remove low counts
     qtiles = qtiles[~qtiles["tmpf"].isin(drops)]
     # compute dewpoint now
@@ -146,8 +160,17 @@ def plotter(fdict):
         )
         * 100.0
     )
+    ab = ctx["_nt"].sts[station]["archive_begin"]
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
+    title = (
+        f"{ctx['_sname']} :: Dew Point Distribution by Air Temp "
+        f"(month={month.upper()}) ({ab.year}-{datetime.datetime.now().year}), "
+        f"n={len(df.index):.0f}"
+    )
+    subtitle = "(must have 6+ hourly observations at the given temperature)"
 
-    (fig, ax) = figure_axes(apctx=ctx)
+    (fig, ax) = figure_axes(apctx=ctx, title=title, subtitle=subtitle)
     means = qtiles[qtiles["level_1"] == 0.5]
     for l0, l1, color in zip(
         [0.05, 0.25], [0.95, 0.75], ["lightgreen", "violet"]
@@ -157,44 +180,32 @@ def plotter(fdict):
             qtiles[qtiles["level_1"] == l0]["dwpf"].values,
             qtiles[qtiles["level_1"] == l1]["dwpf"].values,
             color=color,
-            label="%.0f-%.0f %%tile" % (l0 * 100, l1 * 100),
+            label=f"{(l0 * 100):.0f}-{(l1 * 100):.0f} %tile",
         )
     ax.plot(
         means["tmpf"].values, means["dwpf"].values, c="blue", lw=3, label="Avg"
     )
     ax.grid(True, zorder=11)
-    ab = ctx["_nt"].sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata.")
-    ax.set_title(
-        (
-            "%s [%s]\nDew Point Distribution by Air Temperature (month=%s) "
-            "(%s-%s), n=%.0f\n"
-            "(must have 6+ hourly observations at the given temperature)"
-        )
-        % (
-            ctx["_nt"].sts[station]["name"],
-            station,
-            month.upper(),
-            ab.year,
-            datetime.datetime.now().year,
-            len(df.index),
-        ),
-        size=10,
-    )
 
     xmin, xmax = means["tmpf"].min() - 2, means["tmpf"].max() + 2
     ax.plot([xmin, xmax], [xmin, xmax], color="tan", lw=1.5)
-    ax.legend(loc=4, ncol=3)
     ax.set_ylabel("Dew Point [F]")
     y2 = ax.twinx()
     y2.plot(means["tmpf"].values, means["relh"].values, color="k")
-    y2.set_ylabel("Relative Humidity [%] (black line)")
+    y2.set_ylabel("Mean Relative Humidity [%] (black line)")
     y2.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     y2.set_ylim(0, 100)
     ax.set_ylim(xmin, xmax)
     ax.set_xlim(xmin, xmax)
     ax.set_xlabel(r"Air Temperature $^\circ$F")
+
+    if ctx.get("date"):
+        df2 = df[df["local_date"] == ctx["date"]]
+        if not df2.empty:
+            lbl = ctx["date"].strftime("%Y-%m-%d")
+            ax.scatter(df2["tmpf"], df2["dwpf"], c="k", s=50, label=lbl)
+
+    ax.legend(loc=4, ncol=4)
 
     return fig, means[["tmpf", "dwpf", "relh"]]
 

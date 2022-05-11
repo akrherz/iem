@@ -92,14 +92,12 @@ def plotter(fdict):
         raise NoDataFound("No Data Found.")
     df["freq"] = df["hit"] / df["total"] * 100.0
 
-    title = ("[%s] %s %s %s %s\nduring %s (Avg: %.2f days/year)") % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-        PDICT.get(varname),
-        PDICT2.get(drct),
-        threshold,
-        calendar.month_name[month],
-        df["hit"].sum() / float(df["total"].sum()) * len(df.index),
+    vv = df["hit"].sum() / float(df["total"].sum()) * len(df.index)
+    title = (
+        f"{ctx['_sname']} :: {PDICT.get(varname)} {PDICT2.get(drct)} "
+        f"{threshold}\n"
+        f"during {calendar.month_name[month]} "
+        f"(Avg: {vv:.2f} days/year)"
     )
     fig, ax = figure_axes(title=title, apctx=ctx)
     bars = ax.bar(np.arange(1, len(df.index) + 1), df["freq"])
@@ -107,13 +105,13 @@ def plotter(fdict):
         ax.text(
             i + 1,
             mybar.get_height() + 0.3,
-            "%s" % (df["hit"][i],),
+            f"{df['hit'][i]}",
             ha="center",
         )
     ax.set_ylabel("Frequency (%)")
     ax.set_xlabel(
-        ("Day of %s, number of years (out of %s) meeting criteria labelled")
-        % (calendar.month_name[month], np.max(df["total"]))
+        f"Day of {calendar.month_name[month]}, number of years "
+        f"(out of {np.max(df['total'])}) meeting criteria labelled"
     )
     ax.grid(True)
     ax.set_xlim(0.5, 31.5)
