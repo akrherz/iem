@@ -13,22 +13,18 @@ from pyiem.plot import figure
 from pyiem.plot.util import fitbox
 from pyiem.exceptions import NoDataFound
 
-PDICT = dict(
-    [
-        ("tmpf", "Air Temperature [F]"),
-        ("dwpf", "Dew Point Temperature [F]"),
-        ("feel", "Feels Like Temperature [F]"),
-        ("relh", "Relative Humidity [%]"),
-    ]
-)
-PDICT2 = dict(
-    [
-        ("day", "Percentiles for Date:"),
-        ("week", "Percentiles for Week of Year Near:"),
-        ("month", "Percentiles for Month:"),
-        ("year", "Percentiles for Entire Year"),
-    ]
-)
+PDICT = {
+    "tmpf": "Air Temperature [F]",
+    "dwpf": "Dew Point Temperature [F]",
+    "feel": "Feels Like Temperature [F]",
+    "relh": "Relative Humidity [%]",
+}
+PDICT2 = {
+    "day": "Percentiles for Date:",
+    "week": "Percentiles for Week of Year Near:",
+    "month": "Percentiles for Month:",
+    "year": "Percentiles for Entire Year",
+}
 
 
 def get_description():

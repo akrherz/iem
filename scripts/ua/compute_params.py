@@ -1,7 +1,9 @@
-"""Compute sounding derived parameters."""
-import sys
+"""Compute sounding derived parameters.
 
-# import warnings
+Run from RUN_10AFTER.sh
+"""
+# pylint: disable=no-member
+import sys
 
 from pyiem.util import get_dbconn, get_sqlalchemy_conn, utc, logger
 from pyiem.network import Table as NetworkTable
@@ -26,12 +28,18 @@ from metpy.calc import (
 from metpy.units import units
 
 LOG = logger()
-# warnings.simplefilter("error")
 
 
-def nonull(val):
+def nonull(val, minval=None, maxval=None):
     """Ensure we don't have NaN."""
-    return np.array(val).item() if not pd.isnull(val) else None
+    if pd.isnull(val):
+        return None
+    val = float(val)
+    if minval is not None and val < minval:
+        return None
+    if maxval is not None and val > maxval:
+        return None
+    return val
 
 
 def log_interp(zz, xx, yy):
@@ -68,8 +76,8 @@ def get_station_elevation(df, nt):
         return data_says
     if np.abs(data_says - metadata_says) > 49:
         raise RuntimeError(
-            ("lowest level %.1f too far from station: %.1f")
-            % (data_says, metadata_says)
+            f"lowest level {data_says:.1f} too far "
+            f"from station: {metadata_says:.1f}"
         )
     return data_says
 
@@ -136,7 +144,7 @@ def do_profile(cursor, fid, gdf, nt):
         msg = f"quorum fail td: {td_profile.size} wind: {wind_profile.size}"
         raise ValueError(msg)
     if gdf["pressure"].min() > 500:
-        raise ValueError("Profile only up to %s mb" % (gdf["pressure"].min(),))
+        raise ValueError(f"Profile only up to {gdf['pressure'].min()} mb")
     # Does a crude check that our metadata station elevation is within 50m
     # of the profile bottom, otherwise we ABORT
     station_elevation_m = get_station_elevation(td_profile, nt)
@@ -247,12 +255,12 @@ def do_profile(cursor, fid, gdf, nt):
     lcl_agl = gt1(lcl_hght - station_elevation_m)
     lfc_agl = gt1(lfc_hght - station_elevation_m)
     args = (
-        nonull(sbcape.to(units("joules / kilogram")).m),
-        nonull(sbcin.to(units("joules / kilogram")).m),
-        nonull(mucape.to(units("joules / kilogram")).m),
-        nonull(mucin.to(units("joules / kilogram")).m),
-        nonull(mlcape.to(units("joules / kilogram")).m),
-        nonull(mlcin.to(units("joules / kilogram")).m),
+        nonull(sbcape.to(units("joules / kilogram")).m, minval=0),
+        nonull(sbcin.to(units("joules / kilogram")).m, maxval=0),
+        nonull(mucape.to(units("joules / kilogram")).m, minval=0),
+        nonull(mucin.to(units("joules / kilogram")).m, maxval=0),
+        nonull(mlcape.to(units("joules / kilogram")).m, minval=0),
+        nonull(mlcin.to(units("joules / kilogram")).m, maxval=0),
         nonull(pwater.to(units("mm")).m),
         nonull(el_agl),
         nonull(el_p.to(units("hPa")).m),
@@ -314,11 +322,9 @@ def main(argv):
         df = pd.read_sql(
             f"""
             select f.fid, f.station, pressure, dwpc, tmpc, drct, smps, height,
-            levelcode from
-            raob_profile_{year} p JOIN raob_flights f
+            levelcode from raob_profile_{year} p JOIN raob_flights f
             on (p.fid = f.fid) WHERE (not computed or computed is null)
-            and height is not null
-            and pressure is not null
+            and height is not null and pressure is not null
             ORDER by pressure DESC
         """,
             conn,
@@ -338,7 +344,7 @@ def main(argv):
         try:
             do_profile(cursor, fid, gdf, nt)
         except (RuntimeError, ValueError, IndexError) as exp:
-            LOG.debug(
+            LOG.info(
                 "Profile %s fid: %s failed calculation %s",
                 gdf.iloc[0]["station"],
                 fid,

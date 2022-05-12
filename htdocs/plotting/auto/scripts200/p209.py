@@ -11,17 +11,16 @@ from matplotlib.colorbar import ColorbarBase
 import matplotlib.colors as mpcolors
 import numpy as np
 
-PDICT = dict(
-    [
-        ("PCT PLANTED", "Planting"),
-        ("PCT EMERGED", "Emerged"),
-        ("PCT DENTED", "Percent Dented"),
-        ("PCT COLORING", "Percent Coloring"),
-        ("PCT SETTING PODS", "Percent Setting Pods"),
-        ("PCT DROPPING LEAVES", "Percent Dropping Leaves"),
-        ("PCT HARVESTED", "Harvest (Grain)"),
-    ]
-)
+PDICT = {
+    "PCT PLANTED": "Planting",
+    "PCT EMERGED": "Emerged",
+    "PCT DENTED": "Percent Dented",
+    "PCT COLORING": "Percent Coloring",
+    "PCT SETTING PODS": "Percent Setting Pods",
+    "PCT DROPPING LEAVES": "Percent Dropping Leaves",
+    "PCT HARVESTED": "Harvest (Grain)",
+}
+
 PDICT2 = {"CORN": "Corn", "SOYBEANS": "Soybean"}
 
 
@@ -130,7 +129,15 @@ def plotter(fdict):
     bins[0] = 0.01
     norm = mpcolors.BoundaryNorm(bins, cmap.N)
 
-    (fig, ax) = figure_axes(apctx=ctx)
+    title = (
+        f"USDA NASS Weekly {ctx['unit_desc']} "
+        f"{PDICT2.get(ctx['commodity_desc'])} Progress for "
+        f"{state_names[ctx['state']]}, % {PDICT.get(ctx['unit_desc'])} over "
+        "weekly periods"
+    )
+    subtitle = "yearly max labelled on left hand side"
+
+    (fig, ax) = figure_axes(apctx=ctx, title=title, subtitle=subtitle)
 
     yearmax = df[["year", "delta"]].groupby("year").max()
     for year, df2 in df.groupby("year"):
@@ -171,27 +178,14 @@ def plotter(fdict):
     ylabels = []
     for yr in range(minyear, maxyear + 1):
         if yr % 5 == 0:
-            ylabels.append("%s %.0f" % (yr, yearmax.at[yr, "delta"]))
+            ylabels.append(f"{yr} {yearmax.at[yr, 'delta']:.0f}")
         else:
-            ylabels.append("%.0f" % (yearmax.at[yr, "delta"],))
+            ylabels.append(f"{yearmax.at[yr, 'delta']:.0f}")
     ax.set_yticklabels(ylabels, fontsize=10)
 
     ax.set_ylim(minyear - 0.5, maxyear + 0.5)
     ax.set_xlim(min(jdays), max(jdays))
     ax.grid(linestyle="-", linewidth="0.5", color="#EEEEEE", alpha=0.7)
-    ax.set_title(
-        (
-            "USDA NASS Weekly %s %s Progress\n"
-            "%s %% %s over weekly periods\n"
-            "yearly max labelled on left hand side"
-        )
-        % (
-            ctx["unit_desc"],
-            PDICT2.get(ctx["commodity_desc"]),
-            state_names[ctx["state"]],
-            PDICT.get(ctx["unit_desc"]),
-        )
-    )
 
     ax.set_position([0.13, 0.1, 0.71, 0.78])
     cax = fig.add_axes(

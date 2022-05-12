@@ -3,6 +3,7 @@ import datetime
 
 import pandas as pd
 import numpy as np
+import matplotlib.dates as mdates
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
@@ -202,7 +203,8 @@ def get_data(ctx):
     ctx["df"] = df
 
     ctx["title"] = (
-        f"{station} {name} {hour:02.0f} UTC Sounding\n"
+        f"{station} {name} {hour:02.0f} UTC Sounding ({dfin['year'].min()} - "
+        f"{dfin['year'].max()})\n"
         f"{PDICT3[varname]} {ctx['leveltitle']}"
     )
 
@@ -353,12 +355,53 @@ def plotter(fdict):
         label="25-75 %tile",
     )
     ax.plot(x, df[ctx["var"], "mean"].values, color="k", zorder=3, label="Avg")
+    ymax = ax.get_ylim()[1]
+    dy = ymax * 0.01
+    # Figure out the monthly max values
+    mmax = df[ctx["var"], "max"].reset_index()
+    mmax["month"] = mmax["sday"].str.slice(0, 2)
+    mmax = mmax.drop(columns="sday").groupby("month").max()
+    mmax.columns = [
+        "max",
+    ]
+    for month, row in mmax.iterrows():
+        sts = datetime.date(ctx["year"], int(month), 1)
+        ets = (sts + datetime.timedelta(days=35)).replace(day=1)
+        ax.plot([sts, ets], [row["max"], row["max"]], zorder=3, color="b")
+        ax.text(
+            sts + datetime.timedelta(days=15),
+            row["max"] + dy,
+            f"{row['max']:.2f}",
+            ha="center",
+        )
+
+    mmin = df[ctx["var"], "min"].reset_index()
+    mmin["month"] = mmin["sday"].str.slice(0, 2)
+    mmin = mmin.drop(columns="sday").groupby("month").min()
+    mmin.columns = [
+        "min",
+    ]
+    for month, row in mmin.iterrows():
+        sts = datetime.date(ctx["year"], int(month), 1)
+        ets = (sts + datetime.timedelta(days=35)).replace(day=1)
+
+        ax.plot([sts, ets], [row["min"], row["min"]], zorder=3, color="b")
+        ax.text(
+            sts + datetime.timedelta(days=15),
+            row["min"] - dy,
+            f"{row['min']:.2f}",
+            ha="center",
+            va="top",
+        )
     ax.legend()
     ax.set_ylabel(PDICT3[ctx["var"]])
     ax.grid(True)
+    ax.xaxis.set_major_locator(mdates.MonthLocator())
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %-d"))
+    ax.set_xlabel(f"Day of {ctx['year']}")
 
     return fig, df
 
 
 if __name__ == "__main__":
-    print(highcharts(dict(station="KABR", var="tmpc", level=500, hour="12")))
+    plotter(dict(station="KABR", var="tmpc", level=500, hour="12"))
