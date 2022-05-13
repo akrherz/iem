@@ -2,7 +2,7 @@
 import datetime
 import json
 
-import memcache
+from pymemcache.client import Client
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
 
@@ -103,18 +103,18 @@ def application(environ, start_response):
     eyear = int(fields.get("eyear", datetime.datetime.now().year + 1))
     cb = fields.get("callback", None)
 
-    mckey = "/json/climodat_stclimo/%s/%s/%s" % (station, syear, eyear)
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    mckey = f"/json/climodat_stclimo/{station}/{syear}/{eyear}"
+    mc = Client(["iem-memcached", 11211])
     res = mc.get(mckey)
     if not res:
         res = run(station, syear, eyear)
         mc.set(mckey, res, 86400)
-
-    if cb is None:
-        data = res
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        res = res.decode("utf-8")
+    mc.close()
+    if cb is not None:
+        res = f"{html_escape(cb)}({res})"
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return [res.encode("ascii")]

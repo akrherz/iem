@@ -220,4 +220,3 @@ for that date.</p>
 </table>
 EOF;
 $t->render('single.phtml');
- ?>

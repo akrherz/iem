@@ -58,7 +58,7 @@ def load_table(state, date):
             }
         )
     if not rows:
-        LOG.debug("No applicable stations found for state: %s", state)
+        LOG.info("No applicable stations found for state: %s", state)
         return None, threaded
     df = pd.DataFrame(rows)
     df = df.set_index("station")
@@ -190,7 +190,7 @@ def commit(cursor, table, df, ts):
     if not df2.empty:
         print(df2)
     for sid, row in df[df["dirty"]].iterrows():
-        LOG.debug(
+        LOG.info(
             "sid: %s high: %s low: %s precip: %s snow: %s snowd: %s",
             sid,
             row["high"],
@@ -261,10 +261,10 @@ def merge_network_obs(df, network, ts):
             LOG.warning("loading obs for network %s yielded no data", network)
         return df
     obs["precip_hour"] = obs["temp_hour"]
-    # Some COOP sites may not report 'daily' high and low, so we cull those
-    # out as nulls
+    # If a site has either a null high or low, we need to estimate both to
+    # avoid troubles with having only one estimated flag column :/
     for col in ["high", "low"]:
-        obs.loc[pd.isnull(obs[col]), col] = np.nan
+        obs.loc[pd.isnull(obs[col]), ("high", "low")] = np.nan
     obs.loc[obs["high"] <= obs["low"], ("high", "low")] = np.nan
     # Tricky part here, if our present data table has data and is not
     # estimated, we don't want to over-write it!
@@ -279,7 +279,7 @@ def merge_network_obs(df, network, ts):
         )
         # Only use when we have observed data and estimated col is True
         useidx = ~pd.isna(df[f"{col}b"]) & df[estcol]
-        LOG.debug(
+        LOG.info(
             "Found %s rows needing data for %s",
             len(useidx.index),
             col,
