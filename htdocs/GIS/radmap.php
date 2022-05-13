@@ -8,6 +8,7 @@
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/vtec.php";
+require_once "../../include/forms.php";
 $postgis = iemdb("postgis");
 
 $plotmeta = Array("title" => Array(),
@@ -102,16 +103,22 @@ if (gettype($layers) == "string"){
 
 /* Straight CGI Butter */
 $sector = isset($_GET["sector"]) ? $_GET["sector"] : "iem";
-$width = isset($_GET["width"]) ? intval($_GET["width"]) : 640;
-$height = isset($_GET["height"]) ? intval($_GET["height"]) : 480;
-$lsrbuffer = isset($_GET["lsrbuffer"]) ? intval($_GET["lsrbuffer"]): 15;
+$width = get_int404("width", 640);
+$height = get_int404("height", 480);
+$lsrbuffer = get_int404("lsrbuffer", 15);
 
 // Now, maybe we set a VTEC string, lets do all sorts of fun
 $vtec_limiter = "";
 if (isset($_GET["vtec"]))
 {
+    $cvtec = xssafe($_GET["vtec"]);
+    // cull errand _
+    $pos = strpos($cvtec, "_");
+    if ($pos !== false) {
+        $cvtec = substr($cvtec, 0, $pos);
+    }
 	// we may have gotten here with '-' or '.' in vtec string, rectify
-	$cvtec = str_replace("-", ".", strtoupper($_GET["vtec"]));
+	$cvtec = str_replace("-", ".", strtoupper($cvtec));
   	$tokens = explode(".", $cvtec);
  	if (sizeof($tokens) == 7){
     	list($year, $pclass, $status, $wfo, $phenomena, $significance, 
@@ -735,4 +742,3 @@ $img->saveImage('');
 
 $map->free();
 unset($map);
-?>
