@@ -20,6 +20,7 @@ def hourly_process(cursor, station, hour, mdf, hdf):
     if row["valid"] not in hdf.index:
         return
     lastob = mdf.iloc[-1]
+    svobs = mdf[~pd.isna(mdf["sv_t16_qc"])]
     sumdf = mdf.sum(numeric_only=True)
     row["obs_count"] = len(mdf.index)
     current = hdf.loc[row["valid"]]
@@ -33,9 +34,13 @@ def hourly_process(cursor, station, hour, mdf, hdf):
     ).split():
         row[colname] = float(lastob[f"{colname}_qc"])
     # Soil Vue Madness
-    for depth in [2, 4, 8, 12, 14, 16, 20, 24, 28, 30, 32, 36, 40, 42, 52]:
-        for col in ["t", "vwc", "ec"]:
-            row[f"sv_{col}{depth}"] = float(lastob[f"sv_{col}{depth}_qc"])
+    if not svobs.empty:
+        sv_lastob = svobs.iloc[-1]
+        for depth in [2, 4, 8, 12, 14, 16, 20, 24, 28, 30, 32, 36, 40, 42, 52]:
+            for col in ["t", "vwc", "ec"]:
+                row[f"sv_{col}{depth}"] = float(
+                    sv_lastob[f"sv_{col}{depth}_qc"]
+                )
     tokens = []
     sigh = {
         "calcvwc12_avg": "calc_vwc_12_avg",
@@ -167,7 +172,7 @@ def main():
     # Hourly work
     cursor = pgconn.cursor()
     for station, gdf in mdf.groupby("station"):
-        for hour, hgdf in mdf.set_index("utc_valid").resample("H"):
+        for hour, hgdf in gdf.set_index("utc_valid").resample("H"):
             hourly_process(cursor, station, hour, hgdf, hdf.loc[station, :])
     cursor.close()
     pgconn.commit()
