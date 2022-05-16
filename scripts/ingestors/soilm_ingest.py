@@ -19,7 +19,7 @@ import pandas as pd
 from metpy.units import units
 from metpy.calc import dewpoint_from_relative_humidity
 from pyiem.observation import Observation
-from pyiem.util import get_dbconn, logger, convert_value, c2f, mm2inch
+from pyiem.util import get_dbconn, logger, convert_value, c2f, mm2inch, utc
 
 LOG = logger()
 ISUAG = get_dbconn("isuag")
@@ -48,8 +48,12 @@ VARCONV = {
     "bp_mb_avg": "bpres_avg",
     "rh": "rh_avg",
     "ec12in": "ec12",
+    "ec_12in": "ec12",
     "ec24in": "ec24",
+    "ec_24in": "ec24",
     "ec50in": "ec50",
+}
+VARCONV_JEFF = {
     "ec_2in": "sv_ec2",
     "ec_4in": "sv_ec4",
     "ec_8in": "sv_ec8",
@@ -86,6 +90,12 @@ VARCONV = {
     "temp_avg24in": "sv_t24",
     "temp_avg30in": "sv_t30",
     "temp_avg40in": "sv_t40",
+}
+VARCONV_TPOI4 = {
+    "temp_avg12in": "t12_c_avg",
+    "temp_avg24in": "t24_c_avg",
+    "vwc_avg12in": "calcvwc12_avg",
+    "vwc_avg24in": "calcvwc24_avg",
 }
 
 TSOIL_COLS = [
@@ -159,7 +169,7 @@ def do_inversion(filename, nwsli):
     """Process Inversion Station Data."""
     fn = f"{BASE}/{filename}_Inversion_MinSI.dat"
     if not os.path.isfile(fn):
-        LOG.debug("missing filename %s", fn)
+        LOG.info("missing filename %s", fn)
         return
     df = pd.read_csv(fn, skiprows=[0, 2, 3], na_values=["NAN"])
     # convert all columns to lowercase
@@ -195,7 +205,7 @@ def do_inversion(filename, nwsli):
                 row["ws_ms_max"],
             ),
         )
-    LOG.debug("Inserted %s inversion rows for %s", len(df.index), nwsli)
+    LOG.info("Inserted %s inversion rows for %s", len(df.index), nwsli)
     cursor.close()
     ISUAG.commit()
 
@@ -210,6 +220,11 @@ def common_df_logic(filename, maxts, nwsli, tablename):
     df.columns = map(str.lower, df.columns)
     # rename columns to rectify differences
     df = df.rename(columns=VARCONV)
+    # extra conversion for Deal's Orchard / Jefferson
+    if nwsli == "DOCI4":
+        df = df.rename(columns=VARCONV_JEFF)
+    elif nwsli == "TPOI4":
+        df = df.rename(columns=VARCONV_TPOI4)
     # QC out some bad temp values
     if tablename == "sm_daily" and nwsli in ["GVNI4", "CSII4"]:
         for col in ["tair_c_avg", "tair_c_min", "tair_c_max"]:
@@ -290,6 +305,13 @@ def common_df_logic(filename, maxts, nwsli, tablename):
     # drop duplicate valids?
     df = df.groupby("valid").first().reset_index()
     if tablename == "sm_daily":
+        # Horrible
+        df = df.rename(
+            columns={
+                "calcvwc12_avg": "calc_vwc_12_avg",
+                "calcvwc24_avg": "calc_vwc_24_avg",
+            },
+        )
         # Rework the valid column into the appropriate date
         df["valid"] = df["valid"].dt.date - datetime.timedelta(days=1)
         # Convert radiation to standardized slrkj_tot
@@ -305,6 +327,13 @@ def common_df_logic(filename, maxts, nwsli, tablename):
             errors="ignore",
         )
     if tablename == "sm_hourly":
+        # Horrible
+        df = df.rename(
+            columns={
+                "calcvwc12_avg": "calc_vwc_12_avg",
+                "calcvwc24_avg": "calc_vwc_24_avg",
+            },
+        )
         # Convert radiation to standardized slrkj_tot
         df["slrkj_tot"] = df["slrmj_tot"] * 1000.0
         # drop things we do not need
@@ -332,15 +361,11 @@ def common_df_logic(filename, maxts, nwsli, tablename):
             continue
         df[f"{colname}_qc"] = df[colname]
         if colname.startswith("calc_vwc"):
-            df["%s_f" % (colname,)] = qcval(
-                df, "%s_qc" % (colname,), 0.01, 0.7
-            )
+            df[f"{colname}_f"] = qcval(df, f"{colname}_qc", 0.01, 0.7)
         elif colname in TSOIL_COLS:
-            df["%s_f" % (colname,)] = qcval2(
-                df, "%s_qc" % (colname,), -20.0, 37.0
-            )
+            df[f"{colname}_f"] = qcval2(df, f"{colname}_qc", -20.0, 37.0)
         else:
-            df["%s_f" % (colname,)] = None
+            df[f"{colname}_f"] = None
 
     df["station"] = nwsli
     if "ws_mph_tmx" in df.columns:
@@ -362,14 +387,14 @@ def common_df_logic(filename, maxts, nwsli, tablename):
 
 def m15_process(nwsli, maxts):
     """Process the 15minute file"""
-    fn = "%s/%s_Min15SI.dat" % (BASE, STATIONS[nwsli])
+    fn = f"{BASE}/{STATIONS[nwsli]}_Min15SI.dat"
     df = common_df_logic(fn, maxts, nwsli, "sm_minute")
     if df is None:
         return 0
 
     # Update IEMAccess
     processed = 0
-    LOG.debug("processing %s rows from %s", len(df.index), fn)
+    LOG.info("processing %s rows from %s", len(df.index), fn)
     acursor = ACCESS.cursor()
     for _i, row in df.iterrows():
         ob = Observation(nwsli, "ISUSM", row["valid"].to_pydatetime())
@@ -414,12 +439,12 @@ def m15_process(nwsli, maxts):
 
 def hourly_process(nwsli, maxts):
     """Process the hourly file"""
-    fn = "%s/%s_HrlySI.dat" % (BASE, STATIONS[nwsli])
+    fn = f"{BASE}/{STATIONS[nwsli]}_HrlySI.dat"
     df = common_df_logic(fn, maxts, nwsli, "sm_hourly")
     if df is None:
         return 0
     processed = 0
-    LOG.debug("processing %s rows from %s", len(df.index), fn)
+    LOG.info("processing %s rows from %s", len(df.index), fn)
     acursor = ACCESS.cursor()
     for _i, row in df.iterrows():
         # Update IEMAccess
@@ -466,11 +491,11 @@ def hourly_process(nwsli, maxts):
 
 def daily_process(nwsli, maxts):
     """Process the daily file"""
-    fn = "%s/%s_DailySI.dat" % (BASE, STATIONS[nwsli])
+    fn = f"{BASE}/{STATIONS[nwsli]}_DailySI.dat"
     df = common_df_logic(fn, maxts, nwsli, "sm_daily")
     if df is None:
         return 0
-    LOG.debug("processing %s rows from %s", len(df.index), fn)
+    LOG.info("processing %s rows from %s", len(df.index), fn)
     processed = 0
     acursor = ACCESS.cursor()
     for _i, row in df.iterrows():
@@ -515,7 +540,7 @@ def daily_process(nwsli, maxts):
 
 def update_pday():
     """Compute today's precip from the current_log archive of data"""
-    LOG.debug("update_pday() called...")
+    LOG.info("update_pday() called...")
     acursor = ACCESS.cursor()
     acursor.execute(
         """
@@ -528,13 +553,10 @@ def update_pday():
     for row in acursor:
         data[row[0]] = row[1]
 
-    for iemid in data:
+    for iemid, entry in data.items():
         acursor.execute(
-            """
-            UPDATE summary SET pday = %s
-            WHERE iemid = %s and day = 'TODAY'
-        """,
-            (data[iemid], iemid),
+            "UPDATE summary SET pday = %s WHERE iemid = %s and day = 'TODAY'",
+            (entry, iemid),
         )
     acursor.close()
     ACCESS.commit()
@@ -579,7 +601,7 @@ def get_max_timestamps(nwsli):
     row = icursor.fetchone()
     if row[0] is not None:
         data["minute"] = row[0]
-    LOG.debug(
+    LOG.info(
         "%s max daily: %s hourly: %s minute: %s",
         nwsli,
         data["daily"],
@@ -591,7 +613,7 @@ def get_max_timestamps(nwsli):
 
 def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
     """Send the raw datafile to LDM"""
-    filename = "%s/%s_DailySI.dat" % (BASE, STATIONS[nwsli])
+    filename = f"{BASE}/{STATIONS[nwsli]}_DailySI.dat"
     if not os.path.isfile(filename):
         return
     fdata = open(filename, "rb").read().decode("ascii", "ignore")
@@ -608,8 +630,10 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
         os.write(tmpfd, lines[linenum].encode("ascii", "ignore"))
     os.close(tmpfd)
     cmd = (
-        "pqinsert -p " "'data c %s csv/isusm/%s_daily.txt bogus txt' %s"
-    ) % (datetime.datetime.utcnow().strftime("%Y%m%d%H%M"), nwsli, tmpfn)
+        "pqinsert -p "
+        f"'data c {utc():%Y%m%d%H%M} csv/isusm/{nwsli}_daily.txt bogus txt' "
+        f"{tmpfn}"
+    )
     proc = subprocess.Popen(
         cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE
     )
@@ -617,7 +641,7 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
     os.remove(tmpfn)
 
     # Send the raw datafile to LDM
-    filename = "%s/%s_HrlySI.dat" % (BASE, STATIONS[nwsli])
+    filename = f"{BASE}/{STATIONS[nwsli]}_HrlySI.dat"
     if not os.path.isfile(filename):
         return
     # Sometimes this file has corrupted characters?
@@ -635,8 +659,10 @@ def dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed):
         os.write(tmpfd, lines[linenum].encode("ascii", "ignore"))
     os.close(tmpfd)
     cmd = (
-        "pqinsert -p " "'data c %s csv/isusm/%s_hourly.txt bogus txt' %s"
-    ) % (datetime.datetime.utcnow().strftime("%Y%m%d%H%M"), nwsli, tmpfn)
+        "pqinsert -p "
+        f"'data c {utc():%Y%m%d%H%M} csv/isusm/{nwsli}_hourly.txt bogus txt' "
+        f"{tmpfn}"
+    )
     proc = subprocess.Popen(
         cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE
     )
@@ -648,14 +674,14 @@ def main(argv):
     """Go main Go"""
     stations = STATIONS if len(argv) == 1 else [argv[1]]
     for nwsli in stations:
-        LOG.debug("starting workflow for: %s", nwsli)
+        LOG.info("starting workflow for: %s", nwsli)
         maxobs = get_max_timestamps(nwsli)
         m15processed = m15_process(nwsli, maxobs["minute"])
         hrprocessed = hourly_process(nwsli, maxobs["hourly"])
         dyprocessed = daily_process(nwsli, maxobs["daily"])
         if hrprocessed > 0:
             dump_raw_to_ldm(nwsli, dyprocessed, hrprocessed)
-        LOG.debug(
+        LOG.info(
             "%s 15min:%s hr:%s daily:%s",
             nwsli,
             m15processed,
@@ -667,21 +693,19 @@ def main(argv):
         do_inversion(INVERSION[nwsli], nwsli)
 
     if EVENTS["reprocess_solar"]:
-        LOG.debug("Calling fix_solar.py with no args")
+        LOG.info("Calling fix_solar.py with no args")
         subprocess.call("python ../isuag/fix_solar.py", shell=True)
     if EVENTS["reprocess_temps"]:
-        LOG.debug("Calling fix_temps.py with no args")
+        LOG.info("Calling fix_temps.py with no args")
         subprocess.call("python ../isuag/fix_temps.py", shell=True)
     for day in EVENTS["days"]:
-        LOG.debug("Calling fix_{solar,precip}.py for %s", day)
+        LOG.info("Calling fix_{solar,precip}.py for %s", day)
         subprocess.call(
-            ("python ../isusm/fix_precip.py %s %s %s")
-            % (day.year, day.month, day.day),
+            f"python ../isusm/fix_precip.py {day:%Y %m %d}",
             shell=True,
         )
         subprocess.call(
-            ("python ../isuag/fix_solar.py %s %s %s")
-            % (day.year, day.month, day.day),
+            f"python ../isuag/fix_solar.py {day:%Y %m %d}",
             shell=True,
         )
 
