@@ -136,7 +136,7 @@
 10.90.12.14    iem-memcached
 # memcache1(248) metvm2 <-> metvm8
 192.168.0.248    iem-memcached1
-# memcache2(247) metvm8 <-> metvm3
+# memcache2(247) metvm8 <-> metvm9
 192.168.0.247    iem-memcached2
 # VI12(62) metvm1 <-> metvm7
 192.168.0.239    iem-memcached3

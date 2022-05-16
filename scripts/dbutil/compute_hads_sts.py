@@ -16,7 +16,7 @@ def get_minvalid(sid):
     cursor = HADSDB.cursor()
     for yr in range(2002, THISYEAR + 1):
         cursor.execute(
-            f"SELECT min(valid) from raw{yr} WHERE station = %s", (sid,)
+            f"SELECT min(date(valid)) from raw{yr} WHERE station = %s", (sid,)
         )
         minv = cursor.fetchone()[0]
         if minv is not None:
@@ -31,26 +31,27 @@ def do_network(network):
         if sts is None:
             continue
         if (
-            nt.sts[sid]["archive_begin"] is None
-            or nt.sts[sid]["archive_begin"] != sts
+            nt.sts[sid]["archive_begin"] is not None
+            and nt.sts[sid]["archive_begin"] == sts
         ):
-            osts = nt.sts[sid]["archive_begin"]
-            fmt = "%Y-%m-%d %H:%M"
-            LOG.info(
-                "%s [%s] new sts: %s OLD sts: %s",
-                sid,
-                network,
-                sts.strftime(fmt),
-                osts.strftime(fmt) if osts is not None else "null",
-            )
-            cursor = MESOSITEDB.cursor()
-            cursor.execute(
-                "UPDATE stations SET archive_begin = %s WHERE id = %s and "
-                "network = %s",
-                (sts, sid, network),
-            )
-            cursor.close()
-            MESOSITEDB.commit()
+            continue
+        osts = nt.sts[sid]["archive_begin"]
+        fmt = "%Y-%m-%d %H:%M"
+        LOG.warning(
+            "%s [%s] new sts: %s OLD sts: %s",
+            sid,
+            network,
+            sts.strftime(fmt),
+            osts.strftime(fmt) if osts is not None else "null",
+        )
+        cursor = MESOSITEDB.cursor()
+        cursor.execute(
+            "UPDATE stations SET archive_begin = %s WHERE id = %s and "
+            "network = %s",
+            (sts, sid, network),
+        )
+        cursor.close()
+        MESOSITEDB.commit()
 
 
 def main(argv):

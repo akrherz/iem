@@ -74,8 +74,8 @@ def process_feature(cursor, domain, feat):
         if url.find("Not_Available") > -1:
             LOG.debug("skipping %s %s %s", cam, valid, url)
             continue
-        # 15 second timeout may be too aggressive
-        req = requests.get(url, timeout=30)
+        # 30 second timeout may be too aggressive
+        req = requests.get(url, timeout=60)
         if req.status_code == 404:
             LOG.debug("cloud 404 %s", url)
             with open(CLOUD404, "a", encoding="utf8") as fh:
