@@ -81,6 +81,7 @@ VARCONV = {
     "temp_4in": "sv_t4",
     "temp_8in": "sv_t8",
     "temp_12in": "sv_t12",
+    "temp_14in": "sv_t14",
     "temp_16in": "sv_t16",
     "temp_20in": "sv_t20",
     "temp_24in": "sv_t24",
