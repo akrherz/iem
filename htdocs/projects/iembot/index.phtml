@@ -145,7 +145,16 @@ mean.</p>
  <dt>&lt;aaa&gt;</dt><dd>First 3 Characters in AWIPS ID</dd>
  <dt>&lt;wmo_source&gt;</dt><dd>Full 4 Character WMO Source ID</dd>
  </dl>
- 
+
+<p><strong>Changelog:</strong>
+<ul>
+    <li><strong>18 May 2022:</strong> VTEC products that are purely
+    continues, cancels, or expires updates now go into more isolated
+    channels than the default phenomena/significance channels. These channels
+    have a suffix of <code>-ACT</code>ion.  For example, a continues Tornado
+    Warning statement would be in <code>TO.W-CON</code>.</li>
+</ul></p>
+
 		{$channels}
 
 <a name="bots"><h3>Twitter IEMBots and Channel Subscriptions</h3></a>
