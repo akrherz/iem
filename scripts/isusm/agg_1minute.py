@@ -1,7 +1,10 @@
 """
 Need to do some custom 1 minute data aggregation to fill out hourly table.
+
+RUN_20_AFTER.sh
 """
 import datetime
+import sys
 
 import numpy as np
 import pandas as pd
@@ -122,36 +125,42 @@ def do_date_ops(df):
     return df
 
 
-def main():
+def main(argv):
     """Do things."""
     pgconn = get_dbconn("isuag")
     # We need to collect up data for periods representing CST dates, this
     # is tricky business
-    date = datetime.date.today() - datetime.timedelta(days=7)
+    # TODO memory troubles with more than 7 days of data :/
+    if len(argv) == 4:
+        sts = datetime.date(int(i) for i in argv[1:])
+    else:
+        sts = datetime.date.today() - datetime.timedelta(days=7)
     # 6z is the start of such a date
-    sts = utc(date.year, date.month, date.day, 6)
+    sts = utc(sts.year, sts.month, sts.day, 6)
+    ets = sts + datetime.timedelta(days=8)
     with get_sqlalchemy_conn("isuag") as conn:
         # Get the minute data
         mdf = pd.read_sql(
             "SELECT *, valid at time zone 'UTC' as utc_valid from sm_minute "
-            "where valid >= %s ORDER by valid ASC",
+            "where valid >= %s and valid < %s ORDER by valid ASC",
             conn,
-            params=(sts,),
+            params=(sts, ets),
             index_col=None,
         ).fillna(np.nan)
         # Get the hourly data
         hdf = pd.read_sql(
             "SELECT *, valid at time zone 'UTC' as utc_valid from sm_hourly "
-            "where valid >= %s ORDER by valid ASC",
+            "where valid >= %s and valid < %s ORDER by valid ASC",
             conn,
-            params=(sts,),
+            params=(sts, ets),
             index_col=None,
         )
         # Get the daily data
         ddf = pd.read_sql(
-            "SELECT * from sm_daily where valid >= %s ORDER by valid ASC",
+            "SELECT * from sm_daily where valid >= %s and valid < %s "
+            "ORDER by valid ASC",
             conn,
-            params=(sts.date(),),
+            params=(sts.date(), ets.date()),
             index_col=["station", "valid"],
         )
 
@@ -183,14 +192,15 @@ def main():
         """WITH data as (
         SELECT station, date(valid),
         sum(etalfalfa_qc) as dailyet from sm_hourly WHERE
-        valid >= %s and etalfalfa_qc is not null GROUP by station, date)
+        valid >= %s and valid < %s
+        and etalfalfa_qc is not null GROUP by station, date)
         UPDATE sm_daily s SET dailyet_qc = d.dailyet, dailyet = d.dailyet
         FROM data d WHERE s.station = d.station and s.valid = d.date""",
-        (sts,),
+        (sts, ets),
     )
     cursor.close()
     pgconn.commit()
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
