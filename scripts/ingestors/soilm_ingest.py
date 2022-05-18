@@ -52,6 +52,7 @@ VARCONV = {
     "ec24in": "ec24",
     "ec_24in": "ec24",
     "ec50in": "ec50",
+    "ec4in": "ec4",
 }
 VARCONV_JEFF = {
     "ec_2in": "sv_ec2",
@@ -92,8 +93,10 @@ VARCONV_JEFF = {
     "temp_avg40in": "sv_t40",
 }
 VARCONV_TPOI4 = {
+    "temp_avg4in": "t4_c_avg",
     "temp_avg12in": "t12_c_avg",
     "temp_avg24in": "t24_c_avg",
+    "vwc_avg4in": "calcvwc4_avg",
     "vwc_avg12in": "calcvwc12_avg",
     "vwc_avg24in": "calcvwc24_avg",
 }
