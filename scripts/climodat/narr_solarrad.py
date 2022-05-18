@@ -132,8 +132,7 @@ def do(date):
     ccursor.execute(
         """
         SELECT station, ST_x(geom), ST_y(geom), temp24_hour from
-        alldata a JOIN stations t on
-        (a.station = t.id) where day = %s
+        alldata a JOIN stations t on (a.station = t.id) where day = %s
         """,
         (date.strftime("%Y-%m-%d"),),
     )

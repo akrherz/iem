@@ -22,8 +22,10 @@
 
 $sselect = "";
 foreach($nt->table as $key => $val){
-	$sselect .= sprintf("<br /><input type=\"checkbox\" name=\"sts\" value=\"%s\">%s (%s County, %s)",
-			$key, $val["name"], $val["county"], $key);
+	$sselect .= sprintf(
+        '<br /><input type="checkbox" name="sts" value="%s" id="%s"> '.
+        '<label for="%s">%s (%s County, %s)</label>',
+		$key, $key, $key, $val["name"], $val["county"], $key);
 }
 
 $soilopts = "";
@@ -47,14 +49,13 @@ $t->content = <<<EOF
 
 <h3>Daily Data Request Form:</h3>
 
-<P><b>Information:</b> This interface accesses the archive of daily weather 
+<p><b>Information:</b> This interface accesses the archive of daily weather 
 data collected from 
 the Iowa State Agclimate Automated Weather stations.  Please
-select the appropiate stations and weather variables desired below. 
+select the stations and weather variables desired below.</p>
 
 <P><B>Data Interval:</B>Currently you are selected to download daily data. 
 You may wish to change this to <a href="hourly.php">hourly data</a>. 
-
 
 <form name="dl" method="GET" action="/cgi-bin/request/isusm.py">
 <input type="hidden" name="mode" value="daily" />
@@ -116,6 +117,14 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 <br /><input type="checkbox" name="vars" value="lwmcon_2_tot">lwmcon_2_tot
 <br /><input type="checkbox" name="vars" value="lwmwet_2_tot">lwmwet_2_tot
 <br /><input type="checkbox" name="vars" value="bpres_avg">bpres_avg
+
+<hr>
+<p>The Ames-AEA, Ames-Kitchen, and Jefferson locations have the
+<a href="https://www.campbellsci.com/soilvue10">CS SoilVue 10</a> installed.<br />
+
+<input type="checkbox" name="vars" value="sv" id="sv">
+<label for="sv">SoilVue Temperature + Moisture Data</label>
+</p>
 
 {$qcbox}
 

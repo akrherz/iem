@@ -38,6 +38,7 @@ PLOTTYPES = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {}
+    desc["frontend"] = "/agclimate/smts.php"
     desc["data"] = True
     desc[
         "description"

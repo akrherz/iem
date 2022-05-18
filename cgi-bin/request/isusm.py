@@ -10,6 +10,7 @@ from sqlalchemy import text
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 MISSING = {"", "M", "-99"}
+SV_DEPTHS = [2, 4, 8, 12, 14, 16, 20, 24, 28, 30, 32, 36, 40, 42, 52]
 
 
 def get_stations(form):
@@ -85,6 +86,11 @@ def fetch_daily(form, cols):
     else:
         cols.insert(0, "valid")
         cols.insert(0, "station")
+    if "sv" in cols:
+        # SoilVue 10 data
+        for depth in SV_DEPTHS:
+            for c2 in ["t", "vwc"]:
+                cols.append(f"sv_{c2}{depth}")
 
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
@@ -104,24 +110,13 @@ def fetch_daily(form, cols):
       valid >= :sts and valid < :ets and station in :stations
       GROUP by station, date
     ), daily as (
-      SELECT station, valid, tair_c_max_qc, tair_c_min_qc, slrkj_tot_qc,
-      rain_in_tot_qc, dailyet_qc, t4_c_avg_qc, t12_c_avg_qc, t24_c_avg_qc,
-      t50_c_avg_qc, calc_vwc_12_avg_qc, calc_vwc_24_avg_qc, calc_vwc_50_avg_qc,
-      ws_mps_s_wvt_qc, ws_mps_max_qc, lwmv_1_qc, lwmv_2_qc,
-      lwmdry_1_tot_qc, lwmcon_1_tot_qc, lwmwet_1_tot_qc, lwmdry_2_tot_qc,
-      lwmcon_2_tot_qc, lwmwet_2_tot_qc, bpres_avg_qc from sm_daily WHERE
+      SELECT *,
+      round(gddxx(50, 86, c2f( tair_c_max_qc ),
+        c2f( tair_c_min_qc ))::numeric,1) as gdd50 from sm_daily WHERE
       valid >= :sts and valid < :ets and station in :stations
     )
-    SELECT d.station, d.valid, s.date, s.soil04tn, s.soil04tx, s.rh,
-    s.rh_min, s.rh_max,
-    s.soil12tn, s.soil12tx, s.soil24tn, s.soil24tx,
-    s.soil50tn, s.soil50tx, tair_c_max_qc, tair_c_min_qc, slrkj_tot_qc,
-    rain_in_tot_qc, dailyet_qc, t4_c_avg_qc, t12_c_avg_qc, t24_c_avg_qc,
-    t50_c_avg_qc, calc_vwc_12_avg_qc, calc_vwc_24_avg_qc, calc_vwc_50_avg_qc,
-    ws_mps_s_wvt_qc, ws_mps_max_qc, round(gddxx(50, 86, c2f( tair_c_max_qc ),
-    c2f( tair_c_min_qc ))::numeric,1) as gdd50, lwmv_1_qc, lwmv_2_qc,
-    lwmdry_1_tot_qc, lwmcon_1_tot_qc, lwmwet_1_tot_qc, lwmdry_2_tot_qc,
-    lwmcon_2_tot_qc, lwmwet_2_tot_qc, bpres_avg_qc
+    SELECT d.*, s.rh_min, s.rh, s.rh_max, s.soil04tn, s.soil04tx,
+    s.soil12tn, s.soil12tx, s.soil24tn, s.soil24tx, s.soil50tn, s.soil50tx
     FROM soils s JOIN daily d on (d.station = s.station and s.date = d.valid)
     ORDER by d.valid ASC
     """
@@ -179,9 +174,24 @@ def fetch_daily(form, cols):
             df["ws_mps_s_wvt_qc"].values, "meter / second", "mile / hour"
         )
     if "gust" in cols:
-        df["gust"] = convert_value(
-            df["ws_mps_max_qc"].values, "meter / second", "mile / hour"
-        )
+        # Le Sigh
+        if df["ws_mph_max_qc"].isnull().all():
+            df["gust"] = convert_value(
+                df["ws_mps_max_qc"].values, "meter / second", "mile / hour"
+            )
+        else:
+            df = df.rename(columns={"ws_mph_max_qc": "gust"})
+    if "sv" in cols:
+        # SoilVue 10 data
+        for depth in SV_DEPTHS:
+            df[f"sv_t{depth}"] = convert_value(
+                df[f"sv_t{depth}_qc"].values, "degC", "degF"
+            )
+            # Copy
+            df[f"sv_vwc{depth}"] = df[f"sv_vwc{depth}_qc"]
+        # Remove the original
+        cols.remove("sv")
+
     # Convert solar radiation to J/m2
     if "solar" in cols:
         df["solar"] = df["slrkj_tot_qc"] * 1000.0
@@ -235,7 +245,7 @@ def fetch_hourly(form, cols):
         sqlextra = ", null as etalfalfa_qc"
     if "sv" in cols:
         # SoilVue 10 data
-        for depth in [2, 4, 8, 12, 16, 20, 24, 30, 40]:
+        for depth in SV_DEPTHS:
             for c2 in ["t", "vwc"]:
                 cols.append(f"sv_{c2}{depth}")
     with get_sqlalchemy_conn("isuag") as conn:
@@ -294,7 +304,7 @@ def fetch_hourly(form, cols):
 
     if "sv" in cols:
         # SoilVue 10 data
-        for depth in [2, 4, 8, 12, 16, 20, 24, 30, 40]:
+        for depth in SV_DEPTHS:
             df[f"sv_t{depth}"] = convert_value(
                 df[f"sv_t{depth}_qc"].values, "degC", "degF"
             )

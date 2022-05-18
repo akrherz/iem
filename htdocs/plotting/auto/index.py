@@ -11,12 +11,14 @@ import sys
 
 # Third Party
 import requests
+import pandas as pd
 from paste.request import get_cookie_dict, parse_formvars
 from pyiem.htmlgen import make_select, station_select
-from pyiem.util import get_dbconn, utc, html_escape
+from pyiem.util import get_dbconn, utc, html_escape, get_sqlalchemy_conn
 from pyiem.templates.iem import TEMPLATE
 from pyiem.reference import state_names, SECTORS_NAME
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
+from sqlalchemy import text
 
 BASEDIR, WSGI_FILENAME = os.path.split(__file__)
 if BASEDIR not in sys.path:
@@ -397,6 +399,7 @@ def generate_form(apid, fdict, headers, cookies):
     if req.status_code != 200:
         return res
     meta = req.json()
+    res["frontend"] = meta.get("frontend")
     if meta.get("description"):
         res["description"] = (
             '<div class="alert alert-info"><h4>Plot Description:</h4>'
@@ -660,12 +663,10 @@ function onNetworkChange(newnetwork){{
     return res
 
 
-def features_for_id(apid):
+def features_for_id(res, apid):
     """List out features for this given plotid."""
     if apid < 1:
         return ""
-    pgconn = get_dbconn("mesosite")
-    cursor = pgconn.cursor()
     s = """
 <h3>IEM Daily Features using this plot</h3>
 <p>The IEM Daily Features found on this website often utilize plots found
@@ -673,17 +674,28 @@ on this application.  Here is a listing of features referencing this
 plot type.</p>
 <ul>
     """
-    cursor.execute(
-        "select to_char(valid, 'dd Mon YYYY'), "
-        "to_char(valid, 'YYYY/mm/dd'), title from feature "
-        "WHERE substr(appurl, 1, 14) = '/plotting/auto' and "
-        " appurl ~* %s ORDER by valid DESC",
-        (f"q={apid}(&|$)",),
-    )
-    for row in cursor:
+    with get_sqlalchemy_conn("mesosite") as conn:
+        extra = ""
+        params = {"appurl": f"q={apid}(&|$)"}
+        if res["frontend"]:
+            extra = " or strpos(appurl, :fe) = 1"
+            params["fe"] = res["frontend"]
+        df = pd.read_sql(
+            text(
+                "select valid, title from feature "
+                "WHERE (substr(appurl, 1, 14) = '/plotting/auto' and "
+                f" appurl ~* :appurl) {extra} and valid < now() "
+                "ORDER by valid DESC"
+            ),
+            conn,
+            params=params,
+            index_col="valid",
+        )
+    for valid, row in df.iterrows():
         s += (
-            f'<li><strong><a href="/onsite/features/cat.php?day={row[1]}">'
-            f"{row[0]}</a></strong>: {row[2]}</li>\n"
+            f'<li><strong><a href="/onsite/features/cat.php?'
+            f'day={valid:%Y-%m-%d}">'
+            f"{valid:%d %b %Y}</a></strong>: {row['title']}</li>\n"
         )
     s += "</ul>"
     return s
@@ -759,7 +771,7 @@ feel free to use these generated graphics in whatever way you wish.</p>
 
 {res["issues"]}
 
-{features_for_id(apid)}
+{features_for_id(res, apid)}
 
 {generate_overview(apid)}
 
