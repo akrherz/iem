@@ -132,7 +132,7 @@ def main(argv):
     # is tricky business
     # TODO memory troubles with more than 7 days of data :/
     if len(argv) == 4:
-        sts = datetime.date(int(i) for i in argv[1:])
+        sts = datetime.date(*[int(i) for i in argv[1:]])
     else:
         sts = datetime.date.today() - datetime.timedelta(days=7)
     # 6z is the start of such a date
