@@ -3,6 +3,7 @@ from io import StringIO
 import datetime
 import sys
 
+import pandas as pd
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn
 from pyiem.network import Table as NetworkTable
@@ -65,7 +66,7 @@ def get_climate(network, stations):
     return data
 
 
-def get_data(network, sts, ets, stations):
+def get_data(network, sts, ets, stations, fmt):
     """Go fetch data please"""
     pgconn = get_dbconn("iem")
     cursor = pgconn.cursor("mystream")
@@ -101,6 +102,10 @@ def get_data(network, sts, ets, stations):
             f"{climate[row[0]][key]['precip']},{row[12]},{row[13]},{row[14]},"
             f"{row[15]},{row[16]},{row[17]},{row[18]}\n"
         )
+    if fmt == "json":
+        sio.seek(0)
+        df = pd.read_csv(sio, index_col=None, parse_dates=False)
+        return df.to_json(orient="records")
 
     return sio.getvalue()
 
@@ -127,4 +132,5 @@ def application(environ, start_response):
     if not stations:
         return [b"ERROR: No stations specified for request"]
     network = form.get("network")[:12]
-    return [get_data(network, sts, ets, stations).encode("ascii")]
+    fmt = form.get("format", "text")
+    return [get_data(network, sts, ets, stations, fmt).encode("ascii")]
