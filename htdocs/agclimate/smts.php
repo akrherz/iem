@@ -21,7 +21,7 @@ $month2 = get_int404('month2', date("m", $now));
 $day2 = get_int404('day2', date("d", $now));
 $hour2 = get_int404('hour2', date("H", $now));
 
-$opt = get_int404('opt', 1);
+$opt = isset($_GET["opt"]) ? xssafe($_GET["opt"]): 1;
 
 $sts = mktime($hour1, 0, 0, $month1, $day1, $year1);
 $ets = mktime($hour2, 0, 0, $month2, $day2, $year2);
@@ -45,6 +45,7 @@ $h2 = hourSelect($hour2, "hour2");
 $ar = Array(
     1 => "3 Panel Plot",
     2 => "Just Soil Temps",
+    "sm" => "Just Soil Moisture",
     3 => "Daily Max/Min 4 Inch Soil Temps",
     4 => "Daily Solar Radiation",
     5 => "Daily Potential Evapotranspiration",
@@ -52,12 +53,13 @@ $ar = Array(
     7 => "Daily Soil Water + Change",
     8 => "Battery Voltage",
     9 => "Daily Rainfall, 4 inch Soil Temp, and RH",
-    10 => "Inversion Diagnostic Plot (BOOI4 Ames - AEA) Only",
+    10 => "Inversion Diagnostic Plot (BOOI4, CAMI4, CRFI4) Only",
 );
 $dd = "This plot is a time series graph of
 observations from a time period and ISU Soil Moisture station of your choice.";
 $desc = Array(1 => $dd,
 		2 => $dd,
+        "sm" => $dd,
 		3 => $dd,
 		4 => $dd,
 		5 => $dd,

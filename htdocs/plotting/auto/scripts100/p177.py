@@ -24,6 +24,7 @@ CENTRAL = pytz.timezone("America/Chicago")
 PLOTTYPES = {
     "1": "3 Panel Plot",
     "2": "Just Soil Temps",
+    "sm": "Just Soil Moisture",
     "3": "Daily Max/Min 4 Inch Soil Temps",
     "4": "Daily Solar Radiation",
     "5": "Daily Potential Evapotranspiration",
@@ -570,6 +571,96 @@ def make_daily_water_change_plot(ctx):
     return fig, df
 
 
+def plot_sm(ctx):
+    """Just soil moisture."""
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            "SELECT * from sm_hourly WHERE station = %s and "
+            "valid BETWEEN %s and %s ORDER by valid ASC",
+            conn,
+            params=(ctx["station"], ctx["sts"], ctx["ets"]),
+            index_col="valid",
+        )
+    d12t = df["calc_vwc_12_avg_qc"]
+    d24t = df["calc_vwc_24_avg_qc"]
+    d50t = df["calc_vwc_50_avg_qc"]
+    d04t = df["calcvwc4_avg_qc"]
+    valid = df.index.values
+
+    title = f"ISUSM Station: {ctx['_sname']} :: Soil Moisture Timeseries"
+    (fig, ax) = figure_axes(apctx=ctx, title=title)
+    ax.grid(True)
+    svplotted = False
+    for col in (
+        df.filter(regex=r"sv_vwc.*_qc", axis=1)
+        .sort_index(
+            axis=1,
+            key=lambda x: (
+                x.str.replace("_qc", "")
+                .str.replace("sv_vwc", " ")
+                .values.astype(int)
+            ),
+        )
+        .columns
+    ):
+        series = df[col]
+        if series.isnull().all():
+            continue
+        depth = col.split("_")[1].replace("vwc", "")
+        ax.plot(valid, series, linewidth=2, label=f"{depth}in")
+        svplotted = True
+    oplotted = False
+    if not svplotted and not d04t.isnull().all():
+        ax.plot(valid, d04t, linewidth=2, color="brown", label="4 inch")
+        oplotted = True
+    if not svplotted and not d12t.isnull().all():
+        ax.plot(valid, d12t, linewidth=2, color="r", label="12 inch")
+        oplotted = True
+    if not svplotted and not d24t.isnull().all():
+        ax.plot(valid, d24t, linewidth=2, color="purple", label="24 inch")
+        oplotted = True
+    print(d50t)
+    if not svplotted and not d50t.isnull().all():
+        ax.plot(valid, d50t, linewidth=2, color="black", label="50 inch")
+        oplotted = True
+    if not oplotted and not svplotted:
+        raise NoDataFound("No Soil Moisture Data for this station")
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width, box.height * 0.94])
+    ax.legend(
+        bbox_to_anchor=(0.5, 1.0),
+        ncol=10,
+        loc="lower center",
+        fontsize=9 if svplotted else 12,
+    )
+    days = (ctx["ets"] - ctx["sts"]).days
+    if days >= 3:
+        interval = max(int(days / 7), 1)
+        ax.xaxis.set_major_locator(
+            mdates.DayLocator(
+                interval=interval, tz=pytz.timezone("America/Chicago")
+            )
+        )
+        ax.xaxis.set_major_formatter(
+            mdates.DateFormatter(
+                "%-d %b\n%Y", tz=pytz.timezone("America/Chicago")
+            )
+        )
+    else:
+        ax.xaxis.set_major_locator(
+            mdates.AutoDateLocator(
+                maxticks=10, tz=pytz.timezone("America/Chicago")
+            )
+        )
+        ax.xaxis.set_major_formatter(
+            mdates.DateFormatter(
+                "%-I %p\n%d %b", tz=pytz.timezone("America/Chicago")
+            )
+        )
+    ax.set_ylabel(r"Volumetric Soil Moisture $m^3/m^3$")
+    return fig, df
+
+
 def plot2(ctx):
     """Just soil temps"""
     with get_sqlalchemy_conn("isuag") as conn:
@@ -731,12 +822,26 @@ def plot1(ctx):
     (l3,) = ax2.plot(valid, solar_wm2, color="g", zorder=1, lw=2)
     ax2.set_ylabel("Solar Radiation [W/m^2]", color="g")
 
-    (l1,) = ax[2].plot(valid, c2f(tair), linewidth=2, color="blue", zorder=2)
-    (l2,) = ax[2].plot(valid, c2f(d04t), linewidth=2, color="brown", zorder=2)
+    handles = []
+    labels = []
+    if not tair.isnull().all():
+        (l1,) = ax[2].plot(
+            valid, c2f(tair), linewidth=2, color="blue", zorder=2
+        )
+        handles.append(l1)
+        labels.append("Air")
+    if not d04t.isnull().all():
+        (l2,) = ax[2].plot(
+            valid, c2f(d04t), linewidth=2, color="brown", zorder=2
+        )
+        handles.append(l2)
+        labels.append('4" Soil')
+    handles.append(l3)
+    labels.append("Solar Radiation")
     ax[2].grid(True)
     ax[2].legend(
-        [l1, l2, l3],
-        ["Air", '4" Soil', "Solar Radiation"],
+        handles,
+        labels,
         bbox_to_anchor=(0.5, 1.1),
         loc="center",
         ncol=3,
@@ -784,6 +889,8 @@ def plotter(fdict):
         fig, df = plot1(ctx)
     elif ctx["opt"] == "2":
         fig, df = plot2(ctx)
+    elif ctx["opt"] == "sm":
+        fig, df = plot_sm(ctx)
     elif ctx["opt"] == "3":
         fig, df = make_daily_plot(ctx)
     elif ctx["opt"] == "4":
