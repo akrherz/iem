@@ -36,7 +36,7 @@ WEB
    "wms_title" "IEM WMS Service"
    "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/net.cgi?"
    "wms_srs" "EPSG:4326 epsg:900913 EPSG:102100 EPSG:3857"
-   "wms_abstract" "IEM generated CONUS composite of NWS WSR-88D level III echo tops NET"
+   "wms_abstract" "IEM generated CONUS composite of NWS WSR-88D level III echo tops EET"
    "wms_keywords" "NEXRAD,NET"
    "wms_accessconstraints" "None"
    "wms_contactperson" "Daryl Herzmann"
@@ -51,7 +51,7 @@ END
 LAYER
   NAME "nexrad-net"
   STATUS ON
-  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/net_0.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/eet_0.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -70,7 +70,7 @@ END
 LAYER
   NAME "nexrad-net-900913"
   STATUS ON
-  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/net_0.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/eet_0.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -90,7 +90,7 @@ END
 LAYER
   NAME "nexrad-net-900913-m05m"
   STATUS ON
-  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/net_1.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/eet_1.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -110,7 +110,7 @@ END
 LAYER
   NAME "nexrad-net-900913-m10m"
   STATUS ON
-  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/net_2.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/eet_2.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -129,7 +129,7 @@ END
 LAYER
   NAME "nexrad-net-900913-m15m"
   STATUS ON
-  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/net_3.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/eet_3.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -148,7 +148,7 @@ END
 LAYER
   NAME "nexrad-net-900913-m20m"
   STATUS ON
-  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/net_4.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/eet_4.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -167,7 +167,7 @@ END
 LAYER
   NAME "nexrad-net-900913-m25m"
   STATUS ON
-  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/net_5.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/eet_5.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -187,7 +187,7 @@ END
 LAYER
   NAME "nexrad-net-900913-m30m"
   STATUS ON
-  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/net_6.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/eet_6.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -206,7 +206,7 @@ END
 LAYER
   NAME "nexrad-net-900913-m35m"
   STATUS ON
-  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/net_7.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/eet_7.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -225,7 +225,7 @@ END
 LAYER
   NAME "nexrad-net-900913-m40m"
   STATUS ON
-  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/net_8.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/eet_8.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -244,7 +244,7 @@ END
 LAYER
   NAME "nexrad-net-900913-m45m"
   STATUS ON
-  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/net_9.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/eet_9.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -263,7 +263,7 @@ END
 LAYER
   NAME "nexrad-net-900913-m50m"
   STATUS ON
-  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/net_10.tif"
+  DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/eet_10.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 4650000000000000
@@ -283,7 +283,7 @@ END
 LAYER
   NAME "nexrad-net-m05m"
   STATUS ON
-  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/net_1.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/eet_1.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -302,7 +302,7 @@ END
 LAYER
   NAME "nexrad-net-m10m"
   STATUS ON
-  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/net_2.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/eet_2.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -321,7 +321,7 @@ END
 LAYER
   NAME "nexrad-net-m15m"
   STATUS ON
-  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/net_3.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/eet_3.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -340,7 +340,7 @@ END
 LAYER
   NAME "nexrad-net-m20m"
   STATUS ON
-  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/net_4.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/eet_4.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -359,7 +359,7 @@ END
 LAYER
   NAME "nexrad-net-m25m"
   STATUS ON
-  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/net_5.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/eet_5.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -378,7 +378,7 @@ END
 LAYER
   NAME "nexrad-net-m30m"
   STATUS ON
-  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/net_6.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/eet_6.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -397,7 +397,7 @@ END
 LAYER
   NAME "nexrad-net-m35m"
   STATUS ON
-  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/net_7.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/eet_7.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -416,7 +416,7 @@ END
 LAYER
   NAME "nexrad-net-m40m"
   STATUS ON
-  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/net_8.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/eet_8.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -435,7 +435,7 @@ END
 LAYER
   NAME "nexrad-net-m45m"
   STATUS ON
-  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/net_9.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/eet_9.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
@@ -454,7 +454,7 @@ END
 LAYER
   NAME "nexrad-net-m50m"
   STATUS ON
-  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/net_10.tif"
+  DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/eet_10.tif"
   TYPE RASTER
   MINSCALE 0
   MAXSCALE 465000000
