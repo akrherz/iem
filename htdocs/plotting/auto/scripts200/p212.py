@@ -73,6 +73,8 @@ def get_description():
     <p>The Storm Prediction Center website has a
     <a href="https://www.spc.noaa.gov/exper/soundingclimo/">
     very similiar tool</a> that you may want to check out.</p>
+
+    <p>The max and min monthly values are labeled within the plot.</p>
     """
     desc["arguments"] = [
         dict(
@@ -201,10 +203,12 @@ def get_data(ctx):
         format="%Y%m%d%H",
     ).tz_localize("UTC")
     ctx["df"] = df
+    ctx["dfin"] = dfin
 
     ctx["title"] = (
-        f"{station} {name} {hour:02.0f} UTC Sounding ({dfin['year'].min()} - "
-        f"{dfin['year'].max()})\n"
+        f"{station} {name} {hour:02.0f} UTC Sounding "
+        f"({dfin['year'].index[0]:%Y-%m-%d %H}z - "
+        f"{dfin['year'].index[-1]:%Y-%m-%d %H}z)\n"
         f"{PDICT3[varname]} {ctx['leveltitle']}"
     )
 
@@ -336,6 +340,7 @@ def plotter(fdict):
     get_data(ctx)
     df = ctx["df"]
     fig, ax = figure_axes(apctx=ctx, title=ctx["title"])
+    ax.set_position([0.1, 0.1, 0.88, 0.8])
     colname = f"{ctx['var']}_{ctx['year']}"
     x = df["utc_valid"].values
     ax.plot(x, df[colname].values, label=str(ctx["year"]), zorder=4, color="r")
@@ -355,43 +360,43 @@ def plotter(fdict):
         label="25-75 %tile",
     )
     ax.plot(x, df[ctx["var"], "mean"].values, color="k", zorder=3, label="Avg")
-    ymax = ax.get_ylim()[1]
-    dy = ymax * 0.01
-    # Figure out the monthly max values
-    mmax = df[ctx["var"], "max"].reset_index()
-    mmax["month"] = mmax["sday"].str.slice(0, 2)
-    mmax = mmax.drop(columns="sday").groupby("month").max()
-    mmax.columns = [
-        "max",
-    ]
-    for month, row in mmax.iterrows():
+    # buffer out the yaxis some more
+    maxval = ctx["dfin"][ctx["var"]].max()
+    minval = ctx["dfin"][ctx["var"]].min()
+    drange = maxval - minval
+    ax.set_ylim(minval - drange * 0.1, maxval + drange * 0.1)
+    dy = drange * 0.01
+
+    minmax = (
+        ctx["dfin"]
+        .loc[:, ctx["var"]]
+        .groupby(lambda idx_: idx_.month)
+        .agg(["max", "idxmax", "min", "idxmin"])
+    )
+    for month, row in minmax.iterrows():
         sts = datetime.date(ctx["year"], int(month), 1)
         ets = (sts + datetime.timedelta(days=35)).replace(day=1)
         ax.plot([sts, ets], [row["max"], row["max"]], zorder=3, color="b")
         ax.text(
             sts + datetime.timedelta(days=15),
             row["max"] + dy,
-            f"{row['max']:.2f}",
+            f"{row['idxmax'].year}\n"
+            f"{row['idxmax']:%-m/%-d %H}z\n{row['max']:.2f}",
             ha="center",
+            bbox=dict(color="white", alpha=0.5),
         )
-
-    mmin = df[ctx["var"], "min"].reset_index()
-    mmin["month"] = mmin["sday"].str.slice(0, 2)
-    mmin = mmin.drop(columns="sday").groupby("month").min()
-    mmin.columns = [
-        "min",
-    ]
-    for month, row in mmin.iterrows():
-        sts = datetime.date(ctx["year"], int(month), 1)
-        ets = (sts + datetime.timedelta(days=35)).replace(day=1)
-
+        # Values near zero are very likely irrelevant
+        if abs(row["min"] - 0) < 0.001:
+            continue
         ax.plot([sts, ets], [row["min"], row["min"]], zorder=3, color="b")
         ax.text(
             sts + datetime.timedelta(days=15),
             row["min"] - dy,
-            f"{row['min']:.2f}",
+            f"{row['idxmin'].year}\n"
+            f"{row['idxmin']:%-m/%-d %H}z\n{row['min']:.2f}",
             ha="center",
             va="top",
+            bbox=dict(color="white", alpha=0.5),
         )
     ax.legend()
     ax.set_ylabel(PDICT3[ctx["var"]])
@@ -399,9 +404,10 @@ def plotter(fdict):
     ax.xaxis.set_major_locator(mdates.MonthLocator())
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %-d"))
     ax.set_xlabel(f"Day of {ctx['year']}")
+    ax.set_xlim(x[0], x[-1])
 
     return fig, df
 
 
 if __name__ == "__main__":
-    plotter(dict(station="KABR", var="tmpc", level=500, hour="12"))
+    plotter(dict(station="KABR", var="tmpc", level=500, hour="00"))

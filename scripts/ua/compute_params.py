@@ -32,7 +32,7 @@ LOG = logger()
 
 def nonull(val, minval=None, maxval=None):
     """Ensure we don't have NaN."""
-    if pd.isnull(val):
+    if pd.isnull(val) or np.isinf(val):
         return None
     val = float(val)
     if minval is not None and val < minval:
