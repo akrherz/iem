@@ -52,12 +52,13 @@ def sane_date(year, month, day):
 def get_cgi_dates(form):
     """Figure out which dates are requested via the form, we shall attempt
     to account for invalid dates provided!"""
-    y1 = int(form.get("year1"))
-    m1 = int(form.get("month1"))
-    d1 = int(form.get("day1"))
-    y2 = int(form.get("year2"))
-    m2 = int(form.get("month2"))
-    d2 = int(form.get("day2"))
+    today = datetime.date.today()
+    y1 = int(form.get("year1", today.year))
+    m1 = int(form.get("month1", 1))
+    d1 = int(form.get("day1", 1))
+    y2 = int(form.get("year2", today.year))
+    m2 = int(form.get("month2", today.month))
+    d2 = int(form.get("day2", today.day))
 
     ets = sane_date(y2, m2, d2)
     archive_end = datetime.date.today() - datetime.timedelta(days=1)
@@ -567,15 +568,18 @@ def do_simple(ctx):
 
     cursor.execute(sql, args)
     sio = StringIO()
-    sio.write("# Iowa Environmental Mesonet -- NWS Cooperative Data\n")
-    sio.write(f"# Created: {utc():%d %b %Y %H:%M:%S} UTC\n")
-    sio.write("# Contact: daryl herzmann akrherz@iastate.edu 515-294-5978\n")
-    sio.write("# Data Period: %s - %s\n" % (ctx["sts"], ctx["ets"]))
-    if ctx["scenario"] == "yes":
+    if ctx["with_header"] != "no":
+        sio.write("# Iowa Environmental Mesonet -- NWS Cooperative Data\n")
+        sio.write(f"# Created: {utc():%d %b %Y %H:%M:%S} UTC\n")
         sio.write(
-            "# !SCENARIO DATA! inserted after: %s replicating year: %s\n"
-            % (ctx["ets"], ctx["scenario_year"])
+            "# Contact: daryl herzmann akrherz@iastate.edu 515-294-5978\n"
         )
+        sio.write("# Data Period: %s - %s\n" % (ctx["sts"], ctx["ets"]))
+        if ctx["scenario"] == "yes":
+            sio.write(
+                "# !SCENARIO DATA! inserted after: %s replicating year: %s\n"
+                % (ctx["ets"], ctx["scenario_year"])
+            )
 
     p = {"comma": ",", "tab": "\t", "space": " "}
     d = p[ctx["delim"]]
@@ -841,6 +845,7 @@ def application(environ, start_response):
     if ctx["scenario"] == "yes":
         ctx["scenario_year"] = int(form.get("scenario_year", 2099))
     ctx["scenario_sts"], ctx["scenario_ets"] = get_scenario_period(ctx)
+    ctx["with_header"] = form.get("with_header", "yes")
 
     # TODO: this code stinks and is likely buggy
     headers = []
