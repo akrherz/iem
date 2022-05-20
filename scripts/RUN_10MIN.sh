@@ -22,9 +22,4 @@ cd ../../summary
 python update_dailyrain.py
 
 cd ../outgoing
-iemphp wxc_rwis.php
 python madis2csv.py
-python wxc_azos_prec.py
-python wxc_iarwis_traffic.py
-python wxc_iemstage.py IA
-python wxc_iemstage.py MN

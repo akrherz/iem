@@ -16,9 +16,6 @@ cd ../qc
 python check_webcams.py
 python check_isusm_online.py
 
-cd ../outgoing
-python wxc_iemrivers.py
-
 cd ../iemplot
 ./RUN.csh
 

@@ -21,9 +21,6 @@ python check_station_geom.py
 python check_vtec_eventids.py
 python check_afos_sources.py
 
-cd ../outgoing
-python wxc_moon.py
-
 cd ../iemre
 python grid_rsds.py
 

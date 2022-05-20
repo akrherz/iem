@@ -24,25 +24,6 @@ def main():
 
     fmt = "%-6s:%-19s: %3s / %3s / %5s / %4s / %2s\n"
 
-    out = open("/tmp/awos_rtp.shef", "w")
-    out.write(
-        """
-
-
-.BR DMX %s Z DH00/TAIRVS/TAIRVI/PPDRVZ/SFDRVZ/SDIRVZ
-: IOWA AWOS RTP FIRST GUESS PROCESSED BY THE IEM
-:   06Z TO 00Z HIGH TEMPERATURE FOR %s
-:   06Z TO 00Z LOW TEMPERATURE FOR %s
-:   00Z YESTERDAY TO 00Z TODAY RAINFALL
-:   ...BASED ON REPORTED OBS...
-"""
-        % (
-            ets.strftime("%m%d"),
-            sts12z.strftime("%d %b %Y").upper(),
-            sts12z.strftime("%d %b %Y").upper(),
-        )
-    )
-
     # We get 18 hour highs
     highs = {}
     sql = """SELECT t.id as station,
@@ -74,7 +55,7 @@ def main():
     for row in icursor:
         if qdict.get(row[0], {}).get("precip") or row[1] is None:
             continue
-        pcpn[row[0]] = "%5.2f" % (row[1],)
+        pcpn[row[0]] = f"{row[1]:5.2f}"
 
     lows = {}
     icursor.execute(
@@ -93,22 +74,35 @@ def main():
 
     ids = list(nt.sts.keys())
     ids.sort()
-    for sid in ids:
-        if nt.sts[sid]["attributes"].get("IS_AWOS") != "1":
-            continue
-        myP = pcpn.get(sid, "M")
-        myH = highs.get(sid, "M")
-        myL = lows.get(sid, "M")
 
-        out.write(fmt % (sid, nt.sts[sid]["name"], myH, myL, myP, "M", "M"))
+    with open("/tmp/awos_rtp.shef", "w", encoding="utf-8") as fh:
+        fh.write(
+            f"""
 
-    out.write(".END\n")
-    out.close()
+
+.BR DMX {ets:%m%d} Z DH00/TAIRVS/TAIRVI/PPDRVZ/SFDRVZ/SDIRVZ
+: IOWA AWOS RTP FIRST GUESS PROCESSED BY THE IEM
+:   06Z TO 00Z HIGH TEMPERATURE FOR {sts12z:%d %b %Y}
+:   06Z TO 00Z LOW TEMPERATURE FOR {sts12z:%d %b %Y}
+:   00Z YESTERDAY TO 00Z TODAY RAINFALL
+:   ...BASED ON REPORTED OBS...
+"""
+        )
+        for sid in ids:
+            if nt.sts[sid]["attributes"].get("IS_AWOS") != "1":
+                continue
+            myP = pcpn.get(sid, "M")
+            myH = highs.get(sid, "M")
+            myL = lows.get(sid, "M")
+
+            fh.write(fmt % (sid, nt.sts[sid]["name"], myH, myL, myP, "M", "M"))
+
+        fh.write(".END\n")
 
     cmd = (
-        "pqinsert -p 'plot ac %s0000 awos_rtp_00z.shef "
+        f"pqinsert -p 'plot ac {ets:%Y%m%d}0000 awos_rtp_00z.shef "
         "awos_rtp_00z.shef shef' /tmp/awos_rtp.shef"
-    ) % (ets.strftime("%Y%m%d"),)
+    )
     subprocess.call(cmd, shell=True)
 
 

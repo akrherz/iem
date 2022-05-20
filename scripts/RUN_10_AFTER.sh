@@ -58,10 +58,7 @@ fi
 cd rwis
 python process_traffic.py &
 
-cd ../../outgoing
-iemphp wxc_cocorahs.php
-
-cd ../current
+cd ../../current
 python plot_hilo.py
 python ifc_today_total.py
 python today_min_windchill.py
