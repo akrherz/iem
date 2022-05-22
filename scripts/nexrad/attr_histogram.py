@@ -3,11 +3,11 @@ import calendar
 import sys
 
 import numpy as np
-from pandas import read_sql
+import pandas as pd
 from pyiem.network import Table as NetworkTable
 from pyiem.plot.use_agg import plt
 from pyiem.plot import get_cmap
-from pyiem.util import get_dbconnstr, utc
+from pyiem.util import get_sqlalchemy_conn, utc
 from tqdm import tqdm
 
 
@@ -17,18 +17,16 @@ def run(nexrad, name, network, cname):
     cmap.set_bad("white")
 
     today = utc()
-
-    df = read_sql(
-        """
-    SELECT drct, sknt, extract(doy from valid) as doy, valid
-    from nexrad_attributes_log WHERE nexrad = %s and sknt > 0
-    """,
-        get_dbconnstr("radar"),
-        params=(nexrad,),
-        index_col=None,
-    )
+    with get_sqlalchemy_conn("radar") as conn:
+        df = pd.read_sql(
+            "SELECT drct, sknt, extract(doy from valid) as doy, valid "
+            "from nexrad_attributes_log WHERE nexrad = %s and sknt > 0",
+            conn,
+            params=(nexrad,),
+            index_col=None,
+        )
     if df.empty:
-        print("No results for %s" % (nexrad,))
+        print(f"No results for {nexrad}")
         return
     minvalid = df["valid"].min()
 
@@ -54,18 +52,10 @@ def run(nexrad, name, network, cname):
     ax[0].set_xticks((0, 90, 180, 270, 360))
     ax[0].set_xticklabels(("N", "E", "S", "W", "N"))
     ax[0].set_title(
-        (
-            "Storm Attributes Histogram\n%s - %s K%s %s (%s)\n"
-            "%s total attrs, units are ~ (attrs+scans)/year"
-        )
-        % (
-            minvalid.strftime("%d %b %Y"),
-            today.strftime("%d %b %Y"),
-            nexrad,
-            name,
-            network,
-            len(df.index),
-        )
+        "Storm Attributes Histogram\n"
+        f"{minvalid:%d %b %Y} - {today:%d %b %Y} K{nexrad} "
+        f"{name} ({network})\n"
+        f"{len(df.index)} total attrs, units are ~ (attrs+scans)/year"
     )
     ax[0].grid(True)
 
@@ -91,11 +81,10 @@ def run(nexrad, name, network, cname):
     ax[1].grid(True)
 
     ax[1].set_xlabel(
-        ("Generated %s by Iowa Environmental Mesonet")
-        % (today.strftime("%d %b %Y"),)
+        f"Generated {today:%-d %b %Y} by Iowa Environmental Mesonet"
     )
 
-    fig.savefig("%s_histogram.png" % (nexrad,))
+    fig.savefig(f"{nexrad}_histogram.png")
     plt.close()
 
 

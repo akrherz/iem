@@ -125,36 +125,34 @@ def main():
             "PTMP4": sanity_check(ptmp4[recnum], -100, 150, "%.0f", ""),
         }
 
-    out = open("/tmp/madis.csv", "w")
-    out.write("%s\n" % (fmt,))
-    for stid in db:
-        for key in format_tokens:
-            if key in db[stid]:
-                out.write("%s" % (db[stid][key],))
-            out.write(",")
-        out.write("\n")
-    out.close()
+    with open("/tmp/madis.csv", "w", encoding="utf-8") as fh:
+        fh.write("%s\n" % (fmt,))
+        for stid in db:
+            for key in format_tokens:
+                if key in db[stid]:
+                    fh.write("%s" % (db[stid][key],))
+                fh.write(",")
+            fh.write("\n")
 
     pqstr = "data c %s fn/madis.csv bogus csv" % (utc.strftime("%Y%m%d%H%M"),)
     cmd = "pqinsert -i -p '%s' /tmp/madis.csv" % (pqstr,)
     subprocess.call(cmd, shell=True)
     os.remove("/tmp/madis.csv")
 
-    out = open("/tmp/madis.csv", "w")
-    out.write("%s\n" % (fmt,))
-    for stid in db:
-        if db[stid]["PROVIDER"] in ["IADOT", "NEDOR"]:
-            for key in format_tokens:
-                if key in db[stid]:
-                    out.write("%s" % (db[stid][key],))
-                out.write(",")
-            out.write("\n")
-    out.close()
+    with open("/tmp/madis.csv", "w", encoding="utf-8") as fh:
+        fh.write("%s\n" % (fmt,))
+        for stid in db:
+            if db[stid]["PROVIDER"] in ["IADOT", "NEDOR"]:
+                for key in format_tokens:
+                    if key in db[stid]:
+                        fh.write("%s" % (db[stid][key],))
+                    fh.write(",")
+                fh.write("\n")
 
     pqstr = "data c %s fn/madis_iamn.csv bogus csv" % (
         utc.strftime("%Y%m%d%H%M"),
     )
-    cmd = "pqinsert -i -p '%s' /tmp/madis.csv" % (pqstr,)
+    cmd = f"pqinsert -i -p '{pqstr}' /tmp/madis.csv"
     subprocess.call(cmd, shell=True)
     os.remove("/tmp/madis.csv")
 
