@@ -41,10 +41,11 @@ def get_description():
     desc["data"] = True
     desc[
         "description"
-    ] = """This plot presents statistics for a period of
-    days each year provided your start date and number of days after that
-    date. If your period crosses a year bounds, the plotted year represents
-    the year of the start date of the period.
+    ] = """This plot presents aggregate statistics by year for a date period
+    of your choice.  You can either set an explicit date period or make
+    the end date based on the first date below a given low temperature
+    threshold. If your period crosses a year bounds,
+    the plotted year represents the year of the start date of the period.
 
     <br /><br />This autoplot is specific to data from COOP stations, a
     similiar autoplot <a href="/plotting/auto/?q=140">#140</a> exists for
@@ -72,6 +73,16 @@ def get_description():
             label="Start Day:",
         ),
         dict(type="int", name="days", default="14", label="Number of Days"),
+        dict(
+            optional=True,
+            type="int",
+            name="stop",
+            default="32",
+            label=(
+                "Stop accumulation once daily low (after 1 July) "
+                "below threshold (F) [overrides number of days above]"
+            ),
+        ),
         dict(
             type="select",
             name="varname",
@@ -140,62 +151,129 @@ def plotter(fdict):
     varname = ctx["varname"]
     year = ctx["year"]
     threshold = ctx["thres"]
-    sdays = []
-    for i in range(days):
-        ts = sts + datetime.timedelta(days=i)
-        sdays.append(ts.strftime("%m%d"))
-
-    doff = (days + 1) if ets.year != sts.year else 0
+    stop = ctx.get("stop")
+    params = {
+        "gddbase": gddbase,
+        "gddceil": gddceil,
+        "t": threshold,
+        "station": station,
+    }
+    if stop is None:
+        sdays = []
+        for i in range(days):
+            ts = sts + datetime.timedelta(days=i)
+            sdays.append(ts.strftime("%m%d"))
+        daylimit = "sday in :sdays"
+        params["sdays"] = tuple(sdays)
+        doff = (days + 1) if ets.year != sts.year else 0
+    else:
+        daylimit = "sday >= :sday"
+        params["sday"] = sts.strftime("%m%d")
+        doff = 0
     culler = " and snow is not null" if varname.find("snow") > -1 else ""
+
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             text(
                 f"""
         SELECT extract(year from day - '{doff} days'::interval)::int as yr,
-        avg((high+low)/2.) as avg_temp, avg(high) as avg_high_temp,
-        sum(gddxx(:gddbase, :gddceil, high, low)) as gdd,
-        avg(low) as avg_low_temp,
-        sum(precip) as precip,
-        sum(snow) as snow,
-        min(low) as min_low,
-        max(low) as max_low,
-        max(high) as max_high,
-        min(high) as min_high,
-        sum(case when high >= :t then 1 else 0 end) as "days-high-above",
-        sum(case when high < :t then 1 else 0 end) as "days-high-below",
-        sum(case when low >= :t then 1 else 0 end) as "days-lows-above",
-        sum(case when low < :t then 1 else 0 end) as "days-lows-below",
-        sum(case when snow >= :t then 1 else 0 end) as "days-snow-above",
-        count(*)
-        from alldata_{station[:2]} WHERE station = :station and sday in :sdays
-        {culler} GROUP by yr ORDER by yr ASC
+        day, high, low, precip, snow, (high + low) / 2. as avg_temp,
+        gddxx(:gddbase, :gddceil, high, low) as gdd
+        from alldata_{station[:2]} WHERE station = :station and {daylimit}
+        {culler} ORDER by day ASC
         """
             ),
             conn,
-            params={
-                "gddbase": gddbase,
-                "gddceil": gddceil,
-                "t": threshold,
-                "station": station,
-                "sdays": tuple(sdays),
-            },
+            params=params,
+            index_col=None,
+            parse_dates="day",
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
+
+    if stop is not None:
+        # Compute the first date each year with the low below stop treshold
+        # and truncate the dataframe to that date.
+        df = (
+            df.assign(
+                hit=lambda df_: (
+                    (df_["day"].dt.month >= 7) & (df_["low"] < stop)
+                )
+            )
+            .groupby("yr")
+            .apply(
+                lambda g: (
+                    g
+                    if not g["hit"].any()
+                    else g.loc[: g.low[g["hit"]].index[0]]
+                )
+            )
+            .transform(lambda g: g)
+            .reset_index(drop=True)
+            .set_index("day")
+        )
+
+    # Now we compute the aggregates for each year.
+    df = (
+        df.reset_index()
+        .groupby("yr")
+        .agg(
+            avg_temp=("avg_temp", "mean"),
+            avg_high_temp=("high", "mean"),
+            avg_low_temp=("low", "mean"),
+            precip=("precip", "sum"),
+            gdd=("gdd", "sum"),
+            min_low=("low", "min"),
+            max_low=("low", "max"),
+            max_high=("high", "max"),
+            min_high=("high", "min"),
+            days_high_above=("high", lambda x: (x >= threshold).sum()),
+            days_high_below=("high", lambda x: (x < threshold).sum()),
+            days_lows_above=("low", lambda x: (x >= threshold).sum()),
+            days_lows_below=("low", lambda x: (x < threshold).sum()),
+            days_snow_above=("snow", lambda x: (x >= threshold).sum()),
+            count=("high", "count"),
+            min_day=("day", "min"),
+        )
+        .reset_index()
+        .rename(
+            columns={
+                "days_high_above": "days-high-above",
+                "days_high_below": "days-high-below",
+                "days_lows_above": "days-lows-above",
+                "days_lows_below": "days-lows-below",
+                "days_snow_above": "days-snow-above",
+            }
+        )
+        .set_index("yr")
+        .assign(
+            range_high=lambda df_: df_["max_high"] - df_["min_high"],
+            range_low=lambda df_: df_["max_low"] - df_["min_low"],
+        )
+    )
+
     fmter = intfmt if varname.find("days") > -1 else nice
     yrfmter = intfmt if sts.year == ets.year else crossesjan1
-    df["range_high"] = df["max_high"] - df["min_high"]
-    df["range_low"] = df["max_low"] - df["min_low"]
-    # require at least 90% coverage
-    df = df[df["count"] >= (days * 0.9)]
+    if stop is None:
+        # require at least 90% coverage
+        df = df[df["count"] >= (days * 0.9)]
+    else:
+        # Drop last row
+        df = df.iloc[:-1]
+        # drop any rows with a min date not equal to sts
+        df = df[df["min_day"].dt.strftime("%m%d") == sts.strftime("%m%d")]
     # require values , not nan
-    df = df[df[varname].notnull()].sort_values(varname, ascending=False)
+    df2 = df[df[varname].notnull()].sort_values(varname, ascending=False)
 
     title = PDICT.get(varname).replace("(threshold)", str(threshold))
     title = (
         f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
-        f"{title} from {sts:%-d %B} through {ets:%-d %B}"
+        f"{title} from {sts:%-d %B} "
     )
+    if stop is None:
+        title += f"through {ets:%-d %B}"
+    else:
+        title += f"until first day after 1 July w/ Low < {stop}F"
     fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(2, 1)
     # Move axes over to make some room for the top 10
@@ -206,24 +284,24 @@ def plotter(fdict):
     dy = 0.03
     ypos = 0.9
     fig.text(0.86, ypos, "Top 10")
-    for _, row in df.head(10).iterrows():
+    for yr, row in df2.head(10).iterrows():
         ypos -= dy
-        _fp = {"weight": "bold"} if row["yr"] == year else {}
-        fig.text(0.86, ypos, yrfmter(row["yr"]), font_properties=_fp)
+        _fp = {"weight": "bold"} if yr == year else {}
+        fig.text(0.86, ypos, yrfmter(yr), font_properties=_fp)
         fig.text(0.95, ypos, fmter(row[varname]), font_properties=_fp)
 
     ypos -= 2 * dy
     fig.text(0.86, ypos, "Bottom 10")
     ypos = ypos - 10 * dy
-    for _, row in df.tail(10).iterrows():
-        _fp = {"weight": "bold"} if row["yr"] == year else {}
-        fig.text(0.86, ypos, yrfmter(row["yr"]), font_properties=_fp)
+    for yr, row in df2.tail(10).iterrows():
+        _fp = {"weight": "bold"} if yr == year else {}
+        fig.text(0.86, ypos, yrfmter(yr), font_properties=_fp)
         fig.text(0.95, ypos, fmter(row[varname]), font_properties=_fp)
         ypos += dy
 
-    bars = ax[0].bar(df["yr"], df[varname], facecolor="r", edgecolor="r")
+    bars = ax[0].bar(df.index, df[varname], facecolor="r", edgecolor="r")
     thisvalue = "M"
-    for mybar, x, y in zip(bars, df["yr"], df[varname]):
+    for mybar, x, y in zip(bars, df.index, df[varname]):
         if x == year:
             mybar.set_facecolor("g")
             mybar.set_edgecolor("g")
@@ -244,7 +322,7 @@ def plotter(fdict):
     ax[0].set_ylabel(ylabel)
     ax[0].grid(True)
     ax[0].legend(ncol=2, fontsize=10)
-    ax[0].set_xlim(df["yr"].min() - 1, df["yr"].max() + 1)
+    ax[0].set_xlim(df.index[0] - 1, df.index[-1] + 1)
     rng = df[varname].max() - df[varname].min()
     if varname in ["snow", "precip"] or varname.startswith("days"):
         ax[0].set_ylim(-0.1, df[varname].max() + rng * 0.3)
@@ -270,12 +348,12 @@ def plotter(fdict):
         ax[1].axvline(thisvalue, color="g")
     mysort = df.sort_values(by=varname, ascending=True)
     info = (
-        f"Min: {df2[varname].min():.2f} {yrfmter(df['yr'][mysort.index[0]])}\n"
+        f"Min: {df2[varname].min():.2f} {yrfmter(mysort.index[0])}\n"
         f"95th: {ptile[1]:.2f}\n"
         f"Mean: {np.average(df2[varname]):.2f}\n"
         f"STD: {np.std(df2[varname]):.2f}\n"
         f"5th: {ptile[3]:.2f}\n"
-        f"Max: {df2[varname].max():.2f} {yrfmter(df['yr'][mysort.index[-1]])}"
+        f"Max: {df2[varname].max():.2f} {yrfmter(mysort.index[-1])}"
     )
     ax[1].text(
         0.75,
@@ -289,4 +367,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"varname": "days-snow-above", "thres": 0.01})
+    plotter({"varname": "gdd", "thres": 0.01, "stop": 32})
