@@ -116,7 +116,7 @@ def workflow(valid, routes):
         )
     )
     if not os.path.isfile(gribfn):
-        LOG.info("missing %s", gribfn)
+        LOG.warning("missing %s", gribfn)
         return
     grbs = pygrib.open(gribfn)
     for i in range(grbs.messages):
@@ -127,7 +127,7 @@ def main(argv):
     """So Something great"""
     valid = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
     routes = "ac" if argv[5] == "RT" else "a"
-    LOG.debug("valid: %s routes: %s", valid, routes)
+    LOG.info("valid: %s routes: %s", valid, routes)
     # See if we already have output
     fn = valid.strftime(
         "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/hrrr/%H/refd_0000.png"

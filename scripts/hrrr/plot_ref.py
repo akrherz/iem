@@ -40,7 +40,7 @@ def run(valid, routes):
     )
 
     if not os.path.isfile(fn):
-        LOG.info("hrrr/plot_ref missing %s", fn)
+        LOG.warning("hrrr/plot_ref missing %s", fn)
         return
     grbs = pygrib.open(fn)
 
@@ -134,7 +134,7 @@ def main(argv):
     """Go Main"""
     valid = utc(int(argv[1]), int(argv[2]), int(argv[3]), int(argv[4]))
     routes = "ac" if argv[5] == "RT" else "a"
-    LOG.debug("valid: %s routes: %s", valid, routes)
+    LOG.info("valid: %s routes: %s", valid, routes)
 
     # See if we already have output
     fn = valid.strftime(

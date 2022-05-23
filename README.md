@@ -21,6 +21,7 @@ Process | Primary | Backup | Monitor
 ------- | ------- | ------ | -------
 AWOS Ingest | iem16 | iem14 | nagios `check_awos_ingest.py`
 GOES R/S | iem8-dc | iem19 | None
+hrrr | iem8-dc | None | None
 iembot  | iem13    | None  | nagios checks for twistd processes running
 iemdb1 | metvm4 | metvm8 | nagios check
 iemdb2 | metvm2 | metvm0 | nagios check

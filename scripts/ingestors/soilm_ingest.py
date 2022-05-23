@@ -108,7 +108,7 @@ TSOIL_COLS = [
     "t24_c_avg",
     "t50_c_avg",
 ]
-BASE = "/mesonet/home/loggernet"
+BASE = "/home/loggernet"
 STATIONS = {
     "CAMI4": "Calumet",
     "BOOI4": "AEAFarm",

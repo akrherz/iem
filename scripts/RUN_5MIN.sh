@@ -11,9 +11,6 @@ cd ../roads
 python archive_roadsplot.py $STAMP &
 python ingest_roads_rest.py &
 
-cd ../ingestors
-python soilm_ingest.py &
-
 cd ifc
 python ingest_ifc_precip.py &
 
