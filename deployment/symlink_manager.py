@@ -31,7 +31,6 @@ PAIRS = [
     ["/mesonet/share/cases", f"{M7}/share/cases"],
     ["/mesonet/share/climodat", f"{M2}/share/climodat"],
     ["/mesonet/share/features", f"{M7}/share/features"],
-    ["/mesonet/share/frost", f"{M7}/share/frost"],
     ["/mesonet/share/iemmaps", f"{M7}/share/iemmaps"],
     ["/mesonet/share/lapses", f"{M7}/share/lapses"],
     ["/mesonet/share/pickup", f"{M2}/share/pickup"],

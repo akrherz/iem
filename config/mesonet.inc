@@ -229,10 +229,6 @@ RewriteRule ^/search /search.py [QSA]
     RewriteRule (.*)_metar_collective.txt metar_collective.py?state=$1
   </Directory>
 
-  <Directory "/opt/iem/htdocs/frost">
-    RewriteRule frost_ts_([a-z]+)_([\-\.0-9]+)_([\.0-9]+).png$ frost_ts.py?lon=$2&lat=$3&model=$1
-  </Directory>
-
   <Directory "/opt/iem/htdocs/geojson">
 	## QSA causes the query string to be appended
 	RewriteRule network/(.*).geojson network.py?network=$1 [QSA]
