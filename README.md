@@ -28,7 +28,7 @@ iemdb3 | metvm6 | metvm1 | nagios check
 iem-web-services | iem12 | iem16 | nagios check
 letsencrpyt | iem19 | None | nagios SSL check
 LDM | iem14 | None | None
-LoggerNet | iem15 | None | None
+LoggerNet | iem8-dc | None | nagios check
 memcached | iem8-dc | iem11-dc | nagios check
 NEXRAD Mosaics | iem8-dc | iem16 | nagios checks archive
 openfire | iem16 | iem14 | None
