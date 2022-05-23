@@ -339,6 +339,20 @@ def add_to_plotvars(value, fdict, arg, res):
             res["pltvars"].append(f"{arg['name']}:{val}")
 
 
+def set_cookie_networkselect(cookies, headers, arg, value):
+    """Set a cookie with special logic for how stations are handled."""
+    network = arg.get("network", "")
+    name = f"{arg['name']}_{network}"  # Important
+    if value == cookies.get(name):
+        return
+    headers.append(
+        (
+            "Set-Cookie",
+            f"{name}={value}; Path=/plotting/auto/; Max-Age=8640000",
+        )
+    )
+
+
 def set_cookie(cookies, headers, name, value):
     """Optionally set a cookie in the response headers."""
     if value == cookies.get(name):
@@ -346,7 +360,7 @@ def set_cookie(cookies, headers, name, value):
     headers.append(
         (
             "Set-Cookie",
-            f"{name}:{value}; Path=/plotting/auto/; Max-Age=8640000",
+            f"{name}={value}; Path=/plotting/auto/; Max-Age=8640000",
         )
     )
 
@@ -436,6 +450,7 @@ def generate_form(apid, fdict, headers, cookies):
         elif arg["type"] == "ugc":
             form = ugc_handler(arg["name"], value, fdict)
         elif arg["type"] == "networkselect":
+            set_cookie_networkselect(cookies, headers, arg, value)
             form = networkselect_handler(value, arg, res)
         elif arg["type"] == "phenomena":
             form = make_select(arg["name"], value, VTEC_PHENOMENA)
@@ -835,11 +850,27 @@ $(document).ready(function(){{
     }
 
 
+def remove_all_cookies(headers, cookiestr):
+    """Unset things that should have not gotten set."""
+    for token in cookiestr.split(";"):
+        meat = token if token.find("=") == -1 else token[: token.find("=")]
+        headers.append(
+            (
+                "Set-Cookie",
+                f"={meat.strip()}; Path=/plotting/auto/; Max-Age=-1",
+            )
+        )
+
+
 def application(environ, start_response):
     """mod-wsgi handler."""
     fdict = parse_formvars(environ)
     cookies = get_cookie_dict(environ)
     headers = [("Content-type", "text/html")]
+    # invalid cookies may invalidate the entire cookie parsing
+    # https://bugs.python.org/issue41945
+    if not cookies and environ.get("HTTP_COOKIE", "") != "":
+        remove_all_cookies(headers, environ["HTTP_COOKIE"])
     tdict = generate(fdict, headers, cookies)
     start_response("200 OK", headers)
     return [TEMPLATE.render(tdict).encode("utf-8")]
