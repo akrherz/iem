@@ -252,14 +252,17 @@ def common_df_logic(filename, maxts, nwsli, tablename):
         axis=1,
         errors="ignore",
     )
+    if "ws_mps_s_wvt" in df.columns:
+        df = df.assign(ws_mph=lambda df_: df_["ws_mps_s_wvt"] * 2.23694,).drop(
+            columns=["ws_mps_s_wvt"],
+        )
+
     if tablename == "sm_minute":
         # Storage of how far this covers
         df["duration"] = 15
         # slrkw_avg SIC is actually W/m2 over 15 minutes, we want to store as
         # a total over 15 minutes W/m2 -> kJ/s/m2
         df["slrkj_tot"] = df["slrkw_avg"] * 60.0 * 15.0 / 1000.0
-        # Wind
-        df["ws_mph_s_wvt"] = df["ws_mps_s_wvt"] * 2.23694
         # drop our no longer needed columns
         df = df.drop(
             [
@@ -315,13 +318,6 @@ def common_df_logic(filename, maxts, nwsli, tablename):
                 "calcvwc24_avg": "vwc24",
             },
         )
-        # Average wind speed
-        if "ws_mps_s_wvt" in df.columns:
-            df = df.assign(
-                ws_mph=lambda df_: df_["ws_mps_s_wvt"] * 2.23694,
-            ).drop(
-                columns=["ws_mps_s_wvt"],
-            )
         # Max wind speed
         if "ws_mps_max" in df.columns:
             df = (
@@ -434,7 +430,7 @@ def m15_process(nwsli, maxts):
             )
         # ob.data["srad"] = row["slrkw_avg_qc"]
         ob.data["sknt"] = convert_value(
-            row["ws_mph_s_wvt_qc"], "mile / hour", "knot"
+            row["ws_mph_qc"], "mile / hour", "knot"
         )
         ob.data["gust"] = convert_value(
             row["ws_mph_max_qc"], "mile / hour", "knot"
@@ -484,9 +480,7 @@ def hourly_process(nwsli, maxts):
                 dewpoint_from_relative_humidity(tmpc, relh).to(units("degF")).m
             )
         ob.data["phour"] = round(row["rain_in_tot_qc"], 2)
-        ob.data["sknt"] = convert_value(
-            row["ws_mps_s_wvt_qc"], "meter / second", "knot"
-        )
+        ob.data["sknt"] = convert_value(row["ws_mph"], "mile / hour", "knot")
         if "ws_mph_max" in df.columns:
             ob.data["gust"] = convert_value(
                 row["ws_mph_max_qc"], "mile / hour", "knot"

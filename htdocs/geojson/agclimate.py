@@ -133,8 +133,7 @@ def get_data(pgconn, ts):
             coalesce(m.vwc50_qc, h.vwc50_qc) as vwc50_qc,
             coalesce(m.ws_mph_max, h.ws_mph_max) as ws_mph_max,
             coalesce(m.winddir_d1_wvt, h.winddir_d1_wvt) as winddir_d1_wvt,
-            coalesce(m.ws_mph_s_wvt * 0.447,
-                    coalesce(h.ws_mps_s_wvt, 0))as ws_mps_s_wvt
+            coalesce(m.ws_mph, coalesce(h.ws_mph, 0)) as ws_mph
             from sm_hourly h LEFT JOIN sm_minute m on (
                 h.station = m.station and
                 h.valid = date_trunc('hour', m.valid))
@@ -223,7 +222,7 @@ def get_data(pgconn, ts):
                     "gust": safe(row["ws_mph_max"], 1),
                     "wind": (
                         f"{drct2text(row['winddir_d1_wvt'])}@"
-                        f"{(row['ws_mps_s_wvt'] * 2.23):.0f}"
+                        f"{(row['ws_mph']):.0f}"
                     ),
                     "name": nt.sts[sid]["name"],
                 },

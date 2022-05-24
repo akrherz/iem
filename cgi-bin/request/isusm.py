@@ -310,9 +310,7 @@ def fetch_hourly(form, cols):
         df["solar"] = df["slrkj_tot_qc"] * 1000.0
 
     if "speed" in cols:
-        df["speed"] = convert_value(
-            df["ws_mps_s_wvt_qc"].values, "meter / second", "mile / hour"
-        )
+        df["speed"] = df["ws_mph_qc"]
 
     if "et" in cols:
         df["et"] = convert_value(df["etalfalfa_qc"].values, "mm", "inch")

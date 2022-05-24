@@ -917,12 +917,8 @@ def plotter(fdict):
         "ws_mph_tmx_qc",
         "tair_c_tmn",
         "tair_c_tmx",
-        "ws_mps_tmx",
         "tair_c_tmx_qc",
         "tair_c_tmn_qc",
-        "ws_mps_tmx_qc",
-        "ws_mph_tmx",
-        "ws_mph_tmx_qc",
     ]:
         if col in df.columns:
             df[col] = df[col].apply(

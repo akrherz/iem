@@ -158,7 +158,7 @@ def use_table(sio):
                     100,
                 ),
                 p(
-                    (nan(row["ws_mph_s_wvt"]) * units("mph"))
+                    (nan(row["ws_mph"]) * units("mph"))
                     .to(units("meter / second"))
                     .m,
                     2,

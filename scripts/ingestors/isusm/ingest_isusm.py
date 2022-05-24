@@ -102,6 +102,7 @@ VARCONV = {
     "bp_mb": "bpres_avg",
     "battv": "battv_min",
     "encrh": "encrh_avg",
+    "ws_mph_s_wvt": "ws_mph",
 }
 STATIONS = {
     "Sutherland": "CAMI4",
@@ -233,7 +234,7 @@ def minute_iemaccess(df):
         ob.data["srad"] = row["slrkj_tot_qc"] / 60.0 * 1000.0
         ob.data["pcounter"] = row["rain_in_tot_qc"]
         ob.data["sknt"] = convert_value(
-            row["ws_mph_s_wvt_qc"], "mile / hour", "knot"
+            row["ws_mph_qc"], "mile / hour", "knot"
         )
         if "ws_mph_max" in df.columns:
             ob.data["gust"] = convert_value(
@@ -288,6 +289,7 @@ def process(fullfn):
                 "calcvwc12_avg": "vwc12",
                 "calcvwc24_avg": "vwc24",
                 "calcvwc50_avg": "vwc50",
+                "ws_mph_s_wvt": "ws_mph",
             }
         )
     df["valid"] = df["valid"].apply(make_time)
@@ -303,6 +305,11 @@ def process(fullfn):
         axis=1,
         errors="ignore",
     )
+    if "ws_mps_s_wvt" in df.columns:
+        df = df.assign(ws_mph=lambda df_: df_["ws_mps_s_wvt"] * 2.23694,).drop(
+            columns=["ws_mps_s_wvt"],
+        )
+
     if tabletype == "DailySI":
         # This is kludgy, during CDT, timestamp is 1 AM, CST, midnight
         df["valid"] = df["valid"].dt.date - datetime.timedelta(days=1)
@@ -315,10 +322,8 @@ def process(fullfn):
         )
     elif tabletype == "HrlySI":
         df["slrkj_tot"] = df["slrw_avg"] * 3600.0 / 1000.0
-        df["ws_mps_s_wvt"] = df["ws_mph_s_wvt"] * 0.44704
         df = df.drop(
             [
-                "ws_mph_s_wvt",
                 "slrw_avg",
                 "solarradcalc",
                 "p12outofrange",
