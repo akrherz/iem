@@ -170,17 +170,9 @@ def fetch_daily(form, cols):
         df[key] = convert_value(df[col].values, "degC", "degF")
 
     if "speed" in cols:
-        df["speed"] = convert_value(
-            df["ws_mps_s_wvt_qc"].values, "meter / second", "mile / hour"
-        )
+        df = df.rename(columns={"ws_mph_qc": "speed"})
     if "gust" in cols:
-        # Le Sigh
-        if df["ws_mph_max_qc"].isnull().all():
-            df["gust"] = convert_value(
-                df["ws_mps_max_qc"].values, "meter / second", "mile / hour"
-            )
-        else:
-            df = df.rename(columns={"ws_mph_max_qc": "gust"})
+        df = df.rename(columns={"ws_mph_max_qc": "gust"})
     if "sv" in cols:
         # SoilVue 10 data
         for depth in SV_DEPTHS:

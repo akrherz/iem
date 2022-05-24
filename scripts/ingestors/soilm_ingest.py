@@ -315,6 +315,28 @@ def common_df_logic(filename, maxts, nwsli, tablename):
                 "calcvwc24_avg": "calc_vwc_24_avg",
             },
         )
+        # Average wind speed
+        if "ws_mps_s_wvt" in df.columns:
+            df = df.assign(
+                ws_mph=lambda df_: df_["ws_mps_s_wvt"] * 2.23694,
+            ).drop(
+                columns=["ws_mps_s_wvt"],
+            )
+        # Max wind speed
+        if "ws_mps_max" in df.columns:
+            df = (
+                df.assign(
+                    ws_mph_max=lambda df_: df_["ws_mps_max"] * 2.23694,
+                )
+                .drop(
+                    columns=["ws_mps_max"],
+                )
+                .rename(
+                    columns={"ws_mps_tmx": "ws_mph_tmx"},
+                    errors="ignore",
+                )
+            )
+
         # Rework the valid column into the appropriate date
         df["valid"] = df["valid"].dt.date - datetime.timedelta(days=1)
         # Convert radiation to standardized slrkj_tot
@@ -526,12 +548,12 @@ def daily_process(nwsli, maxts):
                 valid.strftime("%Y-%m-%d"),
             )
             EVENTS["reprocess_solar"] = True
-        if "ws_mps_max" in df.columns:
+        if "ws_mph_max_qc" in df.columns:
             ob.data["max_sknt"] = convert_value(
-                row["ws_mps_max_qc"], "meter / second", "knot"
+                row["ws_mph_max_qc"], "mile / hour", "knot"
             )
         ob.data["avg_sknt"] = convert_value(
-            row["ws_mps_s_wvt_qc"], "meter / second", "knot"
+            row["ws_mph_qc"], "mile / hour", "knot"
         )
         ob.save(acursor)
 
@@ -692,8 +714,8 @@ def main(argv):
             dyprocessed,
         )
     update_pday()
-    for nwsli in INVERSION:
-        do_inversion(INVERSION[nwsli], nwsli)
+    for nwsli, item in INVERSION.items():
+        do_inversion(item, nwsli)
 
     if EVENTS["reprocess_solar"]:
         LOG.info("Calling fix_solar.py with no args")

@@ -245,9 +245,9 @@ def plot7(ctx):
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
             """
-            SELECT station, ws_mps_max_qc, to_char(ws_mps_tmx, 'HH24MI')
+            SELECT station, ws_mph_max_qc, to_char(ws_mph_tmx, 'HH24MI')
             as time from sm_daily WHERE
-            valid = %s and ws_mps_max_qc is not null
+            valid = %s and ws_mph_max_qc is not null
         """,
             conn,
             params=(ctx["date"],),
@@ -255,11 +255,6 @@ def plot7(ctx):
         )
     if df.empty:
         raise NoDataFound("No Data Found for This Plot.")
-    df["gust_mph"] = (
-        (df["ws_mps_max_qc"].values * units("meter / second"))
-        .to(units("mph"))
-        .m
-    )
 
     data = []
     for station, row in df.iterrows():
@@ -269,7 +264,7 @@ def plot7(ctx):
             {
                 "lon": ctx["nt"].sts[station]["lon"],
                 "lat": ctx["nt"].sts[station]["lat"],
-                "tmpf": row["gust_mph"],
+                "tmpf": row["ws_mph_max_qc"],
                 #  'dwpf': row['time'],  backend bug plotting non-numbers
                 "id": ctx["nt"].sts[station]["plot_name"],
                 "id_color": "k",
@@ -283,22 +278,14 @@ def plot8(ctx):
     """Daily peak wind."""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
-            """
-            SELECT station, ws_mps_s_wvt_qc
-            from sm_daily WHERE
-            valid = %s and ws_mps_s_wvt_qc is not null
-        """,
+            "SELECT station, ws_mph_qc from sm_daily WHERE valid = %s and "
+            "ws_mph_qc is not null",
             conn,
             params=(ctx["date"],),
             index_col="station",
         )
     if df.empty:
         raise NoDataFound("No Data Found for This Plot.")
-    df["wind_mph"] = (
-        (df["ws_mps_s_wvt_qc"].values * units("meter / second"))
-        .to(units("mph"))
-        .m
-    )
 
     data = []
     for station, row in df.iterrows():
@@ -308,7 +295,7 @@ def plot8(ctx):
             {
                 "lon": ctx["nt"].sts[station]["lon"],
                 "lat": ctx["nt"].sts[station]["lat"],
-                "tmpf": row["wind_mph"],
+                "tmpf": row["ws_mph_qc"],
                 #  'dwpf': row['time'],  backend bug plotting non-numbers
                 "id": ctx["nt"].sts[station]["plot_name"],
                 "id_color": "k",
