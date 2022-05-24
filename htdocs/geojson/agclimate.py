@@ -39,12 +39,12 @@ def safe_m(val):
 
 def compute_plant_water(row):
     """Crude algo."""
-    if row["calc_vwc_12_avg_qc"] is None or row["calc_vwc_24_avg_qc"] is None:
+    if row["vwc12_qc"] is None or row["vwc24_qc"] is None:
         return "M"
     if row["station"] == "FRUI4":  # Problematic
         return "M"
-    p12 = min([max([0.1, row["calc_vwc_12_avg_qc"]]), 0.45])
-    p24 = min([max([0.1, row["calc_vwc_24_avg_qc"]]), 0.45])
+    p12 = min([max([0.1, row["vwc12_qc"]]), 0.45])
+    p24 = min([max([0.1, row["vwc24_qc"]]), 0.45])
     val = (p12 * 12 + p24 * 12) - (24 * 0.1)
     return safe(val, 2)
 
@@ -128,12 +128,9 @@ def get_data(pgconn, ts):
             coalesce(m.t12_c_avg_qc, h.t12_c_avg_qc) as t12_c_avg_qc,
             coalesce(m.t24_c_avg_qc, h.t24_c_avg_qc) as t24_c_avg_qc,
             coalesce(m.t50_c_avg_qc, h.t50_c_avg_qc) as t50_c_avg_qc,
-            coalesce(m.calcvwc12_avg_qc, h.calc_vwc_12_avg_qc)
-                as calc_vwc_12_avg_qc,
-            coalesce(m.calcvwc24_avg_qc, h.calc_vwc_24_avg_qc)
-                as calc_vwc_24_avg_qc,
-            coalesce(m.calcvwc50_avg_qc, h.calc_vwc_50_avg_qc)
-                as calc_vwc_50_avg_qc,
+            coalesce(m.vwc12_qc, h.vwc12_qc) as vwc12_qc,
+            coalesce(m.vwc24_qc, h.vwc24_qc) as vwc24_qc,
+            coalesce(m.vwc50_qc, h.vwc50_qc) as vwc50_qc,
             coalesce(m.ws_mph_max, h.ws_mph_max) as ws_mph_max,
             coalesce(m.winddir_d1_wvt, h.winddir_d1_wvt) as winddir_d1_wvt,
             coalesce(m.ws_mph_s_wvt * 0.447,
@@ -209,17 +206,17 @@ def get_data(pgconn, ts):
                         else "M"
                     ),
                     "soil12m": (
-                        safe_m(row["calc_vwc_12_avg_qc"])
+                        safe_m(row["vwc12_qc"])
                         if not q.get("soil12", False)
                         else "M"
                     ),
                     "soil24m": (
-                        safe_m(row["calc_vwc_24_avg_qc"])
+                        safe_m(row["vwc24_qc"])
                         if not q.get("soil24", False)
                         else "M"
                     ),
                     "soil50m": (
-                        safe_m(row["calc_vwc_50_avg_qc"])
+                        safe_m(row["vwc50_qc"])
                         if not q.get("soil50", False)
                         else "M"
                     ),

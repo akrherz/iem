@@ -36,9 +36,9 @@ VARCONV = {
     "vwc12_avg": "vwc_12_avg",
     "vwc24_avg": "vwc_24_avg",
     "vwc50_avg": "vwc_50_avg",
-    "calcvwc12_avg": "calc_vwc_12_avg",
-    "calcvwc24_avg": "calc_vwc_24_avg",
-    "calcvwc50_avg": "calc_vwc_50_avg",
+    "calcvwc12_avg": "vwc12",
+    "calcvwc24_avg": "vwc24",
+    "calcvwc50_avg": "vwc50",
     "outofrange06": "p06outofrange",
     "outofrange12": "p12outofrange",
     "outofrange24": "p24outofrange",
@@ -97,8 +97,8 @@ VARCONV_TPOI4 = {
     "temp_avg12in": "t12_c_avg",
     "temp_avg24in": "t24_c_avg",
     "vwc_avg4in": "vwc4",
-    "vwc_avg12in": "calcvwc12_avg",
-    "vwc_avg24in": "calcvwc24_avg",
+    "vwc_avg12in": "vwc12",
+    "vwc_avg24in": "vwc24",
 }
 
 TSOIL_COLS = [
@@ -287,20 +287,20 @@ def common_df_logic(filename, maxts, nwsli, tablename):
         # HACK
         df = df.rename(
             columns={
-                "calc_vwc_06_avg": "calcvwc06_avg",
-                "vwc_06_avg": "calcvwc06_avg",
-                "vwc_12_avg": "calcvwc12_avg",
-                "vwc_24_avg": "calcvwc24_avg",
-                "vwc_50_avg": "calcvwc50_avg",
-                "vwc_avg2in": "calcvwc02_avg",
-                "vwc_avg4in": "calcvwc04_avg",
-                "vwc_avg8in": "calcvwc08_avg",
-                "vwc_avg12in": "calcvwc12_avg",
-                "vwc_avg16in": "calcvwc16_avg",
-                "vwc_avg20in": "calcvwc20_avg",
-                "calc_vwc_12_avg": "calcvwc12_avg",
-                "calc_vwc_24_avg": "calcvwc24_avg",
-                "calc_vwc_50_avg": "calcvwc50_avg",
+                "calc_vwc_06_avg": "vwc6",
+                "vwc_06_avg": "vwc6",
+                "vwc_12_avg": "vwc12",
+                "vwc_24_avg": "vwc24",
+                "vwc_50_avg": "vwc50",
+                "vwc_avg2in": "sv_vwc2",
+                "vwc_avg4in": "sv_vwc4",
+                "vwc_avg8in": "sv_vwc8",
+                "vwc_avg12in": "sv_vwc12",
+                "vwc_avg16in": "sv_vwc16",
+                "vwc_avg20in": "sv_vwc20",
+                "calc_vwc_12_avg": "vwc12",
+                "calc_vwc_24_avg": "vwc24",
+                "calc_vwc_50_avg": "vwc50",
                 "bpres_avg": "bp_mb",
             }
         )
@@ -311,8 +311,8 @@ def common_df_logic(filename, maxts, nwsli, tablename):
         # Horrible
         df = df.rename(
             columns={
-                "calcvwc12_avg": "calc_vwc_12_avg",
-                "calcvwc24_avg": "calc_vwc_24_avg",
+                "calcvwc12_avg": "vwc12",
+                "calcvwc24_avg": "vwc24",
             },
         )
         # Average wind speed
@@ -355,8 +355,8 @@ def common_df_logic(filename, maxts, nwsli, tablename):
         # Horrible
         df = df.rename(
             columns={
-                "calcvwc12_avg": "calc_vwc_12_avg",
-                "calcvwc24_avg": "calc_vwc_24_avg",
+                "calcvwc12_avg": "vwc12",
+                "calcvwc24_avg": "vwc24",
             },
         )
         # Convert radiation to standardized slrkj_tot
@@ -385,7 +385,7 @@ def common_df_logic(filename, maxts, nwsli, tablename):
         if colname in ["valid", "duration"]:
             continue
         df[f"{colname}_qc"] = df[colname]
-        if colname.startswith("calc_vwc"):
+        if colname.startswith("vwc"):
             df[f"{colname}_f"] = qcval(df, f"{colname}_qc", 0.01, 0.7)
         elif colname in TSOIL_COLS:
             df[f"{colname}_f"] = qcval2(df, f"{colname}_qc", -20.0, 37.0)
@@ -449,12 +449,12 @@ def m15_process(nwsli, maxts):
             ob.data["c3tmpf"] = c2f(row["t24_c_avg_qc"])
         if "t50_c_avg" in df.columns:
             ob.data["c4tmpf"] = c2f(row["t50_c_avg_qc"])
-        if "calc_vwc_12_avg" in df.columns:
-            ob.data["c2smv"] = row["calc_vwc_12_avg_qc"] * 100.0
-        if "calc_vwc_24_avg" in df.columns:
-            ob.data["c3smv"] = row["calc_vwc_24_avg_qc"] * 100.0
-        if "calc_vwc_50_avg" in df.columns:
-            ob.data["c4smv"] = row["calc_vwc_50_avg_qc"] * 100.0
+        if "vwc12" in df.columns:
+            ob.data["c2smv"] = row["vwc12_qc"] * 100.0
+        if "vwc24" in df.columns:
+            ob.data["c3smv"] = row["vwc24_qc"] * 100.0
+        if "vwc50" in df.columns:
+            ob.data["c4smv"] = row["vwc50_qc"] * 100.0
         ob.save(acursor, force_current_log=True)
         processed += 1
     acursor.close()
@@ -501,12 +501,12 @@ def hourly_process(nwsli, maxts):
             ob.data["c3tmpf"] = c2f(row["t24_c_avg_qc"])
         if "t50_c_avg" in df.columns:
             ob.data["c4tmpf"] = c2f(row["t50_c_avg_qc"])
-        if "calc_vwc_12_avg" in df.columns:
-            ob.data["c2smv"] = row["calc_vwc_12_avg_qc"] * 100.0
-        if "calc_vwc_24_avg" in df.columns:
-            ob.data["c3smv"] = row["calc_vwc_24_avg_qc"] * 100.0
-        if "calc_vwc_50_avg" in df.columns:
-            ob.data["c4smv"] = row["calc_vwc_50_avg_qc"] * 100.0
+        if "vwc12" in df.columns:
+            ob.data["c2smv"] = row["vwc12_qc"] * 100.0
+        if "vwc24" in df.columns:
+            ob.data["c3smv"] = row["vwc24_qc"] * 100.0
+        if "vwc50" in df.columns:
+            ob.data["c4smv"] = row["vwc50_qc"] * 100.0
         ob.save(acursor)
         processed += 1
     acursor.close()

@@ -436,11 +436,11 @@ def make_vsm_histogram_plot(ctx):
         df = pd.read_sql(
             """
             SELECT
-            CASE WHEN t12_c_avg_qc > 1 then calc_vwc_12_avg_qc else null end
+            CASE WHEN t12_c_avg_qc > 1 then vwc12_qc else null end
                 as v12,
-            CASE WHEN t24_c_avg_qc > 1 then calc_vwc_24_avg_qc else null end
+            CASE WHEN t24_c_avg_qc > 1 then vwc24_qc else null end
                 as v24,
-            CASE WHEN t50_c_avg_qc > 1 then calc_vwc_50_avg_qc else null end
+            CASE WHEN t50_c_avg_qc > 1 then vwc50_qc else null end
                 as v50
             from sm_hourly
             where station = %s and valid >= %s and valid < %s
@@ -490,11 +490,11 @@ def make_daily_water_change_plot(ctx):
             """
         WITH obs as (
             SELECT valid,
-            CASE WHEN t12_c_avg_qc > 1 then calc_vwc_12_avg_qc else null end
+            CASE WHEN t12_c_avg_qc > 1 then vwc12_qc else null end
             as v12,
-            CASE WHEN t24_c_avg_qc > 1 then calc_vwc_24_avg_qc else null end
+            CASE WHEN t24_c_avg_qc > 1 then vwc24_qc else null end
             as v24,
-            CASE WHEN t50_c_avg_qc > 1 then calc_vwc_50_avg_qc else null end
+            CASE WHEN t50_c_avg_qc > 1 then vwc50_qc else null end
             as v50
             from sm_daily
             where station = %s and valid >= %s and valid < %s)
@@ -581,9 +581,9 @@ def plot_sm(ctx):
             params=(ctx["station"], ctx["sts"], ctx["ets"]),
             index_col="valid",
         )
-    d12t = df["calc_vwc_12_avg_qc"]
-    d24t = df["calc_vwc_24_avg_qc"]
-    d50t = df["calc_vwc_50_avg_qc"]
+    d12t = df["vwc12_qc"]
+    d24t = df["vwc24_qc"]
+    d50t = df["vwc50_qc"]
     d04t = df["vwc4_qc"]
     valid = df.index.values
 
@@ -747,12 +747,12 @@ def plot1(ctx):
     if df.empty:
         raise NoDataFound("No Data Found for This Plot.")
     solar_wm2 = df["slrkj_tot_qc"] / 3600.0 * 1000.0
-    d12sm = df["calc_vwc_12_avg_qc"]
+    d12sm = df["vwc12_qc"]
     d12t = df["t12_c_avg_qc"]
     d24t = df["t24_c_avg_qc"]
     d50t = df["t50_c_avg_qc"]
-    d24sm = df["calc_vwc_24_avg_qc"]
-    d50sm = df["calc_vwc_50_avg_qc"]
+    d24sm = df["vwc24_qc"]
+    d50sm = df["vwc50_qc"]
     rain = df["rain_in_tot_qc"]
     tair = df["tair_c_avg_qc"]
     d04t = df["t4_c_avg_qc"]

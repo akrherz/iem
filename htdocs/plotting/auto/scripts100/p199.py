@@ -309,8 +309,8 @@ def plot9(ctx):
     """Daily peak wind."""
     with get_sqlalchemy_conn("isuag") as conn:
         df = pd.read_sql(
-            "SELECT station, calc_vwc_12_avg_qc, calc_vwc_24_avg_qc from "
-            "sm_daily WHERE valid = %s and calc_vwc_24_avg_qc is not null "
+            "SELECT station, vwc12_qc, vwc24_qc from "
+            "sm_daily WHERE valid = %s and vwc24_qc is not null "
             "and station != 'FRUI4'",
             conn,
             params=(ctx["date"],),
@@ -318,8 +318,8 @@ def plot9(ctx):
         )
     if df.empty:
         raise NoDataFound("No Data Found for This Plot.")
-    df["vwc_12"] = df["calc_vwc_12_avg_qc"].clip(0.1, 0.45)
-    df["vwc_24"] = df["calc_vwc_24_avg_qc"].clip(0.1, 0.45)
+    df["vwc_12"] = df["vwc12_qc"].clip(0.1, 0.45)
+    df["vwc_24"] = df["vwc24_qc"].clip(0.1, 0.45)
     df["val"] = (df["vwc_12"] * 12 + df["vwc_24"] * 12) - (24 * 0.1)
     df = df[~df["val"].isna()]
 

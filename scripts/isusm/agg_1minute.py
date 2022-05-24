@@ -32,8 +32,7 @@ def hourly_process(cursor, station, hour, mdf, hdf):
     row["slrkj_tot"] = sumdf["slrkj_tot"]
     # Take last ob
     for colname in (
-        "t4_c_avg t12_c_avg t24_c_avg t50_c_avg calcvwc12_avg "
-        "calcvwc24_avg calcvwc50_avg rh_avg"
+        "t4_c_avg t12_c_avg t24_c_avg t50_c_avg vwc12 vwc24 vwc50 rh_avg"
     ).split():
         row[colname] = float(lastob[f"{colname}_qc"])
     # Soil Vue Madness
@@ -45,20 +44,14 @@ def hourly_process(cursor, station, hour, mdf, hdf):
                     sv_lastob[f"sv_{col}{depth}_qc"]
                 )
     tokens = []
-    sigh = {
-        "calcvwc12_avg": "calc_vwc_12_avg",
-        "calcvwc24_avg": "calc_vwc_24_avg",
-        "calcvwc50_avg": "calc_vwc_50_avg",
-    }
     for colname in row.index:
         if colname in ["station", "valid"]:
             continue
         if colname == "obs_count":
             tokens.append(f"{colname} = {row[colname]}")
             continue
-        cname = sigh.get(colname, colname)
-        tokens.append(f"{cname} = coalesce({cname}, %({colname})s)")
-        tokens.append(f"{cname}_qc = coalesce({cname}_qc, %({colname})s)")
+        tokens.append(f"{colname} = coalesce({colname}, %({colname})s)")
+        tokens.append(f"{colname}_qc = coalesce({colname}_qc, %({colname})s)")
     LOG.info("updating sm_hourly %s %s", station, row["valid"])
     cursor.execute(
         f"UPDATE sm_hourly SET {','.join(tokens)} "
@@ -78,8 +71,7 @@ def daily_process(cursor, station, date, df, ddf):
     row["tair_c_min"] = mindf["tair_c_avg_qc"]
     # For daily, we want the average for some of these columns
     for colname in (
-        "t4_c_avg t12_c_avg t24_c_avg t50_c_avg calcvwc12_avg "
-        "calcvwc24_avg calcvwc50_avg rh_avg"
+        "t4_c_avg t12_c_avg t24_c_avg t50_c_avg vwc12 vwc24 vwc50 rh_avg"
     ).split():
         row[colname] = float(avgdf[f"{colname}_qc"])
     # Soil Vue Madness
@@ -94,20 +86,14 @@ def daily_process(cursor, station, date, df, ddf):
     row = row.replace({np.nan: None})
     # build up SQL statement
     tokens = []
-    sigh = {
-        "calcvwc12_avg": "calc_vwc_12_avg",
-        "calcvwc24_avg": "calc_vwc_24_avg",
-        "calcvwc50_avg": "calc_vwc_50_avg",
-    }
     for colname in row.index:
         if colname in ["station", "date"]:
             continue
         if colname == "obs_count":
             tokens.append(f"{colname} = {row[colname]}")
             continue
-        cname = sigh.get(colname, colname)
-        tokens.append(f"{cname} = coalesce({cname}, %({colname})s)")
-        tokens.append(f"{cname}_qc = coalesce({cname}_qc, %({colname})s)")
+        tokens.append(f"{colname} = coalesce({colname}, %({colname})s)")
+        tokens.append(f"{colname}_qc = coalesce({colname}_qc, %({colname})s)")
     LOG.info("updating sm_daily %s %s", station, date)
     cursor.execute(
         f"UPDATE sm_daily SET {','.join(tokens)} "
@@ -182,6 +168,9 @@ def main(argv):
     cursor = pgconn.cursor()
     for station, gdf in mdf.groupby("station"):
         for hour, hgdf in gdf.set_index("utc_valid").resample("H"):
+            if station not in hdf.index:
+                LOG.warning("%s is not in hourly", station)
+                continue
             hourly_process(cursor, station, hour, hgdf, hdf.loc[station, :])
     cursor.close()
     pgconn.commit()

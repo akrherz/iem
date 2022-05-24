@@ -88,7 +88,7 @@ def do_soil_moisture(row):
         # CS655
         t = data.get(f"t{depth}_c_avg")
         sv_t = data.get(f"sv_t{depth}")
-        vwc = data.get(f"calcvwc{depth:02d}_avg")
+        vwc = data.get(f"vwc{depth}")
         sv_vwc = data.get(f"sv_vwc{depth}")
         if pd.isna([t, sv_t, vwc, sv_vwc]).all():
             continue

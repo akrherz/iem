@@ -36,12 +36,12 @@ VARCONV = {
     "vwc_avg12in": "vwc_12_avg",
     "vwc24_avg": "vwc_24_avg",
     "vwc_avg24in": "vwc_24_avg",
-    "vwc_avg30in": "calcvwc30_avg",
+    "vwc_avg30in": "calcvwc30_avg",  # TODO
     "vwc_avg40in": "calcvwc40_avg",
     "vwc50_avg": "vwc_50_avg",
-    "calcvwc12_avg": "calc_vwc_12_avg",
-    "calcvwc24_avg": "calc_vwc_24_avg",
-    "calcvwc50_avg": "calc_vwc_50_avg",
+    "calcvwc12_avg": "vwc12",
+    "calcvwc24_avg": "vwc24",
+    "calcvwc50_avg": "vwc50",
     "outofrange12": "p12outofrange",
     "outofrange24": "p24outofrange",
     "outofrange50": "p50outofrange",
@@ -245,12 +245,12 @@ def minute_iemaccess(df):
                 ob.data[f"c{j + 1}tmpf"] = c2f(row[f"t{col}_c_avg_qc"])
         if "t50_c_avg" in df.columns:
             ob.data["c4tmpf"] = c2f(row["t50_c_avg_qc"])
-        if "calcvwc12_avg" in df.columns:
-            ob.data["c2smv"] = row["calcvwc12_avg_qc"] * 100.0
+        if "vwc12" in df.columns:
+            ob.data["c2smv"] = row["vwc12_qc"] * 100.0
         if "calcvwc24_avg" in df.columns:
-            ob.data["c3smv"] = row["calcvwc24_avg_qc"] * 100.0
+            ob.data["c3smv"] = row["vwc24_qc"] * 100.0
         if "calcvwc50_avg" in df.columns:
-            ob.data["c4smv"] = row["calcvwc50_avg_qc"] * 100.0
+            ob.data["c4smv"] = row["vwc50_qc"] * 100.0
         ob.save(cursor)
     cursor.close()
     pgconn.commit()
@@ -336,7 +336,7 @@ def process(fullfn):
         if colname == "valid":
             continue
         df[f"{colname}_qc"] = df[colname]
-        if colname.startswith("calc_vwc"):
+        if colname.startswith("vwc"):
             df[f"{colname}_f"] = qcval(df, f"{colname}_qc", 0.01, 0.7)
         elif colname in TSOIL_COLS:
             df[f"{colname}_f"] = qcval2(df, f"{colname}_qc", -20.0, 37.0)

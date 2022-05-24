@@ -140,9 +140,9 @@ def fetch_daily(form, cols):
         "rh_avg_qc": "relh",
         "rain_in_tot_qc": "precip",
         "winddir_d1_wvt_qc": "drct",
-        "calc_vwc_12_avg_qc": "soil12vwc",
-        "calc_vwc_24_avg_qc": "soil24vwc",
-        "calc_vwc_50_avg_qc": "soil50vwc",
+        "vwc12_qc": "soil12vwc",
+        "vwc24_qc": "soil24vwc",
+        "vwc50_qc": "soil50vwc",
         "dailyet_qc": "et",
     }
     df = df.rename(xref, axis=1, errors="ignore")
@@ -284,9 +284,9 @@ def fetch_hourly(form, cols):
         "soil12t": "t12_c_avg_qc",
         "soil24t": "t24_c_avg_qc",
         "soil50t": "t50_c_avg_qc",
-        "soil12vwc": "calc_vwc_12_avg_qc",
-        "soil24vwc": "calc_vwc_24_avg_qc",
-        "soil50vwc": "calc_vwc_50_avg_qc",
+        "soil12vwc": "vwc12_qc",
+        "soil24vwc": "vwc24_qc",
+        "soil50vwc": "vwc50_qc",
     }
     for key, col in tc.items():
         if key not in cols:
