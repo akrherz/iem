@@ -30,7 +30,7 @@ EVENTS = {"reprocess_solar": False, "days": [], "reprocess_temps": False}
 VARCONV = {
     "tsoil_c_avg": "t4_c_avg",
     "timestamp": "valid",
-    "vwc_avg6in": "calcvwc4_avg",  # Unique to Masonville, call it 4 inch
+    "vwc_avg6in": "vwc4",  # Unique to Masonville, call it 4 inch
     "temp_avg6in": "t4_c_avg",  # Unique to Masonville
     "ec6in": "ec4",  # Unique to Masonville
     "vwc12_avg": "vwc_12_avg",
@@ -96,7 +96,7 @@ VARCONV_TPOI4 = {
     "temp_avg4in": "t4_c_avg",
     "temp_avg12in": "t12_c_avg",
     "temp_avg24in": "t24_c_avg",
-    "vwc_avg4in": "calcvwc4_avg",
+    "vwc_avg4in": "vwc4",
     "vwc_avg12in": "calcvwc12_avg",
     "vwc_avg24in": "calcvwc24_avg",
 }

@@ -584,7 +584,7 @@ def plot_sm(ctx):
     d12t = df["calc_vwc_12_avg_qc"]
     d24t = df["calc_vwc_24_avg_qc"]
     d50t = df["calc_vwc_50_avg_qc"]
-    d04t = df["calcvwc4_avg_qc"]
+    d04t = df["vwc4_qc"]
     valid = df.index.values
 
     title = f"ISUSM Station: {ctx['_sname']} :: Soil Moisture Timeseries"
