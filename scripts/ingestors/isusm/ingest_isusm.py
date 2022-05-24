@@ -285,6 +285,9 @@ def process(fullfn):
             columns={
                 "timestamp": "valid",
                 "tsoil_c_avg": "t4_c_avg",
+                "calcvwc12_avg": "vwc12",
+                "calcvwc24_avg": "vwc24",
+                "calcvwc50_avg": "vwc50",
             }
         )
     df["valid"] = df["valid"].apply(make_time)
