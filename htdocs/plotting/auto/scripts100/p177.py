@@ -7,10 +7,11 @@ import psycopg2
 import pytz
 import pandas as pd
 import matplotlib.dates as mdates
+import matplotlib.colors as mpcolors
 from matplotlib.patches import Patch
 from matplotlib.lines import Line2D
 from pyiem import meteorology
-from pyiem.plot import figure, figure_axes
+from pyiem.plot import figure, figure_axes, get_cmap
 from pyiem.util import (
     convert_value,
     get_autoplot_context,
@@ -32,7 +33,8 @@ PLOTTYPES = {
     "7": "Daily Soil Water + Change",
     "8": "Battery Voltage",
     "9": "Daily Rainfall, 4 inch Soil Temp, and RH",
-    "10": "Inversion Diagnostic Plot (BOOI4 Ames - AEA) Only",
+    "10": "Inversion Diagnostic Plot (BOOI4, CAMI4, CRFI4)",
+    "11": "Inversion Daily Timing (BOOI4, CAMI4, CRFI4)",
 }
 
 
@@ -79,6 +81,79 @@ def get_description():
         ),
     ]
     return desc
+
+
+def make_inversion_timing(ctx):
+    """Generate an inversion plot"""
+    # Rectify the start date to midnight
+    ctx["sts"] = ctx["sts"].replace(hour=0, minute=0)
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            "SELECT valid at time zone 'UTC' as utc_valid, "
+            "tair_10_c_avg_qc, tair_15_c_avg_qc "
+            "from sm_inversion where station = %s and "
+            "valid >= %s and valid < %s and tair_10_c_avg_qc is not null and "
+            "tair_15_c_avg_qc is not null ORDER by valid ASC",
+            conn,
+            params=(ctx["station"], ctx["sts"], ctx["ets"]),
+        )
+    if df.empty:
+        raise NoDataFound("No inversion data found for station!")
+    df = df.assign(
+        utc_valid=lambda df_: df_.utc_valid.dt.tz_localize(pytz.UTC),
+        valid=lambda df_: df_.utc_valid.dt.tz_convert(CENTRAL),
+        delta=lambda df_: (
+            c2f(df_.tair_10_c_avg_qc) - c2f(df_.tair_15_c_avg_qc)
+        ),
+    )
+
+    grid = np.ones(((ctx["ets"] - ctx["sts"]).days + 1, 1440)) * np.nan
+    df["minute"] = df["valid"].dt.hour * 60 + df["valid"].dt.minute
+    # F
+    df["day"] = (df["valid"] - df["valid"].iloc[0]).dt.days
+    for _, row in df.iterrows():
+        grid[row["day"], row["minute"]] = float(row["delta"])
+    title = f"ISUSM Station: {ctx['_sname']} :: Inversion Timeseries"
+    subtitle = "10 Foot Air Temperature minus 1.5 Foot Air Temperature (F)"
+    fig, ax = figure_axes(apctx=ctx, title=title, subtitle=subtitle)
+    clevs = np.arange(-2, 2.1, 0.2)
+    cmap = get_cmap("bwr")
+    norm = mpcolors.BoundaryNorm(clevs, cmap.N)
+    res = ax.imshow(
+        grid, aspect="auto", interpolation="none", cmap=cmap, norm=norm
+    )
+    fig.colorbar(res).set_label(
+        "<< Less Likely           Inversion            More Likely >>"
+    )
+    ax.set_xticks(np.arange(0, 1441, 120))
+    # hours of the day
+    ax.set_xticklabels(
+        [
+            "Mid",
+            "2 AM",
+            "4 AM",
+            "6 AM",
+            "8 AM",
+            "10 AM",
+            "Noon",
+            "2 PM",
+            "4 PM",
+            "6 PM",
+            "8 PM",
+            "10 PM",
+            "Mid",
+        ]
+    )
+    ax.grid(True)
+    ax.set_xlabel("Local Time (US Central)")
+
+    def custom(x, _pos=None):
+        dt = ctx["sts"] + datetime.timedelta(days=x)
+        return dt.strftime("%-d %b")
+
+    ax.yaxis.set_major_formatter(custom)
+
+    return fig, df
 
 
 def make_inversion_plot(ctx):
@@ -907,6 +982,8 @@ def plotter(fdict):
         fig, df = make_daily_rainfall_soil_rh(ctx)
     elif ctx["opt"] == "10":
         fig, df = make_inversion_plot(ctx)
+    elif ctx["opt"] == "11":
+        fig, df = make_inversion_timing(ctx)
 
     # removal of timestamps, sigh
     df = df.reset_index()
