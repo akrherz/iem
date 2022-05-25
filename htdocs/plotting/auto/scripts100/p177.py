@@ -118,6 +118,7 @@ def make_inversion_timing(ctx):
     fig, ax = figure_axes(apctx=ctx, title=title, subtitle=subtitle)
     clevs = np.arange(-2, 2.1, 0.2)
     cmap = get_cmap("bwr")
+    cmap.set_bad("tan")
     norm = mpcolors.BoundaryNorm(clevs, cmap.N)
     res = ax.imshow(
         grid, aspect="auto", interpolation="none", cmap=cmap, norm=norm
@@ -145,7 +146,7 @@ def make_inversion_timing(ctx):
         ]
     )
     ax.grid(True)
-    ax.set_xlabel("Local Time (US Central)")
+    ax.set_xlabel(f"{ctx['sts'].year} Local Time (US Central)")
 
     def custom(x, _pos=None):
         dt = ctx["sts"] + datetime.timedelta(days=x)

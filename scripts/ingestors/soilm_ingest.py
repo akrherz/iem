@@ -314,6 +314,9 @@ def common_df_logic(filename, maxts, nwsli, tablename):
         # Horrible
         df = df.rename(
             columns={
+                "vwc_12_avg": "vwc12",
+                "vwc_24_avg": "vwc24",
+                "vwc_50_avg": "vwc50",
                 "calcvwc12_avg": "vwc12",
                 "calcvwc24_avg": "vwc24",
             },
