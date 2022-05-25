@@ -1,14 +1,10 @@
-"""Search for a network to generate windroses for
+"""Pick two networks to drive windroses for.
 
 Called from RUN_2AM.sh script
 """
-import os
 import subprocess
-import stat
-import datetime
 
-from pandas import read_sql
-from pyiem.util import get_dbconnstr, logger
+from pyiem.util import get_dbconn, logger
 
 LOG = logger()
 CACHEDIR = "/mesonet/share/windrose/"
@@ -34,31 +30,21 @@ def do_network(network):
 
 def main():
     """Main"""
-    now = datetime.datetime.now()
-    df = read_sql(
-        """SELECT max(id) as station, network from stations
-        WHERE (network ~* 'ASOS' or network ~* 'DCP' or network ~* 'RWIS')
-        and online = 't' GROUP by network ORDER by random()""",
-        get_dbconnstr("mesosite"),
-        index_col="network",
-    )
-    for network, row in df.iterrows():
-        station = row["station"]
-        testfn = f"{CACHEDIR}/{network}/{station}/{station}_yearly.png"
-        if not os.path.isfile(testfn):
-            LOG.warning(
-                "Driving network %s because no file for %s", network, station
-            )
-            do_network(network)
-            break
-        mtime = os.stat(testfn)[stat.ST_MTIME]
-        age = float(now.strftime("%s")) - mtime
-        # 250 days in seconds, enough to cover the number of networks
-        if age < (250 * 24 * 60 * 60):
-            continue
-        LOG.warning("Driving network %s because of age!", network)
+    with get_dbconn("mesosite") as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "with data as (SELECT id from networks where "
+            "(id ~* '_ASOS' or id ~* '_DCP' or id ~* 'RWIS') "
+            "ORDER by windrose_update ASC NULLS FIRST LIMIT 2) "
+            "UPDATE networks n SET windrose_update = now() FROM data d "
+            "WHERE d.id = n.id RETURNING n.id"
+        )
+        rows = cursor.fetchall()
+
+    for row in rows:
+        network = row[0]
+        LOG.warning("Driving network %s", network)
         do_network(network)
-        break
 
 
 if __name__ == "__main__":
