@@ -32,7 +32,8 @@ def hourly_process(cursor, station, hour, mdf, hdf):
     row["slrkj_tot"] = sumdf["slrkj_tot"]
     # Take last ob
     for colname in (
-        "t4_c_avg t12_c_avg t24_c_avg t50_c_avg vwc12 vwc24 vwc50 rh_avg"
+        "t4_c_avg t12_c_avg t24_c_avg t50_c_avg vwc12 vwc24 vwc50 rh_avg "
+        "tair_c_avg"
     ).split():
         row[colname] = float(lastob[f"{colname}_qc"])
     # Soil Vue Madness
