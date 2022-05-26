@@ -2,106 +2,145 @@
 /* Fails when no polygon warning was present with the warning
    ex) CAR.SV.9.2007
 */
-if (! isset($sts) ) die(); /* Avoid direct calls.... */
-
-if (substr($_SERVER["REMOTE_ADDR"],0,6) == "66.249") die();
+if (! isset($sts) ) {
+    header("Location: /cow/");
+    die(); /* Avoid direct calls.... */
+}
 
 function printLSR($lsr)
 {
-  $lt = Array("F" => "Flash Flood", "T" => "Tornado", "D" => "Tstm Wnd Dmg",
-  "H" => "Hail","G" => "Wind Gust", "W" => "Waterspout", "M" => "Marine Tstm Wnd",
-"2" => "Dust Storm");
-  $background = "#0f0";
-  if ($lsr["warned"] == False) $background = "#f00";
-  if ($lsr["leadtime"] == "NA") { $background = "#eee"; $leadtime = "NA"; }
-  else {$leadtime = $lsr["leadtime"] ." minutes"; }
-  if ($lsr["tdq"]) $background = "#aaa";
-  if ($lsr["magnitude"] == 0) $lsr["magnitude"] = "";
-  $uri = sprintf("../lsr/#%s/%s/%s", $lsr["wfo"], gmdate("YmdHi", $lsr["ts"]),
-         gmdate("YmdHi", $lsr["ts"]) );
-  return sprintf("<tr style=\"background: #eee;\"><td></td><td><a href=\"%s\" target=\"_new\">%s</a></td><td style=\"background: %s;\">%s</td><td>%s,%s</td><td><a href=\"%s\" target=\"_new\">%s</a></td><td>%s</td><td>%s</td><td colspan=\"5\">%s</td></tr>", 
-	$uri, gmdate("m/d/Y H:i", $lsr["ts"]), $background, $leadtime,
-	$lsr["county"], $lsr["state"], $uri, $lsr["city"],
-	$lt[strval($lsr["type"])], $lsr["magnitude"], $lsr["remark"]);
+    $valid = new DateTime($lsr["valid"]);
+    $lt = Array(
+        "F" => "Flash Flood", "T" => "Tornado", "D" => "Tstm Wnd Dmg",
+        "H" => "Hail","G" => "Wind Gust", "W" => "Waterspout",
+        "M" => "Marine Tstm Wnd", "2" => "Dust Storm");
+    $background = ($lsr["warned"] == False) ? "#f00" : "#0f0";
+    if (is_null($lsr["leadtime"])) {
+        $background = "#eee";
+        $leadtime = "NA";
+    } else {
+        $leadtime = $lsr["leadtime"] ." minutes";
+    }
+    if ($lsr["tdq"]) {
+        $background = "#aaa";
+    }
+    if ($lsr["magnitude"] == 0) {
+        $lsr["magnitude"] = "";
+    }
+    $uri = sprintf("/lsr/#%s/%s/%s", $lsr["wfo"], $valid->format("YmdHi"),
+        $valid->format("YmdHi") );
+    return sprintf(
+        '<tr style="background: #eee;"><td></td>'.
+        '<td><a href="%s" target="_new">%s</a></td>'.
+        '<td style="background: %s;">%s</td><td>%s,%s</td>'.
+        '<td><a href="%s" target="_new">%s</a></td><td>%s</td><td>%s</td>'.
+        '<td colspan="5">%s</td></tr>',
+	    $uri, $valid->format("m/d/Y H:i"), $background, $leadtime,
+	    $lsr["county"], $lsr["state"], $uri, $lsr["city"],
+	    $lt[strval($lsr["type"])], $lsr["magnitude"], $lsr["remark"]);
 }
-function clean_area_verify($buffered, $parea){
-	if ($buffered === null) return 'invalid warning geometry';
-	return sprintf("%.0f%%", $buffered / $parea * 100.0);
-}
-function printWARN($cow, $warn)
+
+function printWARN($lsrs, $warn)
 {
-  global $lsrbuffer;
-  $ts = $warn["sts"] + 5*60;
-  $uri = sprintf("/vtec/#%s-O-%s-K%s-%s-%s-%04d", date("Y", $ts), 
+    global $lsrbuffer;
+    $issue = new DateTime($warn["issue"]);
+    $expire = new DateTime($warn["expire"]);
+    $uri = sprintf(
+        "/vtec/#%s-O-%s-K%s-%s-%s-%04d",
+        $issue->format("Y"), 
         $warn["status"], $warn["wfo"], $warn["phenomena"], 
         $warn["significance"], $warn["eventid"]);
-  $background = "#0f0";
-  if ($warn["verify"] == False){ $background = "#f00"; }
-  $bratio = "0";
-  if ($warn["perimeter"] > 0){
-  	$bratio = $warn["sharedborder"] / $warn["perimeter"] * 100.0;
-  }
-  $windhail = "";
-  if ($warn["windtag"] != null){
-  	$windhail = sprintf("<br />H: %s\"<br />W: %s", $warn["hailtag"], $warn["windtag"]);
-  }
+    $background = "#0f0";
+    if ($warn["verify"] == False){ $background = "#f00"; }
+    $bratio = "0";
+    if ($warn["perimeter"] > 0){
+  	    $bratio = $warn["sharedborder"] / $warn["perimeter"] * 100.0;
+    }
+    $windhail = "";
+    if ($warn["windtag"] != null){
+  	    $windhail = sprintf("<br />H: %s\"<br />W: %s", $warn["hailtag"], $warn["windtag"]);
+    }
 
-  $s = sprintf("<tr><td style=\"background: %s;\"><a href=\"%s\">%s.%s</a>%s</td>
+    $s = sprintf(
+        "<tr><td style=\"background: %s;\"><a href=\"%s\">%s.%s</a>%s</td>
   		<td>%s</td><td>%s</td>
   		<td colspan=\"2\"><a href=\"%s\" target=\"_new\">%s</a></td>
   		<td><a href=\"%s\">%s</a></td><td>%.0f sq km</td>
   		<td>%.0f sq km</td><td>%.0f %%</td>
   		<td>%.0f%% <a href=\"/GIS/radmap.php?layers[]=legend&layers[]=ci&layers[]=cbw&layers[]=sbw&layers[]=uscounties&layers[]=bufferedlsr&vtec=%s.K%s.%s.%s.%04d&lsrbuffer=%s\">Visual</a></td>
-  		<td>%s</td><td>%s</td></tr>\n", 
-    $background, $uri, $warn["phenomena"], $warn["eventid"], $windhail,
-    gmdate("m/d/Y H:i", $warn["sts"]), gmdate("m/d/Y H:i", $warn["expire"]), 
-    $uri, implode(", ", $warn["ugcname"]), $uri, $warn["status"], $warn["parea"], 
-    $warn["carea"], ($warn["carea"] - $warn["parea"])/ $warn["carea"]  * 100,
-    $bratio,
-    date("Y", $ts), $warn["wfo"], $warn["phenomena"], $warn["significance"],
-    $warn["eventid"], $lsrbuffer,
-    clean_area_verify($warn["buffered"], $warn["parea"]), $warn["fcster"]);
+  		<td>%.0f%%</td><td>%s</td></tr>\n", 
+        $background, $uri, $warn["phenomena"], $warn["eventid"], $windhail,
+        $issue->format("m/d/Y H:i"),
+        $expire->format("m/d/Y H:i"), 
+        $uri, implode(", ", $warn["ar_ugcname"]), $uri,
+        $warn["status"], $warn["parea"], 
+        $warn["carea"],
+        ($warn["carea"] - $warn["parea"])/ $warn["carea"]  * 100,
+        $bratio,
+        $issue->format("Y"), $warn["wfo"], $warn["phenomena"],
+        $warn["significance"], $warn["eventid"], $lsrbuffer,
+        $warn["areaverify"] / $warn["parea"] * 100., $warn["fcster"]);
 
-  reset($warn["lsrs"]);
-  if (sizeof($warn["lsrs"]) == 0 && $warn["verify"]){
-  	$s .= "<tr><td></td><td colspan=\"10\">The warning above had one or more local
-  			storm reports that were within previously issued warnings and are
-  			not double counted here.  Thus the warning appears as verified,
-  			but no local storm reports are shown. Future code improvements may 
-  			be added to the Cow to better account for these.</td></tr>";
-  }
   
-  foreach($warn["lsrs"] as $k => $lsr){ 
-	$s .= printLSR($cow->lsrs[$lsr]); 
-  }
-  return $s;
+    /* TODO
+    if ($warn["stormreports"] == ""){
+      	$s .= "<tr><td></td><td colspan=\"10\">The warning above had one or more local
+  	    		storm reports that were within previously issued warnings and are
+  		    	not double counted here.  Thus the warning appears as verified,
+  			    but no local storm reports are shown. Future code improvements may 
+  			    be added to the Cow to better account for these.</td></tr>";
+    }
+    */
+    $lsrids = explode(",", $warn["stormreports"]);
+    foreach($lsrs as $k => $lsr){
+        if (in_array($lsr["id"], $lsrids)){
+            $s .= printLSR($lsr["properties"]);
+        }
+    }
+    return $s;
 }
 
-include_once "../../include/cow.php";
-$cow = new Cow( iemdb("postgis") );
-// Allow for four char WFO
-$usewfo = (strlen($wfo) == 4) ? substr($wfo, 1, 3): $wfo;
-$cow->setLimitWFO( Array($usewfo) );
-$cow->setLimitTime( $sts, $ets );
-$cow->setHailSize( $hail );
-$cow->setWind( $wind );
-$cow->setLimitType( $wtype );
-$cow->setLimitLSRType( $ltype );
-$cow->setLSRBuffer( $lsrbuffer );
-$cow->setWarningBuffer($warnbuffer);
-$cow->setForecaster($fcster);
+$phenoms = "";
+foreach($wtype as $k => $w){
+    $phenoms .= sprintf("&phenomena=%s", $w);
+}
+$lsrtypes = "";
+foreach($ltype as $k => $w){
+    $lsrtypes .= sprintf("&lsrtype=%s", $w);
+}
+
+// Build Cow API URL
+$wsuri = sprintf(
+    "http://iem.local/api/1/cow.json?wfo=%s&begints=%sZ&".
+    "endts=%sZ&hailsize=%s&wind=%s%s%s&lsrbuffer=%s&warningbuffer=%s",
+    (strlen($wfo) == 4) ? substr($wfo, 1, 3): $wfo,
+    $sts->format("Y-m-d\\TH:i:00"),
+    $ets->format("Y-m-d\\TH:i:00"),
+    $hail,
+    $wind,
+    $phenoms,
+    $lsrtypes,
+    $lsrbuffer,
+    floatval($warnbuffer) * 100., // approx to km
+);
+if ($fcster != ''){
+    $wsuri .= sprintf("&fcster=%s", $fcster);
+}
 if (isset($useWindHailTag) && $useWindHailTag == 'Y'){
-	$cow->useWindHailTag = true;
+    $wsuri .= "&windhailtag=Y";
 }
 if (isset($limitwarns) && $limitwarns == 'Y'){
-	$cow->limitwarns = true;
+    $wsuri .= "&limitwarns=Y";
 }
-$cow->milk();
 
-$charturl = sprintf("chart.php?aw=%s&ae=%s&b=%s&c=%s&d=%s",
-            $cow->computeWarningsVerified(), $cow->computeWarnedEvents(),
-            $cow->computeUnwarnedEvents(), $cow->computeWarningsUnverified(),
-            "NA");
+$jobj = json_decode(file_get_contents($wsuri), True);
+$stats = $jobj['stats'];
+
+$charturl = sprintf(
+    "chart.php?aw=%s&ae=%s&b=%s&c=%s&d=%s",
+    $stats["events_verified"], $stats["warned_reports"],
+    $stats["unwarned_reports"], $stats["events_total"] - $stats["events_verified"],
+    "NA");
 
 if (sizeof($ltype) == 0){
 	$content .= "<div class='warning'>You did not select any of the Local Storm 
@@ -112,42 +151,41 @@ if (sizeof($wtype) == 0){
 	types above, so none are listed below...<br /><br /></div>";
 }
 
-$dstat = date("m/d/Y H:i", $sts);
-$dstat1 = date("m/d/Y H:i", $ets);
+$dstat = $sts->format("m/d/Y H:i");
+$dstat1 = $ets->format("m/d/Y H:i");
 
+$aw = sprintf("%s", $stats["events_verified"]);
+$pv = sprintf("%.1f", $stats["events_verified"] / $stats["events_total"] * 100);
+$sr = sprintf("%.1f", 100 - $stats["size_poly_vs_county[%]"]);
+$asz =  sprintf("%.0f", $stats["avg_size[sq km]"]);
+$av = sprintf("%.0f", $stats["area_verify[%]"]);
 
-$aw = sprintf("%s", $cow->computeWarningsVerified());
-$pv = sprintf("%.1f", $cow->computeWarningsVerifiedPercent());
-$sr = sprintf("%.1f", $cow->computeSizeReduction());
-$asz =  sprintf("%.0f", $cow->computeAverageSize());
-$av = sprintf("%.0f", $cow->computeAreaVerify());
-$ae = $cow->computeWarnedEvents();
-$b = $cow->computeUnwarnedEvents();
-$tdq = $cow->computeTDQEvents();
+$ae = $stats["warned_reports"];
+$b = $stats["unwarned_reports"];
+$tdq = $stats["tdq_stormreports"];
 
 $wtable = "";
-reset($cow->warnings);
-$wsz = sizeof($cow->warnings);
-foreach($cow->warnings as $k => $warn){
-	$wtable .= printWARN($cow, $warn);
+$wsz = sizeof($jobj["events"]["features"]);
+foreach($jobj["events"]["features"] as $k => $warn){
+	$wtable .= printWARN($jobj["stormreports"]["features"], $warn["properties"]);
 }
 
 $ltable = "";
-reset($cow->lsrs);
-$lsz = sizeof($cow->lsrs);
-foreach($cow->lsrs as $k => $lsr){
-	if ($lsr["warned"]) continue;
-
-	$ltable .= printLSR($lsr);
+$lsz = sizeof($jobj["stormreports"]["features"]);
+foreach($jobj["stormreports"]["features"] as $k => $lsr){
+	if ($lsr["properties"]["warned"]) {
+        continue;
+    }
+	$ltable .= printLSR($lsr["properties"]);
 }
-$far = sprintf("%.2f", $cow->computeFAR());
-$pod = sprintf("%.2f", $cow->computePOD());
-$csi = sprintf("%.2f", $cow->computeCSI());
+$far = sprintf("%.2f", $stats["FAR[1]"]);
+$pod = sprintf("%.2f", $stats["POD[1]"]);
+$csi = sprintf("%.2f", $stats["CSI[1]"]);
 
-$aleadtime = sprintf("%.1f", $cow->computeAverageLeadTime());
-$allleadtime = sprintf("%.1f", $cow->computeAllLeadTime());
-$maxleadtime = sprintf("%.1f", $cow->computeMaxLeadTime());
-$minleadtime = sprintf("%.1f", $cow->computeMinLeadTime());
+$aleadtime = sprintf("%.1f", $stats["avg_leadtime_firstreport[min]"]);
+$allleadtime = sprintf("%.1f", $stats["avg_leadtime[min]"]);
+$maxleadtime = sprintf("%.1f", $stats["max_leadtime[min]"]);
+$minleadtime = sprintf("%.1f", $stats["min_leadtime[min]"]);
 
 $fwarning = "";
 if ($fcster != ''){
@@ -159,7 +197,26 @@ if ($fcster != ''){
 EOF;
 }
 
+$shpuri = sprintf(
+    "/cgi-bin/request/gis/watchwarn.py?year1=%s&amp;".
+    "month1=%s&amp;day1=%s&amp;hour1=%s&amp;minute1=0&amp;year2=%s&amp;".
+    "month2=%s&amp;".
+    "day2=%s&amp;hour2=%s&amp;minute2=0&amp;limit1=yes&amp;wfo[]=%s",
+    $sts->format("Y"), $sts->format("m"), $sts->format("d"),
+    $sts->format("H"), $ets->format("Y"), $ets->format("m"), $ets->format("d"),
+    $ets->format("H"), $wfo);
+
+$lsruri = sprintf(
+    '/cgi-bin/request/gis/lsr.py?wfo[]=%s&amp;sts=%sZ&amp;ets=%sZ',
+    $wfo, $sts->format("Y-m-d\\TH:i"), $ets->format("Y-m-d\\TH:i"),
+);
+
 $content .= <<<EOF
+<strong>Related Downloads:</strong>
+<a href="{$wsuri}" class="btn btn-primary">JSON Web Service</a> &nbsp;
+<a href="{$shpuri}" class="btn btn-primary">Shapefile of Warnings</a> &nbsp;
+<a href="{$lsruri}" class="btn btn-primary">Shapefile of LSRs</a> &nbsp;
+
 <h3>Summary:</h3>
 <b>Begin Date:</b> {$dstat} <b>End Date:</b> {$dstat1}
 <br />* These numbers are not official and should be used for educational purposes only.
@@ -178,9 +235,9 @@ ${fwarning}
  <tr><th>Storm Based Warning Size Reduction:</th><th>{$sr}%</th></tr>
  <tr><th>Avg SBW Size (sq km)</th><th>{$asz}</th></tr>
  <tr><th>Areal Verification %:</th><th>{$av}%</th></tr>
- <tr><th>Reports</th><th>{$lsz}</th></tr>
- <tr><th>Warned Events (A<sub>e</sub>)</th><th>{$ae}</th></tr>
- <tr><th>Unwarned Events (B)</th><th>{$b}</th></tr>
+ <tr><th>Local Storm Reports</th><th>{$lsz}</th></tr>
+ <tr><th>Warned Local Storm Reports (A<sub>e</sub>)</th><th>{$ae}</th></tr>
+ <tr><th>Unwarned Local Storm Reports (B)</th><th>{$b}</th></tr>
  <tr><th>Non TOR LSRs during TOR warning</th><th>{$tdq}</th></tr>
  </table>
 	</div>
@@ -197,9 +254,7 @@ ${fwarning}
 	</div>
 </div>
 
-
-
-<h3 class="heading">Warnings Issued & Verifying LSRs:</h3>
+<h3>Warnings Issued & Verifying LSRs:</h3>
 <strong>Column Headings:</strong> 
 <i>Issued:</i> UTC timestamp of when the product was issued, 
 <i>Expired:</i> UTC timestamp of when the product expired,

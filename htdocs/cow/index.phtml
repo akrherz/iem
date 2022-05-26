@@ -6,20 +6,20 @@ require_once "../../include/network.php";
 require_once "../../include/forms.php";
 $t = new MyView();
 
-putenv("TZ=UTC");
- date_default_timezone_set('UTC');
  $wtype = isset($_GET["wtype"]) ? $_GET["wtype"] : Array();
  $ltype = isset($_GET["ltype"]) ? $_GET["ltype"] : Array();
- $syear = isset($_GET["syear"]) ? intval($_GET["syear"]): date("Y");
- $smonth = isset($_GET["smonth"]) ? intval($_GET["smonth"]): date("m");
- $sday = isset($_GET["sday"]) ? intval($_GET["sday"]): date("d");
- $shour = isset($_GET["shour"]) ? intval($_GET["shour"]): 12;
- $sts = mktime($shour, 0, 0, $smonth, $sday, $syear);
- $eyear = isset($_GET["eyear"]) ? intval($_GET["eyear"]): date("Y");
- $emonth = isset($_GET["emonth"]) ? intval($_GET["emonth"]): date("m");
- $eday = isset($_GET["eday"]) ? intval($_GET["eday"]): date("d");
- $ehour = isset($_GET["ehour"]) ? intval($_GET["ehour"]): 12;
- $ets = mktime($ehour, 0, 0, $emonth, $eday, $eyear);
+ $syear = get_int404("syear", date("Y"));
+ $smonth = get_int404("smonth", 1);
+ $sday = get_int404("sday", 1);
+ $shour = get_int404("shour", 12);
+ $sts = new DateTime("{$syear}-{$smonth}-{$sday} {$shour}:00");
+
+ $eyear = get_int404("eyear", date("Y"));
+ $emonth = get_int404("emonth", date("m"));
+ $eday = get_int404("eday", date("d"));
+ $ehour = get_int404("ehour", 12);
+ $ets = new DateTime("{$eyear}-{$emonth}-{$eday} {$ehour}:00");
+
  $hail = isset($_GET["hail"]) ? floatval($_GET["hail"]): 1.0;
  $wind = isset($_REQUEST["wind"]) ? floatval($_REQUEST["wind"]): 58;
  $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,4) : "MPX";
@@ -29,7 +29,7 @@ putenv("TZ=UTC");
  $limitwarns = isset($_REQUEST["limitwarns"]) ? $_REQUEST["limitwarns"] : 'N';
  $fcster = isset($_GET["fcster"]) ? xssafe($_GET["fcster"]): '';
 
- $abegin = mktime(0,0,0,6,8,2005);
+ $abegin = new DateTime("2005-08-06");
  if ($sts < $abegin){ $sts = $abegin; }
  if ($ets < $sts){ $n = $sts; $sts = $ets; $ets = $n; }
 
@@ -69,19 +69,22 @@ putenv("TZ=UTC");
 }
  $wselect .= "</select>";
 
- $ar = Array("TO"=> "Tornado",
+ $ar = Array(
+    "TO"=> "Tornado",
  	"SV" => "Svr T'storm",
  	"MA" => "Marine",
-	 "FF" => "Flash Flood (2008+)",
-     "DS" => "Dust Storm (2018+)");
+	"FF" => "Flash Flood (2008+)",
+    "DS" => "Dust Storm (2018+)");
  $tselect = "";
  foreach($ar as $k => $v){
- 	$tselect .= sprintf("<input name=\"wtype[]\" type=\"checkbox\" 
- 			id=\"%s\" value=\"%s\"%s>%s</input>", $k, $k, 
- 		(in_array($k, $wtype) ? " CHECKED": ""), $v);
+ 	$tselect .= sprintf(
+         '<input name="wtype[]" type="checkbox"  id="%s" value="%s"%s> '.
+         '<label for="%s">%s</label> ', $k, $k, 
+ 		(in_array($k, $wtype) ? " CHECKED": ""), $k, $v);
  }
  
- $ar = Array("T" => "Tornado",
+ $ar = Array(
+    "T" => "Tornado",
  "D" => "Wind Damage",
  "H" => "Hail",
  "G" => "Wind Gust",
@@ -91,10 +94,12 @@ putenv("TZ=UTC");
  $ltselect = "";
  foreach($ar as $k => $v){
  	if ($k == "MA2") $ltselect .= "<br />";
- 	$ltselect .= sprintf("<input name=\"ltype[]\" type=\"checkbox\"
- 			id=\"%s%s\" value=\"%s\"%s>%s</input>", $k, 
+ 	$ltselect .= sprintf(
+         '<input name="ltype[]" type="checkbox" id="%s%s" value="%s"%s> '.
+         '<label for="%s%s">%s</label> ', $k, 
  			(strlen($k) == 2)? "2": "", $k,
- 			(in_array($k, $ltype) ? " CHECKED": ""), $v);
+ 			(in_array($k, $ltype) ? " CHECKED": ""), 
+            $k, (strlen($k) == 2)? "2": "", $v);
  }
    
  
@@ -116,15 +121,16 @@ putenv("TZ=UTC");
  $ar = Array(58 => "58 mph", 70 => "70 mph", 75 => "75 mph", 80 => "80 mph", 150 => "150 mph");
  $wiselect = make_select("wind", $wind, $ar);
 
- $tagselect = "<input name=\"windhailtag\" type=\"checkbox\" value=\"Y\" ";
+ $tagselect = '<input id="windhailtag" name="windhailtag" type="checkbox" value="Y" ';
  $tagselect .= (($useWindHailTag == 'Y') ? " CHECKED": "");
  $tagselect .= <<<EOF
->When possible, verify SVR warnings against issuance WIND...HAIL tag
+> <label for="windhailtag">When possible, verify SVR warnings against
+issuance WIND...HAIL tag</label>
  <a href="/nws/list_tags.php" target="_new"><i class="fa fa-link"></i> App listing per-WFO tags</a>
-<br /><input name="limitwarns" type="checkbox" value="Y" 
+<br /><input id="limitwarns" name="limitwarns" type="checkbox" value="Y" 
 EOF;
 	$tagselect .= (($limitwarns == 'Y')? " CHECKED": "");
-	$tagselect .= ">When possible, limit considered warnings to your hail/wind threshold";
+	$tagselect .= '> <label for="limitwarns">When possible, limit considered warnings to your hail/wind threshold</label>';
 
 $forecaster_form = "";
 $resetlink = "/cow/";
@@ -275,6 +281,11 @@ has been favorably compared against the legacy PHP based Cow statistics. Please
 feel free to use it and <a href="/info/contacts.php">report back</a> any issues
 you find.</p>
 
+<p><strong>25 May 2022</strong>: The website Cow interface was updated to use
+this API service to drive the statistics displayed (dogfooding).  As doing such,
+some shortcomings of the API were realized.  So the JSON schema returned by the
+service was improved some, but should all still be backwards compat.</p>
+
 <p>The JSON emitting service endpoint is:
 <br /><code>https://mesonet.agron.iastate.edu/api/1/cow.json</code></p>
 
@@ -340,7 +351,10 @@ specify more than one phenomena, i.e. <code>phenomena=TO&amp;phenomena=SV</code>
 <td>So like in the case of phenomena above, here you are specifying which
 category of Local Storm Reports to consider.  This gets to be a bit difficult
 to fully explain. In general, the codes reflect with Local Storm Report types
-should be used that can potentially verify the warning. i.e. <code>lsrtype=TO&amp;lsrtype=SV</code>
+should be used that can potentially verify the warning. i.e. <code>lsrtype=TO&amp;lsrtype=SV</code>.
+The two letter identifiers are aliases to explicit LSR types.  You can specify
+the explicit types of <code>T</code>: Tornado, <code>G</code>: TStorm Wind Gust,
+<code>D</code>: TStorm Wind Damanage, <code>H</code>: Hail.
 </td></tr>
 
 <tr>
@@ -434,4 +448,3 @@ $(document).ready(function(){
 EOF;
 $t->content = $content;
 $t->render('full.phtml');
-?>
