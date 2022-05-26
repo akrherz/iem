@@ -91,10 +91,7 @@ def plotter(fdict):
             and c30 > 0 ORDER by valid ASC
         ), present as (
             SELECT valid, t4_c_avg_qc * 9./5. + 32. as tsoil,
-            'C' as dtype,
-            vwc_12_avg_qc as vwc12,
-            vwc_24_avg_qc as vwc24,
-            vwc_50_avg_qc as vwc50
+            'C' as dtype, vwc12, vwc24, vwc50
             from sm_daily
             where station = %s and t4_c_avg_qc is not null ORDER by valid ASC
         )
