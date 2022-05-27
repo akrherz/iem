@@ -51,19 +51,20 @@ def run(valid, routes):
     cmap = mpcolors.ListedColormap(rampdf[["r", "g", "b"]].to_numpy() / 256)
     cmap.set_under("white")
     for minute in range(0, HOURS[valid.hour] * 60 + 1, 15):
-        if minute > (18 * 60) and minute % 60 != 0:
+        is_minute = minute <= (18 * 60)  # grib sucks
+        if not is_minute and minute % 60 != 0:
             continue
         now = valid + datetime.timedelta(minutes=minute)
         now = now.astimezone(pytz.timezone("America/Chicago"))
         grbs.seek(0)
+
         try:
             gs = grbs.select(
-                level=1000,
-                forecastTime=(
-                    minute if minute <= (18 * 60) else int(minute / 60)
-                ),
+                indicatorOfUnitOfTimeRange=0 if is_minute else 1,  # Grib 4.4
+                forecastTime=minute if is_minute else int(minute / 60),
             )
         except ValueError:
+            LOG.info("select failure: %s %s", valid, minute)
             continue
         if lats is None:
             lats, lons = gs[0].latlons()
@@ -71,18 +72,13 @@ def run(valid, routes):
             lats = lats[x1:x2, y1:y2]
             lons = lons[x1:x2, y1:y2]
 
-        # HACK..............
-        if len(gs) > 1 and minute > (18 * 60):
-            reflect = gs[-1]["values"][x1:x2, y1:y2]
-        else:
-            reflect = gs[0]["values"][x1:x2, y1:y2]
+        reflect = gs[0]["values"][x1:x2, y1:y2]
         reflect = np.where(reflect < -9, -100, reflect)
         mp = MapPlot(
             sector="midwest",
             axisbg="tan",
-            title=("%s UTC NCEP HRRR 1 km AGL Reflectivity")
-            % (valid.strftime("%-d %b %Y %H"),),
-            subtitle=("valid: %s") % (now.strftime("%-d %b %Y %I:%M %p %Z"),),
+            title=f"{valid:%-d %b %Y %H} UTC NCEP HRRR 1 km AGL Reflectivity",
+            subtitle=f"valid: {now:%-d %b %Y %I:%M %p %Z}",
         )
         levels = [-32, -30]
         levels.extend(range(-10, 96, 5))
@@ -97,10 +93,10 @@ def run(valid, routes):
             clip_on=False,
             clevstride=5,
         )
-        pngfn = "/tmp/hrrr_ref_%s_%03i.png" % (valid.strftime("%Y%m%d%H"), i)
+        pngfn = f"/tmp/hrrr_ref_{valid:%Y%m%d%H}_{i:03.0f}.png"
         mp.postprocess(filename=pngfn)
         mp.close()
-        subprocess.call("convert %s %s.gif" % (pngfn, pngfn[:-4]), shell=True)
+        subprocess.call(["convert", pngfn, f"{pngfn[:-4]}.gif"])
 
         i += 1
 
@@ -108,21 +104,20 @@ def run(valid, routes):
     subprocess.call(
         (
             "gifsicle --loopcount=0 --delay=50 "
-            "/tmp/hrrr_ref_%s_???.gif > /tmp/hrrr_ref_%s.gif"
-        )
-        % (valid.strftime("%Y%m%d%H"), valid.strftime("%Y%m%d%H")),
+            f"/tmp/hrrr_ref_{valid:%Y%m%d%H}_???.gif > "
+            f"/tmp/hrrr_ref_{valid:%Y%m%d%H}.gif"
+        ),
         shell=True,
         stderr=subprocess.PIPE,
         stdout=subprocess.PIPE,
     )
 
     pqstr = (
-        "plot %s %s model/hrrr/hrrr_1km_ref.gif "
-        "model/hrrr/hrrr_1km_ref_%02i.gif gif"
-    ) % (routes, valid.strftime("%Y%m%d%H%M"), valid.hour)
+        f"plot {routes} {valid:%Y%m%d%H%M} model/hrrr/hrrr_1km_ref.gif "
+        f"model/hrrr/hrrr_1km_ref_{valid.hour:02.0f}.gif gif"
+    )
     subprocess.call(
-        ("pqinsert -p '%s' /tmp/hrrr_ref_%s.gif")
-        % (pqstr, valid.strftime("%Y%m%d%H")),
+        f"pqinsert -p '{pqstr}' /tmp/hrrr_ref_{valid:%Y%m%d%H}.gif",
         shell=True,
         stderr=subprocess.PIPE,
         stdout=subprocess.PIPE,
