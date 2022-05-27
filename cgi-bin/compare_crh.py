@@ -49,7 +49,7 @@ def application(_environ, start_response):
     SELECT ugc, wfo, phenomena, significance, eventid from warnings
     where expire > now()
     """,
-        get_dbconn("postgis", user="nobody"),
+        get_dbconn("postgis"),
         index_col=None,
     )
     for _idx, row in capdf.iterrows():

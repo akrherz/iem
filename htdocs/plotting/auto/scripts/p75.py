@@ -9,16 +9,14 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-PDICT2 = dict(
-    [
-        ("winter", "Winter (Dec, Jan, Feb)"),
-        ("fma", "FMA (Feb, Mar, Apr)"),
-        ("spring", "Spring (Mar, Apr, May)"),
-        ("summer", "Summer (Jun, Jul, Aug)"),
-        ("fall", "Fall (Sep, Oct, Nov)"),
-        ("all", "Entire Year"),
-    ]
-)
+PDICT2 = {
+    "winter": "Winter (Dec, Jan, Feb)",
+    "fma": "FMA (Feb, Mar, Apr)",
+    "spring": "Spring (Mar, Apr, May)",
+    "summer": "Summer (Jun, Jul, Aug)",
+    "fall": "Fall (Sep, Oct, Nov)",
+    "all": "Entire Year",
+}
 
 
 def get_description():
@@ -62,10 +60,8 @@ def plotter(fdict):
     _ = PDICT2[season]
     startyear = ctx["year"]
 
-    table = "alldata_%s" % (station[:2],)
-
     ccursor.execute(
-        f"""
+        """
       SELECT extract(year from day + '%s month'::interval) as yr,
       sum(case when month in (12, 1, 2)
       then precip else 0 end) as winter,
@@ -78,7 +74,7 @@ def plotter(fdict):
       sum(case when month in (9, 10, 11)
       then precip else 0 end) as fall,
       sum(precip) as all
-      from {table} WHERE station = %s GROUP by yr ORDER by yr ASC
+      from alldata WHERE station = %s GROUP by yr ORDER by yr ASC
     """,
         (1 if season != "all" else 0, station),
     )
@@ -98,12 +94,9 @@ def plotter(fdict):
 
     data = np.array(df["data"])
     years = np.array(df["year"])
-    title = ("[%s] %s %.0f-%.0f Precipitation [%s] ") % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-        min(years),
-        max(years),
-        PDICT2[season],
+    title = (
+        f"{ctx['_sname']} {min(years):.0f}-{max(years):.0f} :: "
+        f"Precipitation [{PDICT2[season]}] "
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     avgv = np.average(data)
@@ -128,8 +121,8 @@ def plotter(fdict):
     ax.text(
         0.01,
         0.99,
-        "Avg: %.2f, slope: %.2f inch/century, R$^2$=%.2f"
-        % (avgv, h_slope * 100.0, r_value**2),
+        f"Avg: {avgv:.2f}, slope: {(h_slope * 100.):.2f} inch/century, "
+        f"R$^2$={(r_value**2):.2f}",
         transform=ax.transAxes,
         va="top",
         bbox=dict(color="white"),

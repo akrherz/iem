@@ -12,7 +12,7 @@ warnings.filterwarnings("ignore")
 
 def main():
     """GO"""
-    pgconn = get_dbconn("iem", user="nobody")
+    pgconn = get_dbconn("iem")
     cursor = pgconn.cursor()
 
     # Compute normal from the climate database

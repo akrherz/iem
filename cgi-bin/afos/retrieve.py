@@ -124,7 +124,7 @@ def application(environ, start_response):
         return [sio.getvalue().encode("ascii", "ignore")]
 
     try:
-        mydb = get_dbconn("afos", user="nobody")
+        mydb = get_dbconn("afos")
     except Exception:  # noqa
         return [b"Error Connecting to Database, please try again!"]
 

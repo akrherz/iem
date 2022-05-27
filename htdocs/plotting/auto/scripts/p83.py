@@ -76,11 +76,9 @@ def plotter(fdict):
         (dt + datetime.timedelta(days=days)).strftime("%-d %b"),
     )
 
-    table = "alldata_%s" % (station[:2],)
-
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
         with data as (
             SELECT day, year,
             count(*) OVER
@@ -107,7 +105,7 @@ def plotter(fdict):
             sum(precip) OVER
                 (ORDER by day ASC ROWS BETWEEN 1 FOLLOWING AND %s FOLLOWING)
                 as pa
-            from {table} WHERE station = %s)
+            from alldata WHERE station = %s)
 
         SELECT year, hb as high_before, lb as low_before, pb as precip_before,
         ha as high_after, la as low_after, pa as precip_after from
@@ -154,12 +152,9 @@ def plotter(fdict):
             va="bottom",
             color="r",
         )
-    msg = ("[%s] %s %s over %s days prior to and after %s") % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-        PDICT.get(varname),
-        days,
-        dt.strftime("%-d %B"),
+    msg = (
+        f"{ctx['_sname']} :: {PDICT.get(varname)} over {days} days "
+        f"prior to and after {dt:%-d %B}"
     )
     tokens = msg.split()
     sz = int(len(tokens) / 2)

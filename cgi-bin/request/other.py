@@ -30,7 +30,7 @@ def fetcher(station, sts, ets):
         "c1tmpf",
     ]
 
-    pgconn = get_dbconn("other", user="nobody")
+    pgconn = get_dbconn("other")
     ocursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ocursor.execute(
         """

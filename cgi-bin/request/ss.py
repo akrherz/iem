@@ -35,7 +35,7 @@ def gage_run(sts, ets, stations, excel, start_response):
     if len(stations) == 1:
         stations.append(0)
 
-    dbconn = get_dbconn("other", user="nobody")
+    dbconn = get_dbconn("other")
     sql = """select date(valid) as date, to_char(valid, 'HH24:MI:SS') as time,
     site_serial, ch1_data_p, ch2_data_p,
     ch1_data_t, ch2_data_t, ch1_data_c
@@ -72,7 +72,7 @@ def gage_run(sts, ets, stations, excel, start_response):
 
 def bubbler_run(sts, ets, excel, start_response):
     """run()"""
-    dbconn = get_dbconn("other", user="nobody")
+    dbconn = get_dbconn("other")
     sql = """
     WITH one as (SELECT valid, value from ss_bubbler WHERE
     valid between '%s' and '%s' and field = 'Batt Voltage'),

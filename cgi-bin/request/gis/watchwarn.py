@@ -263,7 +263,7 @@ def application(environ, start_response):
         return [str(exp).encode("ascii")]
 
     accept = form.get("accept", "shapefile")
-    pgconn = get_dbconn("postgis", user="nobody")
+    pgconn = get_dbconn("postgis")
     if accept == "excel":
         headers = [
             ("Content-type", EXL),

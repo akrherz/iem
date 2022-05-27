@@ -133,7 +133,18 @@ if (isset($limitwarns) && $limitwarns == 'Y'){
     $wsuri .= "&limitwarns=Y";
 }
 
-$jobj = json_decode(file_get_contents($wsuri), True);
+$res = file_get_contents($wsuri);
+if ($res === FALSE) {
+    echo <<< EOM
+<h3>IEM Cow API Error</h3>
+
+<p>Sorry, the backend service for your request had an unexpected failure.  Please
+consider contacting daryl, akrherz@iastate.edu and copy/paste the long URL that
+appears at the top of this webpage for his review and fix!</p>
+EOM;
+    die();
+}
+$jobj = json_decode($res, True);
 $stats = $jobj['stats'];
 
 $charturl = sprintf(

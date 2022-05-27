@@ -45,7 +45,7 @@ def get_context(environ):
 
 def run(ctx, start_response):
     """Go run!"""
-    pgconn = get_dbconn("postgis", user="nobody")
+    pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
 
     spatialsql = ""

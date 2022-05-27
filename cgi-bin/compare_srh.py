@@ -26,7 +26,7 @@ def application(_environ, start_response):
     where expire > now()
     GROUP by wfo, phenomena, significance, eventid
     """,
-        get_dbconn("postgis", user="nobody"),
+        get_dbconn("postgis"),
         index_col=["wfo", "phenomena", "significance", "eventid"],
     )
     for idx, g_srhdf in srhdf.groupby(["wfo", "phenom", "sig", "event"]):

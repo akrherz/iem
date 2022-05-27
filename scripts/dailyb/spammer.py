@@ -146,7 +146,7 @@ def cowreport():
 
 def feature():
     """Print the feature for yesterday"""
-    mesosite = get_dbconn("mesosite", user="nobody")
+    mesosite = get_dbconn("mesosite")
     mcursor = mesosite.cursor(cursor_factory=psycopg2.extras.DictCursor)
     lastts = datetime.datetime.now() + datetime.timedelta(days=-1)
     # Query
