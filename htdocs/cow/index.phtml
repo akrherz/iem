@@ -425,8 +425,72 @@ example, <code>fcster=forecaster10</code></td></tr>
 {"generated_at": "ISO9660",
  "params": {dictionary of how API was called},
  "stats": {dictionary of generated statistics},
+   "area_verify%": float # percent of polygon area verified
+   "avg_leadtime[min]": int # Average leadtime in minutes
+   "avg_size[sq km]": float # Average polygon size in square kilometers
+   "CSI[1]": float # Critical Success Index 0-1
+   "events_verified": int # Number of warning events verified
+   "events_total": int # Number of warning events considered for report
+   "FAR[1]": float # False Alarm Rate 0-1
+   "max_leadtime[min]": int # Longest leadtime in minutes
+   "min_leadtime[min]": int # Shortest leadtime in minutes
+   "POD[1]": float # Probability of Detection 0-1
+   "reports_total: int # Number of LSRs considered for report
+   "shared_border%": float # percent of polygon border coincident with political bounds
+   "size_poly_vs_county[%s]" : float # percent of polygon size compared to county size
+   "tdq_stormreports": int # number of non-verifying storm reports in a TOR but outside SVR
+   "unwarned_reports": int # number of LSRs without a warning
+
  "events": GeoJSON-style object of warnings,
+   "features": []
+     "id": str # unique id for this warning
+     "properties":
+       "ar_ugc": [] # list of ugc codes for this warning
+       "ar_ugcname": [] # list of ugc names for this warning
+       "areaverify": float # percent of polygon area verified
+       "carea": float # area of associated counties/parishes in square kilometers
+       "eventid": int # VTEC Event Identifier
+       "expire": "ISO8601" # expiration time of warning
+       "fcster": str # Forecaster/Product Signature of the warning
+       "hailtag": float # IBW Hail Size (inch) at issuance
+       "issue": "ISO8601" # issue time of warning
+       "lat0": float # latitude of polygon centroid
+       "lead0": int # leadtime in minutes of the first verifying LSR
+       "lon0": float # longitude of polygon centroid
+       "parea": float # sq km area of polygon computed in EPSG:2163
+       "perimeter": float # perimeter of polygon computed in EPSG:2163
+       "phenomena": str # VTEC Phenomena Two-Letter Code
+       "sharedborder": float # perimeter of polygon shared with political border
+       "significance": str # VTEC Significance One-Letter Code
+       "status": str # VTEC Status of last event product update
+       "statuses": str # typo of status, but kept for backwards compatibility
+       "stormreports": str # comma seperated list of storm report IDs that verified warning
+       "stormreports_all": str # comma seperated list of all storm reports within space/time bounds
+       "verify": bool # true if warning verified
+       "wfo": str # WFO that issued warning
+       "windtag": float # IBW Wind Speed (mph) at issuance
+       "year": int # year of warning
  "stormreports": GeoJSON-style object on LSRS
+   "features": []
+     "id": int # Sequential LSR identifier used for cross-references
+     "properties":
+       "city": str # City name of LSR
+       "county": str # County name of LSR
+       "lat0": float # latitude of LSR
+       "leadtime": int # leadtime in minutes to first verifying warning
+       "lon0": float # longitude of LSR
+       "lsrtype": str # LSR type (SV, TO, FF, MA)
+       "magnitude": float # LSR magnitude
+       "remark": str # LSR remark
+       "source": str # LSR source
+       "state": str # State identifier of LSR
+       "tdq": bool # Was this LSR covered only by a TOR warning, but not of a
+                   # TOR LSR type?  Such events are not counted against verif.
+       "type": str # IEM internal LSR type code (1 char)
+       "typetext": str # LSR type found in NWS Product Text
+       "valid": "ISO8601" # LSR valid time
+       "warned": bool # Was this LSR warned for?
+       "wfo": str # WFO that issued warning
 }
 </pre>
 
