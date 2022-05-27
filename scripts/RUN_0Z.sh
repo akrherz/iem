@@ -8,6 +8,9 @@ fi
 cd util
 python make_archive_baseline.py
 
+cd ../climodat
+python sync_coop_updates.py
+
 # Wait a bit, so that more obs can come in
 sleep 300
 

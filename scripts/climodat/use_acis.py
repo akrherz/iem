@@ -65,7 +65,7 @@ def do(meta, station, acis_station, interactive):
     }
     if not interactive:
         payload["sdate"] = (today - datetime.timedelta(days=365)).strftime(fmt)
-    LOG.debug(
+    LOG.info(
         "Call ACIS for: %s[%s %s] to update: %s",
         acis_station,
         payload["sdate"],
@@ -74,10 +74,10 @@ def do(meta, station, acis_station, interactive):
     )
     req = exponential_backoff(requests.post, SERVICE, json=payload, timeout=30)
     if req is None:
-        LOG.info("Total download failure for %s", acis_station)
+        LOG.warning("Total download failure for %s", acis_station)
         return 0
     if req.status_code != 200:
-        LOG.info("Got status_code %s for %s", req.status_code, acis_station)
+        LOG.warning("Got status_code %s for %s", req.status_code, acis_station)
         # Give server some time to recover from transient errors
         time.sleep(60)
         return 0
@@ -98,7 +98,7 @@ def do(meta, station, acis_station, interactive):
             acis[col].tolist(),
             index=acis.index,
         )
-    LOG.debug("Loaded %s rows from ACIS", len(acis.index))
+    LOG.info("Loaded %s rows from ACIS", len(acis.index))
     acis["day"] = pd.to_datetime(acis["day"])
     acis = acis.set_index("day")
     pgconn = get_dbconn("coop")
@@ -109,7 +109,7 @@ def do(meta, station, acis_station, interactive):
         params=(station,),
         index_col="day",
     )
-    LOG.debug("Loaded %s rows from IEM", len(obs.index))
+    LOG.info("Loaded %s rows from IEM", len(obs.index))
     obs["dbhas"] = 1
     cursor = pgconn.cursor()
     # join the tables
@@ -155,7 +155,7 @@ def do(meta, station, acis_station, interactive):
         updates += 1
 
     if minday is not None:
-        LOG.info(
+        LOG.warning(
             "%s[%s %s] Updates: %s Inserts: %s",
             station,
             minday.date(),

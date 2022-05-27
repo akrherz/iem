@@ -7,7 +7,7 @@ run from RUN_NOON.sh
 """
 # pylint: disable=cell-var-from-loop
 
-from pyiem.util import get_dbconn, get_dbconnstr, logger
+from pyiem.util import get_dbconn, get_sqlalchemy_conn, logger
 import pandas as pd
 from psycopg2.extras import DictCursor
 
@@ -16,15 +16,16 @@ LOG = logger()
 
 def load_changes():
     """Find what has changed."""
-    df = pd.read_sql(
-        "SELECT distinct id, c.iemid, network, tzname, "
-        "date(valid at time zone t.tzname) from current_log c JOIN "
-        "stations t on (c.iemid = t.iemid) WHERE t.network ~* 'COOP' and "
-        "updated > now() - '25 hours'::interval",
-        get_dbconnstr("iem"),
-        index_col=None,
-    )
-    LOG.debug("Found %s database changes", len(df.index))
+    with get_sqlalchemy_conn("iem") as conn:
+        df = pd.read_sql(
+            "SELECT distinct id, c.iemid, network, tzname, "
+            "date(valid at time zone t.tzname) from current_log c JOIN "
+            "stations t on (c.iemid = t.iemid) WHERE t.network ~* 'COOP' and "
+            "updated > now() - '25 hours'::interval",
+            conn,
+            index_col=None,
+        )
+    LOG.info("Found %s database changes", len(df.index))
     return df
 
 
@@ -69,7 +70,7 @@ def compare_and_update(ccursor, currentob, newob):
             )
     if not updates:
         return 0
-    LOG.debug(
+    LOG.info(
         "%s %s %s", currentob["station"], currentob["day"], ", ".join(messages)
     )
     ccursor.execute(
@@ -138,12 +139,12 @@ def main():
                 continue
             updates += updated
             if updates > 0 and updates % 100 == 0:
-                LOG.debug("database commit after %s updates", updates)
+                LOG.info("database commit after %s updates", updates)
                 ccursor.close()
                 coopdb.commit()
                 ccursor = coopdb.cursor(cursor_factory=DictCursor)
 
-    LOG.info("synced %s rows, %s unused, %s dups", updates, unused, dups)
+    LOG.warning("synced %s rows, %s unused, %s dups", updates, unused, dups)
     ccursor.close()
     coopdb.commit()
 
