@@ -146,7 +146,6 @@ def do(meta, station, acis_station, interactive):
                 "VALUES (%s, %s, %s, %s, %s)",
                 (station, day, day.strftime("%m%d"), day.year, day.month),
             )
-        # LOG.debug("%s -> %s %s", day, work, args)
         cursor.execute(
             f"UPDATE {table} SET {','.join(work)} WHERE station = %s and "
             "day = %s",

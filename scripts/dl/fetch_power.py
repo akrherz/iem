@@ -109,14 +109,13 @@ def main(argv):
                     jslice, islice
                 ] = data
                 current[date]["dirty"] = True
-    for date in current:
-        if not current[date]["dirty"]:
+    for date, item in current.items():
+        if not item["dirty"]:
             continue
-        LOG.debug("saving %s", date)
-        iemre.set_grids(date, current[date]["data"])
+        LOG.info("saving %s", date)
+        iemre.set_grids(date, item["data"])
         subprocess.call(
-            "python ../iemre/db_to_netcdf.py %s"
-            % (date.strftime("%Y %m %d"),),
+            f"python ../iemre/db_to_netcdf.py {date:%Y %m %d}",
             shell=True,
         )
 

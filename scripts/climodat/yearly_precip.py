@@ -16,8 +16,8 @@ def runYear(year):
         ".png"
     )
     pqstr = f"plot m 000000000000 bogus {year}/summary/total_precip.png png"
-    LOG.debug(url)
-    LOG.debug(pqstr)
+    LOG.info(url)
+    LOG.info(pqstr)
     res = web2ldm(url, pqstr)
     if not res:
         LOG.info("failed for year: %s", year)

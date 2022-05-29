@@ -33,7 +33,7 @@ def main():
         fh.write(req.content)
     dstamp = utcnow.strftime("%Y%m%d%H%M")
     pqstr = f"plot a {dstamp} bogus wwa/wwa_{dstamp}.png png"
-    LOG.debug(pqstr)
+    LOG.info(pqstr)
     subprocess.call(f"pqinsert -i -p '{pqstr}' {tmpfd.name}", shell=True)
     os.unlink(tmpfd.name)
 

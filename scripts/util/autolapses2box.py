@@ -26,15 +26,15 @@ def main():
             continue
         localfns.append(tarfilename)
     if not localfns:
-        LOG.info("Found no files within the past day?")
+        LOG.warning("Found no files within the past day?")
         return
 
     remotepath = valid.strftime("/stage/iemwebcams/auto/%Y/%m/%d")
     cmd = (
-        'rsync -a --rsync-path "mkdir -p %s && rsync" %s '
-        "mesonet@metl60.agron.iastate.edu:%s"
-    ) % (remotepath, " ".join(localfns), remotepath)
-    LOG.debug(cmd)
+        f'rsync -a --rsync-path "mkdir -p {remotepath} && rsync" '
+        f"{' '.join(localfns)} mesonet@metl60.agron.iastate.edu:{remotepath}"
+    )
+    LOG.info(cmd)
     subprocess.call(cmd, shell=True)
 
 

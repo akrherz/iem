@@ -56,7 +56,7 @@ def main(argv):
                 f"{now:%Y%m}/{now:%Y%m%d}/"
                 f"{WMO_XREF[key]}_KWBR_{now:%Y%m%d%H%M}"
             )
-            LOG.debug("Downloading %s", url)
+            LOG.info("Downloading %s", url)
             req = requests.get(url, timeout=60)
             if req.status_code != 200:
                 LOG.info("Failed to get %s got %s", url, req.status_code)

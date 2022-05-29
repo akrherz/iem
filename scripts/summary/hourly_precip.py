@@ -27,7 +27,7 @@ def archive(ts):
 
     Currently, we only support the METAR database :(
     """
-    asos = get_dbconn("asos", user="nobody")
+    asos = get_dbconn("asos")
     acursor = asos.cursor()
     iem = get_dbconn("iem")
     icursor = iem.cursor()

@@ -301,7 +301,7 @@ def main(valid):
         finally:
             cursor.close()
             dbconn.commit()
-    LOG.debug("%s entered %s levels of data", valid, obs["added"].sum())
+    LOG.info("%s entered %s levels of data", valid, obs["added"].sum())
     df2 = obs[obs["count"] == 0]
     if len(df2.index) > 40:
         LOG.info("%s high missing count of %s", valid, len(df2.index))

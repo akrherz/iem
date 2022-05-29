@@ -3,7 +3,7 @@
 We need to check the IEM Access database for any COOP sites with updated
 data and then update the climodat database appropriately, ufff.
 
-run from RUN_NOON.sh
+run from RUN_NOON.sh and RUN_0Z.sh
 """
 # pylint: disable=cell-var-from-loop
 

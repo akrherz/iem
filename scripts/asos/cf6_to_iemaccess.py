@@ -80,7 +80,6 @@ def main(argv):
         for ocol, ccol in zip(obscols, cf6cols):
             if not comp(row[ocol], row[ccol]):
                 continue
-            # LOG.debug("%s %s %s->%s", station, ocol, row[ocol], row[ccol])
             updated_vals += 1
             work.append(f"{ocol} = %s")
             params.append(row[ccol])

@@ -27,7 +27,7 @@ def do_agg(dkey, fname, ts, data):
         "%Y%m%d%H.daily.grib2"
     )
     if not os.path.isfile(fn):
-        LOG.debug("missing %s", fn)
+        LOG.info("missing %s", fn)
         return
     # Precip
     gribs = pygrib.open(fn)
@@ -42,7 +42,7 @@ def do_agg(dkey, fname, ts, data):
         d = data["fx"].setdefault(
             key, dict(precip=None, high=None, low=None, srad=None)
         )
-        LOG.debug("Writting %s %s from ftime: %s", dkey, key, ftime)
+        LOG.info("Writting %s %s from ftime: %s", dkey, key, ftime)
         if d[dkey] is None:
             d[dkey] = grib.values * 6 * 3600.0
         else:
@@ -68,7 +68,7 @@ def do_temp(dkey, fname, func, ts, data):
         if key not in data["fx"]:
             continue
         d = data["fx"][key]
-        LOG.debug("Writting %s %s from ftime: %s", dkey, key, ftime)
+        LOG.info("Writting %s %s from ftime: %s", dkey, key, ftime)
         if d[dkey] is None:
             d[dkey] = grib.values
         else:
@@ -105,10 +105,8 @@ def dbsave(ts, data):
     cursor = pgconn.cursor()
     # Check to see if we already have data for this date
     cursor.execute(
-        """
-        SELECT id from forecast_inventory
-        WHERE model = 'CFS' and modelts = %s
-    """,
+        "SELECT id from forecast_inventory "
+        "WHERE model = 'CFS' and modelts = %s",
         (ts,),
     )
     if cursor.rowcount > 0:

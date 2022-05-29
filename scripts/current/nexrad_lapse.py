@@ -29,7 +29,7 @@ def run(sts, ets):
     while now <= ets:
         fn = now.strftime("frame_%Y%m%d%H%M.png")
         if not os.path.isfile(fn):
-            LOG.debug("Creating %s", fn)
+            LOG.info("Creating %s", fn)
             mp = MapPlot(
                 twitter=True,
                 title="NWS NEXRAD Mosaic",
@@ -50,7 +50,7 @@ def run(sts, ets):
     font = ImageFont.truetype(font_path, size=16)
     while now <= ets:
         framefn = now.strftime("frame_%Y%m%d%H%M.png")
-        LOG.debug("Processing %s", framefn)
+        LOG.info("Processing %s", framefn)
         im = Image.open(framefn)
         draw = ImageDraw.Draw(im)
         draw.rectangle(
@@ -71,7 +71,7 @@ def run(sts, ets):
         now += interval
 
     # Make the GIF
-    LOG.debug("Creating aPNG %s.png", tmpname)
+    LOG.info("Creating aPNG %s.png", tmpname)
     durations = [100] * len(images)
     durations[-1] = 2000
     images[0].save(
@@ -98,7 +98,7 @@ def main():
     ets = utc()
     ets -= datetime.timedelta(minutes=ets.minute % 5)
     sts = ets - datetime.timedelta(hours=2)
-    LOG.debug("running for %s to %s", sts, ets)
+    LOG.info("running for %s to %s", sts, ets)
     setupdir()
     run(sts, ets)
 

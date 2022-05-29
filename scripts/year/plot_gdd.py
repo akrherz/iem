@@ -22,11 +22,11 @@ def main(argv):
     )
     name = "gdd" if gddbase == 50 else f"gdd{gddbase}"
     pqstr = f"plot c 000000000000 summary/{name}_jan1.png bogus png"
-    LOG.debug(url)
-    LOG.debug(pqstr)
+    LOG.info(url)
+    LOG.info(pqstr)
     res = web2ldm(url, pqstr)
     if not res:
-        LOG.info("failed for gddbase: %s", gddbase)
+        LOG.warning("failed for gddbase: %s", gddbase)
 
 
 if __name__ == "__main__":

@@ -24,7 +24,7 @@ PROPNAME = "prism.archive_end"
 def do_process(valid, fn):
     """Process this file, please"""
     # shape of data is (1, 621, 1405)
-    LOG.debug("Processing %s", fn)
+    LOG.info("Processing %s", fn)
     data = rasterio.open(fn).read()
     varname = fn.split("_")[1]
     idx = daily_offset(valid)
@@ -81,7 +81,7 @@ def update_properties(valid):
     with get_dbconn("mesosite") as dbconn:
         cursor = dbconn.cursor()
         args = (valid.strftime("%Y-%m-%d"), PROPNAME)
-        LOG.debug("setting %s", args)
+        LOG.info("setting %s", args)
         cursor.execute(
             "UPDATE properties SET propvalue = %s where propname = %s",
             args,

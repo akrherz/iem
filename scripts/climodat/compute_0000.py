@@ -37,7 +37,7 @@ def zero(val):
 def update_database(stid, valid, row):
     """Update the database with these newly computed values!"""
     if row["precip"] is None:
-        LOG.debug("Skipping %s as has missing data %s", stid, row)
+        LOG.info("Skipping %s as has missing data %s", stid, row)
         return
     table = f"alldata_{stid[:2]}"
 

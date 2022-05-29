@@ -319,7 +319,7 @@ def main(argv):
         cursor = pgconn.cursor()
         df, threaded = load_table(state, date)
         if df is None:
-            LOG.debug("skipping state %s as load_table empty", state)
+            LOG.info("skipping state %s as load_table empty", state)
             continue
         df = merge_network_obs(df, f"{state}_COOP", date)
         df = merge_network_obs(df, f"{state}_ASOS", date)

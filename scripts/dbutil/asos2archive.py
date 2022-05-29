@@ -29,7 +29,7 @@ def get_first_updated():
         (PROPERTY_NAME,),
     )
     if cursor.rowcount == 0:
-        LOG.info("iem property %s is not set, abort!", PROPERTY_NAME)
+        LOG.warning("iem property %s is not set, abort!", PROPERTY_NAME)
         sys.exit()
 
     dt = datetime.datetime.strptime(cursor.fetchone()[0], ISO9660)
@@ -160,12 +160,11 @@ def do_insert(source_cursor, madis):
         cursor.execute(sql, args)
         inserts += 1
         if inserts % 1000 == 0:
-            LOG.debug("cycling cursor at %s inserts", inserts)
             cursor.close()
             pgconn.commit()
             cursor = pgconn.cursor()
 
-    LOG.debug("insert %s, skip %s delete %s rows", inserts, skips, deletes)
+    LOG.info("insert %s, skip %s delete %s rows", inserts, skips, deletes)
     cursor.close()
     pgconn.commit()
 
@@ -177,7 +176,7 @@ def main():
     iempgconn = get_dbconn("iem")
     icursor = iempgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    LOG.debug(
+    LOG.info(
         "Processing %s thru %s",
         first_updated.strftime(ISO9660),
         last_updated.strftime(ISO9660),
@@ -203,7 +202,7 @@ def main():
             """,
             (first_updated, last_updated),
         )
-        LOG.debug("processing %s rows for madis: %s", icursor.rowcount, madis)
+        LOG.info("processing %s rows for madis: %s", icursor.rowcount, madis)
         if icursor.rowcount > 0:
             do_insert(icursor, madis)
 

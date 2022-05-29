@@ -19,10 +19,10 @@ def main():
     """Go Main Go."""
     for url in URLS:
         full = f"{BASEURL}{url}::_cb:1.png"
-        LOG.debug("Fetching %s", full)
+        LOG.info("Fetching %s", full)
         req = requests.get(full, timeout=120)
         if req.status_code != 200:
-            LOG.info("got status_code %s for %s", req.status_code, full)
+            LOG.warning("got status_code %s for %s", req.status_code, full)
 
 
 if __name__ == "__main__":

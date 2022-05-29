@@ -8,7 +8,7 @@ from pyiem.util import get_dbconn
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconn("mesosite", user="nobody")
+    pgconn = get_dbconn("mesosite")
     mcursor = pgconn.cursor()
 
     mcursor.execute(

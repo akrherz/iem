@@ -117,7 +117,7 @@ def main(argv):
     for ts in times:
         if not need_to_run(ts):
             continue
-        LOG.debug("running for %s", ts)
+        LOG.info("running for %s", ts)
         fetch(ts)
 
 

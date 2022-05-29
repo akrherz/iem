@@ -67,7 +67,7 @@ def run(prod, sts):
             continue
         n0r = gdal.Open(fn, 0)
         n0rd = n0r.ReadAsArray()
-        LOG.debug(
+        LOG.info(
             "%s %s %s %s", now, n0rd.dtype, np.shape(n0rd), n0r.RasterCount
         )
         if maxn0r is None:

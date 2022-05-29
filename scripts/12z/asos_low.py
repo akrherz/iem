@@ -36,7 +36,7 @@ def main():
         index_col="id",
     )
     df = df[df["low"].notnull()]
-    LOG.debug("found %s observations for %s", len(df.index), now)
+    LOG.info("found %s observations for %s", len(df.index), now)
 
     for sector in [
         "iowa",
@@ -84,7 +84,7 @@ def main():
             f"summary/{sector.lower()}_asos_12z_low.png "
             f"{sector.lower()}_asos_12z_low.png png"
         )
-        LOG.debug(pqstr)
+        LOG.info(pqstr)
         mp.postprocess(pqstr=pqstr)
         mp.close()
 

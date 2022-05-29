@@ -25,7 +25,7 @@ def main():
         "'MISMA1', 'MISAM1'))"
     )
     if acursor.rowcount == 0:
-        LOG.info("Found no products to delete between 7-31 days")
+        LOG.warning("Found no products to delete between 7-31 days")
     acursor.close()
     pgconn.commit()
 

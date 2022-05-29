@@ -17,7 +17,7 @@ warnings.simplefilter("ignore", category=DeprecationWarning)
 def consume(scursor, fn, ts, grid_ids):
     """Actually process the filename at given timestamp"""
     table = "data_%s" % (ts.strftime("%Y_%m"),)
-    LOG.debug("Processing %s for table %s", fn, table)
+    LOG.info("Processing %s for table %s", fn, table)
     nc = ncopen(fn)
     gpids = nc.variables["Grid_Point_ID"][:]
     sms = nc.variables["Soil_Moisture"][:].tolist()
@@ -87,7 +87,7 @@ def lookforfiles():
     for fn in files:
         ts = fn2datetime(fn)
         if ts is None:
-            LOG.info("ingest_smos: fn2datetime fail: %s", fn)
+            LOG.warning("ingest_smos: fn2datetime fail: %s", fn)
             continue
         scursor.execute("SELECT * from obtimes where valid = %s", (ts,))
         row = scursor.fetchone()

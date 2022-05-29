@@ -29,10 +29,10 @@ def dl(now, varname, scenario):
         f"cfs/cfs.{now:%Y%m%d/%H}/time_grib_{s2}/{varname}.{s2}"
         f".{now:%Y%m%d%H}.daily.grb2"
     )
-    LOG.debug("fetching %s", uri)
+    LOG.info("fetching %s", uri)
     response = exponential_backoff(requests.get, uri, timeout=60)
     if response is None or response.status_code != 200:
-        LOG.info("dl %s failed", uri)
+        LOG.warning("dl %s failed", uri)
         return
     with tempfile.NamedTemporaryFile(delete=False) as tmpfd:
         tmpfd.write(response.content)

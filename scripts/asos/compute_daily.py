@@ -207,7 +207,6 @@ def do(ts):
                 gdf.iloc[0]["network"],
             )
         if updates % 100 == 0:
-            LOG.debug("committing cursor")
             icursor.close()
             iemaccess.commit()
             icursor = iemaccess.cursor()

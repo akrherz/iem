@@ -40,7 +40,7 @@ def workflow(now, realtime):
 
     gribfn = mrms.fetch("PrecipRate", now)
     if gribfn is None:
-        lf = LOG.info if realtime else LOG.debug
+        lf = LOG.warning if realtime else LOG.info
         lf("Missing PrecipRate: %s", now.strftime("%Y-%m-%dT%H:%MZ"))
         return
 
@@ -129,13 +129,7 @@ def main(argv):
     """Go Main Go"""
     utcnow = utc()
     if len(argv) == 6:
-        utcnow = utc(
-            int(argv[1]),
-            int(argv[2]),
-            int(argv[3]),
-            int(argv[4]),
-            int(argv[5]),
-        )
+        utcnow = utc(*[int(x) for x in argv[1:6]])
         workflow(utcnow, False)
     else:
         # If our time is an odd time, run 5 minutes ago

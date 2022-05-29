@@ -14,9 +14,9 @@ LOG = logger()
 def main():
     """Go Main Go"""
     nt = NetworkTable("IA_COOP")
-    iem_pgconn = get_dbconn("iem", user="nobody")
+    iem_pgconn = get_dbconn("iem")
     icursor = iem_pgconn.cursor()
-    coop_pgconn = get_dbconn("coop", user="nobody")
+    coop_pgconn = get_dbconn("coop")
     ccursor = coop_pgconn.cursor()
 
     o = open("IEMNWSMPR.txt", "w")
@@ -68,7 +68,7 @@ def main():
         if thisStation in nt.sts:
             climate_site = nt.sts[thisStation]["climate_site"]
             if climate_site not in mrain:
-                LOG.debug("climate_site has no data: %s", climate_site)
+                LOG.info("climate_site has no data: %s", climate_site)
                 continue
             d[thisStation] = {"prectot": thisPrec, "cnt": thisCount}
             d[thisStation]["name"] = nt.sts[thisStation]["name"]

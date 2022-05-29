@@ -91,7 +91,7 @@ def run(ts):
         try:
             rad_mj = float(total[j, i])
         except IndexError:
-            LOG.debug("station %s outside of bounds j:%s i:%s", row[0], j, i)
+            LOG.info("station %s outside of bounds j:%s i:%s", row[0], j, i)
             continue
 
         if rad_mj < 0:

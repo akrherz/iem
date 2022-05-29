@@ -10,7 +10,7 @@ import datetime
 try:
     from zoneinfo import ZoneInfo
 except ImportError:
-    from backports.zoneinfo import ZoneInfo
+    from backports.zoneinfo import ZoneInfo  # type: ignore
 
 from pyiem.util import logger, get_dbconn, get_dbconnstr
 from pyiem.network import Table as NetworkTable
@@ -26,7 +26,7 @@ def run(valid):
     """Do Work."""
     nt = NetworkTable("USCRN")
     iem_pgconn = get_dbconn("iem")
-    LOG.debug("Processing %s", valid.date())
+    LOG.info("Processing %s", valid.date())
     # Fetch enough data to cross all the dates
     df = read_sql(
         "SELECT station, valid at time zone 'UTC' as utc_valid, precip_mm "
@@ -55,7 +55,7 @@ def run(valid):
         if df2.empty:
             continue
         precip = (df2["precip_mm"].sum() * MM).to(INCH).m
-        LOG.debug("station: %s precip: %.2f", station, precip)
+        LOG.info("station: %s precip: %.2f", station, precip)
         icursor = iem_pgconn.cursor()
 
         def _do_update():
@@ -68,7 +68,7 @@ def run(valid):
             return icursor.rowcount
 
         if _do_update() == 0:
-            LOG.debug("Adding summary table entry for %s %s", iemid, valid)
+            LOG.info("Adding summary table entry for %s %s", iemid, valid)
             icursor.execute(
                 f"INSERT into summary_{valid.year}(iemid, day) "
                 "VALUES (%s, %s)",

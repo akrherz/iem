@@ -17,23 +17,18 @@ def run(date):
     os.chdir("/mesonet/tmp")
     tarfn = date.strftime("iem_%Y%m%d.tgz")
     # Step 1: Create a gzipped tar file
-    cmd = "tar -czf %s /mesonet/ARCHIVE/data/%s" % (
-        tarfn,
-        date.strftime("%Y/%m/%d"),
+    cmd = (
+        f"tar -czf {tarfn} "
+        f"/mesonet/ARCHIVE/data/{date:%Y}/{date:%m}/{date:%d}"
     )
-    LOG.debug(cmd)
+    LOG.info(cmd)
     subprocess.call(cmd, shell=True, stderr=subprocess.PIPE)
     cmd = date.strftime(
-        "ssh mesonet@metl60.agron.iastate.edu "
-        "mkdir -p /stage/IEMArchive/%Y/%m"
-    )
-    LOG.debug(cmd)
-    subprocess.call(cmd, shell=True)
-    cmd = date.strftime(
-        f"rsync -a --remove-source-files {tarfn} "
+        f"rsync -a --remove-source-files "
+        f"--rsync-path 'mkdir -p /stage/IEMArchive/%Y/%m && rsync' {tarfn} "
         "mesonet@metl60.agron.iastate.edu:/stage/IEMArchive/%Y/%m"
     )
-    LOG.debug(cmd)
+    LOG.info(cmd)
     subprocess.call(cmd, shell=True)
 
 

@@ -43,7 +43,7 @@ def workflow(date, routes):
     # print("process_usdm workflow for %s" % (date, ))
     # 1. get file from USDM website
     url = "%sUSDM_%s_M.zip" % (BASEURL, date.strftime("%Y%m%d"))
-    LOG.debug("Fetching %s", url)
+    LOG.info("Fetching %s", url)
     req = exponential_backoff(requests.get, url, timeout=30)
     if req is None:
         LOG.info("Download full fail: %s", url)
@@ -78,7 +78,7 @@ def workflow(date, routes):
             fn.split("/")[-1],
             fn,
         )
-        LOG.debug(cmd)
+        LOG.info(cmd)
         subprocess.call(cmd, shell=True)
         os.unlink(fn)
     # 4. Clean up after ourself

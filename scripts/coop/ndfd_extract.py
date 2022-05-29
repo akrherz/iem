@@ -43,7 +43,7 @@ def do_precip(gribs, ftime, data):
     cst = ftime - datetime.timedelta(hours=6)
     key = cst.strftime("%Y-%m-%d")
     d = data["fx"].setdefault(key, dict(precip=None, high=None, low=None))
-    LOG.debug("Writting precip %s from ftime: %s", key, ftime)
+    LOG.info("Writting precip %s from ftime: %s", key, ftime)
     if d["precip"] is None:
         d["precip"] = sel[0].values
     else:
@@ -59,7 +59,7 @@ def do_temp(name, dkey, gribs, ftime, data):
     cst = ftime - datetime.timedelta(hours=6)
     key = cst.strftime("%Y-%m-%d")
     d = data["fx"].setdefault(key, dict(precip=None, high=None, low=None))
-    LOG.debug("Writting %s %s from ftime: %s", name, key, ftime)
+    LOG.info("Writting %s %s from ftime: %s", name, key, ftime)
     d[dkey] = convert_value(sel[0].values, "degK", "degF")
 
 
@@ -81,7 +81,7 @@ def process(ts):
         if not os.path.isfile(fn):
             LOG.warning("missing: %s", fn)
             continue
-        LOG.debug("-> %s", fn)
+        LOG.info("-> %s", fn)
         gribs = pygrib.open(fn)
         do_precip(gribs, ftime, data)
         do_temp("Maximum temperature", "high", gribs, ftime, data)

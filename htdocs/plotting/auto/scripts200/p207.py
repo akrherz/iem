@@ -195,7 +195,6 @@ def get_description():
 
 def load_data(ctx, basets, endts):
     """Generate a dataframe with the data we want to analyze."""
-    LOG.debug("call")
     with get_sqlalchemy_conn("postgis") as conn:
         df = read_postgis(
             text(
@@ -217,7 +216,6 @@ def load_data(ctx, basets, endts):
             index_col=None,
             geom_col="geo",
         )
-    LOG.debug("Loaded %s rows", len(df.index))
     df[USEME] = True
     df["nwsli"] = df.index.values
     df["plotme"] = True
@@ -254,7 +252,6 @@ def load_data(ctx, basets, endts):
             index_col=None,
             geom_col="geo",
         )
-    LOG.debug("Loaded %s rows", len(df2.index))
     df2[USEME] = True
     df2["plotme"] = True
     df2["source"] = "COOP"
@@ -291,7 +288,6 @@ def compute_grid_bounds(ctx, csector):
 
 def add_zeros(df, ctx):
     """Add values of zero where we believe appropriate."""
-    LOG.debug("call")
     cellsize = ctx["sz"] * 1000.0
     newrows = []
     if ctx["z"] in ["yes", "plot"]:
@@ -345,7 +341,6 @@ def add_zeros(df, ctx):
         maxval = gdf["val"].max()
         df.loc[gdf[gdf["val"] < (maxval * 0.8)].index, USEME] = False
         df.loc[gdf[gdf["val"] < (maxval * 0.8)].index, "plotme"] = False
-    LOG.debug("done")
     return df
 
 
@@ -494,5 +489,4 @@ if __name__ == "__main__":
             c="no",
         )
     )
-    LOG.debug("writing image")
     fig.savefig("/tmp/test.png")
