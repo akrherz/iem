@@ -11,10 +11,16 @@ $pgconn = iemdb("hads");
 
 $station = isset($_REQUEST['station']) ? xssafe($_REQUEST["station"]): die("No station");
 $varname = isset($_REQUEST['var']) ? xssafe($_REQUEST['var']): die("No var");
+if (strlen($varname) == 7){
+    $varname = substr($varname, 0, 6);
+}
 $sday = isset($_REQUEST['sday']) ? strtotime($_REQUEST['sday']) : die("No sday");
 $eday = isset($_REQUEST['eday']) ? strtotime($_REQUEST['eday']) : die("No eday");
 
-$rs = pg_prepare($pgconn, "SELECT", "SELECT * from raw". date("Y", $sday) .
+$rs = pg_prepare(
+    $pgconn,
+    "SELECT",
+    "SELECT * from raw". date("Y", $sday) .
 	" WHERE station = $1 and valid BETWEEN $2 and $3 and key = $4 ".
 	"ORDER by valid ASC");
 
