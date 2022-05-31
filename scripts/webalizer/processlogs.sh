@@ -1,7 +1,6 @@
 # Process the apache log files generated from the IEM cluster
 # iem
 # iemssl
-# cocorahs
 # datateam
 # sustainablecorn
 # weatherim
@@ -15,7 +14,7 @@ export mm="`date --date '1 day ago' +'%m'`"
 export dd="`date --date '1 day ago' +'%d'`"
 export yyyymm="`date --date '1 day ago' +'%Y%m'`"
 
-PREFIXES="iem iemssl cocorahs datateam sustainablecorn weatherim depbackend"
+PREFIXES="iem iemssl datateam sustainablecorn weatherim depbackend"
 MACHINES="iemvs100 iemvs101 iemvs102 iemvs103 iemvs104 iemvs105 iemvs106 iemvs107 iemvs108 iemvs109"
 CONFBASE="/opt/iem/scripts/webalizer"
 
@@ -52,7 +51,6 @@ mv combined.access_log combined-iem.log
 
 # Step 3, run webalizer against these log files
 /home/mesonet/bin/webalizer -c ${CONFBASE}/mesonet.conf -T combined-iem.log
-/home/mesonet/bin/webalizer -c ${CONFBASE}/cocorahs.conf combined-cocorahs.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/sustainablecorn.conf combined-sustainablecorn.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/weatherim.conf combined-weatherim.log
 /home/mesonet/bin/webalizer -c ${CONFBASE}/datateam.conf combined-datateam.log
