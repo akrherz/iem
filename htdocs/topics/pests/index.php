@@ -137,7 +137,7 @@ the backend that generates the maps/data here.</p>
  <li><strong>1,700</strong>: Peak larval movement</li>
 </ul>
 
-<p>Learn more link TBD</p>
+<p><a href="https://crops.extension.iastate.edu/encyclopedia/stalk-borer">Learn more here!</a></p>
 </div>
 
 <div id="japanese_beetle" class="pinfo" style="display: none;">
