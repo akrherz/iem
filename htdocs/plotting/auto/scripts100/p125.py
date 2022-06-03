@@ -208,7 +208,7 @@ def plotter(fdict):
         title = MDICT[month]
     params = {}
     dtlimiter = "extract(month from valid) in :months"
-    if ctx["sdate"] is not None and ctx["edate"] is not None:
+    if ctx.get("sdate") is not None and ctx.get("edate") is not None:
         dtlimiter = "valid >= :sdate and valid <= :edate"
         params["sdate"] = ctx["sdate"].replace(year=2000)
         params["edate"] = ctx["edate"].replace(year=2000)
