@@ -22,21 +22,30 @@
 
 $sselect = "";
 foreach($nt->table as $key => $val){
-	$sselect .= sprintf(
+    $sselect .= sprintf(
         '<br /><input type="checkbox" name="sts" value="%s" id="%s"> '.
         '<label for="%s">%s (%s County, %s)</label>',
-		$key, $key, $key, $val["name"], $val["county"], $key);
+        $key, $key, $key, $val["name"], $val["county"], $key);
 }
 
 $soilopts = "";
 $levels = Array(4,12,24,50);
 foreach($levels as $key => $val){
-	$soilopts .= sprintf("<br /><input type=\"checkbox\" name=\"vars\" value=\"soil%02dtn\">Daily Low %s inch Soil Temperature [F]</input>\n"
-		,$val, $val);
-	$soilopts .= sprintf("<br /><input type=\"checkbox\" name=\"vars\" value=\"soil%02dt\">Daily Average %s inch Soil Temperature [F]</input>\n"
-		,$val, $val);
-	$soilopts .= sprintf("<br /><input type=\"checkbox\" name=\"vars\" value=\"soil%02dtx\">Daily High %s inch Soil Temperature [F]</input>\n"
-			,$val, $val);
+    $soilopts .= sprintf(
+        '<br /><input type="checkbox" name="vars" value="soil%02dtn" '.
+        'id="soil%02dtn"> <label for="soil%02dtn">'.
+        'Daily Low %s inch Soil Temperature [F]</label>'. "\n",
+        $val, $val, $val, $val);
+    $soilopts .= sprintf(
+        '<br /><input type="checkbox" name="vars" value="soil%02dt" '.
+        'id="soil%02dt"> <label for="soil%02dt">'.
+        'Daily Average %s inch Soil Temperature [F]</label>'. "\n",
+        $val, $val, $val, $val);
+    $soilopts .= sprintf(
+        '<br /><input type="checkbox" name="vars" value="soil%02dtx" '.
+        'id="soil%02dtx"> <label for="soil%02dtx">'.
+        'Daily High %s inch Soil Temperature [F]</label>'. "\n",
+        $val, $val, $val, $val);
 }
 
 $t->content = <<<EOF
@@ -89,34 +98,59 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 <h4>Options:</h4>
 
 <strong>Select from available variables</strong><br />
-<input type="checkbox" name="vars" value="high">High Temperature [F]
-<br /><input type="checkbox" name="vars" value="low">Low Temperature [F]
-<br /><input type="checkbox" name="vars" value="rh_min">Minimum Relative Humidity [%]
-<br /><input type="checkbox" name="vars" value="rh">Average Relative Humidity [%]
-<br /><input type="checkbox" name="vars" value="rh_max">Maximum Relative Humidity [%]
-<br /><input type="checkbox" name="vars" value="gdd50">Growing Degree Days (base 50) [F]
-<br /><input type="checkbox" name="vars" value="solar">Solar Radiation [J/m^2]
-<br /><input type="checkbox" name="vars" value="precip">Precipitation [inch]
-<br /><input type="checkbox" name="vars" value="speed">Average Wind Speed [mph]
-<br /><input type="checkbox" name="vars" value="gust">Wind Gust [mph]
-<br /><input type="checkbox" name="vars" value="et"> <a href="/agclimate/et.phtml" target="_new">Reference Evapotranspiration (alfalfa)</a> [inch]
+<input type="checkbox" name="vars" value="high" id="high">
+ <label for="high">High Temperature [F]</label>
+<br /><input type="checkbox" name="vars" value="low" id="low">
+ <label for="low">Low Temperature [F]</label>
+<br /><input type="checkbox" name="vars" value="rh_min" id="rh_min">
+ <label for="rh_min">Minimum Relative Humidity [%]</label>
+<br /><input type="checkbox" name="vars" value="rh" id="rh">
+ <label for="rh">Average Relative Humidity [%]</label>
+<br /><input type="checkbox" name="vars" value="rh_max" id="rh_max">
+ <label for="rh_max">Maximum Relative Humidity [%]</label>
+<br /><input type="checkbox" name="vars" value="gdd50" id="gdd50">
+ <label for="gdd50">Growing Degree Days (base 50) [F]</label>
+<br /><input type="checkbox" name="vars" value="solar" id="solar">
+ <label for="solar">Solar Radiation [J/m^2]</label>
+ <br /><input type="checkbox" name="vars" value="solar_mj" id="solar_mj">
+ <label for="solar_mj">Solar Radiation [MJ/m^2]</label>
+<br /><input type="checkbox" name="vars" value="precip" id="precip">
+ <label for="precip">Precipitation [inch]</label>
+<br /><input type="checkbox" name="vars" value="speed" id="speed">
+ <label for="speed">Average Wind Speed [mph]</label>
+<br /><input type="checkbox" name="vars" value="gust" id="gust">
+ <label for="gust">Wind Gust [mph]</label>
+<br /><input type="checkbox" name="vars" value="et" id="et">
+ <label for="et">Reference Evapotranspiration [inch]</label> <a href="/agclimate/et.phtml" target="_new">More Info</a>
 {$soilopts}
-<br /><input type="checkbox" name="vars" value="soil12vwc">12 inch Soil Moisture [%]
-<br /><input type="checkbox" name="vars" value="soil24vwc">24 inch Soil Moisture [%]
-<br /><input type="checkbox" name="vars" value="soil50vwc">50 inch Soil Moisture [%]
+<br /><input type="checkbox" name="vars" value="soil12vwc" id="soil12vwc">
+ <label for="soil12vwc">12 inch Soil Moisture [%]</label>
+<br /><input type="checkbox" name="vars" value="soil24vwc" id="soil24vwc">
+ <label for="soil24vwc">24 inch Soil Moisture [%]</label>
+<br /><input type="checkbox" name="vars" value="soil50vwc" id="soil50vwc">
+ <label for="soil50vwc">50 inch Soil Moisture [%]</label>
 
 <hr>
 <p><strong>Vineyard Station-only Variables</strong>
 <br />Sorry for the cryptic labels, this is a current work in progress.
-<br /><input type="checkbox" name="vars" value="lwmv_1">lwmv_1
-<br /><input type="checkbox" name="vars" value="lwmv_2">lwmv_2
-<br /><input type="checkbox" name="vars" value="lwmdry_1_tot">lwmdry_1_tot
-<br /><input type="checkbox" name="vars" value="lwmcon_1_tot">lwmcon_1_tot
-<br /><input type="checkbox" name="vars" value="lwmwet_1_tot">lwmwet_1_tot
-<br /><input type="checkbox" name="vars" value="lwmdry_2_tot">lwmdry_2_tot
-<br /><input type="checkbox" name="vars" value="lwmcon_2_tot">lwmcon_2_tot
-<br /><input type="checkbox" name="vars" value="lwmwet_2_tot">lwmwet_2_tot
-<br /><input type="checkbox" name="vars" value="bpres_avg">bpres_avg
+<br /><input type="checkbox" name="vars" value="lwmv_1" id="lwmv_1">
+ <label for="lwmv_1">lwmv_1</label>
+<br /><input type="checkbox" name="vars" value="lwmv_2" id="lwmv_2">
+ <label for="lwmv_2">lwmv_2</label>
+<br /><input type="checkbox" name="vars" value="lwmdry_1_tot" id="lwmdry_1_tot">
+ <label for="lwmdry_1_tot">lwmdry_1_tot</label>
+<br /><input type="checkbox" name="vars" value="lwmcon_1_tot" id="lwmcon_1_tot">
+ <label for="lwmcon_1_tot">lwmcon_1_tot</label>
+<br /><input type="checkbox" name="vars" value="lwmwet_1_tot" id="lwmwet_1_tot">
+ <label for="lwmwet_1_tot">lwmwet_1_tot</label>
+<br /><input type="checkbox" name="vars" value="lwmdry_2_tot" id="lwmdry_2_tot">
+ <label for="lwmdry_2_tot">lwmdry_2_tot</label>
+<br /><input type="checkbox" name="vars" value="lwmcon_2_tot" id="lwmcon_2_tot">
+ <label for="lwmcon_2_tot">lwmcon_2_tot</label>
+<br /><input type="checkbox" name="vars" value="lwmwet_2_tot" id="lwmwet_2_tot">
+ <label for="lwmwet_2_tot">lwmwet_2_tot</label>
+<br /><input type="checkbox" name="vars" value="bpres_avg" id="bpres_avg">
+ <label for="bpres_avg">bpres_avg</label>
 
 <hr>
 <p>The Ames-AEA, Ames-Kitchen, and Jefferson locations have the
@@ -129,26 +163,27 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 {$qcbox}
 
 <p><strong>View on web browser or</strong> &nbsp; 
- <br /><input type="checkbox" name="todisk" value="yes">Download directly to disk
+ <br /><input type="checkbox" name="todisk" value="yes" id="todisk">
+  <label for="todisk">Download directly to disk</label>
 
 <p><strong>How should the data be formatted?:</strong> &nbsp; 
 <select name="format">
-	<option value="excel">Microsoft Excel (xlsx)</option>
-	<option value="comma">Comma Delimited Text File</option>
-  	<option value="tab">Tab Delimited Text File</option>
+    <option value="excel">Microsoft Excel (xlsx)</option>
+    <option value="comma">Comma Delimited Text File</option>
+      <option value="tab">Tab Delimited Text File</option>
 </select>
 
 <p><strong>How should missing values be represented?:</strong>
 <br /> 
 <select name="missing">
-	<option value="-99">-99</option>
-	<option value="M">M</option>
-  	<option value="">(blank, empty space)</option>
+    <option value="-99">-99</option>
+    <option value="M">M</option>
+      <option value="">(blank, empty space)</option>
 </select>
 
 <p><h4>Submit your request:</h4>
-	<input type="submit" value="Get Data">
-	<input type="reset">
+    <input type="submit" value="Get Data">
+    <input type="reset">
 
 </form>
 
@@ -158,7 +193,7 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 <dl class="dl-horizontal">
  <dt>station</dt><dd>National Weather Service Location Identifier for the
  site.  This is a five character identifier.</dd>
- 		
+         
  <dt>valid</dt><dd>Date of the observation</dd>
 
  <dt>high</dt><dd>High Temperature [F]</dd>
@@ -170,7 +205,7 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
  <dt>solar</dt><dd>Solar Radiation [J/m^2]</dd>
  <dt>precip</dt><dd>Precipitation [inch]</dd>
  <dt>speed</dt><dd>Average Wind Speed [mph], 10 minute average, 10 ft above ground</dd>
- <dt>gust</dt><dd>Peak Wind Gust [mph], 10 minute average, 10 ft above ground</dd>		
+ <dt>gust</dt><dd>Peak Wind Gust [mph], 10 minute average, 10 ft above ground</dd>        
  <dt>et</dt><dd>Evapotranspiration [inch]</dd>
  <dt>soil04tn</dt><dd>Daily Low 4 inch Depth Soil Temperature [F]</dd>
  <dt>soil04t</dt><dd>Daily Average 4 inch Depth Soil Temperature [F]</dd>
@@ -187,8 +222,8 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
  <dt>soil12vwc</dt><dd>Average 12 inch Depth Soil Volumetric Water Content [%]</dd>
  <dt>soil24vwc</dt><dd>Average 24 inch Depth Soil Volumetric Water Content [%]</dd>
  <dt>soil50vwc</dt><dd>Average 50 inch Depth Soil Volumetric Water Content [%]</dd>
- 		
- 		
+         
+         
 </dl>
 
 </div></div>
