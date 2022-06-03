@@ -17,26 +17,24 @@ PDICT.update(SECTORS_NAME)
 PDICT2 = {
     "both": "Show both contour and values",
     "values": "Show just the values",
-    "contour": "Show just the contour",
+    "contour": "Show just the filled contour",
 }
-PDICT3 = dict(
-    [
-        ("avg_temp", "Average Temperature"),
-        ("avg_high", "Average High Temperature"),
-        ("avg_low", "Average Low Temperature"),
-        ("total_cdd65", "Total Cooling Degree Days (base=65)"),
-        ("total_gdd32", "Total Growing Degree Days (base=32)"),
-        ("total_gdd41", "Total Growing Degree Days (base=41)"),
-        ("total_gdd46", "Total Growing Degree Days (base=46)"),
-        ("total_gdd48", "Total Growing Degree Days (base=48)"),
-        ("total_gdd50", "Total Growing Degree Days (base=50)"),
-        ("total_gdd51", "Total Growing Degree Days (base=51)"),
-        ("total_gdd52", "Total Growing Degree Days (base=52)"),
-        ("total_hdd65", "Total Heating Degree Days (base=65)"),
-        ("total_sdd86", "Total Stress Degree Days (base=86)"),
-        ("total_precip", "Total Precipitation"),
-    ]
-)
+PDICT3 = {
+    "avg_temp": "Average Temperature",
+    "avg_high": "Average High Temperature",
+    "avg_low": "Average Low Temperature",
+    "total_cdd65": "Total Cooling Degree Days (base=65)",
+    "total_gdd32": "Total Growing Degree Days (base=32)",
+    "total_gdd41": "Total Growing Degree Days (base=41)",
+    "total_gdd46": "Total Growing Degree Days (base=46)",
+    "total_gdd48": "Total Growing Degree Days (base=48)",
+    "total_gdd50": "Total Growing Degree Days (base=50)",
+    "total_gdd51": "Total Growing Degree Days (base=51)",
+    "total_gdd52": "Total Growing Degree Days (base=52)",
+    "total_hdd65": "Total Heating Degree Days (base=65)",
+    "total_sdd86": "Total Stress Degree Days (base=86)",
+    "total_precip": "Total Precipitation",
+}
 PDICT5 = {
     "climate": "Period of Record Climatology",
     "climate51": "1951-Present Climatology",
@@ -104,6 +102,24 @@ def get_description():
             options=MDICT,
         ),
         dict(
+            type="date",
+            default="2020/01/01",
+            min="2020/01/01",
+            max="2020/12/31",
+            name="sdate",
+            optional=True,
+            label="Start Date (ignore year) of Inclusive Period (optional)",
+        ),
+        dict(
+            type="date",
+            default="2020/12/31",
+            min="2020/01/01",
+            max="2020/12/31",
+            name="edate",
+            optional=True,
+            label="End Date (ignore year) of Inclusive Period (optional)",
+        ),
+        dict(
             type="select",
             name="sector",
             default="state",
@@ -145,6 +161,20 @@ def get_description():
     return desc
 
 
+def make_levels(minval, maxval, count):
+    """make a pretty list of levels."""
+    vrange = maxval - minval
+    step = vrange / float(count)
+    avail = [0.01, 0.1, 0.25, 0.5, 1, 2, 5, 10, 25, 50, 100]
+    avail.extend([150, 200, 250, 500, 750, 1000])
+    # compute a new and round step value
+    step = avail[np.digitize(step, avail)]
+    # compute the new min and max
+    minval = np.floor(minval / step) * step
+    maxval = np.ceil(maxval / step) * step
+    return np.arange(minval, maxval + 0.001, step)
+
+
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
@@ -173,37 +203,41 @@ def plotter(fdict):
         months = [ts.month]
 
     if len(months) == 1:
-        title = "%s %s" % (calendar.month_name[months[0]], PDICT3[varname])
+        title = f"{calendar.month_name[months[0]]} {PDICT3[varname]}"
     else:
-        title = "%s" % (MDICT[month],)
+        title = MDICT[month]
+    params = {}
+    dtlimiter = "extract(month from valid) in :months"
+    if ctx["sdate"] is not None and ctx["edate"] is not None:
+        dtlimiter = "valid >= :sdate and valid <= :edate"
+        params["sdate"] = ctx["sdate"].replace(year=2000)
+        params["edate"] = ctx["edate"].replace(year=2000)
+        title = f"{ctx['sdate']:%b %-d} thru {ctx['edate']:%b %d}"
+
     mp = MapPlot(
         apctx=ctx,
         sector=sector,
         state=state,
         axisbg="white",
-        title="%s %s for %s" % (PDICT5[ctx["src"]], PDICT3[varname], title),
+        title=f"{PDICT5[ctx['src']]} {PDICT3[varname]} for {title}",
         nocaption=True,
     )
     bnds = mp.panels[0].get_extent(crs=LATLON)
+    params.update(
+        {
+            "b1": bnds[0],
+            "b2": bnds[2],
+            "b3": bnds[1],
+            "b4": bnds[3],
+            "months": tuple(months),
+        }
+    )
 
     joincol = "id"
     if ctx["src"] == "ncdc_climate81":
         joincol = "ncdc81"
     elif ctx["src"] == "ncei_climate91":
         joincol = "ncei91"
-    extra = ""
-    if not ctx["src"].startswith("ncdc_"):
-        extra = """,
-        sum(cdd65) as total_cdd65,
-        sum(hdd65) as total_hdd65,
-        sum(gdd32) as total_gdd32,
-        sum(gdd41) as total_gdd41,
-        sum(gdd46) as total_gdd46,
-        sum(gdd48) as total_gdd48,
-        sum(gdd50) as total_gdd50,
-        sum(gdd51) as total_gdd51,
-        sum(gdd52) as total_gdd52
-        """
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             text(
@@ -215,58 +249,56 @@ def plotter(fdict):
                 ST_Contains(ST_MakeEnvelope(:b1, :b2, :b3, :b4, 4326), geom)
                 GROUP by myid
             )
-            SELECT station, extract(month from valid) as month,
+            SELECT station,
             max(lon) as lon, min(lat) as lat,
             sum(precip) as total_precip,
             avg(high) as avg_high,
             avg(low) as avg_low,
-            avg((high+low)/2.) as avg_temp {extra} from {ctx["src"]} c
+            avg((high+low)/2.) as avg_temp,
+            sum(cdd65) as total_cdd65,
+            sum(hdd65) as total_hdd65,
+            sum(gdd32) as total_gdd32,
+            sum(gdd41) as total_gdd41,
+            sum(gdd46) as total_gdd46,
+            sum(gdd48) as total_gdd48,
+            sum(gdd50) as total_gdd50,
+            sum(gdd51) as total_gdd51,
+            sum(gdd52) as total_gdd52 from {ctx["src"]} c
             JOIN mystations t on (c.station = t.myid)
-            WHERE extract(month from valid) in :months
-            GROUP by station, month
+            WHERE {dtlimiter}
+            GROUP by station
             """
             ),
             conn,
-            params={
-                "b1": bnds[0],
-                "b2": bnds[2],
-                "b3": bnds[1],
-                "b4": bnds[3],
-                "months": tuple(months),
-            },
-            index_col=["station", "month"],
+            params=params,
+            index_col="station",
         )
     if df.empty:
         raise NoDataFound("No data was found for query, sorry.")
-
-    if len(months) == 1:
-        df2 = df
-    else:
-        if varname.startswith("total"):
-            df2 = df.sum(axis=0, level="station")
-        else:
-            df2 = df.mean(axis=0, level="station")
-        df2["lat"] = df["lat"].mean(axis=0, level="station")
-        df2["lon"] = df["lon"].mean(axis=0, level="station")
-    levels = np.linspace(df2[varname].min(), df2[varname].max(), 10)
-    levels = [round(x, PRECISION.get(varname, 1)) for x in levels]
+    df = df[~pd.isna(df[varname])]
+    if df.empty:
+        raise NoDataFound("No data was found for query, sorry.")
+    levels = make_levels(df[varname].min(), df[varname].max(), 10)
     if opt in ["both", "contour"]:
         mp.contourf(
-            df2["lon"].values,
-            df2["lat"].values,
-            df2[varname].values,
+            df["lon"].values,
+            df["lat"].values,
+            df[varname].values,
             levels,
             units=UNITS.get(varname, "F"),
             cmap=get_cmap(ctx["cmap"]),
+            extend="neither",
             clip_on=False,
         )
+        # Manual clipping sector
+        mp.draw_mask(None if sector == "state" else "conus")
     if sector == "state":
         mp.drawcounties()
     if opt in ["both", "values"]:
         mp.plot_values(
-            df2["lon"].values,
-            df2["lat"].values,
-            df2[varname].values,
+            df["lon"].values,
+            df["lat"].values,
+            df[varname].values,
             fmt="%%.%if" % (PRECISION.get(varname, 1),),
             labelbuffer=5,
         )

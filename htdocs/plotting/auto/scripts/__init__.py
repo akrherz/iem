@@ -254,7 +254,7 @@ monthly_opts = [
         "id": 130,
         "label": "Average High/Low Temperature with/without Snowcover",
     },
-    {"id": 125, "label": "Climatological Maps of Annual/Monthly Averages"},
+    {"id": 125, "label": "Climatological Maps of Period Averages"},
     {"id": 1, "label": "Comparison of Multi-Month Totals/Averages"},
     {"id": 55, "label": "Daily Climatology Comparison"},
     {"id": 17, "label": "Daily High/Low Temps or Precip with Climatology"},
