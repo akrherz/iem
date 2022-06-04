@@ -123,23 +123,19 @@ def get_description():
             default=12,
         ),
         dict(
-            type="date",
+            type="sday",
             name="sdate",
-            default="2000/1/1",
+            default="0101",
             optional=True,
-            min="2000/1/1",
-            max="2000/12/31",
             label=(
                 "Start date (inclusive) for explicit date period: (optional)"
             ),
         ),
         dict(
-            type="date",
+            type="sday",
             name="edate",
-            default="2000/12/31",
+            default="1231",
             optional=True,
-            min="2000/1/1",
-            max="2000/12/31",
             label="End date (inclusive) for explicit date period: (optional)",
         ),
         dict(

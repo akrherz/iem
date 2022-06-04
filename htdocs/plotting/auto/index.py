@@ -268,6 +268,48 @@ def datetypes_handler(arg, value):
     return make_select(arg["name"], value, dict(items), showvalue=False)
 
 
+def sday_handler(value, arg, res):
+    """Handler for datetime instances."""
+    dpname = f"datepicker_{arg['name']}"
+    vmin = arg.get("min", "0101")
+    vmax = arg.get("max", "1231")
+    # account for legacy URLs that had dates here
+    if value.find("/") > -1:
+        value = f"{value[5:7]}{value[8:10]}"
+
+    def _todate(val):
+        """convert to a timestamp value."""
+        return f"2000/{val[:2]}/{val[2:]}"
+
+    res[
+        "jsextra"
+    ] += f"""
+$( '#{dpname}' ).datepicker({{
+    beforeShow: function (input, inst) {{
+        inst.dpDiv.addClass('sday');
+    }},
+    onClose: function(dateText, inst) {{
+        inst.dpDiv.removeClass('sday');
+    }},
+    changeMonth: true,
+    changeYear: false,
+    dateFormat: "mm/dd",
+    altFormat: "mmdd",
+    altField: "#alt_{dpname}",
+    maxDate: new Date('{_todate(vmax)}'),
+    minDate: new Date('{_todate(vmin)}')
+}});
+$("#{dpname}").datepicker(
+    'setDate', new Date('{_todate(value)}')
+);
+    """
+    return (
+        f'<input type="text" id="{dpname}"> (mm/dd)'
+        f'<input type="hidden" name="{arg["name"]}" value="{value}" '
+        f'id="alt_{dpname}">'
+    )
+
+
 def date_handler(value, arg, res):
     """Handler for datetime instances."""
     dpname = f"datepicker_{arg['name']}"
@@ -484,6 +526,8 @@ def generate_form(apid, fdict, headers, cookies):
             form = datetime_handler(value, arg, res)
         elif arg["type"] == "date":
             form = date_handler(value, arg, res)
+        elif arg["type"] == "sday":
+            form = sday_handler(value, arg, res)
         # Handle the fun that is having it be optional
         if arg.get("optional", False):
             opton = fdict.get(f"_opt_{arg['name']}") == "on"
@@ -626,6 +670,9 @@ var progressBar = setInterval(function (){{
 .ui-datepicker-year {{
   color: #000;
 }}
+.sday .ui-datepicker-year {{
+  display: none;
+}}
 .ui-datepicker-month {{
   color: #000;
 }}
@@ -762,7 +809,8 @@ def generate(fdict, headers, cookies):
 
 <p>This application dynamically generates many types of graphs.  These graphs
 are derived from processing of various data sources done by the IEM.  Please
-feel free to use these generated graphics in whatever way you wish.</p>
+feel free to use these generated graphics in whatever way you wish.
+<a href="/plotting/auto/">Reset App</a>.</p>
 
 <br /><form method="GET" name="t">
 <div class="form-group">

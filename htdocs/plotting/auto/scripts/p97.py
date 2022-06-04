@@ -4,7 +4,7 @@ import datetime
 import numpy as np
 import pandas as pd
 import geopandas as gpd
-from pyiem.plot import MapPlot, get_cmap
+from pyiem.plot import MapPlot, get_cmap, centered_bins, pretty_bins
 from pyiem.util import (
     get_autoplot_context,
     get_dbconn,
@@ -483,32 +483,29 @@ def plotter(fdict):
     )
     fmt = "%.2f"
     cmap = get_cmap(ctx["cmap"])
+    extend = "both"
     if varname in [
         "precip_depart",
         "avg_temp_depart",
         "gdd_depart",
         "snow_depart",
     ]:
+        # encapsulte most of the data
         rng = df[varname].abs().describe(percentiles=[0.95])["95%"]
-        clevels = np.linspace(
-            0 - rng, rng, 7, dtype="i" if varname == "gdd_depart" else "f"
-        )
+        clevels = centered_bins(rng)
         if varname == "gdd_depart":
             fmt = "%.0f"
     elif varname in ["precip_sum", "snow_sum"]:
         rng = df[varname].abs().describe(percentiles=[0.95])["95%"]
-        clevels = np.linspace(0, rng, 7)
-        cmap.set_under("white")
-        cmap.set_over("black")
+        clevels = pretty_bins(0, rng)
+        extend = "max"
     elif varname.endswith("_percent"):
         clevels = np.array([10, 25, 50, 75, 100, 125, 150, 175, 200])
         fmt = "%.0f"
     else:
-        minv = df[varname].min() - 5
-        maxv = df[varname].max() + 5
-        clevels = np.linspace(minv, maxv, 6, dtype="i")
+        clevels = pretty_bins(df[varname].min(), df[varname].max())
         fmt = "%.0f"
-    clevlabels = [fmt % x for x in clevels]
+        extend = "neither"
     cmap.set_bad("white")
     if ctx["p"] == "contour":
         mp.contourf(
@@ -516,10 +513,11 @@ def plotter(fdict):
             df["lat"].values,
             df[varname].values,
             clevels,
-            clevlabels=clevlabels,
             cmap=cmap,
             units=UNITS.get(varname),
+            extend=extend,
         )
+
     if ctx["c"] == "yes":
         df2 = df
         if ctx["d"] == "wfo":

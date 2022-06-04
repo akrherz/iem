@@ -1,9 +1,8 @@
 """Change in NCEI climatology over some period."""
 import datetime
 
-import numpy as np
 import pandas as pd
-from pyiem.plot import get_cmap
+from pyiem.plot import get_cmap, centered_bins
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
@@ -92,7 +91,6 @@ def plotter(fdict):
         raise NoDataFound("No Data Found.")
 
     days = int((date2 - date1).days)
-    extent = int(df[varname].abs().max())
     mp = MapPlot(
         apctx=ctx,
         title=(
@@ -101,11 +99,13 @@ def plotter(fdict):
         subtitle=f"from {date1:%-d %B} to {date2:%-d %B}",
         nocaption=True,
     )
+    # Encapsulate most of the data
+    rng = df[varname].abs().describe(percentiles=[0.95])["95%"]
     mp.contourf(
         df["lon"].values,
         df["lat"].values,
         df[varname].values,
-        np.arange(0 - extent, extent + 1, 2),
+        centered_bins(rng, bins=10),
         cmap=get_cmap(ctx["cmap"]),
         units="F",
     )

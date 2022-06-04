@@ -2,9 +2,8 @@
 import calendar
 import datetime
 
-import numpy as np
 import pandas as pd
-from pyiem.plot import MapPlot, get_cmap
+from pyiem.plot import MapPlot, get_cmap, pretty_bins
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import SECTORS_NAME, LATLON
@@ -92,7 +91,12 @@ def get_description():
     climatological averages.  The IEM maintains a number of different
     climatologies based on period of record and source.  If you pick the NCEI
     Climatology, only basic temperature and precipitation variables are
-    available at this time."""
+    available at this time.
+
+    <p>If you select a period of dates with the end date prior to the start
+    date, the logic then has the period cross the 1 January boundary.  For
+    example, a period between Dec 15 and Jan 15 will be computed.</p>
+    """
     desc["arguments"] = [
         dict(
             type="select",
@@ -102,22 +106,18 @@ def get_description():
             options=MDICT,
         ),
         dict(
-            type="date",
-            default="2020/01/01",
-            min="2020/01/01",
-            max="2020/12/31",
+            type="sday",
+            default="0101",
             name="sdate",
             optional=True,
-            label="Start Date (ignore year) of Inclusive Period (optional)",
+            label="Start Date of Inclusive Period (optional)",
         ),
         dict(
-            type="date",
-            default="2020/12/31",
-            min="2020/01/01",
-            max="2020/12/31",
+            type="sday",
+            default="1231",
             name="edate",
             optional=True,
-            label="End Date (ignore year) of Inclusive Period (optional)",
+            label="End Date of Inclusive Period (optional)",
         ),
         dict(
             type="select",
@@ -161,20 +161,6 @@ def get_description():
     return desc
 
 
-def make_levels(minval, maxval, count):
-    """make a pretty list of levels."""
-    vrange = maxval - minval
-    step = vrange / float(count)
-    avail = [0.01, 0.1, 0.25, 0.5, 1, 2, 5, 10, 25, 50, 100]
-    avail.extend([150, 200, 250, 500, 750, 1000])
-    # compute a new and round step value
-    step = avail[np.digitize(step, avail)]
-    # compute the new min and max
-    minval = np.floor(minval / step) * step
-    maxval = np.ceil(maxval / step) * step
-    return np.arange(minval, maxval + 0.001, step)
-
-
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
@@ -209,9 +195,12 @@ def plotter(fdict):
     params = {}
     dtlimiter = "extract(month from valid) in :months"
     if ctx.get("sdate") is not None and ctx.get("edate") is not None:
-        dtlimiter = "valid >= :sdate and valid <= :edate"
-        params["sdate"] = ctx["sdate"].replace(year=2000)
-        params["edate"] = ctx["edate"].replace(year=2000)
+        if ctx["sdate"] > ctx["edate"]:
+            dtlimiter = "(valid >= :sdate or valid <= :edate)"
+        else:
+            dtlimiter = "valid >= :sdate and valid <= :edate"
+        params["sdate"] = ctx["sdate"]
+        params["edate"] = ctx["edate"]
         title = f"{ctx['sdate']:%b %-d} thru {ctx['edate']:%b %d}"
 
     mp = MapPlot(
@@ -278,7 +267,7 @@ def plotter(fdict):
     df = df[~pd.isna(df[varname])]
     if df.empty:
         raise NoDataFound("No data was found for query, sorry.")
-    levels = make_levels(df[varname].min(), df[varname].max(), 10)
+    levels = pretty_bins(df[varname].min(), df[varname].max(), 10)
     if opt in ["both", "contour"]:
         mp.contourf(
             df["lon"].values,
@@ -299,7 +288,7 @@ def plotter(fdict):
             df["lon"].values,
             df["lat"].values,
             df[varname].values,
-            fmt="%%.%if" % (PRECISION.get(varname, 1),),
+            fmt=f"%.{PRECISION.get(varname, 1)}f",
             labelbuffer=5,
         )
 

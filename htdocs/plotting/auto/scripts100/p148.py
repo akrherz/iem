@@ -9,16 +9,14 @@ from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
-PDICT = dict(
-    [
-        ("easter", "Easter (Western Church Dates)"),
-        ("labor", "Labor Day"),
-        ("memorial", "Memorial Day"),
-        ("mother", "Mothers Day"),
-        ("exact", "Same Date each Year"),
-        ("thanksgiving", "Thanksgiving"),
-    ]
-)
+PDICT = {
+    "easter": "Easter (Western Church Dates)",
+    "labor": "Labor Day",
+    "memorial": "Memorial Day",
+    "mother": "Mothers Day",
+    "exact": "Same Date each Year",
+    "thanksgiving": "Thanksgiving",
+}
 PDICT2 = {
     "high": "High Temperature [F]",
     "low": "Low Temperature [F]",
@@ -55,11 +53,9 @@ def get_description():
             label="Which date/holiday to plot?",
         ),
         dict(
-            type="date",
+            type="sday",
             name="thedate",
-            default="2000/01/01",
-            min="2000/01/01",
-            max="2000/12/31",
+            default="0101",
             label="Same date each year to plot (when selected above):",
         ),
         dict(
@@ -193,11 +189,7 @@ def get_context(fdict):
             )
     if ctx["df"].empty:
         raise NoDataFound("No Data Found.")
-    ctx["title"] = ("%s [%s] Daily %s") % (
-        ctx["_nt"].sts[ctx["station"]]["name"],
-        ctx["station"],
-        PDICT2[ctx["varname"]],
-    )
+    ctx["title"] = f"{ctx['_sname']} :: Daily {PDICT2[ctx['varname']]}"
     return ctx
 
 
@@ -207,7 +199,7 @@ def highcharts(fdict):
     ctx["df"] = ctx["df"].reset_index()
     v2 = ctx["df"][["year", ctx["varname"]]].to_json(orient="values")
     avgval = ctx["df"][ctx["varname"]].mean()
-    avgvallbl = "%.2f" % (avgval,)
+    avgvallbl = f"{avgval:.2f}"
     series = (
         """{
         name: '"""
@@ -276,11 +268,11 @@ def plotter(fdict):
     )
     mean = ctx["df"][ctx["varname"]].mean()
     ax.axhline(mean)
-    ax.set_title("%s\non %s" % (ctx["title"], ctx["subtitle"]))
+    ax.set_title(f"{ctx['title']}\non {ctx['subtitle']}")
     ax.text(
         ctx["df"].index.values[-1] + 1,
         mean,
-        "%.2f" % (mean,),
+        f"{mean:.2f}",
         ha="left",
         va="center",
     )
