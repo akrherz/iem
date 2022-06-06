@@ -59,7 +59,7 @@ foreach($intervals as $key => $interval)
       // hackery to account for trace values
       $val = floatval($z["p1"]);
       if ($val > 0.005){
-          $retval = sprintf("%.2f", $val);
+          $retval = round($val, 2);
       } else if ($val > 0){
           $retval = "T";
       } else{
@@ -76,5 +76,3 @@ foreach($data as $station => $d)
 }
 
 echo json_encode($ar);
-
-?>
