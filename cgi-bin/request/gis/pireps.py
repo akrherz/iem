@@ -1,16 +1,11 @@
-"""
-    Dump PIREPs
-"""
+"""Provide PIREPs."""
 import datetime
 import zipfile
 from io import BytesIO, StringIO
 
-# import cgitb
 import shapefile
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, utc
-
-# cgitb.enable()
 
 
 def get_context(environ):
@@ -117,9 +112,8 @@ def run(ctx, start_response):
     with zipfile.ZipFile(
         zio, mode="w", compression=zipfile.ZIP_DEFLATED
     ) as zf:
-        zf.writestr(
-            fn + ".prj", open(("/opt/iem/data/gis/meta/4326.prj")).read()
-        )
+        with open("/opt/iem/data/gis/meta/4326.prj", encoding="ascii") as fh:
+            zf.writestr(f"{fn}.prj", fh.read())
         zf.writestr(fn + ".shp", shpio.getvalue())
         zf.writestr(fn + ".shx", shxio.getvalue())
         zf.writestr(fn + ".dbf", dbfio.getvalue())

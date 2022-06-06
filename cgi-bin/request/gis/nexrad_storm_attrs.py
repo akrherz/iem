@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
     Dump storm attributes from the database to a shapefile for the users
 """
@@ -141,9 +140,8 @@ def run(ctx, start_response):
     with zipfile.ZipFile(
         zio, mode="w", compression=zipfile.ZIP_DEFLATED
     ) as zf:
-        zf.writestr(
-            fn + ".prj", open(("/opt/iem/data/gis/meta/4326.prj")).read()
-        )
+        with open("/opt/iem/data/gis/meta/4326.prj", encoding="utf-8") as fh:
+            zf.writestr(f"{fh}.prj", fh.read())
         zf.writestr(fn + ".shp", shpio.getvalue())
         zf.writestr(fn + ".shx", shxio.getvalue())
         zf.writestr(fn + ".dbf", dbfio.getvalue())

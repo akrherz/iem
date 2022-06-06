@@ -93,6 +93,7 @@ The <a href="/climodat/">Climodat</a> reports present summarized GDD data.
 
 <p>Maps of Growing Degree Days:
 <ul>
+ <li><a href="/plotting/auto/?q=125">Custom Climatology Maps</a></li>
  <li><a href="/data/summary/gdd_mon.png">This Month's GDD 50/86</a></li>
  <li><a href="/data/summary/gdd_jan1.png">This Years's GDD 50/86</a></li>
  <li><a href="/data/summary/gdd_may1.png">May 1 - Nov 1 GDD 50/86</a></li>
