@@ -8,6 +8,8 @@ var table2IsByPoint = true;
 var hashlinkUGC;
 var edate;
 var sdate;
+var edate1;
+var sdate1;
 var BACKEND_EVENTS_BYPOINT = '/json/vtec_events_bypoint.py';
 var BACKEND_EVENTS_BYUGC = '/json/vtec_events_byugc.py';
 var BACKEND_SBW_BYPOINT = '/json/sbw_by_point.py';
@@ -78,7 +80,9 @@ function updateTable(){
     $.ajax({
         data: {
             lat: $("#lat").val(),
-            lon: $("#lon").val()
+            lon: $("#lon").val(),
+            sdate: $.datepicker.formatDate("yy/mm/dd", sdate1.datepicker("getDate")),
+            edate: $.datepicker.formatDate("yy/mm/dd", edate1.datepicker("getDate"))
         },
         url: BACKEND_SBW_BYPOINT,
         dataType: "json",
@@ -156,7 +160,9 @@ function buildUI(){
         var params = {
             fmt: (btn.data("opt") == "csv") ? "csv" : "xlsx",
             lat: $("#lat").val(),
-            lon: $("#lon").val()
+            lon: $("#lon").val(),
+            sdate: $.datepicker.formatDate("yy/mm/dd", sdate1.datepicker("getDate")),
+            edate: $.datepicker.formatDate("yy/mm/dd", edate1.datepicker("getDate"))
         };
         if (btn.data("table") == "2"){
             url = BACKEND_EVENTS_BYUGC;
@@ -203,6 +209,27 @@ function buildUI(){
         }
     });
     edate.datepicker("setDate", +1);
+    sdate1 = $("input[name='sdate1']").datepicker({
+        dateFormat:"mm/dd/yy",
+        altFormat:"yy/mm/dd",
+        minDate: new Date(2002, 0, 1),
+        maxDate: new Date(),
+        onClose: function(){
+            updateTable();
+        }
+    });
+    sdate1.datepicker("setDate", new Date(2002, 0, 1));
+    edate1 = $("input[name='edate1']").datepicker({
+        dateFormat:"mm/dd/yy",
+        altFormat:"yy/mm/dd",
+        minDate: new Date(2002, 0, 1),
+        defaultDate: +1,
+        onClose: function(){
+            updateTable();
+        }
+    });
+    edate1.datepicker("setDate", +1);
+
     // select boxes
     var data = $.map(states, function(obj){
         var e = {};

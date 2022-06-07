@@ -695,7 +695,6 @@ def plot_sm(ctx):
     if not svplotted and not d24t.isnull().all():
         ax.plot(valid, d24t, linewidth=2, color="purple", label="24 inch")
         oplotted = True
-    print(d50t)
     if not svplotted and not d50t.isnull().all():
         ax.plot(valid, d50t, linewidth=2, color="black", label="50 inch")
         oplotted = True

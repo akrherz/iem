@@ -7,18 +7,16 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
-PDICT = dict(
-    [
-        ("last_high_above", "Last Date At or Above (High Temperature)"),
-        ("last_high_below", "Last Date Below (High Temperature)"),
-        ("first_high_above", "First Date At or Above (High Temperature)"),
-        ("first_high_below", "First Date Below (High Temperature)"),
-        ("first_low_above", "First Date At or Above (Low Temperature)"),
-        ("first_low_below", "First Date Below (Low Temperature)"),
-        ("last_low_above", "Last Date At or Above(Low Temperature)"),
-        ("last_low_below", "Last Date Below (Low Temperature)"),
-    ]
-)
+PDICT = {
+    "last_high_above": "Last Date At or Above (High Temperature)",
+    "last_high_below": "Last Date Below (High Temperature)",
+    "first_high_above": "First Date At or Above (High Temperature)",
+    "first_high_below": "First Date Below (High Temperature)",
+    "first_low_above": "First Date At or Above (Low Temperature)",
+    "first_low_below": "First Date Below (Low Temperature)",
+    "last_low_above": "Last Date At or Above(Low Temperature)",
+    "last_low_below": "Last Date Below (Low Temperature)",
+}
 PDICT2 = {
     "calendar": "Compute over Calendar Year",
     "winter": "Compute over Winter Season",
@@ -156,12 +154,11 @@ def plotter(fdict):
     df2 = df[df["count"] > 0]
     if df2.empty:
         raise NoDataFound("No data found.")
-    title = ("%s [%s] %s Date and Days\n" r"%s %s$^\circ$F") % (
-        ctx["_nt"].sts[station]["name"],
-        station,
-        extrenum.capitalize(),
-        PDICT["%s_%s_%s" % (extrenum, varname, direction)],
-        threshold,
+    tl = PDICT["%s_%s_%s" % (extrenum, varname, direction)]
+    title = (
+        f"{ctx['_sname']} :: {extrenum.capitalize()} Date and Days\n"
+        f"{tl} {threshold}"
+        r"$^\circ$F"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     # The present year value may be so low that it destorts the plot

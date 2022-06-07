@@ -13,7 +13,7 @@ $t->jsextra = <<<EOF
 <script src="/vendor/jquery-datatables/1.10.20/datatables.min.js"></script>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src="/vendor/select2/4.1.0rc0/select2.min.js"></script>
-<script type="text/javascript" src="search.js"></script>
+<script type="text/javascript" src="search.js?v=2"></script>
 EOF;
 $t->headextra = <<<EOF
 <script src="https://maps.googleapis.com/maps/api/js?key={$gmapskey}" type="text/javascript"></script>
@@ -50,7 +50,12 @@ grid will update and provide a listing of storm based warnings found.
 		<p><strong>Either enter coordinates manually:</strong><br />
 		<i>Latitude (deg N):</i> <input size="8" id="lat" value="41.53"><br />
 		<i>Longitude (deg E):</i> <input size="8" id="lon" value="-93.653">
-		<button type="button" class="btn btn-default" id="manualpt">Update</button>
+        <br /><label for="sdate1">Start Date:
+            <input name="sdate1" type="text" id="sdate1"></label>
+            <br /><label for="edate1">End Date:
+            <input name="edate1" type="text" id="edate1"></label>
+    
+        <button type="button" class="btn btn-default" id="manualpt">Update</button>
 		</p>
 		<p><strong>Or drag marker to select coordinate:</strong><br />
 		<div id="map" class="map"></div>

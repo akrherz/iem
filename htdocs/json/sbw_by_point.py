@@ -11,6 +11,7 @@ from paste.request import parse_formvars
 from pyiem.util import get_sqlalchemy_conn, utc
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE, get_ps_string
 from pandas.io.sql import read_sql
+from sqlalchemy import text
 
 ISO = "%Y-%m-%dT%H:%M:%SZ"
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -32,16 +33,21 @@ def get_events(ctx):
     data = {"sbws": [], "lon": ctx["lon"], "lat": ctx["lat"], "valid": None}
     data["generation_time"] = utc().strftime(ISO)
     valid_limiter = ""
+    params = {
+        "lon": ctx["lon"],
+        "lat": ctx["lat"],
+        "sdate": ctx["sdate"],
+        "edate": ctx["edate"],
+    }
     if "valid" in ctx:
-        valid_limiter = " and issue <= '%s+00' and expire > '%s+00' " % (
-            ctx["valid"].strftime("%Y-%m-%d %H:%M"),
-            ctx["valid"].strftime("%Y-%m-%d %H:%M"),
-        )
+        valid_limiter = " and issue <= :valid and expire > :valid "
         data["valid"] = ctx["valid"].strftime(ISO)
+        params["valid"] = ctx["valid"]
 
     with get_sqlalchemy_conn("postgis") as conn:
         df = read_sql(
-            f"""
+            text(
+                f"""
     select wfo, significance, phenomena,
     to_char(issue at time zone 'UTC',
                 'YYYY-MM-DDThh24:MIZ') as iso_issued,
@@ -53,13 +59,14 @@ def get_events(ctx):
                 'YYYY-MM-DD hh24:MI') as expired,
         eventid,
     tml_direction, tml_sknt, hvtec_nwsli, windtag, hailtag, tornadotag,
-    damagetag from sbw
-    where status = 'NEW' and
-    ST_Contains(geom, ST_SetSRID(ST_GeomFromEWKT('POINT(%s %s)'),4326)) and
-    issue > '2005-10-01' {valid_limiter} ORDER by issue ASC
-        """,
+    damagetag from sbw where status = 'NEW' and
+    ST_Contains(geom, ST_SetSRID(ST_GeomFromEWKT('POINT(:lon :lat)'),4326)) and
+    issue > :sdate and expire < :edate
+    {valid_limiter} ORDER by issue ASC
+        """
+            ),
             conn,
-            params=(ctx["lon"], ctx["lat"]),
+            params=params,
         )
     if df.empty:
         return data, df
@@ -122,6 +129,13 @@ def application(environ, start_response):
     ctx = {}
     ctx["lat"] = float(fields.get("lat", 41.99))
     ctx["lon"] = float(fields.get("lon", -92.0))
+    ctx["sdate"] = datetime.datetime.strptime(
+        fields.get("sdate", "2002/1/1"), "%Y/%m/%d"
+    )
+    ctx["edate"] = datetime.datetime.strptime(
+        fields.get("edate", "2099/1/1"), "%Y/%m/%d"
+    )
+
     fmt = fields.get("fmt", "json")
     try:
         try_valid(ctx, fields)
