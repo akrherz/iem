@@ -1,13 +1,14 @@
 <?php
 require_once "../../../../config/settings.inc.php";
 require_once "../../../../include/iemmap.php";
+require_once "../../../../include/forms.php";
 
 $var = isset($_GET["var"]) ? $_GET["var"] : "gdd50";
-$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
-$smonth = isset($_GET["smonth"]) ? $_GET["smonth"]:  5;
-$emonth = isset($_GET["emonth"]) ? $_GET["emonth"]: 10;
-$sday = isset($_GET["sday"]) ? $_GET["sday"]: 1;
-$eday = isset($_GET["eday"]) ? $_GET["eday"]: 1;
+$year = get_int404("year", date("Y"));
+$smonth = get_int404("smonth", 5);
+$emonth = get_int404("emonth", 9);
+$sday = get_int404("sday", 1);
+$eday = get_int404("eday", 30);
 $imgsz = isset($_GET["imgsz"]) ? $_GET["imgsz"] : "640x480";
 $ar = explode("x", $imgsz);
 $width = $ar[0];
@@ -104,29 +105,42 @@ foreach($jobj["features"] as $bogus => $value) {
     if ($value === null){
         continue;
     }
+    $sid = $props["station"];
+    $lon = $props["lon"];
+    $lat = $props["lat"];
+    if ($sid == "DONI4"){
+        $lat -= 0.2;
+    }
+    elseif ($sid == "AHTI4"){
+        $lat += 0.2;
+        $lon -= 0.2;
+    }
+    elseif ($sid == "FRUI4"){
+        $lat -= 0.05;
+    }
 
     // Red Dot... 
     $pt = ms_newPointObj();
-    $pt->setXY($props['lon'], $props['lat'], 0);
+    $pt->setXY($lon, $lat, 0);
     $pt->draw($map, $ponly, $img, 0);
 
     // Value UL
     $pt = ms_newPointObj();
-    $pt->setXY($props['lon'], $props['lat'], 0);
+    $pt->setXY($lon, $lat, 0);
     $pt->draw($map, $snet, $img, 1, round($value, $rnd[$datavar]) );
 
     // Climate
     if (substr($var, 0, 3) == "gdd" || $var == "precip")
     {
         $pt = ms_newPointObj();
-        $pt->setXY($props['lon'], $props['lat'], 0);
+        $pt->setXY($lon, $lat, 0);
         $pt->draw($map, $snet, $img, 2, "(". round($value - $props["climo_". $datavar], $rnd[$datavar]) .")");
 
     }
 
     // City Name
     $pt = ms_newPointObj();
-    $pt->setXY($props['lon'], $props['lat'], 0);
+    $pt->setXY($lon, $lat, 0);
     $ar = explode("-", $props['name']);
     $pt->draw($map, $snet, $img, 0, $ar[0] );
 }
@@ -137,5 +151,3 @@ $map->drawLabelCache($img);
 
 header("Content-type: image/png");
 $img->saveImage('');
-
-?>
