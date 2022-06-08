@@ -111,6 +111,40 @@ EOM;
     }
     $attrtable .= "</tbody></table>";
 }
+$threading = "";
+if ((strpos($network, "CLIMATE") > 0) && (substr($station, 2, 1) == "T")){
+    $pgconn = iemdb("mesosite");
+    pg_prepare(
+        $pgconn,
+        "SELECT",
+        "SELECT t.id, t.network, t.name, s.begin_date, s.end_date ".
+        "from station_threading s ".
+        "JOIN stations t on (s.source_iemid = t.iemid) WHERE s.iemid = $1 ".
+        "ORDER by s.begin_date ASC"
+    );
+    $result = pg_execute($pgconn, "SELECT", Array($metadata["iemid"]));
+    if (pg_numrows($result) > 0){
+        $threading = <<<EOM
+<h3>Station Threading:</h3>
+<p>This station threads together data from multiple stations to provide a
+long term record for the location.</p>
+<table class="table table-condensed table-striped">
+<thead><tr><th>Station</th><th>Begin Date</th><th>End Date</th></tr></thead>
+<tbody>
+EOM;
+    }
+    while ($row = pg_fetch_array($result)){
+        $threading .= sprintf(
+            "<tr><td><a href=\"/sites/site.php?station=%s&network=%s\">%s (%s)</a></td><td>%s</td><td>%s</td></tr>",
+            $row["id"], $row["network"], $row["name"], $row["id"],
+            $row["begin_date"], $row["end_date"],
+        );
+    }
+    if (pg_numrows($result) > 0){
+        $threading .= "</tbody></table>";
+    }
+    pg_close($pgconn);
+}
 
 $t->content = <<<EOF
 
@@ -132,6 +166,8 @@ $t->content = <<<EOF
 </table>
 
 {$attrtable}
+
+{$threading}
 
 <a href="networks.php?station={$station}&amp;network={$network}" class="btn btn-primary"><span class="fa fa-menu-hamburger"></span> View {$network} Network Table</a>
 

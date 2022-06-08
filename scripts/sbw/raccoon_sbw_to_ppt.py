@@ -22,9 +22,10 @@ from pyiem.util import get_dbconn, logger
 os.putenv("DISPLAY", "localhost:1")
 
 LOG = logger()
-__REV__ = "28Jan2020"
+__REV__ = "06Jun2022"
 TMPDIR = "/mesonet/tmp"
 SUPER_RES = datetime.datetime(2010, 3, 1)
+N0B_SWITCH = datetime.datetime(2022, 5, 16)
 
 
 def test_job():
@@ -84,7 +85,7 @@ def get_warnings(sts, ets, wfo, wtypes):
     tokens = wtypes.split(",")
     tokens.append("ZZZ")
     phenomenas = str(tuple(tokens))
-    pgconn = get_dbconn("postgis", user="nobody")
+    pgconn = get_dbconn("postgis")
     pcursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     sql = """
     WITH stormbased as (
@@ -354,13 +355,17 @@ def do_job(job):
             if job["nexrad_product"] == "N0U":
                 if now < SUPER_RES:
                     n0qn0r = "N0V"
-                else:
+                elif now < N0B_SWITCH:
                     n0qn0r = "N0U"
+                else:
+                    n0qn0r = "N0S"
             else:
                 if now < SUPER_RES:
                     n0qn0r = "N0R"
-                else:
+                elif now < N0B_SWITCH:
                     n0qn0r = "N0Q"
+                else:
+                    n0qn0r = "N0B"
 
             url = "http://iem.local/GIS/radmap.php?"
             url += "layers[]=ridge&ridge_product=%s&ridge_radar=%s&" % (

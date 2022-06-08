@@ -30,7 +30,7 @@ $jobj = iemws_json("currents.json", $arr);
 <th rowspan='2'>Valid</th>
 <th colspan='3'>Air Temp &deg;F</th>
 <th colspan='3'>Wind MPH</th>
-<th colspan='2'>Rain inch</th>
+<th rowspan='2'>Today's Rain inch</th>
 <th>4 inches</th>
 <th colspan='2'>12 inches</th>
 <th colspan='2'>24 inches</th>
@@ -39,7 +39,6 @@ $jobj = iemws_json("currents.json", $arr);
 <tr>
 <th>Ob</th><th>High</th><th>Low</th>
 <th>Speed</th><th>Gust</th><th>Today's Peak</th>
-<th>Hour</th><th>Day</th>
 <th>Temp &deg;F</th><th>Temp &deg;F</th><th>Moist %</th>
 <th>Temp &deg;F</th><th>Moist %</th>
 <th>Temp &deg;F</th><th>Moist %</th>
@@ -63,7 +62,7 @@ EOM;
          "<td><a href=\"%s\">%s</a></td><td>%s</td>".
  		 "<td>%s</td><td>%s</td><td>%s</td>".
  		 "<td>%s @ %s</td><td>%s</td><td>%s @ %s</td>".
- 		 "<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>".
+ 		 "<td>%s</td><td>%s</td><td>%s</td><td>%s</td>".
  		 "<td>%s</td><td>%s</td>".
          "<td>%s</td><td>%s</td></tr>",
          $sid, $uri, $nt->table[$sid]['name'],
@@ -75,7 +74,6 @@ EOM;
 			 pretty($data['gust'] * 1.15, '%.0f'),
 			 pretty($data['max_gust'] * 1.15, '%.0f'),
  			date("g:i A", strtotime($data['local_max_gust_ts'])),
-			 pretty($data['phour'], '%.2f'),
 			 pretty($data['pday'], '%.2f'),
 			 pretty($data["c1tmpf"], '%.1f'),
  			pretty($data["c2tmpf"], '%.1f'), 
@@ -100,7 +98,8 @@ EOM;
  $v = isset($_REQUEST["v"]) ? htmlentities($_REQUEST["v"]): 'tmpf';
  $t = new MyView();
  $t->current_network = "ISU Soil Moisture";
- $t->title = "ISU Ag Climate Sortable Currents"; 
+ $t->title = "ISU Ag Climate Sortable Currents";
+ $t->refresh = 300;
 
  $t->breadcrumbs = <<<EOF
  <ol class="breadcrumb">

@@ -144,13 +144,14 @@ class RAOB:
         fid = row[0]
         txn.execute("DELETE from raob_profile where fid = %s", (fid,))
         if txn.rowcount > 0 and self.valid.hour in [0, 12]:
-            LOG.warning(
-                "RAOB del %s rows for sid: %s valid: %s",
-                txn.rowcount,
-                self.station,
-                self.valid.strftime("%Y-%m-%d %H"),
-            )
-        table = "raob_profile_%s" % (self.valid.year,)
+            if self.station != "KSYA":  # noisey
+                LOG.warning(
+                    "RAOB del %s rows for sid: %s valid: %s",
+                    txn.rowcount,
+                    self.station,
+                    self.valid.strftime("%Y-%m-%d %H"),
+                )
+        table = f"raob_profile_{self.valid.year}"
         for d in self.profile:
             txn.execute(
                 f"INSERT into {table} (fid, ts, levelcode, pressure, height, "
