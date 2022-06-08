@@ -560,30 +560,6 @@ def daily_process(nwsli, maxts):
     return processed
 
 
-def update_pday():
-    """Compute today's precip from the current_log archive of data"""
-    LOG.info("update_pday() called...")
-    acursor = ACCESS.cursor()
-    acursor.execute(
-        """
-        SELECT s.iemid, sum(case when phour > 0 then phour else 0 end) from
-        current_log s JOIN stations t on (t.iemid = s.iemid)
-        WHERE t.network = 'ISUSM' and valid > 'TODAY' GROUP by s.iemid
-    """
-    )
-    data = {}
-    for row in acursor:
-        data[row[0]] = row[1]
-
-    for iemid, entry in data.items():
-        acursor.execute(
-            "UPDATE summary SET pday = %s WHERE iemid = %s and day = 'TODAY'",
-            (entry, iemid),
-        )
-    acursor.close()
-    ACCESS.commit()
-
-
 def get_max_timestamps(nwsli):
     """Fetch out our max values"""
     icursor = ISUAG.cursor()
@@ -710,7 +686,6 @@ def main(argv):
             hrprocessed,
             dyprocessed,
         )
-    update_pday()
     for nwsli, item in INVERSION.items():
         do_inversion(item, nwsli)
 

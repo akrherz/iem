@@ -5,6 +5,7 @@ cd cache
 python nws_wawa_archive.py &
 
 cd ../isusm
+python agg_precip.py &
 python csv2ldm.py &
 
 cd ../roads
