@@ -1,4 +1,5 @@
 // TODO print grid
+var dragPan;
 var olmap; // Openlayers map
 var lsrtable; // LSR DataTable
 var sbwtable; // SBW DataTable
@@ -328,10 +329,6 @@ function formatLSR(data) {
         '</div>';
 }
 
-function formatSBW(data) {
-    // Format what is presented
-    return '<div>' + data.link + '</div>';
-}
 function revisedRandId() {
     return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(2, 10);
 }
@@ -364,6 +361,75 @@ function lsrHTML(feature) {
     return lines.join("<br />");
 }
 
+function formatSBW(feature){
+    var lines = [];
+    var ph = feature.get("phenomena");
+    var pph = ph in iemdata.vtec_phenomena ? iemdata.vtec_phenomena[ph] : ph;
+    var s = feature.get("significance");
+    var ss = s in iemdata.vtec_significance ? iemdata.vtec_significance[s] : s;
+    lines.push("<strong>" + pph + " " + ss + "</strong>");
+    var issue = moment.utc(feature.get("issue"));
+    var expire = moment.utc(feature.get("expire"));
+    var ldt = issue.local().format("M/D LT");
+    var z = issue.utc().format("kk:mm")
+    lines.push("<strong>Issued:</strong> " + ldt + " (" + z + "Z)");
+    ldt = expire.local().format("M/D LT");
+    z = expire.utc().format("kk:mm")
+    lines.push("<strong>Expired:</strong> " + ldt + " (" + z + "Z)");
+    lines.push("<strong>More Details:</strong> <a href='" + feature.get("href") + "' target='_blank'>VTEC Browser</a>");
+    return lines.join("<br />");
+}
+
+function handleSBWClick(feature){
+    var divid = revisedRandId();
+    var div = document.createElement("div");
+    var title = feature.get("wfo") + " " + feature.get("phenomena") +
+        "." + feature.get("significance") + " #" + feature.get("eventid");
+    div.innerHTML = '<div class="panel panel-primary panel-popup" id="' + divid + '">' +
+        '<div class="panel-heading">' + title +
+        ' &nbsp; <button type="button" class="close" ' +
+        'data-target="#' + divid + '" data-dismiss="alert"> ' +
+        '<span aria-hidden="true">&times;</span>' +
+        '<span class="sr-only">Close</span></button></div>' +
+        '<div class="panel-body">' + formatSBW(feature) + '</div>' +
+        '</div>';
+    var coordinates = feature.getGeometry().getFirstCoordinate();
+    var marker = new ol.Overlay({
+        position: coordinates,
+        positioning: 'center-center',
+        element: div,
+        stopEvent: false,
+        dragging: false
+    });
+    olmap.addOverlay(marker);
+    div.addEventListener('mousedown', function (evt) {
+        dragPan.setActive(false);
+        marker.set('dragging', true);
+    });
+    olmap.on('pointermove', function (evt) {
+        if (marker.get('dragging') === true) {
+            marker.setPosition(evt.coordinate);
+        }
+    });
+    olmap.on('pointerup', function (evt) {
+        if (marker.get('dragging') === true) {
+            dragPan.setActive(true);
+            marker.set('dragging', false);
+        }
+    });
+    var id = feature.getId();
+    sbwtable.rows().deselect();
+    sbwtable.row(
+        sbwtable.rows(function (idx, data, node) {
+            if (data["id"] === id) {
+                sbwtable.row(idx).select();
+                return true;
+            }
+            return false;
+        })
+    ).show().draw(false);
+
+}
 function initUI() {
     // Generate UI components of the page
     var handle = $("#radartime");
@@ -502,7 +568,6 @@ function initUI() {
     });
     var ls = new ol.control.LayerSwitcher();
     olmap.addControl(ls);
-    var dragPan;
     olmap.getInteractions().forEach(function (interaction) {
         if (interaction instanceof ol.interaction.DragPan) {
             dragPan = interaction;
@@ -515,6 +580,10 @@ function initUI() {
                 return feature;
             });
         if (feature === undefined) {
+            return;
+        }
+        if (feature.get("phenomena") !== undefined) {
+            handleSBWClick(feature);
             return;
         }
         if (feature.get('magnitude') === undefined) return;
