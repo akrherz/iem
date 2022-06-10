@@ -2,9 +2,11 @@
 import json
 import datetime
 
-import memcache
+from pymemcache.client import Client
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
+
+DAMAGE_TAGS = "CONSIDERABLE DESTRUCTIVE CATASTROPHIC".split()
 
 
 def ptime(val):
@@ -14,12 +16,22 @@ def ptime(val):
     return val.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def run(wfo, year):
+def run(wfo, damagetag, year):
     """Actually generate output"""
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
+    wfolimiter = f" w.wfo = '{wfo}' and "
+    damagelimiter = ""
+    if damagetag is not None:
+        damagetag = damagetag.upper()
+        assert damagetag in DAMAGE_TAGS
+        wfolimiter = ""
+        damagelimiter = (
+            f" (damagetag = '{damagetag}' or "
+            f"floodtag_damage = '{damagetag}') and "
+        )
     cursor.execute(
-        """
+        f"""
     WITH stormbased as (
      SELECT eventid, phenomena, issue at time zone 'UTC' as utc_issue,
      expire at time zone 'UTC' as utc_expire,
@@ -27,34 +39,29 @@ def run(wfo, year):
      polygon_end at time zone 'UTC' as utc_polygon_end,
      status, windtag, hailtag, tornadotag, tml_sknt, damagetag, wfo,
      floodtag_flashflood, floodtag_damage, floodtag_heavyrain,
-     floodtag_dam, floodtag_leeve
-     from sbw_"""
-        + str(year)
-        + """ WHERE wfo = %s
-     and phenomena in ('SV', 'TO', 'FF', 'MA')
+     floodtag_dam, floodtag_leeve, waterspouttag
+     from sbw_{year} w WHERE {damagelimiter} {wfolimiter}
+     phenomena in ('SV', 'TO', 'FF', 'MA')
      and significance = 'W' and status != 'EXP' and status != 'CAN'
  ),
 
  countybased as (
      select string_agg( u.name || ' ['||u.state||']', ', ') as locations,
-     eventid, phenomena from warnings_"""
-        + str(year)
-        + """ w JOIN ugcs u
-    ON (u.gid = w.gid) WHERE w.wfo = %s and
+     eventid, phenomena, w.wfo from warnings_{year} w JOIN ugcs u
+    ON (u.gid = w.gid) WHERE {wfolimiter}
     significance = 'W' and phenomena in ('SV', 'TO', 'FF', 'MA')
-    and eventid is not null GROUP by eventid, phenomena
+    and eventid is not null GROUP by w.wfo, eventid, phenomena
  )
 
  SELECT c.eventid, c.locations, s.utc_issue, s.utc_expire,
  s.utc_polygon_begin, s.utc_polygon_end, s.status, s.windtag, s.hailtag,
  s.tornadotag, s.tml_sknt, s.damagetag, s.wfo, s.phenomena,
  s.floodtag_flashflood, s.floodtag_damage, s.floodtag_heavyrain,
- s.floodtag_dam, s.floodtag_leeve
- from countybased c, stormbased s WHERE c.eventid = s.eventid and
- c.phenomena = s.phenomena
- ORDER by eventid ASC, utc_polygon_begin ASC
+ s.floodtag_dam, s.floodtag_leeve, s.waterspouttag
+ from countybased c JOIN stormbased s ON (c.eventid = s.eventid and
+ c.phenomena = s.phenomena and c.wfo = s.wfo)
+ ORDER by s.wfo ASC, eventid ASC, utc_polygon_begin ASC
      """,
-        (wfo, wfo),
     )
 
     res = dict(
@@ -65,12 +72,8 @@ def run(wfo, year):
     )
     for row in cursor:
         # TODO the wfo here is a bug without it being 4 char
-        href = "/vtec/#%s-O-%s-K%s-%s-W-%04i" % (
-            year,
-            row[6],
-            row[12],
-            row[13],
-            row[0],
+        href = (
+            f"/vtec/#{year}-O-{row[6]}-K{row[12]}-{row[13]}-W-{row[0]:04.0f}"
         )
         data = dict(
             eventid=row[0],
@@ -95,6 +98,7 @@ def run(wfo, year):
             floodtag_heavyrain=row[16],
             floodtag_dam=row[17],
             floodtag_leeve=row[18],
+            waterspouttag=row[19],
         )
         res["results"].append(data)
 
@@ -106,20 +110,23 @@ def application(environ, start_response):
     fields = parse_formvars(environ)
     wfo = fields.get("wfo", "DMX")[:4]
     year = int(fields.get("year", 2015))
+    damagetag = fields.get("damagetag")
     cb = fields.get("callback")
 
-    mckey = "/json/ibw_tags/v2/%s/%s" % (wfo, year)
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    mckey = (
+        f"/json/ibw_tags/{damagetag if damagetag is not None else wfo}/{year}"
+    )
+    mc = Client(["iem-memcached", 11211])
     res = mc.get(mckey)
     if not res:
-        res = run(wfo, year)
+        res = run(wfo, damagetag, year)
         mc.set(mckey, res, 3600)
-
-    if cb is None:
-        data = res
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        res = res.decode("utf-8")
+    mc.close()
+    if cb is not None:
+        res = f"{html_escape(cb)}({res})"
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return [res.encode("ascii")]
