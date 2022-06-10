@@ -17,7 +17,7 @@
 
  $damagetags = Array(
     "considerable" => "Considerable",
-    "destructive" => "Destructive",
+    "destructive" => "Destructive (SVR Only)",
     "catastrophic" => "Catastrophic",
 );
 if (!array_key_exists($damagetag, $damagetags)) {

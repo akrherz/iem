@@ -120,20 +120,6 @@ def mm2in(val):
     return (val * units.mm).to(units.inch).m
 
 
-def estimate_snow(df, ds):
-    """Estimate the Snow based on COOP reports"""
-    snowgrid12 = mm2in(ds["snow_12z"].values)
-    snowdgrid12 = mm2in(ds["snowd_12z"].values)
-
-    for sid, row in df.iterrows():
-        if pd.isnull(row["snow"]):
-            df.at[sid, "snow"] = snowgrid12[row["gridj"], row["gridi"]]
-            df.at[sid, "dirty"] = True
-        if pd.isnull(row["snowd"]):
-            df.at[sid, "snowd"] = snowdgrid12[row["gridj"], row["gridi"]]
-            df.at[sid, "dirty"] = True
-
-
 def k2f(val):
     """Converter."""
     return (val * units.degK).to(units.degF).m
@@ -327,7 +313,7 @@ def main(argv):
         if state not in NON_CONUS:
             estimate_hilo(df, ds)
             estimate_precip(df, ds)
-            estimate_snow(df, ds)
+            # We can not estimate snow at this time.
         if threaded:
             merge_threaded(df, threaded)
         if not commit(cursor, table, df, date):
