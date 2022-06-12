@@ -15,8 +15,8 @@ from pyiem.network import Table as NetworkTable
 from pyiem.util import utc
 
 PRODS = {
-    "NEXRAD": ["N0B", "N0S", "N0U", "N0Z", "NET"],
-    "TWDR": ["NET", "TZL", "TV0"],
+    "NEXRAD": ["N0B", "N0S"],
+    "TWDR": ["TZL", "TV0"],
 }
 PILS = (
     "LSR|FWW|CFW|TCV|RFW|FFA|SVR|TOR|SVS|SMW|MWS|NPW|WCN|WSW|EWW|FLS"
