@@ -73,7 +73,6 @@ def get_context(fdict):
     station = ctx["station"]
     varname = ctx["var"]
     half = ctx["half"]
-    table = "alldata_%s" % (station[:2],)
 
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
@@ -87,14 +86,14 @@ def get_context(fdict):
             extract(doy from day) + 366 else
             extract(doy from day) end,
             CASE WHEN month < 7 then year - 1 else year end, {varname}, day
-            from {table} WHERE station = %s and low is not null and
+            from alldata WHERE station = %s and low is not null and
             high is not null and day >= %s ORDER by day ASC""",
             (station, datetime.date(startyear, 7, 1)),
         )
     else:
         cursor.execute(
             f"""SELECT extract(doy from day), year, {varname} from
-            {table} WHERE station = %s and high is not null and
+            alldata WHERE station = %s and high is not null and
             low is not null and year >= %s ORDER by day ASC""",
             (station, startyear),
         )
@@ -155,9 +154,9 @@ def get_context(fdict):
     ctx["year"] = year
     ctx["half"] = half
     if ctx["half"] == "fall":
-        title = "Minimum Daily %s Temperature after 1 July"
+        title = "Season to Date Minimum Daily %s Temperature after 1 July"
     else:
-        title = "Maximum Daily %s Temperature"
+        title = "Year to Date Maximum Daily %s Temperature"
     title = title % (varname.capitalize(),)
     ctx["ylabel"] = title
     ctx["title"] = f"{startyear}-{thisyear - 1} {ctx['_sname']}\n" f"{title}"
@@ -268,7 +267,7 @@ def plotter(fdict):
         color="b",
         lw=1.5,
         zorder=6,
-        label="%s" % (ctx["year"],),
+        label=f"{ctx['year']}",
     )
     if ctx["half"] == "spring":
         ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
@@ -281,10 +280,10 @@ def plotter(fdict):
         labels = calendar.month_abbr[7:]
         labels.extend(calendar.month_abbr[1:7])
         ax.set_xticklabels(labels)
-    ax.set_ylabel(r"%s $^\circ$F" % (ctx["ylabel"],))
+    ax.set_ylabel(ctx["ylabel"] + r" $^\circ$F")
     ax.axhline(ctx["t"], linestyle="--", lw=1, color="k", zorder=6)
     ax.text(
-        ax.get_xlim()[1], ctx["t"], r"%.0f$^\circ$F" % (ctx["t"],), va="center"
+        ax.get_xlim()[1], ctx["t"], f"{ctx['t']:.0f}" r"$^\circ$F", va="center"
     )
     ax.grid(True)
 
