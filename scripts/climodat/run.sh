@@ -6,6 +6,3 @@ python ks_monthly.py
 python avg_temp.py `date +%Y`
 python precip_days.py `date +%Y`
 python yearly_precip.py `date +%Y`
-
-cd /mesonet/share/climodat/
-zip -q -r everything.zip ks

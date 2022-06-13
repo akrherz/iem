@@ -134,7 +134,6 @@ RewriteRule ^/search /search.py [QSA]
   Alias "/archive/rer" "/mesonet/ARCHIVE/rer"
   Alias "/m/img"     "/mesonet/share/iemmaps"
   Alias "/sites/pics"     "/mesonet/share/pics"
-  Alias "/climodat/everything.zip" "/mesonet/share/climodat/everything.zip"
   Alias "/climodat/reports" "/mesonet/share/climodat/reports"
   Alias "/climodat/ks" "/mesonet/share/climodat/ks"
 
