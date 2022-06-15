@@ -337,6 +337,22 @@ EOM
 	)
 );
 
+$services[] = Array(
+	"title" => "NWS VTEC Event Listing by WFO valid during Given Period",
+	"url" => "/json/vtec_events_bywfo.py?wfo={wfo}&start={start}&end={end}",
+	"desc" => "Produces a listing of VTEC Events (watch, warning,
+	advisories) by wfo with UGC information enumerated.",
+	"vars" => Array(
+			"wfo" => "3 character WFO identifier",
+			"start" => "ISO Start Datetime UTC (YYYY-MM-DDTHH:MM)",
+			"end" => "ISO End Datetime UTC (YYYY-MM-DDTHH:MM)",
+	),
+	"example" => Array(
+			"{wfo}" => "DMX",
+			"{start}" => "2022-06-14T00:00",
+			"{end}" => "2022-06-15T00:00",
+	)
+);
   
   $services[] = Array(
   		"title" => "NWS Text Products by AWIPS ID and Time Period",
