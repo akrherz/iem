@@ -86,10 +86,10 @@ def application(environ, start_response):
     wfo = fields.get("wfo", "DMX")[:3].upper()
     start = datetime.datetime.strptime(
         fields.get("start", "2022-05-01T12:00")[:16], "%Y-%m-%dT%H:%M"
-    )
+    ).replace(tzinfo=datetime.timezone.utc)
     end = datetime.datetime.strptime(
         fields.get("end", "2022-05-02T12:00")[:16], "%Y-%m-%dT%H:%M"
-    )
+    ).replace(tzinfo=datetime.timezone.utc)
     phenomena = fields.get("phenomena")
     significance = fields.get("significance")
     cb = fields.get("callback", None)
