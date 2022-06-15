@@ -39,6 +39,10 @@ def get_df(wfo, start, end, phenomena, significance):
             text(
                 f"""
             SELECT
+            to_char(product_issue at time zone 'UTC',
+                'YYYY-MM-DDThh24:MI:SSZ') as product_issued,
+            to_char(init_expire at time zone 'UTC',
+                'YYYY-MM-DDThh24:MI:SSZ') as init_expired,
             to_char(issue at time zone 'UTC',
                 'YYYY-MM-DDThh24:MI:SSZ') as issued,
             to_char(expire at time zone 'UTC',
@@ -66,8 +70,10 @@ def as_json(df):
         res["events"].append(
             {
                 "url": row["url"],
+                "product_issued": row["product_issued"],
                 "issue": row["issued"],
                 "expire": row["expired"],
+                "init_expired": row["init_expired"],
                 "eventid": row["eventid"],
                 "phenomena": row["phenomena"],
                 "hvtec_nwsli": row["hvtec_nwsli"],
