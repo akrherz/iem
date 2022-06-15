@@ -47,6 +47,8 @@ def get_df(wfo, start, end, phenomena, significance):
                 'YYYY-MM-DDThh24:MI:SSZ') as issued,
             to_char(expire at time zone 'UTC',
                 'YYYY-MM-DDThh24:MI:SSZ') as expired,
+            to_char(updated at time zone 'UTC',
+                'YYYY-MM-DDThh24:MI:SSZ') as updated,
             eventid, phenomena, significance, hvtec_nwsli, wfo, ugc
             from warnings WHERE wfo = :wfo and issue < :end
             and (expire > :start or init_expire > :start)
@@ -74,6 +76,7 @@ def as_json(df):
                 "issue": row["issued"],
                 "expire": row["expired"],
                 "init_expired": row["init_expired"],
+                "updated": row["updated"],
                 "eventid": row["eventid"],
                 "phenomena": row["phenomena"],
                 "hvtec_nwsli": row["hvtec_nwsli"],
