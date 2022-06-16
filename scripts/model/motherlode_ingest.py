@@ -16,7 +16,7 @@ from pyiem.util import get_dbconn, logger
 LOG = logger()
 NT = NetworkTable("IA_ASOS")
 
-BASE_URL = "https://tds.scigw.unidata.ucar.edu/thredds/ncss/grib/NCEP/"
+BASE_URL = "https://tds.scigw.unidata.ucar.edu/thredds/ncss/grid/grib/NCEP/"
 BASE_URL2 = "http://thredds.ucar.edu/thredds/ncss/grib/NCEP/"
 URLS = {
     "NAM": (
@@ -166,7 +166,7 @@ def run_model(mcursor, model, runtime):
         cnt = run(
             mcursor,
             model,
-            "K" + sid,
+            f"K{sid}",
             NT.sts[sid]["lon"],
             NT.sts[sid]["lat"],
             runtime,
