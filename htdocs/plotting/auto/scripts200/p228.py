@@ -132,7 +132,7 @@ def plotter(fdict):
         sector="state",
         state=state,
     )
-    mp.draw_usdm(date)
+    mp.draw_usdm(date, alpha=1)
     mp.drawcounties()
     levels = [-100, -2, -1.6, -1.3, -0.8, -0.5, 0.5, 0.8, 1.3, 1.6, 2, 100]
     cmap = mpcolors.ListedColormap(
@@ -156,7 +156,7 @@ def plotter(fdict):
         edgecolor="#ffffff",
         aspect=None,
         ax=mp.panels[0].ax,
-        zorder=Z_OVERLAY2,
+        zorder=Z_OVERLAY2 + 3,
         markersize=60,
     )
     df.to_crs(mp.panels[0].crs).assign(
@@ -166,7 +166,7 @@ def plotter(fdict):
         edgecolor="#ffffff",
         aspect=None,
         ax=mp.panels[0].ax,
-        zorder=Z_OVERLAY2,
+        zorder=Z_OVERLAY2 + 3,
         markersize=60,
     )
     df.to_crs(mp.panels[0].crs).assign(
@@ -176,7 +176,7 @@ def plotter(fdict):
         edgecolor="#ffffff",
         aspect=None,
         ax=mp.panels[0].ax,
-        zorder=Z_OVERLAY2,
+        zorder=Z_OVERLAY2 + 3,
         markersize=60,
     )
 
