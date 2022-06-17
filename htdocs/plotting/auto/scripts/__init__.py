@@ -243,6 +243,10 @@ daily_opts = [
     {"id": 81, "label": "Standard Deviation of Daily Temperatures"},
     {"id": 28, "label": "Trailing Number of Days Precipitation Total Rank"},
     {
+        "id": 228,
+        "label": "Trailing Standardized Precipitation (SPI) + Drought Monitor",
+    },
+    {
         "id": 142,
         "label": "Trailing X Number of Days Temp/Precipitation Departures",
     },
