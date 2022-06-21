@@ -119,7 +119,14 @@ def plotter(fdict):
         ),
         subtitle=f"Valid {edate:%d %b %Y %H%M} UTC",
     )
-    mp.fill_cwas(data, bins=bins, ilabel=True, units="Days", lblformat="%.0f")
+    mp.fill_cwas(
+        data,
+        bins=bins,
+        ilabel=True,
+        units="Days",
+        lblformat="%.0f",
+        labelbuffer=0,
+    )
 
     return mp.fig, df
 

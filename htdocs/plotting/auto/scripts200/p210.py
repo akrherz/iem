@@ -152,6 +152,7 @@ def plotter(fdict):
         extend="neither",
         bins=bins,
         units="count" if ctx["var"] == "count" else "year",
+        labelbuffer=0,
     )
     return mp.fig, df
 
