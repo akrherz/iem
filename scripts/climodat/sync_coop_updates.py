@@ -144,7 +144,8 @@ def main():
                 coopdb.commit()
                 ccursor = coopdb.cursor(cursor_factory=DictCursor)
 
-    LOG.warning("synced %s rows, %s unused, %s dups", updates, unused, dups)
+    logl = LOG.warning if updates < 500 else LOG.info
+    logl("synced %s rows, %s unused, %s dups", updates, unused, dups)
     ccursor.close()
     coopdb.commit()
 

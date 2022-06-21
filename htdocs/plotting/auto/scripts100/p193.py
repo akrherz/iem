@@ -4,7 +4,7 @@ import os
 
 import numpy as np
 import pygrib
-from pyiem.plot import MapPlot, get_cmap
+from pyiem.plot import MapPlot, get_cmap, pretty_bins
 from pyiem.util import get_autoplot_context, utc, mm2inch
 from pyiem.exceptions import NoDataFound
 
@@ -126,8 +126,7 @@ def plotter(fdict):
     cmap.set_under("#EEEEEE")
     cmap.set_over("black")
     if scale == "auto":
-        levs = np.linspace(0, np.max(precip) * 1.1, 10)
-        levs = [round(lev, 2) for lev in levs]
+        levs = pretty_bins(0, np.max(precip))
         levs[0] = 0.01
     elif scale == "10":
         levs = np.arange(0, 10.1, 1.0)
