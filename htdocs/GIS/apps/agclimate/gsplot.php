@@ -39,8 +39,8 @@ $varDef = Array(
   "gdd50" => "Growing Degree Days (base=50)",
   "gdd51" => "Growing Degree Days (base=51)",
   "gdd52" => "Growing Degree Days (base=52)",
-  "et" => "Potential Evapotranspiration",
-  "precip" => "Precipitation",
+  "et" => "Potential Evapotranspiration (inch)",
+  "precip" => "Precipitation (inch)",
   "srad" => "Solar Radiation (langleys)",
   "sgdd50" => "Soil Growing Degree Days (base=50)",
   "sgdd52" => "Soil Growing Degree Days (base=52)",
@@ -91,10 +91,10 @@ $states->draw($img);
 $iards->draw($img);
 $bar640t->draw($img);
 
-$sdate = mktime(0, 0, 0, $smonth, $sday, $year);
-$edate = mktime(0, 0, 0, $emonth, $eday, $year);
-$sstr_txt = strftime("%b %d", $sdate);
-$estr_txt = strftime("%b %d", $edate);
+$sdate = new DateTime("${year}-${smonth}-${sday}");
+$edate = new DateTime("${year}-${emonth}-${eday}");
+$sstr_txt = $sdate->format("M j");
+$estr_txt = $edate->format("M j");
 
 $jdata = file_get_contents("http://iem.local". $wsuri);
 $jobj = json_decode($jdata, $assoc=TRUE);
@@ -102,17 +102,30 @@ $jobj = json_decode($jdata, $assoc=TRUE);
 foreach($jobj["features"] as $bogus => $value) {
     $props = $value["properties"];
     $value = $props[$datavar];
-    if ($value === null){
+    if (is_null($value)){
         continue;
     }
     $sid = $props["station"];
     $lon = $props["lon"];
     $lat = $props["lat"];
+    if ($datavar == "et" && $sid == "GVNI4"){
+        continue;
+    }
     if ($sid == "DONI4"){
         $lat -= 0.2;
     }
     elseif ($sid == "AHTI4"){
         $lat += 0.2;
+        $lon -= 0.2;
+    }
+    elseif ($sid == "AKCI4"){
+        $lat -= 0.2;
+        $lon += 0.2;
+    }
+    elseif ($sid == "AMFI4"){
+        continue;
+    }
+    elseif ($sid == "BOOI4"){
         $lon -= 0.2;
     }
     elseif ($sid == "FRUI4"){
@@ -146,7 +159,7 @@ foreach($jobj["features"] as $bogus => $value) {
 }
 
 iemmap_title($map, $img, $year." ". $varDef[$var] , 
-	"(". $sstr_txt ." - ". $estr_txt .")");
+	"(". $sstr_txt ." - ". $estr_txt .") [some stations moved for legibility]");
 $map->drawLabelCache($img);
 
 header("Content-type: image/png");
