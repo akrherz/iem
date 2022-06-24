@@ -261,7 +261,6 @@ def gen_metars(obs, filename, convids=False):
 
 def update_iemaccess(obs):
     """Update the IEMAccess database"""
-    icursor = IEM.cursor()
     for sid in obs:
         ob = obs[sid]
         iemob = Observation(sid, "IA_RWIS", ob["valid"])
@@ -277,9 +276,10 @@ def update_iemaccess(obs):
                 iemob.data[varname] = ob.get(varname)
             elif not np.isnan(thisval):
                 iemob.data[varname] = ob.get(varname)
+        icursor = IEM.cursor()
         iemob.save(icursor)
-    icursor.close()
-    IEM.commit()
+        icursor.close()
+        IEM.commit()
 
 
 def process_features(features):
