@@ -135,7 +135,7 @@ def plotter(fdict):
         data[row[0].hour].append(row[1])
 
     title = (
-        f"{ctx['_nt'].sts[station]['name']} [{station}] Hourly Temp "
+        f"{ctx['_sname']} :: Hourly Temp "
         f"Distributions over ({month.capitalize()})"
     )
     subtitle = (

@@ -45,7 +45,6 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     season = ctx["season"]
-    table = f"alldata_{station[:2]}"
 
     year = (
         "case when month > 6 then year + 1 else year end"
@@ -57,7 +56,7 @@ def plotter(fdict):
             f"""
         WITH obs as (
             SELECT day, month, high, low, {year} as season
-            from {table} WHERE station = %s),
+            from alldata WHERE station = %s),
         data as (
             SELECT season, day,
             max(high) OVER (PARTITION by season ORDER by day ASC
@@ -83,18 +82,16 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No Data Found.")
     df2 = df[df["typ"] == season]
-    fig = figure(apctx=ctx)
+
+    tt = f"{PDICT[season]} Steps {'Down' if season == 'fall' else 'Up'}"
+    title = f"{ctx['_sname']} :: {tt} in Temperature"
+    fig = figure(title=title, apctx=ctx)
     ax = fig.subplots(3, 1)
     dyear = df2.groupby(["year"]).count()
     ax[0].bar(dyear.index, dyear["level"], facecolor="tan", edgecolor="tan")
     ax[0].axhline(dyear["level"].mean(), lw=2)
     ax[0].set_ylabel(f"Yearly Events Avg: {dyear['level'].mean():.1f}")
     ax[0].set_xlim(dyear.index.min() - 1, dyear.index.max() + 1)
-    title = f"{PDICT[season]} Steps {'Down' if season == 'fall' else 'Up'}"
-    ax[0].set_title(
-        f"{ctx['_nt'].sts[station]['name']} [{station}]\n"
-        f"{title} in Temperature"
-    )
     ax[0].grid(True)
 
     ax[1].hist(

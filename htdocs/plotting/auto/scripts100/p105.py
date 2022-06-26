@@ -107,24 +107,23 @@ def plotter(fdict):
     if df.empty:
         raise NoDataFound("No Data Found.")
 
-    fig = figure(apctx=ctx)
+    fig = figure(title=f"{ctx['_sname']} :: Precipitation Metrics", apctx=ctx)
     ax = fig.subplots(2, 1, sharex=True)
 
     ax[0].plot(np.arange(1, 366), df["d1"], c="r", label="No Rain")
     ax[0].plot(
-        np.arange(1, 366), df["d2"], c="b", label="Below %.2fin" % (threshold,)
+        np.arange(1, 366),
+        df["d2"],
+        c="b",
+        label=f"Below {threshold:.2f}in",
     )
     ax[0].set_ylabel("Consec Days below threshold")
     ax[0].grid(True)
     ax[0].legend(ncol=2, loc=(0.5, -0.13), fontsize=10)
-    ax[0].set_title(
-        "%s [%s] Precipitation Metrics"
-        % (ctx["_nt"].sts[station]["name"], station)
-    )
     ax[0].text(
         0.05,
         -0.09,
-        "Trace Reports %s" % ("Included" if use_trace else "Excluded",),
+        f"Trace Reports {'Included' if use_trace else 'Excluded'}",
         transform=ax[0].transAxes,
         ha="left",
     )

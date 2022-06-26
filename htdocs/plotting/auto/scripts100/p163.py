@@ -78,7 +78,10 @@ def get_description():
         "description"
     ] = """This application generates a map displaying the
     number of LSRs issued between a period of your choice by NWS Office. These
-    are the preliminary reports and not official totals of events.
+    are the preliminary reports and not official totals of events.</p>
+
+    <p>For plots that compare against an "average" value, the period of record
+    is used (since 2002).</p>
 
     <p><strong>NOTE:</strong> If you choose a period longer than one year,
     only the "count" metric is available.  Sorry.

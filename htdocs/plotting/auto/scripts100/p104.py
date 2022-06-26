@@ -108,12 +108,12 @@ def plotter(fdict):
         for i in range(0, 0 - days, -1):
             sdays.append((now + datetime.timedelta(days=i)).strftime("%m%d"))
         cursor.execute(
-            f"""
+            """
         SELECT avg(p), stddev(p), avg(t), stddev(t),
         max(case when year = %s then p else -999 end),
         max(case when year = %s then t else -999 end) from
         (SELECT year, sum(precip) as p, avg((high+low)/2.) as t
-        from alldata_{station[:2]}
+        from alldata
         WHERE station = %s and sday in %s GROUP by year) as foo
         """,
             (now.year, now.year, station, tuple(sdays)),

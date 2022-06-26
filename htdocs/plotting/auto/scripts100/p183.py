@@ -26,7 +26,7 @@ def get_description():
     ] = """This plot presents a time series of areal coverage
     of United States Drought Monitor for a given state of your choice. This
     plot uses a JSON data service provided by the
-    <a href="http://droughtmonitor.unl.edu">Drought Monitor</a> website.
+    <a href="https://droughtmonitor.unl.edu">Drought Monitor</a> website.
     """
     today = datetime.datetime.today()
     sts = today - datetime.timedelta(days=720)
@@ -65,8 +65,8 @@ def plotter(fdict):
     state = ctx["state"]
 
     fips = ""
-    for key in state_fips:
-        if state_fips[key] == state:
+    for key, entry in state_fips.items():
+        if entry == state:
             fips = key
     if ctx["s"] == "state":
         payload = {"area": fips, "statstype": "2"}

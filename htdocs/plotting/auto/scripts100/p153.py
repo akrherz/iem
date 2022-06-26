@@ -8,20 +8,18 @@ from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
-PDICT = dict(
-    [
-        ("max_dwpf", "Highest Dew Point Temperature"),
-        ("min_dwpf", "Lowest Dew Point Temperature"),
-        ("max_tmpf", "Highest Air Temperature"),
-        ("min_tmpf", "Lowest Air Temperature"),
-        ("max_feel", "Highest Feels Like Temperature"),
-        ("min_feel", "Lowest Feels Like Temperature"),
-        ("max_mslp", "Maximum Sea Level Pressure"),
-        ("min_mslp", "Minimum Sea Level Pressure"),
-        ("max_alti", "Maximum Pressure Altimeter"),
-        ("min_alti", "Minimum Pressure Altimeter"),
-    ]
-)
+PDICT = {
+    "max_dwpf": "Highest Dew Point Temperature",
+    "min_dwpf": "Lowest Dew Point Temperature",
+    "max_tmpf": "Highest Air Temperature",
+    "min_tmpf": "Lowest Air Temperature",
+    "max_feel": "Highest Feels Like Temperature",
+    "min_feel": "Lowest Feels Like Temperature",
+    "max_mslp": "Maximum Sea Level Pressure",
+    "min_mslp": "Minimum Sea Level Pressure",
+    "max_alti": "Maximum Pressure Altimeter",
+    "min_alti": "Minimum Pressure Altimeter",
+}
 UNITS = {
     "max_dwpf": "F",
     "max_tmpf": "F",

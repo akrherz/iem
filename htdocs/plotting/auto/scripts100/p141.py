@@ -144,13 +144,13 @@ def plotter(fdict):
         resdf["%s[F]" % (_v)] = c2f(thisyear[_v].values)
     resdf["rain[in]"] = mm2inch(thisyear["rain"])
     for _ptype, unit in zip(["gdd", "rain"], ["F", "in"]):
-        resdf[_ptype + "cum_climo[%s]" % (unit,)] = cdf.groupby("doy")[
+        resdf[f"{_ptype}cum_climo[{unit}]"] = cdf.groupby("doy")[
             _ptype + "cum"
         ].mean()
-        resdf[_ptype + "cum_min[%s]" % (unit,)] = df.groupby("doy")[
+        resdf[f"{_ptype}cum_min[{unit}]"] = df.groupby("doy")[
             _ptype + "cum"
         ].min()
-        resdf[_ptype + "cum_max[%s]" % (unit,)] = df.groupby("doy")[
+        resdf[f"{_ptype}cum_max[{unit}]"] = df.groupby("doy")[
             _ptype + "cum"
         ].max()
     for _ptype in ["maxt", "mint"]:
