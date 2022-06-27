@@ -116,6 +116,9 @@ def plotter(fdict):
 
     # compute the affine
     (west, east, south, north) = mp.panels[0].get_extent(LATLON)
+    # HACK
+    if mp.sector == "conus":
+        west, east, south, north = (-126, -65, 23, 50)
     raster = np.zeros(
         (int((north - south) / griddelta), int((east - west) / griddelta))
     )
