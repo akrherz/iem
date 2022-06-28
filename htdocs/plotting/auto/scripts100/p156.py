@@ -238,7 +238,7 @@ def plotter(fdict):
             if row == 0 and col == 0 and ctx["w"] == "one":
                 ax.legend(ncol=5, loc=(0.35, -0.1), prop=prop)
             if row == 0 and col == 1:
-                ax.legend(ncol=5, loc=(1.4, -0.25), prop=prop)
+                ax.legend(ncol=5, loc=(0.4, -0.25), prop=prop)
             ax.set_xticks(xticks)
             ax.set_xticklabels(calendar.month_abbr[1:])
             ax.set_xlim(df["doy"].min() - 5, df["doy"].max() + 5)
