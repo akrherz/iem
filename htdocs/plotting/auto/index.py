@@ -26,7 +26,7 @@ if BASEDIR not in sys.path:
 # Local
 import scripts  # noqa
 
-HIGHCHARTS = "9.3.1"
+HIGHCHARTS = "10.1.0"
 OPENLAYERS = "6.4.3"
 CSECTORS = state_names.copy()
 CSECTORS.update(SECTORS_NAME)
@@ -564,7 +564,9 @@ def generate_form(apid, fdict, headers, cookies):
             ] += f"""
 <script src="/vendor/highcharts/{HIGHCHARTS}/highcharts.js"></script>
 <script src="/vendor/highcharts/{HIGHCHARTS}/highcharts-more.js"></script>
+<script src="/vendor/highcharts/{HIGHCHARTS}/modules/accessibility.js"></script>
 <script src="/vendor/highcharts/{HIGHCHARTS}/modules/exporting.js"></script>
+<script src="/vendor/highcharts/{HIGHCHARTS}/modules/heatmap.js"></script>
 <script src="{res['imguri']}.js"></script>
             """
         elif fmt == "maptable":

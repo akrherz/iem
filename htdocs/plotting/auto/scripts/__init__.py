@@ -139,10 +139,7 @@ daily_opts = [
     {"id": 35, "label": "Histogram of X Hour Temp/RH/Dew/Pressure Changes"},
     {
         "id": 60,
-        "label": (
-            "Hourly Temperature/Dew Point/RH Frequencies "
-            "Above/Below Threshold"
-        ),
+        "label": ("Hourly Variable Frequencies/Min/Max by Week of Year"),
     },
     {"id": 86, "label": "IEM Daily Reanalysis Plots"},
     {
