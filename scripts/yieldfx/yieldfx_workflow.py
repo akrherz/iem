@@ -14,16 +14,13 @@ from io import StringIO
 import os
 import subprocess
 
-import dropbox
-import requests
 import numpy as np
 import pandas as pd
 from metpy.units import units
 from pyiem.meteorology import gdd
 from pyiem.util import (
-    get_properties,
     get_dbconn,
-    get_dbconnstr,
+    get_sqlalchemy_conn,
     logger,
     convert_value,
 )
@@ -36,68 +33,22 @@ XREF = {
     "lewis": {"isusm": "OKLI4", "climodat": "IA0364"},
     "nashua": {"isusm": "NASI4", "climodat": "IA1402"},
     "sutherland": {"isusm": "CAMI4", "climodat": "IA1442"},
-    "kanawha": {"isusm": "KNAI4", "climodat": "IA1541"},
+    "kanawha": {"isusm": "KNAI4", "climodat": "IA2977"},
     "mcnay": {"isusm": "CHAI4", "climodat": "IA1394"},
     "muscatine": {"isusm": "FRUI4", "climodat": "IA5837"},
 }
-
-DO_UPLOAD = len(sys.argv) == 1
-if not DO_UPLOAD:
-    LOG.info("Disabling dropbox upload of results")
 
 
 def p(val, prec):
     """Use 99 for missing values, which Dr A says is wrong, sigh"""
     if val is None or np.isnan(val):
         return "99"
-    _fmt = "%%.%sf" % (prec,)
+    _fmt = f"%.{prec}f"
     return _fmt % (val,)
-
-
-def upload_summary_plots():
-    """Some additional work"""
-    props = get_properties()
-    dbx = dropbox.Dropbox(props.get("dropbox.token"))
-    year = datetime.date.today().year
-    interval = "jan1"
-    for opt in ["yes", "no"]:
-        for location in XREF:
-            (tmpfd, tmpfn) = tempfile.mkstemp()
-            uri = (
-                "http://iem.local/plotting/auto/plot/143/"
-                "location:%s::s:%s::opt:%s::dpi:100.png"
-            ) % (location, interval, opt)
-            res = requests.get(uri)
-            os.write(tmpfd, res.content)
-            os.close(tmpfd)
-            today = datetime.date.today()
-            remotefn = ("%s_%s_%s%s.png") % (
-                location,
-                today.strftime("%Y%m%d"),
-                interval,
-                "_yields" if opt == "yes" else "",
-            )
-            if DO_UPLOAD:
-                try:
-                    dbx.files_upload(
-                        open(tmpfn, "rb").read(),
-                        ("/YieldForecast/Daryl/%s vs other years plots%s/%s")
-                        % (
-                            year,
-                            " with yields" if opt == "yes" else "",
-                            remotefn,
-                        ),
-                        mode=dropbox.files.WriteMode.overwrite,
-                    )
-                except Exception:
-                    LOG.info("dropbox fail")
-            os.unlink(tmpfn)
 
 
 def write_and_upload(df, location):
     """We are done, whew!"""
-    props = get_properties()
-    dbx = dropbox.Dropbox(props.get("dropbox.token"))
     (tmpfd, tmpfn) = tempfile.mkstemp(text=True)
     sio = StringIO()
     for line in open("baseline/%s.met" % (location,)):
@@ -178,16 +129,6 @@ def write_and_upload(df, location):
     os.close(tmpfd)
 
     today = datetime.date.today()
-    remotefn = "%s_%s.met" % (location, today.strftime("%Y%m%d"))
-    if DO_UPLOAD:
-        try:
-            dbx.files_upload(
-                open(tmpfn, "rb").read(),
-                "/YieldForecast/Daryl/%s" % (remotefn,),
-                mode=dropbox.files.WriteMode.overwrite,
-            )
-        except Exception:
-            LOG.info("dropbox fail")
     # Save file for usage by web plotting...
     os.chmod(tmpfn, 0o644)
     # os.rename fails here due to cross device link bug
@@ -205,16 +146,17 @@ def qc(df):
 
 def load_baseline(location):
     """return a dataframe of this location's data"""
-    df = pd.read_sql(
-        """
-        SELECT *, extract(doy from valid) as doy,
-        extract(year from valid) as year
-        from yieldfx_baseline where station = %s ORDER by valid
-        """,
-        get_dbconnstr("coop", user="nobody"),
-        params=(location,),
-        index_col="valid",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            """
+            SELECT *, extract(doy from valid) as doy,
+            extract(year from valid) as year
+            from yieldfx_baseline where station = %s ORDER by valid
+            """,
+            conn,
+            params=(location,),
+            index_col="valid",
+        )
     # we want data from 1980 to this year
     today = datetime.date.today()
     # So now, we need to move any data that exists for this year and overwrite
@@ -239,7 +181,7 @@ def load_baseline(location):
 
 def replace_forecast(df, location):
     """Replace dataframe data with forecast for this location"""
-    pgconn = get_dbconn("coop", user="nobody")
+    pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
     today = datetime.date.today()
     nextjan1 = datetime.date(today.year + 1, 1, 1)
@@ -295,7 +237,7 @@ def replace_forecast(df, location):
 
 def replace_cfs(df, location):
     """Replace the CFS data for this year!"""
-    pgconn = get_dbconn("coop", user="nobody")
+    pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
     coop = XREF[location]["climodat"]
     today = datetime.date.today() + datetime.timedelta(days=3)
@@ -338,7 +280,7 @@ def replace_obs_iem(df, location):
     Tricky part, if the baseline already provides data for this year, we should
     use it!
     """
-    pgconn = get_dbconn("iem", user="nobody")
+    pgconn = get_dbconn("iem")
     cursor = pgconn.cursor()
     station = XREF[location]["station"]
     today = datetime.date.today()
@@ -403,7 +345,7 @@ def replace_obs(df, location):
     Tricky part, if the baseline already provides data for this year, we should
     use it!
     """
-    pgconn = get_dbconn("isuag", user="nobody")
+    pgconn = get_dbconn("isuag")
     cursor = pgconn.cursor()
     isusm = XREF[location]["isusm"]
     today = datetime.date.today()
@@ -418,8 +360,7 @@ def replace_obs(df, location):
     cursor.execute(
         """
         select valid, tair_c_max_qc, tair_c_min_qc, slrkj_tot_qc / 1000.,
-        vwc_12_avg_qc,
-        vwc_24_avg_qc, vwc_50_avg_qc, t4_c_avg_qc, t12_c_avg_qc,
+        vwc12_qc, vwc24_qc, vwc50_qc, t4_c_avg_qc, t12_c_avg_qc,
         t24_c_avg_qc, t50_c_avg_qc,
         rain_in_tot_qc * 25.4 from sm_daily WHERE station = %s and valid >= %s
         and tair_c_max_qc is not null and tair_c_min_qc is not null
@@ -480,7 +421,7 @@ def replace_obs(df, location):
                 row[11],
             )
     if replaced:
-        LOG.debug(
+        LOG.info(
             "  replaced with obs from %s for %s->%s",
             isusm,
             replaced[0],
@@ -497,20 +438,11 @@ def compute_gdd(df):
 
 def do(location):
     """Workflow for a particular location"""
-    LOG.debug("yieldfx_workflow: Processing '%s'", location)
+    LOG.info("yieldfx_workflow: Processing '%s'", location)
     # 1. Read baseline
     df = load_baseline(location)
     # 2. Add columns and observed data
-    for colname in [
-        "gdd",
-        "st4",
-        "st12",
-        "st24",
-        "st50",
-        "sm12",
-        "sm24",
-        "sm50",
-    ]:
+    for colname in "gdd st4 st12 st24 st50 sm12 sm24 sm50".split():
         df[colname] = None
     # 3. Do data replacement
     # TODO: what to do with RAIN!
@@ -529,7 +461,7 @@ def do(location):
     # 8. Write and upload the file
     write_and_upload(df, location)
     # 9. Upload summary plots
-    upload_summary_plots()
+    # upload_summary_plots()
 
 
 def main(argv):

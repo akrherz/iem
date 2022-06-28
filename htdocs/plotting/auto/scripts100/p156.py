@@ -50,6 +50,14 @@ NASS_CROP_PROGRESS_LOOKUP = {
         "SOIL, TOPSOIL - MOISTURE, MEASURED IN PCT SHORT",
     ],
 }
+PDICT = {
+    "six": "Plot all six states",
+    "one": "Plot just state #1",
+}
+PDICT2 = {
+    "all": "Plot all available years",
+    "s": "Plot only selected years",
+}
 
 
 def get_description():
@@ -59,19 +67,30 @@ def get_description():
     desc["nass"] = True
     desc[
         "description"
-    ] = """This chart presents crop condition reports.
+    ] = """This chart presents crop condition reports from USDA/NASS.
 
-    <p><strong>Update 28 June 2021:</strong> The CGI interface was modified
-    to use a different signature, sorry for breaking any previous
-    bookmarks.</p>
     """
     desc["arguments"] = [
+        dict(
+            type="select",
+            name="w",
+            default="six",
+            options=PDICT,
+            label="How many states to plot:",
+        ),
         dict(type="state", name="st1", default="IA", label="Select State #1:"),
         dict(type="state", name="st2", default="IL", label="Select State #2:"),
         dict(type="state", name="st3", default="MN", label="Select State #3:"),
         dict(type="state", name="st4", default="WI", label="Select State #4:"),
         dict(type="state", name="st5", default="MO", label="Select State #5:"),
         dict(type="state", name="st6", default="IN", label="Select State #6:"),
+        dict(
+            type="select",
+            name="y",
+            default="all",
+            options=PDICT2,
+            label="How many years to plot:",
+        ),
         dict(
             type="year",
             min=1981,
@@ -130,17 +149,17 @@ def plotter(fdict):
     years = [y1, y2, y3, y4]
     states = [st1, st2, st3, st4, st5, st6]
     varname = ctx["var"]
-    params = NASS_CROP_PROGRESS_LOOKUP[varname]
-    if isinstance(params, list):
-        dlimit = " short_desc in %s" % (str(tuple(params)),)
-    else:
-        dlimit = f" short_desc = '{params}' "
+    desc = NASS_CROP_PROGRESS_LOOKUP[varname]
+    if not isinstance(desc, list):
+        desc = [
+            desc,
+        ]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             text(
                 "select extract(year from week_ending) as year, week_ending, "
                 "sum(num_value) as value, state_alpha "
-                f"from nass_quickstats where {dlimit} and "
+                "from nass_quickstats where short_desc in :desc and "
                 "num_value is not null and state_alpha in :states "
                 "GROUP by year, week_ending, state_alpha "
                 "ORDER by state_alpha, week_ending"
@@ -148,6 +167,7 @@ def plotter(fdict):
             conn,
             params={
                 "states": tuple(states),
+                "desc": tuple(desc),
             },
             index_col=None,
             parse_dates="week_ending",
@@ -157,36 +177,47 @@ def plotter(fdict):
     df["doy"] = pd.to_numeric(df["week_ending"].dt.strftime("%j"))
     prop = FontProperties(size=10)
 
-    title = ("USDA Weekly Crop Condition Report :: %s (%.0f-%.0f)") % (
-        NASS_CROP_PROGRESS[varname],
-        df["year"].min(),
-        df["year"].max(),
+    title = (
+        f"{NASS_CROP_PROGRESS[varname]} "
+        f"({df['year'].min():.0f} till {df['week_ending'].max():%-d %b %Y})"
     )
-    fig = figure(title=title, apctx=ctx)
-    width = 0.29
+    fig = figure(
+        title=title,
+        subtitle="USDA/NASS Weekly Crop Condition Report",
+        apctx=ctx,
+    )
+    width = 0.28
     height = 0.32
-    x0 = 0.05
+    x0 = 0.08
     xpad = 0.03
     y0 = 0.07
     y1 = 0.51
-    axes = [
-        [
-            fig.add_axes([x0, y1, width, height]),
-            fig.add_axes([x0 + width + xpad, y1, width, height]),
-            fig.add_axes([x0 + 2 * width + 2 * xpad, y1, width, height]),
-        ],
-        [
-            fig.add_axes([x0, y0, width, height]),
-            fig.add_axes([x0 + width + xpad, y0, width, height]),
-            fig.add_axes([x0 + 2 * width + 2 * xpad, y0, width, height]),
-        ],
-    ]
+    if ctx["w"] == "one":
+        axes = [
+            [fig.add_axes([x0, 0.12, 0.9, 0.75]), None, None],
+            [None, None, None],
+        ]
+    else:
+        axes = [
+            [
+                fig.add_axes([x0, y1, width, height]),
+                fig.add_axes([x0 + width + xpad, y1, width, height]),
+                fig.add_axes([x0 + 2 * width + 2 * xpad, y1, width, height]),
+            ],
+            [
+                fig.add_axes([x0, y0, width, height]),
+                fig.add_axes([x0 + width + xpad, y0, width, height]),
+                fig.add_axes([x0 + 2 * width + 2 * xpad, y0, width, height]),
+            ],
+        ]
 
     xticks = (1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335)
     i = 0
     for col in range(3):
         for row in range(2):
             ax = axes[row][col]
+            if ax is None:
+                continue
             state = states[i]
             df2 = df[df["state_alpha"] == state]
             if df2.empty:
@@ -194,6 +225,8 @@ def plotter(fdict):
             colors = ["black", "green", "blue", "red"]
 
             for year, gdf in df2.groupby("year"):
+                if ctx["y"] != "all" and year not in years:
+                    continue
                 ax.plot(
                     gdf["doy"],
                     gdf["value"],
@@ -202,8 +235,10 @@ def plotter(fdict):
                     zorder=5 if year in years else 3,
                     label=f"{year:.0f}" if year in years else None,
                 )
+            if row == 0 and col == 0 and ctx["w"] == "one":
+                ax.legend(ncol=5, loc=(0.35, -0.1), prop=prop)
             if row == 0 and col == 1:
-                ax.legend(ncol=5, loc=(0.4, -0.25), prop=prop)
+                ax.legend(ncol=5, loc=(1.4, -0.25), prop=prop)
             ax.set_xticks(xticks)
             ax.set_xticklabels(calendar.month_abbr[1:])
             ax.set_xlim(df["doy"].min() - 5, df["doy"].max() + 5)
@@ -215,7 +250,7 @@ def plotter(fdict):
             ax.text(
                 0,
                 1.0,
-                "%s" % (state_names[state],),
+                state_names[state],
                 ha="left",
                 va="bottom",
                 size=16,

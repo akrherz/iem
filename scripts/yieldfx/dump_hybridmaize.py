@@ -2,50 +2,49 @@
 import datetime
 import subprocess
 
-import dropbox
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_properties, get_dbconn, logger, convert_value
+from pyiem.util import get_dbconn, logger, convert_value
 
 LOG = logger()
 SITES = ["ames", "nashua", "sutherland", "crawfordsville", "lewis"]
 XREF = ["BOOI4", "NASI4", "CAMI4", "CRFI4", "OKLI4"]
+DIRPATH = "/mesonet/share/pickup/yieldfx"
 
 
 def main():
     """Go Main Go"""
     nt = NetworkTable("ISUSM")
-    ipgconn = get_dbconn("iem", user="nobody")
+    ipgconn = get_dbconn("iem")
     icursor = ipgconn.cursor()
-    props = get_properties()
-    dbx = dropbox.Dropbox(props.get("dropbox.token"))
     today = datetime.date.today()
     for i, site in enumerate(SITES):
         # Need to figure out this year's data
         thisyear = {}
         # get values from latest yieldfx dump
-        for line in open("/mesonet/share/pickup/yieldfx/%s.met" % (site,)):
-            line = line.strip()
-            if not line.startswith("2016"):
-                continue
-            tokens = line.split()
-            valid = datetime.date(int(tokens[0]), 1, 1) + datetime.timedelta(
-                days=int(tokens[1]) - 1
-            )
-            if valid >= today:
-                break
-            thisyear[valid.strftime("%m%d")] = {
-                "radn": float(tokens[2]),
-                "maxt": float(tokens[3]),
-                "mint": float(tokens[4]),
-                "rain": float(tokens[5]),
-                "windspeed": None,
-                "rh": None,
-            }
+        with open(f"{DIRPATH}/{site}.met", encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line.startswith("2016"):
+                    continue
+                tokens = line.split()
+                valid = datetime.date(
+                    int(tokens[0]), 1, 1
+                ) + datetime.timedelta(days=int(tokens[1]) - 1)
+                if valid >= today:
+                    break
+                thisyear[valid.strftime("%m%d")] = {
+                    "radn": float(tokens[2]),
+                    "maxt": float(tokens[3]),
+                    "mint": float(tokens[4]),
+                    "rain": float(tokens[5]),
+                    "windspeed": None,
+                    "rh": None,
+                }
         # Supplement with DSM data
         icursor.execute(
             """
         select day, avg_sknt, avg_rh from summary where iemid = 37004
-        and day >= '2016-01-01' ORDER by day ASC"""
+        and day >= '2022-01-01' ORDER by day ASC"""
         )
         for row in icursor:
             if row[1] is None or row[2] is None:
@@ -102,11 +101,6 @@ year    day     Solar   T-High  T-Low   RelHum  Precip  WndSpd\r
             now += datetime.timedelta(days=1)
         fh.close()
         try:
-            dbx.files_upload(
-                open(fn, "rb").read(),
-                "/Hybrid-Maize-Metfiles/%s" % (fn,),
-                mode=dropbox.files.WriteMode.overwrite,
-            )
             subprocess.call(
                 ("mv %s /mesonet/share/pickup/yieldfx/%s.wth") % (fn, site),
                 shell=True,
