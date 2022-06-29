@@ -72,7 +72,7 @@ def get_description():
     desc["arguments"] = [
         dict(
             type="csector",
-            name="sector",
+            name="csector",
             default="conus",
             label="Select Sector:",
         ),
@@ -224,7 +224,6 @@ def plotter(fdict):
 
     mp = MapPlot(
         apctx=ctx,
-        sector=ctx["sector"],
         title=ctx["title"],
         subtitle=ctx["subtitle"],
         nocaption=True,
