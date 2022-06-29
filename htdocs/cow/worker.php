@@ -21,6 +21,9 @@ function printLSR($lsr, $verified=FALSE)
     } else {
         $leadtime = $lsr["leadtime"] ." minutes";
     }
+    if (array_key_exists("__assoc__", $lsr)){
+        $background = "#8FBC8F";
+    }
     if ($lsr["tdq"] || ! $verified) {
         $background = "#aaa";
     }
@@ -81,23 +84,26 @@ function printWARN($lsrs, $warn)
         $warn["significance"], $warn["eventid"], $lsrbuffer,
         $warn["areaverify"] / $warn["parea"] * 100., $warn["fcster"]);
 
-  
-    /* TODO
-    if ($warn["stormreports"] == ""){
-      	$s .= "<tr><td></td><td colspan=\"10\">The warning above had one or more local
-  	    		storm reports that were within previously issued warnings and are
-  		    	not double counted here.  Thus the warning appears as verified,
-  			    but no local storm reports are shown. Future code improvements may 
-  			    be added to the Cow to better account for these.</td></tr>";
-    }
-    */
     $all_lsrs = explode(",", $warn["stormreports_all"]);
     $verif_lsrs = explode(",", $warn["stormreports"]);
     foreach($lsrs as $k => $lsr){
-        if (in_array($lsr["id"], $all_lsrs)){
-            $verified = in_array($lsr["id"], $verif_lsrs);
-            $s .= printLSR($lsr["properties"], $verified);
+        if (! in_array($lsr["id"], $all_lsrs)){
+            continue;
         }
+        $verified = in_array($lsr["id"], $verif_lsrs);
+        // Recompute the lead time as this LSR may have a leadtime based on
+        // an earlier warning
+        $lsrvalid = new DateTime($lsr["properties"]["valid"]);
+        $leadtime = (
+            intval($lsrvalid->diff($issue)->format("%h")) * 60 +
+            intval($lsrvalid->diff($issue)->format("%i"))
+        );
+        if ($leadtime != $lsr["properties"]["leadtime"]){
+            $lsr["properties"]["leadtime"] = $leadtime;
+            $lsr["properties"]["__assoc__"] = True;
+        }
+
+        $s .= printLSR($lsr["properties"], $verified);
     }
     return $s;
 }
@@ -278,9 +284,14 @@ ${fwarning}
 <i>Size % (C-P)/C:</i> Size reduction gained by the storm based warning,
 <i>Perimeter Ratio:</i> Estimated percentage of the storm based warning polygon border that was influenced by political boundaries (0% is ideal).
 <i>Areal Verification %:</i> Percentage of the polygon warning that received a verifying report (report is buffered {$lsrbuffer} km).
-<br />The second line is for details on any LSRs. If the displayed lead time for
-the LSR has a gray background, it means the LSR did not verify that warning due
-to it being a non-verifying type.
+
+<table class="table-condensed">
+<tr><th>LSR Leadtime Color Key</th>
+<td style="background: #0F0;">LSR verified warning</td>
+<td style="background: #8FBC8F;">LSR covered by earlier warning</td>
+<td style="background: #AAA;">LSR non-verifying type for warning</td>
+</table>
+
 <br />
 <table cellspacing="0" cellpadding="2" border="1">
 <tr>
