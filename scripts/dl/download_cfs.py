@@ -26,7 +26,7 @@ def dl(now, varname, scenario):
     s2 = f"{scenario:02d}"
     uri = (
         "https://nomads.ncep.noaa.gov/pub/data/nccf/com/cfs/prod/"
-        f"cfs/cfs.{now:%Y%m%d/%H}/time_grib_{s2}/{varname}.{s2}"
+        f"cfs.{now:%Y%m%d/%H}/time_grib_{s2}/{varname}.{s2}"
         f".{now:%Y%m%d%H}.daily.grb2"
     )
     LOG.info("fetching %s", uri)
