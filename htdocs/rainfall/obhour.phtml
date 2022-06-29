@@ -1,14 +1,20 @@
 <?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
+require_once "../../include/forms.php";
 $t = new MyView();
+$network = isset($_GET["network"]) ? xssafe($_GET["network"]): "IA_ASOS";
 
-$t->headextra = '<link rel="stylesheet" type="text/css" href="/vendor/ext/3.4.1/resources/css/ext-all.css"/>
+$t->headextra = <<<EOM
+<link rel="stylesheet" type="text/css" href="/vendor/ext/3.4.1/resources/css/ext-all.css"/>
 <script type="text/javascript" src="/vendor/ext/3.4.1/adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="/vendor/ext/3.4.1/ext-all.js"></script>
 <script type="text/javascript" src="/vendor/ext/ux/StatusBar.js"></script>
-<script type="text/javascript" src="obhour-static.js?v=2"></script>
-';
+<script>
+var defaultnetwork = '{$network}';
+</script>
+<script type="text/javascript" src="obhour-static.js"></script>
+EOM;
 
 $t->title = "Hourly Precip Accumulator";
 

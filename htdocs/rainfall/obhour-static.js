@@ -1,3 +1,10 @@
+function updateURI(network){
+    // set the URI
+    const url = new URL(window.location);
+    url.searchParams.set('network', network);
+    window.history.pushState({}, '', url);
+}
+
 Ext.onReady(function(){
 
 Ext.namespace('iemdata');
@@ -71,7 +78,7 @@ var network_selector = new Ext.form.ComboBox({
              emptyText:'Select a Network...',
              selectOnFocus:true,
              lazyRender: true,
-             value:"IA_ASOS",
+             value:defaultnetwork,
              width:190
 });
 
@@ -130,6 +137,7 @@ var selectform = new Ext.form.FormPanel({
          handler: function() {
            var sff = Ext.getCmp('selectform').getForm();
            var network = sff.findField('network').getValue();
+           updateURI(network);
            var localDate = sff.findField('df').getValue();
            var tm = sff.findField('tm').getValue();
            var d = new Date.parseDate(tm, 'h A');
@@ -260,6 +268,4 @@ new Ext.Viewport({
          ]
 });
 
-
-// End of static.js
 });
