@@ -35,13 +35,13 @@ $m2 = monthSelect("", "month2");
 $d2 = daySelect2("", "day2");
 
 $ar = Array(
-		"Etc/UTC" => "Coordinated Universal Time (UTC)",
-		"America/New_York" => "America/New_York (EST/EDT)",
-		"America/Chicago" => "America/Chicago (CST/CDT)",
-		"America/Denver" => "America/Denver (MST/MDT)",
-		"America/Los_Angeles" => "America/Los_Angeles (WST/WDT)",
-		"America/Anchorage" => "America/Anchorage (AKST/AKDT)",
-		);
+    "Etc/UTC" => "Coordinated Universal Time (UTC)",
+    "America/New_York" => "America/New_York (EST/EDT)",
+    "America/Chicago" => "America/Chicago (CST/CDT)",
+    "America/Denver" => "America/Denver (MST/MDT)",
+    "America/Los_Angeles" => "America/Los_Angeles (PST/PDT)",
+    "America/Anchorage" => "America/Anchorage (AKST/AKDT)",
+);
 
 $tzselect = make_select("tz", "America/Chicago", $ar);
 
@@ -119,5 +119,3 @@ data prior to 2010 for missing hours.</div>
 
 EOF;
 $t->render('single.phtml');
-
-?>

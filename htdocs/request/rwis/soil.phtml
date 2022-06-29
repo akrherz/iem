@@ -20,13 +20,13 @@ $ds2 = daySelect2("", "day2");
 $hs2 = gmtHourSelect("", "hour2");
 
 $ar = Array(
-		"Etc/UTC" => "Coordinated Universal Time (UTC)",
-		"America/New_York" => "America/New_York (EST/EDT)",
-		"America/Chicago" => "America/Chicago (CST/CDT)",
-		"America/Denver" => "America/Denver (MST/MDT)",
-		"America/Los_Angeles" => "America/Los_Angeles (WST/WDT)",
-		"America/Anchorage" => "America/Anchorage (AKST/AKDT)",
-		);
+    "Etc/UTC" => "Coordinated Universal Time (UTC)",
+    "America/New_York" => "America/New_York (EST/EDT)",
+    "America/Chicago" => "America/Chicago (CST/CDT)",
+    "America/Denver" => "America/Denver (MST/MDT)",
+    "America/Los_Angeles" => "America/Los_Angeles (PST/PDT)",
+    "America/Anchorage" => "America/Anchorage (AKST/AKDT)",
+);
 $tzselect = make_select("tz", "Etc/UTC", $ar);
 
 $t->content = <<<EOF
@@ -133,5 +133,3 @@ How shall the output values be seperated?
 </form>
 EOF;
 $t->render('single.phtml');
-
-?>

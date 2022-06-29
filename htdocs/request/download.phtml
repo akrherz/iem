@@ -27,12 +27,12 @@ $d1select = daySelect2(1, "day1");
 $d2select = daySelect2(date("d"), "day2");
 
 $ar = Array(
-	"Etc/UTC" => "Coordinated Universal Time (UTC)",
-	"America/New_York" => "America/New_York (EST/EDT)",
+    "Etc/UTC" => "Coordinated Universal Time (UTC)",
+    "America/New_York" => "America/New_York (EST/EDT)",
     "America/Chicago" => "America/Chicago (CST/CDT)",
     "America/Denver" => "America/Denver (MST/MDT)",
-    "America/Los_Angeles" => "America/Los_Angeles (WST/WDT)",
-	"America/Anchorage" => "America/Anchorage (AKST/AKDT)",
+    "America/Los_Angeles" => "America/Los_Angeles (PST/PDT)",
+    "America/Anchorage" => "America/Anchorage (AKST/AKDT)",
 );
 
 $tzselect = make_select("tz", "Etc/UTC", $ar);
@@ -315,4 +315,3 @@ by site. Values are in inches. This value may or may not contain frozen
 
 EOF;
 $t->render('full.phtml');
-?>
