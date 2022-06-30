@@ -189,6 +189,8 @@ def fetch_daily(form, cols):
         df["solar"] = df["slrkj_tot_qc"] * 1000.0
     if "solar_mj" in cols:
         df["solar_mj"] = df["slrkj_tot_qc"] / 1000.0
+    if "et" in cols:
+        df["et"] = convert_value(df["et"], "mm", "inch")
 
     overwrite = (
         "bp_mb lwmv_1 lwmv_2 lwmdry_1_tot lwmcon_1_tot lwmwet_1_tot "
