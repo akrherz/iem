@@ -163,7 +163,7 @@ def plotter(fdict):
     df["ceiling"] = df.apply(ceilingfunc, axis=1)
 
     title = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
+        f"{ctx['_sname']}\n"
         f"Recent Time Series {pd.to_datetime(df.index.values[0]):%Y %b %-d} - "
         f"{pd.to_datetime(df.index.values[-1]):%Y %b %-d}"
     )

@@ -185,7 +185,7 @@ def plotter(fdict):
     # Compute the monthly totals
     with util.get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
         SELECT year, month, avg((high+low)/2.) as avg_temp,
         avg(high) as avg_high, min(high) as min_high,
         avg(low) as avg_low, max(low) as max_low,
@@ -201,8 +201,7 @@ def plotter(fdict):
         sum(gddxx(50, 86, high, low)) as gdd50,
         sum(gddxx(51, 86, high, low)) as gdd51,
         sum(gddxx(52, 86, high, low)) as gdd52
-        from alldata_{station[:2]}
-        WHERE station = %s and day < %s GROUP by year, month
+        from alldata WHERE station = %s and day < %s GROUP by year, month
         """,
             conn,
             params=(threshold, station, today.replace(day=1)),
@@ -242,11 +241,11 @@ def plotter(fdict):
     )
     y = (
         h_slope
-        * np.arange(resdf[varname1 + "_1"].min(), resdf[varname1 + "_1"].max())
+        * np.arange(resdf[f"{varname1}_1"].min(), resdf[f"{varname1}_1"].max())
         + intercept
     )
     ax.plot(
-        np.arange(resdf[varname1 + "_1"].min(), resdf[varname1 + "_1"].max()),
+        np.arange(resdf[f"{varname1}_1"].min(), resdf[f"{varname1}_1"].max()),
         y,
         lw=2,
         color="r",
@@ -309,8 +308,7 @@ def plotter(fdict):
     )
     ll = len(
         resdf[
-            (resdf["%s_1" % (varname1,)] < x)
-            & (resdf["%s_2" % (varname2,)] < y)
+            (resdf[f"{varname1}_1"] < x) & (resdf[f"{varname2}_2"] < y)
         ].index
     )
     ax.text(

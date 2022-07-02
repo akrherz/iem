@@ -114,7 +114,7 @@ def plotter(fdict):
 
     ccursor.execute(
         "SELECT year, month, sum(precip), avg((high+low)/2.) "
-        f"from alldata_{station[:2]} where station = %s GROUP by year, month",
+        "from alldata where station = %s GROUP by year, month",
         (station,),
     )
     if ccursor.rowcount == 0:
@@ -134,11 +134,7 @@ def plotter(fdict):
         data["precip"] += _precip
         data["temp"].append(float(_temp))
 
-    title2 = "[%s] %s %s" % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-        title(wanted),
-    )
+    title2 = f"{ctx['_sname']} :: {title(wanted)}"
     subtitle = "%s SOI (3 month average)" % (
         datetime.date(2000, wantmonth, 1).strftime("%B"),
     )
@@ -173,9 +169,7 @@ def plotter(fdict):
                 x, y, facecolor=c, edgecolor="k", s=60, zorder=3, marker="o"
             )
         if year in highyears:
-            ax.text(
-                x, y + 0.2, "%s" % (year,), ha="center", va="bottom", zorder=5
-            )
+            ax.text(x, y + 0.2, f"{year}", ha="center", va="bottom", zorder=5)
         rows.append(dict(year=year, precip=x, tmpf=y, soi3m=val))
 
     ax.axhline(np.average(ys), lw=2, color="k", linestyle="-.", zorder=2)

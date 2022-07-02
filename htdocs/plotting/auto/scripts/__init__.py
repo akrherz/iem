@@ -626,10 +626,10 @@ mopts = [
     {"id": 16, "label": "Wind Rose when specified criterion is meet"},
 ]
 nsopts = [
-    {"id": 156, "label": ("Crop Condition by Year for Six States")},
-    {"id": 127, "label": ("Crop Progress by Year")},
-    {"id": 197, "label": ("Crop Progress State Average Map")},
-    {"id": 209, "label": ("Crop Progress Weekly Change")},
+    {"id": 156, "label": "NASS Crop Condition by Year for Six States"},
+    {"id": 127, "label": "NASS Crop Progress by Year"},
+    {"id": 197, "label": "NASS Crop Progress State Average Map"},
+    {"id": 209, "label": "NASS Crop Progress Weekly Change"},
 ]
 nopts = [
     {

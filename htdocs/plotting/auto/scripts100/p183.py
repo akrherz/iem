@@ -95,14 +95,12 @@ def plotter(fdict):
     df.index.name = "Date"
 
     df = df.reset_index()
+    tt = state_names[state] if ctx["s"] == "state" else "CONUS"
     title = (
-        "Areal coverage of Drought for %s\n" "from US Drought Monitor %s - %s"
-    ) % (
-        state_names[state] if ctx["s"] == "state" else "CONUS",
-        df["Date"].min().strftime("%-d %B %Y"),
-        df["Date"].max().strftime("%-d %B %Y"),
+        f"Areal coverage of Drought for {tt}\n"
+        f"from US Drought Monitor {df['Date'].min():%-d %B %Y} - "
+        f"{df['Date'].max():%-d %B %Y}"
     )
-
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     # HACK to get a datetime64 to datetime so matplotlib works
@@ -163,7 +161,7 @@ def plotter(fdict):
     ax.set_xlim(
         df["Date"].min(), df["Date"].max() + datetime.timedelta(days=7)
     )
-    ax.legend(loc=(-0.04, -0.15), ncol=5, fontsize=14)
+    ax.legend(bbox_to_anchor=(0, -0.13, 1, 0), loc="center", ncol=5)
     ax.set_position([0.1, 0.15, 0.8, 0.75])
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b\n%Y"))
 

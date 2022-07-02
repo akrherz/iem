@@ -474,10 +474,10 @@ def generate_form(apid, fdict, headers, cookies):
         res[
             "nassmsg"
         ] = """
-<div class="alert alert-warning">This data presentation utilizes the
+<p><div class="alert alert-warning">This data presentation utilizes the
         <a href="http://quickstats.nass.usda.gov/">USDA NASS Quickstats</a>.
         This presentation is not endorsed nor certified by USDA.
-</div>
+</div></p>
         """
     form = ""
     formhtml = ""
@@ -564,7 +564,8 @@ def generate_form(apid, fdict, headers, cookies):
             ] += f"""
 <script src="/vendor/highcharts/{HIGHCHARTS}/highcharts.js"></script>
 <script src="/vendor/highcharts/{HIGHCHARTS}/highcharts-more.js"></script>
-<script src="/vendor/highcharts/{HIGHCHARTS}/modules/accessibility.js"></script>
+<script src="/vendor/highcharts/{HIGHCHARTS}/modules/accessibility.js">
+</script>
 <script src="/vendor/highcharts/{HIGHCHARTS}/modules/exporting.js"></script>
 <script src="/vendor/highcharts/{HIGHCHARTS}/modules/heatmap.js"></script>
 <script src="{res['imguri']}.js"></script>
@@ -698,6 +699,7 @@ function onNetworkChange(newnetwork){{
         <button type="submit" name="_cb" value="1">
         Force Updated Plot (no caching)</button>
 </form>
+    {res['nassmsg']}
     """
     if meta.get("data"):
         res[

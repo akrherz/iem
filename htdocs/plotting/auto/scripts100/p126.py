@@ -141,10 +141,7 @@ def plotter(fdict):
         label="%s" % (year,),
     )
 
-    ax[0].set_title(
-        ("%s [%s]\nDaily Mean Surface %s")
-        % (station, ctx["_nt"].sts[station]["name"], PDICT[varname])
-    )
+    ax[0].set_title(f"{ctx['_sname']}]\nDaily Mean Surface {PDICT[varname]}")
     lbl = (
         "Mixing Ratio ($g/kg$)"
         if varname == "mixing_ratio"
