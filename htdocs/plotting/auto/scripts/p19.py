@@ -95,13 +95,13 @@ def plotter(fdict):
     elif month == "summer":
         months = [6, 7, 8]
     else:
-        ts = datetime.datetime.strptime("2000-" + month + "-01", "%Y-%b-%d")
+        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
     with get_sqlalchemy_conn("coop") as conn:
         ddf = pd.read_sql(
             text(
-                f"SELECT high, low, year, month from alldata_{station[:2]} "
+                "SELECT high, low, year, month from alldata "
                 "WHERE station = :station "
                 "and year > 1892 and high >= low and month in :months "
             ),
@@ -131,12 +131,11 @@ def plotter(fdict):
     hist.mask = np.where(hist < (1.0 / years), True, False)
     ar = np.argwhere(hist.max() == hist)
 
-    title = f"[{station}] {ctx['_nt'].sts[station]['name']}"
     subtitle = (
         "Daily High vs Low Temperature Histogram + Range between Low + High "
         f"(month={month.upper()})"
     )
-    fig = figure(title=title, subtitle=subtitle, apctx=ctx)
+    fig = figure(title=ctx["_sname"], subtitle=subtitle, apctx=ctx)
     kax = fig.add_axes([0.65, 0.5, 0.3, 0.36])
     kax.grid(True)
     kax.text(

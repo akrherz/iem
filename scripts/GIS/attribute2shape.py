@@ -10,8 +10,9 @@ import datetime
 
 import shapefile
 import psycopg2.extras
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconn, utc, logger
 
+LOG = logger()
 INFORMATION = """
    Iowa Environmental Mesonet
    National Weather Service NEXRAD Storm Attributes Shapefile
@@ -108,9 +109,7 @@ def main():
     # Less aggressively delete data
     if now.minute % 10 == 0:
         pcursor.execute(
-            """
-            DELETE from nexrad_attributes WHERE valid < %s
-        """,
+            "DELETE from nexrad_attributes WHERE valid < %s",
             (ets,),
         )
     pcursor.execute(
@@ -147,7 +146,7 @@ def main():
 
     if pcursor.rowcount == 0:
         if now.minute == 1:
-            print("No NEXRAD attributes found, this may be bad!")
+            LOG.warning("No NEXRAD attributes found, this may be bad!")
         shp.point(0.1, 0.1)
         shp.record(
             "200000000000",
@@ -172,26 +171,26 @@ def main():
 
     shp.close()
     shutil.copy("/opt/iem/data/gis/meta/4326.prj", "current_nexattr.prj")
-    zfp = zipfile.ZipFile("current_nexattr.zip", "w", zipfile.ZIP_DEFLATED)
-    zfp.write("current_nexattr.shp")
-    zfp.write("current_nexattr.shx")
-    zfp.write("current_nexattr.dbf")
-    zfp.write("current_nexattr.prj")
+    with zipfile.ZipFile(
+        "current_nexattr.zip", "w", zipfile.ZIP_DEFLATED
+    ) as zfp:
+        zfp.write("current_nexattr.shp")
+        zfp.write("current_nexattr.shx")
+        zfp.write("current_nexattr.dbf")
+        zfp.write("current_nexattr.prj")
 
-    zfp.writestr("current_nexattr.txt", INFORMATION)
-    zinfo = zfp.getinfo("current_nexattr.txt")
-    zinfo.external_attr = 0o664
-    zfp.close()
+        zfp.writestr("current_nexattr.txt", INFORMATION)
+        zinfo = zfp.getinfo("current_nexattr.txt")
+        zinfo.external_attr = 0o664
 
     cmd = (
-        'pqinsert -i -p "zip c %s '
-        'gis/shape/4326/us/current_nexattr.zip bogus zip" '
-        "current_nexattr.zip"
-    ) % (now.strftime("%Y%m%d%H%M"),)
+        f'pqinsert -i -p "zip c {now:%Y%m%d%H%M} '
+        'gis/shape/4326/us/current_nexattr.zip bogus zip" current_nexattr.zip'
+    )
     subprocess.call(cmd, shell=True)
 
     for suffix in ["zip", "shp", "dbf", "shx", "prj"]:
-        os.unlink("current_nexattr.%s" % (suffix,))
+        os.unlink(f"current_nexattr.{suffix}")
 
 
 if __name__ == "__main__":

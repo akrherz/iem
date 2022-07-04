@@ -1,28 +1,12 @@
 """Close to average!"""
 import calendar
 
-import numpy as np
 import pandas as pd
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"high": "High temperature", "low": "Low Temperature"}
-
-
-def smooth(x, window_len=11, window="hanning"):
-    """Smoother"""
-    if window_len < 3:
-        return x
-
-    s = np.r_[x[window_len - 1 : 0 : -1], x, x[-1:-window_len:-1]]
-    if window == "flat":  # moving average
-        w = np.ones(window_len, "d")
-    else:
-        w = eval("np." + window + "(window_len)")
-
-    y = np.convolve(w / w.sum(), s, mode="valid")
-    return y
 
 
 def get_description():
@@ -68,7 +52,7 @@ def plotter(fdict):
     station = ctx["station"]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
         WITH climate as (
             SELECT to_char(valid, 'mmdd') as sday, high, low from
             ncei_climate91 where station = %s
@@ -78,7 +62,7 @@ def plotter(fdict):
                 then 1 else 0 end) as high_count,
         SUM(case when a.low >= (c.low + %s) and a.low < (c.low + %s)
                 then 1 else 0 end) as low_count
-        FROM alldata_{station[:2]} a JOIN climate c on (a.sday = c.sday)
+        FROM alldata a JOIN climate c on (a.sday = c.sday)
         WHERE a.sday != '0229' and station = %s GROUP by doy ORDER by doy ASC
         """,
             conn,
@@ -97,16 +81,18 @@ def plotter(fdict):
 
     df["high_freq"] = df["high_count"] / df["count"] * 100.0
     df["low_freq"] = df["low_count"] / df["count"] * 100.0
-    hvals = smooth(df["high_freq"].values, 7, "flat")
-    lvals = smooth(df["low_freq"].values, 7, "flat")
+    hvals = df["high_freq"].rolling(7, min_periods=1).mean().values
+    lvals = df["low_freq"].rolling(7, min_periods=1).mean().values
     title = (
-        "%s [%s]\nFreq of Temp between "
-        r"%s$^\circ$F and %s$^\circ$F of NCEI-81 Average"
-    ) % (ctx["station"], ctx["_nt"].sts[ctx["station"]]["name"], minv, maxv)
+        f"{ctx['_sname']}\nFreq of Temp between {minv}"
+        r"$^\circ$F and "
+        f"{maxv}"
+        r"$^\circ$F of NCEI-81 Average"
+    )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 
-    ax.plot(df.index.values, hvals[3:-3], color="r", label="High", zorder=1)
-    ax.plot(df.index.values, lvals[3:-3], color="b", label="Low", zorder=1)
+    ax.plot(df.index.values, hvals, color="r", label="High", zorder=1)
+    ax.plot(df.index.values, lvals, color="b", label="Low", zorder=1)
     ax.axhline(50, lw=2, color="green", zorder=2)
     ax.set_ylabel("Percentage of Years [%]")
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
@@ -114,6 +100,7 @@ def plotter(fdict):
     ax.legend(loc="best")
     ax.set_xlabel("* seven day smoother applied")
     ax.set_xlim(1, 367)
+    ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     ax.set_ylim(0, 100)
     ax.grid(True)
     return fig, df

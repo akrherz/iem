@@ -81,7 +81,7 @@ for year in range(2005, 2009):
     for month in (1, 4, 7, 10):
         for hour in range(24):
             now = datetime.datetime(year, month, 15, hour)
-            print now
+            print(now)
             metar_extract(now)
             process_metar(now)
             generate_image(now)

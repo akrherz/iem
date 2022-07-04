@@ -388,12 +388,7 @@ def get_context(fdict):
     ctx["station"] = station
     ctx["threshold"] = threshold
     ctx["month"] = month
-    ctx["title"] = ("[%s] %s %s-%s") % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-        df.index.min(),
-        df.index.max(),
-    )
+    ctx["title"] = f"{ctx['_sname']} {df.index.min()}-{df.index.max()}"
     ctx["subtitle"] = ("%s %s") % (label, PDICT[ptype])
     if ptype.find("days") == 0 and ptype.find("avg") == -1:
         ctx["subtitle"] += " (%s)" % (threshold,)

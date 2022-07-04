@@ -152,17 +152,16 @@ def main():
     source.Destroy()
     out_ds.Destroy()
 
-    z = zipfile.ZipFile("current_ww.zip", "w", zipfile.ZIP_DEFLATED)
-    z.write("current_ww.shp")
     shutil.copy(
         "/opt/iem/scripts/GIS/current_ww.shp.xml", "current_ww.shp.xml"
     )
-    z.write("current_ww.shp.xml")
-    z.write("current_ww.shx")
-    z.write("current_ww.dbf")
     shutil.copy("/opt/iem/data/gis/meta/4326.prj", "current_ww.prj")
-    z.write("current_ww.prj")
-    z.close()
+    with zipfile.ZipFile("current_ww.zip", "w", zipfile.ZIP_DEFLATED) as z:
+        z.write("current_ww.shp")
+        z.write("current_ww.shp.xml")
+        z.write("current_ww.shx")
+        z.write("current_ww.dbf")
+        z.write("current_ww.prj")
 
     cmd = (
         'pqinsert -p "zip c %s '
@@ -170,7 +169,7 @@ def main():
     ) % (utcnow.strftime("%Y%m%d%H%M"),)
     subprocess.call(cmd, shell=True)
     for suffix in ["shp", "shp.xml", "shx", "dbf", "prj", "zip"]:
-        os.remove("current_ww.%s" % (suffix,))
+        os.remove(f"current_ww.{suffix}")
 
 
 if __name__ == "__main__":
