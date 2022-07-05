@@ -1,5 +1,5 @@
 <?php
-// Used in fe.phtml and lib.php
+// Used in fe.phtml and table.phtml
 
 $mosvars = Array(
  "n_x" => "Max/Min Temp [F]",
@@ -34,5 +34,3 @@ $mosvars = Array(
  "lcb" => "LCB",
  "swh" => "SWH",
 );
-
-?>

@@ -6,14 +6,12 @@ require_once "../../include/myview.php";
 $t = new MyView();
 require_once "lib.php";
 
-$year1 = isset($_GET["year1"]) ? intval($_GET["year1"]): date("Y");
-$year2 = isset($_GET["year2"]) ? intval($_GET["year2"]): date("Y");
-$month1 = isset($_GET["month1"]) ? intval($_GET["month1"]): date("m");
-$month2 = isset($_GET["month2"]) ? intval($_GET["month2"]): date("m");
-$day1 = isset($_GET["day1"]) ? intval($_GET["day1"]): date("d");
-$day2 = isset($_GET["day2"]) ? intval($_GET["day2"]): date("d");
-$hour1 = isset($_GET["hour1"]) ? intval($_GET["hour1"]): 0;
-$hour2 = isset($_GET["hour2"]) ? intval($_GET["hour2"]): 12;
+$year1 = get_int404("year1", date("Y"));
+$year2 = get_int404("year2", date("Y"));
+$month1 = get_int404("month1", date("m"));
+$month2 = get_int404("month2", date("m"));
+$day1 = get_int404("day1", date("d"));
+$day2 = get_int404("day2", date("d"));
 $model = isset($_GET["model"]) ? xssafe($_GET["model"]): "GFS";
 $station = isset($_GET["station"]) ? strtoupper(xssafe($_GET["station"])): "KAMW";
 
@@ -35,6 +33,11 @@ $modselect = "<select name=\"model\">";
 $modselect .= "<option value=\"GFS\" ";
 if ($model == "GFS") $modselect .= " SELECTED";
 $modselect .= ">AVN/GFS</option>\n";
+
+$modselect .= "<option value=\"MEX\" ";
+if ($model == "MEX") $modselect .= " SELECTED";
+$modselect .= ">GFS-X (MEX)</option>\n";
+
 $modselect .= "<option value=\"NAM\" ";
 if ($model == "NAM" || $model == "ETA") $modselect .= " SELECTED";
 $modselect .= ">Eta/NAM</option>\n";
@@ -103,4 +106,3 @@ and 19 UTC cycles as per guidance from the MOS developers.  For dates before
 </table>
 EOF;
 $t->render('single.phtml');
-?>

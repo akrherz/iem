@@ -113,7 +113,7 @@ def plotter(fdict):
             ha="center",
         )
 
-    return mp.fig, df.drop("geom", axis=1)
+    return mp.fig, df.drop(["geom", "issue", "expire"], axis=1)
 
 
 if __name__ == "__main__":
