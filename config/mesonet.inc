@@ -215,6 +215,20 @@ RewriteRule ^/search /search.py [QSA]
     ProxyPassReverse "http://iem-archive.local/archive/data"
   </Location>
 
+<Proxy "balancer://arcgis">
+    BalancerMember "https://iem-arcgis1.agron.iastate.edu:6443/arcgis"
+    BalancerMember "https://iem-arcgis2.agron.iastate.edu:6443/arcgis"
+</Proxy>
+  SSLProxyCheckPeerCN off
+  SSLProxyCheckPeerExpire off
+  SSLProxyCheckPeerName off
+  SSLProxyEngine On
+  SSLProxyVerify none
+
+ <Location "/arcgis">
+  ProxyPass        "balancer://arcgis"
+  ProxyPassReverse "balancer://arcgis"
+ </Location>
 
   <Directory "/opt/iem/htdocs/content">
     RewriteRule pil_([A-Z0-9]{3,6}).png$ pil.php?pil=$1
