@@ -95,7 +95,7 @@ def plotter(fdict):
 
     with util.get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
         SELECT year,
         max(high) as "max-high",
         min(high) as "min-high",
@@ -112,7 +112,7 @@ def plotter(fdict):
         avg(case when precip > 0.009 then precip else null end)
             as "avg-precip2",
         sum(case when precip >= %s then 1 else 0 end) as "days-precip"
-        from alldata_{station[:2]}
+        from alldata
         where station = %s and year >= %s and year <= %s
         GROUP by year ORDER by year ASC
         """,
@@ -133,11 +133,7 @@ def plotter(fdict):
     df["range-hilo"] = df["max-high"] - df["min-low"]
 
     years = df.index.values
-    title = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']} "
-        f"{min(years)}-{max(years)}\n"
-        f"{PDICT[ptype]}"
-    )
+    title = f"{ctx['_sname']} :: {min(years)}-{max(years)}\n" f"{PDICT[ptype]}"
     if ptype.find("days") == 0:
         title += f" ({threshold})"
     (fig, ax) = figure_axes(title=title, apctx=ctx)

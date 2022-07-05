@@ -119,7 +119,7 @@ def plotter(fdict):
 
     dlast = np.max(data[-1, :])
     for year in range(year0, lastyear):
-        idx = np.digitize([dlast], data[year - year0, :])
+        idx = np.digitize([dlast], data[year - year0, :], right=True)
         ax.text(idx[0], year, "X", va="center", zorder=2, color="white")
 
     cmap = get_cmap(ctx["cmap"])
@@ -147,4 +147,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(unit_desc="CP"))
+    plotter(dict(short_desc="SP", state="IA"))

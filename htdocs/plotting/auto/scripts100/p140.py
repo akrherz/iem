@@ -86,9 +86,21 @@ def nice(val):
     """pretty print"""
     if val == "M":
         return "M"
-    if 0 < val < 0.01:
+    if 0 < val < 0.005:
         return "Trace"
     return f"{val:.2f}"
+
+
+def crossesjan1(val):
+    """Pretty print for a year."""
+    return f"{val:.0f}-{(val + 1):.0f}"
+
+
+def intfmt(val):
+    """format int values"""
+    if val == "M":
+        return "M"
+    return f"{val:.0f}"
 
 
 def plotter(fdict):
@@ -132,24 +144,51 @@ def plotter(fdict):
                 "station": station,
                 "sdays": tuple(sdays),
             },
+            index_col="yr",
         )
     if df.empty:
         raise NoDataFound("No data was found.")
     df["range_high_temp"] = df["max_high"] - df["min_high"]
     df["range_low_temp"] = df["max_low"] - df["min_low"]
+    # require values , not nan
+    df2 = df[df[varname].notnull()].sort_values(varname, ascending=False)
 
     title = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
+        f"{ctx['_sname']}\n"
         f"{PDICT.get(varname)} from {sts:%d %b} through {ets:%d %b}"
     )
     fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(2, 1)
+    ax[0].set_position([0.07, 0.53, 0.78, 0.36])
+    ax[1].set_position([0.07, 0.1, 0.78, 0.36])
+
+    fmter = intfmt if varname.find("days") > -1 else nice
+    yrfmter = intfmt if sts.year == ets.year else crossesjan1
+
+    # Print top 10
+    dy = 0.03
+    ypos = 0.9
+    fig.text(0.86, ypos, "Top 10")
+    for yr, row in df2.head(10).iterrows():
+        ypos -= dy
+        _fp = {"weight": "bold"} if yr == year else {}
+        fig.text(0.86, ypos, yrfmter(yr), font_properties=_fp)
+        fig.text(0.95, ypos, fmter(row[varname]), font_properties=_fp)
+
+    ypos -= 2 * dy
+    fig.text(0.86, ypos, "Bottom 10")
+    ypos = ypos - 10 * dy
+    for yr, row in df2.tail(10).iterrows():
+        _fp = {"weight": "bold"} if yr == year else {}
+        fig.text(0.86, ypos, yrfmter(yr), font_properties=_fp)
+        fig.text(0.95, ypos, fmter(row[varname]), font_properties=_fp)
+        ypos += dy
 
     bars = ax[0].bar(
-        df["yr"], df[varname], facecolor="r", edgecolor="r", align="center"
+        df.index, df[varname], facecolor="r", edgecolor="r", align="center"
     )
     thisvalue = "M"
-    for mybar, x, y in zip(bars, df["yr"], df[varname]):
+    for mybar, x, y in zip(bars, df.index.values, df[varname]):
         if x == year:
             mybar.set_facecolor("g")
             mybar.set_edgecolor("g")
@@ -168,7 +207,7 @@ def plotter(fdict):
     ax[0].set_ylabel(ylabel)
     ax[0].grid(True)
     ax[0].legend(ncol=2, fontsize=10)
-    ax[0].set_xlim(df["yr"].min() - 1, df["yr"].max() + 1)
+    ax[0].set_xlim(df.index.values[0] - 1, df.index.values[-1] + 1)
     dy = df[varname].max() - df[varname].min()
     ax[0].set_ylim(df[varname].min() - dy * 0.2, df[varname].max() + dy * 0.25)
     box = ax[0].get_position()
@@ -187,12 +226,12 @@ def plotter(fdict):
     ax[1].set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     mysort = df.sort_values(by=varname, ascending=True)
     info = (
-        f"Min: {df[varname].min():.2f} {df['yr'][mysort.index[0]]:.0f}\n"
+        f"Min: {df[varname].min():.2f} {yrfmter(mysort.index[0])}\n"
         f"95th: {ptile[1]:.2f}\n"
         f"Mean: {df[varname].mean():.2f}\n"
         f"STD: {df[varname].std():.2f}\n"
         f"5th: {ptile[3]:.2f}\n"
-        f"Max: {df[varname].max():.2f} {df['yr'][mysort.index[-1]]:.0f}"
+        f"Max: {df[varname].max():.2f} {yrfmter(mysort.index[-1])}"
     )
     ax[1].axvline(thisvalue, lw=2, color="g")
     ax[1].text(
