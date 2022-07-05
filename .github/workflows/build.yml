@@ -72,4 +72,5 @@ jobs:
     - name: View Apache Logs
       if: failure()
       run: |
+        sudo systemctl status apache2 -l
         sudo cat /var/log/apache2/error.log
