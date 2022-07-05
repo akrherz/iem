@@ -32,7 +32,7 @@ jobs:
         # need apache2-dev for mod-wsgi to build
         sudo apt-get install apache2 apache2-dev memcached
         sudo service memcached start
-        sudo a2enmod headers rewrite proxy cgi expires authz_groupfile
+        sudo a2enmod headers rewrite proxy proxy_http proxy_balancer ssl lbmethod_byrequests cgi expires authz_groupfile
         # we do things the old fashioned way, we earn it
         sudo a2dissite 000-default.conf
         sudo cp .github/ci_support/mod_wsgi.conf /etc/apache2/sites-enabled/
@@ -72,4 +72,5 @@ jobs:
     - name: View Apache Logs
       if: failure()
       run: |
+        sudo systemctl status apache2 -l
         sudo cat /var/log/apache2/error.log
