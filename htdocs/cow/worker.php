@@ -193,7 +193,7 @@ foreach($jobj["events"]["features"] as $k => $warn){
 $ltable = "";
 $lsz = sizeof($stormreports);
 foreach($stormreports as $k => $lsr){
-	if ($lsr["properties"]["warned"]) {
+	if ($lsr["properties"]["warned"] || $lsr["properties"]["tdq"]) {
         continue;
     }
 	$ltable .= printLSR($lsr["properties"]);
