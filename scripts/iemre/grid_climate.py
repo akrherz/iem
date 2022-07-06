@@ -56,7 +56,7 @@ def grid_solar(nc, ts):
             ),
             conn,
             params={
-                "sday": ts.strftime("%d%m"),
+                "sday": ts.strftime("%m%d"),
                 "minyears": (2020 - 1979),  # approx
             },
             index_col="station",
