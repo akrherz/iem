@@ -3,10 +3,11 @@ import sys
 import datetime
 
 import numpy as np
-from pandas import read_sql
+import pandas as pd
 from scipy.interpolate import NearestNDInterpolator
 from pyiem import iemre
-from pyiem.util import get_dbconnstr, ncopen, convert_value, logger
+from pyiem.util import get_sqlalchemy_conn, ncopen, convert_value, logger
+from sqlalchemy import text
 
 LOG = logger()
 
@@ -32,50 +33,69 @@ def generic_gridder(nc, df, idx):
     return None
 
 
-def grid_day(nc, ts):
-    """
-    I proctor the gridding of data on an hourly basis
-
-    @param ts Timestamp of the analysis, we'll consider a 20 minute window
-    """
+def grid_solar(nc, ts):
+    """Special Solar Ops."""
     offset = iemre.daily_offset(ts)
     if ts.day == 29 and ts.month == 2:
         ts = datetime.datetime(2000, 3, 1)
 
-    df = read_sql(
-        """
-        SELECT c.*, st_x(t.geom) as lon, st_y(t.geom) as lat
-        from ncdc_climate71 c JOIN stations t ON (c.station = t.id)
-        WHERE valid = %s and
-        substr(station,3,4) != '0000' and
-        substr(station,3,1) not in ('C', 'T')
-    """,
-        get_dbconnstr("coop"),
-        params=(ts,),
-        index_col="station",
-    )
-    if len(df.index) > 4:
-        if "high_tmpk" in nc.variables:
-            res = generic_gridder(nc, df, "high")
-            if res is not None:
-                nc.variables["high_tmpk"][offset] = convert_value(
-                    res, "degF", "degK"
-                )
-            res = generic_gridder(nc, df, "low")
-            if res is not None:
-                nc.variables["low_tmpk"][offset] = convert_value(
-                    res, "degF", "degK"
-                )
-        res = generic_gridder(nc, df, "precip")
-        if res is not None:
-            nc.variables["p01d"][offset] = convert_value(
-                res, "inch", "millimeter"
+    with get_sqlalchemy_conn("coop") as conn:
+        # Look for stations with data back to 1979 for merra
+        df = pd.read_sql(
+            text(
+                """
+            with data as (
+                select station, count(*), avg(merra_srad) from alldata
+                where sday = :sday and merra_srad is not null
+                GROUP by station
             )
-    else:
-        print(
-            ("%s has %02i entries, FAIL")
-            % (ts.strftime("%Y-%m-%d"), len(df.index))
+            SELECT d.avg as rad, st_x(t.geom) as lon, st_y(t.geom) as lat,
+            station from data d JOIN stations t ON (d.station = t.id)
+            WHERE count >= :minyears
+        """
+            ),
+            conn,
+            params={
+                "sday": ts.strftime("%d%m"),
+                "minyears": (2020 - 1979),  # approx
+            },
+            index_col="station",
         )
+    # Database storage is MJ, so is our netcdf
+    nc.variables["swdn"][offset] = generic_gridder(nc, df, "rad")
+
+
+def grid_day(nc, ts):
+    """Grid things."""
+    offset = iemre.daily_offset(ts)
+    if ts.day == 29 and ts.month == 2:
+        ts = datetime.datetime(2000, 3, 1)
+
+    with get_sqlalchemy_conn("coop") as conn:
+        df = pd.read_sql(
+            """
+            SELECT c.*, st_x(t.geom) as lon, st_y(t.geom) as lat
+            from ncei_climate91 c JOIN stations t ON (c.station = t.id)
+            WHERE valid = %s
+        """,
+            conn,
+            params=(ts,),
+            index_col="station",
+        )
+    if "high_tmpk" in nc.variables:
+        res = generic_gridder(nc, df, "high")
+        if res is not None:
+            nc.variables["high_tmpk"][offset] = convert_value(
+                res, "degF", "degK"
+            )
+        res = generic_gridder(nc, df, "low")
+        if res is not None:
+            nc.variables["low_tmpk"][offset] = convert_value(
+                res, "degF", "degK"
+            )
+    res = generic_gridder(nc, df, "precip")
+    if res is not None:
+        nc.variables["p01d"][offset] = convert_value(res, "inch", "millimeter")
 
 
 def workflow(ts):
@@ -84,6 +104,7 @@ def workflow(ts):
     # Load up our netcdf file!
     with ncopen(iemre.get_dailyc_ncname(), "a", timeout=300) as nc:
         grid_day(nc, ts)
+        grid_solar(nc, ts)
 
     with ncopen(iemre.get_dailyc_mrms_ncname(), "a", timeout=300) as nc:
         grid_day(nc, ts)
@@ -95,14 +116,9 @@ def main(argv):
         ts = datetime.datetime(int(argv[1]), int(argv[2]), int(argv[3]))
         workflow(ts)
     else:
-        sts = datetime.datetime(2000, 1, 1)
-        ets = datetime.datetime(2001, 1, 1)
-        interval = datetime.timedelta(days=1)
-        now = sts
-        while now < ets:
-            print(now)
-            workflow(now)
-            now += interval
+        for ts in pd.date_range("2000/1/1", "2000/12/31"):
+            print(ts)
+            workflow(ts)
 
 
 if __name__ == "__main__":
