@@ -17,7 +17,7 @@ WEB
   MAXSCALE 4650000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  #LOG "/var/webtmp/w0.log"
+  # LOG "/var/webtmp/w0.log"
   METADATA
    "wms_title" "IEM WMS IDEP Service"
    "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/wms/idep.cgi?"
@@ -1568,7 +1568,7 @@ END # LAYER
 
 LAYER
   NAME "huc8"
-  DATA "/mesonet/data/gis/static/shape/4326/us/huc8_01.shp"
+  DATA "/mesonet/data/gis/static/shape/4326/us/huc8_20220707.shp"
   TYPE LINE
   PROJECTION
     "init=epsg:4326"
