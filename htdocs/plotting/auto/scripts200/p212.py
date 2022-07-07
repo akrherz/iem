@@ -152,6 +152,9 @@ def get_data(ctx):
                 },
                 index_col="utc_valid",
             )
+            if not dfin.empty:
+                # Drop duplicates :(
+                dfin = dfin.groupby("utc_valid").first()
     else:
         ctx["leveltitle"] = ""
         with get_sqlalchemy_conn("raob") as conn:
@@ -410,4 +413,6 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="KABR", var="tmpc", level=500, hour="00"))
+    plotter(
+        dict(station="KEPZ", var="height", level=500, hour="00", year=1996)
+    )
