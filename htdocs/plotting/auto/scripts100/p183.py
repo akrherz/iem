@@ -67,9 +67,9 @@ def plotter(fdict):
     fips = ""
     for key, entry in state_fips.items():
         if entry == state:
-            fips = key
+            fips = f"{key:02.0f}"
     if ctx["s"] == "state":
-        payload = {"area": fips, "statstype": "2"}
+        payload = {"area": f"'{fips}'", "statstype": "2"}  # Le Sigh
         suffix = "state"
     else:
         payload = {"area": "conus", "statstype": "2"}
@@ -169,4 +169,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({})
+    plotter({"state": "CA"})

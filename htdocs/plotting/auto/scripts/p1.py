@@ -9,28 +9,27 @@ from pyiem.plot import figure_axes
 from pyiem import util
 from pyiem.exceptions import NoDataFound
 
-PDICT = dict(
-    (
-        ("total_precip", "Total Precipitation"),
-        ("avg_temp", "Average Temperature"),
-        ("max_high", "Maximum High Temperature"),
-        ("avg_high", "Average High Temperature"),
-        ("min_high", "Minimum High Temperature"),
-        ("max_low", "Maximum Low Temperature"),
-        ("avg_low", "Average Low Temperature"),
-        ("min_low", "Minimum Low Temperature"),
-        ("days_high_aoa", "Days with High At or Above"),
-        ("cdd65", "Cooling Degree Days (base 65)"),
-        ("hdd65", "Heating Degree Days (base 65)"),
-        ("gdd32", "Growing Degree Days (base 32)"),
-        ("gdd41", "Growing Degree Days (base 41)"),
-        ("gdd46", "Growing Degree Days (base 46)"),
-        ("gdd48", "Growing Degree Days (base 48)"),
-        ("gdd50", "Growing Degree Days (base 50)"),
-        ("gdd51", "Growing Degree Days (base 51)"),
-        ("gdd52", "Growing Degree Days (base 52)"),
-    )
-)
+PDICT = {
+    "total_precip": "Total Precipitation",
+    "avg_temp": "Average Temperature",
+    "max_high": "Maximum High Temperature",
+    "avg_high": "Average High Temperature",
+    "min_high": "Minimum High Temperature",
+    "max_low": "Maximum Low Temperature",
+    "avg_low": "Average Low Temperature",
+    "min_low": "Minimum Low Temperature",
+    "days_high_aoa": "Days with High At or Above",
+    "avg_rad": "Average Daily Solar Radiation",
+    "cdd65": "Cooling Degree Days (base 65)",
+    "hdd65": "Heating Degree Days (base 65)",
+    "gdd32": "Growing Degree Days (base 32)",
+    "gdd41": "Growing Degree Days (base 41)",
+    "gdd46": "Growing Degree Days (base 46)",
+    "gdd48": "Growing Degree Days (base 48)",
+    "gdd50": "Growing Degree Days (base 50)",
+    "gdd51": "Growing Degree Days (base 51)",
+    "gdd52": "Growing Degree Days (base 52)",
+}
 
 UNITS = {
     "total_precip": "inch",
@@ -42,6 +41,7 @@ UNITS = {
     "avg_low": "F",
     "min_low": "F",
     "days_high_aoa": "days",
+    "avg_rad": "MJ/d",
     "cdd65": "F",
     "hdd65": "F",
     "gdd32": "F",
@@ -163,7 +163,8 @@ def combine(df, months, offsets):
         tmpdf = pd.DataFrame({"a": xdf["max_high"], "b": thisdf["max_high"]})
         xdf["max_high"] = tmpdf.max(axis=1)
     if len(months) > 1:
-        xdf["avg_temp"] = xdf["avg_temp"] / float(len(months))
+        for col in ["temp", "rad"]:
+            xdf[f"avg_{col}"] = xdf[f"avg_{col}"] / float(len(months))
 
     return xdf
 
@@ -192,6 +193,7 @@ def plotter(fdict):
         sum(precip) as total_precip, max(high) as max_high,
         min(low) as min_low,
         sum(case when high >= %s then 1 else 0 end) as days_high_aoa,
+        avg(coalesce(merra_srad, hrrr_srad)) as avg_rad,
         sum(cdd(high, low, 65)) as cdd65,
         sum(hdd(high, low, 65)) as hdd65,
         sum(gddxx(32, 86, high, low)) as gdd32,
@@ -226,8 +228,8 @@ def plotter(fdict):
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.scatter(
-        resdf[varname1 + "_1"],
-        resdf[varname2 + "_2"],
+        resdf[f"{varname1}_1"],
+        resdf[f"{varname2}_2"],
         marker="s",
         facecolor="b",
         edgecolor="b",
@@ -256,8 +258,8 @@ def plotter(fdict):
     ymonths = ", ".join([calendar.month_abbr[x] for x in months2])
     t1 = "" if varname1 not in ["days_high_aoa"] else " %.0f" % (threshold,)
     t2 = "" if varname2 not in ["days_high_aoa"] else " %.0f" % (threshold,)
-    x = resdf["%s_1" % (varname1,)].mean()
-    y = resdf["%s_2" % (varname2,)].mean()
+    x = resdf[f"{varname1}_1"].mean()
+    y = resdf[f"{varname2}_2"].mean()
     ax.set_xlabel(
         "%s\n%s%s [%s], Avg: %.1f"
         % (xmonths, PDICT[varname1], t1, UNITS[varname1], x),

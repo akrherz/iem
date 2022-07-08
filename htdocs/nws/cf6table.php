@@ -73,6 +73,7 @@ $table = <<<EOF
 EOF;
 function trace($val){
 	if ($val == 0.0001) return 'T';
+    if ($val > 0) return sprintf("%.2f", $val);
 	return $val;
 }
 foreach($arr as $entry){
@@ -99,12 +100,12 @@ foreach($arr as $entry){
 			</tr>", $row["product"], $col1, 
 			$row["high"], $row["low"], $row["avg_temp"],
 			$row["dep_temp"], $row["hdd"], $row["cdd"],
-            $row["precip"], $row["snow"], $row["snowd_12z"],
+            trace($row["precip"]), $row["snow"], $row["snowd_12z"],
             $row["avg_smph"], $row["max_smph"], $row["avg_drct"],
             $row["gust_smph"], $row["gust_drct"],
             $row["minutes_sunshine"], $row["possible_sunshine"],
             $row["cloud_ss"], $row["wxcodes"],
-		);
+        );
 }
 $table .= "</table>";
 
