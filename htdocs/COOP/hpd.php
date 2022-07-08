@@ -8,9 +8,9 @@ require_once "../../include/forms.php";
 require_once "../../include/database.inc.php";
 
 $station = isset($_GET["station"]) ? xssafe($_GET['station']): null;
-$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
-$month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
-$day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
+$year = get_int404("year", date("Y"));
+$month = get_int404("month", date("m"));
+$day = get_int404("day", date("d"));
 
 $yselect = yearSelect2(2008, $year, "year");
 $mselect = monthSelect2($month, "month");
@@ -19,20 +19,23 @@ $dselect = daySelect2($day, "day");
 $table = "<p>Please select a station and date.</p>";
 if ($station){
 	$dbconn = iemdb('other');
-	$rs = pg_prepare($dbconn, "SELECT", "select * from hpd_alldata
-			WHERE station = $1 and valid >= $2 and valid < $3
-			ORDER by valid ASC");
+	$rs = pg_prepare(
+        $dbconn,
+        "SELECT",
+        "select * from hpd_alldata WHERE station = $1 and valid >= $2 ".
+        "and valid < $3 ORDER by valid ASC"
+    );
 	$valid = mktime(0, 0, 0, $month, $day, $year);
 	$sts = date("Y-m-d 00:00", $valid);
 	$ets = date("Y-m-d 23:59", $valid);
 	$rs = pg_execute($dbconn, "SELECT", Array($station, $sts, $ets));
-	$table = '<table class="table table-striped"><tr><th>Valid</th><th>Precip</th><th>Counter</th><th>Temp C</th><th>Battery</th></tr>';
+	$table = '<table class="table table-striped"><tr><th>Valid</th><th>Precip</th></tr>';
 	for($i=0;$row=pg_fetch_assoc($rs);$i++){
-		$table .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
-				$row["valid"], $row["calc_precip"], $row["counter"],
-				$row["tmpc"], $row["battery"]);
-	}
-	$table .= "</table>";
+        $table .= sprintf(
+            "<tr><td>%s</td><td>%s</td></tr>",
+            $row["valid"], $row["precip"]);
+    }
+    $table .= "</table>";
 }
 
 $t = new MyView();
@@ -65,5 +68,3 @@ to the current date.</p>
 		
 EOF;
 $t->render('single.phtml');
-
-?>

@@ -59,12 +59,10 @@ python compute_hads_sts.py
 python clean_unknown_hads.py
 python unknown_stations.py
 
-cd ../ingestors/ncdc
+cd ../ingestors/ncei
 if [ $DD -eq "15" ]
-	then
-	python ingest_fisherporter.py $(date --date '90 days ago' +'%Y %m')
-	python ingest_fisherporter.py $(date --date '180 days ago' +'%Y %m')
-	python ingest_fisherporter.py $(date --date '360 days ago' +'%Y %m')
+    then
+    python ingest_fisherporter.py
 fi
 
 cd ../../windrose
