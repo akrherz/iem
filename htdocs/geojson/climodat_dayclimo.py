@@ -2,7 +2,7 @@
 import datetime
 import json
 
-import memcache
+from pymemcache.client import Client
 from paste.request import parse_formvars
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn, html_escape
@@ -14,10 +14,10 @@ def run(network, month, day, syear, eyear):
     cursor = pgconn.cursor()
 
     nt = NetworkTable(network)
-    sday = "%02i%02i" % (month, day)
-    table = "alldata_%s" % (network[:2],)
+    sday = f"{month:02.0f}{day:02.0f}"
+    table = f"alldata_{network[:2]}"
     cursor.execute(
-        """
+        f"""
     WITH data as (
       SELECT station, year, precip,
       avg(precip) OVER (PARTITION by station) as avg_precip,
@@ -28,9 +28,7 @@ def run(network, month, day, syear, eyear):
       avg(low) OVER (PARTITION by station) as avg_low,
       rank() OVER (PARTITION by station ORDER by low ASC) as min_low,
       rank() OVER (PARTITION by station ORDER by precip DESC) as max_precip
-      from """
-        + table
-        + """ WHERE sday = %s and year >= %s and year < %s),
+      from {table} WHERE sday = %s and year >= %s and year < %s),
 
     max_highs as (
       SELECT station, high, array_agg(year) as years from data
@@ -124,23 +122,20 @@ def application(environ, start_response):
     eyear = int(form.get("eyear", datetime.datetime.now().year + 1))
     cb = form.get("callback", None)
 
-    mckey = "/geojson/climodat_dayclimo/%s/%s/%s/%s/%s" % (
-        network,
-        month,
-        day,
-        syear,
-        eyear,
+    mckey = (
+        f"/geojson/climodat_dayclimo/{network}/{month}/{day}/{syear}/{eyear}"
     )
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    mc = Client(["iem-memcached", 11211])
     res = mc.get(mckey)
     if not res:
         res = run(network, month, day, syear, eyear)
         mc.set(mckey, res, 86400)
-
-    if cb is None:
-        data = res
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        res = res.decode("utf-8")
+    mc.close()
+
+    if cb is not None:
+        res = f"{html_escape(cb)}({res})"
 
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return [res.encode("ascii")]

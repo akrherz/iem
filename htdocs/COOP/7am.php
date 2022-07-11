@@ -1,5 +1,5 @@
 <?php
-$OL = "6.4.3";
+$OL = "6.14.1";
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 86);
 require_once "../../include/mlib.php";
@@ -18,8 +18,8 @@ $t->headextra = <<<EOF
         background-color: #FFFFFF;
 }
 .popover {
-                width: 300px;
-                }
+    width: 300px;
+}
 </style>
 EOF;
 
@@ -72,5 +72,3 @@ $t->content = <<<EOF
 
 EOF;
 $t->render("full.phtml");
-
-?>

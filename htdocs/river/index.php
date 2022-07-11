@@ -132,4 +132,3 @@ $content .=  "</table>";
 
 $t->content = $content;
 $t->render("full.phtml");
-?>

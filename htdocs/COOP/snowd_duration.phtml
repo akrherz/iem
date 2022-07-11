@@ -9,8 +9,8 @@ require_once "../../include/forms.php";
 require_once "../../include/database.inc.php";
 $coopdb = iemdb('coop');
 $station = isset($_GET["station"]) ? xssafe($_GET["station"]): 'IA0200';
-$month = isset($_GET["month"]) ? intval($_GET["month"]): 12;
-$day = isset($_GET["day"]) ? intval($_GET["day"]): 25;
+$month = get_int404("month", 12);
+$day = get_int404("day", 25);
 
 $ts = strtotime("2000-${month}-${day}");
 $sday = date('md', $ts);
@@ -80,4 +80,3 @@ ground for Christmas in Ames, how long does it stick around for?"</p>
 {$table}
 EOF;
 $t->render('single.phtml');
-?>

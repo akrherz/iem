@@ -14,8 +14,8 @@ require_once "../../include/forms.php";
 $dbconn = iemdb("iem");
 
 $wfo = isset($_REQUEST['wfo']) ? xssafe($_REQUEST['wfo']) : 'DMX';
-$year = isset($_REQUEST["year"]) ? intval($_REQUEST["year"]): date("Y"); 
-$month = isset($_REQUEST["month"]) ? xssafe($_REQUEST["month"]): date("m"); 
+$year = get_int404("year", date("Y")); 
+$month = get_int404("month", date("m")); 
 
 $rs = pg_prepare($dbconn, "MYSELECT", "select id, name,
  count(*) as total, 
@@ -85,4 +85,3 @@ is "missing" data from sites.  Please <a href="/info/contacts.php">let us know</
 </table>
 EOF;
 $t->render('single.phtml');
-?>

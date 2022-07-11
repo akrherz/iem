@@ -1,15 +1,15 @@
 <?php
  require_once "../../config/settings.inc.php";
  define("IEM_APPID", 4);
+ require_once "../../include/forms.php";
  
  $station = isset($_GET["station"])? substr($_GET["station"],0,5) : "";
  $network = isset($_GET["network"])? substr($_GET["network"],0,7) : "IA_COOP";
  $date = isset($_GET["date"]) ? substr($_GET["date"],0, 10) : "";
  $sortvar = isset($_GET["sortvar"]) ? substr($_GET["sortvar"], 0, 10): "";
- $year = isset($_GET["year"]) ? substr($_GET["year"], 0, 4): date("Y");
+ $year = get_int404("year", date("Y"));
 
  if ($date == "" && $station == "") $station = "AMSI4";
- require_once "../../include/forms.php";
  require_once "../../include/myview.php";
  require_once "../../include/imagemaps.php";
  require_once "../../include/network.php";
@@ -221,4 +221,3 @@ function hiderows(){
 </script>
 EOF;
 $t->render('single.phtml');
-?>

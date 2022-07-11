@@ -62,7 +62,5 @@ $roads_int->draw($img);
 
 $map->drawLabelCache($img);
 
-
 header("Content-type: image/png");
 $img->saveImage('');
-?>

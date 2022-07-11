@@ -4,9 +4,9 @@ define("IEM_APPID", 152);
 require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 
-$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y", time()-3600);
-$month = isset($_GET["month"]) ? intval($_GET["month"]): date("m", time()-3600);
-$day = isset($_GET["day"]) ? intval($_GET["day"]): date("d", time()-3600);
+$year = get_int404("year", date("Y", time()-3600));
+$month = get_int404("month", date("m", time()-3600));
+$day = get_int404("day", date("d", time()-3600));
 $sortby = isset($_GET["sortby"]) ? xssafe($_GET["sortby"]): "size";
 $typ = isset($_GET["typ"]) ? xssafe($_GET["typ"]): "W";
 
@@ -123,4 +123,3 @@ number for the year, and issuance time for the date the image is valid (22:52 UT
 EOF;
 $t->content = $content;
 $t->render('single.phtml');
-?>

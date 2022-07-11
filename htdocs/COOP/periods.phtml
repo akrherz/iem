@@ -8,10 +8,10 @@
  
  $t = new MyView();
  define("IEM_APPID", 31);
- $smonth = isset($_GET["smonth"]) ? intval($_GET["smonth"]): 0;
- $emonth = isset($_GET["emonth"]) ? intval($_GET["emonth"]): 0;
- $sday = isset($_GET["sday"]) ? intval($_GET["sday"]): 0;
- $eday = isset($_GET["eday"]) ? intval($_GET["eday"]): 0;
+ $smonth = get_int404("smonth", 0);
+ $emonth = get_int404("emonth", 0);
+ $sday = get_int404("sday", 0);
+ $eday = get_int404("eday", 0);
  $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "avg_high";
  $station = isset($_GET["station"]) ? xssafe($_GET['station']): 'IA0000';
  $network = isset($_GET["network"]) ? xssafe($_GET["network"]): "IACLIMATE";
@@ -105,4 +105,3 @@ like.
 before using...
 EOF;
 $t->render('single.phtml');
-?>

@@ -191,39 +191,39 @@ $tperim = $totals["TO_perim"] + $totals["SV_perim"] + $totals["MA_perim"] +
         $counts[$p] = max(1, $totals["${p}_cnt"]);
     } 
 
-$table .= sprintf("<tr><th> </th><th>Total/Averages</th>
-         <th>%s</th><th>%.1f</th><th>%.1f</th>
-         <th class='phto'>%s</th><th class='phto'>%.1f</th><th class='phto'>%.1f</th>
-         <th class='phsv'>%s</th><th class='phsv'>%.1f</th><th class='phsv'>%.1f</th>
-         <th class='phma'>%s</th><th class='phma'>%.1f</th><th class='phma'>%.1f</th>
-         <th class='phff'>%s</th><th class='phff'>%.1f</th><th class='phff'>%.1f</th>
-         <th class='phfa'>%s</th><th class='phfa'>%.1f</th><th class='phfa'>%.1f</th>
-         <th class='phds'>%s</th><th class='phds'>%.1f</th><th class='phds'>%.1f</th>
-         <th class='phsq'>%s</th><th class='phsq'>%.1f</th><th class='phsq'>%.1f</th>
-          </tr>",
-
-		$tcount, $tperim/$tcount/1000.0, $tpoly/$tcount/1000000.0,
-		$totals["TO_cnt"],
-		$totals["TO_perim"]/$counts["TO"]/1000.0,
-		$totals["TO_area"]/$counts["TO"]/1000000.0,
-		$totals["SV_cnt"],
-		$totals["SV_perim"]/$counts["SV"]/1000.0,
-		$totals["SV_area"]/$counts["SV"]/1000000.0,
-		$totals["MA_cnt"],
-		$totals["MA_perim"]/$counts["MA"]/1000.0,
-		$totals["MA_area"]/$counts["MA"]/1000000.0,
-		$totals["FF_cnt"],
-		$totals["FF_perim"]/$counts["FF"]/1000.0,
-		$totals["FF_area"]/$counts["FF"]/1000000.0,
-		$totals["FA_cnt"],
-		$totals["FA_perim"]/$counts["FA"]/1000.0,
-		$totals["FA_area"]/$counts["FA"]/1000000.0,
-		$totals["DS_cnt"],
-		$totals["DS_perim"]/$counts["DS"]/1000.0,
-		$totals["DS_area"]/$counts["DS"]/1000000.0,
-		$totals["SQ_cnt"],
-		$totals["SQ_perim"]/$counts["SQ"]/1000.0,
-		$totals["SQ_area"]/$counts["SQ"]/1000000.0
+$table .= sprintf(
+    "<tr><th> </th><th>Total/Averages</th>".
+    "<th>%s</th><th>%.1f</th><th>%.1f</th>".
+    "<th class='phto'>%s</th><th class='phto'>%.1f</th><th class='phto'>%.1f</th>".
+    "<th class='phsv'>%s</th><th class='phsv'>%.1f</th><th class='phsv'>%.1f</th>".
+    "<th class='phma'>%s</th><th class='phma'>%.1f</th><th class='phma'>%.1f</th>".
+    "<th class='phff'>%s</th><th class='phff'>%.1f</th><th class='phff'>%.1f</th>".
+    "<th class='phfa'>%s</th><th class='phfa'>%.1f</th><th class='phfa'>%.1f</th>".
+    "<th class='phds'>%s</th><th class='phds'>%.1f</th><th class='phds'>%.1f</th>".
+    "<th class='phsq'>%s</th><th class='phsq'>%.1f</th><th class='phsq'>%.1f</th>".
+    "</tr>",
+    $tcount, $tperim/$tcount/1000.0, $tpoly/$tcount/1000000.0,
+    $totals["TO_cnt"],
+    $totals["TO_perim"]/$counts["TO"]/1000.0,
+    $totals["TO_area"]/$counts["TO"]/1000000.0,
+    $totals["SV_cnt"],
+    $totals["SV_perim"]/$counts["SV"]/1000.0,
+    $totals["SV_area"]/$counts["SV"]/1000000.0,
+    $totals["MA_cnt"],
+    $totals["MA_perim"]/$counts["MA"]/1000.0,
+    $totals["MA_area"]/$counts["MA"]/1000000.0,
+    $totals["FF_cnt"],
+    $totals["FF_perim"]/$counts["FF"]/1000.0,
+    $totals["FF_area"]/$counts["FF"]/1000000.0,
+    $totals["FA_cnt"],
+    $totals["FA_perim"]/$counts["FA"]/1000.0,
+    $totals["FA_area"]/$counts["FA"]/1000000.0,
+    $totals["DS_cnt"],
+    $totals["DS_perim"]/$counts["DS"]/1000.0,
+    $totals["DS_area"]/$counts["DS"]/1000000.0,
+    $totals["SQ_cnt"],
+    $totals["SQ_perim"]/$counts["SQ"]/1000.0,
+    $totals["SQ_area"]/$counts["SQ"]/1000000.0
 );
 
 $table .= "</table>";

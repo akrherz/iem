@@ -14,8 +14,8 @@
  require_once "../../include/imagemaps.php";
 
  $tbl = isset($_GET["tbl"]) ? substr($_GET["tbl"],0,10) : "climate";
- $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m");
- $day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d");
+ $month = get_int404("month", date("m"));
+ $day = get_int404("day", date("d"));
  $valid = mktime(0,0,0,$month, $day, 2000);
  $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "station";
  $network = isset($_GET['network']) ? substr($_GET['network'],0,9): 'IACLIMATE';

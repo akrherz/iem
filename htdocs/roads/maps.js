@@ -77,4 +77,3 @@ $(document).ready(function(){
 	//TODO add refreshing of layers
 
 }); // End of onready
-

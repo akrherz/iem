@@ -4,12 +4,12 @@ import calendar
 
 import numpy as np
 import pandas as pd
+import matplotlib.colors as mpcolors
+from matplotlib.colorbar import ColorbarBase
 from metpy.units import units
 import metpy.calc as mcalc
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
-from pyiem.plot import get_cmap
-from pyiem.plot import figure_axes
-from pyiem.plot.util import fitbox
+from pyiem.plot import get_cmap, figure_axes, pretty_bins
 from pyiem.exceptions import NoDataFound
 
 PDICT = {
@@ -180,28 +180,56 @@ def plotter(fdict):
     df["week"] = (df["doy"] / 7).astype(int)
     df["delta"] = df[h2] - df[h1]
 
-    (fig, ax) = figure_axes(apctx=ctx)
+    sts = datetime.datetime(2000, 6, 1, h1)
+    ets = datetime.datetime(2000, 6, 1, h2)
+    sd = "same day" if h2 > h1 else "previous day"
+    subtitle = f"{ets:%-I %p} minus {sts:%-I %p} ({sd}) (timezone: {tzname})"
+    title = (
+        f"{ctx['_sname']}:: {PDICT[varname]} Difference "
+        f"({df['year'].min():.0f}-{df['year'].max():.0f})"
+    )
+    (fig, ax) = figure_axes(apctx=ctx, title=title, subtitle=subtitle)
     if ctx["opt"] == "no":
         ax.set_xlabel(
-            "Plotted lines are smoothed over %.0f days" % (ctx["smooth"],)
+            f"Plotted lines are smoothed over {ctx['smooth']:.0f} days"
         )
-    ax.set_ylabel(
-        "%s %s Difference"
-        % (PDICT[varname], "Accumulated Sum" if ctx["opt"] == "yes" else "")
-    )
+    ast = "Accumulated Sum" if ctx["opt"] == "yes" else ""
+    ax.set_ylabel(f"{PDICT[varname]} {ast} Difference")
 
     if ctx["opt"] == "no":
+        # Find a reasonable ymin that gets most of the data
+        ymax = df["delta"].abs().describe(percentiles=[0.95])["95%"]
         # Histogram
+        dy = 0.25 if ctx["v"] == "q" else 1.0
         H, xedges, yedges = np.histogram2d(
-            df["doy"].values, df["delta"].values, bins=(50, 50)
+            df["doy"].values,
+            df["delta"].values,
+            bins=(
+                np.arange(0, 366, 7),
+                np.arange(-ymax - 0.5, ymax + 0.5, dy),
+            ),
         )
+        cmap = get_cmap(ctx["cmap"])
+        cmap.set_under("tan")
+        # Days per year / 7
+        data = H.transpose() / 7.0
+        bins = pretty_bins(0, np.max(data))
+        norm = mpcolors.BoundaryNorm(bins, cmap.N)
+        ax.set_position([0.13, 0.1, 0.71, 0.78])
         ax.pcolormesh(
             xedges,
             yedges,
-            H.transpose(),
-            cmap=get_cmap(ctx["cmap"]),
+            np.where(data > 0, data, -1),
+            cmap=cmap,
+            norm=norm,
             alpha=0.5,
         )
+        ax.set_ylim(0 - ymax, 0 + ymax)
+        cax = fig.add_axes(
+            [0.86, 0.12, 0.03, 0.75], frameon=False, yticks=[], xticks=[]
+        )
+        cb = ColorbarBase(cax, norm=norm, cmap=cmap, extend="min")
+        cb.set_label("Days/Year")
 
     # Plot an average line
     gdf = (
@@ -242,22 +270,6 @@ def plotter(fdict):
     ax.set_xlim(1, 366)
     ax.grid(True)
     ax.legend(loc="best", ncol=5)
-    sts = datetime.datetime(2000, 6, 1, h1)
-    ets = datetime.datetime(2000, 6, 1, h2)
-    title = (
-        "%s [%s] %s Difference (%.0f-%.0f)\n" "%s minus %s (%s) (timezone: %s)"
-    ) % (
-        ctx["_nt"].sts[station]["name"],
-        station,
-        PDICT[varname],
-        df["year"].min(),
-        df["year"].max(),
-        ets.strftime("%-I %p"),
-        sts.strftime("%-I %p"),
-        "same day" if h2 > h1 else "previous day",
-        tzname,
-    )
-    fitbox(fig, title, 0.05, 0.95, 0.91, 0.99, ha="center")
 
     return fig, df
 

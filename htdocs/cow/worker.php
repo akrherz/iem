@@ -11,6 +11,7 @@ function printLSR($lsr, $verified=FALSE)
 {
     $valid = new DateTime($lsr["valid"]);
     $lt = Array(
+        "x" => "Debris Flow",
         "F" => "Flash Flood", "T" => "Tornado", "D" => "Tstm Wnd Dmg",
         "H" => "Hail","G" => "Wind Gust", "W" => "Waterspout",
         "M" => "Marine Tstm Wnd", "2" => "Dust Storm");
@@ -38,9 +39,9 @@ function printLSR($lsr, $verified=FALSE)
         '<td style="background: %s;">%s</td><td>%s,%s</td>'.
         '<td><a href="%s" target="_new">%s</a></td><td>%s</td><td>%s</td>'.
         '<td colspan="5">%s</td></tr>',
-	    $uri, $valid->format("m/d/Y H:i"), $background, $leadtime,
-	    $lsr["county"], $lsr["state"], $uri, $lsr["city"],
-	    $lt[strval($lsr["type"])], $lsr["magnitude"], $lsr["remark"]);
+        $uri, $valid->format("m/d/Y H:i"), $background, $leadtime,
+        $lsr["county"], $lsr["state"], $uri, $lsr["city"],
+        $lt[strval($lsr["type"])], $lsr["magnitude"], $lsr["remark"]);
 }
 
 function printWARN($lsrs, $warn)
@@ -65,13 +66,13 @@ function printWARN($lsrs, $warn)
     }
 
     $s = sprintf(
-        "<tr><td style=\"background: %s;\"><a href=\"%s\">%s.%s</a>%s</td>
-  		<td>%s</td><td>%s</td>
-  		<td colspan=\"2\"><a href=\"%s\" target=\"_new\">%s</a></td>
-  		<td><a href=\"%s\">%s</a></td><td>%.0f sq km</td>
-  		<td>%.0f sq km</td><td>%.0f %%</td>
-  		<td>%.0f%% <a href=\"/GIS/radmap.php?layers[]=legend&layers[]=ci&layers[]=cbw&layers[]=sbw&layers[]=uscounties&layers[]=bufferedlsr&vtec=%s.K%s.%s.%s.%04d&lsrbuffer=%s\">Visual</a></td>
-  		<td>%.0f%%</td><td>%s</td></tr>\n", 
+        "<tr><td style=\"background: %s;\"><a href=\"%s\">%s.%s</a>%s</td>".
+        "<td>%s</td><td>%s</td>".
+        "<td colspan=\"2\"><a href=\"%s\" target=\"_new\">%s</a></td>".
+        "<td><a href=\"%s\">%s</a></td><td>%.0f sq km</td>".
+        "<td>%.0f sq km</td><td>%.0f %%</td>".
+        "<td>%.0f%% <a href=\"/GIS/radmap.php?layers[]=legend&layers[]=ci&layers[]=cbw&layers[]=sbw&layers[]=uscounties&layers[]=bufferedlsr&vtec=%s.K%s.%s.%s.%04d&lsrbuffer=%s\">Visual</a></td>".
+        "<td>%.0f%%</td><td>%s</td></tr>\n", 
         $background, $uri, $warn["phenomena"], $warn["eventid"], $windhail,
         $issue->format("m/d/Y H:i"),
         $expire->format("m/d/Y H:i"), 
@@ -174,7 +175,11 @@ $dstat = $sts->format("m/d/Y H:i");
 $dstat1 = $ets->format("m/d/Y H:i");
 
 $aw = sprintf("%s", $stats["events_verified"]);
-$pv = sprintf("%.1f", $stats["events_verified"] / $stats["events_total"] * 100);
+if ($stats["events_total"] == 0){
+    $pv = "0";
+} else {
+    $pv = sprintf("%.1f", $stats["events_verified"] / $stats["events_total"] * 100);
+}
 $sr = sprintf("%.1f", 100 - $stats["size_poly_vs_county[%]"]);
 $asz =  sprintf("%.0f", $stats["avg_size[sq km]"]);
 $av = sprintf("%.0f", $stats["area_verify[%]"]);
@@ -323,14 +328,14 @@ ${fwarning}
 <h3>Storm Reports without warning:</h3> 
 <table class="table table-bordered table-condensed">
 <tr>
-	<th>lsr</th>
-	<th>Valid</th>
-	<th>Lead Time:</th>
-	<th>County</th>
-	<th>City</th>
-	<th>Type</th>
-	<th>Magnitude</th>
-	<th>Remark</th>
+    <th>lsr</th>
+    <th>Valid</th>
+    <th>Lead Time:</th>
+    <th>County</th>
+    <th>City</th>
+    <th>Type</th>
+    <th>Magnitude</th>
+    <th>Remark</th>
 </tr>
 {$ltable}
 </table>

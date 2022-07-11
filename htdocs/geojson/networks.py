@@ -3,7 +3,7 @@ import json
 import datetime
 
 import psycopg2.extras
-import memcache
+from pymemcache.client import Client
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
 
@@ -15,13 +15,9 @@ def run():
 
     utcnow = datetime.datetime.utcnow()
 
-    # Look for polygons into the future as well as we now have Flood products
-    # with a start time in the future
     cursor.execute(
-        """
-        SELECT ST_asGeoJson(extent) as geojson, id, name
-        from networks WHERE extent is not null ORDER by id ASC
-    """
+        "SELECT ST_asGeoJson(extent) as geojson, id, name "
+        "from networks WHERE extent is not null ORDER by id ASC"
     )
 
     res = {
@@ -52,16 +48,16 @@ def application(environ, start_response):
     cb = form.get("callback", None)
 
     mckey = "/geojson/network.geojson"
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    mc = Client(["iem-memcached", 11211])
     res = mc.get(mckey)
     if not res:
         res = run()
         mc.set(mckey, res, 86400)
-
-    if cb is None:
-        data = res
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        res = res.decode("utf-8")
+    mc.close()
+    if cb is not None:
+        res = f"{html_escape(cb)}({res})"
 
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return [res.encode("ascii")]

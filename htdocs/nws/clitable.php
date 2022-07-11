@@ -10,9 +10,9 @@ require_once "../../include/network.php";
 $nt = new NetworkTable("NWSCLI");
 
 $station = isset($_GET["station"]) ? xssafe($_GET["station"]): 'KDSM';
-$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
-$month = isset($_GET["month"]) ? intval($_GET["month"]): null;
-$day = isset($_GET["day"]) ? intval($_GET["day"]): null;
+$year = get_int404("year", date("Y"));
+$month = get_int404("month", null);
+$day = get_int404("day", null);
 $opt = isset($_GET["opt"]) ? xssafe($_GET["opt"]): "bystation";
 
 $ys = yearSelect(2009, $year, "year");
@@ -239,4 +239,3 @@ $('#makefancy').click(function(){
 </script>
 EOF;
 $t->render('full.phtml');
-?>

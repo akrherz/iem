@@ -125,4 +125,3 @@ thresholds are surpassed in the fall.
 </table>
 EOF;
 $t->render('single.phtml');
-?>

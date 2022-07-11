@@ -1,16 +1,16 @@
 <?php
-include("../../config/settings.inc.php");
-include_once "../../include/myview.php";
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 
-include("../../include/forms.php");
-include("../../include/database.inc.php");
-include("../../include/network.php");
+require_once "../../include/forms.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/network.php";
 require_once "../../include/imagemaps.php";
 
 $nt = new NetworkTable("WFO");
 $nt->table["ALL"] = Array("name" => " --- All ---- ");
-include "../../include/vtec.php";
+require_once "../../include/vtec.php";
 $postgis = iemdb('postgis');
 
 $wfo = isset($_GET["wfo"])? xssafe($_GET["wfo"]): 'ALL';
@@ -146,4 +146,3 @@ experimental at best.  The areas shown are computed using
 </table>
 EOF;
 $t->render('single.phtml');
-?>

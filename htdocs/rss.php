@@ -43,5 +43,3 @@ echo "</rss>\n";
 
 $memcache->set("/rss.php", ob_get_contents(), 600); // ten minutes
 ob_end_flush();
-
-?>
