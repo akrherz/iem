@@ -26,7 +26,12 @@ def get_description():
     processes a data stream by NLDN to construct this heatmap. The flash
     density is computed over a two by two kilometer grid constructed using
     a US National Atlas Albers (EPSG:2163) projection.  You are limited to plot
-    less than 32 days worth of data at a time.
+    less than 32 days worth of data at a time.</p>
+
+    <p><strong>Note:</strong> Due to some lame reasons, it is difficult to
+    document what data gaps exist within this dataset.  In general, the
+    coverage should be good outside of the major gap on 10 August 2020 due
+    to the derecho power outage.</p>
     """
     desc["arguments"] = [
         dict(

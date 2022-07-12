@@ -48,11 +48,11 @@ def plotter(fdict):
     year = ctx["year"]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
         with obs as (
         select day, (case when month < 7 then year - 1 else year end)
             as myyear,
-        low, month from alldata_{station[:2]} where station = %s
+        low, month from alldata where station = %s
         ), obs2 as (
             select day, myyear, low, month,
             low - min(low) OVER
@@ -75,7 +75,7 @@ def plotter(fdict):
         raise NoDataFound("No Data Found.")
     df["largest_change"] = df["largest_change"] * -1
     title = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
+        f"{ctx['_sname']}\n"
         "Max 1 Aug till 30 Jun Low Temp Drop Exceeding "
         "Previous Min Low for Season"
     )

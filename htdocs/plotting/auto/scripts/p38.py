@@ -8,14 +8,12 @@ from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
-PDICT = dict(
-    [
-        ("best", "Use NARR, then MERRA, then HRRR"),
-        ("narr_srad", "Use NARR (1979-2015)"),
-        ("merra_srad", "Use MERRA v2"),
-        ("hrrr_srad", "Use HRRR (2013+)"),
-    ]
-)
+PDICT = {
+    "best": "Use NARR, then MERRA, then HRRR",
+    "narr_srad": "Use NARR (1979-2015)",
+    "merra_srad": "Use MERRA v2",
+    "hrrr_srad": "Use HRRR (2013+)",
+}
 
 
 def get_description():
@@ -67,15 +65,14 @@ def plotter(fdict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
             WITH agg as (
                 SELECT sday, max(coalesce(narr_srad, 0))
-                from alldata_{station[:2]} where
+                from alldata where
                 station = %s  and year > 1978 GROUP by sday),
             obs as (
                 SELECT sday, day, narr_srad, merra_srad, hrrr_srad
-                from alldata_{station[:2]} WHERE
-                station = %s and year = %s)
+                from alldata WHERE station = %s and year = %s)
             SELECT a.sday, a.max as max_narr, o.day, o.narr_srad, o.merra_srad,
             o.hrrr_srad from agg a LEFT JOIN obs o on (a.sday = o.sday)
             ORDER by a.sday ASC
@@ -96,7 +93,12 @@ def plotter(fdict):
     if df["best"].loc["0229"] is None:
         df = df.drop("0229")
 
-    fig = figure(apctx=ctx)
+    lyear = datetime.date.today().year - 1
+    title = (
+        f"{ctx['_sname']} Daily Solar Radiation\n"
+        f"1979-{lyear} NARR Climatology w/ {year} "
+    )
+    fig = figure(apctx=ctx, title=title)
     ax = fig.add_axes([0.1, 0.1, 0.6, 0.8])
 
     ax.fill_between(
@@ -112,16 +114,11 @@ def plotter(fdict):
             df[varname],
             fc="g",
             ec="g",
-            label="%s" % (year,),
+            label=f"{year}",
         )
     ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax.set_xticklabels(calendar.month_abbr[1:])
     ax.set_xlim(0, 366)
-    lyear = datetime.date.today().year - 1
-    ax.set_title(
-        ("[%s] %s Daily Solar Radiation\n" "1979-%s NARR Climatology w/ %s ")
-        % (station, ctx["_nt"].sts[station]["name"], lyear, year)
-    )
     ax.legend()
     ax.grid(True)
     ax.set_ylabel("Shortwave Solar Radiation $MJ$ $d^{-1}$")
@@ -144,7 +141,7 @@ def plotter(fdict):
             ax3.text(
                 0.5,
                 0.5,
-                "%s or %s\nis missing" % (xlabel, ylabel),
+                f"{xlabel} or {ylabel}\nis missing",
                 ha="center",
                 va="center",
             )

@@ -8,21 +8,17 @@ from pyiem.plot import get_cmap
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 
-PDICT = dict(
-    (
-        ("avg", "Daily Average Temperature"),
-        ("gdd", "Growing Degree Days"),
-        ("high", "High Temperature"),
-        ("low", "Low Temperature"),
-    )
-)
-OPTDICT = dict(
-    (
-        ("diff", "Difference in Degrees F"),
-        ("sigma", "Difference in Standard Deviations"),
-        ("ptile", "Percentile"),
-    )
-)
+PDICT = {
+    "avg": "Daily Average Temperature",
+    "gdd": "Growing Degree Days",
+    "high": "High Temperature",
+    "low": "Low Temperature",
+}
+OPTDICT = {
+    "diff": "Difference in Degrees F",
+    "sigma": "Difference in Standard Deviations",
+    "ptile": "Percentile",
+}
 
 
 def get_description():
@@ -39,7 +35,7 @@ def get_description():
         dict(
             type="station",
             name="station",
-            default="IA0200",
+            default="IATAME",
             label="Select Station:",
             network="IACLIMATE",
         ),
@@ -97,28 +93,33 @@ def plotter(fdict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
         WITH data as (
-        select day, year, sday,
-        high,
-        low,
-        (high+low)/2. as temp,
-        gddxx(%s, %s, high, low) as gdd,
-        rank() OVER (PARTITION by sday ORDER by high ASC) as high_ptile,
-        rank() OVER (PARTITION by sday ORDER by (high+low)/2. ASC)
-            as temp_ptile,
-        rank() OVER (PARTITION by sday ORDER by low ASC) as low_ptile,
-        rank() OVER (PARTITION by sday
-            ORDER by gddxx(%s, %s, high, low) ASC) as gdd_ptile
-        from alldata_{station[:2]} where station = %s
+            select day, year, sday,
+            high,
+            low,
+            (high+low)/2. as temp,
+            gddxx(%s, %s, high, low) as gdd,
+            rank() OVER (PARTITION by sday ORDER by high ASC) as high_ptile,
+            rank() OVER (PARTITION by sday ORDER by (high+low)/2. ASC)
+                as temp_ptile,
+            rank() OVER (PARTITION by sday ORDER by low ASC) as low_ptile,
+            rank() OVER (PARTITION by sday
+                ORDER by gddxx(%s, %s, high, low) ASC) as gdd_ptile,
+            coalesce(merra_srad, hrrr_srad) as srad,
+            rank() OVER (PARTITION by sday
+                ORDER by coalesce(merra_srad, hrrr_srad) ASC) as srad_ptile
+            from alldata where station = %s
         ), climo as (
-        SELECT sday, avg(high) as avg_high, avg(low) as avg_low,
-        avg((high+low)/2.) as avg_temp, stddev(high) as stddev_high,
-        stddev(low) as stddev_low, stddev((high+low)/2.) as stddev_temp,
-        avg(gddxx(%s, %s, high, low)) as avg_gdd,
-        stddev(gddxx(%s, %s, high, low)) as stddev_gdd,
-        count(*)::float as years
-        from alldata_{station[:2]} WHERE station = %s GROUP by sday
+            SELECT sday, avg(high) as avg_high, avg(low) as avg_low,
+            avg((high+low)/2.) as avg_temp, stddev(high) as stddev_high,
+            stddev(low) as stddev_low, stddev((high+low)/2.) as stddev_temp,
+            avg(gddxx(%s, %s, high, low)) as avg_gdd,
+            stddev(gddxx(%s, %s, high, low)) as stddev_gdd,
+            avg(coalesce(merra_srad, hrrr_srad)) as avg_srad,
+            stddev(coalesce(merra_srad, hrrr_srad)) as stddev_srad,
+            count(*)::float as years
+            from alldata WHERE station = %s GROUP by sday
         )
         SELECT day,
         d.high - c.avg_high as high_diff,
@@ -129,6 +130,8 @@ def plotter(fdict):
         (d.temp - c.avg_temp) / c.stddev_temp as avg_sigma,
         d.gdd - c.avg_gdd as gdd_diff,
         (d.gdd - c.avg_gdd) / greatest(c.stddev_gdd, 0.1) as gdd_sigma,
+        d.srad - c.avg_srad as srad_diff,
+        (d.srad - c.avg_srad) / greatest(c.stddev_srad, 0.1) as srad_sigma,
         d.high,
         c.avg_high,
         d.low,
@@ -137,10 +140,13 @@ def plotter(fdict):
         c.avg_temp,
         d.gdd,
         c.avg_gdd,
+        d.srad,
+        c.avg_srad,
         high_ptile / years * 100. as high_ptile,
         low_ptile / years * 100. as low_ptile,
         temp_ptile / years * 100. as temp_ptile,
-        gdd_ptile / years * 100. as gdd_ptile
+        gdd_ptile / years * 100. as gdd_ptile,
+        0 as srad_ptile
         from data d JOIN climo c on
         (c.sday = d.sday) WHERE d.year = %s ORDER by day ASC
         """,
@@ -160,8 +166,10 @@ def plotter(fdict):
             ),
             index_col=None,
         )
+    tt = "Departure" if how != "ptile" else "Percentile"
+    title = f"{ctx['_sname']}:: Year {year} Daily {PDICT[varname]} {tt}"
 
-    (fig, ax) = figure_axes(apctx=ctx)
+    (fig, ax) = figure_axes(apctx=ctx, title=title)
     diff = df[varname + "_" + how].values
     if how == "ptile" and "cmap" in ctx:
         bins = range(0, 101, 10)
@@ -178,25 +186,13 @@ def plotter(fdict):
                 _bar.set_edgecolor("r")
     ax.grid(True)
     if how == "diff":
-        ax.set_ylabel(r"%s Departure $^\circ$F" % (PDICT[varname],))
+        ax.set_ylabel(f"{PDICT[varname]} Departure " r"$^\circ$F")
     elif how == "ptile":
-        ax.set_ylabel("%s Percentile (100 highest)" % (PDICT[varname],))
+        ax.set_ylabel(f"{PDICT[varname]} Percentile (100 highest)")
     else:
-        ax.set_ylabel(r"%s Std Dev Departure ($\sigma$)" % (PDICT[varname],))
+        ax.set_ylabel(f"{PDICT[varname]} Std Dev Departure " r"($\sigma$)")
     if varname == "gdd":
-        ax.set_xlabel(
-            "Growing Degree Day Base: %s Ceiling: %s" % (gddbase, gddceil)
-        )
-    ax.set_title(
-        ("%s %s\nYear %s Daily %s %s")
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            year,
-            PDICT[varname],
-            "Departure" if how != "ptile" else "Percentile",
-        )
-    )
+        ax.set_xlabel(f"Growing Degree Day Base: {gddbase} Ceiling: {gddceil}")
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b"))
     ax.xaxis.set_major_locator(mdates.DayLocator(1))
 

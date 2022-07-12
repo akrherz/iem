@@ -2,7 +2,7 @@
 import calendar
 import datetime
 
-from pandas import read_sql
+import pandas as pd
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
@@ -97,13 +97,12 @@ def plotter(fdict):
     low, high = [float(x) for x in ctx["rng"].split("-")]
     varname = ctx["var"]
     with get_sqlalchemy_conn("coop") as conn:
-        df = read_sql(
+        df = pd.read_sql(
             f"""
             select month,
             sum(case when {varname} >= %s and {varname} <= %s
                 then 1 else 0 end) as hits, count(*)
-            from alldata_{station[:2]} where station = %s
-            and {varname} is not null
+            from alldata where station = %s and {varname} is not null
             and year >= %s and year <= %s GROUP by month ORDER by month ASC
         """,
             conn,
@@ -125,7 +124,7 @@ def plotter(fdict):
     days_per_year = freq / 100.0 * 365.0
     u = "inch" if varname == "precip" else "F"
     title = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']}:: "
+        f"{ctx['_sname']}:: "
         f"Daily {PDICT2[varname]} between {low} and {high} {u} (inclusive)\n"
         f"Partition of Observed ({hits}/{count} {freq:.1f}%) "
         f"Days {PDICT[ctx['w']]} ({ctx['syear']}-{ctx['eyear']})"
