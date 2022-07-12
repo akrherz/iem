@@ -91,10 +91,12 @@ def do_insert(source_cursor, madis):
                 skips += 1
                 continue
             # Skip if old metar is longer and new metar is not a COR
+            # and old METAR is not from DS3505
             if (
                 metar is not None
                 and len(metar) > len(row["raw"])
-                and row["raw"].find(" COR ") == 0
+                and row["raw"].find(" COR ") == -1
+                and metar.find("IEM_DS3505") == -1
             ):
                 skips += 1
                 continue

@@ -54,7 +54,7 @@ def get_description():
             label="End Timestamp (UTC):",
             min="2016/10/12 0000",
         ),
-        dict(type="cmap", name="cmap", default="binary", label="Color Ramp:"),
+        dict(type="cmap", name="cmap", default="inferno", label="Color Ramp:"),
     ]
     return desc
 
@@ -124,7 +124,8 @@ def plotter(fdict):
     )
     H = H.transpose()
     bins = pretty_bins(0, np.max(H))
-    bins[0] = 1
+    if bins[1] > 1:
+        bins[0] = 1
     cmap = get_cmap(ctx["cmap"])
     cmap.set_under("white")
     norm = mpcolors.BoundaryNorm(bins, cmap.N)
