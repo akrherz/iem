@@ -1,8 +1,10 @@
 """Climodat"""
 import datetime
+from calendar import month_abbr
 
-from pandas.io.sql import read_sql
-from pyiem.plot import figure_axes
+import pandas as pd
+import numpy as np
+from pyiem.plot import figure
 from pyiem.util import get_sqlalchemy_conn, get_autoplot_context
 from pyiem.exceptions import NoDataFound
 
@@ -90,7 +92,7 @@ def plotter(fdict):
     station = ctx["station"]
 
     with get_sqlalchemy_conn("coop") as conn:
-        df = read_sql(
+        df = pd.read_sql(
             f"""
         with events as (
             SELECT c.climoweek, a.precip, a.year from alldata_{station[:2]} a
@@ -112,9 +114,17 @@ def plotter(fdict):
         sum(case when precip >= 1.01 and precip < 2.01 then 1 else 0 end)
             as cat4,
         sum(case when precip >= 2.01 then 1 else 0 end) as cat5,
+        sum(case when precip > 0.009 and precip < 0.26 then precip else 0 end)
+            as sum_cat1,
+        sum(case when precip >= 0.26 and precip < 0.51 then precip else 0 end)
+            as sum_cat2,
+        sum(case when precip >= 0.51 and precip < 1.01 then precip else 0 end)
+            as sum_cat3,
+        sum(case when precip >= 1.01 and precip < 2.01 then precip else 0 end)
+            as sum_cat4,
+        sum(case when precip >= 2.01 then precip else 0 end) as sum_cat5,
         count(*) from events GROUP by climoweek)
-        SELECT e.climoweek, e.max, r.year, e.avg, e.cat1, e.cat2, e.cat3,
-        e.cat4, e.cat5 from
+        SELECT e.*, r.year from
         stats e JOIN ranks r on (r.climoweek = e.climoweek) WHERE r.rank = 1
         ORDER by e.climoweek ASC
         """,
@@ -138,7 +148,7 @@ def plotter(fdict):
         f"# Report Generated: {today:%d %b %Y}\n"
         "# Climate Record: "
         f"{ctx['_nt'].sts[station]['archive_begin']} -> {today}\n"
-        f"# Site Information: [{station}] {ctx['_nt'].sts[station]['name']}\n"
+        f"# Site Information: {ctx['_sname']}\n"
         "# Contact Information: "
         "Daryl Herzmann akrherz@iastate.edu 515.294.5978\n"
         "# Based on climoweek periods, this report summarizes liquid "
@@ -150,32 +160,46 @@ def plotter(fdict):
         " WK TIME PERIOD    VAL  YR     RAIN     0.25     0.50     1.00     "
         "2.00    >2.01  DAYS\n"
     )
-    title = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']} Precipitation "
-        "Bin Histogram"
-    )
-    fig, ax = figure_axes(title=title, apctx=ctx)
+    title = f"{ctx['_sname']}:: Precipitation Bin [inch] Frequency Histogram"
+    fig = figure(title=title, apctx=ctx)
+    ax = fig.add_axes([0.1, 0.15, 0.8, 0.75])
     df["total"] = (
         df["cat1"] + df["cat2"] + df["cat3"] + df["cat4"] + df["cat5"]
     )
     for i in range(1, 6):
         df[f"cat{i}f"] = df[f"cat{i}"] / df["total"] * 100.0
     cs = df[["cat1f", "cat2f", "cat3f", "cat4f", "cat5f"]].cumsum(axis=1)
-    ax.bar(cs.index.values, cs["cat1f"].values, label=bins[1])
-    for i in range(2, 6):
+    cs["cat0f"] = 0
+    # Reset xaxis to make it prettier
+    cs = cs.assign(
+        x=lambda df_: np.where(
+            df_.index.values > 44,
+            df_.index.values - 45,
+            df_.index.values + 9,
+        ),
+        cat1=df["cat1f"],
+        cat2=df["cat2f"],
+        cat3=df["cat3f"],
+        cat4=df["cat4f"],
+        cat5=df["cat5f"],
+    ).sort_values("x", ascending=True)
+    for i in range(1, 6):
+        # We fake a x-axis to remove the weird start on Mar 1 thing
         ax.bar(
-            cs.index.values,
-            df[f"cat{i}f"].values,
+            np.arange(0, 53) * 7,
+            cs[f"cat{i}"].values,
             bottom=cs[f"cat{i-1}f"].values,
             label=bins[i],
+            width=7.0,
         )
     ax.grid(True)
-    ax.legend(ncol=1, loc=(1, 0.5))
-    ax.set_ylabel("Frequency of Precip Bin by Climoweek [%]")
-    xticks = range(1, 52, 10)
-    ax.set_xticks(xticks)
-    ax.set_xticklabels([CWEEK[c].replace("-->", "\n") for c in xticks])
-    ax.set_xlabel("Climate Week")
+    ax.legend(ncol=5, loc=(0.1, -0.15))
+    ax.set_ylabel("Daily Frequency of Precip Bin by Climoweek [%]")
+    ax.set_xlabel("Groupted by Climoweek of Year")
+    ax.set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
+    ax.set_xticklabels(month_abbr[1:])
+    ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
+    ax.set_xlim(-0.5, 358.5)
 
     annEvents = 0
     cat1t = 0

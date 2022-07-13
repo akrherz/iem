@@ -44,7 +44,7 @@ def main():
         icursor.execute(
             """
         select day, avg_sknt, avg_rh from summary where iemid = 37004
-        and day >= '2022-01-01' ORDER by day ASC"""
+        and day >= '2021-09-01' ORDER by day ASC"""
         )
         for row in icursor:
             if row[1] is None or row[2] is None:
@@ -62,7 +62,7 @@ def main():
 %.2f (Lat.)\r
 year    day     Solar   T-High  T-Low   RelHum  Precip  WndSpd\r
                 MJ/m2   oC      oC      %%       mm      km/hr\r
-    """
+"""
             % (
                 site.upper(),
                 nt.sts[XREF[i]]["lat"],
@@ -73,7 +73,7 @@ year    day     Solar   T-High  T-Low   RelHum  Precip  WndSpd\r
         )
 
         # Get the baseline obs
-        sts = datetime.date(2022, 1, 1)
+        sts = datetime.date(2021, 9, 1)
         ets = today
         now = sts
         while now < ets:
