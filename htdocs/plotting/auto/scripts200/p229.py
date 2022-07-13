@@ -93,6 +93,8 @@ def plotter(fdict):
             geom_col="geo",
         )
     df = gpd.sjoin(df, statedf, predicate="within")
+    if df.empty:
+        raise NoDataFound("No Lightning Data Found.")
     [xmin, ymin, xmax, ymax] = statedf.total_bounds
     buffer = 30_000
     title = (
