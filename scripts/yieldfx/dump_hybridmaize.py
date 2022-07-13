@@ -73,7 +73,7 @@ year    day     Solar   T-High  T-Low   RelHum  Precip  WndSpd\r
         )
 
         # Get the baseline obs
-        sts = datetime.date(2016, 1, 1)
+        sts = datetime.date(2022, 1, 1)
         ets = today
         now = sts
         while now < ets:
@@ -102,8 +102,7 @@ year    day     Solar   T-High  T-Low   RelHum  Precip  WndSpd\r
         fh.close()
         try:
             subprocess.call(
-                ("mv %s /mesonet/share/pickup/yieldfx/%s.wth") % (fn, site),
-                shell=True,
+                ["mv", fn, f"/mesonet/share/pickup/yieldfx/{site}.wth"],
             )
         except Exception as exp:
             LOG.exception(exp)

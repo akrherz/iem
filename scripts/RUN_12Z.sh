@@ -45,3 +45,7 @@ csh BACKUP.csh
 cd ../uscrn
 python compute_uscrn_pday.py $(date --date '1 days ago' +'%Y %m %d')
 python compute_uscrn_pday.py $(date --date '7 days ago' +'%Y %m %d')
+
+cd ../yieldfx
+python yieldfx_workflow.py
+python dump_hybridmaize.py

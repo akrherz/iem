@@ -51,10 +51,11 @@ def write_and_upload(df, location):
     """We are done, whew!"""
     (tmpfd, tmpfn) = tempfile.mkstemp(text=True)
     sio = StringIO()
-    for line in open("baseline/%s.met" % (location,)):
-        if line.startswith("year"):
-            break
-        sio.write(line.strip() + "\r\n")
+    with open(f"baseline/{location}.met", encoding="utf-8") as fh:
+        for line in fh:
+            if line.startswith("year"):
+                break
+            sio.write(line.strip() + "\r\n")
     sio.write(
         ("! auto-generated at %sZ by daryl akrherz@iastate.edu\r\n")
         % (datetime.datetime.utcnow().isoformat(),)
@@ -128,13 +129,11 @@ def write_and_upload(df, location):
     os.write(tmpfd, sio.getvalue().encode("utf-8"))
     os.close(tmpfd)
 
-    today = datetime.date.today()
     # Save file for usage by web plotting...
     os.chmod(tmpfn, 0o644)
     # os.rename fails here due to cross device link bug
     subprocess.call(
-        ("mv %s /mesonet/share/pickup/yieldfx/%s.met") % (tmpfn, location),
-        shell=True,
+        ["mv", tmpfn, f"/mesonet/share/pickup/yieldfx/{location}.met"],
     )
 
 
@@ -292,13 +291,10 @@ def replace_obs_iem(df, location):
         )
     ]
 
-    table = "summary_%s" % (jan1.year,)
     cursor.execute(
-        """
+        f"""
         select day, max_tmpf, min_tmpf, srad_mj, pday
-        from """
-        + table
-        + """ s JOIN stations t on (s.iemid = t.iemid)
+        from summary_{jan1.year} s JOIN stations t on (s.iemid = t.iemid)
         WHERE t.id = %s and max_tmpf is not null
         and day < 'TODAY' ORDER by day ASC
         """,
