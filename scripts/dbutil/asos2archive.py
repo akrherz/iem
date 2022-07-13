@@ -209,7 +209,7 @@ def main():
             do_insert(icursor, madis)
 
         if icursor.rowcount == 0 and not madis:
-            LOG.info(
+            LOG.warning(
                 "%s - %s Nothing done?",
                 first_updated.strftime("%Y-%m-%dT%H:%M"),
                 last_updated.strftime("%Y-%m-%dT%H:%M"),

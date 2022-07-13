@@ -175,7 +175,7 @@ def get_mckey(scriptnum, fdict, fmt):
     for key in fdict:
         # Internal app controls should not be used on the memcache key
         # except when they should be, sigh
-        if not key.startswith("_") or key in ["_r"]:
+        if not key.startswith("_") or key in ["_r", "_"]:
             vals.append(f"{key}:{fdict[key]}")
     return (
         f"/plotting/auto/plot/{scriptnum}/{'::'.join(vals)}.{fmt}"

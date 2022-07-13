@@ -19,7 +19,8 @@ def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {}
     desc["defaults"] = {"_r": "t"}
-    desc["cache"] = 3600
+    # Shorten the cache as CLIs sometimes get updated frequently.
+    desc["cache"] = 300
     desc["data"] = True
     desc[
         "description"
