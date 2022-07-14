@@ -7,8 +7,6 @@ beautifulsoup4
 cartopy_offlinedata
 # pytest
 coverage
-# upload scripts
-dropbox
 # one wxc script
 ephem
 # various places
