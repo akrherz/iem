@@ -7,6 +7,9 @@ require_once "../../include/myview.php";
  * Rip off weather bureau website, but do it better
  */
 function wind_formatter($row){
+    if (is_null($row["drct"]) && is_null($row["sknt"])){
+        return "M";
+    }
 	if (is_null($row["drct"]) && ($row["sknt"] > 0) && ($row["sknt"] < 10)) {
 		return sprintf("VRB %.0f", $row["sknt"] * 1.15);
 	}
@@ -15,7 +18,7 @@ function wind_formatter($row){
 	}
 	if (is_null($row["drct"])){
 		return "M";
-	} 
+	}
 	$gust_text = "";
 	if ($row["gust"] > 0){
 		$gust_text = sprintf("G %.0f", $row["gust"] * 1.15);
