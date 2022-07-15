@@ -110,15 +110,28 @@ def get_data(network, sts, ets, stations, fmt):
     return sio.getvalue()
 
 
-def application(environ, start_response):
-    """See how we are called"""
-    form = parse_formvars(environ)
+def parse_dates(form):
+    """Nicely resolve dates please."""
     sts = datetime.date(
         int(form.get("year1")), int(form.get("month1")), int(form.get("day1"))
     )
     ets = datetime.date(
         int(form.get("year2")), int(form.get("month2")), int(form.get("day2"))
     )
+    return sts, ets
+
+
+def application(environ, start_response):
+    """See how we are called"""
+    form = parse_formvars(environ)
+    try:
+        sts, ets = parse_dates(form)
+    except Exception:
+        start_response(
+            "500 Internal Server Error", [("Content-type", "text/plain")]
+        )
+        return [b"Error while parsing provided dates, ensure they are valid."]
+
     if sts.year != ets.year and overloaded():
         start_response(
             "503 Service Unavailable", [("Content-type", "text/plain")]
