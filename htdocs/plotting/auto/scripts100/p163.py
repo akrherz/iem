@@ -438,6 +438,8 @@ def plotter(fdict):
             labelbuffer=0,
         )
     elif by == "ugc":
+        # Grrr
+        df2 = df2.loc[df2.index.str.slice(2, 3) == "C"]
         mp.fill_ugcs(
             df2.to_dict(),
             bins=bins,
@@ -447,6 +449,7 @@ def plotter(fdict):
             units=units,
             extend=extend,
             labelbuffer=1,
+            is_firewx=False,
         )
     else:
         mp.fill_states(
