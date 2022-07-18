@@ -143,7 +143,7 @@ def application(environ, start_response):
         aWFO = form.getall("wfo[]")
         aWFO.append("XXX")  # Hack to make next section work
         if "ALL" not in aWFO:
-            wfoLimiter = " and wfo in %s " % (str(tuple(aWFO)),)
+            wfoLimiter = " and l.wfo in %s " % (str(tuple(aWFO)),)
 
     fn = f"lsr_{sts:%Y%m%d%H%M}_{ets:%Y%m%d%H%M}"
     if form.get("fmt", "") == "excel":
