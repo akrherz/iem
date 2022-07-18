@@ -2,7 +2,7 @@
 import datetime
 
 import numpy as np
-from geopandas import read_postgis
+import geopandas as gpd
 from affine import Affine
 import pandas as pd
 from pyiem.grid.zs import CachingZonalStats
@@ -298,7 +298,7 @@ def plotter(fdict):
         params["hour"] = int(hour)
         hour_limiter = " and cycle = :hour "
     with get_sqlalchemy_conn("postgis") as conn:
-        df = read_postgis(
+        df = gpd.read_postgis(
             text(
                 f"""
             select expire, min(issue) as min_issue, st_union(geom) as geom,

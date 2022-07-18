@@ -250,6 +250,17 @@ def plotter(fdict):
     while now <= ets:
         data[now] = {"val": " "}
         now += datetime.timedelta(days=1)
+    df2 = (
+        df.reset_index()
+        .groupby("threshold")
+        .last()
+        .assign(
+            days=lambda df_: (ets - df_["date"]).dt.days,
+        )
+    )
+    aggtxt = []
+    for thres, row in df2.iterrows():
+        aggtxt.append(f"{thres} {row['days']} Days")
     for date, row in df.iterrows():
         if row["threshold"] == "TSTM" and ctx.get("g", "yes") == "no":
             continue
@@ -266,7 +277,10 @@ def plotter(fdict):
             f"Highest {'WPC' if outlook_type == 'E' else 'SPC'} Day "
             f"{day} {PDICT[outlook_type]} Outlook for {title2}"
         ),
-        subtitle=f"Valid {sts:%d %b %Y} - {ets:%d %b %Y}",
+        subtitle=(
+            f"Valid {sts:%d %b %Y} - {ets:%d %b %Y}. "
+            f"Days since by threshold: {', '.join(aggtxt)}"
+        ),
     )
     return fig, df
 
