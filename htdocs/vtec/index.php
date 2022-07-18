@@ -327,7 +327,5 @@ $t->content = <<<EOF
   </div><!-- ./col-md-9 -->
 </div><!-- ./row -->
 
-
 EOF;
 $t->render('full.phtml');
-?>

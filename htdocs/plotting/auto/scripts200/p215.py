@@ -107,7 +107,6 @@ def get_description():
 
 def get_df(ctx, period):
     """Get our data."""
-    table = "alldata_%s" % (ctx["station"][:2])
     month = ctx["month"]
     ctx["mlabel"] = f"{month.capitalize()} Season"
     if month == "all":
@@ -128,7 +127,7 @@ def get_df(ctx, period):
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             text(
-                f"SELECT high, low, (high+low)/2. as avgt from {table} WHERE "
+                "SELECT high, low, (high+low)/2. as avgt from alldata WHERE "
                 "day >= :d1 and day <= :d2 and station = :station "
                 "and high is not null "
                 "and low is not null and month in :months"
@@ -172,13 +171,9 @@ def plotter(fdict):
     df = pd.DataFrame({label1: kern1(xpos), label2: kern2(xpos)}, index=xpos)
 
     fig = figure(apctx=ctx)
-    title = "[%s] %s %s Distribution\n%s vs %s over %s" % (
-        ctx["station"],
-        ctx["_nt"].sts[ctx["station"]]["name"],
-        PDICT[ctx["v"]],
-        period2,
-        period1,
-        ctx["mlabel"],
+    title = (
+        f"{ctx['_sname']}:: {PDICT[ctx['v']]} Distribution\n"
+        f"{period2} vs {period1} over {ctx['mlabel']}"
     )
     fitbox(fig, title, 0.12, 0.9, 0.91, 0.99)
 
@@ -246,4 +241,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict())
+    plotter({})

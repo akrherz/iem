@@ -7,7 +7,7 @@ require_once "../../include/forms.php";
 require_once "../../include/imagemaps.php";
 
 $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"], 0, 4): 'DMX';
-$year = isset($_GET["year"]) ? intval($_GET["year"]) : intval(date("Y"));
+$year = get_int404("year", intval(date("Y")));
 $state = isset($_GET['state']) ? substr($_GET["state"], 0, 2): 'IA';
 $which = isset($_GET["which"]) ? $_GET["which"]: 'wfo';
 $significance = isset($_GET["s"]) ? xssafe($_GET["s"]): "";
@@ -153,4 +153,3 @@ directly access it here:
 
 EOF;
 $t->render("single.phtml");
-?>

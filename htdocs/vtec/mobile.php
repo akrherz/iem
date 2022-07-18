@@ -63,4 +63,3 @@ $t->content = <<<EOF
 EOF;
 
 $t->render('single.phtml');
-?>

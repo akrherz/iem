@@ -49,5 +49,3 @@ for( $i=0; $row  = pg_fetch_array($result); $i++)
 
 header("Content-type: application/json");
 echo json_encode($ar);
-
-?>

@@ -2,7 +2,6 @@
 from datetime import timedelta
 
 import pandas as pd
-from pandas import read_sql
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
@@ -36,7 +35,7 @@ def get_description():
 def get_data(meta):
     """Fetch Data."""
     with get_sqlalchemy_conn("asos1min") as conn:
-        obsdf = read_sql(
+        obsdf = pd.read_sql(
             "SELECT valid, precip, extract(year from valid)::int as year, "
             "extract(doy from valid)::int as doy "
             "from alldata_1minute where station = %s and valid > %s and "
@@ -50,7 +49,7 @@ def get_data(meta):
     obsdf["inwarn"] = False
     obsdf["nearwarn"] = False
     with get_sqlalchemy_conn("postgis") as conn:
-        warndf = read_sql(
+        warndf = pd.read_sql(
             "SELECT issue, expire from sbw WHERE issue > '2002-01-01' and "
             "phenomena in ('TO', 'SV') and significance = 'W' and "
             "status = 'NEW' and ST_Contains(geom, "

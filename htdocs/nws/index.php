@@ -157,8 +157,8 @@ eventd database.</li>
 <br />Simple table showing IEM indicated Tornado and Flash Flood Emergency 
 events.</li>
 
-<li><a href="/vtec/pds.php">Tornado Particularly Dangerous Situation Warnings</a>
-<br />Simple table showing IEM indicated PDS Tornado Warnings.</li>
+<li><a href="/vtec/pds.php">Particularly Dangerous Situation Warnings</a>
+<br />Simple table showing IEM indicated PDS Tornado / Flash Flood Warnings.</li>
 
 
  <li><a href="/cow/sbwsum.phtml">Summary Images of Daily Storm Based Warnings</a>

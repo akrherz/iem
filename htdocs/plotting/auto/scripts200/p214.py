@@ -222,7 +222,7 @@ def get_data(fdict):
     minyear = ctx["df"]["utc_valid"].dt.year.min()
     ctx["xlabel"] = VDICT[ctx["x"]]
     ctx["ylabel"] = ADICT[ctx["agg"]] + " " + VDICT[ctx["y"]]
-    ctx["title"] = ("%s [%s]") % (ctx["_nt"].sts[station]["name"], station)
+    ctx["title"] = ctx["_sname"]
     ctx["subtitle"] = ("%s %s by %s (month=%s) (%s-%s)") % (
         ADICT[agg],
         VDICT[y],

@@ -40,20 +40,19 @@ EOM;
 $t->content = <<<EOF
 <ol class="breadcrumb">
  <li><a href="/nws/">NWS Resources</a></li>
- <li class="active">Particularly Dangerous Situation Tornado Warnings</li>
+ <li class="active">Particularly Dangerous Situation Warnings</li>
 </ol>
-<h3>Particularly Dangerous Situation Tornado Warnings</h3>
+<h3>Particularly Dangerous Situation Tornado / Flash Flood Warnings</h3>
 
-<div class="alert alert-info">This page presents the current
+<p>This page presents the current and
 <strong>unofficial</strong> IEM
-accounting of Tornado Warnings that contain the special Particularly Dangerous Situation
-phrasing.
-</div>
+accounting of Warnings that contain the special Particularly Dangerous Situation
+phrasing. This phrasing is the only key used to identify such events.  The phrasing
+can occur in either the issuance and/or followup statements.</p>
 
 <p>There is a <a href="/json/">JSON(P) webservice</a> that backends this table presentation, you can
 directly access it here:
-<br /><code>https://mesonet.agron.iastate.edu/json/vtec_pds.py
-</code></p>
+<br /><code>https://mesonet.agron.iastate.edu/json/vtec_pds.py</code></p>
 
 <p><strong>Related:</strong>
 <a class="btn btn-primary" href="/vtec/emergencies.php">TOR/FFW Emergencies</a>

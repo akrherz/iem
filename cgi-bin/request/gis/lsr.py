@@ -136,7 +136,7 @@ def application(environ, start_response):
         aStates = form.getall("state")
         aStates.append("XX")
         if "_ALL" not in aStates:
-            statelimiter = " and state in %s " % (str(tuple(aStates)),)
+            statelimiter = " and l.state in %s " % (str(tuple(aStates)),)
 
     wfoLimiter = ""
     if "wfo[]" in form:

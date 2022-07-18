@@ -1,11 +1,11 @@
 <?php 
 include_once "../../config/settings.inc.php";
+include_once "../../include/forms.php";
 define("IEM_APPID", 115);
-$year = isset($_GET["year"]) ? intval($_GET["year"]) : intval(date("Y"));
+$year = get_int404("year", intval(date("Y")));
 
 include_once "../../include/myview.php";
 include_once "../../include/vtec.php";
-include_once "../../include/forms.php";
 include_once "../../include/imagemaps.php";
 
 $uri = sprintf("http://iem.local/json/vtec_max_etn.py?year=%s&format=html", 
@@ -21,7 +21,6 @@ $t->headextra = <<<EOM
 EOM;
 
 $yselect = yearSelect2(2005, $year, 'year');
-
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
@@ -63,4 +62,3 @@ $(document).ready(function(){
 </script>
 EOM;
 $t->render("full.phtml");
-?>
