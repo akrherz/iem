@@ -24,6 +24,8 @@ SCHEMA = {
             ("REMARK", "str:200"),
             ("LON", "float"),
             ("LAT", "float"),
+            ("UGC", "str:6"),
+            ("UGCNAME", "str:128"),
         ]
     ),
 }
@@ -39,20 +41,23 @@ def main():
     with get_sqlalchemy_conn("postgis") as conn:
         df = read_postgis(
             """
-            SELECT distinct geom,
+            SELECT distinct l.geom,
             to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as VALID,
             coalesce(magnitude, 0)::float as MAG,
-            wfo as WFO,
+            l.wfo as WFO,
             type as TYPECODE,
             typetext as TYPETEXT,
             city as CITY,
             county as COUNTY,
-            state as STATE,
-            source as SOURCE,
+            l.state as STATE,
+            l.source as SOURCE,
             substr(coalesce(remark, ''), 1, 200) as REMARK,
-            ST_x(geom) as LON,
-            ST_y(geom) as LAT
-            from lsrs WHERE valid > (now() -'1 day'::interval)
+            ST_x(l.geom) as LON,
+            ST_y(l.geom) as LAT,
+            u.ugc as UGC,
+            u.name as UGCNAME
+            from lsrs l LEFT JOIN ugcs u on (l.gid = u.gid)
+            WHERE valid > (now() -'1 day'::interval)
         """,
             conn,
             index_col=None,

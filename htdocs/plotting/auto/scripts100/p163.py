@@ -6,7 +6,7 @@ import pandas as pd
 import pytz
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, get_cmap
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 
 MDICT = dict(
     [
@@ -60,13 +60,21 @@ MDICT = dict(
         ("WILDFIRE", "WILDFIRE"),
     ]
 )
-PDICT = {"wfo": "By NWS Forecast Office", "state": "By State"}
+PDICT = {
+    "ugc": "By County",
+    "wfo": "By NWS Forecast Office",
+    "state": "By State",
+}
 PDICT2 = {
     "count": "Event Count",
     "days": "Days with 1+ Events",
     "count_rank": "Rank of Event Count (1=lowest) Since 2003",
     "count_departure": "Departure from Average of Event Count",
     "count_standard": "Standardized Departure from Average of Event Count",
+}
+PDICT3 = {
+    "yes": "Label Values",
+    "no": "Hide Label Values",
 }
 
 
@@ -77,18 +85,29 @@ def get_description():
     desc[
         "description"
     ] = """This application generates a map displaying the
-    number of LSRs issued between a period of your choice by NWS Office. These
+    number of LSRs issued between a period of your choice. These
     are the preliminary reports and not official totals of events.</p>
 
     <p>For plots that compare against an "average" value, the period of record
     is used (since 2002).</p>
 
     <p><strong>NOTE:</strong> If you choose a period longer than one year,
-    only the "count" metric is available.  Sorry.
+    only the "count" metric is available.  Sorry.</p>
+
+    <p><strong>Caution while plotting by county:</strong> The raw NWS LSR
+    product text only contains a free-text name and state.  The IEM attempts
+    to use some heuristics to associate those with an actual political
+    boundary.  This fails about one percent of the time.
     """
-    today = datetime.date.today() + datetime.timedelta(days=1)
+    today = utc() + datetime.timedelta(days=1)
     jan1 = today.replace(month=1, day=1)
     desc["arguments"] = [
+        dict(
+            type="csector",
+            default="conus",
+            name="csector",
+            label="Geographical extent to plot:",
+        ),
         dict(
             type="select",
             name="var",
@@ -109,6 +128,7 @@ def get_description():
             default=today.strftime("%Y/%m/%d 0000"),
             label="End Date / Time (UTC):",
             min="2006/01/01 0000",
+            max=today.strftime("%Y/%m/%d 0000"),
         ),
         dict(
             type="select",
@@ -125,6 +145,13 @@ def get_description():
             options=PDICT,
         ),
         dict(type="cmap", name="cmap", default="plasma", label="Color Ramp:"),
+        dict(
+            type="select",
+            options=PDICT3,
+            default="yes",
+            label="Label values on map?",
+            name="lbl",
+        ),
     ]
     return desc
 
@@ -222,23 +249,43 @@ def plotter(fdict):
         )
     else:
         tlimiter = f" and typetext = '{myfilter}' "
+    state_limiter = ""
+    if len(ctx["csector"]) == 2:
+        state_limiter = f" and l.state = '{ctx['csector']}' "
     cmap = get_cmap(ctx["cmap"])
     extend = "neither"
 
     if varname == "days":
         with get_sqlalchemy_conn("postgis") as conn:
-            df = pd.read_sql(
-                f"""
-            WITH data as (
-                SELECT distinct wfo, state, date(valid)
-                from lsrs where valid >= %s and valid < %s {tlimiter}
-            )
-            SELECT {by}, count(*) from data GROUP by {by}
-            """,
-                conn,
-                params=(sts, ets),
-                index_col=by,
-            )
+            if by != "ugc":
+                df = pd.read_sql(
+                    f"""
+                WITH data as (
+                    SELECT distinct wfo, state, date(valid)
+                    from lsrs l where valid >= %s and valid < %s {tlimiter}
+                    {state_limiter}
+                )
+                SELECT {by}, count(*) from data GROUP by {by}
+                """,
+                    conn,
+                    params=(sts, ets),
+                    index_col=by,
+                )
+            else:
+                df = pd.read_sql(
+                    """
+                WITH data as (
+                    SELECT distinct ugc, date(valid)
+                    from lsrs l JOIN ugcs u on (l.gid = u.gid)
+                    where valid >= %s and valid < %s {tlimiter}
+                    {state_limiter}
+                )
+                SELECT ugc, count(*) from data GROUP by ugc
+                """,
+                    conn,
+                    params=(sts, ets),
+                    index_col=by,
+                )
         df2 = df["count"]
         if df2.max() < 10:
             bins = list(range(1, 11, 1))
@@ -250,18 +297,37 @@ def plotter(fdict):
         cmap.set_over("#EEEEEE")
     elif varname == "count":
         with get_sqlalchemy_conn("postgis") as conn:
-            df = pd.read_sql(
-                f"""
-            WITH data as (
-                SELECT distinct wfo, state, valid, type,
-                magnitude, geom from lsrs
-                where valid >= %s and valid < %s {tlimiter})
-            SELECT {by}, count(*) from data GROUP by {by}
-            """,
-                conn,
-                index_col=by,
-                params=(sts, ets),
-            )
+            if by != "ugc":
+                df = pd.read_sql(
+                    f"""
+                WITH data as (
+                    SELECT distinct wfo, state, valid, type,
+                    magnitude, geom from lsrs l
+                    where valid >= %s and valid < %s {tlimiter}
+                    {state_limiter}
+                )
+                SELECT {by}, count(*) from data GROUP by {by}
+                """,
+                    conn,
+                    index_col=by,
+                    params=(sts, ets),
+                )
+            else:
+                df = pd.read_sql(
+                    f"""
+                WITH data as (
+                    SELECT distinct ugc, valid, type,
+                    magnitude, l.geom from
+                    lsrs l JOIN ugcs u on (l.gid = u.gid)
+                    where valid >= %s and valid < %s {tlimiter}
+                    {state_limiter}
+                )
+                SELECT ugc, count(*) from data GROUP by ugc
+                """,
+                    conn,
+                    index_col=by,
+                    params=(sts, ets),
+                )
         df2 = df["count"]
         if df2.max() < 10:
             bins = list(range(1, 11, 1))
@@ -289,18 +355,33 @@ def plotter(fdict):
             )
         # Expensive
         with get_sqlalchemy_conn("postgis") as conn:
-            df = pd.read_sql(
-                f"""
-            WITH data as (
-                SELECT distinct wfo, {yearcol} as year, state, valid, type,
-                magnitude, geom from lsrs
-                where {slimiter} {tlimiter}
-            )
-            SELECT {by}, year, count(*) from data GROUP by {by}, year
-            """,
-                conn,
-                index_col=None,
-            )
+            if by != "ugc":
+                df = pd.read_sql(
+                    f"""
+                WITH data as (
+                    SELECT distinct wfo, {yearcol} as year, state, valid, type,
+                    magnitude, geom from lsrs l
+                    where {slimiter} {tlimiter} {state_limiter}
+                )
+                SELECT {by}, year, count(*) from data GROUP by {by}, year
+                """,
+                    conn,
+                    index_col=None,
+                )
+            else:
+                df = pd.read_sql(
+                    f"""
+                WITH data as (
+                    SELECT distinct ugc, {yearcol} as year, valid, type,
+                    magnitude, l.geom
+                    from lsrs l JOIN ugcs u on (l.gid = u.gid)
+                    where {slimiter} {tlimiter} {state_limiter}
+                )
+                SELECT {by}, year, count(*) from data GROUP by {by}, year
+                """,
+                    conn,
+                    index_col=None,
+                )
         # Fill out zeros
         idx = pd.MultiIndex.from_product(
             [df[by].unique(), df["year"].unique()],
@@ -351,10 +432,21 @@ def plotter(fdict):
             bins=bins,
             lblformat=lformat,
             cmap=cmap,
-            ilabel=True,
+            ilabel=ctx["lbl"] == "yes",
             units=units,
             extend=extend,
             labelbuffer=0,
+        )
+    elif by == "ugc":
+        mp.fill_ugcs(
+            df2.to_dict(),
+            bins=bins,
+            lblformat=lformat,
+            cmap=cmap,
+            ilabel=ctx["lbl"] == "yes",
+            units=units,
+            extend=extend,
+            labelbuffer=1,
         )
     else:
         mp.fill_states(
@@ -362,7 +454,7 @@ def plotter(fdict):
             bins=bins,
             lblformat=lformat,
             cmap=cmap,
-            ilabel=True,
+            ilabel=ctx["lbl"] == "yes",
             units=units,
             extend=extend,
             labelbuffer=0,

@@ -123,12 +123,16 @@ SOURCE   Who reported the LSR
 REMARK   Text summary with the LSR
 LAT      Latitude
 LON      Longitude
+UGC      IEM computed NWS UGC code (6 character), sometimes null
+UGCNAME  IEM computed NWS UGC name (128 character), sometimes null
 </pre>
 
 <h4>Archive notes:</h4>
 <ul>
  <li>Before 1 Dec 2006, there was no differentiation between Snow and Sleet reports.</li>
+  <li><strong>18 July 2022:</strong> Added output fields that attempt to cross
+  reference NWS UGC County/Zones database to the referenced county/state found
+  in the LSR text.  This all is sub-optimal, but works in 99% of cases.</li>
 </ul>
 EOF;
 $t->render('single.phtml');
-?>

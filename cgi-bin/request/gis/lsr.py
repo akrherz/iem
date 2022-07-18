@@ -6,9 +6,8 @@ from io import BytesIO, StringIO
 
 import shapefile
 import pandas as pd
-from pandas.io.sql import read_sql
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconn, utc, get_sqlalchemy_conn
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 ISO8660 = "%Y-%m-%dT%H:%M"
@@ -50,24 +49,33 @@ def get_time_domain(form):
     return sts, ets
 
 
-def do_excel(pgconn, sts, ets, wfolimiter, statelimiter):
+def do_excel(sts, ets, wfolimiter, statelimiter):
     """Export as Excel."""
-    df = read_sql(
-        "WITH wfos as (select case when length(id) = 4 then substr(id, 1, 3) "
-        "else id end as cwa, tzname from stations where network = 'WFO') "
-        "SELECT distinct "
-        "l.wfo as office, "
-        "to_char(valid at time zone w.tzname, "
-        " 'YYYY/MM/DD HH24:MI') as lvalid, "
-        "to_char(valid at time zone 'UTC', 'YYYY/MM/DD HH24:MI') as utcvalid, "
-        "county, city, state, typetext, magnitude, source, "
-        "ST_y(geom) as lat, ST_x(geom) as lon, coalesce(remark, '') as remark "
-        "from lsrs l JOIN wfos w on (l.wfo = w.cwa) "
-        f"WHERE valid >= %s and valid < %s {wfolimiter} {statelimiter} "
-        "ORDER by utcvalid ASC",
-        pgconn,
-        params=(sts, ets),
-    )
+    with get_sqlalchemy_conn("postgis") as conn:
+        df = pd.read_sql(
+            f"""
+            WITH wfos as (
+                select case when length(id) = 4 then substr(id, 1, 3)
+                else id end as cwa, tzname from stations where network = 'WFO'
+            ), reports as (
+                select distinct l.wfo, valid, county, city, l.state, typetext,
+                magnitude, l.source, ST_y(l.geom) as lat, ST_x(l.geom) as lon,
+                coalesce(remark, '') as remark, u.ugc, u.name as ugcname
+                from lsrs l LEFT JOIN ugcs u on (l.gid = u.gid) WHERE
+                valid >= %s and valid < %s {wfolimiter} {statelimiter}
+            )
+            SELECT l.wfo as office,
+            to_char(valid at time zone w.tzname,
+             'YYYY/MM/DD HH24:MI') as lvalid,
+            to_char(valid at time zone 'UTC',
+                'YYYY/MM/DD HH24:MI') as utcvalid,
+            county, city, state, typetext, magnitude, source, lat, lon,
+            remark, ugc, ugcname
+            from reports l JOIN wfos w on (l.wfo = w.cwa)
+            ORDER by utcvalid ASC""",
+            conn,
+            params=(sts, ets),
+        )
     df = df.rename(
         {
             "office": "Office",
@@ -137,14 +145,14 @@ def application(environ, start_response):
         if "ALL" not in aWFO:
             wfoLimiter = " and wfo in %s " % (str(tuple(aWFO)),)
 
-    fn = "lsr_%s_%s" % (sts.strftime("%Y%m%d%H%M"), ets.strftime("%Y%m%d%H%M"))
+    fn = f"lsr_{sts:%Y%m%d%H%M}_{ets:%Y%m%d%H%M}"
     if form.get("fmt", "") == "excel":
         headers = [
             ("Content-type", EXL),
             ("Content-disposition", f"attachment; Filename={fn}.xlsx"),
         ]
         start_response("200 OK", headers)
-        return [do_excel(pgconn, sts, ets, wfoLimiter, statelimiter)]
+        return [do_excel(sts, ets, wfoLimiter, statelimiter)]
 
     os.chdir("/tmp")
     for suffix in ["shp", "shx", "dbf", "csv"]:
@@ -155,7 +163,7 @@ def application(environ, start_response):
     csv.write(
         (
             "VALID,VALID2,LAT,LON,MAG,WFO,TYPECODE,TYPETEXT,CITY,"
-            "COUNTY,STATE,SOURCE,REMARK\n"
+            "COUNTY,STATE,SOURCE,REMARK,UGC,UGCNAME\n"
         )
     )
 
@@ -163,12 +171,13 @@ def application(environ, start_response):
         f"""
         SELECT distinct
         to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as dvalid,
-        magnitude, wfo, type, typetext,
-        city, county, state, source,
+        magnitude, l.wfo, type, typetext,
+        city, county, l.state, l.source,
         substr(coalesce(remark, ''),0,200) as tremark,
-        ST_y(geom), ST_x(geom),
-        to_char(valid at time zone 'UTC', 'YYYY/MM/DD HH24:MI') as dvalid2
-        from lsrs WHERE
+        ST_y(l.geom), ST_x(l.geom),
+        to_char(valid at time zone 'UTC', 'YYYY/MM/DD HH24:MI') as dvalid2,
+        u.ugc, u.name as ugcname
+        from lsrs l LEFT JOIN ugcs u on (l.gid = u.gid) WHERE
         valid >= %s and valid < %s {wfoLimiter} {statelimiter}
         ORDER by dvalid ASC
         """,
@@ -196,9 +205,11 @@ def application(environ, start_response):
         shp.field("REMARK", "C", 200)
         shp.field("LAT", "F", 7, 4)
         shp.field("LON", "F", 9, 4)
+        shp.field("UGC", "C", 6)
+        shp.field("UGCNAME", "C", 128)
         for row in cursor:
             row = list(row)
-            shp.point(row[-2], row[-3])
+            shp.point(row[11], row[10])
             if row[9] is not None:
                 row[9] = (
                     row[9]
@@ -206,14 +217,21 @@ def application(environ, start_response):
                     .decode("ascii", "ignore")
                     .replace(",", "_")
                 )
+            if row[14] is not None:
+                row[14] = (
+                    row[14]
+                    .encode("utf-8", "ignore")
+                    .decode("ascii", "ignore")
+                    .replace(",", "_")
+                )
             shp.record(*row[:-1])
             csv.write(
-                ("%s,%s,%.2f,%.2f,%s,%s,%s,%s,%s,%s,%s,%s,%s\n")
+                ("%s,%s,%.2f,%.2f,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n")
                 % (
                     row[0],
                     row[12],
-                    row[-3],
-                    row[-2],
+                    row[10],
+                    row[11],
                     row[1],
                     row[2],
                     row[3],
@@ -223,13 +241,15 @@ def application(environ, start_response):
                     row[7],
                     row[8],
                     row[9] if row[9] is not None else "",
+                    row[13],
+                    row[14],
                 )
             )
 
     if "justcsv" in form or form.get("fmt", "") == "csv":
         headers = [
             ("Content-type", "application/octet-stream"),
-            ("Content-Disposition", "attachment; filename=%s.csv" % (fn,)),
+            ("Content-Disposition", f"attachment; filename={fn}.csv"),
         ]
         start_response("200 OK", headers)
         return [csv.getvalue().encode("ascii", "ignore")]
@@ -238,16 +258,15 @@ def application(environ, start_response):
     with zipfile.ZipFile(
         zio, mode="w", compression=zipfile.ZIP_DEFLATED
     ) as zf:
-        zf.writestr(
-            fn + ".prj", open(("/opt/iem/data/gis/meta/4326.prj")).read()
-        )
-        zf.writestr(fn + ".shp", shpio.getvalue())
-        zf.writestr(fn + ".shx", shxio.getvalue())
-        zf.writestr(fn + ".dbf", dbfio.getvalue())
-        zf.writestr(fn + ".csv", csv.getvalue())
+        with open("/opt/iem/data/gis/meta/4326.prj", encoding="utf-8") as fh:
+            zf.writestr(f"{fn}.prj", fh.read())
+        zf.writestr(f"{fn}.shp", shpio.getvalue())
+        zf.writestr(f"{fn}.shx", shxio.getvalue())
+        zf.writestr(f"{fn}.dbf", dbfio.getvalue())
+        zf.writestr(f"{fn}.csv", csv.getvalue())
     headers = [
         ("Content-type", "application/octet-stream"),
-        ("Content-Disposition", "attachment; filename=%s.zip" % (fn,)),
+        ("Content-Disposition", f"attachment; filename={fn}.zip"),
     ]
     start_response("200 OK", headers)
     return [zio.getvalue()]
