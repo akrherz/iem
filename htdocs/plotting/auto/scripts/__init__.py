@@ -696,6 +696,13 @@ nopts = [
             "WPC Excessive Rainfall Outlook Calendar"
         ),
     },
+    {
+        "id": 230,
+        "label": (
+            "SPC Convective/Fire Wx or "
+            "WPC Excessive Rainfall Last Event Infographic"
+        ),
+    },
     {"id": 200, "label": "SPC + WPC Outlook Heatmap"},
     {
         "id": 166,
