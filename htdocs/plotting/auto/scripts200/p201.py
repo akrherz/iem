@@ -1,8 +1,13 @@
 """Calendar of SPC Outlooks by WFO/state."""
+import calendar
 import datetime
 
 import pandas as pd
-from pyiem.plot import calendar_plot
+import numpy as np
+import matplotlib.colors as mpcolors
+from matplotlib.patches import Rectangle
+from matplotlib.ticker import MaxNLocator
+from pyiem.plot import calendar_plot, figure
 from pyiem.reference import state_names
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, get_dbconn
 from pyiem.exceptions import NoDataFound
@@ -30,18 +35,20 @@ COLORS = {
     "CRIT": "#ff787d",
     "EXTM": "#ff78ff",
 }
-DAYS = dict(
-    (
-        ("1", "Day 1"),
-        ("2", "Day 2"),
-        ("3", "Day 3"),
-        ("4", "Day 4"),
-        ("5", "Day 5"),
-        ("6", "Day 6"),
-        ("7", "Day 7"),
-        ("8", "Day 8"),
-    )
-)
+DAYS = {
+    "1": "Day 1",
+    "2": "Day 2",
+    "3": "Day 3",
+    "4": "Day 4",
+    "5": "Day 5",
+    "6": "Day 6",
+    "7": "Day 7",
+    "8": "Day 8",
+}
+MDICT = {
+    "cal": "Plot Calendar (limited <= 12 months)",
+    "heat": "Plot Heatmap (unlimited)",
+}
 
 
 def get_description():
@@ -67,6 +74,13 @@ def get_description():
     today = datetime.date.today()
     jan1 = today.replace(month=1, day=1)
     desc["arguments"] = [
+        dict(
+            type="select",
+            name="mode",
+            default="cal",
+            label="Plotting Mode:",
+            options=MDICT,
+        ),
         dict(
             type="date",
             name="sdate",
@@ -260,7 +274,8 @@ def plotter(fdict):
     )
     aggtxt = []
     for thres, row in df2.iterrows():
-        aggtxt.append(f"{thres} {row['days']} Days")
+        if thres in COLORS:
+            aggtxt.append(f"{thres} {row['days']} Days")
     for date, row in df.iterrows():
         if row["threshold"] == "TSTM" and ctx.get("g", "yes") == "no":
             continue
@@ -268,20 +283,65 @@ def plotter(fdict):
             "val": row["threshold"],
             "cellcolor": COLORS.get(row["threshold"], "#EEEEEE"),
         }
-    fig = calendar_plot(
-        sts,
-        ets,
-        data,
-        apctx=ctx,
-        title=(
-            f"Highest {'WPC' if outlook_type == 'E' else 'SPC'} Day "
-            f"{day} {PDICT[outlook_type]} Outlook for {title2}"
-        ),
-        subtitle=(
-            f"Valid {sts:%d %b %Y} - {ets:%d %b %Y}. "
-            f"Days since by threshold: {', '.join(aggtxt)}"
-        ),
+    title = (
+        f"Highest {'WPC' if outlook_type == 'E' else 'SPC'} Day "
+        f"{day} {PDICT[outlook_type]} Outlook for {title2}"
     )
+    subtitle = (
+        f"Valid {sts:%d %b %Y} - {ets:%d %b %Y}. "
+        f"Days since by threshold: {', '.join(aggtxt)}"
+    )
+    if ctx["mode"] == "cal":
+        fig = calendar_plot(
+            sts,
+            ets,
+            data,
+            apctx=ctx,
+            title=title,
+            subtitle=subtitle,
+        )
+    else:
+        fig = figure(apctx=ctx, title=title, subtitle=subtitle)
+        ax = fig.add_axes([0.05, 0.15, 0.9, 0.75])
+        data = np.ones((ets.year - sts.year + 1, 366)) * -1
+        thresholds = list(COLORS.keys())
+        for date, row in df.iterrows():
+            if row["threshold"] == "TSTM" and ctx.get("g", "yes") == "no":
+                continue
+            if row["threshold"] in thresholds:
+                y = date.year - sts.year
+                x = int(date.strftime("%j"))
+                data[y, x] = thresholds.index(row["threshold"])
+
+        cmap = mpcolors.ListedColormap(list(COLORS.values()))
+        cmap.set_under("#FFFFFF")
+        norm = mpcolors.BoundaryNorm(range(len(COLORS)), cmap.N)
+        ax.imshow(
+            data,
+            aspect="auto",
+            interpolation="nearest",
+            extent=(1, 367, ets.year + 0.5, sts.year - 0.5),
+            cmap=cmap,
+            norm=norm,
+        )
+        rects = []
+        rlabels = []
+        uvals = df["threshold"].unique().tolist()
+        for thres, color in COLORS.items():
+            if thres in uvals:
+                rlabels.append(thres)
+                rects.append(Rectangle((0, 0), 1, 1, fc=color))
+        ax.legend(
+            rects,
+            rlabels,
+            ncol=10,
+            loc=(0, -0.1),
+        )
+        ax.set_xticks([1, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335])
+        ax.set_xticklabels(calendar.month_abbr[1:])
+        ax.grid()
+        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+
     return fig, df
 
 
