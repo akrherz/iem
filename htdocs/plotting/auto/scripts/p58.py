@@ -42,10 +42,10 @@ def plotter(fdict):
     threshold = float(ctx["threshold"])
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
             WITH monthly as (
             SELECT year, month, max(precip), sum(precip)
-            from alldata_{station[:2]}
+            from alldata
             WHERE station = %s and precip is not null GROUP by year, month)
 
             SELECT month,
@@ -63,7 +63,7 @@ def plotter(fdict):
     df["freq"] = df["hits"] / df["years"] * 100.0
 
     title = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
+        f"{ctx['_sname']}\n"
         f"Frequency of one day having >= {threshold:.0f}% of that month's "
         "precip total"
     )

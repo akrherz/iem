@@ -2,7 +2,7 @@
 import calendar
 import datetime
 
-from pandas.io.sql import read_sql
+import pandas as pd
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
@@ -113,7 +113,7 @@ def plotter(fdict):
         )
     trunc = "day" if ctx["w"] == "day" else "hour"
     with get_sqlalchemy_conn("asos") as conn:
-        df = read_sql(
+        df = pd.read_sql(
             f"""
         WITH data as (
             SELECT distinct date_trunc(%s,
@@ -136,7 +136,7 @@ def plotter(fdict):
     t2 = pweather if pweather != "1" else "TS"
     t3 = " with at least one hourly report" if ctx["w"] == "day" else ""
     title = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']} {PDICT[pweather]} "
+        f"{ctx['_sname']}:: {PDICT[pweather]} "
         "Events\n"
         f"({syear}-{datetime.date.today().year}) Distinct {t1} with "
         f"'{t2}' Reported{t3}"

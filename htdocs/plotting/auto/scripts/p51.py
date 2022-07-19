@@ -114,7 +114,7 @@ def plotter(fdict):
     gddbase = ctx["base"]
     gddceil = ctx["ceil"]
     whichplots = ctx["which"]
-    glabel = "gdd%s%s" % (gddbase, gddceil)
+    glabel = f"gdd{gddbase}{gddceil}"
 
     # Make sure we have climo info
     if (
@@ -185,12 +185,12 @@ def plotter(fdict):
     # build the obs
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
-            "SELECT day, to_char(day, 'mmdd') as sday, "
-            f"gddxx(%s, %s, max_tmpf, min_tmpf) as o{glabel}, pday as oprecip, "
-            "sdd86(max_tmpf, min_tmpf) as osdd86 from summary s JOIN stations t "
-            "ON (s.iemid = t.iemid) "
-            "WHERE t.id = %s and t.network = %s and "
-            "to_char(day, 'mmdd') != '0229' ORDER by day ASC",
+            f"""SELECT day, to_char(day, 'mmdd') as sday,
+            gddxx(%s, %s, max_tmpf, min_tmpf) as o{glabel}, pday as oprecip,
+            sdd86(max_tmpf, min_tmpf) as osdd86 from summary s JOIN stations t
+            ON (s.iemid = t.iemid)
+            WHERE t.id = %s and t.network = %s and
+            to_char(day, 'mmdd') != '0229' ORDER by day ASC""",
             conn,
             params=(gddbase, gddceil, station, ctx["network"]),
             index_col=None,
@@ -213,16 +213,16 @@ def plotter(fdict):
         )
         ax3 = fig.add_axes([0.1, 0.35, 0.8, 0.2], sharex=ax1)
         ax4 = fig.add_axes([0.1, 0.1, 0.8, 0.2], sharex=ax1)
-        title = ("GDD(base=%.0f,ceil=%.0f), Precip, & " "SDD(base=86)") % (
-            gddbase,
-            gddceil,
+        title = (
+            f"GDD(base={gddbase:.0f},ceil={gddceil:.0f}), Precip, & "
+            "SDD(base=86)"
         )
     elif whichplots == "gdd":
         ax1 = fig.add_axes([0.14, 0.31, 0.8, 0.57])
         ax2 = fig.add_axes(
             [0.14, 0.11, 0.8, 0.2], sharex=ax1, facecolor="#EEEEEE"
         )
-        title = ("GDD(base=%.0f,ceil=%.0f)") % (gddbase, gddceil)
+        title = f"GDD(base={gddbase:.0f},ceil={gddceil:.0f})"
     elif whichplots == "precip":
         ax3 = fig.add_axes([0.1, 0.11, 0.8, 0.75])
         ax1 = ax3
@@ -233,8 +233,7 @@ def plotter(fdict):
         title = "Stress Degree Days (base=86)"
 
     ax1.set_title(
-        ("Accumulated %s\n%s %s")
-        % (title, station, ctx["_nt"].sts[station]["name"]),
+        f"Accumulated {title}\n{ctx['_sname']}",
         fontsize=18 if whichplots == "all" else 14,
     )
 
@@ -247,14 +246,14 @@ def plotter(fdict):
         yearlabel = sts.year
         x = df.loc[sts:ets]
         if sts.year != ets.year:
-            yearlabel = "%s-%s" % (sts.year, ets.year)
+            yearlabel = f"{sts.year}-{ets.year}"
         if whichplots in ["gdd", "all"]:
             ax1.plot(
                 range(len(x.index)),
                 x[f"o{glabel}"].cumsum().values,
                 zorder=6,
                 color=color,
-                label="%s" % (yearlabel,),
+                label=f"{yearlabel}",
                 lw=2,
             )
         # Get cumulated precip
@@ -332,20 +331,19 @@ def plotter(fdict):
     xmax = np.nanmax(pacc, 0)
     if whichplots in ["all", "precip"]:
         ax3.fill_between(range(len(xmin)), xmin, xmax, color="lightblue")
-        ax3.set_ylabel("Precipitation [inch]", fontsize=16)
+        ax3.set_ylabel("Precipitation [inch]")
         ax3.grid(True)
     xmin = np.nanmin(sacc, 0)
     xmax = np.nanmax(sacc, 0)
     if whichplots in ["all", "sdd"]:
         ax4.fill_between(range(len(xmin)), xmin, xmax, color="lightblue")
-        ax4.set_ylabel(r"SDD Base 86 $^{\circ}\mathrm{F}$", fontsize=16)
+        ax4.set_ylabel(r"SDD Base 86 $^{\circ}\mathrm{F}$")
         ax4.grid(True)
 
     if whichplots in ["all", "gdd"]:
         ax1.set_ylabel(
-            (r"GDD Base %.0f Ceil %.0f $^{\circ}\mathrm{F}$")
-            % (gddbase, gddceil),
-            fontsize=16,
+            f"GDD Base {gddbase:.0f} Ceil {gddceil:.0f} "
+            r"$^{\circ}\mathrm{F}$"
         )
 
         ax1.text(

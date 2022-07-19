@@ -190,9 +190,7 @@ def plotter(fdict):
         )
 
     for year, gdf in df.groupby("year"):
-        size = gdf["doy"].max() - gdf["doy"].min()
-        if size < 1:
-            size = 1
+        size = max(gdf["doy"].max() - gdf["doy"].min(), 1)
         ax.barh(
             year,
             size,
@@ -203,7 +201,7 @@ def plotter(fdict):
         )
         if ctx["f"] == "none":
             continue
-        elif ctx["f"] == "daily":
+        if ctx["f"] == "daily":
             ax.barh(
                 gdf["year"].values,
                 [1] * len(gdf.index),

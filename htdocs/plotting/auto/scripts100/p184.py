@@ -2,7 +2,6 @@
 import datetime
 
 import pandas as pd
-from pandas.io.sql import read_sql
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
@@ -74,7 +73,7 @@ def plotter(fdict):
         # Truncate up to the next year
         params["sts"] = f"{ab.year + 1}-01-01"
     with get_sqlalchemy_conn("coop") as conn:
-        df = read_sql(
+        df = pd.read_sql(
             text(
                 "SELECT year, day, high from alldata WHERE "
                 "station = :station and day >= :sts and "

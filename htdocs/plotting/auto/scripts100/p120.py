@@ -1,11 +1,10 @@
 """last spring temp"""
 import datetime
 
-from pandas.io.sql import read_sql
 import pandas as pd
 import matplotlib.dates as mdates
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 
@@ -50,13 +49,9 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
     thresholds = [ctx["t1"], ctx["t2"], ctx["t3"], ctx["t4"]]
-
-    table = "alldata_%s" % (station[:2],)
-    # Load up dict of dates..
 
     df = pd.DataFrame(
         {
@@ -72,18 +67,19 @@ def plotter(fdict):
 
     for base in thresholds:
         # Query Last doy for each year in archive
-        df2 = read_sql(
-            f"""
-            select year,
-            max(case when low <= %s then extract(doy from day)
-                else 0 end) as doy from {table}
-            WHERE month < 7 and station = %s and year > %s and year < %s
-            GROUP by year
-        """,
-            pgconn,
-            params=(base, station, ctx["syear"], ctx["eyear"]),
-            index_col=None,
-        )
+        with get_sqlalchemy_conn("coop") as conn:
+            df2 = pd.read_sql(
+                """
+                select year,
+                max(case when low <= %s then extract(doy from day)
+                    else 0 end) as doy from alldata
+                WHERE month < 7 and station = %s and year > %s and year < %s
+                GROUP by year
+            """,
+                conn,
+                params=(base, station, ctx["syear"], ctx["eyear"]),
+                index_col=None,
+            )
         for _, row in df2.iterrows():
             if row["doy"] == 0:
                 continue

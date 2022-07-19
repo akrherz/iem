@@ -113,8 +113,6 @@ def plotter(fdict):
     month = ctx["month"]
     ctx["mag"] = abs(ctx["mag"])
 
-    table = f"alldata_{station[:2]}"
-
     yr = "year as yr"
     if month == "all":
         months = range(1, 13)
@@ -157,7 +155,7 @@ def plotter(fdict):
             stddev(low) as stddev_low,
             avg((high+low)/2.) as avg_temp,
             stddev((high+low)/2.) as stddev_temp
-            from {table} WHERE
+            from alldata WHERE
             station = :station GROUP by sday)
 
         SELECT {yr},
@@ -170,7 +168,7 @@ def plotter(fdict):
         sum(case when (o.high+o.low)/2. {comp}
         (a.avg_temp {op} a.stddev_temp * {smul} {op} {offset})
             then 1 else 0 end) as avg_{which},
-        count(*) as days from {table} o, avgs a WHERE o.station = :station
+        count(*) as days from alldata o, avgs a WHERE o.station = :station
         and o.sday = a.sday and month in :months
         GROUP by yr ORDER by yr ASC
         """
@@ -191,7 +189,7 @@ def plotter(fdict):
 
     title = "\n".join(
         [
-            f"[{station}] {ctx['_nt'].sts[station]['name']} "
+            f"{ctx['_sname']} "
             f"{df.index.values.min()}-{df.index.values.max()} "
             f"{PDICT4[ctx['opt']]} of Days",
             f"with {PDICT[varname]} {metric} {PDICT3[ctx['which']]} "

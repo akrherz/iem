@@ -119,7 +119,7 @@ def plotter(fdict):
         width=1,
         fc="red",
         ec="None",
-        label="%s & Above (%.1f%%)" % (t5, val),
+        label=f"{t5} & Above ({val:.1f}%)",
     )
     val = df["d5"].sum() / df["count"].sum() * 100.0
     ax.bar(
@@ -129,7 +129,7 @@ def plotter(fdict):
         width=1,
         fc="tan",
         ec="None",
-        label="%s-%s (%.1f%%)" % (t4, t5 - 1, val),
+        label=f"{t4}-{t5 - 1} ({val:.1f}%)",
     )
     val = df["d4"].sum() / df["count"].sum() * 100.0
     ax.bar(
@@ -139,7 +139,7 @@ def plotter(fdict):
         width=1,
         fc="yellow",
         ec="None",
-        label="%s-%s (%.1f%%)" % (t3, t4 - 1, val),
+        label=f"{t3}-{t4 - 1} ({val:.1f}%)",
     )
     val = df["d3"].sum() / df["count"].sum() * 100.0
     ax.bar(
@@ -149,7 +149,7 @@ def plotter(fdict):
         fc="green",
         bottom=(df["p2"] + df["p1"]).values,
         ec="None",
-        label="%s-%s (%.1f%%)" % (t2, t3 - 1, val),
+        label=f"{t2}-{t3 - 1} ({val:.1f}%)",
     )
     val = df["d2"].sum() / df["count"].sum() * 100.0
     ax.bar(
@@ -159,7 +159,7 @@ def plotter(fdict):
         width=1,
         fc="blue",
         ec="None",
-        label="%s-%s (%.1f%%)" % (t1, t2 - 1, val),
+        label=f"{t1}-{t2 - 1} ({val:.1f}%)",
     )
     val = df["d1"].sum() / df["count"].sum() * 100.0
     ax.bar(
@@ -168,7 +168,7 @@ def plotter(fdict):
         width=1,
         fc="purple",
         ec="None",
-        label="Below %s (%.1f%%)" % (t1, val),
+        label=f"Below {t1} ({val:.1f}%)",
     )
 
     ax.grid(True, zorder=11)
@@ -176,14 +176,10 @@ def plotter(fdict):
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
     ax.set_title(
-        ("%s [%s]\n" r"Hourly %s ($^\circ$F) Frequencies (%s-%s)")
-        % (
-            ctx["_nt"].sts[station]["name"],
-            station,
-            PDICT[v],
-            ab.year,
-            datetime.datetime.now().year,
-        )
+        f"{ctx['_sname']}\n"
+        f"Hourly {PDICT[v]} "
+        r"($^\circ$F) "
+        f"Frequencies ({ab.year}-{datetime.datetime.now().year})"
     )
     ax.set_ylabel("Frequency [%]")
 

@@ -1,7 +1,7 @@
 """Heatmap of SPI/Departure values."""
 import calendar
 
-from pandas import read_sql
+import pandas as pd
 from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
@@ -76,16 +76,16 @@ def plotter(fdict):
     station = ctx["station"]
     varname = ctx["var"]
     with get_sqlalchemy_conn("coop") as conn:
-        df = read_sql(
+        df = pd.read_sql(
             text(
-                f"""
+                """
             WITH climo as (
                 select to_char(valid, 'mmdd') as sday, precip from
                 ncei_climate91 where station = :ncei
             )
             select a.day, a.sday, a.precip as ob_precip,
             c.precip as climo_precip
-            from alldata_{station[:2]} a, climo c where a.station = :station
+            from alldata a, climo c where a.station = :station
             and a.sday = c.sday and a.precip is not null
             ORDER by a.day ASC
         """
@@ -127,8 +127,7 @@ def plotter(fdict):
     df["doy"] = df.index.map(lambda x: x.timetuple().tm_yday)
 
     title = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']}:: {days} Day "
-        f"{PDICT[varname]}\n"
+        f"{ctx['_sname']}:: {days} Day {PDICT[varname]}\n"
         "Heatmap of values by day of year\n"
         f"Climatology: {PDICT2[ctx['c']]}"
     )

@@ -5,9 +5,8 @@ import os
 import pytz
 import pygrib
 from metpy.units import units, masked_array
-from pandas.io.sql import read_sql
 import pandas as pd
-from pyiem.util import get_autoplot_context, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import MapPlot, get_cmap
 from pyiem.reference import SECTORS_NAME
 from pyiem.exceptions import NoDataFound
@@ -150,19 +149,19 @@ def plotter(fdict):
     ]
     if ts.year < 2019:
         column = "hour%02i" % (hour,)
-        pgconn = get_dbconn("postgis")
-        df = read_sql(
-            """
-        WITH data as (
-            SELECT ugc, rank() OVER (PARTITION by ugc ORDER by valid DESC),
-            hour01, hour03, hour06, hour12, hour24
-            from ffg WHERE valid >= %s and valid <= %s)
-        SELECT *, substr(ugc, 3, 1) as ztype from data where rank = 1
-        """,
-            pgconn,
-            params=(ts - datetime.timedelta(hours=24), ts),
-            index_col="ugc",
-        )
+        with get_sqlalchemy_conn("postgis") as conn:
+            df = pd.read_sql(
+                """
+            WITH data as (
+                SELECT ugc, rank() OVER (PARTITION by ugc ORDER by valid DESC),
+                hour01, hour03, hour06, hour12, hour24
+                from ffg WHERE valid >= %s and valid <= %s)
+            SELECT *, substr(ugc, 3, 1) as ztype from data where rank = 1
+            """,
+                conn,
+                params=(ts - datetime.timedelta(hours=24), ts),
+                index_col="ugc",
+            )
         df2 = df[df["ztype"] == "C"]
         plot.fill_ugcs(
             df2[column].to_dict(),
@@ -188,10 +187,8 @@ def plotter(fdict):
         for offset in range(0, 24, 4):
             ts2 = ts - datetime.timedelta(hours=offset)
             testfn = ts2.strftime(
-                (
-                    "/mesonet/ARCHIVE/data/%Y/%m/%d/model/ffg/"
-                    "5kmffg_%Y%m%d%H.grib2"
-                )
+                "/mesonet/ARCHIVE/data/%Y/%m/%d/"
+                "model/ffg/5kmffg_%Y%m%d%H.grib2"
             )
             if os.path.isfile(testfn):
                 fn = testfn
