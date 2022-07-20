@@ -297,13 +297,16 @@ if (in_array("goes", $layers) && isset($_REQUEST["goes_sector"]) &&
 }
 
 /* Draw NEXRAD Layer */
-if (in_array("nexrad", $layers) || in_array("nexrad_tc", $layers)){
+if (in_array("nexrad", $layers) || in_array("nexrad_tc", $layers)  || in_array("nexrad_tc6", $layers)){
   $radarfp = "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.tif";
   if (($ts + 300) < time()) {
     $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png", $radts);
   }
   if (in_array("nexrad_tc", $layers)){
     $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/max_n0r_0z0z_%Y%m%d.png", $ts);
+  }
+  if (in_array("nexrad_tc6", $layers)){
+    $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/max_n0r_6z6z_%Y%m%d.png", $ts);
   }
   if (is_file($radarfp)){
     $radar = $map->getlayerbyname("nexrad_n0r");
@@ -313,13 +316,16 @@ if (in_array("nexrad", $layers) || in_array("nexrad_tc", $layers)){
   }
 }
 
-if (in_array("n0q", $layers) || in_array("n0q_tc", $layers)){
+if (in_array("n0q", $layers) || in_array("n0q_tc", $layers) || in_array("n0q_tc6", $layers)){
   $radarfp = "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_0.png";
   if (($ts + 300) < time()) {
     $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0q_%Y%m%d%H%M.png", $radts);
   }
   if (in_array("n0q_tc", $layers)){
     $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/max_n0q_0z0z_%Y%m%d.png", $ts);
+  }
+  if (in_array("n0q_tc6", $layers)){
+    $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/max_n0q_6z6z_%Y%m%d.png", $ts);
   }
   if (is_file($radarfp)){
     $radar = $map->getlayerbyname("nexrad_n0q");
@@ -685,10 +691,18 @@ if (isset($_GET["title"])){
   $title = "IEM NEXRAD Daily N0Q Max Base Reflectivity";
   $d = sprintf("Valid between %s 00:00 and 23:59 UTC",
       gmdate("d M Y", $ts));
+} else if (in_array("n0q_tc6", $layers)){
+  $title = "IEM NEXRAD 24 Hour N0Q Max Base Reflectivity";
+  $d = sprintf("Valid between %s 06:00 and %s 05:55 UTC",
+        gmdate("d M Y", $ts), gmdate("d M Y", $ts + 86400));
 } else if (in_array("nexrad_tc", $layers)){
   $title = "IEM NEXRAD Daily N0R Max Base Reflectivity";
   $d = sprintf("Valid between %s 00:00 and 23:59 UTC",
       gmdate("d M Y", $ts));
+} else if (in_array("nexrad_tc6", $layers)){
+    $title = "IEM NEXRAD 24 Hour N0R Max Base Reflectivity";
+    $d = sprintf("Valid between %s 06:00 and %s 05:55 UTC",
+        gmdate("d M Y", $ts), gmdate("d M Y", $ts + 86400));
 } else {
   $title = "IEM Plot";
   if ($plotmeta["subtitle"] != ""){
@@ -718,13 +732,13 @@ $point = ms_newpointobj();
 $point->setXY(42, 32);
 $point->draw($map, $layer, $img, 0);
 
-if (in_array("nexrad", $layers) || in_array("nexrad_tc", $layers) ){
+if (in_array("nexrad", $layers) || in_array("nexrad_tc", $layers) || in_array("nexrad_tc6", $layers)){
   $layer = $map->getLayerByName("n0r-ramp");
   $point = ms_newpointobj();
   $point->setXY(($width - 80), 15);
   $point->draw($map, $layer, $img, 0);
 }
-if (in_array("n0q", $layers) || in_array("n0q_tc", $layers) ){
+if (in_array("n0q", $layers) || in_array("n0q_tc", $layers) || in_array("n0q_tc6", $layers)){
   $layer = $map->getLayerByName("n0q-ramp");
   $point = ms_newpointobj();
   $point->setXY(($width - 130), 18);

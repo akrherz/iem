@@ -22,7 +22,7 @@ python elnino.py
 
 # nexrad N0R and N0Q composites
 cd ../summary
-python max_reflect.py
+python max_reflect.py $(date -u --date '1 days ago' +'%Y %m %d') 0
 
 # Rerun today
 cd ../dbutil

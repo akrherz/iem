@@ -65,6 +65,10 @@ python today_min_windchill.py
 
 cd ../summary
 python hourly_precip.py
+if [ $LHH -eq "06" ]
+then
+    python max_reflect.py $(date -u --date '1 days ago' +'%Y %m %d') 6 &
+fi
 
 cd ../week
 python plot_obs.py

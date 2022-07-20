@@ -1,4 +1,6 @@
-"""Create simple maximum dbz composites for a given UTC date
+"""NEXRAD max reflectivity summary images.
+
+Run from RUN_0Z.sh, RUN_10_AFTER.sh (6z)
 """
 import datetime
 import os
@@ -7,14 +9,11 @@ import sys
 import subprocess
 
 import requests
-import osgeo.gdal as gdal
-from osgeo import gdalconst
+from osgeo import gdal, gdalconst
 import numpy as np
 from pyiem.util import get_dbconn, logger, utc
 
 LOG = logger()
-PGCONN = get_dbconn("mesosite", user="nobody")
-CURSOR = PGCONN.cursor()
 URLBASE = "http://iem.local/GIS/radmap.php?width=1280&height=720&"
 
 
@@ -28,14 +27,17 @@ def get_colortable(prod):
       colortable
 
     """
-    CURSOR.execute(
+    pgconn = get_dbconn("mesosite")
+    cursor = pgconn.cursor()
+    cursor.execute(
         "select r,g,b from iemrasters_lookup l JOIN iemrasters r on "
         "(r.id = l.iemraster_id) WHERE r.name = %s ORDER by l.coloridx ASC",
         ("composite_" + prod,),
     )
     ct = gdal.ColorTable()
-    for i, row in enumerate(CURSOR):
+    for i, row in enumerate(cursor):
         ct.SetColorEntry(i, (row[0], row[1], row[2], 255))
+    pgconn.close()
     return ct
 
 
@@ -46,6 +48,10 @@ def run(prod, sts):
       prod (str): Product to run for, either n0r or n0q
       sts (datetime): date to run for
     """
+    yest = utc() - datetime.timedelta(days=1)
+    routes = "ac" if sts.date() == yest.date() else "c"
+    label = f"{sts.hour}z{sts.hour}z"
+    LOG.info("Running for %s with routes=%s, label=%s", sts, routes, label)
     ets = sts + datetime.timedelta(days=1)
     interval = datetime.timedelta(minutes=5)
 
@@ -56,18 +62,15 @@ def run(prod, sts):
     now = sts
     while now < ets:
         fn = now.strftime(
-            (
-                "/mesonet/ARCHIVE/data/%Y/%m/%d/"
-                "GIS/uscomp/" + prod + "_%Y%m%d%H%M.png"
-            )
+            f"/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/{prod}_%Y%m%d%H%M.png"
         )
         if not os.path.isfile(fn):
-            LOG.info("missing file: %s", fn)
+            LOG.warning("missing file: %s", fn)
             now += interval
             continue
         n0r = gdal.Open(fn, 0)
         n0rd = n0r.ReadAsArray()
-        LOG.info(
+        LOG.debug(
             "%s %s %s %s", now, n0rd.dtype, np.shape(n0rd), n0r.RasterCount
         )
         if maxn0r is None:
@@ -78,7 +81,7 @@ def run(prod, sts):
 
     out_driver = gdal.GetDriverByName("gtiff")
     outdataset = out_driver.Create(
-        "max.tiff",
+        f"/tmp/{sts:%Y%m%d%H}.tiff",
         n0r.RasterXSize,
         n0r.RasterYSize,
         n0r.RasterCount,
@@ -89,104 +92,85 @@ def run(prod, sts):
     outdataset.GetRasterBand(1).WriteArray(maxn0r)
     del outdataset
 
-    subprocess.call("convert max.tiff max.png", shell=True)
+    subprocess.call(
+        f"convert /tmp/{sts:%Y%m%d%H}.tiff /tmp/{sts:%Y%m%d%H}.png",
+        shell=True,
+    )
     # Insert into LDM
     cmd = (
-        "pqinsert -p 'plot a %s0000 bogus GIS/uscomp/max_%s_0z0z_%s.png "
-        "png' max.png"
-    ) % (sts.strftime("%Y%m%d"), prod, sts.strftime("%Y%m%d"))
+        f"pqinsert -p 'plot a {sts:%Y%m%d%H}00 bogus "
+        f"GIS/uscomp/max_{prod}_{label}_{sts:%Y%m%d}.png png' "
+        f"/tmp/{sts:%Y%m%d%H}.png"
+    )
+    LOG.info(cmd)
     subprocess.call(cmd, shell=True)
 
     # Create tmp world file
-    wldfn = "/tmp/tmpwld%s.wld" % (sts.strftime("%Y%m%d"),)
-    out = open(wldfn, "w")
-    if prod == "n0r":
-        out.write(
-            """0.01
-0.0
-0.0
--0.01
--126.0
-50.0"""
-        )
-    else:
-        out.write(
-            """0.005
-0.0
-0.0
--0.005
--126.0
-50.0"""
-        )
-
-    out.close()
+    wldfn = f"/tmp/tmpwld{sts:%Y%m%d%H}.wld"
+    with open(wldfn, "w", encoding="utf-8") as fh:
+        if prod == "n0r":
+            fh.write("0.01\n0.0\n0.0\n-0.01\n-126.0\n50.0")
+        else:
+            fh.write("0.005\n0.0\n0.0\n-0.005\n-126.0\n50.0")
 
     # Insert world file as well
     cmd = (
-        "pqinsert -i -p 'plot a %s0000 bogus GIS/uscomp/max_%s_0z0z_%s.wld "
-        "wld' %s"
-    ) % (sts.strftime("%Y%m%d"), prod, sts.strftime("%Y%m%d"), wldfn)
+        f"pqinsert -i -p 'plot a {sts:%Y%m%d%H}00 bogus "
+        f"GIS/uscomp/max_{prod}_{label}_{sts:%Y%m%d}.wld wld' {wldfn}"
+    )
+    LOG.info(cmd)
     subprocess.call(cmd, shell=True)
 
     # cleanup
-    os.remove("max.tiff")
-    os.remove("max.png")
+    os.remove(f"/tmp/{sts:%Y%m%d%H}.tiff")
+    os.remove(f"/tmp/{sts:%Y%m%d%H}.png")
     os.remove(wldfn)
 
-    # Sleep for a bit
+    LOG.info("sleeping 60 to allow LDM to propogate")
     time.sleep(60)
 
     # Iowa
+    layer = "nexrad_tc" if prod == "n0r" else "n0q_tc"
+    if sts.hour == 6:
+        layer = f"{layer}6"
     png = requests.get(
-        "%slayers[]=uscounties&layers[]=%s&ts=%s"
-        % (
-            URLBASE,
-            "nexrad_tc" if prod == "n0r" else "n0q_tc",
-            sts.strftime("%Y%m%d%H%M"),
-        )
+        f"{URLBASE}layers[]=uscounties&layers[]={layer}&ts={sts:%Y%m%d%H%M}"
     )
-    fp = open("tmp.png", "wb")
-    fp.write(png.content)
-    fp.close()
+    with open(f"/tmp/{sts:%Y%m%d%H}.png", "wb") as fh:
+        fh.write(png.content)
     cmd = (
-        "pqinsert -p 'plot ac %s0000 summary/max_%s_0z0z_comprad.png "
-        "comprad/max_%s_0z0z_%s.png png' tmp.png"
-    ) % (sts.strftime("%Y%m%d"), prod, prod, sts.strftime("%Y%m%d"))
+        f"pqinsert -p 'plot {routes} {sts:%Y%m%d%H}00 "
+        f"summary/max_{prod}_{label}_comprad.png "
+        f"comprad/max_{prod}_{label}_{sts:%Y%m%d}.png png' "
+        f"/tmp/{sts:%Y%m%d%H}.png"
+    )
+    LOG.info(cmd)
     subprocess.call(cmd, shell=True)
 
     # US
     png = requests.get(
-        ("%ssector=conus&layers[]=uscounties&" "layers[]=%s&ts=%s")
-        % (
-            URLBASE,
-            "nexrad_tc" if prod == "n0r" else "n0q_tc",
-            sts.strftime("%Y%m%d%H%M"),
-        )
+        f"{URLBASE}sector=conus&layers[]=uscounties&layers[]={layer}"
+        f"&ts={sts:%Y%m%d%H%M}"
     )
-    fp = open("tmp.png", "wb")
-    fp.write(png.content)
-    fp.close()
+    with open(f"/tmp/{sts:%Y%m%d%H}.png", "wb") as fh:
+        fh.write(png.content)
     cmd = (
-        "pqinsert -p 'plot ac %s0000 summary/max_%s_0z0z_usrad.png "
-        "usrad/max_%s_0z0z_%s.png png' tmp.png"
-    ) % (sts.strftime("%Y%m%d"), prod, prod, sts.strftime("%Y%m%d"))
+        f"pqinsert -p 'plot {routes} {sts:%Y%m%d%H}00 "
+        f"summary/max_{prod}_{label}_usrad.png "
+        f"usrad/max_{prod}_{label}_{sts:%Y%m%d}.png png' "
+        f"/tmp/{sts:%Y%m%d%H}.png"
+    )
+    LOG.info(cmd)
     subprocess.call(cmd, shell=True)
-    os.remove("tmp.png")
+    os.remove(f"/tmp/{sts:%Y%m%d%H}.png")
 
 
 def main(argv):
     """Run main()"""
-    # Default is to run for yesterday
-    ts = utc() - datetime.timedelta(days=1)
-    ts = ts.replace(hour=0, minute=0, second=0, microsecond=0)
-    if len(argv) == 4:
-        ts = ts.replace(
-            year=int(argv[1]), month=int(argv[2]), day=int(argv[3])
-        )
+    ts = utc(*[int(i) for i in argv[1:5]])
     for prod in ["n0r", "n0q"]:
         run(prod, ts)
 
 
 if __name__ == "__main__":
-    # Do something
     main(sys.argv)
