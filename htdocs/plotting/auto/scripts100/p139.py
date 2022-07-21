@@ -169,15 +169,9 @@ def plotter(fdict):
         raise NoDataFound("Unknown station metadata.")
     tz = ZoneInfo(ctx["_nt"].sts[station]["tzname"])
     title = (
-        "%s [%s] %s-%s\n"
-        "Top 10 %s Local Calendar Day [%s] Temperature Differences"
-    ) % (
-        ctx["_nt"].sts[station]["name"],
-        station,
-        ab.year,
-        datetime.date.today().year,
-        PDICT[ctx["v"]],
-        month.capitalize(),
+        f"{ctx['_sname']} ({ab.year}-{datetime.date.today().year})\n"
+        f"Top 10 {PDICT[ctx['v']]} Local Calendar Day "
+        f"[{month.capitalize()}] Temperature Differences"
     )
     fig = figure(title=title, apctx=ctx)
     fig.text(

@@ -27,7 +27,7 @@ def get_description():
         dict(
             type="station",
             name="station1",
-            default="IA0200",
+            default="IATAME",
             label="Select Station #1:",
             network="IACLIMATE",
         ),
@@ -65,13 +65,13 @@ def plotter(fdict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
         WITH obs1 as (
             SELECT day, high, low, precip, (high+low)/2. as avgt from
-            alldata_{station1[:2]} WHERE station = %s),
+            alldata WHERE station = %s),
         obs2 as (
             SELECT day, high, low, precip, (high+low)/2. as avgt from
-            alldata_{station2[:2]} WHERE station = %s)
+            alldata WHERE station = %s)
 
         SELECT extract(doy from o.day) as doy, count(*),
         sum(case when o.high >= (t.high + %s) then 1 else 0 end) as high_hits,

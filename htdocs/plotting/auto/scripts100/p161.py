@@ -157,10 +157,7 @@ def get_context(fdict):
         DIRS[ctx["dir"]],
         ctx["thres"],
     )
-    ctx["subtitle"] = "%s [%s]" % (
-        ctx["_nt"].sts[ctx["zstation"]]["name"],
-        ctx["zstation"],
-    )
+    ctx["subtitle"] = ctx["_sname"]
     return ctx
 
 

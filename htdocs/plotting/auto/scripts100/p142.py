@@ -46,7 +46,7 @@ def get_description():
         dict(
             type="station",
             name="station",
-            default="IA0200",
+            default="IATAME",
             label="Select Station:",
             network="IACLIMATE",
         ),
@@ -144,7 +144,7 @@ def plotter(fdict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
         -- Get all period averages
         with avgs as (
             SELECT day, sday,
@@ -164,7 +164,7 @@ def plotter(fdict):
             sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as p1_precip,
             sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as p2_precip,
             sum(precip) OVER (ORDER by day ASC ROWS %s PRECEDING) as p3_precip
-            from alldata_{station[:2]} WHERE station = %s
+            from alldata WHERE station = %s
         ),
         -- Get sday composites
         sdays as (
@@ -267,12 +267,9 @@ def plotter(fdict):
     fig.text(
         0.5,
         0.93,
-        (
-            "[%s] %s\n"
-            "Trailing %s, %s, %s Day Departures & "
-            "US Drought Monitor"
-        )
-        % (station, ctx["_nt"].sts[station]["name"], p1, p2, p3),
+        f"{ctx['_sname']}\n"
+        f"Trailing {p1}, {p2}, {p3} Day Departures & "
+        "US Drought Monitor",
         ha="center",
         fontsize=14,
     )

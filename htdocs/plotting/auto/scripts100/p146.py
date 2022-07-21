@@ -67,7 +67,7 @@ def plotter(fdict):
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
     title = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']} "
+        f"{ctx['_sname']} "
         f"({ab.year}-{datetime.date.today().year})\n"
         "Temperature Frequency During Precipitation by Week"
     )

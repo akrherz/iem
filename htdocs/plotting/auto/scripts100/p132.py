@@ -31,13 +31,11 @@ MDICT = dict(
     ]
 )
 
-METRICS = dict(
-    [
-        ("total_precip", "Total Precipitation"),
-        ("max_least_high", "Max Least High"),
-        ("min_greatest_low", "Min Greatest Low"),
-    ]
-)
+METRICS = {
+    "total_precip": "Total Precipitation",
+    "max_least_high": "Max Least High",
+    "min_greatest_low": "Min Greatest Low",
+}
 
 
 def get_description():
@@ -100,8 +98,6 @@ def plotter(fdict):
     varname = ctx["var"]
     days = ctx["days"]
 
-    table = "alldata_%s" % (station[:2],)
-
     if month == "all":
         months = range(1, 13)
     elif month == "fall":
@@ -133,7 +129,7 @@ def plotter(fdict):
             current row) as max_least_high,
             max(low) OVER (ORDER by day ASC ROWS BETWEEN :days preceding and
             current row) as min_greatest_low
-            from {table} WHERE station = :station)
+            from alldata WHERE station = :station)
 
             SELECT day as end_date, start_date, {varname} from data WHERE
             month in :months and
@@ -183,8 +179,16 @@ def plotter(fdict):
                 row["end_date"].year,
             )
         ylabels.append(lbl)
+    ab = ctx["_nt"].sts[station]["archive_begin"]
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
+    title = (
+        f"{ctx['_sname']}:: Top 10 Events\n"
+        f"{METRICS[varname]} [days={days}] ({MDICT[month]}) "
+        f"({ab.year}-{datetime.datetime.now().year})"
+    )
 
-    fig = figure(apctx=ctx)
+    fig = figure(apctx=ctx, title=title)
     ax = fig.add_axes([0.1, 0.1, 0.5, 0.8])
     ax.barh(
         range(10, 0, -1),
@@ -208,22 +212,6 @@ def plotter(fdict):
             if varname in ["total_precip"]
             else r"Temperature $^\circ$F"
         )
-    )
-    ab = ctx["_nt"].sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata.")
-    ax.set_title(
-        ("%s [%s] Top 10 Events\n%s [days=%s] (%s) (%s-%s)")
-        % (
-            ctx["_nt"].sts[station]["name"],
-            station,
-            METRICS[varname],
-            days,
-            MDICT[month],
-            ab.year,
-            datetime.datetime.now().year,
-        ),
-        size=12,
     )
 
     return fig, df

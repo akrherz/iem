@@ -8,28 +8,27 @@ from pyiem.plot import figure
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
-MDICT = dict(
-    [
-        ("all", "No Month/Time Limit"),
-        ("jul1", "Jul 1 - Jun 30"),
-        ("spring", "Spring (MAM)"),
-        ("fall", "Fall (SON)"),
-        ("winter", "Winter (DJF)"),
-        ("summer", "Summer (JJA)"),
-        ("jan", "January"),
-        ("feb", "February"),
-        ("mar", "March"),
-        ("apr", "April"),
-        ("may", "May"),
-        ("jun", "June"),
-        ("jul", "July"),
-        ("aug", "August"),
-        ("sep", "September"),
-        ("oct", "October"),
-        ("nov", "November"),
-        ("dec", "December"),
-    ]
-)
+MDICT = {
+    "all": "No Month/Time Limit",
+    "ytd": f"Jan 1 through {datetime.date.today():%b %-d}",
+    "jul1": "Jul 1 - Jun 30",
+    "spring": "Spring (MAM)",
+    "fall": "Fall (SON)",
+    "winter": "Winter (DJF)",
+    "summer": "Summer (JJA)",
+    "jan": "January",
+    "feb": "February",
+    "mar": "March",
+    "apr": "April",
+    "may": "May",
+    "jun": "June",
+    "jul": "July",
+    "aug": "August",
+    "sep": "September",
+    "oct": "October",
+    "nov": "November",
+    "dec": "December",
+}
 
 METRICS = {
     "tmpf": "Air Temp (F)",
@@ -97,7 +96,7 @@ def get_description():
             type="select",
             name="month",
             default="all",
-            label="Month Limiter",
+            label="Date Limiter",
             options=MDICT,
         ),
         dict(
@@ -123,7 +122,7 @@ def plotter(fdict):
     year = ctx["year"]
 
     offset = "ts"
-    if month in ["all", "jul1"]:
+    if month in ["all", "jul1", "ytd"]:
         if month == "jul1":
             offset = "ts - '6 months'::interval"
         months = range(1, 13)
@@ -144,6 +143,9 @@ def plotter(fdict):
     opp = ">=" if mydir == "aoa" else "<"
 
     dbvarname = "(sknt * 1.15)" if varname == "sped" else varname
+    doylimit = ""
+    if month == "ytd":
+        doylimit = " and to_char(ts, 'mmdd') <= :sday "
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
             text(
@@ -157,7 +159,8 @@ def plotter(fdict):
             SELECT extract(year from {offset})::int as year,
             extract(hour from ts)::int as hour,
             sum(hit) as hits, count(*) as obs from hourly
-            WHERE extract(month from ts) in :months GROUP by year, hour
+            WHERE extract(month from ts) in :months {doylimit}
+            GROUP by year, hour
             """
             ),
             conn,
@@ -166,6 +169,7 @@ def plotter(fdict):
                 "t": threshold,
                 "station": station,
                 "months": tuple(months),
+                "sday": datetime.date.today().strftime("%m%d"),
             },
             index_col=None,
         )
@@ -187,6 +191,8 @@ def plotter(fdict):
     # Loop over plot years and background highlight any years with less than
     # 80% data coverage
     obscount = len(months) * 30 * 24 * 0.8
+    if month == "ytd":
+        obscount = int(f"{datetime.date.today():%j}") * 24 * 0.8
     for _year in range(ydf.index.values[0], ydf.index.values[-1] + 1):
         if _year not in ydf.index or ydf.at[_year, "obs"] < obscount:
             ax[0].axvspan(_year - 0.5, _year + 0.5, color="#cfebfd", zorder=-3)
@@ -205,6 +211,9 @@ def plotter(fdict):
     ax[0].set_xlim(ydf.index.min() - 0.5, ydf.index.max() + 0.5)
     ax[0].xaxis.set_major_locator(MaxNLocator(integer=True))
     ax[0].set_xlabel("Years with blue shading have more than 20% missing data")
+    avgv = ydf["hits"].mean()
+    ax[0].axhline(avgv, color="k", zorder=10)
+    ax[0].text(ydf.index.max() + 0.7, avgv, f"Avg\n{avgv:.1f}", va="center")
 
     df2 = ydf[ydf["obs"] > obscount]
     years = len(df2.index)

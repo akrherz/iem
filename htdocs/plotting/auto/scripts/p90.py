@@ -137,6 +137,7 @@ def get_description():
     <p><strong>This app can be very slow</strong>, so please let it grind
     away as sometimes it will take 3-5 minutes to generate a map :("""
     today = datetime.date.today()
+    tom = today + datetime.timedelta(days=1)
     jan1 = today.replace(day=1, month=1)
     desc["arguments"] = [
         dict(
@@ -198,9 +199,10 @@ def get_description():
         dict(
             type="datetime",
             name="edate",
-            default=today.strftime("%Y/%m/%d 0000"),
+            default=tom.strftime("%Y/%m/%d 0000"),
             label="End DateTime UTC:",
             min="1986/01/01 0000",
+            max=tom.strftime("%Y/%m/%d 0000"),
         ),
         dict(
             type="networkselect",
@@ -256,7 +258,7 @@ def do_polygon(ctx):
     year = ctx["year"]
     year2 = ctx["year2"]
     # figure out the start and end timestamps
-    if varname in ["total", "days"]:
+    if varname in ["total", "days", "lastyear"]:
         sts = sdate
         ets = edate
     elif varname == "hour":

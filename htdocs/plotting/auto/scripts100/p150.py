@@ -213,7 +213,7 @@ def plotter(fdict):
             )
         )
     ax.set_yticks(range(len(df.index)))
-    ax.set_yticklabels(["%.0f" % (a,) for a in df.index.values])
+    ax.set_yticklabels([f"{a:.0f}" for a in df.index.values])
     ax.set_ylim(-0.5, len(df.index) - 0.5)
     ax.set_xlabel("Percentile [100 = highest]")
     ax.set_ylabel("Mandatory Pressure Level (hPa)")

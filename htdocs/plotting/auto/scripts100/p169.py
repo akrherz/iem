@@ -137,8 +137,7 @@ def plotter(fdict):
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
     title = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']} Top 10 "
-        f"{MDICT[mydir]}\n"
+        f"{ctx['_sname']}:: Top 10 {MDICT[mydir]}\n"
         f"Over {hours} Hour Period ({ab.year}-{datetime.date.today().year}) "
         f"[{MDICT2[month]}]"
     )

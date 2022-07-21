@@ -141,14 +141,11 @@ def plotter(fdict):
     minfreq = len(months) * 30 * 0.8
     df2 = df[df["cnt"] > minfreq]
     lts = datetime.datetime(2000, 1, 1, int(hour), 0)
-    title = "%s [%s] %s Local %s-%s" % (
-        ctx["_nt"].sts[station]["name"],
-        station,
-        lts.strftime("%-I %p"),
-        df2.index.min(),
-        df2.index.max(),
+    title = (
+        f"{ctx['_sname']}:: {lts:%-I %p} Local "
+        f"({df2.index.min()}-{df2.index.max()})"
     )
-    subtitle = "%s [%s]" % (PDICT[varname], MDICT[month])
+    subtitle = f"{PDICT[varname]} [{MDICT[month]}]"
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     ax.bar(df2.index.values, df2[varname], align="center", ec="b", fc="b")
     m = df2[varname].mean()

@@ -72,13 +72,13 @@ def plotter(fdict):
     ]
     df["month"] = df["ts"].dt.month
     grp = df[["month", "u", "v", "sknt"]].groupby("month").mean()
-    grp["u_%s" % (units,)] = convert_value(
+    grp[f"u_{units}"] = convert_value(
         grp["u"].values, "meter / second", UNITCONV[units]
     )
-    grp["v_%s" % (units,)] = convert_value(
+    grp[f"v_{units}"] = convert_value(
         grp["v"].values, "meter / second", UNITCONV[units]
     )
-    grp["sped_%s" % (units,)] = convert_value(
+    grp[f"sped_{units}"] = convert_value(
         grp["sknt"].values, "knot", UNITCONV[units]
     )
     grp["drct"] = wind_direction(
@@ -86,7 +86,11 @@ def plotter(fdict):
         munits("meter / second") * grp["v"].values,
     ).m
     maxval = grp[f"sped_{units}"].max()
-    (fig, ax) = figure_axes(apctx=ctx)
+    title = (
+        f"{ctx['_sname']} [{df['ts'].min().year}-{df['ts'].max().year}]\n"
+        "Monthly Average Wind Speed andVector Average Direction"
+    )
+    (fig, ax) = figure_axes(apctx=ctx, title=title)
     ax.barh(grp.index.values, grp[f"sped_{units}"].values, align="center")
     ax.set_xlabel(f"Average Wind Speed [{UNITS[units]}]")
     ax.set_yticks(range(1, 13))
@@ -111,18 +115,6 @@ def plotter(fdict):
             bbox=dict(color="white", boxstyle="square,pad=0.03"),
         )
     ax.set_ylim(12.5, 0.5)
-    ax.set_title(
-        (
-            "[%s] %s [%s-%s]\nMonthly Average Wind Speed and"
-            " Vector Average Direction"
-        )
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            df["ts"].min().year,
-            df["ts"].max().year,
-        )
-    )
 
     return fig, grp
 

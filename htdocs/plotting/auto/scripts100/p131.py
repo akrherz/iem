@@ -162,18 +162,12 @@ def plotter(fdict):
     if hour is not None:
         ts = datetime.datetime(2000, 1, 1, hour)
         hrlabel = ts.strftime("%-I %p")
+    tt = "Overcast Clouds" if varname == "OVC" else "Clear Skies"
     title = (
-        "%s [%s]\nFrequency of %s by "
-        "Air Temp (month=%s,hour=%s) (%s-%s)\n"
+        f"{ctx['_sname']}\n"
+        f"Frequency of {tt} by Air Temp (month={month.upper()},hour={hrlabel})"
+        f" ({ab.year}-{datetime.datetime.now().year})\n"
         "(must have 3+ hourly observations at the given temperature)"
-    ) % (
-        ctx["_nt"].sts[station]["name"],
-        station,
-        "Overcast Clouds" if varname == "OVC" else "Clear Skies",
-        month.upper(),
-        hrlabel,
-        ab.year,
-        datetime.datetime.now().year,
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.bar(df2["t"], df2["freq"], ec="green", fc="green", width=1)
@@ -185,7 +179,7 @@ def plotter(fdict):
         ax.axvline(32, lw=2, color="k")
         ax.text(32, -4, "32", ha="center")
     ax.axhline(avg, lw=2, color="k")
-    ax.text(df2["t"].min() + 5, avg + 2, "Avg: %.1f%%" % (avg,))
+    ax.text(df2["t"].min() + 5, avg + 2, f"Avg: {avg:.1f}%")
 
     return fig, df
 
