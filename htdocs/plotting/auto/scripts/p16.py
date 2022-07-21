@@ -278,11 +278,9 @@ def get_context(fdict):
         f"{minvalid.year}-{maxvalid.year} {ctx['station']} Wind Rose, "
         f"month={ctx['month'].upper()}"
     )
-    ctx["title"] = "%s-%s %s Wind Rose, month=%s" % (
-        minvalid.year,
-        maxvalid.year,
-        ctx["station"],
-        ctx["month"].upper(),
+    ctx["title"] = (
+        f"{minvalid.year}-{maxvalid.year} {ctx['station']} Wind Rose, "
+        f"month={ctx['month'].upper()}"
     )
     ctx["subtitle"] = "%s, %s" % (
         ctx["_nt"].sts[ctx["station"]]["name"],

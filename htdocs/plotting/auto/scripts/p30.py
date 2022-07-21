@@ -28,7 +28,7 @@ def get_description():
         dict(
             type="station",
             name="station",
-            default="IA0200",
+            default="IATAME",
             label="Select Station:",
             network="IACLIMATE",
         ),
@@ -80,7 +80,7 @@ def plot_trailing(ax, df, colname):
     ax.text(
         df.index.values[-1] + 2,
         df[colname].mean(),
-        "%.0f" % (df[colname].mean(),),
+        f"{df[colname].mean():.0f}",
         ha="left",
         va="center",
     )
@@ -93,14 +93,12 @@ def plotter(fdict):
     month = ctx["month"]
     year = ctx["year"]
 
-    table = "alldata_%s" % (station[:2],)
-
     if ctx["opt"] == "monthly":
         with get_sqlalchemy_conn("coop") as conn:
             df = pd.read_sql(
-                f"""
+                """
             SELECT year,  max(high) as max_high,  min(low) as min_low
-            from {table} where station = %s and month = %s and
+            from alldata where station = %s and month = %s and
             high is not null and low is not null
             and year <= %s GROUP by year
             ORDER by year ASC
@@ -112,9 +110,9 @@ def plotter(fdict):
     else:
         with get_sqlalchemy_conn("coop") as conn:
             df = pd.read_sql(
-                f"""
+                """
             SELECT year,  max(high) as max_high,  min(low) as min_low
-            from {table} where station = %s and
+            from alldata where station = %s and
             high is not null and low is not null
             and year <= %s GROUP by year
             ORDER by year ASC
@@ -127,11 +125,8 @@ def plotter(fdict):
         raise NoDataFound("No Data Found.")
     df["rng"] = df["max_high"] - df["min_low"]
 
-    title = ("%s %s\n%s Temperature Range (Max High - Min Low)") % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-        (calendar.month_name[month] if ctx["opt"] == "monthly" else "Yearly"),
-    )
+    tt = calendar.month_name[month] if ctx["opt"] == "monthly" else "Yearly"
+    title = f"{ctx['_sname']}\n" f"{tt} Temperature Range (Max High - Min Low)"
     fig = figure(title=title, apctx=ctx)
     ax = fig.subplots(3, 1, sharex=True)
     ax[0].scatter(df.index.values, df["max_high"].values)
@@ -159,13 +154,9 @@ def plotter(fdict):
     if year in df.index:
         ax[2].scatter(year, df.at[year, "rng"], marker="o", color="r", s=10)
         ax[2].set_title(
-            ("Year %s [Hi: %s Lo: %s Rng: %s] Highlighted")
-            % (
-                year,
-                df.at[year, "max_high"],
-                df.at[year, "min_low"],
-                df.at[year, "rng"],
-            ),
+            f"Year {year} [Hi: {df.at[year, 'max_high']} "
+            f"Lo: {df.at[year, 'min_low']} Rng: {df.at[year, 'rng']}] "
+            "Highlighted",
             color="r",
         )
     ax[2].set_ylabel(r"Temperature Range $^\circ$F")

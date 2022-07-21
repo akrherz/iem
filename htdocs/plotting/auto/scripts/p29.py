@@ -82,15 +82,8 @@ def plotter(fdict):
     ut = utc(2000, 1, 1, hour, 0)
     localt = ut.astimezone(pytz.timezone(ctx["_nt"].sts[station]["tzname"]))
     title = (
-        "%s [%s]\nFrequency of %s UTC (%s LST) "
-        r"Temp between %s$^\circ$F and %s$^\circ$F"
-    ) % (
-        ctx["_nt"].sts[station]["name"],
-        station,
-        hour,
-        localt.strftime("%-I %p"),
-        t1,
-        t2,
+        f"{ctx['_sname']}\nFrequency of {hour} UTC ({localt:%-I %p} LST) "
+        rf"Temp between {t1}$^\circ$F and {t2}$^\circ$F"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.scatter(
@@ -98,7 +91,7 @@ def plotter(fdict):
         df["below_freq"],
         marker="s",
         s=40,
-        label="Below %s" % (t1,),
+        label=f"Below {t1}",
         color="b",
         zorder=3,
     )
@@ -106,7 +99,7 @@ def plotter(fdict):
         np.arange(1, 13),
         df["freq"],
         fc="tan",
-        label="%s - %s" % (t1, t2),
+        label=f"{t1} - {t2}",
         zorder=2,
         align="center",
     )
@@ -115,7 +108,7 @@ def plotter(fdict):
         df["above_freq"],
         marker="s",
         s=40,
-        label="Above %s" % (t2,),
+        label=f"Above {t2}",
         color="r",
         zorder=3,
     )

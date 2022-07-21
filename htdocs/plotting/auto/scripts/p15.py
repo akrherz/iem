@@ -55,11 +55,11 @@ def plotter(fdict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
         with obs as
         (select month, year, high, lag(high) OVER (ORDER by day ASC) as lhigh,
         low, lag(low) OVER (ORDER by day ASC) as llow
-        from alldata_{station[:2]} where station = %s)
+        from alldata where station = %s)
 
         SELECT year, month,
         sum(case when high > lhigh then 1 else 0 end)::numeric as high_greater,
@@ -85,10 +85,8 @@ def plotter(fdict):
     nochange2 = gyear[varname + "_unch"]
     decrease2 = gyear[varname + "_lower"]
 
-    title = "%s [%s]\nDay to Day %s Temperature Change" % (
-        ctx["_nt"].sts[station]["name"],
-        station,
-        varname.title(),
+    title = (
+        f"{ctx['_sname']}\n" f"Day to Day {varname.title()} Temperature Change"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 
@@ -108,7 +106,7 @@ def plotter(fdict):
         decrease2 / total2 * 100.0,
         fc="lightblue",
         width=0.4,
-        label="%s ''" % (year,),
+        label=f"{year} ''",
         align="center",
     )
     ax.bar(
@@ -126,7 +124,7 @@ def plotter(fdict):
         bottom=(decrease2 / total2 * 100.0).values,
         fc="lightgreen",
         width=0.4,
-        label="%s ''" % (year,),
+        label=f"{year} ''",
         align="center",
     )
     ax.bar(
@@ -144,7 +142,7 @@ def plotter(fdict):
         bottom=((decrease2 + nochange2) / total2).values * 100.0,
         fc="pink",
         width=0.4,
-        label="%s ''" % (year,),
+        label=f"{year} ''",
         align="center",
     )
 
@@ -158,7 +156,7 @@ def plotter(fdict):
             txt = ax.text(
                 i + offset,
                 decrease[i] / total[i] * 100.0 - 5,
-                "%.0f" % (decrease[i] / total[i] * 100.0),
+                f"{(decrease[i] / total[i] * 100.0):.0f}",
                 ha="center",
                 fontsize=10,
             )
@@ -169,7 +167,7 @@ def plotter(fdict):
             txt = ax.text(
                 i + offset,
                 ymid,
-                "%.0f" % (nochange[i] / total[i] * 100.0),
+                f"{(nochange[i] / total[i] * 100.0):.0f}",
                 ha="center",
                 va="center",
                 fontsize=10,
@@ -180,7 +178,7 @@ def plotter(fdict):
             txt = ax.text(
                 i + offset,
                 (decrease[i] + nochange[i]) / total[i] * 100.0 + 2,
-                "%.0f" % (increase[i] / total[i] * 100.0),
+                f"{(increase[i] / total[i] * 100.0):.0f}",
                 ha="center",
                 fontsize=10,
             )

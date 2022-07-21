@@ -10,16 +10,14 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from matplotlib.font_manager import FontProperties
 
 
-PDICT = dict(
-    [
-        ("high_over", "High Temperature At or Above"),
-        ("high_under", "High Temperature Below"),
-        ("avgt_over", "Daily Average Temperature At or Above"),
-        ("avgt_under", "Daily Average Temperature Below"),
-        ("low_over", "Low Temperature At or Above"),
-        ("low_under", "Low Temperature Below"),
-    ]
-)
+PDICT = {
+    "high_over": "High Temperature At or Above",
+    "high_under": "High Temperature Below",
+    "avgt_over": "Daily Average Temperature At or Above",
+    "avgt_under": "Daily Average Temperature Below",
+    "low_over": "Low Temperature At or Above",
+    "low_under": "Low Temperature Below",
+}
 TDICT = {
     "threshold": "Compare against prescribed threshold",
     "average": "Compare against climatological average",
@@ -44,7 +42,7 @@ def get_description():
         dict(
             type="station",
             name="station",
-            default="IA0200",
+            default="IATAME",
             network="IACLIMATE",
             label="Select Station:",
         ),
@@ -96,8 +94,6 @@ def plotter(fdict):
     threshold = ctx["threshold"]
     varname = ctx["var"]
 
-    table = "alldata_%s" % (station[:2],)
-
     # Get averages
     if ctx["climo"] == "por":
         cltable = "climate"
@@ -122,7 +118,7 @@ def plotter(fdict):
             SELECT extract(doy from day)::int as d, o.high, o.low, o.day,
             (o.high + o.low) / 2. as avgt,
             c.high as climo_high, c.low as climo_low, c.avgt as climo_avgt
-            from {table} o JOIN myclimo c on (o.sday = c.sday)
+            from alldata o JOIN myclimo c on (o.sday = c.sday)
             where o.station = %s and o.high is not null ORDER by day ASC
             """,
             conn,
@@ -179,20 +175,13 @@ def plotter(fdict):
     ax.bar(np.arange(1, 367), maxperiod[1:], fc="b", ec="b")
     ax.grid(True)
     ax.set_ylabel("Consecutive Days")
-    ttitle = r"%s$^\circ$F" % (threshold,)
+    ttitle = rf"{threshold}$^\circ$F"
     if ctx["which"] == "average":
         ttitle = f"Average ({ADICT[ctx['climo']]})"
-    title = "\n".join(
-        [
-            "%s %s (%s-%s)"
-            % (
-                station,
-                ctx["_nt"].sts[station]["name"],
-                obs.index.values[0].strftime("%Y %b %d"),
-                obs.index.values[-1].strftime("%Y %b %d"),
-            ),
-            "Maximum Straight Days with %s %s" % (PDICT[varname], ttitle),
-        ]
+    title = (
+        f"{ctx['_sname']} ({obs.index.values[0]:%Y %b %d}-"
+        f"{obs.index.values[-1]:%Y %b %d})\n"
+        f"Maximum Straight Days with {PDICT[varname]} {ttitle}"
     )
     fitbox(fig, title, 0.1, 0.92, 0.9, 0.97)
     ax.set_xticks(xticks)
@@ -214,12 +203,7 @@ def plotter(fdict):
         fig.text(
             0.7,
             ypos,
-            "%s - %s -> %s"
-            % (
-                row["period"],
-                d1.strftime("%Y %b %d"),
-                d2.strftime("%Y %b %d"),
-            ),
+            f"{row['period']} - {d1:%Y %b %d} -> {d2:%Y %b %d}",
             color="red" if d2.year == today.year else "k",
             fontproperties=monofont,
         )
