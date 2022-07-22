@@ -199,7 +199,7 @@ def get_data(fdict):
                     ORDER by {y} {direction}, valid DESC) as timestamp
                 from alldata where station = :station
                 and extract(month from valid) in :months
-                and report_type = 2 and valid >= :basets
+                and report_type != 1 and valid >= :basets
                 and {x} is not null and {y} is not null
                 ORDER by x ASC)
             SELECT x, {agg}(yv) as y, max(timestamp) as utc_valid from data

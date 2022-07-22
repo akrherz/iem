@@ -48,7 +48,7 @@ def plotter(fdict):
             WHERE station = %s and
             (skyc1 = 'OVC' or skyc2 = 'OVC' or skyc3 = 'OVC' or skyc4 = 'OVC')
             and valid > '1973-01-01' and (extract(minute from valid) = 0 or
-            extract(minute from valid) > 50) and report_type = 2
+            extract(minute from valid) > 50) and report_type != 1
         """,
             conn,
             params=(station,),

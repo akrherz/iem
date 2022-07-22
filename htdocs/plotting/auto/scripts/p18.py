@@ -176,7 +176,7 @@ def get_data(fdict):
             "SELECT valid at time zone 'UTC' as valid, "
             f"extract(epoch from valid) * 1000 as ticks, {col} as datum "
             "from alldata WHERE station = %s and valid > %s and valid < %s "
-            f"and {ctx['var']} is not null and report_type = 2 "
+            f"and {ctx['var']} is not null and report_type != 1 "
             "ORDER by valid ASC",
             conn,
             params=(

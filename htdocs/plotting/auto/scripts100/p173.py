@@ -137,7 +137,7 @@ def get_context(fdict):
         WITH obs as (
             SELECT (valid + '10 minutes'::interval) at time zone %s as ts,
             sknt from alldata where station = %s and sknt >= 0 and sknt < 150
-            and report_type = 2 {ylimiter})
+            and report_type != 1 {ylimiter})
 
         select extract(month from ts)::int as month,
         extract(hour from ts)::int as hour, extract(day from ts)::int as day,

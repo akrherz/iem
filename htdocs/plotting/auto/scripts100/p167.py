@@ -88,7 +88,7 @@ def plotter(fdict):
         SELECT valid at time zone %s as ts,
         skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, vsby
         from alldata where station = %s and valid BETWEEN %s and %s
-        and vsby is not null and report_type = 2 ORDER by valid ASC
+        and vsby is not null and report_type != 1 ORDER by valid ASC
         """,
             conn,
             params=(tzname, station, sts, ets),

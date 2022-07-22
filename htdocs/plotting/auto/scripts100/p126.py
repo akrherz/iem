@@ -73,7 +73,7 @@ def plotter(fdict):
             extract(doy from valid) as doy, tmpf, dwpf, relh from alldata
             where station = %s and dwpf > -50 and dwpf < 90 and
             tmpf > -50 and tmpf < 120 and valid > '1950-01-01'
-            and report_type = 2
+            and report_type != 1
         """,
             conn,
             params=(station,),

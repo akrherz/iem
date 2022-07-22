@@ -91,7 +91,7 @@ def plotter(fdict):
             count(*)
             from alldata where station = %s and {v} is not null
             and extract(minute  from valid  - '1 minute'::interval) > 49
-            and report_type = 2
+            and report_type != 1
             GROUP by week ORDER by week ASC
         """,
             conn,

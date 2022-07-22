@@ -62,7 +62,7 @@ def plotter(fdict):
         WITH data as (
             SELECT valid at time zone %s  + '10 minutes'::interval as v, tmpf
             from alldata where station = %s and tmpf > -90 and tmpf < 150
-            and extract(month from valid) = %s and report_type = 2)
+            and extract(month from valid) = %s and report_type != 1)
 
         SELECT extract(hour from v) as hour,
         min(v) as min_valid, max(v) as max_valid,

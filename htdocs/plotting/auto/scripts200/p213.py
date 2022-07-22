@@ -157,7 +157,7 @@ def plotter(fdict):
             extract(hour from valid at time zone %s +
                 '10 minutes'::interval)::int as hr, {varname}
             from alldata WHERE station = %s and {varname} is not null {limiter}
-            and report_type = 2 ORDER by valid ASC
+            and report_type != 1 ORDER by valid ASC
         """,
             conn,
             params=(tzname, tzname, station),

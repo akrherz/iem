@@ -207,7 +207,7 @@ def plotter(fdict):
             vsby,
             extract(epoch from (valid - %s))/3600. as hours
             from alldata where station = %s and valid BETWEEN %s and %s
-            and report_type = 2
+            and report_type != 1
             ORDER by valid ASC
         """,
             conn,

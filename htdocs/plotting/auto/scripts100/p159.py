@@ -153,7 +153,7 @@ def plotter(fdict):
             SELECT date_trunc('hour', valid + '10 minutes'::interval)
             at time zone :tzname as ts,
             max(case when {dbvarname}::int {opp} :t then 1 else 0 end) as hit
-            from alldata where station = :station and report_type = 2
+            from alldata where station = :station and report_type != 1
             GROUP by ts)
 
             SELECT extract(year from {offset})::int as year,

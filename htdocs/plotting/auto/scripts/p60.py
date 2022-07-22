@@ -135,7 +135,7 @@ def get_df(ctx):
                 at time zone :tzname) as local_valid,
                 max({varname}) as d from alldata WHERE station = :station
                 and {varname} is not null {timelimiter}
-                and report_type = 2 GROUP by date, local_valid
+                and report_type != 1 GROUP by date, local_valid
             )
             SELECT (extract(doy from date) / 7)::int as week,
             extract(hour from local_valid) as hour,

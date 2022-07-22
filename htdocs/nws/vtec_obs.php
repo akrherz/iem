@@ -164,11 +164,14 @@ for($i=0;$row=pg_fetch_assoc($rs);$i++){
 	$table .= "<p><strong>ASOS/AWOS IDs:</strong> ";
   	$table .= str_replace(",'ZZZZZ'", "", $stations);
   	$table .= "<br />";
-  	$rs2 = pg_query($asos, "SELECT station, valid, to_char(valid, 'ddHH24MI') as z,
-  					tmpf, dwpf, sknt, gust, vsby, wcht(tmpf,sknt)  from alldata
-  					WHERE valid BETWEEN '$issue' and '$expire' and 
-  					station in $stations and report_type = 2
-  					ORDER by station, valid ASC");
+  	$rs2 = pg_query(
+        $asos,
+        "SELECT station, valid, to_char(valid, 'ddHH24MI') as z, ".
+        "tmpf, dwpf, sknt, gust, vsby, wcht(tmpf,sknt)  from alldata ".
+        "WHERE valid BETWEEN '$issue' and '$expire' and ".
+        "station in $stations and report_type != 1 ".
+        "ORDER by station, valid ASC"
+    );
   	$table .= "<table class=\"table table-condensed\">";
   	$ostation = "";
   	$stfound = 0;

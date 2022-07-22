@@ -94,7 +94,7 @@ def plotter(fdict):
             and drct is not null and dwpf is not null and dwpf <= tmpf
             and sknt > 3 and drct::int % 10 = 0
             and extract(month from valid) in :months
-            and report_type = 2
+            and report_type != 1
         """
             ),
             conn,

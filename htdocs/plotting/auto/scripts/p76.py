@@ -226,7 +226,7 @@ def get_data(ctx, startyear):
                 and dwpf < 100 and tmpf >= dwpf and
                 extract(month from valid) in :months and
                 extract(hour from valid at time zone :tzname) in :hours
-                and report_type = 2
+                and report_type != 1
             )
         SELECT valid,
         extract(year from valid + ':days days'::interval)::int as year,

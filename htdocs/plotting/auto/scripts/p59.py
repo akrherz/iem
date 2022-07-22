@@ -69,7 +69,7 @@ def plotter(fdict):
         df = pd.read_sql(
             "SELECT extract(doy from valid) as doy, sknt, drct from alldata "
             "where station = %s and sknt >= 0 and drct >= 0 "
-            "and report_type = 2",
+            "and report_type != 1",
             conn,
             params=(station,),
             index_col=None,

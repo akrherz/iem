@@ -18,6 +18,22 @@ from pyiem.util import get_dbconn, logger, utc
 LOG = logger()
 PROPERTY_NAME = "asos2archive_last"
 ISO9660 = "%Y-%m-%dT%H:%M:%SZ"
+RMTHRES = utc(1996, 7, 1)
+
+
+def build_reset_times() -> dict:
+    """Return dictionary with known reset minutes."""
+    pgconn = get_dbconn("mesosite")
+    cursor = pgconn.cursor()
+    cursor.execute(
+        "SELECT id, value from stations t JOIN station_attributes a on "
+        "t.iemid = a.iemid where a.attr = 'METAR_RESET_MINUTE'"
+    )
+    res = {}
+    for row in cursor:
+        res[row[0]] = row[1]
+    pgconn.close()
+    return res
 
 
 def get_first_updated():
@@ -71,19 +87,27 @@ def compute_time(argv):
     return sts, ets
 
 
-def do_insert(source_cursor, madis):
+def do_insert(source_cursor, reset_times, madis):
     """Insert the rows into the archive."""
     pgconn = get_dbconn("asos")
     cursor = pgconn.cursor()
 
     (inserts, skips, deletes) = (0, 0, 0)
-    report_type = 1 if madis else 2
     for row in source_cursor:
+        report_type = 4  # specials
+        if madis:
+            report_type = 1
+        else:
+            if row["valid"] < RMTHRES and row["valid"].minute == 0:
+                report_type = 3
+            elif reset_times.get(row["id"]) == row["valid"].minute:
+                report_type = 3
+
         # Look for previous entries
         cursor.execute(
             "SELECT metar from alldata where station = %s and valid = %s "
-            "and report_type = %s",
-            (row["id"], row["valid"], report_type),
+            f"and report_type {'=' if madis else '!='} 1",
+            (row["id"], row["valid"]),
         )
         if cursor.rowcount > 0:
             metar = cursor.fetchone()[0]
@@ -102,8 +126,8 @@ def do_insert(source_cursor, madis):
                 continue
             cursor.execute(
                 "DELETE from alldata where station = %s and valid = %s "
-                "and report_type = %s",
-                (row["id"], row["valid"], report_type),
+                f"and report_type {'=' if madis else '!='} 1",
+                (row["id"], row["valid"]),
             )
             deletes += cursor.rowcount
 
@@ -174,6 +198,7 @@ def do_insert(source_cursor, madis):
 def main():
     """Do Something Good"""
     last_updated = utc()
+    reset_times = build_reset_times()
     first_updated = get_first_updated()
     iempgconn = get_dbconn("iem")
     icursor = iempgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -206,7 +231,7 @@ def main():
         )
         LOG.info("processing %s rows for madis: %s", icursor.rowcount, madis)
         if icursor.rowcount > 0:
-            do_insert(icursor, madis)
+            do_insert(icursor, reset_times, madis)
 
         if icursor.rowcount == 0 and not madis:
             LOG.warning(

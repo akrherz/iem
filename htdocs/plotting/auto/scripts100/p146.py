@@ -45,7 +45,7 @@ def plotter(fdict):
         WITH obs as (
             SELECT date_trunc('hour', valid) as t, avg(tmpf) as avgt from
             alldata WHERE station = %s and p01i > 0.009 and tmpf is not null
-            and report_type = 2 GROUP by t
+            and report_type != 1 GROUP by t
         )
 
         SELECT extract(week from t) as week, avgt from obs

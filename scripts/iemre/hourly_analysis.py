@@ -163,7 +163,7 @@ def grid_hour(ts):
     ST_Contains(
     ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
     geom) and t.network ~* 'ASOS' and
-    valid >= %s and valid < %s and report_type = 2
+    valid >= %s and valid < %s and report_type != 1
     GROUP by station, lon, lat""",
             conn,
             params=params,

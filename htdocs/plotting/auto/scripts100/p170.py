@@ -119,7 +119,7 @@ def plotter(fdict):
             SELECT distinct date_trunc(%s,
                 valid at time zone %s + '10 minutes'::interval) as datum
             from alldata where station = %s and {limiter}
-            and valid > '1973-01-01' and report_type = 2)
+            and valid > '1973-01-01' and report_type != 1)
 
         SELECT extract(year from datum)::int as year,
         extract(month from datum)::int as month,

@@ -154,7 +154,7 @@ def plotter(fdict):
             "avg(dwpf)::int as dwpf, avg(feel) as feel "
             f"from alldata WHERE station = %s {tmpflimit} "
             "and dwpf <= tmpf and valid > %s and valid < %s "
-            f"and report_type = 2 {doylimiter} GROUP by d",
+            f"and report_type != 1 {doylimiter} GROUP by d",
             conn,
             params=(station, sdate, edate),
             index_col=None,
