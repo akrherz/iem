@@ -10,9 +10,9 @@ require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
 require_once "../../include/imagemaps.php";
 
-$day = isset($_GET['day']) ? intval($_GET["day"]): date("d");
-$month = isset($_GET['month']) ? intval($_GET["month"]): date("m");
-$year = isset($_GET['year']) ? intval($_GET["year"]): date("Y");
+$day = get_int404("day", date("d"));
+$month = get_int404("month", date("m"));
+$year = get_int404("year", date("Y"));
 $station = isset($_GET['station'])? xssafe($_GET['station']): null;
 $network = isset($_GET['network']) ? xssafe($_GET["network"]) : 'IA_DCP';
 
@@ -193,4 +193,3 @@ $t->content = <<<EOF
 $extra
 EOF;
 $t->render('full.phtml');
-?>

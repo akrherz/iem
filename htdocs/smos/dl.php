@@ -1,17 +1,18 @@
 <?php 
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
+require_once "../../include/forms.php";
 
 $conn = iemdb("smos");
 
-$lat = isset($_REQUEST["lat"])? $_REQUEST["lat"] : die("No lat");
-$lon = isset($_REQUEST["lon"])? $_REQUEST["lon"] : die("No lon");
-$day1 = isset($_GET["day1"]) ? $_GET["day1"] : die("No day1 specified");
-$day2 = isset($_GET["day2"]) ? $_GET["day2"] : die("No day2 specified");
-$month1 = isset($_GET["month1"]) ? $_GET["month1"]: die("No month specified");
-$month2 = isset($_GET["month2"]) ? $_GET["month2"]: die("No month specified");
-$year1 = isset($_GET["year1"]) ? $_GET["year1"] : die("No year1 specified");
-$year2 = isset($_GET["year2"]) ? $_GET["year2"] : die("No year2 specified");
+$lat = isset($_REQUEST["lat"])? xssafe($_REQUEST["lat"]): die("No lat");
+$lon = isset($_REQUEST["lon"])? xssafe($_REQUEST["lon"]): die("No lon");
+$day1 = isset($_GET["day1"]) ? xssafe($_GET["day1"]): die("No day1 specified");
+$day2 = isset($_GET["day2"]) ? xssafe($_GET["day2"]): die("No day2 specified");
+$month1 = isset($_GET["month1"]) ? xssafe($_GET["month1"]): die("No month specified");
+$month2 = isset($_GET["month2"]) ? xssafe($_GET["month2"]): die("No month specified");
+$year1 = isset($_GET["year1"]) ? xssafe($_GET["year1"]): die("No year1 specified");
+$year2 = isset($_GET["year2"]) ? xssafe($_GET["year2"]): die("No year2 specified");
 
 $ts1 = mktime(0,0,0, $month1, $day1, $year1);
 $ts2 = mktime(0,0,0, $month2, $day2, $year2);
@@ -40,5 +41,3 @@ for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 			$row["sm"], $row["od"]);
 	
 }
-
-?>

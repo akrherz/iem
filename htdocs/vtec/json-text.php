@@ -5,17 +5,18 @@
  */
 require_once '../../config/settings.inc.php';
 require_once "../../include/database.inc.php";
+require_once "../../include/forms.php";
 
 $connect = iemdb("postgis");
 pg_exec($connect, "SET TIME ZONE 'UTC'");
 
-$year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
+$year = get_int404("year", 2006);
 if ($year == 0) die("ERROR: invalid \$year set");
-$wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : "MPX";
-$eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
-$phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
-$significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
-$lastsvs = isset($_GET["lastsvs"]) ? $_GET["lastsvs"] : 'n';
+$wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]),0,3) : "MPX";
+$eventid = get_int404("eventid", 103);
+$phenomena = isset($_GET["phenomena"]) ? substr(xssafe($_GET["phenomena"]),0,2) : "SV";
+$significance = isset($_GET["significance"]) ? substr(xssafe($_GET["significance"]),0,1) : "W";
+$lastsvs = isset($_GET["lastsvs"]) ? xssafe($_GET["lastsvs"]): 'n';
 
 $sql = "SELECT replace(report,'\001','') as report, 
                replace(svs,'\001','') as svs

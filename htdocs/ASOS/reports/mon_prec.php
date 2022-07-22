@@ -5,7 +5,7 @@ require_once "../../../include/database.inc.php";
 require_once "../../../include/network.php";
 require_once "../../../include/forms.php";
 
-$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
+$year = get_int404("year", date("Y"));
 
 $yselect = yearSelect2(2004, $year, "year");
 
@@ -129,4 +129,3 @@ on available ASOS data.
 </table>
 EOF;
 $t->render('single.phtml');
-?>

@@ -10,17 +10,15 @@ from pyiem.plot import get_cmap, figure
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
-PDICT = dict(
-    [
-        ("coldest_temp", "Coldest Average Temperature"),
-        ("coldest_hitemp", "Coldest Average High Temperature"),
-        ("coldest_lotemp", "Coldest Average Low Temperature"),
-        ("warmest_temp", "Warmest Average Temperature"),
-        ("warmest_hitemp", "Warmest Average High Temperature"),
-        ("warmest_lotemp", "Warmest Average Low Temperature"),
-        ("wettest", "Highest Precipitation"),
-    ]
-)
+PDICT = {
+    "coldest_temp": "Coldest Average Temperature",
+    "coldest_hitemp": "Coldest Average High Temperature",
+    "coldest_lotemp": "Coldest Average Low Temperature",
+    "warmest_temp": "Warmest Average Temperature",
+    "warmest_hitemp": "Warmest Average High Temperature",
+    "warmest_lotemp": "Warmest Average Low Temperature",
+    "wettest": "Highest Precipitation",
+}
 # How to get plot variable from dataframe
 XREF = {
     "coldest_temp": "avg_temp",
@@ -152,7 +150,6 @@ def get_data(ctx):
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
-    station = ctx["station"]
     days = ctx["days"]
     varname = ctx["var"]
     df = get_data(ctx)
@@ -162,7 +159,7 @@ def plotter(fdict):
     # Don't plot zeros for precip
     if varname == "wettest":
         df = df[df["sum_precip"] > 0]
-    title = "%s [%s]" % (ctx["_nt"].sts[station]["name"], station)
+    title = ctx["_sname"]
     subtitle = PDICT.get(varname)
     if days == 1:
         subtitle = subtitle.replace("Average ", "")

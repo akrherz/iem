@@ -9,11 +9,11 @@ require_once "../../include/myview.php";
 $t = new MyView();
 
 $network = isset($_GET['network']) ? xssafe($_GET["network"]): 'IA_DCP';
-$minute = isset($_GET['minute']) ? intval($_GET["minute"]): 0;
-$hour = isset($_GET['hour']) ? intval($_GET["hour"]): date("H");
-$day = isset($_GET['day']) ? intval($_GET["day"]): date("d");
-$month = isset($_GET['month']) ? intval($_GET["month"]): date("m");
-$year = isset($_GET['year']) ? intval($_GET["year"]): date("Y");
+$minute = get_int404("minute", 0);
+$hour = get_int404("hour", date("H"));
+$day = get_int404("day", date("d"));
+$month = get_int404("month", date("m"));
+$year = get_int404("year", date("Y"));
 
 $now = time() - 3600;
 $ts = mktime($hour, $minute, 0, $month, $day, $year);
@@ -43,7 +43,6 @@ $hs = hourSelect($hour, 'hour');
 
 $ar = Array("00"=> "00", "15" => "15", "30" => "30", "45" => "45");
 $mis = make_select("minute", $minute, $ar);
-
 
 $tbl = strftime("raw%Y_%m", $ts);
 $dstr = strftime("%Y-%m-%d %H:%M", $ts);
@@ -140,4 +139,3 @@ choice.
 </table>
 EOF;
 $t->render('full.phtml');
-?>

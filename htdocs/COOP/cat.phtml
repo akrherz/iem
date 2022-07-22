@@ -3,10 +3,10 @@
  define("IEM_APPID", 4);
  require_once "../../include/forms.php";
  
- $station = isset($_GET["station"])? substr($_GET["station"],0,5) : "";
- $network = isset($_GET["network"])? substr($_GET["network"],0,7) : "IA_COOP";
- $date = isset($_GET["date"]) ? substr($_GET["date"],0, 10) : "";
- $sortvar = isset($_GET["sortvar"]) ? substr($_GET["sortvar"], 0, 10): "";
+ $station = isset($_GET["station"])? substr(xssafe($_GET["station"]),0,5) : "";
+ $network = isset($_GET["network"])? substr(xssafe($_GET["network"]),0,7) : "IA_COOP";
+ $date = isset($_GET["date"]) ? substr(xssafe($_GET["date"]),0, 10) : "";
+ $sortvar = isset($_GET["sortvar"]) ? substr(xssafe($_GET["sortvar"]), 0, 10): "";
  $year = get_int404("year", date("Y"));
 
  if ($date == "" && $station == "") $station = "AMSI4";
@@ -66,8 +66,10 @@ EOF;
 
 $content .= "<select name=\"network\">";
 $mesosite = iemdb("mesosite");
-$rs = pg_query($mesosite, "SELECT id, name from networks 
-		where id ~* 'COOP' ORDER by name ASC");
+$rs = pg_query(
+    $mesosite,
+    "SELECT id, name from networks where id ~* 'COOP' ORDER by name ASC",
+);
 for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 	$sel = '';
 	if ($network == $row["id"]){
@@ -98,8 +100,6 @@ $content .= <<<EOF
   <th><a href="{$link}snoww">Snow Water Equiv</a></th></tr></thead>
 EOF;
 
-
- 
  $nt = new NetworkTable($network);
  $cities = $nt->table;
  $iemdb = iemdb("iem");
