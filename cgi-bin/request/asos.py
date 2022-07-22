@@ -209,7 +209,7 @@ def application(environ, start_response):
 
     # Save direct to disk or view in browser
     direct = form.get("direct", "no") == "yes"
-    report_type = form.getall("report_type")
+    report_types = [int(i) for i in form.getall("report_type")]
     sts, ets = get_time_bounds(form, tzinfo)
     if sts is None:
         start_response(
@@ -264,12 +264,13 @@ def application(environ, start_response):
         metalimiter = "t.network ~* 'ASOS' and "
 
     rlimiter = ""
-    if len(report_type) == 1:
-        rlimiter = f" and report_type = {int(report_type[0])}"
-    elif len(report_type) > 1:
-        rlimiter = (
-            f" and report_type in {tuple([int(a) for a in report_type])}"
-        )
+    # Munge legacy report_type=2 into 2,3,4 see akrherz/iem#104
+    if 2 in report_types:
+        report_types.extend([3, 4])
+    if len(report_types) == 1:
+        rlimiter = f" and report_type = {report_types[0]}"
+    elif len(report_types) > 1:
+        rlimiter = f" and report_type in {tuple(report_types)}"
     sqlcols = ",".join(querycols)
     sorder = "DESC" if "hours" in form else "ASC"
     if stations:
