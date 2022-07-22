@@ -77,12 +77,8 @@ EOM;
         $this->table[$id]["archive_end"] = new DateTime($this->table[$id]["archive_end"]);
     }
     // Make attributes more accessible
-    $this->table[$id]["attrs"] = array_filter(
-        json_decode($this->table[$id]["attrs"])
-    );
-    $this->table[$id]["attr_values"] = array_filter(
-        json_decode($this->table[$id]["attr_values"])
-    );
+    $this->table[$id]["attrs"] = json_decode($this->table[$id]["attrs"]);
+    $this->table[$id]["attr_values"] = json_decode($this->table[$id]["attr_values"]);
     $this->table[$id]["attributes"] = array();
     foreach ($this->table[$id]["attrs"] as $key => $value){
       $this->table[$id]["attributes"][$value] = $this->table[$id]["attr_values"][$key];
@@ -94,5 +90,3 @@ EOM;
     return $this->table[$id];
   }
 }
-
-?>

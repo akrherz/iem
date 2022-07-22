@@ -31,7 +31,7 @@ def build_reset_times() -> dict:
     )
     res = {}
     for row in cursor:
-        res[row[0]] = row[1]
+        res[row[0]] = int(row[1])
     pgconn.close()
     return res
 
