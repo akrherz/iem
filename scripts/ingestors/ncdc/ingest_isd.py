@@ -5,23 +5,52 @@ import os
 
 import tqdm
 import requests
+from pyiem.nws.products.metarcollect import to_metar
 from pyiem.ncei import ds3505
 from pyiem.util import get_dbconn, utc, exponential_backoff, logger
 
 LOG = logger()
-ADD_ONLY = True
 TMPDIR = "/mesonet/tmp"
+
+
+class FakeTextProd:
+    def __init__(self):
+        """Lame."""
+        self.utcnow = None
+        self.valid = None
+        self.nwsli_provider = {}
+
+
+def set_metadata(prod, faa):
+    """Need to figure out what the network, iemid are."""
+    mesosite = get_dbconn("mesosite")
+    cursor = mesosite.cursor()
+    localid = faa[1:] if faa.startswith("K") else faa
+    cursor.execute(
+        "select network, tzname, iemid from stations where id = %s and "
+        "network ~* 'ASOS'",
+        (localid,),
+    )
+    if cursor.rowcount != 1:
+        LOG.fatal("Failed to find station metadata!")
+        sys.exit()
+    (network, tzname, _iemid) = cursor.fetchone()
+    prod.nwsli_provider[localid] = {"network": network, "tzname": tzname}
+    mesosite.close()
 
 
 def main(argv):
     """Go"""
-    pgconn = get_dbconn("asos")
+    textprod = FakeTextProd()
+    asosdb = get_dbconn("asos")
+    iemdb = get_dbconn("iem")
     airforce = int(argv[1])
     wban = int(argv[2])
     faa = argv[3]
     if len(faa) == 3:
         LOG.error("Provided faa ID should be 4 chars, abort")
         return
+    set_metadata(textprod, faa)
     year = max([int(argv[4]), 1928])  # database starts in 1928
     year2 = int(argv[5])
     failedyears = []
@@ -30,19 +59,17 @@ def main(argv):
     for year in tqdm.tqdm(range(year, year2)):
         sts = utc(year, 1, 1)
         ets = sts.replace(year=year + 1)
-        cursor = pgconn.cursor()
+        acursor = asosdb.cursor()
+        icursor = iemdb.cursor()
         lfn = "%06i-%05i-%s" % (airforce, wban, year)
-        if not os.path.isfile("%s/%s" % (TMPDIR, lfn)):
-            uri = "https://www1.ncdc.noaa.gov/pub/data/noaa/%s/%s.gz" % (
-                year,
-                lfn,
-            )
+        if not os.path.isfile(f"{TMPDIR}/{lfn}"):
+            uri = f"https://www1.ncdc.noaa.gov/pub/data/noaa/{year}/{lfn}.gz"
             req = exponential_backoff(requests.get, uri, timeout=30)
             if req is None or req.status_code != 200:
                 LOG.info("Failed to fetch %s", uri)
                 failedyears.append(year)
                 continue
-            with open("%s/%s.gz" % (TMPDIR, lfn), "wb") as fh:
+            with open(f"{TMPDIR}/{lfn}.gz", "wb") as fh:
                 fh.write(req.content)
             subprocess.call(
                 "gunzip %s/%s.gz" % (TMPDIR, lfn),
@@ -51,21 +78,20 @@ def main(argv):
             )
         added = 0
         bad = 0
-        removed = 0
         skipped = 0
         current = []
-        if ADD_ONLY:
-            # build out our current obs
-            cursor.execute(
-                "SELECT valid at time zone 'UTC' from alldata where "
-                "station = %s and valid >= %s and valid < %s "
-                "ORDER by valid ASC",
-                (dbid, sts, ets),
-            )
-            for row in cursor:
-                current.append(row[0].strftime("%Y%m%d%H%M"))
+        # build out our current obs
+        acursor.execute(
+            "SELECT valid at time zone 'UTC' from alldata where "
+            "station = %s and valid >= %s and valid < %s "
+            "ORDER by valid ASC",
+            (dbid, sts, ets),
+        )
+        for row in acursor:
+            current.append(row[0].strftime("%Y%m%d%H%M"))
+        acursor.close()
         # ignore any bad bytes, sigh
-        for line in open("%s/%s" % (TMPDIR, lfn), errors="ignore"):
+        for line in open(f"{TMPDIR}/{lfn}", errors="ignore", encoding="utf-8"):
             try:
                 data = ds3505.parser(line.strip(), faa, add_metar=True)
             except Exception as exp:
@@ -75,30 +101,22 @@ def main(argv):
             if data is None:
                 bad += 1
                 continue
-            if added == 0 and not ADD_ONLY:
-                cursor.execute(
-                    "DELETE from alldata where station = %s and "
-                    "valid >= %s and valid < %s",
-                    (dbid, sts, ets),
-                )
-                if cursor.rowcount > 0:
-                    LOG.info("deleted %s rows for %s", cursor.rowcount, dbid)
-                removed = cursor.rowcount
-            if ADD_ONLY and data["valid"].strftime("%Y%m%d%H%M") in current:
+            if data["valid"].strftime("%Y%m%d%H%M") in current:
                 skipped += 1
                 continue
-            res = ds3505.sql(cursor, faa, data)
-            if res is None:
-                skipped += 1
-            else:
-                added += 1
+            textprod.valid = data["valid"]
+            textprod.utcnow = data["valid"]
+            mtr = to_metar(textprod, data["metar"])
+            mtr.to_iemaccess(
+                icursor, force_current_log=True, skip_current=True
+            )
+            added += 1
         msgs.append(
-            ("  %s: %s added: %s removed: %s bad: %s" " skipped: %s")
-            % (year, faa, added, removed, bad, skipped)
+            f"  {year}: {faa} added: {added} bad: {bad} skipped: {skipped}"
         )
-        cursor.close()
-        pgconn.commit()
-        os.unlink("%s/%s" % (TMPDIR, lfn))
+        icursor.close()
+        iemdb.commit()
+        os.unlink(f"{TMPDIR}/{lfn}")
     LOG.info(" failed years: %s", failedyears)
     LOG.info("\n".join(msgs))
 
