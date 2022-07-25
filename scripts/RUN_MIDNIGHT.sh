@@ -11,6 +11,9 @@ python compute_daily.py
 cd ../iemre
 python daily_analysis.py $(date --date '1 day ago' +'%Y %m %d')
 
+cd ../asos
+python adjust_report_type.py $(date -u --date '1 day ago' +'%Y %m %d')
+
 cd ../smos
 python plot.py 12
 
@@ -38,14 +41,14 @@ python mrms_monthly_plot.py
 # Assume we have MERRA data by the 28th each month
 if [ $DD -eq "28" ]
 then
-	cd ../dl
-	python fetch_merra.py
-	MM=$(date -u --date '1 month ago' +'%m')
-	YYYY=$(date -u --date '1 month ago' +'%Y')
-	cd ../climodat
-	python merra_solarrad.py $YYYY $MM
-	cd ../iemre
-	python grid_rsds.py $YYYY $MM
+    cd ../dl
+    python fetch_merra.py
+    MM=$(date -u --date '1 month ago' +'%m')
+    YYYY=$(date -u --date '1 month ago' +'%Y')
+    cd ../climodat
+    python merra_solarrad.py $YYYY $MM
+    cd ../iemre
+    python grid_rsds.py $YYYY $MM
 fi
 
 # Move content to offlining
