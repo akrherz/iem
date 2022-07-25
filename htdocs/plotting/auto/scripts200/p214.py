@@ -181,7 +181,7 @@ def get_data(fdict):
     elif month == "summer":
         months = [6, 7, 8]
     else:
-        ts = datetime.datetime.strptime("2000-" + month + "-01", "%Y-%b-%d")
+        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
@@ -199,7 +199,7 @@ def get_data(fdict):
                     ORDER by {y} {direction}, valid DESC) as timestamp
                 from alldata where station = :station
                 and extract(month from valid) in :months
-                and report_type != 1 and valid >= :basets
+                and report_type = 3 and valid >= :basets
                 and {x} is not null and {y} is not null
                 ORDER by x ASC)
             SELECT x, {agg}(yv) as y, max(timestamp) as utc_valid from data

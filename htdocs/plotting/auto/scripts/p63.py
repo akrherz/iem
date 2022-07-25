@@ -49,8 +49,8 @@ def plotter(fdict):
     eyear = datetime.datetime.now().year
 
     cursor.execute(
-        f"""
-        SELECT sday, year, high, low, precip, day from alldata_{station[:2]}
+        """
+        SELECT sday, year, high, low, precip, day from alldata
         where station = %s and sday != '0229'
         and year >= %s ORDER by day ASC
     """,
@@ -101,7 +101,7 @@ def plotter(fdict):
         )
     )
     title = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
+        f"{ctx['_sname']}\n"
         "Daily Records Set Per Year "
         f"{syear} sets record then accumulate ({syear + 1}-{eyear})\n"
         "events/year value is long term average, total events / "

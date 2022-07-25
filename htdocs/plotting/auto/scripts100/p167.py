@@ -88,7 +88,7 @@ def plotter(fdict):
         SELECT valid at time zone %s as ts,
         skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, vsby
         from alldata where station = %s and valid BETWEEN %s and %s
-        and vsby is not null and report_type != 1 ORDER by valid ASC
+        and vsby is not null and report_type = 3 ORDER by valid ASC
         """,
             conn,
             params=(tzname, station, sts, ets),
@@ -136,7 +136,7 @@ def plotter(fdict):
 
     df["flstatus"] = conds
     title = (
-        f"{ctx['_sname']} {sts:%b %Y} Flight Category\n"
+        f"{ctx['_sname']}:: {sts:%b %Y} Flight Category\n"
         "based on Hourly METAR Cloud Amount/Level and Visibility Reports"
     )
     (fig, ax) = figure_axes(apctx=ctx, title=title)

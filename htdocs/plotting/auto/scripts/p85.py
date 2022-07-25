@@ -62,7 +62,7 @@ def plotter(fdict):
         WITH data as (
             SELECT valid at time zone %s  + '10 minutes'::interval as v, tmpf
             from alldata where station = %s and tmpf > -90 and tmpf < 150
-            and extract(month from valid) = %s and report_type != 1)
+            and extract(month from valid) = %s and report_type = 3)
 
         SELECT extract(hour from v) as hour,
         min(v) as min_valid, max(v) as max_valid,
@@ -85,7 +85,7 @@ def plotter(fdict):
     hours = df.index.values
     title = (
         f"({df['min_valid'].min().year} - {df['max_valid'].max().year}) "
-        f"{ctx['_nt'].sts[station]['name']} [{station}]\n"
+        f"{ctx['_sname']}\n"
         f"Frequency of {calendar.month_name[month]} Hour, {PDICT[mydir]}: "
         f"{thres}"
         r"$^\circ$F"

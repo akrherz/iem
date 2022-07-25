@@ -128,7 +128,7 @@ def plotter(fdict):
                 'hour', valid at time zone %s  + '10 minutes'::interval) as v,
             tmpf, dwpf, sknt, drct, alti, relh, random() as r,
             coalesce(mslp, alti * 33.8639, 1013.25) as slp
-            from alldata where station = %s and report_type != 1
+            from alldata where station = %s and report_type = 3
             and extract(hour from
             valid at time zone %s + '10 minutes'::interval)
             in (%s, %s)),

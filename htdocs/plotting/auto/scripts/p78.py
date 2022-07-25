@@ -102,7 +102,7 @@ def plotter(fdict):
             and drct is not null and dwpf is not null and dwpf <= tmpf
             and relh is not null
             and extract(month from valid) in :months
-            and report_type != 1
+            and report_type = 3
         """
             ),
             conn,
@@ -164,7 +164,7 @@ def plotter(fdict):
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
     title = (
-        f"{ctx['_sname']} :: Dew Point Distribution by Air Temp "
+        f"{ctx['_sname']}:: Dew Point Distribution by Air Temp "
         f"(month={month.upper()}) ({ab.year}-{datetime.datetime.now().year}), "
         f"n={len(df.index):.0f}"
     )

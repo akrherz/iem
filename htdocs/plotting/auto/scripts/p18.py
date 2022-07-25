@@ -9,16 +9,14 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, get_dbconn
 from pyiem.exceptions import NoDataFound
 
-MDICT = dict(
-    [
-        ("tmpf", "Air Temperature"),
-        ("dwpf", "Dew Point Temperature"),
-        ("feel", "Feels Like Temperature"),
-        ("alti", "Pressure Altimeter"),
-        ("relh", "Relative Humidity"),
-        ("mslp", "Sea Level Pressure"),
-    ]
-)
+MDICT = {
+    "tmpf": "Air Temperature",
+    "dwpf": "Dew Point Temperature",
+    "feel": "Feels Like Temperature",
+    "alti": "Pressure Altimeter",
+    "relh": "Relative Humidity",
+    "mslp": "Sea Level Pressure",
+}
 UNITS = {
     "tmpf": "°F",
     "dwpf": "°F",
@@ -84,10 +82,7 @@ def highcharts(fdict):
         now += oneday
 
     j = {}
-    j["title"] = dict(
-        text=("[%s] %s Time Series")
-        % (ctx["station"], ctx["_nt"].sts[ctx["station"]]["name"])
-    )
+    j["title"] = dict(text=f"{ctx['_sname']} Time Series")
     j["xAxis"] = dict(type="datetime")
     j["yAxis"] = dict(
         title=dict(text="%s %s" % (MDICT[ctx["var"]], UNITS[ctx["var"]]))
@@ -195,12 +190,10 @@ def get_data(fdict):
 def plotter(fdict):
     """Go"""
     ctx = get_data(fdict)
-    title = "%s [%s]\n%s Timeseries %s - %s" % (
-        ctx["_nt"].sts[ctx["station"]]["name"],
-        ctx["station"],
-        MDICT[ctx["var"]],
-        ctx["sdate"].strftime("%d %b %Y"),
-        ctx["edate"].strftime("%d %b %Y"),
+    title = (
+        f"{ctx['_sname']}\n"
+        f"{MDICT[ctx['var']]} Timeseries {ctx['sdate']:%d %b %Y} - "
+        f"{ctx['edate']:%d %b %Y}"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 

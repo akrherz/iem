@@ -63,7 +63,7 @@ def plotter(fdict):
                 select day, high, low,
         rank() OVER (PARTITION by year ORDER by high {s}) as high_rank,
         rank() OVER (PARTITION by year ORDER by low {s}) as low_rank
-                from alldata_{station[:2]} where station = %s and month = %s),
+                from alldata where station = %s and month = %s),
             highs as (
                 SELECT extract(day from day) as dom, count(*) from ranks
                 where high_rank = 1 GROUP by dom),
@@ -82,9 +82,10 @@ def plotter(fdict):
     fig = figure(apctx=ctx)
     ax = fig.subplots(2, 1, sharex=True)
     lbl = "Coldest" if mydir == "cold" else "Hottest"
+    # match suptitle for plot2
     ax[0].set_title(
         (
-            f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
+            f"{ctx['_sname']}\n"
             f"Frequency of Day in {calendar.month_name[month]}\n"
             f"Having {lbl} High Temperature of {calendar.month_name[month]}"
         ),

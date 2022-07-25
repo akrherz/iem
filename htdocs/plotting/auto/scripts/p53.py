@@ -90,8 +90,7 @@ def plotter(fdict):
             sum(case when {v}::int >= %s then 1 else 0 end) as d6,
             count(*)
             from alldata where station = %s and {v} is not null
-            and extract(minute  from valid  - '1 minute'::interval) > 49
-            and report_type != 1
+            and report_type = 3
             GROUP by week ORDER by week ASC
         """,
             conn,
@@ -109,7 +108,16 @@ def plotter(fdict):
         ts = sts.replace(month=i)
         xticks.append(float(ts.strftime("%j")) / 7.0)
 
-    (fig, ax) = figure_axes(apctx=ctx)
+    ab = ctx["_nt"].sts[station]["archive_begin"]
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
+    title = (
+        f"{ctx['_sname']}\n"
+        f"Hourly {PDICT[v]} "
+        r"($^\circ$F) "
+        f"Frequencies ({ab.year}-{datetime.datetime.now().year})"
+    )
+    (fig, ax) = figure_axes(apctx=ctx, title=title)
     x = df.index.values - 1
     val = df["d6"].sum() / df["count"].sum() * 100.0
     ax.bar(
@@ -172,15 +180,6 @@ def plotter(fdict):
     )
 
     ax.grid(True, zorder=11)
-    ab = ctx["_nt"].sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata.")
-    ax.set_title(
-        f"{ctx['_sname']}\n"
-        f"Hourly {PDICT[v]} "
-        r"($^\circ$F) "
-        f"Frequencies ({ab.year}-{datetime.datetime.now().year})"
-    )
     ax.set_ylabel("Frequency [%]")
 
     ax.set_xticks(xticks)

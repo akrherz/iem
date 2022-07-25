@@ -94,7 +94,7 @@ def plotter(fdict):
             and drct is not null and dwpf is not null and dwpf <= tmpf
             and sknt > 3 and drct::int % 10 = 0
             and extract(month from valid) in :months
-            and report_type != 1
+            and report_type = 3
         """
             ),
             conn,
@@ -144,7 +144,7 @@ def plotter(fdict):
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
     titles = [
-        f"{ctx['_nt'].sts[station]['name']} [{station}]",
+        f"{ctx['_sname']}:: ",
         f"Average Dew Point by Wind Direction (month={month.upper()}) "
         f"({max([1973, ab.year])}-{datetime.datetime.now().year})",
         "(must have 3+ hourly obs > 3 knots at given direction)",

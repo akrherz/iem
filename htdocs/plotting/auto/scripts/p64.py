@@ -70,7 +70,7 @@ def get_data(ctx):
     snowd = np.zeros((eyear - syear + 1, 366))
     cursor.execute(
         "SELECT extract(doy from day), year, snow, snowd from "
-        f"alldata_{station[:2]} where station = %s and year >= %s",
+        "alldata where station = %s and year >= %s",
         (station, syear),
     )
     for row in cursor:
@@ -136,7 +136,7 @@ def plotter(fdict):
         else f"{float(ctx['threshold']):.2f}+ Inch"
     )
     title = (
-        f"{ctx['_sname']} :: {t1} {t2} Snowfall\n"
+        f"{ctx['_sname']}:: {t1} {t2} Snowfall\n"
         "(color is how long snow remained)"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)

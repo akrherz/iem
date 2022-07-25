@@ -53,7 +53,9 @@ def get_description():
       <code>VCTSRA</code> would match.</li>
       <li><strong>Thunder Reports (excluding VCTS)</strong> includes most
       <code>TS</code> mentions, but not any including <code>VC</code></li>
-    </ul>
+    </ul></p>
+
+    <p>This autoplot considers both routine and special hourly reports.
     """
     desc["arguments"] = [
         dict(

@@ -206,7 +206,7 @@ def get_context(fdict):
             extract(year from valid + '5 months'::interval) as season,
             wcht(tmpf::numeric, (sknt * 1.15)::numeric) from alldata
             WHERE station = %s and tmpf is not null and sknt is not null
-            and tmpf < 50 and sknt >= %s and report_type != 1 ORDER by valid)
+            and tmpf < 50 and sknt >= %s and report_type = 3 ORDER by valid)
         SELECT case when (valid - lag) < '3 hours'::interval then (valid - lag)
         else '3 hours'::interval end as timedelta, wcht,
         season, to_char(valid, 'mmdd') as sday from data
@@ -232,7 +232,7 @@ def get_context(fdict):
         df2[i] = df[df["wcht"] < i].groupby("season")["timedelta"].sum()
     ctx["df"] = df2
     ctx["title"] = (
-        f"{ctx['_sname']} :: Wind Chill Hours {textra} "
+        f"{ctx['_sname']}:: Wind Chill Hours {textra} "
         f"({df['season'].min():.0f}-{df['season'].max():.0f})"
     )
     ctx["subtitle"] = f"Hours below threshold by season (wind >= {sknt} kts)"

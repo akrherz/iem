@@ -154,7 +154,7 @@ def plotter(fdict):
             "avg(dwpf)::int as dwpf, avg(feel) as feel "
             f"from alldata WHERE station = %s {tmpflimit} "
             "and dwpf <= tmpf and valid > %s and valid < %s "
-            f"and report_type != 1 {doylimiter} GROUP by d",
+            f"and report_type = 3 {doylimiter} GROUP by d",
             conn,
             params=(station, sdate, edate),
             index_col=None,
@@ -205,8 +205,7 @@ def plotter(fdict):
     title = f"till {datetime.date.today():%-d %b}"
     title = "Entire Year" if ytd == "no" else title
     title = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']} "
-        f"{minyear}-{maxyear}\n"
+        f"{ctx['_sname']} ({minyear}-{maxyear})\n"
         f"{title2} Histogram ({title}){inctitle}"
     )
     fig, ax = figure_axes(title=title, apctx=ctx)

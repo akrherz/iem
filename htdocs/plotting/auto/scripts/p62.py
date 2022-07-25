@@ -63,15 +63,14 @@ def plotter(fdict):
     sts = datetime.date(syear, 11, 1)
     ets = datetime.date(eyear + 1, 6, 1)
 
-    table = "alldata_%s" % (station[:2],)
     eyear = datetime.datetime.now().year
     obs = np.ma.ones((eyear - syear + 1, 183), "f") * -1
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
             SELECT year, extract(doy from day) as doy, snowd, day,
             case when month < 6 then year - 1 else year end as winter_year
-            from {table} WHERE station = %s and
+            from alldata WHERE station = %s and
             month in (11, 12, 1, 2, 3, 4) and snowd >= 0 and
             day between %s and %s
         """,
@@ -90,7 +89,10 @@ def plotter(fdict):
     obs.mask = np.where(obs < 0, True, False)
     # obs[obs == 0] = -1
 
-    fig = figure(apctx=ctx)
+    title = (
+        f"{ctx['_sname']}\n" f"Daily Snow Depth ({minyear}-{eyear}) [inches]"
+    )
+    fig = figure(apctx=ctx, title=title)
     ax = fig.add_axes([0.1, 0.1, 0.93, 0.8])
     ax.set_xticks((0, 29, 60, 91, 120, 151, 181))
     ax.set_xticklabels(
@@ -98,10 +100,6 @@ def plotter(fdict):
     )
     ax.set_ylabel("Year of Nov,Dec of Season Labeled")
     ax.set_xlabel("Date of Winter Season")
-    ax.set_title(
-        ("[%s] %s\nDaily Snow Depth (%s-%s) [inches]")
-        % (station, ctx["_nt"].sts[station]["name"], minyear, eyear)
-    )
 
     cmap = copy.copy(nwssnow())
     norm = mpcolors.BoundaryNorm(LEVELS, cmap.N)

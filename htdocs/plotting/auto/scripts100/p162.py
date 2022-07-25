@@ -47,8 +47,7 @@ def plotter(fdict):
             greatest(skyl1, skyl2, skyl3, skyl4) as sky from alldata
             WHERE station = %s and
             (skyc1 = 'OVC' or skyc2 = 'OVC' or skyc3 = 'OVC' or skyc4 = 'OVC')
-            and valid > '1973-01-01' and (extract(minute from valid) = 0 or
-            extract(minute from valid) > 50) and report_type != 1
+            and valid > '1973-01-01' and report_type = 3
         """,
             conn,
             params=(station,),
@@ -84,7 +83,7 @@ def plotter(fdict):
     syear = max([1973, ab.year])
 
     title = (
-        f"{syear}-{datetime.date.today().year} {ctx['_sname']} "
+        f"({syear}-{datetime.date.today().year}) {ctx['_sname']}:: "
         "Ceilings Frequency\n"
         "Level at which Overcast Conditions Reported"
     )

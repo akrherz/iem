@@ -110,7 +110,7 @@ def plotter(fdict):
                 count(*)
                 from alldata where station = :station
                 and tmpf is not null and extract(month from valid) in :months
-                and report_type != 1
+                and report_type = 3
                 GROUP by t ORDER by t ASC
                 """
                 ),
@@ -135,7 +135,7 @@ def plotter(fdict):
                 and tmpf is not null and extract(month from valid) in :months
                 and extract(hour from ((valid +
                     '10 minutes'::interval) at time zone :tzname)) = :hour
-                and report_type != 1
+                and report_type = 3
                 GROUP by t ORDER by t ASC
                 """
                 ),

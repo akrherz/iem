@@ -226,7 +226,7 @@ def get_data(ctx, startyear):
                 and dwpf < 100 and tmpf >= dwpf and
                 extract(month from valid) in :months and
                 extract(hour from valid at time zone :tzname) in :hours
-                and report_type != 1
+                and report_type = 3
             )
         SELECT valid,
         extract(year from valid + ':days days'::interval)::int as year,
@@ -267,11 +267,10 @@ def make_plot(df, ctx):
     )
     avgv = means[varname].mean()
     title = (
-        "[%s] %s %.0f-%.0f\n"
+        "%s (%.0f-%.0f)\n"
         "%s %s [%s] %s Avg: %.1f, slope: %.2f %s/century, R$^2$=%.2f"
     ) % (
-        ctx["station"],
-        ctx["_nt"].sts[ctx["station"]]["name"],
+        ctx["_sname"],
         means.index.min(),
         means.index.max(),
         PDICT[varname],
@@ -356,9 +355,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    _fig, _df = plotter(
-        {
-            "station": "DSM",
-            "network": "IA_ASOS",
-        }
-    )
+    plotter({"station": "DSM", "network": "IA_ASOS"})

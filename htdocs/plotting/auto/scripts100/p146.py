@@ -42,13 +42,9 @@ def plotter(fdict):
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
             """
-        WITH obs as (
-            SELECT date_trunc('hour', valid) as t, avg(tmpf) as avgt from
+            SELECT extract(week from valid) as week, tmpf from
             alldata WHERE station = %s and p01i > 0.009 and tmpf is not null
-            and report_type != 1 GROUP by t
-        )
-
-        SELECT extract(week from t) as week, avgt from obs
+            and report_type = 3
         """,
             conn,
             params=(station,),
@@ -73,9 +69,9 @@ def plotter(fdict):
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 
-    bins = np.arange(df["avgt"].min() - 5, df["avgt"].max() + 5, 2)
+    bins = np.arange(df["tmpf"].min() - 5, df["tmpf"].max() + 5, 2)
     H, xedges, yedges = np.histogram2d(
-        df["week"].values, df["avgt"].values, [range(0, 54), bins]
+        df["week"].values, df["tmpf"].values, [range(0, 54), bins]
     )
     rows = []
     for i, x in enumerate(xedges[:-1]):

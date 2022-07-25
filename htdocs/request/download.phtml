@@ -158,7 +158,7 @@ data available from this archive!</p>
 
 
 <br><br>
-<h4>3) Specific Date Range (If needed):</h4>
+<h4>3) Select Date Range:</h4>
 <p><strong>Note:</strong> These dates define timestamps starting at
 midnight of the selected timezone.  The start date is inclusive and the
 end date is exclusive.</p>
@@ -174,7 +174,7 @@ end date is exclusive.</p>
 {$tzselect}
 
 <h4>5) Download Options:</h4>
-		
+
 <p><strong>Data Format:</strong> 
 <select name="format">
 <option value="onlycomma">Comma Delimited</option>
@@ -220,14 +220,15 @@ end date is exclusive.</p>
 
 <h4>6) Limit Report Types</h4>
 
-<p>This attempts to filter the downloaded data
-	to only include those reports you want.  In the future, this will deliniate
-	between routine and special obs. Select the report types to include.
-<br /> 
-<select name="report_type" size="5" MULTIPLE>
-	<option value="1" selected>MADIS HFMETAR</option>
-	<option value="2" selected>Routine + SPECIals</option>
-</select>
+<p>See <a href="/onsite/news.phtml?id=1434">news item</a> on recent changes
+made for report types.  When in doubt, pick both routine and specials.</p>
+
+<input type="checkbox" name="report_type" value="1" id="rt1">
+<label for="rt1">MADIS HFMETAR / 5 Minute ASOS</label><br />
+<input type="checkbox" name="report_type" value="3" id="rt3" checked>
+<label for="rt3">Routine / Once Hourly</label><br />
+<input type="checkbox" name="report_type" value="4" id="rt4" checked>
+<label for="rt4">Specials</label><br />
 
 <h4>7) Finally, get Data:</h4>
 

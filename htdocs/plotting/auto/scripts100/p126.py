@@ -73,7 +73,7 @@ def plotter(fdict):
             extract(doy from valid) as doy, tmpf, dwpf, relh from alldata
             where station = %s and dwpf > -50 and dwpf < 90 and
             tmpf > -50 and tmpf < 120 and valid > '1950-01-01'
-            and report_type != 1
+            and report_type = 3
         """,
             conn,
             params=(station,),
@@ -118,7 +118,8 @@ def plotter(fdict):
     df3 = dyear[["doy", varname]].groupby("doy").describe()
     df3[(varname, "diff")] = df3[(varname, "mean")] - df2[(varname, "mean")]
 
-    fig = figure(apctx=ctx)
+    title = f"{ctx['_sname']}]:: Daily Mean Surface {PDICT[varname]}"
+    fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(2, 1)
     multiplier = 1000.0 if varname == "mixing_ratio" else 10.0
 
@@ -141,7 +142,6 @@ def plotter(fdict):
         label="%s" % (year,),
     )
 
-    ax[0].set_title(f"{ctx['_sname']}]\nDaily Mean Surface {PDICT[varname]}")
     lbl = (
         "Mixing Ratio ($g/kg$)"
         if varname == "mixing_ratio"
@@ -169,7 +169,7 @@ def plotter(fdict):
             rect.set_edgecolor(cbelow)
 
     plunits = "$g/kg$" if varname == "mixing_ratio" else "hPa"
-    ax[1].set_ylabel("%.0f Departure (%s)" % (year, plunits))
+    ax[1].set_ylabel(f"{year:.0f} Departure ({plunits})")
     ax[1].set_xlim(0, 366)
     ax[1].set_xticks((1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335))
     ax[1].set_xticklabels(calendar.month_abbr[1:])

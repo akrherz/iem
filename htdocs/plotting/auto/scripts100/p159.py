@@ -152,9 +152,8 @@ def plotter(fdict):
                 f"""WITH hourly as (
             SELECT date_trunc('hour', valid + '10 minutes'::interval)
             at time zone :tzname as ts,
-            max(case when {dbvarname}::int {opp} :t then 1 else 0 end) as hit
-            from alldata where station = :station and report_type != 1
-            GROUP by ts)
+            case when {dbvarname}::int {opp} :t then 1 else 0 end as hit
+            from alldata where station = :station and report_type = 3)
 
             SELECT extract(year from {offset})::int as year,
             extract(hour from ts)::int as hour,
@@ -181,7 +180,7 @@ def plotter(fdict):
     title = (
         f"({mlabel}) {METRICS[varname]} Hours {DIRS[mydir]} "
         f"{threshold}{UNITS[varname]}\n"
-        f"{ctx['_sname']} :: ({ydf.index.min():.0f}-{ydf.index.max():.0f})"
+        f"{ctx['_sname']}:: ({ydf.index.min():.0f}-{ydf.index.max():.0f})"
     )
     fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(2, 1)

@@ -59,7 +59,7 @@ def get_description():
     return desc
 
 
-def plot_sky(days, vsby, data, station, ctx, sts):
+def plot_sky(days, vsby, data, ctx, sts):
     """Sky plot variant."""
     fig = figure(apctx=ctx)
     # vsby plot
@@ -90,7 +90,7 @@ def plot_sky(days, vsby, data, station, ctx, sts):
     fig.text(
         0.5,
         0.935,
-        f"[{station}] {ctx['_nt'].sts[station]['name']} {sts:%b %Y} "
+        f"{ctx['_sname']}:: {sts:%b %Y} "
         "Clouds & Visibility\nbased on ASOS METAR Cloud Amount ",
         ha="center",
         fontsize=14,
@@ -131,7 +131,7 @@ def plot_sky(days, vsby, data, station, ctx, sts):
     return fig
 
 
-def plot_vsby(days, vsby, station, ctx, sts):
+def plot_vsby(days, vsby, ctx, sts):
     """Sky plot variant."""
     fig = figure(apctx=ctx)
 
@@ -155,7 +155,7 @@ def plot_vsby(days, vsby, station, ctx, sts):
     fig.text(
         0.5,
         0.935,
-        f"[{station}] {ctx['_nt'].sts[station]['name']} {sts:%b %Y} "
+        f"{ctx['_sname']}:: {sts:%b %Y} "
         "Visibility\nbased on hourly ASOS METAR Visibility Reports",
         ha="center",
         fontsize=14,
@@ -203,12 +203,10 @@ def plotter(fdict):
         df = pd.read_sql(
             """
             SELECT valid at time zone 'UTC' as valid,
-            skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4,
-            vsby,
+            skyc1, skyc2, skyc3, skyc4, skyl1, skyl2, skyl3, skyl4, vsby,
             extract(epoch from (valid - %s))/3600. as hours
             from alldata where station = %s and valid BETWEEN %s and %s
-            and report_type != 1
-            ORDER by valid ASC
+            and report_type = 3 ORDER by valid ASC
         """,
             conn,
             params=(sts, station, sts, ets),
@@ -240,9 +238,9 @@ def plotter(fdict):
     vsby = np.ma.array(vsby, mask=np.where(vsby < 0, True, False))
 
     if ptype == "vsby":
-        fig = plot_vsby(days, vsby, station, ctx, sts)
+        fig = plot_vsby(days, vsby, ctx, sts)
     else:
-        fig = plot_sky(days, vsby, data, station, ctx, sts)
+        fig = plot_sky(days, vsby, data, ctx, sts)
 
     return fig, df
 
