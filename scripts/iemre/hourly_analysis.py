@@ -79,15 +79,9 @@ def grid_wind(df, domain):
 
 
 def grid_skyc(df, domain):
-    """Hmmmm"""
-    v = []
-    for _station, row in df.iterrows():
-        try:
-            _v = max(row["max_skyc1"], row["max_skyc2"], row["max_skyc3"])
-        except TypeError:
-            continue
-        v.append(_v)
-    df["skyc"] = v
+    """Take the max sky coverage value."""
+    cols = ["max_skyc1", "max_skyc2", "max_skyc3", "max_skyc4"]
+    df["skyc"] = df[cols].max(axis="columns")
     return generic_gridder(df, "skyc", domain)
 
 
@@ -154,6 +148,7 @@ def grid_hour(ts):
     max(getskyc(skyc1)) as max_skyc1,
     max(getskyc(skyc2)) as max_skyc2,
     max(getskyc(skyc3)) as max_skyc3,
+    max(getskyc(skyc4)) as max_skyc4,
     max(case when p01i > 0 and p01i < 1000 then p01i else 0 end) as phour,
     max(case when dwpf > -60 and dwpf < 100 THEN dwpf else null end)
         as max_dwpf,
