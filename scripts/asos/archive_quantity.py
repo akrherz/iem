@@ -1,117 +1,76 @@
 """ Create a simple prinout of observation quanity in the database """
+from calendar import month_abbr
 import sys
 
-import datetime
-import numpy as np
-from pyiem.util import get_dbconn
-
-BASEYEAR = 1928
-
-
-class bcolors:
-    """Kind of hacky"""
-
-    HEADER = "\033[95m"
-    OKBLUE = "\033[94m"
-    OKGREEN = "\033[92m"
-    WARNING = "\033[93m"
-    FAIL = "\033[91m"
-    ENDC = "\033[0m"
+# Third Party
+from colorama import Fore, Style
+import pandas as pd
+from pyiem.util import get_sqlalchemy_conn
 
 
-def d(hits, total):
-    """another hack"""
-    if total == 0:
-        return " N/A"
-    val = hits / float(total)
-    c1 = bcolors.ENDC
-    if val > 0.5:
-        c1 = bcolors.FAIL
-    return "%s%.2f%s" % (c1, val, bcolors.ENDC)
+def colorize(val, perfect, bad):
+    """pretty."""
+    if pd.isna(val):
+        return "-----"
+    if val == perfect:
+        return " FULL"
+    if val < bad:
+        color = Fore.RED
+    else:
+        color = Fore.GREEN
+    if val > 1.5:
+        return color + f"{val:5.0f}" + Style.RESET_ALL
+    return color + f"{val:5.2f}" + Style.RESET_ALL
 
 
 def main(argv):
     """Go Main Go"""
-    now = datetime.datetime.utcnow()
-    years = int(now.year - 1928 + 1)
-    counts = np.zeros((years, 12))
-    mslp = np.zeros((years, 12))
-    metar = np.zeros((years, 12))
+    station = argv[1]
+    sumvar = "freq" if len(argv) == 2 else argv[2]
 
-    pgconn = get_dbconn("asos", user="nobody")
-    acursor = pgconn.cursor()
-
-    stid = argv[1]
-    acursor.execute(
-        """
-        SELECT extract(year from valid) as yr,
-        extract(month from valid) as mo, count(*),
-        sum(case when mslp is null or mslp < 1 then 1 else 0 end),
-        sum(case when metar is null or metar = '' then 1 else 0 end)
-        from alldata WHERE station = %s and report_type != 1
-        GROUP by yr, mo ORDER by yr ASC, mo ASC
-    """,
-        (stid,),
+    with get_sqlalchemy_conn("asos") as conn:
+        df = pd.read_sql(
+            """
+            SELECT date(valid at time zone 'UTC') as date,
+            count(*) as total_obs,
+            sum(case when report_type = 3 then 1 else 0 end) as routine_obs,
+            sum(case when report_type in (3, 4) then 1 else 0 end) as obs
+            from alldata WHERE station = %s GROUP by date ORDER by date
+            """,
+            conn,
+            params=(station,),
+            index_col="date",
+        )
+    df = (
+        df.reindex(pd.date_range(df.index[0], df.index[-1]))
+        .assign(
+            possible=24,
+        )
+        .fillna(0)
+        .resample("m")
+        .sum()
+        .assign(
+            year=lambda df_: df_.index.year,
+            month=lambda df_: df_.index.month,
+            freq=lambda df_: df_["routine_obs"] / df_["possible"],
+        )
+        .pivot(
+            index="year",
+            columns="month",
+            values=sumvar,
+        )
+        .rename(
+            columns=dict((i + 1, v) for i, v in enumerate(month_abbr[1:])),
+        )
     )
-
-    for row in acursor:
-        counts[int(row[0] - BASEYEAR), int(row[1] - 1)] = row[2]
-        mslp[int(row[0] - BASEYEAR), int(row[1] - 1)] = row[3]
-        metar[int(row[0] - BASEYEAR), int(row[1] - 1)] = row[4]
-
-    print(f"Observation Count For {stid}")
-    print("YEAR  JAN  FEB  MAR  APR  MAY  JUN  JUL  AUG  SEP  OCT  NOV  DEC")
-    output = False
-    for i in range(years):
-        year = BASEYEAR + i
-        if year > now.year:
-            continue
-        if not output and np.max(counts[i, :]) == 0:
-            continue
-        output = True
-
-        if len(argv) < 3:
-            print(
-                ("%s %4i %4i %4i %4i %4i %4i %4i %4i %4i %4i %4i %4i")
-                % (
-                    year,
-                    counts[i, 0],
-                    counts[i, 1],
-                    counts[i, 2],
-                    counts[i, 3],
-                    counts[i, 4],
-                    counts[i, 5],
-                    counts[i, 6],
-                    counts[i, 7],
-                    counts[i, 8],
-                    counts[i, 9],
-                    counts[i, 10],
-                    counts[i, 11],
-                )
-            )
+    print(f"Observation Count For {station}")
+    # Could not get pandas to output properly, so I manually do it :(
+    for values in df.itertuples():
+        print(values[0], end=" ")
+        if sumvar in ["obs", "total_obs"]:
+            print(" ".join(colorize(v, -1, 24 * 28) for v in values[1:]))
         else:
-            if argv[2] == "metar":
-                data = metar
-            else:
-                data = mslp
-            print(
-                ("%s %4s %4s %4s %4s %4s %4s %4s %4s %4s %4s %4s %4s")
-                % (
-                    year,
-                    d(data[i, 0], counts[i, 0]),
-                    d(data[i, 1], counts[i, 1]),
-                    d(data[i, 2], counts[i, 2]),
-                    d(data[i, 3], counts[i, 3]),
-                    d(data[i, 4], counts[i, 4]),
-                    d(data[i, 5], counts[i, 5]),
-                    d(data[i, 6], counts[i, 6]),
-                    d(data[i, 7], counts[i, 7]),
-                    d(data[i, 8], counts[i, 8]),
-                    d(data[i, 9], counts[i, 9]),
-                    d(data[i, 10], counts[i, 10]),
-                    d(data[i, 11], counts[i, 11]),
-                )
-            )
+            print(" ".join(colorize(v, 1, 0.95) for v in values[1:]))
 
 
 if __name__ == "__main__":
