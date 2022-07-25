@@ -92,6 +92,7 @@
 192.168.0.231 iemdb-mattermost.local
 192.168.0.231 iemdb-mesonet.local
 192.168.0.231 iemdb-mesosite.local
+192.168.0.231 iemdb-mos iemdb-mos.local
 192.168.0.231 iemdb-nc1018.local
 192.168.0.231 iemdb-nwx.local
 192.168.0.231 iemdb-other.local
@@ -126,7 +127,6 @@
 192.168.0.230 iemdb-hml.local
 192.168.0.230 iemdb-iem.local
 192.168.0.230 iemdb-mec.local
-192.168.0.230 iemdb-mos iemdb-mos.local
 192.168.0.230 iemdb-openfire.local
 192.168.0.230 iemdb-snet.local
 
