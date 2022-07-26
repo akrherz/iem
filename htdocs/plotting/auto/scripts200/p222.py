@@ -2,9 +2,15 @@
 from datetime import timedelta
 
 import pandas as pd
+from sqlalchemy import text
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
+
+PDICT = {
+    "svrtor": "Severe Thunderstorm + Tornado Warnings",
+    "ffw": "Flash Flood Warnings",
+}
 
 
 def get_description():
@@ -14,9 +20,9 @@ def get_description():
     desc[
         "description"
     ] = """Using available one minute precipitation data from an ASOS, this
-    data is merged with an archive of Severe Thunderstorm and Tornado
-    Warnings.  Precipitation totals are then computed during the warnings
-    and within one hour of the warning.
+    data is merged with an archive of polygon based warnings.
+    Precipitation totals are then computed during the warnings that spatially
+    cover the observation point and within one hour of the warning.
 
     <p>This app is slow to load, please be patient!
     """
@@ -28,11 +34,18 @@ def get_description():
             network="IA_ASOS",
             label="Select Station (not all have 1 minute, sorry):",
         ),
+        dict(
+            type="select",
+            options=PDICT,
+            name="w",
+            label="Select warning type(s) to accumulate precipitation during",
+            default="svrtor",
+        ),
     ]
     return desc
 
 
-def get_data(meta):
+def get_data(ctx, meta):
     """Fetch Data."""
     with get_sqlalchemy_conn("asos1min") as conn:
         obsdf = pd.read_sql(
@@ -48,15 +61,22 @@ def get_data(meta):
         raise NoDataFound("Failed to find any one-minute data, sorry.")
     obsdf["inwarn"] = False
     obsdf["nearwarn"] = False
+    phenomenas = ("TO", "SV")
+    if ctx["w"] == "ffw":
+        phenomenas = ("FF",)
     with get_sqlalchemy_conn("postgis") as conn:
         warndf = pd.read_sql(
-            "SELECT issue, expire from sbw WHERE issue > '2002-01-01' and "
-            "phenomena in ('TO', 'SV') and significance = 'W' and "
-            "status = 'NEW' and ST_Contains(geom, "
-            "GeomFromEWKT('SRID=4326;POINT(%s %s)')) "
-            "ORDER by issue ASC",
+            text(
+                """
+            SELECT issue, expire from sbw WHERE issue > '2002-01-01' and
+            phenomena in :ph and significance = 'W' and
+            status = 'NEW' and ST_Contains(geom,
+            GeomFromEWKT('SRID=4326;POINT(:lon :lat)'))
+            ORDER by issue ASC
+            """
+            ),
             conn,
-            params=(meta["lon"], meta["lat"]),
+            params={"ph": phenomenas, "lon": meta["lon"], "lat": meta["lat"]},
             index_col=None,
         )
     td = timedelta(hours=1)
@@ -86,11 +106,14 @@ def plotter(fdict):
     meta = ctx["_nt"].sts[ctx["zstation"]]
     if "HAS1MIN" not in meta["attributes"]:
         raise NoDataFound("Sorry, the IEM has no one-minute data for station.")
-    obsdf, df = get_data(meta)
+    obsdf, df = get_data(ctx, meta)
+    label = "TOR or SVR"
+    if ctx["w"] == "ffw":
+        label = "Flash Flood"
     title = (
         f"[{ctx['zstation']}] {meta['name']} Yearly "
         f"Airport Precipitation [{df.index.min():.0f}-{df.index.max():.0f}]\n"
-        "Contribution during, near, and outside of TOR or SVR warning "
+        f"Contribution during, near, and outside of {label} warning "
         "using one minute interval precipitation"
     )
     x = df.index.astype(int).tolist()
@@ -177,7 +200,7 @@ def plotter(fdict):
     ax.set_ylabel("Frequency [%]")
     ax.set_title(
         "Frequency that given minute precipitation total\n"
-        "coincided with SVR or TOR warning"
+        f"coincided with {label} warning"
     )
     ax.grid(True)
 
