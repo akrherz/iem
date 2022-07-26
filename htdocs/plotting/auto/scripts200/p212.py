@@ -5,58 +5,45 @@ import pandas as pd
 import numpy as np
 import matplotlib.dates as mdates
 from pyiem.plot import figure_axes
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, mm2inch
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
 PDICT = {"00": "00 UTC", "12": "12 UTC"}
-PDICT3 = dict(
-    [
-        ("tmpc", "Air Temperature (°C)"),
-        ("dwpc", "Dew Point (°C)"),
-        ("el_agl_m", "Equalibrium Level (m AGL)"),
-        ("el_pressure_hpa", "Equalibrium Pressure (hPa)"),
-        ("el_tmpc", "Equalibrium Level Temperature (°C)"),
-        ("height", "Height (m)"),
-        ("lcl_agl_m", "Lifted Condensation Level (m AGL)"),
-        ("lcl_pressure_hpa", "Lifted Condensation Level (hPa)"),
-        ("lcl_tmpc", "Lifted Condensation Level Temperature (°C)"),
-        ("lfc_agl_m", "Lifted of Free Convection (m AGL)"),
-        ("lfc_pressure_hpa", "Lifted of Free Convection (hPa)"),
-        ("lfc_tmpc", "Lifted of Free Convection Temperature (°C)"),
-        ("mlcape_jkg", "Mixed Layer (100hPa) CAPE (J/kg)"),
-        ("mlcin_jkg", "Mixed Layer (100hPa) CIN (J/kg)"),
-        ("mucape_jkg", "Most Unstable CAPE (J/kg)"),
-        ("mucin_jkg", "Most Unstable CIN (J/kg)"),
-        ("pwater_mm", "Precipitable Water (mm)"),
-        ("shear_sfc_1km_smps", "Shear 0-1km AGL Magnitude (m/s)"),
-        ("shear_sfc_3km_smps", "Shear 0-3km AGL Magnitude (m/s)"),
-        ("shear_sfc_6km_smps", "Shear 0-6km AGL Magnitude (m/s)"),
-        (
-            "srh_sfc_1km_neg",
-            "Storm Relative Helicity Negative (0-1km) (m2/s2)",
-        ),
-        (
-            "srh_sfc_1km_pos",
-            "Storm Relative Helicity Positive (0-1km) (m2/s2)",
-        ),
-        ("srh_sfc_1km_total", "Storm Relative Helicity Total (0-1km) (m2/s2)"),
-        (
-            "srh_sfc_3km_neg",
-            "Storm Relative Helicity Negative (0-3km) (m2/s2)",
-        ),
-        (
-            "srh_sfc_3km_pos",
-            "Storm Relative Helicity Positive (0-3km) (m2/s2)",
-        ),
-        ("srh_sfc_3km_total", "Storm Relative Helicity Total (0-3km) (m2/s2)"),
-        ("sbcape_jkg", "Surface Based CAPE (J/kg)"),
-        ("sbcin_jkg", "Surface Based CIN (J/kg)"),
-        ("sweat_index", "Sweat Index"),
-        ("total_totals", "Total Totals (°C)"),
-        ("smps", "Wind Speed (mps)"),
-    ]
-)
+PDICT3 = {
+    "tmpc": "Air Temperature (°C)",
+    "dwpc": "Dew Point (°C)",
+    "el_agl_m": "Equalibrium Level (m AGL)",
+    "el_pressure_hpa": "Equalibrium Pressure (hPa)",
+    "el_tmpc": "Equalibrium Level Temperature (°C)",
+    "height": "Height (m)",
+    "lcl_agl_m": "Lifted Condensation Level (m AGL)",
+    "lcl_pressure_hpa": "Lifted Condensation Level (hPa)",
+    "lcl_tmpc": "Lifted Condensation Level Temperature (°C)",
+    "lfc_agl_m": "Lifted of Free Convection (m AGL)",
+    "lfc_pressure_hpa": "Lifted of Free Convection (hPa)",
+    "lfc_tmpc": "Lifted of Free Convection Temperature (°C)",
+    "mlcape_jkg": "Mixed Layer (100hPa) CAPE (J/kg)",
+    "mlcin_jkg": "Mixed Layer (100hPa) CIN (J/kg)",
+    "mucape_jkg": "Most Unstable CAPE (J/kg)",
+    "mucin_jkg": "Most Unstable CIN (J/kg)",
+    "pwater_mm": "Precipitable Water (mm)",
+    "pwater_in": "Precipitable Water (inch)",
+    "shear_sfc_1km_smps": "Shear 0-1km AGL Magnitude (m/s)",
+    "shear_sfc_3km_smps": "Shear 0-3km AGL Magnitude (m/s)",
+    "shear_sfc_6km_smps": "Shear 0-6km AGL Magnitude (m/s)",
+    "srh_sfc_1km_neg": "Storm Relative Helicity Negative (0-1km) (m2/s2)",
+    "srh_sfc_1km_pos": "Storm Relative Helicity Positive (0-1km) (m2/s2)",
+    "srh_sfc_1km_total": "Storm Relative Helicity Total (0-1km) (m2/s2)",
+    "srh_sfc_3km_neg": "Storm Relative Helicity Negative (0-3km) (m2/s2)",
+    "srh_sfc_3km_pos": "Storm Relative Helicity Positive (0-3km) (m2/s2)",
+    "srh_sfc_3km_total": "Storm Relative Helicity Total (0-3km) (m2/s2)",
+    "sbcape_jkg": "Surface Based CAPE (J/kg)",
+    "sbcin_jkg": "Surface Based CIN (J/kg)",
+    "sweat_index": "Sweat Index",
+    "total_totals": "Total Totals (°C)",
+    "smps": "Wind Speed (mps)",
+}
 
 
 def get_description():
@@ -128,6 +115,9 @@ def get_data(ctx):
             ctx["_nt"].sts[station]["name"].split("--")[1].strip().split(" ")
         )
     varname = ctx["var"]
+    varname_final = ctx["var"]
+    if varname == "pwater_in":
+        varname = "pwater_mm"
     hour = int(ctx["hour"])
     level = ctx["level"]
     if varname in ["tmpc", "dwpc", "height", "smps"]:
@@ -173,6 +163,8 @@ def get_data(ctx):
             )
     if dfin.empty:
         raise NoDataFound("No Data Found.")
+    if varname_final == "pwater_in":
+        dfin["pwater_in"] = mm2inch(dfin["pwater_mm"])
     dfin["sday"] = dfin.index.strftime("%m%d")
     # Drop leapday if this year does not have it.
     try:
