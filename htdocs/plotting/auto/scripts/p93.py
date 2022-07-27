@@ -149,12 +149,13 @@ def plotter(fdict):
         tmpflimit = ""
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
-            "SELECT date_trunc('hour', valid at time zone 'UTC') as d, "
-            "avg(tmpf)::int as tmpf, "
-            "avg(dwpf)::int as dwpf, avg(feel) as feel "
-            f"from alldata WHERE station = %s {tmpflimit} "
-            "and dwpf <= tmpf and valid > %s and valid < %s "
-            f"and report_type = 3 {doylimiter} GROUP by d",
+            f"""
+            SELECT valid at time zone 'UTC' as valid,
+            tmpf::int as tmpf,
+            dwpf::int as dwpf, feel
+            from alldata WHERE station = %s {tmpflimit}
+            and dwpf <= tmpf and valid > %s and valid < %s
+            and report_type = 3 {doylimiter}""",
             conn,
             params=(station, sdate, edate),
             index_col=None,
@@ -164,7 +165,7 @@ def plotter(fdict):
     bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:
         raise NoDataFound("Unknown station metadata.")
-    df["year"] = df["d"].dt.year
+    df["year"] = df["valid"].dt.year
 
     df2 = df
     title2 = VDICT[varname]
@@ -181,7 +182,7 @@ def plotter(fdict):
         LEVELS[varname] = np.arange(80, maxval)
     elif varname == "windchill":
         compop = np.less_equal
-        df["year"] = df["d"].apply(
+        df["year"] = df["valid"].apply(
             lambda x: (x.year - 1) if x.month < 7 else x.year
         )
         inctitle = " [All Obs Included]"
@@ -226,8 +227,9 @@ def plotter(fdict):
     df3 = df2[df2["year"] == highlightyear]
     for level in LEVELS[varname]:
         x.append(level)
-        y.append(len(df2[compop(df2["feel"], level)]) / years)
-        y2.append(len(df3[compop(df3["feel"], level)]))
+        y.append(len(df2[compop(df2[varname], level)].index) / years)
+        y2.append(len(df3[compop(df3[varname], level)].index))
+
         if level % 2 == 0:
             ax.text(xloc, yloc, f"{level}", transform=ax.transAxes)
             ax.text(
@@ -272,6 +274,6 @@ def plotter(fdict):
 if __name__ == "__main__":
     plotter(
         dict(
-            ytd="yes", network="IA_ASOS", zstation="AMW", var="tmpf", inc="yes"
+            ytd="yes", network="UT_ASOS", zstation="SGU", var="dwpf", inc="yes"
         )
     )

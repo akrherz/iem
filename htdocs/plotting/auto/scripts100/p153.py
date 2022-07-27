@@ -190,7 +190,7 @@ def plotter(fdict):
     if ab is None:
         raise NoDataFound("Unknown station metadata")
     title = (
-        f"{ctx['_sname']} ({ab.year}-{datetime.date.today().year}\n"
+        f"{ctx['_sname']} ({ab.year}-{datetime.date.today().year})\n"
         f"{PDICT[varname]} [{MDICT[month]}]"
     )
     (fig, ax) = figure_axes(apctx=ctx, title=title)
