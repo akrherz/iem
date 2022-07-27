@@ -166,7 +166,17 @@ def plotter(fdict):
     if df2.empty:
         raise NoDataFound("No Data Found")
 
-    (fig, ax) = figure_axes(apctx=ctx)
+    nt = NetworkTable("ISUSM")
+    nt2 = NetworkTable("ISUAG", only_online=False)
+    ab = nt.sts[station]["archive_begin"]
+    if ab is None:
+        raise NoDataFound("Unknown station metadata.")
+    title = (
+        f"[{station}] {nt.sts[station]['name']} 4 Inch Soil Temps\n"
+        f"[{oldstation}] {nt2.sts[oldstation]['name']} used for pre-{ab.year} "
+        "dates"
+    )
+    (fig, ax) = figure_axes(apctx=ctx, title=title)
 
     d2000 = utc(2000, 1, 1, 6)
     for d in [df, df2]:
@@ -208,21 +218,6 @@ def plotter(fdict):
     ax.set_xlim(xticks[2], xticks[6])
     ax.grid(True)
 
-    nt = NetworkTable("ISUSM")
-    nt2 = NetworkTable("ISUAG", only_online=False)
-    ab = nt.sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata.")
-    ax.set_title(
-        ("[%s] %s 4 Inch Soil Temps\n[%s] %s used for pre-%s dates")
-        % (
-            station,
-            nt.sts[station]["name"],
-            oldstation,
-            nt2.sts[oldstation]["name"],
-            ab.year,
-        )
-    )
     ax.set_ylim(df["yr"].min() - 1, df2["yr"].max() + 1)
 
     p0 = plt.Rectangle((0, 0), 1, 1, fc="r")

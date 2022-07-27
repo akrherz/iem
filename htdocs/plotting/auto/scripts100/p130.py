@@ -40,7 +40,7 @@ def plotter(fdict):
     # Load all available data
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"SELECT year, month, high, low, snowd from alldata_{station[:2]} "
+            "SELECT year, month, high, low, snowd from alldata "
             "WHERE station = %s and snowd is not null",
             conn,
             params=(station,),
@@ -61,7 +61,7 @@ def plotter(fdict):
     months2 = [x for x in monthsall if x < 7]
     months.extend(months2)
     title = (
-        f"{ctx['_nt'].sts[station]['name']} [{station}]\n"
+        f"{ctx['_sname']}\n"
         "Daily Temp Distributions by Month by Snow Cover"
         f"[{df['year'].min()}-{df['year'].min()}]"
     )

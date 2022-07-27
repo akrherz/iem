@@ -15,6 +15,7 @@ PDICT = {
     "min_tmpf": "Lowest Air Temperature",
     "max_feel": "Highest Feels Like Temperature",
     "min_feel": "Lowest Feels Like Temperature",
+    "max_p01i": "Maximum Hourly Precipitation",
     "max_mslp": "Maximum Sea Level Pressure",
     "min_mslp": "Minimum Sea Level Pressure",
     "max_alti": "Maximum Pressure Altimeter",
@@ -27,6 +28,7 @@ UNITS = {
     "min_tmpf": "F",
     "min_feel": "F",
     "max_feel": "F",
+    "max_p01i": "in",
     "max_mslp": "mb",
     "min_mslp": "mb",
     "max_alti": "in",
@@ -67,7 +69,9 @@ def get_description():
     by the IEM.  Sadly, this app will likely point out some bad data points
     as such points tend to be obvious at extremes.  If you contact us to
     point out troubles, we'll certainly attempt to fix the archive to
-    remove the bad data points.  Observations are arbitrarly bumped 10
+    remove the bad data points.</p>
+
+    <p>For non-precipitation reports, observations are arbitrarly bumped 10
     minutes into the future to place the near to top of the hour obs on
     that hour.  For example, a 9:53 AM observation becomes the ob for 10 AM.
     """
@@ -95,6 +99,13 @@ def get_description():
         ),
     ]
     return desc
+
+
+def rounder(row, varname):
+    """Hacky."""
+    if varname in ["max_p01i", "max_alti", "min_alti"]:
+        return f"{row[varname]:.2f}"
+    return f"{row[varname]:3.0f}"
 
 
 def plotter(fdict):
@@ -126,17 +137,19 @@ def plotter(fdict):
     elif month == "gs":
         months = [5, 6, 7, 8, 9]
     else:
-        ts = datetime.datetime.strptime("2000-" + month + "-01", "%Y-%b-%d")
+        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month]
+    delta = 10 if varname != "max_p01i" else -1
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
             text(
                 f"""
         WITH obs as (
-            SELECT (valid + '10 minutes'::interval) at time zone :tzname as ts,
+            SELECT (valid + '{delta} minutes'::interval)
+                at time zone :tzname as ts,
             tmpf::int as itmpf, dwpf::int as idwpf,
-            feel::int as ifeel, mslp, alti from alldata
+            feel::int as ifeel, mslp, alti, p01i from alldata
             where station = :station and
             extract(month from valid at time zone :tzname) in :months),
         agg1 as (
@@ -150,7 +163,8 @@ def plotter(fdict):
             max(alti) as max_alti,
             min(alti) as min_alti,
             max(mslp) as max_mslp,
-            min(mslp) as min_mslp
+            min(mslp) as min_mslp,
+            max(p01i) as max_p01i
             from obs GROUP by hr)
         SELECT o.ts, a.hr::int as hr,
             a.{varname} from agg1 a JOIN obs o on
@@ -172,37 +186,30 @@ def plotter(fdict):
     y0 = 0.1
     yheight = 0.8
     dy = yheight / 24.0
-    (fig, ax) = figure_axes(apctx=ctx)
+    ab = ctx["_nt"].sts[station]["archive_begin"]
+    if ab is None:
+        raise NoDataFound("Unknown station metadata")
+    title = (
+        f"{ctx['_sname']} ({ab.year}-{datetime.date.today().year}\n"
+        f"{PDICT[varname]} [{MDICT[month]}]"
+    )
+    (fig, ax) = figure_axes(apctx=ctx, title=title)
     ax.set_position([0.12, y0, 0.57, yheight])
     ax.barh(df["hr"], df[varname], align="center")
     ax.set_ylim(-0.5, 23.5)
     ax.set_yticks([0, 4, 8, 12, 16, 20])
     ax.set_yticklabels(["Mid", "4 AM", "8 AM", "Noon", "4 PM", "8 PM"])
     ax.grid(True)
-    ax.set_xlim([df[varname].min() - 5, df[varname].max() + 5])
+    if varname == "max_p01i":
+        ax.set_xlim([0, df[varname].max() + 0.5])
+    else:
+        delta = 0.25 if varname.find("alti") > -1 else 5
+        ax.set_xlim([df[varname].min() - delta, df[varname].max() + delta])
     ax.set_ylabel(
-        "Local Time %s" % (ctx["_nt"].sts[station]["tzname"],),
+        f"Local Time {ctx['_nt'].sts[station]['tzname']}",
         fontproperties=font1,
     )
 
-    ab = ctx["_nt"].sts[station]["archive_begin"]
-    if ab is None:
-        raise NoDataFound("Unknown station metadata")
-    fig.text(
-        0.5,
-        0.93,
-        ("%s [%s] %s-%s\n" "%s [%s]")
-        % (
-            ctx["_nt"].sts[station]["name"],
-            station,
-            ab.year,
-            datetime.date.today().year,
-            PDICT[varname],
-            MDICT[month],
-        ),
-        ha="center",
-        fontproperties=font1,
-    )
     ypos = y0 + (dy / 2.0)
     for hr in range(24):
         sdf = df[df["hr"] == hr]
@@ -212,9 +219,9 @@ def plotter(fdict):
         fig.text(
             0.7,
             ypos,
-            "%3.0f: %s%s"
+            "%3s: %s%s"
             % (
-                row[varname],
+                rounder(row, varname),
                 pd.Timestamp(row["ts"]).strftime("%d %b %Y"),
                 ("*" if len(sdf.index) > 1 else ""),
             ),
@@ -223,7 +230,7 @@ def plotter(fdict):
         )
         ypos += dy
     ax.set_xlabel(
-        "%s %s, * denotes ties" % (PDICT[varname], UNITS[varname]),
+        f"{PDICT[varname]} {UNITS[varname]}, * denotes ties",
         fontproperties=font1,
     )
 

@@ -30,7 +30,7 @@ def get_description():
         dict(
             type="station",
             name="station",
-            default="IA0200",
+            default="IATAME",
             network="IACLIMATE",
             label="Select Station:",
         ),
@@ -61,11 +61,11 @@ def plotter(fdict):
     with get_sqlalchemy_conn("coop") as conn:
         # Have to do a redundant query to get the running values
         obs = pd.read_sql(
-            f"""
+            """
         WITH trail as (
             SELECT day, year,
             avg((high+low)/2.) OVER (ORDER by day ASC ROWS 91 PRECEDING)
-            as avgt from alldata_{station[:2]} WHERE station = %s)
+            as avgt from alldata WHERE station = %s)
 
         SELECT day, avgt from trail WHERE year between %s and %s
         ORDER by day ASC
@@ -78,11 +78,11 @@ def plotter(fdict):
         raise NoDataFound("No Data Found.")
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
         WITH trail as (
             SELECT day, year,
             avg((high+low)/2.) OVER (ORDER by day ASC ROWS 91 PRECEDING)
-            as avgt from alldata_{station[:2]} WHERE station = %s),
+            as avgt from alldata WHERE station = %s),
         extremes as (
             SELECT day, year, avgt,
             rank() OVER (PARTITION by year ORDER by avgt ASC) as minrank,
@@ -134,8 +134,7 @@ def plotter(fdict):
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
     ax[0].set_title(
-        ("%s-%s [%s] %s\n91 Day Average Temperatures")
-        % (ab.year, year + 3, station, ctx["_nt"].sts[station]["name"])
+        f"{ab.year}-{year + 3} {ctx['_sname']}\n91 Day Average Temperatures"
     )
     ax[0].set_ylabel(r"Trailing 91 Day Avg T $^{\circ}$F")
     ax[0].xaxis.set_major_formatter(mdates.DateFormatter("%b\n%Y"))

@@ -47,14 +47,14 @@ def get_data(fdict):
     offset = int((date - jul1).days)
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
         with obs as (
             select day,
             day -
             ((case when month > 6 then year else year - 1 end)||'-07-01')::date
             as doy,
             (case when month > 6 then year else year - 1 end) as eyear, snow
-            from alldata_{station[:2]} where station = %s)
+            from alldata where station = %s)
 
             SELECT eyear,
             sum(case when doy < %s then snow else 0 end) as before,
@@ -73,15 +73,11 @@ def get_data(fdict):
 def highcharts(fdict):
     """Highcharts Output"""
     ctx = get_autoplot_context(fdict, get_description())
-    station = ctx["station"]
     date = ctx["date"]
     df = get_data(fdict)
 
     j = {}
-    j["title"] = {
-        "text": "%s [%s] Snowfall Totals"
-        % (ctx["_nt"].sts[station]["name"], station)
-    }
+    j["title"] = {"text": f"{ctx['_sname']}:: Snowfall Totals"}
     j["subtitle"] = {
         "text": "Before and After %s" % (date.strftime("%-d %B"),)
     }
@@ -144,16 +140,14 @@ def highcharts(fdict):
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
-    station = ctx["station"]
     date = ctx["date"]
     df = get_data(fdict)
     if df.empty:
         raise NoDataFound("Error, no results returned!")
 
-    title = ("%s [%s] Snowfall Totals\nPrior to and after: %s") % (
-        ctx["_nt"].sts[station]["name"],
-        station,
-        date.strftime("%-d %B"),
+    title = (
+        f"{ctx['_sname']}:: Snowfall Totals\n"
+        f"Prior to and after: {date:%-d %B}"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.scatter(df["before"].values, df["after"].values)

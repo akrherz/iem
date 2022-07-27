@@ -103,7 +103,10 @@ def cull_missing(df, colname, missingdays):
     years = []
     if not df2.empty:
         years = list(df2.index.values)
-    return df[~df["binyear"].isin(years)], years
+    resdf = df[~df["binyear"].isin(years)]
+    minyear = resdf["binyear"].min()
+    # Prevent scary cullyears listing
+    return resdf, list(filter(lambda x: x > minyear, years))
 
 
 def plotter(fdict):
@@ -117,7 +120,6 @@ def plotter(fdict):
     year2 = ctx.get("year2")
     year3 = ctx.get("year3")
     sdate = ctx["sdate"]
-    table = f"alldata_{station[:2]}"
     # belt and suspenders
     assert ctx["var"] in PDICT
     with get_sqlalchemy_conn("coop") as conn:
@@ -136,7 +138,7 @@ def plotter(fdict):
             with obs as (
                 SELECT day, {ctx["var"]}, sday,
                 case when sday >= %s then year else year - 1 end as binyear
-                from {table} WHERE station = %s
+                from alldata WHERE station = %s
             )
             SELECT day, binyear::int, {ctx["var"]}, sday,
             row_number() OVER (PARTITION by binyear ORDER by day ASC) as row,
