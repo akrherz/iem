@@ -172,6 +172,7 @@ def plotter(fdict):
     compop = np.greater_equal
     inctitle = ""
     if varname == "heatindex":
+        df[varname] = df["feel"]
         inctitle = " [All Obs Included]"
         if inc == "no":
             df2 = df[df["feel"] > df["tmpf"]]
@@ -181,6 +182,7 @@ def plotter(fdict):
         maxval = int(df2["feel"].max() + 1)
         LEVELS[varname] = np.arange(80, maxval)
     elif varname == "windchill":
+        df[varname] = df["feel"]
         compop = np.less_equal
         df["year"] = df["valid"].apply(
             lambda x: (x.year - 1) if x.month < 7 else x.year
