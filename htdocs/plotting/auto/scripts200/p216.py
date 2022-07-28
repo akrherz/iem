@@ -70,7 +70,7 @@ def plotter(fdict):
         f"""
         select day, {varname},
         case when month > 6 then year + 1 else year end
-        from alldata_{station[:2]} where station = %s and {varname} is not null
+        from alldata where station = %s and {varname} is not null
         ORDER by day ASC
     """,
         (station,),
@@ -112,13 +112,10 @@ def plotter(fdict):
 
     label = "AOA" if mydir == "above" else "below"
     label2 = "Year" if mydir == "above" else "Season"
-    title = r"[%s] %s %s Max Consec Days with %s %s %s$^\circ$F" % (
-        station,
-        ctx["_nt"].sts[station]["name"],
-        label2,
-        varname.capitalize(),
-        label,
-        threshold,
+    title = (
+        f"{ctx['_sname']}:: {label2} Max Consec Days with "
+        f"{varname.capitalize()} {label} {threshold}"
+        r"$^\circ$F"
     )
     fig = figure(title=title, apctx=ctx)
     ax = fig.add_axes([0.1, 0.1, 0.5, 0.8])

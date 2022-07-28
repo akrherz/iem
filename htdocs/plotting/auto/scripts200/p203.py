@@ -13,20 +13,16 @@ from pyiem.nws.vtec import VTEC_PHENOMENA
 from sqlalchemy import text
 
 
-PDICT = dict(
-    [
-        ("W", "By Issuance Center"),
-        ("S", "By Polygon Size"),
-        ("T", "By Issuance Time"),
-    ]
-)
-PDICT2 = dict(
-    [
-        ("W", "Tornado + Severe Thunderstorm Warnings"),
-        ("F", "Flash Flood Warnings"),
-        ("M", "Marine Warnings"),
-    ]
-)
+PDICT = {
+    "W": "By Issuance Center",
+    "S": "By Polygon Size",
+    "T": "By Issuance Time",
+}
+PDICT2 = {
+    "W": "Tornado + Severe Thunderstorm Warnings",
+    "F": "Flash Flood Warnings",
+    "M": "Marine Warnings",
+}
 COLORS = {"SV": "#ffff00", "TO": "#ff0000", "FF": "#00ff00", "MA": "#00ff00"}
 
 
@@ -169,7 +165,7 @@ def plotter(fdict):
     mydir = os.sep.join(
         [os.path.dirname(os.path.abspath(__file__)), "../../../images"]
     )
-    logo = mpimage.imread("%s/logo_reallysmall.png" % (mydir,))
+    logo = mpimage.imread(f"{mydir}/logo_reallysmall.png")
     y0 = fig.get_figheight() * 100.0 - logo.shape[0] - 5
     fig.figimage(logo, 5, y0, zorder=3)
 

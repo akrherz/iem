@@ -63,15 +63,6 @@ def get_description():
     return desc
 
 
-def nice(val):
-    """Helper."""
-    if val == "M":
-        return "M"
-    if 0 < val < 0.01:
-        return "Trace"
-    return f"{val:.2f}"
-
-
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())

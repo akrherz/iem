@@ -102,6 +102,7 @@ def plotter(fdict):
     params["wfo"] = station if len(station) == 3 else station[1:]
     if station == "_ALL":
         wfo_limiter = ""
+        ctx["_sname"] = "All Offices"
     if opt == "state":
         wfo_limiter = " and substr(ugc, 1, 2) = :state "
         params["state"] = state

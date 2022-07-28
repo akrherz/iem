@@ -104,21 +104,14 @@ def plotter(fdict):
     elif ctx["season"] == "winter":
         months = [12, 1, 2]
     else:
-        ts = datetime.datetime.strptime(
-            "2000-" + ctx["season"] + "-01", "%Y-%b-%d"
-        )
+        ts = datetime.datetime.strptime(f"2000-{ctx['season']}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
-    title = "[%s] %s :: Time of Day Frequency" % (
-        wfo,
-        ctx["_nt"].sts[wfo]["name"],
-    )
-    subtitle = "%s (%s.%s) [%s]" % (
-        vtec.get_ps_string(phenomena, significance),
-        phenomena,
-        significance,
-        MDICT[ctx["season"]],
+    title = f"{ctx['_sname']} :: Time of Day Frequency"
+    subtitle = (
+        f"{vtec.get_ps_string(phenomena, significance)} "
+        f"({phenomena}.{significance}) [{MDICT[ctx['season']]}]"
     )
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
 
@@ -200,8 +193,8 @@ def plotter(fdict):
             "Mid",
         ]
     )
-    ax.set_xlabel("Timezone: %s (Daylight or Standard)" % (tzname,))
-    ax.set_ylabel("Percentage [%%] out of %.0f Events" % (df["total"].max(),))
+    ax.set_xlabel(f"Timezone: {tzname} (Daylight or Standard)")
+    ax.set_ylabel(f"Percentage [%] out of {df['total'].max():.0f} Events")
 
     return fig, df
 

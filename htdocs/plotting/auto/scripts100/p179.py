@@ -83,7 +83,7 @@ def plotter(fdict):
     cursor = pgconn.cursor()
     cursor.execute(
         "SELECT year, extract(doy from day), gddxx(%s, %s, high,low), low "
-        f"from alldata_{station[:2]} where station = %s and "
+        "from alldata where station = %s and "
         "year > %s and day < %s",
         (base, ceil, station, byear, today),
     )
@@ -136,7 +136,7 @@ def plotter(fdict):
     probs = np.where(probs < 0.1, -1, probs)
     scenario_probs = np.where(scenario_probs < 0.1, -1, scenario_probs)
     title = (
-        f"{byear}-{eyear - 1} {ctx['_sname']} GDDs\n"
+        f"({byear}-{eyear - 1}) {ctx['_sname']}:: GDDs\n"
         f"Frequency [%] of reaching {gddbase:.0f} GDDs "
         f"({base:.0f}/{ceil:.0f}) prior to first freeze"
     )

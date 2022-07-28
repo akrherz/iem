@@ -57,16 +57,17 @@ def plotter(fdict):
     year = ctx["year"]
     month = ctx["month"]
     with get_sqlalchemy_conn("asos") as conn:
+        # This could use report_type=3, but its not all that slow and already
+        # accounts for double-accounting.
         df = pd.read_sql(
             """
             WITH obs as (
                 SELECT to_char(valid, 'YYYYmmdd') as yyyymmdd,
                 SUM(case when (skyc1 = 'OVC' or skyc2 = 'OVC' or skyc3 = 'OVC'
                             or skyc4 = 'OVC') then 1 else 0 end)
-                from alldata where station = %s
-                and valid > '1951-01-01'
+                from alldata where station = %s and valid > '1951-01-01'
                 and extract(hour from (valid at time zone %s) +
-                            '10 minutes'::interval ) = %s
+                    '10 minutes'::interval ) = %s
                 GROUP by yyyymmdd)
 
             SELECT substr(o.yyyymmdd,1,4)::int as year,
@@ -84,7 +85,13 @@ def plotter(fdict):
     climo = df.groupby("month").sum()
     climo["freq"] = climo["hits"] / climo["count"] * 100.0
 
-    fig = figure(apctx=ctx)
+    title = (
+        f"({df['year'].min():.0f}-{datetime.datetime.now().year}) "
+        f"{ctx['_sname']}\n"
+        f"Frequency of {datetime.datetime(2000, 1, 1, hour, 0):%I %p} "
+        "Cloud Observation of Overcast"
+    )
+    fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(2, 1)
     ax[0].bar(
         climo.index.values - 0.2,
@@ -126,16 +133,6 @@ def plotter(fdict):
     ax[0].grid(True)
     ax[0].set_xticklabels(calendar.month_abbr[1:])
     ax[0].set_ylabel("Frequency [%]")
-    ax[0].set_title(
-        ("%.0f-%s [%s] %s\nFrequency of %s Cloud Observation of Overcast")
-        % (
-            df["year"].min(),
-            datetime.datetime.now().year,
-            station,
-            ctx["_nt"].sts[station]["name"],
-            datetime.datetime(2000, 1, 1, hour, 0).strftime("%I %p"),
-        )
-    )
 
     # Plot second one now
     obs = df[df["month"] == month]

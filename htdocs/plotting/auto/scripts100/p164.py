@@ -99,10 +99,10 @@ def plotter(fdict):
                 f"     Measurable {v.capitalize()}   % -->"
             )
             colors = ["r", "b"]
-        df[v + "_count"] = df[f"{v}_above"] + df[f"{v}_below"]
+        df[f"{v}_count"] = df[f"{v}_above"] + df[f"{v}_below"]
     for v in ["high", "low"]:
         df[v + "_count"] = (
-            df[v + "_above"] + df[f"{v}_below"] + df[f"{v}_equal"]
+            df[f"{v}_above"] + df[f"{v}_below"] + df[f"{v}_equal"]
         )
         if varname == v:
             xlabel = "<-- Below Average %    |    Above Average % -->"

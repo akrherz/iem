@@ -90,8 +90,7 @@ def plotter(fdict):
         title = f"base={ceiling}"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"SELECT year, sday, {gfunc} as {glabel} from "
-            f"alldata_{station[:2]} WHERE "
+            f"SELECT year, sday, {gfunc} as {glabel} from alldata WHERE "
             "station = %s and year > 1892 and sday != '0229'",
             conn,
             params=(station,),
@@ -107,7 +106,7 @@ def plotter(fdict):
     )
     df2 = df2.unstack(level=-1)
     title = (
-        f"{syear}-{thisyear} {ctx['_nt'].sts[station]['name']} [{station}]\n"
+        f"({syear}-{thisyear}) {ctx['_sname']}\n"
         f"{year} {PDICT[varname]} ({title})"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)

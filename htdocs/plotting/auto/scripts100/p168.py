@@ -45,11 +45,11 @@ def plotter(fdict):
         raise NoDataFound("Unknown station metadata.")
     with util.get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
         with data as (
             select day, high, year,
             rank() OVER (PARTITION by high ORDER by sday DESC)
-            from alldata_{station[:2]} where station = %s)
+            from alldata where station = %s)
         SELECT day, year, high, rank from data WHERE rank = 1
         ORDER by high DESC, day DESC
         """,

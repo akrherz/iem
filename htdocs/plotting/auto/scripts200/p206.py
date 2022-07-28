@@ -172,7 +172,7 @@ def plotter(fdict):
         state=ctx["state"],
         cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),
         axisbg="white",
-        title="%s for %s on %s" % (PDICT2[ctx["v"]], ctx["title"], ctx["day"]),
+        title=f"{PDICT2[ctx['v']]} for {ctx['title']} on {ctx['day']}",
         nocaption=True,
         titlefontsize=16,
     )

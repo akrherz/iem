@@ -68,11 +68,11 @@ def plotter(fdict):
         lastday = lastday.replace(day=1)
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""SELECT year, month, avg((high+low)/2.) as avg_temp,
+            """SELECT year, month, avg((high+low)/2.) as avg_temp,
         avg(high) as avg_high_temp, avg(low) as avg_low_temp,
         sum(precip) as total_precip,
         sum(case when precip > 0.005 then 1 else 0 end) as rain_days
-        from alldata_{station[:2]} where station = %s and day < %s
+        from alldata where station = %s and day < %s
         GROUP by year, month
         """,
             conn,
@@ -115,7 +115,7 @@ def plotter(fdict):
     if ab is None:
         raise NoDataFound("Unknown Station Metadata.")
     title = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
+        f"{ctx['_sname']}\n"
         f"{PDICT2[agg]} {PDICT[varname]} [{ab.year}-{lastday.year}]"
     )
     if col == "mean_total_precip":

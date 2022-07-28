@@ -70,12 +70,11 @@ def get_description():
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
-    table = f"alldata_{ctx['station'][:2]}"
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             "select day, sday, precip, high, "
             "extract(doy from day)::int as doy, "
-            f"year from {table}  WHERE station = %s ORDER by day ASC",
+            "year from alldata WHERE station = %s ORDER by day ASC",
             conn,
             params=(ctx["station"],),
             index_col="day",
@@ -114,12 +113,9 @@ def plotter(fdict):
     for day, row in df2.iterrows():
         data[day.year - baseyear, row["doy"] - 1] = row[ctx["var"]]
 
-    title = "[%s] %s (%s-%s)\n%s" % (
-        ctx["station"],
-        ctx["_nt"].sts[ctx["station"]]["name"],
-        ctx["syear"],
-        ctx["eyear"],
-        PDICT[ctx["var"]].replace("XX", str(ctx["days"])),
+    title = (
+        f"{ctx['_sname']} ({ctx['syear']}-{ctx['eyear']})\n"
+        f"{PDICT[ctx['var']].replace('XX', str(ctx['days']))}"
     )
     fig, ax = figure_axes(title=title, apctx=ctx)
     heatmap(

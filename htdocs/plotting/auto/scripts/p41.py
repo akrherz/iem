@@ -10,13 +10,11 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
 ODICT = {"max": "Maximum", "min": "Minimum", "avg": "Average"}
-PDICT = dict(
-    [
-        ("high", "Daily High Temperature"),
-        ("low", "Daily Low Temperature"),
-        ("avg", "Daily Average Temperature"),
-    ]
-)
+PDICT = {
+    "high": "Daily High Temperature",
+    "low": "Daily Low Temperature",
+    "avg": "Daily Average Temperature",
+}
 MDICT = dict(
     [
         ("all", "All Year"),
@@ -72,7 +70,7 @@ def get_description():
         dict(
             type="station",
             name="station",
-            default="IA0200",
+            default="IATAME",
             network="IACLIMATE",
             label="Select Station:",
         ),
@@ -134,7 +132,7 @@ def get_description():
     return desc
 
 
-def get_data(table, station, month, period, varname, days, opt):
+def get_data(station, month, period, varname, days, opt):
     """Get Data please"""
     doffset = "0 days"
     if len(month) < 3:
@@ -163,7 +161,7 @@ def get_data(table, station, month, period, varname, days, opt):
                 SELECT
                 extract(year from day + '{doffset}'::interval)::int
                 as myyear,
-                high, low, (high+low)/2. as avg from {table}
+                high, low, (high+low)/2. as avg from alldata
                 WHERE station = %s and high is not null
                 and low is not null {mlimiter})
             SELECT * from data {ylimiter}
@@ -184,7 +182,7 @@ def get_data(table, station, month, period, varname, days, opt):
                 SELECT
                 extract(year from day + '{doffset}'::interval)::int
                 as myyear,
-                high, low, (high+low)/2. as avg, day, month from {table}
+                high, low, (high+low)/2. as avg, day, month from alldata
                 WHERE station = %s and high is not null and low is not null),
             agg1 as (
                 SELECT myyear, month, {res} as {varname}
@@ -217,10 +215,8 @@ def plotter(fdict):
     days = ctx["days"]
     opt = ctx["opt"]
 
-    table = f"alldata_{station[:2]}"
-
-    m1data, y1, y2 = get_data(table, station, month1, p1, varname, days, opt)
-    m2data, y3, y4 = get_data(table, station, month2, p2, varname, days, opt)
+    m1data, y1, y2 = get_data(station, month1, p1, varname, days, opt)
+    m2data, y3, y4 = get_data(station, month2, p2, varname, days, opt)
 
     pc1 = np.percentile(m1data, range(0, 101, 1))
     pc2 = np.percentile(m2data, range(0, 101, 1))
@@ -266,18 +262,8 @@ def plotter(fdict):
     if days > 1:
         t2 = "%s %s over %s days" % (ODICT[opt], PDICT[varname], days)
     fig.suptitle(
-        ("[%s] %s\n%s (%s-%s) vs %s (%s-%s)\n%s")
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            MDICT[month2],
-            y1,
-            y2,
-            MDICT[month1],
-            y3,
-            y4,
-            t2,
-        )
+        f"{ctx['_sname']}\n"
+        f"{MDICT[month2]} ({y1}-{y2}) vs {MDICT[month1]} ({y3}-{y4})\n{t2}"
     )
     ax.set_xlabel(
         r"%s (%s-%s) %s $^\circ$F" % (MDICT[month1], y1, y2, PDICT[varname])

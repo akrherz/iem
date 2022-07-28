@@ -7,16 +7,13 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
-PDICT = dict(
-    [
-        ("precip", "Precipitation"),
-        ("avgt", "Average Temperature"),
-        ("high", "High Temperature"),
-        ("low", "Low Temperature"),
-        ("precip", "Precipitation"),
-        ("snow", "Snowfall"),
-    ]
-)
+PDICT = {
+    "avgt": "Average Temperature",
+    "high": "High Temperature",
+    "low": "Low Temperature",
+    "precip": "Precipitation",
+    "snow": "Snowfall",
+}
 
 
 def parse_range(rng):
@@ -116,10 +113,9 @@ def plotter(fdict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
             SELECT year, day, high, low, precip, snow,
-            (high + low) / 2. as avgt from alldata_{station[:2]} WHERE
-            station = %s and
+            (high + low) / 2. as avgt from alldata WHERE station = %s and
             extract(doy from day) <= extract(doy from %s::date)
         """,
             conn,

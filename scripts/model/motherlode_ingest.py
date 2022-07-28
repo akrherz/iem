@@ -20,7 +20,7 @@ BASE_URL = "https://tds.scigw.unidata.ucar.edu/thredds/ncss/grid/grib/NCEP/"
 BASE_URL2 = "http://thredds.ucar.edu/thredds/ncss/grib/NCEP/"
 URLS = {
     "NAM": (
-        "NAM/CONUS_12km/conduit/" "NAM_CONUS_12km_conduit_%Y%m%d_%H00.grib2/GC"
+        "NAM/CONUS_12km/conduit/NAM_CONUS_12km_conduit_%Y%m%d_%H00.grib2/GC"
     ),
     "GFS": "GFS/Global_0p5deg/GFS_Global_0p5deg_%Y%m%d_%H00.grib2/GC",
     "RAP": "RAP/CONUS_13km/RR_CONUS_13km_%Y%m%d_%H00.grib2/GC",
@@ -73,22 +73,18 @@ def run(mcursor, model, station, lon, lat, ts):
         if val[model] is not None:
             vstring += f"var={val[model]}&"
 
+    host = (
+        BASE_URL
+        if (
+            datetime.datetime.utcnow().replace(tzinfo=pytz.UTC) - ts
+        ).total_seconds()
+        < 86400
+        else BASE_URL2
+    )
     url = (
-        "%s%s?%slatitude=%s&longitude=%s&temporal=all&vertCoord="
+        f"{host}{ts.strftime(URLS[model])}?{vstring}latitude={lat}&"
+        f"longitude={lon}&temporal=all&vertCoord="
         "&accept=csv&point=true"
-    ) % (
-        (
-            BASE_URL
-            if (
-                datetime.datetime.utcnow().replace(tzinfo=pytz.UTC) - ts
-            ).total_seconds()
-            < 86400
-            else BASE_URL2
-        ),
-        ts.strftime(URLS[model]),
-        vstring,
-        lat,
-        lon,
     )
     try:
         fp = requests.get(url, timeout=120)

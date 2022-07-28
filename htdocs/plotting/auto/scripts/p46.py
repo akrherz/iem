@@ -92,9 +92,7 @@ def plotter(fdict):
     elif ctx["month"] == "summer":
         months = [6, 7, 8]
     else:
-        ts = datetime.datetime.strptime(
-            "2000-" + ctx["month"] + "-01", "%Y-%b-%d"
-        )
+        ts = datetime.datetime.strptime(f"2000-{ctx['month']}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
@@ -137,30 +135,23 @@ def plotter(fdict):
             ys.append(lev)
     ys = np.array(ys)
 
-    fig = figure(apctx=ctx)
+    title = (
+        f"{ctx['_sname']} ({df.index[0]:.0f}-{df.index[-1]:.0f}\n"
+        f"Frequency of Observed {PDICT[ctx['var']]} over {MDICT[ctx['month']]}"
+    )
+    fig = figure(apctx=ctx, title=title)
     ax = fig.subplots(2, 1)
 
     color = "b" if ctx["var"] == "wcht" else "r"
     ax[0].barh(ys - 0.4, freq, ec=color, fc=color)
-    ax[0].set_ylabel(rf"{PDICT[ctx['var']]} $^\circ$F")
+    ax[0].set_ylabel(f"{PDICT[ctx['var']]} " r"$^\circ$F")
     ax[0].set_xlabel("Frequency [%]")
-    ax[0].set_title(
-        ("[%s] %s %.0f-%.0f\nFrequency of Observed %s over %s")
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            df.index[0],
-            df.index[-1],
-            PDICT[ctx["var"]],
-            MDICT[ctx["month"]],
-        )
-    )
     ax[0].set_xticks([0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100])
     ax[0].grid(True)
 
     ax[1].bar(df.index.values, df[col], fc=color, ec=color)
     ax[1].set_ylim(bottom=df[col].min() - 5)
-    ax[1].set_ylabel(rf"{PDICT[ctx['var']]} $^\circ$F")
+    ax[1].set_ylabel(f"{PDICT[ctx['var']]} " r"$^\circ$F")
     ax[1].grid(True)
     if offset > 0:
         ax[1].set_xlabel("Year label for spring portion of season")
