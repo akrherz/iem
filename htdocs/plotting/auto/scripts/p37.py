@@ -10,6 +10,8 @@ from pyiem.util import get_autoplot_context, get_dbconn
 PDICT = {
     "NAM": "NAM (9 Dec 2008 - current)",
     "GFS": "GFS (16 Dec 2003 - current)",
+    "MEX": "GFS Extended (12 Jul 2020 - current)",
+    "NBE": "NBE (23 Jul 2020 - current)",
     "ETA": "ETA (24 Feb 2002 - 9 Dec 2008)",
     "AVN": "AVN (1 Jun 2000 - 16 Dec 2003)",
 }
@@ -28,16 +30,16 @@ T_SQL = """
     SELECT date(ftime),
     min(case when
         extract(hour from ftime at time zone 'UTC') = 12
-        then n_x else null end) as min_morning,
+        then coalesce(n_x, tmp) else null end) as min_morning,
     max(case when
         extract(hour from ftime at time zone 'UTC') = 12
-        then n_x else null end) as max_morning,
+        then coalesce(n_x, tmp) else null end) as max_morning,
     min(case when
         extract(hour from ftime at time zone 'UTC') = 0
-        then n_x else null end) as min_afternoon,
+        then coalesce(n_x, tmp) else null end) as min_afternoon,
     max(case when
         extract(hour from ftime at time zone 'UTC') = 0
-        then n_x else null end) as max_afternoon
+        then coalesce(n_x, tmp) else null end) as max_afternoon
     from alldata WHERE station = %s and runtime BETWEEN %s and %s
     and model = %s GROUP by date
     """
@@ -303,9 +305,10 @@ def plotter(fdict):
         else:
             obs[row[0]] = row[1]
 
+    mlabel = PDICT[model][: PDICT[model].find(" (")]
     title = (
         f"{ctx['_sname']} :: {PDICT2[ctx['var']]}\n"
-        f"{model} Forecast MOS Range for {month1:%B %Y}"
+        f"{mlabel} Forecast MOS Range for {month1:%B %Y}"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 
