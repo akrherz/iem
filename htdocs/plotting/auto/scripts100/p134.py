@@ -14,9 +14,11 @@ PDICT = {
     "coldest_temp": "Coldest Average Temperature",
     "coldest_hitemp": "Coldest Average High Temperature",
     "coldest_lotemp": "Coldest Average Low Temperature",
+    "coldest_lodwpf": "Coldest Average Low Dew Point Temperature",
     "warmest_temp": "Warmest Average Temperature",
     "warmest_hitemp": "Warmest Average High Temperature",
     "warmest_lotemp": "Warmest Average Low Temperature",
+    "warmest_hidwpf": "Warmest Average High Dew Point Temperature",
     "wettest": "Highest Precipitation",
 }
 # How to get plot variable from dataframe
@@ -24,9 +26,11 @@ XREF = {
     "coldest_temp": "avg_temp",
     "coldest_hitemp": "avg_hitemp",
     "coldest_lotemp": "avg_lotemp",
+    "coldest_lodwpf": "avg_lodwpf",
     "warmest_temp": "avg_temp",
     "warmest_hitemp": "avg_hitemp",
     "warmest_lotemp": "avg_lotemp",
+    "warmest_hidwpf": "avg_hidwpf",
     "wettest": "sum_precip",
 }
 
@@ -42,6 +46,9 @@ def get_description():
     each year with the extreme criterion meet. In the case of a tie, the
     first period of the season is used for the analysis.  For a season to
     count within the analysis, it must have had at least 200 days with data.
+
+    <p>The dew point option only works for ASOS networks and does a simple
+    arthimetic mean of dew point temperatures.
     """
     desc["arguments"] = [
         dict(
@@ -71,10 +78,12 @@ def get_data(ctx):
     offset = 6 if varname.startswith("coldest") else 0
     station = ctx["station"]
     if ctx["network"].endswith("CLIMATE"):
-        table = "alldata_%s" % (station[:2],)
+        table = "alldata"
         dbname = "coop"
         highcol = "high"
         lowcol = "low"
+        highdwpf = "null"
+        lowdwpf = "null"
         precipcol = "precip"
         stationcol = "station"
     else:
@@ -82,6 +91,8 @@ def get_data(ctx):
         dbname = "iem"
         highcol = "max_tmpf"
         lowcol = "min_tmpf"
+        highdwpf = "max_dwpf"
+        lowdwpf = "min_dwpf"
         precipcol = "pday"
         table = "summary"
         stationcol = "iemid"
@@ -96,43 +107,55 @@ def get_data(ctx):
             OVER (ORDER by day ASC ROWS %s preceding) as avg_hitemp,
         avg({lowcol})
             OVER (ORDER by day ASC ROWS %s preceding) as avg_lotemp,
+        avg({highdwpf})
+            OVER (ORDER by day ASC ROWS %s preceding) as avg_hidwpf,
+        avg({lowdwpf})
+            OVER (ORDER by day ASC ROWS %s preceding) as avg_lodwpf,
         sum({precipcol})
             OVER (ORDER by day ASC ROWS %s preceding) as sum_precip
         from {table} WHERE {stationcol} = %s and {highcol} is not null),
         agg1 as (
             SELECT season, day, avg_temp, avg_hitemp, avg_lotemp,
-            sum_precip,
+            sum_precip, avg_hidwpf, avg_lodwpf,
             row_number()
-                OVER (PARTITION by season ORDER by avg_temp ASC, day ASC)
-                as coldest_temp_rank,
+                OVER (PARTITION by season ORDER by avg_temp ASC nulls last,
+                day ASC) as coldest_temp_rank,
             row_number()
-                OVER (PARTITION by season ORDER by avg_hitemp ASC, day ASC)
-                as coldest_hitemp_rank,
+                OVER (PARTITION by season ORDER by avg_hitemp ASC nulls last,
+                day ASC) as coldest_hitemp_rank,
             row_number()
-                OVER (PARTITION by season ORDER by avg_lotemp ASC, day ASC)
-                as coldest_lotemp_rank,
+                OVER (PARTITION by season ORDER by avg_lotemp ASC nulls last,
+                day ASC) as coldest_lotemp_rank,
             row_number()
-                OVER (PARTITION by season ORDER by avg_temp DESC, day ASC)
-                as warmest_temp_rank,
+                OVER (PARTITION by season ORDER by avg_hidwpf DESC nulls last,
+                day ASC) as warmest_hidwpf_rank,
             row_number()
-                OVER (PARTITION by season ORDER by avg_hitemp DESC, day ASC)
-                as warmest_hitemp_rank,
+                OVER (PARTITION by season ORDER by avg_temp DESC nulls last,
+                day ASC) as warmest_temp_rank,
             row_number()
-                OVER (PARTITION by season ORDER by avg_lotemp DESC, day ASC)
-                as warmest_lotemp_rank,
+                OVER (PARTITION by season ORDER by avg_hitemp DESC nulls last,
+                day ASC) as warmest_hitemp_rank,
             row_number()
-                OVER (PARTITION by season ORDER by sum_precip DESC, day ASC)
-                as wettest_rank,
+                OVER (PARTITION by season ORDER by avg_lotemp DESC nulls last,
+                day ASC) as warmest_lotemp_rank,
+            row_number()
+                OVER (PARTITION by season ORDER by avg_lodwpf ASC nulls last,
+                day ASC) as coldest_lodwpf_rank,
+            row_number()
+                OVER (PARTITION by season ORDER by sum_precip DESC nulls last,
+                day ASC) as wettest_rank,
             count(*) OVER (PARTITION by season)
             from data)
         SELECT season, day,
         extract(doy from day - '%s days'::interval)::int as doy,
-        avg_temp, avg_hitemp, avg_lotemp,
+        avg_temp, avg_hitemp, avg_lotemp, avg_hidwpf, avg_lodwpf,
         sum_precip from agg1 where {varname}_rank = 1 and count > 200
         """,
             conn,
             params=(
                 offset,
+                days - 1,
+                days - 1,
                 days - 1,
                 days - 1,
                 days - 1,
@@ -224,6 +247,7 @@ def plotter(fdict):
     series = df[XREF[varname]]
     ax = fig.add_axes([0.55, 0.5, 0.43, 0.4])
     ax.bar(df.index.values, series.values, color="blue", width=1)
+    ax.set_ylim(bottom=series.min() - 5)
     ax.text(
         0.03,
         1.01,
@@ -244,17 +268,12 @@ def plotter(fdict):
     ax.set_yticks([0, 5, 10, 25, 50, 75, 90, 95, 100])
     mysort = df.sort_values(by=XREF[varname], ascending=True)
     info = (
-        "Min: %.2f %.0f\n95th: %.2f\nMean: %.2f\nSTD: %.2f\n5th: %.2f\n"
-        "Max: %.2f %.0f"
-    ) % (
-        series.min(),
-        mysort.index[0],
-        ptile[1],
-        series.mean(),
-        series.std(),
-        ptile[3],
-        series.max(),
-        mysort.index[-1],
+        f"Min: {series.min():.2f} {mysort.index[0]:.0f}\n"
+        f"95th: {ptile[1]:.2f}\n"
+        f"Mean: {series.mean():.2f}\n"
+        f"STD: {series.std():.2f}\n"
+        f"5th: {ptile[3]:.2f}\n"
+        f"Max: {series.max():.2f} {mysort.index[-1]:.0f}"
     )
     ax.text(
         0.75,
