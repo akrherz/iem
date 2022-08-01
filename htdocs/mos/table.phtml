@@ -18,14 +18,30 @@ $hour =  0;
 $model = isset($_GET["model"]) ? strtoupper(xssafe($_GET["model"])): "GFS";
 $station = isset($_GET["station"]) ? strtoupper(xssafe($_GET["station"])): "KAMW";
 $vname = isset($_GET["vname"]) ? strtolower(xssafe($_GET["vname"])): "tmp";
+$models = Array(
+    "GFS" => "AVN/GIS",
+    "MEX" => "GFS Extended (MEX)",
+    "NAM" => "NAM",
+    "ETA" => "ETA",
+    "NBS" => "NBS",
+    "NBE" => "NBE",
+    "LAV" => "LAV",
+);
+if (! array_key_exists($model, $models)){
+    $model = "NBE";
+}
 
 $now = strtotime("${year}-${month}-${day} ${hour}:00");
 if ($model == "NAM" && $now < mktime(12,0,0,12,9,2008)){ $model = "ETA"; }
 if ($model == "GFS" && $now < mktime(12,0,0,12,16,2003)){ $model = "AVN"; }
 $sts = $now - (86400*3) - (3600*12);
 $ets = $now - 3600;
+if ($model == "MEX" || $model == "NBE"){
+    $ets = $ets + (86400 * 7);
+}
 
-$runsper = Array("GFS"=>6, "AVN"=>6, "NAM"=>12, "ETA"=>12, "NBS" => 6);
+$runsper = Array("GFS"=>6,
+"AVN"=>6, "NAM"=>12, "ETA"=>12, "NBS" => 6, "MEX" => 12, "NBE" => 6, "LAV" => 6);
 $sqlSelector = "(";
 $runtimes = Array();
 $data = Array();
@@ -105,17 +121,7 @@ foreach($mosvars as $v => $n)
 }
 $content .= "</select>";
 
-$content .= "<select name=\"model\">";
-$content .= "<option value=\"GFS\" ";
-if ($model == "GFS") $content .= " SELECTED";
-$content .= ">AVN/GFS</option>\n";
-$content .= "<option value=\"NAM\" ";
-if ($model == "NAM" || $model == "ETA") $content .= " SELECTED";
-  $content .= ">Eta/NAM</option>\n";
-  $content .= "<option value=\"NBS\" ";
-  if ($model == "NBS") $content .= " SELECTED";
-    $content .= ">NBS</option>\n";
-  $content .= "</select>";
+$content .= make_select("model", $model, $models);
 
 $content .= yearSelect(2000,$year);
 $content .= monthSelect($month);
@@ -128,4 +134,3 @@ $content .= "</form>";
 $content .= $table;
 $t->content = $content;
 $t->render('single.phtml');
-?>
