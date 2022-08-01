@@ -48,7 +48,7 @@ def do(meta, station, acis_station, interactive):
       station (str): IEM Station identifier ie IA0200
       acis_station (str): the ACIS identifier ie 130197
     """
-    table = "alldata_%s" % (station[:2],)
+    table = f"alldata_{station[:2]}"
     today = datetime.date.today()
     fmt = "%Y-%m-%d"
     payload = {

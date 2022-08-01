@@ -34,7 +34,7 @@ def main(argv):
         )
         if missing.empty:
             continue
-        LOG.info(
+        LOG.warning(
             "station: %s, missing: %s [%s - %s] has:%s days",
             station,
             len(missing),

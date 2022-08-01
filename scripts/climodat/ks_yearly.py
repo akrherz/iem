@@ -113,23 +113,7 @@ def process(sid, csv):
 
 def main():
     """Go Main Go"""
-    nt = NetworkTable(
-        (
-            "IACLIMATE",
-            "ILCLIMATE",
-            "INCLIMATE",
-            "OHCLIMATE",
-            "MICLIMATE",
-            "KYCLIMATE",
-            "WICLIMATE",
-            "MNCLIMATE",
-            "SDCLIMATE",
-            "NDCLIMATE",
-            "NECLIMATE",
-            "KSCLIMATE",
-            "MOCLIMATE",
-        )
-    )
+    nt = NetworkTable("IACLIMATE")
     csv = setupcsv()
     keys = list(nt.sts.keys())
     keys.sort()

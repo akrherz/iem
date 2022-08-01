@@ -127,10 +127,7 @@ def runYear(year):
         labelcolor="tan",
         fmt="%.1f",
     )
-    pqstr = "plot m %s bogus %s/summary/avg_temp.png png" % (
-        now.strftime("%Y%m%d%H%M"),
-        year,
-    )
+    pqstr = f"plot m {now:%Y%m%d%H%M} bogus {year}/summary/avg_temp.png png"
     mp.postprocess(pqstr=pqstr)
     mp.close()
 

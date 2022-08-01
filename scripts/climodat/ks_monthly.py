@@ -10,23 +10,7 @@ from tqdm import tqdm
 from pyiem.network import Table as NetworkTable
 from pyiem.util import get_dbconn
 
-nt = NetworkTable(
-    (
-        "IACLIMATE",
-        "ILCLIMATE",
-        "INCLIMATE",
-        "OHCLIMATE",
-        "MICLIMATE",
-        "KYCLIMATE",
-        "WICLIMATE",
-        "MNCLIMATE",
-        "SDCLIMATE",
-        "NDCLIMATE",
-        "NECLIMATE",
-        "KSCLIMATE",
-        "MOCLIMATE",
-    )
-)
+nt = NetworkTable("IACLIMATE")
 pgconn = get_dbconn("coop")
 cursor = pgconn.cursor()
 
