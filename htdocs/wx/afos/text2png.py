@@ -92,5 +92,6 @@ def application(environ, start_response):
     if not res:
         res = make_image(e, pil)
         mc.set(key, res, 3600)
+    mc.close()
     start_response("200 OK", [("Content-type", "image/png")])
     return [res]

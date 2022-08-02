@@ -72,7 +72,7 @@ def get_description():
         dict(
             type="station",
             name="station",
-            default="IA0200",
+            default="IATAME",
             label="Select Station:",
             network="IACLIMATE",
         ),
@@ -211,7 +211,7 @@ def plotter(fdict):
             as middle_stat, {ctx["stat"]}({ctx["var"]}) OVER
             (ORDER by day ASC rows between :days PRECEDING and 1 PRECEDING)
             as trailing_stat
-        from alldata_{station[:2]} where station = :station)
+        from alldata where station = :station)
         SELECT * from data WHERE month in :months and year >= :syear
             and year <= :eyear ORDER by day ASC
         """
@@ -271,9 +271,8 @@ def plotter(fdict):
         if ctx["thres"] is None
         else rf"\nBack Threshold of at least {ctx['thres']:.0f} $^\circ$F"
     )
-    title = ("%s %s (%.0f-%.0f) Max Change in %s %s (%s)\n%s%s") % (
-        station,
-        ctx["_nt"].sts[station]["name"],
+    title = ("%s (%.0f-%.0f) Max Change in %s %s (%s)\n%s%s") % (
+        ctx["_sname"],
         max([ctx["_nt"].sts[station]["archive_begin"].year, syear]),
         eyear,
         PDICT3[ctx["var"]].replace("Temperature", "Temp"),

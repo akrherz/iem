@@ -8,9 +8,9 @@ require_once "../../../include/imagemaps.php";
 require_once "../../../include/forms.php"; 
 
 $station = isset($_GET["station"]) ? xssafe($_GET["station"]): "";
-$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y", time() - 86400);
-$month = isset($_GET["month"]) ? intval($_GET["month"]): date("m", time() - 86400);
-$day = isset($_GET["day"]) ? intval($_GET["day"]): date("d", time() - 86400);
+$year = get_int404("year", date("Y", time() - 86400));
+$month = get_int404("month", date("m", time() - 86400));
+$day = get_int404("day", date("d", time() - 86400));
 
 $t = new MyView();
 $t->title = "Iowa ASOS 1 Minute Time Series";
@@ -38,21 +38,15 @@ $ds = daySelect($day, "day");
 $extra = "";
 if (strlen($station) > 0 ) {
 	$extra = <<<EOF
+<br /><br />
+<img src="1min.php?year={$year}&month={$month}&day={$day}&station={$station}" ALT="Time Series">
+<br />
+<img src="1min_V.php?year={$year}&month={$month}&day={$day}&station={$station}" ALT="Time Series">
+<br />
+<img src="1min_P.php?year={$year}&month={$month}&day={$day}&station={$station}" ALT="Time Series">
 
-
-	<BR><BR>
-
-	<img src="1min.php?year={$year}&month={$month}&day={$day}&station={$station}" ALT="Time Series">
-
-	<BR>
-	<img src="1min_V.php?year={$year}&month={$month}&day={$day}&station={$station}" ALT="Time Series">
-
-	<br>
-	<img src="1min_P.php?year={$year}&month={$month}&day={$day}&station={$station}" ALT="Time Series">
-
-
-	<p><b>Note:</b> The wind speeds are indicated every minute by the red line.
-	The blue dots represent wind direction and are shown every 10 minutes.</p>
+<p><b>Note:</b> The wind speeds are indicated every minute by the red line.
+The blue dots represent wind direction and are shown every 10 minutes.</p>
 EOF;
 }
 
@@ -64,6 +58,9 @@ $t->content = <<<EOF
 central time date.  Data for some sites goes back to the year 2000 and is mostly
 updated until {$endts}.</p>
 
+<p><a href="/plotting/auto/?q=211">Autoplot 211</a> is a more modern interface
+to generate charts like these and the raw data download for this data is
+<a href="/request/asos/1min.phtml">here</a>.</p>
 
 
   <form method="GET" action="1station_1min.phtml">

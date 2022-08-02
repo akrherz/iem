@@ -10,7 +10,7 @@ define("IEM_APPID", 47);
 $e = get_int404("e", null);
 $pil = isset($_GET['pil']) ? strtoupper(substr(xssafe($_GET['pil']),0,6)) : null;
 $bbb = isset($_GET["bbb"]) ? strtoupper(substr(xssafe($_GET["bbb"]), 0, 3)) : null;
-$dir = isset($_REQUEST['dir']) ? $_REQUEST['dir'] : null;
+$dir = isset($_REQUEST['dir']) ? xssafe($_REQUEST['dir']) : null;
 
 if (is_null($pil) || trim($pil) == ""){
 	die("No 'pil' provided by URL, it is required.");

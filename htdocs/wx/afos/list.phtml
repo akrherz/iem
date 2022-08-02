@@ -205,12 +205,14 @@ if ($view == "prod"){
 
 $drangecheck = (isset($_REQUEST["drange"]))? "checked='checked'" : "";
 $groups = Array("WFO", "RFC", "NWS", "NCEP", "CWSU", "WSO");
-$groupnames = Array("Weather Forecast Offices (WFO)",
-		"River Forecast Centers (RFC)",
-		"NWS Admin Organizations",
-		"NCEP Centers",
-		"Center Weather Service Units (CWSU)",
-		"Weather Service Offices (WSO)");
+$groupnames = Array(
+    "Weather Forecast Offices (WFO)",
+    "River Forecast Centers (RFC)",
+    "NWS Admin Organizations",
+    "NCEP Centers",
+    "Center Weather Service Units (CWSU)",
+    "Weather Service Offices (WSO)",
+);
 $sources = Array();
 foreach($groups as $key => $s){
 	$sources[$groupnames[$key]] = Array();

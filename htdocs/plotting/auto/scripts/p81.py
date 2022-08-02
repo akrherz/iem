@@ -50,7 +50,7 @@ def plotter(fdict):
             f"""
         with data as (
             select extract(doy from day) as doy,
-            day, {varname} as v from alldata_{station[:2]} WHERE
+            day, {varname} as v from alldata WHERE
             station = %s),
         doyagg as (
             SELECT doy, stddev(v) from data GROUP by doy),

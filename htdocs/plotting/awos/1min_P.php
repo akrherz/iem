@@ -4,15 +4,16 @@
 require_once "../../../config/settings.inc.php";
 include("../../../include/database.inc.php");
 include("../../../include/network.php");
+require_once "../../../include/forms.php";
 $nt = new NetworkTable("AWOS");
 include ("../../../include/jpgraph/jpgraph.php");
 include ("../../../include/jpgraph/jpgraph_line.php");
 include ("../../../include/jpgraph/jpgraph_led.php");
 
-$station = isset($_GET["station"]) ? $_GET["station"] : "ADU";
-$year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
-$month = isset($_GET["month"]) ? $_GET["month"]: date("m");
-$day = isset($_GET["day"]) ? $_GET["day"]: date("d");
+$station = isset($_GET["station"]) ? xssafe($_GET["station"]): "";
+$year = get_int404("year", date("Y", time() - 86400));
+$month = get_int404("month", date("m", time() - 86400));
+$day = get_int404("day", date("d", time() - 86400));
 
 $myTime = strtotime($year."-".$month."-".$day);
 

@@ -89,7 +89,7 @@ def plotter(fdict):
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
     title = (
-        f"{ctx['_nt'].sts[station]['name']} [{station}]\n"
+        f"{ctx['_sname']}\n"
         f"Frequency of {threshold}+ knot Wind Speeds by Temperature "
         f"for {calendar.month_name[month]} "
         f"({ab.year}-{datetime.datetime.now().year})\n"

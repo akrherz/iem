@@ -8,12 +8,11 @@ body{
  margin-left: 5px;
  border-left-width: 3px; 
  border-color: blue;
+ background-color: #eeeeee;
 }
 </style>
-
-
 </head>
-<body bgcolor="#eeeeee">
+<body>
 
 <h3>NWS Text Product Finder</h3>
 

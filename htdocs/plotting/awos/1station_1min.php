@@ -6,9 +6,9 @@ require_once "../../../include/forms.php";
 $t = new MyView();
 
 $station = isset($_GET["station"]) ? xssafe($_GET["station"]): "";
-$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
-$month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
-$day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
+$year = get_int404("year", 2011);
+$month = get_int404("month", 1);
+$day = get_int404("day", 1);
 
 $t->title = "AWOS 1 Minute Time Series";
 

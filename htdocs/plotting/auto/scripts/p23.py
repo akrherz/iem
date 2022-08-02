@@ -8,14 +8,12 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, get_dbconn
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
-PDICT = dict(
-    [
-        ("avg_high", "Average High Temperature [F]"),
-        ("avg_temp", "Average Temperature [F]"),
-        ("avg_low", "Average Low Temperature [F]"),
-        ("precip", "Total Precipitation [inch]"),
-    ]
-)
+PDICT = {
+    "avg_high": "Average High Temperature [F]",
+    "avg_temp": "Average Temperature [F]",
+    "avg_low": "Average Low Temperature [F]",
+    "precip": "Total Precipitation [inch]",
+}
 
 
 def get_description():
@@ -31,7 +29,7 @@ def get_description():
         dict(
             type="station",
             name="station",
-            default="IA0200",
+            default="IATAME",
             label="Select Station:",
             network="IACLIMATE",
         ),
@@ -66,7 +64,6 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["station"]
-    table = "alldata_%s" % (station[:2],)
     syear = ctx["syear"]
     years = ctx["years"]
     varname = ctx["var"]
@@ -91,11 +88,11 @@ def plotter(fdict):
     elnino = np.array(elnino)
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
         WITH climo2 as (
             SELECT year, month, avg((high+low)/2.), sum(precip),
             avg(high) as avg_high, avg(low) as avg_low
-            from {table} where station = %s
+            from alldata where station = %s
             and day < %s GROUP by year, month),
         climo as (
             select month, avg(avg) as t, avg(sum) as p,
@@ -104,7 +101,7 @@ def plotter(fdict):
         obs as (
             SELECT year, month, avg((high+low)/2.), avg(high) as avg_high,
             avg(low) as avg_low,
-            sum(precip) from {table} where station = %s
+            sum(precip) from alldata where station = %s
             and day < %s and year >= %s and year < %s GROUP by year, month)
 
         SELECT obs.year, obs.month, obs.avg - climo.t as avg_temp,
@@ -132,9 +129,10 @@ def plotter(fdict):
     )
 
     title = (
-        "[%s] %s Monthly Departure of %s + El Nino 3.4 Index\n"
+        f"{ctx['_sname']}:: Monthly Departure of {PDICT.get(varname)} "
+        "+ El Nino 3.4 Index\n"
         "Climatology computed from present day period of record"
-    ) % (station, ctx["_nt"].sts[station]["name"], PDICT.get(varname))
+    )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     xticks = []
@@ -177,7 +175,7 @@ def plotter(fdict):
     ax2.set_ylabel("El Nino 3.4 Index (line)")
     ax2.set_ylim(-3, 3)
 
-    ax.set_ylabel("%s Departure (bars)" % (PDICT.get(varname),))
+    ax.set_ylabel(f"{PDICT.get(varname)} Departure (bars)")
     ax.grid(True)
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)

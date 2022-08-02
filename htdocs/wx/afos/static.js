@@ -182,9 +182,9 @@ function buildUI(){
 }
 
 $(function(){
-	// jquery on-ready
-	buildUI();
-	readAnchorTags();
-	readCookies();
-	saveCookies();
+    // jquery on-ready
+    buildUI();
+    readAnchorTags();
+    readCookies();
+    saveCookies();
 });

@@ -47,14 +47,14 @@ def plotter(fdict):
     t2 = ctx["t2"]
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
             SELECT year,
             min(low) as min_low,
             min(case when low < %s then extract(doy from day)
                 else 999 end) as t1_doy,
             min(case when low < %s then extract(doy from day)
                 else 999 end) as t2_doy
-            from alldata_{station[:2]} where station = %s and month > 6
+            from alldata where station = %s and month > 6
             GROUP by year ORDER by year ASC
         """,
             conn,
@@ -78,10 +78,7 @@ def plotter(fdict):
             fmt = "%b %-d" if ts.day == 1 else "%-d"
             xticklabels.append(ts.strftime(fmt))
 
-    title = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
-        "First Fall Temperature Occurences"
-    )
+    title = f"{ctx['_sname']}\nFirst Fall Temperature Occurences"
     (fig, ax) = figure_axes(title=title, apctx=ctx)
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
@@ -98,7 +95,7 @@ def plotter(fdict):
     ax.text(
         0.95,
         0.91,
-        "slope: %.2f days/day, R$^2$=%.2f" % (h_slope, r_value**2),
+        f"slope: {h_slope:.2f} days/day, R$^2$={(r_value**2):.2f}",
         bbox=dict(color="white"),
         transform=ax.transAxes,
         va="bottom",
@@ -108,8 +105,8 @@ def plotter(fdict):
 
     ax.set_ylim(-1, max(doy2 - doy) + 4)
     ax.set_xlim(min(doy) - 4, max(doy) + 4)
-    ax.set_ylabel(r"Days until first sub %s$^{\circ}\mathrm{F}$" % (t2,))
-    ax.set_xlabel(r"First day of sub %s$^{\circ}\mathrm{F}$" % (t1,))
+    ax.set_ylabel(f"Days until first sub {t2}" r"$^{\circ}\mathrm{F}$")
+    ax.set_xlabel(f"First day of sub {t1}" r"$^{\circ}\mathrm{F}$")
 
     ax.grid(True)
 
