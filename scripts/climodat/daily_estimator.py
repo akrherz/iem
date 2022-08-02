@@ -285,6 +285,9 @@ def merge_threaded(df, threaded):
     for sid in threaded:
         copysid = threaded[sid]
         if copysid in df.index:
+            # Ensure that we force a database write for a new entry
+            if sid not in df.index:
+                df.at[copysid, "dirty"] = True
             df.loc[sid] = df.loc[copysid]
 
 
