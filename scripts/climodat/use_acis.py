@@ -187,10 +187,14 @@ def main(argv):
                 if sid[2] in ["T", "C"] or sid[2:] == "0000":
                     continue
                 acis_station = ncei_state_codes[arg] + sid[2:]
+                if acis_station[2] in ["K", "P"]:
+                    acis_station = sid[2:]
                 _worker(sid, acis_station)
         else:
             station = arg
             acis_station = ncei_state_codes[station[:2]] + station[2:]
+            if acis_station[2] in ["K", "P"]:
+                acis_station = station[2:]
             _worker(station, acis_station)
     else:
         (station, acis_station) = argv[1], argv[2]
