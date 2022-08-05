@@ -184,17 +184,21 @@ def main(argv):
     if len(argv) == 2:
         if len(arg) == 2:
             for sid in nt.sts:
-                if sid[2] in ["T", "C"] or sid[2:] == "0000":
+                if sid[2] == "C" or sid[2:] == "0000":
                     continue
                 acis_station = ncei_state_codes[arg] + sid[2:]
-                if acis_station[2] in ["K", "P"]:
+                if sid[2] in ["K", "P"]:
                     acis_station = sid[2:]
+                if sid[2] == "T":
+                    acis_station = f"{sid[3:]}thr"
                 _worker(sid, acis_station)
         else:
             station = arg
             acis_station = ncei_state_codes[station[:2]] + station[2:]
-            if acis_station[2] in ["K", "P"]:
+            if station[2] in ["K", "P"]:
                 acis_station = station[2:]
+            if station[2] == "T":
+                acis_station = f"{station[3:]}thr"
             _worker(station, acis_station)
     else:
         (station, acis_station) = argv[1], argv[2]
