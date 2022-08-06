@@ -27,6 +27,7 @@ import requests
 from tqdm import tqdm
 
 LOG = logger()
+HIDDENURL = "https://www1.ncdc.noaa.gov/pub/download/hidden/onemin"
 BASEDIR = "/mesonet/ARCHIVE/raw/asos/data"
 TMPDIR = "/mesonet/tmp/asos1min"
 if not os.path.isdir(TMPDIR):
@@ -189,12 +190,12 @@ def dl_archive(df, dt):
     """Do archived downloading."""
     baseuri = "https://www1.ncdc.noaa.gov/pub/data/asos-onemin"
     for station in df.index.values:
-        datadir = "%s/%s" % (BASEDIR, station)
+        datadir = f"{BASEDIR}/{station}"
         if not os.path.isdir(datadir):
             os.makedirs(datadir)
         station4 = station if len(station) == 4 else f"K{station}"
         for page in [5, 6]:
-            fn = "640%s0%s%s%02i.dat" % (page, station4, dt.year, dt.month)
+            fn = f"640{page}0{station4}{dt:%Y%m}.dat"
             if not os.path.isfile(f"{datadir}/{fn}"):
                 uri = f"{baseuri}/640{page}-{dt.strftime('%Y')}/{fn}"
                 req = exponential_backoff(requests.get, uri, timeout=60)
@@ -219,7 +220,6 @@ def runner(pgconn, metadata, station):
     if not os.path.isfile(metadata["fn5"]) or not os.path.isfile(
         metadata["fn6"]
     ):
-        LOG.debug("skipping %s due to missing files", station)
         return 0
 
     # Our final amount of data
@@ -248,6 +248,14 @@ def runner(pgconn, metadata, station):
 
     mints = min(data)
     maxts = max(data)
+    if (maxts - mints) > datetime.timedelta(days=40):
+        LOG.warning(
+            "refusing to update %s due to %s-%s > 40 days",
+            station,
+            mints,
+            maxts,
+        )
+        return 0
 
     cursor = pgconn.cursor()
     cursor.execute(
@@ -259,33 +267,16 @@ def runner(pgconn, metadata, station):
         "removed %s rows between %s and %s", cursor.rowcount, mints, maxts
     )
     sio = StringIO()
-    cols = [
-        "station",
-        "valid",
-        "vis1_coeff",
-        "vis1_nd",
-        "vis2_coeff",
-        "vis2_nd",
-        "vis3_coeff",
-        "vis3_nd",
-        "drct",
-        "sknt",
-        "gust_drct",
-        "gust_sknt",
-        "ptype",
-        "precip",
-        "pres1",
-        "pres2",
-        "pres3",
-        "tmpf",
-        "dwpf",
-    ]
+    cols = (
+        "station valid vis1_coeff vis1_nd vis2_coeff vis2_nd vis3_coeff "
+        "vis3_nd drct sknt gust_drct gust_sknt ptype precip pres1 "
+        "pres2 pres3 tmpf dwpf"
+    ).split()
 
     # Loop over the data we got please
     fmt = "\t".join(["%s"] * len(cols[2:]))
-    for ts in data:
-        entry = data[ts]
-        sio.write("%s\t%s\t" % (station, ts))
+    for ts, entry in data.items():
+        sio.write(f"{station}\t{ts}\t")
         sio.write(fmt % (*[entry.get(col) for col in cols[2:]],))
         sio.write("\n")
     sio.seek(0)
@@ -327,7 +318,10 @@ def init_dataframe(argv):
     df["archive_end"] = utc(1980, 1, 1)
     df["fn5"] = ""
     df["fn6"] = ""
-    if len(argv) >= 3:
+    dt = utc() - datetime.timedelta(days=2)
+    if len(argv) == 2:  # Hard coded hidden filename
+        dl_realtime(df, dt, filebase=argv[1])
+    elif len(argv) >= 3:
         if len(argv) == 4:
             LOG.info("Limiting work to station %s", argv[1])
             df = df.loc[[argv[1]]]
@@ -336,7 +330,6 @@ def init_dataframe(argv):
             dt = utc(int(argv[1]), int(argv[2]))
         dl_archive(df, dt)
     else:
-        dt = utc() - datetime.timedelta(days=1)
         merge_archive_end(df, dt)
         df["archive_end"] = df["archive_end"].fillna(DT1980)
         dl_realtime(df, dt)
@@ -357,34 +350,43 @@ def merge_archive_end(df, dt):
     df["archive_end"] = df2["max"]
 
 
-def dl_realtime(df, dt):
+def dl_realtime(df, dt, filebase=None):
     """Download and stage the 'real-time' processing."""
     for page in [1, 2]:
-        tmpfn = f"om{page}_{dt.strftime('%Y%m')}.tar.Z"
-        uri = f"https://www1.ncdc.noaa.gov/pub/download/hidden/onemin/{tmpfn}"
-        res = requests.get(uri, timeout=60, stream=True)
-        with open(f"{TMPDIR}/{tmpfn}", "wb") as fh:
-            for chunk in res.iter_content(chunk_size=4096):
-                if chunk:
-                    fh.write(chunk)
+        # Good grief asos-1min-pg1_d202207_c20220721.tar.gz
+        tmpfn = (
+            f"asos-1min-pg{page}_d{dt.strftime('%Y%m')}_c{dt:%Y%m%d}.tar.gz"
+        )
+        if filebase is not None:
+            tmpfn = f"asos-1min-pg{page}_{filebase}.tar.gz"
+        if not os.path.isfile(f"{TMPDIR}/{tmpfn}"):
+            uri = f"{HIDDENURL}/{tmpfn}"
+            res = requests.get(uri, timeout=60, stream=True)
+            if res.status_code != 200:
+                LOG.warning("Got HTTP %s for %s", res.status_code, uri)
+                continue
+            with open(f"{TMPDIR}/{tmpfn}", "wb") as fh:
+                for chunk in res.iter_content(chunk_size=4096):
+                    if chunk:
+                        fh.write(chunk)
         with tarfile.open(f"{TMPDIR}/{tmpfn}", "r:gz") as tar:
             for tarinfo in tar:
                 if not tarinfo.isreg():
                     continue
-                if not tarinfo.name.startswith("640"):
+                if not tarinfo.name.startswith("asos-1min-pg"):
                     LOG.info("Unknown filename %s", tarinfo.name)
                     continue
-                page = tarinfo.name[3]
-                station = tarinfo.name[5:9]
+                station = tarinfo.name.split("-")[3]
                 if station[0] == "K":
                     station = station[1:]
                 if station not in df.index:
-                    LOG.info("Unknown station %s, FIXME!", station)
+                    LOG.warning("Unknown station %s, FIXME!", station)
                     continue
                 f = tar.extractfile(tarinfo.name)
                 with open(f"{TMPDIR}/{tarinfo.name}", "wb") as fh:
                     fh.write(f.read())
-                df.at[station, f"fn{page}"] = f"{TMPDIR}/{tarinfo.name}"
+                # sick
+                df.at[station, f"fn{page + 4}"] = f"{TMPDIR}/{tarinfo.name}"
 
 
 def cleanup(df):
@@ -393,7 +395,6 @@ def cleanup(df):
         for page in [5, 6]:
             fn = row[f"fn{page}"]
             if not pd.isnull(fn) and fn.startswith(TMPDIR):
-                LOG.debug("removing %s", fn)
                 os.unlink(fn)
 
 
