@@ -146,7 +146,12 @@ def plotter(fdict):
         data[row["hour"], row[groupby] - 1] += 1
 
     data.mask = np.where(data == 0, True, False)
-    fig = figure(apctx=ctx)
+    title = (
+        f"{ctx['_sname']}:: {PDICT[code]} Reports\n"
+        f"[{minyear:.0f} - {maxyear:.0f}] by hour and "
+        f"{PDICT2[groupby].replace('group ', '')}"
+    )
+    fig = figure(apctx=ctx, title=title)
     ax = fig.add_axes([0.11, 0.25, 0.7, 0.65])
     cax = fig.add_axes([0.82, 0.04, 0.02, 0.15])
 
@@ -161,11 +166,6 @@ def plotter(fdict):
     ax.set_yticks((0, 4, 8, 12, 16, 20))
     ax.set_ylabel(f"Local Time, {ctx['_nt'].sts[station]['tzname']}")
     ax.set_yticklabels(("Mid", "4 AM", "8 AM", "Noon", "4 PM", "8 PM"))
-    ax.set_title(
-        f"[{station}] {ctx['_nt'].sts[station]['name']} {PDICT[code]} "
-        f"Reports\n[{minyear:.0f} - {maxyear:.0f}] by hour and "
-        f"{PDICT2[groupby].replace('group ', '')}"
-    )
     ax.grid(True)
     lax = fig.add_axes([0.11, 0.1, 0.7, 0.15])
     if groupby == "week":

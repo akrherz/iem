@@ -1,5 +1,6 @@
 """daily ranges"""
 import calendar
+import datetime
 
 import pandas as pd
 import numpy as np
@@ -7,18 +8,16 @@ from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
-PDICT = dict(
-    [
-        ("min_range", "Minimum Daily High to Low Temperature Range"),
-        ("max_range", "Maximum Daily High to Low Temperature Range"),
-        ("max_high", "Maximum Daily High Temperature"),
-        ("max_low", "Maximum Daily Low Temperature"),
-        ("min_high", "Minimum Daily High Temperature"),
-        ("min_low", "Minimum Daily Low Temperature"),
-        ("max_precip", "Maximum Daily Precipitation"),
-        ("max_snow", "Maximum Daily Snowfall"),
-    ]
-)
+PDICT = {
+    "min_range": "Minimum Daily High to Low Temperature Range",
+    "max_range": "Maximum Daily High to Low Temperature Range",
+    "max_high": "Maximum Daily High Temperature",
+    "max_low": "Maximum Daily Low Temperature",
+    "min_high": "Minimum Daily High Temperature",
+    "min_low": "Minimum Daily Low Temperature",
+    "max_precip": "Maximum Daily Precipitation",
+    "max_snow": "Maximum Daily Snowfall",
+}
 
 
 def get_description():
@@ -72,7 +71,7 @@ def plotter(fdict):
             SELECT month, day, high, low, precip, snow,
             rank() OVER (
                 PARTITION by month ORDER by {orderer} NULLS LAST)
-            from alldata_{station[:2]} WHERE station = %s)
+            from alldata WHERE station = %s)
 
         select month, to_char(day, 'Mon dd, YYYY') as dd, high, low, precip,
         snow, (high - low) as range from ranks
@@ -102,10 +101,9 @@ def plotter(fdict):
             labels.append(f"{row[tokens[1]]} - {row['dd']}")
         ranges.append(row[tokens[1]])
 
-    title = (
-        f"{ctx['_nt'].sts[station]['name']} [{station}]\n"
-        f"{PDICT[varname]} by Month"
-    )
+    syear = ctx["_nt"].sts[station]["archive_begin"].year
+    eyear = datetime.date.today().year
+    title = f"{ctx['_sname']} ({syear}-{eyear})\n" f"{PDICT[varname]} by Month"
 
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 

@@ -94,8 +94,8 @@ def plotter(fdict):
     if ab is None:
         raise NoDataFound("Unknown station metadata.")
     title = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']} "
-        f"{max([ab.year, 1973])}-{datetime.date.today().year}\n"
+        f"{ctx['_sname']} "
+        f"({max([ab.year, 1973])}-{datetime.date.today().year})\n"
         f"Hourly Temp Departure (skies were {PDICT[ctx['which']]} vs all)"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)

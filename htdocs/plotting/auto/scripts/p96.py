@@ -92,7 +92,11 @@ def plotter(fdict):
         )
 
     df = pd.DataFrame(rows)
-    (fig, ax) = figure_axes(apctx=ctx)
+    title = (
+        f"{ctx['_sname']} ({minvalid.year}-{datetime.date.today().year})\n"
+        "Bias of 24 Hour 'Day' Split for Precipitation"
+    )
+    (fig, ax) = figure_axes(apctx=ctx, title=title)
     acount = np.average(cnts)
     years = today.year - minvalid.year
     arc = (np.array(cnts) - acount) / float(years)
@@ -107,23 +111,14 @@ def plotter(fdict):
     maxv = max([0 - np.min(aavgv), np.max(aavgv)])
     ax2.set_ylim(0 - maxv - 0.01, maxv + 0.01)
     ax2.set_ylabel("Bias with Average 24 Hour Precip [in/day]", color="r")
-    ax.set_title(
-        ("[%s] %s %s-%s\nBias of 24 Hour 'Day' Split for Precipitation")
-        % (
-            station,
-            ctx["_nt"].sts[station]["name"],
-            minvalid.year,
-            datetime.date.today().year,
-        )
-    )
     ax.set_ylabel("Bias of Days per Year with Precip", color="b")
     ax.set_xlim(0, 24)
     ax.set_xticks((0, 4, 8, 12, 16, 20, 24))
     ax.set_xticklabels(("Mid", "4 AM", "8 AM", "Noon", "4 PM", "8 PM", "Mid"))
     ax.grid(True)
     ax.set_xlabel(
-        ("Hour Used for 24 Hour Summary, Timezone: %s")
-        % (ctx["_nt"].sts[station]["tzname"],)
+        "Hour Used for 24 Hour Summary, "
+        f"Timezone: {ctx['_nt'].sts[station]['tzname']}"
     )
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width * 0.95, box.height])
