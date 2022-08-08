@@ -11,7 +11,7 @@ import geopandas as gpd
 from paste.request import parse_formvars
 from pyiem.util import get_sqlalchemy_conn, utc
 
-gpd.io.file.fiona.drvsupport.supported_drivers["KML"] = "rw"
+fiona.supported_drivers["KML"] = "rw"
 PRJFILE = "/opt/iem/data/gis/meta/4326.prj"
 
 
