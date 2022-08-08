@@ -145,7 +145,10 @@ def fetch_daily(form, cols):
         "vwc50_qc": "soil50vwc",
         "dailyet_qc": "et",
     }
-    df = df.rename(xref, axis=1, errors="ignore")
+    df = df.rename(columns=xref, errors="ignore")
+    # Mul by 100 for %
+    for depth in [12, 24, 50]:
+        df[f"soil{depth}vwc"] = df[f"soil{depth}vwc"] * 100.0
     # Now we need to do some mass data conversion, sigh
     tc = {
         "high": "tair_c_max_qc",
@@ -279,8 +282,14 @@ def fetch_hourly(form, cols):
         "rh_avg_qc": "relh",
         "rain_in_tot_qc": "precip",
         "winddir_d1_wvt_qc": "drct",
+        "vwc12_qc": "soil12vwc",
+        "vwc24_qc": "soil24vwc",
+        "vwc50_qc": "soil50vwc",
     }
-    df = df.rename(xref, axis=1, errors="ignore")
+    df = df.rename(columns=xref, errors="ignore")
+    # Mul by 100 for %
+    for depth in [12, 24, 50]:
+        df[f"soil{depth}vwc"] = df[f"soil{depth}vwc"] * 100.0
     # Now we need to do some mass data conversion, sigh
     tc = {
         "tmpf": "tair_c_avg_qc",
@@ -288,9 +297,6 @@ def fetch_hourly(form, cols):
         "soil12t": "t12_c_avg_qc",
         "soil24t": "t24_c_avg_qc",
         "soil50t": "t50_c_avg_qc",
-        "soil12vwc": "vwc12_qc",
-        "soil24vwc": "vwc24_qc",
-        "soil50vwc": "vwc50_qc",
     }
     for key, col in tc.items():
         if key not in cols:
