@@ -92,6 +92,8 @@ def application(environ, start_response):
     if not res:
         res = run(network, only_online)
         mc.set(mckey, res, 86400 if network == "FPS" else 3600)
+    else:
+        res = res.decode("utf-8")
     mc.close()
     if cb is not None:
         res = f"{html_escape(cb)}({res})"
