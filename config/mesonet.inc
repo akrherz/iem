@@ -320,6 +320,7 @@ RewriteRule ^/search /search.py [QSA]
   </Directory>
 
   <Directory "/opt/iem/htdocs/plotting/auto">
+    RewriteRule qrcode/([0-9]{1,12})/(.*).png$ gen_qrcode.py?p=$1&q=$2&fmt=png
     RewriteRule plot/([0-9]{1,12})/(.*).png$ autoplot.py?p=$1&q=$2&fmt=png
     RewriteRule plot/([0-9]{1,12})/(.*).csv$ autoplot.py?p=$1&q=$2&fmt=csv
     RewriteRule plot/([0-9]{1,12})/(.*).txt$ autoplot.py?p=$1&q=$2&fmt=txt
