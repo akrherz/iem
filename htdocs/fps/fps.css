@@ -5,3 +5,19 @@ html {
     -o-background-size: cover;
     background-size: cover;
 }
+
+body {
+    background-color: #ffffff00 !important;
+}
+
+h3 {
+    color: #fff;
+    font-weight: bolder;
+    font-size: x-large;
+}
+
+#olmap {
+    width: 100%;
+    min-height: 400px;
+    height: 450px;
+}

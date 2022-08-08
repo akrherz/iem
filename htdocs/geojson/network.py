@@ -3,7 +3,7 @@ import json
 import datetime
 
 import psycopg2.extras
-import memcache
+from pymemcache.client import Client
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
 
@@ -20,6 +20,12 @@ def run(network, only_online):
             "from stations t JOIN station_attributes a "
             "ON (t.iemid = a.iemid) WHERE t.network ~* 'ASOS' and "
             "a.attr = 'HAS1MIN' ORDER by id ASC",
+        )
+    elif network == "FPS":
+        cursor.execute(
+            "SELECT ST_asGeoJson(geom, 4) as geojson, * "
+            "from stations WHERE (network ~* 'ASOS' or network ~* 'CLIMATE') "
+            "and country = 'US' and online ORDER by id ASC",
         )
     else:
         online = "and online" if only_online else ""
@@ -40,9 +46,9 @@ def run(network, only_online):
     for row in cursor:
         ab = row["archive_begin"]
         ae = row["archive_end"]
-        time_domain = "(%s-%s)" % (
-            "????" if ab is None else ab.year,
-            "Now" if ae is None else ae.year,
+        time_domain = (
+            f"({'????' if ab is None else ab.year}-"
+            f"{'Now' if ae is None else ae.year})"
         )
         res["features"].append(
             dict(
@@ -80,17 +86,15 @@ def application(environ, start_response):
     network = form.get("network", "KCCI")
     only_online = form.get("only_online", "0") == "1"
 
-    mckey = "/geojson/network/%s.geojson|%s" % (network, only_online)
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    mckey = f"/geojson/network/{network}.geojson|{only_online}"
+    mc = Client(["iem-memcached", 11211])
     res = mc.get(mckey)
     if not res:
         res = run(network, only_online)
-        mc.set(mckey, res, 3600)
-
-    if cb is None:
-        data = res
-    else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        mc.set(mckey, res, 86400 if network == "FPS" else 3600)
+    mc.close()
+    if cb is not None:
+        res = f"{html_escape(cb)}({res})"
 
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return [res.encode("ascii")]
