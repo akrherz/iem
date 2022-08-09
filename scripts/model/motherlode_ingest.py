@@ -41,16 +41,6 @@ VLOOKUP = {
         "GFS": "Precipitable_water_entire_atmosphere_single_layer",
         "RAP": "Precipitable_water_entire_atmosphere_single_layer",
     },
-    "precipcon": {
-        "RAP": "Convective_precipitation_surface_1_Hour_Accumulation",
-        "NAM": "Convective_precipitation_surface_3_Hour_Accumulation",
-        "GFS": "Convective_precipitation_surface_Mixed_intervals_Accumulation",
-    },
-    "precip": {
-        "RAP": "Total_precipitation_surface_1_Hour_Accumulation",
-        "NAM": "Total_precipitation_surface_3_Hour_Accumulation",
-        "GFS": "Total_precipitation_surface_Mixed_intervals_Accumulation",
-    },
 }
 
 
@@ -128,18 +118,11 @@ def run(mcursor, model, station, lon, lat, ts):
         sbcape = xref(row, "sbcape", model)
         sbcin = xref(row, "sbcin", model)
         pwater = xref(row, "pwater", model)
-        precipcon = xref(row, "precipcon", model)
-        precip = xref(row, "precip", model)
-        if precip < 0:
-            precip = None
-        if precipcon < 0:
-            precipcon = None
         fts = datetime.datetime.strptime(row["time"], "%Y-%m-%dT%H:%M:%SZ")
         fts = fts.replace(tzinfo=pytz.utc)
         sql = f"""INSERT into {table} (station, model, runtime,
-              ftime, sbcape, sbcin, pwater, precipcon, precip)
-              VALUES (%s, %s , %s,
-              %s, %s, %s, %s, %s, %s )"""
+              ftime, sbcape, sbcin, pwater)
+              VALUES (%s, %s , %s, %s, %s, %s, %s)"""
         args = (
             station,
             model,
@@ -148,8 +131,6 @@ def run(mcursor, model, station, lon, lat, ts):
             sbcape,
             sbcin,
             pwater,
-            precipcon,
-            precip,
         )
         mcursor.execute(sql, args)
         count += 1
