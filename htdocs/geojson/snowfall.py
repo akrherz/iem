@@ -2,7 +2,7 @@
 import datetime
 import json
 
-import memcache
+from pymemcache.client import Client
 import psycopg2.extras
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
@@ -67,15 +67,15 @@ def application(environ, start_response):
     headers = [("Content-type", "application/vnd.geo+json")]
 
     mckey = f"/geojson/snowfall/{ts:%Y%m%d}?callback={cb}"
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    mc = Client(["iem-memcached", 11211])
     res = mc.get(mckey)
     if not res:
         res = get_data(ts)
         mc.set(mckey, res, 300)
-    if cb is None:
-        data = res
     else:
-        data = f"{html_escape(cb)}({res})"
+        res = res.decode("utf-8")
+    if cb is not None:
+        res = f"{html_escape(cb)}({res})"
 
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return [res.encode("ascii")]

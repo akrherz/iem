@@ -1,7 +1,7 @@
 """ Recent METARs containing some pattern """
 import json
 
-import memcache
+from pymemcache.client import Client
 import psycopg2.extras
 from paste.request import parse_formvars
 from pyiem.reference import TRACE_VALUE
@@ -93,18 +93,19 @@ def application(environ, start_response):
     headers = [("Content-type", "application/vnd.geo+json")]
 
     mckey = f"/geojson/recent_metar?callback={cb}&q={q}"
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    mc = Client(["iem-memcached", 11211])
     res = mc.get(mckey)
     if not res:
         res = get_data(q)
         mc.set(mckey, res, 300)
-    if cb is None:
-        data = res
     else:
-        data = f"{html_escape(cb)}({res})"
+        res = res.decode("utf-8")
+    mc.close()
+    if cb is not None:
+        res = f"{html_escape(cb)}({res})"
 
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return [res.encode("ascii")]
 
 
 if __name__ == "__main__":

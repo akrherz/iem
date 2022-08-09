@@ -2,7 +2,7 @@
 import json
 import datetime
 
-import memcache
+from pymemcache.client import Client
 import psycopg2.extras
 import pytz
 from paste.request import parse_formvars
@@ -139,16 +139,17 @@ def application(environ, start_response):
         headers = [("Content-type", "text/csv")]
 
     mckey = f"/geojson/nexrad_attr.{fmt}|{ts}"
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    mc = Client(["iem-memcached", 11211])
     res = mc.get(mckey)
     if not res:
         res = run(ts, fmt)
         mc.set(mckey, res, 30 if ts == "" else 3600)
-
-    if cb is None or fmt == "csv":
-        data = res
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        res = res.decode("utf-8")
+    mc.close()
+
+    if cb is not None and fmt != "csv":
+        res = f"{html_escape(cb)}({res})"
 
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return [res.encode("ascii")]
