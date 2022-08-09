@@ -6,33 +6,11 @@
     <link href="/vendor/iastate-v2.0.13/css/iastate.min.css" rel="stylesheet">
     <link rel='stylesheet' href="/vendor/openlayers/6.15.1/ol.css" type='text/css'>
     <link rel='stylesheet' href="/vendor/openlayers/6.15.1/ol-layerswitcher.css" type='text/css'>
-
+    <link rel="stylesheet" href="/vendor/jquery-ui/1.12.1/jquery-ui.css">
     <link rel="stylesheet" type="text/css" href="fps.css" />
 </head>
 
 <body>
-
-    <!-- Modals -->
-    <div class="modal fade" id="locatorModal" tabindex="-1" role="dialog" aria-labelledby="eventsModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                            aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="eventsModalLabel">Listing of Daily Events</h4>
-                </div>
-                <div class="modal-body" onkeypress="return event.keyCode != 13;">
-                    <div id="eventsres"></div>
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
 
     <!-- Content -->
     <div class="row">
@@ -50,17 +28,21 @@
             <div id="olmap"></div>
         </div>
         <div class="col-md-2">
-            <button type="button" class="btn btn-default" data-toggle="modal" data-target="#locatorModal"><i
-                class="fa fa-info"></i> Locator!</button>
-            </div>
+        </div>
     </div>
 
+    <div class="row airport-data-template" style="display:none;">
+        <div class="col-md-3">Controls</div>
+        <div class="col-md-9">Data Display</div>
+    </div>
 
 </body>
 <script src="/vendor/jquery/1.11.3/jquery-1.11.3.min.js"></script>
 <script src="/vendor/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script src='/vendor/openlayers/6.15.1/ol.js'></script>
 <script src='/vendor/openlayers/6.15.1/ol-layerswitcher.js'></script>
+<script src="/vendor/jquery-ui/1.12.1/jquery-ui.js"></script>
 <script src="app.js"></script>
+<script src="dialog.js"></script>
 
 </html>

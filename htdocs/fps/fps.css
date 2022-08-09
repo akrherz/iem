@@ -21,3 +21,20 @@ h3 {
     min-height: 400px;
     height: 450px;
 }
+
+.ui-window-bar .ui-button {
+    position: absolute;
+    top: 50%;
+    width: 20px;
+    margin: -10px 0 0 0;
+    padding: 1px;
+    height: 20px;
+}
+
+.ui-window-bar .ui-window-minimize {
+    right: calc(.3em + 40px);
+}
+
+.ui-window-bar .ui-window-maximize {
+    right: calc(.3em + 20px);
+}
