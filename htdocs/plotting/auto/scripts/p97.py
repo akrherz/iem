@@ -39,6 +39,10 @@ PDICT2 = {
     "snow_depart": "Snowfall Departure",
     "snow_percent": "Snowfall Percent of Average",
     "snow_sum": "Snowfall Total",
+    "sdd86_sum": "Stress Degree Days (86F) Total",
+    "csdd86_sum": "Stress Degree Days (86F) Climatology",
+    "sdd86_depart": "Stress Degree Days (86F) Departure",
+    "sdd86_percent": "Stress Degree Days (86F) Percent of Average",
 }
 PDICT4 = {
     "yes": "Yes, overlay Drought Monitor",
@@ -48,14 +52,18 @@ UNITS = {
     "min_low_temp": "F",
     "avg_low_temp": "F",
     "avg_high_temp": "F",
+    "cgdd_sum": "F",
     "gdd_depart": "F",
-    "gdd_percet": "%",
+    "gdd_percent": "%",
     "gdd_sum": "F",
+    "csdd86_sum": "F",
+    "sdd86_depart": "F",
+    "sdd86_percent": "%",
+    "sdd86_sum": "F",
     "cdd65_sum": "F",
     "hdd65_sum": "F",
     "cdd65_depart": "F",
     "hdd65_depart": "F",
-    "cgdd_sum": "F",
     "avg_temp_depart": "F",
     "avg_temp": "F",
     "precip_depart": "inch",
@@ -229,7 +237,7 @@ def compute_tables_wfo(wfo):
 def replace_gdd_climo(ctx, df, table, date1, date2):
     """Here we are, incredible pain."""
     # Short circuit if we are not doing departures
-    if ctx["var"] in ["gdd_sum"]:
+    if ctx["var"] in ["gdd_sum", "sdd_sum"]:
         return df
     d1 = date1.strftime("%m%d")
     d2 = date2.strftime("%m%d")
@@ -271,7 +279,7 @@ def build_climate_sql(ctx, table):
 
     sql = f"""
     SELECT t.id as station, to_char(valid, 'mmdd') as sday, precip, high,
-    low, {gddclimocol} as gdd, cdd65, hdd65, snow
+    low, {gddclimocol} as gdd, cdd65, hdd65, snow, sdd86
     from {ctx['ct']} c, stations t WHERE c.station = t.{stjoin} and
     {netlimiter} """
 
@@ -318,6 +326,7 @@ def get_data(ctx):
             WITH obs as (
                 SELECT station, gddxx(:gddbase, :gddceil, high, low) as gdd,
                 cdd(high, low, 65) as cdd65, hdd(high, low, 65) as hdd65,
+                case when high > 86 then high - 86 else 0 end as sdd86,
                 sday, high, low, precip, snow,
                 (high + low)/2. as avg_temp
                 from {table} WHERE
@@ -330,9 +339,11 @@ def get_data(ctx):
                 o.precip as precip, c.precip as cprecip,
                 o.avg_temp, o.cdd65, o.hdd65,
                 o.high, o.low, o.gdd, c.gdd as cgdd,
+                o.sdd86, c.sdd86 as csdd86,
                 o.gdd - c.gdd as gdd_diff,
                 o.cdd65 - c.cdd65 as cdd65_diff,
                 o.hdd65 - c.hdd65 as hdd65_diff,
+                o.sdd86 - c.sdd86 as sdd86_diff,
                 o.avg_temp - (c.high + c.low)/2. as temp_diff,
                 o.snow as snow, c.snow as csnow,
                 o.snow - c.snow as snow_diff
@@ -354,8 +365,12 @@ def get_data(ctx):
                 max(high) as max_high_temp,
                 min(low) as min_low_temp, sum(gdd_diff) as gdd_depart,
                 sum(gdd) / greatest(1, sum(cgdd)) * 100. as gdd_percent,
+                sum(sdd86_diff) as sdd86_depart,
+                sum(sdd86) / greatest(1, sum(csdd86)) * 100. as sdd86_percent,
                 avg(temp_diff) as avg_temp_depart, sum(gdd) as gdd_sum,
                 sum(cgdd) as cgdd_sum,
+                sum(sdd86) as sdd86_sum,
+                sum(csdd86) as csdd86_sum,
                 sum(cdd65) as cdd65_sum,
                 sum(hdd65) as hdd65_sum,
                 sum(cdd65_diff) as cdd65_depart,
@@ -378,6 +393,10 @@ def get_data(ctx):
             gdd_sum,
             gdd_percent,
             cgdd_sum,
+            sdd86_depart,
+            sdd86_sum,
+            sdd86_percent,
+            csdd86_sum,
             max_high_temp,
             avg_high_temp,
             avg_low_temp,
