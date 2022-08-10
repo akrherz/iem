@@ -18,6 +18,7 @@ PDICT2 = {
     "feel": "Feels Like Temp",
     "p01i": "Precipitation",
     "relh": "Relative Humidity",
+    "vsby": "Visibility",
 }
 UNITS = {
     "tmpf": "F",
@@ -25,6 +26,7 @@ UNITS = {
     "feel": "F",
     "p01i": "inch",
     "relh": "%",
+    "vsby": "miles",
 }
 PDICT3 = {
     "freq": "Frequency",
@@ -172,6 +174,8 @@ def get_df(ctx):
     units = r"$^\circ$F" if varname != "relh" else "%"
     if varname == "p01i":
         units = "inch"
+    elif varname == "vsby":
+        units = "miles"
     df2 = df[~df["min_valid"].isna()]
     title = f"{PDICT[direction]} {threshold}{units}"
     if ctx["w"] != "freq":
