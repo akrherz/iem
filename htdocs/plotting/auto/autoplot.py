@@ -213,7 +213,7 @@ def workflow(mc, environ, form, fmt):
     # Our output content
     content = ""
     if fmt == "js" and isinstance(mixedobj, dict):
-        content = f'$("#ap_container").highcharts({json.dumps(mixedobj)});'
+        content = f'Highcharts.chart("ap_container", {json.dumps(mixedobj)});'
     elif fmt in ["js", "geojson"]:
         content = mixedobj
     elif fmt in ["svg", "png", "pdf"]:

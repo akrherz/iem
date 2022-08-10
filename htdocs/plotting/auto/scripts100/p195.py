@@ -148,8 +148,12 @@ def highcharts(fdict):
                 ),
             )
         )
-    return """
-    $("#ap_container").highcharts({
+    containername = fdict.get("_e", "ap_container")
+    return (
+        """
+Highcharts.chart('"""
+        + containername
+        + """', {
         chart: {
             type: 'scatter',
             zoomType: 'xy'
@@ -186,9 +190,11 @@ def highcharts(fdict):
         },
         series: %s
     });
-    """ % (
-        ctx["title"].replace("\n", "<br>"),
-        json.dumps(series),
+    """
+        % (
+            ctx["title"].replace("\n", "<br>"),
+            json.dumps(series),
+        )
     )
 
 

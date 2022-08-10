@@ -116,13 +116,16 @@ def get_context(fdict):
 def highcharts(fdict):
     """Go"""
     ctx = get_context(fdict)
+    containername = fdict.get("_e", "ap_container")
 
     return (
         """
     var avg_days = """
         + str(ctx["df"]["avg_days"].values.tolist())
         + """;
-$("#ap_container").highcharts({
+Highcharts.chart('"""
+        + containername
+        + """', {
     title: {text: '"""
         + ctx["title"]
         + """'},

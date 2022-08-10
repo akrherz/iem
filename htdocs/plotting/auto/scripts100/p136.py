@@ -114,9 +114,12 @@ def highcharts(fdict):
             for a in zip(ctx["lines"]["max"]["x"], ctx["lines"]["max"]["y"])
         ]
     )
+    containername = fdict.get("_e", "ap_container")
     res = (
         """
-$("#ap_container").highcharts({
+Highcharts.chart('"""
+        + containername
+        + """', {
     title: {text: '"""
         + ctx["title"]
         + """'},

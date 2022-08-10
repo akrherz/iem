@@ -246,9 +246,12 @@ def highcharts(fdict):
         )
 
     plotlines = ",".join(lines)
+    containername = fdict.get("_e", "ap_container")
     return (
         """
-$("#ap_container").highcharts({
+Highcharts.chart('"""
+        + containername
+        + """', {
     time: {
         useUTC: false,
         timezone: '"""

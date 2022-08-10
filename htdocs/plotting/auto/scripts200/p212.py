@@ -220,11 +220,12 @@ def highcharts(fdict):
     tc = ("ticks", "")
     mx = df[f"{ctx['var']}_max_year"]
     mn = df[f"{ctx['var']}_min_year"]
+    containername = fdict.get("_e", "ap_container")
     res = f"""
     var max_years = {mx.values.tolist()};
     var min_years = {mn.values.tolist()};
 
-    $("#ap_container").highcharts({{
+Highcharts.chart("{containername}", {{
         title: {{
             text: "{title}"
         }},

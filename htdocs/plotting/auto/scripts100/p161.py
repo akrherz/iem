@@ -166,10 +166,13 @@ def highcharts(fdict):
     ctx = get_context(fdict)
     ctx["df"] = ctx["df"].reset_index()
     data = ctx["df"][["year", "count"]].to_json(orient="values")
+    containername = fdict.get("_e", "ap_container")
 
     return (
         """
-    $("#ap_container").highcharts({
+Highcharts.chart('"""
+        + containername
+        + """', {
         chart: {
             type: 'column'
         },

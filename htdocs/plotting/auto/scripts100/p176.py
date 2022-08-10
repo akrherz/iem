@@ -143,9 +143,12 @@ def highcharts(fdict):
     }
     """
     )
+    containername = fdict.get("_e", "ap_container")
     return (
         """
-    $("#ap_container").highcharts({
+Highcharts.chart('"""
+        + containername
+        + """', {
         time: {useUTC: true}, // needed since we are using dates here :/
         chart: {
             type: 'scatter',

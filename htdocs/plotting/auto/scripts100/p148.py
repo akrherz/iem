@@ -41,7 +41,7 @@ def get_description():
         dict(
             type="station",
             name="station",
-            default="IA0200",
+            default="IATAME",
             network="IACLIMATE",
             label="Select Station:",
         ),
@@ -212,10 +212,13 @@ def highcharts(fdict):
     }
     """
     )
+    containername = fdict.get("_e", "ap_container")
 
     return (
         """
-    $("#ap_container").highcharts({
+    Highcharts.chart('"""
+        + containername
+        + """', {
         chart: {
             type: 'column',
             zoomType: 'x'

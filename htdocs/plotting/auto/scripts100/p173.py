@@ -222,9 +222,12 @@ def highcharts(fdict):
         """
         )
     series = ",".join(lines)
+    containername = fdict.get("_e", "ap_container")
     return (
         """
-    $("#ap_container").highcharts({
+Highcharts.chart('"""
+        + containername
+        + """', {
         chart: {
             type: 'column'
         },

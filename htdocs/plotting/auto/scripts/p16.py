@@ -118,9 +118,10 @@ def highcharts(fdict):
         True,
     )
     arr = [drct2text(mydir) for mydir in dir_edges]
+    containername = fdict.get("_e", "ap_container")
     return f"""
     var arr = {arr};
-    $("#ap_container").highcharts({{
+    Highcharts.chart("{containername}", {{
         series: [
         {{name: '{bins[1]} - {bins[2]}',
           data: {str(list(zip(arr, table[1])))},

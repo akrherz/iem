@@ -175,9 +175,12 @@ def highcharts(fdict):
         thisyear = ctx["df"][["dates", "thisyear"]].to_json(orient="values")
     except Exception:
         thisyear = "[]"
+    containername = fdict.get("_e", "ap_container")
     return (
         """
-$("#ap_container").highcharts({
+Highcharts.chart('"""
+        + containername
+        + """', {
     title: {text: '"""
         + ctx["title"].replace("\n", " ")
         + """'},

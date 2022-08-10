@@ -159,9 +159,12 @@ def highcharts(fdict):
     """Go high charts"""
     ctx = get_context(fdict)
     ptinterval = "10" if ctx["decadal"] else "1"
+    containername = fdict.get("_e", "ap_container")
     return (
         """
-$("#ap_container").highcharts({
+Highcharts.chart('"""
+        + containername
+        + """', {
     title: {text: '"""
         + ctx["title"]
         + """'},

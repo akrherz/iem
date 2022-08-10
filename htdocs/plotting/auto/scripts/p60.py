@@ -204,6 +204,7 @@ def highcharts(fdict):
         ylabels.append(dt.strftime("%-I %p"))
     ylabels.append("")  # shrug
     title = ctx["title"].replace(r"$^\circ$", "&deg;").replace("\n", "<br />")
+    containername = fdict.get("_e", "ap_container")
 
     return f"""
     var units = {repr(ctx['units'])};
@@ -214,7 +215,7 @@ def highcharts(fdict):
         return axis.categories[point[isY ? 'y' : 'x']];
     }}
 
-    Highcharts.chart('ap_container', {{
+    Highcharts.chart("{containername}", {{
         chart: {{
             type: 'heatmap',
             zoomType: 'xy'

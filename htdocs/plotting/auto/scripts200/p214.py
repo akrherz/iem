@@ -110,6 +110,7 @@ def highcharts(fdict):
     ctx = get_data(fdict)
     df = ctx["df"]
     ISO = "%Y-%m-%d %H:%M Z"
+    containername = fdict.get("_e", "ap_container")
     return (
         """
 var x = """
@@ -118,7 +119,9 @@ var x = """
 var dates = """
         + str(df["utc_valid"].dt.strftime(ISO).tolist())
         + """;
-$("#ap_container").highcharts({
+Highcharts.chart('"""
+        + containername
+        + """', {
     title: {text: '"""
         + ctx["title"]
         + """'},

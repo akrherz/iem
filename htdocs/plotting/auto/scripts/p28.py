@@ -51,7 +51,7 @@ def get_description():
         dict(
             type="station",
             name="station",
-            default="IA0200",
+            default="IATAME",
             label="Select Station:",
             network="IACLIMATE",
         ),
@@ -216,9 +216,12 @@ def highcharts(fdict):
         ctx["sdate"].month - 1,
         ctx["sdate"].day,
     )
+    containername = fdict.get("_e", "ap_container")
     return (
         """
-$("#ap_container").highcharts({
+Highcharts.chart('"""
+        + containername
+        + """', {
     time: {useUTC: false},
     title: {text: '"""
         + ctx["title"]
