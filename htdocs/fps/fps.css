@@ -38,3 +38,8 @@ h3 {
 .ui-window-bar .ui-window-maximize {
     right: calc(.3em + 20px);
 }
+
+.viz {
+    width: 100%;
+    height: 100%;
+}

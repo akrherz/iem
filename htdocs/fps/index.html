@@ -17,9 +17,12 @@
         <div class="col-md-2">
             <img src="/images/iem_logo.svg" class="img img-responsive">
         </div>
-        <div class="col-md-10">
+        <div class="col-md-8">
             <h3>Iowa Environmental Mesonet</h3>
             <h3>Capturing Iowa's Weather and Climate Variability</h3>
+        </div>
+        <div class="col-md-2">
+            <img src="/images/isulogo.png" class="img img-responsive">
         </div>
     </div>
 
@@ -32,8 +35,12 @@
     </div>
 
     <div class="row airport-data-template" style="display:none;">
-        <div class="col-md-3">Controls</div>
-        <div class="col-md-9">Data Display</div>
+        <div class="col-md-3">
+            <button role="button" class="btnloader" onClick="loaderClicked(this)"
+            data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
+            ><i class="fa fa-line-chart"></i> July Average Highs</button>
+        </div>
+        <div class="col-md-9 data-display">Data Display</div>
     </div>
 
 </body>
@@ -42,6 +49,11 @@
 <script src='/vendor/openlayers/6.15.1/ol.js'></script>
 <script src='/vendor/openlayers/6.15.1/ol-layerswitcher.js'></script>
 <script src="/vendor/jquery-ui/1.12.1/jquery-ui.js"></script>
+<script src="/vendor/highcharts/10.1.0/highcharts.js"></script>
+<script src="/vendor/highcharts/10.1.0/highcharts-more.js"></script>
+<script src="/vendor/highcharts/10.1.0/modules/accessibility.js"></script>
+<script src="/vendor/highcharts/10.1.0/modules/exporting.js"></script>
+<script src="/vendor/highcharts/10.1.0/modules/heatmap.js"></script>
 <script src="app.js"></script>
 <script src="dialog.js"></script>
 

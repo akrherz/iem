@@ -29,9 +29,15 @@ function mapClickHandler(event){
     if (feature === undefined) {
         return;
     }
+    // TODO prevent two windows opening for same station?
+    // Create new div to hold window content
     var div = document.createElement("div");
+    div.classList.add("datadiv");
+    div.setAttribute("data-station", feature.get("sid"));
+    div.setAttribute("data-network", feature.get("network"));
     div.setAttribute("title", feature.get("sid"));
-    $(".airport-data-template").clone().css("display", "block").appendTo($(div));
+    var $newdiv = $(".airport-data-template").clone().css("display", "block").appendTo($(div));
+    $newdiv.removeClass("airport-data-template");
     var classID = feature.get("sid");
     windowFactory(div, classID);
 }
@@ -77,7 +83,26 @@ function initMap(){
     olMap.on("click", mapClickHandler);
 
 }
+function loaderClicked(elem){
+    var $elem = $(elem);
+    var container = $elem.closest(".datadiv");
+    var station = $(container).data("station");
+    var network = $(container).data("network");
+    var tpl = $elem.data("url-template");
+    var divid = "d" + station + network;
+    var uri = tpl
+        .replace("{station}", station)
+        .replace("{network}", network)
+        .replace("{elem}", divid);
+    var target = $(container).find(".data-display");
+    // Create a div to append into that target
+    var datadiv = document.createElement("div");
+    datadiv.id = divid;
+    datadiv.classList.add("viz");
+    $(datadiv).appendTo($(target));
+    $.getScript(uri);
+}
 
-$(document).ready(() => {
+$(document).ready(function() {
     initMap();
 });
