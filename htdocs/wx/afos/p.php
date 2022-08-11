@@ -159,39 +159,46 @@ for ($i=0; $row = pg_fetch_assoc($rs); $i++)
 				$row["source"], date("d", $basets), date("m", $basets), 
 				date("Y", $basets));
 		$date2 =  date("d M Y", $basets);
+        $year = date("Y", $basets);
+        $year2 = intval($year) + 1;
 		$content .= <<<EOF
 <div class="row">
-<div class="col-sm-12">
+<div class="col-sm-6 col-md-6">
 <p>Displaying AFOS PIL: <strong>$pil</strong> 
 Received: <strong>{$dstamp} UTC</strong>
+
+<a rel="nofollow" class="btn btn-primary" 
+ href="p.php?dir=prev&pil=$pil&e=$newe"><i class="fa fa-arrow-left"></i> 
+ Previous in Time</a>
+<a rel="nofollow" class="btn btn-primary" 
+ href="p.php?pil=$pil">Latest Product</a>
+<a rel="nofollow" class="btn btn-primary" 
+ href="p.php?dir=next&pil=$pil&e=$newe">Next in Time <i class="fa fa-arrow-right"></i></a>
+
+<p><a rel="nofollow" class="btn btn-primary" 
+ href="{$listlink}">View All {$row["source"]} Products for {$date2}</a>
+<a rel="nofollow" class="btn btn-primary"
+ href="{$t->twitter_image}">View As Image</a>
+<a class="btn btn-primary" href="{$rawtext}">Download As Text</a></p>
+
 </div>
+<div class="col-sm-6 col-md-6 well">
+<form method="GET" action="/cgi-bin/afos/retrieve.py" name="bulk">
+<input type="hidden" name="dl" value="1">
+<input type="hidden" name="limit" value="9999">
+<p><i class="fa fa-download"></i> <strong>Bulk Download</strong> (single file,
+ delimited by ASCII \\003 char)</p>
+<strong>PIL:</strong> <input type="text" size="6" name="pil" value="${pil}">
+<br /><strong>Start UTC Date @0z:</strong> <input type="date" min="1980-01-01"
+ value="${year}-01-01" name="sdate">
+ <br /><strong>End UTC Date @0z:</strong> <input type="date" min="1980-01-01"
+ value="${year2}-01-01" name="edate">
+<br /><input type="submit" value="Download Please">
+</form>
+ </div>
 </div>
 
-<div class="row">
-<div class="col-sm-2">
-<a rel="nofollow" class="btn btn-primary" 
-	href="p.php?dir=prev&pil=$pil&e=$newe"><i class="fa fa-arrow-left"></i> 
-	Previous in Time</a>
-</div>
-<div class="col-sm-3">
-	<a rel="nofollow" class="btn btn-primary" 
-	href="{$listlink}">View All {$row["source"]} Products for {$date2}</a>
-</div>
-<div class="col-sm-2">
-	<a rel="nofollow" class="btn btn-primary" 
-	href="p.php?dir=next&pil=$pil&e=$newe">Next in Time <i class="fa fa-arrow-right"></i></a>
-</div>
-<div class="col-sm-5">
-	<a rel="nofollow" class="btn btn-primary" 
-	href="p.php?pil=$pil">Latest Product</a>
-	<a rel="nofollow" class="btn btn-primary"
-	href="{$t->twitter_image}">View As Image</a>
-	<a class="btn btn-primary"
-	href="{$rawtext}">Download As Text</a>
-</div>
-</div><!-- ./row -->
 EOF;
-		
 	}
 	if (strtotime($row["mytime"]) != $basets){ continue; }
 	$d = preg_replace("/\r\r\n/", "\n", $row["data"]);
