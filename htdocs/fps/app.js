@@ -85,6 +85,30 @@ function initMap(){
     olMap.on("click", mapClickHandler);
 
 }
+function createQRDialog(qrurl){
+    var div = document.createElement("div");
+    div.title = "Scan QR Code for IEM Website Link";
+    var img = document.createElement("img");
+    img.src = qrurl;
+    div.appendChild(img);
+    var dlg = $(div).dialog({
+        draggable: true,
+        autoOpen: true,
+        classes: {
+            "ui-dialog": "ui-window-options",
+            "ui-dialog-titlebar": "ui-window-bar"
+        },
+        modal: true,
+        responsive: true,
+        width: 600,
+        height: 600,
+        close: function() {
+            $(this).dialog('destroy').remove();
+        }
+    });
+    $(dlg).dialog("open");
+}
+
 function loaderClicked(elem){
     var $elem = $(elem);
     var container = $elem.closest(".datadiv");
@@ -96,12 +120,23 @@ function loaderClicked(elem){
         .replace("{station}", station)
         .replace("{network}", network)
         .replace("{elem}", divid);
-    var target = $(container).find(".data-display");
+    var qrurl = uri.replace("/plot/", "/qrcode/").replace(".js", ".png");
+    var $target = $(container).find(".data-display");
+    // Remove any previous content
+    $target.empty();
+    // Create a QR code icon for usage
+    var button = document.createElement("button");
+    button.classList.add("qrbutton");
+    button.innerHTML = '<i class="fa fa-qrcode"></i> QR';
+    button.onclick = function(){
+        createQRDialog(qrurl);
+    }
+    $(button).appendTo($target);
     // Create a div to append into that target
     var datadiv = document.createElement("div");
     datadiv.id = divid;
     datadiv.classList.add("viz");
-    $(datadiv).appendTo($(target));
+    $(datadiv).appendTo($target);
     $.getScript(uri);
 }
 
