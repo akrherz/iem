@@ -1,3 +1,4 @@
+var epoch = 0;
 var olMap;
 var stationLayer;
 
@@ -38,7 +39,8 @@ function mapClickHandler(event){
     div.setAttribute("title", feature.get("sid"));
     var $newdiv = $(".airport-data-template").clone().css("display", "block").appendTo($(div));
     $newdiv.removeClass("airport-data-template");
-    var classID = feature.get("sid");
+    var classID = feature.get("sid") + "_" + epoch;
+    epoch += 1;
     windowFactory(div, classID);
 }
 

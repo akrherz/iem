@@ -6,49 +6,74 @@
     <link href="/vendor/iastate-v2.0.13/css/iastate.min.css" rel="stylesheet">
     <link rel='stylesheet' href="/vendor/openlayers/6.15.1/ol.css" type='text/css'>
     <link rel='stylesheet' href="/vendor/openlayers/6.15.1/ol-layerswitcher.css" type='text/css'>
-    <link rel="stylesheet" href="/vendor/jquery-ui/1.12.1/jquery-ui.css">
+    <link rel="stylesheet" href="/vendor/jquery-ui/1.13.2/jquery-ui.css">
     <link rel="stylesheet" type="text/css" href="fps.css" />
 </head>
 
 <body>
-
+<div class="container-fluid h-100 d-flex flex-column">
     <!-- Content -->
     <div class="row">
-        <div class="col-md-2">
-            <img src="/images/iem_logo.svg" class="img img-responsive">
+        <div class="col-md-1">
+            <img src="/images/iem_logo.svg" class="img img-responsive"
+             style="height: 50px; padding-left: 50px;">
         </div>
-        <div class="col-md-8">
-            <h3>Iowa Environmental Mesonet</h3>
-            <h3>Capturing Iowa's Weather and Climate Variability</h3>
-        </div>
-        <div class="col-md-2">
-            <img src="/images/isulogo.png" class="img img-responsive">
+        <div class="col-md-11">
+            <h3 class="title">Iowa Environmental Mesonet:: Capturing Iowa's Weather and Climate Variability</h3>
         </div>
     </div>
+    <br clear="all"/>
 
     <div class="row">
-        <div class="col-md-10">
+        <div class="col-md-10" style="padding-left: 25px;">
             <div id="olmap"></div>
         </div>
         <div class="col-md-2">
         </div>
     </div>
 
-    <div class="row airport-data-template" style="display:none;">
-        <div class="col-md-3">
+    <div class="row airport-data-template"
+     style="display:none; min-height: 0px; width: 100%; overflow-y: hidden; height: auto;">
+        <div class="col-md-3" style="overflow-y: scroll; height: 450;">
+            <h3>High Temps</h3>
             <button role="button" class="btnloader" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
             ><i class="fa fa-line-chart"></i> July Average Highs</button>
+            <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
+            data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
+            ><i class="fa fa-line-chart"></i> July Average Highs</button>
+            <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
+            data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
+            ><i class="fa fa-line-chart"></i> July Average Highs</button>
+            <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
+            data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
+            ><i class="fa fa-line-chart"></i> July Average Highs</button>
+            <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
+            data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
+            ><i class="fa fa-line-chart"></i> July Average Highs</button>
+            <h3>Precipitation</h3>
+            <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
+            data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
+            ><i class="fa fa-line-chart"></i> July Average Highs</button>
+            <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
+            data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
+            ><i class="fa fa-line-chart"></i> July Average Highs</button>
+            <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
+            data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
+            ><i class="fa fa-line-chart"></i> July Average Highs</button>
+            <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
+            data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
+            ><i class="fa fa-line-chart"></i> July Average Highs</button>
         </div>
-        <div class="col-md-9 data-display">Data Display</div>
+        <div class="col-md-9 data-display" style="overflow-y: auto; height: auto;"">Data Display</div>
     </div>
-
+</div><!-- ./container -->
 </body>
 <script src="/vendor/jquery/1.11.3/jquery-1.11.3.min.js"></script>
 <script src="/vendor/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script src='/vendor/openlayers/6.15.1/ol.js'></script>
 <script src='/vendor/openlayers/6.15.1/ol-layerswitcher.js'></script>
-<script src="/vendor/jquery-ui/1.12.1/jquery-ui.js"></script>
+<script src="/vendor/jquery-ui/1.13.2/jquery-ui.js"></script>
 <script src="/vendor/highcharts/10.1.0/highcharts.js"></script>
 <script src="/vendor/highcharts/10.1.0/highcharts-more.js"></script>
 <script src="/vendor/highcharts/10.1.0/modules/accessibility.js"></script>

@@ -1,4 +1,4 @@
-var activeDialogs = 0;
+var dockPosition = 0;
 
 // https://stackoverflow.com/questions/48712560
 function addButtons(dlg) {
@@ -39,9 +39,10 @@ function addButtons(dlg) {
             $min.data("isMin", true);
             dlg.animate({
                 height: '40px',
-                top: $(window).height() - (50 * activeDialogs),
+                top: $(window).height() - 50 - dockPosition,
                 left: 0
             }, 200);
+            dockPosition += 50;
             dlg.find(".ui-dialog-content").hide();
         } else {
             $min.data("isMin", false);
@@ -51,6 +52,7 @@ function addButtons(dlg) {
                 top: $min.data("original-pos").top + "px",
                 left: $min.data("original-pos").left + "px"
             }, 200);
+            dockPosition -= 50;
         }
     });
     $max.click(function (e) {
@@ -80,7 +82,6 @@ function addButtons(dlg) {
 }
 
 function windowFactory(initdiv, classID){
-    activeDialogs += 1;
     var dlg = $(initdiv).dialog({
         draggable: true,
         autoOpen: true,
@@ -91,11 +92,20 @@ function windowFactory(initdiv, classID){
         },
         modal: false,
         responsive: true,
-        width: 600,
-        height: 400,
+        width: 800,
+        height: 500,
         close: function() {
-            activeDialogs -= 1;
             $(this).dialog('destroy').remove();
+        },
+        resizeStop: function() {
+            // Causes charts to fit their container
+            $(Highcharts.charts).each(function(i,chart){
+                var height = chart.renderTo.clientHeight; 
+                var width = chart.renderTo.clientWidth; 
+                chart.setSize(width, height); 
+            });
+            // Fixes responsive troubles with boostrap?
+            $(this).find(".col-md-3").height(this.clientHeight);
         }
     });
     

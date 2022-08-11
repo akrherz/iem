@@ -1,5 +1,5 @@
 html { 
-    background: url(background.png) no-repeat center center fixed; 
+    background: url(img/background.png) no-repeat center center fixed; 
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
@@ -10,7 +10,11 @@ body {
     background-color: #ffffff00 !important;
 }
 
-h3 {
+html,body {
+    height: 100%;
+}
+
+h3.title {
     color: #fff;
     font-weight: bolder;
     font-size: x-large;
@@ -37,6 +41,10 @@ h3 {
 
 .ui-window-bar .ui-window-maximize {
     right: calc(.3em + 20px);
+}
+
+.ui-dialog-content {
+    overflow: hidden !important;
 }
 
 .viz {
