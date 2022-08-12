@@ -159,7 +159,8 @@ def get_data(ctx):
                     "select "
                     "extract(year from valid at time zone 'UTC')::int "
                     "as year, valid at time zone 'UTC' as utc_valid, "
-                    f"{varname} from raob_flights WHERE station in :stations "
+                    f"{varname} from raob_flights f WHERE "
+                    "station in :stations "
                     f"{hrlimiter} and {varname} is not null ORDER by valid ASC"
                 ),
                 conn,
@@ -413,5 +414,7 @@ def plotter(fdict):
 
 if __name__ == "__main__":
     plotter(
-        dict(station="KEPZ", var="height", level=500, hour="both", year=1996)
+        dict(
+            station="KEPZ", var="pwater_in", level=500, hour="both", year=1996
+        )
     )
