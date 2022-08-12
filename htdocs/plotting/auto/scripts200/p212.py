@@ -9,7 +9,7 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, mm2inch
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
-PDICT = {"00": "00 UTC", "12": "12 UTC"}
+PDICT = {"00": "00 UTC", "12": "12 UTC", "both": "00 + 12 UTC"}
 PDICT3 = {
     "tmpc": "Air Temperature (°C)",
     "dwpc": "Dew Point (°C)",
@@ -62,6 +62,9 @@ def get_description():
     very similiar tool</a> that you may want to check out.</p>
 
     <p>The max and min monthly values are labeled within the plot.</p>
+
+    <p>If you select to plot both 00 and 12 UTC, the climatology is computed
+    seperately at 00 and 12 UTC.  The chart gets more noisey when doing so.</p>
     """
     desc["arguments"] = [
         dict(
@@ -118,8 +121,16 @@ def get_data(ctx):
     varname_final = ctx["var"]
     if varname == "pwater_in":
         varname = "pwater_mm"
-    hour = int(ctx["hour"])
     level = ctx["level"]
+    params = {
+        "stations": tuple(stations),
+        "level": level,
+    }
+    hour = ctx["hour"]
+    hrlimiter = "and extract(hour from f.valid at time zone 'UTC') in (0, 12)"
+    if hour != "both":
+        hrlimiter = "and extract(hour from f.valid at time zone 'UTC') = :hour"
+        params["hour"] = int(hour)
     if varname in ["tmpc", "dwpc", "height", "smps"]:
         ctx["leveltitle"] = f" @ {level} hPa"
         with get_sqlalchemy_conn("raob") as conn:
@@ -130,16 +141,11 @@ def get_data(ctx):
                     "as year, f.valid at time zone 'UTC' as utc_valid, "
                     f"{varname} from raob_profile p JOIN raob_flights f on "
                     "(p.fid = f.fid) WHERE f.station in :stations "
-                    "and p.pressure = :level and "
-                    "extract(hour from f.valid at time zone 'UTC') = :hour "
+                    f"{hrlimiter} and p.pressure = :level  "
                     f"and {varname} is not null ORDER by valid ASC"
                 ),
                 conn,
-                params={
-                    "stations": tuple(stations),
-                    "level": level,
-                    "hour": hour,
-                },
+                params=params,
                 index_col="utc_valid",
             )
             if not dfin.empty:
@@ -154,23 +160,22 @@ def get_data(ctx):
                     "extract(year from valid at time zone 'UTC')::int "
                     "as year, valid at time zone 'UTC' as utc_valid, "
                     f"{varname} from raob_flights WHERE station in :stations "
-                    "and extract(hour from valid at time zone 'UTC') = :hour "
-                    f"and {varname} is not null ORDER by valid ASC"
+                    f"{hrlimiter} and {varname} is not null ORDER by valid ASC"
                 ),
                 conn,
-                params={"stations": tuple(stations), "hour": hour},
+                params=params,
                 index_col="utc_valid",
             )
     if dfin.empty:
         raise NoDataFound("No Data Found.")
     if varname_final == "pwater_in":
         dfin["pwater_in"] = mm2inch(dfin["pwater_mm"])
-    dfin["sday"] = dfin.index.strftime("%m%d")
+    dfin["sday"] = dfin.index.strftime("%m%d%H")
     # Drop leapday if this year does not have it.
     try:
         datetime.date(ctx["year"], 2, 29)
     except ValueError:
-        dfin = dfin[dfin["sday"] != "0229"]
+        dfin = dfin[dfin["sday"].str.slice(0, 4) != "0229"]
     # create the climatology dataframe
     df = dfin[["sday", ctx["var"]]].groupby("sday").describe()
     # Merge in this year's obs
@@ -194,14 +199,15 @@ def get_data(ctx):
 
     # Create a utc_valid column for later usage
     df["utc_valid"] = pd.to_datetime(
-        str(ctx["year"]) + df.index + f"{hour:02.0f}",
+        str(ctx["year"]) + df.index,
         format="%Y%m%d%H",
     ).tz_localize("UTC")
     ctx["df"] = df
     ctx["dfin"] = dfin
 
+    label = "00 + 12 UTC" if hour == "both" else f"{int(hour):02.0f} UTC"
     ctx["title"] = (
-        f"{station} {name} {hour:02.0f} UTC Sounding "
+        f"{station} {name} {label} Sounding "
         f"({dfin['year'].index[0]:%Y-%m-%d %H}z - "
         f"{dfin['year'].index[-1]:%Y-%m-%d %H}z)\n"
         f"{PDICT3[varname]} {ctx['leveltitle']}"
@@ -407,5 +413,5 @@ def plotter(fdict):
 
 if __name__ == "__main__":
     plotter(
-        dict(station="KEPZ", var="height", level=500, hour="00", year=1996)
+        dict(station="KEPZ", var="height", level=500, hour="both", year=1996)
     )
