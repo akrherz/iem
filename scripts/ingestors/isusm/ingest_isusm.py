@@ -248,9 +248,9 @@ def minute_iemaccess(df):
             ob.data["c4tmpf"] = c2f(row["t50_c_avg_qc"])
         if "vwc12" in df.columns:
             ob.data["c2smv"] = row["vwc12_qc"] * 100.0
-        if "calcvwc24_avg" in df.columns:
+        if "vwc24" in df.columns:
             ob.data["c3smv"] = row["vwc24_qc"] * 100.0
-        if "calcvwc50_avg" in df.columns:
+        if "vwc50" in df.columns:
             ob.data["c4smv"] = row["vwc50_qc"] * 100.0
         ob.save(cursor)
     cursor.close()
