@@ -186,16 +186,20 @@ Received: <strong>{$dstamp} UTC</strong>
 <form method="GET" action="/cgi-bin/afos/retrieve.py" name="bulk">
 <input type="hidden" name="dl" value="1">
 <input type="hidden" name="limit" value="9999">
-<p><i class="fa fa-download"></i> <strong>Bulk Download</strong> (single file,
- delimited by ASCII \\003 char)</p>
+<p><i class="fa fa-download"></i> <strong>Bulk Download</strong></p>
 <strong>PIL:</strong> <input type="text" size="6" name="pil" value="${pil}">
+<select name="fmt">
+ <option value="text">Single Text File (\\003 Delimited)</option>
+ <option value="zip">Zip File of One Product per File</option>
+</select>
 <br /><strong>Start UTC Date @0z:</strong> <input type="date" min="1980-01-01"
  value="${year}-01-01" name="sdate">
  <br /><strong>End UTC Date @0z:</strong> <input type="date" min="1980-01-01"
  value="${year2}-01-01" name="edate">
 <br /><input type="submit" value="Download Please">
 </form>
- </div>
+
+</div>
 </div>
 
 EOF;

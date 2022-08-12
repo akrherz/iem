@@ -1,7 +1,8 @@
 """give me some AFOS data please."""
 from datetime import datetime, timezone
 import re
-from io import StringIO
+from io import StringIO, BytesIO
+import zipfile
 
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
@@ -55,6 +56,16 @@ def get_date(raw):
     return dt.replace(tzinfo=timezone.utc)
 
 
+def zip_handler(cursor):
+    """Stream back a zipfile!"""
+    bio = BytesIO()
+    with zipfile.ZipFile(bio, "w") as zfp:
+        for row in cursor:
+            zfp.writestr(f"{row[1]}_{row[2]}.txt", row[0])
+    bio.seek(0)
+    return [bio.getvalue()]
+
+
 def application(environ, start_response):
     """Process the request"""
     # Attempt to keep the file from downloading and just displaying in chrome
@@ -76,10 +87,11 @@ def application(environ, start_response):
     ttaaii = form.get("ttaaii", "")[:6]
     fmt = form.get("fmt", "text")
     headers = [("X-Content-Type-Options", "nosniff")]
-    if form.get("dl") == "1":
+    if form.get("dl") == "1" or fmt == "zip":
+        suffix = "zip" if fmt == "zip" else "txt"
         headers.append(("Content-type", "application/octet-stream"))
         headers.append(
-            ("Content-disposition", "attachment; filename=afos.txt")
+            ("Content-disposition", f"attachment; filename=afos.{suffix}")
         )
     else:
         if fmt == "text":
@@ -157,6 +169,8 @@ def application(environ, start_response):
             f"{ttlimit} ORDER by entered DESC LIMIT {limit}"
         )
         cursor.execute(sql)
+    if fmt == "zip":
+        return zip_handler(cursor)
 
     for row in cursor:
         if fmt == "html":
