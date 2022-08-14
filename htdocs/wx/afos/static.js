@@ -103,29 +103,27 @@ function addTab(pil, center, ttaaii, limit, sdate, edate, doCookieSave){
 		saveCookies();		
 	}
 }
-
+function dlbtn(btn, fmt){
+    var pil = $(".nav-tabs li.active").data('pil');
+    if (pil === undefined){
+        return;
+    }
+    var limit = $(".nav-tabs li.active").data('limit');
+    var center = $(".nav-tabs li.active").data('center');
+    var ttaaii = $(".nav-tabs li.active").data('ttaaii');
+    var sdate = $(".nav-tabs li.active").data('sdate');
+    var edate = $(".nav-tabs li.active").data('edate');
+    sdate = (sdate == NO_DATE_SET) ? "": sdate;
+    edate = (edate == NO_DATE_SET) ? "": edate;
+    window.location = "/cgi-bin/afos/retrieve.py?dl=1&fmt="+ fmt +"&pil="+pil+"&center="+
+            center +"&limit="+ limit +"&sdate="+ sdate +"&edate="+ edate +
+            "&ttaaii=" + ttaaii;
+    $(btn).blur();
+}
 function buildUI(){
 	// listen for refresh clicks
 	$("#toolbar-refresh").click(function(){
 		refreshActiveTab();
-		$(this).blur();
-	});
-	// Save data to disk :)
-	$("#toolbar-download").click(function(){
-		var pil = $(".nav-tabs li.active").data('pil');
-		if (pil === undefined){
-			return;
-		}
-		var limit = $(".nav-tabs li.active").data('limit');
-		var center = $(".nav-tabs li.active").data('center');
-		var ttaaii = $(".nav-tabs li.active").data('ttaaii');
-		var sdate = $(".nav-tabs li.active").data('sdate');
-		var edate = $(".nav-tabs li.active").data('edate');
-		sdate = (sdate == NO_DATE_SET) ? "": sdate;
-		edate = (edate == NO_DATE_SET) ? "": edate;
-		window.location = "/cgi-bin/afos/retrieve.py?dl=1&fmt=text&pil="+pil+"&center="+
-				center +"&limit="+ limit +"&sdate="+ sdate +"&edate="+ edate +
-				"&ttaaii=" + ttaaii;
 		$(this).blur();
 	});
 	// Print!

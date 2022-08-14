@@ -141,7 +141,8 @@ $t->content = <<<EOF
     <div class="panel-body">
     <div id="thetabs-toolbar">
         <button type="button" id="toolbar-refresh" class="btn btn-default"><i class="fa fa-refresh"></i> Refresh</button>
-        <button type="button" id="toolbar-download" class="btn btn-default"><i class="fa fa-download"></i> Download Text</button>
+        <button type="button" id="toolbar-download" class="btn btn-default" onclick="dlbtn(this, 'text');"><i class="fa fa-download"></i> Download Text</button>
+        <button type="button" id="toolbar-zip" class="btn btn-default" onclick="dlbtn(this, 'zip');"><i class="fa fa-file-archive-o"></i> Download Zipfile</button>
         <button type="button" id="toolbar-print" class="btn btn-default"><i class="fa fa-print"></i> Send Text to Printer</button>
         <button type="button" id="toolbar-close" class="btn btn-default"><i class="fa fa-close"></i> Close Tab</button>
     </div>
