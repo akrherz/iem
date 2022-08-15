@@ -11,19 +11,14 @@
 </head>
 
 <body>
-<div class="container-fluid h-100 d-flex flex-column">
-    <!-- Content -->
-    <div class="row">
-        <div class="col-md-1">
-            <img src="/images/iem_logo.svg" class="img img-responsive"
-             style="height: 50px; padding-left: 50px;">
-        </div>
-        <div class="col-md-11">
-            <h3 class="title">Iowa Environmental Mesonet:: Capturing Iowa's Weather and Climate Variability</h3>
-        </div>
-    </div>
-    <br clear="all"/>
+    <img src="/images/iem_logo.svg"
+     style="height: 75px; position: absolute; left: 25px; top: -5px;">
 
+    <h3 class="title">Iowa Environmental Mesonet:: Capturing Iowa's Weather and Climate Variability</h3>
+
+    <p class="wx">ISU AEA Farm (2 miles SE FPS), <span id="wxtime">9:46 AM</span> Temp: 80&deg;F Rain:0.00"</p>
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
     <div class="row">
         <div class="col-md-10" style="padding-left: 25px;">
             <div id="olmap"></div>
@@ -32,42 +27,42 @@
         </div>
     </div>
 
-    <div class="row airport-data-template"
+    <div class="row coop-data-template"
      style="display:none; min-height: 0px; width: 100%; overflow-y: hidden; height: auto;">
         <div class="col-md-3" style="overflow-y: scroll; height: 450;">
-            <h3>High Temps</h3>
+            <h3>Temperature</h3>
             <button role="button" class="btnloader" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
+            ><i class="fa fa-line-chart"></i> July Max High</button>
+            <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
+            data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:avg-high::_e:{elem}.js"
             ><i class="fa fa-line-chart"></i> July Average Highs</button>
             <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
-            ><i class="fa fa-line-chart"></i> July Average Highs</button>
+            ><i class="fa fa-line-chart"></i> TBD</button>
             <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
-            ><i class="fa fa-line-chart"></i> July Average Highs</button>
+            ><i class="fa fa-line-chart"></i> TBD</button>
             <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
-            ><i class="fa fa-line-chart"></i> July Average Highs</button>
-            <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
-            data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
-            ><i class="fa fa-line-chart"></i> July Average Highs</button>
+            ><i class="fa fa-line-chart"></i> TBD</button>
             <h3>Precipitation</h3>
             <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
-            data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
-            ><i class="fa fa-line-chart"></i> July Average Highs</button>
+            data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:sum-precip::_e:{elem}.js"
+            ><i class="fa fa-line-chart"></i> July Total Precip</button>
             <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
-            ><i class="fa fa-line-chart"></i> July Average Highs</button>
+            ><i class="fa fa-line-chart"></i> TBD</button>
             <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
-            ><i class="fa fa-line-chart"></i> July Average Highs</button>
+            ><i class="fa fa-line-chart"></i> TBD</button>
             <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
-            ><i class="fa fa-line-chart"></i> July Average Highs</button>
+            ><i class="fa fa-line-chart"></i> TBD</button>
         </div>
         <div class="col-md-9 data-display" style="overflow-y: auto; height: auto;""></div>
     </div>
-</div><!-- ./container -->
+
 </body>
 <script src="/vendor/jquery/1.11.3/jquery-1.11.3.min.js"></script>
 <script src="/vendor/bootstrap/3.3.7/js/bootstrap.min.js"></script>

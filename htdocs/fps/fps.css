@@ -15,15 +15,24 @@ html,body {
 }
 
 h3.title {
-    color: #fff;
+    color: #ff0;
     font-weight: bolder;
     font-size: x-large;
+    position: absolute;
+    top: -15px;
+    left: 150px;
+}
+.wx {
+    position: absolute;
+    top: 30px;
+    left: 150px;
+    font-weight: bolder;
 }
 
 #olmap {
     width: 100%;
     min-height: 400px;
-    height: 450px;
+    height: 530px;
 }
 
 .ui-window-bar .ui-button {

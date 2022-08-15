@@ -36,9 +36,9 @@ function mapClickHandler(event){
     div.classList.add("datadiv");
     div.setAttribute("data-station", feature.get("sid"));
     div.setAttribute("data-network", feature.get("network"));
-    div.setAttribute("title", feature.get("sid"));
-    var $newdiv = $(".airport-data-template").clone().css("display", "block").appendTo($(div));
-    $newdiv.removeClass("airport-data-template");
+    div.setAttribute("title", feature.get("sid") + " " + feature.get("sname"));
+    var $newdiv = $(".coop-data-template").clone().css("display", "block").appendTo($(div));
+    $newdiv.removeClass("coop-data-template");
     var classID = feature.get("sid") + "_" + epoch;
     epoch += 1;
     windowFactory(div, classID);
