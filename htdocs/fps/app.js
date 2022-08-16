@@ -109,18 +109,7 @@ function createQRDialog(qrurl){
     $(dlg).dialog("open");
 }
 
-function loaderClicked(elem){
-    var $elem = $(elem);
-    var container = $elem.closest(".datadiv");
-    var station = $(container).data("station");
-    var network = $(container).data("network");
-    var tpl = $elem.data("url-template");
-    var divid = "d" + station + network;
-    var uri = tpl
-        .replace("{station}", station)
-        .replace("{network}", network)
-        .replace("{elem}", divid);
-    var qrurl = uri.replace("/plot/", "/qrcode/").replace(".js", ".png");
+function loadAutoplot(container, qrurl, uri, divid){
     var $target = $(container).find(".data-display");
     // Remove any previous content
     $target.empty();
@@ -138,8 +127,42 @@ function loaderClicked(elem){
     datadiv.classList.add("viz");
     $(datadiv).appendTo($target);
     $.getScript(uri);
+
+}
+function loaderClicked(elem){
+    var $elem = $(elem);
+    var container = $elem.closest(".datadiv");
+    var station = $(container).data("station");
+    var network = $(container).data("network");
+    var tpl = $elem.data("url-template");
+    var divid = "d" + station + network;
+    var uri = tpl
+        .replace("{station}", station)
+        .replace("{network}", network)
+        .replace("{elem}", divid)
+        .replace("{month}", $("select[name=coop_trends_month]").val())
+        .replace("{type}", $("select[name=coop_trends_type]").val());
+    var qrurl = uri.replace("/plot/", "/qrcode/").replace(".js", ".png");
+    loadAutoplot(container, qrurl, uri, divid);
+}
+
+function wxCurrents(){
+    // Show Weather
+    $.ajax({
+        url: "/json/current.py?network=ISUSM&station=BOOI4",
+        dataType: "json",
+        success: function(data) {
+            var valid = data.last_ob.local_valid;
+            $("#wxtime").text(valid);
+            var tmpf = data.last_ob["airtemp[F]"].toFixed(1);
+            $("#tmpf").text(tmpf);
+        }
+    });
+
 }
 
 $(document).ready(function() {
     initMap();
+    wxCurrents();
+    window.setInterval(wxCurrents, 120000);
 });

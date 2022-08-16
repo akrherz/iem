@@ -1,13 +1,11 @@
 html { 
-    background: url(img/background.png) no-repeat center center fixed; 
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
+    background: url(img/background.png); 
 }
 
 body {
     background-color: #ffffff00 !important;
+    width: 1920px;
+    height: 1000px;
 }
 
 html,body {
@@ -22,11 +20,12 @@ h3.title {
     top: -15px;
     left: 150px;
 }
-.wx {
+#wx {
     position: absolute;
-    top: 30px;
-    left: 150px;
+    bottom: 10px;
+    right: 50px;
     font-weight: bolder;
+    background-color: #fff;
 }
 
 #olmap {

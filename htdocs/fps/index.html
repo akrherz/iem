@@ -16,7 +16,12 @@
 
     <h3 class="title">Iowa Environmental Mesonet:: Capturing Iowa's Weather and Climate Variability</h3>
 
-    <p class="wx">ISU AEA Farm (2 miles SE FPS), <span id="wxtime">9:46 AM</span> Temp: 80&deg;F Rain:0.00"</p>
+    <div id="wx">Current Weather
+        <br />ISU AEA Farm (2 miles SE FPS)
+        <br /><span id="wxtime">9:46 AM</span>
+        <br />Temp: <span id="tmpf">80</span>&deg;F
+        <br />Rain:0.00"
+    </div>
     <p>&nbsp;</p>
     <p>&nbsp;</p>
     <div class="row">
@@ -30,33 +35,73 @@
     <div class="row coop-data-template"
      style="display:none; min-height: 0px; width: 100%; overflow-y: hidden; height: auto;">
         <div class="col-md-3" style="overflow-y: scroll; height: 450;">
+            <h3>Trends</h3>
+            <br /><strong>Variable:</strong>
+            <select name="coop_trends_type">
+                <option value="max-high">Maximum High</option>
+                <option value="avg-high">Average High</option>
+                <option value="std-high">Standard Deviation High</option>
+                <option value="delta-high">Average Day to Day High Change</option>
+                <option value="min-high">Minimum High</option>
+                <option value="max-low">Maximum Low</option>
+                <option value="avg-low">Average Low</option>
+                <option value="std-low">Standard Deviation Low</option>
+                <option value="delta-low">Average Day to Day Low Change</option>
+                <option value="min-low">Minimum Low</option>
+                <option value="avg-temp">Average Temp</option>
+                <option value="std-temp">Standard Deviation of Average Temp</option>
+                <option value="delta-temp">Average Day to Day Avg Temp Change</option>
+                <option value="range-avghi-avglo">Range between Average High + Average Low</option>
+                <option value="max-precip">Maximum Daily Precip</option>
+                <option value="sum-precip">Total Precipitation</option>
+            </select>
+            <br /><strong>Period:</strong>
+            <select name="coop_trends_month">
+                <option value="spring">Spring (MAM)</option>
+                <option value="fall">Fall (SON)</option>
+                <option value="winter">Winter (DJF)</option>
+                <option value="summer">Summer (JJA)</option>
+                <option value="1">January</option>
+                <option value="2">February</option>
+                <option value="3">March</option>
+                <option value="4">April</option>
+                <option value="5">May</option>
+                <option value="6">June</option>
+                <option value="7">July</option>
+                <option value="8" selected="selected">August</option>
+                <option value="9">September</option>
+                <option value="10">October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+            </select>
+
+            <button role="button" onClick="loaderClicked(this);"
+             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:{month}::type:{type}::_e:{elem}.js"><i class="fa fa-line-chart"></i> Create Chart</button>
             <h3>Temperature</h3>
-            <button role="button" class="btnloader" onClick="loaderClicked(this)"
-            data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
-            ><i class="fa fa-line-chart"></i> July Max High</button>
-            <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
+            
+            <br /><button role="button" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:avg-high::_e:{elem}.js"
             ><i class="fa fa-line-chart"></i> July Average Highs</button>
-            <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
+            <br /><button role="button" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
             ><i class="fa fa-line-chart"></i> TBD</button>
-            <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
+            <br /><button role="button" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
             ><i class="fa fa-line-chart"></i> TBD</button>
-            <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
+            <br /><button role="button" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
             ><i class="fa fa-line-chart"></i> TBD</button>
             <h3>Precipitation</h3>
-            <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
+            <br /><button role="button" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:sum-precip::_e:{elem}.js"
             ><i class="fa fa-line-chart"></i> July Total Precip</button>
-            <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
+            <br /><button role="button" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
             ><i class="fa fa-line-chart"></i> TBD</button>
-            <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
+            <br /><button role="button" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
             ><i class="fa fa-line-chart"></i> TBD</button>
-            <br /><button role="button" class="btnloader" onClick="loaderClicked(this)"
+            <br /><button role="button" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
             ><i class="fa fa-line-chart"></i> TBD</button>
         </div>
