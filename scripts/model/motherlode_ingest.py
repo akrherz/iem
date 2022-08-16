@@ -17,7 +17,7 @@ LOG = logger()
 NT = NetworkTable("IA_ASOS")
 
 BASE_URL = "https://tds.scigw.unidata.ucar.edu/thredds/ncss/grid/grib/NCEP/"
-BASE_URL2 = "http://thredds.ucar.edu/thredds/ncss/grib/NCEP/"
+BASE_URL2 = "https://thredds.ucar.edu/thredds/ncss/grid/grib/NCEP/"
 URLS = {
     "NAM": (
         "NAM/CONUS_12km/conduit/NAM_CONUS_12km_conduit_%Y%m%d_%H00.grib2/GC"
@@ -79,6 +79,7 @@ def run(mcursor, model, station, lon, lat, ts):
     try:
         fp = requests.get(url, timeout=120)
         if fp.status_code == 404:
+            LOG.info(url)
             LOG.warning("Grid %s %s missing", model, ts)
             return 0
         sio = StringIO(fp.text)
