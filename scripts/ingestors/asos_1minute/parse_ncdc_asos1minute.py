@@ -188,16 +188,21 @@ def p1_parser(line, metadata):
 
 def dl_archive(df, dt):
     """Do archived downloading."""
-    baseuri = "https://www1.ncdc.noaa.gov/pub/data/asos-onemin"
+    # https://www.ncei.noaa.gov/data/automated-surface-observing-system-one-
+    # minute-pg1/access/2022/08/asos-1min-pg1-K1J0-202208.dat
+    baseuri = (
+        "https://www.ncei.noaa.gov/data/automated-surface-observing-system-"
+        "one-minute-pg"
+    )
     for station in df.index.values:
         datadir = f"{BASEDIR}/{station}"
         if not os.path.isdir(datadir):
             os.makedirs(datadir)
         station4 = station if len(station) == 4 else f"K{station}"
-        for page in [5, 6]:
-            fn = f"640{page}0{station4}{dt:%Y%m}.dat"
+        for page in [1, 2]:
+            fn = f"asos-1min-pg{page}-{station4}-{dt:%Y%m}.dat"
             if not os.path.isfile(f"{datadir}/{fn}"):
-                uri = f"{baseuri}/640{page}-{dt.strftime('%Y')}/{fn}"
+                uri = f"{baseuri}{page}/access/{dt:%Y/%m}/{fn}"
                 req = exponential_backoff(requests.get, uri, timeout=60)
                 if req is None:
                     LOG.info("total failure %s", uri)
@@ -207,7 +212,7 @@ def dl_archive(df, dt):
                     continue
                 with open(f"{datadir}/{fn}", "wb") as fh:
                     fh.write(req.content)
-            df.at[station, f"fn{page}"] = f"{datadir}/{fn}"
+            df.at[station, f"fn{page + 4}"] = f"{datadir}/{fn}"
 
 
 def liner(fn):
