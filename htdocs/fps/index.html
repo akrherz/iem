@@ -34,29 +34,24 @@
 
     <div class="row coop-data-template"
      style="display:none; min-height: 0px; width: 100%; overflow-y: hidden; height: auto;">
-        <div class="col-md-3" style="overflow-y: scroll; height: 450;">
+        <div class="col-md-4" style="overflow-y: scroll; height: 450;">
             <h3>Trends</h3>
             <br /><strong>Variable:</strong>
             <select name="coop_trends_type">
                 <option value="max-high">Maximum High</option>
                 <option value="avg-high">Average High</option>
-                <option value="std-high">Standard Deviation High</option>
-                <option value="delta-high">Average Day to Day High Change</option>
                 <option value="min-high">Minimum High</option>
                 <option value="max-low">Maximum Low</option>
                 <option value="avg-low">Average Low</option>
-                <option value="std-low">Standard Deviation Low</option>
-                <option value="delta-low">Average Day to Day Low Change</option>
                 <option value="min-low">Minimum Low</option>
                 <option value="avg-temp">Average Temp</option>
-                <option value="std-temp">Standard Deviation of Average Temp</option>
-                <option value="delta-temp">Average Day to Day Avg Temp Change</option>
-                <option value="range-avghi-avglo">Range between Average High + Average Low</option>
+                <option value="range-avghi-avglo">Range between Ave High + Low</option>
                 <option value="max-precip">Maximum Daily Precip</option>
                 <option value="sum-precip">Total Precipitation</option>
             </select>
-            <br /><strong>Period:</strong>
+            <br /><strong>Month/Season:</strong>
             <select name="coop_trends_month">
+                <option value="year">Calendar Year</option>
                 <option value="spring">Spring (MAM)</option>
                 <option value="fall">Fall (SON)</option>
                 <option value="winter">Winter (DJF)</option>
@@ -105,7 +100,7 @@
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:7::type:max-high::_e:{elem}.js"
             ><i class="fa fa-line-chart"></i> TBD</button>
         </div>
-        <div class="col-md-9 data-display" style="overflow-y: auto; height: auto;""></div>
+        <div class="col-md-8 data-display" style="overflow-y: auto; height: auto;""></div>
     </div>
 
 </body>

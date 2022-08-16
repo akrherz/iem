@@ -46,26 +46,25 @@ PDICT = dict(
     ]
 )
 PDICT2 = {"no": "Plot Yearly Values", "yes": "Plot Decadal Values"}
-MDICT = dict(
-    [
-        ("spring", "Spring (MAM)"),
-        ("fall", "Fall (SON)"),
-        ("winter", "Winter (DJF)"),
-        ("summer", "Summer (JJA)"),
-        ("1", "January"),
-        ("2", "February"),
-        ("3", "March"),
-        ("4", "April"),
-        ("5", "May"),
-        ("6", "June"),
-        ("7", "July"),
-        ("8", "August"),
-        ("9", "September"),
-        ("10", "October"),
-        ("11", "November"),
-        ("12", "December"),
-    ]
-)
+MDICT = {
+    "year": "Calendar Year",
+    "spring": "Spring (MAM)",
+    "fall": "Fall (SON)",
+    "winter": "Winter (DJF)",
+    "summer": "Summer (JJA)",
+    "1": "January",
+    "2": "February",
+    "3": "March",
+    "4": "April",
+    "5": "May",
+    "6": "June",
+    "7": "July",
+    "8": "August",
+    "9": "September",
+    "10": "October",
+    "11": "November",
+    "12": "December",
+}
 
 
 def get_description():
@@ -160,78 +159,46 @@ def highcharts(fdict):
     ctx = get_context(fdict)
     ptinterval = "10" if ctx["decadal"] else "1"
     containername = fdict.get("_e", "ap_container")
-    return (
-        """
-Highcharts.chart('"""
-        + containername
-        + """', {
-    title: {text: '"""
-        + ctx["title"]
-        + """'},
-    subtitle: {text: '"""
-        + ctx["subtitle"]
-        + """'},
-    chart: {zoomType: 'x'},
-    tooltip: {shared: true},
-    xAxis: {title: {text: '"""
-        + ctx["xlabel"]
-        + """'}},
-yAxis: {title: {text: '"""
-        + ctx["ylabel"].replace(r"$^\circ$", "")
-        + """'}},
-    series: [{
-        name: '"""
-        + ctx["ptype"]
-        + """',
+    ylabel = ctx["ylabel"].replace(r"$^\circ$", "")
+    return f"""
+Highcharts.chart('{containername}', {{
+    title: {{text: '{ctx["title"]}'}},
+    subtitle: {{text: '{ctx["subtitle"]}'}},
+    chart: {{zoomType: 'x'}},
+    tooltip: {{shared: true}},
+    xAxis: {{title: {{text: '{ctx["xlabel"]}'}}}},
+    yAxis: {{title: {{text: '{ylabel}'}}}},
+    series: [{{
+        name: '{ctx["ptype"]}',
         type: 'column',
         width: 0.8,
-        pointStart: """
-        + str(ctx["df"].index.min())
-        + """,
-        pointInterval: """
-        + ptinterval
-        + """,
-        tooltip: {
+        pointStart: {ctx["df"].index.min()},
+        pointInterval: {ptinterval},
+        tooltip: {{
             valueDecimals: 2
-        },
-        data: """
-        + str(ctx["data"].tolist())
-        + """
-        }, {
-        tooltip: {
-            valueDecimals: 2
-        },
+        }},
+        data: {str(ctx["data"].tolist())},
+        threshold: null
+        }}, {{
+        tooltip: {{valueDecimals: 2}},
         name: '30 Year Trailing Avg',
-        pointStart: """
-        + str(ctx["df"].index.min() + (3 if ctx["decadal"] else 30))
-        + """,
-        pointInterval: """
-        + ptinterval
-        + """,
+    pointStart: {str(ctx["df"].index.min() + (3 if ctx["decadal"] else 30))},
+        pointInterval: {ptinterval},
             width: 2,
-        data: """
-        + str(ctx["tavg"][(3 if ctx["decadal"] else 30) :])
-        + """
-        },{
-            tooltip: {
+        data: {str(ctx["tavg"][(3 if ctx["decadal"] else 30) :])}
+        }},{{
+            tooltip: {{
                 valueDecimals: 2
-            },
+            }},
             name: 'Average',
             width: 2,
             pointPadding: 0.1,
-            pointStart: """
-        + str(ctx["df"].index.min())
-        + """,
-            pointInterval: """
-        + ptinterval
-        + """,
-            data: """
-        + str([ctx["avgv"]] * len(ctx["df"].index))
-        + """
-        }]
-});
+            pointStart: {str(ctx["df"].index.min())},
+            pointInterval: {ptinterval},
+            data: {str([ctx["avgv"]] * len(ctx["df"].index))}
+        }}]
+}});
     """
-    )
 
 
 def get_context(fdict):
@@ -262,6 +229,9 @@ def get_context(fdict):
     elif month == "summer":
         months = [6, 7, 8]
         label = "Summer (JJA)"
+    elif month == "year":
+        months = range(1, 13)
+        label = "Calendar Year"
     else:
         months = [int(month)]
         label = calendar.month_name[int(month)]
@@ -359,17 +329,11 @@ def get_context(fdict):
     if df2.empty:
         raise NoDataFound("No data was found for query")
     df = df.dropna()
-    xlabel = "Year, Max: %.2f %s%s" % (
-        df[ptype].max(),
-        df2.index.values[0],
-        "+" if len(df2.index) > 1 else "",
-    )
+    xx = "+" if len(df2.index) > 1 else ""
+    xlabel = f"Year, Max: {df[ptype].max():.2f} {df2.index.values[0]}{xx}"
     df2 = df[df[ptype] == df[ptype].min()]
-    xlabel += ", Min: %.2f %s%s" % (
-        df[ptype].min(),
-        df2.index.values[0],
-        "+" if len(df2.index) > 1 else "",
-    )
+    xx = "+" if len(df2.index) > 1 else ""
+    xlabel += f", Min: {df[ptype].min():.2f} {df2.index.values[0]}{xx}"
     ctx["xlabel"] = xlabel
     data = df[ptype].values
     ctx["data"] = data
@@ -392,16 +356,16 @@ def get_context(fdict):
     ctx["threshold"] = threshold
     ctx["month"] = month
     ctx["title"] = f"{ctx['_sname']} {df.index.min()}-{df.index.max()}"
-    ctx["subtitle"] = ("%s %s") % (label, PDICT[ptype])
+    ctx["subtitle"] = f"{label} {PDICT[ptype]}"
     if ptype.find("days") == 0 and ptype.find("avg") == -1:
-        ctx["subtitle"] += " (%s)" % (threshold,)
+        ctx["subtitle"] += f" ({threshold})"
 
     units = r"$^\circ$F"
     if ctx["ptype"].find("precip") > 0:
         units = "inches"
     elif ctx["ptype"].find("days") > 0:
         units = "days"
-    ctx["ylabel"] = "%s [%s]" % (PDICT[ctx["ptype"]], units)
+    ctx["ylabel"] = f"{PDICT[ctx['ptype']]} [{units}]"
     return ctx
 
 

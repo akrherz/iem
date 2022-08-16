@@ -21,6 +21,18 @@ var climateStyle = new ol.style.Style({
     })
     
 });
+var climodistrictStyle = new ol.style.Style({
+    zindex: 101,
+    image: new ol.style.Circle({
+        fill: new ol.style.Fill({color: '#f00'}),
+        stroke: new ol.style.Stroke({
+            color: '#000000',
+            width: 2.25
+        }),
+        radius: 7
+    })
+    
+});
 
 function mapClickHandler(event){
     var feature = olMap.forEachFeatureAtPixel(event.pixel,
@@ -48,6 +60,10 @@ function stationLayerStyleFunc(feature, resolution){
     var network = feature.get("network");
     if (network.search("ASOS") > 0){
         return airportStyle;
+    }
+    var sid = feature.get("sid");
+    if (sid.substr(2, 1) == "C"){
+        return climodistrictStyle;
     }
     return climateStyle;
 }
@@ -100,7 +116,7 @@ function createQRDialog(qrurl){
         },
         modal: true,
         responsive: true,
-        width: 600,
+        width: 800,
         height: 600,
         close: function() {
             $(this).dialog('destroy').remove();
@@ -136,12 +152,14 @@ function loaderClicked(elem){
     var network = $(container).data("network");
     var tpl = $elem.data("url-template");
     var divid = "d" + station + network;
+    var month = container.find("select[name=coop_trends_month]").val();
+    var type = container.find("select[name=coop_trends_type]").val();
     var uri = tpl
         .replace("{station}", station)
         .replace("{network}", network)
         .replace("{elem}", divid)
-        .replace("{month}", $("select[name=coop_trends_month]").val())
-        .replace("{type}", $("select[name=coop_trends_type]").val());
+        .replace("{month}", month)
+        .replace("{type}", type);
     var qrurl = uri.replace("/plot/", "/qrcode/").replace(".js", ".png");
     loadAutoplot(container, qrurl, uri, divid);
 }
