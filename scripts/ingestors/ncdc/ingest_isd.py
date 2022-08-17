@@ -2,10 +2,11 @@
 import sys
 import subprocess
 import os
+from unittest import mock
 
 import tqdm
 import requests
-from pyiem.nws.products.metarcollect import to_metar
+from pyiem.nws.products.metarcollect import to_metar, to_iemaccess, normid
 from pyiem.ncei import ds3505
 from pyiem.util import get_dbconn, utc, exponential_backoff, logger
 
@@ -13,35 +14,26 @@ LOG = logger()
 TMPDIR = "/mesonet/tmp"
 
 
-class FakeTextProd:
-    def __init__(self):
-        """Lame."""
-        self.utcnow = None
-        self.valid = None
-        self.nwsli_provider = {}
-
-
-def set_metadata(prod, faa):
+def get_metadata(faa):
     """Need to figure out what the network, iemid are."""
     mesosite = get_dbconn("mesosite")
     cursor = mesosite.cursor()
-    localid = faa[1:] if faa.startswith("K") else faa
+    localid = normid(faa)
     cursor.execute(
-        "select network, tzname, iemid from stations where id = %s and "
+        "select tzname, iemid from stations where id = %s and "
         "network ~* 'ASOS'",
         (localid,),
     )
     if cursor.rowcount != 1:
         LOG.fatal("Failed to find station metadata!")
         sys.exit()
-    (network, tzname, _iemid) = cursor.fetchone()
-    prod.nwsli_provider[localid] = {"network": network, "tzname": tzname}
+    (tzname, iemid) = cursor.fetchone()
     mesosite.close()
+    return tzname, iemid
 
 
 def main(argv):
     """Go"""
-    textprod = FakeTextProd()
     asosdb = get_dbconn("asos")
     iemdb = get_dbconn("iem")
     airforce = int(argv[1])
@@ -50,18 +42,18 @@ def main(argv):
     if len(faa) == 3:
         LOG.error("Provided faa ID should be 4 chars, abort")
         return
-    set_metadata(textprod, faa)
+    tzname, iemid = get_metadata(faa)
     year = max([int(argv[4]), 1928])  # database starts in 1928
     year2 = int(argv[5])
     failedyears = []
     msgs = []
-    dbid = faa if len(faa) == 4 and faa[0] != "K" else faa[1:]
+    dbid = normid(faa)
     for year in tqdm.tqdm(range(year, year2)):
         sts = utc(year, 1, 1)
         ets = sts.replace(year=year + 1)
         acursor = asosdb.cursor()
         icursor = iemdb.cursor()
-        lfn = "%06i-%05i-%s" % (airforce, wban, year)
+        lfn = f"{airforce:06.0f}-{wban:05.0f}-{year}"
         if not os.path.isfile(f"{TMPDIR}/{lfn}"):
             uri = f"https://www1.ncdc.noaa.gov/pub/data/noaa/{year}/{lfn}.gz"
             req = exponential_backoff(requests.get, uri, timeout=30)
@@ -72,7 +64,7 @@ def main(argv):
             with open(f"{TMPDIR}/{lfn}.gz", "wb") as fh:
                 fh.write(req.content)
             subprocess.call(
-                "gunzip %s/%s.gz" % (TMPDIR, lfn),
+                f"gunzip {TMPDIR}/{lfn}.gz",
                 shell=True,
                 stderr=subprocess.PIPE,
             )
@@ -104,11 +96,17 @@ def main(argv):
             if data["valid"].strftime("%Y%m%d%H%M") in current:
                 skipped += 1
                 continue
+            textprod = mock.Mock()
             textprod.valid = data["valid"]
             textprod.utcnow = data["valid"]
             mtr = to_metar(textprod, data["metar"])
-            mtr.to_iemaccess(
-                icursor, force_current_log=True, skip_current=True
+            to_iemaccess(
+                icursor,
+                mtr,
+                iemid,
+                tzname,
+                force_current_log=True,
+                skip_current=True,
             )
             added += 1
         msgs.append(
