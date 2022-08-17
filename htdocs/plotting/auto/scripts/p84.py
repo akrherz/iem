@@ -71,6 +71,14 @@ def get_description():
             optional=True,
         ),
         dict(
+            type="networkselect",
+            name="cwa",
+            default="DMX",
+            label="Plot for CONUS NWS WFO",
+            optional=True,
+            network="WFO",
+        ),
+        dict(
             type="select",
             name="src",
             default="mrms",
@@ -186,6 +194,8 @@ def plotter(fdict):
     if len(sector) == 2:
         state = sector
         sector = "state"
+    if ctx.get("cwa") is not None:
+        sector = "cwa"
 
     clncvar = "p01d"
     if src == "mrms":
@@ -239,6 +249,7 @@ def plotter(fdict):
 
     mp = MapPlot(
         sector=sector,
+        cwa=ctx.get("cwa"),
         state=state,
         north=north,
         east=east,
@@ -368,6 +379,8 @@ def plotter(fdict):
         mp.drawcities(minpop=500 if sector == "custom" else 5000)
     if usdm == "yes":
         mp.draw_usdm(edate, filled=False, hatched=True)
+    if ctx.get("cwa") is not None:
+        mp.draw_cwas()
 
     return mp.fig
 
