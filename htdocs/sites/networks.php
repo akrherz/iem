@@ -214,7 +214,8 @@ added stations.
 <br /><strong>Special Table Requests</strong>
 <ul>
  <li><a href="networks.php?special=allasos&format=gempak&nohtml">Global METAR in GEMPAK Format</a></li>
-</ul>
+<li><a href="/geojson/network/AZOS.geojson">Global METAR/ASOS in GeoJSON</a></li>
+ </ul>
 </div>
 
 

@@ -28,6 +28,11 @@ def run(network, only_online):
             "network ~* 'CLIMATE'and archive_begin < '1990-01-01')) "
             "and country = 'US' and online ORDER by id ASC",
         )
+    elif network == "AZOS":
+        cursor.execute(
+            "SELECT ST_asGeoJson(geom, 4) as geojson, * "
+            "from stations WHERE network ~* 'ASOS' and online ORDER by id ASC",
+        )
     else:
         online = "and online" if only_online else ""
         cursor.execute(
