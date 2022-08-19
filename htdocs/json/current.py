@@ -1,7 +1,7 @@
 """Current Observation for a station and network"""
 import json
 
-import memcache
+from pymemcache.client import Client
 import psycopg2.extras
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape, utc
@@ -18,8 +18,8 @@ def run(network, station):
         valid at time zone 'UTC' as utctime,
         valid at time zone m.tzname as localtime
         from current c JOIN mystation m on (c.iemid = m.iemid)),
-    summ as (SELECT * from summary s JOIN lastob o on (s.iemid = o.miemid and
-    s.day = date(o.localtime)))
+    summ as (SELECT *, s.pday as s_pday from summary s JOIN lastob o
+    on (s.iemid = o.miemid and s.day = date(o.localtime)))
     select * from summ
     """,
         (station, network),
@@ -57,6 +57,7 @@ def run(network, station):
     ob["visibility[mile]"] = row["vsby"]
     ob["raw"] = row["raw"]
     ob["presentwx"] = [] if row["wxcodes"] is None else row["wxcodes"]
+    ob["precip_today[in]"] = row["s_pday"]
     return json.dumps(data)
 
 
@@ -68,17 +69,18 @@ def application(environ, start_response):
     cb = fields.get("callback", None)
 
     mckey = f"/json/current/{network}/{station}"
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    mc = Client(["iem-memcached", 11211])
     res = mc.get(mckey)
     if not res:
         res = run(network, station)
         mc.set(mckey, res, 60)
-
-    if cb is None:
-        data = res
     else:
-        data = f"{html_escape(cb)}({res})"
+        res = res.decode("utf-8")
+    mc.close()
+
+    if cb is not None:
+        res = f"{html_escape(cb)}({res})"
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return [res.encode("ascii")]

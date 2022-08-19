@@ -256,6 +256,8 @@ function wxCurrents(){
             $("#wxtime").text(valid);
             var tmpf = data.last_ob["airtemp[F]"].toFixed(1);
             $("#tmpf").text(tmpf);
+            var pday = data.last_ob["precip_today[in]"].toFixed(2);
+            $("#pday").text(pday);
         }
     });
 
