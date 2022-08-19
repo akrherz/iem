@@ -2,7 +2,7 @@
 import os
 import json
 
-import memcache
+from pymemcache.client import Client
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
 
@@ -58,17 +58,18 @@ def application(environ, start_response):
 
     hostname = os.environ.get("SERVER_NAME", "")
     mckey = ("/json/spcmcd/%.4f/%.4f") % (lon, lat)
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    mc = Client(["iem-memcached", 11211])
     res = mc.get(mckey) if hostname != "iem.local" else None
     if not res:
         res = dowork(lon, lat)
         mc.set(mckey, res, 3600)
-
-    if cb is None:
-        data = res
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        res = res.decode("utf-8")
+    mc.close()
+
+    if cb is not None:
+        res = "%s(%s)" % (html_escape(cb), res)
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return [res.encode("ascii")]

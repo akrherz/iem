@@ -1,6 +1,6 @@
 """Generate a WXC formatted file of DOT Snowplow positions"""
 import datetime
-import memcache
+from pymemcache.client import Client
 
 from pyiem.util import get_dbconn
 
@@ -50,9 +50,12 @@ def application(_environ, start_response):
     start_response("200 OK", [("Content-type", "text/plain")])
 
     mckey = "/request/wxc/idot_trucks.txt"
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    mc = Client(["iem-memcached", 11211])
     res = mc.get(mckey)
     if not res:
         res = get_data()
         mc.set(mckey, res, 300)
+    else:
+        res = res.decode("utf-8")
+    mc.close()
     return [res.encode("ascii")]

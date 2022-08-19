@@ -4,7 +4,7 @@
 import json
 import datetime
 
-import memcache
+from pymemcache.client import Client
 import pytz
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
@@ -49,7 +49,7 @@ def application(environ, start_response):
     cb = fields.get("callback", None)
 
     mckey = f"/json/nwstext_search/{sts}/{ets}/{awipsid}?callback={cb}"
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    mc = Client(["iem-memcached", 11211])
     res = mc.get(mckey)
     if not res:
         sts = datetime.datetime.strptime(sts, "%Y-%m-%dT%H:%MZ")
@@ -62,11 +62,12 @@ def application(environ, start_response):
 
         res = run(sts, ets, awipsid)
         mc.set(mckey, res, cacheexpire)
-
-    if cb is None:
-        data = res
     else:
-        data = f"{html_escape(cb)}({res})"
+        res = res.decode("utf-8")
+    mc.close()
+
+    if cb is not None:
+        res = f"{html_escape(cb)}({res})"
 
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return [res.encode("ascii")]

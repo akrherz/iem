@@ -5,7 +5,7 @@ import datetime
 
 from pandas.io.sql import read_sql
 from dateutil.parser import parse
-import memcache
+from pymemcache.client import Client
 from paste.request import parse_formvars
 from pyiem.reference import IEMVARS
 from pyiem.util import get_sqlalchemy_conn, html_escape
@@ -80,17 +80,17 @@ def application(environ, start_response):
 
     hostname = os.environ.get("SERVER_NAME", "")
     mckey = f"/json/obhistory/{station}/{network}/{date}"
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    mc = Client(["iem-memcached", 11211])
     res = mc.get(mckey) if hostname != "iem.local" else None
     if not res:
         res = workflow(station, network, date).replace("NaN", "null")
         mc.set(mckey, res, 3600)
-
-    if cb is None:
-        data = res
     else:
-        data = f"{html_escape(cb)}({res})"
+        res = res.decode("utf-8")
+    mc.close()
+    if cb is not None:
+        res = f"{html_escape(cb)}({res})"
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return [res.encode("ascii")]

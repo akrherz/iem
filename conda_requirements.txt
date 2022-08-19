@@ -61,8 +61,6 @@ pyshp>=2
 pytest
 pytest-xdist
 # important
-python-memcached
-# important
 pytz
 # various places
 rasterio

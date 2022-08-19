@@ -1,7 +1,7 @@
 """Listing of VTEC events for state and year"""
 import json
 
-import memcache
+from pymemcache.client import Client
 import psycopg2.extras
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
@@ -102,17 +102,18 @@ def application(environ, start_response):
         phenomena,
         significance,
     )
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    mc = Client(["iem-memcached", 11211])
     res = mc.get(mckey)
     if not res:
         res = run(state, year, phenomena, significance)
         mc.set(mckey, res, 60)
-
-    if cb is None:
-        data = res
     else:
-        data = f"{html_escape(cb)}({res})"
+        res = res.decode("utf-8")
+    mc.close()
+
+    if cb is not None:
+        res = f"{html_escape(cb)}({res})"
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return [res.encode("ascii")]

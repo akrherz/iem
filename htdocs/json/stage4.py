@@ -5,7 +5,7 @@ import json
 import os
 
 import numpy as np
-import memcache
+from pymemcache.client import Client
 from paste.request import parse_formvars
 from pyiem import iemre
 from pyiem.util import utc, ncopen, html_escape, mm2inch
@@ -67,17 +67,18 @@ def application(environ, start_response):
     cb = fields.get("callback", None)
 
     mckey = "/json/stage4/%.2f/%.2f/%s?callback=%s" % (lon, lat, valid, cb)
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    mc = Client(["iem-memcached", 11211])
     res = mc.get(mckey)
     if not res:
         res = dowork(fields)
         mc.set(mckey, res, 3600 * 12)
-
-    if cb is None:
-        data = res
     else:
-        data = "%s(%s)" % (html_escape(cb), res)
+        res = res.decode("utf-8")
+    mc.close()
+
+    if cb is not None:
+        res = "%s(%s)" % (html_escape(cb), res)
 
     headers = [("Content-type", "application/json")]
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return [res.encode("ascii")]

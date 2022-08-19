@@ -13,7 +13,7 @@ Add storm tracks.
 """
 import math
 
-import memcache
+from pymemcache.client import Client
 import pyproj
 import numpy as np
 import psycopg2.extras
@@ -382,10 +382,13 @@ def application(environ, start_response):
         tvs,
         max_size,
     )
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    mc = Client(["iem-memcached", 11211])
     res = mc.get(mckey)
     if not res:
         res = produce_content(nexrad, poh, meso, tvs, max_size)
         mc.set(mckey, res, 60)
+    else:
+        res = res.decode("utf-8")
+    mc.close()
     start_response("200 OK", [("Content-type", "text/plain")])
     return [res.encode("ascii")]

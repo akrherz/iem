@@ -4,7 +4,7 @@
 import datetime
 import json
 
-import memcache
+from pymemcache.client import Client
 import pytz
 import pandas as pd
 from paste.request import parse_formvars
@@ -122,7 +122,7 @@ def application(environ, start_response):
         mckey = f"/json/spcwatch/{lon:.4f}/{lat:.4f}"
     else:
         mckey = f"/json/spcwatch/{ts:%Y%m%d%H%M}"
-    mc = memcache.Client(["iem-memcached:11211"], debug=0)
+    mc = Client(["iem-memcached", 11211])
     res = mc.get(mckey)
     if not res:
         if lat != 0 and lon != 0:
@@ -130,12 +130,13 @@ def application(environ, start_response):
         else:
             res = dowork(ts)
         mc.set(mckey, res)
-
-    if cb is None:
-        data = res
     else:
-        data = f"{html_escape(cb)}({res})"
+        res = res.decode("utf-8")
+    mc.close()
+
+    if cb is not None:
+        res = f"{html_escape(cb)}({res})"
 
     headers = [("Content-type", "application/vnd.geo+json")]
     start_response("200 OK", headers)
-    return [data.encode("ascii")]
+    return [res.encode("ascii")]
