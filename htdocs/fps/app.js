@@ -1,5 +1,6 @@
 var epoch = 0;
 var olMap;
+var overviewMap;
 var stationLayer;
 
 var airportStyle = new ol.style.Style({
@@ -9,30 +10,57 @@ var airportStyle = new ol.style.Style({
         scale: [0.2, 0.2]
     })
 });
+airportStyle.enabled = true;
+var isusmStyle = new ol.style.Style({
+    zindex: 99,
+    image: new ol.style.Icon({
+        src: "img/isu.svg",
+        scale: [0.2, 0.2]
+    })
+});
+isusmStyle.enabled = true;
 var climateStyle = new ol.style.Style({
     zindex: 100,
     image: new ol.style.Circle({
-        fill: new ol.style.Fill({color: '#0f0'}),
+        fill: new ol.style.Fill({color: '#00ff00'}),
         stroke: new ol.style.Stroke({
-            color: '#000000',
+            color: '#008800',
             width: 2.25
         }),
         radius: 7
     })
-    
 });
+climateStyle.enabled = true;
 var climodistrictStyle = new ol.style.Style({
     zindex: 101,
-    image: new ol.style.Circle({
-        fill: new ol.style.Fill({color: '#f00'}),
-        stroke: new ol.style.Stroke({
-            color: '#000000',
-            width: 2.25
+    text: new ol.style.Text({
+        text: '',
+        font: 'bold 14pt serif',
+        fill: new ol.style.Fill({
+          color: [255, 255, 255, 1],
         }),
-        radius: 7
+        backgroundFill: new ol.style.Fill({
+          color: [0, 0, 255, 1],
+        }),
+        padding: [2, 2, 2, 2],
     })
-    
 });
+climodistrictStyle.enabled = true;
+var stateStyle = new ol.style.Style({
+    zindex: 102,
+    text: new ol.style.Text({
+        text: '',
+        font: 'bold 14pt serif',
+        fill: new ol.style.Fill({
+          color: [255, 255, 255, 1],
+        }),
+        backgroundFill: new ol.style.Fill({
+          color: [255, 0, 0, 1],
+        }),
+        padding: [2, 2, 2, 2],
+    })
+});
+stateStyle.enabled = true;
 
 function mapClickHandler(event){
     var feature = olMap.forEachFeatureAtPixel(event.pixel,
@@ -47,10 +75,13 @@ function mapClickHandler(event){
     var div = document.createElement("div");
     div.classList.add("datadiv");
     div.setAttribute("data-station", feature.get("sid"));
-    div.setAttribute("data-network", feature.get("network"));
+    var network = feature.get("network");
+    div.setAttribute("data-network", network);
     div.setAttribute("title", feature.get("sid") + " " + feature.get("sname"));
-    var $newdiv = $(".coop-data-template").clone().css("display", "block").appendTo($(div));
-    $newdiv.removeClass("coop-data-template");
+    var prefix = (network.endsWith("ASOS") ? "asos": "coop");
+    prefix = (network == "ISUSM") ? "isusm": prefix;
+    var $newdiv = $(`.${prefix}-data-template`).clone().css("display", "block").appendTo($(div));
+    $newdiv.removeClass(`${prefix}-data-template`);
     var classID = feature.get("sid") + "_" + epoch;
     epoch += 1;
     windowFactory(div, classID);
@@ -59,13 +90,21 @@ function mapClickHandler(event){
 function stationLayerStyleFunc(feature, resolution){
     var network = feature.get("network");
     if (network.search("ASOS") > 0){
-        return airportStyle;
+        return airportStyle.enabled ? airportStyle: null;
+    }
+    if (network == "ISUSM"){
+        return isusmStyle.enabled ? isusmStyle: null;
     }
     var sid = feature.get("sid");
     if (sid.substr(2, 1) == "C"){
-        return climodistrictStyle;
+        climodistrictStyle.getText().setText(sid.substr(0, 2) + parseInt(sid.substr(3, 3)));
+        return climodistrictStyle.enabled ? climodistrictStyle: null;
     }
-    return climateStyle;
+    if (sid.substr(2, 4) == "0000"){
+        stateStyle.getText().setText(sid.substr(0, 2));
+        return stateStyle.enabled ? stateStyle: null;
+    }
+    return climateStyle.enabled ? climateStyle: null;
 }
 
 function initMap(){
@@ -77,9 +116,24 @@ function initMap(){
         }),
         style: stationLayerStyleFunc
     });
+    overviewMap = new ol.control.OverviewMap({
+        target: document.querySelector('#overviewmap'),
+        layers: [
+            new ol.layer.Tile({
+                title: 'OpenStreetMap',
+                visible: true,
+                type: 'base',
+                source: new ol.source.OSM()
+            }),
+        ],
+        collapseLabel: '\u00BB',
+        collapsible: false,
+        label: '\u00AB',
+        collapsed: false,
+      });
     olMap = new ol.Map({
         target: 'olmap',
-        controls: ol.control.defaults().extend([new ol.control.FullScreen()]),
+        controls: ol.control.defaults().extend([overviewMap]),
         view: new ol.View({
             enableRotation: false,
             center: ol.proj.transform([-94.5, 42.1], 'EPSG:4326', 'EPSG:3857'),
@@ -96,6 +150,7 @@ function initMap(){
             stationLayer
         ]
     });
+
     var ls = new ol.control.LayerSwitcher();
     olMap.addControl(ls);
     olMap.on("click", mapClickHandler);
@@ -137,13 +192,40 @@ function loadAutoplot(container, qrurl, uri, divid){
         createQRDialog(qrurl);
     }
     $(button).appendTo($target);
-    // Create a div to append into that target
-    var datadiv = document.createElement("div");
-    datadiv.id = divid;
-    datadiv.classList.add("viz");
-    $(datadiv).appendTo($target);
-    $.getScript(uri);
+    if (uri.endsWith("js")){
+        // Create a div to append into that target
+        var datadiv = document.createElement("div");
+        datadiv.id = divid;
+        datadiv.classList.add("viz");
+        $(datadiv).appendTo($target);
+        $.getScript(uri);
+    } else {
+        var img = document.createElement("img");
+        img.classList.add("img");
+        img.classList.add("img-responsive");
+        img.src = uri;
+        $(img).appendTo($target);
+    }
 
+}
+function changeStations(elem){
+    var netclass = $(elem).attr("id");
+    if (netclass == "asos"){
+        airportStyle.enabled = elem.checked;
+    }
+    if (netclass == "isusm"){
+        isusmStyle.enabled = elem.checked;
+    }
+    if (netclass == "coop"){
+        climateStyle.enabled = elem.checked;
+    }
+    if (netclass == "cd"){
+        climodistrictStyle.enabled = elem.checked;
+    }
+    if (netclass == "state"){
+        stateStyle.enabled = elem.checked;
+    }
+    stationLayer.changed();
 }
 function loaderClicked(elem){
     var $elem = $(elem);

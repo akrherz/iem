@@ -33,7 +33,16 @@ h3.title {
     min-height: 400px;
     height: 530px;
 }
-
+#overviewmap {
+    width: 100%;
+    min-height: 400px;
+    height: 400px;
+    margin-left: 30px;
+}
+.ol-overviewmap .ol-overviewmap-map {
+    width: 300px !important;
+    height: 300px !important;
+}
 .ui-window-bar .ui-button {
     position: absolute;
     top: 50%;
