@@ -58,6 +58,7 @@ def run(network, station):
     ob["raw"] = row["raw"]
     ob["presentwx"] = [] if row["wxcodes"] is None else row["wxcodes"]
     ob["precip_today[in]"] = row["s_pday"]
+    ob["c1tmpf[F]"] = row["c1tmpf"]
     return json.dumps(data)
 
 

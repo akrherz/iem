@@ -18,9 +18,10 @@
 
     <div id="wx">Current Weather
         <br />ISU AEA Farm (2 miles SE FPS)
-        <br /><span id="wxtime">9:46 AM</span>
-        <br /><i class="fa fa-thermometer-half"></i> Temp: <span id="tmpf">80</span>&deg;F
-        <br /><i class="fa fa-tint"></i> Rain: <span id="pday">0.00</span>"
+        <br />@ <span id="wxtime">9:46 AM</span>
+        <br /><i class="fa fa-thermometer-half"></i> Air Temp: <span id="tmpf">80</span>&deg;F
+        &nbsp; <i class="fa fa-tint"></i> Rain: <span id="pday">0.00</span>"
+        <br /><i class="fa fa-tree"></i> 4" Soil Temp: <span id="soil4">--</span>&deg;F
     </div>
     <p>&nbsp;</p>
     <p>&nbsp;</p>
@@ -159,6 +160,7 @@
     </div><!-- ./coop-data-template -->
 
 </body>
+<script src="/vendor/moment/2.13.0/moment.min.js"></script>
 <script src="/vendor/jquery/1.11.3/jquery-1.11.3.min.js"></script>
 <script src="/vendor/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script src='/vendor/openlayers/6.15.1/ol.js'></script>
@@ -171,5 +173,6 @@
 <script src="/vendor/highcharts/10.1.0/modules/heatmap.js"></script>
 <script src="app.js"></script>
 <script src="dialog.js"></script>
+<script src="wx.js"></script>
 
 </html>

@@ -246,25 +246,6 @@ function loaderClicked(elem){
     loadAutoplot(container, qrurl, uri, divid);
 }
 
-function wxCurrents(){
-    // Show Weather
-    $.ajax({
-        url: "/json/current.py?network=ISUSM&station=BOOI4",
-        dataType: "json",
-        success: function(data) {
-            var valid = data.last_ob.local_valid;
-            $("#wxtime").text(valid);
-            var tmpf = data.last_ob["airtemp[F]"].toFixed(1);
-            $("#tmpf").text(tmpf);
-            var pday = data.last_ob["precip_today[in]"].toFixed(2);
-            $("#pday").text(pday);
-        }
-    });
-
-}
-
 $(document).ready(function() {
     initMap();
-    wxCurrents();
-    window.setInterval(wxCurrents, 120000);
 });

@@ -26,6 +26,8 @@ h3.title {
     right: 50px;
     font-weight: bolder;
     background-color: #fff;
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
 #olmap {
