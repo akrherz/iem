@@ -49,7 +49,7 @@ def add_job(row):
     """Add back a job"""
     pgconn = get_dbconn("mesosite")
     mcursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    LOG.info("setting racoon jobid: %s back to unprocessed", row["jobid"])
+    LOG.warning("setting racoon jobid: %s back to unprocessed", row["jobid"])
     mcursor.execute(
         "UPDATE racoon_jobs SET processed = False WHERE jobid = %s",
         (row["jobid"],),
@@ -403,15 +403,15 @@ def do_job(job):
     cmd = "unoconv -f ppt %s" % (outputfile,)
     subprocess.call(cmd, shell=True)
     pptfn = "%s.ppt" % (basefn,)
-    LOG.info("Generated %s with %s slides", pptfn, i)
+    LOG.wawrning("Generated %s with %s slides", pptfn, i)
     if os.path.isfile(pptfn):
-        LOG.info("...copied to webfolder")
+        LOG.warning("...copied to webfolder")
         shutil.copyfile(pptfn, "/mesonet/share/pickup/raccoon/%s" % (pptfn,))
         # Cleanup
         os.chdir(TMPDIR)
         subprocess.call("rm -rf %s" % (job["jobid"],), shell=True)
     else:
-        LOG.info("Uh oh, no output file, lets kill soffice.bin")
+        LOG.warning("Uh oh, no output file, lets kill soffice.bin")
         subprocess.call("pkill --signal 9 soffice.bin", shell=True)
         add_job(job)
 
