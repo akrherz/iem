@@ -365,7 +365,7 @@ def plotter(fdict):
         mp.draw_usdm(edate, filled=False, hatched=True)
     if ctx.get("cwa") is not None:
         mp.draw_cwas()
-
+    mp.draw_mask("conus")
     return mp.fig
 
 
