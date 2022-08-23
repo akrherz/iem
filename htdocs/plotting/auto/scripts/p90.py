@@ -12,7 +12,12 @@ from pyiem.nws import vtec
 from pyiem.reference import state_names, state_bounds, wfo_bounds
 from pyiem.plot import get_cmap
 from pyiem.plot.geoplot import MapPlot
-from pyiem.util import get_autoplot_context, get_dbconn, get_sqlalchemy_conn
+from pyiem.util import (
+    get_autoplot_context,
+    get_dbconn,
+    get_sqlalchemy_conn,
+    utc,
+)
 from pyiem.exceptions import NoDataFound
 
 PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
@@ -254,6 +259,9 @@ def do_polygon(ctx):
     significance = ctx["significance"]
     t = ctx["t"]
     sdate = ctx["sdate"]
+    if sdate.year < 2001:
+        ctx["sdate"] = utc(2001, 1, 1)
+        sdate = ctx["sdate"]
     edate = ctx["edate"]
     year = ctx["year"]
     year2 = ctx["year2"]
@@ -407,10 +415,7 @@ def do_polygon(ctx):
         ] = f" between {sdate:%d %b %Y %H%M} and {edate:%d %b %Y %H%M} UTC"
         ctx["units"] = "count"
     elif varname == "yearavg":
-        ctx["title"] = ("Yearly Avg: %s and %s") % (
-            minv.strftime("%d %b %Y"),
-            maxv.strftime("%d %b %Y"),
-        )
+        ctx["title"] = f"Yearly Avg: {minv:%d %b %Y} and {maxv:%d %b %Y}"
         years = (maxv.year - minv.year) + 1
         counts = counts / years
         ctx["units"] = "count per year"
