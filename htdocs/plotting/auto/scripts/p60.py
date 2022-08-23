@@ -293,7 +293,7 @@ def plotter(fdict):
     (fig, ax) = figure_axes(title=ctx["title"], apctx=ctx)
     cmap = get_cmap(ctx["cmap"])
     cmap.set_bad("white")
-    if ctx["w"] == "freq" or ctx["var"] == "relh":
+    if ctx["w"] != "freq" and ctx["var"] == "relh":
         bins = np.arange(0, 101, 5, dtype="f")
     else:
         bins = pretty_bins(df[ctx["w"]].min(), df[ctx["w"]].max())
