@@ -4,7 +4,7 @@ import os
 
 import numpy as np
 from pyiem import iemre, util
-from pyiem.plot import get_cmap
+from pyiem.plot import get_cmap, pretty_bins
 from pyiem.plot.geoplot import MapPlot
 from pyiem.reference import LATLON
 from pyiem.exceptions import NoDataFound
@@ -324,29 +324,13 @@ def plotter(fdict):
         p01d = np.where(p01d < 0.001, np.nan, p01d)
         cmap.set_under("white")
         # Dynamic Range based on min/max grid value, since we restrict plot
-        minval = np.floor(np.nanmin(p01d))
+        # minval = np.floor(np.nanmin(p01d))
         maxval = np.ceil(np.nanpercentile(p01d, [95])[0])
-        clevs = [0.01, 0.1, 0.3, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5, 6, 8, 10]
-        if minval == 0:
-            if maxval <= 1:
-                clevs = np.arange(0, 1.01, 0.1)
-            elif maxval <= 3:
-                clevs = np.arange(0, 3.01, 0.25)
-            elif maxval <= 5:
-                clevs = np.arange(0, 5.01, 0.5)
-            elif maxval <= 10:
-                clevs = np.arange(0, 10.01, 1.0)
+        if maxval < 1:
+            clevs = np.arange(0, 1.01, 0.1)
         else:
-            # Find an interval that encloses the bounds
-            rng = maxval - minval
-            for interval in [0.1, 0.25, 0.5, 1, 1.5, 2, 3, 5, 10]:
-                if interval * 10 >= rng:
-                    clevs = np.arange(
-                        minval, minval + interval * 10 + 0.01, interval
-                    )
-                    break
-        if minval == 0:
-            clevs[0] = 0.01
+            clevs = pretty_bins(0, maxval)
+        clevs[0] = 0.01
 
     if len(lons.shape) == 1:
         x2d, y2d = np.meshgrid(lons, lats)
