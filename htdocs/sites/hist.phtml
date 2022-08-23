@@ -23,9 +23,9 @@ $sortvar = isset($_GET['sortvar']) ? xssafe($_GET['sortvar']): 'id';
 if ($sortvar == 'station'){ $sortvar = 'id'; }
 
 $ts = new Datetime("$year-$month-$day");
-$dateStr = $ts->format("%Y-%m-%d");
-$nicedate = $ts->format("%d %B %Y");
-$nicemonthdate = $ts->format("%B %Y");
+$dateStr = $ts->format("Y-m-d");
+$nicedate = $ts->format("d M Y");
+$nicemonthdate = $ts->format("M Y");
 $htmlout = "";
 
 function snowprint($val){
@@ -132,9 +132,11 @@ if ($mode == "monthly") {
         $dvalid = date("Ymd", strtotime($row["date"] . " 12:00"));
         if (is_null($row["max_tmpf"])) $row["max_tmpf"] = "M";
         $str = "High: ". $row["max_tmpf"] ;
+        if ($row["tmpf_est"]) $str .= "(E)";
 
         if (is_null($row["min_tmpf"])) $row["min_tmpf"] = "M";
         $str .= "<br>Low: ". $row["min_tmpf"] ;
+        if ($row["tmpf_est"]) $str .= "(E)";
 
         if ($row["precip"] < 0.01 && $row["precip"] > 0){
             $str .= "<br>Rain: Trace ";
@@ -143,6 +145,7 @@ if ($mode == "monthly") {
       	} else {
   	    	$str .= "<br>Rain: ". sprintf("%.2f", $row["precip"]);
   	    }
+        if ($row["precip_est"]) $str .= "(E)";
 
         if (! is_null($row["max_rstage"]) && $row["max_rstage"] >= 0){
             $str .= "<br>Max Stage[ft]: ". sprintf("%.2f", $row["max_rstage"]);
@@ -254,19 +257,18 @@ EOF;
   		$htmlout .= "<tr><td>". $row['station'] ."</td>
   		<td><a href=\"hist.phtml?network=$network&year=$year&month=$month&mode=monthly&station=". $row["station"] ."\">{$label}</a></td>";
 
-    	$htmlout .= "<td>". $row["max_tmpf"] ."</td>";
+        $te = $row["tmpf_est"] ? "(E)": "";
+    	$htmlout .= "<td>". $row["max_tmpf"] ." ${te}</td>";
 
-	  	$htmlout .= "<td>". $row["min_tmpf"] ."</td>";
+	  	$htmlout .= "<td>". $row["min_tmpf"] ." ${te}</td>";
 		$htmlout .= "<td>". $row["min_feel"] ."</td>";
 		$htmlout .= "<td>". $row["max_feel"] ."</td>";
 
 		$htmlout .= "<td>". $row["min_dwpf"] ."</td>";
 		$htmlout .= "<td>". $row["max_dwpf"] ."</td>";
-	    	
-	  	if ($row["precip"] < 0)
-	    	$htmlout .= "<td>M</td>";
-	  	else
-	    	$htmlout .= "<td>". snowprint($row["precip"]) ."</td>";
+	    
+        $pe = $row["precip_est"] ? "(E)": "";
+	    $htmlout .= "<td>". snowprint($row["precip"]) ." ${pe}</td>";
 	
 	  	if (strlen($row["max_gust"]) > 0 && $row["max_gust_localts"] != "") {
 	    	$gtim = strtotime(substr($row["max_gust_localts"],0,16));
@@ -310,14 +312,15 @@ $ms = monthSelect($month, "month");
 $ds = daySelect($day);
 if ($mode == "monthly"){
   $content .= <<<EOF
-  	<h2>Data Calendar for {$st->table[$station]["name"]}</h2>
-  		The calendar chart below shows the daily reported climate variables.  
-  You can click on a date to display the values for all sites for that day. 
-  Time stamps are displayed in the <strong>{$metadata["tzname"]}</strong> 
-  timezone. Wind speeds are in mph and temperatures in Fahrenheit.
-	<p>Year: &nbsp; {$ys}
-	<p>Month: &nbsp; {$ms}
-	<p>&nbsp; <input type='submit' value='Change'></form>
+<h2>Data Calendar for {$st->table[$station]["name"]}</h2>
+<p>The calendar chart below shows the daily reported climate variables.  
+You can click on a date to display the values for all sites for that day. 
+Time stamps are displayed in the <strong>{$metadata["tzname"]}</strong> 
+timezone. Wind speeds are in mph and temperatures in Fahrenheit.  Values
+flagged with a <i>(E)</i> are estimated by the IEM.</p>
+  <p>Year: &nbsp; {$ys}
+    <p>Month: &nbsp; {$ms}
+    <p>&nbsp; <input type='submit' value='Change'></form>
 </div>
 EOF;
 } else {
