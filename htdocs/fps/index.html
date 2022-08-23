@@ -45,6 +45,14 @@
         </div>
     </div>
 
+    <!-- maprow -->
+    <div style="max-height: 75px;">
+    <strong>Maps:</strong>
+
+    <img src="/data/iowa_ifc_1d.png" role="button" onclick="loadImage(this.src, this.title);"
+     title="Iowa Flood Center Rainfall" style="height: 75px;">
+    </div>
+
     <div class="row isusm-data-template"
     style="display:none; min-height: 0px; width: 100%; overflow-y: hidden; height: auto;">
        <div class="col-md-4" style="overflow-y: scroll; height: 450;">
@@ -99,6 +107,9 @@
             <br /><button role="button" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:year::type:max-precip::_e:{elem}.js"
             ><i class="fa fa-line-chart"></i> Daily Max Precip</button>
+            <br /><button role="button" onClick="loaderClicked(this)"
+            data-url-template="/plotting/auto/plot/142/network:{network}::station:{station}::p1:31::p2:91::p3:365::pvar:precip::how:diff::_r:86.png"
+            ><i class="fa fa-line-chart"></i> Drought Monitoring</button>
 
             <h3>Trends</h3>
             <br /><strong>Variable:</strong>

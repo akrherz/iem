@@ -156,6 +156,32 @@ function initMap(){
     olMap.on("click", mapClickHandler);
 
 }
+function loadImage(imsrc, imtitle){
+    var div = document.createElement("div");
+    div.title = imtitle;
+    var img = document.createElement("img");
+    img.classList.add("img");
+    img.classList.add("img-responsive");
+    img.src = imsrc;
+    div.appendChild(img);
+    var dlg = $(div).dialog({
+        draggable: true,
+        autoOpen: true,
+        classes: {
+            "ui-dialog": "ui-window-options",
+            "ui-dialog-titlebar": "ui-window-bar"
+        },
+        modal: true,
+        responsive: true,
+        width: 800,
+        height: 600,
+        close: function() {
+            $(this).dialog('destroy').remove();
+        }
+    });
+    $(dlg).dialog("open");
+
+}
 function createQRDialog(qrurl){
     var div = document.createElement("div");
     div.title = "Scan QR Code for IEM Website Link";
