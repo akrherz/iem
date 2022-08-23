@@ -8,22 +8,20 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
-PDICT = dict(
-    [
-        ("avg_high_temp", "Average High Temperature"),
-        ("range_high_temp", "Range of High Temperature"),
-        ("avg_low_temp", "Average Low Temperature"),
-        ("range_low_temp", "Range of Low Temperature"),
-        ("avg_temp", "Average Temperature"),
-        ("avg_dewp", "Average Dew Point Temp"),
-        ("avg_wind_speed", "Average Wind Speed"),
-        ("max_high", "Maximum High Temperature"),
-        ("min_high", "Minimum High Temperature"),
-        ("max_low", "Maximum Low Temperature"),
-        ("min_low", "Minimum Low Temperature"),
-        ("precip", "Total Precipitation"),
-    ]
-)
+PDICT = {
+    "avg_high_temp": "Average High Temperature",
+    "range_high_temp": "Range of High Temperature",
+    "avg_low_temp": "Average Low Temperature",
+    "range_low_temp": "Range of Low Temperature",
+    "avg_temp": "Average Temperature",
+    "avg_dewp": "Average Dew Point Temp",
+    "avg_wind_speed": "Average Wind Speed",
+    "max_high": "Maximum High Temperature",
+    "min_high": "Minimum High Temperature",
+    "max_low": "Maximum Low Temperature",
+    "min_low": "Minimum Low Temperature",
+    "precip": "Total Precipitation",
+}
 
 
 def get_description():
@@ -51,6 +49,13 @@ def get_description():
             default="DSM",
             label="Select Station",
             network="IA_ASOS",
+        ),
+        dict(
+            type="year",
+            default=1928,
+            min=1928,
+            name="syear",
+            label="Limit plot start year (if data exists) to:",
         ),
         dict(
             type="month",
@@ -134,7 +139,7 @@ def plotter(fdict):
         avg((max_dwpf + min_dwpf)/2.) as avg_dewp
         from summary s JOIN stations t on (s.iemid = t.iemid)
         WHERE t.network = :network and t.id = :station
-        and to_char(day, 'mmdd') in :sdays
+        and to_char(day, 'mmdd') in :sdays and day >= :sdate
         GROUP by yr ORDER by yr ASC
         """
             ),
@@ -143,6 +148,7 @@ def plotter(fdict):
                 "network": ctx["network"],
                 "station": station,
                 "sdays": tuple(sdays),
+                "sdate": datetime.date(ctx["syear"], 1, 1),
             },
             index_col="yr",
         )
@@ -198,7 +204,10 @@ def plotter(fdict):
         df[varname].mean(),
         lw=2,
         label=f"Avg: {df[varname].mean():.2f}",
+        color="b",
     )
+    trail = df[varname].rolling(30, min_periods=30, center=False).mean()
+    ax[0].plot(trail.index, trail.values, color="k", label="30yr Avg", lw=2)
     ylabel = r"Temperature $^\circ$F"
     if varname in ["precip"]:
         ylabel = "Precipitation [inch]"

@@ -28,22 +28,26 @@ h3.title {
     background-color: #fff;
     padding-left: 20px;
     padding-right: 20px;
+    border: 3px solid #000;
 }
 
 #olmap {
     width: 100%;
     min-height: 400px;
-    height: 530px;
+    height: 700px;
 }
 #overviewmap {
     width: 100%;
     min-height: 400px;
     height: 400px;
-    margin-left: 30px;
+    margin-left: 50px;
 }
-.ol-overviewmap .ol-overviewmap-map {
+.ol-overviewmap .ol-overviewmap-map{
     width: 300px !important;
     height: 300px !important;
+}
+#overviewmap > div {
+    left: 30px !important;
 }
 .ui-window-bar .ui-button {
     position: absolute;

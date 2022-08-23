@@ -233,16 +233,23 @@ function loaderClicked(elem){
     var station = $(container).data("station");
     var network = $(container).data("network");
     var tpl = $elem.data("url-template");
+    var qrtpl = $elem.data("qrcode-template");
     var divid = "d" + station + network;
-    var month = container.find("select[name=coop_trends_month]").val();
-    var type = container.find("select[name=coop_trends_type]").val();
+    var month = container.find("select[name=month]").val();
+    var type = container.find("select[name=type]").val();
     var uri = tpl
-        .replace("{station}", station)
-        .replace("{network}", network)
-        .replace("{elem}", divid)
-        .replace("{month}", month)
-        .replace("{type}", type);
+        .replaceAll("{station}", station)
+        .replaceAll("{network}", network)
+        .replaceAll("{elem}", divid)
+        .replaceAll("{month}", month)
+        .replaceAll("{type}", type);
     var qrurl = uri.replace("/plot/", "/qrcode/").replace(".js", ".png");
+    if (qrtpl !== undefined){
+        qrtpl = qrtpl
+        .replaceAll("{station}", station)
+        .replaceAll("{network}", network);
+        qrurl = `/plotting/auto/gen_qrcode.py?q=${qrtpl}`;
+    }
     loadAutoplot(container, qrurl, uri, divid);
 }
 

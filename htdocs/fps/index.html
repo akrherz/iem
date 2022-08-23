@@ -16,9 +16,8 @@
 
     <h3 class="title">Iowa Environmental Mesonet:: Capturing Iowa's Weather and Climate Variability</h3>
 
-    <div id="wx">Current Weather
+    <div id="wx">Current Weather @ <span id="wxtime">9:46 AM</span>
         <br />ISU AEA Farm (2 miles SE FPS)
-        <br />@ <span id="wxtime">9:46 AM</span>
         <br /><i class="fa fa-thermometer-half"></i> Air Temp: <span id="tmpf">80</span>&deg;F
         &nbsp; <i class="fa fa-tint"></i> Rain: <span id="pday">0.00</span>"
         <br /><i class="fa fa-tree"></i> 4" Soil Temp: <span id="soil4">--</span>&deg;F
@@ -26,8 +25,8 @@
     <p>&nbsp;</p>
     <p>&nbsp;</p>
     <div class="row">
-        <div class="col-md-2" style="padding-left: 30px; height: 500px;">
-            <strong>Legend:</strong>
+        <div class="col-md-2" style="padding-left: 30px; height: 700px;">
+            <strong>Symbol Legend:</strong>
             <br /><input type="checkbox" id="isusm" checked="checked" onclick="changeStations(this);">
               <label for="isusm"><img src="img/isu.svg" style="height: 30px;"> ISU Soil Moisture</label>
             <br /><input type="checkbox" id="asos" checked="checked" onclick="changeStations(this);">
@@ -42,7 +41,6 @@
             <br /><div id="overviewmap"></div>
         </div>
         <div class="col-md-10" style="padding-left: 25px;">
-            <strong>Click on station symbol to explore available plots!</strong>
             <div id="olmap"></div>
         </div>
     </div>
@@ -52,7 +50,7 @@
        <div class="col-md-4" style="overflow-y: scroll; height: 450;">
            <h3>Main Topics</h3>
 
-           <button role="button" onClick="loaderClicked(this);"
+           <button role="button" onClick="loaderClicked(this);" class="autoload"
             data-url-template="/plotting/auto/plot/145/network:ISUSM::station:{station}::var:tsoil::year:2022::_r:86.png"><i class="fa fa-line-chart"></i> 4in Soil Temps</button>
 
        </div>
@@ -62,45 +60,30 @@
     <div class="row asos-data-template"
      style="display:none; min-height: 0px; width: 100%; overflow-y: hidden; height: auto;">
         <div class="col-md-4" style="overflow-y: scroll; height: 450;">
-            <h3>Trends</h3>
-            <br /><strong>Variable:</strong>
-            <select name="coop_trends_type">
-                <option value="max-high">Maximum High</option>
-                <option value="avg-high">Average High</option>
-                <option value="min-high">Minimum High</option>
-                <option value="max-low">Maximum Low</option>
-                <option value="avg-low">Average Low</option>
-                <option value="min-low">Minimum Low</option>
-                <option value="avg-temp">Average Temp</option>
-                <option value="range-avghi-avglo">Range between Ave High + Low</option>
-                <option value="max-precip">Maximum Daily Precip</option>
-                <option value="sum-precip">Total Precipitation</option>
-            </select>
+            <h3>Main Topics</h3>
+            <button role="button" onClick="loaderClicked(this);" class="autoload"
+            data-url-template="/plotting/auto/plot/140/network:{network}::station:{station}::syear:1973::month:4::day:1::days:30::varname:avg_wind_speed::year:2022::_r:86.png"><i class="fa fa-line-chart"></i> April Wind Speed</button>
+
+            <h3>Wind Roses</h3>
             <br /><strong>Month/Season:</strong>
-            <select name="coop_trends_month">
-                <option value="year">Calendar Year</option>
-                <option value="spring">Spring (MAM)</option>
-                <option value="fall">Fall (SON)</option>
-                <option value="winter">Winter (DJF)</option>
-                <option value="summer">Summer (JJA)</option>
-                <option value="1">January</option>
-                <option value="2">February</option>
-                <option value="3">March</option>
-                <option value="4">April</option>
-                <option value="5">May</option>
-                <option value="6">June</option>
-                <option value="7">July</option>
-                <option value="8" selected="selected">August</option>
-                <option value="9">September</option>
-                <option value="10">October</option>
-                <option value="11">November</option>
-                <option value="12">December</option>
+            <select name="month">
+                <option value="yearly">Calendar Year</option>
+                <option value="jan">January</option>
+                <option value="feb">February</option>
+                <option value="mar">March</option>
+                <option value="apr">April</option>
+                <option value="may">May</option>
+                <option value="jun">June</option>
+                <option value="jul">July</option>
+                <option value="aug" selected="selected">August</option>
+                <option value="sep">September</option>
+                <option value="oct">October</option>
+                <option value="nov">November</option>
+                <option value="dec">December</option>
             </select>
-
             <button role="button" onClick="loaderClicked(this);"
-             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:{month}::type:{type}::_e:{elem}.js"><i class="fa fa-line-chart"></i> Create Chart</button>
-
-             <h3>TBD</h3>
+            data-qrcode-template="https://mesonet.agron.iastate.edu/sites/windrose.phtml?station={station}&network={network}"
+            data-url-template="/onsite/windrose/{network}/{station}/{station}_{month}.png"><i class="fa fa-line-chart"></i> View Windrose</button>
 
         </div>
         <div class="col-md-8 data-display" style="overflow-y: auto; height: auto;"></div>
@@ -110,7 +93,7 @@
      style="display:none; min-height: 0px; width: 100%; overflow-y: hidden; height: auto;">
         <div class="col-md-4" style="overflow-y: scroll; height: 450;">
             <h3>Main Topics</h3>
-            <button role="button" onClick="loaderClicked(this)"
+            <button role="button" onClick="loaderClicked(this)" class="autoload"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:year::type:avg-temp::_e:{elem}.js"
             ><i class="fa fa-line-chart"></i> Average Temperature</button>
             <br /><button role="button" onClick="loaderClicked(this)"
@@ -119,7 +102,7 @@
 
             <h3>Trends</h3>
             <br /><strong>Variable:</strong>
-            <select name="coop_trends_type">
+            <select name="type">
                 <option value="max-high">Maximum High</option>
                 <option value="avg-high">Average High</option>
                 <option value="min-high">Minimum High</option>
@@ -127,12 +110,12 @@
                 <option value="avg-low">Average Low</option>
                 <option value="min-low">Minimum Low</option>
                 <option value="avg-temp">Average Temp</option>
-                <option value="range-avghi-avglo">Range between Ave High + Low</option>
+                <option value="range-avghi-avglo">Ave High + Low Range</option>
                 <option value="max-precip">Maximum Daily Precip</option>
                 <option value="sum-precip">Total Precipitation</option>
             </select>
             <br /><strong>Month/Season:</strong>
-            <select name="coop_trends_month">
+            <select name="month">
                 <option value="year">Calendar Year</option>
                 <option value="spring">Spring (MAM)</option>
                 <option value="fall">Fall (SON)</option>

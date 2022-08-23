@@ -111,4 +111,6 @@ function windowFactory(initdiv, classID){
     
     addButtons($("."+classID));    
     $(dlg).dialog("open");
+    // Find the first button with autoload class and click it
+    $(initdiv).find(".autoload").click();
 }

@@ -13,6 +13,8 @@ HTTP200 = "200 OK"
 
 def q2uri(qstr):
     """Convert the query string to a URI."""
+    if qstr.startswith("https://mesonet"):
+        return qstr
     uri = "https://mesonet.agron.iastate.edu/plotting/auto/?"
     for token in qstr.split("::"):
         token2 = token.split(":")
