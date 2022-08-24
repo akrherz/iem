@@ -403,7 +403,7 @@ def do_job(job):
     cmd = "unoconv -f ppt %s" % (outputfile,)
     subprocess.call(cmd, shell=True)
     pptfn = "%s.ppt" % (basefn,)
-    LOG.wawrning("Generated %s with %s slides", pptfn, i)
+    LOG.warning("Generated %s with %s slides", pptfn, i)
     if os.path.isfile(pptfn):
         LOG.warning("...copied to webfolder")
         shutil.copyfile(pptfn, "/mesonet/share/pickup/raccoon/%s" % (pptfn,))
