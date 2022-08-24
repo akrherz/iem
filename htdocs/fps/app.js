@@ -156,13 +156,23 @@ function initMap(){
     olMap.on("click", mapClickHandler);
 
 }
-function loadImage(imsrc, imtitle){
+function loadImage(elem){
     var div = document.createElement("div");
-    div.title = imtitle;
+    div.title = elem.title;
+    var tgt = $(elem).data("target");
+    var qrurl =  `/plotting/auto/gen_qrcode.py?q=${tgt}`
+    // Create a QR code icon for usage
+    var button = document.createElement("button");
+    button.classList.add("qrbutton");
+    button.innerHTML = '<i class="fa fa-qrcode"></i> QR';
+    button.onclick = function(){
+        createQRDialog(qrurl);
+    }
+    $(button).appendTo($(div));
     var img = document.createElement("img");
     img.classList.add("img");
     img.classList.add("img-responsive");
-    img.src = imsrc;
+    img.src = elem.src;
     div.appendChild(img);
     var dlg = $(div).dialog({
         draggable: true,
@@ -278,7 +288,13 @@ function loaderClicked(elem){
     }
     loadAutoplot(container, qrurl, uri, divid);
 }
+function initUI(){
+    $(".maprow img").click(function(){
+        loadImage(this);
+    });
+}
 
 $(document).ready(function() {
     initMap();
+    initUI();
 });

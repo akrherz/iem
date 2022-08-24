@@ -40,17 +40,29 @@
 
             <br /><div id="overviewmap"></div>
         </div>
-        <div class="col-md-10" style="padding-left: 25px;">
+        <div class="col-md-8" style="padding-left: 25px;">
             <div id="olmap"></div>
         </div>
-    </div>
-
-    <!-- maprow -->
-    <div style="max-height: 75px;">
-    <strong>Maps:</strong>
-
-    <img src="/data/iowa_ifc_1d.png" role="button" onclick="loadImage(this.src, this.title);"
-     title="Iowa Flood Center Rainfall" style="height: 75px;">
+        <div class="col-md-2 maprow">
+            <img src="/data/iowa_ifc_1d.png" role="button" title="Iowa Flood Center Rainfall"
+            data-target="https://mesonet.agron.iastate.edu">
+           <img src="/plotting/auto/plot/84/sector:IA::src:mrms::opt:dep::usdm:yes::ptype:g::sdate:2022-08-01::cmap:BrBG::_r:43.png"
+            role="button" title="Precip Departure Aug 1"
+            data-target="https://mesonet.agron.iastate.edu">
+           <img src="/plotting/auto/plot/185/sector:IA::threshold:2.0::cmap:terrain::_r:43.png" role="button"
+            title="Days to Accumulate 2 inches"
+            data-target="https://mesonet.agron.iastate.edu">
+           <img src="/plotting/auto/plot/183/s:state::state:IA::sdate:2021-01-01::_r:43.png" role="button"
+            title="Iowa Drought Coverage"
+            data-target="https://mesonet.agron.iastate.edu">
+           <img src="/plotting/auto/plot/127/state:IA::short_desc:CD::cmap:jet::_r:43.png" role="button"
+            title="USDA NASS Corn Denting Progress"
+            data-target="https://mesonet.agron.iastate.edu/plotting/auto/?_wait=no&q=127&state=IA&short_desc=CD&cmap=jet&_r=43&dpi=100&_fmt=png">
+           <img src="/plotting/auto/plot/24/csector:midwest::var:precip::p:month::year:2022::month:summer::cmap:RdBu_r::_r:43.png" role="button"
+            title="Climate District Precip Ranks"
+            data-target="https://mesonet.agron.iastate.edu/plotting/auto/?_wait=no&q=24&csector=midwest&var=precip&p=month&year=2022&month=summer&sdate=2022%2F04%2F05&edate=2022%2F05%2F03&cmap=RdBu&cmap_r=on&_r=t&dpi=100&_fmt=png">
+       
+        </div>
     </div>
 
     <div class="row isusm-data-template"
@@ -71,6 +83,11 @@
             <h3>Main Topics</h3>
             <button role="button" onClick="loaderClicked(this);" class="autoload"
             data-url-template="/plotting/auto/plot/140/network:{network}::station:{station}::syear:1973::month:4::day:1::days:30::varname:avg_wind_speed::year:2022::_r:86.png"><i class="fa fa-line-chart"></i> April Wind Speed</button>
+            <button role="button" onClick="loaderClicked(this);"
+            data-url-template="/plotting/auto/plot/126/network:{network}::station:{station}::year:2022.png"><i class="fa fa-line-chart"></i> 2022 Humidity</button>
+            <button role="button" onClick="loaderClicked(this);"
+            data-url-template="/plotting/auto/plot/93/network:{network}::zstation:{station}::syear:1973::year:2022::var:heatindex::ytd:yes::inc:no::_r:43.png">
+            <i class="fa fa-line-chart"></i> 2022 Heat Index</button>
 
             <h3>Wind Roses</h3>
             <br /><strong>Month/Season:</strong>

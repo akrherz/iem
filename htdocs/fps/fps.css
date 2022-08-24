@@ -23,18 +23,19 @@ h3.title {
 #wx {
     position: absolute;
     bottom: 10px;
-    right: 50px;
+    right: 35px;
     font-weight: bolder;
     background-color: #fff;
     padding-left: 20px;
     padding-right: 20px;
     border: 3px solid #000;
+    z-index: 100;
 }
 
 #olmap {
     width: 100%;
     min-height: 400px;
-    height: 700px;
+    height: 750px;
 }
 #overviewmap {
     width: 100%;
@@ -45,6 +46,13 @@ h3.title {
 .ol-overviewmap .ol-overviewmap-map{
     width: 300px !important;
     height: 300px !important;
+}
+.maprow {
+    overflow-y: scroll;
+    height: 750px;
+}
+.maprow > img {
+    height: 150px;
 }
 #overviewmap > div {
     left: 30px !important;

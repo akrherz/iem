@@ -33,6 +33,7 @@ PDICT4 = {
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {}
+    desc["cache"] = 3600  # Things like MRMS update hourly
     desc["data"] = False
     desc[
         "description"
