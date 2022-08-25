@@ -783,6 +783,7 @@ function buildUI(){
         var data = eventTable.row( this ).data();
         if (data[0] == CONFIG.etn) return;
         CONFIG.etn = data[0];
+        $("#etn").val(CONFIG.etn);
         loadTabs();
         // Switch to the details tab after the click
         $('#event_tab').trigger('click');

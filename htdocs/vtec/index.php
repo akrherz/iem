@@ -1,13 +1,14 @@
 <?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/mlib.php";
+require_once "../../include/forms.php";
 force_https();
 require_once "../../include/myview.php";
-$OL = "6.4.3";
+$OL = "6.15.1";
 $t = new MyView();
 $t->title = "Valid Time Event Code (VTEC) App";
 
-$v = isset($_GET["vtec"]) ? $_GET["vtec"] : "2012-O-NEW-KBMX-TO-W-0001";
+$v = isset($_GET["vtec"]) ? xssafe($_GET["vtec"]) : "2012-O-NEW-KBMX-TO-W-0001";
 $tokens = preg_split('/-/', $v);
 $year = $tokens[0];
 $operation = $tokens[1];
@@ -31,7 +32,7 @@ $t->jsextra = <<<EOM
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
-<script type="text/javascript" src="vtec_static.js?v=4"></script>
+<script type="text/javascript" src="vtec_static.js"></script>
 <script>
 var CONFIG = {
   radar: null,
@@ -46,7 +47,7 @@ var CONFIG = {
   etn: {$etn}
 };
 </script>
-<script type="text/javascript" src="vtec_app.js?v=7"></script>
+<script type="text/javascript" src="vtec_app.js"></script>
 EOM;
 
 $theform = <<<EOM
