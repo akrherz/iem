@@ -11,25 +11,23 @@ from pyiem.exceptions import NoDataFound
 from pyiem.reference import LATLON
 from metpy.units import units, masked_array
 
-PDICT = dict(
-    (
-        ("p01d_12z", "24 Hour Precipitation at 12 UTC"),
-        ("p01d", "Calendar Day Precipitation"),
-        ("range_tmpk", "Range between Min and Max Temp"),
-        ("range_tmpk_12z", "Range between Min and Max Temp at 12 UTC"),
-        ("low_tmpk", "Minimum Temperature"),
-        ("low_tmpk_12z", "Minimum Temperature at 12 UTC"),
-        ("high_tmpk", "Maximum Temperature"),
-        ("high_tmpk_12z", "Maximum Temperature at 12 UTC"),
-        ("p01d", "Calendar Day Precipitation"),
-        ("power_swdn", "NASA POWER :: Incident Shortwave Down"),
-        ("rsds", "Solar Radiation"),
-        ("avg_dwpk", "Average Dew Point"),
-        ("wind_speed", "Average Wind Speed"),
-        ("snow_12z", "Experimental 24-Hour Snowfall at 12 UTC"),
-        ("snowd_12z", "Experimental 24-Hour Snow Depth at 12 UTC"),
-    )
-)
+PDICT = {
+    "p01d_12z": "24 Hour Precipitation at 12 UTC",
+    "p01d": "Calendar Day Precipitation",
+    "range_tmpk": "Range between Min and Max Temp",
+    "range_tmpk_12z": "Range between Min and Max Temp at 12 UTC",
+    "low_tmpk": "Minimum Temperature",
+    "low_tmpk_12z": "Minimum Temperature at 12 UTC",
+    "high_tmpk": "Maximum Temperature",
+    "high_tmpk_12z": "Maximum Temperature at 12 UTC",
+    "p01d": "Calendar Day Precipitation",
+    "power_swdn": "NASA POWER :: Incident Shortwave Down",
+    "rsds": "Solar Radiation",
+    "avg_dwpk": "Average Dew Point",
+    "wind_speed": "Average Wind Speed",
+    "snow_12z": "Experimental 24-Hour Snowfall at 12 UTC",
+    "snowd_12z": "Experimental 24-Hour Snow Depth at 12 UTC",
+}
 PDICT2 = {"c": "Contour Plot", "g": "Grid Cell Mesh"}
 
 

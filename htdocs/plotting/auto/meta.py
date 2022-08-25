@@ -134,7 +134,3 @@ def application(environ, start_response):
     start_response(status, response_headers)
     # json.dumps returns str, we need bytes here
     return [output.encode()]
-
-
-# from paste.exceptions.errormiddleware import ErrorMiddleware
-# application = ErrorMiddleware(application, debug=True)

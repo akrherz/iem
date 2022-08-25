@@ -47,7 +47,7 @@ function j(name){
 EOF;
 
 // A dance here to get a 4-char and 3-char identifier
-$source = isset($_REQUEST["source"])? substr($_GET["source"],0,4) : 'DMX';
+$source = isset($_REQUEST["source"])? substr(xssafe($_GET["source"]),0,4) : 'DMX';
 $cccc = $source;
 $sesource = $source;
 if (strlen($source) == 3){
