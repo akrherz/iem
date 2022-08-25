@@ -15,7 +15,7 @@ html,body {
 h3.title {
     color: #ff0;
     font-weight: bolder;
-    font-size: x-large;
+    font-size: 32;
     position: absolute;
     top: -15px;
     left: 150px;
@@ -88,4 +88,19 @@ h3.title {
     top: 3px;
     right: 3px;
     z-index: 200;
+}
+#popover {
+    background-color: rgba(0, 0, 0, 0.75);
+    color: #FFF;
+    padding-left: 20px;
+    padding-right: 20px;
+    z-index: 1002;
+}
+#popover span {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #ff0;
+}
+.ddisplay button {
+    margin: 3px;
 }

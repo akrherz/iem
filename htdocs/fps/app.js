@@ -1,6 +1,7 @@
 var epoch = 0;
 var olMap;
 var overviewMap;
+var popup;
 var stationLayer;
 
 var airportStyle = new ol.style.Style({
@@ -62,6 +63,17 @@ var stateStyle = new ol.style.Style({
 });
 stateStyle.enabled = true;
 
+function make_iem_tms(title, layername, visible, type) {
+    return new ol.layer.Tile({
+        title: title,
+        visible: visible,
+        type: type,
+        source: new ol.source.XYZ({
+            url: '/c/tile.py/1.0.0/' + layername + '/{z}/{x}/{y}.png'
+        })
+    })
+}
+
 function mapClickHandler(event){
     var feature = olMap.forEachFeatureAtPixel(event.pixel,
         function (feature) {
@@ -106,6 +118,17 @@ function stationLayerStyleFunc(feature, resolution){
     }
     return climateStyle.enabled ? climateStyle: null;
 }
+function displayFeature(evt){
+    var features = olMap.getFeaturesAtPixel(olMap.getEventPixel(evt.originalEvent));
+    if (features.length > 0){
+        var feature = features[0];
+        popup.element.hidden = false;
+        popup.setPosition(evt.coordinate);
+        $('#info-name').html("[" + feature.get("sid") + "] " + feature.get('sname'));
+    } else {
+        popup.element.hidden = true;
+    }
+}
 
 function initMap(){
     stationLayer = new ol.layer.Vector({
@@ -125,6 +148,7 @@ function initMap(){
                 type: 'base',
                 source: new ol.source.OSM()
             }),
+            make_iem_tms('US States', 'usstates', true, '')
         ],
         collapseLabel: '\u00BB',
         collapsible: false,
@@ -147,6 +171,8 @@ function initMap(){
                 type: 'base',
                 source: new ol.source.OSM()
             }),
+            make_iem_tms('US States', 'usstates', true, ''),
+            make_iem_tms('US Counties', 'uscounties', false, ''),
             stationLayer
         ]
     });
@@ -154,7 +180,18 @@ function initMap(){
     var ls = new ol.control.LayerSwitcher();
     olMap.addControl(ls);
     olMap.on("click", mapClickHandler);
-
+    olMap.on("pointermove", function(evt){
+        if (evt.dragging){
+            return;
+        }
+        displayFeature(evt);
+    });
+    //  showing the position the user clicked
+    popup = new ol.Overlay({
+        element: document.getElementById('popover'),
+        offset: [7, 7]
+    });
+    olMap.addOverlay(popup);
 }
 function loadImage(elem){
     var div = document.createElement("div");

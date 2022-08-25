@@ -15,7 +15,10 @@
      style="height: 75px; position: absolute; left: 25px; top: -5px;">
 
     <h3 class="title">Iowa Environmental Mesonet:: Capturing Iowa's Weather and Climate Variability</h3>
-
+    <div id="popover">
+        <span id="info-name"></span>
+    </div>
+    
     <div id="wx">Current Weather @ <span id="wxtime">9:46 AM</span>
         <br />ISU AEA Farm (2 miles SE FPS)
         <br /><i class="fa fa-thermometer-half"></i> Air Temp: <span id="tmpf">80</span>&deg;F
@@ -65,22 +68,22 @@
         </div>
     </div>
 
-    <div class="row isusm-data-template"
+    <div class="row isusm-data-template ddisplay"
     style="display:none; min-height: 0px; width: 100%; overflow-y: hidden; height: auto;">
        <div class="col-md-4" style="overflow-y: scroll; height: 450;">
-           <h3>Main Topics</h3>
 
            <button role="button" onClick="loaderClicked(this);" class="autoload"
             data-url-template="/plotting/auto/plot/145/network:ISUSM::station:{station}::var:tsoil::year:2022::_r:86.png"><i class="fa fa-line-chart"></i> 4in Soil Temps</button>
+           <button role="button" onClick="loaderClicked(this);"
+            data-url-template="/plotting/auto/plot/177/network:ISUSM::station:{station}::opt:4::sts:2022-05-01%200000::_r:43.png"><i class="fa fa-sun-o"></i> Daily Solar Radiation</i></button>
 
        </div>
        <div class="col-md-8 data-display" style="overflow-y: auto; height: auto;"></div>
    </div><!-- ./isuag-data-template -->
 
-    <div class="row asos-data-template"
+    <div class="row asos-data-template ddisplay"
      style="display:none; min-height: 0px; width: 100%; overflow-y: hidden; height: auto;">
         <div class="col-md-4" style="overflow-y: scroll; height: 450;">
-            <h3>Main Topics</h3>
             <button role="button" onClick="loaderClicked(this);" class="autoload"
             data-url-template="/plotting/auto/plot/140/network:{network}::station:{station}::syear:1973::month:4::day:1::days:30::varname:avg_wind_speed::year:2022::_r:86.png"><i class="fa fa-line-chart"></i> April Wind Speed</button>
             <button role="button" onClick="loaderClicked(this);"
@@ -90,7 +93,7 @@
             <i class="fa fa-line-chart"></i> 2022 Heat Index</button>
 
             <h3>Wind Roses</h3>
-            <br /><strong>Month/Season:</strong>
+            <strong>Month/Season:</strong>
             <select name="month">
                 <option value="yearly">Calendar Year</option>
                 <option value="jan">January</option>
@@ -114,10 +117,9 @@
         <div class="col-md-8 data-display" style="overflow-y: auto; height: auto;"></div>
     </div><!-- ./asos-data-template -->
 
-    <div class="row coop-data-template"
+    <div class="row coop-data-template ddisplay"
      style="display:none; min-height: 0px; width: 100%; overflow-y: hidden; height: auto;">
         <div class="col-md-4" style="overflow-y: scroll; height: 450;">
-            <h3>Main Topics</h3>
             <button role="button" onClick="loaderClicked(this)" class="autoload"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:year::type:avg-temp::_e:{elem}.js"
             ><i class="fa fa-line-chart"></i> Average Temperature</button>
@@ -129,7 +131,7 @@
             ><i class="fa fa-line-chart"></i> Drought Monitoring</button>
 
             <h3>Trends</h3>
-            <br /><strong>Variable:</strong>
+            <strong>Variable:</strong>
             <select name="type">
                 <option value="max-high">Maximum High</option>
                 <option value="avg-high">Average High</option>
