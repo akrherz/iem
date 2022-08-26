@@ -92,7 +92,7 @@ def do_insert(source_cursor, reset_times, madis):
     pgconn = get_dbconn("asos")
     cursor = pgconn.cursor()
 
-    (inserts, skips, deletes) = (0, 0, 0)
+    (inserts, skips, locked, deletes) = (0, 0, 0, 0)
     for row in source_cursor:
         report_type = 4  # specials
         if madis:
@@ -105,12 +105,15 @@ def do_insert(source_cursor, reset_times, madis):
 
         # Look for previous entries
         cursor.execute(
-            "SELECT metar from alldata where station = %s and valid = %s "
-            f"and report_type {'=' if madis else '!='} 1",
+            "SELECT metar, editable from alldata where station = %s and "
+            f"valid = %s and report_type {'=' if madis else '!='} 1",
             (row["id"], row["valid"]),
         )
         if cursor.rowcount > 0:
-            metar = cursor.fetchone()[0]
+            (metar, editable) = cursor.fetchone()[0]
+            if not editable:
+                locked += 1
+                continue
             if metar == row["raw"]:
                 skips += 1
                 continue
@@ -190,7 +193,13 @@ def do_insert(source_cursor, reset_times, madis):
             pgconn.commit()
             cursor = pgconn.cursor()
 
-    LOG.info("insert %s, skip %s delete %s rows", inserts, skips, deletes)
+    LOG.info(
+        "insert %s, skip %s, locked %s, delete %s rows",
+        inserts,
+        skips,
+        locked,
+        deletes,
+    )
     cursor.close()
     pgconn.commit()
 
