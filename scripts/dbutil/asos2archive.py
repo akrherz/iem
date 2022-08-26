@@ -110,7 +110,7 @@ def do_insert(source_cursor, reset_times, madis):
             (row["id"], row["valid"]),
         )
         if cursor.rowcount > 0:
-            (metar, editable) = cursor.fetchone()[0]
+            (metar, editable) = cursor.fetchone()
             if not editable:
                 locked += 1
                 continue
