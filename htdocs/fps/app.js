@@ -5,7 +5,7 @@ var popup;
 var stationLayer;
 
 var airportStyle = new ol.style.Style({
-    zindex: 99,
+    zIndex: 99,
     image: new ol.style.Icon({
         src: "img/airport.svg",
         scale: [0.2, 0.2]
@@ -13,7 +13,7 @@ var airportStyle = new ol.style.Style({
 });
 airportStyle.enabled = true;
 var isusmStyle = new ol.style.Style({
-    zindex: 99,
+    zIndex: 99,
     image: new ol.style.Icon({
         src: "img/isu.svg",
         scale: [0.2, 0.2]
@@ -21,7 +21,7 @@ var isusmStyle = new ol.style.Style({
 });
 isusmStyle.enabled = true;
 var climateStyle = new ol.style.Style({
-    zindex: 100,
+    zIndex: 100,
     image: new ol.style.Circle({
         fill: new ol.style.Fill({color: '#00ff00'}),
         stroke: new ol.style.Stroke({
@@ -33,7 +33,7 @@ var climateStyle = new ol.style.Style({
 });
 climateStyle.enabled = true;
 var climodistrictStyle = new ol.style.Style({
-    zindex: 101,
+    zIndex: 101,
     text: new ol.style.Text({
         text: '',
         font: 'bold 14pt serif',
@@ -48,7 +48,7 @@ var climodistrictStyle = new ol.style.Style({
 });
 climodistrictStyle.enabled = true;
 var stateStyle = new ol.style.Style({
-    zindex: 102,
+    zIndex: 102,
     text: new ol.style.Text({
         text: '',
         font: 'bold 14pt serif',
@@ -162,7 +162,8 @@ function initMap(){
             enableRotation: false,
             center: ol.proj.transform([-94.5, 42.1], 'EPSG:4326', 'EPSG:3857'),
             zoom: 7,
-            maxZoom: 16
+            maxZoom: 16,
+            minZoom: 6
         }),
         layers: [
             new ol.layer.Tile({

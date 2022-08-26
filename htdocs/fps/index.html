@@ -47,21 +47,36 @@
             <div id="olmap"></div>
         </div>
         <div class="col-md-2 maprow">
-            <img src="/data/iowa_ifc_1d.png" role="button" title="Iowa Flood Center Rainfall"
+            <strong>4 inch Soil Temperatures</strong>
+            <img src="/data/soilt_day1.png" role="button" title="4in Soil Temperatures"
+             data-target="https://mesonet.agron.iastate.edu/agclimate/soilt.php">
+
+             <br /><strong>Today's Precipitation</strong>
+             <img src="/data/iowa_ifc_1d.png" role="button" title="Iowa Flood Center Rainfall"
             data-target="https://mesonet.agron.iastate.edu">
-           <img src="/plotting/auto/plot/84/sector:IA::src:mrms::opt:dep::usdm:yes::ptype:g::sdate:2022-08-01::cmap:BrBG::_r:43.png"
+
+            <br /><strong>Precipitation Departure</strong>
+            <img src="/plotting/auto/plot/84/sector:IA::src:mrms::opt:dep::usdm:yes::ptype:g::sdate:2022-08-01::cmap:BrBG::_r:43.png"
             role="button" title="Precip Departure Aug 1"
             data-target="https://mesonet.agron.iastate.edu">
-           <img src="/plotting/auto/plot/185/sector:IA::threshold:2.0::cmap:terrain::_r:43.png" role="button"
+
+            <br /><strong>Days to Accum 2 inches</strong>
+            <img src="/plotting/auto/plot/185/sector:IA::threshold:2.0::cmap:terrain::_r:43.png" role="button"
             title="Days to Accumulate 2 inches"
             data-target="https://mesonet.agron.iastate.edu">
-           <img src="/plotting/auto/plot/183/s:state::state:IA::sdate:2021-01-01::_r:43.png" role="button"
+
+            <br /><strong>Iowa Drought Coverage</strong>
+            <img src="/plotting/auto/plot/183/s:state::state:IA::sdate:2021-01-01::_r:43.png" role="button"
             title="Iowa Drought Coverage"
             data-target="https://mesonet.agron.iastate.edu">
-           <img src="/plotting/auto/plot/127/state:IA::short_desc:CD::cmap:jet::_r:43.png" role="button"
+
+            <br /><strong>NASS Corn Denting Progress</strong>
+            <img src="/plotting/auto/plot/127/state:IA::short_desc:CD::cmap:jet::_r:43.png" role="button"
             title="USDA NASS Corn Denting Progress"
             data-target="https://mesonet.agron.iastate.edu/plotting/auto/?_wait=no&q=127&state=IA&short_desc=CD&cmap=jet&_r=43&dpi=100&_fmt=png">
-           <img src="/plotting/auto/plot/24/csector:midwest::var:precip::p:month::year:2022::month:summer::cmap:RdBu_r::_r:43.png" role="button"
+
+            <br /><strong>Climate District Ranks</strong>
+            <img src="/plotting/auto/plot/24/csector:midwest::var:precip::p:month::year:2022::month:summer::cmap:RdBu_r::_r:43.png" role="button"
             title="Climate District Precip Ranks"
             data-target="https://mesonet.agron.iastate.edu/plotting/auto/?_wait=no&q=24&csector=midwest&var=precip&p=month&year=2022&month=summer&sdate=2022%2F04%2F05&edate=2022%2F05%2F03&cmap=RdBu&cmap_r=on&_r=t&dpi=100&_fmt=png">
        
@@ -73,7 +88,11 @@
        <div class="col-md-4" style="overflow-y: scroll; height: 450;">
 
            <button role="button" onClick="loaderClicked(this);" class="autoload"
-            data-url-template="/plotting/auto/plot/145/network:ISUSM::station:{station}::var:tsoil::year:2022::_r:86.png"><i class="fa fa-line-chart"></i> 4in Soil Temps</button>
+            data-url-template="/plotting/auto/plot/145/network:ISUSM::station:{station}::var:tsoil::year:2022::_r:86.png"><i class="fa fa-thermometer-quarter"></i> 4in Soil Temps</button>
+            <button role="button" onClick="loaderClicked(this);"
+            data-url-template="/plotting/auto/plot/177/network:ISUSM::station:{station}::opt:sm::sts:2022-05-01%200000::_r:86.png"><i class="fa fa-tint"></i> Soil Moisture</button>
+            <button role="button" onClick="loaderClicked(this);"
+            data-url-template="/plotting/auto/plot/177/network:ISUSM::station:{station}::opt:7::sts:2022-05-01%200000::_r:86.png"><i class="fa fa-battery-half"></i> Available Soil Water</button>
            <button role="button" onClick="loaderClicked(this);"
             data-url-template="/plotting/auto/plot/177/network:ISUSM::station:{station}::opt:4::sts:2022-05-01%200000::_r:43.png"><i class="fa fa-sun-o"></i> Daily Solar Radiation</i></button>
 
@@ -87,10 +106,10 @@
             <button role="button" onClick="loaderClicked(this);" class="autoload"
             data-url-template="/plotting/auto/plot/140/network:{network}::station:{station}::syear:1973::month:4::day:1::days:30::varname:avg_wind_speed::year:2022::_r:86.png"><i class="fa fa-line-chart"></i> April Wind Speed</button>
             <button role="button" onClick="loaderClicked(this);"
-            data-url-template="/plotting/auto/plot/126/network:{network}::station:{station}::year:2022.png"><i class="fa fa-line-chart"></i> 2022 Humidity</button>
+            data-url-template="/plotting/auto/plot/140/network:{network}::station:{station}::syear:1973::month:6::day:1::days:92::varname:avg_dewp::year:2022::_r:43.png"><i class="fa fa-fire"></i> Summer Dew Points</button>
             <button role="button" onClick="loaderClicked(this);"
             data-url-template="/plotting/auto/plot/93/network:{network}::zstation:{station}::syear:1973::year:2022::var:heatindex::ytd:yes::inc:no::_r:43.png">
-            <i class="fa fa-line-chart"></i> 2022 Heat Index</button>
+            <i class="fa fa-table"></i> 2022 Heat Index</button>
 
             <h3>Wind Roses</h3>
             <strong>Month/Season:</strong>
@@ -126,6 +145,15 @@
             <br /><button role="button" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:year::type:max-precip::_e:{elem}.js"
             ><i class="fa fa-line-chart"></i> Daily Max Precip</button>
+
+            <br /><button role="button" onClick="loaderClicked(this)"
+            data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:spring::type:sum-precip::_e:{elem}.js"
+            ><i class="fa fa-line-chart"></i> Spring Season Precip</button>
+
+            <br /><button role="button" onClick="loaderClicked(this)"
+            data-url-template="/plotting/auto/plot/10/network:{network}::station:{station}::direction:below::varname:low::threshold:32::year:1893::_r:86::dpi:100.png"
+            ><i class="fa fa-tree"></i> Growing Season</button>
+
             <br /><button role="button" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/142/network:{network}::station:{station}::p1:31::p2:91::p3:365::pvar:precip::how:diff::_r:86.png"
             ><i class="fa fa-line-chart"></i> Drought Monitoring</button>

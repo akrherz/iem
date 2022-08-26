@@ -11,11 +11,13 @@ import qrcode
 HTTP200 = "200 OK"
 
 
-def q2uri(qstr):
+def q2uri(qstr, pval):
     """Convert the query string to a URI."""
     if qstr.startswith("https://mesonet"):
         return qstr
     uri = "https://mesonet.agron.iastate.edu/plotting/auto/?"
+    if pval is not None:
+        uri += f"q={pval}&"
     for token in qstr.split("::"):
         token2 = token.split(":")
         if len(token2) != 2:
@@ -32,7 +34,7 @@ def application(environ, start_response):
         fields["q"] = fields["q"].replace("network:WFO", "network:NWS")
     if fields.get("q", "").find("network:WFO::wfo:PAAQ") > -1:
         fields["q"] = fields["q"].replace("network:WFO", "network:NWS")
-    uri = q2uri(fields.get("q"))
+    uri = q2uri(fields.get("q"), fields.get("p"))
     mckey = hashlib.md5(uri.encode("utf-8")).hexdigest()
     # Figure out what our response headers should be
     response_headers = [("Content-type", "image/png")]
