@@ -78,6 +78,19 @@ function addButtons(dlg) {
                 left: $max.data("original-pos").top + "px"
             }, 200);
         }
+        // Wait for parent to resize!
+        window.setTimeout(function() { resizeCharts(dlg); }, 500);
+    });
+}
+function resizeCharts(dlg){
+    // console.log("resizeCharts with dlg.height=" + dlg.height());
+    // Fixes responsive troubles with boostrap?
+    $(dlg).find(".ui-dialog-content").height(dlg.height() - 24);
+    // Causes charts to fit their container
+    $(Highcharts.charts).each(function(i,chart){
+        var height = chart.renderTo.clientHeight; 
+        var width = chart.renderTo.clientWidth; 
+        chart.setSize(width, height);
     });
 }
 
@@ -98,14 +111,7 @@ function windowFactory(initdiv, classID){
             $(this).dialog('destroy').remove();
         },
         resizeStop: function() {
-            // Causes charts to fit their container
-            $(Highcharts.charts).each(function(i,chart){
-                var height = chart.renderTo.clientHeight; 
-                var width = chart.renderTo.clientWidth; 
-                chart.setSize(width, height); 
-            });
-            // Fixes responsive troubles with boostrap?
-            $(this).find(".col-md-3").height(this.clientHeight);
+            resizeCharts(dlg);
         }
     });
     

@@ -120,6 +120,7 @@ def get_description():
             default=today.strftime("%Y/%m/%d"),
             label="End Date:",
             min="1893/01/01",
+            max=f"{datetime.today():%Y/%m/%d}",
         ),
         dict(type="cmap", name="cmap", default="YlGnBu", label="Color Ramp:"),
     ]

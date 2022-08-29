@@ -14,7 +14,7 @@
     <img src="/images/iem_logo.svg"
      style="height: 75px; position: absolute; left: 25px; top: -5px;">
 
-    <h3 class="title">Iowa Environmental Mesonet:: Capturing Iowa's Weather and Climate Variability</h3>
+    <h3 class="title">Iowa Environmental Mesonet:: Capturing Weather and Climate Variability</h3>
     <div id="popover">
         <span id="info-name"></span>
     </div>
@@ -44,6 +44,7 @@
             <br /><div id="overviewmap"></div>
         </div>
         <div class="col-md-8" style="padding-left: 25px;">
+            <strong>Click symbol on map to view available plots:</strong><br />
             <div id="olmap"></div>
         </div>
         <div class="col-md-2 maprow">
@@ -84,8 +85,8 @@
     </div>
 
     <div class="row isusm-data-template ddisplay"
-    style="display:none; min-height: 0px; width: 100%; overflow-y: hidden; height: auto;">
-       <div class="col-md-4" style="overflow-y: scroll; height: 450;">
+    style="display:none; min-height: 0px; width: 100%; overflow-y: hidden;">
+       <div class="col-md-4" style="overflow-y: scroll;">
 
            <button role="button" onClick="loaderClicked(this);" class="autoload"
             data-url-template="/plotting/auto/plot/145/network:ISUSM::station:{station}::var:tsoil::year:2022::_r:86.png"><i class="fa fa-thermometer-quarter"></i> 4in Soil Temps</button>
@@ -97,19 +98,36 @@
             data-url-template="/plotting/auto/plot/177/network:ISUSM::station:{station}::opt:4::sts:2022-05-01%200000::_r:43.png"><i class="fa fa-sun-o"></i> Daily Solar Radiation</i></button>
 
        </div>
-       <div class="col-md-8 data-display" style="overflow-y: auto; height: auto;"></div>
+       <div class="col-md-8 data-display" style="overflow-y: auto;"></div>
    </div><!-- ./isuag-data-template -->
 
     <div class="row asos-data-template ddisplay"
-     style="display:none; min-height: 0px; width: 100%; overflow-y: hidden; height: auto;">
-        <div class="col-md-4" style="overflow-y: scroll; height: 450;">
+     style="display:none; min-height: 0px; width: 100%; overflow-y: hidden;">
+        <div class="col-md-4" style="overflow-y: scroll;">
             <button role="button" onClick="loaderClicked(this);" class="autoload"
-            data-url-template="/plotting/auto/plot/140/network:{network}::station:{station}::syear:1973::month:4::day:1::days:30::varname:avg_wind_speed::year:2022::_r:86.png"><i class="fa fa-line-chart"></i> April Wind Speed</button>
+            data-url-template="/plotting/auto/plot/140/network:{network}::station:{station}::syear:1973::month:4::day:1::days:30::varname:avg_wind_speed::year:2022::_r:86.png">
+            <i class="fa fa-leaf"></i> April Wind Speed</button>
+            
             <button role="button" onClick="loaderClicked(this);"
-            data-url-template="/plotting/auto/plot/140/network:{network}::station:{station}::syear:1973::month:6::day:1::days:92::varname:avg_dewp::year:2022::_r:43.png"><i class="fa fa-fire"></i> Summer Dew Points</button>
+            data-url-template="/plotting/auto/plot/140/network:{network}::station:{station}::syear:1973::month:6::day:1::days:92::varname:avg_dewp::year:2022::_r:43.png">
+            <i class="fa fa-fire"></i> Summer Dew Points</button>
+            
             <button role="button" onClick="loaderClicked(this);"
             data-url-template="/plotting/auto/plot/93/network:{network}::zstation:{station}::syear:1973::year:2022::var:heatindex::ytd:yes::inc:no::_r:43.png">
-            <i class="fa fa-table"></i> 2022 Heat Index</button>
+            <i class="fa fa-table"></i> 2022 Heat Index Hrs</button>
+
+            <button role="button" onClick="loaderClicked(this);"
+            data-url-template="/plotting/auto/plot/82/network:{network}::station:{station}::var:high_departure::sdate:2022-05-01::edate:2022-08-31::_r:43.png">
+            <i class="fa fa-calendar"></i> 2022 Highs Calendar</button>
+
+            <button role="button" onClick="loaderClicked(this);"
+            data-url-template="/plotting/auto/plot/51/network:{network}::station:{station}::sdate:2022-05-01::base:50::ceil:86::year2:2021::year3:2019::which:gdd::_r:43.png">
+            <i class="fa fa-fire"></i> 2022 GS Accum GDD</button>
+
+            <button role="button" onClick="loaderClicked(this);"
+            data-url-template="/plotting/auto/plot/51/network:{network}::station:{station}::sdate:2022-05-01::base:50::ceil:86::year2:2021::year3:2019::which:precip::_r:43.png">
+            <i class="fa fa-tint"></i> 2022 GS Accum Precip</button>
+
 
             <h3>Wind Roses</h3>
             <strong>Month/Season:</strong>
@@ -130,33 +148,43 @@
             </select>
             <button role="button" onClick="loaderClicked(this);"
             data-qrcode-template="https://mesonet.agron.iastate.edu/sites/windrose.phtml?station={station}&network={network}"
-            data-url-template="/onsite/windrose/{network}/{station}/{station}_{month}.png"><i class="fa fa-line-chart"></i> View Windrose</button>
+            data-url-template="/onsite/windrose/{network}/{station}/{station}_{month}.png">
+            <i class="fa fa-pie-chart"></i> View Windrose</button>
 
         </div>
-        <div class="col-md-8 data-display" style="overflow-y: auto; height: auto;"></div>
+        <div class="col-md-8 data-display" style="overflow-y: auto;"></div>
     </div><!-- ./asos-data-template -->
 
     <div class="row coop-data-template ddisplay"
-     style="display:none; min-height: 0px; width: 100%; overflow-y: hidden; height: auto;">
-        <div class="col-md-4" style="overflow-y: scroll; height: 450;">
+     style="display:none; min-height: 0px; width: 100%; overflow-y: hidden;">
+        <div class="col-md-4" style="overflow-y: scroll;">
             <button role="button" onClick="loaderClicked(this)" class="autoload"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:year::type:avg-temp::_e:{elem}.js"
-            ><i class="fa fa-line-chart"></i> Average Temperature</button>
+            ><i class="fa fa-thermometer-half"></i> Average Temperature</button>
             <br /><button role="button" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:year::type:max-precip::_e:{elem}.js"
-            ><i class="fa fa-line-chart"></i> Daily Max Precip</button>
+            ><i class="fa fa-tint"></i> Daily Max Precip</button>
 
             <br /><button role="button" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:spring::type:sum-precip::_e:{elem}.js"
-            ><i class="fa fa-line-chart"></i> Spring Season Precip</button>
+            ><i class="fa fa-tint"></i> Spring Season Precip</button>
 
             <br /><button role="button" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/10/network:{network}::station:{station}::direction:below::varname:low::threshold:32::year:1893::_r:86::dpi:100.png"
-            ><i class="fa fa-tree"></i> Growing Season</button>
+            ><i class="fa fa-tree"></i> Growing Season Days</button>
 
             <br /><button role="button" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/142/network:{network}::station:{station}::p1:31::p2:91::p3:365::pvar:precip::how:diff::_r:86.png"
-            ><i class="fa fa-line-chart"></i> Drought Monitoring</button>
+            ><i class="fa fa-star-half-o"></i> Drought Monitoring</button>
+
+            <br /><button role="button" onClick="loaderClicked(this)"
+            data-url-template="/plotting/auto/plot/215/network:{network}::station:{station}::v:high::month:all::sy1:1930::ey1:1939::sy2:2012::ey2:2021::_r:43.png"
+            ><i class="fa fa-arrows-h"></i> 1930s vs 2010s</button>
+
+            <br /><button role="button" onClick="loaderClicked(this)"
+            data-url-template="/plotting/auto/plot/28/network:{network}::station:{station}::opt:rank::_r:43.png"
+            ><i class="fa fa-refresh"></i> Precip Status</button>
+
 
             <h3>Trends</h3>
             <strong>Variable:</strong>
@@ -197,7 +225,7 @@
              data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:{month}::type:{type}::_e:{elem}.js"><i class="fa fa-line-chart"></i> Create Chart</button>
 
         </div>
-        <div class="col-md-8 data-display" style="overflow-y: auto; height: auto;"></div>
+        <div class="col-md-8 data-display" style="overflow-y: auto;"></div>
     </div><!-- ./coop-data-template -->
 
 </body>
