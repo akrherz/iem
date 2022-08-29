@@ -1,6 +1,7 @@
 <?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
+require_once "../../../include/forms.php";
 
 /** We need these vars to make this work */
 $subc = isset($_GET["subc"]) ? $_GET["subc"] : "";
@@ -11,12 +12,12 @@ $s0 = isset($_GET["s0"]) ? $_GET["s0"]: "";
 $s1 = isset($_GET["s1"]) ? $_GET["s1"]: "";
 $s2 = isset($_GET["s2"]) ? $_GET["s2"]: "";
 $s3 = isset($_GET["s3"]) ? $_GET["s3"]: "";
-$syear = isset($_GET["syear"]) ? $_GET["syear"] : date("Y");
-$smonth = isset($_GET["smonth"]) ? $_GET["smonth"]: date("m");
-$sday = isset($_GET["sday"]) ? $_GET["sday"] : date("d");
-$days = isset($_GET["days"]) ? $_GET["days"]: 2;
-$station = isset($_GET['station']) ? $_GET["station"] : "";
-$mode = isset($_GET["mode"]) ? $_GET["mode"]: "rt";
+$syear = get_int404("syear", date("Y"));
+$smonth = get_int404("smonth", date("m"));
+$sday = get_int404("sday", date("d"));
+$days = get_int404("days", 2);
+$station = isset($_GET['station']) ? xssafe($_GET["station"]) : "";
+$mode = isset($_GET["mode"]) ? xssafe($_GET["mode"]): "rt";
 
 /** Lets assemble a time period if this plot is historical */
 if (strlen($days) > 0) {
@@ -309,5 +310,3 @@ if (max($pcpn) != "" && isset($_GET["pcpn"]) )
 
 
 $graph->Stroke();
-?>
-

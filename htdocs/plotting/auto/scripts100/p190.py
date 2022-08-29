@@ -73,7 +73,7 @@ def plotter(fdict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
         WITH data as (
             SELECT sday, day, year,
             rank() OVER (PARTITION by sday ORDER by high DESC NULLS LAST)
@@ -86,7 +86,7 @@ def plotter(fdict):
                 as min_low_rank,
             rank() OVER (PARTITION by sday ORDER by precip DESC NULLS LAST)
                 as max_precip_rank
-            from alldata_{station[:2]} WHERE station = %s)
+            from alldata WHERE station = %s)
         SELECT *,
         extract(doy from
         ('2000-'||substr(sday, 1, 2)||'-'||substr(sday, 3, 2))::date) as doy

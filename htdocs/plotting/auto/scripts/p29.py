@@ -57,14 +57,14 @@ def plotter(fdict):
         df = pd.read_sql(
             """
         WITH obs as (
-            SELECT date_trunc('hour', valid) as t,
-            round(avg(tmpf)::numeric, 0) as tmp from alldata
-            WHERE station = %s and (extract(minute from valid) > 50 or
-            extract(minute from valid) = 10) and
-            extract(hour from valid at time zone 'UTC') = %s
-            and tmpf is not null GROUP by t
+            SELECT (valid + '10 minutes'::interval) at time zone 'UTC' as vld,
+            round(tmpf::numeric, 0) as tmp from alldata
+            WHERE station = %s and report_type = 3 and
+            extract(hour from
+                (valid + '10 minutes'::interval) at time zone 'UTC') = %s
+            and tmpf is not null
         )
-        SELECT extract(month from t) as month,
+        SELECT extract(month from vld) as month,
         sum(case when tmp >= %s and tmp <= %s then 1 else 0 end)::int as hits,
         sum(case when tmp > %s then 1 else 0 end) as above,
         sum(case when tmp < %s then 1 else 0 end) as below,

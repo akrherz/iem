@@ -1,14 +1,15 @@
 <?php
-include("../../../config/settings.inc.php");
-include("../../../include/database.inc.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/database.inc.php";
+require_once "../../../include/forms.php";
 
 /** We need these vars to make this work */
-$syear = isset($_GET["syear"]) ? $_GET["syear"] : date("Y");
-$smonth = isset($_GET["smonth"]) ? $_GET["smonth"]: date("m");
-$sday = isset($_GET["sday"]) ? $_GET["sday"] : date("d");
-$days = isset($_GET["days"]) ? $_GET["days"]: 2;
-$station = isset($_GET['station']) ? $_GET["station"] : "";
-$mode = isset($_GET["mode"]) ? $_GET["mode"]: "rt";
+$syear = get_int404("syear", date("Y"));
+$smonth = get_int404("smonth", date("m"));
+$sday = get_int404("sday", date("d"));
+$days = get_int404("days", 2);
+$station = isset($_GET['station']) ? xssafe($_GET["station"]) : "";
+$mode = isset($_GET["mode"]) ? xssafe($_GET["mode"]): "rt";
 
 $sts = time() - (3.*86400.);
 $ets = time();
@@ -55,14 +56,13 @@ if ($mode != 'rt') {
 	pg_close($dbconn);
 }
 
-include ("../../../include/jpgraph/jpgraph.php");
-include ("../../../include/jpgraph/jpgraph_line.php");
-include ("../../../include/jpgraph/jpgraph_bar.php");
-include ("../../../include/jpgraph/jpgraph_date.php");
-include ("../../../include/jpgraph/jpgraph_led.php");
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_bar.php";
+require_once "../../../include/jpgraph/jpgraph_date.php";
+require_once "../../../include/jpgraph/jpgraph_led.php";
 
 if (pg_num_rows($rs) == 0){
-	
 	$led = new DigitalLED74();
     $led->StrokeNumber('NO SOIL DATA AVAILABLE',LEDC_GREEN);
     die();
@@ -112,4 +112,3 @@ for($j=0;$j<15;$j++){
 }
 
 $graph->Stroke();
-?>

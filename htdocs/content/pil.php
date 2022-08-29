@@ -36,4 +36,3 @@ ImageDestroy($img);
 
 $memcache->set("pil_${pil}.png", ob_get_contents(), 0);
 ob_end_flush();
-?>

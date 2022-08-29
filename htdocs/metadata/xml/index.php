@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/network.php";
@@ -14,11 +14,14 @@ $content = <<<EOF
 
 EOF;
 
-foreach($nt->table as $k => $v){
-	$content .= sprintf("<li><a href='pl_ISUSM_%s.xml'>%s %s</a></li>",
-			$k, $k, $v["name"]);
+foreach ($nt->table as $k => $v) {
+    $content .= sprintf(
+        "<li><a href='pl_ISUSM_%s.xml'>%s %s</a></li>",
+        $k,
+        $k,
+        $v["name"]
+    );
 }
 
 $t->content = $content;
 $t->render("single.phtml");
-?>

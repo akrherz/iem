@@ -41,4 +41,3 @@ ImageTTFText($gif, 14, 0, $x_pad , 55, $black, $Font, $year);
 header("content-type: image/png");
 ImagePng($gif);
 ImageDestroy($gif);
-?>

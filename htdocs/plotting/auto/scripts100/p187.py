@@ -96,7 +96,7 @@ def plotter(fdict):
     ax.set_ylabel("Percentile (no spatial weighting)")
     ax.grid(True)
     ax.set_title(
-        f"[{station}] {ctx['_nt'].sts[station]['name']}\n"
+        f"{ctx['_sname']}\n"
         f"Yearly {PDICT[varname]} Percentile for all {station[:2]} stations"
     )
 
