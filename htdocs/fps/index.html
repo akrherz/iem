@@ -80,13 +80,13 @@
             <img src="/plotting/auto/plot/24/csector:midwest::var:precip::p:month::year:2022::month:summer::cmap:RdBu_r::_r:43.png" role="button"
             title="Climate District Precip Ranks"
             data-target="https://mesonet.agron.iastate.edu/plotting/auto/?_wait=no&q=24&csector=midwest&var=precip&p=month&year=2022&month=summer&sdate=2022%2F04%2F05&edate=2022%2F05%2F03&cmap=RdBu&cmap_r=on&_r=t&dpi=100&_fmt=png">
-       
+
         </div>
     </div>
 
     <div class="row isusm-data-template ddisplay"
-    style="display:none; min-height: 0px; width: 100%; overflow-y: hidden;">
-       <div class="col-md-4" style="overflow-y: scroll;">
+    style="display:none; min-height: 0px; width: 100%;">
+       <div class="col-md-4" style="overflow-y: scroll; height: 100%;">
 
            <button role="button" onClick="loaderClicked(this);" class="autoload"
             data-url-template="/plotting/auto/plot/145/network:ISUSM::station:{station}::var:tsoil::year:2022::_r:86.png"><i class="fa fa-thermometer-quarter"></i> 4in Soil Temps</button>
@@ -102,8 +102,8 @@
    </div><!-- ./isuag-data-template -->
 
     <div class="row asos-data-template ddisplay"
-     style="display:none; min-height: 0px; width: 100%; overflow-y: hidden;">
-        <div class="col-md-4" style="overflow-y: scroll;">
+     style="display:none; min-height: 0px; width: 100%;">
+        <div class="col-md-4" style="overflow-y: scroll; height: 100%;">
             <button role="button" onClick="loaderClicked(this);" class="autoload"
             data-url-template="/plotting/auto/plot/140/network:{network}::station:{station}::syear:1973::month:4::day:1::days:30::varname:avg_wind_speed::year:2022::_r:86.png">
             <i class="fa fa-leaf"></i> April Wind Speed</button>
@@ -156,11 +156,16 @@
     </div><!-- ./asos-data-template -->
 
     <div class="row coop-data-template ddisplay"
-     style="display:none; min-height: 0px; width: 100%; overflow-y: hidden;">
-        <div class="col-md-4" style="overflow-y: scroll;">
+     style="display:none; min-height: 0px; width: 100%;">
+        <div class="col-md-4" style="overflow-y: scroll; height: 100%;">
             <button role="button" onClick="loaderClicked(this)" class="autoload"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:year::type:avg-temp::_e:{elem}.js"
             ><i class="fa fa-thermometer-half"></i> Average Temperature</button>
+
+            <br /><button role="button" onClick="loaderClicked(this)"
+            data-url-template="/plotting/auto/plot/32/network:{network}::station:{station}::year:2022::var:high::gddbase:50::gddceil:86::how:diff::cmap:jet::_r:43.png"
+            ><i class="fa fa-thermometer-quarter"></i> 2022 High Departures</button>
+
             <br /><button role="button" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:year::type:max-precip::_e:{elem}.js"
             ><i class="fa fa-tint"></i> Daily Max Precip</button>
@@ -184,6 +189,10 @@
             <br /><button role="button" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/28/network:{network}::station:{station}::opt:rank::_r:43.png"
             ><i class="fa fa-refresh"></i> Precip Status</button>
+
+            <br /><button role="button" onClick="loaderClicked(this)"
+            data-url-template="/plotting/auto/plot/176/network:{network}::station:{station}::opt:0::w:daily::_e:{elem}.js"
+            ><i class="fa fa-plus-circle"></i> Records Set by Year</button>
 
 
             <h3>Trends</h3>

@@ -102,7 +102,7 @@ def safe(row, varname):
 def diff(val, climo):
     """Safe subtraction."""
     if val is None or climo is None:
-        return None
+        return 0
     return float(val) - climo
 
 
@@ -148,7 +148,7 @@ def plotter(fdict):
             cursor_factory=psycopg2.extras.DictCursor
         )
         cursor.execute(
-            f"""
+            """
             SELECT
             day,
             high as max_tmpf,
@@ -159,7 +159,7 @@ def plotter(fdict):
             precip as pday,
             null as avg_sknt, null as peak_wind,
             null as max_rstage
-            from alldata_{station[:2]}
+            from alldata
             WHERE day >= %s and day <= %s and
             station = %s ORDER by day ASC
         """,

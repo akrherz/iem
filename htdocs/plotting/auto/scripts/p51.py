@@ -129,7 +129,7 @@ def plotter(fdict):
         climo = pd.read_sql(
             f"SELECT day, sday, gddxx(%s, %s, high, low) as {glabel}, "
             "sdd86(high, low) as sdd86, precip "
-            f"from alldata_{climosite[:2]} WHERE station = %s and "
+            "from alldata WHERE station = %s and "
             "year >= 1951 ORDER by day ASC",
             conn,
             params=(gddbase, gddceil, ctx["_nt"].sts[station]["climate_site"]),
@@ -186,7 +186,8 @@ def plotter(fdict):
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
             f"""SELECT day, to_char(day, 'mmdd') as sday,
-            gddxx(%s, %s, max_tmpf, min_tmpf) as o{glabel}, pday as oprecip,
+            gddxx(%s, %s, max_tmpf, min_tmpf) as o{glabel},
+            coalesce(pday, 0) as oprecip,
             sdd86(max_tmpf, min_tmpf) as osdd86 from summary s JOIN stations t
             ON (s.iemid = t.iemid)
             WHERE t.id = %s and t.network = %s and

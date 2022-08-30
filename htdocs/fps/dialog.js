@@ -85,7 +85,7 @@ function addButtons(dlg) {
 function resizeCharts(dlg){
     // console.log("resizeCharts with dlg.height=" + dlg.height());
     // Fixes responsive troubles with boostrap?
-    $(dlg).find(".ui-dialog-content").height(dlg.height() - 24);
+    $(dlg).find(".ui-dialog-content").height(dlg.height() - 40);
     // Causes charts to fit their container
     $(Highcharts.charts).each(function(i,chart){
         var height = chart.renderTo.clientHeight; 
