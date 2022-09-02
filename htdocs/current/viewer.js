@@ -211,12 +211,6 @@ function parseURI() {
 }
 
 function buildUI() {
-    // Init UI components
-
-    // Live Shot Button
-    $("#lsbutton").click(function () {
-        liveShot();
-    });
 
     // Thanks to http://jsfiddle.net/hmgyu371/
     $('#toggle_event_mode button').click(function () {
