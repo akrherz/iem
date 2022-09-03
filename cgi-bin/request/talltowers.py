@@ -2,15 +2,14 @@
 from io import StringIO, BytesIO
 
 try:
-    from backports.zoneinfo import ZoneInfo
-except ImportError:
     from zoneinfo import ZoneInfo  # type: ignore
+except ImportError:
+    from backports.zoneinfo import ZoneInfo  # type: ignore
 import datetime
 
 from paste.request import parse_formvars
 import pandas as pd
-from pandas.io.sql import read_sql
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, get_sqlalchemy_conn
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -101,12 +100,12 @@ def application(environ, start_response):
     data_analog where tower in %s and valid >= %s and valid < %s
     GROUP by tower, ts ORDER by tower, ts
     """
-
-    df = read_sql(
-        sql,
-        pgconn,
-        params=(tzname, tuple(stations), sts, ets),
-    )
+    with get_sqlalchemy_conn("talltowers", user="tt_web") as conn:
+        df = pd.read_sql(
+            sql,
+            conn,
+            params=(tzname, tuple(stations), sts, ets),
+        )
     df = df.rename(columns={"ts": "valid"})
     df["tower"] = df["tower"].replace(TOWERIDS)
     pgconn.close()

@@ -75,9 +75,9 @@ def friendly_date(form, key):
         dt = dt.replace(tzinfo=pytz.UTC)
     except Exception:
         return (
-            "Invalid %s date provided, should be '%%m/%%d/%%Y %%H:%%M'"
+            f"Invalid {key} date provided, should be '%m/%d/%Y %H:%M'"
             " in UTC timezone"
-        ) % (key,)
+        )
     return dt
 
 
@@ -98,12 +98,8 @@ def application(environ, start_response):
             ("Content-type", "application/octet-stream"),
             (
                 "Content-Disposition",
-                "attachment; filename=%s_%s_%s.txt"
-                % (
-                    station,
-                    sts.strftime("%Y%m%d%H"),
-                    ets.strftime("%Y%m%d%H"),
-                ),
+                "attachment; "
+                f"filename={station}_{sts:%Y%m%d%H}_{ets:%Y%m%d%H}.txt",
             ),
         ]
     else:

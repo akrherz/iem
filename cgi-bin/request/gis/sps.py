@@ -7,7 +7,7 @@ import zipfile
 # Third Party
 from geopandas import read_postgis
 from paste.request import parse_formvars
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_sqlalchemy_conn, utc
 
 
 def get_context(environ):
@@ -38,7 +38,6 @@ def get_context(environ):
 
 def run(ctx, start_response):
     """Do something!"""
-    pgconn = get_dbconn("postgis")
     common = "at time zone 'UTC', 'YYYYMMDDHH24MI'"
     schema = {
         "geometry": "Polygon",
@@ -58,21 +57,22 @@ def run(ctx, start_response):
             ]
         ),
     }
-
-    df = read_postgis(
-        "select "
-        f"to_char(issue {common}) as issue, "
-        f"to_char(expire {common}) as expire, "
-        f"product_id as prod_id, "
-        "wfo, landspout as lndspout, waterspout as wtrspout, "
-        "max_hail_size as max_hail, max_wind_gust as max_wind, "
-        f"to_char(tml_valid {common}) as tml_vald, tml_direction as tml_drct, "
-        "tml_sknt, geom from sps WHERE issue >= %s and "
-        "issue < %s and not ST_isempty(geom) ORDER by issue ASC",
-        pgconn,
-        params=(ctx["sts"], ctx["ets"]),
-        geom_col="geom",
-    )
+    with get_sqlalchemy_conn("postgis") as pgconn:
+        df = read_postgis(
+            "select "
+            f"to_char(issue {common}) as issue, "
+            f"to_char(expire {common}) as expire, "
+            f"product_id as prod_id, "
+            "wfo, landspout as lndspout, waterspout as wtrspout, "
+            "max_hail_size as max_hail, max_wind_gust as max_wind, "
+            f"to_char(tml_valid {common}) as tml_vald, "
+            "tml_direction as tml_drct, "
+            "tml_sknt, geom from sps WHERE issue >= %s and "
+            "issue < %s and not ST_isempty(geom) ORDER by issue ASC",
+            pgconn,
+            params=(ctx["sts"], ctx["ets"]),
+            geom_col="geom",
+        )
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
         return b"ERROR: no results found for your query"

@@ -5,21 +5,21 @@ from io import BytesIO
 
 import pandas as pd
 from paste.request import parse_formvars
-from pyiem.util import get_dbconnstr
+from pyiem.util import get_sqlalchemy_conn
 
 EXL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 def run(sts, ets, start_response):
     """Get data!"""
-    dbconn = get_dbconnstr("other")
-    sql = """SELECT * from feel_data_daily where
-    valid >= %s and valid < %s ORDER by valid ASC"""
-    df = pd.read_sql(sql, dbconn, params=(sts, ets))
+    with get_sqlalchemy_conn("other") as dbconn:
+        sql = """SELECT * from feel_data_daily where
+        valid >= %s and valid < %s ORDER by valid ASC"""
+        df = pd.read_sql(sql, dbconn, params=(sts, ets))
 
-    sql = """SELECT * from feel_data_hourly where
-    valid >= %s and valid < %s ORDER by valid ASC"""
-    df2 = pd.read_sql(sql, dbconn, params=(sts, ets))
+        sql = """SELECT * from feel_data_hourly where
+        valid >= %s and valid < %s ORDER by valid ASC"""
+        df2 = pd.read_sql(sql, dbconn, params=(sts, ets))
 
     def fmt(val):
         """Lovely hack."""

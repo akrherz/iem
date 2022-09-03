@@ -17,8 +17,8 @@ from pyiem.util import get_dbconn, ncopen
 
 def get_gridinfo(filename, xpoints, ypoints):
     """Figure out the grid navigation, sigh"""
-    wld = "%s.wld" % (filename[:-4],)
-    lines = open(wld).readlines()
+    with open(f"{filename[:-4]}.wld", encoding="ascii") as fh:
+        lines = fh.readlines()
     dx = float(lines[0])
     dy = float(lines[3])
     west = float(lines[4])
@@ -35,10 +35,8 @@ def get_table(prod):
     cursor = pgconn.cursor()
     xref = [1.0e20] * 256
     cursor.execute(
-        """
-        SELECT id, filename_template, units, cf_long_name
-        from iemrasters where name = %s
-    """,
+        "SELECT id, filename_template, units, cf_long_name "
+        "from iemrasters where name = %s",
         (prod,),
     )
     (rid, template, units, long_name) = cursor.fetchone()
