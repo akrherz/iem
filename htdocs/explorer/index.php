@@ -1,30 +1,34 @@
-<html>
+<?php
+require_once "../../config/settings.inc.php";
+define("IEM_APPID", 138);
+require_once "../../include/myview.php";
+$t = new MyView();
+$t->title = "IEM Explorer";
+$t->headextra = <<<EOM
+<link rel='stylesheet' href="/vendor/openlayers/6.15.1/ol.css" type='text/css'>
+<link rel='stylesheet' href="/vendor/openlayers/6.15.1/ol-layerswitcher.css" type='text/css'>
+<link rel="stylesheet" href="/vendor/jquery-ui/1.13.2/jquery-ui.css">
+<link rel="stylesheet" type="text/css" href="explorer.css" />
+EOM;
+$t->jsextra = <<<EOM
+<script src="/vendor/moment/2.13.0/moment.min.js"></script>
+<script src='/vendor/openlayers/6.15.1/ol.js'></script>
+<script src='/vendor/openlayers/6.15.1/ol-layerswitcher.js'></script>
+<script src="/vendor/jquery-ui/1.13.2/jquery-ui.js"></script>
+<script src="/vendor/highcharts/10.1.0/highcharts.js"></script>
+<script src="/vendor/highcharts/10.1.0/highcharts-more.js"></script>
+<script src="/vendor/highcharts/10.1.0/modules/accessibility.js"></script>
+<script src="/vendor/highcharts/10.1.0/modules/exporting.js"></script>
+<script src="/vendor/highcharts/10.1.0/modules/heatmap.js"></script>
+<script src="app.js"></script>
+<script src="dialog.js"></script>
+EOM;
 
-<head>
-    <title>Farm Progress Show 2022 Display</title>
-    <link href="/vendor/fa/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <link href="/vendor/iastate-v2.0.13/css/iastate.min.css" rel="stylesheet">
-    <link rel='stylesheet' href="/vendor/openlayers/6.15.1/ol.css" type='text/css'>
-    <link rel='stylesheet' href="/vendor/openlayers/6.15.1/ol-layerswitcher.css" type='text/css'>
-    <link rel="stylesheet" href="/vendor/jquery-ui/1.13.2/jquery-ui.css">
-    <link rel="stylesheet" type="text/css" href="fps.css" />
-</head>
-
-<body>
-    <img src="/images/iem_logo.svg"
-     style="height: 75px; position: absolute; left: 25px; top: -5px;">
-
-    <h3 class="title">Iowa Environmental Mesonet:: Capturing Weather and Climate Variability</h3>
+$t->content = <<<EOM
     <div id="popover">
         <span id="info-name"></span>
     </div>
-    
-    <div id="wx">Current Weather @ <span id="wxtime">9:46 AM</span>
-        <br />ISU AEA Farm (2 miles SE FPS)
-        <br /><i class="fa fa-thermometer-half"></i> Air Temp: <span id="tmpf">80</span>&deg;F
-        &nbsp; <i class="fa fa-tint"></i> Rain: <span id="pday">0.00</span>"
-        <br /><i class="fa fa-tree"></i> 4" Soil Temp: <span id="soil4">--</span>&deg;F
-    </div>
+
     <p>&nbsp;</p>
     <p>&nbsp;</p>
     <div class="row">
@@ -237,20 +241,6 @@
         <div class="col-md-8 data-display" style="overflow-y: auto;"></div>
     </div><!-- ./coop-data-template -->
 
-</body>
-<script src="/vendor/moment/2.13.0/moment.min.js"></script>
-<script src="/vendor/jquery/1.11.3/jquery-1.11.3.min.js"></script>
-<script src="/vendor/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-<script src='/vendor/openlayers/6.15.1/ol.js'></script>
-<script src='/vendor/openlayers/6.15.1/ol-layerswitcher.js'></script>
-<script src="/vendor/jquery-ui/1.13.2/jquery-ui.js"></script>
-<script src="/vendor/highcharts/10.1.0/highcharts.js"></script>
-<script src="/vendor/highcharts/10.1.0/highcharts-more.js"></script>
-<script src="/vendor/highcharts/10.1.0/modules/accessibility.js"></script>
-<script src="/vendor/highcharts/10.1.0/modules/exporting.js"></script>
-<script src="/vendor/highcharts/10.1.0/modules/heatmap.js"></script>
-<script src="app.js"></script>
-<script src="dialog.js"></script>
-<script src="wx.js"></script>
 
-</html>
+EOM;
+$t->render("full.phtml");
