@@ -45,4 +45,7 @@ cd ../cache
 bash download_cpc.sh
 
 cd ../dl
+# NB used for drydown
 python download_cfs.py
+cd ../yieldfx
+python cfs2iemre_netcdf.py

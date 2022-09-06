@@ -1,6 +1,6 @@
 """Convert the CFS grib data into something mimicing IEMRE.
 
-This will allow for downstream usage by PSIMS. Run from RUN_NOON.sh
+This will allow for downstream usage by PSIMS/Drydown. Run from RUN_NOON.sh
 """
 import os
 import sys
