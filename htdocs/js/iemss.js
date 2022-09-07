@@ -206,9 +206,13 @@ $().ready(function() {
 	geojsonSource.on('change', function(e) {
 		if (geojsonSource.getState() == 'ready') {
 			$.each(geojsonSource.getFeatures(), function (index, feat) {
+                var lbl = "["+ feat.get('sid') +"] "+ feat.get('sname');
+                if (network != 'TAF') {
+                    lbl += " "+ feat.get("time_domain");
+                }
 				$('#stations_in').append($('<option/>', { 
-					value: feat.get('sid'),
-					text : "["+ feat.get('sid') +"] "+ feat.get('sname') +" "+ feat.get("time_domain")
+                    value: feat.get('sid'),
+                    text : lbl
 				}));
 			});
 			sortListing("id");

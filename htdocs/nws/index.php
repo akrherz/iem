@@ -50,9 +50,9 @@ hole with hundreds of plotting options for many datasets of NWS interest.</p>
   <ul>
 <li><a href="/request/gis/cwas.phtml">Center Weather Advisories (CWA) in Shapefile/KML format</a>
 <li><a href="/request/gis/awc_gairmets.phtml">Graphical AIRMETs in Shapefile/KML format</a></li>
-<li><a href="/request/gis/pireps.php">PIREPs in Shapefile format</a>
-<li><a href="/request/gis/awc_sigmets.phtml">SIGMETs in Shapefile/KML format</a>
-</li>
+<li><a href="/request/gis/pireps.php">PIREPs in Shapefile format</a></li>
+<li><a href="/request/gis/awc_sigmets.phtml">SIGMETs in Shapefile/KML format</a></li>
+<li><a href="/request/taf.php">Terminal Aerodome Forecasts (TAFs)</a></li>
 </ul>
 
 </div>

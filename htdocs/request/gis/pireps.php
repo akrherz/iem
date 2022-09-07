@@ -37,6 +37,7 @@ longer periods of data.</p>
 <a class="btn btn-primary" href="cwas.phtml">CWSU Center Weather Advisories</a>
 <a class="btn btn-primary" href="awc_gairmets.phtml">Graphical AIRMETs</a>
 <a class="btn btn-primary" href="awc_sigmets.phtml">SIGMETs</a>
+<a class="btn btn-primary" href="/request/taf.php">TAFs</a>
 </p>
 
 <form method="GET" action="/cgi-bin/request/gis/pireps.py">

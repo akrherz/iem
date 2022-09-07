@@ -14,12 +14,14 @@ def run(network, only_online):
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     # One off special
-    if network == "ASOS1MIN":
+    if network in ["ASOS1MIN", "TAF"]:
+
         cursor.execute(
             "SELECT ST_asGeoJson(geom, 4) as geojson, t.* "
             "from stations t JOIN station_attributes a "
             "ON (t.iemid = a.iemid) WHERE t.network ~* 'ASOS' and "
-            "a.attr = 'HAS1MIN' ORDER by id ASC",
+            "a.attr = %s ORDER by id ASC",
+            ("HAS1MIN" if network == "ASOS1MIN" else "HASTAF",),
         )
     elif network == "FPS":
         cursor.execute(
