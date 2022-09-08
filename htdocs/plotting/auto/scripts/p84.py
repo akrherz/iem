@@ -328,7 +328,7 @@ def plotter(fdict):
         # Dynamic Range based on min/max grid value, since we restrict plot
         # minval = np.floor(np.nanmin(p01d))
         maxval = np.ceil(np.nanpercentile(p01d, [95])[0])
-        if maxval < 1:
+        if np.isnan(maxval) or maxval < 1:
             clevs = np.arange(0, 1.01, 0.1)
         else:
             clevs = pretty_bins(0, maxval)
