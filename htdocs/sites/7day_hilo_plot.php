@@ -158,4 +158,3 @@ if ($hasclimate){
  $graph->Add($l1plot);
 }
 $graph->Stroke();
-?>

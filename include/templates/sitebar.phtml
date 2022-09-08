@@ -104,6 +104,13 @@ if (preg_match('/ASOS/', $network) > 0){
     $uri = sprintf("/request/download.phtml?network=%s", $network);
 	echo sprintf("<a href=\"%s\" class=\"btn btn-default\"><span class=\"fa fa-download\"></span> Download</a>", 
 			$uri);
+    // TAF
+    if (array_key_exists("HASTAF", $metadata["attributes"])){
+        echo sprintf(
+            '<a href="/sites/taf.php?station=%s&amp;network=%s" '.
+            'class="btn btn-default"><span class="fa fa-cloud"></span> Terminal Aerodome Forecast</a>', 
+            $station, $network);            
+    }
 }elseif (preg_match('/DCP/', $network) > 0){
 	$uri = sprintf("/request/dcp/fe.phtml?network=%s", $network);
 	echo sprintf("<a href=\"%s\" class=\"btn btn-default\"><span class=\"fa fa-download\"></span> Download</a>", 
