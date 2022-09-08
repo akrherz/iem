@@ -161,7 +161,7 @@ def plot(ax, interval, valid, tmpf, lines, mydir, month):
     delta = (valid[-1] - valid[0]).total_seconds()
     i = tmpf.index(min(tmpf))
     mylbl = (
-        f"{valid[0].year}\n{(delta / 86400):.0f}d"
+        f"{valid[0].year}\n{int(delta / 86400):.0f}d"
         f"{((delta % 86400) / 3600.0):.0f}h"
     )
     x0 = valid[0].replace(month=1, day=1, hour=0, minute=0)
@@ -288,7 +288,7 @@ def plotter(fdict):
             lower, upper = upper, lower
         label = f"within range {lower} <= x < {upper}"
     subtitle = (
-        f"{MDICT.get(month)} :: {(hours / 24):.0f}d{(hours % 24):.0f}h+ "
+        f"{MDICT.get(month)} :: {int(hours / 24)}d{(hours % 24):.0f}h+ "
         f"Streaks {label} {units}"
     )
     (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
