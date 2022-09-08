@@ -284,7 +284,7 @@ monthly_opts = [
     {"id": 116, "label": ("Cooling/Heating Degree Days monthly totals")},
     {
         "id": 42,
-        "label": ("Hourly Variable Streaks Above/Below Threshold"),
+        "label": "Consecutive Hours / Streaks Above/Below Threshold",
     },
     {"id": 154, "label": "Hourly Temperature Averages by Month"},
     {"id": 85, "label": "Hourly Temperature Frequencies by Month"},

@@ -41,28 +41,26 @@ PDICT2 = {
     "dwpf": "Dew Point Temperature",
     "mslp": "Sea Level Pressure",
 }
-MDICT = dict(
-    [
-        ("all", "Entire Year"),
-        ("spring", "Spring (MAM)"),
-        ("fall", "Fall (SON)"),
-        # no worky ('winter', 'Winter (DJF)'),
-        ("summer", "Summer (JJA)"),
-        # no worky ('octmar', 'October thru March'),
-        ("jan", "January"),
-        ("feb", "February"),
-        ("mar", "March"),
-        ("apr", "April"),
-        ("may", "May"),
-        ("jun", "June"),
-        ("jul", "July"),
-        ("aug", "August"),
-        ("sep", "September"),
-        ("oct", "October"),
-        ("nov", "November"),
-        ("dec", "December"),
-    ]
-)
+MDICT = {
+    "all": "Entire Year",
+    "spring": "Spring (MAM)",
+    "fall": "Fall (SON)",
+    # no worky ('winter', 'Winter (DJF)'),
+    "summer": "Summer (JJA)",
+    # no worky ('octmar', 'October thru March'),
+    "jan": "January",
+    "feb": "February",
+    "mar": "March",
+    "apr": "April",
+    "may": "May",
+    "jun": "June",
+    "jul": "July",
+    "aug": "August",
+    "sep": "September",
+    "oct": "October",
+    "nov": "November",
+    "dec": "December",
+}
 
 
 def get_description():
@@ -81,6 +79,9 @@ def get_description():
     drawn to 10, so if you hit the limit, please change the thresholds.  This
     plot also stops any computed streak when it encounters a data gap greater
     than three hours.
+
+    <p>You can additionally set a secondary threshold which then makes this
+    autoplot compute streaks within a range of values.</p>
     """
     year_range = f"1928-{datetime.date.today().year}"
     desc["arguments"] = [
@@ -126,6 +127,16 @@ def get_description():
             label="Temperature (F) / Pressure (mb) Threshold:",
         ),
         dict(
+            optional=True,
+            type="float",
+            name="t2",
+            default=60,
+            label=(
+                "Secondary Temperature (F) / Pressure (mb) Threshold (for "
+                "range queries)"
+            ),
+        ),
+        dict(
             type="int",
             name="hours",
             default=36,
@@ -149,10 +160,9 @@ def plot(ax, interval, valid, tmpf, lines, mydir, month):
         return lines
     delta = (valid[-1] - valid[0]).total_seconds()
     i = tmpf.index(min(tmpf))
-    mylbl = "%s\n%id%.0fh" % (
-        valid[0].year,
-        delta / 86400,
-        (delta % 86400) / 3600.0,
+    mylbl = (
+        f"{valid[0].year}\n{(delta / 86400):.0f}d"
+        f"{((delta % 86400) / 3600.0):.0f}h"
     )
     x0 = valid[0].replace(month=1, day=1, hour=0, minute=0)
     offset = 0
@@ -222,9 +232,8 @@ def plotter(fdict):
     y1, y2 = None, None
     if "yrange" in ctx:
         y1, y2 = ctx["yrange"].split("-")
-        year_limiter = (" and valid >= '%s-01-01' and valid < '%s-01-01' ") % (
-            int(y1),
-            int(y2),
+        year_limiter = (
+            f" and valid >= '{int(y1)}-01-01' and valid < '{int(y2)}-01-01' "
         )
     if month == "all":
         months = range(1, 13)
@@ -235,7 +244,7 @@ def plotter(fdict):
     elif month == "summer":
         months = [6, 7, 8]
     else:
-        ts = datetime.datetime.strptime("2000-" + month + "-01", "%Y-%b-%d")
+        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
@@ -254,27 +263,36 @@ def plotter(fdict):
     units = r"$^\circ$F"
     if varname == "mslp":
         units = "mb"
-    title = "%s-%s [%s] %s" % (
-        y1 if y1 is not None else ab.year,
-        y2 if y2 is not None else datetime.datetime.now().year,
-        station,
-        ctx["_nt"].sts[station]["name"],
+    title = (
+        f"{y1 if y1 is not None else ab.year}-"
+        f"{y2 if y2 is not None else datetime.datetime.now().year} "
+        f"{ctx['_sname']}"
     )
-    subtitle = r"%s :: %.0fd%.0fh+ Streaks %s %s %s" % (
-        MDICT.get(month),
-        hours / 24,
-        hours % 24,
-        mydir,
-        threshold,
-        units,
-    )
-    (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
     interval = datetime.timedelta(hours=hours)
 
     valid = []
     tmpf = []
     year = 0
     lines = []
+    # Figure out bounds check values
+    lower = threshold
+    upper = 9999
+    if ctx.get("t2") is None:
+        if mydir == "below":
+            lower = -9999
+            upper = threshold
+        label = f"{mydir} {threshold}"
+    else:
+        upper = ctx["t2"]
+        if mydir == "below":
+            lower, upper = upper, lower
+        label = f"within range {lower} <= x < {upper}"
+    subtitle = (
+        f"{MDICT.get(month)} :: {(hours / 24):.0f}d{(hours % 24):.0f}h+ "
+        f"Streaks {label} {units}"
+    )
+    (fig, ax) = figure_axes(title=title, subtitle=subtitle, apctx=ctx)
+
     for row in cursor:
         if (month != "all" and year != row[0].year) or (
             valid and (row[0] - valid[-1]) > datetime.timedelta(hours=3)
@@ -283,14 +301,10 @@ def plotter(fdict):
             lines = plot(ax, interval, valid, tmpf, lines, mydir, month)
             valid = []
             tmpf = []
-        if (mydir == "above" and row[1] >= threshold) or (
-            mydir == "below" and row[1] < threshold
-        ):
+        if lower <= row[1] < upper:
             valid.append(row[0])
             tmpf.append(row[1])
-        if (mydir == "above" and row[1] < threshold) or (
-            mydir == "below" and row[1] >= threshold
-        ):
+        else:
             valid.append(row[0])
             tmpf.append(row[1])
             lines = plot(ax, interval, valid, tmpf, lines, mydir, month)
