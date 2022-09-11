@@ -9,7 +9,11 @@ from pyiem.plot import MapPlot, get_cmap
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 
-PDICT = {"cwa": "Plot by NWS Forecast Office", "state": "Plot by State"}
+PDICT = {
+    "cwa": "Plot by NWS Forecast Office",
+    "state": "Plot by State",
+    "conus": "Plot for contiguous US",
+}
 PDICT2 = {
     "max_tmpf": "Max Air Temperature [F]",
     "min_tmpf": "Min Air Temperature [F]",
@@ -109,12 +113,17 @@ def get_df(ctx, buf=2.25):
     if ctx["t"] == "state":
         bnds = reference.state_bounds[ctx["state"]]
         ctx["title"] = reference.state_names[ctx["state"]]
+    elif ctx["t"] == "conus":
+        bnds = [
+            reference.CONUS_WEST,
+            reference.CONUS_SOUTH,
+            reference.CONUS_EAST,
+            reference.CONUS_NORTH,
+        ]
+        ctx["title"] = "Contiguous US"
     else:
         bnds = reference.wfo_bounds[ctx["wfo"]]
-        ctx["title"] = "NWS CWA %s [%s]" % (
-            ctx["_nt"].sts[ctx["wfo"]]["name"],
-            ctx["wfo"],
-        )
+        ctx["title"] = f"NWS CWA {ctx['_sname']}"
     with get_sqlalchemy_conn("iem") as conn:
         df = pd.read_sql(
             """
@@ -166,9 +175,12 @@ def plotter(fdict):
     df = get_df(ctx)
     if df.empty:
         raise NoDataFound("No data was found for your query")
+    sector = "state" if ctx["t"] == "state" else "cwa"
+    if ctx["t"] == "conus":
+        sector = "conus"
     mp = MapPlot(
         apctx=ctx,
-        sector=("state" if ctx["t"] == "state" else "cwa"),
+        sector=sector,
         state=ctx["state"],
         cwa=(ctx["wfo"] if len(ctx["wfo"]) == 3 else ctx["wfo"][1:]),
         axisbg="white",
@@ -218,7 +230,8 @@ def plotter(fdict):
         "%.1f" if varname in ["max_gust", "max_sknt"] else "%.0f",
         labelbuffer=3,
     )
-    mp.drawcounties()
+    if ctx["t"] != "conus":
+        mp.drawcounties()
     if ctx["t"] == "cwa":
         mp.draw_cwas()
 

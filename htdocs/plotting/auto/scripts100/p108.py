@@ -106,6 +106,8 @@ def plotter(fdict):
     station = ctx["station"]
     sdate = ctx["sdate"]
     edate = ctx["edate"]
+    if edate < sdate:
+        sdate, edate = edate, sdate
     year2 = ctx.get("year2", 0)
     year3 = ctx.get("year3", 0)
     year4 = ctx.get("year4", 0)
@@ -125,11 +127,11 @@ def plotter(fdict):
         WITH avgs as (
             SELECT sday, avg(gddxx(%s, %s, high, low)) as c{glabel},
             avg(sdd86(high, low)) as csdd86, avg(precip) as cprecip
-            from alldata_{station[:2]} WHERE station = %s GROUP by sday
+            from alldata WHERE station = %s GROUP by sday
         )
         SELECT day, gddxx(%s, %s, high, low) as o{glabel}, c{glabel},
         o.precip as oprecip, cprecip,
-        sdd86(o.high, o.low) as osdd86, csdd86 from alldata_{station[:2]} o
+        sdd86(o.high, o.low) as osdd86, csdd86 from alldata o
         JOIN avgs a on (o.sday = a.sday)
         WHERE station = %s and o.sday != '0229' ORDER by day ASC
         """,
