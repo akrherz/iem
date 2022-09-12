@@ -184,7 +184,7 @@ def get_description():
 
 
 def outlook_search(valid, days, outlook_type):
-    """Go look for a nearest in time TAF."""
+    """Find nearest outlook."""
     cursor = get_dbconn("postgis").cursor()
     cursor.execute(
         "SELECT product_issue at time zone 'UTC' from spc_outlook "
