@@ -129,7 +129,7 @@ def get_df(ctx, buf=2.25):
             """
             WITH mystation as (
                 select id, st_x(geom) as lon, st_y(geom) as lat,
-                state, wfo, iemid from stations
+                state, wfo, iemid, country from stations
                 where network ~* 'ASOS' and
                 ST_contains(ST_geomfromtext(
                     'SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))'),
@@ -139,7 +139,7 @@ def get_df(ctx, buf=2.25):
             s.min_rh, s.max_rh, s.min_feel, s.max_feel,
             max_sknt * 1.15 as max_sknt,
             max_gust * 1.15 as max_gust, t.id as station, t.lat, t.lon,
-            t.wfo, t.state from
+            t.wfo, t.state, t.country from
             summary s JOIN mystation t on (s.iemid = t.iemid)
             WHERE s.day = %s
         """,
@@ -218,7 +218,9 @@ def plotter(fdict):
             spacing="proportional",
             extend=extend,
         )
-    if ctx["t"] == "state":
+    if ctx["t"] == "conus":
+        df2 = df[df["country"] == "US"]
+    elif ctx["t"] == "state":
         df2 = df[df[ctx["t"]] == ctx[ctx["t"]]]
     else:
         df2 = df[df["wfo"] == ctx["wfo"]]
