@@ -15,8 +15,10 @@ $t->title = "Download Hourly Precipitation Data";
 $network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]): "IA_ASOS";
 
 $nselect = "<select name=\"network\">";
-$rs = pg_query($mesosite, "SELECT id, name from networks WHERE
-		id = 'ASOS' or id ~* 'ASOS' ORDER by name ASC");
+$rs = pg_query(
+    $mesosite,
+    "SELECT id, name from networks WHERE id ~* 'ASOS' and ".
+    "length(id) = 7 ORDER by name ASC");
 for ($i=0;$row=pg_fetch_assoc($rs);$i++){
 	$sel = '';
 	if ($network == $row["id"]){
@@ -31,8 +33,8 @@ $y1 = yearSelect2(1941, date("Y"), "year1");
 $m1 = monthSelect("", "month1");
 $d1 = daySelect2("", "day1");
 $y2 = yearSelect2(1941, date("Y"), "year2");
-$m2 = monthSelect("", "month2");
-$d2 = daySelect2("", "day2");
+$m2 = monthSelect(date("m"), "month2");
+$d2 = daySelect2(date("d"), "day2");
 
 $ar = Array(
     "Etc/UTC" => "Coordinated Universal Time (UTC)",
@@ -68,7 +70,7 @@ data prior to 2010 for missing hours.</div>
 <form name="network" action="hourlyprecip.phtml">
 {$nselect}		
 <input type="submit" value="Switch Network">
-		</form>
+</form>
 
 <form target="_blank" name="dl" action="/cgi-bin/request/hourlyprecip.py">
 <input type="hidden" value="{$network}" name="network" />
@@ -78,6 +80,8 @@ data prior to 2010 for missing hours.</div>
 
 <h4>1) Select Station(s):</h4>
 <div id="iemss" data-network="{$network}" data-name="station" data-supports-all="0"></div>
+
+</div><div class="col-sm-4">
 
 <h4>2) Select period:</h4>
 <table class="table table-striped">
@@ -97,24 +101,33 @@ data prior to 2010 for missing hours.</div>
   </tr>
 </table>
 
-<h4>3) Timezone of Observation Times:</h4>
+<h4>3) Metadata</h4>
+<input type="checkbox" name="lalo" value="1" id="lalo">
+<label for="lalo">Include Station Lat/Lon</label>
+<br /><input type="checkbox" name="st" value="1" id="st">
+<label for="st">Include State of Station</label>
+
+<h4>4) Timezone of Observation Times:</h4>
 <p><i>The following options are available for how the observation time is 
 	presented.</i></p>
 {$tzselect}
-    		
-</div>
-<div class="col-sm-4">
+
+<input type="submit" value="Request Data">
+
+<h4>Download Fields</h4>
 
 <dl class="dl-horizontal">
  <dt>station</dt><dd>Common identifier for the station.</dd>
  <dt>network</dt><dd>Network identifier for the station.</dd>
  <dt>valid</dt><dd>Hour on which the precip fell.</dd>
- <dt>precip_in</dt><dd>Hourly Precipitation [inch].</dd>
-    		</dl>
-    		 		
-		
+ <dt>precip_in</dt><dd>Hourly Precipitation [inch]. A value of 0.0001 denotes
+ a Trace.</dd>
+ <dt>lat</dt><dd>Station Latitude (deg N), when selected.</dd>
+ <dt>lon</dt><dd>Station Longitude (deg E), when selected.</dd>
+ <dt>st</dt><dd>Station State Indentifier, when selected.</dd>
+</dl>
+
 </div></div>
-    		<input type="submit" value="Request Data">
 </form>
 
 EOF;

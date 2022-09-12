@@ -6,22 +6,33 @@ from paste.request import parse_formvars
 from pyiem.util import get_dbconn
 
 
-def get_data(network, sts, ets, tzinfo, stations):
+def get_data(network, ctx, tzinfo, stations):
     """Go fetch data please"""
     pgconn = get_dbconn("iem")
     cursor = pgconn.cursor()
-    res = "station,network,valid,precip_in\n"
+    res = "station,network,valid,precip_in"
+    sql = ""
+    if ctx["lalo"]:
+        res += ",lat,lon"
+        sql += " , st_y(geom) as lat, st_x(geom) as lon "
+    if ctx["st"]:
+        res += ",st"
+        sql += ", state "
+    res += "\n"
     cursor.execute(
-        "SELECT id, t.network, valid, phour from hourly h JOIN stations t on "
-        "(h.iemid = t.iemid) WHERE "
-        "valid >= %s and valid < %s and t.network = %s and t.id in %s "
-        "ORDER by valid ASC",
-        (sts, ets, network, tuple(stations)),
+        f"""
+        SELECT id, t.network, valid, phour {sql}
+        from hourly h JOIN stations t on
+        (h.iemid = t.iemid) WHERE
+        valid >= %s and valid < %s and t.network = %s and t.id in %s
+        ORDER by valid ASC
+        """,
+        (ctx["sts"], ctx["ets"], network, tuple(stations)),
     )
     for row in cursor:
         res += (
             f"{row[0]},{row[1]},{row[2].astimezone(tzinfo):%Y-%m-%d %H:%M},"
-            f"{row[3]}\n"
+            f"{','.join([str(x) for x in row[3:]])}\n"
         )
 
     return res.encode("ascii", "ignore")
@@ -32,13 +43,17 @@ def application(environ, start_response):
     start_response("200 OK", [("Content-type", "text/plain")])
     form = parse_formvars(environ)
     tzinfo = pytz.timezone(form.get("tz", "America/Chicago"))
+    ctx = {
+        "st": form.get("st") == "1",
+        "lalo": form.get("lalo") == "1",
+    }
     try:
-        sts = datetime.date(
+        ctx["sts"] = datetime.date(
             int(form.get("year1")),
             int(form.get("month1")),
             int(form.get("day1")),
         )
-        ets = datetime.date(
+        ctx["ets"] = datetime.date(
             int(form.get("year2")),
             int(form.get("month2")),
             int(form.get("day2")),
@@ -49,4 +64,4 @@ def application(environ, start_response):
     if not stations:
         return [b"ERROR: No stations specified for request."]
     network = form.get("network")[:12]
-    return [get_data(network, sts, ets, tzinfo, stations=stations)]
+    return [get_data(network, ctx, tzinfo, stations=stations)]
