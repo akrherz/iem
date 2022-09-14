@@ -180,6 +180,20 @@ def build_querycols(form):
     return res
 
 
+def toobusy(pgconn, name):
+    """Check internal logging..."""
+    cursor = pgconn.cursor()
+    cursor.execute(
+        "SELECT pid from pg_stat_activity where query ~* %s",
+        (name,),
+    )
+    over = cursor.rowcount > 5
+    if over:
+        sys.stderr.write(f"asos.py cursors {cursor.rowcount}: {name}\n")
+    cursor.close()
+    return over
+
+
 def application(environ, start_response):
     """Go main Go"""
     if environ["REQUEST_METHOD"] == "OPTIONS":
@@ -203,7 +217,14 @@ def application(environ, start_response):
         yield b"Invalid Timezone (tz) provided"
         return
     pgconn = get_dbconn("asos")
-    acursor = pgconn.cursor("mystream")
+    cursor_name = f"mystream_{environ.get('REMOTE_ADDR')}"
+    if toobusy(pgconn, cursor_name):
+        start_response(
+            "503 Service Unavailable", [("Content-type", "text/plain")]
+        )
+        yield b"ERROR: server over capacity, please try later"
+        return
+    acursor = pgconn.cursor(cursor_name)
     acursor.itersize = 2000
     acursor.scrollable = False
 
