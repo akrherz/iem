@@ -63,6 +63,9 @@ def get_description():
     <p><strong>Note:</strong>  This app is very effective at finding bad data
     points as the spark-line plot of the data for the given period will look
     flakey.</p>
+
+    <p><a href="/plotting/auto/?q=139">Autoplot 139</a> is similar to this
+    plot, but only considers a calendar day.</p>
     """
     desc["arguments"] = [
         dict(

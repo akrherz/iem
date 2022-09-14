@@ -20,7 +20,16 @@ def get_description():
     NWS VTEC Watch, Warning, Advisory product.  The complication with this
     tool is that some alerts are issued for zones and others are for
     counties.  If you do not find results for one, try switching to the
-    other."""
+    other.</p>
+
+    <p>There's a second major complication and that is the case of watches
+    and how VTEC handles issuance and expiration time.  Some watches are
+    issued for time periods well into the future and are either cancelled
+    or upgraded prior to the VTEC issuance time.  In those cases, this app
+    considers the wall clock issuance time of the watch as the start time
+    and the wall clock time when the watch was either cancelled or upgraded.
+    In this case, both lines are presented as equatl.
+    """
     desc["arguments"] = [
         dict(
             type="ugc",
@@ -66,14 +75,25 @@ def plotter(fdict):
         wfo = row[0]
         name = row[2]
 
-    cursor.execute(
-        """
-     SELECT expire - issue, init_expire - issue, issue at time zone 'UTC'
-     from warnings WHERE ugc = %s and phenomena = %s and significance = %s
-     and wfo = %s and expire > issue and init_expire > issue
-    """,
-        (ugc, phenomena, significance, wfo),
-    )
+    if significance == "A" and phenomena not in ["SV", "TO"]:
+        cursor.execute(
+            """
+        SELECT issue - product_issue, issue - product_issue,
+        issue at time zone 'UTC'
+        from warnings WHERE ugc = %s and phenomena = %s and significance = %s
+        and wfo = %s
+        """,
+            (ugc, phenomena, significance, wfo),
+        )
+    else:
+        cursor.execute(
+            """
+        SELECT expire - issue, init_expire - issue, issue at time zone 'UTC'
+        from warnings WHERE ugc = %s and phenomena = %s and significance = %s
+        and wfo = %s
+        """,
+            (ugc, phenomena, significance, wfo),
+        )
     if cursor.rowcount < 2:
         raise NoDataFound("No Results Found, try flipping zone/county")
 
