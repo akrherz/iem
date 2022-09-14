@@ -50,7 +50,11 @@ def get_description():
     sprites of the temperature time series starting at 12 hours before the
     denoted date and ending at 12 hours after the date.  The sprite often
     quickly points out bad data points, sigh, but also easily shows if the
-    temperature change was an increase during the day or decrease."""
+    temperature change was an increase during the day or decrease.
+
+    <p><a href="/plotting/auto/?q=169">Autoplot 169</a> is similar to this
+    plot, but computes the change over arbitrary time windows.</p>
+    """
     desc["arguments"] = [
         dict(
             type="zstation",
