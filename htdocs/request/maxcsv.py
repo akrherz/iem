@@ -361,10 +361,9 @@ def do_ahps_fx(nwsli):
     res += "|Date|,|Stage|,|--Flow-|\n"
     odf = df[df["type"] == "F"]
     for _, row in odf.iterrows():
-        res += "%s,%.2fft,%.1fkcfs\n" % (
-            row["Time"],
-            row["Stage[ft]"],
-            row["Flow[kcfs]"],
+        res += (
+            f"{row['Time']},{row['Stage[ft]']:.2f}ft,"
+            f"{row['Fow[kcfs']:.1f}kcfs\n"
         )
     return res
 
@@ -373,7 +372,7 @@ def feet(val, suffix="'"):
     """Make feet indicator"""
     if pd.isnull(val) or val == "":
         return ""
-    return "%.1f%s" % (val, suffix)
+    return f"{val:.1f}{suffix}"
 
 
 def do_ahps(nwsli):
@@ -407,7 +406,7 @@ def do_ahps(nwsli):
         return "NO DATA"
     row = cursor.fetchone()
     generationtime = row[2]
-    y = "{}".format(generationtime.year)
+    y = f"{generationtime.year}"
     # Figure out which keys we have
     cursor.execute(
         """

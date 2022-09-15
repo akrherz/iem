@@ -282,6 +282,10 @@
                     "url": "/json/"
                 },
                 {
+                    "title": "LDM",
+                    "url": "/request/ldm.php"
+                },
+                {
                     "title": "OGC Webservices",
                     "url": "/ogc/"
                 },

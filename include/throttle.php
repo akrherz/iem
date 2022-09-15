@@ -13,5 +13,3 @@ if ($memcache->increment($key, 1, 0, 300) > 5) {
     http_response_code(429);
     die('429: Too Many Requests');
 }
-
-?>

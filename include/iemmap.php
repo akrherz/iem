@@ -26,5 +26,3 @@ function iemmap_title($map, $img, $title=null, $subtitle=null){
 		$point->draw($map, $iem_headerbar_title, $img, 1, $subtitle);
 	}
 }
-
-?>

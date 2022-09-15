@@ -82,4 +82,3 @@ header('Content-type: text/plain');
  echo $ob["relh"] ."\n";
  echo $ob["alti"] ."\n";
  echo intval($ob["feel"]) ."\n";
-?>

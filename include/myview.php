@@ -19,7 +19,11 @@ class MyView {
         if (file_exists($this->template_dir.$template_file)) {
             include $this->template_dir.$template_file;
         } else {
-            throw new Exception('no template file ' . $template_file . ' present in directory ' . $this->template_dir);
+            throw new Exception(
+                'no template file ' .
+                $template_file . ' present in directory ' .
+                $this->template_dir
+            );
         }
     }
     public function __set($name, $value) {
@@ -29,4 +33,3 @@ class MyView {
         return $this->vars[$name];
     }
 }
-?>
