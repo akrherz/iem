@@ -6,6 +6,7 @@
  https://www1.ncdc.noaa.gov/pub/download/hidden/onemin/
 """
 # stdlib
+from asyncio import subprocess
 import re
 import codecs
 import os
@@ -401,6 +402,8 @@ def cleanup(df):
             fn = row[f"fn{page}"]
             if not pd.isnull(fn) and fn.startswith(TMPDIR):
                 os.unlink(fn)
+    # Cleanup tmp folder
+    subprocess.call(f"tmpwatch 200 {TMPDIR}", shell=True)
 
 
 def main(argv):
