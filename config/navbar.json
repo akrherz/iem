@@ -241,6 +241,10 @@
                     "url": "/vtec/search.php"
                 },
                 {
+                    "title": "Special Weather Statement (SPS) Search",
+                    "url": "/nws/sps_search/"
+                },
+                {
                     "title": "SPC Convective Outlook / MCD Search",
                     "url": "/nws/spc_outlook_search/"
                 },

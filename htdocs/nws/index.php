@@ -113,8 +113,16 @@ options listed.</p>
   <br />of archived Storm Based Warning polygons.</li>
  <li><a href="/iembot/">IEMBot</a>
   <br />Realtime chatrooms, twitter posting service, RSS feeds and more.</li> 
-  <li><a href="/request/gis/sps.phtml">Special Weather Statement (SPS) Polygons</a><br />
-    Shapefile download of SPS polygons and IBW tags.</li>
+</ul>
+
+<p><strong>Special Weather Statements (SPS)</strong></p>
+<ul>
+    <li><a href="/request/gis/sps.phtml">SPS Polygon Download</a>
+    <br />Download shapefiles of SPSs.</li>
+    <li><a href="/nws/sps_search/">SPS Search by Point</a>
+    <br />Search for SPSs by point.</li>
+    <li><a href="/wx/afos/p.php?pil=SPSDMX">SPS Text Download</a>
+    <br />Request raw SPS text over a period of your choice.</li>
 </ul>
 
 <p><strong>Maps and Graphics</strong></p>
