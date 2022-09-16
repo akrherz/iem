@@ -10,7 +10,8 @@ from pyiem.util import get_sqlalchemy_conn, get_properties
 from paste.request import parse_formvars
 import requests
 
-STATION_RE = re.compile(r"^[A-Z0-9]{3,10}$", re.I)
+AFOS_RE = re.compile(r"^[A-Z0-9]{6}$", re.I)
+STATION_RE = re.compile(r"^[A-Z0-9]{3,5}$", re.I)
 AUTOPLOT_RE = re.compile(r"^(autoplot|ap)?\s?(?P<n>\d{1,3})$", re.I)
 
 
@@ -33,6 +34,7 @@ def geocoder(q):
     req = requests.get(
         "https://maps.googleapis.com/maps/api/geocode/json",
         params=dict(address=q, key=props["google.maps.key2"], sensor="true"),
+        timeout=30,
     )
     data = req.json()
     if not data["results"]:
@@ -55,6 +57,11 @@ def geocoder(q):
 def ap_handler(apid):
     """Forward to the appropriate autoplot page."""
     return f"/plotting/auto/?q={apid}"
+
+
+def afos_handler(pil):
+    """Forward to AFOS handler."""
+    return f"/wx/afos/p.php?pil={pil}"
 
 
 def station_handler(sid):
@@ -80,6 +87,8 @@ def find_handler(q):
     if m:
         d = m.groupdict()
         return ap_handler, d["n"]
+    if AFOS_RE.match(q):
+        return afos_handler, q.upper()
     if STATION_RE.match(q):
         return station_handler, q.upper()
     # Likely want to always do this one last, as it will catch things
