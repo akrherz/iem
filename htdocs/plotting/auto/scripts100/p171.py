@@ -141,9 +141,9 @@ def plotter(fdict):
             )
         raise NoDataFound("Sorry, no data found!")
 
-    df2 = df.pivot("yr", "mo", "count")
-    df2 = df2.reindex(
-        index=range(df["yr"].min(), df["yr"].max() + 1), columns=range(1, 13)
+    df2 = df.pivot("yr", "mo", "count").reindex(
+        index=range(df["yr"].min(), df["yr"].max() + 1),
+        columns=range(1, 13),
     )
 
     title = f"NWS {ctx['_sname']}"
@@ -173,11 +173,19 @@ def plotter(fdict):
         cmap=ctx["cmap"],
         zorder=2,
     )
+    # Add sums to RHS
+    sumdf = df2.sum(axis="columns").fillna(0)
+    for year, count in sumdf.iteritems():
+        ax.text(12, year, f"{count:.0f}")
     # Add some horizontal lines
     for i, year in enumerate(range(df["yr"].min(), df["yr"].max() + 1)):
+        ax.text(
+            12 + 0.7, i + 0.5, f"{sumdf[year]:4.0f}", ha="right", va="center"
+        )
         if year % 5 != 0:
             continue
         ax.axhline(i, zorder=3, lw=1, color="gray")
+    ax.text(1.0, -0.02, "Total", transform=ax.transAxes)
     # Add some vertical lines
     for i in range(1, 12):
         ax.axvline(i, zorder=3, lw=1, color="gray")
