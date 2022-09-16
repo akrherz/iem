@@ -10,8 +10,8 @@ from pyiem.util import get_sqlalchemy_conn, get_properties
 from paste.request import parse_formvars
 import requests
 
-AFOS_RE = re.compile(r"^[A-Z0-9]{6}$", re.I)
-STATION_RE = re.compile(r"^[A-Z0-9]{3,5}$", re.I)
+AFOS_RE = re.compile(r"^[A-Z]{5}[A-Z0-9]$", re.I)
+STATION_RE = re.compile(r"^[A-Z0-9]{3,10}$", re.I)
 AUTOPLOT_RE = re.compile(r"^(autoplot|ap)?\s?(?P<n>\d{1,3})$", re.I)
 
 
@@ -111,6 +111,7 @@ def default_form():
 of supported search values.</p>
 
 <ul>
+    <li>A NWS AFOS/AWIPS Idenitifer (AFDDMX, SWODY1)</li>
     <li>A station ID (KFWS, AMSI4, DSM, IA0200)</li>
     <li>An autoplot identifier (ap1, ap2, autoplot 100)</li>
     <li>The nearest station to a street address (123 Main St Ames Iowa)</li>
