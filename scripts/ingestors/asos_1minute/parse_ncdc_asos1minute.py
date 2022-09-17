@@ -6,11 +6,11 @@
  https://www1.ncdc.noaa.gov/pub/download/hidden/onemin/
 """
 # stdlib
-from asyncio import subprocess
 import re
 import codecs
 import os
 from io import StringIO
+import subprocess
 import sys
 import tarfile
 import datetime
