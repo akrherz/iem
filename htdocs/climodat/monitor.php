@@ -291,4 +291,3 @@ for a bias assessment of these values.</p>
 EOF;
 
 $t->render('full.phtml');
-?>

@@ -6,8 +6,8 @@ require_once "../../include/forms.php";
 $t->title = "Climatology by Year";
 require_once "../../include/adodb-time.inc.php";
 
-$year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y") - 1;
-$prod = isset($_GET["prod"]) ? intval($_GET["prod"]) : 1;
+$year = get_int404("year", date("Y") - 1);
+$prod = get_int404("prod", 1);
 
 $products = Array(
  1 => Array("name" => "Total Precipitation", 
@@ -51,4 +51,3 @@ when using these plots.</p>
 </div>
 EOF;
 $t->render('single.phtml');
-?>

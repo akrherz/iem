@@ -171,18 +171,22 @@ def plotter(fdict):
     cs = df[["cat1f", "cat2f", "cat3f", "cat4f", "cat5f"]].cumsum(axis=1)
     cs["cat0f"] = 0
     # Reset xaxis to make it prettier
-    cs = cs.assign(
-        x=lambda df_: np.where(
-            df_.index.values > 44,
-            df_.index.values - 45,
-            df_.index.values + 9,
-        ),
-        cat1=df["cat1f"],
-        cat2=df["cat2f"],
-        cat3=df["cat3f"],
-        cat4=df["cat4f"],
-        cat5=df["cat5f"],
-    ).sort_values("x", ascending=True)
+    cs = (
+        cs.assign(
+            x=lambda df_: np.where(
+                df_.index.values > 44,
+                df_.index.values - 45,
+                df_.index.values + 9,
+            ),
+            cat1=df["cat1f"],
+            cat2=df["cat2f"],
+            cat3=df["cat3f"],
+            cat4=df["cat4f"],
+            cat5=df["cat5f"],
+        )
+        .sort_values("x", ascending=True)
+        .drop(53, errors="ignore")
+    )
     for i in range(1, 6):
         # We fake a x-axis to remove the weird start on Mar 1 thing
         ax.bar(
@@ -273,4 +277,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({})
+    plotter({"station": "IA0070"})

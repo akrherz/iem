@@ -1,14 +1,16 @@
 <?php
-include("../../config/settings.inc.php");
-include("../../include/myview.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Information";
 
 $t->content = <<<EOF
 <h3>Iowa Weather/Climate Records</h3>
 
+<strong>The information on this page is not being updated!</strong>
+
 <p>Here is a summary of Iowa weather and climate records.  The <a href="http://www.agriculture.state.ia.us/climatology.htm">Iowa State 
-Climatologist</a>, Harry Hillaker, is the source of these records unless 
+Climatologist</a>, Dr Justin Glisan, is the source of these records unless 
 otherwise noted.
 
 <h3>Air Temperature (All values in Fahrenhit)</h3>
@@ -87,7 +89,7 @@ otherwise noted.
 
 </td></tr></table>
 
-<h3 class="heading">Rainfall Accumulation (All values in inches)</h3>
+<h3>Rainfall Accumulation (All values in inches)</h3>
 
 <table cellpadding="5">
 <tr><td valign="top">
@@ -130,4 +132,3 @@ otherwise noted.
 </table>
 EOF;
 $t->render('single.phtml');
-?>
