@@ -3,6 +3,7 @@ import datetime
 
 import pandas as pd
 from matplotlib.patches import Rectangle
+from sqlalchemy import text
 from pyiem.plot import figure
 from pyiem.reference import state_names
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, get_dbconn
@@ -94,6 +95,13 @@ def get_description():
             default="IAZ048",
             label="Select UGC Zone/County (when appropriate):",
         ),
+        dict(
+            type="date",
+            name="date",
+            label="Set retroactive date (exclude events on or after date):",
+            optional=True,
+            default=f"{datetime.date.today():%Y/%m/%d}",
+        ),
     ]
     return desc
 
@@ -106,6 +114,15 @@ def plotter(fdict):
     day = int(ctx["day"])
     ugc = ctx["ugc"]
 
+    params = {
+        "day": day,
+        "outlook_type": outlook_type,
+    }
+    date_limiter = ""
+    if ctx.get("date") is not None:
+        date_limiter = " and outlook_date < :date "
+        params["date"] = ctx["date"]
+
     sqllimiter = ""
     category = "CATEGORICAL"
     if day >= 4 and outlook_type == "C":
@@ -114,21 +131,22 @@ def plotter(fdict):
         category = "CRITICAL FIRE WEATHER AREA"
     elif outlook_type == "F":
         category = "FIRE WEATHER CATEGORICAL"
+    params["category"] = category
     if ctx["w"] == "all":
         with get_sqlalchemy_conn("postgis") as conn:
             df = pd.read_sql(
-                """
+                text(
+                    f"""
                 select max(expire at time zone 'UTC') as max_expire,
                 threshold from spc_outlooks
-                WHERE category = %s and day = %s and outlook_type = %s and
-                threshold not in ('IDRT', 'SDRT') GROUP by threshold
-            """,
-                conn,
-                params=(
-                    category,
-                    day,
-                    outlook_type,
+                WHERE category = :category and day = :day and
+                outlook_type = :outlook_type and
+                threshold not in ('IDRT', 'SDRT') {date_limiter}
+                GROUP by threshold
+            """
                 ),
+                conn,
+                params=params,
                 index_col="threshold",
             )
         title2 = "Contiguous US"
@@ -164,32 +182,33 @@ def plotter(fdict):
             geoval = ctx["mystate"]
             title2 = state_names[ctx["mystate"]]
 
+        params["geoval"] = geoval
         with get_sqlalchemy_conn("postgis") as conn:
             df = pd.read_sql(
-                f"""
+                text(
+                    f"""
                 select max(expire at time zone 'UTC') as max_expire,
                 threshold from
                 spc_outlooks o, {table} t
-                WHERE t.{abbrcol} = %s and category = %s
+                WHERE t.{abbrcol} = :geoval and category = :category
                 and ST_Intersects(st_buffer(o.geom, 0), t.{geomcol})
-                and o.day = %s and o.outlook_type = %s {sqllimiter}
-                GROUP by threshold
-            """,
-                conn,
-                params=(
-                    geoval,
-                    category,
-                    day,
-                    outlook_type,
+                and o.day = :day and o.outlook_type = :outlook_type
+                {sqllimiter} {date_limiter} GROUP by threshold
+            """
                 ),
+                conn,
+                params=params,
                 index_col="threshold",
             )
     if df.empty:
         raise NoDataFound("No Results For Query.")
     df["date"] = df["max_expire"].dt.date - datetime.timedelta(days=1)
     df["days"] = (datetime.date.today() - df["date"]).dt.days
+    _ll = ""
+    if ctx.get("date") is not None:
+        _ll = f"Prior to {ctx['date']:%-d %b %Y}, "
     title = (
-        f"Most Recent {'WPC' if outlook_type == 'E' else 'SPC'} Day "
+        f"{_ll}Most Recent {'WPC' if outlook_type == 'E' else 'SPC'} Day "
         f"{day} {PDICT[outlook_type]} Outlook for {title2}"
     )
     fig = figure(
