@@ -74,7 +74,7 @@ EOM;
 $pgconn = iemdb("mesosite");
 $rs = pg_query($pgconn, "SELECT * from news ORDER by entered DESC LIMIT 5");
 
-$today = mktime(0,0,0, date("m"), date("d"), date("Y"));
+$today = new DateTime();
 
 $news = "";
 for ($i=0; $row = pg_fetch_array($rs); $i++){
