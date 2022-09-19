@@ -78,9 +78,9 @@ $today = mktime(0,0,0, date("m"), date("d"), date("Y"));
 
 $news = "";
 for ($i=0; $row = pg_fetch_array($rs); $i++){
-    $ts = strtotime(substr($row["entered"],0,16));
-    if ($ts > $today) $sts = strftime("%I:%M %p", $ts);
-    $sts = strftime("%d %b %I:%M %p", $ts);
+    $ts = new DateTime(substr($row["entered"],0,16));
+    if ($ts > $today) $sts = $ts->format("g:i A");
+    $sts = $ts->format("n M g:i A");
     $news .= sprintf("<p><a href=\"/onsite/news.phtml?id=%s\">%s</a>".
         "<br /><i>Posted:</i> %s</li>\n", $row["id"], $row["title"], $sts);
 }

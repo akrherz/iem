@@ -17,7 +17,7 @@ $m2select = monthSelect( date("m") );
 $d2select = daySelect( date("d") );
 $h2select = gmtHourSelect( 0 , "hour");
 $ar = Array("1" => "1 Hour", "24" => "24 Hour", "48" => "48 Hour",
-		"72" => "72 Hour");
+        "72" => "72 Hour");
 $pselect = make_select("period", 1, $ar);
 
 $archivedir = '/archive/data/'. date("Y") .'/'. date('m') .'/'. date('d') .'/GIS/mrms';
@@ -40,7 +40,9 @@ can view/download this dataset.</p>
 <form method="GET" action="bypoint.phtml" name="bypoint">
 <b>Instructions:</b> With this form you can request daily estimates of rainfall
 for a particular year and for a particular point.  This point can be specified 
-in a number of ways. <b>Caveat:</b>  Geocoding is not perfect.  Your address may not be found in the database.  If you first attempt fails, try using a popular building address for a location near you.
+in a number of ways. <b>Caveat:</b>  Geocoding is not perfect.  Your address
+may not be found in the database.  If you first attempt fails, try using a
+popular building address for a location near you.
 
 <p><b>Start Year:</b>
 {$ys}
@@ -48,21 +50,31 @@ in a number of ways. <b>Caveat:</b>  Geocoding is not perfect.  Your address may
 {$ye}
 <br /><b>View Options:</b>
 <select name="view">
-	<option value="online">Online
-	<option value="download">Download to disk
+    <option value="online">Online
+    <option value="download">Download to disk
 </select>
 
 <table class="table table-bordered">
 <thead>
 <tr>
-	<th colspan="6">Choose a method to select data point:</th>
+    <th colspan="6">Choose a method to select data point:</th>
 </tr></thead>
 
 <tbody>
 <tr>
-	<td colspan="2"><input type="radio" name="method" value="latlon">Specify Latitude &amp; Longitude</td>
-	<td colspan="2"><input type="radio" name="method" value="geocode" checked="checked">Geocode An Address</td>
-	<td colspan="2"><input type="radio" name="method" value="id">Specify IEM Site ID</td></tr>
+    <td colspan="2">
+    <input type="radio" name="method" value="latlon" id="latlon">
+    <label for="latlon">Specify Latitude &amp; Longitude</label>
+    </td>
+    <td colspan="2">
+    <input type="radio" name="method" value="geocode" checked="checked" id="geocode">
+    <label for="geocode">Geocode An Address</label>
+    </td>
+    <td colspan="2">
+    <input type="radio" name="method" value="id" id="idid">
+    <label for="idid">Specify IEM Site ID</label>
+    </td>
+</tr>
 
 <tr>
 <td><b>Latitude:</b></td> <td><input type="text" name="lat" size="6"></td>
@@ -91,18 +103,18 @@ year, the estimates will be current for that period till yesterday.
 <table class="table table-bordered">
 <thead>
 <tr>
-	<th>Month:</th><th>Day:</th><th>Year:</th><th>Coverage Type:</th>
-	<th>Duration</th><th>Projection:</th>
+    <th>Month:</th><th>Day:</th><th>Year:</th><th>Coverage Type:</th>
+    <th>Duration</th><th>Projection:</th>
 </tr></thead>
 <tbody>
 <tr>
-	<td>{$mselect}</td>
-	<td>{$dselect}</td>
-	<td>{$yselect}</td>
-	<td><select name="geometry">
-	<option value="point">Point
-	<option value="polygon">Polygon
-	</select></td>
+    <td>{$mselect}</td>
+    <td>{$dselect}</td>
+    <td>{$yselect}</td>
+    <td><select name="geometry">
+    <option value="point">Point
+    <option value="polygon">Polygon
+    </select></td>
     <td>
 <select name="duration">
   <option value="day">One Day
@@ -110,10 +122,10 @@ year, the estimates will be current for that period till yesterday.
   <option value="year">Calendar Year
 </select>
     </td>
-	<td><select name="epsg">
-	<option value="4326">Geographic (EPSG: 4326)
-	<option value="26915">NAD83 UTM Zone15N (EPSG: 26915)
-	</select></td>
+    <td><select name="epsg">
+    <option value="4326">Geographic (EPSG: 4326)
+    <option value="26915">NAD83 UTM Zone15N (EPSG: 26915)
+    </select></td>
 </tr>
 </tbody>
 </table>
@@ -146,10 +158,10 @@ precipitation analysis produced by the
 <a href="http://www.ncep.noaa.gov">National Center for Environmental Prediction</a>.  
 The IEM processes this data source in the following ways:
 <ul>
-	<li>Extract data valid for Iowa from the national analyses.</li>
-	<li>Convert the data from Grib format to a relational database.</li>
-	<li>Produce summary totals for the local day instead of GMT day.</li>
-	<li>Provide instant access to this data from this page and others.</li>
+    <li>Extract data valid for Iowa from the national analyses.</li>
+    <li>Convert the data from Grib format to a relational database.</li>
+    <li>Produce summary totals for the local day instead of GMT day.</li>
+    <li>Provide instant access to this data from this page and others.</li>
 </ul>
 
 <p>Rainfall estimates are produced each day at 3:30 AM for the previous day.
@@ -166,9 +178,9 @@ be refined then.  Sounds confusing.  Please
 rainfall estimates.  This project is called 
 <a href="http://mrms.ou.edu/">Multi-RADAR Multi-Sensor System</a>.  The IEM 
 processes some of the data found in this feed and produces products from it.
-			
+            
 <h4>GIS RASTER PNG Images of Accumulation Estimates</h4>
-			
+            
 <p>The technique used provides 8-bit PNG images whereby a function can be used
 to convert the 8-bit value into a rainfall.  This equation is different for
 the various products produced by the IEM in order to accomodate the data ranges
@@ -215,14 +227,14 @@ the script converts the 8bit PNG mentioned above to uint16 IMG file on the fly!<
 </thead>
 <tbody>
 <tr><td>{$pselect}</td>
-	<td>{$y2select} {$m2select} {$d2select}</td>
-	<td> {$h2select} </td>
-			</tr>
+    <td>{$y2select} {$m2select} {$d2select}</td>
+    <td> {$h2select} </td>
+            </tr>
 </tbody>
 </table>
-		
-			<input type="submit" value="Request ERDAS Imagine File" />
-		</form>
+        
+            <input type="submit" value="Request ERDAS Imagine File" />
+        </form>
 
 <br />		
 
