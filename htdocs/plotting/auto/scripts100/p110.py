@@ -190,7 +190,7 @@ def plotter(fdict):
     for i in range(1, 6):
         # We fake a x-axis to remove the weird start on Mar 1 thing
         ax.bar(
-            np.arange(0, 53) * 7,
+            np.arange(0, len(cs.index)) * 7,
             cs[f"cat{i}"].values,
             bottom=cs[f"cat{i-1}f"].values,
             label=bins[i],
