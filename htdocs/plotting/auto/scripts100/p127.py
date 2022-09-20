@@ -74,7 +74,8 @@ def plotter(fdict):
             extract(doy from week_ending)::int as day_of_year
             from nass_quickstats
             where short_desc = %s and state_alpha = %s and
-            num_value is not null ORDER by week_ending ASC
+            num_value is not null and week_ending is not null
+            ORDER by week_ending ASC
         """,
             conn,
             params=(short_desc, state),
@@ -147,4 +148,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(short_desc="SP", state="IA"))
+    plotter({})
