@@ -170,19 +170,18 @@ def plotter(fdict):
             df = pd.read_sql(
                 """
             with data as (
-                select expire, threshold from spc_outlooks
+                select outlook_date, threshold from spc_outlooks
                 WHERE category = %s and day = %s and outlook_type = %s and
-                expire > %s and expire < %s and
+                outlook_date >= %s and outlook_date <= %s and
                 threshold not in ('IDRT', 'SDRT')),
             agg as (
-                select date(expire - '1 day'::interval), d.threshold, priority,
-                rank() OVER (PARTITION by date(expire - '1 day'::interval)
-                ORDER by priority DESC)
+                select outlook_date, d.threshold, priority,
+                rank() OVER (PARTITION by outlook_date ORDER by priority DESC)
                 from data d JOIN spc_outlook_thresholds t
                 on (d.threshold = t.threshold))
 
-            SELECT distinct date, threshold from agg where rank = 1
-            ORDER by date ASC
+            SELECT distinct outlook_date as date, threshold from agg
+            where rank = 1 ORDER by date ASC
             """,
                 conn,
                 params=(
@@ -231,21 +230,20 @@ def plotter(fdict):
             df = pd.read_sql(
                 f"""
             with data as (
-                select expire, threshold from
+                select outlook_date, threshold from
                 spc_outlooks o, {table} t
                 WHERE t.{abbrcol} = %s and category = %s
                 and ST_Intersects(st_buffer(o.geom, 0), t.{geomcol})
-                and o.day = %s and o.outlook_type = %s and expire > %s
-                and expire < %s {sqllimiter}),
+                and o.day = %s and o.outlook_type = %s and outlook_date >= %s
+                and outlook_date <= %s {sqllimiter}),
             agg as (
-                select date(expire - '1 day'::interval), d.threshold, priority,
-                rank() OVER (PARTITION by date(expire - '1 day'::interval)
-                ORDER by priority DESC)
+                select outlook_date, d.threshold, priority,
+                rank() OVER (PARTITION by outlook_date ORDER by priority DESC)
                 from data d JOIN spc_outlook_thresholds t
                 on (d.threshold = t.threshold))
 
-            SELECT distinct date, threshold from agg where rank = 1
-            ORDER by date ASC
+            SELECT distinct outlook_date as date, threshold from agg
+            where rank = 1 ORDER by date ASC
             """,
                 conn,
                 params=(
@@ -303,7 +301,7 @@ def plotter(fdict):
     else:
         fig = figure(apctx=ctx, title=title, subtitle=subtitle)
         ax = fig.add_axes([0.05, 0.15, 0.9, 0.75])
-        data = np.ones((ets.year - sts.year + 1, 367)) * -1
+        data = np.ones((ets.year - sts.year + 1, 366)) * -1
         thresholds = list(COLORS.keys())
         for date, row in df.iterrows():
             if row["threshold"] == "TSTM" and ctx.get("g", "yes") == "no":
@@ -311,16 +309,16 @@ def plotter(fdict):
             if row["threshold"] in thresholds:
                 y = date.year - sts.year
                 x = int(date.strftime("%j"))
-                data[y, x] = thresholds.index(row["threshold"])
+                data[y, x - 1] = thresholds.index(row["threshold"])
 
         cmap = mpcolors.ListedColormap(list(COLORS.values()))
-        cmap.set_under("#FFFFFF")
+        cmap.set_under("#FFF")
         norm = mpcolors.BoundaryNorm(range(len(COLORS)), cmap.N)
         ax.imshow(
             data,
             aspect="auto",
             interpolation="nearest",
-            extent=(1, 367, ets.year + 0.5, sts.year - 0.5),
+            extent=(0, 366, ets.year + 0.5, sts.year - 0.5),
             cmap=cmap,
             norm=norm,
         )
@@ -337,7 +335,7 @@ def plotter(fdict):
             ncol=10,
             loc=(0, -0.1),
         )
-        ax.set_xticks([1, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335])
+        ax.set_xticks([0, 30, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334])
         ax.set_xticklabels(calendar.month_abbr[1:])
         ax.grid()
         ax.yaxis.set_major_locator(MaxNLocator(min_n_ticks=1, integer=True))
@@ -348,10 +346,11 @@ def plotter(fdict):
 if __name__ == "__main__":
     plotter(
         dict(
+            mode="heat",
             state="IA",
             w="all",
-            sdate="2019-01-01",
-            day="4",
-            edate="2019-04-25",
+            sdate="2021-01-01",
+            day="1",
+            edate="2021-09-21",
         )
     )
