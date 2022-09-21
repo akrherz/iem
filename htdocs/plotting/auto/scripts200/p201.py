@@ -303,7 +303,7 @@ def plotter(fdict):
     else:
         fig = figure(apctx=ctx, title=title, subtitle=subtitle)
         ax = fig.add_axes([0.05, 0.15, 0.9, 0.75])
-        data = np.ones((ets.year - sts.year + 1, 366)) * -1
+        data = np.ones((ets.year - sts.year + 1, 367)) * -1
         thresholds = list(COLORS.keys())
         for date, row in df.iterrows():
             if row["threshold"] == "TSTM" and ctx.get("g", "yes") == "no":
@@ -340,7 +340,7 @@ def plotter(fdict):
         ax.set_xticks([1, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335])
         ax.set_xticklabels(calendar.month_abbr[1:])
         ax.grid()
-        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+        ax.yaxis.set_major_locator(MaxNLocator(min_n_ticks=1, integer=True))
 
     return fig, df
 
