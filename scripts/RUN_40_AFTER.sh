@@ -27,7 +27,6 @@ python scan_ingest.py
 
 cd ../madis
 python extract_madis.py
-python extract_metarqc.py
 python extract_hfmetar.py 0 &
 
 cd ../cocorahs
