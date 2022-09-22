@@ -5,70 +5,72 @@
  require_once "../../../include/database.inc.php";
  require_once "../../../include/forms.php";
  require_once "../../../include/mlib.php";
- require_once "../../../include/network.php";
 
  $t = new MyView();
  $t->title = "Quality Control, MADIS Raw QC";
  $dbconn = iemdb("iem");
- $rs = pg_prepare($dbconn, "SELECT", "SELECT * from current_qc WHERE 
-       network = $1");
+ $rs = pg_prepare(
+    $dbconn,
+    "SELECT",
+    "SELECT c.*, t.id as station, t.name from current_qc c JOIN stations t on ".
+    "(c.iemid = t.iemid) WHERE t.network = $1");
  $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "station";
  $network = isset($_GET["network"])? substr($_GET["network"],0,10): "IA_ASOS";
+ if ($network == "AWOS") {
+    $network = "IA_ASOS";
+ }
  $baa = 'network.phtml?network='. $network;
 
- $nt = new NetworkTable($network);
- $cities = $nt->table;
  
  $rs = pg_execute($dbconn, "SELECT", Array($network));
  
  $data = Array();
  for($i=0; $row = pg_fetch_array($rs); $i++)
  {
- 	$data[ $row["station"] ] = $row;
- 	$data[ $row["station"] ]["sname"] = $cities[ $row["station"] ]["name"];
+     $data[ $row["station"] ] = $row;
  }
   
  $finalA = Array();
  $finalA = aSortBySecondIndex($data, $sortcol);
  $ns_networks = Array(
- 		"IA_ASOS" => "ASOS/AWOS [Iowa]",
- 		"MN_ASOS" => "ASOS/AWOS [Minnesota]",
- 		"WI_ASOS"    => "ASOS/AWOS [Wisconsin]",
- 		"IL_ASOS"    => "ASOS/AWOS [Illinios]",
- 		"IN_ASOS"    => "ASOS/AWOS [Indiana]",
- 		"OH_ASOS"    => "ASOS/AWOS [Ohio]",
- 		"MI_ASOS"    => "ASOS/AWOS [Michigan]",
- 		"KS_ASOS"    => "ASOS/AWOS [Kansas]",
- 		"NE_ASOS"    => "ASOS/AWOS [Nebraska]",
- 		"SD_ASOS"    => "ASOS/AWOS [South Dakota]",
- 		"ND_ASOS"    => "ASOS/AWOS [North Dakota]",
+         "IA_ASOS" => "ASOS/AWOS [Iowa]",
+         "MN_ASOS" => "ASOS/AWOS [Minnesota]",
+         "WI_ASOS"    => "ASOS/AWOS [Wisconsin]",
+         "IL_ASOS"    => "ASOS/AWOS [Illinios]",
+         "IN_ASOS"    => "ASOS/AWOS [Indiana]",
+         "OH_ASOS"    => "ASOS/AWOS [Ohio]",
+         "MI_ASOS"    => "ASOS/AWOS [Michigan]",
+         "KS_ASOS"    => "ASOS/AWOS [Kansas]",
+         "NE_ASOS"    => "ASOS/AWOS [Nebraska]",
+         "SD_ASOS"    => "ASOS/AWOS [South Dakota]",
+         "ND_ASOS"    => "ASOS/AWOS [North Dakota]",
  );
  
  $sselect = "";
  foreach($ns_networks as $key => $val){
- 	$sselect .= "<option value=\"network.phtml?network=$key\" ";
- 	if ($network == $key) $sselect .= "selected=\"selected\"";
- 	$sselect .= ">". $ns_networks[$key] ."\n";
+     $sselect .= "<option value=\"network.phtml?network=$key\" ";
+     if ($network == $key) $sselect .= "selected=\"selected\"";
+     $sselect .= ">". $ns_networks[$key] ."\n";
  }
 
 
  $i = false;
  
  function vp($v, $r){
- 	if ($v > 0) return '<td><font id="c">'. round($v,$r) .'</font></td>';
- 	else if ($v < 0) return '<td><font id="w">'. round($v,$r) .'</font></td>';
- 	return '<td>'. round($v,$r) .'</td>';
+     if ($v > 0) return '<td><font id="c">'. round($v,$r) .'</font></td>';
+     else if ($v < 0) return '<td><font id="w">'. round($v,$r) .'</font></td>';
+     return '<td>'. round($v,$r) .'</td>';
  }
  function pp($v, $r){
- 	if (intval($v) == -17966) return 'M';
- 	return round($v,$r);
+     if (intval($v) == -17966) return 'M';
+     return round($v,$r);
  }
  $table = "";
  foreach($finalA as $key => $val){
- 	$ts = strtotime($val["valid"]);
- 	$table .= '<tr ';
- 	if ($i) $table .= 'class="even"';
- 	$table .= '><td>'. $val["station"] .'</td><td>'. $cities[$key]["name"] .'</td>
+     $ts = strtotime($val["valid"]);
+     $table .= '<tr ';
+     if ($i) $table .= 'class="even"';
+     $table .= '><td>'. $val["station"] .'</td><td>'. $val["name"] .'</td>
   <td>'. strftime("%d %b %H:%M", $ts) .'</td>
   <td id="divider">'. pp($val["tmpf"],0) .'</td>'.
    vp($val["tmpf_qc_av"], 1) .
@@ -81,7 +83,7 @@
    vp($val["alti_qc_sc"], 2) .
    '</tr>';
  
- 	$i = ! $i;
+     $i = ! $i;
  }
  
  $t->content = <<<EOF
@@ -92,9 +94,6 @@ observed value is too high.  <font color="#0000ff">Blue numbers</font>
 indicate that the observed value is too low.  The 'QC' value is an 
 average of all of the QC routines MADIS runs.  The 'Spatial' column is a 
 result of the <i>Spatial Consistency Check</i>.</p>
-
-
-
 
 <form method="GET" name="switchNetwork">
  

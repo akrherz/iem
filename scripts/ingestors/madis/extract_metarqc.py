@@ -1,40 +1,39 @@
-"""
- Extract MADIS METAR QC information to the database
+"""Extract MADIS METAR QC information to the database
+
+called from RUN_40_AFTER.sh
 """
 import os
 import sys
 import datetime
-import warnings
 
 import numpy as np
-import pytz
 from netCDF4 import chartostring
-from pyiem.util import get_dbconn, ncopen, convert_value
+from pyiem.util import get_dbconn, ncopen, convert_value, logger, utc
 
-warnings.filterwarnings("ignore", category=DeprecationWarning)
+LOG = logger()
 
 
 def figure(val, qcval):
     """Go."""
     if qcval > 1000:
-        return "Null"
+        return None
     tmpf = convert_value(val, "degK", "degF")
     qcval = convert_value(val + qcval, "degK", "degF")
-    return qcval - tmpf
+    return float(qcval - tmpf)
 
 
 def figure_alti(qcval):
     """Go."""
     if qcval > 100000.0:
-        return "Null"
-    return qcval / 100.0
+        return None
+    return float(qcval) / 100.0
 
 
 def check(val):
     """Go."""
     if val > 200000.0:
-        return "Null"
-    return val
+        return None
+    return float(val)
 
 
 def main():
@@ -42,12 +41,13 @@ def main():
     pgconn = get_dbconn("iem")
     icursor = pgconn.cursor()
 
-    now = datetime.datetime.utcnow() - datetime.timedelta(hours=3)
-
-    fn = "/mesonet/data/madis/metar/%s.nc" % (now.strftime("%Y%m%d_%H00"),)
-    table = "current_qc"
-
+    for offset in range(5):
+        now = utc() - datetime.timedelta(hours=offset)
+        fn = f"/mesonet/data/madis/metar/{now:%Y%m%d_%H}00.nc"
+        if os.path.isfile(fn):
+            break
     if not os.path.isfile(fn):
+        LOG.info("Missing %s", fn)
         sys.exit()
 
     nc = ncopen(fn)
@@ -64,42 +64,47 @@ def main():
         sid = ids[j]
         if len(sid) < 4:
             continue
-        if sid[0] == "K":
-            ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(
-                seconds=int(nc.variables["timeObs"][j])
-            )
-            ts = ts.replace(tzinfo=pytz.utc)
-            (tmpf, tmpf_qc_av, tmpf_qc_sc) = ("Null", "Null", "Null")
-            (dwpf, dwpf_qc_av, dwpf_qc_sc) = ("Null", "Null", "Null")
-            (alti, alti_qc_av, alti_qc_sc) = ("Null", "Null", "Null")
-            if (
-                not np.ma.is_masked(nc_tmpk[j])
-                and not np.ma.is_masked(tmpkqcd[j, 0])
-                and not np.ma.is_masked(tmpkqcd[j, 6])
-            ):
-                tmpf = check(convert_value(nc_tmpk[j], "degK", "degF"))
-                tmpf_qc_av = figure(nc_tmpk[j], tmpkqcd[j, 0])
-                tmpf_qc_sc = figure(nc_tmpk[j], tmpkqcd[j, 6])
-            if (
-                not np.ma.is_masked(nc_dwpk[j])
-                and not np.ma.is_masked(dwpkqcd[j, 0])
-                and not np.ma.is_masked(dwpkqcd[j, 6])
-            ):
-                dwpf = check(convert_value(nc_dwpk[j], "degK", "degF"))
-                dwpf_qc_av = figure(nc_dwpk[j], dwpkqcd[j, 0])
-                dwpf_qc_sc = figure(nc_dwpk[j], dwpkqcd[j, 6])
-            if not np.ma.is_masked(nc_alti[j]):
-                alti = check(nc_alti[j] / 100.0 * 0.0295298)
-                alti_qc_av = figure_alti(altiqcd[j, 0] * 0.0295298)
-                alti_qc_sc = figure_alti(altiqcd[j, 6] * 0.0295298)
-            sql = """
-                UPDATE %s SET tmpf = %s, tmpf_qc_av = %s,
-                tmpf_qc_sc = %s, dwpf = %s, dwpf_qc_av = %s,
-                dwpf_qc_sc = %s, alti = %s, alti_qc_av = %s,
-                alti_qc_sc = %s, valid = '%s' WHERE
-                station = '%s'
-                """ % (
-                table,
+        sid = sid[1:] if sid.startswith("K") else sid
+        ts = (
+            datetime.datetime(1970, 1, 1)
+            + datetime.timedelta(seconds=int(nc.variables["timeObs"][j]))
+        ).replace(tzinfo=datetime.timezone.utc)
+        (tmpf, tmpf_qc_av, tmpf_qc_sc) = (None, None, None)
+        (dwpf, dwpf_qc_av, dwpf_qc_sc) = (None, None, None)
+        (alti, alti_qc_av, alti_qc_sc) = (None, None, None)
+        if (
+            not np.ma.is_masked(nc_tmpk[j])
+            and not np.ma.is_masked(tmpkqcd[j, 0])
+            and not np.ma.is_masked(tmpkqcd[j, 6])
+        ):
+            tmpf = check(convert_value(nc_tmpk[j], "degK", "degF"))
+            tmpf_qc_av = figure(nc_tmpk[j], tmpkqcd[j, 0])
+            tmpf_qc_sc = figure(nc_tmpk[j], tmpkqcd[j, 6])
+        if (
+            not np.ma.is_masked(nc_dwpk[j])
+            and not np.ma.is_masked(dwpkqcd[j, 0])
+            and not np.ma.is_masked(dwpkqcd[j, 6])
+        ):
+            dwpf = check(convert_value(nc_dwpk[j], "degK", "degF"))
+            dwpf_qc_av = figure(nc_dwpk[j], dwpkqcd[j, 0])
+            dwpf_qc_sc = figure(nc_dwpk[j], dwpkqcd[j, 6])
+        if (
+            not np.ma.is_masked(nc_alti[j])
+            and not np.ma.is_masked(altiqcd[j, 0])
+            and not np.ma.is_masked(altiqcd[j, 6])
+        ):
+            alti = check(nc_alti[j] / 100.0 * 0.0295298)
+            alti_qc_av = figure_alti(altiqcd[j, 0] * 0.0295298)
+            alti_qc_sc = figure_alti(altiqcd[j, 6] * 0.0295298)
+        icursor.execute(
+            """
+            UPDATE current_qc c SET tmpf = %s, tmpf_qc_av = %s,
+            tmpf_qc_sc = %s, dwpf = %s, dwpf_qc_av = %s,
+            dwpf_qc_sc = %s, alti = %s, alti_qc_av = %s,
+            alti_qc_sc = %s, valid = %s FROM stations t WHERE
+            c.iemid = t.iemid and t.id = %s and t.network ~* 'ASOS'
+            """,
+            (
                 tmpf,
                 tmpf_qc_av,
                 tmpf_qc_sc,
@@ -109,15 +114,24 @@ def main():
                 alti,
                 alti_qc_av,
                 alti_qc_sc,
-                ts.strftime("%Y-%m-%d %H:%M+00"),
-                sid[1:],
+                ts,
+                sid,
+            ),
+        )
+        if icursor.rowcount == 0:
+            # Data is in SA format :/
+            if len(sid) == 4:
+                continue
+            # Add entry
+            LOG.warning("Adding current_qc entry for %s", sid)
+            icursor.execute(
+                "INSERT into current_qc (iemid) "
+                "SELECT iemid from stations where id = %s "
+                "and network ~* 'ASOS'",
+                (sid,),
             )
-            sql = sql.replace("--", "Null").replace("nan", "Null")
-            try:
-                icursor.execute(sql)
-            except Exception as exp:
-                print(exp)
-                print(sql)
+            if icursor.rowcount == 0:
+                LOG.warning("Unknown station? %s", sid)
 
     nc.close()
     icursor.close()

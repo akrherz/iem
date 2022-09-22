@@ -66,6 +66,7 @@ def main():
         provider = providers[p]
         if provider not in ["IEM", "IADOT"]:
             continue
+        sid = stations[p]
         ticks = int(times[p])
         ts = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=ticks)
         ts = ts.replace(tzinfo=pytz.UTC)
@@ -87,10 +88,12 @@ def main():
             alti_qc_av = figure_alti(altiqcd[p, 0] * 0.0295298)
             alti_qc_sc = figure_alti(altiqcd[p, 6] * 0.0295298)
         sql = """
-            UPDATE current_qc SET tmpf = %s, tmpf_qc_av = %s,
+            UPDATE current_qc c SET tmpf = %s, tmpf_qc_av = %s,
             tmpf_qc_sc = %s, dwpf = %s, dwpf_qc_av = %s,
             dwpf_qc_sc = %s, alti = %s, alti_qc_av = %s,
-            alti_qc_sc = %s, valid = %s WHERE station = %s
+            alti_qc_sc = %s, valid = %s FROM stations t
+            WHERE c.iemid = t.iemid and t.id = %s and
+            t.network in ('ISUSM', 'IA_RWIS')
         """
         args = (
             tmpf,
@@ -103,9 +106,20 @@ def main():
             alti_qc_av,
             alti_qc_sc,
             ts,
-            stations[p],
+            sid,
         )
         icursor.execute(sql, args)
+        if icursor.rowcount == 0:
+            # Add entry
+            LOG.warning("Adding current_qc entry for %s", sid)
+            icursor.execute(
+                "INSERT into current_qc (iemid) "
+                "SELECT iemid from stations where id = %s "
+                "and network in ('ISUSM', 'IA_RWIS')",
+                (sid,),
+            )
+            if icursor.rowcount == 0:
+                LOG.warning("Unknown station? %s", sid)
 
     icursor.close()
     pgconn.commit()
