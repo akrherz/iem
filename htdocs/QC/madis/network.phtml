@@ -12,7 +12,8 @@
  $rs = pg_prepare(
     $dbconn,
     "SELECT",
-    "SELECT c.*, t.id as station, t.name from current_qc c JOIN stations t on ".
+    "SELECT c.*, t.id as station, t.name, ".
+    "c.valid at time zone 'UTC' as uv from current_qc c JOIN stations t on ".
     "(c.iemid = t.iemid) WHERE t.network = $1");
  $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "station";
  $network = isset($_GET["network"])? substr($_GET["network"],0,10): "IA_ASOS";
@@ -32,27 +33,25 @@
   
  $finalA = Array();
  $finalA = aSortBySecondIndex($data, $sortcol);
- $ns_networks = Array(
-         "IA_ASOS" => "ASOS/AWOS [Iowa]",
-         "MN_ASOS" => "ASOS/AWOS [Minnesota]",
-         "WI_ASOS"    => "ASOS/AWOS [Wisconsin]",
-         "IL_ASOS"    => "ASOS/AWOS [Illinios]",
-         "IN_ASOS"    => "ASOS/AWOS [Indiana]",
-         "OH_ASOS"    => "ASOS/AWOS [Ohio]",
-         "MI_ASOS"    => "ASOS/AWOS [Michigan]",
-         "KS_ASOS"    => "ASOS/AWOS [Kansas]",
-         "NE_ASOS"    => "ASOS/AWOS [Nebraska]",
-         "SD_ASOS"    => "ASOS/AWOS [South Dakota]",
-         "ND_ASOS"    => "ASOS/AWOS [North Dakota]",
- );
- 
- $sselect = "";
- foreach($ns_networks as $key => $val){
-     $sselect .= "<option value=\"network.phtml?network=$key\" ";
-     if ($network == $key) $sselect .= "selected=\"selected\"";
-     $sselect .= ">". $ns_networks[$key] ."\n";
- }
 
+$rs = pg_exec(
+    iemdb("mesosite"),
+    "SELECT id, name from networks"
+);
+$networks = Array();
+while($row=pg_fetch_assoc($rs)){
+    $networks[$row["id"]] = $row["name"];
+}
+
+$rs = pg_exec(
+    $dbconn,
+    "select distinct network from current_qc q JOIN stations t ".
+    "ON (q.iemid = t.iemid) ORDER by network ASC");
+$ar = Array();
+while($row=pg_fetch_assoc($rs)){
+    $ar[$row["network"]] = $networks[$row["network"]];
+}
+$sselect = make_select("network", $network, $ar);
 
  $i = false;
  
@@ -67,11 +66,11 @@
  }
  $table = "";
  foreach($finalA as $key => $val){
-     $ts = strtotime($val["valid"]);
+     $ts = new DateTime($val["uv"]);
      $table .= '<tr ';
      if ($i) $table .= 'class="even"';
      $table .= '><td>'. $val["station"] .'</td><td>'. $val["name"] .'</td>
-  <td>'. strftime("%d %b %H:%M", $ts) .'</td>
+  <td>'. $ts->format("d M G:i") .'Z</td>
   <td id="divider">'. pp($val["tmpf"],0) .'</td>'.
    vp($val["tmpf_qc_av"], 1) .
    vp($val["tmpf_qc_sc"], 1) .
@@ -87,7 +86,7 @@
  }
  
  $t->content = <<<EOF
-<h3 class="heading">MADIS QC Values</h3>
+<h3>MADIS QC Values</h3>
 <p>Here are the MADIS QC values for some of the networks
 in the IEM.  <font color="#ff0000">Red numbers</font> indicate that the 
 observed value is too high.  <font color="#0000ff">Blue numbers</font> 
@@ -97,10 +96,9 @@ result of the <i>Spatial Consistency Check</i>.</p>
 
 <form method="GET" name="switchNetwork">
  
-<b>Select Network:</b><select name="id"
- onChange="location=this.form.id.options[this.form.id.selectedIndex].value">
 {$sselect}
- </select>
+
+<input type="submit" value="Switch Network">
 </form>
 
 <style>
