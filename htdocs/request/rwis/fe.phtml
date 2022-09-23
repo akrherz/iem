@@ -3,8 +3,9 @@ require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/imagemaps.php";
 require_once "../../../include/forms.php";
+require_once "../../../include/database.inc.php";
 
-$network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,7): "IA_RWIS";
+$network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]): "IA_RWIS";
 
 define("IEM_APPID", 63);
 $t = new MyView();
@@ -31,6 +32,15 @@ $ar = Array(
 );
 $tzselect = make_select("tz", "Etc/UTC", $ar);
 
+$ar = Array();
+$rs = pg_exec(
+    iemdb("mesosite"),
+    "SELECT id, name from networks where id ~* 'RWIS' ORDER by name ASC"
+);
+while ($row=pg_fetch_assoc($rs)){
+    $ar[$row["id"]] = $row["name"];
+}
+$sselect = make_select("network", $network, $ar);
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
@@ -46,24 +56,13 @@ back to 1995, whereas we only have data for other states back to 2009.
 The archive has some holes in it around the year 2000 and 2001, 
 but it mostly in tack outside of those dates.</p>
 
-<p>Data is available from the following states: 
- <a href="fe.phtml?network=AK_RWIS">Alaska</a>,
- <a href="fe.phtml?network=CO_RWIS">Colorado</a>,
- <a href="fe.phtml?network=IN_RWIS">Indiana</a>,
- <a href="fe.phtml?network=IA_RWIS">Iowa</a>,
- <a href="fe.phtml?network=KS_RWIS">Kansas</a>,
- <a href="fe.phtml?network=KY_RWIS">Kentucky</a>,
- <a href="fe.phtml?network=MN_RWIS">Minnesota</a>,
- <a href="fe.phtml?network=NE_RWIS">Nebraska</a>,
- <a href="fe.phtml?network=ND_RWIS">North Dakota</a>,
- <a href="fe.phtml?network=NV_RWIS">Nevada</a>,
- <a href="fe.phtml?network=NH_RWIS">New Hampshire</a>, 
- <a href="fe.phtml?network=OH_RWIS">Ohio</a>,
- <a href="fe.phtml?network=VA_RWIS">Virginia</a>,
- <a href="fe.phtml?network=WV_RWIS">West Virginia</a>,
- <a href="fe.phtml?network=WI_RWIS">Wisconsin</a>,
- and <a href="fe.phtml?network=WY_RWIS">Wyoming</a>.
- 
+<p>
+<form method="GET" name="s">
+<strong>Available States:</strong> ${sselect}
+<input type="submit" value="Select Network">
+</form>
+</p>
+
 <form target="_blank" method="GET" action="/cgi-bin/request/rwis.py" name="iemss">
 <input type="hidden" name="minute1" value="0">
 <input type="hidden" name="minute2" value="0">
