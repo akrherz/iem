@@ -56,31 +56,27 @@ def application(environ, start_response):
     tbl = "alldata"
     if src in ["soil", "traffic"]:
         tbl = f"alldata_{src}"
+    network = form.get("network", "IA_RWIS")
+    nt = NetworkTable(network, only_online=False)
+    if "_ALL" in stations:
+        stations = list(nt.sts.keys())
     params = {
         "tzname": tzname,
         "ids": tuple(stations),
         "ets": ets,
         "sts": sts,
     }
-    if "_ALL" in stations:
-        sql = text(
-            f"SELECT *, valid at time zone :tzname as obtime from {tbl} "
-            "WHERE valid BETWEEN :sts and :ets ORDER by valid ASC"
-        )
-    else:
-        sql = text(
-            f"SELECT *, valid at time zone :tzname as obtime from {tbl} "
-            "WHERE station in :ids and valid BETWEEN :sts and :ets "
-            "ORDER by valid ASC"
-        )
+    sql = text(
+        f"SELECT *, valid at time zone :tzname as obtime from {tbl} "
+        "WHERE station in :ids and valid BETWEEN :sts and :ets "
+        "ORDER by valid ASC"
+    )
     with get_sqlalchemy_conn("rwis") as conn:
         df = pd.read_sql(sql, conn, params=params)
     if df.empty:
         start_response("200 OK", [("Content-type", "text/plain")])
         return [b"Sorry, no results found for query!"]
     if include_latlon:
-        network = form.get("network", "IA_RWIS")
-        nt = NetworkTable(network, only_online=False)
         myvars.insert(2, "longitude")
         myvars.insert(3, "latitude")
 
