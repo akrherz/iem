@@ -52,13 +52,13 @@ longer periods of data.</p>
     </tr>
 </thead>
 <tr>
-	<th></th>
+    <th></th>
     <th>Year</th><th>Month</th><th>Day</th>
     <th>Hour</th><th>Minute</th>
     <td rowspan="3">
     <select name="fmt">
-		<option value="shp">ESRI Shapefile</option>
-		<option value="csv">Comma Delimited</option>
+        <option value="shp">ESRI Shapefile</option>
+        <option value="csv">Comma Delimited</option>
     </select>
     </td>
     <td rowspan="3">
@@ -79,7 +79,7 @@ EOF;
 $content .= "
     <th>Start:</th>
     <td>
-     ". yearSelect2(2015, date("Y"), "year1") ."
+     ". yearSelect2(2003, date("Y"), "year1") ."
     </td>
     <td>
      ". monthSelect2(0,"month1") ."
@@ -98,7 +98,7 @@ $content .= "
   <tr>
     <th>End:</th>
     <td>
-     ". yearSelect2(2015, date("Y"), "year2") ."
+     ". yearSelect2(2003, date("Y"), "year2") ."
     </td>
     <td>
      ". monthSelect2(0,"month2") ."
@@ -131,7 +131,7 @@ Field 5: Type=N/Double, Title='LON', Longitude
 
 <h4>Archive notes:</h4>
 <ul>
- <li>Archive starts 20 Jan 2015</li>
+ <li>Archive starts March 2003</li>
  <li><strong>8 January 2020</strong>: Previously, the ingest process would not
  consider PIPEPs with unknown / bad location details.  These are now included
  in the CSV option with a "None" column for the latitude and longitude.  On a
@@ -139,6 +139,12 @@ Field 5: Type=N/Double, Title='LON', Longitude
  <li><strong>21 April 2021</strong>: It was kindly pointed out that location
  offsets are in nautical miles and not miles.  The archive was reprocessed
  to properly use nautical miles.</li>
+ <li><strong>23 September 2022</strong>: The archive was backfilled for as long
+ as raw data was available from NCEI.  This backfilling covered a period between
+ early March 2003 and 20 January 2015.  Confidence is not great that this backfilling
+ is complete and PIREPs from Canada are mostly missing.  Again, due to reasons
+ above and the poor format of this data, this archive is not the greatest, but
+ is certainly unique!</li>
  </ul>
 EOF;
 $t->content = $content;
