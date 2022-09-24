@@ -4,10 +4,10 @@ require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 define("IEM_APPID", 53);
 
-$day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d", time());
-$month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m", time());
-$hour = isset($_GET["hour"]) ? intval($_GET["hour"]) : date("H", time());
-$minute = isset($_GET["minute"]) ? intval($_GET["minute"]) : 0;
+$day = get_int404("day", date("d"));
+$month = get_int404("month", date("m"));
+$hour = get_int404("hour", date("H"));
+$minute = get_int404("minute", 0);
 $sz = isset($_GET["sz"]) ? floatval($_GET["sz"]) : 2.5;
 
 /* Do areal extents */

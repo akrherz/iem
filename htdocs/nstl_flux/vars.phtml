@@ -1,11 +1,11 @@
 <?php
-include("../../config/settings.inc.php");
-include("../../include/forms.php");
-include("../../include/myview.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/forms.php";
+require_once "../../include/myview.php";
+require_once "../../include/database.inc.php";
 $t = new MyView();
 
 $t->title = "NLAE Flux Sites Variables";
-include("../../include/database.inc.php");
 
 $pg_conn = iemdb("other");
 $sql = "SELECT * from flux_vars ORDER by name ASC";
@@ -13,7 +13,7 @@ $rs = pg_exec($pg_conn, $sql);
 $rows = "";
 for( $i=0; $row = pg_fetch_assoc($rs); $i++)
 {
-	$rows .= sprintf("<tr><th>%s</th><td>%s</td><td>%s</td></tr>", $row["name"], $row["units"], $row["details"]);
+    $rows .= sprintf("<tr><th>%s</th><td>%s</td><td>%s</td></tr>", $row["name"], $row["units"], $row["details"]);
 }
 
 $t->content = <<<EOF
@@ -38,4 +38,3 @@ Each variable is not collected at every site.
 
 EOF;
 $t->render('single.phtml');
-?>

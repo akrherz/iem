@@ -3,7 +3,8 @@
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/network.php";
-$network = isset($_GET["network"]) ? $_GET["network"] : "KCCI"; 
+require_once "../../include/forms.php";
+$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "KCCI"; 
 
 header("Content-Type: application/vnd.google-earth.kml+xml");
 echo <<<EOF

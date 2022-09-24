@@ -42,8 +42,8 @@ width="640" height="480" alt="radmap image"/>
 <div class="desc">
  Layer(s) to draw in the map. Here is a list of available layers:
 <ul>
-	<li><i>airtemps</i> - <strong>Realtime Only</strong> Plot 2 meter air 
-		temperatures in Fahrenheit.</li>
+    <li><i>airtemps</i> - <strong>Realtime Only</strong> Plot 2 meter air 
+        temperatures in Fahrenheit.</li>
  <li><i>cbw</i> - County/Zone based Watch/Warning/Advisories</li>
  <li><i>county_warnings</i> - County based Warnings</li>
  <li><i>cwas</i> - National Weather Service County Warning Area (CWA)</li>
@@ -51,9 +51,9 @@ width="640" height="480" alt="radmap image"/>
  also need to specify the sector and the product as two seperate 
  CGI variables. <sup>[2]</sup>
  <ul>
- 	<li><i>goes_sector</i> either EAST, WEST, HI (Hawaii), AK (Alaska), PR (Puerto Rico)</li>
- 	<li><i>goes_product</i> VIS for visible, IR for infrared, and WV for water
- 	vapor</li>
+     <li><i>goes_sector</i> either EAST, WEST, HI (Hawaii), AK (Alaska), PR (Puerto Rico)</li>
+     <li><i>goes_product</i> VIS for visible, IR for infrared, and WV for water
+     vapor</li>
  </ul>
  </li>
  <li><i>interstates</i> - Interstate Roadways</li>
@@ -65,24 +65,24 @@ width="640" height="480" alt="radmap image"/>
  also need to specify the RADAR site and level 3 product as two seperate 
  CGI variables. <sup>[2]</sup>
  <ul>
- 	<li><i>ridge_radar</i> 3 character radar identifier</li>
- 	<li><i>ridge_product</i> 3 character levelIII product identifier</li>
+     <li><i>ridge_radar</i> 3 character radar identifier</li>
+     <li><i>ridge_product</i> 3 character levelIII product identifier</li>
  </ul>
  </li>
  <li><i>roads</i> - Iowa Winter Road Conditions</li>
  <li><i>sbw</i> - Storm based Watch/Warning/Advisories</li>
-	<li><i>surface</i> - <strong>Realtime Only</strong> Plot dots for RWIS
-	pavement temperatures. See <a href="/GIS/apps/iem/freeze.phtml">IEM Freeze</a> app.</li>
+    <li><i>surface</i> - <strong>Realtime Only</strong> Plot dots for RWIS
+    pavement temperatures. See <a href="/GIS/apps/iem/freeze.phtml">IEM Freeze</a> app.</li>
   <li><i>uscounties</i> - CONUS Counties </li>
  <li><i>usdm</i> - United States Drought Monitor (latest only)</li>
  <li><i>watch_by_county</i> - Convective Watch-by-County</li>
  <li><i>watches</i> - Polygon SPC Watch boundaries</li>
 </ul>
 <p>[1] Storm reports are plotting valid at the given time (variable ts).
-		To specify a time range, set ts1 and ts2 variable to the UTC start
-		and end time respectively.
-		For example, &amp;ts1=200806071000&amp;ts2=200806071015 to get LSRs
-		between 10 and 1015z.</p>
+        To specify a time range, set ts1 and ts2 variable to the UTC start
+        and end time respectively.
+        For example, &amp;ts1=200806071000&amp;ts2=200806071015 to get LSRs
+        between 10 and 1015z.</p>
 <p>[2] Logic is applied to these layers to find the closest imagery to the specified
 time or the realtime imagery if no time (variable ts) is specified.
 </div>
@@ -205,8 +205,7 @@ os.system("ffmpeg -y -i %05d.png -b 2000k out.mp4")
  imagery layers as available plotting options.</li>
  <li><strong>4 May 2012:</strong> Add incorporated places as a layer option.</li>
  <li><strong>22 May 2016:</strong> Clarified the Local Storm Reports timestamp
-		options.</li>
+        options.</li>
 </ul>
 EOF;
 $t->render('single.phtml');
-?>

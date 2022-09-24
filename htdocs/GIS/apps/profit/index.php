@@ -20,40 +20,40 @@ $t->jsextra = <<<EOF
 var map;
 var player;
 $(document).ready(function(){
-	player = new ol.layer.Tile({
+    player = new ol.layer.Tile({
                         title: 'Profitability',
-						visible: true,
+                        visible: true,
                         source: new ol.source.XYZ({
                                 url : '/c/tile.py/1.0.0/profit2010/{z}/{x}/{y}.png'
                         })
                 });
-		
-		map = new ol.Map({
+        
+        map = new ol.Map({
                 target: 'map',
                 layers: [new ol.layer.Tile({
             title: 'OpenStreetMap',
             visible: true,
             source: new ol.source.OSM()
                 }), player],
-		view: new ol.View({
+        view: new ol.View({
                         projection: 'EPSG:3857',
-					center: ol.proj.transform([-93.5, 42.1], 'EPSG:4326', 'EPSG:3857'),
+                    center: ol.proj.transform([-93.5, 42.1], 'EPSG:4326', 'EPSG:3857'),
             zoom: 7
-		
+        
                 })
-		});
+        });
     var layerSwitcher = new ol.control.LayerSwitcher();
     map.addControl(layerSwitcher);
 
-	$("#yearselect").buttonset();
-	$( '#yearselect input[type=radio]').change(function(){
-		player.setSource(new ol.source.XYZ({
-			url : '/c/tile.py/1.0.0/profit'+this.value+'/{z}/{x}/{y}.png'
-		}));
+    $("#yearselect").buttonset();
+    $( '#yearselect input[type=radio]').change(function(){
+        player.setSource(new ol.source.XYZ({
+            url : '/c/tile.py/1.0.0/profit'+this.value+'/{z}/{x}/{y}.png'
+        }));
     });
-	$("#disclaimer_btn").click(function(){
-		$('#disclaimer').dialog({width: '50%', height: 400});	
-	});
+    $("#disclaimer_btn").click(function(){
+        $('#disclaimer').dialog({width: '50%', height: 400});	
+    });
 });
 </script>
 EOF;
@@ -68,16 +68,16 @@ $t->content = <<<EOF
     background-color:#FFFFFF;
 }
 #yearselect{
-	position:absolute; 
+    position:absolute; 
     top:0.5em; 
     left:60px; 
     z-index:10000; 
     background-color:#FFFFFF;	
 }
-		a {
-		color: #00f !important;
-		text-decoration: underline !important;
-		}
+        a {
+        color: #00f !important;
+        text-decoration: underline !important;
+        }
 </style>
 <div style="width:100%; height:100%" id="map">
 <div id="yearselect">
@@ -87,7 +87,7 @@ $t->content = <<<EOF
   <input type="radio" id="y2013" name="whichyear" value="2013"><label for="y2013">2013</label>
   <input type="radio" id="y2015" name="whichyear" value="2015"><label for="y2015">2015</label>
 </div>
-		
+        
 <div id="legend"><img src="profit_legend.png" />
 <br /><button class="btn btn-default" id="disclaimer_btn" type="button" role="button"><i class="fa fa-info"></i> View Disclaimer</button>
 </div>
@@ -136,7 +136,7 @@ surveys</a> (ISU extension, 2010-2013, 2015), adjusted to corn
 suitability rating (CSR). Crop production costs were taken from the
 <a href="http://www.extension.iastate.edu/agdm/crops/html/a1-20.html">ISU
 Ag Decision Maker cost estimates</a>.</p>
-		
+        
 </div><!-- ./disclaimer -->
 </div>
 

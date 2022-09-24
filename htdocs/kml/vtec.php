@@ -1,18 +1,19 @@
 <?php
 /* Sucks to render a KML */
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
-include("../../include/vtec.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/vtec.php";
+require_once "../../include/forms.php";
 $connect = iemdb("postgis");
 
-$year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
-$wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,4) : "MPX";
+$year = get_int404("year", 2006);
+$wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]),0,4) : "MPX";
 if (strlen($wfo) > 3){
     $wfo = substr($wfo, 1, 3);
 }
-$eventid = isset($_GET["eventid"]) ? intval($_GET["eventid"]) : 103;
-$phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
-$significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
+$eventid = get_int404("eventid", 103);
+$phenomena = isset($_GET["phenomena"]) ? substr(xssafe($_GET["phenomena"]),0,2) : "SV";
+$significance = isset($_GET["significance"]) ? substr(xssafe($_GET["significance"]),0,1) : "W";
 
 $rs = pg_prepare($connect, "SELECT", "SELECT  
            ST_askml(geom) as kml, issue, expire, status,
@@ -27,7 +28,7 @@ $result = pg_execute($connect, "SELECT",
 
 if (pg_num_rows($result) <= 0) {
     $rs = pg_prepare($connect, "SELECT2", "SELECT 
-    		issue, expire, status,  
+            issue, expire, status,  
            ST_askml(u.geom) as kml,
            round(ST_area(ST_transform(u.geom,2163)) / 1000000.0) as psize
            from warnings_$year w JOIN ugcs u on (u.gid = w.gid)
@@ -85,5 +86,3 @@ for($i=0;$row=pg_fetch_assoc($result);$i++){
 }
 echo " </Document>
 </kml>";
-
-?>

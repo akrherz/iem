@@ -4,8 +4,7 @@
  */
 require_once "../../config/settings.inc.php";
 $extents = isset($_GET["BBOX"]) ? explode(",", $_GET["BBOX"]) : 
-	Array(-105,40,-97,47);
-
+    Array(-105,40,-97,47);
 
 $mapFile = "../../data/gis/base4326.map";
 $map = ms_newMapObj($mapFile);
@@ -23,7 +22,6 @@ $lakes = $map->getlayerbyname("lakes");
 $lakes->set("status", MS_ON);
 $lakes->draw($img);
 
-
 $states = $map->getlayerbyname("states");
 $states->set("status", MS_ON);
 $states->draw($img);
@@ -37,4 +35,3 @@ $rt->draw($map, $rect, $img, 0, " ");
 
 header ("Content-type: image/png");
 $img->saveImage('');
-?>

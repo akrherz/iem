@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
-import pyiem.nws.vtec as vtec
+from pyiem.nws import vtec
 from pyiem.exceptions import NoDataFound
 
 

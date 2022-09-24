@@ -1,6 +1,5 @@
 <?php
-include("../../../../config/settings.inc.php");
-
+require_once "../../../../config/settings.inc.php";
 
 $map = ms_newMapObj("robins.map");
 
@@ -19,6 +18,3 @@ $map->drawLabelCache($img);
 
 header("Content-type: image/png");
 $img->saveImage('');
-
-
-?>

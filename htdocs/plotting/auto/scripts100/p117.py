@@ -30,7 +30,6 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     station = ctx["station"]
 
-    table = "alldata_%s" % (station[:2],)
     bs = ctx["_nt"].sts[station]["archive_begin"]
     if bs is None:
         raise NoDataFound("No Data Found.")
@@ -52,21 +51,19 @@ def plotter(fdict):
         station,
     )
 
-    s = ctx["_nt"].sts[station]["archive_begin"]
-    e = datetime.date.today().year + 1
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
             SELECT year, month, sum(case when high > 86 then 1 else 0 end)
             as days, sum(case when high > 86 then high - 86 else 0 end) as sdd
-            from {table} WHERE station = %s GROUP by year, month
+            from alldata WHERE station = %s GROUP by year, month
         """,
             conn,
             params=(station,),
             index_col=None,
         )
-    sdd = df.pivot("year", "month", "sdd")
-    days = df.pivot("year", "month", "days")
+    sdd = df.pivot(index="year", columns="month", values="sdd")
+    days = df.pivot(index="year", columns="month", values="days")
     df = sdd.join(days, lsuffix="sdd", rsuffix="days")
 
     res += (
@@ -77,7 +74,7 @@ def plotter(fdict):
     )
 
     yrCnt = 0
-    for yr in range(s.year, e):
+    for yr in range(df.index.min(), df.index.max() + 1):
         yrCnt += 1
         res += "%5s" % (yr,)
         total = 0
@@ -122,4 +119,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({})
+    plotter({"network": "KSCLIMATE", "station": "KS0405"})

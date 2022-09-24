@@ -1,7 +1,8 @@
 <?php
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
-$network = isset($_GET["network"]) ? $_GET["network"] : "KCCI"; 
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/forms.php";
+$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "KCCI"; 
 
 header("Content-Type: application/vnd.google-earth.kml+xml");
 echo <<<EOF
@@ -23,9 +24,9 @@ EOF;
 
 $conn = iemdb("mesosite");
 pg_prepare($conn, "SELECT", "SELECT *, ST_x(geom) as lon, ST_y(geom) as lat
-		from camera_current c JOIN webcams w
-		on (w.id = c.cam) WHERE 
-		valid > (now() - '30 minutes'::interval) and network = $1");
+        from camera_current c JOIN webcams w
+        on (w.id = c.cam) WHERE 
+        valid > (now() - '30 minutes'::interval) and network = $1");
 $rs = pg_execute($conn, "SELECT", Array($network)); 
 for ($i=0;$row=pg_fetch_assoc($rs);$i++)
 {
@@ -43,4 +44,3 @@ for ($i=0;$row=pg_fetch_assoc($rs);$i++)
 </Placemark>";
 }
 echo "</Document></kml>";
-?>

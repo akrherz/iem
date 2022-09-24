@@ -20,7 +20,7 @@ $myStations = $ISUAGcities;
 $height = 480;
 $width = 640;
 
-$map = ms_newMapObj("../../../../data/gis/base26915.map");
+$map = new mapObj("../../../../data/gis/base26915.map");
 $map->setProjection("init=epsg:26915");
 $map->setsize($width,$height);
 $map->setextent(175000, 4440000, 775000, 4890000);
@@ -64,8 +64,8 @@ if ($month >= 9) {
 
 $data = Array();
 $sql = "select station, min(valid) as v from sm_hourly "
-		."WHERE valid > '${sdate}' and tair_c_avg < f2c(29.0) and "
-		."valid < '${edate}' GROUP by station";
+        ."WHERE valid > '${sdate}' and tair_c_avg < f2c(29.0) and "
+        ."valid < '${edate}' GROUP by station";
 $rs =  pg_exec($c, $sql);
 for ($i=0; $row = pg_fetch_array($rs); $i++) {
   $bdate = $sdate;
@@ -105,20 +105,18 @@ for ($i=0; $row = pg_fetch_array($rs); $i++) {
 
   $data[$key]['var2'] = round($avg,0);
 
-
   // Red Dot... 
-  $pt = ms_newPointObj();
+  $pt = new pointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
   $pt->draw($map, $ponly, $img, 0);
 
-
   // Value UL
-  $pt = ms_newPointObj();
+  $pt = new pointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
   $pt->draw($map, $snet, $img, 1, $val);
 
   // City Name
-  $pt = ms_newPointObj();
+  $pt = new pointObj();
   $pt->setXY($ISUAGcities[$key]['lon'], $ISUAGcities[$key]['lat'], 0);
   if ($key == "A131909" || $key == "A130209"){
     $pt->draw($map, $snet, $img, 0, $ISUAGcities[$key]['name'] );
@@ -129,14 +127,13 @@ for ($i=0; $row = pg_fetch_array($rs); $i++) {
 }
 
 iemmap_title($map, $img, "Standard Chill Units [ $sdate thru ". date("Y-m-d", $ts) ." ]",
-	($i == 0) ? 'No Data Found!': null);
+    ($i == 0) ? 'No Data Found!': null);
 $map->drawLabelCache($img);
-
 
 if (strlen($direct) > 0) { 
   header("Content-type: image/png");
   $img->saveImage();
 } else { 
     $url = $img->saveWebImage();
-	echo sprintf("<img src=\"%s\" border=\"1\">", $url);
+    echo sprintf("<img src=\"%s\" border=\"1\">", $url);
 }

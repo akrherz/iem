@@ -1,8 +1,8 @@
 <?php
 /* Sucks to render a KML */
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
-include("../../include/vtec.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/vtec.php";
 $connect = iemdb("postgis");
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
@@ -12,7 +12,7 @@ $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
 $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
 
 $rs = pg_prepare($connect, "SELECT", "SELECT issue, expire, status, 
-		   ST_askml(geom) as kml,
+           ST_askml(geom) as kml,
            round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize
            from sbw_$year 
            WHERE wfo = $1 and phenomena = $2 and 
@@ -69,5 +69,3 @@ echo $row["kml"];
 echo "</Placemark>
  </Document>
 </kml>";
-
-?>

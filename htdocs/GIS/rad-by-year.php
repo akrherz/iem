@@ -8,7 +8,6 @@ $beginYear = 1995;
 $endYear = intval( date("Y") );
 $yearsPerRow = 4;
 
-
 $twidth = 160 - 2;
 $theight = 140 - 2;
 $header = 40;
@@ -128,4 +127,3 @@ for ($year=$beginYear; $year <= $endYear; $year++)
 }
 header ("Content-type: image/png");
 $img2->saveImage('');
-?>

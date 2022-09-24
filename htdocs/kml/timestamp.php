@@ -30,4 +30,3 @@
  header("content-type: image/png");
  ImagePng($gif);
  ImageDestroy($gif);
-?>

@@ -59,7 +59,6 @@ $map2->imagecolor->setrgb(155,155,155);
 $map2->setSize($width, $height);
 $img2 = $map2->prepareImage();
 
-
 $buffer = 0.3;
 
 $xmax = 0;
@@ -228,4 +227,3 @@ $sz0 = $row["area"];
 }
 header ("Content-type: image/png");
 $img2->saveImage('');
-?>

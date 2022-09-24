@@ -2,8 +2,8 @@
 /* 
  * Generate KML of the county intersection of a SBW
  */
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
 $connect = iemdb("postgis");
 
 $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
@@ -67,4 +67,3 @@ for($i=0;$row=pg_fetch_assoc($rs);$i++){
 }
 echo " </Document>
 </kml>";
-?>

@@ -8,106 +8,117 @@ require_once "../../../../include/iemmap.php";
 require_once "../../../../include/database.inc.php";
 require_once "../../../../include/forms.php";
 
-$state = isset($_GET['state']) ? xssafe($_GET['state']): '' ;
-$radar = isset($_GET['radar']) ? xssafe($_GET['radar']): 1;
-$refresh = isset($_GET['refresh']) ? xssafe($_GET['refresh']): 0;
-$imgsize = isset($_GET["imgsize"]) ? xssafe($_GET["imgsize"]): "640x480";
+$state = isset($_GET['state']) ? xssafe($_GET['state']) : '';
+$radar = isset($_GET['radar']) ? xssafe($_GET['radar']) : 1;
+$refresh = isset($_GET['refresh']) ? xssafe($_GET['refresh']) : 0;
+$imgsize = isset($_GET["imgsize"]) ? xssafe($_GET["imgsize"]) : "640x480";
 $tokens = explode("x", $imgsize);
 $imgwidth = intval($tokens[0]);
 $imgheight = intval($tokens[1]);
 $uri = "freeze.phtml";
 
 if ($state == "MN_N")
-  $sextent = "-96,44,-91,49";
+    $sextent = "-96,44,-91,49";
 else if ($state == "MN_S")
-  $sextent = "-96,42,-91,47";
+    $sextent = "-96,42,-91,47";
 else if ($state == "ND")
-  $sextent = "-105,45,-96,47";
+    $sextent = "-105,45,-96,47";
 else if ($state == "SD")
-  $sextent = "-105,42,-96,47";
+    $sextent = "-105,42,-96,47";
 else if ($state == "KS")
-  $sextent = "-102.5,37,-94.5,40";
+    $sextent = "-102.5,37,-94.5,40";
 else if ($state == "NE")
-  $sextent = "-104,40,-95.3,43";
+    $sextent = "-104,40,-95.3,43";
 else if ($state == "WI")
-  $sextent = "-95,43,-87,47";
+    $sextent = "-95,43,-87,47";
 else if ($state == "IL")
-  $sextent = "-93,37,-87,43";
+    $sextent = "-93,37,-87,43";
 else if ($state == "MO")
-  $sextent = "-95,36,-90,41";
+    $sextent = "-95,36,-90,41";
 else if ($state == "IA_NE")
-  $sextent = "-93.6,41.9,-90,43.8";
+    $sextent = "-93.6,41.9,-90,43.8";
 else if ($state == "IA_SE")
-  $sextent = "-93.6,40.3,-90,41.9";
+    $sextent = "-93.6,40.3,-90,41.9";
 else if ($state == "IA_C")
-  $sextent = "-95.1,41.1,-91.5,42.7";
+    $sextent = "-95.1,41.1,-91.5,42.7";
 else if ($state == "IA_SW")
-  $sextent = "-96.6,40.3,-93.6,41.9";
+    $sextent = "-96.6,40.3,-93.6,41.9";
 else if ($state == "IA_NW")
-  $sextent = "-96.6,41.9,-93.6,43.8";
+    $sextent = "-96.6,41.9,-93.6,43.8";
 else if ($state == "IA")
-  $sextent = "-96,40,-91,45";
+    $sextent = "-96,40,-91,45";
 else if ($state == "AK")
-  $sextent = "-178.227822,51.590982,-130.007704,71.38269";
+    $sextent = "-178.227822,51.590982,-130.007704,71.38269";
 else if ($state == "HI")
-  $sextent = "-160.249925,18.913826,-154.809286,22.23603";
+    $sextent = "-160.249925,18.913826,-154.809286,22.23603";
 else if ($state == "NW")
-  $sextent = "-120.85,37.983,-101.853,51.983";
+    $sextent = "-120.85,37.983,-101.853,51.983";
 
- if (isset($sextent))
-   $oextents = $sextent;
- else 
-   $oextents = isset($_GET['extents']) ? xssafe($_GET['extents']): "-105,36,-86,50";
- $zoom     = isset($_GET['zoom']) ? intval($_GET['zoom']): 0;
- /**
-  * Something simple to enable click interface on a PHP mapcript
-  * application
-  */
- function click2geo($oextents, $click_x, $click_y, $imgsz_x, $imgsz_y, $zoom) {
- 
- 	$arExtents = explode(",", $oextents);
- 	$ll_x = $arExtents[0];
- 	$ll_y = $arExtents[1];
- 	$ur_x = $arExtents[2];
- 	$ur_y = $arExtents[3];
- 	//  print_r($arExtents);
- 
- 	$dy = ($ur_y - $ll_y) / floatval($imgsz_y);
- 	$dx = ($ur_x - $ll_x) / floatval($imgsz_x);
- 
- 	$centerX = ($click_x * $dx) + $ll_x ;
- 	$centerY = $ur_y - ($click_y * $dy) ;
- 
- 	if (intval($zoom) < 0)
- 		$zoom = -1 / intval($zoom) ;
- 
- 	$n_ll_x = $centerX - (($dx * $zoom) * ($imgsz_x / 2.00));
- 	$n_ur_x = $centerX + (($dx * $zoom) * ($imgsz_x / 2.00));
- 	$n_ll_y = $centerY - (($dy * $zoom) * ($imgsz_y / 2.00));
- 	$n_ur_y = $centerY + (($dy * $zoom) * ($imgsz_y / 2.00));
- 
- 	return $n_ll_x .",". $n_ll_y .",". $n_ur_x .",". $n_ur_y ;
- }
- if ( isset($_GET['img_x']) ){
-   $extents = click2geo($oextents, $_GET['img_x'], $_GET['img_y'],
-     $imgwidth, $imgheight, $zoom);
- } else {
-   $extents = $oextents;
- }
+if (isset($sextent))
+    $oextents = $sextent;
+else
+    $oextents = isset($_GET['extents']) ? xssafe($_GET['extents']) : "-105,36,-86,50";
+$zoom     = isset($_GET['zoom']) ? intval($_GET['zoom']) : 0;
+/**
+ * Something simple to enable click interface on a PHP mapcript
+ * application
+ */
+function click2geo($oextents, $click_x, $click_y, $imgsz_x, $imgsz_y, $zoom)
+{
+
+    $arExtents = explode(",", $oextents);
+    $ll_x = $arExtents[0];
+    $ll_y = $arExtents[1];
+    $ur_x = $arExtents[2];
+    $ur_y = $arExtents[3];
+    //  print_r($arExtents);
+
+    $dy = ($ur_y - $ll_y) / floatval($imgsz_y);
+    $dx = ($ur_x - $ll_x) / floatval($imgsz_x);
+
+    $centerX = ($click_x * $dx) + $ll_x;
+    $centerY = $ur_y - ($click_y * $dy);
+
+    if (intval($zoom) < 0)
+        $zoom = -1 / intval($zoom);
+
+    $n_ll_x = $centerX - (($dx * $zoom) * ($imgsz_x / 2.00));
+    $n_ur_x = $centerX + (($dx * $zoom) * ($imgsz_x / 2.00));
+    $n_ll_y = $centerY - (($dy * $zoom) * ($imgsz_y / 2.00));
+    $n_ur_y = $centerY + (($dy * $zoom) * ($imgsz_y / 2.00));
+
+    return $n_ll_x . "," . $n_ll_y . "," . $n_ur_x . "," . $n_ur_y;
+}
+if (isset($_GET['img_x'])) {
+    $extents = click2geo(
+        $oextents,
+        $_GET['img_x'],
+        $_GET['img_y'],
+        $imgwidth,
+        $imgheight,
+        $zoom
+    );
+} else {
+    $extents = $oextents;
+}
 
 $imgurl = "/GIS/radmap.php?layers[]=airtemps&amp;layers[]=uscounties&amp;";
-$imgurl .= sprintf("width=%s&amp;height=%s&amp;layers[]=surface&amp;bbox=%s&amp;", 
-			$imgwidth, $imgheight, $extents);
-if ($radar){
-	$imgurl .= "layers[]=nexrad&";
+$imgurl .= sprintf(
+    "width=%s&amp;height=%s&amp;layers[]=surface&amp;bbox=%s&amp;",
+    $imgwidth,
+    $imgheight,
+    $extents
+);
+if ($radar) {
+    $imgurl .= "layers[]=nexrad&";
 }
 $imgurl .= "&title=IEM%20Freeze&";
 
- if ($refresh > 0){
-  $t->headextra = "<meta http-equiv=\"refresh\" content=\"". $refresh ."; URL=". $uri ."?imgsize=$imgsize&refresh=". $refresh ."&extents=". $extents ."&state=". $state ."\">\n";
- }
- $t->title = "IEM Freeze";
- $t->jsextra = <<<EOF
+if ($refresh > 0) {
+    $t->headextra = "<meta http-equiv=\"refresh\" content=\"" . $refresh . "; URL=" . $uri . "?imgsize=$imgsize&refresh=" . $refresh . "&extents=" . $extents . "&state=" . $state . "\">\n";
+}
+$t->title = "IEM Freeze";
+$t->jsextra = <<<EOF
 <script Language="JavaScript">
  function resetButtons(){
    document.panButton.src = "/images/button_pan_off.png";
@@ -117,33 +128,43 @@ $imgurl .= "&title=IEM%20Freeze&";
 </script>
 EOF;
 
- $ar = Array("1" => "Show", "0" => "Hide");
- $rselect = make_select("radar", $radar, $ar);
- 
- $ar = Array("0" => "Never", "300" => "5 minutes", "600" => "10 minutes");
- $reselect = make_select("refresh", $refresh, $ar);
- 
- $sselect = "<select name=\"ba\" onChange=\"location=this.form.ba.options[this.form.ba.selectedIndex].value\">";
- $sselect .= "<option value=\"#\"> -- User Defined -- </option>";
- $ar = Array("A"=> "Midwest US", "AK" => "Alaska", "HI" => "Hawaii",
- "IL" => "Illinois", "IA" => "Iowa", "IA_C" => "Iowa Central", "IA_NE" => "Iowa Northeast", 
- "IA_SE" => "Iowa Southeast", "IA_SW" => "Iowa Southwest", "IA_NW" => "Iowa Northwest",
- "KS" => "Kansas", "NE" => "Nebraska", "MN_N" => "Minnesota North",
- "MN_S" => "Minnsota South", "MO" => "Missouri", "ND" => "North Dakota", 
- "NW" => "Pacific Northwest", "SD" => "South Dakota", "WI" => "Wisconsin");
- foreach($ar as $key => $val){
- 	$sselect .= sprintf("<option value=\"%s?width=%s&amp;height=%s&amp;state=%s\"%s>%s</option>\n",
- 			$uri, $imgwidth, $imgheight, $key, 
- 			($state == $key) ? " SELECTED": "", $val); 
- }
- $sselect .= "</select>";
- 
- $ar = Array("640x480" => "640x480",
- 		"800x600" => "800x600",
- 		"1280x1024" => "1280x1024");
- $imgsizeselect = make_select("imgsize", $imgsize, $ar);
- 
- 
+$ar = array("1" => "Show", "0" => "Hide");
+$rselect = make_select("radar", $radar, $ar);
+
+$ar = array("0" => "Never", "300" => "5 minutes", "600" => "10 minutes");
+$reselect = make_select("refresh", $refresh, $ar);
+
+$sselect = "<select name=\"ba\" onChange=\"location=this.form.ba.options[this.form.ba.selectedIndex].value\">";
+$sselect .= "<option value=\"#\"> -- User Defined -- </option>";
+$ar = array(
+    "A" => "Midwest US", "AK" => "Alaska", "HI" => "Hawaii",
+    "IL" => "Illinois", "IA" => "Iowa", "IA_C" => "Iowa Central", "IA_NE" => "Iowa Northeast",
+    "IA_SE" => "Iowa Southeast", "IA_SW" => "Iowa Southwest", "IA_NW" => "Iowa Northwest",
+    "KS" => "Kansas", "NE" => "Nebraska", "MN_N" => "Minnesota North",
+    "MN_S" => "Minnsota South", "MO" => "Missouri", "ND" => "North Dakota",
+    "NW" => "Pacific Northwest", "SD" => "South Dakota", "WI" => "Wisconsin"
+);
+foreach ($ar as $key => $val) {
+    $sselect .= sprintf(
+        "<option value=\"%s?width=%s&amp;height=%s&amp;state=%s\"%s>%s</option>\n",
+        $uri,
+        $imgwidth,
+        $imgheight,
+        $key,
+        ($state == $key) ? " SELECTED" : "",
+        $val
+    );
+}
+$sselect .= "</select>";
+
+$ar = array(
+    "640x480" => "640x480",
+    "800x600" => "800x600",
+    "1280x1024" => "1280x1024"
+);
+$imgsizeselect = make_select("imgsize", $imgsize, $ar);
+
+
 $t->content = <<<EOF
 
 
@@ -188,7 +209,7 @@ $t->content = <<<EOF
 </div>
 </div>
 </form>
-		
+        
 <b>Preset Views:</b><br />
 <form name="ba">
 {$sselect}
@@ -201,7 +222,7 @@ $t->content = <<<EOF
 the image you see above.  You could place the above image on your webpage by
 right-clicking the image above and select "Copy Image URL" and then use that
 as your image source on your webpage.</div>
-		
+        
 <p><b>IEM Freeze</b> lets you quickly evaluate air
 and pavement temperatures, along with concurrent radar observations
 of precipitation:<br>
@@ -212,9 +233,9 @@ of precipitation:<br>
 </ul>
 
 <p>This <a href="/cool/images/freeze_031215.png">historical plot</a> 
-	shows how IEM Freeze looks when the winter weather gets interesting.</p>
+    shows how IEM Freeze looks when the winter weather gets interesting.</p>
 
-		<p>Your feedback is needed!  Please <a href="/info/contacts.php">let me know</a> how you would like this 
+        <p>Your feedback is needed!  Please <a href="/info/contacts.php">let me know</a> how you would like this 
 application to behave.
 EOF;
 $t->render("single.phtml");

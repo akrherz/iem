@@ -25,7 +25,7 @@ serving them out with Mapserver.</li>
 archive of presentations.</li>
  <li><a href="rasters.php">IEM RASTERs Lookup Tables</a>
 <br />Metadata on how you can convert IEM produced RASTERs into actual
-		values!</li>
+        values!</li>
 </ul>
 
 
@@ -56,7 +56,7 @@ archive of presentations.</li>
  <li><a href="http://wdssii.nssl.noaa.gov/?r=products">NSSL Google Earth Data</a>
   <br />Weather data integrated into Google Earth!</li>
  <li><a href="http://www.ocs.orst.edu/prism/products/matrix.phtml">Oregon State PRISM</a>
-	<br />These folks provide nationwide GIS ready datasets of climate data.  Their site is outstanding!</li>
+    <br />These folks provide nationwide GIS ready datasets of climate data.  Their site is outstanding!</li>
   
   <li><a href="http://www.prism.oregonstate.edu/">USDA PRISM</a> data page (GIS Climate Data).</li>
  <li>Iowa <a href="http://www.igsb.uiowa.edu/nrgis/gishome.htm">Natural Resources Geographic Information System (NRGIS)</a></li>
@@ -81,10 +81,10 @@ IEM webpages.  It signifies that the data link is ready for most GIS systems.
  <li><a href="/climodat/index.phtml#ks">Iowa Climate Summaries</a>
   <br />GIS ready data files of monthly and yearly climate summaries dating
 back to 1951.</li>
-	<li><a href="/GIS/apps/iem/freeze.phtml">IEM Freeze</a>
-	<br />Web mapping application to support winter weather nowcasting.</li>
-	<li><a href="/GIS/radview.phtml">IEM Radview</a>
-	<br />Our effort to provide NEXRAD information in realtime to GIS systems.</li>
+    <li><a href="/GIS/apps/iem/freeze.phtml">IEM Freeze</a>
+    <br />Web mapping application to support winter weather nowcasting.</li>
+    <li><a href="/GIS/radview.phtml">IEM Radview</a>
+    <br />Our effort to provide NEXRAD information in realtime to GIS systems.</li>
  <li><a href="/rainfall/">IEM Rainfall</a>
   <br />Gridded rainfall estimates in GIS formats dating back to 2002 for Iowa.</li>
  <li><a href="/roads/">IEM Iowa Road Conditions</a>
@@ -143,4 +143,3 @@ WPC Precip Discussion MPD Polygon Shapefile Download</a></li>
 </div></div>
 EOM;
 $t->render("single.phtml");
-?>
