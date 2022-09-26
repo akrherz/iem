@@ -4,6 +4,7 @@
 import subprocess
 import smtplib
 import os
+import re
 import datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -16,12 +17,20 @@ import wwa  # @UnresolvedImport
 
 LOG = logger()
 IEM_BRANCHES = "https://api.github.com/repos/akrherz/iem/branches"
+URLS = re.compile(r"(https?://[\w\d:#@%/;$()~_?\+-=\\\.&]*)", re.M)
 
 
 def mywrap(text):
     """Make text pretty, my friends"""
     text = text.replace("\n\n", "\n").replace("\n", "\n    ").rstrip()
     return text
+
+
+def htmlize(msg):
+    """Convert things into html."""
+    for token in URLS.findall(msg):
+        msg = msg.replace(token, f'<a href="{token}">{token}</a>')
+    return msg
 
 
 def get_github_commits():
@@ -70,7 +79,7 @@ def get_github_commits():
             data = {
                 "stamp": valid.strftime("%b %-d %-2I:%M %p"),
                 "msg": commit["commit"]["message"],
-                "htmlmsg": commit["commit"]["message"]
+                "htmlmsg": htmlize(commit["commit"]["message"])
                 .replace("\n\n", "\n")
                 .replace("\n", "<br />\n"),
                 "branch": branch,
