@@ -2,18 +2,19 @@
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 138);
 require_once "../../include/myview.php";
+$OL = "7.1.0";
 $t = new MyView();
 $t->title = "IEM Explorer";
 $t->headextra = <<<EOM
-<link rel='stylesheet' href="/vendor/openlayers/6.15.1/ol.css" type='text/css'>
-<link rel='stylesheet' href="/vendor/openlayers/6.15.1/ol-layerswitcher.css" type='text/css'>
+<link rel='stylesheet' href="/vendor/openlayers/${OL}/ol.css" type='text/css'>
+<link rel='stylesheet' href="/vendor/openlayers/${OL}/ol-layerswitcher.css" type='text/css'>
 <link rel="stylesheet" href="/vendor/jquery-ui/1.13.2/jquery-ui.css">
 <link rel="stylesheet" type="text/css" href="explorer.css" />
 EOM;
 $t->jsextra = <<<EOM
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
-<script src='/vendor/openlayers/6.15.1/ol.js'></script>
-<script src='/vendor/openlayers/6.15.1/ol-layerswitcher.js'></script>
+<script src='/vendor/openlayers/${OL}/ol.js'></script>
+<script src='/vendor/openlayers/${OL}/ol-layerswitcher.js'></script>
 <script src="/vendor/jquery-ui/1.13.2/jquery-ui.js"></script>
 <script src="/vendor/highcharts/10.1.0/highcharts.js"></script>
 <script src="/vendor/highcharts/10.1.0/highcharts-more.js"></script>
@@ -151,7 +152,6 @@ $t->content = <<<EOM
                 <option value="dec">December</option>
             </select>
             <button role="button" onClick="loaderClicked(this);"
-            data-qrcode-template="https://mesonet.agron.iastate.edu/sites/windrose.phtml?station={station}&network={network}"
             data-url-template="/onsite/windrose/{network}/{station}/{station}_{month}.png">
             <i class="fa fa-pie-chart"></i> View Windrose</button>
 
@@ -197,7 +197,6 @@ $t->content = <<<EOM
             <br /><button role="button" onClick="loaderClicked(this)"
             data-url-template="/plotting/auto/plot/176/network:{network}::station:{station}::opt:0::w:daily::_e:{elem}.js"
             ><i class="fa fa-plus-circle"></i> Records Set by Year</button>
-
 
             <h3>Trends</h3>
             <strong>Variable:</strong>

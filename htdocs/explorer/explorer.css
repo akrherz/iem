@@ -49,6 +49,7 @@ h3.title {
 .ui-window-bar .ui-window-maximize {
     right: calc(.3em + 20px);
 }
+.ui-dialog { z-index: 2000 !important ;}
 
 .ui-dialog-content {
     overflow: hidden !important;

@@ -157,7 +157,7 @@ function initMap(){
       });
     olMap = new ol.Map({
         target: 'olmap',
-        controls: ol.control.defaults().extend([overviewMap]),
+        controls: ol.control.defaults.defaults().extend([overviewMap]),
         view: new ol.View({
             enableRotation: false,
             center: ol.proj.transform([-94.5, 42.1], 'EPSG:4326', 'EPSG:3857'),
@@ -198,15 +198,15 @@ function loadImage(elem){
     var div = document.createElement("div");
     div.title = elem.title;
     var tgt = $(elem).data("target");
-    var qrurl =  `/plotting/auto/gen_qrcode.py?q=${tgt}`
-    // Create a QR code icon for usage
-    var button = document.createElement("button");
-    button.classList.add("qrbutton");
-    button.innerHTML = '<i class="fa fa-qrcode"></i> QR';
-    button.onclick = function(){
-        createQRDialog(qrurl);
-    }
-    $(button).appendTo($(div));
+    var p = document.createElement("p");
+    var ahref = document.createElement("a");
+    ahref.href = tgt;
+    ahref.target = "_blank";
+    ahref.text = "IEM Website Link";
+    ahref.classList.add("btn");
+    ahref.classList.add("btn-default");
+    p.appendChild(ahref);
+    div.appendChild(p);
     var img = document.createElement("img");
     img.classList.add("img");
     img.classList.add("img-responsive");
@@ -230,42 +230,39 @@ function loadImage(elem){
     $(dlg).dialog("open");
 
 }
-function createQRDialog(qrurl){
-    var div = document.createElement("div");
-    div.title = "Scan QR Code for IEM Website Link";
-    var img = document.createElement("img");
-    img.src = qrurl;
-    div.appendChild(img);
-    var dlg = $(div).dialog({
-        draggable: true,
-        autoOpen: true,
-        classes: {
-            "ui-dialog": "ui-window-options",
-            "ui-dialog-titlebar": "ui-window-bar"
-        },
-        modal: true,
-        responsive: true,
-        width: 800,
-        height: 600,
-        close: function() {
-            $(this).dialog('destroy').remove();
-        }
-    });
-    $(dlg).dialog("open");
-}
 
-function loadAutoplot(container, qrurl, uri, divid){
+function compute_href(uri){
+    // Some magic here :/
+    var tokens = uri.split("/");
+    console.log(tokens);
+    var res = "";
+    if (tokens[1] == "plotting"){
+        res = "/plotting/auto/?q=" + tokens[4] + "&";
+        var tokens2 = tokens[5].split("::");
+        tokens2.forEach(function (a){
+            if (a.startsWith("_")){
+                return;
+            }
+            var tokens3 = a.split(":");
+            res += tokens3[0] + "=" + tokens3[1] + "&";
+        });
+    }
+    return res;
+}
+function loadAutoplot(container, uri, divid){
     var $target = $(container).find(".data-display");
     // Remove any previous content
     $target.empty();
-    // Create a QR code icon for usage
-    var button = document.createElement("button");
-    button.classList.add("qrbutton");
-    button.innerHTML = '<i class="fa fa-qrcode"></i> QR';
-    button.onclick = function(){
-        createQRDialog(qrurl);
-    }
-    $(button).appendTo($target);
+    var iemhref = compute_href(uri);
+    var p = document.createElement("p");
+    var ahref = document.createElement("a");
+    ahref.href = iemhref;
+    ahref.target = "_blank";
+    ahref.text = "IEM Website Link";
+    ahref.classList.add("btn");
+    ahref.classList.add("btn-default");
+    p.appendChild(ahref);
+    $(p).appendTo($target);
     if (uri.endsWith("js")){
         // Create a div to append into that target
         var datadiv = document.createElement("div");
@@ -307,7 +304,6 @@ function loaderClicked(elem){
     var station = $(container).data("station");
     var network = $(container).data("network");
     var tpl = $elem.data("url-template");
-    var qrtpl = $elem.data("qrcode-template");
     var divid = "d" + station + network;
     var month = container.find("select[name=month]").val();
     var type = container.find("select[name=type]").val();
@@ -317,14 +313,7 @@ function loaderClicked(elem){
         .replaceAll("{elem}", divid)
         .replaceAll("{month}", month)
         .replaceAll("{type}", type);
-    var qrurl = uri.replace("/plot/", "/qrcode/").replace(".js", ".png");
-    if (qrtpl !== undefined){
-        qrtpl = qrtpl
-        .replaceAll("{station}", station)
-        .replaceAll("{network}", network);
-        qrurl = `/plotting/auto/gen_qrcode.py?q=${qrtpl}`;
-    }
-    loadAutoplot(container, qrurl, uri, divid);
+    loadAutoplot(container, uri, divid);
 }
 function initUI(){
     $(".maprow img").click(function(){

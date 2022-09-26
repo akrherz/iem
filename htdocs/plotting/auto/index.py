@@ -814,7 +814,9 @@ def generate(fdict, headers, cookies):
 <p>This application dynamically generates many types of graphs.  These graphs
 are derived from processing of various data sources done by the IEM.  Please
 feel free to use these generated graphics in whatever way you wish.
-<a href="/plotting/auto/">Reset App</a>.</p>
+<a href="/plotting/auto/">Reset App</a>. The
+<a href="/explorer/">IEM Explorer</a> application offers a simplified frontend
+to some of these autoplots.</p>
 
 <br /><form method="GET" name="t">
 <div class="form-group">

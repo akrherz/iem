@@ -20,6 +20,10 @@
                     "url": "/climodat/monitor.php"
                 },
                 {
+                    "title": "IEM Explorer",
+                    "url": "/explorer/"
+                },
+                {
                     "title": "Hourly Precip",
                     "url": "/rainfall/obhour.phtml"
                 },

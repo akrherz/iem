@@ -21,8 +21,8 @@ questions!</p>
 <p>IEM's most popular applications:
 <a role="button" class="btn btn-success" href="/plotting/auto/"><i class="fa fa-signal"></i> Automated Data Plotting</a>
 <a role="button" class="btn btn-success" href="/climodat/"><i class="fa fa-list-alt"></i> Climodat</a>
+<a role="button" class="btn btn-success" href="/explorer/"><i class="fa fa-map"></i> IEM Explorer</a>
 <a role="button" class="btn btn-success" href="/plotting/auto/?q=108"><i class="fa fa-signal"></i> Single Site Graphs</a>
-<a role="button" class="btn btn-success" href="/COOP/current.phtml"><i class="fa fa-refresh"></i> Sortable Currents</a>
 </p>
 
 
