@@ -1,16 +1,16 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/database.inc.php";
 require_once "../../../include/imagemaps.php";
-require_once "../../../include/forms.php"; 
+require_once "../../../include/forms.php";
 
 $mesosite = iemdb('mesosite');
-$network = isset($_REQUEST['network']) ? xssafe($_REQUEST["network"]): 'IA_COOP';
+$network = isset($_REQUEST['network']) ? xssafe($_REQUEST["network"]) : 'IA_COOP';
 
 define("IEM_APPID", 45);
 $t = new MyView();
-$t->title = "NWS COOP Raw Observations Download"; 
+$t->title = "NWS COOP Raw Observations Download";
 
 $content = <<<EOF
 <ol class="breadcrumb">
@@ -20,9 +20,9 @@ $content = <<<EOF
 
 <p>This form provides access to the raw observations from the NWS COOP network.
 <strong>The date presented in the download is the date on which the observation
-		was made!</strong> The observations represent a 24 hour period prior
-		to the timestamp on the observation.  These observations are typically
-		made around 7 AM localtime.</p>
+        was made!</strong> The observations represent a 24 hour period prior
+        to the timestamp on the observation.  These observations are typically
+        made around 7 AM localtime.</p>
 EOF;
 
 $west = <<<EOF
@@ -31,14 +31,18 @@ $west = <<<EOF
 EOF;
 
 $rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'COOP' 
-		ORDER by name ASC");
-for ($i=0;$row=pg_fetch_assoc($rs);$i++){
-	$sel = '';
-	if ($network == $row["id"]){
-		$sel = " selected='SELECTED'";
-	}
-	$west .= sprintf("<option value='%s'%s>%s</option>\n",
-	  $row["id"], $sel, $row["name"]);
+        ORDER by name ASC");
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    $sel = '';
+    if ($network == $row["id"]) {
+        $sel = " selected='SELECTED'";
+    }
+    $west .= sprintf(
+        "<option value='%s'%s>%s</option>\n",
+        $row["id"],
+        $sel,
+        $row["name"]
+    );
 }
 
 $west .= <<<EOF
@@ -52,7 +56,7 @@ $west .= <<<EOF
 
 <p><h3>1. Select Station(s):</h3><br>
 EOF;
-$west .= networkMultiSelect($network, "", Array(), "station[]"); 
+$west .= networkMultiSelect($network, "", array(), "station[]");
 
 $y1 = yearSelect2(2010, date("Y"), "year1");
 $m1 = monthSelect("", "month1");
@@ -74,7 +78,7 @@ a local calendar day!.</p>
   <tr>
     <th>Start:</th>
     <td>{$y1}</td><td>{$m1}</td><td>{$d1}</td>
-		</tr>
+        </tr>
 
   <tr>
     <th>End:</th>
@@ -126,7 +130,6 @@ $west
 $east
 </div>
 </div>
-
 
 EOM;
 

@@ -74,7 +74,7 @@ def do_hads():
             (row[0],),
         )
         for row2 in acursor:
-            print("    %s %s %s" % (row2[0], row2[1], row2[2]))
+            print(f"    {row2[0]} {row2[1]} {row2[2]}")
 
 
 def main():

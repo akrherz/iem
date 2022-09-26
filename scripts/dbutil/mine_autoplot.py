@@ -36,7 +36,7 @@ def find_and_save(cursor, dbendts):
         (appid, timing, uri) = tokens[0]
         try:
             valid = datetime.datetime.strptime(
-                "%s %s" % (thisyear, line[:15]), "%Y %b %d %H:%M:%S"
+                f"{thisyear} {line[:15]}", "%Y %b %d %H:%M:%S"
             )
         except ValueError as exp:
             LOG.info(line)
@@ -54,10 +54,12 @@ def find_and_save(cursor, dbendts):
         inserts += 1
     # Don't complain during the early morning hours
     if inserts == 0 and now.hour > 5:
-        LOG.info(
+        LOG.warning(
             "mine_autoplot: no new entries found for databasing since %s",
             dbendts,
         )
+    else:
+        LOG.info("Inserted %s records", inserts)
 
 
 def main():

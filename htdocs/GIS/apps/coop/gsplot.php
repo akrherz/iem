@@ -7,23 +7,22 @@ require_once "../../../../include/database.inc.php";
 $coopdb = iemdb("coop");
 require_once "../../../../include/forms.php";
 require_once "../../../../include/network.php";
+/** Need to use external date lib 
+  * http://php.weblogs.com/adodb_date_time_library
+  */
+require_once "../../../../include/adodb-time.inc.php";
 
-$var = isset($_GET["var"]) ? $_GET["var"]: "gdd50";
-$year = isset($_GET["year"]) ? $_GET["year"]: date("Y");
-$smonth = isset($_GET["smonth"]) ? $_GET["smonth"]: 5;
-$sday = isset($_GET["sday"]) ? $_GET["sday"]: 1;
-$emonth = isset($_GET["emonth"]) ? $_GET["emonth"]: date("m");
-$eday = isset($_GET["eday"]) ? $_GET["eday"]: date("d");
-$network = isset($_REQUEST["network"]) ? $_REQUEST["network"]: "IACLIMATE";
+$var = isset($_GET["var"]) ? xssafe($_GET["var"]): "gdd50";
+$year = get_int404("year", date("Y"));
+$smonth = get_int404("smonth", 5);
+$sday = get_int404("sday", 1);
+$emonth = get_int404("emonth", date("m"));
+$eday = get_int404("eday", date("d"));
+$network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]): "IACLIMATE";
 
 $nt = new NetworkTable( $network );
 $cities = $nt->table;
 
-
-/** Need to use external date lib 
-  * http://php.weblogs.com/adodb_date_time_library
-  */
-include("../../../../include/adodb-time.inc.php");
 
 $sts = adodb_mktime(0,0,0,$smonth, $sday, $year);
 $ets = adodb_mktime(0,0,0,$emonth, $eday, $year);
@@ -38,7 +37,7 @@ function mktitlelocal($map, $imgObj, $titlet) {
   $layer = $map->getLayerByName("credits");
  
      // point feature with text for location
-  $point = ms_newpointobj();
+  $point = new pointobj();
   $point->setXY( 0, 10);
   $point->draw($map, $layer, $imgObj, 0, $titlet );
 }
@@ -46,7 +45,7 @@ function mktitlelocal($map, $imgObj, $titlet) {
 function plotNoData($map, $img){
   $layer = $map->getLayerByName("credits");
 
-  $point = ms_newpointobj();
+  $point = new pointobj();
   $point->setXY( 100, 200);
   $point->draw($map, $layer, $img, 1,
     "  No data found for this date! ");
@@ -93,7 +92,7 @@ $width = 640;
 
 $proj = "init=epsg:26915";
 
-$map = ms_newMapObj("../../../../data/gis/base26915.map");
+$map = new MapObj("../../../../data/gis/base26915.map");
 $map->setProjection($proj);
 
 $state = substr($network,0,2);
@@ -163,17 +162,17 @@ for($i=0;$row=pg_fetch_array($rs);$i++){
 	$ukey = $row["station"];
 	if (! isset($cities[$ukey]) ) continue;
 		  	  // Red Dot...  
-  $pt = ms_newPointObj();
+  $pt = new PointObj();
   $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
   $pt->draw($map, $ponly, $img, 0);
 
   // City Name
-  $pt = ms_newPointObj();
+  $pt = new PointObj();
   $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
   $pt->draw($map, $snet, $img, 3, substr($ukey, 2, 4));
 
 		  // Value UL
-  $pt = ms_newPointObj();
+  $pt = new PointObj();
   $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
   $pt->draw($map, $snet, $img, 0,
      round($row["s_".$var], $rnd[$var]) );
@@ -189,4 +188,3 @@ $map->drawLabelCache($img);
 
 header("Content-type: image/png");
 $img->saveImage('');
-?>

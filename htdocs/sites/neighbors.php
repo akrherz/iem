@@ -27,7 +27,7 @@ function neighbors($station,$lat,$lon){
         $row["network"], $row["name"]);
      }
    $s .= "</table>";
-	return $s;
+    return $s;
 }
 
 $n = neighbors($station,$metadata["lat"],$metadata["lon"]);
@@ -39,4 +39,3 @@ radius circle from the station location. Click on the site name for more informa
 {$n}
 EOF;
 $t->render('sites.phtml');
-?>

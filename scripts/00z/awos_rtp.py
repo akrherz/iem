@@ -1,5 +1,6 @@
 """Generate a First Guess RTP that the bureau can use for their product."""
 import datetime
+import os
 import subprocess
 
 import pytz
@@ -32,8 +33,7 @@ def main():
         WHERE t.iemid = c.iemid and t.network = 'IA_ASOS' and valid > %s
             and valid < %s
         and tmpf > -99 GROUP by t.id """
-    args = (sts6z, ets)
-    icursor.execute(sql, args)
+    icursor.execute(sql, (sts6z, ets))
     for row in icursor:
         if qdict.get(row[0], {}).get("tmpf"):
             continue
@@ -104,6 +104,7 @@ def main():
         "awos_rtp_00z.shef shef' /tmp/awos_rtp.shef"
     )
     subprocess.call(cmd, shell=True)
+    os.unlink("/tmp/awos_rtp.shef")
 
 
 if __name__ == "__main__":

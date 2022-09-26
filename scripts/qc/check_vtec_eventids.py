@@ -12,7 +12,7 @@ LOG = logger()
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconn("postgis", user="mesonet")
+    pgconn = get_dbconn("postgis")
     pcursor = pgconn.cursor()
     pcursor2 = pgconn.cursor()
 
@@ -50,10 +50,8 @@ def main():
         eventid = row[1]
 
         # Skip these
-        if (
-            wfo in ("NHC")
-            or phenomena in ("TR", "HU", "SS")
-            or (phenomena in ("TO", "SV", "SS") and sig == "A")
+        if phenomena in ("TR", "HU", "SS") or (
+            phenomena in ("TO", "SV", "SS") and sig == "A"
         ):
             continue
 

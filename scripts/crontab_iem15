@@ -1,5 +1,0 @@
-CRON_TZ=UTC
-S=/opt/iem/scripts
-
-# Archive ISUSM data
-26 6 * * * cd $S/isusm; python archiver.py

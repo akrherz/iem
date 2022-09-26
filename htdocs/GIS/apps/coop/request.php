@@ -1,5 +1,5 @@
 <?php
-include("../../../../config/settings.inc.php");
+require_once "../../../../config/settings.inc.php";
  // -----------------------------------------------------------------
  // request.php
  //   Give the user the climate data in the format they want...
@@ -8,8 +8,8 @@ include("../../../../config/settings.inc.php");
 // Prevent client abort from leaving temp files around
 ignore_user_abort(true);
 
-include_once "../../../../include/database.inc.php";
-include_once "../../../../include/network.php";
+require_once "../../../../include/database.inc.php";
+require_once "../../../../include/network.php";
 $month = isset($_GET["month"]) ? $_GET["month"] : die();
 $day = isset($_GET["day"]) ? $_GET["day"] : die();
 
@@ -102,4 +102,3 @@ unlink("${filePre}.shp");
 unlink("${filePre}.prj");
 unlink("${filePre}.dbf");
 unlink("${filePre}.shx");
-?>

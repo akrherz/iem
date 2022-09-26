@@ -50,4 +50,3 @@ capacity of the air.</p>
 <p>Atmospheric pressure expressed in inches of mercury.</p></div>
 EOF;
 $t->render('single.phtml');
-?>

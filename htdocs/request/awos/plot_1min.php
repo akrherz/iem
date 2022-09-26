@@ -1,6 +1,6 @@
 <?php
-include("../../../config/settings.inc.php");
-include_once("../../../include/database.inc.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/database.inc.php";
 
 $sqlStr = "SELECT station, ";
 for ($i=0; $i< $num_vars;$i++){
@@ -83,5 +83,3 @@ $fp = "jpgraph_". $station ."_". time() .".png";
 $graph->Stroke("/var/webtmp/". $fp);
 
 echo "<p><img src=\"/tmp/". $fp ."\">\n";
-
-?>

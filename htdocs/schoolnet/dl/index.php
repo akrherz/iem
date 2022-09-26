@@ -8,7 +8,7 @@ require_once "../../../include/forms.php";
 require_once "../../../include/imagemaps.php";
 
 $nselect = networkMultiSelect(Array("KCCI", "KIMT", "KELO"), '', Array(),
-	'station[]');
+    'station[]');
 
 $y1 = yearSelect2(2002, date("Y"), "year1");
 $m1 = monthSelect(date("m"), "month1");
@@ -152,4 +152,3 @@ Wind data afterwards are 1 minute average values.
 <br>
 EOF;
 $t->render('single.phtml');
-?>

@@ -1,6 +1,6 @@
 <?php
-include("../../config/settings.inc.php");
-include("../../include/database.inc.php");
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
 $con = iemdb("postgis");
 
 // kvillewxguy@hotmail.com
@@ -12,7 +12,7 @@ $rs = pg_query($con, $sql);
 $row = pg_fetch_array($rs, 0);
 $valid = substr($row["valid"],0,16);
 
-$map = ms_newMapObj('roads.map');
+$map = new MapObj('roads.map');
 //$map->setProjection("init=epsg:4326");
 $map->setProjection("init=epsg:26915");
 $map->selectOutputFormat("png24");

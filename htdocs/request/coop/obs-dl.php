@@ -75,24 +75,24 @@ $rs = pg_execute($connection, "SELECT", Array() );
 pg_close($connection);
 
 function cleaner($v){
-	if ($v == 0.0001) return "T";
-	if ($v == -99) return 'M';
-	return $v;
+    if ($v == 0.0001) return "T";
+    if ($v == -99) return 'M';
+    return $v;
 }
 
  $cols = Array("nwsli", "date", "time", "high_F", "low_F", "precip", 
- 	"snow_inch", "snowd_inch");
+     "snow_inch", "snowd_inch");
  $data = implode($d[$delim], $cols) ."\n";
  for( $i=0; $row = pg_fetch_array($rs); $i++) 
  {
    $data .= sprintf("%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n", 
-   		$row["id"], $d[$delim], 
-   		$row["day"], $d[$delim], 
-   		$row["cv"], $d[$delim],
-   		cleaner($row["max_tmpf"]), $d[$delim], 
-   		cleaner($row["min_tmpf"]), $d[$delim],
-   		cleaner($row["pday"]), $d[$delim], cleaner($row["snow"]),$d[$delim],
-   		cleaner($row["snowd"]));
+           $row["id"], $d[$delim], 
+           $row["day"], $d[$delim], 
+           $row["cv"], $d[$delim],
+           cleaner($row["max_tmpf"]), $d[$delim], 
+           cleaner($row["min_tmpf"]), $d[$delim],
+           cleaner($row["pday"]), $d[$delim], cleaner($row["snow"]),$d[$delim],
+           cleaner($row["snowd"]));
  }
 
  echo $data;

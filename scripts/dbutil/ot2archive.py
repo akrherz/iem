@@ -4,6 +4,8 @@ Runs at 00 and 12 UTC
 """
 import datetime
 import sys
+
+# third party
 import psycopg2.extras
 from pyiem.util import get_dbconn, utc, logger
 
@@ -18,7 +20,7 @@ def dowork(ts, ts2):
     ocursor = OTHER.cursor(cursor_factory=psycopg2.extras.DictCursor)
     icursor = IEM.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ocursor.execute(
-        f"DELETE from t{ts.year} WHERE valid >= %s and valid < %s", (ts, ts2)
+        "DELETE from alldata WHERE valid >= %s and valid < %s", (ts, ts2)
     )
 
     # Get obs from Access
@@ -29,7 +31,7 @@ def dowork(ts, ts2):
         (ts, ts2),
     )
     if icursor.rowcount == 0:
-        LOG.info("found no results for ts: %s ts2: %s", ts, ts2)
+        LOG.warning("found no results for ts: %s ts2: %s", ts, ts2)
 
     for row in icursor:
         pday = 0
@@ -38,24 +40,25 @@ def dowork(ts, ts2):
         alti = row["alti"]
         if alti is None and row["mslp"] is not None:
             alti = row["mslp"] * 0.03
-        sql = """INSERT into t%s (station, valid, tmpf, dwpf, drct, sknt, alti,
-             pday, gust, c1tmpf, srad) values
-             ('%s','%s',%s,%s,%s,%s,%s,%s,%s,%s,%s)
-        """ % (
-            ts.year,
+        args = (
             row["id"],
             row["valid"],
-            (row["tmpf"] or "Null"),
-            (row["dwpf"] or "Null"),
-            (row["drct"] or "Null"),
-            (row["sknt"] or "Null"),
-            (alti or "Null"),
+            row["tmpf"],
+            row["dwpf"],
+            row["drct"],
+            row["sknt"],
+            alti,
             pday,
-            (row["gust"] or "Null"),
-            (row["c1tmpf"] or "Null"),
-            (row["srad"] or "Null"),
+            row["gust"],
+            row["c1tmpf"],
+            row["srad"],
         )
-        ocursor.execute(sql)
+        ocursor.execute(
+            "INSERT into alldata(station, valid, tmpf, dwpf, drct, sknt, "
+            "alti, pday, gust, c1tmpf, srad) values "
+            "(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+            args,
+        )
 
     ocursor.close()
     OTHER.commit()

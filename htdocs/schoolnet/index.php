@@ -57,4 +57,3 @@ stations are placed at schools for educational purposes and to get students
 interested in the weather.</div>
 EOF;
 $t->render('single.phtml');
-?>

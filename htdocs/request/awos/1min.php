@@ -1,5 +1,5 @@
 <?php 
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 65);
 include_once "../../../include/myview.php";
 $t = new MyView();
@@ -63,7 +63,7 @@ where converted to ASOS in September of 2000.  Data for these sites exists
 in this archive up until that point.</i><br>
 {$sselect}
 
-<p><h3 class="subtitle">2. Select Start/End Time:</h3><br>
+<p><h3>2. Select Start/End Time:</h3><br>
 <strong>Time Zone:</strong><input type="radio" value="UTC" name="tz" checked="checked"> UTC  
 <input type="radio" value="local" name="tz">Local CST/CDT
 
@@ -103,7 +103,7 @@ in this archive up until that point.</i><br>
 
 </div>
 <div class="col-md-6 col-sm-6">
-    		
+
 
 <p><h3 class="subtitle">4. Data Sampling?</h3><br>
 <i>Data is potentially available every minute, but you don't have to download
@@ -149,4 +149,3 @@ How shall the output values be seperated?
 </form>
 EOF;
 $t->render('single.phtml');
-?>

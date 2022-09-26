@@ -4,6 +4,7 @@ require_once "../../include/mlib.php";
 force_https();
 require_once "../../include/forms.php";
 require_once "../../include/myview.php";
+// custom code in smosmap.js that will need replaced...
 $OL = "6.2.1";
 $t = new MyView();
 $t->title = "SMOS Data";
@@ -53,10 +54,10 @@ to request a point outside of the domain.  Data is available since
 <i>Enter Latitude/Longitude manually or drag marker on map to the right.</i>
 <table>
 <tr><th>Latitude (north degree)</th>
-	<th><input id="lat" type="text" name="lat" size="6" value="42.0" /></th></tr>
+    <th><input id="lat" type="text" name="lat" size="6" value="42.0" /></th></tr>
 <tr><th>Longitude (east degree)</th>
-	<th><input id="lon" type="text" name="lon" size="6" value="-93.0" /></th></tr>
-	</table>
+    <th><input id="lon" type="text" name="lon" size="6" value="-93.0" /></th></tr>
+    </table>
 <table>
   <tr>
     <td></td>
@@ -80,11 +81,11 @@ to request a point outside of the domain.  Data is available since
 </div><div class="col-md-6">
 <div id="map"></div>
 
-    		</div></div>
+            </div></div>
 
 <input type="submit" value="Get Data!" />
-	
-	</form>
+
+    </form>
 
 <p><h4>Recent Analysis Plots at 00 UTC</h4>
 <i>Click image for archived imagery</i>
@@ -126,10 +127,8 @@ to request a point outside of the domain.  Data is available since
 <a href="/timemachine/#54.0"><img src="/data/smos_midwest_od12.png" class="img img-responsive" /></a>
 </div>
 </div>
-    		
-    		
+
+
 <br />
 EOF;
 $t->render('single.phtml');
-
-?>

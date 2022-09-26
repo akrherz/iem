@@ -9,3 +9,6 @@ BASH_ENV=/home/mesonet/.bashrc
 0 * * * * cd /opt/iem/scripts/mrms; sleep 15; python mesh_contours.py -i 1440 --datetime $(date -u --date '2 minutes ago' +'\%Y-\%m-\%dT\%H:\%M')
 
 */5 * * * * sleep 60; cd /opt/iem/scripts/current; python nexrad_lapse.py
+
+# Archive ISUSM data
+26 6 * * * cd $S/isusm; python archiver.py

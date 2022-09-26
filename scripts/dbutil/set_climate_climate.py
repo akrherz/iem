@@ -24,23 +24,23 @@ def main():
         # Find the closest site
         mcursor2.execute(
             """
-        select id from stations WHERE network = '%sCLIMATE'
+        select id from stations WHERE network = %s
         and substr(id,3,1) = 'C'
         ORDER by ST_distance(geom, (SELECT geom from stations WHERE
-        id = '%s' and network = '%sCLIMATE')) ASC LIMIT 1
-        """
-            % (state, sid, state)
+        id = %s and network = %s)) ASC LIMIT 1
+        """,
+            (f"{state}CLIMATE", sid, f"{state}CLIMATE"),
         )
         row2 = mcursor2.fetchone()
         if row2 is None:
-            print("Could not find Climate Site for: %s" % (sid,))
+            print(f"Could not find Climate Site for: {sid}")
             continue
         if row[2] != row2[0]:
             mcursor2.execute(
                 "UPDATE stations SET climate_site = %s WHERE id = %s",
                 (row2[0], sid),
             )
-            print("Set Climate: %s->%s for ID: %s" % (row[2], row2[0], sid))
+            print(f"Set Climate: {row[2]}->{row2[0]} for ID: {sid}")
 
     mcursor2.close()
     pgconn.commit()

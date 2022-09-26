@@ -1,7 +1,7 @@
 <?php 
-include("../../../config/settings.inc.php");
-include_once "../../../include/forms.php";
-include_once "../../../include/myview.php";
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/forms.php";
+require_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "SCAN Data Download";
 
@@ -16,8 +16,8 @@ $hs2 = gmtHourSelect("", "hour2");
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
-	<li><a href="/scan/">SCAN</a></li>
-  	<li class="active">Download Data</li>
+    <li><a href="/scan/">SCAN</a></li>
+      <li class="active">Download Data</li>
  </ol>
 
 <p>Filling out this form will provide you with whatever archive data the
@@ -52,7 +52,7 @@ IEM has from the SCAN network.  The archive has some holes in it....
     <td>{$ms}</td>
     <td>{$ds}</td>
     <td>${hs}
-	<input type="hidden" name="minute1" value="0">
+    <input type="hidden" name="minute1" value="0">
     </td>
   </tr>
 
@@ -66,7 +66,7 @@ IEM has from the SCAN network.  The archive has some holes in it....
     </td>
     <td>
      {$hs2}
-	<input type="hidden" name="minute2" value="0">
+    <input type="hidden" name="minute2" value="0">
     </td>
   </tr>
 </table>
@@ -116,5 +116,3 @@ How shall the output values be seperated?
 </form>
 EOF;
 $t->render('single.phtml');
-
-?>
