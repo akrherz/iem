@@ -5,6 +5,7 @@ from datetime import timezone
 # third party
 import pandas as pd
 import geopandas as gpd
+from sqlalchemy import text
 from pyiem.nws import vtec
 from pyiem.plot.geoplot import MapPlot
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
@@ -107,14 +108,24 @@ def plotter(fdict):
     ctx = get_autoplot_context(fdict, get_description())
     utcvalid = ctx.get("valid")
     wfo = ctx["wfo"]
+    if wfo == "NHC":
+        ctx["opt"] = "expand"
     tzname = ctx["_nt"].sts[wfo]["tzname"]
     p1 = ctx["phenomenav"][:2]
     s1 = ctx["significancev"][:1]
     etn = int(ctx["etn"])
     year = int(ctx["year"])
+    params = {
+        "wfo": wfo[-3:],
+        "etn": etn,
+        "s1": s1,
+        "p1": p1,
+    }
     with get_sqlalchemy_conn("postgis") as conn:
+        wfolim = "w.wfo = :wfo and" if wfo != "NHC" else ""
         df = gpd.read_postgis(
-            f"""
+            text(
+                f"""
             SELECT w.ugc, simple_geom, u.name,
             issue at time zone 'UTC' as issue,
             expire at time zone 'UTC' as expire,
@@ -122,11 +133,12 @@ def plotter(fdict):
             1 as val,
             status, is_emergency, is_pds, w.wfo
             from warnings_{year} w JOIN ugcs u on (w.gid = u.gid)
-            WHERE w.wfo = %s and eventid = %s and significance = %s and
-            phenomena = %s ORDER by issue ASC
-        """,
+            WHERE {wfolim} eventid = :etn and significance = :s1 and
+            phenomena = :p1 ORDER by issue ASC
+        """
+            ),
             conn,
-            params=(wfo[-3:], etn, s1, p1),
+            params=params,
             index_col="ugc",
             geom_col="simple_geom",
         )

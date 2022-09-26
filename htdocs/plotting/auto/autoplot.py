@@ -313,6 +313,8 @@ def application(environ, start_response):
     # HACK
     if fields.get("q", "").find("network:WFO::wfo:PHEB") > -1:
         fields["q"] = fields["q"].replace("network:WFO", "network:NWS")
+    if fields.get("q", "").find("network:WFO::wfo:NHC") > -1:
+        fields["q"] = fields["q"].replace("network:WFO", "network:NCEP")
     if fields.get("q", "").find("network:WFO::wfo:PAAQ") > -1:
         fields["q"] = fields["q"].replace("network:WFO", "network:NWS")
     # Figure out the format that was requested from us, default to png
