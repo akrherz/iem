@@ -6,15 +6,15 @@ String.prototype.rsplit = function (sep, maxsplit) {
     return maxsplit ? [split.slice(0, -maxsplit).join(sep)].concat(split.slice(-maxsplit)) : split;
 }
 
-flowplayer(function (api, root) { 
+flowplayer(function (api, root) {
     api.on("error", function (e, api, err) {
         if (err.code === 4) { // Video file not found
             // reset state
             api.error = api.loading = false;
         }
     });
-  
- });
+
+});
 
 function myloader() {
     var ts = new Date();
@@ -27,7 +27,7 @@ function myloader() {
     api.load({
         sources: [
             { type: "video/flv", src: url },
-            { type: "video/mp4",  src: url2 }
+            { type: "video/mp4", src: url2 }
         ]
     });
 }

@@ -1,15 +1,15 @@
 <?php
- require_once "../../config/settings.inc.php";
- define("IEM_APPID", 116);
- require_once "../../include/myview.php";
+require_once "../../config/settings.inc.php";
+define("IEM_APPID", 116);
+require_once "../../include/myview.php";
 
- $t = new MyView();
- $t->refresh = 60;
- $t->title = "Iowa State Webcams";
+$t = new MyView();
+$t->refresh = 60;
+$t->title = "Iowa State Webcams";
 
- $cb = rand(0, 100000);
+$cb = rand(0, 100000);
 
-	$t->content = <<<EOF
+$t->content = <<<EOF
 <style>
 .nopadding {
    padding: 0 !important;
@@ -25,13 +25,10 @@
 <p>This page provides the most recently cached webcam image by the IEM.</p>
 
 <div class="row">
-  <div class="col-md-4">
-<h4>Agronomy Hall</h4>
-<img src="/data/camera/stills/KCCI-016.jpg?${cb}" class="img img-responsive"></div>
-  <div class="col-md-4">
+  <div class="col-md-6">
 <h4>AEA Farm</h4>
 <img src="/data/camera/stills/KCCI-027.jpg?${cb}" class="img img-responsive"></div>
-  <div class="col-md-4">
+  <div class="col-md-6">
 <h4>Memorial Union</h4>
 <img src="/data/camera/stills/ISUC-003.jpg?${cb}" class="img img-responsive"></div>
 </div>

@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
@@ -11,7 +11,6 @@ $t->content = <<<EOM
 <p>After the death of <a href="/onsite/news.phtml?id=1378">Dr Ray Arritt</a>, a
 new project coordinator has yet to be named.  Please address all questions to
 daryl.</p>
-
 
 <div class="alert alert-danger">
 Please send daryl an email before calling him!  Daryl rapidly turns around emails

@@ -1,45 +1,47 @@
 <?php
- include("../../config/settings.inc.php");
- include("../../include/myview.php");
- $t = new MyView();
- define("IEM_APPID", 70);
- include("../../include/database.inc.php");
- $conn = iemdb("postgis");
- $sel = isset($_GET["sel"]) ? intval($_GET["sel"]) : -1;
- $t->refresh = 300;
- $t->title = "SPC Watches Overview";
- 
- $metdata = Array();
- $rs = pg_query($conn, "SELECT * from watches_current");
- for ($i=0;$row=pg_fetch_assoc($rs);$i++){
- 	$metadata[$row["sel"]] = $row;
- 	$metadata[$row["sel"]]["sts"] = strtotime(substr($row["issued"],0,16));
- 	$metadata[$row["sel"]]["ets"] = strtotime(substr($row["expired"],0,16));
- }
- 
- if ($sel > -1) { 
-	$row = $metadata["SEL". $sel];
+require_once "../../config/settings.inc.php";
+define("IEM_APPID", 70);
+require_once "../../include/myview.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/forms.php";
 
-	$t->content = <<<EOF
+$t = new MyView();
+$conn = iemdb("postgis");
+$sel = get_int404("sel", -1);
+$t->refresh = 300;
+$t->title = "SPC Watches Overview";
+
+$metdata = array();
+$rs = pg_query($conn, "SELECT * from watches_current");
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    $metadata[$row["sel"]] = $row;
+    $metadata[$row["sel"]]["sts"] = strtotime(substr($row["issued"], 0, 16));
+    $metadata[$row["sel"]]["ets"] = strtotime(substr($row["expired"], 0, 16));
+}
+
+if ($sel > -1) {
+    $row = $metadata["SEL" . $sel];
+
+    $t->content = <<<EOF
 <a href="sel.phtml">View All Watches</a>
 
 <p><img src="/data/sel{$sel}comp.png" />
 
 <br /><pre>{$row["report"]}</pre>
 EOF;
-} else { 
-	$content = "";
-	for ($i=0;$i<10;$i++){
-		$row = $metadata["SEL".$i];
-		$content .= "<div class=\"col-md-4 well\">
-		<strong>SEL${i}:</strong> Issued: ". date("j M Y g:i A" ,$row["sts"])
-				."<br />Expired: ". date("j M Y g:i A" ,$row["ets"]) .",
-						<a href=\"/GIS/apps/rview/watch.phtml?year=". date("Y" ,$row["sts"]) ."&num=". $row["num"] ."\">more info</a>
-						<br /><a href=\"sel.phtml?sel=${i}\">
-		<img src=\"/data/sel${i}comp.png\" class=\"img img-responsive\"></a>
-		</div>";
-	}
-	$t->content = <<<EOF
+} else {
+    $content = "";
+    for ($i = 0; $i < 10; $i++) {
+        $row = $metadata["SEL" . $i];
+        $content .= "<div class=\"col-md-4 well\">
+        <strong>SEL${i}:</strong> Issued: " . date("j M Y g:i A", $row["sts"])
+            . "<br />Expired: " . date("j M Y g:i A", $row["ets"]) . ",
+                        <a href=\"/GIS/apps/rview/watch.phtml?year=" . date("Y", $row["sts"]) . "&num=" . $row["num"] . "\">more info</a>
+                        <br /><a href=\"sel.phtml?sel=${i}\">
+        <img src=\"/data/sel${i}comp.png\" class=\"img img-responsive\"></a>
+        </div>";
+    }
+    $t->content = <<<EOF
 
 <p>Click on an image to get an enlarged view as well as the text for the watch. 
 These images are for the last 10 areas in which watches have been valid for.  
@@ -49,6 +51,5 @@ presented are in US Central time.
 $content
 
 EOF;
-} 
+}
 $t->render('single.phtml');
-?>

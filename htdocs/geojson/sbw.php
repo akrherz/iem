@@ -25,48 +25,48 @@ function toTime($s){
 $rs = pg_query($postgis, "SET TIME ZONE 'UTC'");
 
 if (isset($_REQUEST["phenomena"])){
-  $year = isset($_GET["year"]) ? intval($_GET["year"]) : 2006;
-  $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3) : "MPX";
+  $year = get_int404("year", 2006);
+  $wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]),0,3) : "MPX";
   $eventid = get_int404("eventid", 103);
-  $phenomena = isset($_GET["phenomena"]) ? substr($_GET["phenomena"],0,2) : "SV";
-  $significance = isset($_GET["significance"]) ? substr($_GET["significance"],0,1) : "W";
-  	
+  $phenomena = isset($_GET["phenomena"]) ? substr(xssafe($_GET["phenomena"]),0,2) : "SV";
+  $significance = isset($_GET["significance"]) ? substr(xssafe($_GET["significance"]),0,1) : "W";
+      
   $rs = pg_prepare($postgis, "SELECT", "SELECT  
-  			issue, expire, phenomena, status, w.wfo, eventid, significance,
-  		to_char(issue, 'YYYY-MM-DDThh24:MI:SSZ') as iso_issue,
-  		to_char(expire, 'YYYY-MM-DDThh24:MI:SSZ') as iso_expire,
-  		ST_asGeoJson(geom) as geojson, hvtec_nwsli
+              issue, expire, phenomena, status, w.wfo, eventid, significance,
+          to_char(issue, 'YYYY-MM-DDThh24:MI:SSZ') as iso_issue,
+          to_char(expire, 'YYYY-MM-DDThh24:MI:SSZ') as iso_expire,
+          ST_asGeoJson(geom) as geojson, hvtec_nwsli
       FROM sbw_$year w WHERE
       status = 'NEW' and significance = $1 and wfo = $2
       and eventid = $3 and phenomena = $4");
   $rs = pg_execute($postgis, "SELECT", Array($significance, $wfo,
-  		$eventid, $phenomena));
+          $eventid, $phenomena));
   if (pg_num_rows($rs) < 1){
-  	$rs = pg_prepare($postgis, "SELECT222", "SELECT 
-  			issue, expire, phenomena, status, w.wfo, eventid, significance,
-  		to_char(issue, 'YYYY-MM-DDThh24:MI:SSZ') as iso_issue,
-  		to_char(expire, 'YYYY-MM-DDThh24:MI:SSZ') as iso_expire,
-  			ST_asGeoJson(u.geom) as geojson, w.hvtec_nwsli
-  			FROM warnings_$year w JOIN ugcs u on (u.gid = w.gid) WHERE
-  			significance = $1 and w.wfo = $2
-  			and eventid = $3 and phenomena = $4");
-  	$rs = pg_execute($postgis, "SELECT222", Array($significance, $wfo,
-  		$eventid, $phenomena));
+      $rs = pg_prepare($postgis, "SELECT222", "SELECT 
+              issue, expire, phenomena, status, w.wfo, eventid, significance,
+          to_char(issue, 'YYYY-MM-DDThh24:MI:SSZ') as iso_issue,
+          to_char(expire, 'YYYY-MM-DDThh24:MI:SSZ') as iso_expire,
+              ST_asGeoJson(u.geom) as geojson, w.hvtec_nwsli
+              FROM warnings_$year w JOIN ugcs u on (u.gid = w.gid) WHERE
+              significance = $1 and w.wfo = $2
+              and eventid = $3 and phenomena = $4");
+      $rs = pg_execute($postgis, "SELECT222", Array($significance, $wfo,
+          $eventid, $phenomena));
   }
   
 } else {
-	$wfos = isset($_REQUEST["wfos"]) ? explode(",", $_REQUEST["wfos"]) : Array();
-	$sts = isset($_REQUEST["sts"]) ? toTime($_REQUEST["sts"]) : die("sts not defined");
-	$ets = isset($_REQUEST["ets"]) ? toTime($_REQUEST["ets"]) : die("ets not defined");
-	$wfoList = implode("','", $wfos);
-	$str_wfo_list = "and wfo in ('$wfoList')";
-	if ($wfoList == ""){  $str_wfo_list = ""; }
-	
-	$rs = pg_prepare($postgis, "SELECT", "SELECT 
-  			issue, expire, phenomena, status, w.wfo, eventid, significance,
-  		to_char(issue, 'YYYY-MM-DDThh24:MI:SSZ') as iso_issue,
-  		to_char(expire, 'YYYY-MM-DDThh24:MI:SSZ') as iso_expire,
-			ST_asGeoJson(geom) as geojson, hvtec_nwsli
+    $wfos = isset($_REQUEST["wfos"]) ? explode(",", $_REQUEST["wfos"]) : Array();
+    $sts = isset($_REQUEST["sts"]) ? toTime($_REQUEST["sts"]) : die("sts not defined");
+    $ets = isset($_REQUEST["ets"]) ? toTime($_REQUEST["ets"]) : die("ets not defined");
+    $wfoList = implode("','", $wfos);
+    $str_wfo_list = "and wfo in ('$wfoList')";
+    if ($wfoList == ""){  $str_wfo_list = ""; }
+    
+    $rs = pg_prepare($postgis, "SELECT", "SELECT 
+              issue, expire, phenomena, status, w.wfo, eventid, significance,
+          to_char(issue, 'YYYY-MM-DDThh24:MI:SSZ') as iso_issue,
+          to_char(expire, 'YYYY-MM-DDThh24:MI:SSZ') as iso_expire,
+            ST_asGeoJson(geom) as geojson, hvtec_nwsli
       FROM sbw w WHERE
       issue < $2 and
       expire > $1 and expire < $3 $str_wfo_list

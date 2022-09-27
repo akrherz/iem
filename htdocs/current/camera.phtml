@@ -1,57 +1,56 @@
-<?php 
- require_once "../../config/settings.inc.php";
- require_once "../../include/iemprop.php";
- $camera_refresh = get_iemprop("webcam.interval");
- require_once "../../include/myview.php";
- require_once "../../include/forms.php"; 
- require_once "../../include/cameras.inc.php";
- $t = new MyView();
+<?php
+require_once "../../config/settings.inc.php";
+require_once "../../include/iemprop.php";
+$camera_refresh = get_iemprop("webcam.interval");
+require_once "../../include/myview.php";
+require_once "../../include/forms.php";
+require_once "../../include/cameras.inc.php";
+$t = new MyView();
 /* CGI GET Requests */
- $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
- $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
- $day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
- $hour = isset($_GET["hour"]) ? intval($_GET["hour"]): date("H");
- $minute = isset($_GET["minute"]) ? intval($_GET["minute"]): date("i");
- $isarchive = isset($_GET["archive"]);
- $network = isset($_GET["network"]) ? xssafe($_GET["network"]): "KCCI";
+$year = get_int404("year", date("Y"));
+$month = get_int404("month", date("m"));
+$day = get_int404("day", date("d"));
+$hour = get_int404("hour", date("H"));
+$minute = get_int404("minute", date("i"));
+$isarchive = isset($_GET["archive"]);
+$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "KCCI";
 
- $ts = time();
- if ($isarchive){
- $radts = mktime($hour, $minute, 0, $month, $day, $year) - (($minute % 5) * 60);
- } else {
- $radts = time();
- }
- $num = 1;
- if ($network == "KCRG"){ $cameras["KCCI-017"]["network"] = "KCRG"; }
- foreach($cameras as $id => $val)
- {
+$ts = time();
+if ($isarchive) {
+    $radts = mktime($hour, $minute, 0, $month, $day, $year) - (($minute % 5) * 60);
+} else {
+    $radts = time();
+}
+$num = 1;
+if ($network == "KCRG") {
+    $cameras["KCCI-017"]["network"] = "KCRG";
+}
+foreach ($cameras as $id => $val) {
     if ($cameras[$id]["network"] != $network) continue;
 
-	$cameras[$id]["url"] = sprintf("/data/camera/stills/%s.jpg?%s", $id, time() );
+    $cameras[$id]["url"] = sprintf("/data/camera/stills/%s.jpg?%s", $id, time());
     $camfn = "/mesonet/ldmdata/camera/stills/${id}.jpg";
-    if (!is_file($camfn) || filemtime($camfn) < (time() - 1200))
-    {      
+    if (!is_file($camfn) || filemtime($camfn) < (time() - 1200)) {
         $cameras[$id]["active"] = false;
     }
 
-    if ($isarchive)
-    {
+    if ($isarchive) {
         $cameras[$id]["active"] = true;
         $ts = mktime($hour, $minute, 0, $month, $day, $year);
         $ts5 = mktime($hour, $minute - ($minute % 5), 0, $month, $day, $year);
 
-        $fp = "/mesonet/ARCHIVE/data/". gmdate("Y/m/d/", $ts) ."camera/$id/${id}_". gmdate("YmdHi", $ts) .".jpg";
-        $url = "/archive/data/". gmdate("Y/m/d/", $ts) ."camera/$id/${id}_". gmdate("YmdHi", $ts) .".jpg";
-        $fp5 = "/mesonet/ARCHIVE/data/". gmdate("Y/m/d/", $ts5) ."camera/$id/${id}_". gmdate("YmdHi", $ts5) .".jpg";
-        $url5 = "/archive/data/". gmdate("Y/m/d/", $ts5) ."camera/$id/${id}_". gmdate("YmdHi", $ts5) .".jpg";
+        $fp = "/mesonet/ARCHIVE/data/" . gmdate("Y/m/d/", $ts) . "camera/$id/${id}_" . gmdate("YmdHi", $ts) . ".jpg";
+        $url = "/archive/data/" . gmdate("Y/m/d/", $ts) . "camera/$id/${id}_" . gmdate("YmdHi", $ts) . ".jpg";
+        $fp5 = "/mesonet/ARCHIVE/data/" . gmdate("Y/m/d/", $ts5) . "camera/$id/${id}_" . gmdate("YmdHi", $ts5) . ".jpg";
+        $url5 = "/archive/data/" . gmdate("Y/m/d/", $ts5) . "camera/$id/${id}_" . gmdate("YmdHi", $ts5) . ".jpg";
 
         if (is_file($fp)) $cameras[$id]["url"] = $url;
         else if (is_file($fp5)) $cameras[$id]["url"] = $url5;
         else $cameras[$id]["active"] = false;
     }
- 
-    if ($cameras[$id]["active"]){ 
-        $cameras[$id]["num"] = intval(substr($id,5,3));
+
+    if ($cameras[$id]["active"]) {
+        $cameras[$id]["num"] = intval(substr($id, 5, 3));
     }
 }/* End of while */
 
@@ -70,14 +69,16 @@ function switchToArchiveMode()
 </script>
 EOF;
 
-if (! $isarchive)
-	$t->refresh = $camera_refresh;
+if (!$isarchive)
+    $t->refresh = $camera_refresh;
 
-$selback = Array("KELO" => "#fff", "KCCI" => "#fff", "KCRG" => "#fff",
-                 "MCFC" => "#fff");
+$selback = array(
+    "KELO" => "#fff", "KCCI" => "#fff", "KCRG" => "#fff",
+    "MCFC" => "#fff"
+);
 $selback[$network] = "#ffcc99";
 
-$isarchived = ($isarchive) ? " CHECKED=CHECKED": "" ;
+$isarchived = ($isarchive) ? " CHECKED=CHECKED" : "";
 $jsextra = 'onChange="javascript: switchToArchiveMode();"';
 $ys = yearSelect2(2003, $year, "year", $jsextra);
 $month_select = monthSelect2($month, "month", $jsextra);
@@ -89,14 +90,15 @@ $dd = date("YmdHi", $radts);
 
 $misstxt = "Cameras Missing: ";
 $control = "";
-foreach($cameras as $id => $v)
-{
-	if ($v["network"] != $network){ continue; }
-	if (! $v["active"] ){
-		$misstxt .= $v["name"] ." , ";
-		continue;
-	}
-	$control .= sprintf("<div style=\"float: left; margin-left: 5px;\"><b>%s. %s, %s</b> (%s County)<br /><img src=\"%s\"></div>", $v["num"], $v["name"], $v["state"], $v["county"], $v["url"]);
+foreach ($cameras as $id => $v) {
+    if ($v["network"] != $network) {
+        continue;
+    }
+    if (!$v["active"]) {
+        $misstxt .= $v["name"] . " , ";
+        continue;
+    }
+    $control .= sprintf("<div style=\"float: left; margin-left: 5px;\"><b>%s. %s, %s</b> (%s County)<br /><img src=\"%s\"></div>", $v["num"], $v["name"], $v["state"], $v["county"], $v["url"]);
 }
 
 $t->content = <<<EOF
@@ -114,8 +116,6 @@ $t->content = <<<EOF
 </div>
 <br clear="all" />
 </div>
-
-
 
 <form method="GET" action="camera.phtml">
 <input type="hidden" value="{$network}" name="network"> 

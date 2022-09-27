@@ -10,14 +10,14 @@ $t = new MyView();
 $java = isset($_GET["java"]) ? xssafe($_GET["java"]): 'script';
 $cid = isset($_GET['cid']) ? xssafe($_GET['cid']): 'KCCI-016';
 
-$frames  = isset($_GET['frames']) ? intval($_GET['frames']): 12;
-$interval = isset($_GET['interval']) ? intval($_GET['interval']): 300;
-$day = isset($_GET['day']) ? intval($_GET["day"]): date("d", time() - 3600);
-$month = isset($_GET['month']) ? intval($_GET["month"]): date("m", time() - 3600);
-$hour = isset($_GET['hour']) ? intval($_GET["hour"]): date("H", time() - 3600);
-$minute = isset($_GET['minute']) ? intval($_GET["minute"]): date("i", time() - 3600);
+$frames  = get_int404('frames', 12);
+$interval = get_int404('interval', 300);
+$day = get_int404("day", date("d", time() - 3600));
+$month = get_int404("month", date("m", time() - 3600));
+$hour = get_int404("hour", date("H", time() - 3600));
+$minute = get_int404("minute", date("i", time() - 3600));
 $minute = $minute - ($minute % 5);
-$year = isset($_GET['year']) ? intval($_GET["year"]): date("Y", time() - 3600);
+$year = get_int404("year", date("Y", time() - 3600));
 $nts = mktime($hour, $minute, 0, $month, $day, $year);
 
 $width = 320; $height = 240;

@@ -1,88 +1,103 @@
 <?php
- require_once "../../config/settings.inc.php";
- $JQUERYUI = "1.12.1";
+require_once "../../config/settings.inc.php";
+$JQUERYUI = "1.12.1";
 
- require_once "../../include/myview.php";
- $t = new MyView();
- $uri = 'mcview.phtml';
- require_once "../../include/forms.php";
- require_once "../../include/database.inc.php";
- $postgis = iemdb("postgis");
+require_once "../../include/myview.php";
+$t = new MyView();
+$uri = 'mcview.phtml';
+require_once "../../include/forms.php";
+require_once "../../include/database.inc.php";
+$postgis = iemdb("postgis");
 
- $rs = pg_prepare($postgis, "SELECT", "select * from watches 
-       WHERE issued <= $1 and expired >= $1 ORDER by sel ASC");
+$rs = pg_prepare(
+    $postgis,
+    "SELECT",
+    "select * from watches " .
+        "WHERE issued <= $1 and expired >= $1 ORDER by sel ASC"
+);
 
- /** Import our variables */
- $prod = isset($_GET["prod"]) ? xssafe($_GET["prod"]): "comprad";
- $java = isset($_GET["java"]) ? xssafe($_GET["java"]): "script";
- $mode = isset($_GET["mode"]) ? xssafe($_GET["mode"]): "realtime";
- $frames = get_int404("frames", 13);
- $interval = get_int404("interval", 5);
- $autopilot = isset($_GET["autopilot"]) ? xssafe($_GET["autopilot"]): "no";
+/** Import our variables */
+$prod = isset($_GET["prod"]) ? xssafe($_GET["prod"]) : "comprad";
+$java = isset($_GET["java"]) ? xssafe($_GET["java"]) : "script";
+$mode = isset($_GET["mode"]) ? xssafe($_GET["mode"]) : "realtime";
+$frames = get_int404("frames", 13);
+$interval = get_int404("interval", 5);
+$autopilot = isset($_GET["autopilot"]) ? xssafe($_GET["autopilot"]) : "no";
 
 /* Lets see what the form is set to */
- $year = get_int404("year", date("Y"));
- $month = get_int404("month", date("m"));
- $day = get_int404("day", date("d"));
- $hour = get_int404("hour", date("h"));
- $minute = get_int404("minute", date("i"));
+$year = get_int404("year", date("Y"));
+$month = get_int404("month", date("m"));
+$day = get_int404("day", date("d"));
+$hour = get_int404("hour", date("h"));
+$minute = get_int404("minute", date("i"));
 
- // Used for the info presented below the plot on getting the raw data
- $gissource = ($year > 2014) ? 'n0q': 'n0r';
- $gissourcenum = ($year > 2014) ? '2': '1';
- 
- /** Acceptable number of frames are between 1 and 10000 */
- if (intval($frames) > 10000 || intval($frames) < 1) $frames = 13;
- /** Acceptable interval is between 5 and 60 */
- if (intval($interval) > 60 || intval($interval) < 5) $interval = 5;
+// Used for the info presented below the plot on getting the raw data
+$gissource = ($year > 2014) ? 'n0q' : 'n0r';
+$gissourcenum = ($year > 2014) ? '2' : '1';
 
- $astart = Array("comprad" => mktime(0,0,0,1,1,1995),
-         "usrad" => mktime(0,0,0,1,1,1995),
-         "ictrad" => mktime(0,0,0,1,1,1995),
-         "hunrad" => mktime(0,0,0,1,1,1995),
-         "sdrad" => mktime(0,0,0,1,1,1995),
-         "sel0rad" => mktime(13,35,0,11,2,2004),
-         "sel1rad" => mktime(13,35,0,11,2,2004),
-         "sel2rad" => mktime(13,35,0,11,2,2004),
-         "sel3rad" => mktime(13,35,0,11,2,2004),
-         "sel4rad" => mktime(13,35,0,11,2,2004),
-         "sel5rad" => mktime(13,35,0,11,2,2004),
-         "sel6rad" => mktime(13,35,0,11,2,2004),
-         "sel7rad" => mktime(13,35,0,11,2,2004),
-         "sel8rad" => mktime(13,35,0,11,2,2004),
-         "sel9rad" => mktime(13,35,0,11,2,2004),
-         "lotrad" => mktime(0,0,0,1,1,1995) );
+/** Acceptable number of frames are between 1 and 10000 */
+if (intval($frames) > 10000 || intval($frames) < 1) $frames = 13;
+/** Acceptable interval is between 5 and 60 */
+if (intval($interval) > 60 || intval($interval) < 5) $interval = 5;
 
- $now = time() - 60;
- $aend = time();
+$astart = array(
+    "comprad" => mktime(0, 0, 0, 1, 1, 1995),
+    "usrad" => mktime(0, 0, 0, 1, 1, 1995),
+    "ictrad" => mktime(0, 0, 0, 1, 1, 1995),
+    "hunrad" => mktime(0, 0, 0, 1, 1, 1995),
+    "sdrad" => mktime(0, 0, 0, 1, 1, 1995),
+    "sel0rad" => mktime(13, 35, 0, 11, 2, 2004),
+    "sel1rad" => mktime(13, 35, 0, 11, 2, 2004),
+    "sel2rad" => mktime(13, 35, 0, 11, 2, 2004),
+    "sel3rad" => mktime(13, 35, 0, 11, 2, 2004),
+    "sel4rad" => mktime(13, 35, 0, 11, 2, 2004),
+    "sel5rad" => mktime(13, 35, 0, 11, 2, 2004),
+    "sel6rad" => mktime(13, 35, 0, 11, 2, 2004),
+    "sel7rad" => mktime(13, 35, 0, 11, 2, 2004),
+    "sel8rad" => mktime(13, 35, 0, 11, 2, 2004),
+    "sel9rad" => mktime(13, 35, 0, 11, 2, 2004),
+    "lotrad" => mktime(0, 0, 0, 1, 1, 1995)
+);
+
+$now = time() - 60;
+$aend = time();
 
 /* Figure when the lapse starts! $ts */
-if ($mode == "realtime"){
-  $ts = $now - ($frames -1) * (intval($interval) * 60);
+if ($mode == "realtime") {
+    $ts = $now - ($frames - 1) * (intval($interval) * 60);
 } else { /* Historical */
-  $ots = mktime($hour, $minute, 0, $month, $day, $year);
-  /* Make sure archive request is not sooner than archive start */
-  if ($ots < $astart[$prod])  
-    $ts = $astart[$prod];
-  /* Make sure archive request is not in the future */
-  else if ($ots > $now)    
-    $ts = $now - (($frames) * (intval($interval) * 60) ) ;
-  /* Set the timestamp */
-  else 
-    $ts = $ots;
+    $ots = mktime($hour, $minute, 0, $month, $day, $year);
+    /* Make sure archive request is not sooner than archive start */
+    if ($ots < $astart[$prod])
+        $ts = $astart[$prod];
+    /* Make sure archive request is not in the future */
+    else if ($ots > $now)
+        $ts = $now - (($frames) * (intval($interval) * 60));
+    /* Set the timestamp */
+    else
+        $ts = $ots;
 }
 
-$rs = pg_execute($postgis, "SELECT", Array( date("Y-m-d H:i", $ts)));
+$rs = pg_execute($postgis, "SELECT", array(date("Y-m-d H:i", $ts)));
 $watches = "<div style=\"border: 1px solid #000; padding-left: 10px; background: #eee; width: 100%;\"><strong>Valid Watches:</strong> ";
-for($i=0;$row=pg_fetch_array($rs);$i++){
-  $issued = strtotime( $row["issued"] );
-  $watches .= sprintf("<a href=\"mcview.phtml?prod=%srad&java=none&mode=%s&frames=1&interval=5&year=%s&month=%s&day=%s&hour=%s&minute=%s\">%s (%s %s)</a> &nbsp; ", 
-   trim(strtolower($row["sel"])), $mode, $year, $month, 
-   $day, $hour, $minute,
-   $row["sel"], $row["type"], $row["num"]);
+for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    $issued = strtotime($row["issued"]);
+    $watches .= sprintf(
+        "<a href=\"mcview.phtml?prod=%srad&java=none&mode=%s&frames=1&interval=5&year=%s&month=%s&day=%s&hour=%s&minute=%s\">%s (%s %s)</a> &nbsp; ",
+        trim(strtolower($row["sel"])),
+        $mode,
+        $year,
+        $month,
+        $day,
+        $hour,
+        $minute,
+        $row["sel"],
+        $row["type"],
+        $row["num"]
+    );
 }
-if (pg_num_rows($rs) == 0){
-  $watches .= " <i>None valid for the selected time</i> ";
+if (pg_num_rows($rs) == 0) {
+    $watches .= " <i>None valid for the selected time</i> ";
 }
 $watches .= "</div>";
 
@@ -117,65 +132,66 @@ $minute = $ma;
 /* Our actual loop start time! */
 $loopts = $ts - ($diff * 60);
 $lwidth = 650;
-$lheight =550;
+$lheight = 550;
 
 $files = "";
 
-$images = Array();
-$radtimes = Array();
-for ($i=0; $i < intval($frames); $i++){
-	$fts = $loopts + ($i * (intval($interval) * 60));
-	if ($fts > time()){
-		continue;
-	}
-  $myuri = "/archive/data/". gmdate('Y/m/d/', $fts ) ."$prod/n0r_". 
-  		gmdate('Ymd_Hi', $fts ) .".png";
-  $myhref = "/archive/data/". gmdate('Y/m/d/', $fts ) ."GIS/uscomp/n0r_".
-  	 gmdate('YmdHi', $fts ) .".png";
-  $gisbase = "/archive/data/". gmdate('Y/m/d/', $fts ) ."GIS/uscomp/";
-  $files .= $myuri .",";
-  $images[] = $myuri;
-  $radtimes[] = $fts;
+$images = array();
+$radtimes = array();
+for ($i = 0; $i < intval($frames); $i++) {
+    $fts = $loopts + ($i * (intval($interval) * 60));
+    if ($fts > time()) {
+        continue;
+    }
+    $myuri = "/archive/data/" . gmdate('Y/m/d/', $fts) . "$prod/n0r_" .
+        gmdate('Ymd_Hi', $fts) . ".png";
+    $myhref = "/archive/data/" . gmdate('Y/m/d/', $fts) . "GIS/uscomp/n0r_" .
+        gmdate('YmdHi', $fts) . ".png";
+    $gisbase = "/archive/data/" . gmdate('Y/m/d/', $fts) . "GIS/uscomp/";
+    $files .= $myuri . ",";
+    $images[] = $myuri;
+    $radtimes[] = $fts;
 }
 
-$ar = Array("comprad" => "A1. Iowa (Default)",
-	"usrad" => "A1. United States",
-	"hunrad" => "A1. Huntsville, AL",
-	"lotrad" => "A1. North Illinois",
-	"sdrad" => "A1. South Dakota",
-	"ictrad" => "A1. Wichita, KS",
-	"sel0rad" => "A3. Watch (SEL0)",
-	"sel1rad" => "A3. Watch (SEL1)",
-	"sel2rad" => "A3. Watch (SEL2)",
-	"sel3rad" => "A3. Watch (SEL3)",
-	"sel4rad" => "A3. Watch (SEL4)",
-	"sel5rad" => "A3. Watch (SEL5)",
-	"sel6rad" => "A3. Watch (SEL6)",
-	"sel7rad" => "A3. Watch (SEL7)",
-	"sel8rad" => "A3. Watch (SEL8)",
-	"sel9rad" => "A3. Watch (SEL9)",
+$ar = array(
+    "comprad" => "A1. Iowa (Default)",
+    "usrad" => "A1. United States",
+    "hunrad" => "A1. Huntsville, AL",
+    "lotrad" => "A1. North Illinois",
+    "sdrad" => "A1. South Dakota",
+    "ictrad" => "A1. Wichita, KS",
+    "sel0rad" => "A3. Watch (SEL0)",
+    "sel1rad" => "A3. Watch (SEL1)",
+    "sel2rad" => "A3. Watch (SEL2)",
+    "sel3rad" => "A3. Watch (SEL3)",
+    "sel4rad" => "A3. Watch (SEL4)",
+    "sel5rad" => "A3. Watch (SEL5)",
+    "sel6rad" => "A3. Watch (SEL6)",
+    "sel7rad" => "A3. Watch (SEL7)",
+    "sel8rad" => "A3. Watch (SEL8)",
+    "sel9rad" => "A3. Watch (SEL9)",
 );
 $prodselect = make_select("prod", $prod, $ar);
 
-$ar = Array(
-	"script" => "Java Script",
-	"none" => "List Images",	
+$ar = array(
+    "script" => "Java Script",
+    "none" => "List Images",
 );
 $loopselect = make_select("java", $java, $ar);
 
-$ar = Array(
-	"realtime" => "Real Time",
-	"archive" => "Archived",
+$ar = array(
+    "realtime" => "Real Time",
+    "archive" => "Archived",
 );
 $modeselect = make_select("mode", $mode, $ar);
 
-$ar = Array(
-	"5" => "5 Min (Default)",
-	"10" => "10 min",
-	"15" => "15 min",
-	"20" => "20 min",
-	"30" => "30 min",
-	"60" => "60 min",
+$ar = array(
+    "5" => "5 Min (Default)",
+    "10" => "10 min",
+    "15" => "15 min",
+    "20" => "20 min",
+    "30" => "30 min",
+    "60" => "60 min",
 );
 $intselect = make_select("interval", $interval, $ar);
 
@@ -183,71 +199,71 @@ $start = intval(1995);
 $now = time();
 $tyear = strftime("%Y", $now);
 $dateselect = "<select name='year' onChange=\"javascript: switchToArchiveMode(); \">\n";
-for ($i=$start; $i<=$tyear;$i++) {
-	$dateselect .= "<option value='".$i ."' ";
-	if ($i == intval($year)) $dateselect .= "SELECTED";
-	$dateselect .= ">". $i ."\n";
+for ($i = $start; $i <= $tyear; $i++) {
+    $dateselect .= "<option value='" . $i . "' ";
+    if ($i == intval($year)) $dateselect .= "SELECTED";
+    $dateselect .= ">" . $i . "\n";
 }
 $dateselect .= "</select>\n";
 
 $dateselect .= "<select name='month' onChange=\"javascript: switchToArchiveMode(); \">\n";
-for ($i=1; $i<=12;$i++) {
-	$ts = mktime(0,0,0,$i,1,0);
-	$dateselect .= "<option value='".$i ."' ";
-	if ($i == intval($month)) $dateselect .= "SELECTED";
-	$dateselect .= ">". strftime("%b" ,$ts) ."\n";
+for ($i = 1; $i <= 12; $i++) {
+    $ts = mktime(0, 0, 0, $i, 1, 0);
+    $dateselect .= "<option value='" . $i . "' ";
+    if ($i == intval($month)) $dateselect .= "SELECTED";
+    $dateselect .= ">" . strftime("%b", $ts) . "\n";
 }
 $dateselect .= "</select>\n";
 
 $dateselect .= "<select name='day' onChange=\"javascript: switchToArchiveMode(); \">\n";
-for ($k=1;$k<32;$k++){
-	$dateselect .= "<option value=\"".$k."\" ";
-	if ($k == (int)$day){
-		$dateselect .= "SELECTED";
-	}
-	$dateselect .= ">".$k."\n";
+for ($k = 1; $k < 32; $k++) {
+    $dateselect .= "<option value=\"" . $k . "\" ";
+    if ($k == (int)$day) {
+        $dateselect .= "SELECTED";
+    }
+    $dateselect .= ">" . $k . "\n";
 }
 $dateselect .= "</select>\n";
 
 
 $timeselect = "<select name='hour'  onChange=\"javascript: switchToArchiveMode(); \">\n";
-for ($i=0; $i<24;$i++) {
-	$ts = mktime($i,0,0,1,1,0);
-	$timeselect .= "<option value='".$i."' ";
-	if ($i == intval($hour)) $timeselect .= "SELECTED";
-	$timeselect .= ">". strftime("%I %p" ,$ts) ."\n";
+for ($i = 0; $i < 24; $i++) {
+    $ts = mktime($i, 0, 0, 1, 1, 0);
+    $timeselect .= "<option value='" . $i . "' ";
+    if ($i == intval($hour)) $timeselect .= "SELECTED";
+    $timeselect .= ">" . strftime("%I %p", $ts) . "\n";
 }
 $timeselect .= "</select>\n";
 
 $timeselect .= "<select name='minute' onChange=\"javascript: switchToArchiveMode(); \">\n";
-for ($i=0; $i<60;$i=$i+5) {
-	$timeselect .= "<option value='".$i."' ";
-	if ($i == intval($minute)) $timeselect .= "SELECTED";
-	$timeselect .= sprintf(">%02d\n", $i );
+for ($i = 0; $i < 60; $i = $i + 5) {
+    $timeselect .= "<option value='" . $i . "' ";
+    if ($i == intval($minute)) $timeselect .= "SELECTED";
+    $timeselect .= sprintf(">%02d\n", $i);
 }
 $timeselect .= "</select>\n";
 
-$autoselected = ($autopilot == "yes") ? " checked=\"checked\"": ""; 
-$rtmessage = ($mode == "realtime")? " &nbsp; <b>REAL-TIME mode:</b> Will refresh in 5 minutes": "";
+$autoselected = ($autopilot == "yes") ? " checked=\"checked\"" : "";
+$rtmessage = ($mode == "realtime") ? " &nbsp; <b>REAL-TIME mode:</b> Will refresh in 5 minutes" : "";
 
 
 $jsextra = "";
 $headextra = "";
 
-if ($java == 'script'){
-	$i = 0;
-	$jsurls = [];
-	foreach($images as $key => $val){
-	    $jsurls[] = sprintf("'%s'", $val);
-	}
-	$myimages = implode(",", $jsurls);
-	$control = "<p><div id=\"myanimation\"></div></p>";
-	$headextra .= <<<EOM
+if ($java == 'script') {
+    $i = 0;
+    $jsurls = [];
+    foreach ($images as $key => $val) {
+        $jsurls[] = sprintf("'%s'", $val);
+    }
+    $myimages = implode(",", $jsurls);
+    $control = "<p><div id=\"myanimation\"></div></p>";
+    $headextra .= <<<EOM
 <link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.css">
 <link rel="stylesheet" href="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.theme.min.css">
 <link rel="stylesheet" href="/vendor/jsani/2.84/jquery.jsani.min.css">
 EOM;
-	$jsextra .= <<<EOM
+    $jsextra .= <<<EOM
 <script src="/vendor/jquery-ui/{$JQUERYUI}/jquery-ui.min.js"></script>
 <script language="javascript" type="text/javascript" src="/vendor/jsani/2.84/jquery.jsani.min.js"></script>
 <script>
@@ -266,20 +282,20 @@ EOM;
 </script>
 EOM;
 } else {
- 	reset($images);
- 	$control = "";
- 	foreach($images as $key => $val){
-   		$control .= "<p><img src=\"". $val ."\" class=\"img img-responsive\">\n";
- 	}
+    reset($images);
+    $control = "";
+    foreach ($images as $key => $val) {
+        $control .= "<p><img src=\"" . $val . "\" class=\"img img-responsive\">\n";
+    }
 }
 
 $radlinks = "";
-foreach ($radtimes as $value ){
-	$myhref = "/archive/data/". gmdate('Y/m/d/',$value ) ."GIS/uscomp/${gissource}_". gmdate('YmdHi', $value ) .".png";
-	$myhref2 = "https://mesonet.agron.iastate.edu{$myhref}";
-	$radlinks .= "<li><a href='$myhref'>$myhref2</a> ".
-	"(<a href='/request/gis/${gissource}2gtiff.php?dstr=". gmdate('YmdHi', $value) ."'>GeoTiff</a> or ".
-	"<a href=\"/cgi-bin/request/raster2netcdf.py?dstr=". gmdate('YmdHi', $value) ."&prod=composite_${gissource}\">netCDF</a>)</li>\n";
+foreach ($radtimes as $value) {
+    $myhref = "/archive/data/" . gmdate('Y/m/d/', $value) . "GIS/uscomp/${gissource}_" . gmdate('YmdHi', $value) . ".png";
+    $myhref2 = "https://mesonet.agron.iastate.edu{$myhref}";
+    $radlinks .= "<li><a href='$myhref'>$myhref2</a> " .
+        "(<a href='/request/gis/${gissource}2gtiff.php?dstr=" . gmdate('YmdHi', $value) . "'>GeoTiff</a> or " .
+        "<a href=\"/cgi-bin/request/raster2netcdf.py?dstr=" . gmdate('YmdHi', $value) . "&prod=composite_${gissource}\">netCDF</a>)</li>\n";
 }
 
 
@@ -295,8 +311,8 @@ function switchToArchiveMode()
 -->
 </script>
 EOF;
-if ($autopilot == "yes"){
- 	$headextra .= <<<EOF
+if ($autopilot == "yes") {
+    $headextra .= <<<EOF
 <style>
 body{
   background: #fff;
@@ -310,11 +326,11 @@ body{
 </style>
 EOF;
 }
-  $t->headextra = $headextra;
-  if ($mode == "realtime") {
-	$t->refresh = 300;
-  }
-  $t->title = "Current & Historical IEM NEXRAD Mosaic Loop";
+$t->headextra = $headextra;
+if ($mode == "realtime") {
+    $t->refresh = 300;
+}
+$t->title = "Current & Historical IEM NEXRAD Mosaic Loop";
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
@@ -391,4 +407,3 @@ on these mosaics.</p>
 EOF;
 $t->jsextra = $jsextra;
 $t->render('single.phtml');
-?>

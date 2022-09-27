@@ -1,12 +1,13 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/cameras.inc.php";
 
 $camselect = "<select id=\"mycam\" name=\"mycam\" onchange=\"myloader();\">";
-foreach($cameras as $key => $dict)
-{
-	if ($dict["removed"] || ($dict["network"] != "KCRG" && $key != 'KCCI-017')){ continue; }
-	$camselect .= "<option value=\"". $dict["moviebase"] ."\">". $dict["name"] ." \n";
+foreach ($cameras as $key => $dict) {
+    if ($dict["removed"] || ($dict["network"] != "KCRG" && $key != 'KCCI-017')) {
+        continue;
+    }
+    $camselect .= "<option value=\"" . $dict["moviebase"] . "\">" . $dict["name"] . " \n";
 }
 $camselect .= "</select>";
 
@@ -37,42 +38,42 @@ echo <<<EOF
 
 <script>
 flowplayer.conf = {
-	engine: 'flash',
-	swf: '/vendor/flowplayer/6.0.2/flowplayer.swf'
+    engine: 'flash',
+    swf: '/vendor/flowplayer/6.0.2/flowplayer.swf'
 };
-	ts = new Date();
-	var container = document.getElementById("player");
-	flowplayer(container, {
-		clip : {
-			sources: [{type: 'video/mp4',
-					   src: '/onsite/lapses/auto/kirkwood_sunrise.mp4?'+ ts.getTime()},
-					  {type: 'video/flv',
-					   src: '/onsite/lapses/auto/kirkwood_sunrise.flv?'+ ts.getTime()}
-		
-		]}
-	});
-		
+    ts = new Date();
+    var container = document.getElementById("player");
+    flowplayer(container, {
+        clip : {
+            sources: [{type: 'video/mp4',
+                       src: '/onsite/lapses/auto/kirkwood_sunrise.mp4?'+ ts.getTime()},
+                      {type: 'video/flv',
+                       src: '/onsite/lapses/auto/kirkwood_sunrise.flv?'+ ts.getTime()}
+        
+        ]}
+    });
+        
 function myloader()
 {
-  	ts = new Date();
-  	var mycam = document.theform.mycam.value;
-  	var mylapse = document.theform.mylapse.value;
-	window.location.href = "#"+mycam+"_"+mylapse;
-  	url =  "/onsite/lapses/auto/"+ mycam +"_"+ mylapse +".flv?"+ ts.getTime();
-  	url2 =  "/onsite/lapses/auto/"+ mycam +"_"+ mylapse +".mp4?"+ ts.getTime();
-	api = flowplayer();
-	api.load([{flash:url, mp4:url2}]);
+      ts = new Date();
+      var mycam = document.theform.mycam.value;
+      var mylapse = document.theform.mylapse.value;
+    window.location.href = "#"+mycam+"_"+mylapse;
+      url =  "/onsite/lapses/auto/"+ mycam +"_"+ mylapse +".flv?"+ ts.getTime();
+      url2 =  "/onsite/lapses/auto/"+ mycam +"_"+ mylapse +".mp4?"+ ts.getTime();
+    api = flowplayer();
+    api.load([{flash:url, mp4:url2}]);
 }
 
 var tokens = window.location.href.split('#');
 if (tokens.length == 2){
   tokens2 = tokens[1].split('_');
   if (tokens2.length == 2){
-	mycam = tokens2[0];
-	document.getElementById('mycam').value = mycam;
-	mylapse = tokens2[1];
-	document.getElementById('mylapse').value = mylapse;
-	myloader();
+    mycam = tokens2[0];
+    document.getElementById('mycam').value = mycam;
+    mylapse = tokens2[1];
+    document.getElementById('mylapse').value = mylapse;
+    myloader();
   }
 } 
 
@@ -81,4 +82,3 @@ if (tokens.length == 2){
 </body>
 </html>
 EOF;
-?>

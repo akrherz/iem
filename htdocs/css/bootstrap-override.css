@@ -1,37 +1,45 @@
 /* slim down the top red bar */
 .navbar-site .wordmark-unit {
-	margin: 10px 0 10px;
+    margin: 10px 0 10px;
 }
+
 .navbar-site .navbar-site-search .form-control {
-	margin: 10px 0 10px;
+    margin: 10px 0 10px;
 }
+
 .navbar-site .navbar-site-search .search-icon {
-	top: 20px;
+    top: 20px;
 }
+
 @media print {
-  a[href]:after {
-    content: "";
-  }
-}
-.navbar .nav > li > a {
-	padding-left: 6px;
-	padding-right: 6px;
+    a[href]:after {
+        content: "";
+    }
 }
 
-a.book{
-	background:url(/images/book.png) no-repeat 10px 1px;
-	padding-left: 40px;
-}
-a.agweather{
-	background:url(/images/tractor.png) no-repeat 10px 1px;
-	padding-left: 40px;
-}
-a.nws{
-	background:url(/images/nws.png) no-repeat 10px 1px;
-	padding-left: 40px;
+.navbar .nav>li>a {
+    padding-left: 6px;
+    padding-right: 6px;
 }
 
-.top-buffer { margin-top:20px; }
+a.book {
+    background: url(/images/book.png) no-repeat 10px 1px;
+    padding-left: 40px;
+}
+
+a.agweather {
+    background: url(/images/tractor.png) no-repeat 10px 1px;
+    padding-left: 40px;
+}
+
+a.nws {
+    background: url(/images/nws.png) no-repeat 10px 1px;
+    padding-left: 40px;
+}
+
+.top-buffer {
+    margin-top: 20px;
+}
 
 img.olTileImage {
     max-width: none;

@@ -10,11 +10,11 @@ $t = new MyView();
 
 $products = Array(
  "mesonet" => Array("aformat" => 'mesonet_%H00.gif',
-		"tint" => 3600, "width" => 900, "height" => 700, "minute" => 8,
-		"name" => "Iowa Mesonet Plot"),
+        "tint" => 3600, "width" => 900, "height" => 700, "minute" => 8,
+        "name" => "Iowa Mesonet Plot"),
  "mwmesonet" => Array("aformat" => 'MWmesonet_%H00.gif',
-		"tint" => 3600, "width" => 900, "height" => 700, "minute" => 8,
-		"name" => "Midwest Mesonet Plot"),
+        "tint" => 3600, "width" => 900, "height" => 700, "minute" => 8,
+        "name" => "Midwest Mesonet Plot"),
 );
 
 $baseurl2 = '/archive/data/';
@@ -27,27 +27,27 @@ if ($m < $products[$prod]["minute"])  $loopendts = time() - 3600;
 $q = $frames - 1;
 for($i=$q; $i >= 0; $i--)
 {
-	$ts = $loopendts - ($products[$prod]["tint"] * $i);
-	$gts = strtotime( gmdate("Y-m-d H:i", $ts) );
-	$u = $baseurl2 . strftime("%Y/%m/%d/". $products[$prod]["aformat"], $gts);
-	$hrefs .= "<br><img src=\"$u\">";
-	$files .= $u .","; 
+    $ts = $loopendts - ($products[$prod]["tint"] * $i);
+    $gts = strtotime( gmdate("Y-m-d H:i", $ts) );
+    $u = $baseurl2 . strftime("%Y/%m/%d/". $products[$prod]["aformat"], $gts);
+    $hrefs .= "<br><img src=\"$u\">";
+    $files .= $u .","; 
 }
 
 /* ========================================================= */
 
  $t->title = "Product Looper"; 
  $ar = Array(
- 		"none" => "List Images"
+         "none" => "List Images"
  );
  $loopselect = make_select("java", $java, $ar);
  
  $prodselect = "<select name=\"prod\">";
  foreach($products as $k => $v)
  {
- 	$prodselect .= "<option value=\"$k\" ";
- 	if ($prod == $k) $prodselect .= " SELECTED ";
- 	$prodselect .= ">". $products[$k]["name"] ."\n";
+     $prodselect .= "<option value=\"$k\" ";
+     if ($prod == $k) $prodselect .= " SELECTED ";
+     $prodselect .= ">". $products[$k]["name"] ."\n";
  }
  $prodselect .= "</select>";
  
@@ -79,4 +79,3 @@ $t->content = <<<EOF
 </div>
 EOF;
 $t->render('single.phtml');
-?>

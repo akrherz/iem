@@ -57,10 +57,8 @@ def application(environ, start_response):
         postgis = get_dbconn("postgis")
         pcursor = postgis.cursor()
         pcursor.execute(
-            """
-        SELECT ST_x(ST_Centroid(geom)), ST_y(ST_Centroid(geom)) from ugcs WHERE
-        ugc = %s and end_ts is null
-        """,
+            "SELECT ST_x(ST_Centroid(geom)), ST_y(ST_Centroid(geom)) "
+            "from ugcs WHERE ugc = %s and end_ts is null",
             (ugc,),
         )
         row = pcursor.fetchone()
@@ -115,11 +113,12 @@ def application(environ, start_response):
 
     headers = [
         ("Content-type", "application/octet-stream"),
-        ("Content-Disposition", "attachment; filename=%s.zip" % (basefn,)),
+        ("Content-Disposition", f"attachment; filename={basefn}.zip"),
     ]
     start_response("200 OK", headers)
-    content = open(basefn + ".zip", "rb").read()
+    with open(f"{basefn}.zip", "rb") as fh:
+        content = fh.read()
     for suffix in ["zip", "shp", "shx", "dbf", "prj"]:
-        os.unlink("%s.%s" % (basefn, suffix))
+        os.unlink(f"{basefn}.{suffix}")
 
     return [content]

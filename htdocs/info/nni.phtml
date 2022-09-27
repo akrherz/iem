@@ -1,9 +1,9 @@
 <?php
- include("../../config/settings.inc.php");
- include("../../include/myview.php");
- $t = new MyView();
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
+$t = new MyView();
 
- $t->title = "Representivity";
+$t->title = "Representivity";
 $t->content = <<<EOF
 <style>
 .figure {

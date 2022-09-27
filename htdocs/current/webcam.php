@@ -6,15 +6,14 @@
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 9);
 require_once "../../include/myview.php";
+
 $t = new MyView();
- require_once "../../include/iemprop.php";
- $camera_refresh = get_iemprop("webcam.interval");
 $t->headextra = <<<EOF
 <link rel="stylesheet" type="text/css" href="https://extjs.cachefly.net/ext/gpl/5.0.0/build/packages/ext-theme-neptune/build/resources/ext-theme-neptune-all.css"/>
 <script type="text/javascript" src="https://extjs.cachefly.net/ext/gpl/5.0.0/build/ext-all.js"></script>
 <script>
 Ext.namespace('cfg');
-cfg.refreshint = ${camera_refresh}000;
+cfg.refreshint = 60000;
 cfg.header = 'iem-header';
 cfg.headerHeight = 60;
 cfg.jsonSource = '/json/webcams.php';

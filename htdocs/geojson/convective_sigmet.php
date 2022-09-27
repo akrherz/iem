@@ -13,32 +13,33 @@ $rs = pg_prepare($postgis, "SELECT", "SELECT *,
       ST_asGeoJson(geom) as geojson
       FROM sigmets_current WHERE sigmet_type = 'C' and expire > now() ");
 
-$rs = pg_execute($postgis, "SELECT", Array());
+$rs = pg_execute($postgis, "SELECT", array());
 
 
-$ar = Array(
-  "type"=>"FeatureCollection",
-  "features" => Array()
+$ar = array(
+    "type" => "FeatureCollection",
+    "features" => array()
 );
 
-$reps = Array();
-$subs = Array();
+$reps = array();
+$subs = array();
 
-for ($i=0;$row=pg_fetch_array($rs);$i++)
-{
-  $reps[] = "\"REPLACEME$i\"";
-  $subs[] = $row["geojson"];
+for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    $reps[] = "\"REPLACEME$i\"";
+    $subs[] = $row["geojson"];
 
 
-  $z = Array("type"=>"Feature", "id"=>$i, 
-             "properties"=>Array(
-                "issue"     => substr($row["issue"],0,16),
-                "expire"     => substr($row["expire"],0,16),
-                "label"         => $row["label"]
-  				),
-              
-             "geometry"=> "REPLACEME$i");
-                         
-  $ar["features"][] = $z;
+    $z = array(
+        "type" => "Feature", "id" => $i,
+        "properties" => array(
+            "issue"     => substr($row["issue"], 0, 16),
+            "expire"     => substr($row["expire"], 0, 16),
+            "label"         => $row["label"]
+        ),
+
+        "geometry" => "REPLACEME$i"
+    );
+
+    $ar["features"][] = $z;
 }
 echo str_replace($reps, $subs, json_encode($ar));

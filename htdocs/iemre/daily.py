@@ -47,7 +47,7 @@ def application(environ, start_response):
         return [json.dumps(data).encode("ascii")]
 
     if ts.year > 1980:
-        ncfn = "/mesonet/data/prism/%s_daily.nc" % (ts.year,)
+        ncfn = f"/mesonet/data/prism/{ts.year}_daily.nc"
         if not os.path.isfile(ncfn):
             prism_precip = None
         else:

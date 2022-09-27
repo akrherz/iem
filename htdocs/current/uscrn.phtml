@@ -1,129 +1,130 @@
 <?php
- require_once "../../config/settings.inc.php";
- require_once "../../include/myview.php";
- require_once "../../include/forms.php";
- require_once "../../include/mlib.php";
- 
- $t = new MyView();
- $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "state";
- $sorder = isset($_GET["sorder"]) ? xssafe($_GET["sorder"]): "asc";
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
+require_once "../../include/forms.php";
+require_once "../../include/mlib.php";
 
- $t->refresh = 60;
- $t->title = "US Climate Reference Network Latest Reports";
+$t = new MyView();
+$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "state";
+$sorder = isset($_GET["sorder"]) ? xssafe($_GET["sorder"]) : "asc";
 
-$arr = Array("network" => "USCRN");
+$t->refresh = 60;
+$t->title = "US Climate Reference Network Latest Reports";
+
+$arr = array("network" => "USCRN");
 $jobj = iemws_json("currents.json", $arr);
 
-$vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
-  "sknt" => "Wind Speed [knots]", "drct" => "Wind Direction [deg]",
-  "srad" => "Solar Radiation [W / m2]", "peak" => "Today's Wind Gust [knots]",
-  "peak_ts" => "Time of Peak Gust", "relh" => "Relative Humidity",
-  "feel" => "Feels Like [F]", "vsby" => "Visibility [miles]",
-  "ts" => "Observation Time", "phour" => "Last Hour Rainfall [inch]",
-  "min_tmpf" => "Today's Low Temperature",
-  "max_tmpf" => "Today's High Temperature", "name" => "Station Name",
-  "state" => "Station State",
-  "pday" => "Today Rainfall [inch]");
+$vals = array(
+    "tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
+    "sknt" => "Wind Speed [knots]", "drct" => "Wind Direction [deg]",
+    "srad" => "Solar Radiation [W / m2]", "peak" => "Today's Wind Gust [knots]",
+    "peak_ts" => "Time of Peak Gust", "relh" => "Relative Humidity",
+    "feel" => "Feels Like [F]", "vsby" => "Visibility [miles]",
+    "ts" => "Observation Time", "phour" => "Last Hour Rainfall [inch]",
+    "min_tmpf" => "Today's Low Temperature",
+    "max_tmpf" => "Today's High Temperature", "name" => "Station Name",
+    "state" => "Station State",
+    "pday" => "Today Rainfall [inch]"
+);
 
 $t->current_network = 'USCRN';
 
-$ar = Array(
-	"asc" => "Ascending",
-	"desc" => "Descending"
+$ar = array(
+    "asc" => "Ascending",
+    "desc" => "Descending"
 );
 $aselect = make_select("sorder", $sorder, $ar);
 
 $uri = "uscrn.phtml?sorder=$sorder&sortcol=";
 
-$mydata = Array();
-foreach($jobj["data"] as $bogus => $iemob)
-{
+$mydata = array();
+foreach ($jobj["data"] as $bogus => $iemob) {
     $key = $iemob["station"];
-	$mydata[$key] = $iemob;
-	if ($mydata[$key]["relh"] < 5)
-	{
-		$mydata[$key]["relh"] = "M";
-		$mydata[$key]["dewpf"] = "M";
-		if ($sortcol == "feel" || $sortcol == "dwpf" || $sortcol == "relh") {
-			$mydata[$key] = 0;
-			continue;
-		}
-	}
-	if ($mydata[$key]["tmpf"] < -60)
-	{
-		$mydata[$key]["tmpf"] = "M";
-		if ($sortcol == "tmpf" || $sortcol == "feel" || $sortcol == "dwpf" || $sortcol == "relh") {
-			$mydata[$key] = 0;
-			continue;
-		}
-	}
-	if ($mydata[$key]["alti"] < -60)
-	{
-		$mydata[$key]["alti"] = "M";
-		if ($sortcol == "alti") {
-			$mydata[$key] = 0;
-			continue;
-		}
-	}
-	if ($mydata[$key]["vsby"] < 0)
-	{
-		$mydata[$key]["vsby"] = "M";
-		if ($sortcol == "vsby") {
-			$mydata[$key] = 0;
-			continue;
-		}
-	}
+    $mydata[$key] = $iemob;
+    if ($mydata[$key]["relh"] < 5) {
+        $mydata[$key]["relh"] = "M";
+        $mydata[$key]["dewpf"] = "M";
+        if ($sortcol == "feel" || $sortcol == "dwpf" || $sortcol == "relh") {
+            $mydata[$key] = 0;
+            continue;
+        }
+    }
+    if ($mydata[$key]["tmpf"] < -60) {
+        $mydata[$key]["tmpf"] = "M";
+        if ($sortcol == "tmpf" || $sortcol == "feel" || $sortcol == "dwpf" || $sortcol == "relh") {
+            $mydata[$key] = 0;
+            continue;
+        }
+    }
+    if ($mydata[$key]["alti"] < -60) {
+        $mydata[$key]["alti"] = "M";
+        if ($sortcol == "alti") {
+            $mydata[$key] = 0;
+            continue;
+        }
+    }
+    if ($mydata[$key]["vsby"] < 0) {
+        $mydata[$key]["vsby"] = "M";
+        if ($sortcol == "vsby") {
+            $mydata[$key] = 0;
+            continue;
+        }
+    }
 
-	if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
-		$mydata[$key]["peak"] = $mydata[$key]["max_gust"];
-		$mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_gust_ts"]);
-	} else {
-		$mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
-		$mydata[$key]["peak_ts"] = 0;
-		if ($mydata[$key]["local_max_sknt_ts"])
-		{
-			$mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_sknt_ts"]);
-		}
-	}
-
+    if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]) {
+        $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
+        $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_gust_ts"]);
+    } else {
+        $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
+        $mydata[$key]["peak_ts"] = 0;
+        if ($mydata[$key]["local_max_sknt_ts"]) {
+            $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_sknt_ts"]);
+        }
+    }
 }
 
-$finalA = Array();
+$finalA = array();
 $finalA = aSortBySecondIndex($mydata, $sortcol, $sorder);
 $now = time();
 $i = 0;
 $table = "";
-foreach($finalA as $key => $val)
-{
-	$i++;
-	$parts = $finalA[$key];
+foreach ($finalA as $key => $val) {
+    $i++;
+    $parts = $finalA[$key];
 
-	$table .= "<tr";
-	if ($i % 2 == 0)  $table .= " bgcolor='#eeeeee'";
-	$table .= "><td><input type=\"checkbox\" name=\"st[]\" value=\"".$key."\"></td>";
+    $table .= "<tr";
+    if ($i % 2 == 0)  $table .= " bgcolor='#eeeeee'";
+    $table .= "><td><input type=\"checkbox\" name=\"st[]\" value=\"" . $key . "\"></td>";
 
-	$tdiff = $now - strtotime($parts["local_valid"]);
-	$table .= sprintf("<td>%s [%s] (<a href=\"/sites/site.php?station=%s&amp;".
-		"network=%s\">%s</a>)</td>",
-		$parts["name"], $parts["state"], $key, "USCRN", $key);
-	$table .= "<td ";
-	if ($tdiff > 10000){
-		$fmt = "%d %b %I:%M %p";
-	} else {
-		$fmt = "%I:%M %p";
-	}
+    $tdiff = $now - strtotime($parts["local_valid"]);
+    $table .= sprintf(
+        "<td>%s [%s] (<a href=\"/sites/site.php?station=%s&amp;" .
+            "network=%s\">%s</a>)</td>",
+        $parts["name"],
+        $parts["state"],
+        $key,
+        "USCRN",
+        $key
+    );
+    $table .= "<td ";
+    if ($tdiff > 10000) {
+        $fmt = "%d %b %I:%M %p";
+    } else {
+        $fmt = "%I:%M %p";
+    }
 
-	$table .= ">". strftime($fmt, strtotime($parts["local_valid"])) ."</td>
-     <td align='center'>". round($parts["tmpf"],0) ."(<font color=\"#ff0000\">". round($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">". round($parts["min_tmpf"],0) ."</font>)</td>
-     <td>". round($parts["dwpf"],0) ."</td>
-     <td>". round($parts["feel"],0) ."</td>
-	    <td>". $parts["srad"] ."</td>
-             <td>". round($parts["sknt"],0) ;
-	if (strlen($parts["gust"] != 0)){
-		$table .= "G". round($parts["gust"],0);
-	} $table .= "</td>";
-	$table .= "<td>". round($parts["peak"],0) ." @ ". strftime("%I:%M %p", $parts["peak_ts"]) ."</td>
-	    </tr>\n";
+    $table .= ">" . strftime($fmt, strtotime($parts["local_valid"])) . "</td>
+     <td align='center'>" . round($parts["tmpf"], 0) . "(<font color=\"#ff0000\">" . round($parts["max_tmpf"], 0) . "</font>/<font color=\"#0000ff\">" . round($parts["min_tmpf"], 0) . "</font>)</td>
+     <td>" . round($parts["dwpf"], 0) . "</td>
+     <td>" . round($parts["feel"], 0) . "</td>
+        <td>" . $parts["srad"] . "</td>
+             <td>" . round($parts["sknt"], 0);
+    if (strlen($parts["gust"] != 0)) {
+        $table .= "G" . round($parts["gust"], 0);
+    }
+    $table .= "</td>";
+    $table .= "<td>" . round($parts["peak"], 0) . " @ " . strftime("%I:%M %p", $parts["peak_ts"]) . "</td>
+        </tr>\n";
 }
 $t->content = <<<EOF
 
@@ -173,4 +174,3 @@ station.</p>
 </form></div>
 EOF;
 $t->render('sortables.phtml');
-?>

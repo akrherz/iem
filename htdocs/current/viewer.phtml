@@ -7,38 +7,39 @@ force_https();
 require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 $t = new MyView();
- require_once "../../include/cameras.inc.php"; 
- $id = isset($_GET["id"]) ? xssafe($_GET["id"]): "ISUC-003";
+require_once "../../include/cameras.inc.php";
+$id = isset($_GET["id"]) ? xssafe($_GET["id"]) : "ISUC-003";
 
- $camselect = "";
- $cnt = 0;
- foreach($cameras as $cid => $v)
- {
- 	if ($v["active"] && $v["network"] != "IDOT"){
- 		$camselect .= "<div class=\"col-md-2\"><label class=\"radio-inline\"><input type=\"radio\" name=\"id\" value=\"$cid\" id=\"c$cid\" ";
- 		if ($cid == $id) { $camselect .= "checked=\"checked\""; }
- 		$camselect .= " onClick=\"setCamera('{$cid}');\">". $v["name"] ."</label></div>\n";
- 		$cnt += 1;
- 	}
- }
- 
- $t->title =  "Current + Live Web Camera Shots";
- $t->jsextra = <<<EOF
+$camselect = "";
+$cnt = 0;
+foreach ($cameras as $cid => $v) {
+    if ($v["active"] && $v["network"] != "IDOT") {
+        $camselect .= "<div class=\"col-md-2\"><label class=\"radio-inline\"><input type=\"radio\" name=\"id\" value=\"$cid\" id=\"c$cid\" ";
+        if ($cid == $id) {
+            $camselect .= "checked=\"checked\"";
+        }
+        $camselect .= " onClick=\"setCamera('{$cid}');\">" . $v["name"] . "</label></div>\n";
+        $cnt += 1;
+    }
+}
+
+$t->title =  "Current + Live Web Camera Shots";
+$t->jsextra = <<<EOF
  <script src='/vendor/openlayers/{$OL}/ol.js'></script>
  <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
  <script src="/vendor/moment/2.13.0/moment.min.js"></script>
  <script src="/vendor/bootstrap-datetimepicker/4.17.47/bootstrap-datetimepicker.min.js"></script>
  <script src='viewer.js'></script>
 EOF;
- $t->headextra = <<<EOF
+$t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" type="text/css">
 <link rel="stylesheet" href="/vendor/bootstrap-datetimepicker/4.17.47/bootstrap-datetimepicker.min.css" type="text/css">
 EOF;
- 
 
- 
- $t->content = <<<EOF
+
+
+$t->content = <<<EOF
 <style>
  h3 {
    margin-top: 0px;
@@ -46,16 +47,16 @@ EOF;
 </style>
  
      <div class="row">
-     	<div class="col-sm-4">
-     	<h3><i class="fa fa-camera"></i> IEM Webcam Viewer</h3>
-     	</div>
+         <div class="col-sm-4">
+         <h3><i class="fa fa-camera"></i> IEM Webcam Viewer</h3>
+         </div>
         <div class='col-sm-4'>
     <strong>Mode:</strong>
 <div class="btn-group" id="toggle_event_mode">
-	<button type="button" class="btn btn-info locked_active">Realtime</button>
-	<button type="button" class="btn btn-default unlocked_inactive">Archive</button>
+    <button type="button" class="btn btn-info locked_active">Realtime</button>
+    <button type="button" class="btn btn-default unlocked_inactive">Archive</button>
 </div>
-		</div>
+        </div>
         <div class='col-sm-4'>
         <div id="dtdiv" style="display: none;">
     <strong>Date &amp; Time:</strong> (click calendar icon)
@@ -98,21 +99,21 @@ EOF;
 <h3>Application Details</h3>
 
 <p>This webpage should dynamically update while in "Realtime" mode, so there
-	is no need to refresh the page.  If you click the "Archive" mode option,
-	a time selector will appear and all presented data should be approximately
-	valid at that time.</p>
+    is no need to refresh the page.  If you click the "Archive" mode option,
+    a time selector will appear and all presented data should be approximately
+    valid at that time.</p>
 
 <p>Routinely, the IEM is archiving webcam imagery every 5 minutes.  During
-	interesting weather, this interval is decreased to every 1 minute.  So
-	if you pick a minute (ie 35) divisible by 5, you are most likely to
-	get an archived image.</p>
-		
+    interesting weather, this interval is decreased to every 1 minute.  So
+    if you pick a minute (ie 35) divisible by 5, you are most likely to
+    get an archived image.</p>
+        
 <p>The arrows on the map represent the direction at which the webcam is
-	pointed.  Due to software and hardware issues, these directions can
-	sometimes be off.</p>
-		
+    pointed.  Due to software and hardware issues, these directions can
+    sometimes be off.</p>
+        
 <p>More information on the IEM's webcam work can be found
-	<a href="/projects/webcam.php">here</a>.</p>
+    <a href="/projects/webcam.php">here</a>.</p>
 
 
 EOF;

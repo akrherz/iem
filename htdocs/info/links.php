@@ -8,7 +8,7 @@ $t->content = <<<EOF
 <h3>Links</h3><p>
 
 <div class="row"><div class="col-sm-6">
-		
+
 <h3>Other State Mesonets:</h3>
 <ul>
  <li><a href="http://www.awis.com/mesonet/index.html">Alabama Mesonet</a></li>
@@ -23,7 +23,6 @@ $t->content = <<<EOF
  <li><a href="http://www.mesonet.ttu.edu/">West Texas Mesonet</a></li>
  <li><a href="http://agwx.soils.wisc.edu/uwex_agwx/awon">Wisconsin Extension AgWeather</a></li>
 </ul>
-		
 
 <h3>Real Time Air Quality Charts and Maps</h3>
 
@@ -46,7 +45,7 @@ access this data in the following locations:</p>
 </ul>
 
 </div><div class="col-sm-6">
-		
+
 <h3>Other Links:</h3>
 <ul>
  <li><a href="http://www.iowaagriculture.gov/climatology.asp">Iowa State Climatologist Office</a></li>

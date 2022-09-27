@@ -1,28 +1,29 @@
 """Generate current plot of Temperature"""
 import datetime
 
-from pandas import read_sql
+import pandas as pd
 from pyiem.plot import MapPlot
-from pyiem.util import get_dbconnstr
+from pyiem.util import get_sqlalchemy_conn, utc
 
 
 def get_df():
     """Get my data"""
-
-    return read_sql(
-        """
-      SELECT s.id as station, s.network, tmpf, drct, sknt,
-      ST_x(s.geom) as lon, ST_y(s.geom) as lat
-      FROM current c, stations s
-      WHERE s.network ~* 'ASOS' and s.country = 'US' and
-      s.state not in ('HI', 'AK') and
-      s.iemid = c.iemid and
-      (valid + '30 minutes'::interval) > now() and
-      tmpf >= -50 and tmpf < 140
-    """,
-        get_dbconnstr("iem"),
-        index_col="station",
-    )
+    with get_sqlalchemy_conn("iem") as conn:
+        df = pd.read_sql(
+            """
+        SELECT s.id as station, s.network, tmpf, drct, sknt,
+        ST_x(s.geom) as lon, ST_y(s.geom) as lat
+        FROM current c, stations s
+        WHERE s.network ~* 'ASOS' and s.country = 'US' and
+        s.state not in ('HI', 'AK') and
+        s.iemid = c.iemid and
+        (valid + '30 minutes'::interval) > now() and
+        tmpf >= -50 and tmpf < 140
+        """,
+            conn,
+            index_col="station",
+        )
+    return df
 
 
 def main():
@@ -37,7 +38,7 @@ def main():
         mp = MapPlot(
             axisbg="white",
             sector=sector,
-            title=("%s 2 meter Air Temperature") % (sector.capitalize(),),
+            title=f"{sector.capitalize()} 2 meter Air Temperature",
             subtitle=now.strftime("%d %b %Y %-I:%M %p"),
         )
         mp.contourf(
@@ -53,11 +54,9 @@ def main():
         )
         if sector == "iowa":
             mp.drawcounties()
-        pqstr = ("plot ac %s00 %s_tmpf.png %s_tmpf_%s.png png" "") % (
-            datetime.datetime.utcnow().strftime("%Y%m%d%H"),
-            sector,
-            sector,
-            datetime.datetime.utcnow().strftime("%H"),
+        pqstr = (
+            f"plot ac {utc():%Y%m%d%H}00 {sector}_tmpf.png "
+            f"{sector}_tmpf_{utc():%H}.png png"
         )
         mp.postprocess(view=False, pqstr=pqstr)
         mp.close()
