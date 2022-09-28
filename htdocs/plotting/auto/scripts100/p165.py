@@ -96,6 +96,13 @@ def get_description():
             ),
         ),
         dict(
+            optional=True,
+            type="sday",
+            default=f"{today:%m%d}",
+            name="sday",
+            label="Plot percentiles for a given date [optional]",
+        ),
+        dict(
             type="year",
             default=1893,
             optional=True,
@@ -185,14 +192,7 @@ def plotter(fdict):
     df["doy"] = (df["event"] - df["min_day"]).dt.days
 
     basedate = datetime.date(2000, 7 if varname == "fall_below" else 1, 1)
-    if ctx.get("p") is None:
-        df2 = df[df[YRGP[varname]] == year].copy()
-        # Require sites have enough data
-        df2 = df2[df2["count"] > (df2["count"].max() * 0.9)]
-        title = r"%s %s %s$^\circ$F" % (year, PDICT2[varname], threshold)
-        df2["pdate"] = df2["event"].apply(lambda x: x.strftime("%-m/%-d"))
-        extra = ""
-    else:
+    if ctx.get("p") is not None:
         # Remove low count stations
         df2 = df[["doy"]].groupby("station").count()
         df = df[~df.index.isin(df2[df2["doy"] < 10].index.values)]
@@ -212,6 +212,31 @@ def plotter(fdict):
             ", period of record: "
             f"{df[YRGP[varname]].min():.0f}-{df[YRGP[varname]].max():.0f}"
         )
+    elif ctx.get("sday") is not None:
+        # Compute percentiles for the given date
+        df2 = df[["doy"]].groupby("station").count()
+        df = df[~df.index.isin(df2[df2["doy"] < 10].index.values)]
+        doy = (ctx["sday"] - basedate).days
+        hits = df[df["doy"] <= doy]["doy"].groupby("station").count()
+        # count again due to filtering above
+        df2 = df[["doy"]].groupby("station").count()
+        df2["percentile"] = (hits / df2["doy"] * 100).fillna(0)
+        title = (
+            f"Percentile on {ctx['sday']:%-d %b} of {PDICT2[varname]} "
+            f"{threshold}"
+            r"$^\circ$F"
+        )
+        extra = (
+            ", period of record: "
+            f"{df[YRGP[varname]].min():.0f}-{df[YRGP[varname]].max():.0f}"
+        )
+    else:
+        df2 = df[df[YRGP[varname]] == year].copy()
+        # Require sites have enough data
+        df2 = df2[df2["count"] > (df2["count"].max() * 0.9)]
+        title = f"{year} {PDICT2[varname]} {threshold}" r"$^\circ$F"
+        df2["pdate"] = df2["event"].apply(lambda x: x.strftime("%-m/%-d"))
+        extra = ""
     if df2.empty:
         raise NoDataFound("No Data was found")
     for station in df2.index.values:
@@ -230,30 +255,52 @@ def plotter(fdict):
         subtitle=f"based on NWS COOP and IEM Daily Estimates{extra}",
         nocaption=True,
     )
-    levs = np.linspace(
-        df2["doy"].min() - 1, df2["doy"].max() + 1, 7, dtype="i"
-    )
-    if "cint" in ctx:
-        levs = np.arange(
-            df2["doy"].min() - 1, df2["doy"].max() + 1, ctx["cint"], dtype="i"
-        )
-    if popt == "contour" and (levs[-1] - levs[0]) > 5:
-
-        def f(val):
-            return (basedate + datetime.timedelta(days=int(val))).strftime(
-                "%b %-d"
-            )
-
-        levlables = list(map(f, levs))
+    if ctx.get("sday") is not None:
         mp.contourf(
             df2["lon"],
             df2["lat"],
-            df2["doy"],
-            levs,
-            clevlabels=levlables,
+            df2["percentile"],
+            np.arange(0, 101, 10),
             cmap=ctx["cmap"],
+            extend="neither",
         )
-    mp.plot_values(df2["lon"], df2["lat"], df2["pdate"].values, labelbuffer=5)
+        mp.plot_values(
+            df2["lon"],
+            df2["lat"],
+            df2["percentile"].values,
+            fmt="%.0f",
+            labelbuffer=5,
+        )
+    else:
+        levs = np.linspace(
+            df2["doy"].min() - 1, df2["doy"].max() + 1, 7, dtype="i"
+        )
+        if "cint" in ctx:
+            levs = np.arange(
+                df2["doy"].min() - 1,
+                df2["doy"].max() + 1,
+                ctx["cint"],
+                dtype="i",
+            )
+        if popt == "contour" and (levs[-1] - levs[0]) > 5:
+
+            def f(val):
+                return (basedate + datetime.timedelta(days=int(val))).strftime(
+                    "%b %-d"
+                )
+
+            levlables = list(map(f, levs))
+            mp.contourf(
+                df2["lon"],
+                df2["lat"],
+                df2["doy"],
+                levs,
+                clevlabels=levlables,
+                cmap=ctx["cmap"],
+            )
+        mp.plot_values(
+            df2["lon"], df2["lat"], df2["pdate"].values, labelbuffer=5
+        )
     mp.drawcounties()
 
     return mp.fig, df[[YRGP[varname], "event", "doy"]]
@@ -262,11 +309,11 @@ def plotter(fdict):
 if __name__ == "__main__":
     plotter(
         dict(
-            p=50,
+            sday="0928",
             sector="IA",
             threshold=32,
             var="fall_below",
             popt="contour",
-            year="2019",
+            year="2022",
         )
     )
