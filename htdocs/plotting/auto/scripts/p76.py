@@ -12,29 +12,27 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, utc
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
-MDICT = dict(
-    [
-        ("all", "No Month/Time Limit"),
-        ("water_year", "Water Year"),
-        ("spring", "Spring (MAM)"),
-        ("spring2", "Spring (AMJ)"),
-        ("fall", "Fall (SON)"),
-        ("winter", "Winter (DJF)"),
-        ("summer", "Summer (JJA)"),
-        ("jan", "January"),
-        ("feb", "February"),
-        ("mar", "March"),
-        ("apr", "April"),
-        ("may", "May"),
-        ("jun", "June"),
-        ("jul", "July"),
-        ("aug", "August"),
-        ("sep", "September"),
-        ("oct", "October"),
-        ("nov", "November"),
-        ("dec", "December"),
-    ]
-)
+MDICT = {
+    "all": "No Month/Time Limit",
+    "water_year": "Water Year",
+    "spring": "Spring (MAM)",
+    "spring2": "Spring (AMJ)",
+    "fall": "Fall (SON)",
+    "winter": "Winter (DJF)",
+    "summer": "Summer (JJA)",
+    "jan": "January",
+    "feb": "February",
+    "mar": "March",
+    "apr": "April",
+    "may": "May",
+    "jun": "June",
+    "jul": "July",
+    "aug": "August",
+    "sep": "September",
+    "oct": "October",
+    "nov": "November",
+    "dec": "December",
+}
 PDICT = {
     "tmpf": "Air Temperature",
     "dwpf": "Dew Point Temperature",
@@ -284,7 +282,6 @@ def make_plot(df, ctx):
     )
 
     (fig, ax) = figure_axes(title=title, apctx=ctx)
-    ax.set_position([0.05, 0.06, 0.93, 0.84])
 
     ar = ["tmpf", "relh", "dwpf", "feel"]
     colorabove = "seagreen" if varname in ar else "lightsalmon"
@@ -338,7 +335,7 @@ def make_plot(df, ctx):
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax.set_ylabel(f"{PDICT[varname]} [{UNITS[varname]}]")
     ax.grid(True)
-    ax.legend(ncol=1, loc=(0.9, 1.0))
+    ax.legend(ncol=2)
     return fig, means
 
 

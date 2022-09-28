@@ -125,11 +125,11 @@ def get_df(ctx, buf=2.25):
         bnds = reference.wfo_bounds[ctx["wfo"]]
         ctx["title"] = f"NWS CWA {ctx['_sname']}"
     with get_sqlalchemy_conn("iem") as conn:
-        df = pd.read_sql(
+        df = gpd.read_postgis(
             """
             WITH mystation as (
                 select id, st_x(geom) as lon, st_y(geom) as lat,
-                state, wfo, iemid, country from stations
+                state, wfo, iemid, country, geom from stations
                 where network ~* 'ASOS' and
                 ST_contains(ST_geomfromtext(
                     'SRID=4326;POLYGON((%s %s, %s %s, %s %s, %s %s, %s %s))'),
@@ -139,7 +139,7 @@ def get_df(ctx, buf=2.25):
             s.min_rh, s.max_rh, s.min_feel, s.max_feel,
             max_sknt * 1.15 as max_sknt,
             max_gust * 1.15 as max_gust, t.id as station, t.lat, t.lon,
-            t.wfo, t.state, t.country from
+            t.wfo, t.state, t.country, t.geom from
             summary s JOIN mystation t on (s.iemid = t.iemid)
             WHERE s.day = %s
         """,
@@ -157,14 +157,18 @@ def get_df(ctx, buf=2.25):
                 bnds[1] - buf,
                 ctx["day"],
             ),
+            geom_col="geom",
         )
     if df.empty:
         raise NoDataFound("No Data Found.")
-    df = gpd.GeoDataFrame(
-        df, geometry=gpd.points_from_xy(df["lon"], df["lat"])
-    )
 
     return df[pd.notnull(df[ctx["v"]])]
+
+
+def geojson(fdict):
+    """GeoJSON Content."""
+    ctx = get_autoplot_context(fdict, get_description())
+    return (get_df(ctx).drop(columns=["lat", "lon", "day"])), ctx["v"]
 
 
 def plotter(fdict):
@@ -237,7 +241,11 @@ def plotter(fdict):
     if ctx["t"] == "cwa":
         mp.draw_cwas()
 
-    return mp.fig, df
+    return mp.fig, df.drop(
+        columns=[
+            "geom",
+        ]
+    )
 
 
 if __name__ == "__main__":
