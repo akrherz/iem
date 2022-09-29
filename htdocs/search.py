@@ -78,6 +78,20 @@ def station_handler(sid):
     return station_df_handler(df)
 
 
+def has_station(sid):
+    """Le Sigh."""
+    # convert KXXX to XXX
+    if sid.startswith("K") and len(sid) == 4:
+        sid = sid[1:]
+    with get_sqlalchemy_conn("mesosite") as conn:
+        df = pd.read_sql(
+            "SELECT id, network from stations where id = %s",
+            conn,
+            params=(sid,),
+        )
+    return not df.empty
+
+
 def find_handler(q):
     """Do we have a handler for this request?"""
     if q == "":
@@ -87,10 +101,12 @@ def find_handler(q):
     if m:
         d = m.groupdict()
         return ap_handler, d["n"]
+    # Can overlap with AFOS_RE
+    if STATION_RE.match(q):
+        if has_station(q):
+            return station_handler, q.upper()
     if AFOS_RE.match(q):
         return afos_handler, q.upper()
-    if STATION_RE.match(q):
-        return station_handler, q.upper()
     # Likely want to always do this one last, as it will catch things
     c = CommonRegex(q)
     # pylint: disable=no-member
