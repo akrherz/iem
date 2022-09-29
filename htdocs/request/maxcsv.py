@@ -52,6 +52,65 @@ def figurePhase(p1, p2):
     return "Full Moon"
 
 
+def do_moonphase(lon, lat):
+    """Get the next four phases of the moon."""
+    moon = ephem.Moon()
+    obs = ephem.Observer()
+    obs.lat = str(lat)
+    obs.long = str(lon)
+    obs.date = utc().strftime("%Y/%m/%d %H:%M")
+    series = pd.Series(
+        {
+            "new_moon": ephem.next_new_moon(utc())
+            .datetime()
+            .replace(tzinfo=datetime.timezone.utc),
+            "full_moon": ephem.next_full_moon(utc())
+            .datetime()
+            .replace(tzinfo=datetime.timezone.utc),
+            "first_quarter": ephem.next_first_quarter_moon(utc())
+            .datetime()
+            .replace(tzinfo=datetime.timezone.utc),
+            "last_quarter": ephem.next_last_quarter_moon(utc())
+            .datetime()
+            .replace(tzinfo=datetime.timezone.utc),
+        }
+    ).sort_values(ascending=True)
+    print(series)
+    # Figure out the timezone
+    cursor = get_dbconn("mesosite").cursor()
+    cursor.execute(
+        "select tzid from tz_world WHERE "
+        "st_contains(geom, st_setsrid(ST_Point(%s, %s), 4326))",
+        (lon, lat),
+    )
+    if cursor.rowcount == 0:
+        tzid = "UTC"
+    else:
+        tzid = cursor.fetchone()[0]
+    tz = ZoneInfo(tzid)
+
+    s = series.dt.to_pydatetime()
+    return pd.DataFrame(
+        {
+            "longitude": lon,
+            "latitude": lat,
+            "moon_phase1": series.index[0],
+            "moon_phase1_date": s[0].astimezone(tz).strftime("%Y/%m/%d"),
+            "moon_phase1_time": s[0].astimezone(tz).strftime("%-I:%M %P"),
+            "moon_phase2": series.index[1],
+            "moon_phase2_date": s[1].astimezone(tz).strftime("%Y/%m/%d"),
+            "moon_phase2_time": s[1].astimezone(tz).strftime("%-I:%M %P"),
+            "moon_phase3": series.index[2],
+            "moon_phase3_date": s[2].astimezone(tz).strftime("%Y/%m/%d"),
+            "moon_phase3_time": s[2].astimezone(tz).strftime("%-I:%M %P"),
+            "moon_phase4": series.index[3],
+            "moon_phase4_date": s[3].astimezone(tz).strftime("%Y/%m/%d"),
+            "moon_phase4_time": s[3].astimezone(tz).strftime("%-I:%M %P"),
+        },
+        index=[0],
+    )
+
+
 def do_moon(lon, lat):
     """Moon fun."""
     moon = ephem.Moon()
@@ -557,6 +616,9 @@ def router(appname):
         df = do_webcams("KCRG")
     elif appname == "uvi":
         df = do_uvi()
+    elif appname.startswith("moonphase"):
+        tokens = appname.replace(".txt", "").split("_")
+        df = do_moonphase(float(tokens[1]), float(tokens[2]))
     elif appname.startswith("moon"):
         tokens = appname.replace(".txt", "").split("_")
         df = do_moon(float(tokens[1]), float(tokens[2]))
