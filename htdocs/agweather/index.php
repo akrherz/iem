@@ -215,10 +215,10 @@ information for daily temperatures, but they are not always on a calendar date.
 summarized SDD data.
 <ul>
     <li><a href="/climodat/monitor.php">Climodat Station Monitor</a></li>
-  	<li><a href="/GIS/apps/coop/gsplot.phtml?var=sdd86&year={$y}">Map of Totals</a></li>
-  	<li><a href="/plotting/auto/?q=108">Single Site Graphs</a></li>
+      <li><a href="/GIS/apps/coop/gsplot.phtml?var=sdd86&year={$y}">Map of Totals</a></li>
+      <li><a href="/plotting/auto/?q=108">Single Site Graphs</a></li>
 </ul>
-  		</td>
+          </td>
 </tr>
 
 <tr><td>Wind</td>
@@ -232,12 +232,16 @@ such frequency, but it is delayed by ~24 hours.
 </td>
 <td>
 <ul>
-  <li><a href="/data/summary/today_gust.png">Peak Wind Gust</a></li>
+    <li><a href="/data/summary/today_gust.png">Peak Wind Gust</a></li>
 </ul>
 </td>
-<td colspan="3">...</td>
+<td colspan="3">
+<p><a href="/sites/windrose.phtml?station=AMW&network=IA_ASOS">Windroses</a> are
+neat visualizations of wind direction and speed frequency.  The link takes you
+to the interface for the Ames Airport.  You can switch stations to find the
+same for other locations.</p>
+</td>
 </tr>
-
 
 </tbody>
 </table>
