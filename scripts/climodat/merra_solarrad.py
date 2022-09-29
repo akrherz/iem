@@ -1,12 +1,12 @@
 """
- Sample the MERRA solar radiation analysis into estimated values for the
- COOP point archive
+Sample the MERRA solar radiation analysis into estimated values for the
+COOP point archive
 
- 1 langley is 41840.00 J m-2 is 41840.00 W s m-2 is 11.622 W hr m-2
+1 langley is 41840.00 J m-2 is 41840.00 W s m-2 is 11.622 W hr m-2
 
- So 1000 W m-2 x 3600 is 3,600,000 W s m-2 is 86 langleys
+So 1000 W m-2 x 3600 is 3,600,000 W s m-2 is 86 langleys
 
- Dr Arritt wants MJ m-2 dy-1
+RUN_MIDNIGHT.sh every 28th of the month.
 """
 import datetime
 import sys
@@ -53,7 +53,7 @@ def do(date):
     fn = sts.strftime("/mesonet/data/merra2/%Y/%Y%m%d.nc")
     fn2 = ets.strftime("/mesonet/data/merra2/%Y/%Y%m%d.nc")
     if not os.path.isfile(fn):
-        LOG.info("%s miss[%s] -> fail", sts.strftime("%Y%m%d"), fn)
+        LOG.warning("%s miss[%s] -> fail", sts.strftime("%Y%m%d"), fn)
         return
     with ncopen(fn, timeout=300) as nc:
         rad = nc.variables["SWGDN"][7:, :, :]
@@ -62,7 +62,7 @@ def do(date):
         yc = nc.variables["lat"][:]
 
     if not os.path.isfile(fn2):
-        LOG.info("%s miss[%s] -> zeros", sts.strftime("%Y%m%d"), fn2)
+        LOG.warning("%s miss[%s] -> zeros", sts.strftime("%Y%m%d"), fn2)
         rad2 = 0
         cs_rad2 = 0
     else:
@@ -134,7 +134,7 @@ def do(date):
         if row[3] in range(4, 13):
             date2 = (date + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
         ccursor2.execute(
-            f"UPDATE alldata_{row[0][:2]} SET merra_srad = %s, "
+            "UPDATE alldata SET merra_srad = %s, "
             "merra_srad_cs = %s WHERE day = %s and station = %s",
             (rad_mj, cs_rad_mj, date2, row[0]),
         )

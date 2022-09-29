@@ -1,7 +1,7 @@
 """
  Monthly download of the MERRA data, website suggests that the previous
  month is available around the 2-3 week of the next month, so this is run
- from RUN_MIDNIGHT.sh, but only on the 21rst of each month
+ from RUN_MIDNIGHT.sh, but only on the 28th of each month
 
 MERRA2 Variables we want to process
 -----------------------------------
