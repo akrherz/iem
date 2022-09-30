@@ -20,7 +20,7 @@ import os
 import sys
 import subprocess
 
-from pyiem.util import get_properties, logger
+from pyiem.util import get_properties, logger, ncopen
 
 LOG = logger()
 PROPS = get_properties()
@@ -70,6 +70,13 @@ def do_month(sts):
             cmd, stdout=subprocess.PIPE, shell=True, stderr=subprocess.PIPE
         ) as proc:
             proc.stderr.read()
+        # Check that the netcdf file is valid
+        try:
+            nc = ncopen(localfn)
+            nc.close()
+        except Exception:
+            LOG.warning("ncopen %s failed, deleting.", localfn)
+            os.unlink(localfn)
         now += interval
 
 
