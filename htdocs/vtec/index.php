@@ -4,31 +4,32 @@ require_once "../../include/mlib.php";
 require_once "../../include/forms.php";
 force_https();
 require_once "../../include/myview.php";
-$OL = "6.15.1";
+$OL = "7.1.0";
+$JQUERYUI = "1.13.2";
 $t = new MyView();
 $t->title = "Valid Time Event Code (VTEC) App";
 
-$v = isset($_GET["vtec"]) ? xssafe($_GET["vtec"]) : "2012-O-NEW-KBMX-TO-W-0001";
+$v = isset($_GET["vtec"]) ? xssafe($_GET["vtec"]) : "2022-O-NEW-KDMX-TO-W-0012";
 $tokens = preg_split('/-/', $v);
 $year = $tokens[0];
 $operation = $tokens[1];
 $vstatus = $tokens[2];
 $wfo4 = $tokens[3];
-$wfo = substr($wfo4,1,3);
+$wfo = substr($wfo4, 1, 3);
 $phenomena = $tokens[4];
 $significance = $tokens[5];
 $etn = intval($tokens[6]);
 
 $t->headextra = <<<EOM
 <link rel="stylesheet" href="/vendor/jquery-datatables/1.10.20/datatables.min.css" />
-<link rel="stylesheet" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css" />
+<link rel="stylesheet" href="/vendor/jquery-ui/${JQUERYUI}/jquery-ui.min.css" />
 <link rel='stylesheet' href="/vendor/openlayers/{$OL}/ol.css" type='text/css'>
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
 <link rel="stylesheet" href="vtec_static.css" />
 EOM;
 $t->jsextra = <<<EOM
 <script src="/vendor/jquery-datatables/1.10.20/datatables.min.js"></script>
-<script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
+<script src="/vendor/jquery-ui/${JQUERYUI}/jquery-ui.js"></script>
 <script src="/vendor/moment/2.13.0/moment.min.js"></script>
 <script src='/vendor/openlayers/{$OL}/ol.js'></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
@@ -153,8 +154,6 @@ $infodiv = <<<EOM
 
 <div id="sbwhistory"></div>
 
-
-
 EOM;
 
 $eventsdiv = <<<EOM
@@ -169,7 +168,6 @@ selected year.  Click on the row to select that event.</p>
     </button>
 </div>
 
-
 <table id="eventtable">
 <thead>
 <tr>
@@ -180,6 +178,7 @@ selected year.  Click on the row to select that event.</p>
  <th>VTEC Expire</th>
  <th>Area km**2</th>
  <th>Locations</th>
+ <th>Signature</th>
 </tr>
 </thead>
 <tbody>
@@ -315,14 +314,14 @@ $t->content = <<<EOF
     <div class="panel-body">
      <div class="tab-content clearfix">
 
-       <div class="tab-pane active" id="help">{$helpdiv}</div><!-- ./help -->
+       <div class="tab-pane active" id="help">{$helpdiv}</div>
        <div class="tab-pane" id="info">
 {$infodiv}
        </div><!-- ./info -->
-       <div class="tab-pane" id="textdata">{$textdiv}</div><!-- ./textdata -->
-       <div class="tab-pane" id="themap">{$mapdiv}</div><!-- ./themap -->
-       <div class="tab-pane" id="stormreports">{$lsrsdiv}</div><!-- ./stormreports -->
-       <div class="tab-pane" id="listevents">{$eventsdiv}</div><!-- ./listevents -->
+       <div class="tab-pane" id="textdata">{$textdiv}</div>
+       <div class="tab-pane" id="themap">{$mapdiv}</div>
+       <div class="tab-pane" id="stormreports">{$lsrsdiv}</div>
+       <div class="tab-pane" id="listevents">{$eventsdiv}</div>
     </div><!-- ./tab-content -->
     </div><!-- ./panel-body -->
   </div><!-- ./col-md-9 -->

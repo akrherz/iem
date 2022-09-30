@@ -74,12 +74,9 @@ def run(wfo, year, phenomena, significance, combo):
         "events": [],
     }
     for row in cursor:
-        uri = "/vtec/#%s-O-NEW-K%s-%s-%s-%04i" % (
-            year,
-            wfo,
-            row["phenomena"],
-            row["significance"],
-            row["eventid"],
+        uri = (
+            f"/vtec/#{year}-O-NEW-K{wfo}-{row['phenomena']}-"
+            f"{row['significance']}-{row['eventid']:04.0f}"
         )
         res["events"].append(
             dict(
@@ -95,6 +92,7 @@ def run(wfo, year, phenomena, significance, combo):
                 init_expire=row["utc_init_expire"].strftime(ISO9660),
                 uri=uri,
                 wfo=wfo,
+                fcster=row["fcster"],
             )
         )
 
