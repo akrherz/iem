@@ -1,20 +1,25 @@
 .tab-pane {
     width: 100%;
 }
+
 #map {
     width: 100%;
     min-height: 400px;
-    height: 450px;
+    height: 75vh;
+    box-sizing: border-box;
 }
+
 td.details-control {
-    text-align:center;
-    color:forestgreen;
+    text-align: center;
+    color: forestgreen;
     cursor: pointer;
 }
+
 tr.shown td.details-control {
-    text-align:center; 
-    color:red;
+    text-align: center;
+    color: red;
 }
+
 .popover {
-  min-width: 400px;
+    min-width: 400px;
 }
