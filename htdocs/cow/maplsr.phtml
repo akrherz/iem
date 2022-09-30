@@ -5,8 +5,14 @@ require_once "../../config/settings.inc.php";
 $ts = isset($_GET["ts"]) ? strtotime($_GET["ts"]) : time();
 $ts2 = isset($_GET["ts2"]) ? strtotime($_GET["ts2"]) : $ts;
 $wfo = isset($_GET["wfo"]) ? $_GET["wfo"] : "";
-$mywfos = isset($_GET["wfos"]) ? $_GET["wfos"] : Array();
-if (sizeof($mywfos) == 0 && $wfo != ""){ $mywfos[] = $wfo; }
-$url = sprintf("/lsr/#%s/%s/%s", implode(",",$mywfos),
-       date("YmdHi", $ts), date("YmdHi", $ts2) );
+$mywfos = isset($_GET["wfos"]) ? $_GET["wfos"] : array();
+if (sizeof($mywfos) == 0 && $wfo != "") {
+    $mywfos[] = $wfo;
+}
+$url = sprintf(
+    "/lsr/#%s/%s/%s",
+    implode(",", $mywfos),
+    date("YmdHi", $ts),
+    date("YmdHi", $ts2)
+);
 header("Location: $url");

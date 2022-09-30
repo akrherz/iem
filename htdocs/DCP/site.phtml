@@ -22,37 +22,37 @@ $hads = iemdb("hads");
 $mesosite = iemdb("mesosite");
 
 if ($station != null){
-	/* Make sure this site is not both a DCP and COOP site, this would cause
-	 * the app to do a yearlong query, which is expensive.
-	 */
-	$rs = pg_prepare($mesosite, "DUPSTATIONS", "SELECT network from stations
-			WHERE id = $1 and (network ~* '_DCP' or network ~* '_COOP')");
-	$rs = pg_execute($mesosite, "DUPSTATIONS", Array($station));
-	$alone = (pg_numrows($rs) == 1) ? TRUE: FALSE;
-	
-	if (preg_match('/_COOP/', $network) && $alone){
-		$table = sprintf("raw%s", date("Y",$ts));
-		$rs = pg_prepare($hads, "QUERY", "SELECT * from $table WHERE 
-				station = $1 ORDER by valid ASC");
-				$rs = pg_execute($hads, "QUERY", Array($station));
-	} else {
-		$table = sprintf("raw%s_%s", date("Y",$ts), date("m", $ts));
-		$rs = pg_prepare($hads, "QUERY", "SELECT * from $table WHERE 
-				station = $1 and valid BETWEEN $2 and $3 ORDER by valid ASC");
-		$rs = pg_execute($hads, "QUERY", 
-				Array($station, date("Y-m-d", $ts), date("Y-m-d", $ts+86400)));
-	}
+    /* Make sure this site is not both a DCP and COOP site, this would cause
+     * the app to do a yearlong query, which is expensive.
+     */
+    $rs = pg_prepare($mesosite, "DUPSTATIONS", "SELECT network from stations
+            WHERE id = $1 and (network ~* '_DCP' or network ~* '_COOP')");
+    $rs = pg_execute($mesosite, "DUPSTATIONS", Array($station));
+    $alone = (pg_numrows($rs) == 1) ? TRUE: FALSE;
+    
+    if (preg_match('/_COOP/', $network) && $alone){
+        $table = sprintf("raw%s", date("Y",$ts));
+        $rs = pg_prepare($hads, "QUERY", "SELECT * from $table WHERE 
+                station = $1 ORDER by valid ASC");
+                $rs = pg_execute($hads, "QUERY", Array($station));
+    } else {
+        $table = sprintf("raw%s_%s", date("Y",$ts), date("m", $ts));
+        $rs = pg_prepare($hads, "QUERY", "SELECT * from $table WHERE 
+                station = $1 and valid BETWEEN $2 and $3 ORDER by valid ASC");
+        $rs = pg_execute($hads, "QUERY", 
+                Array($station, date("Y-m-d", $ts), date("Y-m-d", $ts+86400)));
+    }
 
-	$data = Array();
-	$cols = Array();
-	for($i=0;$row=pg_fetch_array($rs);$i++){
-	  $cols[ $row["key"] ] = 1;
-	  $data[ strtotime(substr($row["valid"],0,16)) ][ $row["key"] ] = $row["value"];  
-	}
-	$mycols = array_keys($cols);
-	sort($mycols);
+    $data = Array();
+    $cols = Array();
+    for($i=0;$row=pg_fetch_array($rs);$i++){
+      $cols[ $row["key"] ] = 1;
+      $data[ strtotime(substr($row["valid"],0,16)) ][ $row["key"] ] = $row["value"];  
+    }
+    $mycols = array_keys($cols);
+    sort($mycols);
 }
-	
+    
 $t->title = "SHEF Data by Site by Day";
 if (is_null($station)){
   $t->headextra = <<<EOF
@@ -67,7 +67,7 @@ EOF;
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function(){
-	$(".iemselect2").select2();	
+    $(".iemselect2").select2();	
 });
 </script>
 EOF;
@@ -76,14 +76,14 @@ EOF;
 
 $nselect = "<select name=\"network\">";
 $rs = pg_query($mesosite, "SELECT id, name from networks ". 
-	"where id ~* '_DCP' or id ~* '_COOP' ORDER by name ASC");
+    "where id ~* '_DCP' or id ~* '_COOP' ORDER by name ASC");
 for ($i=0;$row=pg_fetch_assoc($rs);$i++){
-	$sel = '';
-	if ($network == $row["id"]){
-		$sel = " selected='SELECTED'";
-	}
-	$nselect .= sprintf("<option value='%s'%s>%s</option>\n",
-			$row["id"], $sel, $row["name"]);
+    $sel = '';
+    if ($network == $row["id"]){
+        $sel = " selected='SELECTED'";
+    }
+    $nselect .= sprintf("<option value='%s'%s>%s</option>\n",
+            $row["id"], $sel, $row["name"]);
 }
 $nselect .= "</select>";
 $n2select = networkSelect($network, $station);
@@ -94,7 +94,7 @@ $ds = daySelect($day);
 
 $extra = "";
 if (is_null($station)){ 
-	$extra = <<<EOF
+    $extra = <<<EOF
 <style type="text/css">
         #map {
             width: 100%;
@@ -106,47 +106,47 @@ if (is_null($station)){
 <div id="map"></div>
 EOF;
 } else { 
-	if (! $alone){
-		$extra = <<<EOF
+    if (! $alone){
+        $extra = <<<EOF
 <div class="warning">This site is listed within the IEM database as both a 
-	"COOP" and "DCP" site. This printout below will only include a days 
-	worth of data.</div>
+    "COOP" and "DCP" site. This printout below will only include a days 
+    worth of data.</div>
 EOF;
-	}
-	$extra .= "<br /><br />
-	<table class=\"table table-striped table-bordered\" style=\"width: auto;\">";
-	$theader = "<thead><tr><th>Site:</th><th>Valid:</th>";
-	foreach($mycols as $k => $v){ $theader .= "<th>$v</th>"; }
-	$theader .= "</tr></thead>";
-	
-	$times = array_keys($data);
-	if (sizeof($times) == 0){
-		$extra .= $theader;
-		$extra .= "<tr><td colspan=\"2\">No Data Found</td></tr>";
-	}
-	$colorme = True;
-	$cnt = 0;
-	foreach($times as $k => $ts){
-		if ($cnt % 30 == 0){
-			$extra .= $theader;
-		}
-	
-		$extra .= sprintf("<tr%s><td>%s</td><td><a href='cat.phtml?year=%s&month=%s&day=%s&hour=%s&minute=%s'>%s</a></td>",
-				($colorme)? " style='background: #eee;'": "", $station,
-				date("Y", $ts), date("m", $ts), date("d", $ts), date("H", $ts),
-				date("i", $ts), date("Y-m-d H:i", $ts) );
-		$colorme = !$colorme;
-		foreach($mycols as $k => $v){
-			$extra .= sprintf("<td>%s</td>", $data[$ts][$v] ?? '');
-		}
-		$extra .= "</tr>";
-	
-		$cnt += 1;
-	}
-	
-	$extra .= "</table>";
+    }
+    $extra .= "<br /><br />
+    <table class=\"table table-striped table-bordered\" style=\"width: auto;\">";
+    $theader = "<thead><tr><th>Site:</th><th>Valid:</th>";
+    foreach($mycols as $k => $v){ $theader .= "<th>$v</th>"; }
+    $theader .= "</tr></thead>";
+    
+    $times = array_keys($data);
+    if (sizeof($times) == 0){
+        $extra .= $theader;
+        $extra .= "<tr><td colspan=\"2\">No Data Found</td></tr>";
+    }
+    $colorme = True;
+    $cnt = 0;
+    foreach($times as $k => $ts){
+        if ($cnt % 30 == 0){
+            $extra .= $theader;
+        }
+    
+        $extra .= sprintf("<tr%s><td>%s</td><td><a href='cat.phtml?year=%s&month=%s&day=%s&hour=%s&minute=%s'>%s</a></td>",
+                ($colorme)? " style='background: #eee;'": "", $station,
+                date("Y", $ts), date("m", $ts), date("d", $ts), date("H", $ts),
+                date("i", $ts), date("Y-m-d H:i", $ts) );
+        $colorme = !$colorme;
+        foreach($mycols as $k => $v){
+            $extra .= sprintf("<td>%s</td>", $data[$ts][$v] ?? '');
+        }
+        $extra .= "</tr>";
+    
+        $cnt += 1;
+    }
+    
+    $extra .= "</table>";
 }
-	
+    
 $t->content = <<<EOF
 <ol class="breadcrumb">
  <li><a href="/DCP/">GOES DCP/HADS Mainpage</a></li>
@@ -189,7 +189,7 @@ $t->content = <<<EOF
 </tr></table>
 </form>
 
-	
+    
 $extra
 EOF;
 $t->render('full.phtml');

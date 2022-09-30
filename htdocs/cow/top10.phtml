@@ -18,25 +18,25 @@ $limit = isset($_GET["limit"])? xssafe($_GET["limit"]): 'TOSV';
 $tlimit = isset($_GET["tlimit"])? xssafe($_GET["tlimit"]): '2007';
 $lstring = "'SV','TO'";
 if ($limit == "TO"){
-	$lstring = "'TO'";
+    $lstring = "'TO'";
 } else if ($limit == 'SV'){
-	$lstring = "'SV'";
+    $lstring = "'SV'";
 } else if ($limit == 'FF'){
-	$lstring = "'FF'";
+    $lstring = "'FF'";
 } else if ($limit == 'MA'){
-	$lstring = "'MA'";
+    $lstring = "'MA'";
 }
 
 $tstring = '1980-01-01';
 if ($tlimit == '2007'){
-	$tstring = '2007-10-01';
+    $tstring = '2007-10-01';
 }
 else if ($tlimit == '2011'){
-	$tstring = '2011-01-01';
+    $tstring = '2011-01-01';
 }
 $wlimit = "and wfo = $1";
 if ($wfo == 'ALL'){
-	$wlimit = "and 'ALL' = $1";
+    $wlimit = "and 'ALL' = $1";
 }
 
 pg_query($postgis, "SET TIME ZONE 'UTC'");
@@ -55,40 +55,40 @@ $extra = Array("ALL" => Array("name" => "--- ALL Forecast Offices ---"));
 $sselect = networkSelect("WFO", $wfo, $extra, "wfo");
 
 $ar = Array("TOSV" => "Tornado + Severe Thunderstorm",
-	"TO" => "Tornado Only",
-	"SV" => "Severe Thunderstorm Only",
-	"FF" => "Flash Flood Only",
-	"MA" => "Marine Only");
+    "TO" => "Tornado Only",
+    "SV" => "Severe Thunderstorm Only",
+    "FF" => "Flash Flood Only",
+    "MA" => "Marine Only");
 
 $lselect = make_select("limit", $limit, $ar);
 
 $ar = Array("all" => "All Available",
-	"2007" => "After 1 Oct 2007",
-	"2011" => "After 1 Jan 2011");
+    "2007" => "After 1 Oct 2007",
+    "2011" => "After 1 Jan 2011");
 $tselect = make_select("tlimit", $tlimit, $ar);
 
 $ltable = "";
 $rs = pg_execute($postgis, "SELECTDESC", Array($wfo));
 for($i=0;$row=pg_fetch_array($rs);$i++){
 
-	$url = sprintf("/vtec/#%s-O-%s-K%s-%s-%s-%04d", substr($row['date'],0,4),
-			'NEW', $row['wfo'], $row["phenomena"],
-			$row['significance'], $row["eventid"]);
-	$ltable .= sprintf("<tr><td>%s</td><td>%.0f</td><td>%s</td><td><a href='%s'>%s %s %s</a></td></tr>\n",
-			$row['date'], $row['area'], $row['wfo'], $url, $vtec_phenomena[$row['phenomena']],
-			$vtec_significance[$row["significance"]], $row['eventid']);
+    $url = sprintf("/vtec/#%s-O-%s-K%s-%s-%s-%04d", substr($row['date'],0,4),
+            'NEW', $row['wfo'], $row["phenomena"],
+            $row['significance'], $row["eventid"]);
+    $ltable .= sprintf("<tr><td>%s</td><td>%.0f</td><td>%s</td><td><a href='%s'>%s %s %s</a></td></tr>\n",
+            $row['date'], $row['area'], $row['wfo'], $url, $vtec_phenomena[$row['phenomena']],
+            $vtec_significance[$row["significance"]], $row['eventid']);
 }
 
 $btable = "";
 $rs = pg_execute($postgis, "SELECTASC", Array($wfo));
 for($i=0;$row=pg_fetch_array($rs);$i++){
 
-	$url = sprintf("/vtec/#%s-O-%s-K%s-%s-%s-%04d", substr($row['date'],0,4),
-			'NEW', $row['wfo'], $row["phenomena"],
-			$row['significance'], $row["eventid"]);
-	$btable .= sprintf("<tr><td>%s</td><td>%.2f</td><td>%s</td><td><a href='%s'>%s %s %s</a></td></tr>\n",
-			$row['date'], $row['area'], $row["wfo"], $url, $vtec_phenomena[$row['phenomena']],
-			$vtec_significance[$row["significance"]], $row['eventid']);
+    $url = sprintf("/vtec/#%s-O-%s-K%s-%s-%s-%04d", substr($row['date'],0,4),
+            'NEW', $row['wfo'], $row["phenomena"],
+            $row['significance'], $row["eventid"]);
+    $btable .= sprintf("<tr><td>%s</td><td>%.2f</td><td>%s</td><td><a href='%s'>%s %s %s</a></td></tr>\n",
+            $row['date'], $row['area'], $row["wfo"], $url, $vtec_phenomena[$row['phenomena']],
+            $vtec_significance[$row["significance"]], $row['eventid']);
 }
 
 $t->content = <<<EOF

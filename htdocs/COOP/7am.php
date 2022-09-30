@@ -13,9 +13,9 @@ $t->headextra = <<<EOF
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
 <style>
 .map {
-        height: 400px;
-        width: 100%;
-        background-color: #FFFFFF;
+    height: 400px;
+    width: 100%;
+    background-color: #FFFFFF;
 }
 .popover {
     width: 300px;
@@ -32,29 +32,29 @@ EOF;
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
-	<li><a href="/COOP/">NWS COOP</a></li>
-	<li class="active">7 AM - 24 Hour Precipitation Analysis</li>
+    <li><a href="/COOP/">NWS COOP</a></li>
+    <li class="active">7 AM - 24 Hour Precipitation Analysis</li>
 </ol>
 
 <p>The purpose of this application is to provide a visual comparison of
-	various datasources for the once daily COOP Reports.</p>
-		
+    various datasources for the once daily COOP Reports.</p>
+        
 <form name="bah">
 <div class="row">
 <div class="col-md-6">
-		<strong>Parameter to Plot:</strong>
-	<select onChange="javascript: updateMap();" id="renderattr">
-		<option value='pday'>Precipitation</option>
-		<option value='snow'>Snowfall</option>
-		<option value='snowd'>Snow Depth [inch]</option>	
-		<option value='high'>24 Hour High Temperature</option>
-		<option value='low'>24 Hour Low Temperature</option>
-		<option value='coop_tmpf'>Temperature at Observation Time</option>
-	</select>
-	<br /><strong>MRMS Legend:</strong> <img src="/images/mrms_q3_p24h.png" />
+        <strong>Parameter to Plot:</strong>
+    <select onChange="javascript: updateMap();" id="renderattr">
+        <option value='pday'>Precipitation</option>
+        <option value='snow'>Snowfall</option>
+        <option value='snowd'>Snow Depth [inch]</option>	
+        <option value='high'>24 Hour High Temperature</option>
+        <option value='low'>24 Hour Low Temperature</option>
+        <option value='coop_tmpf'>Temperature at Observation Time</option>
+    </select>
+    <br /><strong>MRMS Legend:</strong> <img src="/images/mrms_q3_p24h.png" />
 </div>
 <div class="col-md-6">
-	<strong>View Date:</strong>
+    <strong>View Date:</strong>
     <button role="button" id="minusday">-1 Day</button>
     <input type="text" id="datepicker" size="30">
     <button role="button" id="plusday">+1 Day</button>
@@ -68,7 +68,7 @@ $t->content = <<<EOF
   <!-- Hidden div with the popover content -->
   <p>This is the popover content</p>
 </div>
-		
+        
 
 EOF;
 $t->render("full.phtml");

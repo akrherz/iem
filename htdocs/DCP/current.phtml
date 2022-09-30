@@ -1,29 +1,29 @@
 <?php
- require_once "../../config/settings.inc.php";
- define("IEM_APPID", 75);
- require_once "../../include/myview.php";
- $t = new MyView();
- require_once "../../include/database.inc.php";
- require_once "../../include/forms.php";
- require_once "../../include/mlib.php";
- $pgconn = iemdb('iem');
- $mesosite = iemdb('mesosite');
-  
- $sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']): "valid";
- $network = isset($_GET['network']) ? xssafe($_GET["network"]): 'IA_DCP';
- $shef = isset($_REQUEST['shef']) && $_REQUEST['shef'] == 'yes';
+require_once "../../config/settings.inc.php";
+define("IEM_APPID", 75);
+require_once "../../include/myview.php";
+$t = new MyView();
+require_once "../../include/database.inc.php";
+require_once "../../include/forms.php";
+require_once "../../include/mlib.php";
+$pgconn = iemdb('iem');
+$mesosite = iemdb('mesosite');
 
- $t->title = "DCP/GOES Current Conditions";
- $t->refresh = 600;
+$sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']) : "valid";
+$network = isset($_GET['network']) ? xssafe($_GET["network"]) : 'IA_DCP';
+$shef = isset($_REQUEST['shef']) && $_REQUEST['shef'] == 'yes';
+
+$t->title = "DCP/GOES Current Conditions";
+$t->refresh = 600;
 
 $t->breadcrumbs = <<<EOF
 <ol class="breadcrumb">
-		<li><a href="/DCP/">DCP Network</a></li>
-		<li class="active">Sortable Currents</li>
-		</ol>
+        <li><a href="/DCP/">DCP Network</a></li>
+        <li class="active">Sortable Currents</li>
+        </ol>
 EOF;
-$cols = Array(
-    "valid" => "Timestamp",		
+$cols = array(
+    "valid" => "Timestamp",
     'station' => "Station ID",
     'name' => 'Station Name',
     'HGIZ' => 'Water Stage Height',
@@ -34,43 +34,52 @@ $cols = Array(
     'TWIZ' => 'Water Temperature',
 );
 
- $rs = pg_prepare(
-     $pgconn,
-     "SELECT",
-     "select c.*, s.name, ".
-     "c.valid at time zone s.tzname as localvalid ".
-     "from current_shef c JOIN stations s ".
-     "on (c.station = s.id) where s.network = $1");
- $rs = pg_execute($pgconn, "SELECT", Array($network));
+$rs = pg_prepare(
+    $pgconn,
+    "SELECT",
+    "select c.*, s.name, " .
+        "c.valid at time zone s.tzname as localvalid " .
+        "from current_shef c JOIN stations s " .
+        "on (c.station = s.id) where s.network = $1"
+);
+$rs = pg_execute($pgconn, "SELECT", array($network));
 
- $obs = Array();
- for($i=0;$row=pg_fetch_assoc($rs);$i++){
- 	$datakey = sprintf("%s%s%s", $row["physical_code"], $row["duration"],
- 			$row["extremum"]);
- 	$obs[ $row['station'] ][ $datakey ] = $row["value"]; 
- 	$obs[ $row['station'] ]['valid'] = strtotime($row["localvalid"]);
- 	$obs[ $row['station'] ]['name'] = $row["name"];
- }
- $final = aSortBySecondIndex($obs, $sortcol, "desc");
- 
- $nselect = "<select name=\"network\">";
- $rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'DCP' ORDER by name ASC");
- for ($i=0;$row=pg_fetch_assoc($rs);$i++){
- 	$sel = '';
- 	if ($network == $row["id"]){
- 		$sel = " selected='SELECTED'";
- 	}
- 	$nselect .= sprintf("<option value='%s'%s>%s</option>\n",
- 	  $row["id"], $sel, $row["name"]);
- }
- $nselect .= "</select>";
- 
- $ar = Array("no" => "No", "yes" => "Yes");
- $sselect = make_select("shef", $shef, $ar);
- 
- $t->current_network = "DCP"; 
- $baseurl2 = "current.phtml?network=$network&sortcol=";
- 
+$obs = array();
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    $datakey = sprintf(
+        "%s%s%s",
+        $row["physical_code"],
+        $row["duration"],
+        $row["extremum"]
+    );
+    $obs[$row['station']][$datakey] = $row["value"];
+    $obs[$row['station']]['valid'] = strtotime($row["localvalid"]);
+    $obs[$row['station']]['name'] = $row["name"];
+}
+$final = aSortBySecondIndex($obs, $sortcol, "desc");
+
+$nselect = "<select name=\"network\">";
+$rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'DCP' ORDER by name ASC");
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    $sel = '';
+    if ($network == $row["id"]) {
+        $sel = " selected='SELECTED'";
+    }
+    $nselect .= sprintf(
+        "<option value='%s'%s>%s</option>\n",
+        $row["id"],
+        $sel,
+        $row["name"]
+    );
+}
+$nselect .= "</select>";
+
+$ar = array("no" => "No", "yes" => "Yes");
+$sselect = make_select("shef", $shef, $ar);
+
+$t->current_network = "DCP";
+$baseurl2 = "current.phtml?network=$network&sortcol=";
+
 $content = <<<EOF
 <form method="GET" action="current.phtml" name="myselector">
 <input type="hidden" name="sortcol" value="{$sortcol}">
@@ -98,66 +107,65 @@ $content = <<<EOF
   </tr></thead>
 <tbody>
 EOF;
- $now = time();
- foreach($final as $site => $value){
-   $url = sprintf("/sites/site.php?station=%s&network=%s", $site, $network);
-   $content .= "<tr><td><a href=\"$url\">$site</a></td>
-    <td>". $value["name"] ."</font></td>";
-   $content .= "<td ";
-   $tdiff = $now - $value["valid"];
-   if ($tdiff > (6*3600) ){
-       $content .= 'bgcolor="red"';
-   }
-   $content .= ">". strftime("%d %b %I:%M %p", $value["valid"]) ."</td>";
-   
-   if (array_key_exists('HGIZ', $value)){
-      $content .= sprintf("<td>%s</td>", $value["HGIZ"]);
-   } else {
-      $content .= "<td></td>";
-   }
+$now = time();
+foreach ($final as $site => $value) {
+    $url = sprintf("/sites/site.php?station=%s&network=%s", $site, $network);
+    $content .= "<tr><td><a href=\"$url\">$site</a></td>
+    <td>" . $value["name"] . "</font></td>";
+    $content .= "<td ";
+    $tdiff = $now - $value["valid"];
+    if ($tdiff > (6 * 3600)) {
+        $content .= 'bgcolor="red"';
+    }
+    $content .= ">" . strftime("%d %b %I:%M %p", $value["valid"]) . "</td>";
 
-   if (array_key_exists('TAIZ', $value)){
-   	$content .= sprintf("<td>%s</td>", $value["TAIZ"]);
-   } else {
-   	$content .= "<td></td>";
-   }
-   
-   if (array_key_exists('TWIZ', $value)){
-   	$content .= sprintf("<td>%s</td>", $value["TWIZ"]);
-   } else {
-   	$content .= "<td></td>";
-   }
-    
-   if (array_key_exists('PPHZ', $value)){
-   	$content .= sprintf("<td>%s</td>", $value["PPHZ"]);
-   } else {
-   	$content .= "<td></td>";
-   }
+    if (array_key_exists('HGIZ', $value)) {
+        $content .= sprintf("<td>%s</td>", $value["HGIZ"]);
+    } else {
+        $content .= "<td></td>";
+    }
 
-   if (array_key_exists('PPDZ', $value)){
-   	$content .= sprintf("<td>%s</td>", $value["PPDZ"]);
-   } else {
-   	$content .= "<td></td>";
-   }
-  
-   if (array_key_exists('VBIZ', $value)){
-   	$content .= sprintf("<td>%s</td>", $value["VBIZ"]);
-   } else {
-   	$content .= "<td></td>";
-   }
-    
-   
-   $content .= "</tr>";    
-	if ($shef)
-	{
-		$content .= "<tr><td colspan=\"9\">";
-		foreach($value as $k => $v){
-			if ($k == 'name' || $k == 'valid') continue;
-           $content .= sprintf("/%s %s ", $k, $v);
+    if (array_key_exists('TAIZ', $value)) {
+        $content .= sprintf("<td>%s</td>", $value["TAIZ"]);
+    } else {
+        $content .= "<td></td>";
+    }
+
+    if (array_key_exists('TWIZ', $value)) {
+        $content .= sprintf("<td>%s</td>", $value["TWIZ"]);
+    } else {
+        $content .= "<td></td>";
+    }
+
+    if (array_key_exists('PPHZ', $value)) {
+        $content .= sprintf("<td>%s</td>", $value["PPHZ"]);
+    } else {
+        $content .= "<td></td>";
+    }
+
+    if (array_key_exists('PPDZ', $value)) {
+        $content .= sprintf("<td>%s</td>", $value["PPDZ"]);
+    } else {
+        $content .= "<td></td>";
+    }
+
+    if (array_key_exists('VBIZ', $value)) {
+        $content .= sprintf("<td>%s</td>", $value["VBIZ"]);
+    } else {
+        $content .= "<td></td>";
+    }
+
+
+    $content .= "</tr>";
+    if ($shef) {
+        $content .= "<tr><td colspan=\"9\">";
+        foreach ($value as $k => $v) {
+            if ($k == 'name' || $k == 'valid') continue;
+            $content .= sprintf("/%s %s ", $k, $v);
         }
         $content .= "</td></tr>";
-	}
- }
+    }
+}
 $content .= <<<EOF
 </tbody><tfoot>
 <tr><td colspan="9">&nbsp;</td></tr>

@@ -16,13 +16,13 @@ $t->headextra = <<<EOF
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
 <style>
 .map {
-	height: 400px;
-	width: 100%;
-	background-color: #D2B48C;
+    height: 400px;
+    width: 100%;
+    background-color: #D2B48C;
 }
 .popover {
-		width: 300px;
-		}
+    width: 300px;
+}
 </style>
 EOF;
 $t->jsextra = <<<EOF
@@ -40,13 +40,13 @@ $t->content = <<<EOF
 </div>
 
 <div class="breadcrumb">
-		<li><a href="/DCP/">DCP/HADS Mainpage</a></li>
-		<li class="active">Map of SHEF Reports</li>
-		</div>
-		
+        <li><a href="/DCP/">DCP/HADS Mainpage</a></li>
+        <li class="active">Map of SHEF Reports</li>
+        </div>
+        
 <div class="row">
 <div class="col-md-12">
-		
+        
 <div class="pull-right">
 <i class="fa fa-text-size"></i>
 <button id="fminus" class="btn btn-default"><i class="fa fa-minus"></i></button>
@@ -60,7 +60,7 @@ limits the map to only show stations that have reported the value within the
 given number of days.  This is a work-in-progress here and <a href="/info/contacts.php">your feedback</a> would
 be wonderful.</p>
 
-		<form name='bah'><p><strong>Select Physical Code:</strong> 
+        <form name='bah'><p><strong>Select Physical Code:</strong> 
 <select onChange="javascript: updateMap();" id="pe">
 <option value="AD">[AD] Reserved</option>
 <option value="AF">[AF] Surface frost intensity (coded, see Table 20)</option>
@@ -319,12 +319,12 @@ be wonderful.</p>
 <option value="YY">[YY] GENOR raingage status level 3 - NERON observing sites (YYIRG)</option>
 <option value="YZ">[YZ] Time of Observation – Minutes of the calendar day, minutes 0 - NERON observing sites (YZIRG)</option>
 </select>	
-		
+        
 &nbsp; &nbsp; <strong>Duration:</strong>
 <select onChange="javascript: updateMap();" id="duration">
-	<option value="D">D Day (24 Hour)</option>
-	<option value="I">I Instantaneous</option>
-	<option value="Q">Q 6 Hour</option>
+    <option value="D">D Day (24 Hour)</option>
+    <option value="I">I Instantaneous</option>
+    <option value="Q">Q 6 Hour</option>
 </select>	
 
 &nbsp; <strong>Within # of Days:</strong> <input id="days" onChange="javascript: updateMap();" type="text" size="5" name="days" value="2">
@@ -337,4 +337,3 @@ be wonderful.</p>
 EOF;
 
 $t->render('full.phtml');
-?>

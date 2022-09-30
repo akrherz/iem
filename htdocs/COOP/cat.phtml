@@ -1,22 +1,22 @@
 <?php
- require_once "../../config/settings.inc.php";
- define("IEM_APPID", 4);
- require_once "../../include/forms.php";
- 
- $station = isset($_GET["station"])? substr(xssafe($_GET["station"]),0,5) : "";
- $network = isset($_GET["network"])? substr(xssafe($_GET["network"]),0,7) : "IA_COOP";
- $date = isset($_GET["date"]) ? substr(xssafe($_GET["date"]),0, 10) : "";
- $sortvar = isset($_GET["sortvar"]) ? substr(xssafe($_GET["sortvar"]), 0, 10): "";
- $year = get_int404("year", date("Y"));
+require_once "../../config/settings.inc.php";
+define("IEM_APPID", 4);
+require_once "../../include/forms.php";
 
- if ($date == "" && $station == "") $station = "AMSI4";
- require_once "../../include/myview.php";
- require_once "../../include/imagemaps.php";
- require_once "../../include/network.php";
- $t = new MyView();
- $t->title = "NWS COOP Observations by Date by Site";
+$station = isset($_GET["station"]) ? substr(xssafe($_GET["station"]), 0, 5) : "";
+$network = isset($_GET["network"]) ? substr(xssafe($_GET["network"]), 0, 7) : "IA_COOP";
+$date = isset($_GET["date"]) ? substr(xssafe($_GET["date"]), 0, 10) : "";
+$sortvar = isset($_GET["sortvar"]) ? substr(xssafe($_GET["sortvar"]), 0, 10) : "";
+$year = get_int404("year", date("Y"));
 
- $content = <<<EOF
+if ($date == "" && $station == "") $station = "AMSI4";
+require_once "../../include/myview.php";
+require_once "../../include/imagemaps.php";
+require_once "../../include/network.php";
+$t = new MyView();
+$t->title = "NWS COOP Observations by Date by Site";
+
+$content = <<<EOF
  <ol class="breadcrumb">
   <li><a href="/COOP/">NWS Cooperative Observers</a></li>
   <li class="active">View Reports by Date or Site</li>		
@@ -26,43 +26,43 @@
  date when the observation was reported.  For observations made at 7 AM, this 
  would be a for a 24 hour period up until that time and not for that local date.
  The timestamps shown are valid for the local timezone of that reporting station.
- 		
+         
  <p><div class="alert alert-info"><strong>Hint:</strong> You should be able to 
- 	highlight the values in the table and then copy + paste these values into a 
- 	spreadsheet program like Excel. A 
- 	<a class="alert-link" href="/request/daily.phtml?network={$network}">download interface</a> does exist for these
+     highlight the values in the table and then copy + paste these values into a 
+     spreadsheet program like Excel. A 
+     <a class="alert-link" href="/request/daily.phtml?network={$network}">download interface</a> does exist for these
     observations.</div>
- 		
+         
 <form name="switchnwsli" action="cat.phtml" method="GET">
 EOF;
 
- // SCENARIO 1: Print out data for year for station
+// SCENARIO 1: Print out data for year for station
 if (strlen($station) > 0) {
-  	$link = "cat.phtml?year=$year&station=$station&network=$network&sortvar=";
-  	if ($sortvar == "") $sortvar = "day";
- 	$stationselect = networkSelect($network, $station);
- 	$content .= <<<EOF
+    $link = "cat.phtml?year=$year&station=$station&network=$network&sortvar=";
+    if ($sortvar == "") $sortvar = "day";
+    $stationselect = networkSelect($network, $station);
+    $content .= <<<EOF
  <h3>COOP obs listed by station</h3>
  (<i>Click on a date to get all obs for a particular date.</i>)
  
  <p>{$stationselect}
  Select Year: 
 EOF;
-  	$content .= yearSelect(2004, $year, "year"); 
-} 
+    $content .= yearSelect(2004, $year, "year");
+}
 
 // SCENARIO 2: Print out all stations for network and date
-if (strlen($date) > 0) { 
-  	$year = substr($date,0,4);
-  	$link = "cat.phtml?date=$date&network=$network&sortvar=";
-  	if ($sortvar == "") $sortvar = "station";
-	$content .= <<<EOF
+if (strlen($date) > 0) {
+    $year = substr($date, 0, 4);
+    $link = "cat.phtml?date=$date&network=$network&sortvar=";
+    if ($sortvar == "") $sortvar = "station";
+    $content .= <<<EOF
 <h3>COOP obs listed by date</h3>
 (<i>Click on the NWSLI to view all obs from one station.</i>)
  
  <p>Enter Date: <input type="text" size="11" maxlength="10" name="date" value="{$date}">
 EOF;
-} 
+}
 
 $content .= "<select name=\"network\">";
 $mesosite = iemdb("mesosite");
@@ -70,13 +70,17 @@ $rs = pg_query(
     $mesosite,
     "SELECT id, name from networks where id ~* 'COOP' ORDER by name ASC",
 );
-for ($i=0;$row=pg_fetch_assoc($rs);$i++){
-	$sel = '';
-	if ($network == $row["id"]){
-		$sel = " selected='SELECTED'";
-	}
-	$content .= sprintf("<option value='%s'%s>%s</option>\n",
-	  $row["id"], $sel, $row["name"]);
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    $sel = '';
+    if ($network == $row["id"]) {
+        $sel = " selected='SELECTED'";
+    }
+    $content .= sprintf(
+        "<option value='%s'%s>%s</option>\n",
+        $row["id"],
+        $sel,
+        $row["name"]
+    );
 }
 $content .= <<<EOF
 </select>
@@ -100,103 +104,105 @@ $content .= <<<EOF
   <th><a href="{$link}snoww">Snow Water Equiv</a></th></tr></thead>
 EOF;
 
- $nt = new NetworkTable($network);
- $cities = $nt->table;
- $iemdb = iemdb("iem");
+$nt = new NetworkTable($network);
+$cities = $nt->table;
+$iemdb = iemdb("iem");
 
- $sortdir = "ASC";
- if ($sortvar == "pday" || $sortvar == "snow" || $sortvar == "snowd" ||
-     $sortvar == "max_tmpf" || $sortvar == "snoww") 
-   $sortdir = "DESC";
- if (strlen($station) > 0) {
-     $rs = pg_prepare($iemdb, "SELECT", "SELECT c.*, s.id as station, 
+$sortdir = "ASC";
+if (
+    $sortvar == "pday" || $sortvar == "snow" || $sortvar == "snowd" ||
+    $sortvar == "max_tmpf" || $sortvar == "snoww"
+)
+    $sortdir = "DESC";
+if (strlen($station) > 0) {
+    $rs = pg_prepare($iemdb, "SELECT", "SELECT c.*, s.id as station, 
      s.name as sname, c.coop_valid at time zone s.tzname as cts, c.report 
      from summary_$year c, stations s
      WHERE s.id = $1 and s.network = $2 and c.iemid = s.iemid 
      and c.day <= 'TODAY' ORDER by $sortvar $sortdir");
-     $rs = pg_execute($iemdb, "SELECT", Array($station, $network));
- } else {
+    $rs = pg_execute($iemdb, "SELECT", array($station, $network));
+} else {
     $rs = pg_prepare($iemdb, "SELECT", "SELECT c2.*, s.id as station, 
      s.name as sname, c2.coop_valid at time zone s.tzname as cts, c2.report
      from summary_$year c2, stations s
      WHERE c2.day = $1
      and s.network = $2 and c2.iemid = s.iemid ORDER by $sortvar $sortdir");
-    $rs = pg_execute($iemdb, "SELECT", Array($date, $network));
+    $rs = pg_execute($iemdb, "SELECT", array($date, $network));
+}
 
- }
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    $nwsli = $row["station"];
+    $high = $row["max_tmpf"];
+    if ($high == "-99" || $high == "") $high = "M";
+    if ($high > 130 || $high < -90) $high = "M";
 
- for( $i=0; $row = pg_fetch_assoc($rs); $i++) {
-   $nwsli = $row["station"];
-   $high = $row["max_tmpf"];
-   if ($high == "-99" || $high == "") $high = "M";
-   if ($high > 130 || $high < -90) $high = "M";
 
-   
-   $tmpf = $row["coop_tmpf"];
-   if ($tmpf == "-99" || $tmpf == "") $tmpf = "M";
-   if ($tmpf > 130 || $tmpf < -90) $tmpf = "M";
-   
-   $low = $row["min_tmpf"];
-   if ($low == "99" || $low == "" || $low == -99) $low = "M";
-   if ($low > 130 || $low < -90) $low = "M";
+    $tmpf = $row["coop_tmpf"];
+    if ($tmpf == "-99" || $tmpf == "") $tmpf = "M";
+    if ($tmpf > 130 || $tmpf < -90) $tmpf = "M";
 
-   $rain = $row["pday"];
-   if ($rain == 0.0001) $rain = "T";
-   if ($rain == -99 || $rain == "") $rain = "M";
-   if ($rain > 30 || $rain < 0) $rain = "M";
+    $low = $row["min_tmpf"];
+    if ($low == "99" || $low == "" || $low == -99) $low = "M";
+    if ($low > 130 || $low < -90) $low = "M";
 
-   $snow = $row["snow"];
-   if ($snow == 0.0001) $snow = "T";
-   if ($snow == -99 || $snow == "") $snow = "M";
-   if ($snow > 100 || $snow < 0) $snow = "M";
+    $rain = $row["pday"];
+    if ($rain == 0.0001) $rain = "T";
+    if ($rain == -99 || $rain == "") $rain = "M";
+    if ($rain > 30 || $rain < 0) $rain = "M";
 
-   $snowd = $row["snowd"];
-   if ($snowd == 0.0001) $snowd = "T";
-   if ($snowd == -99 || $snowd == "") $snowd = "M";
-   if ($snowd > 1000 || $snowd < 0) $snowd = "M";
+    $snow = $row["snow"];
+    if ($snow == 0.0001) $snow = "T";
+    if ($snow == -99 || $snow == "") $snow = "M";
+    if ($snow > 100 || $snow < 0) $snow = "M";
 
-   $snoww = $row["snoww"];
-   if ($snoww == 0.0001) $snoww = "T";
-   if ($snoww == -99 || $snoww == "") $snoww = "M";
-   if ($snoww > 1000 || $snoww < 0) $snoww = "M";
-   
-   $rowcontent = "<tr><td>";
-   if (strlen($station) > 0){
-     $rowcontent .= $nwsli;
-   } else {
-     $rowcontent .= "<a href=\"cat.phtml?station=". $nwsli ."&network=". $network ."\">". $nwsli ."</a>";
-   }
+    $snowd = $row["snowd"];
+    if ($snowd == 0.0001) $snowd = "T";
+    if ($snowd == -99 || $snowd == "") $snowd = "M";
+    if ($snowd > 1000 || $snowd < 0) $snowd = "M";
 
-   $rowcontent .= "</td><td>". $cities[$nwsli]["name"] ."</td>";
-   $dstring = $row["day"];
-   
-   if ($tmpf == "M" && $high == "M" && $low == "M" && $rain == "M" 
-   		&& $snow == "M" && $snowd == "M"){
-		$dddd = "<a href=\"cat.phtml?date=". $row["day"] ."&network=". $network ."\">". $dstring ."</a>";
-		$rowcontent = str_replace("<tr>", "<tr class=\"nodata\">", $rowcontent) .
-			"<td colspan=\"8\">No Observation Reported for $dddd</td></tr>";
+    $snoww = $row["snoww"];
+    if ($snoww == 0.0001) $snoww = "T";
+    if ($snoww == -99 || $snoww == "") $snoww = "M";
+    if ($snoww > 1000 || $snoww < 0) $snoww = "M";
 
-   } else {
-	   $rowcontent .= "<td>";
-	   if ($row["cts"]){
-			$dstring = date("j M Y gA", strtotime(substr($row["coop_valid"],0,16)));		
-		}
-	   
-	   if (strlen($date) > 0){
-	      $rowcontent .= $dstring;
-	   } else {
-	      $rowcontent .= "<a href=\"cat.phtml?date=". $row["day"] ."&network=". $network ."\">". $dstring ."</a>";
-	   }
-	   $rowcontent .= "</td><td>". $tmpf ."</td><td>". $high ."</td><td>". $low ."</td><td>". $rain ."</td><td>". $snow ."</td><td>". $snowd ."</td><td>". $snoww ."</td></tr>\n";
-       if (! is_null($row["report"])){
-           $rowcontent .= sprintf(
-               '<tr><td colspan="8">%s</td></tr>',
-               $row["report"],
-           );
-       }
+    $rowcontent = "<tr><td>";
+    if (strlen($station) > 0) {
+        $rowcontent .= $nwsli;
+    } else {
+        $rowcontent .= "<a href=\"cat.phtml?station=" . $nwsli . "&network=" . $network . "\">" . $nwsli . "</a>";
     }
-   $content .= $rowcontent;
- }
+
+    $rowcontent .= "</td><td>" . $cities[$nwsli]["name"] . "</td>";
+    $dstring = $row["day"];
+
+    if (
+        $tmpf == "M" && $high == "M" && $low == "M" && $rain == "M"
+        && $snow == "M" && $snowd == "M"
+    ) {
+        $dddd = "<a href=\"cat.phtml?date=" . $row["day"] . "&network=" . $network . "\">" . $dstring . "</a>";
+        $rowcontent = str_replace("<tr>", "<tr class=\"nodata\">", $rowcontent) .
+            "<td colspan=\"8\">No Observation Reported for $dddd</td></tr>";
+    } else {
+        $rowcontent .= "<td>";
+        if ($row["cts"]) {
+            $dstring = date("j M Y gA", strtotime(substr($row["coop_valid"], 0, 16)));
+        }
+
+        if (strlen($date) > 0) {
+            $rowcontent .= $dstring;
+        } else {
+            $rowcontent .= "<a href=\"cat.phtml?date=" . $row["day"] . "&network=" . $network . "\">" . $dstring . "</a>";
+        }
+        $rowcontent .= "</td><td>" . $tmpf . "</td><td>" . $high . "</td><td>" . $low . "</td><td>" . $rain . "</td><td>" . $snow . "</td><td>" . $snowd . "</td><td>" . $snoww . "</td></tr>\n";
+        if (!is_null($row["report"])) {
+            $rowcontent .= sprintf(
+                '<tr><td colspan="8">%s</td></tr>',
+                $row["report"],
+            );
+        }
+    }
+    $content .= $rowcontent;
+}
 
 $content .= <<<EOF
  </table>
@@ -209,14 +215,14 @@ $t->jsextra = <<<EOF
 <script>
 var currentmode = true;
 function hiderows(){
-	if (currentmode){
-		$('tr.nodata').hide();
-		$("#rowshower").attr('value','Show rows without data');
-	} else {
-		$('tr.nodata').show();
-		$("#rowshower").attr('value','Hide rows without data');
-	}
-	currentmode = !currentmode;
+    if (currentmode){
+        $('tr.nodata').hide();
+        $("#rowshower").attr('value','Show rows without data');
+    } else {
+        $('tr.nodata').show();
+        $("#rowshower").attr('value','Hide rows without data');
+    }
+    currentmode = !currentmode;
 }
 </script>
 EOF;

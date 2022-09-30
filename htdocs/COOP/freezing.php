@@ -1,4 +1,4 @@
-<?php 
+<?php
 define("IEM_APPID", 158);
 require_once "../../config/settings.inc.php";
 require_once "../../include/forms.php";
@@ -6,13 +6,13 @@ require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Freezing Dates";
 
-require_once "../../include/database.inc.php"; 
+require_once "../../include/database.inc.php";
 require_once "../../include/network.php";
 require_once "../../include/mlib.php";
 $nt = new NetworkTable("IACLIMATE");
 $cities = $nt->table;
 
-$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "station";
+$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "station";
 
 $connection = iemdb("coop");
 
@@ -29,59 +29,55 @@ $query = "select station, valid, low from climate
 $rs2 = pg_exec($connection, $query);
 
 
-$data = Array();
-for( $i=0; $row = pg_fetch_array($rs); $i++)
-{
-$st = $row["station"];
-		if (! isset($data[$st])){
-		$data[$st] = Array("min_low" => 100, "station" => $st);
-		$data[$st]["low"] = $row["min_low"];
-				$data[$st]["lowyr"] = $row["min_low_yr"] ."-". substr($row["valid"], 5, 6);
-		}
-		if (! isset($data[$st]["low28"]) ){
-				if (intval($row["min_low"]) < 29 ){
-				$data[$st]["low28"] = $row["min_low"];
-				$data[$st]["low28yr"] = $row["min_low_yr"] ."-". substr($row["valid"], 5, 6);
-		}
-		}
+$data = array();
+for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    $st = $row["station"];
+    if (!isset($data[$st])) {
+        $data[$st] = array("min_low" => 100, "station" => $st);
+        $data[$st]["low"] = $row["min_low"];
+        $data[$st]["lowyr"] = $row["min_low_yr"] . "-" . substr($row["valid"], 5, 6);
+    }
+    if (!isset($data[$st]["low28"])) {
+        if (intval($row["min_low"]) < 29) {
+            $data[$st]["low28"] = $row["min_low"];
+            $data[$st]["low28yr"] = $row["min_low_yr"] . "-" . substr($row["valid"], 5, 6);
+        }
+    }
+}
 
-		}
+for ($i = 0; $row = pg_fetch_array($rs2); $i++) {
+    $st = $row["station"];
+    if (!isset($data[$st]["avelow40day"])) {
+        if (intval($row["low"]) < 41) {
+            $data[$st]["avelow40day"] = substr($row["valid"], 5, 6);
+        }
+    }
+    if (!isset($data[$st]["avelow32day"])) {
+        if (intval($row["low"]) < 33) {
+            $data[$st]["avelow32day"] = substr($row["valid"], 5, 6);
+        }
+    }
+    if (!isset($data[$st]["avelow28day"])) {
+        if (intval($row["low"]) < 28) {
+            $data[$st]["avelow28day"] = substr($row["valid"], 5, 6);
+        }
+    }
+}
 
-		for( $i=0; $row = pg_fetch_array($rs2); $i++)
-		{
-		$st = $row["station"];
-		if (! isset($data[$st]["avelow40day"])){
-		if ( intval($row["low"]) < 41 ){
-		$data[$st]["avelow40day"] = substr($row["valid"], 5, 6);
-		}
-		}
-		if (! isset($data[$st]["avelow32day"])){
-		if ( intval($row["low"]) < 33 ){
-			$data[$st]["avelow32day"] = substr($row["valid"], 5, 6);
-			}
-			}
-			if (! isset($data[$st]["avelow28day"])){
-			if ( intval($row["low"]) < 28 ){
-				$data[$st]["avelow28day"] = substr($row["valid"], 5, 6);
-     }
-				}
-
-				}
-
-				$finalA = Array();
-				$finalA = aSortBySecondIndex($data, $sortcol);
+$finalA = array();
+$finalA = aSortBySecondIndex($data, $sortcol);
 
 $table = "";
-foreach($finalA as $key => $value ){
-	if (! array_key_exists($key, $cities)) continue;
-	$table .= "<tr><td>". $cities[strtoupper($key)]["name"] ."</td>
-    <td>". $data[$key]["low"] ."</td>
-    <td>". $data[$key]["lowyr"] ."</td>
-    <td>". $data[$key]["low28"] ."</td>
-    <td>". $data[$key]["low28yr"] ."</td>
-    <td>". $data[$key]["avelow40day"] ."</td>
-    <td>". $data[$key]["avelow32day"] ."</td>
-    <td>". $data[$key]["avelow28day"] ."</td>
+foreach ($finalA as $key => $value) {
+    if (!array_key_exists($key, $cities)) continue;
+    $table .= "<tr><td>" . $cities[strtoupper($key)]["name"] . "</td>
+    <td>" . $data[$key]["low"] . "</td>
+    <td>" . $data[$key]["lowyr"] . "</td>
+    <td>" . $data[$key]["low28"] . "</td>
+    <td>" . $data[$key]["low28yr"] . "</td>
+    <td>" . $data[$key]["avelow40day"] . "</td>
+    <td>" . $data[$key]["avelow32day"] . "</td>
+    <td>" . $data[$key]["avelow28day"] . "</td>
     </tr>\n";
 }
 

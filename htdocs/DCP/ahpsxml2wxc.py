@@ -10,11 +10,9 @@ def do(nwsli):
     """work"""
     res = ""
     xml = requests.get(
-        (
-            "https://water.weather.gov/ahps2/"
-            "hydrograph_to_xml.php?gage=%s&output=xml"
-        )
-        % (nwsli,)
+        "https://water.weather.gov/ahps2/"
+        f"hydrograph_to_xml.php?gage={nwsli}&output=xml",
+        timeout=50,
     ).content
     elementStream = domish.elementStream()
     roots = []

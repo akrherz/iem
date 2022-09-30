@@ -8,7 +8,7 @@ require_once "../../include/network.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 
-$network = isset($_GET['network']) ? xssafe($_GET["network"]): 'IA_DCP';
+$network = isset($_GET['network']) ? xssafe($_GET["network"]) : 'IA_DCP';
 $minute = get_int404("minute", 0);
 $hour = get_int404("hour", date("H"));
 $day = get_int404("day", date("d"));
@@ -17,7 +17,7 @@ $year = get_int404("year", date("Y"));
 
 $now = time() - 3600;
 $ts = mktime($hour, $minute, 0, $month, $day, $year);
-$nt = new NetworkTable( Array($network) );
+$nt = new NetworkTable(array($network));
 $cities = $nt->table;
 
 $t->title = "GOES/DCP/HADS Display Observations";
@@ -25,15 +25,19 @@ $t->title = "GOES/DCP/HADS Display Observations";
 $dstr = date("d M Y h:i a", $ts);
 
 $nselect = "<select name=\"network\">";
-$rs = pg_query($mesosite, "SELECT id, name from networks ".
-  "where id ~* '_DCP' or id ~* '_COOP' ORDER by name ASC");
-for ($i=0;$row=pg_fetch_assoc($rs);$i++){
-	$sel = '';
-	if ($network == $row["id"]){
-		$sel = " selected='SELECTED'";
-	}
-	$nselect .= sprintf("<option value='%s'%s>%s</option>\n",
-			$row["id"], $sel, $row["name"]);
+$rs = pg_query($mesosite, "SELECT id, name from networks " .
+    "where id ~* '_DCP' or id ~* '_COOP' ORDER by name ASC");
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    $sel = '';
+    if ($network == $row["id"]) {
+        $sel = " selected='SELECTED'";
+    }
+    $nselect .= sprintf(
+        "<option value='%s'%s>%s</option>\n",
+        $row["id"],
+        $sel,
+        $row["name"]
+    );
 }
 $nselect .= "</select>";
 $ys = yearSelect(2002, $year, "year");
@@ -41,7 +45,7 @@ $ms = monthSelect($month);
 $ds = daySelect($day);
 $hs = hourSelect($hour, 'hour');
 
-$ar = Array("00"=> "00", "15" => "15", "30" => "30", "45" => "45");
+$ar = array("00" => "00", "15" => "15", "30" => "30", "45" => "45");
 $mis = make_select("minute", $minute, $ar);
 
 $tbl = strftime("raw%Y_%m", $ts);
@@ -49,53 +53,56 @@ $dstr = strftime("%Y-%m-%d %H:%M", $ts);
 $ldate = strftime("%d %b %Y %I:%M %p", $ts);
 
 $rs = pg_prepare($pgconn, "SELECT", "SELECT t.* from $tbl t, stations s WHERE " .
-		"valid = $1 and s.id = t.station and s.network = $2");
+    "valid = $1 and s.id = t.station and s.network = $2");
 
-$rs = pg_execute($pgconn, "SELECT", Array($dstr, $network) );
+$rs = pg_execute($pgconn, "SELECT", array($dstr, $network));
 pg_close($pgconn);
 
 /* Load up the data into a big fat array */
-$data = Array();
-$datakeys = Array();
-for( $i=0; $row = pg_fetch_array($rs); $i++)
-{
-	$station = $row["station"];
-	if (! array_key_exists($station, $cities)){ continue; }
-	$data[ $row["station"] ][ substr($row["key"],0,3) ] = $row["value"];
-	$datakeys[ substr($row["key"],0,3) ]= 1;
+$data = array();
+$datakeys = array();
+for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    $station = $row["station"];
+    if (!array_key_exists($station, $cities)) {
+        continue;
+    }
+    $data[$row["station"]][substr($row["key"], 0, 3)] = $row["value"];
+    $datakeys[substr($row["key"], 0, 3)] = 1;
 }
-$stations = array_keys( $data );
-$keys = array_keys( $datakeys );
+$stations = array_keys($data);
+$keys = array_keys($datakeys);
 asort($stations);
 asort($keys);
 
 $table = "<table class=\"table table-condensed table-striped table-bordered\">";
 $header = "<tr style=\"background: #eee;\">
  <th>NWS ID</th><th>Station</th>";
-foreach($keys as $k => $v){
-  $header .= sprintf("<th>%s</th>", $v);
+foreach ($keys as $k => $v) {
+    $header .= sprintf("<th>%s</th>", $v);
 }
 $header .= "</tr>";
 
 $row = 0;
-foreach($stations as $k => $v){
-  if ($row % 25 == 0){ $table .= $header; }
-  $row += 1;
+foreach ($stations as $k => $v) {
+    if ($row % 25 == 0) {
+        $table .= $header;
+    }
+    $row += 1;
 
-  $table .= sprintf("<tr><td><a href='site.phtml?station=%s&year=%s&month=%s&day=%s'>%s</a></td><td>%s</td>", $v, date("Y", $ts), date("m", $ts), date("d", $ts), $v, $cities[$v]['name']);
-  reset($keys);
-  foreach($keys as $k => $key){
-    $table .= sprintf("<td>%s</td>", $data[$v][$key] ?? '');
-  }
-  $table .= "</tr>";
+    $table .= sprintf("<tr><td><a href='site.phtml?station=%s&year=%s&month=%s&day=%s'>%s</a></td><td>%s</td>", $v, date("Y", $ts), date("m", $ts), date("d", $ts), $v, $cities[$v]['name']);
+    reset($keys);
+    foreach ($keys as $k => $key) {
+        $table .= sprintf("<td>%s</td>", $data[$v][$key] ?? '');
+    }
+    $table .= "</tr>";
 }
 $table .= "</table>";
 
 $t->content = <<<EOF
 <div class="breadcrumb">
-		<li><a href="/DCP/">DCP/HADS Mainpage</a></li>
-		<li class="active">View All Reports at One Time</li>
-	</div>
+        <li><a href="/DCP/">DCP/HADS Mainpage</a></li>
+        <li class="active">View All Reports at One Time</li>
+    </div>
 
 <h3>DCP Data Report for time: {$dstr}</h3>
 

@@ -7,34 +7,33 @@ $t = new MyView();
 $t->title = "Quality Control, Active Trouble Tickets";
 
 $conn = iemdb("portfolio");
-$rs = pg_exec($conn, "SELECT *, getSiteName(s_mid) as s_name from tt_base ".
+$rs = pg_exec($conn, "SELECT *, getSiteName(s_mid) as s_name from tt_base " .
     "WHERE status != 'CLOSED' ORDER by id ASC");
 pg_close($conn);
 
-$ars = Array("isusm" => "", "iaawos" => "", "iarwis" => "");
+$ars = array("isusm" => "", "iaawos" => "", "iarwis" => "");
 
-for( $i=0; $row = pg_fetch_array($rs); $i++)
-{
-    if (! array_key_exists($row["portfolio"], $ars)){
+for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    if (!array_key_exists($row["portfolio"], $ars)) {
         continue;
     }
-	$entered = new DateTime(substr($row["entered"],0,16));
-	$last = new DateTime(substr($row["last"],0,16));
-	$s = "<tr>
-		<th>". $row["id"] ."</th>
-		<td>". $row["status"] ."</td>
-		<td>". $entered->format("Y-m-d") ."</td>
-		<td>". $last->format("Y-m-d") ."</td>
-		<td>[". $row["s_mid"] ."] ". $row["s_name"] ."</td>
-		<td>". $row["subject"] ."</td>
+    $entered = new DateTime(substr($row["entered"], 0, 16));
+    $last = new DateTime(substr($row["last"], 0, 16));
+    $s = "<tr>
+        <th>" . $row["id"] . "</th>
+        <td>" . $row["status"] . "</td>
+        <td>" . $entered->format("Y-m-d") . "</td>
+        <td>" . $last->format("Y-m-d") . "</td>
+        <td>[" . $row["s_mid"] . "] " . $row["s_name"] . "</td>
+        <td>" . $row["subject"] . "</td>
      </tr>";
-	@$ars[$row["portfolio"]] .= $s;
- }
- 
- foreach($ars as $key => $val){
- 	if ($val == '')
- 		$ars[$key] = "<tr><td colspan=\"6\">No Open/Active Tickets Found</td></tr>";
- }
+    @$ars[$row["portfolio"]] .= $s;
+}
+
+foreach ($ars as $key => $val) {
+    if ($val == '')
+        $ars[$key] = "<tr><td colspan=\"6\">No Open/Active Tickets Found</td></tr>";
+}
 
 $t->content = <<<EOF
 <ol class="breadcrumb">

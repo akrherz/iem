@@ -54,7 +54,6 @@ def figurePhase(p1, p2):
 
 def do_moonphase(lon, lat):
     """Get the next four phases of the moon."""
-    moon = ephem.Moon()
     obs = ephem.Observer()
     obs.lat = str(lat)
     obs.long = str(lon)

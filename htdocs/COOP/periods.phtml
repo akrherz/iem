@@ -1,75 +1,83 @@
 <?php
- require_once "../../config/settings.inc.php";
- require_once "../../include/myview.php";
- require_once "../../include/forms.php";
- require_once "../../include/database.inc.php";
- require_once "../../include/imagemaps.php";
- require_once "../../include/network.php";
- 
- $t = new MyView();
- define("IEM_APPID", 31);
- $smonth = get_int404("smonth", 0);
- $emonth = get_int404("emonth", 0);
- $sday = get_int404("sday", 0);
- $eday = get_int404("eday", 0);
- $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "avg_high";
- $station = isset($_GET["station"]) ? xssafe($_GET['station']): 'IA0000';
- $network = isset($_GET["network"]) ? xssafe($_GET["network"]): "IACLIMATE";
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
+require_once "../../include/forms.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/imagemaps.php";
+require_once "../../include/network.php";
 
- $nt = new NetworkTable($network);
+$t = new MyView();
+define("IEM_APPID", 31);
+$smonth = get_int404("smonth", 0);
+$emonth = get_int404("emonth", 0);
+$sday = get_int404("sday", 0);
+$eday = get_int404("eday", 0);
+$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "avg_high";
+$station = isset($_GET["station"]) ? xssafe($_GET['station']) : 'IA0000';
+$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IACLIMATE";
 
- $t->title = "Time period comparisons";
+$nt = new NetworkTable($network);
 
- $table = "";
- if ($sday > 0){
- 	$sts = mktime(0,0,0,$smonth, $sday, 2000);
- 	$ets = mktime(0,0,0,$emonth, $eday, 2000);
- 	
- 	$coop = iemdb("coop");
- 	$sname = $nt->table[$station]['name'];
- 	$link = "periods.phtml?station={$station}&amp;network={$network}&amp;sday=$sday&eday=$eday&smonth=$smonth&emonth=$emonth&sortcol=";
- 	$nicedate = sprintf("%s - %s", date("d M", $sts), date("d M", $ets) );
- 	$table .= <<<EOF
- 	<p><strong>Yearly average temperatures for {$sname} [$station] between ({$nicedate}) 
- 	dates inclusive</strong><br />
- 	<table class="table table-striped table-condensed table-bordered">
- 	<tr>
- 	  <th><a href="{$link}year">Year:</a></th>
- 	  <th><a href="{$link}avg_temp">Avg Temp (F):</a></th>
- 	  <th><a href="{$link}avg_high">Avg High Temp (F):</a></th>
- 	  <th><a href="{$link}avg_low">Avg Low Temp (F):</a></th>
- 	  <th><a href="{$link}sum_precip">Precip Total (inch):</a></th>
- 	  <th><a href="{$link}sum_snow">Snow Total (inch):</a></th>
- 	  </tr>
+$t->title = "Time period comparisons";
+
+$table = "";
+if ($sday > 0) {
+    $sts = mktime(0, 0, 0, $smonth, $sday, 2000);
+    $ets = mktime(0, 0, 0, $emonth, $eday, 2000);
+
+    $coop = iemdb("coop");
+    $sname = $nt->table[$station]['name'];
+    $link = "periods.phtml?station={$station}&amp;network={$network}&amp;sday=$sday&eday=$eday&smonth=$smonth&emonth=$emonth&sortcol=";
+    $nicedate = sprintf("%s - %s", date("d M", $sts), date("d M", $ets));
+    $table .= <<<EOF
+     <p><strong>Yearly average temperatures for {$sname} [$station] between ({$nicedate}) 
+     dates inclusive</strong><br />
+     <table class="table table-striped table-condensed table-bordered">
+     <tr>
+       <th><a href="{$link}year">Year:</a></th>
+       <th><a href="{$link}avg_temp">Avg Temp (F):</a></th>
+       <th><a href="{$link}avg_high">Avg High Temp (F):</a></th>
+       <th><a href="{$link}avg_low">Avg Low Temp (F):</a></th>
+       <th><a href="{$link}sum_precip">Precip Total (inch):</a></th>
+       <th><a href="{$link}sum_snow">Snow Total (inch):</a></th>
+       </tr>
 EOF;
- 	 $mytable = sprintf("alldata_%s", substr($station, 0, 2));
-	 $rs = pg_prepare($coop, "SELECTOR", "select year,
-	 		sum(precip) as sum_precip, sum(snow) as sum_snow,
-	 		avg(high) as avg_high, avg(low) as avg_low,
-	 		avg((high+low)/2.0) as avg_temp from {$mytable}
-	 		WHERE station = $1 and sday >= $2 and sday <= $3
-	 		GROUP by year ORDER by {$sortcol} DESC");
+    $mytable = sprintf("alldata_%s", substr($station, 0, 2));
+    $rs = pg_prepare($coop, "SELECTOR", "select year,
+             sum(precip) as sum_precip, sum(snow) as sum_snow,
+             avg(high) as avg_high, avg(low) as avg_low,
+             avg((high+low)/2.0) as avg_temp from {$mytable}
+             WHERE station = $1 and sday >= $2 and sday <= $3
+             GROUP by year ORDER by {$sortcol} DESC");
 
-	 $rs = pg_execute($coop, "SELECTOR", Array($station, date("md", $sts),
-	 		date("md", $ets)));
-	 for( $i=0; $row = pg_fetch_assoc($rs); $i++) {
-	 		$table .= sprintf("<tr><th>%s</th><td>%.2f</td><td>%.2f</td><td>%.2f</td><td>%.2f</td><td>%.1f</td></tr>",
-	 				$row["year"], $row["avg_temp"], $row["avg_high"],
-	 				$row["avg_low"], $row["sum_precip"], $row["sum_snow"]);
-	 }
-	 $table .= "</table>";
- }
- 
- $smonthselect = monthSelect($smonth, "smonth");
- $sdayselect = daySelect2($sday, "sday");
- $emonthselect = monthSelect($emonth, "emonth");
- $edayselect = daySelect2($eday, "eday");
- $nselect = networkSelect($network, $station );
+    $rs = pg_execute($coop, "SELECTOR", array(
+        $station, date("md", $sts),
+        date("md", $ets)
+    ));
+    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+        $table .= sprintf(
+            "<tr><th>%s</th><td>%.2f</td><td>%.2f</td><td>%.2f</td><td>%.2f</td><td>%.1f</td></tr>",
+            $row["year"],
+            $row["avg_temp"],
+            $row["avg_high"],
+            $row["avg_low"],
+            $row["sum_precip"],
+            $row["sum_snow"]
+        );
+    }
+    $table .= "</table>";
+}
+
+$smonthselect = monthSelect($smonth, "smonth");
+$sdayselect = daySelect2($sday, "sday");
+$emonthselect = monthSelect($emonth, "emonth");
+$edayselect = daySelect2($eday, "eday");
+$nselect = networkSelect($network, $station);
 $sselect = selectClimodatNetwork($network, "network");
- $t->content = <<<EOF
+$t->content = <<<EOF
 <ol class="breadcrumb">
-	<li><a href="/COOP/">NWS COOP</a></li>
-	<li class="active">Yearly time period averages</li>
+    <li><a href="/COOP/">NWS COOP</a></li>
+    <li class="active">Yearly time period averages</li>
 </ol>
 
 <h3>COOP Yearly Summary Between Two Dates</h3>

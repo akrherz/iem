@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
  * NWS COOP currents lister
  */
@@ -10,69 +10,78 @@ require_once "../../include/forms.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/mlib.php";
 
- $t = new MyView();
- $nt = new NetworkTable("WFO");
- $mesosite = iemdb("mesosite");
- 
-$network = isset($_GET['network']) ? xssafe($_GET['network']): 'IA_COOP'; 
-$wfo = isset($_REQUEST["wfo"]) ? xssafe($_REQUEST['wfo']): null;
-$sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']): 'ts';
-$sortdir = isset($_GET['sortdir']) ? xssafe($_GET['sortdir']): 'desc';
+$t = new MyView();
+$nt = new NetworkTable("WFO");
+$mesosite = iemdb("mesosite");
+
+$network = isset($_GET['network']) ? xssafe($_GET['network']) : 'IA_COOP';
+$wfo = isset($_REQUEST["wfo"]) ? xssafe($_REQUEST['wfo']) : null;
+$sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']) : 'ts';
+$sortdir = isset($_GET['sortdir']) ? xssafe($_GET['sortdir']) : 'desc';
 if ($sortdir != "asc" && $sortdir != "desc") $sortdir = "desc";
 
-function precip_formatter($val){
-	if ($val === '') return '';
-	if ($val === 0.0001) return 'T';
-	if ($val < 0) return 'M';
-	return $val;
+function precip_formatter($val)
+{
+    if ($val === '') return '';
+    if ($val === 0.0001) return 'T';
+    if ($val < 0) return 'M';
+    return $val;
 }
 
-function make_row($dict, $oddrow){
-	$s = "<tr";
-	if ($oddrow) $s .= ' bgcolor="#EEEEEE"';
-	$s .= ">";
+function make_row($dict, $oddrow)
+{
+    $s = "<tr";
+    if ($oddrow) $s .= ' bgcolor="#EEEEEE"';
+    $s .= ">";
 
-	$sitesurl = sprintf("%s/sites/site.php?station=%s&network=%s",
-			BASEURL, $dict["sid"], $dict["network"]);
+    $sitesurl = sprintf(
+        "%s/sites/site.php?station=%s&network=%s",
+        BASEURL,
+        $dict["sid"],
+        $dict["network"]
+    );
 
-	$s .= <<<EOF
-	<td><input type="checkbox" name="st[]" value="{$dict["sid"]}"/></td>
-	<td><a href="/p.php?pid={$dict["raw"]}" class="btn btn-small"><i class="fa fa-paperclip"></i></a>		
-	</td>
+    $s .= <<<EOF
+    <td><input type="checkbox" name="st[]" value="{$dict["sid"]}"/></td>
+    <td><a href="/p.php?pid={$dict["raw"]}" class="btn btn-small"><i class="fa fa-paperclip"></i></a>		
+    </td>
 EOF;
-	$s .= "<td><a href=\"cat.phtml?station=". $dict["sid"] ."&network=". $dict["network"] . "\">". $dict['sid'] ."</a></td>";
-	$s .= "<td><a href=\"$sitesurl\">". $dict["name"] .", ". $dict["state"] ."</a></td>";
-	$s .= "<td>". $dict["county"] ."</td>";
+    $s .= "<td><a href=\"cat.phtml?station=" . $dict["sid"] . "&network=" . $dict["network"] . "\">" . $dict['sid'] . "</a></td>";
+    $s .= "<td><a href=\"$sitesurl\">" . $dict["name"] . ", " . $dict["state"] . "</a></td>";
+    $s .= "<td>" . $dict["county"] . "</td>";
 
-	$bgcolor = (date("Ymd") != date("Ymd", $dict["ts"])) ? '#F00': 'inherit';
-	$fmt = (date("Ymd") != date("Ymd", $dict["ts"])) ? '%d %b %Y %I:%M %p': '%I:%M %p';
-	$s .= "<td style=\"background: $bgcolor;\">". strftime($fmt, $dict["lts"]) ."</td>";
+    $bgcolor = (date("Ymd") != date("Ymd", $dict["ts"])) ? '#F00' : 'inherit';
+    $fmt = (date("Ymd") != date("Ymd", $dict["ts"])) ? '%d %b %Y %I:%M %p' : '%I:%M %p';
+    $s .= "<td style=\"background: $bgcolor;\">" . strftime($fmt, $dict["lts"]) . "</td>";
 
-	$s .= sprintf("<td>%s</td><td><span style=\"color: #F00;\">%s</span></td>
+    $s .= sprintf(
+        "<td>%s</td><td><span style=\"color: #F00;\">%s</span></td>
     <td><span style=\"color: #00F;\">%s</span></td>",
-			$dict["tmpf"] != "" ? $dict["tmpf"] : "M",
-			$dict["max_tmpf"] != "" ? $dict["max_tmpf"] : "M",
-			$dict["min_tmpf"] != "" ? $dict["min_tmpf"] : "M"
-	);
+        $dict["tmpf"] != "" ? $dict["tmpf"] : "M",
+        $dict["max_tmpf"] != "" ? $dict["max_tmpf"] : "M",
+        $dict["min_tmpf"] != "" ? $dict["min_tmpf"] : "M"
+    );
 
-	$s .= sprintf("<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>",
+    $s .= sprintf(
+        "<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>",
         precip_formatter($dict["pday"]),
-		precip_formatter($dict["snow"]),
+        precip_formatter($dict["snow"]),
         precip_formatter($dict["ratio"]),
         precip_formatter($dict["snowd"]),
-		precip_formatter($dict["snoww"]));
+        precip_formatter($dict["snoww"])
+    );
 
-	$s .= "</tr>\n";
-	return $s;
+    $s .= "</tr>\n";
+    return $s;
 }
 
-if (is_null($wfo)){
-    $arr = Array(
+if (is_null($wfo)) {
+    $arr = array(
         "network" => $network,
     );
     $baseurl = "current.phtml?network=$network";
 } else {
-    $arr = Array(
+    $arr = array(
         "networkclass" => "COOP",
         "wfo" => $wfo,
     );
@@ -80,39 +89,40 @@ if (is_null($wfo)){
 }
 $jobj = iemws_json("currents.json", $arr);
 
-$db = Array();
-foreach($jobj["data"] as $bogus => $iemob){
+$db = array();
+foreach ($jobj["data"] as $bogus => $iemob) {
     $site = $iemob["station"];
-	$db[$site] = Array('snow'=> "", 'snowd'=>"", 'ratio'=>"", 'pday'=>"",
-			'min_tmpf'=>"", 'max_tmpf'=>"", 'tmpf'=>"", 'snoww'=>"");
-	$db[$site]['ts'] = strtotime($iemob["local_valid"]);
-	$db[$site]['lts'] = strtotime($iemob["local_valid"]);
-	$db[$site]['sid'] = $site;
-	$db[$site]['name'] = $iemob["name"];
-	$db[$site]['raw'] = $iemob["raw"];
-	$db[$site]['state'] = $iemob["state"];
-	$db[$site]['network'] = $iemob["network"];
-	$db[$site]['county'] = $iemob["county"];
-	if ($iemob["tmpf"] > -100) {
-		$db[$site]['tmpf'] = $iemob["tmpf"];
-	}
-	if ($iemob["max_tmpf"] > -100) {
-		$db[$site]['max_tmpf'] = $iemob["max_tmpf"];
-	}
+    $db[$site] = array(
+        'snow' => "", 'snowd' => "", 'ratio' => "", 'pday' => "",
+        'min_tmpf' => "", 'max_tmpf' => "", 'tmpf' => "", 'snoww' => ""
+    );
+    $db[$site]['ts'] = strtotime($iemob["local_valid"]);
+    $db[$site]['lts'] = strtotime($iemob["local_valid"]);
+    $db[$site]['sid'] = $site;
+    $db[$site]['name'] = $iemob["name"];
+    $db[$site]['raw'] = $iemob["raw"];
+    $db[$site]['state'] = $iemob["state"];
+    $db[$site]['network'] = $iemob["network"];
+    $db[$site]['county'] = $iemob["county"];
+    if ($iemob["tmpf"] > -100) {
+        $db[$site]['tmpf'] = $iemob["tmpf"];
+    }
+    if ($iemob["max_tmpf"] > -100) {
+        $db[$site]['max_tmpf'] = $iemob["max_tmpf"];
+    }
 
-	if ($iemob["min_tmpf"] < 99) {
-		$db[$site]['min_tmpf'] = $iemob["min_tmpf"];
-	}
+    if ($iemob["min_tmpf"] < 99) {
+        $db[$site]['min_tmpf'] = $iemob["min_tmpf"];
+    }
 
-	$db[$site]['pday'] = $iemob["pday"];
-	$db[$site]['snoww'] = $iemob["snoww"];
-	$db[$site]['snow'] = ($iemob["snow"] >= 0) ? $iemob["snow"] : "";
-	$db[$site]['snowd'] = ($iemob["snowd"] >= 0) ? $iemob["snowd"] : "";
-	$db[$site]["ratio"] = -1;
-	if ($db[$site]["snow"] > 0.0001 && $db[$site]["pday"] > 0.0001)
-	{
-		$db[$site]["ratio"] = intval( $db[$site]["snow"] / $db[$site]["pday"] );
-	}
+    $db[$site]['pday'] = $iemob["pday"];
+    $db[$site]['snoww'] = $iemob["snoww"];
+    $db[$site]['snow'] = ($iemob["snow"] >= 0) ? $iemob["snow"] : "";
+    $db[$site]['snowd'] = ($iemob["snowd"] >= 0) ? $iemob["snowd"] : "";
+    $db[$site]["ratio"] = -1;
+    if ($db[$site]["snow"] > 0.0001 && $db[$site]["pday"] > 0.0001) {
+        $db[$site]["ratio"] = intval($db[$site]["snow"] / $db[$site]["pday"]);
+    }
 }
 
 $db = aSortBySecondIndex($db, $sortcol, $sortdir);
@@ -120,63 +130,70 @@ $db = aSortBySecondIndex($db, $sortcol, $sortdir);
 $oddrow = true;
 $firstsection = "";
 $lastsection = "";
-foreach($db as $site => $value){
-	$oddrow = ! $oddrow;
-	if (date("Ymd", $value["ts"]) == date("Ymd")){
-		$firstsection .= make_row($value, $oddrow);
-	} else {
-		$value["tmpf"] = "";
-		$lastsection .= make_row($value, $oddrow);
-	}
+foreach ($db as $site => $value) {
+    $oddrow = !$oddrow;
+    if (date("Ymd", $value["ts"]) == date("Ymd")) {
+        $firstsection .= make_row($value, $oddrow);
+    } else {
+        $value["tmpf"] = "";
+        $lastsection .= make_row($value, $oddrow);
+    }
 }
 
-function get_sortdir($baseurl, $column, $sortCol, $sortDir){
-	$newSort = ($sortDir == "asc") ? "desc" : "asc";
-	if ($column == $sortCol) return "${baseurl}&sortcol=$column&sortdir=$newSort";
-	return "${baseurl}&sortcol=$column&sortdir=$sortDir";
+function get_sortdir($baseurl, $column, $sortCol, $sortDir)
+{
+    $newSort = ($sortDir == "asc") ? "desc" : "asc";
+    if ($column == $sortCol) return "${baseurl}&sortcol=$column&sortdir=$newSort";
+    return "${baseurl}&sortcol=$column&sortdir=$sortDir";
 }
 
 $t->title = "NWS COOP Current Sortables";
 $t->headextra = <<<EOF
  <script language="JavaScript" type="text/javascript">
-	<!--//BEGIN Script
-	function new_window(url) {
- 	link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
-	}
-	//END Script-->
-	</script>
+    <!--//BEGIN Script
+    function new_window(url) {
+     link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
+    }
+    //END Script-->
+    </script>
 EOF;
 
-$cols = Array("ts" => "Valid", "county" => "County",
-  "sid" => "Site ID", "name" => "Station Name", 
-  "ratio" => "Snow to Water Ratio",
-  "tmpf" => "Ob Temperature", "max_tmpf" => "24 hour High",
-  "min_tmpf" => "24 hour Low", "snow" => "24 hour Snowfall",
-  "snowd" => "Snowfall Depth", "pday" => "24 hour rainfall",
-  "phour" => "Rainfall One Hour", "snoww" => "Snow Water Equivalent");
+$cols = array(
+    "ts" => "Valid", "county" => "County",
+    "sid" => "Site ID", "name" => "Station Name",
+    "ratio" => "Snow to Water Ratio",
+    "tmpf" => "Ob Temperature", "max_tmpf" => "24 hour High",
+    "min_tmpf" => "24 hour Low", "snow" => "24 hour Snowfall",
+    "snowd" => "Snowfall Depth", "pday" => "24 hour rainfall",
+    "phour" => "Rainfall One Hour", "snoww" => "Snow Water Equivalent"
+);
 $t->current_network = "COOP";
 
 $nselect = '<select name="network">';
 $rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'COOP' ORDER by name ASC");
-for ($i=0;$row=pg_fetch_assoc($rs);$i++){
-	$sel = '';
-	if ($network == $row["id"]){
-		$sel = " selected='SELECTED'";
-	}
-	$nselect .= sprintf("<option value='%s'%s>%s</option>\n",
-	  $row["id"], $sel, $row["name"]);
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    $sel = '';
+    if ($network == $row["id"]) {
+        $sel = " selected='SELECTED'";
+    }
+    $nselect .= sprintf(
+        "<option value='%s'%s>%s</option>\n",
+        $row["id"],
+        $sel,
+        $row["name"]
+    );
 }
 $nselect .= "</select>";
 
 $wselect = "<select name=\"wfo\">";
-foreach($nt->table as $key => $value){
-	$wselect .= "<option value=\"$key\" ";
-	if ($wfo == $key) $wselect .= "SELECTED";
-	$wselect .= ">[".$key."] ". $nt->table[$key]["name"] ."\n";
+foreach ($nt->table as $key => $value) {
+    $wselect .= "<option value=\"$key\" ";
+    if ($wfo == $key) $wselect .= "SELECTED";
+    $wselect .= ">[" . $key . "] " . $nt->table[$key]["name"] . "\n";
 }
 $wselect .= "</select>";
 
-$sorts = Array("asc" => "Ascending", "desc" => "Descending");
+$sorts = array("asc" => "Ascending", "desc" => "Descending");
 
 $one = get_sortdir($baseurl, "sid", $sortcol, $sortdir);
 $two = get_sortdir($baseurl, "name", $sortcol, $sortdir);

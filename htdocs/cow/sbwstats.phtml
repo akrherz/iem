@@ -24,10 +24,10 @@ $sortby = isset($_GET["sortby"]) ? xssafe($_GET["sortby"]): "wfo";
 $sts = mktime($shour,0,0,$smonth, $sday, $syear);
 $ets = mktime($ehour,0,0,$emonth, $eday, $eyear);
 $gis_url = sprintf("/cgi-bin/request/gis/watchwarn.py?limit1=yes&amp;".
-		"year1=%s&amp;month1=%s&amp;day1=%s&amp;hour1=%s&amp;minute1=0&amp;".
-		"year2=%s&amp;month2=%s&amp;day2=%s&amp;hour2=%s&amp;minute2=0",  
-		  date("Y", $sts), date("m", $sts),date("d", $sts), date("H", $sts), 
-		  date("Y", $ets), date("m", $ets), date("d", $ets), date("H", $ets) );
+        "year1=%s&amp;month1=%s&amp;day1=%s&amp;hour1=%s&amp;minute1=0&amp;".
+        "year2=%s&amp;month2=%s&amp;day2=%s&amp;hour2=%s&amp;minute2=0",  
+          date("Y", $sts), date("m", $sts),date("d", $sts), date("H", $sts), 
+          date("Y", $ets), date("m", $ets), date("d", $ets), date("H", $ets) );
 
 $rs = pg_prepare($postgis, "SELECT", "SELECT wfo, phenomena, count(*) as cnt,
   sum( st_area2d( ST_transform(geom,2163) ) ) as sum_polysize,
@@ -101,30 +101,30 @@ $table = "
 </tr>
 ";
 $totals = Array(
-	"TO_cnt" => 0, "TO_perim" => 0, "TO_area" => 0,
-	"SV_cnt" => 0, "SV_perim" => 0, "SV_area" => 0,
-	"MA_cnt" => 0, "MA_perim" => 0, "MA_area" => 0,
-	"FF_cnt" => 0, "FF_perim" => 0, "FF_area" => 0,	
-	"FA_cnt" => 0, "FA_perim" => 0, "FA_area" => 0,	
-	"DS_cnt" => 0, "DS_perim" => 0, "DS_area" => 0,	
-	"SQ_cnt" => 0, "SQ_perim" => 0, "SQ_area" => 0,	
+    "TO_cnt" => 0, "TO_perim" => 0, "TO_area" => 0,
+    "SV_cnt" => 0, "SV_perim" => 0, "SV_area" => 0,
+    "MA_cnt" => 0, "MA_perim" => 0, "MA_area" => 0,
+    "FF_cnt" => 0, "FF_perim" => 0, "FF_area" => 0,	
+    "FA_cnt" => 0, "FA_perim" => 0, "FA_area" => 0,	
+    "DS_cnt" => 0, "DS_perim" => 0, "DS_area" => 0,	
+    "SQ_cnt" => 0, "SQ_perim" => 0, "SQ_area" => 0,	
 );
 foreach($sorted as $v => $wfo)
 {
     foreach($phenoms as $idx => $phenom)
     {
-		$totals["${phenom}_cnt"] += $data[$wfo]["${phenom}_cnt"];
-		$totals["${phenom}_perim"] += $data[$wfo]["${phenom}_sum_perimsize"];
-		$totals["${phenom}_area"] += $data[$wfo]["${phenom}_sum_polysize"];
-	}
-	
+        $totals["${phenom}_cnt"] += $data[$wfo]["${phenom}_cnt"];
+        $totals["${phenom}_perim"] += $data[$wfo]["${phenom}_sum_perimsize"];
+        $totals["${phenom}_area"] += $data[$wfo]["${phenom}_sum_polysize"];
+    }
+    
   $cnt = $data[$wfo]["TO_cnt"] + 
-  		$data[$wfo]["SV_cnt"] +
-  		$data[$wfo]["MA_cnt"] +
-  		$data[$wfo]["FA_cnt"] +
-  		$data[$wfo]["FF_cnt"] +
-  		$data[$wfo]["DS_cnt"] +
-  		$data[$wfo]["SQ_cnt"] ;
+          $data[$wfo]["SV_cnt"] +
+          $data[$wfo]["MA_cnt"] +
+          $data[$wfo]["FA_cnt"] +
+          $data[$wfo]["FF_cnt"] +
+          $data[$wfo]["DS_cnt"] +
+          $data[$wfo]["SQ_cnt"] ;
   $perim = $data[$wfo]["TO_sum_perimsize"] + 
            $data[$wfo]["SV_sum_perimsize"] +
            $data[$wfo]["MA_sum_perimsize"] +
@@ -155,28 +155,28 @@ foreach($sorted as $v => $wfo)
          <td class='phsq'>%s</td><td class='phsq'>%.1f</td><td class='phsq'>%.1f</td>
           </tr>", $wfo, $nt->table[$wfo]['name'], 
           $cnt, $perim/$cnt/1000.0, $poly/$cnt/1000000.0,
-	$data[$wfo]["TO_cnt"], 
-	$data[$wfo]["TO_sum_perimsize"]/$counts["TO"]/1000.0,
-	$data[$wfo]["TO_sum_polysize"]/$counts["TO"]/1000000.0,
-	$data[$wfo]["SV_cnt"], 
-	$data[$wfo]["SV_sum_perimsize"]/$counts["SV"]/1000.0,
-	$data[$wfo]["SV_sum_polysize"]/$counts["SV"]/1000000.0,
-	$data[$wfo]["MA_cnt"], 
-	$data[$wfo]["MA_sum_perimsize"]/$counts["MA"]/1000.0,
-	$data[$wfo]["MA_sum_polysize"]/$counts["MA"]/1000000.0,
-	$data[$wfo]["FF_cnt"], 
-	$data[$wfo]["FF_sum_perimsize"]/$counts["FF"]/1000.0,
-	$data[$wfo]["FF_sum_polysize"]/$counts["FF"]/1000000.0,
-	$data[$wfo]["FA_cnt"], 
-	$data[$wfo]["FA_sum_perimsize"]/$counts["FA"]/1000.0,
-	$data[$wfo]["FA_sum_polysize"]/$counts["FA"]/1000000.0,
-	$data[$wfo]["DS_cnt"], 
-	$data[$wfo]["DS_sum_perimsize"]/$counts["DS"]/1000.0,
-	$data[$wfo]["DS_sum_polysize"]/$counts["DS"]/1000000.0,
-	$data[$wfo]["SQ_cnt"], 
-	$data[$wfo]["SQ_sum_perimsize"]/$counts["SQ"]/1000.0,
-	$data[$wfo]["SQ_sum_polysize"]/$counts["SQ"]/1000000.0
-	);
+    $data[$wfo]["TO_cnt"], 
+    $data[$wfo]["TO_sum_perimsize"]/$counts["TO"]/1000.0,
+    $data[$wfo]["TO_sum_polysize"]/$counts["TO"]/1000000.0,
+    $data[$wfo]["SV_cnt"], 
+    $data[$wfo]["SV_sum_perimsize"]/$counts["SV"]/1000.0,
+    $data[$wfo]["SV_sum_polysize"]/$counts["SV"]/1000000.0,
+    $data[$wfo]["MA_cnt"], 
+    $data[$wfo]["MA_sum_perimsize"]/$counts["MA"]/1000.0,
+    $data[$wfo]["MA_sum_polysize"]/$counts["MA"]/1000000.0,
+    $data[$wfo]["FF_cnt"], 
+    $data[$wfo]["FF_sum_perimsize"]/$counts["FF"]/1000.0,
+    $data[$wfo]["FF_sum_polysize"]/$counts["FF"]/1000000.0,
+    $data[$wfo]["FA_cnt"], 
+    $data[$wfo]["FA_sum_perimsize"]/$counts["FA"]/1000.0,
+    $data[$wfo]["FA_sum_polysize"]/$counts["FA"]/1000000.0,
+    $data[$wfo]["DS_cnt"], 
+    $data[$wfo]["DS_sum_perimsize"]/$counts["DS"]/1000.0,
+    $data[$wfo]["DS_sum_polysize"]/$counts["DS"]/1000000.0,
+    $data[$wfo]["SQ_cnt"], 
+    $data[$wfo]["SQ_sum_perimsize"]/$counts["SQ"]/1000.0,
+    $data[$wfo]["SQ_sum_polysize"]/$counts["SQ"]/1000000.0
+    );
 }
 
 $tcount = $totals["TO_cnt"] + $totals["SV_cnt"] + $totals["MA_cnt"] +

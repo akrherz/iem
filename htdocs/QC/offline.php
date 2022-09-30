@@ -19,25 +19,25 @@ $rs = pg_prepare(
 $nt = new NetworkTable("IA_ASOS");
 function networkOffline($network)
 {
-	global $pgconn, $nt;
-	$nt->load_network($network);
-	$cities = $nt->table;
-	$s = "";
-	$rs = pg_execute($pgconn, "SELECT", Array($network) );
+    global $pgconn, $nt;
+    $nt->load_network($network);
+    $cities = $nt->table;
+    $s = "";
+    $rs = pg_execute($pgconn, "SELECT", Array($network) );
 
-	$q = 0;
-	for( $i=0; $row = pg_fetch_array($rs); $i++)
-	{
-		$valid = $row["v"];
-		$station = $row["station"];
-		if (! isset($cities[$station]))  continue;
-		$name = $cities[$station]['name'];
-		$s .= "<tr><td>$station</td><td>$name</td><td>$valid</td></tr>\n";
-		$q = 1;
-	}
-	if ($q == 0){ $s .= "<tr><td colspan=3>All Sites Online!!!</td></tr>\n"; }
+    $q = 0;
+    for( $i=0; $row = pg_fetch_array($rs); $i++)
+    {
+        $valid = $row["v"];
+        $station = $row["station"];
+        if (! isset($cities[$station]))  continue;
+        $name = $cities[$station]['name'];
+        $s .= "<tr><td>$station</td><td>$name</td><td>$valid</td></tr>\n";
+        $q = 1;
+    }
+    if ($q == 0){ $s .= "<tr><td colspan=3>All Sites Online!!!</td></tr>\n"; }
 
-	return $s;
+    return $s;
 }
 $rwis = networkOffline("IA_RWIS");
 $awos = networkOffline("IA_ASOS");

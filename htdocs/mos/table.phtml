@@ -15,10 +15,10 @@ $year = get_int404("year", date("Y", time() + 86400));
 $month = get_int404("month", date("m", time() + 86400));
 $day = get_int404("day", date("d", time() + 86400));
 $hour =  0;
-$model = isset($_GET["model"]) ? strtoupper(xssafe($_GET["model"])): "GFS";
-$station = isset($_GET["station"]) ? strtoupper(xssafe($_GET["station"])): "KAMW";
-$vname = isset($_GET["vname"]) ? strtolower(xssafe($_GET["vname"])): "tmp";
-$models = Array(
+$model = isset($_GET["model"]) ? strtoupper(xssafe($_GET["model"])) : "GFS";
+$station = isset($_GET["station"]) ? strtoupper(xssafe($_GET["station"])) : "KAMW";
+$vname = isset($_GET["vname"]) ? strtolower(xssafe($_GET["vname"])) : "tmp";
+$models = array(
     "GFS" => "AVN/GIS",
     "MEX" => "GFS Extended (MEX)",
     "NAM" => "NAM",
@@ -27,66 +27,70 @@ $models = Array(
     "NBE" => "NBE",
     "LAV" => "LAV",
 );
-if (! array_key_exists($model, $models)){
+if (!array_key_exists($model, $models)) {
     $model = "NBE";
 }
 
 $now = strtotime("${year}-${month}-${day} ${hour}:00");
-if ($model == "NAM" && $now < mktime(12,0,0,12,9,2008)){ $model = "ETA"; }
-if ($model == "GFS" && $now < mktime(12,0,0,12,16,2003)){ $model = "AVN"; }
-$sts = $now - (86400*3) - (3600*12);
+if ($model == "NAM" && $now < mktime(12, 0, 0, 12, 9, 2008)) {
+    $model = "ETA";
+}
+if ($model == "GFS" && $now < mktime(12, 0, 0, 12, 16, 2003)) {
+    $model = "AVN";
+}
+$sts = $now - (86400 * 3) - (3600 * 12);
 $ets = $now - 3600;
-if ($model == "MEX" || $model == "NBE"){
+if ($model == "MEX" || $model == "NBE") {
     $ets = $ets + (86400 * 7);
 }
 
-$runsper = Array("GFS"=>6,
-"AVN"=>6, "NAM"=>12, "ETA"=>12, "NBS" => 6, "MEX" => 12, "NBE" => 6, "LAV" => 6);
+$runsper = array(
+    "GFS" => 6,
+    "AVN" => 6, "NAM" => 12, "ETA" => 12, "NBS" => 6, "MEX" => 12, "NBE" => 6, "LAV" => 6
+);
 $sqlSelector = "(";
-$runtimes = Array();
-$data = Array();
+$runtimes = array();
+$data = array();
 $table = sprintf("<hr><h3>[$station] $model MOS $vname Table Centered On: %sZ</h3>", date('Y M d, H', $now));
-for($now=$sts;$now <= $ets; $now += (3600*$runsper[$model])){
-  $s = date("Y-m-d H:i", $now);
-  $runtimes[] = $s;
+for ($now = $sts; $now <= $ets; $now += (3600 * $runsper[$model])) {
+    $s = date("Y-m-d H:i", $now);
+    $runtimes[] = $s;
 }
-$table .= sprintf("<table class=\"table table-condensed table-bordered table-striped\"><thead><tr><td></td><th colspan=\"%s\">Model Run Initialized at:</th></tr><tr><th width=\"75\">Valid:</th>", sizeof($runtimes) );
-for($now=$sts;$now <= $ets; $now += (3600*$runsper[$model])){
-  $s = date("Y-m-d H:i", $now);
-  $sqlSelector .= sprintf("'%s',", $s);
-  $table .= sprintf("<th>%sZ</th>", date('d/H', $now));
-  $data[$s] = Array();
+$table .= sprintf("<table class=\"table table-condensed table-bordered table-striped\"><thead><tr><td></td><th colspan=\"%s\">Model Run Initialized at:</th></tr><tr><th width=\"75\">Valid:</th>", sizeof($runtimes));
+for ($now = $sts; $now <= $ets; $now += (3600 * $runsper[$model])) {
+    $s = date("Y-m-d H:i", $now);
+    $sqlSelector .= sprintf("'%s',", $s);
+    $table .= sprintf("<th>%sZ</th>", date('d/H', $now));
+    $data[$s] = array();
 }
 $table .= "</tr></thead><tbody>\n";
-$sqlSelector = substr($sqlSelector,0,-1) . ")";
+$sqlSelector = substr($sqlSelector, 0, -1) . ")";
 
-$rs = pg_prepare($mosdb, "SELECT", "SELECT *, t06_1 ||'/'||t06_2 as t06, ".
-      "t12_1 ||'/'|| t12_2 as t12 from alldata WHERE ".
-      "runtime IN $sqlSelector ".
-      "and station = $1 and model = $2");
-$rs = pg_execute($mosdb, "SELECT", Array($station, $model));
-for ($i=0;$row=pg_fetch_array($rs);$i++)
-{
-  $data[ substr($row["runtime"],0,16) ][ substr($row["ftime"],0,16) ] = $row[$vname];
+$rs = pg_prepare($mosdb, "SELECT", "SELECT *, t06_1 ||'/'||t06_2 as t06, " .
+    "t12_1 ||'/'|| t12_2 as t12 from alldata WHERE " .
+    "runtime IN $sqlSelector " .
+    "and station = $1 and model = $2");
+$rs = pg_execute($mosdb, "SELECT", array($station, $model));
+for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    $data[substr($row["runtime"], 0, 16)][substr($row["ftime"], 0, 16)] = $row[$vname];
 }
 
-
-for($now=$sts+(3600*12);$now <= $ets+(2*86400); $now += (3600*3)){
-    $thisrow = sprintf("<tr><td>%sZ</td>", date('d/H', $now) );
+for ($now = $sts + (3600 * 12); $now <= $ets + (2 * 86400); $now += (3600 * 3)) {
+    $thisrow = sprintf("<tr><td>%sZ</td>", date('d/H', $now));
     $allnulls = TRUE;
     $lookup = date('Y-m-d H:i', $now);
-    foreach($runtimes as $k => $s){
+    foreach ($runtimes as $k => $s) {
         $val = null;
-        if (array_key_exists($lookup, $data[$s])){
+        if (array_key_exists($lookup, $data[$s])) {
             $val = $data[$s][$lookup];
         }
-        if (! is_null($val)){
+        if (!is_null($val)) {
             $allnulls = FALSE;
         }
         $thisrow .= sprintf("<td>%s</td>", $val);
     }
     $thisrow .= "</tr>\n";
-    if (! $allnulls) {
+    if (!$allnulls) {
         $table .= $thisrow;
     }
 }
@@ -113,17 +117,16 @@ should use the "K" for United States sites.</p>
 
 <select name="vname">
 EOF;
-foreach($mosvars as $v => $n)
-{
-  $content .= "<option value=\"$v\"";
-  if ($vname == $v) $content .= " SELECTED";
-  $content .= ">$n [". strtoupper($v) ."]</option>\n";
+foreach ($mosvars as $v => $n) {
+    $content .= "<option value=\"$v\"";
+    if ($vname == $v) $content .= " SELECTED";
+    $content .= ">$n [" . strtoupper($v) . "]</option>\n";
 }
 $content .= "</select>";
 
 $content .= make_select("model", $model, $models);
 
-$content .= yearSelect(2000,$year);
+$content .= yearSelect(2000, $year);
 $content .= monthSelect($month);
 $content .= daySelect($day);
 

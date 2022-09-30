@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 99);
 require_once "../../include/myview.php";
@@ -6,22 +6,26 @@ require_once "../../include/database.inc.php";
 
 $pgconn = iemdb('hads');
 $rs = pg_query($pgconn, "SELECT nwsli, max(product) from unknown"
-		." WHERE length(nwsli) = 5 and "
-		."nwsli ~* '[A-Z][A-Z][A-Z][A-Z][0-9]' "
-		."GROUP by nwsli ORDER by nwsli ASC");
+    . " WHERE length(nwsli) = 5 and "
+    . "nwsli ~* '[A-Z][A-Z][A-Z][A-Z][0-9]' "
+    . "GROUP by nwsli ORDER by nwsli ASC");
 $table = <<<EOF
 <table id="table1" class="table table-striped table-bordered">
 <thead><tr><th>NWSLI</th><th>WMO Source</th><th>Recent Product</th></tr></thead>
 <tbody>
 EOF;
-$floor = date("YmdHi", time() - 8*86400);
-for($i=0; $row=pg_fetch_array($rs); $i++){
-	$link = sprintf("<a href=\"/p.php?pid=%s\">%s</a>", $row[1], $row[1]);
-	if (substr($row[1], 0, 12) < $floor){
-		$link = $row[1];
-	}
-	$table .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td>\n",
-			$row[0], substr($row[1], 13, 4), $link);
+$floor = date("YmdHi", time() - 8 * 86400);
+for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    $link = sprintf("<a href=\"/p.php?pid=%s\">%s</a>", $row[1], $row[1]);
+    if (substr($row[1], 0, 12) < $floor) {
+        $link = $row[1];
+    }
+    $table .= sprintf(
+        "<tr><td>%s</td><td>%s</td><td>%s</td>\n",
+        $row[0],
+        substr($row[1], 13, 4),
+        $link
+    );
 }
 $table .= "</tbody></table>";
 
@@ -36,8 +40,8 @@ EOF;
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
-		<li><a href="/DCP/">HADS/DCP Mainpage</a></li>
-		<li class="active">Unknown NWSLIs</li>
+        <li><a href="/DCP/">HADS/DCP Mainpage</a></li>
+        <li class="active">Unknown NWSLIs</li>
 </ol>
 
 <h3>Unknown NWSLIs used in SHEF Products</h3>

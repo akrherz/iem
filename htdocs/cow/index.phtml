@@ -6,149 +6,168 @@ require_once "../../include/network.php";
 require_once "../../include/forms.php";
 $t = new MyView();
 
- $wtype = isset($_GET["wtype"]) ? $_GET["wtype"] : Array();
- $ltype = isset($_GET["ltype"]) ? $_GET["ltype"] : Array();
- $syear = get_int404("syear", date("Y"));
- $smonth = get_int404("smonth", 1);
- $sday = get_int404("sday", 1);
- $shour = get_int404("shour", 12);
- $sts = new DateTime("{$syear}-{$smonth}-{$sday} {$shour}:00");
+$wtype = isset($_GET["wtype"]) ? $_GET["wtype"] : array();
+$ltype = isset($_GET["ltype"]) ? $_GET["ltype"] : array();
+$syear = get_int404("syear", date("Y"));
+$smonth = get_int404("smonth", 1);
+$sday = get_int404("sday", 1);
+$shour = get_int404("shour", 12);
+$sts = new DateTime("{$syear}-{$smonth}-{$sday} {$shour}:00");
 
- $eyear = get_int404("eyear", date("Y"));
- $emonth = get_int404("emonth", date("m"));
- $eday = get_int404("eday", date("d"));
- $ehour = get_int404("ehour", 12);
- $ets = new DateTime("{$eyear}-{$emonth}-{$eday} {$ehour}:00");
+$eyear = get_int404("eyear", date("Y"));
+$emonth = get_int404("emonth", date("m"));
+$eday = get_int404("eday", date("d"));
+$ehour = get_int404("ehour", 12);
+$ets = new DateTime("{$eyear}-{$emonth}-{$eday} {$ehour}:00");
 
- $hail = isset($_GET["hail"]) ? floatval($_GET["hail"]): 1.0;
- $wind = isset($_REQUEST["wind"]) ? floatval($_REQUEST["wind"]): 58;
- $wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,4) : "MPX";
- $lsrbuffer = isset($_GET["lsrbuffer"]) ? intval($_GET["lsrbuffer"]) : 15;
- $warnbuffer = isset($_GET["warnbuffer"]) ? floatval($_GET["warnbuffer"]) : 0.01;
- $useWindHailTag = isset($_REQUEST["windhailtag"]) ? $_REQUEST["windhailtag"] : 'N';
- $limitwarns = isset($_REQUEST["limitwarns"]) ? $_REQUEST["limitwarns"] : 'N';
- $fcster = isset($_GET["fcster"]) ? xssafe($_GET["fcster"]): '';
+$hail = isset($_GET["hail"]) ? floatval($_GET["hail"]) : 1.0;
+$wind = isset($_REQUEST["wind"]) ? floatval($_REQUEST["wind"]) : 58;
+$wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"], 0, 4) : "MPX";
+$lsrbuffer = get_int404("lsrbuffer", 15);
+$warnbuffer = isset($_GET["warnbuffer"]) ? floatval($_GET["warnbuffer"]) : 0.01;
+$useWindHailTag = isset($_REQUEST["windhailtag"]) ? $_REQUEST["windhailtag"] : 'N';
+$limitwarns = isset($_REQUEST["limitwarns"]) ? $_REQUEST["limitwarns"] : 'N';
+$fcster = isset($_GET["fcster"]) ? xssafe($_GET["fcster"]) : '';
 
- $abegin = new DateTime("2005-08-06");
- if ($sts < $abegin){ $sts = $abegin; }
- if ($ets < $sts){ $n = $sts; $sts = $ets; $ets = $n; }
-
- if ( in_array("FF", $wtype) && $syear < 2008){ 
-   $wtype = array_diff( $wtype, array("FF") );
- }
- if ( in_array("FF", $ltype) && $syear < 2008){ 
-   $ltype = array_diff( $ltype, array("FF") );
- }
-
- if ( in_array("DS", $wtype) && $syear < 2018){ 
-	$wtype = array_diff( $wtype, array("FF") );
-  }
-  if ( in_array("DS", $ltype) && $syear < 2018){ 
-	$ltype = array_diff( $ltype, array("DS") );
-  }
- 
-
- $t->title = "Cow (Storm Based Warning Verification)";
- $nt = new NetworkTable("WFO");
-
- $y1 = yearSelect2(2005,$syear,"syear");
- $m1 = monthSelect($smonth, "smonth");
- $d1 = daySelect2($sday, "sday");
- $h1 = gmtHourSelect($shour, "shour");
-
- $y2 = yearSelect2(2005,$eyear,"eyear");
- $m2 = monthSelect($emonth, "emonth");
- $d2 = daySelect2($eday, "eday");
- $h2 = gmtHourSelect($ehour, "ehour");
- 
- $wselect = "<select name=\"wfo\" class=\"iemselect2\">";
- foreach($nt->table as $key => $value){
- 	$wselect .= "<option value=\"$key\" ";
- 	if ($wfo == $key) $wselect .= "SELECTED";
- 	$wselect .= ">". $nt->table[$key]["name"] ." [".$key."]</option>\n";
+$abegin = new DateTime("2005-08-06");
+if ($sts < $abegin) {
+    $sts = $abegin;
 }
- $wselect .= "</select>";
+if ($ets < $sts) {
+    $n = $sts;
+    $sts = $ets;
+    $ets = $n;
+}
 
- $ar = Array(
-    "TO"=> "Tornado",
- 	"SV" => "Svr T'storm",
- 	"MA" => "Marine",
-	"FF" => "Flash Flood (2008+)",
-    "DS" => "Dust Storm (2018+)");
- $tselect = "";
- foreach($ar as $k => $v){
- 	$tselect .= sprintf(
-         '<input name="wtype[]" type="checkbox"  id="%s" value="%s"%s> '.
-         '<label for="%s">%s</label> ', $k, $k, 
- 		(in_array($k, $wtype) ? " CHECKED": ""), $k, $v);
- }
- 
- $ar = Array(
+if (in_array("FF", $wtype) && $syear < 2008) {
+    $wtype = array_diff($wtype, array("FF"));
+}
+if (in_array("FF", $ltype) && $syear < 2008) {
+    $ltype = array_diff($ltype, array("FF"));
+}
+
+if (in_array("DS", $wtype) && $syear < 2018) {
+    $wtype = array_diff($wtype, array("FF"));
+}
+if (in_array("DS", $ltype) && $syear < 2018) {
+    $ltype = array_diff($ltype, array("DS"));
+}
+
+$t->title = "Cow (Storm Based Warning Verification)";
+$nt = new NetworkTable("WFO");
+
+$y1 = yearSelect2(2005, $syear, "syear");
+$m1 = monthSelect($smonth, "smonth");
+$d1 = daySelect2($sday, "sday");
+$h1 = gmtHourSelect($shour, "shour");
+
+$y2 = yearSelect2(2005, $eyear, "eyear");
+$m2 = monthSelect($emonth, "emonth");
+$d2 = daySelect2($eday, "eday");
+$h2 = gmtHourSelect($ehour, "ehour");
+
+$wselect = "<select name=\"wfo\" class=\"iemselect2\">";
+foreach ($nt->table as $key => $value) {
+    $wselect .= "<option value=\"$key\" ";
+    if ($wfo == $key) $wselect .= "SELECTED";
+    $wselect .= ">" . $nt->table[$key]["name"] . " [" . $key . "]</option>\n";
+}
+$wselect .= "</select>";
+
+$ar = array(
+    "TO" => "Tornado",
+    "SV" => "Svr T'storm",
+    "MA" => "Marine",
+    "FF" => "Flash Flood (2008+)",
+    "DS" => "Dust Storm (2018+)"
+);
+$tselect = "";
+foreach ($ar as $k => $v) {
+    $tselect .= sprintf(
+        '<input name="wtype[]" type="checkbox"  id="%s" value="%s"%s> ' .
+            '<label for="%s">%s</label> ',
+        $k,
+        $k,
+        (in_array($k, $wtype) ? " CHECKED" : ""),
+        $k,
+        $v
+    );
+}
+
+$ar = array(
     "T" => "Tornado",
- "D" => "Wind Damage",
- "H" => "Hail",
- "G" => "Wind Gust",
- "MA" => "Marine",
- "FF" => "Flash Flood (2008+)",
- "DS" => "Dust Storm (2018+)");
- $ltselect = "";
- foreach($ar as $k => $v){
- 	if ($k == "MA2") $ltselect .= "<br />";
- 	$ltselect .= sprintf(
-         '<input name="ltype[]" type="checkbox" id="%s%s" value="%s"%s> '.
-         '<label for="%s%s">%s</label> ', $k, 
- 			(strlen($k) == 2)? "2": "", $k,
- 			(in_array($k, $ltype) ? " CHECKED": ""), 
-            $k, (strlen($k) == 2)? "2": "", $v);
- }
-   
- 
- $ar = Array("0.75" => "0.75",
- 	"1.00" => "1.00",
- "1.75" => "1.75",
- "2.00" => "2.00",
- "2.75" => "2.75",
- "7.00" => "7.00");
- 
- $hselect = make_select("hail", $hail, $ar);
- 
- $ar = Array("5" => "5", "15" => "15", "30" => "30");
- $lbselect = make_select("lsrbuffer", $lsrbuffer, $ar);
- 
- $ar = Array("0" => "0", "0.01" => "0.01");
- $wbuffer = make_select("warnbuffer", $warnbuffer, $ar);
- 
- $ar = Array(58 => "58 mph", 70 => "70 mph", 75 => "75 mph", 80 => "80 mph", 150 => "150 mph");
- $wiselect = make_select("wind", $wind, $ar);
+    "D" => "Wind Damage",
+    "H" => "Hail",
+    "G" => "Wind Gust",
+    "MA" => "Marine",
+    "FF" => "Flash Flood (2008+)",
+    "DS" => "Dust Storm (2018+)"
+);
+$ltselect = "";
+foreach ($ar as $k => $v) {
+    if ($k == "MA2") $ltselect .= "<br />";
+    $ltselect .= sprintf(
+        '<input name="ltype[]" type="checkbox" id="%s%s" value="%s"%s> ' .
+            '<label for="%s%s">%s</label> ',
+        $k,
+        (strlen($k) == 2) ? "2" : "",
+        $k,
+        (in_array($k, $ltype) ? " CHECKED" : ""),
+        $k,
+        (strlen($k) == 2) ? "2" : "",
+        $v
+    );
+}
 
- $tagselect = '<input id="windhailtag" name="windhailtag" type="checkbox" value="Y" ';
- $tagselect .= (($useWindHailTag == 'Y') ? " CHECKED": "");
- $tagselect .= <<<EOF
+
+$ar = array(
+    "0.75" => "0.75",
+    "1.00" => "1.00",
+    "1.75" => "1.75",
+    "2.00" => "2.00",
+    "2.75" => "2.75",
+    "7.00" => "7.00"
+);
+
+$hselect = make_select("hail", $hail, $ar);
+
+$ar = array("5" => "5", "15" => "15", "30" => "30");
+$lbselect = make_select("lsrbuffer", $lsrbuffer, $ar);
+
+$ar = array("0" => "0", "0.01" => "0.01");
+$wbuffer = make_select("warnbuffer", $warnbuffer, $ar);
+
+$ar = array(58 => "58 mph", 70 => "70 mph", 75 => "75 mph", 80 => "80 mph", 150 => "150 mph");
+$wiselect = make_select("wind", $wind, $ar);
+
+$tagselect = '<input id="windhailtag" name="windhailtag" type="checkbox" value="Y" ';
+$tagselect .= (($useWindHailTag == 'Y') ? " CHECKED" : "");
+$tagselect .= <<<EOF
 > <label for="windhailtag">When possible, verify SVR warnings against
 issuance WIND...HAIL tag</label>
  <a href="/nws/list_tags.php" target="_new"><i class="fa fa-link"></i> App listing per-WFO tags</a>
 <br /><input id="limitwarns" name="limitwarns" type="checkbox" value="Y" 
 EOF;
-	$tagselect .= (($limitwarns == 'Y')? " CHECKED": "");
-	$tagselect .= '> <label for="limitwarns">When possible, limit considered warnings to your hail/wind threshold</label>';
+$tagselect .= (($limitwarns == 'Y') ? " CHECKED" : "");
+$tagselect .= '> <label for="limitwarns">When possible, limit considered warnings to your hail/wind threshold</label>';
 
 $forecaster_form = "";
 $resetlink = "/cow/";
 // Allow for a special bypass to expose this configuration setting
-if (isset($_GET["f"])){
-	$resetlink = "/cow/?f";
-	$forecaster_form = <<<EOF
-	<input type="hidden" name="f" />
+if (isset($_GET["f"])) {
+    $resetlink = "/cow/?f";
+    $forecaster_form = <<<EOF
+    <input type="hidden" name="f" />
 <br />Filter by Product Signature (exact match):<input type="text" name="fcster" size="15" value="{$fcster}" />
 EOF;
 }
- 
+
 $content = <<<EOF
 <a href="{$resetlink}">Reset Application</a> (All timestamps are displayed in UTC)
 <form method="GET" name="cow" rel="nofollow">
 
 <div class="row">
-	<div class="col-sm-6">
+    <div class="col-sm-6">
 
 <table class="table table-condensed">
 <tr><th>Start:</th><td>{$y1} {$m1} {$d1} {$h1}</td></tr>
@@ -159,9 +178,9 @@ $content = <<<EOF
 <tr><th>Warning Buffer:</th><td>{$wbuffer} degrees</td></tr>
 <tr><th>Wind:</th><td>{$wiselect}</td></tr>
 </table>
-	
-	</div>
-	<div class="col-sm-6">
+    
+    </div>
+    <div class="col-sm-6">
 
 <table class="table table-condensed">
 <tr><th>Warning Type:</th>
@@ -169,12 +188,12 @@ $content = <<<EOF
 <script type="text/javascript">
 function wtypeSelect()
 {
-	document.getElementById("TO").checked = true;
-	document.getElementById("SV").checked = true;
-	document.getElementById("MA").checked = true;
-	document.getElementById("FF").checked = true;
-	document.getElementById("DS").checked = true;
-	return false;
+    document.getElementById("TO").checked = true;
+    document.getElementById("SV").checked = true;
+    document.getElementById("MA").checked = true;
+    document.getElementById("FF").checked = true;
+    document.getElementById("DS").checked = true;
+    return false;
 }
 </script>
 <button onclick="return wtypeSelect()">Select All</button> {$tselect}
@@ -184,14 +203,14 @@ function wtypeSelect()
 <script type="text/javascript">
 function ltypeSelect()
 {
-	document.getElementById("T").checked = true;
-	document.getElementById("D").checked = true;
-	document.getElementById("H").checked = true;
-	document.getElementById("G").checked = true;
-	document.getElementById("FF2").checked = true;
-	document.getElementById("MA2").checked = true;
-	document.getElementById("DS2").checked = true;
-	return false;
+    document.getElementById("T").checked = true;
+    document.getElementById("D").checked = true;
+    document.getElementById("H").checked = true;
+    document.getElementById("G").checked = true;
+    document.getElementById("FF2").checked = true;
+    document.getElementById("MA2").checked = true;
+    document.getElementById("DS2").checked = true;
+    return false;
 }
 </script>
 <button onclick="return ltypeSelect()">Select All</button> {$ltselect}
@@ -201,19 +220,19 @@ function ltypeSelect()
  {$tagselect}
  {$forecaster_form}
  </td></tr>
-		
+        
 </table>
-	
-	</div>
+    
+    </div>
 </div>
 
 <input type="submit" value="Go Cow Go">
 </form>
 EOF;
-if (isset($_GET["hail"])){ 
- 	include("worker.php");
+if (isset($_GET["hail"])) {
+    include("worker.php");
 } else {
-$content .= <<<EOF
+    $content .= <<<EOF
 
 <h3>IEM Cow (NWS Storm Based Warning Verification)</h3>
 
