@@ -294,6 +294,10 @@
                     "url": "/request/ldm.php"
                 },
                 {
+                    "title": "Max CSV",
+                    "url": "/request/maxcsv.php"
+                },
+                {
                     "title": "OGC Webservices",
                     "url": "/ogc/"
                 },

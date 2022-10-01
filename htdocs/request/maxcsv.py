@@ -421,7 +421,7 @@ def do_ahps_fx(nwsli):
     for _, row in odf.iterrows():
         res += (
             f"{row['Time']},{row['Stage[ft]']:.2f}ft,"
-            f"{row['Fow[kcfs']:.1f}kcfs\n"
+            f"{row['Flow[kcfs]']:.1f}kcfs\n"
         )
     return res
 
