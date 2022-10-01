@@ -38,5 +38,5 @@ rabbitmq | iem9-dc | iem8-dc | nagios check
 samba | iem16 | None | cron scripts check data availability
 RIDGE | iem9-dc | None    | inbound file queue, check latency 7 radars
 webalizer | iem19 | None | None
-Webcam Current | iem13 | None | cron script monitors for offline webcams
-Webcam Lapses | iem13 | None | None
+Webcam Current | iem18 | None | cron script monitors for offline webcams
+Webcam Lapses | iem18 | None | None
