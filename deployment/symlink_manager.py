@@ -9,7 +9,7 @@ LOG = logger()
 M2 = "/mnt/mesonet2"
 M7 = "/mnt/mesonet7"
 PAIRS = [
-    ["/mesonet/data/merra2", f"{M2}/data/merra2"],
+    ["/mesonet/data/merra2", f"{M7}/data/merra2"],
     ["/mesonet/nawips", f"{M2}/gempak"],
     ["/mesonet/wepp", f"{M2}/idep"],
     ["/mesonet/ARCHIVE/gempak", f"{M2}/longterm/gempak"],
