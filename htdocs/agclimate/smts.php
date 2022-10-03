@@ -27,9 +27,9 @@ $sts = mktime($hour1, 0, 0, $month1, $day1, $year1);
 $ets = mktime($hour2, 0, 0, $month2, $day2, $year2);
 $errmsg = "";
 if ($ets <= $sts){
-	$errmsg = "<div class=\"alert alert-warning\">Error, your requested".
-			" End Time is before the Start Time.  Please adjust your selection".
-			" and try once again.</div>";
+    $errmsg = "<div class=\"alert alert-warning\">Error, your requested".
+            " End Time is before the Start Time.  Please adjust your selection".
+            " and try once again.</div>";
 }
 
 $sselect = networkSelect("ISUSM", $station);
@@ -59,14 +59,14 @@ $ar = Array(
 $dd = "This plot is a time series graph of
 observations from a time period and ISU Soil Moisture station of your choice.";
 $desc = Array(1 => $dd,
-		2 => $dd,
+        2 => $dd,
         "sm" => $dd,
-		3 => $dd,
-		4 => $dd,
-		5 => $dd,
-		6 => $dd,
-		7 => $dd,
-		8 => $dd);
+        3 => $dd,
+        4 => $dd,
+        5 => $dd,
+        6 => $dd,
+        7 => $dd,
+        8 => $dd);
 $desc[6] = <<<EOF
 This plot presents a histogram of hourly volumetric soil moisture observations.
 The y-axis is expressed in logarithmic to better show the low frequency obs
@@ -91,14 +91,14 @@ $thedescription = $desc[$opt];
 $oselect = make_select("opt", $opt, $ar);
 
 $img = sprintf("<img src=\"/plotting/auto/plot/177/network:ISUSM::".
-		"station:%s::opt:%s::sts:%d-%02d-%02d%%20%02d00::".
-		"ets:%d-%02d-%02d%%20%02d00.png".
-		"\">",
-		$station, $opt,
-		$year1, $month1, $day1, $hour1,
-		$year2, $month2, $day2, $hour2);
+        "station:%s::opt:%s::sts:%d-%02d-%02d%%20%02d00::".
+        "ets:%d-%02d-%02d%%20%02d00.png".
+        "\">",
+        $station, $opt,
+        $year1, $month1, $day1, $hour1,
+        $year2, $month2, $day2, $hour2);
 if ($errmsg != ""){
-	$img = $errmsg;
+    $img = $errmsg;
 }
 
 $t->content = <<<EOF
@@ -127,18 +127,18 @@ and click the 'Make Plot' button below.
 <tr><td rowspan='2'>{$sselect}</td>
  <td rowspan="2">{$oselect}</td>
 <td>Start Time</td>
-	<td>{$y1}</td>
-	<td>{$m1}</td>
-	<td>{$d1}</td>
-	<td>{$h1}</td>
-	</tr>
+    <td>{$y1}</td>
+    <td>{$m1}</td>
+    <td>{$d1}</td>
+    <td>{$h1}</td>
+    </tr>
 <tr>
 <td>End Time</td>
-	<td>{$y2}</td>
-	<td>{$m2}</td>
-	<td>{$d2}</td>
-	<td>{$h2}</td>
-	</tr>
+    <td>{$y2}</td>
+    <td>{$m2}</td>
+    <td>{$d2}</td>
+    <td>{$h2}</td>
+    </tr>
 
 </tbody>
 </table>

@@ -1,41 +1,41 @@
 <?php
- require_once "../../config/settings.inc.php";
- require_once "../../include/myview.php";
- $t = new MyView();
- 
- $t->title = "ISUSM - Network Metadata";
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
+$t = new MyView();
+
+$t->title = "ISUSM - Network Metadata";
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
-		<li><a href="/agclimate/">ISU Soil Moisture Network</a></li>
-		<li class="active">Network Metadata</li>
+        <li><a href="/agclimate/">ISU Soil Moisture Network</a></li>
+        <li class="active">Network Metadata</li>
 </ol>
 
 <h3>ISU Soil Moisture Network</h3>
 
 <div class="alert alert-info">These stations were installed in 2013-2014 and
-		include soil moisture sensors.</div>
-		
+        include soil moisture sensors.</div>
+        
 <h4>Campbell Scientific Sensor Package</h4>
 
 <ul>
  <li><a href="http://www.campbellsci.com/cr1000">CR1000 Data Logger</a></li>
  <li><a href="http://www.campbellsci.com/cm106">CM106 Tripod</a> (station mast)</li>
  <li><a href="http://www.campbellsci.com/cs300-pyranometer">CS300 Pyranometer</a>
-		(total incoming solar radiation)</li>
+        (total incoming solar radiation)</li>
  <li><a href="http://www.campbellsci.com/03002-wind-sentry">03002 Wind Sentry</a>
-		(wind speed and direction @ approximately 10 feet AGL)</li>
+        (wind speed and direction @ approximately 10 feet AGL)</li>
  <li><a href="http://www.campbellsci.com/cs215-l">CS215 Air Temperature and Relative Humidity</a>
-		(@ approximately 5 feet AGL)</li>
+        (@ approximately 5 feet AGL)</li>
  <li><a href="http://www.campbellsci.com/te525-l">TE525 Rain Gage</a></li>
  <li><a href="http://www.campbellsci.com/cs655">Campbell CS655 Water Content Reflectometers</a> (Soil Moisture, Temperature)</li>
 </ul>
-		
+        
 
 <h3>Legacy ISU Ag Climate Network</h3>
 
 <div class="alert alert-info">These stations were removed in spring 2014.</div>
-		
+        
 <table class="table table-striped">
 <caption>Station Id conversion table</caption>
 <tr><th>StationId:</th><th>Station Name:</th><th>Data Starts At:</th><th>Data Ends At:</th></tr>
@@ -59,12 +59,9 @@ $t->content = <<<EOF
 
 <p>You can get lat/lon information from <a href="/sites/networks.php?network=ISUAG&format=html">this page</a>.
 
-
-
-
 <div class="row">
-		<div class="col-md-6 col-sm-6">
-		<h4>Units for Data</h4>
+    <div class="col-md-6 col-sm-6">
+    <h4>Units for Data</h4>
 
 <table class="table table-striped">
 <tr><td>Evapotranspiration</td><td>inches</td></tr>
@@ -75,12 +72,12 @@ $t->content = <<<EOF
 <tr><td>Wind speeds</td><td>MPH</td></tr>
 <tr><td>Time</td><td>local time, either CST or CDT</td></tr>
 </table>
-		
+
 <h4>Hardware Specs</h4>
-		
+
 <p><strong>Soil Temperature</strong> The soil probe is 4 inches deep underneath
 a one square meter bare patch of soil.
-		
+
 <p><strong>Temperature:</strong> All of our stations have either the Campbell 
 HMP35 or HMP45.  The 35 was discontinued and replaced with the 45. They are 
 mounted within a radiation grill at 2 meters height.
@@ -89,10 +86,10 @@ mounted within a radiation grill at 2 meters height.
 model <a href="http://www.campbellsci.com/li200x-l">LI200X</a>.
 
 </div>
-		<div class="col-md-6 col-sm-6 well">
-		<img src="/agclimate/images/campbell.jpg" class="img img-responsive" />
-		</div>
-		</div>
+        <div class="col-md-6 col-sm-6 well">
+        <img src="/agclimate/images/campbell.jpg" class="img img-responsive" />
+        </div>
+        </div>
 
 EOF;
 $t->render('single.phtml');

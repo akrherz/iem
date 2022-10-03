@@ -1,13 +1,17 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Climatology Plots for Yesterday";
 
-$u1 = sprintf("/archive/data/%scoop_avg_temp.png", 
-		date("Y/m/d/" , date("U") - 86400 ));
-$u2 = sprintf("/archive/data/%scoop_rec_temp.png",
-		date("Y/m/d/" , date("U") - 86400 ));
+$u1 = sprintf(
+    "/archive/data/%scoop_avg_temp.png",
+    date("Y/m/d/", date("U") - 86400)
+);
+$u2 = sprintf(
+    "/archive/data/%scoop_rec_temp.png",
+    date("Y/m/d/", date("U") - 86400)
+);
 
 $t->content = <<<EOF
 <h4>Temperature</h4>

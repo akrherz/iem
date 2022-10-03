@@ -1,16 +1,16 @@
 <?php
- require_once "../../config/settings.inc.php";
- require_once "../../include/myview.php";
- $t = new MyView();
- 
- $t->title = "ISUSM - Ames Second Tipping Bucket Printout";
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
+$t = new MyView();
 
- $table = file_get_contents("http://iem.local/agclimate/ames_precip.py");
+$t->title = "ISUSM - Ames Second Tipping Bucket Printout";
+
+$table = file_get_contents("http://iem.local/agclimate/ames_precip.py");
 
 $t->content = <<<EOF
 <ol class="breadcrumb">
-		<li><a href="/agclimate/">ISU Soil Moisture Network</a></li>
-		<li class="active">Ames AEA Farm Dual Tipping Bucket</li>
+    <li><a href="/agclimate/">ISU Soil Moisture Network</a></li>
+    <li class="active">Ames AEA Farm Dual Tipping Bucket</li>
 </ol>
 <style>
 .tableFixHead          { overflow-y: auto; height: 100px; }

@@ -7,7 +7,6 @@ $year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
 $month = isset($_GET["month"]) ? $_GET["month"] : date("m");
 $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
 
-
 $gif = ImageCreate($width,$height);
 
 $black = ImageColorAllocate($gif,0,0,0);
@@ -36,7 +35,6 @@ $dx = abs($size[2] - $size[0]);
 $dy = abs($size[5] - $size[3]);
 $x_pad = ($width - $dx) / 2 ;
 ImageTTFText($gif, 14, 0, $x_pad , 55, $black, $Font, $year);
-
 
 header("content-type: image/png");
 ImagePng($gif);

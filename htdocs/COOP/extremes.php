@@ -94,7 +94,7 @@ if ($station != null) {
         );
     }
 
-    $h3 = "<h3 class=\"heading\">NWS COOP Climatology for " . $cities[strtoupper($station)]["name"] . " (ID: " . $station . ")</h3>";
+    $h3 = "<h3>NWS COOP Climatology for " . $cities[strtoupper($station)]["name"] . " (ID: " . $station . ")</h3>";
     // Option 2, just a single date
 } else {
     if ($sortcol == 'valid') $sortcol = 'station';
@@ -172,9 +172,9 @@ if ($station != null) {
 
 
 $t->content = <<<EOF
- 
- {$h3}
- 
+
+{$h3}
+
 <p>This table gives a listing of <b>unofficial</b> daily records for NWS
 COOP stations.  Some records may have occured on multiple years, only one
 is listed here.  You may click on a column to sort it.  You can click on the station
@@ -210,7 +210,7 @@ for that date.</p>
 <br />
 
 <table class="table table-bordered table-condensed table-striped">
-<thead>
+<thead style="position: sticky;top: 0;background:#FFF;">
   <tr>
    <th rowspan='2' class='subtitle' valign='top'>
 {$h4}

@@ -1,88 +1,90 @@
 <?php
- require_once "../../config/settings.inc.php";
- define("IEM_APPID", 57);
- require_once "../../include/database.inc.php";
- $access = iemdb("iem");
- require_once "../../include/myview.php";
- require_once "../../include/forms.php";
- require_once "../../include/network.php";
- 
- $t = new MyView();
- $t->title = "CoCoRaHS Observations";
- 
- $station = isset($_GET["station"])? xssafe($_GET["station"]): "";
- $network = isset($_GET["network"])? xssafe($_GET["network"]): "IACOCORAHS";
- $date = isset($_GET["date"]) ? substr($_GET["date"],0, 10) : date("Y-m-d");
- $sortvar = isset($_GET["sortvar"]) ? substr($_GET["sortvar"], 0, 10): "pday";
- $year = isset($_GET["year"]) ? substr($_GET["year"], 0, 4): date("Y");
- $sortdir = "ASC";
- if ($sortvar == "pday" || $sortvar == "snow" ||
- $sortvar == "snowd" || $sortvar == "max_tmpf"){
- 	$sortdir = "DESC";
- }
- 
- $nt = new NetworkTable($network);
+require_once "../../config/settings.inc.php";
+define("IEM_APPID", 57);
+require_once "../../include/database.inc.php";
+$access = iemdb("iem");
+require_once "../../include/myview.php";
+require_once "../../include/forms.php";
+require_once "../../include/network.php";
 
- $ys =  yearSelect(2007, $year, "year");
- 
+$t = new MyView();
+$t->title = "CoCoRaHS Observations";
+
+$station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "";
+$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IACOCORAHS";
+$date = isset($_GET["date"]) ? substr($_GET["date"], 0, 10) : date("Y-m-d");
+$sortvar = isset($_GET["sortvar"]) ? substr($_GET["sortvar"], 0, 10) : "pday";
+$year = isset($_GET["year"]) ? substr($_GET["year"], 0, 4) : date("Y");
+$sortdir = "ASC";
+if (
+    $sortvar == "pday" || $sortvar == "snow" ||
+    $sortvar == "snowd" || $sortvar == "max_tmpf"
+) {
+    $sortdir = "DESC";
+}
+
+$nt = new NetworkTable($network);
+
+$ys =  yearSelect(2007, $year, "year");
+
 if (strlen($station) > 0) {
-	$rs = pg_prepare($access, "SELECTOR", "SELECT s.*, t.id as station 
-			from summary_$year s JOIN stations t
-			ON (t.iemid = s.iemid) WHERE t.id = $1
-			ORDER by $sortvar $sortdir");
-	$rs = pg_execute($access, "SELECTOR", Array($station));
+    $rs = pg_prepare($access, "SELECTOR", "SELECT s.*, t.id as station 
+            from summary_$year s JOIN stations t
+            ON (t.iemid = s.iemid) WHERE t.id = $1
+            ORDER by $sortvar $sortdir");
+    $rs = pg_execute($access, "SELECTOR", array($station));
 } else {
-	$rs = pg_prepare($access, "SELECTOR", "SELECT s.*, t.id as station 
-		from summary_$year s JOIN stations t
-		ON (t.iemid = s.iemid) WHERE day = $1 and
-		network = $2 ORDER by $sortvar $sortdir");
-	$rs = pg_execute($access, "SELECTOR", Array($date, $network));
+    $rs = pg_prepare($access, "SELECTOR", "SELECT s.*, t.id as station 
+        from summary_$year s JOIN stations t
+        ON (t.iemid = s.iemid) WHERE day = $1 and
+        network = $2 ORDER by $sortvar $sortdir");
+    $rs = pg_execute($access, "SELECTOR", array($date, $network));
 }
 $hirow = 1;
 $table = "";
-for( $i=0; $row = pg_fetch_assoc($rs); $i++) {
-	$nwsli = $row["station"];
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    $nwsli = $row["station"];
 
-	$rain = $row["pday"];
-	if ($rain == 0.0001) $rain = "T";
-	if ($rain == -99 || $rain == "") $rain = "M";
-	if ($rain > 10 || $rain < 0) $rain = "M";
+    $rain = $row["pday"];
+    if ($rain == 0.0001) $rain = "T";
+    if ($rain == -99 || $rain == "") $rain = "M";
+    if ($rain > 10 || $rain < 0) $rain = "M";
 
-	$snow = $row["snow"];
-	if ($snow == 0.0001) $snow = "T";
-	if ($snow == -99 || $snow == "") $snow = "M";
-	if ($snow > 100 || $snow < 0) $snow = "M";
+    $snow = $row["snow"];
+    if ($snow == 0.0001) $snow = "T";
+    if ($snow == -99 || $snow == "") $snow = "M";
+    if ($snow > 100 || $snow < 0) $snow = "M";
 
-	$snowd = $row["snowd"];
-	if ($snowd == 0.0001) $snowd = "T";
-	if ($snowd == -99 || $snowd == "") $snowd = "M";
-	if ($snowd > 1000 || $snowd < 0) $snowd = "M";
+    $snowd = $row["snowd"];
+    if ($snowd == 0.0001) $snowd = "T";
+    if ($snowd == -99 || $snowd == "") $snowd = "M";
+    if ($snowd > 1000 || $snowd < 0) $snowd = "M";
 
-	$table .= "<tr";
-	if ($hirow) $table .= " class=\"even\"";
-	$hirow = ! $hirow;
-	$table .= "><td>";
-	if (strlen($station) > 0){
-		$table .= $nwsli;
-	} else {
-		$table .= "<a href=\"obs.phtml?station=". $nwsli ."&network=". $network ."\">". $nwsli ."</a>";
-	}
+    $table .= "<tr";
+    if ($hirow) $table .= " class=\"even\"";
+    $hirow = !$hirow;
+    $table .= "><td>";
+    if (strlen($station) > 0) {
+        $table .= $nwsli;
+    } else {
+        $table .= "<a href=\"obs.phtml?station=" . $nwsli . "&network=" . $network . "\">" . $nwsli . "</a>";
+    }
 
-	$table .= "</td><td>". $nt->table[$nwsli]["name"] ."</td><td>". $nt->table[$nwsli]["county"] ."</td><td>";
+    $table .= "</td><td>" . $nt->table[$nwsli]["name"] . "</td><td>" . $nt->table[$nwsli]["county"] . "</td><td>";
 
-	if (strlen($date) > 0){
-		$table .= $row["day"];
-	} else {
-		$table .= "<a href=\"obs.phtml?date=". $row["day"] ."&network=". $network ."\">". $row["day"] ."</a>";
-	}
+    if (strlen($date) > 0) {
+        $table .= $row["day"];
+    } else {
+        $table .= "<a href=\"obs.phtml?date=" . $row["day"] . "&network=" . $network . "\">" . $row["day"] . "</a>";
+    }
 
-	$table .= "</td><td>". $rain ."</td><td>". $snow ."</td><td>". $snowd ."</td></tr>\n";
+    $table .= "</td><td>" . $rain . "</td><td>" . $snow . "</td><td>" . $snowd . "</td></tr>\n";
 }
 if (strlen($station) > 0) {
-  	$link = "obs.phtml?station=".$station."&network=". $network ."&sortvar=";
-  	if ($sortvar == "") $sortvar = "day";
+    $link = "obs.phtml?station=" . $station . "&network=" . $network . "&sortvar=";
+    if ($sortvar == "") $sortvar = "day";
 
-	$content = <<<EOF
+    $content = <<<EOF
 <ol class="breadcrumb">
  <li><a href="/cocorahs/">CoCoRaHS Mainpage</a></li>
  <li class="active">CoCoRaHS obs listed by station</li>
@@ -95,11 +97,12 @@ if (strlen($station) > 0) {
 Select Year: {$ys}
 <input type="submit" value="View CoCoRaHS Station"></form>
 EOF;
-} if (strlen($date) > 0) { 
-  $year = substr($date,0,4);
-  $link = "obs.phtml?date=".$date."&network=". $network ."&sortvar=";
-  if ($sortvar == "") $sortvar = "id";
-$content = <<<EOF
+}
+if (strlen($date) > 0) {
+    $year = substr($date, 0, 4);
+    $link = "obs.phtml?date=" . $date . "&network=" . $network . "&sortvar=";
+    if ($sortvar == "") $sortvar = "id";
+    $content = <<<EOF
 <ol class="breadcrumb">
  <li><a href="/cocorahs/">CoCoRaHS Mainpage</a></li>
  <li class="active">CoCoRaHS obs listed by date</li>
@@ -111,7 +114,7 @@ $content = <<<EOF
 
 <input type="submit" value="View Date"></form>
 EOF;
-} 
+}
 
 $content .= <<<EOF
 <p><table class="table table-striped table-bordered">
@@ -137,4 +140,3 @@ before using...</div>
 EOF;
 $t->content = $content;
 $t->render('single.phtml');
-?>

@@ -1,14 +1,14 @@
-<?php 
- require_once "../../config/settings.inc.php";
- require_once "../../include/myview.php"; 
- require_once "../../include/mlib.php";
- force_https();
+<?php
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
+require_once "../../include/mlib.php";
+force_https();
 
- define("IEM_APPID", 10); 
- $OL = "6.14.1";
- $t = new MyView();
- $t->title = "ISU Soil Moisture Network"; 
- 
+define("IEM_APPID", 10);
+$OL = "7.1.0";
+$t = new MyView();
+$t->title = "ISU Soil Moisture Network";
+
 $t->jsextra = <<<EOF
 <script src="/vendor/openlayers/${OL}/ol.js"></script>
 <script src="/vendor/openlayers/${OL}/ol-layerswitcher.js"></script>
@@ -23,7 +23,7 @@ $dt = new DateTime();
 // Move back 3 minutes to allow data to arrive
 $dt->sub(new DateInterval("PT3M"));
 // Set back to nearest minute modulo 5
-$dt->modify( '-' . ($dt->format('i') % 5) . ' minutes' );
+$dt->modify('-' . ($dt->format('i') % 5) . ' minutes');
 
 $dt = $dt->format("Y/m/d H:i");
 $t->headextra = <<<EOF
@@ -44,8 +44,8 @@ var defaultdt = "{$dt}";
 }
 </style>
 EOF;
- 
- $t->content = <<<EOF
+
+$t->content = <<<EOF
 
 <h3>ISU Soil Moisture Network</h3>
 
@@ -59,7 +59,7 @@ during 2012.
  
 <form name="mapper">
 <div class="row">
-	<div class="col-md-3 col-sm-5 well">
+    <div class="col-md-3 col-sm-5 well">
 
 <h4>Popular Tools:</h4>
 <div class="list-group">
@@ -94,12 +94,12 @@ during 2012.
   <i class="fa fa-info"></i> Station Metadata</a>
 </div>
 
-	</div>
-	<div class="col-md-9 col-sm-7">
-	
+    </div>
+    <div class="col-md-9 col-sm-7">
+    
 <div class="row">
 <div class="col-md-6">
-	<h4>Select Time:</h4> 
+    <h4>Select Time:</h4> 
 <input type="text" id="datetimepicker" name="dosomething" />
 <br />
  <button type="button" class="btn btn-default btn-xs dt" data-delta="-86400000">-1 Day</button>
@@ -112,31 +112,31 @@ during 2012.
 <div class="col-md-6">
 <h4>Select Variable:</h4>
 <select name="varname" id="varpicker">
-	<option value="tmpf">Air Temperature [F]</option>
-	<option value="bat">Battery Voltage [V]</option>
-	<option value="encrh_avg">Logger Enclosure Rel Humid [%]</option>
-	<option value="et">Evapotranspiration [inch]</option>
-	<option value="high">Daily High Temperature [F]</option>
-	<option value="low">Daily Low Temperature [F]</option>
-	<option value="pday">Calendar Day Precipitation [inch]</option>
-	<option value="p24i">24 Hour Precipitation [inch]</option>
-	<option value="hrprecip">Hourly Precipitation [inch]</option>
-	<option value="radmj">Hourly Solar Radiation [MJ]</option>
-	<option value="srad_wm2">Solar Radiation [W/m2]</option>
-	<option value="rh">Relative Humidity [%]</option>
-	<option value="plant_water_6_30">Plant Available Water Estimate (6-30in) [inch]</option>
-	<option value="soil12m">Soil Moisture (12 inch) [Vol %]</option>
-	<option value="soil24m">Soil Moisture (24 inch) [Vol %]</option>
-	<option value="soil50m">Soil Moisture (50 inch) [Vol %]</option>
-	<option value="soil04t">Soil Temperature (4 inch) [F]</option>
-	<option value="soil12t">Soil Temperature (12 inch) [F]</option>
-	<option value="soil24t">Soil Temperature (24 inch) [F]</option>
-	<option value="soil50t">Soil Temperature (50 inch) [F]</option>
-	<option value="wind">Wind Direction + Speed [mph]</option>
-	<option value="gust">Wind Gust [mph]</option>
+    <option value="tmpf">Air Temperature [F]</option>
+    <option value="bat">Battery Voltage [V]</option>
+    <option value="encrh_avg">Logger Enclosure Rel Humid [%]</option>
+    <option value="et">Evapotranspiration [inch]</option>
+    <option value="high">Daily High Temperature [F]</option>
+    <option value="low">Daily Low Temperature [F]</option>
+    <option value="pday">Calendar Day Precipitation [inch]</option>
+    <option value="p24i">24 Hour Precipitation [inch]</option>
+    <option value="hrprecip">Hourly Precipitation [inch]</option>
+    <option value="radmj">Hourly Solar Radiation [MJ]</option>
+    <option value="srad_wm2">Solar Radiation [W/m2]</option>
+    <option value="rh">Relative Humidity [%]</option>
+    <option value="plant_water_6_30">Plant Available Water Estimate (6-30in) [inch]</option>
+    <option value="soil12m">Soil Moisture (12 inch) [Vol %]</option>
+    <option value="soil24m">Soil Moisture (24 inch) [Vol %]</option>
+    <option value="soil50m">Soil Moisture (50 inch) [Vol %]</option>
+    <option value="soil04t">Soil Temperature (4 inch) [F]</option>
+    <option value="soil12t">Soil Temperature (12 inch) [F]</option>
+    <option value="soil24t">Soil Temperature (24 inch) [F]</option>
+    <option value="soil50t">Soil Temperature (50 inch) [F]</option>
+    <option value="wind">Wind Direction + Speed [mph]</option>
+    <option value="gust">Wind Gust [mph]</option>
 </select>
 </div></div><!-- end row -->
-	
+    
 <span id="maptitle">The map is displaying Air Temperature [F] valid at {$dt}</span>
 <div id="map"></div>
 <div id="popup" title="Station Information"></div>
@@ -178,33 +178,33 @@ during 2012.
 </form>
 
 <div class="row">
- 	<div class="col-md-6 col-sm-6">
+     <div class="col-md-6 col-sm-6">
 
-	 <h4>Rainfall Disclaimer:</h4>
-	 <p>The Soil Moisture Network uses a non-heated tipping bucket rain gage and is
-	 unable to measure snowfall. If you are interested in higher quality 
-	 precipitation data, check out the <a href="/COOP/">NWS COOP</a> network
-	 of human observations.</p>
-	 
-	 <h4>Additional Tools/Apps:</h4>
+     <h4>Rainfall Disclaimer:</h4>
+     <p>The Soil Moisture Network uses a non-heated tipping bucket rain gage and is
+     unable to measure snowfall. If you are interested in higher quality 
+     precipitation data, check out the <a href="/COOP/">NWS COOP</a> network
+     of human observations.</p>
+     
+     <h4>Additional Tools/Apps:</h4>
 <ul>
 <li><a href="soilt-prob.php">4 inch Soil Temperature Probabilities</a></li>
 <li><a href="/plotting/auto/?q=199">Daily Data Plotter</a></li>
 </ul>			
- 	<h4>Information:</h4>
+     <h4>Information:</h4>
 <ul>
 <li><a href="/agclimate/info.phtml">Information</a> about network stations.</li>
 <li><a href="et.phtml">Information on Evapotranspiration</a> calculations</li>
 <li><a href="/agclimate/usage/">Website Usage Stats</a></li>
 </ul>		
 
- 	</div>
- 	<div class="col-md-6 col-sm-6">
+     </div>
+     <div class="col-md-6 col-sm-6">
 
 <h4>Temperature Plots:</h4>
 <ul>
   <li><a href="display.php?prod=1">Max/Min Air Temps</a></li>
-	<li><a href="display.php?prod=12">Standard Chill Units since 1 Sept</a></li>
+    <li><a href="display.php?prod=12">Standard Chill Units since 1 Sept</a></li>
 </ul>
 
 <h4>Soil Plots:</h4>

@@ -1,136 +1,152 @@
 <?php
- require_once "../../config/settings.inc.php";
- define("IEM_APPID", 7);
- 
- require_once "../../include/myview.php";
- require_once "../../include/mlib.php";
- require_once "../../include/forms.php";
- require_once "../../include/network.php";
- require_once "../../include/database.inc.php";
- 
- $network = isset($_GET['network']) ? substr($_GET["network"],0,10) : 'IA_ASOS';
- $metar = isset($_GET['metar']) ? xssafe($_GET["metar"]): "no";
- $sortcol = isset($_GET['sortcol'])  ? xssafe($_GET['sortcol']): "ts";
- $sorder = isset($_GET['sorder']) ? xssafe($_GET['sorder']): "desc";
- $format = isset($_REQUEST["format"]) ? xssafe($_REQUEST['format']): 'html';
- if ($format == 'jsonp'){
- 	header("Location: /geojson/network_obs.php?network=$network&callback=mycallback");
- 	die();
- }
-  $t = new MyView();
-  $t->title = "{$network} Current Conditions";
-  $t->refresh = 1200;
-  $t->headextra = <<<EOF
+require_once "../../config/settings.inc.php";
+define("IEM_APPID", 7);
+
+require_once "../../include/myview.php";
+require_once "../../include/mlib.php";
+require_once "../../include/forms.php";
+require_once "../../include/network.php";
+require_once "../../include/database.inc.php";
+
+$network = isset($_GET['network']) ? substr(xssafe($_GET["network"]), 0, 10) : 'IA_ASOS';
+$metar = isset($_GET['metar']) ? xssafe($_GET["metar"]) : "no";
+$sortcol = isset($_GET['sortcol'])  ? xssafe($_GET['sortcol']) : "ts";
+$sorder = isset($_GET['sorder']) ? xssafe($_GET['sorder']) : "desc";
+$format = isset($_REQUEST["format"]) ? xssafe($_REQUEST['format']) : 'html';
+if ($format == 'jsonp') {
+    header("Location: /geojson/network_obs.php?network=$network&callback=mycallback");
+    die();
+}
+$t = new MyView();
+$t->title = "{$network} Current Conditions";
+$t->refresh = 1200;
+$t->headextra = <<<EOF
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
 EOF;
-  $t->jsextra = <<<EOF
+$t->jsextra = <<<EOF
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
-  		
+          
 <script language="JavaScript" type="text/javascript">
 $(document).ready(function(){
     $(".iemselect2").select2();
 });
 </script>
 EOF;
- $t->current_network = "ASOS";
-  
-  $nt = new NetworkTable($network, FALSE, TRUE);
-  $cities = $nt->table;
-  $mesosite = iemdb('mesosite');
-  pg_prepare($mesosite, "FINDTZ", "SELECT tzname from networks where id = $1");
-  $rs = pg_execute($mesosite, "FINDTZ", Array($network));
-  if (pg_num_rows($rs) < 1){
-  	$tzname = "America/Chicago";
-  } else {
-  	$row = pg_fetch_assoc($rs,0);
-  	$tzname = $row["tzname"];
-  }
-  
-$vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
-  "sknt" => "Wind Speed [knots]", "drct" => "Wind Direction [deg]",
-  "alti" => "Altimeter [mb]", "peak" => "Today's Wind Gust [knots]",
-  "peak_ts" => "Time of Peak Gust", "relh" => "Relative Humidity",
-  "feel" => "Feels Like [F]", "vsby" => "Visibility [miles]",
-  "ts" => "Observation Time", "phour" => "Last Hour Rainfall [inch]",
-  "min_tmpf" => "Today's Low Temperature", "name" => "Station Name",
-  "max_tmpf" => "Today's High Temperature", "id" => "Station Identifier",
-  "skyl1" => "Cloud Level 1",
-  "skyl2" => "Cloud Level 2",
-  "skyl3" => "Cloud Level 3",
-  "skyl4" => "Cloud Level 4",
-  "pday" => "Today Rainfall [inch]", );
-if (!array_key_exists($sortcol, $vals)){
+$t->current_network = "ASOS";
+
+$nt = new NetworkTable($network, FALSE, TRUE);
+$cities = $nt->table;
+$mesosite = iemdb('mesosite');
+pg_prepare($mesosite, "FINDTZ", "SELECT tzname from networks where id = $1");
+$rs = pg_execute($mesosite, "FINDTZ", array($network));
+if (pg_num_rows($rs) < 1) {
+    $tzname = "America/Chicago";
+} else {
+    $row = pg_fetch_assoc($rs, 0);
+    $tzname = $row["tzname"];
+}
+
+$vals = array(
+    "tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
+    "sknt" => "Wind Speed [knots]", "drct" => "Wind Direction [deg]",
+    "alti" => "Altimeter [mb]", "peak" => "Today's Wind Gust [knots]",
+    "peak_ts" => "Time of Peak Gust", "relh" => "Relative Humidity",
+    "feel" => "Feels Like [F]", "vsby" => "Visibility [miles]",
+    "ts" => "Observation Time", "phour" => "Last Hour Rainfall [inch]",
+    "min_tmpf" => "Today's Low Temperature", "name" => "Station Name",
+    "max_tmpf" => "Today's High Temperature", "id" => "Station Identifier",
+    "skyl1" => "Cloud Level 1",
+    "skyl2" => "Cloud Level 2",
+    "skyl3" => "Cloud Level 3",
+    "skyl4" => "Cloud Level 4",
+    "pday" => "Today Rainfall [inch]",
+);
+if (!array_key_exists($sortcol, $vals)) {
     $sortcol = "name";
 }
 
-$arr = Array(
+$arr = array(
     "network" => $network,
 );
 $jobj = iemws_json("currents.json", $arr);
 
 /* Final data array */
-$mydata = Array();
+$mydata = array();
 
-foreach($jobj["data"] as $bogus => $iemob){
+foreach ($jobj["data"] as $bogus => $iemob) {
     $key = $iemob["station"];
     $mydata[$key] = $iemob;
     $mydata[$key]["ts"] = strtotime($iemob["local_valid"]);
     $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
-    if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
-      $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
-      $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_gust_ts"]);
+    if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]) {
+        $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
+        $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_gust_ts"]);
     } else {
-      $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
-      if ($mydata[$key]["local_max_sknt_ts"]) {
-         $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_sknt_ts"]);
-      }
+        $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
+        if ($mydata[$key]["local_max_sknt_ts"]) {
+            $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_sknt_ts"]);
+        }
     }
 } // End of while
 
-if($format == 'csv'){
-	$csv = "station,valid_gmt,tmpf,max_tmpf,min_tmpf,dwpf,sknt,drct,relh,vsby,phour_in,pday_in,metar\n";
-	foreach($mydata as $key => $data){
+if ($format == 'csv') {
+    $csv = "station,valid_gmt,tmpf,max_tmpf,min_tmpf,dwpf,sknt,drct,relh,vsby,phour_in,pday_in,metar\n";
+    foreach ($mydata as $key => $data) {
         $dt = new DateTime($data['utc_valid']);
-		$csv .= sprintf("%s,%s,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.1f,%s,%.2f,%.2f,%s\n", $key, 
-		    $dt->format("Y-m-d H:i"),
-			$data['tmpf'], $data["max_tmpf"], $data["min_tmpf"], 
-			$data['dwpf'], $data['sknt'], $data['drct'], $data['relh'], 
-			$data['vsby'], $data['phour'],
-			$data['pday'], $data['raw']);
-	}
-	header("Content-type: text/plain");
-	echo $csv;
-	die();
+        $csv .= sprintf(
+            "%s,%s,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.1f,%s,%.2f,%.2f,%s\n",
+            $key,
+            $dt->format("Y-m-d H:i"),
+            $data['tmpf'],
+            $data["max_tmpf"],
+            $data["min_tmpf"],
+            $data['dwpf'],
+            $data['sknt'],
+            $data['drct'],
+            $data['relh'],
+            $data['vsby'],
+            $data['phour'],
+            $data['pday'],
+            $data['raw']
+        );
+    }
+    header("Content-type: text/plain");
+    echo $csv;
+    die();
 }
 
 $nselect = '<select class="iemselect2" name="network">';
 $rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'ASOS' ORDER by name ASC");
-for ($i=0;$row=pg_fetch_assoc($rs);$i++){
-	$sel = '';
-	if ($network == $row["id"]){
-		$sel = " selected='SELECTED'";
-	}
-	$nselect .= sprintf("<option value='%s'%s>%s</option>\n",
-	  $row["id"], $sel, $row["name"]);
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    $sel = '';
+    if ($network == $row["id"]) {
+        $sel = " selected='SELECTED'";
+    }
+    $nselect .= sprintf(
+        "<option value='%s'%s>%s</option>\n",
+        $row["id"],
+        $sel,
+        $row["name"]
+    );
 }
 $nselect .= "</select>";
 
-$ar = Array(
-	"no" => "No",
-	"yes" => "Yes"
+$ar = array(
+    "no" => "No",
+    "yes" => "Yes"
 );
 $mselect = make_select("metar", $metar, $ar);
 
-$ar = Array(
-		"asc" => "Ascending",
-		"desc" => "Descending"
+$ar = array(
+    "asc" => "Ascending",
+    "desc" => "Descending"
 );
 $sselect = make_select("sorder", $sorder, $ar);
 
-$ar = Array(
-		"html" => "Web Page",
-		"csv" => "Comma Delimited",
-		"jsonp" => "Geo-JSON-P"
+$ar = array(
+    "html" => "Web Page",
+    "csv" => "Comma Delimited",
+    "jsonp" => "Geo-JSON-P"
 );
 $fselect = make_select("format", $format, $ar);
 
@@ -207,90 +223,95 @@ $old = "";
 $domain = array_keys($nt->table);
 $online = array();
 
-foreach ($finalA as $key => $parts){
+foreach ($finalA as $key => $parts) {
     // Keep track of online stations
     $online[] = $key;
-  $i++;
+    $i++;
 
-  $row = "<tr";
-  if ($i % 2 == 0)  $row .= " bgcolor='#eeeeee'";  
-  $row .= "><td><input type=\"checkbox\" name=\"st[]\" value=\"".$key."\"></td>";
-
-  $tdiff = $now - strtotime($parts["utc_valid"]);
-  $url = sprintf("/sites/site.php?station=%s&network=%s", $key, $network);
-  $row .= sprintf("<td><a href='%s'>%s</a></td>", $url, $key);
-  $row .= "<td>". $cities[$key]["name"] . "</td>";
-  $row .= "<td ";
-  if ($tdiff > 10000){
-    $fmt = "%d %b %I:%M %p";
-    $row .= "bgcolor=\"red\">". strftime($fmt, $parts["ts"]) ."</td><td colspan=\"18\">Site Offline</td></tr>";
-    $old .= $row;
-    continue;
-  } else if ($tdiff > 7200){
-    $fmt = "%I:%M %p";
-    $row .= 'bgcolor="orange"';
-  } else if ($tdiff > 3600){
-    $fmt = "%I:%M %p";
-    $row .= 'bgcolor="green"';
-  } else {
-    $fmt = "%I:%M %p";
-  }
-  $phour = ($parts["phour"] != 0.0001) ? $parts["phour"] : 'T';
-  $pday = ($parts["pday"] != 0.0001) ? $parts["pday"] : 'T';
-  
-  $ptmpf = ($parts["tmpf"] !== null) ? round($parts["tmpf"],0): 'M';
-  $pdwpf = ($parts["dwpf"] !== null) ? round($parts["dwpf"],0): 'M';
-  $pfeel = ($ptmpf === "M" || $pdwpf === "M" || $parts["feel"] === null) ? "M": round($parts["feel"], 0);
-  $prelh = ($ptmpf === "M" || $pdwpf === "M" || $parts["relh"] === null) ? "M": round($parts["relh"], 0);
-  $row .= ">". strftime($fmt, $parts["ts"]) ."</td>".
-      "<td align='center'>". str_replace("}", " ", str_replace("{", " ", $parts["wxcodes"])) ."</td>".
-  "<td align='center'>". $ptmpf ."</td><td><font color=\"#ff0000\">". round($parts["max_tmpf"],0) ."</font></td><td><font color=\"#0000ff\">". round($parts["min_tmpf"],0) ."</font></td>
-     <td>". $pdwpf ."</td>
-     <td>". $pfeel ."</td>
-	    <td>". $prelh ."</td>
-	    <td>". $parts["alti"] ."</td>
-	    <td>". $parts["vsby"] ."</td>
-             <td>". round($parts["sknt"],0) ;
-
-   if (floatval($parts["gust"] > 0)){
-      $row .= "G". round($parts["gust"],0);
-   } $row .= "</td>";
-   $row .= "<td>". drct2txt( $parts["drct"] ) ."</td><td>";
-  if (isset($parts["peak_ts"])) $row .=  $parts["peak"] ." @ ". strftime("%I:%M %p", $parts["peak_ts"]) ;
-  $text_pday = $parts['pday'] == -99 ? 'M': $parts['pday'];
-  $row .= "</td><td>{$phour}</td>
-            <td>{$pday}</td>
-<td>". $parts["skyc1"] ." ". $parts["skyl1"] ."</td>
-<td>". $parts["skyc2"] ." ". $parts["skyl2"] ."</td>
-<td>". $parts["skyc3"] ." ". $parts["skyl3"] ."</td>
-<td>". $parts["skyc4"] ." ". $parts["skyl4"] ."</td>
-	    </tr>\n";
-  if ($metar == "yes") {
-    $row .= "<tr";
+    $row = "<tr";
     if ($i % 2 == 0)  $row .= " bgcolor='#eeeeee'";
-    $row .= ">";
-    $row .= "<td colspan=\"22\">
-             <font color=\"brown\">". $parts["raw"] ."</font></td>
+    $row .= "><td><input type=\"checkbox\" name=\"st[]\" value=\"" . $key . "\"></td>";
+
+    $tdiff = $now - strtotime($parts["utc_valid"]);
+    $url = sprintf("/sites/site.php?station=%s&network=%s", $key, $network);
+    $row .= sprintf("<td><a href='%s'>%s</a></td>", $url, $key);
+    $row .= "<td>" . $cities[$key]["name"] . "</td>";
+    $row .= "<td ";
+    if ($tdiff > 10000) {
+        $fmt = "%d %b %I:%M %p";
+        $row .= "bgcolor=\"red\">" . strftime($fmt, $parts["ts"]) . "</td><td colspan=\"18\">Site Offline</td></tr>";
+        $old .= $row;
+        continue;
+    } else if ($tdiff > 7200) {
+        $fmt = "%I:%M %p";
+        $row .= 'bgcolor="orange"';
+    } else if ($tdiff > 3600) {
+        $fmt = "%I:%M %p";
+        $row .= 'bgcolor="green"';
+    } else {
+        $fmt = "%I:%M %p";
+    }
+    $phour = ($parts["phour"] != 0.0001) ? $parts["phour"] : 'T';
+    $pday = ($parts["pday"] != 0.0001) ? $parts["pday"] : 'T';
+
+    $ptmpf = ($parts["tmpf"] !== null) ? round($parts["tmpf"], 0) : 'M';
+    $pdwpf = ($parts["dwpf"] !== null) ? round($parts["dwpf"], 0) : 'M';
+    $pfeel = ($ptmpf === "M" || $pdwpf === "M" || $parts["feel"] === null) ? "M" : round($parts["feel"], 0);
+    $prelh = ($ptmpf === "M" || $pdwpf === "M" || $parts["relh"] === null) ? "M" : round($parts["relh"], 0);
+    $row .= ">" . strftime($fmt, $parts["ts"]) . "</td>" .
+        "<td align='center'>" . str_replace("}", " ", str_replace("{", " ", $parts["wxcodes"])) . "</td>" .
+        "<td align='center'>" . $ptmpf . "</td><td><font color=\"#ff0000\">" . round($parts["max_tmpf"], 0) . "</font></td><td><font color=\"#0000ff\">" . round($parts["min_tmpf"], 0) . "</font></td>
+     <td>" . $pdwpf . "</td>
+     <td>" . $pfeel . "</td>
+        <td>" . $prelh . "</td>
+        <td>" . $parts["alti"] . "</td>
+        <td>" . $parts["vsby"] . "</td>
+             <td>" . round($parts["sknt"], 0);
+
+    if (floatval($parts["gust"] > 0)) {
+        $row .= "G" . round($parts["gust"], 0);
+    }
+    $row .= "</td>";
+    $row .= "<td>" . drct2txt($parts["drct"]) . "</td><td>";
+    if (isset($parts["peak_ts"])) $row .=  $parts["peak"] . " @ " . strftime("%I:%M %p", $parts["peak_ts"]);
+    $text_pday = $parts['pday'] == -99 ? 'M' : $parts['pday'];
+    $row .= "</td><td>{$phour}</td>
+            <td>{$pday}</td>
+<td>" . $parts["skyc1"] . " " . $parts["skyl1"] . "</td>
+<td>" . $parts["skyc2"] . " " . $parts["skyl2"] . "</td>
+<td>" . $parts["skyc3"] . " " . $parts["skyl3"] . "</td>
+<td>" . $parts["skyc4"] . " " . $parts["skyl4"] . "</td>
+        </tr>\n";
+    if ($metar == "yes") {
+        $row .= "<tr";
+        if ($i % 2 == 0)  $row .= " bgcolor='#eeeeee'";
+        $row .= ">";
+        $row .= "<td colspan=\"22\">
+             <font color=\"brown\">" . $parts["raw"] . "</font></td>
              </tr>\n";
-   }
-  $table .= $row;
- }
+    }
+    $table .= $row;
+}
 
 $offline = array_diff($domain, $online);
 $offline_entries = "";
 // loop over offline entries
-foreach($offline as $sid){
+foreach ($offline as $sid) {
     $sname = $nt->table[$sid]["name"];
     $url = sprintf("/sites/site.php?station=%s&network=%s", $sid, $network);
     $offline_entries .= sprintf(
-        "<tr><td><input type=\"checkbox\" name=\"st[]\" value=\"%s\"></td>".
-        "<td><a href='%s'>%s</a></td>".
-        "<td>%s</td><td colspan=\"19\">Site Offline</td></tr>\n",
-        $sid, $url, $sid, $sname);
+        "<tr><td><input type=\"checkbox\" name=\"st[]\" value=\"%s\"></td>" .
+            "<td><a href='%s'>%s</a></td>" .
+            "<td>%s</td><td colspan=\"19\">Site Offline</td></tr>\n",
+        $sid,
+        $url,
+        $sid,
+        $sname
+    );
 }
 
- $table .= $old;
- $table .= $offline_entries;
+$table .= $old;
+$table .= $offline_entries;
 $table .= <<<EOF
 </tbody>
 

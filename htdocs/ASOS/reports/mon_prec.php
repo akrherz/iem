@@ -27,15 +27,15 @@ WHERE
  network = 'IA_ASOS'
  and pday >= 0
 GROUP by id, month");
-$data = Array();
-for($i=0;$row=pg_fetch_assoc($rs);$i++)
-{
-  if (!array_key_exists($row['id'], $data))
-  { 
-    $data[$row['id']] = Array(null,null,null,null,null,null,null,
-      null,null,null,null,null);
-  }
-  $data[$row["id"]][intval($row["month"])-1] = $row["precip"];
+$data = array();
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    if (!array_key_exists($row['id'], $data)) {
+        $data[$row['id']] = array(
+            null, null, null, null, null, null, null,
+            null, null, null, null, null
+        );
+    }
+    $data[$row["id"]][intval($row["month"]) - 1] = $row["precip"];
 }
 $t->headextra = '
 <link rel="stylesheet" type="text/css" href="/vendor/ext/3.4.1/resources/css/ext-all.css"/>
@@ -62,33 +62,45 @@ Ext.onReady(function(){
 ';
 
 reset($data);
-function friendly($val){
-	if (is_null($val)) return "M";
-	return sprintf("%.2f", $val);
+function friendly($val)
+{
+    if (is_null($val)) return "M";
+    return sprintf("%.2f", $val);
 }
 $table = "";
-foreach($data as $key => $val){
-	$table .= sprintf("<tr><td>%s</td><td>%s</td>
+foreach ($data as $key => $val) {
+    $table .= sprintf(
+        "<tr><td>%s</td><td>%s</td>
   <td>%s</td><td>%s</td><td>%s</td>
   <td>%s</td><td>%s</td><td>%s</td>
   <td>%s</td><td>%s</td><td>%s</td>
   <td>%s</td><td>%s</td><td>%s</td>
   <td>%.2f</td><td>%.2f</td>
-  </tr>", $key, $cities[$key]["name"],
-			friendly($val[0]), friendly($val[1]), friendly($val[2]),
-			friendly($val[3]), friendly($val[4]), friendly($val[5]),
-			friendly($val[6]), friendly($val[7]), friendly($val[8]),
-			friendly($val[9]), friendly($val[10]), friendly($val[11]),
-			array_sum(array_slice($val,4,4)),
-			array_sum($val)
-	);
+  </tr>",
+        $key,
+        $cities[$key]["name"],
+        friendly($val[0]),
+        friendly($val[1]),
+        friendly($val[2]),
+        friendly($val[3]),
+        friendly($val[4]),
+        friendly($val[5]),
+        friendly($val[6]),
+        friendly($val[7]),
+        friendly($val[8]),
+        friendly($val[9]),
+        friendly($val[10]),
+        friendly($val[11]),
+        array_sum(array_slice($val, 4, 4)),
+        array_sum($val)
+    );
 }
 
 $d = date("d M Y h a");
 $t->content = <<<EOF
 <ol class="breadcrumb">
-	<li><a href="/ASOS/">ASOS Mainpage</a></li>
-	<li>{$year} Iowa ASOS Precipitation Report</li>
+    <li><a href="/ASOS/">ASOS Mainpage</a></li>
+    <li>{$year} Iowa ASOS Precipitation Report</li>
 </ol>
 
 <p>This table was generated at {$d} and is based

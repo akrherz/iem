@@ -90,7 +90,6 @@ ImageTTFTextAlign($png, 14, 0, $boxcenterx + ($boxwidth/4) , $boxcentery - ($box
 ImageTTFTextAlign($png, 14, 0, $boxcenterx - ($boxwidth/4) , $boxcentery + ($boxheight/4) + 7, $black, $font, $c, 'C');
 ImageTTFTextAlign($png, 14, 0, $boxcenterx + ($boxwidth/4) , $boxcentery + ($boxheight/4) + 7, $black, $font, $d, 'C');
 
-
 header("Content-type: image/png");
 ImagePng($png);
 ImageDestroy($png);

@@ -7,43 +7,43 @@ $ch = '';
 $cd = '';
 $highlight = "<i class=\"fa fa-check\"></i> &nbsp; ";
 if ($uri == '/agclimate/hist/dailyRequest.php'){
-	$ld = $highlight;
+    $ld = $highlight;
 }
 elseif ($uri == '/agclimate/hist/hourlyRequest.php'){
-	$lh = $highlight;
+    $lh = $highlight;
 }
 elseif ($uri == '/agclimate/hist/hourly.php'){
-	$ch = $highlight;
+    $ch = $highlight;
 }
 elseif ($uri == '/agclimate/hist/daily.php'){
-	$cd = $highlight;
+    $cd = $highlight;
 }
 
 $box = <<<EOM
 <div class="row">
-	<div class="col-sm-6">
+    <div class="col-sm-6">
 <div class="panel panel-default">
   <div class="panel-heading">Legacy "ISU AgClimate" 1986-~2013</div>
   <div class="panel-body">
-		<div class="row">
-			<div class="col-sm-6">{$lh}<a href="hourlyRequest.php">Hourly Data</a></div>
-			<div class="col-sm-6">{$ld}<a href="dailyRequest.php">Daily Data</a></div>
-		</div>
+        <div class="row">
+            <div class="col-sm-6">{$lh}<a href="hourlyRequest.php">Hourly Data</a></div>
+            <div class="col-sm-6">{$ld}<a href="dailyRequest.php">Daily Data</a></div>
+        </div>
     </div>
 </div>
-	</div>
-	<div class="col-sm-6">
+    </div>
+    <div class="col-sm-6">
 <div class="panel panel-default">
   <div class="panel-heading">"ISU Soil Moisture Network" ~2013-present</div>
   <div class="panel-body">
-		<div class="row">
-			<div class="col-sm-6">{$ch}<a href="hourly.php">Hourly Data</a></div>
-			<div class="col-sm-6">{$cd}<a href="daily.php">Daily Data</a></div>
-		</div>
+        <div class="row">
+            <div class="col-sm-6">{$ch}<a href="hourly.php">Hourly Data</a></div>
+            <div class="col-sm-6">{$cd}<a href="daily.php">Daily Data</a></div>
+        </div>
     </div>
 </div>
 
-	</div>
+    </div>
 </div>
 EOM;
 
@@ -61,5 +61,3 @@ $qcbox = <<<EOM
 </table>
 -->
 EOM;
-
-?>

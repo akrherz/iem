@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 
@@ -7,84 +7,84 @@ $t->title = "ISUSM - Evapotranspiration Details";
 
 $t->content = <<<EOF
 <ul class="breadcrumb">
-		<li><a href="/agclimate/">ISU Soil Moisture Network</a></li>
-		<li class="current">ET Details</li>
+        <li><a href="/agclimate/">ISU Soil Moisture Network</a></li>
+        <li class="current">ET Details</li>
 </ul>
-		
+        
 <h3>Evapotranspiration Details</h3>
 
 <p>Evapotranspiration (ET) is a term that describes the transport of water from
-	the ground surface and soil to the atmosphere.  This includes processes like
-	evaporation of liquid water and transpiration done by vegetation.  It is
-	an important part of the Water Cycle and knowing the amount of ET happening
-	during the growing season is important for usage in modelling, irrigation,
-	and crop management.</p>
+    the ground surface and soil to the atmosphere.  This includes processes like
+    evaporation of liquid water and transpiration done by vegetation.  It is
+    an important part of the Water Cycle and knowing the amount of ET happening
+    during the growing season is important for usage in modelling, irrigation,
+    and crop management.</p>
 
 <h4>So lets 'observe' ET!</h4>
-		
+        
 <p>Directly measuring ET is not practical as you would have to somehow account
-	for every molecule of water vapor and know its exact source to know if it
-	contributed to the local ET.  The most common approach to directly
-	measuring ET is very expensive as it involves tracking air flow and
-	moisture in 3 dimensions. Another approach is through the usage of a
-	lysimeters, which attempt to keep an accounting of soil water.</p>
+    for every molecule of water vapor and know its exact source to know if it
+    contributed to the local ET.  The most common approach to directly
+    measuring ET is very expensive as it involves tracking air flow and
+    moisture in 3 dimensions. Another approach is through the usage of a
+    lysimeters, which attempt to keep an accounting of soil water.</p>
 
 <p>So when all else fails, we can produce model estimates based on more
-	commonly collected data.  That is what the legacy ISU AgClimate Network
-	and now ISU Soil Moisture Network has done.  This page attempts to fully
-	document the equations used and the application caveats of the data.</p>
+    commonly collected data.  That is what the legacy ISU AgClimate Network
+    and now ISU Soil Moisture Network has done.  This page attempts to fully
+    document the equations used and the application caveats of the data.</p>
 
 <h3>Estimating Evapotranspiration</h3>
 
 <div class="alert alert-info">The estimation techniques described should apply
-		for both the legacy ISU AgClimate Network and the current ISU Soil
-		Moisture Network.</div>
+        for both the legacy ISU AgClimate Network and the current ISU Soil
+        Moisture Network.</div>
 
 <p>Hourly estimates of ET are made by a set of equations found on the Campbell
-		Scientific Data Logger.  These hourly values are then summed to produce
-		calendar day totals to avoid confusion with having slightly conflicting
-		ET values for a given day.</p>
+        Scientific Data Logger.  These hourly values are then summed to produce
+        calendar day totals to avoid confusion with having slightly conflicting
+        ET values for a given day.</p>
 
 <p>The hourly ET is estimated by the <a href="http://www.kimberly.uidaho.edu/water/asceewri/ASCE_Standardized_Ref_ET_Eqn_Phoenix2000.pdf">ASCE Standardized Reference Evapotranspiration Equation</a>
-		, which assumes a reference tall crop (alfalfa).  The equation is as follows,
-		taken from the aforementioned reference.
+        , which assumes a reference tall crop (alfalfa).  The equation is as follows,
+        taken from the aforementioned reference.
 
 <br /><img src="images/eqn2_et.png" alt="Reference ET Equation" /></p>
 
 <p>The terms are defined as:
-	<table class="table table-striped table-condensed table-bordered">
+    <table class="table table-striped table-condensed table-bordered">
 <thead><tr><th>Symbol</th><th>Description</th><th>Units</th></tr></thead>
 <tbody>
-		<tr>
-		<td>&Delta;</td>
-		<td>Slope of the vapor pressure-tempertaure curve, estimated by using
-		the mean temperature for the day or hour.</td>
-		<td>kPa &deg;C<sup>-1</sup></td>
-		</tr>
+        <tr>
+        <td>&Delta;</td>
+        <td>Slope of the vapor pressure-tempertaure curve, estimated by using
+        the mean temperature for the day or hour.</td>
+        <td>kPa &deg;C<sup>-1</sup></td>
+        </tr>
 
-		<tr>
-		<td>R<sub>n</sub></td>
-		<td>Net Radition.  This is the combination of received shortwave minus
-		the amount reflected by the crop (albedo) and longwave transmitted by
-		the soil.</td>
-		<td>MJ m<sup>-2</sup> d<sup>-1</sup></td>
-		</tr>
-		
-		<tr>
-		<td>G</td>
-		<td>Ground Soil Heat Flux.</td>
-		<td>MJ m<sup>-2</sup> d<sup>-1</sup></td>
-		</tr>
-		
+        <tr>
+        <td>R<sub>n</sub></td>
+        <td>Net Radition.  This is the combination of received shortwave minus
+        the amount reflected by the crop (albedo) and longwave transmitted by
+        the soil.</td>
+        <td>MJ m<sup>-2</sup> d<sup>-1</sup></td>
+        </tr>
+        
+        <tr>
+        <td>G</td>
+        <td>Ground Soil Heat Flux.</td>
+        <td>MJ m<sup>-2</sup> d<sup>-1</sup></td>
+        </tr>
+        
 </tbody>
 </table>
-		
+        
 <p><strong>References:</strong>
 <ol>
-	<li><a href="https://en.wikipedia.org/wiki/Evapotranspiration">Wikipedia's Evapotranspiration</a></li>
-	<li><a href="http://www.kimberly.uidaho.edu/water/asceewri/ASCE_Standardized_Ref_ET_Eqn_Phoenix2000.pdf">ASCE Standardized Reference ET</a></li>
-	<li><a href="http://www.kimberly.uidaho.edu/water/fao56/fao56.pdf">FAO 56</a></li>
-	<li><a href="https://github.com/woodcrafty/PyETo">Python Implementation</a> of FAO 56 and other equations</li>
+    <li><a href="https://en.wikipedia.org/wiki/Evapotranspiration">Wikipedia's Evapotranspiration</a></li>
+    <li><a href="http://www.kimberly.uidaho.edu/water/asceewri/ASCE_Standardized_Ref_ET_Eqn_Phoenix2000.pdf">ASCE Standardized Reference ET</a></li>
+    <li><a href="http://www.kimberly.uidaho.edu/water/fao56/fao56.pdf">FAO 56</a></li>
+    <li><a href="https://github.com/woodcrafty/PyETo">Python Implementation</a> of FAO 56 and other equations</li>
 </ol></p>
 
 EOF;

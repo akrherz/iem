@@ -1,35 +1,49 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
-require_once "../../include/forms.php"; 
+require_once "../../include/forms.php";
 $t->title = "Climatology by Year";
 require_once "../../include/adodb-time.inc.php";
 
 $year = get_int404("year", date("Y") - 1);
 $prod = get_int404("prod", 1);
 
-$products = Array(
- 1 => Array("name" => "Total Precipitation", 
-            "tpl" => "/archive/data/%Y/summary/total_precip.png"),
- 2 => Array("name" => "Days with Precipitation", 
-            "tpl" => "/archive/data/%Y/summary/precip_days.png"),
- 20 => Array("name" => "Average High Temperature", 
-            "tpl" => "/archive/data/%Y/summary/avg_high.png"),
- 21 => Array("name" => "Average Low Temperature", 
-            "tpl" => "/archive/data/%Y/summary/avg_low.png"),
- 22 => Array("name" => "Average Temperature", 
-            "tpl" => "/archive/data/%Y/summary/avg_temp.png"),
+$products = array(
+    1 => array(
+        "name" => "Total Precipitation",
+        "tpl" => "/archive/data/%Y/summary/total_precip.png"
+    ),
+    2 => array(
+        "name" => "Days with Precipitation",
+        "tpl" => "/archive/data/%Y/summary/precip_days.png"
+    ),
+    20 => array(
+        "name" => "Average High Temperature",
+        "tpl" => "/archive/data/%Y/summary/avg_high.png"
+    ),
+    21 => array(
+        "name" => "Average Low Temperature",
+        "tpl" => "/archive/data/%Y/summary/avg_low.png"
+    ),
+    22 => array(
+        "name" => "Average Temperature",
+        "tpl" => "/archive/data/%Y/summary/avg_temp.png"
+    ),
 
 );
 
-$ts = adodb_mktime(1,1,1,1,1,$year);
-$imgurl = strftime($products[$prod]["tpl"],$ts);
+$ts = adodb_mktime(1, 1, 1, 1, 1, $year);
+$imgurl = strftime($products[$prod]["tpl"], $ts);
 
 $a = "";
-foreach($products as $key => $ar){
-	$a .= sprintf("<option value=\"%s\" %s>%s", $key,
-			($prod == $key) ? "SELECTED": "", $ar["name"]);
+foreach ($products as $key => $ar) {
+    $a .= sprintf(
+        "<option value=\"%s\" %s>%s",
+        $key,
+        ($prod == $key) ? "SELECTED" : "",
+        $ar["name"]
+    );
 }
 $ys = yearSelect(1893, $year);
 

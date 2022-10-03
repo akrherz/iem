@@ -1,10 +1,10 @@
-<?php 
- require_once "../../config/settings.inc.php";
- require_once "../../include/myview.php";
- $t = new MyView();
- $t->title = "Note about ASOS Precipitation Data";
+<?php
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
+$t = new MyView();
+$t->title = "Note about ASOS Precipitation Data";
 
- $t->content = <<<EOF
+$t->content = <<<EOF
 <h3>Notes about ASOS Precipitation Reports</h3>
 
 <p>The Automated Surface Observation System <a href="/ASOS/">ASOS</a> is the
@@ -87,4 +87,3 @@ you would like to see made.
 
 EOF;
 $t->render('single.phtml');
- ?>

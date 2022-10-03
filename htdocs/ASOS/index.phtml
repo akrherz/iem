@@ -1,7 +1,7 @@
-<?php 
- require_once "../../config/settings.inc.php";
- define("IEM_APPID", 21);
- require_once '../../include/myview.php';
+<?php
+require_once "../../config/settings.inc.php";
+define("IEM_APPID", 21);
+require_once '../../include/myview.php';
 
 $t = new MyView();
 $t->title = "ASOS/AWOS Network";
@@ -15,14 +15,13 @@ $t->content = <<< EOM
 <br>Stations: 15
 <br><a href="/sites/locate.php?network=IA_ASOS">Locations</a>
 </div>
-		
+        
 The Automated Surface Observing System (ASOS) is considered
 to be the flagship automated observing network.  Located at airports, the ASOS
 stations provide essential observations for the National Weather Service (NWS), the Federal Aviation Administration (FAA), and the Department of Defense (DOD).
 The primary function of the ASOS stations are to take minute-by-minute 
 observations and generate basic weather reports.<font class="ref">[1]</font>
 
-		
 <p class="intro">Observations from the ASOS network are nationally monitored 
 for quality 24 hours per day.  Depending on the trouble, maintenance can
 be performed on the same day.</p>
@@ -36,8 +35,8 @@ be performed on the same day.</p>
  <li><a href="/data/mesonet.gif">Combined Mesonet</a></li>
  <li><a href="/data/asos.gif">ASOS Mesonet</a></li>
  <li><a href="/data/wcht.gif">Wind Chill Index</a></li>
-	<li><a href="recent.phtml">Recent Interesting METAR Reports</a></li>
-	<li><a href="/data/relh.gif">Relative Humidity</a></li>
+    <li><a href="recent.phtml">Recent Interesting METAR Reports</a></li>
+    <li><a href="/data/relh.gif">Relative Humidity</a></li>
 </ul>
 
 
@@ -74,7 +73,7 @@ and is delayed by 18-36 hours or more due to NCEI availability.</p>
  <li><a href="/request/asos/hourlyprecip.phtml">Download</a> computed hourly precipitation totals</li>
  <li><a href="/request/daily.phtml">Download</a> computed daily summaries</li>
  <li><a href="/climodat/">IEM Climodat</a> has monthly/yearly summaries of 
-		precipitation and temperature.</li>
+        precipitation and temperature.</li>
 </ul>
 
 

@@ -1,4 +1,4 @@
-<?php 
+<?php
 // Monitor a bunch of climodat sites
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 89);
@@ -9,15 +9,16 @@ require_once "../../include/network.php";
 require_once "../../include/forms.php";
 
 
-function ss($v){
-	if ($v == '') return '';
-	return intval($v);
+function ss($v)
+{
+    if ($v == '') return '';
+    return intval($v);
 }
 
 $year = date("Y");
-$sdate = isset($_GET["sdate"]) ? xssafe($_GET["sdate"]): "05/01/${year}";
-$network = isset($_GET["network"]) ? xssafe($_GET["network"]): "IACLIMATE";
-$edate = isset($_GET["edate"]) ? xssafe($_GET["edate"]): "12/31/${year}";
+$sdate = isset($_GET["sdate"]) ? xssafe($_GET["sdate"]) : "05/01/${year}";
+$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IACLIMATE";
+$edate = isset($_GET["edate"]) ? xssafe($_GET["edate"]) : "12/31/${year}";
 $gddbase = isset($_GET["gddbase"]) ? intval($_GET["gddbase"]) : 50;
 $gddfloor = isset($_GET["gddfloor"]) ? ss($_GET["gddfloor"]) : 50;
 $gddceil = isset($_GET["gddceil"]) ? ss($_GET["gddceil"]) : 86;
@@ -28,39 +29,39 @@ $hiddendates = <<<EOF
 EOF;
 $sdate = strtotime($sdate);
 $edate = strtotime($edate);
-$s = isset($_GET["s"]) ? $_GET["s"]: Array();
-if (isset($_GET['r'])){
-	$r = $_GET["r"];
-	foreach($r as $k => $v){
-		if(($key = array_search($v, $s)) !== false) {
-			unset($s[$key]);
-		}
-	}
+$s = isset($_GET["s"]) ? $_GET["s"] : array();
+if (isset($_GET['r'])) {
+    $r = $_GET["r"];
+    foreach ($r as $k => $v) {
+        if (($key = array_search($v, $s)) !== false) {
+            unset($s[$key]);
+        }
+    }
 }
 // Prevent stations from appearing twice in the display
-$tmpst = Array();
-foreach($s as $k => $v){
-	if (in_array($v, $tmpst)){
-		unset($s[$k]);
-	} else{
-		$tmpst[] = $v;
-	}
+$tmpst = array();
+foreach ($s as $k => $v) {
+    if (in_array($v, $tmpst)) {
+        unset($s[$k]);
+    } else {
+        $tmpst[] = $v;
+    }
 }
 
 $hiddenstations = "";
 $table = "";
-$stationgrps = Array();
-foreach($s as $k => $v){
-	$state = substr($v, 0, 2);
-	if (! array_key_exists($state, $stationgrps)){
-		$stationgrps[$state] = Array();
-	}
-	$stationgrps[$state][] = $v;
-	$hiddenstations .= "<input type=\"hidden\" name=\"s[]\" value=\"$v\">";
+$stationgrps = array();
+foreach ($s as $k => $v) {
+    $state = substr($v, 0, 2);
+    if (!array_key_exists($state, $stationgrps)) {
+        $stationgrps[$state] = array();
+    }
+    $stationgrps[$state][] = $v;
+    $hiddenstations .= "<input type=\"hidden\" name=\"s[]\" value=\"$v\">";
 }
-$networks = Array();
-foreach($stationgrps as $state => $v){
-	$networks[] = sprintf("%sCLIMATE", $state);
+$networks = array();
+foreach ($stationgrps as $state => $v) {
+    $networks[] = sprintf("%sCLIMATE", $state);
 }
 $nt2 = new NetworkTable($networks);
 
@@ -68,69 +69,80 @@ $sdatestr = date("Y-m-d", $sdate);
 $edatestr = date("Y-m-d", $edate);
 
 $gddstr = "gddxx({$gddbase}, {$gddceil}, high, low)";
-if ($gddfloor == '' || $gddceil == ''){
-	$gddstr = "gdd_onlybase({$gddbase}, high, low)";
+if ($gddfloor == '' || $gddceil == '') {
+    $gddstr = "gdd_onlybase({$gddbase}, high, low)";
 }
 $pgconn = iemdb('coop');
 
 // Loop over station groups
-foreach($stationgrps as $state => $stations){
-	$sstring = "('". implode(",", $stations) ."')";
-	$sstring = str_replace(",", "','", $sstring);
-	// bulk radiation bias values applied below
-	$sql = <<<EOF
-	WITH climo as (
-	  SELECT station, sday, avg(precip) as avg_precip,
-	  avg(sdd86(high,low)) as avg_sdd,
-	  avg({$gddstr}) as avg_gdd,
-	  avg(merra_srad) as avg_srad
-	  from alldata_{$state} WHERE station in {$sstring}
-	  and year > 1950 GROUP by station, sday)
-	  
-	select o.station,
-	   sum({$gddstr}) as ogdd50,
-	   sum(o.precip) as oprecip,
-	   sum(c.avg_gdd) as cgdd50, sum(c.avg_precip) as cprecip,
-	   sum(c.avg_srad) as csrad,
-	   max(o.high) as maxtmpf, min(o.low) as mintmpf,
-	   avg( (o.high + o.low) / 2.0 ) as avgtmpf,
-	   sum(c.avg_sdd) as csdd86, sum(sdd86(o.high, o.low)) as osdd86,
-	   sum(coalesce(merra_srad, narr_srad / 1.14, hrrr_srad * 1.09)) as osrad
-	  from alldata_{$state} o, climo c WHERE
-	   o.station in {$sstring}
-	   and o.station = c.station
-	   and day >= '{$sdatestr}' and day <= '{$edatestr}'
-	   and o.sday = c.sday  GROUP by o.station
-	   ORDER by o.station ASC
+foreach ($stationgrps as $state => $stations) {
+    $sstring = "('" . implode(",", $stations) . "')";
+    $sstring = str_replace(",", "','", $sstring);
+    // bulk radiation bias values applied below
+    $sql = <<<EOF
+    WITH climo as (
+      SELECT station, sday, avg(precip) as avg_precip,
+      avg(sdd86(high,low)) as avg_sdd,
+      avg({$gddstr}) as avg_gdd,
+      avg(merra_srad) as avg_srad
+      from alldata_{$state} WHERE station in {$sstring}
+      and year > 1950 GROUP by station, sday)
+      
+    select o.station,
+       sum({$gddstr}) as ogdd50,
+       sum(o.precip) as oprecip,
+       sum(c.avg_gdd) as cgdd50, sum(c.avg_precip) as cprecip,
+       sum(c.avg_srad) as csrad,
+       max(o.high) as maxtmpf, min(o.low) as mintmpf,
+       avg( (o.high + o.low) / 2.0 ) as avgtmpf,
+       sum(c.avg_sdd) as csdd86, sum(sdd86(o.high, o.low)) as osdd86,
+       sum(coalesce(merra_srad, narr_srad / 1.14, hrrr_srad * 1.09)) as osrad
+      from alldata_{$state} o, climo c WHERE
+       o.station in {$sstring}
+       and o.station = c.station
+       and day >= '{$sdatestr}' and day <= '{$edatestr}'
+       and o.sday = c.sday  GROUP by o.station
+       ORDER by o.station ASC
 EOF;
-	$rs = pg_query($pgconn, $sql);
-	for ($i=0;$row=pg_fetch_assoc($rs);$i++){
-		$table .= sprintf("<tr><td>"
-				."<input type=\"checkbox\" name=\"r[]\" value=\"%s\" >"
-				." %s</td><td>%s</td>"
-				."<td>%.2f</td><td>%.2f</td><td>%.2f</td>"
-				."<td>%.1f</td><td>%.1f</td><td>%.1f</td>"
-				."<td>%.1f</td><td>%.1f</td><td>%.1f</td>"
-				."<td>%s</td><td>%s</td><td>%.1f</td>"
-				."<td>%.1f</td><td>%.1f %.1f%%</td></tr>", 
-				$row['station'], $row['station'], $nt2->table[$row['station']]['name'], $row["oprecip"],
-				$row["cprecip"], $row["oprecip"] - $row["cprecip"],
-				$row["ogdd50"],
-				$row["cgdd50"], $row["ogdd50"] - $row["cgdd50"],
-				$row["osdd86"],
-				$row["csdd86"], $row["osdd86"] - $row["csdd86"],
-				$row["maxtmpf"], $row["mintmpf"], $row["avgtmpf"],
-				$row['osrad'], $row['osrad'] - $row['csrad'],
-				($row['osrad'] - $row['csrad']) / $row['csrad'] * 100.);
-	}
+    $rs = pg_query($pgconn, $sql);
+    for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+        $table .= sprintf(
+            "<tr><td>"
+                . "<input type=\"checkbox\" name=\"r[]\" value=\"%s\" >"
+                . " %s</td><td>%s</td>"
+                . "<td>%.2f</td><td>%.2f</td><td>%.2f</td>"
+                . "<td>%.1f</td><td>%.1f</td><td>%.1f</td>"
+                . "<td>%.1f</td><td>%.1f</td><td>%.1f</td>"
+                . "<td>%s</td><td>%s</td><td>%.1f</td>"
+                . "<td>%.1f</td><td>%.1f %.1f%%</td></tr>",
+            $row['station'],
+            $row['station'],
+            $nt2->table[$row['station']]['name'],
+            $row["oprecip"],
+            $row["cprecip"],
+            $row["oprecip"] - $row["cprecip"],
+            $row["ogdd50"],
+            $row["cgdd50"],
+            $row["ogdd50"] - $row["cgdd50"],
+            $row["osdd86"],
+            $row["csdd86"],
+            $row["osdd86"] - $row["csdd86"],
+            $row["maxtmpf"],
+            $row["mintmpf"],
+            $row["avgtmpf"],
+            $row['osrad'],
+            $row['osrad'] - $row['csrad'],
+            ($row['osrad'] - $row['csrad']) / $row['csrad'] * 100.
+        );
+    }
 }
-$nselect = networkSelect($network, "IA0000", Array(), "s[]");
+$nselect = networkSelect($network, "IA0000", array(), "s[]");
 
 $t = new MyView();
 $showmap = " hidden";
-if (isset($_GET['map'])){
-	$t->iemss = True;
-	$showmap = "";
+if (isset($_GET['map'])) {
+    $t->iemss = True;
+    $showmap = "";
 }
 $t->title = "Climodat Station Monitor";
 $t->headextra = <<<EOF
@@ -143,15 +155,15 @@ $t->jsextra = <<<EOF
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function(){
-	sdate = $("#sdate").datepicker({altFormat:"yymmdd"});
-	sdate.datepicker('setDate', "$sdatestr");
-	edate = $("#edate").datepicker({altFormat:"yymmdd"});	
-	edate.datepicker('setDate', "$edatestr");
+    sdate = $("#sdate").datepicker({altFormat:"yymmdd"});
+    sdate.datepicker('setDate', "$sdatestr");
+    edate = $("#edate").datepicker({altFormat:"yymmdd"});	
+    edate.datepicker('setDate', "$edatestr");
 
-	//Make into more PHP friendly
-	$('#addmapstations').on('click', function(){
-		$('#stations_out').attr('name', 's[]');
-	});
+    //Make into more PHP friendly
+    $('#addmapstations').on('click', function(){
+        $('#stations_out').attr('name', 's[]');
+    });
 });
 </script>
 EOF;
@@ -209,8 +221,8 @@ for a bias assessment of these values.</p>
 <input type="hidden" name="network" value="{$network}">
 {$hiddendates}
 {$hiddenstations}
-	{$nselect}
-	<input type="submit" value="Add Station">
+    {$nselect}
+    <input type="submit" value="Add Station">
 </form>
 <form name="addfrommap">
 <input type="hidden" name="network" value="{$network}">
@@ -267,20 +279,20 @@ for a bias assessment of these values.</p>
 {$hiddendates}
 <table class="table table-bordered table-striped table-condensed">
 <thead><tr>
-	<th rowspan="2">ID</th>
-	<th rowspan="2">Name</th>
-	<th colspan="3">Precipitation [inch]</th>
-	<th colspan="3">Growing Degree Days (base {$gddbase}, floor {$gddfloor}, ceil {$gddceil})</th>
-	<th colspan="3">Stress Degree Days (base 86)</th>
-	<th colspan="3">Daily Temperature [F]</th>
-	<th colspan="2">Solar Rad [MJ]</th>
+    <th rowspan="2">ID</th>
+    <th rowspan="2">Name</th>
+    <th colspan="3">Precipitation [inch]</th>
+    <th colspan="3">Growing Degree Days (base {$gddbase}, floor {$gddfloor}, ceil {$gddceil})</th>
+    <th colspan="3">Stress Degree Days (base 86)</th>
+    <th colspan="3">Daily Temperature [F]</th>
+    <th colspan="2">Solar Rad [MJ]</th>
 </tr>
 <tr>
-	<th>Total</th><th>Climo</th><th>Departure</th>
-	<th>Total</th><th>Climo</th><th>Departure</th>
-	<th>Total</th><th>Climo</th><th>Departure</th>
-	<th>Max</th><th>Min</th><th>Avg</th>
-	<th>Total</th><th>Departure</th>
+    <th>Total</th><th>Climo</th><th>Departure</th>
+    <th>Total</th><th>Climo</th><th>Departure</th>
+    <th>Total</th><th>Climo</th><th>Departure</th>
+    <th>Max</th><th>Min</th><th>Avg</th>
+    <th>Total</th><th>Departure</th>
 </tr>
 </thead>
 <tbody>{$table}</tbody>

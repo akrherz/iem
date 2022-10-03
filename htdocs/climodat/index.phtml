@@ -1,92 +1,104 @@
 <?php
 $OL = "7.1.0";
- require_once "../../config/settings.inc.php";
- define("IEM_APPID", 15);
- require_once "../../include/mlib.php";
- force_https();
- require_once "../../include/myview.php";
- require_once "../../include/iemprop.php";
- require_once "../../include/imagemaps.php";
- require_once "../../include/forms.php";
- // hacky
- $report = sprintf("%02d", get_int404("report", 1));
- $station = isset($_REQUEST["station"])? strtoupper(substr(xssafe($_REQUEST["station"]),0,6)) : "";
- $network = isset($_REQUEST['network']) ? strtoupper(xssafe($_REQUEST['network'])) : 'IACLIMATE';
+require_once "../../config/settings.inc.php";
+define("IEM_APPID", 15);
+require_once "../../include/mlib.php";
+force_https();
+require_once "../../include/myview.php";
+require_once "../../include/iemprop.php";
+require_once "../../include/imagemaps.php";
+require_once "../../include/forms.php";
+// hacky
+$report = sprintf("%02d", get_int404("report", 1));
+$station = isset($_REQUEST["station"]) ? strtoupper(substr(xssafe($_REQUEST["station"]), 0, 6)) : "";
+$network = isset($_REQUEST['network']) ? strtoupper(xssafe($_REQUEST['network'])) : 'IACLIMATE';
 // Make sure that our network matches the station, silly bots
-if ($station != ""){
-	if (substr($station, 0, 2) != substr($network, 0, 2)){
-		$network = sprintf("%sCLIMATE", substr($station, 0, 2));
-	}
+if ($station != "") {
+    if (substr($station, 0, 2) != substr($network, 0, 2)) {
+        $network = sprintf("%sCLIMATE", substr($station, 0, 2));
+    }
 }
- 
- if (isset($_GET["id"])){
-   $station = substr(xssafe($_GET["id"]),0,6);
- }
 
- $xref = Array("01" => "110/",
- 		"02" => "111/",
- 		"03" => "112/",
- 		"04" => "113/var:maxmin::",
- 		"05" => "113/var:precip::",
- 		"06" => "113/var:range::",
- 		"07" => "113/var:means::",
- 		"08" => "114/",
- 		"09" => "10/threshold:32::varname:low::direction:below::",
- 		"10" => "10/threshold:30::varname:low::direction:below::",
- 		"11" => "10/threshold:28::varname:low::direction:below::",
- 		"12" => "10/threshold:26::varname:low::direction:below::",
- 		"13" => "10/threshold:24::varname:low::direction:below::",
- 		"14" => "115/var:avg_high::",
- 		"15" => "115/var:avg_low::",
- 		"16" => "115/var:avg_temp::",
- 		"17" => "115/var:precip::",
- 		"18" => "116/var:hdd::",
- 		"19" => "116/var:cdd::",
- 		"20" => "117/",
- 		"21" => "118/var:precip_days::",
- 		"22" => "119/",
- 		"23" => "120/",
- 		"24" => "121/",
- 		"25" => "118/var:snow_days::",
- 		"26" => "122/",
- 		"27" => "123/",
- 		"28" => "124/",
- 		"29" => "115/var:snow::",
- 		);
- 
- if (isset($_GET["dl"]) ){
- 	if (array_key_exists($report, $xref)){
- 		$uri = sprintf("http://iem.local/plotting/auto/plot/%sstation:%s::network:%s.txt",
- 				$xref[$report], $station, $network);
+if (isset($_GET["id"])) {
+    $station = substr(xssafe($_GET["id"]), 0, 6);
+}
+
+$xref = array(
+    "01" => "110/",
+    "02" => "111/",
+    "03" => "112/",
+    "04" => "113/var:maxmin::",
+    "05" => "113/var:precip::",
+    "06" => "113/var:range::",
+    "07" => "113/var:means::",
+    "08" => "114/",
+    "09" => "10/threshold:32::varname:low::direction:below::",
+    "10" => "10/threshold:30::varname:low::direction:below::",
+    "11" => "10/threshold:28::varname:low::direction:below::",
+    "12" => "10/threshold:26::varname:low::direction:below::",
+    "13" => "10/threshold:24::varname:low::direction:below::",
+    "14" => "115/var:avg_high::",
+    "15" => "115/var:avg_low::",
+    "16" => "115/var:avg_temp::",
+    "17" => "115/var:precip::",
+    "18" => "116/var:hdd::",
+    "19" => "116/var:cdd::",
+    "20" => "117/",
+    "21" => "118/var:precip_days::",
+    "22" => "119/",
+    "23" => "120/",
+    "24" => "121/",
+    "25" => "118/var:snow_days::",
+    "26" => "122/",
+    "27" => "123/",
+    "28" => "124/",
+    "29" => "115/var:snow::",
+);
+
+if (isset($_GET["dl"])) {
+    if (array_key_exists($report, $xref)) {
+        $uri = sprintf(
+            "http://iem.local/plotting/auto/plot/%sstation:%s::network:%s.txt",
+            $xref[$report],
+            $station,
+            $network
+        );
         header("Content-type: text/plain");
-        header(sprintf("Content-Disposition: attachment;Filename=%s_%s.txt",
-        		$station, $report));
- 		echo file_get_contents($uri);
-     	die();
-   }
- }
- if (isset($_GET["xlsx"]) ){
- 	if (array_key_exists($report, $xref)){
- 		$uri = sprintf("http://iem.local/plotting/auto/plot/%sstation:%s::network:%s.xlsx",
- 				$xref[$report], $station, $network);
+        header(sprintf(
+            "Content-Disposition: attachment;Filename=%s_%s.txt",
+            $station,
+            $report
+        ));
+        echo file_get_contents($uri);
+        die();
+    }
+}
+if (isset($_GET["xlsx"])) {
+    if (array_key_exists($report, $xref)) {
+        $uri = sprintf(
+            "http://iem.local/plotting/auto/plot/%sstation:%s::network:%s.xlsx",
+            $xref[$report],
+            $station,
+            $network
+        );
         header("Content-type: application/vnd.ms-excel");
         header("Content-Disposition: attachment;Filename=iem.xlsx");
- 		echo file_get_contents($uri);
- 		die();
- 	}
- }
- 
-$coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
+        echo file_get_contents($uri);
+        die();
+    }
+}
+
+$coop_archive_end = strtotime(get_iemprop("iaclimate.end"));
 $t = new MyView();
 $t->title = "Climodat Reports";
 
-if ($station == "" || ! is_file("/mesonet/share/climodat/reports/${station}_$report.txt")){
-	$t->headextra = <<<EOF
+if ($station == "" || !is_file("/mesonet/share/climodat/reports/${station}_$report.txt")) {
+    $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol.css" type="text/css">
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" rel="stylesheet" />
 <link rel="stylesheet" type="text/css" href="/vendor/select2/4.0.3/select2.min.css"/ >
 EOF;
-	$t->jsextra = <<<EOF
+    $t->jsextra = <<<EOF
 <script src="/vendor/openlayers/{$OL}/ol.js" type="text/javascript"></script>
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
 <script src="/js/olselect.php?network=${network}"></script>
@@ -97,50 +109,49 @@ $(document).ready(function(){
 });
 </script>
 EOF;
- 	
 }
 $enddate = date('d M Y', $coop_archive_end);
-$nselect = networkSelect($network, $station );
+$nselect = networkSelect($network, $station);
 
 
-$ar = Array(
-	"Precipitation" => Array(
-		"05" => "Daily Maximum Precipitation",
-		"17" => "Monthly + Yearly Precipitation Total",
-		"21" => "Monthly Rainy Days",
-		"28" => "Precipitation Events by Month &amp; Year",
-		"01" => "Precipitation Events per Climate Week",
-		"02" => "Top 30 Rainfall Events",
-	),
-	"Temperature" => Array(
-		"04" => "Daily Record Highs and Lows",
-		"06" => "Daily Record High and Low Ranges",
-		"07" => "Daily Mean Highs and Lows",
-		"27" => "High/Low Consecutive Day Streaks",
-		"14" => "Monthly Average Maximum Temperatures",
-		"15" => "Monthly Average Minimum Temperatures",
-		"16" => "Monthly Average Mean Temperatures",
-		"18" => "Monthly Heating Degree Days",
-		"19" => "Monthly Cooling Degree Days",
-		"08" => "Number of Days Each Year Min &gt;= 32",
-		"20" => "Heat Stress Variables",
-		"26" => "Yearly Temperature Exceedance Histograms",
-	),
-	"Growing Season" => Array(
-		"03" => "Growing Degree Days",
-		"09" => "Last Spring / First Fall / Length of Season Base=32",
-		"10" => "Last Spring / First Fall / Length of Season Base=30",
-		"11" => "Last Spring / First Fall / Length of Season Base=28",
-		"12" => "Last Spring / First Fall / Length of Season Base=26",
-		"13" => "Last Spring / First Fall / Length of Season Base=24",
-		"22" => "First Fall Freeze Probabilities",
-		"23" => "Last Spring Freeze Probabilities",
-		"24" => "Freeze/Thaw Cycles",
-	),
-	"Snow" => Array(
-		"25" => "Monthly Snowy Days",
-		"29" => "Monthly + Yearly Snow Total",
-	)
+$ar = array(
+    "Precipitation" => array(
+        "05" => "Daily Maximum Precipitation",
+        "17" => "Monthly + Yearly Precipitation Total",
+        "21" => "Monthly Rainy Days",
+        "28" => "Precipitation Events by Month &amp; Year",
+        "01" => "Precipitation Events per Climate Week",
+        "02" => "Top 30 Rainfall Events",
+    ),
+    "Temperature" => array(
+        "04" => "Daily Record Highs and Lows",
+        "06" => "Daily Record High and Low Ranges",
+        "07" => "Daily Mean Highs and Lows",
+        "27" => "High/Low Consecutive Day Streaks",
+        "14" => "Monthly Average Maximum Temperatures",
+        "15" => "Monthly Average Minimum Temperatures",
+        "16" => "Monthly Average Mean Temperatures",
+        "18" => "Monthly Heating Degree Days",
+        "19" => "Monthly Cooling Degree Days",
+        "08" => "Number of Days Each Year Min &gt;= 32",
+        "20" => "Heat Stress Variables",
+        "26" => "Yearly Temperature Exceedance Histograms",
+    ),
+    "Growing Season" => array(
+        "03" => "Growing Degree Days",
+        "09" => "Last Spring / First Fall / Length of Season Base=32",
+        "10" => "Last Spring / First Fall / Length of Season Base=30",
+        "11" => "Last Spring / First Fall / Length of Season Base=28",
+        "12" => "Last Spring / First Fall / Length of Season Base=26",
+        "13" => "Last Spring / First Fall / Length of Season Base=24",
+        "22" => "First Fall Freeze Probabilities",
+        "23" => "Last Spring Freeze Probabilities",
+        "24" => "Freeze/Thaw Cycles",
+    ),
+    "Snow" => array(
+        "25" => "Monthly Snowy Days",
+        "29" => "Monthly + Yearly Snow Total",
+    )
 );
 
 $vselect = make_select("report", $report, $ar);
@@ -196,15 +207,27 @@ this website contains charts and downloadable datasets that may interest you.</l
 <p>
 EOF;
 
-if ($station != ""){
-	$tokens = explode("/", $xref[$report]);
-	$autoploturi = sprintf("/plotting/auto/?q=%s&amp;station=%s&amp;network=%s&amp;_fmt=text",
-			$tokens[0], $station, $network);
-	$dluri = sprintf("/climodat/?station=%s&amp;network=%s&amp;dl=yes&amp;report=%s",
-			$station, $network, $report);
-	$xluri = sprintf("/climodat/?station=%s&amp;network=%s&amp;xlsx=yes&amp;report=%s",
-			$station, $network, $report);
-	$content .= <<<EOF
+if ($station != "") {
+    $tokens = explode("/", $xref[$report]);
+    $autoploturi = sprintf(
+        "/plotting/auto/?q=%s&amp;station=%s&amp;network=%s&amp;_fmt=text",
+        $tokens[0],
+        $station,
+        $network
+    );
+    $dluri = sprintf(
+        "/climodat/?station=%s&amp;network=%s&amp;dl=yes&amp;report=%s",
+        $station,
+        $network,
+        $report
+    );
+    $xluri = sprintf(
+        "/climodat/?station=%s&amp;network=%s&amp;xlsx=yes&amp;report=%s",
+        $station,
+        $network,
+        $report
+    );
+    $content .= <<<EOF
 <p>
 <a href="{$dluri}" class="btn btn-primary"><i class="fa fa-book"></i> Download This Report</a>
 <a href="{$xluri}" class="btn btn-primary"><i class="fa fa-download"></i> Download This Report as Excel</a>
@@ -212,14 +235,18 @@ if ($station != ""){
 </p>
 <pre>
 EOF;
-	if (array_key_exists($report, $xref)){
-		$uri = sprintf("http://iem.local/plotting/auto/plot/%sstation:%s::network:%s.txt",
-				$xref[$report], $station, $network);
-		$content .= file_get_contents($uri);
-	} 
-	$content .= "</pre>\n";
+    if (array_key_exists($report, $xref)) {
+        $uri = sprintf(
+            "http://iem.local/plotting/auto/plot/%sstation:%s::network:%s.txt",
+            $xref[$report],
+            $station,
+            $network
+        );
+        $content .= file_get_contents($uri);
+    }
+    $content .= "</pre>\n";
 } else {
-	$content .= <<<EOF
+    $content .= <<<EOF
 <style type="text/css">
 #map {
    width: 640px;
@@ -264,6 +291,6 @@ if you would like to see other variables in these files or have any other commen
 <p><b>Disclaimer:</b> While we use care to provide accurate weather/climatic information, errors may occur because of equipment or other failure. We therefore provide this information without any warranty of accuracy. Users of this weather/climate data do so at their own risk, and are advised to use independent judgement as to whether to verify the data presented.</p>
 </div>
 EOF;
-}  
+}
 $t->content = $content;
 $t->render("single.phtml");

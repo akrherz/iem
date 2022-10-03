@@ -1,107 +1,108 @@
-<?php 
- require_once "../../config/settings.inc.php";
- require_once "../../include/myview.php";
- require_once "../../include/forms.php";
+<?php
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
+require_once "../../include/forms.php";
 
- $t = new MyView();
- $t->title = "Ag Climate";
- $prod = get_int404("prod", 1);
- $year = get_int404("year", date("Y"));
- $month = get_int404("month", date("m"));
- 
-$old2new = Array(
- "/data/agclimate/air-temp-out.png" => 1,
- "/data/agclimate/4in-temp-out.png" => 2,
- "/agclimate/daily_pics/4in-temp-out.png" => 2,
- "/data/agclimate/soil-hilo-out.png" => 3,
- "/agclimate/daily_pics/soil-hilo-out.png" => 3,
- "/data/agclimate/rad-out.png" => 4,
- "/data/agclimate/prec-out.png" => 5,
- "/data/agclimate/et-out.png" => 6,
- "/data/agclimate/pk-wind-out.png" => 7,
- "/data/agclimate/avewind-out.png" => 8,
- "/data/agclimate/mon-et-out.png" => 10,
- "/data/agclimate/mon-prec-out.png" => 11 );
+$t = new MyView();
+$t->title = "Ag Climate";
+$prod = get_int404("prod", 1);
+$year = get_int404("year", date("Y"));
+$month = get_int404("month", date("m"));
 
- // Legacy
- if (isset($_GET["src"])){
-  $prod = $old2new[$_GET["src"]];
- }
+$old2new = array(
+    "/data/agclimate/air-temp-out.png" => 1,
+    "/data/agclimate/4in-temp-out.png" => 2,
+    "/agclimate/daily_pics/4in-temp-out.png" => 2,
+    "/data/agclimate/soil-hilo-out.png" => 3,
+    "/agclimate/daily_pics/soil-hilo-out.png" => 3,
+    "/data/agclimate/rad-out.png" => 4,
+    "/data/agclimate/prec-out.png" => 5,
+    "/data/agclimate/et-out.png" => 6,
+    "/data/agclimate/pk-wind-out.png" => 7,
+    "/data/agclimate/avewind-out.png" => 8,
+    "/data/agclimate/mon-et-out.png" => 10,
+    "/data/agclimate/mon-prec-out.png" => 11
+);
 
-$data = Array(
-1 => Array(
- "mapurl" => "/data/agclimate/air-temp-out.png",
- "desc" => "High and low air temperature for a local day. Measurements are 
+// Legacy
+if (isset($_GET["src"])) {
+    $prod = $old2new[$_GET["src"]];
+}
+
+$data = array(
+    1 => array(
+        "mapurl" => "/data/agclimate/air-temp-out.png",
+        "desc" => "High and low air temperature for a local day. Measurements are 
             made at a 2 meter height.",
-),
-2 => Array(
- "mapurl" => "/data/agclimate/4in-temp-out.png",
- "desc" => "Average 4 inch soil depth temperature.  Usually under a 
+    ),
+    2 => array(
+        "mapurl" => "/data/agclimate/4in-temp-out.png",
+        "desc" => "Average 4 inch soil depth temperature.  Usually under a 
             bare soil.",
-),
-3 => Array(
- "mapurl" => "/data/agclimate/soil-hilo-out.png",
- "desc" => "High and low 4 inch soil depth temperature.  Usually under a 
+    ),
+    3 => array(
+        "mapurl" => "/data/agclimate/soil-hilo-out.png",
+        "desc" => "High and low 4 inch soil depth temperature.  Usually under a 
             bare soil.",
-),
-4 => Array(
- "mapurl" => "/data/agclimate/rad-out.png",
- "desc" => "Daily total (direct + diffuse) solar radiation.",
-),
-5 => Array(
- "mapurl" => "/data/agclimate/prec-out.png",
- "desc" => "Daily total precipitation.  This is measured with a <b>non-heated</b> tipping bucket located near the ground.  These reported values should be
+    ),
+    4 => array(
+        "mapurl" => "/data/agclimate/rad-out.png",
+        "desc" => "Daily total (direct + diffuse) solar radiation.",
+    ),
+    5 => array(
+        "mapurl" => "/data/agclimate/prec-out.png",
+        "desc" => "Daily total precipitation.  This is measured with a <b>non-heated</b> tipping bucket located near the ground.  These reported values should be
 used with extreme caution.  For various reasons, the reported values are 
 often too low.",
-),
-6 => Array(
- "mapurl" => "/data/agclimate/et-out.png",
- "desc" => "Potential maximum estimated evapotranspiration.  This value uses
+    ),
+    6 => array(
+        "mapurl" => "/data/agclimate/et-out.png",
+        "desc" => "Potential maximum estimated evapotranspiration.  This value uses
             a daily Penman formulation with a crop coefficient of 1.",
-),
-7 => Array(
- "mapurl" => "/data/agclimate/pk-wind-out.png",
- "desc" => "Peak 5 second sustained wind gust.  The value is presented along
+    ),
+    7 => array(
+        "mapurl" => "/data/agclimate/pk-wind-out.png",
+        "desc" => "Peak 5 second sustained wind gust.  The value is presented along
       with the time using a 24 hour clock.  For example, 18:00 would be 6 PM.
       Values are in local time, either CDT or CST depending on the time of
       year.",
-),
-8 => Array(
- "mapurl" => "/data/agclimate/avewind-out.png",
- "desc" => "Average wind speed for the day as recorded by the data logger
+    ),
+    8 => array(
+        "mapurl" => "/data/agclimate/avewind-out.png",
+        "desc" => "Average wind speed for the day as recorded by the data logger
             on the station.",
-),
-10 => Array(
- "mapurl" => "/GIS/apps/agclimate/month.php?dvar=dailyet&direct=yes&year=$year&month=$month",
- "desc" => "Monthly total of daily maximum potential evapotranspiration. The
+    ),
+    10 => array(
+        "mapurl" => "/GIS/apps/agclimate/month.php?dvar=dailyet&direct=yes&year=$year&month=$month",
+        "desc" => "Monthly total of daily maximum potential evapotranspiration. The
             daily value is calculated via a Penman formulation with a crop
             coefficient of 1.  The value would be a theoretical maximum."
-),
-11 => Array(
- "mapurl" => "/GIS/apps/agclimate/month.php?dvar=rain_in_tot&direct=yes&year=$year&month=$month",
- "desc" => "Monthly total of daily reported precipitation. This is measured with a <b>non-heated</b> tipping bucket located near the ground.  These reported values should be
+    ),
+    11 => array(
+        "mapurl" => "/GIS/apps/agclimate/month.php?dvar=rain_in_tot&direct=yes&year=$year&month=$month",
+        "desc" => "Monthly total of daily reported precipitation. This is measured with a <b>non-heated</b> tipping bucket located near the ground.  These reported values should be
 used with extreme caution.  For various reasons, the reported values are 
 often too low."
-),
-12 => Array(
- "mapurl" => "/data/agclimate/chill-sum.png",
- "desc" => "The Standard Chill Unit map is a summation of hours during 
+    ),
+    12 => array(
+        "mapurl" => "/data/agclimate/chill-sum.png",
+        "desc" => "The Standard Chill Unit map is a summation of hours during 
    which the temperature was between 32 and 45 degrees <b>after</b> 
    1 September.  The value has application for 
    fruit growers in the state.  The departure from average is also 
    presented.  This average is computed from the observational record at
    the site."
-),
+    ),
 );
 
 $extra = "";
 if ($prod == 10 || $prod == 11) {
-	$extra .= "<form method='GET' name='ts'>";
-	$extra .= "<input type='hidden' value='$prod' name='prod'>";
-	$extra .= "<strong>Select Year: </strong>". yearSelect(1987, $year);
-	$extra .= "<strong>Select Month: </strong>". monthSelect($month, "month");
-	$extra .= "<input type='submit' value='Update Plot' />";
-	$extra .= '</form>';
+    $extra .= "<form method='GET' name='ts'>";
+    $extra .= "<input type='hidden' value='$prod' name='prod'>";
+    $extra .= "<strong>Select Year: </strong>" . yearSelect(1987, $year);
+    $extra .= "<strong>Select Month: </strong>" . monthSelect($month, "month");
+    $extra .= "<input type='submit' value='Update Plot' />";
+    $extra .= '</form>';
 }
 
 $t->content = <<<EOF
@@ -201,7 +202,6 @@ $t->content = <<<EOF
 
 </table>
 </div>
-		
 
 </TD></TR>
 </table>

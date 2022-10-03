@@ -1,27 +1,28 @@
-<?php 
- require_once "../../config/settings.inc.php"; 
- require_once "../../include/myview.php";
- 
- require_once "../../include/database.inc.php";
- require_once "../../include/network.php";
- require_once "../../include/mlib.php";
- $nt = new NetworkTable("ISUSM");
+<?php
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
 
- $PUBLIC_URI = "https://mesonet.agron.iastate.edu/api/1/currents.json?network=ISUSM";
-$arr = Array(
+require_once "../../include/database.inc.php";
+require_once "../../include/network.php";
+require_once "../../include/mlib.php";
+$nt = new NetworkTable("ISUSM");
+
+$PUBLIC_URI = "https://mesonet.agron.iastate.edu/api/1/currents.json?network=ISUSM";
+$arr = array(
     "network" => "ISUSM",
 );
 $jobj = iemws_json("currents.json", $arr);
 
- function pretty($val, $fmt){
-	 // Pretty print things for the table
-	 if (is_null($val)){
-		 return "M";
-	 }
-	 return sprintf($fmt, $val);
- }
+function pretty($val, $fmt)
+{
+    // Pretty print things for the table
+    if (is_null($val)) {
+        return "M";
+    }
+    return sprintf($fmt, $val);
+}
 
- $table = <<<EOM
+$table = <<<EOM
 <form method="GET" action="/my/current.phtml" name="my">
 <table class='table table-striped table-bordered table-condensed'>
 <tr>
@@ -44,47 +45,53 @@ $jobj = iemws_json("currents.json", $arr);
 <th>Temp &deg;F</th><th>Moist %</th>
 </tr>
 EOM;
- $offline = Array();
- $threshold = time() - 86400;
- foreach($jobj["data"] as $bogus => $data){
-     $sid = $data["station"];
- 	$uri = sprintf("/sites/site.php?station=%s&network=ISUSM", $sid);
- 	
-	 $ts = strtotime($data["local_valid"]);
- 	if ($ts < $threshold){
- 		$offline[] = sprintf("<a href=\"%s\">%s</a>", $uri,
-				 $nt->table[$sid]['name']);
- 		continue;
- 	}
- 	
- 	$table .= sprintf(
-         "<tr><td><input type=\"checkbox\" name=\"st[]\" value=\"%s\"></td>".
-         "<td><a href=\"%s\">%s</a></td><td>%s</td>".
- 		 "<td>%s</td><td>%s</td><td>%s</td>".
- 		 "<td>%s @ %s</td><td>%s</td><td>%s @ %s</td>".
- 		 "<td>%s</td><td>%s</td><td>%s</td><td>%s</td>".
- 		 "<td>%s</td><td>%s</td>".
-         "<td>%s</td><td>%s</td></tr>",
-         $sid, $uri, $nt->table[$sid]['name'],
-			 date("g:i A", $ts),
-			 pretty($data["tmpf"], '%.1f'),
-			 pretty($data["max_tmpf"], '%.1f'),
-			 pretty($data["min_tmpf"], '%.1f'), 
- 			drct2txt($data["drct"]), pretty($data["sknt"] * 1.15, '%.0f'),
-			 pretty($data['gust'] * 1.15, '%.0f'),
-			 pretty($data['max_gust'] * 1.15, '%.0f'),
- 			date("g:i A", strtotime($data['local_max_gust_ts'])),
-			 pretty($data['pday'], '%.2f'),
-			 pretty($data["c1tmpf"], '%.1f'),
- 			pretty($data["c2tmpf"], '%.1f'), 
-			($data["c2smv"] < 0) ? "Frozen": pretty($data["c2smv"], '%.1f'),
-			pretty($data["c3tmpf"], '%.1f'), 
- 			($data["c3smv"] < 0) ? "Frozen": pretty($data["c3smv"], '%.1f'),
- 			pretty($data["c4tmpf"], '%.1f'), 
- 			($data["c4smv"] < 0) ? "Frozen": pretty($data["c4smv"], '%.1f') 
- 	);
- }
- 
+$offline = array();
+$threshold = time() - 86400;
+foreach ($jobj["data"] as $bogus => $data) {
+    $sid = $data["station"];
+    $uri = sprintf("/sites/site.php?station=%s&network=ISUSM", $sid);
+
+    $ts = strtotime($data["local_valid"]);
+    if ($ts < $threshold) {
+        $offline[] = sprintf(
+            "<a href=\"%s\">%s</a>",
+            $uri,
+            $nt->table[$sid]['name']
+        );
+        continue;
+    }
+
+    $table .= sprintf(
+        "<tr><td><input type=\"checkbox\" name=\"st[]\" value=\"%s\"></td>" .
+            "<td><a href=\"%s\">%s</a></td><td>%s</td>" .
+            "<td>%s</td><td>%s</td><td>%s</td>" .
+            "<td>%s @ %s</td><td>%s</td><td>%s @ %s</td>" .
+            "<td>%s</td><td>%s</td><td>%s</td><td>%s</td>" .
+            "<td>%s</td><td>%s</td>" .
+            "<td>%s</td><td>%s</td></tr>",
+        $sid,
+        $uri,
+        $nt->table[$sid]['name'],
+        date("g:i A", $ts),
+        pretty($data["tmpf"], '%.1f'),
+        pretty($data["max_tmpf"], '%.1f'),
+        pretty($data["min_tmpf"], '%.1f'),
+        drct2txt($data["drct"]),
+        pretty($data["sknt"] * 1.15, '%.0f'),
+        pretty($data['gust'] * 1.15, '%.0f'),
+        pretty($data['max_gust'] * 1.15, '%.0f'),
+        date("g:i A", strtotime($data['local_max_gust_ts'])),
+        pretty($data['pday'], '%.2f'),
+        pretty($data["c1tmpf"], '%.1f'),
+        pretty($data["c2tmpf"], '%.1f'),
+        ($data["c2smv"] < 0) ? "Frozen" : pretty($data["c2smv"], '%.1f'),
+        pretty($data["c3tmpf"], '%.1f'),
+        ($data["c3smv"] < 0) ? "Frozen" : pretty($data["c3smv"], '%.1f'),
+        pretty($data["c4tmpf"], '%.1f'),
+        ($data["c4smv"] < 0) ? "Frozen" : pretty($data["c4smv"], '%.1f')
+    );
+}
+
 $table .= <<<EOM
 </table>
 <input type="submit" value="Add to Favorites">
@@ -92,26 +99,25 @@ $table .= <<<EOM
 
 </form>
 EOM;
- if (sizeof($offline) > 0){
- 	$table .= sprintf("<br />Sites Offline: %s", implode(", ", $offline));
- }
- $v = isset($_REQUEST["v"]) ? htmlentities($_REQUEST["v"]): 'tmpf';
- $t = new MyView();
- $t->current_network = "ISU Soil Moisture";
- $t->title = "ISU Ag Climate Sortable Currents";
- $t->refresh = 300;
+if (sizeof($offline) > 0) {
+    $table .= sprintf("<br />Sites Offline: %s", implode(", ", $offline));
+}
+$v = isset($_REQUEST["v"]) ? htmlentities($_REQUEST["v"]) : 'tmpf';
+$t = new MyView();
+$t->current_network = "ISU Soil Moisture";
+$t->title = "ISU Ag Climate Sortable Currents";
+$t->refresh = 300;
 
- $t->breadcrumbs = <<<EOF
+$t->breadcrumbs = <<<EOF
  <ol class="breadcrumb">
  <li><a href="/agclimate/">ISU Soil Moisture Network</a></li>
  <li class="active">Sortable Currents</li>
  </ol>
 EOF;
- $t->content = <<<EOF
+$t->content = <<<EOF
+<p>This table provides the most recent hourly observations collected from the
+network.  The data was provided by <a href="${PUBLIC_URI}">this JSON webservice</a>.</p>
 
- <p>This table provides the most recent hourly observations collected from the
- network.  The data was provided by <a href="${PUBLIC_URI}">this JSON webservice</a>.</p>
- 
 <br />
 {$table}
 

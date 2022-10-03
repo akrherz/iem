@@ -1,51 +1,69 @@
-<?php 
- /* 
+<?php
+/* 
   * Download front end for daily data from the ISUSM network
   */
- require_once "../../../config/settings.inc.php";
- require_once "../../../include/myview.php";
- require_once "../../../include/network.php";
- require_once "../../../include/forms.php";
- require_once "boxinc.phtml";
- 
- $t = new MyView();
- $t->title = "ISU Soil Moisture Daily Data Request";
- 
- $nt = new NetworkTable("ISUSM");
- 
- $yselect = yearSelect2(2013, date("Y"), "year1");
- $mselect = monthSelect(1, "month1");
- $dselect= daySelect2(1, "day1");
- $yselect2 = yearSelect2(2013, date("Y"), "year2");
- $mselect2 = monthSelect(date("m"), "month2");
- $dselect2= daySelect2(date("d"), "day2");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/myview.php";
+require_once "../../../include/network.php";
+require_once "../../../include/forms.php";
+require_once "boxinc.phtml";
+
+$t = new MyView();
+$t->title = "ISU Soil Moisture Daily Data Request";
+
+$nt = new NetworkTable("ISUSM");
+
+$yselect = yearSelect2(2013, date("Y"), "year1");
+$mselect = monthSelect(1, "month1");
+$dselect = daySelect2(1, "day1");
+$yselect2 = yearSelect2(2013, date("Y"), "year2");
+$mselect2 = monthSelect(date("m"), "month2");
+$dselect2 = daySelect2(date("d"), "day2");
 
 $sselect = "";
-foreach($nt->table as $key => $val){
+foreach ($nt->table as $key => $val) {
     $sselect .= sprintf(
-        '<br /><input type="checkbox" name="sts" value="%s" id="%s"> '.
-        '<label for="%s">%s (%s County, %s)</label>',
-        $key, $key, $key, $val["name"], $val["county"], $key);
+        '<br /><input type="checkbox" name="sts" value="%s" id="%s"> ' .
+            '<label for="%s">%s (%s County, %s)</label>',
+        $key,
+        $key,
+        $key,
+        $val["name"],
+        $val["county"],
+        $key
+    );
 }
 
 $soilopts = "";
-$levels = Array(4,12,24,50);
-foreach($levels as $key => $val){
+$levels = array(4, 12, 24, 50);
+foreach ($levels as $key => $val) {
     $soilopts .= sprintf(
-        '<br /><input type="checkbox" name="vars" value="soil%02dtn" '.
-        'id="soil%02dtn"> <label for="soil%02dtn">'.
-        'Daily Low %s inch Soil Temperature [F]</label>'. "\n",
-        $val, $val, $val, $val);
+        '<br /><input type="checkbox" name="vars" value="soil%02dtn" ' .
+            'id="soil%02dtn"> <label for="soil%02dtn">' .
+            'Daily Low %s inch Soil Temperature [F]</label>' . "\n",
+        $val,
+        $val,
+        $val,
+        $val
+    );
     $soilopts .= sprintf(
-        '<br /><input type="checkbox" name="vars" value="soil%02dt" '.
-        'id="soil%02dt"> <label for="soil%02dt">'.
-        'Daily Average %s inch Soil Temperature [F]</label>'. "\n",
-        $val, $val, $val, $val);
+        '<br /><input type="checkbox" name="vars" value="soil%02dt" ' .
+            'id="soil%02dt"> <label for="soil%02dt">' .
+            'Daily Average %s inch Soil Temperature [F]</label>' . "\n",
+        $val,
+        $val,
+        $val,
+        $val
+    );
     $soilopts .= sprintf(
-        '<br /><input type="checkbox" name="vars" value="soil%02dtx" '.
-        'id="soil%02dtx"> <label for="soil%02dtx">'.
-        'Daily High %s inch Soil Temperature [F]</label>'. "\n",
-        $val, $val, $val, $val);
+        '<br /><input type="checkbox" name="vars" value="soil%02dtx" ' .
+            'id="soil%02dtx"> <label for="soil%02dtx">' .
+            'Daily High %s inch Soil Temperature [F]</label>' . "\n",
+        $val,
+        $val,
+        $val,
+        $val
+    );
 }
 
 $t->content = <<<EOF
@@ -229,4 +247,3 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
 </div></div>
 EOF;
 $t->render("single.phtml");
-?>

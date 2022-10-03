@@ -14,12 +14,12 @@ $sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']): 'ts';
 $t->title = "CoCoRaHS Last Observation";
 $t->headextra = <<<EOF
 <script language="JavaScript" type="text/javascript">
-	<!--//BEGIN Script
-	function new_window(url) {
- 	link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
-	}
-	//END Script-->
-	</script>
+    <!--//BEGIN Script
+    function new_window(url) {
+     link = window.open(url,"_new","toolbar=0,location=0,directories=0,status=0,menubar=no,scrollbars=yes,resizable=yes,width=800,height=600");
+    }
+    //END Script-->
+    </script>
 EOF;
 $t->current_network = "CoCoRaHS";
 
@@ -146,8 +146,7 @@ $content .= <<<EOF
 </tbody>
 </table>
 <input type="submit" value="Add to Favorites">
- 		</form>
+         </form>
 EOF;
 $t->content = $content;
 $t->render('sortables.phtml');
-?>

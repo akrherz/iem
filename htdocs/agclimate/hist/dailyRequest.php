@@ -1,21 +1,21 @@
-<?php 
- /* Daily Data download for the ISUAG Network */ 
- require_once "../../../config/settings.inc.php";
- require_once "../../../include/forms.php";
- define("IEM_APPID", 12);
- require_once "../../../include/myview.php";
- include_once "boxinc.phtml";
- $t = new MyView();
- $t->title = "ISU AgClimate Legacy Daily Data Request";
+<?php
+/* Daily Data download for the ISUAG Network */
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/forms.php";
+define("IEM_APPID", 12);
+require_once "../../../include/myview.php";
+include_once "boxinc.phtml";
+$t = new MyView();
+$t->title = "ISU AgClimate Legacy Daily Data Request";
 
- $ys = yearSelect2(1986, date("Y"), "startYear", '', 2014); 
- $ms = monthSelect(1, "startMonth"); 
- $ds = daySelect2(1, "startDay"); 
- $ys2 = yearSelect2(1986, date("Y"), "endYear", '', 2014); 
- $ms2 = monthSelect(date("m"), "endMonth");
- $ds2 = daySelect2(date("d"), "endDay");
- 
- $t->content = <<<EOF
+$ys = yearSelect2(1986, date("Y"), "startYear", '', 2014);
+$ms = monthSelect(1, "startMonth");
+$ds = daySelect2(1, "startDay");
+$ys2 = yearSelect2(1986, date("Y"), "endYear", '', 2014);
+$ms2 = monthSelect(date("m"), "endMonth");
+$ds2 = daySelect2(date("d"), "endDay");
+
+$t->content = <<<EOF
  <ol class="breadcrumb">
   <li><a href="/agclimate">ISU AgClimate</a></li>
   <li class="active">Legacy Network Daily Download</li>
@@ -92,7 +92,7 @@ When selecting the time interval, make sure you that choose <B> * valid * </B> d
   <td>{$ys2}</td>
   <td>{$ms2}</td>
   <td>{$ds2}</td>
- 		</tr>
+         </tr>
 </table>
 
 <h4>Options:</h4>
@@ -138,12 +138,11 @@ or something appropriate for delimited text.</div>
 </div></div>
 
 <p><b><h4>Submit your request:</h4></b>
-	<input type="submit" value="Get Data">
-	<input type="reset">
+    <input type="submit" value="Get Data">
+    <input type="reset">
 
 </form>
 
 <br />
 EOF;
 $t->render('single.phtml');
-?>

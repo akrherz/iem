@@ -91,16 +91,16 @@ var mystyle = new ol.style.Style({
 });
 var greenArrow = new ol.style.Style({
     image: new ol.style.Icon({
-      crossOrigin: 'anonymous',
-      scale: 0.04,
-      src: '/images/green_arrow_up.svg',
+        crossOrigin: 'anonymous',
+        scale: 0.04,
+        src: '/images/green_arrow_up.svg',
     })
 });
 var redArrow = new ol.style.Style({
     image: new ol.style.Icon({
-      crossOrigin: 'anonymous',
-      scale: 0.04,
-      src: '/images/red_arrow_down.svg',
+        crossOrigin: 'anonymous',
+        scale: 0.04,
+        src: '/images/red_arrow_down.svg',
     })
 });
 
@@ -131,7 +131,7 @@ $().ready(function () {
             $("#" + feature.getId() + "_15").text(feature.get('tmpf_15'));
             $("#" + feature.getId() + "_5").text(feature.get('tmpf_5'));
             $("#" + feature.getId() + "_10").text(feature.get('tmpf_10'));
-            return [feature.get("is_inversion") ? redArrow: greenArrow];
+            return [feature.get("is_inversion") ? redArrow : greenArrow];
         }
     });
     n0q = new ol.layer.Tile({
@@ -176,11 +176,11 @@ $().ready(function () {
                 'Air Temp: ' + feature.get('tmpf'),
                 '</p>'
             ].join('<br/>');
-            if (feature.get("tmpf_15")){
+            if (feature.get("tmpf_15")) {
                 content = [
                     '<p>Site ID: <code>' + feature.getId() + '</code>',
                     'Name: ' + feature.get('name'),
-                    'Inversion: ' + (feature.get("is_inversion") ? "Likely": "Unlikely"),
+                    'Inversion: ' + (feature.get("is_inversion") ? "Likely" : "Unlikely"),
                     'Air Temp @1.5ft: ' + feature.get('tmpf_15'),
                     'Air Temp @5ft: ' + feature.get('tmpf_5'),
                     'Air Temp @10ft: ' + feature.get('tmpf_10'),
@@ -237,7 +237,7 @@ function setDate() {
         .datepicker("enable");
 }
 
-function setupUI(){
+function setupUI() {
     $(".dt").click(function (e) {
         timeChanged = true;
         $(this).removeClass('focus');
@@ -245,15 +245,15 @@ function setupUI(){
         setDate();
         updateMap();
     });
-    
-    
+
+
     $('#varpicker').change(function () {
         varname = $('#varpicker').val();
         gj.setStyle(gj.getStyle());
         updateTitle();
-    });    
+    });
 };
 
-$(document).ready(function(){
+$(document).ready(function () {
     setupUI();
 });

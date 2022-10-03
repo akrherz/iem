@@ -1,23 +1,23 @@
-<?php 
- require_once "../../config/settings.inc.php";
- define("IEM_APPID", 104);
- require_once "../../include/myview.php";
- $t = new MyView();
- $t->title = "Recent Interesting METAR Reports";
+<?php
+require_once "../../config/settings.inc.php";
+define("IEM_APPID", 104);
+require_once "../../include/myview.php";
+$t = new MyView();
+$t->title = "Recent Interesting METAR Reports";
 
- $t->content = <<<EOF
+$t->content = <<<EOF
  <ol class="breadcrumb">
- 	<li><a href="/ASOS/">ASOS Mainpage</a></li>
-	<li class="active">Recent Interesting METAR Reports</li>
+     <li><a href="/ASOS/">ASOS Mainpage</a></li>
+    <li class="active">Recent Interesting METAR Reports</li>
  </ol>
 <p>The IEM processes and archives a feed of METAR formatted weather observations.
- 	These observations sometimes contain interesting things reported.  This page
- 	lists out such recent occurences of a given phenomena. This page lists
- 	out reports for the past 2 to 3 days.</p>
+     These observations sometimes contain interesting things reported.  This page
+     lists out such recent occurences of a given phenomena. This page lists
+     out reports for the past 2 to 3 days.</p>
 
  <form name="local">
  <p><strong>Select Report:</strong>
- 	<select id="report" name="report">
+     <select id="report" name="report">
         <option value="snowdepth">Snow Depth Reports (4/xxx)</option>
         <option value="fc">Funnel Cloud / Tornado / Waterspouts Reports (FC/+FC)</option>
         <option value="gr">Hail Reports (GR)</option>
@@ -27,7 +27,7 @@
         <option value="pno">No Precipitation Reported (PNO)</option>
         <option value="50">Wind Sustained/Gusts AOA 50 kts (US Only)</option>
         <option value="50A">Wind Sustained/Gusts AOA 50 kts (Worldwide)</option>
- 	</select>
+     </select>
  </form></o>
 
  <p><table class="table table-bordered table-striped" id="datatable">
@@ -42,44 +42,43 @@ $t->jsextra = <<<EOF
 var report = 'snowdepth';
 
 function fetch(){
-	$('#datatable tbody').empty();
-	$('#datatable tbody').append('<tr><th colspan="5">Querying server, one moment</th></tr>');
-	$.get('/geojson/recent_metar.py?q='+report).done(function(j){
-		$('#datatable tbody').empty();
-		for (var i=0; i < j.features.length; i++){
-			var feat = j.features[i];
-			var row = ['<tr>',
-				'<td>'+ feat.properties.station +'</td>',
-				'<td>'+ feat.properties.network +'</td>',
-				'<td>'+ feat.properties.valid +'</td>',
-				'<td>'+ feat.properties.value +'</td>',
-				'<td>'+ feat.properties.metar +'</td>',
-				'</tr>'];
-			$('#datatable tbody').append(row.join(''));
-		}
-		if (j.features.length == 0){
-			$('#datatable tbody').append('<tr><th colspan="5">No results were found, sorry!</th></tr>');
-		}
-	});
+    $('#datatable tbody').empty();
+    $('#datatable tbody').append('<tr><th colspan="5">Querying server, one moment</th></tr>');
+    $.get('/geojson/recent_metar.py?q='+report).done(function(j){
+        $('#datatable tbody').empty();
+        for (var i=0; i < j.features.length; i++){
+            var feat = j.features[i];
+            var row = ['<tr>',
+                '<td>'+ feat.properties.station +'</td>',
+                '<td>'+ feat.properties.network +'</td>',
+                '<td>'+ feat.properties.valid +'</td>',
+                '<td>'+ feat.properties.value +'</td>',
+                '<td>'+ feat.properties.metar +'</td>',
+                '</tr>'];
+            $('#datatable tbody').append(row.join(''));
+        }
+        if (j.features.length == 0){
+            $('#datatable tbody').append('<tr><th colspan="5">No results were found, sorry!</th></tr>');
+        }
+    });
 }
 
 $( document ).ready(function() {
-	$("#report").change(function(){
-		//console.log("change() called...");
-		report = this.value;
-		window.location.href = '#'+report;
-		fetch();
-	});
-	
-	var tokens = window.location.href.split("#");
-	if (tokens.length == 2){
-		report = tokens[1];
-		$('#report').val(report);
-	}
-	fetch();
+    $("#report").change(function(){
+        //console.log("change() called...");
+        report = this.value;
+        window.location.href = '#'+report;
+        fetch();
+    });
+    
+    var tokens = window.location.href.split("#");
+    if (tokens.length == 2){
+        report = tokens[1];
+        $('#report').val(report);
+    }
+    fetch();
 });
 </script>
 EOF;
- 
+
 $t->render('single.phtml');
- ?>

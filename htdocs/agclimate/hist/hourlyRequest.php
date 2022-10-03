@@ -1,21 +1,21 @@
-<?php 
- /* Daily Data download for the ISUAG Network */ 
- include("../../../config/settings.inc.php");
- include("../../../include/forms.php");
- define("IEM_APPID", 13);
- include_once "boxinc.phtml";
- include("../../../include/myview.php");
- $t = new MyView();
- $t->title = "ISU AgClimate Legacy Hourly Data Request";
+<?php
+/* Daily Data download for the ISUAG Network */
+include("../../../config/settings.inc.php");
+include("../../../include/forms.php");
+define("IEM_APPID", 13);
+include_once "boxinc.phtml";
+include("../../../include/myview.php");
+$t = new MyView();
+$t->title = "ISU AgClimate Legacy Hourly Data Request";
 
- $ys = yearSelect2(1986, date("Y"), "startYear", '', 2014); 
- $ms = monthSelect(1, "startMonth"); 
- $ds = daySelect2(1, "startDay"); 
- $ys2 = yearSelect2(1986, date("Y"), "endYear", '', 2014); 
- $ms2 = monthSelect(date("m"), "endMonth");
- $ds2 = daySelect2(date("d"), "endDay");
- 
- $t->content = <<<EOF
+$ys = yearSelect2(1986, date("Y"), "startYear", '', 2014);
+$ms = monthSelect(1, "startMonth");
+$ds = daySelect2(1, "startDay");
+$ys2 = yearSelect2(1986, date("Y"), "endYear", '', 2014);
+$ms2 = monthSelect(date("m"), "endMonth");
+$ds2 = daySelect2(date("d"), "endDay");
+
+$t->content = <<<EOF
  <ol class="breadcrumb">
   <li><a href="/agclimate">ISU AgClimate</a></li>
   <li class="active">Legacy Network Hourly Download</li>
@@ -38,19 +38,19 @@ data from this network, see <a href="dailyRequest.php">this page</a>.
 <tr><td valign="top">
 
 <p><b><h4 class="subtitle">Select station(s):</h4></b>
-	<input type="checkbox" name="sts[]" value="A130209">Ames<BR>
-	<input type="checkbox" name="sts[]" value="A131069">Calmar<BR>
-	<input type="checkbox" name="sts[]" value="A131299">Castana<BR>
-	<input type="checkbox" name="sts[]" value="A131329">Cedar Rapids<BR>
-	<input type="checkbox" name="sts[]" value="A131559">Chariton<BR>	
-	<input type="checkbox" name="sts[]" value="A131909">Crawfordsville<BR>
+    <input type="checkbox" name="sts[]" value="A130209">Ames<BR>
+    <input type="checkbox" name="sts[]" value="A131069">Calmar<BR>
+    <input type="checkbox" name="sts[]" value="A131299">Castana<BR>
+    <input type="checkbox" name="sts[]" value="A131329">Cedar Rapids<BR>
+    <input type="checkbox" name="sts[]" value="A131559">Chariton<BR>	
+    <input type="checkbox" name="sts[]" value="A131909">Crawfordsville<BR>
   <input type="checkbox" name="sts[]" value="A130219">Gilbert<BR> 
-	<input type="checkbox" name="sts[]" value="A134309">Kanawha<BR>
-	<input type="checkbox" name="sts[]" value="A134759">Lewis<BR>
-	<input type="checkbox" name="sts[]" value="A135849">Muscatine<BR>
-	<input type="checkbox" name="sts[]" value="A135879">Nashua<BR>
-	<input type="checkbox" name="sts[]" value="A136949">Rhodes<BR>
-	<input type="checkbox" name="sts[]" value="A138019">Sutherland<BR>
+    <input type="checkbox" name="sts[]" value="A134309">Kanawha<BR>
+    <input type="checkbox" name="sts[]" value="A134759">Lewis<BR>
+    <input type="checkbox" name="sts[]" value="A135849">Muscatine<BR>
+    <input type="checkbox" name="sts[]" value="A135879">Nashua<BR>
+    <input type="checkbox" name="sts[]" value="A136949">Rhodes<BR>
+    <input type="checkbox" name="sts[]" value="A138019">Sutherland<BR>
 
 </td><td valign="top">
 
@@ -63,24 +63,24 @@ data from this network, see <a href="dailyRequest.php">this page</a>.
   <input type="checkbox" name="vars[]" value="c400">Wind Speed [MPH] (~3 meter height)<BR>
   <input type="checkbox" name="vars[]" value="c600">Wind Direction [deg] (~3 meter height)<BR>
   <!-- no idea on units ATM
-	<input type="checkbox" name="vars[]" value="c700"><a href="/agclimate/et.phtml" target="_new">Reference Evapotranspiration (alfalfa)</a> [in/dy]<br />
-	-->
+    <input type="checkbox" name="vars[]" value="c700"><a href="/agclimate/et.phtml" target="_new">Reference Evapotranspiration (alfalfa)</a> [in/dy]<br />
+    -->
 </td></tr></table>
 
 <p><b><h4 class="subtitle">Select the time interval:</h4></b>
-		<TABLE>
-				<TR><TH></TH><TH>Year:</TH><TH>Month:</TH><TH>Day:</TH></TR>
-				<TR><TH>Starting On:</TH>
-				<td>${ys}</td>
-				<td>${ms}</td>
-				<td>${ds}</td>
-				</TR>
-				<TR><TH>Ending On:</TH>
-				<td>${ys2}</td>
-				<td>${ms2}</td>
-				<td>${ds2}</td>
-				</TR>
-			</TABLE>
+        <TABLE>
+                <TR><TH></TH><TH>Year:</TH><TH>Month:</TH><TH>Day:</TH></TR>
+                <TR><TH>Starting On:</TH>
+                <td>${ys}</td>
+                <td>${ms}</td>
+                <td>${ds}</td>
+                </TR>
+                <TR><TH>Ending On:</TH>
+                <td>${ys2}</td>
+                <td>${ms2}</td>
+                <td>${ds2}</td>
+                </TR>
+            </TABLE>
 
 <p><b><h4 class="subtitle">Options:</h4></b>
 <input type="checkbox" name="qcflags" value="yes">Include QC Flags
@@ -117,11 +117,10 @@ data from this network, see <a href="dailyRequest.php">this page</a>.
 
 
 <p><b><h4 class="subtitle">Submit your request:</h4></b>
-	<input type="submit" value="Submit Query">
-	<input type="reset">
+    <input type="submit" value="Submit Query">
+    <input type="reset">
 
 <BR><BR>
 </form>
 EOF;
- $t->render('single.phtml');
-?>
+$t->render('single.phtml');

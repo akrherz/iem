@@ -1,34 +1,38 @@
-<?php 
- require_once "../../../config/settings.inc.php";
- require_once "../../../include/myview.php";
- $t = new MyView();
- $t->title = "ISU Soil Moisture Minute/Hourly Data Request";
- 
- require_once "../../../include/network.php";
- $nt = new NetworkTable("ISUSM");
- require_once "../../../include/forms.php";
- require_once "boxinc.phtml";
- 
- $yselect = yearSelect2(2013, 2013, "year1");
- $mselect = monthSelect(1, "month1");
- $dselect= daySelect2(1, "day1");
- $yselect2 = yearSelect2(2013, date("Y"), "year2");
- $mselect2 = monthSelect(date("m"), "month2");
- $dselect2= daySelect2(date("d"), "day2");
+<?php
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/myview.php";
+$t = new MyView();
+$t->title = "ISU Soil Moisture Minute/Hourly Data Request";
+
+require_once "../../../include/network.php";
+$nt = new NetworkTable("ISUSM");
+require_once "../../../include/forms.php";
+require_once "boxinc.phtml";
+
+$yselect = yearSelect2(2013, 2013, "year1");
+$mselect = monthSelect(1, "month1");
+$dselect = daySelect2(1, "day1");
+$yselect2 = yearSelect2(2013, date("Y"), "year2");
+$mselect2 = monthSelect(date("m"), "month2");
+$dselect2 = daySelect2(date("d"), "day2");
 
 $sselect = "";
-foreach($nt->table as $key => $val)
-{
-	$sselect .= sprintf(
-        '<br /><input type="checkbox" name="sts" value="%s" id="%s"> '.
-        '<label for="%s">[%s] %s (%s County) (%s-%s)</label>',
-		$key, $key, $key, $key, $val["name"], $val["county"],
-        is_null($val["archive_begin"]) ? "": $val["archive_begin"]->format("Y-m-d"),
-        is_null($val["archive_end"]) ? "today": $val["archive_end"]->format("Y-m-d"),
+foreach ($nt->table as $key => $val) {
+    $sselect .= sprintf(
+        '<br /><input type="checkbox" name="sts" value="%s" id="%s"> ' .
+            '<label for="%s">[%s] %s (%s County) (%s-%s)</label>',
+        $key,
+        $key,
+        $key,
+        $key,
+        $val["name"],
+        $val["county"],
+        is_null($val["archive_begin"]) ? "" : $val["archive_begin"]->format("Y-m-d"),
+        is_null($val["archive_end"]) ? "today" : $val["archive_end"]->format("Y-m-d"),
     );
 }
 
-$ar = Array(
+$ar = array(
     "tmpf" => "Air Temperature [F]",
     "relh" => "Relative Humidity [%]",
     "solar" => "Solar Radiation [J/m2]",
@@ -47,16 +51,16 @@ $ar = Array(
 );
 $vselect = make_checkboxes("vars", "", $ar);
 
-$ar = Array(
-"lwmv_1" => "lwmv_1",
-"lwmv_2" => "lwmv_2",
-"lwmdry_1_tot" => "lwmdry_1_tot",
-"lwmcon_1_tot" => "lwmcon_1_tot",
-"lwmwet_1_tot" => "lwmwet_1_tot",
-"lwmdry_2_tot" => "lwmdry_2_tot",
-"lwmcon_2_tot" => "lwmcon_2_tot",
-"lwmwet_2_tot" => "lwmwet_2_tot",
-"bpres_avg" => "bpres_avg",
+$ar = array(
+    "lwmv_1" => "lwmv_1",
+    "lwmv_2" => "lwmv_2",
+    "lwmdry_1_tot" => "lwmdry_1_tot",
+    "lwmcon_1_tot" => "lwmcon_1_tot",
+    "lwmwet_1_tot" => "lwmwet_1_tot",
+    "lwmdry_2_tot" => "lwmdry_2_tot",
+    "lwmcon_2_tot" => "lwmcon_2_tot",
+    "lwmwet_2_tot" => "lwmwet_2_tot",
+    "bpres_avg" => "bpres_avg",
 );
 $vselect2 = make_checkboxes("vars", "", $ar);
 
@@ -113,7 +117,7 @@ hourly data.</p>
 
 
 <h4>Options:</h4>
- 		
+         
 <strong>Select from available variables</strong><br />
 <a href="/agclimate/et.phtml" target="_new">Reference Evapotranspiration (alfalfa)</a>
 
@@ -131,7 +135,7 @@ hourly data.</p>
 <p><strong>Vineyard Station-only Variables</strong>
 
 {$vselect2}
- 		
+         
 {$qcbox}
 
 <p>
@@ -141,17 +145,17 @@ hourly data.</p>
 
  <p><strong>How should the data be formatted?:</strong> &nbsp; 
 <select name="format">
-	<option value="excel">Microsoft Excel (xlsx)</option>
-	<option value="comma">Comma Delimited Text File</option>
-  	<option value="tab">Tab Delimited Text File</option>
+    <option value="excel">Microsoft Excel (xlsx)</option>
+    <option value="comma">Comma Delimited Text File</option>
+      <option value="tab">Tab Delimited Text File</option>
 </select>
 
 <p><strong>How should missing values be represented?:</strong>
 <br /> 
 <select name="missing">
-	<option value="-99">-99</option>
-	<option value="M">M</option>
-  	<option value="">(blank, empty space)</option>
+    <option value="-99">-99</option>
+    <option value="M">M</option>
+      <option value="">(blank, empty space)</option>
 </select>
 
 <p><strong>Timezone for Data:</strong>
@@ -163,8 +167,8 @@ hourly data.</p>
 
 <p><strong>Submit your request:</strong>
 <br />
-	<input type="submit" value="Submit">
-	<input type="reset">
+    <input type="submit" value="Submit">
+    <input type="reset">
 
 </form>
 
