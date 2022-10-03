@@ -1,73 +1,79 @@
 <?php
- require_once "../../config/settings.inc.php";
- define("IEM_APPID", 54);
- require_once "../../include/myview.php";
- require_once "../../include/database.inc.php";
- require_once "../../include/forms.php";
- require_once "../../include/mlib.php";
- 
- $t = new MyView();
+require_once "../../config/settings.inc.php";
+define("IEM_APPID", 54);
+require_once "../../include/myview.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/forms.php";
+require_once "../../include/mlib.php";
 
- $conn = iemdb("postgis");
+$t = new MyView();
 
- $sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "segid"; 
- $t->refresh = 600;
+$conn = iemdb("postgis");
+
+$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "segid";
+$t->refresh = 600;
 
 
-$sql = "SELECT * from roads_current r, roads_base b, roads_conditions c ".
-		"WHERE r.segid = b.segid and r.cond_code = c.code";
+$sql = "SELECT * from roads_current r, roads_base b, roads_conditions c " .
+    "WHERE r.segid = b.segid and r.cond_code = c.code";
 $rs = pg_query($conn, $sql);
 
-$obs = Array();
-for ($i=0; $row = pg_fetch_array($rs); $i++)
-{
-  $seg = intval($row["segid"]);
-  $obs[$seg] = $row;
-  $t2 = preg_split('/ to /', $row["longname"]);
-  if (sizeof($t2) == 2){
-  	$obs[$seg]["minor0"] = $t2[0];
-  	$obs[$seg]["minor1"] = $t2[1];
-  } else {
-  	$obs[$seg]["minor0"] = $t2[0];
-  	$obs[$seg]["minor1"] = '';
-  }
-  
-  if ($row["type"] == 1){ $obs[$seg]["number"] = intval($row["int1"]); }
-  if ($row["type"] == 2){ $obs[$seg]["number"] = intval($row["us1"]); }
-  if ($row["type"] == 3){ $obs[$seg]["number"] = intval($row["st1"]); }
-  $valid = substr($row["valid"],0,16);
+$obs = array();
+for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    $seg = intval($row["segid"]);
+    $obs[$seg] = $row;
+    $t2 = preg_split('/ to /', $row["longname"]);
+    if (sizeof($t2) == 2) {
+        $obs[$seg]["minor0"] = $t2[0];
+        $obs[$seg]["minor1"] = $t2[1];
+    } else {
+        $obs[$seg]["minor0"] = $t2[0];
+        $obs[$seg]["minor1"] = '';
+    }
+
+    if ($row["type"] == 1) {
+        $obs[$seg]["number"] = intval($row["int1"]);
+    }
+    if ($row["type"] == 2) {
+        $obs[$seg]["number"] = intval($row["us1"]);
+    }
+    if ($row["type"] == 3) {
+        $obs[$seg]["number"] = intval($row["st1"]);
+    }
+    $valid = substr($row["valid"], 0, 16);
 }
 $ts = strtotime($valid);
-$valid = strftime("%I:%M %p on %d %b %Y", $ts); 
+$valid = strftime("%I:%M %p on %d %b %Y", $ts);
 
-$types = Array(1 => "Interstate", 2 => "US Highway", 3 => "State Highway");
+$types = array(1 => "Interstate", 2 => "US Highway", 3 => "State Highway");
 
-$vals = Array("number" => "Route #", "type" => "Road Classification",
-  "minor0" => "Start Point", "minor1" => "End Point", 
-  "label" => "Road Condition", "cond_code" => "Road Condition",
-  "segid" => "Travel Path");
+$vals = array(
+    "number" => "Route #", "type" => "Road Classification",
+    "minor0" => "Start Point", "minor1" => "End Point",
+    "label" => "Road Condition", "cond_code" => "Road Condition",
+    "segid" => "Travel Path"
+);
 
- $uri = "rc.phtml?sortcol="; 
- 
- $finalA = aSortBySecondIndex($obs, $sortcol);
- $now = time();
- $i = 0;
- $table = "";
- foreach($finalA as $key => $val)
- {
- 	$i++;
- 	$parts = $finalA[$key];
- 
- 	$table .= "<tr";
- 	if ($i % 2 == 0)  $table .= " bgcolor='#eeeeee'";
- 	$table .= "></td>";
- 
- 	$table .= "<td>". $types[$parts["type"]] ."</td>";
- 	$table .= "<td>". $parts["number"] ."</td>";
- 	$table .= "<td>". $parts["minor0"] ."</td>";
- 	$table .= "<td>". $parts["raw"] ."</td>";
- }
-  
+$uri = "rc.phtml?sortcol=";
+
+$finalA = aSortBySecondIndex($obs, $sortcol);
+$now = time();
+$i = 0;
+$table = "";
+foreach ($finalA as $key => $val) {
+    $i++;
+    $parts = $finalA[$key];
+
+    $table .= "<tr";
+    if ($i % 2 == 0)  $table .= " bgcolor='#eeeeee'";
+    $table .= "></td>";
+
+    $table .= "<td>" . $types[$parts["type"]] . "</td>";
+    $table .= "<td>" . $parts["number"] . "</td>";
+    $table .= "<td>" . $parts["minor0"] . "</td>";
+    $table .= "<td>" . $parts["raw"] . "</td>";
+}
+
 
 $t->content = <<<EOF
 <ol class="breadcrumb">

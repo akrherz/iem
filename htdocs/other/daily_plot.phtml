@@ -1,16 +1,16 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Other Network";
-require_once "../../include/forms.php"; 
+require_once "../../include/forms.php";
 require_once "../../include/imagemaps.php";
 
 $year = get_int404("year", date("Y"));
 $month = get_int404("month", date("m"));
 $day = get_int404("day", date("d"));
-$myTime = mktime(0,0,0,$month,$day,$year);
-$station = isset($_GET["station"]) ? xssafe($_GET["station"]): "OT0002";
+$myTime = mktime(0, 0, 0, $month, $day, $year);
+$station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "OT0002";
 
 $nselect = networkSelect("OT", $station);
 $yselect = yearSelect(2007, $year);

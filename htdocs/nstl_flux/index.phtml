@@ -25,11 +25,11 @@ $rs = pg_exec($pg_conn, $sql);
 
 for( $i=0; $row = pg_fetch_assoc($rs); $i++)
 {
-	$rows .= sprintf("<tr><th>%s</th><td>%s</td><td>%.4f</td>
-			<td>%.4f</td><td>%s</td><td>%s</td></tr>", $row["station"], 
-			$row["surface"], $nt->table[$row["station"]]['lat'], 
-			$nt->table[$row["station"]]['lon'], 
-			substr($row["sts"],0,10), substr($row["ets"],0,10) );
+    $rows .= sprintf("<tr><th>%s</th><td>%s</td><td>%.4f</td>
+            <td>%.4f</td><td>%s</td><td>%s</td></tr>", $row["station"], 
+            $row["surface"], $nt->table[$row["station"]]['lat'], 
+            $nt->table[$row["station"]]['lon'], 
+            substr($row["sts"],0,10), substr($row["ets"],0,10) );
 }
 
 $sselect = networkMultiSelect("NSTLFLUX", '', Array(), 'station[]');
@@ -100,4 +100,3 @@ align="left">First Observation</th><th align="left">Last Observation</th></tr></
 
 EOF;
 $t->render('single.phtml');
-?>

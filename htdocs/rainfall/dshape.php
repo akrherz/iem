@@ -1,16 +1,17 @@
 <?php
  /* Download .zip files of rainfall estimates! */
 require_once "../../config/settings.inc.php";
+require_once "../../include/forms.php";
 
 // Prevent client abort from leaving temp files around
 ignore_user_abort(true);
 
-$year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y", time() - 86400);
-$month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m", time() - 86400);
-$day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d", time() - 86400);
-$epsg = isset($_GET["epsg"]) ? intval($_GET["epsg"]) : 4326;
-$geometry = isset($_GET["geometry"]) ? $_GET["geometry"] : "point";
-$duration = isset($_GET["duration"]) ? $_GET["duration"] : "day";
+$year = get_int404("year", date("Y", time() - 86400));
+$month = get_int404("month", date("m", time() - 86400));
+$day = get_int404("day", date("d", time() - 86400));
+$epsg = get_int404("epsg", 4326);
+$geometry = isset($_GET["geometry"]) ? xssafe($_GET["geometry"]) : "point";
+$duration = isset($_GET["duration"]) ? xssafe($_GET["duration"]) : "day";
 
 $ts = mktime(0,0,0,$month, $day, $year);
 
@@ -49,4 +50,3 @@ unlink($fp.".dbf");
 unlink($fp.".prj");
 unlink($fp.".avl");
 unlink("${fp}.zip");
-?>

@@ -52,13 +52,13 @@ LAYER
 END
 
 LAYER
-	NAME basins
-	TYPE POINT
-	PROJECTION
-		"init=epsg:26915"
-	END
-	STATUS ON
-	LABELCACHE ON
+    NAME basins
+    TYPE POINT
+    PROJECTION
+        "init=epsg:26915"
+    END
+    STATUS ON
+    LABELCACHE ON
   CLASS
     LABEL
       COLOR 250 250 0

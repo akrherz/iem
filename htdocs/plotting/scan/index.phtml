@@ -8,32 +8,38 @@ require_once "../../../include/imagemaps.php";
 $t = new MyView();
 $t->title = "SCAN Plotting";
 
- $station = isset($_GET["station"]) ? xssafe($_GET["station"]): "S2031";
- $year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y", time() - 1*86400);
- $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m", time() - 1*86400);
- $day = isset($_GET["day"]) ? intval($_GET["day"]): date("d", time() - 1*86400);
- $plot = isset($_GET["plot"]) ? intval($_GET["plot"]) : 0;
+$station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "S2031";
+$year = get_int404("year", date("Y", time() - 1 * 86400));
+$month = get_int404("month", date("m", time() - 1 * 86400));
+$day = get_int404("day", date("d", time() - 1 * 86400));
+$plot = get_int404("plot", 0);
 
-$u = Array("radn5temps.php", "radn5temps2.php", "smv.php", "winds.php", "precip.php");
-$ulabel = Array("Soil Temps + Solar Rad",
-"Soil/Air Temps + Solar Rad",
-"Soil Moisture + Solar Rad",
-"Wind Speed + Direction",
-"Precipitation");
+$u = array("radn5temps.php", "radn5temps2.php", "smv.php", "winds.php", "precip.php");
+$ulabel = array(
+    "Soil Temps + Solar Rad",
+    "Soil/Air Temps + Solar Rad",
+    "Soil Moisture + Solar Rad",
+    "Wind Speed + Direction",
+    "Precipitation"
+);
 $myu = $u[$plot];
 
- $ploturl = "$myu?station=$station&amp;year=$year&amp;month=$month&amp;day=$day";
- 
- $sselect = networkSelect("SCAN", $station);
- $yselect = yearSelect(2004, $year, "year");
- $mselect = monthSelect($month, "month");
- $dselect = daySelect($day, "day");
- $pselect = "<select name=\"plot\">";
- foreach($u as $key => $val){
- 	$pselect .= sprintf("<option value=\"%s\"%s>%s</option>", $key, 
- 			($key == $plot) ? ' selected="selected"': '', $ulabel[$key]);
- }
- $pselect .= "</select>";
+$ploturl = "$myu?station=$station&amp;year=$year&amp;month=$month&amp;day=$day";
+
+$sselect = networkSelect("SCAN", $station);
+$yselect = yearSelect(2004, $year, "year");
+$mselect = monthSelect($month, "month");
+$dselect = daySelect($day, "day");
+$pselect = "<select name=\"plot\">";
+foreach ($u as $key => $val) {
+    $pselect .= sprintf(
+        "<option value=\"%s\"%s>%s</option>",
+        $key,
+        ($key == $plot) ? ' selected="selected"' : '',
+        $ulabel[$key]
+    );
+}
+$pselect .= "</select>";
 $t->content = <<<EOF
 <ol class="breadcrumb">
 <li><a href="/scan/">SCAN</a></li>

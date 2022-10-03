@@ -9,15 +9,15 @@ $t->content = <<<EOF
 <h3>OGC Web Services</h3>
 
 <p>The <a href="http://www.opengeospatial.org">Open Geospatial Consortium, Inc</a> (OGC) 
-		is a standards organization leading the development of geospatial and 
-		location based services.  The OGC has adopted a number of specifications, 
-		some of which are used by the IEM.  This page lists these services.</p>
+        is a standards organization leading the development of geospatial and 
+        location based services.  The OGC has adopted a number of specifications, 
+        some of which are used by the IEM.  This page lists these services.</p>
 
 <h4>Some items of note:</h4>
 <ol>
  <li>All of these services are available via https:// connections.</li>
  <li>There are four DNS aliases for the website to allow web browers to make
-	many simultaneous requests against these services.<br />
+    many simultaneous requests against these services.<br />
   <ol>
     <li>mesonet1.agron.iastate.edu</li> 
     <li>mesonet2.agron.iastate.edu</li> 
@@ -195,20 +195,20 @@ Example: goes_east_conus_ch02
   and level III product you want. For example, sector=DMX&amp;prod=N0Q
   <br />
   <br /><i>Layer:</i> <strong>single</strong> Most recent image for the given 
-		RADAR identifier and Level III product.  A simple JSON metadata file
-		exists for each RADAR and Level III product combination, for example 
-		<a href="/data/gis/images/4326/ridge/DMX/N0Q_0.json">DMX N0Q</a>.
+        RADAR identifier and Level III product.  A simple JSON metadata file
+        exists for each RADAR and Level III product combination, for example 
+        <a href="/data/gis/images/4326/ridge/DMX/N0Q_0.json">DMX N0Q</a>.
   <br />
   <br /><i>Layer:</i> <strong>single-archive</strong> This allows request of
-		a specific volume scan time from IEM's archive of imagery.  You need
-		to specify the prod and sector like with the "single" layer, but also
-		need to include a year, month, day and time.  All of these values are 
-		in UTC.  Here's an <a href="https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/ridge.cgi?service=wms&version=1.1.1&request=GetMap&format=png&TRANSPARENT=TRUE&bgcolor=0xCCCCFE&BBOX=-14215828.6745634,5401834.631799334,-13166501.150410566,6006604.399507464&SRS=EPSG:3857&width=1716&height=989&sector=RTX&prod=N0Q&layers=single-archive&year=2015&month=01&day=27&time=2303">example request</a>
-		that gets NEXRAD RTX N0Q product for 27 Jan 2015 at 23:03 UTC.  You 
-		must know the volume scan times prior to making the request.  There
-		are <a href="/json/">JSON</a> services that can help you out. 
-		Unfortunately, this service <strong>does not support WMS-T</strong> 
-		due to complications with how I serve this information out, sorry.
+        a specific volume scan time from IEM's archive of imagery.  You need
+        to specify the prod and sector like with the "single" layer, but also
+        need to include a year, month, day and time.  All of these values are 
+        in UTC.  Here's an <a href="https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/ridge.cgi?service=wms&version=1.1.1&request=GetMap&format=png&TRANSPARENT=TRUE&bgcolor=0xCCCCFE&BBOX=-14215828.6745634,5401834.631799334,-13166501.150410566,6006604.399507464&SRS=EPSG:3857&width=1716&height=989&sector=RTX&prod=N0Q&layers=single-archive&year=2015&month=01&day=27&time=2303">example request</a>
+        that gets NEXRAD RTX N0Q product for 27 Jan 2015 at 23:03 UTC.  You 
+        must know the volume scan times prior to making the request.  There
+        are <a href="/json/">JSON</a> services that can help you out. 
+        Unfortunately, this service <strong>does not support WMS-T</strong> 
+        due to complications with how I serve this information out, sorry.
  </li>
  
  <hr />

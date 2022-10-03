@@ -38,7 +38,7 @@ CONFIG MS_NONSQUARE YES
 
  
 PROJECTION
-	"init=epsg:26915"
+    "init=epsg:26915"
 END
 
 OUTPUTFORMAT

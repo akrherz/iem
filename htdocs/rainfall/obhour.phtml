@@ -3,7 +3,7 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 $t = new MyView();
-$network = isset($_GET["network"]) ? xssafe($_GET["network"]): "IA_ASOS";
+$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_ASOS";
 
 $t->headextra = <<<EOM
 <link rel="stylesheet" type="text/css" href="/vendor/ext/3.4.1/resources/css/ext-all.css"/>

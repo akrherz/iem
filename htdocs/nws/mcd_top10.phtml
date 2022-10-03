@@ -11,10 +11,13 @@ require_once "../../include/network.php";
 require_once "../../include/imagemaps.php";
 require_once  "../../include/vtec.php";
 
-$baseurl = sprintf("http://iem.local/json/mcd_bysize.py?count=%s&sort=",
-    $count);
+$baseurl = sprintf(
+    "http://iem.local/json/mcd_bysize.py?count=%s&sort=",
+    $count
+);
 
-function dowork($baseurl, $sort){
+function dowork($baseurl, $sort)
+{
     $uri = $baseurl . $sort;
     $public = str_replace("http://iem.local", "https://mesonet.agron.iastate.edu", $uri);
     $s = <<<EOM
@@ -26,12 +29,16 @@ function dowork($baseurl, $sort){
 
 EOM;
     $jdata = file_get_contents($uri);
-    $json = json_decode($jdata, $assoc=TRUE);
-    foreach($json["mcds"] as $key => $val)
-    {
-        $s .= sprintf("<tr><td>%s</td><td><a href=\"%s\">%s</a></td><td>%s</td><td>%.2f</td></tr>",
-            $val["year"], $val["spcurl"], $val["product_num"], $val["utc_issue"],
-            $val["area_sqkm"]);
+    $json = json_decode($jdata, $assoc = TRUE);
+    foreach ($json["mcds"] as $key => $val) {
+        $s .= sprintf(
+            "<tr><td>%s</td><td><a href=\"%s\">%s</a></td><td>%s</td><td>%.2f</td></tr>",
+            $val["year"],
+            $val["spcurl"],
+            $val["product_num"],
+            $val["utc_issue"],
+            $val["area_sqkm"]
+        );
     }
     $s .= "</table>\n";
     return $s;

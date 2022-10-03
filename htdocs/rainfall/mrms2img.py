@@ -19,7 +19,7 @@ def workflow(valid, period, start_response):
     fn = valid.strftime(
         (
             "/mesonet/ARCHIVE/data/%Y/%m/%d/"
-            "GIS/mrms/p" + str(period) + "h_%Y%m%d%H%M.png"
+            f"GIS/mrms/p{period}h_%Y%m%d%H%M.png"
         )
     )
     if not os.path.isfile(fn):
@@ -54,7 +54,7 @@ def workflow(valid, period, start_response):
     # print '5', np.max(data), np.min(data), data[0,0]
 
     drv = gdal.GetDriverByName("HFA")
-    outfn = "mrms_%sh_%s.img" % (period, valid.strftime("%Y%m%d%H%M"))
+    outfn = f"mrms_{period}h_{valid:%Y%m%d%H%M}.img"
     ds = drv.Create(
         outfn, size[1], size[0], 1, gdal.GDT_UInt16, options=["COMPRESS=YES"]
     )
@@ -67,7 +67,7 @@ def workflow(valid, period, start_response):
     ds.GetRasterBand(1).SetUnitType("mm")
     title = valid.strftime("%s UTC %d %b %Y")
     ds.GetRasterBand(1).SetDescription(
-        "MRMS Q3 %sHR Precip Ending %s" % (period, title)
+        f"MRMS Q3 {period}HR Precip Ending {title}"
     )
     # Optional, allows ArcGIS to auto show a legend
     ds.GetRasterBand(1).ComputeStatistics(True)
@@ -77,7 +77,7 @@ def workflow(valid, period, start_response):
     # close file
     del ds
 
-    zipfn = "mrms_%sh_%s.zip" % (period, valid.strftime("%Y%m%d%H%M"))
+    zipfn = f"mrms_{period}h_{valid:%Y%m%d%H%M}.zip"
     with zipfile.ZipFile(zipfn, "w", zipfile.ZIP_DEFLATED) as zfp:
         zfp.write(outfn)
         zfp.write(outfn + ".aux.xml")
@@ -85,11 +85,12 @@ def workflow(valid, period, start_response):
     # Send file back to client
     headers = [
         ("Content-type", "application/octet-stream"),
-        ("Content-Disposition", "attachment; filename=%s" % (zipfn,)),
+        ("Content-Disposition", f"attachment; filename={zipfn}"),
     ]
     start_response("200 OK", headers)
     bio = BytesIO()
-    bio.write(open(zipfn, "rb").read())
+    with open(zipfn, "rb") as fh:
+        bio.write(fh.read())
     os.unlink(outfn)
     os.unlink(zipfn)
     os.unlink(outfn + ".aux.xml")

@@ -6,21 +6,23 @@ require_once "../../include/forms.php";
 $t = new MyView();
 $t->title = "GIS-Ready Rainfall Data";
 
-$mselect = monthSelect( date("m", time() - 86400) );
-$dselect = daySelect( date("d", time() - 86400) );
+$mselect = monthSelect(date("m", time() - 86400));
+$dselect = daySelect(date("d", time() - 86400));
 $yselect = yearSelect(1997, date("Y", time() - 86400), "year");
 $ys = yearSelect2(1997, date("Y"), "syear");
 $ye = yearSelect2(1997, date("Y"), "eyear");
 
 $y2select = yearSelect2(2014, date("Y"), "year");
-$m2select = monthSelect( date("m") );
-$d2select = daySelect( date("d") );
-$h2select = gmtHourSelect( 0 , "hour");
-$ar = Array("1" => "1 Hour", "24" => "24 Hour", "48" => "48 Hour",
-        "72" => "72 Hour");
+$m2select = monthSelect(date("m"));
+$d2select = daySelect(date("d"));
+$h2select = gmtHourSelect(0, "hour");
+$ar = array(
+    "1" => "1 Hour", "24" => "24 Hour", "48" => "48 Hour",
+    "72" => "72 Hour"
+);
 $pselect = make_select("period", 1, $ar);
 
-$archivedir = '/archive/data/'. date("Y") .'/'. date('m') .'/'. date('d') .'/GIS/mrms';
+$archivedir = '/archive/data/' . date("Y") . '/' . date('m') . '/' . date('d') . '/GIS/mrms';
 
 $t->content = <<<EOF
 <h3>IEM Rainfall</h3>

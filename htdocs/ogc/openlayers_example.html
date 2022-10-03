@@ -126,11 +126,11 @@ function init(){
     );
     
     var wwa = new OpenLayers.Layer.WMS(
-    		"WWA",
-    		"https://mesonet.agron.iastate.edu/cgi-bin/wms/us/wwa.cgi?",
-    		{layers: "warnings_c", transparent: "TRUE", format: 'image/png'},
-    		{isBaseLayer: false, buffer:0, singleTile: false,
-    		 opacity: 0.5, visibility: false}
+            "WWA",
+            "https://mesonet.agron.iastate.edu/cgi-bin/wms/us/wwa.cgi?",
+            {layers: "warnings_c", transparent: "TRUE", format: 'image/png'},
+            {isBaseLayer: false, buffer:0, singleTile: false,
+             opacity: 0.5, visibility: false}
     );
     
     map.addLayers([gmap, irsat, vissat, hawaiisat, aksat, states, n0q, wwa]);
@@ -141,42 +141,42 @@ function init(){
     if (!map.getCenter()){ map.zoomToMaxExtent(); }
     
     function refresher(){
-    	//console.log("call refresher()");
-    	OpenLayers.Request.GET({
-  		  url: '/json/tms.json',
-  		  success: processData
-  		});
-  		 
-  		function processData( data ) {
-  		  var json = new OpenLayers.Format.JSON().read( data.responseText );
+        //console.log("call refresher()");
+        OpenLayers.Request.GET({
+            url: '/json/tms.json',
+            success: processData
+          });
+           
+          function processData( data ) {
+            var json = new OpenLayers.Format.JSON().read( data.responseText );
 
-  		  for (var i=0; i < json.services.length; i++){
-  			  var s = json.services[i];
-  			  if (s.id == 'ridge_uscomp_n0q'){
-  				  var valid = new Date(s.utc_valid);
-  				  n0q.setName("NEXRAD N0Q @"
-  				  	+ ("0"+valid.getUTCHours()).slice(-2)
-  				  	+ ("0"+valid.getUTCMinutes()).slice(-2)
-  				  	+ " UTC");
-  				  n0q.layername = s.layername;
-  				  n0q.setVisibility(true);
-  			  }
-  		  }
-  		  n0q.redraw();
+            for (var i=0; i < json.services.length; i++){
+                var s = json.services[i];
+                if (s.id == 'ridge_uscomp_n0q'){
+                    var valid = new Date(s.utc_valid);
+                    n0q.setName("NEXRAD N0Q @"
+                        + ("0"+valid.getUTCHours()).slice(-2)
+                        + ("0"+valid.getUTCMinutes()).slice(-2)
+                        + " UTC");
+                    n0q.layername = s.layername;
+                    n0q.setVisibility(true);
+                }
+            }
+            n0q.redraw();
 
-  		}
+          }
     }
     refresher();
     window.setInterval(function(){
-		refresher();
+        refresher();
     }, 5*60000);
     
 }
 </script>
 </head>
 <body onload="init()">
-	
+    
 <div style="width:100%; height:100%" id="map"></div>
-	
+    
 </body>
 </html>

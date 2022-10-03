@@ -1,9 +1,9 @@
-<?php 
- require_once "../../config/settings.inc.php"; 
- require_once "../../include/myview.php";
- $t = new MyView();
+<?php
+require_once "../../config/settings.inc.php";
+require_once "../../include/myview.php";
+$t = new MyView();
 
- $t->content = <<<EOF
+$t->content = <<<EOF
 <ol class="breadcrumb">
   <li><a href="/roads/">Roads</a></li>
   <li class="active">GIS Products</li>
@@ -47,4 +47,3 @@ application to one of these services.
 <br /> <code>https://mesonet.agron.iastate.edu/cgi-bin/wms/iowa/roadcond.cgi?</code></p>
 EOF;
 $t->render('single.phtml');
- ?>

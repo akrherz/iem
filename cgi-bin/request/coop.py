@@ -264,8 +264,7 @@ def do_century(ctx):
         ).encode("ascii")
 
     station = ctx["stations"][0]
-    network = "%sCLIMATE" % (station[:2],)
-    nt = NetworkTable(network, only_online=False)
+    nt = NetworkTable(f"{station[:2]}CLIMATE", only_online=False)
 
     dbconn = get_database()
     cursor = dbconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -279,19 +278,13 @@ def do_century(ctx):
     table = get_tablename(ctx["stations"])
     thisyear = datetime.datetime.now().year
     cursor.execute(
-        """
+        f"""
     WITH scenario as (
-        SELECT """
-        + str(thisyear)
-        + """::int as year, month, high, low, precip
-        from """
-        + table
-        + """
+        SELECT {thisyear}::int as year, month, high, low, precip
+        from {table}
         WHERE station = %s and day > %s and day <= %s and sday != '0229'
     ), obs as (
-      select year, month, high, low, precip from """
-        + table
-        + """
+      select year, month, high, low, precip from {table}
       WHERE station = %s and day >= %s and day <= %s
     ), data as (
       SELECT * from obs UNION select * from scenario
@@ -311,8 +304,8 @@ def do_century(ctx):
 
         data[row["year"]][row["month"]] = {
             "prec": (row["prec"] * units("inch")).to(units("mm")).m,
-            "tmin": f2c(row["tmin"]),
-            "tmax": f2c(row["tmax"]),
+            "tmin": f2c(float(row["tmin"])),
+            "tmax": f2c(float(row["tmax"])),
         }
     sio = StringIO()
     sio.write("# Iowa Environmental Mesonet -- NWS Cooperative Data\n")

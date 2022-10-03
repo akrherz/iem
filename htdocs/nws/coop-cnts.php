@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
  * Print out a listing of COOP sites and observation frequency
  */
@@ -14,8 +14,8 @@ require_once "../../include/forms.php";
 $dbconn = iemdb("iem");
 
 $wfo = isset($_REQUEST['wfo']) ? xssafe($_REQUEST['wfo']) : 'DMX';
-$year = get_int404("year", date("Y")); 
-$month = get_int404("month", date("m")); 
+$year = get_int404("year", date("Y"));
+$month = get_int404("month", date("m"));
 
 $rs = pg_prepare($dbconn, "MYSELECT", "select id, name,
  count(*) as total, 
@@ -30,26 +30,32 @@ $rs = pg_prepare($dbconn, "MYSELECT", "select id, name,
 
 
 $tstring = sprintf("%s-%02d-01", $year, intval($month));
-$data = pg_execute($dbconn, "MYSELECT", Array($tstring, $wfo));
+$data = pg_execute($dbconn, "MYSELECT", array($tstring, $wfo));
 
 $t->title = "NWS COOP Obs per month per WFO";
 
 $wselect = "";
-foreach($nt->table as $key => $value)
-{
-	$wselect .= "<option value=\"$key\" ";
-	if ($wfo == $key) $wselect .= "SELECTED";
-	$wselect .= ">[".$key."] ". $nt->table[$key]["name"] ."\n";
+foreach ($nt->table as $key => $value) {
+    $wselect .= "<option value=\"$key\" ";
+    if ($wfo == $key) $wselect .= "SELECTED";
+    $wselect .= ">[" . $key . "] " . $nt->table[$key]["name"] . "\n";
 }
 
 $ys = yearSelect("2010", $year);
 $ms = monthSelect($month);
 
 $table = "";
-for($i=0;$row=pg_fetch_assoc($data);$i++){
-	$table .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", $row["id"], 
-	$row["name"], $row["total"], $row["pobs"], $row["tobs"], $row["sobs"],
-	$row["sdobs"]);
+for ($i = 0; $row = pg_fetch_assoc($data); $i++) {
+    $table .= sprintf(
+        "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
+        $row["id"],
+        $row["name"],
+        $row["total"],
+        $row["pobs"],
+        $row["tobs"],
+        $row["sobs"],
+        $row["sdobs"]
+    );
 }
 
 

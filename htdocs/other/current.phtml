@@ -14,10 +14,10 @@
  pg_prepare($mesosite, "FINDTZ", "SELECT tzname from networks where id = $1");
  $rs = pg_execute($mesosite, "FINDTZ", Array($network));
  if (pg_num_rows($rs) < 1){
- 	$tzname = "America/Chicago";
+     $tzname = "America/Chicago";
  } else {
- 	$row = pg_fetch_assoc($rs,0);
- 	$tzname = $row["tzname"];
+     $row = pg_fetch_assoc($rs,0);
+     $tzname = $row["tzname"];
  }
   
  $t->title = "Other Currents";
@@ -38,8 +38,8 @@ $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
 
 $t->breadcrumbs = <<<EOF
 <ol class="breadcrumb">
-	<li><a href="/other/">Other Networks</a></li>
-	<li class="active">Current Conditions</li>
+    <li><a href="/other/">Other Networks</a></li>
+    <li class="active">Current Conditions</li>
 </ol>
 EOF;
 
@@ -47,19 +47,19 @@ $mydata = Array();
 
 foreach($jobj["data"] as $bogus => $iemob){
     $key = $iemob["station"];
-	$mydata[$key] = $iemob;
-	$mydata[$key]["ts"] = strtotime($iemob["local_valid"]);
-	$mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
+    $mydata[$key] = $iemob;
+    $mydata[$key]["ts"] = strtotime($iemob["local_valid"]);
+    $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
     $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]),
        f2c($mydata[$key]["dwpf"]) );
-	
-	if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
-		$mydata[$key]["peak"] = $mydata[$key]["max_gust"];
-		$mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_gust_ts"]);
-	} else {
-		$mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
-		$mydata[$key]["peak_ts"] = @strtotime($mydata[$key]["local_max_sknt_ts"]);
-	}
+    
+    if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
+        $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
+        $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_gust_ts"]);
+    } else {
+        $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
+        $mydata[$key]["peak_ts"] = @strtotime($mydata[$key]["local_max_sknt_ts"]);
+    }
 
 }
 
@@ -70,34 +70,34 @@ $now = time();
 $table = "";
 // Loop though all data
 foreach($finalA as $key => $parts){
-	$i++;
-	$tdiff = $now - $parts["ts"];
-	// Don't show stations over 5 days old
-	if ($tdiff > 86400*5){
-		continue;
-	}
-	$table .= "<tr";
-	if ($i % 2 == 0)  $table .= " bgcolor='#eeeeee'";
+    $i++;
+    $tdiff = $now - $parts["ts"];
+    // Don't show stations over 5 days old
+    if ($tdiff > 86400*5){
+        continue;
+    }
+    $table .= "<tr";
+    if ($i % 2 == 0)  $table .= " bgcolor='#eeeeee'";
 
-	$table .= ">";
-	$table .= "<td><input type=\"checkbox\" name=\"st[]\"
+    $table .= ">";
+    $table .= "<td><input type=\"checkbox\" name=\"st[]\"
                value=\"".$key."\"></td>";
-	$table .= sprintf("<td><a href=\"/sites/site.php?station=%s&amp;network=%s\">%s</a></td>",
-	    $key, $network, $parts["name"]); 
-	$table .= "<td ";
-	if ($tdiff > 11900){
-		$table .= 'bgcolor="red"';
-		$format = "%b-%d-%y %I:%M %p";
-	} else if ($tdiff > 7200){
-		$table .= 'bgcolor="orange"';
-		$format = "%I:%M %p";
-	} else if ($tdiff > 3600){
-		$table .= 'bgcolor="green"';
-		$format = "%I:%M %p";
-	} else {
-		$format = "%I:%M %p";
-	}
-	$table .= ">". strftime($format, $parts["ts"]) ."</td>
+    $table .= sprintf("<td><a href=\"/sites/site.php?station=%s&amp;network=%s\">%s</a></td>",
+        $key, $network, $parts["name"]); 
+    $table .= "<td ";
+    if ($tdiff > 11900){
+        $table .= 'bgcolor="red"';
+        $format = "%b-%d-%y %I:%M %p";
+    } else if ($tdiff > 7200){
+        $table .= 'bgcolor="orange"';
+        $format = "%I:%M %p";
+    } else if ($tdiff > 3600){
+        $table .= 'bgcolor="green"';
+        $format = "%I:%M %p";
+    } else {
+        $format = "%I:%M %p";
+    }
+    $table .= ">". strftime($format, $parts["ts"]) ."</td>
   <td align='center'>". round($parts["tmpf"],0) ."(<font color=\"#ff0000\">".
   round($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">".
   round($parts["min_tmpf"],0) ."</font>)</td>
@@ -105,23 +105,23 @@ foreach($finalA as $key => $parts){
  <td>". round($parts["feel"], 1) ."</td>
  <td>". $parts["relh"] ."</td>
  <td>". round($parts["sknt"],0) ;
-	if (strlen($parts["gust"]) > 0 && $parts["gust"] > 0){
-		$table .= "G". round($parts["gust"],1);
-	}
-	$table .= "</td>
+    if (strlen($parts["gust"]) > 0 && $parts["gust"] > 0){
+        $table .= "G". round($parts["gust"],1);
+    }
+    $table .= "</td>
             <td>". round($parts["drct"],0) ."</td>
-	    <td>". round($parts["peak"],0) ."@ ". strftime("%I:%M %p", $parts["peak_ts"] ) ."</td>
-	    </tr>\n";
+        <td>". round($parts["peak"],0) ."@ ". strftime("%I:%M %p", $parts["peak_ts"] ) ."</td>
+        </tr>\n";
 }
 
 $networks = Array(
-		"KYMN" => "Kentucky Mesonet",
-		"OT" => "IEM Misc Stations",
-		"VTWAC" => "Vermont Weather Analytics Center");
+        "KYMN" => "Kentucky Mesonet",
+        "OT" => "IEM Misc Stations",
+        "VTWAC" => "Vermont Weather Analytics Center");
 $buttons = "";
 foreach($networks as $key => $val){
-	$buttons .= sprintf("<a class=\"btn btn-sm%s\" href=\"current.phtml?network=%s\">%s</a>",
-			($key == $network) ? ' active': '', $key, $val);
+    $buttons .= sprintf("<a class=\"btn btn-sm%s\" href=\"current.phtml?network=%s\">%s</a>",
+            ($key == $network) ? ' active': '', $key, $val);
 }
 
 $content = <<<EOF

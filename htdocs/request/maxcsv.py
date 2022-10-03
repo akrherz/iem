@@ -74,7 +74,6 @@ def do_moonphase(lon, lat):
             .replace(tzinfo=datetime.timezone.utc),
         }
     ).sort_values(ascending=True)
-    print(series)
     # Figure out the timezone
     cursor = get_dbconn("mesosite").cursor()
     cursor.execute(

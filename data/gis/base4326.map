@@ -1118,13 +1118,13 @@ LAYER
    END
   END
   CLASS
-  	COLOR 0 0 0
-  	LABEL
-  		COLOR 0 0 0
-  		TYPE BITMAP
-  		SIZE MEDIUM
-  		FORCE TRUE
-  	END
+      COLOR 0 0 0
+      LABEL
+          COLOR 0 0 0
+          TYPE BITMAP
+          SIZE MEDIUM
+          FORCE TRUE
+      END
   END
 END
 

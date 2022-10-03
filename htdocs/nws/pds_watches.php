@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 136);
 
@@ -9,25 +9,30 @@ require_once "../../include/imagemaps.php";
 
 $uri = "http://iem.local/json/watches.py?is_pds=1";
 $data = file_get_contents($uri);
-$json = json_decode($data, $assoc=TRUE);
+$json = json_decode($data, $assoc = TRUE);
 $table = "";
-foreach($json['events'] as $key => $val){
+foreach ($json['events'] as $key => $val) {
     $spclink = sprintf(
-        '<a target="_blank" href="https://www.spc.noaa.gov/products/watch/'.
-        '%s/ww%04.0f.html">%s %s</a>',
-     $val['year'], $val['num'], $val["type"], $val['num']);
-	$table .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td>".
-    "<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
-			$val["year"],
-			$spclink,
-            $val["states"],
-            $val["issue"],
-            $val["expire"],
-            $val["tornadoes_1m_strong"],
-            $val["hail_1m_2inch"],
-            $val["max_hail_size"],
-            $val["max_wind_gust_knots"],
-        );
+        '<a target="_blank" href="https://www.spc.noaa.gov/products/watch/' .
+            '%s/ww%04.0f.html">%s %s</a>',
+        $val['year'],
+        $val['num'],
+        $val["type"],
+        $val['num']
+    );
+    $table .= sprintf(
+        "<tr><td>%s</td><td>%s</td><td>%s</td>" .
+            "<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
+        $val["year"],
+        $spclink,
+        $val["states"],
+        $val["issue"],
+        $val["expire"],
+        $val["tornadoes_1m_strong"],
+        $val["hail_1m_2inch"],
+        $val["max_hail_size"],
+        $val["max_wind_gust_knots"],
+    );
 }
 
 $t = new MyView();

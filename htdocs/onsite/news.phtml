@@ -1,91 +1,89 @@
 <?php
- require_once "../../config/settings.inc.php";
- define("IEM_APPID", 22);
- require_once "../../include/myview.php";
- $t = new MyView();
- require_once "../../include/database.inc.php";
- require_once "../../include/forms.php";
- $dbconn = iemdb("mesosite", TRUE, TRUE);
+require_once "../../config/settings.inc.php";
+define("IEM_APPID", 22);
+require_once "../../include/myview.php";
+$t = new MyView();
+require_once "../../include/database.inc.php";
+require_once "../../include/forms.php";
+$dbconn = iemdb("mesosite", TRUE, TRUE);
 
- $id = get_int404("id");
- $q = isset($_GET["q"]) ? pg_escape_string(xssafe($_GET["q"])) : "";
- $tag = isset($_GET['tag']) ? pg_escape_string(xssafe($_GET['tag'])) : null;
+$id = get_int404("id");
+$q = isset($_GET["q"]) ? pg_escape_string(xssafe($_GET["q"])) : "";
+$tag = isset($_GET['tag']) ? pg_escape_string(xssafe($_GET['tag'])) : null;
 $content = <<< EOF
 <p><form method="GET" action="news.phtml" name="searchnews">
 <b>Search Archive:</b> <input type="text" name="q" value="{$q}" size="20"><input type="submit" value="Go!">
 </form>
 EOF;
 
-  if ($id > 0) {
-	$rs = pg_prepare($dbconn, "READS", "UPDATE news SET views = views + 1 
+if ($id > 0) {
+    $rs = pg_prepare($dbconn, "READS", "UPDATE news SET views = views + 1 
       WHERE id = $1");
-  	pg_execute($dbconn, "READS", Array($id) );
-	$rs = pg_prepare($dbconn, "SELECTONE", "SELECT *, 
+    pg_execute($dbconn, "READS", array($id));
+    $rs = pg_prepare($dbconn, "SELECTONE", "SELECT *, 
       to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate 
       from news WHERE id = $1");
-  	$result = pg_execute($dbconn, "SELECTONE", Array($id) );
-  } else if ($q != "") {
-	$rs = pg_prepare($dbconn, "SEARCH", "SELECT *, 
+    $result = pg_execute($dbconn, "SELECTONE", array($id));
+} else if ($q != "") {
+    $rs = pg_prepare($dbconn, "SEARCH", "SELECT *, 
       to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate 
       from news WHERE (title ~* $1 or body ~* $1) 
       ORDER by entered DESC");
-  	$result = pg_execute($dbconn, "SEARCH", Array($q) );
-  } else if (! is_null($tag)){
-  	$rs = pg_prepare($dbconn, "SEARCH", "SELECT *,
+    $result = pg_execute($dbconn, "SEARCH", array($q));
+} else if (!is_null($tag)) {
+    $rs = pg_prepare($dbconn, "SEARCH", "SELECT *,
       to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate
       from news WHERE tags @> Array[$1]::varchar[]
       ORDER by entered DESC");
-  	$result = pg_execute($dbconn, "SEARCH", Array($tag) );
-  } else {
+    $result = pg_execute($dbconn, "SEARCH", array($tag));
+} else {
     $q = "SELECT *, to_char(entered, 'YYYY-MM-DD HH:MI AM') as webdate 
            from news ORDER by entered DESC LIMIT 1";
     $result = pg_exec($dbconn, $q);
-    $row = pg_fetch_assoc($result,0);
+    $row = pg_fetch_assoc($result, 0);
     $id = intval($row["id"]);
-  }
-
-if (pg_numrows($result) == 1 && $id > 0){
-  $prev = $id -1;
-  $next = $id +1;
-  $content .= "<a rel=\"nofollow\" href=\"news.phtml?id=$prev\">&lt;&lt; Previous</a> &nbsp; &nbsp; &nbsp;";
-  $content .= "<a rel=\"nofollow\" href=\"news.phtml?id=$next\">Next &gt;&gt;</a>\n";
-
 }
 
-function print_tags($str){
-	if ($str == "" || is_null($str)) return "none";
-	
-	$ar  = explode(",", trim($str, "{}"));
-	$s = "";
-    foreach($ar as $k => $v)
-    { 
-		$s .= sprintf("<a href='news.phtml?tag=%s'>%s</a> ", $v, $v);
-	}
-	return $s;
+if (pg_numrows($result) == 1 && $id > 0) {
+    $prev = $id - 1;
+    $next = $id + 1;
+    $content .= "<a rel=\"nofollow\" href=\"news.phtml?id=$prev\">&lt;&lt; Previous</a> &nbsp; &nbsp; &nbsp;";
+    $content .= "<a rel=\"nofollow\" href=\"news.phtml?id=$next\">Next &gt;&gt;</a>\n";
 }
 
-for( $i=0; $i < pg_num_rows($result) && $row = pg_fetch_assoc($result,$i); $i++) 
-{ 
-  $id = $row["id"];
-  $content .= '<div class="panel panel-success">';
-  $content .= "<div class=\"panel-heading\"><span class=\"badge\">{$row["views"]} Views</span> ". $row["title"] ."</div>";
-  $l = sprintf("<a href='news.phtml?id=%s'>ID #%s</a> ", $id, $id);
-  $content .= "<button type=\"button\" class=\"btn btn-default btn-xs\">Permalink: ". $l ."</button>";
-  $content .= "<button type=\"button\" class=\"btn btn-default btn-xs\">Date: ". $row["webdate"] ."</button>";
-  $content .= "<button type=\"button\" class=\"btn btn-default btn-xs\">Author: ". $row["author"] ."</button>";
-  if (! is_null($row["tags"])){
-  	$content .= "<button type=\"button\" class=\"btn btn-default btn-xs\">Tags: ". print_tags($row["tags"]) ."</button>";
-  }
-  if (strlen($row["url"]) > 0) {
-     $content .= "<br /><i>Link:</i> <a href=\"{$row["url"]}\">{$row["url"]}</a>\n";
-  }
-  $content .= "<p>{$row["body"]}<p>";
-  $content .= "</div>";
+function print_tags($str)
+{
+    if ($str == "" || is_null($str)) return "none";
+
+    $ar  = explode(",", trim($str, "{}"));
+    $s = "";
+    foreach ($ar as $k => $v) {
+        $s .= sprintf("<a href='news.phtml?tag=%s'>%s</a> ", $v, $v);
+    }
+    return $s;
+}
+
+for ($i = 0; $i < pg_num_rows($result) && $row = pg_fetch_assoc($result, $i); $i++) {
+    $id = $row["id"];
+    $content .= '<div class="panel panel-success">';
+    $content .= "<div class=\"panel-heading\"><span class=\"badge\">{$row["views"]} Views</span> " . $row["title"] . "</div>";
+    $l = sprintf("<a href='news.phtml?id=%s'>ID #%s</a> ", $id, $id);
+    $content .= "<button type=\"button\" class=\"btn btn-default btn-xs\">Permalink: " . $l . "</button>";
+    $content .= "<button type=\"button\" class=\"btn btn-default btn-xs\">Date: " . $row["webdate"] . "</button>";
+    $content .= "<button type=\"button\" class=\"btn btn-default btn-xs\">Author: " . $row["author"] . "</button>";
+    if (!is_null($row["tags"])) {
+        $content .= "<button type=\"button\" class=\"btn btn-default btn-xs\">Tags: " . print_tags($row["tags"]) . "</button>";
+    }
+    if (strlen($row["url"]) > 0) {
+        $content .= "<br /><i>Link:</i> <a href=\"{$row["url"]}\">{$row["url"]}</a>\n";
+    }
+    $content .= "<p>{$row["body"]}<p>";
+    $content .= "</div>";
 } // End of for
 
-if (pg_numrows($result) == 1){
-	$t->jsextra = <<<EOF
-		<div id="fb-root"></div>
+if (pg_numrows($result) == 1) {
+    $t->jsextra = <<<EOF
+        <div id="fb-root"></div>
 <script type="text/javascript">
 (function(d, s, id) {
   var js, fjs = d.getElementsByTagName(s)[0];
@@ -96,28 +94,28 @@ if (pg_numrows($result) == 1){
 }(document, 'script', 'facebook-jssdk'));
 
 window.fbAsyncInit = function() {
-	FB.Event.subscribe('comment.create', function(response){
-	    $.post('/fbcomments.php', {
-	      "action": "comment created",
-	      "url_of_page_comment_leaved_on": response.href,
-	      "id_of_comment_object": response.commentID
-	    });
-	  });
+    FB.Event.subscribe('comment.create', function(response){
+        $.post('/fbcomments.php', {
+          "action": "comment created",
+          "url_of_page_comment_leaved_on": response.href,
+          "id_of_comment_object": response.commentID
+        });
+      });
 }
 </script>
 EOF;
-	$huri = "https://mesonet.agron.iastate.edu/onsite/news.phtml?id=". $id; 
-	$content .= <<<EOF
+    $huri = "https://mesonet.agron.iastate.edu/onsite/news.phtml?id=" . $id;
+    $content .= <<<EOF
 <div class="fb-comments" data-href="{$huri}" data-numposts="5" data-colorscheme="light"></div>
 EOF;
-	$content .= "</div>";
-	$t->title = $row["title"];
-}else{
-	$t->title = "News and Notes";	
+    $content .= "</div>";
+    $t->title = $row["title"];
+} else {
+    $t->title = "News and Notes";
 }
-  if (pg_numrows($result) == 0) {
+if (pg_numrows($result) == 0) {
     $content .= "<div class='alert alert-danger'>No news items were found based on your search parameters!
-    		<a href='news.phtml' class='link link-danger'>Here</a> is the last news item posted.</div>";
-  }
+            <a href='news.phtml' class='link link-danger'>Here</a> is the last news item posted.</div>";
+}
 $t->content = $content;
 $t->render('single.phtml');

@@ -1,6 +1,6 @@
 <?php 
-include("../../../config/settings.inc.php");
-include("../../../include/myview.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
 $t = new MyView();
 $t->title = "Beloit Weather Station";
@@ -18,8 +18,8 @@ $day = isset( $_GET["day"] ) ? intval($_GET["day"]): date("d");
   ON (t.iemid = s.iemid)
   WHERE t.id = 'OT0009' and max_tmpf > -99 ORDER by day DESC");
  for($i=0;$row=pg_fetch_array($rs2);$i++){
- 	$table .= sprintf("<tr><th>%s</th><td>%.1f</td><td>%.1f</td><td>%.2f</td></tr>",
- 			$row["day"], $row["max_tmpf"], $row["min_tmpf"], $row["pday"]);
+     $table .= sprintf("<tr><th>%s</th><td>%.1f</td><td>%.1f</td><td>%.2f</td></tr>",
+             $row["day"], $row["max_tmpf"], $row["min_tmpf"], $row["pday"]);
  }
  
  $t->content = <<<EOF

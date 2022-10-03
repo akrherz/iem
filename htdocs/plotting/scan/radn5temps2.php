@@ -1,24 +1,29 @@
 <?php
-include("../../../config/settings.inc.php");
-include("../../../include/database.inc.php");
-include("../../../include/network.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/database.inc.php";
+require_once "../../../include/network.php";
+require_once "../../../include/forms.php";
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
 $nt = new NetworkTable("SCAN");
+
 $connection = iemdb("scan");
- $station = isset($_GET["station"]) ? $_GET["station"] : "S2031";
- $year = isset($_GET["year"]) ? $_GET["year"] : date("Y", time() - 3*86400);
- $month = isset($_GET["month"]) ? $_GET["month"] : date("m", time() - 3*86400);
- $day = isset($_GET["day"]) ? $_GET["day"] : date("d", time() - 3*86400);
+
+$station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "S2031";
+$year = get_int404("year", date("Y", time() - 3 * 86400));
+$month = get_int404("month", date("m", time() - 3 * 86400));
+$day = get_int404("day", date("d", time() - 3 * 86400));
 
 $y2label = "Temperature [C]";
 
 $date = "$year-$month-$day";
 
 $rs = pg_prepare($connection, "SELECT", "SELECT c1tmpf, c2tmpf, c3tmpf, 
-		c4tmpf, c5tmpf, srad , tmpf,
-		to_char(valid, 'mmdd/HH24') as tvalid 
-		from alldata WHERE 
-		station = $1 and date(valid) >= $2  
-		ORDER by tvalid ASC LIMIT 96");
+        c4tmpf, c5tmpf, srad , tmpf,
+        to_char(valid, 'mmdd/HH24') as tvalid 
+        from alldata WHERE 
+        station = $1 and date(valid) >= $2  
+        ORDER by tvalid ASC LIMIT 96");
 
 $result = pg_execute($connection, "SELECT", Array($station, $date));
 
@@ -46,8 +51,6 @@ for( $i=0; $row = pg_fetch_array($result); $i++)
 
 pg_close($connection);
 
-include ("../../../include/jpgraph/jpgraph.php");
-include ("../../../include/jpgraph/jpgraph_line.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(660,450,"example1");
@@ -131,5 +134,3 @@ $graph->AddY2($lineplot);
 
 // Display the graph
 $graph->Stroke();
-
-?>

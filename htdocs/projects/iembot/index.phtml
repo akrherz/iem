@@ -1,9 +1,9 @@
 <?php
- require_once "../../../config/settings.inc.php";
- require_once "../../../include/network.php";
- $nt = new NetworkTable("WFO"); 
- require_once "../../../include/myview.php";
- require_once "../../../include/database.inc.php";
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/network.php";
+$nt = new NetworkTable("WFO");
+require_once "../../../include/myview.php";
+require_once "../../../include/database.inc.php";
 
 $btable = <<<EOM
 <table class="table table-striped table-bordered table-condensed">
@@ -13,20 +13,24 @@ EOM;
 $pgconn = iemdb("mesosite");
 $rs = pg_exec(
     $pgconn,
-    "select o.screen_name, string_agg(channel, ', ' order by channel) ".
-    "as channels from iembot_twitter_oauth o JOIN iembot_twitter_subs s on ".
-    "(o.user_id = s.user_id) WHERE o.iem_owned GROUP by o.screen_name ".
-    "ORDER by screen_name ASC"
+    "select o.screen_name, string_agg(channel, ', ' order by channel) " .
+        "as channels from iembot_twitter_oauth o JOIN iembot_twitter_subs s on " .
+        "(o.user_id = s.user_id) WHERE o.iem_owned GROUP by o.screen_name " .
+        "ORDER by screen_name ASC"
 );
-while ($row= pg_fetch_assoc($rs)){
-  $btable .= sprintf("<tr><td><a href=\"https://twitter.com/%s\">@%s</a></td><td>%s</td></tr>",
-      $row["screen_name"], $row["screen_name"], $row["channels"]);
+while ($row = pg_fetch_assoc($rs)) {
+    $btable .= sprintf(
+        "<tr><td><a href=\"https://twitter.com/%s\">@%s</a></td><td>%s</td></tr>",
+        $row["screen_name"],
+        $row["screen_name"],
+        $row["channels"]
+    );
 }
 $btable .= "</tbody></table>";
 
 $t = new MyView();
- $t->title = "IEMBot Project";
- $t->jsextra = <<<EOF
+$t->title = "IEMBot Project";
+$t->jsextra = <<<EOF
 <script>
      $().ready(function(){
         var tokens = window.location.href.split('#');
@@ -42,15 +46,15 @@ $t = new MyView();
     });
 </script>
 EOF;
- 
- $wselect = "<select name=\"wfo\" onChange=\"javascript: urlChanger(); return false;\">";
-foreach($nt->table as $key => $val){
-  $wselect .= "<option value=\"$key\">[$key] ". $val["name"] ."\n";
+
+$wselect = "<select name=\"wfo\" onChange=\"javascript: urlChanger(); return false;\">";
+foreach ($nt->table as $key => $val) {
+    $wselect .= "<option value=\"$key\">[$key] " . $val["name"] . "\n";
 }
 $wselect .= "</select>";
- 
+
 $channels = file_get_contents('channels.html');
- $t->content = <<<EOF
+$t->content = <<<EOF
 <ol class="breadcrumb">
  <li><a href="/current/severe.phtml">Severe Weather</a></li>
  <li class="active">IEMBot Project</li>

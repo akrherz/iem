@@ -68,8 +68,6 @@ $ts_lbl = date("d M Y", $sts);
 
 pg_close($pgconn);
 
-
-
 // Create the graph. These two calls are always required
 $graph = new Graph(640, 350);
 $graph->SetScale("datlin");

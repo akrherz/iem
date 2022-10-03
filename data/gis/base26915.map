@@ -165,7 +165,7 @@ LAYER
         OFFSET -1 -1 # for size 30 UR
         BUFFER 0
         PARTIALS TRUE
-	FORCE TRUE
+    FORCE TRUE
     END
   END 
 END
@@ -1108,16 +1108,16 @@ LAYER
 END
 
 LAYER
-	NAME states
-	STATUS OFF
-	TYPE LINE
-	DATA "/mesonet/data/gis/static/shape/26915/us/states.shp"
-	PROJECTION
-	  "init=epsg:26915"
-	END
+    NAME states
+    STATUS OFF
+    TYPE LINE
+    DATA "/mesonet/data/gis/static/shape/26915/us/states.shp"
+    PROJECTION
+      "init=epsg:26915"
+    END
   CLASS
     STYLE
-	  COLOR 0 0 0	
+      COLOR 0 0 0	
       WIDTH 2.0
     END
   END

@@ -1,46 +1,52 @@
 <?php
- require_once "../../config/settings.inc.php";
- define("IEM_APPID", 77);
- putenv("TZ=UTC");
- date_default_timezone_set('UTC');
- require_once "../../include/myview.php";
- require_once "../../include/vtec.php"; 
- require_once "../../include/forms.php";
- require_once "../../include/imagemaps.php";
-  
- $t = new MyView();
- 
- $year = isset($_REQUEST["year"])? intval($_REQUEST["year"]): date("Y");
- $wfo = isset($_REQUEST["wfo"])? xssafe($_REQUEST["wfo"]): "DMX";
- $opt = isset($_REQUEST["opt"])? xssafe($_REQUEST["opt"]): "bywfo";
- $damagetag = isset($_REQUEST["damagetag"])? xssafe($_REQUEST["damagetag"]): "considerable";
+require_once "../../config/settings.inc.php";
+define("IEM_APPID", 77);
+putenv("TZ=UTC");
+date_default_timezone_set('UTC');
+require_once "../../include/myview.php";
+require_once "../../include/vtec.php";
+require_once "../../include/forms.php";
+require_once "../../include/imagemaps.php";
 
- $damagetags = Array(
+$t = new MyView();
+
+$year = isset($_REQUEST["year"]) ? intval($_REQUEST["year"]) : date("Y");
+$wfo = isset($_REQUEST["wfo"]) ? xssafe($_REQUEST["wfo"]) : "DMX";
+$opt = isset($_REQUEST["opt"]) ? xssafe($_REQUEST["opt"]) : "bywfo";
+$damagetag = isset($_REQUEST["damagetag"]) ? xssafe($_REQUEST["damagetag"]) : "considerable";
+
+$damagetags = array(
     "considerable" => "Considerable",
     "destructive" => "Destructive (SVR Only)",
     "catastrophic" => "Catastrophic",
 );
 if (!array_key_exists($damagetag, $damagetags)) {
-  $damagetag = "considerable";
+    $damagetag = "considerable";
 }
 
 $bywfochecked = "";
 $bydamagetagchecked = "";
- if ($opt == "bywfo"){
+if ($opt == "bywfo") {
     $bywfochecked = "checked";
-    $jsonuri = sprintf("http://iem.local/json/ibw_tags.py?wfo=%s&year=%s",
-        $wfo, $year);
+    $jsonuri = sprintf(
+        "http://iem.local/json/ibw_tags.py?wfo=%s&year=%s",
+        $wfo,
+        $year
+    );
     $title = "NWS $wfo issued Impact Based Warning Tags for $year";
- } else {
+} else {
     $bydamagetagchecked = "checked";
-    $jsonuri = sprintf("http://iem.local/json/ibw_tags.py?damagetag=%s&year=%s",
-        $damagetag, $year);
+    $jsonuri = sprintf(
+        "http://iem.local/json/ibw_tags.py?damagetag=%s&year=%s",
+        $damagetag,
+        $year
+    );
     $title = "NWS Damage Tags of $damagetag for $year";
- }
- $publicjsonuri = str_replace("http://iem.local", "https://mesonet.agron.iastate.edu", $jsonuri);
- 
- $t->title = $title;
- $t->headextra = '
+}
+$publicjsonuri = str_replace("http://iem.local", "https://mesonet.agron.iastate.edu", $jsonuri);
+
+$t->title = $title;
+$t->headextra = '
 <link rel="stylesheet" type="text/css" href="/vendor/ext/3.4.1/resources/css/ext-all.css"/>
 <script type="text/javascript" src="/vendor/ext/3.4.1/adapter/ext/ext-base.js"></script>
 <script type="text/javascript" src="/vendor/ext/3.4.1/ext-all.js"></script>
@@ -60,7 +66,7 @@ Ext.onReady(function(){
         single: true
     }); // run once
 
- 	var btn2 = Ext.get("create-grid2");
+     var btn2 = Ext.get("create-grid2");
     btn2.on("click", function(){
         btn2.dom.disabled = true;
  
@@ -73,7 +79,7 @@ Ext.onReady(function(){
         single: true
     }); // run once
 
-	var btn3 = Ext.get("create-grid3");
+    var btn3 = Ext.get("create-grid3");
     btn3.on("click", function(){
         btn3.dom.disabled = true;
  
@@ -86,7 +92,7 @@ Ext.onReady(function(){
         single: true
     }); // run once
 
-	var btn4 = Ext.get("create-grid4");
+    var btn4 = Ext.get("create-grid4");
     btn4.on("click", function(){
         btn4.dom.disabled = true;
  
@@ -103,59 +109,86 @@ Ext.onReady(function(){
 });
 </script>
 ';
- 
 
-function do_col1($row){	
-	if ($row["status"] == 'NEW'){
-		return sprintf("<a href=\"%s\">%s</a>", $row['href'], $row["eventid"]);
-	}
-	$ptype = 'SVS';
-	if ($row["phenomena"] == 'MA') $ptype = "MWS";
-	elseif ($row["phenomena"] == 'FF') $ptype = "FFS";
-	return sprintf("<a href=\"%s\">%s.%s</a>", $row['href'], $row["eventid"], $ptype);
-	
+
+function do_col1($row)
+{
+    if ($row["status"] == 'NEW') {
+        return sprintf("<a href=\"%s\">%s</a>", $row['href'], $row["eventid"]);
+    }
+    $ptype = 'SVS';
+    if ($row["phenomena"] == 'MA') $ptype = "MWS";
+    elseif ($row["phenomena"] == 'FF') $ptype = "FFS";
+    return sprintf("<a href=\"%s\">%s.%s</a>", $row['href'], $row["eventid"], $ptype);
 }
-function do_col2($row){
-	if ($row["status"] == 'NEW'){
-		return date("Y/m/d Hi", strtotime($row["issue"]));
-	}
-	return date("Y/m/d Hi", strtotime($row["polygon_begin"]));
+function do_col2($row)
+{
+    if ($row["status"] == 'NEW') {
+        return date("Y/m/d Hi", strtotime($row["issue"]));
+    }
+    return date("Y/m/d Hi", strtotime($row["polygon_begin"]));
 }
-function do_col3($row){
-	if ($row["status"] == 'NEW'){
-		return date("Hi", strtotime($row["expire"]));
-	}
-		return date("Hi", strtotime($row["polygon_end"]));
+function do_col3($row)
+{
+    if ($row["status"] == 'NEW') {
+        return date("Hi", strtotime($row["expire"]));
+    }
+    return date("Hi", strtotime($row["polygon_end"]));
 }
-function do_row($row){
-	return sprintf("<tr><td>%s</td><td>%s</td><td nowrap>%s</td><td>%s</td><td>%s</td>"
- 			."<td>%02.0f</td><td>%4.2f</td><td>%s</td><td>%s</td><td>%02.0f</td></tr>",
-            do_col1($row), $row["wfo"], do_col2($row),
- 			do_col3($row),
- 			$row["locations"], $row["windtag"], $row["hailtag"],
- 			$row["tornadotag"], $row["damagetag"], $row["tml_sknt"]);
+function do_row($row)
+{
+    return sprintf(
+        "<tr><td>%s</td><td>%s</td><td nowrap>%s</td><td>%s</td><td>%s</td>"
+            . "<td>%02.0f</td><td>%4.2f</td><td>%s</td><td>%s</td><td>%02.0f</td></tr>",
+        do_col1($row),
+        $row["wfo"],
+        do_col2($row),
+        do_col3($row),
+        $row["locations"],
+        $row["windtag"],
+        $row["hailtag"],
+        $row["tornadotag"],
+        $row["damagetag"],
+        $row["tml_sknt"]
+    );
 }
-function do_row_ma($row){
-	return sprintf("<tr><td>%s</td><td>%s</td><td nowrap>%s</td><td>%s</td><td>%s</td>"
- 			."<td>%02.0f</td><td>%4.2f</td><td>%s</td><td>%02.0f</td></tr>",
-            do_col1($row), $row["wfo"], do_col2($row),
- 			do_col3($row),
- 			$row["locations"], $row["windtag"], $row["hailtag"],
- 			$row["waterspouttag"], $row["tml_sknt"]);
+function do_row_ma($row)
+{
+    return sprintf(
+        "<tr><td>%s</td><td>%s</td><td nowrap>%s</td><td>%s</td><td>%s</td>"
+            . "<td>%02.0f</td><td>%4.2f</td><td>%s</td><td>%02.0f</td></tr>",
+        do_col1($row),
+        $row["wfo"],
+        do_col2($row),
+        do_col3($row),
+        $row["locations"],
+        $row["windtag"],
+        $row["hailtag"],
+        $row["waterspouttag"],
+        $row["tml_sknt"]
+    );
 }
 
-function do_row_ffw($row){
-	return sprintf("<tr><td>%s</td><td>%s</td><td nowrap>%s</td><td>%s</td><td>%s</td>".
-        "<td>%s</td><td>%s</td><td>%s</td><td>%s</td>".
-        "<td>%s</td></tr>",
-		do_col1($row), $row["wfo"], do_col2($row), do_col3($row),
-		$row["locations"], $row["floodtag_flashflood"],
-		$row["floodtag_damage"],
-        $row["floodtag_heavyrain"], $row["floodtag_dam"],
-        $row["floodtag_leeve"]);
+function do_row_ffw($row)
+{
+    return sprintf(
+        "<tr><td>%s</td><td>%s</td><td nowrap>%s</td><td>%s</td><td>%s</td>" .
+            "<td>%s</td><td>%s</td><td>%s</td><td>%s</td>" .
+            "<td>%s</td></tr>",
+        do_col1($row),
+        $row["wfo"],
+        do_col2($row),
+        do_col3($row),
+        $row["locations"],
+        $row["floodtag_flashflood"],
+        $row["floodtag_damage"],
+        $row["floodtag_heavyrain"],
+        $row["floodtag_dam"],
+        $row["floodtag_leeve"]
+    );
 }
- 
- $svrtable = <<<EOF
+
+$svrtable = <<<EOF
  <table id='svr' class="table table-condensed table-striped table-bordered">
  <thead><tr><th>Eventid</th><th>WFO</th><th>Start (UTC)</th><th>End</th>
  <th>Counties/Parishes</th>
@@ -163,8 +196,8 @@ function do_row_ffw($row){
  <th>Storm Speed (kts)</th></tr></thead>
  <tbody>
 EOF;
- $tortable = str_replace('svr', 'tor', $svrtable);
- $smwtable = <<<EOM
+$tortable = str_replace('svr', 'tor', $svrtable);
+$smwtable = <<<EOM
  <table id='svr' class="table table-condensed table-striped table-bordered">
  <thead><tr><th>Eventid</th><th>WFO</th><th>Start (UTC)</th><th>End</th>
  <th>Counties/Parishes</th>
@@ -172,7 +205,7 @@ EOF;
  <th>Storm Speed (kts)</th></tr></thead>
  <tbody>
 EOM;
- $ffwtable = <<<EOF
+$ffwtable = <<<EOF
  <table id='ffw' class="table table-condensed table-striped table-bordered">
  <thead><tr><th>Eventid</th><th>WFO</th><th>Start (UTC)</th><th>End</th>
  <th>Counties/Parishes</th>
@@ -182,21 +215,20 @@ EOM;
  <tbody>
 EOF;
 
- $data = file_get_contents($jsonuri);
- $json = json_decode($data, $assoc=TRUE);
- 
- foreach($json['results'] as $key => $val){
- 	if ($val["phenomena"] == 'SV'){
- 		$svrtable .= do_row($val);
-	} elseif ($val["phenomena"] == 'TO'){
-		$tortable .= do_row($val);
-	} elseif ($val["phenomena"] == 'MA'){
-		$smwtable .= do_row_ma($val);
-	} else {
- 		$ffwtable .= do_row_ffw($val);
- 	}
- 	
- }
+$data = file_get_contents($jsonuri);
+$json = json_decode($data, $assoc = TRUE);
+
+foreach ($json['results'] as $key => $val) {
+    if ($val["phenomena"] == 'SV') {
+        $svrtable .= do_row($val);
+    } elseif ($val["phenomena"] == 'TO') {
+        $tortable .= do_row($val);
+    } elseif ($val["phenomena"] == 'MA') {
+        $smwtable .= do_row_ma($val);
+    } else {
+        $ffwtable .= do_row_ffw($val);
+    }
+}
 
 $svrtable .= "</tbody></table>";
 $tortable .= "</tbody></table>";
@@ -207,9 +239,9 @@ $tselect = make_select("damagetag", $damagetag, $damagetags);
 
 $yselect = yearSelect2(2002, $year, 'year');
 $wselect = networkSelect("WFO", $wfo, array(), "wfo");
-$gentime = $json["gentime"]; 
+$gentime = $json["gentime"];
 
- $t->content = <<<EOF
+$t->content = <<<EOF
  <ol class="breadcrumb">
  <li><a href="/nws/">NWS Resources</a></li>
  <li>List Warning Tags Issued</li>
@@ -256,16 +288,16 @@ $gentime = $json["gentime"];
  
  <h3>Severe Thunderstorm Warnings</h3>
 <button id="create-grid1" class="btn btn-info" type="button">Make Table Sortable</button>
- 		{$svrtable}
+         {$svrtable}
 
 <h3>Flash Flood Warnings</h3>
 <button id="create-grid3" class="btn btn-info" type="button">Make Table Sortable</button>
-		{$ffwtable}
+        {$ffwtable}
 
 <h3>Marine Warnings</h3>
 <button id="create-grid4" class="btn btn-info" type="button">Make Table Sortable</button>
-		{$smwtable}
+        {$smwtable}
 
  
 EOF;
- $t->render('full.phtml');
+$t->render('full.phtml');

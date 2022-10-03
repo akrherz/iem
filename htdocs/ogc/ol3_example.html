@@ -15,17 +15,17 @@ var n0q;
  * the DOM is rendered!  Notice the onload="" attribute to the body tag below
  */
 function init(){
-	// Initially the layername is set to some random timestamp, which is
-	// layer updated in refresher()
-	n0q = new ol.layer.Tile({
+    // Initially the layername is set to some random timestamp, which is
+    // layer updated in refresher()
+    n0q = new ol.layer.Tile({
         title: 'NEXRAD Base Reflectivity',
         source: new ol.source.XYZ({
                 url : '/cache/tile.py/1.0.0/ridge::USCOMP-N0Q-201506172005/{z}/{x}/{y}.png'
         })
-	});
-	map = new ol.Map({
-		target: 'map',
-		layers: [new ol.layer.Tile({
+    });
+    map = new ol.Map({
+        target: 'map',
+        layers: [new ol.layer.Tile({
             title: 'OpenStreetMap',
             visible: true,
             source: new ol.source.OSM()
@@ -35,57 +35,57 @@ function init(){
             source: new ol.source.XYZ({
                     url : '/cache/tile.py/1.0.0/goes_east_conus_ch13/{z}/{x}/{y}.png'
             })
-   		}), new ol.layer.Tile({
+           }), new ol.layer.Tile({
             title: 'GOES East FullDisk IR Satellite',
             visible: false,
             source: new ol.source.XYZ({
                     url : '/cache/tile.py/1.0.0/goes_east_fulldisk_ch13/{z}/{x}/{y}.png'
             })
-   		}), n0q  
-		],
+           }), n0q  
+        ],
         view: new ol.View({
             projection: 'EPSG:3857',
             center: [-10575351, 5160979],
             zoom: 3
-    	})
-	});
+        })
+    });
 
-	var layerSwitcher = new ol.control.LayerSwitcher();
+    var layerSwitcher = new ol.control.LayerSwitcher();
     map.addControl(layerSwitcher);
     
     // Query an IEM JSON service to get the latest timestamps for the TMSs
     // requires Jquery
     function refresher(){
-    	$.getJSON('/json/tms.json', function(data){
+        $.getJSON('/json/tms.json', function(data){
 
-    		$.each(data.services, function(key, val){
-    			if (val.id == 'ridge_uscomp_n0q'){
-    				var dt = new Date(val.utc_valid);
-    				n0q.set('title', "NEXRAD N0Q @"
-    	  				  	+ ("0"+dt.getUTCHours()).slice(-2)
-    	  				  	+ ("0"+dt.getUTCMinutes()).slice(-2)
-    	  				  	+ " UTC");
-    				n0q.setSource(new ol.source.XYZ({
-    					url : '/cache/tile.py/1.0.0/'+val.layername+'/{z}/{x}/{y}.png'
-    				}));
-    			}
-    		})
-    	});
+            $.each(data.services, function(key, val){
+                if (val.id == 'ridge_uscomp_n0q'){
+                    var dt = new Date(val.utc_valid);
+                    n0q.set('title', "NEXRAD N0Q @"
+                                + ("0"+dt.getUTCHours()).slice(-2)
+                                + ("0"+dt.getUTCMinutes()).slice(-2)
+                                + " UTC");
+                    n0q.setSource(new ol.source.XYZ({
+                        url : '/cache/tile.py/1.0.0/'+val.layername+'/{z}/{x}/{y}.png'
+                    }));
+                }
+            })
+        });
 
     }
     refresher();
     window.setInterval(function(){
-		refresher();
+        refresher();
     }, 5*60000);
     
-	
+    
 }
 </script>
 </head>
 <body onload="init()">
-	
+    
 <div style="width:100%; height:100%" id="map"></div>
-	
+    
 <script src="/vendor/jquery/1.11.3/jquery-1.11.3.min.js"></script>
 </body>
 </html>

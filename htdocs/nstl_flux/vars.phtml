@@ -11,8 +11,7 @@ $pg_conn = iemdb("other");
 $sql = "SELECT * from flux_vars ORDER by name ASC";
 $rs = pg_exec($pg_conn, $sql);
 $rows = "";
-for( $i=0; $row = pg_fetch_assoc($rs); $i++)
-{
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $rows .= sprintf("<tr><th>%s</th><td>%s</td><td>%s</td></tr>", $row["name"], $row["units"], $row["details"]);
 }
 

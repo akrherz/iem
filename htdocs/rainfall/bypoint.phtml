@@ -1,8 +1,8 @@
 <?php
- require_once "../../config/settings.inc.php";
- require_once "../../include/database.inc.php";
- require_once "../../include/forms.php";
- /* bypoint.phtml  Query IEM rainfall by a point */
+require_once "../../config/settings.inc.php";
+require_once "../../include/database.inc.php";
+require_once "../../include/forms.php";
+/* bypoint.phtml  Query IEM rainfall by a point */
 $wepp = iemdb("wepp");
 $iem = iemdb("iem");
 
@@ -16,81 +16,70 @@ $rs = pg_prepare($wepp, "SELECTRAIN", "select rainfall / 25.4 as inch,
 $method = isset($_GET["method"]) ? xssafe($_GET["method"]) : die('$method not specified');
 $syear = get_int404("syear", 0);
 $eyear = get_int404("eyear", 0);
-if ($syear == 0 || $eyear == 0){
+if ($syear == 0 || $eyear == 0) {
     die("Please supply both syear and eyear.");
 }
 $view = isset($_GET["view"]) ? xssafe($_GET["view"]) : "online";
 
-$d = Array();
-$sts = mktime(0,0,0,1,1,$syear);
-$ets = mktime(0,0,0,1,1,$eyear + 1);
-$today = mktime(0,0,0, date("m", time()), date("d", time()), date("Y", time()) );
+$d = array();
+$sts = mktime(0, 0, 0, 1, 1, $syear);
+$ets = mktime(0, 0, 0, 1, 1, $eyear + 1);
+$today = mktime(0, 0, 0, date("m", time()), date("d", time()), date("Y", time()));
 if ($today < $ets) $ets = $today;
 $now = $sts;
-while ($now < $ets)
-{
-    $d[ date("Y-m-d", $now) ] = Array("rain"=> 0, "ob"=> "M");
+while ($now < $ets) {
+    $d[date("Y-m-d", $now)] = array("rain" => 0, "ob" => "M");
     $now += 86400;
 }
 
 $data = "# IEM Rainfall https://mesonet.agron.iastate.edu/rainfall 
-# Date Generated: ". date("r") ."\n";
-if ($method == "geocode")
-{
+# Date Generated: " . date("r") . "\n";
+if ($method == "geocode") {
     $s = isset($_GET["street"]) ? xssafe($_GET["street"]) : "100 Main Street";
-    $c = xssafe($_GET["city"]) .", IA";
+    $c = xssafe($_GET["city"]) . ", IA";
     $data .= "# Request Method: Geocoded $s , $c\n";
     $u = sprintf("http://iem.local/cgi-bin/geocoder.py?street=%s&city=%s", $s, $c);
-    $res = trim( file_get_contents(str_replace(" ", "%20", $u)) );
+    $res = trim(file_get_contents(str_replace(" ", "%20", $u)));
     //echo "GEOCODER RESPONSE:::$res::: $u :::";
-    if (substr($res,0,5) != "ERROR")
-    {
+    if (substr($res, 0, 5) != "ERROR") {
         $tokens = explode(",", $res);
         $latitude = $tokens[0];
         $longitude = $tokens[1];
-    } else 
-    {
+    } else {
         die("Geocoder failed for: $s, $c");
     }
-}
-else if ($method == "id")
-{
+} else if ($method == "id") {
     require_once "../../include/station.php";
     $id = strtoupper(xssafe($_GET["nwsli"]));
     $st = new StationData($id);
     $cities = $st->table;
-    $latitude = round($cities[$id]["lat"],4);
-    $longitude = round($cities[$id]["lon"],4);
+    $latitude = round($cities[$id]["lat"], 4);
+    $longitude = round($cities[$id]["lon"], 4);
     $data .= "# Request Method: Specified NWSLI $id \n";
 
-        $rs = pg_execute($iem, "SELECTSUM", Array($id, date('Y-m-d', $sts),
-            date('Y-m-d', $ets)));
-        while ($row = pg_fetch_array($rs))
-        {
-            if ($row["pday"] >= 0)
-            {
-                $d[ $row["day"] ]["ob"] = $row["pday"];
-            } else {
-                $d[ $row["day"] ]["ob"] = 0;
-
-            }
+    $rs = pg_execute($iem, "SELECTSUM", array(
+        $id, date('Y-m-d', $sts),
+        date('Y-m-d', $ets)
+    ));
+    while ($row = pg_fetch_array($rs)) {
+        if ($row["pday"] >= 0) {
+            $d[$row["day"]]["ob"] = $row["pday"];
+        } else {
+            $d[$row["day"]]["ob"] = 0;
         }
-    
-}
-else if ($method == "latlon")
-{
-    if (isset($_GET["lat"])){ 
-        $latitude = floatval($_GET["lat"]); 
+    }
+} else if ($method == "latlon") {
+    if (isset($_GET["lat"])) {
+        $latitude = floatval($_GET["lat"]);
     };
-    if (isset($_GET["lon"])){ 
-        $longitude = floatval($_GET["lon"]); 
+    if (isset($_GET["lon"])) {
+        $longitude = floatval($_GET["lon"]);
     };
     $data .= "# Request Method: Specified Lat $latitude Lon $longitude \n";
 }
 
 /* Cleanup Lat Lon values */
-if ($longitude > 0)
-{
+if ($longitude > 0) {
     $longitude = 0 - $longitude;
 }
 
@@ -99,45 +88,52 @@ $sql = "select hrap_i, ST_distance( the_geom,
     from hrap_utm ORDER by st_distance ASC LIMIT 1";
 $rs = pg_exec($wepp, $sql);
 $row = pg_fetch_array($rs);
-if ($row[1] > 25000){
-    echo sprintf("ERROR: Point is %.1f km outside of data domain, abort.",
-            $row[1] / 1000.0);
+if ($row[1] > 25000) {
+    echo sprintf(
+        "ERROR: Point is %.1f km outside of data domain, abort.",
+        $row[1] / 1000.0
+    );
     die();
 }
 
 $hrap_i = $row["hrap_i"];
 $data .= "# Latitude: $latitude Longitude: $longitude HRAP_I: $hrap_i
 Date,Estimate,YearToDate";
-if ($method == 'id'){
-  $data .= ",Observation\n";
+if ($method == 'id') {
+    $data .= ",Observation\n";
 } else {
-  $data .= "\n";
+    $data .= "\n";
 }
 
 
-$rs = pg_execute($wepp, "SELECTRAIN", Array($hrap_i, date('Y-m-d', $sts),
-        date('Y-m-d', $ets)));
+$rs = pg_execute($wepp, "SELECTRAIN", array(
+    $hrap_i, date('Y-m-d', $sts),
+    date('Y-m-d', $ets)
+));
 
 $tot = 0;
 $otot = 0;
-while ($row = pg_fetch_array($rs))
-{
+while ($row = pg_fetch_array($rs)) {
     $tot += $row["inch"];
-    $ob = $d[ $row["valid"] ]["ob"];
-    $otot += ($ob == "M") ? 0: $ob;
-    $d[ $row["valid"] ]["rain"] = $row["inch"];
+    $ob = $d[$row["valid"]]["ob"];
+    $otot += ($ob == "M") ? 0 : $ob;
+    $d[$row["valid"]]["rain"] = $row["inch"];
 }
 
 $running = 0;
-foreach($d as $k => $v)
-{
+foreach ($d as $k => $v) {
     $running += $d[$k]["rain"];
-  if ($method == "id") {
-    $data .=  sprintf("%s,%5.2f,%5.2f,%9s\n", $k, $d[$k]["rain"], $running,
-            $d[$k]["ob"]);
-  } else {
-    $data .=  sprintf("%s,%5.2f,%5.2f\n", $k, $d[$k]["rain"], $running);
-  }
+    if ($method == "id") {
+        $data .=  sprintf(
+            "%s,%5.2f,%5.2f,%9s\n",
+            $k,
+            $d[$k]["rain"],
+            $running,
+            $d[$k]["ob"]
+        );
+    } else {
+        $data .=  sprintf("%s,%5.2f,%5.2f\n", $k, $d[$k]["rain"], $running);
+    }
 }
 
 if ($method == "id") {
@@ -145,9 +141,8 @@ if ($method == "id") {
 } else {
     $data .= sprintf("%s,%4.2f,%4.2f\n", "Total", $tot, $running);
 }
-    
-if ($view == "download")
-{
+
+if ($view == "download") {
     header("Content-type: application/octet-stream");
     header("Content-Disposition: attachment; filename=iemrainfall.dat");
     echo $data;

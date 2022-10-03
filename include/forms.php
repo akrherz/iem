@@ -9,7 +9,7 @@ function xssafe($data, $encoding='UTF-8')
     if (is_array($data)){
         return $data;
     }
-	$res = htmlspecialchars($data, ENT_QUOTES | ENT_HTML401, $encoding);
+    $res = htmlspecialchars($data, ENT_QUOTES | ENT_HTML401, $encoding);
     if ($res !== $data){
         // 404 this
         http_response_code(404);
@@ -20,7 +20,7 @@ function xssafe($data, $encoding='UTF-8')
 }
 function xecho($data)
 {
-	echo xssafe($data);
+    echo xssafe($data);
 }
 
 // Ensure we are getting int values from request or we 404
@@ -316,7 +316,7 @@ function yearSelect2($start, $selected, $fname, $jsextra='', $endyear=null){
     $s .= ">". $i ."</option>";
   }
   $s .= "</select>\n";
-	return $s;
+    return $s;
 }
 
 
@@ -363,8 +363,8 @@ function segmentSelect($dbconn, $year, $month, $selected, $name="segid")
 { 
   $s = "<select name=\"$name\" class=\"iemselect2\">\n";
   $rs = pg_prepare($dbconn, "R_S",
-  		"SELECT segid, major, minor from roads_base "
-  		." WHERE archive_begin <= $1 and archive_end > $1 ORDER by major ASC");
+          "SELECT segid, major, minor from roads_base "
+          ." WHERE archive_begin <= $1 and archive_end > $1 ORDER by major ASC");
   $rs = pg_execute($dbconn, "R_S", Array("${year}-${month}-01"));
   for ($i=0; $row = pg_fetch_array($rs); $i++)
   { 

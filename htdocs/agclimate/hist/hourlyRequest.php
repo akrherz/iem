@@ -1,10 +1,10 @@
 <?php
 /* Daily Data download for the ISUAG Network */
-include("../../../config/settings.inc.php");
-include("../../../include/forms.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/forms.php";
 define("IEM_APPID", 13);
-include_once "boxinc.phtml";
-include("../../../include/myview.php");
+require_once "boxinc.phtml";
+require_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "ISU AgClimate Legacy Hourly Data Request";
 

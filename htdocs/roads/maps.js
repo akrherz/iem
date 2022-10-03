@@ -2,13 +2,13 @@ var map, selectedFeature, selectControl;
 var roadlayer;
 
 var style = new ol.style.Style({
-	fill: new ol.style.Fill({
-		color: 'rgba(255, 255, 255, 0)'
-	}),
-	stroke: new ol.style.Stroke({
-		color: '#000000',
-		width: 2
-	})
+    fill: new ol.style.Fill({
+        color: 'rgba(255, 255, 255, 0)'
+    }),
+    stroke: new ol.style.Stroke({
+        color: '#000000',
+        width: 2
+    })
 });
 
 // Lookup 'table' for styling of road conditions based on cond_code
@@ -36,44 +36,44 @@ var rcLookup = {
 
 $(document).ready(function(){
 
-	var roadLayer = new ol.layer.Vector({
-		title: 'Winter Road Conditions',
-		source: new ol.source.Vector({
-			url: '/geojson/winter_roads.geojson',
-			format: new ol.format.GeoJSON()
-		}),
-		style: function(feature, resolution){
-			try{
-				style.getStroke().setColor(rcLookup[feature.get('code')]);
-			} catch(e) {
-			}
-			return [style];
-		}
-	});
-	
-	map = new ol.Map({
-		target: 'map',
-		layers: [new ol.layer.Tile({
+    var roadLayer = new ol.layer.Vector({
+        title: 'Winter Road Conditions',
+        source: new ol.source.Vector({
+            url: '/geojson/winter_roads.geojson',
+            format: new ol.format.GeoJSON()
+        }),
+        style: function(feature, resolution){
+            try{
+                style.getStroke().setColor(rcLookup[feature.get('code')]);
+            } catch(e) {
+            }
+            return [style];
+        }
+    });
+    
+    map = new ol.Map({
+        target: 'map',
+        layers: [new ol.layer.Tile({
             title: 'OpenStreetMap',
             visible: true,
             source: new ol.source.OSM()
         }), roadLayer],
         view: new ol.View({
-        	projection: 'EPSG:3857',
-        	center: ol.proj.transform([-93.5, 42.1], 'EPSG:4326', 'EPSG:3857'),
-        	zoom: 7
+            projection: 'EPSG:3857',
+            center: ol.proj.transform([-93.5, 42.1], 'EPSG:4326', 'EPSG:3857'),
+            zoom: 7
         })
-	});
+    });
 
-	// Create a LayerSwitcher instance and add it to the map
+    // Create a LayerSwitcher instance and add it to the map
     var layerSwitcher = new ol.control.LayerSwitcher();
     map.addControl(layerSwitcher);
 
-	//TODO add hover support
-	//TODO add warnings overlay
-	//TODO add pavementtemps
-	//TODO add airtemps
-	//TODO add nexrad
-	//TODO add refreshing of layers
+    //TODO add hover support
+    //TODO add warnings overlay
+    //TODO add pavementtemps
+    //TODO add airtemps
+    //TODO add nexrad
+    //TODO add refreshing of layers
 
 }); // End of onready

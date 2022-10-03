@@ -9,26 +9,27 @@ $t = new MyView();
 $t->title = "River Forecast Point Monitor";
 $content = "";
 
-$wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"],0,3): "DMX";
-$state = isset($_GET["state"]) ? substr($_GET["state"],0,2): "IA";
+$wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"], 0, 3) : "DMX";
+$state = isset($_GET["state"]) ? substr($_GET["state"], 0, 2) : "IA";
 
-$sevcol = Array(
- "N" =>"#0f0",
- "0" =>"#ff0",
- "1" =>"#ff9900",
- "2" =>"#f00",
- "3" =>"#f0f",
- "U" =>"#fff");
+$sevcol = array(
+    "N" => "#0f0",
+    "0" => "#ff0",
+    "1" => "#ff9900",
+    "2" => "#f00",
+    "3" => "#f0f",
+    "U" => "#fff"
+);
 
 $url = "https://mesonet.agron.iastate.edu/api/1/nws/current_flood_warnings.json";
 $c1 = "";
 $c2 = "";
 $c3 = "";
-if (isset($_REQUEST["state"])){
+if (isset($_REQUEST["state"])) {
     $c2 = " well";
     $url .= "?state={$state}";
     $ptitle = "<h3>River Forecast Point Monitor by State</h3>";
-} else if (isset($_REQUEST["all"])){
+} else if (isset($_REQUEST["all"])) {
     $c3 = " well";
     $ptitle = "<h3>River Forecast Point Monitor (view all)</h3>";
 } else {
@@ -38,34 +39,48 @@ if (isset($_REQUEST["state"])){
 }
 
 $jdata = file_get_contents($url);
-$jobj = json_decode($jdata, $assoc=TRUE);
+$jobj = json_decode($jdata, $assoc = TRUE);
 
-$rivers = Array();
-$used = Array();
-foreach($jobj["data"] as $bogus => $row)
-{
+$rivers = array();
+$used = array();
+foreach ($jobj["data"] as $bogus => $row) {
     if (in_array($row["nwsli"], $used)) {
         continue;
     }
     $used[] = $row["nwsli"];
-  $river = $row["river_name"];
-  $uri = sprintf("/vtec/#%s-O-%s-K%s-%s-%s-%04d", date("Y"),
-        "NEW", $row["wfo"], $row["phenomena"],
-        "W", $row["eventid"]);
-    if (!array_key_exists($river, $rivers)){
+    $river = $row["river_name"];
+    $uri = sprintf(
+        "/vtec/#%s-O-%s-K%s-%s-%s-%04d",
+        date("Y"),
+        "NEW",
+        $row["wfo"],
+        $row["phenomena"],
+        "W",
+        $row["eventid"]
+    );
+    if (!array_key_exists($river, $rivers)) {
         $rivers[$river] = "";
     }
 
-  $rivers[$river] .= sprintf("<tr><td style='background: %s;'>&nbsp;&nbsp;</td>".
-      "<th>%s<br />".
-      "<a href=\"/plotting/auto/?q=160&amp;station=%s\"><i class=\"fa fa-signal\"></i> %s</a></th><td><a href='%s'>%s</a></td><td>%s</td>".
-      "<td>%s</td><td>%s</td><td><strong>Impact...</strong> %s</td></tr>",
-      $sevcol[$row["severity"]], $row["name"], 
-      $row["nwsli"], $row["nwsli"], $uri, $row["counties"], $row["stage_text"],
-      $row["flood_text"], $row["forecast_text"], $row["impact_text"]);
+    $rivers[$river] .= sprintf(
+        "<tr><td style='background: %s;'>&nbsp;&nbsp;</td>" .
+            "<th>%s<br />" .
+            "<a href=\"/plotting/auto/?q=160&amp;station=%s\"><i class=\"fa fa-signal\"></i> %s</a></th><td><a href='%s'>%s</a></td><td>%s</td>" .
+            "<td>%s</td><td>%s</td><td><strong>Impact...</strong> %s</td></tr>",
+        $sevcol[$row["severity"]],
+        $row["name"],
+        $row["nwsli"],
+        $row["nwsli"],
+        $uri,
+        $row["counties"],
+        $row["stage_text"],
+        $row["flood_text"],
+        $row["forecast_text"],
+        $row["impact_text"]
+    );
 }
 $content .= $ptitle;
-$nselect = networkSelect("WFO", $wfo, Array(), 'wfo');
+$nselect = networkSelect("WFO", $wfo, array(), 'wfo');
 $sselect = stateSelect($state);
 $content .= <<<EOF
 <p>This page produces a summary listing for National Weather Service Flood 
@@ -118,14 +133,12 @@ $content .= '<p><table class="table table-condensed table-bordered">';
 $rvs = array_keys($rivers);
 asort($rvs);
 
-foreach($rvs as $idx => $key)
-{
-  $content .=  "<tr><th colspan=\"7\" style='background: #eee; text-align: left;'>$key</th></tr>";
-  $content .=  $rivers[$key];
-
+foreach ($rvs as $idx => $key) {
+    $content .=  "<tr><th colspan=\"7\" style='background: #eee; text-align: left;'>$key</th></tr>";
+    $content .=  $rivers[$key];
 }
-if (sizeof($rvs) == 0){
-	$content .= "<tr><td colspan=\"7\">No Entries Found</td></tr>";
+if (sizeof($rvs) == 0) {
+    $content .= "<tr><td colspan=\"7\">No Entries Found</td></tr>";
 }
 
 $content .=  "</table>";

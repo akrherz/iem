@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 /**
  * Produce a map of CF6 parsed data for a single day
  */
@@ -20,7 +21,7 @@ $t->headextra = <<<EOF
     width: 100%;
 }
 .popover {
-	width: 300px;
+    width: 300px;
 }
 
 </style>
@@ -40,43 +41,43 @@ $t->content = <<<EOF
 </div>
 
 <div class="breadcrumb">
-		<li><a href="/nws/">NWS Mainpage</a></li>
-		<li class="active">Map of NWS Daily CF6 Reports</li>
-		</div>
-		
+        <li><a href="/nws/">NWS Mainpage</a></li>
+        <li class="active">Map of NWS Daily CF6 Reports</li>
+        </div>
+        
 <div class="row">
 <div class="col-md-12">
-		
+        
 <div class="pull-right">
 <i class="fa fa-text-size"></i>
 <button id="fminus" class="btn btn-default"><i class="fa fa-minus"></i></button>
 <button id="fplus" class="btn btn-default"><i class="fa fa-plus"></i></button>
 </div>
 
-		<form name='bah'><p><strong>Select Variable to Plot:</strong> 
+        <form name='bah'><p><strong>Select Variable to Plot:</strong> 
 <select onChange="javascript: updateMap();" id="renderattr">
-	<option value="high">High Temperature</option>
-	<option value="low">Low Temperature</option>
-	<option value="avg_temp">Average Temperature</option>
-	<option value="dep_temp">Average Temperature Depature</option>
-	<option value="hdd">Heating Degree Days</option>
-	<option value="cdd">Cooling Degree Days</option>
-	<option value="precip">Precipitation</option>
-	<option value="snow">Snowfall</option>
-	<option value="snowd_12z">Snow Depth at 12z</option>
-	<option value="avg_smph">Average Wind Speed</option>
-	<option value="max_smph">Max Wind Speed</option>
-	<option value="avg_drct">Average Wind Direction</option>
-	<option value="minutes_sunshine">Minutes Sunshine</option>
-	<option value="possible_sunshine">Possible Sunshine</option>
-	<option value="cloud_ss">Cloud SS</option>
-	<option value="wxcodes">wxcodes</option>
-	<option value="gust_smph">Wind Gust</option>
-	<option value="gust_drct">Wind Gust Direction</option>
+    <option value="high">High Temperature</option>
+    <option value="low">Low Temperature</option>
+    <option value="avg_temp">Average Temperature</option>
+    <option value="dep_temp">Average Temperature Depature</option>
+    <option value="hdd">Heating Degree Days</option>
+    <option value="cdd">Cooling Degree Days</option>
+    <option value="precip">Precipitation</option>
+    <option value="snow">Snowfall</option>
+    <option value="snowd_12z">Snow Depth at 12z</option>
+    <option value="avg_smph">Average Wind Speed</option>
+    <option value="max_smph">Max Wind Speed</option>
+    <option value="avg_drct">Average Wind Direction</option>
+    <option value="minutes_sunshine">Minutes Sunshine</option>
+    <option value="possible_sunshine">Possible Sunshine</option>
+    <option value="cloud_ss">Cloud SS</option>
+    <option value="wxcodes">wxcodes</option>
+    <option value="gust_smph">Wind Gust</option>
+    <option value="gust_drct">Wind Gust Direction</option>
     </select>	
-		
+        
 <strong>For Date:</strong><input type="text" id="datepicker" size="30">
-		
+        
 </form>
 </div></div><!-- ./row -->
 
@@ -88,11 +89,11 @@ $t->content = <<<EOF
 
 </div></div><!-- ./row -->
 
-		
+        
 <div class="row">
 <div class="col-md-12">
     <h4>Click on map to show CF6 text below</h4>
-	<div id="cf6report"></div>
+    <div id="cf6report"></div>
 </div>
 </div>
 

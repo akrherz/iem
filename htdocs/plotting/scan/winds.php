@@ -1,22 +1,27 @@
 <?php
-include("../../../config/settings.inc.php");
-include("../../../include/database.inc.php");
-$connection = iemdb("scan");
-include("../../../include/network.php");
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/database.inc.php";
+require_once "../../../include/network.php";
+require_once "../../../include/forms.php";
+require_once "../../../include/jpgraph/jpgraph.php";
+require_once "../../../include/jpgraph/jpgraph_line.php";
+require_once "../../../include/jpgraph/jpgraph_scatter.php";
 $nt = new NetworkTable("SCAN");
 
- $station = isset($_GET["station"]) ? $_GET["station"] : "S2031";
- $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y", time() - 3*86400);
- $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m", time() - 3*86400);
- $day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d", time() - 3*86400);
+$connection = iemdb("scan");
+
+$station = isset($_GET["station"]) ? xssafe($_GET["station"]) : "S2031";
+$year = get_int404("year", date("Y", time() - 3 * 86400));
+$month = get_int404("month", date("m", time() - 3 * 86400));
+$day = get_int404("day", date("d", time() - 3 * 86400));
 
 $date = "$year-$month-$day";
 
 $rs = pg_prepare($connection, "SELECT", "SELECT sknt, drct, 
-		to_char(valid, 'mmdd/HH24') as tvalid 
-		from alldata WHERE 
-		station = $1 and date(valid) >= $2  
-		ORDER by tvalid ASC LIMIT 96");
+        to_char(valid, 'mmdd/HH24') as tvalid 
+        from alldata WHERE 
+        station = $1 and date(valid) >= $2  
+        ORDER by tvalid ASC LIMIT 96");
 
 $result = pg_execute($connection, "SELECT", Array($station, $date));
 
@@ -33,10 +38,6 @@ for( $i=0; $row = pg_fetch_array($result); $i++)
 }
 
 pg_close($connection);
-
-include ("../../../include/jpgraph/jpgraph.php");
-include ("../../../include/jpgraph/jpgraph_line.php");
-include ("../../../include/jpgraph/jpgraph_scatter.php");
 
 // Create the graph. These two calls are always required
 $graph = new Graph(660,450,"example1");
@@ -89,5 +90,3 @@ $graph->AddY2($lineplot1);
 
 // Display the graph
 $graph->Stroke();
-
-?>

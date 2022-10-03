@@ -13,15 +13,15 @@ $result = pg_exec($connection, $query1);
 $table = "";
 $count = pg_num_rows($result);
 for($i = 0; $row = pg_fetch_assoc($result); $i ++) {
-	if ($i % 4 == 0) {
-		$table .= "<tr>\n";
-	}
-	$table .= sprintf("<td><a href=\"cat.php?day=%s\">%s</a> 
-			<i class=\"green\">%s</i>/<i class=\"red\">%s</i>/%s</td>",
-	$row["href"], $row["title"], $row["good"], $row["bad"], $row["abstain"]);
-	if (($i+1) % 4 == 0) {
-		$table .= "</tr>\n";
-	}
+    if ($i % 4 == 0) {
+        $table .= "<tr>\n";
+    }
+    $table .= sprintf("<td><a href=\"cat.php?day=%s\">%s</a> 
+            <i class=\"green\">%s</i>/<i class=\"red\">%s</i>/%s</td>",
+    $row["href"], $row["title"], $row["good"], $row["bad"], $row["abstain"]);
+    if (($i+1) % 4 == 0) {
+        $table .= "</tr>\n";
+    }
 }
 
 
