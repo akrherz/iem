@@ -58,10 +58,8 @@ else{
     $tsSQL = date("Y-m-d H:i:00+00", $ts);
     $tsSQL2 = date("Y-m-d H:i:00+00", $ts2);
 
-    $year = date("Y", $ts);
-
     $result = pull_vtec_events_by_wfo_year(
-        $connect, $year, $mywfos, $tsSQL, $tsSQL2, $_GET);
+        $connect, $mywfos, $tsSQL, $tsSQL2, $_GET);
 }
 
 header('Content-disposition: attachment; filename=sbw_interval.kml');
@@ -166,7 +164,7 @@ function pull_wfos_in_states($db, $state_abbreviations){
 }
 
 function pull_vtec_events_by_wfo_year(
-        $db, $year, $wfos, $tsSQL, $tsSQL2, $form){
+        $db, $wfos, $tsSQL, $tsSQL2, $form){
     if(count($wfos) > 0 && ! in_array("ALL", $wfos)){
         $wfolimiter = 'wfo IN (\'' . implode("','", $wfos) . '\') and';
     }
@@ -186,20 +184,20 @@ function pull_vtec_events_by_wfo_year(
         $statuslimiter = " status != 'CAN' ";
     }
     $rs = pg_prepare($db, "SELECT-INT", "SELECT 
-		issue, expire, phenomena, significance, eventid, wfo, status,
+        issue, expire, phenomena, significance, eventid, wfo, status,
            ST_askml(geom) as kml,
            round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize,
            polygon_begin, polygon_end, tornadotag, damagetag, windtag, hailtag
-           from sbw_$year 
+           from sbw
            WHERE $wfolimiter coalesce(issue, polygon_begin) >= $1
            and coalesce(issue, polygon_begin) <= $2
            and $statuslimiter and eventid > 0 $pslimiter");
     $rs = pg_prepare($db, "SELECT", "SELECT
-		issue, expire, phenomena, significance, eventid, wfo, status,
+        issue, expire, phenomena, significance, eventid, wfo, status,
            ST_askml(geom) as kml,
            round(ST_area(ST_transform(geom,2163)) / 1000000.0) as psize,
            polygon_begin, polygon_end, tornadotag, damagetag, windtag, hailtag
-           from sbw_$year 
+           from sbw
            WHERE $wfolimiter coalesce(issue, polygon_begin) <= $1 and
            expire > $2
            and $statuslimiter and eventid > 0 $pslimiter");
@@ -212,5 +210,3 @@ function pull_vtec_events_by_wfo_year(
     }
     return $result;
 }
-
-?>
