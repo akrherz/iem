@@ -29,6 +29,9 @@ PDICT = {
     "range_low": "Range of Low Temperature",
     "precip": "Total Precipitation",
     "snow": "Total Snowfall",
+    "days-precip-above": (
+        "Days with Precipitation Greater Than or Equal To (threshold)"
+    ),
     "days-snow-above": (
         "Days with Snowfall Greater Than or Equal To (threshold)"
     ),
@@ -232,6 +235,7 @@ def plotter(fdict):
             days_lows_above=("low", lambda x: (x >= threshold).sum()),
             days_lows_below=("low", lambda x: (x < threshold).sum()),
             days_snow_above=("snow", lambda x: (x >= threshold).sum()),
+            days_precip_above=("precip", lambda x: (x >= threshold).sum()),
             count=("high", "count"),
             min_day=("day", "min"),
         )
@@ -243,6 +247,7 @@ def plotter(fdict):
                 "days_lows_above": "days-lows-above",
                 "days_lows_below": "days-lows-below",
                 "days_snow_above": "days-snow-above",
+                "days_precip_above": "days-precip-above",
             }
         )
         .set_index("yr")
