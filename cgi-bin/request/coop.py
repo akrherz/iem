@@ -182,36 +182,18 @@ def do_apsim(ctx):
   ()         ()   (MJ/m^2)       (oC)       (oC)       (mm)\n"""
     )
 
-    if ctx.get("hayhoe_model") is not None:
-        cursor.execute(
-            """
-            SELECT day, high, low, precip,
-            extract(doy from day) as doy,
-            0 as srad
-            from hayhoe_daily WHERE station = %s
-            and day >= %s and scenario = %s and model = %s
-            ORDER by day ASC
+    cursor.execute(
+        f"""
+        SELECT day, high, low, precip,
+        extract(doy from day) as doy,
+        coalesce(narr_srad, merra_srad, hrrr_srad) as srad
+        from {table}
+        WHERE station = %s and
+        day >= %s and day <= %s and high is not null and
+        low is not null and precip is not null ORDER by day ASC
         """,
-            (
-                ctx["stations"][0],
-                ctx["sts"],
-                ctx["hayhoe_scenario"],
-                ctx["hayhoe_model"],
-            ),
-        )
-    else:
-        cursor.execute(
-            f"""
-            SELECT day, high, low, precip,
-            extract(doy from day) as doy,
-            coalesce(narr_srad, merra_srad, hrrr_srad) as srad
-            from {table}
-            WHERE station = %s and
-            day >= %s and day <= %s and high is not null and
-            low is not null and precip is not null ORDER by day ASC
-            """,
-            (station, ctx["sts"], ctx["ets"]),
-        )
+        (station, ctx["sts"], ctx["ets"]),
+    )
     for row in cursor:
         srad = -99 if row["srad"] is None else row["srad"]
         sio.write(
@@ -399,34 +381,15 @@ def do_daycent(ctx):
         if febtest not in extra:
             feb28 = datetime.date(thisyear, 2, 28)
             extra[febtest] = extra[feb28]
-    if ctx.get("hayhoe_model") is not None:
-        cursor.execute(
-            """
-            SELECT day, high, low, precip,
-            extract(doy from day) as doy
-            from hayhoe_daily WHERE station = %s
-            and day >= %s and scenario = %s and model = %s
-            ORDER by day ASC
-        """,
-            (
-                ctx["stations"][0],
-                ctx["sts"],
-                ctx["hayhoe_scenario"],
-                ctx["hayhoe_model"],
-            ),
-        )
-    else:
-        cursor.execute(
-            """
-            SELECT day, high, low, precip,
-            extract(doy from day) as doy
-            from """
-            + table
-            + """ WHERE station = %s
-            and day >= %s and day <= %s ORDER by day ASC
-        """,
-            (ctx["stations"][0], ctx["sts"], ctx["ets"]),
-        )
+    cursor.execute(
+        f"""
+        SELECT day, high, low, precip,
+        extract(doy from day) as doy
+        from {table} WHERE station = %s
+        and day >= %s and day <= %s ORDER by day ASC
+    """,
+        (ctx["stations"][0], ctx["sts"], ctx["ets"]),
+    )
     sio = StringIO()
     sio.write("Daily Weather Data File (use extra weather drivers = 0):\n\n")
     for row in cursor:
@@ -832,8 +795,6 @@ def application(environ, start_response):
     ctx["delim"] = form.get("delim", "comma")
     ctx["inclatlon"] = form.get("gis", "no")
     ctx["scenario"] = form.get("scenario", "no")
-    ctx["hayhoe_scenario"] = form.get("hayhoe_scenario")
-    ctx["hayhoe_model"] = form.get("hayhoe_model")
     ctx["scenario_year"] = 2099
     if ctx["scenario"] == "yes":
         ctx["scenario_year"] = int(form.get("scenario_year", 2099))
