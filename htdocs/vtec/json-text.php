@@ -12,11 +12,11 @@ pg_exec($connect, "SET TIME ZONE 'UTC'");
 
 $year = get_int404("year", 2006);
 if ($year == 0) die("ERROR: invalid \$year set");
-$wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]),0,3) : "MPX";
+$wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]), 0, 3) : "MPX";
 $eventid = get_int404("eventid", 103);
-$phenomena = isset($_GET["phenomena"]) ? substr(xssafe($_GET["phenomena"]),0,2) : "SV";
-$significance = isset($_GET["significance"]) ? substr(xssafe($_GET["significance"]),0,1) : "W";
-$lastsvs = isset($_GET["lastsvs"]) ? xssafe($_GET["lastsvs"]): 'n';
+$phenomena = isset($_GET["phenomena"]) ? substr(xssafe($_GET["phenomena"]), 0, 2) : "SV";
+$significance = isset($_GET["significance"]) ? substr(xssafe($_GET["significance"]), 0, 1) : "W";
+$lastsvs = isset($_GET["lastsvs"]) ? xssafe($_GET["lastsvs"]) : 'n';
 
 $sql = "SELECT replace(report,'\001','') as report, 
                replace(svs,'\001','') as svs
@@ -27,25 +27,23 @@ $sql = "SELECT replace(report,'\001','') as report,
 
 $result = pg_exec($connect, $sql);
 
-$ar = Array("data" => Array() );
-for( $i=0; $row  = pg_fetch_array($result); $i++)
-{
-  $z = Array();
-  $z["id"] = $i +1;
-  $z["report"] = preg_replace("/\r\r\n/", "\n",$row["report"]);
-  $z["svs"] = Array();
-  $tokens = @explode('__', $row["svs"]);
-  $lsvs = "";
-  foreach($tokens as $key => $val)
-  { 
-    if ($val == "") continue;
-    $lsvs = htmlspecialchars( $val );
-    $z["svs"][] = preg_replace("/\r\r\n/", "\n",$lsvs);
-  }
-  if ($lastsvs == "y"){
-    $z["svs"] = preg_replace("/\r\r\n/", "\n",$lsvs);
-  }
-  $ar["data"][] = $z;
+$ar = array("data" => array());
+for ($i = 0; $row  = pg_fetch_array($result); $i++) {
+    $z = array();
+    $z["id"] = $i + 1;
+    $z["report"] = preg_replace("/\r\r\n/", "\n", $row["report"]);
+    $z["svs"] = array();
+    $tokens = @explode('__', $row["svs"]);
+    $lsvs = "";
+    foreach ($tokens as $key => $val) {
+        if ($val == "") continue;
+        $lsvs = htmlspecialchars($val);
+        $z["svs"][] = preg_replace("/\r\r\n/", "\n", $lsvs);
+    }
+    if ($lastsvs == "y") {
+        $z["svs"] = preg_replace("/\r\r\n/", "\n", $lsvs);
+    }
+    $ar["data"][] = $z;
 }
 
 header("Content-type: application/json");

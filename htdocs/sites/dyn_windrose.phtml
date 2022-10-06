@@ -1,10 +1,10 @@
-<?php 
+<?php
 // Frontend for dynamic windrose generation.  All kinds of options exist in
 // this form and are basically translated into /cgi-bin/mywindrose.py, which
 // then translates into pyIEM.windrose_utils
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
-require_once "../../include/forms.php";  
+require_once "../../include/forms.php";
 require_once "../../include/myview.php";
 
 // Makes sure this page has proper context
@@ -21,64 +21,66 @@ $hour1 = get_int404("hour1", 0);
 $hour2 = get_int404("hour2", 0);
 $minute1 = get_int404("minute1", 0);
 $minute2 = get_int404("minute2", 0);
-$units = isset($_GET["units"]) ? xssafe($_GET["units"]): "mph";
+$units = isset($_GET["units"]) ? xssafe($_GET["units"]) : "mph";
 $nsector = get_int404('nsector', 36);
-$level = isset($_GET["level"]) ? floatval($_GET['level']): 1000;
-$fmt = isset($_GET["fmt"]) ? xssafe($_GET["fmt"]): 'png';
+$level = isset($_GET["level"]) ? floatval($_GET['level']) : 1000;
+$fmt = isset($_GET["fmt"]) ? xssafe($_GET["fmt"]) : 'png';
 $dpi = get_int404("dpi", 100);
-$bins = Array(2, 5, 7, 10, 15, 20);
-for ($i=0; $i < sizeof($bins); $i++){
-	$bins[$i] = isset($_GET["bin{$i}"]) ? floatval($_GET["bin{$i}"]): $bins[$i];
+$bins = array(2, 5, 7, 10, 15, 20);
+for ($i = 0; $i < sizeof($bins); $i++) {
+    $bins[$i] = isset($_GET["bin{$i}"]) ? floatval($_GET["bin{$i}"]) : $bins[$i];
 }
 
 // If hour1 is set, we might as well assume we are wanting a plot
-if (isset($_GET["hour1"])){
-	$rose_uri = "/cgi-bin/mywindrose.py?nsector=$nsector&amp;station=$station".
-		"&amp;network=$network&amp;day1=$day1&amp;day2=$day2&amp;".
-		"month1=$month1&amp;month2=$month2&amp;year1=$year1&amp;year2=".
-		"$year2&amp;hour1=$hour1&amp;".
-		"hour2=$hour2&amp;minute1=$minute1&amp;minute2=$minute2&amp;".
-		"units=$units&amp;fmt=$fmt&amp;dpi=$dpi";
-	if (isset($_GET["setbins"])){
-		$rose_uri .= sprintf("&amp;bins=%s", implode(",", $bins));
-	}
-	if (isset($_GET["hourlimit"])){
-	  $rose_uri .= "&amp;hourlimit=1";
-	}
-	if (isset($_GET["monthlimit"])){
-	  $rose_uri .= "&amp;monthlimit=1";
-	}
-	if (isset($_GET["limit_by_doy"])){
+if (isset($_GET["hour1"])) {
+    $rose_uri = "/cgi-bin/mywindrose.py?nsector=$nsector&amp;station=$station" .
+        "&amp;network=$network&amp;day1=$day1&amp;day2=$day2&amp;" .
+        "month1=$month1&amp;month2=$month2&amp;year1=$year1&amp;year2=" .
+        "$year2&amp;hour1=$hour1&amp;" .
+        "hour2=$hour2&amp;minute1=$minute1&amp;minute2=$minute2&amp;" .
+        "units=$units&amp;fmt=$fmt&amp;dpi=$dpi";
+    if (isset($_GET["setbins"])) {
+        $rose_uri .= sprintf("&amp;bins=%s", implode(",", $bins));
+    }
+    if (isset($_GET["hourlimit"])) {
+        $rose_uri .= "&amp;hourlimit=1";
+    }
+    if (isset($_GET["monthlimit"])) {
+        $rose_uri .= "&amp;monthlimit=1";
+    }
+    if (isset($_GET["limit_by_doy"])) {
         $rose_uri .= "&amp;limit_by_doy=1";
     }
-    if (isset($_GET["hourrangelimit"])){
-		$rose_uri .= "&amp;hourrangelimit=1";
-	}
-	if (isset($_GET["staticrange"])){
-		$rose_uri .= "&amp;staticrange=1";
-	}
-	if ($network == 'RAOB'){
-		$rose_uri .= "&amp;level=". $level;
-	}
-	$rosedata_uri = "{$rose_uri}&amp;justdata=true";
+    if (isset($_GET["hourrangelimit"])) {
+        $rose_uri .= "&amp;hourrangelimit=1";
+    }
+    if (isset($_GET["staticrange"])) {
+        $rose_uri .= "&amp;staticrange=1";
+    }
+    if ($network == 'RAOB') {
+        $rose_uri .= "&amp;level=" . $level;
+    }
+    $rosedata_uri = "{$rose_uri}&amp;justdata=true";
 }
 
 $firstyear = 1995;
-if (! is_null($metadata["archive_begin"])){
-	$firstyear = $metadata["archive_begin"]->format("Y");
+if (!is_null($metadata["archive_begin"])) {
+    $firstyear = $metadata["archive_begin"]->format("Y");
 }
 
 $t = new MyView();
 $t->title = "Custom Wind Roses";
 $t->sites_current = "custom_windrose";
 $tznote = "(Times are in {$metadata["tzname"]} time zone)";
-if ($network == 'RAOB'){
-	$tznote = "(Times presented are in UTC)";
+if ($network == 'RAOB') {
+    $tznote = "(Times presented are in UTC)";
 }
 
-$ar = Array("png" => "PNG Image (.PNG)",
-			"pdf" => "Portable Document Format (.PDF)",
-			"svg" => "Scalable Vector Graphic (.SVG)");
+$ar = array(
+    "png" => "PNG Image (.PNG)",
+    "pdf" => "Portable Document Format (.PDF)",
+    "svg" => "Scalable Vector Graphic (.SVG)"
+);
 $fselect = make_select("fmt", $fmt, $ar);
 
 $content = <<<EOF
@@ -120,47 +122,51 @@ $hs1 = hourSelect($hour1, "hour1");
 $hs2 = hourSelect($hour2, "hour2");
 $mi1 = minuteSelect($minute1, "minute1");
 $mi2 = minuteSelect($minute2, "minute2");
-if ($network == 'RAOB'){
-	$levels = Array(1000 => 1000,
-			925 => 925,
-			850 => 850,
-			700 => 700,
-			500 => 500,
-			400 => 400,
-			300 => 300,
-			250 => 250,
-			150 => 150,
-			100 => 100);
-	$content .= 'Select Pressure Level: ' . make_select("level", $level, $levels) .' hPa<br />';
-	$hours = Array(0 => 0, 12 => 12);
-	$hs1 = make_select("hour1", $hour1, $hours);
-	$hs2 = make_select("hour2", $hour2, $hours);
-	$mi1 = "";
-	$mi2 = "";
+if ($network == 'RAOB') {
+    $levels = array(
+        1000 => 1000,
+        925 => 925,
+        850 => 850,
+        700 => 700,
+        500 => 500,
+        400 => 400,
+        300 => 300,
+        250 => 250,
+        150 => 150,
+        100 => 100
+    );
+    $content .= 'Select Pressure Level: ' . make_select("level", $level, $levels) . ' hPa<br />';
+    $hours = array(0 => 0, 12 => 12);
+    $hs1 = make_select("hour1", $hour1, $hours);
+    $hs2 = make_select("hour2", $hour2, $hours);
+    $mi1 = "";
+    $mi2 = "";
 }
-$ar = Array("kts" => "knots (KTS)",
-			"mph" => "miles per hour (MPH)",
-			"mps" => "meters per second (MPS)");
+$ar = array(
+    "kts" => "knots (KTS)",
+    "mph" => "miles per hour (MPH)",
+    "mps" => "meters per second (MPS)"
+);
 $uselect = make_select("units", $units, $ar);
 
 $content .= '<input type="checkbox" name="hourlimit" value="1" ';
-if (isset($_GET["hourlimit"])) $content .= "checked=\"checked\" "; 
+if (isset($_GET["hourlimit"])) $content .= "checked=\"checked\" ";
 $content .= 'id="r1"> <label for="r1">1. Limit to Hour of Start Time</label>';
 
 $content .= '<br /><input type="checkbox" name="monthlimit" value="1" ';
-if (isset($_GET["monthlimit"])) $content .= "checked=\"checked\" "; 
+if (isset($_GET["monthlimit"])) $content .= "checked=\"checked\" ";
 $content .= 'id="r2"> <label for="r2">2a. Limit to Month of Start Time</label>';
 
 $content .= '<br /><input type="checkbox" name="limit_by_doy" value="1" ';
-if (isset($_GET["limit_by_doy"])) $content .= "checked=\"checked\" "; 
+if (isset($_GET["limit_by_doy"])) $content .= "checked=\"checked\" ";
 $content .= 'id="r2b"> <label for="r2b">2b. Limit to Month+Day Period each Year</label>';
 
 $content .= '<br /><input type="checkbox" name="hourrangelimit" value="1" ';
-if (isset($_GET["hourrangelimit"])) $content .= "checked=\"checked\" "; 
+if (isset($_GET["hourrangelimit"])) $content .= "checked=\"checked\" ";
 $content .= 'id="r3"> <label for="r3">3. Limit to Range of hours given by start and end time</label>';
 
 $content .= '<br /><input type="checkbox" name="staticrange" value="1" ';
-if (isset($_GET["staticrange"])) $content .= "checked=\"checked\" "; 
+if (isset($_GET["staticrange"])) $content .= "checked=\"checked\" ";
 $content .= 'id="o1"> <label for="o1">Optional: Hard code the frequency axis limit to 100%</label>';
 
 // Allow setting of wind speed bins
@@ -170,31 +176,36 @@ reports together. A value of 2 knots is likely the most appropriate here. The
 bin ranges are inclusive on the lower end and exclusive on the upper end.</p>
 EOM;
 $content .= sprintf(
-    '<br /><input type="checkbox" name="setbins" '.
-	'value="1"%s id="o2"> <label for="o2">Optional. User provided wind speed bins</label><br />'.
-	'<div style="display: %s;" id="showbins"> 0 - '.
-	'<input type="text" name="bin0" value="%s" size="4"> - '.
-	'<input type="text" name="bin1" value="%s" size="4"> - '.
-	'<input type="text" name="bin2" value="%s" size="4"> - '.
-	'<input type="text" name="bin3" value="%s" size="4"> - '.
-	'<input type="text" name="bin4" value="%s" size="4"> - '.
-    '<input type="text" name="bin5" value="%s" size="4"> +'.
-    '%s'.
-	'</div>',
-		isset($_GET["setbins"]) ? " checked=\"checked\"": "",
-		isset($_GET["setbins"]) ? "block": "none",
-		$bins[0], $bins[1], $bins[2], $bins[3], $bins[4], $bins[5],
+    '<br /><input type="checkbox" name="setbins" ' .
+        'value="1"%s id="o2"> <label for="o2">Optional. User provided wind speed bins</label><br />' .
+        '<div style="display: %s;" id="showbins"> 0 - ' .
+        '<input type="text" name="bin0" value="%s" size="4"> - ' .
+        '<input type="text" name="bin1" value="%s" size="4"> - ' .
+        '<input type="text" name="bin2" value="%s" size="4"> - ' .
+        '<input type="text" name="bin3" value="%s" size="4"> - ' .
+        '<input type="text" name="bin4" value="%s" size="4"> - ' .
+        '<input type="text" name="bin5" value="%s" size="4"> +' .
+        '%s' .
+        '</div>',
+    isset($_GET["setbins"]) ? " checked=\"checked\"" : "",
+    isset($_GET["setbins"]) ? "block" : "none",
+    $bins[0],
+    $bins[1],
+    $bins[2],
+    $bins[3],
+    $bins[4],
+    $bins[5],
     $missive,
 );
 $jsextra = <<<EOF
 $(document).ready(function(){
-	$("input[name=setbins]").click(function(){
-		if (this.checked){
-			$("#showbins").show();
-		} else {
-			$("#showbins").hide();
-		}
-	});
+    $("input[name=setbins]").click(function(){
+        if (this.checked){
+            $("#showbins").show();
+        } else {
+            $("#showbins").hide();
+        }
+    });
 });
 EOF;
 
@@ -203,81 +214,85 @@ $content .= '<br />Display Units: ';
 $content .= $uselect;
 
 $content .= '<br />Direction Bins: <select name="nsector">';
-$opts = Array(8,12,16,20,24,28,32,36);
-foreach($opts as $k => $v){
-	$content .= sprintf("<option value=\"%s\" %s>%s</option>\n", $v, 
-			($nsector == $v) ? 'selected="selected"': '',$v);
+$opts = array(8, 12, 16, 20, 24, 28, 32, 36);
+foreach ($opts as $k => $v) {
+    $content .= sprintf(
+        "<option value=\"%s\" %s>%s</option>\n",
+        $v,
+        ($nsector == $v) ? 'selected="selected"' : '',
+        $v
+    );
 }
 
 
 $content .= '
 </select>
 
-<br />Image Format: '. $fselect .'
-<br />Image DPI: <input type="text" name="dpi" value="' . $dpi .'" size="4">
+<br />Image Format: ' . $fselect . '
+<br />Image DPI: <input type="text" name="dpi" value="' . $dpi . '" size="4">
 <br /><input type="submit"></td>
   </tr>
 
   <tr>
     <th>Start:</th>
     <td>
-     '. yearSelect2($firstyear, $year1, "year1") .'
+     ' . yearSelect2($firstyear, $year1, "year1") . '
     </td>
     <td>
-     '. monthSelect($month1, "month1") .'
+     ' . monthSelect($month1, "month1") . '
     </td>
     <td>
-     '. daySelect2($day1, "day1") .'
+     ' . daySelect2($day1, "day1") . '
     </td>
     <td>
-     '. $hs1 .'
+     ' . $hs1 . '
     </td>
     <td>
-     '. $mi1 .'
+     ' . $mi1 . '
     </td>
   </tr>
 
   <tr>
     <th>End:</th>
-    <td>'. yearSelect2($firstyear, $year2, "year2") .'</td>
+    <td>' . yearSelect2($firstyear, $year2, "year2") . '</td>
     <td>
-     '. monthSelect($month2, "month2") .'
+     ' . monthSelect($month2, "month2") . '
     </td>
     <td>
-     '. daySelect2($day2, "day2").'
+     ' . daySelect2($day2, "day2") . '
     </td>
     <td>
-     '. $hs2 .'
+     ' . $hs2 . '
     </td>
     <td>
-     '. $mi2 .'
+     ' . $mi2 . '
     </td>
   </tr>
 </table>
 </form>';
 
-if (isset($rose_uri)){
-  $content .= "<div class=\"alert alert-info\" id=\"img-loading\">Image will appear below once generated, please be patient...</div>";
-  $content .= "<a href='{$rosedata_uri}' class='btn btn-primary' role='button' rel='nofollow'><i class='fa fa-list'></i> View raw data for chart</a><br />";
-  if ($fmt == 'pdf'){
-  	$content .= <<<EOF
+if (isset($rose_uri)) {
+    $content .= "<div class=\"alert alert-info\" id=\"img-loading\">Image will appear below once generated, please be patient...</div>";
+    $content .= "<a href='{$rosedata_uri}' class='btn btn-primary' role='button' rel='nofollow'><i class='fa fa-list'></i> View raw data for chart</a><br />";
+    if ($fmt == 'pdf') {
+        $content .= <<<EOF
 <object id="windrose-plot" src="{$rose_uri}" width="700px" height="700px">
     <embed src="{$rose_uri}" width="700px" height="700px">
     </embed>
 </object>
 EOF;
-  } else {
-	  $content .= "<img src=\"$rose_uri\" class=\"img-responsive\" id=\"windrose-plot\">";
-  }
+    } else {
+        $content .= "<img src=\"$rose_uri\" class=\"img-responsive\" id=\"windrose-plot\">";
+    }
 } else {
-  $content .= "<div class=\"alert alert-info\">Please make your custom plot
-  		selections above</a>";
+    $content .= "<div class=\"alert alert-info\">Please make your custom plot
+          selections above</a>";
 }
 $t->jsextra = <<<EOF
 <script>
   $('#windrose-plot').load(function(){
-	$('#img-loading').css('display', 'none');	
-	});
+    $('#img-loading').css('display', 'none');	
+    });
 
 {$jsextra}
 </script>

@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 120);
 
@@ -9,18 +9,25 @@ require_once "../../include/imagemaps.php";
 
 $uri = "http://iem.local/json/vtec_emergencies.py";
 $data = file_get_contents($uri);
-$json = json_decode($data, $assoc=TRUE);
+$json = json_decode($data, $assoc = TRUE);
 $table = "";
-foreach($json['events'] as $key => $val){
-    $table .= sprintf("<tr><td>%s</td><td>%s</td><td>%s</td>".
-        "<td><a href=\"%s\">%s</a></td>".
-		"<td>%s</td><td>%s</td><td>%s %s</td><td>%s</td><td>%s</td></tr>",
+foreach ($json['events'] as $key => $val) {
+    $table .= sprintf(
+        "<tr><td>%s</td><td>%s</td><td>%s</td>" .
+            "<td><a href=\"%s\">%s</a></td>" .
+            "<td>%s</td><td>%s</td><td>%s %s</td><td>%s</td><td>%s</td></tr>",
         $val["year"],
-        $val["wfo"], $val["states"], $val["uri"], $val["eventid"],
-        $val["phenomena"], $val["significance"],
+        $val["wfo"],
+        $val["states"],
+        $val["uri"],
+        $val["eventid"],
+        $val["phenomena"],
+        $val["significance"],
         $vtec_phenomena[$val["phenomena"]],
-        $vtec_significance[$val["significance"]], 
-        $val["issue"], $val["expire"]);
+        $vtec_significance[$val["significance"]],
+        $val["issue"],
+        $val["expire"]
+    );
 }
 
 $t = new MyView();

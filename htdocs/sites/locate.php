@@ -4,23 +4,25 @@ $OL = "6.6.0";
  * Main landing page for the IEM Sites stuff
  */
 require_once "../../include/forms.php";
-if (isset($_GET["station"]) && isset($_GET["network"]))
-{
-	$uri = sprintf("site.php?station=%s&network=%s",
-			xssafe($_REQUEST["station"]), xssafe($_REQUEST["network"]));
-  	header("Location: $uri");
-  	exit();
+if (isset($_GET["station"]) && isset($_GET["network"])) {
+    $uri = sprintf(
+        "site.php?station=%s&network=%s",
+        xssafe($_REQUEST["station"]),
+        xssafe($_REQUEST["network"])
+    );
+    header("Location: $uri");
+    exit();
 }
- require_once "../../include/mlib.php";
- force_https();
- require_once "../../config/settings.inc.php";
- define("IEM_APPID", 5);
- require_once "../../include/database.inc.php";
- require_once "../../include/imagemaps.php";
- require_once "../../include/myview.php";
+require_once "../../include/mlib.php";
+force_https();
+require_once "../../config/settings.inc.php";
+define("IEM_APPID", 5);
+require_once "../../include/database.inc.php";
+require_once "../../include/imagemaps.php";
+require_once "../../include/myview.php";
 
-$network = isset($_GET["network"]) ? xssafe($_GET["network"]): "IA_ASOS";
-  
+$network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IA_ASOS";
+
 $t = new MyView();
 $t->title = "Site Locator";
 $t->headextra = <<<EOF
@@ -35,7 +37,7 @@ $t->jsextra = <<<EOF
 <script src="/vendor/select2/4.0.3/select2.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function(){
-	$(".iemselect2").select2();	
+    $(".iemselect2").select2();	
 });
 </script>
 EOF;

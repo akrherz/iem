@@ -34,10 +34,10 @@ $t->content = <<<EOF
 <p>This application allows you to search for National Weather Service Watch,
 Warning, and Advisories.  There are currently two options:
 <ul>
-	<li><a href="#bypoint">1. Search for Storm Based Warnings by Point</a></li>
-	<li><a href="#byugc">2. Search of Watch/Warning/Advisories by County/Zone or by Point</a></li>
+    <li><a href="#bypoint">1. Search for Storm Based Warnings by Point</a></li>
+    <li><a href="#byugc">2. Search of Watch/Warning/Advisories by County/Zone or by Point</a></li>
 </ul>
-		
+        
 <h3><a name="bypoint">1.</a> Search for Storm Based Warnings by Point</h3>
 
 <br />The official warned area for some products the NWS issues is a polygon.
@@ -46,21 +46,21 @@ marker to where you are interested in.  Once you stop dragging the marker, the
 grid will update and provide a listing of storm based warnings found.  
 <br clear="all" />
 <div class="row">
-	<div class="col-md-4">
-		<p><strong>Either enter coordinates manually:</strong><br />
-		<i>Latitude (deg N):</i> <input size="8" id="lat" value="41.53"><br />
-		<i>Longitude (deg E):</i> <input size="8" id="lon" value="-93.653">
+    <div class="col-md-4">
+        <p><strong>Either enter coordinates manually:</strong><br />
+        <i>Latitude (deg N):</i> <input size="8" id="lat" value="41.53"><br />
+        <i>Longitude (deg E):</i> <input size="8" id="lon" value="-93.653">
         <br /><label for="sdate1">Start Date:
             <input name="sdate1" type="text" id="sdate1"></label>
             <br /><label for="edate1">End Date:
             <input name="edate1" type="text" id="edate1"></label>
     
         <button type="button" class="btn btn-default" id="manualpt">Update</button>
-		</p>
-		<p><strong>Or drag marker to select coordinate:</strong><br />
-		<div id="map" class="map"></div>
-	</div>
-	<div class="col-md-8">
+        </p>
+        <p><strong>Or drag marker to select coordinate:</strong><br />
+        <div id="map" class="map"></div>
+    </div>
+    <div class="col-md-8">
     <h4 id="table1title"></h4>
     <button type="button" data-table="1" data-opt="excel" class="btn btn-default iemtool"><i class="fa fa-download"></i> Export to Excel...</button>
     <button type="button" data-table="1" data-opt="csv" class="btn btn-default iemtool"><i class="fa fa-download"></i> Export to CSV...</button>
@@ -94,19 +94,19 @@ some products (like winter warnings), they issue for forecast zones.
 <div class="alert alert-warning">Please note: NWS forecast offices have 
 changed over the years, this application may incorrectly label old warnings as coming from
 an office that did not exist at the time.
-		
-	<br /><strong>Also note:</strong> This particular search interface will return
-		<strong>false-positives</strong> for some warnings that are now fully polygon/storm based. The IEM
-		database tracks the UGC areas associated with the storm based warnings. So querying
-		by UGC (even if you query by point), will return some warnings that were not actually
-		active for that point, but were technically active for that UGC of which the point
-		falls inside of. Please use the above search for these types of warnings!
-		</div>
+        
+    <br /><strong>Also note:</strong> This particular search interface will return
+        <strong>false-positives</strong> for some warnings that are now fully polygon/storm based. The IEM
+        database tracks the UGC areas associated with the storm based warnings. So querying
+        by UGC (even if you query by point), will return some warnings that were not actually
+        active for that point, but were technically active for that UGC of which the point
+        falls inside of. Please use the above search for these types of warnings!
+        </div>
 <br />
 
 <form id="form2">
 <div class="row">
-	<div class="col-md-4">
+    <div class="col-md-4">
         <label for="state">Select State:
         <select name="state" style="width: 100%"></select></label>
         <br /><label for="ugc">Select County/Zone:
@@ -115,17 +115,17 @@ an office that did not exist at the time.
         <input name="sdate" type="text"></label>
         <br /><label for="edate">End Date:
         <input name="edate" type="text"></label>
-		
-		<p><strong>You can otherwise search by lat/lon point. The start and
-		end date set above are used with this option as well:</strong><br />
-		<i>Latitude (deg N):</i> <input size="8" id="lat2" value="41.53"><br />
-		<i>Longitude (deg E):</i> <input size="8" id="lon2" value="-93.653">
-		<button type="button" class="btn btn-default" id="manualpt2">Update</button>
-		</p>
-		<p><strong>Or drag marker to select coordinate:</strong><br />
-		<div id="map2" class="map"></div>
-	</div>
-	<div class="col-md-8">
+        
+        <p><strong>You can otherwise search by lat/lon point. The start and
+        end date set above are used with this option as well:</strong><br />
+        <i>Latitude (deg N):</i> <input size="8" id="lat2" value="41.53"><br />
+        <i>Longitude (deg E):</i> <input size="8" id="lon2" value="-93.653">
+        <button type="button" class="btn btn-default" id="manualpt2">Update</button>
+        </p>
+        <p><strong>Or drag marker to select coordinate:</strong><br />
+        <div id="map2" class="map"></div>
+    </div>
+    <div class="col-md-8">
     <h4 id="table2title"></h4>
     <button type="button" data-table="2" data-opt="excel" class="btn btn-default iemtool"><i class="fa fa-download"></i> Export to Excel...</button>
     <button type="button" data-table="2" data-opt="csv" class="btn btn-default iemtool"><i class="fa fa-download"></i> Export to CSV...</button>
@@ -135,9 +135,9 @@ an office that did not exist at the time.
     <tr><th>Event</th><th>Phenomena</th><th>Significance</th><th>Issued</th>
     <th>Expired</th></tr></thead>
     </table>
-	</div>
+    </div>
 </div><!-- ./row -->
 </form><!-- ./form2 -->
-		
+        
 EOF;
 $t->render('full.phtml');

@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/mlib.php";
 force_https();
@@ -10,40 +10,43 @@ require_once "../../include/iemprop.php";
 $gmapskey = get_iemprop("google.maps.key");
 
 $alertmsg = "";
-if (isset($_GET["lat"]) &&
-		$_GET["lat"] != "move marker" &&
-		floatval($_GET["lat"]) != 0 &&
-		floatval($_GET["lat"]) != 1 &&
-		floatval($_GET["lat"]) != -1 &&
-		floatval($_GET["lon"]) != 0 &&
-		floatval($_GET["lon"]) != 1 &&
-		floatval($_GET["lon"]) != -1){
+if (
+    isset($_GET["lat"]) &&
+    $_GET["lat"] != "move marker" &&
+    floatval($_GET["lat"]) != 0 &&
+    floatval($_GET["lat"]) != 1 &&
+    floatval($_GET["lat"]) != -1 &&
+    floatval($_GET["lon"]) != 0 &&
+    floatval($_GET["lon"]) != 1 &&
+    floatval($_GET["lon"]) != -1
+) {
     // Log the request so to effectively do some DOS protection.
     $pgconn = iemdb("mesosite");
     $rs = pg_prepare(
         $pgconn,
         "INSERT",
-        "INSERT into weblog(client_addr, uri, referer, http_status) ".
-        "VALUES ($1, $2, $3, $4)"
+        "INSERT into weblog(client_addr, uri, referer, http_status) " .
+            "VALUES ($1, $2, $3, $4)"
     );
     pg_execute(
         $pgconn,
         "INSERT",
-        Array(
+        array(
             $_SERVER["REMOTE_ADDR"],
             "/sites/site.php?network={$network}&station={$station}",
             $_SERVER["HTTP_REFERER"],
-            404)
+            404
+        )
     );
     pg_close($pgconn);
 
     $newlat = floatval($_GET["lat"]);
-	$newlon = floatval($_GET["lon"]);
-	$email = isset($_GET["email"]) ? xssafe($_GET["email"]): 'n/a';
-	$name = isset($_GET["name"]) ? xssafe($_GET["name"]): "n/a";
+    $newlon = floatval($_GET["lon"]);
+    $email = isset($_GET["email"]) ? xssafe($_GET["email"]) : 'n/a';
+    $name = isset($_GET["name"]) ? xssafe($_GET["name"]) : "n/a";
     $delta = (
-        ($newlat - $cities[$station]["lat"]) ** 2 + 
-        ($newlon - $cities[$station]["lon"]) ** 2)**0.5;
+        ($newlat - $cities[$station]["lat"]) ** 2 +
+        ($newlon - $cities[$station]["lon"]) ** 2) ** 0.5;
     $msg = <<<EOF
 IEM Sites Move Request
 ======================
@@ -57,7 +60,7 @@ IEM Sites Move Request
 
 https://mesonet.agron.iastate.edu/sites/site.php?network={$network}&station={$station}
 EOF;
-    if (($delta < 0.5) || (strpos($email, '@') > 0)){
+    if (($delta < 0.5) || (strpos($email, '@') > 0)) {
         mail("akrherz@iastate.edu", "Please move {$station} {$network}", $msg);
     }
     $alertmsg = <<<EOM
@@ -76,25 +79,30 @@ $t->sites_current = "base";
 $lat = sprintf("%.5f", $cities[$station]["lat"]);
 $lon = sprintf("%.5f", $cities[$station]["lon"]);
 
-function pretty_key($key){
-    if ($key == "TRACKS_STATION"){
+function pretty_key($key)
+{
+    if ($key == "TRACKS_STATION") {
         return "Data tracks station";
     }
     return $key;
 }
-function pretty_value($key, $value){
-    if ($key == "TRACKS_STATION"){
+function pretty_value($key, $value)
+{
+    if ($key == "TRACKS_STATION") {
         $tokens = explode("|", $value);
         return sprintf(
             '<a href="/sites/site.php?station=%s&network=%s">%s [%s]</a>',
-            $tokens[0], $tokens[1], $tokens[0], $tokens[1]
+            $tokens[0],
+            $tokens[1],
+            $tokens[0],
+            $tokens[1]
         );
     }
     return $value;
 }
 
 $attrtable = "";
-if (sizeof($cities[$station]["attributes"]) > 0){
+if (sizeof($cities[$station]["attributes"]) > 0) {
     $attrtable .= <<<EOM
     <h3>Station Attributes:</h3>
     <p><i>These are key value pairs used by the IEM to do data management.</i></p>
@@ -102,7 +110,7 @@ if (sizeof($cities[$station]["attributes"]) > 0){
     <thead><tr><th>Key / Description</th><th>Value</th></tr></thead>
     <tbody>
 EOM;
-    foreach($cities[$station]["attributes"] as $key => $value){
+    foreach ($cities[$station]["attributes"] as $key => $value) {
         $attrtable .= sprintf(
             "<tr><td>%s</td><td>%s</td></tr>",
             pretty_key($key),
@@ -112,18 +120,18 @@ EOM;
     $attrtable .= "</tbody></table>";
 }
 $threading = "";
-if ((strpos($network, "CLIMATE") > 0) && (substr($station, 2, 1) == "T")){
+if ((strpos($network, "CLIMATE") > 0) && (substr($station, 2, 1) == "T")) {
     $pgconn = iemdb("mesosite");
     pg_prepare(
         $pgconn,
         "SELECT",
-        "SELECT t.id, t.network, t.name, s.begin_date, s.end_date ".
-        "from station_threading s ".
-        "JOIN stations t on (s.source_iemid = t.iemid) WHERE s.iemid = $1 ".
-        "ORDER by s.begin_date ASC"
+        "SELECT t.id, t.network, t.name, s.begin_date, s.end_date " .
+            "from station_threading s " .
+            "JOIN stations t on (s.source_iemid = t.iemid) WHERE s.iemid = $1 " .
+            "ORDER by s.begin_date ASC"
     );
-    $result = pg_execute($pgconn, "SELECT", Array($metadata["iemid"]));
-    if (pg_numrows($result) > 0){
+    $result = pg_execute($pgconn, "SELECT", array($metadata["iemid"]));
+    if (pg_numrows($result) > 0) {
         $threading = <<<EOM
 <h3>Station Threading:</h3>
 <p>This station threads together data from multiple stations to provide a
@@ -133,14 +141,18 @@ long term record for the location.</p>
 <tbody>
 EOM;
     }
-    while ($row = pg_fetch_array($result)){
+    while ($row = pg_fetch_array($result)) {
         $threading .= sprintf(
             "<tr><td><a href=\"/sites/site.php?station=%s&network=%s\">%s (%s)</a></td><td>%s</td><td>%s</td></tr>",
-            $row["id"], $row["network"], $row["name"], $row["id"],
-            $row["begin_date"], $row["end_date"],
+            $row["id"],
+            $row["network"],
+            $row["name"],
+            $row["id"],
+            $row["begin_date"],
+            $row["end_date"],
         );
     }
-    if (pg_numrows($result) > 0){
+    if (pg_numrows($result) > 0) {
         $threading .= "</tbody></table>";
     }
     pg_close($pgconn);
@@ -179,16 +191,16 @@ $t->content = <<<EOF
  <strong>Is the location shown for this station wrong?</strong>
  <br />If so, please consider submitting a location submission by moving the marker
  on the map and completing this form below.<br />
-	<form name="updatecoords" method="GET">
-	<input type="hidden" value="{$network}" name="network">
-	<input type="hidden" value="{$station}" name="station">
-	New Latitude: <input id="newlat" type="text" size="10" name="lat" placeholder="move marker">
-	New Longitude: <input id="newlon" type="text" size="10" name="lon" placeholder="move marker">
-	<br />Enter Your Email Address [1]: <input type="text" size="40" name="email" placeholder="optional">
-	<br />Better Location Name?: <input type="text" name="name" value="{$cities[$station]["name"]}" />
-	<br />[1] Your email address will not be shared nor will you be added to any
-	lists. The IEM developer will simply email you back after consideration of
-	this request.
+    <form name="updatecoords" method="GET">
+    <input type="hidden" value="{$network}" name="network">
+    <input type="hidden" value="{$station}" name="station">
+    New Latitude: <input id="newlat" type="text" size="10" name="lat" placeholder="move marker">
+    New Longitude: <input id="newlon" type="text" size="10" name="lon" placeholder="move marker">
+    <br />Enter Your Email Address [1]: <input type="text" size="40" name="email" placeholder="optional">
+    <br />Better Location Name?: <input type="text" name="name" value="{$cities[$station]["name"]}" />
+    <br />[1] Your email address will not be shared nor will you be added to any
+    lists. The IEM developer will simply email you back after consideration of
+    this request.
 
     <br /><strong>Note:</strong> If you are looking for a wind rose for a location
     other than this, your only option on this website is to find the nearest station
@@ -207,24 +219,24 @@ function load(){
           };
     map = new google.maps.Map(document.getElementById('mymap'),
               mapOptions);
-	marker = new google.maps.Marker({
-            		position: mapOptions.center,
- 	 				map: map,
-					draggable: true
-				});
+    marker = new google.maps.Marker({
+                    position: mapOptions.center,
+                      map: map,
+                    draggable: true
+                });
     google.maps.event.addListener(marker, 'dragend', function() {
           displayCoordinates(marker.getPosition());
     });
-            		
+                    
     //callback on when the marker is done moving    		
-	function displayCoordinates(pnt) {
+    function displayCoordinates(pnt) {
         var lat = pnt.lat();
         lat = lat.toFixed(8);
         var lng = pnt.lng();
-		lng = lng.toFixed(8);
-		$("#newlat").val(lat);
+        lng = lng.toFixed(8);
+        $("#newlat").val(lat);
         $("#newlon").val(lng);
-	}
+    }
 }
 google.maps.event.addDomListener(window, 'load', load);
 

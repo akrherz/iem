@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 85);
 require_once "../../include/myview.php";
@@ -6,56 +6,76 @@ require_once "../../include/vtec.php";
 require_once "../../include/forms.php";
 require_once "../../include/imagemaps.php";
 
-$wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"], 0, 4): 'DMX';
+$wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"], 0, 4) : 'DMX';
 $year = get_int404("year", intval(date("Y")));
-$state = isset($_GET['state']) ? substr($_GET["state"], 0, 2): 'IA';
-$which = isset($_GET["which"]) ? $_GET["which"]: 'wfo';
-$significance = isset($_GET["s"]) ? xssafe($_GET["s"]): "";
-$phenomena = isset($_GET["p"]) ? xssafe($_GET["p"]): "";
+$state = isset($_GET['state']) ? substr($_GET["state"], 0, 2) : 'IA';
+$which = isset($_GET["which"]) ? $_GET["which"] : 'wfo';
+$significance = isset($_GET["s"]) ? xssafe($_GET["s"]) : "";
+$phenomena = isset($_GET["p"]) ? xssafe($_GET["p"]) : "";
 $pon = (isset($_GET["pon"]) && $_GET["pon"] == "on");
 $son = (isset($_GET["son"]) && $_GET["son"] == "on");
 
 
-if ($which == 'wfo'){
-	$service = "";
-	$uri = sprintf("http://iem.local/json/vtec_events.py?wfo=%s&year=%s", 
-	$wfo, $year);
+if ($which == 'wfo') {
+    $service = "";
+    $uri = sprintf(
+        "http://iem.local/json/vtec_events.py?wfo=%s&year=%s",
+        $wfo,
+        $year
+    );
 } else {
-	$service = "_bystate";
-	$uri = sprintf("http://iem.local/json/vtec_events_bystate.py?state=%s&year=%s", 
-	$state, $year);
+    $service = "_bystate";
+    $uri = sprintf(
+        "http://iem.local/json/vtec_events_bystate.py?state=%s&year=%s",
+        $state,
+        $year
+    );
 }
-if ($significance != "" && $son){
+if ($significance != "" && $son) {
     $uri .= sprintf("&significance=%s", $significance);
 }
-if ($phenomena != "" && $pon){
+if ($phenomena != "" && $pon) {
     $uri .= sprintf("&phenomena=%s", $phenomena);
 }
 $public_uri = str_replace(
-    "http://iem.local", "https://mesonet.agron.iastate.edu", $uri);
+    "http://iem.local",
+    "https://mesonet.agron.iastate.edu",
+    $uri
+);
 $data = file_get_contents($uri);
-$json = json_decode($data, $assoc=TRUE);
+$json = json_decode($data, $assoc = TRUE);
 $table = "";
-if (sizeof($json["events"]) == 0){
+if (sizeof($json["events"]) == 0) {
     $table .= "<tr><th colspan=\"8\">No Events Found</th><tr>";
 }
-foreach($json['events'] as $key => $val){
+foreach ($json['events'] as $key => $val) {
     $hmlurl = "";
-    if (($val["hvtec_nwsli"] != null) && ($val["hvtec_nwsli"] != "00000")){
+    if (($val["hvtec_nwsli"] != null) && ($val["hvtec_nwsli"] != "00000")) {
         $ts = strtotime($val["issue"]);
         // Create a deep link to HML autoplot
-        $hmlurl = sprintf("<a href=\"https://mesonet.agron.iastate.edu/". 
-            "plotting/auto/?_wait=no&q=160&station=%s&dt=%s\">%s</a>",
-            $val["hvtec_nwsli"], date("Y/m/d 0000", $ts), $val["hvtec_nwsli"]);
+        $hmlurl = sprintf(
+            "<a href=\"https://mesonet.agron.iastate.edu/" .
+                "plotting/auto/?_wait=no&q=160&station=%s&dt=%s\">%s</a>",
+            $val["hvtec_nwsli"],
+            date("Y/m/d 0000", $ts),
+            $val["hvtec_nwsli"]
+        );
     }
-	$table .= sprintf("<tr><td>%s</td><td><a href=\"%s\">%s</a></td>".
-            "<td>%s</td><td>%s</td><td>%s %s</td><td>%s</td><td>%s</td>".
+    $table .= sprintf(
+        "<tr><td>%s</td><td><a href=\"%s\">%s</a></td>" .
+            "<td>%s</td><td>%s</td><td>%s %s</td><td>%s</td><td>%s</td>" .
             "<td>%s</td></tr>",
-			$val["wfo"], $val["uri"], $val["eventid"],
-			$val["phenomena"], $val["significance"],
-			$vtec_phenomena[$val["phenomena"]],
-			$vtec_significance[$val["significance"]], 
-			$val["issue"], $val["expire"], $hmlurl);
+        $val["wfo"],
+        $val["uri"],
+        $val["eventid"],
+        $val["phenomena"],
+        $val["significance"],
+        $vtec_phenomena[$val["phenomena"]],
+        $vtec_significance[$val["significance"]],
+        $val["issue"],
+        $val["expire"],
+        $hmlurl
+    );
 }
 
 $t = new MyView();
@@ -77,10 +97,10 @@ $stselect = stateSelect($state);
 $pselect = make_select("p", $phenomena, $vtec_phenomena);
 $sselect = make_select("s", $significance, $vtec_significance);
 
-$wchecked = ($which == 'wfo') ? "CHECKED": "";
-$schecked = ($which == 'state') ? "CHECKED": "";
-$ponchecked = $pon ? "CHECKED": "";
-$sonchecked = $son ? "CHECKED": "";
+$wchecked = ($which == 'wfo') ? "CHECKED" : "";
+$schecked = ($which == 'state') ? "CHECKED" : "";
+$ponchecked = $pon ? "CHECKED" : "";
+$sonchecked = $son ? "CHECKED" : "";
 
 $t->content = <<<EOF
 <ol class="breadcrumb">

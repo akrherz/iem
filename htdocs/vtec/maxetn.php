@@ -1,15 +1,15 @@
 <?php 
-include_once "../../config/settings.inc.php";
-include_once "../../include/forms.php";
+require_once "../../config/settings.inc.php";
+require_once "../../include/forms.php";
 define("IEM_APPID", 115);
 $year = get_int404("year", intval(date("Y")));
 
-include_once "../../include/myview.php";
-include_once "../../include/vtec.php";
-include_once "../../include/imagemaps.php";
+require_once "../../include/myview.php";
+require_once "../../include/vtec.php";
+require_once "../../include/imagemaps.php";
 
 $uri = sprintf("http://iem.local/json/vtec_max_etn.py?year=%s&format=html", 
-		$year);
+        $year);
 $wsuri = sprintf("https://mesonet.agron.iastate.edu/json/vtec_max_etn.py?year=%s",
     $year);
 $table = file_get_contents($uri);
@@ -41,12 +41,12 @@ see presented on this page<br />
 <code>{$wsuri}</code></p>
 
 <form method="GET" action="maxetn.php">
-		Select Year: $yselect
-		<input type="submit" value="Generate Table">
+        Select Year: $yselect
+        <input type="submit" value="Generate Table">
 </form>
 
 <hr >
-	<h3>Max VTEC ETN listing for {$year}</h3>
+    <h3>Max VTEC ETN listing for {$year}</h3>
 <div id="thetable">
 {$table}
 </div>

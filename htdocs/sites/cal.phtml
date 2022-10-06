@@ -16,43 +16,43 @@ $xref = Array("IA_ASOS" => "iaawos",
 $portfolio = array_key_exists($network, $xref) ? $xref[$network]: null;
 
 $varDict = Array("tmpf" => "Air Temperature [F]",
-		"dwpf" => "Dew Point [F]");
+        "dwpf" => "Dew Point [F]");
 $table = "";
 if ($portfolio != null)
 {
-	$conn = iemdb("portfolio");
+    $conn = iemdb("portfolio");
     $rs = pg_prepare(
         $conn,
         "SELECT",
         "SELECT * from iem_calibration WHERE portfolio = $1 and ".
         "station = $2 ORDER by valid DESC"
     );
-	$rs = pg_execute($conn, "SELECT", array($portfolio, $station));
+    $rs = pg_execute($conn, "SELECT", array($portfolio, $station));
 
-	if (pg_numrows($rs) == 0){
-		$table .= "<tr><th colspan=6>No events found in database.</th></tr>";
-	}
+    if (pg_numrows($rs) == 0){
+        $table .= "<tr><th colspan=6>No events found in database.</th></tr>";
+    }
 
-	$rowDict = Array("tmpf"=>"", "dwpf"=>"");
-	for( $i=0; $row = pg_fetch_array($rs); $i++)
-	{
-		$param = $row["parameter"];
-		$color = "#00f";
-		$ts = strtotime(substr($row["valid"], 0, 16));
-		$ds = date("d M Y, h:i A", $ts);
-		if (floatval($row["adjustment"]) > 0){ $color = "#f00"; }
-		$rowDict[$param] .= sprintf("<tr style=\"color: $color;\"><th>%s</th><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", $row["id"], $row["station"], $ds, $row["parameter"], $row["final"], $row["adjustment"]);
-		if (strlen($row["comments"]) > 0){ $rowDict[$param] .= "<tr><td></td><td colspan=5>Comments: ". $row["comments"] ."</td></tr>"; }
-	}
+    $rowDict = Array("tmpf"=>"", "dwpf"=>"");
+    for( $i=0; $row = pg_fetch_array($rs); $i++)
+    {
+        $param = $row["parameter"];
+        $color = "#00f";
+        $ts = strtotime(substr($row["valid"], 0, 16));
+        $ds = date("d M Y, h:i A", $ts);
+        if (floatval($row["adjustment"]) > 0){ $color = "#f00"; }
+        $rowDict[$param] .= sprintf("<tr style=\"color: $color;\"><th>%s</th><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", $row["id"], $row["station"], $ds, $row["parameter"], $row["final"], $row["adjustment"]);
+        if (strlen($row["comments"]) > 0){ $rowDict[$param] .= "<tr><td></td><td colspan=5>Comments: ". $row["comments"] ."</td></tr>"; }
+    }
 
 
-	foreach($rowDict as $param => $tbl){
-		$table .= "<tr><th colspan=\"6\" align=\"left\" style=\"background: #eee; border-bottom: 1px solid #000\">". $varDict[$param] ."</th></tr>";
-		$table .= $tbl;
-	}
+    foreach($rowDict as $param => $tbl){
+        $table .= "<tr><th colspan=\"6\" align=\"left\" style=\"background: #eee; border-bottom: 1px solid #000\">". $varDict[$param] ."</th></tr>";
+        $table .= $tbl;
+    }
 
 } else {
-	$table .= "<tr><td colspan=\"6\">Sorry no calibration information is collected for $network network</td></tr>";
+    $table .= "<tr><td colspan=\"6\">Sorry no calibration information is collected for $network network</td></tr>";
 }
 
 
@@ -70,4 +70,3 @@ $t->content = <<<EOF
 </table>
 EOF;
 $t->render('sites.phtml');
-?>

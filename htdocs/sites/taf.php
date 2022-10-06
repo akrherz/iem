@@ -1,10 +1,10 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "setup.php";
 require_once "../../include/myview.php";
 
-$station4 = (strlen($station) == 3) ? sprintf("K%s", $station): $station;
+$station4 = (strlen($station) == 3) ? sprintf("K%s", $station) : $station;
 $station3 = substr($station4, 1, 3);
 
 $t = new MyView();

@@ -490,7 +490,7 @@ function initUI() {
         format: "L LT",
         step: 1,
         maxDate: '+1970/01/03',
-        minDate: '2001/01/01',
+        minDate: '2003/01/01',
         onClose: function (dp, $input) {
             loadData();
         }

@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "setup.php";
 require_once "../../include/mlib.php";
 require_once "../../include/forms.php";
@@ -6,142 +6,174 @@ require_once "../../include/myview.php";
 /*
  * Rip off weather bureau website, but do it better
  */
-function wind_formatter($row){
-    if (is_null($row["drct"]) && is_null($row["sknt"])){
+function wind_formatter($row)
+{
+    if (is_null($row["drct"]) && is_null($row["sknt"])) {
         return "M";
     }
-	if (is_null($row["drct"]) && ($row["sknt"] > 0) && ($row["sknt"] < 10)) {
-		return sprintf("VRB %.0f", $row["sknt"] * 1.15);
-	}
-	if (($row["drct"] == 0) && ($row["sknt"] == 0)) {
-		return "Calm";
-	}
-	if (is_null($row["drct"])){
-		return "M";
-	}
-	$gust_text = "";
-	if ($row["gust"] > 0){
-		$gust_text = sprintf("G %.0f", $row["gust"] * 1.15);
-	}
-	return sprintf("%s %.0f%s", drct2txt($row["drct"]), $row["sknt"] * 1.15,
-	$gust_text );
+    if (is_null($row["drct"]) && ($row["sknt"] > 0) && ($row["sknt"] < 10)) {
+        return sprintf("VRB %.0f", $row["sknt"] * 1.15);
+    }
+    if (($row["drct"] == 0) && ($row["sknt"] == 0)) {
+        return "Calm";
+    }
+    if (is_null($row["drct"])) {
+        return "M";
+    }
+    $gust_text = "";
+    if ($row["gust"] > 0) {
+        $gust_text = sprintf("G %.0f", $row["gust"] * 1.15);
+    }
+    return sprintf(
+        "%s %.0f%s",
+        drct2txt($row["drct"]),
+        $row["sknt"] * 1.15,
+        $gust_text
+    );
 }
-function indy_sky_formatter($skyc, $skyl){
-	if (intval($skyl) > 0){ $skyl = sprintf("%03d", $skyl/100); }
-	else { $skyl = "";}	
-	if (is_null($skyc) || trim($skyc) == "") return "";
-	return sprintf("%s%s<br />", $skyc,$skyl);
+function indy_sky_formatter($skyc, $skyl)
+{
+    if (intval($skyl) > 0) {
+        $skyl = sprintf("%03d", $skyl / 100);
+    } else {
+        $skyl = "";
+    }
+    if (is_null($skyc) || trim($skyc) == "") return "";
+    return sprintf("%s%s<br />", $skyc, $skyl);
 }
-function sky_formatter($row){
-	return sprintf("%s%s%s%s", 
-	indy_sky_formatter($row["skyc1"], $row["skyl1"]),
-	indy_sky_formatter($row["skyc2"], $row["skyl2"]),
-	indy_sky_formatter($row["skyc3"], $row["skyl3"]),
-	indy_sky_formatter($row["skyc4"], $row["skyl4"])
-	);
+function sky_formatter($row)
+{
+    return sprintf(
+        "%s%s%s%s",
+        indy_sky_formatter($row["skyc1"], $row["skyl1"]),
+        indy_sky_formatter($row["skyc2"], $row["skyl2"]),
+        indy_sky_formatter($row["skyc3"], $row["skyl3"]),
+        indy_sky_formatter($row["skyc4"], $row["skyl4"])
+    );
 }
-function temp_formatter($val){
-	if (is_null($val)) return "";
-	return sprintf("%.0f", $val);
+function temp_formatter($val)
+{
+    if (is_null($val)) return "";
+    return sprintf("%.0f", $val);
 }
-function vis_formatter($val){
-	if (is_null($val)) return "";
-	return round($val, 2);
+function vis_formatter($val)
+{
+    if (is_null($val)) return "";
+    return round($val, 2);
 }
-function precip_formatter($val){
+function precip_formatter($val)
+{
     if (is_null($val)) return "";
     if ($val == 0.0001) return "T";
     return round($val, 2);
 }
-function asos_formatter($i, $row){
-	$ts = strtotime(substr($row["local_valid"], 0, 16));
-	$relh = relh(f2c($row["tmpf"]), f2c($row["dwpf"]) );
-	$relh = (! is_null($relh)) ? intval($relh): "";
-	$ismadis = (strpos($row["raw"], "MADISHF") > 0); 
-	return sprintf("<tr style=\"background: %s;\" class=\"%sob\" data-madis=\"%s\">" .
-	"</div><td>%s</td><td>%s</td><td>%s</td>
-	<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>
-	<td><span class=\"high\">%s</span></td>
-	<td><span class=\"low\">%s</span></td>
-	<td>%s%%</td>
-	<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>
-	<tr style=\"background: %s;\" class=\"%smetar\">" .
-	"<td colspan=\"17\">%s</td></tr>", 
-	($i % 2 == 0)? "#FFF": "#EEE",
-	$ismadis ? "hf": "",
-	$ismadis ? "1": "0",
-	date("g:i A", $ts), wind_formatter($row) , vis_formatter($row["vsby"]),
-	sky_formatter($row), $row["wxcodes"], temp_formatter($row["tmpf"]), 
-	temp_formatter($row["dwpf"]),
-	temp_formatter($row["feel"]),
-	temp_formatter($row["max_tmpf_6hr"]), temp_formatter($row["min_tmpf_6hr"]), 
-	relh(f2c($row["tmpf"]), f2c($row["dwpf"])),
-    $row["alti"], $row["mslp"],
-    $row["snowdepth"],
-    precip_formatter($row["p01i"]),
-    precip_formatter($row["p03i"]),
-    precip_formatter($row["p06i"]),
-	($i % 2 == 0)? "#FFF": "#EEE",
-	$ismadis ? " hf": "", $row["raw"]
-	);
+function asos_formatter($i, $row)
+{
+    $ts = strtotime(substr($row["local_valid"], 0, 16));
+    $relh = relh(f2c($row["tmpf"]), f2c($row["dwpf"]));
+    $relh = (!is_null($relh)) ? intval($relh) : "";
+    $ismadis = (strpos($row["raw"], "MADISHF") > 0);
+    return sprintf(
+        "<tr style=\"background: %s;\" class=\"%sob\" data-madis=\"%s\">" .
+            "</div><td>%s</td><td>%s</td><td>%s</td>
+    <td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>
+    <td><span class=\"high\">%s</span></td>
+    <td><span class=\"low\">%s</span></td>
+    <td>%s%%</td>
+    <td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>
+    <tr style=\"background: %s;\" class=\"%smetar\">" .
+            "<td colspan=\"17\">%s</td></tr>",
+        ($i % 2 == 0) ? "#FFF" : "#EEE",
+        $ismadis ? "hf" : "",
+        $ismadis ? "1" : "0",
+        date("g:i A", $ts),
+        wind_formatter($row),
+        vis_formatter($row["vsby"]),
+        sky_formatter($row),
+        $row["wxcodes"],
+        temp_formatter($row["tmpf"]),
+        temp_formatter($row["dwpf"]),
+        temp_formatter($row["feel"]),
+        temp_formatter($row["max_tmpf_6hr"]),
+        temp_formatter($row["min_tmpf_6hr"]),
+        relh(f2c($row["tmpf"]), f2c($row["dwpf"])),
+        $row["alti"],
+        $row["mslp"],
+        $row["snowdepth"],
+        precip_formatter($row["p01i"]),
+        precip_formatter($row["p03i"]),
+        precip_formatter($row["p06i"]),
+        ($i % 2 == 0) ? "#FFF" : "#EEE",
+        $ismadis ? " hf" : "",
+        $row["raw"]
+    );
 }
-function formatter($i, $row){
-	$ts = strtotime(substr($row["local_valid"], 0, 16));
-	$relh = relh(f2c($row["tmpf"]), f2c($row["dwpf"]) );
-	$relh = (! is_null($relh)) ? intval($relh): "";
-	return sprintf("<tr style=\"background: %s;\">" .
-	"<td>%s</td><td>%s</td><td>%s</td>
-	<td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
-	($i % 2 == 0)? "#FFF": "#EEE",
-	date("g:i A", $ts), wind_formatter($row) , temp_formatter($row["tmpf"]), 
-	temp_formatter($row["dwpf"]),
-	temp_formatter($row["feel"]),
-	relh(f2c($row["tmpf"]), f2c($row["dwpf"])),
-    precip_formatter($row["phour"]),
-	);
+function formatter($i, $row)
+{
+    $ts = strtotime(substr($row["local_valid"], 0, 16));
+    $relh = relh(f2c($row["tmpf"]), f2c($row["dwpf"]));
+    $relh = (!is_null($relh)) ? intval($relh) : "";
+    return sprintf(
+        "<tr style=\"background: %s;\">" .
+            "<td>%s</td><td>%s</td><td>%s</td>
+    <td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
+        ($i % 2 == 0) ? "#FFF" : "#EEE",
+        date("g:i A", $ts),
+        wind_formatter($row),
+        temp_formatter($row["tmpf"]),
+        temp_formatter($row["dwpf"]),
+        temp_formatter($row["feel"]),
+        relh(f2c($row["tmpf"]), f2c($row["dwpf"])),
+        precip_formatter($row["phour"]),
+    );
 }
-function hads_formatter($i, $row, $shefcols){
-	$ts = strtotime(substr($row["local_valid"], 0, 16));
-	$relh = relh(f2c($row["tmpf"]), f2c($row["dwpf"]) );
-	$relh = (! is_null($relh)) ? intval($relh): "";
+function hads_formatter($i, $row, $shefcols)
+{
+    $ts = strtotime(substr($row["local_valid"], 0, 16));
+    $relh = relh(f2c($row["tmpf"]), f2c($row["dwpf"]));
+    $relh = (!is_null($relh)) ? intval($relh) : "";
     $html = "";
-    foreach ($shefcols as $bogus => $name){
+    foreach ($shefcols as $bogus => $name) {
         $html .= sprintf("<td>%s</td>", $row["$name"]);
     }
-    return sprintf("<tr style=\"background: %s;\">" .
-	"<td>%s</td><td>%s</td><td>%s</td>
-	<td>%s</td><td>%s</td><td>%s</td><td>%s</td>%s</tr>",
-	($i % 2 == 0)? "#FFF": "#EEE",
-	date("g:i A", $ts), wind_formatter($row) , temp_formatter($row["tmpf"]), 
-	temp_formatter($row["dwpf"]),
-	temp_formatter($row["feel"]),
-	relh(f2c($row["tmpf"]), f2c($row["dwpf"])),
-    precip_formatter($row["phour"]), $html
-	);
+    return sprintf(
+        "<tr style=\"background: %s;\">" .
+            "<td>%s</td><td>%s</td><td>%s</td>
+    <td>%s</td><td>%s</td><td>%s</td><td>%s</td>%s</tr>",
+        ($i % 2 == 0) ? "#FFF" : "#EEE",
+        date("g:i A", $ts),
+        wind_formatter($row),
+        temp_formatter($row["tmpf"]),
+        temp_formatter($row["dwpf"]),
+        temp_formatter($row["feel"]),
+        relh(f2c($row["tmpf"]), f2c($row["dwpf"])),
+        precip_formatter($row["phour"]),
+        $html
+    );
 }
 $year = get_int404("year", date("Y"));
 $month = get_int404("month", date("m"));
 $day = get_int404("day", date("d"));
-$metar = (isset($_GET["metar"]) && $_GET["metar"] == "1") ? "1": "0";
-$madis = (isset($_GET["madis"]) && $_GET["madis"] == "1") ? "1": "0";
+$metar = (isset($_GET["metar"]) && $_GET["metar"] == "1") ? "1" : "0";
+$madis = (isset($_GET["madis"]) && $_GET["madis"] == "1") ? "1" : "0";
 $sortdir = isset($_GET["sortdir"]) ? xssafe($_GET["sortdir"]) : "asc";
-$date = mktime(0,0,0,$month, $day, $year);
+$date = mktime(0, 0, 0, $month, $day, $year);
 $yesterday = $date - 86400;
 $tomorrow = $date + 86400;
-if ($tomorrow > time()){
-	$tomorrow = null;
+if ($tomorrow > time()) {
+    $tomorrow = null;
 }
 
-$sortopts = Array(
+$sortopts = array(
     "asc" => "Ascending",
     "desc" => "Descending",
 );
 $sortform = make_select("sortdir", $sortdir, $sortopts);
 
-if (! is_null($metadata["archive_begin"])){
-	$startyear = intval($metadata["archive_begin"]->format("Y"));
+if (!is_null($metadata["archive_begin"])) {
+    $startyear = intval($metadata["archive_begin"]->format("Y"));
 } else {
-	$startyear = 2010;
+    $startyear = 2010;
 }
 
 $t = new MyView();
@@ -149,11 +181,13 @@ $t = new MyView();
 $t->title = "Observation History";
 $t->sites_current = 'obhistory';
 
-$savevars = Array("year"=>date("Y", $date),
- "month"=>date("m", $date), "day"=>date("d", $date)); 
+$savevars = array(
+    "year" => date("Y", $date),
+    "month" => date("m", $date), "day" => date("d", $date)
+);
 $madis_show = ($madis == "1") ? "true" : "false";
 $metar_show = ($metar == "1") ? "true" : "false";
- $t->jsextra = <<<EOF
+$t->jsextra = <<<EOF
 <script type="text/javascript">
 var metar_show = {$metar_show};
 var madis_show = {$madis_show};
@@ -198,17 +232,17 @@ function showMETAR(){
     $("#metar_toggle").html("<i class=\"fa fa-minus\"></i> Hide METARs");
 }
 function toggleMETAR(){
-	if (metar_show){
-		// Hide both METARs and HFMETARs
-		$(".metar").css("display", "none");
-		$(".hfmetar").css("display", "none");
+    if (metar_show){
+        // Hide both METARs and HFMETARs
+        $(".metar").css("display", "none");
+        $(".hfmetar").css("display", "none");
         $("#metar_toggle").html("<i class=\"fa fa-plus\"></i> Show METARs");
         $("#hmetar").val("0");
-	} else{
+    } else{
         // show
         showMETAR();
         $("#hmetar").val("1");
-	}
+    }
     metar_show = !metar_show;
     updateURI();
 }
@@ -220,18 +254,18 @@ function showMADIS(){
     $("#madis_toggle").html("<i class=\"fa fa-minus\"></i> Hide High Frequency MADIS");
 }
 function toggleMADIS(){
-	if (madis_show){
-		// Hide MADIS
-		$("tr[data-madis=1]").css("display", "none");
-		$(".hfmetar").css("display", "none");
-		$("#madis_toggle").html("<i class=\"fa fa-plus\"></i> Show High Frequency MADIS");
+    if (madis_show){
+        // Hide MADIS
+        $("tr[data-madis=1]").css("display", "none");
+        $(".hfmetar").css("display", "none");
+        $("#madis_toggle").html("<i class=\"fa fa-plus\"></i> Show High Frequency MADIS");
         $("#hmadis").val("0");
-	} else {
+    } else {
         // Show
         showMADIS();
         $("#hmadis").val("1");
-	}
-	madis_show = !madis_show;
+    }
+    madis_show = !madis_show;
     updateURI();
 }
 $(document).ready(function(){
@@ -247,14 +281,14 @@ EOF;
 $dstr = date("d F Y", $date);
 $tzname =  $metadata["tzname"];
 
-$ys = yearSelect($startyear,date("Y", $date));
+$ys = yearSelect($startyear, date("Y", $date));
 $ms = monthSelect(date("m", $date));
 $ds = daySelect(date("d", $date));
 
-$mbutton = (preg_match("/ASOS/", $network)) ? 
-"<a onclick=\"javascript:toggleMETAR();\" class=\"btn btn-success\" id=\"metar_toggle\"><i class=\"fa fa-plus\"></i> Show METARs</a>" .
-" &nbsp; <a onclick=\"javascript:toggleMADIS();\" class=\"btn btn-success\" id=\"madis_toggle\"><i class=\"fa fa-plus\"></i> Show High Frequency MADIS</a>"
-: "";
+$mbutton = (preg_match("/ASOS/", $network)) ?
+    "<a onclick=\"javascript:toggleMETAR();\" class=\"btn btn-success\" id=\"metar_toggle\"><i class=\"fa fa-plus\"></i> Show METARs</a>" .
+    " &nbsp; <a onclick=\"javascript:toggleMADIS();\" class=\"btn btn-success\" id=\"madis_toggle\"><i class=\"fa fa-plus\"></i> Show High Frequency MADIS</a>"
+    : "";
 
 $content = <<<EOF
 <style>
@@ -268,10 +302,10 @@ $content = <<<EOF
   display: none;
 }
 .hfob {
-	display: none;
+    display: none;
 }
 .hfmetar {
-	display: none;
+    display: none;
 }
 </style>
 
@@ -290,31 +324,45 @@ Time Order:{$sortform}
 </form>
 <p>{$mbutton}</p>
 EOF;
-$content .= sprintf("<a id=\"prevbutton\" ".
-    "data-year=\"%s\" data-month=\"%s\" data-day=\"%s\" ".
-    "href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" ".
-    "class=\"btn btn-default\">Previous Day</a>",
-    date("Y", $yesterday), date("m", $yesterday), date("d", $yesterday),
-    $network, $station, date("Y", $yesterday),
-    date("m", $yesterday), date("d", $yesterday));
-  
-if ($tomorrow){
-  $content .= sprintf("<a id=\"nextbutton\" ". 
-    "data-year=\"%s\" data-month=\"%s\" data-day=\"%s\" ".
-    "href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" ".
-    "class=\"btn btn-default\">Next Day</a>",
-    date("Y", $tomorrow), date("m", $tomorrow), date("d", $tomorrow),
-    $network, $station, date("Y", $tomorrow),
-    date("m", $tomorrow), date("d", $tomorrow));
+$content .= sprintf(
+    "<a id=\"prevbutton\" " .
+        "data-year=\"%s\" data-month=\"%s\" data-day=\"%s\" " .
+        "href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" " .
+        "class=\"btn btn-default\">Previous Day</a>",
+    date("Y", $yesterday),
+    date("m", $yesterday),
+    date("d", $yesterday),
+    $network,
+    $station,
+    date("Y", $yesterday),
+    date("m", $yesterday),
+    date("d", $yesterday)
+);
+
+if ($tomorrow) {
+    $content .= sprintf(
+        "<a id=\"nextbutton\" " .
+            "data-year=\"%s\" data-month=\"%s\" data-day=\"%s\" " .
+            "href=\"obhistory.php?network=%s&station=%s&year=%s&month=%s&day=%s\" " .
+            "class=\"btn btn-default\">Next Day</a>",
+        date("Y", $tomorrow),
+        date("m", $tomorrow),
+        date("d", $tomorrow),
+        $network,
+        $station,
+        date("Y", $tomorrow),
+        date("m", $tomorrow),
+        date("d", $tomorrow)
+    );
 }
 $notes = '';
-if ($network == "ISUSM"){
-	$notes .= "<li>Wind direction and wind speed are 10 minute averages at 10 feet above the ground.</li>";
+if ($network == "ISUSM") {
+    $notes .= "<li>Wind direction and wind speed are 10 minute averages at 10 feet above the ground.</li>";
 }
 
 // API endpoint
 $errmsg = "";
-$arr = Array(
+$arr = array(
     "station" => $station,
     "network" => $network,
     "date" => date("Y-m-d", $date),
@@ -322,13 +370,13 @@ $arr = Array(
 );
 $wsuri = sprintf("/api/1/obhistory.json?%s", http_build_query($arr));
 $jobj = iemws_json("obhistory.json", $arr);
-if ($jobj === FALSE){
-    $jobj = Array("data" => Array(), "schema" => Array("fields" => Array()));
+if ($jobj === FALSE) {
+    $jobj = array("data" => array(), "schema" => array("fields" => array()));
     $errmsg = "Failed to fetch history from web service. No data was found.";
 }
 
-if (preg_match("/ASOS/", $network)){
-	$notes .= <<<EOM
+if (preg_match("/ASOS/", $network)) {
+    $notes .= <<<EOM
 <li>For recent years, this page also optionally shows observations from the
 <a href="https://madis.ncep.noaa.gov/madis_OMO.shtml">MADIS High Frequency METAR</a>
 dataset.  This dataset had a problem with temperatures detailed <a href="https://mesonet.agron.iastate.edu/onsite/news.phtml?id=1290">here</a>.</li>
@@ -360,20 +408,22 @@ EOM;
     
     <tr align="center" bgcolor="#b0c4de"><th>Max.</th><th>Min.</th></tr>    
 EOM;
-} else if (preg_match("/DCP|COOP/", $network)){
+} else if (preg_match("/DCP|COOP/", $network)) {
     // Figure out what extra columns we have here.
-    $shefcols = Array();
+    $shefcols = array();
     $shefextra = "";
-    foreach($jobj["schema"]["fields"] as $bogus => $field){
+    foreach ($jobj["schema"]["fields"] as $bogus => $field) {
         $name = $field["name"];
-        if (preg_match("/^[A-Z]/", $name)){
+        if (preg_match("/^[A-Z]/", $name)) {
             $shefcols[] = $name;
         }
     }
     asort($shefcols);
     $shefheader = sprintf(
-        "<th colspan=\"%s\">RAW SHEF CODES</th>", sizeof($shefcols));
-    foreach($shefcols as $bogus => $val){
+        "<th colspan=\"%s\">RAW SHEF CODES</th>",
+        sizeof($shefcols)
+    );
+    foreach ($shefcols as $bogus => $val) {
         $shefextra .= sprintf("<th>%s</th>", $val);
     }
     $header = <<<EOM
@@ -394,7 +444,6 @@ EOM;
     {$shefextra}
     </tr>
 EOM;
-
 } else {
     $header = <<<EOM
     <tr align="center" bgcolor="#b0c4de">
@@ -417,14 +466,13 @@ EOM;
 $table = "";
 $i = 0;
 $data = $jobj["data"];
-if ($sortdir == "desc"){
+if ($sortdir == "desc") {
     $data = array_reverse($data);
 }
-foreach($data as $bogus => $row)
-{
-    if (preg_match("/ASOS/", $network)){
+foreach ($data as $bogus => $row) {
+    if (preg_match("/ASOS/", $network)) {
         $table .= asos_formatter($i, $row);
-    } else if (preg_match("/DCP|COOP/", $network)){
+    } else if (preg_match("/DCP|COOP/", $network)) {
         $table .= hads_formatter($i, $row, $shefcols);
     } else {
         $table .= formatter($i, $row);
@@ -432,7 +480,7 @@ foreach($data as $bogus => $row)
     $i++;
 }
 $errdiv = "";
-if ($errmsg != ""){
+if ($errmsg != "") {
     $errdiv = <<<EOM
 <div class="alert alert-warning">{$errmsg}</div>
 EOM;

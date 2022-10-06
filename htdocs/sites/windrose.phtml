@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "setup.php";
@@ -6,7 +6,7 @@ require_once "setup.php";
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Site Wind Roses";
-$t->sites_current="windrose"; 
+$t->sites_current = "windrose";
 
 $content = <<<EOF
 <h3>Wind Roses</h4>
@@ -24,35 +24,37 @@ the <a href="/disclaimer.php">disclaimer page</a> contains more details.</p>
 EOF;
 
 $rosedata_uri = "/cgi-bin/mywindrose.py?nsector=36&station=$station&network=$network"
-		."&year1=1970&day1=1&day2=1&month2=1&minute1=0&minute2=0&units=mph&"
-		."justdata=true&hour1=0&hour2=0&year2=". (intval(date("Y"))+1);
+    . "&year1=1970&day1=1&day2=1&month2=1&minute1=0&minute2=0&units=mph&"
+    . "justdata=true&hour1=0&hour2=0&year2=" . (intval(date("Y")) + 1);
 
 
-if (file_exists("/mesonet/share/windrose/${network}/${station}/${station}_yearly.png"))
-{
-  $content .= "<p><h4>Yearly Climatology:</h4>
+if (file_exists("/mesonet/share/windrose/${network}/${station}/${station}_yearly.png")) {
+    $content .= "<p><h4>Yearly Climatology:</h4>
   <div class='row'><div class='col-md-12'><a href='{$rosedata_uri}&month1=1' class='btn btn-primary' role='button' rel='nofollow'><i class='fa fa-list'></i> View raw data</a>
   <br /><br /><img src=\"/onsite/windrose/${network}/${station}/${station}_yearly.png\" class='img-responsive'>
   </div></div>";
 
- $content .= "<p><h4>Monthly Climatology:  (click thumbnail)</h4>
- 		<div class='row'>";
- for ($mon=1;$mon<13;$mon++)
- {
-  $ts = mktime(0,0,0,$mon,1,2006);
-  $url = sprintf("/onsite/windrose/%s/%s/%s_%s.png",
-        $network, $station, $station, strtolower(date("M", $ts)) );
-  $rosedata = $rosedata_uri ."&month1={$mon}&monthlimit=1";
-  $content .= "<div class='col-md-4 well'><strong>".date("F", $ts) ."</strong> 
+    $content .= "<p><h4>Monthly Climatology:  (click thumbnail)</h4>
+         <div class='row'>";
+    for ($mon = 1; $mon < 13; $mon++) {
+        $ts = mktime(0, 0, 0, $mon, 1, 2006);
+        $url = sprintf(
+            "/onsite/windrose/%s/%s/%s_%s.png",
+            $network,
+            $station,
+            $station,
+            strtolower(date("M", $ts))
+        );
+        $rosedata = $rosedata_uri . "&month1={$mon}&monthlimit=1";
+        $content .= "<div class='col-md-4 well'><strong>" . date("F", $ts) . "</strong> 
   <a href='{$rosedata}' class='btn btn-primary' role='button' rel='nofollow'><i class='fa fa-list'></i> View raw data</a>
   <br /><br /><a href=\"$url\"><img src=\"$url\" class='img-responsive'></a></div>\n";
-  if ($mon % 3 == 0) $content .= "</div>";
-  if ($mon % 3 == 0 && $mon != 12) $content .= "<div class='row'>";
- } 
- $content .= "</div>";
-}else 
-{
-  $content .= "<div class=\"alert alert-danger\">Sorry, no wind roses are available for this site.</div>";
+        if ($mon % 3 == 0) $content .= "</div>";
+        if ($mon % 3 == 0 && $mon != 12) $content .= "<div class='row'>";
+    }
+    $content .= "</div>";
+} else {
+    $content .= "<div class=\"alert alert-danger\">Sorry, no wind roses are available for this site.</div>";
 }
 
 $t->content = $content;

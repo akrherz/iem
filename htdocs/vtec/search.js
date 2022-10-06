@@ -15,41 +15,41 @@ var BACKEND_EVENTS_BYUGC = '/json/vtec_events_byugc.py';
 var BACKEND_SBW_BYPOINT = '/json/sbw_by_point.py';
 
 var states = [["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"],
-		["AR", "Arkansas"], ["CA", "California"], ["CO", "Colorado"],
-		["CT", "Connecticut"], ["DE", "Delaware"], ["FL", "Florida"],
-		["GA", "Georgia"], ["HI", "Hawaii"], ["ID", "Idaho"],
-		["IL", "Illinois"], ["IN", "Indiana"], ["IA", "Iowa"],
-		["KS", "Kansas"], ["KY", "Kentucky"], ["LA", "Louisiana"],
-		["ME", "Maine"], ["MD", "Maryland"], ["MA", "Massachusetts"],
-		["MI", "Michigan"], ["MN", "Minnesota"], ["MS", "Mississippi"],
-		["MO", "Missouri"], ["MT", "Montana"], ["NE", "Nebraska"],
-		["NV", "Nevada"], ["NH", "New Hampshire"], ["NJ", "New Jersey"],
-		["NM", "New Mexico"], ["NY", "New York"], ["NC", "North Carolina"],
-		["ND", "North Dakota"], ["OH", "Ohio"], ["OK", "Oklahoma"],
-		["OR", "Oregon"], ["PA", "Pennsylvania"], ["RI", "Rhode Island"],
-		["SC", "South Carolina"], ["SD", "South Dakota"], ["TN", "Tennessee"],
-		["TX", "Texas"], ["UT", "Utah"], ["VT", "Vermont"], ["VA", "Virginia"],
-		["WA", "Washington"], ["WV", "West Virginia"], ["WI", "Wisconsin"],
-		["WY", "Wyoming"],
-		["AM", "Atlantic Ocean AM"],
-		["AN", "Atlantic Ocean AN"],
-		["AS", "AS"],
-		["DC", "Distict of Columbia"],
-		["GM", "Gulf of Mexico"],
-		["GU", "Guam"],
-		["LC", "Lake St. Clair"],
-		["LE", "Lake Erie"],
-		["LH", "Lake Huron"],
-		["LM", "Lake Michigan"],
-		["LO", "Lake Ontario"],
-		["LS", "Lake Superior"],
-		["PH", "Hawaii PH Zones"],
-		["PK", "Alaska PK Zones"],
-		["PM", "Zones PM"],
-		["PR", "Puerto Rico"],
-		["PS", "Zones PS"],
-		["PZ", "Pacific Ocean PZ"],
-		["SL", "St. Lawrence River"]
+        ["AR", "Arkansas"], ["CA", "California"], ["CO", "Colorado"],
+        ["CT", "Connecticut"], ["DE", "Delaware"], ["FL", "Florida"],
+        ["GA", "Georgia"], ["HI", "Hawaii"], ["ID", "Idaho"],
+        ["IL", "Illinois"], ["IN", "Indiana"], ["IA", "Iowa"],
+        ["KS", "Kansas"], ["KY", "Kentucky"], ["LA", "Louisiana"],
+        ["ME", "Maine"], ["MD", "Maryland"], ["MA", "Massachusetts"],
+        ["MI", "Michigan"], ["MN", "Minnesota"], ["MS", "Mississippi"],
+        ["MO", "Missouri"], ["MT", "Montana"], ["NE", "Nebraska"],
+        ["NV", "Nevada"], ["NH", "New Hampshire"], ["NJ", "New Jersey"],
+        ["NM", "New Mexico"], ["NY", "New York"], ["NC", "North Carolina"],
+        ["ND", "North Dakota"], ["OH", "Ohio"], ["OK", "Oklahoma"],
+        ["OR", "Oregon"], ["PA", "Pennsylvania"], ["RI", "Rhode Island"],
+        ["SC", "South Carolina"], ["SD", "South Dakota"], ["TN", "Tennessee"],
+        ["TX", "Texas"], ["UT", "Utah"], ["VT", "Vermont"], ["VA", "Virginia"],
+        ["WA", "Washington"], ["WV", "West Virginia"], ["WI", "Wisconsin"],
+        ["WY", "Wyoming"],
+        ["AM", "Atlantic Ocean AM"],
+        ["AN", "Atlantic Ocean AN"],
+        ["AS", "AS"],
+        ["DC", "Distict of Columbia"],
+        ["GM", "Gulf of Mexico"],
+        ["GU", "Guam"],
+        ["LC", "Lake St. Clair"],
+        ["LE", "Lake Erie"],
+        ["LH", "Lake Huron"],
+        ["LM", "Lake Michigan"],
+        ["LO", "Lake Ontario"],
+        ["LS", "Lake Superior"],
+        ["PH", "Hawaii PH Zones"],
+        ["PK", "Alaska PK Zones"],
+        ["PM", "Zones PM"],
+        ["PR", "Puerto Rico"],
+        ["PS", "Zones PS"],
+        ["PZ", "Pacific Ocean PZ"],
+        ["SL", "St. Lawrence River"]
 ];
 
 function updateMarkerPosition(lon, lat) {
@@ -304,12 +304,12 @@ function initialize() {
     var default_lon = -93.653;
     var default_lat = 41.53;
 
-	// Do the anchor tag linking, please
-	var tokens = window.location.href.split("#");
-	if (tokens.length == 2){
-		var tokens2 = tokens[1].split("/");
-		if (tokens2.length == 2){
-			if (tokens2[0] == 'byugc'){
+    // Do the anchor tag linking, please
+    var tokens = window.location.href.split("#");
+    if (tokens.length == 2){
+        var tokens2 = tokens[1].split("/");
+        if (tokens2.length == 2){
+            if (tokens2[0] == 'byugc'){
                 var aTag = $("a[name='byugc']");
                 $('html,body').animate({scrollTop: aTag.offset().top},'slow');
                 hashlinkUGC = tokens2[1];
@@ -322,20 +322,20 @@ function initialize() {
                         }
                     }
                 });
-			}
+            }
         }
-		if (tokens2.length == 3){
-			if (tokens2[0] == 'bypoint'){
+        if (tokens2.length == 3){
+            if (tokens2[0] == 'bypoint'){
                 default_lat = tokens2[2];
                 default_lon = tokens2[1];
                 updateMarkerPosition(default_lon, default_lat);
-			}
-			if (tokens2[0] == 'eventsbypoint'){
+            }
+            if (tokens2[0] == 'eventsbypoint'){
                 default_lat = tokens2[2];
                 default_lon = tokens2[1];
                 updateMarkerPosition2(default_lon, default_lat);
-			}
-		}
+            }
+        }
     }
 
     mapwidget1 = new MapMarkerWidget("map", default_lon, default_lat);
