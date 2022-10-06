@@ -8,27 +8,27 @@ require_once "../../../../include/forms.php";
 
 $t = new MyView();
 
-$county = isset($_GET['county']) ? xssafe($_GET["county"]): "";
-$cntyext = isset($_GET['cntyext']) ? $_GET["cntyext"]: "";
-$ul_x = isset($_GET["ul_x"]) ? $_GET["ul_x"]: "";
-$ul_y = isset($_GET["ul_y"]) ? $_GET["ul_y"]: "";
-$lr_x = isset($_GET["lr_x"]) ? $_GET["lr_x"]: "";
-$lr_y = isset($_GET["lr_y"]) ? $_GET["lr_y"]: "";
-$map_x = isset($_GET["map_x"]) ? $_GET["map_x"]: "";
-$map_y = isset($_GET["map_y"]) ? $_GET["map_y"]: "";
-$map_height = isset($_GET["map_height"]) ? $_GET["map_height"]: "";
-$map_width = isset($_GET["map_width"]) ? $_GET["map_width"]: "";
+$county = isset($_GET['county']) ? xssafe($_GET["county"]) : "";
+$cntyext = isset($_GET['cntyext']) ? $_GET["cntyext"] : "";
+$ul_x = isset($_GET["ul_x"]) ? $_GET["ul_x"] : "";
+$ul_y = isset($_GET["ul_y"]) ? $_GET["ul_y"] : "";
+$lr_x = isset($_GET["lr_x"]) ? $_GET["lr_x"] : "";
+$lr_y = isset($_GET["lr_y"]) ? $_GET["lr_y"] : "";
+$map_x = isset($_GET["map_x"]) ? $_GET["map_x"] : "";
+$map_y = isset($_GET["map_y"]) ? $_GET["map_y"] : "";
+$map_height = isset($_GET["map_height"]) ? $_GET["map_height"] : "";
+$map_width = isset($_GET["map_width"]) ? $_GET["map_width"] : "";
 
-if ($ul_x != ""){
-  $dx = ($ul_x - $lr_x) / $map_width;
-  $dy = ($ul_y - $lr_y) / $map_height;
-  $clickx = ($map_x * (0 - $dx) ) + $ul_x;
-  $clicky = ($map_y * (0 - $dy) ) + $ul_y;
-  $extents = Array($clickx - 0.3, $clicky - 0.3, $clickx + 0.3, $clicky + 0.3);
-}else if ($cntyext != ""){
-  $extents = explode(" ", $cntyext);
+if ($ul_x != "") {
+    $dx = ($ul_x - $lr_x) / $map_width;
+    $dy = ($ul_y - $lr_y) / $map_height;
+    $clickx = ($map_x * (0 - $dx)) + $ul_x;
+    $clicky = ($map_y * (0 - $dy)) + $ul_y;
+    $extents = array($clickx - 0.3, $clicky - 0.3, $clickx + 0.3, $clicky + 0.3);
+} else if ($cntyext != "") {
+    $extents = explode(" ", $cntyext);
 } else {
-  $extents = Array(-96.639706, 39.1497,-90.140061, 44.726);
+    $extents = array(-96.639706, 39.1497, -90.140061, 44.726);
 }
 
 $t->title = "RADAR Comparison";
@@ -38,29 +38,36 @@ $latlon = ms_newprojectionobj("init=epsg:4326");
 $p26915 = ms_newprojectionobj("init=epsg:26915");
 
 $cntyMdpoint = ms_newpointobj();
-$cntyMdpoint->setXY( ($extents[0] + $extents[2])/2, 
-                     ($extents[1] + $extents[3])/2 );
+$cntyMdpoint->setXY(($extents[0] + $extents[2]) / 2,
+    ($extents[1] + $extents[3]) / 2
+);
 $cntyMdpoint->project($latlon, $p26915);
 
-$n = Array("DMX", "DVN", "ARX", "MPX", "FSD", "OAX", "EAX");
-$distances = Array();
-foreach($n as $key => $site){
-  $r = ms_newpointobj();
-  $r->setXY($nt->table[$site]['lon'], $nt->table[$site]['lat']);
-  $r->project($latlon, $p26915);
-  $distances[$site] = round( $r->distanceToPoint($cntyMdpoint) / 1000 , 0);
-
+$n = array("DMX", "DVN", "ARX", "MPX", "FSD", "OAX", "EAX");
+$distances = array();
+foreach ($n as $key => $site) {
+    $r = ms_newpointobj();
+    $r->setXY($nt->table[$site]['lon'], $nt->table[$site]['lat']);
+    $r->project($latlon, $p26915);
+    $distances[$site] = round($r->distanceToPoint($cntyMdpoint) / 1000, 0);
 }
 
 //print_r($distances);
 
-$site = "DMX"; $dmx_url = drawCountyNEXRAD($site, $extents);
-$site = "DVN"; $dvn_url = drawCountyNEXRAD($site, $extents);
-$site = "ARX"; $arx_url = drawCountyNEXRAD($site, $extents);
-$site = "FSD"; $fsd_url = drawCountyNEXRAD($site, $extents);
-$site = "OAX"; $oax_url = drawCountyNEXRAD($site, $extents);
-$site = "MPX"; $mpx_url = drawCountyNEXRAD($site, $extents);
-$site = "EAX"; $eax_url = drawCountyNEXRAD($site, $extents);
+$site = "DMX";
+$dmx_url = drawCountyNEXRAD($site, $extents);
+$site = "DVN";
+$dvn_url = drawCountyNEXRAD($site, $extents);
+$site = "ARX";
+$arx_url = drawCountyNEXRAD($site, $extents);
+$site = "FSD";
+$fsd_url = drawCountyNEXRAD($site, $extents);
+$site = "OAX";
+$oax_url = drawCountyNEXRAD($site, $extents);
+$site = "MPX";
+$mpx_url = drawCountyNEXRAD($site, $extents);
+$site = "EAX";
+$eax_url = drawCountyNEXRAD($site, $extents);
 
 $ftime = filemtime('/mesonet/ldmdata/gis/images/4326/ridge/DMX/N0B_0.png');
 $radTS = date("m/d h:i a", $ftime);
@@ -84,8 +91,8 @@ $t->content = <<<EOF
   area (shown in white)<br>
   {$s}
  
-	<a href="compare.phtml">Reset app</a> <i>(view state)</i>
-  	<br>RADAR composite valid: $radTS 
+    <a href="compare.phtml">Reset app</a> <i>(view state)</i>
+      <br>RADAR composite valid: $radTS 
 <p><b>Notes:</b>
 <li>This app is purely for educational purposes.</li>
 <li>Distances are measured from the RADAR site to the midpoint of the area 

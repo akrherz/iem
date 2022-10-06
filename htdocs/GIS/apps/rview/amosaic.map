@@ -193,7 +193,7 @@ LAYER
     LABEL
         TYPE BITMAP
         SIZE MEDIUM
-	FORCE TRUE
+    FORCE TRUE
         COLOR 0 0 0
     END
   END

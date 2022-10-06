@@ -11,17 +11,18 @@ require_once "../../../../include/adodb-time.inc.php";
 require_once "../../../../include/forms.php";
 require_once "../../../../include/network.php";
 
-$var = isset($_GET["var"]) ? xssafe($_GET["var"]): "high";
-$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
-$month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
-$day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
-$source = isset($_GET["source"]) ? xssafe($_GET["source"]): "prelim";
-$size = isset($_GET["size"]) ? xssafe($_GET["size"]): "640x480";
+$var = isset($_GET["var"]) ? xssafe($_GET["var"]) : "high";
+$year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y");
+$month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m");
+$day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d");
+$source = isset($_GET["source"]) ? xssafe($_GET["source"]) : "prelim";
+$size = isset($_GET["size"]) ? xssafe($_GET["size"]) : "640x480";
 $showlabels = (isset($_GET["labels"]) && $_GET["labels"] == "on");
 $tokens = explode("x", $size);
-$width = $tokens[0]; $height = $tokens[1];
+$width = $tokens[0];
+$height = $tokens[1];
 
-$ts = adodb_mktime(0,0,0,$month,$day,$year);
+$ts = adodb_mktime(0, 0, 0, $month, $day, $year);
 $ndate = adodb_date("Y-m-d", $ts);
 
 $t = new MyView();
@@ -41,29 +42,35 @@ if ($source == "qc") $nt = new NetworkTable("IACLIMATE");
 else $nt = new NetworkTable("IA_COOP");
 $cities = $nt->table;
 
-function plotNoData($map, $img){
-	$layer = $map->getLayerByName("credits");
+function plotNoData($map, $img)
+{
+    $layer = $map->getLayerByName("credits");
 
-	$point = ms_newpointobj();
-	$point->setXY( 100, 200);
-	$point->draw($map, $layer, $img, 1,
-			"  No data found for this date! ");
+    $point = ms_newpointobj();
+    $point->setXY(100, 200);
+    $point->draw(
+        $map,
+        $layer,
+        $img,
+        1,
+        "  No data found for this date! "
+    );
 }
 
-$vardef = Array(
+$vardef = array(
     "high" => "High Temperature",
-	"low" => "Low Temperature",
+    "low" => "Low Temperature",
     "tob" => "Temperature At Observation",
-	"precip" => "Precipitation",
-	"snow" => "Snow [1]",
+    "precip" => "Precipitation",
+    "snow" => "Snow [1]",
     "snowd" => "Snow Depth [2]",
     "ratio" => "Snow to Liquid Ratio",
 );
-if (!array_key_exists($var, $vardef)){
+if (!array_key_exists($var, $vardef)) {
     $var = "precip";
 }
 
-$rnd = Array(
+$rnd = array(
     "et" => 2,
     "prec" => 2,
     "snow" => 0,
@@ -98,35 +105,40 @@ $img = $map->prepareImage();
 $counties->draw($img);
 $states->draw($img);
 
-$dbvar = ($var == "ratio") ? "snow": $var;
-if ($source == "qc")
-{
-	$c = iemdb("coop");
-	$sql = sprintf("SELECT * from alldata_ia "
-			." WHERE day = '%s' and %s is not null"
-            ." and substr(station, 3, 1) != 'C' and station != 'IA0000'"
-            ." ORDER by $dbvar DESC",
-			adodb_date("Y-m-d", $ts), $dbvar );
-	$cutstring1 = 2;
-	$cutstring2 = 4;
+$dbvar = ($var == "ratio") ? "snow" : $var;
+if ($source == "qc") {
+    $c = iemdb("coop");
+    $sql = sprintf(
+        "SELECT * from alldata_ia "
+            . " WHERE day = '%s' and %s is not null"
+            . " and substr(station, 3, 1) != 'C' and station != 'IA0000'"
+            . " ORDER by $dbvar DESC",
+        adodb_date("Y-m-d", $ts),
+        $dbvar
+    );
+    $cutstring1 = 2;
+    $cutstring2 = 4;
 } else {
-	$c = iemdb("iem");
-	$cutstring1 = 0;
-	$cutstring2 = 5;
-	$sql = sprintf("SELECT id as station, day, snowd, max_tmpf as high, ".
-	    "min_tmpf as low, pday as precip, snow, snowd, coop_tmpf as tob ".
-        "from summary_%s s ".
-	    "JOIN stations t on (t.iemid = s.iemid) WHERE day = '%s' and ".
-	    "network = 'IA_COOP' ORDER by $dbvar DESC",
-	    adodb_date("Y", $ts), adodb_date("Y-m-d", $ts) );
+    $c = iemdb("iem");
+    $cutstring1 = 0;
+    $cutstring2 = 5;
+    $sql = sprintf(
+        "SELECT id as station, day, snowd, max_tmpf as high, " .
+            "min_tmpf as low, pday as precip, snow, snowd, coop_tmpf as tob " .
+            "from summary_%s s " .
+            "JOIN stations t on (t.iemid = s.iemid) WHERE day = '%s' and " .
+            "network = 'IA_COOP' ORDER by $dbvar DESC",
+        adodb_date("Y", $ts),
+        adodb_date("Y-m-d", $ts)
+    );
 }
 
 $rs =  pg_exec($c, $sql);
-$vals = Array();
-for ($i=0; $row = pg_fetch_array($rs); $i++) {
+$vals = array();
+for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     $stid = $row['station'];
-    if ($var == "ratio"){
-        if ($row["snow"] > 0 && $row["precip"] > 0){
+    if ($var == "ratio") {
+        if ($row["snow"] > 0 && $row["precip"] > 0) {
             $vals[$stid] = round($row["snow"] / $row["precip"], 1);
         } else {
             $vals[$stid] = 0;
@@ -139,50 +151,67 @@ for ($i=0; $row = pg_fetch_array($rs); $i++) {
 /* ------------------------------------------------------- */
 
 
-$tr = "# ".$ndate." ". $vardef[$var] ."
+$tr = "# " . $ndate . " " . $vardef[$var] . "
 # Download From: https://mesonet.agron.iastate.edu/GIS/apps/coop/plot.phtml
-# Download Date: ". strftime("%d %b %Y") ."
+# Download Date: " . strftime("%d %b %Y") . "
 # Data Contact: Daryl Herzmann akrherz@iastate.edu 515.294.5978
 #-----------------------snip------------------\n";
-$tr .= sprintf("%-6s, %-20s, %-20s, %-10s, %10s, %10s, %10s\n", 'ID',
-    'StationName', 'County', 'Date', 'Latitude', 'Longitude', $var);
-foreach($vals as $key => $value){
-	$ukey = strtoupper($key);
-	if (! isset($cities[$ukey]) ) continue;
+$tr .= sprintf(
+    "%-6s, %-20s, %-20s, %-10s, %10s, %10s, %10s\n",
+    'ID',
+    'StationName',
+    'County',
+    'Date',
+    'Latitude',
+    'Longitude',
+    $var
+);
+foreach ($vals as $key => $value) {
+    $ukey = strtoupper($key);
+    if (!isset($cities[$ukey])) continue;
 
-    $tr .= sprintf("%-6s, %-20s, %-20s, %10s, %10.4f, %10.4f, %10s\n", $key,
-        $cities[$ukey]['name'], $cities[$ukey]['county'], $ndate,
-		$cities[$ukey]['lat'], $cities[$ukey]['lon'], $value );
+    $tr .= sprintf(
+        "%-6s, %-20s, %-20s, %10s, %10.4f, %10.4f, %10s\n",
+        $key,
+        $cities[$ukey]['name'],
+        $cities[$ukey]['county'],
+        $ndate,
+        $cities[$ukey]['lat'],
+        $cities[$ukey]['lon'],
+        $value
+    );
 
-	if ($ukey == "IA0807") $cities["IA0807"]["lon"] -= 0.1;
+    if ($ukey == "IA0807") $cities["IA0807"]["lon"] -= 0.1;
 
-	if ($showlabels){
-		$pt = ms_newPointObj();
-		$pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
-		$pt->draw($map, $ponly, $img, 0);
+    if ($showlabels) {
+        $pt = ms_newPointObj();
+        $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
+        $pt->draw($map, $ponly, $img, 0);
 
-		$pt = ms_newPointObj();
-		$pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
-		$pt->draw($map, $cityname, $img, 0, substr($key,$cutstring1,$cutstring2) );
-	}
+        $pt = ms_newPointObj();
+        $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
+        $pt->draw($map, $cityname, $img, 0, substr($key, $cutstring1, $cutstring2));
+    }
 
-	// Value UL
-	$pt = ms_newPointObj();
-	$pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
-	if ($value == 0.0001) $value = "T";
-	$pt->draw($map, $snet, $img, 2, $value);
+    // Value UL
+    $pt = ms_newPointObj();
+    $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
+    if ($value == 0.0001) $value = "T";
+    $pt->draw($map, $snet, $img, 2, $value);
 }
 
 if ($i == 0)
-	plotNoData($map, $img);
+    plotNoData($map, $img);
 
-iemmap_title($map, $img, $ndate ." ". $vardef[$var] );
+iemmap_title($map, $img, $ndate . " " . $vardef[$var]);
 $map->drawLabelCache($img);
 
 $url = $img->saveWebImage();
 
-$ar = Array("qc" => "QC'd (1893-)",
-			"prelim" => "Preliminary (2004+)");
+$ar = array(
+    "qc" => "QC'd (1893-)",
+    "prelim" => "Preliminary (2004+)"
+);
 $sourceselect = make_select("source", $source, $ar);
 
 $varselect = make_select("var", $var, $vardef);
@@ -191,23 +220,37 @@ $yselect = yearselect(1893, $year);
 $mselect = monthSelect2($month, 'month');
 $dselect = daySelect2($day, 'day');
 
-$ar = Array(
-	"640x480" => "640x480",
-	"1024x768" => "1024x768",
-	"1280x1024" => "1280x1024"
+$ar = array(
+    "640x480" => "640x480",
+    "1024x768" => "1024x768",
+    "1280x1024" => "1280x1024"
 );
 $sizeselect = make_select("size", $size, $ar);
 
-$showlabelson = ($showlabels) ? " CHECKED=\"CHECKED\" ": "";
+$showlabelson = ($showlabels) ? " CHECKED=\"CHECKED\" " : "";
 
-$minusone = sprintf("plot.phtml?source=%s&amp;var=%s&amp;year=%s&amp;". 
-    "month=%s&amp;day=%s&amp;size=%s&amp;labels=%s",
-		$source, $var, date("Y", $ts - 86400), date("m", $ts - 86400),
-		date("d", $ts - 86400), $size, $showlabels ? "on": "off");
-$plusone = sprintf("plot.phtml?source=%s&amp;var=%s&amp;year=%s&amp;". 
-    "month=%s&amp;day=%s&amp;size=%s&amp;labels=%s",
-		$source, $var, date("Y", $ts + 86400), date("m", $ts + 96400),
-		date("d", $ts + 96400), $size, $showlabels ? "on": "off");
+$minusone = sprintf(
+    "plot.phtml?source=%s&amp;var=%s&amp;year=%s&amp;" .
+        "month=%s&amp;day=%s&amp;size=%s&amp;labels=%s",
+    $source,
+    $var,
+    date("Y", $ts - 86400),
+    date("m", $ts - 86400),
+    date("d", $ts - 86400),
+    $size,
+    $showlabels ? "on" : "off"
+);
+$plusone = sprintf(
+    "plot.phtml?source=%s&amp;var=%s&amp;year=%s&amp;" .
+        "month=%s&amp;day=%s&amp;size=%s&amp;labels=%s",
+    $source,
+    $var,
+    date("Y", $ts + 86400),
+    date("m", $ts + 96400),
+    date("d", $ts + 96400),
+    $size,
+    $showlabels ? "on" : "off"
+);
 
 $t->content = <<<EOF
 <p>With this application, you can plot COOP observations for a date of your

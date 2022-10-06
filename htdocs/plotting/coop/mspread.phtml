@@ -3,8 +3,8 @@ require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 $t = new MyView();
 
- $t->title = "Monthly Temperature Spreads";
- $t->content = <<<EOF
+$t->title = "Monthly Temperature Spreads";
+$t->content = <<<EOF
 
 <p><h3>Monthly Temperature Spreads</h3><p>
 
@@ -24,5 +24,4 @@ $t = new MyView();
 <p><img src="images/spread_nov.png">
 <p><img src="images/spread_dec.png">
 EOF;
- $t->render('single.phtml');
- ?>
+$t->render('single.phtml');

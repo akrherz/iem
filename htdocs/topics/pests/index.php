@@ -48,7 +48,7 @@ EOM;
 // Compute a good fall Year
 $year = intval(date("Y"));
 
-$ar = Array(
+$ar = array(
     "seedcorn_maggot" => "Seedcorn Maggot (Delia platura)",
     "alfalfa_weevil" => "Alfalfa Weevil (Hypera postica)",
     "soybean_aphid" => "Soybean Aphid (Aphis glycines)",
@@ -56,7 +56,7 @@ $ar = Array(
     "japanese_beetle" => "Japanese Beetle (Popillia japonica)",
 );
 $pselect = make_select("pest", $pest, $ar, "updateImage", "form-control");
-$nselect = networkSelect($network, $station, Array(), "station", TRUE);
+$nselect = networkSelect($network, $station, array(), "station", TRUE);
 
 $t->content = <<<EOM
 <ol class="breadcrumb">

@@ -1,4 +1,4 @@
-<?php 
+<?php
 include("../../../config/settings.inc.php");
 define("IEM_APPID", 80);
 include_once "../../../include/myview.php";
@@ -18,9 +18,9 @@ $ms2 = monthSelect("", "month2");
 $ds2 = daySelect2("", "day2");
 $hs2 = gmtHourSelect("", "hour2");
 
-$rselect = rwisMultiSelect("", 5); 
+$rselect = rwisMultiSelect("", 5);
 
-$ar = Array(
+$ar = array(
     "Etc/UTC" => "Coordinated Universal Time (UTC)",
     "America/New_York" => "America/New_York (EST/EDT)",
     "America/Chicago" => "America/Chicago (CST/CDT)",
@@ -72,7 +72,7 @@ $t->content = <<<EOF
     <td>{$ms}</td>
     <td>{$ds}</td>
     <td>{$hs}
-	<input type="hidden" name="minute1" value="0"></td>
+    <input type="hidden" name="minute1" value="0"></td>
   </tr>
 
   <tr>
@@ -81,7 +81,7 @@ $t->content = <<<EOF
     <td>{$ms2}</td>
     <td>{$ds2}</td>
     <td>{$hs2}
-	<input type="hidden" name="minute2" value="0"></td>
+    <input type="hidden" name="minute2" value="0"></td>
     </tr>
 </table>
 
@@ -91,7 +91,7 @@ $t->content = <<<EOF
    <i>This controls the timezone used for presenting the timestamps in the
     downloaded file.</i>
    <br />{$tzselect}</p>
-    		
+            
 <p><h3 class="subtitle">4. How to view?</h3><br>
 <select name="what">
   <option value="txt">Download to Disk</option>

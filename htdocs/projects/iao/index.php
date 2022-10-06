@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 
 require_once "../../../include/myview.php";
@@ -8,8 +8,8 @@ $t->title = "Iowa Atmospheric Observatory";
 $t->headextra = <<<EOM
 <style>
 div.hangs p {
-  padding-left: 22px ;
-  text-indent: -22px ;
+  padding-left: 22px;
+  text-indent: -22px;
 }
 </style>
 EOM;

@@ -9,14 +9,14 @@ $t = new MyView();
 $t->jsextra = <<<EOF
 <script>
 $('select[name=station]').change( function() {
-	nexrad = $('select[name=station]').val();
-	$('#histimage').attr('src', '/pickup/nexrad_attrs/'+nexrad+'_histogram.png');
-	window.location.href = "#"+ nexrad;
+    nexrad = $('select[name=station]').val();
+    $('#histimage').attr('src', '/pickup/nexrad_attrs/'+nexrad+'_histogram.png');
+    window.location.href = "#"+ nexrad;
 });
 
 var tokens = window.location.href.split('#');
 if (tokens.length == 2 && tokens[1].length == 3){
-	$('#histimage').attr('src', '/pickup/nexrad_attrs/'+ tokens[1] +'_histogram.png');
+    $('#histimage').attr('src', '/pickup/nexrad_attrs/'+ tokens[1] +'_histogram.png');
 }
 </script>
 EOF;
@@ -31,41 +31,41 @@ $content = <<<EOF
  a data hole and would like it filled, please let us know.
 
 <div class="alert alert-warning">The <a href="https://www.ncdc.noaa.gov">National Climatic Data Center</a> now
-		has a very impressive archive and interface to download these attributes.
-		You can find it on their <a href="https://www.ncdc.noaa.gov/swdi/">Severe
-		Weather Data Inventory</a>.  For programic access, check out their 
-		<a href="https://www.ncdc.noaa.gov/swdiws/">web services</a>.</div>
-		
+        has a very impressive archive and interface to download these attributes.
+        You can find it on their <a href="https://www.ncdc.noaa.gov/swdi/">Severe
+        Weather Data Inventory</a>.  For programic access, check out their 
+        <a href="https://www.ncdc.noaa.gov/swdiws/">web services</a>.</div>
+        
 <p>The archive behind this application is large, so please be patient after clicking
  the Givme button below.  If you request all RADARs, you can only request up to 
  seven days worth of data.  If you can request a single RADAR, there is no 
  date restriction, but the download will be slow! 
 
 <p><a class="btn btn-default" href="#histograms" role="button">
-		<i class="fa fa-stats"></i> View Histograms</a>
+        <i class="fa fa-stats"></i> View Histograms</a>
  
 <form method="GET" action="/cgi-bin/request/gis/nexrad_storm_attrs.py">
 <h4>Select time interval</h4>
 <i>(Times are in UTC.)</i>
 <table class="table">
 <thead><tr><th>RADAR Site</th><th colspan="6">Time Interval</th>
-		<th>Format</th></tr></thead>
+        <th>Format</th></tr></thead>
 <tr>
     <th></th>
-	<th></th>
+    <th></th>
     <th>Year</th><th>Month</th><th>Day</th>
     <th>Hour</th><th>Minute</th>
     <td rowspan="3"><select name="fmt">
-		<option value="shp">ESRI Shapefile</option>
-		<option value="csv">Comma Delimited</option>
-		</select></td>
+        <option value="shp">ESRI Shapefile</option>
+        <option value="csv">Comma Delimited</option>
+        </select></td>
 </tr>
 
 <tr>
   <td rowspan='2'>
 EOF;
 $content .= networkMultiSelect(Array("NEXRAD", "TWDR"), 'ALL', 
-  		Array("ALL"=>"ALL"), "radar") ."</td>
+          Array("ALL"=>"ALL"), "radar") ."</td>
     <th>Start:</th>
     <td>
      ". yearSelect2(2005, date("Y"), "year1") ."
@@ -147,7 +147,7 @@ A direction of "west" would represent a storm moving from west to east.
 <p><strong>Select RADAR:</strong> 
 EOF;
 $content .= networkSelect(Array("NEXRAD", "TWDR"), 
-		'DMX') ."
+        'DMX') ."
 <br />
 <img id='histimage' src='/pickup/nexrad_attrs/DMX_histogram.png' alt='Histogram' />
 
@@ -155,5 +155,3 @@ $content .= networkSelect(Array("NEXRAD", "TWDR"),
 
 $t->content = $content;
 $t->render('single.phtml');
-
-?>

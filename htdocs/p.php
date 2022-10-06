@@ -1,5 +1,6 @@
 <?php
-$pid = isset($_GET['pid']) ? substr($_GET['pid'], 0, 35) : "";
+require_once "../include/forms.php";
+$pid = isset($_GET['pid']) ? substr(xssafe($_GET['pid']), 0, 35) : "";
 
 // 201212100547-KTOP-FXUS63-AFDTOP
 $tokens = explode("-", $pid);

@@ -11,19 +11,19 @@ $t = new MyView();
 $t->iemss = True;
 define("IEM_APPID", 44);
 $mesosite = iemdb('mesosite');
- 
+
 $t->title = "DCP/HADS Data Download";
 
  $nselect = "<select name=\"network\">";
 $rs = pg_query($mesosite, "SELECT id, name from networks ".
   "where id ~* '_DCP' or id ~* '_COOP' ORDER by name ASC");
 for ($i=0;$row=pg_fetch_assoc($rs);$i++){
-	$sel = '';
-	if ($network == $row["id"]){
-		$sel = " selected='SELECTED'";
-	}
-	$nselect .= sprintf("<option value='%s'%s>%s</option>\n",
-	  $row["id"], $sel, $row["name"]);
+    $sel = '';
+    if ($network == $row["id"]){
+        $sel = " selected='SELECTED'";
+    }
+    $nselect .= sprintf("<option value='%s'%s>%s</option>\n",
+      $row["id"], $sel, $row["name"]);
 }
 $nselect .= "</select>";
 
@@ -91,7 +91,7 @@ time due to size/speed contraints.</p>
     <td>{$ms1}</td>
     <td>{$ds1}</td>
     <td>{$hs1}
-	<input type="hidden" name="minute1" value="0"></td>
+    <input type="hidden" name="minute1" value="0"></td>
     </td>
   </tr>
 
@@ -155,7 +155,7 @@ separated in the downloaded file?</p>
 
 <input type="submit" value="Process Data Request">
 <input type="reset">
-    		
+            
 </div>
 </div>
 
@@ -191,4 +191,3 @@ most important, which are the variable type and duration of observation.</p>
 </form>
 EOF;
 $t->render('single.phtml');
-?>

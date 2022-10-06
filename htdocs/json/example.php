@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
  * This is the example referenced on the /json/ webpage
  */
@@ -6,7 +6,7 @@ require_once "../../include/forms.php";
 
 header('Content-type: application/json; charset=utf-8');
 
-$arr = Array(
+$arr = array(
     "Name" => "daryl",
     "Profession" => "nerd",
     "Age" => 99,
@@ -14,8 +14,8 @@ $arr = Array(
 $json = json_encode($arr);
 
 // JSON if no callback
-if( ! isset($_REQUEST['callback']))
-	exit( $json );
+if (!isset($_REQUEST['callback']))
+    exit($json);
 
 $cb = xssafe($_REQUEST['callback']);
 echo "{$cb}($json)";

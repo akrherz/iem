@@ -5,7 +5,7 @@ $t = new MyView();
 define("IEM_APPID", 39);
 require_once "../include/database.inc.php";
 $dbconn = iemdb("mesosite");
- 
+
 $t->title = "Application Listing";
 $t->jsextra = <<<EOF
 <script src="/vendor/jquery-filtertable/1.5.7/jquery.filtertable.min.js"></script>
@@ -22,7 +22,7 @@ $rs = pg_exec(
     "GROUP by appid"
 );
 for ($i=0;$row=pg_fetch_assoc($rs);$i++){
-	$tags[$row["appid"]] = $row["t"];
+    $tags[$row["appid"]] = $row["t"];
 }
 $rs = pg_exec($dbconn, "SELECT * from iemapps i ORDER by appid ASC");
 for ($i=0;$row=pg_fetch_assoc($rs);$i++){
@@ -32,7 +32,7 @@ for ($i=0;$row=pg_fetch_assoc($rs);$i++){
     }
     $table .= sprintf(
         "<tr><th><a href='%s'>%s</a></th><td>%s</td><td>%s</td></tr>\n", 
-		$row["url"],  $row["name"], $row["description"], $tt);
+        $row["url"],  $row["name"], $row["description"], $tt);
 }
 
 
@@ -53,4 +53,3 @@ $t->content = <<<EOF
 </table>
 EOF;
 $t->render('single.phtml');
-?> 

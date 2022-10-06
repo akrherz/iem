@@ -1,5 +1,5 @@
 <?php 
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 include_once "../../../include/myview.php";
 include_once "../../../include/imagemaps.php";
 require_once "../../../include/forms.php";
@@ -15,7 +15,7 @@ $varselect = make_select("var", $var, $ar);
 
 $imgurl = "";
 if (strlen($station) > 0 ){
-	$imgurl = "<img src=\"extremes.php?var=". $var ."&amp;station=". $station ."\">\n";
+    $imgurl = "<img src=\"extremes.php?var=". $var ."&amp;station=". $station ."\">\n";
 }
 
 
@@ -55,4 +55,3 @@ station of your choice.</p>
 {$imgurl}
 EOF;
 $t->render('single.phtml');
-?>

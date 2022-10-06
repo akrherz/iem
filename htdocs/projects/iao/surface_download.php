@@ -23,12 +23,12 @@ $h1select = hourSelect(0, "hour1");
 $h2select = hourSelect(0, "hour2");
 
 $ar = Array(
-	"Etc/UTC" => "Coordinated Universal Time (UTC)",
+    "Etc/UTC" => "Coordinated Universal Time (UTC)",
     "America/Chicago" => "America/Chicago (CST/CDT)",
 );
 
 $tzselect = make_select("tz", "Etc/UTC", $ar);
-		
+        
 $t->content = <<<EOF
 
 <ol class="breadcrumb">
@@ -91,12 +91,12 @@ by the National Science Foundation (grant #1701278).</p>
 
 
 <h4>5) Data Format:</h4>
-		
+        
 <p>
 <select name="format">
-	<option value="comma">Comma Delimited</option>
-	<option value="excel">Excel (.xlsx)</option>
-	<option value="tdf">Tab Delimited</option>
+    <option value="comma">Comma Delimited</option>
+    <option value="excel">Excel (.xlsx)</option>
+    <option value="tdf">Tab Delimited</option>
 </select></p>
 
 <h4>6) Finally, process request</h4>

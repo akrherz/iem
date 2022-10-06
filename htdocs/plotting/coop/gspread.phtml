@@ -3,9 +3,9 @@ include("../../../config/settings.inc.php");
 include_once "../../../include/myview.php";
 $t = new MyView();
 
- $t->title = "Growing Season Temperature Spreads";
+$t->title = "Growing Season Temperature Spreads";
 
- $t->content = <<<EOF
+$t->content = <<<EOF
 <p><h3 class="heading">Seasonal Temperature Spreads</h3><p>
 
 <p>Related: <a href="spread_fe.phtml">View by Date</a>
@@ -17,4 +17,3 @@ $t = new MyView();
 <p><img src="images/spread_son.png">
 EOF;
 $t->render('single.phtml');
- ?>

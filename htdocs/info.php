@@ -10,7 +10,7 @@ $t->content = <<<EOF
 
 <div class="row">
 <div class="col-md-6 col-sm-6">
-		
+
 <h3>Quick Links:</h3></p>
 <ul>
 <li><a href="/info/iem.php">IEM Info/Background</a></li>
@@ -21,10 +21,10 @@ $t->content = <<<EOF
 <p>
 <h3>Station Locations: (graphical)</h3>
 <ul>
-	<li><a href="/sites/locate.php?network=IA_ASOS">ASOS Locations</a></li>
-	<li><a href="/sites/locate.php?network=IA_RWIS">RWIS Locations</a></li>
-	<li><a href="/sites/locate.php?network=IA_COOP">COOP Locations</a></li>
-	<li><a href="/sites/locate.php?network=ISUSM">ISU Soil Moisture Locations</a></li>
+    <li><a href="/sites/locate.php?network=IA_ASOS">ASOS Locations</a></li>
+    <li><a href="/sites/locate.php?network=IA_RWIS">RWIS Locations</a></li>
+    <li><a href="/sites/locate.php?network=IA_COOP">COOP Locations</a></li>
+    <li><a href="/sites/locate.php?network=ISUSM">ISU Soil Moisture Locations</a></li>
 </ul>
 
 </div>
@@ -32,7 +32,7 @@ $t->content = <<<EOF
 
 <h3>IEM Server Information:</h3>
 <ul>
-	<li><a href="/usage/">Webfarm Statistics</a></li>
+    <li><a href="/usage/">Webfarm Statistics</a></li>
 </ul>
 
 <h3>Papers/Presentations</h3>

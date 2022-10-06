@@ -21,7 +21,6 @@ $area = isset($_GET["area"]) ? xssafe($_GET["area"]): "all";
 $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
 $day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
 
-
 $height = 350;
 $width = 350;
 
@@ -265,4 +264,3 @@ $t->content = <<<EOF
 
 EOF;
 $t->render('single.phtml');
-?>

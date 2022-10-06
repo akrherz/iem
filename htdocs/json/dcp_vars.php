@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
  * Simple service to return a listing of SHEF variables for a given NWSLI
  * 
@@ -17,24 +17,23 @@ $rs = pg_prepare(
     "SELECT distinct key from $table WHERE station = $1"
 );
 
-$station = isset($_REQUEST["station"]) ? strtoupper($_REQUEST["station"]) : 
-			die(json_encode('Please provide a station variable (NWSLI)')); 
+$station = isset($_REQUEST["station"]) ? strtoupper($_REQUEST["station"]) :
+    die(json_encode('Please provide a station variable (NWSLI)'));
 
-$rs = pg_execute($hads, "SELECT", Array($station));
+$rs = pg_execute($hads, "SELECT", array($station));
 
-$ar = Array("vars"=> Array());
+$ar = array("vars" => array());
 
-for ($i=0;$row=pg_fetch_assoc($rs);$i++)
-{
-  $z = Array("id"=>$row["key"]);
-  $ar["vars"][] = $z;
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    $z = array("id" => $row["key"]);
+    $ar["vars"][] = $z;
 }
 
 $json = json_encode($ar);
 
 // JSON if no callback
-if( ! isset($_REQUEST['callback']))
-	exit( $json );
+if (!isset($_REQUEST['callback']))
+    exit($json);
 
 $cb = xssafe($_REQUEST['callback']);
 echo "{$cb}($json)";

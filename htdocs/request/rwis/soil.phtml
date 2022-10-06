@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 81);
 include_once "../../../include/myview.php";
@@ -19,7 +19,7 @@ $ms2 = monthSelect("", "month2");
 $ds2 = daySelect2("", "day2");
 $hs2 = gmtHourSelect("", "hour2");
 
-$ar = Array(
+$ar = array(
     "Etc/UTC" => "Coordinated Universal Time (UTC)",
     "America/New_York" => "America/New_York (EST/EDT)",
     "America/Chicago" => "America/Chicago (CST/CDT)",
@@ -84,7 +84,7 @@ the temperature reading in Fahrenheit was recorded.</p>
     <td>{$ms}</td>
     <td>{$ds}</td>
     <td>{$hs}
-	<input type="hidden" name="minute1" value="0"></td>
+    <input type="hidden" name="minute1" value="0"></td>
   </tr>
 
   <tr>
@@ -93,7 +93,7 @@ the temperature reading in Fahrenheit was recorded.</p>
     <td>{$ms2}</td>
     <td>{$ds2}</td>
     <td>{$hs2}
-	<input type="hidden" name="minute2" value="0"></td>
+    <input type="hidden" name="minute2" value="0"></td>
     </tr>
 </table>
 
@@ -103,7 +103,7 @@ the temperature reading in Fahrenheit was recorded.</p>
    <i>This controls the timezone used for presenting the timestamps in the
     downloaded file.</i>
    <br />{$tzselect}</p>
-    		
+            
 <p><h3>4. How to view?</h3><br>
 <select name="what">
   <option value="txt">Download to Disk</option>

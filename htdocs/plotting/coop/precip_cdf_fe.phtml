@@ -2,6 +2,5 @@
 $station = isset($_GET["station"]) ? $_GET['station']: 'IA0200';
 $network = sprintf("%sCLIMATE", substr($station, 0, 2));
 $uri = sprintf("/plotting/auto/?q=107&network=%s&station=%s&varname=precip",
-		$network, $station);
+        $network, $station);
 header("Location: {$uri}");
-?>

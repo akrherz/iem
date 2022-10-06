@@ -1,33 +1,37 @@
 <html>
+
 <head>
- <title>Top</title>
+    <title>Top</title>
 </head>
+
 <body bgcolor="white">
 
-<form method="GET" action="/cgi-bin/afos/retrieve.py" target="display">
+    <form method="GET" action="/cgi-bin/afos/retrieve.py" target="display">
 
-<table border="0" width="100%">
-<tr>
-  <th>Enter AFOS PIL:<br>
-  ex) <i>AFDDMX</i></th> 
-  <td><input type="text" name="pil" size=20></td>
+        <table border="0" width="100%">
+            <tr>
+                <th>Enter AFOS PIL:<br>
+                    ex) <i>AFDDMX</i></th>
+                <td><input type="text" name="pil" size=20></td>
 
-  <td><SELECT name="limit">
-    <option value="1">Latest
-    <option value="2">Last 2
-    <option value="5">Last 5
-    <option value="10">Last 10
-    <option value="1500">Last 1500
-</SELECT></td>
+                <td><SELECT name="limit">
+                        <option value="1">Latest
+                        <option value="2">Last 2
+                        <option value="5">Last 5
+                        <option value="10">Last 10
+                        <option value="1500">Last 1500
+                    </SELECT></td>
 
-  <td><input type="submit" value="GET"></td>
+                <td><input type="submit" value="GET"></td>
 
-  <td valign="top" align="right"><b><a target="display" href="bottom.php">NWS Text Product Finder</a></b><br>
-  <a target="_top" href="/">Iowa Environmental Mesonet</a><br>
-  <b>*</b>Unofficial data for educational use only.
+                <td valign="top" align="right"><b><a target="display" href="bottom.php">NWS Text Product Finder</a></b><br>
+                    <a target="_top" href="/">Iowa Environmental Mesonet</a><br>
+                    <b>*</b>Unofficial data for educational use only.
 
-</tr></table>
+            </tr>
+        </table>
 
-</form>
+    </form>
 </body>
+
 </html>

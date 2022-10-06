@@ -1,5 +1,5 @@
 <?php 
-include("../../../config/settings.inc.php");
+require_once "../../../config/settings.inc.php";
 require_once "../../../include/forms.php";
 include_once "../../../include/myview.php";
 $t = new MyView();
@@ -16,32 +16,32 @@ $cities = $nt->table;
 $s1 = "";
 for(reset($cities); $key = key($cities); next($cities))
 {
-	$s1 .= "<option value=\"" . $cities[$key]["id"] ."\"";
-	if ($cities[$key]["id"] == $station1) $s1 .= " SELECTED ";
+    $s1 .= "<option value=\"" . $cities[$key]["id"] ."\"";
+    if ($cities[$key]["id"] == $station1) $s1 .= " SELECTED ";
 
-	$s1 .= ">" . $cities[$key]["name"] . "\n";
+    $s1 .= ">" . $cities[$key]["name"] . "\n";
 }
 $s2 = "";
 for(reset($cities); $key = key($cities); next($cities))
 {
-	$s2 .= "<option value=\"" . $cities[$key]["id"] ."\"";
-	if ($cities[$key]["id"] == $station2) $s2 .= " SELECTED ";
+    $s2 .= "<option value=\"" . $cities[$key]["id"] ."\"";
+    if ($cities[$key]["id"] == $station2) $s2 .= " SELECTED ";
 
-	$s2 .= ">" . $cities[$key]["name"] . "\n";
+    $s2 .= ">" . $cities[$key]["name"] . "\n";
 }
 $ar = Array("o" => "One Station", "c" => "Compare Two");
 $modeselect = make_select("mode", $mode, $ar);
 
 if ($station1 != "" && $station2 != "")
 {
-	if ($mode == "c"){
-		$imgurl = "<img src=\"threshold_histogram.php?station1=".$station1."&station2=".$station2."\">\n";
+    if ($mode == "c"){
+        $imgurl = "<img src=\"threshold_histogram.php?station1=".$station1."&station2=".$station2."\">\n";
 
-	}else {
-		$imgurl = "<img src=\"threshold_histogram.php?station1=". $station1 ."\">\n";
-	}
+    }else {
+        $imgurl = "<img src=\"threshold_histogram.php?station1=". $station1 ."\">\n";
+    }
 } else {
-	$imgurl = "<p>Select your site above...</p>";
+    $imgurl = "<p>Select your site above...</p>";
 }
 
 $t->content = <<<EOF
@@ -96,4 +96,3 @@ your sites.
 {$imgurl}
 EOF;
 $t->render('single.phtml');
-?>

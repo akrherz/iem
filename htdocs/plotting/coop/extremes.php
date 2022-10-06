@@ -6,9 +6,9 @@ $station = isset($_GET["station"]) ? strtoupper($_GET["station"]) : die();
 $var = isset($_GET["var"]) ? $_GET["var"]: die();
 
 $rs = pg_prepare($connection, "SELECT", "SELECT max_".$var." as max, " .
-		"min_".$var." as min, ".$var." as avg, years, " .
-		"to_char(valid, 'mm dd') as valid from climate " .
-		"WHERE station = $1 ORDER by valid ASC");
+        "min_".$var." as min, ".$var." as avg, years, " .
+        "to_char(valid, 'mm dd') as valid from climate " .
+        "WHERE station = $1 ORDER by valid ASC");
 $result = pg_execute($connection, "SELECT", Array($station));
 
 
@@ -107,4 +107,3 @@ $graph->AddLine(new PlotLine(HORIZONTAL,32,"blue",2));
 
 // Display the graph
 $graph->Stroke();
-?>

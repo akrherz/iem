@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 
 require_once "../../../include/myview.php";
@@ -10,25 +10,25 @@ $t = new MyView();
 
 $t->title = "Download TallTowers 1 minute aggregate data";
 
-$y1select = yearSelect2(2016, date("Y"), "year1"); 
-$y2select = yearSelect2(2016, date("Y"), "year2"); 
+$y1select = yearSelect2(2016, date("Y"), "year1");
+$y2select = yearSelect2(2016, date("Y"), "year2");
 
-$m1select = monthSelect2(1, "month1"); 
-$m2select = monthSelect2(date("m"), "month2"); 
+$m1select = monthSelect2(1, "month1");
+$m2select = monthSelect2(date("m"), "month2");
 
-$d1select = daySelect2(1, "day1"); 
+$d1select = daySelect2(1, "day1");
 $d2select = daySelect2(date("d"), "day2");
 
 $h1select = hourSelect(0, "hour1");
 $h2select = hourSelect(0, "hour2");
 
-$ar = Array(
-	"Etc/UTC" => "Coordinated Universal Time (UTC)",
+$ar = array(
+    "Etc/UTC" => "Coordinated Universal Time (UTC)",
     "America/Chicago" => "America/Chicago (CST/CDT)",
 );
 
 $tzselect = make_select("tz", "Etc/UTC", $ar);
-		
+
 $t->content = <<<EOF
 
 <ol class="breadcrumb">
@@ -122,12 +122,12 @@ request.</p>
 
 
 <h4>8) Download Options:</h4>
-		
+        
 <p><strong>Data Format:</strong> 
 <select name="format">
-	<option value="comma">Comma Delimited</option>
-	<option value="excel">Excel (.xlsx)</option>
-	<option value="tdf">Tab Delimited</option>
+    <option value="comma">Comma Delimited</option>
+    <option value="excel">Excel (.xlsx)</option>
+    <option value="tdf">Tab Delimited</option>
 </select></p>
 
 <h4>9) Finally, process request</h4>

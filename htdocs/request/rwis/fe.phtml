@@ -1,18 +1,18 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/imagemaps.php";
 require_once "../../../include/forms.php";
 require_once "../../../include/database.inc.php";
 
-$network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]): "IA_RWIS";
+$network = isset($_REQUEST["network"]) ? xssafe($_REQUEST["network"]) : "IA_RWIS";
 
 define("IEM_APPID", 63);
 $t = new MyView();
 $t->iemss = True;
 $t->title = "RWIS Data Download";
 
-$startyr = ($network == 'IA_RWIS') ? 1995: 2009;
+$startyr = ($network == 'IA_RWIS') ? 1995 : 2009;
 $ys1 = yearSelect2($startyr, date("Y"), "year1");
 $ms1 = monthSelect("", "month1");
 $ds1 = daySelect2("", "day1");
@@ -22,7 +22,7 @@ $ms2 = monthSelect("", "month2");
 $ds2 = daySelect2("", "day2");
 $hs2 = hourSelect("", "hour2");
 
-$ar = Array(
+$ar = array(
     "Etc/UTC" => "Coordinated Universal Time (UTC)",
     "America/New_York" => "America/New_York (EST/EDT)",
     "America/Chicago" => "America/Chicago (CST/CDT)",
@@ -32,12 +32,12 @@ $ar = Array(
 );
 $tzselect = make_select("tz", "Etc/UTC", $ar);
 
-$ar = Array();
+$ar = array();
 $rs = pg_exec(
     iemdb("mesosite"),
     "SELECT id, name from networks where id ~* 'RWIS' ORDER by name ASC"
 );
-while ($row=pg_fetch_assoc($rs)){
+while ($row = pg_fetch_assoc($rs)) {
     $ar[$row["id"]] = $row["name"];
 }
 $sselect = make_select("network", $network, $ar);

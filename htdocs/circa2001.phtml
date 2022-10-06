@@ -1,329 +1,407 @@
 <HTML>
+
 <HEAD>
-	<TITLE>Iowa Mesonet Development</TITLE>
-	<META NAME="AUTHOR" CONTENT="Daryl Herzmann">
-	<style>
-	/* Generic class for warning messages */
-.warning {
- border:solid 1px #000;
- background:#FCF9CE url(images/warning.png) 6px 4px no-repeat;
- color:#222222;
- padding-left: 40px;
- padding-top: 10px;
- padding-bottom: 10px;
- text-align: left;
-}
-	.sans11{ font-size: 11px; font-family: Arial, Helvetica, Geneva, Swiss, SunSans-Regular }
-.title { border: 10px; font-size: 24px; font-family: Helvetica, Geneva, Swiss, SunSans-Regular }
-.siders {color: black; font-weight: bold; font-size: 12px; }
-.bluet {color: blue; font-weight: bold; font-size: 14px; }
-.here {color: black; font-weight: bold; font-size: 11px;}
-.there {font-size: 11px; font-family: Arial;}
-a {font-size: 11px; color: blue; }
-	</style>
+    <TITLE>Iowa Mesonet Development</TITLE>
+    <META NAME="AUTHOR" CONTENT="Daryl Herzmann">
+    <style>
+        /* Generic class for warning messages */
+        .warning {
+            border: solid 1px #000;
+            background: #FCF9CE url(images/warning.png) 6px 4px no-repeat;
+            color: #222222;
+            padding-left: 40px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            text-align: left;
+        }
+
+        .sans11 {
+            font-size: 11px;
+            font-family: Arial, Helvetica, Geneva, Swiss, SunSans-Regular
+        }
+
+        .title {
+            border: 10px;
+            font-size: 24px;
+            font-family: Helvetica, Geneva, Swiss, SunSans-Regular
+        }
+
+        .siders {
+            color: black;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .bluet {
+            color: blue;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .here {
+            color: black;
+            font-weight: bold;
+            font-size: 11px;
+        }
+
+        .there {
+            font-size: 11px;
+            font-family: Arial;
+        }
+
+        a {
+            font-size: 11px;
+            color: blue;
+        }
+    </style>
 </HEAD>
 
-<?php 
-	$title = "Iowa Environmental Mesonet";?>
+<?php
+$title = "Iowa Environmental Mesonet"; ?>
+
 <BODY rightmargin="0" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" BGCOLOR="#EEEEEE">
-<div class="warning">
-The IEM website celebrates its 10th anniversary today!  Here is how the homepage looked on
-17 June 2001.  Thank you for visiting the website and support of our project.
-  All of the links on the page take you to the current homepage.
-</div>
+    <div class="warning">
+        The IEM website celebrates its 10th anniversary today! Here is how the homepage looked on
+        17 June 2001. Thank you for visiting the website and support of our project.
+        All of the links on the page take you to the current homepage.
+    </div>
 
-<TABLE width="100%" bgcolor="white" cellspacing="0" border="0" cellpadding="0" rowspacing="0" border="0">
-<TR bgcolor="#336699"><TD colspan="5" align="CENTER">
+    <TABLE width="100%" bgcolor="white" cellspacing="0" border="0" cellpadding="0" rowspacing="0" border="0">
+        <TR bgcolor="#336699">
+            <TD colspan="5" align="CENTER">
 
-	<font color="white" class="title"><?php print($title); ?></font>
+                <font color="white" class="title"><?php print($title); ?></font>
 
-</TD></TR>
+            </TD>
+        </TR>
 
-<TR bgcolor="black"><TH colspan="5">
-	<span><font color="white"  class="sans11"> Department of Agronomy & Iowa State
-University</font></span>
-</TH></TR>
+        <TR bgcolor="black">
+            <TH colspan="5">
+                <span>
+                    <font color="white" class="sans11"> Department of Agronomy & Iowa State
+                        University</font>
+                </span>
+            </TH>
+        </TR>
 
-<TR>
+        <TR>
 
-<TD bgcolor="#ccccff" width="3"><img src="/icons/spacer.gif" border="0" width="3"></TD>
-<TD bgcolor="#ccccff" valign="TOP" width="120">
-	<BR>
-	
-	<!-- Feature Section -->
-	<TABLE bgcolor="black" cellpadding="2" rowspacing="0" cellspacing="0" border="0" width="100%">
-	<TR><TD>
+            <TD bgcolor="#ccccff" width="3"><img src="/icons/spacer.gif" border="0" width="3"></TD>
+            <TD bgcolor="#ccccff" valign="TOP" width="120">
+                <BR>
 
-	<TABLE bgcolor="#ffefd5" cellpadding="3" border="0" cellspacing="0" rowspacing="0" width="100%">
-	<TR><TD>
-		<font class="bluet">Feature:</font><BR>
-		<img src="http://www.meteor.iastate.edu/mesonet/data/feature.gif" width="150">
+                <!-- Feature Section -->
+                <TABLE bgcolor="black" cellpadding="2" rowspacing="0" cellspacing="0" border="0" width="100%">
+                    <TR>
+                        <TD>
 
-<BR><B>14 Jun 2001:</B><BR>
-Powerful storms move into Iowa! Check out the radar.
+                            <TABLE bgcolor="#ffefd5" cellpadding="3" border="0" cellspacing="0" rowspacing="0" width="100%">
+                                <TR>
+                                    <TD>
+                                        <font class="bluet">Feature:</font><BR>
+                                        <img src="http://www.meteor.iastate.edu/mesonet/data/feature.gif" width="150">
+
+                                        <BR><B>14 Jun 2001:</B><BR>
+                                        Powerful storms move into Iowa! Check out the radar.
 
 
-	</TD>
-	</TR></TABLE>
+                                    </TD>
+                                </TR>
+                            </TABLE>
 
-	</TD></TR></TABLE>
-	<!-- End of Feature Section -->
-	
-	
-	
-	<TABLE width="100%" cellpadding="2" rowspacing="2" border="0" cellspacing="0">
-	
-
-	<TR><TD><BR></TD></TR>
-
-	<TR>
-	<TD NOBR>
-		<span class="siders">Cooperating Members:</span>
-	</TD></TR>
-	<TR><TD>
-		<a href="http://www.crh.noaa.gov/dmx/">NWS Des Moines</a>
-		<BR><a href="http://www.weatherview.dot.state.ia.us/">IaDOT RWIS</a>
-		<BR><a href="http://www.meteor.iastate.edu/agclimate">ISU Agclimate Network</a>
-	</TD></TR>
-
-	<TR><TD><BR></TD></TR>
-
-	<TR>
-	<TD NOBR>
-		<P class="siders">Contact Information:
-	</TD></TR>
-	<TR><TD>
-		Dennis Todey<BR>
-		&nbsp; &nbsp; (<i><a href="mailto:dptodey@iastate.edu">dptodey@iastate.edu</a></i>)
-
-		<P>Daryl Herzmann<BR>
-		&nbsp; &nbsp; (<i><a href="mailto:akrherz@iastate.edu">akrherz@iastate.edu</a></i>)
-	</TD></TR>
-
-	<TR><TD><BR></TD></TR>
-
-	<TR><TD align="center">
-		<img
-src="http://pals.agron.iastate.edu/cgi-bin/Count.cgi?df=mesonet.dat&chcolor=T" align="absmiddle">
-	</TD></TR>
-
-	</TABLE>
-
-	
-</TD>
-
-<TD bgcolor="#336699" width="3"> <img src="/icons/spacer.gif" border="0" width="3"></TD>
-<TD bgcolor="white" width="3"> <img src="/icons/spacer.gif" border="0" width="3"></TD>
+                        </TD>
+                    </TR>
+                </TABLE>
+                <!-- End of Feature Section -->
 
 
 
-
-<TD width="500">
-
-	<TABLE border="0" cellpadding="3" cellspacing="0" rowspacing="0"><TR><TD>
+                <TABLE width="100%" cellpadding="2" rowspacing="2" border="0" cellspacing="0">
 
 
+                    <TR>
+                        <TD><BR></TD>
+                    </TR>
 
-<P><img src="/icons/alert.red.gif">This site is a temporary test bed for Iowa mesonet products.  
+                    <TR>
+                        <TD NOBR>
+                            <span class="siders">Cooperating Members:</span>
+                        </TD>
+                    </TR>
+                    <TR>
+                        <TD>
+                            <a href="http://www.crh.noaa.gov/dmx/">NWS Des Moines</a>
+                            <BR><a href="http://www.weatherview.dot.state.ia.us/">IaDOT RWIS</a>
+                            <BR><a href="http://www.meteor.iastate.edu/agclimate">ISU Agclimate Network</a>
+                        </TD>
+                    </TR>
 
-<BR><BR>
+                    <TR>
+                        <TD><BR></TD>
+                    </TR>
 
+                    <TR>
+                        <TD NOBR>
+                            <P class="siders">Contact Information:
+                        </TD>
+                    </TR>
+                    <TR>
+                        <TD>
+                            Dennis Todey<BR>
+                            &nbsp; &nbsp; (<i><a href="mailto:dptodey@iastate.edu">dptodey@iastate.edu</a></i>)
 
+                            <P>Daryl Herzmann<BR>
+                                &nbsp; &nbsp; (<i><a href="mailto:akrherz@iastate.edu">akrherz@iastate.edu</a></i>)
+                        </TD>
+                    </TR>
 
-<TABLE cellpadding="2" cellspacing="0" rowspacing="0" colspacing="0" border="0">
+                    <TR>
+                        <TD><BR></TD>
+                    </TR>
 
-<TR>
-	<TD colspan="2"><font class="bluet"><B>Current Data:</B></font></TD>
-	<TH>
-	17 Jun 2001 15 UTC
-	</TH>
-</TR>
+                    <TR>
+                        <TD align="center">
+                            <img src="http://pals.agron.iastate.edu/cgi-bin/Count.cgi?df=mesonet.dat&chcolor=T" align="absmiddle">
+                        </TD>
+                    </TR>
 
-<TR>
-	<TD rowspan="6"><BR></TD>
-	<TD>Iowa DOT RWIS data with ASOS/AWOS data.</TD>
-	<TD> [ <a href="/index2.phtml">Current</a> ] </TD>
-</TR>
-<TR>
-	<TD>ASOS/AWOS data plotted by itself.</TD> 
-	<TD> [ <a href="/index2.phtml">Current</a> ] 
-	&nbsp; 48 / 49 Reporting
-	</TD>
-</TR>
-<TR>
-	<TD>RWIS data plotted by itself.</TD>
-	<TD> [ <a href="/index2.phtml">Current</a> ] 
-	&nbsp; 42 / 49 Reporting
-	</TD>
-</TR>
-
-<TR>
-	<TD>Today's total precip. [ASOS]</TD>
-	<TD> <a href="/index2.phtml">Plot</a> 
-	</TD>
-</TR>
-
-<TR>
-        <TD>Hourly Mesonet + DMX NEXRAD</TD>
-        <TD> <a href="/index2.phtml">Image</a>
-        </TD>
-</TR>
-
-<TR>
-        <TD>20 Minute Mesonet + DMX NEXRAD</TD>
-        <TD> <a href="/index2.phtml">Image</a> &nbsp; | &nbsp;
-        <a href="/index2.phtml">Loop</a>
-        </TD>
-</TR>
-
-<!-- spacer -->
-<TR>
-	<TD colspan="3">&nbsp;</TD>
-</TR>
-
-<TR>
-	
-	<TD colspan="2"><font class="bluet"><B>Comparison Plots:</B></font></TD>
-	<TD></TD>
-</TR>
-<TR>
-	<TD rowspan="3"> &nbsp;</TD>
-	<TD>Temperatures [RWIS vs ASOS].</TD>
-	<TD> 
-		<a href="/index2.phtml">Plot</a> | 
-		<a href="/index2.phtml">Contour</a>
-	</TD>
-</TR>
-<TR>
-	<TD>Dew Points [RWIS vs ASOS].</TD>
-	<TD> 
-		<a href="/index2.phtml">Plot</a> | 
-		<a href="/index2.phtml">Contour</a>
-	</TD>
-</TR>
-
-<TR>
-	<TD>Meteograms [RWIS vs ASOS].</TD>
-	<TD> 
-		<a href="/index2.phtml">Cedar Rapids</a> | 
-		<a href="/index2.phtml">Council Bluffs</a> | 
-		<a href="/index2.phtml">Des Moines</a> 
-	</TD>
-</TR>
+                </TABLE>
 
 
-<!-- spacer -->
-<TR>
-	<TD colspan="4">&nbsp;</TD>
-</TR>
+            </TD>
 
-<TR>
-	
-	<TD colspan="2"><font class="bluet"><B>Climatology:</B></font></TD>
-	<TD></TD>
-</TR>
-
-<TR>
-	<TD rowspan="5" > &nbsp;</TD>
-	<TD>High/Low Temperatures [ASOS/AWOS/RWIS].</TD>
-	<TD> 
-		[ <a href="/index2.phtml">Yesterday</a> ] 
-	</TD>
-</TR>
-
-<TR>
-	<TD colspan="2"> &nbsp; &nbsp; &nbsp;  <i>Selected Areas</I>
-		( <a href="/index2.phtml">Cedar Rapids</a> )
-		( <a href="/index2.phtml">Council Bluffs</a> ) 
-		( <a href="/index2.phtml">Des Moines</a> ) 
-	</TD>
-</TR>
-
-<TR>
-	
-	<TD>Total Precipitation [ASOS].</TD>
-	<TD> 
-		[ <a href="/index2.phtml">Yesterday</a> ] 
-		[ <a href="/index2.phtml">Ending 00Z</a> ] 
-		[ <a href="/index2.phtml">Ending 12Z</a> ] 
-	</TD>
-</TR>
-
-<TR>
-	
-	<TD>Growing Degree Days (base=50) [ASOS/AWOS]</TD>
-	<TD> 
-		 <a href="/index2.phtml">Plot</a> | <a href="/index2.phtml">Contour</a> 
-	</TD>
-</TR>
-
-<TR>
-	
-	<TD>Growing Degree Days (base=50) [RWIS]</TD>
-	<TD> 
-		 <a href="/index2.phtml">Plot</a> 
-	</TD>
-</TR>
+            <TD bgcolor="#336699" width="3"> <img src="/icons/spacer.gif" border="0" width="3"></TD>
+            <TD bgcolor="white" width="3"> <img src="/icons/spacer.gif" border="0" width="3"></TD>
 
 
 
-<!-- spacer -->
-<TR>
-	<TD colspan="3">&nbsp;</TD>
-</TR>
 
-<TR>
-	
-	<TD colspan="2"><font class="bluet"><B>Current Data Files:</B></font></TD>
-	<TD></TD>
-</TR>
+            <TD width="500">
 
-<TR>
-	<TD rowspan="3"> &nbsp;</TD>
-	<TD>ASOS/AWOS.</TD>
-	<TD> 
-		<a href="/index2.phtml">GEMPAK</a> 
-	</TD>
-</TR>
+                <TABLE border="0" cellpadding="3" cellspacing="0" rowspacing="0">
+                    <TR>
+                        <TD>
 
-<TR>
-	<TD>RWIS Data.</TD>
-	<TD> 
-		<a href="/index2.phtml">RAW CDF</a> | <a href="/index2.phtml">GEMPAK</a>
-	</TD>
-</TR>
 
-	
-<TR>
-	
-	<TD>Combined Mesonet.</TD>
-	<TD> 
-		<a href="/index2.phtml">GEMPAK</a> 
-	</TD>
-</TR>
 
-</TABLE>
+                            <P><img src="/icons/alert.red.gif">This site is a temporary test bed for Iowa mesonet products.
 
-	</TD></TR></TABLE>
+                                <BR><BR>
 
-<P align="CENTER"><font size="+1"><B> | </B></font>
-<font class="here">Homepage</font> <font size="+1"><B> | </B></font>
-<a class="there" href="/index2.phtml">Info</a> <font size="+1"><B> | </B></font>
-<a class="there" href="/index2.phtml">Docs</a> <font size="+1"><B> | </B></font>
 
-</TD></TR>
 
-<TR bgcolor="black"><TD colspan="5"><img src="/icons/spacer.gif" height="1" border="0" width="1"></TD></TR>
+                            <TABLE cellpadding="2" cellspacing="0" rowspacing="0" colspacing="0" border="0">
 
-<TR bgcolor="#EEEEEE">
-	<TD colspan="5" align="right">
-	&copy; 2001: Iowa Environmental Mesonet<BR>
-	Iowa State University
-	
-</TD></TR>
+                                <TR>
+                                    <TD colspan="2">
+                                        <font class="bluet"><B>Current Data:</B></font>
+                                    </TD>
+                                    <TH>
+                                        17 Jun 2001 15 UTC
+                                    </TH>
+                                </TR>
 
-</TABLE>
+                                <TR>
+                                    <TD rowspan="6"><BR></TD>
+                                    <TD>Iowa DOT RWIS data with ASOS/AWOS data.</TD>
+                                    <TD> [ <a href="/index2.phtml">Current</a> ] </TD>
+                                </TR>
+                                <TR>
+                                    <TD>ASOS/AWOS data plotted by itself.</TD>
+                                    <TD> [ <a href="/index2.phtml">Current</a> ]
+                                        &nbsp; 48 / 49 Reporting
+                                    </TD>
+                                </TR>
+                                <TR>
+                                    <TD>RWIS data plotted by itself.</TD>
+                                    <TD> [ <a href="/index2.phtml">Current</a> ]
+                                        &nbsp; 42 / 49 Reporting
+                                    </TD>
+                                </TR>
+
+                                <TR>
+                                    <TD>Today's total precip. [ASOS]</TD>
+                                    <TD> <a href="/index2.phtml">Plot</a>
+                                    </TD>
+                                </TR>
+
+                                <TR>
+                                    <TD>Hourly Mesonet + DMX NEXRAD</TD>
+                                    <TD> <a href="/index2.phtml">Image</a>
+                                    </TD>
+                                </TR>
+
+                                <TR>
+                                    <TD>20 Minute Mesonet + DMX NEXRAD</TD>
+                                    <TD> <a href="/index2.phtml">Image</a> &nbsp; | &nbsp;
+                                        <a href="/index2.phtml">Loop</a>
+                                    </TD>
+                                </TR>
+
+                                <!-- spacer -->
+                                <TR>
+                                    <TD colspan="3">&nbsp;</TD>
+                                </TR>
+
+                                <TR>
+
+                                    <TD colspan="2">
+                                        <font class="bluet"><B>Comparison Plots:</B></font>
+                                    </TD>
+                                    <TD></TD>
+                                </TR>
+                                <TR>
+                                    <TD rowspan="3"> &nbsp;</TD>
+                                    <TD>Temperatures [RWIS vs ASOS].</TD>
+                                    <TD>
+                                        <a href="/index2.phtml">Plot</a> |
+                                        <a href="/index2.phtml">Contour</a>
+                                    </TD>
+                                </TR>
+                                <TR>
+                                    <TD>Dew Points [RWIS vs ASOS].</TD>
+                                    <TD>
+                                        <a href="/index2.phtml">Plot</a> |
+                                        <a href="/index2.phtml">Contour</a>
+                                    </TD>
+                                </TR>
+
+                                <TR>
+                                    <TD>Meteograms [RWIS vs ASOS].</TD>
+                                    <TD>
+                                        <a href="/index2.phtml">Cedar Rapids</a> |
+                                        <a href="/index2.phtml">Council Bluffs</a> |
+                                        <a href="/index2.phtml">Des Moines</a>
+                                    </TD>
+                                </TR>
+
+
+                                <!-- spacer -->
+                                <TR>
+                                    <TD colspan="4">&nbsp;</TD>
+                                </TR>
+
+                                <TR>
+
+                                    <TD colspan="2">
+                                        <font class="bluet"><B>Climatology:</B></font>
+                                    </TD>
+                                    <TD></TD>
+                                </TR>
+
+                                <TR>
+                                    <TD rowspan="5"> &nbsp;</TD>
+                                    <TD>High/Low Temperatures [ASOS/AWOS/RWIS].</TD>
+                                    <TD>
+                                        [ <a href="/index2.phtml">Yesterday</a> ]
+                                    </TD>
+                                </TR>
+
+                                <TR>
+                                    <TD colspan="2"> &nbsp; &nbsp; &nbsp; <i>Selected Areas</I>
+                                        ( <a href="/index2.phtml">Cedar Rapids</a> )
+                                        ( <a href="/index2.phtml">Council Bluffs</a> )
+                                        ( <a href="/index2.phtml">Des Moines</a> )
+                                    </TD>
+                                </TR>
+
+                                <TR>
+
+                                    <TD>Total Precipitation [ASOS].</TD>
+                                    <TD>
+                                        [ <a href="/index2.phtml">Yesterday</a> ]
+                                        [ <a href="/index2.phtml">Ending 00Z</a> ]
+                                        [ <a href="/index2.phtml">Ending 12Z</a> ]
+                                    </TD>
+                                </TR>
+
+                                <TR>
+
+                                    <TD>Growing Degree Days (base=50) [ASOS/AWOS]</TD>
+                                    <TD>
+                                        <a href="/index2.phtml">Plot</a> | <a href="/index2.phtml">Contour</a>
+                                    </TD>
+                                </TR>
+
+                                <TR>
+
+                                    <TD>Growing Degree Days (base=50) [RWIS]</TD>
+                                    <TD>
+                                        <a href="/index2.phtml">Plot</a>
+                                    </TD>
+                                </TR>
+
+
+
+                                <!-- spacer -->
+                                <TR>
+                                    <TD colspan="3">&nbsp;</TD>
+                                </TR>
+
+                                <TR>
+
+                                    <TD colspan="2">
+                                        <font class="bluet"><B>Current Data Files:</B></font>
+                                    </TD>
+                                    <TD></TD>
+                                </TR>
+
+                                <TR>
+                                    <TD rowspan="3"> &nbsp;</TD>
+                                    <TD>ASOS/AWOS.</TD>
+                                    <TD>
+                                        <a href="/index2.phtml">GEMPAK</a>
+                                    </TD>
+                                </TR>
+
+                                <TR>
+                                    <TD>RWIS Data.</TD>
+                                    <TD>
+                                        <a href="/index2.phtml">RAW CDF</a> | <a href="/index2.phtml">GEMPAK</a>
+                                    </TD>
+                                </TR>
+
+
+                                <TR>
+
+                                    <TD>Combined Mesonet.</TD>
+                                    <TD>
+                                        <a href="/index2.phtml">GEMPAK</a>
+                                    </TD>
+                                </TR>
+
+                            </TABLE>
+
+                        </TD>
+                    </TR>
+                </TABLE>
+
+                <P align="CENTER">
+                    <font size="+1"><B> | </B></font>
+                    <font class="here">Homepage</font>
+                    <font size="+1"><B> | </B></font>
+                    <a class="there" href="/index2.phtml">Info</a>
+                    <font size="+1"><B> | </B></font>
+                    <a class="there" href="/index2.phtml">Docs</a>
+                    <font size="+1"><B> | </B></font>
+
+            </TD>
+        </TR>
+
+        <TR bgcolor="black">
+            <TD colspan="5"><img src="/icons/spacer.gif" height="1" border="0" width="1"></TD>
+        </TR>
+
+        <TR bgcolor="#EEEEEE">
+            <TD colspan="5" align="right">
+                &copy; 2001: Iowa Environmental Mesonet<BR>
+                Iowa State University
+
+            </TD>
+        </TR>
+
+    </TABLE>
 
 </BODY>
-</HTML>
 
+</HTML>

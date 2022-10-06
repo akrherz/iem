@@ -52,4 +52,3 @@ readfile($zipFile);
 
 unlink($zipFile);
 unlink("${outFile}.tif");
-?>

@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 132);
 require_once "../../../include/myview.php";
@@ -43,38 +43,38 @@ products are assigned a product identifier of <code>GMT</code> on that page.
 EOF;
 $content .= "<th>Start:</th>
     <td>
-     ". yearSelect2(2021, date("Y"), "year1") ."
+     " . yearSelect2(2021, date("Y"), "year1") . "
     </td>
     <td>
-     ". monthSelect2(0,"month1") ."
+     " . monthSelect2(0, "month1") . "
     </td>
     <td>
-     ". daySelect2(0, "day1") ."
+     " . daySelect2(0, "day1") . "
     </td>
     <td>
-     ". gmtHourSelect(0, "hour1") ."
+     " . gmtHourSelect(0, "hour1") . "
     </td>
     <td>
-     ". minuteSelect(0, "minute1") ."
+     " . minuteSelect(0, "minute1") . "
     </td>
   </tr>
 
   <tr>
     <th>End:</th>
     <td>
-     ". yearSelect2(2021, date("Y"), "year2") ."
+     " . yearSelect2(2021, date("Y"), "year2") . "
     </td>
     <td>
-     ". monthSelect2(date("m"), "month2") ."
+     " . monthSelect2(date("m"), "month2") . "
     </td>
     <td>
-     ". daySelect2(date("d"), "day2") ."
+     " . daySelect2(date("d"), "day2") . "
     </td>
     <td>
-     ". gmtHourSelect(0, "hour2") ."
+     " . gmtHourSelect(0, "hour2") . "
     </td>
     <td>
-     ". minuteSelect(0, "minute2") ."
+     " . minuteSelect(0, "minute2") . "
     </td>
   </tr>
 </table>";

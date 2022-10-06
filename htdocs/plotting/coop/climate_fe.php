@@ -1,6 +1,6 @@
 <?php 
-include("../../../config/settings.inc.php");
-include("../../../include/imagemaps.php");     
+require_once "../../../config/settings.inc.php";
+require_once "../../../include/imagemaps.php";
 require_once "../../../include/forms.php";
 include_once "../../../include/myview.php";
 $t = new MyView();
@@ -12,7 +12,7 @@ $mode = isset($_GET["mode"]) ? xssafe($_GET["mode"]): "";
 
 $imgurl = sprintf("/plotting/auto/plot/180/network1:IACLIMATE::station1:%s", $station1);
 if ($mode == 'c'){
-	$imgurl .= sprintf("::station2:%s", $station2);
+    $imgurl .= sprintf("::station2:%s", $station2);
 }
 $imgurl .= ".png";
 
@@ -63,4 +63,3 @@ plot two stations at once for a visual comparison.</p>
 <img src="$imgurl">
 EOF;
 $t->render('single.phtml');
-?>
