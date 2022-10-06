@@ -151,6 +151,8 @@ def station_handler(value, arg, fdict, res, typ):
         netlim = "WHERE id ~* 'ASOS'"
     elif typ == "station":
         netlim = "WHERE id ~* 'CLIMATE'"
+    elif typ == "sid":
+        netlim = "WHERE id !~* 'CLIMATE'"
     cursor.execute(f"SELECT id, name from networks {netlim} ORDER by name ASC")
     for row in cursor:
         networks[row[0]] = row[1]

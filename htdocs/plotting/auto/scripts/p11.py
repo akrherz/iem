@@ -99,10 +99,10 @@ def plotter(fdict):
         )
     if df.empty:
         raise NoDataFound("No Data Found!")
-    df["range"] = df["max_" + varname] - df["min_" + varname]
+    df["range"] = df[f"max_{varname}"] - df[f"min_{varname}"]
 
     title = (
-        f"{ctx['_nt'].sts[station]['name']} [{station}] {year} "
+        f"{ctx['_sname']}:: {year} "
         f"Daily Min/Max {PDICT2[varname]}\n"
         f"Period: {df.index.values[0]:%-d %b} to {df.index.values[-1]:%-d %b}"
     )
@@ -112,7 +112,7 @@ def plotter(fdict):
         df["range"].values,
         ec="g",
         fc="g",
-        bottom=df["min_" + varname].values,
+        bottom=df[f"min_{varname}"].values,
         zorder=1,
     )
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%-d\n%b"))
@@ -137,9 +137,8 @@ def plotter(fdict):
             va="center",
         )
     ax.grid(True)
-    ax.set_ylabel(
-        "%s %s" % (PDICT2[varname], r"$^\circ$F" if varname != "rh" else "%")
-    )
+    ll = r"$^\circ$F" if varname != "rh" else "%"
+    ax.set_ylabel(f"{PDICT2[varname]} {ll}")
     ax.set_xlabel(
         f"Days meeting emphasis: {len(hits)}, "
         f"first: {hits[0].strftime('%B %d') if hits else 'None'} "

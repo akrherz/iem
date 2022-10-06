@@ -121,7 +121,7 @@ def get_data(network, station, tzname, sdate):
                 index_col="utc_valid",
             )
         return df
-    return None
+    raise NoDataFound("No data was found for this site.")
 
 
 def plotter(fdict):

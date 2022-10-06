@@ -42,10 +42,10 @@ def plotter(fdict):
 
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
         with data as (
             select year, month, extract(doy from day) as doy,
-            generate_series(32, high) as t from alldata_{station[:2]}
+            generate_series(32, high) as t from alldata
             where station = %s and year < %s),
         agger as (
             SELECT year, t, min(doy), max(doy) from data GROUP by year, t)

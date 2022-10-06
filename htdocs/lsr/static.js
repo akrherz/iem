@@ -361,7 +361,7 @@ function lsrHTML(feature) {
     return lines.join("<br />");
 }
 
-function formatSBW(feature){
+function formatSBW(feature) {
     var lines = [];
     var ph = feature.get("phenomena");
     var pph = ph in iemdata.vtec_phenomena ? iemdata.vtec_phenomena[ph] : ph;
@@ -380,7 +380,7 @@ function formatSBW(feature){
     return lines.join("<br />");
 }
 
-function handleSBWClick(feature){
+function handleSBWClick(feature) {
     var divid = revisedRandId();
     var div = document.createElement("div");
     var title = feature.get("wfo") + " " + feature.get("phenomena") +
@@ -489,7 +489,9 @@ function initUI() {
     $(".iemdtp").datetimepicker({
         format: "L LT",
         step: 1,
-        onChangeDateTime: function (dp, $input) {
+        maxDate: '+1970/01/03',
+        minDate: '2001/01/01',
+        onClose: function (dp, $input) {
             loadData();
         }
     });
@@ -525,7 +527,7 @@ function initUI() {
     });
     olmap = new ol.Map({
         target: 'map',
-        controls: ol.control.defaults().extend([new ol.control.FullScreen()]),
+        controls: ol.control.defaults.defaults().extend([new ol.control.FullScreen()]),
         view: new ol.View({
             enableRotation: false,
             center: ol.proj.transform([-94.5, 42.1], 'EPSG:4326', 'EPSG:3857'),

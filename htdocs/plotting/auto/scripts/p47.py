@@ -50,9 +50,9 @@ def plotter(fdict):
     with get_sqlalchemy_conn("coop") as conn:
         # beat month
         df = pd.read_sql(
-            f"""
+            """
         SELECT year, sum(precip) as precip, sum(snow) as snow from
-        alldata_{station[:2]} WHERE station = %s and month = %s and
+        alldata WHERE station = %s and month = %s and
         precip >= 0 and snow >= 0 GROUP by year ORDER by year ASC
         """,
             conn,
@@ -66,8 +66,7 @@ def plotter(fdict):
         x="precip", y="snow", data=df, s=50, color="tan"
     ).plot_joint(sns.kdeplot, n_levels=6)
     title = (
-        f"[{station}] {ctx['_nt'].sts[station]['name']}"
-        f"({df.index.min()}-{df.index.max()})\n"
+        f"{ctx['_sname']} ({df.index.min()}-{df.index.max()})\n"
         f"{calendar.month_name[month]} Snowfall vs Precipitation Totals"
     )
     figure(title=title, apctx=ctx, fig=g.figure)

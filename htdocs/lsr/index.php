@@ -1,7 +1,7 @@
 <?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
-$OL = "6.14.1";
+$OL = "7.1.0";
 $DT = "1.11.1";
 $S2 = "4.1.0rc0";
 
@@ -19,7 +19,7 @@ $t->jsextra = <<<EOF
 <script src='/vendor/openlayers/{$OL}/ol-layerswitcher.js'></script>
 
 <script type="text/javascript" src="wfos.js"></script>
-<script type="text/javascript" src="static.js"></script>
+<script type="text/javascript" src="static.js?v=2"></script>
 <script>
 $(document).ready(function(){
     initUI(); // static.js
