@@ -2,11 +2,14 @@
 
 called from RUN_5MIN.sh
 """
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pyiem.util import get_dbconn, logger, get_sqlalchemy_conn
 
 LOG = logger()
+CST = ZoneInfo("Etc/GMT+6")
 
 
 def main():
@@ -15,7 +18,7 @@ def main():
     pgconn = get_dbconn("iem")
     cursor = pgconn.cursor()
     cursor.execute(
-        "SELECT distinct id, c.iemid, date(valid) from "
+        "SELECT distinct id, c.iemid, date(valid at time zone 'UTC+6') from "
         "current_log c JOIN stations t on "
         "(c.iemid = t.iemid) WHERE t.network = 'ISUSM' and c.pcounter > 0 and "
         "updated > now() - '10 minutes'::interval"
@@ -25,13 +28,17 @@ def main():
         return
     for (station, iemid, date) in cursor:
         LOG.info("Processing %s %s", station, date)
+        # NB so careful here, we have to total over a CST date :(
+        sts = datetime(date.year, date.month, date.day, 1, tzinfo=CST)
+        ets = sts + timedelta(hours=24)
+
         with get_sqlalchemy_conn("iem") as conn:
             df = pd.read_sql(
                 "SELECT valid, phour, pcounter from current_log "
-                "WHERE iemid = %s and valid >= %s and valid < %s "
+                "WHERE iemid = %s and valid > %s and valid < %s "
                 "ORDER by valid ASC",
                 conn,
-                params=(iemid, date, date + pd.Timedelta(days=1)),
+                params=(iemid, sts, ets),
                 index_col="valid",
             )
         df = (
