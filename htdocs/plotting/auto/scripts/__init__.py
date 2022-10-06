@@ -310,7 +310,7 @@ monthly_opts = [
         "id": 24,
         "label": (
             "Monthly Precipitation/Temperature "
-            "Climate District Ranks/Aridity"
+            "Climate District / Statewide Ranks/Aridity"
         ),
     },
     {

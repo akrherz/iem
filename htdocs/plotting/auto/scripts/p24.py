@@ -19,6 +19,10 @@ PDICT2 = {
     "month": "Plot by Month(s) [Option 1]",
     "day": "Plot by Inclusive Date Period [Option 2]",
 }
+PDICT3 = {
+    "cd": "Climate District",
+    "st": "State",
+}
 
 MDICT = {
     "spring": "Spring (MAM)",
@@ -47,7 +51,7 @@ def get_description():
     desc["cache"] = 86400
     desc[
         "description"
-    ] = """The map presents IEM computed climate district
+    ] = """The map presents IEM computed climate district or statewide
     ranks for a metric of your choice.  This map can be generated for a given
     month and year or period of dates.  If the period of days includes leap
     day, this day is included and unweighted against years without it.  If the
@@ -55,7 +59,7 @@ def get_description():
     second year in the selection.  For plotting period Option 2, the time
     period is limited to 1 year or less.
 
-    <p>The climate district data uses the current NWS COOP nomenclature of
+    <p>The data uses the current NWS COOP nomenclature of
     reporting each day at approximately 7 AM.  So for example, a plot of June
     precipitation would stricly include the period of 7 AM 31 May
     to 7 AM 30 June. Data for the current date is available at approximately
@@ -64,6 +68,13 @@ def get_description():
     today = datetime.date.today()
     lmonth = today - datetime.timedelta(days=28)
     desc["arguments"] = [
+        dict(
+            type="select",
+            options=PDICT3,
+            default="cd",
+            name="which",
+            label="Plot Climate Districts or States:",
+        ),
         dict(
             type="csector",
             name="csector",
@@ -138,6 +149,9 @@ def get_daily_data(ctx, sdate, edate):
     if len(ctx["csector"]) == 2:
         statelimiter = f" and substr(station, 1, 2) = '{ctx['csector']}' "
         table = f"alldata_{ctx['csector']}"
+    stationlimiter = "substr(station, 3, 1) = 'C'"
+    if ctx["which"] == "st":
+        stationlimiter = "substr(station, 3, 4) = '0000'"
 
     with get_sqlalchemy_conn("coop") as conn:
         ctx["df"] = pd.read_sql(
@@ -152,7 +166,7 @@ def get_daily_data(ctx, sdate, edate):
             avg(high) as avghi,
             max(day) as max_date
             from {table}
-            WHERE substr(station, 3, 1) = 'C' and ( {sday} ) {statelimiter}
+            WHERE {stationlimiter} and ( {sday} ) {statelimiter}
             GROUP by myyear, station),
         ranks as (
             SELECT station, myyear as year,
@@ -230,7 +244,7 @@ def plotter(fdict):
         title=(
             f"{ctx['label']} {PDICT[ctx['var']]} "
             f"{'Ranks ' if ctx['var'] != 'aridity' else ''}"
-            "by Climate District"
+            f"by {PDICT3[ctx['which']]}"
         ),
         subtitle=subtitle,
         titlefontsize=14,
@@ -255,14 +269,25 @@ def plotter(fdict):
         bins = np.arange(-4, 4.1, 1)
         pvar = ctx["var"]
         fmt = "%.1f"
-    mp.fill_climdiv(
-        ctx["df"][pvar],
-        ilabel=True,
-        plotmissing=False,
-        lblformat=fmt,
-        bins=bins,
-        cmap=cmap,
-    )
+    if ctx["which"] == "st":
+        ctx["df"].index = ctx["df"].index.str.slice(0, 2)
+        mp.fill_states(
+            ctx["df"][pvar],
+            ilabel=True,
+            plotmissing=False,
+            lblformat=fmt,
+            bins=bins,
+            cmap=cmap,
+        )
+    else:
+        mp.fill_climdiv(
+            ctx["df"][pvar],
+            ilabel=True,
+            plotmissing=False,
+            lblformat=fmt,
+            bins=bins,
+            cmap=cmap,
+        )
 
     return mp.fig, ctx["df"]
 
