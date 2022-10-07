@@ -8,29 +8,27 @@ from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
 from sqlalchemy import text
 
-MDICT = dict(
-    [
-        ("all", "No Month/Time Limit"),
-        ("water_year", "Water Year"),
-        ("spring", "Spring (MAM)"),
-        ("spring2", "Spring (AMJ)"),
-        ("fall", "Fall (SON)"),
-        ("winter", "Winter (DJF)"),
-        ("summer", "Summer (JJA)"),
-        ("jan", "January"),
-        ("feb", "February"),
-        ("mar", "March"),
-        ("apr", "April"),
-        ("may", "May"),
-        ("jun", "June"),
-        ("jul", "July"),
-        ("aug", "August"),
-        ("sep", "September"),
-        ("oct", "October"),
-        ("nov", "November"),
-        ("dec", "December"),
-    ]
-)
+MDICT = {
+    "all": "No Month/Time Limit",
+    "water_year": "Water Year",
+    "spring": "Spring (MAM)",
+    "spring2": "Spring (AMJ)",
+    "fall": "Fall (SON)",
+    "winter": "Winter (DJF)",
+    "summer": "Summer (JJA)",
+    "jan": "January",
+    "feb": "February",
+    "mar": "March",
+    "apr": "April",
+    "may": "May",
+    "jun": "June",
+    "jul": "July",
+    "aug": "August",
+    "sep": "September",
+    "oct": "October",
+    "nov": "November",
+    "dec": "December",
+}
 
 
 def get_description():
@@ -50,6 +48,9 @@ def get_description():
     <p>If an individual event goes for more than 24 hours, the event is
     capped at a 24 hour duration for the purposes of this analysis.  Events
     like Flood Warnings are prime examples of this.
+
+    <p><a href="/plotting/auto/?q=48">Autoplot 48</a> is similar to this, but
+    plots for a single county/zone/parish at a time.
     """
     desc["arguments"] = [
         dict(

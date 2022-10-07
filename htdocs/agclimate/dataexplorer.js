@@ -23,7 +23,6 @@ Date.prototype.toIEMString = function () {
 if (!Date.prototype.toISOString) {
     (function () {
 
-
         Date.prototype.toISOString = function () {
             return this.getUTCFullYear()
                 + '-' + pad(this.getUTCMonth() + 1)

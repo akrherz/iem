@@ -20,7 +20,11 @@ def get_description():
     zone, what is the frequency by time of day that the product was valid.  The
     total number of events for the county/zone is used for the frequency. Due
     to how the NWS issues some products for counties and some products for
-    zones, you may need to try twice to get the proper one selected."""
+    zones, you may need to try twice to get the proper one selected.
+
+    <p><a href="/plotting/auto/?q=72">Autoplot 72</a> is similar to this, but
+    plots for a single WFO at a time.
+    """
     desc["arguments"] = [
         dict(
             type="ugc",
