@@ -10,7 +10,7 @@ from pyiem.reference import state_names
 from pyiem.util import get_dbconn, ncopen, convert_value
 
 NT = NetworkTable(["%sCLIMATE" % (abbr,) for abbr in state_names])
-COOP = get_dbconn("coop", user="nobody")
+COOP = get_dbconn("coop")
 
 
 def generic_gridder(nc, cursor, idx):

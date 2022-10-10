@@ -31,17 +31,17 @@ def main(argv):
     years = now.year - 1893 + 1
     counts = np.zeros((years, 12))
 
-    pgconn = get_dbconn("coop", user="nobody")
+    pgconn = get_dbconn("coop")
     acursor = pgconn.cursor()
 
     stid = argv[1]
     acursor.execute(
-        f"""SELECT year, month,
+        """SELECT year, month,
      count(*),
      sum(case when high is null then 0 else 1 end),
      sum(case when low is null then 0 else 1 end),
      sum(case when precip is null then 0 else 1 end)
-     from alldata_{stid[:2]} WHERE
+     from alldata WHERE
      station = %s and year > 1892 GROUP by year, month""",
         (stid,),
     )

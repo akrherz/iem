@@ -25,11 +25,11 @@ from xlwt import Workbook
 from pyiem.util import get_dbconn, logger
 
 LOG = logger()
-MESOSITE = get_dbconn("mesosite", user="nobody")
+MESOSITE = get_dbconn("mesosite")
 mcursor = MESOSITE.cursor()
-COOP = get_dbconn("coop", user="nobody")
+COOP = get_dbconn("coop")
 ccursor = COOP.cursor()
-HADS = get_dbconn("hads", user="nobody")
+HADS = get_dbconn("hads")
 hcursor = HADS.cursor()
 
 DATA = """IA0112,ALBI4,A

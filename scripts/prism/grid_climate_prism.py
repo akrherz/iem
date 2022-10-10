@@ -12,7 +12,7 @@ from pyiem.util import get_dbconn, ncopen, convert_value, logger
 
 LOG = logger()
 NT = NetworkTable(["%sCLIMATE" % (abbr,) for abbr in state_names])
-COOP = get_dbconn("coop", user="nobody")
+COOP = get_dbconn("coop")
 
 
 def generic_gridder(nc, cursor, idx):

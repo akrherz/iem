@@ -41,7 +41,7 @@ function get_iemapps_tags($tagname){
 
 function get_website_stats(){
     $memcache = new Memcached();
-    $memcache->addServer('iem-memcached', 11211);
+    $memcache->addServer('iem-memcached.local', 11211);
     $val = $memcache->get("iemperf.json");
     if (! $val){
         // Fetch from nagios

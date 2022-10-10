@@ -9,7 +9,7 @@ LOG = logger()
 
 def main():
     """Go Main"""
-    pgconn = get_dbconn("mesosite", user="nobody")
+    pgconn = get_dbconn("mesosite")
     mcursor = pgconn.cursor()
 
     mcursor.execute(

@@ -23,10 +23,8 @@ def dance(cid, start_ts, end_ts):
     )
     for row in cursor:
         uri = row[0].strftime(
-            (
-                "https://mesonet.agron.iastate.edu/archive/"
-                "data/%Y/%m/%d/camera/" + cid + "/" + cid + "_%Y%m%d%H%M.jpg"
-            )
+            "https://mesonet.agron.iastate.edu/archive/"
+            f"data/%Y/%m/%d/camera/{cid}/{cid}_%Y%m%d%H%M.jpg"
         )
         data["images"].append(
             dict(

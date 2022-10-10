@@ -321,7 +321,7 @@ def application(environ, start_response):
     fmt = fields.get("fmt", "png")[:7]
     # Figure out what our response headers should be
     response_headers = get_response_headers(fmt)
-    mc = Client(["iem-memcached", 11211])
+    mc = Client(["iem-memcached.local", 11211])
     try:
         # do the work!
         status, output = workflow(mc, environ, fields, fmt)

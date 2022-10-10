@@ -37,7 +37,7 @@ NO_FEATURES = [
 
 def main():
     """DO Something"""
-    pgconn = get_dbconn("mesosite", user="nobody")
+    pgconn = get_dbconn("mesosite")
     cursor = pgconn.cursor()
 
     cursor.execute(

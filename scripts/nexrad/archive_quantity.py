@@ -11,7 +11,7 @@ def main():
     years = now.year - 2000 + 1
     counts = np.zeros((years, 12))
 
-    pgconn = get_dbconn("radar", user="nobody")
+    pgconn = get_dbconn("radar")
     acursor = pgconn.cursor()
 
     stid = sys.argv[1]

@@ -102,9 +102,7 @@ def main(argv):
             "Running laptop syncing from upstream, assume iemdb is localhost!"
         )
         # HACK
-        mesosite = get_dbconnstr(
-            "mesosite", host="172.16.172.1", user="nobody"
-        )
+        mesosite = get_dbconnstr("mesosite", host="172.16.172.1")
         subscribers.insert(0, "mesosite")
     df = read_sql(
         "SELECT * from stations ORDER by iemid ASC",

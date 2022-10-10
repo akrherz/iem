@@ -41,7 +41,7 @@ def print_blank_sname():
 
 def do_hads():
     """Print out the hads stuff."""
-    hads = get_dbconn("hads", user="nobody")
+    hads = get_dbconn("hads")
     access = get_dbconn("iem")
     hcursor = hads.cursor()
     acursor = access.cursor()

@@ -122,7 +122,7 @@ def application(environ, start_response):
         mckey = f"/json/spcwatch/{lon:.4f}/{lat:.4f}"
     else:
         mckey = f"/json/spcwatch/{ts:%Y%m%d%H%M}"
-    mc = Client(["iem-memcached", 11211])
+    mc = Client(["iem-memcached.local", 11211])
     res = mc.get(mckey)
     if not res:
         if lat != 0 and lon != 0:

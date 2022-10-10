@@ -17,23 +17,13 @@ def doit(now):
     Generate some plots for the COOP data!
     """
     st = NetworkTable(
-        [
-            "IA_COOP",
-            "MO_COOP",
-            "KS_COOP",
-            "NE_COOP",
-            "SD_COOP",
-            "ND_ASOS",
-            "MN_COOP",
-            "WI_COOP",
-            "IL_COOP",
-            "IN_COOP",
-            "OH_COOP",
-            "MI_COOP",
-        ]
+        (
+            "IA_COOP MO_COOP KS_COOP NE_COOP SD_COOP ND_ASOS",
+            "MN_COOP WI_COOP IL_COOP IN_COOP OH_COOP MI_COOP",
+        ).split()
     )
 
-    pgconn = get_dbconn("iem", user="nobody")
+    pgconn = get_dbconn("iem")
     icursor = pgconn.cursor()
 
     clevs = [0, 0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.75, 1, 2, 3, 4, 5, 10]

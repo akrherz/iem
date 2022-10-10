@@ -54,7 +54,7 @@ def get_description():
 
 def get_data(ctx):
     """Get some data please"""
-    pgconn = get_dbconn("coop", user="nobody")
+    pgconn = get_dbconn("coop")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     station = ctx["station"]
     threshold = ctx["threshold"]

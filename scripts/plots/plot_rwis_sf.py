@@ -4,7 +4,7 @@ import numpy as np
 from pyiem.plot import MapPlot
 from pyiem.util import get_dbconn
 
-IEM = get_dbconn("iem", user="nobody")
+IEM = get_dbconn("iem")
 
 
 def cln(vals):

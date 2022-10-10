@@ -38,7 +38,7 @@ def find_scans(root, bird, product, start_gts, end_gts):
         mydir = now.strftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/sat/awips211")
         if os.path.isdir(mydir):
             os.chdir(mydir)
-            filenames = glob.glob("GOES_%s_%s_*.wld" % (bird, product))
+            filenames = glob.glob(f"GOES_{bird}_{product}_*.wld")
             filenames.sort()
             for filename in filenames:
                 ts = datetime.datetime.strptime(
@@ -78,7 +78,7 @@ def application(environ, start_response):
     headers = []
     data = ""
     if callback is not None:
-        data = "%s(" % (html_escape(callback),)
+        data = f"{html_escape(callback)}("
     if operation == "list":
         data += json.dumps(list_files(fields))
     if callback is not None:

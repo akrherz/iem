@@ -24,7 +24,7 @@ Font: 1, 11, 1, "Courier New"
         ARROWS,
     )
 
-    pgconn = get_dbconn("postgis", user="nobody")
+    pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
 
     cursor.execute(
@@ -64,7 +64,7 @@ def application(_environ, start_response):
     start_response("200 OK", [("Content-type", "text/plain")])
 
     mckey = "/request/grx/iadot_trucks.txt"
-    mc = Client(["iem-memcached", 11211])
+    mc = Client(["iem-memcached.local", 11211])
     res = mc.get(mckey)
     if not res:
         res = produce_content()

@@ -31,7 +31,7 @@ def get_gridinfo(filename, xpoints, ypoints):
 
 def get_table(prod):
     """Return our lookup table"""
-    pgconn = get_dbconn("mesosite", user="nobody")
+    pgconn = get_dbconn("mesosite")
     cursor = pgconn.cursor()
     xref = [1.0e20] * 256
     cursor.execute(

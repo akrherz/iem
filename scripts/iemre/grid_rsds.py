@@ -22,7 +22,7 @@ SWITCH_DATE = utc(2014, 10, 10, 20)
 
 def do_coop(ts):
     """Use COOP solar radiation data"""
-    pgconn = get_dbconn("coop", user="nobody")
+    pgconn = get_dbconn("coop")
     cursor = pgconn.cursor()
 
     cursor.execute(

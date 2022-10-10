@@ -16,7 +16,7 @@ WFOS = ["KDMX", "KARX", "KDVN", "KFSD", "KOAX"]
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconn("afos", user="nobody")
+    pgconn = get_dbconn("afos")
     acursor = pgconn.cursor()
 
     now = datetime.datetime.now()

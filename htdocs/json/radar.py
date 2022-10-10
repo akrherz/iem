@@ -10,6 +10,7 @@ from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
 
 NIDS = {
+    "N0B": "Base Reflectivity (Super Res)",
     "N0Q": "Base Reflectivity (High Res)",
     "N0U": "Base Radial Velocity (High Res)",
     "N0S": "Storm Relative Radial Velocity",
@@ -77,7 +78,7 @@ def available_radars(fields):
         radar = row[0]
         if not os.path.isdir(
             start_gts.strftime(
-                ("/mesonet/ARCHIVE/data/" "%Y/%m/%d/GIS/ridge/" + radar)
+                f"/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ridge/{radar}"
             )
         ):
             continue
@@ -117,12 +118,8 @@ def find_scans(root, radar, product, sts, ets):
         while now < ets:
             if os.path.isfile(
                 now.strftime(
-                    (
-                        "/mesonet/ARCHIVE/data/"
-                        "%Y/%m/%d/GIS/uscomp/"
-                        + product.lower()
-                        + "_%Y%m%d%H%M.png"
-                    )
+                    "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/"
+                    f"{product.lower()}_%Y%m%d%H%M.png"
                 )
             ):
                 times.append({"ts": now.strftime("%Y-%m-%dT%H:%MZ")})
@@ -131,16 +128,9 @@ def find_scans(root, radar, product, sts, ets):
         while now < ets:
             if os.path.isfile(
                 now.strftime(
-                    "/mesonet/ARCHIVE/data/"
-                    "%Y/%m/%d/GIS/ridge/"
-                    + radar
-                    + "/"
-                    + product
-                    + "/"
-                    + radar
-                    + "_"
-                    + product
-                    + "_%Y%m%d%H%M.png"
+                    "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ridge/"
+                    f"{radar}/{product}/{radar}_{product}"
+                    "_%Y%m%d%H%M.png"
                 )
             ):
                 times.append({"ts": now.strftime("%Y-%m-%dT%H:%MZ")})
@@ -192,10 +182,8 @@ def list_products(fields):
     if radar == "USCOMP":
         for dirname in ["N0Q", "N0R"]:
             testfp = now.strftime(
-                (
-                    "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/"
-                    "uscomp/" + dirname.lower() + "_%Y%m%d0000.png"
-                )
+                "/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/"
+                f"uscomp/{dirname.lower()}_%Y%m%d0000.png"
             )
             if os.path.isfile(testfp):
                 root["products"].append(
@@ -203,7 +191,7 @@ def list_products(fields):
                 )
     else:
         basedir = now.strftime(
-            ("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ridge/" + radar)
+            f"/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/ridge/{radar}"
         )
         if os.path.isdir(basedir):
             os.chdir(basedir)

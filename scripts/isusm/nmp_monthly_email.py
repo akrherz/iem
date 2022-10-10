@@ -17,7 +17,7 @@ from pyiem.util import get_properties, get_dbconnstr
 
 def generate_report(start_date, end_date):
     """Generate the text report"""
-    pgconn = get_dbconnstr("isuag", user="nobody")
+    pgconn = get_dbconnstr("isuag")
     days = (end_date - start_date).days + 1
     totalobs = days * 24 * 25
     df = read_sql(

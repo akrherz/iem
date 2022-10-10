@@ -10,7 +10,7 @@ from pyiem.util import get_dbconn
 def main():
     """Go Main Go"""
     now = datetime.datetime.now()
-    pgconn = get_dbconn("iem", user="nobody")
+    pgconn = get_dbconn("iem")
     icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     day1 = datetime.date.today().replace(day=1)
@@ -22,12 +22,10 @@ def main():
     valmask = []
     table = "summary_%s" % (day1.year,)
     icursor.execute(
-        """
+        f"""
         SELECT id, s.network, ST_x(s.geom) as lon, ST_y(s.geom) as lat,
         avg( (max_tmpf + min_tmpf)/2.0 ) as avgt , count(*) as cnt
-        from """
-        + table
-        + """ c JOIN stations s ON (s.iemid = c.iemid)
+        from {table} c JOIN stations s ON (s.iemid = c.iemid)
         WHERE s.network = 'IA_ASOS' and
         day >= %s and day < %s
         and max_tmpf > -30 and min_tmpf < 90 GROUP by id, s.network, lon, lat

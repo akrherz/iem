@@ -49,7 +49,7 @@ def application(environ, start_response):
     cb = fields.get("callback", None)
 
     mckey = f"/json/nwstext_search/{sts}/{ets}/{awipsid}?callback={cb}"
-    mc = Client(["iem-memcached", 11211])
+    mc = Client(["iem-memcached.local", 11211])
     res = mc.get(mckey)
     if not res:
         sts = datetime.datetime.strptime(sts, "%Y-%m-%dT%H:%MZ")

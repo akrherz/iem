@@ -10,9 +10,9 @@ from pyiem.util import get_dbconn
 def main():
     """Go Main Go"""
     nt = NetworkTable("IA_COOP")
-    iem_pgconn = get_dbconn("iem", user="nobody")
+    iem_pgconn = get_dbconn("iem")
     icursor = iem_pgconn.cursor()
-    coop_pgconn = get_dbconn("coop", user="nobody")
+    coop_pgconn = get_dbconn("coop")
     ccursor = coop_pgconn.cursor()
 
     fp = open("IEMNWSYPR.txt", "w")

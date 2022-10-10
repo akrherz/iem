@@ -130,7 +130,7 @@ def database(lastob, ddf, hdf, force_currentlog):
 
 def get_last():
     """Get the last timestamp"""
-    pgconn = get_dbconn("iem", user="nobody")
+    pgconn = get_dbconn("iem")
     cursor = pgconn.cursor()
     cursor.execute(
         """SELECT valid at time zone 'UTC'

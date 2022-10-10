@@ -81,65 +81,65 @@
 
 ### iemdb PostgreSQL
 # iemdb1(231) metvm4 -> metvm8
-192.168.0.231 iemdb1.local
-192.168.0.231 iemdb-afos.local
-192.168.0.231 iemdb-asos1min.local
-192.168.0.231 iemdb-frost.local
-192.168.0.231 iemdb-id3b.local
-192.168.0.231 iemdb-idep.local
-192.168.0.231 iemdb-isuag.local
-192.168.0.231 iemdb-kcci.local
-192.168.0.231 iemdb-mattermost.local
-192.168.0.231 iemdb-mesonet.local
-192.168.0.231 iemdb-mesosite.local
-192.168.0.231 iemdb-mos iemdb-mos.local
-192.168.0.231 iemdb-nc1018.local
-192.168.0.231 iemdb-nwx.local
-192.168.0.231 iemdb-other.local
-192.168.0.231 iemdb-portfolio.local
-192.168.0.231 iemdb-rtstats.local
-192.168.0.231 iemdb-rwis.local
-192.168.0.231 iemdb-scada.local
-192.168.0.231 iemdb-scan.local
-192.168.0.231 iemdb-squaw.local
-192.168.0.231 iemdb-sustainablecorn.local
-192.168.0.231 iemdb-td.local
-192.168.0.231 iemdb-wepp.local
+10.24.19.122 iemdb1.local
+10.24.19.122 iemdb-afos.local
+10.24.19.122 iemdb-asos1min.local
+10.24.19.122 iemdb-frost.local
+10.24.19.122 iemdb-id3b.local
+10.24.19.122 iemdb-idep.local
+10.24.19.122 iemdb-isuag.local
+10.24.19.122 iemdb-kcci.local
+10.24.19.122 iemdb-mattermost.local
+10.24.19.122 iemdb-mesonet.local
+10.24.19.122 iemdb-mesosite.local
+10.24.19.122 iemdb-mos iemdb-mos.local
+10.24.19.122 iemdb-nc1018.local
+10.24.19.122 iemdb-nwx.local
+10.24.19.122 iemdb-other.local
+10.24.19.122 iemdb-portfolio.local
+10.24.19.122 iemdb-rtstats.local
+10.24.19.122 iemdb-rwis.local
+10.24.19.122 iemdb-scada.local
+10.24.19.122 iemdb-scan.local
+10.24.19.122 iemdb-squaw.local
+10.24.19.122 iemdb-sustainablecorn.local
+10.24.19.122 iemdb-td.local
+10.24.19.122 iemdb-wepp.local
 
 ### iemdb2 PostgreSQL
 # iemdb2(222) metvm2 -> metvm0
-192.168.0.222 iemdb2.local
-192.168.0.222 iemdb-coop.local
-192.168.0.222 iemdb-hads iemdb-hads.local
-192.168.0.222 iemdb-talltowers.local
-192.168.0.222 iemdb-iemre.local
-192.168.0.222 iemdb-smos.local
-192.168.0.222 iemdb-raob.local
-192.168.0.222 iemdb-nldn.local
-192.168.0.222 iemdb-radar.local
-192.168.0.222 iemdb-postgis.local
+10.24.19.121 iemdb2.local
+10.24.19.121 iemdb-coop.local
+10.24.19.121 iemdb-hads iemdb-hads.local
+10.24.19.121 iemdb-talltowers.local
+10.24.19.121 iemdb-iemre.local
+10.24.19.121 iemdb-smos.local
+10.24.19.121 iemdb-raob.local
+10.24.19.121 iemdb-nldn.local
+10.24.19.121 iemdb-radar.local
+10.24.19.121 iemdb-postgis.local
 
 ### iemdb3 PostgreSQL
 # iemdb3(230) metvm6 -> metvm1
-192.168.0.230 iemdb3.local
-192.168.0.230 iemdb-asos.local
-192.168.0.230 iemdb-awos.local
-192.168.0.230 iemdb-hml.local
-192.168.0.230 iemdb-iem.local
-192.168.0.230 iemdb-mec.local
-192.168.0.230 iemdb-openfire.local
-192.168.0.230 iemdb-snet.local
+10.24.19.120 iemdb3.local
+10.24.19.120 iemdb-asos.local
+10.24.19.120 iemdb-awos.local
+10.24.19.120 iemdb-hml.local
+10.24.19.120 iemdb-iem.local
+10.24.19.120 iemdb-mec.local
+10.24.19.120 iemdb-openfire.local
+10.24.19.120 iemdb-snet.local
 
 ##############################################################################
 
 # runs with special 10 MB size and 8 GB memory size
-10.90.12.14    iem-memcached
-# memcache1(248) metvm2 <-> metvm8
-192.168.0.248    iem-memcached1
+10.90.12.14    iem-memcached iem-memcached.local
+# memcache1(248) metvm9 <-> metvm8
+10.24.19.117    iem-memcached1 iem-memcached1.local
 # memcache2(247) metvm8 <-> metvm9
-192.168.0.247    iem-memcached2
+10.24.19.116    iem-memcached2 iem-memcached2.local
 # VI12(62) metvm1 <-> metvm7
-192.168.0.239    iem-memcached3
+10.24.19.115    iem-memcached3 iem-memcached3.local
 
 # iembot(246) iem16
 192.168.0.246    iembot
@@ -149,8 +149,6 @@
 192.168.0.240    iem-openfire openfire-bosh
 # ldm(235) iem11
 192.168.0.235    iem-ldm.local
-# VI_0_234(68) iem15
-192.168.0.234    iem-loggernet.local
 # iemarchive(232) metvm3
 192.168.0.232    iem-archive.local
 # awos(253) iem16 <-> iem14

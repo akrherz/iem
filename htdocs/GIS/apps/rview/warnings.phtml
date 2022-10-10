@@ -388,7 +388,7 @@ if (intval($loop) == 1 || intval($loop) == 2){
       $jsurls = implode(", ", $urls);
       // Save this animation to memcache for future potential use
       $memcache = new Memcached();
-      $memcache->addServer('iem-memcached', 11211);
+      $memcache->addServer('iem-memcached.local', 11211);
       $fts = time();
       $memcache->set("/GIS/apps/rview/warnings.phtml?fts=${fts}", $urls, 86400);
       

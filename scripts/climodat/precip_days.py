@@ -17,7 +17,7 @@ def runYear(year):
     nt = NetworkTable("IACLIMATE")
     nt.sts["IA0200"]["lon"] = -93.4
     nt.sts["IA5992"]["lat"] = 41.65
-    pgconn = get_dbconn("coop", user="nobody")
+    pgconn = get_dbconn("coop")
     ccursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     lats = []

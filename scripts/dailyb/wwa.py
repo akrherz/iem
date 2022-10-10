@@ -3,7 +3,7 @@ import datetime
 import pytz
 from pyiem.util import get_dbconn, utc
 
-POSTGIS = get_dbconn("postgis", user="nobody")
+POSTGIS = get_dbconn("postgis")
 cursor = POSTGIS.cursor()
 
 textfmt = """

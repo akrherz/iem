@@ -19,7 +19,7 @@ def n(val):
 
 def main():
     """Go Main Go"""
-    pgconn = get_dbconn("iem", user="nobody")
+    pgconn = get_dbconn("iem")
     icursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     lats = []

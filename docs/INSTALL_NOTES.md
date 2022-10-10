@@ -17,7 +17,7 @@ PHP should save sessions in memcached. In `/etc/php.ini`.
     ; Point php.ini at memcache for sessions
     [Session]
     session.save_handler = memcache
-    session.save_path = "tcp://iem-memcached:11211"
+    session.save_path = "tcp://iem-memcached.local:11211"
 
 Extra RPMs necessary
 -----

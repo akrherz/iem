@@ -13,9 +13,9 @@ from pyiem.util import get_dbconn
 def main():
     """Go Main Go"""
     nt = NetworkTable("IA_COOP")
-    iem_dbconn = get_dbconn("iem", user="nobody")
+    iem_dbconn = get_dbconn("iem")
     icursor = iem_dbconn.cursor()
-    coop_dbconn = get_dbconn("coop", user="nobody")
+    coop_dbconn = get_dbconn("coop")
     ccursor = coop_dbconn.cursor()
 
     tmpfd = tempfile.NamedTemporaryFile(delete=False, mode="w")

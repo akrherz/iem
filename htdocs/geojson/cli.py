@@ -223,7 +223,7 @@ def application(environ, start_response):
         headers.append(("Content-type", "text/plain"))
 
     mckey = f"/geojson/cli/{ts:%Y%m%d}?callback={cb}&fmt={fmt}"
-    mc = Client(["iem-memcached", 11211])
+    mc = Client(["iem-memcached.local", 11211])
     data = mc.get(mckey)
     if data is None:
         data = get_data(ts, fmt)

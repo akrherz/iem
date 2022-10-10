@@ -61,7 +61,7 @@ def application(environ, start_response):
     cb = fields.get("callback", None)
 
     mckey = "/json/vtec_emergencies"
-    mc = Client(("iem-memcached", 11211))
+    mc = Client(("iem-memcached.local", 11211))
     data = mc.get(mckey)
     if data is not None:
         data = data.decode("utf-8")

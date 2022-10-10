@@ -60,7 +60,7 @@ def add_job(row):
 
 def check_for_work():
     """See if we have any requests to process!"""
-    pgconn = get_dbconn("mesosite", user="nobody")
+    pgconn = get_dbconn("mesosite")
     mcursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     mcursor2 = pgconn.cursor()
     mcursor.execute(

@@ -217,7 +217,7 @@ def compute_xlabels(ax):
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("asos", user="nobody")
+    pgconn = get_dbconn("asos")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     ctx = get_autoplot_context(fdict, get_description())

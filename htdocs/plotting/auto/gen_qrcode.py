@@ -38,7 +38,7 @@ def application(environ, start_response):
     mckey = hashlib.md5(uri.encode("utf-8")).hexdigest()
     # Figure out what our response headers should be
     response_headers = [("Content-type", "image/png")]
-    mc = Client(["iem-memcached", 11211])
+    mc = Client(["iem-memcached.local", 11211])
     res = mc.get(mckey)
     if not res:
         img = qrcode.make(uri)

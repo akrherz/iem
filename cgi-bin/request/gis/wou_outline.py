@@ -9,7 +9,7 @@ from paste.request import parse_formvars
 from pyiem import wellknowntext
 from pyiem.util import get_dbconn
 
-POSTGIS = get_dbconn("postgis", user="nobody")
+POSTGIS = get_dbconn("postgis")
 
 
 def main(year, etn, start_response):

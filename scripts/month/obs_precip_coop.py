@@ -8,7 +8,7 @@ from pyiem.util import get_dbconn
 def main():
     """Go Main Go"""
     now = datetime.date.today()
-    pgconn = get_dbconn("iem", user="nobody")
+    pgconn = get_dbconn("iem")
     icursor = pgconn.cursor()
 
     day1 = now.replace(day=1)

@@ -14,7 +14,7 @@ def main():
     nt = NetworkTable("IACLIMATE")
     nt.sts["IA0200"]["lon"] = -93.6
     nt.sts["IA5992"]["lat"] = 41.65
-    coop = get_dbconn("coop", user="nobody")
+    coop = get_dbconn("coop")
 
     obs = []
     cursor = coop.cursor(cursor_factory=psycopg2.extras.DictCursor)

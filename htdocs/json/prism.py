@@ -105,7 +105,7 @@ def application(environ, start_response):
     cb = fields.get("callback", None)
 
     mckey = f"/json/prism/{lon:.2f}/{lat:.2f}/{valid}?callback={cb}"
-    mc = Client(["iem-memcached", 11211])
+    mc = Client(["iem-memcached.local", 11211])
     res = mc.get(mckey)
     if res is None:
         res = dowork(valid, lon, lat)

@@ -18,12 +18,9 @@ def dowork(count, sort):
     cursor.execute(
         f"""
         SELECT issue at time zone 'UTC' as i,
-        expire at time zone 'UTC' as e,
-        num,
-        product_id, year,
+        expire at time zone 'UTC' as e, num, product_id, year,
         ST_Area(geom::geography) / 1000000. as area_sqkm,
-        concerning
-        from mcd WHERE not ST_isEmpty(geom)
+        concerning from mcd WHERE not ST_isEmpty(geom)
         ORDER by area_sqkm {sort} LIMIT %s
     """,
         (count,),
