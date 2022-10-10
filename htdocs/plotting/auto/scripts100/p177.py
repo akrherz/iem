@@ -24,6 +24,7 @@ from pyiem.exceptions import NoDataFound
 CENTRAL = pytz.timezone("America/Chicago")
 PLOTTYPES = {
     "1": "3 Panel Plot",
+    "at": "One Minute Timeseries",
     "2": "Just Soil Temps",
     "sm": "Just Soil Moisture",
     "3": "Daily Max/Min 4 Inch Soil Temps",
@@ -45,8 +46,8 @@ def get_description():
     desc["data"] = True
     desc[
         "description"
-    ] = """This application generates a series of chart types
-    for data from the ISU Soil Moisture Network.
+    ] = """This application generates time series charts using data from the
+    ISU Soil Moisture Network.
     """
     ets = datetime.datetime.now().replace(minute=0)
     sts = ets - datetime.timedelta(days=7)
@@ -779,33 +780,69 @@ def plot2(ctx):
         loc="lower center",
         fontsize=9 if svplotted else 12,
     )
-    days = (ctx["ets"] - ctx["sts"]).days
-    if days >= 3:
-        interval = max(int(days / 7), 1)
-        ax.xaxis.set_major_locator(
-            mdates.DayLocator(
-                interval=interval, tz=pytz.timezone("America/Chicago")
-            )
-        )
-        ax.xaxis.set_major_formatter(
-            mdates.DateFormatter(
-                "%-d %b\n%Y", tz=pytz.timezone("America/Chicago")
-            )
-        )
-    else:
-        ax.xaxis.set_major_locator(
-            mdates.AutoDateLocator(
-                maxticks=10, tz=pytz.timezone("America/Chicago")
-            )
-        )
-        ax.xaxis.set_major_formatter(
-            mdates.DateFormatter(
-                "%-I %p\n%d %b", tz=pytz.timezone("America/Chicago")
-            )
-        )
+    xaxis_magic(ctx, ax)
     if ax.get_ylim()[0] < 40:
         ax.axhline(32, linestyle="--", lw=2, color="tan")
     ax.set_ylabel(r"Temperature $^\circ$F")
+    return fig, df
+
+
+def plot_at(ctx):
+    """One minute temperatures."""
+    with get_sqlalchemy_conn("isuag") as conn:
+        df = pd.read_sql(
+            """
+            SELECT valid, tair_c_avg_qc, rh_avg_qc, slrkj_tot_qc,
+            ws_mph_qc, ws_mph_max_qc from sm_minute WHERE
+            station = %s and valid BETWEEN %s and %s ORDER by valid ASC
+            """,
+            conn,
+            params=(ctx["station"], ctx["sts"], ctx["ets"]),
+            index_col="valid",
+        )
+    if df.empty:
+        raise NoDataFound("No Data Found for This Plot.")
+
+    fig = figure(
+        apctx=ctx,
+        title=f"{ctx['_sname']}:: One Minute Interval Plot",
+        subtitle=(
+            f"Valid between {ctx['sts']:%-d %b %Y %-I:%M %p} and "
+            f"{ctx['ets']:%-d %b %Y %-I:%M %p} Central Time"
+        ),
+    )
+    ax = fig.subplots(2, 1, sharex=True)
+    ax[0].plot(df.index, c2f(df["tair_c_avg_qc"]), color="r")
+    ax[0].set_ylabel(r"Air Temperature [$^\circ$F]", color="r")
+    ax[0].grid(True)
+    if ax[0].get_ylim()[0] < 40:
+        ax[0].axhline(32, linestyle="--", lw=2, color="tan")
+
+    ax2 = ax[0].twinx()
+    ax2.plot(df.index, df["slrkj_tot_qc"].values / 60.0 * 1000, color="k")
+    ax2.set_ylabel("Solar Radiation [$W m^{-2}$]")
+    xaxis_magic(ctx, ax[0])
+
+    ax[1].bar(
+        df.index,
+        df["ws_mph_max_qc"],
+        width=1 / 1440.0,
+        zorder=3,
+        color="r",
+        label="Gust",
+    )
+    ax[1].bar(
+        df.index,
+        df["ws_mph_qc"],
+        width=1 / 1440.0,
+        zorder=4,
+        color="b",
+        label="Avg",
+    )
+    ax[1].grid(True)
+    ax[1].set_ylabel("Wind Speed [MPH]")
+    ax[1].legend(loc="best", ncol=2)
+
     return fig, df
 
 
@@ -833,7 +870,10 @@ def plot1(ctx):
     d04t = df["t4_c_avg_qc"]
     valid = df.index
 
-    fig = figure(apctx=ctx)
+    fig = figure(
+        title=f"ISUSM Station: {ctx['_sname']} Timeseries",
+        apctx=ctx,
+    )
     ax = fig.subplots(3, 1, sharex=True)
     ax[0].grid(True)
     ax2 = ax[0].twinx()
@@ -852,9 +892,8 @@ def plot1(ctx):
         ax[0].plot(valid, d24sm * 100.0, linewidth=2, color="purple", zorder=5)
     if not d50sm.isnull().all():
         ax[0].plot(valid, d50sm * 100.0, linewidth=2, color="black", zorder=5)
-    ax[0].set_ylabel("Volumetric Soil Water Content [%]", fontsize=10)
+    ax[0].set_ylabel("Volumetric\nSoil Water Content [%]")
 
-    ax[0].set_title(f"ISUSM Station: {ctx['_sname']} Timeseries")
     box = ax[0].get_position()
     ax[0].set_position(
         [box.x0, box.y0 + box.height * 0.05, box.width, box.height * 0.95]
@@ -926,33 +965,37 @@ def plot1(ctx):
     ax[2].set_zorder(ax2.get_zorder() + 1)
     ax[2].patch.set_visible(False)
     ax[0].set_xlim(df.index.min(), df.index.max())
+    xaxis_magic(ctx, ax)
 
+    return fig, df
+
+
+def xaxis_magic(ctx, ax):
+    """Do the xaxis magic."""
     days = (ctx["ets"] - ctx["sts"]).days
     if days >= 3:
         interval = max(int(days / 7), 1)
-        ax[2].xaxis.set_major_locator(
+        ax.xaxis.set_major_locator(
             mdates.DayLocator(
                 interval=interval, tz=pytz.timezone("America/Chicago")
             )
         )
-        ax[2].xaxis.set_major_formatter(
+        ax.xaxis.set_major_formatter(
             mdates.DateFormatter(
                 "%-d %b\n%Y", tz=pytz.timezone("America/Chicago")
             )
         )
     else:
-        ax[2].xaxis.set_major_locator(
+        ax.xaxis.set_major_locator(
             mdates.AutoDateLocator(
                 maxticks=10, tz=pytz.timezone("America/Chicago")
             )
         )
-        ax[2].xaxis.set_major_formatter(
+        ax.xaxis.set_major_formatter(
             mdates.DateFormatter(
-                "%-I %p\n%d %b", tz=pytz.timezone("America/Chicago")
+                "%-I %p\n%-d %b", tz=pytz.timezone("America/Chicago")
             )
         )
-
-    return fig, df
 
 
 def plotter(fdict):
@@ -964,6 +1007,8 @@ def plotter(fdict):
         fig, df = plot1(ctx)
     elif ctx["opt"] == "2":
         fig, df = plot2(ctx)
+    elif ctx["opt"] == "at":
+        fig, df = plot_at(ctx)
     elif ctx["opt"] == "sm":
         fig, df = plot_sm(ctx)
     elif ctx["opt"] == "3":
