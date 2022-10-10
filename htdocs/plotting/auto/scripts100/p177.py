@@ -1,5 +1,5 @@
 """ISU Soil Moisture Network Time Series"""
-# pylint: disable=no-member
+# pylint: disable=no-member,too-many-lines
 import datetime
 
 import numpy as np
@@ -965,7 +965,7 @@ def plot1(ctx):
     ax[2].set_zorder(ax2.get_zorder() + 1)
     ax[2].patch.set_visible(False)
     ax[0].set_xlim(df.index.min(), df.index.max())
-    xaxis_magic(ctx, ax)
+    xaxis_magic(ctx, ax[2])
 
     return fig, df
 
