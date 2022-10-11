@@ -3,6 +3,26 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "setup.php";
 
+// Switch this page to DCP, if necessary
+if (strpos($network, "COOP") > 0) {
+    $dbconn = iemdb("mesosite");
+    pg_prepare($dbconn, "SEL", "SELECT network from stations where id = $1 and network = $2");
+    $rs = pg_execute(
+        $dbconn,
+        "SEL",
+        Array(
+            $station,
+            str_replace("_COOP", "_DCP", $network),
+        )
+    );
+    if (pg_numrows($rs) == 1){
+        $res = pg_fetch_row($rs);
+        $network = $res[0];
+        header("Location: /sites/windrose.phtml?station=${station}&network=${network}");
+        die();
+    }
+}
+
 require_once "../../include/myview.php";
 $t = new MyView();
 $t->title = "Site Wind Roses";

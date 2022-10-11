@@ -10,6 +10,27 @@ require_once "../../include/myview.php";
 // Makes sure this page has proper context
 require_once "setup.php";
 
+// Switch this page to DCP, if necessary
+if (strpos($network, "COOP") > 0) {
+    $dbconn = iemdb("mesosite");
+    pg_prepare($dbconn, "SEL", "SELECT network from stations where id = $1 and network = $2");
+    $rs = pg_execute(
+        $dbconn,
+        "SEL",
+        Array(
+            $station,
+            str_replace("_COOP", "_DCP", $network),
+        )
+    );
+    if (pg_numrows($rs) == 1){
+        $res = pg_fetch_row($rs);
+        $network = $res[0];
+        header("Location: /sites/dyn_windrose.phtml?station=${station}&network=${network}");
+        die();
+    }
+
+}
+
 // HTTP GET vars
 $day1 = get_int404("day1", 1);
 $day2 = get_int404("day2", date("d"));
