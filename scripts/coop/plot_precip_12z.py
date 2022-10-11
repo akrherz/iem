@@ -18,8 +18,8 @@ def doit(now):
     """
     st = NetworkTable(
         (
-            "IA_COOP MO_COOP KS_COOP NE_COOP SD_COOP ND_ASOS",
-            "MN_COOP WI_COOP IL_COOP IN_COOP OH_COOP MI_COOP",
+            "IA_COOP MO_COOP KS_COOP NE_COOP SD_COOP ND_ASOS"
+            "MN_COOP WI_COOP IL_COOP IN_COOP OH_COOP MI_COOP"
         ).split()
     )
 
