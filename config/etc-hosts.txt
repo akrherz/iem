@@ -143,10 +143,10 @@
 
 # iembot(246) iem19
 10.24.19.206    iembot.local iembot
-# iemwebservices(241) iem12 <-> iem16
+# iemwebservices(241) iem12 <-> iem19
 192.168.0.241    iem-web-services.local
-# openfire(240) iem16
-192.168.0.240    iem-openfire openfire-bosh
+# openfire(240) iem19
+10.24.19.206    iem-openfire openfire-bosh
 # ldm(235) iem11
 192.168.0.235    iem-ldm.local
 # iemarchive(232) metvm3
