@@ -41,6 +41,9 @@ def main():
                 params=(iemid, sts, ets),
                 index_col="valid",
             )
+        if len(df.index) < 2:
+            LOG.info("Skipping %s as got just %s rows", station, len(df.index))
+            continue
         df = (
             df.reindex(pd.date_range(df.index[0], df.index[-1], freq="60S"))
             .fillna(0)
