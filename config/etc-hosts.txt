@@ -141,8 +141,8 @@
 # VI12(62) metvm1 <-> metvm7
 10.24.19.115    iem-memcached3 iem-memcached3.local
 
-# iembot(246) iem16
-192.168.0.246    iembot
+# iembot(246) iem19
+10.24.19.206    iembot.local iembot
 # iemwebservices(241) iem12 <-> iem16
 192.168.0.241    iem-web-services.local
 # openfire(240) iem16
@@ -151,5 +151,3 @@
 192.168.0.235    iem-ldm.local
 # iemarchive(232) metvm3
 192.168.0.232    iem-archive.local
-# awos(253) iem16 <-> iem14
-192.168.0.253    iem-awos-ingest.local
