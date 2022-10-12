@@ -9,11 +9,12 @@ use Abraham\TwitterOAuth\TwitterOAuth;
 
 require_once "../../../include/iemprop.php";
 require_once "../../../include/forms.php";
+require_once "../../../include/database.inc.php";
 
 define("TWITTER_KEY", get_iemprop('bot.twitter.consumerkey'));
 define("TWITTER_SECRET", get_iemprop('bot.twitter.consumersecret'));
 
-$pgconn = pg_connect('host=iemdb-mesosite.local user=ldm dbname=mesosite');
+$pgconn = iemdb('mesosite');
 $user_id = isset($_SESSION["user_id"]) ? $_SESSION["user_id"] : '';
 $screen_name = isset($_SESSION["screen_name"]) ? $_SESSION["screen_name"] : '';
 $channel = isset($_REQUEST["channel"]) ? strtoupper(xssafe($_REQUEST["channel"])) : '';
