@@ -120,15 +120,15 @@
 10.24.19.121 iemdb-postgis.local
 
 ### iemdb3 PostgreSQL
-# iemdb3(230) metvm6 -> metvm1
-10.24.19.120 iemdb3.local
-10.24.19.120 iemdb-asos.local
-10.24.19.120 iemdb-awos.local
-10.24.19.120 iemdb-hml.local
-10.24.19.120 iemdb-iem.local
-10.24.19.120 iemdb-mec.local
-10.24.19.120 iemdb-openfire.local
-10.24.19.120 iemdb-snet.local
+# iemdb3 metvm6-dc
+10.90.12.23 iemdb3.local
+10.90.12.23 iemdb-asos.local
+10.90.12.23 iemdb-awos.local
+10.90.12.23 iemdb-hml.local
+10.90.12.23 iemdb-iem.local
+10.90.12.23 iemdb-mec.local
+10.90.12.23 iemdb-openfire.local
+10.90.12.23 iemdb-snet.local
 
 ##############################################################################
 
