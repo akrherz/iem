@@ -175,7 +175,7 @@ def plotter(fdict):
     )
     # Add sums to RHS
     sumdf = df2.sum(axis="columns").fillna(0)
-    for year, count in sumdf.iteritems():
+    for year, count in sumdf.items():
         ax.text(12, year, f"{count:.0f}")
     # Add some horizontal lines
     for i, year in enumerate(range(df["yr"].min(), df["yr"].max() + 1)):
