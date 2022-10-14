@@ -17,12 +17,14 @@ VDICT = {
     "dwpf": "Dew Point Temperature",
     "heatindex": "Heat Index",
     "windchill": "Wind Chill Index",
+    "gust": "Wind Gust",
 }
 LEVELS = {
     "tmpf": np.arange(85, 115),
     "dwpf": np.arange(60, 85),
     "heatindex": np.arange(80, 121),
     "windchill": np.arange(-50, 1),
+    "gust": np.arange(30, 71),
 }
 OPTDICT = {
     "no": "No, only include times when heatindex/windchill is additive",
@@ -151,7 +153,7 @@ def plotter(fdict):
         df = pd.read_sql(
             f"""
             SELECT valid at time zone 'UTC' as valid,
-            tmpf::int as tmpf,
+            tmpf::int as tmpf, gust * 1.15 as gust,
             dwpf::int as dwpf, feel
             from alldata WHERE station = %s {tmpflimit}
             and dwpf <= tmpf and valid > %s and valid < %s
@@ -195,6 +197,8 @@ def plotter(fdict):
             df2 = df
         minval = int(df2["feel"].min() - 1)
         LEVELS[varname] = np.arange(minval, minval + 51)
+    elif varname == "gust":
+        pass
     else:
         maxval = int(df2[varname].max() + 1)
         LEVELS[varname] = np.arange(maxval - 31, maxval)
@@ -268,7 +272,8 @@ def plotter(fdict):
     ax2.set_yticklabels([f"{s:.0f}" for s in np.arange(0, ymax, dy) / 24])
     ax2.set_ylabel("Expressed in 24 Hour Days")
     ax.set_ylabel("Hours Per Year")
-    ax.set_xlabel(f"{VDICT[varname]} " r"$^\circ$F")
+    unit = r"$^\circ$F" if varname != "gust" else "MPH"
+    ax.set_xlabel(f"{VDICT[varname]} {unit}")
     ax.legend(loc=(2 if varname == "windchill" else 1), scatterpoints=1)
     return fig, rdf
 
