@@ -26,7 +26,7 @@ def get_description():
         dict(
             type="station",
             name="station",
-            default="IA0200",
+            default="IATAME",
             network="IACLIMATE",
             label="Select Station:",
         ),
@@ -73,8 +73,7 @@ def plotter(fdict):
     # beat month
     cursor.execute(
         "SELECT extract(day from day), (high+low)/2. from "
-        f"alldata_{station[:2]} "
-        "WHERE station = %s and year = %s and month = %s "
+        "alldata WHERE station = %s and year = %s and month = %s "
         "ORDER by day ASC",
         (station, year, month),
     )
@@ -87,7 +86,7 @@ def plotter(fdict):
 
     # build history
     cursor.execute(
-        f"SELECT year, day, (high+low)/2. from alldata_{station[:2]} "
+        "SELECT year, day, (high+low)/2. from alldata "
         "WHERE station = %s and month = %s and extract(day from day) <= %s "
         "and day < %s ORDER by day ASC",
         (station, effective_date.month, days, ets),
@@ -192,4 +191,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="IA0200", network="IACLIMATE"))
+    plotter(dict(station="IATAME", network="IACLIMATE"))

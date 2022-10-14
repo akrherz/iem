@@ -26,7 +26,7 @@ def get_description():
         dict(
             type="station",
             name="station",
-            default="IA0200",
+            default="IATAME",
             label="Select Station:",
             network="IACLIMATE",
         ),
@@ -76,11 +76,10 @@ def plotter(fdict):
     year = ctx["year"]
     gdd1 = ctx["gdd1"]
     gdd2 = ctx["gdd2"]
-    table = f"alldata_{station[:2]}"
 
     ccursor.execute(
         "SELECT day, gddxx(%s, %s, high, low) as gdd "
-        f"from {table} WHERE year = %s and station = %s ORDER by day ASC",
+        "from alldata WHERE year = %s and station = %s ORDER by day ASC",
         (ctx["gddbase"], ctx["gddceil"], year, station),
     )
     days = []

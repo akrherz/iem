@@ -141,7 +141,7 @@ def plotter(fdict):
             )
         raise NoDataFound("Sorry, no data found!")
 
-    df2 = df.pivot("yr", "mo", "count").reindex(
+    df2 = df.pivot(index="yr", columns="mo", values="count").reindex(
         index=range(df["yr"].min(), df["yr"].max() + 1),
         columns=range(1, 13),
     )

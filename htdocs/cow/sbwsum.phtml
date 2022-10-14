@@ -4,40 +4,55 @@ define("IEM_APPID", 152);
 require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 
-$year = get_int404("year", date("Y", time()-3600));
-$month = get_int404("month", date("m", time()-3600));
-$day = get_int404("day", date("d", time()-3600));
-$sortby = isset($_GET["sortby"]) ? xssafe($_GET["sortby"]): "size";
-$typ = isset($_GET["typ"]) ? xssafe($_GET["typ"]): "W";
+$year = get_int404("year", date("Y", time() - 3600));
+$month = get_int404("month", date("m", time() - 3600));
+$day = get_int404("day", date("d", time() - 3600));
+$sortby = isset($_GET["sortby"]) ? xssafe($_GET["sortby"]) : "size";
+$typ = isset($_GET["typ"]) ? xssafe($_GET["typ"]) : "W";
 
-$d = Array("size" => "S", "wfo" => "W", "time" => "T");
+$d = array("size" => "S", "wfo" => "W", "time" => "T");
 
-$ts = mktime(0,0,0,$month, $day, $year);
+$ts = mktime(0, 0, 0, $month, $day, $year);
 
-$archivebegin = mktime(0,0,0,1,1,2005);
-if ($ts < $archivebegin) { $ts = $archivebegin; }
+$archivebegin = mktime(0, 0, 0, 1, 1, 2005);
+if ($ts < $archivebegin) {
+    $ts = $archivebegin;
+}
 
-$imap = sprintf("http://iem.local/plotting/auto/plot/203/typ:%s::sort:%s::date:%s.txt",
-    substr($typ, 0, 1), $d[$sortby], date("Y-m-d", $ts));
-$imgurl = sprintf("/plotting/auto/plot/203/typ:%s::sort:%s::date:%s.png",
-    substr($typ, 0, 1), $d[$sortby], date("Y-m-d", $ts));
+$imap = sprintf(
+    "http://iem.local/plotting/auto/plot/203/typ:%s::sort:%s::date:%s.txt",
+    substr($typ, 0, 1),
+    $d[$sortby],
+    date("Y-m-d", $ts)
+);
+$imgurl = sprintf(
+    "/plotting/auto/plot/203/typ:%s::sort:%s::date:%s.png",
+    substr($typ, 0, 1),
+    $d[$sortby],
+    date("Y-m-d", $ts)
+);
 
-$gis_url = sprintf("/cgi-bin/request/gis/watchwarn.py?year=%s&amp;".
-        "month1=%s&amp;day1=%s&amp;hour1=0&amp;minute1=0&amp;month2=%s&amp;".
+$gis_url = sprintf(
+    "/cgi-bin/request/gis/watchwarn.py?year=%s&amp;" .
+        "month1=%s&amp;day1=%s&amp;hour1=0&amp;minute1=0&amp;month2=%s&amp;" .
         "day2=%s&amp;hour2=0&amp;minute2=0&amp;limit1=yes",
-        date("Y", $ts), date("m", $ts),date("d", $ts), date("m", $ts +86400),
-        date("d", $ts + 86400));
+    date("Y", $ts),
+    date("m", $ts),
+    date("d", $ts),
+    date("m", $ts + 86400),
+    date("d", $ts + 86400)
+);
 
 $t = new MyView();
 $t->title = "Storm Based Warning Polygon Visual Summary";
 
-$opts = Array(
+$opts = array(
     "size" => "Polygon Size",
     "wfo" => "NWS WFO Office",
     "time" => "Issuance Time"
 );
 $sselect = make_select("sortby", $sortby, $opts);
-$opts = Array(
+$opts = array(
     "W" => "Tornado + Severe Thunderstorm Warning",
     "F" => "Flash Flood Warning",
     "M" => "Marine Warning"
@@ -45,10 +60,10 @@ $opts = Array(
 $wselect = make_select("typ", $typ, $opts);
 
 
-$today = date("d M Y", time() - 3600 );
+$today = date("d M Y", time() - 3600);
 
 $ys = yearSelect(2002, date("Y", $ts), "year");
-$ds = daySelect(date("d", $ts) , "day");
+$ds = daySelect(date("d", $ts), "day");
 $ms = monthSelect(date("m", $ts), "month");
 $content = <<<EOF
 
@@ -101,7 +116,7 @@ projection (EPSG:2163).
 </div><!-- ./ row -->
 
 EOF;
-$content .= file_get_contents($imap); 
+$content .= file_get_contents($imap);
 $content .= <<<EOF
 <div class='alert alert-info'>Note: You can click on the polygon to get the 
 warning text, radar, and more!</div>

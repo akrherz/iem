@@ -14,15 +14,15 @@ $cfg["air_temperature"] = array(
             "label" => "2m Air Temperature",
             "timemachine" => "#115.0",
             "img" => "/data/iowa_tmpf.png",
-            "desc" => "Analysis of air temperature readings from airport ".
+            "desc" => "Analysis of air temperature readings from airport " .
                 "weather stations."
         ),
         "12z_low" => array(
             "label" => "12 UTC Low Temperature",
             "timemachine" => "#63.0",
             "img" => "/data/summary/iowa_asos_12z_low.png",
-            "desc" => "Based on manually computed minimums and 12 hour ".
-                "minimums, when available, the plot shows low temperatures at ".
+            "desc" => "Based on manually computed minimums and 12 hour " .
+                "minimums, when available, the plot shows low temperatures at " .
                 "12 UTC."
         ),
         "today_high" => array(
@@ -35,14 +35,14 @@ $cfg["air_temperature"] = array(
             "label" => "Heat Index",
             "timemachine" => "#10.0",
             "img" => "/data/heat.gif",
-            "desc" => "Current heat index values computed using present day ".
+            "desc" => "Current heat index values computed using present day " .
                 "NWS equation."
         ),
         "iowa_wc_index" => array(
             "label" => "Wind Chill Index",
             "timemachine" => "#25.0",
             "img" => "/data/wcht.gif",
-            "desc" => "Current wind chill index values computed using present ".
+            "desc" => "Current wind chill index values computed using present " .
                 "day NWS equation."
         ),
         "iowa_wc_min" => array(
@@ -135,7 +135,8 @@ $cfg["humidity"] = array(
             "label" => "Relative Humidity",
             "timemachine" => null,
             "img" => "/data/relh.gif",
-            "desc" => "Description to be written..."
+            "desc" => "Relative humidity is the percentage of capacity of the " .
+                "air to hold water vapor."
         ),
         "iowa_md" => array(
             "label" => "Surface Moisture Divergence &amp; Winds",

@@ -25,7 +25,7 @@ def get_description():
         dict(
             type="station",
             name="station",
-            default="IA2203",
+            default="IATDSM",
             network="IACLIMATE",
             label="Select Station:",
         ),
@@ -62,11 +62,11 @@ def plotter(fdict):
     # beat month
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
-            f"""
+            """
         with obs as (
         SELECT sday, avg(high) as avgh, avg(low) as avgl,
         avg((high+low)/2.) as avgt, min(year) as min_year,
-        max(year) as max_year from alldata_{station[:2]}
+        max(year) as max_year from alldata
         WHERE station = %s and month = %s and year >= %s and year <= %s
         GROUP by sday
         ), c91 as (
@@ -188,4 +188,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter(dict(station="IA0200"))
+    plotter(dict(station="IATAME"))

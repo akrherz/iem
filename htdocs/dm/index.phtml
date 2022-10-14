@@ -6,12 +6,15 @@ require_once '../../include/myview.php';
 $t = new MyView();
 $t->title = "Drought Monitoring Products";
 $startyear = intval(date("Y"));
-if (intval(date("m")) < 10){
+if (intval(date("m")) < 10) {
     $startyear -= 1;
 }
-$departureplot = sprintf("/plotting/auto/plot/97/sector:IA::var:precip_depart".
-    "::date1:%s-10-01::usdm:no::date2:%s::dpi:100.png", $startyear,
-    date("Y-m-d"));
+$departureplot = sprintf(
+    "/plotting/auto/plot/97/sector:IA::var:precip_depart" .
+        "::date1:%s-10-01::usdm:no::date2:%s::dpi:100.png",
+    $startyear,
+    date("Y-m-d")
+);
 
 
 $t->content = <<<EOF

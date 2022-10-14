@@ -39,7 +39,7 @@ def get_description():
         dict(
             type="station",
             name="station",
-            default="IA0200",
+            default="IATAME",
             label="Select Station:",
             network="IACLIMATE",
         ),
@@ -256,7 +256,7 @@ def plotter(fdict):
 if __name__ == "__main__":
     plotter(
         dict(
-            station="IA0200",
+            station="IATAME",
             network="IACLIMATE",
             direction="above2",
             varname="snow",

@@ -6,8 +6,8 @@ require_once "../../include/network.php";
 require_once "../../include/forms.php";
 $t = new MyView();
 
-$wtype = isset($_GET["wtype"]) ? $_GET["wtype"] : array();
-$ltype = isset($_GET["ltype"]) ? $_GET["ltype"] : array();
+$wtype = isset($_GET["wtype"]) ? xssafe($_GET["wtype"]) : array();
+$ltype = isset($_GET["ltype"]) ? xssafe($_GET["ltype"]) : array();
 $syear = get_int404("syear", date("Y"));
 $smonth = get_int404("smonth", 1);
 $sday = get_int404("sday", 1);
@@ -20,13 +20,13 @@ $eday = get_int404("eday", date("d"));
 $ehour = get_int404("ehour", 12);
 $ets = new DateTime("{$eyear}-{$emonth}-{$eday} {$ehour}:00");
 
-$hail = isset($_GET["hail"]) ? floatval($_GET["hail"]) : 1.0;
-$wind = isset($_REQUEST["wind"]) ? floatval($_REQUEST["wind"]) : 58;
-$wfo = isset($_GET["wfo"]) ? substr($_GET["wfo"], 0, 4) : "MPX";
+$hail = isset($_GET["hail"]) ? floatval(xssafe($_GET["hail"])) : 1.0;
+$wind = isset($_REQUEST["wind"]) ? floatval(xssafe($_REQUEST["wind"])) : 58;
+$wfo = isset($_GET["wfo"]) ? substr(xssafe($_GET["wfo"]), 0, 4) : "MPX";
 $lsrbuffer = get_int404("lsrbuffer", 15);
-$warnbuffer = isset($_GET["warnbuffer"]) ? floatval($_GET["warnbuffer"]) : 0.01;
-$useWindHailTag = isset($_REQUEST["windhailtag"]) ? $_REQUEST["windhailtag"] : 'N';
-$limitwarns = isset($_REQUEST["limitwarns"]) ? $_REQUEST["limitwarns"] : 'N';
+$warnbuffer = isset($_GET["warnbuffer"]) ? floatval(xssafe($_GET["warnbuffer"])) : 0.01;
+$useWindHailTag = isset($_REQUEST["windhailtag"]) ? xssafe($_REQUEST["windhailtag"]) : 'N';
+$limitwarns = isset($_REQUEST["limitwarns"]) ? xssafe($_REQUEST["limitwarns"]) : 'N';
 $fcster = isset($_GET["fcster"]) ? xssafe($_GET["fcster"]) : '';
 
 $abegin = new DateTime("2005-08-06");

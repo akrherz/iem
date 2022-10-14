@@ -7,7 +7,6 @@ $t->content = <<<EOM
 
 <h3>IEM GIS Information</h3>
 
-
 <p>Geographic Information System (GIS) is a system for manipulating spatially 
 referenced data.  Since the IEM contains many spatially referenced datasets, it would only seem
 natural to integrate IEM data into GIS applications.<p>

@@ -311,4 +311,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    highcharts(dict(network="IACLIMATE", station="IA0200", half="fall"))
+    highcharts(dict(network="IACLIMATE", station="IATAME", half="fall"))

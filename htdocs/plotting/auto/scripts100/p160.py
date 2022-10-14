@@ -155,7 +155,7 @@ def get_context(fdict):
     if df.empty:
         raise NoDataFound("No Data Found.")
     df["valid"] = df["valid"].dt.tz_localize(pytz.UTC)
-    ctx["odf"] = df.pivot("valid", "label", "value")
+    ctx["odf"] = df.pivot(index="valid", columns="label", values="value")
     if ctx["fdf"].empty:
         ctx["df"] = ctx["odf"].reset_index()
     else:

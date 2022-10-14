@@ -39,8 +39,9 @@ def get_description():
     desc[
         "description"
     ] = """Caution: This plot takes a bit of time to
-    generate. This plot displays a histogram of hourly heat index
-    values or temperature or dew point or wind chill.
+    generate. This plot displays a histogram of hourly observations.
+    <strong>Only the routine hourly observations are considered</strong>,
+    so specials or multiple observations per hour are not considered.
     The connecting lines between the dots are to help readability. In the
     case of wind chill, the year shown is for the winter season actual year
     with December contained within.

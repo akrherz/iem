@@ -1,14 +1,14 @@
 <?php 
 require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 65);
-include_once "../../../include/myview.php";
+require_once "../../../include/myview.php";
 $t = new MyView();
 $t->title = "AWOS One Minute Data Download";
 
-include("../../../include/iemprop.php");
+require_once "../../../include/iemprop.php";
 $awos_archive_end = strtotime( get_iemprop("awos.1min.end") );
-include("../../../include/imagemaps.php");
-include("../../../include/forms.php");
+require_once "../../../include/imagemaps.php";
+require_once "../../../include/forms.php";
 $bogus = 0;
 
 $ys1 = yearSelect2(1995, date("Y"), "year1");

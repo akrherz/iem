@@ -6,7 +6,7 @@
 from shapely.geometry import LineString, MultiLineString
 import requests
 from pyiem.util import get_dbconn
-from ingest_roads_rest import URI
+from ingest_roads_rest import URI, LOG
 
 
 def main():
@@ -14,18 +14,19 @@ def main():
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
     cursor.execute("DELETE from roads_current")
-    print("removed %s rows from roads_current" % (cursor.rowcount,))
+    LOG.info("removed %s rows from roads_current", cursor.rowcount)
     req = requests.get(URI, timeout=30)
     jobj = req.json()
     archive_begin = "2020-10-12 12:00"
-    print("adding %s rows to roads_base" % (len(jobj["features"]),))
+    LOG.info("adding %s rows to roads_base", len(jobj["features"]))
     for feat in jobj["features"]:
         props = feat["attributes"]
         # Geometry is [[pt]] and we only have single segments
         path = MultiLineString([LineString(feat["geometry"]["paths"][0])])
         # segid is defined by the database insert
         major = props["ROUTE_NAME"]
-        minor = props["NAMEID"].split(":", 1)[1]
+        print(props["NAMEID"])
+        minor = props["NAMEID"].split("--", 1)[1].strip()
         (typ, num) = major.replace("-", " ").split()[:2]
         int1 = num if typ == "I" else None
         us1 = num if typ == "US" else None
@@ -34,15 +35,14 @@ def main():
             num = 0
         sys_id = props["ROUTE_RANK"]
         longname = props["LONG_NAME"]
-        geom = (
-            "ST_Transform(ST_SetSrid(ST_GeomFromText('%s'), 3857), 26915)"
-        ) % (path.wkt)
         idot_id = props["SEGMENT_ID"]
         cursor.execute(
-            f"""
+            """
             INSERT into roads_base (major, minor, us1, st1, int1, type,
             longname, geom, idot_id, archive_begin)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, {geom}, %s, %s) RETURNING segid
+            VALUES (%s, %s, %s, %s, %s, %s, %s,
+            ST_Transform(ST_SetSrid(ST_GeomFromText(%s), 4326), 26915),
+            %s, %s) RETURNING segid
         """,
             (
                 major[:10],
@@ -52,6 +52,7 @@ def main():
                 int1,
                 sys_id,
                 longname,
+                path.wkt,
                 idot_id,
                 archive_begin,
             ),
@@ -79,11 +80,10 @@ def main():
         cursor.execute(
             "UPDATE roads_base SET wfo = %s WHERE segid = %s", (wfo, segid)
         )
-        # Add a roads_current entry, 85 is a hack
         cursor.execute(
             """
             INSERT into roads_current(segid, valid, cond_code)
-            VALUES (%s, %s, 85)
+            VALUES (%s, %s, 0)
         """,
             (segid, archive_begin),
         )

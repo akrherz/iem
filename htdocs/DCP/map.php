@@ -43,10 +43,10 @@ $t->content = <<<EOF
         <li><a href="/DCP/">DCP/HADS Mainpage</a></li>
         <li class="active">Map of SHEF Reports</li>
         </div>
-        
+
 <div class="row">
 <div class="col-md-12">
-        
+
 <div class="pull-right">
 <i class="fa fa-text-size"></i>
 <button id="fminus" class="btn btn-default"><i class="fa fa-minus"></i></button>
@@ -60,7 +60,7 @@ limits the map to only show stations that have reported the value within the
 given number of days.  This is a work-in-progress here and <a href="/info/contacts.php">your feedback</a> would
 be wonderful.</p>
 
-        <form name='bah'><p><strong>Select Physical Code:</strong> 
+<form name='bah'><p><strong>Select Physical Code:</strong> 
 <select onChange="javascript: updateMap();" id="pe">
 <option value="AD">[AD] Reserved</option>
 <option value="AF">[AF] Surface frost intensity (coded, see Table 20)</option>
@@ -317,9 +317,9 @@ be wonderful.</p>
 <option value="YV">[YV] A Second Battery Voltage (NERON sites ONLY), voltage 0 (YVIRG)</option>
 <option value="YW">[YW] GENOR raingage status level 2 - NERON observing sites (YWIRG)</option>
 <option value="YY">[YY] GENOR raingage status level 3 - NERON observing sites (YYIRG)</option>
-<option value="YZ">[YZ] Time of Observation – Minutes of the calendar day, minutes 0 - NERON observing sites (YZIRG)</option>
+<option value="YZ">[YZ] Time of Observation - Minutes of the calendar day, minutes 0 - NERON observing sites (YZIRG)</option>
 </select>	
-        
+
 &nbsp; &nbsp; <strong>Duration:</strong>
 <select onChange="javascript: updateMap();" id="duration">
     <option value="D">D Day (24 Hour)</option>

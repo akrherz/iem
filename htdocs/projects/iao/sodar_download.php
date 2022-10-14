@@ -92,8 +92,6 @@ by the National Science Foundation (grant #1701278).</p>
 
 </div><div class="col-md-6">
 
-
-
 <h4>7) Select Output Resolution</h4>
 
 <select name="window">
