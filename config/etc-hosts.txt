@@ -107,17 +107,17 @@
 10.24.19.122 iemdb-wepp.local
 
 ### iemdb2 PostgreSQL
-# iemdb2(222) metvm2 -> metvm0
-10.24.19.121 iemdb2.local
-10.24.19.121 iemdb-coop.local
-10.24.19.121 iemdb-hads iemdb-hads.local
-10.24.19.121 iemdb-talltowers.local
-10.24.19.121 iemdb-iemre.local
-10.24.19.121 iemdb-smos.local
-10.24.19.121 iemdb-raob.local
-10.24.19.121 iemdb-nldn.local
-10.24.19.121 iemdb-radar.local
-10.24.19.121 iemdb-postgis.local
+# iemdb2 metvm2-dc
+10.90.12.22 iemdb2.local
+10.90.12.22 iemdb-coop.local
+10.90.12.22 iemdb-hads iemdb-hads.local
+10.90.12.22 iemdb-talltowers.local
+10.90.12.22 iemdb-iemre.local
+10.90.12.22 iemdb-smos.local
+10.90.12.22 iemdb-raob.local
+10.90.12.22 iemdb-nldn.local
+10.90.12.22 iemdb-radar.local
+10.90.12.22 iemdb-postgis.local
 
 ### iemdb3 PostgreSQL
 # iemdb3 metvm6-dc
