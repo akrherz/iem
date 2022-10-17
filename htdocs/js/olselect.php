@@ -5,7 +5,7 @@
  */
 require_once "../../config/settings.inc.php";
 require_once "../../include/forms.php";
-$network = isset($_GET['network']) ? xssafe($_GET['network']): 'IA_ASOS';
+$network = isset($_GET['network']) ? xssafe($_GET['network']) : 'IA_ASOS';
 $multi = isset($_GET["multi"]);
 header("Content-type: application/javascript");
 $uri = sprintf("/api/1/network/%s.geojson", $network);
@@ -22,20 +22,20 @@ function selectAllStations(){
 
 $(document).ready(function(){
 
-	vectorLayer = new ol.layer.Vector({
-		source: new ol.source.Vector({
-			url: '{$uri}',
-			format: new ol.format.GeoJSON()
-		}),
-		style: function(feature, resolution){
+    vectorLayer = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            url: '{$uri}',
+            format: new ol.format.GeoJSON()
+        }),
+        style: function(feature, resolution){
             var color = feature.get("online") ? '#00ff00' : '#ffff00';
             var zindex = feature.get("online") ? 100 : 99;
             return [
-            	new ol.style.Style({
+                new ol.style.Style({
                     zIndex: zindex,
-                	image: new ol.style.Circle({
-                    	fill: new ol.style.Fill({
-                        	color: color
+                    image: new ol.style.Circle({
+                        fill: new ol.style.Fill({
+                            color: color
                         }),
                         stroke: new ol.style.Stroke({
                             color: '#000000',
@@ -45,20 +45,20 @@ $(document).ready(function(){
                     })
                 })
             ];
-		}
-	});
-	vectorLayer.getSource().on('change', function(e){
-		if (vectorLayer.getSource().getState() == 'ready'){
-			map.getView().fit(
+        }
+    });
+    vectorLayer.getSource().on('change', function(e){
+        if (vectorLayer.getSource().getState() == 'ready'){
+            map.getView().fit(
                 vectorLayer.getSource().getExtent(),
                 {
-					size: map.getSize(),
+                    size: map.getSize(),
                     padding: [50, 50, 50, 50]
                 }
             );
-		}
-	});
-					
+        }
+    });
+                    
         map = new ol.Map({
                 target: 'map',
                 layers: [new ol.layer.Tile({
@@ -83,16 +83,15 @@ $(document).ready(function(){
                 })
         });
 
-	var layerSwitcher = new ol.control.LayerSwitcher();
+    var layerSwitcher = new ol.control.LayerSwitcher();
     map.addControl(layerSwitcher);
-					
-	jQuery('<div/>', {
-	    id: 'mappopup',
+
+    jQuery('<div/>', {
+        id: 'mappopup',
         style: 'width: 200px;'
-	}).appendTo('#map');									
-					
-	element = document.getElementById('mappopup');
-	popup = new ol.Overlay({
+    }).appendTo('#map');
+    element = document.getElementById('mappopup');
+    popup = new ol.Overlay({
         element: element,
         positioning: 'bottom-center',
         stopEvent: false
@@ -105,24 +104,24 @@ $(document).ready(function(){
              function(feature, layer) {
                  return feature;
              });
-		$(element).popover('destroy');
+        $(element).popover('destroy');
         if (feature) {
             var geometry = feature.getGeometry();
             var coord = geometry.getCoordinates();
             popup.setPosition(coord);
-    		$(element).popover({
-			    'placement': 'top',
-    			'animation': false,
-    			'html': true,
-    			'content': '<p>'+
+            $(element).popover({
+                'placement': 'top',
+                'animation': false,
+                'html': true,
+                'content': '<p>'+
                     feature.get('name') +
                     '<br /><strong>Online:</strong> ' + feature.get('online') +
                     '</p>'
-  			});
-    		$(element).popover('show');
+              });
+            $(element).popover('show');
             // Set the select form to proper value
-   		    $('select[name="station"]').select2().val(feature.get('id')).trigger('change');
-  		} 
+               $('select[name="station"]').select2().val(feature.get('id')).trigger('change');
+          } 
    });
 
 });
