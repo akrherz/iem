@@ -192,9 +192,9 @@ def plotter(fdict):
         df["spring"].mean(),
         df["season"].mean(),
     )
-    years = np.array(df["year"])
-    spring = np.array(df["spring"])
-    fall = np.array(df["fall"])
+    years = np.array(df["year"], dtype=int)
+    spring = np.array(df["spring"], dtype=int)
+    fall = np.array(df["fall"], dtype=int)
 
     s_slp, s_int, s_r, _, _ = stats.linregress(years, spring)
     f_slp, f_int, f_r, _, _ = stats.linregress(years, fall)

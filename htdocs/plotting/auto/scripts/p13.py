@@ -71,7 +71,7 @@ def plotter(fdict):
     for row in cursor:
         if row["year"] == today.year and row["d"] < 270:
             continue
-        maxsday.append(int(row["d"] - delta))
+        maxsday.append(int(row["d"]) - delta)
         years.append(row["year"])
 
     df = pd.DataFrame(dict(year=pd.Series(years), doy=pd.Series(maxsday)))
