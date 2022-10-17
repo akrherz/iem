@@ -71,7 +71,7 @@ def plotter(fdict):
     for row in cursor:
         if row["year"] == today.year and row["d"] < 270:
             continue
-        maxsday.append(row["d"] - delta)
+        maxsday.append(int(row["d"] - delta))
         years.append(row["year"])
 
     df = pd.DataFrame(dict(year=pd.Series(years), doy=pd.Series(maxsday)))
@@ -89,7 +89,7 @@ def plotter(fdict):
     yticks = []
     yticklabels = []
     for i in np.arange(min(maxsday) - 5, max(maxsday) + 5, 1):
-        ts = datetime.datetime(2000, 1, 1) + datetime.timedelta(days=i)
+        ts = datetime.datetime(2000, 1, 1) + datetime.timedelta(days=int(i))
         if ts.day in [1, 8, 15, 22, 29]:
             yticks.append(i)
             yticklabels.append(ts.strftime("%-d %b"))
