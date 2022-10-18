@@ -83,28 +83,29 @@
 # iemdb1(231) metvm4 -> metvm8
 10.24.19.122 iemdb1.local
 10.24.19.122 iemdb-afos.local
-10.24.19.122 iemdb-asos1min.local
-10.24.19.122 iemdb-frost.local
-10.24.19.122 iemdb-id3b.local
-10.24.19.122 iemdb-idep.local
-10.24.19.122 iemdb-isuag.local
-10.24.19.122 iemdb-kcci.local
-10.24.19.122 iemdb-mattermost.local
-10.24.19.122 iemdb-mesonet.local
-10.24.19.122 iemdb-mesosite.local
-10.24.19.122 iemdb-mos iemdb-mos.local
-10.24.19.122 iemdb-nc1018.local
-10.24.19.122 iemdb-nwx.local
-10.24.19.122 iemdb-other.local
-10.24.19.122 iemdb-portfolio.local
-10.24.19.122 iemdb-rtstats.local
-10.24.19.122 iemdb-rwis.local
-10.24.19.122 iemdb-scada.local
-10.24.19.122 iemdb-scan.local
-10.24.19.122 iemdb-squaw.local
-10.24.19.122 iemdb-sustainablecorn.local
-10.24.19.122 iemdb-td.local
-10.24.19.122 iemdb-wepp.local
+10.90.12.21 iemdb-asos1min.local
+10.90.12.21 iemdb-frost.local
+10.90.12.21 iemdb-id3b.local
+10.90.12.21 iemdb-idep.local
+10.90.12.21 iemdb-isuag.local
+10.90.12.21 iemdb-kcci.local
+10.90.12.21 iemdb-mattermost.local
+10.90.12.21 iemdb-mesonet.local
+10.90.12.21 iemdb-mesosite.local
+10.90.12.21 iemdb-mos iemdb-mos.local
+10.90.12.21 iemdb-nc1018.local
+10.90.12.21 iemdb-nwx.local
+10.90.12.21 iemdb-other.local
+10.90.12.21 iemdb-portfolio.local
+10.90.12.21 iemdb-rtstats.local
+10.90.12.21 iemdb-rwis.local
+10.90.12.21 iemdb-scada.local
+10.90.12.21 iemdb-scan.local
+10.90.12.21 iemdb-squaw.local
+10.90.12.21 iemdb-sustainablecorn.local
+10.90.12.21 iemdb-td.local
+10.90.12.21 iemdb-wepp.local
+
 
 ### iemdb2 PostgreSQL
 # iemdb2 metvm2-dc

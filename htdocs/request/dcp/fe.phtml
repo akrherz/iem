@@ -1,11 +1,11 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/imagemaps.php";
 require_once "../../../include/forms.php";
 require_once "../../../include/database.inc.php";
 
-$network = isset($_GET['network']) ? xssafe($_GET["network"]): 'IA_DCP';
+$network = isset($_GET['network']) ? xssafe($_GET["network"]) : 'IA_DCP';
 
 $t = new MyView();
 $t->iemss = True;
@@ -14,16 +14,20 @@ $mesosite = iemdb('mesosite');
 
 $t->title = "DCP/HADS Data Download";
 
- $nselect = "<select name=\"network\">";
-$rs = pg_query($mesosite, "SELECT id, name from networks ".
-  "where id ~* '_DCP' or id ~* '_COOP' ORDER by name ASC");
-for ($i=0;$row=pg_fetch_assoc($rs);$i++){
+$nselect = "<select name=\"network\">";
+$rs = pg_query($mesosite, "SELECT id, name from networks " .
+    "where id ~* '_DCP' or id ~* '_COOP' ORDER by name ASC");
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $sel = '';
-    if ($network == $row["id"]){
+    if ($network == $row["id"]) {
         $sel = " selected='SELECTED'";
     }
-    $nselect .= sprintf("<option value='%s'%s>%s</option>\n",
-      $row["id"], $sel, $row["name"]);
+    $nselect .= sprintf(
+        "<option value='%s'%s>%s</option>\n",
+        $row["id"],
+        $sel,
+        $row["name"]
+    );
 }
 $nselect .= "</select>";
 
@@ -45,13 +49,6 @@ $t->content = <<<EOF
 <p>This form allows you to download whatever data the IEM was able to collect from
 the GOES/DCP/HADS/AHPS (insert other acronyms here) data collection platforms.  This
 dataset is huge and the download may take a number of seconds to process.</p>
-
-<div class="alert alert-info" role="alert">
-<strong>20 August 2019:</strong> This service has been struggling to provide the
-requested data in a timely fashion.  You likely need to request the data in monthly
-chunks to get it to work :(  Hopefully additional database resources can be found
-to help speed up this service.
-</div>
 
 <form method="GET" name="chstate">
 <p>Select from State/Country: {$nselect}
