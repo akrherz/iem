@@ -57,7 +57,7 @@ def application(environ, start_response):
     cb = fields.get("callback")
 
     mckey = "/json/tms.json"
-    mc = Client(["iem-memcached.local", 11211])
+    mc = Client("iem-memcached.local:11211")
     res = mc.get(mckey)
     if res is None:
         res = run()

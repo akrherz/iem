@@ -52,7 +52,7 @@ def application(environ, start_response):
     cb = form.get("callback", None)
 
     mckey = "/geojson/winter_roads.geojson"
-    mc = Client(["iem-memcached.local", 11211])
+    mc = Client("iem-memcached.local:11211")
     res = mc.get(mckey)
     if not res:
         res = run()

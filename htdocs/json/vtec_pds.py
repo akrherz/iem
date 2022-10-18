@@ -61,7 +61,7 @@ def application(environ, start_response):
     cb = fields.get("callback", None)
 
     mckey = "/json/vtec_pds"
-    mc = Client(["iem-memcached.local", 11211])
+    mc = Client("iem-memcached.local:11211")
     res = mc.get(mckey)
     if not res:
         res = run()

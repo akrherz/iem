@@ -97,7 +97,7 @@ def application(environ, start_response):
     only_online = form.get("only_online", "0") == "1"
 
     mckey = f"/geojson/network/{network}.geojson|{only_online}"
-    mc = Client(["iem-memcached.local", 11211])
+    mc = Client("iem-memcached.local:11211")
     res = mc.get(mckey)
     if not res:
         res = run(network, only_online)

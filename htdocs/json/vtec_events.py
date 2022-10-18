@@ -123,7 +123,7 @@ def application(environ, start_response):
     mckey = (
         f"/json/vtec_events/{wfo}/{year}/{phenomena}/{significance}/{combo}"
     )
-    mc = Client(["iem-memcached.local", 11211])
+    mc = Client("iem-memcached.local:11211")
     res = mc.get(mckey)
     if not res:
         res = run(wfo, year, phenomena, significance, combo)

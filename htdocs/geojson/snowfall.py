@@ -67,7 +67,7 @@ def application(environ, start_response):
     headers = [("Content-type", "application/vnd.geo+json")]
 
     mckey = f"/geojson/snowfall/{ts:%Y%m%d}?callback={cb}"
-    mc = Client(["iem-memcached.local", 11211])
+    mc = Client("iem-memcached.local:11211")
     res = mc.get(mckey)
     if not res:
         res = get_data(ts)

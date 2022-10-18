@@ -116,7 +116,7 @@ def application(environ, start_response):
     mckey = (
         f"/json/ibw_tags/{damagetag if damagetag is not None else wfo}/{year}"
     )
-    mc = Client(["iem-memcached.local", 11211])
+    mc = Client("iem-memcached.local:11211")
     res = mc.get(mckey)
     if not res:
         res = run(wfo, damagetag, year)

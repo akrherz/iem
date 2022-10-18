@@ -137,7 +137,7 @@ def application(environ, start_response):
     ts = ts.replace(hour=12, tzinfo=pytz.utc)
 
     mckey = f"/geojson/7am/{dt}/{group}"
-    mc = Client(["iem-memcached.local", 11211])
+    mc = Client("iem-memcached.local:11211")
     res = mc.get(mckey)
     if res is None:
         res = router(group, ts)

@@ -92,7 +92,7 @@ def application(environ, start_response):
         headers.append(("Content-type", "text/html"))
 
     mckey = f"/json/vtec_max_etn/{year}/{fmt}"
-    mc = Client(["iem-memcached.local", 11211])
+    mc = Client("iem-memcached.local:11211")
     res = mc.get(mckey)
     if res is None:
         res = run(year, fmt)

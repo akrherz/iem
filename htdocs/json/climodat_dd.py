@@ -92,7 +92,7 @@ def application(environ, start_response):
     gddceil = int(fields.get("gddceil", 86))
 
     mckey = f"/json/climodat_dd/{station}/{sdate}/{edate}/{gddbase}/{gddceil}"
-    mc = Client(["iem-memcached.local", 11211])
+    mc = Client("iem-memcached.local:11211")
     res = mc.get(mckey)
     if res is None:
         res = run(station, sdate, edate, gddbase, gddceil)

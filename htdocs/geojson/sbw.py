@@ -83,7 +83,7 @@ def application(environ, start_response):
     ts = form.get("ts", "")[:24]
 
     mckey = f"/geojson/sbw.geojson|{ts}"
-    mc = Client(["iem-memcached.local", 11211])
+    mc = Client("iem-memcached.local:11211")
     res = mc.get(mckey)
     if not res:
         res = run(ts)
