@@ -80,9 +80,9 @@
 ##############################################################################
 
 ### iemdb PostgreSQL
-# iemdb1(231) metvm4 -> metvm8
-10.24.19.122 iemdb1.local
-10.24.19.122 iemdb-afos.local
+# iemdb1 metvm4-dc
+10.90.12.21 iemdb1.local
+10.90.12.21 iemdb-afos.local
 10.90.12.21 iemdb-asos1min.local
 10.90.12.21 iemdb-frost.local
 10.90.12.21 iemdb-id3b.local
