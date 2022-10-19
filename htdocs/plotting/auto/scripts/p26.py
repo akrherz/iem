@@ -82,26 +82,25 @@ def get_context(fdict):
     if half == "fall":
         cursor.execute(
             f"""SELECT
-            CASE WHEN month < 7 then
-            extract(doy from day) + 366 else
-            extract(doy from day) end,
-            CASE WHEN month < 7 then year - 1 else year end, {varname}, day
+            day - (
+                (case when month > 6 then year else year - 1 end)::text ||
+                '-07-01')::date,
+            case when month > 6 then year else year - 1 end, {varname}
             from alldata WHERE station = %s and low is not null and
             high is not null and day >= %s ORDER by day ASC""",
             (station, datetime.date(startyear, 7, 1)),
         )
     else:
         cursor.execute(
-            f"""SELECT extract(doy from day), year, {varname} from
+            f"""SELECT extract(doy from day) - 1, year, {varname} from
             alldata WHERE station = %s and high is not null and
             low is not null and year >= %s ORDER by day ASC""",
             (station, startyear),
         )
     if cursor.rowcount == 0:
         raise NoDataFound("No Data Found.")
-    subval = 1 if half == "spring" else 183
     for row in cursor:
-        data[int(row[1] - startyear), int(row[0] - subval)] = row[2]
+        data[int(row[1] - startyear), int(row[0])] = row[2]
 
     data.mask = np.where(data == 199, True, False)
 
@@ -117,25 +116,21 @@ def get_context(fdict):
     idx = year - startyear
     doys = list(range(1, 366))
     f = np.ma.max if half == "spring" else np.ma.min
-    lastdoy = int(today.strftime("%j"))
-    if half == "fall" and today.month > 6:
-        lastdoy -= 183
     for doy in doys:
-        if year != today.year or doy < lastdoy:
-            dyear.append(f(data[idx, :doy]))
+        if not np.ma.is_masked(data[idx, doy]):
+            dyear.append(f(data[idx, : (doy + 1)]))
         vals = f(data[:-1, :doy], 1)
         avg.append(np.ma.average(vals))
         mins.append(np.ma.min(vals))
         maxs.append(np.ma.max(vals))
-        p = np.percentile(vals, [2.5, 25, 75, 97.5])
+        p = np.nanpercentile(np.ma.filled(vals, np.nan), [2.5, 25, 75, 97.5])
         p2p5.append(p[0])
         p25.append(p[1])
         p75.append(p[2])
         p97p5.append(p[3])
-
     # http://stackoverflow.com/questions/19736080
     d = dict(
-        doy=pd.Series(doys) + subval,
+        doy=pd.Series(doys) + (1 if half == "spring" else 183),
         mins=pd.Series(mins),
         maxs=pd.Series(maxs),
         p2p5=pd.Series(p2p5),
@@ -311,4 +306,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    highcharts(dict(network="IACLIMATE", station="IATAME", half="fall"))
+    plotter(dict(network="IACLIMATE", station="IATDSM", half="fall"))
