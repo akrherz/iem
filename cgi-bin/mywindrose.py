@@ -160,7 +160,9 @@ def application(environ, start_response):
         tzname = "UTC"
     bins = []
     if "bins" in form:
-        bins = [float(v) for v in form.get("bins").split(",")]
+        bins = [
+            float(v) for v in form.get("bins").split(",") if v.strip() != ""
+        ]
     res = windrose(
         station,
         database=dbname,

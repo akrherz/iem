@@ -48,8 +48,14 @@ $level = isset($_GET["level"]) ? floatval($_GET['level']) : 1000;
 $fmt = isset($_GET["fmt"]) ? xssafe($_GET["fmt"]) : 'png';
 $dpi = get_int404("dpi", 100);
 $bins = array(2, 5, 7, 10, 15, 20);
+function conv($val){
+    if (trim($val) == ""){
+        return "";
+    }
+    return floatval($val);
+}
 for ($i = 0; $i < sizeof($bins); $i++) {
-    $bins[$i] = isset($_GET["bin{$i}"]) ? floatval($_GET["bin{$i}"]) : $bins[$i];
+    $bins[$i] = isset($_GET["bin{$i}"]) ? conv(xssafe($_GET["bin{$i}"])) : $bins[$i];
 }
 
 // If hour1 is set, we might as well assume we are wanting a plot
@@ -194,7 +200,8 @@ $content .= 'id="o1"> <label for="o1">Optional: Hard code the frequency axis lim
 $missive = <<<EOM
 <p>Since calm winds have no direction, the first bin lumps all the calm
 reports together. A value of 2 knots is likely the most appropriate here. The
-bin ranges are inclusive on the lower end and exclusive on the upper end.</p>
+bin ranges are inclusive on the lower end and exclusive on the upper end. If you
+want to plot less than six bins, leave the right most boxes blank.</p>
 EOM;
 $content .= sprintf(
     '<br /><input type="checkbox" name="setbins" ' .
