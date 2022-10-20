@@ -1,7 +1,11 @@
-"""Computes the Climatology and fills out the table!"""
-import datetime
-import psycopg2.extras
+"""Computes the Climatology and fills out the table!
 
+Run for a previous date from RUN_2AM.sh
+"""
+import datetime
+import sys
+
+import psycopg2.extras
 from tqdm import tqdm
 from pyiem.reference import state_names
 from pyiem.network import Table as NetworkTable
@@ -31,19 +35,26 @@ META = {
 }
 
 
-def daily_averages(table):
+def daily_averages(table, ts):
     """
     Compute and Save the simple daily averages
     """
+    sday_limiter = ""
+    day_limiter = ""
+    if ts is not None:
+        sday_limiter = f" and sday = '{ts:%m%d}' "
+        day_limiter = f" and valid = '2000-{ts:%m-%d}' "
     for st in state_names:
-        nt = NetworkTable("%sCLIMATE" % (st,))
+        nt = NetworkTable(f"{st}CLIMATE")
         if not nt.sts:
             LOG.info("Skipping %s as it has no stations", st)
             continue
         LOG.info("Computing Daily Averages for state: %s", st)
         ccursor = COOP.cursor()
         ccursor.execute(
-            f"DELETE from {table} WHERE substr(station, 1, 2) = %s", (st,)
+            f"DELETE from {table} WHERE substr(station, 1, 2) = %s "
+            f"{day_limiter}",
+            (st,),
         )
         LOG.info("    removed %s rows from %s", ccursor.rowcount, table)
         ccursor.execute(
@@ -76,7 +87,7 @@ def daily_averages(table):
     avg(merra_srad) as srad
     from alldata_{st} WHERE day >= %s and day < %s and
     precip is not null and high is not null and low is not null
-    and station in %s
+    and station in %s {sday_limiter}
     GROUP by d, station)""",
             (
                 META[table]["sts"].strftime("%Y-%m-%d"),
@@ -105,15 +116,18 @@ def do_date(ccursor2, table, row, col, agg_col):
         ),
     )
     years = []
-    for row in ccursor2:
-        years.append(row[0])
+    for row2 in ccursor2:
+        years.append(row2[0])
     if not years:
         LOG.info("None %s %s %s", row, col, agg_col)
     return years
 
 
-def set_daily_extremes(table):
+def set_daily_extremes(table, ts):
     """Set the extremes on a given table"""
+    sday_limiter = ""
+    if ts is not None:
+        sday_limiter = f" and valid = '2000-{ts:%m-%d}' "
     ccursor = COOP.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ccursor.execute(
         f"""
@@ -121,7 +135,7 @@ def set_daily_extremes(table):
         max_high is not null
         and min_high_yr is null and min_high is not null
         and max_low_yr is null and max_low is not null
-        and min_low_yr is null and min_low is not null
+        and min_low_yr is null and min_low is not null {sday_limiter}
         """
     )
     ccursor2 = COOP.cursor()
@@ -162,12 +176,15 @@ def set_daily_extremes(table):
     COOP.commit()
 
 
-def main():
+def main(argv):
     """Go Main Go"""
+    ts = None
+    if len(argv) == 4:
+        ts = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
     for table in META:
-        daily_averages(table)
-        set_daily_extremes(table)
+        daily_averages(table, ts)
+        set_daily_extremes(table, ts)
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

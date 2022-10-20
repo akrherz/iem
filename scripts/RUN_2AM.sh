@@ -8,8 +8,8 @@ bash run_plots.sh
 cd ../isusm
 python backfill_summary.py &
 if [ $DD -eq "07" ]
-	then
-		python nmp_monthly_email.py
+    then
+        python nmp_monthly_email.py
 fi
 
 cd ../swat
@@ -18,6 +18,7 @@ python swat_realtime.py &
 # Run the climodat estimator to get sites that are valid at midnight
 cd ../climodat
 python daily_estimator.py $(date --date '1 days ago' +'%Y %m %d')
+python compute_climate.py $(date --date '1 days ago' +'%Y %m %d')
 
 # Look for stuff we missed with noaaport ingest
 cd ../rtma
@@ -28,25 +29,25 @@ bash run.sh &
 
 cd ../coop
 if [ $DD -eq "01" ]
-	then
-	python first_guess_for_harry.py
+    then
+    python first_guess_for_harry.py
 fi
 
 cd ../util
 if [ $DD -eq "02" ]
-	then
-		bash monthly.sh $(date --date '3 days ago' +'%y %m')
+    then
+        bash monthly.sh $(date --date '3 days ago' +'%y %m')
 fi
 
 cd ../dl
 if [ $DD -eq "09" ]
-	then
-		 python download_narr.py $(date --date '13 days ago' +'%Y %m') &
+    then
+         python download_narr.py $(date --date '13 days ago' +'%Y %m') &
 fi
 # run every Monday
 if [ $DD -eq "1" ]
-	then
-		python fetch_power.py $(date --date '7 days ago' +'%Y')
+    then
+        python fetch_power.py $(date --date '7 days ago' +'%Y')
 fi
 
 cd ../cache
