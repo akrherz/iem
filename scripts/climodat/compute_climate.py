@@ -105,8 +105,8 @@ def do_date(ccursor2, table, row, col, agg_col):
     ccursor2.execute(
         f"""
         SELECT year from alldata_{row['station'][:2]} where station = %s and
-        {col} = {row[agg_col]} and sday = %s and day >= %s and day < %s
-        ORDER by year ASC
+        abs({col} - {row[agg_col]}) < 0.001 and
+        sday = %s and day >= %s and day < %s ORDER by year ASC
     """,
         (
             row["station"],
@@ -119,7 +119,14 @@ def do_date(ccursor2, table, row, col, agg_col):
     for row2 in ccursor2:
         years.append(row2[0])
     if not years:
-        LOG.info("None %s %s %s", row, col, agg_col)
+        LOG.info(
+            "None %s %s %s %s %s",
+            row["station"],
+            row["valid"],
+            row[agg_col],
+            col,
+            agg_col,
+        )
     return years
 
 
@@ -182,7 +189,7 @@ def main(argv):
     if len(argv) == 4:
         ts = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
     for table in META:
-        daily_averages(table, ts)
+        # daily_averages(table, ts)
         set_daily_extremes(table, ts)
 
 
