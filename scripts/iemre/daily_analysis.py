@@ -193,7 +193,7 @@ def do_precip12(ts, ds):
 
 def grid_day12(ts, ds):
     """Use the COOP data for gridding"""
-    LOG.debug("12z hi/lo for %s", ts)
+    LOG.info("12z hi/lo for %s", ts)
     mybuf = 2.0
     # non-midwest COOP ingest is not "complete" until start of 2012
     if ts.year > 2011:
@@ -229,7 +229,7 @@ def grid_day12(ts, ds):
                 iemre.SOUTH - mybuf,
             ),
         )
-        LOG.debug("loaded %s rows from iemaccess database", len(df.index))
+        LOG.info("loaded %s rows from iemaccess database", len(df.index))
     else:
         df = read_sql(
             """
@@ -265,7 +265,7 @@ def grid_day12(ts, ds):
                 ts,
             ),
         )
-        LOG.debug("loaded %s rows from climodat database", len(df.index))
+        LOG.info("loaded %s rows from climodat database", len(df.index))
     # Require that high > low before any gridding, accounts for some COOP
     # sites that only report TOB and not 24 hour high/low
     df.loc[df["highdata"] <= df["lowdata"], ["highdata", "lowdata"]] = None
@@ -364,7 +364,7 @@ def grid_day(ts, ds):
             ),
         )
     if len(df.index) < 4:
-        LOG.info(
+        LOG.warning(
             "%s has %02i entries, FAIL", ts.strftime("%Y-%m-%d"), len(df.index)
         )
         return
@@ -390,10 +390,10 @@ def workflow(ts, irealtime, justprecip):
     """Do Work"""
     # load up our current data
     ds = iemre.get_grids(ts)
-    LOG.debug("loaded %s variables from IEMRE database", len(ds))
+    LOG.info("loaded %s variables from IEMRE database", len(ds))
     # For this date, the 12 UTC COOP obs will match the date
     if not justprecip:
-        LOG.debug("doing 12z logic for %s", ts)
+        LOG.info("doing 12z logic for %s", ts)
         grid_day12(ts, ds)
     do_precip12(ts, ds)
     # This is actually yesterday!
@@ -403,10 +403,10 @@ def workflow(ts, irealtime, justprecip):
         ts -= datetime.timedelta(days=1)
         ds = iemre.get_grids(ts)
     if not justprecip:
-        LOG.debug("doing calendar day logic for %s", ts)
+        LOG.info("doing calendar day logic for %s", ts)
         grid_day(ts, ds)
     copy_iemre(ts, ds)
-    LOG.debug("calling iemre.set_grids()")
+    LOG.info("calling iemre.set_grids()")
     iemre.set_grids(ts, ds)
     subprocess.call(f"python db_to_netcdf.py {ts:%Y %m %d}", shell=True)
 

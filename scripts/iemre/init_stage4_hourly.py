@@ -23,12 +23,12 @@ def init_year(ts):
     # grid shape is y, x
     lats, lons = grb.latlons()
 
-    fp = "%s/%s_stage4_hourly.nc" % (BASEDIR, ts.year)
+    fp = f"{BASEDIR}/{ts:%Y}_stage4_hourly.nc"
     if os.path.isfile(fp):
-        LOG.warn("Cowardly refusing to overwrite %s", fp)
+        LOG.warning("Cowardly refusing to overwrite %s", fp)
         return
     nc = ncopen(fp, "w")
-    nc.title = "IEM Packaged NOAA Stage IV for %s" % (ts.year,)
+    nc.title = f"IEM Packaged NOAA Stage IV for {ts:Y}"
     nc.platform = "Grided Estimates"
     nc.description = "NOAA Stage IV on HRAP Grid"
     nc.institution = "Iowa State University, Ames, IA, USA"
@@ -48,7 +48,7 @@ def init_year(ts):
     nc.createDimension("bnds", 2)
     ts2 = datetime.datetime(ts.year + 1, 1, 1)
     days = (ts2 - ts).days
-    print("Year %s has %s days" % (ts.year, days))
+    LOG.info("Year %s has %s days", ts.year, days)
     nc.createDimension("time", int(days) * 24)
 
     # Setup Coordinate Variables

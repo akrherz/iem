@@ -6,10 +6,10 @@ from pyiem.util import logger
 LOG = logger()
 BASEURL = "https://mesonet.agron.iastate.edu/plotting/auto/plot"
 URLS = [
-    "/97/sector:midwest::var:precip_sum::date1:2021-04-01::cmap:Blues::c:no",
-    "/97/sector:midwest::var:precip_depart::date1:2021-04-01::cmap:BrBG::c:no",
-    "/97/sector:midwest::var:gdd_sum::date1:2021-04-01::cmap:inferno::c:no",
-    "/97/sector:midwest::var:gdd_depart::date1:2021-04-01"
+    "/97/sector:midwest::var:precip_sum::date1:2022-04-01::cmap:Blues::c:no",
+    "/97/sector:midwest::var:precip_depart::date1:2022-04-01::cmap:BrBG::c:no",
+    "/97/sector:midwest::var:gdd_sum::date1:2022-04-01::cmap:inferno::c:no",
+    "/97/sector:midwest::var:gdd_depart::date1:2022-04-01"
     "::cmap:RdYlBu_r::c:no",
     "/193/csector:midwest::f:168::opt:wpc::scale:7::cmap:Blues",
 ]

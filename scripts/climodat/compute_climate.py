@@ -189,7 +189,7 @@ def main(argv):
     if len(argv) == 4:
         ts = datetime.date(int(argv[1]), int(argv[2]), int(argv[3]))
     for table in META:
-        # daily_averages(table, ts)
+        daily_averages(table, ts)
         set_daily_extremes(table, ts)
 
 
