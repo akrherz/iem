@@ -148,7 +148,7 @@ def set_daily_extremes(table, ts):
     ccursor2 = COOP.cursor()
     cnt = 0
     total = ccursor.rowcount
-    for row in tqdm(ccursor, total=total):
+    for row in tqdm(ccursor, total=total, disable=not sys.stdout.isatty()):
         data = {}
         data["max_high_yr"] = do_date(ccursor2, table, row, "high", "max_high")
         data["min_high_yr"] = do_date(ccursor2, table, row, "high", "min_high")
