@@ -34,28 +34,26 @@ UNITS = {
     "max_alti": "in",
     "min_alti": "in",
 }
-MDICT = dict(
-    [
-        ("all", "No Month Limit"),
-        ("spring", "Spring (MAM)"),
-        ("fall", "Fall (SON)"),
-        ("winter", "Winter (DJF)"),
-        ("summer", "Summer (JJA)"),
-        ("gs", "1 May to 30 Sep"),
-        ("jan", "January"),
-        ("feb", "February"),
-        ("mar", "March"),
-        ("apr", "April"),
-        ("may", "May"),
-        ("jun", "June"),
-        ("jul", "July"),
-        ("aug", "August"),
-        ("sep", "September"),
-        ("oct", "October"),
-        ("nov", "November"),
-        ("dec", "December"),
-    ]
-)
+MDICT = {
+    "all": "No Month Limit",
+    "spring": "Spring (MAM)",
+    "fall": "Fall (SON)",
+    "winter": "Winter (DJF)",
+    "summer": "Summer (JJA)",
+    "gs": "1 May to 30 Sep",
+    "jan": "January",
+    "feb": "February",
+    "mar": "March",
+    "apr": "April",
+    "may": "May",
+    "jun": "June",
+    "jul": "July",
+    "aug": "August",
+    "sep": "September",
+    "oct": "October",
+    "nov": "November",
+    "dec": "December",
+}
 
 
 def get_description():
@@ -89,6 +87,20 @@ def get_description():
             default="all",
             options=MDICT,
             label="Select Month/Season/All",
+        ),
+        dict(
+            type="sday",
+            optional=True,
+            name="sday",
+            label="Start Day of The Year (inclusive):",
+            default=f"{datetime.date.today():%m%d}",
+        ),
+        dict(
+            type="sday",
+            optional=True,
+            name="eday",
+            label="End Day of The Year (inclusive):",
+            default="1231",
         ),
         dict(
             type="select",
@@ -140,6 +152,28 @@ def plotter(fdict):
         ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month]
+    params = {
+        "tzname": ctx["_nt"].sts[station]["tzname"],
+        "station": station,
+        "months": tuple(months),
+    }
+    doylimiter = ""
+    monlimiter = ""
+    if "sday" in ctx and "eday" in ctx:
+        params["sday"] = f"{ctx['sday']:%m%d}"
+        params["eday"] = f"{ctx['eday']:%m%d}"
+        op = "and" if params["sday"] < params["eday"] else "or"
+        doylimiter = (
+            f"and (to_char(valid at time zone :tzname, 'mmdd') >= :sday {op} "
+            "to_char(valid at time zone :tzname, 'mmdd') <= :eday)"
+        )
+        over = f"{ctx['sday']:%-d %b} thru {ctx['eday']:%-d %b}"
+    else:
+        over = MDICT[month]
+        if len(months) < 12:
+            monlimiter = (
+                "and extract(month from valid at time zone :tzname) in :months"
+            )
     delta = 10 if varname != "max_p01i" else -1
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
@@ -150,8 +184,8 @@ def plotter(fdict):
                 at time zone :tzname as ts,
             tmpf::int as itmpf, dwpf::int as idwpf,
             feel::int as ifeel, mslp, alti, p01i from alldata
-            where station = :station and
-            extract(month from valid at time zone :tzname) in :months),
+            where station = :station {doylimiter} {monlimiter}
+            ),
         agg1 as (
             SELECT extract(hour from ts) as hr,
             max(idwpf) as max_dwpf,
@@ -174,11 +208,7 @@ def plotter(fdict):
         """
             ),
             conn,
-            params={
-                "tzname": ctx["_nt"].sts[station]["tzname"],
-                "station": station,
-                "months": tuple(months),
-            },
+            params=params,
             index_col=None,
         )
     if df.empty:
@@ -191,7 +221,7 @@ def plotter(fdict):
         raise NoDataFound("Unknown station metadata")
     title = (
         f"{ctx['_sname']} ({ab.year}-{datetime.date.today().year})\n"
-        f"{PDICT[varname]} [{MDICT[month]}]"
+        f"{PDICT[varname]} [{over}]"
     )
     (fig, ax) = figure_axes(apctx=ctx, title=title)
     ax.set_position([0.12, y0, 0.57, yheight])
@@ -219,12 +249,8 @@ def plotter(fdict):
         fig.text(
             0.7,
             ypos,
-            "%3s: %s%s"
-            % (
-                rounder(row, varname),
-                pd.Timestamp(row["ts"]).strftime("%d %b %Y"),
-                ("*" if len(sdf.index) > 1 else ""),
-            ),
+            f"{rounder(row, varname):3s}: {pd.Timestamp(row['ts']):%d %b %Y}"
+            f"{'*' if len(sdf.index) > 1 else ''}",
             fontproperties=font0,
             va="center",
         )

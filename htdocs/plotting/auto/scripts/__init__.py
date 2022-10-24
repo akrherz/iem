@@ -582,7 +582,7 @@ mopts = [
         ),
     },
     {"id": 192, "label": "Hourly Analysis Maps of ASOS/METAR Stations"},
-    {"id": 153, "label": "Hourly Extremes by Month/Season/Year"},
+    {"id": 153, "label": "Hourly Extremes by Month/Season/Day Period/Year"},
     {
         "id": 159,
         "label": "Hourly Frequency / Histogram by year and by hour of day",
