@@ -203,8 +203,8 @@ RewriteRule ^/search /search.py [QSA]
   </Directory>
 
   <LocationMatch "/api/1">
-    ProxyPass "http://iem-web-services.local:8000"
-    ProxyPassReverse "http://iem-web-services.local:8000"
+    ProxyPass "https://iem-web-services.agron.iastate.edu"
+    ProxyPassReverse "https://iem-web-services.agron.iastate.edu"
   </LocationMatch>
 
   <Location "/archive/data">

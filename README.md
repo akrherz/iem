@@ -25,7 +25,7 @@ iembot  | iem19    | None  | nagios checks for twistd processes running
 iemdb1 | metvm4 | metvm8 | nagios check
 iemdb2 | metvm2 | metvm0 | nagios check
 iemdb3 | metvm6 | metvm1 | nagios check
-iem-web-services | iem12 | iem19 | nagios check
+iem-web-services | iem27-dc | iem11-dc | nagios check
 letsencrpyt | iem19 | None | nagios SSL check
 LDM | iem11 | None | None
 LoggerNet | iem8-dc | None | nagios check
