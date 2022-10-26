@@ -523,6 +523,10 @@ hopts = [
             "US Drought Monitor + Weather Prediction Center Forecasted Rain"
         ),
     },
+    {
+        "id": 231,
+        "label": ("Weekly Statewide SPI Changes and Drought Classification"),
+    },
 ]
 mopts = [
     {
