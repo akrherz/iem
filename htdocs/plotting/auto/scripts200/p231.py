@@ -23,18 +23,25 @@ def get_description():
     <p>Caution, this chart does take a number of seconds to generate.
     """
     today = datetime.date.today() - datetime.timedelta(days=1)
+    lastweek = today - datetime.timedelta(days=7)
     desc["arguments"] = [
+        dict(
+            type="date",
+            name="from",
+            default=f"{lastweek:%Y/%m/%d}",
+            label="Evaluate change on this starting date:",
+        ),
         dict(
             type="date",
             name="on",
             default=f"{today:%Y/%m/%d}",
-            label="Evaluate Weekly Change on Date:",
+            label="Evaluate change on this ending date:",
         ),
         dict(
             type="int",
             name="days",
             default=60,
-            label="Compute SPI over how many days",
+            label="Compute SPI over how many trailing days",
         ),
         dict(
             type="state",
@@ -46,10 +53,9 @@ def get_description():
     return desc
 
 
-def compute(state, date, days):
+def compute(state, sdate, edate, days):
     """Compute the statistic."""
     # Do we need magic 1 Jan logic?
-    sts = date - datetime.timedelta(days=7)
     with get_sqlalchemy_conn("coop") as conn:
         df = pd.read_sql(
             f"""
@@ -77,7 +83,11 @@ def compute(state, date, days):
             t.network = '{state}CLIMATE'
             """,
             conn,
-            params=(days - 1, (f"{date:%m%d}", f"{sts:%m%d}"), (sts, date)),
+            params=(
+                days - 1,
+                (f"{edate:%m%d}", f"{sdate:%m%d}"),
+                (sdate, edate),
+            ),
             parse_dates=["day"],
         )
     if df.empty:
@@ -90,9 +100,8 @@ def compute(state, date, days):
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description())
-    df = compute(ctx["state"], ctx["on"], ctx["days"])
-    sts = ctx["on"] - datetime.timedelta(days=7)
-    startdf = df[df["sday"] == f"{sts:%m%d}"].set_index("station")
+    df = compute(ctx["state"], ctx["from"], ctx["on"], ctx["days"])
+    startdf = df[df["sday"] == f"{ctx['from']:%m%d}"].set_index("station")
     enddf = df[df["sday"] == f"{ctx['on']:%m%d}"].set_index("station")
     if startdf.empty or enddf.empty:
         raise NoDataFound("No data available for given date.")
@@ -132,7 +141,7 @@ def plotter(fdict):
     mp = MapPlot(
         title=(
             f"{state_names[ctx['state']]} {ctx['days']} Day SPI Change "
-            f"{sts:%-d %b %Y} - {ctx['on']:%-d %b %Y}"
+            f"from {ctx['from']:%-d %b %Y} to {ctx['on']:%-d %b %Y}"
         ),
         subtitle=(
             "Map shows SPI drought classification on end date, "
@@ -179,7 +188,7 @@ def plotter(fdict):
     mp.fig.text(
         0.7, 0.32, f"Station Change Count\nSPI on {ctx['on']:%-d %b %Y}"
     )
-    mp.fig.text(0.65, 0.1, f"SPI on {sts:%-d %b %Y}", rotation=90)
+    mp.fig.text(0.65, 0.1, f"SPI on {ctx['from']:%-d %b %Y}", rotation=90)
     ax = mp.fig.add_axes(
         [0.7, 0.31, 0.25, 0.1], xticks=[], yticks=[], facecolor="None"
     )
