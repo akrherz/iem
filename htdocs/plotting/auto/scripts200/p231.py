@@ -2,6 +2,7 @@
 import datetime
 
 import pandas as pd
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import MapPlot, plt
 from pyiem.reference import state_names
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
@@ -21,11 +22,12 @@ def get_description():
 
     <p>Caution, this chart does take a number of seconds to generate.
     """
+    today = datetime.date.today() - datetime.timedelta(days=1)
     desc["arguments"] = [
         dict(
             type="date",
             name="on",
-            default=f"{datetime.date.today():%Y/%m/%d}",
+            default=f"{today:%Y/%m/%d}",
             label="Evaluate Weekly Change on Date:",
         ),
         dict(
@@ -78,6 +80,8 @@ def compute(state, date, days):
             params=(days - 1, (f"{date:%m%d}", f"{sts:%m%d}"), (sts, date)),
             parse_dates=["day"],
         )
+    if df.empty:
+        raise NoDataFound("Failed to find any data for given date")
     df["depart"] = df["sum"] - df["avg_precip"]
     df["spi"] = df["depart"] / df["std_precip"]
     return df
@@ -90,6 +94,8 @@ def plotter(fdict):
     sts = ctx["on"] - datetime.timedelta(days=7)
     startdf = df[df["sday"] == f"{sts:%m%d}"].set_index("station")
     enddf = df[df["sday"] == f"{ctx['on']:%m%d}"].set_index("station")
+    if startdf.empty or enddf.empty:
+        raise NoDataFound("No data available for given date.")
     df = startdf.join(enddf, how="inner", lsuffix="_start", rsuffix="_end")
     df = df.sort_values("spi_start", ascending=True)
     df["depart_change"] = df["depart_end"] - df["depart_start"]

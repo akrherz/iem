@@ -57,8 +57,8 @@ def main(network):
                 )
 
                 mcursor.execute(
-                    "UPDATE stations SET archive_end = %s WHERE id = %s "
-                    "and network = %s",
+                    "UPDATE stations SET archive_end = %s, online = 'f' "
+                    "WHERE id = %s and network = %s",
                     (row[2], station, network),
                 )
 
@@ -73,8 +73,8 @@ def main(network):
             )
 
             mcursor.execute(
-                "UPDATE stations SET archive_end = null WHERE id = %s "
-                "and network = %s",
+                "UPDATE stations SET archive_end = null, online = 't' "
+                "WHERE id = %s and network = %s",
                 (station, network),
             )
 
