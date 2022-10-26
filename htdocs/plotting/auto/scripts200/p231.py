@@ -29,13 +29,13 @@ def get_description():
             type="date",
             name="from",
             default=f"{lastweek:%Y/%m/%d}",
-            label="Evaluate change on this starting date:",
+            label="Evaluate change from this starting date:",
         ),
         dict(
             type="date",
             name="on",
             default=f"{today:%Y/%m/%d}",
-            label="Evaluate change on this ending date:",
+            label="Evaluate change to this ending date:",
         ),
         dict(
             type="int",
@@ -151,6 +151,7 @@ def plotter(fdict):
         state=ctx["state"],
         axes_position=[0.02, 0.1, 0.6, 0.8],
     )
+    mp.drawcounties()
     mp.draw_usdm(ctx["on"])
     mp.plot_values(
         df["lon_start"],
