@@ -32,7 +32,7 @@ LoggerNet | iem8-dc | None | nagios check
 memcached | iem8-dc | iem11-dc | nagios check
 NEXRAD Mosaics | iem8-dc | iem16 | nagios checks archive
 NWWS-OI Ingest | iem12 | None | None
-openfire | iem19 | None | None
+openfire | iem11-dc | None | None
 rabbitmq | iem9-dc | iem8-dc | nagios check
 samba | iem16 | None | cron scripts check data availability
 RIDGE | iem9-dc | None    | inbound file queue, check latency 7 radars

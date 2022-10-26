@@ -144,8 +144,6 @@
 
 # iembot(246) iem19
 10.24.19.206    iembot.local iembot
-# openfire(240) iem19
-10.24.19.206    iem-openfire openfire-bosh
 # ldm(235) iem11
 192.168.0.235    iem-ldm.local
 # iemarchive(232) metvm3
