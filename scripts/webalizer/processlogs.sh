@@ -24,24 +24,24 @@ cd /mnt/webalizer/tmp
 # Step 1, bring all these log files back to roost and delete them remotely
 for MACH in $MACHINES
 do
-	# limit file transfer to 750Mbit/s
-	scp -l 750000 -q root@${MACH}:/mesonet/www/logs/*-${yyyymmdd} .
-	ssh root@$MACH "rm -f /mesonet/www/logs/*-${yyyymmdd}"
-	# rename the files so that they are unique
-	for PREF in $PREFIXES
-	do
-		if [ -e ${PREF}-${yyyymmdd} ]; then
-			mv ${PREF}-${yyyymmdd} ${PREF}-${MACH}.log
-		fi
-	done
+    # limit file transfer to 750Mbit/s
+    scp -l 750000 -q root@${MACH}:/mesonet/www/logs/*-${yyyymmdd} .
+    ssh root@$MACH "rm -f /mesonet/www/logs/*-${yyyymmdd}"
+    # rename the files so that they are unique
+    for PREF in $PREFIXES
+    do
+        if [ -e ${PREF}-${yyyymmdd} ]; then
+            mv ${PREF}-${yyyymmdd} ${PREF}-${MACH}.log
+        fi
+    done
 done
 
 for PREF in $PREFIXES
 do
-	echo "============== $PREF ============="
-	wc -l ${PREF}-*.log
-	csh -c "(/usr/local/bin/mergelog ${PREF}-*.log > combined-${PREF}.log) >& /dev/null"	
-	rm -f ${PREF}-*.log
+    echo "============== $PREF ============="
+    wc -l ${PREF}-*.log
+    csh -c "(/usr/local/bin/mergelog ${PREF}-*.log > combined-${PREF}.log) >& /dev/null"	
+    rm -f ${PREF}-*.log
 done
 
 # special step to merge the combined-iem.logs and combined-iemssl.log files
@@ -64,10 +64,10 @@ rm -f agclimate.log
 # Step 4, archive these files
 for PREF in $PREFIXES
 do
-	if [ -e combined-${PREF}.log ]; then
-		mv combined-${PREF}.log ${PREF}-${yyyymmdd}.log
-		gzip ${PREF}-${yyyymmdd}.log
-	fi
+    if [ -e combined-${PREF}.log ]; then
+        mv combined-${PREF}.log ${PREF}-${yyyymmdd}.log
+        gzip ${PREF}-${yyyymmdd}.log
+    fi
 done
 
 # Step 5, copy files to staging for cloud storage

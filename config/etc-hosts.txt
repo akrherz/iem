@@ -119,8 +119,8 @@
 
 ##############################################################################
 
-# iem19
-10.24.19.206    iembot
+# iem8-dc
+10.90.12.30 iembot
 # iem11, still needed to shield bandwidth
 192.168.0.235    iem-ldm.local
 # metvm3
