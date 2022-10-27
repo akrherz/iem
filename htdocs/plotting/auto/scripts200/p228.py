@@ -1,13 +1,18 @@
 """3 Dot Scatter plot.."""
 import datetime
+import sys
 
+import numpy as np
+import pandas as pd
 import geopandas as gpd
 import matplotlib.colors as mpcolors
 from pyiem.exceptions import NoDataFound
+from pyiem.network import Table as NetworkTable
 from pyiem.plot import MapPlot
-from pyiem.reference import Z_OVERLAY2
+from pyiem.reference import Z_OVERLAY2, state_bounds
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from sqlalchemy import text
+from tqdm import tqdm
 
 
 def get_description():
@@ -23,8 +28,11 @@ def get_description():
     of <code>(accum - climatology) / standard deviation</code>.</p>
 
     <p>This autoplot is extremely slow to generate due to the on-the-fly
-    calculation of standard deviation.  Hopefully that can be speed up
-    sometime in the future!
+    calculation of standard deviation. As such, an optimization is done to
+    sub-sample from available stations since the resulting map can only display
+    a certain number of data points legibly. This means that the dataset you
+    download from this page does not contain all available stations for a given
+    state :/
     """
     dt = datetime.date.today() - datetime.timedelta(days=1)
     desc["arguments"] = [
@@ -77,60 +85,79 @@ def plotter(fdict):
         "date": date,
         "sday": date.strftime("%m%d"),
         "network": f"{state}CLIMATE",
-        "sts": date - datetime.timedelta(days=366 * 31),
     }
+    dfs = []
+    nt = NetworkTable(f"{state}CLIMATE")
+    [xmin, ymin, xmax, ymax] = state_bounds[state]
+    GZ = 0.5
+    hits = np.zeros((int((ymax - ymin) / GZ) + 1, int((xmax - xmin) / GZ) + 1))
     with get_sqlalchemy_conn("coop") as conn:
-        df = gpd.read_postgis(
-            text(
-                f"""
-            WITH data as (
-                SELECT station, sday, day,
-                sum(precip) OVER (PARTITION by station ORDER by day ASC
-                ROWS BETWEEN :d1 PRECEDING AND CURRENT ROW) as p1,
-                sum(precip) OVER (PARTITION by station ORDER by day ASC
-                ROWS BETWEEN :d2 PRECEDING AND CURRENT ROW) as p2,
-                sum(precip) OVER (PARTITION by station ORDER by day ASC
-                ROWS BETWEEN :d3 PRECEDING AND CURRENT ROW) as p3
-                from alldata_{state} WHERE
-                day > :sts and day <= :date and
-                substr(station, 3, 1) not in ('C', 'T') and
-                substr(station, 3, 4) != '0000'
-            ), stats as (
-                SELECT station,
-                avg(p1) as avg_p1, stddev(p1) as stddev_p1,
-                avg(p2) as avg_p2, stddev(p2) as stddev_p2,
-                avg(p3) as avg_p3, stddev(p3) as stddev_p3,
-                count(*)
-                from data WHERE sday = :sday GROUP by station
-            ), agg as (
-                select d.station, s.avg_p1, s.stddev_p1, s.avg_p2, s.stddev_p2,
+        # A single shot query was taking moons to complete, so a brute force
+        # looper seems to be net faster.  We can also cull what gets
+        # processed
+        progress = tqdm(nt.sts.items(), disable=not sys.stdout.isatty())
+        for station, meta in progress:
+            if not meta["online"]:
+                continue
+            yidx = int((meta["lat"] - ymin) / GZ)
+            xidx = int((meta["lon"] - xmin) / GZ)
+            hits[yidx, xidx] += 1
+            if hits[yidx, xidx] > 1:
+                continue
+            progress.set_description(station)
+            params["station"] = station
+            params["lat"] = meta["lat"]
+            params["lon"] = meta["lon"]
+            dfs.append(
+                pd.read_sql(
+                    text(
+                        f"""
+                WITH data as (
+                    SELECT sday, day,
+                    sum(precip) OVER (PARTITION by station ORDER by day ASC
+                    ROWS BETWEEN :d1 PRECEDING AND CURRENT ROW) as p1,
+                    sum(precip) OVER (PARTITION by station ORDER by day ASC
+                    ROWS BETWEEN :d2 PRECEDING AND CURRENT ROW) as p2,
+                    sum(precip) OVER (PARTITION by station ORDER by day ASC
+                    ROWS BETWEEN :d3 PRECEDING AND CURRENT ROW) as p3
+                    from alldata_{state} WHERE day <= :date and
+                    station = :station
+                ), stats as (
+                    SELECT avg(p1) as avg_p1, stddev(p1) as stddev_p1,
+                    avg(p2) as avg_p2, stddev(p2) as stddev_p2,
+                    avg(p3) as avg_p3, stddev(p3) as stddev_p3,
+                    count(*)
+                    from data WHERE sday = :sday
+                )
+                select s.avg_p1, s.stddev_p1, s.avg_p2, s.stddev_p2,
                 s.avg_p3, s.stddev_p3, d.p1, d.p2, d.p3,
                 (d.p1 - s.avg_p1) / s.stddev_p1 as z1,
                 (d.p2 - s.avg_p2) / s.stddev_p2 as z2,
-                (d.p3 - s.avg_p3) / s.stddev_p3 as z3
-                from data d JOIN stats s on (d.station = s.station)
-                WHERE d.day = :date and s.count > 29
+                (d.p3 - s.avg_p3) / s.stddev_p3 as z3, s.count,
+                :station as station, :lat as lat, :lon as lon
+                from data d, stats s WHERE d.day = :date
+            """
+                    ),
+                    conn,
+                    params=params,
+                )
             )
-            select a.*, geom
-            from agg a JOIN stations t on (a.station = t.id)
-            WHERE t.network = :network
-        """
-            ),
-            conn,
-            params=params,
-            geom_col="geom",
-            index_col="station",
-        )
+    df = pd.concat(dfs)
+    df = df[df["count"] >= 30]
     if df.empty:
         raise NoDataFound("Did not find any data.")
+    df = gpd.GeoDataFrame(
+        df, geometry=gpd.points_from_xy(df["lon"], df["lat"], crs="EPSG:4326")
+    )
     mp = MapPlot(
         title="Trailing Day Standardized Precipitation Index",
         subtitle=(
-            f"Ending {date:%B %-d %Y} computed over past 30 years, "
-            "expressed in Drought Classification"
+            f"Ending {date:%B %-d %Y} computed for stations w/ 30+ years "
+            "of data"
         ),
         sector="state",
         state=state,
+        stateborderwidth=2,
     )
     mp.draw_usdm(date, alpha=1)
     mp.drawcounties()
@@ -160,7 +187,7 @@ def plotter(fdict):
         markersize=60,
     )
     df.to_crs(mp.panels[0].crs).assign(
-        geom=lambda x: x.geom.translate(xoff, -yoff)
+        geometry=lambda x: x.geometry.translate(xoff, -yoff)
     ).plot(
         facecolor=df["color2"],
         edgecolor="#ffffff",
@@ -170,7 +197,7 @@ def plotter(fdict):
         markersize=60,
     )
     df.to_crs(mp.panels[0].crs).assign(
-        geom=lambda x: x.geom.translate(-xoff, -yoff)
+        geometry=lambda x: x.geometry.translate(-xoff, -yoff)
     ).plot(
         facecolor=df["color3"],
         edgecolor="#ffffff",
@@ -187,9 +214,8 @@ def plotter(fdict):
     mp.fig.text(0.90, 0.93, f"{d2:3.0f}", bbox=boxs)
     mp.fig.text(0.86, 0.93, f"{d3:3.0f}", bbox=boxs)
 
-    clevlabels = "- D4 D3 D2 D1 D0 W0 W1 W2 W3 W4 -".split()
-    clevlabels[0] = ""
-    clevlabels[-1] = ""
+    clevlabels = ["", "D4", "D3", "D2", "D1", "D0"]
+    clevlabels.extend(["W0", "W1", "W2", "W3", "W4", ""])
     mp.draw_colorbar(
         levels,
         cmap,
@@ -202,4 +228,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({"var": "spi"})
+    plotter({"d3": "365", "state": "NE"})[0].savefig("/tmp/bah.png")

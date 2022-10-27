@@ -5,7 +5,7 @@ import numpy as np
 from affine import Affine
 import pandas as pd
 from geopandas import read_postgis
-from pyiem.plot import MapPlot, pretty_bins
+from pyiem.plot import MapPlot
 from pyiem.plot.colormaps import stretch_cmap
 from pyiem.grid.zs import CachingZonalStats
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, get_dbconn
@@ -92,7 +92,9 @@ def make_tuesday(date):
     with get_dbconn("postgis") as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT max(valid) from usdm")
-        tuesday = min([tuesday, cursor.fetchone()[0]])
+        maxdate = cursor.fetchone()[0]
+        if maxdate is not None:
+            tuesday = min([tuesday, maxdate])
     return tuesday
 
 
