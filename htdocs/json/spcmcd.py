@@ -58,7 +58,7 @@ def application(environ, start_response):
 
     hostname = os.environ.get("SERVER_NAME", "")
     mckey = ("/json/spcmcd/%.4f/%.4f") % (lon, lat)
-    mc = Client("iem-memcached.local:11211")
+    mc = Client("iem-memcached:11211")
     res = mc.get(mckey) if hostname != "iem.local" else None
     if not res:
         res = dowork(lon, lat)

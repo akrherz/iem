@@ -102,7 +102,7 @@ def application(environ, start_response):
         phenomena,
         significance,
     )
-    mc = Client("iem-memcached.local:11211")
+    mc = Client("iem-memcached:11211")
     res = mc.get(mckey)
     if not res:
         res = run(state, year, phenomena, significance)

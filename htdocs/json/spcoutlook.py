@@ -151,7 +151,7 @@ def application(environ, start_response):
     cb = fields.get("callback")
 
     mckey = f"/json/spcoutlook/{lon:.4f}/{lat:.4f}/{last}/{day}/{cat}/{time}"
-    mc = Client("iem-memcached.local:11211")
+    mc = Client("iem-memcached:11211")
     res = mc.get(mckey)
     if not res:
         if time is not None:

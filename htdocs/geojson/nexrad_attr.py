@@ -139,7 +139,7 @@ def application(environ, start_response):
         headers = [("Content-type", "text/csv")]
 
     mckey = f"/geojson/nexrad_attr.{fmt}|{ts}"
-    mc = Client("iem-memcached.local:11211")
+    mc = Client("iem-memcached:11211")
     res = mc.get(mckey)
     if not res:
         res = run(ts, fmt)

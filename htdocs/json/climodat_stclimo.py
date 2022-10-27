@@ -104,7 +104,7 @@ def application(environ, start_response):
     cb = fields.get("callback", None)
 
     mckey = f"/json/climodat_stclimo/{station}/{syear}/{eyear}"
-    mc = Client("iem-memcached.local:11211")
+    mc = Client("iem-memcached:11211")
     res = mc.get(mckey)
     if not res:
         res = run(station, syear, eyear)

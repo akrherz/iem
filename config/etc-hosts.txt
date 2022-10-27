@@ -8,80 +8,69 @@
 127.0.0.1        depbackend.local
 127.0.0.1        mesonet.agron.iastate.edu
 
-192.168.0.1      iem-director0 iem-director0.local
-192.168.0.2      iem-director1 iem-director1.local
+###
+# Things defined that don't really hurt anything nor are used in this codebase
+#
+192.168.0.1      iem-director0.local
+192.168.0.2      iem-director1.local
 192.168.0.4      thumper-ah.local
-10.24.19.229      mtadmin.local
-192.168.0.10      metfs1.local       iem-idd0      iem-idd0.local  
-
-# Service VMs
-192.168.0.11     iem11 iem11.local
-192.168.0.12     iem12 iem12.local
-192.168.0.13     iem13 iem13.local
-192.168.0.14     iem14 iem14.local
-192.168.0.15     iem15 iem15.local
-192.168.0.16     iem16 iem16.local
-192.168.0.17     iem17 iem17.local
-192.168.0.18     iem18 iem18.local
-192.168.0.19     iem19 iem19.local lesync.local
+192.168.0.11     iem11.local
+192.168.0.12     iem12.local
+192.168.0.18     iem18.local
+192.168.0.19     iem19.local lesync.local
 
 # VM servers for webfarm nodes
-192.168.0.50     iemvm0 iemvm0.local 
-192.168.0.51     iemvm1 iemvm1.local 
-192.168.0.52     iemvm2 iemvm2.local 
-192.168.0.53     iemvm3 iemvm3.local
-192.168.0.54     iemvm4 iemvm4.local
-192.168.0.55     iemvm5 iemvm5.local
-192.168.0.56     iemvm6 iemvm6.local
-192.168.0.57     iemvm7 iemvm7.local
-192.168.0.58     iemvm8 iemvm8.local
-192.168.0.59     iemvm9 iemvm9.local
+192.168.0.50     iemvm0.local 
+192.168.0.51     iemvm1.local 
+192.168.0.52     iemvm2.local 
+192.168.0.53     iemvm3.local
+192.168.0.54     iemvm4.local
+192.168.0.55     iemvm5.local
+192.168.0.56     iemvm6.local
+192.168.0.57     iemvm7.local
+192.168.0.58     iemvm8.local
+192.168.0.59     iemvm9.local
 
 # webfarm nodes
-192.168.0.100    iemvs100      iemvs100.local
-192.168.0.101    iemvs101      iemvs101.local
-192.168.0.102    iemvs102      iemvs102.local
-192.168.0.103    iemvs103      iemvs103.local
-192.168.0.104    iemvs104      iemvs104.local
-192.168.0.105    iemvs105      iemvs105.local
-192.168.0.106    iemvs106      iemvs106.local
-192.168.0.107    iemvs107      iemvs107.local
-192.168.0.108    iemvs108      iemvs108.local
-192.168.0.109    iemvs109      iemvs109.local
+192.168.0.100    iemvs100.local
+192.168.0.101    iemvs101.local
+192.168.0.102    iemvs102.local
+192.168.0.103    iemvs103.local
+192.168.0.104    iemvs104.local
+192.168.0.105    iemvs105.local
+192.168.0.106    iemvs106.local
+192.168.0.107    iemvs107.local
+192.168.0.108    iemvs108.local
+192.168.0.109    iemvs109.local
 
 # met vm servers
 192.168.0.200    metvm0.local
 192.168.0.201    metvm1.local
-192.168.0.202    metvm2.local
 192.168.0.203    metvm3.local
-192.168.0.204    metvm4.local
 192.168.0.205    metvm5.local
-192.168.0.206    metvm6.local
 192.168.0.207    metvm7.local
 192.168.0.208    metvm8.local
 192.168.0.209    metvm9.local
-192.168.10.200    metvm0.ib
-192.168.10.201    metvm1.ib
-192.168.10.202    metvm2.ib
-192.168.10.203    metvm3.ib
-192.168.10.204    metvm4.ib
-192.168.10.205    metvm5.ib
-192.168.10.206    metvm6.ib
-192.168.10.207    metvm7.ib
-192.168.10.208    metvm8.ib
-192.168.10.209    metvm9.ib
 
-#
-# IPs that float thanks to the magic of pulse or keepalived
-# BE CAREFUL HERE not to assign a backup and kvm iron to same service!
-#   iem-director0 <-> iem-director1
-192.168.0.254    iem-gateway   iem-gateway.local
+192.168.0.254    iem-gateway.local
+
+###
+# Things redundantly defined within DNS
+10.24.19.229      mtadmin
+# runs with special 10 MB size and 8 GB memory size
+10.90.12.14    iem-memcached
+# memcache1(248) metvm9 <-> metvm8
+10.24.19.117    iem-memcached1
+# memcache2(247) metvm8 <-> metvm9
+10.24.19.116    iem-memcached2
+# VI12(62) metvm1 <-> metvm7
+10.24.19.115    iem-memcached3
 
 ##############################################################################
+# Database stuff
 
 ### iemdb PostgreSQL
 # iemdb1 metvm4-dc
-10.90.12.21 iemdb1.local
 10.90.12.21 iemdb-afos.local
 10.90.12.21 iemdb-asos1min.local
 10.90.12.21 iemdb-frost.local
@@ -106,10 +95,8 @@
 10.90.12.21 iemdb-td.local
 10.90.12.21 iemdb-wepp.local
 
-
 ### iemdb2 PostgreSQL
 # iemdb2 metvm2-dc
-10.90.12.22 iemdb2.local
 10.90.12.22 iemdb-coop.local
 10.90.12.22 iemdb-hads iemdb-hads.local
 10.90.12.22 iemdb-talltowers.local
@@ -122,7 +109,6 @@
 
 ### iemdb3 PostgreSQL
 # iemdb3 metvm6-dc
-10.90.12.23 iemdb3.local
 10.90.12.23 iemdb-asos.local
 10.90.12.23 iemdb-awos.local
 10.90.12.23 iemdb-hml.local
@@ -133,18 +119,9 @@
 
 ##############################################################################
 
-# runs with special 10 MB size and 8 GB memory size
-10.90.12.14    iem-memcached iem-memcached.local
-# memcache1(248) metvm9 <-> metvm8
-10.24.19.117    iem-memcached1 iem-memcached1.local
-# memcache2(247) metvm8 <-> metvm9
-10.24.19.116    iem-memcached2 iem-memcached2.local
-# VI12(62) metvm1 <-> metvm7
-10.24.19.115    iem-memcached3 iem-memcached3.local
-
-# iembot(246) iem19
-10.24.19.206    iembot.local iembot
-# ldm(235) iem11
+# iem19
+10.24.19.206    iembot
+# iem11, still needed to shield bandwidth
 192.168.0.235    iem-ldm.local
-# iemarchive(232) metvm3
-192.168.0.232    iem-archive.local
+# metvm3
+10.24.19.236  iem-archive.local

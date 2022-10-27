@@ -7,7 +7,7 @@ $pil = isset($_REQUEST["pil"]) ? substr(xssafe($_REQUEST["pil"]), 0, 6) : 'AFDDM
 
 // Try to get it from memcached
 $memcache = new Memcached();
-$memcache->addServer('iem-memcached.local', 11211);
+$memcache->addServer('iem-memcached', 11211);
 $val = $memcache->get("pil_${pil}.png");
 if ($val) {
     header("Content-type: image/png");

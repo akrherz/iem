@@ -8,7 +8,7 @@ require_once "../../../config/settings.inc.php";
 
 // Try to get it from memcached
 $memcache = new Memcached();
-$memcache->addServer('iem-memcached.local', 11211);
+$memcache->addServer('iem-memcached', 11211);
 $val = $memcache->get("/request/grx/roadcond.php");
 if ($val) {
     die($val);

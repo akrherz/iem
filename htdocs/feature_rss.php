@@ -4,7 +4,7 @@ define("IEM_APPID", 62);
 header("Content-type: text/xml; charset=UTF-8");
 
 $memcache = new Memcached();
-$memcache->addServer('iem-memcached.local', 11211);
+$memcache->addServer('iem-memcached', 11211);
 $val = $memcache->get("/feature_rss.php");
 if ($val) {
     die($val);

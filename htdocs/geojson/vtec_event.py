@@ -177,7 +177,7 @@ def application(environ, start_response):
         f"/geojson/vtec_event/{wfo}/{year}/{phenomena}/{significance}/"
         f"{etn}/{sbw}/{lsrs}"
     )
-    mc = Client("iem-memcached.local:11211")
+    mc = Client("iem-memcached:11211")
     res = mc.get(mckey)
     if not res:
         if lsrs == 1:

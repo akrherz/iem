@@ -1,7 +1,7 @@
 <?php
 
 $memcache = new Memcached();
-$memcache->addServer('iem-memcached.local', 11211);
+$memcache->addServer('iem-memcached', 11211);
 $cameras = $memcache->get("php/cameras.inc.php");
 if ($cameras) {
     return;

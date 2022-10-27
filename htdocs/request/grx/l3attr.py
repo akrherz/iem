@@ -382,7 +382,7 @@ def application(environ, start_response):
         tvs,
         max_size,
     )
-    mc = Client("iem-memcached.local:11211")
+    mc = Client("iem-memcached:11211")
     res = mc.get(mckey)
     if not res:
         res = produce_content(nexrad, poh, meso, tvs, max_size)

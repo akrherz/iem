@@ -65,7 +65,7 @@ def application(environ, start_response):
     year = int(fields.get("year", 2022))
 
     mckey = f"/json/watch/{is_pds}/{year}"
-    mc = Client("iem-memcached.local:11211")
+    mc = Client("iem-memcached:11211")
     res = mc.get(mckey)
     if not res:
         res = run(year, is_pds)

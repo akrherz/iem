@@ -87,7 +87,7 @@ def application(environ, start_response):
     e = form.get("e", "201612141916")[:12]
     pil = form.get("pil", "ADMNFD")[:6].replace(" ", "")
     key = f"{e}_{pil}.png"
-    mc = Client("iem-memcached.local:11211")
+    mc = Client("iem-memcached:11211")
     res = mc.get(key)
     if not res:
         res = make_image(e, pil)

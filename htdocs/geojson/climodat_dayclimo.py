@@ -125,7 +125,7 @@ def application(environ, start_response):
     mckey = (
         f"/geojson/climodat_dayclimo/{network}/{month}/{day}/{syear}/{eyear}"
     )
-    mc = Client("iem-memcached.local:11211")
+    mc = Client("iem-memcached:11211")
     res = mc.get(mckey)
     if not res:
         res = run(network, month, day, syear, eyear)

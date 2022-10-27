@@ -97,7 +97,7 @@ def application(environ, start_response):
     i, j = iemre.find_ij(lon, lat)
     mckey = f"iemre/hourly/{sts:%Y%m%d}/{i}/{j}"
 
-    mc = Client("iem-memcached.local:11211")
+    mc = Client("iem-memcached:11211")
     res = mc.get(mckey)
     if res is None:
         res = workflow(sts, ets, i, j)

@@ -5,7 +5,7 @@ $key = "throttle_" . $_SERVER['REMOTE_ADDR'];
 
 $memcache = new Memcached();
 $memcache->setOption(Memcached::OPT_BINARY_PROTOCOL, true);
-$memcache->addServer('iem-memcached.local', 11211);
+$memcache->addServer('iem-memcached', 11211);
 register_shutdown_function(function () use ($memcache, $key) {
     $memcache->decrement($key);
 });

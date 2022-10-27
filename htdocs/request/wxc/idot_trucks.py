@@ -50,7 +50,7 @@ def application(_environ, start_response):
     start_response("200 OK", [("Content-type", "text/plain")])
 
     mckey = "/request/wxc/idot_trucks.txt"
-    mc = Client("iem-memcached.local:11211")
+    mc = Client("iem-memcached:11211")
     res = mc.get(mckey)
     if not res:
         res = get_data()

@@ -7,7 +7,7 @@ ignore_user_abort(true);
 $fts = isset($_GET["fts"]) ? intval($_GET["fts"]) : exit();
 
 $memcache = new Memcached();
-$memcache->addServer('iem-memcached.local', 11211);
+$memcache->addServer('iem-memcached', 11211);
 $urls = $memcache->get("/GIS/apps/rview/warnings.phtml?fts=${fts}");
 if (!$urls) {
     die("fts not found, ERROR");

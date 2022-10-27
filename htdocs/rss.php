@@ -3,7 +3,7 @@
  header("Content-type: text/xml; charset=UTF-8");
  
  $memcache = new Memcached();
- $memcache->addServer('iem-memcached.local', 11211);
+ $memcache->addServer('iem-memcached', 11211);
  $val = $memcache->get("/rss.php");
  if ($val){
  	die($val);

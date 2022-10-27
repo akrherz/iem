@@ -68,7 +68,7 @@ def fetch(cid):
 def workflow(cid):
     """The necessary workflow for this camera ID"""
     mckey = f"/current/live/{cid}.jpg"
-    mc = Client("iem-memcached.local:11211")
+    mc = Client("iem-memcached:11211")
     res = mc.get(mckey)
     if res:
         return res

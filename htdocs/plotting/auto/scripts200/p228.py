@@ -142,6 +142,8 @@ def plotter(fdict):
                     params=params,
                 )
             )
+    if not dfs:
+        raise NoDataFound("Did not find any data.")
     df = pd.concat(dfs)
     df = df[df["count"] >= 30]
     if df.empty:
@@ -224,7 +226,7 @@ def plotter(fdict):
         clevlabels=clevlabels,
     )
 
-    return mp.fig, df
+    return mp.fig, df.drop(columns=["geometry"])
 
 
 if __name__ == "__main__":

@@ -41,11 +41,11 @@ function get_iemapps_tags($tagname){
 
 function get_website_stats(){
     $memcache = new Memcached();
-    $memcache->addServer('iem-memcached.local', 11211);
+    $memcache->addServer('iem-memcached', 11211);
     $val = $memcache->get("iemperf.json");
     if (! $val){
         // Fetch from nagios
-        $val = @file_get_contents("http://mtadmin.local/cgi-bin/get_iemstats.py");
+        $val = @file_get_contents("http://mtadmin/cgi-bin/get_iemstats.py");
         if ($val) $memcache->set("iemperf.json", $val, 90);
     }
     $bcolor = "success";
