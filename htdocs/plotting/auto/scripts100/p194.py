@@ -5,10 +5,10 @@ import numpy as np
 from affine import Affine
 import pandas as pd
 from geopandas import read_postgis
-from pyiem.plot import MapPlot
+from pyiem.plot import MapPlot, pretty_bins
 from pyiem.plot.colormaps import stretch_cmap
 from pyiem.grid.zs import CachingZonalStats
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, get_dbconn
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import LATLON
 
@@ -87,7 +87,13 @@ def get_description():
 def make_tuesday(date):
     """Make sure we back up to a tuesday"""
     offset = (date.weekday() - 1) % 7
-    return date - datetime.timedelta(days=offset)
+    tuesday = date - datetime.timedelta(days=offset)
+    # Ensure that the database has this date
+    with get_dbconn("postgis") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT max(valid) from usdm")
+        tuesday = min([tuesday, cursor.fetchone()[0]])
+    return tuesday
 
 
 def plotter(fdict):
@@ -191,6 +197,7 @@ def plotter(fdict):
         ramp,
         cmap=cmap,
         units="count" if ctx["w"] == "weeks" else "Percent",
+        clip_on=False,
     )
     if len(csector) == 2:
         mp.drawcounties()
@@ -205,4 +212,6 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({})
+    plotter({"d": "4", "w": "weeks", "csector": "midwest"})[0].savefig(
+        "/tmp/bah.png"
+    )
