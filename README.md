@@ -21,7 +21,7 @@ Process | Primary | Backup | Monitor
 ------- | ------- | ------ | -------
 GOES R/S | iem8-dc | iem19 | None
 hrrr | iem8-dc | None | None
-iembot  | iem8-dc | None  | nagios checks for twistd processes running
+iembot  | iem9-dc | None  | nagios checks for twistd processes running
 iemdb1 | metvm4 | metvm8 | nagios check
 iemdb2 | metvm2 | metvm0 | nagios check
 iemdb3 | metvm6 | metvm1 | nagios check

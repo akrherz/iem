@@ -56,7 +56,7 @@
 
 ###
 # Things redundantly defined within DNS
-10.24.19.229      mtadmin
+10.90.12.31 nagios
 # runs with special 10 MB size and 8 GB memory size
 10.90.12.14    iem-memcached
 # memcache1(248) metvm9 <-> metvm8
