@@ -19,7 +19,6 @@ $t->headextra = <<<EOF
     overflow-y: scroll;
     overflow-x: hidden;
     max-height: 350px;
-
 }
 </style>
 EOF;
@@ -31,32 +30,25 @@ $(document).ready(function(){
 });
 
 function showHide(v){
-	var d2 = document.getElementById("d2");
-	if (document.getElementById("drange").checked){
-		d2.style.display = "block";
-	} else{
-		d2.style.display = "none";
-	}
+    var d2 = document.getElementById("d2");
+    if (document.getElementById("drange").checked){
+        d2.style.display = "block";
+    } else{
+        d2.style.display = "none";
+    }
 }
 function j(name){
-	$('html,body').animate({
-		scrollTop: $("#sect"+name).offset().top
-	 });
+    $('html,body').animate({
+        scrollTop: $("#sect"+name).offset().top
+     });
 }
 </script>
 EOF;
 
 // A dance here to get a 4-char and 3-char identifier
 $source = isset($_REQUEST["source"]) ? substr(xssafe($_GET["source"]), 0, 4) : 'DMX';
-$cccc = $source;
-$sesource = $source;
-if (strlen($source) == 3) {
-    $cccc = "K$source";
-}
-if ((strlen($source) == 4) && (substr($source, 0, 1) == 'K')) {
-    $sesource = substr($source, 1, 3);
-}
-
+$pil = isset($_REQUEST["pil"]) ? xssafe($_REQUEST["pil"]) : "AFD";
+$by = isset($_REQUEST["by"]) ? xssafe($_REQUEST["by"]) : "cccc";
 $view = isset($_GET["view"]) ? xssafe($_GET["view"]) : 'grid';
 $order = isset($_GET["order"]) ? xssafe($_GET["order"]) : "asc";
 
@@ -66,6 +58,22 @@ $day = get_int404("day", date("d"));
 $year2 = get_int404("year2", date("Y"));
 $month2 = get_int404("month2", date("m"));
 $day2 = get_int404("day2", date("d"));
+
+$res = file_get_contents("http://iem.local/json/reference.py");
+$jobj = json_decode($res, $assoc = TRUE, JSON_FORCE_OBJECT);
+$pilselect = make_select("pil", $pil, $jobj['prodDefinitions'], $jscallback = "",
+    $cssclass = "form-control iemselect2",
+    $multiple=FALSE,
+    $showvalue=TRUE);
+
+$cccc = $source;
+$sesource = $source;
+if (strlen($source) == 3) {
+    $cccc = "K$source";
+}
+if ((strlen($source) == 4) && (substr($source, 0, 1) == 'K')) {
+    $sesource = substr($source, 1, 3);
+}
 
 // Belt-suspenders check here
 $dt = new DateTime("$year-$month-$day");
@@ -108,11 +116,16 @@ $atags = "";
 // Loop over dates in the datequeue
 $prods = array();
 $columns = array();
+$params = array();
+if ($by == "cccc") {
+    $params["cccc"] = $cccc;
+} else {
+    $params["pil"] = $pil;
+}
+$antiby = ($by == "cccc") ? "pil": "cccc";
 foreach ($datequeue as $dt) {
-    $res = iemws_json(
-        "nws/afos/list.json",
-        array("cccc" => $cccc, "date" => $dt),
-    );
+    $params["date"] = $dt;
+    $res = iemws_json("nws/afos/list.json", $params);
     $rows = $res["data"];
     if ($order == "desc") {
         $rows = array_reverse($rows);
@@ -126,11 +139,12 @@ foreach ($datequeue as $dt) {
         foreach ($rows as $row) {
             $ts = strtotime($row["entered"]);
             $url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
-            if (!array_key_exists($row["pil"], $prods)) {
-                $prods[$row["pil"]] = "";
+            if (!array_key_exists($row[$antiby], $prods)) {
+                $prods[$row[$antiby]] = "";
             }
-            $prods[$row["pil"]] .= sprintf(
-                "<tr><td><a href=\"%s\">%s</a></td><td>%s</td><td>%s</td></tr>",
+            $prods[$row[$antiby]] .= sprintf(
+                "<tr><td>%s</td><td><a href=\"%s\">%s</a></td><td>%s</td><td>%s</td></tr>",
+                $row["cccc"],
                 $url,
                 $row["pil"],
                 gmdate("Y-m-d", $ts),
@@ -141,10 +155,10 @@ foreach ($datequeue as $dt) {
         foreach ($rows as $row) {
             $ts = strtotime($row["entered"]);
             $url = sprintf("p.php?pil=%s&e=%s", $row["pil"], gmdate("YmdHi", $ts));
-            if (!array_key_exists($row["pil"], $columns)) {
-                $columns[$row["pil"]] = "";
+            if (!array_key_exists($row[$antiby], $columns)) {
+                $columns[$row[$antiby]] = "";
             }
-            $columns[$row["pil"]] .= sprintf(
+            $columns[$row[$antiby]] .= sprintf(
                 "<a href=\"%s\">%s</a> (%s)<br />",
                 $url,
                 $row["pil"],
@@ -194,7 +208,7 @@ foreach ($datequeue as $dt) {
 if ($view == "prod") {
     $keys = array_keys($prods);
     asort($keys);
-    $table .= "<table class=\"table table-condensed table-striped\"><tr><th>Product Link</th><th>Date</th><th>UTC Time</th></tr>";
+    $table .= "<table class=\"table table-condensed table-striped\"><tr><th>Source</th><th>Product Link</th><th>Date</th><th>UTC Time</th></tr>";
     foreach ($keys as $i => $k) {
         $table .= sprintf("%s", $prods[$k]);
     }
@@ -203,7 +217,7 @@ if ($view == "prod") {
     ksort($columns);
     $keys = array_keys($columns);
     $table = "";
-    $atags .= '<div class="clearfix"></div><strong>Skip to PIL:</strong> ';
+    $atags .= '<div class="clearfix"></div><strong>Skip to ' . $antiby . ':</strong> ';
     foreach ($keys as $i => $k) {
         $atags .= sprintf(
             "<a class=\"btn btn-default btn-sm\" href=\"javascript:void(0)\" onclick=\"j('%s');\">%s</a> ",
@@ -264,16 +278,18 @@ $d2select = daySelect2($day2, "day2");
 
 $ar = array(
     "time" => "Chronological",
-    "grid" => "PIL Grid",
+    "grid" => "Grid",
     "prod" => "Product List"
 );
 $vselect = make_select("view", $view, $ar);
+$bycccc = ($by == "cccc") ? ' checked="checked"' : "";
+$bypil = ($by == "pil") ? ' checked="checked"' : "";
 
 
 $t->content = <<<EOM
-<h3>NWS Text Products by Issuing Center by Date</h3>
-<p>This application prints out a listing of IEM archived text products
-by issuing NWS Issuing Center and by date.  After about
+<h3>NWS Text Products by Date and Issuance Center or PIL</h3>
+<p>This application prints out a listing of IEM archived text products.
+After about
 seven days, the IEM purges a lot of the frequently issued products like
 SHEF and METAR data. Please be patient with this page if you select a 
 range of dates.</p>
@@ -304,8 +320,12 @@ and a brief associated product name on the NWS website.</p>
 <form name="selector" method="GET">
 <div class="row well">
 <div class="col-md-5">
-  <strong>Select Issuing Center:</strong>
+  <input type="radio" name="by" value="cccc" id="bycccc"${bycccc}>
+    <label for="bycccc">By Center</label>
   <br />{$netselect}
+  <br /><input type="radio" name="by" value="pil" id="bypil"${bypil}>
+    <label for="bypil">By Product ID</label>
+    <br />{$pilselect}
 </div>
 <div class="col-md-5">
   <strong>For UTC Date:</strong>

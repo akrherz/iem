@@ -257,7 +257,7 @@
                     "url": "/GIS/apps/rview/watch.phtml"
                 },
                 {
-                    "title": "Text by WFO/Center",
+                    "title": "Text Listing by WFO/Center/Product",
                     "url": "/wx/afos/list.phtml"
                 },
                 {

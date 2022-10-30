@@ -202,6 +202,14 @@ for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
             date("m", $basets),
             date("Y", $basets)
         );
+        $pil3 = substr($pil, 0, 3);
+        $pil_listlink = sprintf(
+            "list.phtml?by=pil&pil=%s&amp;day=%s&amp;month=%s&amp;year=%s",
+            $pil3,
+            date("d", $basets),
+            date("m", $basets),
+            date("Y", $basets)
+        );
         $date2 =  date("d M Y", $basets);
         $year = date("Y", $basets);
         $year2 = intval($year) + 1;
@@ -221,6 +229,8 @@ Received: <strong>{$dstamp} UTC</strong>
 
 <p><a rel="nofollow" class="btn btn-primary" 
  href="{$listlink}">View All {$row["source"]} Products for {$date2}</a>
+ <a rel="nofollow" class="btn btn-primary" 
+ href="{$pil_listlink}">View All {$pil3} Products for {$date2}</a>
 <a rel="nofollow" class="btn btn-primary"
  href="{$t->twitter_image}">View As Image</a>
 <a class="btn btn-primary" href="{$rawtext}">Download As Text</a></p>
