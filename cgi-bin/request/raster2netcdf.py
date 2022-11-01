@@ -103,7 +103,8 @@ def do_work(valid, prod, start_response):
     ]
     start_response("200 OK", headers)
     bio = BytesIO()
-    bio.write(open(tmpname, "rb").read())
+    with open(tmpname, "rb") as fh:
+        bio.write(fh.read())
     # remove tmp netcdf file
     os.unlink(tmpname)
     return bio.getvalue()

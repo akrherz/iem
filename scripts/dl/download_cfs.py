@@ -40,7 +40,7 @@ def dl(now, varname, scenario):
     # better be a big number
     grb = pygrib.open(tmpfd.name)
     if grb.messages < REQUIRED_MSGS:
-        LOG.info(
+        LOG.warning(
             "[%s] %s %s has only %s messages, need %s+",
             scenario,
             now,

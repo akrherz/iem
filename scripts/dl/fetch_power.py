@@ -27,7 +27,7 @@ def main(argv):
         ds = iemre.get_grids(now, varnames="power_swdn")
         maxval = ds["power_swdn"].values.max()
         if np.isnan(maxval) or maxval < 0:
-            LOG.debug("adding %s as currently empty", now)
+            LOG.info("adding %s as currently empty", now)
             current[now] = {"data": ds, "dirty": False}
         now -= datetime.timedelta(days=1)
     if not current:
@@ -35,7 +35,7 @@ def main(argv):
         return
     sts = min(list(current.keys()))
     ets = max(list(current.keys()))
-    LOG.debug("running between %s and %s", sts, ets)
+    LOG.info("running between %s and %s", sts, ets)
 
     queue = []
     # 10x10 degree chunk is the max request size...
@@ -45,25 +45,19 @@ def main(argv):
     for x0, y0 in tqdm(queue, disable=not sys.stdout.isatty()):
         url = (
             "https://power.larc.nasa.gov/api/temporal/daily/regional?"
-            "latitude-min=%s&latitude-max=%s&longitude-min=%s&"
-            "longitude-max=%s&parameters=ALLSKY_SFC_SW_DWN&community=SB&"
-            "start=%s&end=%s&format=NETCDF"
-        ) % (
-            y0,
-            y0 + 9.9,
-            x0,
-            x0 + 9.9,
-            sts.strftime("%Y%m%d"),
-            ets.strftime("%Y%m%d"),
+            f"latitude-min={y0}&latitude-max={y0 + 9.9}&"
+            f"longitude-min={x0}&"
+            f"longitude-max={x0 + 9.9}&parameters=ALLSKY_SFC_SW_DWN&"
+            f"community=SB&start={sts:%Y%m%d}&end={ets:%Y%m%d}&format=netcdf"
         )
         req = exponential_backoff(requests.get, url, timeout=60)
         # Can't find docs on how many requests/sec are allowed...
         if req is not None and req.status_code == 429:
-            LOG.debug("Got 429 (too-many-requests), sleeping 60")
+            LOG.info("Got 429 (too-many-requests), sleeping 60")
             time.sleep(60)
             req = exponential_backoff(requests.get, url, timeout=60)
         if req is None or req.status_code != 200:
-            LOG.info(
+            LOG.warning(
                 "failed to download %s with %s %s",
                 url,
                 "req is none" if req is None else req.status_code,
@@ -75,7 +69,6 @@ def main(argv):
             for chunk in req.iter_content(chunk_size=1024):
                 if chunk:
                     fh.write(chunk)
-            fh.close()
         with ncopen(ncfn) as nc:
             for day, _ in enumerate(nc.variables["time"][:]):
                 date = sts + datetime.timedelta(days=day)
