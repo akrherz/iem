@@ -1,4 +1,4 @@
-# Only EDIT on github!
+# Dumpster fire of crontab entries that I have running all over the place.
 BASH_ENV=/home/mesonet/.bashrc
 SHELL=/bin/bash
 S=/opt/iem/scripts
@@ -42,3 +42,20 @@ S=/opt/iem/scripts
 6 6 * * * cd $S/ingestors/asos_1minute; python parse_ncdc_asos1minute.py
 
 03,13,24 * * * * cd $S/plots; ./HOURLY_PLOTS
+
+# webalizer
+0 0 * * * cd $S/webalizer; sh processlogs.sh
+
+# Run 36h runs dont finish until 50 after
+55 * * * * cd $S; sh RUN_40_AFTER_2.sh
+
+# IEM8
+*/2 * * * * cd /opt/iem/scripts/mrms; sleep 40; timeout 60 python mesh_contours.py -i 2 --datetime $(date -u --date '2 minutes ago' +'\%Y-\%m-\%dT\%H:\%M')
+*/2 * * * * cd /opt/iem/scripts/mrms; timeout 240 python mesh_contours.py -i 30 --datetime $(date -u --date '2 minutes ago' +'\%Y-\%m-\%dT\%H:\%M')
+0 * * * * cd /opt/iem/scripts/mrms; sleep 10; python mesh_contours.py -i 60 --datetime $(date -u --date '2 minutes ago' +'\%Y-\%m-\%dT\%H:\%M')
+0 * * * * cd /opt/iem/scripts/mrms; sleep 15; python mesh_contours.py -i 1440 --datetime $(date -u --date '2 minutes ago' +'\%Y-\%m-\%dT\%H:\%M')
+
+*/5 * * * * sleep 60; cd /opt/iem/scripts/current; python nexrad_lapse.py
+
+# Archive ISUSM data
+26 6 * * * cd $S/isusm; python archiver.py
