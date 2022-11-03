@@ -210,6 +210,8 @@ RewriteRule ^/search /search.py [QSA]
   <Location "/archive/data">
     RequestHeader set "Host" "iem-archive.local"
     ProxyPreserveHost Off
+    # Send 404s back here
+    ProxyErrorOverride On
     # hacky to keep the paths matching in auto-index
     ProxyPass "http://iem-archive.local/archive/data"
     ProxyPassReverse "http://iem-archive.local/archive/data"
