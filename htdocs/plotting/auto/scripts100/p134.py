@@ -229,14 +229,7 @@ def plotter(fdict):
 
     lax.bar(np.arange(366 * 2), counts, edgecolor="blue", facecolor="blue")
     lax.set_ylabel("Years")
-    lax.text(
-        0.02,
-        0.9,
-        "Frequency of Day\nwithin period",
-        transform=lax.transAxes,
-        va="top",
-        bbox=bboxprops,
-    )
+    lax.set_xlabel("Frequency of day within period")
     ax.set_ylim(df.index.values.min() - 3, df.index.values.max() + 3)
 
     ax.set_xlim(df["doy"].min() - 10, df["doy"].max() + 10)
@@ -245,7 +238,7 @@ def plotter(fdict):
 
     # Plot per year
     series = df[XREF[varname]]
-    ax = fig.add_axes([0.55, 0.5, 0.43, 0.4])
+    ax = fig.add_axes([0.59, 0.5, 0.4, 0.4])
     ax.bar(df.index.values, series.values, color="blue", width=1)
     ax.set_ylim(bottom=series.min() - 5)
     ax.text(
@@ -259,7 +252,7 @@ def plotter(fdict):
     ax.grid(True)
 
     # CDF
-    ax = fig.add_axes([0.55, 0.1, 0.43, 0.3])
+    ax = fig.add_axes([0.59, 0.1, 0.4, 0.3])
     X2 = np.sort(series.values)
     ptile = np.percentile(X2, [0, 5, 50, 95, 100])
     N = len(series.values)
