@@ -262,7 +262,7 @@ def workflow(mc, environ, form, fmt):
             df.index.name = None
             # Need to set engine as xlsx/xls can't be inferred
             with pd.ExcelWriter(tmpfn, engine="openpyxl") as writer:
-                df.to_excel(writer, encoding="latin-1", sheet_name="Sheet1")
+                df.to_excel(writer, sheet_name="Sheet1")
             with open(tmpfn, "rb") as fh:
                 content = fh.read()
             os.unlink(tmpfn)
