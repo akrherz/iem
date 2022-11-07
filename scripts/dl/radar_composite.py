@@ -38,7 +38,7 @@ def save(sectorName, file_name, dir_name, ts, routes, bbox=None):
     req = exponential_backoff(requests.get, uri, timeout=60)
     LOG.debug(uri)
     if req is None or req.status_code != 200:
-        LOG.info("%s failure", uri)
+        LOG.warning("%s failure", uri)
         return
 
     with tempfile.NamedTemporaryFile(delete=False) as tmpfd:
@@ -64,8 +64,14 @@ def runtime(ts, routes):
 
     # Now, we query for watches.
     pcursor.execute(
-        "select sel, ST_xmax(geom), ST_xmin(geom), ST_ymax(geom), "
-        "ST_ymin(geom) from watches_current ORDER by issued DESC"
+        """
+        with data as (
+            select sel, rank() OVER (PARTITION by sel ORDER by issued DESC),
+            ST_xmax(geom), ST_xmin(geom), ST_ymax(geom), ST_ymin(geom)
+            from watches where issued < %s and issued > %s)
+        select * from data where rank = 1
+        """,
+        (ts, ts - datetime.timedelta(months=4)),
     )
     for row in pcursor:
         xmin = float(row[2]) - 0.75
@@ -85,8 +91,7 @@ def main(argv):
     if (utc() - ts).total_seconds() > 1000:
         runtime(ts, "a")
         return
-    else:
-        runtime(ts, "ac")
+    runtime(ts, "ac")
     for hroff in [1, 3, 7, 12, 24]:
         valid = ts - datetime.timedelta(hours=hroff)
         uri = (
@@ -95,7 +100,7 @@ def main(argv):
         )
         req = requests.get(uri, timeout=15)
         if req.status_code == 404:
-            LOG.info("%s 404, rerunning %s", uri, valid)
+            LOG.warning("%s 404, rerunning %s", uri, valid)
             runtime(valid, "a")
 
 
