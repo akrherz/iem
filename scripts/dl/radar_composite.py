@@ -71,7 +71,7 @@ def runtime(ts, routes):
             from watches where issued < %s and issued > %s)
         select * from data where rank = 1
         """,
-        (ts, ts - datetime.timedelta(months=4)),
+        (ts, ts - datetime.timedelta(days=120)),
     )
     for row in pcursor:
         xmin = float(row[2]) - 0.75
