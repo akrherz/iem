@@ -113,7 +113,7 @@ if (is_null($e)) {
             WHERE pil = $1 and entered = $2");
         $rs = pg_execute($conn, "_LSELECT", array(
             $pil,
-            date("Y-m-d H:i", $ts)
+            gmdate("Y-m-d H:i+00", $ts)
         ));
     } else {
         $rs = pg_prepare($conn, "_LSELECT", "SELECT data, bbb,
@@ -121,7 +121,7 @@ if (is_null($e)) {
             WHERE pil = $1 and entered = $2 and bbb = $3");
         $rs = pg_execute($conn, "_LSELECT", array(
             $pil,
-            date("Y-m-d H:i", $ts), $bbb
+            gmdate("Y-m-d H:i+00", $ts), $bbb
         ));
     }
 }
