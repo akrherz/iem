@@ -230,7 +230,7 @@ function ltypeSelect()
 </form>
 EOF;
 if (isset($_GET["hail"])) {
-    include("worker.php");
+    require_once "worker.php";
 } else {
     $content .= <<<EOF
 

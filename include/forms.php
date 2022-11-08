@@ -375,5 +375,3 @@ function segmentSelect($dbconn, $year, $month, $selected, $name="segid")
   return $s;
 } // End of segmentSelect
 
-
-?>

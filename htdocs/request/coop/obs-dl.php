@@ -7,7 +7,7 @@ $connection = iemdb("iem");
 $nt = new NetworkTable($network);
 $cities = $nt->table;
 
-$delim = isset($_GET["delim"]) ? $_GET["delim"]: ",";
+$delim = isset($_GET["delim"]) ? $_GET["delim"]: "comma";
 $what = isset($_GET["what"]) ? $_GET["what"]: 'dl';
 
 $day1 = isset($_GET["day1"]) ? $_GET["day1"] : die("No day1 specified");

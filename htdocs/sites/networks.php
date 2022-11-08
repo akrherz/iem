@@ -186,7 +186,7 @@ if (!$nohtml || $format == 'shapefile') {
     $sextra = "";
     if (isset($_REQUEST['station'])) {
         $t->sites_current = "tables";
-        include("setup.php");
+        require_once "setup.php";
         $page = 'sites.phtml';
         $sextra = sprintf(
             "<input type=\"hidden\" value=\"%s\" name=\"station\">",
