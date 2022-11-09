@@ -537,12 +537,6 @@ mopts = [
         ),
     },
     {
-        "id": 79,
-        "label": (
-            "Average Dew Point by Wind Direction by Month or Season or Year"
-        ),
-    },
-    {
         "id": 40,
         "label": (
             "Cloud Amount and Level Timeseries / Visibility for One Month"
@@ -551,6 +545,13 @@ mopts = [
     {"id": 88, "label": "Cloudiness Impact on Hourly Temperatures"},
     {"id": 214, "label": "Combos of Hourly Observations Var Vs Var"},
     {"id": 59, "label": "Daily u and vs Wind Component Climatologies"},
+    {
+        "id": 79,
+        "label": (
+            "Dew Point Distribution by Wind Direction "
+            "by Month or Season or Year"
+        ),
+    },
     {
         "id": 54,
         "label": (

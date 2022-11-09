@@ -4,6 +4,7 @@ import datetime
 import pandas as pd
 from metpy.units import units
 import metpy.calc as mcalc
+import matplotlib.ticker as mticker
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
@@ -92,7 +93,7 @@ def plotter(fdict):
             coalesce(mslp, alti * 33.8639, 1013.25) as slp
             from alldata where station = :station
             and drct is not null and dwpf is not null and dwpf <= tmpf
-            and sknt > 3 and drct::int % 10 = 0
+            and sknt >= 3 and drct::int % 10 = 0
             and extract(month from valid) in :months
             and report_type = 3
         """
@@ -122,7 +123,14 @@ def plotter(fdict):
         df["mixingratio"].values * units("kg/kg"),
     ).to(units("kPa"))
 
-    means = df.groupby("t").mean().copy()
+    ptiles = (
+        df[["dwpf", "t"]]
+        .groupby("t")
+        .quantile([0, 0.05, 0.25, 0.75, 0.95, 1])
+        .reset_index()
+        .rename(columns={"level_1": "ptile"})
+    )
+    means = df[["vapor_pressure", "t"]].groupby("t").mean().copy()
     # compute dewpoint now
     means["dwpf"] = (
         mcalc.dewpoint(means["vapor_pressure"].values * units("kPa"))
@@ -131,14 +139,48 @@ def plotter(fdict):
     )
 
     (fig, ax) = figure_axes(apctx=ctx)
-    ax.bar(
+    ymax = ptiles[ptiles["ptile"] == 1]
+    ymin = ptiles[ptiles["ptile"] == 0]
+    ax.fill_between(
+        ymin["t"].values,
+        ymin["dwpf"].values,
+        ymax["dwpf"].values,
+        ec="brown",
+        fc="tan",
+        label="Range",
+        step="mid",
+    )
+    ymax2 = ptiles[ptiles["ptile"] == 0.95]
+    ymin2 = ptiles[ptiles["ptile"] == 0.05]
+    ax.fill_between(
+        ymin2["t"].values,
+        ymin2["dwpf"].values,
+        ymax2["dwpf"].values,
+        ec="blue",
+        fc="lightblue",
+        label="5th - 95th",
+        step="mid",
+    )
+    ymax2 = ptiles[ptiles["ptile"] == 0.75]
+    ymin2 = ptiles[ptiles["ptile"] == 0.25]
+    ax.fill_between(
+        ymin2["t"].values,
+        ymin2["dwpf"].values,
+        ymax2["dwpf"].values,
+        label="25th - 75th",
+        ec="red",
+        fc="pink",
+        step="mid",
+    )
+    ax.plot(
         means.index.values,
         means["dwpf"].values,
-        ec="green",
-        fc="green",
-        width=10,
-        align="center",
+        color="k",
+        lw=3,
+        label="Mean",
+        drawstyle="steps-mid",
     )
+    ax.legend(ncol=4)
     ax.grid(True, zorder=11)
     ab = ctx["_nt"].sts[station]["archive_begin"]
     if ab is None:
@@ -147,12 +189,13 @@ def plotter(fdict):
         f"{ctx['_sname']}:: ",
         f"Average Dew Point by Wind Direction (month={month.upper()}) "
         f"({max([1973, ab.year])}-{datetime.datetime.now().year})",
-        "(must have 3+ hourly obs > 3 knots at given direction)",
+        "(must have 3+ hourly obs >= 3 knots at given direction)",
     ]
     ax.set_title("\n".join(titles), size=10)
 
     ax.set_ylabel("Dew Point [F]")
-    ax.set_ylim(means["dwpf"].min() - 5, means["dwpf"].max() + 5)
+    ax.set_ylim(ymin["dwpf"].min() - 10, ymax["dwpf"].max() + 10)
+    ax.yaxis.set_major_locator(mticker.MultipleLocator(5))
     ax.set_xlim(-5, 365)
     ax.set_xticks([0, 45, 90, 135, 180, 225, 270, 315, 360])
     ax.set_xticklabels(["N", "NE", "E", "SE", "S", "SW", "W", "NW", "N"])
