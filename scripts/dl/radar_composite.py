@@ -69,7 +69,8 @@ def runtime(ts, routes):
             select sel, rank() OVER (PARTITION by sel ORDER by issued DESC),
             ST_xmax(geom), ST_xmin(geom), ST_ymax(geom), ST_ymin(geom)
             from watches where issued < %s and issued > %s)
-        select sel, st_xmax, st_xmin, st_ymax, st_ymin from data where rank = 1
+        select trim(sel), st_xmax, st_xmin, st_ymax, st_ymin from data
+        where rank = 1
         """,
         (ts, ts - datetime.timedelta(days=120)),
     )
