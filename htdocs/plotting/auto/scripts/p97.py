@@ -1,4 +1,5 @@
 """map of climodat departures"""
+# pylint: disable=invalid-unary-operand-type
 import datetime
 
 import numpy as np
@@ -18,6 +19,10 @@ PDICT = {
     "sector": "Plot by Sector / State",
     "wfo": "Plot by NWS Weather Forecast Office (WFO)",
 }
+NCEI_BAD = (
+    "cgdd_sum gdd_depart gdd_percent cdd65_depart hdd65_depart "
+    "csdd86_sum sdd86_depart sdd86_percent"
+).split()
 PDICT2 = {
     "max_high_temp": "Maximum High Temperature",
     "avg_high_temp": "Average High Temperature",
@@ -438,6 +443,8 @@ def geojson(fdict):
 def plotter(fdict):
     """Go"""
     ctx = get_autoplot_context(fdict, get_description(), rectify_dates=True)
+    if ctx["var"] in NCEI_BAD and ctx["ct"].startswith("ncei"):
+        raise NoDataFound("Combo of NCEI Climatology + GDDs does not work!")
     df = get_data(ctx)
     sector = ctx["sector"]
     date1 = ctx["date1"]
@@ -565,14 +572,14 @@ if __name__ == "__main__":
             "wfo": "DMX",
             "d": "sector",
             "sector": "IA",
-            "var": "precip_depart",
+            "var": "gdd_percent",
             "gddbase": 50,
             "gddceil": 86,
-            "date1": "2022/01/01",
-            "date2": "2022/02/06",
+            "date1": "2022-04-01",
+            "date2": "2022-04-30",
             "p": "contour",
             "cmap": "RdYlBu",
             "c": "yes",
-            "ct": "climate51",
+            "ct": "ncei_climate91",
         }
     )
