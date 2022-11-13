@@ -1,8 +1,8 @@
 # Ensure this is actually being run at 00z, since crontab is in CST/CDT
 HH=$(date -u +%H)
 if [ "$HH" -ne "00" ]
-	then
-		exit
+    then
+        exit
 fi
 
 cd util
@@ -10,6 +10,7 @@ python make_archive_baseline.py
 
 cd ../climodat
 python sync_coop_updates.py
+python daily_estimator.py $(date +'%Y %m %d')
 
 # Wait a bit, so that more obs can come in
 sleep 300

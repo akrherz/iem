@@ -4,8 +4,10 @@
 
 RUN_NOON.sh - processes the current date, this skips any calendar day sites
 RUN_NOON.sh - processes yesterday, running all sites
+RUN_0Z.sh - processes the current date and gets the prelim calday sites data.
 RUN_2AM.sh - processes yesterday, which should run all sites
 """
+# pylint: disable=invalid-unary-operand-type
 import sys
 import datetime
 
@@ -28,14 +30,17 @@ def load_table(state, date):
     # not run the estimator for `offline` sites
     nt = NetworkTable(f"{state}CLIMATE", only_online=True)
     rows = []
-    istoday = date == datetime.date.today()
+    # Logic to determine if we can generate data for today's date or not
+    skip_calday_sites = (
+        date == datetime.date.today() and datetime.datetime.now().hour < 18
+    )
     threaded = {}
     for sid in nt.sts:
         # handled by compute_0000
         if sid[2:] == "0000" or sid[2] == "C":
             continue
         entry = nt.sts[sid]
-        if istoday and not entry["temp24_hour"] in range(3, 12):
+        if skip_calday_sites and not entry["temp24_hour"] in range(3, 12):
             continue
         if entry["threading"]:
             threaded[sid] = nt.get_threading_id(sid, date)
@@ -172,9 +177,6 @@ def commit(cursor, table, df, ts):
     """Inject into the database!"""
     # Inject!
     allowed_failures = 10
-    df2 = df[pd.isna(df["dirty"])]
-    if not df2.empty:
-        print(df2)
     for sid, row in df[df["dirty"]].iterrows():
         LOG.info(
             "sid: %s high: %s low: %s precip: %s snow: %s snowd: %s",
@@ -254,7 +256,7 @@ def merge_network_obs(df, network, ts):
     obs.loc[obs["high"] <= obs["low"], ("high", "low")] = np.nan
     # Tricky part here, if our present data table has data and is not
     # estimated, we don't want to over-write it!
-    df = df.join(obs, how="left", on="tracks", rsuffix="b")
+    df = df.join(obs, how="left", on="tracks", rsuffix="b").copy()
     # HACK the `high` and `precip` columns end up modifying the estimated
     # column, which fouls up subsequent logic
     for col in "low temp_hour high snow snowd precip_hour precip".split():
@@ -304,7 +306,6 @@ def main(argv):
         ]
     )
     for state in states:
-        table = f"alldata_{state}"
         cursor = pgconn.cursor()
         df, threaded = load_table(state, date)
         if df is None:
@@ -319,7 +320,7 @@ def main(argv):
             # We can not estimate snow at this time.
         if threaded:
             merge_threaded(df, threaded)
-        if not commit(cursor, table, df, date):
+        if not commit(cursor, f"alldata_{state}", df, date):
             return
         cursor.close()
         pgconn.commit()
