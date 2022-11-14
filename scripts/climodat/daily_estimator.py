@@ -7,17 +7,18 @@ RUN_NOON.sh - processes yesterday, running all sites
 RUN_0Z.sh - processes the current date and gets the prelim calday sites data.
 RUN_2AM.sh - processes yesterday, which should run all sites
 """
-# pylint: disable=invalid-unary-operand-type
-import sys
 import datetime
 
-import pandas as pd
+# pylint: disable=invalid-unary-operand-type
+import sys
+
 import numpy as np
+import pandas as pd
 from metpy.units import units
 from pyiem import iemre
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, get_dbconnstr, logger
 from pyiem.reference import TRACE_VALUE, state_names
+from pyiem.util import get_dbconn, get_dbconnstr, logger
 from sqlalchemy import text
 
 LOG = logger()
@@ -256,7 +257,7 @@ def merge_network_obs(df, network, ts):
     obs.loc[obs["high"] <= obs["low"], ("high", "low")] = np.nan
     # Tricky part here, if our present data table has data and is not
     # estimated, we don't want to over-write it!
-    df = df.join(obs, how="left", on="tracks", rsuffix="b").copy()
+    df = df.join(obs, how="left", on="tracks", rsuffix="b")
     # HACK the `high` and `precip` columns end up modifying the estimated
     # column, which fouls up subsequent logic
     for col in "low temp_hour high snow snowd precip_hour precip".split():
@@ -278,7 +279,7 @@ def merge_network_obs(df, network, ts):
         # suboptimal
         if col in ["high", "precip"]:
             df.loc[useidx, estcol] = False
-        df = df.drop(col + "b", axis=1)
+        df = df.drop(f"{col}b", axis=1)
     return df
 
 

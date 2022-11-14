@@ -8,6 +8,10 @@ fi
 cd util
 python make_archive_baseline.py
 
+cd ../iemre
+# need to run daily analysis for climodat estimator to then work
+python daily_analysis.py $(date +'%Y %m %d')
+
 cd ../climodat
 python sync_coop_updates.py
 python daily_estimator.py $(date +'%Y %m %d')

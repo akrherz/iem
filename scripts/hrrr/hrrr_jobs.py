@@ -1,8 +1,8 @@
 """What we need to do with HRRR"""
-import sys
-import time
 import datetime
 import subprocess
+import sys
+import time
 
 
 def main(argv):
@@ -19,7 +19,7 @@ def main(argv):
     for cmd in cmds:
         subprocess.call(cmd, shell=True)
         # allow for some time for LDM to move data
-        time.sleep(60)
+        time.sleep(120)
 
 
 if __name__ == "__main__":
