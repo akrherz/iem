@@ -8,7 +8,7 @@ $dvar = isset($_GET["dvar"]) ? $_GET["dvar"] : "rain_in_tot";
 
 $title = Array(
     "rain_in_tot" => "Rainfall (inches)", 
-	"dailyet" => "Potential Evapotrans. (in)");
+    "dailyet" => "Potential Evapotrans. (in)");
 if (!array_key_exists($dvar, $title)) die();
 
 $rs = pg_prepare($dbconn, "SELECT", "select station, sum({$dvar}_qc) as s,
@@ -112,8 +112,8 @@ if (strlen($direct) > 0) {
   header("Content-type: image/png");
   $img->saveImage();
 } else {
-	$url = $img->saveWebImage();
+    $url = $img->saveWebImage();
 ?>
-<img src="<?php echo $url; ?>" border=1>
-
-<?php } ?>
+<img src="<?php echo $url; ?>">
+<?php
+}

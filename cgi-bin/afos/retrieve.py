@@ -1,8 +1,8 @@
 """give me some AFOS data please."""
-from datetime import datetime, timezone
 import re
-from io import StringIO, BytesIO
 import zipfile
+from datetime import datetime, timezone
+from io import BytesIO, StringIO
 
 from paste.request import parse_formvars
 from pyiem.util import get_dbconn, html_escape
@@ -34,7 +34,7 @@ def pil_logic(s):
             for q in WARPIL:
                 res.append(f"{q}{pil[3:6]}")
         else:
-            res.append(f"{pil.strip():6s}")
+            res.append(f"{pil.strip():6.6s}")
     return res
 
 

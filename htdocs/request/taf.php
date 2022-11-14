@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 require_once "../../include/imagemaps.php";
@@ -13,8 +13,8 @@ $t->title = "Terminal Aerodome Forecast (TAF) Data Download";
 
 $bogus = 0;
 $y1select = yearSelect2(2021, date("Y"), "year1");
-$m1select = monthSelect(1, "month1"); 
-$d1select = daySelect2(1, "day1"); 
+$m1select = monthSelect(1, "month1");
+$d1select = daySelect2(1, "day1");
 
 $y2select = yearSelect2(2021, date("Y"), "year2");
 $m2select = monthSelect(date("m"), "month2");
@@ -22,11 +22,11 @@ $d2select = daySelect2(date("d"), "day2");
 
 $t->headextra = <<<EOM
 <style type="text/css">
-        #map {
-            width: 100%;
-            height: 450px;
-            border: 2px solid black;
-        }
+#map {
+    width: 100%;
+    height: 450px;
+    border: 2px solid black;
+}
 </style>
 EOM;
 $t->content = <<<EOF

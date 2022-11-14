@@ -1,16 +1,15 @@
 """Ingest the files kindly sent to me by poker"""
-import glob
-import re
 import datetime
-import subprocess
+import glob
 import os
+import re
+import subprocess
 
 import pytz
-from pyiem.util import noaaport_text, get_dbconn
 from pyiem.nws.product import TextProduct
+from pyiem.util import get_dbconn, noaaport_text
 
 BAD_CHARS = r"[^\n\r\001\003a-zA-Z0-9:\(\)\%\.,\s\*\-\?\|/><&$=\+\@]"
-DEBUG = False
 PGCONN = get_dbconn("afos")
 XREF_SOURCE = {
     "KABE": "KPHI",
@@ -465,12 +464,7 @@ def process(order):
                 bulletin = noaaport_text(bulletin)
                 prod = TextProduct(bulletin, utcnow=ts, parse_segments=False)
                 prod.source = XREF_SOURCE.get(prod.source, prod.source)
-            except Exception as exp:
-                if DEBUG:
-                    o = open("/tmp/bad/%s.txt" % (bad,), "w")
-                    o.write(bulletin)
-                    o.close()
-                    print("Parsing Failure %s" % (exp,))
+            except Exception:
                 bad += 1
                 continue
             if prod.valid < base or prod.valid > ceiling:
