@@ -124,7 +124,6 @@ def construct_urls(station,start_date,finish_date):
     endts = datetime.datetime(*finish_date)
 
     SERVICE = "http://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?"
-    MAX_ATTEMPTS = 6 
     service = SERVICE + "data=all&tz=Etc/UTC&format=comma&latlon=yes&"
 
     service += startts.strftime("year1=%Y&month1=%m&day1=%d&")
