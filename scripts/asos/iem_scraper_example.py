@@ -6,6 +6,9 @@ import json
 import time
 import datetime
 
+#allows user to import data into a pandas DataFrame.
+import pandas as pd 
+
 # Python 2 and 3: alternative 4
 try:
     from urllib.request import urlopen
@@ -102,6 +105,46 @@ def download_alldata():
             fh.write(data)
         now += interval
 
+def construct_urls(station,start_date,finish_date):
+  '''
+  This function allows you to construct a list of URLs for a list of stations and start dates.
+  This is also written using Python 3.6 and later, did not add a checker but one could be added in 
+  the future to ensure you're using a newer version of Python.
+  
+  Args: 
+    station: a list of strings containing the 4 letter airport/station code.
+    start_date: a tuple containing the calendar date of the start date. Format (year,month,day)
+    finish_date: a tuple containing the calendar date of the finish date. Format (year,month,day)
+    
+  Returns: 
+    list of urls.
+  '''
+  try: 
+    startts = datetime.datetime(*start_date)
+    endts = datetime.datetime(*finish_date)
+
+    SERVICE = "http://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?"
+    MAX_ATTEMPTS = 6 
+    service = SERVICE + "data=all&tz=Etc/UTC&format=comma&latlon=yes&"
+
+    service += startts.strftime("year1=%Y&month1=%m&day1=%d&")
+    service += endts.strftime("year2=%Y&month2=%m&day2=%d&")
+    return [f"{service}&station={station}" for station in station]
+  
+  except:
+    print(f'Bad data with: {station} - using {start_date} and {finish_date}')
+
+ def pull_metar(url):
+  '''
+  This function simply returns a Pandas DataFrame for a requested URL. 
+  
+  Args: 
+    url: takes a url string that contains a .csv file. 
+    
+  Returns: 
+    Pandas DataFrame.
+  '''
+  return pd.read_csv(url, skiprows=5)
 
 def main():
     """Our main method"""
@@ -134,3 +177,18 @@ def main():
 if __name__ == "__main__":
     download_alldata()
     # main()
+
+    
+'''
+Example use case of using the construct_urls and pull_metar functions. 
+
+def main():
+    start = (2021,5,1)
+    finish = (2021,11,30)
+    url = construct_urls(['KDSM'], start, finish)
+    metar = pull_metar(url[0]) 
+
+if __name__ == "__main__":
+    main()
+'''
+    
