@@ -134,14 +134,15 @@ def copy_iemre(ts, ds):
                 uwnd = hnc.variables["uwnd"][offset, :, :]
                 vwnd = hnc.variables["vwnd"][offset, :, :]
                 if uwnd.mask.all():
-                    # Don't complain about the last two timestamp being missing
-                    if offset < (offset2 - 2):
+                    # Quell logging when we are close to current clock time.
+                    now = sts + datetime.timedelta(hours=(offset - offset1))
+                    if now < (utc() - datetime.timedelta(hours=3)):
                         LOG.warning(
                             "No wind for offset: %s[%s-%s] %s",
                             offset,
                             offset1,
                             offset2,
-                            sts,
+                            now,
                         )
                     continue
                 windhours += 1
