@@ -6,8 +6,12 @@ import json
 import time
 import datetime
 
-#allows user to import data into a pandas DataFrame.
-import pandas as pd 
+"Libraries that follows should be within Python Standard Library" 
+import argparse
+import codecs
+import csv
+import datetime
+
 
 # Python 2 and 3: alternative 4
 try:
@@ -105,45 +109,70 @@ def download_alldata():
             fh.write(data)
         now += interval
 
-def construct_urls(station,start_date,finish_date):
-  '''
-  This function allows you to construct a list of URLs for a list of stations and start dates.
-  This is also written using Python 3.6 and later, did not add a checker but one could be added in 
-  the future to ensure you're using a newer version of Python.
-  
-  Args: 
-    station: a list of strings containing the 4 letter airport/station code.
-    start_date: a tuple containing the calendar date of the start date. Format (year,month,day)
-    finish_date: a tuple containing the calendar date of the finish date. Format (year,month,day)
+def construct_urls(station, start_date, finish_date):
+    '''
+    This function allows you to construct a list of URLs for a list of stations and start dates.
+    This is also written using Python 3.6 and later, did not add a checker but one could be added in
+    the future to ensure you're using a newer version of Python. 
     
-  Returns: 
-    list of urls.
-  '''
-  try: 
-    startts = datetime.datetime(*start_date)
-    endts = datetime.datetime(*finish_date)
+    A checker to see if airports are within IEM database could be added if needed.
 
-    SERVICE = "http://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?"
-    service = SERVICE + "data=all&tz=Etc/UTC&format=comma&latlon=yes&"
+    Args:
+    station: a list or tuple of strings containing the 4 letter airport/station code.
+    start_date: a datetime.datetime of the calendar date of the start date. Format (year,month,day)
+    finish_date: a datetime.datetime of the calendar date of the end date. Format (year,month,day)
 
-    service += startts.strftime("year1=%Y&month1=%m&day1=%d&")
-    service += endts.strftime("year2=%Y&month2=%m&day2=%d&")
-    return [f"{service}&station={station}" for station in station]
-  
-  except:
-    print(f'Bad data with: {station} - using {start_date} and {finish_date}')
+    Returns:
+      A list of urls.
+    '''
+    
+    if not isinstance(station, (list, tuple)):
+        raise TypeError(f'Station must be a {list} or {tuple}.')
+
+    if not all(isinstance(x, str) for x in station):
+        raise TypeError(f'Station elements must be a list all being {str}')
+
+    if start_date > datetime.datetime.now():
+        raise ValueError(f'Starting date {start_date} is in the future.')
+
+    if finish_date > datetime.datetime.now():
+        raise ValueError(f'End date {finish_date} is in the future.')
+
+    if start_date > finish_date:
+        raise ValueError(
+            f'Start date {start_date} is past your finish_date {finish_date}')
+
+    try:
+
+        SERVICE = "http://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?"
+        service = SERVICE + "data=all&tz=Etc/UTC&format=comma&latlon=yes&"
+
+        service += start_date.strftime("year1=%Y&month1=%m&day1=%d&")
+        service += finish_date.strftime("year2=%Y&month2=%m&day2=%d&")
+        return [f"{service}&station={station}" for station in station]
+
+    except Exception as exp:
+        print(f"""Bad data with: {station} - using {start_date}
+        and {finish_date}.\nException raised {exp}.""")
 
  def pull_metar(url):
-  '''
-  This function simply returns a Pandas DataFrame for a requested URL. 
-  
-  Args: 
-    url: takes a url string that contains a .csv file. 
-    
-  Returns: 
-    Pandas DataFrame.
-  '''
-  return pd.read_csv(url, skiprows=5)
+    '''
+    This function simply returns a Pandas DataFrame for a requested URL.
+
+    Args:
+      url: takes a url string that contains a .csv file.
+
+    Returns:
+      A list of tuples.
+    '''
+
+    response = urlopen(url)
+    csvfile = csv.reader(codecs.iterdecode(response, "utf-8"))
+    list_of_tuples = list(map(tuple, csvfile))
+
+    # If the user wants to strip the DEBUG info given, use the del command below.
+    # del list_of_tuples[0:5]
+    return list_of_tuples
 
 def main():
     """Our main method"""
@@ -182,10 +211,29 @@ if __name__ == "__main__":
 Example use case of using the construct_urls and pull_metar functions. 
 
 def main():
-    start = (2021,5,1)
-    finish = (2021,11,30)
-    url = construct_urls(['KDSM'], start, finish)
-    metar = pull_metar(url[0]) 
+    '''Takes start and finish dates from command line, then passes it to retrieve the metars.'''
+
+    # Takes in user input for the start and end dates.
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--start', nargs='+', type=int)
+    parser.add_argument('--finish', nargs='+', type=int)
+    args = parser.parse_args()
+    start = datetime.datetime(*args.start)
+    finish = datetime.datetime(*args.finish)
+
+    metar = []
+    # Can pull in from file, just needs to be List or Tuple.
+    station = ["CYOW", "CYYZ"]
+    
+    url = construct_urls(station, start, finish)
+
+    for i in url:
+        metar += pull_metar(i)
+
+    print(f"URL constructed is:\n{chr(10).join(url)} \n")
+    print(
+        f'CSV file in a list of tuples is:\n{chr(10).join(repr(x) for x in metar)}')
+
 
 if __name__ == "__main__":
     main()
