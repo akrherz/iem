@@ -211,7 +211,7 @@ if __name__ == "__main__":
 Example use case of using the construct_urls and pull_metar functions. 
 
 def main():
-    '''Takes start and finish dates from command line, then passes it to retrieve the metars.'''
+    """ Takes start and finish dates from command line, then passes it to retrieve the metars. """
 
     # Takes in user input for the start and end dates.
     parser = argparse.ArgumentParser()
