@@ -1,5 +1,5 @@
 <?php
-require "../../include/form.php";
+require "../../include/forms.php";
 /* Generate Cheezy PIL image
  * 
  */
