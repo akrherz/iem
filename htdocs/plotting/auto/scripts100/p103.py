@@ -86,9 +86,20 @@ def plotter(fdict):
     tt = f"{PDICT[season]} Steps {'Down' if season == 'fall' else 'Up'}"
     title = f"{ctx['_sname']} :: {tt} in Temperature"
     fig = figure(title=title, apctx=ctx)
-    ax = fig.subplots(3, 1)
+    x = 0.1
+    ax = [
+        fig.add_axes([x, 0.7, 0.88, 0.2]),
+        fig.add_axes([x, 0.4, 0.88, 0.2]),
+        fig.add_axes([x, 0.1, 0.88, 0.2]),
+    ]
     dyear = df2.groupby(["year"]).count()
-    ax[0].bar(dyear.index, dyear["level"], facecolor="tan", edgecolor="tan")
+    ax[0].bar(
+        dyear.index,
+        dyear["level"],
+        width=1.0,
+        facecolor="tan",
+        edgecolor="tan",
+    )
     ax[0].axhline(dyear["level"].mean(), lw=2)
     ax[0].set_ylabel(f"Yearly Events Avg: {dyear['level'].mean():.1f}")
     ax[0].set_xlim(dyear.index.min() - 1, dyear.index.max() + 1)

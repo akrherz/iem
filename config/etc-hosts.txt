@@ -14,10 +14,8 @@
 192.168.0.1      iem-director0.local
 192.168.0.2      iem-director1.local
 192.168.0.4      thumper-ah.local
-192.168.0.11     iem11.local
-192.168.0.12     iem12.local
+192.168.0.12     iem12.local lesync.local
 192.168.0.18     iem18.local
-192.168.0.19     iem19.local lesync.local
 
 # VM servers for webfarm nodes
 192.168.0.50     iemvm0.local 
