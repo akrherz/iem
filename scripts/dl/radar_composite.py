@@ -62,6 +62,10 @@ def runtime(ts, routes):
     for i in ["lot", "ict", "sd", "hun"]:
         save(i, f"{i}comp.png", f"{i}rad", ts, routes)
 
+    # SEL starts in about 2007
+    if ts.year < 2007:
+        return
+
     # Now, we query for watches.
     pcursor.execute(
         """
