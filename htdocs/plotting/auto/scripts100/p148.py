@@ -148,7 +148,7 @@ def get_context(fdict):
     if date == "exact":
         with get_sqlalchemy_conn("coop") as conn:
             ctx["df"] = pd.read_sql(
-                f"SELECT year, high, day, precip from {table} "
+                f"SELECT year, high, low, day, precip from {table} "
                 "WHERE station = %s and sday = %s ORDER by year ASC",
                 conn,
                 params=(station, thedate.strftime("%m%d")),
@@ -176,7 +176,7 @@ def get_context(fdict):
         with get_sqlalchemy_conn("coop") as conn:
             ctx["df"] = pd.read_sql(
                 text(
-                    f"SELECT year, high, day, precip from {table} "
+                    f"SELECT year, high, day, low, precip from {table} "
                     "WHERE station = :station and day in :days "
                     "ORDER by year ASC"
                 ),

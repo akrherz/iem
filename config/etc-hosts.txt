@@ -69,6 +69,7 @@
 
 ### iemdb PostgreSQL
 # iemdb1 metvm4-dc
+10.90.12.21 iemdb1.local
 10.90.12.21 iemdb-afos.local
 10.90.12.21 iemdb-asos1min.local
 10.90.12.21 iemdb-frost.local
@@ -95,6 +96,7 @@
 
 ### iemdb2 PostgreSQL
 # iemdb2 metvm2-dc
+10.90.12.22 iemdb2.local
 10.90.12.22 iemdb-coop.local
 10.90.12.22 iemdb-hads iemdb-hads.local
 10.90.12.22 iemdb-talltowers.local
@@ -107,6 +109,7 @@
 
 ### iemdb3 PostgreSQL
 # iemdb3 metvm6-dc
+10.90.12.23 iemdb3.local
 10.90.12.23 iemdb-asos.local
 10.90.12.23 iemdb-awos.local
 10.90.12.23 iemdb-hml.local
