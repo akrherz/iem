@@ -62,8 +62,8 @@ def plotter(fdict):
     months.extend(months2)
     title = (
         f"{ctx['_sname']}\n"
-        "Daily Temp Distributions by Month by Snow Cover"
-        f"[{df['year'].min()}-{df['year'].min()}]"
+        "Daily Temp Distributions by Month by Snow Cover "
+        f"({df['year'].min()}-{df['year'].max()})"
     )
 
     fig = figure(apctx=ctx, title=title)
