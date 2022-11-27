@@ -313,8 +313,7 @@ RewriteRule ^/search /search.py [QSA]
   </Directory>
 
   <Directory "/opt/iem/htdocs/current">
-	RewriteRule live.php(.*)$ live.py$1
-    RewriteRule live/(.*).jpg live.py?id=$1 [L]
+    RewriteRule live/(.*).jpg http://pyvbcam.local/live.py?id=$1 [P]
   </Directory>
 
   <Directory "/opt/iem/htdocs/other">
