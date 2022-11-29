@@ -94,6 +94,10 @@
                     "url": "/COOP/extremes.php"
                 },
                 {
+                    "title": "Daily Observations",
+                    "url": "/request/daily.phtml"
+                },
+                {
                     "title": "IEM Reanalysis",
                     "url": "/iemre/"
                 },

@@ -79,14 +79,14 @@ def get_data(network, sts, ets, stations, fmt):
         "min_dewpoint_f,precip_in,avg_wind_speed_kts,avg_wind_drct,"
         "min_rh,avg_rh,max_rh,climo_high_f,climo_low_f,climo_precip_in,"
         "snow_in,snowd_in,min_feel,avg_feel,max_feel,max_wind_speed_kts,"
-        "max_wind_gust_kts\n"
+        "max_wind_gust_kts,srad_mj\n"
     )
     if len(stations) == 1:
         stations.append("ZZZZZ")
     cursor.execute(
         """SELECT id, day, max_tmpf, min_tmpf, max_dwpf, min_dwpf,
         pday, avg_sknt, vector_avg_drct, min_rh, avg_rh, max_rh, snow,
-        snowd, min_feel, avg_feel, max_feel, max_sknt, max_gust
+        snowd, min_feel, avg_feel, max_feel, max_sknt, max_gust, srad_mj
         from summary s JOIN stations t
         on (t.iemid = s.iemid) WHERE
         s.day >= %s and s.day <= %s and t.network = %s and t.id in %s
@@ -100,7 +100,7 @@ def get_data(network, sts, ets, stations, fmt):
             f"{row[7]},{row[8]},{row[9]},{row[10]},{row[11]},"
             f"{climate[row[0]][key]['high']},{climate[row[0]][key]['low']},"
             f"{climate[row[0]][key]['precip']},{row[12]},{row[13]},{row[14]},"
-            f"{row[15]},{row[16]},{row[17]},{row[18]}\n"
+            f"{row[15]},{row[16]},{row[17]},{row[18]},{row[19]}\n"
         )
     if fmt == "json":
         sio.seek(0)

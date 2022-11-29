@@ -7,6 +7,10 @@ YYYY=$(date -u +'%Y')
 cd asos
 python compute_daily.py
 
+cd ../other
+python ot2archive.py $(date --date '1 day ago' +'%Y %m %d')
+python update_daily_srad.py $(date --date '1 day ago' +'%Y %m %d')
+
 # Need this done so that IEMRE daily grids are there for DEP
 cd ../iemre
 python daily_analysis.py $(date --date '1 day ago' +'%Y %m %d')

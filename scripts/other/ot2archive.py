@@ -1,6 +1,6 @@
 """
 Dump iem database of OT data to archive
-Runs at 00 and 12 UTC
+Runs at midnight and 12 UTC for previous day
 """
 import datetime
 import sys
@@ -65,8 +65,8 @@ def dowork(ts, ts2):
 
 
 def main(argv):
-    """Run for a given UTC date"""
-    ts = utc(int(argv[1]), int(argv[2]), int(argv[3]))
+    """Run for a given 6z to 6z period."""
+    ts = utc(int(argv[1]), int(argv[2]), int(argv[3]), 6)
     ts2 = ts + datetime.timedelta(hours=24)
     dowork(ts, ts2)
 

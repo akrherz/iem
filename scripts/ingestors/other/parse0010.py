@@ -27,7 +27,8 @@ def main():
         LOG.debug("missing %s", fn)
         sys.exit(0)
 
-    lines = open(fn, "r").readlines()
+    with open(fn, encoding="ascii") as fh:
+        lines = fh.readlines()
     lastline = lines[-1].strip()
     tokens = re.split(r"[\s+]+", lastline)
     if len(tokens) != 20:

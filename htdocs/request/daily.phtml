@@ -46,12 +46,12 @@ $t->content = <<<EOF
     "daily" data are effectively the once-daily observations.</p.
 
 <p>Select network to download from:<br />
-<form target="_blank" name="network" action="daily.phtml">
-{$nselect}		
+<form name="network" action="daily.phtml">
+{$nselect}
 <input type="submit" value="Switch Network">
-        </form>
+</form>
 
-<form name="iemss" action="/cgi-bin/request/daily.py">
+<form target="_blank" name="iemss" action="/cgi-bin/request/daily.py">
 <input type="hidden" value="{$network}" name="network" />
 
 <p>&nbsp;</p>
@@ -96,7 +96,7 @@ $t->content = <<<EOF
  <dt>avg_wind_drct</dt><dd>Average Wind Direction [deg]</dd>
  <dt>min_rh</dt><dd>Minimum Relative Humidity [%]</dd>
  <dt>avg_rh</dt><dd>Average Relative Humidity [%]: computed by time averaging
-            the available reports, it is not average of the daily max/min.</dd>
+  the available reports, it is not average of the daily max/min.</dd>
  <dt>max_rh</dt><dd>Maximum Relative Humidity [%]</dd>
  <dt>climo_high_f</dt><dd>NCEI 1991-2020 Daily High Temperature Climatology [F]</dd>
  <dt>climo_low_f</dt><dd>NCEI 1991-2020 Daily Low Temperature Climatology [F]</dd>
@@ -112,11 +112,12 @@ $t->content = <<<EOF
  temperature.  The value is always at least the air temperature.</dd>
  <dt>max_wind_speed_kts</dt><dd>Maximum sustained wind speed in knots.</dd>
  <dt>max_wind_gust_kts</dt><dd>Maximum wind gust in knots.</dd>
-            </dl>
+ <dt>srad_mj</dt><dd>Daily Solar Radiation MJ/m2 (when available).</dd> 
+</dl>
 
 </div></div>
             <input type="submit" value="Request Data">
 </form>
 
 EOF;
-$t->render('single.phtml');
+$t->render('full.phtml');
