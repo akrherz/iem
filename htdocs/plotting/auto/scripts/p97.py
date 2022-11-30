@@ -10,11 +10,13 @@ from pyiem.util import (
     get_autoplot_context,
     get_dbconn,
     get_sqlalchemy_conn,
+    logger,
 )
 from pyiem.exceptions import NoDataFound
 from pyiem.reference import wfo_bounds
 from sqlalchemy import text
 
+LOG = logger()
 PDICT = {
     "sector": "Plot by Sector / State",
     "wfo": "Plot by NWS Weather Forecast Office (WFO)",
@@ -355,7 +357,7 @@ def get_data(ctx):
                 from obs o JOIN climo c ON
                 (o.station = c.station and o.sday = c.sday)),
             agg as (
-                SELECT station,
+                SELECT station, count(*) as obs,
                 avg(avg_temp) as avg_temp,
                 sum(precip_diff) as precip_depart,
                 sum(precip) / greatest(sum(cprecip), 0.0001) * 100.
@@ -407,12 +409,13 @@ def get_data(ctx):
             avg_low_temp,
             cdd65_sum, hdd65_sum, cdd65_depart, hdd65_depart,
             ST_x(t.geom) as lon, ST_y(t.geom) as lat,
-            t.geom
+            t.geom, obs
             from agg d JOIN stations t on (d.station = t.id)
             WHERE t.network ~* 'CLIMATE' and t.online {wfo_limiter}
             """
         )
         with get_sqlalchemy_conn("coop") as conn:
+            LOG.info("Starting %s table query", table)
             df = gpd.read_postgis(
                 sql,
                 conn,
@@ -420,6 +423,7 @@ def get_data(ctx):
                 index_col="station",
                 geom_col="geom",
             )
+            LOG.info("Finshing %s table query", table)
         if ctx["gddbase"] not in GDD_KNOWN_BASES or ctx["gddceil"] != 86:
             # We need to compute our own GDD Climatology, Le Sigh
             df = replace_gdd_climo(ctx, df, table, date1, date2)
@@ -431,6 +435,8 @@ def get_data(ctx):
     df = df[~pd.isna(df[ctx["var"]])]
     if df.empty:
         raise NoDataFound("All data found to be missing.")
+    # Require 90% quorum
+    df = df[df["obs"] > (df["obs"].max() * 0.9)]
     return df.reindex(df[ctx["var"]].abs().sort_values(ascending=False).index)
 
 
@@ -522,8 +528,9 @@ def plotter(fdict):
         if varname == "gdd_depart":
             fmt = "%.0f"
     elif varname in ["precip_sum", "snow_sum"]:
-        rng = df[varname].abs().describe(percentiles=[0.95])["95%"]
-        clevels = pretty_bins(0, rng)
+        ptiles = df[varname].abs().describe(percentiles=[0.05, 0.95])
+        minval = 0 if ptiles["5%"] < 1 else ptiles["5%"]
+        clevels = pretty_bins(minval, ptiles["95%"])
         extend = "max"
     elif varname.endswith("_percent"):
         clevels = np.array([10, 25, 50, 75, 100, 125, 150, 175, 200])
@@ -572,11 +579,11 @@ if __name__ == "__main__":
             "wfo": "DMX",
             "d": "sector",
             "sector": "IA",
-            "var": "gdd_percent",
+            "var": "precip_sum",
             "gddbase": 50,
             "gddceil": 86,
-            "date1": "2022-04-01",
-            "date2": "2022-04-30",
+            "date1": "1950-01-01",
+            "date2": "1955-12-31",
             "p": "contour",
             "cmap": "RdYlBu",
             "c": "yes",
