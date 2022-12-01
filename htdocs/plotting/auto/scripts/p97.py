@@ -104,6 +104,11 @@ def get_description():
     data for a period of your choice.  Spatially aggregated values like those
     for climate districts and statewide averages are not included.  The IEM
     computed climatologies are based on simple daily averages of observations.
+
+    <p><strong>Change 1 Dec 2022:</strong> When you select a plot variable that
+    does need climatology, the resulting download does not contain those
+    climatology fields as they are computationally expensive to compute
+    on-the-fly.  This was done as an optimization to speed up the app.
     """
     today = datetime.datetime.today() - datetime.timedelta(days=1)
     desc["arguments"] = [
@@ -328,92 +333,136 @@ def get_data(ctx):
         "cull": tuple(cull),
     }
     for table in tables:
-        sql = text(
-            f"""
-            WITH obs as (
-                SELECT station, gddxx(:gddbase, :gddceil, high, low) as gdd,
-                cdd(high, low, 65) as cdd65, hdd(high, low, 65) as hdd65,
-                case when high > 86 then high - 86 else 0 end as sdd86,
-                sday, high, low, precip, snow,
-                (high + low)/2. as avg_temp
-                from {table} WHERE
-                day >= :date1 and day <= :date2 and
-                substr(station, 3, 1) != 'C' and
-                substr(station, 3, 4) != '0000' and station not in :cull),
-            climo as ({build_climate_sql(ctx, table)}),
-            combo as (
-                SELECT o.station, o.precip - c.precip as precip_diff,
-                o.precip as precip, c.precip as cprecip,
-                o.avg_temp, o.cdd65, o.hdd65,
-                o.high, o.low, o.gdd, c.gdd as cgdd,
-                o.sdd86, c.sdd86 as csdd86,
-                o.gdd - c.gdd as gdd_diff,
-                o.cdd65 - c.cdd65 as cdd65_diff,
-                o.hdd65 - c.hdd65 as hdd65_diff,
-                o.sdd86 - c.sdd86 as sdd86_diff,
-                o.avg_temp - (c.high + c.low)/2. as temp_diff,
-                o.snow as snow, c.snow as csnow,
-                o.snow - c.snow as snow_diff
-                from obs o JOIN climo c ON
-                (o.station = c.station and o.sday = c.sday)),
-            agg as (
-                SELECT station, count(*) as obs,
-                avg(avg_temp) as avg_temp,
-                sum(precip_diff) as precip_depart,
-                sum(precip) / greatest(sum(cprecip), 0.0001) * 100.
-                    as precip_percent,
-                sum(snow_diff) as snow_depart,
-                sum(snow) / greatest(sum(csnow), 0.0001) * 100.
-                    as snow_percent,
-                sum(precip) as precip, sum(cprecip) as cprecip,
-                sum(snow) as snow, sum(csnow) as csnow,
-                avg(high) as avg_high_temp,
-                avg(low) as avg_low_temp,
-                max(high) as max_high_temp,
-                min(low) as min_low_temp, sum(gdd_diff) as gdd_depart,
-                sum(gdd) / greatest(1, sum(cgdd)) * 100. as gdd_percent,
-                sum(sdd86_diff) as sdd86_depart,
-                sum(sdd86) / greatest(1, sum(csdd86)) * 100. as sdd86_percent,
-                avg(temp_diff) as avg_temp_depart, sum(gdd) as gdd_sum,
-                sum(cgdd) as cgdd_sum,
-                sum(sdd86) as sdd86_sum,
-                sum(csdd86) as csdd86_sum,
-                sum(cdd65) as cdd65_sum,
-                sum(hdd65) as hdd65_sum,
-                sum(cdd65_diff) as cdd65_depart,
-                sum(hdd65_diff) as hdd65_depart
-                from combo GROUP by station)
+        # Only compute expensive climatology, when necessary
+        if ctx["var"].endswith("_depart") or ctx["var"].endswith("_percent"):
+            sql = text(
+                f"""
+                WITH obs as (
+                    SELECT station,
+                    gddxx(:gddbase, :gddceil, high, low) as gdd,
+                    cdd(high, low, 65) as cdd65, hdd(high, low, 65) as hdd65,
+                    case when high > 86 then high - 86 else 0 end as sdd86,
+                    sday, high, low, precip, snow,
+                    (high + low)/2. as avg_temp
+                    from {table} WHERE
+                    day >= :date1 and day <= :date2 and
+                    substr(station, 3, 1) != 'C' and
+                    substr(station, 3, 4) != '0000' and station not in :cull),
+                climo as ({build_climate_sql(ctx, table)}),
+                combo as (
+                    SELECT o.station, o.precip - c.precip as precip_diff,
+                    o.precip as precip, c.precip as cprecip,
+                    o.avg_temp, o.cdd65, o.hdd65,
+                    o.high, o.low, o.gdd, c.gdd as cgdd,
+                    o.sdd86, c.sdd86 as csdd86,
+                    o.gdd - c.gdd as gdd_diff,
+                    o.cdd65 - c.cdd65 as cdd65_diff,
+                    o.hdd65 - c.hdd65 as hdd65_diff,
+                    o.sdd86 - c.sdd86 as sdd86_diff,
+                    o.avg_temp - (c.high + c.low)/2. as temp_diff,
+                    o.snow as snow, c.snow as csnow,
+                    o.snow - c.snow as snow_diff
+                    from obs o JOIN climo c ON
+                    (o.station = c.station and o.sday = c.sday)),
+                agg as (
+                    SELECT station, count(*) as obs,
+                    avg(avg_temp) as avg_temp,
+                    sum(precip_diff) as precip_depart,
+                    sum(precip) / greatest(sum(cprecip), 0.0001) * 100.
+                        as precip_percent,
+                    sum(snow_diff) as snow_depart,
+                    sum(snow) / greatest(sum(csnow), 0.0001) * 100.
+                        as snow_percent,
+                    sum(precip) as precip, sum(cprecip) as cprecip,
+                    sum(snow) as snow, sum(csnow) as csnow,
+                    avg(high) as avg_high_temp,
+                    avg(low) as avg_low_temp,
+                    max(high) as max_high_temp,
+                    min(low) as min_low_temp, sum(gdd_diff) as gdd_depart,
+                    sum(gdd) / greatest(1, sum(cgdd)) * 100. as gdd_percent,
+                    sum(sdd86_diff) as sdd86_depart,
+                    sum(sdd86) / greatest(1, sum(csdd86)) * 100.
+                        as sdd86_percent,
+                    avg(temp_diff) as avg_temp_depart, sum(gdd) as gdd_sum,
+                    sum(cgdd) as cgdd_sum,
+                    sum(sdd86) as sdd86_sum,
+                    sum(csdd86) as csdd86_sum,
+                    sum(cdd65) as cdd65_sum,
+                    sum(hdd65) as hdd65_sum,
+                    sum(cdd65_diff) as cdd65_depart,
+                    sum(hdd65_diff) as hdd65_depart
+                    from combo GROUP by station)
 
-            SELECT d.station, t.name, t.wfo,
-            avg_temp,
-            precip as precip_sum,
-            cprecip as cprecip_sum,
-            precip_depart,
-            precip_percent,
-            snow as snow_sum,
-            csnow as csnow_sum,
-            snow_depart,
-            snow_percent,
-            min_low_temp,
-            avg_temp_depart,
-            gdd_depart,
-            gdd_sum,
-            gdd_percent,
-            cgdd_sum,
-            sdd86_depart,
-            sdd86_sum,
-            sdd86_percent,
-            csdd86_sum,
-            max_high_temp,
-            avg_high_temp,
-            avg_low_temp,
-            cdd65_sum, hdd65_sum, cdd65_depart, hdd65_depart,
-            ST_x(t.geom) as lon, ST_y(t.geom) as lat,
-            t.geom, obs
-            from agg d JOIN stations t on (d.station = t.id)
-            WHERE t.network ~* 'CLIMATE' and t.online {wfo_limiter}
-            """
-        )
+                SELECT d.station, t.name, t.wfo,
+                avg_temp,
+                precip as precip_sum,
+                cprecip as cprecip_sum,
+                precip_depart,
+                precip_percent,
+                snow as snow_sum,
+                csnow as csnow_sum,
+                snow_depart,
+                snow_percent,
+                min_low_temp,
+                avg_temp_depart,
+                gdd_depart,
+                gdd_sum,
+                gdd_percent,
+                cgdd_sum,
+                sdd86_depart,
+                sdd86_sum,
+                sdd86_percent,
+                csdd86_sum,
+                max_high_temp,
+                avg_high_temp,
+                avg_low_temp,
+                cdd65_sum, hdd65_sum, cdd65_depart, hdd65_depart,
+                ST_x(t.geom) as lon, ST_y(t.geom) as lat,
+                t.geom, obs
+                from agg d JOIN stations t on (d.station = t.id)
+                WHERE t.network ~* 'CLIMATE' and t.online {wfo_limiter}
+                """
+            )
+        else:
+            sql = text(
+                f"""
+                WITH obs as (
+                    SELECT station, count(*) as obs,
+                    sum(gddxx(:gddbase, :gddceil, high, low)) as gdd_sum,
+                    sum(cdd(high, low, 65)) as cdd65_sum,
+                    sum(hdd(high, low, 65)) as hdd65_sum,
+                    sum(case when high > 86 then high - 86 else 0 end)
+                        as sdd86_sum,
+                    avg(high) as avg_high_temp,
+                    max(high) as max_high_temp,
+                    min(low) as min_low_temp,
+                    avg(low) as avg_low_temp,
+                    sum(precip) as precip_sum,
+                    sum(snow) as snow_sum,
+                    avg((high + low)/2.) as avg_temp
+                    from {table} WHERE
+                    day >= :date1 and day <= :date2 and
+                    substr(station, 3, 1) != 'C' and
+                    substr(station, 3, 4) != '0000' and station not in :cull
+                    GROUP by station)
+
+                SELECT d.station, t.name, t.wfo,
+                avg_temp,
+                precip_sum,
+                snow_sum,
+                min_low_temp,
+                gdd_sum,
+                sdd86_sum,
+                max_high_temp,
+                avg_high_temp,
+                avg_low_temp,
+                cdd65_sum, hdd65_sum,
+                ST_x(t.geom) as lon, ST_y(t.geom) as lat,
+                t.geom, obs
+                from obs d JOIN stations t on (d.station = t.id)
+                WHERE t.network ~* 'CLIMATE' and t.online {wfo_limiter}
+                """
+            )
         with get_sqlalchemy_conn("coop") as conn:
             LOG.info("Starting %s table query", table)
             df = gpd.read_postgis(
