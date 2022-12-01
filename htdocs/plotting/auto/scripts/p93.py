@@ -1,4 +1,4 @@
-"""hourly histogram"""
+"""hourly histogram."""
 import datetime
 
 import numpy as np
@@ -14,7 +14,9 @@ PDICT = {
 }
 VDICT = {
     "tmpf": "Air Temperature",
+    "tmpf_cold": "Air Temperature :: Cold Values",
     "dwpf": "Dew Point Temperature",
+    "dwpf_cold": "Dew Point Temperature :: Cold Values",
     "heatindex": "Heat Index",
     "windchill": "Wind Chill Index",
     "gust": "Wind Gust",
@@ -122,11 +124,11 @@ def get_doylimit(ytd, varname):
     """Get the SQL limiter"""
     if ytd == "no":
         return ""
-    if varname != "windchill":
+    if varname not in ["windchill", "tmpf_cold", "dwpf_cold"]:
         return "and extract(doy from valid) < extract(doy from 'TODAY'::date)"
     if datetime.date.today().month > 7:
         res = "and extract(doy from valid) < extract(doy from 'TODAY'::date) "
-        if varname == "windchill":
+        if varname in ["windchill", "tmpf_cold", "dwpf_cold"]:
             res += "and extract(month from valid) > 6"
         return res
 
@@ -147,16 +149,13 @@ def plotter(fdict):
     varname = ctx["var"]
     inc = ctx["inc"]
     doylimiter = get_doylimit(ytd, varname)
-    tmpflimit = "and tmpf >= 50" if varname != "windchill" else "and tmpf < 50"
-    if varname not in ["windchill", "heatindex"]:
-        tmpflimit = ""
     with get_sqlalchemy_conn("asos") as conn:
         df = pd.read_sql(
             f"""
             SELECT valid at time zone 'UTC' as valid,
             tmpf::int as tmpf, gust * 1.15 as gust,
             dwpf::int as dwpf, feel
-            from alldata WHERE station = %s {tmpflimit}
+            from alldata WHERE station = %s
             and dwpf <= tmpf and valid > %s and valid < %s
             and report_type = 3 {doylimiter}""",
             conn,
@@ -174,6 +173,7 @@ def plotter(fdict):
     title2 = VDICT[varname]
     compop = np.greater_equal
     inctitle = ""
+    legloc = 1
     if varname == "heatindex":
         df[varname] = df["feel"]
         inctitle = " [All Obs Included]"
@@ -184,19 +184,23 @@ def plotter(fdict):
             df2 = df
         maxval = int(df2["feel"].max() + 1)
         LEVELS[varname] = np.arange(80, maxval)
-    elif varname == "windchill":
-        df[varname] = df["feel"]
+    elif varname in ["windchill", "tmpf_cold", "dwpf_cold"]:
+        legloc = 2
+        if varname == "windchill":
+            df[varname] = df["feel"]
+        else:
+            df[varname] = df[varname[:4]]
         compop = np.less_equal
         df["year"] = df["valid"].apply(
             lambda x: (x.year - 1) if x.month < 7 else x.year
         )
         inctitle = " [All Obs Included]"
-        if inc == "no":
+        if varname == "windchill" and inc == "no":
             df2 = df[df["feel"] < df["tmpf"]]
             inctitle = " [Only Additive]"
         else:
             df2 = df
-        minval = int(df2["feel"].min() - 1)
+        minval = int(df2[varname].min() - 1)
         LEVELS[varname] = np.arange(minval, minval + 51)
     elif varname == "gust":
         pass
@@ -210,15 +214,18 @@ def plotter(fdict):
     x = []
     y = []
     y2 = []
-    title = f"till {datetime.date.today():%-d %b}"
+    title = ""
+    if varname in ["windchill", "tmpf_cold", "dwpf_cold"]:
+        title = "1 Jul "
+    title = f"{title}till {datetime.date.today():%-d %b}"
     title = "Entire Year" if ytd == "no" else title
     title = (
         f"{ctx['_sname']} ({minyear}-{maxyear})\n"
-        f"{title2} Histogram ({title}){inctitle}"
+        f"{title2.split('::')[0]} Histogram ({title}){inctitle}"
     )
     fig, ax = figure_axes(title=title, apctx=ctx)
-    ax.set_position([0.06, 0.1, 0.64, 0.8])
-    yloc = 1.0
+    ax.set_position([0.08, 0.1, 0.62, 0.8])
+    yloc = 0.95
     xloc = 1.13
     yrlabel = (
         f"{highlightyear}"
@@ -253,7 +260,7 @@ def plotter(fdict):
                 transform=ax.transAxes,
                 color="r",
             )
-            yloc -= 0.04
+            yloc -= 0.035
     ax.text(xloc, yloc, f"n={len(df2.index)}", transform=ax.transAxes)
     for x0, y0, y02 in zip(x, y, y2):
         ax.plot([x0, x0], [y0, y02], color="k")
@@ -274,8 +281,8 @@ def plotter(fdict):
     ax2.set_ylabel("Expressed in 24 Hour Days")
     ax.set_ylabel("Hours Per Year")
     unit = r"$^\circ$F" if varname != "gust" else "MPH"
-    ax.set_xlabel(f"{VDICT[varname]} {unit}")
-    ax.legend(loc=(2 if varname == "windchill" else 1), scatterpoints=1)
+    ax.set_xlabel(f"{VDICT[varname].split('::')[0]} {unit}")
+    ax.legend(loc=legloc, scatterpoints=1)
     return fig, rdf
 
 
