@@ -57,7 +57,7 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT"
     "wms_srs"   "EPSG:4326 EPSG:900913 EPSG:102100 EPSG:3857"
     "wms_extent" "-171 15 -66 70"
-    "wms_timeextent" "2011-02-16/2022-12-31/PT5M"
+    "wms_timeextent" "2011-02-16/2023-12-31/PT5M"
     "wms_timeitem" "datetime"
     "wms_timedefault" "2011-02-21T19:30:00Z"
   END
@@ -79,7 +79,7 @@ LAYER
     "wms_title" "NEXRAD BASE REFLECT"
     "wms_srs"   "EPSG:4326 EPSG:900913 EPSG:102100 EPSG:3857"
     "wms_extent" "-171 15 -66 70"
-    "wms_timeextent" "2011-02-16/2022-12-31/PT5M"
+    "wms_timeextent" "2011-02-16/2023-12-31/PT5M"
     "wms_timeitem" "datetime"
     "wms_timedefault" "2011-02-21T19:30:00Z"
   END
