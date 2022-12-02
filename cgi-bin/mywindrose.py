@@ -179,6 +179,7 @@ def application(environ, start_response):
         level=form.get("level", None),
         limit_by_doy=(form.get("limit_by_doy") == "1"),
         bins=bins,
+        plot_convention=form.get("conv", "from"),
     )
     if "justdata" in form:
         # We want text

@@ -46,6 +46,7 @@ $units = isset($_GET["units"]) ? xssafe($_GET["units"]) : "mph";
 $nsector = get_int404('nsector', 36);
 $level = isset($_GET["level"]) ? floatval($_GET['level']) : 1000;
 $fmt = isset($_GET["fmt"]) ? xssafe($_GET["fmt"]) : 'png';
+$conv = isset($_GET["conv"]) ? xssafe($_GET["conv"]) : "from";
 $dpi = get_int404("dpi", 100);
 $bins = array(2, 5, 7, 10, 15, 20);
 function conv($val){
@@ -65,7 +66,7 @@ if (isset($_GET["hour1"])) {
         "month1=$month1&amp;month2=$month2&amp;year1=$year1&amp;year2=" .
         "$year2&amp;hour1=$hour1&amp;" .
         "hour2=$hour2&amp;minute1=$minute1&amp;minute2=$minute2&amp;" .
-        "units=$units&amp;fmt=$fmt&amp;dpi=$dpi";
+        "units=$units&amp;fmt=$fmt&amp;dpi=$dpi&amp;conv=$conv";
     if (isset($_GET["setbins"])) {
         $rose_uri .= sprintf("&amp;bins=%s", implode(",", $bins));
     }
@@ -236,6 +237,16 @@ $(document).ready(function(){
     });
 });
 EOF;
+
+$content .= "<br /><strong>Bar Convention of Plot:</strong>";
+$content .= '<br /><input type="radio" id="met" name="conv" value="from"';
+$content .= ($conv == "from") ? ' checked="checked"' : "";
+$content .= '><label for="met"> Meteorology: Bars point in direction wind is '.
+    'blowing from.</label>';
+$content .= '<br /><input type="radio" id="eng" name="conv" value="to"';
+$content .= ($conv == "to") ? ' checked="checked"' : "";
+$content .= '><label for="eng"> Engineering: Bars point in direction wind is '.
+    'blowing toward.</label>';
 
 // Pick between display units
 $content .= '<br />Display Units: ';
