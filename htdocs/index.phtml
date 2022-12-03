@@ -80,7 +80,7 @@ $news = "";
 for ($i=0; $row = pg_fetch_array($rs); $i++){
     $ts = new DateTime(substr($row["entered"],0,16));
     if ($ts > $today) $sts = $ts->format("g:i A");
-    $sts = $ts->format("n M g:i A");
+    $sts = $ts->format("j M g:i A");
     $news .= sprintf("<p><a href=\"/onsite/news.phtml?id=%s\">%s</a>".
         "<br /><i>Posted:</i> %s</li>\n", $row["id"], $row["title"], $sts);
 }
