@@ -40,22 +40,23 @@ if (intval($frames) > 10000 || intval($frames) < 1) $frames = 13;
 /** Acceptable interval is between 5 and 60 */
 if (intval($interval) > 60 || intval($interval) < 5) $interval = 5;
 
+$jan2007 = mktime(0, 0, 0, 1, 1, 2007);
 $astart = array(
     "comprad" => mktime(0, 0, 0, 1, 1, 1995),
     "usrad" => mktime(0, 0, 0, 1, 1, 1995),
     "ictrad" => mktime(0, 0, 0, 1, 1, 1995),
     "hunrad" => mktime(0, 0, 0, 1, 1, 1995),
     "sdrad" => mktime(0, 0, 0, 1, 1, 1995),
-    "sel0rad" => mktime(13, 35, 0, 11, 2, 2004),
-    "sel1rad" => mktime(13, 35, 0, 11, 2, 2004),
-    "sel2rad" => mktime(13, 35, 0, 11, 2, 2004),
-    "sel3rad" => mktime(13, 35, 0, 11, 2, 2004),
-    "sel4rad" => mktime(13, 35, 0, 11, 2, 2004),
-    "sel5rad" => mktime(13, 35, 0, 11, 2, 2004),
-    "sel6rad" => mktime(13, 35, 0, 11, 2, 2004),
-    "sel7rad" => mktime(13, 35, 0, 11, 2, 2004),
-    "sel8rad" => mktime(13, 35, 0, 11, 2, 2004),
-    "sel9rad" => mktime(13, 35, 0, 11, 2, 2004),
+    "sel0rad" => $jan2007,
+    "sel1rad" => $jan2007,
+    "sel2rad" => $jan2007,
+    "sel3rad" => $jan2007,
+    "sel4rad" => $jan2007,
+    "sel5rad" => $jan2007,
+    "sel6rad" => $jan2007,
+    "sel7rad" => $jan2007,
+    "sel8rad" => $jan2007,
+    "sel9rad" => $jan2007,
     "lotrad" => mktime(0, 0, 0, 1, 1, 1995)
 );
 
