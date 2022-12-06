@@ -76,11 +76,25 @@ def is_realtime(gts):
     return utcnow.strftime("%Y%m%d%H") == gts.strftime("%Y%m%d%H")
 
 
+def need_not_run(gts, hr) -> bool:
+    """Do we need to run for this combination?"""
+    testfn = (
+        f"/mesonet/ARCHIVE/data/{gts:%Y/%m/%d}/GIS/mrms/p{hr}h_"
+        f"{gts:%Y%m%d%H%M}.png"
+    )
+    return os.path.isfile(testfn)
+
+
 def doit(gts, hr):
     """
     Actually generate a PNG file from the 8 NMQ tiles
     """
     irealtime = is_realtime(gts)
+    if not irealtime:
+        if need_not_run(gts, hr):
+            LOG.info("Skipping as archive file exists")
+            return
+        LOG.warning("Reprocessing %s[%s] due to missing archive.", gts, hr)
     routes = "ac" if irealtime else "a"
     sts = gts - datetime.timedelta(hours=hr)
     times = [gts]
@@ -99,7 +113,7 @@ def doit(gts, hr):
     for now in times:
         gribfn = mrms.fetch(mproduct, now)
         if gribfn is None:
-            LOG.info(
+            LOG.warning(
                 "%s MISSING %s\n  %s\n",
                 hr,
                 now.strftime("%Y-%m-%dT%H:%MZ"),
@@ -157,93 +171,55 @@ def doit(gts, hr):
 
     if irealtime:
         pqstr = (
-            "pqinsert -i -p 'plot c %s "
-            "gis/images/4326/mrms/p%ih_nn.wld "
-            "GIS/mrms/p%ih_%s.wld wld' "
-            "%s_nn.wld"
-            ""
-        ) % (
-            tstr,
-            hr,
-            hr,
-            tstr,
-            tmpfn,
+            f"pqinsert -i -p 'plot c {tstr} "
+            f"gis/images/4326/mrms/p{hr}h_nn.wld "
+            f"GIS/mrms/p{hr}h_{tstr}.wld wld' "
+            f"{tmpfn}_nn.wld"
         )
         subprocess.call(pqstr, shell=True)
 
     # Now we inject into LDM
     pqstr = (
-        "pqinsert -i -p 'plot %s %s "
-        "gis/images/4326/mrms/p%ih.png GIS/mrms/p%ih_%s.png png' "
-        "%s.png"
-        ""
-    ) % (
-        routes,
-        tstr,
-        hr,
-        hr,
-        tstr,
-        tmpfn,
+        f"pqinsert -i -p 'plot {routes} {tstr} "
+        f"gis/images/4326/mrms/p{hr}h.png GIS/mrms/p{hr}h_{tstr}.png png' "
+        f"{tmpfn}.png"
     )
     subprocess.call(pqstr, shell=True)
 
     if irealtime:
         # Now we inject into LDM
         pqstr = (
-            "pqinsert -i -p 'plot c %s "
-            "gis/images/4326/mrms/p%ih_nn.png "
-            "GIS/mrms/p%ih_%s.png png' "
-            "%s_nn.png"
-        ) % (
-            tstr,
-            hr,
-            hr,
-            tstr,
-            tmpfn,
+            f"pqinsert -i -p 'plot c {tstr} "
+            f"gis/images/4326/mrms/p{hr}h_nn.png "
+            f"GIS/mrms/p{hr}h_{tstr}.png png' {tmpfn}_nn.png"
         )
         subprocess.call(pqstr, shell=True)
 
-    if irealtime:
         # Create 3857 image
         cmd = (
             "gdalwarp -s_srs EPSG:4326 -t_srs EPSG:3857 -q -of GTiff "
-            "-tr 1000.0 1000.0 %s.png %s.tif"
-        ) % (tmpfn, tmpfn)
+            f"-tr 1000.0 1000.0 {tmpfn}.png {tmpfn}.tif"
+        )
         subprocess.call(cmd, shell=True)
 
         cmd = (
             "gdalwarp -s_srs EPSG:4326 -t_srs EPSG:3857 -q -of GTiff "
-            "-tr 1000.0 1000.0 %s_nn.png %s_nn.tif"
-        ) % (tmpfn, tmpfn)
+            f"-tr 1000.0 1000.0 {tmpfn}_nn.png {tmpfn}_nn.tif"
+        )
         subprocess.call(cmd, shell=True)
 
         # Insert into LDM
         pqstr = (
-            "pqinsert -i -p 'plot c %s "
-            "gis/images/3857/mrms/p%ih.tif "
-            "GIS/mrms/p%ih_%s.tif tif' "
-            "%s.tif"
-            ""
-        ) % (
-            tstr,
-            hr,
-            hr,
-            tstr,
-            tmpfn,
+            f"pqinsert -i -p 'plot c {tstr} "
+            f"gis/images/3857/mrms/p{hr}h.tif "
+            f"GIS/mrms/p{hr}h_{tstr}.tif tif' {tmpfn}.tif"
         )
         subprocess.call(pqstr, shell=True)
 
         pqstr = (
-            "pqinsert -i -p 'plot c %s "
-            "gis/images/3857/mrms/p%ih_nn.tif "
-            "GIS/mrms/p%ih_%s.tif tif' "
-            "%s_nn.tif"
-        ) % (
-            tstr,
-            hr,
-            hr,
-            tstr,
-            tmpfn,
+            f"pqinsert -i -p 'plot c {tstr} "
+            f"gis/images/3857/mrms/p{hr}h_nn.tif "
+            f"GIS/mrms/p{hr}h_{tstr}.tif tif' {tmpfn}_nn.tif"
         )
         subprocess.call(pqstr, shell=True)
 
@@ -252,30 +228,16 @@ def doit(gts, hr):
 
         # Insert into LDM
         pqstr = (
-            "pqinsert -i -p 'plot c %s "
-            "gis/images/4326/mrms/p%ih.json "
-            "GIS/mrms/p%ih_%s.json json'"
-            " %s.json"
-        ) % (
-            tstr,
-            hr,
-            hr,
-            tstr,
-            tmpfn,
+            f"pqinsert -i -p 'plot c {tstr} "
+            f"gis/images/4326/mrms/p{hr}h.json "
+            f"GIS/mrms/p{hr}h_{tstr}.json json' {tmpfn}.json"
         )
         subprocess.call(pqstr, shell=True)
 
         pqstr = (
-            "pqinsert -i -p 'plot c %s "
-            "gis/images/4326/mrms/p%ih_nn.json "
-            "GIS/mrms/p%ih_%s.json json'"
-            " %s.json"
-        ) % (
-            tstr,
-            hr,
-            hr,
-            tstr,
-            tmpfn,
+            f"pqinsert -i -p 'plot c {tstr} "
+            f"gis/images/4326/mrms/p{hr}h_nn.json "
+            f"GIS/mrms/p{hr}h_{tstr}.json json' {tmpfn}.json"
         )
         subprocess.call(pqstr, shell=True)
     for suffix in ["tif", "json", "png", "wld"]:
@@ -299,6 +261,9 @@ def main(argv):
     )
     for hr in [1, 24, 48, 72]:
         doit(gts, hr)
+        # Also reprocess last hour and six hours ago
+        for offset in [1, 6]:
+            doit(gts - datetime.timedelta(hours=offset), hr)
     cleanup()
 
 
