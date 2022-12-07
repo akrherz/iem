@@ -46,7 +46,7 @@ def main(argv):
     valid = utc(*[int(a) for a in argv[1:6]])
     source = compute_source(valid)
     routes = "ac" if len(argv) > 6 else "a"
-    LOG.debug("Using source: `%s` for valid: %s[%s]", source, valid, routes)
+    LOG.info("Using source: `%s` for valid: %s[%s]", source, valid, routes)
     url = valid.strftime(
         "https://gpm1.gesdisc.eosdis.nasa.gov/thredds/ncss/aggregation/"
         f"GPM_3IMERGHH{source}.06/%Y/GPM_3IMERGHH{source}"
@@ -67,7 +67,7 @@ def main(argv):
             ct,
             source,
         )
-        LOG.debug(url)
+        LOG.info(url)
         return
     with tempfile.NamedTemporaryFile(delete=False) as tmp:
         tmp.write(req.content)

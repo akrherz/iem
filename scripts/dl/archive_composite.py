@@ -16,7 +16,7 @@ def main(argv):
     now = sts
     while now < ets:
         cmd = f"python radar_composite.py {now:%Y %m %d %H %M}"
-        LOG.debug(cmd)
+        LOG.info(cmd)
         subprocess.call(cmd, shell=True)
         now += interval
 

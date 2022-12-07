@@ -21,7 +21,7 @@ def query(sql, args=None):
     hcursor.execute("set work_mem='16GB'")
     hcursor.execute(sql, args if args is not None else [])
     ets = datetime.datetime.now()
-    LOG.debug(
+    LOG.info(
         "%7s [%8.4fs] %s", hcursor.rowcount, (ets - sts).total_seconds(), sql
     )
     hcursor.close()
@@ -30,7 +30,7 @@ def query(sql, args=None):
 
 def workflow(valid):
     """Do the work for this date, which is set to 00 UTC"""
-    tbl = "raw%s" % (valid.strftime("%Y_%m"),)
+    tbl = f"raw{valid:%Y_%m}"
 
     # make sure our tmp table does not exist
     query("DROP TABLE IF EXISTS tmp")

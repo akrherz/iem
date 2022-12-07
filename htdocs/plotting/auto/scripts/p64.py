@@ -81,7 +81,7 @@ def get_data(ctx):
         snowd[row[1] - syear, int(row[0] - 1)] = row[3]
     # reset any nan
     snow = np.where(np.isnan(snow), 0, snow)
-    snowd = np.where(np.isnan(snowd), 0, snowd)
+    snowd = np.where(np.isnan(snowd), -1, snowd)
 
     rows = []
     for i, year in enumerate(range(syear, eyear)):
@@ -92,6 +92,9 @@ def get_data(ctx):
         if hits.size == 0:
             continue
         idx = hits[0] if ctx["dir"] == "first" else hits[-1]
+        # Check that we have snowd for this index, if not, DQ
+        if snowdepth[idx] < 0:
+            continue
         # Compute how long this stuck around
         sfree = idx + 1
         for sfree in range(idx + 1, 366):
@@ -136,7 +139,8 @@ def plotter(fdict):
         else f"{float(ctx['threshold']):.2f}+ Inch"
     )
     title = (
-        f"{ctx['_sname']}:: {t1} {t2} Snowfall\n"
+        f"{ctx['_sname']}:: {t1} {t2} Snowfall "
+        f"({df['year'].min()}-{df['year'].max()})\n"
         "(color is how long snow remained)"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)

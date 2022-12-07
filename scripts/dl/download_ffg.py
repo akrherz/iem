@@ -22,18 +22,19 @@ def do(ts):
         return
     remotefn = ts.strftime("5kmffg_%Y%m%d%H.grb2")
     url = f"https://ftp.wpc.ncep.noaa.gov/workoff/ffg/{remotefn}"
-    LOG.debug("fetching %s", url)
+    LOG.info("fetching %s", url)
     req = exponential_backoff(requests.get, url, timeout=20)
     if req is None or req.status_code != 200:
-        LOG.info("Download of %s failed", url)
+        LOG.warning("Download of %s failed", url)
         return
     tmpfd, tmpfn = tempfile.mkstemp()
     os.write(tmpfd, req.content)
     os.close(tmpfd)
     cmd = (
-        "pqinsert -i -p 'data a %s bogus " "model/ffg/%s.grib2 grib2' %s"
-    ) % (ts.strftime("%Y%m%d%H%M"), remotefn[:-5], tmpfn)
-    LOG.debug(cmd)
+        f"pqinsert -i -p 'data a {ts:%Y%m%d%H%M} bogus "
+        f"model/ffg/{remotefn[:-5]}.grib2 grib2' {tmpfn}"
+    )
+    LOG.info(cmd)
     subprocess.call(cmd, shell=True)
 
     os.remove(tmpfn)

@@ -36,7 +36,7 @@ $ar = Array(
 );
 
 $tzselect = make_select("tz", "Etc/UTC", $ar);
-		
+        
 $t->content = <<<EOF
 <style type="text/css">
         #map {
@@ -121,37 +121,37 @@ data available from this archive!</p>
 <p><strong>Note:</strong> Precipitation data is unavailable for non-US sites.</p>
 
 <select name="data" size="10" MULTIPLE>
-	<option value="all" SELECTED>All Available</option>
-	<option value="tmpf">Air Temperature [F]</option>
-	<option value="tmpc">Air Temperature [C]</option>
-	<option value="dwpf">Dew Point [F]</option>
-	<option value="dwpc">Dew Point [C]</option>
-	<option value="relh">Relative Humidity [%]</option>
-	<option value="feel">Heat Index/Wind Chill [F]</option>
-	<option value="drct">Wind Direction </option>
-	<option value="sknt">Wind Speed [knots]</option>
-	<option value="sped">Wind Speed [mph]</option>
-	<option value="alti">Altimeter [inches]</option>
-	<option value="mslp">Sea Level Pressure [mb]</option>
-	<option value="p01m">1 hour Precipitation [mm]</option>
-	<option value="p01i">1 hour Precipitation [inch]</option>
-	<option value="vsby">Visibility [miles]</option>
-	<option value="gust">Wind Gust [knots]</option>
-	<option value="gust_mph">Wind Gust [mph]</option>
-	<option value="skyc1">Cloud Coverage Level 1</option>
-	<option value="skyc2">Cloud Coverage Level 2</option>
-	<option value="skyc3">Cloud Coverage Level 3</option>
-	<option value="skyl1">Cloud Height Level 1 [ft]</option>
-	<option value="skyl2">Cloud Height Level 2 [ft]</option>
-	<option value="skyl3">Cloud Height Level 3 [ft]</option>
-	<option value="wxcodes">Present Weather Code(s)</option>
-	<option value="ice_accretion_1hr">Ice Accretion 1 Hour</option>
-	<option value="ice_accretion_3hr">Ice Accretion 3 Hour</option>
-	<option value="ice_accretion_6hr">Ice Accretion 6 Hour</option>
-	<option value="peak_wind_gust">Peak Wind Gust [knots]</option>
-	<option value="peak_wind_gust_mph">Peak Wind Gust [MPH]</option>
-	<option value="peak_wind_drct">Peak Wind Direction [deg]</option>
-	<option value="peak_wind_time">Peak Wind Time</option>
+    <option value="all" SELECTED>All Available</option>
+    <option value="tmpf">Air Temperature [F]</option>
+    <option value="tmpc">Air Temperature [C]</option>
+    <option value="dwpf">Dew Point [F]</option>
+    <option value="dwpc">Dew Point [C]</option>
+    <option value="relh">Relative Humidity [%]</option>
+    <option value="feel">Heat Index/Wind Chill [F]</option>
+    <option value="drct">Wind Direction </option>
+    <option value="sknt">Wind Speed [knots]</option>
+    <option value="sped">Wind Speed [mph]</option>
+    <option value="alti">Altimeter [inches]</option>
+    <option value="mslp">Sea Level Pressure [mb]</option>
+    <option value="p01m">1 hour Precipitation [mm]</option>
+    <option value="p01i">1 hour Precipitation [inch]</option>
+    <option value="vsby">Visibility [miles]</option>
+    <option value="gust">Wind Gust [knots]</option>
+    <option value="gust_mph">Wind Gust [mph]</option>
+    <option value="skyc1">Cloud Coverage Level 1</option>
+    <option value="skyc2">Cloud Coverage Level 2</option>
+    <option value="skyc3">Cloud Coverage Level 3</option>
+    <option value="skyl1">Cloud Height Level 1 [ft]</option>
+    <option value="skyl2">Cloud Height Level 2 [ft]</option>
+    <option value="skyl3">Cloud Height Level 3 [ft]</option>
+    <option value="wxcodes">Present Weather Code(s)</option>
+    <option value="ice_accretion_1hr">Ice Accretion 1 Hour</option>
+    <option value="ice_accretion_3hr">Ice Accretion 3 Hour</option>
+    <option value="ice_accretion_6hr">Ice Accretion 6 Hour</option>
+    <option value="peak_wind_gust">Peak Wind Gust [knots]</option>
+    <option value="peak_wind_gust_mph">Peak Wind Gust [MPH]</option>
+    <option value="peak_wind_drct">Peak Wind Direction [deg]</option>
+    <option value="peak_wind_time">Peak Wind Time</option>
     <option value="snowdepth">Snow Depth (4-group) [inch]</option>
     <option value="metar">Raw METAR</option>
 </select>
@@ -167,10 +167,10 @@ end date is exclusive.</p>
 <tr><th>Start Date:</th><td>{$y1select} {$m1select} {$d1select}</td></tr>
 <tr><th>End Date:</th><td>{$y2select} {$m2select} {$d2select}</td></tr>
 </table>
-		
+
 <h4>4) Timezone of Observation Times:</h4>
 <p><i>The following options are available for how the observation time is 
-	presented.</i></p>
+    presented.</i></p>
 {$tzselect}
 
 <h4>5) Download Options:</h4>
@@ -235,18 +235,18 @@ made for report types.  When in doubt, pick both routine and specials.</p>
   <input type="submit" value="Get Data">
   <input type="reset">
 
- 		</div>
- 		</div>
- 		
+         </div>
+         </div>
+         
 </form>
 
 <p><strong>Download Variable Description</strong>
-	<br /><a href="https://www.weather.gov/media/asos/aum-toc.pdf">ASOS User's Guide</a>
-		has detailed information about these data variables. The value "M" represents
-		either value that was reported as missing or a value that was set to missing
-		after meeting some general quality control check, or a value that was never
-		reported by the sensor.  The METAR format makes it difficult to determine
-		which of the three cases may have happened.</p>
+    <br /><a href="https://www.weather.gov/media/asos/aum-toc.pdf">ASOS User's Guide</a>
+        has detailed information about these data variables. The value "M" represents
+        either value that was reported as missing or a value that was set to missing
+        after meeting some general quality control check, or a value that was never
+        reported by the sensor.  The METAR format makes it difficult to determine
+        which of the three cases may have happened.</p>
 
 <dl class="dl-horizontal">
 <dt>station:</dt>
@@ -267,9 +267,9 @@ made for report types.  When in doubt, pick both routine and specials.</p>
 <dd>One hour precipitation for the period from the observation time
 to the time of the previous hourly precipitation reset.  This varies slightly
 by site. Values are in inches. This value may or may not contain frozen
-		precipitation melted by some device on the sensor or estimated
-		by some other means.  Unfortunately, we do not know of an
-		authoritative database denoting which station has which sensor.</dd>
+        precipitation melted by some device on the sensor or estimated
+        by some other means.  Unfortunately, we do not know of an
+        authoritative database denoting which station has which sensor.</dd>
 <dt>alti:</dt>
 <dd>Pressure altimeter in inches</dd>
 <dt>mslp:</dt>

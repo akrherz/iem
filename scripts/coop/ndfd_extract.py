@@ -128,7 +128,6 @@ def dbsave(ts, data):
     for date in list(data["fx"].keys()):
         d = data["fx"][date]
         if d["high"] is None or d["low"] is None or d["precip"] is None:
-            LOG.debug("Missing data for date: %s", date)
             del data["fx"][date]
 
     found_data = False

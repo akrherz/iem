@@ -21,7 +21,7 @@ TMP = "/mesonet/tmp"
 def process(tarfn):
     """Process this tarfn"""
     os.chdir(TMP)
-    subprocess.call("tar -xf %s" % (tarfn,), shell=True)
+    subprocess.call(f"tar -xf {tarfn}", shell=True)
     for grbfn in glob.glob("merged_AWIP32*sfc"):
         grbs = pygrib.open(grbfn)
         for pnum, pname in zip(["204", "61"], ["rad", "apcp"]):
@@ -33,24 +33,17 @@ def process(tarfn):
             for grb in argrbs:
                 dt = grb["dataDate"]
                 hr = int(grb["dataTime"]) / 100.0
-                ts = datetime.datetime.strptime(
-                    "%s %.0f" % (dt, hr), "%Y%m%d %H"
-                )
-                fn = "%s_%s.grib" % (pname, ts.strftime("%Y%m%d%H%M"))
+                ts = datetime.datetime.strptime(f"{dt} {hr:.0f}", "%Y%m%d %H")
+                fn = f"{pname}_{ts:%Y%m%d%H%M}.grib"
                 with open(fn, "wb") as fh:
                     fh.write(grb.tostring())
 
                 cmd = (
-                    "pqinsert -p 'data a %s bogus "
-                    "model/NARR/%s_%s.grib grib' %s"
-                ) % (
-                    ts.strftime("%Y%m%d%H%M"),
-                    pname,
-                    ts.strftime("%Y%m%d%H%M"),
-                    fn,
+                    f"pqinsert -p 'data a {ts:%Y%m%d%H%M} bogus "
+                    f"model/NARR/{pname}_{ts:%Y%m%d%H%M}.grib grib' {fn}"
                 )
                 subprocess.call(cmd, shell=True)
-                LOG.debug("grbfn: %s fn: %s", grbfn, fn)
+                LOG.info("grbfn: %s fn: %s", grbfn, fn)
                 os.remove(fn)
         os.remove(grbfn)
 
@@ -76,16 +69,16 @@ def fetch_rda(year, month):
     lastday = (
         datetime.date(year, month, 1) + datetime.timedelta(days=35)
     ).replace(day=1) - datetime.timedelta(days=1)
-    days.append("20%s" % (lastday.day,))
+    days.append(f"20{lastday.day}")
     for day in days:
         uri = (
             "https://rda.ucar.edu/data/ds608.0/3HRLY/"
-            "%i/NARRsfc_%i%02i_%s.tar"
-        ) % (year, year, month, day)
+            f"{year}/NARRsfc_{year}{month:02.0f}_{day}.tar"
+        )
         req = exponential_backoff(
             requests.get, uri, timeout=30, cookies=cookies, stream=True
         )
-        tmpfn = "%s/narr.tar" % (TMP,)
+        tmpfn = f"{TMP}/narr.tar"
         with open(tmpfn, "wb") as fh:
             for chunk in req.iter_content(chunk_size=1024):
                 if chunk:
@@ -95,8 +88,7 @@ def fetch_rda(year, month):
 
     # Now call coop script
     subprocess.call(
-        ("python /opt/iem/scripts/climodat/narr_solarrad.py %s %s")
-        % (year, month),
+        f"python /opt/iem/scripts/climodat/narr_solarrad.py {year} {month}",
         shell=True,
     )
 
