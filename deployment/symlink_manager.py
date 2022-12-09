@@ -77,9 +77,13 @@ def main():
         link = f"/mesonet/ARCHIVE/data/{year}"
         target = f"/mnt/archive00/ARCHIVE/data/{year}"
         workflow(link, target)
-    for year in range(2022, 2024):
+    for year in range(2022, 2023):
         link = f"/mesonet/ARCHIVE/data/{year}"
         target = f"/mnt/mtarchive3/ARCHIVE/data/{year}"
+        workflow(link, target)
+    for year in range(2023, 2024):
+        link = f"/mesonet/ARCHIVE/data/{year}"
+        target = f"/mnt/mtarchive4/ARCHIVE/data/{year}"
         workflow(link, target)
 
     for (link, target) in PAIRS:
