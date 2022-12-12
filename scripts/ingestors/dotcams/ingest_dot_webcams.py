@@ -58,11 +58,12 @@ def process_feature(cursor, domain, feat):
         if timestamp is None:
             continue
         valid = datetime(1970, 1, 1) + timedelta(seconds=timestamp / 1000.0)
-        valid = valid.replace(tzinfo=timezone.utc)
+        # We drop the seconds information as we can't really deal with it yet
+        valid = valid.replace(second=0, tzinfo=timezone.utc)
         if valid > CEILING:
             LOG.info("%s is in the future %s, skipping", cam, valid)
             continue
-        LOG.debug("%s %s", cam, valid)
+        LOG.info("%s %s %s", cam, valid, props[f"IMAGE_URL{suffix}"])
         # Do we have this image?
         cursor.execute(
             "SELECT drct from camera_log where valid = %s and cam = %s",
@@ -90,17 +91,12 @@ def process_feature(cursor, domain, feat):
         tmpfd = tempfile.NamedTemporaryFile(mode="wb", delete=False)
         tmpfd.write(req.content)
         tmpfd.close()
-        # Create log entry
-        cursor.execute(
-            "INSERT into camera_log(cam, valid, drct) VALUES (%s, %s, %s)",
-            (cam, valid, 0),
-        )
         # Get current entry
         cursor.execute(
             "SELECT valid from camera_current where cam = %s", (cam,)
         )
         if cursor.rowcount == 0:
-            LOG.info("Creating camera_current entry for %s", cam)
+            LOG.warning("Creating camera_current entry for %s", cam)
             cursor.execute(
                 "INSERT into camera_current(cam, valid, drct) "
                 "VALUES (%s, %s, %s)",
@@ -113,21 +109,29 @@ def process_feature(cursor, domain, feat):
         routes = "a"
         if valid > lastvalid:
             routes = "ac"
-            cursor.execute(
-                "UPDATE camera_current SET valid = %s where cam = %s",
-                (valid, cam),
-            )
         cmd = (
             f"pqinsert -p 'webcam {routes} {valid:%Y%m%d%H%M} "
             f"camera/stills/{cam}.jpg "
             f"camera/{cam}/{cam}_{valid:%Y%m%d%H%M}.jpg jpg' {tmpfd.name}"
         )
-        LOG.debug(cmd)
         with subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         ) as proc:
-            proc.communicate()
+            stdout, stderr = proc.communicate()
+            if stderr != b"" or stdout != b"":
+                LOG.info("%s stdout: %s stderr: %s", cmd, stdout, stderr)
+                continue
         os.unlink(tmpfd.name)
+        # Create log entry
+        cursor.execute(
+            "INSERT into camera_log(cam, valid, drct) VALUES (%s, %s, %s)",
+            (cam, valid, 0),
+        )
+        if valid > lastvalid:
+            cursor.execute(
+                "UPDATE camera_current SET valid = %s where cam = %s",
+                (valid, cam),
+            )
 
 
 def main():
