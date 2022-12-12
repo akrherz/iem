@@ -81,7 +81,7 @@ def get_description():
     return desc
 
 
-def plot_date(ax, i, date, station, tz):
+def plot_date(ax, i, date, station, tz) -> bool:
     """plot date."""
     # request 36 hours
     sts = datetime.datetime(date.year, date.month, date.day, tzinfo=tz)
@@ -97,8 +97,16 @@ def plot_date(ax, i, date, station, tz):
             index_col=None,
         )
     if df.empty:
-        return
+        return False
     df["valid"] = df["valid"].dt.tz_localize(ZoneInfo("UTC"))
+    # Ensure that we have at least one ob within six hours to start and end
+    h6 = datetime.timedelta(hours=6)
+    dv = df["valid"]
+    if df[(dv >= sts) & (dv < (sts + h6))].empty:
+        return False
+    h18 = datetime.timedelta(hours=18)
+    if df[(dv >= (sts + h18)) & (dv < (sts + h6 + h18))].empty:
+        return False
     df["norm"] = (df["tmpf"] - df["tmpf"].min()) / (
         df["tmpf"].max() - df["tmpf"].min()
     )
@@ -111,9 +119,10 @@ def plot_date(ax, i, date, station, tz):
         df["xnorm"].values[-1],
         df["norm"].values[-1] + i,
         date.strftime("%-d %b %Y"),
-        va="center",
+        va="bottom" if df["norm"].values[-1] < 0.5 else "top",
         color=lp[0].get_color(),
     )
+    return True
 
 
 def plotter(fdict):
@@ -136,12 +145,13 @@ def plotter(fdict):
     elif month == "summer":
         months = [6, 7, 8]
     else:
-        ts = datetime.datetime.strptime("2000-" + month + "-01", "%Y-%b-%d")
+        ts = datetime.datetime.strptime(f"2000-{month}-01", "%Y-%b-%d")
         # make sure it is length two for the trick below in SQL
         months = [ts.month, 999]
 
     order = "DESC" if ctx["v"] == "largest" else "ASC"
     with get_sqlalchemy_conn("iem") as conn:
+        # Over-sample as we may get some DQ's due to lack of data
         df = pd.read_sql(
             text(
                 f"""
@@ -151,7 +161,7 @@ def plotter(fdict):
             where t.id = :station and t.network = :network
             and extract(month from day) in :months
             and max_tmpf is not null and min_tmpf is not null
-            ORDER by difference {order}, date DESC LIMIT 10
+            ORDER by difference {order}, date DESC LIMIT 50
         """
             ),
             conn,
@@ -184,21 +194,28 @@ def plotter(fdict):
     y = 0.74
     ax = fig.add_axes([0.5, 0.1, 0.3, 0.69])
     i = 10
+    hits = 0
+    rank = 0
+    rankval = -1
     for _, row in df.iterrows():
+        if hits >= 10:
+            break
+        if not plot_date(ax, i, row["date"], station, tz):
+            continue
+        if row["difference"] > rankval:
+            rank += 1
+            rankval = row["difference"]
+        hits += 1
         fig.text(
             0.1,
             y,
-            ("%2.0f  %11s   %3.0f   %3.0f  %3.0f")
-            % (
-                row["rank"],
-                row["date"].strftime("%d %b %Y"),
-                row["difference"],
-                row["min"],
-                row["max"],
+            (
+                f"{rank:2.0f}  {row['date']:%d %b %Y}   "
+                f"{row['difference']:3.0f}   "
+                f"{row['min']:3.0f}  {row['max']:3.0f}"
             ),
             fontproperties=font0,
         )
-        plot_date(ax, i, row["date"], station, tz)
         y -= 0.07
         i -= 1
     ax.set_title("Hourly Temps On Date & +/-12 Hrs")
