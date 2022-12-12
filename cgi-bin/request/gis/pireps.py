@@ -58,7 +58,7 @@ def run(ctx, start_response):
     sql = f"""
         SELECT to_char(valid at time zone 'UTC', 'YYYYMMDDHH24MI') as utctime,
         case when is_urgent then 'T' else 'F' end,
-        substr(aircraft_type, 0, 40),
+        substr(replace(aircraft_type, ',', ' '), 0, 40),
         substr(replace(report, ',', ' '), 0, 255),
         ST_y(geom::geometry) as lat, ST_x(geom::geometry) as lon
         from pireps WHERE {spatialsql}
