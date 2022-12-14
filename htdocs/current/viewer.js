@@ -2,6 +2,7 @@ var map;
 var n0q;
 var webcamGeoJsonLayer;
 var idotdashcamGeoJsonLayer;
+var idotRWISLayer;
 var sbwlayer;
 var selectControl;
 var ts = null;
@@ -50,6 +51,12 @@ var trackaplowStyle2 = new ol.style.Style({
         scale: 0.6
     })
 });
+var rwisStyle = new ol.style.Style({
+    image: new ol.style.Icon({
+        src: '/images/rwiscam.svg',
+        scale: 0.6
+    })
+});
 var cameraStyle2 = new ol.style.Style({
     image: new ol.style.Icon({
         src: '/images/red_arrow.png',
@@ -90,7 +97,39 @@ function findFeatureByCid(cid) {
             feature = feat;
         }
     });
+    if (feature) {
+        return feature;
+    }
+    idotRWISLayer.getSource().forEachFeature(function (feat) {
+        if (feat.get('cid') == cid) {
+            feature = feat;
+        }
+    });
     return feature;
+}
+
+function handleRWISClick(img){
+    $("#rwismain").attr('src', $(img).attr("src"));
+}
+function doRWISView(){
+    // Do the magic that is the multi-view RWIS data...
+    $("#singleimageview").css("display", "none");
+    $("#rwisview").css("display", "block");
+    $("#rwislist").empty();
+    var i = 0;
+    var hit = false;
+    while (i < 10){
+        var url = currentCameraFeature.get('imgurl' + i);
+        if (url !== null){
+            if (!hit){
+                $("#rwismain").attr('src', url);
+                hit = true;
+                continue;
+            }
+            $("#rwislist").append('<div class="col-md-2"><img onclick="handleRWISClick(this);" src="' + url +'" class="img img-responsive"></div>');
+        }
+        i += 1;
+    }
 }
 
 // main workflow for updating the webcam image shown to the user
@@ -101,24 +140,39 @@ function updateCamera() {
             return;
         }
     }
-    var url = currentCameraFeature.get("url");
-    if (url === undefined) {
-        url = currentCameraFeature.get("imgurl");
-    }
-    var valid = currentCameraFeature.get("valid");
-    if (valid === undefined) {
-        valid = currentCameraFeature.get("utc_valid");
-    }
-    var name = currentCameraFeature.get("name");
-    if (name === undefined) {
-        name = "Iowa DOT Dash Cam";
-    }
-    if (url !== undefined) {
-        $("#webcam_image").attr('src', url);
-        $("#webcam_title").html(
-            "[" + currentCameraFeature.get("cid") + "] " + name +
-            ' @ ' + moment(valid).format("D MMM YYYY h:mm A"));
+    var cid = currentCameraFeature.get("cid");
+    console.log("Proceeding with updateCamera(), cid=", cid);
+    if (cid.startsWith("IDOT-")){
+        doRWISView();
         updateHashLink();
+    }
+    else {
+        $("#singleimageview").css("display", "block");
+        $("#rwisview").css("display", "none");
+        $("#liveshot").css("display", "block");
+        var url = currentCameraFeature.get("url");
+        if (url === undefined) {
+            $("#liveshot").css("display", "none");
+            url = currentCameraFeature.get("imgurl");
+        }
+        if (url === undefined) {
+            url = currentCameraFeature.get("imgurl0");
+        }
+        var valid = currentCameraFeature.get("valid");
+        if (valid === undefined) {
+            valid = currentCameraFeature.get("utc_valid");
+        }
+        var name = currentCameraFeature.get("name");
+        if (name === undefined) {
+            name = "Iowa DOT Dash Cam";
+        }
+        if (url !== undefined) {
+            $("#webcam_image").attr('src', url);
+            $("#webcam_title").html(
+                "[" + currentCameraFeature.get("cid") + "] " + name +
+                ' @ ' + moment(valid).format("D MMM YYYY h:mm A"));
+            updateHashLink();
+            }
     }
 
 }
@@ -136,7 +190,7 @@ function getRADARSource() {
     var prod = dt.year() < 2011 ? 'N0R' : 'N0Q';
     $("#radar_title").html('US Base Reflectivity @ ' + dt.format("h:mm A"));
     return new ol.source.XYZ({
-        url: '/cache/tile.py/1.0.0/ridge::USCOMP-' + prod + '-' + dt.utc().format('YMMDDHHmm') + '/{z}/{x}/{y}.png'
+        url: 'https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/ridge::USCOMP-' + prod + '-' + dt.utc().format('YMMDDHHmm') + '/{z}/{x}/{y}.png'
     });
 }
 
@@ -160,6 +214,7 @@ function refreshJSON() {
     });
     webcamGeoJsonLayer.setSource(newsource);
 
+    // Dashcam
     url = "/api/1/idot_dashcam.geojson";
     if (!realtimeMode) {
         // Append the current timestamp to the URI
@@ -173,6 +228,22 @@ function refreshJSON() {
         updateCamera();
     });
     idotdashcamGeoJsonLayer.setSource(newsource);
+
+    // RWIS
+    url = "/api/1/idot_rwiscam.geojson";
+    if (!realtimeMode) {
+        // Append the current timestamp to the URI
+        url += "?valid=" + $('#dtpicker').data('DateTimePicker').date().utc().format(ISOFMT);
+    }
+    newsource = new ol.source.Vector({
+        url: url,
+        format: new ol.format.GeoJSON()
+    });
+    newsource.on('change', function () {
+        updateCamera();
+    });
+    idotRWISLayer.setSource(newsource);
+    
 
     var url = "/geojson/sbw.geojson";
     if (!realtimeMode) {
@@ -262,7 +333,7 @@ $().ready(function () {
         }
     });
     idotdashcamGeoJsonLayer = new ol.layer.Vector({
-        title: 'Iowa DOT Truck Dashcams',
+        title: 'Iowa DOT Truck Dashcams (2014-)',
         style: function (feature, resolution) {
             if (currentCameraFeature &&
                 currentCameraFeature.get("cid") == feature.get("cid")) {
@@ -272,8 +343,19 @@ $().ready(function () {
             return [trackaplowStyle];
         }
     });
+    idotRWISLayer = new ol.layer.Vector({
+        title: 'Iowa DOT RWIS Webcams (2010-)',
+        style: function (feature, resolution) {
+            if (currentCameraFeature &&
+                currentCameraFeature.get("cid") == feature.get("cid")) {
+                currentCameraFeature = feature;
+                return [rwisStyle];
+            }
+            return [rwisStyle];
+        }
+    });
     webcamGeoJsonLayer = new ol.layer.Vector({
-        title: 'Webcams',
+        title: 'Webcams (2003-)',
         style: function (feature, resolution) {
             if (currentCameraFeature &&
                 currentCameraFeature.get("cid") == feature.get("cid")) {
@@ -301,8 +383,9 @@ $().ready(function () {
         }),
             n0q,
             sbwlayer,
-            webcamGeoJsonLayer,
-            idotdashcamGeoJsonLayer
+            idotdashcamGeoJsonLayer,
+            idotRWISLayer,
+            webcamGeoJsonLayer
         ],
         view: new ol.View({
             projection: 'EPSG:3857',

@@ -17,11 +17,11 @@ EOF;
 
 $conn = iemdb("mesosite");
 $rs = pg_query($conn, "SELECT id, name, date(sts) as s from webcams WHERE network = 'IDOT'
-		ORDER by name ASC");
+        ORDER by name ASC");
 $sform = "<select name='cid'>";
 for ($i=0;$row=pg_fetch_assoc($rs);$i++){
-	$sform .= sprintf("<option value='%s'>%s -- (%s)</option>\n", $row["id"], $row["name"],
-			$row["s"]);
+    $sform .= sprintf("<option value='%s'>%s -- (%s)</option>\n", $row["id"], $row["name"],
+            $row["s"]);
 }
 $sform .= "</select>";
 
@@ -37,7 +37,8 @@ a listing of images available for that date. <strong>Hint:</strong> Once you
 select a time, use the up/down keyboard arrow to create a quasi-timelapse.</p>
 
 <p>Archiving started back on 19 Dec 2009.  The start date of invidual webcams
-is shown in the select menu.
+is shown in the select menu. The <a href="/current/viewer.phtml">IEM Webcam Viewer</a>
+is another tool that allows viewing the RWIS webcam archive.</p>
 
 <input type="hidden" id="realdate" />
 

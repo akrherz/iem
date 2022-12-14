@@ -1,23 +1,29 @@
-<?php 
+<?php
 require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 require_once "../../include/cameras.inc.php";
 require_once "../../include/forms.php";
 $camid = isset($_GET["camid"]) ? xssafe($_GET["camid"]) : "IDOT-000";
 
-$cdict = Array();
+$cdict = array();
 $selectform = "<select name=\"camid\">\n";
-foreach($cameras as $id => $cam){
-  if ($cam["network"] != "IDOT"){ continue; }
-  $base = substr($id,0,8);
-  if (! array_key_exists($base, $cdict)){ $cdict[$base] = 0; }
-  $cdict[$base] += 1;
+foreach ($cameras as $id => $cam) {
+    if ($cam["network"] != "IDOT") {
+        continue;
+    }
+    $base = substr($id, 0, 8);
+    if (!array_key_exists($base, $cdict)) {
+        $cdict[$base] = 0;
+    }
+    $cdict[$base] += 1;
 
-  if (substr($id,9,2) == "00"){
-    $selectform .= "<option value=\"$base\"";
-    if ($base == $camid){  $selectform .= " selected=\"selected\" "; }
-    $selectform .= ">". $cam["name"] ."</option>";
-  }
+    if (substr($id, 9, 2) == "00") {
+        $selectform .= "<option value=\"$base\"";
+        if ($base == $camid) {
+            $selectform .= " selected=\"selected\" ";
+        }
+        $selectform .= ">" . $cam["name"] . "</option>";
+    }
 }
 $selectform .= "</select>\n";
 
@@ -25,9 +31,13 @@ $t = new MyView();
 $t->title = "Iowa DOT RWIS Data";
 
 $camimgs = "";
-for($i=0;$i<$cdict[$camid];$i++){
-	$camimgs .= sprintf("<div class=\"col-md-3\"><img src=\"/data/camera/stills/%s-%02d.jpg?%s\" class=\"img img-responsive\"></div>", 
-			$camid, $i, time() );
+for ($i = 0; $i < $cdict[$camid]; $i++) {
+    $camimgs .= sprintf(
+        "<div class=\"col-md-3\"><img src=\"/data/camera/stills/%s-%02d.jpg?%s\" class=\"img img-responsive\"></div>",
+        $camid,
+        $i,
+        time()
+    );
 }
 
 $t->content = <<<EOF
@@ -53,7 +63,8 @@ supplement their site.
 
 </div><!-- ./row -->
 
-<h4>Roadside Webcams <a href="camera.phtml" class="btn btn-default">Webcam Archive Viewer</a></h4>
+<h4>Roadside Webcams <a href="camera.phtml" class="btn btn-primary">RWIS Archive Viewer</a>
+<a href="/current/viewer.phtml" class="btn btn-primary">IEM Webcam Viewer</a></h4>
 
 <form method="" action="" name="widget">
 Available sites: {$selectform}
@@ -67,7 +78,7 @@ Available sites: {$selectform}
 
 <div class="row">
 <div class="col-md-4">
-		
+        
 
   <h3>Current Conditions</h3>
 <ul>
@@ -76,8 +87,8 @@ Available sites: {$selectform}
     <li><a href="soil.phtml">Soil Probes</a></li>
     <li><a href="traffic.phtml">Traffic Data</a></li>
     <li><a href="/GIS/apps/iem/freeze.phtml">IEM Freeze</a>
-	<br /><dd>Combine air and pavement temperatures with current
-  	RADAR.</dd></li>
+    <br /><dd>Combine air and pavement temperatures with current
+      RADAR.</dd></li>
 </ul>
 
   <h3>Time Series Plots:</h3>

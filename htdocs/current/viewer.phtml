@@ -1,5 +1,5 @@
 <?php
-$OL = "6.15.1";
+$OL = "7.1.0";
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 95);
 require_once "../../include/mlib.php";
@@ -9,19 +9,6 @@ require_once "../../include/forms.php";
 $t = new MyView();
 require_once "../../include/cameras.inc.php";
 $id = isset($_GET["id"]) ? xssafe($_GET["id"]) : "ISUC-003";
-
-$camselect = "";
-$cnt = 0;
-foreach ($cameras as $cid => $v) {
-    if ($v["active"] && $v["network"] != "IDOT") {
-        $camselect .= "<div class=\"col-md-2\"><label class=\"radio-inline\"><input type=\"radio\" name=\"id\" value=\"$cid\" id=\"c$cid\" ";
-        if ($cid == $id) {
-            $camselect .= "checked=\"checked\"";
-        }
-        $camselect .= " onClick=\"setCamera('{$cid}');\">" . $v["name"] . "</label></div>\n";
-        $cnt += 1;
-    }
-}
 
 $t->title =  "Current + Live Web Camera Shots";
 $t->jsextra = <<<EOF
@@ -36,8 +23,6 @@ $t->headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css" type="text/css">
 <link rel="stylesheet" href="/vendor/bootstrap-datetimepicker/4.17.47/bootstrap-datetimepicker.min.css" type="text/css">
 EOF;
-
-
 
 $t->content = <<<EOF
 <style>
@@ -74,27 +59,38 @@ $t->content = <<<EOF
  
 <div class="row">
 <div class="col-md-6">
-<img id="webcam_image" name="camera" src="/data/camera/stills/{$id}.jpg" class="img img-responsive" />
-<br />
-<h3 id="webcam_title">Application is Loading...</h3>
+
+<div id="singleimageview">
+<img id="webcam_image" name="camera" src="/data/camera/stills/{$id}.jpg" class="img img-responsive">
+<br /><button role="button" onclick="liveShot();" id="liveshot">Request Live Shot</button>
+<h3 id="webcam_title"></h3>
 </div>
+
+<div id="rwisview" style="display: none;">
+<img id="rwismain" class="img img-responsive">
+<br />
+<strong>Click on thumbnail to view</strong><br />
+<div class="row" id="rwislist" style="height: 100px;">
+</div>
+</div><!-- ./rwisview -->
+<br />
+</div><!-- ./col-md-6 -->
 <div class="col-md-6">
 <div style="width: 100%; height: 400px;" id="map"></div>
+<br />
 <h3 id="radar_title">Application is Loading...</h3>
+
+<table>
+<tr><th>Key:</th>
+<th><img src="/images/rwiscam.svg" style="height: 30px;"> IDOT RWIS</th>
+<th><img src="/images/trackaplow.png" style="height: 30px;"> IDOT Track-A-Plow</th>
+<th><img src="/images/yellow_arrow.png" style="height: 30px;"> Media Webcams</th>
+</tr>
+</table>
 </div>
 </div><!-- ./row -->
 
 <br clear="all" />
-
-<form name="main" target="JavaScript: func()">
-<b>Select camera by clicking arrow on map or from list below:</b>
-<div class="row">
-{$camselect}
-</div>
-<p><button type="button" id="lsbutton" onclick="liveShot();">Live Shot!</button>
-
-</form>
-
 
 <h3>Application Details</h3>
 
@@ -108,9 +104,9 @@ $t->content = <<<EOF
     if you pick a minute (ie 35) divisible by 5, you are most likely to
     get an archived image.</p>
         
-<p>The arrows on the map represent the direction at which the webcam is
-    pointed.  Due to software and hardware issues, these directions can
-    sometimes be off.</p>
+<p>The media webcams have pan-tilt-zoom capabilities along with the option to request
+a live image.  The arrows on the map indicate the direction the webcam is pointed in, but
+can sometimes be wrong for various painful reasons.</p>
         
 <p>More information on the IEM's webcam work can be found
     <a href="/projects/webcam.php">here</a>.</p>
