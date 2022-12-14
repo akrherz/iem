@@ -71,7 +71,7 @@ def get_description():
         dict(
             type="zstation",
             name="zstation",
-            default="DSM",
+            default="AMW",
             label="Select Station:",
             network="IA_ASOS",
         ),
