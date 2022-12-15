@@ -304,7 +304,10 @@ monthly_opts = [
     },
     {
         "id": 95,
-        "label": "Monthly Precipitation/Temperature with El Nino SOI Index",
+        "label": (
+            "Monthly Precipitation/Temperature with "
+            "El Nino SOI Index Relationship"
+        ),
     },
     {
         "id": 24,
@@ -319,7 +322,10 @@ monthly_opts = [
     },
     {"id": 6, "label": "Monthly Precipitation/Temperature Distributions"},
     {"id": 8, "label": "Monthly Precipitation Reliability"},
-    {"id": 23, "label": "Monthly Station Departures + El Nino 3.4 Index"},
+    {
+        "id": 23,
+        "label": "Monthly Station Departures + El Nino 3.4 Index Time Series",
+    },
     {"id": 36, "label": "Month warmer than other Month for Year"},
     {
         "id": 58,

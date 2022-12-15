@@ -27,7 +27,7 @@ questions!</p>
 
 
 <table class="table table-striped table-bordered">
-<thead>
+<thead style="position: sticky;top: 0;background:#FFF;">
 <tr>
  <th rowspan="2">Variable</th>
  <th colspan="6">Timescale / Reporting Interval</th>
@@ -131,17 +131,18 @@ for various pests of interest.</p>
  available for download.
  
  </td>
- <td colspan="3" rowspan="2"><a href="/climodat/">Climodat Reports</a> contain summarized precipitation
- data from the NWS COOP network.
+ <td colspan="3" rowspan="2">
  <ul>
+  <li><a href="/climodat/">Climodat Reports</a> contain summarized precipitation
+  data from the NWS COOP network.</li>
   <li><a href="/climodat/monitor.php">Climodat Station Monitor</a></li>
-  <li><a href="/GIS/apps/coop/gsplot.phtml?var=prec&smonth=1&sday=1&year={$y}">Map of Totals</a></li>
+  <li><a href="/GIS/apps/coop/gsplot.phtml?var=prec&smonth=1&sday=1&year={$y}">Map of Totals</a> (legacy app)</li>
+  <li><a href="/plotting/auto/?q=97">Maps of Totals/Departures</a></li>
+  <li><a href="/plotting/auto/?q=84">Multiday summaries of MRMS estimates</a></li>
   <li><a href="/plotting/auto/?q=108">Single Site Graphs</a></li>
  </ul>
- 
- <br /><a href="/plotting/auto/?q=97">Maps of Departures</a> from average.
- <br /><a href="/plotting/auto/?q=84">Multiday summaries of MRMS estimates</a>.
- 
+
+
  </td>
 </tr>
 

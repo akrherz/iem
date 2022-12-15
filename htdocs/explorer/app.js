@@ -86,15 +86,19 @@ function mapClickHandler(event){
     // Create new div to hold window content
     var div = document.createElement("div");
     div.classList.add("datadiv");
-    div.setAttribute("data-station", feature.get("sid"));
+    var station = feature.get("sid");
+    div.setAttribute("data-station", station);
     var network = feature.get("network");
     div.setAttribute("data-network", network);
-    div.setAttribute("title", feature.get("sid") + " " + feature.get("sname"));
+    div.setAttribute("title", station + " " + feature.get("sname"));
     var prefix = (network.endsWith("ASOS") ? "asos": "coop");
     prefix = (network == "ISUSM") ? "isusm": prefix;
     var $newdiv = $(`.${prefix}-data-template`).clone().css("display", "block").appendTo($(div));
+    $newdiv.find("a").each(function(i, a){
+        a.href = a.href.replaceAll("{station}", station).replaceAll("{network}", network);
+    });
     $newdiv.removeClass(`${prefix}-data-template`);
-    var classID = feature.get("sid") + "_" + epoch;
+    var classID = station + "_" + epoch;
     epoch += 1;
     windowFactory(div, classID);
 }
@@ -234,7 +238,6 @@ function loadImage(elem){
 function compute_href(uri){
     // Some magic here :/
     var tokens = uri.split("/");
-    console.log(tokens);
     var res = "";
     if (tokens[1] == "plotting"){
         res = "/plotting/auto/?q=" + tokens[4] + "&";

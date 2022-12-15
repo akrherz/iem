@@ -1,10 +1,8 @@
 """Monthly departures and elnino"""
 import datetime
 
-import psycopg2.extras
-import numpy as np
 import pandas as pd
-from pyiem.util import get_autoplot_context, get_sqlalchemy_conn, get_dbconn
+from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
@@ -59,8 +57,6 @@ def get_description():
 
 def plotter(fdict):
     """Go"""
-    pgconn = get_dbconn("coop")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     ctx = get_autoplot_context(fdict, get_description())
 
     station = ctx["station"]
@@ -74,19 +70,14 @@ def plotter(fdict):
     if archiveend.day < 20:
         archiveend = archiveend.replace(day=1)
 
-    elnino = []
-    elninovalid = []
-    cursor.execute(
-        "SELECT anom_34, monthdate from elnino where monthdate >= %s and "
-        "monthdate < %s ORDER by monthdate ASC",
-        (sts, ets),
-    )
-    for row in cursor:
-        elnino.append(float(row[0]))
-        elninovalid.append(row[1])
-
-    elnino = np.array(elnino)
     with get_sqlalchemy_conn("coop") as conn:
+        ndf = pd.read_sql(
+            "SELECT anom_34, monthdate from elnino where monthdate >= %s and "
+            "monthdate < %s ORDER by monthdate ASC",
+            conn,
+            params=(sts, ets),
+            index_col="monthdate",
+        )
         df = pd.read_sql(
             """
         WITH climo2 as (
@@ -127,17 +118,19 @@ def plotter(fdict):
     df["date"] = pd.to_datetime(
         {"year": df["year"], "month": df["month"], "day": 1}
     )
+    df = df.set_index("date")
+    df["nino34"] = ndf["anom_34"]
 
     title = (
         f"{ctx['_sname']}:: Monthly Departure of {PDICT.get(varname)} "
-        "+ El Nino 3.4 Index\n"
+        "+ Niño 3.4 Index\n"
         "Climatology computed from present day period of record"
     )
     (fig, ax) = figure_axes(title=title, apctx=ctx)
 
     xticks = []
     xticklabels = []
-    for v in df["date"]:
+    for v in df.index:
         if v.month not in [1, 7]:
             continue
         if years > 8 and v.month == 7:
@@ -157,7 +150,7 @@ def plotter(fdict):
     if varname == "precip":
         _a, _b = _b, _a
     bars = ax.bar(
-        df["date"].dt.date.values,
+        df.index.date,
         df[varname].values,
         fc=_a,
         ec=_a,
@@ -171,8 +164,10 @@ def plotter(fdict):
 
     ax2 = ax.twinx()
 
-    ax2.plot(elninovalid, elnino, zorder=2, color="k", lw=2.0)
-    ax2.set_ylabel("El Nino 3.4 Index (line)")
+    ax2.plot(
+        ndf.index.values, ndf["anom_34"].values, zorder=2, color="k", lw=2.0
+    )
+    ax2.set_ylabel("<-- La Niña :: Niño 3.4 Index (line) :: El Niño -->")
     ax2.set_ylim(-3, 3)
 
     ax.set_ylabel(f"{PDICT.get(varname)} Departure (bars)")
