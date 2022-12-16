@@ -17,6 +17,7 @@ $pgconn = iemdb("iem");
 $rs = pg_prepare($pgconn, "SELECT", "SELECT extract(year from day) as year," .
     "extract(month from day) as month, sum(pday) as precip, " .
     "avg(avg_rh) as avg_rh, avg(max_tmpf) as avg_high, " .
+    "avg(avg_sknt) * 1.15 as avg_wind_mph, ".
     "avg(min_tmpf) as avg_low, avg((max_tmpf + min_tmpf) / 2.) as avg_temp " .
     "from summary s " .
     "JOIN stations t on (s.iemid = t.iemid) WHERE t.id = $1 and t.network = $2 " .
@@ -41,6 +42,7 @@ $rs = pg_prepare($pgconn, "SELECT", "SELECT " .
 $rs = pg_execute($pgconn, "SELECT", array($metadata["ncei91"]));
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
     $climo[$row["month"]] = $row;
+    $climo[$row["month"]]["avg_wind_mph"] = null;
 }
 
 function f($data, $key1, $key2, $fmt)
@@ -59,7 +61,8 @@ function f($data, $key1, $key2, $fmt)
 function make_table($data, $key, $minyear, $maxyear, $fmt, $climo)
 {
     $table = '<table class="table table-ruled table-condensed table-bordered">' .
-        '<thead><tr><th>Year</th><th>Jan</th><th>Feb</th><th>Mar</th>' .
+        '<thead style="position: sticky;top: 0;background:#FFF;">'.
+        '<tr><th>Year</th><th>Jan</th><th>Feb</th><th>Mar</th>' .
         '<th>Apr</th><th>May</th><th>Jun</th><th>Jul</th><th>Aug</th>' .
         '<th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th></tr></thead>' .
         '<tbody>';
@@ -86,23 +89,23 @@ function make_table($data, $key, $minyear, $maxyear, $fmt, $climo)
     }
     if (sizeof($climo) > 0) {
         $table .= @sprintf(
-            "<tr><td>%s</td><td>$fmt</td><td>$fmt</td>" .
+            "<tr><td>%s</td><td>%s</td><td>$fmt</td>" .
                 "<td>$fmt</td><td>$fmt</td><td>$fmt</td><td>$fmt</td>" .
                 "<td>$fmt</td><td>$fmt</td><td>$fmt</td><td>$fmt</td>" .
                 "<td>$fmt</td><td>$fmt</td></tr>",
             "NCEI Climatology",
-            $climo["1"][$key],
-            $climo["2"][$key],
-            $climo["3"][$key],
-            $climo["4"][$key],
-            $climo["5"][$key],
-            $climo["6"][$key],
-            $climo["7"][$key],
-            $climo["8"][$key],
-            $climo["9"][$key],
-            $climo["10"][$key],
-            $climo["11"][$key],
-            $climo["12"][$key]
+            f($climo["1"], $key, $key, $fmt),
+            f($climo["2"], $key, $key, $fmt),
+            f($climo["3"], $key, $key, $fmt),
+            f($climo["4"], $key, $key, $fmt),
+            f($climo["5"], $key, $key, $fmt),
+            f($climo["6"], $key, $key, $fmt),
+            f($climo["7"], $key, $key, $fmt),
+            f($climo["8"], $key, $key, $fmt),
+            f($climo["9"], $key, $key, $fmt),
+            f($climo["10"], $key, $key, $fmt),
+            f($climo["11"], $key, $key, $fmt),
+            f($climo["12"], $key, $key, $fmt)
         );
     }
     $table .= "</tbody></table>";
@@ -115,6 +118,14 @@ $preciptable = make_table(
     $minyear,
     $maxyear,
     "%.2f",
+    $climo
+);
+$windtable = make_table(
+    $data,
+    "avg_wind_mph",
+    $minyear,
+    $maxyear,
+    "%.1f",
     $climo
 );
 $hightable = make_table(
@@ -219,24 +230,27 @@ dataset.</p>
 <p><i class="fa fa-table"></i> To load shown data into Microsoft Excel,
 highlight the table information with your mouse and then copy/paste into Excel.</p>
 
-<h3>Precipitation Totals [inch]</h3>
+<h3><a name="precip"></a>Precipitation Totals [inch]</h3>
 
 {$preciptable}
 
-<h3>Average Daily High Temperature [F]</h3>
+<h3><a name="avg_wind_mph"></a>Average Wind Speed [MPH]</h3>
+
+{$windtable}
+
+<h3><a name="avg_high"></a>Average Daily High Temperature [F]</h3>
 
 {$hightable}
 
-<h3>Average Daily Low Temperature [F]</h3>
+<h3><a name="avg_low"></a>Average Daily Low Temperature [F]</h3>
 
 {$lowtable}
 
-<h3>Average Daily Temperature (high+low)/2 [F]</h3>
+<h3><a name="avg_temp"></a>Average Daily Temperature (high+low)/2 [F]</h3>
 
 {$temptable}
 
-
-<h3>Average Relative Humidity [%]</h3>
+<h3><a name="avg_rh"></a>Average Relative Humidity [%]</h3>
 
 <p>This value is computed via a simple average of available observations weighted
 by the duration between observations.</p>

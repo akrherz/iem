@@ -94,7 +94,7 @@ $t->content = <<<EOM
        <div class="col-md-4" style="overflow-y: scroll; height: 100%;">
             <a class="btn btn-default" target="_blank" href="/sites/site.php?station={station}&amp;network={network}"><i class="fa fa-sign-out"></i> Site Mainpage</a>
 
-           <button role="button" onClick="loaderClicked(this);" class="autoload"
+            <br /><button role="button" onClick="loaderClicked(this);" class="autoload"
             data-url-template="/plotting/auto/plot/145/network:ISUSM::station:{station}::var:tsoil::year:2022::_r:86.png"><i class="fa fa-thermometer-quarter"></i> 4in Soil Temps</button>
             <button role="button" onClick="loaderClicked(this);"
             data-url-template="/plotting/auto/plot/177/network:ISUSM::station:{station}::opt:sm::sts:2022-05-01%200000::_r:86.png"><i class="fa fa-tint"></i> Soil Moisture</button>
@@ -112,7 +112,7 @@ $t->content = <<<EOM
         <div class="col-md-4" style="overflow-y: scroll; height: 100%;">
             <a class="btn btn-default" target="_blank" href="/sites/site.php?station={station}&amp;network={network}"><i class="fa fa-sign-out"></i> Site Mainpage</a>
 
-            <button role="button" onClick="loaderClicked(this);" class="autoload"
+            <br /><button role="button" onClick="loaderClicked(this);" class="autoload"
             data-url-template="/plotting/auto/plot/140/network:{network}::station:{station}::syear:1973::month:4::day:1::days:30::varname:avg_wind_speed::year:2022::_r:86.png">
             <i class="fa fa-leaf"></i> April Wind Speed</button>
             
@@ -167,7 +167,7 @@ $t->content = <<<EOM
         <div class="col-md-4" style="overflow-y: scroll; height: 100%;">
             <a class="btn btn-default" target="_blank" href="/sites/site.php?station={station}&amp;network={network}"><i class="fa fa-sign-out"></i> Site Mainpage</a>
 
-            <button role="button" onClick="loaderClicked(this)" class="autoload"
+            <br /><button role="button" onClick="loaderClicked(this)" class="autoload"
             data-url-template="/plotting/auto/plot/3/network:{network}::station:{station}::month:year::type:avg-temp::_e:{elem}.js"
             ><i class="fa fa-thermometer-half"></i> Average Temperature</button>
 
