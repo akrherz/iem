@@ -103,6 +103,7 @@ def find_handler(q):
         return ap_handler, d["n"]
     # Can overlap with AFOS_RE
     if STATION_RE.match(q):
+        q = q.upper()
         if has_station(q):
             return station_handler, q.upper()
     if AFOS_RE.match(q):
