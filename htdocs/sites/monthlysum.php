@@ -57,6 +57,14 @@ function f($data, $key1, $key2, $fmt)
     if ($val === NULL) return "M";
     return sprintf($fmt, $val);
 }
+function f2($data, $key, $fmt){
+    if (!array_key_exists($key, $data)){
+        return "M";
+    }
+    $val = $data[$key];
+    if (is_null($val)) return "M";
+    return sprintf($fmt, $val);
+}
 
 function make_table($data, $key, $minyear, $maxyear, $fmt, $climo)
 {
@@ -89,23 +97,23 @@ function make_table($data, $key, $minyear, $maxyear, $fmt, $climo)
     }
     if (sizeof($climo) > 0) {
         $table .= @sprintf(
-            "<tr><td>%s</td><td>%s</td><td>$fmt</td>" .
-                "<td>$fmt</td><td>$fmt</td><td>$fmt</td><td>$fmt</td>" .
-                "<td>$fmt</td><td>$fmt</td><td>$fmt</td><td>$fmt</td>" .
-                "<td>$fmt</td><td>$fmt</td></tr>",
+            "<tr><td>%s</td><td>%s</td><td>%s</td>" .
+                "<td>%s</td><td>%s</td><td>%s</td><td>%s</td>" .
+                "<td>%s</td><td>%s</td><td>%s</td><td>%s</td>" .
+                "<td>%s</td><td>%s</td></tr>",
             "NCEI Climatology",
-            f($climo["1"], $key, $key, $fmt),
-            f($climo["2"], $key, $key, $fmt),
-            f($climo["3"], $key, $key, $fmt),
-            f($climo["4"], $key, $key, $fmt),
-            f($climo["5"], $key, $key, $fmt),
-            f($climo["6"], $key, $key, $fmt),
-            f($climo["7"], $key, $key, $fmt),
-            f($climo["8"], $key, $key, $fmt),
-            f($climo["9"], $key, $key, $fmt),
-            f($climo["10"], $key, $key, $fmt),
-            f($climo["11"], $key, $key, $fmt),
-            f($climo["12"], $key, $key, $fmt)
+            f2($climo["1"], $key, $fmt),
+            f2($climo["2"], $key, $fmt),
+            f2($climo["3"], $key, $fmt),
+            f2($climo["4"], $key, $fmt),
+            f2($climo["5"], $key, $fmt),
+            f2($climo["6"], $key, $fmt),
+            f2($climo["7"], $key, $fmt),
+            f2($climo["8"], $key, $fmt),
+            f2($climo["9"], $key, $fmt),
+            f2($climo["10"], $key, $fmt),
+            f2($climo["11"], $key, $fmt),
+            f2($climo["12"], $key, $fmt)
         );
     }
     $table .= "</tbody></table>";
