@@ -169,6 +169,8 @@ def main(argv):
     """Run main()"""
     ts = utc(*[int(i) for i in argv[1:5]])
     for prod in ["n0r", "n0q"]:
+        if ts < utc(2010, 11, 13) and prod == "n0q":
+            continue
         run(prod, ts)
 
 
