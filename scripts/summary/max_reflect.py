@@ -49,7 +49,7 @@ def run(prod, sts):
       sts (datetime): date to run for
     """
     yest = utc() - datetime.timedelta(days=1)
-    routes = "ac" if sts.date() == yest.date() else "c"
+    routes = "ac" if sts.date() == yest.date() else "a"
     label = f"{sts.hour}z{sts.hour}z"
     LOG.info("Running for %s with routes=%s, label=%s", sts, routes, label)
     ets = sts + datetime.timedelta(days=1)
@@ -134,7 +134,8 @@ def run(prod, sts):
     if sts.hour == 6:
         layer = f"{layer}6"
     png = requests.get(
-        f"{URLBASE}layers[]=uscounties&layers[]={layer}&ts={sts:%Y%m%d%H%M}"
+        f"{URLBASE}layers[]=uscounties&layers[]={layer}&ts={sts:%Y%m%d%H%M}",
+        timeout=120,
     )
     with open(f"/tmp/{sts:%Y%m%d%H}.png", "wb") as fh:
         fh.write(png.content)
@@ -150,7 +151,8 @@ def run(prod, sts):
     # US
     png = requests.get(
         f"{URLBASE}sector=conus&layers[]=uscounties&layers[]={layer}"
-        f"&ts={sts:%Y%m%d%H%M}"
+        f"&ts={sts:%Y%m%d%H%M}",
+        timeout=120,
     )
     with open(f"/tmp/{sts:%Y%m%d%H}.png", "wb") as fh:
         fh.write(png.content)
