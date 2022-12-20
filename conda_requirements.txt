@@ -22,7 +22,7 @@ imageio
 # soft requirement for pandas
 lxml
 # pin down until bugs are fixed
-matplotlib-base<3.5
+matplotlib-base
 # various places
 metar
 # duh
