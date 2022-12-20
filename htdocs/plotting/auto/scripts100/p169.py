@@ -263,7 +263,7 @@ def plotter(fdict):
     ax.set_ylim(10.5, 0.5)
     ax.grid(True)
     ax.set_xlabel("Delta Degrees Fahrenheit")
-    return fig, df
+    return fig, events
 
 
 if __name__ == "__main__":
