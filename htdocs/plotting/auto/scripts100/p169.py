@@ -200,7 +200,7 @@ def plotter(fdict):
         # Create aggregate
         gdf = df.rolling(f"{hours}h", closed="both").agg(["max", "min"])
         gdf.columns = ["_".join(col) for col in gdf.columns.values]
-        df = df.join(gdf)
+        df = df.join(gdf).iloc[::-1]
         df["delta"] = (df["tmpf"] - df[deltacol]).abs()
         # Only consider cases when current val equals extremum
         events = (
@@ -279,11 +279,10 @@ def plotter(fdict):
 if __name__ == "__main__":
     plotter(
         {
-            "zstation": "EST",
-            "network": "IA_ASOS",
-            "hours": 12,
+            "zstation": "DEN",
+            "network": "CO_ASOS",
+            "hours": 24,
             "dir": "warm",
             "how": "over",
-            "month": "spring",
         }
     )
