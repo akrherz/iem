@@ -157,9 +157,26 @@ mean.</p>
     channels than the default phenomena/significance channels. These channels
     have a suffix of <code>-ACT</code>ion.  For example, a continues Tornado
     Warning statement would be in <code>TO.W-CON</code>.</li>
+    <li><strong>20 Dec 2022:</strong> Added documentation on handling of
+    ASOS/METAR wind gusts.  Mount Washington KMWN was thresholded to 80kts.
+    </li>
 </ul></p>
 
-		{$channels}
+<p><strong>ASOS/METAR Wind Gusts</strong>
+
+<p>The IEM realtime ingest attempts to properly handle wind gust and peak
+wind gust reports.  When either of these meet or exceed 50 kts, an alert like
+so is generated. <code>Dakota Hills,CO (C99) ASOS  reports gust of 54 knots
+(62.1 mph) from WNW @ 1415Z KC99 201415Z AUTO 30029G54KT 10SM CLR M12/M18 A3009 RMK AO2</code>.</p>
+
+<p>The channels associated with this alert include the corresponding WFO <code>XXX</code>,
+the 4-character ICAO for the site <code>METAR.ICAO</code>, and in increments of ten thresholded
+wind channels for the site <code>METAR.ICAO.WIND##</code>.  This allows one to subscribe to
+alerts that meet or exceed a given threshold.  For example, a 75 knot gust for Mount Washington
+(KMWN) would go to channels <code>METAR.KMWN</code>, <code>METAR.KMWN.WIND50</code>
+, <code>METAR.KMWN.WIND60</code>, and <code>METAR.KMWN.WIND70</code>.</p>
+
+{$channels}
 
 <a name="bots"><h3>Twitter IEMBots and Channel Subscriptions</h3></a>
 
