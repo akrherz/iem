@@ -53,7 +53,7 @@ def get_description():
     match between the starting timestamp and ending timestamp of the given
     window of time.  For example, computing a 12 hour change between exactly
     6:53 AM and 6:53 PM.</td></tr>
-    <tr><td>Compute over time window/td><td>This is more forgiving and
+    <tr><td>Compute over time window</td><td>This is more forgiving and
     considers the observation at the start of the window and then any
     subsequent observation over the window of time.  The end of the
     window is inclusive as well.</td></tr>
@@ -195,7 +195,7 @@ def plotter(fdict):
             df["delta"] = df[deltacol] - df["tmpf"]
         else:
             df["delta"] = df["tmpf"] - df[deltacol]
-        events = df.sort_values("delta", ascending=False).head(100)
+        events = df.sort_values("delta", ascending=False).head(100).copy()
     elif ctx["how"] == "over":
         # Create aggregate
         gdf = df.rolling(f"{hours}h", closed="both").agg(["max", "min"])
@@ -207,6 +207,7 @@ def plotter(fdict):
             df[df["tmpf"] == df[compcol]]
             .sort_values("delta", ascending=False)
             .head(100)
+            .copy()
         )
 
     hlabel = "Over Exactly" if ctx["how"] == "exact" else "Within"
@@ -222,10 +223,9 @@ def plotter(fdict):
 
     labels = []
     used = []
+    events["use"] = 0
     # workaround dups from above
     for valid, row in events.iterrows():
-        if len(labels) >= 10:
-            break
         # Construct time period with data
         sts = valid
         ets = valid + timedelta(hours=hours) + timedelta(minutes=1)
@@ -245,6 +245,12 @@ def plotter(fdict):
             ets = entry.index[0].to_pydatetime()
         else:
             ets -= timedelta(minutes=1)
+        events.at[valid, "use"] = 1
+        events.at[valid, "start_valid_utc"] = sts
+        events.at[valid, "end_valid_utc"] = ets
+        # Allow the output to contain more data
+        if len(labels) >= 10:
+            continue
         sts = sts.replace(tzinfo=pytz.UTC).astimezone(pytz.timezone(tzname))
         ets = ets.replace(tzinfo=pytz.UTC).astimezone(pytz.timezone(tzname))
         lbl = (
@@ -263,7 +269,11 @@ def plotter(fdict):
     ax.set_ylim(10.5, 0.5)
     ax.grid(True)
     ax.set_xlabel("Delta Degrees Fahrenheit")
-    return fig, events
+    return fig, (
+        events[events["use"] == 1]
+        .reset_index()
+        .drop(columns=["utc_valid", "end_valid", "use"], errors="ignore")
+    )
 
 
 if __name__ == "__main__":
