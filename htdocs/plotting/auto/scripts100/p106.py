@@ -2,6 +2,7 @@
 import datetime
 
 import psycopg2.extras
+from pyiem.exceptions import NoDataFound
 from pyiem.plot import figure_axes
 from pyiem.util import get_autoplot_context, get_dbconn
 
@@ -129,6 +130,8 @@ def plotter(fdict):
     data = []
     for _ in range(24):
         data.append([])
+    if cursor.rowcount == 0:
+        raise NoDataFound("Failed to find any data for station.")
     for row in cursor:
         data[row[0].hour].append(row[1])
     cursor.close()
