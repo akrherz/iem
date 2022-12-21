@@ -142,6 +142,10 @@ def do(meta, station, acis_station, interactive):
                 continue
             work.append(f"{col} = %s")
             args.append(newval)
+            if col in ["high", "precip"]:
+                work.append(
+                    f"{'temp' if col == 'high' else 'precip'}_estimated = 'f'"
+                )
             if dbhas:
                 updates[col] += 1
         if not work:
