@@ -200,7 +200,9 @@ def plotter(fdict):
         # Create aggregate
         gdf = df.rolling(f"{hours}h", closed="both").agg(["max", "min"])
         gdf.columns = ["_".join(col) for col in gdf.columns.values]
-        df = df.join(gdf).iloc[::-1]
+        df = df.join(gdf)
+        if df.index[0] < df.index[-1]:
+            df = df.iloc[::-1]
         df["delta"] = (df["tmpf"] - df[deltacol]).abs()
         # Only consider cases when current val equals extremum
         events = (
