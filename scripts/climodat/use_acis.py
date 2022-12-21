@@ -6,7 +6,12 @@ import time
 import requests
 import pandas as pd
 from pyiem.network import Table as NetworkTable
-from pyiem.util import get_dbconn, get_dbconnstr, logger, exponential_backoff
+from pyiem.util import (
+    get_dbconn,
+    logger,
+    exponential_backoff,
+    get_sqlalchemy_conn,
+)
 from pyiem.reference import TRACE_VALUE, ncei_state_codes
 
 LOG = logger()
@@ -17,10 +22,6 @@ def safe(val):
     """Hack"""
     if pd.isnull(val):
         return None
-    if val in ["M", "S"]:
-        return None
-    if val == "T":
-        return TRACE_VALUE
     # Multi-day we can't support
     if isinstance(val, str) and val.endswith("A"):
         return None
@@ -35,10 +36,10 @@ def compare(row, colname):
     oldval = safe(row[colname])
     newval = safe(row[f"a{colname}"])
     if oldval is None and newval is not None:
-        return True
+        return newval
     if newval is not None and oldval != newval:
-        return True
-    return False
+        return newval
+    return None
 
 
 def do(meta, station, acis_station, interactive):
@@ -57,10 +58,10 @@ def do(meta, station, acis_station, interactive):
         "edate": meta["attributes"].get("CEILING", today.strftime(fmt)),
         "elems": [
             {"name": "maxt", "add": "t"},
-            {"name": "mint", "add": "t"},
+            {"name": "mint"},
             {"name": "pcpn", "add": "t"},
-            {"name": "snow", "add": "t"},
-            {"name": "snwd", "add": "t"},
+            {"name": "snow"},
+            {"name": "snwd"},
         ],
     }
     if not interactive:
@@ -93,53 +94,62 @@ def do(meta, station, acis_station, interactive):
         j["data"],
         columns="day ahigh alow aprecip asnow asnowd".split(),
     )
-    for col in "ahigh alow aprecip asnow asnowd".split():
+    for col in "ahigh aprecip".split():
         acis[[col, f"{col}_hour"]] = pd.DataFrame(
             acis[col].tolist(),
             index=acis.index,
         )
+        # hour values of -1 are missing
+        acis.loc[acis[f"{col}_hour"] < 0, f"{col}_hour"] = pd.NA
+    # Rectify the name to match IEM database
+    acis = acis.rename(columns={"ahigh_hour": "atemp_hour"}).replace(
+        {"T": TRACE_VALUE, "M": pd.NA, "S": pd.NA}
+    )
+
     LOG.info("Loaded %s rows from ACIS", len(acis.index))
     acis["day"] = pd.to_datetime(acis["day"])
     acis = acis.set_index("day")
     pgconn = get_dbconn("coop")
-    obs = pd.read_sql(
-        f"SELECT day, high, low, precip, snow, snowd from {table} WHERE "
-        "station = %s ORDER by day ASC",
-        get_dbconnstr("coop"),
-        params=(station,),
-        index_col="day",
-    )
+    with get_sqlalchemy_conn("coop") as conn:
+        obs = pd.read_sql(
+            """
+            SELECT day, high, low, precip, snow, snowd, temp_hour,
+            precip_hour, 1 as dbhas
+            from alldata WHERE station = %s ORDER by day ASC
+            """,
+            conn,
+            params=(station,),
+            index_col="day",
+        )
     LOG.info("Loaded %s rows from IEM", len(obs.index))
-    obs["dbhas"] = 1
     cursor = pgconn.cursor()
     # join the tables
     df = acis.join(obs, how="left")
     inserts = 0
-    updates = 0
+    updates = {}
     minday = None
     maxday = None
+    cols = "high low precip snow snowd temp_hour precip_hour".split()
+    for col in cols:
+        updates[col] = 0
     for day, row in df.iterrows():
         work = []
         args = []
-        for col in ["high", "low", "precip", "snow", "snowd"]:
-            if not compare(row, col):
+        dbhas = row["dbhas"] == 1
+        for col in cols:
+            newval = compare(row, col)
+            if newval is None:
                 continue
             work.append(f"{col} = %s")
-            args.append(safe(row[f"a{col}"]))
-            if col in ["high", "precip"]:
-                work.append(
-                    f"{'temp' if col == 'high' else 'precip'}_hour = %s"
-                )
-                work.append(
-                    f"{'temp' if col == 'high' else 'precip'}_estimated = 'f'"
-                )
-                args.append(row[f"a{col}_hour"])
+            args.append(newval)
+            if dbhas:
+                updates[col] += 1
         if not work:
             continue
         if minday is None:
             minday = day
         maxday = day
-        if row["dbhas"] != 1:
+        if not dbhas:
             inserts += 1
             cursor.execute(
                 f"INSERT into {table} (station, day, sday, year, month) "
@@ -151,20 +161,28 @@ def do(meta, station, acis_station, interactive):
             "day = %s",
             (*args, station, day),
         )
-        updates += 1
 
+    uu = [
+        updates["high"],
+        updates["temp_hour"],
+        updates["low"],
+        updates["precip"],
+        updates["precip_hour"],
+        updates["snow"],
+        updates["snowd"],
+    ]
     if minday is not None:
         LOG.warning(
-            "%s[%s %s] Updates: %s Inserts: %s",
+            "%s[%s %s] New:%s Updates H:%s HH:%s L:%s P:%s PH:%s S:%s D:%s",
             station,
             minday.date(),
             maxday.date(),
-            updates,
             inserts,
+            *uu,
         )
     cursor.close()
     pgconn.commit()
-    return updates
+    return max(uu)
 
 
 def main(argv):
