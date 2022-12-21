@@ -7,31 +7,28 @@ from pyiem import util
 from pyiem.plot import figure_axes
 from pyiem.exceptions import NoDataFound
 
-PDICT = dict(
-    [
-        ("max-high", "Maximum High"),
-        ("avg-high", "Average High"),
-        ("min-high", "Minimum High"),
-        ("max-low", "Maximum Low"),
-        ("avg-low", "Average Low"),
-        ("min-low", "Minimum Low"),
-        ("max-precip", "Maximum Daily Precip"),
-        ("range-hilo", "Range between Min Low and Max High"),
-        ("sum-precip", "Total Precipitation"),
-        ("avg-precip", "Daily Average Precipitation"),
-        ("avg-precip2", "Daily Average Precipitation (on wet days)"),
-        ("days-precip", "Days with Precipitation Above (threshold)"),
-        (
-            "days-high-above",
-            "Days with High Temp Greater Than or Equal To (threshold)",
-        ),
-        (
-            "days-lows-above",
-            "Days with Low Temp Greater Than or Equal To (threshold)",
-        ),
-        ("days-lows-below", "Days with Low Temp Below (threshold)"),
-    ]
-)
+PDICT = {
+    "max-high": "Maximum High",
+    "avg-high": "Average High",
+    "min-high": "Minimum High",
+    "max-low": "Maximum Low",
+    "avg-low": "Average Low",
+    "min-low": "Minimum Low",
+    "max-precip": "Maximum Daily Precip",
+    "range-hilo": "Range between Min Low and Max High",
+    "sum-precip": "Total Precipitation",
+    "avg-precip": "Daily Average Precipitation",
+    "avg-precip2": "Daily Average Precipitation (on wet days)",
+    "days-precip": "Days with Precipitation Above (threshold)",
+    "days-high-above": (
+        "Days with High Temp Greater Than or Equal To (threshold)"
+    ),
+    "days-high-below": "Days with High Temp Below (threshold)",
+    "days-lows-above": (
+        "Days with Low Temp Greater Than or Equal To (threshold)"
+    ),
+    "days-lows-below": "Days with Low Temp Below (threshold)",
+}
 
 
 def get_description():
@@ -106,6 +103,7 @@ def plotter(fdict):
         max(precip) as "max-precip",
         sum(precip) as "sum-precip",
         sum(case when high >= %s then 1 else 0 end) as "days-high-above",
+        sum(case when high < %s then 1 else 0 end) as "days-high-below",
         sum(case when low >= %s then 1 else 0 end) as "days-lows-above",
         sum(case when low < %s then 1 else 0 end) as "days-lows-below",
         avg(precip) as "avg-precip",
@@ -118,6 +116,7 @@ def plotter(fdict):
         """,
             conn,
             params=(
+                threshold,
                 threshold,
                 threshold,
                 threshold,
@@ -160,7 +159,9 @@ def plotter(fdict):
         colorabove = "dodgerblue"
         colorbelow = "tomato"
         precision = "%.2f"
-    bars = ax.bar(np.array(years) - 0.4, data, fc=colorabove, ec=colorabove)
+    bars = ax.bar(
+        np.array(years), data, fc=colorabove, ec=colorabove, align="center"
+    )
     for i, mybar in enumerate(bars):
         if data[i] < avgv:
             mybar.set_facecolor(colorbelow)
