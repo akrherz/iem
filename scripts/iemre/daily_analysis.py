@@ -238,16 +238,18 @@ def grid_day12(ts, ds):
             SELECT id, ST_X(geom) as lon, ST_Y(geom) as lat, state, name
             from stations where ST_Contains(
   ST_GeomFromEWKT('SRID=4326;POLYGON((%s %s, %s  %s, %s %s, %s %s, %s %s))'),
-  geom) and network ~* 'CLIMATE' and (temp24_hour is null or
-            temp24_hour between 4 and 10)
-            and substr(id, 3, 1) not in ('C', 'T')
+  geom) and network ~* 'CLIMATE' and substr(id, 3, 1) not in ('C', 'T')
             and substr(id, 3, 4) != '0000'
         )
         SELECT m.lon, m.lat, m.state, m.id as station, m.name as name,
-        case when precip_estimated then null else precip end as precipdata,
+        case when (precip_estimated or precip_hour is null or
+            precip_hour < 4 or precip_hour > 11) then null
+            else precip end as precipdata,
         snow as snowdata, snowd as snowddata,
-        case when temp_estimated then null else high end as highdata,
-        case when temp_estimated then null else low end as lowdata
+        case when (temp_estimated or temp_hour is null or temp_hour < 4
+            or temp_hour > 11) then null else high end as highdata,
+        case when (temp_estimated or temp_hour is null or temp_hour < 4
+            or temp_hour > 11) then null else low end as lowdata
         from alldata a JOIN mystations m
         ON (a.station = m.id) WHERE a.day = %s
         """,
