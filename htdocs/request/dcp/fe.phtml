@@ -55,7 +55,6 @@ dataset is huge and the download may take a number of seconds to process.</p>
 <input type="submit" value="Change Group">
 </form>
 
-
 <form target="_blank" method="GET" action="/cgi-bin/request/hads.py" name="iemss">
 <input type='hidden' name='network' value="{$network}" />
 
@@ -73,7 +72,8 @@ dataset is huge and the download may take a number of seconds to process.</p>
 
 <p>Times are specified in UTC. Archive starts in 2002 for Iowa and on
 9 Dec 2010 for all others.  You can only download data within one year at a
-time due to size/speed contraints.</p>
+time due to size/speed contraints.  When requesting all stations, you can
+only request 24 hours worth of data.</p>
 
 <table class="table table-condensed">
   <tr>

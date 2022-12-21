@@ -2,11 +2,13 @@
 Download Interface for HADS data
 """
 # pylint: disable=abstract-class-instantiated
+from datetime import timedelta
 from io import StringIO, BytesIO
 
 import pandas as pd
 from pandas.io.sql import read_sql
 from paste.request import parse_formvars
+from pyiem.network import Table as NetworkTable
 from pyiem.util import get_sqlalchemy_conn, utc
 from sqlalchemy import text
 
@@ -86,7 +88,7 @@ def threshold_search(table, threshold, thresholdvar):
 def application(environ, start_response):
     """Go do something"""
     form = parse_formvars(environ)
-    # network = form.get('network')
+    network = form.get("network")
     delimiter = DELIMITERS.get(form.get("delim", "comma"))
     what = form.get("what", "dl")
     threshold = form.get("threshold", -99)
@@ -95,6 +97,10 @@ def application(environ, start_response):
     thresholdvar = form.get("threshold-var", "RG")
     sts, ets = get_time(form)
     stations = form.getall("stations")
+    if "_ALL" in stations and network is not None:
+        stations = list(NetworkTable(network[:10]).sts.keys())
+        if (ets - sts) > timedelta(hours=24):
+            ets = sts + timedelta(hours=24)
     if not stations:
         start_response("200 OK", [("Content-type", "text/plain")])
         return [b"Error, no stations specified for the query!"]
