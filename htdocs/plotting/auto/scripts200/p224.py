@@ -14,16 +14,22 @@ PDICT = {
     "active": "Include WaWA that have been created or valid at the given time",
     "within": "Include WaWA with VTEC issuance time before the given time",
 }
+PDICT2 = {
+    "pop": "Population",
+    "area": "Area",
+}
 
 
 def get_description():
     """Return a dict describing how to call this plotter"""
     desc = {}
     desc["data"] = True
+    desc["cache"] = 120
     desc[
         "description"
     ] = """
-    <p>This autoplot attempts to estimate the number of people in the US
+    <p>This autoplot attempts to estimate the number of people or area
+    in the US
     under a given NWS Watch/Warning/Advisory (WaWA).  Double-accounting is
     somewhat a problem here in the case of overlapping polygons. For each
     WaWA type, if there are polygons associated with the event, the
@@ -53,6 +59,13 @@ def get_description():
     """
     desc["arguments"] = [
         dict(
+            type="select",
+            options=PDICT2,
+            name="which",
+            default="pop",
+            label="Aggregate Population or Area",
+        ),
+        dict(
             type="datetime",
             name="valid",
             default=utc().strftime("%Y/%m/%d %H%M"),
@@ -80,6 +93,7 @@ def plotter(fdict):
 
     isscol = "issue" if ctx["opt"] == "within" else "product_issue"
     popyear = int(valid.year - (valid.year % 5))
+    col = "final_pop" if ctx["which"] == "pop" else "final_area_sqkm"
     with get_sqlalchemy_conn("postgis") as conn:
         df = pd.read_sql(
             text(
@@ -93,26 +107,31 @@ def plotter(fdict):
                 GROUP by key ORDER by pop DESC
             ), sbwevents as (
                 select phenomena ||'.'|| significance as key,
-                count(*) from sbw w
+                count(*),
+                sum(st_area(w.geom::geography) / 1e6) as area from sbw w
                 WHERE polygon_begin <= :valid and polygon_end >= :valid
                 GROUP by key
             ), sbwagg as (
-                select p.key, p.pop, e.count as events
+                select p.key, p.pop, e.count as events, e.area
                 from sbwpop p JOIN sbwevents e on (p.key = e.key)
             ), cbwpop as (
                 select phenomena ||'.'|| significance as key,
                 array_agg(distinct substr(w.ugc, 1, 2)) as states,
+                sum(area2163) as area,
                 sum(gpw_population_{popyear}) as pop, count(*) as events
                 from warnings w JOIN ugcs u on (w.gid = u.gid)
                 WHERE {isscol} <= :valid and expire >= :valid
                 GROUP by key ORDER by pop DESC
             )
             select c.key, c.pop as zone_pop, s.pop as poly_pop, c.states,
+            c.area as zone_area_sqkm, s.area as poly_area_sqkm,
             c.events as zone_events, coalesce(s.events, 0) as poly_events,
             (case when s.pop is not null then s.pop else c.pop end)
-                as final_pop
+                as final_pop,
+            (case when s.area is not null then s.area else c.area end)
+                as final_area_sqkm
             from cbwpop c LEFT JOIN sbwagg s
-            on (c.key = s.key) ORDER by final_pop DESC
+            on (c.key = s.key) ORDER by {col} DESC
                 """
             ),
             conn,
@@ -121,16 +140,23 @@ def plotter(fdict):
         )
     if df.empty:
         raise NoDataFound("No WaWA data found at the given timestamp!")
+    df["label"] = df.index.to_series().apply(
+        lambda x: get_ps_string(*x.split("."))
+    )
     df["states"] = df["states"].apply(" ".join)
     dt = valid.astimezone(ZoneInfo("America/Chicago")).strftime(
         "%Y-%m-%d %-I:%M %p %Z"
     )
     qualifier = "Active" if ctx["opt"] == "within" else "Created/Active"
-    title = f"Population under {qualifier} NWS Watch/Warning/Advisory @ {dt}"
-    subtitle = (
-        f"Based on GPW {popyear} Population "
-        "and IEM Warning/Watch/Advisory data"
+    title = (
+        f"{PDICT2[ctx['which']]} under {qualifier} "
+        f"NWS Watch/Warning/Advisory @ {dt}"
     )
+    subtitle = "Unofficial IEM Warning/Watch/Advisory data"
+    if ctx["which"] == "pop":
+        subtitle = f"Based on GPW {popyear} Population and {subtitle}"
+    else:
+        title = title.replace(" under ", "[sq km] under ")
 
     fig = figure(title=title, subtitle=subtitle, apctx=ctx)
     # add axes without any markups
@@ -138,7 +164,7 @@ def plotter(fdict):
     ypos = 0.8
     xbarstart = 0.26
     xbarend = 0.85
-    maxval = df["final_pop"].max()
+    maxval = df[col].max()
 
     fig.text(xbarend + 0.03, ypos + 0.09, "Cnty/Zone\nEvents", ha="center")
     fig.text(xbarend + 0.07, ypos + 0.09, "Polygons")
@@ -149,21 +175,20 @@ def plotter(fdict):
         ax.add_patch(rect)
         # Draw a rectange for each of the top 5
         color = NWS_COLORS.get(key, "#EEEEEE")
-        label = get_ps_string(*key.split("."))
         # A simple abbrevation to start
         fig.text(0.03, ypos + 0.01, key, color=color, fontsize="xx-large")
         # A lablel above the top
-        fig.text(0.03, ypos + 0.05, label, fontsize="large")
+        fig.text(0.03, ypos + 0.05, row["label"], fontsize="large")
         # The population number with commas
         fig.text(
             0.25,
             ypos + 0.01,
-            f"{int(row['final_pop']):,}",
+            f"{int(row[col]):,}",
             fontsize="x-large",
             ha="right",
         )
         # A bar in the color of the event
-        xlen = row["final_pop"] / maxval * (xbarend - xbarstart)
+        xlen = row[col] / maxval * (xbarend - xbarstart)
         rect = Rectangle((xbarstart, ypos + 0.01), xlen, 0.03, facecolor=color)
         ax.add_patch(rect)
 
@@ -194,4 +219,4 @@ def plotter(fdict):
 
 
 if __name__ == "__main__":
-    plotter({})
+    plotter({"which": "area"})
