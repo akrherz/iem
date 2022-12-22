@@ -37,13 +37,12 @@ def do(now):
     tmpfd = tempfile.NamedTemporaryFile(delete=False)
     tmpfd.write(req.content)
     tmpfd.close()
-    pqstr = "plot %s %s iaroads.png iaroads/iaroads_%s.png png" % (
-        routes,
-        now.strftime("%Y%m%d%H%M"),
-        now.strftime("%H%M"),
+    pqstr = (
+        f"plot {routes} {now:%Y%m%d%H%M} iaroads.png "
+        f"iaroads/iaroads_{now:%H%M}.png png"
     )
     LOG.debug(pqstr)
-    subprocess.call("pqinsert -i -p '%s' %s" % (pqstr, tmpfd.name), shell=True)
+    subprocess.call(f"pqinsert -i -p '{pqstr}' {tmpfd.name}", shell=True)
     os.unlink(tmpfd.name)
 
 

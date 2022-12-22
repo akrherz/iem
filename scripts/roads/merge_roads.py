@@ -15,9 +15,7 @@ def main():
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
     df = read_sql(
-        """
-    SELECT idot_id, longname from roads_base where archive_end > 'TODAY'
-    """,
+        "SELECT idot_id, longname from roads_base where archive_end is null",
         get_dbconnstr("postgis"),
         index_col="idot_id",
     )
@@ -44,8 +42,9 @@ def main():
         sys_id = props["ROUTE_RANK"]
         longname = props["LONG_NAME"]
         geom = (
-            "ST_Transform(ST_SetSrid(ST_GeomFromText('%s'), 3857), 26915)"
-        ) % (path.wkt)
+            f"ST_Transform(ST_SetSrid(ST_GeomFromText('{path.wkt}'), 3857), "
+            "26915)"
+        )
         LOG.info("idot_id %s [%s] is new", idot_id, major)
         cursor.execute(
             f"""

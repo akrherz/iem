@@ -2,8 +2,6 @@
 
  * JSON data is in 3857
 """
-import sys
-import json
 
 from shapely.geometry import LineString, MultiLineString
 import requests
@@ -45,7 +43,7 @@ def main():
             f"""
         SELECT st_length(geom),
         st_length({geom}), archive_begin from roads_base
-        where idot_id = %s and archive_end > '2022-01-01'::date
+        where idot_id = %s and archive_end is null
         ORDER by archive_begin DESC
         """,
             (idot_id,),
@@ -60,7 +58,7 @@ def main():
             cursor.execute(
                 f"""
             UPDATE roads_base SET geom = {geom}
-            WHERE idot_id = %s and archive_end > '2022-01-01'::date
+            WHERE idot_id = %s and archive_end is null
             """,
                 (idot_id,),
             )

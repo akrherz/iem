@@ -36,11 +36,18 @@ import zipfile
 import subprocess
 import os
 
+import pandas as pd
 import psycopg2.extras
 from shapely.wkb import loads
 import shapefile
 import requests
-from pyiem.util import exponential_backoff, get_dbconn, logger
+from pyiem.util import (
+    exponential_backoff,
+    get_dbconn,
+    logger,
+    get_sqlalchemy_conn,
+    utc,
+)
 
 LOG = logger()
 URI = (
@@ -94,7 +101,7 @@ ROADCOND = {
 }
 
 
-def export_shapefile(txn, utc):
+def export_shapefile(txn, valid):
     """Export a Shapefile of Road Conditions"""
     os.chdir("/tmp")
     shp = shapefile.Writer("iaroad_cond")
@@ -134,16 +141,16 @@ def export_shapefile(txn, utc):
         )
 
     shp.close()
-    with open("iaroad_cond.prj", "w") as fp:
+    with open("iaroad_cond.prj", "w", encoding="ascii") as fp:
         fp.write(EPSG26915)
     with zipfile.ZipFile("iaroad_cond.zip", "w") as zfp:
         for suffix in ["shp", "shx", "dbf", "prj"]:
             zfp.write(f"iaroad_cond.{suffix}")
 
     subprocess.call(
-        f"pqinsert -p 'zip ac {utc:%Y%m%d%H%M} "
+        f"pqinsert -p 'zip ac {valid:%Y%m%d%H%M} "
         "gis/shape/26915/ia/iaroad_cond.zip "
-        f"GIS/iaroad_cond_{utc:%Y%m%d%H%M}.zip zip' iaroad_cond.zip",
+        f"GIS/iaroad_cond_{valid:%Y%m%d%H%M}.zip zip' iaroad_cond.zip",
         shell=True,
     )
 
@@ -156,15 +163,16 @@ def main():
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    lookup = {}
-    current = {}
-    cursor.execute(
-        "select c.segid, b.longname, c.cond_code, b.idot_id from "
-        "roads_current c JOIN roads_base b on (c.segid = b.segid)"
-    )
-    for row in cursor:
-        lookup[row[3]] = row[0]
-        current[row[0]] = row[2]
+    with get_sqlalchemy_conn("postgis") as conn:
+        current = pd.read_sql(
+            """
+            select c.segid, b.longname, c.cond_code, b.idot_id,
+            c.valid at time zone 'UTC' as utc_valid from
+            roads_current c JOIN roads_base b on (c.segid = b.segid)
+            """,
+            conn,
+            index_col="idot_id",
+        )
 
     req = exponential_backoff(requests.get, URI, timeout=30)
     if req is None:
@@ -181,14 +189,15 @@ def main():
     dirty = False
     for feat in jobj["features"]:
         props = feat["attributes"]
-        segid = lookup.get(props["SEGMENT_ID"])
-        if segid is None:
+        idot_id = props["SEGMENT_ID"]
+        if idot_id not in current.index:
             LOG.warning(
-                "Unknown longname '%s' segment_id '%s'",
+                "Unknown idot_id '%s' with long_name '%s'",
+                idot_id,
                 props["LONG_NAME"],
-                props["SEGMENT_ID"],
             )
             continue
+        segid = current.at[idot_id, "segid"]
         raw = props["HL_PAVEMENT_CONDITION"]
         if raw is None:
             continue
@@ -206,26 +215,28 @@ def main():
         # Timestamps appear to be UTC now
         if props["CARS_MSG_UPDATE_DATE"] is not None:
             # print(json.dumps(feat, indent=4))
-            valid = datetime.datetime(1970, 1, 1) + datetime.timedelta(
+            valid = utc(1970, 1, 1) + datetime.timedelta(
                 seconds=props["CARS_MSG_UPDATE_DATE"] / 1000.0
             )
         else:
-            valid = datetime.datetime.utcnow()
+            # Sucks, but alas
+            LOG.info("CARS_MSG_UPDATE_DATE is missing, default to utcnow!")
+            valid = utc()
         # Save to log, if difference
-        if cond != current[segid]:
+        if cond != current.at[idot_id, "cond_code"]:
             cursor.execute(
                 """
                 INSERT into roads_log(segid, valid, cond_code, raw)
                 VALUES (%s, %s, %s, %s)
             """,
-                (segid, valid.strftime("%Y-%m-%d %H:%M+00"), cond, raw),
+                (segid, valid, cond, raw),
             )
             dirty = True
         # Update currents
         cursor.execute(
             "UPDATE roads_current SET cond_code = %s, valid = %s, "
             "raw = %s WHERE segid = %s",
-            (cond, valid.strftime("%Y-%m-%d %H:%M+00"), raw, segid),
+            (cond, valid, raw, segid),
         )
 
     # Force a run each morning at about 3 AM

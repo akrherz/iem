@@ -13,11 +13,11 @@ def main():
     """Go Main, please"""
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
-    cursor.execute("DELETE from roads_current")
-    LOG.info("removed %s rows from roads_current", cursor.rowcount)
+    # cursor.execute("DELETE from roads_current")
+    # LOG.info("removed %s rows from roads_current", cursor.rowcount)
     req = requests.get(URI, timeout=30)
     jobj = req.json()
-    archive_begin = "2020-10-12 12:00"
+    archive_begin = "2022-12-20 12:00"
     LOG.info("adding %s rows to roads_base", len(jobj["features"]))
     for feat in jobj["features"]:
         props = feat["attributes"]
@@ -25,7 +25,6 @@ def main():
         path = MultiLineString([LineString(feat["geometry"]["paths"][0])])
         # segid is defined by the database insert
         major = props["ROUTE_NAME"]
-        print(props["NAMEID"])
         minor = props["NAMEID"].split("--", 1)[1].strip()
         (typ, num) = major.replace("-", " ").split()[:2]
         int1 = num if typ == "I" else None
@@ -36,12 +35,15 @@ def main():
         sys_id = props["ROUTE_RANK"]
         longname = props["LONG_NAME"]
         idot_id = props["SEGMENT_ID"]
+        if idot_id != 505:
+            continue
+        print(props["NAMEID"])
         cursor.execute(
             """
             INSERT into roads_base (major, minor, us1, st1, int1, type,
             longname, geom, idot_id, archive_begin)
             VALUES (%s, %s, %s, %s, %s, %s, %s,
-            ST_Transform(ST_SetSrid(ST_GeomFromText(%s), 4326), 26915),
+            ST_Transform(ST_SetSrid(ST_GeomFromText(%s), 3857), 26915),
             %s, %s) RETURNING segid
         """,
             (
