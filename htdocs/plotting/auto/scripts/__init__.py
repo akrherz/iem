@@ -655,6 +655,13 @@ nopts = [
         ),
     },
     {
+        "id": 232,
+        "label": (
+            "ASOS/METAR Time Series during NWS Alert Headline "
+            "(Blizzard / Wind / Heat / Wind Chill)"
+        ),
+    },
+    {
         "id": 191,
         "label": "Calendar Plot of Watch/Warn/Adv Daily Counts",
     },
