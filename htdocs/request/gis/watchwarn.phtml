@@ -14,28 +14,41 @@ $t->title = "NWS Watches Warnings Advisories Download";
 
 $nt = new NetworkTable("WFO");
 
+function entry($year, $suffix){
+    $fn = "/mesonet/share/pickup/wwa/${year}_${suffix}.zip";
+    if (! is_file($fn)){
+        return "N/A";
+    }
+    $link = '<a href="/pickup/wwa/${year}_${suffix}.zip">Zip</a>';
+    return sprintf("%s (%s, %s)", $link, get_file_size($fn), get_file_created_date($fn));
+}
+function get_file_created_date($filename) {
+    $ctime = filectime($filename);
+    return date("d M Y", $ctime);
+}
+
 function get_file_size($filename, $size_in = 'MB') {
-	$size_in_bytes = @filesize ( $filename );
-	
-	// Precision: decimals at the end for each type of size
-	
-	if ($size_in == 'B') {
-		$size = $size_in_bytes;
-		$precision = 0;
-	} elseif ($size_in == 'KB') {
-		$size = (($size_in_bytes / 1024));
-		$precision = 2;
-	} elseif ($size_in == 'MB') {
-		$size = (($size_in_bytes / 1024) / 1024);
-		$precision = 2;
-	} elseif ($size_in == 'GB') {
-		$size = (($size_in_bytes / 1024) / 1024) / 1024;
-		$precision = 2;
-	}
-	
-	$size = round ( $size, $precision );
-	
-	return $size . ' ' . $size_in;
+    $size_in_bytes = @filesize ( $filename );
+    
+    // Precision: decimals at the end for each type of size
+    
+    if ($size_in == 'B') {
+        $size = $size_in_bytes;
+        $precision = 0;
+    } elseif ($size_in == 'KB') {
+        $size = (($size_in_bytes / 1024));
+        $precision = 2;
+    } elseif ($size_in == 'MB') {
+        $size = (($size_in_bytes / 1024) / 1024);
+        $precision = 2;
+    } elseif ($size_in == 'GB') {
+        $size = (($size_in_bytes / 1024) / 1024) / 1024;
+        $precision = 2;
+    }
+    
+    $size = round ( $size, $precision );
+    
+    return $size . ' ' . $size_in;
 }
 
 $location_select_groups = array('states', 'wfo');
@@ -82,20 +95,11 @@ $mi3select = minuteSelect(0, "minute3");
 
 $table = "";
 for($year=1986;$year<=date("Y");$year++){
-	$allurl = sprintf("<a href=\"/pickup/wwa/%s_all.zip\">Zip</a>",  $year);
-	$allfp = "/mesonet/share/pickup/wwa/${year}_all.zip";
-	$tsmfurl = sprintf("<a href=\"/pickup/wwa/%s_tsmf.zip\">Zip</a>",  $year);
-	$tsmffp = "/mesonet/share/pickup/wwa/${year}_tsmf.zip";
-	$sbwurl = "N/A";
-	$sbwfp = "/dev/zero";
-	if ($year > 2001){
-		$sbwurl = sprintf("<a href=\"/pickup/wwa/%s_tsmf_sbw.zip\">Zip</a>", 
-				$year);
-		$sbwfp = "/mesonet/share/pickup/wwa/${year}_tsmf_sbw.zip";
-	}
-	$table .= sprintf("<tr><th>%s</th><td>%s (%s)</td><td>%s (%s)</td><td>%s (%s)</td></tr>", $year,
-		$allurl, get_file_size($allfp), $tsmfurl, get_file_size($tsmffp),
-		$sbwurl, get_file_size($sbwfp) );
+    $table .= sprintf(
+        "<tr><th>%s</th><td>%s</td><td>%s</td>".
+        "<td>%s</td></tr>", $year,
+        entry($year, "all"), entry($year, "tsmfurl"), entry($year, "tsmf_sbw")
+    );
 }
 
 $content = <<<EOF
@@ -175,12 +179,12 @@ $content .= <<<EOF
   </tr>
 
 <tr>
-	<th colspan="6">
-	<input type="radio" name="timeopt" value="1" checked="checked" /> 
-	Option 1: WWA events with start time between the specified start
-	and end dates.</th>
+    <th colspan="6">
+    <input type="radio" name="timeopt" value="1" checked="checked" /> 
+    Option 1: WWA events with start time between the specified start
+    and end dates.</th>
 </tr>
-  
+
   <tr>
     <th>Start:</th>
     <td>{$y1select}</td><td>{$m1select}</td><td>{$d1select}</td>
@@ -190,17 +194,16 @@ $content .= <<<EOF
     <td>{$y2select}</td><td>{$m2select}</td><td>{$d2select}</td>
     <td>{$h2select}</td><td>{$mi2select}</td></tr>
 <tr>
-	<th colspan="6">
-	<input type="radio" name="timeopt" value="2" /> 
-	Option 2: WWA events valid at this exact time (UTC)</th>
+    <th colspan="6">
+    <input type="radio" name="timeopt" value="2" /> 
+    Option 2: WWA events valid at this exact time (UTC)</th>
 </tr>
-	<tr>
+    <tr>
     <th>Valid:</th>
     <td>{$y3select}</td><td>{$m3select}</td><td>{$d3select}</td>
     <td>{$h3select}</td><td>{$mi3select}</td></tr>
-    
-    
-    </table>
+
+</table>
 
 <br /><input id="limit0" type="checkbox" name="limit0" value="yes">
 <label for="limit0">Limit output to Tornado, Severe Thunderstorm, Marine, and
@@ -228,8 +231,8 @@ statements. [<sup>1</sup>]</label></p>
 
   <script type="text/javascript">
 function kmlsub(f, url){
-	f.action = url;
-	f.submit();
+    f.action = url;
+    f.submit();
 }
 function excel(f){
     $("#accept").val("excel");
@@ -256,11 +259,12 @@ for this dataset.</p>
 <h4>Pre-generated zip files</h4>
 
 <p>These files are same as you could download from the form on the left, just
-you don't have to wait so long! The current year's data is current up until
-roughly 2 AM this morning.</p>
+you don't have to wait so long! A script runs at around 2 AM Central Time each
+day to dump the current year's data. The date stamps with each file denote
+when they were generated.</p>
 
 <table class="table table-bordered table-striped">
-<thead>
+<thead style="position: sticky;top: 0;background:#FFF;">
 <tr><th>Year</th><th>All</th><th>Limit Tor,Svr,Mar,FF</th>
 <th>Limit Storm Based<br />Tor,Svr,Mar,FF</th></tr>
 </thead>
@@ -274,25 +278,25 @@ roughly 2 AM this morning.</p>
 
 <h4>Service changes:</h4>
 <ul>
-	<li><strong>12 Mar 2019</strong>: Added <code>UPDATED</code> column to the
-	dataset providing the timestamp of the most recent NWS Text Product for
-	the event.</li>
-	<li><strong>3 Feb 2016</strong>: This service used to allow the download
-	of the high-resolution AWIPS counties/zones shapes.  Sadly, the size
-	of these polygons would overwhelm the backend data service.  So now
-	this service only returns the simplified county/zone polygons. You
-	may wish to do a join against the
-	<a href="http://www.nws.noaa.gov/geodata/">AWIPS Geodatabase</a> to
-	get the high resolution depiction. The <code>NWS_UGC</code> column is what
-	you would use to join.</li>	
+    <li><strong>12 Mar 2019</strong>: Added <code>UPDATED</code> column to the
+    dataset providing the timestamp of the most recent NWS Text Product for
+    the event.</li>
+    <li><strong>3 Feb 2016</strong>: This service used to allow the download
+    of the high-resolution AWIPS counties/zones shapes.  Sadly, the size
+    of these polygons would overwhelm the backend data service.  So now
+    this service only returns the simplified county/zone polygons. You
+    may wish to do a join against the
+    <a href="http://www.nws.noaa.gov/geodata/">AWIPS Geodatabase</a> to
+    get the high resolution depiction. The <code>NWS_UGC</code> column is what
+    you would use to join.</li>	
 </ul>
-		
+        
 <h4>Archive status:</h4>
 <table class="table table-bordered table-striped">
 <thead>
 <tr><th>Dataset component</th><th>Start Time</th><th>Notes</th></tr>
 </thead>
-		<tr>
+        <tr>
  <td>Tornado<br />Severe T'storm<br /> Flash Flood<br />Special Marine</td>
  <td>1 Jan 2002 (Polygons)
      <br />1 Jan 1986 (Counties)</td>
@@ -314,5 +318,3 @@ roughly 2 AM this morning.</p>
 EOF;
 $t->content = $content;
 $t->render('full.phtml');
-
-?>
