@@ -70,7 +70,8 @@ $visibility->draw($img);
 $roads = $map->getlayerbyname("roads");
 $roads->set("status", MS_ON);
 $dbvalid = date('Y-m-d H:i', $ts);
-$dbvalid2 = date('Y-m-d H:i', $ts - 14 * 86400);
+# yuck
+$dbvalid2 = date('Y-m-d H:i', $ts - 90 * 86400);
 if (isset($_GET['valid'])) {
     $sql = <<< EOM
     geom from (
