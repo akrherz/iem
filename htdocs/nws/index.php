@@ -29,10 +29,10 @@ hole with hundreds of plotting options for many datasets of NWS interest.</p>
 
 <div class="well">
 <strong>Did you see an image posted to social media with the IEM logo on it?</strong><br />
-	Daryl posts some interesting graphics to his 
-	<a href="https://twitter.com/akrherz">Twitter @akrherz</a> page.  Generally,
-	these are one-off images that are not available for dynamic generation on
-	this website.
+    Daryl posts some interesting graphics to his 
+    <a href="https://twitter.com/akrherz">Twitter @akrherz</a> page.  Generally,
+    these are one-off images that are not available for dynamic generation on
+    this website.
 </div>
 
 </div>
@@ -148,9 +148,12 @@ options listed.</p>
 <ul>
  <li><a href="/nws/list_tags.php">List SVR+TOR Warning Tags</a>
   <br />This application will list tags used in Severe Thunderstorm and
-		Tornado warnings by NWS Office by Year.</li>
-   <li><a href="/vtec/yearly_counts.php">Number of VTEC Events by year</a>
-  <br />Table of the number of VTEC events by year.</li>
+        Tornado warnings by NWS Office by Year.</li>
+
+<li><a href="/nws/list_ugcs.php">List Universal Geographic Codes (UGC) by WFO/State</a></li>
+
+<li><a href="/vtec/yearly_counts.php">Number of VTEC Events by year</a>
+<br />Table of the number of VTEC events by year.</li>
 
   <li><a href="/vtec/events.php">VTEC Events by WFO or State by Year</a>
   <br />Simple table listing any VTEC events by a given WFO or state for
@@ -171,7 +174,7 @@ events.</li>
 
  <li><a href="/cow/sbwsum.phtml">Summary Images of Daily Storm Based Warnings</a>
   <br />Displays just the storm based warning geometries for one UTC day
-		at a time.</li>
+        at a time.</li>
  <li><a href="/cow/top10.phtml">Top 10 Polygon Sizes</a></li>
 </ul>
 
@@ -198,9 +201,9 @@ events.</li>
   <div class="panel-heading">ASOS/AWOS METAR</div>
   <div class="panel-body">
 <ul>
-	<li>Daily Climate Summary (AFOS: CLI Product) 
-		<a href="climap.php">Interactive Map</a> or 
-		<a href="clitable.php">Text Table</a></li>
+    <li>Daily Climate Summary (AFOS: CLI Product) 
+        <a href="climap.php">Interactive Map</a> or 
+        <a href="clitable.php">Text Table</a></li>
  <li><a href="obs.php">Sortable Currents by WFO</a></li>
 </ul>
 
@@ -223,8 +226,8 @@ first guess at fields the NWS needs for their RTP product.</p>
  <li><a href="/nws/coop-cnts.php">Monthly COOP Frequency Reports</a>
   <br />Quantity of observations received by variable for the COOP network</li>
  <li><a href="/COOP/current.phtml">Sortable Current COOP Reports</a>
-		<br />View today's COOP reports by WFO or by state.  Includes derived
-		frozen to liquid ratio and SWE reports.</li>
+        <br />View today's COOP reports by WFO or by state.  Includes derived
+        frozen to liquid ratio and SWE reports.</li>
 </ul>
   </div>
 </div>
@@ -245,7 +248,7 @@ first guess at fields the NWS needs for their RTP product.</p>
   <div class="panel-heading">Local Storm Reports (LSR)</div>
   <div class="panel-body">
 <p>The IEM processes LSRs issued by the NWS in real-time. A number of
-	applications on this website utilize this source of reports.</p>
+    applications on this website utilize this source of reports.</p>
 <ul>
     <li><a href="/plotting/auto/?q=207">LSR + COOP Snowfall Analysis Autoplot #207</a>
     <br />Dynamic analysis of available LSR and COOP reports that is used to
@@ -265,7 +268,7 @@ first guess at fields the NWS needs for their RTP product.</p>
      <li><a href="/request/gis/lsrs.phtml">Archived Local Storm Reports</a>
  <br />Generate a shapefile of LSRs for a period of your choice dating back 
   to 2003!</li>
-		<li><a href="/lsr/">Local Storm Report App</a></li>
+        <li><a href="/lsr/">Local Storm Report App</a></li>
 </ul>
   </div>
 </div>
