@@ -266,11 +266,12 @@ def merge_network_obs(df, network, ts):
             if col in ["precip", "snow", "snowd", "precip_hour"]
             else "temp_estimated"
         )
-        # Only use when we have observed data and estimated col is True
-        useidx = ~pd.isna(df[f"{col}b"]) & df[estcol]
+        # Use obs if the current entry is null or is estimated and new
+        # col is not null
+        useidx = pd.isna(df[col]) | (~pd.isna(df[f"{col}b"]) & df[estcol])
         LOG.info(
             "Found %s rows needing data for %s",
-            len(useidx.index),
+            useidx.sum(),
             col,
         )
         # using DataSeries.update() caused SettingWithCopyError, shrug
