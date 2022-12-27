@@ -726,6 +726,13 @@ nopts = [
     },
     {"id": 200, "label": "SPC + WPC Outlook Heatmap"},
     {
+        "id": 143,
+        "label": (
+            "Special Weather Statements (SPS) "
+            "Polygon Count by Year by Month"
+        ),
+    },
+    {
         "id": 166,
         "label": (
             "Storm Prediction Center (SPC) Watches per Year for a State"

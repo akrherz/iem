@@ -25,7 +25,6 @@ NO_FEATURES = [
     122,
     123,
     124,  # climodat text-only reports
-    143,
     141,  # yieldfx plots
     144,  # soil temp periods, too fragile of data to be useful
     152,  # growing season differences, too noisey
