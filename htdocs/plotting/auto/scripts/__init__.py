@@ -733,6 +733,13 @@ nopts = [
         ),
     },
     {
+        "id": 233,
+        "label": (
+            "Special Weather Statements (SPS) "
+            "Polygon Calendar of Daily Counts"
+        ),
+    },
+    {
         "id": 166,
         "label": (
             "Storm Prediction Center (SPC) Watches per Year for a State"
