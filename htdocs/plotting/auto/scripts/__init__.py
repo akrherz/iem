@@ -681,6 +681,7 @@ nopts = [
         "label": "Gantt Chart of WFO Issued Watch/Warning/Advisories",
     },
     {"id": 163, "label": "Local Storm Reports Issued by WFO/State [map]"},
+    {"id": 234, "label": "Local Storm Reports Caledar Counts"},
     {"id": 102, "label": "Local Storm Report Source Type Ranks by Year"},
     {
         "id": 44,
