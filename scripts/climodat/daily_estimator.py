@@ -269,17 +269,28 @@ def merge_network_obs(df, network, ts):
         # Use obs if the current entry is null or is estimated and new
         # col is not null
         useidx = pd.isna(df[col]) | (~pd.isna(df[f"{col}b"]) & df[estcol])
+        hits = useidx.sum()
+        if hits == 0:
+            continue
         LOG.info(
-            "Found %s rows needing data for %s",
-            useidx.sum(),
+            "Found %s/%s rows needing data for %s",
+            hits,
+            len(df.index),
             col,
         )
-        # using DataSeries.update() caused SettingWithCopyError, shrug
-        df.loc[useidx, col] = df[f"{col}b"]
-        df.loc[useidx, "dirty"] = True
-        # suboptimal
-        if col in ["high", "precip"]:
-            df.loc[useidx, estcol] = False
+        # Workaround pandas-dev/pandas/issues/48673
+        if hits == len(df.index):
+            df[col] = df[f"{col}b"]
+            df["dirty"] = True
+            # suboptimal
+            if col in ["high", "precip"]:
+                df[estcol] = False
+        else:
+            df.loc[useidx, col] = df[f"{col}b"]
+            df.loc[useidx, "dirty"] = True
+            # suboptimal
+            if col in ["high", "precip"]:
+                df.loc[useidx, estcol] = False
         df = df.drop(f"{col}b", axis=1)
     return df
 
