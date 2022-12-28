@@ -824,8 +824,8 @@ function loadData() {
         url: "/geojson/lsr.php",
         dataType: 'json',
         success: function (data) {
-            if (data.features.length == 3000) {
-                alert("App limit of 3,000 LSRs reached.");
+            if (data.features.length == 10000) {
+                alert("App limit of 10,000 LSRs reached.");
             }
             lsrLayer.getSource().addFeatures(
                 (new ol.format.GeoJSON({ featureProjection: 'EPSG:3857' })
