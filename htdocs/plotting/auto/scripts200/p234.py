@@ -5,6 +5,7 @@ import pandas as pd
 from pyiem.plot import calendar_plot
 from pyiem.util import get_autoplot_context, get_sqlalchemy_conn
 from pyiem.exceptions import NoDataFound
+from pyiem.reference import state_names
 from sqlalchemy import text
 
 PDICT = {"yes": "Colorize Cells in Chart", "no": "Just plot values please"}
@@ -58,6 +59,7 @@ MDICT = {
     "WATER SPOUT": "WATER SPOUT",
     "WILDFIRE": "WILDFIRE",
 }
+PDICT2 = {"cwa": "by NWS Forecast Office", "state": "by State"}
 
 
 def get_description():
@@ -66,7 +68,10 @@ def get_description():
     desc["data"] = True
     desc[
         "description"
-    ] = """
+    ] = """This autoplot generates a calendar showing calendar day Local Storm
+    Report totals by NWS Weather Forecast Office (WFO) or State.  The calendar
+    date is based on the local timezone of the WFO selected.  The calendar plot
+    type only supports up to 12 months plotted at once.
     """
     today = datetime.date.today()
     jan1 = today.replace(month=1, day=1)
@@ -93,12 +98,25 @@ def get_description():
             label="Local Storm Report Type Filter",
         ),
         dict(
+            type="select",
+            name="w",
+            options=PDICT2,
+            default="cwa",
+            label="Plot stats for:",
+        ),
+        dict(
             type="networkselect",
             name="wfo",
             network="WFO",
             all=True,
             default="DMX",
-            label="Select WFO:",
+            label="Select WFO (when appropriate):",
+        ),
+        dict(
+            type="state",
+            name="state",
+            default="IA",
+            label="Select State (when appropriate):",
         ),
         dict(
             type="select",
@@ -123,6 +141,7 @@ def plotter(fdict):
     if (ets - sts).days > 366:
         raise NoDataFound("Chart duration needs to be less than 1 year.")
     wfo = ctx["wfo"]
+    state = ctx["state"]
     params = {}
     params["tzname"] = ctx["_nt"].sts[wfo]["tzname"]
     params["sts"] = sts - datetime.timedelta(days=2)
@@ -134,13 +153,20 @@ def plotter(fdict):
     }
     if wfo not in ctx["_nt"].sts:
         raise NoDataFound("No Data Found.")
-    wfo_limiter = " and wfo = :wfo "
     params["wfo"] = wfo if len(wfo) == 3 else wfo[1:]
-    if wfo == "_ALL":
-        wfo_limiter = ""
-    title2 = f"NWS {ctx['_sname']}"
-    if wfo == "_ALL":
-        title2 = "All NWS Offices"
+    wfo_limiter = ""
+    if ctx["w"] == "cwa":
+        wfo_limiter = " and wfo = :wfo "
+        if wfo == "_ALL":
+            wfo_limiter = ""
+        title2 = f"NWS {ctx['_sname']}"
+        if wfo == "_ALL":
+            title2 = "All NWS Offices"
+    else:
+        wfo_limiter = " and state = :state "
+        params["state"] = state
+        title2 = f"{state_names[state]}"
+
     myfilter = ctx["filter"]
     if myfilter == "NONE":
         tlimiter = ""
@@ -190,7 +216,7 @@ def plotter(fdict):
         heatmap=(ctx["heatmap"] == "yes"),
         title=f"{title2} :: Preliminary/Unfiltered Local Storm Reports",
         subtitle=(
-            f"Valid {sts:%d %b %Y %H:%M} - {ets:%d %b %Y %H:%M} UTC, "
+            f"Valid {sts:%d %b %Y} - {ets:%d %b %Y} "
             f"type limiter: {MDICT.get(myfilter)}"
         ),
     )
