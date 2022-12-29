@@ -56,11 +56,7 @@ def load_table(state, date):
                 "temp24_hour": nt.sts[sid]["temp24_hour"],
                 "precip24_hour": nt.sts[sid]["precip24_hour"],
                 "dirty": False,
-                "tracks": (
-                    nt.sts[sid]["attributes"]
-                    .get("TRACKS_STATION", "|")
-                    .split("|")[0]
-                ),
+                "tracks": (nt.sts[sid]["attributes"].get("TRACKS_STATION")),
             }
         )
     if not rows:
@@ -235,7 +231,8 @@ def commit(cursor, table, df, ts):
 def merge_obs(df, state, ts):
     """Merge data from observations."""
     obs = pd.read_sql(
-        "SELECT t.id as station, max_tmpf as high, min_tmpf as low, "
+        "SELECT t.id || '|' || t.network as tracks, "
+        "max_tmpf as high, min_tmpf as low, "
         "pday as precip, snow, snowd, "
         "coalesce(extract(hour from (coop_valid + '1 minute'::interval) "
         "  at time zone tzname), 24) as temp_hour "
@@ -243,7 +240,7 @@ def merge_obs(df, state, ts):
         "on (t.iemid = s.iemid) WHERE t.network in (%s, %s) and s.day = %s",
         get_dbconnstr("iem"),
         params=(f"{state}_COOP", f"{state}_ASOS", ts),
-        index_col="station",
+        index_col="tracks",
     )
     if obs.empty:
         LOG.warning("loading obs for state %s yielded no data", state)
