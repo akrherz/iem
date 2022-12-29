@@ -232,7 +232,7 @@ def commit(cursor, table, df, ts):
     return True
 
 
-def merge_network_obs(df, network, ts):
+def merge_obs(df, state, ts):
     """Merge data from observations."""
     obs = pd.read_sql(
         "SELECT t.id as station, max_tmpf as high, min_tmpf as low, "
@@ -240,14 +240,13 @@ def merge_network_obs(df, network, ts):
         "coalesce(extract(hour from (coop_valid + '1 minute'::interval) "
         "  at time zone tzname), 24) as temp_hour "
         "from summary s JOIN stations t "
-        "on (t.iemid = s.iemid) WHERE t.network = %s and s.day = %s",
+        "on (t.iemid = s.iemid) WHERE t.network in (%s, %s) and s.day = %s",
         get_dbconnstr("iem"),
-        params=(network, ts),
+        params=(f"{state}_COOP", f"{state}_ASOS", ts),
         index_col="station",
     )
     if obs.empty:
-        if network not in ["DC_ASOS"]:
-            LOG.warning("loading obs for network %s yielded no data", network)
+        LOG.warning("loading obs for state %s yielded no data", state)
         return df
     obs["precip_hour"] = obs["temp_hour"]
     # If a site has either a null high or low, we need to estimate both to
@@ -324,8 +323,7 @@ def main(argv):
         if df is None:
             LOG.info("skipping state %s as load_table empty", state)
             continue
-        df = merge_network_obs(df, f"{state}_COOP", date)
-        df = merge_network_obs(df, f"{state}_ASOS", date)
+        df = merge_obs(df, state, date)
         # IEMRE does not exist for these states, so we skip this
         if state not in NON_CONUS:
             estimate_hilo(df, ds)
