@@ -142,7 +142,7 @@ def get_description():
     <p><strong>This app can be very slow</strong>, so please let it grind
     away as sometimes it will take 3-5 minutes to generate a map :("""
     today = datetime.date.today()
-    tom = today + datetime.timedelta(days=1)
+    tom = today + datetime.timedelta(days=3)
     jan1 = today.replace(day=1, month=1)
     desc["arguments"] = [
         dict(
