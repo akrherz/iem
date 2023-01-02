@@ -142,6 +142,8 @@ def plotter(fdict):
     period = ctx["period"]
     state = ctx["state"][:2]
     df = get_data(ctx)
+    if df.empty:
+        raise NoDataFound("No data found for query.")
 
     fig = figure(apctx=ctx)
     ax = fig.subplots(2, 1, sharex=True)
