@@ -15,11 +15,11 @@ $t->title = "NWS Watches Warnings Advisories Download";
 $nt = new NetworkTable("WFO");
 
 function entry($year, $suffix){
-    $fn = "/mesonet/share/pickup/wwa/${year}_${suffix}.zip";
+    $fn = "/mesonet/share/pickup/wwa/{$year}_{$suffix}.zip";
     if (! is_file($fn)){
         return "N/A";
     }
-    $link = '<a href="/pickup/wwa/${year}_${suffix}.zip">Zip</a>';
+    $link = sprintf('<a href="/pickup/wwa/%s_%s.zip">Zip</a>', $year, $suffix);
     return sprintf("%s (%s, %s)", $link, get_file_size($fn), get_file_created_date($fn));
 }
 function get_file_created_date($filename) {
