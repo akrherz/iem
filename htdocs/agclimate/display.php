@@ -73,13 +73,13 @@ often too low.",
             on the station.",
     ),
     10 => array(
-        "mapurl" => "/GIS/apps/agclimate/month.php?dvar=dailyet&direct=yes&year=$year&month=$month",
+        "mapurl" => "/GIS/apps/agclimate/month.php?dvar=dailyet&year=$year&month=$month",
         "desc" => "Monthly total of daily maximum potential evapotranspiration. The
             daily value is calculated via a Penman formulation with a crop
             coefficient of 1.  The value would be a theoretical maximum."
     ),
     11 => array(
-        "mapurl" => "/GIS/apps/agclimate/month.php?dvar=rain_in_tot&direct=yes&year=$year&month=$month",
+        "mapurl" => "/GIS/apps/agclimate/month.php?dvar=rain_in_tot&year=$year&month=$month",
         "desc" => "Monthly total of daily reported precipitation. This is measured with a <b>non-heated</b> tipping bucket located near the ground.  These reported values should be
 used with extreme caution.  For various reasons, the reported values are 
 often too low."

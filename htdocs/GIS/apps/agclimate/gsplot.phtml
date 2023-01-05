@@ -58,8 +58,8 @@ $wsuri = sprintf(
 );
 
 $imgurl = sprintf("gsplot.php?var=%s&amp;year=%s&amp;smonth=%s&amp;".
-		"emonth=%s&amp;eday=%s&amp;sday=%s&amp;imgsz=%s",
-		$var, $year, $smonth, $emonth, $eday, $sday, $imgsz);
+        "emonth=%s&amp;eday=%s&amp;sday=%s&amp;imgsz=%s",
+        $var, $year, $smonth, $emonth, $eday, $sday, $imgsz);
 
 $round = Array("precip" => 2, "gdd" => 0, "sgdd" => 0, "et" => 2, "srad" => 0);
 
@@ -114,7 +114,7 @@ $vselect = make_select("var", $var, $varDef);
 $h3 = "";
 if ($datavar == "gdd" ||  $var == "precip")
 {
-	$h3 = "Departure from climatology is shown below the accumulated value.";
+    $h3 = "Departure from climatology is shown below the accumulated value.";
 }
 $yselect = yearSelect(1986, $year, "year");
 $smselect = monthSelect2($smonth, 'smonth');
@@ -123,8 +123,8 @@ $emselect = monthSelect2($emonth, 'emonth');
 $edselect = daySelect2($eday, 'eday');
 
 $ar = Array("640x480" => "640x480",
-		"720x496" => "720x496",
-		"1024x768" => "1024x768");
+        "720x496" => "720x496",
+        "1024x768" => "1024x768");
 $iselect = make_select("imgsz", $imgsz, $ar);
 
 $t->content = <<<EOF

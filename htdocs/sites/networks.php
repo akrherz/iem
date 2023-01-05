@@ -1,4 +1,5 @@
 <?php
+require_once "/usr/lib64/php/modules/mapscript.php";
 require_once "../../config/settings.inc.php";
 define("IEM_APPID", 6);
 require_once "../../include/database.inc.php";
@@ -109,14 +110,14 @@ EOM;
     } else if ($format == "shapefile") {
 
         /* Create SHP,DBF bases */
-        $filePre = "${network}_locs";
+        $filePre = "{$network}_locs";
         if (!is_file("/var/webtmp/{$filePre}.zip")) {
             $shpFname = "/var/webtmp/$filePre";
             @unlink($shpFname . ".shp");
             @unlink($shpFname . ".shx");
             @unlink($shpFname . ".dbf");
             @unlink($shpFname . ".zip");
-            $shpFile = ms_newShapeFileObj($shpFname, MS_SHP_POINT);
+            $shpFile = new shapeFileObj($shpFname, MS_SHAPEFILE_POINT);
             $dbfFile = dbase_create($shpFname . ".dbf", array(
                 array("ID", "C", 6),
                 array("NAME", "C", 50),
@@ -125,7 +126,7 @@ EOM;
             ));
 
             foreach ($cities as $sid => $row) {
-                $pt = ms_newPointobj();
+                $pt = new pointObj();
                 $pt->setXY($row["lon"], $row["lat"], 0);
                 $shpFile->addPoint($pt);
 
@@ -140,7 +141,7 @@ EOM;
             dbase_close($dbfFile);
             chdir("/var/webtmp/");
             copy("/opt/iem/data/gis/meta/4326.prj", $filePre . ".prj");
-            popen("zip " . $filePre . ".zip " . $filePre . ".shp " . $filePre . ".shx " . $filePre . ".dbf " . $filePre . ".prj", 'r');
+            popen("zip {$filePre}.zip {$filePre}.shp {$filePre}.shx {$filePre}.dbf {$filePre}.prj", 'r');
         }
         $table .= "Shapefile Generation Complete.<br>";
         $table .= "Please download this <a href=\"/tmp/" . $filePre . ".zip\">zipfile</a>.";

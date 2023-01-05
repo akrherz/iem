@@ -57,7 +57,9 @@ LAYER
   CLASS
     EXPRESSION ([tmpf] >= 35 && [tmpf] < 120)
     TEXT ([tmpf])
-    COLOR -1 -1 -1
+    STYLE
+      COLOR -1 -1 -1
+    END
     LABEL
       COLOR 30 190 20
       OUTLINECOLOR 0 0 0
@@ -73,7 +75,9 @@ LAYER
   CLASS
     EXPRESSION ([tmpf] >= 34)
     TEXT ([tmpf])
-    COLOR -1 -1 -1
+    STYLE
+      COLOR -1 -1 -1
+    END
     LABEL
       COLOR 215 255 0
       OUTLINECOLOR  0 0 0
@@ -89,7 +93,9 @@ LAYER
   CLASS
     EXPRESSION ([tmpf] >= 33)
     TEXT ([tmpf])
-    COLOR -1 -1 -1
+    STYLE
+      COLOR -1 -1 -1
+    END
     LABEL
       COLOR 255 164 0
       OUTLINECOLOR 0 0 0
@@ -105,7 +111,9 @@ LAYER
   CLASS
     EXPRESSION ([tmpf] >= 32)
     TEXT ([tmpf])
-    COLOR -1 -1 -1
+    STYLE
+      COLOR -1 -1 -1
+    END
     LABEL
       COLOR 255 50 0
       OUTLINECOLOR 0 0 0
@@ -121,7 +129,9 @@ LAYER
   CLASS
     EXPRESSION ([tmpf] >= 31)
     TEXT ([tmpf])
-    COLOR -1 -1 -1
+    STYLE
+      COLOR -1 -1 -1
+    END
     LABEL
       COLOR 255 0 144
       OUTLINECOLOR 0 0 0
@@ -137,7 +147,9 @@ LAYER
   CLASS
     EXPRESSION ([tmpf] >= 30)
     TEXT ([tmpf])
-    COLOR -1 -1 -1
+    STYLE
+      COLOR -1 -1 -1
+    END
     LABEL
       #COLOR 232 164 226
       OUTLINECOLOR 0 0 0
@@ -154,7 +166,9 @@ LAYER
   CLASS
     EXPRESSION ([tmpf] > -40)
     TEXT ([tmpf])
-    COLOR -1 -1 -1
+    STYLE
+      COLOR -1 -1 -1
+    END
     LABEL
       #COLOR 232 214 226
       OUTLINECOLOR 0 0 0

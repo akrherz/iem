@@ -1,4 +1,6 @@
 <?php
+require_once "/usr/lib64/php/modules/mapscript.php";
+
 require_once "../../../../config/settings.inc.php";
 // -----------------------------------------------------------------
 // request.php
@@ -18,10 +20,10 @@ function addPoint($row, $lon, $lat, $name)
     global $shpFile, $dbfFile;
 
     // Create the shape
-    $shp = ms_newShapeObj(MS_SHAPE_POINT);
-    $pt = ms_newPointobj();
+    $shp = new shapeObj(MS_SHAPE_POINT);
+    $pt = new pointobj();
     $pt->setXY($lon, $lat, 0);
-    $line = ms_newLineObj();
+    $line = new lineObj();
     $line->add($pt);
     $shp->add($line);
     $shpFile->addShape($shp);
@@ -66,7 +68,7 @@ pg_close($pgcon);
 chdir("/tmp/cli2shp");
 
 $shpFname =  $filePre;
-$shpFile = ms_newShapeFileObj($shpFname, MS_SHP_POINT);
+$shpFile = new shapeFileObj($shpFname, MS_SHAPEFILE_POINT);
 $dbfFile = dbase_create($shpFname . ".dbf", array(
     array("SITE", "C", 6),
     array("NAME", "C", 50),
@@ -92,18 +94,17 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     );
 } // End of for
 
-$shpFile->free();
 dbase_close($dbfFile);
 
 // Generate zip file
 copy("/opt/iem/data/gis/meta/4326.prj", $filePre . ".prj");
-popen("zip " . $filePre . ".zip " . $filePre . ".shp " . $filePre . ".shx " . $filePre . ".dbf " . $filePre . ".prj", 'r');
+popen("zip {$filePre}.zip {$filePre}.shp {$filePre}.shx {$filePre}.dbf {$filePre}.prj", 'r');
 
 header("Content-type: application/octet-stream");
-header("Content-Disposition: attachment; filename=${filePre}.zip");
-readfile("${filePre}.zip");
-unlink("${filePre}.zip");
-unlink("${filePre}.shp");
-unlink("${filePre}.prj");
-unlink("${filePre}.dbf");
-unlink("${filePre}.shx");
+header("Content-Disposition: attachment; filename={$filePre}.zip");
+readfile("{$filePre}.zip");
+unlink("{$filePre}.zip");
+unlink("{$filePre}.shp");
+unlink("{$filePre}.prj");
+unlink("{$filePre}.dbf");
+unlink("{$filePre}.shx");

@@ -34,8 +34,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/mrms/p72h_nn.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -60,8 +58,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/mrms/p48h_nn.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -86,8 +82,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/mrms/p24h_nn.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -112,8 +106,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/mrms/p1h_nn.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END

@@ -1,4 +1,6 @@
 <?php
+require_once "/usr/lib64/php/modules/mapscript.php";
+
 require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 $con = iemdb("postgis");
@@ -30,33 +32,33 @@ $map->setsize(720, 496);
 $img = $map->prepareImage();
 
 $states = $map->getlayerbyname("states");
-$states->set("status", MS_ON);
-$states->draw($img);
+$states->__set("status", MS_ON);
+$states->draw($map, $img);
 
 $roads = $map->getlayerbyname("roads");
-$roads->set("status", MS_ON);
+$roads->__set("status", MS_ON);
 
 for ($k = 0; $k < 17; $k++) {
     $r_c1 = $roads->getClass($k);
     $r_s1 = $r_c1->getStyle(0);
-    $r_s1->set("size", 0);
+    $r_s1->__set("size", 0);
     $r_s1 = $r_c1->getStyle(1);
-    $r_s1->set("size", 5);
+    $r_s1->__set("size", 5);
 }
-$roads->draw($img);
+$roads->draw($map, $img);
 
 $roads_int = $map->getlayerbyname("roads-inter");
-$roads_int->set("status", MS_ON);
+$roads_int->__set("status", MS_ON);
 for ($k = 0; $k < 17; $k++) {
     $r_c1 = $roads_int->getClass($k);
     $r_s1 = $r_c1->getStyle(0);
-    $r_s1->set("size", 0);
+    $r_s1->__set("size", 0);
     $r_s1 = $r_c1->getStyle(1);
-    $r_s1->set("size", 7);
+    $r_s1->__set("size", 7);
 }
-$roads_int->draw($img);
+$roads_int->draw($map, $img);
 
 $map->drawLabelCache($img);
 
 header("Content-type: image/png");
-$img->saveImage('');
+echo $img->getBytes();

@@ -1,4 +1,5 @@
 <?php
+require_once "../../../../include/iemmap.php";
 
 function determine_time_base($t)
 {
@@ -16,7 +17,7 @@ function tv_logo($map, $imgObj, $titlet)
  $layer = $map->getLayerByName("credits");
 
   // point feature with text for location
- $point = ms_newpointobj();
+ $point = new pointobj();
  $point->setXY(80, 400);
 
  $point->draw($map, $layer, $imgObj, 1, $titlet);
@@ -24,47 +25,45 @@ function tv_logo($map, $imgObj, $titlet)
 
  $layer = $map->getLayerByName("logo");
 
- $point = ms_newpointobj();
+ $point = new pointobj();
  $point->setXY(80, 400);
 
  $point->draw($map, $layer, $imgObj, 0, "");
 
-
-
 }
 
 function mktitle($map, $imgObj, $titlet, $subtitle="", $width=640) {
-	$height = ($subtitle == "")? 36: 53;
-	$layer = ms_newLayerObj($map);
-	$layer->set("status", MS_ON );
-	$layer->set("type", MS_LAYER_POLYGON );
-	$layer->set("transform", MS_OFF );
-	$wkt = "POLYGON((0 0, 0 $height, $width $height, $width 0, 0 0))";
-	$layer->addFeature(ms_shapeObjFromWkt($wkt));
+    $height = ($subtitle == "")? 36: 53;
+    $layer = new layerObj($map);
+    $layer->__set("status", MS_ON );
+    $layer->__set("type", MS_LAYER_POLYGON );
+    $layer->__set("transform", MS_OFF );
+    $wkt = "POLYGON((0 0, 0 $height, $width $height, $width 0, 0 0))";
+    $layer->addFeature(shapeObj::fromWkt($wkt));
 
-	$layerc0 = ms_newClassObj($layer);
-	$layerc0s0 = ms_newStyleObj($layerc0);
-	$layerc0s0->color->setRGB(0,0,0);
-	$layer->draw($imgObj);
-	
-	$tlayer = $map->getLayerByName("iem_headerbar_title");
-  	$point = ms_newpointobj();
-  	$point->setXY(82, 22);
-  	$point->draw($map, $tlayer, $imgObj, 0, $titlet);
-  	if ($subtitle != ""){
-		$point = ms_newpointobj();
-		$point->setXY(82, 39);
-		$point->draw($map, $tlayer, $imgObj, 1, $subtitle);
-  	}
+    $layerc0 = new classObj($layer);
+    $layerc0s0 = new styleObj($layerc0);
+    $layerc0s0->color->setRGB(0,0,0);
+    $layer->draw($map, $imgObj);
+    
+    $tlayer = $map->getLayerByName("iem_headerbar_title");
+      $point = new pointObj();
+      $point->setXY(82, 22);
+      $point->draw($map, $tlayer, $imgObj, 0, $titlet);
+      if ($subtitle != ""){
+        $point = new pointObj();
+        $point->setXY(82, 39);
+        $point->draw($map, $tlayer, $imgObj, 1, $subtitle);
+      }
 }
                                                                                 
 function mklogolocal($map, $imgObj) {
                                                                                 
  $layer = $map->getLayerByName("logo");
- //$layer->set("transparency", MS_GD_ALPHA);
+ //$layer->__set("transparency", MS_GD_ALPHA);
 
  // point feature with text for location
- $point = ms_newpointobj();
+ $point = new pointObj();
  $point->setXY(40, 26);
                                                                                 
  $point->draw($map, $layer, $imgObj, 0, "");
@@ -76,38 +75,35 @@ function drawStateNEXRAD($hlext) {
  $width = 350;
  $height = 300;
 
- $map = ms_newMapObj("mosaic.map");
- $map->set("width", $width);
- $map->set("height", $height);
+ $map = new mapObj("mosaic.map");
+ $map->__set("width", $width);
+ $map->__set("height", $height);
 
  $map->setextent(-96.639706, 40.375437,-90.140061, 43.501196);
  $map->setProjection("init=epsg:4326");
 
  $namerica = $map->getlayerbyname("namerica");
- $namerica->set("status", MS_ON);
+ $namerica->__set("status", MS_ON);
 
  $counties = $map->getlayerbyname("counties_unproj");
- $counties->set("status", MS_ON);
+ $counties->__set("status", MS_ON);
 
  $radarL = $map->getlayerbyname("radar");
- $radarL->set("status", MS_ON);
+ $radarL->__set("status", MS_ON);
 
  $img = $map->prepareImage();
- $namerica->draw($img);
- $radarL->draw($img);
- $counties->draw($img);
+ $namerica->draw($map, $img);
+ $radarL->draw($map, $img);
+ $counties->draw($map, $img);
 
  $rect = $map->getlayerbyname("rect");
- $rect->set("status", MS_ON);
+ $rect->__set("status", MS_ON);
 
  /** Draw a box for what we are zoomed in on */
- $rt = ms_newRectObj();
- $rt->setextent($hlext[0], $hlext[1], $hlext[2], $hlext[3]);
+ $rt = new rectObj($hlext[0], $hlext[1], $hlext[2], $hlext[3]);
  $rt->draw($map, $rect, $img, 0, " ");
 
-
-  
- $url = $img->saveWebImage();
+ $url = saveWebImage($img);
 
  $s = "<form name=\"img\" method=\"GET\" action=\"compare.phtml\">";
 
@@ -129,29 +125,28 @@ function drawCountyNEXRAD($site, $extents) {
   $height = "150";
  
   /** ----------------------- */
-  $map = ms_newMapObj("mosaic.map");
-  $map->set("width", $width);
-  $map->set("height", $height);
+  $map = new mapObj("mosaic.map");
+  $map->__set("width", $width);
+  $map->__set("height", $height);
 
   $map->setextent($extents[0],$extents[1], $extents[2],$extents[3] );
   $map->setProjection("init=epsg:4326");
 
  $namerica = $map->getlayerbyname("namerica");
- $namerica->set("status", MS_ON);
+ $namerica->__set("status", MS_ON);
   $counties = $map->getlayerbyname("counties_unproj");
-  $counties->set("status", MS_ON);
+  $counties->__set("status", MS_ON);
 
   $radarL = $map->getlayerbyname("DMX");
-  $radarL->set("status", MS_ON);
-  $radarL->set("data", "/mesonet/ldmdata/gis/images/4326/ridge/${site}/N0B_0.png");
+  $radarL->__set("status", MS_ON);
+  $radarL->__set("data", "/mesonet/ldmdata/gis/images/4326/ridge/{$site}/N0B_0.png");
 
   $img = $map->prepareImage();
-  $namerica->draw($img);
-  $radarL->draw($img);
-  $counties->draw($img);
-  
-  $url = $img->saveWebImage();
-  return $url;
+  $namerica->draw($map, $img);
+  $radarL->draw($map, $img);
+  $counties->draw($map, $img);
+
+  return saveWebImage($img);
 
 }
 
@@ -160,28 +155,25 @@ function drawKCCI($extents) {
   $height = "150";
  
   /** ----------------------- */
-  $map = ms_newMapObj("mosaic.map");
-  $map->set("width", $width);
-  $map->set("height", $height);
+  $map = new mapObj("mosaic.map");
+  $map->__set("width", $width);
+  $map->__set("height", $height);
 
   $map->setextent($extents[0],$extents[1], $extents[2],$extents[3] );
   $map->setProjection("init=epsg:4326");
 
  $namerica = $map->getlayerbyname("namerica");
- $namerica->set("status", MS_ON);
+ $namerica->__set("status", MS_ON);
   $counties = $map->getlayerbyname("counties_unproj");
-  $counties->set("status", MS_ON);
+  $counties->__set("status", MS_ON);
 
   $radarL = $map->getlayerbyname("KCCI");
-  $radarL->set("status", MS_ON);
+  $radarL->__set("status", MS_ON);
 
   $img = $map->prepareImage();
-  $namerica->draw($img);
-  $radarL->draw($img);
-  $counties->draw($img);
+  $namerica->draw($map, $img);
+  $radarL->draw($map, $img);
+  $counties->draw($map, $img);
   
-  $url = $img->saveWebImage();
-  return $url;
-
+  return saveWebImage($img);
 }
-?>

@@ -18,8 +18,6 @@ END
 #
 WEB
   TEMPLATE ia.html
-  MINSCALE 0
-  MAXSCALE 465000000
   IMAGEPATH "/tmp/"
   IMAGEURL "/tmp/"
   METADATA
@@ -39,8 +37,6 @@ LAYER
   NAME "refd-t"
   STATUS ON
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -67,8 +63,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0000.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -87,8 +81,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0015.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -107,8 +99,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0030.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -127,8 +117,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0045.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -147,8 +135,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0060.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -167,8 +153,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0075.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -187,8 +171,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0090.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -207,8 +189,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0105.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -227,8 +207,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0120.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -247,8 +225,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0135.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -267,8 +243,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0150.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -287,8 +261,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0165.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -307,8 +279,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0180.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -327,8 +297,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0195.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -347,8 +315,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0210.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -367,8 +333,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0225.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -387,8 +351,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0240.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -407,8 +369,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0255.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -427,8 +387,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0270.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -447,8 +405,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0285.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -467,8 +423,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0300.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -487,8 +441,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0315.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -507,8 +459,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0330.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -527,8 +477,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0345.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -547,8 +495,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0360.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -567,8 +513,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0375.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -587,8 +531,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0390.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -607,8 +549,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0405.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -627,8 +567,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0420.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -647,8 +585,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0435.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -667,8 +603,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0450.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -687,8 +621,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0465.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -707,8 +639,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0480.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -727,8 +657,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0495.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -747,8 +675,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0510.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -767,8 +693,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0525.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -787,8 +711,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0540.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -807,8 +729,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0555.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -827,8 +747,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0570.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -847,8 +765,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0585.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -867,8 +783,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0600.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -887,8 +801,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0615.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -907,8 +819,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0630.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -927,8 +837,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0645.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -947,8 +855,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0660.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -967,8 +873,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0675.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -987,8 +891,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0690.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1007,8 +909,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0705.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1027,8 +927,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0720.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1047,8 +945,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0735.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1067,8 +963,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0750.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1087,8 +981,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0765.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1107,8 +999,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0780.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1127,8 +1017,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0795.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1147,8 +1035,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0810.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1167,8 +1053,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0825.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1187,8 +1071,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0840.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1207,8 +1089,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0855.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1227,8 +1107,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0870.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1247,8 +1125,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0885.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1267,8 +1143,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0900.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1287,8 +1161,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0915.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1307,8 +1179,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0930.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1327,8 +1197,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0945.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1347,8 +1215,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0960.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1367,8 +1233,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0975.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1387,8 +1251,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0990.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1407,8 +1269,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1005.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1427,8 +1287,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1020.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1447,8 +1305,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1035.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1467,8 +1323,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1050.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1487,8 +1341,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1065.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1506,8 +1358,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1080.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1525,8 +1375,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1140.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1544,8 +1392,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1200.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1563,8 +1409,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1260.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1582,8 +1426,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1320.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1601,8 +1443,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1380.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1620,8 +1460,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1440.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1639,8 +1477,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1500.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1658,8 +1494,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1560.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1677,8 +1511,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1620.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1696,8 +1528,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1680.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1715,8 +1545,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1740.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1734,8 +1562,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1800.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1753,8 +1579,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1860.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1772,8 +1596,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1920.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1791,8 +1613,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_1980.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1810,8 +1630,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_2040.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1829,8 +1647,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_2100.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1848,8 +1664,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_2160.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1867,8 +1681,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/hrrr/refd_0000.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END

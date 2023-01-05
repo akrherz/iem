@@ -20,9 +20,11 @@ LAYER
       POSITION AUTO
       PARTIALS FALSE
     END
-    COLOR 255 255 255
-    SYMBOL 'tornado'
-    SIZE 10
+    STYLE
+      COLOR 255 255 255
+      SYMBOL 'tornado'
+      SIZE 10
+    END
   END
   CLASS
     EXPRESSION /G/
@@ -35,9 +37,11 @@ LAYER
       POSITION AUTO
       PARTIALS FALSE
     END
-    COLOR 255 255 255
-    SYMBOL 'circle'
-    SIZE 10
+    STYLE
+      COLOR 255 255 255
+      SYMBOL 'circle'
+      SIZE 10
+    END
   END
   CLASS
     EXPRESSION /M/
@@ -50,9 +54,11 @@ LAYER
       POSITION AUTO
       PARTIALS FALSE
     END
-    COLOR 255 255 255
-    SYMBOL 'circle'
-    SIZE 10
+    STYLE
+      COLOR 255 255 255
+      SYMBOL 'circle'
+      SIZE 10
+    END
   END
   CLASS
     EXPRESSION /T/
@@ -65,9 +71,11 @@ LAYER
       POSITION AUTO
       PARTIALS FALSE
     END
-    COLOR 255 255 255
-    SYMBOL 'tornado'
-    SIZE 10
+    STYLE
+      COLOR 255 255 255
+      SYMBOL 'tornado'
+      SIZE 10
+    END
   END
   CLASS
     EXPRESSION /R/
@@ -80,9 +88,11 @@ LAYER
       POSITION AUTO
       PARTIALS FALSE
     END
-    COLOR 255 255 255
-    SYMBOL 'circle'
-    SIZE 10
+    STYLE
+      COLOR 255 255 255
+      SYMBOL 'circle'
+      SIZE 10
+    END
   END
   CLASS
     EXPRESSION /F/
@@ -95,9 +105,11 @@ LAYER
       POSITION AUTO
       PARTIALS FALSE
     END
-    COLOR 255 255 255
-    SYMBOL 'circle'
-    SIZE 10
+    STYLE
+      COLOR 255 255 255
+      SYMBOL 'circle'
+      SIZE 10
+    END
   END
   CLASS
     EXPRESSION /H/
@@ -110,9 +122,11 @@ LAYER
       POSITION AUTO
       PARTIALS FALSE
     END
-    COLOR 255 255 255
-    SYMBOL 'triangle'
-    SIZE 10
+    STYLE
+      COLOR 255 255 255
+      SYMBOL 'triangle'
+      SIZE 10
+    END
   END
   CLASS
     EXPRESSION /S/
@@ -125,9 +139,11 @@ LAYER
       POSITION AUTO
       PARTIALS FALSE
     END
-    COLOR 255 255 255
-    SYMBOL 'circle'
-    SIZE 7
+    STYLE
+      COLOR 255 255 255
+      SYMBOL 'circle'
+      SIZE 7
+    END
   END
   CLASS
     EXPRESSION /5/
@@ -140,9 +156,11 @@ LAYER
       POSITION AUTO
       PARTIALS FALSE
     END
-    COLOR 255 255 255
-    SYMBOL 'circle'
-    SIZE 7
+    STYLE
+      COLOR 255 255 255
+      SYMBOL 'circle'
+      SIZE 7
+    END
   END
   CLASS
     EXPRESSION /D/
@@ -155,8 +173,10 @@ LAYER
       POSITION AUTO
       PARTIALS FALSE
     END
-    COLOR 255 255 255
-    SYMBOL 'triangle'
-    SIZE 10
+    STYLE
+      COLOR 255 255 255
+      SYMBOL 'triangle'
+      SIZE 10
+    END
   END
 END

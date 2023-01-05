@@ -16,8 +16,6 @@ END
 #
 WEB
   TEMPLATE ia.html
-  MINSCALE 0
-  MAXSCALE 465000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
   #LOG "/tmp/political.log"
@@ -41,8 +39,6 @@ LAYER
   STATUS ON
   DATA "nws/fire_zones.shp"
   TYPE LINE
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -66,8 +62,6 @@ LAYER
   STATUS ON
   DATA "us/counties.shp"
   TYPE LINE
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -92,8 +86,6 @@ LAYER
   STATUS ON
   DATA "us/counties.shp"
   TYPE LINE
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -120,8 +112,6 @@ LAYER
   STATUS ON
   DATA "us/states.shp"
   TYPE LINE
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -131,9 +121,11 @@ LAYER
     "wms_extent" "-126 24 -66 50"
   END
   CLASS
-    SYMBOL 0
-    COLOR 0 0 0
-    SIZE 3
+    STYLE
+      SYMBOL 0
+      COLOR 0 0 0
+      SIZE 3
+    END
   END
 END
 
@@ -144,8 +136,6 @@ LAYER
   STATUS ON
   DATA "nws/cwas.shp"
   TYPE LINE
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -155,9 +145,11 @@ LAYER
     "wms_extent" "-180 10 -66 89"
   END
   CLASS
-    SYMBOL 0
-    COLOR 0 0 0
-    SIZE 3
+    STYLE
+      SYMBOL 0
+      COLOR 0 0 0
+      SIZE 3
+    END
   END
 END
 
@@ -168,8 +160,6 @@ LAYER
   STATUS ON
   DATA "nws/rfc.shp"
   TYPE LINE
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -179,9 +169,11 @@ LAYER
     "wms_extent" "-180 10 -66 89"
   END
   CLASS
-    SYMBOL 0
-    COLOR 0 0 0
-    SIZE 3
+    STYLE
+      SYMBOL 0
+      COLOR 0 0 0
+      SIZE 3
+    END
   END
 END
 
@@ -192,8 +184,6 @@ LAYER
   STATUS ON
   DATA "nws/cwsu.shp"
   TYPE LINE
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -203,9 +193,11 @@ LAYER
     "wms_extent" "-180 10 -66 89"
   END
   CLASS
-    SYMBOL 0
-    COLOR 0 0 0
-    SIZE 3
+    STYLE
+      SYMBOL 0
+      COLOR 0 0 0
+      SIZE 3
+    END
   END
 END
 
@@ -216,8 +208,6 @@ LAYER
   STATUS ON
   DATA "us/tribal.shp"
   TYPE LINE
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -227,9 +217,11 @@ LAYER
     "wms_extent" "-180 10 -66 89"
   END
   CLASS
-    SYMBOL 0
-    COLOR 0 0 0
-    SIZE 3
+    STYLE
+      SYMBOL 0
+      COLOR 0 0 0
+      SIZE 3
+    END
   END
 END
 
@@ -275,7 +267,9 @@ LAYER
     "wms_extent" "-110 30 -86 45"
   END
   CLASS
-    COLOR 0 0 255
+    STYLE
+      COLOR 0 0 255
+    END
   END
 END
 

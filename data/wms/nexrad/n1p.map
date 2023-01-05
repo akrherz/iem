@@ -26,8 +26,6 @@ WEB
 #  HEADER ia_header.html
   TEMPLATE ia.html
 #  FOOTER ia_footer.html
-  MINSCALE 0
-  MAXSCALE 465000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
   METADATA
@@ -51,8 +49,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n1p_0.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END

@@ -26,8 +26,6 @@ WEB
 #  HEADER ia_header.html
   TEMPLATE ia.html
 #  FOOTER ia_footer.html
-  MINSCALE 0
-  MAXSCALE 465000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
   #LOG "/tmp/ntp.log"
@@ -55,8 +53,6 @@ LAYER
   PROJECTION
     "init=epsg:4326"
   END
-  MINSCALE 0
-  MAXSCALE 465000000
   METADATA
     "wms_title" "NEXRAD STORM TOTAL PRECIP"
     "wms_srs"   "EPSG:4326 EPSG:26915"

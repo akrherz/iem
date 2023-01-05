@@ -9,8 +9,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/%(sector)s/channel%(channel)02i/GOES-16_C%(channel)02i.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/%(sector)s/channel%(channel)02i/GOES-16_C%(channel)02i.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END"""

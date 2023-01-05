@@ -13,8 +13,6 @@ PROJECTION
 END
 
 WEB
-  MINSCALE 90000
-  MAXSCALE 4650000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
   # LOG "/var/webtmp/w0.log"
@@ -55,7 +53,9 @@ LAYER
   PROJECTION
    "init=epsg:3857"
   END
-  TRANSPARENCY 50
+  COMPOSITE
+    OPACITY 50
+  END
 END
 
 LAYER

@@ -27,8 +27,6 @@ WEB
 #  HEADER ia_header.html
   TEMPLATE ia.html
 #  FOOTER ia_footer.html
-  MINSCALE 0
-  MAXSCALE 465000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
   #LOG "/tmp/n0q-w0.log"
@@ -56,8 +54,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0q_0.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -76,8 +72,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/AKCOMP/n0q_0.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -96,8 +90,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/HICOMP/n0q_0.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -115,8 +107,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/PRCOMP/n0q_0.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -136,8 +126,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0q_1.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -155,8 +143,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/HICOMP/n0q_1.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -174,8 +160,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/AKCOMP/n0q_1.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -193,8 +177,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/PRCOMP/n0q_1.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -213,8 +195,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0q_2.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -232,8 +212,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/AKCOMP/n0q_2.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -251,8 +229,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/HICOMP/n0q_2.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -270,8 +246,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/PRCOMP/n0q_2.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -290,8 +264,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0q_3.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -309,8 +281,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/AKCOMP/n0q_3.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -328,8 +298,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/HICOMP/n0q_3.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -347,8 +315,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/PRCOMP/n0q_3.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -367,8 +333,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0q_4.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -386,8 +350,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/HICOMP/n0q_4.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -405,8 +367,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/AKCOMP/n0q_4.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -424,8 +384,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/PRCOMP/n0q_4.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -444,8 +402,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0q_5.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -463,8 +419,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/HICOMP/n0q_5.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -482,8 +436,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/AKCOMP/n0q_5.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -501,8 +453,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/PRCOMP/n0q_5.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -521,8 +471,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0q_6.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -540,8 +488,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/HICOMP/n0q_6.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -559,8 +505,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/AKCOMP/n0q_6.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -578,8 +522,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/PRCOMP/n0q_6.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -598,8 +540,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0q_7.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -617,8 +557,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/HICOMP/n0q_7.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -636,8 +574,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/AKCOMP/n0q_7.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -655,8 +591,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/PRCOMP/n0q_7.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -675,8 +609,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0q_8.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -694,8 +626,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/HICOMP/n0q_8.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -713,8 +643,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/AKCOMP/n0q_8.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -732,8 +660,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/PRCOMP/n0q_8.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -752,8 +678,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0q_9.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -771,8 +695,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/HICOMP/n0q_9.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -790,8 +712,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/AKCOMP/n0q_9.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -809,8 +729,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/PRCOMP/n0q_9.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -829,8 +747,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/n0q_10.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -848,8 +764,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/AKCOMP/n0q_10.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -867,8 +781,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/HICOMP/n0q_10.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -886,8 +798,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/900913/PRCOMP/n0q_10.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 4650000000000000
   PROJECTION
     "init=epsg:3857"
   END
@@ -908,8 +818,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_0.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
    "init=epsg:4326"
   END
@@ -927,8 +835,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/HICOMP/n0q_0.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
    "init=epsg:4326"
   END
@@ -946,8 +852,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/AKCOMP/n0q_0.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
    "init=epsg:4326"
   END
@@ -965,8 +869,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/PRCOMP/n0q_0.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
    "init=epsg:4326"
   END
@@ -985,8 +887,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_1.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
    "init=epsg:4326"
   END
@@ -1004,8 +904,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/HICOMP/n0q_1.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
    "init=epsg:4326"
   END
@@ -1023,8 +921,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/AKCOMP/n0q_1.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
    "init=epsg:4326"
   END
@@ -1042,8 +938,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/PRCOMP/n0q_1.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
    "init=epsg:4326"
   END
@@ -1062,8 +956,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_2.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1081,8 +973,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/HICOMP/n0q_2.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1100,8 +990,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/AKCOMP/n0q_2.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1119,8 +1007,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/PRCOMP/n0q_2.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1139,8 +1025,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_3.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1158,8 +1042,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/HICOMP/n0q_3.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1177,8 +1059,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/AKCOMP/n0q_3.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1196,8 +1076,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/PRCOMP/n0q_3.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1216,8 +1094,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_4.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1235,8 +1111,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/HICOMP/n0q_4.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1254,8 +1128,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/AKCOMP/n0q_4.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1273,8 +1145,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/PRCOMP/n0q_4.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1293,8 +1163,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_5.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1312,8 +1180,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/HICOMP/n0q_5.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1331,8 +1197,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/AKCOMP/n0q_5.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1350,8 +1214,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/PRCOMP/n0q_5.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1370,8 +1232,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_6.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1389,8 +1249,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/HICOMP/n0q_6.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1408,8 +1266,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/AKCOMP/n0q_6.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1427,8 +1283,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/PRCOMP/n0q_6.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1447,8 +1301,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_7.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1466,8 +1318,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/HICOMP/n0q_7.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1485,8 +1335,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/AKCOMP/n0q_7.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1504,8 +1352,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/PRCOMP/n0q_7.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1524,8 +1370,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_8.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1543,8 +1387,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/AKCOMP/n0q_8.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1562,8 +1404,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/HICOMP/n0q_8.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1581,8 +1421,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/PRCOMP/n0q_8.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1601,8 +1439,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_9.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1620,8 +1456,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/HICOMP/n0q_9.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1639,8 +1473,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/AKCOMP/n0q_9.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1658,8 +1490,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/PRCOMP/n0q_9.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1678,8 +1508,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0q_10.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1697,8 +1525,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/AKCOMP/n0q_10.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1716,8 +1542,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/PRCOMP/n0q_10.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END
@@ -1735,8 +1559,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/4326/HICOMP/n0q_10.tif"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   PROJECTION
     "init=epsg:4326"
   END

@@ -13,8 +13,6 @@ SHAPEPATH "/mesonet/data/gis/static/"
 SYMBOLSET "/opt/iem/data/gis/stations.sym"
 IMAGECOLOR -1 -1 -1
 IMAGETYPE PNG
-TRANSPARENT off
-INTERLACE off
 
 #
 # Projection definition, consult the PROJ.4 documentation for parameter discussion
@@ -30,8 +28,6 @@ WEB
   HEADER q_header.html
   TEMPLATE fancy.html
   FOOTER q_footer.html
-  MINSCALE 90000
-  MAXSCALE 40000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
 END
@@ -62,8 +58,10 @@ LAYER
    "init=epsg:4326"
   END
   CLASS
-    OUTLINECOLOR 255 0 0
-    COLOR 200 200 200
+    STYLE
+      OUTLINECOLOR 255 0 0
+      COLOR 200 200 200
+    END
   END
 END
 
@@ -80,11 +78,12 @@ LAYER
     "init=epsg:4326"
  END
   CLASS
-    COLOR -1 -1 -1
-    BACKGROUNDCOLOR -1 -1 -1
-    OUTLINECOLOR 0 0 255
-    SYMBOL 0
-    SIZE 3
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 0 0 255
+      SYMBOL 0
+      SIZE 3
+    END
     LABEL
       TYPE TRUETYPE
       FONT 'liberation'

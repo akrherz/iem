@@ -15,8 +15,6 @@ PROJECTION
 END
 
 WEB
-  MINSCALE 90000
-  MAXSCALE 4650000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
   #LOG "/var/webtmp/w0.log"
@@ -38,8 +36,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel01/GOES-16_C01.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel01/GOES-16_C01.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -49,8 +45,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel02/GOES-16_C02.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel02/GOES-16_C02.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -60,8 +54,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel03/GOES-16_C03.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel03/GOES-16_C03.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -71,8 +63,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel04/GOES-16_C04.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel04/GOES-16_C04.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -82,8 +72,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel05/GOES-16_C05.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel05/GOES-16_C05.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -93,8 +81,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel06/GOES-16_C06.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel06/GOES-16_C06.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -104,8 +90,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel07/GOES-16_C07.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel07/GOES-16_C07.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -115,8 +99,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel08/GOES-16_C08.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel08/GOES-16_C08.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -126,8 +108,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel09/GOES-16_C09.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel09/GOES-16_C09.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -137,8 +117,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel10/GOES-16_C10.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel10/GOES-16_C10.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -148,8 +126,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel11/GOES-16_C11.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel11/GOES-16_C11.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -159,8 +135,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel12/GOES-16_C12.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel12/GOES-16_C12.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -170,8 +144,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel13/GOES-16_C13.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel13/GOES-16_C13.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -181,8 +153,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel14/GOES-16_C14.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel14/GOES-16_C14.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -192,8 +162,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel15/GOES-16_C15.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel15/GOES-16_C15.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -203,8 +171,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel16/GOES-16_C16.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/fulldisk/channel16/GOES-16_C16.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -214,8 +180,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel01/GOES-16_C01.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel01/GOES-16_C01.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -225,8 +189,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel02/GOES-16_C02.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel02/GOES-16_C02.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -236,8 +198,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel03/GOES-16_C03.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel03/GOES-16_C03.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -247,8 +207,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel04/GOES-16_C04.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel04/GOES-16_C04.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -258,8 +216,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel05/GOES-16_C05.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel05/GOES-16_C05.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -269,8 +225,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel06/GOES-16_C06.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel06/GOES-16_C06.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -280,8 +234,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel07/GOES-16_C07.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel07/GOES-16_C07.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -291,8 +243,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel08/GOES-16_C08.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel08/GOES-16_C08.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -302,8 +252,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel09/GOES-16_C09.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel09/GOES-16_C09.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -313,8 +261,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel10/GOES-16_C10.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel10/GOES-16_C10.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -324,8 +270,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel11/GOES-16_C11.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel11/GOES-16_C11.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -335,8 +279,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel12/GOES-16_C12.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel12/GOES-16_C12.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -346,8 +288,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel13/GOES-16_C13.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel13/GOES-16_C13.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -357,8 +297,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel14/GOES-16_C14.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel14/GOES-16_C14.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -368,8 +306,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel15/GOES-16_C15.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel15/GOES-16_C15.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -379,8 +315,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel16/GOES-16_C16.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel16/GOES-16_C16.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -390,8 +324,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel01/GOES-16_C01.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel01/GOES-16_C01.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -401,8 +333,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel02/GOES-16_C02.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel02/GOES-16_C02.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -412,8 +342,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel03/GOES-16_C03.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel03/GOES-16_C03.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -423,8 +351,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel04/GOES-16_C04.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel04/GOES-16_C04.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -434,8 +360,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel05/GOES-16_C05.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel05/GOES-16_C05.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -445,8 +369,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel06/GOES-16_C06.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel06/GOES-16_C06.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -456,8 +378,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel07/GOES-16_C07.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel07/GOES-16_C07.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -467,8 +387,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel08/GOES-16_C08.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel08/GOES-16_C08.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -478,8 +396,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel09/GOES-16_C09.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel09/GOES-16_C09.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -489,8 +405,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel10/GOES-16_C10.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel10/GOES-16_C10.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -500,8 +414,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel11/GOES-16_C11.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel11/GOES-16_C11.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -511,8 +423,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel12/GOES-16_C12.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel12/GOES-16_C12.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -522,8 +432,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel13/GOES-16_C13.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel13/GOES-16_C13.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -533,8 +441,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel14/GOES-16_C14.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel14/GOES-16_C14.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -544,8 +450,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel15/GOES-16_C15.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel15/GOES-16_C15.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -555,8 +459,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel16/GOES-16_C16.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-1/channel16/GOES-16_C16.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -566,8 +468,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel01/GOES-16_C01.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel01/GOES-16_C01.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -577,8 +477,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel02/GOES-16_C02.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel02/GOES-16_C02.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -588,8 +486,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel03/GOES-16_C03.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel03/GOES-16_C03.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -599,8 +495,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel04/GOES-16_C04.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel04/GOES-16_C04.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -610,8 +504,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel05/GOES-16_C05.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel05/GOES-16_C05.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -621,8 +513,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel06/GOES-16_C06.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel06/GOES-16_C06.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -632,8 +522,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel07/GOES-16_C07.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel07/GOES-16_C07.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -643,8 +531,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel08/GOES-16_C08.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel08/GOES-16_C08.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -654,8 +540,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel09/GOES-16_C09.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel09/GOES-16_C09.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -665,8 +549,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel10/GOES-16_C10.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel10/GOES-16_C10.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -676,8 +558,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel11/GOES-16_C11.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel11/GOES-16_C11.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -687,8 +567,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel12/GOES-16_C12.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel12/GOES-16_C12.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -698,8 +576,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel13/GOES-16_C13.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel13/GOES-16_C13.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -709,8 +585,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel14/GOES-16_C14.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel14/GOES-16_C14.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -720,8 +594,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel15/GOES-16_C15.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel15/GOES-16_C15.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -731,8 +603,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel16/GOES-16_C16.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/mesoscale-2/channel16/GOES-16_C16.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -742,8 +612,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/puertorico/channel01/GOES-16_C01.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/puertorico/channel01/GOES-16_C01.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -753,8 +621,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/puertorico/channel02/GOES-16_C02.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/puertorico/channel02/GOES-16_C02.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -764,8 +630,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/puertorico/channel03/GOES-16_C03.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/puertorico/channel03/GOES-16_C03.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -775,8 +639,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/puertorico/channel04/GOES-16_C04.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/puertorico/channel04/GOES-16_C04.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -786,8 +648,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/puertorico/channel05/GOES-16_C05.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/puertorico/channel05/GOES-16_C05.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -797,8 +657,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/puertorico/channel06/GOES-16_C06.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/puertorico/channel06/GOES-16_C06.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -808,8 +666,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/puertorico/channel07/GOES-16_C07.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/puertorico/channel07/GOES-16_C07.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -819,8 +675,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/puertorico/channel08/GOES-16_C08.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/puertorico/channel08/GOES-16_C08.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -830,8 +684,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/puertorico/channel09/GOES-16_C09.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/puertorico/channel09/GOES-16_C09.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -841,8 +693,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/puertorico/channel10/GOES-16_C10.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/puertorico/channel10/GOES-16_C10.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -852,8 +702,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/puertorico/channel11/GOES-16_C11.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/puertorico/channel11/GOES-16_C11.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -863,8 +711,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/puertorico/channel12/GOES-16_C12.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/puertorico/channel12/GOES-16_C12.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -874,8 +720,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/puertorico/channel13/GOES-16_C13.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/puertorico/channel13/GOES-16_C13.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -885,8 +729,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/puertorico/channel14/GOES-16_C14.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/puertorico/channel14/GOES-16_C14.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -896,8 +738,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/puertorico/channel15/GOES-16_C15.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/puertorico/channel15/GOES-16_C15.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
@@ -907,8 +747,6 @@ LAYER
   STATUS ON
   DATA "/mesonet/ldmdata/gis/images/GOES/puertorico/channel16/GOES-16_C16.png"
   TYPE RASTER
-  MINSCALE 0
-  MAXSCALE 465000000
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/puertorico/channel16/GOES-16_C16.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END

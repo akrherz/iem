@@ -28,8 +28,6 @@ WEB
 #  HEADER q_header.html
   TEMPLATE select.html
 #  FOOTER q_footer.html
-  MINSCALE 90000
-  MAXSCALE 40000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
 END
@@ -111,29 +109,6 @@ LAYER
       FORCE TRUE
       POSITION UC
       OFFSET 0 3
-    END
-  END
-END
-
-LAYER
-  NAME cwas
-  STATUS OFF
-  TYPE POLYGON
-  DATA /mesonet/data/gis/static/shape/4326/nws/cwas.shp
-  PROJECTION
-   "init=epsg:4326"
-  END
-  LABELITEM "WFO"
-  CLASS
-    OUTLINECOLOR 255 165 0
-    LABEL
-      MINFEATURESIZE 50
-      OUTLINECOLOR 0 0 0
-      COLOR 255 255 255
-      TYPE BITMAP
-      SIZE MEDIUM
-      POSITION CC
-      PARTIALS FALSE
     END
   END
 END
@@ -277,12 +252,17 @@ LAYER
   CLASSITEM "FIPS_CNTRY"
   CLASS
     EXPRESSION /US/
-    COLOR  105 105 105
+    STYLE
+      COLOR  105 105 105
+    END
   END
   CLASS
-    COLOR 191 191 191
+    STYLE
+      COLOR 191 191 191
+    END
   END
 END
+
 LAYER
   NAME lakes
   STATUS OFF
@@ -292,9 +272,12 @@ LAYER
    "init=epsg:4326"
   END
   CLASS
-    COLOR 0 0 250
+    STYLE
+      COLOR 0 0 250
+    END
   END
 END
+
 LAYER
   NAME nexrad_n0q
   DATA /mesonet/ldmdata/gis/images/4326/USCOMP/n0q_0.png
@@ -307,7 +290,6 @@ LAYER
     "init=epsg:4326"
   END
   OFFSITE 0 0 0
-  TRANSPARENCY 70
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 LAYER
@@ -319,9 +301,11 @@ LAYER
    "init=epsg:4326"
   END
   CLASS
-    SYMBOL "circle"
-    COLOR 54 54 54
-    SIZE 1
+    STYLE
+      SYMBOL "circle"
+      COLOR 54 54 54
+      SIZE 1
+    END
   END
 END
 ###
@@ -505,163 +489,8 @@ LAYER
     END
   END
 END
-LAYER
-  CONNECTIONTYPE postgis
-  NAME warnings0_c
-  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
-  DATA "geom from (select phenomena, significance, u.geom, random() as oid from warnings w JOIN ugcs u on (u.gid = w.gid) WHERE  expire > CURRENT_TIMESTAMP) as foo using unique oid using SRID=4326"
-  STATUS OFF
-  TYPE LINE
-  PROJECTION
-   "init=epsg:4326"
-  END
-  CLASS
-    NAME "Flash Flood Warn"
-    EXPRESSION (('[phenomena]' = 'FF' or '[phenomena]' = 'MA') and '[significance]' = 'W')
-    STYLE
-      COLOR 0 255 0
-      SIZE 2
-      SYMBOL 'circle'
-    END
-  END
-  CLASS
-    NAME "Svr T'storm Warn"
-    EXPRESSION ('[phenomena]' = 'SV' and '[significance]' = 'W')
-    STYLE
-      COLOR 0 0 0
-      SIZE 4
-      SYMBOL 'circle'
-    END
-    STYLE
-      COLOR 255 255 0
-      SIZE 2
-      SYMBOL 'circle'
-    END
-  END
-  CLASS
-    NAME "Tornado Warn"
-    EXPRESSION ('[phenomena]' = 'TO' and '[significance]' = 'W')
-    STYLE
-      COLOR 0 0 0
-      SIZE 4
-      SYMBOL 'circle'
-    END
-    STYLE
-      COLOR 255 0 0
-      SIZE 2
-      SYMBOL 'circle'
-    END
-  END
 
-    # Advisories
-    CLASS
-        NAME "Winter Advisory"
-        EXPRESSION (('[phenomena]' = 'WW' or '[phenomena]' = 'BZ'  or '[phenomena]' = 'WS' or '[phenomena]' = 'IP' or '[phenomena]' = 'HP' or '[phenomena]' = 'ZR' or '[phenomena]' = 'IS') and '[significance]' = 'Y')
-        STYLE
-          COLOR  222 184 135
-          SIZE  3
-          SYMBOL    'circle'
-        END
-        #STYLE
-        #  COLOR 222 184 135
-        #  SIZE  1
-        #  SYMBOL    'circle'
-        #END
-    END
-    # Snow and Blowing snow
-    CLASS
-        NAME "Sn or Blow Sn Adv"
-        EXPRESSION (('[phenomena]' = 'LE' or '[phenomena]' = 'SN' or '[phenomena]' = 'BS' or '[phenomena]' = 'SB') and '[significance]' = 'Y')
-        STYLE
-          COLOR 176 224 230
-          SIZE  3 
-          SYMBOL    'circle'
-        END
-        STYLE
-          COLOR 255 255 255
-          SIZE  1
-          SYMBOL    'circle'
-        END
-    END
 
-    # Heavy Snow
-    CLASS
-        NAME "Heavy Snow Warn"
-        EXPRESSION ('[phenomena]' = 'HS' and '[significance]' = 'W')
-        STYLE
-          COLOR 138 43 226
-          SIZE 3
-          SYMBOL 'circle'
-        END
-        STYLE
-          COLOR 255 255 255
-          SIZE 1
-          SYMBOL 'circle'
-        END
-    END
-    # WW Warning
-    CLASS
-        NAME "Winter Storm Warn"
-        EXPRESSION (('[phenomena]' = 'LE' or '[phenomena]' = 'WS' or '[phenomena]' = 'WW') and '[significance]' = 'W')
-        COLOR   255 105 180
-        SIZE    3
-        SYMBOL  'circle'
-    END
-    # Sleet Fz
-    CLASS
-        NAME "Ice/Frz/Sleet Warn"
-        EXPRESSION (('[phenomena]' = 'IP' or '[phenomena]' = 'HP' or '[phenomena]' = 'ZR' or '[phenomena]' = 'IS') and '[significance]' = 'W')         
-        COLOR   255 20 147
-        SIZE    3
-        SYMBOL  'circle'
-    END
-    # Blizzard
-    CLASS
-        NAME "Blizzard Warn"
-        EXPRESSION ('[phenomena]' = 'BZ' and '[significance]' = 'W')
-        COLOR   255 0 0
-        SIZE    3
-        SYMBOL  'circle'
-    END
-    # Freeze Warning
-    CLASS
-        NAME "Freeze Warn"
-        EXPRESSION ('[phenomena]' = 'FZ' and '[significance]' = 'W')
-        COLOR   255 0 0
-        SIZE    3
-        SYMBOL  'circle'
-    END
-    # Marine Statement?
-    CLASS
-        NAME "Marine Statement"
-        EXPRESSION ('[phenomena]' = 'MA' and '[significance]' = 'S')
-        COLOR   0 200 0
-        SIZE    3
-        SYMBOL  'circle'
-    END
-    #CLASS
-    #    NAME "Other"
-    #    #EXPRESSION ('[phenomena]' = 'MA' and '[significance]' = 'S')
-    #    COLOR   200 200 200
-    #    SIZE    3
-    #    SYMBOL  'circle'
-    #END
-END
-# Bar Header Bar!
-LAYER
-  NAME bar640t
-  TYPE POLYGON
-  TRANSFORM FALSE
-  STATUS OFF
-  FEATURE
-    POINTS 0 0 0 36 640 36 640 0 0 0 END
-  END
-#  TRANSPARENCY 70
-  LABELCACHE FALSE
-  CLASS
-    COLOR 0 0 0
-  END
-END
 # Credits
 LAYER
   NAME "bar640t-title"
@@ -693,36 +522,6 @@ LAYER
       PARTIALS TRUE
       BUFFER 2
     END
-  END
-END
-
-LAYER
-  NAME "n0r-ramp"
-  TYPE POINT
-  STATUS default
-  TRANSFORM FALSE
-  TRANSPARENCY 10
-  CLASS
-    LABEL
-    END
-    SYMBOL 'n0r-ramp'
-    #SIZE 40
-        COLOR 0 0 0
-  END
-END
-
-LAYER
-  NAME "n0q-ramp"
-  TYPE POINT
-  STATUS default
-  TRANSFORM FALSE
-  TRANSPARENCY 10
-  CLASS
-    LABEL
-    END
-    SYMBOL 'n0q-ramp'
-    #SIZE 40
-        COLOR 0 0 0
   END
 END
 
@@ -784,19 +583,6 @@ LAYER
   END
 END
 
-# IEM Logo
-LAYER
-  NAME logo
-  TYPE POINT
-  STATUS default
-  TRANSFORM FALSE
-  CLASS
-   LABEL
-   END
-   SYMBOL 'iem_logo'
-   COLOR 0 0 0
-  END
-END
 LAYER
   NAME nexrad_n0r
   DATA /mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.tif
@@ -809,13 +595,11 @@ LAYER
     "init=epsg:4326"
   END
   OFFSITE 0 0 0
-  TRANSPARENCY 70
 END
+
 LAYER
   NAME "east_vis_1km"
   STATUS ON
-  MINSCALE 0
-  MAXSCALE 465000000
   DATA "/mesonet/ldmdata/gis/images/awips211/GOES13_EAST_VIS.png"
   TYPE RASTER
   PROJECTION
@@ -846,15 +630,14 @@ LAYER
   END
   LABELCACHE ON
   LABELITEM 'CO_NAME'
-  LABELMAXSCALE 400000
   CLASS
-    OUTLINECOLOR 210 210 210
-#    COLOR 140 144 90
+    STYLE
+      OUTLINECOLOR 210 210 210
+    END
     LABEL 
       SIZE TINY
       TYPE BITMAP
       POSITION LC
-#      COLOR 90 90 90
       COLOR 0 0 0
       PARTIALS FALSE
       FORCE FALSE
@@ -874,7 +657,6 @@ LAYER
   END
   LABELCACHE ON
   LABELITEM 'NAME'
-  LABELMAXSCALE 400000
   CLASS
     STYLE
       OUTLINECOLOR 210 210 210
@@ -893,17 +675,6 @@ LAYER
 END
 
 LAYER
-  NAME wmsback
-  STATUS ON
-  CONNECTIONTYPE WMS
-  TYPE RASTER
-  CONNECTION "http://cairo.gis.iastate.edu/cgi-bin/server.cgi?format=jpeg&wmtver=1.0.0&request=map&servicename=GetMap&layers=cir"
-  PROJECTION
-    "init=epsg:26915"
-  END
-END
-
-LAYER
   NAME iards
   TYPE LINE
   STATUS ON
@@ -911,12 +682,14 @@ LAYER
    "init=epsg:26915"
   END
   DATA "/mesonet/data/gis/static/shape/26915/iowa/iaroads.shp"
-  #CLASSITEM "STATE"
+  CLASSITEM "NAME"
   CLASS
     EXPRESSION "[NAME] = 'Interstate Route 35'"
-    COLOR 119 136 153
-    SYMBOL 1
-    SIZE 2
+    STYLE
+      COLOR 119 136 153
+      SYMBOL 1
+      SIZE 2
+    END
   END
 END
 
@@ -929,9 +702,11 @@ LAYER
   END
   LABELCACHE ON
   CLASS
-   SYMBOL 1
-   COLOR 255 0 0
-   SIZE 5
+    STYLE
+      SYMBOL 1
+      COLOR 255 0 0
+      SIZE 5
+    END
   END
 END
 
@@ -974,7 +749,9 @@ LAYER
    "init=epsg:4326"
   END
   CLASS
-    COLOR -1 -1 -1
+    STYLE
+      COLOR -1 -1 -1
+    END
     LABEL
       COLOR  255 255 0
       OUTLINECOLOR  0 0 0
@@ -991,7 +768,9 @@ LAYER
     END
   END
   CLASS
-    COLOR -1 -1 -1
+    STYLE
+      COLOR -1 -1 -1
+    END
     LABEL
       COLOR 0 0 0
       SIZE 7
@@ -1006,7 +785,9 @@ LAYER
     END
   END
   CLASS
-    COLOR -1 -1 -1
+    STYLE
+      COLOR -1 -1 -1
+    END
     LABEL
       COLOR  0 0 0
       SIZE 14
@@ -1031,7 +812,9 @@ LAYER
     "init=epsg:4326"
   END
   CLASS
-    COLOR -1 -1 -1
+    STYLE
+      COLOR -1 -1 -1
+    END
     LABEL
       COLOR 0 0 0
       SIZE MEDIUM
@@ -1053,10 +836,12 @@ LAYER
   PROJECTION
     "init=epsg:26915"
   END
-  CLASS 
-   SYMBOL 1
-   COLOR 255 255 255
-   SIZE 10
+  CLASS
+   STYLE
+     SYMBOL 1
+     COLOR 255 255 255
+     SIZE 10
+   END
     LABEL
       COLOR  255 255 255
       OUTLINECOLOR 0 0 0 
@@ -1087,8 +872,10 @@ LAYER
     "init=epsg:26915"
   END
   CLASS
-    COLOR -1 -1 -1
-    OUTLINECOLOR 255 255 255   
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 255 255 255   
+    END
     LABEL
       COLOR  255 255 255
       OUTLINECOLOR 0 0 0 
@@ -1156,9 +943,10 @@ LAYER
   LABELITEM HWYNAME
   DATA "/mesonet/data/gis/static/shape/4326/us/interstates.shp"
   CLASS
-#    EXPRESSION ([HWYNAME] < 100)
-    COLOR -1 -1 -1
-    SYMBOL 'interstate_shield'
+    STYLE
+      COLOR -1 -1 -1
+      SYMBOL 'interstate_shield'
+    END
     LABEL
       TYPE TRUETYPE
       FONT 'liberation'
@@ -1173,50 +961,6 @@ LAYER
 END
 
 INCLUDE "inc_lsrs.map"
-
-LAYER
-  NAME sites
-  STATUS OFF
-  TYPE POINT
-  CONNECTIONTYPE POSTGIS
-  CONNECTION "user=nobody dbname=mesosite host=iemdb-mesosite.local"
-  DATA "geom from (select geom, id, plot_name, msoid, network, case when is_climate_site THEN 't' ELSE 'f' END as is_climate_site  from stations WHERE online = 't') as foo using unique msoid using srid=4326"
-  PROJECTION
-   "init=epsg:4326"
-  END
-  TOLERANCE 1000
-  TOLERANCEUNITS pixels
-  LABELITEM "plot_name"
-  FILTER "network = 'IA_RWIS'"
-  LABELCACHE ON
-  CLASS
-    TEMPLATE "http://kcci.mesonet.agron.iastate.edu/site.phtml?station=[ID]"
-    COLOR 0 0 0
-    SYMBOL 'circle'
-    SIZE 6
-    OVERLAYSYMBOL 'circle'
-    OVERLAYSIZE 4
-    OVERLAYCOLOR 250 0 0
-    LABEL
-      TYPE BITMAP
-#      TYPE TRUETYPE
-      SIZE SMALL
-#      FONT Verabd
-#      ANTIALIAS FALSE
-#      SIZE 8
-#      OUTLINECOLOR 250 250 250
-      COLOR 0 0 255
-      POSITION AUTO
-      FORCE FALSE
-      PARTIALS FALSE
-      BUFFER 0
-      ANTIALIAS FALSE
-    END
-  END
-END
-
 INCLUDE 'inc_roads.map'
-
-
 
 END

@@ -114,7 +114,6 @@ LAYER
   DATA /mesonet/ldmdata/gis/images/26915/KCCI/KCCI_N0R_0.tif
   #DATA /mesonet/data/gis/images/kcci2.tif
   OFFSITE  0 0 0
-  TRANSPARENCY 80
   PROJECTION
    "init=epsg:26915"
   END
@@ -185,31 +184,35 @@ LAYER
   CLASS
    LABEL
    END
-   SYMBOL 'x'
-   COLOR 0 0 0
-   SIZE 8
+   STYLE
+     SYMBOL 'x'
+     COLOR 0 0 0
+     SIZE 8
+   END
   END
   CLASS
    LABEL
    END
-   SYMBOL 'circle'
-   COLOR 255 255 255
-   SIZE 8
+   STYLE
+     SYMBOL 'circle'
+     COLOR 255 255 255
+     SIZE 8
+   END
   END
   CLASS
    LABEL
    END
-   SYMBOL 'triangle'
-   COLOR 250 250 0
-   SIZE 8
+   STYLE
+     SYMBOL 'triangle'
+     COLOR 250 250 0
+     SIZE 8
+   END
  END
 END
 
 LAYER
   NAME "east_vis_1km"
   STATUS ON
-  MINSCALE 0
-  MAXSCALE 465000000
   DATA "/mesonet/ldmdata/gis/images/awips211/GOES13_EAST_VIS.png"
   TYPE RASTER
   PROJECTION
@@ -278,24 +281,7 @@ LAYER
   END
 END
 
-# North America!!!
-LAYER
-  NAME namerica
-  STATUS OFF
-  TYPE POLYGON
-  DATA /mesonet/data/gis/static/shape/4326/world/world_borders.shp
-  PROJECTION
-   "init=epsg:4326"
-  END
-  CLASSITEM "FIPS_CNTRY"
-  CLASS
-    EXPRESSION /US/
-    COLOR  105 105 105
-  END
-  CLASS
-    COLOR 191 191 191
-  END
-END
+
 
 # United States
 LAYER
@@ -318,6 +304,29 @@ LAYER
   END
 END
 
+LAYER
+  NAME namerica
+  STATUS OFF
+  TYPE POLYGON
+  DATA /mesonet/data/gis/static/shape/2163/world/namerica.shp
+  PROJECTION
+   "init=epsg:2163"
+  END
+  CLASSITEM "FIPS_CNTRY"
+  CLASS
+    EXPRESSION /US/
+    STYLE
+      COLOR  105 105 105
+    END
+  END
+  CLASS
+    STYLE
+      COLOR 191 191 191
+    END
+  END
+END
+
+
 # Lakes
 LAYER
   NAME lakes
@@ -328,7 +337,9 @@ LAYER
    "init=epsg:4326"
   END
   CLASS
-    COLOR 0 0 250
+    STYLE
+      COLOR 0 0 250
+    END
   END
 END
 
@@ -342,9 +353,11 @@ LAYER
    "init=epsg:4326"
   END
   CLASS
-    SYMBOL "circle"
-    COLOR 54 54 54
-    SIZE 1
+    STYLE
+      SYMBOL "circle"
+      COLOR 54 54 54
+      SIZE 1
+    END
   END
 END
 
@@ -359,7 +372,9 @@ LAYER
   END
   LABELITEM "NAME"
   CLASS
-    OUTLINECOLOR 255 165 0
+    STYLE
+      OUTLINECOLOR 255 165 0
+    END
     LABEL
       MINFEATURESIZE 50
       OUTLINECOLOR 0 0 0
@@ -384,35 +399,16 @@ LAYER
    "init=epsg:4326"
   END
   CLASS
-    SYMBOL "circle"
-    COLOR 141 141 141
-    SIZE 1
-  END
-END
-
-
-LAYER
-  NAME cwas
-  STATUS OFF
-  TYPE POLYGON
-  DATA /mesonet/data/gis/static/shape/4326/nws/cwas.shp
-  PROJECTION
-   "init=epsg:4326"
-  END
-  LABELITEM "WFO"
-  CLASS
-    OUTLINECOLOR 255 165 0
-    LABEL
-      MINFEATURESIZE 50
-      OUTLINECOLOR 0 0 0
-      COLOR 255 255 255
-      TYPE BITMAP
-      SIZE MEDIUM
-      POSITION CC
-      PARTIALS FALSE
+    STYLE
+      SYMBOL "circle"
+      COLOR 141 141 141
+      SIZE 1
     END
   END
 END
+
+
+
 
 # USDM!
 LAYER
@@ -426,23 +422,33 @@ LAYER
   CLASSITEM "DCAT"
   CLASS
     EXPRESSION /0/
-    COLOR 100 0 0
+    STYLE
+      COLOR 100 0 0
+    END
   END
   CLASS
     EXPRESSION /1/
-    COLOR 120 0 0
+    STYLE
+      COLOR 120 0 0
+    END
   END
   CLASS
     EXPRESSION /2/
-    COLOR 160 0 0
+    STYLE
+      COLOR 160 0 0
+    END
   END
   CLASS
     EXPRESSION /3/
-    COLOR 200 0 0
+    STYLE
+      COLOR 200 0 0
+    END
   END
   CLASS
     EXPRESSION /4/
-    COLOR 255 0 0
+    STYLE
+      COLOR 255 0 0
+    END
   END
 END
 
@@ -485,149 +491,6 @@ LAYER
       SYMBOL 'circle'
     END
   END
-END
-
-LAYER
-  CONNECTIONTYPE postgis
-  NAME warnings0_c
-  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
-  DATA "geom from (select phenomena, significance, u.geom, random() as  oid from warnings w JOIN ugcs u on (u.gid = w.gid) WHERE  expire > CURRENT_TIMESTAMP) as foo using unique oid using SRID=4326"
-  STATUS OFF
-  TYPE LINE
-  PROJECTION
-   "init=epsg:4326"
-  END
-  CLASS
-    NAME "Flash Flood Warn"
-    EXPRESSION (('[phenomena]' = 'FF' or '[phenomena]' = 'MA') and '[significance]' = 'W')
-    STYLE
-      COLOR 0 255 0
-      SIZE 2
-      SYMBOL 'circle'
-    END
-  END
-  CLASS
-    NAME "Svr T'storm Warn"
-    EXPRESSION ('[phenomena]' = 'SV' and '[significance]' = 'W')
-    STYLE
-      COLOR 0 0 0
-      SIZE 4
-      SYMBOL 'circle'
-    END
-    STYLE
-      COLOR 255 255 0
-      SIZE 2
-      SYMBOL 'circle'
-    END
-  END
-  CLASS
-    NAME "Tornado Warn"
-    EXPRESSION ('[phenomena]' = 'TO' and '[significance]' = 'W')
-    STYLE
-      COLOR 0 0 0
-      SIZE 4
-      SYMBOL 'circle'
-    END
-    STYLE
-      COLOR 255 0 0
-      SIZE 2
-      SYMBOL 'circle'
-    END
-  END
-
-    # Advisories
-    CLASS
-        NAME "Winter Advisory"
-        EXPRESSION (('[phenomena]' = 'WW' or '[phenomena]' = 'BZ'  or '[phenomena]' = 'WS' or '[phenomena]' = 'IP' or '[phenomena]' = 'HP' or '[phenomena]' = 'ZR' or '[phenomena]' = 'IS') and '[significance]' = 'Y')
-        STYLE
-          COLOR  222 184 135
-          SIZE  3
-          SYMBOL    'circle'
-        END
-        #STYLE
-        #  COLOR 222 184 135
-        #  SIZE  1
-        #  SYMBOL    'circle'
-        #END
-    END
-    # Snow and Blowing snow
-    CLASS
-        NAME "Sn or Blow Sn Adv"
-        EXPRESSION (('[phenomena]' = 'LE' or '[phenomena]' = 'SN' or '[phenomena]' = 'BS' or '[phenomena]' = 'SB') and '[significance]' = 'Y')
-        STYLE
-          COLOR 176 224 230
-          SIZE  3 
-          SYMBOL    'circle'
-        END
-        STYLE
-          COLOR 255 255 255
-          SIZE  1
-          SYMBOL    'circle'
-        END
-    END
-
-    # Heavy Snow
-    CLASS
-        NAME "Heavy Snow Warn"
-        EXPRESSION ('[phenomena]' = 'HS' and '[significance]' = 'W')
-        STYLE
-          COLOR 138 43 226
-          SIZE 3
-          SYMBOL 'circle'
-        END
-        STYLE
-          COLOR 255 255 255
-          SIZE 1
-          SYMBOL 'circle'
-        END
-    END
-    # WW Warning
-    CLASS
-        NAME "Winter Storm Warn"
-        EXPRESSION (('[phenomena]' = 'LE' or '[phenomena]' = 'WS' or '[phenomena]' = 'WW') and '[significance]' = 'W')
-        COLOR   255 105 180
-        SIZE    3
-        SYMBOL  'circle'
-    END
-    # Sleet Fz
-    CLASS
-        NAME "Ice/Frz/Sleet Warn"
-        EXPRESSION (('[phenomena]' = 'IP' or '[phenomena]' = 'HP' or '[phenomena]' = 'ZR' or '[phenomena]' = 'IS') and '[significance]' = 'W')         
-        COLOR   255 20 147
-        SIZE    3
-        SYMBOL  'circle'
-    END
-    # Blizzard
-    CLASS
-        NAME "Blizzard Warn"
-        EXPRESSION ('[phenomena]' = 'BZ' and '[significance]' = 'W')
-        COLOR   255 0 0
-        SIZE    3
-        SYMBOL  'circle'
-    END
-    # Freeze Warning
-    CLASS
-        NAME "Freeze Warn"
-        EXPRESSION ('[phenomena]' = 'FZ' and '[significance]' = 'W')
-        COLOR   255 0 0
-        SIZE    3
-        SYMBOL  'circle'
-    END
-    # Marine Statement?
-    CLASS
-        NAME "Marine Statement"
-        EXPRESSION ('[phenomena]' = 'MA' and '[significance]' = 'S')
-        COLOR   0 200 0
-        SIZE    3
-        SYMBOL  'circle'
-    END
-    #CLASS
-    #    NAME "Other"
-    #    #EXPRESSION ('[phenomena]' = 'MA' and '[significance]' = 'S')
-    #    COLOR   200 200 200
-    #    SIZE    3
-    #    SYMBOL  'circle'
-    #END
 END
 
 LAYER
@@ -821,10 +684,10 @@ LAYER
   CLASSITEM 'phenomena'
   CLASS
     EXPRESSION /TO|SV|MA/
-    COLOR -1 -1 -1
-    OUTLINECOLOR 255 255 255
-#    SYMBOL 1
-#    SIZE 10
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 255 255 255
+    END
   END
 END
 
@@ -843,7 +706,6 @@ LAYER
     "init=epsg:4326"
   END
   OFFSITE 0 0 0
-  TRANSPARENCY 70
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
@@ -859,7 +721,6 @@ LAYER
     "init=epsg:4326"
   END
   OFFSITE 0 0 0
-  TRANSPARENCY 70
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
@@ -876,41 +737,14 @@ LAYER
     "init=epsg:4326"
   END
   CLASS
-    OUTLINECOLOR 250 250 250
-  END
-END
-
-# IEM Logo
-LAYER
-  NAME logo
-  TYPE POINT
-  STATUS default
-  TRANSFORM FALSE
-  FEATURE
-    WKT "POINT(100 100)"
-  END
-  CLASS
     STYLE
-      SYMBOL 'iem_logo'
+      OUTLINECOLOR 250 250 250
     END
   END
 END
 
-# Bar Header Bar!
-LAYER
-  NAME bar640t
-  TYPE POLYGON
-  TRANSFORM FALSE
-  STATUS OFF
-  FEATURE
-    POINTS 0 0 0 36 640 36 640 0 0 0 END
-  END
-#  TRANSPARENCY 70
-  LABELCACHE FALSE
-  CLASS
-    COLOR 0 0 0
-  END
-END
+
+
 
 # Credits
 LAYER
@@ -1000,35 +834,9 @@ LAYER
   END
 END
 
-LAYER
-  NAME "n0r-ramp"
-  TYPE POINT
-  STATUS default
-  TRANSFORM FALSE
-  TRANSPARENCY 10
-  CLASS
-    LABEL
-    END
-    SYMBOL 'n0r-ramp'
-    #SIZE 40
-        COLOR 0 0 0
-  END
-END
 
-LAYER
-  NAME "n0q-ramp"
-  TYPE POINT
-  STATUS default
-  TRANSFORM FALSE
-  TRANSPARENCY 10
-  CLASS
-    LABEL
-    END
-    SYMBOL 'n0q-ramp'
-    #SIZE 40
-        COLOR 0 0 0
-  END
-END
+
+
 
 # Used in php plotter
 LAYER
@@ -1040,7 +848,9 @@ LAYER
    "init=epsg:4326"
   END
   CLASS
-    COLOR -1 -1 -1
+    STYLE
+      COLOR -1 -1 -1
+    END
     LABEL
       COLOR  255 255 0
       OUTLINECOLOR  0 0 0
@@ -1058,7 +868,9 @@ LAYER
     END
   END
   CLASS
-    COLOR -1 -1 -1
+    STYLE
+      COLOR -1 -1 -1
+    END
     LABEL
       COLOR  0 255 0
       OUTLINECOLOR  0 0 0
@@ -1086,7 +898,9 @@ LAYER
    "init=epsg:4326"
   END
   CLASS
-    COLOR -1 -1 -1
+    STYLE
+      COLOR -1 -1 -1
+    END
     LABEL
       COLOR  255 255 255
       OUTLINECOLOR 0 0 0 
@@ -1110,15 +924,19 @@ LAYER
   NAME pointonly
   STATUS OFF
   CLASS 
-   SYMBOL 1
-   COLOR 255 0 0
-   SIZE 15
-   LABEL
-    COLOR -1 -1 -1
-   END
+    STYLE
+      SYMBOL 1
+      COLOR 255 0 0
+      SIZE 15
+    END
+    LABEL
+      COLOR -1 -1 -1
+    END
   END
   CLASS
+    STYLE
       COLOR 0 0 0
+    END
       LABEL
           COLOR 0 0 0
           TYPE BITMAP
@@ -1143,7 +961,9 @@ LAYER
    "init=epsg:4326"
   END
   CLASS
-    COLOR 255 0 0
+    STYLE
+      COLOR 255 0 0
+    END
     LABEL
         COLOR 250 0 0
         SHADOWCOLOR 0 0 0
@@ -1177,9 +997,11 @@ LAYER
   END
   CLASS
     TEXT ([station])
-    COLOR 250 250 250
-    SYMBOL "circle"
-    SIZE 5
+    STYLE
+      COLOR 250 250 250
+      SYMBOL "circle"
+      SIZE 5
+    END
     LABEL
       SIZE SMALL
       OFFSET 7 0
@@ -1211,7 +1033,9 @@ LAYER
   END
   CLASS
     TEXT ([tmpf])
-    COLOR -1 -1 -1
+    STYLE
+      COLOR -1 -1 -1
+    END
     LABEL
       SIZE SMALL
       OFFSET -7 0
@@ -1258,8 +1082,9 @@ LAYER
   END
   LABELITEM sknt
   CLASS
-#    TEXT ([sknt])
-    COLOR -1 -1 -1
+    STYLE
+      COLOR -1 -1 -1
+    END
     LABEL
       ANGLE [drct]
       SIZE 40
@@ -1331,51 +1156,65 @@ LAYER
   CLASS
     NAME ">=35"
     EXPRESSION ([tsf0] >= 35)
-    COLOR 30 190 20
-    SYMBOL 'circle'
-    SIZE 8
+    STYLE
+      COLOR 30 190 20
+      SYMBOL 'circle'
+      SIZE 8
+    END
   END
   CLASS
     NAME "34-35"
     EXPRESSION ([tsf0] >= 34)
-    COLOR 215 255 0
-    SYMBOL 'circle'
-    SIZE 8
+    STYLE
+      COLOR 215 255 0
+      SYMBOL 'circle'
+      SIZE 8
+    END
   END
   CLASS
     NAME "33-34"
     EXPRESSION ([tsf0] >= 33)
-    COLOR 255 164 0
-    SYMBOL 'circle'
-    SIZE 8
+    STYLE
+      COLOR 255 164 0
+      SYMBOL 'circle'
+      SIZE 8
+    END
   END
   CLASS
     NAME "32-33"
     EXPRESSION ([tsf0] >= 32)
-    COLOR 255 50 0
-    SYMBOL 'circle'
-    SIZE 10
+    STYLE
+      COLOR 255 50 0
+      SYMBOL 'circle'
+      SIZE 10
+    END
   END
   CLASS
     NAME "31-32"
     EXPRESSION ([tsf0] >= 31)
-    COLOR 255 0 144
-    SYMBOL 'circle'
-    SIZE 8
+    STYLE
+      COLOR 255 0 144
+      SYMBOL 'circle'
+      SIZE 8
+    END
   END
   CLASS
     NAME "30-31"
     EXPRESSION ([tsf0] >= 30)
-    COLOR 255 0 255
-    SYMBOL 'circle'
-    SIZE 8
+    STYLE
+      COLOR 255 0 255
+      SYMBOL 'circle'
+      SIZE 8
+    END
   END
   CLASS
     NAME "< 30"
     EXPRESSION ([tsf0] < 30)
-    COLOR 255 255 255
-    SYMBOL 'circle'
-    SIZE 8
+    STYLE
+      COLOR 255 255 255
+      SYMBOL 'circle'
+      SIZE 8
+    END
   END
 END
 
@@ -1399,7 +1238,9 @@ LAYER
   CLASS
     EXPRESSION ([tmpf] >= 35 AND [tmpf] < 120)
     TEXT ([tmpf])
-    COLOR -1 -1 -1
+    STYLE
+      COLOR -1 -1 -1
+    END
     LABEL
       COLOR 30 190 20
       OUTLINECOLOR 0 0 0
@@ -1416,7 +1257,9 @@ LAYER
   CLASS
     EXPRESSION ([tmpf] >= 34)
     TEXT ([tmpf])
-    COLOR -1 -1 -1
+    STYLE
+      COLOR -1 -1 -1
+    END
     LABEL
       COLOR 215 255 0
       OUTLINECOLOR 0 0 0
@@ -1433,7 +1276,9 @@ LAYER
   CLASS
     EXPRESSION ([tmpf] >= 33)
     TEXT ([tmpf])
-    COLOR -1 -1 -1
+    STYLE
+      COLOR -1 -1 -1
+    END
     LABEL
       COLOR 255 164 0
       OUTLINECOLOR 0 0 0
@@ -1450,7 +1295,9 @@ LAYER
   CLASS
     EXPRESSION ([tmpf] >= 32)
     TEXT ([tmpf])
-    COLOR -1 -1 -1
+    STYLE
+      COLOR -1 -1 -1
+    END
     LABEL
       COLOR 255 50 0
       OUTLINECOLOR 0 0 0
@@ -1467,7 +1314,9 @@ LAYER
   CLASS
     EXPRESSION ([tmpf] >= 31)
     TEXT ([tmpf])
-    COLOR -1 -1 -1
+    STYLE
+      COLOR -1 -1 -1
+    END
     LABEL
       COLOR 255 0 144
       OUTLINECOLOR 0 0 0
@@ -1484,7 +1333,9 @@ LAYER
   CLASS
     EXPRESSION ([tmpf] >= 30)
     TEXT ([tmpf])
-    COLOR -1 -1 -1
+    STYLE
+      COLOR -1 -1 -1
+    END
     LABEL
       #COLOR 232 164 226
       COLOR 255 0 255
@@ -1502,7 +1353,9 @@ LAYER
   CLASS
     EXPRESSION ([tmpf] > -40)
     TEXT ([tmpf])
-    COLOR -1 -1 -1
+    STYLE
+      COLOR -1 -1 -1
+    END
     LABEL
       #COLOR 232 214 226
       COLOR 255 255 255

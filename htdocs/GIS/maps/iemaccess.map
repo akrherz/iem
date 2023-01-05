@@ -25,8 +25,6 @@ WEB
 #  HEADER ia_header.html
   TEMPLATE ia.html
 #  FOOTER ia_footer.html
-  MINSCALE 90000
-  MAXSCALE 4650000
   IMAGEPATH "/home/httpd/html/tmp/"
   IMAGEURL "https://mesonet.agron.iastate.edu/tmp/"
   LOG "/home/httpd/html/tmp/w0.log"

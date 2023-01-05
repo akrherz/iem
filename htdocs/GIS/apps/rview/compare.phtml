@@ -1,4 +1,6 @@
 <?php
+require_once "/usr/lib64/php/modules/mapscript.php";
+
 require_once "../../../../config/settings.inc.php";
 define("IEM_APPID", 68);
 require_once "../../../../include/myview.php";
@@ -34,10 +36,10 @@ if ($ul_x != "") {
 $t->title = "RADAR Comparison";
 $nt = new NetworkTable("NEXRAD");
 
-$latlon = ms_newprojectionobj("init=epsg:4326");
-$p26915 = ms_newprojectionobj("init=epsg:26915");
+$latlon = new projectionObj("init=epsg:4326");
+$p26915 = new projectionObj("init=epsg:26915");
 
-$cntyMdpoint = ms_newpointobj();
+$cntyMdpoint = new pointObj();
 $cntyMdpoint->setXY(($extents[0] + $extents[2]) / 2,
     ($extents[1] + $extents[3]) / 2
 );
@@ -46,13 +48,11 @@ $cntyMdpoint->project($latlon, $p26915);
 $n = array("DMX", "DVN", "ARX", "MPX", "FSD", "OAX", "EAX");
 $distances = array();
 foreach ($n as $key => $site) {
-    $r = ms_newpointobj();
+    $r = new pointObj();
     $r->setXY($nt->table[$site]['lon'], $nt->table[$site]['lat']);
     $r->project($latlon, $p26915);
     $distances[$site] = round($r->distanceToPoint($cntyMdpoint) / 1000, 0);
 }
-
-//print_r($distances);
 
 $site = "DMX";
 $dmx_url = drawCountyNEXRAD($site, $extents);

@@ -18,8 +18,6 @@ END
 #
 WEB
   TEMPLATE ia.html
-  MINSCALE 0
-  MAXSCALE 465000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
   METADATA
@@ -40,8 +38,6 @@ END
 LAYER
   NAME "hawaii_ir"
   STATUS ON
-  MINSCALE 0
-  MAXSCALE 465000000
   DATA "/mesonet/ldmdata/gis/images/GOES/hawaii/channel13/GOES-17_C13.png"
   TYPE RASTER
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/hawaii/channel13/GOES-17_C13.msinc"

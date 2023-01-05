@@ -27,8 +27,6 @@ END
 WEB
   HEADER q_header.html
   FOOTER q_footer.html
-  MINSCALE 90000
-  MAXSCALE 40000000
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
   METADATA
@@ -101,7 +99,6 @@ LAYER
     "init=epsg:4326"
   END
   OFFSITE 1
-  TRANSPARENCY 70
 END
 
 LAYER
@@ -134,7 +131,6 @@ LAYER
     "init=epsg:4326"
   END
   OFFSITE 1
-  TRANSPARENCY 70
 END
 
 
@@ -407,7 +403,6 @@ LAYER
   TYPE POINT
   STATUS default
   TRANSFORM FALSE
-  TRANSPARENCY 10
   CLASS
     SYMBOL 'iem_logo'
     SIZE 40

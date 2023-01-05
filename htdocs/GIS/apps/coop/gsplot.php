@@ -2,6 +2,8 @@
 /* Generate a plot based on a request from gsplot.phtml, no more tmp 
  * files please
  */
+require_once "/usr/lib64/php/modules/mapscript.php";
+
 require_once "../../../../config/settings.inc.php";
 require_once "../../../../include/database.inc.php";
 $coopdb = iemdb("coop");
@@ -125,28 +127,28 @@ $map->setextent(
 );
 
 $counties = $map->getlayerbyname("counties");
-$counties->set("status", MS_ON);
+$counties->__set("status", MS_ON);
 
 $states = $map->getlayerbyname("states");
-$states->set("status", MS_ON);
+$states->__set("status", MS_ON);
 
 $bar640t = $map->getlayerbyname("bar640t");
-$bar640t->set("status", MS_ON);
+$bar640t->__set("status", MS_ON);
 
 $snet = $map->getlayerbyname("snet");
-$snet->set("status", MS_ON);
+$snet->__set("status", MS_ON);
 
 $iards = $map->getlayerbyname("iards");
-$iards->set("status", 1);
+$iards->__set("status", 1);
 
 $ponly = $map->getlayerbyname("pointonly");
-$ponly->set("status", MS_ON);
+$ponly->__set("status", MS_ON);
 
 $img = $map->prepareImage();
-$counties->draw($img);
-$states->draw($img);
-$iards->draw($img);
-$bar640t->draw($img);
+$counties->draw($map, $img);
+$states->draw($map, $img);
+$iards->draw($map, $img);
+$bar640t->draw($map, $img);
 
 $rs = pg_prepare($coopdb, "SELECT", "SELECT station, 
     sum(precip) as s_prec,
@@ -177,7 +179,7 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     // Red Dot...  
     $pt = new PointObj();
     $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
-    $pt->draw($map, $ponly, $img, 0);
+    $pt->draw($map, $ponly, $img, 0, "");
 
     // City Name
     $pt = new PointObj();
@@ -186,7 +188,7 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
 
     // Value UL
     $pt = new PointObj();
-    $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
+    $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0, "");
     $pt->draw(
         $map,
         $snet,
@@ -209,4 +211,4 @@ mktitlelocal($map, $img, $title);
 $map->drawLabelCache($img);
 
 header("Content-type: image/png");
-$img->saveImage('');
+echo $img->getBytes();

@@ -1,4 +1,6 @@
 <?php
+require_once "/usr/lib64/php/modules/mapscript.php";
+
 require_once "../../../../config/settings.inc.php";
 define("IEM_APPID", 49);
 require_once "../../../../include/myview.php";
@@ -46,7 +48,7 @@ function plotNoData($map, $img)
 {
     $layer = $map->getLayerByName("credits");
 
-    $point = ms_newpointobj();
+    $point = new pointObj();
     $point->setXY(100, 200);
     $point->draw(
         $map,
@@ -79,7 +81,7 @@ $rnd = array(
 
 $myStations = $cities;
 
-$map = ms_newMapObj("../../../../data/gis/base26915.map");
+$map = new mapObj("../../../../data/gis/base26915.map");
 $map->selectOutputFormat("PNG24");
 $map->setSize($width, $height);
 $map->setProjection("init=epsg:26915");
@@ -87,23 +89,23 @@ $map->setProjection("init=epsg:26915");
 $map->setextent(250000, 4450000, 690000, 4880000);
 
 $states = $map->getlayerbyname("states");
-$states->set("status", MS_ON);
+$states->__set("status", MS_ON);
 
 $counties = $map->getlayerbyname("iacounties");
-$counties->set("status", MS_ON);
+$counties->__set("status", MS_ON);
 
 $snet = $map->getlayerbyname("datapoint");
-$snet->set("status", MS_ON);
+$snet->__set("status", MS_ON);
 
 $ponly = $map->getlayerbyname("pointonly");
-$ponly->set("status", MS_ON);
+$ponly->__set("status", MS_ON);
 
 $cityname = $map->getlayerbyname("cityname");
-$cityname->set("status", MS_ON);
+$cityname->__set("status", MS_ON);
 
 $img = $map->prepareImage();
-$counties->draw($img);
-$states->draw($img);
+$counties->draw($map, $img);
+$states->draw($map, $img);
 
 $dbvar = ($var == "ratio") ? "snow" : $var;
 if ($source == "qc") {
@@ -184,17 +186,17 @@ foreach ($vals as $key => $value) {
     if ($ukey == "IA0807") $cities["IA0807"]["lon"] -= 0.1;
 
     if ($showlabels) {
-        $pt = ms_newPointObj();
+        $pt = new pointObj();
         $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
         $pt->draw($map, $ponly, $img, 0);
 
-        $pt = ms_newPointObj();
+        $pt = new pointObj();
         $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
         $pt->draw($map, $cityname, $img, 0, substr($key, $cutstring1, $cutstring2));
     }
 
     // Value UL
-    $pt = ms_newPointObj();
+    $pt = new pointObj();
     $pt->setXY($cities[$ukey]['lon'], $cities[$ukey]['lat'], 0);
     if ($value == 0.0001) $value = "T";
     $pt->draw($map, $snet, $img, 2, $value);
@@ -206,7 +208,7 @@ if ($i == 0)
 iemmap_title($map, $img, $ndate . " " . $vardef[$var]);
 $map->drawLabelCache($img);
 
-$url = $img->saveWebImage();
+$url = saveWebImage($img);
 
 $ar = array(
     "qc" => "QC'd (1893-)",

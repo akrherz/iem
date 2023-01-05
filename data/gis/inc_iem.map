@@ -51,50 +51,60 @@ LAYER
   CLASSITEM "DM"
   CLASS
     EXPRESSION /0/
-    COLOR 100 0 0
-    SIZE 4
+    STYLE
+      COLOR 100 0 0
+      SIZE 4
+      SYMBOL 'circle'
+    END
     TEXT "D0"
-    SYMBOL 'circle'
     LABEL
       COLOR 255 255 255
     END
   END
   CLASS
     EXPRESSION /1/
-    COLOR 120 0 0
     TEXT "D1"
-    SIZE 4
-    SYMBOL 'circle'
+    STYLE
+      COLOR 120 0 0
+      SIZE 4
+      SYMBOL 'circle'
+    END
     LABEL
       COLOR 255 255 255
     END
   END
   CLASS
     EXPRESSION /2/
-    COLOR 160 0 0
     TEXT "D2"
-    SIZE 4
-    SYMBOL 'circle'
+    STYLE
+      COLOR 160 0 0
+      SIZE 4
+      SYMBOL 'circle'
+    END
     LABEL
       COLOR 255 255 255
     END
   END
   CLASS
     EXPRESSION /3/
-    COLOR 200 0 0
     TEXT "D3"
-    SYMBOL 'circle'
-    SIZE 4
+    STYLE
+      COLOR 200 0 0
+      SYMBOL 'circle'
+      SIZE 4
+    END
     LABEL
       COLOR 255 255 255
     END
   END
   CLASS
     EXPRESSION /4/
-    COLOR 255 0 0
-    SIZE 4
-    SYMBOL 'circle'
     TEXT "D4"
+    STYLE
+      COLOR 255 0 0
+      SIZE 4
+      SYMBOL 'circle'
+    END
     LABEL
       COLOR 255 255 255
     END
@@ -176,7 +186,9 @@ LAYER
   STATUS OFF
   CLASS
     NAME "station-cr"
-    COLOR 0 0 0
+    STYLE
+      COLOR 0 0 0
+    END
     LABEL
       COLOR 0 0 0
       FONT 'liberation'
@@ -189,7 +201,9 @@ LAYER
   END
   CLASS
     NAME "station-ul"
-    COLOR 0 0 0
+    STYLE
+      COLOR 0 0 0
+    END
     LABEL
       COLOR 255 0 0
       FONT 'liberation'
@@ -202,7 +216,9 @@ LAYER
   END
   CLASS
     NAME "station-ll"
-    COLOR 0 0 255
+    STYLE
+      COLOR 0 0 255
+    END
     LABEL
       COLOR 0 0 255
       FONT 'liberation'
@@ -214,3 +230,238 @@ LAYER
     END
   END
 END
+
+LAYER
+  NAME cwas
+  STATUS OFF
+  TYPE POLYGON
+  DATA /mesonet/data/gis/static/shape/4326/nws/cwas.shp
+  PROJECTION
+   "init=epsg:4326"
+  END
+  LABELITEM "WFO"
+  CLASS
+    STYLE
+      OUTLINECOLOR 255 165 0
+    END
+    LABEL
+      MINFEATURESIZE 50
+      OUTLINECOLOR 0 0 0
+      COLOR 255 255 255
+      TYPE BITMAP
+      SIZE MEDIUM
+      POSITION CC
+      PARTIALS FALSE
+    END
+  END
+END
+
+LAYER
+  CONNECTIONTYPE postgis
+  NAME warnings0_c
+  CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
+  DATA "geom from (select phenomena, significance, u.geom, random() as  oid from warnings w JOIN ugcs u on (u.gid = w.gid) WHERE  expire > CURRENT_TIMESTAMP) as foo using unique oid using SRID=4326"
+  STATUS OFF
+  TYPE LINE
+  PROJECTION
+   "init=epsg:4326"
+  END
+  CLASS
+    NAME "Flash Flood Warn"
+    EXPRESSION (('[phenomena]' = 'FF' or '[phenomena]' = 'MA') and '[significance]' = 'W')
+    STYLE
+      COLOR 0 255 0
+      SIZE 2
+      SYMBOL 'circle'
+    END
+  END
+  CLASS
+    NAME "Svr T'storm Warn"
+    EXPRESSION ('[phenomena]' = 'SV' and '[significance]' = 'W')
+    STYLE
+      COLOR 0 0 0
+      SIZE 4
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 255 255 0
+      SIZE 2
+      SYMBOL 'circle'
+    END
+  END
+  CLASS
+    NAME "Tornado Warn"
+    EXPRESSION ('[phenomena]' = 'TO' and '[significance]' = 'W')
+    STYLE
+      COLOR 0 0 0
+      SIZE 4
+      SYMBOL 'circle'
+    END
+    STYLE
+      COLOR 255 0 0
+      SIZE 2
+      SYMBOL 'circle'
+    END
+  END
+
+    # Advisories
+    CLASS
+        NAME "Winter Advisory"
+        EXPRESSION (('[phenomena]' = 'WW' or '[phenomena]' = 'BZ'  or '[phenomena]' = 'WS' or '[phenomena]' = 'IP' or '[phenomena]' = 'HP' or '[phenomena]' = 'ZR' or '[phenomena]' = 'IS') and '[significance]' = 'Y')
+        STYLE
+          COLOR  222 184 135
+          SIZE  3
+          SYMBOL    'circle'
+        END
+        #STYLE
+        #  COLOR 222 184 135
+        #  SIZE  1
+        #  SYMBOL    'circle'
+        #END
+    END
+    # Snow and Blowing snow
+    CLASS
+        NAME "Sn or Blow Sn Adv"
+        EXPRESSION (('[phenomena]' = 'LE' or '[phenomena]' = 'SN' or '[phenomena]' = 'BS' or '[phenomena]' = 'SB') and '[significance]' = 'Y')
+        STYLE
+          COLOR 176 224 230
+          SIZE  3 
+          SYMBOL    'circle'
+        END
+        STYLE
+          COLOR 255 255 255
+          SIZE  1
+          SYMBOL    'circle'
+        END
+    END
+
+    # Heavy Snow
+    CLASS
+        NAME "Heavy Snow Warn"
+        EXPRESSION ('[phenomena]' = 'HS' and '[significance]' = 'W')
+        STYLE
+          COLOR 138 43 226
+          SIZE 3
+          SYMBOL 'circle'
+        END
+        STYLE
+          COLOR 255 255 255
+          SIZE 1
+          SYMBOL 'circle'
+        END
+    END
+    # WW Warning
+    CLASS
+        NAME "Winter Storm Warn"
+        EXPRESSION (('[phenomena]' = 'LE' or '[phenomena]' = 'WS' or '[phenomena]' = 'WW') and '[significance]' = 'W')
+        STYLE
+          COLOR   255 105 180
+          SIZE    3
+          SYMBOL  'circle'
+        END
+    END
+    # Sleet Fz
+    CLASS
+        NAME "Ice/Frz/Sleet Warn"
+        EXPRESSION (('[phenomena]' = 'IP' or '[phenomena]' = 'HP' or '[phenomena]' = 'ZR' or '[phenomena]' = 'IS') and '[significance]' = 'W')         
+        STYLE
+          COLOR   255 20 147
+          SIZE    3
+          SYMBOL  'circle'
+        END
+    END
+    # Blizzard
+    CLASS
+        NAME "Blizzard Warn"
+        EXPRESSION ('[phenomena]' = 'BZ' and '[significance]' = 'W')
+        STYLE
+          COLOR   255 0 0
+          SIZE    3
+          SYMBOL  'circle'
+        END
+    END
+    # Freeze Warning
+    CLASS
+        NAME "Freeze Warn"
+        EXPRESSION ('[phenomena]' = 'FZ' and '[significance]' = 'W')
+        STYLE
+          COLOR   255 0 0
+          SIZE    3
+          SYMBOL  'circle'
+        END
+    END
+    # Marine Statement?
+    CLASS
+        NAME "Marine Statement"
+        EXPRESSION ('[phenomena]' = 'MA' and '[significance]' = 'S')
+        STYLE
+          COLOR   0 200 0
+          SIZE    3
+          SYMBOL  'circle'
+        END
+    END
+END
+
+# Bar Header Bar!
+LAYER
+  NAME bar640t
+  TYPE POLYGON
+  TRANSFORM FALSE
+  STATUS OFF
+  FEATURE
+    POINTS 0 0 0 36 640 36 640 0 0 0 END
+  END
+  LABELCACHE FALSE
+  CLASS
+    STYLE
+      COLOR 0 0 0
+    END
+  END
+END
+
+LAYER
+  NAME "n0q-ramp"
+  TYPE POINT
+  STATUS default
+  TRANSFORM FALSE
+  CLASS
+    LABEL
+    END
+    STYLE
+      SYMBOL 'n0q-ramp'
+      COLOR 0 0 0
+    END
+  END
+END
+
+# IEM Logo
+LAYER
+  NAME logo
+  TYPE POINT
+  STATUS default
+  TRANSFORM FALSE
+  FEATURE
+    WKT "POINT(100 100)"
+  END
+  CLASS
+    STYLE
+      SYMBOL 'iem_logo'
+    END
+  END
+END
+
+LAYER
+  NAME "n0r-ramp"
+  TYPE POINT
+  STATUS default
+  TRANSFORM FALSE
+  CLASS
+    LABEL
+    END
+    STYLE
+      SYMBOL 'n0r-ramp'
+      COLOR 0 0 0
+    END
+  END
+END
+
