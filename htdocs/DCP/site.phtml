@@ -28,7 +28,7 @@ if ($station != null){
     $rs = pg_prepare($mesosite, "DUPSTATIONS", "SELECT network from stations
             WHERE id = $1 and (network ~* '_DCP' or network ~* '_COOP')");
     $rs = pg_execute($mesosite, "DUPSTATIONS", Array($station));
-    $alone = (pg_numrows($rs) == 1) ? TRUE: FALSE;
+    $alone = (pg_num_rows($rs) == 1) ? TRUE: FALSE;
     
     if (preg_match('/_COOP/', $network) && $alone){
         $table = sprintf("raw%s", date("Y",$ts));

@@ -13,7 +13,7 @@ $rs = pg_prepare($conn, "_LSELECT", "SELECT data from products " .
 $rs = pg_execute($conn, "_LSELECT", array($pil));
 
 $content = "";
-if (pg_numrows($rs) < 1) {
+if (pg_num_rows($rs) < 1) {
     $content .= "ERROR: No products found in past 48 hours.";
 }
 for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {

@@ -26,7 +26,7 @@ $ERROR = "";
 
 
 $rs = pg_execute($db, "CHECK4WATCH", Array($year, $num));
-if (pg_numrows($rs) == 0) {
+if (pg_num_rows($rs) == 0) {
   $t->content = "<h3>Sorry, watch number $num for year $year was not found</h3>";
   $t->render('single.phtml');
   die();

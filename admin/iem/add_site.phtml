@@ -82,7 +82,7 @@ $sql = sprintf("SELECT *, ST_y(geom) as y, ST_x(geom) as x from stations
 		WHERE id = '%s' and network = '%s'", 
 		$station, $network);
 $rs = pg_exec($pgconn, $sql);
-if (pg_numrows($rs) == 1){
+if (pg_num_rows($rs) == 1){
   	$row = pg_fetch_assoc($rs,0);
   	$elevation = $row['elevation'];
   	$sname = $row["name"];

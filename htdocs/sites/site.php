@@ -131,7 +131,7 @@ if ((strpos($network, "CLIMATE") > 0) && (substr($station, 2, 1) == "T")) {
             "ORDER by s.begin_date ASC"
     );
     $result = pg_execute($pgconn, "SELECT", array($metadata["iemid"]));
-    if (pg_numrows($result) > 0) {
+    if (pg_num_rows($result) > 0) {
         $threading = <<<EOM
 <h3>Station Threading:</h3>
 <p>This station threads together data from multiple stations to provide a
@@ -152,7 +152,7 @@ EOM;
             $row["end_date"],
         );
     }
-    if (pg_numrows($result) > 0) {
+    if (pg_num_rows($result) > 0) {
         $threading .= "</tbody></table>";
     }
     pg_close($pgconn);

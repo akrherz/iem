@@ -40,7 +40,7 @@ if ($ts > 0) { /* If we are in archive mode and requesting a non 5 minute interv
         strftime("%Y-%m-%d %H:%M", $ts)
     );
     $rs = pg_exec($conn, $sql);
-    if (pg_numrows($rs) == 0) {
+    if (pg_num_rows($rs) == 0) {
         $ts = $ts - (intval(date("i", $ts)) % 5 * 60);
         $sql = sprintf(
             "SELECT * from camera_log WHERE valid = '%s'",

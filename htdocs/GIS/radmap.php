@@ -260,7 +260,7 @@ if ($sector == "wfo") {
         . " (SELECT ST_Extent(geom) as geom from ugcs WHERE "
         . " wfo = $1 and end_ts is null) as foo");
     $rs = pg_execute($postgis, "WFOBOUNDS", array($sector_wfo));
-    if (pg_numrows($rs) > 0) {
+    if (pg_num_rows($rs) > 0) {
         $row = pg_fetch_assoc($rs, 0);
         $buffer = 0.25;
         $sectors["wfo"] = array(

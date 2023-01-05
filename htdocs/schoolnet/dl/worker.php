@@ -70,7 +70,7 @@ $sqlStr .= " ORDER by valid ASC";
 pg_exec($connection, "set enable_seqscan=off");
 $rs =  pg_exec($connection, $sqlStr);
 
-if (pg_numrows($rs) == 0) {
+if (pg_num_rows($rs) == 0) {
     die("Did not find any data for this query!");
 } else if ($dl_option == "download") {
     header("Content-type: application/octet-stream");
