@@ -5,7 +5,7 @@ MAP
 NAME mosaic
 STATUS OFF
 SIZE 900 600
-FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
+FONTSET "/opt/iem/data/gis/fonts.list"
 # 3 x 2  1200 x 800 km
 EXTENT -200000 4300000 1000000 5100000
 #EXTENT -104 37 -87 49
