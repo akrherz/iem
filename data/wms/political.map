@@ -5,6 +5,8 @@ MAP
 NAME "political"
 STATUS OFF
 SIZE 450 350
+EXTENT -179 1 -40 89
+UNITS DD
 SHAPEPATH "/mesonet/data/gis/static/shape/3857/"
 IMAGECOLOR -1 -1 -1
 
@@ -18,7 +20,6 @@ WEB
   TEMPLATE ia.html
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
-  #LOG "/tmp/political.log"
   METADATA
    "wms_title" "IEM Political Boundaries Service"
    "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/data/wms/political.map&SERVICE=WMS&"
@@ -28,7 +29,7 @@ WEB
    "wms_accessconstraints" "None"
    "wms_contactperson" "Daryl Herzmann"
    "wms_contactorganization" "Iowa State University"
-      "wms_enable_request" "*"
+    "wms_enable_request" "*"
   END
 END
 

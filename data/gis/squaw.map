@@ -7,8 +7,6 @@ UNITS METERS
 #SHAPEPATH "/mesonet/www/apps/squaw/data/gis"
 IMAGECOLOR 255 255 255
 IMAGETYPE PNG
-TRANSPARENT off
-INTERLACE off
 
 SYMBOL
    NAME 'circle'
@@ -79,9 +77,11 @@ LAYER
   STATUS OFF
   LABELCACHE OFF
   CLASS
-    COLOR 190 190 190
-    SYMBOL 'circle'
-    SIZE 1
+    STYLE
+      COLOR 190 190 190
+      SYMBOL 'circle'
+      SIZE 1
+    END
   END
 END
 

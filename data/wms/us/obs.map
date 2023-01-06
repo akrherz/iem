@@ -3,11 +3,10 @@ MAP
 NAME base4326
 STATUS OFF
 SIZE 640 480
-#FONTSET "../fonts/fonts.list"
 EXTENT -104 37 -87 49
 UNITS DD
 SHAPEPATH "./"
-SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
+SYMBOLSET "/opt/iem/data/gis/symbols/stations.sym"
 IMAGETYPE PNG
 IMAGECOLOR 0 0 255
 #TRANSPARENT ON

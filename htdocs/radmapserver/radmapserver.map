@@ -15,7 +15,6 @@ END
 
 # Map interface definition
 WEB
-  LOG "/tmp/radmapserver.log"
   TEMPLATE radmapserver.html
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "/tmp/"
@@ -43,7 +42,9 @@ LAYER
     "init=epsg:4326"
   END
   CLASS
-    OUTLINECOLOR 255 0 0
+    STYLE
+      COLOR 255 0 0
+    END
   END
 END
 

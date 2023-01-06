@@ -27,7 +27,6 @@ WEB
 #  FOOTER ia_footer.html
   IMAGEPATH "/home/httpd/html/tmp/"
   IMAGEURL "https://mesonet.agron.iastate.edu/tmp/"
-  LOG "/home/httpd/html/tmp/w0.log"
   METADATA
    "wms_title" "IEM WMS Service"
    "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/htdocs/GIS/maps/kcciradar.map&amp;"

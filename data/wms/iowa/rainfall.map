@@ -213,77 +213,107 @@ LAYER
     CLASS
         NAME "12.0 +"
         EXPRESSION ([da] > 12)
-        COLOR 217 31 38
+        STYLE
+          COLOR 217 31 38
+        END
     END
     CLASS
         NAME "8.00 - 12.0"
         EXPRESSION ([da] > 8)
-        COLOR 241 88 34
+        STYLE
+          COLOR 241 88 34
+        END
     END
     CLASS
         NAME "6.00 - 8.00"
         EXPRESSION ([da] > 6)
-        COLOR 249 166 128
+        STYLE
+          COLOR 249 166 128
+        END
     END
     CLASS
         NAME "5.00 - 6.00"
         EXPRESSION ([da] > 5)
-        COLOR 255 212 128
+        STYLE
+          COLOR 255 212 128
+        END
     END
     CLASS
         NAME "4.00 - 5.00"
         EXPRESSION ([da] > 4)
-        COLOR 246 235 20
+        STYLE
+          COLOR 246 235 20
+        END
     END
     CLASS
         NAME "3.50 - 4.00"
         EXPRESSION ([da] > 3.5)
-        COLOR 176 210 54
+        STYLE
+          COLOR 176 210 54
+        END
     END
     CLASS
         NAME "3.00 - 3.50"
         EXPRESSION ([da] > 3)
-        COLOR 81 184 72
+        STYLE
+          COLOR 81 184 72
+        END
     END
     CLASS
         NAME "2.50 - 3.00"
         EXPRESSION ([da] > 2.5)
-        COLOR 91 193 157
+        STYLE
+            COLOR 91 193 157
+        END
     END
     CLASS
         NAME "2.00 - 2.50"
         EXPRESSION ([da] > 2)
-        COLOR 111 204 221
+        STYLE
+            COLOR 111 204 221
+        END
     END
     CLASS
         NAME "1.50 - 2.00"
         EXPRESSION ([da] > 1.5)
-        COLOR 81 122 189
+        STYLE
+            COLOR 81 122 189
+        END
     END
     CLASS
         NAME "1.00 - 1.50"
         EXPRESSION ([da] > 1)
-        COLOR 57 83 164
+        STYLE
+            COLOR 57 83 164
+        END
     END
     CLASS
         NAME "0.60 - 1.00"
         EXPRESSION ([da] > 0.60)
-        COLOR 121 81 161
+        STYLE
+            COLOR 121 81 161
+        END
     END
     CLASS
         NAME "0.30 - 0.60"
         EXPRESSION ([da] > 0.30)
-        COLOR 186 82 159
+        STYLE
+            COLOR 186 82 159
+        END
     END
     CLASS
         NAME "0.05 - 0.30"
         EXPRESSION ([da] > 0.05)
-        COLOR 218 157 198
+        STYLE
+            COLOR 218 157 198
+        END
     END
     CLASS
         NAME "0.01 - 0.05"
         EXPRESSION ([da] > 0)
-        COLOR 248 207 226
+        STYLE
+            COLOR 248 207 226
+        END
     END
 END
 
@@ -303,7 +333,7 @@ END
         NAME "TEST4"
         STYLE
             SYMBOL '../../gis/symbols/bars/rainbow2.png'
-          COLOR 0 0 0
+            COLOR 0 0 0
         END
     END
 END
@@ -328,77 +358,107 @@ LAYER
     CLASS
         NAME "12.0 +"
         EXPRESSION ([da] > 12)
-        COLOR 217 31 38
+        STYLE
+            COLOR 217 31 38
+        END
     END
     CLASS
         NAME "8.0 - 12.0"
         EXPRESSION ([da] > 8)
-        COLOR 241 88 34
+        STYLE
+            COLOR 241 88 34
+        END
     END
     CLASS
         NAME "6.00 - 8.00"
         EXPRESSION ([da] > 6)
-        COLOR 249 166 128
+        STYLE
+            COLOR 249 166 128
+        END
     END
     CLASS
         NAME "5.00 - 6.00"
         EXPRESSION ([da] > 5)
-        COLOR 255 212 128
+        STYLE
+            COLOR 255 212 128
+        END
     END
     CLASS
         NAME "4.00 - 5.00"
         EXPRESSION ([da] > 4)
-        COLOR 246 235 20
+        STYLE
+            COLOR 246 235 20
+        END
     END
     CLASS
         NAME "3.50 - 4.00"
         EXPRESSION ([da] > 3.5)
-        COLOR 176 210 54
+        STYLE
+            COLOR 176 210 54
+        END
     END
     CLASS
         NAME "3.00 - 3.50"
         EXPRESSION ([da] > 3)
-        COLOR 81 184 72
+        STYLE
+            COLOR 81 184 72
+        END
     END
     CLASS
         NAME "2.50 - 3.00"
         EXPRESSION ([da] > 2.5)
-        COLOR 91 193 157
+        STYLE
+            COLOR 91 193 157
+        END
     END
     CLASS
         NAME "2.00 - 2.50"
         EXPRESSION ([da] > 2)
-        COLOR 111 204 221
+        STYLE
+            COLOR 111 204 221
+        END
     END
     CLASS
         NAME "1.50 - 2.00"
         EXPRESSION ([da] > 1.5)
-        COLOR 81 122 189
+        STYLE
+            COLOR 81 122 189
+        END
     END
     CLASS
         NAME "1.00 - 1.50"
         EXPRESSION ([da] > 1)
-        COLOR 57 83 164
+        STYLE
+            COLOR 57 83 164
+        END
     END
     CLASS
         NAME "0.60 - 1.00"
         EXPRESSION ([da] > 0.60)
-        COLOR 121 81 161
+        STYLE
+            COLOR 121 81 161
+        END
     END
     CLASS
         NAME "0.30 - 0.60"
         EXPRESSION ([da] > 0.30)
-        COLOR 186 82 159
+        STYLE
+            COLOR 186 82 159
+        END
     END
     CLASS
         NAME "0.05 - 0.30"
         EXPRESSION ([da] > 0.05)
-        COLOR 218 157 198
+        STYLE
+            COLOR 218 157 198
+        END
     END
     CLASS
         NAME "0.01 - 0.05"
         EXPRESSION ([da] > 0)
-        COLOR 248 207 226
+        STYLE
+            COLOR 248 207 226
+        END
     END
 END
 
