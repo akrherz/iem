@@ -280,16 +280,18 @@ $lsruri = sprintf(
     $ets->format("Y-m-d\\TH:i"),
 );
 
+// lame
+$extwsuri = str_replace("http://iem.local", "", $wsuri);
 $content .= <<<EOF
 <strong>Related Downloads:</strong>
-<a href="{$wsuri}" class="btn btn-primary">JSON Web Service</a> &nbsp;
+<a href="{$extwsuri}" class="btn btn-primary">JSON Web Service</a> &nbsp;
 <a href="{$shpuri}" class="btn btn-primary">Shapefile of Warnings</a> &nbsp;
 <a href="{$lsruri}" class="btn btn-primary">Shapefile of LSRs</a> &nbsp;
 
 <h3>Summary:</h3>
 <b>Begin Date:</b> {$dstat} <b>End Date:</b> {$dstat1}
 <br />* These numbers are not official and should be used for educational purposes only.
-${fwarning}
+{$fwarning}
 
 <div class="row">
   <div class="col-sm-2">
