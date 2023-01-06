@@ -60,7 +60,7 @@ SCALEBAR
   STATUS TRUE
 END
 
-INCLUDE "inc_iem.map"
+INCLUDE "iem.mapinc"
 
 LAYER
   NAME "places2010"
@@ -253,7 +253,7 @@ LAYER
   END
 END
 
-INCLUDE 'inc_roads.map'
+INCLUDE 'roads.mapinc'
 
 LAYER
   NAME states
@@ -412,7 +412,7 @@ LAYER
   END
 END
 
-INCLUDE "inc_lsrs.map"
+INCLUDE "lsrs.mapinc"
 
 # watches
 LAYER

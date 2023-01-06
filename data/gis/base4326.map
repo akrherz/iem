@@ -689,8 +689,8 @@ LAYER
   END
 END
 
-INCLUDE "inc_lsrs.map"
-INCLUDE "inc_iem.map"
+INCLUDE "lsrs.mapinc"
+INCLUDE "iem.mapinc"
 
 LAYER
   NAME nexrad_n0r
@@ -1099,7 +1099,7 @@ LAYER
   END
 END
 
-INCLUDE "inc_roads.map"
+INCLUDE "roads.mapinc"
 
 LAYER
   CONNECTIONTYPE postgis

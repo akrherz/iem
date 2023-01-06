@@ -29,7 +29,7 @@ WEB
   IMAGEURL "/tmp/"
 END
 
-INCLUDE "inc_iem.map"
+INCLUDE "iem.mapinc"
 
 LAYER
   NAME "places2010"
@@ -957,7 +957,7 @@ LAYER
   END
 END
 
-INCLUDE "inc_lsrs.map"
-INCLUDE 'inc_roads.map'
+INCLUDE "lsrs.mapinc"
+INCLUDE 'roads.mapinc'
 
 END
