@@ -12,8 +12,6 @@ SHAPEPATH "/mesonet/data/gis/static/"
 SYMBOLSET "./stations.sym"
 IMAGECOLOR 0 0 250
 IMAGETYPE PNG
-TRANSPARENT OFF
-INTERLACE off
 
 #
 PROJECTION
@@ -199,7 +197,7 @@ END
 
 LAYER
   NAME "east_vis_1km"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/awips211/GOES13_EAST_VIS.png"
   TYPE RASTER
   PROJECTION
@@ -229,7 +227,9 @@ LAYER
    "init=epsg:2163"
   END
   CLASS
-    OUTLINECOLOR 54 54 54
+    STYLE
+      OUTLINECOLOR 54 54 54
+    END
   END
 END
 
@@ -290,10 +290,12 @@ LAYER
   CLASSITEM 'phenomena'
   CLASS
         EXPRESSION /TO|SV/
-    COLOR -1 -1 -1
-    OUTLINECOLOR 255 255 255
-    SYMBOL 'circle'
-    SIZE 1
+    STYLE
+      COLOR -1 -1 -1
+      OUTLINECOLOR 255 255 255
+      SYMBOL 'circle'
+      SIZE 1
+    END
   END
 END
 

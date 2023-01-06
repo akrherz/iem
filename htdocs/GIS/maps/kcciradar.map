@@ -6,11 +6,11 @@ NAME "radar"
 STATUS ON
 SIZE 450 350
 #SYMBOLSET symbols/symbol.sym
-FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
+FONTSET "/opt/iem/data/gis/fonts.list"
 EXTENT 200000 4400000 710000 4900000
 UNITS METERS
 SHAPEPATH "/mesonet/data/gis/"
-SYMBOLSET "/mesonet/data/gis/static/symbols/stations.sym"
+SYMBOLSET "/opt/iem/data/gis/symbols/stations.sym"
 IMAGECOLOR -1 -1 -1
 IMAGETYPE png
 
@@ -39,7 +39,6 @@ WEB
 #  FOOTER ia_footer.html
   IMAGEPATH "/var/webtmp/"
   IMAGEURL "https://mesonet.agron.iastate.edu/tmp/"
-  LOG "/var/webtmp/w0.log"
   METADATA
    "wms_title" "IEM WMS Service"
    "wms_onlineresource" "https://mesonet.agron.iastate.edu/cgi-bin/mapserv/mapserv?map=/opt/iem/htdocs/GIS/maps/kcciradar.map&amp;"

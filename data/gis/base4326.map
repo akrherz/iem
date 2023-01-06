@@ -10,8 +10,6 @@ SHAPEPATH "./"
 SYMBOLSET "./stations.sym"
 IMAGETYPE PNG
 IMAGECOLOR 0 0 255
-#TRANSPARENT ON
-#INTERLACE off
 
 #CONFIG "MS_ERRORFILE" "/tmp/ms_error.txt"
 #CONFIG "CPL_DEBUG" "ON"
@@ -98,7 +96,7 @@ END
 
 LAYER
   NAME EAX
-  STATUS ON
+  STATUS OFF
   TYPE RASTER
   DATA /mesonet/ldmdata/gis/images/4326/ridge/EAX/N0B_0.png
   OFFSITE 255 255 255
@@ -109,7 +107,7 @@ END
 
 LAYER
   NAME KCCI
-  STATUS ON
+  STATUS OFF
   TYPE RASTER
   DATA /mesonet/ldmdata/gis/images/26915/KCCI/KCCI_N0R_0.tif
   #DATA /mesonet/data/gis/images/kcci2.tif
@@ -212,7 +210,7 @@ END
 
 LAYER
   NAME "east_vis_1km"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/awips211/GOES13_EAST_VIS.png"
   TYPE RASTER
   PROJECTION

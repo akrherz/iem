@@ -1,12 +1,9 @@
 MAP
-#
-# Start of map file
-#
+
 NAME "weatherwarn"
 STATUS ON
 SIZE 450 350
-#SYMBOLSET symbols/symbol.sym
-FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
+FONTSET "/opt/iem/data/gis/fonts.list"
 EXTENT -155.0 15.0 -30.0 70.0
 UNITS DD
 SHAPEPATH "/mesonet/data/gis/static/"
