@@ -2,7 +2,7 @@ MAP
 # select.map
 
 NAME select
-STATUS ON
+STATUS OFF
 # 4x3
 SIZE 480 360
 FONTSET "./fonts.list"
@@ -144,7 +144,7 @@ END
 
 LAYER
   NAME snet
-  STATUS ON
+  STATUS OFF
   TYPE POINT
   LABELCACHE ON
   PROJECTION
@@ -674,7 +674,7 @@ END
 LAYER
   NAME iards
   TYPE LINE
-  STATUS ON
+  STATUS OFF
   PROJECTION
    "init=epsg:26915"
   END
@@ -739,7 +739,7 @@ END
 
 LAYER
   NAME datapoint
-  STATUS ON
+  STATUS OFF
   TYPE POINT
   LABELCACHE ON
   PROJECTION
@@ -802,7 +802,7 @@ END
 
 LAYER
   NAME cityname
-  STATUS ON
+  STATUS OFF
   TYPE POINT
   LABELCACHE ON
   PROJECTION
@@ -826,7 +826,7 @@ END
 LAYER
   TYPE POINT
   NAME dot
-  STATUS ON
+  STATUS OFF
   METADATA
     "wms_title"  "Dot Layer"
   END
@@ -860,7 +860,7 @@ END
 LAYER
   TYPE POLYGON
   NAME rect
-  STATUS ON
+  STATUS OFF
   METADATA
     "wms_title"  "Rect Layer"
      "wms_srs"   "EPSG:26915"

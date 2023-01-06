@@ -4,7 +4,7 @@ MAP
 # Sample map file for a chameleon app.
 #
 NAME road_conditions
-STATUS ON
+STATUS OFF
 SIZE 640 480
 EXTENT 200000 4450000 710000 4950000
 UNITS METERS
@@ -130,7 +130,7 @@ LEGEND
     SIZE MEDIUM
     COLOR 0 0 89
   END
-  STATUS ON
+  STATUS OFF
 END
 
 SCALEBAR
@@ -145,7 +145,7 @@ SCALEBAR
   OUTLINECOLOR 0 0 0
   UNITS miles
   INTERVALS 5
-  STATUS ON
+  STATUS OFF
 END
 
 
@@ -185,7 +185,7 @@ END
 
 LAYER
   NAME counties
-  STATUS ON
+  STATUS OFF
   TYPE LINE
   DATA "/mesonet/data/gis/static/shape/26915/iowa/iacounties.shp"
   METADATA

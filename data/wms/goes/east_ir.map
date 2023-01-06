@@ -3,7 +3,7 @@ MAP
 # Start of map file
 #
 NAME "goes_east_ir"
-STATUS ON
+STATUS OFF
 SIZE 450 350
 EXTENT -126 24 -66 50
 UNITS DD
@@ -38,7 +38,7 @@ END
 #
 LAYER
   NAME "east_ir_4km"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/GOES/conus/channel13/GOES-16_C13.png"
   TYPE RASTER
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/conus/channel13/GOES-16_C13.msinc"

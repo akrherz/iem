@@ -3,7 +3,7 @@ MAP
 # Start of map file
 #
 NAME mosaic
-STATUS ON
+STATUS OFF
 SIZE 900 600
 FONTSET "/mesonet/data/gis/static/fonts/fonts.list"
 # 3 x 2  1200 x 800 km
@@ -62,7 +62,7 @@ LAYER
   NAME lsrs
   CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select distinct city, magnitude, valid, geom, type as ltype, city || magnitude || x(geom) || y(geom) as k from lsrs) as foo USING unique k USING SRID=4326 "
-  STATUS ON
+  STATUS OFF
   TYPE POINT
   TEMPLATE q_template.html
   FILTER "valid > 'YESTERDAY'::timestamp"
@@ -144,7 +144,7 @@ END
 LAYER
   TYPE POLYGON
   NAME rect
-  STATUS ON
+  STATUS OFF
   METADATA
     "wms_title"  "Rect Layer"
      "wms_srs"   "EPSG:26915"
@@ -163,7 +163,7 @@ LAYER
  NAME KCCI
  DATA /mesonet/ldmdata/gis/images/26915/KCCI/KCCI_N0R_0.png
  TYPE RASTER
- STATUS ON
+ STATUS OFF
  PROJECTION
    "init=epsg:26915"
  END
@@ -174,7 +174,7 @@ LAYER
   NAME radar
   DATA /mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.tif
   TYPE RASTER
-  STATUS ON
+  STATUS OFF
   METADATA
     "wms_title" "Composite NEXRAD"
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
@@ -189,7 +189,7 @@ LAYER
   NAME DMX
   DATA /mesonet/ldmdata/gis/images/4326/ridge/DMX/N0B_0.png
   TYPE RASTER
-  STATUS ON
+  STATUS OFF
   METADATA
     "wms_title" "DMX NEXRAD"
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
@@ -206,7 +206,7 @@ LAYER
   NAME radar2
   DATA /mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.tif
   TYPE RASTER
-  STATUS ON
+  STATUS OFF
   METADATA
     "wms_title" "Composite NEXRAD"
      "wms_srs" "EPSG:4269"  # Specify as Latlong?
@@ -239,7 +239,7 @@ END
 
 LAYER
   NAME namerica
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   DATA /mesonet/data/gis/static/shape/4326/world/world_borders.shp
   PROJECTION
@@ -261,7 +261,7 @@ END
 
 LAYER
   NAME inex
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   DATA /mesonet/data/gis/static/shape/4326/iem/nex_rings.shp
   PROJECTION
@@ -276,7 +276,7 @@ END
 
 LAYER
   NAME icwa
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   DATA /mesonet/data/gis/static/shape/4326/iem/cwas.shp
   PROJECTION
@@ -298,7 +298,7 @@ END
 
 LAYER
   NAME states
-  STATUS DEFAULT
+  STATUS OFF
   TYPE LINE
   DATA /mesonet/data/gis/static/shape/4326/us/states.shp
   METADATA
@@ -319,7 +319,7 @@ END
 
 LAYER
   NAME counties
-  STATUS ON
+  STATUS OFF
   TYPE LINE
   DATA /mesonet/data/gis/static/shape/26915/us/counties.shp
   PROJECTION
@@ -336,7 +336,7 @@ END
 
 LAYER
   NAME counties_unproj
-  STATUS ON
+  STATUS OFF
   TYPE LINE
   DATA /mesonet/data/gis/static/shape/4326/us/uscounties.shp
   PROJECTION
@@ -354,7 +354,7 @@ END
 
 LAYER
   NAME uscounties
-  STATUS ON
+  STATUS OFF
   TYPE LINE
   DATA /mesonet/data/gis/static/shape/4326/us/uscounties.shp
   PROJECTION
@@ -414,7 +414,7 @@ LAYER
   NAME warnings0_c
   CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from (select phenomena, geom, random() as oid from warnings WHERE significance != 'A' and expire > CURRENT_TIMESTAMP) as foo using unique oid using SRID=4326"
-  STATUS ON
+  STATUS OFF
   TYPE LINE
   METADATA
     "wms_title" "Current County Warnings"
@@ -469,7 +469,7 @@ LAYER
   CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   #DATA "geom from warnings"
   DATA "geom from (select phenomena, geom, random() as oid from sbw WHERE significance != 'A' and issue > 'YESTERDAY'::timestamp and status = 'NEW') as foo using unique oid using SRID=4326"
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   METADATA
     "wms_title" "Todays County Warnings"
@@ -494,7 +494,7 @@ LAYER
   CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   #DATA "geom from warnings"
   DATA "geom from (select phenomena, geom, random() as oid from sbw WHERE significance != 'A' and expire > CURRENT_TIMESTAMP and status = 'NEW') as foo using unique oid using SRID=4326"
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   METADATA
     "wms_title" "Current Polygon Warnings"
@@ -520,7 +520,7 @@ LAYER
   NAME warnings1d_p
   CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "geom from sbw"
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   METADATA
     "wms_title" "Todays Polygon Warnings"
@@ -554,7 +554,7 @@ END
 
 LAYER
   NAME iowa_counties
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   DATA /mesonet/data/gis/static/shape/4326/iem/cwa_counties.shp
   PROJECTION
@@ -580,7 +580,7 @@ END
 
 LAYER
   NAME lakes
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   DATA /mesonet/data/gis/static/shape/4326/us/major_lakes.shp
   PROJECTION
@@ -596,7 +596,7 @@ END
 
 LAYER
   NAME cwas
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   DATA /mesonet/data/gis/static/shape/4326/us/cwas.shp
   PROJECTION

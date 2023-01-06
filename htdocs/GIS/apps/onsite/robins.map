@@ -3,7 +3,7 @@ MAP
 # Start of map file
 #
 NAME robins
-STATUS ON
+STATUS OFF
 SIZE 450 400
 #SYMBOLSET symbols/symbol.sym
 FONTSET "/opt/iem/data/gis/fonts.list"
@@ -51,7 +51,7 @@ END
 
 LAYER
   NAME counties
-  STATUS ON
+  STATUS OFF
   TYPE POLYGON
   DATA /mesonet/data/gis/static/shape/4326/us/uscounties.shp
   PROJECTION
@@ -70,7 +70,7 @@ LAYER
   NAME robins
   CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "the_geom from (select id, random() as oid, the_geom from robins) as foo using unique oid using srid=4326"
-  STATUS DEFAULT
+  STATUS OFF
   TYPE POINT
   TEMPLATE q_template.html
   LABELITEM 'id'

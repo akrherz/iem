@@ -3,7 +3,7 @@ MAP
 # Start of map file
 #
 NAME "hawaii_vis"
-STATUS ON
+STATUS OFF
 SIZE 450 350
 EXTENT -126 24 -66 50
 UNITS DD
@@ -38,7 +38,7 @@ END
 #
 LAYER
   NAME "hawaii_vis"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/GOES/hawaii/channel02/GOES-17_C02.png"
   TYPE RASTER
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/hawaii/channel02/GOES-17_C02.msinc"

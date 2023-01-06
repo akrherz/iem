@@ -1,7 +1,7 @@
 MAP
 #
 NAME road_conditions
-STATUS ON
+STATUS OFF
 SIZE 640 480
 EXTENT -97 40 -89 44
 UNITS DD
@@ -53,7 +53,7 @@ LEGEND
     SIZE MEDIUM
     COLOR 0 0 89
   END
-  STATUS ON
+  STATUS OFF
 END
 
 SCALEBAR
@@ -68,7 +68,7 @@ SCALEBAR
   OUTLINECOLOR 0 0 0
   UNITS miles
   INTERVALS 5
-  STATUS ON
+  STATUS OFF
 END
 
 
@@ -83,7 +83,7 @@ LAYER
   NAME "roadcond-noninterstate"
   CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "mygeom from (select b.type as rtype, b.int1, random() as boid, b.segid, c.cond_code, ST_Transform(b.geom,4326) as mygeom from roads_base b, roads_current c WHERE b.segid = c.segid and b.type > 1 ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
-  STATUS ON
+  STATUS OFF
   TYPE LINE
   METADATA
     "wms_title" "Iowa Non-Interstates Conditions"
@@ -277,7 +277,7 @@ LAYER
   NAME "roadcond-interstate"
   CONNECTION "user=nobody dbname=postgis host=iemdb-postgis.local"
   DATA "mygeom from (select b.type as rtype, b.int1, random() as boid, b.segid, c.cond_code, ST_Transform(b.geom,4326) as mygeom from roads_base b, roads_current c WHERE b.segid = c.segid and b.type = 1 ORDER by b.segid DESC) as foo using UNIQUE boid using SRID=26915"
-  STATUS ON
+  STATUS OFF
   TYPE LINE
   METADATA
     "wms_title" "Iowa Interstates Conditions"

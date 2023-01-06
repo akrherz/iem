@@ -3,7 +3,7 @@ MAP
 
 NAME "mrms_nn"
 SIZE 450 350
-STATUS ON
+STATUS OFF
 EXTENT -126 24 -66 50
 UNITS DD
 IMAGECOLOR -1 -1 -1
@@ -31,7 +31,7 @@ END
 #
 LAYER
   NAME "mrms_p72h"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/mrms/p72h_nn.png"
   TYPE RASTER
   PROJECTION
@@ -55,7 +55,7 @@ END
 #
 LAYER
   NAME "mrms_p48h"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/mrms/p48h_nn.png"
   TYPE RASTER
   PROJECTION
@@ -79,7 +79,7 @@ END
 #
 LAYER
   NAME "mrms_p24h"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/mrms/p24h_nn.png"
   TYPE RASTER
   PROJECTION
@@ -103,7 +103,7 @@ END
 #
 LAYER
   NAME "mrms_p1h"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/mrms/p1h_nn.png"
   TYPE RASTER
   PROJECTION

@@ -9,7 +9,7 @@ LAYER
   PROJECTION
     "init=epsg:4326"
   END
-  STATUS ON
+  STATUS OFF
   TYPE POINT
   DATA "/mesonet/data/gis/static/shape/4326/nws/cities.shp"
   LABELITEM 'name'

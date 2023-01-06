@@ -3,7 +3,7 @@ MAP
 # Start of map file
 #
 NAME "political"
-STATUS ON
+STATUS OFF
 SIZE 450 350
 SHAPEPATH "/mesonet/data/gis/static/shape/3857/"
 IMAGECOLOR -1 -1 -1
@@ -36,7 +36,7 @@ END
 #
 LAYER
   NAME "fz"
-  STATUS ON
+  STATUS OFF
   DATA "nws/fire_zones.shp"
   TYPE LINE
   PROJECTION
@@ -59,7 +59,7 @@ END
 #
 LAYER
   NAME "uscounties"
-  STATUS ON
+  STATUS OFF
   DATA "us/counties.shp"
   TYPE LINE
   PROJECTION
@@ -83,7 +83,7 @@ END
 #
 LAYER
   NAME "iacounties"
-  STATUS ON
+  STATUS OFF
   DATA "us/counties.shp"
   TYPE LINE
   PROJECTION
@@ -109,7 +109,7 @@ END
 #
 LAYER
   NAME "usstates"
-  STATUS ON
+  STATUS OFF
   DATA "us/states.shp"
   TYPE LINE
   PROJECTION
@@ -133,7 +133,7 @@ END
 #
 LAYER
   NAME "wfo"
-  STATUS ON
+  STATUS OFF
   DATA "nws/cwas.shp"
   TYPE LINE
   PROJECTION
@@ -157,7 +157,7 @@ END
 #
 LAYER
   NAME "rfc"
-  STATUS ON
+  STATUS OFF
   DATA "nws/rfc.shp"
   TYPE LINE
   PROJECTION
@@ -181,7 +181,7 @@ END
 #
 LAYER
   NAME "cwsu"
-  STATUS ON
+  STATUS OFF
   DATA "nws/cwsu.shp"
   TYPE LINE
   PROJECTION
@@ -205,7 +205,7 @@ END
 #
 LAYER
   NAME "tribal"
-  STATUS ON
+  STATUS OFF
   DATA "us/tribal.shp"
   TYPE LINE
   PROJECTION
@@ -230,7 +230,7 @@ END
 LAYER
   NAME "iarivers"
   GROUP "iahydrology"
-  STATUS ON
+  STATUS OFF
   DATA "iowa/IA_NHDplus_General.shp"
   TYPE LINE
   PROJECTION
@@ -255,7 +255,7 @@ END
 LAYER
   NAME "iawaterbody"
   GROUP "iahydrology"
-  STATUS ON
+  STATUS OFF
   DATA "iowa/IA_NHD_waterbody_general.shp"
   TYPE POLYGON
   PROJECTION
@@ -277,7 +277,7 @@ END
 #
 LAYER
   NAME "iahshd"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/data/gis/static/images/3857/iowa/hshd100m1.tif"
   TYPE RASTER
   PROJECTION
@@ -295,7 +295,7 @@ END
 #
 LAYER
   NAME "iaglu"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/data/gis/static/images/3857/iowa/glu0813.tif"
   TYPE RASTER
   PROJECTION

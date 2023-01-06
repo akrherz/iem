@@ -3,7 +3,7 @@ MAP
 # Start of map file
 #
 NAME mosaic
-STATUS ON
+STATUS OFF
 SIZE 900 600
 FONTSET "/opt/iem/data/gis/fonts.list"
 # 3 x 2  1200 x 800 km
@@ -60,7 +60,7 @@ END
 LAYER
   TYPE POLYGON
   NAME rect
-  STATUS ON
+  STATUS OFF
   METADATA
     "wms_title"  "Rect Layer"
      "wms_srs"   "EPSG:26915"
@@ -193,7 +193,7 @@ END
 
 LAYER
   NAME states
-  STATUS DEFAULT
+  STATUS OFF
   TYPE LINE
   DATA /mesonet/data/gis/static/shape/4326/us/states.shp
   METADATA
@@ -214,7 +214,7 @@ END
 
 LAYER
   NAME counties
-  STATUS ON
+  STATUS OFF
   TYPE LINE
   DATA /mesonet/data/gis/static/shape/26915/us/counties.shp
   PROJECTION
@@ -231,7 +231,7 @@ END
 
 LAYER
   NAME counties_unproj
-  STATUS ON
+  STATUS OFF
   TYPE LINE
   DATA /mesonet/data/gis/static/shape/4326/us/uscounties.shp
   PROJECTION
@@ -249,7 +249,7 @@ END
 
 LAYER
   NAME uscounties
-  STATUS ON
+  STATUS OFF
   TYPE LINE
   DATA /mesonet/data/gis/static/shape/4326/us/uscounties.shp
 

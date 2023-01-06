@@ -1,7 +1,7 @@
 # Mapserver mapfile for IDEP 
 MAP
 NAME "IDEP"
-STATUS ON
+STATUS OFF
 SIZE 800 600
 EXTENT -179 1 -40 89
 UNITS DD
@@ -40,7 +40,7 @@ LAYER
   PROJECTION
     "init=epsg:4326"
   END
-  STATUS ON
+  STATUS OFF
   OFFSITE 0 0 0
   TYPE RASTER
 END
@@ -48,7 +48,7 @@ END
 LAYER
   NAME depmask
   DATA "/mesonet/data/gis/static/images/3857/dep/depdomain.png"
-  STATUS ON
+  STATUS OFF
   TYPE RASTER
   PROJECTION
    "init=epsg:3857"
@@ -69,7 +69,7 @@ LAYER
   PROJECTION
     "init=epsg:4326"
   END
-  STATUS ON
+  STATUS OFF
   OFFSITE 0 0 0
   TYPE RASTER
 END
@@ -90,7 +90,7 @@ LAYER
     PROJECTION
       "init=epsg:5070"
     END # PROJECTION
-    STATUS ON
+    STATUS OFF
     TILEITEM "location"
     TYPE POLYGON
     UNITS METERS
@@ -226,7 +226,7 @@ LAYER
     PROJECTION
       "init=epsg:5070"
     END # PROJECTION
-    STATUS ON
+    STATUS OFF
     TILEITEM "location"
     TYPE POLYGON
     UNITS METERS
@@ -359,7 +359,7 @@ LAYER
     PROJECTION
       "init=epsg:5070"
     END # PROJECTION
-    STATUS ON
+    STATUS OFF
     TILEITEM "location"
     TYPE POLYGON
     UNITS METERS
@@ -492,7 +492,7 @@ LAYER
     PROJECTION
       "init=epsg:5070"
     END # PROJECTION
-    STATUS ON
+    STATUS OFF
     TILEITEM "location"
     TYPE POLYGON
     UNITS METERS
@@ -628,7 +628,7 @@ LAYER
     PROJECTION
       "init=epsg:5070"
     END # PROJECTION
-    STATUS ON
+    STATUS OFF
     TILEITEM "location"
     TYPE POLYGON
     UNITS METERS
@@ -774,7 +774,7 @@ LAYER
     PROJECTION
       "init=epsg:5070"
     END # PROJECTION
-    STATUS ON
+    STATUS OFF
     TILEITEM "location"
     TYPE POLYGON
     UNITS METERS
@@ -910,7 +910,7 @@ LAYER
     PROJECTION
       "init=epsg:5070"
     END # PROJECTION
-    STATUS ON
+    STATUS OFF
     TILEITEM "location"
     TYPE POLYGON
     UNITS METERS
@@ -1043,7 +1043,7 @@ LAYER
     PROJECTION
       "init=epsg:5070"
     END # PROJECTION
-    STATUS ON
+    STATUS OFF
     TILEITEM "location"
     TYPE POLYGON
     UNITS METERS
@@ -1179,7 +1179,7 @@ LAYER
     PROJECTION
       "init=epsg:5070"
     END # PROJECTION
-    STATUS ON
+    STATUS OFF
     TILEITEM "location"
     TYPE POLYGON
     UNITS METERS
@@ -1318,7 +1318,7 @@ LAYER
     PROJECTION
       "init=epsg:5070"
     END # PROJECTION
-    STATUS ON
+    STATUS OFF
     TILEITEM "location"
     TYPE POLYGON
     UNITS METERS
@@ -1457,7 +1457,7 @@ LAYER
     PROJECTION
       "init=epsg:5070"
     END # PROJECTION
-    STATUS ON
+    STATUS OFF
     TILEITEM "location"
     TYPE POLYGON
     UNITS METERS
@@ -1584,7 +1584,7 @@ LAYER
   PROJECTION
     "init=epsg:4326"
   END # PROJECTION
-  STATUS ON
+  STATUS OFF
   TYPE LINE
   CLASS
     STYLE
@@ -1603,7 +1603,7 @@ LAYER
   PROJECTION
     "init=epsg:5070"
   END # PROJECTION
-  STATUS ON
+  STATUS OFF
   TYPE LINE
   UNITS METERS
   LABELITEM fpath
@@ -1634,7 +1634,7 @@ LAYER
   PROJECTION
     "init=epsg:5070"
   END # PROJECTION
-  STATUS ON
+  STATUS OFF
   TYPE LINE
   UNITS METERS
   CLASS

@@ -3,7 +3,7 @@ MAP
 # Start of map file
 #
 NAME "RIDGE"
-STATUS ON
+STATUS OFF
 SIZE 800 600
 EXTENT -179 1 -40 89
 UNITS DD
@@ -36,7 +36,7 @@ END
 LAYER
   NAME "single"
   TYPE RASTER
-  STATUS ON
+  STATUS OFF
   DEBUG ON
   PROJECTION
     "init=epsg:4326"
@@ -59,7 +59,7 @@ END
 LAYER
   NAME "composite-single"
   TYPE RASTER
-  STATUS ON
+  STATUS OFF
   DEBUG ON
   PROJECTION
     "init=epsg:4326"
@@ -82,7 +82,7 @@ END
 LAYER
   NAME "single-archive"
   TYPE RASTER
-  STATUS ON
+  STATUS OFF
   DEBUG ON
   PROJECTION
     "init=epsg:4326"
@@ -109,7 +109,7 @@ END
 LAYER
   NAME "composite-archive-uscomp-n0r"
   TYPE RASTER
-  STATUS ON
+  STATUS OFF
   DEBUG ON
   PROJECTION
     "init=epsg:4326"
@@ -136,7 +136,7 @@ LAYER
   GROUP "composite-archive"
   NAME "composite-archive-uscomp"
   TYPE RASTER
-  STATUS ON
+  STATUS OFF
   DEBUG ON
   PROJECTION
     "init=epsg:4326"
@@ -163,7 +163,7 @@ LAYER
   GROUP "composite-archive"
   NAME "composite-archive-hicomp"
   TYPE RASTER
-  STATUS ON
+  STATUS OFF
   DEBUG ON
   PROJECTION
     "init=epsg:4326"
@@ -190,7 +190,7 @@ LAYER
   GROUP "composite-archive"
   NAME "composite-archive-akcomp"
   TYPE RASTER
-  STATUS ON
+  STATUS OFF
   DEBUG ON
   PROJECTION
     "init=epsg:4326"
@@ -217,7 +217,7 @@ LAYER
   GROUP "composite-archive"
   NAME "composite-archive-prcomp"
   TYPE RASTER
-  STATUS ON
+  STATUS OFF
   DEBUG ON
   PROJECTION
     "init=epsg:4326"

@@ -3,7 +3,7 @@ MAP
 # Start of map file
 #
 NAME "radar"
-STATUS ON
+STATUS OFF
 SIZE 450 350
 #SYMBOLSET symbols/symbol.sym
 EXTENT 200000 4400000 710000 4900000
@@ -45,7 +45,7 @@ END
 #
 LAYER
   NAME kcci
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/data/gis/images/26915/KCCI_N0R.tif"
   TYPE RASTER
   PROJECTION

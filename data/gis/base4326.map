@@ -1,7 +1,7 @@
 MAP
 
 NAME base4326
-STATUS ON
+STATUS OFF
 SIZE 640 480
 FONTSET "./fonts.list"
 EXTENT -104 37 -87 49
@@ -84,7 +84,7 @@ END
 
 LAYER
   NAME DMX
-  STATUS ON
+  STATUS OFF
   TYPE RASTER
   DATA /mesonet/ldmdata/gis/images/4326/ridge/DMX/N0B_0.png
   OFFSITE 255 255 255
@@ -120,7 +120,7 @@ END
 
 LAYER
   NAME FSD
-  STATUS ON
+  STATUS OFF
   TYPE RASTER
   DATA /mesonet/ldmdata/gis/images/4326/ridge/FSD/N0B_0.png
   OFFSITE 255 255 255
@@ -128,7 +128,7 @@ END
 
 LAYER
   NAME ABR
-  STATUS ON
+  STATUS OFF
   TYPE RASTER
   DATA /mesonet/ldmdata/gis/images/4326/ridge/ABR/N0B_0.png
   OFFSITE 255 255 255
@@ -136,7 +136,7 @@ END
 
 LAYER
   NAME UDX
-  STATUS ON
+  STATUS OFF
   TYPE RASTER
   DATA /mesonet/ldmdata/gis/images/4326/ridge/UDX/N0B_0.png
   OFFSITE 255 255 255
@@ -144,7 +144,7 @@ END
 
 LAYER
   NAME MPX
-  STATUS ON
+  STATUS OFF
   TYPE RASTER
   DATA /mesonet/ldmdata/gis/images/4326/ridge/MPX/N0B_0.png
   OFFSITE 255 255 255
@@ -153,7 +153,7 @@ END
 
 LAYER
   NAME ARX
-  STATUS ON
+  STATUS OFF
   TYPE RASTER
   DATA /mesonet/ldmdata/gis/images/4326/ridge/ARX/N0B_0.png
   OFFSITE 255 255 255
@@ -161,7 +161,7 @@ END
 
 LAYER
   NAME DVN
-  STATUS ON
+  STATUS OFF
   TYPE RASTER
   DATA /mesonet/ldmdata/gis/images/4326/ridge/DVN/N0B_0.png
   OFFSITE 255 255 255
@@ -169,7 +169,7 @@ END
 
 LAYER
   NAME OAX
-  STATUS ON
+  STATUS OFF
   TYPE RASTER
   DATA /mesonet/ldmdata/gis/images/4326/ridge/OAX/N0B_0.png
   OFFSITE 255 255 255
@@ -178,7 +178,7 @@ END
 LAYER
   TYPE POINT
   NAME site
-  STATUS ON
+  STATUS OFF
   CLASS
    LABEL
    END

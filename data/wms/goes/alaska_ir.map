@@ -3,7 +3,7 @@ MAP
 # Start of map file
 #
 NAME "alaska_ir"
-STATUS ON
+STATUS OFF
 SIZE 450 350
 EXTENT -178.3 51.5 -130.0 71.4
 UNITS DD
@@ -37,7 +37,7 @@ END
 #
 LAYER
   NAME "alaska_ir"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/GOES/alaska/channel13/GOES-17_C13.png"
   TYPE RASTER
   INCLUDE "/mesonet/ldmdata/gis/images/GOES/alaska/channel13/GOES-17_C13.msinc"

@@ -3,7 +3,7 @@ MAP
 # Start of map file
 #
 NAME "radar"
-STATUS ON
+STATUS OFF
 SIZE 450 350
 FONTSET "/opt/iem/data/gis/fonts.list"
 EXTENT -126 26 -76 50
@@ -54,7 +54,7 @@ END
 #
 LAYER
   NAME usradar
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.tif"
   TYPE RASTER
   PROJECTION

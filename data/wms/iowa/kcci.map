@@ -3,7 +3,7 @@ MAP
 # Start of map file
 #
 NAME "iemtest"
-STATUS ON
+STATUS OFF
 SIZE 450 350
 #SYMBOLSET symbols/symbol.sym
 #FONTSET "/mesonet/data/gis/fonts/fonts.list"
@@ -45,7 +45,7 @@ END
 LAYER
   NAME kccidoppler
   DATA  "/mesonet/ldmdata/gis/images/26915/KCCI/KCCI_N0R_0.png"
-  STATUS ON
+  STATUS OFF
   TYPE RASTER
   METADATA
     "wms_title" "KCCI Super DopplerHD"

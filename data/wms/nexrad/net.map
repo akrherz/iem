@@ -3,7 +3,7 @@ MAP
 # Start of map file
 #
 NAME "nexrad_base_reflect"
-STATUS ON
+STATUS OFF
 SIZE 450 350
 #SYMBOLSET symbols/symbol.sym
 EXTENT -126 24 -66 50
@@ -48,7 +48,7 @@ END
 #
 LAYER
   NAME "nexrad-net"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/eet_0.tif"
   TYPE RASTER
   PROJECTION
@@ -65,7 +65,7 @@ END
 
 LAYER
   NAME "nexrad-net-900913"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/eet_0.tif"
   TYPE RASTER
   PROJECTION
@@ -83,7 +83,7 @@ END
 
 LAYER
   NAME "nexrad-net-900913-m05m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/eet_1.tif"
   TYPE RASTER
   PROJECTION
@@ -101,7 +101,7 @@ END
 
 LAYER
   NAME "nexrad-net-900913-m10m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/eet_2.tif"
   TYPE RASTER
   PROJECTION
@@ -118,7 +118,7 @@ END
 
 LAYER
   NAME "nexrad-net-900913-m15m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/eet_3.tif"
   TYPE RASTER
   PROJECTION
@@ -135,7 +135,7 @@ END
 
 LAYER
   NAME "nexrad-net-900913-m20m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/eet_4.tif"
   TYPE RASTER
   PROJECTION
@@ -152,7 +152,7 @@ END
 
 LAYER
   NAME "nexrad-net-900913-m25m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/eet_5.tif"
   TYPE RASTER
   PROJECTION
@@ -170,7 +170,7 @@ END
 
 LAYER
   NAME "nexrad-net-900913-m30m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/eet_6.tif"
   TYPE RASTER
   PROJECTION
@@ -187,7 +187,7 @@ END
 
 LAYER
   NAME "nexrad-net-900913-m35m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/eet_7.tif"
   TYPE RASTER
   PROJECTION
@@ -204,7 +204,7 @@ END
 
 LAYER
   NAME "nexrad-net-900913-m40m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/eet_8.tif"
   TYPE RASTER
   PROJECTION
@@ -221,7 +221,7 @@ END
 
 LAYER
   NAME "nexrad-net-900913-m45m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/eet_9.tif"
   TYPE RASTER
   PROJECTION
@@ -238,7 +238,7 @@ END
 
 LAYER
   NAME "nexrad-net-900913-m50m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/900913/USCOMP/eet_10.tif"
   TYPE RASTER
   PROJECTION
@@ -256,7 +256,7 @@ END
 
 LAYER
   NAME "nexrad-net-m05m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/eet_1.tif"
   TYPE RASTER
   PROJECTION
@@ -273,7 +273,7 @@ END
 
 LAYER
   NAME "nexrad-net-m10m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/eet_2.tif"
   TYPE RASTER
   PROJECTION
@@ -290,7 +290,7 @@ END
 
 LAYER
   NAME "nexrad-net-m15m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/eet_3.tif"
   TYPE RASTER
   PROJECTION
@@ -307,7 +307,7 @@ END
 
 LAYER
   NAME "nexrad-net-m20m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/eet_4.tif"
   TYPE RASTER
   PROJECTION
@@ -324,7 +324,7 @@ END
 
 LAYER
   NAME "nexrad-net-m25m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/eet_5.tif"
   TYPE RASTER
   PROJECTION
@@ -341,7 +341,7 @@ END
 
 LAYER
   NAME "nexrad-net-m30m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/eet_6.tif"
   TYPE RASTER
   PROJECTION
@@ -358,7 +358,7 @@ END
 
 LAYER
   NAME "nexrad-net-m35m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/eet_7.tif"
   TYPE RASTER
   PROJECTION
@@ -375,7 +375,7 @@ END
 
 LAYER
   NAME "nexrad-net-m40m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/eet_8.tif"
   TYPE RASTER
   PROJECTION
@@ -392,7 +392,7 @@ END
 
 LAYER
   NAME "nexrad-net-m45m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/eet_9.tif"
   TYPE RASTER
   PROJECTION
@@ -409,7 +409,7 @@ END
 
 LAYER
   NAME "nexrad-net-m50m"
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/4326/USCOMP/eet_10.tif"
   TYPE RASTER
   PROJECTION

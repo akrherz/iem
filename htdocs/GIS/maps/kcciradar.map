@@ -3,7 +3,7 @@ MAP
 # Start of map file
 #
 NAME "radar"
-STATUS ON
+STATUS OFF
 SIZE 450 350
 #SYMBOLSET symbols/symbol.sym
 FONTSET "/opt/iem/data/gis/fonts.list"
@@ -56,7 +56,7 @@ END
 #
 LAYER
   NAME kcci
-  STATUS ON
+  STATUS OFF
   DATA "/mesonet/ldmdata/gis/images/26915/KCCI/KCCI_N0R_0.png"
   TYPE RASTER
   PROJECTION
