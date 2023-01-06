@@ -39,9 +39,9 @@ END
 LAYER
   NAME "alaska_wv"
   STATUS OFF
-  DATA "/mesonet/ldmdata/gis/images/GOES/alaska/channel09/GOES-17_C09.png"
+  DATA "/mesonet/ldmdata/gis/images/GOES/alaska/channel09/GOES-18_C09.png"
   TYPE RASTER
-  INCLUDE "/mesonet/ldmdata/gis/images/GOES/alaska/channel09/GOES-17_C09.msinc"
+  INCLUDE "/mesonet/ldmdata/gis/images/GOES/alaska/channel09/GOES-18_C09.msinc"
   PROCESSING "CLOSE_CONNECTION=NORMAL"
 END
 
