@@ -134,7 +134,7 @@ EOM;
                     $row["id"],
                     $row["name"],
                     $row["network"],
-                    substr($row["archive_begin"], 0, 16)
+                    $row["archive_begin"]->format("Y-m-d"),
                 ));
             }
             unset($shpFile);

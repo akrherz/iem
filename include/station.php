@@ -6,6 +6,8 @@ require_once dirname(__FILE__) . "/network.php";
 
 class StationData
 {
+    public $table;
+    public $dbconn;
 
     function __construct($a, $n = "")
     {

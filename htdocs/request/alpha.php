@@ -48,20 +48,20 @@ if (isset($_REQUEST['test'])) {
   <observation_time>Last Updated on {$tstamp}</observation_time>
   <observation_time_rfc822>{$tstamp2}</observation_time_rfc822>
     <weather>Unknown</weather>
-    <temperature_string>${tstring}</temperature_string>
-    <temp_f>${ob["tmpf"]}</temp_f>
-    <temp_c>${tmpc}</temp_c>
-    <relative_humidity>${ob["relh"]}</relative_humidity>
-    <wind_string>${wstring}</wind_string>
-    <wind_dir>${wdirtext}</wind_dir>
-    <wind_degrees>${ob["drct"]}</wind_degrees>
-    <wind_mph>${speed}</wind_mph>
-    <wind_kt>${ob["sknt"]}</wind_kt>
-    <pressure_string>${pres} mb</pressure_string>
-    <pressure_mb>${pres}</pressure_mb>
-    <pressure_in>${ob["alti"]}</pressure_in>
-    <dewpoint_string>${dstring}</dewpoint_string>
-    <dewpoint_f>${ob["dwpf"]}</dewpoint_f>
+    <temperature_string>($tstring}</temperature_string>
+    <temp_f>{$ob["tmpf"]}</temp_f>
+    <temp_c>{$tmpc}</temp_c>
+    <relative_humidity>{$ob["relh"]}</relative_humidity>
+    <wind_string>{$wstring}</wind_string>
+    <wind_dir>{$wdirtext}</wind_dir>
+    <wind_degrees>{$ob["drct"]}</wind_degrees>
+    <wind_mph>{$speed}</wind_mph>
+    <wind_kt>{$ob["sknt"]}</wind_kt>
+    <pressure_string>{$pres} mb</pressure_string>
+    <pressure_mb>{$pres}</pressure_mb>
+    <pressure_in>{$ob["alti"]}</pressure_in>
+    <dewpoint_string>{$dstring}</dewpoint_string>
+    <dewpoint_f>{$ob["dwpf"]}</dewpoint_f>
     <dewpoint_c>$dwpc</dewpoint_c>
     <visibility_mi>Unknown</visibility_mi>
      <icon_url_base>http://forecast.weather.gov/images/wtf/small/</icon_url_base>

@@ -19,37 +19,37 @@ pg_exec($db, "SET TIME ZONE 'UTC'");
 $rs = pg_prepare($db, "CHECK4WATCH", "SELECT *, ST_xmin(geom) as x0, 
       ST_xmax(geom) as x1, ST_ymin(geom) as y0, ST_ymax(geom) as y1,
       ST_askml(geom) as kml, 
-		ST_asGeoJSON(geom) as geojson from watches 
+      ST_asGeoJSON(geom) as geojson from watches 
       where extract(year from issued) = $1 and num = $2");
 
 $ERROR = "";
 
 
-$rs = pg_execute($db, "CHECK4WATCH", Array($year, $num));
+$rs = pg_execute($db, "CHECK4WATCH", array($year, $num));
 if (pg_num_rows($rs) == 0) {
-  $t->content = "<h3>Sorry, watch number $num for year $year was not found</h3>";
-  $t->render('single.phtml');
-  die();
+    $t->content = "<h3>Sorry, watch number $num for year $year was not found</h3>";
+    $t->render('single.phtml');
+    die();
 }
 
-$row = pg_fetch_array($rs,0);
+$row = pg_fetch_array($rs, 0);
 
 $textlinks = "";
-if (! is_null($row["product_id_saw"])) {
+if (!is_null($row["product_id_saw"])) {
     $textlinks .= sprintf(
         '<tr><th>SAW Issuance</th><td><a href="/p.php?pid=%s">%s</a></td></tr>',
         $row["product_id_saw"],
         $row["product_id_saw"],
     );
 }
-if (! is_null($row["product_id_sel"])) {
+if (!is_null($row["product_id_sel"])) {
     $textlinks .= sprintf(
         '<tr><th>SEL Issuance</th><td><a href="/p.php?pid=%s">%s</a></td></tr>',
         $row["product_id_sel"],
         $row["product_id_sel"],
     );
 }
-if (! is_null($row["product_id_sel"])) {
+if (!is_null($row["product_id_sel"])) {
     $textlinks .= sprintf(
         '<tr><th>Watch Probs</th><td><a href="/p.php?pid=%s">%s</a></td></tr>',
         $row["product_id_wwp"],
@@ -59,51 +59,59 @@ if (! is_null($row["product_id_sel"])) {
 
 $ts = strtotime($row["issued"]);
 $expires = strtotime($row["expired"]);
-$d = date("d F Y H:i" ,  $ts);
+$d = date("d F Y H:i",  $ts);
 
 $maptitle = htmlentities("SPC Watch number $num during $year");
 $margin = 0.5;
-$url = sprintf("%s/GIS/radmap.php?title=%s&layers[]=uscounties&layers[]=nexrad&ts=%s&height=480&width=640&layers[]=watches&layers[]=watch_by_county&sector=conus&bbox=%s,%s,%s,%s", $rooturl, $maptitle, gmdate('YmdHi', $ts), $row["x0"] -$margin, $row["y0"]-$margin, $row["x1"]+$margin, $row["y1"]+$margin);
+$url = sprintf("%s/GIS/radmap.php?title=%s&layers[]=uscounties&layers[]=nexrad&ts=%s&height=480&width=640&layers[]=watches&layers[]=watch_by_county&sector=conus&bbox=%s,%s,%s,%s", $rooturl, $maptitle, gmdate('YmdHi', $ts), $row["x0"] - $margin, $row["y0"] - $margin, $row["x1"] + $margin, $row["y1"] + $margin);
 
 /*____________________________ Plot LSRs */
-if ($expires < time() && $year > 2002)
-{
- $lurl = sprintf("%s/GIS/radmap.php?layers[]=lsrs&ts=%s&ts2=%s&height=480&width=640&layers[]=watches&sector=conus&bbox=%s,%s,%s,%s", $rooturl, gmdate('YmdHi', $ts), gmdate('YmdHi', $expires), $row["x0"] -$margin, $row["y0"]-$margin, $row["x1"]+$margin, $row["y1"]+$margin);
+if ($expires < time() && $year > 2002) {
+    $lurl = sprintf("%s/GIS/radmap.php?layers[]=lsrs&ts=%s&ts2=%s&height=480&width=640&layers[]=watches&sector=conus&bbox=%s,%s,%s,%s", $rooturl, gmdate('YmdHi', $ts), gmdate('YmdHi', $expires), $row["x0"] - $margin, $row["y0"] - $margin, $row["x1"] + $margin, $row["y1"] + $margin);
 }
 
 $ourl = sprintf("%s/GIS/radmap.php?layers[]=nexrad&ts=%s&height=480&width=640&layers[]=watches&sector=conus", $rooturl, gmdate('YmdHi', $ts));
 
 $prevlink = "";
-if ($num > 1){
-	$prevlink = "<a href=\"watch.phtml?year=$year&num=". ($num -1) ."\">Previous Watch</a>";
+if ($num > 1) {
+    $prevlink = "<a href=\"watch.phtml?year=$year&num=" . ($num - 1) . "\">Previous Watch</a>";
 }
-$nextlink = "<a href=\"watch.phtml?year=$year&num=". ($num +1) ."\">Next Watch</a>";
+$nextlink = "<a href=\"watch.phtml?year=$year&num=" . ($num + 1) . "\">Next Watch</a>";
 
-$yselect = yearSelect(1997,$year);
+$yselect = yearSelect(1997, $year);
 
-$issue = substr($row["issued"],0,16);
-$expire = substr($row["expired"],0,16);
+$issue = substr($row["issued"], 0, 16);
+$expire = substr($row["expired"], 0, 16);
 
-$spclink = sprintf("https://www.spc.noaa.gov/products/watch/%s/ww%04d.html",
-	$year, $num);
+$spclink = sprintf(
+    "https://www.spc.noaa.gov/products/watch/%s/ww%04d.html",
+    $year,
+    $num
+);
 
 $woulink = "";
 /* Include a link to download WOU outlines... */
-if (date("Y", $ts) > 2005){
-	$woulink .= "<tr><th>WOU Outline Shapefiles</th><td>";
-	$begints = $ts + ((60 - intval(date("i", $ts))) * 60);
-	$endts = $expires - (intval(date("i", $expires)) * 60);
-	while ($begints <= $endts){
-		$woulink .= sprintf("<a href=\"/cgi-bin/request/gis/watch_by_county.py?year=%s&month=%s&day=%s&hour=%s&minute=00&etn=%s\">%sZ</a>, ",
-				gmdate("Y", $begints), gmdate("m", $begints), gmdate("d", $begints),
-				gmdate("H", $begints) , $num, gmdate("H", $begints));
-		$begints += 3600;
-	}
+if (date("Y", $ts) > 2005) {
+    $woulink .= "<tr><th>WOU Outline Shapefiles</th><td>";
+    $begints = $ts + ((60 - intval(date("i", $ts))) * 60);
+    $endts = $expires - (intval(date("i", $expires)) * 60);
+    while ($begints <= $endts) {
+        $woulink .= sprintf(
+            "<a href=\"/cgi-bin/request/gis/watch_by_county.py?year=%s&month=%s&day=%s&hour=%s&minute=00&etn=%s\">%sZ</a>, ",
+            gmdate("Y", $begints),
+            gmdate("m", $begints),
+            gmdate("d", $begints),
+            gmdate("H", $begints),
+            $num,
+            gmdate("H", $begints)
+        );
+        $begints += 3600;
+    }
 }
 
 $ltext = "";
-if (isset($lurl)){ 
-	$ltext .= "<h3>Local Storm Reports:</h3><img src=\"$lurl\">"; 
+if (isset($lurl)) {
+    $ltext .= "<h3>Local Storm Reports:</h3><img src=\"$lurl\">";
 }
 $kml = htmlentities($row["kml"]);
 
@@ -177,7 +185,7 @@ valid area is issued by county and marine zone.
 
 <p><strong>Watch Polygon (GeoJSON):</strong><br />
 <pre>{$row["geojson"]}</pre>
-		
+        
 
 EOF;
 $t->render('single.phtml');

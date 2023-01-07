@@ -34,11 +34,11 @@ EOF;
     for ($i = 0; $i < 10; $i++) {
         $row = $metadata["SEL" . $i];
         $content .= "<div class=\"col-md-4 well\">
-        <strong>SEL${i}:</strong> Issued: " . date("j M Y g:i A", $row["sts"])
+        <strong>SEL{$i}:</strong> Issued: " . date("j M Y g:i A", $row["sts"])
             . "<br />Expired: " . date("j M Y g:i A", $row["ets"]) . ",
                         <a href=\"/GIS/apps/rview/watch.phtml?year=" . date("Y", $row["sts"]) . "&num=" . $row["num"] . "\">more info</a>
-                        <br /><a href=\"sel.phtml?sel=${i}\">
-        <img src=\"/data/sel${i}comp.png\" class=\"img img-responsive\"></a>
+                        <br /><a href=\"sel.phtml?sel={$i}\">
+        <img src=\"/data/sel{$i}comp.png\" class=\"img img-responsive\"></a>
         </div>";
     }
     $t->content = <<<EOF

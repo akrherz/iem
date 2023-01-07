@@ -14,70 +14,72 @@ putenv("TZ=UTC");
 date_default_timezone_set('UTC');
 
 
-if (isset($_GET["img_x"]) && isset($_GET["img_y"]) )
-{
-  $arExtents = explode(",", $_GET["extents"]);
-  $ll_x = $arExtents[0];  
-  $ll_y = $arExtents[1];
-  $ur_x = $arExtents[2];
-  $ur_y = $arExtents[3];
+if (isset($_GET["img_x"]) && isset($_GET["img_y"])) {
+    $arExtents = explode(",", $_GET["extents"]);
+    $ll_x = $arExtents[0];
+    $ll_y = $arExtents[1];
+    $ur_x = $arExtents[2];
+    $ur_y = $arExtents[3];
 
-  $dy = ($ur_y - $ll_y) / floatval(480);
-  $dx = ($ur_x - $ll_x) / floatval(640);
+    $dy = ($ur_y - $ll_y) / floatval(480);
+    $dx = ($ur_x - $ll_x) / floatval(640);
 
-  $_GET["lon0"] = (intval($_GET["img_x"]) * $dx) + $ll_x ;
-  $_GET["lat0"] = $ur_y - (intval($_GET["img_y"]) * $dy) ;
-  /* $_GET["site"] = "user"; */
+    $_GET["lon0"] = (intval($_GET["img_x"]) * $dx) + $ll_x;
+    $_GET["lat0"] = $ur_y - (intval($_GET["img_y"]) * $dy);
+    /* $_GET["site"] = "user"; */
 }
 
-$layers = isset($_GET["layers"]) ? $_GET["layers"]: Array("cwas", "warnings",
-        "uscounties", "nexrad", "watches");
-$cu = isset($_GET["cu"]) ? intval($_GET["cu"]): 0;
+$layers = isset($_GET["layers"]) ? $_GET["layers"] : array(
+    "cwas", "warnings",
+    "uscounties", "nexrad", "watches"
+);
+$cu = isset($_GET["cu"]) ? intval($_GET["cu"]) : 0;
 $loop = isset($_GET["loop"]) ? intval($_GET["loop"]) : 0;
 if ($loop == 2) $loop = 1;
-$tz = isset($_GET["tz"]) ? xssafe($_GET["tz"]): "CDT";
-$tzdict = Array("UTC" => 0, "EDT" => 14400, "EST" => 18000, "CDT" => 18000, 
-        "CST" => 21600, "MDT" => 21600, "MST" => 25200, "PDT" => 25200, 
-        "PST" => 28800);
+$tz = isset($_GET["tz"]) ? xssafe($_GET["tz"]) : "CDT";
+$tzdict = array(
+    "UTC" => 0, "EDT" => 14400, "EST" => 18000, "CDT" => 18000,
+    "CST" => 21600, "MDT" => 21600, "MST" => 25200, "PDT" => 25200,
+    "PST" => 28800
+);
 
 $tzoff = $tzdict[$tz];
-$autopilot = isset($_GET["autopilot"]) ? xssafe($_GET["autopilot"]): 0;
-$filter = isset($_GET["filter"]) ? intval($_GET["filter"]): 0;
-$lsrwindow = isset($_GET["lsrwindow"]) ? intval($_GET["lsrwindow"]): "0";
-$lsrlook = isset($_GET["lsrlook"]) ? xssafe($_GET["lsrlook"]): "+";
+$autopilot = isset($_GET["autopilot"]) ? xssafe($_GET["autopilot"]) : 0;
+$filter = isset($_GET["filter"]) ? intval($_GET["filter"]) : 0;
+$lsrwindow = isset($_GET["lsrwindow"]) ? intval($_GET["lsrwindow"]) : "0";
+$lsrlook = isset($_GET["lsrlook"]) ? xssafe($_GET["lsrlook"]) : "+";
 // careful here as we can have PXXX sites
-$site = isset($_GET["site"]) ? substr($_GET["site"],0,4): "DMX";
-$osite = isset($_GET["osite"]) ? substr($_GET["osite"],0,4): "DMX";
-$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]): "issued";
-$sortdir = isset($_GET["sortdir"]) ? intval($_GET["sortdir"]): 0;
-$lon0 = isset($_GET["lon0"]) ? floatval($_GET["lon0"]): 0;
-$lat0 = isset($_GET["lat0"]) ? floatval($_GET["lat0"]): 0;
-$zoom = isset($_GET["zoom"]) ? intval($_GET["zoom"]): 250;
-$imgsize = isset($_GET["imgsize"]) ? xssafe($_GET["imgsize"]): "640x480";
-$interval = isset($_GET["interval"]) ? intval($_GET["interval"]): 5;
-$frames = isset($_GET["frames"]) ? intval($_GET["frames"]): 10;
-$warngeo = isset($_GET["warngeo"]) ? xssafe($_GET["warngeo"]): "both";
+$site = isset($_GET["site"]) ? substr($_GET["site"], 0, 4) : "DMX";
+$osite = isset($_GET["osite"]) ? substr($_GET["osite"], 0, 4) : "DMX";
+$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "issued";
+$sortdir = isset($_GET["sortdir"]) ? intval($_GET["sortdir"]) : 0;
+$lon0 = isset($_GET["lon0"]) ? floatval($_GET["lon0"]) : 0;
+$lat0 = isset($_GET["lat0"]) ? floatval($_GET["lat0"]) : 0;
+$zoom = isset($_GET["zoom"]) ? intval($_GET["zoom"]) : 250;
+$imgsize = isset($_GET["imgsize"]) ? xssafe($_GET["imgsize"]) : "640x480";
+$interval = isset($_GET["interval"]) ? intval($_GET["interval"]) : 5;
+$frames = isset($_GET["frames"]) ? intval($_GET["frames"]) : 10;
+$warngeo = isset($_GET["warngeo"]) ? xssafe($_GET["warngeo"]) : "both";
 $ar = explode("x", $imgsize);
 $width = $ar[0];
 $height = $ar[1];
 
 $isarchive = (isset($_GET["archive"]) && $_GET["archive"] == "yes") ? 1 : 0;
-$archive = isset($_GET["archive"]) ? xssafe($_GET["archive"]): "";
+$archive = isset($_GET["archive"]) ? xssafe($_GET["archive"]) : "";
 //if ($isarchive) { $loop = 0; }
 $a = time();
-if ($isarchive)
-{
-  $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y", $a - $tzoff);
-  $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m", $a - $tzoff);
-  $day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d", $a - $tzoff);
-  $hour = isset($_GET["hour"]) ? intval($_GET["hour"]) : date("H", $a - $tzoff);
-  $m = isset($_GET["minute"]) ? intval($_GET["minute"]) : date("i", $a - $tzoff);
+if ($isarchive) {
+    $year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y", $a - $tzoff);
+    $month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m", $a - $tzoff);
+    $day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d", $a - $tzoff);
+    $hour = isset($_GET["hour"]) ? intval($_GET["hour"]) : date("H", $a - $tzoff);
+    $m = isset($_GET["minute"]) ? intval($_GET["minute"]) : date("i", $a - $tzoff);
 } else {
-  $year = date("Y", $a - $tzoff);
-  $month = date("m", $a - $tzoff);
-  $day = date("d", $a - $tzoff);
-  $hour = date("H", $a - $tzoff);
-  $m = date("i", $a - $tzoff);
+    $year = date("Y", $a - $tzoff);
+    $month = date("m", $a - $tzoff);
+    $day = date("d", $a - $tzoff);
+    $hour = date("H", $a - $tzoff);
+    $m = date("i", $a - $tzoff);
 }
 
 if ($m >= 55) $ma = "55";
@@ -95,23 +97,24 @@ else $ma = "00";
 //if (! $isarchive ) {$m = $ma;}
 $m = $ma;
 $basets = mktime($hour, $m, 0, $month, $day, $year);
-$wfo_filter_ts = mktime(0,0,0,8,29,2004);
-if ($isarchive && $basets < $wfo_filter_ts)
-{
-  $filter = 0;
+$wfo_filter_ts = mktime(0, 0, 0, 8, 29, 2004);
+if ($isarchive && $basets < $wfo_filter_ts) {
+    $filter = 0;
 }
 
 $nt = new NetworkTable("WFO", TRUE);
-$nt->table["NHC"] = Array("lat" => 25.75 , "lon" => -80.38 , 
-        "name" => "National Hurricane Center");
+$nt->table["NHC"] = array(
+    "lat" => 25.75, "lon" => -80.38,
+    "name" => "National Hurricane Center"
+);
 
-$uri = "$baseuri?frames=$frames&amp;interval=$interval&amp;site=$site&amp;".
-    "cu=$cu&amp;archive=$archive&amp;year=$year&amp;month=$month&amp;".
-    "day=$day&amp;hour=$hour&amp;minute=$m&amp;loop=$loop&amp;".
+$uri = "$baseuri?frames=$frames&amp;interval=$interval&amp;site=$site&amp;" .
+    "cu=$cu&amp;archive=$archive&amp;year=$year&amp;month=$month&amp;" .
+    "day=$day&amp;hour=$hour&amp;minute=$m&amp;loop=$loop&amp;" .
     "filter=$filter&amp;sortdir=$sortdir&amp;zoom=$zoom&amp;warngeo=$warngeo";
-$uri_nowfo = "$baseuri?frames=$frames&amp;interval=$interval&amp;".
-    "archive=$archive&amp;cu=$cu&amp;year=$year&amp;month=$month&amp;".
-    "day=$day&amp;hour=$hour&amp;minute=$m&amp;loop=$loop&amp;".
+$uri_nowfo = "$baseuri?frames=$frames&amp;interval=$interval&amp;" .
+    "archive=$archive&amp;cu=$cu&amp;year=$year&amp;month=$month&amp;" .
+    "day=$day&amp;hour=$hour&amp;minute=$m&amp;loop=$loop&amp;" .
     "filter=$filter&amp;sortdir=$sortdir&amp;zoom=$zoom&amp;warngeo=$warngeo";
 
 
@@ -123,16 +126,13 @@ $uri_nowfo = "$baseuri?frames=$frames&amp;interval=$interval&amp;".
   + case4: Nothing happens. lat0 lon0 are defined
 */
 
-if (isset($_GET["lat0"]) && isset($_GET["lon0"]) && $osite == $site)
-{
-  $uri .= "&lat0=$lat0&lon0=$lon0";
-}
-else if (isset($_GET["site"]) || $lat0 == 0 || $lon0 == 0 || $osite != $site)
-{
-  $osite = $site;
-  $lat0 = $nt->table[$site]["lat"];
-  $lon0 = $nt->table[$site]["lon"];
-  $uri .= "&lat0=$lat0&lon0=$lon0";
+if (isset($_GET["lat0"]) && isset($_GET["lon0"]) && $osite == $site) {
+    $uri .= "&lat0=$lat0&lon0=$lon0";
+} else if (isset($_GET["site"]) || $lat0 == 0 || $lon0 == 0 || $osite != $site) {
+    $osite = $site;
+    $lat0 = $nt->table[$site]["lat"];
+    $lon0 = $nt->table[$site]["lon"];
+    $uri .= "&lat0=$lat0&lon0=$lon0";
 }
 
 $t->title = "RADAR &amp; NWS Warnings";
@@ -148,8 +148,8 @@ $headextra = <<<EOF
 <link rel="stylesheet" href="/vendor/jsani/2.84/jquery.jsani.min.css">
 <link rel="stylesheet" type="text/css" href="warnings.css" />
 EOF;
-if (! $isarchive)
-  $jsextra .= "setTimeout(\"document.myform.submit()\", 300000);\n";
+if (!$isarchive)
+    $jsextra .= "setTimeout(\"document.myform.submit()\", 300000);\n";
 
 $jsextra .= "</script>";
 $t->headextra = $headextra;
@@ -162,12 +162,12 @@ $content = <<<EOF
 <input type="hidden" value="{$site}" name="osite">
 <input type="hidden" name="tzoff" value="0">
 EOF;
-if (isset($_GET["lat0"])) { 
-$content .= "<input type=\"hidden\" value=\"{$lat0}\" name=\"lat0\">
+if (isset($_GET["lat0"])) {
+    $content .= "<input type=\"hidden\" value=\"{$lat0}\" name=\"lat0\">
     <input type=\"hidden\" value=\"{$lon0}\" name=\"lon0\">";
-} 
+}
 
-$rtl = Array(
+$rtl = array(
     "usdm" => "US Drought Monitor",
     "goes_east1V" => "GOES East Visible",
     "goes_west1V" => "GOES West Visible",
@@ -178,13 +178,17 @@ $rtl = Array(
     "current_sites" => "Site Labels",
 );
 $rtlselect = "";
-foreach($rtl as $key => $val){
-    $rtlselect .= sprintf("<br /><input name=\"layers[]\" type=\"checkbox\" "
-            ." value=\"%s\"%s>%s\n", $key, 
-            (in_array($key, $layers)) ? ' checked="checked"': '', $val);
+foreach ($rtl as $key => $val) {
+    $rtlselect .= sprintf(
+        "<br /><input name=\"layers[]\" type=\"checkbox\" "
+            . " value=\"%s\"%s>%s\n",
+        $key,
+        (in_array($key, $layers)) ? ' checked="checked"' : '',
+        $val
+    );
 }
 
-$ll = Array(
+$ll = array(
     "nexrad" => "CONUS NEXRAD",
     "akn0q" => "Alaska NEXRAD (2010+)",
     "hin0q" => "Hawaii NEXRAD (2010+)",
@@ -196,103 +200,122 @@ $ll = Array(
     "watches" => "Watches",
 );
 $lselect = "";
-foreach($ll as $key => $val){
-    $lselect .= sprintf("<br /><input name=\"layers[]\" type=\"checkbox\" "
-            ." value=\"%s\"%s>%s\n", $key,
-            (in_array($key, $layers)) ? ' checked="checked"': '', $val);
+foreach ($ll as $key => $val) {
+    $lselect .= sprintf(
+        "<br /><input name=\"layers[]\" type=\"checkbox\" "
+            . " value=\"%s\"%s>%s\n",
+        $key,
+        (in_array($key, $layers)) ? ' checked="checked"' : '',
+        $val
+    );
 }
 
 $wselect = "<select name=\"site\" style=\"width: 195px;\">";
-foreach($nt->table as $key => $value){
+foreach ($nt->table as $key => $value) {
     $wselect .= "<option value=\"$key\" ";
     if ($site == $key) $wselect .= "SELECTED";
-    $wselect .= ">[".$key."] ". $value["name"] ."</option>";
+    $wselect .= ">[" . $key . "] " . $value["name"] . "</option>";
 }
 $wselect .= "</select>";
 
-$ar = Array("UTC"=>"UTC", "EDT"=>"EDT", "EST"=>"EST", 
-        "CDT"=>"CDT", 
-        "CST"=>"CST", 
-        "MDT"=>"MDT", 
-        "MST"=>"MST", "PDT"=>"PDT", 
-        "PST"=>"PST");
+$ar = array(
+    "UTC" => "UTC", "EDT" => "EDT", "EST" => "EST",
+    "CDT" => "CDT",
+    "CST" => "CST",
+    "MDT" => "MDT",
+    "MST" => "MST", "PDT" => "PDT",
+    "PST" => "PST"
+);
 $tzselect = make_select("tz", $tz, $ar);
 
-$ar = Array("both" => "County + Polygon",
+$ar = array(
+    "both" => "County + Polygon",
     "county" => "County Only",
-    "sbw" => "Storm Based Warning");
+    "sbw" => "Storm Based Warning"
+);
 $wgselect = make_select("warngeo", $warngeo, $ar);
 
-$ar = Array(5 => "5 km", 10 => "10 km", 25 => "25 km", 50 => "50 km",
+$ar = array(
+    5 => "5 km", 10 => "10 km", 25 => "25 km", 50 => "50 km",
     100 => "100 km", 250 => "250 km", 500 => "500 km", 1000 => "1000 km",
-    3000 => "3000 km");
+    3000 => "3000 km"
+);
 $zselect = make_select("zoom", $zoom, $ar);
 
-$ar = Array(0 => "Hide", 5 => "5 minutes", 10 => "10 minutes",
-    15 => "15 minutes", 30 => "30 minutes", 60 => "60 minutes");
+$ar = array(
+    0 => "Hide", 5 => "5 minutes", 10 => "10 minutes",
+    15 => "15 minutes", 30 => "30 minutes", 60 => "60 minutes"
+);
 $lwselect = make_select("lsrwindow", $lsrwindow, $ar);
 
-$ar = Array("fcster" => "Product Author", "phenomena" => "Product Type",
+$ar = array(
+    "fcster" => "Product Author", "phenomena" => "Product Type",
     "expire" => "Product Expiration", "issue" => "Product Issued",
-        "sname" => "State Name", "updated" => "Product Updated",
-        "wfo" => "Weather Office", "eventid" => "VTEC Event ID",
-        "status" => "VTEC Status");
+    "sname" => "State Name", "updated" => "Product Updated",
+    "wfo" => "Weather Office", "eventid" => "VTEC Event ID",
+    "status" => "VTEC Status"
+);
 $sselect = make_select("sortcol", $sortcol, $ar);
 
-$ar = Array(
-    "640x480"=>"640x480",
-    "800x600"=>"800x600",
-    "1024x768"=>"1024x768",
-    "1280x1024"=>"1280x1024",
+$ar = array(
+    "640x480" => "640x480",
+    "800x600" => "800x600",
+    "1024x768" => "1024x768",
+    "1280x1024" => "1280x1024",
 );
 $igselect = make_select("imgsize", $imgsize, $ar);
 
-$ar = Array(
+$ar = array(
     "+" => "+",
     "-" => "-",
     "+/-" => "+/-",
 );
 $lrselect = make_select("lsrlook", $lsrlook, $ar);
 
-$ar = Array(
+$ar = array(
     "0" => "1 image only",
     "1" => "Java Script Loop"
 );
 $loselect = make_select("loop", $loop, $ar);
 
-$ar = Array(
+$ar = array(
     "5" => "5 minutes",
-        "10" => "10 minutes",
-        "15" => "15 minutes",
-        "30" => "30 minutes",
-        "60" => "1 hour",
-        "120" => "2 hours",
-        "1440" => "1 day",
+    "10" => "10 minutes",
+    "15" => "15 minutes",
+    "30" => "30 minutes",
+    "60" => "1 hour",
+    "120" => "2 hours",
+    "1440" => "1 day",
 );
 $ivselect = make_select("interval", $interval, $ar);
 
-$ar = Array("0"=>"No", "1"=>"Yes");
+$ar = array("0" => "No", "1" => "Yes");
 $wfselect = make_select("filter", $filter, $ar);
 
 $pradio = "<br /><input type=\"radio\" value=\"0\" name=\"cu\" ";
-if ($cu == 0) { $pradio .= "checked"; } 
+if ($cu == 0) {
+    $pradio .= "checked";
+}
 $pradio .= ">Show All";
 $pradio .= "<br /><input type=\"radio\" value=\"1\" name=\"cu\" ";
-if ($cu == 1) { $pradio .= "checked"; } $pradio .= ">Convective Only";
+if ($cu == 1) {
+    $pradio .= "checked";
+}
+$pradio .= ">Convective Only";
 
-$ar = Array(0 => "DESC", 1 => "ASC");
+$ar = array(0 => "DESC", 1 => "ASC");
 $sdselect = make_select("sortdir", $sortdir, $ar);
 
 $yselect = yearSelect(2003, $year, "year");
 $mselect = monthSelect($month, "month");
 $dselect = daySelect($day, "day");
 $hselect = hourSelect($hour, "hour");
-$miselect = minuteSelect($m, "minute",5);
+$miselect = minuteSelect($m, "minute", 5);
 
-$achecked = ($isarchive) ? " CHECKED='CHECKED'": "";
-$dwwidth= $width + 250;
+$achecked = ($isarchive) ? " CHECKED='CHECKED'" : "";
+$dwwidth = $width + 250;
 $content .= <<<EOF
-<div id="datawindow" style="background: #eee; width: ${dwwidth}px; z-index: 2;">
+<div id="datawindow" style="background: #eee; width: {$dwwidth}px; z-index: 2;">
 <input type="submit" value="Layers" style="background: #73FA4D;" onClick="javascript: showControl('layers-control'); return false;">
 <input type="submit" value="Locations" style="background: #F2FE5A;" onClick="javascript: showControl('locations-control'); return false;">
 <input type="submit" value="Time" style="background: #FF5EC4;" onClick="javascript: showControl('time-control'); return false;">
@@ -377,31 +400,31 @@ EOF;
 
 $heightadd = 0;
 $maptitle = "IEM NEXRAD Mosaic Base Reflectivity";
-if (intval($loop) == 1 || intval($loop) == 2){
+if (intval($loop) == 1 || intval($loop) == 2) {
     // Alternative 1, we want javascript looper!
-      $urls = Array();  	
-      for ($i=0; $i<$frames; $i++){
-           $imgi = $frames - 1 - $i;
-       include "warnings_plot.php";
-           $urls[] = "'$url'";
+    $urls = array();
+    for ($i = 0; $i < $frames; $i++) {
+        $imgi = $frames - 1 - $i;
+        include "warnings_plot.php";
+        $urls[] = "'$url'";
     }
-      $jsurls = implode(", ", $urls);
-      // Save this animation to memcache for future potential use
-      $memcache = new Memcached();
-      $memcache->addServer('iem-memcached', 11211);
-      $fts = time();
-      $memcache->set("/GIS/apps/rview/warnings.phtml?fts=${fts}", $urls, 86400);
-      
-      $content .= "</form>";
-      $content .= "<a href=\"anim_gif.php?fts=$fts\">Download as Animated Gif</a><br />";
-      $content .= "<div id=\"myanimation\"></div>\n";
+    $jsurls = implode(", ", $urls);
+    // Save this animation to memcache for future potential use
+    $memcache = new Memcached();
+    $memcache->addServer('iem-memcached', 11211);
+    $fts = time();
+    $memcache->set("/GIS/apps/rview/warnings.phtml?fts={$fts}", $urls, 86400);
+
+    $content .= "</form>";
+    $content .= "<a href=\"anim_gif.php?fts=$fts\">Download as Animated Gif</a><br />";
+    $content .= "<div id=\"myanimation\"></div>\n";
     $jsextra .= <<<EOM
 <script>
  $(document).ready(function () {
     var myanimation = $("#myanimation").jsani({
         imageSrcs: [$jsurls],
-        aniWidth: ${width},
-        aniHeight: ${height},
+        aniWidth: {$width},
+        aniHeight: {$height},
         initdwell: 200,
         controls: ['stopplay', 'firstframe', 'previous', 'next', 'lastframe', 'looprock', 'slow', 'fast', 'zoom'],
         last_frame_pause: 8,
@@ -412,11 +435,11 @@ if (intval($loop) == 1 || intval($loop) == 2){
 </script>
 EOM;
 } else {
-  $imgi = 0;
-  include("warnings_plot.php");
-  $content .= "<input type=\"hidden\" name=\"extents\" value=\"{$x0},{$y0},{$x1},{$y1}\">\n";  
-  $content .= "<input type=\"image\" name=\"img\" src=\"". $url ."\" border=\"1\">\n";
-  $content .= "</form>";
+    $imgi = 0;
+    include("warnings_plot.php");
+    $content .= "<input type=\"hidden\" name=\"extents\" value=\"{$x0},{$y0},{$x1},{$y1}\">\n";
+    $content .= "<input type=\"image\" name=\"img\" src=\"" . $url . "\" border=\"1\">\n";
+    $content .= "</form>";
 }
 $content .= <<<EOF
 <!-- Warnings Key! -->
@@ -429,19 +452,18 @@ $content .= "<input type=\"hidden\" name=\"extents\" value=\"{$x0},{$y0},{$x1},{
 
 $connection = iemdb("postgis");
 
-$scols = Array("wfo", "phenomena", "cname", "expire", "sname", "issue", "updated", "status", "fcster", "eventid");
-if (! in_array($sortcol, $scols) ){
- $sortcol = "issue";
+$scols = array("wfo", "phenomena", "cname", "expire", "sname", "issue", "updated", "status", "fcster", "eventid");
+if (!in_array($sortcol, $scols)) {
+    $sortcol = "issue";
 }
 if ($sortdir == 1) $sortdir = "ASC";
 else $sortdir = "DESC";
 
 $wtable = "warnings_$year";
 $tsextra = "CURRENT_TIMESTAMP and issue < CURRENT_TIMESTAMP ";
-if ($isarchive)
-{
-  $wtable = "warnings_$year";
-  $tsextra = "'". strftime("%Y-%m-%d %H:%M:00+00", $basets + $tzoff ) ."' and w.issue < '". strftime("%Y-%m-%d %H:%M:00+00", $basets + $tzoff ) ."'";
+if ($isarchive) {
+    $wtable = "warnings_$year";
+    $tsextra = "'" . strftime("%Y-%m-%d %H:%M:00+00", $basets + $tzoff) . "' and w.issue < '" . strftime("%Y-%m-%d %H:%M:00+00", $basets + $tzoff) . "'";
 }
 $cuextra = "";
 if ($cu == 1) {
@@ -454,105 +476,104 @@ $query = "SELECT w.phenomena, u.name as cname, w.expire as expire,
   ST_ymax(u.geom) as lat0, w.wfo as wfo
   from $wtable w, nws_ugc u
   WHERE w.expire > $tsextra and w.significance != 'A'
-   and w.ugc = u.ugc $cuextra ORDER by ". pg_escape_string($sortcol) ." ". $sortdir;
+   and w.ugc = u.ugc $cuextra ORDER by " . pg_escape_string($sortcol) . " " . $sortdir;
 pg_exec($connection, "set time zone 'GMT'");
 $result = pg_exec($connection, $query);
 
 pg_close($connection);
 
-$afos = Array("SV" => "Svr Tstorm",
-  "TO" => "Tornado",
-  "FF" => "Flash Flood");
+$afos = array(
+    "SV" => "Svr Tstorm",
+    "TO" => "Tornado",
+    "FF" => "Flash Flood"
+);
 $content .= "<div style=\"clear: both;\">
 Warnings Valid at: <b>";
 
-if ($tzoff == 0)
-{
-  if ($isarchive)
-  $content .= strftime("%d %b %Y %H:%M %Z", $basets); 
-  else
-  $content .= strftime("%d %b %Y %H:%M %Z"); 
-}
-else 
-{
-  if ($isarchive)
-  $content .= strftime("%d %b %Y %I:%M %p ", $basets) . $tz; 
-  else
-  $content .= strftime("%d %b %Y %I:%M %p ", time() - $tzoff) . $tz; 
+if ($tzoff == 0) {
+    if ($isarchive)
+        $content .= strftime("%d %b %Y %H:%M %Z", $basets);
+    else
+        $content .= strftime("%d %b %Y %H:%M %Z");
+} else {
+    if ($isarchive)
+        $content .= strftime("%d %b %Y %I:%M %p ", $basets) . $tz;
+    else
+        $content .= strftime("%d %b %Y %I:%M %p ", time() - $tzoff) . $tz;
 }
 $content .= "</b>
 <br clear=\"all\" />";
 $k = 0;
-if ($tzoff == 0)
-{
-  $dformat = "%H:%M GMT";
-}
-else
-{
-  $dformat = "%I:%M %p";
+if ($tzoff == 0) {
+    $dformat = "%H:%M GMT";
+} else {
+    $dformat = "%I:%M %p";
 }
 
 /* Loop thru results from database! */
-$wA = Array();
-$iA = Array();
-$uA = Array();
-$fA = Array();
-for( $i=0; $row = pg_fetch_array($result); $i++) 
-{
-  /* Save the drama! */
-  if ($filter && $row["wfo"] != $site) continue; 
+$wA = array();
+$iA = array();
+$uA = array();
+$fA = array();
+for ($i = 0; $row = pg_fetch_array($result); $i++) {
+    /* Save the drama! */
+    if ($filter && $row["wfo"] != $site) continue;
 
-  /* key is wfo_state_vtecP_vtecE_vtecSig_expire_status */
-  $key = sprintf("%s|%s|%s|%s|%s|%s|%s", $row["wfo"], $row["sname"], 
-     $row["phenomena"], $row["eventid"], $row["significance"], $row["expire"],
-     $row["status"]);
+    /* key is wfo_state_vtecP_vtecE_vtecSig_expire_status */
+    $key = sprintf(
+        "%s|%s|%s|%s|%s|%s|%s",
+        $row["wfo"],
+        $row["sname"],
+        $row["phenomena"],
+        $row["eventid"],
+        $row["significance"],
+        $row["expire"],
+        $row["status"]
+    );
 
-  $iA[$key] = $row["issue"];
-  $uA[$key] = $row["updated"];
-  $fA[$key] = $row["fcster"];
-  if (!array_key_exists($key, $wA)){
-      $wA[$key] = "";
-  }
-  $wA[$key] .= "<a href=\"warnings.phtml?archive=$archive&$baseuri?tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&tzoff=$tzoff&sortdir=$sortdir&loop=$loop&sortcol=$sortcol&c=yes&lon0=". $row["lon0"] ."&lat0=". $row["lat0"] ."&warngeo=$warngeo\">". $row["cname"] ."</a>, ";
+    $iA[$key] = $row["issue"];
+    $uA[$key] = $row["updated"];
+    $fA[$key] = $row["fcster"];
+    if (!array_key_exists($key, $wA)) {
+        $wA[$key] = "";
+    }
+    $wA[$key] .= "<a href=\"warnings.phtml?archive=$archive&$baseuri?tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&tzoff=$tzoff&sortdir=$sortdir&loop=$loop&sortcol=$sortcol&c=yes&lon0=" . $row["lon0"] . "&lat0=" . $row["lat0"] . "&warngeo=$warngeo\">" . $row["cname"] . "</a>, ";
 }
 
 /* Now we loop thru aggregated warnings */
-foreach($wA as $key => $val)
-{
-  $tokens = explode("|", $key);
-  $wfo = $tokens[0];
-  $sname = $tokens[1];
-  $phenomena = $tokens[2];
-  $eventid = $tokens[3];
-  $significance = $tokens[4];
-  $expire = $tokens[5];
-  $status = $tokens[6];
+foreach ($wA as $key => $val) {
+    $tokens = explode("|", $key);
+    $wfo = $tokens[0];
+    $sname = $tokens[1];
+    $phenomena = $tokens[2];
+    $eventid = $tokens[3];
+    $significance = $tokens[4];
+    $expire = $tokens[5];
+    $status = $tokens[6];
 
-  $warningscat = "warnings_cat.phtml?year=$year&wfo=$wfo&phenomena=$phenomena&eventid=$eventid&significance=$significance";
+    $warningscat = "warnings_cat.phtml?year=$year&wfo=$wfo&phenomena=$phenomena&eventid=$eventid&significance=$significance";
 
-  $k += 1;
-  $issue = strtotime($iA[$key]) - $tzoff;
-  $expire = strtotime($expire) - $tzoff;
-  $updated = strtotime($uA[$key]) - $tzoff;
-  $resetApp = "$uri_nowfo&tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&archive=$archive&tzoff=$tzoff&site=$wfo";
+    $k += 1;
+    $issue = strtotime($iA[$key]) - $tzoff;
+    $expire = strtotime($expire) - $tzoff;
+    $updated = strtotime($uA[$key]) - $tzoff;
+    $resetApp = "$uri_nowfo&tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&archive=$archive&tzoff=$tzoff&site=$wfo";
 
-  $content .= "<div class=\"wwa-state\">$sname</div><div class=\"wwa$significance\"><span style=\"font-size: 14pt;\">". $vtec_phenomena[$phenomena] ." ". $vtec_significance[$significance] ."</span> (<a href=\"$warningscat\">View Text</a>) expires ". strftime($dformat, $expire) ." by <a href=\"$resetApp\">$wfo</a> (". $fA[$key] .")<br />". $wA[$key] ."in $sname  <br /><div class=\"vtec\">VTEC# $eventid ($status)</div><div class=\"issued\">Issued: ".strftime($dformat, $issue) ."</div><div class=\"updated\">Updated: ".  strftime($dformat, $updated) ."</div>&nbsp;</div>\n";
-
-
+    $content .= "<div class=\"wwa-state\">$sname</div><div class=\"wwa$significance\"><span style=\"font-size: 14pt;\">" . $vtec_phenomena[$phenomena] . " " . $vtec_significance[$significance] . "</span> (<a href=\"$warningscat\">View Text</a>) expires " . strftime($dformat, $expire) . " by <a href=\"$resetApp\">$wfo</a> (" . $fA[$key] . ")<br />" . $wA[$key] . "in $sname  <br /><div class=\"vtec\">VTEC# $eventid ($status)</div><div class=\"issued\">Issued: " . strftime($dformat, $issue) . "</div><div class=\"updated\">Updated: " .  strftime($dformat, $updated) . "</div>&nbsp;</div>\n";
 }
-if ($k == 0 && $filter){
- $msg = "<p>No warnings currently valid for ". $nt->table[$site]["name"] ;
+if ($k == 0 && $filter) {
+    $msg = "<p>No warnings currently valid for " . $nt->table[$site]["name"];
 } else if ($k == 0) {
- $msg = "<p>No warnings valid in the United States";
+    $msg = "<p>No warnings valid in the United States";
 }
-if ($k == 0){
-  $content .= $msg;
+if ($k == 0) {
+    $content .= $msg;
 }
 
 $content .= "<div style=\"clear: both;\">";
-if (! $isarchive) { 
-  $content .= "<img src=\"/images/gisready.png\">Download <a href=\"/data/gis/shape/unproj/us/current_ww.zip\">GIS shapefile of current warnings</a> and/or <a href=\"/data/gis/images/4326/USCOMP/n0r_0.gtif.Z\">GeoTiff of NEXRAD base reflectivity</a>.";
-} 
+if (!$isarchive) {
+    $content .= "<img src=\"/images/gisready.png\">Download <a href=\"/data/gis/shape/unproj/us/current_ww.zip\">GIS shapefile of current warnings</a> and/or <a href=\"/data/gis/images/4326/USCOMP/n0r_0.gtif.Z\">GeoTiff of NEXRAD base reflectivity</a>.";
+}
 $content .= <<<EOF
 <font size="-1">
 <p><b>Notes:</b>

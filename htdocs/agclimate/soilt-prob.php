@@ -133,14 +133,14 @@ is not considered.</div>
 
 <div class="row"><div class="col-md-6">
 
- <h3>Spring Probabilities<br />Given date to July 1rst</h3>
- {$spring}
+<h3>Spring Probabilities<br />Given date to July 1rst</h3>
+{$spring}
 
- </div><div class="col-md-6">
+</div><div class="col-md-6">
 
- <h3>Fall Probabilities<br />July 1rst to given date</h3>
- {$fall}
+<h3>Fall Probabilities<br />July 1rst to given date</h3>
+{$fall}
 
- </div></div>
+</div></div>
 EOF;
 $t->render('single.phtml');

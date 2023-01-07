@@ -11,15 +11,15 @@ require_once "../../../../include/forms.php";
 $t = new MyView();
 
 $county = isset($_GET['county']) ? xssafe($_GET["county"]) : "";
-$cntyext = isset($_GET['cntyext']) ? $_GET["cntyext"] : "";
-$ul_x = isset($_GET["ul_x"]) ? $_GET["ul_x"] : "";
-$ul_y = isset($_GET["ul_y"]) ? $_GET["ul_y"] : "";
-$lr_x = isset($_GET["lr_x"]) ? $_GET["lr_x"] : "";
-$lr_y = isset($_GET["lr_y"]) ? $_GET["lr_y"] : "";
-$map_x = isset($_GET["map_x"]) ? $_GET["map_x"] : "";
-$map_y = isset($_GET["map_y"]) ? $_GET["map_y"] : "";
-$map_height = isset($_GET["map_height"]) ? $_GET["map_height"] : "";
-$map_width = isset($_GET["map_width"]) ? $_GET["map_width"] : "";
+$cntyext = isset($_GET['cntyext']) ? xssafe($_GET["cntyext"]) : "";
+$ul_x = isset($_GET["ul_x"]) ? xssafe($_GET["ul_x"]) : "";
+$ul_y = isset($_GET["ul_y"]) ? xssafe($_GET["ul_y"]) : "";
+$lr_x = isset($_GET["lr_x"]) ? xssafe($_GET["lr_x"]) : "";
+$lr_y = isset($_GET["lr_y"]) ? xssafe($_GET["lr_y"]) : "";
+$map_x = isset($_GET["map_x"]) ? xssafe($_GET["map_x"]) : "";
+$map_y = isset($_GET["map_y"]) ? xssafe($_GET["map_y"]) : "";
+$map_height = isset($_GET["map_height"]) ? xssafe($_GET["map_height"]) : "";
+$map_width = isset($_GET["map_width"]) ? xssafe($_GET["map_width"]) : "";
 
 if ($ul_x != "") {
     $dx = ($ul_x - $lr_x) / $map_width;

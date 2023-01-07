@@ -12,52 +12,42 @@ $conn = iemdb("mesosite");
 /* First, we need some GET vars */
 $network = isset($_GET["network"])
     ? substr($_GET["network"], 0, 4) : die("No \$network Set");
-$ts = 0;
+$ts = null;
 if ($network == "KCRG") {
     $cameras["KCCI-017"]["network"] = "KCRG";
 }
 
 if (isset($_GET["ts"]) && $_GET["ts"] != "0") {
-    $q = strptime($_GET["ts"], '%Y%m%d%H%M');
-    $ts = gmmktime(
-        $q["tm_hour"],
-        $q["tm_min"],
-        0,
-        1 + $q["tm_mon"],
-        $q["tm_mday"],
-        1900 + $q["tm_year"]
-    );
-}
-/* Now, we need to figure out if we are in realtime or archive mode */
-if (time() - $ts < 300) {
-    $ts = 0;
+    $ts = DateTime::createFromFormat('%Y%m%d%H%M', $_GET["ts"]);
 }
 
-if ($ts > 0) { /* If we are in archive mode and requesting a non 5 minute interval,
-     what shall we do? Lets check for entries in the database */
+if (! is_null($ts)) {
+    // If we are in archive mode and requesting a non 5 minute interval,
+    // what shall we do? Lets check for entries in the database
     $sql = sprintf(
         "SELECT * from camera_log WHERE valid = '%s'",
-        strftime("%Y-%m-%d %H:%M", $ts)
+        $ts->format("Y-m-d H:i")
     );
     $rs = pg_exec($conn, $sql);
     if (pg_num_rows($rs) == 0) {
-        $ts = $ts - (intval(date("i", $ts)) % 5 * 60);
+        $mins = intval($ts->format("i")) % 5;
+        $ts = $ts->sub(new DateInterval("{$mins}i"));
         $sql = sprintf(
             "SELECT * from camera_log WHERE valid = '%s'",
-            strftime("%Y-%m-%d %H:%M", $ts)
+            $ts->format("Y-m-d H:i")
         );
         $rs = pg_exec($conn, $sql);
     }
 
     /* Now we compute the RADAR timestamp, yippee */
-    $radts = $ts - (intval(date("i", $ts)) % 5 * 60);
+    $mins = intval($ts->format("i")) % 5;
+    $radts = $ts->sub(new DateInterval("P{$mins}i"));
 } else {
     $sql = "SELECT * from camera_current WHERE valid > (now() - '30 minutes'::interval)";
     $rs = pg_exec($conn, $sql);
-    $radts = time() - 60 - (intval(date("i", time() - 60)) % 5 * 60);
-}
-if ($ts == 0) {
-    $ts = time();
+    $radts = new DateTime();
+    $mins = intval($radts->format("i")) % 5;
+    $radts = $radts->sub(new DateInterval("P{$mins}i"));
 }
 
 /* Who was online and where did they look?  Hehe */
@@ -91,8 +81,8 @@ $counties->__set("status", 1);
 
 $c0 = $map->getlayerbyname("sbw");
 $c0->__set("status", MS_ON);
-$db_ts = gmstrftime("%Y-%m-%d %H:%M+00", $ts);
-$year = date("Y", $ts);
+$db_ts = $ts->format("Y-m-d H:i");
+$year = $ts->format("Y");
 $c0->__set("data", "geom from "
     . " (select significance, phenomena, geom, random() as oid from sbw_$year "
     . " WHERE polygon_end > '$db_ts' and polygon_begin <= '$db_ts' and "
@@ -173,7 +163,7 @@ $d = date("m/d/Y h:i A", $radts);
 $layer = $map->getLayerByName("credits");
 $point = new pointobj();
 $point->setXY(5, $y);
-$point->draw($map, $layer, $img, 0,  "${title}: $d");
+$point->draw($map, $layer, $img, 0,  "{$title}: $d");
 
 $map->drawLabelCache($img);
 

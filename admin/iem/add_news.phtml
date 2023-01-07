@@ -6,19 +6,21 @@ include("../../include/myview.php");
 $t = new MyView();
 
 $title = isset($_POST["title"]) ? $_POST["title"] : "";
-$body = isset($_POST["body"]) ? $_POST["body"]: "";
-$author = isset($_POST["author"]) ? $_POST["author"]: "";
-$url = isset($_POST["url"]) ? $_POST["url"]: "";
-$tags = isset($_REQUEST["tags"]) ? explode(",", $_REQUEST["tags"]): Array();
+$body = isset($_POST["body"]) ? $_POST["body"] : "";
+$author = isset($_POST["author"]) ? $_POST["author"] : "";
+$url = isset($_POST["url"]) ? $_POST["url"] : "";
+$tags = isset($_REQUEST["tags"]) ? explode(",", $_REQUEST["tags"]) : array();
 
 $msg = "";
 if (strlen($title) > 0) {
- $conn = iemdb("mesosite", TRUE, TRUE);
- $rs = pg_prepare($conn, "INJECTOR", "INSERT into 
+    $conn = iemdb("mesosite", TRUE, TRUE);
+    $rs = pg_prepare($conn, "INJECTOR", "INSERT into 
        news(body, author, title, url, tags) VALUES ($1,$2,$3,$4, $5)");
- pg_execute($conn, "INJECTOR", Array(str_replace("\r", "", $body), 
- 	$author, $title, $url, "{". join(",",$tags) ."}"));
- $msg = "Story entered!";
+    pg_execute($conn, "INJECTOR", array(
+        str_replace("\r", "", $body),
+        $author, $title, $url, "{" . join(",", $tags) . "}"
+    ));
+    $msg = "Story entered!";
 }
 
 $t->title = "Add News Item";
@@ -26,8 +28,8 @@ $t->title = "Add News Item";
 $t->jsextra = "
 <script>
 $('#testhtml').click(function(){
-		$('#testhtml_target').html($('#story').val());
-		});
+    $('#testhtml_target').html($('#story').val());
+});
 </script>
 ";
 
@@ -48,16 +50,15 @@ $t->content = <<<EOF
 
 <p>Tags (comma seperated)
 <input type="text" name="tags" />
-		
+
 <p>Post Story:
  <input type="submit">
  <input type="reset">
  <a class="btn btn-default" role="button" id="testhtml">Preview</a>
-		
+
 </form>
 
 <div id="testhtml_target"></div>
 
 EOF;
 $t->render('single.phtml');
-?>

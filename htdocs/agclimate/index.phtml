@@ -10,8 +10,8 @@ $t = new MyView();
 $t->title = "ISU Soil Moisture Network";
 
 $t->jsextra = <<<EOF
-<script src="/vendor/openlayers/${OL}/ol.js"></script>
-<script src="/vendor/openlayers/${OL}/ol-layerswitcher.js"></script>
+<script src="/vendor/openlayers/{$OL}/ol.js"></script>
+<script src="/vendor/openlayers/{$OL}/ol-layerswitcher.js"></script>
 <script src="/vendor/jquery-ui/1.11.4/jquery-ui.js"></script>
 <script src="dataexplorer.js"></script>
 <script src="/vendor/jquery-ui-timepicker/1.5.3/jquery-ui-timepicker-addon.js"></script>
@@ -27,8 +27,8 @@ $dt->modify('-' . ($dt->format('i') % 5) . ' minutes');
 
 $dt = $dt->format("Y/m/d H:i");
 $t->headextra = <<<EOF
-<link rel="stylesheet" type="text/css" href="/vendor/openlayers/${OL}/ol.css"/ >
-<link rel="stylesheet" type="text/css" href="/vendor/openlayers/${OL}/ol-layerswitcher.css"/ >
+<link rel="stylesheet" type="text/css" href="/vendor/openlayers/{$OL}/ol.css"/ >
+<link rel="stylesheet" type="text/css" href="/vendor/openlayers/{$OL}/ol-layerswitcher.css"/ >
 <link rel="stylesheet" type="text/css" href="/vendor/jquery-ui-timepicker/1.5.3/jquery-ui-timepicker-addon.css"/ >
 <link rel="stylesheet" type="text/css" href="/vendor/jquery-ui/1.11.4/jquery-ui.min.css"/ >
 <script>

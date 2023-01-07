@@ -12,11 +12,11 @@ $t->iemss = True;
 $t->title = "Terminal Aerodome Forecast (TAF) Data Download";
 
 $bogus = 0;
-$y1select = yearSelect2(2021, date("Y"), "year1");
+$y1select = yearSelect2(1996, date("Y"), "year1");
 $m1select = monthSelect(1, "month1");
 $d1select = daySelect2(1, "day1");
 
-$y2select = yearSelect2(2021, date("Y"), "year2");
+$y2select = yearSelect2(1996, date("Y"), "year2");
 $m2select = monthSelect(date("m"), "month2");
 $d2select = daySelect2(date("d"), "day2");
 
@@ -40,7 +40,7 @@ Aerodome Forecasts (TAF)s.  This page allows an atomic data download of the
 processed data.  If you are wishing to download the raw NWS text TAF data,
 try looking <a href="/wx/afos/p.php?pil=TAFDSM">here</a> as a starting point.</p>
 
-<p>The TAF archive dates back to 23 March 2021.</p>
+<p>The TAF archive dates back to 1 January 1996.</p>
 
 <p><strong>Related:</strong>
 <a class="btn btn-primary" href="/request/gis/cwas.phtml">CWSU Center Weather Advisories</a>

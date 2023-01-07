@@ -197,8 +197,8 @@ $ar = array(
 $intselect = make_select("interval", $interval, $ar);
 
 $start = intval(1995);
-$now = time();
-$tyear = strftime("%Y", $now);
+$now = new DateTime();
+$tyear = $now->format("Y");
 $dateselect = "<select name='year' onChange=\"javascript: switchToArchiveMode(); \">\n";
 for ($i = $start; $i <= $tyear; $i++) {
     $dateselect .= "<option value='" . $i . "' ";
@@ -209,10 +209,10 @@ $dateselect .= "</select>\n";
 
 $dateselect .= "<select name='month' onChange=\"javascript: switchToArchiveMode(); \">\n";
 for ($i = 1; $i <= 12; $i++) {
-    $ts = mktime(0, 0, 0, $i, 1, 0);
+    $ts = new DateTime("2000-$i-01");
     $dateselect .= "<option value='" . $i . "' ";
     if ($i == intval($month)) $dateselect .= "SELECTED";
-    $dateselect .= ">" . strftime("%b", $ts) . "\n";
+    $dateselect .= ">" . $ts->format("M") . "\n";
 }
 $dateselect .= "</select>\n";
 
@@ -229,16 +229,16 @@ $dateselect .= "</select>\n";
 
 $timeselect = "<select name='hour'  onChange=\"javascript: switchToArchiveMode(); \">\n";
 for ($i = 0; $i < 24; $i++) {
-    $ts = mktime($i, 0, 0, 1, 1, 0);
-    $timeselect .= "<option value='" . $i . "' ";
+    $ts = new DateTime("2000-01-01 $i:00");
+    $timeselect .= "<option value='{$i}' ";
     if ($i == intval($hour)) $timeselect .= "SELECTED";
-    $timeselect .= ">" . strftime("%I %p", $ts) . "\n";
+    $timeselect .= ">" . $ts->format("I A") . "\n";
 }
 $timeselect .= "</select>\n";
 
 $timeselect .= "<select name='minute' onChange=\"javascript: switchToArchiveMode(); \">\n";
 for ($i = 0; $i < 60; $i = $i + 5) {
-    $timeselect .= "<option value='" . $i . "' ";
+    $timeselect .= "<option value='{$i}' ";
     if ($i == intval($minute)) $timeselect .= "SELECTED";
     $timeselect .= sprintf(">%02d\n", $i);
 }
@@ -292,11 +292,11 @@ EOM;
 
 $radlinks = "";
 foreach ($radtimes as $value) {
-    $myhref = "/archive/data/" . gmdate('Y/m/d/', $value) . "GIS/uscomp/${gissource}_" . gmdate('YmdHi', $value) . ".png";
+    $myhref = "/archive/data/" . gmdate('Y/m/d/', $value) . "GIS/uscomp/{$gissource}_" . gmdate('YmdHi', $value) . ".png";
     $myhref2 = "https://mesonet.agron.iastate.edu{$myhref}";
     $radlinks .= "<li><a href='$myhref'>$myhref2</a> " .
-        "(<a href='/request/gis/${gissource}2gtiff.php?dstr=" . gmdate('YmdHi', $value) . "'>GeoTiff</a> or " .
-        "<a href=\"/cgi-bin/request/raster2netcdf.py?dstr=" . gmdate('YmdHi', $value) . "&prod=composite_${gissource}\">netCDF</a>)</li>\n";
+        "(<a href='/request/gis/{$gissource}2gtiff.php?dstr=" . gmdate('YmdHi', $value) . "'>GeoTiff</a> or " .
+        "<a href=\"/cgi-bin/request/raster2netcdf.py?dstr=" . gmdate('YmdHi', $value) . "&prod=composite_{$gissource}\">netCDF</a>)</li>\n";
 }
 
 
