@@ -56,10 +56,8 @@ $stationString .= ")";
 if (isset($_GET["day"]))
     die("Incorrect CGI param, use day1, day2");
 
-$ts1 = mktime($hour1, $minute1, 0, $month1, $day1, $year1) or
-    die("Invalid Date Format");
-$ts2 = mktime($hour2, $minute2, 0, $month2, $day2, $year2) or
-    die("Invalid Date Format");
+$ts1 = new DateTime("{$year1}-{$month1}-{$day1} {$hour1}:{$minute1}");
+$ts2 = new DateTime("{$year2}-{$month2}-{$day2} {$hour2}:{$minute2}");
 
 $num_vars = count($vars);
 if ($num_vars == 0)  die("You did not specify data");
@@ -69,10 +67,10 @@ for ($i = 0; $i < $num_vars; $i++) {
     $sqlStr .= substr($vars[$i], 0, 11) . " as var" . $i . ", ";
 }
 
-$sqlTS1 = strftime("%Y-%m-%d %H:%M", $ts1);
-$sqlTS2 = strftime("%Y-%m-%d %H:%M", $ts2);
-$table = strftime("alldata_1minute");
-$nicedate = strftime("%Y-%m-%d", $ts1);
+$sqlTS1 = $ts1->format("Y-m-d H:i");
+$sqlTS2 = $ts2->format("Y-m-d H:i");
+$table = "alldata_1minute";
+$nicedate = $ts1->format("Y-m-d");
 
 $sampleStr = array(
     "1min" => "1",
@@ -111,9 +109,9 @@ $rs = pg_execute($dbconn, "SELECT", array());
 pg_close($dbconn);
 
 if ($gis == "yes") {
-    echo "station,station_name,lat,lon,valid(${tz}),";
+    echo "station,station_name,lat,lon,valid({$tz}),";
 } else {
-    echo "station,station_name,valid(${tz}),";
+    echo "station,station_name,valid({$tz}),";
 }
 for ($j = 0; $j < $num_vars; $j++) {
     echo $vars[$j] . $d[$delim];

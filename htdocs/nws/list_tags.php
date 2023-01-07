@@ -278,7 +278,7 @@ $t->content = <<<EOF
  that provides the data found in this table.  The direct URL is:<br />
  <code>{$publicjsonuri}</code></div>
  
- <p><strong>This table is based on data generated at: ${gentime}</strong>.  There is about
+ <p><strong>This table is based on data generated at: {$gentime}</strong>.  There is about
  an hour worth of caching involved with this page, so please check back later for updated
  values.</p>
  

@@ -41,13 +41,14 @@ if (! is_null($ts)) {
 
     /* Now we compute the RADAR timestamp, yippee */
     $mins = intval($ts->format("i")) % 5;
-    $radts = $ts->sub(new DateInterval("P{$mins}i"));
+    $radts = $ts->sub(new DateInterval("PT{$mins}M"));
 } else {
+    $ts = new DateTime();
     $sql = "SELECT * from camera_current WHERE valid > (now() - '30 minutes'::interval)";
     $rs = pg_exec($conn, $sql);
     $radts = new DateTime();
     $mins = intval($radts->format("i")) % 5;
-    $radts = $radts->sub(new DateInterval("P{$mins}i"));
+    $radts = $radts->sub(new DateInterval("PT{$mins}M"));
 }
 
 /* Who was online and where did they look?  Hehe */
@@ -92,7 +93,8 @@ $c0->__set("data", "geom from "
 
 $radar = $map->getlayerbyname("nexrad_n0q");
 $radar->__set("status", MS_ON);
-$fp = "/mesonet/ARCHIVE/data/" . gmdate('Y/m/d/', $radts) . "GIS/uscomp/n0r_" . gmdate('YmdHi', $radts) . ".png";
+$radts->setTimezone(new DateTimeZone("UTC"));
+$fp = "/mesonet/ARCHIVE/data/" . $radts->format('Y/m/d/') . "GIS/uscomp/n0r_" . $radts->format('YmdHi') . ".png";
 if (file_exists($fp)) {
     $radar->__set("data", $fp);
     $title = "RADAR";
@@ -158,7 +160,7 @@ foreach ($cdrct as $key => $drct) {
         $pt->draw($map, $cp, $img, 1, 'a');
     }
 }
-$d = date("m/d/Y h:i A", $radts);
+$d = $ts->format("m/d/Y h:i A");
 
 $layer = $map->getLayerByName("credits");
 $point = new pointobj();

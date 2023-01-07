@@ -5,7 +5,7 @@ $t = new MyView();
 require_once "../../include/database.inc.php";
 require_once "../../include/forms.php";
 $dbconn = iemdb("iem");
-$sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']): 'valid';
+$sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']) : 'valid';
 
 /* Query out the data */
 $rs = pg_prepare($dbconn, "SELECT", "select t.valid, s.name as sname,
@@ -27,59 +27,77 @@ $rs = pg_prepare($dbconn, "SELECT", "select t.valid, s.name as sname,
       from rwis_soil_data t, stations s
       where s.remote_id = t.location_id GROUP by sname, valid
       ORDER by $sortcol DESC NULLS LAST");
-$rs = pg_execute($dbconn, "SELECT", Array());
+$rs = pg_execute($dbconn, "SELECT", array());
 
- $t->title = "RWIS Current Soil Probe Data";
- $t->refresh = 600;
+$t->title = "RWIS Current Soil Probe Data";
+$t->refresh = 600;
 
- $t->current_network = "RWIS Soil"; 
+$t->current_network = "RWIS Soil";
 
- function fancytime($strtime){
- 	$now = time();
- 	$ts = strtotime($strtime);
- 	if (($now - $ts) < 600){ return date("h:i A", $ts); }
- 	else { return date("M d h:i A", $ts); }
- }
- function f($val){
-     return $val;
- }
- $vals = Array(
-"sname" => "Station Name",
-"valid" => "Observation Time",
-"tmpf_1in" => "1 inch Depth Temperature",
-"tmpf_3in" => "3 inch Depth Temperature",
-"tmpf_6in" => "6 inch Depth Temperature",
-"tmpf_9in" => "9 inch Depth Temperature",
-"tmpf_12in" => "12 inch Depth Temperature",
-"tmpf_18in" => "18 inch Depth Temperature",
-"tmpf_24in" => "24 inch Depth Temperature",
-"tmpf_30in" => "30 inch Depth Temperature",
-"tmpf_36in" => "36 inch Depth Temperature",
-"tmpf_42in" => "42 inch Depth Temperature",
-"tmpf_48in" => "48 inch Depth Temperature",
-"tmpf_54in" => "54 inch Depth Temperature",
-"tmpf_60in" => "60 inch Depth Temperature",
-"tmpf_66in" => "66 inch Depth Temperature",
-"tmpf_72in" => "72 inch Depth Temperature",
- );
- 
- $data = Array();
- $table  = "";
- for($i=0;$row=pg_fetch_array($rs);$i++){
- 	$table .= sprintf("<tr><th>%s</th><th>%s</th>
+function fancytime($strtime)
+{
+    $now = time();
+    $ts = strtotime($strtime);
+    if (($now - $ts) < 600) {
+        return date("h:i A", $ts);
+    } else {
+        return date("M d h:i A", $ts);
+    }
+}
+function f($val)
+{
+    return $val;
+}
+$vals = array(
+    "sname" => "Station Name",
+    "valid" => "Observation Time",
+    "tmpf_1in" => "1 inch Depth Temperature",
+    "tmpf_3in" => "3 inch Depth Temperature",
+    "tmpf_6in" => "6 inch Depth Temperature",
+    "tmpf_9in" => "9 inch Depth Temperature",
+    "tmpf_12in" => "12 inch Depth Temperature",
+    "tmpf_18in" => "18 inch Depth Temperature",
+    "tmpf_24in" => "24 inch Depth Temperature",
+    "tmpf_30in" => "30 inch Depth Temperature",
+    "tmpf_36in" => "36 inch Depth Temperature",
+    "tmpf_42in" => "42 inch Depth Temperature",
+    "tmpf_48in" => "48 inch Depth Temperature",
+    "tmpf_54in" => "54 inch Depth Temperature",
+    "tmpf_60in" => "60 inch Depth Temperature",
+    "tmpf_66in" => "66 inch Depth Temperature",
+    "tmpf_72in" => "72 inch Depth Temperature",
+);
+
+$data = array();
+$table  = "";
+for ($i = 0; $row = pg_fetch_array($rs); $i++) {
+    $table .= sprintf(
+        "<tr><th>%s</th><th>%s</th>
    <td>%s</td><td>%s</td><td>%s</td><td>%s</td>
    <td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>
    <td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>
    <td>%s</td></tr>\n",
-    $row["sname"], fancytime($row["valid"]),
-    f($row["tmpf_1in"]), f($row["tmpf_3in"]), f($row["tmpf_6in"]),
-    f($row["tmpf_9in"]), f($row["tmpf_12in"]), f($row["tmpf_18in"]),
-    f($row["tmpf_24in"]), f($row["tmpf_30in"]), f($row["tmpf_36in"]),
-    f($row["tmpf_42in"]), f($row["tmpf_48in"]), f($row["tmpf_54in"]),
-    f($row["tmpf_60in"]), f($row["tmpf_66in"]), f($row["tmpf_72in"]));
- }
- 
- $t->content = <<<EOF
+        $row["sname"],
+        fancytime($row["valid"]),
+        f($row["tmpf_1in"]),
+        f($row["tmpf_3in"]),
+        f($row["tmpf_6in"]),
+        f($row["tmpf_9in"]),
+        f($row["tmpf_12in"]),
+        f($row["tmpf_18in"]),
+        f($row["tmpf_24in"]),
+        f($row["tmpf_30in"]),
+        f($row["tmpf_36in"]),
+        f($row["tmpf_42in"]),
+        f($row["tmpf_48in"]),
+        f($row["tmpf_54in"]),
+        f($row["tmpf_60in"]),
+        f($row["tmpf_66in"]),
+        f($row["tmpf_72in"])
+    );
+}
+
+$t->content = <<<EOF
 <h3>Iowa RWIS Soil Probe Data</h3>
 
 <p>** This page will automatically refresh every 10 minutes.

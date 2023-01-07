@@ -13,7 +13,7 @@ $t->title = "SCAN Sortable Currents";
 $t->refresh = 3600;
 
 function make_link($sid){
-	return sprintf("/sites/site.php?network=SCAN&station=%s", $sid);
+    return sprintf("/sites/site.php?network=SCAN&station=%s", $sid);
 }
 
 
@@ -26,19 +26,19 @@ $jobj = iemws_json("currents.json", $arr);
 foreach($jobj["data"] as $bogus => $iemob){
     $key = $iemob["station"];
     $mydata[$key] = $iemob;
-	$mydata[$key]["ts"] = strtotime($iemob["local_valid"]);
-	$mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
-	$mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]),
-			f2c($mydata[$key]["dwpf"]) );
-	if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
-		$mydata[$key]["peak"] = $mydata[$key]["max_gust"];
-		$mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_gust_ts"]);
-	} else {
-		$mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
-		if ($mydata[$key]["local_max_sknt_ts"]){
-			$mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_sknt_ts"]);
-		}
-	}
+    $mydata[$key]["ts"] = new DateTime($iemob["local_valid"]);
+    $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
+    $mydata[$key]["relh"] = relh(f2c($mydata[$key]["tmpf"]),
+            f2c($mydata[$key]["dwpf"]) );
+    if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]){
+        $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
+        $mydata[$key]["peak_ts"] = new DateTime($mydata[$key]["local_max_gust_ts"]);
+    } else {
+        $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
+        if ($mydata[$key]["local_max_sknt_ts"]){
+            $mydata[$key]["peak_ts"] = new DateTime($mydata[$key]["local_max_sknt_ts"]);
+        }
+    }
 
 }
 
@@ -49,33 +49,33 @@ $now = time();
 $t1 = "";
 // Loop though all data
 foreach($finalA as $key => $val){
-	$parts = $finalA[$key];
-	$i++;
-	$tdiff = $now - $parts["ts"];
-	// Don't show stations over 5 days old
-	if ($tdiff > 86400*5){
-		continue;
-	}
-	$t1 .= "<tr";
-	if ($i % 2 == 0)  $t1 .= " bgcolor='#eeeeee'";
+    $parts = $finalA[$key];
+    $i++;
+    $tdiff = $now - $parts["ts"];
+    // Don't show stations over 5 days old
+    if ($tdiff > 86400*5){
+        continue;
+    }
+    $t1 .= "<tr";
+    if ($i % 2 == 0)  $t1 .= " bgcolor='#eeeeee'";
 
-	$t1 .= ">";
-	$t1 .= "<td><input type=\"checkbox\" name=\"st[]\"
+    $t1 .= ">";
+    $t1 .= "<td><input type=\"checkbox\" name=\"st[]\"
                value=\"".$key."\"></td>";
-	$t1 .= "<td><a href=\"". make_link($key) ."\">". $cities[$key]["name"] . "</a></td><td ";
-	if ($tdiff > 11900){
-		$t1 .= 'bgcolor="red"';
-		$format = "%b-%d-%y %I:%M %p";
-	} else if ($tdiff > 9600){
-		$t1 .= 'bgcolor="orange"';
-		$format = "%I:%M %p";
-	} else if ($tdiff > 7200){
-		$t1 .= 'bgcolor="green"';
-		$format = "%I:%M %p";
-	} else {
-		$format = "%I:%M %p";
-	}
-	$t1 .= ">". strftime($format, $parts["ts"]) ."</td>
+    $t1 .= "<td><a href=\"". make_link($key) ."\">". $cities[$key]["name"] . "</a></td><td ";
+    if ($tdiff > 11900){
+        $t1 .= 'bgcolor="red"';
+        $format = "B-d-Y h:i A";
+    } else if ($tdiff > 9600){
+        $t1 .= 'bgcolor="orange"';
+        $format = "h:i A";
+    } else if ($tdiff > 7200){
+        $t1 .= 'bgcolor="green"';
+        $format = "h:i A";
+    } else {
+        $format = "h:i A";
+    }
+    $t1 .= ">". $parts["ts"]->format($format) ."</td>
   <td align='center'>". round($parts["tmpf"],0) ."(<font color=\"#ff0000\">".
   round($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">".
   round($parts["min_tmpf"],0) ."</font>)</td>
@@ -83,51 +83,51 @@ foreach($finalA as $key => $val){
  <td>". round($parts["feel"], 0) ."</td>
  <td>". $parts["relh"] ."</td>
  <td>". round($parts["sknt"],0) ;
-	if (strlen($parts["gust"]) > 0 && $parts["gust"] > 0){
-		$t1 .= "G". $parts["gust"];
-	}
-	$t1 .= "</td><td>". round($parts["drct"],0) ."</td>";
-	$t1 .= "<td>";
-	if (array_key_exists("peak_ts", $parts)){
-		$t1 .= round($parts["peak"],0) ."@ ". strftime("%I:%M %p", $parts["peak_ts"]) ;
-	}	
-	$t1 .= "</td><td>". round($parts["srad"],0) ."</td></tr>";
+    if (strlen($parts["gust"]) > 0 && $parts["gust"] > 0){
+        $t1 .= "G". $parts["gust"];
+    }
+    $t1 .= "</td><td>". round($parts["drct"],0) ."</td>";
+    $t1 .= "<td>";
+    if (array_key_exists("peak_ts", $parts)){
+        $t1 .= round($parts["peak"],0) ."@ ". $parts["peak_ts"]->format("h:i P") ;
+    }	
+    $t1 .= "</td><td>". round($parts["srad"],0) ."</td></tr>";
 }
 
 $t2 = "";
 $n = $finalA;
 foreach($n as $key => $parts){
-	$tdiff = $now - $parts["ts"];
-	// Don't show stations over 5 days old
-	if ($tdiff > 86400*5){
-		continue;
-	}
-	$i++;
-	$t2 .= "<tr";
-	if ($i % 2 == 0)  $t2 .= " bgcolor='#eeeeee'";
+    $tdiff = $now - $parts["ts"];
+    // Don't show stations over 5 days old
+    if ($tdiff > 86400*5){
+        continue;
+    }
+    $i++;
+    $t2 .= "<tr";
+    if ($i % 2 == 0)  $t2 .= " bgcolor='#eeeeee'";
 
-	$t2 .= ">";
-	$t2 .= "<td><a href=\"". make_link($key) ."\">". $cities[$key]["name"] . "</a></td></td><td ";
-	if ($tdiff > 11900){
-		$t2 .= 'bgcolor="red"';
-		$format = "%b-%d-%y %I:%M %p";
-	} else if ($tdiff > 9600){
-		$t2 .= 'bgcolor="orange"';
-		$format = "%I:%M %p";
-	} else if ($tdiff > 7200){
-		$t2 .= 'bgcolor="green"';
-		$format = "%I:%M %p";
-	} else {
-		$format = "%I:%M %p";
-	}
-	$t2 .= ">". strftime($format, $parts["ts"]) ."</td>
+    $t2 .= ">";
+    $t2 .= "<td><a href=\"". make_link($key) ."\">". $cities[$key]["name"] . "</a></td></td><td ";
+    if ($tdiff > 11900){
+        $t2 .= 'bgcolor="red"';
+        $format = "M-d-Y h:i P";
+    } else if ($tdiff > 9600){
+        $t2 .= 'bgcolor="orange"';
+        $format = "h:i P";
+    } else if ($tdiff > 7200){
+        $t2 .= 'bgcolor="green"';
+        $format = "h:i P";
+    } else {
+        $format = "h:i P";
+    }
+    $t2 .= ">". $parts["ts"]->format($format) ."</td>
     <td>". round($parts["c1smv"],0) ."</td><td>". round($parts["c1tmpf"],0) ."</td>
     <td>". round($parts["c2smv"],0) ."</td><td>". round($parts["c2tmpf"],0) ."</td>
     <td>". round($parts["c3smv"],0) ."</td><td>". round($parts["c3tmpf"],0) ."</td>
     <td>". round($parts["c4smv"],0) ."</td><td>". round($parts["c4tmpf"],0) ."</td>
     <td>". round($parts["c5smv"],0) ."</td><td>". round($parts["c5tmpf"],0) ."</td>";
 
-	$t2 .= "</tr>";
+    $t2 .= "</tr>";
 }
 
 $vals = Array("tmpf" => "Air Temperature [F]", "dwpf" => "Dew Point Temp [F]",
