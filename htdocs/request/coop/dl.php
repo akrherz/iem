@@ -7,7 +7,6 @@ require_once "../../../config/settings.inc.php";
 require_once "../../../include/database.inc.php";
 require_once "../../../include/mlib.php";
 require_once "../../../include/network.php";
-require_once "adodb-time.inc.php";
 
 $connection = iemdb("coop");
 $network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"], 0, 10) : "IACLIMATE";
@@ -54,19 +53,17 @@ $stationString .= ")";
 if (isset($_GET["day"]))
     die("Incorrect CGI param, use day1, day2");
 
-$ts1 = adodb_mktime(0, 0, 0, $month1, $day1, $year1) or
-    die("Invalid Date Format");
-$ts2 = adodb_mktime(0, 0, 0, $month2, $day2, $year2) or
-    die("Invalid Date Format");
+$ts1 = new DateTime("{$year1}-{$month1}-{$day1}");
+$ts2 = new DateTime("{$year2}-{$month2}-{$day2}");
 
 
 $num_vars = count($vars);
 if ($num_vars == 0)  die("You did not specify data");
 
-$sqlTS1 = adodb_date("Y-m-d", $ts1);
-$sqlTS2 = adodb_date("Y-m-d", $ts2);
+$sqlTS1 = $ts1->format("Y-m-d");
+$sqlTS2 = $ts2->format("Y-m-d");
 $table = "alldata";
-$nicedate = adodb_date("Y-m-d", $ts1);
+$nicedate = $ts1->format("Y-m-d");
 
 $d = array("space" => " ", "comma" => ",", "tab" => "\t");
 

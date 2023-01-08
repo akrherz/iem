@@ -9,10 +9,6 @@ require_once "../../../../include/database.inc.php";
 $coopdb = iemdb("coop");
 require_once "../../../../include/forms.php";
 require_once "../../../../include/network.php";
-/** Need to use external date lib 
- * http://php.weblogs.com/adodb_date_time_library
- */
-require_once "../../../../include/adodb-time.inc.php";
 
 $var = isset($_GET["var"]) ? xssafe($_GET["var"]) : "gdd50";
 $year = get_int404("year", date("Y"));
@@ -26,12 +22,8 @@ $nt = new NetworkTable($network);
 $cities = $nt->table;
 
 
-$sts = adodb_mktime(0, 0, 0, $smonth, $sday, $year);
-$ets = adodb_mktime(0, 0, 0, $emonth, $eday, $year);
-
-if ($sts > $ets) {
-    $sts = $ets - 86400;
-}
+$sts = new DateTime("{$year}-{$smonth}-{$sday}");
+$ets = new DateTime("{$year}-{$emonth}-{$eday}");
 
 
 function mktitlelocal($map, $imgObj, $titlet)
@@ -108,7 +100,7 @@ $state = substr($network, 0, 2);
 $dbconn = iemdb("postgis");
 $rs = pg_query($dbconn, "SELECT ST_xmin(g), ST_xmax(g), ST_ymin(g), ST_ymax(g) from (
         select ST_Extent(ST_Transform(the_geom,26915)) as g from states 
-        where state_abbr = '${state}'
+        where state_abbr = '{$state}'
         ) as foo");
 $row = pg_fetch_array($rs, 0);
 $buf = 35000; // 35km
@@ -168,8 +160,8 @@ $rs = pg_prepare($coopdb, "SELECT", "SELECT station,
   GROUP by station 
     ORDER by station ASC");
 $rs = pg_execute($coopdb, "SELECT", array(
-    adodb_date("Y-m-d", $sts),
-    adodb_date("Y-m-d", $ets)
+    $sts->format("Y-m-d"),
+    $ets->format("Y-m-d")
 ));
 
 for ($i = 0; $row = pg_fetch_array($rs); $i++) {
@@ -203,8 +195,8 @@ if ($i == 0)
 $title = sprintf(
     "%s (%s through %s)",
     $varDef[$var],
-    adodb_date("Y-m-d", $sts),
-    adodb_date("Y-m-d", $ets)
+    $sts->format("Y-m-d"),
+    $ets->format("Y-m-d")
 );
 
 mktitlelocal($map, $img, $title);

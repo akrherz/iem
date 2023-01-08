@@ -4,7 +4,6 @@ require_once "../../include/myview.php";
 $t = new MyView();
 require_once "../../include/forms.php";
 $t->title = "Climatology by Year";
-require_once "../../include/adodb-time.inc.php";
 
 $year = get_int404("year", date("Y") - 1);
 $prod = get_int404("prod", 1);
@@ -33,8 +32,8 @@ $products = array(
 
 );
 
-$ts = adodb_mktime(1, 1, 1, 1, 1, $year);
-$imgurl = strftime($products[$prod]["tpl"], $ts);
+$ts = new DateTime("{$year}-01-01");
+$imgurl = str_replace("%Y", $ts->format("Y"), $products[$prod]["tpl"]);
 
 $a = "";
 foreach ($products as $key => $ar) {
