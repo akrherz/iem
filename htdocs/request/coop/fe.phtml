@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 define("IEM_APPID", 3);
 require_once "../../../include/myview.php";
@@ -7,13 +7,13 @@ require_once "../../../include/network.php";
 require_once "../../../include/forms.php";
 require_once "../../../include/imagemaps.php";
 
-$network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"],0,10) : "IACLIMATE";
+$network = isset($_REQUEST["network"]) ? substr($_REQUEST["network"], 0, 10) : "IACLIMATE";
 
 $t = new MyView();
 $t->iemss = True;
 $t->title = "Climodat Dataset Daily Data Download";
 
-$coop_archive_end = strtotime( get_iemprop("iaclimate.end") );
+$coop_archive_end = strtotime(get_iemprop("iaclimate.end"));
 
 $enddate = date('d M Y', $coop_archive_end);
 
@@ -159,7 +159,7 @@ needed and not available from past year, Feb 28 data is simply repeated.</i>
 <br />
 <input type="checkbox" name="scenario" value="yes"> Yes, use this year
 for replacement: {$sy_select}
-    		
+
 <p><h4>9. Submit Form:</h4>
 <i>Please be patient and only submit this form once.  It may take 10-20
 seconds to get a response.</i><br />

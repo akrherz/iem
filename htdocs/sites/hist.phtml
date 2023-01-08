@@ -46,10 +46,10 @@ function printMonth($year, $month, $db, $thisApp, $dailyApp)
     $lastMonth = $sts - 5 * 86400; // 5 days earlier
     $nextMonth = $ets + 5 * 86400; // 5 days later
 
-    $lurl = $thisApp . strftime("&year=%Y&month=%m", $lastMonth);
-    $lstr = strftime("%b %Y", $lastMonth);
-    $nurl = $thisApp . strftime("&year=%Y&month=%m", $nextMonth);
-    $nstr = strftime("%b %Y", $nextMonth);
+    $lurl = $thisApp . sprintf("&year=%s&month=%s", date("Y", $lastMonth), date("m", $lastMonth));
+    $lstr = date("M Y", $lastMonth);
+    $nurl = $thisApp . sprintf("&year=%s&month=%s", date("Y", $nextMonth), date("m", $nextMonth));
+    $nstr = date("M Y", $nextMonth);
 
     // Get the day of the week of the first day this month
     $first_dow = intval(strftime("%w", $sts));
@@ -225,7 +225,7 @@ The bars are the observations and the dots are climatology.
 The red line would be an average month while the blue line and bars are observations.
 
 <h3>Daily Average Wind Speeds</h3>
-<img src="/plotting/auto/plot/71/network:${network}::zstation:${station}::year:${year}::month:${month}::units:MPH::dpi:100.png" class="img img-responsive"></p>
+<img src="/plotting/auto/plot/71/network:{$network}::zstation:{$station}::year:{$year}::month:{$month}::units:MPH::dpi:100.png" class="img img-responsive"></p>
 <br /><strong>Description:</strong> This chart is of the daily average wind speeds.
 EOM;
 } else {
@@ -272,9 +272,9 @@ EOF;
           <td><a href=\"hist.phtml?network=$network&year=$year&month=$month&mode=monthly&station=" . $row["station"] . "\">{$label}</a></td>";
 
         $te = $row["tmpf_est"] ? "(E)" : "";
-        $htmlout .= "<td>" . $row["max_tmpf"] . " ${te}</td>";
+        $htmlout .= "<td>" . $row["max_tmpf"] . " {$te}</td>";
 
-        $htmlout .= "<td>" . $row["min_tmpf"] . " ${te}</td>";
+        $htmlout .= "<td>" . $row["min_tmpf"] . " {$te}</td>";
         $htmlout .= "<td>" . $row["min_feel"] . "</td>";
         $htmlout .= "<td>" . $row["max_feel"] . "</td>";
 
@@ -282,7 +282,7 @@ EOF;
         $htmlout .= "<td>" . $row["max_dwpf"] . "</td>";
 
         $pe = $row["precip_est"] ? "(E)" : "";
-        $htmlout .= "<td>" . snowprint($row["precip"]) . " ${pe}</td>";
+        $htmlout .= "<td>" . snowprint($row["precip"]) . " {$pe}</td>";
 
         if (strlen($row["max_gust"]) > 0 && $row["max_gust_localts"] != "") {
             $gtim = strtotime(substr($row["max_gust_localts"], 0, 16));

@@ -166,18 +166,18 @@ tmax  1981  30.84  28.71  27.02  16.84  12.88   6.82   8.21   7.70  11.90  20.02
                     "%7.2f%7.2f%7.2f%7.2f%7.2f\n",
                 $val,
                 $y,
-                $monthly["${y}01"][$val],
-                $monthly["${y}02"][$val],
-                $monthly["${y}03"][$val],
-                $monthly["${y}04"][$val],
-                $monthly["${y}05"][$val],
-                $monthly["${y}06"][$val],
-                $monthly["${y}07"][$val],
-                $monthly["${y}08"][$val],
-                $monthly["${y}09"][$val],
-                $monthly["${y}10"][$val],
-                $monthly["${y}11"][$val],
-                $monthly["${y}12"][$val]
+                $monthly["{$y}01"][$val],
+                $monthly["{$y}02"][$val],
+                $monthly["{$y}03"][$val],
+                $monthly["{$y}04"][$val],
+                $monthly["{$y}05"][$val],
+                $monthly["{$y}06"][$val],
+                $monthly["{$y}07"][$val],
+                $monthly["{$y}08"][$val],
+                $monthly["{$y}09"][$val],
+                $monthly["{$y}10"][$val],
+                $monthly["{$y}11"][$val],
+                $monthly["{$y}12"][$val]
             );
         }
     }

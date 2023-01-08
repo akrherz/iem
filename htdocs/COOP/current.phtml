@@ -51,8 +51,8 @@ EOF;
     $s .= "<td>" . $dict["county"] . "</td>";
 
     $bgcolor = (date("Ymd") != date("Ymd", $dict["ts"])) ? '#F00' : 'inherit';
-    $fmt = (date("Ymd") != date("Ymd", $dict["ts"])) ? '%d %b %Y %I:%M %p' : '%I:%M %p';
-    $s .= "<td style=\"background: $bgcolor;\">" . strftime($fmt, $dict["lts"]) . "</td>";
+    $fmt = (date("Ymd") != date("Ymd", $dict["ts"])) ? 'd M Y h:i A' : 'h:i A';
+    $s .= "<td style=\"background: $bgcolor;\">" . date($fmt, $dict["lts"]) . "</td>";
 
     $s .= sprintf(
         "<td>%s</td><td><span style=\"color: #F00;\">%s</span></td>
@@ -143,8 +143,8 @@ foreach ($db as $site => $value) {
 function get_sortdir($baseurl, $column, $sortCol, $sortDir)
 {
     $newSort = ($sortDir == "asc") ? "desc" : "asc";
-    if ($column == $sortCol) return "${baseurl}&sortcol=$column&sortdir=$newSort";
-    return "${baseurl}&sortcol=$column&sortdir=$sortDir";
+    if ($column == $sortCol) return "{$baseurl}&sortcol=$column&sortdir=$newSort";
+    return "{$baseurl}&sortcol=$column&sortdir=$sortDir";
 }
 
 $t->title = "NWS COOP Current Sortables";

@@ -15,9 +15,9 @@ function ss($v)
 }
 
 $year = date("Y");
-$sdate = isset($_GET["sdate"]) ? xssafe($_GET["sdate"]) : "05/01/${year}";
+$sdate = isset($_GET["sdate"]) ? xssafe($_GET["sdate"]) : "05/01/{$year}";
 $network = isset($_GET["network"]) ? xssafe($_GET["network"]) : "IACLIMATE";
-$edate = isset($_GET["edate"]) ? xssafe($_GET["edate"]) : "12/31/${year}";
+$edate = isset($_GET["edate"]) ? xssafe($_GET["edate"]) : "12/31/{$year}";
 $gddbase = isset($_GET["gddbase"]) ? intval($_GET["gddbase"]) : 50;
 $gddfloor = isset($_GET["gddfloor"]) ? ss($_GET["gddfloor"]) : 50;
 $gddceil = isset($_GET["gddceil"]) ? ss($_GET["gddceil"]) : 86;

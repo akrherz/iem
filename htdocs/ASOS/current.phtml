@@ -76,15 +76,15 @@ $mydata = array();
 foreach ($jobj["data"] as $bogus => $iemob) {
     $key = $iemob["station"];
     $mydata[$key] = $iemob;
-    $mydata[$key]["ts"] = strtotime($iemob["local_valid"]);
+    $mydata[$key]["ts"] = new DateTime($iemob["local_valid"]);
     $mydata[$key]["sped"] = $mydata[$key]["sknt"] * 1.15078;
     if ($mydata[$key]["max_gust"] > $mydata[$key]["max_sknt"]) {
         $mydata[$key]["peak"] = $mydata[$key]["max_gust"];
-        $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_gust_ts"]);
+        $mydata[$key]["peak_ts"] = new DateTime($mydata[$key]["local_max_gust_ts"]);
     } else {
         $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
         if ($mydata[$key]["local_max_sknt_ts"]) {
-            $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_sknt_ts"]);
+            $mydata[$key]["peak_ts"] = new DateTime($mydata[$key]["local_max_sknt_ts"]);
         }
     }
 } // End of while
@@ -169,12 +169,12 @@ Select Network: {$nselect}</td>
 <td>Format: {$fselect}</td></td>
 <td><input type="submit" value="Go!"></form></td>
 </tr></table>
-<br />Times shown are for timezone: <strong>${tzname}.</strong> The local day summary
+<br />Times shown are for timezone: <strong>{$tzname}.</strong> The local day summary
 is based on that timezone. <br />Table sorted by: <b>({$vals[$sortcol]})</b>  
 &nbsp; &nbsp; Click on
 a column to sort it. Click on site ID for more information. You can download data from 
-this network <a href='/request/download.phtml?network=${network}'>here</a>
-and you can view <a href="/sites/hist.phtml?station=${station}&network=${network}&mode=daily&year=$year&month=$month&day=$day">daily summaries</a>
+this network <a href='/request/download.phtml?network={$network}'>here</a>
+and you can view <a href="/sites/hist.phtml?station={$station}&network={$network}&mode=daily&year=$year&month=$month&day=$day">daily summaries</a>
 on this network.
 
 <form method="GET" action="/my/current.phtml">
@@ -238,18 +238,18 @@ foreach ($finalA as $key => $parts) {
     $row .= "<td>" . $cities[$key]["name"] . "</td>";
     $row .= "<td ";
     if ($tdiff > 10000) {
-        $fmt = "%d %b %I:%M %p";
-        $row .= "bgcolor=\"red\">" . strftime($fmt, $parts["ts"]) . "</td><td colspan=\"18\">Site Offline</td></tr>";
+        $fmt = "d M h:i P";
+        $row .= "bgcolor=\"red\">" . $parts["ts"]->format($fmt) . "</td><td colspan=\"18\">Site Offline</td></tr>";
         $old .= $row;
         continue;
     } else if ($tdiff > 7200) {
-        $fmt = "%I:%M %p";
+        $fmt = "h:i A";
         $row .= 'bgcolor="orange"';
     } else if ($tdiff > 3600) {
-        $fmt = "%I:%M %p";
+        $fmt = "h:i A";
         $row .= 'bgcolor="green"';
     } else {
-        $fmt = "%I:%M %p";
+        $fmt = "h:i A";
     }
     $phour = ($parts["phour"] != 0.0001) ? $parts["phour"] : 'T';
     $pday = ($parts["pday"] != 0.0001) ? $parts["pday"] : 'T';
@@ -258,7 +258,7 @@ foreach ($finalA as $key => $parts) {
     $pdwpf = ($parts["dwpf"] !== null) ? round($parts["dwpf"], 0) : 'M';
     $pfeel = ($ptmpf === "M" || $pdwpf === "M" || $parts["feel"] === null) ? "M" : round($parts["feel"], 0);
     $prelh = ($ptmpf === "M" || $pdwpf === "M" || $parts["relh"] === null) ? "M" : round($parts["relh"], 0);
-    $row .= ">" . strftime($fmt, $parts["ts"]) . "</td>" .
+    $row .= ">" . $parts["ts"]->format($fmt) . "</td>" .
         "<td align='center'>" . str_replace("}", " ", str_replace("{", " ", $parts["wxcodes"])) . "</td>" .
         "<td align='center'>" . $ptmpf . "</td><td><font color=\"#ff0000\">" . round($parts["max_tmpf"], 0) . "</font></td><td><font color=\"#0000ff\">" . round($parts["min_tmpf"], 0) . "</font></td>
      <td>" . $pdwpf . "</td>
@@ -273,7 +273,7 @@ foreach ($finalA as $key => $parts) {
     }
     $row .= "</td>";
     $row .= "<td>" . drct2txt($parts["drct"]) . "</td><td>";
-    if (isset($parts["peak_ts"])) $row .=  $parts["peak"] . " @ " . strftime("%I:%M %p", $parts["peak_ts"]);
+    if (isset($parts["peak_ts"])) $row .=  $parts["peak"] . " @ " . $parts["peak_ts"]->format("h:i A");
     $text_pday = $parts['pday'] == -99 ? 'M' : $parts['pday'];
     $row .= "</td><td>{$phour}</td>
             <td>{$pday}</td>
