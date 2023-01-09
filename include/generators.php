@@ -132,7 +132,7 @@ function gen_feature($t){
     if ($row["mediasuffix"] == 'mp4'){
         $imgiface = <<<EOM
 <video class="img img-responsive" controls>
-    <source src="${imghref}" type="video/mp4">
+    <source src="{$imghref}" type="video/mp4">
     Your browser does not support the video tag.
 </video>
 EOM;

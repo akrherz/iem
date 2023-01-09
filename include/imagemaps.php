@@ -94,7 +94,7 @@ function networkMultiSelect(
     include_once dirname(__FILE__) . "/network.php";
     $nt = new NetworkTable($network);
     $cities = $nt->table;
-    $s .= "<select name=\"${label}\" size=\"5\" MULTIPLE >\n";
+    $s .= "<select name=\"{$label}\" size=\"5\" MULTIPLE >\n";
 
     foreach ($extra as $idx => $sid) {
         $s .= "<option value=\"$idx\" ";
@@ -147,7 +147,7 @@ function networkSelect(
         if ($selected == $sid) {
             $s .= "SELECTED";
         }
-        $s .= ">${sname}</option>\n";
+        $s .= ">{$sname}</option>\n";
     }
     foreach ($extra as $idx => $sid) {
         if (is_array($sid)) {
@@ -162,7 +162,7 @@ function networkSelect(
         if ($selected == $sid) {
             $s .= "SELECTED";
         }
-        $s .= ">${sname}</option>\n";
+        $s .= ">{$sname}</option>\n";
     }
     $s .= "</select>\n";
     return $s;
@@ -184,7 +184,7 @@ function networkSelectAuto($network, $selected, $extra = array())
         if ($selected == $sid) {
             $s .= "SELECTED";
         }
-        $s .= ">${sname}</option>\n";
+        $s .= ">{$sname}</option>\n";
     }
     foreach ($extra as $idx => $sid) {
         $nt->load_station($sid);
@@ -194,7 +194,7 @@ function networkSelectAuto($network, $selected, $extra = array())
         if ($selected == $sid) {
             $s .= "SELECTED";
         }
-        $s .= ">${sname}</option>\n";
+        $s .= ">{$sname}</option>\n";
     }
     $s .= "</select>\n";
     return $s;

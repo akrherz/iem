@@ -4,7 +4,7 @@ function iemws_json($endpoint, $args)
 {
     // Everything is method get at the moment
     $cgi = http_build_query($args);
-    $uri = "https://iem-web-services.agron.iastate.edu/${endpoint}?${cgi}";
+    $uri = "https://iem-web-services.agron.iastate.edu/{$endpoint}?{$cgi}";
     // Try twice to get the content
     $jobj = FALSE;
     for ($i = 0; $i < 2; $i++) {
