@@ -258,8 +258,9 @@ foreach ($finalA as $key => $parts) {
     $pdwpf = ($parts["dwpf"] !== null) ? round($parts["dwpf"], 0) : 'M';
     $pfeel = ($ptmpf === "M" || $pdwpf === "M" || $parts["feel"] === null) ? "M" : round($parts["feel"], 0);
     $prelh = ($ptmpf === "M" || $pdwpf === "M" || $parts["relh"] === null) ? "M" : round($parts["relh"], 0);
+    $wxc = is_null($parts["wxcodes"]) ? "": str_replace("{", " ", $parts["wxcodes"]);
     $row .= ">" . $parts["ts"]->format($fmt) . "</td>" .
-        "<td align='center'>" . str_replace("}", " ", str_replace("{", " ", $parts["wxcodes"])) . "</td>" .
+        "<td align='center'>{$wxc}</td>" .
         "<td align='center'>" . $ptmpf . "</td><td><font color=\"#ff0000\">" . round($parts["max_tmpf"], 0) . "</font></td><td><font color=\"#0000ff\">" . round($parts["min_tmpf"], 0) . "</font></td>
      <td>" . $pdwpf . "</td>
      <td>" . $pfeel . "</td>

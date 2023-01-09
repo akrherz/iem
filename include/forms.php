@@ -369,7 +369,7 @@ function monthSelect2($selected, $name, $jsextra = '')
         $ts = new DateTime("2000-$i-01");
         $s .= "<option value='" . $i . "' ";
         if ($i == intval($selected)) $s .= "SELECTED";
-        $s .= ">" . $ts->format("B") . "</option>";
+        $s .= ">" . $ts->format("M") . "</option>";
     }
     return $s . "</select>\n";
 }

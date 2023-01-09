@@ -117,7 +117,7 @@ foreach ($final as $site => $value) {
     if ($tdiff > (6 * 3600)) {
         $content .= 'bgcolor="red"';
     }
-    $content .= ">" . strftime("%d %b %I:%M %p", $value["valid"]) . "</td>";
+    $content .= ">" . date("d M h:i A", $value["valid"]) . "</td>";
 
     if (array_key_exists('HGIZ', $value)) {
         $content .= sprintf("<td>%s</td>", $value["HGIZ"]);

@@ -289,7 +289,7 @@ $content .= <<<EOF
 <h3>Summary:</h3>
 <b>Begin Date:</b> {$dstat} <b>End Date:</b> {$dstat1}
 <br />* These numbers are not official and should be used for educational purposes only.
-${fwarning}
+{$fwarning}
 
 <div class="row">
   <div class="col-sm-2">

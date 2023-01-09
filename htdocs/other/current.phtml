@@ -58,9 +58,14 @@ foreach($jobj["data"] as $bogus => $iemob){
         $mydata[$key]["peak_ts"] = strtotime($mydata[$key]["local_max_gust_ts"]);
     } else {
         $mydata[$key]["peak"] = $mydata[$key]["max_sknt"];
-        $mydata[$key]["peak_ts"] = @strtotime($mydata[$key]["local_max_sknt_ts"]);
+        $val = is_null($mydata[$key]["local_max_sknt_ts"]) ? null: strtotime($mydata[$key]["local_max_sknt_ts"]);
+        $mydata[$key]["peak_ts"] = $val;
     }
 
+}
+
+function myround($val, $prec){
+    return is_null($val) ? "": round($val, $prec);
 }
 
 $finalA = aSortBySecondIndex($mydata, $sortcol);
@@ -85,37 +90,33 @@ foreach($finalA as $key => $parts){
     $table .= sprintf("<td><a href=\"/sites/site.php?station=%s&amp;network=%s\">%s</a></td>",
         $key, $network, $parts["name"]); 
     $table .= "<td ";
+    $format = "h:i A";
     if ($tdiff > 11900){
         $table .= 'bgcolor="red"';
-        $format = "%b-%d-%y %I:%M %p";
+        $format = "M-d-Y h:i A";
     } else if ($tdiff > 7200){
         $table .= 'bgcolor="orange"';
-        $format = "%I:%M %p";
     } else if ($tdiff > 3600){
         $table .= 'bgcolor="green"';
-        $format = "%I:%M %p";
-    } else {
-        $format = "%I:%M %p";
     }
-    $table .= ">". strftime($format, $parts["ts"]) ."</td>
-  <td align='center'>". round($parts["tmpf"],0) ."(<font color=\"#ff0000\">".
-  round($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">".
-  round($parts["min_tmpf"],0) ."</font>)</td>
- <td>". round($parts["dwpf"],0) ."</td>
- <td>". round($parts["feel"], 1) ."</td>
+    $table .= ">". date($format, $parts["ts"]) ."</td>
+  <td align='center'>". myround($parts["tmpf"],0) ."(<font color=\"#ff0000\">".
+  myround($parts["max_tmpf"],0) ."</font>/<font color=\"#0000ff\">".
+  myround($parts["min_tmpf"],0) ."</font>)</td>
+ <td>". myround($parts["dwpf"],0) ."</td>
+ <td>". myround($parts["feel"], 1) ."</td>
  <td>". $parts["relh"] ."</td>
- <td>". round($parts["sknt"],0) ;
+ <td>". myround($parts["sknt"],0) ;
     if (strlen($parts["gust"]) > 0 && $parts["gust"] > 0){
-        $table .= "G". round($parts["gust"],1);
+        $table .= "G". myround($parts["gust"],1);
     }
     $table .= "</td>
-            <td>". round($parts["drct"],0) ."</td>
-        <td>". round($parts["peak"],0) ."@ ". strftime("%I:%M %p", $parts["peak_ts"] ) ."</td>
+            <td>". myround($parts["drct"],0) ."</td>
+        <td>". myround($parts["peak"],0) ."@ ". date("h:i A", $parts["peak_ts"] ) ."</td>
         </tr>\n";
 }
 
 $networks = Array(
-        "KYMN" => "Kentucky Mesonet",
         "OT" => "IEM Misc Stations",
         "VTWAC" => "Vermont Weather Analytics Center");
 $buttons = "";
@@ -128,7 +129,7 @@ $content = <<<EOF
 
 <p><b>Other Networks:</b> {$buttons}
  
-<br /><strong>Times shown are for timezone: ${tzname}.</strong> The local day summary
+<br /><strong>Times shown are for timezone: {$tzname}.</strong> The local day summary
 is based on that timezone.
 <br />Sorted by: <b>({$vals[$sortcol]})</b>  &nbsp; &nbsp; Click on
 a column to sort it.<br>

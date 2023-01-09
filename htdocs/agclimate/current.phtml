@@ -60,7 +60,7 @@ foreach ($jobj["data"] as $bogus => $data) {
         );
         continue;
     }
-
+    $gts = is_null($data["local_max_gust_ts"]) ? "": date("g:i A", strtotime($data['local_max_gust_ts']));
     $table .= sprintf(
         "<tr><td><input type=\"checkbox\" name=\"st[]\" value=\"%s\"></td>" .
             "<td><a href=\"%s\">%s</a></td><td>%s</td>" .
@@ -80,7 +80,7 @@ foreach ($jobj["data"] as $bogus => $data) {
         pretty($data["sknt"] * 1.15, '%.0f'),
         pretty($data['gust'] * 1.15, '%.0f'),
         pretty($data['max_gust'] * 1.15, '%.0f'),
-        date("g:i A", strtotime($data['local_max_gust_ts'])),
+        $gts,
         pretty($data['pday'], '%.2f'),
         pretty($data["c1tmpf"], '%.1f'),
         pretty($data["c2tmpf"], '%.1f'),
