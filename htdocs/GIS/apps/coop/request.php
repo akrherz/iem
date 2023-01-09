@@ -51,8 +51,8 @@ if (strlen($day) == 0) {
     $day = date('d');
 }
 $ts = mktime(0, 0, 0, $month, $day, 2000);
-$sqlDate = strftime('%Y-%m-%d', $ts);
-$filePre = strftime('%m%d', $ts) . "_coop";
+$sqlDate = date('Y-m-d', $ts);
+$filePre = date('md', $ts) . "_coop";
 
 
 $pgcon = iemdb("coop");

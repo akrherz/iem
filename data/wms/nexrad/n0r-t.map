@@ -42,6 +42,7 @@ WEB
    "wms_enable_request" "*"
    "wms_timeformat" "YYYY-MM-DDTHH:MM:SSZ,YYYY-MM-DDTHH:MM"
     "ows_http_max_age" "86400"
+    "wms_allow_getmap_without_styles" "true"
   END
 END
 

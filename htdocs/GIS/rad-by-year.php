@@ -69,9 +69,10 @@ $map2->drawLabelCache($img2);
 $gdimg_dest = imagecreatefromstring($img2->getBytes());
 
 $i = 0;
+$utcnow = new DateTime('now', new DateTimeZone("UTC"));
 for ($year = $beginYear; $year <= $endYear; $year++) {
-    $radts = mktime($hour, $minute, 0, $month, $day, $year);
-    if ($radts > time()) {
+    $radts = new DateTime("{$year}-{$month}-{$day} {$hour}:{$minute}", new DateTimeZone("UTC"));
+    if ($radts > $utcnow) {
         continue;
     }
 
@@ -92,7 +93,11 @@ for ($year = $beginYear; $year <= $endYear; $year++) {
     $lakes->draw($map, $img);
 
     /* Draw NEXRAD Layer */
-    $radarfp =  gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png", $radts);
+    $radarfp =  sprintf(
+        "/mesonet/ARCHIVE/data/%s/GIS/uscomp/n0r_%s.png",
+        $radts->format("Y/m/d"),
+        $radts->format("YmdHi"),
+    );
     if (is_file($radarfp)) {
         $radar = $map->getlayerbyname("nexrad_n0r");
         $radar->__set("status", MS_ON);
