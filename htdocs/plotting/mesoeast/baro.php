@@ -16,9 +16,10 @@ if (strlen($year) == 4 && strlen($month) > 0 && strlen($day) > 0 ){
   $myTime = strtotime(date("Y-m-d"));
 }
 
-$titleDate = strftime("%b %d, %Y", $myTime);
+$titleDate = date("M d, Y", $myTime);
+$dirRef = date("Y/m/d", $myTime);
+
 $formatFloor = mktime(0, 0, 0, 1, 1, 2016);
-$dirRef = strftime("%Y/%m/%d", $myTime);
 $fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0006.dat");
 
 $parts = array();
@@ -37,9 +38,9 @@ $max_yaxis_i = 0;
 $prev_Tmpf = 0.0;
 
 foreach($fcontents as $linenum => $line){
-	$parts = explode(" ", $line);
-	$times[] = strtotime(sprintf("%s %s %s %s %s", $parts[0], $parts[1],
-			$parts[2], $parts[3], $parts[4]));
+  $parts = explode(" ", $line);
+  $times[] = strtotime(sprintf("%s %s %s %s %s", $parts[0], $parts[1],
+      $parts[2], $parts[3], $parts[4]));
   $thisTmpf = $parts[13];
   $thisTmpf = round((floatval($thisTmpf) * 33.8639),2);
 //  if ($thisTmpf < -50 || $thisTmpf > 150 ){

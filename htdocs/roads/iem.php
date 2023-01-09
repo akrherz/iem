@@ -14,9 +14,9 @@ if (!isset($_GET["valid"])) {
     $rs = pg_query($con, $sql);
 
     $row = pg_fetch_array($rs, 0);
-    $ts = strtotime(substr($row["valid"], 0, 16));
+    $ts = new DateTime(substr($row["valid"], 0, 16), new DateTimeZone("America/Chicago"));
 } else {
-    $ts = strtotime($_GET["valid"]);
+    $ts = new DateTime($_GET["valid"], new DateTimeZone("America/Chicago"));
 }
 
 $map = new MapObj("roads.map");
@@ -45,7 +45,9 @@ $map->__set("height", $height);
 $img = $map->prepareImage();
 
 if (isset($_GET["nexrad"])) {
-    $radarfn = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0q_%Y%m%d%H%M.png", $ts);
+    $gmtts = clone $ts;
+    $gmtts->setTimezone(new DateTimeZone("UTC"));
+    $radarfn = sprintf("/mesonet/ARCHIVE/data/%s/GIS/uscomp/n0q_%s.png", $gmtts->format("Y/m/d"), $gmtts->format("YmdHi"));
     $radar = $map->getlayerbyname("nexrad_n0q");
     $radar->__set("status", MS_ON);
     $radar->__set("data", $radarfn);
@@ -68,9 +70,11 @@ $visibility->draw($map, $img);
 
 $roads = $map->getlayerbyname("roads");
 $roads->__set("status", MS_ON);
-$dbvalid = date('Y-m-d H:i', $ts);
+$dbvalid = $ts->format('Y-m-d H:i');
 # yuck
-$dbvalid2 = date('Y-m-d H:i', $ts - 90 * 86400);
+$dbvalid2 = clone $ts;
+$dbvalid2->sub(new DateInterval("P90D"));
+$dbvalid2 = $dbvalid2->format('Y-m-d H:i');
 if (isset($_GET['valid'])) {
     $sql = <<< EOM
     geom from (
@@ -100,8 +104,12 @@ $roads_int->draw($map, $img);
 
 if (isset($_GET["trucks"])) {
     // 10 minute window for trucks
-    $w1 = date('Y-m-d H:i', $ts - 300);
-    $w2 = date('Y-m-d H:i', $ts + 300);
+    $w1 = clone $ts;
+    $w1->sub(new DateInterval("PT5M"));
+    $w1 = $w1->format('Y-m-d H:i');
+    $w2 = clone $ts;
+    $w2->add(new DateInterval("PT5M"));
+    $w2 = $w2->format('Y-m-d H:i');
     $trucks = $map->getlayerbyname("trucks");
     $trucks->__set("status", MS_ON);
     $trucks->__set("data", "geom from (select geom, random() as boid from " .
@@ -109,10 +117,6 @@ if (isset($_GET["trucks"])) {
         "using UNIQUE boid using SRID=4326");
     $trucks->draw($map, $img);
 }
-
-//$roads_lbl = $map->getlayerbyname("roads_label");
-//$roads_lbl->draw($map, $img);
-//$roads_lbl->__set("connection", $_DATABASE);
 
 if ($thumbnail) {
     $logokey2 = $map->getlayerbyname("colorkey-small");
@@ -132,7 +136,7 @@ if ($thumbnail) {
 }
 
 $logokey = new layerObj($map);
-$logokey->__set("type", MS_SHP_POINT);
+$logokey->__set("type", MS_SHP_POINTZ);
 $logokey->__set("transform", MS_FALSE);
 $logokey->__set("status", MS_ON);
 $logokey->__set("labelcache", MS_ON);
@@ -161,7 +165,7 @@ if ($thumbnail) {
 } else {
     $point->setXY(300, 10);
 }
-$point->draw($map, $layer, $img, 0, date('Y-m-d h:i A', $ts));
+$point->draw($map, $layer, $img, 0, $ts->format('Y-m-d h:i A'));
 
 $map->drawLabelCache($img);
 

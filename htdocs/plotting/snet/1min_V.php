@@ -45,7 +45,7 @@ if (pg_num_rows($rs) == 0) {
  die();
 }
 
-$titleDate = strftime("%b %d, %Y", $myTime);
+$titleDate = date("M d, Y", $myTime);
 $cityname = $cities[$station]['name'];
 $wA = mktime(0,0,0, 8, 4, 2002);
 $wLabel = "1min avg Wind Speed";
@@ -146,5 +146,3 @@ $graph->AddY2($lineplot);
 $graph->AddY2($lp1);
 
 $graph->Stroke();
-
-?>

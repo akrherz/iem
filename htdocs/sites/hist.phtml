@@ -284,7 +284,7 @@ EOF;
         $pe = $row["precip_est"] ? "(E)" : "";
         $htmlout .= "<td>" . snowprint($row["precip"]) . " {$pe}</td>";
 
-        if (strlen($row["max_gust"]) > 0 && $row["max_gust_localts"] != "") {
+        if (!is_null($row["max_gust"]) && $row["max_gust_localts"] != "") {
             $gtim = strtotime(substr($row["max_gust_localts"], 0, 16));
             $gs = date("g:i A", $gtim);
             $g = round($row["max_gust"] * 1.15, 0);

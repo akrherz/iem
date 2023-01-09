@@ -17,16 +17,17 @@ $day = get_int404("day", date("d", time() - 86400));
 
 $myTime = strtotime($year."-".$month."-".$day);
 
-$titleDate = strftime("%b %d, %Y", $myTime);
-$tableName = strftime("t%Y_%m", $myTime);
-$sqlDate = strftime("%Y-%m-%d", $myTime);
+$titleDate = date("M d, Y", $myTime);
+$tableName = sprintf("t%s", date("Y_m", $myTime));
+$sqlDate = date("Y-m-d", $myTime);
+
 
 
 $connection = iemdb("awos");
 $rs = pg_prepare($connection, "SELECT", "SELECT " .
-		"to_char(valid, 'HH24:MI') as tvalid, p01i, alti from " .
-		"". $tableName ." WHERE station = $1 and " .
-		"  date(valid) = $2 ORDER by tvalid");
+        "to_char(valid, 'HH24:MI') as tvalid, p01i, alti from " .
+        "". $tableName ." WHERE station = $1 and " .
+        "  date(valid) = $2 ORDER by tvalid");
 
 $result = pg_execute($connection, "SELECT", Array($station, $sqlDate));
 
@@ -106,9 +107,9 @@ for( $p=0; $row = pg_fetch_array($result); $p++)  {
 } // End of while
 
 $xpre = array(0 => '12 AM', '1 AM', '2 AM', '3 AM', '4 AM', '5 AM',
-	'6 AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM', 'Noon',
-	'1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM', '7 PM',
-	'8 PM', '9 PM', '10 PM', '11 PM', 'Midnight');
+    '6 AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM', 'Noon',
+    '1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM', '7 PM',
+    '8 PM', '9 PM', '10 PM', '11 PM', 'Midnight');
 
 
 for ($j=0; $j<24; $j++){

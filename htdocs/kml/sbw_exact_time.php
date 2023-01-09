@@ -48,7 +48,7 @@ echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
  <ScreenOverlay id=\"legend_bar\">
    <visibility>1</visibility>
    <Icon>
-       <href>https://mesonet.agron.iastate.edu/kml/timestamp.php?label=". strftime("%d%%20%B%%20%Y%%20%-I:%M%%20%p%%20%Z", $radarts) ."</href>
+       <href>https://mesonet.agron.iastate.edu/kml/timestamp.php?label=". date("d M Y h:i A T", $radarts) ."</href>
    </Icon>
    <description>WaterWatch Legend</description>
    <overlayXY x=\".3\" y=\"0.99\" xunits=\"fraction\" yunits=\"fraction\"/>

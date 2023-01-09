@@ -1,23 +1,22 @@
-<?php 
+<?php
 require_once "../../../config/settings.inc.php";
 require_once "../../../include/myview.php";
 require_once "../../../include/forms.php";
 $t = new MyView();
 $t->title = "ISU AMS Station on Agronomy";
 
-$year = isset($_GET["year"]) ? intval($_GET["year"]): date("Y");
-$month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
-$day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
-$myTime = mktime(0,0,0,$month, $day, $year);
+$year = isset($_GET["year"]) ? intval($_GET["year"]) : date("Y");
+$month = isset($_GET["month"]) ? intval($_GET["month"]) : date("m");
+$day = isset($_GET["day"]) ? intval($_GET["day"]) : date("d");
+$myTime = mktime(0, 0, 0, $month, $day, $year);
 
-$dirRef = strftime("%Y/%m/%d", $myTime);
+$dirRef = date("Y/m/d", $myTime);
 $dataurl = "https://mesonet.agron.iastate.edu/archive/data/$dirRef/text/ot/ot0002.dat";
 
- 
- $ys = yearSelect2(2003, $year, "year");
- $ms = monthSelect($month, "month");
- $ds = daySelect($day, "day");
- 
+$ys = yearSelect2(2003, $year, "year");
+$ms = monthSelect($month, "month");
+$ds = daySelect($day, "day");
+
 $t->content = <<<EOF
 
 <a href="/other/">Other Networks</a> &nbsp;<b> > </b> &nbsp; ISU AMS Station
@@ -45,4 +44,3 @@ the archive <br> begins 15 Jan 2003.</p>
 </td></tr></table>
 EOF;
 $t->render('single.phtml');
-?>

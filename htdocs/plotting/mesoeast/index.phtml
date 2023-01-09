@@ -10,16 +10,16 @@ $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
 $day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
 $myTime = mktime(0,0,0,$month,$day,$year);
 
-$dirRef = strftime("%Y/%m/%d", $myTime);
+$dirRef = date("Y/m/d", $myTime);
 $dataurl = "/archive/data/$dirRef/text/ot/ot0006.dat";
 
 $ys = yearSelect(2003, $year);
 $ms = monthSelect($month);
 $ds = daySelect($day);
 
-$titleDate = strftime("%b %d, %Y", $myTime);
+$titleDate = date("M d, Y", $myTime);
 
-$dirRef = strftime("%Y/%m/%d", $myTime);
+$dirRef = date("Y/m/d", $myTime);
 $fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0006.dat");
 
 $thisMax = -99;
@@ -27,16 +27,16 @@ $thisMin = 99;
 $maxGust = 0;
 foreach($fcontents as $line_num => $line){
     if ($line_num < 5) continue;
-	$parts = explode(" ", $line);
-	$tm = $parts[5];
-	if ($tm > $thisMax){ $thisMax = $tm; }
-	if ($tm < $thisMin){ $thisMin = $tm; }
-	$gust = floatval($parts[11]);
-	$gust_time = $parts[12];
-	if ($gust > $maxGust){
-		$maxGust = $gust;
-		$gustTime = $gust_time;
-	}
+    $parts = explode(" ", $line);
+    $tm = $parts[5];
+    if ($tm > $thisMax){ $thisMax = $tm; }
+    if ($tm < $thisMin){ $thisMin = $tm; }
+    $gust = floatval($parts[11]);
+    $gust_time = $parts[12];
+    if ($gust > $maxGust){
+        $maxGust = $gust;
+        $gustTime = $gust_time;
+    }
 } // End of while
 
 $t->content = <<<EOF
@@ -85,4 +85,3 @@ Time of Maximum Wind Gust: {$gustTime}<br><br></font></div>
 </div>
 EOF;
 $t->render('single.phtml');
-?>

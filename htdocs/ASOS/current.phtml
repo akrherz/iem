@@ -223,6 +223,12 @@ $old = "";
 $domain = array_keys($nt->table);
 $online = array();
 
+function myround($val, $prec)
+{
+    if (is_null($val)) return "";
+    return round($val, $prec);
+}
+
 foreach ($finalA as $key => $parts) {
     // Keep track of online stations
     $online[] = $key;
@@ -254,23 +260,23 @@ foreach ($finalA as $key => $parts) {
     $phour = ($parts["phour"] != 0.0001) ? $parts["phour"] : 'T';
     $pday = ($parts["pday"] != 0.0001) ? $parts["pday"] : 'T';
 
-    $ptmpf = ($parts["tmpf"] !== null) ? round($parts["tmpf"], 0) : 'M';
-    $pdwpf = ($parts["dwpf"] !== null) ? round($parts["dwpf"], 0) : 'M';
-    $pfeel = ($ptmpf === "M" || $pdwpf === "M" || $parts["feel"] === null) ? "M" : round($parts["feel"], 0);
-    $prelh = ($ptmpf === "M" || $pdwpf === "M" || $parts["relh"] === null) ? "M" : round($parts["relh"], 0);
-    $wxc = is_null($parts["wxcodes"]) ? "": str_replace("{", " ", $parts["wxcodes"]);
+    $ptmpf = ($parts["tmpf"] !== null) ? myround($parts["tmpf"], 0) : 'M';
+    $pdwpf = ($parts["dwpf"] !== null) ? myround($parts["dwpf"], 0) : 'M';
+    $pfeel = ($ptmpf === "M" || $pdwpf === "M" || $parts["feel"] === null) ? "M" : myround($parts["feel"], 0);
+    $prelh = ($ptmpf === "M" || $pdwpf === "M" || $parts["relh"] === null) ? "M" : myround($parts["relh"], 0);
+    $wxc = is_null($parts["wxcodes"]) ? "" : str_replace("{", " ", $parts["wxcodes"]);
     $row .= ">" . $parts["ts"]->format($fmt) . "</td>" .
         "<td align='center'>{$wxc}</td>" .
-        "<td align='center'>" . $ptmpf . "</td><td><font color=\"#ff0000\">" . round($parts["max_tmpf"], 0) . "</font></td><td><font color=\"#0000ff\">" . round($parts["min_tmpf"], 0) . "</font></td>
+        "<td align='center'>" . $ptmpf . "</td><td><font color=\"#ff0000\">" . myround($parts["max_tmpf"], 0) . "</font></td><td><font color=\"#0000ff\">" . myround($parts["min_tmpf"], 0) . "</font></td>
      <td>" . $pdwpf . "</td>
      <td>" . $pfeel . "</td>
         <td>" . $prelh . "</td>
         <td>" . $parts["alti"] . "</td>
         <td>" . $parts["vsby"] . "</td>
-             <td>" . round($parts["sknt"], 0);
+             <td>" . myround($parts["sknt"], 0);
 
     if (floatval($parts["gust"] > 0)) {
-        $row .= "G" . round($parts["gust"], 0);
+        $row .= "G" . myround($parts["gust"], 0);
     }
     $row .= "</td>";
     $row .= "<td>" . drct2txt($parts["drct"]) . "</td><td>";

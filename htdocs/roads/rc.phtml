@@ -43,7 +43,7 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     $valid = substr($row["valid"], 0, 16);
 }
 $ts = strtotime($valid);
-$valid = strftime("%I:%M %p on %d %b %Y", $ts);
+$valid = date("h:i A d M Y", $ts);
 
 $types = array(1 => "Interstate", 2 => "US Highway", 3 => "State Highway");
 

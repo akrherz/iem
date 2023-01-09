@@ -74,12 +74,12 @@ if ($sts > $ets) die("Your start time is greater than your end time!");
 
 $str_stns = implode("','", $st);
 $str_vars = implode(",", $fvars);
-$str_sts  = strftime("%Y-%m-%d %H:00", $sts);
+$str_sts  = date("Y-m-d H:00", $sts);
 if ($rtype == 'hourly') {
-    $str_ets  = strftime("%Y-%m-%d %H:00", $ets + 86400);
+    $str_ets  = date("Y-m-d H:00", $ets + 86400);
     $tsfmt = "YYYY-MM-DD HH24:MI";
 } else {
-    $str_ets  = strftime("%Y-%m-%d %H:00", $ets);
+    $str_ets  = date("Y-m-d H:00", $ets);
     $tsfmt = "YYYY-MM-DD";
 }
 
@@ -103,7 +103,7 @@ echo $cr;
 $c = iemdb("isuag");
 $rs = array();
 $tbl = sprintf("%s", $rtype);
-$sql = "SELECT station, to_char(valid, '${tsfmt}') as dvalid, 
+$sql = "SELECT station, to_char(valid, '{$tsfmt}') as dvalid, 
    $str_vars from $tbl 
    WHERE station IN ('$str_stns') and
    valid BETWEEN '$str_sts' and '$str_ets'

@@ -7,9 +7,9 @@ $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
 
 $myTime = mktime(0,0,0,$month,$day,$year);
 
-$titleDate = strftime("%b %d, %Y", $myTime);
+$titleDate = date("M d, Y", $myTime);
+$dirRef = date("Y/m/d", $myTime);
 
-$dirRef = strftime("%Y/%m/%d", $myTime);
 $fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0003.dat");
 
 

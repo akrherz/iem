@@ -15,7 +15,7 @@ $rs = pg_query($con, $sql);
 $row = pg_fetch_array($rs, 0);
 $valid = substr($row["valid"], 0, 16);
 $ts = strtotime($valid);
-$valid = strftime("%I:%M %p on %d %b %Y", $ts);
+$valid = date("h:i A, d M Y", $ts);
 
 $t->headextra = <<<EOF
 <link type="text/css" href="/vendor/openlayers/{$OL}/ol.css" rel="stylesheet" />

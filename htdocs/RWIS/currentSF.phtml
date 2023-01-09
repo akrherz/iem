@@ -11,22 +11,23 @@ $t->current_network = "RWIS Surface";
 $network = isset($_GET['network']) ? xssafe($_GET['network']) : 'IA_RWIS';
 $sortcol = isset($_GET['sortcol']) ? xssafe($_GET['sortcol']) : 'ts';
 if ($sortcol == "sname") $sortcol = "name";
- $t->title = "RWIS Surface Currents";
- $t->refresh = 600;
+$t->title = "RWIS Surface Currents";
+$t->refresh = 600;
 
-$vals = Array("tsf0" => "Sensor 1 - Temp [F]", 
-  "tmpf" => "Air Temp [F]",
-  "dwpf" => "Dew Point [F]",
-  "tsf1" => "Sensor 2 - Temp [F]",
-  "tsf2" => "Sensor 3 - Temp [F]",
-  "tsf3" => "Sensor 4 - Temp [F]",
-  "pave_avg" => "Ave Surf Temp",
-  "dry0" => "Sensor 1 - Cond [F]",
-  "dry1" => "Sensor 2 - Cond [F]",
-  "dry2" => "Sensor 3 - Cond [F]",
-  "dry3" => "Sensor 4 - Cond [F]",
-  "ts" => "Observation Time",
-  "name" => "Site Name",
+$vals = array(
+    "tsf0" => "Sensor 1 - Temp [F]",
+    "tmpf" => "Air Temp [F]",
+    "dwpf" => "Dew Point [F]",
+    "tsf1" => "Sensor 2 - Temp [F]",
+    "tsf2" => "Sensor 3 - Temp [F]",
+    "tsf3" => "Sensor 4 - Temp [F]",
+    "pave_avg" => "Ave Surf Temp",
+    "dry0" => "Sensor 1 - Cond [F]",
+    "dry1" => "Sensor 2 - Cond [F]",
+    "dry2" => "Sensor 3 - Cond [F]",
+    "dry3" => "Sensor 4 - Cond [F]",
+    "ts" => "Observation Time",
+    "name" => "Site Name",
 );
 
 $t->breadcrumbs = <<<EOF
@@ -37,92 +38,100 @@ $t->breadcrumbs = <<<EOF
 EOF;
 $nselect = "<select name=\"network\">";
 $rs = pg_query($mesosite, "SELECT id, name from networks where id ~* 'RWIS' ORDER by name ASC");
-for ($i=0;$row=pg_fetch_assoc($rs);$i++){
-	$sel = '';
-	if ($network == $row["id"]){
-		$sel = " selected='SELECTED'";
-	}
-	$nselect .= sprintf("<option value='%s'%s>%s</option>\n",
-	  $row["id"], $sel, $row["name"]);
+for ($i = 0; $row = pg_fetch_assoc($rs); $i++) {
+    $sel = '';
+    if ($network == $row["id"]) {
+        $sel = " selected='SELECTED'";
+    }
+    $nselect .= sprintf(
+        "<option value='%s'%s>%s</option>\n",
+        $row["id"],
+        $sel,
+        $row["name"]
+    );
 }
 $nselect .= "</select>";
 
 
-$mydata = Array();
-$arr = Array(
+$mydata = array();
+$arr = array(
     "network" => $network,
 );
 $jobj = iemws_json("currents.json", $arr);
 
-foreach($jobj["data"] as $bogus => $ob){
+foreach ($jobj["data"] as $bogus => $ob) {
     $key = $ob["station"];
-	$mydata[$key] = $ob;
-	$mydata[$key]["ts"] = strtotime($ob["local_valid"]);
+    $mydata[$key] = $ob;
+    $mydata[$key]["ts"] = strtotime($ob["local_valid"]);
 
-	if ($mydata[$key]['tmpf'] < -60){
-		$mydata[$key]['tmpf'] = "M";
-		$mydata[$key]['dwpf'] = "M";
-	}
+    if ($mydata[$key]['tmpf'] < -60) {
+        $mydata[$key]['tmpf'] = "M";
+        $mydata[$key]['dwpf'] = "M";
+    }
 
-	$t2 = Array($mydata[$key]['tsf0'], $mydata[$key]['tsf1'],
-			    $mydata[$key]['tsf2'], $mydata[$key]['tsf3']);
-	arsort($t2);
+    $t2 = array(
+        $mydata[$key]['tsf0'], $mydata[$key]['tsf1'],
+        $mydata[$key]['tsf2'], $mydata[$key]['tsf3']
+    );
+    arsort($t2);
 
-	while (min($t2) == -99){
-		$ba = array_pop($t2);
-		if (sizeof($t2) == 0) break;
-	}
+    while (min($t2) == -99) {
+        $ba = array_pop($t2);
+        if (sizeof($t2) == 0) break;
+    }
 
-	asort($t2);
-	if (sizeof($t2) > 0){
-		while ((max($t2) - min($t2)) > 20){ $ba = array_pop($t2); }
-		$mydata[$key]['pave_avg'] = array_sum($t2) / sizeof($t2);
-	} else {
-		$mydata[$key]['pave_avg'] = -99.99;
-	}
+    asort($t2);
+    if (sizeof($t2) > 0) {
+        while ((max($t2) - min($t2)) > 20) {
+            $ba = array_pop($t2);
+        }
+        $mydata[$key]['pave_avg'] = array_sum($t2) / sizeof($t2);
+    } else {
+        $mydata[$key]['pave_avg'] = -99.99;
+    }
 }
 
 $table = "";
-$finalA = Array();
+$finalA = array();
 $finalA = aSortBySecondIndex($mydata, $sortcol);
 $i = 0;
 $now = time();
-foreach($finalA as $key => $parts){
-	$i++;
-	$tdiff = $now - $parts["ts"];
-	/*    if ($tdiff > 86400*5){
+foreach ($finalA as $key => $parts) {
+    $i++;
+    $tdiff = $now - $parts["ts"];
+    /*    if ($tdiff > 86400*5){
 	 continue;
 	}
 	*/
-	$table .= "<tr";
-	if ($i % 2 == 0)  $table .= " bgcolor='#eeeeee'";
+    $table .= "<tr";
+    if ($i % 2 == 0)  $table .= " bgcolor='#eeeeee'";
 
-	$table .= ">";
-	$table .= "<td><input type=\"checkbox\" name=\"st[]\"
-            value=\"".$key."_SF\"></td>";
-	$table .= "<td>". $parts["name"] . "</td>";
-	$table .= "<td";
-	if ($tdiff > 11900){
-		$table .= ' bgcolor="red">'. strftime("%b-%d-%y %I:%M %p", $parts["ts"]) .'</td>';
-	} else if ($tdiff > 7200){
-		$table .= ' bgcolor="orange">'. strftime("%b-%d %I:%M %p", $parts["ts"]) .'</td>';
-	} else if ($tdiff > 3600){
-		$table .= ' bgcolor="green">'. strftime("%I:%M %p", $parts["ts"]) .'</td>';
-	} else {
-		$table .= '>'. strftime("%I:%M %p", $parts["ts"]) .'</td>';
-	}
-	if ($parts["tsf0"] < -90) $tmpf0 = "M";
-	else $tmpf0 = round($parts["tsf0"], 1);
-	if ($parts["tsf1"] < -90) $tmpf1 = "M";
-	else $tmpf1 = round($parts["tsf1"], 1);
-	if ($parts["tsf2"] < -90) $tmpf2 = "M";
-	else $tmpf2 = round($parts["tsf2"], 1);
-	if ($parts["tsf3"] < -90) $tmpf3 = "M";
-	else $tmpf3 = round($parts["tsf3"], 1);
-	if ($parts["pave_avg"] < -90) $pave_avg = "M";
-	else $pave_avg = round($parts["pave_avg"], 1);
+    $table .= ">";
+    $table .= "<td><input type=\"checkbox\" name=\"st[]\"
+            value=\"" . $key . "_SF\"></td>";
+    $table .= "<td>" . $parts["name"] . "</td>";
+    $table .= "<td";
+    if ($tdiff > 11900) {
+        $table .= ' bgcolor="red">' . date("M-d-Y h:i A", $parts["ts"]) . '</td>';
+    } else if ($tdiff > 7200) {
+        $table .= ' bgcolor="orange">' . date("M-d h:i A", $parts["ts"]) . '</td>';
+    } else if ($tdiff > 3600) {
+        $table .= ' bgcolor="green">' . date("h:i A", $parts["ts"]) . '</td>';
+    } else {
+        $table .= '>' . date("h:i A", $parts["ts"]) . '</td>';
+    }
+    if ($parts["tsf0"] < -90) $tmpf0 = "M";
+    else $tmpf0 = round($parts["tsf0"], 1);
+    if ($parts["tsf1"] < -90) $tmpf1 = "M";
+    else $tmpf1 = round($parts["tsf1"], 1);
+    if ($parts["tsf2"] < -90) $tmpf2 = "M";
+    else $tmpf2 = round($parts["tsf2"], 1);
+    if ($parts["tsf3"] < -90) $tmpf3 = "M";
+    else $tmpf3 = round($parts["tsf3"], 1);
+    if ($parts["pave_avg"] < -90) $pave_avg = "M";
+    else $pave_avg = round($parts["pave_avg"], 1);
 
-	$table .= <<< EOM
+    $table .= <<< EOM
 <td>{$parts["tmpf"]}</td><td>{$parts["dwpf"]}</td>
 <td>{$tmpf0} ({$parts["scond0"]})</td>
 <td>{$tmpf1} ({$parts["scond1"]})</td>

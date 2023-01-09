@@ -22,12 +22,12 @@ $mode = isset($_GET["mode"]) ? xssafe($_GET["mode"]): "rt";
 /** Lets assemble a time period if this plot is historical */
 if (strlen($days) > 0) {
   $sts = mktime(0,0,0, $smonth, $sday, $syear);
-  $dbDateString = "'". strftime('%Y-%m-%d', $sts) ."'";
-  $plotTitle = strftime('%a %d %b %Y', $sts) ."\n";
+  $dbDateString = "'". date('Y-m-d', $sts) ."'";
+  $plotTitle = date('d M Y', $sts) ."\n";
   for ($i=1; $i < intval($days); $i++){
     $tts = $sts + ($i * 86400);
-    $dbDateString .= ",'". strftime('%Y-%m-%d', $tts) ."'";
-    $plotTitle .= strftime('%a %d %b %Y', $tts) ."\n";
+    $dbDateString .= ",'". date('Y-m-d', $tts) ."'";
+    $plotTitle .= date('d M Y', $tts) ."\n";
   }
 }
 

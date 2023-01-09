@@ -200,7 +200,8 @@ EOF;
     // If now() is less than event end, set the plot time to now
     $dts = new DateTime($row["v"]);
     $dts2 = new DateTime($row["e"]);
-    if (time() < $dts2) {
+    $aa = new DateTime();
+    if ($dts2 > $aa) {
         $dts = new DateTime();
     }
 

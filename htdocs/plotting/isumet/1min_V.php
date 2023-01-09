@@ -22,9 +22,9 @@ if ($wA > $myTime){
  $wLabel = "Instant Wind Speed";
 }
 
-$titleDate = strftime("%b %d, %Y", $myTime);
+$titleDate = date("M d, Y", $myTime);
+$dirRef = date("Y/m/d", $myTime);
 
-$dirRef = strftime("%Y/%m/%d", $myTime);
 
 $mph = array();
 $drct = array();
@@ -32,42 +32,42 @@ $gust = array();
 $valid = array();
 
 if ($station == null){
-	$fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0002.dat");
-	foreach($fcontents as $line_num => $line){
-  		$valid[] = strtotime( substr($line, 0, 26) );
-  		$parts = preg_split ("/\s+/", $line);
-		$mph[] = intval($parts[8]);
-		$drct[] = intval($parts[9]);
-		
-	} // End of while
+    $fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0002.dat");
+    foreach($fcontents as $line_num => $line){
+          $valid[] = strtotime( substr($line, 0, 26) );
+          $parts = preg_split ("/\s+/", $line);
+        $mph[] = intval($parts[8]);
+        $drct[] = intval($parts[9]);
+        
+    } // End of while
 } else {
-	$fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0010.dat");
-	/*
-	 * month, day, year, hour, minute, outside temp, hi outside temp, lo outside
+    $fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0010.dat");
+    /*
+     * month, day, year, hour, minute, outside temp, hi outside temp, lo outside
        temp, outside humidity, wind speed, wind direction, wind gust speed, time
- 		of gust, pressure, daily_precip, monthly_rain, yearly_rain, inside
- 		temp, inside humidity, solar radiation, UV index
-	 */
-	foreach($fcontents as $line_num => $line){
-		$tokens = explode(' ', $line);
-		if (sizeof($tokens) != 21){
-			continue;
-		}
-  		  		$tstring = sprintf("%s %s %s %s", $tokens[0], $tokens[1], $tokens[2], $tokens[3]);
-  		$v = strtotime($tstring);
-  		
-		if ($v < $myTime || trim($tstring) == ""){
-			continue;
-		}
+         of gust, pressure, daily_precip, monthly_rain, yearly_rain, inside
+         temp, inside humidity, solar radiation, UV index
+     */
+    foreach($fcontents as $line_num => $line){
+        $tokens = explode(' ', $line);
+        if (sizeof($tokens) != 21){
+            continue;
+        }
+                    $tstring = sprintf("%s %s %s %s", $tokens[0], $tokens[1], $tokens[2], $tokens[3]);
+          $v = strtotime($tstring);
+          
+        if ($v < $myTime || trim($tstring) == ""){
+            continue;
+        }
         $speed = floatval($tokens[9]);
         if ($speed < 0 || $speed > 100){
-        	continue;
+            continue;
         }
-		$valid[] = $v;
-  		$mph[] = $speed;
-  		$drct[] = $tokens[10];
- 	} // End of while
-	
+        $valid[] = $v;
+          $mph[] = $speed;
+          $drct[] = $tokens[10];
+     } // End of while
+    
 }
 
 

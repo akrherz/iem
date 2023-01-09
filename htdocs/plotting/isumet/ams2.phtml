@@ -14,7 +14,7 @@ $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
 $day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
 $myTime = mktime(0,0,0,$month, $day, $year);
 
-$dirRef = strftime("%Y/%m/%d", $myTime);
+$dirRef = date("Y/m/d", $myTime);
 $dataurl = "https://mesonet.agron.iastate.edu/archive/data/$dirRef/text/ot/ot0010.dat";
 
 $station = "isumet";
@@ -41,22 +41,20 @@ the archive <br> begins 8 Sep 2011.</p>
 
 <a href="{$dataurl}">View raw data file</a><br />
 <BR>
-<img src="1min.php?station=ot0010&${ymd}" ALT="Time Series">
+<img src="1min.php?station=ot0010&{$ymd}" ALT="Time Series">
 <BR>
-<img src="1min_inside.php?station=ot0010&${ymd}" ALT="Time Series">
+<img src="1min_inside.php?station=ot0010&{$ymd}" ALT="Time Series">
 <br />
-<img src="rh.php?station=ot0010&${ymd}" ALT="Time Series">
+<img src="rh.php?station=ot0010&{$ymd}" ALT="Time Series">
 <br />
-<img src="srad.php?station=ot0010&${ymd}" ALT="Time Series">
+<img src="srad.php?station=ot0010&{$ymd}" ALT="Time Series">
 <BR>
-<img src="1min_V.php?station=ot0010&${ymd}" ALT="Time Series">
+<img src="1min_V.php?station=ot0010&{$ymd}" ALT="Time Series">
 <BR>
-<img src="1min_P.php?station=ot0010&${ymd}" ALT="Time Series">
+<img src="1min_P.php?station=ot0010&{$ymd}" ALT="Time Series">
 <br />
-<img src="1min.php?station=ot0010&${ymd}&rh" ALT="Time Series">
+<img src="1min.php?station=ot0010&{$ymd}&rh" ALT="Time Series">
 </div>
 EOF;
 
-
 $t->render("single.phtml");
-?>

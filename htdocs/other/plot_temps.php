@@ -16,12 +16,12 @@ $station = isset($_GET["station"]) ? substr(xssafe($_GET["station"]), 0, 10) : "
 
 $myTime = mktime(0, 0, 0, $month, $day, $year);
 
-$dirRef = strftime("%Y_%m/%d", $myTime);
-$titleDate = strftime("%b %d, %Y", $myTime);
+$dirRef = date("Y_m/d", $myTime);
+$titleDate = date("M d, Y", $myTime);
 
 $db = iemdb("other");
-$rs = pg_prepare($db, "SELECT",  "SELECT * from t${year} WHERE station = $1 and date(valid) = $2 ORDER by valid ASC");
-$rs = pg_execute($db, "SELECT", array($station, strftime("%Y-%m-%d", $myTime)));
+$rs = pg_prepare($db, "SELECT",  "SELECT * from t{$year} WHERE station = $1 and date(valid) = $2 ORDER by valid ASC");
+$rs = pg_execute($db, "SELECT", array($station, date("Y-m-d", $myTime)));
 
 $tmpf = array();
 $dwpf = array();

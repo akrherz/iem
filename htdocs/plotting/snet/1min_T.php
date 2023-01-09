@@ -45,7 +45,7 @@ if (pg_num_rows($rs) == 0) {
  die();
 }
 
-$titleDate = strftime("%b %d, %Y", $myTime);
+$titleDate = date("M d, Y", $myTime);
 $cityname = $cities[$station]['name'];
 
 /* BEGIN GOOD WORK HERE */
@@ -146,5 +146,3 @@ if ($station != 'SPEI4'){
 }
 
 $graph->Stroke();
-
-?>

@@ -81,9 +81,9 @@ if (isset($_GET["month"]) && isset($_GET["segid"])) {
             "<tr><td>%s</td>
             <td><a href=\"history.phtml?valid=%s\">%s</a></td>
             <td>%s -- %s</td><td>%s</td></tr>",
-            strftime('%d %b %Y', $ts),
-            strftime('%Y-%m-%d%%20%H:%M', $ts),
-            strftime('%I:%M %p', $ts),
+            date('d M Y', $ts),
+            date('Y-m-d H:i', $ts),
+            date('h:i A', $ts),
             $row["major"],
             $row["minor"],
             $row["label"]
@@ -126,10 +126,10 @@ if (isset($_GET["month"]) && isset($_GET["segid"])) {
             "<tr><td>%s</td><td>%s</td>
             <td><a href=\"history.phtml?segid=%s&month=%s\">%s -- %s</a></td>
             <td>%s</td></tr>",
-            strftime('%d %b %Y', $ts),
-            strftime('%I:%M %p', $ts),
+            date('d M Y', $ts),
+            date('h:i A', $ts),
             $row["segid"],
-            strftime('%m', $ts),
+            date('m', $ts),
             $row["major"],
             $row["minor"],
             $row["label"]

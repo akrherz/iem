@@ -23,9 +23,9 @@ if ($wA > $myTime){
  $wLabel = "Instant Wind Speed";
 }
 
-$titleDate = strftime("%b %d, %Y", $myTime);
+$titleDate = date("M d, Y", $myTime);
+$dirRef = date("Y/m/d", $myTime);
 
-$dirRef = strftime("%Y/%m/%d", $myTime);
 $fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0006.dat");
 
 $mph = array();
@@ -45,9 +45,9 @@ $prevMPH = 0;
 $prevDRCT = 0;
 
 foreach($fcontents as $line_num => $line){
-	$parts = explode(" ", $line);
-	$times[] = strtotime(sprintf("%s %s %s %s %s", $parts[0], $parts[1],
-			$parts[2], $parts[3], $parts[4]));
+    $parts = explode(" ", $line);
+    $times[] = strtotime(sprintf("%s %s %s %s %s", $parts[0], $parts[1],
+            $parts[2], $parts[3], $parts[4]));
   $inTmpf = $parts[5];
   $thisMPH = intval($parts[9]);
   $thisDRCT = intval($parts[10]); 
@@ -115,4 +115,3 @@ if ($hasgust == 1){
   
 
 $graph->Stroke();
-?>

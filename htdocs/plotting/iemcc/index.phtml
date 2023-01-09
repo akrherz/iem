@@ -11,22 +11,21 @@ $month = isset($_GET["month"]) ? intval($_GET["month"]): date("m");
 $day = isset($_GET["day"]) ? intval($_GET["day"]): date("d");
 $myTime = mktime(0,0,0,$month,$day,$year);
 
-$titleDate = strftime("%b %d, %Y", $myTime);
+$titleDate = date("M d, Y", $myTime);
 
-$dirRef = strftime("%Y/%m/%d", $myTime);
+$dirRef = date("Y/m/d", $myTime);
 $dataurl = "https://mesonet.agron.iastate.edu/archive/data/$dirRef/text/ot/ot0007
 .dat";
 
 $myTime = strtotime($year."-".$month."-".$day);
 
-
-$dirRef = strftime("%Y/%m/%d", $myTime);
-$titleDate = strftime("%b %d, %Y", $myTime);
-$jday = strftime("%j", $myTime);
+$dirRef = date("Y/m/d", $myTime);
+$titleDate = date("M d, Y", $myTime);
+$jday = date("j", $myTime);
 
 $fp = '/mesonet/ARCHIVE/data/'.$dirRef.'/text/ot/ot0007.dat';
 if (! is_file($fp)){
-	die("No data for date!");
+    die("No data for date!");
 }
 $fcontents = file('/mesonet/ARCHIVE/data/'.$dirRef.'/text/ot/ot0007.dat');
 
@@ -42,25 +41,25 @@ $times = array();
 $pcpn = 0;
 foreach($fcontents as $line_num => $line)
 {
-	$tokens = preg_split ("/,/", $line);
-	if (sizeof($tokens) != 11) continue;
+    $tokens = preg_split ("/,/", $line);
+    if (sizeof($tokens) != 11) continue;
 
-	if ($jday != $tokens[2]) continue;
+    if ($jday != $tokens[2]) continue;
 
-	$hhmm = str_pad($tokens[3],4,"0",STR_PAD_LEFT);
-	$hh = substr($hhmm,0,2);
-	$mm = substr($hhmm,2,2);
-	$timestamp = mktime($hh,$mm,0,$month,$day,$year);
+    $hhmm = str_pad($tokens[3],4,"0",STR_PAD_LEFT);
+    $hh = substr($hhmm,0,2);
+    $mm = substr($hhmm,2,2);
+    $timestamp = mktime($hh,$mm,0,$month,$day,$year);
 
-	$times[] = $timestamp;
-	$tmpf[] =  $tokens[5];
-	$dwpf[] = dwpf($tokens[5], $tokens[6] );
-	//$sknt[] = $tokens[7] * 1.94;
-	$smph[] = $tokens[7] * 2.24;
-	$drct[] = $tokens[8];
-	$pmsl[] = $tokens[9];
-	$pcpn += ($tokens[10] / 25.4);
-	$rain[] = $pcpn;
+    $times[] = $timestamp;
+    $tmpf[] =  $tokens[5];
+    $dwpf[] = dwpf($tokens[5], $tokens[6] );
+    //$sknt[] = $tokens[7] * 1.94;
+    $smph[] = $tokens[7] * 2.24;
+    $drct[] = $tokens[8];
+    $pmsl[] = $tokens[9];
+    $pcpn += ($tokens[10] / 25.4);
+    $rain[] = $pcpn;
 
 } // End of while
 
@@ -69,8 +68,8 @@ $drct5 = array();
 $times5 = array();
 for($i=0;$i<sizeof($drct);$i+=5)
 {
-	$times5[] = $times[$i];
-	$drct5[] = $drct[$i];
+    $times5[] = $times[$i];
+    $drct5[] = $drct[$i];
 }
 
 require_once "../../../include/jpgraph/jpgraph.php";
@@ -117,7 +116,7 @@ $lineplot2->SetColor("blue");
 $graph->Add($lineplot2);
 $graph->Add($lineplot);
 
-$fp3 = sprintf("jpg-%s-%s.png", time(), rand() );
+$fp3 = sprintf("jpg-%s.png", time() );
 $graph->Stroke("/var/webtmp/$fp3");
 
 /* ----------- Wind Speed and Direction-------------- */
@@ -171,7 +170,7 @@ $graph->AddY2($lineplot);
 $graph->Add($sp1);
 
 
-$fp1 = sprintf("jpg-%s-%s.png", time(), rand() );
+$fp1 = sprintf("jpg-%s.png", time() );
 $graph->Stroke("/var/webtmp/$fp1");
 
 /* ----------- Pressure and precip -------------- */
@@ -222,7 +221,7 @@ $lineplot2->SetColor("black");
 $graph->Add($lineplot2);
 $graph->AddY2($lineplot);
 
-$fp2 = sprintf("jpg-%s-%s.png", time(), rand() );
+$fp2 = sprintf("jpg-%s.png", time());
 $graph->Stroke("/var/webtmp/$fp2");
 
 $ys = yearSelect2(2003, $year, "year");

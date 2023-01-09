@@ -72,7 +72,7 @@ def common(ctx):
             weekends.append(now.day)
         now += datetime.timedelta(days=1)
     req = requests.get(
-        f"http://mesonet.agron.iastate.edu/api/1/daily.json?station={station}&"
+        f"http://iem.local/api/1/daily.json?station={station}&"
         f"network={ctx['network']}&year={year}&month={month}",
         timeout=15,
     )

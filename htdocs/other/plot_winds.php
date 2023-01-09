@@ -13,11 +13,16 @@ $station = isset($_GET["station"]) ? substr(xssafe($_GET["station"]), 0, 10) : "
 
 $myTime = mktime(0, 0, 0, $month, $day, $year);
 
-$dirRef = strftime("%Y_%m/%d", $myTime);
-$titleDate = strftime("%b %d, %Y", $myTime);
+$dirRef = date("Y_m/d", $myTime);
+$titleDate = date("M d, Y", $myTime);
 
 $db = iemdb("other");
-$sql = sprintf("SELECT * from t%s WHERE station = '%s' and date(valid) = '%s' ORDER by valid ASC", $year, $station, strftime("%Y-%m-%d", $myTime));
+$sql = sprintf(
+    "SELECT * from t%s WHERE station = '%s' and date(valid) = '%s' ORDER by valid ASC",
+    $year,
+    $station,
+    date("Y-m-d", $myTime)
+);
 
 $drct = array();
 $sknt = array();

@@ -3,18 +3,22 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/myview.php";
 require_once "../../include/forms.php";
 $t = new MyView();
- /* Script to generate a loop of whatever */
- $prod = isset($_GET['prod']) ? xssafe($_GET['prod']): 'mesonet';
- $java = isset($_GET['java']) ? xssafe($_GET['java']): 'none';
- $frames = isset($_GET['frames']) ? intval($_GET['frames']): 10;
+/* Script to generate a loop of whatever */
+$prod = isset($_GET['prod']) ? xssafe($_GET['prod']) : 'mesonet';
+$java = isset($_GET['java']) ? xssafe($_GET['java']) : 'none';
+$frames = isset($_GET['frames']) ? intval($_GET['frames']) : 10;
 
-$products = Array(
- "mesonet" => Array("aformat" => 'mesonet_%H00.gif',
+$products = array(
+    "mesonet" => array(
+        "aformat" => 'mesonet_%H00.gif',
         "tint" => 3600, "width" => 900, "height" => 700, "minute" => 8,
-        "name" => "Iowa Mesonet Plot"),
- "mwmesonet" => Array("aformat" => 'MWmesonet_%H00.gif',
+        "name" => "Iowa Mesonet Plot"
+    ),
+    "mwmesonet" => array(
+        "aformat" => 'MWmesonet_%H00.gif',
         "tint" => 3600, "width" => 900, "height" => 700, "minute" => 8,
-        "name" => "Midwest Mesonet Plot"),
+        "name" => "Midwest Mesonet Plot"
+    ),
 );
 
 $baseurl2 = '/archive/data/';
@@ -25,34 +29,33 @@ $m = date("i");
 if ($m < $products[$prod]["minute"])  $loopendts = time() - 3600;
 
 $q = $frames - 1;
-for($i=$q; $i >= 0; $i--)
-{
+for ($i = $q; $i >= 0; $i--) {
     $ts = $loopendts - ($products[$prod]["tint"] * $i);
-    $gts = strtotime( gmdate("Y-m-d H:i", $ts) );
-    $u = $baseurl2 . strftime("%Y/%m/%d/". $products[$prod]["aformat"], $gts);
+    $gts = strtotime(gmdate("Y-m-d H:i", $ts));
+    $aa = str_replace("%H", date("H", $gts), $products[$prod]["aformat"]);
+    $u = $baseurl2 . date("Y/m/d/", $gts) . $aa;
     $hrefs .= "<br><img src=\"$u\">";
-    $files .= $u .","; 
+    $files .= $u . ",";
 }
 
 /* ========================================================= */
 
- $t->title = "Product Looper"; 
- $ar = Array(
-         "none" => "List Images"
- );
- $loopselect = make_select("java", $java, $ar);
- 
- $prodselect = "<select name=\"prod\">";
- foreach($products as $k => $v)
- {
-     $prodselect .= "<option value=\"$k\" ";
-     if ($prod == $k) $prodselect .= " SELECTED ";
-     $prodselect .= ">". $products[$k]["name"] ."\n";
- }
- $prodselect .= "</select>";
- 
- $control =  $hrefs;
- 
+$t->title = "Product Looper";
+$ar = array(
+    "none" => "List Images"
+);
+$loopselect = make_select("java", $java, $ar);
+
+$prodselect = "<select name=\"prod\">";
+foreach ($products as $k => $v) {
+    $prodselect .= "<option value=\"$k\" ";
+    if ($prod == $k) $prodselect .= " SELECTED ";
+    $prodselect .= ">" . $products[$k]["name"] . "\n";
+}
+$prodselect .= "</select>";
+
+$control =  $hrefs;
+
 $t->content = <<<EOF
 <h3>IEM Product Looper</h3>
 

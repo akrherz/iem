@@ -49,9 +49,9 @@ $hs = hourSelect($hour, 'hour');
 $ar = array("00" => "00", "15" => "15", "30" => "30", "45" => "45");
 $mis = make_select("minute", $minute, $ar);
 
-$tbl = strftime("raw%Y_%m", $ts);
-$dstr = strftime("%Y-%m-%d %H:%M", $ts);
-$ldate = strftime("%d %b %Y %I:%M %p", $ts);
+$tbl = sprintf("raw%s", date("Y_m", $ts));
+$dstr = date("Y-m-d H:i", $ts);
+$ldate = date("d M Y h:i A", $ts);
 
 $rs = pg_prepare($pgconn, "SELECT", "SELECT t.* from $tbl t, stations s WHERE " .
     "valid = $1 and s.id = t.station and s.network = $2");

@@ -136,6 +136,12 @@ $now = time();
 $cgiStr = "";
 $i = 0;
 $table = "";
+
+function myround($val, $prec){
+    if (is_null($val)) return "";
+    return round($val, $prec);
+}
+
 foreach ($finalA as $key => $val) {
     $i++;
     $parts = $finalA[$key];
@@ -158,14 +164,14 @@ foreach ($finalA as $key => $val) {
     $table .= ">" . date($format, $parts["ts"]) . "</td>";
     $table .= sprintf("<td>%s</td>\n", $parts["wxcodes"]);
 
-    $table .= "<td align='center'>" . round($parts["tmpf"], 0) . "(<font color=\"#ff0000\">" . round($parts["max_tmpf"], 0) . "</font>/<font color=\"#0000ff\">" . round($parts["min_tmpf"], 0) . ")</td>
-          <td align='center'>" . round($parts["dwpf"], 0) . "</td>
-          <td>" . round($parts["feel"], 0) . "</td>
-          <td>" . round($parts["relh"], 0) . "</td>
+    $table .= "<td align='center'>" . myround($parts["tmpf"], 0) . "(<font color=\"#ff0000\">" . myround($parts["max_tmpf"], 0) . "</font>/<font color=\"#0000ff\">" . myround($parts["min_tmpf"], 0) . ")</td>
+          <td align='center'>" . myround($parts["dwpf"], 0) . "</td>
+          <td>" . myround($parts["feel"], 0) . "</td>
+          <td>" . myround($parts["relh"], 0) . "</td>
           <td>" . $parts["alti"] . "</td>
           <td>" . $parts["vsby"] . "</td>
-            <td>" . round($parts["drct"], 0) . "</td>
-            <td>" . round($parts["sknt"], 0) . "</td><td>" . round($parts["peak"], 0) . " @ ";
+            <td>" . myround($parts["drct"], 0) . "</td>
+            <td>" . myround($parts["sknt"], 0) . "</td><td>" . myround($parts["peak"], 0) . " @ ";
     $table .= date($format, $parts["peak_ts"]);
     $table .= "</td>
           <td>" . $parts["phour"] . "</td>
@@ -295,17 +301,17 @@ if ($doSF) {
             $table .= '>' . date("h:i A", strtotime($parts["local_valid"])) . '</td>';
         }
         if ($parts["tsf0"] < -90) $tmpf0 = "M";
-        else $tmpf0 = round($parts["tsf0"], 1);
+        else $tmpf0 = myround($parts["tsf0"], 1);
         if ($parts["tsf1"] < -90) $tmpf1 = "M";
-        else $tmpf1 = round($parts["tsf1"], 1);
+        else $tmpf1 = myround($parts["tsf1"], 1);
         if ($parts["tsf2"] < -90) $tmpf2 = "M";
-        else $tmpf2 = round($parts["tsf2"], 1);
+        else $tmpf2 = myround($parts["tsf2"], 1);
         if ($parts["tsf3"] < -90) $tmpf3 = "M";
-        else $tmpf3 = round($parts["tsf3"], 1);
+        else $tmpf3 = myround($parts["tsf3"], 1);
         if ($parts["rwis_subf"] < -90) $subt = "M";
-        else $subt = round($parts["rwis_subf"], 1);
+        else $subt = myround($parts["rwis_subf"], 1);
         if ($parts["pave_avg"] < -90) $pave_avg = "M";
-        else $pave_avg = round($parts["pave_avg"], 1);
+        else $pave_avg = myround($parts["pave_avg"], 1);
 
         $table .= "<td align='center'>" . $parts["tmpf"] . "</td>
             <td align='center'>" . $parts["dwpf"] . "</td>

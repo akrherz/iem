@@ -1,7 +1,7 @@
 <?php
 /* Generate a 1 minute plot of temperature, dew point, and solar rad */
 require_once "../../../config/settings.inc.php";
-include_once("../../../include/mlib.php");
+require_once "../../../include/mlib.php";
 include_once("../../../include/database.inc.php");
 include("../../../include/jpgraph/jpgraph.php");
 include("../../../include/jpgraph/jpgraph_line.php");
@@ -10,9 +10,9 @@ include("../../../include/jpgraph/jpgraph_date.php");
 include("../../../include/jpgraph/jpgraph_led.php");
 
 $station = "OT0009";
-$year = isset($_GET["year"]) ? $_GET["year"] : date("Y");
-$month = isset($_GET["month"]) ? $_GET["month"] : date("m");
-$day = isset($_GET["day"]) ? $_GET["day"] : date("d");
+$year = isset($_GET["year"]) ? xssafe($_GET["year"]) : date("Y");
+$month = isset($_GET["month"]) ? xssafe($_GET["month"]) : date("m");
+$day = isset($_GET["day"]) ? xssafe($_GET["day"]) : date("d");
 $myTime = mktime(0, 0, 0, $month, $day, $year);
 $today = mktime(0, 0, 0, date("m"), date("d"), date("Y"));
 
@@ -38,7 +38,7 @@ if (pg_num_rows($rs) == 0) {
     die();
 }
 
-$titleDate = strftime("%b %d, %Y", $myTime);
+$titleDate = date("M d, Y", $myTime);
 $cityname = 'Beloit Weather Station';
 
 /* BEGIN GOOD WORK HERE */

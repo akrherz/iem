@@ -16,9 +16,9 @@ if (strlen($year) == 4 && strlen($month) > 0 && strlen($day) > 0 ){
   $myTime = strtotime(date("Y-m-d"));
 }
 $formatFloor = mktime(0, 0, 0, 1, 1, 2016);
-$titleDate = strftime("%b %d, %Y", $myTime);
+$titleDate = date("M d, Y", $myTime);
+$dirRef = date("Y/m/d", $myTime);
 
-$dirRef = strftime("%Y/%m/%d", $myTime);
 $fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0006.dat");
 
 $rh = array();
@@ -26,9 +26,9 @@ $tmpf = Array();
 $times = array();
 
 foreach($fcontents as $line_num => $line){
-	$parts = explode(" ", $line);
-	$times[] = strtotime(sprintf("%s %s %s %s %s", $parts[0], $parts[1],
-			$parts[2], $parts[3], $parts[4]));
+    $parts = explode(" ", $line);
+    $times[] = strtotime(sprintf("%s %s %s %s %s", $parts[0], $parts[1],
+            $parts[2], $parts[3], $parts[4]));
   $rh[] = $parts[8];
   $tmpf[] = $parts[5];
 } // End of while
@@ -78,5 +78,3 @@ $lineplot2->SetLegend("Air Temperature [F]");
 $lineplot2->SetColor("red");
 
 $graph->Stroke();
-
-?>

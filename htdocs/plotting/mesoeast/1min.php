@@ -18,9 +18,8 @@ $day = isset($_GET["day"]) ? $_GET["day"] : date("d");
 $myTime = mktime(0,0,0,$month, $day, $year);
 $formatFloor = mktime(0, 0, 0, 1, 1, 2016);
 
-$titleDate = strftime("%b %d, %Y", $myTime);
-
-$dirRef = strftime("%Y/%m/%d", $myTime);
+$titleDate = date("M d, Y", $myTime);
+$dirRef = date("Y/m/d", $myTime);
 $fcontents = file("/mesonet/ARCHIVE/data/$dirRef/text/ot/ot0006.dat");
 
 $parts = array();
@@ -41,15 +40,15 @@ $max_yaxis_i = 0;
 $prev_Tmpf = 0.0;
 
 foreach($fcontents as $line_num => $line){
-	$parts = explode(" ", $line);
-	$times[] = strtotime(sprintf("%s %s %s %s %s", $parts[0], $parts[1],
-				$parts[2], $parts[3], $parts[4]));
-	$thisTmpf = $parts[5];
-	$thisrh = $parts[8];
-	$thisDwpf = dwpf($thisTmpf,$thisrh);
+    $parts = explode(" ", $line);
+    $times[] = strtotime(sprintf("%s %s %s %s %s", $parts[0], $parts[1],
+                $parts[2], $parts[3], $parts[4]));
+    $thisTmpf = $parts[5];
+    $thisrh = $parts[8];
+    $thisDwpf = dwpf($thisTmpf,$thisrh);
   if ($thisTmpf < -50 || $thisTmpf > 150 ){
     $thisTmpf = "";
-  	$thisDwpf = "";
+      $thisDwpf = "";
   } 
 
     $tmpf[] = $thisTmpf;
@@ -95,5 +94,3 @@ $graph->Add($lineplot2);
 $graph->Add($lineplot);
 
 $graph->Stroke();
-
-?>

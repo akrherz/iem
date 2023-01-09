@@ -108,12 +108,12 @@ foreach ($finalA as $key => $val) {
     );
     $table .= "<td ";
     if ($tdiff > 10000) {
-        $fmt = "%d %b %I:%M %p";
+        $fmt = "d M h:i A";
     } else {
-        $fmt = "%I:%M %p";
+        $fmt = "h:i A";
     }
 
-    $table .= ">" . strftime($fmt, strtotime($parts["local_valid"])) . "</td>
+    $table .= ">" . date($fmt, strtotime($parts["local_valid"])) . "</td>
      <td align='center'>" . round($parts["tmpf"], 0) . "(<font color=\"#ff0000\">" . round($parts["max_tmpf"], 0) . "</font>/<font color=\"#0000ff\">" . round($parts["min_tmpf"], 0) . "</font>)</td>
      <td>" . round($parts["dwpf"], 0) . "</td>
      <td>" . round($parts["feel"], 0) . "</td>
@@ -123,7 +123,7 @@ foreach ($finalA as $key => $val) {
         $table .= "G" . round($parts["gust"], 0);
     }
     $table .= "</td>";
-    $table .= "<td>" . round($parts["peak"], 0) . " @ " . strftime("%I:%M %p", $parts["peak_ts"]) . "</td>
+    $table .= "<td>" . round($parts["peak"], 0) . " @ " . date("h:i A", $parts["peak_ts"]) . "</td>
         </tr>\n";
 }
 $t->content = <<<EOF

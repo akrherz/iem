@@ -62,10 +62,10 @@ for ($i = 0; $i < $num_vars; $i++) {
     $sqlStr .= $vars[$i] . " as var" . $i . ", ";
 }
 
-$sqlTS1 = strftime("%Y-%m-%d %H:%M", $ts1);
-$sqlTS2 = strftime("%Y-%m-%d %H:%M", $ts2);
-$table = strftime("t%Y_hourly", $ts1);
-$nicedate = strftime("%Y-%m-%d", $ts1);
+$sqlTS1 = date("Y-m-d H:i", $ts1);
+$sqlTS2 = date("Y-m-d H:i", $ts2);
+$table = sprintf("t%s_hourly", date("Y", $ts1));
+$nicedate = date("Y-m-d", $ts1);
 
 $sampleStr = array(
     "1min" => "1",
