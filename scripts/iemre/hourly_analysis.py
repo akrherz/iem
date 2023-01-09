@@ -118,7 +118,7 @@ def grid_hour(ts):
     I proctor the gridding of data on an hourly basis
     @param ts Timestamp of the analysis, we'll consider a 20 minute window
     """
-    LOG.debug("grid_hour called...")
+    LOG.info("Processing %s", ts)
     with ncopen(iemre.get_hourly_ncname(ts.year), "r", timeout=300) as nc:
         domain = nc.variables["hasdata"][:, :]
     ts0 = ts - datetime.timedelta(minutes=10)

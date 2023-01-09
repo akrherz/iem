@@ -31,7 +31,7 @@ def run(ts):
     gmtts = ts.astimezone(pytz.utc)
     fn = findfile(gmtts)
     if fn is None:
-        print("merge_mrms_q2 failed to find file for time: %s" % (gmtts,))
+        print(f"merge_mrms_q2 failed to find file for time: {gmtts}")
         return
     img = Image.open(fn)
     data = np.asarray(img)

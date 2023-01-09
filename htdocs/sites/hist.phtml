@@ -170,7 +170,7 @@ if ($mode == "monthly") {
             );
         }
 
-        if (!is_null($row["max_gust"]) && strlen($row["max_gust"]) > 0 && strlen($row["max_gust_localts"]) > 0) {
+        if (!is_null($row["max_gust"]) && !is_null($row["max_gust_localts"]) && strlen($row["max_gust_localts"]) > 0) {
             $gtim = strtotime(substr($row["max_gust_localts"], 0, 16));
             $gs = date("g:i A", $gtim);
             $g = round($row["max_gust"] * 1.15, 0);

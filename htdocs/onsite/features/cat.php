@@ -62,7 +62,7 @@ if ($row["mediasuffix"] == 'mp4'){
     $t->twitter_video_width = $row["media_width"];
     $media = <<<EOM
   <video class="img img-responsive" controls>
-	<source src="${big}" type="video/mp4">
+	<source src="{$big}" type="video/mp4">
 	Your browser does not support the video tag.
 </video>
 EOM;

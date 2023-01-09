@@ -391,6 +391,7 @@ def grid_day(ts, ds):
 
 def workflow(ts, irealtime, justprecip):
     """Do Work"""
+    LOG.info("Run %s irealtime: %s justprecip: %s", ts, irealtime, justprecip)
     # load up our current data
     ds = iemre.get_grids(ts)
     LOG.info("loaded %s variables from IEMRE database", len(ds))

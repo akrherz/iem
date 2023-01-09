@@ -7,14 +7,7 @@ $mesosite = iemdb("mesosite");
 
 $network = isset($_GET["network"]) ? substr($_GET["network"], 0, 20) : "IA_ASOS";
 $tstr = isset($_GET["ts"]) ? $_GET["ts"] : gmdate("YmdHi");
-$ts = mktime(
-    substr($tstr, 8, 2),
-    0,
-    0,
-    substr($tstr, 4, 2),
-    substr($tstr, 6, 2),
-    substr($tstr, 0, 4)
-);
+$ts = DateTime::createFromFormat("YmdHi", $tstr, new DateTimeZone(("UTC")));
 
 $networks = "'$network'";
 if ($network == "IOWA") {
@@ -44,19 +37,21 @@ for ($i = 0; $z = pg_fetch_array($rs); $i++) {
 
 foreach ($intervals as $key => $interval) {
     if ($interval == "midnight") {
-        $localts = $ts + date("Z", $ts);
-        $ts0 = $ts - (intval(date("H", $localts)) * 3600);
+        $ts0 = clone $ts;
+        $ts0->setTimezone(new DateTimeZone("America/Chicago"));
+        $ts0->setTime(0, 0, 0);
     } else {
-        $ts0 = $ts - ($interval * 3600);
+        $ts0 = clone $ts;
+        $ts0->sub(new DateInterval("PT{$interval}H"));
     }
     $sql = sprintf(
         "select id as station, sum(phour) as p1 from hourly_%s h " .
             "JOIN stations t on (h.iemid = t.iemid) WHERE valid >= '%s+00' and " .
             "valid < '%s+00' and t.network IN (%s) " .
             "GROUP by t.id",
-        strftime("%Y", $ts),
-        strftime("%Y-%m-%d %H:%M", $ts0),
-        strftime("%Y-%m-%d %H:%M", $ts),
+        $ts->format("Y"),
+        $ts0->format("Y-m-d H:i"),
+        $ts->format("Y-m-d H:i"),
         $networks
     );
     $rs = pg_exec($connect, $sql);

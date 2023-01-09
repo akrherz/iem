@@ -7,7 +7,7 @@ import pytz
 from osgeo import gdal
 import numpy as np
 from pyiem import iemre
-from pyiem.util import ncopen, logger
+from pyiem.util import ncopen, logger, utc
 
 LOG = logger()
 
@@ -17,8 +17,7 @@ def run(ts):
     now = ts.replace(hour=0, minute=0)
     ets = now + datetime.timedelta(hours=24)
     interval = datetime.timedelta(minutes=5)
-    currenttime = datetime.datetime.utcnow()
-    currenttime = currenttime.replace(tzinfo=pytz.utc)
+    currenttime = utc()
 
     total = None
     while now <= ets:

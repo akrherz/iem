@@ -6,6 +6,7 @@ require_once "../../config/settings.inc.php";
 require_once "../../include/database.inc.php";
 require_once "../../include/vtec.php";
 require_once "../../include/forms.php";
+require_once "../../include/mlib.php";
 
 $mapFile = "../../data/gis/base4326.map";
 $postgis = iemdb("postgis");
@@ -14,11 +15,15 @@ $postgis = iemdb("postgis");
 $vtec = isset($_GET["vtec"]) ? xssafe($_GET["vtec"]) : '2008.KICT.SV.W.0345';
 
 list($year, $wfo, $phenomena, $significance, $eventid) = explode(".", $vtec);
-$eventid = intval($eventid);
-$year = intval($year);
-$wfo = substr($wfo, 1, 3);
-$phenomena = substr($phenomena, 0, 2);
-$significance = substr($significance, 0, 1);
+$utcnow = new DateTime('now', new DateTimeZone("UTC"));
+$eventid = intval(xssafe($eventid));
+$year = intval(xssafe($year));
+if (($year > (intval($utcnow->format("Y")) + 1)) || ($year < 1980)) {
+    xssafe("<script>");
+}
+$wfo = substr(xssafe($wfo), 1, 3);
+$phenomena = substr(xssafe($phenomena), 0, 2);
+$significance = substr(xssafe($significance), 0, 1);
 
 $rs = pg_prepare($postgis, "SELECT", "SELECT ST_xmax(geom), ST_ymax(geom), 
         ST_xmin(geom), ST_ymin(geom), *,
@@ -65,6 +70,7 @@ $xmax = 0;
 $ymax = 0;
 $xmin = 0;
 $xmax = 0;
+$gdimg_dest = null;
 for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     if ($i > 8) {
         continue;
@@ -109,7 +115,7 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
         $point = new pointObj();
         $point->setXY(40, 26);
         $point->draw($map2, $layer, $img2, 0, "");
-    
+
         $map2->drawLabelCache($img2);
         $gdimg_dest = imagecreatefromstring($img2->getBytes());
 
@@ -139,7 +145,12 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
     /* Draw NEXRAD Layer */
     $radarfp = "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.tif";
     if (($ts + 300) < time()) {
-        $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png", $radts);
+        $radts = new DateTime(date("Y-m-d H:i", $radts), new DateTimeZone(("UTC")));
+        $radarfp = sprintf(
+            "/mesonet/ARCHIVE/data/%s/GIS/uscomp/n0r_%s.png",
+            $radts->format("Y/m/d"),
+            $radts->format("YmdHi"),
+        );
     }
     if (is_file($radarfp)) {
         $radar = $map->getlayerbyname("nexrad_n0r");
@@ -232,9 +243,15 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
         $gdimg_src,
         $px[$i],
         $py[$i],
-        0, 0, $twidth, $theight,
+        0,
+        0,
+        $twidth,
+        $theight,
     );
     imagedestroy($gdimg_src);
 }
 header("Content-type: image/png");
+if (is_null($gdimg_dest)){
+    $gdimg_dest = imagecreatefromstring($img2->getBytes());
+}
 echo imagepng($gdimg_dest);
