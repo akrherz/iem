@@ -45,9 +45,11 @@ function get_goes_fn_and_time($ts, $sector, $product)
     $base = "/mesonet/ARCHIVE/data/";
     for ($i = 0; $i < 60; $i++) {
         foreach (array(1, -1) as $mul) {
-            $lts = $ts + ($i * 60 * $mul);
-            $testfn = $base . gmdate("Y/m/d", $lts) . "/GIS/sat/awips211/GOES_${sector}_${product}_" .
-                gmdate("YmdHi", $lts) . ".png";
+            $lts = clone $ts;
+            $mins = $i * $mul;
+            $lts->add(new DateInterval("PT{$mins}"));
+            $testfn = $base . $lts->format("Y/m/d") . "/GIS/sat/awips211/GOES_{$sector}_{$product}_" .
+                $lts->format("YmdHi") . ".png";
             if (is_file($testfn)) {
                 return array($testfn, $lts);
             }
@@ -65,9 +67,11 @@ function get_ridge_fn_and_time($ts, $radar, $product)
     $base = "/mesonet/ARCHIVE/data/";
     for ($i = 0; $i < 10; $i++) {
         foreach (array(1, -1) as $mul) {
-            $lts = $ts + ($i * 60 * $mul);
-            $testfn = $base . gmdate("Y/m/d", $lts) . "/GIS/ridge/$radar/$product/${radar}_${product}_" .
-                gmdate("YmdHi", $lts) . ".png";
+            $lts = clone $ts;
+            $mins = $i * $mul;
+            $lts->add(new DateInterval("PT{$mins}M"));
+            $testfn = $base . $lts->format("Y/m/d") . "/GIS/ridge/$radar/$product/{$radar}_{$product}_" .
+                $lts->format("YmdHi") . ".png";
             if (is_file($testfn)) {
                 return array($testfn, $lts);
             }
@@ -194,10 +198,10 @@ EOF;
 
     // Now the concern here is what to do with the valid time of this plot
     // If now() is less than event end, set the plot time to now
-    $dts = strtotime($row["v"]);
-    $dts2 = strtotime($row["e"]);
+    $dts = new DateTime($row["v"]);
+    $dts2 = new DateTime($row["e"]);
     if (time() < $dts2) {
-        $dts = time();
+        $dts = new DateTime();
     }
 
     $vtec_limiter = sprintf(
@@ -216,13 +220,10 @@ EOF;
 }
 if (isset($_REQUEST['pid'])) {
     $pid = $_REQUEST["pid"];
-    $dts = gmmktime(
-        substr($_GET["pid"], 8, 2),
-        substr($_GET["pid"], 10, 2),
-        0,
-        substr($_GET["pid"], 4, 2),
-        substr($_GET["pid"], 6, 2),
-        substr($_GET["pid"], 0, 4)
+    $dts = DateTime::createFromFormat(
+        "YmdHi",
+        substr($_GET["pid"], 0, 12),
+        new DateTimeZone("UTC"),
     );
     /* First, we query for a bounding box please */
     $rs = pg_prepare(
@@ -278,50 +279,28 @@ if ($sector == "wfo") {
    2.  They specified a VTEC string, use that
    3.  Nothing specified, realtime!
 */
-$ts = isset($_GET["ts"]) ? gmmktime(
-    substr($_GET["ts"], 8, 2),
-    substr($_GET["ts"], 10, 2),
-    0,
-    substr($_GET["ts"], 4, 2),
-    substr($_GET["ts"], 6, 2),
-    substr($_GET["ts"], 0, 4)
-) :
-    time();
-$ts1 = isset($_GET["ts1"]) ? gmmktime(
-    substr($_GET["ts1"], 8, 2),
-    substr($_GET["ts1"], 10, 2),
-    0,
-    substr($_GET["ts1"], 4, 2),
-    substr($_GET["ts1"], 6, 2),
-    substr($_GET["ts1"], 0, 4)
-) :
-    0;
-$ts2 = isset($_GET["ts2"]) ? gmmktime(
-    substr($_GET["ts2"], 8, 2),
-    substr($_GET["ts2"], 10, 2),
-    0,
-    substr($_GET["ts2"], 4, 2),
-    substr($_GET["ts2"], 6, 2),
-    substr($_GET["ts2"], 0, 4)
-) :
-    0;
+
+$utcnow = new DateTime('now', new DateTimeZone("UTC"));
+$ts = isset($_GET["ts"]) ? DateTime::createFromFormat("YmdHi", $_GET["ts"], new DateTimeZone("UTC")) : $utcnow;
+$ts1 = isset($_GET["ts1"]) ? DateTime::createFromFormat("YmdHi", $_GET["ts1"], new DateTimeZone("UTC")) : null;
+$ts2 = isset($_GET["ts2"]) ? DateTime::createFromFormat("YmdHi", $_GET["ts2"], new DateTimeZone("UTC")) : null;
 if (isset($dts) && !isset($_GET["ts"])) {
-    $ts = $dts;
+    $ts = clone $dts;
 }
-if ($ts1 == 0) {
-    $ts1 = $ts;
+if (is_null($ts1)) {
+    $ts1 = clone $ts;
 }
 if (isset($dts2) && !isset($_GET["ts2"])) {
-    $ts2 = $dts2;
+    $ts2 = clone $dts2;
 }
 /* Make sure we have a minute %5 */
-if (time() - $ts > 300) {
-    $radts = $ts - (intval(date("i", $ts) % 5) * 60);
+$radts = clone $ts;
+$mins = intval($ts->format("i")) % 5;
+if ($mins > 0) {
+    $radts->sub(new DateInterval("PT{$mins}M"));
 }
 
 /* Lets Plot stuff already! */
-
-
 $mapFile = "../../data/gis/base" . $sectors[$sector]['epsg'] . ".map";
 $map = new mapObj($mapFile);
 $map->setSize($width, $height);
@@ -336,7 +315,6 @@ if (in_array("n0q", $layers) || in_array("ridge", $layers) || in_array("prn0q", 
 }
 
 $img = $map->prepareImage();
-
 
 $namerica = $map->getlayerbyname("namerica");
 $namerica->status = MS_ON;
@@ -369,21 +347,37 @@ if (
             " GOES %s %s %s ",
             $_REQUEST["goes_sector"],
             $_REQUEST["goes_product"],
-            strftime("%-2I:%M %p %Z",  $res[1])
+            $res[1]->format("h:i A e")
         );
     }
 }
 
+
+
 if (in_array("nexrad", $layers) || in_array("nexrad_tc", $layers)  || in_array("nexrad_tc6", $layers)) {
     $radarfp = "/mesonet/ldmdata/gis/images/4326/USCOMP/n0r_0.tif";
-    if (($ts + 300) < time()) {
-        $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/n0r_%Y%m%d%H%M.png", $radts);
+    $tss = clone $ts;
+    $tss->add(new DateInterval("PT5M"));
+    if ($tss < $utcnow) {
+        $radarfp = sprintf(
+            "/mesonet/ARCHIVE/data/%s/GIS/uscomp/n0r_%s.png",
+            $radts->format("Y/m/d"),
+            $radts->format("YmdHi"),
+        );
     }
     if (in_array("nexrad_tc", $layers)) {
-        $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/max_n0r_0z0z_%Y%m%d.png", $ts);
+        $radarfp = sprintf(
+            "/mesonet/ARCHIVE/data/%s/GIS/uscomp/max_n0r_0z0z_%s.png",
+            $ts->format("Y/m/d"),
+            $ts->format("Ymd"),
+        );
     }
     if (in_array("nexrad_tc6", $layers)) {
-        $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/uscomp/max_n0r_6z6z_%Y%m%d.png", $ts);
+        $radarfp = sprintf(
+            "/mesonet/ARCHIVE/data/%s/GIS/uscomp/max_n0r_6z6z_%s.png",
+            $ts->format("Y/m/d"),
+            $ts->format("Ymd"),
+        );
     }
     if (is_file($radarfp)) {
         $radar = $map->getlayerbyname("nexrad_n0r");
@@ -396,16 +390,32 @@ if (in_array("nexrad", $layers) || in_array("nexrad_tc", $layers)  || in_array("
 /* Draw NEXRAD Layer */
 $prefixes = array("" => "us", "ak" => "ak", "pr" => "pr", "hi" => "hi");
 foreach ($prefixes as $p1 => $p2) {
-    if (in_array("${p1}n0q", $layers) || in_array("${p1}n0q_tc", $layers) || in_array("${p1}n0q_tc6", $layers)) {
+    if (in_array("{$p1}n0q", $layers) || in_array("{$p1}n0q_tc", $layers) || in_array("{$p1}n0q_tc6", $layers)) {
         $radarfp = sprintf("/mesonet/ldmdata/gis/images/4326/%sCOMP/n0q_0.png", strtoupper($p2));
-        if (($ts + 300) < time()) {
-            $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/${p2}comp/n0q_%Y%m%d%H%M.png", $radts);
+        $tss = clone $ts;
+        $tss->add(new DateInterval("PT5M"));
+        if ($tss < $utcnow) {
+            $radarfp = sprintf(
+                "/mesonet/ARCHIVE/data/%s/GIS/%scomp/n0q_%s.png",
+                $radts->format("Y/m/d"),
+                $p2,
+                $radts->format("YmdHi"),
+            );
         }
-        if (in_array("${p1}n0q_tc", $layers)) {
-            $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/${p2}comp/max_n0q_0z0z_%Y%m%d.png", $ts);
+        if (in_array("{$p1}n0q_tc", $layers)) {
+            $radarfp = sprintf(
+                "/mesonet/ARCHIVE/data/%s/GIS/%scomp/max_n0q_0z0z_%s.png",
+                $ts->format("Y/m/d"),
+                $p2,
+                $ts->format("YmdHi"),
+            );
         }
-        if (in_array("${p1}n0q_tc6", $layers)) {
-            $radarfp = gmstrftime("/mesonet/ARCHIVE/data/%Y/%m/%d/GIS/${p2}comp/max_n0q_6z6z_%Y%m%d.png", $ts);
+        if (in_array("{$p1}n0q_tc6", $layers)) {
+            $radarfp = sprintf(
+                "/mesonet/ARCHIVE/data/%s/GIS/%scomp/max_n0q_6z6z_%s.png",
+                $ts->format("Y/m/d"),
+                $ts->format("YmdHi"),
+            );
         }
         if (is_file($radarfp)) {
             $radar = $map->getlayerbyname("nexrad_n0q");
@@ -436,11 +446,10 @@ if (
             " RIDGE %s %s %s ",
             $_REQUEST["ridge_radar"],
             $_REQUEST["ridge_product"],
-            strftime("%-2I:%M %p %Z",  $res[1])
+            $res[1]->format("h:i A e")
         );
     }
 }
-
 
 $states = $map->getlayerbyname("states");
 $states->status = MS_ON;
@@ -466,8 +475,6 @@ $counties = $map->getlayerbyname("uscounties");
 $counties->status = in_array("uscounties", $layers);
 $counties->draw($map, $img);
 
-
-
 $cwas = $map->getlayerbyname("cwas");
 $cwas->status = in_array("cwas", $layers);
 $cwas->draw($map, $img);
@@ -479,17 +486,17 @@ if (in_array("bufferedlsr", $layers)) {
     $blsr->connection = get_dbconn_str("postgis");
     $blsr->status = in_array("bufferedlsr", $layers);
     $sql = "geo from (select distinct city, magnitude, valid, "
-        . "ST_Transform(ST_Buffer(ST_Transform(geom,2163),${lsrbuffer}000),4326) as geo, "
+        . "ST_Transform(ST_Buffer(ST_Transform(geom,2163),{$lsrbuffer}000),4326) as geo, "
         . "type as ltype, city || magnitude || ST_x(geom) || ST_y(geom) as k "
         . "from lsrs WHERE "
         . "ST_Overlaps((select geom from sbw_" . date("Y", $ts) . " WHERE "
         . "wfo = '$wfo' and phenomena = '$phenomena' and "
         . "significance = '$significance' and eventid = $eventid "
         . "and status = 'NEW' LIMIT 1), "
-        . "ST_Transform(ST_Buffer(ST_Transform(geom,2163),${lsrbuffer}000),4326) "
+        . "ST_Transform(ST_Buffer(ST_Transform(geom,2163),{$lsrbuffer}000),4326) "
         . ") and "
-        . "valid >= '" . date("Y-m-d H:i", $ts) . "' and "
-        . "valid < '" . date("Y-m-d H:i", $ts2) . "' and "
+        . "valid >= '" . $ts->format("Y-m-d H:i") . "' and "
+        . "valid < '" . $ts2->format("Y-m-d H:i") . "' and "
         . "((type = 'M' and magnitude >= 34) or "
         . "(type = 'H' and magnitude >= 0.75) or type = 'W' or "
         . "type = 'T' or (type = 'G' and magnitude >= 58) or type = 'D' "
@@ -499,7 +506,7 @@ if (in_array("bufferedlsr", $layers)) {
     $blsr->type = MS_LAYER_POLYGON;
     $blsr->setProjection("init=epsg:4326");
     $blc0 = new ClassObj($blsr);
-    $blc0->name = "Buffered LSRs (${lsrbuffer} km)";
+    $blc0->name = "Buffered LSRs ({$lsrbuffer} km)";
     $blc0s0 = new StyleObj($blc0);
     $blc0s0->symbolname = 'circle';
     $blc0s0->color->setRGB(0, 0, 0);
@@ -521,8 +528,8 @@ $sql = sprintf(
         "issue <= '%s:00+00' and expire > '%s:00+00' " .
         "GROUP by phenomena, eventid ORDER by phenomena ASC) as foo " .
         "using SRID=4326 using unique phenomena",
-    gmstrftime("%Y-%m-%d %H:%M", $ts),
-    gmstrftime("%Y-%m-%d %H:%M", $ts)
+    $ts->format("Y-m-d H:i"),
+    $ts->format("Y-m-d H:i")
 );
 $wbc->data = $sql;
 $wbc->draw($map, $img);
@@ -534,8 +541,8 @@ $sql = sprintf(
     "geom from (select type as wtype, geom, num from watches "
         . "WHERE issued <= '%s:00+00' and expired > '%s:00+00') as foo "
         . "using SRID=4326 using unique num",
-    gmstrftime("%Y-%m-%d %H:%M", $ts),
-    gmstrftime("%Y-%m-%d %H:%M", $ts)
+    $ts->format("Y-m-d H:i"),
+    $ts->format("Y-m-d H:i")
 );
 $watches->data = $sql;
 $watches->draw($map, $img);
@@ -588,7 +595,7 @@ if (isset($_REQUEST["vtec"]) && in_array("cbw", $layers)) {
 }
 
 /* Storm based warning history, plotted as a white outline, I think */
-if (in_array("sbwh", $layers) && intval(gmstrftime("%Y", $ts)) > 2001) {
+if (in_array("sbwh", $layers) && intval($ts->format("Y")) > 2001) {
     $ptext = "'ZZ' as phenomena";
     $sbwh = $map->getlayerbyname("sbw");
     $sbwh->status = MS_ON;
@@ -599,19 +606,17 @@ if (in_array("sbwh", $layers) && intval(gmstrftime("%Y", $ts)) > 2001) {
             . "polygon_end > '%s:00+00' "
             . "%s) as foo using unique oid using SRID=4326",
         $ptext,
-        gmstrftime("%Y", $ts),
-        gmstrftime("%Y-%m-%d %H:%M", $ts),
-        gmstrftime("%Y-%m-%d %H:%M", $ts),
+        $ts->format("%Y"),
+        $ts->format("Y-m-d H:i"),
+        $ts->format("Y-m-d H:i"),
         $vtec_limiter
     );
     $sbwh->data = $sql;
     $sbwh->draw($map, $img);
 }
 
-
-
 /* Storm Based Warning */
-if (in_array("sbw", $layers)  && intval(gmstrftime("%Y", $ts)) > 2001) {
+if (in_array("sbw", $layers)  && intval($ts->format("Y")) > 2001) {
     $ptext = "phenomena";
     if (in_array("sbw", $layers) && in_array("cbw", $layers)) {
         $ptext = "'ZZ' as phenomena";
@@ -625,9 +630,9 @@ if (in_array("sbw", $layers)  && intval(gmstrftime("%Y", $ts)) > 2001) {
             . "and polygon_end > '%s:00+00' "
             . "%s) as foo using unique oid using SRID=4326",
         $ptext,
-        gmstrftime("%Y", $ts),
-        gmstrftime("%Y-%m-%d %H:%M", $ts),
-        gmstrftime("%Y-%m-%d %H:%M", $ts),
+        $ts->format("Y"),
+        $ts->format("Y-m-d H:i"),
+        $ts->format("Y-m-d H:i"),
         $vtec_limiter
     );
     $sbw->data = $sql;
@@ -643,9 +648,9 @@ $sql = sprintf(
         . "random() as oid from warnings_%s w JOIN ugcs u on (u.gid = w.gid) "
         . "WHERE issue <= '%s:00+00' and expire > '%s:00+00' %s "
         . "ORDER by phenomena ASC) as foo using unique oid using SRID=4326",
-    gmstrftime("%Y", $ts),
-    gmstrftime("%Y-%m-%d %H:%M", $ts),
-    gmstrftime("%Y-%m-%d %H:%M", $ts),
+    $ts->format("Y"),
+    $ts->format("Y-m-d H:i"),
+    $ts->format("Y-m-d H:i"),
     $vtec_limiter
 );
 $w0c->data = $sql;
@@ -659,14 +664,14 @@ if ($ts2 > $ts1) {
     $sql = "geom from (select distinct city, magnitude, valid, geom, "
         . "type as ltype, city || magnitude || ST_x(geom) || ST_y(geom) as k "
         . "from lsrs WHERE "
-        . "valid >= '" . gmstrftime("%Y-%m-%d %H:%M", $ts1) . ":00+00' and "
-        . "valid < '" . gmstrftime("%Y-%m-%d %H:%M", $ts2) . ":00+00' "
+        . "valid >= '" . $ts1->format("Y-m-d H:i") . ":00+00' and "
+        . "valid < '" . $ts2->format("Y-m-d H:i") . ":00+00' "
         . "ORDER by valid DESC) as foo USING unique k USING SRID=4326";
 } else {
     $sql = "geom from (select distinct city, magnitude, valid, geom, "
         . "type as ltype, city || magnitude || ST_x(geom) || ST_y(geom) as k "
         . "from lsrs WHERE "
-        . "valid = '" . gmstrftime("%Y-%m-%d %H:%M", $ts) . ":00+00') as foo "
+        . "valid = '" . $ts->format("Y-m-d H:i") . ":00+00') as foo "
         . "USING unique k USING SRID=4326";
 }
 $lsrs->data = $sql;
@@ -759,24 +764,26 @@ if (in_array("airtemps", $layers)) {
 $tlayer = $map->getLayerByName("bar640t-title");
 $point = new pointobj();
 $point->setXY(80, 9);
-$tzformat = "%d %B %Y %-2I:%M %p %Z";
-if (isset($_REQUEST["tz"])) {
-    $tz = $_REQUEST["tz"];
-    if ($tz == 'MDT' || $tz == 'MST') {
-        $tz = "America/Denver";
-    } elseif ($tz == 'PDT' || $tz == 'PST') {
-        $tz = "America/Los_Angeles";
-    } elseif ($tz == 'CDT' || $tz == 'CST') {
-        $tz = "America/Chicago";
-    } elseif ($tz == 'EDT' || $tz == 'EST') {
-        $tz = "America/New_York";
-    }
-    date_default_timezone_set($tz);
-    if ($_REQUEST["tz"] == 'UTC') {
-        $tzformat = "%d %B %Y %H:%M %Z";
-    }
+$tzformat = "d M Y h:i A T";
+$tzinfo = isset($_REQUEST["tz"]) ? xssafe($_REQUEST["tz"]) : "America/Chicago";
+// Translate to ZoneInfo compat
+if ($tzinfo == 'MDT' || $tzinfo == 'MST') {
+    $tzinfo = "America/Denver";
+} elseif ($tzinfo == 'PDT' || $tzinfo == 'PST') {
+    $tzinfo = "America/Los_Angeles";
+} elseif ($tzinfo == 'CDT' || $tzinfo == 'CST') {
+    $tzinfo = "America/Chicago";
+} elseif ($tzinfo == 'EDT' || $tzinfo == 'EST') {
+    $tzinfo = "America/New_York";
 }
-$d = strftime($tzformat,  $ts);
+if ($tzinfo == 'UTC') {
+    $tzformat = "d M Y H:i T";
+}
+$lts = clone $ts;
+$lts->settimezone(new DateTimeZone($tzinfo));
+$d = $lts->format($tzformat);
+$tomorrow = clone $ts;
+$tomorrow->add(new DateInterval("P1D"));
 if (isset($_GET["title"])) {
     $title = substr($_GET["title"], 0, 100);
 } else if (isset($_GET["vtec"])) {
@@ -789,27 +796,27 @@ if (isset($_GET["title"])) {
     $title = "IEM NEXRAD Daily N0Q Max Base Reflectivity";
     $d = sprintf(
         "Valid between %s 00:00 and 23:59 UTC",
-        gmdate("d M Y", $ts)
+        $ts->format("d M Y")
     );
 } else if (in_array("n0q_tc6", $layers)) {
     $title = "IEM NEXRAD 24 Hour N0Q Max Base Reflectivity";
     $d = sprintf(
         "Valid between %s 06:00 and %s 05:55 UTC",
-        gmdate("d M Y", $ts),
-        gmdate("d M Y", $ts + 86400)
+        $ts->format("d M Y"),
+        $tomorrow->format("d M Y")
     );
 } else if (in_array("nexrad_tc", $layers)) {
     $title = "IEM NEXRAD Daily N0R Max Base Reflectivity";
     $d = sprintf(
         "Valid between %s 00:00 and 23:59 UTC",
-        gmdate("d M Y", $ts)
+        $ts->format("d M Y")
     );
 } else if (in_array("nexrad_tc6", $layers)) {
     $title = "IEM NEXRAD 24 Hour N0R Max Base Reflectivity";
     $d = sprintf(
         "Valid between %s 06:00 and %s 05:55 UTC",
-        gmdate("d M Y", $ts),
-        gmdate("d M Y", $ts + 86400)
+        $ts->format("d M Y"),
+        $tomorrow->format("d M Y")
     );
 } else {
     $title = "IEM Plot";

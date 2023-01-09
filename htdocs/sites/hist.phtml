@@ -52,9 +52,9 @@ function printMonth($year, $month, $db, $thisApp, $dailyApp)
     $nstr = date("M Y", $nextMonth);
 
     // Get the day of the week of the first day this month
-    $first_dow = intval(strftime("%w", $sts));
+    $first_dow = intval(date("w", $sts));
 
-    $title = strftime("%B %Y", $sts);
+    $title = date("M Y", $sts);
     $s = <<<EOF
 <table class="table table-bordered">
 <tr><td><a href="{$lurl}">{$lstr}</a></td><th colspan="5">{$title}</th>
@@ -69,14 +69,14 @@ EOF;
     for ($i = 0; $i < $first_dow; $i++) {
         $secs = $now - (86400 * ($first_dow - $i));
         $s .= '<td valign="top" bgcolor="#EEEEEE">';
-        $s .= "<b>" . strftime("%d", $secs) . "</b>";
+        $s .= "<b>" . date("d", $secs) . "</b>";
         $s .= '</td>';
     }
     for ($i = $first_dow; $i < 7; $i++) {
-        $key = strftime("%Y%m%d", $now);
+        $key = date("Ymd", $now);
 
         $s .= '<td valign="top">';
-        $s .= "<b><a href=\"" . $dailyApp . strftime("%d", $now) . "\">" . strftime("%d", $now) . "</a></b>";
+        $s .= "<b><a href=\"" . $dailyApp . date("d", $now) . "\">" . date("d", $now) . "</a></b>";
         if (isset($db[$key]["cv"])) {
             $s .= sprintf(" (@%s)", $db[$key]['cv']);
         }
@@ -89,13 +89,13 @@ EOF;
     while ($now <= $ets) {
         $s .= "<tr>\n";
         for ($i = 0; $i < 7; $i++) {
-            $key = strftime("%Y%m%d", $now);
+            $key = date("Ymd", $now);
             if ($now < $ets) {
                 $s .= '<td valign="top">';
-                $s .= "<b><a href=\"" . $dailyApp . strftime("%d", $now) . "\">" . strftime("%d", $now) . "</a></b>";
+                $s .= "<b><a href=\"" . $dailyApp . date("d", $now) . "\">" . date("d", $now) . "</a></b>";
             } else {
                 $s .= '<td bgcolor="#EEEEEE" valign="top">';
-                $s .= "<b>" . strftime("%d", $now) . "</b>";
+                $s .= "<b>" . date("d", $now) . "</b>";
             }
             if (isset($db[$key]["cv"])) {
                 $s .= sprintf(" (@%s)", $db[$key]['cv']);
@@ -170,7 +170,7 @@ if ($mode == "monthly") {
             );
         }
 
-        if (strlen($row["max_gust"]) > 0 && strlen($row["max_gust_localts"]) > 0) {
+        if (!is_null($row["max_gust"]) && strlen($row["max_gust"]) > 0 && strlen($row["max_gust_localts"]) > 0) {
             $gtim = strtotime(substr($row["max_gust_localts"], 0, 16));
             $gs = date("g:i A", $gtim);
             $g = round($row["max_gust"] * 1.15, 0);
