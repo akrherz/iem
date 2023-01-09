@@ -606,7 +606,7 @@ if (in_array("sbwh", $layers) && intval($ts->format("Y")) > 2001) {
             . "polygon_end > '%s:00+00' "
             . "%s) as foo using unique oid using SRID=4326",
         $ptext,
-        $ts->format("%Y"),
+        $ts->format("Y"),
         $ts->format("Y-m-d H:i"),
         $ts->format("Y-m-d H:i"),
         $vtec_limiter
