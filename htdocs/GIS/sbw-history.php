@@ -102,7 +102,7 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
 
         $point = new pointObj();
         $point->setXY(80, 25);
-        $d = strftime("%d %B %Y %-2I:%M %p %Z",  strtotime($row["init_expire"]));
+        $d = date("d M Y h:i A T",  strtotime($row["init_expire"]));
         $point->draw($map2, $tlayer, $img2, 1, "$wfo " . $vtec_phenomena[$phenomena] . " " . $vtec_significance[$significance] . " #$eventid till  $d");
 
         $layer = $map2->getLayerByName("logo");
@@ -221,7 +221,7 @@ for ($i = 0; $row = pg_fetch_array($rs); $i++) {
 
     $point = new pointObj();
     $point->setXY(2, 25);
-    $d = strftime("%d %b %Y %-2I:%M %p %Z",  $ts);
+    $d = date("d M Y h:i A T",  $ts);
     $point->draw($map, $tlayer, $img, 1, "$d");
 
     $map->embedLegend($img);

@@ -51,7 +51,7 @@ $lsrlook = isset($_GET["lsrlook"]) ? xssafe($_GET["lsrlook"]) : "+";
 // careful here as we can have PXXX sites
 $site = isset($_GET["site"]) ? substr($_GET["site"], 0, 4) : "DMX";
 $osite = isset($_GET["osite"]) ? substr($_GET["osite"], 0, 4) : "DMX";
-$sortcol = isset($_GET["sortcol"]) ? xssafe($_GET["sortcol"]) : "issued";
+$sortcol = isset($_GET["sortcol"]) ? substr(xssafe($_GET["sortcol"]), 0, 20) : "issued";
 $sortdir = isset($_GET["sortdir"]) ? intval($_GET["sortdir"]) : 0;
 $lon0 = isset($_GET["lon0"]) ? floatval($_GET["lon0"]) : 0;
 $lat0 = isset($_GET["lat0"]) ? floatval($_GET["lat0"]) : 0;
@@ -463,7 +463,7 @@ $wtable = "warnings_$year";
 $tsextra = "CURRENT_TIMESTAMP and issue < CURRENT_TIMESTAMP ";
 if ($isarchive) {
     $wtable = "warnings_$year";
-    $tsextra = "'" . strftime("%Y-%m-%d %H:%M:00+00", $basets + $tzoff) . "' and w.issue < '" . strftime("%Y-%m-%d %H:%M:00+00", $basets + $tzoff) . "'";
+    $tsextra = "'" . date("Y-m-d H:i:00+00", $basets + $tzoff) . "' and w.issue < '" . date("Y-m-d H:i:00+00", $basets + $tzoff) . "'";
 }
 $cuextra = "";
 if ($cu == 1) {
@@ -476,7 +476,7 @@ $query = "SELECT w.phenomena, u.name as cname, w.expire as expire,
   ST_ymax(u.geom) as lat0, w.wfo as wfo
   from $wtable w, nws_ugc u
   WHERE w.expire > $tsextra and w.significance != 'A'
-   and w.ugc = u.ugc $cuextra ORDER by " . pg_escape_string($sortcol) . " " . $sortdir;
+   and w.ugc = u.ugc $cuextra ORDER by {$sortcol} {$sortdir}";
 pg_exec($connection, "set time zone 'GMT'");
 $result = pg_exec($connection, $query);
 
@@ -492,22 +492,22 @@ Warnings Valid at: <b>";
 
 if ($tzoff == 0) {
     if ($isarchive)
-        $content .= strftime("%d %b %Y %H:%M %Z", $basets);
+        $content .= date("d M Y H:i T", $basets);
     else
-        $content .= strftime("%d %b %Y %H:%M %Z");
+        $content .= date("d M Y H:i T");
 } else {
     if ($isarchive)
-        $content .= strftime("%d %b %Y %I:%M %p ", $basets) . $tz;
+        $content .= date("d M Y h:i A ", $basets) . $tz;
     else
-        $content .= strftime("%d %b %Y %I:%M %p ", time() - $tzoff) . $tz;
+        $content .= date("d M Y h:i A ", time() - $tzoff) . $tz;
 }
 $content .= "</b>
 <br clear=\"all\" />";
 $k = 0;
 if ($tzoff == 0) {
-    $dformat = "%H:%M GMT";
+    $dformat = "H:i UTC";
 } else {
-    $dformat = "%I:%M %p";
+    $dformat = "h:i A";
 }
 
 /* Loop thru results from database! */
@@ -559,7 +559,15 @@ foreach ($wA as $key => $val) {
     $updated = strtotime($uA[$key]) - $tzoff;
     $resetApp = "$uri_nowfo&tz=$tz&cu=$cu&year=$year&month=$month&day=$day&hour=$hour&minute=$m&archive=$archive&tzoff=$tzoff&site=$wfo";
 
-    $content .= "<div class=\"wwa-state\">$sname</div><div class=\"wwa$significance\"><span style=\"font-size: 14pt;\">" . $vtec_phenomena[$phenomena] . " " . $vtec_significance[$significance] . "</span> (<a href=\"$warningscat\">View Text</a>) expires " . strftime($dformat, $expire) . " by <a href=\"$resetApp\">$wfo</a> (" . $fA[$key] . ")<br />" . $wA[$key] . "in $sname  <br /><div class=\"vtec\">VTEC# $eventid ($status)</div><div class=\"issued\">Issued: " . strftime($dformat, $issue) . "</div><div class=\"updated\">Updated: " .  strftime($dformat, $updated) . "</div>&nbsp;</div>\n";
+    $content .= "<div class=\"wwa-state\">$sname</div>" .
+        "<div class=\"wwa$significance\"><span style=\"font-size: 14pt;\">" .
+        $vtec_phenomena[$phenomena] . " " . $vtec_significance[$significance] .
+        "</span> (<a href=\"$warningscat\">View Text</a>) expires " .
+        date($dformat, $expire) . " by <a href=\"$resetApp\">$wfo</a> (" .
+        $fA[$key] . ")<br />" . $wA[$key] .
+        "in $sname  <br /><div class=\"vtec\">VTEC# $eventid ($status)</div>" .
+        "<div class=\"issued\">Issued: " . date($dformat, $issue) . "</div>" .
+        "<div class=\"updated\">Updated: " .  date($dformat, $updated) . "</div>&nbsp;</div>\n";
 }
 if ($k == 0 && $filter) {
     $msg = "<p>No warnings currently valid for " . $nt->table[$site]["name"];

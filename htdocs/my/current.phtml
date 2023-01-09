@@ -147,16 +147,15 @@ foreach ($finalA as $key => $val) {
     <td><input type=\"checkbox\" name=\"str[]\" value=\"" . $key . "\"></td>
     <th>" . $parts["name"] . " [" . $parts["network"] . "]</th>";
     $table .= "<td ";
+    $format = "h:i A";
     if ($tdiff > 10000) {
         $table .= 'bgcolor="red"';
-        $format = "%b-%d %I:%M %p";
+        $format = "M d h:i A";
     } else if ($tdiff > 3600) {
         $table .= 'bgcolor="green"';
-        $format = "%I:%M %p";
     } else {
-        $format = "%I:%M %p";
     }
-    $table .= ">" . strftime($format, $parts["ts"]) . "</td>";
+    $table .= ">" . date($format, $parts["ts"]) . "</td>";
     $table .= sprintf("<td>%s</td>\n", $parts["wxcodes"]);
 
     $table .= "<td align='center'>" . round($parts["tmpf"], 0) . "(<font color=\"#ff0000\">" . round($parts["max_tmpf"], 0) . "</font>/<font color=\"#0000ff\">" . round($parts["min_tmpf"], 0) . ")</td>
@@ -167,7 +166,7 @@ foreach ($finalA as $key => $val) {
           <td>" . $parts["vsby"] . "</td>
             <td>" . round($parts["drct"], 0) . "</td>
             <td>" . round($parts["sknt"], 0) . "</td><td>" . round($parts["peak"], 0) . " @ ";
-    $table .= strftime($format, $parts["peak_ts"]);
+    $table .= date($format, $parts["peak_ts"]);
     $table .= "</td>
           <td>" . $parts["phour"] . "</td>
           <td>" . $parts["pday"] . "</td></tr>\n";
@@ -287,13 +286,13 @@ if ($doSF) {
         $table .= "<th>" . $parts["name"] . "</th>";
         $table .= "<td";
         if ($tdiff > 11900) {
-            $table .= ' bgcolor="red">' . strftime("%b-%d-%y %I:%M %p", strtotime($parts["local_valid"])) . '</td>';
+            $table .= ' bgcolor="red">' . date("M-d-Y h:i A", strtotime($parts["local_valid"])) . '</td>';
         } else if ($tdiff > 7200) {
-            $table .= ' bgcolor="orange">' . strftime("%b-%d %I:%M %p", strtotime($parts["local_valid"])) . '</td>';
+            $table .= ' bgcolor="orange">' . date("M-d-Y h:i A", strtotime($parts["local_valid"])) . '</td>';
         } else if ($tdiff > 3600) {
-            $table .= ' bgcolor="green">' . strftime("%I:%M %p", strtotime($parts["local_valid"])) . '</td>';
+            $table .= ' bgcolor="green">' . date("h:i A", strtotime($parts["local_valid"])) . '</td>';
         } else {
-            $table .= '>' . strftime("%I:%M %p", strtotime($parts["local_valid"])) . '</td>';
+            $table .= '>' . date("h:i A", strtotime($parts["local_valid"])) . '</td>';
         }
         if ($parts["tsf0"] < -90) $tmpf0 = "M";
         else $tmpf0 = round($parts["tsf0"], 1);
